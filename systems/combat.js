@@ -12,13 +12,13 @@ export class CombatSystem {
     if (this.comboTimer <= 0) this.combo = 0;
   }
 
-  pulse() {
-    if (!this.player.useAbility()) {
+  pulse({ range = 190, consumeEnergy = true, method = "pulse" } = {}) {
+    if (consumeEnergy && !this.player.useAbility()) {
       this.events.emit("combat:ability-blocked", { reason: "energy-or-cooldown" });
       return 0;
     }
 
-    const defeated = this.enemies.pulse(this.player, this.events);
+    const defeated = this.enemies.pulse(this.player, this.events, { range, method });
 
     this.combo += defeated;
     this.comboTimer = 1800;
@@ -29,6 +29,16 @@ export class CombatSystem {
       combo: this.combo
     });
 
+    return defeated;
+  }
+
+  strike() {
+    const defeated = this.enemies.pulse(this.player, this.events, {
+      range: 82,
+      method: "strike"
+    });
+
+    this.events.emit("combat:strike", { player: this.player, defeated });
     return defeated;
   }
 }

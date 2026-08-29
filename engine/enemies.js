@@ -109,16 +109,16 @@ export class EnemyManager {
     }
   }
 
-  pulse(player, events) {
+  pulse(player, events, { range = 190, method = "pulse" } = {}) {
     let defeated = 0;
 
     for (const enemy of this.enemies) {
       if (enemy.dead) continue;
 
-      if (Physics.distance(player, enemy) < 190) {
+      if (Physics.distance(player, enemy) < range) {
         enemy.dead = true;
         defeated++;
-        events.emit("enemy:defeated", { enemy, method: "pulse" });
+        events.emit("enemy:defeated", { enemy, method });
       }
     }
 

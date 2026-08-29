@@ -11,6 +11,7 @@ import { DialogueSystem } from "./systems/dialogue.js";
 import { CameraSystem } from "./systems/camera.js";
 import { ParticleSystem } from "./systems/particles.js";
 import { AudioSystem } from "./systems/audio.js";
+import characterManager from "./characters/characterManager.js";
 
 const $ = selector => document.querySelector(selector);
 
@@ -41,12 +42,28 @@ const ui = {
   dialogue: $("#dialogue-box"),
   dialogueSpeaker: $("#dialogue-speaker"),
   dialogueText: $("#dialogue-text"),
-  minimapPlayer: $("#minimap-player")
+  minimapPlayer: $("#minimap-player"),
+  characterName: $("#character-name"),
+  characterForm: $("#character-form"),
+  characterLevel: $("#character-level"),
+  characterOrb: $("#character-orb"),
+  xpFill: $("#xp-fill"),
+  xpValue: $("#xp-value"),
+  evolve: $("#evolve-button"),
+  specialName: $("#special-name"),
+  ultimateName: $("#ultimate-name"),
+  basicAction: $("#basic-action"),
+  specialAction: $("#special-action"),
+  ultimateAction: $("#ultimate-action"),
+  roster: $("#roster-drawer"),
+  rosterList: $("#roster-list"),
+  startRosterList: $("#start-character-list")
 };
 
 const events = new EventBus();
 const player = new Player();
 const enemies = new EnemyManager();
+characterManager.selectCharacter("stitch", player);
 
 const world = new World({
   seed: SEED,
@@ -102,6 +119,8 @@ spawnEnemiesFromChunks();
 setupEvents();
 updateWorldTheme(true);
 updateHUD(true);
+renderCharacterChoices();
+updateCharacterUI(true);
 
 function setupEvents() {
   events.on("world:chunk-generated", ({ chunk }) => {
@@ -113,6 +132,7 @@ function setupEvents() {
   events.on("collectible:collected", ({ collectible, item }) => {
     crystals++;
     score += 150;
+    characterManager.addXP(35);
     quests.progress("first-exploration", 1);
 
     if (collectible) {
@@ -128,7 +148,8 @@ function setupEvents() {
   });
 
   events.on("enemy:defeated", ({ enemy, method }) => {
-    score += method === "pulse" ? 200 : 300;
+    score += method === "ultimate" ? 360 : method === "pulse" ? 200 : 300;
+    characterManager.addXP(method === "ultimate" ? 90 : 60);
 
     if (enemy) {
       particles.burst(
@@ -136,7 +157,7 @@ function setupEvents() {
         enemy.y + enemy.h / 2,
         {
           count: 20,
-          color: method === "pulse" ? "#9d7cff" : "#ff8ca0",
+          color: method === "ultimate" ? "#f4d596" : method === "pulse" ? "#9d7cff" : "#ff8ca0",
           speed: 6,
           life: 650
         }
@@ -167,6 +188,27 @@ function setupEvents() {
     });
     showMessage(`★ MISIÓN COMPLETADA · +${quest.reward || 0} PUNTOS`);
     updateQuestUI();
+  });
+
+  characterManager.on("level_up", ({ character }) => {
+    particles.burst(player.x + player.w / 2, player.y + player.h / 2, {
+      count: 24, color: character.colors.glow, speed: 7, life: 800
+    });
+    showMessage(`✦ ${character.name.toUpperCase()} · NIVEL ${character.level}`);
+    updateCharacterUI(true);
+  });
+
+  characterManager.on("evolution_available", ({ nextEvolution }) => {
+    showMessage(`✧ EVOLUCIÓN DISPONIBLE · ${nextEvolution.name.toUpperCase()}`);
+    updateCharacterUI(true);
+  });
+
+  characterManager.on("character_evolved", ({ character, result }) => {
+    particles.burst(player.x + player.w / 2, player.y + player.h / 2, {
+      count: 52, color: character.colors.glow, speed: 10, life: 1100
+    });
+    showMessage(`✦ NUEVA FORMA · ${result.newForm.toUpperCase()}`);
+    updateCharacterUI(true);
   });
 }
 
@@ -201,6 +243,8 @@ function update(dt) {
   updateWorldTheme();
 
   player.update(input, world.platforms, dt);
+  characterManager.syncFromPlayer(player);
+  characterManager.update(dt * 16.67);
   collectibles.update();
   enemies.update(player, dt, events);
   combat.update(dt);
@@ -391,6 +435,87 @@ function updateHUD(force = false) {
 
   const progress = Math.max(2, Math.min(98, (player.x % 4500) / 4500 * 100));
   ui.minimapPlayer.style.left = `${progress}%`;
+  updateCharacterUI(force);
+}
+
+function updateCharacterUI(force = false) {
+  const character = characterManager.getActiveCharacter();
+  if (!character) return;
+
+  const progress = characterManager.getEvolutionProgress();
+  const evolution = characterManager.canEvolve();
+  const xpPercent = progress.requiredXP ? Math.round(character.xp / progress.requiredXP * 100) : 0;
+  const special = character.abilities.special;
+  const ultimate = character.abilities.ultimate;
+
+  ui.characterName.textContent = character.name.toUpperCase();
+  ui.characterForm.textContent = character.currentForm;
+  ui.characterLevel.textContent = `NV. ${character.level}`;
+  ui.characterOrb.textContent = character.id === "kawaii-cat" ? "NYA" : character.id === "dragon" ? "DRG" : character.id === "lilo" ? "LIL" : "626";
+  ui.xpFill.style.width = `${Math.max(0, Math.min(100, xpPercent))}%`;
+  ui.xpValue.textContent = `${character.xp} / ${progress.requiredXP} XP`;
+  ui.specialName.textContent = special.name.toUpperCase();
+  ui.ultimateName.textContent = ultimate.name.toUpperCase();
+
+  document.documentElement.style.setProperty("--character-accent", character.colors.primary);
+  document.documentElement.style.setProperty("--character-glow", character.colors.glow);
+
+  ui.evolve.disabled = !evolution.available;
+  ui.evolve.classList.toggle("ready", evolution.available);
+  ui.evolve.textContent = evolution.available
+    ? `EVOLUCIONAR · ${evolution.nextEvolution.name.toUpperCase()}`
+    : `SIGUIENTE FORMA · NV. ${evolution.nextEvolution?.level || "MÁX"}`;
+
+  setAbilityButtonState(ui.specialAction, character.cooldowns.special, true);
+  setAbilityButtonState(ui.ultimateAction, character.cooldowns.ultimate, character.unlockedAbilities.includes("ultimate"));
+  if (force) markSelectedCharacter();
+}
+
+function setAbilityButtonState(button, cooldown, unlocked) {
+  const activeCooldown = Math.ceil((cooldown || 0) / 100) / 10;
+  button.classList.toggle("cooldown", !unlocked || activeCooldown > 0);
+  button.classList.toggle("ready", unlocked && activeCooldown === 0);
+  button.disabled = !unlocked || activeCooldown > 0;
+  button.title = !unlocked ? "Se desbloquea al evolucionar" : activeCooldown > 0 ? `Disponible en ${activeCooldown}s` : "Lista";
+}
+
+function renderCharacterChoices() {
+  const choices = characterManager.getAvailableCharacters();
+  const template = choices.map(character => `
+    <button class="character-choice" type="button" data-character-id="${character.id}"
+      style="--choice-accent:${character.colors.primary};--choice-glow:${character.colors.glow}">
+      <div class="choice-top">
+        <span class="choice-icon">${character.id === "kawaii-cat" ? "NYA" : character.id === "dragon" ? "DRG" : character.id === "lilo" ? "LIL" : "626"}</span>
+        <span><span class="choice-name">${character.name}</span><span class="choice-role">${character.role}</span></span>
+      </div>
+      <p class="choice-description">${character.description}</p>
+    </button>`).join("");
+
+  ui.rosterList.innerHTML = template;
+  ui.startRosterList.innerHTML = template;
+  document.querySelectorAll("[data-character-id]").forEach(button => {
+    button.addEventListener("click", () => switchCharacter(button.dataset.characterId));
+  });
+  markSelectedCharacter();
+}
+
+function markSelectedCharacter() {
+  const activeId = characterManager.activeCharacterId;
+  document.querySelectorAll("[data-character-id]").forEach(button => {
+    button.classList.toggle("selected", button.dataset.characterId === activeId);
+  });
+}
+
+function switchCharacter(characterId) {
+  const result = characterManager.switchCharacter(characterId, player);
+  if (!result.success) return result;
+  particles.burst(player.x + player.w / 2, player.y + player.h / 2, {
+    count: 22, color: result.character.colors.glow, speed: 6, life: 680
+  });
+  showMessage(`◉ OHANA ACTIVA · ${result.character.name.toUpperCase()}`);
+  updateCharacterUI(true);
+  ui.roster.classList.add("hidden");
+  return result;
 }
 
 function showMessage(text) {
@@ -415,27 +540,74 @@ function jump() {
   }
 }
 
-function ability() {
+function basicAttack() {
   if (!running || paused || dialogue.visible) return;
 
-  const energyBefore = player.energy;
-  const defeated = combat.pulse();
+  const defeated = combat.strike();
+  particles.burst(player.x + player.w / 2 + player.facing * 22, player.y + player.h / 2, {
+    count: 12, color: "#f3fbff", speed: 4.5, life: 420
+  });
+  showMessage(defeated ? `✦ ATAQUE OHANA · ${defeated} OBJETIVO${defeated > 1 ? "S" : ""}` : "✦ ATAQUE OHANA");
+}
 
-  if (energyBefore === player.energy && defeated === 0) {
-    showMessage("⚠ ENERGÍA INSUFICIENTE O HABILIDAD RECARGANDO");
+function useSpecial() {
+  if (!running || paused || dialogue.visible) return;
+
+  const result = characterManager.useAbility("special", undefined, player);
+  if (!result.success) {
+    showAbilityBlocked(result);
     return;
   }
+
+  const defeated = combat.pulse({ range: result.ability.range, consumeEnergy: false, method: "pulse" });
 
   particles.burst(
     player.x + player.w / 2,
     player.y + player.h / 2,
-    { count: 32, color: "#9d7cff", speed: 8, life: 720 }
+    { count: 32, color: result.ability.color, speed: 8, life: 720 }
   );
 
   camera.shakeCamera(150);
   showMessage(defeated
-    ? `✦ PULSO ALIENÍGENA · ${defeated} OBJETIVOS`
-    : "✦ PULSO ALIENÍGENA ACTIVADO");
+    ? `✦ ${result.ability.name.toUpperCase()} · ${defeated} OBJETIVOS`
+    : `✦ ${result.ability.name.toUpperCase()} ACTIVADO`);
+  updateCharacterUI();
+}
+
+function useUltimate() {
+  if (!running || paused || dialogue.visible) return;
+
+  const result = characterManager.useUltimate(undefined, player);
+  if (!result.success) {
+    showAbilityBlocked(result);
+    return;
+  }
+
+  const defeated = combat.pulse({ range: result.ability.range, consumeEnergy: false, method: "ultimate" });
+  particles.burst(player.x + player.w / 2, player.y + player.h / 2, {
+    count: 72, color: result.ability.color, speed: 12, life: 1100
+  });
+  camera.shakeCamera(320);
+  showMessage(`★ ${result.ability.name.toUpperCase()} · ${defeated} OBJETIVOS`);
+  updateCharacterUI();
+}
+
+function evolveCharacter() {
+  if (!running || paused || dialogue.visible) return;
+  const result = characterManager.evolve(undefined, player);
+  if (!result.success) {
+    const progress = characterManager.getEvolutionProgress();
+    showMessage(`✧ EVOLUCIÓN REQUIERE NIVEL ${progress?.nextEvolution?.level || "MÁX"}`);
+  }
+}
+
+function showAbilityBlocked(result) {
+  const messages = {
+    ability_locked: "✧ HABILIDAD BLOQUEADA · EVOLUCIONA PARA ACTIVARLA",
+    cooldown: `⌛ HABILIDAD RECARGANDO · ${Math.ceil((result.remaining || 0) / 100) / 10}s`,
+    not_enough_energy: "⚠ ENERGÍA INSUFICIENTE"
+  };
+  showMessage(messages[result.reason] || "⚠ HABILIDAD NO DISPONIBLE");
 }
 
 function showDialogue(line) {
@@ -515,7 +687,13 @@ document.addEventListener("keydown", event => {
   if (code === "ArrowRight" || code === "KeyD") input.right = true;
 
   if (["Space", "ArrowUp", "KeyW"].includes(code) && !event.repeat) jump();
-  if (code === "KeyE" && !event.repeat) ability();
+  if (code === "KeyJ" && !event.repeat) basicAttack();
+  if (code === "KeyK" && !event.repeat) useSpecial();
+  if (code === "KeyL" && !event.repeat) useUltimate();
+  if (code === "KeyE" && !event.repeat) evolveCharacter();
+
+  const characterKeys = { Digit1: "lilo", Digit2: "stitch", Digit3: "dragon", Digit4: "kawaii-cat" };
+  if (characterKeys[code] && !event.repeat) switchCharacter(characterKeys[code]);
 });
 
 document.addEventListener("keyup", event => {
@@ -527,6 +705,12 @@ $("#start-button").addEventListener("click", startGame);
 $("#pause-button").addEventListener("click", () => setPaused(true));
 $("#resume-button").addEventListener("click", () => setPaused(false));
 $("#restart-button").addEventListener("click", restartMission);
+$("#roster-button").addEventListener("click", () => ui.roster.classList.toggle("hidden"));
+$("#close-roster").addEventListener("click", () => ui.roster.classList.add("hidden"));
+ui.evolve.addEventListener("click", evolveCharacter);
+ui.basicAction.addEventListener("click", basicAttack);
+ui.specialAction.addEventListener("click", useSpecial);
+ui.ultimateAction.addEventListener("click", useUltimate);
 
 $("#fullscreen-button").addEventListener("click", async () => {
   try {
@@ -551,7 +735,7 @@ document.querySelectorAll("#mobile-controls button").forEach(button => {
     if (key === "left") input.left = true;
     if (key === "right") input.right = true;
     if (key === "jump") jump();
-    if (key === "ability") ability();
+    if (key === "ability") useSpecial();
   });
 
   const release = () => {
@@ -567,6 +751,19 @@ document.querySelectorAll("#mobile-controls button").forEach(button => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && running && !paused) setPaused(true);
 });
+
+window.ProjectOhana = {
+  player,
+  characterManager,
+  startGame,
+  switchCharacter,
+  basicAttack,
+  useSpecial,
+  useUltimate,
+  evolveCharacter,
+  addXP(amount) { return characterManager.addXP(amount); },
+  getActiveCharacter() { return characterManager.getActiveCharacter(); }
+};
 
 function loop(timestamp) {
   const rawDelta = Math.min(timestamp - lastTime, 50);

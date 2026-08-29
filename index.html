@@ -52,6 +52,23 @@
     <div class="system-row"><span>ESTADO</span><b id="system-state">ONLINE</b></div>
   </aside>
 
+  <aside id="character-card" class="glass-card" aria-label="Estado del personaje activo">
+    <div class="card-kicker"><span>◉</span> PERSONAJE ACTIVO</div>
+    <div class="character-summary">
+      <div id="character-orb" aria-hidden="true">626</div>
+      <div>
+        <strong id="character-name">STITCH</strong>
+        <p id="character-form">Experimento 626</p>
+      </div>
+      <span id="character-level">NV. 1</span>
+    </div>
+    <div class="character-xp">
+      <div class="progress-track"><div id="xp-fill"></div></div>
+      <span id="xp-value">0 / 163 XP</span>
+    </div>
+    <button id="evolve-button" class="tiny-action" type="button" disabled>EVOLUCIÓN BLOQUEADA</button>
+  </aside>
+
   <div id="minimap" aria-hidden="true">
     <div id="minimap-player"></div>
   </div>
@@ -66,6 +83,16 @@
 
   <button id="pause-button" class="icon-button" aria-label="Pausar juego">Ⅱ</button>
   <button id="fullscreen-button" class="icon-button" aria-label="Pantalla completa">⛶</button>
+  <button id="roster-button" class="icon-button" aria-label="Cambiar personaje">◉</button>
+
+  <section id="roster-drawer" class="glass-card hidden" aria-label="Seleccionar personaje">
+    <div class="roster-heading">
+      <div><span class="card-kicker">OHANA</span><strong>ELIGE TU AVENTURA</strong></div>
+      <button id="close-roster" class="close-button" type="button" aria-label="Cerrar selección">×</button>
+    </div>
+    <div id="roster-list" class="character-list"></div>
+    <p class="roster-hint">También puedes cambiar en plena expedición con las teclas 1–4.</p>
+  </section>
 
   <div id="pause-screen" class="overlay hidden">
     <div class="pause-card">
@@ -89,12 +116,16 @@
         Explora biomas, recupera energía y sobrevive a lo que la isla genere después.
       </p>
 
+      <div class="selection-label">SELECCIONA TU OHANA</div>
+      <div id="start-character-list" class="character-list start-character-list"></div>
+
       <button id="start-button" class="primary-button">INICIAR EXPEDICIÓN <span>→</span></button>
 
       <div class="controls">
         <div><kbd>A</kbd><kbd>D</kbd><span>MOVER</span></div>
         <div><kbd>SPACE</kbd><span>SALTAR</span></div>
-        <div><kbd>E</kbd><span>PULSO</span></div>
+        <div><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd><span>HABILIDADES</span></div>
+        <div><kbd>E</kbd><span>EVOLUCIONAR</span></div>
         <div><kbd>ESC</kbd><span>PAUSA</span></div>
       </div>
     </div>
@@ -106,6 +137,12 @@
     <button data-key="jump" class="action" aria-label="Saltar">▲</button>
     <button data-key="ability" class="ability" aria-label="Pulso">✦</button>
   </div>
+
+  <section id="ability-dock" aria-label="Habilidades del personaje">
+    <button id="basic-action" class="ability-button" type="button"><kbd>J</kbd><span>ATAQUE</span></button>
+    <button id="special-action" class="ability-button special" type="button"><kbd>K</kbd><span id="special-name">PULSO</span></button>
+    <button id="ultimate-action" class="ability-button ultimate" type="button"><kbd>L</kbd><span id="ultimate-name">ULTIMATE</span></button>
+  </section>
 </div>
 
 <div id="boot-screen">

@@ -115,8 +115,22 @@ export class Player {
     const x = Math.round(this.x - cameraX);
     const y = Math.round(this.y);
     const walk = Math.sin(this.animationTime * 0.012) * Math.min(1, Math.abs(this.vx) / 2);
+    const character = this.character || {};
+    const colors = character.colors || {};
+    const primary = colors.primary || "#258fe6";
+    const secondary = colors.secondary || "#f27d9f";
+    const glow = colors.glow || "#75f3ff";
 
     ctx.save();
+
+    if (character.evolutionStage > 0) {
+      ctx.globalAlpha = 0.18 + Math.sin(this.animationTime * 0.006) * 0.06;
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x + this.w / 2, y + this.h / 2, 38 + character.evolutionStage * 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
 
     if (this.invulnerable > 0 && Math.floor(this.invulnerable / 90) % 2 === 0) {
       ctx.globalAlpha = 0.45;
@@ -128,23 +142,23 @@ export class Player {
       ctx.translate(-x - this.w, -y);
     }
 
-    ctx.fillStyle = "#1c86d9";
+    ctx.fillStyle = primary;
     ctx.beginPath();
     ctx.ellipse(x + 21, y + 31, 18, 20, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#258fe6";
+    ctx.fillStyle = primary;
     ctx.beginPath();
     ctx.ellipse(x + 21, y + 17, 19, 18, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#267dd1";
+    ctx.fillStyle = secondary;
     ctx.beginPath();
     ctx.ellipse(x + 4, y + 15, 12, 7, -0.45, 0, Math.PI * 2);
     ctx.ellipse(x + 38, y + 15, 12, 7, 0.45, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#f27d9f";
+    ctx.fillStyle = glow;
     ctx.beginPath();
     ctx.ellipse(x + 4, y + 15, 6, 3, -0.45, 0, Math.PI * 2);
     ctx.ellipse(x + 38, y + 15, 6, 3, 0.45, 0, Math.PI * 2);
@@ -171,7 +185,7 @@ export class Player {
     ctx.arc(x + 21, y + 24, 8, 0.15, Math.PI - 0.15);
     ctx.stroke();
 
-    ctx.strokeStyle = "#258fe6";
+    ctx.strokeStyle = primary;
     ctx.lineWidth = 7;
     ctx.lineCap = "round";
     ctx.beginPath();
@@ -181,7 +195,7 @@ export class Player {
     ctx.lineTo(x + 41, y + 38);
     ctx.stroke();
 
-    ctx.strokeStyle = "#176eb9";
+    ctx.strokeStyle = secondary;
     ctx.lineWidth = 8;
     ctx.beginPath();
     ctx.moveTo(x + 15, y + 46);
