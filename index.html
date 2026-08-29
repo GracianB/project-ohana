@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#06131d">
+  <meta name="description" content="PROJECT OHANA · aventura procedural de plataformas">
+  <title>PROJECT OHANA · Procedural Adventure</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-shell" aria-label="PROJECT OHANA">
+  <canvas id="game" width="1280" height="720"></canvas>
+
+  <div id="vignette" aria-hidden="true"></div>
+  <div id="damage-flash" aria-hidden="true"></div>
+
+  <header id="hud">
+    <section class="hud-panel hud-energy" aria-label="Energía del jugador">
+      <div class="hud-heading">
+        <span class="hud-label">ENERGÍA</span>
+        <strong id="energy-value">100%</strong>
+      </div>
+      <div class="energy-bar"><div id="energy-fill"></div></div>
+    </section>
+
+    <section class="hud-center" aria-label="Zona actual">
+      <div class="logo">PROJECT <strong>OHANA</strong></div>
+      <div id="world-label">SINCRONIZANDO MUNDO...</div>
+    </section>
+
+    <section class="hud-stats" aria-label="Estadísticas">
+      <div class="stat"><span class="stat-icon">✦</span><b id="score">000000</b><small>PUNTOS</small></div>
+      <div class="stat"><span class="stat-icon">◈</span><b id="crystals">00</b><small>CRISTALES</small></div>
+      <div class="stat"><span class="stat-icon">⌁</span><b id="chunks">00</b><small>SECTORES</small></div>
+    </section>
+  </header>
+
+  <aside id="quest-card" class="glass-card">
+    <div class="card-kicker"><span>✦</span> MISIÓN ACTIVA</div>
+    <strong id="quest-title">Primera expedición</strong>
+    <p id="quest-description">Recupera cristales de energía para estabilizar la isla.</p>
+    <div class="quest-progress">
+      <div class="progress-track"><div id="quest-fill"></div></div>
+      <span id="quest-progress-text">0 / 10</span>
+    </div>
+  </aside>
+
+  <aside id="system-panel" class="glass-card">
+    <div class="system-row"><span>FPS</span><b id="fps">60</b></div>
+    <div class="system-row"><span>SEMILLA</span><b>6262026</b></div>
+    <div class="system-row"><span>ESTADO</span><b id="system-state">ONLINE</b></div>
+  </aside>
+
+  <div id="minimap" aria-hidden="true">
+    <div id="minimap-player"></div>
+  </div>
+
+  <div id="message" class="toast" role="status"></div>
+
+  <section id="dialogue-box" aria-live="polite">
+    <div id="dialogue-speaker">SISTEMA</div>
+    <div id="dialogue-text"></div>
+    <div class="dialogue-hint">PULSA ENTER PARA CONTINUAR</div>
+  </section>
+
+  <button id="pause-button" class="icon-button" aria-label="Pausar juego">Ⅱ</button>
+  <button id="fullscreen-button" class="icon-button" aria-label="Pantalla completa">⛶</button>
+
+  <div id="pause-screen" class="overlay hidden">
+    <div class="pause-card">
+      <span class="eyebrow">SISTEMA EN ESPERA</span>
+      <h2>PAUSA</h2>
+      <p>La isla seguirá existiendo. Sorprendentemente, puede arreglárselas sin ti unos minutos.</p>
+      <button id="resume-button" class="primary-button">CONTINUAR EXPEDICIÓN</button>
+      <button id="restart-button" class="secondary-button">REINICIAR MISIÓN</button>
+      <div class="pause-controls">ESC · REANUDAR &nbsp; | &nbsp; R · REINICIAR</div>
+    </div>
+  </div>
+
+  <div id="start-screen" class="overlay">
+    <div class="start-card">
+      <div class="alien-mark">◉</div>
+      <p class="eyebrow">EXPERIMENTO DESCONOCIDO · ARCHIVO 626-X</p>
+      <h1>PROJECT<br><span>OHANA</span></h1>
+
+      <p class="intro">
+        Un mundo de plataformas procedural que evoluciona mientras avanzas.
+        Explora biomas, recupera energía y sobrevive a lo que la isla genere después.
+      </p>
+
+      <button id="start-button" class="primary-button">INICIAR EXPEDICIÓN <span>→</span></button>
+
+      <div class="controls">
+        <div><kbd>A</kbd><kbd>D</kbd><span>MOVER</span></div>
+        <div><kbd>SPACE</kbd><span>SALTAR</span></div>
+        <div><kbd>E</kbd><span>PULSO</span></div>
+        <div><kbd>ESC</kbd><span>PAUSA</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-controls">
+    <button data-key="left" aria-label="Mover izquierda">◀</button>
+    <button data-key="right" aria-label="Mover derecha">▶</button>
+    <button data-key="jump" class="action" aria-label="Saltar">▲</button>
+    <button data-key="ability" class="ability" aria-label="Pulso">✦</button>
+  </div>
+</div>
+
+<div id="boot-screen">
+  <div class="boot-core"><div class="boot-orb"></div></div>
+  <p>INICIALIZANDO MOTOR PROCEDURAL</p>
+  <div class="boot-line"><span></span></div>
+</div>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>
