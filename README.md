@@ -1,84 +1,49 @@
-# PROJECT OHANA
+# PROJECT OHANA 1.0
 
-Aventura 2D en canvas. Elige a Lilo, Stitch, Pikachu, el Dragón o Kawaii Cat, explora un mapa tipo metroidvania, encadena combos y evoluciona tres formas.
+Fan adventure 2D en canvas. Elige familia, cruza el archipiélago, encadena combos y evoluciona tres formas.
 
-**Jugar online (cuando Pages esté activo):**  
-https://gracianb.github.io/project-ohana/
+**Jugar ahora:** https://gracianb.github.io/project-ohana/
 
-**Repo:** https://github.com/GracianB/project-ohana
-
-Oleada 2: HUD de cristal, mapa grande, pausa, continuar partida, hitstop, crits, fase 2 del jefe, biomes con más atmósfera. Lista en `IMPROVEMENTS.md`.
-
----
-
-## Jugar sin localhost
-
-El juego es HTML + JS + CSS. No hay backend.
-
-### Opción A — GitHub Pages
-1. Repo → **Settings** → **Pages**
-2. Source: **GitHub Actions** o **Deploy from a branch** → `main` / `/ (root)`
-3. Abre `https://gracianb.github.io/project-ohana/`
-
-Workflow: `.github/workflows/pages.yml`
-
-### Opción B — Netlify Drop
-Arrastra la carpeta a [app.netlify.com/drop](https://app.netlify.com/drop).
-
-### Opción C — local
-```bash
-python -m http.server 8080
-```
-Abre `http://localhost:8080/`  
-No abras `index.html` con doble clic: los módulos ES fallan en `file://`.
-
----
-
-## Controles
+## Cómo se juega
 
 | Tecla | Acción |
-|---|---|
+| --- | --- |
 | WASD / flechas | Mover y saltar |
-| Espacio | Saltar (soltar = salto corto) |
-| Shift / clic derecho | Dash |
+| Shift / clic der. | Dash |
 | F / clic | Golpe |
-| J K L | Habilidades |
+| J K L | Poderes (lejos / medio / definitivo) |
 | E | Evolucionar |
-| S | Bajar de plataforma fina |
+| S | Bajar de plataforma |
 | R | Volver al claro |
-| M | Mapa grande |
-| N | Mute |
-| Esc | Pausa |
+| M | Mapa |
+| N | Sonido |
 | H | Ayuda |
-| 1–5 | Elegir personaje en el menú |
+| Esc | Pausa |
 
+Puertas **ESTE OESTE ARRIBA ABAJO**. Jungla / Lab / Órbita piden forma 2. Caldera y jefe piden forma 3. Solo mueres en pozos reales.
+
+## Familia
+
+- **Lilo** — notas, aro hula, pulso Ohana
+- **Stitch** — plasma, garras, ráfaga 626
+- **Pikachu** — chispa, ataque rápido, trueno
+- **Mushu** — bola de fuego, aletazo, ira del dragón
+- **Kawaii Cat** — ovillo, salto, nueve vidas
+
+J es siempre disparo a distancia. Al evolucionar, J lanza más proyectiles.
+
+## Evoluciones
+
+Tres formas por personaje. XP 40 → forma 2. XP 100 → forma 3. O pulsa E. Cine a pantalla completa y aura nueva.
+
+## Local
+
+```powershell
+cd "X:\GitHub\systems-lab\project-ohana"
+git pull origin main
+python -m http.server 8080
 ```
-        Cumbre ── Órbita
-           │         │
-Lab ─ Cueva ─ Claro ─ Costa ─ Jungla
-                               │
-                         Caldera ─ JEFE
-```
 
-Jungla, Lab y Órbita piden forma 2. Caldera y Jefe piden forma 3.
+Abre `http://localhost:8080`. No abras `index.html` a doble clic.
 
----
-
-## Personajes
-
-| | Lv1 | Lv2 | Lv3 |
-|---|---|---|---|
-| Lilo | Lilo | Guardiana Ohana | Alma de Kauai |
-| Stitch | Stitch | Berserk 626 | Experiment MAX |
-| Pikachu | Pikachu | Raichu | Tormenta |
-| Dragón | Cría | Dragón de Fuego | Volcánico |
-| Gato | Gatito | Neko Shadow | Nueve Vidas |
-
-XP 40 → forma 2. XP 100 → forma 3. O pulsa E.
-
----
-
-## Licencia
-
-Código: MIT.  
-Lilo, Stitch y Pikachu son marcas de Disney / Nintendo / The Pokémon Company. Fan game no comercial.
+Código MIT. Lilo, Stitch y Pikachu son marcas de Disney / Nintendo / TPC. Fan game no comercial.
