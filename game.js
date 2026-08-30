@@ -5,6 +5,7 @@ import { ABILITY_DEFS, useAbility } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx } from "./engine/audio.js";
+import { ROOMS, ROOM_W, ROOM_H } from "./systems/map.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -15,8 +16,8 @@ const XP_NEED = [0, 40, 100];
 const game = {
   player: null, enemies: [], projectiles: [], bolts: [], platforms: [], orbs: [],
   fx: new ParticleSystem(), worldIndex: 0, cam: { x: 0, y: 0 },
-  worldW: 4800, worldH: 900, running: false, spawn: { x: 160, y: 420 },
-  shake: 0, combo: 0, comboT: 0, score: 0, bossSpawned: false
+  worldW: ROOM_W, worldH: ROOM_H, running: false, spawn: { x: 180, y: 500 },
+  shake: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0
 };
 
 function fit() { canvas.width = innerWidth; canvas.height = innerHeight; }
@@ -32,101 +33,109 @@ addEventListener("keydown", (e) => {
   if (e.key === "l" || e.key === "L") useAbility(game, 2);
   if (e.key === "e" || e.key === "E") evolve("manual");
   if (e.key === "r" || e.key === "R") respawn("manual");
-  if (e.key >= "1" && e.key <= "5") changeWorld(Number(e.key) - 1);
+  if (e.key === "m" || e.key === "M") showMap();
 });
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+
+function room() { return ROOMS[game.roomId]; }
+
+function loadRoom(id, fromDir) {
+  const r = ROOMS[id];
+  if (!r) return;
+  if (r.needEvo && game.player && game.player.evo < r.needEvo) {
+    showNotification("CERRADO", "Necesitas forma " + (r.needEvo + 1));
+    sfx("hurt");
+    if (fromDir === "right") game.player.x = game.worldW - game.player.w - 30;
+    if (fromDir === "left") game.player.x = 30;
+    if (fromDir === "up") game.player.y = 80;
+    if (fromDir === "down") game.player.y = game.worldH - 200;
+    return;
+  }
+  game.roomId = id;
+  game.visited[id] = true;
+  game.worldIndex = r.world;
+  game.worldW = ROOM_W; game.worldH = ROOM_H;
+  game.platforms = r.plats.map((p) => ({ x: p[0], y: p[1], w: p[2], h: p[3] }));
+  game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
+  game.enemies = (r.foes || []).map((f, i) => ({
+    x: f[0], y: f[1], w: 30, h: 30, vx: i % 2 ? 1.6 : -1.6, vy: 0,
+    hp: 50 + i * 10, max: 50 + i * 10, kind: ["slime", "bat", "bot"][i % 3],
+    color: ["#6c3", "#c3c", "#fa4"][i % 3], boss: false
+  }));
+  if (r.boss) {
+    game.enemies.push({ x: 900, y: 400, w: 74, h: 74, vx: 2, vy: 0, hp: 420, max: 420, kind: "boss", color: "#f36", boss: true });
+    showNotification("JEFE", r.name);
+  }
+  if (fromDir === "right") game.player.x = 40;
+  if (fromDir === "left") game.player.x = ROOM_W - 80;
+  if (fromDir === "up") game.player.y = ROOM_H - 200;
+  if (fromDir === "down") game.player.y = 80;
+  game.player.vx = 0; game.player.vy = 0;
+  game.cam.x = 0; game.fading = 12;
+  showNotification("SALA", r.name);
+}
+
+function showMap() {
+  const names = Object.keys(game.visited).map((id) => ROOMS[id].name).join(" · ");
+  showNotification("MAPA", names || "Claro Ohana");
+}
 
 function makePlayer(def) {
   const p = { ...def, x: game.spawn.x, y: game.spawn.y, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0 };
   applyForm(p); return p;
 }
 
-function buildPlatforms() {
-  const g = game.worldH - 90;
-  game.platforms = [
-    { x: 0, y: g, w: 380, h: 90 }, { x: 520, y: g, w: 260, h: 90 }, { x: 920, y: g, w: 300, h: 90 },
-    { x: 1360, y: g, w: 220, h: 90 }, { x: 1760, y: g, w: 340, h: 90 }, { x: 2260, y: g, w: 280, h: 90 },
-    { x: 2720, y: g, w: 260, h: 90 }, { x: 3160, y: g, w: 440, h: 90 }, { x: 3720, y: g, w: 280, h: 90 },
-    { x: 4140, y: g, w: 660, h: 90 },
-    { x: 240, y: g - 150, w: 160, h: 18 }, { x: 620, y: g - 240, w: 150, h: 18 },
-    { x: 980, y: g - 170, w: 180, h: 18 }, { x: 1280, y: g - 300, w: 140, h: 18 },
-    { x: 1580, y: g - 210, w: 170, h: 18 }, { x: 1980, y: g - 320, w: 160, h: 18 },
-    { x: 2360, y: g - 190, w: 180, h: 18 }, { x: 2780, y: g - 280, w: 150, h: 18 },
-    { x: 3400, y: g - 220, w: 180, h: 18 }, { x: 3900, y: g - 260, w: 160, h: 18 }
-  ];
-  game.orbs = [];
-  for (let i = 0; i < 12; i++) game.orbs.push({ x: 300 + i * 360, y: 520 - (i % 3) * 80, r: 9, taken: false });
-}
-
-function spawnEnemies() {
-  game.enemies = [];
-  game.bossSpawned = false;
-  [560, 980, 1400, 1860, 2320, 2780, 3220, 3680].forEach((x, i) => {
-    game.enemies.push({ x, y: 200, w: 30, h: 30, vx: (i % 2 ? 1 : -1) * 1.5, vy: 0, hp: 42 + i * 8, max: 42 + i * 8, kind: ["slime", "bat", "bot"][i % 3], color: ["#6c3", "#c3c", "#fa4"][i % 3], boss: false });
-  });
-}
-
-function spawnBoss() {
-  if (game.bossSpawned) return;
-  game.bossSpawned = true;
-  game.enemies.push({ x: 4300, y: 400, w: 70, h: 70, vx: 2.2, vy: 0, hp: 420, max: 420, kind: "boss", color: "#f36", boss: true });
-  showNotification("JEFE", "Algo grande ha despertado al este");
-  sfx("evo");
-}
-
 function start(def) {
   game.player = makePlayer(def);
-  game.worldIndex = 0; game.combo = 0; game.score = 0; game.shake = 0;
-  buildPlatforms(); spawnEnemies();
+  game.combo = 0; game.score = 0; game.shake = 0; game.visited = { hub: true };
   game.projectiles = []; game.bolts = []; game.running = true;
   document.getElementById("char-select").classList.add("hidden");
   renderAbilityBar();
-  showNotification("OHANA", def.evoNames[0] + " entra en combate. Cruza la isla.");
+  loadRoom("hub");
 }
 
 function evolve(reason) {
   const p = game.player;
   if (!p || p.dead) return;
-  if (p.evo >= 2) { if (reason === "manual") showNotification("MAX", "Forma final alcanzada."); return; }
+  if (p.evo >= 2) { if (reason === "manual") showNotification("MAX", "Forma final."); return; }
   if (reason !== "manual" && p.xp < XP_NEED[p.evo + 1]) return;
   p.evo++; applyForm(p); game.shake = 12; sfx("evo");
   showNotification("EVOLUCION Lv" + (p.evo + 1), p.name);
   game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 });
 }
 
-function changeWorld(i) {
-  if (!WORLDS[i]) return;
-  game.worldIndex = i; buildPlatforms(); spawnEnemies();
-  if (game.player && !game.player.dead) { game.player.x = game.spawn.x; game.player.y = game.spawn.y; game.player.vx = 0; game.player.vy = 0; }
-  showNotification("MUNDO", WORLDS[i].name);
-}
-
 function respawn(reason) {
   const p = game.player; if (!p) return;
-  p.x = game.spawn.x; p.y = game.spawn.y; p.vx = 0; p.vy = 0;
-  p.health = p.maxHealth; p.dead = false; p.invuln = 40; game.combo = 0;
-  if (reason !== "manual") showNotification("REAPARECER", "Ohana: nadie se queda atras.");
+  p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 40; game.combo = 0;
+  loadRoom("hub");
+  if (reason !== "manual") showNotification("REAPARECER", "De vuelta al claro.");
 }
 
 function checkVoidDeath() {
   const p = game.player;
   if (p.y > game.worldH + 80 && !p.dead) {
-    p.dead = true; p.health = 0; game.shake = 14; game.combo = 0; sfx("hurt");
-    showNotification("HAS CAIDO AL VACIO", "Reapareces en 1.2s · R para forzar");
-    setTimeout(() => { if (game.player && game.player.dead) respawn("void"); }, 1200);
+    p.dead = true; p.health = 0; game.shake = 14; sfx("hurt");
+    showNotification("VACIO", "Reapareces en el claro");
+    setTimeout(() => { if (game.player && game.player.dead) respawn("void"); }, 900);
   }
 }
 
 function aabb(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
-
 function punch(x, y, color) {
-  game.shake = Math.min(18, game.shake + 6);
-  game.combo += 1; game.comboT = 90;
-  game.score += 10 * game.combo;
-  game.fx.emit(x, y, { color, count: 14, size: 4, up: 1.2 });
-  sfx("hit");
+  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 90; game.score += 10 * game.combo;
+  game.fx.emit(x, y, { color, count: 14, size: 4, up: 1.2 }); sfx("hit");
+}
+
+function tryDoors() {
+  const p = game.player; const r = room();
+  if (p.x > ROOM_W - 20 && r.doors.right) loadRoom(r.doors.right, "right");
+  else if (p.x < -10 && r.doors.left) loadRoom(r.doors.left, "left");
+  else if (p.y < -20 && r.doors.up) loadRoom(r.doors.up, "up");
+  else if (p.y > ROOM_H - 40 && r.doors.down) loadRoom(r.doors.down, "down");
+  if (p.x > ROOM_W - 20 && !r.doors.right) p.x = ROOM_W - p.w;
+  if (p.x < -10 && !r.doors.left) p.x = 0;
 }
 
 function updatePlayer() {
@@ -141,15 +150,12 @@ function updatePlayer() {
   const canJump = p.jumps < p.maxJumps || p.coyote > 0;
   if (p.buffer > 0 && canJump && !p._jumpHeld) {
     p.vy = -p.jumpPower; p.jumps = p.coyote > 0 ? 1 : p.jumps + 1;
-    p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true;
-    game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#fff", count: 6, size: 2, up: 0.4 });
-    sfx("jump");
+    p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; sfx("jump");
   }
   if (!jump) p._jumpHeld = false;
   if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
   if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
-  p.vy += 0.58; p.x += p.vx; p.y += p.vy;
-  const was = p.grounded; p.grounded = false;
+  p.vy += 0.58; p.x += p.vx; p.y += p.vy; p.grounded = false;
   for (const plat of game.platforms) {
     if (p.x + p.w > plat.x + 2 && p.x < plat.x + plat.w - 2) {
       if (p.y + p.h > plat.y && p.y + p.h < plat.y + 22 && p.vy >= 0) {
@@ -158,24 +164,20 @@ function updatePlayer() {
     }
   }
   if (!p.grounded && p.coyote > 0) p.coyote--;
-  if (p.grounded && !was) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ddd", count: 8, size: 2 });
-  p.x = Math.max(-20, Math.min(p.x, game.worldW - p.w + 20));
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
       o.taken = true; p.xp += 8; game.score += 25; sfx("orb");
-      game.fx.emit(o.x, o.y, { color: "#ffe66a", count: 10, size: 3, up: 1 });
     }
   }
-  if (p.x > 4000) spawnBoss();
-  checkVoidDeath();
+  tryDoors(); checkVoidDeath();
   if (p.evo < 2 && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 }
 
 function updateEnemies() {
   for (const e of game.enemies) {
     e.vy += 0.5; e.x += e.vx; e.y += e.vy;
-    if (e.boss) e.vx += Math.sign((game.player.x - e.x) || 1) * 0.05;
+    if (e.boss) e.vx += Math.sign((game.player.x - e.x) || 1) * 0.06;
     for (const plat of game.platforms) {
       if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
         if (e.y + e.h > plat.y && e.y + e.h < plat.y + 28 && e.vy >= 0) { e.y = plat.y - e.h; e.vy = 0; }
@@ -187,22 +189,15 @@ function updateEnemies() {
     const p = game.player;
     if (!p.dead && p.invuln <= 0 && aabb(p, e)) {
       p.health -= e.boss ? 16 : 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 8; p.vy = -5; game.shake = 10; game.combo = 0; sfx("hurt");
-      if (p.health <= 0) {
-        p.dead = true;
-        showNotification("DERROTA", "R para reaparecer");
-        setTimeout(() => { if (game.player && game.player.dead) respawn("combat"); }, 1000);
-      }
+      if (p.health <= 0) { p.dead = true; showNotification("DERROTA", "R al claro"); setTimeout(() => { if (game.player && game.player.dead) respawn("combat"); }, 900); }
     }
   }
   game.enemies = game.enemies.filter((e) => {
     if (e.hp > 0) return true;
     punch(e.x, e.y, e.color);
-    if (e.boss) { sfx("win"); showNotification("VICTORIA", "El jefe cae. Score " + game.score); }
+    if (e.boss) { sfx("win"); showNotification("VICTORIA", "Score " + game.score); }
     return false;
   });
-  if (game.enemies.filter((e) => !e.boss).length < 4) {
-    game.enemies.push({ x: 600 + Math.random() * 2800, y: 120, w: 30, h: 30, vx: Math.random() > 0.5 ? 1.6 : -1.6, vy: 0, hp: 48, max: 48, kind: "slime", color: "#c66", boss: false });
-  }
 }
 
 function updateProjectiles() {
@@ -215,8 +210,7 @@ function updateProjectiles() {
     if (pr.owner === "player") {
       for (const e of game.enemies) {
         if (aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
-          e.hp -= pr.dmg * (1 + game.player.evo * 0.35);
-          pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
+          e.hp -= pr.dmg * (1 + game.player.evo * 0.35); pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
         }
       }
     }
@@ -227,66 +221,75 @@ function updateProjectiles() {
 
 function updateCam() {
   const p = game.player;
-  game.cam.x += (p.x - canvas.width / 2 - game.cam.x) * 0.1;
-  game.cam.y += (p.y - canvas.height * 0.58 - game.cam.y) * 0.1;
+  game.cam.x += (p.x - canvas.width / 2 - game.cam.x) * 0.12;
+  game.cam.y += (p.y - canvas.height * 0.58 - game.cam.y) * 0.12;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
+  if (game.fading > 0) game.fading--;
 }
 
 function drawEnemy(e) {
   const x = e.x - game.cam.x, y = e.y - game.cam.y;
-  ctx.fillStyle = "rgba(0,0,0,.28)";
-  ctx.beginPath(); ctx.ellipse(x + e.w / 2, y + e.h + 3, e.w * 0.42, 5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = e.color;
-  if (e.kind === "boss") {
-    ctx.beginPath(); ctx.ellipse(x + e.w / 2, y + e.h / 2, e.w / 2, e.h / 2.2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = "#111"; ctx.fillRect(x + 18, y + 22, 10, 10); ctx.fillRect(x + 42, y + 22, 10, 10);
-  } else if (e.kind === "bat") { ctx.beginPath(); ctx.ellipse(x + 15, y + 16, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); }
+  if (e.kind === "boss") { ctx.beginPath(); ctx.ellipse(x + e.w / 2, y + e.h / 2, e.w / 2, e.h / 2.2, 0, 0, Math.PI * 2); ctx.fill(); }
+  else if (e.kind === "bat") { ctx.beginPath(); ctx.ellipse(x + 15, y + 16, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); }
   else if (e.kind === "bot") ctx.fillRect(x + 4, y + 4, 22, 22);
   else { ctx.beginPath(); ctx.ellipse(x + 15, y + 20, 15, 12, 0, 0, Math.PI * 2); ctx.fill(); }
   ctx.fillStyle = "#000"; ctx.fillRect(x, y - 10, e.w, 5);
   ctx.fillStyle = e.boss ? "#f55" : "#3f3"; ctx.fillRect(x, y - 10, e.w * (e.hp / e.max), 5);
 }
 
-function drawPlatform(plat, world) {
-  const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
-  ctx.fillStyle = "rgba(0,0,0,.32)"; ctx.fillRect(x + 8, y + 12, plat.w, plat.h);
-  ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
-  ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 11);
-  ctx.fillStyle = "rgba(255,255,255,.22)"; ctx.fillRect(x, y, plat.w, 3);
+function drawMinimap() {
+  const cells = [
+    [1, 0, "ridge"], [2, 0, "space"],
+    [0, 1, "lab"], [1, 1, "cave"], [2, 1, "hub"], [3, 1, "beach"], [4, 1, "jungle"],
+    [4, 2, "volcano"], [5, 2, "boss"]
+  ];
+  const ox = canvas.width - 196, oy = canvas.height - 118;
+  ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(ox - 8, oy - 8, 188, 104);
+  for (const [cx, cy, id] of cells) {
+    const x = ox + cx * 28, y = oy + cy * 28;
+    ctx.fillStyle = game.roomId === id ? "#7ee7ff" : game.visited[id] ? "#3a6" : "#222";
+    ctx.fillRect(x, y, 22, 22);
+  }
 }
 
 function render() {
   const world = WORLDS[game.worldIndex];
   ctx.save(); ctx.translate((Math.random() - 0.5) * game.shake, (Math.random() - 0.5) * game.shake);
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
-  for (const plat of game.platforms) drawPlatform(plat, world);
+  for (const plat of game.platforms) {
+    const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
+    ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.fillRect(x + 8, y + 10, plat.w, plat.h);
+    ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
+    ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 10);
+  }
+  const r = room();
+  ctx.fillStyle = "rgba(126,231,255,.55)";
+  if (r.doors.right) ctx.fillRect(ROOM_W - 18 - game.cam.x, 360 - game.cam.y, 14, 80);
+  if (r.doors.left) ctx.fillRect(4 - game.cam.x, 360 - game.cam.y, 14, 80);
+  if (r.doors.up) ctx.fillRect(760 - game.cam.x, 8 - game.cam.y, 80, 12);
+  if (r.doors.down) ctx.fillRect(760 - game.cam.x, ROOM_H - 20 - game.cam.y, 80, 12);
   for (const o of game.orbs) {
     if (o.taken) continue;
-    const ox = o.x - game.cam.x, oy = o.y - game.cam.y + Math.sin(t / 12 + o.x) * 4;
-    ctx.fillStyle = "#ffe66a"; ctx.shadowColor = "#ffe66a"; ctx.shadowBlur = 16;
-    ctx.beginPath(); ctx.arc(ox, oy, o.r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffe66a"; ctx.shadowColor = "#ffe66a"; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(o.x - game.cam.x, o.y - game.cam.y + Math.sin(t / 12) * 4, 9, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   }
   for (const e of game.enemies) drawEnemy(e);
   for (const pr of game.projectiles) {
-    ctx.fillStyle = pr.color; ctx.shadowColor = pr.color; ctx.shadowBlur = 14;
+    ctx.fillStyle = pr.color; ctx.shadowBlur = 12; ctx.shadowColor = pr.color;
     ctx.fillRect(pr.x - game.cam.x, pr.y - game.cam.y, pr.w, pr.h); ctx.shadowBlur = 0;
-  }
-  for (const b of game.bolts) {
-    ctx.strokeStyle = "#cfff6a"; ctx.lineWidth = 3; ctx.shadowBlur = 16; ctx.shadowColor = "#cfff6a";
-    ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke(); ctx.shadowBlur = 0;
   }
   game.fx.render(ctx, game.cam);
   if (game.player && game.player.invuln % 4 !== 1) drawCharacter(ctx, game.player, game.cam, t);
   ctx.restore();
-  const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.28, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
-  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.42)");
+  const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.3, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.4)");
   ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  if (game.combo > 1) {
-    ctx.fillStyle = "#fff"; ctx.font = "800 42px Outfit, sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(game.combo + " COMBO", canvas.width / 2, 90);
-  }
+  if (game.fading > 0) { ctx.fillStyle = "rgba(0,0,0," + (game.fading / 12) + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+  if (game.combo > 1) { ctx.fillStyle = "#fff"; ctx.font = "800 40px Outfit,sans-serif"; ctx.textAlign = "center"; ctx.fillText(game.combo + " COMBO", canvas.width / 2, 88); }
+  drawMinimap();
 }
 
 function renderAbilityBar() {
@@ -303,8 +306,8 @@ function updateHUD() {
   const need = p.evo >= 2 ? p.xp : XP_NEED[p.evo + 1];
   document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · Lv" + (p.evo + 1) + " · XP " + p.xp + (p.evo < 2 ? "/" + need : "");
   document.getElementById("hp-bar").style.width = Math.max(0, (p.health / p.maxHealth) * 100) + "%";
-  document.getElementById("hud-world").textContent = WORLDS[game.worldIndex].name;
-  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3: " + p.evoNames[p.evo];
+  document.getElementById("hud-world").textContent = room().name;
+  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3 · M mapa";
   const comboEl = document.getElementById("hud-combo");
   if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
   const now = performance.now();
@@ -322,13 +325,10 @@ function loop() {
   }
   requestAnimationFrame(loop);
 }
-
 function setupSelect() {
   const wrap = document.getElementById("chars");
   wrap.innerHTML = ROSTER.map((c) => '<div class="char-card" data-id="' + c.id + '"><div style="height:48px;background:' + c.color + ';border-radius:8px"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small></div>').join("");
-  wrap.querySelectorAll(".char-card").forEach((el) => {
-    el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id)));
-  });
+  wrap.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
 }
 setupSelect();
 loop();
