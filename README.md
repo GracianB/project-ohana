@@ -1,43 +1,49 @@
-# PROJECT OHANA
+# PROJECT OHANA — rebuild
 
-Una aventura de plataformas procedural en canvas, ambientada entre playas, junglas, volcanes, laboratorios alienígenas y espacio profundo.
+Motor canvas modular. Sirve con:
 
-## Jugar localmente
-
-Abre la carpeta con un servidor estático. Por ejemplo:
-
-```powershell
-python -m http.server 4173
+```
+python -m http.server 8080
 ```
 
-Después visita `http://localhost:4173`.
+Abre `http://localhost:8080/`
 
 ## Controles
 
-| Acción | Teclas |
-| --- | --- |
-| Mover | `A` / `D` o flechas |
-| Saltar | `Espacio`, `W` o flecha arriba |
-| Ataque básico | `J` |
-| Habilidad especial | `K` |
-| Ultimate | `L` |
-| Evolucionar | `E` |
-| Cambiar personaje | `1`–`4` |
-| Pausa | `Esc` |
+- WASD / flechas: mover y saltar
+- J K L: habilidades 1 / 2 / ultimate
+- E: evolucionar (3 formas)
+- 1-5: mundos (playa, jungla, volcán, espacio, lab)
+- R: reaparecer
+- ESC / ✕: cerrar notificación
 
-## Personajes
+## Qué se ha reconstruido
 
-- Lilo — exploradora equilibrada.
-- Stitch — experimento resistente.
-- Dragón de Milán — guardián de alto impacto.
-- Gato Kawaii — explorador rápido y energético.
+1. Caer bajo el mundo = muerte + respawn
+2. Notificaciones con botón cerrar y ESC
+3. Pikachu completo
+4. Render distinto por personaje (Lilo, Stitch, Pikachu, Dragón, Gato)
+5. Habilidades únicas
+6. Evoluciones que cambian tamaño, aura y nombre
+7. Fondo distinto por mundo
 
-Cada integrante de la ohana conserva su nivel, XP, energía, habilidades y evolución. Los cristales y enemigos derrotados conceden XP; al alcanzar el nivel necesario, usa `E` para desbloquear una nueva forma y su ultimate.
+## Git (en tu PC)
 
-Para probar el sistema desde la consola del navegador:
-
-```js
-ProjectOhana.addXP(5000);
-ProjectOhana.evolveCharacter();
-ProjectOhana.switchCharacter("dragon");
 ```
+cd "X:\GitHub\systems-lab\project-ohana"
+git fetch origin
+git status
+git pull origin main --rebase
+```
+
+Copia estos archivos encima de los tuyos, luego:
+
+```
+git add -A
+git commit -m "rebuild: unique characters, pikachu, void death, worlds, abilities"
+git push origin main
+```
+
+Si hay conflicto: `git status` y pégame la salida. No uses `--force` salvo que quieras pisar GitHub a propósito.
+
+No subas `PROJECT-OHANA-COMPLETE.zip` al repo.
