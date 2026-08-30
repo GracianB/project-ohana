@@ -1,7 +1,5 @@
 export class ParticleSystem {
-  constructor() {
-    this.items = [];
-  }
+  constructor() { this.items = []; }
   emit(x, y, opts = {}) {
     const n = opts.count ?? 8;
     for (let i = 0; i < n; i++) {
@@ -16,15 +14,13 @@ export class ParticleSystem {
         size: opts.size ?? 3,
         color: opts.color ?? "#fff",
         gravity: opts.gravity ?? 0.05,
+        circle: opts.circle !== false
       });
     }
   }
   update() {
     this.items = this.items.filter((p) => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += p.gravity;
-      p.life--;
+      p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life--;
       return p.life > 0;
     });
   }
@@ -32,7 +28,11 @@ export class ParticleSystem {
     for (const p of this.items) {
       ctx.globalAlpha = p.life / p.max;
       ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - cam.x, p.y - cam.y, p.size, p.size);
+      if (p.circle) {
+        ctx.beginPath();
+        ctx.arc(p.x - cam.x, p.y - cam.y, p.size * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else ctx.fillRect(p.x - cam.x, p.y - cam.y, p.size, p.size);
     }
     ctx.globalAlpha = 1;
   }
