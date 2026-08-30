@@ -1,0 +1,53 @@
+#win-cinema {
+  position: fixed; inset: 0; z-index: 80;
+  display: none; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+#win-cinema.show { display: flex; pointer-events: auto; }
+#win-cinema .win-wash {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255,230,106,.28), transparent 50%),
+    rgba(4, 10, 18, .78);
+  backdrop-filter: blur(10px);
+}
+#win-cinema .win-card {
+  position: relative;
+  width: min(520px, 88vw);
+  padding: 28px 28px 24px;
+  border-radius: 24px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(8,12,20,.86));
+  border: 1px solid rgba(126,231,255,.35);
+  box-shadow: 0 24px 60px rgba(0,0,0,.45), 0 0 40px rgba(255,230,106,.18);
+}
+#win-cinema .win-kicker {
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #9ad7ff;
+}
+#win-cinema h2 {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(32px, 6vw, 52px);
+  color: #fff;
+  margin: 8px 0 10px;
+  text-shadow: 0 0 24px rgba(255,230,106,.45);
+}
+#win-cinema .win-score { color: #c9d7e8; margin: 0 0 12px; }
+#win-cinema .win-jun {
+  font-family: Fredoka, sans-serif;
+  font-size: 26px;
+  color: #ffe66a;
+  text-shadow: 0 0 18px rgba(255,230,106,.55);
+  margin: 0 0 8px;
+}
+#win-cinema .win-sub { color: #9ad7ff; font-size: 13px; margin-bottom: 16px; }
+#win-cinema button {
+  border: 0; border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 800;
+  background: #7ee7ff;
+  color: #04202a;
+  cursor: pointer;
+}
