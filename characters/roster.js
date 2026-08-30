@@ -1,9 +1,7 @@
 export const ROSTER = [
   {
-    id: "lilo",
-    name: "Lilo",
-    color: "#e23b3b",
-    speed: 4.4, jumpPower: 13.2, maxJumps: 1, health: 90, w: 22, h: 32,
+    id: "lilo", name: "Lilo", color: "#e23b3b",
+    speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
     evoNames: ["Lilo Bebé", "Lilo", "Guardiana Ohana", "Alma de Kauai", "Ohana GOD"],
     forms: [
@@ -15,10 +13,8 @@ export const ROSTER = [
     ]
   },
   {
-    id: "stitch",
-    name: "Stitch",
-    color: "#3b6cff",
-    speed: 5.4, jumpPower: 12.4, maxJumps: 2, health: 100, w: 28, h: 24,
+    id: "stitch", name: "Stitch", color: "#3b6cff",
+    speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 26, h: 24,
     abilities: ["dash", "claws", "exp626"],
     evoNames: ["626 Bebé", "Stitch", "Berserk 626", "Experiment MAX", "626 GOD"],
     forms: [
@@ -30,10 +26,8 @@ export const ROSTER = [
     ]
   },
   {
-    id: "pikachu",
-    name: "Pikachu",
-    color: "#f5d000",
-    speed: 6.2, jumpPower: 14.2, maxJumps: 2, health: 70, w: 22, h: 22,
+    id: "pikachu", name: "Pikachu", color: "#f5d000",
+    speed: 5.2, jumpPower: 12.4, maxJumps: 1, health: 60, w: 22, h: 20,
     abilities: ["shock", "quick", "thunder"],
     evoNames: ["Pichu", "Pikachu", "Raichu", "Tormenta", "Rayo GOD"],
     forms: [
@@ -45,10 +39,8 @@ export const ROSTER = [
     ]
   },
   {
-    id: "dragon",
-    name: "Mushu",
-    color: "#e23a1c",
-    speed: 3.8, jumpPower: 11.5, maxJumps: 1, glide: true, health: 140, w: 36, h: 28,
+    id: "dragon", name: "Mushu", color: "#e23a1c",
+    speed: 3.2, jumpPower: 10.2, maxJumps: 1, glide: true, health: 120, w: 28, h: 24,
     abilities: ["breath", "wing", "rage"],
     evoNames: ["Cría", "Mushu", "Guardia Imperial", "Gran Dragon", "Dragon GOD"],
     forms: [
@@ -60,10 +52,8 @@ export const ROSTER = [
     ]
   },
   {
-    id: "cat",
-    name: "Kawaii Cat",
-    color: "#ff8ad4",
-    speed: 5.8, jumpPower: 12.8, maxJumps: 3, health: 70, w: 20, h: 20,
+    id: "cat", name: "Kawaii Cat", color: "#ff8ad4",
+    speed: 4.8, jumpPower: 11.6, maxJumps: 2, health: 70, w: 20, h: 20,
     abilities: ["claw", "catdash", "lives"],
     evoNames: ["Gatito", "Cat", "Neko Shadow", "Nueve Vidas", "Neko GOD"],
     forms: [
@@ -77,7 +67,9 @@ export const ROSTER = [
 ];
 
 export function applyForm(p, opts = {}) {
-  const f = (p.forms && p.forms[p.evo]) || null;
+  const evo = Number(p.evo || 0);
+  p.evo = evo;
+  const f = (p.forms && p.forms[evo]) || null;
   if (!f) return;
   p.name = f.name;
   p.color = f.color;
@@ -85,12 +77,11 @@ export function applyForm(p, opts = {}) {
   p.jumpPower = f.jump;
   p.maxJumps = f.jumps;
   p.maxHealth = f.hp;
-  p.health = Math.min(f.hp, p.health > 0 && opts.keepHp ? p.health + 20 : f.hp);
-  if (!opts.keepHp) p.health = f.hp;
+  p.health = f.hp;
   p.w = f.w;
   p.h = f.h;
   if (f.glide) p.glide = true;
-  if (opts.silent) return;
+  if (opts.silent || evo === 0) return;
   p.evoBurst = 90;
   try {
     window.dispatchEvent(new CustomEvent("ohana-evolve", {
