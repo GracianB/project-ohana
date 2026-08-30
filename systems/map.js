@@ -17,7 +17,7 @@ export const ROOMS = {
     id: "hub", name: "Claro Ohana", world: 0,
     doors: { right: "beach", left: "cave", up: "ridge", down: null },
     plats: [
-      [0, 810, 480, 90], [560, 810, 1040, 90],
+      [0, 810, 1600, 90],
       [80, 680, 160, 18], [300, 620, 150, 18],
       ...stairs(760)
     ],
@@ -27,11 +27,12 @@ export const ROOMS = {
   beach: {
     id: "beach", name: "Costa Kauai", world: 0,
     doors: { left: "hub", right: "jungle", up: null, down: null },
+    pit: true,
     plats: [
-      [0, 810, 400, 90], [500, 810, 280, 90], [880, 810, 720, 90],
+      [0, 810, 620, 90], [860, 810, 740, 90],
       [240, 660, 170, 18], [620, 540, 160, 18], [1040, 620, 180, 18]
     ],
-    foes: [[520, 200, "crawler"], [980, 200, "brute"], [1320, 200, "flyer"]],
+    foes: [[280, 200, "crawler"], [980, 200, "brute"], [1320, 200, "flyer"]],
     orbs: [[280, 520], [1200, 430]]
   },
   jungle: {
@@ -39,7 +40,7 @@ export const ROOMS = {
     doors: { left: "beach", right: null, up: "volcano", down: null },
     needEvo: 1,
     plats: [
-      [0, 810, 520, 90], [640, 810, 220, 90], [980, 810, 620, 90],
+      [0, 810, 1600, 90],
       [180, 680, 150, 18],
       ...stairs(760)
     ],
@@ -50,7 +51,7 @@ export const ROOMS = {
     id: "cave", name: "Cueva Azul", world: 4,
     doors: { right: "hub", left: "lab", up: null, down: null },
     plats: [
-      [0, 810, 680, 90], [800, 810, 800, 90],
+      [0, 810, 1600, 90],
       [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]
     ],
     foes: [[360, 200, "brute"], [1040, 200, "flyer"]],
@@ -70,7 +71,7 @@ export const ROOMS = {
     id: "ridge", name: "Cumbre", world: 3,
     doors: { down: "hub", right: "space", left: null, up: null },
     plats: [
-      [0, 810, 700, 90], [900, 810, 700, 90],
+      [0, 810, 1600, 90],
       [200, 660, 160, 18], [500, 520, 150, 18], [1040, 620, 160, 18]
     ],
     foes: [[480, 200, "flyer"], [1200, 200, "crawler"]],
@@ -80,8 +81,9 @@ export const ROOMS = {
     id: "space", name: "Orbita", world: 3,
     doors: { left: "ridge", down: "volcano", right: null, up: null },
     needEvo: 1,
+    pit: true,
     plats: [
-      [0, 810, 700, 90], [900, 810, 700, 90],
+      [0, 810, 680, 90], [920, 810, 680, 90],
       [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]
     ],
     foes: [[500, 200, "flyer"], [1080, 200, "brute"], [1340, 200, "flyer"]],
@@ -92,7 +94,7 @@ export const ROOMS = {
     doors: { left: "jungle", up: "space", right: "boss", down: null },
     needEvo: 2,
     plats: [
-      [0, 810, 420, 90], [520, 810, 260, 90], [900, 810, 700, 90],
+      [0, 810, 1600, 90],
       ...stairs(760)
     ],
     foes: [[480, 200, "brute"], [980, 200, "crawler"], [1320, 200, "flyer"]],
