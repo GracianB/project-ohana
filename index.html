@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <title>PROJECT OHANA 1.0</title>
+  <title>PROJECT OHANA · DEMO Mundo 1</title>
+  <meta name="description" content="Demo Mundo 1. Cinco formas, un archipiélago, un nido." />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="hud.css" />
   <link rel="stylesheet" href="ending.css" />
   <link rel="stylesheet" href="intro.css" />
+  <link rel="stylesheet" href="demo.css" />
 </head>
 <body>
   <div id="ocean-bg" aria-hidden="true">
@@ -38,7 +40,7 @@
       <div class="hud-meta" id="hud-meta">HP 100 · Lv 1</div>
     </div>
     <div class="hud-block right world">
-      <div class="hud-kicker">Mundo 1</div>
+      <div class="hud-kicker">Demo · Mundo 1</div>
       <div id="hud-world">Isla Kauai</div>
       <div id="hud-evo">Forma 1/5</div>
       <div class="form-pips" id="form-pips"><b></b><b></b><b></b><b></b><b></b></div>
@@ -57,25 +59,36 @@
   </div>
   <main id="char-select">
     <div class="title-stack">
-      <p class="eyebrow">Isla Kauai · Definitiva</p>
+      <p class="eyebrow">DEMO · Mundo 1 · Isla Kauai</p>
       <h1><span class="word project">PROJECT</span> <span class="word ohana">OHANA</span></h1>
-      <p class="tagline">Nueva partida = bebé. Continuar = tu forma y sala.</p>
+      <p class="tagline">Bebé → GOD. Ocho salas. Un nido. Contacta a Jun.</p>
     </div>
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
-      <button id="btn-play" type="button" class="cta primary">Jugar ahora</button>
+      <button id="btn-play" type="button" class="cta primary">Jugar demo</button>
       <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
     <p class="pick-label">Elige a tu ohana bebé</p>
     <section id="chars"></section>
   </main>
-  <div id="help"><div class="panel"><h2>Ruta</h2><p class="note">Nueva partida nace bebé. Continuar recupera forma y sala. Jungla hueco ↓ Caldera.</p></div></div>
-  <div id="map-overlay"><div class="panel"><h2>Mapa</h2><div id="map-grid"></div></div></div>
+  <div id="help">
+    <div class="panel">
+      <h2>Demo Mundo 1</h2>
+      <ul>
+        <li>Empiezas bebé. E hasta GOD (5).</li>
+        <li>Costa: hueco = muerte. Jungla: hueco = Caldera.</li>
+        <li>Visita 8 salas. El nido te llama. Túmbalo.</li>
+      </ul>
+      <p class="note">WASD · Shift dash · F golpe · J K L poderes · M mapa</p>
+    </div>
+  </div>
+  <div id="map-overlay"><div class="panel"><h2>Archipiélago</h2><div id="map-grid"></div></div></div>
   <div id="pause-overlay"><div class="panel slim"><h2>Pausa</h2><button type="button" id="btn-resume">Seguir</button><button type="button" id="btn-quit">Menú</button></div></div>
   <div id="notification-container"></div>
   <script type="module" src="game.js"></script>
   <script type="module" src="systems/title.js"></script>
   <script type="module" src="systems/hud.js"></script>
   <script type="module" src="systems/ending.js"></script>
+  <script type="module" src="systems/demo.js"></script>
 </body>
 </html>
