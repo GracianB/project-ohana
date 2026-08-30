@@ -1,5 +1,5 @@
 import { ROSTER } from "../characters/roster.js";
-import { drawCharacter } from "../characters/draw.js";
+import { drawBaby } from "../characters/baby.js";
 
 const ROLES = { lilo: "Bebé Ohana", stitch: "626 bebé", pikachu: "Pichu", dragon: "Cría", cat: "Gatito" };
 let selectedId = "lilo";
@@ -22,13 +22,10 @@ function paintPortraits() {
       if (!def) return;
       const c = cv.getContext("2d", { alpha: true });
       c.clearRect(0, 0, cv.width, cv.height);
-      const form = (def.forms && def.forms[0]) || def;
-      const dummy = {
-        ...def, ...form,
-        x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true,
-        evo: 0, w: form.w || 24, h: form.h || 24
-      };
-      drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 4 }, tick);
+      c.save();
+      c.translate(cv.width / 2, cv.height / 2 + 10);
+      drawBaby(c, { id: def.id }, tick);
+      c.restore();
     });
   }
   raf = requestAnimationFrame(paintPortraits);
