@@ -133,7 +133,7 @@ function evolve(reason) {
   if (p.evo >= 2) { if (reason === "manual") showNotification("MAX", "Forma final."); return; }
   if (reason !== "manual" && p.xp < XP_NEED[p.evo + 1]) return;
   p.evo++; applyForm(p); game.shake = 12; game.flash = 14; beep("evo");
-  showNotification("EVOLUCION Lv" + (p.evo + 1), p.name);
+  showNotification("EVOLUCION Lv" + (p.evo + 1), p.name, "evo");
   game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 }); save();
 }
 function respawn() {
@@ -155,27 +155,27 @@ function melee() {
     if (aabb(box, e)) { const d = 22 + p.evo * 8; e.hp -= d; e.vx = 8 * p.facing; game.nums.add(e.x, e.y, "" + d, "#fff"); punch(e.x, e.y, p.color); p.xp += 4; }
   }
 }
-function platformUnder(px, py, pw, ph) {
-  let best = null;
+function floorAtX(px, pw) {
+  let lowest = null;
   for (const plat of game.platforms) {
-    if (px + pw > plat.x + 4 && px < plat.x + plat.w - 4 && plat.y >= py + ph - 10) {
-      if (!best || plat.y < best.y) best = plat;
+    if (px + pw > plat.x + 6 && px < plat.x + plat.w - 6) {
+      if (!lowest || plat.y > lowest.y) lowest = plat;
     }
   }
-  return best;
+  return lowest;
 }
 function checkVoidDeath() {
   const p = game.player;
   if (!p || p.dead) return;
   const r = room();
-  const land = platformUnder(p.x, p.y, p.w, p.h);
   if (r.doors.down && p.y > game.worldH - 50 && p.x > 700 && p.x < 920) {
     loadRoom(r.doors.down, "down");
     return;
   }
-  if (land) {
-    if (p.y + p.h > land.y + 20) {
-      p.y = land.y - p.h;
+  const floor = floorAtX(p.x, p.w);
+  if (floor) {
+    if (p.y + p.h > floor.y) {
+      p.y = floor.y - p.h;
       p.vy = 0;
       p.grounded = true;
       p.jumps = 0;
@@ -186,7 +186,7 @@ function checkVoidDeath() {
     p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
     const hurt = document.getElementById("fx-hurt");
     if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
-    showNotification("VACIO", "R al claro");
+    showNotification("VACIO", "R al claro", "hurt");
     game.fx.emit(p.x + p.w / 2, p.y, { color: "#7ee7ff", count: 28, size: 5, up: 2 });
     setTimeout(() => { if (game.player && game.player.dead) respawn(); }, 900);
   }
@@ -236,11 +236,13 @@ function updatePlayer() {
   if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
   if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
   if (p.wall) p.vy = Math.min(p.vy, 2.2);
-  p.vy += 0.58; p.x += p.vx; p.y += p.vy; p.grounded = false;
+  p.vy = Math.min(18, p.vy + 0.58);
+  const prevBottom = p.y + p.h;
+  p.x += p.vx; p.y += p.vy; p.grounded = false;
   for (const plat of game.platforms) {
     if (drop && plat.h <= 18) continue;
     if (p.x + p.w > plat.x + 2 && p.x < plat.x + plat.w - 2) {
-      if (p.y + p.h > plat.y && p.y + p.h < plat.y + 22 && p.vy >= 0) {
+      if (p.vy >= 0 && prevBottom <= plat.y + 8 && p.y + p.h >= plat.y) {
         p.y = plat.y - p.h; p.vy = 0; p.grounded = true; p.jumps = 0; p.coyote = 8;
       }
     }
@@ -292,13 +294,13 @@ function updateEnemies() {
       game.nums.add(p.x, p.y, "-HP", "#f55");
       const hurt = document.getElementById("fx-hurt");
       if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
-      if (p.health <= 0) { p.dead = true; showNotification("DERROTA", "R al claro"); setTimeout(() => { if (game.player && game.player.dead) respawn(); }, 900); }
+      if (p.health <= 0) { p.dead = true; showNotification("DERROTA", "R al claro", "hurt"); setTimeout(() => { if (game.player && game.player.dead) respawn(); }, 900); }
     }
   }
   game.enemies = game.enemies.filter((e) => {
     if (e.hp > 0) return true;
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
-    if (e.boss) { beep("win"); showNotification("VICTORIA", "Score " + game.score); }
+    if (e.boss) { beep("win"); showNotification("VICTORIA", "Score " + game.score, "sala"); }
     return false;
   });
 }
