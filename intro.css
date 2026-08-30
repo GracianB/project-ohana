@@ -1,0 +1,30 @@
+#start-intro {
+  position: fixed; inset: 0; z-index: 90;
+  display: none; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+#start-intro.show { display: flex; }
+#start-intro .intro-wash {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgba(126,231,255,.22), rgba(4,10,18,.82));
+}
+#start-intro .intro-card {
+  position: relative; text-align: center;
+  animation: introPop .7s cubic-bezier(.2,1.4,.3,1);
+}
+#start-intro .intro-kicker {
+  letter-spacing: .28em; text-transform: uppercase;
+  font-size: 12px; color: #9ad7ff;
+}
+#start-intro .intro-title {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(36px, 8vw, 72px);
+  color: #fff;
+  margin: 8px 0;
+  text-shadow: 0 0 28px rgba(255,230,106,.45);
+}
+#start-intro .intro-sub { color: #ffe66a; font-weight: 800; }
+@keyframes introPop {
+  from { transform: scale(.72); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
