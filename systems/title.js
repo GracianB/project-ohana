@@ -22,7 +22,8 @@ function paintPortraits() {
       if (!def) return;
       const c = cv.getContext("2d", { alpha: true });
       c.clearRect(0, 0, cv.width, cv.height);
-      const dummy = { ...def, x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true, evo: 0, w: def.w, h: def.h };
+      const form = (def.forms && def.forms[1]) || def;
+      const dummy = { ...def, ...form, x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true, evo: 1, w: form.w || def.w, h: form.h || def.h };
       drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 8 }, tick);
     });
   }
@@ -58,35 +59,30 @@ function enhance() {
       if (title) title.after(role);
       const stats = document.createElement("div");
       stats.className = "stats";
-      stats.innerHTML = "<i>HP " + def.health + "</i><i>SPD " + def.speed + "</i><i>" + def.maxJumps + " jump</i>";
+      stats.innerHTML = "<i>5 formas</i><i>bebé → GOD</i>";
       el.appendChild(stats);
     }
     el.addEventListener("pointerdown", () => mark(def.id));
   });
   mark(selectedId);
-
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
   if (play) play.onclick = startSelected;
-  if (neu) neu.onclick = startSelected;
-
+  if (neu) neu.onclick = () => { try { localStorage.removeItem("ohana"); } catch (e) {} startSelected(); };
   const save = readSave();
   const cont = document.getElementById("btn-continue");
   if (save && save.id && cont) {
     cont.classList.remove("hidden");
     cont.onclick = () => { selectedId = save.id; mark(save.id); startSelected(); };
   }
-
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
     if (e.key === "Enter") startSelected();
   });
-
   const mo = new MutationObserver(() => {
     if (!document.body.classList.contains("playing") && !raf) paintPortraits();
   });
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   paintPortraits();
 }
-
 enhance();
