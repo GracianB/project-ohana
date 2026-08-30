@@ -16,10 +16,46 @@ export function dismissNotifications() {
   });
 }
 
+export function playEvolutionCinema(detail = {}) {
+  let layer = document.getElementById("evo-cinema");
+  if (!layer) {
+    layer = document.createElement("div");
+    layer.id = "evo-cinema";
+    layer.innerHTML =
+      '<div class="evo-wash"></div>' +
+      '<div class="evo-ring r1"></div>' +
+      '<div class="evo-ring r2"></div>' +
+      '<div class="evo-ring r3"></div>' +
+      '<div class="evo-copy">' +
+        '<p class="evo-kicker">Evolución</p>' +
+        '<h2 class="evo-name"></h2>' +
+        '<p class="evo-stage"></p>' +
+      '</div>';
+    document.body.appendChild(layer);
+  }
+  const name = detail.name || "Nueva forma";
+  const stage = Number(detail.evo || 1) + 1;
+  layer.style.setProperty("--evo", detail.color || "#ffe66a");
+  layer.querySelector(".evo-name").textContent = name;
+  layer.querySelector(".evo-stage").textContent = "FORMA " + Math.min(3, stage) + " / 3";
+  layer.classList.remove("play");
+  void layer.offsetWidth;
+  layer.classList.add("play");
+  clearTimeout(layer._t);
+  layer._t = setTimeout(() => layer.classList.remove("play"), 2100);
+}
+
 export function showNotification(title, message, kind) {
   const parent = box();
   while (parent.children.length > 2) parent.firstChild.remove();
   const type = kind || guessKind(title);
+  if (type === "evo") {
+    playEvolutionCinema({
+      name: String(title).replace(/^[¡!]+/, "").replace(/Evolución!?\s*/i, "").trim() || title,
+      evo: /3|MAX|Alma|Tormenta|Dragon|Vidas/i.test(title + message) ? 2 : 1,
+      color: "#ffe66a",
+    });
+  }
   const el = document.createElement("div");
   el.className = "game-notification " + type;
   el.innerHTML =
@@ -42,7 +78,7 @@ export function showNotification(title, message, kind) {
 
 function guessKind(title) {
   const t = String(title).toUpperCase();
-  if (t.includes("EVO") || t.includes("MAX")) return "evo";
+  if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evo";
   if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "hurt";
   if (t.includes("VICTORIA") || t.includes("SALA") || t.includes("MAPA")) return "sala";
   return "info";
@@ -64,4 +100,5 @@ if (!window.__ohanaNotifyBound) {
     if (e.target.closest && e.target.closest("#top-actions, #ability-bar, #chars, .char-card, .touch-btn, #help, #map-overlay, #pause-overlay")) return;
     if (document.querySelector(".game-notification")) dismissNotifications();
   }, true);
+  addEventListener("ohana-evolve", (e) => playEvolutionCinema(e.detail || {}));
 }
