@@ -8,12 +8,9 @@
   <meta property="og:title" content="PROJECT OHANA 1.0" />
   <meta property="og:description" content="Fan game 2D. Lilo, Stitch, Pikachu, Mushu y Gatito. Metroidvania en canvas." />
   <meta name="theme-color" content="#06101c" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23061a2a'/%3E%3Cpath d='M18 40c8-16 20-16 28 0' stroke='%2337c6c0' stroke-width='4' fill='none'/%3E%3Ccircle cx='32' cy='24' r='6' fill='%23ffe66a'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="hud.css" />
+  <link rel="stylesheet" href="ending.css" />
 </head>
 <body>
   <div id="ocean-bg" aria-hidden="true">
@@ -45,7 +42,7 @@
       <div class="hud-meta" id="hud-meta">HP 100 · Lv 1</div>
     </div>
     <div class="hud-block right world">
-      <div class="hud-kicker">Archipiélago</div>
+      <div class="hud-kicker">Mundo 1</div>
       <div id="hud-world">Isla Kauai</div>
       <div id="hud-evo">Forma: Base</div>
       <div class="form-pips" id="form-pips" aria-hidden="true"><b></b><b></b><b></b></div>
@@ -81,9 +78,9 @@
       <div class="title-haze"></div>
     </div>
     <div class="title-stack">
-      <p class="eyebrow">Isla Kauai · Versión 1.0</p>
+      <p class="eyebrow">Isla Kauai · Mundo 1 · Definitiva</p>
       <h1><span class="word project">PROJECT</span> <span class="word ohana">OHANA</span></h1>
-      <p class="tagline">Nadie se queda atrás. Elige familia, cruza puertas y evoluciona tres formas.</p>
+      <p class="tagline">Explora las 8 salas, tumba al nido y... contacta a Jun.</p>
     </div>
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
@@ -100,22 +97,19 @@
       <span><b>E</b> evo</span>
       <span><b>H</b> ruta</span>
     </p>
-    <p class="hint-line">Ruta: Claro → ESTE Costa → forma 2 → Jungla → forma 3 → ARRIBA Caldera → ESTE Jefe</p>
+    <p class="hint-line">8 salas = te lleva al jefe. Al ganar: contacta a Jun xD</p>
   </main>
   <div id="help">
     <div class="panel">
-      <h2>Cómo se juega</h2>
+      <h2>Mundo 1</h2>
       <ul>
         <li><kbd>WASD</kbd> mover / saltar</li>
-        <li><kbd>Shift</kbd> dash i-frames</li>
-        <li><kbd>F</kbd> / clic golpe</li>
-        <li><kbd>J K L</kbd> habilidades</li>
+        <li><kbd>Shift</kbd> dash</li>
+        <li><kbd>F</kbd> golpe · <kbd>J K L</kbd> poderes</li>
         <li><kbd>E</kbd> evolucionar</li>
-        <li><kbd>S</kbd> bajar plataforma</li>
-        <li><kbd>R</kbd> volver al claro</li>
         <li><kbd>H</kbd> esta ayuda</li>
       </ul>
-      <p class="note"><b>Ruta.</b> Claro ESTE = Costa. En Costa el hueco es POZO mortal, no bajes. Forma 2 abre Jungla (ESTE) y Lab (OESTE desde la cueva). Forma 3: en Jungla salta ARRIBA a la Caldera, o en Órbita cae al pozo ABAJO. Caldera ESTE = jefe. Si ves MURO, no hay puerta. Si ves CERRADO F2/F3, evoluciona primero.</p>
+      <p class="note">Visita Claro, Costa, Jungla, Cueva, Lab, Cumbre, Órbita y Caldera. Al completar las 8, el nido te reclama solo. El jefe tiene 2 fases y duele. Al tumbarlo: contacta a Jun xD</p>
       <div class="close-row">H o clic fuera para cerrar</div>
     </div>
   </div>
@@ -123,7 +117,7 @@
     <div class="panel">
       <h2>Archipiélago Ohana</h2>
       <div id="map-grid"></div>
-      <p class="note">Cyan = aquí · Verde = visitada · Candado = evo</p>
+      <p class="note">Cyan = aquí · Verde = visitada · 8 verdes = jefe</p>
       <div class="close-row">M o Esc cierra</div>
     </div>
   </div>
@@ -136,9 +130,9 @@
     </div>
   </div>
   <div id="notification-container" aria-live="polite"></div>
-  <noscript>Project Ohana necesita JavaScript.</noscript>
   <script type="module" src="game.js"></script>
   <script type="module" src="systems/title.js"></script>
   <script type="module" src="systems/hud.js"></script>
+  <script type="module" src="systems/ending.js"></script>
 </body>
 </html>
