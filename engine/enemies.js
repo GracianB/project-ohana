@@ -1,133 +1,60 @@
-import { Physics } from "./physics.js";
-
-export class Enemy {
-  constructor(config) {
-    this.type = config.type || "crawler";
-
-    this.x = config.x;
-    this.y = config.y;
-    this.w = config.w || 36;
-    this.h = config.h || 38;
-
-    this.min = config.min ?? this.x - 150;
-    this.max = config.max ?? this.x + 150;
-
-    this.vx = config.speed || 1.1;
-    this.health = config.health || 1;
-    this.dead = false;
-
-    this.bob = Math.random() * Math.PI * 2;
-    this.animationTime = 0;
-  }
-
-  update(dt) {
-    if (this.dead) return;
-
-    this.animationTime += dt * 16.67;
-    this.x += this.vx * dt;
-
-    if (this.x < this.min || this.x > this.max) {
-      this.vx *= -1;
-      this.x = Math.max(this.min, Math.min(this.max, this.x));
-    }
-  }
-
-  hit() {
-    this.health--;
-
-    if (this.health <= 0) {
-      this.dead = true;
-      return true;
-    }
-
-    return false;
-  }
-
-  draw(ctx, cameraX) {
-    if (this.dead) return;
-
-    const x = this.x - cameraX;
-    const bob = Math.sin(this.animationTime * 0.004 + this.bob) * 2;
-
-    ctx.save();
-    ctx.translate(x, this.y + bob);
-
-    ctx.fillStyle = "#26324b";
-    ctx.beginPath();
-    ctx.ellipse(18, 22, 18, 17, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "#ff8c9e";
-    ctx.beginPath();
-    ctx.arc(18, 15, 13, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "#151a28";
-    ctx.fillRect(7, 10, 22, 7);
-
-    ctx.fillStyle = "#75f3ff";
-    ctx.fillRect(10, 11, 5, 5);
-    ctx.fillRect(22, 11, 5, 5);
-
-    ctx.restore();
-  }
+export function drawEnemy(ctx, e, cam, t) {
+  const x = e.x - cam.x;
+  const y = e.y - cam.y;
+  ctx.save();
+  ctx.translate(x + e.w / 2, y + e.h / 2);
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 2, e.w * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
+  if (e.kind === "boss") drawBoss(ctx, e, t);
+  else if (e.kind === "flyer") drawFlyer(ctx, e, t);
+  else if (e.kind === "brute") drawBrute(ctx, e, t);
+  else drawCrawler(ctx, e, t);
+  ctx.fillStyle = "#000"; ctx.fillRect(-e.w / 2, -e.h / 2 - 10, e.w, 5);
+  ctx.fillStyle = e.boss ? "#f55" : "#5f5"; ctx.fillRect(-e.w / 2, -e.h / 2 - 10, e.w * Math.max(0, e.hp / e.max), 5);
+  ctx.restore();
 }
 
-export class EnemyManager {
-  constructor() {
-    this.enemies = [];
-  }
+function drawCrawler(ctx, e, t) {
+  const leg = Math.sin(t / 6) * 5;
+  ctx.fillStyle = "#3a8a2a";
+  ctx.beginPath(); ctx.ellipse(0, 4, 16, 11, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#6c3";
+  ctx.beginPath(); ctx.ellipse(0, 0, 12, 8, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#2a5a1a"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(-10, 8); ctx.lineTo(-16, 14 + leg); ctx.moveTo(10, 8); ctx.lineTo(16, 14 - leg); ctx.stroke();
+  ctx.fillStyle = "#111"; ctx.fillRect(-6, -2, 3, 3); ctx.fillRect(3, -2, 3, 3);
+  ctx.fillStyle = "#c33"; ctx.fillRect(-2, 4, 4, 2);
+}
 
-  add(config) {
-    const enemy = new Enemy(config);
-    this.enemies.push(enemy);
-    return enemy;
-  }
+function drawFlyer(ctx, e, t) {
+  const flap = Math.sin(t / 5) * 10;
+  ctx.fillStyle = "#8a4ccf";
+  ctx.beginPath(); ctx.ellipse(0, 2, 11, 8, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(180,120,255,.8)";
+  ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-22, -12 + flap, -8, 8); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(8, 0); ctx.quadraticCurveTo(22, -12 + flap, 8, 8); ctx.fill();
+  ctx.fillStyle = "#111"; ctx.fillRect(-5, -1, 3, 3); ctx.fillRect(2, -1, 3, 3);
+}
 
-  update(player, dt, events) {
-    for (const enemy of this.enemies) {
-      enemy.update(dt);
+function drawBrute(ctx, e, t) {
+  ctx.fillStyle = "#c45a18";
+  ctx.fillRect(-14, -10, 28, 24);
+  ctx.fillStyle = "#7a3010";
+  ctx.fillRect(-16, -16, 10, 10); ctx.fillRect(6, -16, 10, 10);
+  ctx.fillStyle = "#ffe66a";
+  ctx.fillRect(-8, -4, 5, 5); ctx.fillRect(3, -4, 5, 5);
+  ctx.fillStyle = "#111"; ctx.fillRect(-3, 6, 6, 3);
+}
 
-      if (enemy.dead) continue;
-
-      if (Physics.overlap(player, enemy)) {
-        const stomp = player.vy > 0 &&
-          player.y + player.h - player.vy * dt < enemy.y + 14;
-
-        if (stomp) {
-          enemy.dead = true;
-          player.vy = -9;
-          events.emit("enemy:defeated", { enemy, method: "stomp" });
-        } else {
-          const result = player.damage(20);
-
-          if (result) {
-            events.emit("player:damaged", { enemy, result });
-          }
-        }
-      }
-    }
-  }
-
-  pulse(player, events, { range = 190, method = "pulse" } = {}) {
-    let defeated = 0;
-
-    for (const enemy of this.enemies) {
-      if (enemy.dead) continue;
-
-      if (Physics.distance(player, enemy) < range) {
-        enemy.dead = true;
-        defeated++;
-        events.emit("enemy:defeated", { enemy, method });
-      }
-    }
-
-    return defeated;
-  }
-
-  draw(ctx, cameraX) {
-    for (const enemy of this.enemies) {
-      enemy.draw(ctx, cameraX);
-    }
-  }
+function drawBoss(ctx, e, t) {
+  const pulse = 1 + Math.sin(t / 8) * 0.05;
+  ctx.scale(pulse, pulse);
+  ctx.fillStyle = "#c02040";
+  ctx.beginPath(); ctx.ellipse(0, 4, 34, 26, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#7a1020";
+  ctx.beginPath(); ctx.moveTo(-18, -10); ctx.lineTo(-28, -34); ctx.lineTo(-6, -14); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(18, -10); ctx.lineTo(28, -34); ctx.lineTo(6, -14); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-12, -2, 7, 0, Math.PI * 2); ctx.arc(12, -2, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-12, -2, 3, 0, Math.PI * 2); ctx.arc(12, -2, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#ff9aa8"; ctx.beginPath(); ctx.ellipse(0, 12, 10, 6, 0, 0, Math.PI * 2); ctx.fill();
 }
