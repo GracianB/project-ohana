@@ -1,49 +1,104 @@
-# PROJECT OHANA — rebuild
+# PROJECT OHANA
 
-Motor canvas modular. Sirve con:
+Aventura 2D en canvas. Elige a Lilo, Stitch, Pikachu, el Dragón o Kawaii Cat, explora un mapa tipo metroidvania y evoluciona tres formas.
 
-```
+**Jugar online (cuando Pages esté activo):**  
+https://gracianb.github.io/project-ohana/
+
+**Repo:** https://github.com/GracianB/project-ohana
+
+---
+
+## Jugar sin localhost
+
+El juego es HTML + JS + CSS. No hay backend. Cualquiera puede abrirlo si GitHub Pages (o Netlify / Cloudflare Pages) sirve la carpeta raíz.
+
+### Opción A — GitHub Pages (la buena)
+
+1. Repo → **Settings** → **Pages**
+2. Source: **GitHub Actions**  
+   o **Deploy from a branch** → `main` / `/ (root)`
+3. Espera 1 minuto y abre:
+   `https://gracianb.github.io/project-ohana/`
+
+Hay un workflow en `.github/workflows/pages.yml` que publica `main` solo.
+
+### Opción B — Netlify Drop
+
+Arrastra la carpeta del repo a [app.netlify.com/drop](https://app.netlify.com/drop). Te da una URL `*.netlify.app`.
+
+### Opción C — local
+
+```bash
 python -m http.server 8080
 ```
 
-Abre `http://localhost:8080/`
+Abre `http://localhost:8080/`  
+No abras `index.html` con doble clic: los módulos ES fallan en `file://`.
+
+---
 
 ## Controles
 
-- WASD / flechas: mover y saltar
-- J K L: habilidades 1 / 2 / ultimate
-- E: evolucionar (3 formas)
-- 1-5: mundos (playa, jungla, volcán, espacio, lab)
-- R: reaparecer
-- ESC / ✕: cerrar notificación
+| Tecla | Acción |
+|---|---|
+| WASD / flechas | Mover y saltar |
+| Espacio | Saltar |
+| Shift | Dash |
+| F | Golpe cuerpo a cuerpo |
+| J K L | Habilidades |
+| E | Evolucionar (3 formas) |
+| S | Bajar de plataforma fina |
+| R | Volver al claro |
+| M | Lista de salas |
+| N | Mute |
+| Esc | Pausa |
 
-## Qué se ha reconstruido
-
-1. Caer bajo el mundo = muerte + respawn
-2. Notificaciones con botón cerrar y ESC
-3. Pikachu completo
-4. Render distinto por personaje (Lilo, Stitch, Pikachu, Dragón, Gato)
-5. Habilidades únicas
-6. Evoluciones que cambian tamaño, aura y nombre
-7. Fondo distinto por mundo
-
-## Git (en tu PC)
+Puertas etiquetadas **ESTE / OESTE / ARRIBA / ABAJO**.  
+Jungla, Lab y Órbita piden forma 2. Caldera y Jefe piden forma 3.
 
 ```
-cd "X:\GitHub\systems-lab\project-ohana"
-git fetch origin
-git status
-git pull origin main --rebase
+        Cumbre ── Órbita
+           │         │
+Lab ─ Cueva ─ Claro ─ Costa ─ Jungla
+                               │
+                         Caldera ─ JEFE
 ```
 
-Copia estos archivos encima de los tuyos, luego:
+---
+
+## Personajes
+
+| | Lv1 | Lv2 | Lv3 |
+|---|---|---|---|
+| Lilo | Lilo | Guardiana Ohana | Alma de Kauai |
+| Stitch | Stitch | Berserk 626 | Experiment MAX |
+| Pikachu | Pikachu | Raichu | Tormenta |
+| Dragón | Cría | Dragón de Fuego | Volcánico |
+| Gato | Gatito | Neko Shadow | Nueve Vidas |
+
+XP 40 → forma 2. XP 100 → forma 3. O pulsa E.
+
+---
+
+## Estructura
 
 ```
-git add -A
-git commit -m "rebuild: unique characters, pikachu, void death, worlds, abilities"
-git push origin main
+index.html          entrada
+game.js             bucle, salas, combate
+style.css           HUD y menú
+characters/         roster + sprites canvas
+engine/             audio, enemigos, partículas
+systems/            mapa, habilidades, notify
+worlds/             fondos por bioma
 ```
 
-Si hay conflicto: `git status` y pégame la salida. No uses `--force` salvo que quieras pisar GitHub a propósito.
+Motor vivo: `game.js` + `systems/map.js` + `characters/draw.js`.  
+Hay archivos viejos (`engine/player.js`, etc.) de prototipos anteriores; no los importa el juego actual.
 
-No subas `PROJECT-OHANA-COMPLETE.zip` al repo.
+---
+
+## Licencia
+
+Código: MIT.  
+Lilo, Stitch y Pikachu son marcas de Disney / Nintendo / The Pokémon Company. Esto es un fan game no comercial.
