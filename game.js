@@ -32,27 +32,59 @@ addEventListener("pointerdown", () => beep("orb"), { once: true });
 addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
   if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(e.key.toLowerCase())) e.preventDefault();
-  if (e.key === "Escape") { paused = !paused; return; }
+  if (e.key === "h" || e.key === "H" || e.key === "?") { toggleHelp(); return; }
+  if (e.key === "Escape") {
+    const help = document.getElementById("help");
+    const map = document.getElementById("map-overlay");
+    if (help && help.classList.contains("open")) { help.classList.remove("open"); return; }
+    if (map && map.classList.contains("open")) { map.classList.remove("open"); return; }
+    paused = !paused;
+    document.getElementById("pause-overlay")?.classList.toggle("open", paused && game.running);
+    return;
+  }
   if (e.key === "n" || e.key === "N") { muted = !muted; showNotification("AUDIO", muted ? "Mute" : "On"); return; }
   if (!game.running || paused) return;
   if (e.key === "j" || e.key === "J") useAbility(game, 0);
   if (e.key === "k" || e.key === "K") useAbility(game, 1);
   if (e.key === "l" || e.key === "L") useAbility(game, 2);
   if (e.key === "e" || e.key === "E") evolve("manual");
-  if (e.key === "r" || e.key === "R") respawn("manual");
+  if (e.key === "r" || e.key === "R") respawn();
   if (e.key === "m" || e.key === "M") showMap();
   if (e.key === "f" || e.key === "F") melee();
   if (e.key === "Shift") dash();
 });
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
-
+canvas.addEventListener("pointerdown", (e) => {
+  if (!game.running || paused) return;
+  if (e.button === 2) { dash(); return; }
+  melee();
+});
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+function toggleHelp() {
+  const help = document.getElementById("help");
+  if (!help) return;
+  help.classList.toggle("open");
+}
+function showBanner(name) {
+  const el = document.getElementById("room-banner");
+  if (!el) return;
+  el.textContent = name.toUpperCase();
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 1400);
+}
+function setPrompt(text, on) {
+  const el = document.getElementById("prompt");
+  if (!el) return;
+  if (!on) { el.classList.remove("show"); return; }
+  el.textContent = text;
+  el.classList.add("show");
+}
 function room() { return ROOMS[game.roomId]; }
 function save() {
   try {
     localStorage.setItem("ohana", JSON.stringify({ roomId: game.roomId, visited: game.visited, score: game.score, evo: game.player && game.player.evo, id: game.player && game.player.id, xp: game.player && game.player.xp }));
   } catch (e) {}
 }
-
 function loadRoom(id, fromDir) {
   const r = ROOMS[id]; if (!r) return;
   if (r.needEvo && game.player && game.player.evo < r.needEvo) {
@@ -83,9 +115,8 @@ function loadRoom(id, fromDir) {
   if (fromDir === "down") { game.player.x = 780; game.player.y = 80; }
   game.player.vx = 0; game.player.vy = 0; game.cam.x = 0; game.fading = 12;
   if (first && game.player) { game.player.health = Math.min(game.player.maxHealth, game.player.health + 15); game.nums.add(game.player.x, game.player.y, "+15", "#6f6"); }
-  showNotification("SALA", r.name); save();
+  showNotification("SALA", r.name); showBanner(r.name); save();
 }
-
 function showMap() { showNotification("MAPA", Object.keys(game.visited).map((id) => ROOMS[id].name).join(" · ")); }
 function makePlayer(def) {
   const p = { ...def, x: 180, y: 500, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0, dash: 0, wall: 0 };
@@ -94,6 +125,7 @@ function makePlayer(def) {
 function start(def) {
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   game.projectiles = []; game.bolts = []; game.ghosts = []; game.running = true; paused = false;
+  document.body.classList.add("playing");
   document.getElementById("char-select").classList.add("hidden"); renderAbilityBar(); loadRoom("hub");
 }
 function evolve(reason) {
@@ -123,12 +155,39 @@ function melee() {
     if (aabb(box, e)) { const d = 22 + p.evo * 8; e.hp -= d; e.vx = 8 * p.facing; game.nums.add(e.x, e.y, "" + d, "#fff"); punch(e.x, e.y, p.color); p.xp += 4; }
   }
 }
+function platformUnder(px, py, pw, ph) {
+  let best = null;
+  for (const plat of game.platforms) {
+    if (px + pw > plat.x + 4 && px < plat.x + plat.w - 4 && plat.y >= py + ph - 10) {
+      if (!best || plat.y < best.y) best = plat;
+    }
+  }
+  return best;
+}
 function checkVoidDeath() {
   const p = game.player;
-  if (p.y > game.worldH - 10 && room().doors.down) { loadRoom(room().doors.down, "down"); return; }
-  if (p.y > game.worldH + 80 && !p.dead) {
-    p.dead = true; p.health = 0; game.shake = 14; beep("hurt");
+  if (!p || p.dead) return;
+  const r = room();
+  const land = platformUnder(p.x, p.y, p.w, p.h);
+  if (r.doors.down && p.y > game.worldH - 50 && p.x > 700 && p.x < 920) {
+    loadRoom(r.doors.down, "down");
+    return;
+  }
+  if (land) {
+    if (p.y + p.h > land.y + 20) {
+      p.y = land.y - p.h;
+      p.vy = 0;
+      p.grounded = true;
+      p.jumps = 0;
+    }
+    return;
+  }
+  if (p.y > game.worldH + 70) {
+    p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
+    const hurt = document.getElementById("fx-hurt");
+    if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
     showNotification("VACIO", "R al claro");
+    game.fx.emit(p.x + p.w / 2, p.y, { color: "#7ee7ff", count: 28, size: 5, up: 2 });
     setTimeout(() => { if (game.player && game.player.dead) respawn(); }, 900);
   }
 }
@@ -200,6 +259,12 @@ function updatePlayer() {
     }
   }
   tryDoors(); checkVoidDeath();
+  const r = room();
+  if (p.x > ROOM_W - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
+  else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
+  else if (p.y < 90 && r.doors.up && p.x > 700 && p.x < 900) setPrompt("ARRIBA · salta al techo", true);
+  else if (p.y > ROOM_H - 160 && r.doors.down) setPrompt("ABAJO · cae por el hueco", true);
+  else setPrompt("", false);
   if (p.evo < 2 && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 }
 function updateEnemies() {
@@ -225,6 +290,8 @@ function updateEnemies() {
     if (!p.dead && p.invuln <= 0 && aabb(p, e)) {
       p.health -= e.boss ? 16 : 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 8; p.vy = -5; game.shake = 10; game.combo = 0; beep("hurt");
       game.nums.add(p.x, p.y, "-HP", "#f55");
+      const hurt = document.getElementById("fx-hurt");
+      if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
       if (p.health <= 0) { p.dead = true; showNotification("DERROTA", "R al claro"); setTimeout(() => { if (game.player && game.player.dead) respawn(); }, 900); }
     }
   }
@@ -260,6 +327,7 @@ function updateCam() {
   game.cam.x += (p.x + p.facing * 80 - canvas.width / 2 - game.cam.x) * 0.12;
   game.cam.y += (p.y - canvas.height * 0.58 - game.cam.y) * 0.12;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
+  game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - canvas.height + 80)));
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
@@ -287,6 +355,21 @@ function render() {
   const world = WORLDS[game.worldIndex];
   ctx.save(); ctx.translate((Math.random() - 0.5) * game.shake, (Math.random() - 0.5) * game.shake);
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
+  const grounds = game.platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
+  for (let i = 0; i < grounds.length - 1; i++) {
+    const a = grounds[i], b = grounds[i + 1];
+    const gap = b.x - (a.x + a.w);
+    if (gap < 40) continue;
+    const x = a.x + a.w - game.cam.x;
+    const y = a.y - game.cam.y;
+    const g = ctx.createLinearGradient(0, y, 0, y + 130);
+    g.addColorStop(0, "rgba(4,6,14,.2)");
+    g.addColorStop(1, "rgba(2,2,8,.85)");
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y + 8, gap, 140);
+    ctx.fillStyle = "rgba(126,231,255," + (0.16 + Math.sin(t / 9) * 0.08) + ")";
+    ctx.fillRect(x, y + 6, gap, 3);
+  }
   for (const plat of game.platforms) {
     const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
     ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.fillRect(x + 8, y + 10, plat.w, plat.h);
@@ -320,18 +403,14 @@ function render() {
   ctx.restore();
   const low = game.player ? 1 - Math.max(0, game.player.health / game.player.maxHealth) : 0;
   const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.3, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
-  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.38 + low * 0.25) + ")");
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
   ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (game.fading > 0) { ctx.fillStyle = "rgba(0,0,0," + (game.fading / 12) + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
   if (game.flash > 0) { ctx.fillStyle = "rgba(255,255,220," + (game.flash / 20) + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
   if (game.combo > 1) {
     const rank = game.combo > 12 ? "S" : game.combo > 7 ? "A" : game.combo > 3 ? "B" : "C";
-    ctx.fillStyle = "#fff"; ctx.font = "800 40px Outfit,sans-serif"; ctx.textAlign = "center";
-    ctx.fillText(game.combo + " COMBO  " + rank, canvas.width / 2, 88);
-  }
-  if (paused) {
-    ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#fff"; ctx.font = "800 48px Outfit,sans-serif"; ctx.textAlign = "center"; ctx.fillText("PAUSA", canvas.width / 2, canvas.height / 2);
+    ctx.fillStyle = "#fff"; ctx.font = "800 34px Outfit,sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(game.combo + " COMBO  " + rank, canvas.width / 2, 150);
   }
   drawMinimap();
 }
@@ -347,12 +426,30 @@ function updateHUD() {
   document.getElementById("hud-name").textContent = p.name;
   const need = p.evo >= 2 ? p.xp : XP_NEED[p.evo + 1];
   const orbsLeft = game.orbs.filter((o) => !o.taken).length;
-  document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · Lv" + (p.evo + 1) + " · XP " + p.xp + (p.evo < 2 ? "/" + need : "") + " · Orbes " + orbsLeft;
+  document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 2 ? "/" + need : "");
   document.getElementById("hp-bar").style.width = Math.max(0, (p.health / p.maxHealth) * 100) + "%";
+  const xpEl = document.getElementById("xp-bar");
+  if (xpEl) {
+    const nxt = p.evo >= 2 ? 1 : XP_NEED[p.evo + 1];
+    const prev = XP_NEED[p.evo] || 0;
+    xpEl.style.width = p.evo >= 2 ? "100%" : Math.max(0, Math.min(100, ((p.xp - prev) / (nxt - prev)) * 100)) + "%";
+  }
   document.getElementById("hud-world").textContent = room().name;
-  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3 · Kills " + game.kills;
+  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3 · Orbes " + orbsLeft;
   const comboEl = document.getElementById("hud-combo");
   if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
+  const chip = document.getElementById("combo-chip");
+  if (chip) {
+    chip.textContent = game.combo > 1 ? String(game.combo) : "";
+    chip.classList.toggle("show", game.combo > 1);
+  }
+  const boss = game.enemies.find((e) => e.boss);
+  const wrap = document.getElementById("boss-wrap");
+  if (wrap) {
+    wrap.classList.toggle("hidden", !boss);
+    const bar = document.getElementById("boss-bar");
+    if (boss && bar) bar.style.width = Math.max(0, (boss.hp / boss.max) * 100) + "%";
+  }
   const now = performance.now();
   document.querySelectorAll(".ability-slot").forEach((slot) => {
     const def = ABILITY_DEFS[slot.dataset.id];
@@ -370,8 +467,43 @@ function loop() {
 }
 function setupSelect() {
   const wrap = document.getElementById("chars");
-  wrap.innerHTML = ROSTER.map((c) => '<div class="char-card" data-id="' + c.id + '"><div style="height:48px;background:' + c.color + ';border-radius:8px"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small></div>').join("");
+  wrap.innerHTML = ROSTER.map((c, i) => '<button class="char-card" data-id="' + c.id + '"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
   wrap.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
+  addEventListener("keydown", (e) => {
+    if (game.running) return;
+    if (e.key >= "1" && e.key <= "5") {
+      const c = ROSTER[Number(e.key) - 1];
+      if (c) start(c);
+    }
+  });
+  const helpBtn = document.getElementById("btn-help");
+  const fullBtn = document.getElementById("btn-full");
+  const mapBtn = document.getElementById("btn-map");
+  const muteBtn = document.getElementById("btn-mute");
+  const help = document.getElementById("help");
+  if (helpBtn) helpBtn.onclick = toggleHelp;
+  if (mapBtn) mapBtn.onclick = () => { if (game.running) showMap(); };
+  if (muteBtn) muteBtn.onclick = () => { muted = !muted; muteBtn.textContent = muted ? "Mute · N" : "Sonido · N"; showNotification("AUDIO", muted ? "Mute" : "On"); };
+  if (fullBtn) fullBtn.onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); };
+  if (help) help.addEventListener("click", (e) => { if (e.target.id === "help") help.classList.remove("open"); });
+  const resume = document.getElementById("btn-resume");
+  const quit = document.getElementById("btn-quit");
+  if (resume) resume.onclick = () => { paused = false; document.getElementById("pause-overlay")?.classList.remove("open"); };
+  if (quit) quit.onclick = () => {
+    paused = false; game.running = false;
+    document.body.classList.remove("playing");
+    document.getElementById("char-select")?.classList.remove("hidden");
+    document.getElementById("boss-wrap")?.classList.add("hidden");
+    document.getElementById("pause-overlay")?.classList.remove("open");
+  };
+  document.querySelectorAll(".touch-btn").forEach((btn) => {
+    const k = btn.dataset.k;
+    const down = (ev) => { ev.preventDefault(); if (k === "shift") dash(); else if (k === "f") melee(); else keys[k] = true; };
+    const up = (ev) => { ev.preventDefault(); if (k !== "shift" && k !== "f") keys[k] = false; };
+    btn.addEventListener("pointerdown", down);
+    btn.addEventListener("pointerup", up);
+    btn.addEventListener("pointerleave", up);
+  });
 }
 setupSelect();
 loop();
