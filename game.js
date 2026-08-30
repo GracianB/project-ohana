@@ -14,7 +14,8 @@ const XP_NEED = [0, 40, 100];
 const game = {
   player: null, enemies: [], projectiles: [], bolts: [], platforms: [],
   fx: new ParticleSystem(), worldIndex: 0, cam: { x: 0, y: 0 },
-  worldW: 3600, worldH: 900, running: false, spawn: { x: 160, y: 420 }
+  worldW: 3600, worldH: 900, running: false, spawn: { x: 160, y: 420 },
+  shake: 0, combo: 0, comboT: 0, score: 0, hitstop: 0
 };
 
 function fit() { canvas.width = innerWidth; canvas.height = innerHeight; }
@@ -34,7 +35,7 @@ addEventListener("keydown", (e) => {
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
 
 function makePlayer(def) {
-  const p = { ...def, x: game.spawn.x, y: game.spawn.y, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0 };
+  const p = { ...def, x: game.spawn.x, y: game.spawn.y, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0, wasGround: true };
   applyForm(p);
   return p;
 }
@@ -61,50 +62,42 @@ function spawnEnemies() {
 
 function start(def) {
   game.player = makePlayer(def);
-  game.worldIndex = 0;
+  game.worldIndex = 0; game.combo = 0; game.score = 0; game.shake = 0;
   buildPlatforms(); spawnEnemies();
   game.projectiles = []; game.bolts = []; game.running = true;
   document.getElementById("char-select").classList.add("hidden");
   renderAbilityBar();
-  showNotification("OHANA", def.evoNames[0] + " listo. E o XP para evolucionar");
+  showNotification("OHANA", def.evoNames[0] + " entra en combate");
 }
 
 function evolve(reason) {
   const p = game.player;
   if (!p || p.dead) return;
-  if (p.evo >= 2) {
-    if (reason === "manual") showNotification("MAX", "Forma final alcanzada.");
-    return;
-  }
+  if (p.evo >= 2) { if (reason === "manual") showNotification("MAX", "Forma final alcanzada."); return; }
   if (reason !== "manual" && p.xp < XP_NEED[p.evo + 1]) return;
-  p.evo++;
-  applyForm(p);
+  p.evo++; applyForm(p); game.shake = 10;
   showNotification("EVOLUCION Lv" + (p.evo + 1), p.name);
-  game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 40, size: 6, up: 1.6 });
+  game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 });
 }
 
 function changeWorld(i) {
   if (!WORLDS[i]) return;
-  game.worldIndex = i;
-  buildPlatforms(); spawnEnemies();
-  if (game.player && !game.player.dead) {
-    game.player.x = game.spawn.x; game.player.y = game.spawn.y; game.player.vx = 0; game.player.vy = 0;
-  }
+  game.worldIndex = i; buildPlatforms(); spawnEnemies();
+  if (game.player && !game.player.dead) { game.player.x = game.spawn.x; game.player.y = game.spawn.y; game.player.vx = 0; game.player.vy = 0; }
   showNotification("MUNDO", WORLDS[i].name);
 }
 
 function respawn(reason) {
-  const p = game.player;
-  if (!p) return;
+  const p = game.player; if (!p) return;
   p.x = game.spawn.x; p.y = game.spawn.y; p.vx = 0; p.vy = 0;
-  p.health = p.maxHealth; p.dead = false; p.invuln = 40;
+  p.health = p.maxHealth; p.dead = false; p.invuln = 40; game.combo = 0;
   if (reason !== "manual") showNotification("REAPARECER", "Ohana: nadie se queda atras.");
 }
 
 function checkVoidDeath() {
   const p = game.player;
   if (p.y > game.worldH + 80 && !p.dead) {
-    p.dead = true; p.health = 0;
+    p.dead = true; p.health = 0; game.shake = 14; game.combo = 0;
     showNotification("HAS CAIDO AL VACIO", "Reapareces en 1.2s · R para forzar");
     setTimeout(() => { if (game.player && game.player.dead) respawn("void"); }, 1200);
   }
@@ -114,27 +107,42 @@ function aabb(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
+function punch(x, y, color) {
+  game.shake = Math.min(18, game.shake + 6);
+  game.combo += 1; game.comboT = 90;
+  game.score += 10 * game.combo;
+  game.fx.emit(x, y, { color, count: 14, size: 4, up: 1.2 });
+}
+
 function updatePlayer() {
-  const p = game.player;
-  if (p.dead) return;
+  const p = game.player; if (p.dead) return;
   const left = keys["a"] || keys["arrowleft"];
   const right = keys["d"] || keys["arrowright"];
   const jump = keys["w"] || keys["arrowup"] || keys[" "];
   if (left) { p.vx = -p.speed; p.facing = -1; }
   else if (right) { p.vx = p.speed; p.facing = 1; }
   else p.vx *= 0.78;
-  if (jump && p.jumps < p.maxJumps && !p._jumpHeld) { p.vy = -p.jumpPower; p.jumps++; p.grounded = false; p._jumpHeld = true; }
+  if (jump) p.buffer = 8; else if (p.buffer > 0) p.buffer--;
+  const canJump = p.jumps < p.maxJumps || p.coyote > 0;
+  if (p.buffer > 0 && canJump && !p._jumpHeld) {
+    p.vy = -p.jumpPower; p.jumps = p.coyote > 0 ? 1 : p.jumps + 1;
+    p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true;
+    game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#fff", count: 6, size: 2, up: 0.4 });
+  }
   if (!jump) p._jumpHeld = false;
   if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
   if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
-  p.vy += 0.58; p.x += p.vx; p.y += p.vy; p.grounded = false;
+  p.vy += 0.58; p.x += p.vx; p.y += p.vy;
+  const was = p.grounded; p.grounded = false;
   for (const plat of game.platforms) {
     if (p.x + p.w > plat.x + 2 && p.x < plat.x + plat.w - 2) {
       if (p.y + p.h > plat.y && p.y + p.h < plat.y + 22 && p.vy >= 0) {
-        p.y = plat.y - p.h; p.vy = 0; p.grounded = true; p.jumps = 0;
+        p.y = plat.y - p.h; p.vy = 0; p.grounded = true; p.jumps = 0; p.coyote = 8;
       }
     }
   }
+  if (!p.grounded && p.coyote > 0) p.coyote--;
+  if (p.grounded && !was && p.vy >= 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ddd", count: 8, size: 2 });
   p.x = Math.max(-20, Math.min(p.x, game.worldW - p.w + 20));
   if (p.invuln > 0) p.invuln--;
   checkVoidDeath();
@@ -154,7 +162,7 @@ function updateEnemies() {
     if (on && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
     const p = game.player;
     if (!p.dead && p.invuln <= 0 && aabb(p, e)) {
-      p.health -= 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 7; p.vy = -4;
+      p.health -= 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 7; p.vy = -4; game.shake = 8; game.combo = 0;
       if (p.health <= 0) {
         p.dead = true;
         showNotification("DERROTA", "R para reaparecer");
@@ -162,7 +170,12 @@ function updateEnemies() {
       }
     }
   }
-  game.enemies = game.enemies.filter((e) => e.hp > 0);
+  const before = game.enemies.length;
+  game.enemies = game.enemies.filter((e) => {
+    if (e.hp > 0) return true;
+    punch(e.x, e.y, e.color);
+    return false;
+  });
   if (game.enemies.length < 4) {
     game.enemies.push({ x: 600 + Math.random() * 2400, y: 120, w: 30, h: 30, vx: Math.random() > 0.5 ? 1.6 : -1.6, vy: 0, hp: 48, max: 48, kind: "slime", color: "#c66" });
   }
@@ -179,9 +192,7 @@ function updateProjectiles() {
       for (const e of game.enemies) {
         if (aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           e.hp -= pr.dmg * (1 + game.player.evo * 0.35);
-          pr.life = 0;
-          game.fx.emit(e.x, e.y, { color: pr.color, count: 8 });
-          game.player.xp += 6;
+          pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
         }
       }
     }
@@ -195,6 +206,8 @@ function updateCam() {
   game.cam.x += (p.x - canvas.width / 2 - game.cam.x) * 0.1;
   game.cam.y += (p.y - canvas.height * 0.58 - game.cam.y) * 0.1;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
+  if (game.shake > 0) game.shake *= 0.86;
+  if (game.comboT > 0) game.comboT--; else game.combo = 0;
 }
 
 function drawEnemy(e) {
@@ -210,46 +223,40 @@ function drawEnemy(e) {
 }
 
 function drawPlatform(plat, world) {
-  const x = plat.x - game.cam.x;
-  const y = plat.y - game.cam.y;
-  ctx.fillStyle = "rgba(0,0,0,.32)";
-  ctx.fillRect(x + 8, y + 12, plat.w, plat.h);
-  ctx.fillStyle = world.ground;
-  ctx.fillRect(x, y, plat.w, plat.h);
-  ctx.fillStyle = world.groundTop || "#8fd98a";
-  ctx.fillRect(x, y, plat.w, 11);
-  ctx.fillStyle = "rgba(255,255,255,.22)";
-  ctx.fillRect(x, y, plat.w, 3);
-  ctx.fillStyle = "rgba(0,0,0,.18)";
-  ctx.fillRect(x, y + plat.h - 6, plat.w, 6);
-  ctx.fillStyle = "rgba(255,255,255,.1)";
-  ctx.fillRect(x, y, 4, plat.h);
+  const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
+  ctx.fillStyle = "rgba(0,0,0,.32)"; ctx.fillRect(x + 8, y + 12, plat.w, plat.h);
+  ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
+  ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 11);
+  ctx.fillStyle = "rgba(255,255,255,.22)"; ctx.fillRect(x, y, plat.w, 3);
+  ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x, y + plat.h - 6, plat.w, 6);
 }
 
 function render() {
   const world = WORLDS[game.worldIndex];
+  const sx = (Math.random() - 0.5) * game.shake;
+  const sy = (Math.random() - 0.5) * game.shake;
+  ctx.save(); ctx.translate(sx, sy);
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
   for (const plat of game.platforms) drawPlatform(plat, world);
   for (const e of game.enemies) drawEnemy(e);
   for (const pr of game.projectiles) {
-    ctx.fillStyle = pr.color;
-    ctx.shadowColor = pr.color;
-    ctx.shadowBlur = 12;
-    ctx.fillRect(pr.x - game.cam.x, pr.y - game.cam.y, pr.w, pr.h);
-    ctx.shadowBlur = 0;
+    ctx.fillStyle = pr.color; ctx.shadowColor = pr.color; ctx.shadowBlur = 14;
+    ctx.fillRect(pr.x - game.cam.x, pr.y - game.cam.y, pr.w, pr.h); ctx.shadowBlur = 0;
   }
   for (const b of game.bolts) {
     ctx.strokeStyle = "#cfff6a"; ctx.lineWidth = 3; ctx.shadowColor = "#cfff6a"; ctx.shadowBlur = 16;
-    ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke();
-    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke(); ctx.shadowBlur = 0;
   }
   game.fx.render(ctx, game.cam);
   if (game.player && game.player.invuln % 4 !== 1) drawCharacter(ctx, game.player, game.cam, t);
+  ctx.restore();
   const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.28, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
-  vg.addColorStop(0, "rgba(0,0,0,0)");
-  vg.addColorStop(1, "rgba(0,0,0,0.42)");
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.42)");
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (game.combo > 1) {
+    ctx.fillStyle = "#fff"; ctx.font = "800 42px Outfit, sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(game.combo + " COMBO", canvas.width / 2, 90);
+  }
 }
 
 function renderAbilityBar() {
@@ -261,19 +268,19 @@ function renderAbilityBar() {
 }
 
 function updateHUD() {
-  const p = game.player;
-  if (!p) return;
+  const p = game.player; if (!p) return;
   document.getElementById("hud-name").textContent = p.name;
   const need = p.evo >= 2 ? p.xp : XP_NEED[p.evo + 1];
   document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · Lv" + (p.evo + 1) + " · XP " + p.xp + (p.evo < 2 ? "/" + need : "");
   document.getElementById("hp-bar").style.width = Math.max(0, (p.health / p.maxHealth) * 100) + "%";
   document.getElementById("hud-world").textContent = WORLDS[game.worldIndex].name;
   document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3: " + p.evoNames[p.evo];
+  const comboEl = document.getElementById("hud-combo");
+  if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
   const now = performance.now();
   document.querySelectorAll(".ability-slot").forEach((slot) => {
-    const id = slot.dataset.id;
-    const def = ABILITY_DEFS[id];
-    const left = Math.max(0, (p.cds[id] || 0) - now);
+    const def = ABILITY_DEFS[slot.dataset.id];
+    const left = Math.max(0, (p.cds[slot.dataset.id] || 0) - now);
     slot.querySelector("i").style.width = (100 - (left / def.cd) * 100) + "%";
   });
 }
@@ -293,6 +300,5 @@ function setupSelect() {
     el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id)));
   });
 }
-
 setupSelect();
 loop();
