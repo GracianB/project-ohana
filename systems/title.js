@@ -27,74 +27,55 @@ function mark(id) {
   document.querySelectorAll(".char-card").forEach((el) => el.classList.toggle("selected", el.dataset.id === id));
 }
 
-function clickStart(id) {
-  const btn = document.querySelector('#chars .char-card[data-id="' + id + '"]');
-  if (btn) btn.click();
+function startSelected() {
+  const card = document.querySelector('#chars .char-card[data-id="' + selectedId + '"]');
+  if (card) card.click();
 }
 
 function enhance() {
   const wrap = document.getElementById("chars");
-  if (!wrap) return;
-  const oldClick = new Map();
+  if (!wrap || !wrap.querySelector(".char-card")) {
+    setTimeout(enhance, 60);
+    return;
+  }
   wrap.querySelectorAll(".char-card").forEach((el) => {
-    oldClick.set(el.dataset.id, el);
-  });
-  wrap.innerHTML = ROSTER.map((c, i) => {
-    return '<button class="char-card" data-id="' + c.id + '" style="--tint:' + c.color + '">' +
-      '<div class="portrait"><canvas data-id="' + c.id + '" width="196" height="118"></canvas></div>' +
-      '<h3>' + c.name + '</h3>' +
-      '<div class="role">' + (ROLES[c.id] || "Ohana") + '</div>' +
-      '<small>' + c.evoNames.join(" → ") + '</small>' +
-      '<div class="stats"><i>HP ' + c.health + '</i><i>SPD ' + c.speed + '</i><i>' + c.maxJumps + ' jump</i></div>' +
-      '<div class="hint">tecla ' + (i + 1) + '</div></button>';
-  }).join("");
-
-  wrap.querySelectorAll(".char-card").forEach((el) => {
-    el.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
-      if (el.classList.contains("selected")) {
-        const ghost = oldClick.get(el.dataset.id);
-        if (ghost) {
-          wrap.appendChild(ghost);
-          ghost.style.display = "none";
-          ghost.click();
-        }
-      } else mark(el.dataset.id);
-    });
+    const def = ROSTER.find((r) => r.id === el.dataset.id);
+    if (!def) return;
+    el.style.setProperty("--tint", def.color);
+    if (!el.querySelector("canvas")) {
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="196" height="118"></canvas></div>');
+      const role = document.createElement("div");
+      role.className = "role";
+      role.textContent = ROLES[def.id] || "Ohana";
+      const title = el.querySelector("h3");
+      if (title) title.after(role);
+      const stats = document.createElement("div");
+      stats.className = "stats";
+      stats.innerHTML = "<i>HP " + def.health + "</i><i>SPD " + def.speed + "</i><i>" + def.maxJumps + " jump</i>";
+      el.appendChild(stats);
+    }
+    el.addEventListener("pointerdown", () => mark(def.id));
   });
   mark(selectedId);
 
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
-  const startSel = () => {
-    const card = wrap.querySelector('.char-card[data-id="' + selectedId + '"]');
-    if (card) {
-      card.classList.add("selected");
-      card.click();
-      card.click();
-    }
-  };
-  if (play) play.onclick = startSel;
-  if (neu) neu.onclick = startSel;
+  if (play) play.onclick = startSelected;
+  if (neu) neu.onclick = startSelected;
 
   const save = readSave();
   const cont = document.getElementById("btn-continue");
   if (save && save.id && cont) {
     cont.classList.remove("hidden");
-    cont.onclick = () => {
-      selectedId = save.id;
-      startSel();
-    };
+    cont.onclick = () => { selectedId = save.id; mark(save.id); startSelected(); };
   }
 
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
-    if (e.key === "Enter") startSel();
+    if (e.key === "Enter") startSelected();
   });
 
   paintPortraits();
 }
 
-if (document.readyState === "loading") addEventListener("DOMContentLoaded", () => setTimeout(enhance, 50));
-else setTimeout(enhance, 50);
+enhance();
