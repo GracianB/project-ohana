@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="hud.css" />
 </head>
 <body>
   <div id="ocean-bg" aria-hidden="true">
@@ -34,15 +35,23 @@
   </nav>
 
   <header id="hud" role="status" aria-label="Estado del jugador">
-    <div class="hud-block">
-      <div class="hud-name" id="hud-name">Lilo</div>
-      <div class="bar hp"><i id="hp-bar"></i></div>
-      <div class="bar xp"><i id="xp-bar"></i></div>
+    <div class="hud-block player">
+      <div class="hud-ident">
+        <div class="hud-avatar" id="hud-avatar" aria-hidden="true"></div>
+        <div>
+          <div class="hud-kicker">Familia</div>
+          <div class="hud-name" id="hud-name">Lilo</div>
+        </div>
+      </div>
+      <div class="bar-row"><span class="bar-lab">HP</span><div class="bar hp"><i id="hp-bar"></i></div></div>
+      <div class="bar-row"><span class="bar-lab">XP</span><div class="bar xp"><i id="xp-bar"></i></div></div>
       <div class="hud-meta" id="hud-meta">HP 100 · Lv 1</div>
     </div>
-    <div class="hud-block right">
+    <div class="hud-block right world">
+      <div class="hud-kicker">Archipiélago</div>
       <div id="hud-world">Isla Kauai</div>
       <div id="hud-evo">Forma: Base</div>
+      <div class="form-pips" id="form-pips" aria-hidden="true"><b></b><b></b><b></b></div>
       <div id="hud-combo">Combo 0 · Score 0</div>
     </div>
   </header>
@@ -145,5 +154,6 @@
   <noscript>Project Ohana necesita JavaScript.</noscript>
   <script type="module" src="game.js"></script>
   <script type="module" src="systems/title.js"></script>
+  <script type="module" src="systems/hud.js"></script>
 </body>
 </html>
