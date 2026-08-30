@@ -79,4 +79,10 @@ export function applyForm(p) {
   p.w = f.w;
   p.h = f.h;
   if (f.glide) p.glide = true;
+  p.evoBurst = 90;
+  try {
+    window.dispatchEvent(new CustomEvent("ohana-evolve", {
+      detail: { name: p.name, evo: p.evo, color: p.color, id: p.id }
+    }));
+  } catch (_) {}
 }
