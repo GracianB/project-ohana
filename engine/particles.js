@@ -1,10 +1,10 @@
-const MAX = 160;
+const MAX = 72;
 
 export class ParticleSystem {
   constructor() { this.items = []; }
 
   emit(x, y, opts = {}) {
-    let n = opts.count ?? 8;
+    let n = Math.min(opts.count ?? 6, 10);
     const room = MAX - this.items.length;
     if (room <= 0) {
       this.items.splice(0, n);
@@ -16,8 +16,8 @@ export class ParticleSystem {
         x, y,
         vx: Math.cos(a) * s,
         vy: Math.sin(a) * s - (opts.up ?? 0),
-        life: opts.life ?? 28,
-        max: opts.life ?? 28,
+        life: opts.life ?? 22,
+        max: opts.life ?? 22,
         size: (opts.size ?? 3) * (0.6 + Math.random() * 0.7),
         color: opts.color ?? "#fff",
         gravity: opts.gravity ?? 0.05,
@@ -27,16 +27,16 @@ export class ParticleSystem {
   }
 
   burst(x, y, color) {
-    this.emit(x, y, { color, count: 14, size: 3.4, up: 1.4, speed: 3.2, life: 26 });
-    this.emit(x, y, { color: "#fff", count: 8, size: 2, up: 2, speed: 4, life: 18, star: true });
+    this.emit(x, y, { color, count: 8, size: 3, up: 1.2, speed: 3, life: 20 });
+    this.emit(x, y, { color: "#fff", count: 4, size: 2, up: 1.6, speed: 3.4, life: 14, star: true });
   }
 
   dust(x, y) {
-    this.emit(x, y, { color: "#d8c7a4", count: 5, size: 2, up: 0.3, speed: 1.4, life: 16, gravity: 0.08 });
+    this.emit(x, y, { color: "#d8c7a4", count: 3, size: 2, up: 0.3, speed: 1.4, life: 14, gravity: 0.08 });
   }
 
   spark(x, y, color) {
-    this.emit(x, y, { color, count: 10, size: 2, up: 0.8, speed: 3.8, life: 14, gravity: 0.02, star: true });
+    this.emit(x, y, { color, count: 6, size: 2, up: 0.8, speed: 3.4, life: 12, gravity: 0.02, star: true });
   }
 
   update() {
