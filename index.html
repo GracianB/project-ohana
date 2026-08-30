@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <title>PROJECT OHANA 1.0</title>
-  <meta name="description" content="Aventura 2D Ohana 1.0. Elige familia, explora salas, encadena combos y evoluciona tres formas." />
-  <meta property="og:title" content="PROJECT OHANA 1.0" />
-  <meta property="og:description" content="Fan game 2D. Lilo, Stitch, Pikachu, Mushu y Gatito. Metroidvania en canvas." />
-  <meta name="theme-color" content="#06101c" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="hud.css" />
   <link rel="stylesheet" href="ending.css" />
@@ -21,17 +17,16 @@
     <svg class="wave-layer wave-front" viewBox="0 0 1600 200" preserveAspectRatio="none"><path d="M0,140 C 220,90 420,180 640,130 C 860,80 1060,170 1280,120 C 1420,90 1520,130 1600,110 L1600,200 L0,200 Z"/></svg>
   </div>
   <div id="fx-hurt"></div>
-  <div id="fx-heal"></div>
   <nav id="top-actions" aria-label="Acciones">
     <button id="btn-help" type="button">Ayuda · H</button>
     <button id="btn-map" type="button">Mapa · M</button>
     <button id="btn-full" type="button">Pantalla</button>
     <button id="btn-mute" type="button">Sonido · N</button>
   </nav>
-  <header id="hud" role="status" aria-label="Estado del jugador">
+  <header id="hud" role="status">
     <div class="hud-block player">
       <div class="hud-ident">
-        <div class="hud-avatar" id="hud-avatar" aria-hidden="true"></div>
+        <div class="hud-avatar" id="hud-avatar"></div>
         <div>
           <div class="hud-kicker">Familia</div>
           <div class="hud-name" id="hud-name">Lilo</div>
@@ -44,8 +39,8 @@
     <div class="hud-block right world">
       <div class="hud-kicker">Mundo 1</div>
       <div id="hud-world">Isla Kauai</div>
-      <div id="hud-evo">Forma: Base</div>
-      <div class="form-pips" id="form-pips" aria-hidden="true"><b></b><b></b><b></b></div>
+      <div id="hud-evo">Forma 1/5</div>
+      <div class="form-pips" id="form-pips"><b></b><b></b><b></b><b></b><b></b></div>
       <div id="hud-combo">Combo 0 · Score 0</div>
     </div>
   </header>
@@ -56,8 +51,8 @@
   <div id="combo-chip">0</div>
   <div id="room-banner">CLARO OHANA</div>
   <div id="prompt">Entra por ESTE</div>
-  <div id="ability-bar" aria-label="Habilidades" role="toolbar"></div>
-  <canvas id="game" width="1280" height="720" aria-label="Área de juego de Project Ohana"></canvas>
+  <div id="ability-bar"></div>
+  <canvas id="game" width="1280" height="720"></canvas>
   <div id="touch">
     <div class="col">
       <button class="touch-btn" data-k="a">←</button>
@@ -70,17 +65,10 @@
     </div>
   </div>
   <main id="char-select">
-    <div class="title-sky" aria-hidden="true">
-      <div class="title-stars"></div>
-      <div class="title-moon"></div>
-      <div class="title-palm left"></div>
-      <div class="title-palm right"></div>
-      <div class="title-haze"></div>
-    </div>
     <div class="title-stack">
-      <p class="eyebrow">Isla Kauai · Mundo 1 · Definitiva</p>
+      <p class="eyebrow">Isla Kauai · Definitiva</p>
       <h1><span class="word project">PROJECT</span> <span class="word ohana">OHANA</span></h1>
-      <p class="tagline">Explora las 8 salas, tumba al nido y... contacta a Jun.</p>
+      <p class="tagline">Empiezas bebé. Cinco formas. GOD al final. Jungla ↓ Caldera.</p>
     </div>
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
@@ -88,48 +76,25 @@
       <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
     <p class="pick-label">Elige a tu ohana</p>
-    <section id="chars" aria-label="Selección de personaje"></section>
-    <p class="controls">
-      <span><b>WASD</b> mover</span>
-      <span><b>Shift</b> dash</span>
-      <span><b>F</b> golpe</span>
-      <span><b>J K L</b> poderes</span>
-      <span><b>E</b> evo</span>
-      <span><b>H</b> ruta</span>
-    </p>
-    <p class="hint-line">8 salas = te lleva al jefe. Al ganar: contacta a Jun xD</p>
+    <section id="chars"></section>
+    <p class="hint-line">Nueva partida = forma 1 bebé · E evoluciona · Jungla hueco ↓ Caldera</p>
   </main>
   <div id="help">
     <div class="panel">
-      <h2>Mundo 1</h2>
+      <h2>Ruta definitiva</h2>
       <ul>
-        <li><kbd>WASD</kbd> mover / saltar</li>
-        <li><kbd>Shift</kbd> dash</li>
-        <li><kbd>F</kbd> golpe · <kbd>J K L</kbd> poderes</li>
-        <li><kbd>E</kbd> evolucionar</li>
-        <li><kbd>H</kbd> esta ayuda</li>
+        <li>Empiezas <b>bebé</b>. E = siguiente forma. 5ª = GOD.</li>
+        <li>Flechas ← → ↑ ↓ en las puertas. MURO = no hay salida.</li>
+        <li>Jungla (derecha del mapa): hueco del centro ↓ Caldera.</li>
+        <li>Cumbre / Órbita: hueco ↓ Claro.</li>
+        <li>Costa: hueco = pozo mortal.</li>
       </ul>
-      <p class="note">Visita Claro, Costa, Jungla, Cueva, Lab, Cumbre, Órbita y Caldera. Al completar las 8, el nido te reclama solo. El jefe tiene 2 fases y duele. Al tumbarlo: contacta a Jun xD</p>
-      <div class="close-row">H o clic fuera para cerrar</div>
+      <div class="close-row">H cierra</div>
     </div>
   </div>
-  <div id="map-overlay">
-    <div class="panel">
-      <h2>Archipiélago Ohana</h2>
-      <div id="map-grid"></div>
-      <p class="note">Cyan = aquí · Verde = visitada · 8 verdes = jefe</p>
-      <div class="close-row">M o Esc cierra</div>
-    </div>
-  </div>
-  <div id="pause-overlay">
-    <div class="panel slim">
-      <h2>Pausa</h2>
-      <button type="button" id="btn-resume">Seguir</button>
-      <button type="button" id="btn-pause-help">Ayuda</button>
-      <button type="button" id="btn-quit">Menú</button>
-    </div>
-  </div>
-  <div id="notification-container" aria-live="polite"></div>
+  <div id="map-overlay"><div class="panel"><h2>Mapa</h2><div id="map-grid"></div></div></div>
+  <div id="pause-overlay"><div class="panel slim"><h2>Pausa</h2><button type="button" id="btn-resume">Seguir</button><button type="button" id="btn-quit">Menú</button></div></div>
+  <div id="notification-container"></div>
   <script type="module" src="game.js"></script>
   <script type="module" src="systems/title.js"></script>
   <script type="module" src="systems/hud.js"></script>
