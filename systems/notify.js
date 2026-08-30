@@ -1,24 +1,65 @@
-export function showNotification(title, message, kind) {
-  let box = document.getElementById("notification-container");
-  if (!box) {
-    box = document.createElement("div");
-    box.id = "notification-container";
-    document.body.appendChild(box);
+function box() {
+  let el = document.getElementById("notification-container");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "notification-container";
+    document.body.appendChild(el);
   }
-  while (box.children.length > 3) box.firstChild.remove();
+  return el;
+}
+
+export function dismissNotifications() {
+  document.querySelectorAll(".game-notification").forEach((el) => {
+    el.classList.add("closing");
+    setTimeout(() => el.remove(), 220);
+  });
+}
+
+export function showNotification(title, message, kind) {
+  const parent = box();
+  while (parent.children.length > 2) parent.firstChild.remove();
+  const type = kind || guessKind(title);
   const el = document.createElement("div");
-  el.className = "game-notification" + (kind ? " " + kind : "");
-  el.innerHTML = `
-    <button class="notification-close" type="button">✕</button>
-    <h2>${title}</h2>
-    <p>${message}</p>
-    <small>ESC o ✕ para cerrar</small>
-  `;
-  box.appendChild(el);
+  el.className = "game-notification " + type;
+  el.innerHTML =
+    '<button class="notification-close" type="button">✕</button>' +
+    '<div class="badge">' + typeLabel(type) + "</div>" +
+    "<h2>" + title + "</h2>" +
+    "<p>" + message + "</p>" +
+    "<small>Cualquier tecla o clic cierra</small>";
+  parent.appendChild(el);
   const close = () => {
     el.classList.add("closing");
-    setTimeout(() => el.remove(), 280);
+    setTimeout(() => el.remove(), 220);
   };
-  el.querySelector(".notification-close").addEventListener("click", close);
-  setTimeout(close, 4200);
+  el.querySelector(".notification-close").addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    close();
+  });
+  el.addEventListener("click", close);
+  setTimeout(close, 5000);
+}
+
+function guessKind(title) {
+  const t = String(title).toUpperCase();
+  if (t.includes("EVO") || t.includes("MAX")) return "evo";
+  if (t.includes("VACIO") || t.includes("DERROTA") || t.includes("CERRADO")) return "hurt";
+  if (t.includes("VICTORIA") || t.includes("SALA")) return "sala";
+  return "info";
+}
+
+function typeLabel(type) {
+  if (type === "evo") return "✦ EVOLUCIÓN";
+  if (type === "hurt") return "⚠ PELIGRO";
+  if (type === "sala") return "⚑ SALA";
+  return "• OHANA";
+}
+
+if (!window.__ohanaNotifyBound) {
+  window.__ohanaNotifyBound = true;
+  addEventListener("keydown", () => dismissNotifications(), true);
+  addEventListener("pointerdown", (e) => {
+    if (e.target.closest && e.target.closest("#top-actions, #ability-bar, #chars, .char-card, .touch-btn")) return;
+    if (document.querySelector(".game-notification")) dismissNotifications();
+  }, true);
 }
