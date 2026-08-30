@@ -1,7 +1,7 @@
 import { ROSTER } from "../characters/roster.js";
 import { drawCharacter } from "../characters/draw.js";
 
-const ROLES = { lilo: "Corazón", stitch: "Caos 626", pikachu: "Rayo", dragon: "Dragón", cat: "Neko" };
+const ROLES = { lilo: "Bebé Ohana", stitch: "626 bebé", pikachu: "Pichu", dragon: "Cría", cat: "Gatito" };
 let selectedId = "lilo";
 let tick = 0;
 let raf = 0;
@@ -22,9 +22,13 @@ function paintPortraits() {
       if (!def) return;
       const c = cv.getContext("2d", { alpha: true });
       c.clearRect(0, 0, cv.width, cv.height);
-      const form = (def.forms && def.forms[1]) || def;
-      const dummy = { ...def, ...form, x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true, evo: 1, w: form.w || def.w, h: form.h || def.h };
-      drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 8 }, tick);
+      const form = (def.forms && def.forms[0]) || def;
+      const dummy = {
+        ...def, ...form,
+        x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true,
+        evo: 0, w: form.w || 24, h: form.h || 24
+      };
+      drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 4 }, tick);
     });
   }
   raf = requestAnimationFrame(paintPortraits);
@@ -54,12 +58,15 @@ function enhance() {
       el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="196" height="118"></canvas></div>');
       const role = document.createElement("div");
       role.className = "role";
-      role.textContent = ROLES[def.id] || "Ohana";
+      role.textContent = ROLES[def.id] || "Bebé";
       const title = el.querySelector("h3");
-      if (title) title.after(role);
+      if (title) {
+        title.textContent = (def.forms && def.forms[0] && def.forms[0].name) || def.name;
+        title.after(role);
+      }
       const stats = document.createElement("div");
       stats.className = "stats";
-      stats.innerHTML = "<i>5 formas</i><i>bebé → GOD</i>";
+      stats.innerHTML = "<i>empieza bebé</i><i>5 formas</i>";
       el.appendChild(stats);
     }
     el.addEventListener("pointerdown", () => mark(def.id));
@@ -67,7 +74,7 @@ function enhance() {
   mark(selectedId);
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
-  if (play) play.onclick = startSelected;
+  if (play) play.onclick = () => { try { localStorage.removeItem("ohana"); } catch (e) {} startSelected(); };
   if (neu) neu.onclick = () => { try { localStorage.removeItem("ohana"); } catch (e) {} startSelected(); };
   const save = readSave();
   const cont = document.getElementById("btn-continue");
