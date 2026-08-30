@@ -1,5 +1,6 @@
 import { ROSTER } from "../characters/roster.js";
 import { drawBaby } from "../characters/baby.js";
+import { playIntro } from "./intro.js";
 
 const ROLES = { lilo: "Bebé Ohana", stitch: "626 bebé", pikachu: "Pichu", dragon: "Cría", cat: "Gatito" };
 let selectedId = "lilo";
@@ -41,6 +42,21 @@ function startSelected() {
   if (card) card.click();
 }
 
+function begin(kind) {
+  const def = ROSTER.find((r) => r.id === selectedId);
+  const name = def && def.forms && def.forms[0] ? def.forms[0].name : "Ohana";
+  if (kind === "new") {
+    try {
+      localStorage.removeItem("ohana");
+      localStorage.removeItem("ohana-resume");
+    } catch (e) {}
+  }
+  if (kind === "resume") {
+    try { localStorage.setItem("ohana-resume", "1"); } catch (e) {}
+  }
+  playIntro(kind, name, startSelected);
+}
+
 function enhance() {
   const wrap = document.getElementById("chars");
   if (!wrap || !wrap.querySelector(".char-card")) {
@@ -61,27 +77,26 @@ function enhance() {
         title.textContent = (def.forms && def.forms[0] && def.forms[0].name) || def.name;
         title.after(role);
       }
-      const stats = document.createElement("div");
-      stats.className = "stats";
-      stats.innerHTML = "<i>empieza bebé</i><i>5 formas</i>";
-      el.appendChild(stats);
     }
     el.addEventListener("pointerdown", () => mark(def.id));
   });
   mark(selectedId);
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
-  if (play) play.onclick = () => { try { localStorage.removeItem("ohana"); } catch (e) {} startSelected(); };
-  if (neu) neu.onclick = () => { try { localStorage.removeItem("ohana"); } catch (e) {} startSelected(); };
+  if (play) play.onclick = () => begin("new");
+  if (neu) neu.onclick = () => begin("new");
+  wrap.querySelectorAll(".char-card").forEach((el) => {
+    el.addEventListener("click", () => {}, true);
+  });
   const save = readSave();
   const cont = document.getElementById("btn-continue");
   if (save && save.id && cont) {
     cont.classList.remove("hidden");
-    cont.onclick = () => { selectedId = save.id; mark(save.id); startSelected(); };
+    cont.onclick = () => { selectedId = save.id; mark(save.id); begin("resume"); };
   }
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
-    if (e.key === "Enter") startSelected();
+    if (e.key === "Enter") begin("new");
   });
   const mo = new MutationObserver(() => {
     if (!document.body.classList.contains("playing") && !raf) paintPortraits();
