@@ -115,6 +115,68 @@ body.playing #hud {
 .ability-slot .cd { height: 5px; border-radius: 99px; }
 .ability-slot .cd i { box-shadow: 0 0 8px #7ee7ff88; }
 @keyframes hpPulse { 50% { filter: brightness(1.25); } }
+
+#evo-cinema {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#evo-cinema.play { display: flex; }
+#evo-cinema .evo-wash {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--evo, #ffe66a) 55%, transparent), transparent 58%),
+    rgba(255,255,255,.18);
+  animation: evoWash 1.9s ease forwards;
+}
+#evo-cinema .evo-ring {
+  position: absolute;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--evo, #ffe66a);
+  box-shadow: 0 0 24px var(--evo, #ffe66a);
+  animation: evoRing 1.6s ease-out forwards;
+}
+#evo-cinema .r2 { animation-delay: .08s; border-color: #fff; }
+#evo-cinema .r3 { animation-delay: .16s; }
+#evo-cinema .evo-copy { position: relative; text-align: center; animation: evoPop .7s cubic-bezier(.2,1.4,.3,1); }
+#evo-cinema .evo-kicker {
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+#evo-cinema .evo-name {
+  font-family: Fredoka, sans-serif;
+  font-size: clamp(36px, 7vw, 78px);
+  color: #fff;
+  text-shadow: 0 10px 40px rgba(0,0,0,.45), 0 0 24px var(--evo, #ffe66a);
+}
+#evo-cinema .evo-stage {
+  margin-top: 8px;
+  letter-spacing: .2em;
+  color: #ffe66a;
+  font-weight: 800;
+}
+@keyframes evoWash {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes evoRing {
+  from { transform: scale(.2); opacity: 1; }
+  to { transform: scale(8); opacity: 0; }
+}
+@keyframes evoPop {
+  from { transform: scale(.7); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
 @media (max-width: 820px) {
   .hud-avatar { width: 30px; height: 30px; flex-basis: 30px; }
   #ability-bar { bottom: 78px; }
