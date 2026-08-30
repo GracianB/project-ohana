@@ -1,40 +1,44 @@
-# PROJECT OHANA 1.0
+# PROJECT OHANA · DEMO Mundo 1
 
-Fan adventure 2D en canvas. Elige familia, cruza el archipiélago, encadena combos y evoluciona tres formas.
+Fan game 2D en canvas. Isla Kauai, cinco formas, un jefe.
 
-**Jugar ahora:** https://gracianb.github.io/project-ohana/
+**Jugar la demo:** https://gracianb.github.io/project-ohana/
 
-## Cómo se juega
+Nueva partida = bebé. Continuar = tu forma y sala. Al tumbar el nido: *contacta a Jun xD*.
+
+## Mundo 1
+
+```
+        Cumbre ── Órbita
+           |
+Lab ─ Cueva ─ Claro ─ Costa ─ Jungla
+                               |
+                            Caldera ─ Nido
+```
+
+- Costa: hueco central = pozo mortal.
+- Jungla: hueco central = baja a la Caldera (forma 4).
+- Cumbre / Órbita: hueco = vuelve al Claro.
+- 8 salas visitadas llaman al jefe.
+
+## Controles
 
 | Tecla | Acción |
 | --- | --- |
-| WASD / flechas | Mover y saltar |
-| Shift / clic der. | Dash |
-| F / clic | Golpe |
-| J K L | Poderes (lejos / medio / definitivo) |
-| E | Evolucionar |
-| S | Bajar de plataforma |
-| R | Volver al claro |
-| M | Mapa |
-| N | Sonido |
-| H | Ayuda |
-| Esc | Pausa |
+| WASD | Mover / saltar |
+| Shift | Dash |
+| F | Golpe |
+| J K L | Lejos / medio / definitivo |
+| E | Evolucionar (5 formas) |
+| S | Bajar plataforma |
+| R | Claro |
+| M H N Esc | Mapa / ayuda / mute / pausa |
 
-Puertas **ESTE OESTE ARRIBA ABAJO**. Jungla / Lab / Órbita piden forma 2. Caldera y jefe piden forma 3. Solo mueres en pozos reales.
+## Formas
 
-## Familia
+1 Bebé · 2 Base · 3 Evo · 4 Final · 5 GOD
 
-- **Lilo** — notas, aro hula, pulso Ohana
-- **Stitch** — plasma, garras, ráfaga 626
-- **Pikachu** — chispa, ataque rápido, trueno
-- **Mushu** — bola de fuego, aletazo, ira del dragón
-- **Kawaii Cat** — ovillo, salto, nueve vidas
-
-J es siempre disparo a distancia. Al evolucionar, J lanza más proyectiles.
-
-## Evoluciones
-
-Tres formas por personaje. XP 40 → forma 2. XP 100 → forma 3. O pulsa E. Cine a pantalla completa y aura nueva.
+XP 18 / 40 / 70 / 110. O pulsa E con barra llena.
 
 ## Local
 
@@ -44,6 +48,6 @@ git pull origin main
 python -m http.server 8080
 ```
 
-Abre `http://localhost:8080`. No abras `index.html` a doble clic.
+http://localhost:8080 — no abras `index.html` a doble clic.
 
-Código MIT. Lilo, Stitch y Pikachu son marcas de Disney / Nintendo / TPC. Fan game no comercial.
+MIT. Personajes: Disney / Nintendo / TPC. Fan game no comercial.
