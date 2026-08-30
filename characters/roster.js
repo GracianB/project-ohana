@@ -40,15 +40,15 @@ export const ROSTER = [
   },
   {
     id: "dragon",
-    name: "Dragon",
-    color: "#ff6a2a",
+    name: "Mushu",
+    color: "#e23a1c",
     speed: 3.8, jumpPower: 11.5, maxJumps: 1, glide: true, health: 180, w: 52, h: 44,
     abilities: ["breath", "wing", "rage"],
-    evoNames: ["Cria", "Dragon de Fuego", "Volcanico"],
+    evoNames: ["Mushu", "Guardia Imperial", "Gran Dragon Rojo"],
     forms: [
-      { name: "Cria", color: "#ff7a3a", speed: 3.8, jump: 11.5, jumps: 1, hp: 180, w: 40, h: 34, glide: true },
-      { name: "Dragon de Fuego", color: "#e24a12", speed: 4.6, jump: 13.0, jumps: 2, hp: 240, w: 58, h: 48, glide: true },
-      { name: "Volcanico", color: "#7a1400", speed: 5.2, jump: 14.4, jumps: 2, hp: 320, w: 72, h: 58, glide: true }
+      { name: "Mushu", color: "#e23a1c", speed: 3.8, jump: 11.5, jumps: 1, hp: 180, w: 40, h: 36, glide: true },
+      { name: "Guardia Imperial", color: "#d61f12", speed: 4.6, jump: 13.0, jumps: 2, hp: 240, w: 58, h: 50, glide: true },
+      { name: "Gran Dragon Rojo", color: "#8b1208", speed: 5.2, jump: 14.4, jumps: 2, hp: 320, w: 72, h: 60, glide: true }
     ]
   },
   {
