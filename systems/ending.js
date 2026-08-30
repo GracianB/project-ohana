@@ -16,11 +16,27 @@ export function showEnding(detail = {}) {
     document.body.appendChild(layer);
     layer.querySelector("#win-close").onclick = () => layer.classList.remove("show");
   }
-  layer.querySelector(".win-score").textContent = "Score " + (detail.score || 0) + " · Kills " + (detail.kills || 0);
+  if (layer.classList.contains("show")) return;
+  layer.querySelector(".win-score").textContent = detail.score ? ("Score " + detail.score) : "El nido ha caído";
   layer.classList.add("show");
+}
+
+function watchVictory() {
+  const box = document.getElementById("notification-container") || document.body;
+  const scan = () => {
+    document.querySelectorAll(".game-notification h2").forEach((h) => {
+      if (/VICTORIA|NIDO|JEFE/i.test(h.textContent || "")) {
+        const p = h.parentElement && h.parentElement.querySelector("p");
+        showEnding({ score: p ? p.textContent : "" });
+      }
+    });
+  };
+  new MutationObserver(scan).observe(box, { childList: true, subtree: true });
+  addEventListener("ohana-win", (e) => showEnding(e.detail || {}));
 }
 
 if (!window.__ohanaWinBound) {
   window.__ohanaWinBound = true;
-  addEventListener("ohana-win", (e) => showEnding(e.detail || {}));
+  if (document.readyState === "loading") addEventListener("DOMContentLoaded", watchVictory);
+  else watchVictory();
 }
