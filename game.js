@@ -199,6 +199,8 @@ function updateCam() {
 
 function drawEnemy(e) {
   const x = e.x - game.cam.x, y = e.y - game.cam.y;
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.beginPath(); ctx.ellipse(x + e.w / 2, y + e.h + 3, e.w * 0.42, 4, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = e.color;
   if (e.kind === "bat") { ctx.beginPath(); ctx.ellipse(x + 15, y + 16, 14, 8, 0, 0, Math.PI * 2); ctx.fill(); }
   else if (e.kind === "bot") ctx.fillRect(x + 4, y + 4, 22, 22);
@@ -207,26 +209,47 @@ function drawEnemy(e) {
   ctx.fillStyle = "#3f3"; ctx.fillRect(x, y - 8, e.w * (e.hp / e.max), 4);
 }
 
+function drawPlatform(plat, world) {
+  const x = plat.x - game.cam.x;
+  const y = plat.y - game.cam.y;
+  ctx.fillStyle = "rgba(0,0,0,.32)";
+  ctx.fillRect(x + 8, y + 12, plat.w, plat.h);
+  ctx.fillStyle = world.ground;
+  ctx.fillRect(x, y, plat.w, plat.h);
+  ctx.fillStyle = world.groundTop || "#8fd98a";
+  ctx.fillRect(x, y, plat.w, 11);
+  ctx.fillStyle = "rgba(255,255,255,.22)";
+  ctx.fillRect(x, y, plat.w, 3);
+  ctx.fillStyle = "rgba(0,0,0,.18)";
+  ctx.fillRect(x, y + plat.h - 6, plat.w, 6);
+  ctx.fillStyle = "rgba(255,255,255,.1)";
+  ctx.fillRect(x, y, 4, plat.h);
+}
+
 function render() {
   const world = WORLDS[game.worldIndex];
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
-  for (const plat of game.platforms) {
-    ctx.fillStyle = world.ground;
-    ctx.fillRect(plat.x - game.cam.x, plat.y - game.cam.y, plat.w, plat.h);
-    ctx.fillStyle = world.groundTop || "#ffffff88";
-    ctx.fillRect(plat.x - game.cam.x, plat.y - game.cam.y, plat.w, 8);
-  }
+  for (const plat of game.platforms) drawPlatform(plat, world);
   for (const e of game.enemies) drawEnemy(e);
   for (const pr of game.projectiles) {
     ctx.fillStyle = pr.color;
+    ctx.shadowColor = pr.color;
+    ctx.shadowBlur = 12;
     ctx.fillRect(pr.x - game.cam.x, pr.y - game.cam.y, pr.w, pr.h);
+    ctx.shadowBlur = 0;
   }
   for (const b of game.bolts) {
-    ctx.strokeStyle = "#cfff6a"; ctx.lineWidth = 3;
+    ctx.strokeStyle = "#cfff6a"; ctx.lineWidth = 3; ctx.shadowColor = "#cfff6a"; ctx.shadowBlur = 16;
     ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke();
+    ctx.shadowBlur = 0;
   }
-  game.fx.emit && game.fx.render(ctx, game.cam);
+  game.fx.render(ctx, game.cam);
   if (game.player && game.player.invuln % 4 !== 1) drawCharacter(ctx, game.player, game.cam, t);
+  const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.28, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+  vg.addColorStop(0, "rgba(0,0,0,0)");
+  vg.addColorStop(1, "rgba(0,0,0,0.42)");
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function renderAbilityBar() {
