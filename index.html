@@ -2,23 +2,28 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
   <title>PROJECT OHANA</title>
-  <meta name="description" content="Aventura 2D Ohana. Elige personaje, explora salas y evoluciona." />
+  <meta name="description" content="Aventura 2D Ohana. Elige familia, explora salas, encadena combos y evoluciona tres formas." />
   <meta property="og:title" content="PROJECT OHANA" />
-  <meta property="og:description" content="Fan game 2D. Lilo, Stitch, Pikachu y más." />
+  <meta property="og:description" content="Fan game 2D. Lilo, Stitch, Pikachu, Dragón y Gato. Metroidvania en canvas." />
   <meta name="theme-color" content="#060814" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="fx-hurt"></div>
+  <div id="fx-heal"></div>
   <div id="top-actions">
     <button id="btn-help" type="button">Ayuda · H</button>
+    <button id="btn-map" type="button">Mapa · M</button>
     <button id="btn-full" type="button">Pantalla</button>
+    <button id="btn-mute" type="button">Sonido · N</button>
   </div>
   <div id="hud">
     <div class="hud-block">
       <div class="hud-name" id="hud-name">Lilo</div>
-      <div class="bar"><i id="hp-bar"></i></div>
+      <div class="bar hp"><i id="hp-bar"></i></div>
       <div class="bar xp"><i id="xp-bar"></i></div>
       <div class="hud-meta" id="hud-meta">HP 100 · Lv 1</div>
     </div>
@@ -28,6 +33,11 @@
       <div id="hud-combo">Combo 0 · Score 0</div>
     </div>
   </div>
+  <div id="boss-wrap" class="hidden">
+    <div class="boss-label">NIDO FINAL</div>
+    <div class="bar boss"><i id="boss-bar"></i></div>
+  </div>
+  <div id="combo-chip">0</div>
   <div id="room-banner">CLARO OHANA</div>
   <div id="prompt">Entra por ESTE</div>
   <div id="ability-bar"></div>
@@ -44,30 +54,52 @@
     </div>
   </div>
   <div id="char-select">
-    <div class="tag">fan adventure</div>
+    <div class="stars" aria-hidden="true"></div>
+    <div class="tag">fan adventure · oleada 2</div>
     <h1>PROJECT OHANA</h1>
-    <p>Nadie se queda atrás. Elige familia · explora puertas · evoluciona tres formas.</p>
+    <p>Nadie se queda atrás. Elige familia · explora puertas · encadena golpes · evoluciona tres formas.</p>
+    <div id="menu-row">
+      <button id="btn-continue" type="button" class="ghost hidden">Continuar partida</button>
+      <button id="btn-new" type="button" class="ghost">Nueva partida</button>
+    </div>
     <div id="chars"></div>
-    <p style="opacity:.45;font-size:12px">H ayuda · clic en carta o 1-5</p>
+    <p class="hint-line">H ayuda · 1-5 elige · clic en carta</p>
   </div>
   <div id="help">
     <div class="panel">
       <h2>Cómo se juega</h2>
       <ul>
         <li><kbd>WASD</kbd> mover / saltar</li>
-        <li><kbd>Shift</kbd> dash</li>
-        <li><kbd>F</kbd> o clic golpe</li>
+        <li><kbd>Shift</kbd> dash i-frames</li>
+        <li><kbd>F</kbd> / clic golpe</li>
+        <li><kbd>clic der.</kbd> dash</li>
         <li><kbd>J K L</kbd> habilidades</li>
         <li><kbd>E</kbd> evolucionar</li>
         <li><kbd>S</kbd> bajar plataforma</li>
-        <li><kbd>R</kbd> claro</li>
-        <li><kbd>M</kbd> mapa</li>
+        <li><kbd>R</kbd> volver al claro</li>
+        <li><kbd>M</kbd> mapa grande</li>
         <li><kbd>N</kbd> mute</li>
         <li><kbd>Esc</kbd> pausa</li>
         <li><kbd>H</kbd> esta ayuda</li>
-        <li>Puertas ESTE OESTE ARRIBA ABAJO</li>
       </ul>
+      <p class="note">Puertas ESTE OESTE ARRIBA ABAJO. Jungla / Lab / Órbita piden forma 2. Caldera y Jefe piden forma 3.</p>
       <div class="close-row">H o clic fuera para cerrar</div>
+    </div>
+  </div>
+  <div id="map-overlay">
+    <div class="panel">
+      <h2>Archipiélago Ohana</h2>
+      <div id="map-grid"></div>
+      <p class="note">Cyan = aquí · Verde = visitada · Candado = evo</p>
+      <div class="close-row">M o Esc cierra</div>
+    </div>
+  </div>
+  <div id="pause-overlay">
+    <div class="panel slim">
+      <h2>Pausa</h2>
+      <button type="button" id="btn-resume">Seguir</button>
+      <button type="button" id="btn-pause-help">Ayuda</button>
+      <button type="button" id="btn-quit">Menú</button>
     </div>
   </div>
   <div id="notification-container"></div>
