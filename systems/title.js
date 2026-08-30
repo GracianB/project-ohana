@@ -4,22 +4,29 @@ import { drawCharacter } from "../characters/draw.js";
 const ROLES = { lilo: "Corazón", stitch: "Caos 626", pikachu: "Rayo", dragon: "Dragón", cat: "Neko" };
 let selectedId = "lilo";
 let tick = 0;
+let raf = 0;
 
 function readSave() {
   try { return JSON.parse(localStorage.getItem("ohana") || "null"); } catch (e) { return null; }
 }
 
 function paintPortraits() {
+  if (document.body.classList.contains("playing")) {
+    raf = 0;
+    return;
+  }
   tick++;
-  document.querySelectorAll(".char-card canvas").forEach((cv) => {
-    const def = ROSTER.find((r) => r.id === cv.dataset.id);
-    if (!def) return;
-    const c = cv.getContext("2d");
-    c.clearRect(0, 0, cv.width, cv.height);
-    const dummy = { ...def, x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true, evo: 0, w: def.w, h: def.h };
-    drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 8 }, tick);
-  });
-  requestAnimationFrame(paintPortraits);
+  if (tick % 2 === 0) {
+    document.querySelectorAll(".char-card canvas").forEach((cv) => {
+      const def = ROSTER.find((r) => r.id === cv.dataset.id);
+      if (!def) return;
+      const c = cv.getContext("2d", { alpha: true });
+      c.clearRect(0, 0, cv.width, cv.height);
+      const dummy = { ...def, x: 0, y: 0, vx: 0, vy: 0, facing: 1, grounded: true, evo: 0, w: def.w, h: def.h };
+      drawCharacter(c, dummy, { x: -cv.width / 2 + dummy.w / 2, y: -cv.height / 2 + dummy.h / 2 - 8 }, tick);
+    });
+  }
+  raf = requestAnimationFrame(paintPortraits);
 }
 
 function mark(id) {
@@ -75,6 +82,10 @@ function enhance() {
     if (e.key === "Enter") startSelected();
   });
 
+  const mo = new MutationObserver(() => {
+    if (!document.body.classList.contains("playing") && !raf) paintPortraits();
+  });
+  mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   paintPortraits();
 }
 
