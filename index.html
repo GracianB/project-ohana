@@ -23,17 +23,14 @@
     <svg class="wave-layer wave-back" viewBox="0 0 1600 200" preserveAspectRatio="none"><path d="M0,120 C 200,180 400,60 600,110 C 800,160 1000,50 1200,100 C 1400,150 1500,90 1600,120 L1600,200 L0,200 Z"/></svg>
     <svg class="wave-layer wave-front" viewBox="0 0 1600 200" preserveAspectRatio="none"><path d="M0,140 C 220,90 420,180 640,130 C 860,80 1060,170 1280,120 C 1420,90 1520,130 1600,110 L1600,200 L0,200 Z"/></svg>
   </div>
-
   <div id="fx-hurt"></div>
   <div id="fx-heal"></div>
-
   <nav id="top-actions" aria-label="Acciones">
     <button id="btn-help" type="button">Ayuda · H</button>
     <button id="btn-map" type="button">Mapa · M</button>
     <button id="btn-full" type="button">Pantalla</button>
     <button id="btn-mute" type="button">Sonido · N</button>
   </nav>
-
   <header id="hud" role="status" aria-label="Estado del jugador">
     <div class="hud-block player">
       <div class="hud-ident">
@@ -55,7 +52,6 @@
       <div id="hud-combo">Combo 0 · Score 0</div>
     </div>
   </header>
-
   <div id="boss-wrap" class="hidden">
     <div class="boss-label">NIDO FINAL</div>
     <div class="bar boss"><i id="boss-bar"></i></div>
@@ -65,7 +61,6 @@
   <div id="prompt">Entra por ESTE</div>
   <div id="ability-bar" aria-label="Habilidades" role="toolbar"></div>
   <canvas id="game" width="1280" height="720" aria-label="Área de juego de Project Ohana"></canvas>
-
   <div id="touch">
     <div class="col">
       <button class="touch-btn" data-k="a">←</button>
@@ -77,7 +72,6 @@
       <button class="touch-btn" data-k="f">F</button>
     </div>
   </div>
-
   <main id="char-select">
     <div class="title-sky" aria-hidden="true">
       <div class="title-stars"></div>
@@ -86,33 +80,28 @@
       <div class="title-palm right"></div>
       <div class="title-haze"></div>
     </div>
-
     <div class="title-stack">
       <p class="eyebrow">Isla Kauai · Versión 1.0</p>
       <h1><span class="word project">PROJECT</span> <span class="word ohana">OHANA</span></h1>
       <p class="tagline">Nadie se queda atrás. Elige familia, cruza puertas y evoluciona tres formas.</p>
     </div>
-
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
       <button id="btn-play" type="button" class="cta primary">Jugar ahora</button>
       <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
-
     <p class="pick-label">Elige a tu ohana</p>
     <section id="chars" aria-label="Selección de personaje"></section>
-
     <p class="controls">
       <span><b>WASD</b> mover</span>
       <span><b>Shift</b> dash</span>
       <span><b>F</b> golpe</span>
       <span><b>J K L</b> poderes</span>
       <span><b>E</b> evo</span>
-      <span><b>H</b> ayuda</span>
+      <span><b>H</b> ruta</span>
     </p>
-    <p class="hint-line">1–5 elige · Enter juega · clic en carta para entrar</p>
+    <p class="hint-line">Ruta: Claro → ESTE Costa → forma 2 → Jungla → forma 3 → ARRIBA Caldera → ESTE Jefe</p>
   </main>
-
   <div id="help">
     <div class="panel">
       <h2>Cómo se juega</h2>
@@ -120,17 +109,13 @@
         <li><kbd>WASD</kbd> mover / saltar</li>
         <li><kbd>Shift</kbd> dash i-frames</li>
         <li><kbd>F</kbd> / clic golpe</li>
-        <li><kbd>clic der.</kbd> dash</li>
         <li><kbd>J K L</kbd> habilidades</li>
         <li><kbd>E</kbd> evolucionar</li>
         <li><kbd>S</kbd> bajar plataforma</li>
         <li><kbd>R</kbd> volver al claro</li>
-        <li><kbd>M</kbd> mapa</li>
-        <li><kbd>N</kbd> mute</li>
-        <li><kbd>Esc</kbd> pausa</li>
         <li><kbd>H</kbd> esta ayuda</li>
       </ul>
-      <p class="note">Puertas ESTE OESTE ARRIBA ABAJO. Jungla / Lab / Órbita piden forma 2. Caldera y Jefe piden forma 3. Solo mueres en pozos reales.</p>
+      <p class="note"><b>Ruta.</b> Claro ESTE = Costa. En Costa el hueco es POZO mortal, no bajes. Forma 2 abre Jungla (ESTE) y Lab (OESTE desde la cueva). Forma 3: en Jungla salta ARRIBA a la Caldera, o en Órbita cae al pozo ABAJO. Caldera ESTE = jefe. Si ves MURO, no hay puerta. Si ves CERRADO F2/F3, evoluciona primero.</p>
       <div class="close-row">H o clic fuera para cerrar</div>
     </div>
   </div>
