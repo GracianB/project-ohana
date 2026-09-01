@@ -88,18 +88,31 @@ function enhance() {
   wrap.querySelectorAll(".char-card").forEach((el) => {
     el.addEventListener("click", () => {}, true);
   });
-  const save = readSave();
-  const cont = document.getElementById("btn-continue");
-  if (save && save.id && cont) {
-    cont.classList.remove("hidden");
-    cont.onclick = () => { selectedId = save.id; mark(save.id); begin("resume"); };
+  function refreshContinue() {
+    const save = readSave();
+    const cont = document.getElementById("btn-continue");
+    if (!cont) return;
+    if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
+      cont.classList.remove("hidden");
+      cont.onclick = () => { selectedId = save.id; mark(save.id); begin("resume"); };
+    } else {
+      cont.classList.add("hidden");
+    }
   }
+  refreshContinue();
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
-    if (e.key === "Enter") begin("new");
+    if (e.key !== "Enter") return;
+    const save = readSave();
+    if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
+      selectedId = save.id;
+      mark(save.id);
+      begin("resume");
+    } else begin("new");
   });
   const mo = new MutationObserver(() => {
     if (!document.body.classList.contains("playing") && !raf) paintPortraits();
+    if (!document.body.classList.contains("playing")) refreshContinue();
   });
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   paintPortraits();

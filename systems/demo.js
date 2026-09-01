@@ -5,7 +5,7 @@ const HINTS = {
   "Cueva Azul": "OESTE = Lab. ESTE = Claro.",
   "Alien Lab": "Sala cerrada. Solo se sale por ESTE.",
   "Cumbre": "Hueco ABAJO = Claro. ESTE = Órbita.",
-  "Orbita": "Hueco ABAJO = Claro. No hay piso extra abajo.",
+  "Órbita": "Hueco ABAJO = Claro. No hay piso extra abajo.",
   "Caldera": "ESTE = Nido del jefe. OESTE = Jungla.",
   "Nido Final": "Tumba al nido. No es fácil. Al caer: contacta a Jun."
 };

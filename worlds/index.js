@@ -1,7 +1,7 @@
 export const WORLDS = [
   { id: "beach", name: "Isla Kauai", ground: "#d7a45a", groundTop: "#4fa35c", sky: ["#4eb4ff", "#ffe7c4"] },
   { id: "jungle", name: "Jungla", ground: "#245522", groundTop: "#63c85a", sky: ["#0d1f0e", "#2c6a2a"] },
-  { id: "volcano", name: "Volcan", ground: "#3a1610", groundTop: "#ff6a22", sky: ["#180505", "#7a1c08"] },
+  { id: "volcano", name: "Volcán", ground: "#3a1610", groundTop: "#ff6a22", sky: ["#180505", "#7a1c08"] },
   { id: "space", name: "Espacio", ground: "#161628", groundTop: "#7a5cff", sky: ["#050510", "#17143a"] },
   { id: "lab", name: "Alien Lab", ground: "#15202a", groundTop: "#3ee0ff", sky: ["#071018", "#163646"] }
 ];

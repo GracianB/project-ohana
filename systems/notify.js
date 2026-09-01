@@ -34,10 +34,10 @@ export function playEvolutionCinema(detail = {}) {
     document.body.appendChild(layer);
   }
   const name = detail.name || "Nueva forma";
-  const stage = Number(detail.evo || 1) + 1;
+  const stage = Math.max(1, Math.min(5, Number(detail.evo || 0) + 1));
   layer.style.setProperty("--evo", detail.color || "#ffe66a");
   layer.querySelector(".evo-name").textContent = name;
-  layer.querySelector(".evo-stage").textContent = "FORMA " + Math.min(3, stage) + " / 3";
+  layer.querySelector(".evo-stage").textContent = "FORMA " + stage + " / 5";
   layer.classList.remove("play");
   void layer.offsetWidth;
   layer.classList.add("play");
@@ -49,10 +49,11 @@ export function showNotification(title, message, kind) {
   const parent = box();
   while (parent.children.length > 2) parent.firstChild.remove();
   const type = kind || guessKind(title);
-  if (type === "evo") {
+  if (type === "evo" && !/^FORMA\s+\d/i.test(String(title))) {
+    const form = String(title).match(/FORMA\s+(\d)/i);
     playEvolutionCinema({
-      name: String(title).replace(/^[¡!]+/, "").replace(/Evolución!?\s*/i, "").trim() || title,
-      evo: /3|MAX|Alma|Tormenta|Dragon|Vidas/i.test(title + message) ? 2 : 1,
+      name: String(message || title).replace(/^[¡!]+/, "").replace(/Evolución!?\s*/i, "").trim() || title,
+      evo: form ? Number(form[1]) - 1 : 1,
       color: "#ffe66a",
     });
   }

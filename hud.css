@@ -76,17 +76,25 @@ body.playing #hud {
   width: min(540px, 58vw);
   padding: 10px 14px 12px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(40,8,14,.72), rgba(8,6,10,.72));
-  border: 1px solid rgba(255,90,120,.28);
+  background: linear-gradient(180deg, rgba(40,8,14,.82), rgba(8,6,10,.86));
+  border: 1px solid rgba(255,90,120,.42);
   backdrop-filter: blur(14px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.45);
 }
-.boss-label { letter-spacing: .18em; }
+.boss-label {
+  letter-spacing: .18em;
+  color: #ffd0d8;
+  text-shadow: 0 1px 0 #000, 0 0 10px rgba(0,0,0,.7);
+}
 #combo-chip {
   top: 128px;
   font: 800 34px Fredoka, sans-serif;
-  text-shadow: 0 8px 24px rgba(255, 210, 80, .45), 0 2px 0 #000;
+  color: #ffe66a;
+  text-shadow: 0 8px 24px rgba(255, 210, 80, .45), 0 2px 0 #000, 0 0 12px #000;
 }
 #combo-chip.show { transform: translateX(-50%) scale(1.06); }
+body.boss-fight #combo-chip { top: 168px; }
+body.boss-fight #room-banner { top: 118px; }
 #room-banner {
   top: 92px;
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(8,12,20,.78));
@@ -179,6 +187,9 @@ body.playing #hud {
 
 @media (max-width: 820px) {
   .hud-avatar { width: 30px; height: 30px; flex-basis: 30px; }
-  #ability-bar { bottom: 78px; }
-  .ability-slot { min-width: 110px; padding: 8px; }
+  #ability-bar { bottom: 86px; }
+  .ability-slot { min-width: 104px; padding: 8px; }
+  body.playing #hud { top: 44px; }
+  body.boss-fight #combo-chip { top: 132px; }
+  body.boss-fight #room-banner { top: 78px; }
 }

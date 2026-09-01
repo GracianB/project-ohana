@@ -1,3 +1,4 @@
+﻿import { drawBaby } from "./baby.js";
 function aura(ctx, r, color, t, extra) {
   ctx.save();
   ctx.globalAlpha = 0.2 + Math.sin(t / 8) * 0.1;
@@ -44,6 +45,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.save();
   ctx.translate(x + p.w / 2, y + p.h / 2 + bob);
   ctx.scale(p.facing || 1, 1);
+  if ((Number(p.evo) || 0) === 0) { drawBaby(ctx, p, t); ctx.restore(); return; }
   ctx.fillStyle = "rgba(0,0,0,.3)";
   ctx.beginPath();
   ctx.ellipse(0, p.h / 2 + 4, p.w * 0.44, 4.5, 0, 0, Math.PI * 2);

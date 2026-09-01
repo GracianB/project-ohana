@@ -36,7 +36,7 @@ export function drawProjectile(ctx, pr, cam, t) {
   ctx.save();
   ctx.translate(x, y);
   if (pr.spin) ctx.rotate(t * 0.18 + (pr.rot || 0));
-  ctx.shadowBlur = 16;
+  ctx.shadowBlur = 0;
   ctx.shadowColor = pr.color;
   ctx.fillStyle = pr.color;
   ctx.strokeStyle = "#fff";
@@ -142,8 +142,10 @@ const CASTERS = {
     boom(g, "#ff6ad5", 18);
   },
   ohana(g) {
-    g.player.health = Math.min(g.player.maxHealth, g.player.health + 22 + g.player.evo * 8);
+    const heal = 22 + g.player.evo * 8;
+    g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
     g.player.invuln = Math.max(g.player.invuln, 24);
+    if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
     boom(g, "#ffd36a", 28);
     for (const e of g.enemies) {
       const dir = Math.sign(e.x - g.player.x) || 1;
@@ -181,8 +183,13 @@ const CASTERS = {
     const target = nearest(g);
     const tx = target ? target.x + target.w / 2 : g.player.x + 200 * g.player.facing;
     const ty = target ? target.y : g.player.y;
-    g.bolts.push({ x1: g.player.x + g.player.w / 2, y1: g.player.y, x2: tx, y2: ty, life: 14, dmg: 36 + g.player.evo * 10 });
-    if (target) { target.hp -= 36 + g.player.evo * 10; capEnemy(target, Math.sign(target.x - g.player.x) * 2); }
+    const dmg = 36 + g.player.evo * 10;
+    g.bolts.push({ x1: g.player.x + g.player.w / 2, y1: g.player.y, x2: tx, y2: ty, life: 14, dmg });
+    if (target) {
+      target.hp -= dmg;
+      capEnemy(target, Math.sign(target.x - g.player.x) * 2);
+      if (g.nums) g.nums.add(target.x, target.y, "" + dmg, "#9cf", true);
+    }
     g.fx.emit(tx, ty, { color: "#9cf", count: 26, size: 4, speed: 4 });
   },
   breath(g) {
@@ -222,8 +229,10 @@ const CASTERS = {
     shot(g, { color: "#faf", vx: 10, dmg: 12, shape: "claw" });
   },
   lives(g) {
-    g.player.health = Math.min(g.player.maxHealth, g.player.health + 36 + g.player.evo * 8);
+    const heal = 36 + g.player.evo * 8;
+    g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
     g.player.invuln = Math.max(g.player.invuln, 40);
+    if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
     boom(g, "#fff", 26);
   },
 };
