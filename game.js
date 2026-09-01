@@ -1,19 +1,19 @@
 import { ROSTER, applyForm } from "./characters/roster.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
-import { ABILITY_DEFS, useAbility } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx } from "./engine/audio.js";
-import { ROOMS, ROOM_W, ROOM_H } from "./systems/map.js";
+import { ROOMS, ROOM_W, ROOM_H, drawSigns } from "./systems/map.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { Floaters } from "./systems/floaters.js";
 
 const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
 const keys = {};
 let t = 0;
-const XP_NEED = [0, 40, 100];
+const XP_NEED = [0, 18, 40, 70, 110];
 let muted = false;
 let paused = false;
 
@@ -21,11 +21,11 @@ const game = {
   player: null, enemies: [], projectiles: [], bolts: [], platforms: [], orbs: [], hearts: [], ghosts: [],
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, spawn: { x: 180, y: 500 },
-  shake: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0
+  shake: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
-function fit() { canvas.width = innerWidth; canvas.height = innerHeight; }
+function fit() { const w = Math.min(1280, innerWidth|0), h = Math.min(720, innerHeight|0); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }
 addEventListener("resize", fit); fit();
 addEventListener("pointerdown", () => beep("orb"), { once: true });
 
@@ -47,7 +47,7 @@ addEventListener("keydown", (e) => {
   if (e.key === "j" || e.key === "J") useAbility(game, 0);
   if (e.key === "k" || e.key === "K") useAbility(game, 1);
   if (e.key === "l" || e.key === "L") useAbility(game, 2);
-  if (e.key === "e" || e.key === "E") evolve("manual");
+  if (e.code === "KeyE" || e.key === "e" || e.key === "E") { e.preventDefault(); evolve("manual"); }
   if (e.key === "r" || e.key === "R") respawn();
   if (e.key === "m" || e.key === "M") showMap();
   if (e.key === "f" || e.key === "F") melee();
@@ -108,33 +108,58 @@ function loadRoom(id, fromDir) {
     kind: f[2] || "crawler", color: f[2] === "flyer" ? "#8a4ccf" : f[2] === "brute" ? "#c45a18" : "#6c3",
     boss: false, shoot: 0
   }));
-  if (r.boss) game.enemies.push({ x: 900, y: 400, w: 74, h: 74, vx: 2, vy: 0, hp: 420, max: 420, kind: "boss", color: "#f36", boss: true, shoot: 0 });
+  if (r.boss) game.enemies.push({ x: 900, y: 420, w: 90, h: 90, vx: 2.4, vy: 0, hp: 980, max: 980, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0 });
   if (fromDir === "right") game.player.x = 50;
   if (fromDir === "left") game.player.x = ROOM_W - 90;
   if (fromDir === "up") { game.player.x = 780; game.player.y = ROOM_H - 220; }
   if (fromDir === "down") { game.player.x = 780; game.player.y = 80; }
   game.player.vx = 0; game.player.vy = 0; game.cam.x = 0; game.fading = 12;
   if (first && game.player) { game.player.health = Math.min(game.player.maxHealth, game.player.health + 15); game.nums.add(game.player.x, game.player.y, "+15", "#6f6"); }
-  showNotification("SALA", r.name); showBanner(r.name); save();
+  showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); save(); worldClear();
 }
-function showMap() { showNotification("MAPA", Object.keys(game.visited).map((id) => ROOMS[id].name).join(" · ")); }
+function showMap() { showNotification("MAPA", Object.keys(game.visited).map((id) => ROOMS[id].name).join(" Â· ")); }
 function makePlayer(def) {
   const p = { ...def, x: 180, y: 500, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0, dash: 0, wall: 0 };
-  applyForm(p); return p;
+  applyForm(p, { silent: true }); return p;
 }
 function start(def) {
+  const resume = (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
+  try { localStorage.removeItem("ohana-resume"); } catch (e) {}
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   game.projectiles = []; game.bolts = []; game.ghosts = []; game.running = true; paused = false;
+  let roomId = "hub";
+  if (resume) {
+    try {
+      const s = JSON.parse(localStorage.getItem("ohana") || "null");
+      if (s && s.id === def.id) {
+        game.player.evo = Math.max(0, Number(s.evo) || 0);
+        game.player.xp = s.xp || 0;
+        game.visited = s.visited || { hub: true };
+        game.score = s.score || 0;
+        applyForm(game.player, { silent: true });
+        roomId = s.roomId || "hub";
+      }
+    } catch (e) {}
+  }
   document.body.classList.add("playing");
-  document.getElementById("char-select").classList.add("hidden"); renderAbilityBar(); loadRoom("hub");
+  document.getElementById("char-select").classList.add("hidden"); renderAbilityBar(); loadRoom(roomId);
 }
 function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
-  if (p.evo >= 2) { if (reason === "manual") showNotification("MAX", "Forma final."); return; }
-  if (reason !== "manual" && p.xp < XP_NEED[p.evo + 1]) return;
-  p.evo++; applyForm(p); game.shake = 12; game.flash = 14; beep("evo");
-  showNotification("EVOLUCION Lv" + (p.evo + 1), p.name);
-  game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 }); save();
+  p.evo = Number(p.evo) || 0;
+  if (p.evo >= 4) { if (reason === "manual") showNotification("MAX", "Ya eres GOD (forma 5)."); return; }
+  if (reason !== "manual") {
+    const need = XP_NEED[p.evo + 1];
+    if (need == null || p.xp < need) return;
+  }
+  p.evo += 1;
+  applyForm(p);
+  game.shake = 12;
+  game.flash = 14;
+  beep("evo");
+  showNotification("FORMA " + (p.evo + 1) + "/5", p.name);
+  game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 });
+  save();
 }
 function respawn() {
   const p = game.player; if (!p) return;
@@ -152,7 +177,7 @@ function melee() {
   const box = { x: p.x + (p.facing > 0 ? p.w : -28), y: p.y, w: 32, h: p.h };
   game.fx.emit(box.x, box.y + 10, { color: p.color, count: 8, size: 3 });
   for (const e of game.enemies) {
-    if (aabb(box, e)) { const d = 22 + p.evo * 8; e.hp -= d; e.vx = 8 * p.facing; game.nums.add(e.x, e.y, "" + d, "#fff"); punch(e.x, e.y, p.color); p.xp += 4; }
+    if (aabb(box, e)) { let d = 22 + p.evo * 8; if (e.boss) d = Math.ceil(d * 0.5); e.hp -= d; e.vx = (e.boss ? 3 : 8) * p.facing; game.nums.add(e.x, e.y, "" + d, "#fff"); punch(e.x, e.y, p.color); p.xp += 4; }
   }
 }
 function overlapX(px, pw, plat, pad) {
@@ -195,7 +220,7 @@ function checkVoidDeath() {
   const p = game.player;
   if (!p || p.dead) return;
   const r = room();
-  if (r.doors.down && p.y > game.worldH - 80 && p.x > 700 && p.x < 920) {
+  if (r.doors.down && r.pit && p.y > game.worldH - 40 && p.x > 700 && p.x < 920) {
     loadRoom(r.doors.down, "down");
     return;
   }
@@ -218,7 +243,17 @@ function checkVoidDeath() {
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function punch(x, y, color) {
   game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 100; game.score += 10 * game.combo;
-  game.fx.emit(x, y, { color, count: 14, size: 4, up: 1.2 }); beep("hit");
+  game.fx.emit(x, y, { color, count: 10, size: 3.2, up: 1.2 });
+  game.fx.emit(x, y, { color: "#fff", count: 6, size: 2, up: 1.8, speed: 4.4, life: 16, star: true });
+  beep("hit");
+}
+function worldClear() {
+  const need = ["hub", "beach", "jungle", "cave", "lab", "ridge", "space", "volcano"];
+  if (game.won || game.summoned || game.roomId === "boss") return;
+  if (!need.every((id) => game.visited[id])) return;
+  game.summoned = true;
+  showNotification("MUNDO 1", "Todas las salas. El nido te reclama.");
+  setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 1100);
 }
 function tryDoors() {
   const p = game.player; const r = room();
@@ -296,22 +331,49 @@ function updatePlayer() {
   }
   tryDoors(); checkVoidDeath();
   const r = room();
-  if (p.x > ROOM_W - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
-  else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
-  else if (p.y < 90 && r.doors.up && p.x > 700 && p.x < 900) setPrompt("ARRIBA · salta al techo", true);
-  else if (p.y > ROOM_H - 160 && r.doors.down) setPrompt("ABAJO · cae por el hueco", true);
+  if (p.x > ROOM_W - 90 && r.doors.right) setPrompt("ESTE Â· sigue andando", true);
+  else if (p.x < 70 && r.doors.left) setPrompt("OESTE Â· sigue andando", true);
+  else if (p.y < 90 && r.doors.up && p.x > 700 && p.x < 900) setPrompt("ARRIBA Â· salta al techo", true);
+  else if (p.y > ROOM_H - 160 && r.doors.down) setPrompt("ABAJO Â· cae por el hueco", true);
   else setPrompt("", false);
-  if (p.evo < 2 && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+  while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 }
 function updateEnemies() {
   for (const e of game.enemies) {
     if (e.kind === "flyer") e.vy += 0.12; else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
-    if (e.boss) { e.vx += Math.sign((game.player.x - e.x) || 1) * 0.06; if (t % 90 === 0) e.vy = -8; }
+    if (e.boss) {
+      if (e.hp < e.max * 0.45 && e.phase === 1) {
+        e.phase = 2; e.color = "#ff2040"; game.flash = 10; game.shake = 16;
+        showNotification("FASE 2", "El nido se enfurece");
+        game.fx.emit(e.x, e.y, { color: "#ff2040", count: 24, size: 5, up: 2, star: true });
+      }
+      const aggro = e.phase === 2 ? 0.12 : 0.07;
+      e.vx += Math.sign((game.player.x - e.x) || 1) * aggro;
+      e.vx = Math.max(-4.2, Math.min(4.2, e.vx));
+      if (t % (e.phase === 2 ? 70 : 95) === 0) e.vy = -9;
+      e.slam = (e.slam || 0) + 1;
+      if (e.slam > (e.phase === 2 ? 140 : 190)) {
+        e.slam = 0; e.vy = 12;
+        game.fx.emit(e.x + 40, e.y + 70, { color: "#f84", count: 16, size: 4, up: 2 });
+        if (Math.abs(game.player.x - e.x) < 140 && game.player.y > e.y) {
+          game.player.health -= 18; game.player.invuln = 24; game.shake = 14;
+        }
+      }
+    }
     e.shoot = (e.shoot || 0) + 1;
-    if ((e.kind === "brute" || e.boss) && e.shoot > 90) {
+    const rate = e.boss ? (e.phase === 2 ? 48 : 70) : 90;
+    if ((e.kind === "brute" || e.boss) && e.shoot > rate) {
       e.shoot = 0;
-      game.projectiles.push({ x: e.x, y: e.y + 10, vx: Math.sign(game.player.x - e.x) * 5, vy: 0, w: 12, h: 8, life: 70, dmg: 10, color: "#f84", owner: "enemy" });
+      const aim = Math.sign(game.player.x - e.x) || 1;
+      const shots = e.boss && e.phase === 2 ? 3 : 1;
+      for (let s = 0; s < shots; s++) {
+        game.projectiles.push({
+          x: e.x + 20, y: e.y + 18, vx: aim * (5 + s), vy: e.boss ? (s - 1) * 1.6 : 0,
+          w: e.boss ? 16 : 12, h: e.boss ? 12 : 8, life: 80,
+          dmg: e.boss ? 14 : 10, color: e.boss ? "#ff5a6a" : "#f84", owner: "enemy"
+        });
+      }
     }
     for (const plat of game.platforms) {
       if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
@@ -324,7 +386,7 @@ function updateEnemies() {
     if (on && !e.boss && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
     const p = game.player;
     if (!p.dead && p.invuln <= 0 && aabb(p, e)) {
-      p.health -= e.boss ? 16 : 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 8; p.vy = -5; game.shake = 10; game.combo = 0; beep("hurt");
+      p.health -= e.boss ? 22 : 8; p.invuln = 28; p.vx = Math.sign(p.x - e.x || 1) * 8; p.vy = -5; game.shake = 10; game.combo = 0; beep("hurt");
       game.nums.add(p.x, p.y, "-HP", "#f55");
       const hurt = document.getElementById("fx-hurt");
       if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
@@ -334,7 +396,12 @@ function updateEnemies() {
   game.enemies = game.enemies.filter((e) => {
     if (e.hp > 0) return true;
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
-    if (e.boss) { beep("win"); showNotification("VICTORIA", "Score " + game.score); }
+    if (e.boss) {
+      game.won = true; game.flash = 24; game.shake = 20; beep("win");
+      game.fx.emit(e.x + 40, e.y, { color: "#ffe66a", count: 36, size: 6, up: 3, star: true });
+      showNotification("VICTORIA", "Contacta a Jun xD");
+      dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+    }
     return false;
   });
 }
@@ -345,7 +412,7 @@ function updateProjectiles() {
     if (pr.owner === "player") {
       for (const e of game.enemies) {
         if (aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
-          const dmg = pr.dmg * (1 + game.player.evo * 0.35);
+          let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           e.hp -= dmg; e.vx += Math.sign(pr.vx) * 3; pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
           game.nums.add(e.x, e.y, "" + Math.round(dmg), "#ffe66a");
         }
@@ -412,6 +479,7 @@ function render() {
     ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
     ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 10);
   }
+  drawSigns(ctx, r, game.cam, t);
   const r = room();
   if (r.doors.right) drawPortal(ROOM_W - 96, 370, "ESTE");
   if (r.doors.left) drawPortal(10, 370, "OESTE");
@@ -419,8 +487,8 @@ function render() {
   if (r.doors.down) drawPortal(737, ROOM_H - 40, "ABAJO");
   for (const o of game.orbs) {
     if (o.taken) continue;
-    ctx.fillStyle = "#ffe66a"; ctx.shadowBlur = 14; ctx.shadowColor = "#ffe66a";
-    ctx.beginPath(); ctx.arc(o.x - game.cam.x, o.y - game.cam.y + Math.sin(t / 12) * 4, 9, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffe66a"; 
+    ctx.beginPath(); ctx.arc(o.x - game.cam.x, o.y - game.cam.y + Math.sin(t / 12) * 4, 9, 0, Math.PI * 2); ctx.fill(); 
   }
   for (const h of game.hearts) {
     if (h.taken) continue;
@@ -430,9 +498,10 @@ function render() {
     ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
   }
   for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
-  for (const pr of game.projectiles) {
-    ctx.fillStyle = pr.color; ctx.shadowBlur = 12; ctx.shadowColor = pr.color;
-    ctx.fillRect(pr.x - game.cam.x, pr.y - game.cam.y, pr.w, pr.h); ctx.shadowBlur = 0;
+  for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
+  for (const b of game.bolts) {
+    ctx.strokeStyle = "#e8ffff"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke();
   }
   game.fx.render(ctx, game.cam); game.nums.render(ctx, game.cam);
   if (game.player && game.player.invuln % 4 !== 1) drawCharacter(ctx, game.player, game.cam, t);
@@ -454,26 +523,26 @@ function renderAbilityBar() {
   const bar = document.getElementById("ability-bar");
   bar.innerHTML = game.player.abilities.map((id) => {
     const d = ABILITY_DEFS[id];
-    return '<div class="ability-slot" data-id="' + id + '"><div class="key">' + d.key + " · " + d.name + '</div><div class="cd"><i></i></div></div>';
+    return '<div class="ability-slot" data-id="' + id + '"><div class="key">' + d.key + " Â· " + d.name + '</div><div class="cd"><i></i></div></div>';
   }).join("");
 }
 function updateHUD() {
   const p = game.player; if (!p) return;
   document.getElementById("hud-name").textContent = p.name;
-  const need = p.evo >= 2 ? p.xp : XP_NEED[p.evo + 1];
+  const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
   const orbsLeft = game.orbs.filter((o) => !o.taken).length;
-  document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 2 ? "/" + need : "");
+  document.getElementById("hud-meta").textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " Â· XP " + p.xp + (p.evo < 4 ? "/" + need : "");
   document.getElementById("hp-bar").style.width = Math.max(0, (p.health / p.maxHealth) * 100) + "%";
   const xpEl = document.getElementById("xp-bar");
   if (xpEl) {
-    const nxt = p.evo >= 2 ? 1 : XP_NEED[p.evo + 1];
+    const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
     const prev = XP_NEED[p.evo] || 0;
-    xpEl.style.width = p.evo >= 2 ? "100%" : Math.max(0, Math.min(100, ((p.xp - prev) / (nxt - prev)) * 100)) + "%";
+    xpEl.style.width = p.evo >= 4 ? "100%" : Math.max(0, Math.min(100, ((p.xp - prev) / (nxt - prev)) * 100)) + "%";
   }
   document.getElementById("hud-world").textContent = room().name;
-  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/3 · Orbes " + orbsLeft;
+  document.getElementById("hud-evo").textContent = "Forma " + (p.evo + 1) + "/5 Â· Orbes " + orbsLeft;
   const comboEl = document.getElementById("hud-combo");
-  if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
+  if (comboEl) comboEl.textContent = "Combo " + game.combo + " Â· Score " + game.score;
   const chip = document.getElementById("combo-chip");
   if (chip) {
     chip.textContent = game.combo > 1 ? String(game.combo) : "";
@@ -496,14 +565,14 @@ function updateHUD() {
 function loop() {
   t++;
   if (game.running && !paused) {
-    updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); updateCam(); updateHUD();
+    updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); updateCam(); if ((t & 3) === 0) updateHUD();
   }
   if (game.running) render();
   requestAnimationFrame(loop);
 }
 function setupSelect() {
   const wrap = document.getElementById("chars");
-  wrap.innerHTML = ROSTER.map((c, i) => '<button class="char-card" data-id="' + c.id + '"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
+  wrap.innerHTML = ROSTER.map((c, i) => '<button class="char-card" data-id="' + c.id + '"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" â†’ ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
   wrap.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
   addEventListener("keydown", (e) => {
     if (game.running) return;
@@ -519,7 +588,7 @@ function setupSelect() {
   const help = document.getElementById("help");
   if (helpBtn) helpBtn.onclick = toggleHelp;
   if (mapBtn) mapBtn.onclick = () => { if (game.running) showMap(); };
-  if (muteBtn) muteBtn.onclick = () => { muted = !muted; muteBtn.textContent = muted ? "Mute · N" : "Sonido · N"; showNotification("AUDIO", muted ? "Mute" : "On"); };
+  if (muteBtn) muteBtn.onclick = () => { muted = !muted; muteBtn.textContent = muted ? "Mute Â· N" : "Sonido Â· N"; showNotification("AUDIO", muted ? "Mute" : "On"); };
   if (fullBtn) fullBtn.onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); };
   if (help) help.addEventListener("click", (e) => { if (e.target.id === "help") help.classList.remove("open"); });
   const resume = document.getElementById("btn-resume");
