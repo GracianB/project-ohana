@@ -1,8 +1,8 @@
 function blush(ctx, x, y) {
-  ctx.fillStyle = "rgba(255,120,150,.45)";
+  ctx.fillStyle = "rgba(255,120,150,.55)";
   ctx.beginPath();
-  ctx.ellipse(x - 7, y + 3, 3.2, 1.8, 0, 0, Math.PI * 2);
-  ctx.ellipse(x + 7, y + 3, 3.2, 1.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(x - 7, y + 3, 3.6, 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 7, y + 3, 3.6, 2, 0, 0, Math.PI * 2);
   ctx.fill();
 }
 

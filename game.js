@@ -1,7 +1,7 @@
 import { ROSTER, applyForm } from "./characters/roster.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
-import { ABILITY_DEFS, useAbility, drawProjectile } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx } from "./engine/audio.js";
@@ -18,7 +18,7 @@ let muted = false;
 let paused = false;
 
 const game = {
-  player: null, enemies: [], projectiles: [], bolts: [], platforms: [], orbs: [], hearts: [], ghosts: [],
+  player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, spawn: { x: 180, y: 500 },
   shake: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
@@ -195,6 +195,7 @@ function loadRoom(id, fromDir) {
   if (r.boss) game.enemies.push({ x: 900, y: 420, w: 90, h: 90, vx: 2.4, vy: 0, hp: 980, max: 980, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0 });
   game.projectiles = [];
   game.bolts = [];
+  game.slashes = [];
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
   game.fading = 12;
@@ -243,7 +244,7 @@ function start(def) {
   const resume = (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
-  game.projectiles = []; game.bolts = []; game.ghosts = []; game.won = false; game.summoned = false;
+  game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.won = false; game.summoned = false;
   game.running = true; closeOverlays();
   let roomId = "hub";
   if (resume) {
@@ -302,7 +303,20 @@ function melee() {
   if (p.melee > 0) { p.meleeBuf = 8; return; }
   p.melee = 10; p.meleeBuf = 0;
   const box = { x: p.x + (p.facing > 0 ? p.w : -28), y: p.y, w: 32, h: p.h };
-  game.fx.emit(box.x, box.y + 10, { color: p.color, count: 8, size: 3 });
+  const kind = { lilo: "leaf", stitch: "claws", pikachu: "zap", dragon: "fan", cat: "crescent" }[p.id] || "crescent";
+  game.slashes.push({
+    x: p.x + p.w / 2 + p.facing * 12,
+    y: p.y + p.h * 0.45,
+    facing: p.facing,
+    life: 12,
+    max: 12,
+    color: p.color,
+    kind,
+    w: 42 + p.evo * 10,
+  });
+  game.fx.emit(box.x + 10 * p.facing, box.y + 10, {
+    color: p.color, count: 8, size: 3, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.9, star: p.id === "pikachu",
+  });
   for (const e of game.enemies) {
     if (aabb(box, e)) {
       let d = 22 + p.evo * 8;
@@ -584,6 +598,11 @@ function updateProjectiles() {
   for (const pr of game.projectiles) {
     if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
     pr.x += pr.vx; pr.y += pr.vy; pr.life--;
+    if (pr.trail && pr.life % 2 === 0) {
+      game.fx.emit(pr.x + pr.w / 2, pr.y + pr.h / 2, {
+        color: pr.color, count: 1, size: 2, speed: 0.4, life: 8, gravity: 0, up: 0,
+      });
+    }
     if (pr.owner === "player") {
       for (const e of game.enemies) {
         if (aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
@@ -600,6 +619,7 @@ function updateProjectiles() {
   }
   game.projectiles = game.projectiles.filter((pr) => pr.life > 0);
   game.bolts = game.bolts.filter((b) => --b.life > 0);
+  game.slashes = (game.slashes || []).filter((s) => --s.life > 0);
   game.ghosts = game.ghosts.filter((g) => --g.life > 0);
 }
 function updateCam() {
@@ -701,10 +721,8 @@ function render() {
   }
   for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
   for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
-  for (const b of game.bolts) {
-    ctx.strokeStyle = "#e8ffff"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(b.x1 - game.cam.x, b.y1 - game.cam.y); ctx.lineTo(b.x2 - game.cam.x, b.y2 - game.cam.y); ctx.stroke();
-  }
+  for (const b of game.bolts) drawBolt(ctx, b, game.cam, t);
+  for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
   game.fx.render(ctx, game.cam); game.nums.render(ctx, game.cam);
   if (game.player.dead) {
     ctx.globalAlpha = 0.45;

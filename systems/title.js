@@ -1,5 +1,5 @@
 import { ROSTER } from "../characters/roster.js";
-import { drawBaby } from "../characters/baby.js";
+import { drawCharacter } from "../characters/draw.js";
 import { playIntro } from "./intro.js";
 
 const ROLES = { lilo: "Bebé Ohana", stitch: "626 bebé", pikachu: "Pichu", dragon: "Cría", cat: "Gatito" };
@@ -23,10 +23,30 @@ function paintPortraits() {
       if (!def) return;
       const c = cv.getContext("2d", { alpha: true });
       c.clearRect(0, 0, cv.width, cv.height);
+      const evo = Math.floor(tick / 70) % 5;
+      const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
+      const dummy = {
+        id: def.id,
+        x: cv.width / 2 - 16,
+        y: cv.height / 2 - 8,
+        w: 32,
+        h: 32,
+        facing: 1,
+        grounded: true,
+        vx: 0,
+        evo,
+        color: form.color || def.color,
+        melee: 0,
+      };
       c.save();
-      c.translate(cv.width / 2, cv.height / 2 + 10);
-      drawBaby(c, { id: def.id }, tick);
+      c.translate(cv.width / 2, cv.height / 2 + 6);
+      c.scale(0.78, 0.78);
+      dummy.x = -16;
+      dummy.y = -16;
+      drawCharacter(c, dummy, { x: 0, y: 0 }, tick);
       c.restore();
+      const role = cv.closest(".char-card")?.querySelector(".role");
+      if (role) role.textContent = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
     });
   }
   raf = requestAnimationFrame(paintPortraits);

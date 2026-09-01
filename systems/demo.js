@@ -63,6 +63,12 @@ function boot() {
   const mo = new MutationObserver(() => {
     if (document.body.classList.contains("playing")) {
       ensure();
+      const ribbon = document.getElementById("demo-ribbon");
+      if (ribbon) {
+        ribbon.classList.remove("gone");
+        clearTimeout(ribbon._hide);
+        ribbon._hide = setTimeout(() => ribbon.classList.add("gone"), 2600);
+      }
       step = 0;
       setTimeout(play, 800);
     }

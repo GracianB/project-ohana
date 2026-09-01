@@ -123,12 +123,12 @@ body:not(.playing) #hud { display: none; }
 
 #top-actions {
   position: fixed;
-  top: 16px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: none;
   gap: 8px;
-  z-index: 9;
+  z-index: 20;
   pointer-events: auto;
 }
 body.playing #top-actions { display: flex; }
@@ -508,35 +508,44 @@ body.playing #ability-bar { display: flex; }
 
 #notification-container {
   position: fixed;
-  top: 108px;
-  right: 16px;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
   z-index: 30;
-  max-width: 320px;
+  width: min(420px, 90vw);
+  max-width: 420px;
+  pointer-events: none;
 }
 .game-notification {
+  width: 100%;
+  text-align: center;
   background: linear-gradient(180deg, rgba(14, 20, 34, .96), rgba(8, 10, 18, .96));
   border: 1px solid rgba(126, 231, 255, .35);
-  border-left: 5px solid var(--accent);
+  border-top: 5px solid var(--accent);
   border-radius: 18px;
-  padding: 14px 16px 16px;
+  padding: 16px 22px 18px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0, 0, 0, .45), 0 0 24px rgba(126, 231, 255, .18);
   animation: notifyIn .38s cubic-bezier(.2, 1.2, .3, 1);
   cursor: pointer;
+  pointer-events: auto;
 }
 .game-notification.closing { animation: notifyOut .24s ease forwards; }
-.game-notification.evo { border-left-color: #ffe66a; }
-.game-notification.hurt { border-left-color: #ff4d6d; }
+.game-notification.evo { border-top-color: #ffe66a; }
+.game-notification.hurt { border-top-color: #ff4d6d; }
 .notification-close {
   position: absolute; top: 8px; right: 8px; width: 26px; height: 26px;
   border-radius: 50%; background: rgba(255,255,255,.08); color: #fff; border: 0; cursor: pointer;
 }
-.game-notification h2 { font-size: 16px; margin-bottom: 4px; padding-right: 22px; font-family: Fredoka, sans-serif; }
+.game-notification h2 { font-size: 18px; margin-bottom: 4px; padding-right: 0; font-family: Fredoka, sans-serif; }
 .game-notification p { font-size: 13px; opacity: .9; }
+.game-notification .badge { letter-spacing: .16em; font-size: 10px; color: #9ad7ff; margin-bottom: 6px; }
+.game-notification small { display: block; margin-top: 8px; opacity: .55; font-size: 11px; }
 
 #fx-hurt, #fx-heal { position: fixed; inset: 0; pointer-events: none; z-index: 6; opacity: 0; }
 #fx-hurt.on { opacity: 1; background: radial-gradient(circle at center, transparent 40%, rgba(180, 0, 30, .35)); }
@@ -550,8 +559,8 @@ body.playing #ability-bar { display: flex; }
 }
 .hidden { display: none !important; }
 
-@keyframes notifyIn { from { transform: translateX(36px) scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes notifyOut { to { transform: translateX(28px) scale(.96); opacity: 0; } }
+@keyframes notifyIn { from { transform: translateY(-18px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes notifyOut { to { transform: translateY(-12px) scale(.96); opacity: 0; } }
 @keyframes twinkle { 0%, 100% { opacity: .4; } 50% { opacity: .7; } }
 @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-80px); } }
 
@@ -567,7 +576,7 @@ body.playing #ability-bar { display: flex; }
   #prompt { bottom: 150px; }
   #combo-chip { top: 108px; font-size: 22px; }
   #room-banner { top: 64px; }
-  #notification-container { top: auto; bottom: 160px; right: 10px; left: 10px; max-width: none; }
+  #notification-container { top: 18%; left: 50%; right: auto; bottom: auto; width: min(420px, 92vw); max-width: none; }
   #boss-wrap { top: 58px; width: min(540px, 78vw); }
   body.boss-fight #combo-chip { top: 118px; }
 }

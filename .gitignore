@@ -1,6 +1,8 @@
-
 *.exe
 *.msi
 *.zip
 project-ohana/
+server.ps1.txt
+assets/sprites/_raw*.jpg
+
 
