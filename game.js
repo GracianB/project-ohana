@@ -479,8 +479,8 @@ function render() {
     ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
     ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 10);
   }
-  drawSigns(ctx, r, game.cam, t);
   const r = room();
+  drawSigns(ctx, r, game.cam, t);
   if (r.doors.right) drawPortal(ROOM_W - 96, 370, "ESTE");
   if (r.doors.left) drawPortal(10, 370, "OESTE");
   if (r.doors.up) drawPortal(737, 18, "ARRIBA");
