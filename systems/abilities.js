@@ -13,9 +13,12 @@ export const ABILITY_DEFS = {
   breath: { name: "Bola de fuego", key: "J", cd: 540, color: "#ff6a2a" },
   wing: { name: "Aletazo", key: "K", cd: 800, color: "#f84" },
   rage: { name: "Ira del dragón", key: "L", cd: 3000, color: "#f30" },
-  claw: { name: "Ovillo", key: "J", cd: 400, color: "#ff8ad4" },
-  catdash: { name: "Salto Neko", key: "K", cd: 700, color: "#faf" },
-  lives: { name: "Nueve vidas", key: "L", cd: 3400, color: "#fff" },
+  acorn: { name: "Bellotazo", key: "J", cd: 420, color: "#c4783a" },
+  scramble: { name: "Correbellota", key: "K", cd: 650, color: "#e8b07a" },
+  nutstorm: { name: "Tormenta", key: "L", cd: 2400, color: "#ffe6a0" },
+  salt: { name: "Sal cristal", key: "J", cd: 400, color: "#fff3c0" },
+  ketchup: { name: "Chorro kétchup", key: "K", cd: 700, color: "#e23b3b" },
+  fryer: { name: "Freidora", key: "L", cd: 3200, color: "#ffd36a" },
 };
 
 export function useAbility(game, index) {
@@ -474,6 +477,61 @@ const CASTERS = {
         x: g.player.x + g.player.w / 2, y: g.player.y + g.player.h / 2,
         vx: Math.cos(a) * 2.6, vy: Math.sin(a) * 2.6,
         w: 14, h: 14, life: 34, dmg: 6, color: "#ff8ad4", shape: "heart", owner: "player", spin: true, trail: false,
+      });
+    }
+  },
+  acorn(g) {
+    shot(g, { color: "#c4783a", vx: 12, w: 18, h: 18, dmg: 17, spin: true, shape: "orb" });
+    if (g.player.evo >= 1) shot(g, { color: "#e8b07a", vx: 10, vy: -2.2, w: 14, h: 14, dmg: 9, spin: true, shape: "orb" });
+    if (g.player.evo >= 3) shot(g, { color: "#8a4a18", vx: 8, vy: 2.2, w: 12, h: 12, dmg: 8, spin: true, shape: "orb" });
+    boom(g, "#c4783a", 8);
+  },
+  scramble(g) {
+    g.player.vx = 16 * g.player.facing;
+    g.player.invuln = Math.max(g.player.invuln, 12);
+    shot(g, { color: "#e8b07a", vx: 14, dmg: 12, life: 20, w: 20, h: 12, shape: "claw" });
+    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#c4783a" });
+  },
+  nutstorm(g) {
+    const target = nearest(g);
+    const tx = target ? target.x + target.w / 2 : g.player.x + 200 * g.player.facing;
+    const ty = target ? target.y : g.player.y;
+    const dmg = 34 + g.player.evo * 10;
+    g.bolts.push({ x1: g.player.x + g.player.w / 2, y1: g.player.y, x2: tx, y2: ty, life: 14, dmg });
+    shot(g, { color: "#c4783a", vx: 9, vy: -3, w: 16, h: 16, dmg: 12, spin: true, shape: "orb" });
+    shot(g, { color: "#8a4a18", vx: 9, vy: 3, w: 16, h: 16, dmg: 12, spin: true, shape: "orb" });
+    if (target) {
+      target.hp -= dmg;
+      capEnemy(target, Math.sign(target.x - g.player.x) * 2);
+      if (g.nums) g.nums.add(target.x, target.y, "" + dmg, "#e8b07a", true);
+    }
+    g.fx.emit(tx, ty, { color: "#ffe6a0", count: 16, size: 4, speed: 4, star: true });
+  },
+  salt(g) {
+    shot(g, { color: "#fff3c0", vx: 11, w: 16, h: 16, dmg: 15, spin: true, shape: "yarn" });
+    if (g.player.evo >= 1) shot(g, { color: "#ffe08a", vx: 9, vy: -2, w: 12, h: 12, dmg: 8, spin: true, shape: "yarn" });
+    boom(g, "#fff3c0", 8);
+  },
+  ketchup(g) {
+    g.player.vx = 14 * g.player.facing;
+    g.player.vy = -5;
+    g.player.invuln = Math.max(g.player.invuln, 12);
+    shot(g, { color: "#e23b3b", vx: 11, w: 22, h: 16, dmg: 13, shape: "flame" });
+    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#e23b3b" });
+  },
+  fryer(g) {
+    const heal = 30 + g.player.evo * 8;
+    g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
+    g.player.invuln = Math.max(g.player.invuln, 36);
+    if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
+    boom(g, "#ffd36a", 16);
+    for (let i = 0; i < 8; i++) {
+      const a = (Math.PI * 2 * i) / 8;
+      g.projectiles.push({
+        x: g.player.x + g.player.w / 2, y: g.player.y + g.player.h / 2,
+        vx: Math.cos(a) * 4.4, vy: Math.sin(a) * 4.4,
+        w: 16, h: 16, life: 32, dmg: 10 + g.player.evo * 3,
+        color: i % 2 ? "#f0b43a" : "#e23b3b", shape: "flame", owner: "player", trail: true,
       });
     }
   },

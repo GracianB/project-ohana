@@ -3,9 +3,9 @@ import { ROSTER } from "../characters/roster.js";
 const TINT = {
   lilo: "#e23b3b",
   stitch: "#3d9bff",
-  pikachu: "#f5d000",
   dragon: "#e23a1c",
-  cat: "#ff8ad4",
+  ardilla: "#c4783a",
+  frita: "#f0b43a",
 };
 
 function tick() {

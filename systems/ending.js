@@ -7,10 +7,10 @@ export function showEnding(detail = {}) {
       '<div class="win-wash"></div>' +
       '<div class="win-card">' +
         '<p class="win-kicker">Mundo 1 · Nido caído</p>' +
-        '<h2>OHANA COMPLETA</h2>' +
+        '<h2>OHANA COMPLETADO</h2>' +
         '<p class="win-score"></p>' +
-        '<p class="win-jun">Ahora contacta a Jun xD</p>' +
-        '<p class="win-sub">Versión definitiva. Nadie se queda atrás.</p>' +
+        '<p class="win-jun">Mundo 1 cerrado.</p>' +
+        '<p class="win-sub">Nadie se queda atrás.</p>' +
         '<button type="button" id="win-close">Seguir en la isla</button>' +
       '</div>';
     document.body.appendChild(layer);
@@ -25,7 +25,7 @@ function watchVictory() {
   const box = document.getElementById("notification-container") || document.body;
   const scan = () => {
     document.querySelectorAll(".game-notification h2").forEach((h) => {
-      if (/VICTORIA|NIDO|JEFE/i.test(h.textContent || "")) {
+      if (/OHANA COMPLETADO|VICTORIA|NIDO|JEFE/i.test(h.textContent || "")) {
         const p = h.parentElement && h.parentElement.querySelector("p");
         showEnding({ score: p ? p.textContent : "" });
       }

@@ -34,7 +34,7 @@
 32. Jefe con fases visuales
 33. Barra de jefe
 34. 8 salas → tele al nido
-35. Ending contacta a Jun
+35. Ending Ohana completado
 36. Notificaciones cerrables
 37. Cine de evolución
 38. Mapa de archipiélago

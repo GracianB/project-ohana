@@ -4,7 +4,7 @@ Fan game 2D en canvas. Isla Kauai, cinco formas, un jefe.
 
 **Jugar la demo:** https://gracianb.github.io/project-ohana/
 
-Nueva partida = bebé. Continuar = tu forma y sala. Al tumbar el nido: *contacta a Jun xD*.
+Nueva partida = bebé. Continuar = tu forma y sala. Al tumbar el nido: *Ohana completado*.
 
 ## Mundo 1
 

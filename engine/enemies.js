@@ -1,3 +1,5 @@
+import { vfxSprite } from "../characters/sprites.js";
+
 export function drawEnemy(ctx, e, cam, t) {
   const x = e.x - cam.x;
   const y = e.y - cam.y;
@@ -66,19 +68,26 @@ function drawBrute(ctx, e, t) {
 }
 
 function drawBoss(ctx, e, t) {
-  const pulse = 1 + Math.sin(t / 8) * 0.05;
+  const pulse = 1 + Math.sin(t / 8) * 0.04;
   ctx.scale(pulse, pulse);
-  const body = e.phase === 2 ? "#ff2040" : "#c02040";
-  ctx.fillStyle = body;
-  ctx.beginPath(); ctx.ellipse(0, 4, 34, 26, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#7a1020";
-  ctx.beginPath(); ctx.moveTo(-18, -10); ctx.lineTo(-28, -34); ctx.lineTo(-6, -14); ctx.fill();
-  ctx.beginPath(); ctx.moveTo(18, -10); ctx.lineTo(28, -34); ctx.lineTo(6, -14); ctx.fill();
-  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-12, -2, 7, 0, Math.PI * 2); ctx.arc(12, -2, 7, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-12 + Math.sin(t / 10), -2, 3, 0, Math.PI * 2); ctx.arc(12 + Math.sin(t / 10), -2, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#ff9aa8"; ctx.beginPath(); ctx.ellipse(0, 12, 10, 6, 0, 0, Math.PI * 2); ctx.fill();
+  const img = vfxSprite(e.phase === 2 ? "boss-2" : "boss-1");
+  if (img) {
+    const s = 118;
+    ctx.drawImage(img, -s / 2, -s / 2 + 8, s, s);
+  } else {
+    const body = e.phase === 2 ? "#ff2040" : "#c02040";
+    ctx.fillStyle = body;
+    ctx.beginPath(); ctx.ellipse(0, 4, 42, 34, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#7a1020";
+    ctx.beginPath(); ctx.moveTo(-18, -10); ctx.lineTo(-32, -40); ctx.lineTo(-6, -14); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(18, -10); ctx.lineTo(32, -40); ctx.lineTo(6, -14); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-12, -2, 8, 0, Math.PI * 2); ctx.arc(12, -2, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-12, -2, 3.4, 0, Math.PI * 2); ctx.arc(12, -2, 3.4, 0, Math.PI * 2); ctx.fill();
+  }
   if (e.phase === 2) {
-    ctx.strokeStyle = "rgba(255,80,40,.5)"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(0, 0, 40 + Math.sin(t / 4) * 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,60,30,.65)"; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(0, 4, 52 + Math.sin(t / 4) * 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,180,40,.35)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 4, 62 + Math.sin(t / 5) * 3, 0, Math.PI * 2); ctx.stroke();
   }
 }

@@ -7,7 +7,7 @@ const HINTS = {
   "Cumbre": "Hueco ABAJO = Claro. ESTE = Órbita.",
   "Órbita": "Hueco ABAJO = Claro. No hay piso extra abajo.",
   "Caldera": "ESTE = Nido del jefe. OESTE = Jungla.",
-  "Nido Final": "Tumba al nido. No es fácil. Al caer: contacta a Jun."
+  "Nido Final": "Tumba al nido. No es fácil. Al caer: Ohana completado."
 };
 
 const STEPS = [

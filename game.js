@@ -192,7 +192,7 @@ function loadRoom(id, fromDir) {
     kind: f[2] || "crawler", color: f[2] === "flyer" ? "#8a4ccf" : f[2] === "brute" ? "#c45a18" : "#6c3",
     boss: false, shoot: 0
   }));
-  if (r.boss) game.enemies.push({ x: 900, y: 420, w: 90, h: 90, vx: 2.4, vy: 0, hp: 980, max: 980, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0 });
+  if (r.boss) game.enemies.push({ x: 860, y: 390, w: 120, h: 120, vx: 2.1, vy: 0, hp: 1280, max: 1280, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0 });
   game.projectiles = [];
   game.bolts = [];
   game.slashes = [];
@@ -303,7 +303,7 @@ function melee() {
   if (p.melee > 0) { p.meleeBuf = 8; return; }
   p.melee = 10; p.meleeBuf = 0;
   const box = { x: p.x + (p.facing > 0 ? p.w : -28), y: p.y, w: 32, h: p.h };
-  const kind = { lilo: "leaf", stitch: "claws", pikachu: "zap", dragon: "fan", cat: "crescent" }[p.id] || "crescent";
+  const kind = { lilo: "leaf", stitch: "claws", ardilla: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
   game.slashes.push({
     x: p.x + p.w / 2 + p.facing * 12,
     y: p.y + p.h * 0.45,
@@ -315,7 +315,7 @@ function melee() {
     w: 42 + p.evo * 10,
   });
   game.fx.emit(box.x + 10 * p.facing, box.y + 10, {
-    color: p.color, count: 8, size: 3, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.9, star: p.id === "pikachu",
+    color: p.color, count: 8, size: 3, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.9, star: p.id === "ardilla",
   });
   for (const e of game.enemies) {
     if (aabb(box, e)) {
@@ -432,8 +432,8 @@ function worldClear() {
   if (game.won || game.summoned || game.roomId === "boss") return;
   if (!need.every((id) => game.visited[id])) return;
   game.summoned = true;
-  showNotification("MUNDO 1", "Todas las salas. El nido te reclama.");
-  setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 1100);
+  showNotification("EL NIDO DESPIERTA", "Has recorrido las ocho salas. El último recinto te espera.", "sala");
+  setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 2200);
 }
 function nearUpDoor(p) {
   const cx = p.x + p.w / 2;
@@ -536,7 +536,8 @@ function updateEnemies() {
     if (e.boss) {
       if (e.hp < e.max * 0.45 && e.phase === 1) {
         e.phase = 2; e.color = "#ff2040"; game.flash = 10; game.shake = 16;
-        showNotification("FASE 2", "El nido se enfurece");
+        showNotification("FASE 2", "El Nido arde. No aflojes.", "hurt");
+        e.vx *= 1.25;
         game.fx.emit(e.x, e.y, { color: "#ff2040", count: 24, size: 5, up: 2, star: true });
       }
       const aggro = e.phase === 2 ? 0.12 : 0.07;
@@ -557,7 +558,7 @@ function updateEnemies() {
     if ((e.kind === "brute" || e.boss) && e.shoot > rate) {
       e.shoot = 0;
       const aim = Math.sign(game.player.x - e.x) || 1;
-      const shots = e.boss && e.phase === 2 ? 3 : 1;
+      const shots = e.boss ? (e.phase === 2 ? 5 : 2) : 1;
       for (let s = 0; s < shots; s++) {
         game.projectiles.push({
           x: e.x + 20, y: e.y + 18, vx: aim * (5 + s), vy: e.boss ? (s - 1) * 1.6 : 0,
@@ -588,7 +589,7 @@ function updateEnemies() {
     if (e.boss) {
       game.won = true; game.flash = 24; game.shake = 20; beep("win");
       game.fx.emit(e.x + 40, e.y, { color: "#ffe66a", count: 36, size: 6, up: 3, star: true });
-      showNotification("VICTORIA", "Contacta a Jun xD");
+      showNotification("OHANA COMPLETADO", "Mundo 1 cerrado. Nadie se queda atrás.", "sala");
       dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
     }
     return false;

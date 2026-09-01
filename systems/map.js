@@ -95,7 +95,7 @@ export const ROOMS = {
     id: "boss", name: "Nido Final", short: "Nido", world: 2,
     doors: { left: "volcano", right: null, up: null, down: null },
     needEvo: 3,
-    hint: "Jefe. OESTE huye.",
+    hint: "El Nido. OESTE huye. Gana: Ohana completado.",
     plats: [[0, 810, 1600, 90], [180, 620, 180, 18], [700, 500, 200, 18], [1180, 620, 180, 18]],
     foes: [],
     orbs: [[800, 420]],

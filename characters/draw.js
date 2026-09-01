@@ -163,7 +163,7 @@ export function drawCharacter(ctx, p, cam, t) {
     p.evoBurst--;
   }
   ctx.scale(0.88 + evo * 0.11, 0.88 + evo * 0.11);
-  const drawers = { lilo: drawLilo, stitch: drawStitch, pikachu: drawPikachu, dragon: drawMushu, cat: drawCat };
+  const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, ardilla: drawCat, frita: drawLilo };
   (drawers[p.id] || drawLilo)(ctx, p, t, evo);
   ctx.restore();
 }

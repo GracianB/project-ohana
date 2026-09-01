@@ -3,9 +3,9 @@ const cache = new Map();
 const FORM = {
   lilo: [1, 1, 2, 2, 4],
   stitch: [1, 1, 2, 2, 4],
-  pikachu: [1, 1, 1, 1, 1],
   dragon: [0, 1, 2, 2, 2],
-  cat: [0, 1, 2, 4, 4],
+  ardilla: [0, 1, 2, 4, 4],
+  frita: [0, 1, 2, 4, 4],
 };
 
 function load(key) {
@@ -22,7 +22,7 @@ export function preloadSprites() {
   Object.entries(FORM).forEach(([id, row]) => {
     new Set(row).forEach((stage) => load(id + "-" + stage));
   });
-  ["vfx-slash", "vfx-flame", "vfx-note"].forEach((name) => load(name));
+  ["vfx-slash", "vfx-flame", "vfx-note", "boss-1", "boss-2"].forEach((name) => load(name));
 }
 
 export function spriteFor(id, evo) {

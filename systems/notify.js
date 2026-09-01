@@ -81,7 +81,7 @@ function guessKind(title) {
   const t = String(title).toUpperCase();
   if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evo";
   if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "hurt";
-  if (t.includes("VICTORIA") || t.includes("SALA") || t.includes("MAPA")) return "sala";
+  if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("SALA") || t.includes("MAPA") || t.includes("NIDO")) return "sala";
   return "info";
 }
 

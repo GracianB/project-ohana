@@ -26,16 +26,16 @@ export const ROSTER = [
     ]
   },
   {
-    id: "pikachu", name: "Pikachu", color: "#f5d000",
-    speed: 5.2, jumpPower: 12.4, maxJumps: 1, health: 60, w: 22, h: 20,
-    abilities: ["shock", "quick", "thunder"],
-    evoNames: ["Pichu", "Pikachu", "Raichu", "Tormenta", "Rayo GOD"],
+    id: "ardilla", name: "Bellota", color: "#c4783a",
+    speed: 5.2, jumpPower: 12.4, maxJumps: 1, health: 70, w: 22, h: 22,
+    abilities: ["acorn", "scramble", "nutstorm"],
+    evoNames: ["Bellotita", "Bellota", "Guardiana del Roble", "Tormenta de nueces", "Bellota GOD"],
     forms: [
-      { name: "Pichu", color: "#ffe98a", speed: 5.2, jump: 12.4, jumps: 1, hp: 60, w: 22, h: 20 },
-      { name: "Pikachu", color: "#ffe44a", speed: 6.2, jump: 14.2, jumps: 2, hp: 80, w: 30, h: 28 },
-      { name: "Raichu", color: "#e08a20", speed: 6.8, jump: 15.0, jumps: 2, hp: 120, w: 38, h: 36 },
-      { name: "Tormenta", color: "#fff36a", speed: 7.6, jump: 16.2, jumps: 3, hp: 160, w: 44, h: 42 },
-      { name: "Rayo GOD", color: "#fffde0", speed: 8.6, jump: 17.4, jumps: 3, hp: 220, w: 50, h: 48 }
+      { name: "Bellotita", color: "#e8b07a", speed: 5.2, jump: 12.4, jumps: 1, hp: 70, w: 22, h: 22 },
+      { name: "Bellota", color: "#c4783a", speed: 6.2, jump: 14.2, jumps: 2, hp: 95, w: 30, h: 28 },
+      { name: "Guardiana del Roble", color: "#8a4a18", speed: 6.8, jump: 15.0, jumps: 2, hp: 130, w: 36, h: 34 },
+      { name: "Tormenta de nueces", color: "#ffe6a0", speed: 7.6, jump: 16.2, jumps: 3, hp: 170, w: 42, h: 40 },
+      { name: "Bellota GOD", color: "#fff4d0", speed: 8.6, jump: 17.4, jumps: 3, hp: 230, w: 48, h: 46 }
     ]
   },
   {
@@ -52,16 +52,16 @@ export const ROSTER = [
     ]
   },
   {
-    id: "cat", name: "Kawaii Cat", color: "#ff8ad4",
-    speed: 4.8, jumpPower: 11.6, maxJumps: 2, health: 70, w: 20, h: 20,
-    abilities: ["claw", "catdash", "lives"],
-    evoNames: ["Gatito", "Cat", "Neko Shadow", "Nueve Vidas", "Neko GOD"],
+    id: "frita", name: "Frita", color: "#f0b43a",
+    speed: 4.6, jumpPower: 11.4, maxJumps: 2, health: 85, w: 18, h: 28,
+    abilities: ["salt", "ketchup", "fryer"],
+    evoNames: ["Palito", "Frita", "Capa Kétchup", "Crujiente", "Frita GOD"],
     forms: [
-      { name: "Gatito", color: "#ffd0ec", speed: 4.8, jump: 11.6, jumps: 2, hp: 70, w: 20, h: 20 },
-      { name: "Cat", color: "#ffb6e4", speed: 5.8, jump: 12.8, jumps: 3, hp: 90, w: 26, h: 26 },
-      { name: "Neko Shadow", color: "#ff5cb8", speed: 6.8, jump: 14.0, jumps: 3, hp: 130, w: 32, h: 32 },
-      { name: "Nueve Vidas", color: "#fff", speed: 7.6, jump: 15.4, jumps: 4, hp: 170, w: 36, h: 36 },
-      { name: "Neko GOD", color: "#fff6ff", speed: 8.4, jump: 16.8, jumps: 4, hp: 230, w: 42, h: 40 }
+      { name: "Palito", color: "#ffe08a", speed: 4.6, jump: 11.4, jumps: 2, hp: 85, w: 18, h: 28 },
+      { name: "Frita", color: "#f0b43a", speed: 5.6, jump: 12.6, jumps: 3, hp: 110, w: 22, h: 34 },
+      { name: "Capa Kétchup", color: "#e23b3b", speed: 6.4, jump: 13.8, jumps: 3, hp: 145, w: 26, h: 40 },
+      { name: "Crujiente", color: "#ffd36a", speed: 7.2, jump: 15.0, jumps: 4, hp: 185, w: 30, h: 46 },
+      { name: "Frita GOD", color: "#fff1a0", speed: 8.0, jump: 16.4, jumps: 4, hp: 240, w: 34, h: 52 }
     ]
   }
 ];

@@ -19,9 +19,9 @@ export function drawBaby(ctx, p, t) {
   spark(ctx, t);
   const id = p.id;
   if (id === "stitch") babyStitch(ctx, t);
-  else if (id === "pikachu") babyPichu(ctx, t);
+  else if (id === "ardilla") babyCat(ctx, t);
   else if (id === "dragon") babyMushu(ctx, t);
-  else if (id === "cat") babyCat(ctx, t);
+  else if (id === "frita") babyPichu(ctx, t);
   else babyLilo(ctx, t);
 }
 
