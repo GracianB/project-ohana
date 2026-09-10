@@ -108,13 +108,41 @@ export function drawCharacter(ctx, p, cam, t) {
   const x = p.x - cam.x;
   const y = p.y - cam.y;
   const evo = Number(p.evo) || 0;
-  const run = p.grounded ? Math.sin(t * 0.38 * (1 + Math.abs(p.vx))) : 0;
-  const bob = run * Math.min(2.6, Math.abs(p.vx) * 0.45);
-  const swing = p.melee > 0 ? (10 - p.melee) * 0.22 * (p.facing || 1) : 0;
+  const speed = Math.abs(p.vx || 0);
+  const moving = !!p.grounded && speed > 0.55;
+  const runT = t * (0.46 + speed * 0.14);
+  const step = Math.sin(runT);
+  const idle = p.grounded && !moving;
+  const air = !p.grounded;
+  const atk = p.melee > 0 ? (12 - p.melee) / 12 : 0;
+  const bob = idle
+    ? Math.sin(t * 0.1) * 1.8
+    : moving
+      ? Math.abs(step) * -3.1
+      : (p.vy || 0) < 0 ? -2 : 2;
+  const tilt = moving
+    ? step * 0.16
+    : air
+      ? ((p.vy || 0) < 0 ? -0.12 : 0.18)
+      : Math.sin(t * 0.08) * 0.05;
+  const sx = air
+    ? ((p.vy || 0) < 0 ? 0.86 : 1.1)
+    : moving
+      ? 1 + step * 0.07
+      : 1 + Math.sin(t * 0.1) * 0.035;
+  const sy = air
+    ? ((p.vy || 0) < 0 ? 1.16 : 0.88)
+    : moving
+      ? 1 - step * 0.07
+      : 1 - Math.sin(t * 0.1) * 0.035;
+  if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+  }
   ctx.save();
   ctx.translate(x + p.w / 2, y + p.h / 2 + bob);
-  ctx.scale(p.facing || 1, 1);
-  if (swing) ctx.rotate(swing * 0.04);
+  ctx.scale((p.facing || 1) * sx, sy);
+  ctx.rotate(tilt + atk * 0.35 * (p.facing || 1));
   const spr = spriteFor(p.id, evo);
   if (spr) {
     ctx.fillStyle = "rgba(0,0,0,.32)";
@@ -137,7 +165,18 @@ export function drawCharacter(ctx, p, cam, t) {
     const h = Math.max(44, p.h * 1.7 + evo * 4);
     const w = h;
     ctx.drawImage(spr, -w / 2, -h * 0.62, w, h);
+    if (moving) {
+      ctx.strokeStyle = "rgba(255,255,255,.22)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, h * 0.28);
+      ctx.lineTo(-4 + step * 8, h * 0.42);
+      ctx.moveTo(6, h * 0.28);
+      ctx.lineTo(4 - step * 8, h * 0.42);
+      ctx.stroke();
+    }
     ctx.restore();
+    if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
     return;
   }
   if (evo === 0) {
@@ -147,6 +186,7 @@ export function drawCharacter(ctx, p, cam, t) {
     ctx.fill();
     drawBaby(ctx, p, t);
     ctx.restore();
+    if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
     return;
   }
   ctx.fillStyle = "rgba(0,0,0,.32)";
@@ -170,6 +210,7 @@ export function drawCharacter(ctx, p, cam, t) {
   const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, ardilla: drawCat, frita: drawKetchup };
   (drawers[p.id] || drawLilo)(ctx, p, t, evo);
   ctx.restore();
+  if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
 }
 
 function drawLilo(ctx, p, t, evo) {

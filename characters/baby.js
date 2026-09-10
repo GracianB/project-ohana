@@ -12,7 +12,8 @@ function wobble(t) {
 }
 
 export function drawBaby(ctx, p, t) {
-  ctx.rotate(wobble(t));
+  const run = Math.abs(p.vx || 0) > 0.5;
+  ctx.rotate(wobble(t) + (run ? Math.sin(t * 0.45) * 0.12 : 0));
   ctx.scale(0.82, 0.82);
   const id = p.id;
   if (id === "stitch") babyTiko(ctx, t);

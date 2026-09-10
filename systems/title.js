@@ -33,7 +33,7 @@ function paintPortraits() {
         h: 32,
         facing: 1,
         grounded: true,
-        vx: 0,
+        vx: 2.2,
         evo,
         color: form.color || def.color,
         melee: 0,
