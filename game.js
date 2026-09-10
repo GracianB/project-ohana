@@ -192,7 +192,7 @@ function loadRoom(id, fromDir) {
     kind: f[2] || "crawler", color: f[2] === "flyer" ? "#8a4ccf" : f[2] === "brute" ? "#c45a18" : "#6c3",
     boss: false, shoot: 0
   }));
-  if (r.boss) game.enemies.push({ x: 860, y: 390, w: 120, h: 120, vx: 2.1, vy: 0, hp: 1280, max: 1280, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0 });
+  if (r.boss) game.enemies.push({ x: 740, y: 390, w: 120, h: 120, vx: 1.4, vy: 0, hp: 1280, max: 1280, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0, dying: 0 });
   game.projectiles = [];
   game.bolts = [];
   game.slashes = [];
@@ -432,7 +432,7 @@ function worldClear() {
   if (game.won || game.summoned || game.roomId === "boss") return;
   if (!need.every((id) => game.visited[id])) return;
   game.summoned = true;
-  showNotification("EL NIDO DESPIERTA", "Has recorrido las ocho salas. El último recinto te espera.", "sala");
+  showNotification("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.", "sala");
   setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 2200);
 }
 function nearUpDoor(p) {
@@ -533,6 +533,17 @@ function updateEnemies() {
   for (const e of game.enemies) {
     if (e.kind === "flyer") e.vy += 0.12; else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
+    if (e.boss && e.dying) {
+      e.vx = 0; e.vy = 0;
+      e.x += ((ROOM_W / 2 - e.w / 2) - e.x) * 0.14;
+      e.y += ((ROOM_H / 2 - 80 - e.h / 2) - e.y) * 0.14;
+      e.dying--;
+      if (t % 3 === 0) {
+        game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
+        game.flash = 4;
+      }
+      continue;
+    }
     if (e.boss) {
       if (e.hp < e.max * 0.45 && e.phase === 1) {
         e.phase = 2; e.color = "#ff2040"; game.flash = 10; game.shake = 16;
@@ -573,25 +584,44 @@ function updateEnemies() {
       }
     }
     if (e.kind === "flyer" && e.y > 520) e.vy = -2.2;
-    if (e.y > game.worldH) e.hp = 0;
+    if (e.y > game.worldH && !e.boss) e.hp = 0;
+    if (e.boss && !e.dying) {
+      e.x = Math.max(48, Math.min(e.x, ROOM_W - e.w - 48));
+      e.y = Math.min(e.y, ROOM_H - 90 - e.h);
+    }
     const on = game.platforms.find((plat) => e.x + e.w > plat.x && e.x < plat.x + plat.w && Math.abs(e.y + e.h - plat.y) < 4);
     if (on && !e.boss && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
     const p = game.player;
-    if (p && !p.dead && aabb(p, e)) {
+    if (p && !p.dead && !e.dying && aabb(p, e)) {
       const kb = Math.sign(p.x - e.x || 1);
       hurtPlayer(e.boss ? 22 : 8, e.boss ? "-22" : "-8");
       if (!p.dead) { p.vx = kb * 8; p.vy = -5; }
     }
   }
   game.enemies = game.enemies.filter((e) => {
-    if (e.hp > 0) return true;
-    punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
-    if (e.boss) {
-      game.won = true; game.flash = 24; game.shake = 20; beep("win");
-      game.fx.emit(e.x + 40, e.y, { color: "#ffe66a", count: 36, size: 6, up: 3, star: true });
-      showNotification("OHANA COMPLETADO", "Mundo 1 cerrado. Nadie se queda atrás.", "sala");
+    if (e.boss && e.dying) {
+      if (e.dying > 0) return true;
+      game.won = true;
+      game.flash = 28;
+      game.shake = 18;
+      punch(e.x + e.w / 2, e.y + e.h / 2, "#ffe66a");
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 48, size: 7, up: 3.4, star: true });
       dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+      return false;
     }
+    if (e.hp > 0) return true;
+    if (e.boss) {
+      e.dying = 96;
+      e.hp = 0;
+      e.vx = 0;
+      e.vy = 0;
+      game.flash = 16;
+      game.shake = 22;
+      beep("win");
+      showNotification("EL NIDO CAE", "El monstruo se deshace.", "sala");
+      return true;
+    }
+    punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
     return false;
   });
 }
@@ -606,10 +636,10 @@ function updateProjectiles() {
     }
     if (pr.owner === "player") {
       for (const e of game.enemies) {
-        if (aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
+        if (!e.dying && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
-          e.hp -= dmg; e.vx += Math.sign(pr.vx) * 3; pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
+          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.45 : 3); pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
           game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
         }
       }
@@ -844,6 +874,31 @@ function setupSelect() {
     document.getElementById("combo-chip")?.classList.remove("show");
     setPrompt("", false);
   };
+  addEventListener("ohana-after", (e) => {
+    const act = e.detail && e.detail.action;
+    if (act === "continue") {
+      game.running = true;
+      return;
+    }
+    if (act === "repeat") {
+      game.won = false;
+      if (game.player) {
+        game.player.dead = false;
+        game.player.health = game.player.maxHealth;
+      }
+      loadRoom("boss", "right");
+      return;
+    }
+    if (act === "roster") {
+      game.running = false;
+      closeOverlays();
+      document.body.classList.remove("playing", "boss-fight");
+      document.getElementById("char-select")?.classList.remove("hidden");
+      document.getElementById("boss-wrap")?.classList.add("hidden");
+      document.getElementById("combo-chip")?.classList.remove("show");
+      setPrompt("", false);
+    }
+  });
   document.querySelectorAll(".touch-btn").forEach((btn) => {
     const k = btn.dataset.k;
     const down = (ev) => { ev.preventDefault(); if (k === "shift") dash(); else if (k === "f") melee(); else keys[k] = true; };

@@ -9,12 +9,27 @@ export function showEnding(detail = {}) {
         '<p class="win-kicker">Mundo 1 · Nido caído</p>' +
         '<h2>OHANA COMPLETADO</h2>' +
         '<p class="win-score"></p>' +
-        '<p class="win-jun">Mundo 1 cerrado.</p>' +
+        '<p class="win-jun">El monstruo se deshace.</p>' +
         '<p class="win-sub">Nadie se queda atrás.</p>' +
-        '<button type="button" id="win-close">Seguir en la isla</button>' +
-      '</div>';
+        '<div class="win-actions">' +
+          '<button type="button" id="win-continue">Continuar en este mundo</button>' +
+          '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>' +
+          '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>' +
+        "</div>" +
+      "</div>";
     document.body.appendChild(layer);
-    layer.querySelector("#win-close").onclick = () => layer.classList.remove("show");
+    layer.querySelector("#win-continue").onclick = () => {
+      layer.classList.remove("show");
+      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "continue" } }));
+    };
+    layer.querySelector("#win-repeat").onclick = () => {
+      layer.classList.remove("show");
+      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "repeat" } }));
+    };
+    layer.querySelector("#win-roster").onclick = () => {
+      layer.classList.remove("show");
+      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "roster" } }));
+    };
   }
   if (layer.classList.contains("show")) return;
   layer.querySelector(".win-score").textContent = detail.score ? ("Score " + detail.score) : "El nido ha caído";
@@ -22,16 +37,6 @@ export function showEnding(detail = {}) {
 }
 
 function watchVictory() {
-  const box = document.getElementById("notification-container") || document.body;
-  const scan = () => {
-    document.querySelectorAll(".game-notification h2").forEach((h) => {
-      if (/OHANA COMPLETADO|VICTORIA|NIDO|JEFE/i.test(h.textContent || "")) {
-        const p = h.parentElement && h.parentElement.querySelector("p");
-        showEnding({ score: p ? p.textContent : "" });
-      }
-    });
-  };
-  new MutationObserver(scan).observe(box, { childList: true, subtree: true });
   addEventListener("ohana-win", (e) => showEnding(e.detail || {}));
 }
 

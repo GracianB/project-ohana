@@ -43,11 +43,22 @@
   margin: 0 0 8px;
 }
 #win-cinema .win-sub { color: #9ad7ff; font-size: 13px; margin-bottom: 16px; }
+#win-cinema .win-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
 #win-cinema button {
   border: 0; border-radius: 999px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   font-weight: 800;
   background: #7ee7ff;
   color: #04202a;
   cursor: pointer;
+}
+#win-cinema button.ghost {
+  background: transparent;
+  color: #9ad7ff;
+  border: 1px solid rgba(126,231,255,.4);
 }

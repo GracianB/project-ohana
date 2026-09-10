@@ -68,7 +68,13 @@ function drawBrute(ctx, e, t) {
 }
 
 function drawBoss(ctx, e, t) {
-  const pulse = 1 + Math.sin(t / 8) * 0.04;
+  if (e.dying) {
+    const k = Math.max(0.15, e.dying / 96);
+    ctx.globalAlpha = 0.35 + k * 0.65;
+    ctx.scale(0.6 + k * 0.5, 0.6 + k * 0.5);
+    ctx.rotate((96 - e.dying) * 0.04);
+  }
+  const pulse = e.dying ? 1 : 1 + Math.sin(t / 8) * 0.04;
   ctx.scale(pulse, pulse);
   const img = vfxSprite(e.phase === 2 ? "boss-2" : "boss-1");
   if (img) {
