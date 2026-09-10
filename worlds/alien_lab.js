@@ -1,7 +1,7 @@
 
 export const AlienLabWorld = {
   id: "alien_lab",
-  name: "Laboratorio X-626",
+  name: "Laboratorio X",
   theme: "alien-tech",
   sky: ["#071426", "#12345a", "#244b6d"],
   ocean: "#0a3144",

@@ -1,6 +1,6 @@
 const HINTS = {
   "Claro Ohana": "Objetivo: recoge orbes. ESTE = Costa. Centro + salto = Cumbre.",
-  "Costa Kauai": "No caigas al hueco del centro. ESTE pide forma 3.",
+  "Costa Hoku": "No caigas al hueco del centro. ESTE pide forma 3.",
   "Jungla Alta": "Hueco del centro ABAJO = Caldera. Pide forma 4.",
   "Cueva Azul": "OESTE = Lab. ESTE = Claro.",
   "Alien Lab": "Sala cerrada. Solo se sale por ESTE.",
@@ -22,7 +22,7 @@ function ensure() {
   if (document.getElementById("demo-ribbon")) return;
   const ribbon = document.createElement("div");
   ribbon.id = "demo-ribbon";
-  ribbon.innerHTML = "<b>DEMO</b><span>Mundo 1 · Kauai</span>";
+  ribbon.innerHTML = "<b>DEMO</b><span>Mundo 1 · Isla Hoku</span>";
   document.body.appendChild(ribbon);
   const obj = document.createElement("div");
   obj.id = "demo-obj";

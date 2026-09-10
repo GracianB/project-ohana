@@ -227,6 +227,51 @@ body.playing #ability-bar { display: flex; }
 .ability-slot .cd { height: 4px; background: #151820; margin-top: 8px; border-radius: 4px; overflow: hidden; }
 .ability-slot .cd i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--accent), #6b8cff); }
 
+.brand-bar {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  right: 18px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.brand-bar a {
+  color: #9ad7ff;
+  font: 700 11px/1 Outfit, system-ui, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: .85;
+}
+.brand-bar a:hover { color: #7ee7ff; opacity: 1; }
+.brand-gb {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 1.5px solid #eef6ff;
+  border-radius: 4px;
+  color: #eef6ff !important;
+  letter-spacing: .04em !important;
+  font-weight: 800 !important;
+}
+.brand-gb:hover {
+  background: #7ee7ff;
+  color: #071018 !important;
+  border-color: #7ee7ff;
+}
+.legal {
+  z-index: 2;
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #6e889c;
+  text-align: center;
+  max-width: 52ch;
+}
+
 #char-select {
   position: fixed;
   inset: 0;
@@ -236,7 +281,7 @@ body.playing #ability-bar { display: flex; }
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 28px 18px 24px;
+  padding: 64px 18px 24px;
   overflow: hidden;
   background:
     radial-gradient(1200px 520px at 50% -8%, rgba(70, 150, 255, .38), transparent 58%),

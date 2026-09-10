@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  <title>PROJECT OHANA · DEMO Mundo 1</title>
-  <meta name="description" content="Demo Mundo 1. Cinco formas, un archipiélago, un nido." />
+  <title>PROJECT OHANA — Demo Mundo 1 · Gracián Baena</title>
+  <meta name="description" content="Juego canvas 2D. Elenco original: Lani, Tiko, Koa, Bellota, Frita. Cinco formas, un archipiélago, un nido. PLAY · GracianB." />
+  <meta name="author" content="Gracián Baena">
+  <meta name="theme-color" content="#071226">
+  <link rel="canonical" href="https://gracianb.github.io/project-ohana/" />
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="PROJECT OHANA — Demo Mundo 1">
+  <meta property="og:description" content="Púlsalo. Elenco original. Ocho salas. Un nido. Ohana completado.">
+  <meta property="og:url" content="https://gracianb.github.io/project-ohana/">
+  <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="hud.css" />
-  <link rel="stylesheet" href="ending.css" />
-  <link rel="stylesheet" href="intro.css" />
-  <link rel="stylesheet" href="demo.css" />
+  <link rel="stylesheet" href="style.css?v=ohana-1" />
+  <link rel="stylesheet" href="hud.css?v=ohana-1" />
+  <link rel="stylesheet" href="ending.css?v=ohana-1" />
+  <link rel="stylesheet" href="intro.css?v=ohana-1" />
+  <link rel="stylesheet" href="demo.css?v=ohana-1" />
 </head>
 <body>
   <div id="ocean-bg" aria-hidden="true">
@@ -33,7 +42,7 @@
         <div class="hud-avatar" id="hud-avatar"></div>
         <div>
           <div class="hud-kicker">Familia</div>
-          <div class="hud-name" id="hud-name">Lilo</div>
+          <div class="hud-name" id="hud-name">Lani</div>
         </div>
       </div>
       <div class="bar-row"><span class="bar-lab">HP</span><div class="bar hp"><i id="hp-bar"></i></div></div>
@@ -42,7 +51,7 @@
     </div>
     <div class="hud-block right world">
       <div class="hud-kicker">Demo · Mundo 1</div>
-      <div id="hud-world">Isla Kauai</div>
+      <div id="hud-world">Isla Hoku</div>
       <div id="hud-evo">Forma 1/5</div>
       <div class="form-pips" id="form-pips"><b></b><b></b><b></b><b></b><b></b></div>
       <div id="hud-combo">Combo 0 · Score 0</div>
@@ -59,18 +68,25 @@
     <div class="col"><button class="touch-btn" data-k=" ">▲</button><button class="touch-btn" data-k="shift">⇢</button><button class="touch-btn" data-k="f">F</button></div>
   </div>
   <main id="char-select">
+    <nav class="brand-bar" aria-label="Ecosystem">
+      <a class="brand-gb" href="https://gracianb.github.io/GracianB/">GB</a>
+      <a href="https://gracianb.github.io/systems-lab/">PLAY</a>
+      <a href="https://gracianb.github.io/professional-deck/">Deck</a>
+      <a href="https://gracianb.github.io/yoga-instructor/">Yoga</a>
+    </nav>
     <div class="title-stack">
-      <p class="eyebrow">DEMO · Mundo 1 · Isla Kauai</p>
+      <p class="eyebrow">PLAY · DEMO · Mundo 1 · Isla Hoku</p>
       <h1><span class="word project">PROJECT</span> <span class="word ohana">OHANA</span></h1>
-      <p class="tagline">Bebé → GOD. Ocho salas. Un nido. Ohana completado.</p>
+      <p class="tagline">Elenco original. Bebé → GOD. Ocho salas. Un nido. Ohana completado.</p>
     </div>
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
       <button id="btn-play" type="button" class="cta primary">Jugar demo</button>
       <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
-    <p class="pick-label">Elige a tu ohana bebé</p>
+    <p class="pick-label">Elige a tu ohana · Lani · Tiko · Koa · Bellota · Frita</p>
     <section id="chars"></section>
+    <p class="legal">Elenco y arte originales. Sin afiliación con terceros. MIT · Gracián Baena · 2026</p>
   </main>
   <div id="help">
     <div class="panel">

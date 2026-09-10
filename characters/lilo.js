@@ -1,6 +1,6 @@
 const LILO = {
   id: "lilo",
-  name: "Lilo",
+  name: "Lani",
   role: "Exploradora de la isla",
   description: "Ágil, valiente y capaz de convertir cualquier expedición en una aventura.",
   colors: { primary: "#ef6277", secondary: "#ffd39b", glow: "#ffb25c" },
@@ -11,9 +11,9 @@ const LILO = {
   },
   evolution: {
     forms: [
-      { name: "Lilo", level: 1, bonuses: {} },
-      { name: "Lilo Guardiana", level: 3, bonuses: { maxHealth: 20, maxEnergy: 14, speed: 0.22, abilityPower: 0.2 }, unlocks: ["ultimate"] },
-      { name: "Lilo Estelar", level: 6, bonuses: { maxHealth: 18, maxEnergy: 18, speed: 0.3, abilityPower: 0.3 } }
+      { name: "Lani", level: 1, bonuses: {} },
+      { name: "Lani Guardiana", level: 3, bonuses: { maxHealth: 20, maxEnergy: 14, speed: 0.22, abilityPower: 0.2 }, unlocks: ["ultimate"] },
+      { name: "Lani Estelar", level: 6, bonuses: { maxHealth: 18, maxEnergy: 18, speed: 0.3, abilityPower: 0.3 } }
     ]
   }
 };

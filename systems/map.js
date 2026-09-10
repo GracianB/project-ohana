@@ -28,7 +28,7 @@ export const ROOMS = {
     orbs: [[400, 500], [900, 200]]
   },
   beach: {
-    id: "beach", name: "Costa Kauai", short: "Costa", world: 0,
+    id: "beach", name: "Costa Hoku", short: "Costa", world: 0,
     doors: { left: "hub", right: "jungle", up: null, down: null },
     pit: true,
     hint: "Hueco central = POZO. Forma 3 abre ESTE a la jungla.",

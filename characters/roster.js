@@ -1,28 +1,28 @@
 export const ROSTER = [
   {
-    id: "lilo", name: "Lilo", color: "#e23b3b",
+    id: "lilo", name: "Lani", color: "#e23b3b",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
-    evoNames: ["Lilo Bebé", "Lilo", "Guardiana Ohana", "Alma de Kauai", "Ohana GOD"],
+    evoNames: ["Lani Bebé", "Lani", "Guardiana Ohana", "Alma de Hoku", "Ohana GOD"],
     forms: [
-      { name: "Lilo Bebé", color: "#ff8aa0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
-      { name: "Lilo", color: "#e23b3b", speed: 4.4, jump: 13.2, jumps: 1, hp: 110, w: 28, h: 42 },
+      { name: "Lani Bebé", color: "#ff8aa0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
+      { name: "Lani", color: "#e23b3b", speed: 4.4, jump: 13.2, jumps: 1, hp: 110, w: 28, h: 42 },
       { name: "Guardiana Ohana", color: "#ff5a7a", speed: 5.1, jump: 14.4, jumps: 2, hp: 150, w: 34, h: 50 },
-      { name: "Alma de Kauai", color: "#ffd36a", speed: 5.8, jump: 15.6, jumps: 2, hp: 200, w: 40, h: 56 },
+      { name: "Alma de Hoku", color: "#ffd36a", speed: 5.8, jump: 15.6, jumps: 2, hp: 200, w: 40, h: 56 },
       { name: "Ohana GOD", color: "#fff1a8", speed: 7.2, jump: 17.2, jumps: 3, hp: 280, w: 46, h: 62 }
     ]
   },
   {
-    id: "stitch", name: "Stitch", color: "#3b6cff",
+    id: "stitch", name: "Tiko", color: "#3b6cff",
     speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 26, h: 24,
     abilities: ["dash", "claws", "exp626"],
-    evoNames: ["626 Bebé", "Stitch", "Berserk 626", "Experiment MAX", "626 GOD"],
+    evoNames: ["Tiko Bebé", "Tiko", "Tiko Berserk", "Tiko MAX", "Tiko GOD"],
     forms: [
-      { name: "626 Bebé", color: "#9ad4ff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 26, h: 24 },
-      { name: "Stitch", color: "#3d9bff", speed: 5.4, jump: 12.4, jumps: 2, hp: 130, w: 36, h: 32 },
-      { name: "Berserk 626", color: "#1c4bff", speed: 6.4, jump: 13.6, jumps: 2, hp: 175, w: 44, h: 38 },
-      { name: "Experiment MAX", color: "#6af", speed: 7.2, jump: 15.0, jumps: 3, hp: 230, w: 54, h: 46 },
-      { name: "626 GOD", color: "#d6f4ff", speed: 8.2, jump: 16.4, jumps: 3, hp: 300, w: 60, h: 52 }
+      { name: "Tiko Bebé", color: "#9ad4ff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 26, h: 24 },
+      { name: "Tiko", color: "#3d9bff", speed: 5.4, jump: 12.4, jumps: 2, hp: 130, w: 36, h: 32 },
+      { name: "Tiko Berserk", color: "#1c4bff", speed: 6.4, jump: 13.6, jumps: 2, hp: 175, w: 44, h: 38 },
+      { name: "Tiko MAX", color: "#6af", speed: 7.2, jump: 15.0, jumps: 3, hp: 230, w: 54, h: 46 },
+      { name: "Tiko GOD", color: "#d6f4ff", speed: 8.2, jump: 16.4, jumps: 3, hp: 300, w: 60, h: 52 }
     ]
   },
   {
@@ -39,16 +39,16 @@ export const ROSTER = [
     ]
   },
   {
-    id: "dragon", name: "Mushu", color: "#e23a1c",
+    id: "dragon", name: "Koa", color: "#e23a1c",
     speed: 3.2, jumpPower: 10.2, maxJumps: 1, glide: true, health: 120, w: 28, h: 24,
     abilities: ["breath", "wing", "rage"],
-    evoNames: ["Cría", "Mushu", "Guardia Imperial", "Gran Dragon", "Dragon GOD"],
+    evoNames: ["Cría", "Koa", "Guardia del volcán", "Gran Dragón", "Koa GOD"],
     forms: [
       { name: "Cría", color: "#ff7a4a", speed: 3.2, jump: 10.2, jumps: 1, hp: 120, w: 28, h: 24, glide: true },
-      { name: "Mushu", color: "#e23a1c", speed: 3.8, jump: 11.5, jumps: 1, hp: 180, w: 40, h: 36, glide: true },
-      { name: "Guardia Imperial", color: "#d61f12", speed: 4.6, jump: 13.0, jumps: 2, hp: 240, w: 58, h: 50, glide: true },
-      { name: "Gran Dragon Rojo", color: "#8b1208", speed: 5.2, jump: 14.4, jumps: 2, hp: 320, w: 72, h: 60, glide: true },
-      { name: "Dragon GOD", color: "#ffd36a", speed: 6.4, jump: 16.0, jumps: 3, hp: 400, w: 80, h: 68, glide: true }
+      { name: "Koa", color: "#e23a1c", speed: 3.8, jump: 11.5, jumps: 1, hp: 180, w: 40, h: 36, glide: true },
+      { name: "Guardia del volcán", color: "#d61f12", speed: 4.6, jump: 13.0, jumps: 2, hp: 240, w: 58, h: 50, glide: true },
+      { name: "Gran Dragón Rojo", color: "#8b1208", speed: 5.2, jump: 14.4, jumps: 2, hp: 320, w: 72, h: 60, glide: true },
+      { name: "Koa GOD", color: "#ffd36a", speed: 6.4, jump: 16.0, jumps: 3, hp: 400, w: 80, h: 68, glide: true }
     ]
   },
   {
