@@ -168,6 +168,34 @@ function placeFrom(fromDir) {
   p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
   if (fromDir !== "down") snapToFloor(p);
 }
+function makeFoe(x, y, kind, roomId, i, opts) {
+  const hard = { hub: 0, beach: 1, cave: 1, ridge: 1, lab: 2, space: 2, jungle: 2, volcano: 3 }[roomId] || 1;
+  const baby = !!(opts && opts.baby);
+  if (kind === "phosquito") {
+    const hp = baby ? 12 : 20 + hard * 14;
+    return {
+      x, y, w: baby ? 16 : 22, h: baby ? 14 : 18,
+      vx: (i % 2 ? 1 : -1) * (1.6 + hard * 0.25),
+      vy: -0.4, hp, max: hp, kind, color: "#6ad0a8",
+      boss: false, shoot: 0, canSplit: !baby && hard >= 2, split: false, baby,
+    };
+  }
+  if (kind === "planta") {
+    const hp = 36 + hard * 18;
+    return {
+      x, y, w: 30, h: 40, vx: 0, vy: 0, hp, max: hp, kind, color: "#e23b3d",
+      boss: false, shoot: 0, rooted: true, up: true, hide: 40 + i * 20,
+    };
+  }
+  const hp = baby ? 16 : 26 + hard * 16;
+  return {
+    x, y, w: baby ? 22 : 30, h: baby ? 14 : 18,
+    vx: (i % 2 ? 1 : -1) * (1.2 + hard * 0.28),
+    vy: 0, hp, max: hp, kind: "cucaracho", color: "#6a3a12",
+    boss: false, shoot: 0, canEvo: !baby && hard >= 1, evo: 0,
+  };
+}
+
 function loadRoom(id, fromDir) {
   const r = ROOMS[id];
   if (!r) return false;
@@ -186,12 +214,7 @@ function loadRoom(id, fromDir) {
   game.platforms = r.plats.map((p) => ({ x: p[0], y: p[1], w: p[2], h: p[3] }));
   game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
   game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
-  game.enemies = (r.foes || []).map((f, i) => ({
-    x: f[0], y: f[1], w: f[2] === "brute" ? 36 : 32, h: f[2] === "flyer" ? 24 : 28,
-    vx: i % 2 ? 1.7 : -1.7, vy: 0, hp: 50 + i * 12, max: 50 + i * 12,
-    kind: f[2] || "crawler", color: f[2] === "flyer" ? "#8a4ccf" : f[2] === "brute" ? "#c45a18" : "#6c3",
-    boss: false, shoot: 0
-  }));
+  game.enemies = (r.foes || []).map((f, i) => makeFoe(f[0], f[1], f[2], id, i));
   if (r.boss) game.enemies.push({ x: 740, y: 390, w: 120, h: 120, vx: 1.4, vy: 0, hp: 1280, max: 1280, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0, dying: 0 });
   game.projectiles = [];
   game.bolts = [];
@@ -531,7 +554,9 @@ function updatePlayer() {
 function updateEnemies() {
   if (!game.player) return;
   for (const e of game.enemies) {
-    if (e.kind === "flyer") e.vy += 0.12; else e.vy += 0.5;
+    if (e.kind === "phosquito") e.vy += 0.08;
+    else if (e.kind === "planta") e.vy = 0;
+    else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
     if (e.boss && e.fell) {
       e.vx = 0; e.vy = 0;
@@ -565,36 +590,68 @@ function updateEnemies() {
       }
     }
     e.shoot = (e.shoot || 0) + 1;
-    const rate = e.boss ? (e.phase === 2 ? 48 : 70) : 90;
-    if ((e.kind === "brute" || e.boss) && e.shoot > rate) {
-      e.shoot = 0;
-      const aim = Math.sign(game.player.x - e.x) || 1;
-      const shots = e.boss ? (e.phase === 2 ? 5 : 2) : 1;
-      for (let s = 0; s < shots; s++) {
-        game.projectiles.push({
-          x: e.x + 20, y: e.y + 18, vx: aim * (5 + s), vy: e.boss ? (s - 1) * 1.6 : 0,
-          w: e.boss ? 16 : 12, h: e.boss ? 12 : 8, life: 80,
-          dmg: e.boss ? 14 : 10, color: e.boss ? "#ff5a6a" : "#f84", owner: "enemy"
-        });
+    const rate = e.boss ? (e.phase === 2 ? 48 : 70) : e.kind === "planta" ? 70 : 9999;
+    if ((e.kind === "planta" && e.up) || e.boss) {
+      if (e.shoot > rate) {
+        e.shoot = 0;
+        const aim = Math.sign(game.player.x - e.x) || 1;
+        const shots = e.boss ? (e.phase === 2 ? 5 : 2) : 1;
+        for (let s = 0; s < shots; s++) {
+          game.projectiles.push({
+            x: e.x + 10, y: e.y + 8,
+            vx: aim * (4.2 + s) * (e.kind === "planta" ? 0.7 : 1),
+            vy: e.boss ? (s - 1) * 1.6 : (e.kind === "planta" ? -1.2 : 0),
+            w: e.boss ? 16 : 10, h: e.boss ? 12 : 10, life: 80,
+            dmg: e.boss ? 14 : 9, color: e.kind === "planta" ? "#7dca5a" : "#ff5a6a",
+            owner: "enemy",
+          });
+        }
       }
+    }
+    if (e.kind === "cucaracho" && e.canEvo && !e.evo && e.hp < e.max * 0.42) {
+      e.evo = 1;
+      e.w += 10; e.h += 6; e.hp = Math.round(e.max * 1.15); e.max = e.hp;
+      e.vx *= 1.35; e.color = "#8a2010";
+      game.fx.emit(e.x, e.y, { color: "#c45a18", count: 14, size: 4, up: 1.6 });
+      showNotification("CUCARACHO+", "Ha mudado. Más cabreado.", "hurt");
+    }
+    if (e.kind === "phosquito" && e.canSplit && !e.split && e.hp < e.max * 0.5) {
+      e.split = true;
+      game.enemies.push(makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }));
+      game.fx.emit(e.x, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 });
+    }
+    if (e.kind === "planta") {
+      e.vx = 0;
+      e.hide = (e.hide || 0) + 1;
+      if (e.hide > 110) { e.hide = 0; e.up = !e.up; }
+    }
+    if (e.kind === "phosquito") {
+      e.vy += -0.18;
+      if (t % 90 === 0 && game.player) {
+        e.vx += Math.sign(game.player.x - e.x) * 1.4;
+        e.vy = 3.2;
+      }
+      if (e.y > 560) e.vy = -2.4;
+      e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
     }
     for (const plat of game.platforms) {
       if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
         if (e.y + e.h > plat.y && e.y + e.h < plat.y + 28 && e.vy >= 0) { e.y = plat.y - e.h; e.vy = 0; }
       }
     }
-    if (e.kind === "flyer" && e.y > 520) e.vy = -2.2;
     if (e.y > game.worldH && !e.boss) e.hp = 0;
     if (e.boss && !e.dying) {
       e.x = Math.max(48, Math.min(e.x, ROOM_W - e.w - 48));
       e.y = Math.min(e.y, ROOM_H - 90 - e.h);
     }
     const on = game.platforms.find((plat) => e.x + e.w > plat.x && e.x < plat.x + plat.w && Math.abs(e.y + e.h - plat.y) < 4);
-    if (on && !e.boss && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
+    if (on && e.kind === "cucaracho" && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
     const p = game.player;
-    if (p && !p.dead && !e.dying && aabb(p, e)) {
+    const solid = !(e.kind === "planta" && !e.up);
+    if (p && !p.dead && !e.dying && solid && aabb(p, e)) {
       const kb = Math.sign(p.x - e.x || 1);
-      hurtPlayer(e.boss ? 22 : 8, e.boss ? "-22" : "-8");
+      const dmg = e.boss ? 22 : e.kind === "planta" ? 12 : e.evo ? 10 : 7;
+      hurtPlayer(dmg, "-" + dmg);
       if (!p.dead) { p.vx = kb * 8; p.vy = -5; }
     }
   }

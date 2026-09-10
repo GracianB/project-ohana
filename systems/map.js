@@ -24,7 +24,7 @@ export const ROOMS = {
     doors: { right: "beach", left: "cave", up: "ridge", down: null },
     hint: "Piso bajo. ESTE costa · OESTE cueva · centro ARRIBA cumbre.",
     plats: [[0, 810, 1600, 90], [80, 680, 160, 18], [300, 620, 150, 18], ...stairs(760)],
-    foes: [[620, 200, "crawler"], [1180, 200, "flyer"]],
+    foes: [[620, 200, "cucaracho"], [1180, 200, "phosquito"]],
     orbs: [[400, 500], [900, 200]]
   },
   beach: {
@@ -33,7 +33,7 @@ export const ROOMS = {
     pit: true,
     hint: "Hueco central = POZO. Forma 3 abre ESTE a la jungla.",
     plats: [[0, 810, 620, 90], [860, 810, 740, 90], [240, 660, 170, 18], [620, 540, 160, 18], [1040, 620, 180, 18]],
-    foes: [[280, 200, "crawler"], [980, 200, "brute"], [1320, 200, "flyer"]],
+    foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [1320, 200, "phosquito"]],
     orbs: [[280, 520], [1200, 430]]
   },
   jungle: {
@@ -43,7 +43,7 @@ export const ROOMS = {
     pit: true,
     hint: "Esquina derecha del mapa. Hueco central ABAJO = Caldera (forma 4).",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
-    foes: [[400, 200, "crawler"], [860, 200, "flyer"], [1280, 200, "brute"]],
+    foes: [[400, 200, "cucaracho"], [860, 200, "phosquito"], [1280, 200, "planta"]],
     orbs: [[520, 420], [800, 180]]
   },
   cave: {
@@ -51,7 +51,7 @@ export const ROOMS = {
     doors: { right: "hub", left: "lab", up: null, down: null },
     hint: "OESTE lab (forma 2). ESTE claro.",
     plats: [[0, 810, 1600, 90], [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]],
-    foes: [[360, 200, "brute"], [1040, 200, "flyer"]],
+    foes: [[360, 200, "planta"], [1040, 200, "phosquito"]],
     orbs: [[500, 420], [1200, 400]]
   },
   lab: {
@@ -60,7 +60,7 @@ export const ROOMS = {
     needEvo: 1,
     hint: "Solo salida ESTE.",
     plats: [[0, 810, 1600, 90], [180, 660, 180, 18], [480, 520, 180, 18], [860, 380, 180, 18], [1220, 540, 180, 18]],
-    foes: [[400, 200, "brute"], [820, 200, "flyer"], [1240, 200, "crawler"]],
+    foes: [[400, 200, "planta"], [820, 200, "phosquito"], [1240, 200, "cucaracho"]],
     orbs: [[520, 440], [900, 300]]
   },
   ridge: {
@@ -69,7 +69,7 @@ export const ROOMS = {
     pit: true,
     hint: "Hueco central ABAJO = Claro. ESTE = órbita.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [200, 660, 160, 18], [500, 520, 150, 18], [1040, 620, 160, 18]],
-    foes: [[480, 200, "flyer"], [1200, 200, "crawler"]],
+    foes: [[480, 200, "phosquito"], [1200, 200, "cucaracho"]],
     orbs: [[720, 420], [1100, 280]]
   },
   space: {
@@ -79,7 +79,7 @@ export const ROOMS = {
     pit: true,
     hint: "Pozo central ABAJO = Claro.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]],
-    foes: [[500, 200, "flyer"], [1080, 200, "brute"], [1340, 200, "flyer"]],
+    foes: [[500, 200, "phosquito"], [1080, 200, "planta"], [1340, 200, "phosquito"]],
     orbs: [[640, 390], [1120, 260]]
   },
   volcano: {
@@ -88,7 +88,7 @@ export const ROOMS = {
     needEvo: 3,
     hint: "Llegaste por el hueco de la Jungla. ESTE = nido.",
     plats: [[0, 810, 1600, 90], ...stairs(760)],
-    foes: [[480, 200, "brute"], [980, 200, "crawler"], [1320, 200, "flyer"]],
+    foes: [[480, 200, "planta"], [980, 200, "cucaracho"], [1320, 200, "phosquito"]],
     orbs: [[660, 200], [1100, 540]]
   },
   boss: {
