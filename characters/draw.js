@@ -141,6 +141,10 @@ export function drawCharacter(ctx, p, cam, t) {
     return;
   }
   if (evo === 0) {
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    ctx.beginPath();
+    ctx.ellipse(0, p.h / 2 + 2, Math.max(8, p.w * 0.36), 3, 0, 0, Math.PI * 2);
+    ctx.fill();
     drawBaby(ctx, p, t);
     ctx.restore();
     return;

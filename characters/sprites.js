@@ -26,8 +26,10 @@ export function preloadSprites() {
 }
 
 export function spriteFor(id, evo) {
+  const e = Math.max(0, Math.min(4, Number(evo) || 0));
+  if (e === 0) return null;
   const row = FORM[id] || FORM.lilo;
-  const stage = row[Math.max(0, Math.min(4, Number(evo) || 0))];
+  const stage = row[e];
   const img = load(id + "-" + stage);
   return img.complete && img.naturalWidth > 0 ? img : null;
 }
