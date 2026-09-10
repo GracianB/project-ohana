@@ -279,10 +279,11 @@ body.playing #ability-bar { display: flex; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 64px 18px 24px;
-  overflow: hidden;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 72px 18px 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(1200px 520px at 50% -8%, rgba(70, 150, 255, .38), transparent 58%),
     radial-gradient(700px 420px at 8% 108%, rgba(255, 90, 150, .22), transparent 52%),
@@ -375,7 +376,7 @@ body.playing #ability-bar { display: flex; }
 
 .title-stack { position: relative; text-align: center; z-index: 2; }
 .title-stack h1 {
-  font-size: clamp(52px, 9vw, 96px);
+  font-size: clamp(40px, 7vw, 84px);
   letter-spacing: -0.04em;
   text-shadow: 0 0 40px rgba(126,231,255,.35), 0 12px 40px rgba(0,0,0,.45);
 }
@@ -399,7 +400,7 @@ body.playing #ability-bar { display: flex; }
 }
 #char-select h1 {
   font-family: Fredoka, sans-serif;
-  font-size: clamp(56px, 11vw, 118px);
+  font-size: clamp(40px, 7vw, 84px);
   letter-spacing: .06em;
   line-height: .9;
   display: flex;
@@ -470,8 +471,8 @@ body.playing #ability-bar { display: flex; }
 }
 
 .char-card {
-  width: 168px;
-  padding: 14px 14px 16px;
+  width: 156px;
+  padding: 10px 10px 12px;
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(8,12,20,.72));
   border: 1px solid rgba(255,255,255,.16);
   border-radius: 22px;
