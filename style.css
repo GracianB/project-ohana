@@ -292,16 +292,44 @@ body.playing #ability-bar { display: flex; }
 #char-select.hidden { display: none; }
 
 .title-sky { position: absolute; inset: 0; pointer-events: none; }
+.title-veil {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(90,170,255,.28), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 80% 20%, rgba(255,200,80,.16), transparent 50%);
+  pointer-events: none;
+}
 .title-moon {
   position: absolute;
-  top: 8%;
-  right: 14%;
-  width: 86px;
-  height: 86px;
+  top: 6%;
+  right: 10%;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff6d2, #e8d48a 55%, #c9a24a);
-  box-shadow: 0 0 60px 16px rgba(255, 220, 140, .28);
-  opacity: .85;
+  background: radial-gradient(circle at 32% 32%, #fff8e0, #f0d48a 48%, #c9a24a);
+  box-shadow: 0 0 80px 28px rgba(255, 220, 140, .38), 0 0 160px 40px rgba(126,231,255,.12);
+  opacity: .95;
+  animation: moon-pulse 6s ease-in-out infinite;
+}
+@keyframes moon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+.title-island {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: min(920px, 90vw);
+  height: 90px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 100%, rgba(20, 70, 90, .55), transparent 70%);
+  pointer-events: none;
+}
+.title-orb.o3 {
+  width: 140px; height: 140px;
+  left: 46%; top: 8%;
+  background: radial-gradient(circle, rgba(255,230,106,.22), transparent 70%);
+  animation: orb-drift 13s ease-in-out infinite;
 }
 .title-palm {
   position: absolute;
@@ -371,14 +399,14 @@ body.playing #ability-bar { display: flex; }
 }
 #char-select h1 {
   font-family: Fredoka, sans-serif;
-  font-size: clamp(42px, 8.4vw, 92px);
-  letter-spacing: .08em;
-  line-height: .95;
+  font-size: clamp(56px, 11vw, 118px);
+  letter-spacing: .06em;
+  line-height: .9;
   display: flex;
-  gap: .28em;
+  gap: .18em;
   justify-content: center;
   flex-wrap: wrap;
-  text-shadow: 0 12px 50px rgba(70, 170, 255, .35);
+  text-shadow: 0 16px 60px rgba(70, 170, 255, .45);
 }
 #char-select h1 .project { color: #f4fbff; }
 #char-select h1 .ohana {
@@ -414,6 +442,11 @@ body.playing #ability-bar { display: flex; }
   color: #062018;
   border-color: transparent;
   box-shadow: 0 10px 30px rgba(46, 201, 192, .28);
+  animation: cta-glow 2.8s ease-in-out infinite;
+}
+@keyframes cta-glow {
+  0%, 100% { box-shadow: 0 10px 30px rgba(46, 201, 192, .28); }
+  50% { box-shadow: 0 12px 42px rgba(126, 231, 255, .5); }
 }
 .cta:hover { transform: translateY(-2px); }
 .cta.ghost { background: rgba(8, 14, 24, .45); }

@@ -13,7 +13,7 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
 const keys = {};
 let t = 0;
-const XP_NEED = [0, 18, 40, 70, 110];
+const XP_NEED = [0, 55, 140, 260, 420];
 let muted = false;
 let paused = false;
 
@@ -174,7 +174,7 @@ function makeFoe(x, y, kind, roomId, i, opts) {
   if (kind === "phosquito") {
     const hp = baby ? 14 : 24 + hard * 14;
     return {
-      x, y: Math.min(y, 420), w: baby ? 22 : 32, h: baby ? 18 : 26,
+      x, y: 620 + (i % 3) * 24, w: baby ? 22 : 32, h: baby ? 18 : 26,
       vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.28),
       vy: -0.6, hp, max: hp, kind, color: "#6ad0a8",
       boss: false, shoot: 0, canSplit: !baby && hard >= 1 && Math.random() < 0.55, split: false, baby,
@@ -359,7 +359,7 @@ function melee() {
       e.vx = (e.boss ? 3 : 8) * p.facing;
       game.nums.add(e.x, e.y, "" + d, "#fff", d >= 40);
       punch(e.x, e.y, p.color);
-      p.xp += 4;
+      p.xp += 2;
     }
   }
 }
@@ -545,7 +545,7 @@ function updatePlayer() {
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
-      o.taken = true; p.xp += 8; game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+      o.taken = true; p.xp += 4; game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
     }
   }
   for (const h of game.hearts) {
@@ -650,15 +650,17 @@ function updateEnemies() {
       if (e.hide > 110) { e.hide = 0; e.up = !e.up; }
     }
     if (e.kind === "phosquito") {
-      e.vy += -0.18;
+      e.vy += 0.04;
       if (t % 90 === 0 && game.player) {
         e.vx += Math.sign(game.player.x - e.x) * 1.4;
-        e.vy = 3.2;
+        e.vy = 1.6;
       }
-      if (e.y > 560) e.vy = -2.4;
+      if (e.y < 520) e.vy += 0.45;
+      if (e.y > 720) e.vy = -1.8;
       e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
     }
     for (const plat of game.platforms) {
+      if (e.kind === "phosquito") break;
       if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
         if (e.y + e.h > plat.y && e.y + e.h < plat.y + 28 && e.vy >= 0) { e.y = plat.y - e.h; e.vy = 0; }
       }
@@ -723,7 +725,7 @@ function updateProjectiles() {
         if (!e.dying && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
-          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.45 : 3); pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 6;
+          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.45 : 3); pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 3;
           game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
         }
       }

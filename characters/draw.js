@@ -477,6 +477,83 @@ function drawStitch(ctx, p, t, evo) {
 }
 
 function drawPikachu(ctx, p, t, evo) {
+  const body = evo >= 4 ? "#fff8c4" : evo >= 3 ? "#ffe14a" : "#ffd000";
+  const ink = "#3a2208";
+  const s = 1 + evo * 0.08;
+  ctx.scale(s, s);
+  if (evo >= 2) {
+    ctx.strokeStyle = "rgba(255,230,80,.55)";
+    ctx.lineWidth = 1.6;
+    for (let i = 0; i < 3 + evo; i++) {
+      const a = t / 6 + i * 1.1;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a) * (16 + evo * 3), Math.sin(a) * (10 + evo * 2));
+      ctx.stroke();
+    }
+  }
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 5 + evo;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(10, 8);
+  ctx.lineTo(18, -2);
+  ctx.lineTo(14, 10);
+  ctx.lineTo(24, 4);
+  ctx.stroke();
+  ctx.fillStyle = evo >= 2 ? "#fff36a" : "#222";
+  ctx.beginPath();
+  ctx.moveTo(22, 2);
+  ctx.lineTo(32, -6);
+  ctx.lineTo(26, 8);
+  ctx.fill();
+  oval(ctx, 0, 8, 13, 11, body, ink, 1.3);
+  oval(ctx, 0, -6, 12, 11, body, ink, 1.3);
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.moveTo(-7, -12);
+  ctx.lineTo(-9, -32 - evo * 2);
+  ctx.lineTo(-2, -12);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(7, -12);
+  ctx.lineTo(9, -32 - evo * 2);
+  ctx.lineTo(2, -12);
+  ctx.fill();
+  ctx.fillStyle = "#111";
+  ctx.beginPath();
+  ctx.moveTo(-9, -32 - evo * 2);
+  ctx.lineTo(-4, -32 - evo * 2);
+  ctx.lineTo(-6.5, -24);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(9, -32 - evo * 2);
+  ctx.lineTo(4, -32 - evo * 2);
+  ctx.lineTo(6.5, -24);
+  ctx.fill();
+  ctx.fillStyle = "#e23b3d";
+  ctx.beginPath();
+  ctx.arc(-9, 0, 3.4 + evo * 0.4, 0, Math.PI * 2);
+  ctx.arc(9, 0, 3.4 + evo * 0.4, 0, Math.PI * 2);
+  ctx.fill();
+  eye(ctx, -4, -7, 2.4, 2.6);
+  eye(ctx, 4, -7, 2.4, 2.6);
+  ctx.fillStyle = "#333";
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 1.4, 1, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (evo >= 3) {
+    ctx.strokeStyle = "#fff36a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-16, -8);
+    ctx.lineTo(-22, -18);
+    ctx.lineTo(-14, -12);
+    ctx.stroke();
+  }
+}
+
+function drawCatOLD_UNUSED(ctx, p, t, evo) {
   const body = evo >= 4 ? "#fffde8" : evo >= 3 ? "#fff36a" : evo >= 2 ? "#e0891c" : "#ffe44a";
   const ink = "#5a3208";
   const ear = evo >= 2 ? 36 : 30;
@@ -676,9 +753,83 @@ function drawMushu(ctx, p, t, evo) {
 }
 
 function drawCat(ctx, p, t, evo) {
-  const fur = evo >= 4 ? "#fff6ff" : evo >= 3 ? "#f4f0ff" : evo >= 2 ? "#2a1438" : "#ffb6e4";
-  const ink = evo >= 2 && evo < 3 ? "#120814" : "#5a2040";
-  const inner = evo >= 2 && evo < 3 ? "#ff5cb8" : "#fff";
+  const fur = evo >= 4 ? "#fff4fc" : evo >= 3 ? "#ffd0ee" : evo >= 2 ? "#ff8ad4" : "#ffb6e4";
+  const ink = "#5a2040";
+  const inner = "#fff";
+  const s = 1 + evo * 0.06;
+  ctx.scale(s, s);
+  const tails = evo >= 4 ? 3 : 1;
+  ctx.strokeStyle = fur;
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
+  for (let i = 0; i < tails; i++) {
+    const off = (i - (tails - 1) / 2) * 8;
+    ctx.beginPath();
+    ctx.moveTo(10, 10);
+    ctx.quadraticCurveTo(22 + off, -4 + Math.sin(t / 9 + i) * 5, 8 + off, 18);
+    ctx.stroke();
+  }
+  oval(ctx, 0, 12, 14, 11, fur, ink, 1.2);
+  oval(ctx, 0, -8, 13, 12, fur, ink, 1.2);
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.moveTo(-11, -14);
+  ctx.lineTo(-14, -28);
+  ctx.lineTo(-3, -16);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(11, -14);
+  ctx.lineTo(14, -28);
+  ctx.lineTo(3, -16);
+  ctx.fill();
+  ctx.fillStyle = "#ff8ad4";
+  ctx.beginPath();
+  ctx.moveTo(-10, -16);
+  ctx.lineTo(-12, -24);
+  ctx.lineTo(-5, -16);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(10, -16);
+  ctx.lineTo(12, -24);
+  ctx.lineTo(5, -16);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.1;
+  ctx.beginPath();
+  ctx.moveTo(-6, -2);
+  ctx.lineTo(-18, -6);
+  ctx.moveTo(-6, 0);
+  ctx.lineTo(-18, 2);
+  ctx.moveTo(6, -2);
+  ctx.lineTo(18, -6);
+  ctx.moveTo(6, 0);
+  ctx.lineTo(18, 2);
+  ctx.stroke();
+  eye(ctx, -4.5, -9, 2.8, 3.4, true);
+  eye(ctx, 4.5, -9, 2.8, 3.4, true);
+  ctx.fillStyle = "#ff4da0";
+  ctx.beginPath();
+  ctx.moveTo(0, -4);
+  ctx.lineTo(-2.4, -1);
+  ctx.lineTo(2.4, -1);
+  ctx.fill();
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.ellipse(-10, 14, 4, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(10, 14, 4, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (evo >= 2) {
+    ctx.strokeStyle = "rgba(255,180,220,.7)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -8, 16, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  if (evo >= 3) {
+    for (let i = 0; i < 4; i++) star(ctx, Math.cos(t / 10 + i) * 18, Math.sin(t / 10 + i) * 12 - 8, 2.2, "#fff");
+  }
+  return;
+  const _dead = evo;
 
   const tails = evo >= 4 ? 5 : evo >= 3 ? 3 : 1;
   ctx.strokeStyle = evo >= 2 ? "#c9f" : "#ff7ac8";
