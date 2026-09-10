@@ -40,11 +40,11 @@ Personajes **propios**. No hay marcas de terceros. Arquetipos (isla, criatura, d
 
 | | Nombre | Rol | Evoluciona a |
 |:--|:--|:--|:--|
-| 01 | **Lani** | Exploradora Ohana | Guardiana → Alma de Hoku → GOD |
-| 02 | **Tiko** | Experimento azul | Berserk → MAX → GOD |
-| 03 | **Koa** | Dragón del volcán | Guardia → Gran Dragón → GOD |
+| 01 | **Kilo** | Exploradora Ohana | Super Kilo → KILO GOD |
+| 02 | **Glitch** | Experimento azul | Ñam-626 → GLITCH GOD |
+| 03 | **Mucho** | Dragón de bolsillo | Mucho Fuego → MUCHO GOD |
 | 04 | **Bellota** | Guardiana del roble | Tormenta de nueces → GOD |
-| 05 | **Frita** | Palito crujiente | Capa kétchup → GOD |
+| 05 | **Capitán Kétchup** | Palito con rango | Extra Crujiente → KÉtchup GOD |
 
 Cinco formas: **Bebé · Base · Evo · Final · GOD**. XP 18 / 40 / 70 / 110. O pulsa **E** con la barra llena.
 

@@ -1,24 +1,24 @@
 import { vfxSprite } from "../characters/sprites.js";
 
 export const ABILITY_DEFS = {
-  ukulele: { name: "Nota Ohana", key: "J", cd: 520, color: "#ffb347" },
-  hula: { name: "Aro Hula", key: "K", cd: 1400, color: "#ff5ad5" },
-  ohana: { name: "Pulso Ohana", key: "L", cd: 3200, color: "#ffd36a" },
-  dash: { name: "Plasma Tiko", key: "J", cd: 480, color: "#6af" },
-  claws: { name: "Garras", key: "K", cd: 700, color: "#9cf" },
-  exp626: { name: "Ráfaga Tiko", key: "L", cd: 2600, color: "#49f" },
+  ukulele: { name: "Ukeleleazo", key: "J", cd: 480, color: "#ffb347" },
+  hula: { name: "Hula-zarpazo", key: "K", cd: 1280, color: "#ff5ad5" },
+  ohana: { name: "Ohana GO", key: "L", cd: 2800, color: "#ffd36a" },
+  dash: { name: "Plasma Ñam", key: "J", cd: 440, color: "#6af" },
+  claws: { name: "Arañazo", key: "K", cd: 620, color: "#9cf" },
+  exp626: { name: "Ráfaga Ñam", key: "L", cd: 2400, color: "#49f" },
   shock: { name: "Chispa", key: "J", cd: 420, color: "#ffe14a" },
   quick: { name: "Ataque Rápido", key: "K", cd: 650, color: "#fff3a0" },
   thunder: { name: "Trueno", key: "L", cd: 2400, color: "#9cf" },
-  breath: { name: "Bola de fuego", key: "J", cd: 540, color: "#ff6a2a" },
-  wing: { name: "Aletazo", key: "K", cd: 800, color: "#f84" },
-  rage: { name: "Ira del dragón", key: "L", cd: 3000, color: "#f30" },
-  acorn: { name: "Bellotazo", key: "J", cd: 420, color: "#c4783a" },
-  scramble: { name: "Correbellota", key: "K", cd: 650, color: "#e8b07a" },
-  nutstorm: { name: "Tormenta", key: "L", cd: 2400, color: "#ffe6a0" },
-  salt: { name: "Sal cristal", key: "J", cd: 400, color: "#fff3c0" },
-  ketchup: { name: "Chorro kétchup", key: "K", cd: 700, color: "#e23b3b" },
-  fryer: { name: "Freidora", key: "L", cd: 3200, color: "#ffd36a" },
+  breath: { name: "Estornudo picante", key: "J", cd: 500, color: "#ff6a2a" },
+  wing: { name: "Aletazo", key: "K", cd: 740, color: "#f84" },
+  rage: { name: "Mucho fuego", key: "L", cd: 2700, color: "#f30" },
+  acorn: { name: "Bellotazo", key: "J", cd: 380, color: "#c4783a" },
+  scramble: { name: "Correbellota", key: "K", cd: 580, color: "#e8b07a" },
+  nutstorm: { name: "Granizada de nueces", key: "L", cd: 2200, color: "#ffe6a0" },
+  salt: { name: "Sal al cubo", key: "J", cd: 360, color: "#fff3c0" },
+  ketchup: { name: "Chorro kétchup", key: "K", cd: 620, color: "#e23b3b" },
+  fryer: { name: "¡A freír!", key: "L", cd: 2800, color: "#ffd36a" },
 };
 
 export function useAbility(game, index) {
@@ -314,7 +314,7 @@ function shot(game, extra) {
     w: extra.w ?? 16,
     h: extra.h ?? 12,
     life: extra.life ?? 55,
-    dmg: (extra.dmg ?? 16) * (1 + evo * 0.28),
+    dmg: (extra.dmg ?? 18) * (1 + evo * 0.32),
     color: extra.color ?? "#fff",
     homing: extra.homing || false,
     spin: extra.spin || false,
@@ -515,6 +515,8 @@ const CASTERS = {
   ketchup(g) {
     g.player.vx = 14 * g.player.facing;
     g.player.vy = -5;
+    shot(g, { color: "#e23b3b", vx: 12, w: 22, h: 14, dmg: 16, shape: "flame" });
+    if (g.player.evo >= 2) shot(g, { color: "#ff6a4a", vx: 9, vy: -2, w: 16, h: 12, dmg: 10, shape: "flame" });
     g.player.invuln = Math.max(g.player.invuln, 12);
     shot(g, { color: "#e23b3b", vx: 11, w: 22, h: 16, dmg: 13, shape: "flame" });
     g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#e23b3b" });

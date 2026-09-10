@@ -167,7 +167,7 @@ export function drawCharacter(ctx, p, cam, t) {
     p.evoBurst--;
   }
   ctx.scale(0.88 + evo * 0.11, 0.88 + evo * 0.11);
-  const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, ardilla: drawCat, frita: drawLilo };
+  const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, ardilla: drawCat, frita: drawKetchup };
   (drawers[p.id] || drawLilo)(ctx, p, t, evo);
   ctx.restore();
 }
@@ -286,6 +286,38 @@ function drawLilo(ctx, p, t, evo) {
       const a = t / 8 + i * 1.05;
       star(ctx, Math.cos(a) * 26, Math.sin(a) * 18 - 4, 3, "#fff8c8");
     }
+  }
+}
+
+function drawKetchup(ctx, p, t, evo) {
+  const fry = evo >= 3 ? "#ffe08a" : "#f0b43a";
+  const ink = "#7a3a08";
+  ctx.fillStyle = "#c81e1e";
+  ctx.beginPath();
+  ctx.moveTo(-4, -2);
+  ctx.quadraticCurveTo(-22, 8, -8, 22);
+  ctx.lineTo(10, 20);
+  ctx.quadraticCurveTo(6, 6, 6, 0);
+  ctx.fill();
+  ctx.fillStyle = fry;
+  ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(-7, -8, 14, 28, 5) : ctx.rect(-7, -8, 14, 28);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+  oval(ctx, 0, -14, 9, 8, "#f4c2a8", ink, 1.1);
+  eye(ctx, -3, -15, 2.1, 2.3);
+  eye(ctx, 3, -15, 2.1, 2.3);
+  ctx.fillStyle = "#c81e1e";
+  ctx.fillRect(-8, -22, 16, 6);
+  ctx.fillRect(-4, -28, 8, 7);
+  ctx.fillStyle = "#ffe66a";
+  ctx.fillRect(-2, -26, 4, 3);
+  if (evo >= 2) {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(-10, 6, 6, 4);
+    ctx.fillRect(4, 6, 6, 4);
   }
 }
 

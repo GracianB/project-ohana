@@ -301,8 +301,8 @@ function melee() {
   const p = game.player;
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
-  p.melee = 10; p.meleeBuf = 0;
-  const box = { x: p.x + (p.facing > 0 ? p.w : -28), y: p.y, w: 32, h: p.h };
+  p.melee = 12; p.meleeBuf = 0;
+  const box = { x: p.x + (p.facing > 0 ? p.w - 4 : -40), y: p.y - 6, w: 44 + p.evo * 6, h: p.h + 12 };
   const kind = { lilo: "leaf", stitch: "claws", ardilla: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
   game.slashes.push({
     x: p.x + p.w / 2 + p.facing * 12,
@@ -315,11 +315,11 @@ function melee() {
     w: 42 + p.evo * 10,
   });
   game.fx.emit(box.x + 10 * p.facing, box.y + 10, {
-    color: p.color, count: 8, size: 3, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.9, star: p.id === "ardilla",
+    color: p.color, count: 14, size: 3.4, angle: p.facing > 0 ? 0 : Math.PI, spread: 1.1, star: true,
   });
   for (const e of game.enemies) {
     if (aabb(box, e)) {
-      let d = 22 + p.evo * 8;
+      let d = 26 + p.evo * 10;
       if (e.boss) d = Math.ceil(d * 0.5);
       e.hp -= d;
       e.vx = (e.boss ? 3 : 8) * p.facing;
@@ -533,11 +533,11 @@ function updateEnemies() {
   for (const e of game.enemies) {
     if (e.kind === "flyer") e.vy += 0.12; else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
-    if (e.boss && e.dying) {
+    if (e.boss && e.fell) {
       e.vx = 0; e.vy = 0;
       e.x += ((ROOM_W / 2 - e.w / 2) - e.x) * 0.14;
       e.y += ((ROOM_H / 2 - 80 - e.h / 2) - e.y) * 0.14;
-      e.dying--;
+      e.dying = Math.max(0, (e.dying || 0) - 1);
       if (t % 3 === 0) {
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
         game.flash = 4;
@@ -599,28 +599,31 @@ function updateEnemies() {
     }
   }
   game.enemies = game.enemies.filter((e) => {
-    if (e.boss && e.dying) {
+    if (e.boss && e.hp <= 0) {
+      if (!e.fell) {
+        e.fell = true;
+        e.dying = 96;
+        e.hp = 0;
+        e.vx = 0;
+        e.vy = 0;
+        game.flash = 16;
+        game.shake = 22;
+        beep("win");
+        showNotification("EL NIDO CAE", "El monstruo se deshace.", "sala");
+        return true;
+      }
       if (e.dying > 0) return true;
-      game.won = true;
-      game.flash = 28;
-      game.shake = 18;
-      punch(e.x + e.w / 2, e.y + e.h / 2, "#ffe66a");
-      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 48, size: 7, up: 3.4, star: true });
-      dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+      if (!game.won) {
+        game.won = true;
+        game.flash = 28;
+        game.shake = 18;
+        punch(e.x + e.w / 2, e.y + e.h / 2, "#ffe66a");
+        game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 48, size: 7, up: 3.4, star: true });
+        dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+      }
       return false;
     }
     if (e.hp > 0) return true;
-    if (e.boss) {
-      e.dying = 96;
-      e.hp = 0;
-      e.vx = 0;
-      e.vy = 0;
-      game.flash = 16;
-      game.shake = 22;
-      beep("win");
-      showNotification("EL NIDO CAE", "El monstruo se deshace.", "sala");
-      return true;
-    }
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
     return false;
   });
