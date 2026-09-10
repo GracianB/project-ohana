@@ -17,10 +17,44 @@ export function drawBaby(ctx, p, t) {
   ctx.scale(0.82, 0.82);
   const id = p.id;
   if (id === "stitch") babyTiko(ctx, t);
-  else if (id === "ardilla") babyBellota(ctx, t);
+  else if (id === "cat") babyBellota(ctx, t);
   else if (id === "dragon") babyKoa(ctx, t);
   else if (id === "frita") babyFrita(ctx, t);
+  else if (id === "pikachu") babyPika(ctx, t);
   else babyLani(ctx, t);
+}
+
+function babyPika(ctx, t) {
+  const bob = Math.sin(t / 9) * 1.1;
+  ctx.translate(0, 3 + bob);
+  ctx.fillStyle = "#ffe44a";
+  ctx.beginPath();
+  ctx.ellipse(0, 4, 8.2, 7.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#333";
+  ctx.beginPath();
+  ctx.moveTo(-6, -8);
+  ctx.lineTo(-8, -18);
+  ctx.lineTo(-3, -8);
+  ctx.moveTo(6, -8);
+  ctx.lineTo(8, -18);
+  ctx.lineTo(3, -8);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(-2.6, 2, 2.1, 0, Math.PI * 2);
+  ctx.arc(2.6, 2, 2.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#222";
+  ctx.beginPath();
+  ctx.arc(-2.3, 2.2, 1, 0, Math.PI * 2);
+  ctx.arc(2.9, 2.2, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#e23b3b";
+  ctx.beginPath();
+  ctx.arc(-6, 6, 1.8, 0, Math.PI * 2);
+  ctx.arc(6, 6, 1.8, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function babyLani(ctx, t) {

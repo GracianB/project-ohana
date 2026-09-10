@@ -2,7 +2,7 @@ import { ROSTER } from "../characters/roster.js";
 import { drawCharacter } from "../characters/draw.js";
 import { playIntro } from "./intro.js";
 
-const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Glitch", dragon: "Cría Mucho", ardilla: "Bellotita", frita: "Palito" };
+const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Glitch", dragon: "Cría Mucho", pikachu: "Pichu", cat: "Michito", frita: "Palito" };
 let selectedId = "lilo";
 let tick = 0;
 let raf = 0;

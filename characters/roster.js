@@ -26,16 +26,29 @@ export const ROSTER = [
     ]
   },
   {
-    id: "ardilla", name: "Bellota", color: "#c4783a",
-    speed: 5.2, jumpPower: 12.4, maxJumps: 1, health: 70, w: 22, h: 22,
-    abilities: ["acorn", "scramble", "nutstorm"],
-    evoNames: ["Bellotita", "Bellota", "Guardiana del Roble", "Tormenta de nueces", "Bellota GOD"],
+    id: "pikachu", name: "Pika", color: "#ffe44a",
+    speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 24,
+    abilities: ["shock", "quick", "thunder"],
+    evoNames: ["Pichu", "Pika", "Chispa", "Rayo gordo", "PIKA GOD"],
     forms: [
-      { name: "Bellotita", color: "#e8b07a", speed: 5.2, jump: 12.4, jumps: 1, hp: 70, w: 22, h: 22 },
-      { name: "Bellota", color: "#c4783a", speed: 6.2, jump: 14.2, jumps: 2, hp: 95, w: 30, h: 28 },
-      { name: "Guardiana del Roble", color: "#8a4a18", speed: 6.8, jump: 15.0, jumps: 2, hp: 130, w: 36, h: 34 },
-      { name: "Tormenta de nueces", color: "#ffe6a0", speed: 7.6, jump: 16.2, jumps: 3, hp: 170, w: 42, h: 40 },
-      { name: "Bellota GOD", color: "#fff4d0", speed: 8.6, jump: 17.4, jumps: 3, hp: 230, w: 48, h: 46 }
+      { name: "Pichu", color: "#fff36a", speed: 4.8, jump: 12.2, jumps: 2, hp: 78, w: 22, h: 24 },
+      { name: "Pika", color: "#ffe44a", speed: 5.6, jump: 13.4, jumps: 2, hp: 100, w: 28, h: 30 },
+      { name: "Chispa", color: "#e0891c", speed: 6.4, jump: 14.4, jumps: 3, hp: 135, w: 34, h: 36 },
+      { name: "Rayo gordo", color: "#fff36a", speed: 7.2, jump: 15.6, jumps: 3, hp: 175, w: 40, h: 42 },
+      { name: "PIKA GOD", color: "#fffde8", speed: 8.2, jump: 16.8, jumps: 3, hp: 230, w: 46, h: 48 }
+    ]
+  },
+  {
+    id: "cat", name: "Michi", color: "#ffb6e4",
+    speed: 5.0, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
+    abilities: ["claw", "catdash", "lives"],
+    evoNames: ["Michito", "Michi", "Nube rosa", "Nueve vidas", "MICHI GOD"],
+    forms: [
+      { name: "Michito", color: "#ffd0ee", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
+      { name: "Michi", color: "#ffb6e4", speed: 5.8, jump: 13.2, jumps: 2, hp: 95, w: 28, h: 26 },
+      { name: "Nube rosa", color: "#ff8ad4", speed: 6.4, jump: 14.2, jumps: 3, hp: 125, w: 34, h: 32 },
+      { name: "Nueve vidas", color: "#f4f0ff", speed: 7.2, jump: 15.4, jumps: 3, hp: 165, w: 40, h: 38 },
+      { name: "MICHI GOD", color: "#fff6ff", speed: 8.2, jump: 16.6, jumps: 3, hp: 220, w: 46, h: 44 }
     ]
   },
   {

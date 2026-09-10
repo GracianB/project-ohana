@@ -303,7 +303,7 @@ function melee() {
   if (p.melee > 0) { p.meleeBuf = 8; return; }
   p.melee = 12; p.meleeBuf = 0;
   const box = { x: p.x + (p.facing > 0 ? p.w - 4 : -40), y: p.y - 6, w: 44 + p.evo * 6, h: p.h + 12 };
-  const kind = { lilo: "leaf", stitch: "claws", ardilla: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
+  const kind = { lilo: "leaf", stitch: "claws", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
   game.slashes.push({
     x: p.x + p.w / 2 + p.facing * 12,
     y: p.y + p.h * 0.45,
@@ -846,7 +846,7 @@ function setupSelect() {
   wrap.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
   addEventListener("keydown", (e) => {
     if (game.running) return;
-    if (e.key >= "1" && e.key <= "5") {
+    if (e.key >= "1" && e.key <= "6") {
       const c = ROSTER[Number(e.key) - 1];
       if (c) start(c);
     }

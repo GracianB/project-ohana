@@ -118,23 +118,23 @@ export function drawCharacter(ctx, p, cam, t) {
   const bob = idle
     ? Math.sin(t * 0.1) * 1.8
     : moving
-      ? Math.abs(step) * -3.1
-      : (p.vy || 0) < 0 ? -2 : 2;
+      ? Math.abs(step) * -1.4
+      : (p.vy || 0) < 0 ? -1 : 1.2;
   const tilt = moving
-    ? step * 0.16
+    ? step * 0.05
     : air
-      ? ((p.vy || 0) < 0 ? -0.12 : 0.18)
-      : Math.sin(t * 0.08) * 0.05;
+      ? ((p.vy || 0) < 0 ? -0.06 : 0.08)
+      : Math.sin(t * 0.08) * 0.03;
   const sx = air
-    ? ((p.vy || 0) < 0 ? 0.86 : 1.1)
+    ? ((p.vy || 0) < 0 ? 0.94 : 1.04)
     : moving
-      ? 1 + step * 0.07
-      : 1 + Math.sin(t * 0.1) * 0.035;
+      ? 1 + step * 0.03
+      : 1 + Math.sin(t * 0.1) * 0.02;
   const sy = air
-    ? ((p.vy || 0) < 0 ? 1.16 : 0.88)
+    ? ((p.vy || 0) < 0 ? 1.06 : 0.96)
     : moving
-      ? 1 - step * 0.07
-      : 1 - Math.sin(t * 0.1) * 0.035;
+      ? 1 - step * 0.03
+      : 1 - Math.sin(t * 0.1) * 0.02;
   if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) {
     ctx.save();
     ctx.globalAlpha = 0.35;
@@ -142,7 +142,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.save();
   ctx.translate(x + p.w / 2, y + p.h / 2 + bob);
   ctx.scale((p.facing || 1) * sx, sy);
-  ctx.rotate(tilt + atk * 0.35 * (p.facing || 1));
+  ctx.rotate(tilt + atk * 0.16 * (p.facing || 1));
   const spr = spriteFor(p.id, evo);
   if (spr) {
     ctx.fillStyle = "rgba(0,0,0,.32)";
@@ -207,7 +207,7 @@ export function drawCharacter(ctx, p, cam, t) {
     p.evoBurst--;
   }
   ctx.scale(0.88 + evo * 0.11, 0.88 + evo * 0.11);
-  const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, ardilla: drawCat, frita: drawKetchup };
+  const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawMushu, pikachu: drawPikachu, cat: drawCat, frita: drawKetchup };
   (drawers[p.id] || drawLilo)(ctx, p, t, evo);
   ctx.restore();
   if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();

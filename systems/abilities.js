@@ -2,14 +2,17 @@ import { vfxSprite } from "../characters/sprites.js";
 
 export const ABILITY_DEFS = {
   ukulele: { name: "Ukeleleazo", key: "J", cd: 480, color: "#ffb347" },
-  hula: { name: "Hula-zarpazo", key: "K", cd: 1280, color: "#ff5ad5" },
-  ohana: { name: "Ohana GO", key: "L", cd: 2800, color: "#ffd36a" },
+  hula: { name: "Hula-zarpazo", key: "K", cd: 1100, color: "#ff5ad5" },
+  ohana: { name: "Rayo Ohana", key: "L", cd: 2600, color: "#ffd36a" },
   dash: { name: "Plasma Ñam", key: "J", cd: 440, color: "#6af" },
   claws: { name: "Arañazo", key: "K", cd: 620, color: "#9cf" },
   exp626: { name: "Ráfaga Ñam", key: "L", cd: 2400, color: "#49f" },
   shock: { name: "Chispa", key: "J", cd: 420, color: "#ffe14a" },
   quick: { name: "Ataque Rápido", key: "K", cd: 650, color: "#fff3a0" },
-  thunder: { name: "Trueno", key: "L", cd: 2400, color: "#9cf" },
+  thunder: { name: "¡Trueno!", key: "L", cd: 2400, color: "#9cf" },
+  claw: { name: "Ovillo", key: "J", cd: 400, color: "#ff8ad4" },
+  catdash: { name: "Ronroneo", key: "K", cd: 1000, color: "#ffb6e4" },
+  lives: { name: "Rayo Michi", key: "L", cd: 2600, color: "#ff8ad4" },
   breath: { name: "Estornudo picante", key: "J", cd: 500, color: "#ff6a2a" },
   wing: { name: "Aletazo", key: "K", cd: 740, color: "#f84" },
   rage: { name: "Mucho fuego", key: "L", cd: 2700, color: "#f30" },
@@ -329,6 +332,54 @@ function boom(game, color, n) {
   game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color, count: n || 16, size: 4, up: 1.2, speed: 3.2 });
 }
 
+function ringNova(g, color, dmg, n) {
+  const p = g.player;
+  const cx = p.x + p.w / 2;
+  const cy = p.y + p.h / 2;
+  const count = n || 12 + p.evo;
+  const reach = 8.4 + p.evo * 0.6;
+  for (let i = 0; i < count; i++) {
+    const a = (Math.PI * 2 * i) / count;
+    g.projectiles.push({
+      x: cx, y: cy,
+      vx: Math.cos(a) * reach,
+      vy: Math.sin(a) * reach,
+      w: 20, h: 20, life: 40,
+      dmg: (dmg || 14) + p.evo * 3,
+      color, shape: "ring", owner: "player", trail: false,
+    });
+  }
+  const rad = 170 + p.evo * 18;
+  for (const e of g.enemies) {
+    if (Math.hypot(e.x + e.w / 2 - cx, e.y + e.h / 2 - cy) < rad) {
+      const hit = Math.round((dmg || 14) + p.evo * 3);
+      e.hp -= hit;
+      capEnemy(e, Math.sign(e.x - p.x) || 1 * 2.4);
+      if (g.nums) g.nums.add(e.x, e.y, "" + hit, color, hit >= 30);
+    }
+  }
+  boom(g, color, 18);
+}
+
+function skyStrike(g, color, dmg) {
+  const p = g.player;
+  const target = nearest(g);
+  const tx = target ? target.x + target.w / 2 : p.x + 260 * p.facing;
+  const ty = target ? target.y + target.h / 2 : p.y;
+  const hit = Math.round((dmg || 38) + p.evo * 12);
+  g.bolts.push({ x1: tx, y1: ty - 320, x2: tx, y2: ty, life: 18, dmg: hit });
+  g.bolts.push({ x1: tx - 22, y1: ty - 220, x2: tx, y2: ty, life: 12, dmg: hit * 0.35 });
+  g.bolts.push({ x1: tx + 22, y1: ty - 180, x2: tx, y2: ty, life: 10, dmg: hit * 0.25 });
+  if (target) {
+    target.hp -= hit;
+    capEnemy(target, Math.sign(target.x - p.x) * 3);
+    if (g.nums) g.nums.add(target.x, target.y, "" + hit, color || "#ffe66a", true);
+  }
+  g.fx.emit(tx, ty, { color: color || "#ffe66a", count: 28, size: 5, speed: 5, star: true, up: 2 });
+  g.shake = Math.min(18, (g.shake || 0) + 8);
+  g.flash = 8;
+}
+
 function capEnemy(e, vx) {
   e.vx = Math.max(-4.2, Math.min(4.2, vx));
   e.stun = Math.max(e.stun || 0, 22);
@@ -343,41 +394,15 @@ const CASTERS = {
     boom(g, "#ffb347", 10);
   },
   hula(g) {
-    g.player.invuln = Math.max(g.player.invuln, 16);
-    const n = 6 + g.player.evo;
-    for (let i = 0; i < n; i++) {
-      const a = (Math.PI * 2 * i) / n;
-      g.projectiles.push({
-        x: g.player.x + g.player.w / 2,
-        y: g.player.y + g.player.h / 2,
-        vx: Math.cos(a) * 4.2,
-        vy: Math.sin(a) * 4.2,
-        w: 18, h: 18, life: 28, dmg: 11 + g.player.evo * 3,
-        color: "#ff6ad5", shape: "ring", owner: "player", trail: false,
-      });
-    }
-    boom(g, "#ff6ad5", 12);
+    g.player.invuln = Math.max(g.player.invuln, 18);
+    ringNova(g, "#ff6ad5", 15, 14);
   },
   ohana(g) {
-    const heal = 22 + g.player.evo * 8;
+    const heal = 18 + g.player.evo * 6;
     g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
-    g.player.invuln = Math.max(g.player.invuln, 24);
+    g.player.invuln = Math.max(g.player.invuln, 20);
     if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
-    boom(g, "#ffd36a", 16);
-    for (let i = 0; i < 4 + g.player.evo; i++) {
-      const a = (Math.PI * 2 * i) / (4 + g.player.evo);
-      g.projectiles.push({
-        x: g.player.x + g.player.w / 2, y: g.player.y + g.player.h / 2,
-        vx: Math.cos(a) * 3.4, vy: Math.sin(a) * 3.4,
-        w: 16, h: 16, life: 30, dmg: 10 + g.player.evo * 3,
-        color: "#ffe66a", shape: "heart", owner: "player", spin: true,
-      });
-    }
-    for (const e of g.enemies) {
-      const dir = Math.sign(e.x - g.player.x) || 1;
-      capEnemy(e, dir * 3.2);
-      e.vy = -3;
-    }
+    skyStrike(g, "#ffe66a", 42);
   },
   dash(g) {
     shot(g, { color: "#66ccff", w: 28, h: 12, dmg: 20, vx: 13, shape: "bolt" });
@@ -385,18 +410,12 @@ const CASTERS = {
     boom(g, "#6af", 8);
   },
   claws(g) {
-    g.player.vx = 13 * g.player.facing;
-    g.player.invuln = Math.max(g.player.invuln, 10);
-    shot(g, { color: "#9cf", w: 28, h: 16, dmg: 16, vx: 12, shape: "claw" });
-    shot(g, { color: "#cfe", w: 22, h: 14, dmg: 10, vx: 9, vy: -2.2, shape: "claw" });
-    if (g.player.evo >= 2) shot(g, { color: "#fff", w: 20, h: 12, dmg: 8, vx: 8, vy: 2.2, shape: "claw" });
-    boom(g, "#9cf", 8);
+    g.player.vx = 10 * g.player.facing;
+    g.player.invuln = Math.max(g.player.invuln, 12);
+    ringNova(g, "#9cf", 14, 12);
   },
   exp626(g) {
-    g.player.vx = 8 * g.player.facing;
-    for (let i = -1; i <= 1; i++) shot(g, { color: "#49f", vy: i * 2.6, dmg: 18, w: 24, h: 12, shape: "bolt" });
-    if (g.player.evo >= 3) shot(g, { color: "#e8f7ff", vx: 7, dmg: 12, w: 18, shape: "orb" });
-    boom(g, "#49f", 14);
+    skyStrike(g, "#66ccff", 44);
   },
   shock(g) {
     shot(g, { color: "#ffe14a", w: 30, h: 14, dmg: 19, vx: 13, shape: "zap" });
@@ -405,26 +424,12 @@ const CASTERS = {
     boom(g, "#fff36a", 10);
   },
   quick(g) {
-    g.player.vx = 16 * g.player.facing;
-    g.player.invuln = Math.max(g.player.invuln, 10);
-    shot(g, { color: "#fff3a0", vx: 15, dmg: 12, life: 20, w: 26, h: 10, shape: "bolt" });
-    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#ffe44a" });
+    g.player.vx = 12 * g.player.facing;
+    g.player.invuln = Math.max(g.player.invuln, 12);
+    ringNova(g, "#fff36a", 13, 12);
   },
   thunder(g) {
-    const target = nearest(g);
-    const tx = target ? target.x + target.w / 2 : g.player.x + 200 * g.player.facing;
-    const ty = target ? target.y : g.player.y;
-    const dmg = 36 + g.player.evo * 10;
-    g.bolts.push({ x1: g.player.x + g.player.w / 2, y1: g.player.y, x2: tx, y2: ty, life: 14, dmg });
-    if (g.player.evo >= 2) {
-      g.bolts.push({ x1: g.player.x + g.player.w / 2, y1: g.player.y - 8, x2: tx - 16, y2: ty + 10, life: 10, dmg: dmg * 0.4 });
-    }
-    if (target) {
-      target.hp -= dmg;
-      capEnemy(target, Math.sign(target.x - g.player.x) * 2);
-      if (g.nums) g.nums.add(target.x, target.y, "" + dmg, "#9cf", true);
-    }
-    g.fx.emit(tx, ty, { color: "#fff36a", count: 16, size: 4, speed: 4, star: true });
+    skyStrike(g, "#ffe14a", 48);
   },
   breath(g) {
     shot(g, { color: "#ff6a2a", w: 26, h: 18, dmg: 20, vx: 9, shape: "flame" });
@@ -433,24 +438,12 @@ const CASTERS = {
     boom(g, "#ff6a2a", 10);
   },
   wing(g) {
-    g.player.vy = -8;
-    g.player.vx = 11 * g.player.facing;
-    g.player.gliding = 40;
-    shot(g, { color: "#ff8844", w: 28, h: 16, dmg: 14, vx: 9, shape: "wind" });
-    if (g.player.evo >= 2) shot(g, { color: "#ffe36a", w: 20, h: 12, dmg: 8, vx: 7, vy: 1.6, shape: "wind" });
+    g.player.vy = -7;
+    g.player.invuln = Math.max(g.player.invuln, 12);
+    ringNova(g, "#ff8844", 14, 12);
   },
   rage(g) {
-    const n = 10;
-    for (let i = 0; i < n; i++) {
-      const a = (Math.PI * 2 * i) / n;
-      g.projectiles.push({
-        x: g.player.x + g.player.w / 2, y: g.player.y + 8,
-        vx: Math.cos(a) * 6.2, vy: Math.sin(a) * 6.2,
-        w: 18, h: 16, life: 40, dmg: 16 + g.player.evo * 4,
-        color: i % 2 ? "#ff4a20" : "#ffd36a", shape: "flame", owner: "player", trail: true,
-      });
-    }
-    boom(g, "#f40", 16);
+    skyStrike(g, "#ff4a20", 46);
   },
   claw(g) {
     shot(g, { color: "#ff8ad4", vx: 11, w: 18, h: 18, dmg: 15, spin: true, shape: "yarn" });
@@ -459,18 +452,15 @@ const CASTERS = {
     boom(g, "#ff8ad4", 8);
   },
   catdash(g) {
-    g.player.vx = 14 * g.player.facing;
-    g.player.vy = -5;
-    g.player.invuln = Math.max(g.player.invuln, 12);
-    shot(g, { color: "#ff8ad4", vx: 11, w: 22, h: 16, dmg: 12, shape: "crescent" });
-    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#ff8ad4" });
+    g.player.invuln = Math.max(g.player.invuln, 14);
+    ringNova(g, "#ff8ad4", 13, 12);
   },
   lives(g) {
-    const heal = 36 + g.player.evo * 8;
+    const heal = 16 + g.player.evo * 5;
     g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
-    g.player.invuln = Math.max(g.player.invuln, 40);
     if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
-    boom(g, "#fff", 16);
+    skyStrike(g, "#ff8ad4", 40);
+    return;
     for (let i = 0; i < 6; i++) {
       const a = (Math.PI * 2 * i) / 6;
       g.projectiles.push({
@@ -487,10 +477,8 @@ const CASTERS = {
     boom(g, "#c4783a", 8);
   },
   scramble(g) {
-    g.player.vx = 16 * g.player.facing;
     g.player.invuln = Math.max(g.player.invuln, 12);
-    shot(g, { color: "#e8b07a", vx: 14, dmg: 12, life: 20, w: 20, h: 12, shape: "claw" });
-    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#c4783a" });
+    ringNova(g, "#e8b07a", 13, 12);
   },
   nutstorm(g) {
     const target = nearest(g);
@@ -513,29 +501,11 @@ const CASTERS = {
     boom(g, "#fff3c0", 8);
   },
   ketchup(g) {
-    g.player.vx = 14 * g.player.facing;
-    g.player.vy = -5;
-    shot(g, { color: "#e23b3b", vx: 12, w: 22, h: 14, dmg: 16, shape: "flame" });
-    if (g.player.evo >= 2) shot(g, { color: "#ff6a4a", vx: 9, vy: -2, w: 16, h: 12, dmg: 10, shape: "flame" });
     g.player.invuln = Math.max(g.player.invuln, 12);
-    shot(g, { color: "#e23b3b", vx: 11, w: 22, h: 16, dmg: 13, shape: "flame" });
-    g.ghosts.push({ x: g.player.x, y: g.player.y, w: g.player.w, h: g.player.h, life: 10, color: "#e23b3b" });
+    ringNova(g, "#e23b3b", 14, 12);
   },
   fryer(g) {
-    const heal = 30 + g.player.evo * 8;
-    g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
-    g.player.invuln = Math.max(g.player.invuln, 36);
-    if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
-    boom(g, "#ffd36a", 16);
-    for (let i = 0; i < 8; i++) {
-      const a = (Math.PI * 2 * i) / 8;
-      g.projectiles.push({
-        x: g.player.x + g.player.w / 2, y: g.player.y + g.player.h / 2,
-        vx: Math.cos(a) * 4.4, vy: Math.sin(a) * 4.4,
-        w: 16, h: 16, life: 32, dmg: 10 + g.player.evo * 3,
-        color: i % 2 ? "#f0b43a" : "#e23b3b", shape: "flame", owner: "player", trail: true,
-      });
-    }
+    skyStrike(g, "#ffd36a", 42);
   },
 };
 
