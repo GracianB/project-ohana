@@ -46,18 +46,24 @@ function drawCucaracho(ctx, e, t) {
 }
 
 function drawPhosquito(ctx, e, t) {
-  const flap = Math.sin(t / 3.2) * 8;
-  const s = e.baby ? 0.72 : 1;
+  const flap = Math.sin(t / 2.6) * 10;
+  const s = e.baby ? 0.78 : 1.15;
   ctx.scale(s, s);
-  ctx.fillStyle = "rgba(180,255,220,.45)";
-  ctx.beginPath(); ctx.ellipse(-10, -2, 10, 4 + flap * 0.15, -0.4, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(6, -4, 9, 3.5 + flap * 0.12, 0.3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#3a8a6a";
-  ctx.beginPath(); ctx.ellipse(0, 2, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "#1a4030"; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(6, 2); ctx.lineTo(16, 8); ctx.stroke();
-  ctx.fillStyle = "#111"; ctx.fillRect(-2, 0, 2.2, 2.2); ctx.fillRect(2, 0, 2.2, 2.2);
-  ctx.fillStyle = "#7ee7ff"; ctx.beginPath(); ctx.arc(0, 4, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(200,255,240,.55)";
+  ctx.beginPath(); ctx.ellipse(-12, -4, 13, 6 + flap * 0.2, -0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(8, -6, 12, 5 + flap * 0.18, 0.28, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "rgba(126,231,255,.45)"; ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.fillStyle = "#2a6a4a";
+  ctx.beginPath(); ctx.ellipse(0, 3, 9, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#7ee7ff";
+  ctx.beginPath(); ctx.arc(-2, 2, 2.2, 0, Math.PI * 2); ctx.arc(3, 2, 2.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#111";
+  ctx.beginPath(); ctx.arc(-2, 2, 1, 0, Math.PI * 2); ctx.arc(3, 2, 1, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#1a4030"; ctx.lineWidth = 2.4;
+  ctx.beginPath(); ctx.moveTo(8, 4); ctx.lineTo(20, 12); ctx.stroke();
+  ctx.fillStyle = "#c81e1e";
+  ctx.beginPath(); ctx.arc(20, 12, 2.4, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawPlanta(ctx, e, t) {

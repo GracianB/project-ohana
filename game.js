@@ -172,19 +172,19 @@ function makeFoe(x, y, kind, roomId, i, opts) {
   const hard = { hub: 0, beach: 1, cave: 1, ridge: 1, lab: 2, space: 2, jungle: 2, volcano: 3 }[roomId] || 1;
   const baby = !!(opts && opts.baby);
   if (kind === "phosquito") {
-    const hp = baby ? 12 : 20 + hard * 14;
+    const hp = baby ? 14 : 24 + hard * 14;
     return {
-      x, y, w: baby ? 16 : 22, h: baby ? 14 : 18,
-      vx: (i % 2 ? 1 : -1) * (1.6 + hard * 0.25),
-      vy: -0.4, hp, max: hp, kind, color: "#6ad0a8",
-      boss: false, shoot: 0, canSplit: !baby && hard >= 2, split: false, baby,
+      x, y: Math.min(y, 420), w: baby ? 22 : 32, h: baby ? 18 : 26,
+      vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.28),
+      vy: -0.6, hp, max: hp, kind, color: "#6ad0a8",
+      boss: false, shoot: 0, canSplit: !baby && hard >= 1 && Math.random() < 0.55, split: false, baby,
     };
   }
   if (kind === "planta") {
     const hp = 36 + hard * 18;
     return {
-      x, y, w: 30, h: 40, vx: 0, vy: 0, hp, max: hp, kind, color: "#e23b3d",
-      boss: false, shoot: 0, rooted: true, up: true, hide: 40 + i * 20,
+      x, y, w: 34, h: 48, vx: 0, vy: 0, hp, max: hp, kind, color: "#e23b3d",
+      boss: false, shoot: 0, rooted: true, up: true, hide: 40 + i * 20, plant: true,
     };
   }
   const hp = baby ? 16 : 26 + hard * 16;
@@ -192,7 +192,7 @@ function makeFoe(x, y, kind, roomId, i, opts) {
     x, y, w: baby ? 22 : 30, h: baby ? 14 : 18,
     vx: (i % 2 ? 1 : -1) * (1.2 + hard * 0.28),
     vy: 0, hp, max: hp, kind: "cucaracho", color: "#6a3a12",
-    boss: false, shoot: 0, canEvo: !baby && hard >= 1, evo: 0,
+    boss: false, shoot: 0, canEvo: !baby && Math.random() < (0.28 + hard * 0.12), evo: 0,
   };
 }
 
@@ -215,6 +215,17 @@ function loadRoom(id, fromDir) {
   game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
   game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => makeFoe(f[0], f[1], f[2], id, i));
+  for (const e of game.enemies) {
+    if (e.kind === "phosquito") continue;
+    let floor = null;
+    for (const plat of game.platforms) {
+      const mid = e.x + e.w / 2;
+      if (mid > plat.x && mid < plat.x + plat.w) {
+        if (!floor || plat.y > floor.y) floor = plat;
+      }
+    }
+    if (floor) e.y = floor.y - e.h;
+  }
   if (r.boss) game.enemies.push({ x: 740, y: 390, w: 120, h: 120, vx: 1.4, vy: 0, hp: 1280, max: 1280, kind: "boss", color: "#f36", boss: true, shoot: 0, phase: 1, slam: 0, dying: 0 });
   game.projectiles = [];
   game.bolts = [];
@@ -579,6 +590,10 @@ function updateEnemies() {
       const aggro = e.phase === 2 ? 0.12 : 0.07;
       e.vx += Math.sign((game.player.x - e.x) || 1) * aggro;
       e.vx = Math.max(-4.2, Math.min(4.2, e.vx));
+      if (t % 3 === 0) {
+        game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff6a4a", count: 4, size: 3.4, up: 0.6, speed: 2.2 });
+        game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 9, color: e.phase === 2 ? "#ff2040" : "#f36" });
+      }
       if (t % (e.phase === 2 ? 70 : 95) === 0) e.vy = -9;
       e.slam = (e.slam || 0) + 1;
       if (e.slam > (e.phase === 2 ? 140 : 190)) {
@@ -608,12 +623,21 @@ function updateEnemies() {
         }
       }
     }
-    if (e.kind === "cucaracho" && e.canEvo && !e.evo && e.hp < e.max * 0.42) {
+    if (e.kind === "cucaracho" && e.canEvo && e.evo === 0 && e.hp < e.max * 0.42) {
       e.evo = 1;
       e.w += 10; e.h += 6; e.hp = Math.round(e.max * 1.15); e.max = e.hp;
       e.vx *= 1.35; e.color = "#8a2010";
       game.fx.emit(e.x, e.y, { color: "#c45a18", count: 14, size: 4, up: 1.6 });
       showNotification("CUCARACHO+", "Ha mudado. Más cabreado.", "hurt");
+    } else if (e.kind === "cucaracho" && e.evo === 1 && !e.triedEvo2 && e.hp < e.max * 0.32) {
+      e.triedEvo2 = true;
+      if (Math.random() < 0.22) {
+        e.evo = 2;
+        e.w += 8; e.h += 4; e.hp = Math.round(e.max * 1.2); e.max = e.hp;
+        e.vx *= 1.2; e.color = "#c81818";
+        game.fx.emit(e.x, e.y, { color: "#ff4a20", count: 18, size: 5, up: 2, star: true });
+        showNotification("CUCARACHO++", "Raro. Ha mudado otra vez.", "hurt");
+      }
     }
     if (e.kind === "phosquito" && e.canSplit && !e.split && e.hp < e.max * 0.5) {
       e.split = true;
