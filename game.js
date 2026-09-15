@@ -843,9 +843,20 @@ function render() {
   }
   for (const plat of game.platforms) {
     const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
-    ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.fillRect(x + 8, y + 10, plat.w, plat.h);
+    // drop shadow
+    ctx.fillStyle = "rgba(0,0,0,.28)"; ctx.fillRect(x + 6, y + 12, plat.w, plat.h);
+    // body + depth (darken lower half)
     ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
+    ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.fillRect(x, y + Math.max(10, plat.h * 0.45), plat.w, plat.h);
+    // grassy/lit top cap
     ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 10);
+    ctx.fillStyle = "rgba(255,255,255,.14)"; ctx.fillRect(x, y, plat.w, 3);
+    // world-accent glowing edge
+    ctx.globalAlpha = 0.5; ctx.fillStyle = world.edge || "#fff"; ctx.fillRect(x, y - 3, plat.w, 3); ctx.globalAlpha = 1;
+    ctx.fillStyle = world.edge || "#fff"; ctx.fillRect(x, y - 1, plat.w, 2);
+    // side bevels
+    ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.fillRect(x, y, 2, plat.h);
+    ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x + plat.w - 2, y, 2, plat.h);
   }
   const r = room();
   drawSigns(ctx, r, game.cam, t, game.player.evo);
