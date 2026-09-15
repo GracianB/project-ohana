@@ -13,7 +13,7 @@ function stairs(x) {
 }
 
 export const MAP_LAYOUT = [
-  [null, "ridge", "space", null, null, null],
+  [null, "ridge", "space", "reef", null, null],
   ["lab", "cave", "hub", "beach", "jungle", null],
   [null, null, null, null, "volcano", "boss"]
 ];
@@ -74,13 +74,21 @@ export const ROOMS = {
   },
   space: {
     id: "space", name: "Órbita", short: "Órbita", world: 3,
-    doors: { left: "ridge", down: "hub", right: null, up: null },
+    doors: { left: "ridge", down: "hub", right: "reef", up: null },
     needEvo: 1,
     pit: true,
-    hint: "Pozo central ABAJO = Claro.",
+    hint: "Pozo central ABAJO = Claro. ESTE = Arrecife secreto.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]],
-    foes: [[500, 200, "phosquito"], [1080, 200, "planta"], [1340, 200, "phosquito"]],
+    foes: [[500, 200, "phosquito"], [1080, 200, "planta"], [1340, 280, "medusa"]],
     orbs: [[640, 390], [1120, 260]]
+  },
+  reef: {
+    id: "reef", name: "Arrecife Estelar", short: "Arrecife", world: 3,
+    doors: { left: "space", right: null, up: null, down: null },
+    hint: "SECRETO. Cristales de sobra. Las medusas sueltan orbes al caer.",
+    plats: [[0, 810, 1600, 90], [200, 660, 190, 18], [560, 520, 190, 18], [920, 640, 190, 18], [1220, 480, 190, 18], [740, 360, 180, 18]],
+    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [780, 170, "phosquito"]],
+    orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]]
   },
   volcano: {
     id: "volcano", name: "Caldera", short: "Caldera", world: 2,

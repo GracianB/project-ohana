@@ -15,6 +15,7 @@ export function drawEnemy(ctx, e, cam, t) {
   if (e.kind === "boss") drawBoss(ctx, e, t);
   else if (e.kind === "phosquito") drawPhosquito(ctx, e, t);
   else if (e.kind === "planta") drawPlanta(ctx, e, t);
+  else if (e.kind === "medusa") drawMedusa(ctx, e, t);
   else drawCucaracho(ctx, e, t);
   ctx.filter = "none";
   ctx.fillStyle = "#000"; ctx.fillRect(-e.w / 2, -e.h / 2 - 10, e.w, 5);
@@ -89,6 +90,40 @@ function drawPlanta(ctx, e, t) {
   ctx.beginPath(); ctx.arc(-5, -20, 3.2, 0, Math.PI * 2); ctx.arc(5, -20, 3.2, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#111";
   ctx.beginPath(); ctx.arc(-5, -20, 1.4, 0, Math.PI * 2); ctx.arc(5, -20, 1.4, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawMedusa(ctx, e, t) {
+  const pulse = Math.sin(t / 8 + e.x) * 0.14;
+  // soft glow halo
+  ctx.fillStyle = "rgba(255,140,215,.16)";
+  ctx.beginPath(); ctx.arc(0, -2, 22, 0, Math.PI * 2); ctx.fill();
+  // bell (dome)
+  const grad = ctx.createLinearGradient(0, -18, 0, 4);
+  grad.addColorStop(0, "rgba(255,180,235,.9)");
+  grad.addColorStop(1, "rgba(180,120,220,.55)");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, -4, 16, 13 - pulse * 6, 0, Math.PI, 0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "rgba(190,245,255,.7)"; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.ellipse(0, -4, 16, 13 - pulse * 6, 0, Math.PI, 0); ctx.stroke();
+  // inner core
+  ctx.fillStyle = "rgba(190,245,255,.4)";
+  ctx.beginPath(); ctx.arc(0, -6, 6, 0, Math.PI * 2); ctx.fill();
+  // tentacles
+  ctx.strokeStyle = "rgba(255,150,220,.72)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+  for (let i = -2; i <= 2; i++) {
+    const tx = i * 5.5;
+    ctx.beginPath();
+    ctx.moveTo(tx, -2);
+    ctx.quadraticCurveTo(tx + Math.sin(t / 6 + i) * 5, 11, tx + Math.sin(t / 5 + i) * 7, 24);
+    ctx.stroke();
+  }
+  ctx.lineCap = "butt";
+  // eyes
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-4, -6, 2.4, 0, Math.PI * 2); ctx.arc(4, -6, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#221"; ctx.beginPath(); ctx.arc(-4, -6, 1.1, 0, Math.PI * 2); ctx.arc(4, -6, 1.1, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawBoss(ctx, e, t) {

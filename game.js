@@ -191,6 +191,14 @@ function makeFoe(x, y, kind, roomId, i, opts) {
       boss: false, shoot: 0, rooted: true, up: true, hide: 40 + i * 20, plant: true,
     };
   }
+  if (kind === "medusa") {
+    const hp = baby ? 20 : 32 + hard * 12;
+    return {
+      x, y: y || 340, w: 30, h: 34, vx: (i % 2 ? 1 : -1) * 0.5, vy: 0,
+      hp, max: hp, kind: "medusa", color: "#ff8ad0",
+      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: (y || 340), dropsOrb: true,
+    };
+  }
   const hp = baby ? 16 : 26 + hard * 16;
   return {
     x, y, w: baby ? 22 : 30, h: baby ? 14 : 18,
@@ -220,7 +228,7 @@ function loadRoom(id, fromDir) {
   game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => makeFoe(f[0], f[1], f[2], id, i));
   for (const e of game.enemies) {
-    if (e.kind === "phosquito") continue;
+    if (e.kind === "phosquito" || e.kind === "medusa") continue;
     let floor = null;
     for (const plat of game.platforms) {
       const mid = e.x + e.w / 2;
@@ -570,7 +578,7 @@ function updateEnemies() {
   if (!game.player) return;
   for (const e of game.enemies) {
     if (e.kind === "phosquito") e.vy += 0.08;
-    else if (e.kind === "planta") e.vy = 0;
+    else if (e.kind === "planta" || e.kind === "medusa") e.vy = 0;
     else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
     if (e.boss && e.fell) {
@@ -663,8 +671,19 @@ function updateEnemies() {
       if (e.y > 720) e.vy = -1.8;
       e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
     }
+    if (e.kind === "medusa") {
+      e.vy = 0;
+      e.bob = (e.bob || 0) + 0.04;
+      if (e.baseY == null) e.baseY = e.y;
+      e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.15; // drift toward player height, slowly
+      e.y = e.baseY + Math.sin(e.bob) * 40;
+      if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.012;
+      e.vx = Math.max(-1.3, Math.min(1.3, e.vx));
+      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (t % 8 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff9ad8", count: 1, size: 2, up: 0.4, speed: 0.5, life: 14 });
+    }
     for (const plat of game.platforms) {
-      if (e.kind === "phosquito") break;
+      if (e.kind === "phosquito" || e.kind === "medusa") break;
       if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
         if (e.y + e.h > plat.y && e.y + e.h < plat.y + 28 && e.vy >= 0) { e.y = plat.y - e.h; e.vy = 0; }
       }
@@ -712,6 +731,10 @@ function updateEnemies() {
     }
     if (e.hp > 0) return true;
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
+    if (e.dropsOrb) {
+      game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
+    }
     return false;
   });
 }
