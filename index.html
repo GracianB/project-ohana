@@ -15,7 +15,7 @@
   <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=ohana-10" />
+  <link rel="stylesheet" href="style.css?v=ohana-11" />
   <link rel="stylesheet" href="hud.css?v=ohana-1" />
   <link rel="stylesheet" href="ending.css?v=ohana-4" />
   <link rel="stylesheet" href="intro.css?v=ohana-1" />
@@ -64,8 +64,22 @@
   <div id="ability-bar"></div>
   <canvas id="game" width="1280" height="720"></canvas>
   <div id="touch">
-    <div class="col"><button class="touch-btn" data-k="a">←</button><button class="touch-btn" data-k="d">→</button></div>
-    <div class="col"><button class="touch-btn" data-k=" ">▲</button><button class="touch-btn" data-k="shift">⇢</button><button class="touch-btn" data-k="f">F</button></div>
+    <div class="col move">
+      <button class="touch-btn" data-k="a" aria-label="Izquierda">←</button>
+      <button class="touch-btn" data-k="d" aria-label="Derecha">→</button>
+    </div>
+    <div class="col act">
+      <div class="act-row powers">
+        <button class="touch-btn pw" data-k="j" aria-label="Poder J"><b>J</b></button>
+        <button class="touch-btn pw" data-k="k" aria-label="Poder K"><b>K</b></button>
+        <button class="touch-btn pw" data-k="l" aria-label="Poder L"><b>L</b></button>
+      </div>
+      <div class="act-row main">
+        <button class="touch-btn" data-k="f" aria-label="Golpe">F</button>
+        <button class="touch-btn" data-k="shift" aria-label="Dash">⇢</button>
+        <button class="touch-btn jump" data-k=" " aria-label="Saltar">▲</button>
+      </div>
+    </div>
   </div>
   <main id="char-select">
     <nav class="brand-bar" aria-label="Ecosystem">
@@ -114,10 +128,10 @@
   <div id="map-overlay"><div class="panel"><h2>Archipiélago</h2><div id="map-grid"></div><p class="note">M o Esc cierra · verde = visto · cian = aquí</p></div></div>
   <div id="pause-overlay"><div class="panel slim"><h2>Pausa</h2><button type="button" id="btn-resume">Seguir</button><button type="button" id="btn-quit">Menú</button></div></div>
   <div id="notification-container"></div>
-  <script type="module" src="game.js?v=ohana-10"></script>
-  <script type="module" src="systems/title.js?v=ohana-10"></script>
-  <script type="module" src="systems/hud.js?v=ohana-10"></script>
-  <script type="module" src="systems/ending.js?v=ohana-10"></script>
-  <script type="module" src="systems/demo.js?v=ohana-10"></script>
+  <script type="module" src="game.js?v=ohana-11"></script>
+  <script type="module" src="systems/title.js?v=ohana-11"></script>
+  <script type="module" src="systems/hud.js?v=ohana-11"></script>
+  <script type="module" src="systems/ending.js?v=ohana-11"></script>
+  <script type="module" src="systems/demo.js?v=ohana-11"></script>
 </body>
 </html>

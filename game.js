@@ -16,6 +16,10 @@ let t = 0;
 const XP_NEED = [0, 55, 140, 260, 420];
 let muted = false;
 let paused = false;
+// Accessibility: honor prefers-reduced-motion (dampen shake + flashes)
+const RMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+let reduceMotion = RMQ.matches;
+try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches; }); } catch (_) {}
 
 const game = {
   player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
@@ -796,7 +800,8 @@ function drawCrystal(o) {
 function render() {
   if (!game.player) return;
   const world = WORLDS[game.worldIndex] || WORLDS[0];
-  ctx.save(); ctx.translate((Math.random() - 0.5) * game.shake, (Math.random() - 0.5) * game.shake);
+  const shake = reduceMotion ? 0 : game.shake;
+  ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
   const grounds = game.platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
   for (let i = 0; i < grounds.length - 1; i++) {
@@ -854,7 +859,7 @@ function render() {
   vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
   ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
   if (game.fading > 0) { ctx.fillStyle = "rgba(0,0,0," + (game.fading / 12) + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-  if (game.flash > 0) { ctx.fillStyle = "rgba(255,255,220," + (game.flash / 20) + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+  if (game.flash > 0) { const fa = (reduceMotion ? Math.min(game.flash, 5) : game.flash) / 20; ctx.fillStyle = "rgba(255,255,220," + fa + ")"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
   if (canvas.width >= 820) drawMinimap();
 }
 function renderAbilityBar() {
@@ -912,6 +917,18 @@ function updateHUD() {
     if (!def || !fill) return;
     const left = Math.max(0, (p.cds[slot.dataset.id] || 0) - now);
     fill.style.width = (100 - (left / def.cd) * 100) + "%";
+  });
+  // Touch power buttons: label + cooldown ring
+  const PWIDX = { j: 0, k: 1, l: 2 };
+  document.querySelectorAll(".touch-btn.pw").forEach((btn) => {
+    const id = (p.abilities || [])[PWIDX[btn.dataset.k]];
+    const def = id && ABILITY_DEFS[id];
+    if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); return; }
+    btn.classList.remove("off");
+    if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
+    const left = Math.max(0, (p.cds[id] || 0) - now);
+    btn.classList.toggle("cooling", left > 0);
+    btn.style.setProperty("--cd", Math.max(0, 100 - (left / def.cd) * 100) + "%");
   });
 }
 function loop() {
@@ -985,14 +1002,32 @@ function setupSelect() {
       setPrompt("", false);
     }
   });
+  const POWER_KEY = { j: 0, k: 1, l: 2 };
+  const momentary = { shift: 1, f: 1, j: 1, k: 1, l: 1 };
   document.querySelectorAll(".touch-btn").forEach((btn) => {
     const k = btn.dataset.k;
-    const down = (ev) => { ev.preventDefault(); if (k === "shift") dash(); else if (k === "f") melee(); else keys[k] = true; };
-    const up = (ev) => { ev.preventDefault(); if (k !== "shift" && k !== "f") keys[k] = false; };
+    const down = (ev) => {
+      ev.preventDefault();
+      btn.classList.add("held");
+      if (k === "shift") dash();
+      else if (k === "f") melee();
+      else if (k in POWER_KEY) { if (game.running && !paused && !overlayOpen()) useAbility(game, POWER_KEY[k]); }
+      else keys[k] = true;
+    };
+    const up = (ev) => { ev.preventDefault(); btn.classList.remove("held"); if (!momentary[k]) keys[k] = false; };
     btn.addEventListener("pointerdown", down);
     btn.addEventListener("pointerup", up);
     btn.addEventListener("pointercancel", up);
     btn.addEventListener("pointerleave", up);
+  });
+  // Tappable ability slots (desktop + touch): cast by clicking the HUD pill.
+  const abilityBar = document.getElementById("ability-bar");
+  abilityBar?.addEventListener("pointerdown", (ev) => {
+    const slot = ev.target.closest(".ability-slot");
+    if (!slot || !game.running || paused || overlayOpen()) return;
+    ev.preventDefault();
+    const idx = (game.player && game.player.abilities || []).indexOf(slot.dataset.id);
+    if (idx >= 0) useAbility(game, idx);
   });
 }
 setupSelect();
