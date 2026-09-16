@@ -119,53 +119,88 @@ function doorLabel(id, arrow, evo) {
   return arrow + " " + (dest.short || dest.name || id);
 }
 
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 export function drawSigns(ctx, room, cam, t, evo) {
   if (!room || !cam) return;
-  const pulse = 0.45 + Math.sin(t / 8) * 0.2;
-  function mark(wx, wy, label, lock) {
-    const x = wx - cam.x, y = wy - cam.y;
-    ctx.fillStyle = lock ? "rgba(80,16,24," + pulse + ")" : "rgba(10,40,50," + pulse + ")";
-    ctx.fillRect(x, y, 108, 36);
-    ctx.strokeStyle = lock ? "#ff8aa0" : "#7ee7ff";
-    ctx.strokeRect(x + 1, y + 1, 106, 34);
-    ctx.fillStyle = "#fff";
-    ctx.font = "800 12px Outfit,sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "alphabetic";
-    ctx.fillText(label, x + 54, y + 23);
+  const pulse = 0.5 + Math.sin(t / 8) * 0.18;
+  const stage = evo || 0;
+
+  // One clean, glowing sign per door. `anchor` = "left" | "right" | "center".
+  function sign(wx, wy, arrow, destId, anchor) {
+    const dest = ROOMS[destId];
+    const lock = dest && dest.needEvo != null && stage < dest.needEvo;
+    const label = dest ? (lock ? ("Forma " + (dest.needEvo + 1)) : (dest.short || dest.name || destId)) : destId;
+    const text = arrow + "  " + label;
+    ctx.save();
+    ctx.font = "800 14px Outfit, system-ui, sans-serif";
+    const w = Math.max(92, ctx.measureText(text).width + 28);
+    const h = 32;
+    let x = wx - cam.x;
+    if (anchor === "right") x -= w;
+    else if (anchor === "center") x -= w / 2;
+    const y = wy - cam.y;
+    const c = lock ? "255,150,170" : "126,231,255";
+    ctx.shadowColor = "rgba(" + c + "," + (0.55 * pulse) + ")";
+    ctx.shadowBlur = 18;
+    ctx.fillStyle = "rgba(8,16,22,.85)";
+    rrect(ctx, x, y, w, h, 11); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = "rgba(" + c + "," + (0.55 + pulse * 0.4) + ")";
+    ctx.lineWidth = 1.5;
+    rrect(ctx, x + 0.75, y + 0.75, w - 1.5, h - 1.5, 10); ctx.stroke();
+    ctx.fillStyle = lock ? "#ffc2cd" : "#eafcff";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, x + w / 2, y + h / 2 + 1);
+    ctx.restore();
   }
   function wall(x, y, w, h) {
     ctx.fillStyle = "rgba(12,14,20,.88)";
     ctx.fillRect(x - cam.x, y - cam.y, w, h);
-    ctx.fillStyle = "rgba(90,100,120,.45)";
+    ctx.fillStyle = "rgba(90,100,120,.4)";
     for (let i = 0; i < w; i += 20) ctx.fillRect(x - cam.x + i, y - cam.y, 8, h);
-    ctx.fillStyle = "#8b98a8";
-    ctx.font = "700 11px Outfit,sans-serif";
+  }
+  // Pit indicator (single): a pulsing chevron + label at the bottom-centre gap.
+  function pit(label, deadly) {
+    const x = 800 - cam.x, y = ROOM_H - 60 - cam.y;
+    const c = deadly ? "255,120,140" : "126,231,255";
+    ctx.save();
     ctx.textAlign = "center";
-    ctx.fillText("MURO", x - cam.x + w / 2, y - cam.y + h / 2);
+    // chevrons pointing down
+    ctx.strokeStyle = "rgba(" + c + "," + (0.5 + pulse * 0.5) + ")";
+    ctx.lineWidth = 4; ctx.lineCap = "round";
+    for (let i = 0; i < 3; i++) {
+      const yy = y + 14 + i * 12 + Math.sin(t / 6 + i) * 2;
+      ctx.beginPath(); ctx.moveTo(x - 16, yy); ctx.lineTo(x, yy + 10); ctx.lineTo(x + 16, yy); ctx.stroke();
+    }
+    ctx.lineCap = "butt";
+    ctx.font = "800 15px Outfit, system-ui, sans-serif";
+    ctx.fillStyle = "rgba(" + c + ",1)";
+    ctx.fillText(label, x, y);
+    ctx.restore();
   }
-  const stage = evo || 0;
-  if (room.doors.right) {
-    const dest = ROOMS[room.doors.right];
-    mark(ROOM_W - 122, 360, doorLabel(room.doors.right, "→", stage), dest && dest.needEvo != null && stage < dest.needEvo);
-  } else wall(ROOM_W - 16, 80, 20, 700);
-  if (room.doors.left) {
-    const dest = ROOMS[room.doors.left];
-    mark(14, 360, doorLabel(room.doors.left, "←", stage), dest && dest.needEvo != null && stage < dest.needEvo);
-  } else wall(-4, 80, 20, 700);
-  if (room.doors.up) {
-    const dest = ROOMS[room.doors.up];
-    mark(746, 16, doorLabel(room.doors.up, "↑", stage), dest && dest.needEvo != null && stage < dest.needEvo);
-  }
+
+  if (room.doors.right) sign(ROOM_W - 40, 356, "→", room.doors.right, "right"); else wall(ROOM_W - 16, 80, 20, 700);
+  if (room.doors.left) sign(40, 356, "←", room.doors.left, "left"); else wall(-4, 80, 20, 700);
+  if (room.doors.up) sign(800, 22, "↑", room.doors.up, "center");
+
+  // Down / pit: exactly ONE indicator.
   if (room.doors.down) {
-    const dest = ROOMS[room.doors.down];
-    mark(746, ROOM_H - 50, doorLabel(room.doors.down, "↓", stage), dest && dest.needEvo != null && stage < dest.needEvo);
-  }
-  if (room.pit) {
-    ctx.fillStyle = room.doors.down ? "rgba(126,231,255," + pulse + ")" : "rgba(255,120,140," + pulse + ")";
-    ctx.font = "800 14px Outfit,sans-serif";
-    ctx.textAlign = "center";
-    const dest = room.doors.down && ROOMS[room.doors.down];
-    ctx.fillText(dest ? ("ABAJO  " + (dest.short || dest.name)) : "POZO MORTAL", 800 - cam.x, 790 - cam.y);
+    if (room.pit) {
+      const dest = ROOMS[room.doors.down];
+      pit((dest && (dest.short || dest.name)) || "ABAJO", false);
+    } else {
+      sign(800, ROOM_H - 56, "↓", room.doors.down, "center");
+    }
+  } else if (room.pit) {
+    pit("POZO MORTAL", true);
   }
 }

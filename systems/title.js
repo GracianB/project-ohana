@@ -39,8 +39,8 @@ function paintPortraits() {
         melee: 0,
       };
       c.save();
-      c.translate(cv.width / 2, cv.height / 2 + 6);
-      c.scale(0.78, 0.78);
+      c.translate(cv.width / 2, cv.height / 2 + 14);
+      c.scale(0.98, 0.98);
       dummy.x = -16;
       dummy.y = -16;
       drawCharacter(c, dummy, { x: 0, y: 0 }, tick);
@@ -88,7 +88,7 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="196" height="118"></canvas></div>');
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
       const role = document.createElement("div");
       role.className = "role";
       role.textContent = ROLES[def.id] || "Bebé";

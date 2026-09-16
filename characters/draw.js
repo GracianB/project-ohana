@@ -508,7 +508,9 @@ function drawPikachu(ctx, p, t, evo) {
   ctx.lineTo(26, 8);
   ctx.fill();
   oval(ctx, 0, 8, 13, 11, body, ink, 1.3);
+  oval(ctx, 0, 11, 8.5, 7, "rgba(255,255,255,.18)");
   oval(ctx, 0, -6, 12, 11, body, ink, 1.3);
+  shine(ctx, -5, -9, 4.2, 2.6);
   ctx.fillStyle = body;
   ctx.beginPath();
   ctx.moveTo(-7, -12);
@@ -531,6 +533,15 @@ function drawPikachu(ctx, p, t, evo) {
   ctx.lineTo(4, -32 - evo * 2);
   ctx.lineTo(6.5, -24);
   ctx.fill();
+  // cheek glow
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = "rgba(255,80,90,.5)";
+  ctx.beginPath();
+  ctx.arc(-9, 0, 5.6 + evo * 0.4, 0, Math.PI * 2);
+  ctx.arc(9, 0, 5.6 + evo * 0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
   ctx.fillStyle = "#e23b3d";
   ctx.beginPath();
   ctx.arc(-9, 0, 3.4 + evo * 0.4, 0, Math.PI * 2);
@@ -538,9 +549,17 @@ function drawPikachu(ctx, p, t, evo) {
   ctx.fill();
   eye(ctx, -4, -7, 2.4, 2.6);
   eye(ctx, 4, -7, 2.4, 2.6);
+  // little smile
+  ctx.strokeStyle = "#5a3208";
+  ctx.lineWidth = 1.3;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-2.6, -1.5);
+  ctx.quadraticCurveTo(0, 1.2, 2.6, -1.5);
+  ctx.stroke();
   ctx.fillStyle = "#333";
   ctx.beginPath();
-  ctx.ellipse(0, 0, 1.4, 1, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, -3, 1.3, 0.9, 0, 0, Math.PI * 2);
   ctx.fill();
   if (evo >= 3) {
     ctx.strokeStyle = "#fff36a";
@@ -770,7 +789,9 @@ function drawCat(ctx, p, t, evo) {
     ctx.stroke();
   }
   oval(ctx, 0, 12, 14, 11, fur, ink, 1.2);
+  oval(ctx, 0, 15, 8.5, 7, "rgba(255,255,255,.28)");
   oval(ctx, 0, -8, 13, 12, fur, ink, 1.2);
+  shine(ctx, -5, -12, 4.4, 2.8);
   ctx.fillStyle = fur;
   ctx.beginPath();
   ctx.moveTo(-11, -14);

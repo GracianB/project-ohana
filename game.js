@@ -860,10 +860,6 @@ function render() {
   }
   const r = room();
   drawSigns(ctx, r, game.cam, t, game.player.evo);
-  if (r.doors.right) drawPortal(ROOM_W - 96, 370, "ESTE");
-  if (r.doors.left) drawPortal(10, 370, "OESTE");
-  if (r.doors.up) drawPortal(737, 18, "ARRIBA");
-  if (r.doors.down) drawPortal(737, ROOM_H - 40, "ABAJO");
   for (const o of game.orbs) {
     if (o.taken) continue;
     drawCrystal(o);
