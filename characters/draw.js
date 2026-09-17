@@ -774,79 +774,140 @@ function drawMushu(ctx, p, t, evo) {
 function drawCat(ctx, p, t, evo) {
   const fur = evo >= 4 ? "#fff4fc" : evo >= 3 ? "#ffd0ee" : evo >= 2 ? "#ff8ad4" : "#ffb6e4";
   const ink = "#5a2040";
-  const inner = "#fff";
+  const pink = "#ff7ac2";
+  const deep = "#ff4da0";
   const s = 1 + evo * 0.06;
   ctx.scale(s, s);
-  const tails = evo >= 4 ? 3 : 1;
-  ctx.strokeStyle = fur;
-  ctx.lineWidth = 5;
   ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // ---- Curled cat tail (whips gently) ----
+  const tails = evo >= 4 ? 3 : 1;
+  const tw = Math.sin(t / 12) * 3;
   for (let i = 0; i < tails; i++) {
-    const off = (i - (tails - 1) / 2) * 8;
+    const off = (i - (tails - 1) / 2) * 9;
+    ctx.strokeStyle = fur;
+    ctx.lineWidth = 5.5;
     ctx.beginPath();
-    ctx.moveTo(10, 10);
-    ctx.quadraticCurveTo(22 + off, -4 + Math.sin(t / 9 + i) * 5, 8 + off, 18);
+    ctx.moveTo(11, 16);
+    ctx.quadraticCurveTo(26 + off, 14 + tw, 24 + off, 0 + tw);
+    ctx.quadraticCurveTo(22 + off, -10 + tw, 13 + off, -8 + tw);
+    ctx.stroke();
+    // tail tip
+    ctx.fillStyle = evo >= 2 ? "#fff" : deep;
+    ctx.beginPath();
+    ctx.arc(13 + off, -8 + tw, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ---- Sitting body ----
+  oval(ctx, 0, 13, 12, 12, fur, ink, 1.3);
+  oval(ctx, 0, 17, 7.5, 6, "rgba(255,255,255,.30)");
+  // front paws
+  ctx.fillStyle = fur;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.1;
+  for (const px of [-6, 6]) {
+    ctx.beginPath();
+    ctx.ellipse(px, 22, 4.6, 3.4, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
   }
-  oval(ctx, 0, 12, 14, 11, fur, ink, 1.2);
-  oval(ctx, 0, 15, 8.5, 7, "rgba(255,255,255,.28)");
-  oval(ctx, 0, -8, 13, 12, fur, ink, 1.2);
-  shine(ctx, -5, -12, 4.4, 2.8);
-  ctx.fillStyle = fur;
+  // toe beans
+  ctx.fillStyle = pink;
+  for (const px of [-6, 6]) {
+    ctx.beginPath();
+    ctx.ellipse(px, 22, 1.6, 1.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ---- Cat ears (wide base, ON TOP of head) drawn BEFORE head ----
+  function catEar(dir) {
+    const bx = dir * 8;           // base center on the skull
+    ctx.fillStyle = fur;
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(bx - dir * 8, -13);        // inner base
+    ctx.lineTo(bx + dir * 3, -30);        // pointed tip
+    ctx.lineTo(bx + dir * 9, -14);        // outer base (wide)
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    // pink inner ear
+    ctx.fillStyle = pink;
+    ctx.beginPath();
+    ctx.moveTo(bx - dir * 4, -14.5);
+    ctx.lineTo(bx + dir * 2.5, -26);
+    ctx.lineTo(bx + dir * 5.5, -14.5);
+    ctx.closePath();
+    ctx.fill();
+  }
+  catEar(-1);
+  catEar(1);
+
+  // ---- Round head ----
+  oval(ctx, 0, -6, 14, 12.5, fur, ink, 1.3);
+  shine(ctx, -6, -11, 4.4, 2.8);
+
+  // tabby forehead stripes
+  ctx.strokeStyle = deep;
+  ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.moveTo(-11, -14);
-  ctx.lineTo(-14, -28);
-  ctx.lineTo(-3, -16);
-  ctx.fill();
+  ctx.moveTo(0, -16); ctx.lineTo(0, -12);
+  ctx.moveTo(-4, -15.5); ctx.lineTo(-3, -12.5);
+  ctx.moveTo(4, -15.5); ctx.lineTo(3, -12.5);
+  ctx.stroke();
+
+  // ---- Whiskers: 3 long per side ----
+  ctx.strokeStyle = "rgba(90,32,64,.7)";
+  ctx.lineWidth = 1;
+  const wk = Math.sin(t / 18) * 0.8;
+  for (const dir of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(dir * 5, -3);  ctx.lineTo(dir * 22, -7 + wk);
+    ctx.moveTo(dir * 5, -1);  ctx.lineTo(dir * 23, -1);
+    ctx.moveTo(dir * 5, 1);   ctx.lineTo(dir * 22, 5 - wk);
+    ctx.stroke();
+  }
+
+  // ---- Big kitten eyes ----
+  eye(ctx, -5, -7, 3.2, 3.8);
+  eye(ctx, 5, -7, 3.2, 3.8);
+
+  // ---- Pink nose + ω cat mouth ----
+  ctx.fillStyle = deep;
   ctx.beginPath();
-  ctx.moveTo(11, -14);
-  ctx.lineTo(14, -28);
-  ctx.lineTo(3, -16);
-  ctx.fill();
-  ctx.fillStyle = "#ff8ad4";
-  ctx.beginPath();
-  ctx.moveTo(-10, -16);
-  ctx.lineTo(-12, -24);
-  ctx.lineTo(-5, -16);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(10, -16);
-  ctx.lineTo(12, -24);
-  ctx.lineTo(5, -16);
+  ctx.moveTo(0, -1.5);
+  ctx.lineTo(-2.4, -3.4);
+  ctx.lineTo(2.4, -3.4);
+  ctx.closePath();
   ctx.fill();
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1.1;
   ctx.beginPath();
-  ctx.moveTo(-6, -2);
-  ctx.lineTo(-18, -6);
-  ctx.moveTo(-6, 0);
-  ctx.lineTo(-18, 2);
-  ctx.moveTo(6, -2);
-  ctx.lineTo(18, -6);
-  ctx.moveTo(6, 0);
-  ctx.lineTo(18, 2);
+  ctx.moveTo(0, -1.5); ctx.lineTo(0, 0.5);
+  ctx.arc(-1.8, 0.5, 1.8, 0, Math.PI);
+  ctx.moveTo(0, 0.5);
+  ctx.arc(1.8, 0.5, 1.8, 0, Math.PI);
   ctx.stroke();
-  eye(ctx, -4.5, -9, 2.8, 3.4, true);
-  eye(ctx, 4.5, -9, 2.8, 3.4, true);
-  ctx.fillStyle = "#ff4da0";
+
+  // ---- Cheek blush ----
+  ctx.fillStyle = "rgba(255,120,180,.45)";
   ctx.beginPath();
-  ctx.moveTo(0, -4);
-  ctx.lineTo(-2.4, -1);
-  ctx.lineTo(2.4, -1);
+  ctx.ellipse(-9, -3, 3, 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(9, -3, 3, 2, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = fur;
-  ctx.beginPath();
-  ctx.ellipse(-10, 14, 4, 3, 0, 0, Math.PI * 2);
-  ctx.ellipse(10, 14, 4, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
+
+  // ---- Evo flourishes ----
   if (evo >= 2) {
     ctx.strokeStyle = "rgba(255,180,220,.7)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(0, -8, 16, 0, Math.PI * 2);
+    ctx.arc(0, -6, 17, 0, Math.PI * 2);
     ctx.stroke();
   }
   if (evo >= 3) {
-    for (let i = 0; i < 4; i++) star(ctx, Math.cos(t / 10 + i) * 18, Math.sin(t / 10 + i) * 12 - 8, 2.2, "#fff");
+    for (let i = 0; i < 4; i++) star(ctx, Math.cos(t / 10 + i) * 19, Math.sin(t / 10 + i) * 13 - 6, 2.2, "#fff");
   }
 }

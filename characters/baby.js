@@ -17,7 +17,7 @@ export function drawBaby(ctx, p, t) {
   ctx.scale(0.82, 0.82);
   const id = p.id;
   if (id === "stitch") babyTiko(ctx, t);
-  else if (id === "cat") babyBellota(ctx, t);
+  else if (id === "cat") babyMichi(ctx, t);
   else if (id === "dragon") babyKoa(ctx, t);
   else if (id === "frita") babyFrita(ctx, t);
   else if (id === "pikachu") babyPika(ctx, t);
@@ -224,35 +224,127 @@ function babyKoa(ctx, t) {
   ctx.fill();
 }
 
-function babyBellota(ctx, t) {
+function babyMichi(ctx, t) {
   const bob = Math.sin(t / 11) * 1.1;
+  const tw = Math.sin(t / 9) * 3;
   ctx.translate(0, 3 + bob);
-  ctx.fillStyle = "#8a4a18";
+  const fur = "#ffd0ee";
+  const ink = "#5a2040";
+  const deep = "#ff4da0";
+
+  // curled tail behind
+  ctx.strokeStyle = fur;
+  ctx.lineWidth = 4.2;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.ellipse(0, -6, 9, 5.2, 0, Math.PI, Math.PI * 2);
+  ctx.moveTo(7, 10);
+  ctx.quadraticCurveTo(16, 8 + tw, 14, -1 + tw);
+  ctx.stroke();
+  ctx.fillStyle = deep;
+  ctx.beginPath();
+  ctx.arc(14, -1 + tw, 2.2, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillRect(-9, -7, 18, 3);
-  ctx.fillStyle = "#6a3410";
-  ctx.fillRect(-1.2, -14, 2.4, 8);
-  ctx.fillStyle = "#e8b07a";
+
+  // little body
+  ctx.fillStyle = fur;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(0, 4, 8.4, 0, Math.PI * 2);
+  ctx.ellipse(0, 9, 7, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // paws
+  for (const px of [-3.5, 3.5]) {
+    ctx.fillStyle = fur;
+    ctx.beginPath();
+    ctx.ellipse(px, 13.5, 2.8, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = deep;
+    ctx.beginPath();
+    ctx.ellipse(px, 13.8, 1, 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // cat ears (wide base) BEFORE head
+  function ear(dir) {
+    ctx.fillStyle = fur;
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(dir * 1, -8);
+    ctx.lineTo(dir * 6, -18);
+    ctx.lineTo(dir * 9.5, -6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = deep;
+    ctx.beginPath();
+    ctx.moveTo(dir * 3.5, -8);
+    ctx.lineTo(dir * 6, -15);
+    ctx.lineTo(dir * 7.8, -7.5);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ear(-1);
+  ear(1);
+
+  // round head
+  ctx.fillStyle = fur;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(0, -1, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // shine
+  ctx.fillStyle = "rgba(255,255,255,.30)";
+  ctx.beginPath();
+  ctx.ellipse(-4, -5, 3, 2, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // big eyes
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.ellipse(-3.2, -0.5, 2.5, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.2, -0.5, 2.5, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2a0e1e";
+  ctx.beginPath();
+  ctx.arc(-2.8, 0, 1.5, 0, Math.PI * 2);
+  ctx.arc(3.6, 0, 1.5, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-3, 3, 2.4, 0, Math.PI * 2);
-  ctx.arc(3, 3, 2.4, 0, Math.PI * 2);
+  ctx.arc(-3.4, -0.8, 0.6, 0, Math.PI * 2);
+  ctx.arc(3, -0.8, 0.6, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#5a2a10";
+
+  // pink nose + tiny mouth
+  ctx.fillStyle = deep;
   ctx.beginPath();
-  ctx.arc(-2.6, 3.2, 1.15, 0, Math.PI * 2);
-  ctx.arc(3.4, 3.2, 1.15, 0, Math.PI * 2);
+  ctx.moveTo(0, 3.4);
+  ctx.lineTo(-1.6, 2);
+  ctx.lineTo(1.6, 2);
+  ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#c4783a";
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 0.8;
   ctx.beginPath();
-  ctx.moveTo(0, 6);
-  ctx.lineTo(-1.5, 8.2);
-  ctx.lineTo(1.5, 8.2);
-  ctx.fill();
-  blush(ctx, 0, 6, 0.75);
+  ctx.moveTo(0, 3.4); ctx.lineTo(0, 4.4);
+  ctx.arc(-1.1, 4.4, 1.1, 0, Math.PI);
+  ctx.moveTo(0, 4.4);
+  ctx.arc(1.1, 4.4, 1.1, 0, Math.PI);
+  ctx.stroke();
+
+  // whiskers
+  ctx.strokeStyle = "rgba(90,32,64,.6)";
+  ctx.lineWidth = 0.8;
+  for (const dir of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(dir * 4, 2); ctx.lineTo(dir * 12, 0.5);
+    ctx.moveTo(dir * 4, 3.5); ctx.lineTo(dir * 12, 4);
+    ctx.stroke();
+  }
+
+  blush(ctx, 0, 2.5, 0.85);
 }
