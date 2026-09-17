@@ -15,7 +15,7 @@
   <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=ohana-15" />
+  <link rel="stylesheet" href="style.css?v=ohana-16" />
   <link rel="stylesheet" href="hud.css?v=ohana-1" />
   <link rel="stylesheet" href="ending.css?v=ohana-4" />
   <link rel="stylesheet" href="intro.css?v=ohana-1" />
@@ -82,6 +82,16 @@
     </div>
   </div>
   <main id="char-select">
+    <div id="ohana-intro" aria-hidden="true">
+      <div class="oi-ring"></div>
+      <div class="oi-ring two"></div>
+      <div class="oi-inner">
+        <p class="oi-kicker">Project</p>
+        <h2 class="oi-word">OHANA</h2>
+        <p class="oi-tag">Seis formas. Un nido. Nadie se queda atrás.</p>
+      </div>
+      <p class="oi-skip">Toca para entrar</p>
+    </div>
     <nav class="brand-bar" aria-label="Ecosystem">
       <a class="brand-gb" href="https://gracianb.github.io/GracianB/">GB</a>
       <a href="https://gracianb.github.io/systems-lab/">PLAY</a>
@@ -126,8 +136,31 @@
   <div id="map-overlay"><div class="panel"><h2>Archipiélago</h2><div id="map-grid"></div><p class="note">M o Esc cierra · verde = visto · cian = aquí</p></div></div>
   <div id="pause-overlay"><div class="panel slim"><h2>Pausa</h2><button type="button" id="btn-resume">Seguir</button><button type="button" id="btn-quit">Menú</button></div></div>
   <div id="notification-container"></div>
+  <script>
+    (function () {
+      var el = document.getElementById("ohana-intro");
+      if (!el) return;
+      var reduce = false;
+      try { reduce = matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+      var gone = false;
+      function end(skip) {
+        if (gone) return;
+        gone = true;
+        // On an early skip, drop the staggered delays so content appears now.
+        // On the natural timeout the cascade has already played — leave it be.
+        if (skip) document.body.classList.add("no-intro");
+        el.classList.add("done");
+        setTimeout(function () { if (el && el.parentNode) el.parentNode.removeChild(el); }, 900);
+      }
+      el.addEventListener("pointerdown", function () { end(true); }, { passive: true });
+      addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === "Escape" || e.key === " ") end(true);
+      });
+      setTimeout(function () { end(false); }, reduce ? 600 : 3400);
+    })();
+  </script>
   <script type="module" src="game.js?v=ohana-14"></script>
-  <script type="module" src="systems/title.js?v=ohana-14"></script>
+  <script type="module" src="systems/title.js?v=ohana-16"></script>
   <script type="module" src="systems/title-fx.js?v=ohana-14"></script>
   <script type="module" src="systems/hud.js?v=ohana-14"></script>
   <script type="module" src="systems/ending.js?v=ohana-14"></script>

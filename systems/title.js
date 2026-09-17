@@ -18,35 +18,48 @@ function paintPortraits() {
   }
   tick++;
   if (tick % 2 === 0) {
+    let idx = 0;
     document.querySelectorAll(".char-card canvas").forEach((cv) => {
       const def = ROSTER.find((r) => r.id === cv.dataset.id);
-      if (!def) return;
+      if (!def) { idx++; return; }
       const c = cv.getContext("2d", { alpha: true });
       c.clearRect(0, 0, cv.width, cv.height);
-      const evo = Math.floor(tick / 70) % 5;
+      // Slower evolution cycle (~2.8s per form)
+      const evo = Math.floor(tick / 170) % 5;
+      // Evolve burst when the form changes
+      if (cv._evo === undefined) cv._evo = evo;
+      if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
+      cv._burst = Math.max(0, (cv._burst || 0) - 2);
+      // Occasional little attack flash, phase-shifted per card
+      cv._atk = Math.max(0, (cv._atk || 0) - 2);
+      if ((tick + idx * 47) % 380 === 0) cv._atk = 12;
       const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
+      const at = tick * 0.5 + idx * 24;                 // half-speed, staggered
+      const bob = Math.sin(tick * 0.03 + idx) * 4;      // gentle float
+      const sway = Math.sin(tick * 0.02 + idx * 1.3) * 0.05;
       const dummy = {
         id: def.id,
-        x: cv.width / 2 - 16,
-        y: cv.height / 2 - 8,
+        x: -16,
+        y: -16,
         w: 32,
         h: 32,
         facing: 1,
         grounded: true,
-        vx: 2.2,
+        vx: 0.4,                                        // idle, not running
         evo,
         color: form.color || def.color,
-        melee: 0,
+        melee: cv._atk || 0,
+        evoBurst: cv._burst || 0,
       };
       c.save();
-      c.translate(cv.width / 2, cv.height / 2 + 14);
+      c.translate(cv.width / 2, cv.height / 2 + 14 + bob);
+      c.rotate(sway);
       c.scale(0.98, 0.98);
-      dummy.x = -16;
-      dummy.y = -16;
-      drawCharacter(c, dummy, { x: 0, y: 0 }, tick);
+      drawCharacter(c, dummy, { x: 0, y: 0 }, at);
       c.restore();
       const role = cv.closest(".char-card")?.querySelector(".role");
       if (role) role.textContent = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
+      idx++;
     });
   }
   raf = requestAnimationFrame(paintPortraits);
