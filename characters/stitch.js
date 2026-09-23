@@ -1,19 +1,19 @@
 const STITCH = {
   id: "stitch",
-  name: "Tiko",
-  role: "Experimento Tiko",
+  name: "Stitcho",
+  role: "Experimento Stitcho",
   description: "Resistente, impredecible y sorprendentemente bueno protegiendo a su ohana.",
   colors: { primary: "#258fe6", secondary: "#f27d9f", glow: "#75f3ff" },
   stats: { maxHealth: 125, maxEnergy: 100, speed: 5.2, jumpPower: 13, abilityPower: 1.12 },
   abilities: {
     special: { name: "Pulso Alienígena", cost: 15, cooldown: 700, range: 230, color: "#9d7cff" },
-    ultimate: { name: "Caos Tiko", cost: 45, cooldown: 3900, range: 390, color: "#75f3ff", requiredEvolutionStage: 1 }
+    ultimate: { name: "Caos Stitcho", cost: 45, cooldown: 3900, range: 390, color: "#75f3ff", requiredEvolutionStage: 1 }
   },
   evolution: {
     forms: [
-      { name: "Tiko", level: 1, bonuses: {} },
-      { name: "Tiko Centinela", level: 3, bonuses: { maxHealth: 24, maxEnergy: 12, speed: 0.18, abilityPower: 0.25 }, unlocks: ["ultimate"] },
-      { name: "Tiko Galáctico", level: 6, bonuses: { maxHealth: 22, maxEnergy: 16, speed: 0.22, abilityPower: 0.35 } }
+      { name: "Stitcho", level: 1, bonuses: {} },
+      { name: "Stitcho Centinela", level: 3, bonuses: { maxHealth: 24, maxEnergy: 12, speed: 0.18, abilityPower: 0.25 }, unlocks: ["ultimate"] },
+      { name: "Stitcho Galáctico", level: 6, bonuses: { maxHealth: 22, maxEnergy: 16, speed: 0.22, abilityPower: 0.35 } }
     ]
   }
 };

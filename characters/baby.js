@@ -20,184 +20,258 @@ export function drawBaby(ctx, p, t) {
   else if (id === "cat") babyMichi(ctx, t);
   else if (id === "dragon") babyKoa(ctx, t);
   else if (id === "frita") babyFrita(ctx, t);
-  else if (id === "pikachu") babyPika(ctx, t);
+  else if (id === "pikachu") babyChispin(ctx, t);
   else babyLani(ctx, t);
 }
 
-function babyPika(ctx, t) {
+function babyChispin(ctx, t) {
+  // Chispín Bebé — chibi redondo, orejas redondas con tip, mejillas spark
   const bob = Math.sin(t / 9) * 1.1;
   ctx.translate(0, 3 + bob);
   const body = "#ffe44a";
-  const tip = "#222";
-  // stubby tail zig
+  const accent = "#2ec9c0";
+  const ink = "#3a2208";
+  // cola espiral + punta estrella
   ctx.strokeStyle = body;
   ctx.lineWidth = 3.2;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(6, 6);
-  ctx.lineTo(11, 0);
-  ctx.lineTo(9, 6);
-  ctx.lineTo(14, 3);
+  ctx.moveTo(5, 6);
+  ctx.quadraticCurveTo(12, 2, 10, -4);
   ctx.stroke();
-  // round body
+  ctx.fillStyle = accent;
+  ctx.beginPath();
+  ctx.moveTo(10, -6);
+  ctx.lineTo(14, -10);
+  ctx.lineTo(11, -4);
+  ctx.lineTo(15, -3);
+  ctx.closePath();
+  ctx.fill();
+  // blob cuerpo
+  ctx.fillStyle = body;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(0, 5, 9, 8.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // orejas hoja redondeadas
   ctx.fillStyle = body;
   ctx.beginPath();
-  ctx.ellipse(0, 5, 8.5, 7.6, 0, 0, Math.PI * 2);
+  ctx.moveTo(-4, -4);
+  ctx.quadraticCurveTo(-10, -16, -3, -18);
+  ctx.quadraticCurveTo(0, -10, -1, -4);
   ctx.fill();
-  // tall ears with black tips
-  ctx.fillStyle = body;
   ctx.beginPath();
-  ctx.moveTo(-5, -6);
-  ctx.lineTo(-7, -20);
-  ctx.lineTo(-1, -6);
-  ctx.moveTo(5, -6);
-  ctx.lineTo(7, -20);
-  ctx.lineTo(1, -6);
+  ctx.moveTo(4, -4);
+  ctx.quadraticCurveTo(10, -16, 3, -18);
+  ctx.quadraticCurveTo(0, -10, 1, -4);
   ctx.fill();
-  ctx.fillStyle = tip;
+  ctx.fillStyle = accent;
   ctx.beginPath();
-  ctx.moveTo(-7, -20); ctx.lineTo(-3.5, -20); ctx.lineTo(-5.2, -14); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(7, -20); ctx.lineTo(3.5, -20); ctx.lineTo(5.2, -14); ctx.fill();
-  // eyes
+  ctx.ellipse(-4, -15, 2.2, 3, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(4, -15, 2.2, 3, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // ojos
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-2.8, 2, 2.2, 0, Math.PI * 2);
-  ctx.arc(2.8, 2, 2.2, 0, Math.PI * 2);
+  ctx.arc(-2.8, 2, 2.4, 0, Math.PI * 2);
+  ctx.arc(2.8, 2, 2.4, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#222";
   ctx.beginPath();
-  ctx.arc(-2.4, 2.2, 1.05, 0, Math.PI * 2);
-  ctx.arc(3.1, 2.2, 1.05, 0, Math.PI * 2);
+  ctx.arc(-2.4, 2.3, 1.15, 0, Math.PI * 2);
+  ctx.arc(3.1, 2.3, 1.15, 0, Math.PI * 2);
   ctx.fill();
-  // red cheeks
-  ctx.fillStyle = "#e23b3b";
+  ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-6.5, 6, 2.1, 0, Math.PI * 2);
-  ctx.arc(6.5, 6, 2.1, 0, Math.PI * 2);
+  ctx.arc(-3, 1.5, 0.55, 0, Math.PI * 2);
+  ctx.arc(2.5, 1.5, 0.55, 0, Math.PI * 2);
   ctx.fill();
-  blush(ctx, 0, 7, 0.6);
+  // mejillas Ohana cyan (hoja/corazón)
+  ctx.fillStyle = accent;
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(s * 6.5, 7);
+    ctx.quadraticCurveTo(s * 4, 4.5, s * 6.5, 3.5);
+    ctx.quadraticCurveTo(s * 9, 4.5, s * 6.5, 7);
+    ctx.fill();
+  }
+  blush(ctx, 0, 7.5, 0.55);
+  ctx.strokeStyle = "#5a3208";
+  ctx.lineWidth = 1.1;
+  ctx.beginPath();
+  ctx.arc(0, 5.5, 2, 0.2, Math.PI - 0.2);
+  ctx.stroke();
 }
 
 function babyLani(ctx, t) {
+  // Kilo Bebé — bun alto, flequillo, vestidito A-line, cara legible
   const bob = Math.sin(t / 10) * 1.2;
   ctx.translate(0, 4 + bob);
   const dress = "#ff6a8a";
   const skin = "#f4c2a8";
   const hair = "#1a0c08";
-  // little A-line dress
   ctx.fillStyle = dress;
   ctx.beginPath();
   ctx.moveTo(-5, 6);
   ctx.lineTo(5, 6);
-  ctx.lineTo(8, 16);
-  ctx.quadraticCurveTo(0, 18, -8, 16);
+  ctx.lineTo(9, 17);
+  ctx.quadraticCurveTo(0, 19, -9, 17);
   ctx.closePath();
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.fillRect(-2.2, 8, 4.4, 2.6);
-  // stubby legs + shoes
   ctx.strokeStyle = skin;
-  ctx.lineWidth = 2.4;
+  ctx.lineWidth = 2.2;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-4, 15); ctx.lineTo(-5, 18);
-  ctx.moveTo(4, 15); ctx.lineTo(5, 18);
+  ctx.moveTo(-4, 16); ctx.lineTo(-5, 19.5);
+  ctx.moveTo(4, 16); ctx.lineTo(5, 19.5);
   ctx.stroke();
   ctx.fillStyle = "#2a1408";
   ctx.beginPath();
-  ctx.ellipse(-5.2, 18.5, 2.4, 1.3, 0, 0, Math.PI * 2);
-  ctx.ellipse(5.2, 18.5, 2.4, 1.3, 0, 0, Math.PI * 2);
+  ctx.ellipse(-5.2, 20, 2.3, 1.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.2, 20, 2.3, 1.2, 0, 0, Math.PI * 2);
   ctx.fill();
-  // hair bun mass
   ctx.fillStyle = hair;
   ctx.beginPath();
-  ctx.arc(0, -8, 9.5, 0, Math.PI * 2);
+  ctx.arc(0, -6, 8.8, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.ellipse(0, -14, 6, 4.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, -14, 5.5, 4.2, 0, 0, Math.PI * 2);
   ctx.fill();
-  // face
   ctx.fillStyle = skin;
   ctx.beginPath();
-  ctx.arc(0, -5, 7.8, 0, Math.PI * 2);
+  ctx.arc(0, -4, 7.2, 0, Math.PI * 2);
+  ctx.fill();
+  // flequillo
+  ctx.fillStyle = hair;
+  ctx.beginPath();
+  ctx.moveTo(-6.5, -6);
+  ctx.quadraticCurveTo(-3, -3.5, 0, -5.5);
+  ctx.quadraticCurveTo(3, -3.5, 6.5, -6);
+  ctx.quadraticCurveTo(4, -9, 0, -10);
+  ctx.quadraticCurveTo(-4, -9, -6.5, -6);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-3.0, -6, 2.6, 0, Math.PI * 2);
-  ctx.arc(3.0, -6, 2.6, 0, Math.PI * 2);
+  ctx.arc(-2.8, -4.5, 2.5, 0, Math.PI * 2);
+  ctx.arc(2.8, -4.5, 2.5, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#2a1408";
   ctx.beginPath();
-  ctx.arc(-2.6, -5.6, 1.25, 0, Math.PI * 2);
-  ctx.arc(3.4, -5.6, 1.25, 0, Math.PI * 2);
+  ctx.arc(-2.4, -4.1, 1.25, 0, Math.PI * 2);
+  ctx.arc(3.2, -4.1, 1.25, 0, Math.PI * 2);
   ctx.fill();
-  blush(ctx, 0, -2.0, 0.9);
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(-3.1, -5, 0.55, 0, Math.PI * 2);
+  ctx.arc(2.5, -5, 0.55, 0, Math.PI * 2);
+  ctx.fill();
+  blush(ctx, 0, -1.2, 0.85);
   ctx.strokeStyle = "#c47a6a";
   ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.arc(0, -1.2, 2.1, 0.25, Math.PI - 0.25);
+  ctx.arc(0, -0.2, 2.0, 0.25, Math.PI - 0.25);
   ctx.stroke();
-  // tiny arms
   ctx.fillStyle = skin;
   ctx.beginPath();
-  ctx.ellipse(-7, 8, 2.2, 3, 0.2, 0, Math.PI * 2);
-  ctx.ellipse(7, 8, 2.2, 3, -0.2, 0, Math.PI * 2);
+  ctx.ellipse(-7, 8, 2.1, 2.8, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(7, 8, 2.1, 2.8, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2ec9c0";
+  ctx.beginPath();
+  ctx.ellipse(2, -15, 3.5, 1.8, 0.4, 0, Math.PI * 2);
   ctx.fill();
 }
 
 function babyTiko(ctx, t) {
+  // Mini Stitcho — alienito cute: orejas V dentadas, antenas, ojos óvalo, stance ancho
   const flap = Math.sin(t / 7) * 3.2;
   ctx.translate(0, 3);
-  const blue = "#6bb6ff";
-  const ear = "#7ec8ff";
-  // huge baby ears
-  ctx.fillStyle = ear;
+  const blue = "#8ec8ff";
+  const ink = "#0b1a44";
+  ctx.fillStyle = blue;
   ctx.beginPath();
   ctx.moveTo(-5, -4);
-  ctx.quadraticCurveTo(-17, -28 + flap, 0, -8);
+  ctx.lineTo(-3, -10);
+  ctx.quadraticCurveTo(-16, -26 + flap, -8, -8);
+  ctx.closePath();
   ctx.fill();
   ctx.beginPath();
   ctx.moveTo(5, -4);
-  ctx.quadraticCurveTo(17, -28 + flap, 0, -8);
+  ctx.lineTo(3, -10);
+  ctx.quadraticCurveTo(16, -26 + flap, 8, -8);
+  ctx.closePath();
   ctx.fill();
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.moveTo(-12, -20 + flap * 0.4); ctx.lineTo(-15, -24 + flap); ctx.lineTo(-9, -21); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(12, -20 + flap * 0.4); ctx.lineTo(15, -24 + flap); ctx.lineTo(9, -21); ctx.fill();
   ctx.fillStyle = "#f7c0d0";
   ctx.beginPath();
-  ctx.ellipse(-10, -16, 2.6, 5.5, -0.3, 0, Math.PI * 2);
-  ctx.ellipse(10, -16, 2.6, 5.5, 0.3, 0, Math.PI * 2);
+  ctx.ellipse(-10, -14, 2.2, 5, -0.4, 0, Math.PI * 2);
+  ctx.ellipse(10, -14, 2.2, 5, 0.4, 0, Math.PI * 2);
   ctx.fill();
-  // tiny antennae
-  ctx.fillStyle = "#0b1a44";
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-4, -10); ctx.lineTo(-5, -18); ctx.lineTo(-2, -9); ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(4, -10); ctx.lineTo(5, -18); ctx.lineTo(2, -9); ctx.fill();
-  // tubby body
+  ctx.moveTo(-3.5, -10); ctx.lineTo(-5, -18);
+  ctx.moveTo(3.5, -10); ctx.lineTo(5, -18);
+  ctx.stroke();
   ctx.fillStyle = blue;
   ctx.beginPath();
-  ctx.arc(0, 4, 9.8, 0, Math.PI * 2);
+  ctx.arc(-5, -18.5, 1.8, 0, Math.PI * 2);
+  ctx.arc(5, -18.5, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  ctx.ellipse(0, 6, 10, 8.5, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#e9f7ff";
   ctx.beginPath();
-  ctx.ellipse(0, 7, 5.4, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 8, 5.5, 4.2, 0, 0, Math.PI * 2);
   ctx.fill();
-  // stubby feet
+  // cabeza triangular + hocico corto
   ctx.fillStyle = blue;
-  ctx.fillRect(-4, 12, 2.6, 3.2);
-  ctx.fillRect(1.4, 12, 2.6, 3.2);
-  // big eyes
+  ctx.beginPath();
+  ctx.moveTo(-9, 0);
+  ctx.quadraticCurveTo(-10, -12, 0, -14);
+  ctx.quadraticCurveTo(10, -12, 9, 0);
+  ctx.quadraticCurveTo(6, 5, 0, 6);
+  ctx.quadraticCurveTo(-6, 5, -9, 0);
+  ctx.fill();
+  ctx.fillStyle = "#e9f7ff";
+  ctx.beginPath();
+  ctx.ellipse(0, 3, 4.5, 2.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  ctx.ellipse(-6, 14, 3.5, 1.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(6, 14, 3.5, 1.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = blue;
+  ctx.lineWidth = 2.8;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-9, 4); ctx.lineTo(-14, 8);
+  ctx.moveTo(9, 4); ctx.lineTo(14, 8);
+  ctx.stroke();
   ctx.fillStyle = "#111";
   ctx.beginPath();
-  ctx.ellipse(-3.8, 1.2, 3.2, 3.7, 0, 0, Math.PI * 2);
-  ctx.ellipse(3.8, 1.2, 3.2, 3.7, 0, 0, Math.PI * 2);
+  ctx.ellipse(-3.6, -2, 3.4, 4.0, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.6, -2, 3.4, 4.0, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
-  ctx.fillRect(-4.6, -0.4, 1.5, 1.7);
-  ctx.fillRect(2.6, -0.4, 1.5, 1.7);
-  blush(ctx, 0, 4.2, 0.85);
+  ctx.fillRect(-4.5, -4, 1.5, 1.7);
+  ctx.fillRect(2.5, -4, 1.5, 1.7);
+  blush(ctx, 0, 2.5, 0.85);
   ctx.fillStyle = "#111";
   ctx.beginPath();
-  ctx.ellipse(0, 6.8, 2.3, 1.15, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 4.5, 2.0, 1.0, 0, 0, Math.PI * 2);
   ctx.fill();
 }
 

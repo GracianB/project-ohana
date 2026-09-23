@@ -3,7 +3,8 @@
  * Internal state only (deathGhost / souls / wisps / orbit). NEVER touches game.ghosts (dash afterimages).
  *
  * Phases (~294 frames / ~4.9s @60fps; ~105 if prefers-reduced-motion ≈ 1.75s):
- *   Appear → Approach/Claim → Lift-off → Ascend → Apex linger → Dissolve → onDone (respawn)
+ *   Appear → Claim (largo, fantasma grande) → Lift-off → Ascend → Apex → Dissolve → onDone
+ * Ghost: silueta grande alto-contraste; vignette NO tapa el centro.
  *
  * API: DeathFx.start(player, onDone, opts?), update(game), draw(ctx,cam,t),
  *      isPlaying(), cancel(), playerAlpha()
@@ -48,29 +49,29 @@ function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/** Strongly separated palettes — void = cold abyss cyan, hurt = warm rose-magenta. */
+/** High-contrast palettes — void = near-white cyan, hurt = near-white rose; both read on dark/light. */
 const PALETTES = {
   void: {
-    sheet: [150, 225, 255],
-    sheetDeep: [24, 72, 128],
-    hood: [4, 16, 38],
-    eye: [90, 245, 255],
-    glow: [48, 180, 255],
-    soul: [100, 220, 255],
-    tether: [80, 200, 255],
-    vignette: [2, 18, 58],
-    flash: [130, 230, 255],
+    sheet: [235, 252, 255],
+    sheetDeep: [40, 130, 210],
+    hood: [0, 4, 14],
+    eye: [120, 255, 255],
+    glow: [90, 220, 255],
+    soul: [180, 245, 255],
+    tether: [140, 235, 255],
+    vignette: [2, 12, 40],
+    flash: [210, 250, 255],
   },
   hurt: {
-    sheet: [255, 190, 220],
-    sheetDeep: [150, 38, 92],
-    hood: [45, 8, 30],
-    eye: [255, 105, 185],
-    glow: [255, 72, 150],
-    soul: [255, 125, 180],
-    tether: [255, 105, 165],
-    vignette: [68, 4, 30],
-    flash: [255, 160, 205],
+    sheet: [255, 240, 248],
+    sheetDeep: [210, 55, 120],
+    hood: [18, 0, 10],
+    eye: [255, 130, 200],
+    glow: [255, 110, 180],
+    soul: [255, 185, 220],
+    tether: [255, 150, 200],
+    vignette: [48, 2, 22],
+    flash: [255, 210, 230],
   },
 };
 
@@ -80,11 +81,12 @@ function rgba(rgb, a) {
 
 /** Phase end fractions of total duration (shared by full + reduced). */
 const PHASE = {
-  appear: 0.12,
-  claim: 0.28,
-  liftoff: 0.40,
-  ascend: 0.72,
-  apex: 0.85,
+  // Claim largo y legible (~1.6s @294f) — el fantasma debe verse centrado
+  appear: 0.08,
+  claim: 0.40,
+  liftoff: 0.52,
+  ascend: 0.74,
+  apex: 0.86,
   dissolve: 1.0,
 };
 
@@ -171,11 +173,12 @@ export const DeathFx = {
     this._apexPulse = 0;
 
     const side = (player.facing || 1) >= 0 ? -1 : 1;
-    const gw = 42;
-    const gh = 56;
+    // ~2.0× prior 42×56 — reads large / near full-figure on 720p canvas
+    const gw = 84;
+    const gh = 112;
     this.deathGhost = {
-      x: player.x + side * (player.w * 0.55 + 18),
-      y: player.y + player.h * 0.1 - 14,
+      x: player.x + side * (player.w * 0.55 + 28),
+      y: player.y + player.h * 0.05 - 36,
       spawnX: 0,
       spawnY: 0,
       w: gw,
@@ -302,9 +305,10 @@ export const DeathFx = {
 
     // ── 1. Appear 0–12% — materialize, mote burst, ground ripple ──
     if (progress < PHASE.appear) {
-      const a = smoothstep(progress / PHASE.appear);
+      // Steep early fade so silhouette is readable within ~8–10 frames
+      const a = easeOutCubic(smoothstep(progress / PHASE.appear));
       g.form = a;
-      g.alpha = a;
+      g.alpha = Math.max(a, progress > 0.02 ? 0.55 : a);
       g.lean = 0;
       g.armWrap = 0;
       g.eyeGlow = 0.35 + a * 0.25;
@@ -355,7 +359,7 @@ export const DeathFx = {
         p.y = g.grabY - c * 4;
         const tx = p.x + (g.facing > 0 ? -g.w * 0.15 : p.w - g.w * 0.85);
         g.x += (tx - g.x) * 0.07;
-        g.y += ((p.y - 10) - g.y) * 0.05;
+        g.y += ((p.y - g.h * 0.28) - g.y) * 0.08;
         if (!this.reduce) {
           this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.35, true, false);
           // A brief claim-only double emission makes the tether feel audible.
@@ -422,8 +426,20 @@ export const DeathFx = {
         const targetX = g.spawnX + (g.facing > 0 ? g.w * 0.2 : -p.w * 0.1) + sway * 0.45;
         p.x += (targetX - p.x) * 0.08;
       }
-      g.y = (p ? p.y : g.grabY) - 12 - Math.sin(this.frame * 0.1) * 4.5;
+      g.y = (p ? p.y : g.grabY) - 28 - Math.sin(this.frame * 0.1) * 4.5;
       g.x += Math.sin(this.frame * 0.055) * 0.55;
+      // Soft pull toward screen center so lift/void deaths don't leave ghost off-canvas
+      if (game && game.cam) {
+        const vw = (typeof document !== "undefined" && document.getElementById("game"))
+          ? document.getElementById("game").width : 960;
+        const vh = (typeof document !== "undefined" && document.getElementById("game"))
+          ? document.getElementById("game").height : 540;
+        const wantX = game.cam.x + vw * 0.5 - g.w * 0.5;
+        const wantY = game.cam.y + vh * 0.42 - g.h * 0.5;
+        const pull = this.reduce ? 0.04 : 0.06;
+        g.x += (wantX - g.x) * pull * ease;
+        g.y += (wantY - g.y) * pull * ease;
+      }
 
       if (!this.reduce && p) {
         // Dense soul trail upward
@@ -475,8 +491,17 @@ export const DeathFx = {
         p.y = g.grabY - g.lift + hover * 0.3;
         p.x += Math.sin(this.frame * 0.09) * 0.2;
       }
-      g.y = (p ? p.y : g.grabY) - 14 - Math.sin(this.frame * 0.13) * 3;
+      g.y = (p ? p.y : g.grabY) - 30 - Math.sin(this.frame * 0.13) * 3;
       g.x += Math.sin(this.frame * 0.07) * 0.3;
+      if (game && game.cam) {
+        const canvasEl = (typeof document !== "undefined") ? document.getElementById("game") : null;
+        const vw = canvasEl ? canvasEl.width : 960;
+        const vh = canvasEl ? canvasEl.height : 540;
+        const wantX = game.cam.x + vw * 0.5 - g.w * 0.5;
+        const wantY = game.cam.y + vh * 0.4 - g.h * 0.5;
+        g.x += (wantX - g.x) * 0.08;
+        g.y += (wantY - g.y) * 0.08;
+      }
 
       if (!this.reduce && p && (this.frame % 3) === 0) {
         this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, false);
@@ -603,7 +628,7 @@ export const DeathFx = {
     const billow = this._hemBillow || 0;
 
     ctx.save();
-    ctx.globalAlpha = alpha * 0.9 * form;
+    ctx.globalAlpha = alpha * form;
     ctx.translate(cx + g.w / 2 + leanX, cy + g.h / 2 + wobble);
     ctx.scale(g.facing || 1, 1);
     ctx.scale(1 + g.lean * 0.06, 1 - g.lean * 0.04);
@@ -614,8 +639,8 @@ export const DeathFx = {
     const hem = this.reduce ? 0.35 : 1;
 
     // Outer aura
-    ctx.globalAlpha = alpha * 0.25 * form;
-    ctx.fillStyle = rgba(pal.glow, 0.5);
+    ctx.globalAlpha = alpha * 0.48 * form;
+    ctx.fillStyle = rgba(pal.glow, 0.75);
     ctx.beginPath();
     ctx.moveTo(w * 0.5, 0);
     ctx.quadraticCurveTo(w * 1.05, h * 0.22, w * 0.95, h * 0.55);
@@ -628,11 +653,11 @@ export const DeathFx = {
     ctx.fill();
 
     // Main sheet + ragged animated hem (billow scales wave amplitude)
-    ctx.globalAlpha = alpha * 0.82 * form;
+    ctx.globalAlpha = alpha * 0.96 * form;
     const sheetGrad = ctx.createLinearGradient(0, 0, 0, h);
-    sheetGrad.addColorStop(0, rgba(pal.sheet, 0.88));
-    sheetGrad.addColorStop(0.45, rgba(pal.sheet, 0.7));
-    sheetGrad.addColorStop(1, rgba(pal.sheetDeep, 0.35));
+    sheetGrad.addColorStop(0, rgba(pal.sheet, 1));
+    sheetGrad.addColorStop(0.45, rgba(pal.sheet, 0.92));
+    sheetGrad.addColorStop(1, rgba(pal.sheetDeep, 0.7));
     ctx.fillStyle = sheetGrad;
     ctx.beginPath();
     ctx.moveTo(w * 0.5, 2);
@@ -655,9 +680,14 @@ export const DeathFx = {
     ctx.closePath();
     ctx.fill();
 
-    ctx.globalAlpha = alpha * 0.45 * form;
-    ctx.strokeStyle = rgba(pal.glow, 0.85);
-    ctx.lineWidth = 1.4;
+    ctx.globalAlpha = alpha * form;
+    ctx.strokeStyle = rgba(pal.glow, 1);
+    ctx.lineWidth = 3.0;
+    ctx.stroke();
+    // Dark rim — readable on bright world backgrounds
+    ctx.globalAlpha = alpha * 0.7 * form;
+    ctx.strokeStyle = "rgba(0,0,0,0.8)";
+    ctx.lineWidth = 3.6;
     ctx.stroke();
 
     // Subtle apex sheet flare, kept inside the silhouette for readability.
@@ -670,20 +700,20 @@ export const DeathFx = {
       ctx.fill();
     }
 
-    // Hood void
-    ctx.globalAlpha = alpha * 0.9 * form;
-    ctx.fillStyle = rgba(pal.hood, 0.75);
+    // Hood void — near-black for max contrast against bright sheet
+    ctx.globalAlpha = alpha * form;
+    ctx.fillStyle = rgba(pal.hood, 0.97);
     ctx.beginPath();
-    ctx.ellipse(w * 0.5, h * 0.3, w * 0.3, h * 0.24, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.5, h * 0.3, w * 0.32, h * 0.25, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = rgba([0, 0, 0], 0.45);
+    ctx.fillStyle = rgba([0, 0, 0], 0.82);
     ctx.beginPath();
-    ctx.ellipse(w * 0.5, h * 0.32, w * 0.2, h * 0.16, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.5, h * 0.32, w * 0.22, h * 0.17, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Twin eye glow
-    const eyeA = alpha * form * (0.7 + g.eyeGlow * 0.3);
-    const er = 2.0 + g.eyeGlow * 1.5;
+    const eyeA = alpha * form * (0.88 + g.eyeGlow * 0.22);
+    const er = 3.2 + g.eyeGlow * 2.2;
     const eyeY = h * 0.33;
     const eyes = [w * 0.38, w * 0.62];
     for (let e = 0; e < 2; e++) {
@@ -743,21 +773,42 @@ export const DeathFx = {
     const g = this.deathGhost;
     const p = this.player;
     const pal = this.palette;
-    const cx = g.x - cam.x;
-    const cy = g.y - cam.y;
+    const vw = ctx.canvas ? ctx.canvas.width : 960;
+    const vh = ctx.canvas ? ctx.canvas.height : 540;
     const progress = g.phase;
-    const pulse = 0.55 + Math.sin((t || this.frame) * 0.14) * 0.1;
-    const alpha = g.alpha * pulse;
+    // Keep pulse near 1 — prior 0.55 base made the silhouette almost invisible
+    const pulse = 0.94 + Math.sin((t || this.frame) * 0.14) * 0.06;
+    const alpha = Math.min(1, g.alpha * pulse);
+
+    // Screen-space position; bias to center on ascend/apex/void so ghost never leaves canvas
+    let cx = g.x - cam.x;
+    let cy = g.y - cam.y;
+    const preferX = vw * 0.5 - g.w * 0.5;
+    const preferY = vh * 0.4 - g.h * 0.5;
+    let bias = 0;
+    if (progress >= PHASE.ascend) bias = 0.55;
+    else if (progress >= PHASE.liftoff) bias = 0.28;
+    else if (this.reason === "void") bias = 0.4;
+    if (bias > 0) {
+      cx = lerp(cx, preferX, bias);
+      cy = lerp(cy, preferY, bias);
+    }
+    const margin = 6;
+    cx = Math.max(margin, Math.min(cx, vw - g.w - margin));
+    cy = Math.max(margin, Math.min(cy, vh - g.h - margin));
 
     ctx.save();
 
-    // Soft radial vignette
+    // Vignette UNDER ghost: soft edge darken + large clear hole on silhouette
     if (!this.reduce && alpha > 0.05) {
-      const vw = ctx.canvas ? ctx.canvas.width : 960;
-      const vh = ctx.canvas ? ctx.canvas.height : 540;
-      const vigA = (this.reason === "void" ? 0.32 : 0.2) * alpha * Math.min(1, progress * 1.8);
-      const vg = ctx.createRadialGradient(vw * 0.5, vh * 0.45, vh * 0.15, vw * 0.5, vh * 0.5, vw * 0.7);
+      const gx = cx + g.w * 0.5;
+      const gy = cy + g.h * 0.42;
+      // Intentionally low — void used to crush contrast at ~0.32–0.38
+      const vigA = (this.reason === "void" ? 0.16 : 0.12) * alpha * Math.min(1, progress * 1.5);
+      const clearR = Math.max(g.h * 1.05, Math.min(vw, vh) * 0.28);
+      const vg = ctx.createRadialGradient(gx, gy, clearR, gx, gy, Math.max(vw, vh) * 0.78);
       vg.addColorStop(0, rgba(pal.vignette, 0));
+      vg.addColorStop(0.6, rgba(pal.vignette, vigA * 0.3));
       vg.addColorStop(1, rgba(pal.vignette, vigA));
       ctx.fillStyle = vg;
       ctx.fillRect(0, 0, vw, vh);
@@ -917,7 +968,7 @@ export const DeathFx = {
     }
 
     // Under-glow
-    ctx.globalAlpha = alpha * 0.4 * g.form;
+    ctx.globalAlpha = alpha * 0.55 * g.form;
     const glow = ctx.createRadialGradient(
       cx + g.w / 2, cy + g.h * 0.55, 4,
       cx + g.w / 2, cy + g.h * 0.55, g.w * 1.1
@@ -929,7 +980,54 @@ export const DeathFx = {
     ctx.ellipse(cx + g.w / 2, cy + g.h * 0.7, g.w * 0.85, g.h * 0.5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    this._drawGhost(ctx, g, pal, alpha, this.frame, cx, cy);
+    // Escala cinema: fantasma más grande y centrado en claim (silueta inconfundible)
+    let drawCx = cx, drawCy = cy;
+    let scaleBoost = 1;
+    if (progress < PHASE.claim) {
+      const claimT = progress < PHASE.appear
+        ? smoothstep(progress / PHASE.appear) * 0.35
+        : 0.35 + 0.65 * smoothstep((progress - PHASE.appear) / (PHASE.claim - PHASE.appear));
+      scaleBoost = 1 + claimT * 0.55;
+    } else if (progress < PHASE.liftoff) {
+      scaleBoost = 1.55;
+    } else {
+      scaleBoost = 1.35;
+    }
+    if (scaleBoost !== 1) {
+      const gx = cx + g.w * 0.5;
+      const gy = cy + g.h * 0.5;
+      ctx.save();
+      ctx.translate(gx, gy);
+      ctx.scale(scaleBoost, scaleBoost);
+      ctx.translate(-gx, -gy);
+      this._drawGhost(ctx, g, pal, alpha, this.frame, drawCx, drawCy);
+      ctx.restore();
+    } else {
+      this._drawGhost(ctx, g, pal, alpha, this.frame, drawCx, drawCy);
+    }
+
+    // Etiqueta CLAIM legible en fase de captura
+    if (progress >= PHASE.appear && progress < PHASE.liftoff && !this.reduce) {
+      const claimU = progress < PHASE.claim
+        ? smoothstep((progress - PHASE.appear) / Math.max(0.001, PHASE.claim - PHASE.appear))
+        : 1;
+      const labelA = alpha * (progress < PHASE.claim ? claimU : Math.max(0, 1 - (progress - PHASE.claim) / (PHASE.liftoff - PHASE.claim)));
+      if (labelA > 0.05) {
+        const lx = cx + g.w * 0.5;
+        const ly = cy - 18 * scaleBoost;
+        ctx.save();
+        ctx.globalAlpha = labelA;
+        ctx.font = "800 18px Fredoka, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillStyle = rgba(pal.flash, 1);
+        ctx.strokeStyle = "rgba(0,0,0,0.7)";
+        ctx.lineWidth = 4;
+        const label = this.reason === "void" ? "VACÍO…" : "TE RECLAMA…";
+        ctx.strokeText(label, lx, ly);
+        ctx.fillText(label, lx, ly);
+        ctx.restore();
+      }
+    }
 
     // Dissolve flash bloom
     if (progress > PHASE.apex && !this.reduce) {

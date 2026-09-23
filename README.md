@@ -148,10 +148,11 @@ Todos los personajes, nombres, sprites y evoluciones utilizados en el proyecto f
 |  #  | Character           | Role                | Evolution                         |
 | :-: | :------------------ | :------------------ | :-------------------------------- |
 |  01 | **Kilo**            | Exploradora Ohana   | Super Kilo → **KILO GOD**         |
-|  02 | **Glitch**          | Experimento azul    | Ñam-626 → **GLITCH GOD**          |
-|  03 | **Mucho**           | Dragón de bolsillo  | Mucho Fuego → **MUCHO GOD**       |
-|  04 | **Bellota**         | Guardiana del roble | Tormenta de Nueces → **GOD**      |
-|  05 | **Capitán Kétchup** | Palito con rango    | Extra Crujiente → **KÉTCHUP GOD** |
+|  02 | **Stitcho**         | Experimento alien   | Ñam-626 → **STITCHO GOD**         |
+|  03 | **Chispín**         | Chispa Ohana        | Trueno Gordo → **CHISPÍN GOD**    |
+|  04 | **Michi**           | Gato kawaii         | Nueve vidas → **MICHI GOD**       |
+|  05 | **Dino**            | Dragón de bolsillo  | Dino Rex → **DINO GOD**           |
+|  06 | **Capitán Kétchup** | Palito con rango    | Extra Crujiente → **KÉtchup GOD** |
 
 ### The evolution system
 

@@ -110,39 +110,62 @@ export function drawCharacter(ctx, p, cam, t) {
   const evo = Number(p.evo) || 0;
   const speed = Math.abs(p.vx || 0);
   const moving = !!p.grounded && speed > 0.55;
-  const runT = t * (0.46 + speed * 0.14);
+  const runT = t * (0.52 + speed * 0.16);
   const step = Math.sin(runT);
   const idle = p.grounded && !moving;
   const air = !p.grounded;
   const atk = p.melee > 0 ? (12 - p.melee) / 12 : 0;
+  const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
+  const hurtFresh = (p.invuln || 0) > 18; // recoil fuerte al inicio
+  const ascending = air && (p.vy || 0) < -1.2;
+  const falling = air && (p.vy || 0) > 1.5;
+
+  // Walk cycle + jump squash/stretch + hurt recoil (drawers leen p._anim)
   const bob = idle
     ? Math.sin(t * 0.1) * 1.8
     : moving
-      ? Math.abs(step) * -1.4
-      : (p.vy || 0) < 0 ? -1 : 1.2;
+      ? Math.abs(step) * -2.2
+      : ascending ? -2.4 : falling ? 2.0 : 0.6;
   const tilt = moving
-    ? step * 0.05
+    ? step * 0.07
     : air
-      ? ((p.vy || 0) < 0 ? -0.06 : 0.08)
+      ? (ascending ? -0.09 : 0.11)
       : Math.sin(t * 0.08) * 0.03;
-  const sx = air
-    ? ((p.vy || 0) < 0 ? 0.94 : 1.04)
-    : moving
-      ? 1 + step * 0.03
-      : 1 + Math.sin(t * 0.1) * 0.02;
-  const sy = air
-    ? ((p.vy || 0) < 0 ? 1.06 : 0.96)
-    : moving
-      ? 1 - step * 0.03
-      : 1 - Math.sin(t * 0.1) * 0.02;
-  if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) {
+  let sx = 1;
+  let sy = 1;
+  if (ascending) { sx = 0.88; sy = 1.14; }       // stretch up
+  else if (falling) { sx = 1.08; sy = 0.90; }    // squash fall
+  else if (moving) { sx = 1 + step * 0.045; sy = 1 - step * 0.045; }
+  else { sx = 1 + Math.sin(t * 0.1) * 0.02; sy = 1 - Math.sin(t * 0.1) * 0.02; }
+  // Landing squash residual if just grounded after fall
+  if (p.grounded && p._wasAir) { sx = 1.12; sy = 0.86; }
+  p._wasAir = air;
+
+  const recoil = hurtFresh ? 0.14 : hurt ? 0.05 : 0;
+  const recoilX = hurtFresh ? -5 * (p.facing || 1) : 0;
+  p._anim = {
+    step, moving, idle, air, ascending, falling, hurt, hurtFresh,
+    legL: moving ? step * 7 : (air ? (ascending ? -3 : 4) : Math.sin(t * 0.08) * 1.2),
+    legR: moving ? -step * 7 : (air ? (ascending ? -3 : 4) : -Math.sin(t * 0.08) * 1.2),
+    armL: moving ? -step * 5 : (atk ? -8 : Math.sin(t * 0.09) * 2),
+    armR: moving ? step * 5 : (atk ? 10 : -Math.sin(t * 0.09) * 2),
+  };
+
+  // Hurt blink: flash but keep readable (no full vanish)
+  if (hurt && (p.invuln || 0) > 0 && (p.invuln || 0) % 6 < 3 && (p.invuln || 0) < 40) {
     ctx.save();
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.42;
   }
   ctx.save();
-  ctx.translate(x + p.w / 2, y + p.h / 2 + bob);
+  ctx.translate(x + p.w / 2 + recoilX, y + p.h / 2 + bob);
   ctx.scale((p.facing || 1) * sx, sy);
-  ctx.rotate(tilt + atk * 0.16 * (p.facing || 1));
+  ctx.rotate(tilt + atk * 0.16 * (p.facing || 1) + recoil * -(p.facing || 1));
+  if (hurtFresh) {
+    ctx.fillStyle = "rgba(255,80,100,.22)";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, p.w * 0.55, p.h * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
   const spr = spriteFor(p.id, evo);
   if (spr) {
     ctx.fillStyle = "rgba(0,0,0,.32)";
@@ -179,7 +202,7 @@ export function drawCharacter(ctx, p, cam, t) {
       ctx.stroke();
     }
     ctx.restore();
-    if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
+    if (hurt && (p.invuln || 0) > 0 && (p.invuln || 0) % 6 < 3 && (p.invuln || 0) < 40) ctx.restore();
     return;
   }
   if (evo === 0) {
@@ -187,11 +210,24 @@ export function drawCharacter(ctx, p, cam, t) {
     ctx.beginPath();
     ctx.ellipse(0, p.h / 2 + 2, Math.max(8, p.w * 0.36), 3, 0, 0, Math.PI * 2);
     ctx.fill();
-    // Dino Bebé uses drawDino's hatchling silhouette; other chars keep baby.js
-    if (p.id === "dragon") drawDino(ctx, p, t, 0);
-    else drawBaby(ctx, p, t);
+    const evo0Drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawDino, pikachu: drawPikachu };
+    if (evo0Drawers[p.id]) {
+      ctx.scale(0.86, 0.86);
+      evo0Drawers[p.id](ctx, p, t, 0);
+    } else {
+      drawBaby(ctx, p, t);
+    }
+    if (hurt) {
+      ctx.save();
+      ctx.globalAlpha = 0.24;
+      ctx.fillStyle = "#ff3030";
+      ctx.beginPath();
+      ctx.ellipse(0, 2, 14, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
     ctx.restore();
-    if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
+    if (hurt && (p.invuln || 0) > 0 && (p.invuln || 0) % 6 < 3 && (p.invuln || 0) < 40) ctx.restore();
     return;
   }
   ctx.fillStyle = "rgba(0,0,0,.32)";
@@ -217,146 +253,196 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.scale(0.92 + evo * 0.055, 0.92 + evo * 0.055);
   const drawers = { lilo: drawLilo, stitch: drawStitch, dragon: drawDino, pikachu: drawPikachu, cat: drawCat, frita: drawKetchup };
   (drawers[p.id] || drawLilo)(ctx, p, t, evo);
+  if (hurt) {
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = "#ff3030";
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 18 + evo * 2, 16 + evo * 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
-  if (p.invuln > 0 && p.invuln % 6 < 3 && p.invuln < 40) ctx.restore();
+  if (hurt && (p.invuln || 0) > 0 && (p.invuln || 0) % 6 < 3 && (p.invuln || 0) < 40) ctx.restore();
 }
 
 function drawLilo(ctx, p, t, evo) {
   if (evo >= 4) { drawLiloGod(ctx, p, t); return; }
-  // Kilo: human silhouette — big hair bun + A-line dress (never a blob)
-  const dress = evo >= 3 ? "#ffd36a" : evo >= 2 ? "#ff4d78" : "#e0142c";
+  // Kilo: chica clara — bun alto, flequillo, vestido A-line, piernas finas
+  const anim = p._anim || {};
+  const ceremonial = evo >= 3;
+  const ohana = evo >= 2;
+  const baby = evo === 0;
+  const dress = ceremonial ? "#ffd36a" : ohana ? "#ff4d78" : baby ? "#ff9ab0" : "#e0142c";
+  const dressTrim = ceremonial ? "#fff8d6" : "#fff";
   const skin = "#f3c4a0";
-  const hair = evo >= 3 ? "#3a1608" : "#1a0c08";
+  const hair = ceremonial ? "#3a1608" : "#1a0c08";
   const ink = "#3a140c";
-  const hem = evo >= 3 ? 22 : evo >= 2 ? 18 : 15;
-  const dressH = evo >= 3 ? 24 : 19;
-  const headY = evo >= 3 ? -12 : -9;
-  const hairY = evo >= 3 ? -22 : -18;
+  const hem = ceremonial ? 24 : ohana ? 17 : baby ? 11 : 14;
+  const dressH = ceremonial ? 26 : ohana ? 20 : baby ? 14 : 18;
+  const headY = ceremonial ? -14 : baby ? -7 : -10;
+  const bunY = ceremonial ? -28 : ohana ? -24 : baby ? -16 : -20;
+  const legAmp = anim.legL || 0;
+  const legAmpR = anim.legR || 0;
+  const armL = anim.armL || 0;
+  const armR = anim.armR || 0;
 
-  if (evo >= 3) {
-    // Soft cape behind dress
-    ctx.fillStyle = "rgba(255,180,70,.85)";
+  if (ceremonial) {
+    // Capa ceremonial ancha (silueta ≠ evo2)
+    ctx.fillStyle = "rgba(255,200,90,.9)";
     ctx.beginPath();
-    ctx.moveTo(-7, -2);
-    ctx.quadraticCurveTo(-30, 10, -20, 28);
-    ctx.lineTo(20, 28);
-    ctx.quadraticCurveTo(30, 10, 7, -2);
+    ctx.moveTo(-8, 0);
+    ctx.quadraticCurveTo(-34, 12, -26, 34);
+    ctx.lineTo(26, 34);
+    ctx.quadraticCurveTo(34, 12, 8, 0);
     ctx.fill();
+    ctx.strokeStyle = "#c47a18";
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
   }
 
-  // Legs + little shoes (clear biped read)
+  // Piernas finas + zapatitos (walk cycle)
   ctx.strokeStyle = skin;
-  ctx.lineWidth = 3.4;
+  ctx.lineWidth = 2.6;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-7, dressH - 4);
-  ctx.lineTo(-9, dressH + 6);
-  ctx.moveTo(7, dressH - 4);
-  ctx.lineTo(9, dressH + 6);
+  ctx.moveTo(-5.5, dressH - 3);
+  ctx.lineTo(-6.5 + legAmp * 0.15, dressH + 8 + Math.abs(legAmp) * 0.05);
+  ctx.moveTo(5.5, dressH - 3);
+  ctx.lineTo(6.5 + legAmpR * 0.15, dressH + 8 + Math.abs(legAmpR) * 0.05);
   ctx.stroke();
-  ctx.fillStyle = evo >= 3 ? "#fff8d6" : "#2a1408";
+  ctx.fillStyle = ceremonial ? "#fff8d6" : "#2a1408";
   ctx.beginPath();
-  ctx.ellipse(-9.5, dressH + 7, 4.2, 2.2, 0, 0, Math.PI * 2);
-  ctx.ellipse(9.5, dressH + 7, 4.2, 2.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(-7 + legAmp * 0.12, dressH + 9, 3.6, 1.9, 0, 0, Math.PI * 2);
+  ctx.ellipse(7 + legAmpR * 0.12, dressH + 9, 3.6, 1.9, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Hair mass FIRST (silhouette crown) — high bun is Kilo's signature
+  // Cabello: masa + bun ALTO + flequillo
   ctx.fillStyle = hair;
   ctx.beginPath();
-  ctx.ellipse(0, hairY, evo >= 3 ? 17 : 14.5, evo >= 2 ? 13 : 10.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, headY - 4, ceremonial ? 13 : 11.5, ceremonial ? 11 : 9.5, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Twin top puffs
+  // Bun alto (firma)
   ctx.beginPath();
-  ctx.moveTo(-15, hairY + 2);
-  ctx.quadraticCurveTo(-26, hairY - (evo >= 2 ? 22 : 16), -5, hairY - 4);
-  ctx.quadraticCurveTo(0, hairY - (evo >= 3 ? 26 : 20), 5, hairY - 4);
-  ctx.quadraticCurveTo(26, hairY - (evo >= 2 ? 22 : 16), 15, hairY + 2);
+  ctx.ellipse(0, bunY, ceremonial ? 9 : 7.5, ceremonial ? 7 : 5.8, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Side locks framing face
   ctx.beginPath();
-  ctx.ellipse(-12, headY + 2, 4.5, 9, 0.15, 0, Math.PI * 2);
-  ctx.ellipse(12, headY + 2, 4.5, 9, -0.15, 0, Math.PI * 2);
+  ctx.ellipse(0, bunY - 4, 5.5, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Mechones laterales
+  ctx.beginPath();
+  ctx.ellipse(-11, headY + 1, 3.8, 8.5, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(11, headY + 1, 3.8, 8.5, -0.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // Round face
-  oval(ctx, 0, headY, evo >= 3 ? 10.5 : 9.2, evo >= 3 ? 10.5 : 9, skin, ink, 1.15);
-  shine(ctx, -3.2, headY - 3.5, 3.2, 2);
-  eye(ctx, -4, headY - 1, 2.5, 2.8);
-  eye(ctx, 4, headY - 1, 2.5, 2.8);
-  // Blush
-  ctx.fillStyle = "rgba(255,120,140,.4)";
+  // Cara redonda + flequillo por encima
+  oval(ctx, 0, headY, ceremonial ? 10 : 8.8, ceremonial ? 9.5 : 8.4, skin, ink, 1.15);
+  // Flequillo (bangs) — arco sobre la frente
+  ctx.fillStyle = hair;
   ctx.beginPath();
-  ctx.ellipse(-7.5, headY + 2.5, 2.4, 1.5, 0, 0, Math.PI * 2);
-  ctx.ellipse(7.5, headY + 2.5, 2.4, 1.5, 0, 0, Math.PI * 2);
+  ctx.moveTo(-8.5, headY - 4);
+  ctx.quadraticCurveTo(-4, headY - 1.5, 0, headY - 3.5);
+  ctx.quadraticCurveTo(4, headY - 1.5, 8.5, headY - 4);
+  ctx.quadraticCurveTo(6, headY - 8, 0, headY - 9);
+  ctx.quadraticCurveTo(-6, headY - 8, -8.5, headY - 4);
+  ctx.fill();
+  shine(ctx, -3, headY - 2.5, 2.6, 1.6);
+
+  // Cara legible: ojos grandes + pupilas + brillo
+  eye(ctx, -3.6, headY - 0.5, 2.7, 3.0);
+  eye(ctx, 3.6, headY - 0.5, 2.7, 3.0);
+  ctx.fillStyle = "rgba(255,120,140,.45)";
+  ctx.beginPath();
+  ctx.ellipse(-6.8, headY + 2.8, 2.3, 1.4, 0, 0, Math.PI * 2);
+  ctx.ellipse(6.8, headY + 2.8, 2.3, 1.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Nariz + sonrisa claras
+  ctx.fillStyle = "#c47a6a";
+  ctx.beginPath();
+  ctx.ellipse(0, headY + 2.2, 1.1, 0.7, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = "#c47a6a";
-  ctx.lineWidth = 1.4;
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(0, headY + 3.5, 3.2, 0.15, Math.PI - 0.15);
+  ctx.arc(0, headY + 3.8, 3.0, 0.2, Math.PI - 0.2);
   ctx.stroke();
 
-  // A-line dress — wide hem = instant girl-in-dress silhouette
+  // Vestido A-line
   ctx.fillStyle = dress;
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.moveTo(-10, 1);
-  ctx.lineTo(10, 1);
+  ctx.moveTo(-9, 0);
+  ctx.lineTo(9, 0);
   ctx.lineTo(hem, dressH);
-  ctx.quadraticCurveTo(0, dressH + 3, -hem, dressH);
+  ctx.quadraticCurveTo(0, dressH + 3.5, -hem, dressH);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  // White tummy panel
-  ctx.fillStyle = evo >= 3 ? "#fff8d6" : "#fff";
+  // Panel tummy
+  ctx.fillStyle = dressTrim;
   ctx.beginPath();
-  ctx.roundRect ? ctx.roundRect(-4.5, 5, 9, 8, 2) : ctx.rect(-4.5, 5, 9, 8);
+  if (ctx.roundRect) ctx.roundRect(-4, 4, 8, ceremonial ? 10 : 7, 2);
+  else ctx.rect(-4, 4, 8, ceremonial ? 10 : 7);
   ctx.fill();
+  if (ceremonial) {
+    // Ribete dorado ceremonial
+    ctx.strokeStyle = "#c47a18";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-hem + 2, dressH - 2);
+    ctx.quadraticCurveTo(0, dressH + 1, hem - 2, dressH - 2);
+    ctx.stroke();
+  }
 
-  // Chubby arms
-  oval(ctx, -12, 4, 3.6, 5.5, skin);
-  oval(ctx, 12, 4, 3.6, 5.5, skin);
-  limb(ctx, -12, 6, -18, 12, 3.4, skin);
-  limb(ctx, 12, 6, 18, 12, 3.4, skin);
-  oval(ctx, -19, 13, 3.2, 2.8, skin);
-  oval(ctx, 19, 13, 3.2, 2.8, skin);
+  // Brazos
+  oval(ctx, -11 + armL * 0.08, 3, 3.2, 5, skin);
+  oval(ctx, 11 + armR * 0.08, 3, 3.2, 5, skin);
+  limb(ctx, -11, 5, -17 + armL * 0.2, 11 + Math.abs(armL) * 0.05, 2.8, skin);
+  limb(ctx, 11, 5, 17 + armR * 0.2, 11 + Math.abs(armR) * 0.05, 2.8, skin);
+  oval(ctx, -18 + armL * 0.2, 12, 2.8, 2.4, skin);
+  oval(ctx, 18 + armR * 0.2, 12, 2.8, 2.4, skin);
 
   if (evo >= 1) {
-    // Teal leaf clip + flower lei dots
+    // Clip hoja en el bun
     ctx.fillStyle = "#2ec9c0";
     ctx.beginPath();
-    ctx.ellipse(0, hairY - 8, 6.5 + evo * 0.6, 3.4, 0, 0, Math.PI * 2);
+    ctx.ellipse(3, bunY - 2, 5.5, 2.8, 0.4, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#ff8ad4";
-    for (const fx of [-10, 0, 10]) {
+  }
+  if (ohana) {
+    // LEI de flores (cuello) — firma evo2
+    const leiY = 2;
+    const petals = ["#ff8ad4", "#ffe66a", "#ff6a8a", "#fff", "#ff8ad4"];
+    for (let i = 0; i < 5; i++) {
+      const a = -0.9 + i * 0.45;
+      ctx.fillStyle = petals[i];
       ctx.beginPath();
-      ctx.arc(fx, 4, 2.6, 0, Math.PI * 2);
+      ctx.arc(Math.sin(a) * 11, leiY + Math.cos(a) * 2.5, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffe66a";
+      ctx.beginPath();
+      ctx.arc(Math.sin(a) * 11, leiY + Math.cos(a) * 2.5, 1.1, 0, Math.PI * 2);
       ctx.fill();
     }
-  }
-  if (evo >= 2) {
-    // Flower crown petals
+    // Corona de flores en bun
     ctx.fillStyle = "#ffd36a";
     for (let i = -2; i <= 2; i++) {
       ctx.beginPath();
-      ctx.ellipse(i * 5.5, hairY - 6, 2.6, 4.4, i * 0.18, 0, Math.PI * 2);
+      ctx.ellipse(i * 4.5, bunY - 5, 2.2, 3.6, i * 0.15, 0, Math.PI * 2);
       ctx.fill();
     }
-    ctx.strokeStyle = "rgba(255,230,160,.95)";
-    ctx.lineWidth = 2.6;
-    ctx.beginPath();
-    ctx.arc(0, 8, 17 + evo * 2, 0.2, Math.PI - 0.2);
-    ctx.stroke();
   }
-  if (evo >= 3) {
-    // Ukulele-ish star wand
+  if (ceremonial) {
+    // Varita / ukulele estrella
     ctx.strokeStyle = "#c47a18";
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(16, 4);
-    ctx.lineTo(22, -28);
+    ctx.lineTo(24, -30);
     ctx.stroke();
-    star(ctx, 22, -32, 6.5, "#ffe66a");
+    star(ctx, 24, -34, 7, "#ffe66a");
   }
 }
 
@@ -496,283 +582,384 @@ function drawKetchup(ctx, p, t, evo) {
 
 function drawStitch(ctx, p, t, evo) {
   if (evo >= 4) { drawStitchGod(ctx, p, t); return; }
-  // Glitch: alien — huge notched ears + antennae + tubby belly (wide silhouette)
-  const blue = evo >= 3 ? "#6ad0ff" : evo >= 2 ? "#1a3cff" : "#3d9bff";
-  const belly = "#d7f4ff";
+  // Stitcho: experimento alien — orejas V dentadas, hocico corto, brazos-garra, ojos óvalo negros
+  // NO cabeza koala redonda. Stance ancho y bajo.
+  const anim = p._anim || {};
+  const angry = evo >= 2;
+  const tech = evo >= 3;
+  const mini = evo === 0;
+  const blue = tech ? "#5ec8ff" : angry ? "#1540ff" : mini ? "#a8dcff" : "#3d9bff";
+  const blueDeep = tech ? "#1a6aaa" : angry ? "#0a1a88" : "#2a6acc";
+  const belly = tech ? "#c8f0ff" : "#d7f4ff";
   const ink = "#0b1a44";
-  const flap = Math.sin(t / 9) * (2.5 + evo * 0.6);
-  const earH = evo >= 3 ? -56 : evo >= 2 ? -48 : -42;
-  const bodyR = 17 + evo * 1.5;
+  const flap = Math.sin(t / 9) * (2.2 + evo * 0.5);
+  const legL = anim.legL || 0;
+  const legR = anim.legR || 0;
+  const armSwing = anim.armL || 0;
 
-  // Huge rabbit-alien ears (signature silhouette — draw first)
-  ctx.fillStyle = blue;
-  ctx.beginPath();
-  ctx.moveTo(-11, -6);
-  ctx.quadraticCurveTo(-32, earH + flap, -4, -14);
-  ctx.quadraticCurveTo(-14, -18, -11, -6);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(11, -6);
-  ctx.quadraticCurveTo(32, earH + flap, 4, -14);
-  ctx.quadraticCurveTo(14, -18, 11, -6);
-  ctx.fill();
-  // Notch tips
-  ctx.fillStyle = ink;
-  ctx.beginPath();
-  ctx.moveTo(-22, earH * 0.72 + flap * 0.5);
-  ctx.lineTo(-28, earH * 0.85 + flap);
-  ctx.lineTo(-18, earH * 0.78);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(22, earH * 0.72 + flap * 0.5);
-  ctx.lineTo(28, earH * 0.85 + flap);
-  ctx.lineTo(18, earH * 0.78);
-  ctx.fill();
-  // Pink inner ear
-  ctx.fillStyle = "#f4b6c8";
-  ctx.beginPath();
-  ctx.ellipse(-18, earH * 0.5, 4.5, 9 + evo, -0.45, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(18, earH * 0.5, 4.5, 9 + evo, 0.45, 0, Math.PI * 2);
-  ctx.fill();
+  // Orejas V ENORMES dentadas (silueta firma — dibujar primero)
+  const earTip = tech ? -58 : angry ? -52 : mini ? -34 : -46;
+  function ear(side) {
+    const f = flap * side;
+    ctx.fillStyle = blue;
+    ctx.beginPath();
+    ctx.moveTo(side * 8, -8);
+    ctx.lineTo(side * 4, -16);
+    ctx.quadraticCurveTo(side * (28 + evo), earTip + f, side * 14, -10);
+    ctx.quadraticCurveTo(side * 18, -6, side * 8, -8);
+    ctx.fill();
+    // Muesca V en la punta
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.moveTo(side * 18, earTip * 0.78 + f * 0.4);
+    ctx.lineTo(side * 26, earTip * 0.92 + f);
+    ctx.lineTo(side * 12, earTip * 0.82);
+    ctx.lineTo(side * 16, earTip * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    // Interior rosa
+    ctx.fillStyle = "#f4b6c8";
+    ctx.beginPath();
+    ctx.ellipse(side * 16, earTip * 0.48, 3.8, 10 + evo, side * -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Contorno
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(side * 8, -8);
+    ctx.quadraticCurveTo(side * (28 + evo), earTip + f, side * 14, -10);
+    ctx.stroke();
+  }
+  ear(-1);
+  ear(1);
 
-  // Antennae horns
-  ctx.fillStyle = ink;
-  ctx.beginPath();
-  ctx.moveTo(-8, -20);
-  ctx.lineTo(-10, -32 - evo);
-  ctx.lineTo(-4, -18);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(8, -20);
-  ctx.lineTo(10, -32 - evo);
-  ctx.lineTo(4, -18);
-  ctx.fill();
-  ctx.fillStyle = blue;
-  ctx.beginPath();
-  ctx.arc(-10, -33 - evo, 2.4, 0, Math.PI * 2);
-  ctx.arc(10, -33 - evo, 2.4, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Stubby legs
-  ctx.strokeStyle = blue;
-  ctx.lineWidth = 4.5;
+  // Antenas
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 2.2;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-8, 16);
-  ctx.lineTo(-12, 24);
-  ctx.moveTo(8, 16);
-  ctx.lineTo(12, 24);
+  ctx.moveTo(-6, -18);
+  ctx.lineTo(-9, -34 - evo);
+  ctx.moveTo(6, -18);
+  ctx.lineTo(9, -34 - evo);
+  ctx.stroke();
+  ctx.fillStyle = tech ? "#8af0ff" : blue;
+  ctx.beginPath();
+  ctx.arc(-9, -35 - evo, tech ? 3.2 : 2.5, 0, Math.PI * 2);
+  ctx.arc(9, -35 - evo, tech ? 3.2 : 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  if (tech) {
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(-9, -35 - evo, 4.5, 0, Math.PI * 2);
+    ctx.arc(9, -35 - evo, 4.5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Piernas cortas stance ANCHO
+  ctx.strokeStyle = blue;
+  ctx.lineWidth = 5.2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-10, 14);
+  ctx.lineTo(-16 + legL * 0.12, 24);
+  ctx.moveTo(10, 14);
+  ctx.lineTo(16 + legR * 0.12, 24);
   ctx.stroke();
   ctx.fillStyle = blue;
   ctx.beginPath();
-  ctx.ellipse(-13, 25, 4.5, 2.4, 0, 0, Math.PI * 2);
-  ctx.ellipse(13, 25, 4.5, 2.4, 0, 0, Math.PI * 2);
+  ctx.ellipse(-17 + legL * 0.1, 25, 5.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(17 + legR * 0.1, 25, 5.5, 2.6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Tubby body + belly
-  oval(ctx, 0, 6, bodyR, 14 + evo, blue, ink, 1.4);
-  shine(ctx, -6, 0, 5, 3.5);
-  oval(ctx, 0, 11, 10 + evo * 0.5, 7.5, belly);
+  // Cuerpo bajo y ANCHO (no bola koala)
+  const bodyW = tech ? 20 : angry ? 19 : mini ? 13 : 16;
+  const bodyH = tech ? 15 : mini ? 10 : 13;
+  oval(ctx, 0, 8, bodyW, bodyH, blue, ink, 1.4);
+  shine(ctx, -6, 2, 4.5, 3);
+  oval(ctx, 0, 12, bodyW * 0.55, bodyH * 0.55, belly);
 
-  // Big alien eyes
-  const angry = evo >= 2;
-  ctx.fillStyle = evo >= 2 ? "#ff1a1a" : "#111";
+  // Cabeza: más triangular / hocico corto (NO círculo perfecto)
+  ctx.fillStyle = blue;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.35;
   ctx.beginPath();
-  ctx.ellipse(-6.5, 0, 4.6, angry ? 6.2 : 5.4, 0, 0, Math.PI * 2);
-  ctx.ellipse(6.5, 0, 4.6, angry ? 6.2 : 5.4, 0, 0, Math.PI * 2);
+  ctx.moveTo(-14, -2);
+  ctx.quadraticCurveTo(-16, -16, 0, -20);
+  ctx.quadraticCurveTo(16, -16, 14, -2);
+  ctx.quadraticCurveTo(10, 6, 0, 8);
+  ctx.quadraticCurveTo(-10, 6, -14, -2);
+  ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(-7.6, -2.8, 2.2, 2.4);
-  ctx.fillRect(5.6, -2.8, 2.2, 2.4);
-  // Nose + teeth
-  ctx.fillStyle = "#111";
+  ctx.stroke();
+  // Hocico corto saliente
+  ctx.fillStyle = belly;
   ctx.beginPath();
-  ctx.ellipse(0, 7, 2.2, 1.4, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 4, 7, 4.2, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#111";
-  ctx.fillRect(-4.5, 10, 9, 2.8);
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(-3.6, 9.2, 2, 3.2);
-  ctx.fillRect(1.6, 9.2, 2, 3.2);
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.ellipse(0, 2.5, 2.4, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  if (evo >= 2) {
-    // Claw arms raised
-    ctx.strokeStyle = blue;
-    ctx.lineWidth = 4.2;
-    ctx.lineCap = "round";
+  // Ojos óvalo GIGANTES negros
+  const eyeH = angry ? 7.5 : 6.2;
+  ctx.fillStyle = angry ? "#ff1a2a" : "#0a0a12";
+  ctx.beginPath();
+  ctx.ellipse(-6.5, -6, 5.2, eyeH, 0, 0, Math.PI * 2);
+  ctx.ellipse(6.5, -6, 5.2, eyeH, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (angry) {
+    // Cejas enfadadas
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
-    ctx.moveTo(-bodyR + 2, 4);
-    ctx.lineTo(-28, -8);
-    ctx.moveTo(bodyR - 2, 4);
-    ctx.lineTo(28, -8);
+    ctx.moveTo(-12, -14); ctx.lineTo(-2, -10);
+    ctx.moveTo(12, -14); ctx.lineTo(2, -10);
     ctx.stroke();
-    ctx.fillStyle = "#cfe9ff";
-    for (const side of [-1, 1]) {
-      ctx.beginPath();
-      ctx.moveTo(side * 28, -8);
-      ctx.lineTo(side * 36, -14);
-      ctx.lineTo(side * 30, -4);
-      ctx.lineTo(side * 34, -2);
-      ctx.closePath();
-      ctx.fill();
-    }
   }
-  if (evo >= 3) {
-    // Experiment antenna dish
-    oval(ctx, 0, -22, 5.5, 4.2, "#8ad4ff", ink, 1);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(-1.2, -34, 2.4, 12);
-    ctx.strokeStyle = "#cfe9ff";
-    ctx.lineWidth = 3.2;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(-8.2, -9.5, 2.4, 2.8);
+  ctx.fillRect(5.2, -9.5, 2.4, 2.8);
+  if (tech) {
+    // Visor tech cyan
+    ctx.strokeStyle = "#8af0ff";
+    ctx.lineWidth = 1.6;
+    ctx.strokeRect(-12, -14, 24, 12);
+  }
+
+  // Boca / dientes
+  if (angry) {
+    ctx.fillStyle = "#1a0a10";
     ctx.beginPath();
-    ctx.moveTo(-16, 8);
-    ctx.lineTo(-26, 14);
-    ctx.moveTo(16, 8);
-    ctx.lineTo(26, 14);
+    ctx.moveTo(-7, 7); ctx.lineTo(7, 7); ctx.lineTo(5, 12); ctx.lineTo(-5, 12);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    for (const tx of [-4, -1, 2]) {
+      ctx.fillRect(tx, 7, 2.2, 3.5);
+    }
+  } else {
+    ctx.fillStyle = "#1a0a10";
+    ctx.fillRect(-4, 8, 8, 2.4);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(-3.2, 7.4, 2, 2.8);
+    ctx.fillRect(1.2, 7.4, 2, 2.8);
+  }
+
+  // Brazos-garra LARGOS (siempre visibles; evo2+ alzados; mini más cortos)
+  const clawY = angry ? -10 : mini ? 4 : 2;
+  const clawX = angry ? 30 : mini ? 16 : 26;
+  ctx.strokeStyle = blue;
+  ctx.lineWidth = angry ? 5 : 4.2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-bodyW + 2, 4);
+  ctx.lineTo(-clawX + armSwing * 0.15, clawY);
+  ctx.moveTo(bodyW - 2, 4);
+  ctx.lineTo(clawX + armSwing * 0.15, clawY);
+  ctx.stroke();
+  // Garras
+  ctx.fillStyle = tech ? "#e0f8ff" : "#cfe9ff";
+  for (const side of [-1, 1]) {
+    const cx = side * clawX;
+    const cy = clawY;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + side * 10, cy - 8);
+    ctx.lineTo(cx + side * 2, cy + 2);
+    ctx.lineTo(cx + side * 9, cy + 4);
+    ctx.lineTo(cx, cy + 3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1;
     ctx.stroke();
-    oval(ctx, 0, 4, 22, 9, "rgba(180,230,255,.35)");
+  }
+
+  if (tech) {
+    // Placas + antena plato (amenaza tech — silueta ≠ evo2)
+    ctx.fillStyle = "#8ad4ff";
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(-10, -2); ctx.lineTo(-14, 6); ctx.lineTo(-6, 8); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(10, -2); ctx.lineTo(14, 6); ctx.lineTo(6, 8); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    oval(ctx, 0, -24, 6.5, 4.5, "#8ad4ff", ink, 1);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(-1.4, -38, 2.8, 14);
+    // Venas de energía
+    ctx.strokeStyle = "rgba(140,240,255,.85)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-12, 10); ctx.lineTo(-22, 16);
+    ctx.moveTo(12, 10); ctx.lineTo(22, 16);
+    ctx.stroke();
+    oval(ctx, 0, 6, 24, 10, "rgba(100,220,255,.3)");
   }
 }
 
 function drawPikachu(ctx, p, t, evo) {
   if (evo >= 4) { drawPikachuGod(ctx, p, t); return; }
-  // Pika: rodent — tall black-tipped ears + zigzag lightning tail
-  const body = evo >= 3 ? "#ffe14a" : "#ffd000";
+  // Chispín: chibi redondo Ohana — orejas redondas con tip, cola zig-zag Ohana
+  const anim = p._anim || {};
+  const fat = evo >= 3;       // Trueno Gordo
+  const volt = evo >= 2;      // Voltín
+  const body = fat ? "#fff36a" : volt ? "#f0a020" : evo === 0 ? "#fff36a" : "#ffe44a";
   const ink = "#3a2208";
-  const tip = "#1a1208";
-  const s = 1 + evo * 0.07;
+  const accent = "#2ec9c0";   // motivo Ohana (cyan) en vez de discos rojos clásicos
+  const legL = anim.legL || 0;
+  const legR = anim.legR || 0;
+  const s = fat ? 1.15 : 1 + evo * 0.04;
   ctx.scale(s, s);
-  const earTip = -34 - evo * 2;
 
-  if (evo >= 2) {
-    ctx.strokeStyle = "rgba(255,230,80,.6)";
-    ctx.lineWidth = 1.7;
+  if (volt) {
+    // Chispas Ohana (hoja-rayo)
+    ctx.strokeStyle = "rgba(46,201,192,.55)";
+    ctx.lineWidth = 1.8;
     for (let i = 0; i < 3 + evo; i++) {
-      const a = t / 6 + i * 1.1;
+      const a = t / 7 + i * 1.2;
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(Math.cos(a) * (18 + evo * 3), Math.sin(a) * (11 + evo * 2));
+      ctx.lineTo(Math.cos(a) * (16 + evo * 3), Math.sin(a) * (10 + evo * 2));
       ctx.stroke();
     }
   }
 
-  // Zigzag lightning tail (draw behind) — signature
+  // Cola zig-zag Ohana (única — crece con evo)
+  const wag = Math.sin(t / 8) * 2;
+  const tailScale = fat ? 1.5 : volt ? 1.25 : 1;
+  ctx.save();
+  ctx.translate(8, 8);
+  ctx.scale(tailScale, tailScale);
   ctx.strokeStyle = body;
-  ctx.lineWidth = 5.5 + evo;
+  ctx.lineWidth = fat ? 6.5 : 5;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
-  ctx.moveTo(10, 10);
-  ctx.lineTo(16, -4);
-  ctx.lineTo(12, 8);
-  ctx.lineTo(22, 0);
-  ctx.lineTo(18, 12);
+  ctx.moveTo(0, 2);
+  ctx.lineTo(6 + wag * 0.2, -8);
+  ctx.lineTo(2, 2);
+  ctx.lineTo(12 + wag * 0.15, -4);
+  ctx.lineTo(8, 8);
+  ctx.lineTo(18, 2 + wag * 0.1);
   ctx.stroke();
-  // Bolt tip flare
-  ctx.fillStyle = evo >= 2 ? "#fff36a" : tip;
+  // Punta flare Ohana (cyan notch)
+  ctx.fillStyle = accent;
   ctx.beginPath();
-  ctx.moveTo(20, -2);
-  ctx.lineTo(34, -10);
-  ctx.lineTo(24, 6);
-  ctx.lineTo(28, 10);
+  ctx.moveTo(16, 0);
+  ctx.lineTo(28, -8);
+  ctx.lineTo(18, 8);
+  ctx.lineTo(22, 10);
   ctx.closePath();
-  ctx.fill();
-
-  // Stubby hind legs
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.ellipse(-8, 16, 4.5, 3.2, 0, 0, Math.PI * 2);
-  ctx.ellipse(8, 16, 4.5, 3.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Round body
-  oval(ctx, 0, 8, 13.5, 11.5, body, ink, 1.3);
-  oval(ctx, 0, 11, 8.5, 7, "rgba(255,255,255,.2)");
-
-  // Arms
-  oval(ctx, -12, 6, 3.5, 4.5, body);
-  oval(ctx, 12, 6, 3.5, 4.5, body);
-
-  // Round head
-  oval(ctx, 0, -6, 12.5, 11.5, body, ink, 1.3);
-  shine(ctx, -5, -10, 4.2, 2.6);
-
-  // Tall pointy ears ON TOP — black tips for instant Pika read
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.moveTo(-8, -12);
-  ctx.lineTo(-11, earTip);
-  ctx.lineTo(-1, -12);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(8, -12);
-  ctx.lineTo(11, earTip);
-  ctx.lineTo(1, -12);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = tip;
-  ctx.beginPath();
-  ctx.moveTo(-11, earTip);
-  ctx.lineTo(-4, earTip);
-  ctx.lineTo(-7.5, earTip + 10);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(11, earTip);
-  ctx.lineTo(4, earTip);
-  ctx.lineTo(7.5, earTip + 10);
-  ctx.closePath();
-  ctx.fill();
-  // Ear outline
-  ctx.strokeStyle = ink;
-  ctx.lineWidth = 1.1;
-  ctx.beginPath();
-  ctx.moveTo(-8, -12); ctx.lineTo(-11, earTip); ctx.lineTo(-1, -12);
-  ctx.moveTo(8, -12); ctx.lineTo(11, earTip); ctx.lineTo(1, -12);
-  ctx.stroke();
-
-  // Cheek glow + solid red disks (high contrast)
-  ctx.save();
-  ctx.globalAlpha = 0.45;
-  ctx.fillStyle = "rgba(255,60,70,.55)";
-  ctx.beginPath();
-  ctx.arc(-10, 0, 6.2 + evo * 0.5, 0, Math.PI * 2);
-  ctx.arc(10, 0, 6.2 + evo * 0.5, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
-  ctx.fillStyle = "#e23b3d";
+
+  // Patitas
+  ctx.fillStyle = body;
   ctx.beginPath();
-  ctx.arc(-10, 0, 3.8 + evo * 0.35, 0, Math.PI * 2);
-  ctx.arc(10, 0, 3.8 + evo * 0.35, 0, Math.PI * 2);
+  ctx.ellipse(-7 + legL * 0.1, fat ? 18 : 15, fat ? 6 : 4.2, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(7 + legR * 0.1, fat ? 18 : 15, fat ? 6 : 4.2, 3, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  eye(ctx, -4.2, -7, 2.5, 2.7);
-  eye(ctx, 4.2, -7, 2.5, 2.7);
-  // Tiny nose + smile
+  // Cuerpo chibi MUY redondo (cabeza+cuerpo casi un blob)
+  const bw = fat ? 18 : volt ? 14 : evo === 0 ? 11 : 12.5;
+  const bh = fat ? 16 : volt ? 13 : evo === 0 ? 10 : 11.5;
+  oval(ctx, 0, fat ? 6 : 5, bw, bh, body, ink, 1.3);
+  oval(ctx, 0, fat ? 9 : 8, bw * 0.55, bh * 0.5, "rgba(255,255,255,.22)");
+
+  // Brazos cortos
+  oval(ctx, -bw + 2, 4, 3.2, 4, body);
+  oval(ctx, bw - 2, 4, 3.2, 4, body);
+
+  // Cabeza redonda pegada al cuerpo
+  const hr = fat ? 14 : evo === 0 ? 10 : 11.5;
+  oval(ctx, 0, -6, hr, hr * 0.95, body, ink, 1.3);
+  shine(ctx, -4, -10, 3.8, 2.4);
+
+  // Orejas REDONDAS con tip oscuro (no tall pointed)
+  function roundEar(side) {
+    const ex = side * (hr * 0.55);
+    const ey = -hr * 0.9;
+    const erx = volt ? 5.8 : 4.6;
+    const ery = volt ? 7.8 : 6.2;
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, erx, ery, side * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.1;
+    ctx.stroke();
+    // Tip cap (rounded, not triangle)
+    ctx.fillStyle = "#1a1208";
+    ctx.beginPath();
+    ctx.ellipse(ex + side * 0.4, ey - ery * 0.55, erx * 0.62, ery * 0.38, side * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Tiny Ohana spark on tip at volt+
+    if (volt) {
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(ex + side * 0.3, ey - ery * 0.55, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  roundEar(-1);
+  roundEar(1);
+
+  // Mejillas: marcas Ohana (corazón / hoja / spark)
+  ctx.fillStyle = accent;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    const cx = side * (fat ? 12 : 9.5);
+    const cy = 0;
+    ctx.moveTo(cx, cy + 2.5);
+    ctx.quadraticCurveTo(cx - side * 3, cy - 1, cx, cy - 3);
+    ctx.quadraticCurveTo(cx + side * 3, cy - 1, cx, cy + 2.5);
+    ctx.fill();
+  }
+  if (volt) {
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = "rgba(46,201,192,.5)";
+    ctx.beginPath();
+    ctx.arc(-10, 0, 6, 0, Math.PI * 2);
+    ctx.arc(10, 0, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  eye(ctx, -4, -7, fat ? 3 : 2.5, fat ? 3.2 : 2.7);
+  eye(ctx, 4, -7, fat ? 3 : 2.5, fat ? 3.2 : 2.7);
   ctx.fillStyle = "#333";
   ctx.beginPath();
-  ctx.ellipse(0, -3, 1.3, 0.9, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, -3, 1.2, 0.85, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = "#5a3208";
   ctx.lineWidth = 1.3;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-2.8, -1.2);
-  ctx.quadraticCurveTo(0, 1.6, 2.8, -1.2);
+  ctx.moveTo(-2.6, -1);
+  ctx.quadraticCurveTo(0, 2, 2.6, -1);
   ctx.stroke();
 
-  if (evo >= 3) {
-    // Extra bolt spark from cheek
-    ctx.strokeStyle = "#fff36a";
-    ctx.lineWidth = 2.2;
+  if (fat) {
+    // Barriguita + rayos laterales (silueta ancha ≠ Voltín)
+    oval(ctx, 0, 10, 12, 8, "rgba(255,255,255,.25)");
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 2.4;
     ctx.beginPath();
-    ctx.moveTo(-16, -6);
-    ctx.lineTo(-24, -18);
-    ctx.lineTo(-14, -10);
-    ctx.lineTo(-20, -4);
+    ctx.moveTo(-18, -4); ctx.lineTo(-26, -14); ctx.lineTo(-16, -8); ctx.lineTo(-24, -2);
+    ctx.moveTo(18, -4); ctx.lineTo(26, -14); ctx.lineTo(16, -8); ctx.lineTo(24, -2);
+    ctx.stroke();
+  } else if (volt) {
+    ctx.strokeStyle = "#fff36a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-14, -8); ctx.lineTo(-20, -16); ctx.lineTo(-12, -10);
     ctx.stroke();
   }
 }
@@ -1819,7 +2006,7 @@ function drawLiloGod(ctx, p, t) {
   }
 }
 
-/** Evo 4 — GLITCH GOD: apex 626 — energy plate armor, membrane sails, tech crown. */
+/** Evo 4 — STITCHO GOD: apex experiment — energy plate armor, membrane sails, tech crown. */
 function drawStitchGod(ctx, p, t) {
   const blue = "#2a6dff";
   const deep = "#0d2a8a";
@@ -2037,7 +2224,7 @@ function drawStitchGod(ctx, p, t) {
   }
 }
 
-/** Evo 4 — PIKA GOD: thunder deity — bolt wings, mane crown, cheek orbs. */
+/** Evo 4 — CHISPÍN GOD: thunder deity — bolt wings, mane crown, cheek orbs. */
 function drawPikachuGod(ctx, p, t) {
   const body = "#ffe14a";
   const lite = "#fff6a0";

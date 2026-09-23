@@ -1928,10 +1928,13 @@ function render() {
     }
   }
   ctx.restore();
-  const low = 1 - Math.max(0, game.player.health / Math.max(1, game.player.maxHealth));
-  const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.3, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
-  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Skip low-HP edge vignette during death FX — at health=0 it was ~60% opaque over the ghost
+  if (!DeathFx.isPlaying()) {
+    const low = 1 - Math.max(0, game.player.health / Math.max(1, game.player.maxHealth));
+    const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.3, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
   {
     const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
     if (game.fading > 0) {
