@@ -151,13 +151,16 @@ export function drawCharacter(ctx, p, cam, t) {
     ctx.fill();
     if (evo >= 2) glow(ctx, p.w * (0.9 + evo * 0.28 + (evo >= 4 ? 0.55 : 0)), p.color, t, evo >= 4 ? 10 : (evo >= 3 ? 4 + evo : 0));
     if (p.evoBurst > 0) {
-      const k = p.evoBurst / 90;
+      const maxB = Math.max(1, p.evoBurstMax || 90);
+      const k = Math.max(0, Math.min(1, p.evoBurst / maxB));
+      const progress = 1 - k;
+      const radius = Math.max(1, 10 + progress * 216);
       ctx.save();
       ctx.globalAlpha = k;
       ctx.strokeStyle = p.color || "#ffe66a";
-      ctx.lineWidth = 6 * k;
+      ctx.lineWidth = Math.max(0.5, 6 * k);
       ctx.beginPath();
-      ctx.arc(0, 0, 10 + (90 - p.evoBurst) * 2.4, 0, Math.PI * 2);
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
       p.evoBurst--;

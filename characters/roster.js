@@ -128,7 +128,9 @@ export function applyForm(p, opts = {}) {
   }
 
   if (opts.silent || evo === 0) return;
-  p.evoBurst = evo >= 4 ? 140 : 90;
+  const burstFrames = evo >= 4 ? 140 : 90;
+  p.evoBurstMax = burstFrames;
+  p.evoBurst = burstFrames;
   try {
     window.dispatchEvent(new CustomEvent("ohana-evolve", {
       detail: { name: p.name, evo: p.evo, color: p.color, id: p.id }
