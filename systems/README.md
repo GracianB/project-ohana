@@ -35,3 +35,7 @@ API: `spawnFromRoom`, `update`, `draw`, `tryUse`. Datos en `map.js` → `room.po
 ## surprises.js
 Sorpresas positivas por sala (sin tocar progresión evo): pez dorado (beach/reef), lluvia de estrellas (space, orbs +XP), power-up secreto (hub, 1×/run).
 API: `onMakeFoe`, `onEnterRoom`, `onEnemyKilled`, `update`, `draw`, `starOrbBonus`, `reset`.
+
+## boss-nido.js
+Reina del Nido: jefe final en 3 fases (suelo → alas → enloquece) con telegraphs, charge/swoop/slam/spit.
+API: `createBossNido()`, `updateBossNido(e, game, helpers)`. Silueta procedural en `engine/enemies.js` → `drawBoss`.

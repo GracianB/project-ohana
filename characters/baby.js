@@ -27,150 +27,238 @@ export function drawBaby(ctx, p, t) {
 function babyPika(ctx, t) {
   const bob = Math.sin(t / 9) * 1.1;
   ctx.translate(0, 3 + bob);
-  ctx.fillStyle = "#ffe44a";
+  const body = "#ffe44a";
+  const tip = "#222";
+  // stubby tail zig
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 3.2;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.ellipse(0, 4, 8.2, 7.4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#333";
+  ctx.moveTo(6, 6);
+  ctx.lineTo(11, 0);
+  ctx.lineTo(9, 6);
+  ctx.lineTo(14, 3);
+  ctx.stroke();
+  // round body
+  ctx.fillStyle = body;
   ctx.beginPath();
-  ctx.moveTo(-6, -8);
-  ctx.lineTo(-8, -18);
-  ctx.lineTo(-3, -8);
-  ctx.moveTo(6, -8);
-  ctx.lineTo(8, -18);
-  ctx.lineTo(3, -8);
+  ctx.ellipse(0, 5, 8.5, 7.6, 0, 0, Math.PI * 2);
   ctx.fill();
+  // tall ears with black tips
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.moveTo(-5, -6);
+  ctx.lineTo(-7, -20);
+  ctx.lineTo(-1, -6);
+  ctx.moveTo(5, -6);
+  ctx.lineTo(7, -20);
+  ctx.lineTo(1, -6);
+  ctx.fill();
+  ctx.fillStyle = tip;
+  ctx.beginPath();
+  ctx.moveTo(-7, -20); ctx.lineTo(-3.5, -20); ctx.lineTo(-5.2, -14); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(7, -20); ctx.lineTo(3.5, -20); ctx.lineTo(5.2, -14); ctx.fill();
+  // eyes
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-2.6, 2, 2.1, 0, Math.PI * 2);
-  ctx.arc(2.6, 2, 2.1, 0, Math.PI * 2);
+  ctx.arc(-2.8, 2, 2.2, 0, Math.PI * 2);
+  ctx.arc(2.8, 2, 2.2, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#222";
   ctx.beginPath();
-  ctx.arc(-2.3, 2.2, 1, 0, Math.PI * 2);
-  ctx.arc(2.9, 2.2, 1, 0, Math.PI * 2);
+  ctx.arc(-2.4, 2.2, 1.05, 0, Math.PI * 2);
+  ctx.arc(3.1, 2.2, 1.05, 0, Math.PI * 2);
   ctx.fill();
+  // red cheeks
   ctx.fillStyle = "#e23b3b";
   ctx.beginPath();
-  ctx.arc(-6, 6, 1.8, 0, Math.PI * 2);
-  ctx.arc(6, 6, 1.8, 0, Math.PI * 2);
+  ctx.arc(-6.5, 6, 2.1, 0, Math.PI * 2);
+  ctx.arc(6.5, 6, 2.1, 0, Math.PI * 2);
   ctx.fill();
+  blush(ctx, 0, 7, 0.6);
 }
 
 function babyLani(ctx, t) {
   const bob = Math.sin(t / 10) * 1.2;
   ctx.translate(0, 4 + bob);
-  ctx.fillStyle = "#ff6a8a";
+  const dress = "#ff6a8a";
+  const skin = "#f4c2a8";
+  const hair = "#1a0c08";
+  // little A-line dress
+  ctx.fillStyle = dress;
   ctx.beginPath();
-  ctx.ellipse(0, 11, 6.2, 5.2, 0, 0, Math.PI * 2);
+  ctx.moveTo(-5, 6);
+  ctx.lineTo(5, 6);
+  ctx.lineTo(8, 16);
+  ctx.quadraticCurveTo(0, 18, -8, 16);
+  ctx.closePath();
   ctx.fill();
   ctx.fillStyle = "#fff";
-  ctx.fillRect(-2.2, 8, 4.4, 2.4);
-  ctx.fillStyle = "#1a0c08";
+  ctx.fillRect(-2.2, 8, 4.4, 2.6);
+  // stubby legs + shoes
+  ctx.strokeStyle = skin;
+  ctx.lineWidth = 2.4;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(0, -7, 10.5, 0, Math.PI * 2);
+  ctx.moveTo(-4, 15); ctx.lineTo(-5, 18);
+  ctx.moveTo(4, 15); ctx.lineTo(5, 18);
+  ctx.stroke();
+  ctx.fillStyle = "#2a1408";
+  ctx.beginPath();
+  ctx.ellipse(-5.2, 18.5, 2.4, 1.3, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.2, 18.5, 2.4, 1.3, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#f4c2a8";
+  // hair bun mass
+  ctx.fillStyle = hair;
   ctx.beginPath();
-  ctx.arc(0, -5, 8.2, 0, Math.PI * 2);
+  ctx.arc(0, -8, 9.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, -14, 6, 4.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // face
+  ctx.fillStyle = skin;
+  ctx.beginPath();
+  ctx.arc(0, -5, 7.8, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-3.2, -6, 2.8, 0, Math.PI * 2);
-  ctx.arc(3.2, -6, 2.8, 0, Math.PI * 2);
+  ctx.arc(-3.0, -6, 2.6, 0, Math.PI * 2);
+  ctx.arc(3.0, -6, 2.6, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#2a1408";
   ctx.beginPath();
-  ctx.arc(-2.8, -5.6, 1.35, 0, Math.PI * 2);
-  ctx.arc(3.6, -5.6, 1.35, 0, Math.PI * 2);
+  ctx.arc(-2.6, -5.6, 1.25, 0, Math.PI * 2);
+  ctx.arc(3.4, -5.6, 1.25, 0, Math.PI * 2);
   ctx.fill();
-  blush(ctx, 0, -2.2, 0.9);
+  blush(ctx, 0, -2.0, 0.9);
   ctx.strokeStyle = "#c47a6a";
   ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.arc(0, -1.4, 2.2, 0.25, Math.PI - 0.25);
+  ctx.arc(0, -1.2, 2.1, 0.25, Math.PI - 0.25);
   ctx.stroke();
-  ctx.strokeStyle = "#1a0c08";
-  ctx.lineWidth = 2.2;
-  ctx.lineCap = "round";
+  // tiny arms
+  ctx.fillStyle = skin;
   ctx.beginPath();
-  ctx.moveTo(-5, 10);
-  ctx.lineTo(-6, 14);
-  ctx.moveTo(5, 10);
-  ctx.lineTo(6, 14);
-  ctx.stroke();
+  ctx.ellipse(-7, 8, 2.2, 3, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(7, 8, 2.2, 3, -0.2, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function babyTiko(ctx, t) {
-  const flap = Math.sin(t / 7) * 3;
+  const flap = Math.sin(t / 7) * 3.2;
   ctx.translate(0, 3);
-  ctx.fillStyle = "#7ec8ff";
+  const blue = "#6bb6ff";
+  const ear = "#7ec8ff";
+  // huge baby ears
+  ctx.fillStyle = ear;
   ctx.beginPath();
   ctx.moveTo(-5, -4);
-  ctx.quadraticCurveTo(-16, -26 + flap, 0, -8);
+  ctx.quadraticCurveTo(-17, -28 + flap, 0, -8);
   ctx.fill();
   ctx.beginPath();
   ctx.moveTo(5, -4);
-  ctx.quadraticCurveTo(16, -26 + flap, 0, -8);
+  ctx.quadraticCurveTo(17, -28 + flap, 0, -8);
   ctx.fill();
   ctx.fillStyle = "#f7c0d0";
   ctx.beginPath();
-  ctx.ellipse(-10, -16, 2.4, 5, -0.25, 0, Math.PI * 2);
-  ctx.ellipse(10, -16, 2.4, 5, 0.25, 0, Math.PI * 2);
+  ctx.ellipse(-10, -16, 2.6, 5.5, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(10, -16, 2.6, 5.5, 0.3, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#6bb6ff";
+  // tiny antennae
+  ctx.fillStyle = "#0b1a44";
   ctx.beginPath();
-  ctx.arc(0, 4, 9.5, 0, Math.PI * 2);
+  ctx.moveTo(-4, -10); ctx.lineTo(-5, -18); ctx.lineTo(-2, -9); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(4, -10); ctx.lineTo(5, -18); ctx.lineTo(2, -9); ctx.fill();
+  // tubby body
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  ctx.arc(0, 4, 9.8, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#e9f7ff";
   ctx.beginPath();
-  ctx.ellipse(0, 7, 5.2, 3.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 7, 5.4, 4, 0, 0, Math.PI * 2);
   ctx.fill();
+  // stubby feet
+  ctx.fillStyle = blue;
+  ctx.fillRect(-4, 12, 2.6, 3.2);
+  ctx.fillRect(1.4, 12, 2.6, 3.2);
+  // big eyes
   ctx.fillStyle = "#111";
   ctx.beginPath();
-  ctx.ellipse(-3.6, 1.2, 3.1, 3.6, 0, 0, Math.PI * 2);
-  ctx.ellipse(3.6, 1.2, 3.1, 3.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(-3.8, 1.2, 3.2, 3.7, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.8, 1.2, 3.2, 3.7, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
-  ctx.fillRect(-4.4, -0.4, 1.4, 1.6);
-  ctx.fillRect(2.4, -0.4, 1.4, 1.6);
-  blush(ctx, 0, 4, 0.85);
+  ctx.fillRect(-4.6, -0.4, 1.5, 1.7);
+  ctx.fillRect(2.6, -0.4, 1.5, 1.7);
+  blush(ctx, 0, 4.2, 0.85);
   ctx.fillStyle = "#111";
   ctx.beginPath();
-  ctx.ellipse(0, 6.6, 2.2, 1.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 6.8, 2.3, 1.15, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#6bb6ff";
-  ctx.fillRect(-3, 12, 2.4, 3);
-  ctx.fillRect(0.6, 12, 2.4, 3);
 }
 
 function babyFrita(ctx, t) {
   const bob = Math.sin(t / 8) * 1.4;
   ctx.translate(0, 2 + bob);
-  ctx.fillStyle = "#ffe08a";
+  const fry = "#ffe08a";
+  const ket = "#c81e1e";
+  // tiny ketchup drip behind
+  ctx.fillStyle = ket;
   ctx.beginPath();
-  ctx.roundRect(-4.5, -2, 9, 16, 4);
+  ctx.moveTo(-5, 4);
+  ctx.quadraticCurveTo(-10, 10, -4, 16);
+  ctx.lineTo(4, 15);
+  ctx.quadraticCurveTo(2, 8, 4, 4);
   ctx.fill();
-  ctx.fillStyle = "#f0b43a";
+  // tall fry stick
+  ctx.fillStyle = fry;
   ctx.beginPath();
-  ctx.roundRect(-4.5, 8, 9, 6, 3);
+  if (ctx.roundRect) ctx.roundRect(-4.5, -4, 9, 18, 4);
+  else ctx.rect(-4.5, -4, 9, 18);
+  ctx.fill();
+  // grill mark
+  ctx.strokeStyle = "#f0b43a";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-3, 4); ctx.lineTo(3, 5);
+  ctx.stroke();
+  // salt
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(-2, 2, 0.8, 0, Math.PI * 2);
+  ctx.arc(1.5, 7, 0.8, 0, Math.PI * 2);
+  ctx.fill();
+  // head
+  ctx.fillStyle = "#f4c2a8";
+  ctx.beginPath();
+  ctx.arc(0, -8, 6.2, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-2.2, 2, 1.8, 0, Math.PI * 2);
-  ctx.arc(2.2, 2, 1.8, 0, Math.PI * 2);
+  ctx.arc(-2.2, -8.5, 1.9, 0, Math.PI * 2);
+  ctx.arc(2.2, -8.5, 1.9, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#333";
   ctx.beginPath();
-  ctx.arc(-1.9, 2.2, 0.9, 0, Math.PI * 2);
-  ctx.arc(2.5, 2.2, 0.9, 0, Math.PI * 2);
+  ctx.arc(-1.9, -8.3, 0.95, 0, Math.PI * 2);
+  ctx.arc(2.5, -8.3, 0.95, 0, Math.PI * 2);
   ctx.fill();
-  blush(ctx, 0, 5, 0.7);
+  blush(ctx, 0, -5.5, 0.7);
   ctx.strokeStyle = "#c47a2a";
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.15;
   ctx.beginPath();
-  ctx.arc(0, 6.2, 1.8, 0.2, Math.PI - 0.2);
+  ctx.arc(0, -5, 1.7, 0.2, Math.PI - 0.2);
   ctx.stroke();
+  // mini captain hat
+  ctx.fillStyle = ket;
+  ctx.fillRect(-5.5, -13, 11, 3);
+  ctx.fillRect(-2.5, -18, 5, 5);
+  ctx.fillStyle = "#ffe66a";
+  ctx.fillRect(-1.5, -16.5, 3, 2);
 }
 
 function babyKoa(ctx, t) {
@@ -275,119 +363,113 @@ function babyMichi(ctx, t) {
   const ink = "#5a2040";
   const deep = "#ff4da0";
 
-  // curled tail behind
+  // curled tail
   ctx.strokeStyle = fur;
-  ctx.lineWidth = 4.2;
+  ctx.lineWidth = 4.4;
   ctx.lineCap = "round";
   ctx.beginPath();
   ctx.moveTo(7, 10);
-  ctx.quadraticCurveTo(16, 8 + tw, 14, -1 + tw);
+  ctx.quadraticCurveTo(17, 8 + tw, 15, -2 + tw);
   ctx.stroke();
   ctx.fillStyle = deep;
   ctx.beginPath();
-  ctx.arc(14, -1 + tw, 2.2, 0, Math.PI * 2);
+  ctx.arc(15, -2 + tw, 2.3, 0, Math.PI * 2);
   ctx.fill();
 
-  // little body
+  // loaf body
   ctx.fillStyle = fur;
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.ellipse(0, 9, 7, 6, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 9, 7.2, 6.2, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  // paws
   for (const px of [-3.5, 3.5]) {
     ctx.fillStyle = fur;
     ctx.beginPath();
-    ctx.ellipse(px, 13.5, 2.8, 2, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, 13.8, 2.9, 2.1, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = deep;
     ctx.beginPath();
-    ctx.ellipse(px, 13.8, 1, 0.7, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, 14.1, 1.05, 0.75, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // cat ears (wide base) BEFORE head
+  // ears before head
   function ear(dir) {
     ctx.fillStyle = fur;
     ctx.strokeStyle = ink;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(dir * 1, -8);
-    ctx.lineTo(dir * 6, -18);
-    ctx.lineTo(dir * 9.5, -6);
+    ctx.moveTo(dir * 1.2, -8);
+    ctx.lineTo(dir * 6.5, -19);
+    ctx.lineTo(dir * 10, -6);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = deep;
     ctx.beginPath();
     ctx.moveTo(dir * 3.5, -8);
-    ctx.lineTo(dir * 6, -15);
-    ctx.lineTo(dir * 7.8, -7.5);
+    ctx.lineTo(dir * 6.2, -15.5);
+    ctx.lineTo(dir * 8, -7.5);
     ctx.closePath();
     ctx.fill();
   }
   ear(-1);
   ear(1);
 
-  // round head
   ctx.fillStyle = fur;
   ctx.strokeStyle = ink;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(0, -1, 9, 0, Math.PI * 2);
+  ctx.arc(0, -1, 9.2, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  // shine
-  ctx.fillStyle = "rgba(255,255,255,.30)";
+  ctx.fillStyle = "rgba(255,255,255,.32)";
   ctx.beginPath();
   ctx.ellipse(-4, -5, 3, 2, -0.5, 0, Math.PI * 2);
   ctx.fill();
 
-  // big eyes
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.ellipse(-3.2, -0.5, 2.5, 3, 0, 0, Math.PI * 2);
-  ctx.ellipse(3.2, -0.5, 2.5, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(-3.2, -0.5, 2.6, 3.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.2, -0.5, 2.6, 3.1, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#2a0e1e";
   ctx.beginPath();
-  ctx.arc(-2.8, 0, 1.5, 0, Math.PI * 2);
-  ctx.arc(3.6, 0, 1.5, 0, Math.PI * 2);
+  ctx.arc(-2.8, 0, 1.55, 0, Math.PI * 2);
+  ctx.arc(3.6, 0, 1.55, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(-3.4, -0.8, 0.6, 0, Math.PI * 2);
-  ctx.arc(3, -0.8, 0.6, 0, Math.PI * 2);
+  ctx.arc(-3.4, -0.8, 0.65, 0, Math.PI * 2);
+  ctx.arc(3, -0.8, 0.65, 0, Math.PI * 2);
   ctx.fill();
 
-  // pink nose + tiny mouth
   ctx.fillStyle = deep;
   ctx.beginPath();
   ctx.moveTo(0, 3.4);
-  ctx.lineTo(-1.6, 2);
-  ctx.lineTo(1.6, 2);
+  ctx.lineTo(-1.7, 2);
+  ctx.lineTo(1.7, 2);
   ctx.closePath();
   ctx.fill();
   ctx.strokeStyle = ink;
-  ctx.lineWidth = 0.8;
+  ctx.lineWidth = 0.85;
   ctx.beginPath();
-  ctx.moveTo(0, 3.4); ctx.lineTo(0, 4.4);
-  ctx.arc(-1.1, 4.4, 1.1, 0, Math.PI);
-  ctx.moveTo(0, 4.4);
-  ctx.arc(1.1, 4.4, 1.1, 0, Math.PI);
+  ctx.moveTo(0, 3.4); ctx.lineTo(0, 4.5);
+  ctx.arc(-1.15, 4.5, 1.15, 0, Math.PI);
+  ctx.moveTo(0, 4.5);
+  ctx.arc(1.15, 4.5, 1.15, 0, Math.PI);
   ctx.stroke();
 
-  // whiskers
-  ctx.strokeStyle = "rgba(90,32,64,.6)";
-  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = "rgba(90,32,64,.65)";
+  ctx.lineWidth = 0.85;
   for (const dir of [-1, 1]) {
     ctx.beginPath();
-    ctx.moveTo(dir * 4, 2); ctx.lineTo(dir * 12, 0.5);
-    ctx.moveTo(dir * 4, 3.5); ctx.lineTo(dir * 12, 4);
+    ctx.moveTo(dir * 4, 2); ctx.lineTo(dir * 13, 0.2);
+    ctx.moveTo(dir * 4, 3.6); ctx.lineTo(dir * 13, 4.2);
     ctx.stroke();
   }
-
   blush(ctx, 0, 2.5, 0.85);
 }
+

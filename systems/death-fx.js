@@ -1,16 +1,19 @@
 /**
  * Death carry-away FX — cinematic hooded reaper lifts the fallen player, then caller respawns.
- * Internal state only (deathGhost / souls / wisps). NEVER touches game.ghosts (dash afterimages).
+ * Internal state only (deathGhost / souls / wisps / orbit). NEVER touches game.ghosts (dash afterimages).
  *
- * Phases (~110 frames / ~1.8s @60fps; ~45 if prefers-reduced-motion):
- *   Appear → Claim → Ascend → Dissolve → onDone (respawn)
+ * Phases (~270 frames / ~4.5s @60fps; ~105 if prefers-reduced-motion ≈ 1.75s):
+ *   Appear → Approach/Claim → Lift-off → Ascend → Apex linger → Dissolve → onDone (respawn)
  *
  * API: DeathFx.start(player, onDone, opts?), update(game), draw(ctx,cam,t),
  *      isPlaying(), cancel(), playerAlpha()
  */
-const PARTICLE_CAP = 40;
-const WISP_CAP = 10;
-const WISP_INTERVAL = 4;
+const PARTICLE_CAP = 72;
+const WISP_CAP = 16;
+const ORBIT_CAP = 12;
+const WISP_INTERVAL = 3;
+const DURATION_FULL = 270;
+const DURATION_REDUCED = 105;
 
 function prefersReducedMotion() {
   try {
@@ -39,6 +42,10 @@ function easeOutCubic(t) {
 function easeInCubic(t) {
   t = clamp01(t);
   return t * t * t;
+}
+function easeInOutCubic(t) {
+  t = clamp01(t);
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 /** Soft palette by death reason — void = abyss cyan, hurt = rose-cyan. */
@@ -71,24 +78,40 @@ function rgba(rgb, a) {
   return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
 }
 
+/** Phase end fractions of total duration (shared by full + reduced). */
+const PHASE = {
+  appear: 0.12,
+  claim: 0.28,
+  liftoff: 0.40,
+  ascend: 0.72,
+  apex: 0.82,
+  dissolve: 1.0,
+};
+
 export const DeathFx = {
   playing: false,
   player: null,
   onDone: null,
   doneCalled: false,
   frame: 0,
-  duration: 110,
+  duration: DURATION_FULL,
   reduce: false,
   reason: "hurt",
   palette: PALETTES.hurt,
   deathGhost: null,
   souls: null,
   wisps: null,
+  orbit: null,
   _shakeOnce: false,
   _flashOnce: false,
   _appearBurst: false,
+  _liftoffBurst: false,
+  _apexBurst: false,
   _playerAlpha: 1,
   _ripple: 0,
+  _tetherThick: 1,
+  _hemBillow: 0,
+  _orbitActive: false,
 
   isPlaying() {
     return this.playing;
@@ -105,11 +128,13 @@ export const DeathFx = {
     this.deathGhost = null;
     this.souls = null;
     this.wisps = null;
+    this.orbit = null;
     this.player = null;
     this.onDone = null;
     this.doneCalled = true;
     this.frame = 0;
     this._playerAlpha = 1;
+    this._orbitActive = false;
   },
 
   /**
@@ -128,12 +153,17 @@ export const DeathFx = {
     this.onDone = typeof onDone === "function" ? onDone : null;
     this.doneCalled = false;
     this.frame = 0;
-    this.duration = this.reduce ? 45 : 110;
+    this.duration = this.reduce ? DURATION_REDUCED : DURATION_FULL;
     this._shakeOnce = false;
     this._flashOnce = false;
     this._appearBurst = false;
+    this._liftoffBurst = false;
+    this._apexBurst = false;
     this._playerAlpha = 1;
     this._ripple = 0;
+    this._tetherThick = 1;
+    this._hemBillow = 0;
+    this._orbitActive = false;
 
     const side = (player.facing || 1) >= 0 ? -1 : 1;
     const gw = 42;
@@ -154,6 +184,7 @@ export const DeathFx = {
       eyeGlow: 0.4,
       alpha: 0,
       lift: 0,
+      armWrap: 0,
     };
     this.deathGhost.spawnX = this.deathGhost.x;
     this.deathGhost.spawnY = this.deathGhost.y;
@@ -161,6 +192,7 @@ export const DeathFx = {
     // Preallocated pools — recycled, no heavy per-frame alloc
     this.souls = [];
     this.wisps = [];
+    this.orbit = [];
     for (let i = 0; i < PARTICLE_CAP; i++) {
       this.souls.push({
         alive: false, x: 0, y: 0, vx: 0, vy: 0,
@@ -170,6 +202,11 @@ export const DeathFx = {
     for (let i = 0; i < WISP_CAP; i++) {
       this.wisps.push({
         alive: false, x: 0, y: 0, w: 0, h: 0, life: 0, max: 1, alpha: 0,
+      });
+    }
+    for (let i = 0; i < ORBIT_CAP; i++) {
+      this.orbit.push({
+        alive: false, ang: 0, rad: 0, elev: 0, speed: 0, r: 2, tw: 0, life: 0, max: 1,
       });
     }
 
@@ -193,10 +230,10 @@ export const DeathFx = {
     slot.vx = Math.cos(ang) * spd;
     slot.vy = Math.sin(ang) * spd * 0.6 - (burst ? 1.5 : 0.6);
     slot.life = 0;
-    slot.max = 28 + Math.random() * 36;
+    slot.max = 32 + Math.random() * 44;
     slot.r = 1.2 + Math.random() * 2.4;
     slot.tw = Math.random() * Math.PI * 2;
-    slot.pull = towardGhost ? 0.035 + Math.random() * 0.04 : 0.01;
+    slot.pull = towardGhost ? 0.032 + Math.random() * 0.038 : 0.01;
   },
 
   _spawnWisp(p) {
@@ -218,8 +255,27 @@ export const DeathFx = {
     slot.w = p.w;
     slot.h = p.h;
     slot.life = 0;
-    slot.max = 14 + Math.random() * 8;
-    slot.alpha = 0.35;
+    slot.max = 16 + Math.random() * 10;
+    slot.alpha = 0.38;
+  },
+
+  _spawnOrbit(count) {
+    if (!this.orbit || this.reduce) return;
+    let spawned = 0;
+    for (let i = 0; i < this.orbit.length && spawned < count; i++) {
+      const o = this.orbit[i];
+      if (o.alive) continue;
+      o.alive = true;
+      o.ang = Math.random() * Math.PI * 2;
+      o.rad = 18 + Math.random() * 22;
+      o.elev = (Math.random() - 0.5) * 28;
+      o.speed = 0.045 + Math.random() * 0.05;
+      o.r = 1.4 + Math.random() * 2.2;
+      o.tw = Math.random() * Math.PI * 2;
+      o.life = 0;
+      o.max = 40 + Math.random() * 50;
+      spawned++;
+    }
   },
 
   update(game) {
@@ -236,99 +292,208 @@ export const DeathFx = {
       game.shake = Math.max(game.shake || 0, kick);
     }
 
-    // Appear 0–20%
-    if (progress < 0.2) {
-      const a = smoothstep(progress / 0.2);
+    const liftMax = this.reduce ? 110 : 220;
+
+    // ── 1. Appear 0–12% — materialize, mote burst, ground ripple ──
+    if (progress < PHASE.appear) {
+      const a = smoothstep(progress / PHASE.appear);
       g.form = a;
       g.alpha = a;
       g.lean = 0;
+      g.armWrap = 0;
       g.eyeGlow = 0.35 + a * 0.25;
+      g.lift = 0;
       this._ripple = a;
+      this._tetherThick = 0.4;
+      this._hemBillow = 0.2 * a;
       this._playerAlpha = 1;
+      this._orbitActive = false;
       if (!this._appearBurst && a > 0.35) {
         this._appearBurst = true;
         if (!this.reduce) {
           const cx = g.x + g.w * 0.5;
           const cy = g.y + g.h * 0.45;
-          for (let i = 0; i < 14; i++) this._spawnSoul(cx, cy, false, true);
+          for (let i = 0; i < 18; i++) this._spawnSoul(cx, cy, false, true);
+        } else {
+          const cx = g.x + g.w * 0.5;
+          const cy = g.y + g.h * 0.45;
+          for (let i = 0; i < 6; i++) this._spawnSoul(cx, cy, false, true);
         }
       }
-    } else if (progress < 0.35) {
-      // Claim 20–35%
-      const c = smoothstep((progress - 0.2) / 0.15);
+    }
+    // ── 2. Approach / Claim 12–28% — lean in, sheet arms wrap, tether thickens ──
+    else if (progress < PHASE.claim) {
+      const c = smoothstep((progress - PHASE.appear) / (PHASE.claim - PHASE.appear));
       g.form = 1;
       g.alpha = 1;
-      g.lean = c * 0.55;
-      g.eyeGlow = 0.6 + c * 0.25;
-      this._ripple = Math.max(0, 1 - c * 1.2);
-      this._playerAlpha = lerp(1, 0.72, c);
+      g.lean = c * 0.62;
+      g.armWrap = c;
+      g.eyeGlow = 0.6 + c * 0.3;
+      g.lift = 0;
+      this._ripple = Math.max(0, 1 - c * 1.3);
+      this._tetherThick = lerp(0.4, 1.35, c);
+      this._hemBillow = 0.35 + c * 0.25;
+      this._playerAlpha = lerp(1, 0.78, c);
+      this._orbitActive = false;
       if (p) {
-        p.y = g.grabY - c * 10;
+        // Soft settle toward ghost — feet still grounded
+        p.y = g.grabY - c * 4;
         const tx = p.x + (g.facing > 0 ? -g.w * 0.15 : p.w - g.w * 0.85);
-        g.x += (tx - g.x) * 0.06;
+        g.x += (tx - g.x) * 0.07;
+        g.y += ((p.y - 10) - g.y) * 0.05;
         if (!this.reduce && (this.frame & 1) === 0) {
           this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.35, true, false);
         }
       }
-    } else if (progress < 0.85) {
-      // Ascend 35–85%
-      const u = (progress - 0.35) / 0.5;
-      const ease = this.reduce ? smoothstep(u) : easeOutCubic(u);
+    }
+    // ── 3. Lift-off 28–40% — first tug upward, feet leave ground ──
+    else if (progress < PHASE.liftoff) {
+      const u = smoothstep((progress - PHASE.claim) / (PHASE.liftoff - PHASE.claim));
       g.form = 1;
       g.alpha = 1;
-      g.lean = lerp(0.55, 0.2, u);
-      g.eyeGlow = 0.85 + Math.sin(this.frame * 0.18) * 0.12;
+      g.lean = lerp(0.62, 0.4, u);
+      g.armWrap = lerp(1, 0.75, u);
+      g.eyeGlow = 0.9 + Math.sin(this.frame * 0.2) * 0.1;
+      g.lift = easeOutCubic(u) * (this.reduce ? 28 : 48);
       this._ripple = 0;
-      this._playerAlpha = lerp(0.72, 0.4, ease);
-      g.lift = ease * (this.reduce ? 90 : 170);
+      this._tetherThick = lerp(1.35, 1.1, u);
+      this._hemBillow = 0.6 + u * 0.3;
+      this._playerAlpha = lerp(0.78, 0.62, u);
+      this._orbitActive = false;
+      if (p) {
+        p.y = g.grabY - g.lift;
+        const sway = Math.sin(this.frame * 0.12) * 2.5 * u;
+        p.x += sway * 0.15;
+        g.y = p.y - 12 - Math.sin(this.frame * 0.15) * 2;
+        g.x += Math.sin(this.frame * 0.08) * 0.35;
+        if (!this._liftoffBurst && u > 0.25) {
+          this._liftoffBurst = true;
+          const n = this.reduce ? 4 : 10;
+          for (let i = 0; i < n; i++) {
+            this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.85, false, true);
+          }
+        }
+        if (!this.reduce && (this.frame % 2) === 0) {
+          this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.5, true, false);
+        }
+      }
+    }
+    // ── 4. Ascend 40–72% — long float with sway, billowing hem, soul trail, local wisps ──
+    else if (progress < PHASE.ascend) {
+      const u = (progress - PHASE.liftoff) / (PHASE.ascend - PHASE.liftoff);
+      const ease = this.reduce ? smoothstep(u) : easeInOutCubic(u);
+      g.form = 1;
+      g.alpha = 1;
+      g.lean = lerp(0.4, 0.18, u);
+      g.armWrap = lerp(0.75, 0.35, u);
+      g.eyeGlow = 0.85 + Math.sin(this.frame * 0.16) * 0.14;
+      const baseLift = this.reduce ? 48 : 48;
+      g.lift = baseLift + ease * (liftMax - baseLift);
+      this._ripple = 0;
+      this._tetherThick = 1.0 + Math.sin(this.frame * 0.11) * 0.15;
+      this._hemBillow = 0.85 + Math.sin(this.frame * 0.09) * 0.2;
+      this._playerAlpha = lerp(0.62, 0.38, ease);
+      this._orbitActive = false;
 
       if (p) {
-        const sway = Math.sin(this.frame * 0.09) * 4;
+        const sway = Math.sin(this.frame * 0.075) * (this.reduce ? 3 : 6.5);
         p.y = g.grabY - g.lift;
-        const targetX = g.spawnX + (g.facing > 0 ? g.w * 0.2 : -p.w * 0.1) + sway * 0.4;
-        p.x += (targetX - p.x) * 0.1;
+        const targetX = g.spawnX + (g.facing > 0 ? g.w * 0.2 : -p.w * 0.1) + sway * 0.45;
+        p.x += (targetX - p.x) * 0.08;
       }
-      g.y = (p ? p.y : g.grabY) - 12 - Math.sin(this.frame * 0.11) * 3.5;
-      g.x += Math.sin(this.frame * 0.065) * 0.45;
+      g.y = (p ? p.y : g.grabY) - 12 - Math.sin(this.frame * 0.1) * 4.5;
+      g.x += Math.sin(this.frame * 0.055) * 0.55;
 
       if (!this.reduce && p) {
+        // Dense soul trail upward
         if ((this.frame % 2) === 0) {
           this._spawnSoul(
-            p.x + p.w * 0.5 + (Math.random() - 0.5) * 8,
-            p.y + p.h * 0.5,
+            p.x + p.w * 0.5 + (Math.random() - 0.5) * 10,
+            p.y + p.h * 0.55 + (Math.random() - 0.5) * 6,
             true,
             false
           );
         }
+        // Occasional trailing mote below feet
+        if ((this.frame % 5) === 0) {
+          this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.9, false, false);
+        }
         if ((this.frame % WISP_INTERVAL) === 0) this._spawnWisp(p);
+      } else if (this.reduce && p && (this.frame % 4) === 0) {
+        this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.45, true, false);
       }
-    } else {
-      // Dissolve 85–100%
-      const d = (progress - 0.85) / 0.15;
+    }
+    // ── 5. Apex linger 72–82% — brief hover, brighter eyes, orbiting particles ──
+    else if (progress < PHASE.apex) {
+      const u = smoothstep((progress - PHASE.ascend) / (PHASE.apex - PHASE.ascend));
+      g.form = 1;
+      g.alpha = 1;
+      g.lean = 0.15;
+      g.armWrap = 0.3;
+      g.eyeGlow = 1.05 + Math.sin(this.frame * 0.22) * 0.18 + u * 0.15;
+      g.lift = liftMax + Math.sin(this.frame * 0.12) * (this.reduce ? 2 : 5);
+      this._ripple = 0;
+      this._tetherThick = 0.85;
+      this._hemBillow = 0.7 + Math.sin(this.frame * 0.14) * 0.15;
+      this._playerAlpha = lerp(0.38, 0.28, u);
+      this._orbitActive = !this.reduce;
+
+      if (!this._apexBurst) {
+        this._apexBurst = true;
+        this._spawnOrbit(this.reduce ? 0 : 10);
+        if (!this.reduce && p) {
+          for (let i = 0; i < 8; i++) {
+            this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, true);
+          }
+        }
+      }
+
+      if (p) {
+        const hover = Math.sin(this.frame * 0.14) * 2.5;
+        p.y = g.grabY - g.lift + hover * 0.3;
+        p.x += Math.sin(this.frame * 0.09) * 0.2;
+      }
+      g.y = (p ? p.y : g.grabY) - 14 - Math.sin(this.frame * 0.13) * 3;
+      g.x += Math.sin(this.frame * 0.07) * 0.3;
+
+      if (!this.reduce && p && (this.frame % 3) === 0) {
+        this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, false);
+      }
+    }
+    // ── 6. Dissolve 82–100% — player → motes into ghost, ghost rises+fades, flash, onDone ──
+    else {
+      const d = (progress - PHASE.apex) / (PHASE.dissolve - PHASE.apex);
       const di = easeInCubic(d);
       g.form = 1;
-      g.lean = 0.15;
-      g.eyeGlow = 1.1 - di * 0.4;
-      g.alpha = 1 - easeInCubic(Math.max(0, (d - 0.35) / 0.65));
-      this._playerAlpha = Math.max(0, 0.4 * (1 - di * 1.15));
-      g.lift = (this.reduce ? 90 : 170) + di * (this.reduce ? 40 : 80);
+      g.lean = 0.12;
+      g.armWrap = Math.max(0, 0.3 * (1 - di));
+      g.eyeGlow = 1.2 - di * 0.55;
+      g.alpha = 1 - easeInCubic(Math.max(0, (d - 0.28) / 0.72));
+      this._playerAlpha = Math.max(0, 0.28 * (1 - di * 1.2));
+      this._tetherThick = Math.max(0.15, 0.85 * (1 - di));
+      this._hemBillow = 0.5 * (1 - di);
+      g.lift = liftMax + di * (this.reduce ? 50 : 95);
+      this._orbitActive = !this.reduce && d < 0.55;
 
       if (p) {
         p.y = g.grabY - g.lift;
         const hx = g.x + g.w * 0.5 - p.w * 0.5;
-        const hy = g.y + g.h * 0.45 - p.h * 0.4;
-        p.x = lerp(p.x, hx, 0.12 + di * 0.25);
-        p.y = lerp(p.y, hy, di * 0.2);
-        if (!this.reduce && d < 0.7) {
-          this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, true);
+        const hy = g.y + g.h * 0.42 - p.h * 0.35;
+        p.x = lerp(p.x, hx, 0.1 + di * 0.28);
+        p.y = lerp(p.y, hy, di * 0.22);
+        if (d < 0.75) {
+          const burstRate = this.reduce ? ((this.frame % 3) === 0) : true;
+          if (burstRate) {
+            this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, !this.reduce);
+          }
         }
       }
-      g.y = (p ? p.y : g.grabY) - 14 - di * 20 - Math.sin(this.frame * 0.14) * 2;
-      g.x += Math.sin(this.frame * 0.08) * 0.3;
+      g.y = (p ? p.y : g.grabY) - 14 - di * 28 - Math.sin(this.frame * 0.14) * 2;
+      g.x += Math.sin(this.frame * 0.08) * 0.25;
 
-      if (!this._flashOnce && d > 0.55 && game) {
+      if (!this._flashOnce && d > 0.5 && game) {
         this._flashOnce = true;
-        game.flash = Math.max(game.flash || 0, this.reduce ? 5 : 8);
+        game.flash = Math.max(game.flash || 0, this.reduce ? 5 : 9);
       }
     }
 
@@ -338,6 +503,7 @@ export const DeathFx = {
       p.dead = true;
     }
 
+    // Soul particle simulation
     if (this.souls) {
       const hx = g.x + g.w * 0.5;
       const hy = g.y + g.h * 0.42;
@@ -360,14 +526,27 @@ export const DeathFx = {
       }
     }
 
+    // Local wisps (NOT game.ghosts)
     if (this.wisps) {
       for (let i = 0; i < this.wisps.length; i++) {
         const w = this.wisps[i];
         if (!w.alive) continue;
         w.life++;
-        w.y -= 0.35;
-        w.alpha = (1 - w.life / w.max) * 0.32;
+        w.y -= 0.4;
+        w.alpha = (1 - w.life / w.max) * 0.34;
         if (w.life >= w.max) w.alive = false;
+      }
+    }
+
+    // Apex orbit particles around ghost
+    if (this.orbit) {
+      for (let i = 0; i < this.orbit.length; i++) {
+        const o = this.orbit[i];
+        if (!o.alive) continue;
+        o.life++;
+        o.ang += o.speed;
+        o.tw += 0.2;
+        if (!this._orbitActive || o.life >= o.max) o.alive = false;
       }
     }
 
@@ -382,10 +561,12 @@ export const DeathFx = {
     this.deathGhost = null;
     this.souls = null;
     this.wisps = null;
+    this.orbit = null;
     this.player = null;
     this.onDone = null;
     this.frame = 0;
     this._playerAlpha = 1;
+    this._orbitActive = false;
     if (cb) cb();
   },
 
@@ -395,6 +576,7 @@ export const DeathFx = {
 
     const wobble = this.reduce ? 0 : Math.sin(frame * 0.14) * 1.5;
     const leanX = g.lean * (g.facing || 1) * 10;
+    const billow = this._hemBillow || 0;
 
     ctx.save();
     ctx.globalAlpha = alpha * 0.9 * form;
@@ -405,7 +587,7 @@ export const DeathFx = {
 
     const w = g.w;
     const h = g.h;
-    const hem = this.reduce ? 0 : 1;
+    const hem = this.reduce ? 0.35 : 1;
 
     // Outer aura
     ctx.globalAlpha = alpha * 0.25 * form;
@@ -421,7 +603,7 @@ export const DeathFx = {
     ctx.closePath();
     ctx.fill();
 
-    // Main sheet + ragged animated hem
+    // Main sheet + ragged animated hem (billow scales wave amplitude)
     ctx.globalAlpha = alpha * 0.82 * form;
     const sheetGrad = ctx.createLinearGradient(0, 0, 0, h);
     sheetGrad.addColorStop(0, rgba(pal.sheet, 0.88));
@@ -437,10 +619,11 @@ export const DeathFx = {
       [0.78, 0], [0.7, 1], [0.62, 0], [0.54, 1],
       [0.5, 0], [0.46, 1], [0.38, 0], [0.3, 1], [0.22, 0],
     ];
+    const amp = hem * (3.5 + billow * 4.5);
     for (let i = 0; i < waves.length; i++) {
       const wx = waves[i][0] * w;
       const dip = waves[i][1];
-      const wave = hem * Math.sin(frame * 0.16 + i * 0.9) * (3.5 + dip * 2.5);
+      const wave = Math.sin(frame * 0.16 + i * 0.9) * (amp + dip * 2.5 * (0.6 + billow));
       ctx.lineTo(wx, hemY - dip * 5 + wave);
     }
     ctx.quadraticCurveTo(w * 0.1, h * 0.72, w * 0.1, h * 0.48);
@@ -466,18 +649,18 @@ export const DeathFx = {
 
     // Twin eye glow
     const eyeA = alpha * form * (0.7 + g.eyeGlow * 0.3);
-    const er = 2.0 + g.eyeGlow * 1.4;
+    const er = 2.0 + g.eyeGlow * 1.5;
     const eyeY = h * 0.33;
     const eyes = [w * 0.38, w * 0.62];
     for (let e = 0; e < 2; e++) {
       const ex = eyes[e];
       ctx.globalAlpha = eyeA * 0.35;
-      const eg = ctx.createRadialGradient(ex, eyeY, 0, ex, eyeY, er * 3);
+      const eg = ctx.createRadialGradient(ex, eyeY, 0, ex, eyeY, er * 3.2);
       eg.addColorStop(0, rgba(pal.eye, 1));
       eg.addColorStop(1, rgba(pal.eye, 0));
       ctx.fillStyle = eg;
       ctx.beginPath();
-      ctx.arc(ex, eyeY, er * 3, 0, Math.PI * 2);
+      ctx.arc(ex, eyeY, er * 3.2, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = eyeA;
       ctx.fillStyle = rgba(pal.eye, 1);
@@ -490,18 +673,31 @@ export const DeathFx = {
       ctx.fill();
     }
 
-    // Soft arm wrap during claim+
-    if (g.lean > 0.05) {
-      ctx.globalAlpha = alpha * 0.35 * g.lean * form;
-      ctx.strokeStyle = rgba(pal.sheet, 0.8);
-      ctx.lineWidth = 3;
+    // Soft arm wrap during claim / lift-off (driven by armWrap)
+    const wrap = g.armWrap != null ? g.armWrap : (g.lean > 0.05 ? g.lean : 0);
+    if (wrap > 0.05) {
+      ctx.globalAlpha = alpha * 0.38 * wrap * form;
+      ctx.strokeStyle = rgba(pal.sheet, 0.85);
+      ctx.lineWidth = 3.2;
       ctx.beginPath();
       ctx.moveTo(w * 0.75, h * 0.48);
-      ctx.quadraticCurveTo(w * 1.05, h * 0.55, w * 0.9, h * 0.7);
+      ctx.quadraticCurveTo(w * 1.08, h * 0.55, w * 0.92, h * 0.72);
       ctx.stroke();
       ctx.beginPath();
       ctx.moveTo(w * 0.25, h * 0.48);
-      ctx.quadraticCurveTo(-0.05 * w, h * 0.55, w * 0.1, h * 0.7);
+      ctx.quadraticCurveTo(-0.08 * w, h * 0.55, w * 0.08, h * 0.72);
+      ctx.stroke();
+      // Inner wrap glow
+      ctx.globalAlpha = alpha * 0.2 * wrap * form;
+      ctx.strokeStyle = rgba(pal.glow, 0.7);
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.72, h * 0.5);
+      ctx.quadraticCurveTo(w * 1.0, h * 0.58, w * 0.88, h * 0.68);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w * 0.28, h * 0.5);
+      ctx.quadraticCurveTo(0, h * 0.58, w * 0.12, h * 0.68);
       ctx.stroke();
     }
 
@@ -525,7 +721,7 @@ export const DeathFx = {
     if (!this.reduce && alpha > 0.05) {
       const vw = ctx.canvas ? ctx.canvas.width : 960;
       const vh = ctx.canvas ? ctx.canvas.height : 540;
-      const vigA = (this.reason === "void" ? 0.22 : 0.18) * alpha * Math.min(1, progress * 2);
+      const vigA = (this.reason === "void" ? 0.24 : 0.2) * alpha * Math.min(1, progress * 1.8);
       const vg = ctx.createRadialGradient(vw * 0.5, vh * 0.45, vh * 0.15, vw * 0.5, vh * 0.5, vw * 0.7);
       vg.addColorStop(0, rgba(pal.vignette, 0));
       vg.addColorStop(1, rgba(pal.vignette, vigA));
@@ -537,7 +733,7 @@ export const DeathFx = {
     if (this._ripple > 0.02) {
       const rx = cx + g.w * 0.5;
       const ry = cy + g.h * 0.85;
-      const rr = 12 + this._ripple * 48;
+      const rr = 12 + this._ripple * 52;
       ctx.globalAlpha = this._ripple * 0.45;
       ctx.strokeStyle = rgba(pal.glow, 0.9);
       ctx.lineWidth = 2;
@@ -548,6 +744,12 @@ export const DeathFx = {
       ctx.beginPath();
       ctx.ellipse(rx, ry, rr * 0.65, rr * 0.22, 0, 0, Math.PI * 2);
       ctx.stroke();
+      if (this._ripple > 0.5) {
+        ctx.globalAlpha = this._ripple * 0.12;
+        ctx.beginPath();
+        ctx.ellipse(rx, ry, rr * 1.25, rr * 0.42, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
     // Afterimage wisps (local — NOT game.ghosts)
@@ -586,15 +788,43 @@ export const DeathFx = {
       }
     }
 
-    // Glowing tether
-    if (p && progress > 0.12 && this._playerAlpha > 0.02) {
+    // Orbit particles around ghost (apex)
+    if (this.orbit && this._orbitActive) {
+      const ox = cx + g.w * 0.5;
+      const oy = cy + g.h * 0.42;
+      for (let i = 0; i < this.orbit.length; i++) {
+        const o = this.orbit[i];
+        if (!o.alive) continue;
+        const lifeA = 1 - o.life / o.max;
+        const px = ox + Math.cos(o.ang) * o.rad;
+        const py = oy + Math.sin(o.ang) * o.rad * 0.55 + o.elev;
+        const tw = 0.6 + Math.sin(o.tw) * 0.4;
+        ctx.globalAlpha = lifeA * tw * alpha * 0.9;
+        const og = ctx.createRadialGradient(px, py, 0, px, py, o.r * 2.4);
+        og.addColorStop(0, rgba(pal.eye, 1));
+        og.addColorStop(1, rgba(pal.glow, 0));
+        ctx.fillStyle = og;
+        ctx.beginPath();
+        ctx.arc(px, py, o.r * 2.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = lifeA * alpha;
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.beginPath();
+        ctx.arc(px, py, o.r * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Glowing tether (thickens during claim)
+    if (p && progress > PHASE.appear * 0.85 && this._playerAlpha > 0.02) {
       const px = p.x + p.w / 2 - cam.x;
       const py = p.y + p.h * 0.35 - cam.y;
       const gx = cx + g.w * 0.5 + g.lean * g.facing * 6;
       const gy = cy + g.h * 0.5;
       const midX = (gx + px) * 0.5 + Math.sin(this.frame * 0.13) * 10;
       const midY = Math.min(gy, py) - 22 - Math.sin(this.frame * 0.09) * 6;
-      const thick = (this.reason === "void" ? 2.4 : 2.1) + Math.sin(this.frame * 0.2) * 0.7;
+      const thickBase = (this.reason === "void" ? 2.4 : 2.1) * (this._tetherThick || 1);
+      const thick = thickBase + Math.sin(this.frame * 0.2) * 0.7;
       const tAlpha = alpha * (0.35 + this._playerAlpha * 0.4);
 
       ctx.lineCap = "round";
@@ -615,14 +845,15 @@ export const DeathFx = {
       ctx.stroke();
 
       if (!this.reduce) {
+        const beads = progress > PHASE.liftoff ? 5 : 3;
         ctx.globalAlpha = tAlpha;
         ctx.fillStyle = "rgba(255,255,255,0.85)";
-        for (let k = 0; k < 3; k++) {
-          const u = ((this.frame * 0.04 + k / 3) % 1);
+        for (let k = 0; k < beads; k++) {
+          const u = ((this.frame * 0.035 + k / beads) % 1);
           const ox = (1 - u) * (1 - u) * gx + 2 * (1 - u) * u * midX + u * u * px;
           const oy = (1 - u) * (1 - u) * gy + 2 * (1 - u) * u * midY + u * u * py;
           ctx.beginPath();
-          ctx.arc(ox, oy, 1.6, 0, Math.PI * 2);
+          ctx.arc(ox, oy, 1.5 + (this._tetherThick > 1.1 ? 0.4 : 0), 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -644,14 +875,14 @@ export const DeathFx = {
     this._drawGhost(ctx, g, pal, alpha, this.frame, cx, cy);
 
     // Dissolve flash bloom
-    if (progress > 0.85 && !this.reduce) {
-      const d = (progress - 0.85) / 0.15;
-      ctx.globalAlpha = (1 - d) * 0.5 * alpha;
+    if (progress > PHASE.apex && !this.reduce) {
+      const d = (progress - PHASE.apex) / (PHASE.dissolve - PHASE.apex);
+      ctx.globalAlpha = Math.sin(Math.min(1, d * 1.4) * Math.PI) * 0.55 * alpha;
       const hx = cx + g.w * 0.5;
       const hy = cy + g.h * 0.42;
-      const br = 8 + d * 36;
+      const br = 10 + d * 48;
       const burst = ctx.createRadialGradient(hx, hy, 0, hx, hy, br);
-      burst.addColorStop(0, rgba(pal.flash, 0.8));
+      burst.addColorStop(0, rgba(pal.flash, 0.85));
       burst.addColorStop(1, rgba(pal.glow, 0));
       ctx.fillStyle = burst;
       ctx.beginPath();

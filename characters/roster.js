@@ -5,9 +5,9 @@ export const ROSTER = [
     abilities: ["ukulele", "hula", "ohana"],
     evoNames: ["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "KILO GOD"],
     forms: [
-      { name: "Kilo Bebé", color: "#ff8aa0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
+      { name: "Kilo Bebé", color: "#ff9ab0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
       { name: "Kilo", color: "#e23b3d", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 26, h: 34 },
-      { name: "Kilo Ohana", color: "#ff5a7a", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 32, h: 40 },
+      { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 32, h: 40 },
       { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 38, h: 46 },
       { name: "KILO GOD", color: "#fff1a8", speed: 5.8, jump: 14.8, jumps: 3, hp: 190, w: 44, h: 52 }
     ]
@@ -18,9 +18,9 @@ export const ROSTER = [
     abilities: ["dash", "claws", "exp626"],
     evoNames: ["Mini Glitch", "Glitch", "Glitch cabreado", "Ñam-626", "GLITCH GOD"],
     forms: [
-      { name: "Mini Glitch", color: "#9ad4ff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 26, h: 24 },
+      { name: "Mini Glitch", color: "#a8dcff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 26, h: 24 },
       { name: "Glitch", color: "#3d9bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 32, h: 30 },
-      { name: "Glitch cabreado", color: "#1c4bff", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 38, h: 36 },
+      { name: "Glitch cabreado", color: "#1540ff", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 38, h: 36 },
       { name: "Ñam-626", color: "#6af", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 44, h: 42 },
       { name: "GLITCH GOD", color: "#d6f4ff", speed: 7.0, jump: 14.5, jumps: 3, hp: 200, w: 50, h: 48 }
     ]
@@ -33,7 +33,7 @@ export const ROSTER = [
     forms: [
       { name: "Pichu", color: "#fff36a", speed: 4.8, jump: 12.2, jumps: 2, hp: 78, w: 22, h: 24 },
       { name: "Pika", color: "#ffe44a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 28, h: 30 },
-      { name: "Chispa", color: "#e0891c", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 34, h: 36 },
+      { name: "Chispa", color: "#f0a020", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 34, h: 36 },
       { name: "Rayo gordo", color: "#fff36a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 42 },
       { name: "PIKA GOD", color: "#fffde8", speed: 7.2, jump: 15.2, jumps: 3, hp: 170, w: 46, h: 48 }
     ]
@@ -46,7 +46,7 @@ export const ROSTER = [
     forms: [
       { name: "Michito", color: "#ffd0ee", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
       { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 28 },
-      { name: "Nube rosa", color: "#ff8ad4", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 34, h: 34 },
+      { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 34, h: 34 },
       { name: "Nueve vidas", color: "#f4f0ff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 40, h: 40 },
       { name: "MICHI GOD", color: "#fff6ff", speed: 7.4, jump: 15.0, jumps: 3, hp: 165, w: 46, h: 46 }
     ]
@@ -75,10 +75,10 @@ export const ROSTER = [
     abilities: ["salt", "ketchup", "fryer"],
     evoNames: ["Palito", "Frita", "Capitán Kétchup", "Extra Crujiente", "KÉtchup GOD"],
     forms: [
-      { name: "Palito", color: "#ffe08a", speed: 4.6, jump: 11.4, jumps: 2, hp: 85, w: 18, h: 28 },
+      { name: "Palito", color: "#ffe8a0", speed: 4.6, jump: 11.4, jumps: 2, hp: 85, w: 18, h: 28 },
       { name: "Frita", color: "#f0b43a", speed: 5.2, jump: 12.1, jumps: 3, hp: 105, w: 22, h: 32 },
-      { name: "Capitán Kétchup", color: "#e23b3b", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
-      { name: "Extra Crujiente", color: "#ffd36a", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
+      { name: "Capitán Kétchup", color: "#d42020", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
+      { name: "Extra Crujiente", color: "#ffda70", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
       { name: "KÉtchup GOD", color: "#fff1a0", speed: 7.2, jump: 14.5, jumps: 4, hp: 180, w: 34, h: 48 }
     ]
   }

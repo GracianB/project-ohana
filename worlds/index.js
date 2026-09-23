@@ -146,6 +146,16 @@ function drawBeach(ctx, cam, t, W, H) {
     }
   }
 
+  // light foam sparkle along shore (boost)
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 10; i++) {
+    const x = ((i * 140 - cam.x * 0.25 + t * 0.55) % (W + 160)) - 20;
+    const y = oceanY - 6 + Math.sin(t / 9 + i) * 3;
+    ctx.fillStyle = "rgba(220,250,255," + (0.08 + (i % 3) * 0.04) + ")";
+    ctx.beginPath(); ctx.ellipse(x, y, 28 + (i % 3) * 8, 5, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
   // palms ONLY on land — never in pit gap
   const palmSpots = [90, 260, 480, 980, 1180, 1420];
   for (let i = 0; i < palmSpots.length; i++) {
@@ -241,7 +251,7 @@ function palm(ctx, x, baseY, t, seed) {
 }
 
 /* ─────────────────────────  GROVE · Claro Ohana (hub)  ───────────────────────── */
-function drawGrove(ctx, cam, t, W, H) {
+export function drawGrove(ctx, cam, t, W, H) {
   // soft warm sun wash (no ocean)
   const sx = W * 0.72, sy = 90;
   const sun = ctx.createRadialGradient(sx, sy, 6, sx, sy, 180);
@@ -329,6 +339,22 @@ function drawGrove(ctx, cam, t, W, H) {
     ctx.beginPath(); ctx.arc(x, y, 1.4 + pr(i) * 1.6, 0, Math.PI * 2); ctx.fill();
   }
 
+  // soft sun shafts through canopy (light boost)
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 4; i++) {
+    const x = ((i * 280 + 60 - cam.x * 0.05) % (W + 200));
+    const sway = Math.sin(t / 40 + i) * 10;
+    const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 40, H * 0.7);
+    grd.addColorStop(0, "rgba(255,250,180,.10)");
+    grd.addColorStop(1, "rgba(255,230,140,0)");
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.moveTo(x + sway, 0); ctx.lineTo(x + sway + 50, 0);
+    ctx.lineTo(x + sway - 20, H * 0.7); ctx.lineTo(x + sway - 90, H * 0.7);
+    ctx.fill();
+  }
+  ctx.restore();
+
   // soft edge vignette (warm, not abyss)
   const vg = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.25, W / 2, H * 0.45, H * 0.85);
   vg.addColorStop(0, "rgba(0,0,0,0)");
@@ -379,7 +405,7 @@ function drawJungle(ctx, cam, t, W, H) {
   for (let i = 0; i < 6; i++) {
     const x = (i * 300 + 80 - cam.x * 0.05 + Math.sin(t / 50 + i) * 12) % (W + 220);
     const grd = ctx.createLinearGradient(x, 0, x - 100, H);
-    grd.addColorStop(0, "rgba(180,255,140,.14)");
+    grd.addColorStop(0, "rgba(180,255,140,.18)");
     grd.addColorStop(0.5, "rgba(140,230,100,.05)");
     grd.addColorStop(1, "rgba(180,255,150,0)");
     ctx.fillStyle = grd;
@@ -393,6 +419,14 @@ function drawJungle(ctx, cam, t, W, H) {
     const y = (pr(i + 5) * H + Math.sin(t / 24 + i) * 14) % H;
     ctx.fillStyle = "rgba(180,240,150," + (0.2 + pr(i + 2) * 0.45) + ")";
     ctx.beginPath(); ctx.arc((x + W) % W, y, 1.5 + pr(i) * 1.8, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // canopy glitter motes (light boost)
+  for (let i = 0; i < 12; i++) {
+    const x = (pr(i + 40) * W - cam.x * 0.22 + t * 0.22 + W) % W;
+    const y = (pr(i + 41) * H * 0.55 + Math.sin(t / 18 + i) * 8) % (H * 0.55);
+    ctx.fillStyle = "rgba(200,255,160," + (0.18 + pr(i + 42) * 0.35) + ")";
+    ctx.beginPath(); ctx.arc(x, y, 1.2 + pr(i + 43), 0, Math.PI * 2); ctx.fill();
   }
 
   // ground mist
@@ -439,6 +473,18 @@ function drawVolcano(ctx, cam, t, W, H) {
   lg.addColorStop(0.5, "rgba(255,80,20," + (0.22 + Math.sin(t / 9) * 0.06) + ")");
   lg.addColorStop(1, "rgba(255,50,10," + (0.4 + Math.sin(t / 9) * 0.1) + ")");
   ctx.fillStyle = lg; ctx.fillRect(0, H * 0.55, W, H * 0.45);
+  ctx.restore();
+
+  // heat shimmer bands (light boost)
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 5; i++) {
+    const x = ((i * 260 - cam.x * 0.12 + t * 0.3) % (W + 200));
+    const y = H * 0.62 + Math.sin(t / 11 + i) * 12;
+    const hg = ctx.createRadialGradient(x, y, 2, x, y, 50);
+    hg.addColorStop(0, "rgba(255,140,40,.10)");
+    hg.addColorStop(1, "rgba(255,60,0,0)");
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(x, y, 55, 16, 0, 0, Math.PI * 2); ctx.fill();
+  }
   ctx.restore();
 
   // rising embers (more)
@@ -523,6 +569,15 @@ function drawSpace(ctx, cam, t, W, H) {
   ctx.beginPath(); ctx.arc(W * 0.18, 160, 14, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(60,70,90,.4)";
   ctx.beginPath(); ctx.arc(W * 0.18 - 4, 158, 4, 0, Math.PI * 2); ctx.fill();
+
+  // cosmic dust glitter (light boost)
+  for (let i = 0; i < 16; i++) {
+    const x = (pr(i + 90) * W - cam.x * 0.05 + t * 0.08 + W) % W;
+    const y = (pr(i + 91) * H + Math.sin(t / 25 + i) * 6) % H;
+    const a = 0.15 + Math.abs(Math.sin(t / 8 + i)) * 0.45;
+    ctx.fillStyle = "rgba(200,220,255," + a + ")";
+    ctx.fillRect(x, y, 1.2, 1.2);
+  }
 
   // shooting star (periodic, brighter trail)
   const cyc = (t % 420) / 420;
@@ -609,6 +664,18 @@ function drawLab(ctx, cam, t, W, H) {
   }
   ctx.globalAlpha = 1;
 
+  // soft hologram bloom (light boost)
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 3; i++) {
+    const x = W * (0.2 + i * 0.3) + Math.sin(t / 18 + i) * 20;
+    const y = H * 0.35 + Math.cos(t / 22 + i) * 16;
+    const bg = ctx.createRadialGradient(x, y, 2, x, y, 70);
+    bg.addColorStop(0, "rgba(80,240,255,.10)");
+    bg.addColorStop(1, "rgba(40,160,220,0)");
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(x, y, 70, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+
   // scanline flicker
   ctx.fillStyle = "rgba(80,220,255," + (0.03 + Math.sin(t / 4) * 0.015) + ")";
   for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
@@ -616,173 +683,327 @@ function drawLab(ctx, cam, t, W, H) {
 
 /* ─────────────────────────  AQUATIC · Abismo  ───────────────────────── */
 export function drawAquatic(ctx, cam, t, W, H) {
-  // FULL underwater — deep blue wall-to-wall (covers any sky feel)
+  // FULL underwater — deep blue wall-to-wall (kills any sky feel)
   const deep = ctx.createLinearGradient(0, 0, 0, H);
-  deep.addColorStop(0, "rgba(4,40,78,.55)");
-  deep.addColorStop(0.35, "rgba(2,28,62,.72)");
-  deep.addColorStop(0.7, "rgba(1,16,42,.85)");
-  deep.addColorStop(1, "rgba(0,6,22,.92)");
+  deep.addColorStop(0, "rgba(2,36,72,.78)");
+  deep.addColorStop(0.22, "rgba(1,28,58,.88)");
+  deep.addColorStop(0.55, "rgba(0,16,40,.94)");
+  deep.addColorStop(0.82, "rgba(0,8,24,.97)");
+  deep.addColorStop(1, "rgba(0,2,12,.99)");
   ctx.fillStyle = deep;
   ctx.fillRect(0, 0, W, H);
 
-  // distant reef silhouettes (parallax back)
-  for (let i = 0; i < 6; i++) {
-    const x = ((i * 320 - cam.x * 0.08) % (W + 320)) - 80;
-    const y = H * 0.55 + (i % 3) * 20;
-    ctx.fillStyle = i % 2 ? "rgba(10,50,70,.4)" : "rgba(8,40,60,.5)";
+  // secondary teal mid wash (depth color band)
+  const midWash = ctx.createLinearGradient(0, H * 0.15, 0, H * 0.7);
+  midWash.addColorStop(0, "rgba(10,70,110,.22)");
+  midWash.addColorStop(0.5, "rgba(4,50,90,.18)");
+  midWash.addColorStop(1, "rgba(0,20,50,0)");
+  ctx.fillStyle = midWash;
+  ctx.fillRect(0, 0, W, H);
+
+  // distant reef silhouettes (parallax back, denser)
+  for (let i = 0; i < 8; i++) {
+    const x = ((i * 280 - cam.x * 0.07) % (W + 300)) - 90;
+    const y = H * 0.52 + (i % 3) * 22;
+    ctx.fillStyle = i % 2 ? "rgba(6,40,58,.55)" : "rgba(4,28,48,.62)";
     ctx.beginPath();
     ctx.moveTo(x, H);
-    ctx.lineTo(x + 20, y);
-    ctx.quadraticCurveTo(x + 60, y - 40, x + 100, y + 10);
-    ctx.quadraticCurveTo(x + 140, y - 50, x + 180, y);
-    ctx.lineTo(x + 220, H);
+    ctx.lineTo(x + 16, y);
+    ctx.quadraticCurveTo(x + 55, y - 48, x + 95, y + 8);
+    ctx.quadraticCurveTo(x + 140, y - 55, x + 185, y);
+    ctx.quadraticCurveTo(x + 220, y - 30, x + 250, y + 20);
+    ctx.lineTo(x + 280, H);
     ctx.closePath(); ctx.fill();
   }
 
-  // mid coral / rock formations
-  for (let i = 0; i < 8; i++) {
-    const x = ((i * 220 - cam.x * 0.22) % (W + 240)) - 50;
-    const h = 60 + (i % 4) * 28;
-    const cols = ["#8a3a58", "#c45a40", "#3a8a6a", "#d47830", "#6a3a88"];
-    ctx.fillStyle = cols[i % cols.length];
-    ctx.globalAlpha = 0.55;
-    // branching coral
+  // soft jelly silhouettes (far, gentle pulse)
+  for (let j = 0; j < 3; j++) {
+    const jx = ((j * 420 + t * (0.12 + j * 0.04) - cam.x * 0.06) % (W + 200)) - 40;
+    const jy = H * (0.22 + j * 0.14) + Math.sin(t / 28 + j) * 14;
+    const pulse = 0.12 + Math.sin(t / 16 + j) * 0.05;
+    ctx.fillStyle = "rgba(160,220,255," + pulse + ")";
+    ctx.beginPath();
+    ctx.ellipse(jx, jy, 22 + j * 4, 16 + j * 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // tentacles
+    ctx.strokeStyle = "rgba(140,200,240," + (pulse * 0.8) + ")";
+    ctx.lineWidth = 1.5;
+    for (let k = 0; k < 4; k++) {
+      const tx = jx - 12 + k * 8;
+      const sway = Math.sin(t / 14 + k + j) * 8;
+      ctx.beginPath();
+      ctx.moveTo(tx, jy + 10);
+      ctx.quadraticCurveTo(tx + sway, jy + 40, tx + sway * 0.5, jy + 62 + j * 6);
+      ctx.stroke();
+    }
+  }
+
+  // mid coral / rock formations — denser & more colorful
+  const coralCols = ["#c44a6a", "#e86838", "#3aaa78", "#e09030", "#7a48a8", "#2a8ab0", "#d45890"];
+  for (let i = 0; i < 12; i++) {
+    const x = ((i * 170 - cam.x * 0.24) % (W + 220)) - 40;
+    const h = 70 + (i % 5) * 26;
+    ctx.globalAlpha = 0.62 + (i % 3) * 0.08;
+    ctx.fillStyle = coralCols[i % coralCols.length];
+    // branching coral stalk
     ctx.beginPath();
     ctx.moveTo(x, H);
-    ctx.lineTo(x + 8, H - h);
-    ctx.lineTo(x + 22, H - h * 0.7);
-    ctx.lineTo(x + 18, H);
+    ctx.lineTo(x + 6, H - h);
+    ctx.lineTo(x + 20, H - h * 0.72);
+    ctx.lineTo(x + 16, H);
     ctx.closePath(); ctx.fill();
+    // tip clusters
     ctx.beginPath();
-    ctx.arc(x + 10, H - h, 10 + (i % 3) * 4, 0, Math.PI * 2); ctx.fill();
+    ctx.arc(x + 8, H - h, 12 + (i % 3) * 4, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath();
-    ctx.arc(x + 28, H - h * 0.55, 8, 0, Math.PI * 2); ctx.fill();
-    // brain coral blob
+    ctx.arc(x + 26, H - h * 0.58, 9 + (i % 2) * 3, 0, Math.PI * 2); ctx.fill();
+    // secondary branch
     if (i % 2 === 0) {
-      ctx.fillStyle = cols[(i + 2) % cols.length];
+      ctx.fillStyle = coralCols[(i + 3) % coralCols.length];
       ctx.beginPath();
-      ctx.ellipse(x + 50, H - 18, 28, 16, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.moveTo(x + 10, H - h * 0.4);
+      ctx.lineTo(x + 34, H - h * 0.85);
+      ctx.lineTo(x + 40, H - h * 0.7);
+      ctx.lineTo(x + 18, H - h * 0.3);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + 36, H - h * 0.88, 8, 0, Math.PI * 2); ctx.fill();
+    }
+    // brain / boulder coral
+    if (i % 3 !== 2) {
+      ctx.fillStyle = coralCols[(i + 2) % coralCols.length];
+      ctx.beginPath();
+      ctx.ellipse(x + 48, H - 20, 30 + (i % 3) * 6, 18, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,200,160,.25)";
+      ctx.beginPath();
+      ctx.ellipse(x + 40, H - 26, 10, 6, -0.3, 0, Math.PI * 2); ctx.fill();
+    }
+    // anemone tufts
+    if (i % 4 === 0) {
+      ctx.strokeStyle = coralCols[(i + 1) % coralCols.length];
+      ctx.lineWidth = 2;
+      for (let a = 0; a < 5; a++) {
+        const sway = Math.sin(t / 10 + a + i) * 6;
+        ctx.beginPath();
+        ctx.moveTo(x + 55, H - 4);
+        ctx.quadraticCurveTo(x + 55 + sway, H - 28, x + 50 + sway * 1.4, H - 48 - a * 3);
+        ctx.stroke();
+      }
     }
   }
   ctx.globalAlpha = 1;
 
-  // god rays from surface (strong)
+  // god rays from surface (strong / spectacular)
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 7; i++) {
-    const x = ((i * 240 + 40 - cam.x * 0.04) % (W + 260));
-    const sway = Math.sin(t / 35 + i * 0.9) * 22;
-    const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 80, H);
-    grd.addColorStop(0, "rgba(140,230,255,.18)");
-    grd.addColorStop(0.4, "rgba(80,190,255,.07)");
-    grd.addColorStop(1, "rgba(30,100,180,0)");
+  for (let i = 0; i < 9; i++) {
+    const x = ((i * 200 + 30 - cam.x * 0.035) % (W + 280));
+    const sway = Math.sin(t / 32 + i * 0.85) * 28;
+    const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 90, H);
+    grd.addColorStop(0, "rgba(160,240,255,.28)");
+    grd.addColorStop(0.25, "rgba(100,210,255,.12)");
+    grd.addColorStop(0.6, "rgba(50,150,220,.04)");
+    grd.addColorStop(1, "rgba(20,80,160,0)");
     ctx.fillStyle = grd;
     ctx.beginPath();
     ctx.moveTo(x + sway, 0);
-    ctx.lineTo(x + sway + 70, 0);
-    ctx.lineTo(x + sway - 40, H);
-    ctx.lineTo(x + sway - 160, H);
+    ctx.lineTo(x + sway + 85, 0);
+    ctx.lineTo(x + sway - 50, H);
+    ctx.lineTo(x + sway - 190, H);
     ctx.fill();
   }
 
-  // caustic light ripples on mid/floor
-  for (let i = 0; i < 12; i++) {
-    const cx = ((i * 160 - cam.x * 0.15 + t * 0.4) % (W + 180)) - 40;
-    const cy = H * 0.45 + (i % 4) * 55 + Math.sin(t / 12 + i) * 8;
-    const ca = ctx.createRadialGradient(cx, cy, 2, cx, cy, 50);
-    ca.addColorStop(0, "rgba(160,240,255,.14)");
-    ca.addColorStop(0.5, "rgba(100,200,255,.05)");
+  // caustic light ripples — mid + floor, more visible
+  for (let i = 0; i < 18; i++) {
+    const cx = ((i * 130 - cam.x * 0.16 + t * 0.5) % (W + 200)) - 50;
+    const cy = H * 0.4 + (i % 5) * 48 + Math.sin(t / 11 + i) * 10;
+    const rad = 40 + (i % 4) * 12;
+    const ca = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
+    ca.addColorStop(0, "rgba(180,250,255,.22)");
+    ca.addColorStop(0.35, "rgba(120,220,255,.10)");
     ca.addColorStop(1, "rgba(60,150,220,0)");
     ctx.fillStyle = ca;
     ctx.beginPath();
-    ctx.ellipse(cx, cy, 55 + Math.sin(t / 10 + i) * 10, 14, Math.sin(t / 18 + i) * 0.4, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy, rad + Math.sin(t / 9 + i) * 12, 12 + (i % 3) * 4, Math.sin(t / 16 + i) * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // floor caustic sheet
+  for (let i = 0; i < 8; i++) {
+    const cx = ((i * 200 - cam.x * 0.2 + t * 0.35) % (W + 220)) - 40;
+    const cy = H - 30 + Math.sin(t / 14 + i) * 6;
+    const ca = ctx.createRadialGradient(cx, cy, 2, cx, cy, 70);
+    ca.addColorStop(0, "rgba(140,230,255,.16)");
+    ca.addColorStop(1, "rgba(40,120,180,0)");
+    ctx.fillStyle = ca;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 75, 18, 0.15, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();
 
-  // distant fish schools (simple ellipses)
-  for (let s = 0; s < 3; s++) {
-    const bx = ((t * (0.35 + s * 0.1) + s * 400 - cam.x * 0.1) % (W + 300)) - 80;
-    const by = H * (0.28 + s * 0.12);
-    ctx.fillStyle = "rgba(100,180,220," + (0.2 + s * 0.08) + ")";
-    for (let f = 0; f < 7; f++) {
-      const fx = bx + f * 14 + Math.sin(t / 8 + f + s) * 6;
-      const fy = by + Math.sin(f + t / 10) * 10 + (f % 3) * 5;
+  // distant fish schools (cardúmenes)
+  for (let s = 0; s < 5; s++) {
+    const bx = ((t * (0.28 + s * 0.09) + s * 340 - cam.x * 0.09) % (W + 360)) - 100;
+    const by = H * (0.2 + s * 0.1);
+    const dir = s % 2 === 0 ? 1 : -1;
+    ctx.fillStyle = "rgba(120,200,235," + (0.18 + s * 0.05) + ")";
+    for (let f = 0; f < 10; f++) {
+      const fx = bx + dir * (f * 12 + Math.sin(t / 7 + f + s) * 5);
+      const fy = by + Math.sin(f * 0.8 + t / 9) * 12 + (f % 4) * 4;
       ctx.beginPath();
-      ctx.ellipse(fx, fy, 7, 3, 0.2, 0, Math.PI * 2);
+      ctx.ellipse(fx, fy, 6 + (f % 3), 2.5, dir * 0.25, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  // dense rising bubbles
-  for (let i = 0; i < 48; i++) {
-    const life = (t * (0.45 + pr(i) * 0.7) + pr(i) * 800) % 800;
-    const x = (pr(i) * W + Math.sin(life / 30 + i) * 20 - cam.x * 0.16 + W) % W;
-    const y = H - (life / 800) * (H + 50);
-    const r = 1.2 + pr(i + 2) * 4;
-    const a = Math.max(0, 0.6 - life / 1300);
-    ctx.strokeStyle = "rgba(180,230,255," + a + ")";
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillStyle = "rgba(200,240,255," + (a * 0.35) + ")";
-    ctx.beginPath();
-    ctx.arc(x - r * 0.28, y - r * 0.28, r * 0.35, 0, Math.PI * 2);
-    ctx.fill();
+  // occasional sparkle flashes (surface light hits)
+  for (let i = 0; i < 6; i++) {
+    const life = (t * 0.7 + pr(i + 50) * 200) % 200;
+    if (life < 28) {
+      const a = (1 - life / 28) * 0.55;
+      const x = (pr(i + 51) * W - cam.x * 0.1 + W) % W;
+      const y = pr(i + 52) * H * 0.55;
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.strokeStyle = "rgba(220,250,255," + a + ")";
+      ctx.lineWidth = 1.2;
+      const r = 4 + (28 - life) * 0.25;
+      ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); ctx.stroke();
+      ctx.restore();
+    }
   }
 
-  // swaying kelp / seaweed (dense, anchored bottom)
-  for (let i = 0; i < 14; i++) {
-    const x = ((i * 140 - cam.x * 0.38) % (W + 180)) - 30;
+  // rising bubbles — multi-size layers
+  // layer A: tiny dense
+  for (let i = 0; i < 40; i++) {
+    const life = (t * (0.5 + pr(i) * 0.6) + pr(i) * 700) % 700;
+    const x = (pr(i) * W + Math.sin(life / 28 + i) * 16 - cam.x * 0.12 + W) % W;
+    const y = H - (life / 700) * (H + 40);
+    const r = 0.8 + pr(i + 2) * 2.2;
+    const a = Math.max(0, 0.45 - life / 1400);
+    ctx.strokeStyle = "rgba(180,230,255," + a + ")";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+  }
+  // layer B: medium glossy
+  for (let i = 0; i < 28; i++) {
+    const life = (t * (0.4 + pr(i + 20) * 0.7) + pr(i + 20) * 900) % 900;
+    const x = (pr(i + 20) * W + Math.sin(life / 32 + i) * 22 - cam.x * 0.18 + W) % W;
+    const y = H - (life / 900) * (H + 60);
+    const r = 2.2 + pr(i + 22) * 4.5;
+    const a = Math.max(0, 0.65 - life / 1400);
+    ctx.strokeStyle = "rgba(190,235,255," + a + ")";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "rgba(210,245,255," + (a * 0.4) + ")";
+    ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.3, r * 0.35, 0, Math.PI * 2); ctx.fill();
+  }
+  // layer C: large sparse
+  for (let i = 0; i < 10; i++) {
+    const life = (t * (0.28 + pr(i + 40) * 0.4) + pr(i + 40) * 1100) % 1100;
+    const x = (pr(i + 40) * W + Math.sin(life / 40 + i) * 30 - cam.x * 0.22 + W) % W;
+    const y = H - (life / 1100) * (H + 80);
+    const r = 5 + pr(i + 42) * 6;
+    const a = Math.max(0, 0.5 - life / 1600);
+    ctx.strokeStyle = "rgba(200,240,255," + a + ")";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "rgba(220,250,255," + (a * 0.28) + ")";
+    ctx.beginPath(); ctx.arc(x - r * 0.28, y - r * 0.32, r * 0.32, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // swaying kelp / seaweed — denser & colorful
+  for (let i = 0; i < 18; i++) {
+    const x = ((i * 110 - cam.x * 0.4) % (W + 160)) - 30;
     const base = H - 4;
-    const sway = Math.sin(t / 16 + i * 0.65) * 18;
-    const tall = 130 + (i % 4) * 35;
-    ctx.strokeStyle = i % 2 ? "#1a6a48" : "#0c4834";
-    ctx.lineWidth = 5 + (i % 3);
+    const sway = Math.sin(t / 15 + i * 0.6) * 22;
+    const tall = 140 + (i % 5) * 38;
+    const dark = i % 2 ? "#145a3c" : "#0a3c2a";
+    const mid = i % 3 === 0 ? "#2aaa68" : "#1e8a52";
+    ctx.strokeStyle = dark;
+    ctx.lineWidth = 6 + (i % 3);
     ctx.lineCap = "round";
     ctx.beginPath();
     ctx.moveTo(x, base);
     ctx.quadraticCurveTo(x + sway * 0.5, base - tall * 0.5, x + sway, base - tall);
     ctx.stroke();
     // secondary frond
-    ctx.strokeStyle = "#2a9a62";
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = mid;
+    ctx.lineWidth = 3.5;
     ctx.beginPath();
     ctx.moveTo(x, base);
-    ctx.quadraticCurveTo(x + sway * 0.3 - 8, base - tall * 0.45, x + sway * 0.7 - 12, base - tall * 0.85);
+    ctx.quadraticCurveTo(x + sway * 0.3 - 10, base - tall * 0.45, x + sway * 0.7 - 14, base - tall * 0.88);
     ctx.stroke();
-    // leaf tips
-    for (let k = 0; k < 4; k++) {
-      const ly = base - 30 - k * (tall / 5);
-      const lx = x + sway * (0.25 + k * 0.2);
+    // bright tip accent
+    ctx.strokeStyle = "rgba(80,220,140,.55)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + sway * 0.7, base - tall * 0.75);
+    ctx.quadraticCurveTo(x + sway, base - tall * 0.92, x + sway + 4, base - tall);
+    ctx.stroke();
+    // leaf blades
+    for (let k = 0; k < 5; k++) {
+      const ly = base - 24 - k * (tall / 5.5);
+      const lx = x + sway * (0.2 + k * 0.18);
+      const leafSway = Math.sin(t / 11 + k + i) * 6;
+      ctx.strokeStyle = k % 2 ? "#248a58" : "#1a6a44";
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(lx, ly);
-      ctx.quadraticCurveTo(lx + 20 + Math.sin(t / 12 + k + i) * 5, ly - 10, lx + 32, ly + 2);
+      ctx.quadraticCurveTo(lx + 22 + leafSway, ly - 12, lx + 38 + leafSway * 0.5, ly + 4);
       ctx.stroke();
+      if (k % 2 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.quadraticCurveTo(lx - 18 - leafSway, ly - 10, lx - 32, ly + 2);
+        ctx.stroke();
+      }
     }
   }
   ctx.lineCap = "butt";
 
-  // plankton / particulate (dense)
-  for (let i = 0; i < 36; i++) {
-    const x = (pr(i) * W - cam.x * 0.2 + t * 0.1 + W) % W;
-    const y = (pr(i + 7) * H + Math.sin(t / 20 + i) * 12) % H;
-    ctx.fillStyle = "rgba(140,220,255," + (0.15 + pr(i + 3) * 0.4) + ")";
-    ctx.fillRect(x, y, 1.5 + pr(i) * 1.5, 1.5 + pr(i) * 1.5);
+  // plankton / particulate motes (dense)
+  for (let i = 0; i < 55; i++) {
+    const x = (pr(i) * W - cam.x * 0.18 + t * (0.08 + pr(i + 3) * 0.12) + W) % W;
+    const y = (pr(i + 7) * H + Math.sin(t / 18 + i) * 14) % H;
+    const a = 0.12 + pr(i + 3) * 0.45;
+    ctx.fillStyle = "rgba(150,230,255," + a + ")";
+    const s = 1.2 + pr(i) * 2;
+    ctx.fillRect(x, y, s, s);
   }
 
-  // depth vignette — dark blue pressure at edges & top/bottom
-  const vig = ctx.createRadialGradient(W / 2, H * 0.4, H * 0.15, W / 2, H * 0.45, H * 0.85);
-  vig.addColorStop(0, "rgba(0,10,30,0)");
-  vig.addColorStop(0.55, "rgba(0,15,40,.15)");
-  vig.addColorStop(1, "rgba(0,5,20,.55)");
+  // depth vignette — pressure dark at edges & bottom
+  const vig = ctx.createRadialGradient(W / 2, H * 0.38, H * 0.12, W / 2, H * 0.42, H * 0.9);
+  vig.addColorStop(0, "rgba(0,8,24,0)");
+  vig.addColorStop(0.45, "rgba(0,12,32,.12)");
+  vig.addColorStop(0.75, "rgba(0,8,28,.38)");
+  vig.addColorStop(1, "rgba(0,2,12,.72)");
   ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
 
+  // bottom abyss darkness band
+  const abyss = ctx.createLinearGradient(0, H * 0.72, 0, H);
+  abyss.addColorStop(0, "rgba(0,4,16,0)");
+  abyss.addColorStop(1, "rgba(0,2,10,.55)");
+  ctx.fillStyle = abyss; ctx.fillRect(0, H * 0.72, W, H * 0.28);
+
   // top surface shimmer (looking up toward light)
-  const surf = ctx.createLinearGradient(0, 0, 0, H * 0.22);
-  surf.addColorStop(0, "rgba(60,160,220,.28)");
-  surf.addColorStop(0.5, "rgba(40,120,180,.1)");
-  surf.addColorStop(1, "rgba(20,60,100,0)");
-  ctx.fillStyle = surf; ctx.fillRect(0, 0, W, H * 0.22);
+  const surf = ctx.createLinearGradient(0, 0, 0, H * 0.28);
+  surf.addColorStop(0, "rgba(90,190,240,.42)");
+  surf.addColorStop(0.35, "rgba(50,140,200,.18)");
+  surf.addColorStop(1, "rgba(20,70,120,0)");
+  ctx.fillStyle = surf; ctx.fillRect(0, 0, W, H * 0.28);
+
+  // surface ripple lines
+  ctx.strokeStyle = "rgba(160,230,255,.18)";
+  ctx.lineWidth = 1.2;
+  for (let i = 0; i < 5; i++) {
+    const y = 8 + i * 10 + Math.sin(t / 12 + i) * 3;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 40) {
+      const yy = y + Math.sin(x / 50 + t / 10 + i) * 4;
+      if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+    }
+    ctx.stroke();
+  }
 }

@@ -24,7 +24,7 @@ export const ROOMS = {
     doors: { right: "beach", left: "cave", up: "ridge", down: null },
     hint: "Piso bajo. ESTE costa · OESTE cueva · centro ARRIBA cumbre. Catapulta ESTE → Costa.",
     plats: [[0, 810, 1600, 90], [80, 680, 160, 18], [300, 620, 150, 18], ...stairs(760)],
-    foes: [[620, 200, "cucaracho"], [1180, 200, "phosquito"]],
+    foes: [[620, 200, "cucaracho"], [980, 200, "cucaracho"], [1180, 200, "phosquito"]],
     orbs: [[400, 500], [900, 200]],
     portals: [{ type: "catapult", x: 1310, y: 778, w: 100, h: 34, dest: "beach", label: "Costa" }]
   },
@@ -41,7 +41,7 @@ export const ROOMS = {
       [1000, 660, 160, 18],
       [1220, 540, 150, 18]
     ],
-    foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [420, 360, "pez"], [900, 420, "pez"], [1180, 380, "pez"], [1380, 460, "pez"]],
+    foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [420, 200, "cangrejo"], [1180, 200, "cangrejo"], [560, 380, "gaviota"], [1280, 320, "gaviota"]],
     orbs: [[220, 620], [1280, 480]],
     portals: [{ type: "catapult", x: 70, y: 778, w: 100, h: 34, dest: "hub", label: "Claro" }]
   },
@@ -52,7 +52,7 @@ export const ROOMS = {
     pit: true,
     hint: "Esquina derecha del mapa. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
-    foes: [[360, 440, "libelula"], [820, 480, "mosquito"], [1280, 460, "abeja"]],
+    foes: [[360, 440, "libelula"], [820, 480, "mosquito"], [1280, 460, "abeja"], [640, 200, "rana"]],
     orbs: [[520, 420], [800, 180]],
     portals: [{ type: "blackhole", x: 1170, y: 710, w: 80, h: 80, dest: "volcano", label: "Caldera" }]
   },
@@ -61,7 +61,7 @@ export const ROOMS = {
     doors: { right: "hub", left: "lab", up: null, down: null },
     hint: "OESTE lab (forma 2). ESTE claro.",
     plats: [[0, 810, 1600, 90], [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]],
-    foes: [[360, 200, "planta"], [1040, 200, "phosquito"]],
+    foes: [[360, 200, "planta"], [720, 280, "murcielago"], [1100, 240, "murcielago"], [480, 200, "arana"], [1240, 200, "arana"], [1040, 200, "phosquito"]],
     orbs: [[500, 420], [1200, 400]]
   },
   lab: {
@@ -70,7 +70,7 @@ export const ROOMS = {
     needEvo: 1,
     hint: "Solo salida ESTE.",
     plats: [[0, 810, 1600, 90], [180, 660, 180, 18], [480, 520, 180, 18], [860, 380, 180, 18], [1220, 540, 180, 18]],
-    foes: [[400, 200, "planta"], [820, 200, "phosquito"], [1240, 200, "cucaracho"]],
+    foes: [[400, 200, "planta"], [820, 200, "phosquito"], [1240, 200, "cucaracho"], [640, 200, "cucaracho"], [1000, 280, "arana"], [280, 280, "murcielago"]],
     orbs: [[520, 440], [900, 300]]
   },
   ridge: {
@@ -79,7 +79,7 @@ export const ROOMS = {
     pit: true,
     hint: "Hueco central ABAJO = Claro. ESTE = órbita.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [200, 660, 160, 18], [500, 520, 150, 18], [1040, 620, 160, 18]],
-    foes: [[480, 200, "phosquito"], [1200, 200, "cucaracho"]],
+    foes: [[480, 200, "phosquito"], [860, 200, "cucaracho"], [1200, 200, "cucaracho"], [320, 280, "murcielago"], [1040, 240, "murcielago"], [700, 200, "arana"]],
     orbs: [[720, 420], [1100, 280]]
   },
   space: {
@@ -89,7 +89,7 @@ export const ROOMS = {
     pit: true,
     hint: "Pozo central ABAJO = Claro. ESTE = Arrecife secreto. BH → Arrecife.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]],
-    foes: [[500, 200, "phosquito"], [1080, 200, "planta"], [1340, 280, "medusa"]],
+    foes: [[420, 280, "ufo"], [980, 220, "ufo"], [640, 200, "phosquito"], [1280, 300, "brasita"]],
     orbs: [[640, 390], [1120, 260]],
     portals: [{ type: "blackhole", x: 1270, y: 270, w: 80, h: 80, dest: "reef", label: "Arrecife" }]
   },
@@ -98,7 +98,7 @@ export const ROOMS = {
     doors: { left: "space", right: null, up: null, down: null },
     hint: "Bajo el agua. Peces y medusas. Las medusas sueltan orbes. BH → Órbita.",
     plats: [[0, 810, 1600, 90], [200, 660, 190, 18], [560, 520, 190, 18], [920, 640, 190, 18], [1220, 480, 190, 18], [740, 360, 180, 18]],
-    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [1320, 400, "pez"]],
+    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [560, 340, "anguila"], [1280, 380, "anguila"]],
     orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]],
     portals: [{ type: "blackhole", x: 90, y: 710, w: 80, h: 80, dest: "space", label: "Órbita" }]
   },
@@ -108,7 +108,7 @@ export const ROOMS = {
     needEvo: 3,
     hint: "Llegaste por el hueco de la Jungla. ESTE = nido. BH → Jungla.",
     plats: [[0, 810, 1600, 90], ...stairs(760)],
-    foes: [[480, 200, "planta"], [980, 200, "cucaracho"], [1320, 200, "phosquito"]],
+    foes: [[480, 200, "planta"], [720, 200, "escoria"], [1100, 200, "escoria"], [560, 360, "brasita"], [1280, 300, "brasita"]],
     orbs: [[660, 200], [1100, 540]],
     portals: [{ type: "blackhole", x: 190, y: 710, w: 80, h: 80, dest: "jungle", label: "Jungla" }]
   },

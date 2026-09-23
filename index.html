@@ -15,10 +15,10 @@
   <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css?v=ohana-16" />
+  <link rel="stylesheet" href="style.css?v=ohana-17" />
   <link rel="stylesheet" href="hud.css?v=ohana-1" />
   <link rel="stylesheet" href="ending.css?v=ohana-4" />
-  <link rel="stylesheet" href="intro.css?v=ohana-1" />
+  <link rel="stylesheet" href="intro.css?v=ohana-2" />
   <link rel="stylesheet" href="demo.css?v=ohana-1" />
 </head>
 <body>
@@ -57,7 +57,7 @@
       <div id="hud-combo">Combo 0 · Score 0</div>
     </div>
   </header>
-  <div id="boss-wrap" class="hidden"><div class="boss-label">NIDO FINAL</div><div class="bar boss"><i id="boss-bar"></i></div></div>
+  <div id="boss-wrap" class="hidden"><div class="boss-label">REINA DEL NIDO</div><div class="bar boss"><i id="boss-bar"></i></div></div>
   <div id="combo-chip">0</div>
   <div id="room-banner">CLARO OHANA</div>
   <div id="prompt">Entra por ESTE</div>
@@ -105,7 +105,7 @@
       <div class="title-haze"></div>
     </div>
     <div class="title-stack">
-      <div class="crest" aria-hidden="true"><i></i><b></b></div>
+      <div class="logo-mark" aria-hidden="true"><div class="crest"><i></i><b></b></div></div>
       <p class="eyebrow">Demo final · Mundo 1 · Isla Hoku</p>
       <h1><span class="word project">PROJECT</span><span class="word ohana">OHANA</span></h1>
       <p class="tagline">Seis formas. Un nido. Nadie se queda atrás.</p>
@@ -115,7 +115,7 @@
     </div>
     <div id="menu-row">
       <button id="btn-continue" type="button" class="cta ghost hidden">Continuar</button>
-      <button id="btn-play" type="button" class="cta primary">Jugar demo</button>
+      <button id="btn-play" type="button" class="cta primary"><span class="cta-ico" aria-hidden="true">▶</span> Empezar</button>
       <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
     <p class="pick-label">Elige a tu ohana</p>
@@ -159,9 +159,9 @@
       setTimeout(function () { end(false); }, reduce ? 600 : 3400);
     })();
   </script>
-  <script type="module" src="game.js?v=ohana-14"></script>
-  <script type="module" src="systems/title.js?v=ohana-16"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-14"></script>
+  <script type="module" src="game.js?v=ohana-17"></script>
+  <script type="module" src="systems/title.js?v=ohana-17"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-17"></script>
   <script type="module" src="systems/hud.js?v=ohana-14"></script>
   <script type="module" src="systems/ending.js?v=ohana-14"></script>
   <script type="module" src="systems/demo.js?v=ohana-14"></script>

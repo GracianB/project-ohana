@@ -56,18 +56,16 @@ function makePortal(def) {
 /** Partículas orbitales locales (BH). */
 function spawnOrbitals(portal, n) {
   const out = [];
-  const cx = portal.x + portal.w / 2;
-  const cy = portal.y + portal.h / 2;
-  const r = Math.min(portal.w, portal.h) * 0.42;
+  const r = Math.min(portal.w, portal.h) * 0.48;
   for (let i = 0; i < n; i++) {
     out.push({
       portal,
       a: Math.random() * Math.PI * 2,
-      r: r * (0.45 + Math.random() * 0.7),
-      speed: 0.04 + Math.random() * 0.06,
-      size: 1.2 + Math.random() * 2.2,
-      life: 40 + Math.random() * 80,
-      max: 80,
+      r: r * (0.4 + Math.random() * 0.85),
+      speed: 0.05 + Math.random() * 0.08,
+      size: 1.6 + Math.random() * 2.8,
+      life: 50 + Math.random() * 90,
+      max: 100,
       z: Math.random()
     });
   }
@@ -99,7 +97,7 @@ export class Portals {
     // Orbitals por cada BH
     for (const p of this.items) {
       if (p.type === "blackhole") {
-        this.orbitals.push(...spawnOrbitals(p, 14));
+        this.orbitals.push(...spawnOrbitals(p, 22));
       }
     }
   }
@@ -177,7 +175,7 @@ export class Portals {
     return k;
   }
 
-  /** Tint del fade (púrpura BH / ámbar catapulta). */
+  /** Tint del fade/charge: { alpha, color:"r,g,b", vignette? }. */
   getOverlay() {
     return this._overlay;
   }
@@ -328,19 +326,27 @@ export class Portals {
 
   _beginCharge(portal, type, reduce) {
     if (!portal || !portal.dest) return;
+    // Secuencias espectaculares; reduceMotion más cortas
     const max =
       type === "blackhole"
         ? reduce
-          ? 12
-          : 18 + Math.floor(Math.random() * 11) // 18–28
+          ? 14
+          : 28 + Math.floor(Math.random() * 18) // 28–45
         : reduce
-          ? 6
-          : 10 + Math.floor(Math.random() * 5); // 10–14
-    this.charge = { portal, type, t: 0, max };
+          ? 10
+          : 20 + Math.floor(Math.random() * 17); // 20–36
+    this.charge = { portal, type, t: 0, max, snapped: false, freezeLeft: 0 };
     this._visual = { scale: 1, alpha: 1 };
+    this._overlay = {
+      alpha: 0.08,
+      color: type === "blackhole" ? "90,40,160" : "255,160,60",
+      vignette: 0.1
+    };
     if (type === "catapult") {
-      portal.armVel = -0.18; // tensar
-      portal.sparkT = max;
+      portal.armVel = -0.28; // tensar fuerte
+      portal.sparkT = max + 4;
+    } else {
+      portal.swallow = 0;
     }
   }
 
@@ -350,110 +356,245 @@ export class Portals {
     const p = game.player;
     const portal = c.portal;
     c.t++;
-    // Abort de seguridad: charge colgado → forzar queue (no dejar player invisible)
+    // Abort de seguridad: charge colgado → forzar queue (no soft-lock)
     if (c.t > c.max + 30) {
       this._overlay = this._overlay || {
-        alpha: 0.7,
-        color: c.type === "blackhole" ? "90,40,160" : "255,160,60"
+        alpha: 0.75,
+        color: c.type === "blackhole" ? "90,40,160" : "255,160,60",
+        vignette: 0.45
       };
       this._kick = this._kick || this._makeKick(portal, c.type);
-      if (c.type === "blackhole") portal.swallow = 18;
+      if (c.type === "blackhole") portal.swallow = 22;
       this._queue(portal);
       this.charge = null;
       this._visual = { scale: 1, alpha: 1 };
       return;
     }
     const k = Math.min(1, c.t / Math.max(1, c.max)); // 0→1
-
     this.near = portal;
+
+    // Camera shake creciente (cap suave; reduceMotion casi plano)
+    if (game) {
+      const shakeCap = reduce ? 4 : 14;
+      const shakeTarget = reduce
+        ? 1.2 + k * 2.5
+        : c.type === "blackhole"
+          ? 2.5 + k * 11
+          : 2 + k * 12;
+      game.shake = Math.min(shakeCap, Math.max(game.shake || 0, shakeTarget));
+    }
+
     if (c.type === "blackhole") {
-      this.prompt = "◉ Absorbiendo…";
-      const cx = portal.x + portal.w / 2;
-      const cy = portal.y + portal.h / 2;
-      const px = p.x + p.w / 2;
-      const py = p.y + p.h / 2;
-      // Atracción fuerte durante absorb
-      p.vx += (cx - px) * 0.08;
-      p.vy += (cy - py) * 0.08;
-      p.x += (cx - p.w / 2 - p.x) * 0.12;
-      p.y += (cy - p.h / 2 - p.y) * 0.12;
-      this._visual = {
-        scale: Math.max(0.15, 1 - k * 0.9),
-        alpha: Math.max(0.05, 1 - k * 0.95)
-      };
-      if (!reduce && game.fx && c.t % 2 === 0) {
-        game.fx.emit(cx, cy, {
-          color: "#a070ff",
-          count: 2,
-          size: 2.5,
-          up: 0.6,
-          speed: 2.2,
-          life: 14
-        });
-      }
-      if (c.t >= c.max) {
-        portal.swallow = 18;
-        this._overlay = { alpha: 0.85, color: "90,40,160" };
-        this._kick = this._makeKick(portal, "blackhole");
-        this._queue(portal);
-        this.charge = null;
-        this._visual = { scale: 0.2, alpha: 0.1 };
-        if (game.fx) {
-          game.fx.emit(cx, cy, {
-            color: "#e0c0ff",
-            count: reduce ? 10 : 28,
-            size: 5,
-            up: 1.6,
-            speed: 3.5,
-            life: 20,
-            star: true
-          });
-        }
-      }
+      this._tickBlackholeCharge(game, reduce, c, portal, p, k);
     } else {
-      // Catapulta wind-up
-      this.prompt = "⚔ ¡Lanzando!";
-      // Mantener al player sobre la base
-      const tx = portal.x + portal.w * 0.55 - p.w / 2;
-      const ty = portal.y - p.h - 2;
-      p.x += (tx - p.x) * 0.25;
-      p.y += (ty - p.y) * 0.25;
-      p.vx *= 0.5;
-      p.vy = Math.min(p.vy, 0);
-      portal.armAng += portal.armVel;
-      portal.armVel *= 0.92;
-      // Tensar hacia atrás
-      const target = -0.95;
-      portal.armAng += (target - portal.armAng) * 0.2;
-      this._visual = { scale: 1 + k * 0.06, alpha: 1 };
-      if (!reduce && game.fx && c.t % 3 === 0) {
-        game.fx.emit(portal.x + portal.w * 0.7, portal.y, {
-          color: "#ffc078",
-          count: 2,
-          size: 2,
-          up: 1.4,
-          speed: 2,
-          life: 12
+      this._tickCatapultCharge(game, reduce, c, portal, p, k);
+    }
+  }
+
+  _tickBlackholeCharge(game, reduce, c, portal, p, k) {
+    this.prompt = "◉ Absorbiendo…";
+    const cx = portal.x + portal.w / 2;
+    const cy = portal.y + portal.h / 2;
+    const px = p.x + p.w / 2;
+    const py = p.y + p.h / 2;
+    // Pull fuerte + lerp al núcleo (escala con k)
+    const pull = 0.1 + k * 0.2;
+    const lerp = 0.14 + k * 0.22;
+    p.vx += (cx - px) * pull;
+    p.vy += (cy - py) * pull;
+    p.x += (cx - p.w / 2 - p.x) * lerp;
+    p.y += (cy - p.h / 2 - p.y) * lerp;
+    this._visual = {
+      scale: Math.max(0.08, 1 - k * 0.95),
+      alpha: Math.max(0.04, 1 - k * 0.98)
+    };
+    // Overlay púrpura pulsante + vignette
+    const pulse = 0.5 + Math.sin(c.t * 0.45) * 0.5;
+    this._overlay = {
+      alpha: Math.min(0.88, 0.12 + k * 0.62 + pulse * 0.1 * k),
+      color: "90,40,160",
+      vignette: 0.15 + k * 0.55
+    };
+    // Swirl particles densos
+    if (game.fx) {
+      const dens = reduce ? (c.t % 3 === 0) : true;
+      if (dens) {
+        const ang = c.t * 0.55;
+        const rad = (1 - k) * 36 + 6;
+        const sx = cx + Math.cos(ang) * rad;
+        const sy = cy + Math.sin(ang) * rad * 0.55;
+        game.fx.emit(sx, sy, {
+          color: k > 0.6 ? "#e8d0ff" : "#a070ff",
+          count: reduce ? 1 : 2 + (k > 0.5 ? 2 : 0),
+          size: 2 + k * 2.5,
+          up: 0.4,
+          speed: 1.6 + k * 2.2,
+          life: 12 + k * 10
         });
-      }
-      if (c.t >= c.max) {
-        // Snap del brazo
-        portal.armVel = 0.45;
-        portal.armAng = -0.15;
-        this._overlay = { alpha: 0.7, color: "255,160,60" };
-        this._kick = this._makeKick(portal, "catapult");
-        this._queue(portal);
-        this.charge = null;
-        if (game.fx) {
-          game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
-            color: "#ffe0a0",
-            count: reduce ? 8 : 20,
-            size: 3.5,
-            up: 2.4,
-            speed: 4,
-            life: 16
+        if (!reduce && c.t % 2 === 0) {
+          game.fx.emit(px, py, {
+            color: "#c9a0ff",
+            count: 2,
+            size: 1.8,
+            up: 0.8,
+            speed: 2.4,
+            life: 10
           });
         }
+      }
+    }
+    // Orbitals acelera hacia el final
+    if (!reduce) {
+      for (const o of this.orbitals) {
+        if (o.portal === portal) o.a += o.speed * (0.4 + k * 1.6);
+      }
+    }
+    if (c.t >= c.max) {
+      portal.swallow = 24;
+      this._overlay = { alpha: 0.92, color: "90,40,160", vignette: 0.7 };
+      this._kick = this._makeKick(portal, "blackhole");
+      this._queue(portal);
+      this.charge = null;
+      this._visual = { scale: 0.12, alpha: 0.06 };
+      if (game) {
+        game.flash = Math.max(game.flash || 0, reduce ? 8 : 14);
+        game.shake = Math.min(reduce ? 5 : 16, (game.shake || 0) + (reduce ? 3 : 8));
+      }
+      if (game && game.fx) {
+        game.fx.emit(cx, cy, {
+          color: "#e0c0ff",
+          count: reduce ? 12 : 40,
+          size: 6,
+          up: 1.8,
+          speed: 4,
+          life: 24,
+          star: true
+        });
+        game.fx.emit(cx, cy, {
+          color: "#fff",
+          count: reduce ? 4 : 14,
+          size: 3,
+          up: 2.2,
+          speed: 5,
+          life: 16
+        });
+      }
+    }
+  }
+
+  _tickCatapultCharge(game, reduce, c, portal, p, k) {
+    this.prompt = "⚔ ¡Lanzando!";
+    // Anclar player a la base
+    const tx = portal.x + portal.w * 0.55 - p.w / 2;
+    const ty = portal.y - p.h - 2;
+    p.x += (tx - p.x) * 0.3;
+    p.y += (ty - p.y) * 0.3;
+    p.vx *= 0.4;
+    p.vy = Math.min(p.vy, 0);
+
+    // Freeze-frame post-snap: hold + luego queue
+    if (c.snapped) {
+      this._overlay = {
+        alpha: 0.82,
+        color: "255,160,60",
+        vignette: 0.65
+      };
+      this._visual = { scale: 1.08, alpha: 1 };
+      portal.armAng += (0.55 - portal.armAng) * 0.45;
+      if (c.freezeLeft > 0) {
+        c.freezeLeft--;
+        if (c.freezeLeft > 0) return;
+      }
+      this._kick = this._makeKick(portal, "catapult");
+      this._queue(portal);
+      this.charge = null;
+      return;
+    }
+
+    // Wind-up exagerado del brazo
+    portal.armAng += portal.armVel;
+    portal.armVel *= 0.9;
+    const target = -1.05 - k * 0.35; // más atrás al final
+    portal.armAng += (target - portal.armAng) * (0.18 + k * 0.12);
+    portal.armVel -= 0.01 + k * 0.02;
+    this._visual = { scale: 1 + k * 0.1, alpha: 1 };
+    // Overlay ámbar ramp + vignette
+    this._overlay = {
+      alpha: Math.min(0.78, 0.06 + k * k * 0.58),
+      color: "255,160,60",
+      vignette: 0.1 + k * 0.5
+    };
+    // Chispas densas + trail del player
+    if (game && game.fx) {
+      const every = reduce ? 3 : 1;
+      if (c.t % every === 0) {
+        const stoneX = portal.x + portal.w * 0.72;
+        const stoneY = portal.y - 8 - k * 6;
+        game.fx.emit(stoneX, stoneY, {
+          color: k > 0.7 ? "#ffe8a0" : "#ffc078",
+          count: reduce ? 1 : 2 + (k > 0.55 ? 2 : 0),
+          size: 2 + k * 2,
+          up: 1.6 + k,
+          speed: 2.2 + k * 2,
+          life: 12 + k * 8
+        });
+        if (!reduce) {
+          // Trail detrás del player
+          game.fx.emit(p.x + p.w * 0.3, p.y + p.h * 0.6, {
+            color: "#ffb060",
+            count: 1,
+            size: 1.8,
+            up: 0.6,
+            speed: 1.2,
+            life: 10
+          });
+        }
+      }
+      if (!reduce && k > 0.75 && c.t % 2 === 0) {
+        game.fx.emit(portal.x + portal.w * 0.5, portal.y + 4, {
+          color: "#fff0c8",
+          count: 3,
+          size: 2.5,
+          up: 2.2,
+          speed: 3.2,
+          life: 14,
+          star: true
+        });
+      }
+    }
+    if (c.t >= c.max) {
+      // Snap del brazo + burst + freeze-frame 1–2 ticks
+      c.snapped = true;
+      c.freezeLeft = reduce ? 1 : 2;
+      portal.armVel = 0.62;
+      portal.armAng = -0.05;
+      portal.sparkT = 16;
+      this._overlay = { alpha: 0.88, color: "255,160,60", vignette: 0.7 };
+      this._visual = { scale: 1.12, alpha: 1 };
+      if (game) {
+        game.flash = Math.max(game.flash || 0, reduce ? 7 : 13);
+        game.shake = Math.min(reduce ? 5 : 16, (game.shake || 0) + (reduce ? 3 : 9));
+      }
+      if (game && game.fx) {
+        const bx = p.x + p.w / 2;
+        const by = p.y + p.h / 2;
+        game.fx.emit(bx, by, {
+          color: "#ffe0a0",
+          count: reduce ? 10 : 32,
+          size: 4.5,
+          up: 2.8,
+          speed: 5,
+          life: 20
+        });
+        game.fx.emit(bx, by, {
+          color: "#fff",
+          count: reduce ? 4 : 12,
+          size: 2.8,
+          up: 3.2,
+          speed: 4.5,
+          life: 14,
+          star: true
+        });
       }
     }
   }
@@ -556,7 +697,8 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   const x = portal.x - cam.x;
   const y = portal.y - cam.y;
   const charging = charge && charge.portal === portal;
-  const pulse = 0.5 + Math.sin(t / 9) * 0.22 + (charging ? 0.25 : 0);
+  const ck = charging ? Math.min(1, charge.t / Math.max(1, charge.max)) : 0;
+  const pulse = 0.5 + Math.sin(t / 9) * 0.22 + (charging ? 0.3 + ck * 0.4 : 0);
 
   ctx.save();
   // Sombra
@@ -607,11 +749,11 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.fillRect(bx - 5, -8, 8, 6);
   // Glow ámbar en la piedra
   if (charging || portal.sparkT > 0) {
-    ctx.shadowColor = "rgba(255,180,60,.9)";
-    ctx.shadowBlur = 16;
-    ctx.fillStyle = "rgba(255,200,100,.55)";
+    ctx.shadowColor = "rgba(255,180,60,.95)";
+    ctx.shadowBlur = 18 + ck * 14;
+    ctx.fillStyle = "rgba(255,200,100," + (0.5 + ck * 0.35) + ")";
     ctx.beginPath();
-    ctx.arc(bx + 1, -2, 12, 0, Math.PI * 2);
+    ctx.arc(bx + 1, -2, 12 + ck * 8, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
   }
@@ -637,10 +779,11 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   const cx = portal.x + portal.w / 2 - cam.x;
   const cy = portal.y + portal.h / 2 - cam.y;
   const r = Math.min(portal.w, portal.h) * 0.48;
-  const spin = t / 16;
   const charging = charge && charge.portal === portal;
+  const ck = charging ? Math.min(1, charge.t / Math.max(1, charge.max)) : 0;
+  const spin = t / (16 - ck * 10); // anillos aceleran al absorber
   const swallow = portal.swallow || 0;
-  const pulse = 0.55 + Math.sin(t / 7) * 0.2 + (charging ? 0.3 : 0) + swallow * 0.04;
+  const pulse = 0.55 + Math.sin(t / 7) * 0.2 + (charging ? 0.3 + ck * 0.35 : 0) + swallow * 0.04;
 
   ctx.save();
 
@@ -655,28 +798,30 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.arc(cx, cy, r * 1.55, 0, Math.PI * 2);
   ctx.fill();
 
-  // Anillos de acreción elípticos (3–4)
+  // Anillos de acreción elípticos (aceleran + se contraen en charge)
   for (let i = 0; i < 4; i++) {
-    const rr = r * (0.48 + i * 0.2);
-    const a = 0.28 + Math.sin(t / 8 + i * 1.1) * 0.14 + (charging ? 0.15 : 0);
-    ctx.strokeStyle = "rgba(" + (150 + i * 28) + "," + (70 + i * 35) + ",255," + a + ")";
-    ctx.lineWidth = 2.8 - i * 0.45;
+    const shrink = charging ? ck * 0.12 * i : 0;
+    const rr = r * (0.48 + i * 0.2 - shrink);
+    const a = 0.28 + Math.sin(t / 8 + i * 1.1) * 0.14 + (charging ? 0.18 + ck * 0.25 : 0);
+    ctx.strokeStyle = "rgba(" + (150 + i * 28) + "," + (70 + i * 35) + ",255," + Math.min(0.95, a) + ")";
+    ctx.lineWidth = (2.8 - i * 0.45) * (1 + ck * 0.35);
     ctx.beginPath();
-    ctx.ellipse(cx, cy, rr, rr * (0.38 + i * 0.02), spin + i * 0.65, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy, rr, rr * (0.38 + i * 0.02), spin * (1 + ck * 1.8) + i * 0.65, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Partículas orbitales
+  // Partículas orbitales (más visibles en charge)
   if (orbitals) {
     for (const o of orbitals) {
       if (o.portal !== portal) continue;
-      const ox = cx + Math.cos(o.a) * o.r;
-      const oy = cy + Math.sin(o.a) * o.r * 0.42;
-      const lifeA = Math.min(1, o.life / 20) * (0.45 + o.z * 0.55);
-      ctx.globalAlpha = lifeA;
-      ctx.fillStyle = o.z > 0.5 ? "#e8d0ff" : "#a070ff";
+      const pullR = charging ? o.r * (1 - ck * 0.55) : o.r;
+      const ox = cx + Math.cos(o.a) * pullR;
+      const oy = cy + Math.sin(o.a) * pullR * 0.42;
+      const lifeA = Math.min(1, o.life / 20) * (0.5 + o.z * 0.5) * (charging ? 1.15 : 1);
+      ctx.globalAlpha = Math.min(1, lifeA);
+      ctx.fillStyle = o.z > 0.5 ? "#f0e0ff" : "#b080ff";
       ctx.beginPath();
-      ctx.arc(ox, oy, o.size, 0, Math.PI * 2);
+      ctx.arc(ox, oy, o.size * (charging ? 1.25 : 1), 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
