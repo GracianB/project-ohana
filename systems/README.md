@@ -26,7 +26,7 @@ Registro de música y efectos. El juego funciona aunque todavía no existan
 archivos de audio físicos dentro de assets/audio.
 
 ## death-fx.js
-Carry-away cinemático por fases (aparecer → reclamar → ascender → disolver, ~1.8s): reaper con capucha, motas de alma, tether y afterimages locales (nunca `game.ghosts`). Variantes `hurt`/`void`. API: `DeathFx.start(player,onDone,opts?)/update/draw/isPlaying/cancel/playerAlpha`.
+Carry-away cinemático por fases (aparecer → reclamar → ascender → disolver, ~4.9s / ~1.8s con reduced motion): reaper con capucha, motas de alma, tether y afterimages locales (nunca `game.ghosts`). Variantes `hurt`/`void`. API: `DeathFx.start(player,onDone,opts?)/update/draw/isPlaying/cancel/playerAlpha`.
 
 ## portals.js
 Catapultas y agujeros negros como atajos entre salas (no reemplazan doors).

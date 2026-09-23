@@ -2,7 +2,7 @@
  * Death carry-away FX — cinematic hooded reaper lifts the fallen player, then caller respawns.
  * Internal state only (deathGhost / souls / wisps / orbit). NEVER touches game.ghosts (dash afterimages).
  *
- * Phases (~270 frames / ~4.5s @60fps; ~105 if prefers-reduced-motion ≈ 1.75s):
+ * Phases (~294 frames / ~4.9s @60fps; ~105 if prefers-reduced-motion ≈ 1.75s):
  *   Appear → Approach/Claim → Lift-off → Ascend → Apex linger → Dissolve → onDone (respawn)
  *
  * API: DeathFx.start(player, onDone, opts?), update(game), draw(ctx,cam,t),
@@ -12,7 +12,7 @@ const PARTICLE_CAP = 72;
 const WISP_CAP = 16;
 const ORBIT_CAP = 12;
 const WISP_INTERVAL = 3;
-const DURATION_FULL = 270;
+const DURATION_FULL = 294;
 const DURATION_REDUCED = 105;
 
 function prefersReducedMotion() {
@@ -48,29 +48,29 @@ function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/** Soft palette by death reason — void = abyss cyan, hurt = rose-cyan. */
+/** Strongly separated palettes — void = cold abyss cyan, hurt = warm rose-magenta. */
 const PALETTES = {
   void: {
-    sheet: [200, 236, 255],
-    sheetDeep: [90, 140, 180],
-    hood: [12, 28, 48],
-    eye: [140, 255, 255],
-    glow: [120, 220, 255],
-    soul: [160, 245, 255],
-    tether: [170, 240, 255],
-    vignette: [8, 40, 70],
-    flash: [180, 240, 255],
+    sheet: [150, 225, 255],
+    sheetDeep: [24, 72, 128],
+    hood: [4, 16, 38],
+    eye: [90, 245, 255],
+    glow: [48, 180, 255],
+    soul: [100, 220, 255],
+    tether: [80, 200, 255],
+    vignette: [2, 18, 58],
+    flash: [130, 230, 255],
   },
   hurt: {
-    sheet: [230, 220, 245],
-    sheetDeep: [140, 100, 150],
-    hood: [28, 18, 40],
-    eye: [255, 200, 230],
-    glow: [255, 160, 200],
-    soul: [255, 190, 210],
-    tether: [255, 180, 210],
-    vignette: [50, 10, 30],
-    flash: [255, 220, 235],
+    sheet: [255, 190, 220],
+    sheetDeep: [150, 38, 92],
+    hood: [45, 8, 30],
+    eye: [255, 105, 185],
+    glow: [255, 72, 150],
+    soul: [255, 125, 180],
+    tether: [255, 105, 165],
+    vignette: [68, 4, 30],
+    flash: [255, 160, 205],
   },
 };
 
@@ -84,7 +84,7 @@ const PHASE = {
   claim: 0.28,
   liftoff: 0.40,
   ascend: 0.72,
-  apex: 0.82,
+  apex: 0.85,
   dissolve: 1.0,
 };
 
@@ -112,6 +112,7 @@ export const DeathFx = {
   _tetherThick: 1,
   _hemBillow: 0,
   _orbitActive: false,
+  _apexPulse: 0,
 
   isPlaying() {
     return this.playing;
@@ -135,6 +136,7 @@ export const DeathFx = {
     this.frame = 0;
     this._playerAlpha = 1;
     this._orbitActive = false;
+    this._apexPulse = 0;
   },
 
   /**
@@ -164,6 +166,7 @@ export const DeathFx = {
     this._tetherThick = 1;
     this._hemBillow = 0;
     this._orbitActive = false;
+    this._apexPulse = 0;
 
     const side = (player.facing || 1) >= 0 ? -1 : 1;
     const gw = 42;
@@ -308,6 +311,7 @@ export const DeathFx = {
       this._hemBillow = 0.2 * a;
       this._playerAlpha = 1;
       this._orbitActive = false;
+      this._apexPulse = 0;
       if (!this._appearBurst && a > 0.35) {
         this._appearBurst = true;
         if (!this.reduce) {
@@ -341,8 +345,12 @@ export const DeathFx = {
         const tx = p.x + (g.facing > 0 ? -g.w * 0.15 : p.w - g.w * 0.85);
         g.x += (tx - g.x) * 0.07;
         g.y += ((p.y - 10) - g.y) * 0.05;
-        if (!this.reduce && (this.frame & 1) === 0) {
+        if (!this.reduce) {
           this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.35, true, false);
+          // A brief claim-only double emission makes the tether feel audible.
+          if ((this.frame % 3) === 0) {
+            this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.48, true, false);
+          }
         }
       }
     }
@@ -360,6 +368,7 @@ export const DeathFx = {
       this._hemBillow = 0.6 + u * 0.3;
       this._playerAlpha = lerp(0.78, 0.62, u);
       this._orbitActive = false;
+      this._apexPulse = 0;
       if (p) {
         p.y = g.grabY - g.lift;
         const sway = Math.sin(this.frame * 0.12) * 2.5 * u;
@@ -394,6 +403,7 @@ export const DeathFx = {
       this._hemBillow = 0.85 + Math.sin(this.frame * 0.09) * 0.2;
       this._playerAlpha = lerp(0.62, 0.38, ease);
       this._orbitActive = false;
+      this._apexPulse = 0;
 
       if (p) {
         const sway = Math.sin(this.frame * 0.075) * (this.reduce ? 3 : 6.5);
@@ -423,24 +433,25 @@ export const DeathFx = {
         this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.45, true, false);
       }
     }
-    // ── 5. Apex linger 72–82% — brief hover, brighter eyes, orbiting particles ──
+    // ── 5. Apex linger 72–85% — epic hover, brighter eyes, orbiting particles ──
     else if (progress < PHASE.apex) {
       const u = smoothstep((progress - PHASE.ascend) / (PHASE.apex - PHASE.ascend));
       g.form = 1;
       g.alpha = 1;
       g.lean = 0.15;
       g.armWrap = 0.3;
-      g.eyeGlow = 1.05 + Math.sin(this.frame * 0.22) * 0.18 + u * 0.15;
+      g.eyeGlow = 1.18 + Math.sin(this.frame * 0.22) * 0.16 + u * 0.18;
       g.lift = liftMax + Math.sin(this.frame * 0.12) * (this.reduce ? 2 : 5);
       this._ripple = 0;
       this._tetherThick = 0.85;
       this._hemBillow = 0.7 + Math.sin(this.frame * 0.14) * 0.15;
       this._playerAlpha = lerp(0.38, 0.28, u);
       this._orbitActive = !this.reduce;
+      this._apexPulse = this.reduce ? 0 : 0.55 + Math.sin(this.frame * 0.16) * 0.3;
 
       if (!this._apexBurst) {
         this._apexBurst = true;
-        this._spawnOrbit(this.reduce ? 0 : 10);
+        this._spawnOrbit(this.reduce ? 0 : ORBIT_CAP);
         if (!this.reduce && p) {
           for (let i = 0; i < 8; i++) {
             this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, true);
@@ -460,7 +471,7 @@ export const DeathFx = {
         this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, false);
       }
     }
-    // ── 6. Dissolve 82–100% — player → motes into ghost, ghost rises+fades, flash, onDone ──
+    // ── 6. Dissolve 85–100% — player → motes into ghost, ghost rises+fades, flash, onDone ──
     else {
       const d = (progress - PHASE.apex) / (PHASE.dissolve - PHASE.apex);
       const di = easeInCubic(d);
@@ -474,6 +485,7 @@ export const DeathFx = {
       this._hemBillow = 0.5 * (1 - di);
       g.lift = liftMax + di * (this.reduce ? 50 : 95);
       this._orbitActive = !this.reduce && d < 0.55;
+      this._apexPulse = 0;
 
       if (p) {
         p.y = g.grabY - g.lift;
@@ -567,6 +579,7 @@ export const DeathFx = {
     this.frame = 0;
     this._playerAlpha = 1;
     this._orbitActive = false;
+    this._apexPulse = 0;
     if (cb) cb();
   },
 
@@ -635,6 +648,16 @@ export const DeathFx = {
     ctx.strokeStyle = rgba(pal.glow, 0.85);
     ctx.lineWidth = 1.4;
     ctx.stroke();
+
+    // Subtle apex sheet flare, kept inside the silhouette for readability.
+    if (!this.reduce && g.phase >= PHASE.ascend && g.phase < PHASE.apex) {
+      const apexT = smoothstep((g.phase - PHASE.ascend) / (PHASE.apex - PHASE.ascend));
+      ctx.globalAlpha = alpha * (0.06 + apexT * 0.06) * form;
+      ctx.fillStyle = rgba(pal.flash, 0.7);
+      ctx.beginPath();
+      ctx.ellipse(w * 0.5, h * 0.38, w * 0.42, h * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // Hood void
     ctx.globalAlpha = alpha * 0.9 * form;
@@ -813,6 +836,29 @@ export const DeathFx = {
         ctx.arc(px, py, o.r * 0.5, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
+
+    // Apex halo / pulse ring — one restrained cue to make the linger feel special.
+    if (!this.reduce && progress >= PHASE.ascend && progress < PHASE.apex) {
+      const apexT = smoothstep((progress - PHASE.ascend) / (PHASE.apex - PHASE.ascend));
+      const apexPulse = this._apexPulse || 0;
+      const hx = cx + g.w * 0.5;
+      const hy = cy + g.h * 0.42;
+      const ringR = 28 + apexT * 10 + apexPulse * 4;
+      ctx.globalAlpha = alpha * (0.07 + apexPulse * 0.05);
+      ctx.strokeStyle = rgba(pal.flash, 0.75);
+      ctx.lineWidth = 1.2 + apexPulse * 0.9;
+      ctx.beginPath();
+      ctx.ellipse(hx, hy, ringR, ringR * 0.52, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = alpha * (0.05 + apexPulse * 0.04);
+      const halo = ctx.createRadialGradient(hx, hy, 4, hx, hy, ringR * 0.9);
+      halo.addColorStop(0, rgba(pal.flash, 0.42));
+      halo.addColorStop(1, rgba(pal.glow, 0));
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(hx, hy, ringR * 0.9, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     // Glowing tether (thickens during claim)
