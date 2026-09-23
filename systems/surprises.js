@@ -1,5 +1,6 @@
 // Sorpresas jugables: pez dorado, lluvia de estrellas, GOD y power-ups de sala.
 import { showNotification } from "./notify.js";
+import { Rain } from "./rain.js";
 
 const GOLD_ROOMS = { beach: true, reef: true };
 const STAR_DURATION = 480; // ~8s @ 60fps
@@ -7,6 +8,9 @@ const STAR_DELAY_MIN = 90;
 const STAR_DELAY_MAX = 180;
 const AURA_SPARKLE_EVERY = 5;
 const GOD_BURST_FRAMES = 140;
+const UMBRELLA_BURST_FRAMES = 20;
+const CROWN_CD_FRAMES = 90;
+const HUB_LEAF_EVERY = 40;
 
 function emitStars(game, x, y, count, color) {
   if (!game || !game.fx) return;
@@ -55,11 +59,27 @@ export const Surprises = {
 
   // Power-up secreto (hub, 1× por run)
   secret: null, // {x,y,r,taken,secret:true} | null
+  fruit: null, // {x,y,r,taken,fruit:true} | null
   godCrown: null, // {x,y,r,taken,godCrown:true,roomId} | null
   godBurst: 0,
   godRings: [],
   _godPulse: 0,
-  flags: { secretHubTaken: false, godBurstDone: false, godCrownTaken: false },
+  umbrellaBurst: 0,
+  crownCdFlash: 0,
+  hubLeafClock: 0,
+  hubGlowDone: false,
+  _hubStillFrames: 0,
+  _hubLastX: null,
+  _hubLastY: null,
+  _hadUmbrella: false,
+  _rainWasActive: false,
+  flags: {
+    secretHubTaken: false,
+    godBurstDone: false,
+    godCrownTaken: false,
+    jungleFruitTaken: false,
+    crownCdNotified: false,
+  },
 
   reset() {
     this._goldenMarked = false;
@@ -69,13 +89,25 @@ export const Surprises = {
     this.starActive = false;
     this._skyPulse = 0;
     this.secret = null;
+    this.fruit = null;
     this.godCrown = null;
     this.godBurst = 0;
     this.godRings = [];
     this._godPulse = 0;
+    this.umbrellaBurst = 0;
+    this.crownCdFlash = 0;
+    this.hubLeafClock = 0;
+    this.hubGlowDone = false;
+    this._hubStillFrames = 0;
+    this._hubLastX = null;
+    this._hubLastY = null;
+    this._hadUmbrella = false;
+    this._rainWasActive = false;
     this.flags.secretHubTaken = false;
     this.flags.godBurstDone = false;
     this.flags.godCrownTaken = false;
+    this.flags.jungleFruitTaken = false;
+    this.flags.crownCdNotified = false;
   },
 
   /** Celebración única al alcanzar GOD (forma 5). */
@@ -147,9 +179,35 @@ export const Surprises = {
       this.secret = null;
     }
 
+    // Hub ambience: reset the quiet-player trigger for every visit.
+    if (game.roomId === "hub") {
+      this.hubGlowDone = false;
+      this.hubLeafClock = 0;
+      this._hubStillFrames = 0;
+      this._hubLastX = null;
+      this._hubLastY = null;
+    } else {
+      this._hubStillFrames = 0;
+      this._hubLastX = null;
+      this._hubLastY = null;
+    }
+
+    // Jungle fruit: a light chance on each entry, but only one pickup per run.
+    this.fruit = null;
+    if (game.roomId === "jungle" && !this.flags.jungleFruitTaken && Math.random() < 0.22) {
+      this.fruit = { x: 520, y: 400, r: 12, taken: false, fruit: true };
+    }
+
     // Corona estelar: una oportunidad por sala, pero una sola recogida por run.
     this.godCrown = null;
-    if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && !this.flags.godCrownTaken && Math.random() < 0.18) {
+    this.crownCdFlash = 0;
+    if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && this.flags.godCrownTaken) {
+      this.crownCdFlash = CROWN_CD_FRAMES;
+      if (!this.flags.crownCdNotified) {
+        this.flags.crownCdNotified = true;
+        try { showNotification("CORONA", "Ya brillas esta partida.", "sala"); } catch (_) {}
+      }
+    } else if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && Math.random() < 0.18) {
       const pos = crownPosition(game, this.secret);
       this.godCrown = { ...pos, r: 16, taken: false, godCrown: true, roomId: game.roomId };
     }
@@ -182,6 +240,54 @@ export const Surprises = {
   update(game, t) {
     if (!game || !game.player) return;
     const p = game.player;
+
+    // --- Lluvia: transiciones y burst local al recoger el paraguas ---
+    if (Rain.active && !this._rainWasActive && !Rain._grabNotify) {
+      try { showNotification("¡LLUEVE!", "Busca el paraguas rojo en la Costa", "sala"); } catch (_) {}
+    }
+    if (Rain.hasUmbrella && !this._hadUmbrella) this.umbrellaBurst = UMBRELLA_BURST_FRAMES;
+    this._hadUmbrella = !!Rain.hasUmbrella;
+    this._rainWasActive = !!Rain.active;
+    if (this.umbrellaBurst > 0) {
+      this.umbrellaBurst--;
+      const every = game.reduceMotion ? 4 : 2;
+      if (this.umbrellaBurst % every === 0) {
+        emitStars(game, p.x + p.w / 2, p.y + p.h / 2, game.reduceMotion ? 2 : 5, Math.random() < 0.5 ? "#ffe66a" : "#ffffff");
+      }
+    }
+
+    // --- Ambiente suave del hub ---
+    if (game.roomId === "hub") {
+      this.hubLeafClock++;
+      if (!game.reduceMotion && this.hubLeafClock >= HUB_LEAF_EVERY && game.fx) {
+        this.hubLeafClock = 0;
+        try {
+          game.fx.emit(Math.random() * (game.worldW || 1600), 80 + Math.random() * 130, {
+            color: Math.random() < 0.5 ? "#9bdc8a" : "#ffe79a",
+            count: 1,
+            size: 2.4,
+            speed: 0.65,
+            angle: Math.PI / 2,
+            spread: 0.8,
+            life: 80,
+            gravity: 0.015,
+            star: Math.random() < 0.35,
+          });
+        } catch (_) {}
+      }
+      const moved = Math.abs(p.vx || 0) > 0.05 || Math.abs(p.vy || 0) > 0.05
+        || (this._hubLastX != null && Math.hypot(p.x - this._hubLastX, p.y - this._hubLastY) > 0.4);
+      if (moved) this._hubStillFrames = 0;
+      else this._hubStillFrames++;
+      this._hubLastX = p.x;
+      this._hubLastY = p.y;
+      if (!game.reduceMotion && !this.hubGlowDone && this._hubStillFrames > 180) {
+        this.hubGlowDone = true;
+        emitStars(game, p.x + p.w / 2 + (Math.random() - 0.5) * 48, p.y + p.h, 14, "#ffe79a");
+      }
+    }
+
+    if (this.crownCdFlash > 0) this.crownCdFlash--;
 
     // --- Aura cosmética (trail sparkles) ---
     if ((p._surpriseAura || 0) > 0) {
@@ -304,6 +410,28 @@ export const Surprises = {
       }
     }
 
+    // --- Fruto brillante de la jungla (1× por run) ---
+    const fruit = this.fruit;
+    if (fruit && !fruit.taken && game.roomId === "jungle" && !p.dead) {
+      const dx = p.x + p.w / 2 - fruit.x;
+      const dy = p.y + p.h / 2 - fruit.y;
+      if (Math.hypot(dx, dy) < 36) {
+        fruit.taken = true;
+        this.flags.jungleFruitTaken = true;
+        p.health = Math.min(p.maxHealth, p.health + 15);
+        game.score = (game.score || 0) + 40;
+        p._surpriseAura = Math.max(p._surpriseAura || 0, 240);
+        game.flash = Math.max(game.flash || 0, 7);
+        emitStars(game, fruit.x, fruit.y, 18, "#ff82c8");
+        emitStars(game, fruit.x, fruit.y, 8, "#a8f06a");
+        try {
+          if (game.nums) game.nums.add(fruit.x, fruit.y, "+15", "#a8f06a");
+          showNotification("FRUTO OCULTO", "Dulce de la Jungla.", "sala");
+        } catch (_) {}
+        this.fruit = null;
+      }
+    }
+
     // --- Corona estelar (GOD, 1× por run) ---
     const crown = this.godCrown;
     if (crown && !crown.taken && game.roomId === crown.roomId && p.evo >= 4 && !p.dead) {
@@ -401,6 +529,53 @@ export const Surprises = {
       ctx.lineTo(sx - 3, sy - 2);
       ctx.closePath();
       ctx.fill();
+      ctx.restore();
+    }
+
+    // Fruto brillante: baya verde/rosa pulsante de la jungla.
+    const fruit = this.fruit;
+    if (fruit && !fruit.taken && game && game.roomId === "jungle") {
+      const fx = fruit.x - cam.x;
+      const fy = fruit.y - cam.y + Math.sin((t || 0) / 9) * 3;
+      const pulse = 0.75 + 0.25 * Math.sin((t || 0) / 7);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = 0.22 + pulse * 0.16;
+      ctx.fillStyle = "#ff82c8";
+      ctx.beginPath();
+      ctx.arc(fx, fy, 18 + pulse * 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#ff78b8";
+      ctx.beginPath();
+      ctx.arc(fx, fy + 2, 10 + pulse * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#9bea70";
+      ctx.beginPath();
+      ctx.ellipse(fx - 3, fy - 7, 6, 3.5, -0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#b9ff92";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy - 7);
+      ctx.lineTo(fx + 2, fy - 12);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Feedback visual breve: esta partida ya reclamó la corona.
+    if (p && this.crownCdFlash > 0 && game && game.roomId !== "boss") {
+      const cx = p.x + p.w / 2 - cam.x;
+      const cy = p.y + p.h / 2 - cam.y;
+      const fade = Math.min(1, this.crownCdFlash / 18, (CROWN_CD_FRAMES - this.crownCdFlash + 1) / 12);
+      ctx.save();
+      ctx.globalAlpha = 0.16 + fade * 0.38;
+      ctx.strokeStyle = "#ffe66a";
+      ctx.lineWidth = game.reduceMotion ? 2 : 2.5;
+      ctx.setLineDash([5, 6]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 28 + Math.sin((t || 0) / 8) * 2, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.restore();
     }
 

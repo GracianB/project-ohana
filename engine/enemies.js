@@ -158,20 +158,42 @@ function drawTelegraph(ctx, e, t) {
       ctx.fillStyle = `rgba(255,220,80,${0.5 + 0.5 * Math.sin(t * 0.8 + i)})`;
       ctx.beginPath(); ctx.arc(i * 8, 4, 2.4, 0, Math.PI * 2); ctx.fill();
     }
+  } else if (k === "gaviota") {
+    // Dive foreshadow: flash + chevrons hacia abajo (~0.4s)
+    ctx.fillStyle = "rgba(255,120,60,.28)";
+    ctx.beginPath(); ctx.arc(0, 0, r * 1.15, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(255,200,120,.95)"; ctx.lineWidth = 2.6;
+    for (let i = 0; i < 3; i++) {
+      const yy = e.h * 0.2 + i * 9 + (t % 8);
+      ctx.beginPath();
+      ctx.moveTo(-8, yy); ctx.lineTo(0, yy + 6); ctx.lineTo(8, yy);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "rgba(200,220,255,.9)"; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.ellipse(0, e.h * 0.55, 16 + Math.sin(t * 0.6) * 3, 4, 0, 0, Math.PI * 2); ctx.stroke();
+  } else if (k === "medusa") {
+    // Pulse ring expandiendo antes del sting
+    const pr = r * (0.85 + (1 - Math.cos(t * 0.45)) * 0.35);
+    ctx.strokeStyle = "rgba(255,120,220,.95)"; ctx.lineWidth = 3.0;
+    ctx.beginPath(); ctx.arc(0, 0, pr, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = "rgba(190,245,255,.7)"; ctx.lineWidth = 2.0;
+    ctx.beginPath(); ctx.arc(0, 0, pr * 1.35, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "rgba(255,140,220,.2)";
+    ctx.beginPath(); ctx.arc(0, 0, pr * 0.55, 0, Math.PI * 2); ctx.fill();
   }
 }
 
 function drawEliteAura(ctx, e, t) {
   const pulse = 1 + Math.sin(t * 0.35) * 0.08;
   ctx.strokeStyle = "rgba(255,200,40,.95)";
-  ctx.lineWidth = 3.2;
+  ctx.lineWidth = 4.4;
   ctx.beginPath();
   ctx.ellipse(0, 0, e.w * 0.58 * pulse, e.h * 0.58 * pulse, 0, 0, Math.PI * 2);
   ctx.stroke();
   ctx.strokeStyle = "rgba(255,60,40,.55)";
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 2.4;
   ctx.beginPath();
-  ctx.ellipse(0, 0, e.w * 0.7 * pulse, e.h * 0.7 * pulse, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 0, e.w * 0.72 * pulse, e.h * 0.72 * pulse, 0, 0, Math.PI * 2);
   ctx.stroke();
   // Corona pequeña
   ctx.fillStyle = "rgba(255,220,80,.9)";

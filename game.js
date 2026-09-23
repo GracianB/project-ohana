@@ -195,13 +195,20 @@ function placeFrom(fromDir) {
       if (kick.facing) p.facing = kick.facing;
       if (kick.type) portals.trailType = kick.type;
     }
+    // Reef: trail agua-cyan (override tipado en emit + burst de aterrizaje)
+    if (game.roomId === "reef") {
+      portals.trailColor = "#5ecfff";
+      if (!portals.trailType || portals.trailType === "catapult") portals.trailType = "water";
+    }
     // Micro-shake al aterrizar (además del shake de salida)
     game.shake = Math.min(14, (game.shake || 0) + (reduceMotion ? 3 : 5));
     // reduceMotion: estela más corta
     if (reduceMotion && portals.trailTicks > 0) {
       portals.trailTicks = Math.min(portals.trailTicks, 8);
     }
-    const col = (kick && (kick.type === "catapult" || Math.abs(kick.vy || 0) > 5)) ? "#ffc078" : "#c9a0ff";
+    let col = (kick && (kick.type === "catapult" || Math.abs(kick.vy || 0) > 5)) ? "#ffc078" : "#c9a0ff";
+    if (portals.trailColor) col = portals.trailColor;
+    else if (game.roomId === "reef") col = "#5ecfff";
     game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
       color: col, count: reduceMotion ? 10 : 22, size: 4, up: 1.8, speed: 3.2, life: 18, star: true
     });
@@ -1308,7 +1315,7 @@ function updateEnemies() {
       if (t % 8 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff9ad8", count: 1, size: 2, up: 0.4, speed: 0.5, life: 14 });
       if (e.pulsezap > 0) {
         e.pulsezap--;
-        e.telegraph = e.pulsezap > 8;
+        e.telegraph = e.pulsezap > 8; // pulse ring visible ~0.4s (pulsezap 32→9)
         if (e.pulsezap === 8 && game.player) {
           const aim = Math.sign(game.player.x - e.x) || 1;
           game.projectiles.push({
@@ -1325,7 +1332,7 @@ function updateEnemies() {
         e.zapCd = (e.zapCd || 0) - 1;
         if (e.zapCd <= 0 && game.player) {
           const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
-          if (dist < 280) e.pulsezap = 22;
+          if (dist < 280) e.pulsezap = 32; // ~0.4s telegraph before sting
           else e.zapCd = 20;
         }
       }
@@ -1450,7 +1457,7 @@ function updateEnemies() {
         e.telegraph = true;
         e.vx *= 0.88;
         e.vy *= 0.75;
-        if (e.wind > 16) {
+        if (e.wind > 24) { // ~0.4s telegraph
           e.wind = 0; e.telegraph = false; e.diving = 26;
           e.vx = Math.sign(game.player.x - e.x || 1) * 2.6;
           e.vy = 4.2;
@@ -1668,13 +1675,13 @@ function updateEnemies() {
       e.invuln = 28;
       game.flash = Math.max(game.flash, 8);
       game.shake = Math.max(game.shake, e.evo >= 2 ? 14 : 10);
-      // shell-pop particles
+      // shell-pop particles (+1 vs prior lote; cada death stage Design A)
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
         color: e.evo >= 2 ? "#ff4a20" : "#c45a18",
-        count: e.evo >= 2 ? 28 : 20, size: 5, up: 2.4, star: true,
+        count: e.evo >= 2 ? 29 : 21, size: 5, up: 2.4, star: true,
       });
       game.fx.emit(e.x + e.w / 2, e.y, {
-        color: "#ffe0a0", count: 12, size: 3.5, up: 2.8, speed: 3.5, life: 20,
+        color: "#ffe0a0", count: 13, size: 3.5, up: 2.8, speed: 3.5, life: 20,
       });
       if (e.evo >= 2) {
         e.bob = 0;
@@ -1692,6 +1699,11 @@ function updateEnemies() {
       return true;
     }
     Surprises.onEnemyKilled(e, game);
+    if (e.kind === "cucaracho") {
+      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
+        color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
+      });
+    }
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
     if (e.dropsOrb) {
       game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });

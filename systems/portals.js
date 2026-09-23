@@ -86,8 +86,11 @@ export class Portals {
     this._visual = { scale: 1, alpha: 1 }; // flags para game.js
     this._lockNotifyCD = 0;
     this.trailTicks = 0; // estela post-aterrizaje
-    this.trailType = null; // "catapult" | "blackhole"
+    this.trailType = null; // "catapult" | "blackhole" | "water"
+    this.trailColor = null; // override (ej. cyan agua en reef)
     this._landingType = null;
+    this._groundGrace = 0; // auto-fire catapult: grounded este frame o el anterior
+    this._arrivePreferDest = null; // al aterrizar, preferir pad que vuelve al origen
   }
 
   spawnFromRoom(room) {
@@ -99,6 +102,8 @@ export class Portals {
     this._visual = { scale: 1, alpha: 1 };
     this.trailTicks = 0;
     this.trailType = null;
+    this.trailColor = null;
+    this._groundGrace = 0;
     // Orbitals por cada BH
     for (const p of this.items) {
       if (p.type === "blackhole") {
@@ -109,6 +114,10 @@ export class Portals {
 
   landingPad() {
     if (!this.items.length) return null;
+    if (this._arrivePreferDest) {
+      const match = this.items.find((it) => it.dest === this._arrivePreferDest);
+      if (match) return match;
+    }
     return this.items[0];
   }
 
@@ -123,7 +132,9 @@ export class Portals {
     this._kick = null;
     this.trailType = this._landingType || this.trailType || "catapult";
     this.trailTicks = this.trailType === "blackhole" ? 18 : 16;
+    this.trailColor = null;
     this._landingType = null;
+    this._arrivePreferDest = null;
   }
 
   /**
@@ -140,7 +151,9 @@ export class Portals {
     this._kick = null;
     this.trailTicks = 0;
     this.trailType = null;
+    this.trailColor = null;
     this._landingType = null;
+    this._arrivePreferDest = null;
     this.cooldown = 90;
     this.prompt = "";
     this.near = null;
@@ -175,7 +188,8 @@ export class Portals {
       return { x: pad.x + (side > 0 ? pad.w + 48 : -w - 48), y: pad.y + pad.h / 2 - h / 2 };
     }
     // Catapulta: encima de la base, offset mayor para no solapar hitbox
-    const facing = pad.dest === "hub" ? 1 : -1;
+    const midC = pad.x + pad.w / 2;
+    const facing = midC < 800 ? 1 : -1;
     return { x: pad.x + pad.w / 2 - w / 2 + facing * 24, y: pad.y - h - 12 };
   }
 
@@ -216,7 +230,10 @@ export class Portals {
     if (this.trailTicks > 0) {
       this._emitLandingTrail(game, reduce);
       this.trailTicks--;
-      if (this.trailTicks <= 0) this.trailType = null;
+      if (this.trailTicks <= 0) {
+        this.trailType = null;
+        this.trailColor = null;
+      }
     }
     const p = game && game.player;
     if (!p || p.dead) {
@@ -231,6 +248,7 @@ export class Portals {
       if (this.trailTicks > 0) {
         this.trailTicks = 0;
         this.trailType = null;
+        this.trailColor = null;
       }
       this._tickOrbitals(reduce);
       this._springArms(null, reduce);
@@ -253,6 +271,10 @@ export class Portals {
     }
 
     const evo = p.evo || 0;
+    // Grace 1 frame: grounded ahora → 1; si !grounded y grace>0 → permite este frame y luego --
+    const groundedOk = !!(p.grounded || this._groundGrace > 0);
+    if (p.grounded) this._groundGrace = 1;
+    else if (this._groundGrace > 0) this._groundGrace--;
     let closestBH = null;
     let closestDist = Infinity;
 
@@ -315,9 +337,9 @@ export class Portals {
             this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "⚔ CATAPULTA → " + portal.label + " · [E] o párate encima";
-            // Auto-lanzamiento al pisar (grounded); cooldown bloquea re-absorción
-            if (this.cooldown <= 0 && p.grounded) {
+            this.prompt = "⚔ CATAPULTA → " + portal.label + " · Saltar [E]";
+            // Auto-lanzamiento al pisar (grounded este frame o grace 1); cooldown bloquea re-absorción
+            if (this.cooldown <= 0 && groundedOk) {
               this._beginCharge(portal, "catapult", reduce);
             }
           }
@@ -386,7 +408,7 @@ export class Portals {
       };
       this._kick = this._kick || this._makeKick(portal, c.type);
       if (c.type === "blackhole") portal.swallow = 22;
-      this._queue(portal);
+      this._queue(portal, game && game.roomId);
       this.charge = null;
       this._visual = { scale: 1, alpha: 1 };
       return;
@@ -474,7 +496,7 @@ export class Portals {
       portal.swallow = 24;
       this._overlay = { alpha: 0.92, color: "90,40,160", vignette: 0.7 };
       this._kick = this._makeKick(portal, "blackhole");
-      this._queue(portal);
+      this._queue(portal, game && game.roomId);
       this.charge = null;
       this._visual = { scale: 0.12, alpha: 0.06 };
       if (game) {
@@ -527,7 +549,7 @@ export class Portals {
         if (c.freezeLeft > 0) return;
       }
       this._kick = this._makeKick(portal, "catapult");
-      this._queue(portal);
+      this._queue(portal, game && game.roomId);
       this.charge = null;
       return;
     }
@@ -631,18 +653,20 @@ export class Portals {
     return { vx: facing * 5.5, vy: -7.5, facing, type: "catapult" };
   }
 
-  _queue(portal) {
+  _queue(portal, fromRoomId) {
     if (!portal || !portal.dest) {
       this._visual = { scale: 1, alpha: 1 };
       this._overlay = null;
       this.cooldown = Math.max(this.cooldown, 40);
       return;
     }
+    this._arrivePreferDest = fromRoomId || null;
     this.pending = {
       dest: portal.dest,
       from: "portal",
       type: portal.type,
       label: portal.label,
+      fromRoom: fromRoomId || null,
       tint: portal.type === "blackhole" ? "90,40,160" : "255,160,60"
     };
     this.cooldown = 56;
@@ -704,14 +728,22 @@ export class Portals {
     }
   }
 
-  /** Estela de partículas al aterrizar (ámbar / púrpura). Respeta reduceMotion. */
+  /** Estela de partículas al aterrizar (ámbar / púrpura / cyan agua en reef). Respeta reduceMotion. */
   _emitLandingTrail(game, reduce) {
     if (!game || !game.fx || !game.player || game.player.dead) return;
     if (reduce && this.trailTicks % 3 !== 0) return;
     const p = game.player;
     const isBH = this.trailType === "blackhole";
-    const color = isBH ? "#c9a0ff" : "#ffc078";
-    const colorHi = isBH ? "#e8d0ff" : "#ffe8a0";
+    const isWater =
+      this.trailType === "water" ||
+      !!this.trailColor ||
+      game.roomId === "reef";
+    const color = isWater
+      ? this.trailColor || "#5ecfff"
+      : isBH
+        ? "#c9a0ff"
+        : "#ffc078";
+    const colorHi = isWater ? "#a8efff" : isBH ? "#e8d0ff" : "#ffe8a0";
     // Varios emit a lo largo del camino (atrás según velocidad)
     const steps = reduce ? 1 : 3;
     for (let i = 0; i < steps; i++) {
@@ -830,7 +862,7 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.shadowBlur = 0;
 
   // Label
-  ctx.font = "800 11px Outfit, system-ui, sans-serif";
+  ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffe8c8";
   ctx.fillText("⚔ " + (portal.label || "Catapulta"), x + portal.w / 2, y - 8);
@@ -915,7 +947,7 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   }
 
   // Label
-  ctx.font = "800 11px Outfit, system-ui, sans-serif";
+  ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
   ctx.fillText("◉ " + (portal.label || "Agujero"), cx, cy - r - 12);
@@ -943,7 +975,7 @@ function drawNearPrompt(ctx, cam, portal, text, t) {
   ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
-  ctx.font = "900 16px Outfit, system-ui, sans-serif";
+  ctx.font = "900 18px Outfit, system-ui, sans-serif";
   ctx.shadowColor = glow;
   ctx.shadowBlur = 14;
   ctx.fillStyle = "rgba(0,0,0,.6)";

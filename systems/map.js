@@ -13,9 +13,9 @@ function stairs(x) {
 }
 
 export const MAP_LAYOUT = [
-  [null, "ridge", "space", "reef", null, null],
+  [null, "ridge", "space", null, null, null],
   ["lab", "cave", "hub", "beach", "jungle", null],
-  [null, null, null, null, "volcano", "boss"]
+  [null, null, null, "reef", "volcano", "boss"]
 ];
 
 export const ROOMS = {
@@ -30,9 +30,9 @@ export const ROOMS = {
   },
   beach: {
     id: "beach", name: "Costa Hoku", short: "Costa", world: 0,
-    doors: { left: "hub", right: "jungle", up: null, down: null },
+    doors: { left: "hub", right: "jungle", up: null, down: "reef" },
     pit: true,
-    hint: "Hueco central = POZO. Forma 3 abre ESTE a la jungla. Catapulta OESTE → Claro.",
+    hint: "Pozo central BAJA al Arrecife (agua). Forma 3 abre ESTE a la jungla. Catapulta OESTE → Claro.",
     plats: [
       [0, 810, 600, 90],
       [880, 810, 720, 90],
@@ -43,14 +43,17 @@ export const ROOMS = {
     ],
     foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [420, 200, "cangrejo", true], [1180, 200, "cangrejo"], [560, 380, "gaviota"], [1280, 320, "gaviota"]],
     orbs: [[220, 620], [1280, 480]],
-    portals: [{ type: "catapult", x: 70, y: 778, w: 100, h: 34, dest: "hub", label: "Claro" }]
+    portals: [
+      { type: "catapult", x: 70, y: 778, w: 100, h: 34, dest: "hub", label: "Claro" },
+      { type: "catapult", x: 500, y: 778, w: 100, h: 34, dest: "reef", label: "↓ Arrecife" }
+    ]
   },
   jungle: {
     id: "jungle", name: "Jungla Alta", short: "Jungla", world: 1,
     doors: { left: "beach", right: null, up: null, down: "volcano" },
     needEvo: 2,
     pit: true,
-    hint: "Esquina derecha del mapa. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
+    hint: "Fila media, ESTE. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
     foes: [[360, 440, "libelula"], [820, 480, "mosquito"], [1280, 460, "abeja"], [640, 200, "rana", true]],
     orbs: [[520, 420], [800, 180]],
@@ -84,23 +87,26 @@ export const ROOMS = {
   },
   space: {
     id: "space", name: "Órbita", short: "Órbita", world: 3,
-    doors: { left: "ridge", down: "hub", right: "reef", up: null },
+    doors: { left: "ridge", down: "hub", right: null, up: null },
     needEvo: 1,
     pit: true,
-    hint: "Pozo central ABAJO = Claro. ESTE = Arrecife secreto. BH → Arrecife.",
+    hint: "Pozo central ABAJO = Claro. BH secreto → Arrecife abajo.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]],
     foes: [[420, 280, "ufo", true], [980, 220, "ufo"], [640, 200, "phosquito"], [1280, 300, "brasita"]],
     orbs: [[640, 390], [1120, 260]],
-    portals: [{ type: "blackhole", x: 1270, y: 270, w: 80, h: 80, dest: "reef", label: "Arrecife" }]
+    portals: [{ type: "blackhole", x: 1270, y: 270, w: 80, h: 80, dest: "reef", label: "→ Arrecife" }]
   },
   reef: {
     id: "reef", name: "Arrecife Abismo", short: "Arrecife", world: 5,
-    doors: { left: "space", right: null, up: null, down: null },
-    hint: "Bajo el agua. Peces y medusas. Las medusas sueltan orbes. BH → Órbita.",
+    doors: { left: null, right: null, up: "beach", down: null },
+    hint: "Arriba = Costa. Peces y medusas (sueltan orbes). BH puede seguir a Órbita como atajo.",
     plats: [[0, 810, 1600, 90], [200, 660, 190, 18], [560, 520, 190, 18], [920, 640, 190, 18], [1220, 480, 190, 18], [740, 360, 180, 18]],
-    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [560, 340, "anguila", true], [1280, 380, "anguila"]],
+    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [1100, 400, "pez"], [560, 340, "anguila", true], [1280, 380, "anguila"]],
     orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]],
-    portals: [{ type: "blackhole", x: 90, y: 710, w: 80, h: 80, dest: "space", label: "Órbita" }]
+    portals: [
+      { type: "blackhole", x: 90, y: 710, w: 80, h: 80, dest: "space", label: "← Órbita" },
+      { type: "catapult", x: 720, y: 778, w: 100, h: 34, dest: "beach", label: "↑ Costa" }
+    ]
   },
   volcano: {
     id: "volcano", name: "Caldera", short: "Caldera", world: 2,
@@ -199,15 +205,30 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // black hole (radial) in the centre
+    // depth mouth (radial): aqua descent vs black-hole mortal
     const hole = ctx.createRadialGradient(x, y + 36, 2, x, y + 36, 52);
-    hole.addColorStop(0, "rgba(0,0,0,.98)");
-    hole.addColorStop(0.45, "rgba(0,0,0,.85)");
-    hole.addColorStop(1, "rgba(0,0,0,0)");
+    if (deadly) {
+      hole.addColorStop(0, "rgba(0,0,0,.98)");
+      hole.addColorStop(0.45, "rgba(0,0,0,.85)");
+      hole.addColorStop(1, "rgba(0,0,0,0)");
+    } else {
+      hole.addColorStop(0, "rgba(0,40,60,.95)");
+      hole.addColorStop(0.35, "rgba(4,80,110,.78)");
+      hole.addColorStop(0.7, "rgba(20,140,170,.35)");
+      hole.addColorStop(1, "rgba(40,180,200,0)");
+    }
     ctx.fillStyle = hole;
     ctx.beginPath();
     ctx.ellipse(x, y + 36, 58, 20, 0, 0, Math.PI * 2);
     ctx.fill();
+    // soft aqua glow ring for non-mortal descent
+    if (!deadly) {
+      ctx.strokeStyle = "rgba(126,231,255," + (0.4 + pulse * 0.4) + ")";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.ellipse(x, y + 36, 82, 30, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     // animated swirl / vortex arcs
     ctx.strokeStyle = "rgba(" + c + "," + (0.25 + pulse * 0.35) + ")";
@@ -270,6 +291,8 @@ export function drawSigns(ctx, room, cam, t, evo) {
       sign(800, ROOM_H - 56, "↓", room.doors.down, "center");
     }
   } else if (room.pit) {
-    pit("POZO MORTAL", true);
+    // Beach pit = visual hint down to Arrecife (not lethal). Other lone pits stay deadly.
+    if (room.id === "beach") pit("↓ ARRECIFE", false);
+    else pit("POZO MORTAL", true);
   }
 }
