@@ -20,7 +20,7 @@ export const MAP_LAYOUT = [
 
 export const ROOMS = {
   hub: {
-    id: "hub", name: "Claro Ohana", short: "Claro", world: 0,
+    id: "hub", name: "Claro Ohana", short: "Claro", world: 6,
     doors: { right: "beach", left: "cave", up: "ridge", down: null },
     hint: "Piso bajo. ESTE costa · OESTE cueva · centro ARRIBA cumbre. Catapulta ESTE → Costa.",
     plats: [[0, 810, 1600, 90], [80, 680, 160, 18], [300, 620, 150, 18], ...stairs(760)],
