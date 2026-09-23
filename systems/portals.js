@@ -160,6 +160,14 @@ export class Portals {
     const reduce = !!(game && game.reduceMotion);
     const p = game && game.player;
     if (!p || p.dead) {
+      // Evitar soft-lock: charge/pending/visual no se limpian si el player muere mid-viaje
+      if (this.charge || this.pending) {
+        this.charge = null;
+        this.pending = null;
+        this._visual = { scale: 1, alpha: 1 };
+        this._overlay = null;
+        this.cooldown = Math.max(this.cooldown, 40);
+      }
       this._tickOrbitals(reduce);
       this._springArms(null, reduce);
       return;
@@ -167,9 +175,30 @@ export class Portals {
 
     // Charge en curso: no buscar near nuevo
     if (this.charge) {
-      this._tickCharge(game, reduce);
+      // Safety: charge colgado (nunca completa) → forzar cola o abortar
+      if (this.charge.t > this.charge.max + 40) {
+        const stuck = this.charge.portal;
+        const typ = this.charge.type;
+        if (stuck && stuck.dest && !isDestLocked(stuck.dest, p.evo || 0)) {
+          this._kick = this._makeKick(stuck, typ);
+          if (typ === "blackhole") stuck.swallow = 18;
+          this._overlay = { alpha: 0.7, color: typ === "blackhole" ? "90,40,160" : "255,160,60" };
+          this._queue(stuck);
+          this.charge = null;
+          this._visual = { scale: typ === "blackhole" ? 0.2 : 1, alpha: typ === "blackhole" ? 0.1 : 1 };
+        } else {
+          this.charge = null;
+          this.armArrival();
+          const mid = stuck ? stuck.x + stuck.w / 2 : p.x;
+          const dir = (p.x + p.w / 2) < mid ? -1 : 1;
+          p.vx = dir * 8;
+          p.vy = -4;
+        }
+      } else {
+        this._tickCharge(game, reduce);
+      }
       this._tickOrbitals(reduce);
-      this._springArms(this.charge.portal, reduce);
+      this._springArms(this.charge ? this.charge.portal : null, reduce);
       return;
     }
 
@@ -247,6 +276,10 @@ export class Portals {
             this.prompt = "E · Catapulta · Forma " + (need + 1);
           } else {
             this.prompt = "E · Catapulta → " + portal.label;
+            // Auto-fire al estar grounded en el pad (además de tecla E)
+            if (this.cooldown <= 0 && p.grounded) {
+              this._beginCharge(portal, "catapult", reduce);
+            }
           }
           break;
         }
@@ -402,7 +435,12 @@ export class Portals {
   }
 
   _queue(portal) {
-    if (!portal || !portal.dest) return;
+    if (!portal || !portal.dest) {
+      this._visual = { scale: 1, alpha: 1 };
+      this._overlay = null;
+      this.cooldown = Math.max(this.cooldown, 40);
+      return;
+    }
     this.pending = {
       dest: portal.dest,
       from: "portal",

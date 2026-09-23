@@ -683,8 +683,18 @@ function updatePlayer() {
       game._portalFlash = flashKind;
       game._portalFadeMax = fadeLen;
     } else {
+      // Trip abortado (needEvo / dest inválido): sin armArrival el player
+      // queda scale~0.2 alpha~0.1 + overlay púrpura → soft-lock visual.
       game._portalFlash = null;
       game._portalFadeMax = 0;
+      game.fading = 0;
+      portals.armArrival();
+      portals._visual = { scale: 1, alpha: 1 };
+      portals._overlay = null;
+      const dir = (p.facing || 1) >= 0 ? -1 : 1;
+      p.vx = dir * 9;
+      p.vy = -5;
+      p.x = Math.max(24, Math.min(p.x + dir * 56, game.worldW - p.w - 24));
     }
   }
   const r = room();
