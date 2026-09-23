@@ -432,15 +432,51 @@ const CASTERS = {
     skyStrike(g, "#ffe14a", 48);
   },
   breath(g) {
-    shot(g, { color: "#ff6a2a", w: 26, h: 18, dmg: 20, vx: 9, shape: "flame" });
-    if (g.player.evo >= 1) shot(g, { color: "#ff9a3a", w: 18, h: 14, dmg: 10, vx: 7, vy: -2, shape: "flame" });
-    if (g.player.evo >= 2) shot(g, { color: "#ffd36a", w: 18, h: 14, dmg: 10, vx: 7, vy: 2, shape: "flame" });
-    boom(g, "#ff6a2a", 10);
+    const evo = g.player.evo || 0;
+    // Per-form identity for Dino J-ability (other chars use other casters)
+    if (evo <= 0) {
+      // Bebé: short sneeze puff
+      shot(g, { color: "#b8f0c8", w: 14, h: 12, dmg: 11, vx: 6.5, life: 20, shape: "flame" });
+      boom(g, "#9ae8b8", 6);
+    } else if (evo <= 2) {
+      // Dino / Pico: focused flame spit (Pico adds leaner secondaries)
+      shot(g, { color: "#ff6a2a", w: 22 + evo * 3, h: 15 + evo, dmg: 17 + evo * 3, vx: 10, life: 38, shape: "flame" });
+      if (evo >= 2) {
+        shot(g, { color: "#2ec4b6", w: 14, h: 11, dmg: 11, vx: 9, vy: -2.2, life: 32, shape: "flame" });
+        shot(g, { color: "#ffe66a", w: 12, h: 10, dmg: 9, vx: 8.5, vy: 2.0, life: 30, shape: "flame" });
+      } else {
+        shot(g, { color: "#ff9a3a", w: 16, h: 12, dmg: 9, vx: 8, vy: -1.6, life: 30, shape: "flame" });
+      }
+      boom(g, "#ff6a2a", 10 + evo);
+    } else if (evo === 3) {
+      // Rex: wide cone of clay-fire
+      const cone = [
+        { color: "#ff9a3a", vy: -3.4, vx: 7.6, dmg: 14 },
+        { color: "#ff6a2a", vy: -1.2, vx: 8.8, dmg: 17 },
+        { color: "#c96b2a", vy: 0.6, vx: 9.0, dmg: 18 },
+        { color: "#ff4a20", vy: 2.4, vx: 8.2, dmg: 15 },
+        { color: "#e89040", vy: 3.6, vx: 7.2, dmg: 13 },
+      ];
+      for (const c of cone) {
+        shot(g, { color: c.color, w: 20, h: 15, dmg: c.dmg, vx: c.vx, vy: c.vy, life: 34, shape: "flame" });
+      }
+      boom(g, "#c96b2a", 16);
+    } else {
+      // GOD: short god-beam burst (compact, high punch)
+      shot(g, { color: "#ffe66a", w: 52, h: 14, dmg: 34, vx: 16, life: 16, shape: "bolt" });
+      shot(g, { color: "#fff8c8", w: 30, h: 8, dmg: 18, vx: 18, life: 12, shape: "bolt" });
+      shot(g, { color: "#c8ff7a", w: 18, h: 18, dmg: 12, vx: 12, vy: -1.5, life: 14, shape: "flame" });
+      shot(g, { color: "#c8ff7a", w: 18, h: 18, dmg: 12, vx: 12, vy: 1.5, life: 14, shape: "flame" });
+      boom(g, "#ffe66a", 18);
+    }
   },
   wing(g) {
-    g.player.vy = -7;
+    const evo = g.player.evo || 0;
+    g.player.vy = -7 - (evo >= 4 ? 1.5 : 0);
     g.player.invuln = Math.max(g.player.invuln, 12);
-    ringNova(g, "#ff8844", 14, 12);
+    // GOD earns a tiny hop-glide on Aletazo only (forms themselves have no glide)
+    if (evo >= 4) g.player.gliding = Math.max(g.player.gliding || 0, 22);
+    ringNova(g, evo >= 4 ? "#ffe66a" : "#ff8844", 14 + evo, 12 + (evo >= 3 ? 2 : 0));
   },
   rage(g) {
     skyStrike(g, "#ff4a20", 46);
