@@ -228,8 +228,9 @@ function makeFoe(x, y, kind, roomId, i, opts) {
   }
   if (kind === "mosquito") {
     const hp = baby ? 12 : 18 + hard * 10;
+    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 3) * 20));
     return {
-      x, y: 560 + (i % 3) * 28, w: baby ? 20 : 28, h: baby ? 16 : 24,
+      x, y: spawnY, w: baby ? 28 : 40, h: baby ? 22 : 34,
       vx: (i % 2 ? 1 : -1) * (2.4 + hard * 0.35),
       vy: -0.8, hp, max: hp, kind: "mosquito", color: "#ff6a4a",
       boss: false, shoot: 0, baby, diveCd: 40 + i * 12, diving: false, telegraph: false, spiral: 0,
@@ -237,38 +238,30 @@ function makeFoe(x, y, kind, roomId, i, opts) {
   }
   if (kind === "libelula") {
     const hp = 16 + hard * 8;
+    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 3) * 24));
     return {
-      x, y: 480 + (i % 3) * 40, w: 28, h: 30,
+      x, y: spawnY, w: 40, h: 42,
       vx: (i % 2 ? 1 : -1) * (2.2 + hard * 0.3),
       vy: -0.4, hp, max: hp, kind: "libelula", color: "#4aba7a",
       boss: false, shoot: 0, dart: 40 + i * 15, bob: Math.random() * 6.28,
-      telegraph: false, wind: 0, darting: false, baseY: 480 + (i % 3) * 40,
+      telegraph: false, wind: 0, darting: false, baseY: spawnY,
     };
   }
-  if (kind === "avispa") {
+  if (kind === "abeja" || kind === "avispa") {
     const hp = 28 + hard * 12;
+    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 2) * 28));
     return {
-      x, y: 500 + (i % 2) * 40, w: 30, h: 34,
-      vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "avispa", color: "#f0c020",
-      boss: false, shoot: 0, telegraph: false, wind: 0, charging: 0, cd: 40 + i * 18,
-      bob: Math.random() * 6.28, baseY: 500 + (i % 2) * 40,
-    };
-  }
-  if (kind === "abeja") {
-    const hp = 24 + hard * 10;
-    const by = 460 + (i % 3) * 36;
-    return {
-      x, y: by, w: 28, h: 32,
-      vx: (i % 2 ? 1 : -1) * 1.15, vy: 0, hp, max: hp, kind: "abeja", color: "#ffcc33",
-      boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 50 + i * 16,
-      bob: Math.random() * 6.28, baseY: by,
+      x, y: spawnY, w: 42, h: 48,
+      vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "abeja", color: "#f0c020",
+      boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 40 + i * 18,
+      bob: Math.random() * 6.28, baseY: spawnY,
     };
   }
   if (kind === "pez") {
     const hp = 22 + hard * 10;
-    const by = y || 380;
+    const by = Math.max(280, Math.min(560, y || 380));
     return {
-      x, y: by, w: 34, h: 22,
+      x, y: by, w: 28, h: 18,
       vx: (i % 2 ? 1 : -1) * (1.1 + hard * 0.2),
       vy: 0, hp, max: hp, kind: "pez", color: "#3aa8d8",
       boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: by,
@@ -450,7 +443,8 @@ function melee() {
   p.melee = Math.max(7, 13 - evo);
   p.meleeBuf = 0;
 
-  const reach = 50 + evo * 12;
+  // Reach grows with evo; Dino gets a bite of extra jaw-reach
+  const reach = 46 + evo * 11 + (p.id === "dragon" ? 6 + evo * 2 : 0);
   const box = {
     x: p.x + (p.facing > 0 ? p.w - 6 : -reach),
     y: p.y - 10 - evo * 2,
@@ -500,8 +494,10 @@ function melee() {
   });
   game.shake = Math.min(16, (game.shake || 0) + 3 + evo);
 
-  let dBase = 34 + evo * 14;
-  if (evo >= 4) dBase += 10;
+  // Damage: linear + soft quadratic (evo 0→4 ≈ 28, 42, 60, 82, 110)
+  let dBase = 28 + evo * 12 + evo * evo * 2;
+  if (p.id === "dragon") dBase += 2 + evo; // jaw bonus
+  if (evo >= 4) dBase += 8;
 
   for (const e of game.enemies) {
     if (e.invuln > 0 || e.dying) continue;
@@ -1040,8 +1036,8 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
     }
-    // --- avispa: longer telegraph, faster charge, trail ghosts ---
-    if (e.kind === "avispa") {
+    // --- avispa legacy AI disabled (routed to abeja) ---
+    if (false && e.kind === "avispa") {
       e.bob = (e.bob || 0) + 0.05;
       if (e.baseY == null) e.baseY = e.y;
       e.cd = (e.cd || 0) - 1;
@@ -1083,8 +1079,8 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
     }
-    // --- abeja: gentle hover, brief buzz telegraph, then steeper stinger dive ---
-    if (e.kind === "abeja") {
+    // --- abeja/avispa: gentle hover, buzz telegraph, steeper stinger dive ---
+    if (e.kind === "abeja" || e.kind === "avispa") {
       e.bob = (e.bob || 0) + 0.07;
       if (e.baseY == null) e.baseY = e.y;
       e.cd = (e.cd || 0) - 1;
@@ -1156,9 +1152,9 @@ function updateEnemies() {
         e.baseY += Math.sign(game.player.y - e.baseY) * 0.25;
       }
       e.vx = Math.max(e.dashSwim > 0 ? -4.6 : -2.4, Math.min(e.dashSwim > 0 ? 4.6 : 2.4, e.vx));
-      e.baseY = Math.max(200, Math.min(650, e.baseY));
+      e.baseY = Math.max(280, Math.min(560, e.baseY));
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
-      if (t % 5 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ec8f0", count: 1, size: 1.8, up: 0.25, speed: 0.45, life: 14 });
+      if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ec8f0", count: 2, size: 2.0, up: 0.28, speed: 0.5, life: 16 });
     }
     // --- medusa: near player pulse then pink soft zap projectile ---
     if (e.kind === "medusa") {
@@ -1215,8 +1211,7 @@ function updateEnemies() {
       let dmg = 7;
       if (e.boss) dmg = 22;
       else if (e.kind === "planta") dmg = 12;
-      else if (e.kind === "avispa" && e.charging > 0) dmg = 14;
-      else if (e.kind === "abeja" && (e.diving > 0 || e.charging > 0)) dmg = 13;
+      else if ((e.kind === "abeja" || e.kind === "avispa") && (e.diving > 0 || e.charging > 0)) dmg = 14;
       else if (e.kind === "mosquito") dmg = 9;
       else if (e.kind === "libelula") dmg = 8;
       else if (e.kind === "pez") dmg = 8;

@@ -178,7 +178,7 @@ function babyKoa(ctx, t) {
   const bob = Math.sin(t / 9) * 1.1;
   const wag = Math.sin(t / 5) * 2.8;
   ctx.translate(0, 2 + bob);
-  const green = "#9aeea8";
+  const green = "#9ae8b8";
   const belly = "#f0ffe4";
   const ink = "#1e4a22";
   const sprout = "#3bb85a";
