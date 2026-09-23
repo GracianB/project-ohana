@@ -582,224 +582,299 @@ function drawKetchup(ctx, p, t, evo) {
 
 function drawStitch(ctx, p, t, evo) {
   if (evo >= 4) { drawStitchGod(ctx, p, t); return; }
-  // Stitcho: experimento alien — orejas V dentadas, hocico corto, brazos-garra, ojos óvalo negros
-  // NO cabeza koala redonda. Stance ancho y bajo.
+  // Experiment 626 silhouette — angular alien, NOT soft koala ovals.
+  // Reads in 0.3s: trapezoid head, huge lateral V-ears, sausage body, claw arms.
   const anim = p._anim || {};
   const angry = evo >= 2;
   const tech = evo >= 3;
   const mini = evo === 0;
-  const blue = tech ? "#5ec8ff" : angry ? "#1540ff" : mini ? "#a8dcff" : "#3d9bff";
-  const blueDeep = tech ? "#1a6aaa" : angry ? "#0a1a88" : "#2a6acc";
-  const belly = tech ? "#c8f0ff" : "#d7f4ff";
-  const ink = "#0b1a44";
-  const flap = Math.sin(t / 9) * (2.2 + evo * 0.5);
+  const blue = tech ? "#3a9cff" : angry ? "#1a4cff" : mini ? "#4a8cff" : "#2a6cff";
+  const blueDeep = tech ? "#1a5aaa" : angry ? "#0a2a88" : "#1a3aaa";
+  const belly = "#c8e8ff";
+  const ink = "#0a1840";
+  const pink = "#f4a0b8";
+  const flap = Math.sin(t / 9) * (2.4 + evo * 0.45);
   const legL = anim.legL || 0;
   const legR = anim.legR || 0;
   const armSwing = anim.armL || 0;
 
-  // Orejas V ENORMES dentadas (silueta firma — dibujar primero)
-  const earTip = tech ? -58 : angry ? -52 : mini ? -34 : -46;
+  // 1) HUGE lateral V-ears — OUTSIDE and UP, deep tip notch (firma alien)
+  const earTip = tech ? -64 : angry ? -60 : mini ? -52 : -58;
   function ear(side) {
     const f = flap * side;
+    const tipX = side * (32 + evo * 1.5);
+    const tipY = earTip + f;
+    // Outer ear — hard path (no fluffy ellipse)
     ctx.fillStyle = blue;
     ctx.beginPath();
-    ctx.moveTo(side * 8, -8);
-    ctx.lineTo(side * 4, -16);
-    ctx.quadraticCurveTo(side * (28 + evo), earTip + f, side * 14, -10);
-    ctx.quadraticCurveTo(side * 18, -6, side * 8, -8);
-    ctx.fill();
-    // Muesca V en la punta
-    ctx.fillStyle = ink;
-    ctx.beginPath();
-    ctx.moveTo(side * 18, earTip * 0.78 + f * 0.4);
-    ctx.lineTo(side * 26, earTip * 0.92 + f);
-    ctx.lineTo(side * 12, earTip * 0.82);
-    ctx.lineTo(side * 16, earTip * 0.7);
+    ctx.moveTo(side * 10, -6);
+    ctx.lineTo(side * 6, -14);
+    ctx.lineTo(tipX * 0.55, tipY * 0.55);
+    ctx.lineTo(tipX, tipY);
+    // Deep V notch at tip
+    ctx.lineTo(tipX * 0.72, tipY + 10);
+    ctx.lineTo(tipX * 0.42, tipY * 0.78);
+    ctx.lineTo(side * 14, -4);
     ctx.closePath();
     ctx.fill();
-    // Interior rosa
-    ctx.fillStyle = "#f4b6c8";
-    ctx.beginPath();
-    ctx.ellipse(side * 16, earTip * 0.48, 3.8, 10 + evo, side * -0.5, 0, Math.PI * 2);
-    ctx.fill();
-    // Contorno
     ctx.strokeStyle = ink;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(side * 8, -8);
-    ctx.quadraticCurveTo(side * (28 + evo), earTip + f, side * 14, -10);
+    ctx.lineWidth = 1.25;
     ctx.stroke();
+    // Pink inner — tall angular strip
+    ctx.fillStyle = pink;
+    ctx.beginPath();
+    ctx.moveTo(side * 9, -8);
+    ctx.lineTo(tipX * 0.48, tipY * 0.5);
+    ctx.lineTo(tipX * 0.78, tipY + 2);
+    ctx.lineTo(tipX * 0.58, tipY + 8);
+    ctx.lineTo(side * 12, -3);
+    ctx.closePath();
+    ctx.fill();
+    // Ink notch accent
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.moveTo(tipX * 0.88, tipY + 1);
+    ctx.lineTo(tipX, tipY);
+    ctx.lineTo(tipX * 0.72, tipY + 10);
+    ctx.closePath();
+    ctx.fill();
   }
   ear(-1);
   ear(1);
 
-  // Antenas
+  // 2) Tiny antenna stubs on head (short — not long bunny feelers)
+  const antH = mini ? -28 : tech ? -36 : -32;
   ctx.strokeStyle = ink;
-  ctx.lineWidth = 2.2;
+  ctx.lineWidth = 2.0;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-6, -18);
-  ctx.lineTo(-9, -34 - evo);
-  ctx.moveTo(6, -18);
-  ctx.lineTo(9, -34 - evo);
+  ctx.moveTo(-5, -18);
+  ctx.lineTo(-7, antH);
+  ctx.moveTo(5, -18);
+  ctx.lineTo(7, antH);
   ctx.stroke();
-  ctx.fillStyle = tech ? "#8af0ff" : blue;
+  ctx.fillStyle = tech ? "#8af0ff" : blueDeep;
   ctx.beginPath();
-  ctx.arc(-9, -35 - evo, tech ? 3.2 : 2.5, 0, Math.PI * 2);
-  ctx.arc(9, -35 - evo, tech ? 3.2 : 2.5, 0, Math.PI * 2);
+  ctx.arc(-7, antH - 1, tech ? 2.8 : 2.2, 0, Math.PI * 2);
+  ctx.arc(7, antH - 1, tech ? 2.8 : 2.2, 0, Math.PI * 2);
   ctx.fill();
   if (tech) {
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(-9, -35 - evo, 4.5, 0, Math.PI * 2);
-    ctx.arc(9, -35 - evo, 4.5, 0, Math.PI * 2);
+    ctx.arc(-7, antH - 1, 4.2, 0, Math.PI * 2);
+    ctx.arc(7, antH - 1, 4.2, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Piernas cortas stance ANCHO
-  ctx.strokeStyle = blue;
-  ctx.lineWidth = 5.2;
+  // 3) Short wide legs — hunched stance
+  ctx.strokeStyle = blueDeep;
+  ctx.lineWidth = 5.4;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-10, 14);
-  ctx.lineTo(-16 + legL * 0.12, 24);
-  ctx.moveTo(10, 14);
-  ctx.lineTo(16 + legR * 0.12, 24);
+  ctx.moveTo(-11, 14);
+  ctx.lineTo(-18 + legL * 0.12, 25);
+  ctx.moveTo(11, 14);
+  ctx.lineTo(18 + legR * 0.12, 25);
   ctx.stroke();
   ctx.fillStyle = blue;
   ctx.beginPath();
-  ctx.ellipse(-17 + legL * 0.1, 25, 5.5, 2.6, 0, 0, Math.PI * 2);
-  ctx.ellipse(17 + legR * 0.1, 25, 5.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(-19 + legL * 0.1, 26, 6, 2.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(19 + legR * 0.1, 26, 6, 2.8, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Cuerpo bajo y ANCHO (no bola koala)
-  const bodyW = tech ? 20 : angry ? 19 : mini ? 13 : 16;
-  const bodyH = tech ? 15 : mini ? 10 : 13;
-  oval(ctx, 0, 8, bodyW, bodyH, blue, ink, 1.4);
-  shine(ctx, -6, 2, 4.5, 3);
-  oval(ctx, 0, 12, bodyW * 0.55, bodyH * 0.55, belly);
-
-  // Cabeza: más triangular / hocico corto (NO círculo perfecto)
+  // 4) Body: low wide hunched sausage / rounded rectangle (NOT a ball)
+  const bodyW = tech ? 22 : angry ? 20 : mini ? 15 : 18;
+  const bodyH = tech ? 12 : mini ? 9 : 11;
   ctx.fillStyle = blue;
   ctx.strokeStyle = ink;
-  ctx.lineWidth = 1.35;
+  ctx.lineWidth = 1.4;
   ctx.beginPath();
-  ctx.moveTo(-14, -2);
-  ctx.quadraticCurveTo(-16, -16, 0, -20);
-  ctx.quadraticCurveTo(16, -16, 14, -2);
-  ctx.quadraticCurveTo(10, 6, 0, 8);
-  ctx.quadraticCurveTo(-10, 6, -14, -2);
+  // Rounded-rect sausage via hard corners + short arcs
+  const bx0 = -bodyW, bx1 = bodyW, by0 = 2, by1 = 2 + bodyH * 2;
+  const br = mini ? 4 : 5.5;
+  ctx.moveTo(bx0 + br, by0);
+  ctx.lineTo(bx1 - br, by0);
+  ctx.quadraticCurveTo(bx1, by0, bx1, by0 + br);
+  ctx.lineTo(bx1, by1 - br);
+  ctx.quadraticCurveTo(bx1, by1, bx1 - br, by1);
+  ctx.lineTo(bx0 + br, by1);
+  ctx.quadraticCurveTo(bx0, by1, bx0, by1 - br);
+  ctx.lineTo(bx0, by0 + br);
+  ctx.quadraticCurveTo(bx0, by0, bx0 + br, by0);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  // Hocico corto saliente
+  // Light belly panel
   ctx.fillStyle = belly;
   ctx.beginPath();
-  ctx.ellipse(0, 4, 7, 4.2, 0, 0, Math.PI * 2);
+  ctx.moveTo(-bodyW * 0.45, by0 + 4);
+  ctx.lineTo(bodyW * 0.45, by0 + 4);
+  ctx.lineTo(bodyW * 0.38, by1 - 3);
+  ctx.lineTo(-bodyW * 0.38, by1 - 3);
+  ctx.closePath();
   ctx.fill();
+  shine(ctx, -bodyW * 0.35, by0 + 3, 3.5, 2.5);
+
+  // 5) Head: ANGULAR trapezoid / slightly pointed top — hard lineTo, NOT ellipse skull
+  const headTop = mini ? -22 : -26;
+  ctx.fillStyle = blue;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-15, 0);           // jaw L
+  ctx.lineTo(-13, -10);         // cheek L
+  ctx.lineTo(-8, headTop + 4);  // temple L
+  ctx.lineTo(-3, headTop);      // point L
+  ctx.lineTo(3, headTop);       // point R (slight flat peak / mild point)
+  ctx.lineTo(8, headTop + 4);   // temple R
+  ctx.lineTo(13, -10);          // cheek R
+  ctx.lineTo(15, 0);            // jaw R
+  ctx.lineTo(10, 8);            // chin R
+  ctx.lineTo(0, 10);            // chin tip
+  ctx.lineTo(-10, 8);           // chin L
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Deep crease / brow ridge for alien read
+  ctx.strokeStyle = blueDeep;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(-11, -12);
+  ctx.lineTo(0, -14);
+  ctx.lineTo(11, -12);
+  ctx.stroke();
+
+  // 6) Short snout ALWAYS + teeth ALWAYS (even cute)
+  ctx.fillStyle = belly;
+  ctx.beginPath();
+  ctx.moveTo(-7, 2);
+  ctx.lineTo(7, 2);
+  ctx.lineTo(6, 8);
+  ctx.lineTo(0, 9.5);
+  ctx.lineTo(-6, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // Nose
   ctx.fillStyle = ink;
   ctx.beginPath();
-  ctx.ellipse(0, 2.5, 2.4, 1.5, 0, 0, Math.PI * 2);
+  ctx.moveTo(-2.5, 2.5);
+  ctx.lineTo(2.5, 2.5);
+  ctx.lineTo(1.5, 5);
+  ctx.lineTo(-1.5, 5);
+  ctx.closePath();
   ctx.fill();
-
-  // Ojos óvalo GIGANTES negros
-  const eyeH = angry ? 7.5 : 6.2;
-  ctx.fillStyle = angry ? "#ff1a2a" : "#0a0a12";
+  // Mouth cavity + 2–4 teeth
+  ctx.fillStyle = "#120810";
   ctx.beginPath();
-  ctx.ellipse(-6.5, -6, 5.2, eyeH, 0, 0, Math.PI * 2);
-  ctx.ellipse(6.5, -6, 5.2, eyeH, 0, 0, Math.PI * 2);
+  if (angry) {
+    ctx.moveTo(-7, 7); ctx.lineTo(7, 7); ctx.lineTo(5, 12); ctx.lineTo(-5, 12);
+  } else {
+    ctx.moveTo(-5.5, 7.5); ctx.lineTo(5.5, 7.5); ctx.lineTo(4, 10.5); ctx.lineTo(-4, 10.5);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  const teeth = angry ? [-4.5, -1.5, 1.5, 4] : mini ? [-2.8, 1.0] : [-3.5, -0.5, 2.5];
+  for (const tx of teeth) {
+    ctx.fillRect(tx, angry ? 7 : 7.2, angry ? 2.0 : 1.8, angry ? 3.8 : 2.6);
+  }
+
+  // 7) Giant black VERTICAL ovals covering most of face + white square highlights
+  const eyeH = angry ? 9.5 : mini ? 7.5 : 8.8;
+  const eyeW = angry ? 5.0 : 4.6;
+  const eyeY = mini ? -5 : -6.5;
+  ctx.fillStyle = angry ? "#ff1428" : "#05050c";
+  ctx.beginPath();
+  ctx.ellipse(-6.2, eyeY, eyeW, eyeH, 0, 0, Math.PI * 2);
+  ctx.ellipse(6.2, eyeY, eyeW, eyeH, 0, 0, Math.PI * 2);
   ctx.fill();
   if (angry) {
-    // Cejas enfadadas
     ctx.strokeStyle = ink;
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = 2.4;
     ctx.beginPath();
-    ctx.moveTo(-12, -14); ctx.lineTo(-2, -10);
-    ctx.moveTo(12, -14); ctx.lineTo(2, -10);
+    ctx.moveTo(-12, -16); ctx.lineTo(-2, -11);
+    ctx.moveTo(12, -16); ctx.lineTo(2, -11);
     ctx.stroke();
   }
   ctx.fillStyle = "#fff";
-  ctx.fillRect(-8.2, -9.5, 2.4, 2.8);
-  ctx.fillRect(5.2, -9.5, 2.4, 2.8);
+  ctx.fillRect(-8.4, eyeY - 4.5, 2.6, 3.0);
+  ctx.fillRect(5.0, eyeY - 4.5, 2.6, 3.0);
   if (tech) {
-    // Visor tech cyan
+    // Cyan tech visor frame
     ctx.strokeStyle = "#8af0ff";
-    ctx.lineWidth = 1.6;
-    ctx.strokeRect(-12, -14, 24, 12);
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(-13, eyeY - 8, 26, eyeH + 6);
+    ctx.fillStyle = "rgba(100,240,255,.18)";
+    ctx.fillRect(-13, eyeY - 8, 26, eyeH + 6);
   }
 
-  // Boca / dientes
-  if (angry) {
-    ctx.fillStyle = "#1a0a10";
-    ctx.beginPath();
-    ctx.moveTo(-7, 7); ctx.lineTo(7, 7); ctx.lineTo(5, 12); ctx.lineTo(-5, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    for (const tx of [-4, -1, 2]) {
-      ctx.fillRect(tx, 7, 2.2, 3.5);
-    }
-  } else {
-    ctx.fillStyle = "#1a0a10";
-    ctx.fillRect(-4, 8, 8, 2.4);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(-3.2, 7.4, 2, 2.8);
-    ctx.fillRect(1.2, 7.4, 2, 2.8);
-  }
-
-  // Brazos-garra LARGOS (siempre visibles; evo2+ alzados; mini más cortos)
-  const clawY = angry ? -10 : mini ? 4 : 2;
-  const clawX = angry ? 30 : mini ? 16 : 26;
+  // 8) Long claw arms — 3 visible fingers/claws (signature)
+  const clawY = angry ? -14 : mini ? 2 : 0;
+  const clawX = angry ? 32 : mini ? 20 : 28;
   ctx.strokeStyle = blue;
-  ctx.lineWidth = angry ? 5 : 4.2;
+  ctx.lineWidth = angry ? 5.2 : 4.4;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-bodyW + 2, 4);
+  ctx.moveTo(-bodyW + 3, 6);
   ctx.lineTo(-clawX + armSwing * 0.15, clawY);
-  ctx.moveTo(bodyW - 2, 4);
+  ctx.moveTo(bodyW - 3, 6);
   ctx.lineTo(clawX + armSwing * 0.15, clawY);
   ctx.stroke();
-  // Garras
-  ctx.fillStyle = tech ? "#e0f8ff" : "#cfe9ff";
+  // Triple claws each hand
+  ctx.fillStyle = tech ? "#e0f8ff" : "#b8d8ff";
   for (const side of [-1, 1]) {
-    const cx = side * clawX;
+    const cx = side * clawX + armSwing * 0.15;
     const cy = clawY;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + side * 10, cy - 8);
-    ctx.lineTo(cx + side * 2, cy + 2);
-    ctx.lineTo(cx + side * 9, cy + 4);
-    ctx.lineTo(cx, cy + 3);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = ink;
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      const a = (i - 1) * 0.42; // spread
+      const ox = Math.cos(a) * 11;
+      const oy = Math.sin(a) * 9 - (angry ? 4 : 2);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + side * ox, cy + oy - 6);
+      ctx.lineTo(cx + side * (ox * 0.35), cy + 2 + i);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 0.9;
+      ctx.stroke();
+    }
   }
 
   if (tech) {
-    // Placas + antena plato (amenaza tech — silueta ≠ evo2)
-    ctx.fillStyle = "#8ad4ff";
+    // Cyan tech plates + energy veins (silhouette ≠ evo2)
+    ctx.fillStyle = "#7ad4ff";
     ctx.strokeStyle = ink;
     ctx.lineWidth = 1.1;
     ctx.beginPath();
-    ctx.moveTo(-10, -2); ctx.lineTo(-14, 6); ctx.lineTo(-6, 8); ctx.closePath();
+    ctx.moveTo(-11, 0); ctx.lineTo(-16, 8); ctx.lineTo(-6, 10); ctx.closePath();
     ctx.fill(); ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(10, -2); ctx.lineTo(14, 6); ctx.lineTo(6, 8); ctx.closePath();
+    ctx.moveTo(11, 0); ctx.lineTo(16, 8); ctx.lineTo(6, 10); ctx.closePath();
     ctx.fill(); ctx.stroke();
-    oval(ctx, 0, -24, 6.5, 4.5, "#8ad4ff", ink, 1);
+    // Antenna dish
+    ctx.fillStyle = "#8ad4ff";
+    ctx.beginPath();
+    ctx.moveTo(-5, -24); ctx.lineTo(5, -24); ctx.lineTo(4, -30); ctx.lineTo(-4, -30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
     ctx.fillStyle = "#fff";
-    ctx.fillRect(-1.4, -38, 2.8, 14);
-    // Venas de energía
-    ctx.strokeStyle = "rgba(140,240,255,.85)";
+    ctx.fillRect(-1.5, -40, 3, 12);
+    ctx.strokeStyle = "rgba(140,240,255,.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-12, 10); ctx.lineTo(-22, 16);
-    ctx.moveTo(12, 10); ctx.lineTo(22, 16);
+    ctx.moveTo(-12, 12); ctx.lineTo(-24, 18);
+    ctx.moveTo(12, 12); ctx.lineTo(24, 18);
     ctx.stroke();
-    oval(ctx, 0, 6, 24, 10, "rgba(100,220,255,.3)");
+    ctx.fillStyle = "rgba(100,220,255,.28)";
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 26, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
