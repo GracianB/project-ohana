@@ -1,19 +1,19 @@
 const DRAGON = {
   id: "dragon",
-  name: "Dragón de Milán",
-  role: "Guardián volcánico",
-  description: "Potencia bruta y un corazón cálido, aunque su aliento no sea precisamente discreto.",
-  colors: { primary: "#63c976", secondary: "#d9a46e", glow: "#b9ff75" },
-  stats: { maxHealth: 145, maxEnergy: 90, speed: 4.75, jumpPower: 12.4, abilityPower: 1.28 },
+  name: "Dino",
+  role: "Dino de bolsillo",
+  description: "Un dino pequeñito al extremo: tierno, ágil y con más energía de la que cabe en su cuerpo.",
+  colors: { primary: "#5ecf6a", secondary: "#d8f8c8", glow: "#c8ff7a" },
+  stats: { maxHealth: 90, maxEnergy: 90, speed: 3.8, jumpPower: 10.6, abilityPower: 1.05 },
   abilities: {
     special: { name: "Aliento Esmeralda", cost: 18, cooldown: 880, range: 265, color: "#b9ff75" },
-    ultimate: { name: "Corazón de Volcán", cost: 48, cooldown: 4600, range: 430, color: "#ff995c", requiredEvolutionStage: 1 }
+    ultimate: { name: "Rugido Pico", cost: 48, cooldown: 4600, range: 430, color: "#7ee08a", requiredEvolutionStage: 1 }
   },
   evolution: {
     forms: [
-      { name: "Dragón de Milán", level: 1, bonuses: {} },
-      { name: "Dragón de Jade", level: 3, bonuses: { maxHealth: 28, maxEnergy: 12, speed: 0.16, abilityPower: 0.3 }, unlocks: ["ultimate"] },
-      { name: "Dragón Solar", level: 6, bonuses: { maxHealth: 30, maxEnergy: 14, speed: 0.2, abilityPower: 0.4 } }
+      { name: "Dino Bebé", level: 1, bonuses: {} },
+      { name: "Dino", level: 3, bonuses: { maxHealth: 18, maxEnergy: 10, speed: 0.2, abilityPower: 0.2 }, unlocks: ["ultimate"] },
+      { name: "Dino Pico", level: 6, bonuses: { maxHealth: 20, maxEnergy: 12, speed: 0.25, abilityPower: 0.3 } }
     ]
   }
 };

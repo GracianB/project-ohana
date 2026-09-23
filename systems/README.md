@@ -24,3 +24,10 @@ Partículas procedurales para impactos, cristales y habilidades.
 ## audio.js
 Registro de música y efectos. El juego funciona aunque todavía no existan
 archivos de audio físicos dentro de assets/audio.
+
+## death-fx.js
+Carry-away cinemático por fases (aparecer → reclamar → ascender → disolver, ~1.8s): reaper con capucha, motas de alma, tether y afterimages locales (nunca `game.ghosts`). Variantes `hurt`/`void`. API: `DeathFx.start(player,onDone,opts?)/update/draw/isPlaying/cancel/playerAlpha`.
+
+## portals.js
+Catapultas y agujeros negros como atajos entre salas (no reemplazan doors).
+API: `spawnFromRoom`, `update`, `draw`, `tryUse`. Datos en `map.js` → `room.portals`.

@@ -174,54 +174,102 @@ function babyFrita(ctx, t) {
 }
 
 function babyKoa(ctx, t) {
-  const wag = Math.sin(t / 6) * 4;
-  ctx.translate(0, 3);
-  ctx.fillStyle = "#ffe9b8";
-  ctx.beginPath();
-  ctx.ellipse(0, 8, 7.5, 6.5, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = "#d4b07a";
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.arc(0, 8, 7.5, 0.2, Math.PI - 0.2);
-  ctx.stroke();
-  ctx.fillStyle = "#ff6a3a";
-  ctx.beginPath();
-  ctx.arc(0, -2, 8.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#ffe9b8";
-  ctx.beginPath();
-  ctx.arc(1, -1, 5.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#fff7d8";
-  ctx.beginPath();
-  ctx.arc(-2.2, -3.4, 2.6, 0, Math.PI * 2);
-  ctx.arc(3.4, -3.4, 2.6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#2a0a04";
-  ctx.beginPath();
-  ctx.arc(-1.8, -3.1, 1.2, 0, Math.PI * 2);
-  ctx.arc(3.8, -3.1, 1.2, 0, Math.PI * 2);
-  ctx.fill();
-  blush(ctx, 0.5, 0, 0.8);
-  ctx.fillStyle = "#f6c14a";
-  ctx.beginPath();
-  ctx.moveTo(-1, -9);
-  ctx.lineTo(0, -16);
-  ctx.lineTo(3, -9);
-  ctx.fill();
-  ctx.strokeStyle = "#ff6a3a";
-  ctx.lineWidth = 3.2;
+  // Tiny baby dino (evo 0) — cute green oval, stubby legs, big eyes
+  const bob = Math.sin(t / 9) * 1.0;
+  const wag = Math.sin(t / 6) * 2.4;
+  ctx.translate(0, 3 + bob);
+  const green = "#7ee08a";
+  const belly = "#e8ffd8";
+  const ink = "#1e4a22";
+
+  // Tiny tail
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 2.6;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-6, 4);
-  ctx.quadraticCurveTo(-12, 6 + wag, -13, 1 + wag);
+  ctx.moveTo(-5, 4);
+  ctx.quadraticCurveTo(-9, 5 + wag * 0.3, -10.5, 2 + wag);
   ctx.stroke();
-  ctx.fillStyle = "#ff8a55";
+
+  // Body oval
+  ctx.fillStyle = green;
   ctx.beginPath();
-  ctx.ellipse(-8, 2, 3.5, 1.6, -0.4, 0, Math.PI * 2);
-  ctx.ellipse(8, 2, 3.5, 1.6, 0.4, 0, Math.PI * 2);
+  ctx.ellipse(0, 5, 7.2, 6.2, 0, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = belly;
+  ctx.beginPath();
+  ctx.ellipse(0.6, 6.4, 4, 3.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tiny legs
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-2.5, 9);
+  ctx.lineTo(-3, 12);
+  ctx.moveTo(2.5, 9);
+  ctx.lineTo(3, 12);
+  ctx.stroke();
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.ellipse(-3.2, 12.2, 1.8, 0.9, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.2, 12.2, 1.8, 0.9, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Little stubby arms
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(-6, 4);
+  ctx.lineTo(-7.5, 6);
+  ctx.moveTo(6, 4);
+  ctx.lineTo(7.5, 6);
+  ctx.stroke();
+
+  // Head bump / round snout area (same oval-ish head on body)
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.ellipse(2.5, -1, 5.5, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = belly;
+  ctx.beginPath();
+  ctx.ellipse(4.2, 0.2, 2.8, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tiny crest
+  ctx.fillStyle = "#3bb85a";
+  ctx.beginPath();
+  ctx.moveTo(0.5, -5);
+  ctx.lineTo(1.5, -9);
+  ctx.lineTo(3, -5);
+  ctx.fill();
+
+  // Big cute eyes
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.ellipse(1.2, -1.6, 2.4, 2.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(4.6, -1.6, 2.4, 2.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#1a0c08";
+  ctx.beginPath();
+  ctx.arc(1.5, -1.3, 1.15, 0, Math.PI * 2);
+  ctx.arc(4.9, -1.3, 1.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(0.9, -2.2, 0.55, 0, Math.PI * 2);
+  ctx.arc(4.3, -2.2, 0.55, 0, Math.PI * 2);
+  ctx.fill();
+
+  blush(ctx, 2.5, 1.2, 0.7);
+
+  // Tiny smile
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(3.6, 1.4, 1.5, 0.2, Math.PI - 0.2);
+  ctx.stroke();
 }
 
 function babyMichi(ctx, t) {
