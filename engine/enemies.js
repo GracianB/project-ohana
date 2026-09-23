@@ -27,11 +27,15 @@ export function drawEnemy(ctx, e, cam, t) {
   const y = e.y - cam.y;
   ctx.save();
   ctx.translate(x + e.w / 2, y + e.h / 2);
-  if (e.flash > 0 || e.invuln > 0) ctx.filter = "brightness(2.4)";
+  // Hit feedback: flash blanco fuerte, luego rojo
+  if (e.flash > 10) ctx.filter = "brightness(4.2) saturate(0.12)";
+  else if (e.flash > 0) ctx.filter = "brightness(2.6) sepia(0.55) hue-rotate(-25deg)";
+  else if (e.invuln > 0) ctx.filter = "brightness(2.0)";
   ctx.fillStyle = "rgba(0,0,0,.28)";
   ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 2, e.w * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
 
   if (e.telegraph) drawTelegraph(ctx, e, t);
+  if (e.elite) drawEliteAura(ctx, e, t);
 
   if (e.kind === "boss") drawBoss(ctx, e, t);
   else if (e.kind === "phosquito") drawPhosquito(ctx, e, t);
@@ -53,6 +57,16 @@ export function drawEnemy(ctx, e, cam, t) {
   else drawCucaracho(ctx, e, t);
 
   ctx.filter = "none";
+  // Overlay de golpe: blanco → rojo corto
+  if (e.flash > 0) {
+    const a = Math.min(0.72, e.flash / 14);
+    ctx.globalAlpha = a;
+    ctx.fillStyle = e.flash > 9 ? "#ffffff" : "#ff4040";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, e.w * 0.52, e.h * 0.52, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
   drawHpBar(ctx, e);
   ctx.restore();
 }
@@ -69,18 +83,104 @@ function telegraphColor(e) {
   if (e.kind === "arana") return ["rgba(180,100,80,.85)", "rgba(80,40,30,.4)"];
   if (e.kind === "brasita" || e.kind === "escoria") return ["rgba(255,120,40,.9)", "rgba(255,60,20,.45)"];
   if (e.kind === "ufo") return ["rgba(126,231,255,.9)", "rgba(80,180,255,.4)"];
-  if (e.kind === "rana" || e.kind === "cangrejo") return ["rgba(120,220,100,.8)", "rgba(255,140,60,.4)"];
+  if (e.kind === "rana") return ["rgba(120,255,100,.95)", "rgba(80,200,60,.45)"];
+  if (e.kind === "cangrejo") return ["rgba(255,160,60,.95)", "rgba(255,80,40,.45)"];
   return ["rgba(255,80,40,.75)", "rgba(255,160,80,.35)"];
 }
 
 function drawTelegraph(ctx, e, t) {
   const [c1, c2] = telegraphColor(e);
-  const pulse = 1 + Math.sin(t * 0.45) * 0.12;
-  const r = e.w * 0.85 * pulse;
-  ctx.strokeStyle = c1; ctx.lineWidth = 2.4;
+  const pulse = 1 + Math.sin(t * 0.55) * 0.18;
+  const r = e.w * 0.95 * pulse;
+  // Flash de relleno (muy legible)
+  ctx.fillStyle = c2.replace(/,[\d.]+\)$/, ",.22)");
+  ctx.beginPath(); ctx.arc(0, 0, r * 1.05, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = c1; ctx.lineWidth = 3.2;
   ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
-  ctx.strokeStyle = c2; ctx.lineWidth = 1.4;
-  ctx.beginPath(); ctx.arc(0, 0, r * 1.35 + Math.sin(t * 0.6) * 3, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = c2; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.arc(0, 0, r * 1.4 + Math.sin(t * 0.7) * 4, 0, Math.PI * 2); ctx.stroke();
+
+  // Marcadores extra para foes nuevos (salto / zap / pinza / rayo)
+  const k = e.kind;
+  if (k === "rana") {
+    // Anillo en el suelo + foreshadow del salto
+    const gy = e.h * 0.55;
+    ctx.strokeStyle = "rgba(120,255,100,.85)"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.ellipse(0, gy, 18 + Math.sin(t * 0.6) * 4, 5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "rgba(180,255,120,.35)";
+    ctx.beginPath(); ctx.ellipse(0, gy, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+    // Chevrons hacia arriba (salto)
+    ctx.strokeStyle = "rgba(255,255,120,.9)"; ctx.lineWidth = 2.2;
+    for (let i = 0; i < 2; i++) {
+      const yy = -e.h * 0.35 - i * 8 - (t % 10);
+      ctx.beginPath();
+      ctx.moveTo(-7, yy + 5); ctx.lineTo(0, yy); ctx.lineTo(7, yy + 5);
+      ctx.stroke();
+    }
+  } else if (k === "anguila") {
+    // Arco eléctrico + línea de aim al player (si hay aimX/aimY)
+    ctx.strokeStyle = "rgba(255,120,220,.9)"; ctx.lineWidth = 2.4;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.7 + Math.sin(t * 0.8) * 3, 0, Math.PI * 2); ctx.stroke();
+    if (e.aimDx != null && e.aimDy != null) {
+      const len = Math.hypot(e.aimDx, e.aimDy) || 1;
+      const nx = (e.aimDx / len) * 36, ny = (e.aimDy / len) * 36;
+      ctx.strokeStyle = "rgba(126,231,255,.85)"; ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(nx, ny); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(255,100,200,.7)";
+      ctx.beginPath(); ctx.arc(nx, ny, 4 + Math.sin(t * 0.7), 0, Math.PI * 2); ctx.fill();
+    }
+  } else if (k === "cangrejo") {
+    // Pinzas: arcos laterales + marcador de suelo
+    const sway = Math.sin(t * 0.7) * 3;
+    ctx.strokeStyle = "rgba(255,140,60,.95)"; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(-16, -4 + sway, 10, -0.6, 0.8); ctx.stroke();
+    ctx.beginPath(); ctx.arc(16, -4 - sway, 10, Math.PI - 0.8, Math.PI + 0.6); ctx.stroke();
+    ctx.fillStyle = "rgba(255,80,40,.45)";
+    ctx.beginPath(); ctx.ellipse(0, e.h * 0.55, 20 + sway, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = "rgba(255,200,80,.9)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, e.h * 0.55, 22, 5, 0, 0, Math.PI * 2); ctx.stroke();
+  } else if (k === "ufo") {
+    // Rayo hacia abajo + anillo de suelo
+    const beamH = 34 + Math.sin(t * 0.5) * 4;
+    const g = ctx.createLinearGradient(0, 6, 0, beamH);
+    g.addColorStop(0, "rgba(126,231,255,.55)");
+    g.addColorStop(1, "rgba(126,231,255,.05)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(16, beamH); ctx.lineTo(-16, beamH);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(180,255,255,.9)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, beamH, 16 + Math.sin(t * 0.6) * 3, 4, 0, 0, Math.PI * 2); ctx.stroke();
+    // Luces parpadeo
+    for (let i = -1; i <= 1; i++) {
+      ctx.fillStyle = `rgba(255,220,80,${0.5 + 0.5 * Math.sin(t * 0.8 + i)})`;
+      ctx.beginPath(); ctx.arc(i * 8, 4, 2.4, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+
+function drawEliteAura(ctx, e, t) {
+  const pulse = 1 + Math.sin(t * 0.35) * 0.08;
+  ctx.strokeStyle = "rgba(255,200,40,.95)";
+  ctx.lineWidth = 3.2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, e.w * 0.58 * pulse, e.h * 0.58 * pulse, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(255,60,40,.55)";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, e.w * 0.7 * pulse, e.h * 0.7 * pulse, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // Corona pequeña
+  ctx.fillStyle = "rgba(255,220,80,.9)";
+  ctx.beginPath();
+  ctx.moveTo(0, -e.h * 0.55 - 6);
+  ctx.lineTo(-5, -e.h * 0.55 + 2);
+  ctx.lineTo(5, -e.h * 0.55 + 2);
+  ctx.closePath();
+  ctx.fill();
 }
 
 function drawHpBar(ctx, e) {
@@ -89,7 +189,7 @@ function drawHpBar(ctx, e) {
   const bx = -bw / 2;
   const by = -e.h / 2 - 12;
   const ratio = Math.max(0, e.hp / e.max);
-  const tint = e.boss ? "#f55" : (KIND_TINT[e.kind] || "#5f5");
+  const tint = e.boss ? "#f55" : (e.elite ? "#ffd24a" : (KIND_TINT[e.kind] || "#5f5"));
   ctx.fillStyle = "rgba(0,0,0,.65)";
   roundRect(ctx, bx - 1, by - 1, bw + 2, bh + 2, 3);
   ctx.fill();
@@ -900,11 +1000,13 @@ function drawEscoria(ctx, e, t) {
 function drawUfo(ctx, e, t) {
   const bob = Math.sin(t / 8 + (e.bob || 0)) * 1.5;
   ctx.translate(0, bob);
-  // beam when telegraph
+  // beam when telegraph (reforzado; el anillo global también lo marca)
   if (e.telegraph) {
-    ctx.fillStyle = "rgba(126,231,255,.18)";
+    ctx.fillStyle = "rgba(126,231,255,.32)";
     ctx.beginPath();
-    ctx.moveTo(-6, 6); ctx.lineTo(6, 6); ctx.lineTo(14, 28); ctx.lineTo(-14, 28); ctx.closePath(); ctx.fill();
+    ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(18, 34); ctx.lineTo(-18, 34); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,180,.7)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.ellipse(0, 34, 14, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
   }
   // saucer body
   const g = ctx.createLinearGradient(0, -8, 0, 8);

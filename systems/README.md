@@ -33,8 +33,8 @@ Catapultas y agujeros negros como atajos entre salas (no reemplazan doors).
 API: `spawnFromRoom`, `update`, `draw`, `tryUse`. Datos en `map.js` → `room.portals`.
 
 ## surprises.js
-Sorpresas positivas por sala (sin tocar progresión evo): pez dorado (beach/reef), lluvia de estrellas (space, orbs +XP), power-up secreto (hub, 1×/run).
-API: `onMakeFoe`, `onEnterRoom`, `onEnemyKilled`, `update`, `draw`, `starOrbBonus`, `reset`.
+Sorpresas positivas por sala (sin tocar progresión evo): pez dorado (beach/reef), lluvia de estrellas (space, orbs +XP), burst GOD al llegar a forma 5 y Corona estelar (GOD, 1×/run).
+API: `onMakeFoe`, `onEnterRoom`, `onBecomeGod`, `onEnemyKilled`, `update`, `draw`, `starOrbBonus`, `reset`.
 
 ## boss-nido.js
 Reina del Nido: jefe final en 3 fases (suelo → alas → enloquece) con telegraphs, charge/swoop/slam/spit.

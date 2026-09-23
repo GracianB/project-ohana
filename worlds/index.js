@@ -9,7 +9,7 @@ export const WORLDS = [
   { id: "volcano", name: "Volcán",    ground: "#3a1610", groundTop: "#ff6a22", edge: "#ffb04a", sky: ["#120303", "#3a0c06", "#7a1c08"] },
   { id: "space",   name: "Espacio",   ground: "#161628", groundTop: "#7a5cff", edge: "#9a7cff", sky: ["#03030c", "#0b0a24", "#191542"] },
   { id: "lab",     name: "Alien Lab", ground: "#15202a", groundTop: "#3ee0ff", edge: "#7af3ff", sky: ["#050d13", "#0a1a24", "#123646"] },
-  { id: "aquatic", name: "Abismo",    ground: "#062038", groundTop: "#1a7a9a", edge: "#4ec8e8", sky: ["#010c1c", "#042848", "#0a4a78"] },
+  { id: "aquatic", name: "Abismo",    ground: "#0a3a58", groundTop: "#3ec8e8", edge: "#8af8ff", platOutline: "rgba(150,245,255,.85)", sky: ["#010c1c", "#042848", "#0a4a78"] },
   { id: "grove",   name: "Claro",     ground: "#3a6a32", groundTop: "#7ec85a", edge: "#b8f090", sky: ["#6eb8e8", "#a8d8f0", "#e8f4c8"] }
 ];
 
@@ -261,6 +261,16 @@ export function drawGrove(ctx, cam, t, W, H) {
   ctx.fillStyle = sun; ctx.beginPath(); ctx.arc(sx, sy, 180, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(255,252,230,.9)"; ctx.beginPath(); ctx.arc(sx, sy, 28, 0, Math.PI * 2); ctx.fill();
 
+  // far haze / light banks (extra subtle parallax)
+  for (let i = 0; i < 5; i++) {
+    const x = ((i * 380 - cam.x * 0.03 + t * 0.06) % (W + 380)) - 80;
+    const y = 70 + (i % 3) * 36;
+    const hg = ctx.createRadialGradient(x, y, 4, x, y, 90);
+    hg.addColorStop(0, "rgba(255,250,210,.14)");
+    hg.addColorStop(1, "rgba(255,240,180,0)");
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.ellipse(x, y, 100, 28, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
   // distant soft hills
   for (let i = 0; i < 4; i++) {
     const x = ((i * 420 - cam.x * 0.06) % (W + 420)) - 100;
@@ -286,6 +296,22 @@ export function drawGrove(ctx, cam, t, W, H) {
     ctx.arc(x + 8, base - trunkH + 10, 20, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath();
     ctx.arc(x + 38, base - trunkH + 12, 18, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // mid-far canopy fronds (slower than mid trees)
+  for (let i = 0; i < 8; i++) {
+    const x = ((i * 220 - cam.x * 0.1 + t * 0.04) % (W + 240)) - 50;
+    const y = H * 0.34 + (i % 3) * 18;
+    ctx.strokeStyle = "rgba(50,100,45," + (0.18 + (i % 3) * 0.05) + ")";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + 40 + Math.sin(t / 30 + i) * 6, y - 18, x + 90, y + 8);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + 20, y + 10);
+    ctx.quadraticCurveTo(x + 55, y - 8, x + 110, y + 16);
+    ctx.stroke();
   }
 
   // mid trees (clearer)
@@ -497,6 +523,18 @@ function drawVolcano(ctx, cam, t, W, H) {
     ctx.fillRect(x, y, sz, sz);
   }
 
+  // short-cycle ash / ember sparks (cheap, ~2s loop)
+  for (let i = 0; i < 14; i++) {
+    const life = (t * (1.1 + pr(i + 60) * 0.9) + pr(i + 60) * 240) % 240;
+    if (life > 160) continue;
+    const a = (1 - life / 160) * 0.7;
+    const x = (pr(i + 61) * W + Math.sin(life / 18 + i) * 14 - cam.x * 0.15 + W) % W;
+    const y = H * 0.55 - (life / 160) * (H * 0.5) + Math.cos(t / 20 + i) * 4;
+    const sz = 1.2 + pr(i + 62) * 2;
+    ctx.fillStyle = "rgba(255," + (140 + ((i * 29) % 80)) + ",40," + a + ")";
+    ctx.fillRect(x, y, sz, sz * (i % 3 === 0 ? 1.6 : 1));
+  }
+
   // smoke plumes (darker / thicker)
   ctx.fillStyle = "rgba(28,14,12,.55)";
   for (let i = 0; i < 5; i++) {
@@ -577,6 +615,25 @@ function drawSpace(ctx, cam, t, W, H) {
     const a = 0.15 + Math.abs(Math.sin(t / 8 + i)) * 0.45;
     ctx.fillStyle = "rgba(200,220,255," + a + ")";
     ctx.fillRect(x, y, 1.2, 1.2);
+  }
+
+  // short-cycle star twinkles / dust puffs (~1.5s)
+  for (let i = 0; i < 12; i++) {
+    const life = (t * (0.9 + pr(i + 100) * 0.7) + pr(i + 100) * 180) % 180;
+    if (life > 50) continue;
+    const a = Math.sin((life / 50) * Math.PI) * (0.35 + pr(i + 101) * 0.45);
+    const x = (pr(i + 102) * W - cam.x * 0.04 + W) % W;
+    const y = (pr(i + 103) * H * 0.9) % H;
+    ctx.fillStyle = "rgba(220,235,255," + a + ")";
+    const s = 1.1 + pr(i + 104) * 2.2;
+    ctx.fillRect(x, y, s, s);
+    if (i % 4 === 0) {
+      ctx.strokeStyle = "rgba(180,210,255," + (a * 0.7) + ")";
+      ctx.lineWidth = 1;
+      const r = 3 + (50 - life) * 0.08;
+      ctx.beginPath(); ctx.moveTo(x - r, y + s * 0.5); ctx.lineTo(x + r + s, y + s * 0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + s * 0.5, y - r); ctx.lineTo(x + s * 0.5, y + r + s); ctx.stroke();
+    }
   }
 
   // shooting star (periodic, brighter trail)
@@ -700,6 +757,24 @@ export function drawAquatic(ctx, cam, t, W, H) {
   midWash.addColorStop(1, "rgba(0,20,50,0)");
   ctx.fillStyle = midWash;
   ctx.fillRect(0, 0, W, H);
+
+  // far marine snow / light motes (extra subtle parallax)
+  for (let i = 0; i < 18; i++) {
+    const x = (pr(i + 70) * W - cam.x * 0.025 + t * 0.05 + W) % W;
+    const y = (pr(i + 71) * H * 0.85 + Math.sin(t / 40 + i) * 8) % H;
+    ctx.fillStyle = "rgba(160,220,255," + (0.08 + pr(i + 72) * 0.18) + ")";
+    ctx.beginPath(); ctx.arc(x, y, 0.8 + pr(i + 73) * 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // far soft light orbs drifting slower than scroll
+  for (let i = 0; i < 4; i++) {
+    const x = ((i * 360 - cam.x * 0.04 + t * 0.07) % (W + 360)) - 60;
+    const y = H * (0.18 + (i % 3) * 0.16) + Math.sin(t / 35 + i) * 10;
+    const og = ctx.createRadialGradient(x, y, 2, x, y, 70);
+    og.addColorStop(0, "rgba(120,210,255,.10)");
+    og.addColorStop(1, "rgba(40,120,180,0)");
+    ctx.fillStyle = og; ctx.beginPath(); ctx.arc(x, y, 70, 0, Math.PI * 2); ctx.fill();
+  }
 
   // distant reef silhouettes (parallax back, denser)
   for (let i = 0; i < 8; i++) {

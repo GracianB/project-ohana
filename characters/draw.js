@@ -149,7 +149,7 @@ export function drawCharacter(ctx, p, cam, t) {
     ctx.beginPath();
     ctx.ellipse(0, p.h / 2 + 2, p.w * 0.42, 4.2, 0, 0, Math.PI * 2);
     ctx.fill();
-    if (evo >= 2) glow(ctx, p.w * (0.9 + evo * 0.28), p.color, t, evo >= 3 ? 4 + evo : 0);
+    if (evo >= 2) glow(ctx, p.w * (0.9 + evo * 0.28 + (evo >= 4 ? 0.55 : 0)), p.color, t, evo >= 4 ? 10 : (evo >= 3 ? 4 + evo : 0));
     if (p.evoBurst > 0) {
       const k = p.evoBurst / 90;
       ctx.save();
@@ -195,7 +195,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.beginPath();
   ctx.ellipse(0, p.h / 2 + 3, p.w * 0.42, 4.2, 0, 0, Math.PI * 2);
   ctx.fill();
-  if (evo >= 2) glow(ctx, p.w * (0.9 + evo * 0.28), p.color, t, evo >= 3 ? 4 + evo : 0);
+  if (evo >= 2) glow(ctx, p.w * (0.9 + evo * 0.28 + (evo >= 4 ? 0.55 : 0)), p.color, t, evo >= 4 ? 10 : (evo >= 3 ? 4 + evo : 0));
   if (p.evoBurst > 0) {
     const k = p.evoBurst / 90;
     ctx.save();
@@ -216,8 +216,9 @@ export function drawCharacter(ctx, p, cam, t) {
 }
 
 function drawLilo(ctx, p, t, evo) {
+  if (evo >= 4) { drawLiloGod(ctx, p, t); return; }
   // Kilo: human silhouette — big hair bun + A-line dress (never a blob)
-  const dress = evo >= 4 ? "#fff4c8" : evo >= 3 ? "#ffd36a" : evo >= 2 ? "#ff4d78" : "#e0142c";
+  const dress = evo >= 3 ? "#ffd36a" : evo >= 2 ? "#ff4d78" : "#e0142c";
   const skin = "#f3c4a0";
   const hair = evo >= 3 ? "#3a1608" : "#1a0c08";
   const ink = "#3a140c";
@@ -226,19 +227,9 @@ function drawLilo(ctx, p, t, evo) {
   const headY = evo >= 3 ? -12 : -9;
   const hairY = evo >= 3 ? -22 : -18;
 
-  if (evo >= 4) {
-    ctx.save();
-    ctx.globalAlpha = 0.5;
-    oval(ctx, 0, -4, 36, 30, "rgba(255,236,150,.5)");
-    ctx.restore();
-    leaf(ctx, -30, 0, 15, -0.75, "#2bb56a");
-    leaf(ctx, 30, 0, 15, 0.75, "#2bb56a");
-    leaf(ctx, -26, -12, 11, -1.15, "#7ee08a");
-    leaf(ctx, 26, -12, 11, 1.15, "#7ee08a");
-  }
   if (evo >= 3) {
     // Soft cape behind dress
-    ctx.fillStyle = evo >= 4 ? "rgba(255,244,180,.9)" : "rgba(255,180,70,.85)";
+    ctx.fillStyle = "rgba(255,180,70,.85)";
     ctx.beginPath();
     ctx.moveTo(-7, -2);
     ctx.quadraticCurveTo(-30, 10, -20, 28);
@@ -361,20 +352,15 @@ function drawLilo(ctx, p, t, evo) {
     ctx.stroke();
     star(ctx, 22, -32, 6.5, "#ffe66a");
   }
-  if (evo >= 4) {
-    for (let i = 0; i < 6; i++) {
-      const a = t / 8 + i * 1.05;
-      star(ctx, Math.cos(a) * 28, Math.sin(a) * 18 - 4, 3.2, "#fff8c8");
-    }
-  }
 }
 
 function drawKetchup(ctx, p, t, evo) {
+  if (evo >= 4) { drawKetchupGod(ctx, p, t); return; }
   // Capitán Kétchup: tall fry stick + ketchup drip cape + captain hat
-  const fry = evo >= 4 ? "#fff1a0" : evo >= 3 ? "#ffe08a" : "#f0b43a";
+  const fry = evo >= 3 ? "#ffe08a" : "#f0b43a";
   const fryDark = evo >= 3 ? "#e8a028" : "#d49220";
   const ink = "#7a3a08";
-  const ket = evo >= 4 ? "#ff5a5a" : "#c81e1e";
+  const ket = "#c81e1e";
   const stickH = evo >= 3 ? 30 : 26;
   const stickW = evo >= 2 ? 8 : 7;
   const drip = Math.sin(t / 10) * 1.2;
@@ -500,23 +486,14 @@ function drawKetchup(ctx, p, t, evo) {
     ctx.fillStyle = "#fff";
     ctx.fillRect(16.5, -2, 4, 3);
   }
-  if (evo >= 4) {
-    ctx.save();
-    ctx.globalAlpha = 0.55;
-    oval(ctx, 0, 4, 22, 18, "rgba(255,240,160,.5)");
-    ctx.restore();
-    for (let i = 0; i < 5; i++) {
-      const a = t / 7 + i * 1.25;
-      star(ctx, Math.cos(a) * 20, Math.sin(a) * 14, 2.4, "#fff8c8");
-    }
-  }
 }
 
 function drawStitch(ctx, p, t, evo) {
+  if (evo >= 4) { drawStitchGod(ctx, p, t); return; }
   // Glitch: alien — huge notched ears + antennae + tubby belly (wide silhouette)
-  const blue = evo >= 4 ? "#e8f7ff" : evo >= 3 ? "#6ad0ff" : evo >= 2 ? "#1a3cff" : "#3d9bff";
-  const belly = evo >= 4 ? "#fff" : "#d7f4ff";
-  const ink = evo >= 4 ? "#4a7aaa" : "#0b1a44";
+  const blue = evo >= 3 ? "#6ad0ff" : evo >= 2 ? "#1a3cff" : "#3d9bff";
+  const belly = "#d7f4ff";
+  const ink = "#0b1a44";
   const flap = Math.sin(t / 9) * (2.5 + evo * 0.6);
   const earH = evo >= 3 ? -56 : evo >= 2 ? -48 : -42;
   const bodyR = 17 + evo * 1.5;
@@ -651,25 +628,12 @@ function drawStitch(ctx, p, t, evo) {
     ctx.stroke();
     oval(ctx, 0, 4, 22, 9, "rgba(180,230,255,.35)");
   }
-  if (evo >= 4) {
-    ctx.strokeStyle = "rgba(180,240,255,.9)";
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.arc(0, 4, 26, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(0, 4, 32, 0.2, Math.PI - 0.2);
-    ctx.stroke();
-    for (let i = 0; i < 5; i++) {
-      const a = t / 7 + i * 1.2;
-      oval(ctx, Math.cos(a) * 28, Math.sin(a) * 16, 2.2, 2.2, "#fff");
-    }
-  }
 }
 
 function drawPikachu(ctx, p, t, evo) {
+  if (evo >= 4) { drawPikachuGod(ctx, p, t); return; }
   // Pika: rodent — tall black-tipped ears + zigzag lightning tail
-  const body = evo >= 4 ? "#fff8c4" : evo >= 3 ? "#ffe14a" : "#ffd000";
+  const body = evo >= 3 ? "#ffe14a" : "#ffd000";
   const ink = "#3a2208";
   const tip = "#1a1208";
   const s = 1 + evo * 0.07;
@@ -804,12 +768,6 @@ function drawPikachu(ctx, p, t, evo) {
     ctx.lineTo(-14, -10);
     ctx.lineTo(-20, -4);
     ctx.stroke();
-  }
-  if (evo >= 4) {
-    for (let i = 0; i < 4; i++) {
-      const a = t / 8 + i * 1.5;
-      star(ctx, Math.cos(a) * 22, Math.sin(a) * 14 - 2, 2.5, "#fffde8");
-    }
   }
 }
 
@@ -1288,126 +1246,242 @@ function drawDinoRex(ctx, t) {
   }
 }
 
-/** Evo 4 — DINO GOD: compact mythic titan, aura + crown spikes (no glide). */
+/** Evo 4 — DINO GOD: majestic winged kaiju/dragon god (gold + emerald). */
 function drawDinoGod(ctx, t) {
-  const body = "#ffe66a";
-  const belly = "#fff8d8";
-  const ink = "#6a4a18";
-  const gold = "#fff1a0";
-  const glow = "#c8ff7a";
-  const wag = Math.sin(t / 6) * 2.2;
-  const pulse = 0.32 + Math.sin(t / 8) * 0.08;
+  const gold = "#ffd84a";
+  const goldLite = "#fff1a0";
+  const emerald = "#2ecf7a";
+  const emeraldDeep = "#0f8a4a";
+  const belly = "#e8fff0";
+  const ink = "#1a4a30";
+  const flap = Math.sin(t / 5) * 0.36;
+  const wag = Math.sin(t / 5) * 3.2;
+  const pulse = 0.35 + Math.sin(t / 6) * 0.12;
 
-  // Soft golden aura (not wings — form has no glide)
+  // Particle aura (orbiting embers)
   ctx.save();
   ctx.globalAlpha = pulse;
-  dinoOval(ctx, 1, 0, 15, 12, "rgba(255,230,100,.55)");
-  dinoOval(ctx, 1, 0, 11, 9, "rgba(200,255,120,.35)");
+  dinoOval(ctx, 2, 0, 22, 16, "rgba(255,216,74,.35)");
+  dinoOval(ctx, 2, 0, 16, 12, "rgba(46,207,122,.28)");
   ctx.restore();
+  for (let i = 0; i < 8; i++) {
+    const a = t / 5 + i * 0.785;
+    const rr = 16 + (i % 3) * 3;
+    ctx.fillStyle = i % 2 ? goldLite : emerald;
+    ctx.globalAlpha = 0.55 + Math.sin(t / 4 + i) * 0.25;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * rr + 2, Math.sin(a) * rr * 0.65 - 1, 1.4 + (i % 2), 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 
-  // Ribbon celestial tail
-  ctx.strokeStyle = body;
-  ctx.lineWidth = 3.4;
+  // Twin dragon wings (signature silhouette — draw behind body)
+  function wing(side) {
+    const s = side;
+    ctx.save();
+    ctx.translate(s * 2, -2);
+    ctx.rotate(s * (-0.55 + flap));
+    // Membrane
+    ctx.fillStyle = "rgba(46,207,122,.72)";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 10, -14, s * 26, -18);
+    ctx.quadraticCurveTo(s * 22, -4, s * 28, 6);
+    ctx.quadraticCurveTo(s * 16, 4, s * 8, 8);
+    ctx.quadraticCurveTo(s * 4, 2, 0, 0);
+    ctx.fill();
+    // Gold armor plating on wing leading edge
+    ctx.strokeStyle = gold;
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 10, -14, s * 26, -18);
+    ctx.stroke();
+    // Wing fingers
+    ctx.strokeStyle = emeraldDeep;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(s * 4, -2); ctx.lineTo(s * 22, -10);
+    ctx.moveTo(s * 3, 1); ctx.lineTo(s * 24, -2);
+    ctx.moveTo(s * 3, 4); ctx.lineTo(s * 22, 5);
+    ctx.stroke();
+    // Emerald gem on wing joint
+    ctx.fillStyle = emerald;
+    ctx.beginPath();
+    ctx.arc(s * 3, -1, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = goldLite;
+    ctx.beginPath();
+    ctx.arc(s * 2.4, -1.6, 0.7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  wing(-1);
+  wing(1);
+
+  // Comet tail (long ribbon + spark trail)
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 4.2;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-4, 2);
-  ctx.quadraticCurveTo(-10, 8 + wag, -16, 4 + wag);
-  ctx.quadraticCurveTo(-20, 0 + wag, -18, -4 + wag);
+  ctx.moveTo(-6, 2);
+  ctx.quadraticCurveTo(-16, 10 + wag * 0.3, -28, 4 + wag);
+  ctx.quadraticCurveTo(-34, -2 + wag, -30, -8 + wag);
   ctx.stroke();
-  ctx.fillStyle = gold;
-  ctx.beginPath();
-  ctx.moveTo(-18, -4 + wag);
-  ctx.lineTo(-22, -7 + wag);
-  ctx.lineTo(-16, -6 + wag);
-  ctx.closePath();
-  ctx.fill();
-
-  // Compact sturdy legs
-  ctx.strokeStyle = body;
-  ctx.lineWidth = 3.0;
-  ctx.beginPath();
-  ctx.moveTo(-1, 5); ctx.lineTo(-2.2, 10);
-  ctx.moveTo(4, 5); ctx.lineTo(5.4, 10);
-  ctx.stroke();
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.ellipse(-2.5, 10.3, 2.4, 1.2, 0, 0, Math.PI * 2);
-  ctx.ellipse(5.6, 10.3, 2.4, 1.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Luminous compact body
-  dinoOval(ctx, 1, 2.5, 7.0, 5.6, body, ink, 1.15);
-  dinoOval(ctx, 1.2, 3.8, 4.0, 2.8, belly);
-
-  // Glowing chest gem
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.ellipse(1.2, 2.2, 1.6, 2.0, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.ellipse(0.8, 1.6, 0.5, 0.7, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Arms
-  ctx.strokeStyle = body;
+  ctx.strokeStyle = emerald;
   ctx.lineWidth = 2.2;
   ctx.beginPath();
-  ctx.moveTo(-5, 0.5); ctx.lineTo(-8.5, -0.5);
-  ctx.moveTo(6, 0.5); ctx.lineTo(9.5, -0.8);
+  ctx.moveTo(-8, 3);
+  ctx.quadraticCurveTo(-18, 11 + wag * 0.3, -30, 5 + wag);
   ctx.stroke();
-
-  // Noble head
-  dinoOval(ctx, 6.5, -4.2, 6.0, 5.0, body, ink, 1.15);
-  dinoOval(ctx, 9.0, -3.2, 3.4, 2.4, belly);
-
-  // Crown spikes (5) — mythic silhouette
-  ctx.fillStyle = gold;
-  const horns = [[2.8, -7.5, -13], [5.0, -8.5, -16], [7.2, -9, -17.5], [9.4, -8.5, -15.5], [11.4, -7.2, -12.5]];
-  for (const [hx, hy, tip] of horns) {
+  // Comet tip flare
+  ctx.fillStyle = goldLite;
+  ctx.beginPath();
+  ctx.moveTo(-30, -8 + wag);
+  ctx.lineTo(-38, -12 + wag);
+  ctx.lineTo(-28, -4 + wag);
+  ctx.lineTo(-34, -2 + wag);
+  ctx.closePath();
+  ctx.fill();
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = i % 2 ? emerald : goldLite;
     ctx.beginPath();
-    ctx.moveTo(hx - 1.1, hy);
-    ctx.lineTo(hx, tip);
-    ctx.lineTo(hx + 1.1, hy);
+    ctx.arc(-22 - i * 3.5, 2 + wag * 0.4 + (i % 2), 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Powerful hind legs
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 3.6;
+  ctx.beginPath();
+  ctx.moveTo(-2, 6); ctx.lineTo(-4, 13);
+  ctx.moveTo(5, 6); ctx.lineTo(7.5, 13);
+  ctx.stroke();
+  ctx.fillStyle = gold;
+  ctx.beginPath();
+  ctx.ellipse(-4.5, 13.5, 3.2, 1.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(8, 13.5, 3.2, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Emerald claw tips
+  ctx.fillStyle = emerald;
+  ctx.beginPath();
+  ctx.arc(-6.5, 14, 1.1, 0, Math.PI * 2);
+  ctx.arc(6, 14, 1.1, 0, Math.PI * 2);
+  ctx.arc(10, 14, 1.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Armored torso plates
+  dinoOval(ctx, 2, 2.5, 9.5, 7.5, gold, ink, 1.3);
+  // Emerald chest plate
+  ctx.fillStyle = emeraldDeep;
+  ctx.beginPath();
+  ctx.moveTo(2, -2);
+  ctx.lineTo(-4, 2);
+  ctx.lineTo(-3, 8);
+  ctx.lineTo(2, 10);
+  ctx.lineTo(7, 8);
+  ctx.lineTo(8, 2);
+  ctx.closePath();
+  ctx.fill();
+  dinoOval(ctx, 2.2, 4, 5.2, 3.6, belly);
+  // Glowing heart gem
+  ctx.fillStyle = emerald;
+  ctx.beginPath();
+  ctx.ellipse(2.2, 2.5, 2.4, 2.8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = goldLite;
+  ctx.beginPath();
+  ctx.ellipse(1.6, 1.6, 0.8, 1.0, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Shoulder armor pads
+  dinoOval(ctx, -7, -1, 3.5, 2.8, gold, ink, 1);
+  dinoOval(ctx, 10, -1, 3.5, 2.8, gold, ink, 1);
+  ctx.fillStyle = emerald;
+  ctx.beginPath();
+  ctx.arc(-7, -1, 1.4, 0, Math.PI * 2);
+  ctx.arc(10, -1, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Forearms / claws out
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 2.8;
+  ctx.beginPath();
+  ctx.moveTo(-7, 1); ctx.lineTo(-14, -4);
+  ctx.moveTo(10, 1); ctx.lineTo(17, -5);
+  ctx.stroke();
+  ctx.fillStyle = emerald;
+  for (const [cx, cy] of [[-15, -5], [-13, -2], [18, -6], [16, -3]]) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + (cx < 0 ? -3 : 3), cy - 2);
+    ctx.lineTo(cx + (cx < 0 ? -1 : 1), cy + 2);
     ctx.closePath();
     ctx.fill();
   }
 
-  dinoEye(ctx, 4.6, -4.8, 1.7, 1.9);
-  dinoEye(ctx, 8.4, -4.8, 1.7, 1.9);
+  // Noble elongated head
+  dinoOval(ctx, 9, -6, 8.5, 6.2, gold, ink, 1.25);
+  dinoOval(ctx, 14, -4.5, 5.5, 3.6, gold, ink, 1.1);
+  dinoOval(ctx, 13.5, -3.5, 3.8, 2.4, belly);
+
+  // Star crown (5-point celestial diadem)
+  const crown = [[4.5, -10], [7, -14], [10, -16.5], [13, -14], [15.5, -10]];
+  ctx.fillStyle = goldLite;
+  for (const [hx, hy] of crown) {
+    star(ctx, hx, hy, 2.8, goldLite);
+  }
+  // Center emerald star
+  star(ctx, 10, -17.5, 4.2, emerald);
+  star(ctx, 10, -17.5, 2.0, goldLite);
+
+  // Horns flanking crown
+  ctx.fillStyle = emeraldDeep;
+  ctx.beginPath();
+  ctx.moveTo(5, -9); ctx.lineTo(3, -18); ctx.lineTo(7.5, -10); ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(15, -9); ctx.lineTo(17, -18); ctx.lineTo(12.5, -10); ctx.closePath();
+  ctx.fill();
+
+  dinoEye(ctx, 6.5, -6.5, 2.2, 2.4);
+  dinoEye(ctx, 12, -6.2, 2.0, 2.2);
+  // Emerald iris glint
+  ctx.fillStyle = emerald;
+  ctx.beginPath();
+  ctx.arc(7.2, -6.3, 0.7, 0, Math.PI * 2);
+  ctx.arc(12.6, -6.0, 0.65, 0, Math.PI * 2);
+  ctx.fill();
+
   ctx.fillStyle = ink;
   ctx.beginPath();
-  ctx.arc(11.0, -2.6, 0.45, 0, Math.PI * 2);
+  ctx.ellipse(17.5, -4.2, 0.7, 0.45, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = ink;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.1;
   ctx.beginPath();
-  ctx.arc(8.2, -1.4, 1.5, 0.15, Math.PI - 0.15);
+  ctx.arc(12, -2.2, 2.0, 0.1, Math.PI - 0.1);
   ctx.stroke();
 
-  // Orbiting sparkles
-  for (let i = 0; i < 5; i++) {
-    const a = t / 7 + i * 1.25;
-    const sx = Math.cos(a) * 12;
-    const sy = Math.sin(a) * 8.5 - 1;
-    ctx.fillStyle = i % 2 ? "#fff8c8" : glow;
-    ctx.beginPath();
-    for (let k = 0; k < 5; k++) {
-      const ang = -Math.PI / 2 + k * ((Math.PI * 2) / 5);
-      const br = ang + Math.PI / 5;
-      const r = 1.6;
-      if (k === 0) ctx.moveTo(sx + Math.cos(ang) * r, sy + Math.sin(ang) * r);
-      else ctx.lineTo(sx + Math.cos(ang) * r, sy + Math.sin(ang) * r);
-      ctx.lineTo(sx + Math.cos(br) * r * 0.4, sy + Math.sin(br) * r * 0.4);
-    }
-    ctx.closePath();
-    ctx.fill();
-  }
+  // Floating energy rings (halo of power)
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,216,74,.85)";
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.ellipse(2, 1, 18, 7, 0.15, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(46,207,122,.7)";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.ellipse(2, 1, 14, 5.5, -0.2, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function drawCat(ctx, p, t, evo) {
+  if (evo >= 4) { drawCatGod(ctx, p, t); return; }
   // Michi: sitting cat — pointed ears + curled tail + whiskers (loaf silhouette)
-  const fur = evo >= 4 ? "#fff4fc" : evo >= 3 ? "#ffd0ee" : evo >= 2 ? "#ff8ad4" : "#ffb6e4";
+  const fur = evo >= 3 ? "#ffd0ee" : evo >= 2 ? "#ff8ad4" : "#ffb6e4";
   const ink = "#5a2040";
   const pink = "#ff7ac2";
   const deep = "#ff4da0";
@@ -1553,11 +1627,1021 @@ function drawCat(ctx, p, t, evo) {
       star(ctx, Math.cos(t / 10 + i * 1.2) * 20, Math.sin(t / 10 + i * 1.2) * 14 - 6, 2.4, "#fff");
     }
   }
-  if (evo >= 4) {
+}
+
+
+/** Evo 4 — KILO GOD: island sun goddess — leaf wings, armor lei, sun crown. */
+function drawLiloGod(ctx, p, t) {
+  const dress = "#ffd76a";
+  const dressDeep = "#e8a028";
+  const skin = "#f3c4a0";
+  const hair = "#2a1008";
+  const ink = "#3a140c";
+  const teal = "#2ec9c0";
+  const coral = "#ff4d78";
+  const flap = Math.sin(t / 8) * 0.12;
+
+  // Solar aura
+  ctx.save();
+  ctx.globalAlpha = 0.4 + Math.sin(t / 7) * 0.1;
+  oval(ctx, 0, -2, 42, 34, "rgba(255,215,106,.45)");
+  oval(ctx, 0, -2, 28, 22, "rgba(255,120,140,.25)");
+  ctx.restore();
+
+  // Giant leaf wings
+  function leafWing(side) {
     ctx.save();
-    ctx.globalAlpha = 0.4;
-    oval(ctx, 0, 4, 24, 20, "rgba(255,240,255,.55)");
+    ctx.translate(side * 8, 2);
+    ctx.rotate(side * (-0.85 + flap));
+    leaf(ctx, side * 18, -6, 22, side * 0.2, "#2bb56a");
+    leaf(ctx, side * 14, 8, 16, side * -0.35, "#7ee08a");
+    leaf(ctx, side * 22, 2, 12, side * 0.5, teal);
     ctx.restore();
+  }
+  leafWing(-1);
+  leafWing(1);
+
+  // Energy rings around midriff
+  ctx.strokeStyle = "rgba(255,244,180,.9)";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.ellipse(0, 10, 26, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(46,201,192,.75)";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(0, 10, 20, 5.5, 0.2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Flowing divine cape
+  ctx.fillStyle = "rgba(255,200,80,.9)";
+  ctx.beginPath();
+  ctx.moveTo(-10, 0);
+  ctx.quadraticCurveTo(-38, 14, -28, 40);
+  ctx.lineTo(28, 40);
+  ctx.quadraticCurveTo(38, 14, 10, 0);
+  ctx.fill();
+  // Cape armor plates
+  ctx.fillStyle = dressDeep;
+  for (const px of [-18, -6, 6, 18]) {
+    ctx.beginPath();
+    ctx.moveTo(px - 5, 18);
+    ctx.lineTo(px, 12);
+    ctx.lineTo(px + 5, 18);
+    ctx.lineTo(px, 28);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Legs + golden sandals
+  ctx.strokeStyle = skin;
+  ctx.lineWidth = 3.8;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-8, 22); ctx.lineTo(-11, 34);
+  ctx.moveTo(8, 22); ctx.lineTo(11, 34);
+  ctx.stroke();
+  ctx.fillStyle = dress;
+  ctx.beginPath();
+  ctx.ellipse(-11.5, 35, 5.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(11.5, 35, 5.5, 2.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Exaggerated hair bun + twin puffs
+  ctx.fillStyle = hair;
+  ctx.beginPath();
+  ctx.ellipse(0, -28, 20, 16, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-18, -26);
+  ctx.quadraticCurveTo(-32, -52, -6, -30);
+  ctx.quadraticCurveTo(0, -58, 6, -30);
+  ctx.quadraticCurveTo(32, -52, 18, -26);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(-14, -14, 5.5, 11, 0.2, 0, Math.PI * 2);
+  ctx.ellipse(14, -14, 5.5, 11, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tall floral crown (petal spikes + blossoms)
+  for (let i = -3; i <= 3; i++) {
+    const hx = i * 6.5;
+    ctx.fillStyle = i % 2 ? coral : dress;
+    ctx.beginPath();
+    ctx.moveTo(hx - 3, -40);
+    ctx.quadraticCurveTo(hx - 1, -50 - Math.abs(i) * 1.5, hx, -56 - Math.abs(i));
+    ctx.quadraticCurveTo(hx + 1, -50 - Math.abs(i) * 1.5, hx + 3, -40);
+    ctx.closePath();
+    ctx.fill();
+    // Blossom tip
+    ctx.fillStyle = i % 2 ? teal : coral;
+    ctx.beginPath();
+    ctx.arc(hx, -54 - Math.abs(i), 2.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  star(ctx, 0, -58, 5.0, "#fff8c8");
+
+  // Face
+  oval(ctx, 0, -16, 12, 11.5, skin, ink, 1.2);
+  shine(ctx, -4, -20, 3.5, 2.2);
+  eye(ctx, -4.5, -17, 2.8, 3.0);
+  eye(ctx, 4.5, -17, 2.8, 3.0);
+  ctx.fillStyle = "rgba(255,120,140,.5)";
+  ctx.beginPath();
+  ctx.ellipse(-8.5, -13, 2.8, 1.7, 0, 0, Math.PI * 2);
+  ctx.ellipse(8.5, -13, 2.8, 1.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#c47a6a";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, -12, 3.6, 0.15, Math.PI - 0.15);
+  ctx.stroke();
+
+  // Armored A-line dress (layered plates)
+  ctx.fillStyle = dress;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-12, -2);
+  ctx.lineTo(12, -2);
+  ctx.lineTo(26, 26);
+  ctx.quadraticCurveTo(0, 32, -26, 26);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Chest armor panel
+  ctx.fillStyle = "#fff8d6";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-7, 8);
+  ctx.lineTo(0, 16);
+  ctx.lineTo(7, 8);
+  ctx.closePath();
+  ctx.fill();
+  star(ctx, 0, 7, 3.5, coral);
+
+  // Lei of armor blossoms
+  for (const [lx, ly, c] of [[-14, 2, coral], [-7, 0, teal], [0, -1, coral], [7, 0, teal], [14, 2, coral]]) {
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.arc(lx, ly, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(lx, ly, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Arms + golden bracelets
+  oval(ctx, -16, 4, 4, 6, skin);
+  oval(ctx, 16, 4, 4, 6, skin);
+  limb(ctx, -16, 8, -26, 16, 3.8, skin);
+  limb(ctx, 16, 8, 26, 16, 3.8, skin);
+  oval(ctx, -27, 17, 3.6, 3.2, skin);
+  oval(ctx, 27, 17, 3.6, 3.2, skin);
+  ctx.strokeStyle = dress;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.arc(-16, 6, 5, 0, Math.PI * 2);
+  ctx.arc(16, 6, 5, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Orbiting sun motes
+  for (let i = 0; i < 7; i++) {
+    const a = t / 7 + i * 0.9;
+    star(ctx, Math.cos(a) * 34, Math.sin(a) * 22 - 4, 3.0, i % 2 ? "#fff8c8" : teal);
   }
 }
 
+/** Evo 4 — GLITCH GOD: apex 626 — energy plate armor, membrane sails, tech crown. */
+function drawStitchGod(ctx, p, t) {
+  const blue = "#2a6dff";
+  const deep = "#0d2a8a";
+  const plate = "#1a3cff";
+  const plasma = "#7ef0ff";
+  const ink = "#0b1a44";
+  const belly = "#c8ecff";
+  const flap = Math.sin(t / 6) * 0.32;
+  const earFlap = Math.sin(t / 8) * 3.2;
+  const pulse = 0.32 + Math.sin(t / 7) * 0.1;
+
+  // Subtle plasma aura (silhouette is armor+sails, not rings alone)
+  ctx.save();
+  ctx.globalAlpha = pulse;
+  oval(ctx, 0, 4, 36, 26, "rgba(42,109,255,.35)");
+  ctx.restore();
+
+  // === MEMBRANE SAIL-WINGS from back (flapping) ===
+  function sail(side) {
+    const s = side;
+    ctx.save();
+    ctx.translate(s * 4, -2);
+    ctx.rotate(s * (-0.5 + flap));
+    // Mast bone
+    ctx.strokeStyle = plasma;
+    ctx.lineWidth = 2.6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(s * 12, -16);
+    ctx.lineTo(s * 26, -10);
+    ctx.stroke();
+    // Membrane sail
+    ctx.fillStyle = "rgba(80, 180, 255, .65)";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 10, -20 - flap * 8, s * 26, -10);
+    ctx.quadraticCurveTo(s * 20, 4, s * 10, 10);
+    ctx.quadraticCurveTo(s * 4, 4, 0, 2);
+    ctx.closePath();
+    ctx.fill();
+    // Ribs
+    ctx.strokeStyle = "rgba(10, 40, 120, .85)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(s * 2, -1); ctx.lineTo(s * 14, -14);
+    ctx.moveTo(s * 2, 1); ctx.lineTo(s * 22, -4);
+    ctx.moveTo(s * 2, 3); ctx.lineTo(s * 14, 8);
+    ctx.stroke();
+    // Plasma tip
+    ctx.fillStyle = plasma;
+    ctx.beginPath();
+    ctx.arc(s * 26, -10, 2.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  sail(-1);
+  sail(1);
+
+  // Huge notched ears (identity) behind helmet
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  ctx.moveTo(-14, -8);
+  ctx.quadraticCurveTo(-40, -58 + earFlap, -2, -18);
+  ctx.quadraticCurveTo(-18, -22, -14, -8);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(14, -8);
+  ctx.quadraticCurveTo(40, -58 + earFlap, 2, -18);
+  ctx.quadraticCurveTo(18, -22, 14, -8);
+  ctx.fill();
+  ctx.fillStyle = "#f4b6c8";
+  ctx.beginPath();
+  ctx.ellipse(-22, -34, 5, 11, -0.5, 0, Math.PI * 2);
+  ctx.ellipse(22, -34, 5, 11, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ff4a8a";
+  ctx.beginPath();
+  ctx.moveTo(-28, -50 + earFlap); ctx.lineTo(-38, -60 + earFlap); ctx.lineTo(-24, -54 + earFlap);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(28, -50 + earFlap); ctx.lineTo(38, -60 + earFlap); ctx.lineTo(24, -54 + earFlap);
+  ctx.fill();
+
+  // === TECH CROWN / HELMET (rings + antennae) ===
+  ctx.fillStyle = plate;
+  ctx.beginPath();
+  ctx.ellipse(0, -18, 16, 8, 0, Math.PI, Math.PI * 2);
+  ctx.fill();
+  // Halo rings as helmet crest
+  ctx.strokeStyle = plasma;
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.ellipse(0, -26, 10, 4.5, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(160,100,255,.9)";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(0, -30, 7, 3, 0.2, 0, Math.PI * 2);
+  ctx.stroke();
+  // Antennae pair with plasma orbs
+  for (const [ax, ay] of [[-8, -36], [8, -36]]) {
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(ax * 0.3, -20);
+    ctx.lineTo(ax, ay);
+    ctx.stroke();
+    ctx.fillStyle = plasma;
+    ctx.beginPath();
+    ctx.arc(ax, ay - 2, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#a064ff";
+    ctx.beginPath();
+    ctx.arc(ax, ay - 2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Legs
+  ctx.strokeStyle = deep;
+  ctx.lineWidth = 5.5;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-10, 20); ctx.lineTo(-16, 32);
+  ctx.moveTo(10, 20); ctx.lineTo(16, 32);
+  ctx.stroke();
+  ctx.fillStyle = blue;
+  ctx.beginPath();
+  ctx.ellipse(-17, 33, 6, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(17, 33, 6, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body
+  oval(ctx, 0, 8, 20, 17, blue, ink, 1.5);
+  oval(ctx, 0, 13, 12, 9, belly);
+
+  // === SHOULDER + CHEST ENERGY PLATES ===
+  // Shoulders
+  ctx.fillStyle = plate;
+  ctx.beginPath();
+  ctx.ellipse(-16, 0, 7, 5, -0.3, 0, Math.PI * 2);
+  ctx.ellipse(16, 0, 7, 5, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = plasma;
+  ctx.beginPath();
+  ctx.arc(-16, 0, 2.4, 0, Math.PI * 2);
+  ctx.arc(16, 0, 2.4, 0, Math.PI * 2);
+  ctx.fill();
+  // Hex chest plate
+  ctx.fillStyle = deep;
+  ctx.beginPath();
+  ctx.moveTo(0, -4);
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 3;
+    ctx.lineTo(Math.cos(a) * 9, 5 + Math.sin(a) * 7);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = plasma;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.fillStyle = plasma;
+  ctx.beginPath();
+  ctx.arc(0, 5, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#a064ff";
+  ctx.beginPath();
+  ctx.arc(0, 5, 1.6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Claw arms
+  ctx.strokeStyle = blue;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(-18, 4); ctx.lineTo(-34, -14);
+  ctx.moveTo(18, 4); ctx.lineTo(34, -14);
+  ctx.stroke();
+  ctx.fillStyle = plasma;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(side * 34, -14);
+    ctx.lineTo(side * 46, -26);
+    ctx.lineTo(side * 38, -8);
+    ctx.lineTo(side * 44, -4);
+    ctx.lineTo(side * 36, -2);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Red god-eyes
+  ctx.fillStyle = "#ff1a1a";
+  ctx.beginPath();
+  ctx.ellipse(-7.5, -2, 5.5, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(7.5, -2, 5.5, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(-9, -5, 2.6, 2.8);
+  ctx.fillRect(6.5, -5, 2.6, 2.8);
+  ctx.fillStyle = "#111";
+  ctx.beginPath();
+  ctx.ellipse(0, 7, 2.4, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-5.5, 11, 11, 3.2);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(-4.5, 9.8, 2.4, 3.6);
+  ctx.fillRect(2.1, 9.8, 2.4, 3.6);
+
+  // Small orbiting shards (accent)
+  for (let i = 0; i < 5; i++) {
+    const a = t / 6 + i * 1.25;
+    ctx.fillStyle = i % 2 ? plasma : "#a064ff";
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * 32, Math.sin(a) * 18 + 2, 2.0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/** Evo 4 — PIKA GOD: thunder deity — bolt wings, mane crown, cheek orbs. */
+function drawPikachuGod(ctx, p, t) {
+  const body = "#ffe14a";
+  const lite = "#fff6a0";
+  const ink = "#3a2208";
+  const tip = "#1a1208";
+  const bolt = "#7ecbff";
+  const flap = Math.sin(t / 7) * 0.15;
+
+  // Thunder aura
+  ctx.save();
+  ctx.globalAlpha = 0.4 + Math.sin(t / 5) * 0.12;
+  oval(ctx, 0, 2, 38, 28, "rgba(255,225,74,.5)");
+  oval(ctx, 0, 2, 26, 18, "rgba(126,203,255,.3)");
+  ctx.restore();
+
+  // Twin lightning-bolt wings
+  function boltWing(side) {
+    ctx.save();
+    ctx.translate(side * 6, 0);
+    ctx.rotate(side * (-0.4 + flap));
+    ctx.fillStyle = bolt;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(side * 12, -18);
+    ctx.lineTo(side * 6, -8);
+    ctx.lineTo(side * 22, -28);
+    ctx.lineTo(side * 10, -4);
+    ctx.lineTo(side * 28, 4);
+    ctx.lineTo(side * 8, 6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = lite;
+    ctx.beginPath();
+    ctx.moveTo(side * 2, -2);
+    ctx.lineTo(side * 10, -14);
+    ctx.lineTo(side * 5, -6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  boltWing(-1);
+  boltWing(1);
+
+  // Energy rings
+  ctx.strokeStyle = "rgba(255,246,160,.9)";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.ellipse(0, 6, 28, 10, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(126,203,255,.75)";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(0, 6, 22, 7, 0.3, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Massive zigzag thunder cape/tail
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 8;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(8, 14);
+  ctx.lineTo(18, -6);
+  ctx.lineTo(10, 12);
+  ctx.lineTo(30, -4);
+  ctx.lineTo(20, 16);
+  ctx.lineTo(40, 6);
+  ctx.stroke();
+  ctx.fillStyle = bolt;
+  ctx.beginPath();
+  ctx.moveTo(36, 2);
+  ctx.lineTo(52, -12);
+  ctx.lineTo(38, 14);
+  ctx.lineTo(44, 18);
+  ctx.closePath();
+  ctx.fill();
+
+  // Legs
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.ellipse(-10, 22, 5.5, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(10, 22, 5.5, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Body + chest armor plate
+  oval(ctx, 0, 10, 16, 14, body, ink, 1.4);
+  ctx.fillStyle = tip;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-8, 8);
+  ctx.lineTo(0, 18);
+  ctx.lineTo(8, 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = lite;
+  ctx.beginPath();
+  ctx.arc(0, 8, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Arms
+  oval(ctx, -15, 8, 4.5, 5.5, body);
+  oval(ctx, 15, 8, 4.5, 5.5, body);
+
+  // Head
+  oval(ctx, 0, -8, 15, 14, body, ink, 1.4);
+  shine(ctx, -6, -14, 5, 3);
+
+  // Lightning mane crown (exaggerated spikes)
+  ctx.fillStyle = lite;
+  const mane = [[-14, -18], [-8, -28], [-2, -34], [4, -36], [10, -32], [16, -22]];
+  for (const [mx, my] of mane) {
+    ctx.beginPath();
+    ctx.moveTo(mx - 3, -12);
+    ctx.lineTo(mx, my);
+    ctx.lineTo(mx + 3, -12);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Blue tips on mane
+  ctx.fillStyle = bolt;
+  for (const [mx, my] of mane) {
+    ctx.beginPath();
+    ctx.moveTo(mx - 1.5, my + 4);
+    ctx.lineTo(mx, my);
+    ctx.lineTo(mx + 1.5, my + 4);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Tall god-ears with armor tips
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.moveTo(-10, -16); ctx.lineTo(-14, -48); ctx.lineTo(-2, -16);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(10, -16); ctx.lineTo(14, -48); ctx.lineTo(2, -16);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = tip;
+  ctx.beginPath();
+  ctx.moveTo(-14, -48); ctx.lineTo(-5, -48); ctx.lineTo(-9, -36); ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(14, -48); ctx.lineTo(5, -48); ctx.lineTo(9, -36); ctx.closePath();
+  ctx.fill();
+  // Ear energy rings
+  ctx.strokeStyle = bolt;
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.arc(-10, -30, 5, 0, Math.PI * 2);
+  ctx.arc(10, -30, 5, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Black/gold cheek armor plates (not just red disks)
+  for (const side of [-1, 1]) {
+    ctx.fillStyle = tip;
+    ctx.beginPath();
+    ctx.ellipse(side * 14, 0, 8, 6.5, side * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = lite;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(side * 14, 0, 8, 6.5, side * 0.15, 0, Math.PI * 2);
+    ctx.stroke();
+    // Gold gem on plate
+    ctx.fillStyle = lite;
+    ctx.beginPath();
+    ctx.arc(side * 14, 0, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e23b3d";
+    ctx.beginPath();
+    ctx.arc(side * 14, 0, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  eye(ctx, -5, -10, 3.0, 3.2);
+  eye(ctx, 5, -10, 3.0, 3.2);
+  ctx.fillStyle = "#333";
+  ctx.beginPath();
+  ctx.ellipse(0, -4, 1.5, 1.0, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#5a3208";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(-3.5, -1.5);
+  ctx.quadraticCurveTo(0, 2.5, 3.5, -1.5);
+  ctx.stroke();
+
+  // Orbiting sparks
+  for (let i = 0; i < 6; i++) {
+    const a = t / 5 + i * 1.05;
+    ctx.strokeStyle = i % 2 ? lite : bolt;
+    ctx.lineWidth = 2;
+    const x = Math.cos(a) * 30;
+    const y = Math.sin(a) * 18 - 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y - 4);
+    ctx.lineTo(x + 3, y);
+    ctx.lineTo(x - 2, y + 2);
+    ctx.lineTo(x + 4, y + 5);
+    ctx.stroke();
+  }
+}
+
+/** Evo 4 — MICHI GOD: celestial cat — upright/levitating, cloud wings, 3+ comet tails. */
+function drawCatGod(ctx, p, t) {
+  const fur = "#ff6ec8";
+  const lite = "#ffd0ee";
+  const ink = "#5a2040";
+  const pink = "#ff7ac2";
+  const deep = "#ff2a9a";
+  const cloud = "#f4f0ff";
+  const gold = "#ffe66a";
+  const tw = Math.sin(t / 10) * 4;
+  const flap = Math.sin(t / 7) * 0.18;
+  const hover = Math.sin(t / 11) * 1.5;
+
+  ctx.translate(0, hover - 4); // levitating lift
+
+  // Soft celestial aura
+  ctx.save();
+  ctx.globalAlpha = 0.35 + Math.sin(t / 8) * 0.08;
+  oval(ctx, 0, 2, 34, 26, "rgba(255,90,200,.35)");
+  ctx.restore();
+
+  // === CLOUD / STAR WINGS ===
+  function cloudWing(side) {
+    const s = side;
+    ctx.save();
+    ctx.translate(s * 6, -6);
+    ctx.rotate(s * (-0.55 + flap));
+    ctx.fillStyle = cloud;
+    // Cloud puffs forming wing sail
+    for (const [cx, cy, r] of [[8, -6, 7], [16, -12, 6], [22, -4, 7], [14, 4, 5.5], [6, 2, 5]]) {
+      ctx.beginPath();
+      ctx.arc(s * cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = pink;
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 14, -16, s * 24, -6);
+    ctx.quadraticCurveTo(s * 16, 6, 0, 4);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    star(ctx, s * 24, -10, 3.5, gold);
+    ctx.restore();
+  }
+  cloudWing(-1);
+  cloudWing(1);
+
+  // === 3+ COMET TAILS ===
+  for (let i = 0; i < 4; i++) {
+    const off = (i - 1.5) * 10;
+    ctx.strokeStyle = i % 2 ? lite : fur;
+    ctx.lineWidth = 5.5 - (i % 2);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(8, 16);
+    ctx.quadraticCurveTo(28 + off, 12 + tw, 36 + off, -4 + tw);
+    ctx.quadraticCurveTo(34 + off, -16 + tw, 22 + off, -14 + tw);
+    ctx.stroke();
+    // Comet tip spark
+    ctx.fillStyle = i % 2 ? gold : cloud;
+    ctx.beginPath();
+    ctx.arc(22 + off, -14 + tw, 2.8, 0, Math.PI * 2);
+    ctx.fill();
+    star(ctx, 22 + off, -14 + tw, 3.2, gold);
+  }
+
+  // UPRIGHT torso (standing/levitating — NOT loaf)
+  oval(ctx, 0, 8, 11, 14, fur, ink, 1.3);
+  oval(ctx, 0, 10, 6.5, 8, "rgba(255,255,255,.35)");
+
+  // Collar / chest armor
+  ctx.fillStyle = cloud;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 10, 4, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  // Bell pendant
+  ctx.fillStyle = gold;
+  ctx.beginPath();
+  ctx.arc(0, 6, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = deep;
+  ctx.beginPath();
+  ctx.arc(0, 7, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Floating hind paws (levitate cue)
+  ctx.fillStyle = fur;
+  for (const px of [-7, 7]) {
+    ctx.beginPath();
+    ctx.ellipse(px, 22, 5, 3.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = pink;
+  for (const px of [-7, 7]) {
+    ctx.beginPath();
+    ctx.ellipse(px, 22, 1.8, 1.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Tiny front paws held up
+  oval(ctx, -12, 6, 3.5, 4, fur);
+  oval(ctx, 12, 6, 3.5, 4, fur);
+
+  // Pointed divine ears
+  function godEar(dir) {
+    const bx = dir * 9;
+    ctx.fillStyle = fur;
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.25;
+    ctx.beginPath();
+    ctx.moveTo(bx - dir * 9, -18);
+    ctx.lineTo(bx + dir * 2, -44);
+    ctx.lineTo(bx + dir * 11, -18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = pink;
+    ctx.beginPath();
+    ctx.moveTo(bx - dir * 4.5, -20);
+    ctx.lineTo(bx + dir * 2, -38);
+    ctx.lineTo(bx + dir * 6.5, -20);
+    ctx.closePath();
+    ctx.fill();
+    star(ctx, bx + dir * 1.5, -42, 2.6, cloud);
+  }
+  godEar(-1);
+  godEar(1);
+
+  // Crescent + star crown
+  ctx.fillStyle = cloud;
+  ctx.beginPath();
+  ctx.arc(0, -30, 9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fur;
+  ctx.beginPath();
+  ctx.arc(3, -32, 7.5, 0, Math.PI * 2);
+  ctx.fill();
+  star(ctx, -7, -36, 3.4, gold);
+  star(ctx, 8, -38, 2.6, gold);
+
+  // Head (upright on torso)
+  oval(ctx, 0, -12, 14, 13, fur, ink, 1.3);
+  shine(ctx, -6, -17, 4.5, 2.8);
+  // Forehead gem
+  ctx.fillStyle = deep;
+  ctx.beginPath();
+  ctx.moveTo(0, -22);
+  ctx.lineTo(-3, -18);
+  ctx.lineTo(0, -15);
+  ctx.lineTo(3, -18);
+  ctx.closePath();
+  ctx.fill();
+
+  // Whiskers
+  ctx.strokeStyle = "rgba(255,240,250,.85)";
+  ctx.lineWidth = 1.2;
+  const wk = Math.sin(t / 16) * 1.1;
+  for (const dir of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(dir * 5, -8); ctx.lineTo(dir * 26, -14 + wk);
+    ctx.moveTo(dir * 5, -5); ctx.lineTo(dir * 28, -5);
+    ctx.moveTo(dir * 5, -2); ctx.lineTo(dir * 26, 4 - wk);
+    ctx.stroke();
+  }
+
+  eye(ctx, -5.5, -13, 3.4, 4.0);
+  eye(ctx, 5.5, -13, 3.4, 4.0);
+  ctx.fillStyle = deep;
+  ctx.beginPath();
+  ctx.moveTo(0, -6);
+  ctx.lineTo(-2.8, -8.5);
+  ctx.lineTo(2.8, -8.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1.15;
+  ctx.beginPath();
+  ctx.moveTo(0, -6); ctx.lineTo(0, -3.5);
+  ctx.arc(-2, -3.5, 2, 0, Math.PI);
+  ctx.moveTo(0, -3.5);
+  ctx.arc(2, -3.5, 2, 0, Math.PI);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(255,120,180,.5)";
+  ctx.beginPath();
+  ctx.ellipse(-10, -8, 3.2, 2.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(10, -8, 3.2, 2.1, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Orbiting stars
+  for (let i = 0; i < 5; i++) {
+    const a = t / 8 + i * 1.25;
+    star(ctx, Math.cos(a) * 26, Math.sin(a) * 16 - 2, 2.6, i % 2 ? gold : cloud);
+  }
+}
+
+/** Evo 4 — KÉtchup GOD: fry emperor — ketchup cape throne, salt armor, fry wings. */
+function drawKetchupGod(ctx, p, t) {
+  const fry = "#ffd76a";
+  const fryDark = "#e8a028";
+  const ket = "#e02020";
+  const ketLite = "#ff5a5a";
+  const ink = "#7a3a08";
+  const salt = "#fff8e8";
+  const drip = Math.sin(t / 9) * 2;
+  const flap = Math.sin(t / 8) * 0.12;
+
+  // Heat aura
+  ctx.save();
+  ctx.globalAlpha = 0.4 + Math.sin(t / 6) * 0.1;
+  oval(ctx, 0, 4, 34, 28, "rgba(255,215,106,.45)");
+  oval(ctx, 0, 4, 24, 18, "rgba(224,32,32,.28)");
+  ctx.restore();
+
+  // Salt-crystal / sculpted ketchup wings
+  function crystalWing(side) {
+    const s = side;
+    ctx.save();
+    ctx.translate(s * 6, 2);
+    ctx.rotate(s * (-0.65 + flap));
+    // Outer ketchup membrane
+    ctx.fillStyle = "rgba(224,32,32,.55)";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * 12, -18, s * 28, -8);
+    ctx.quadraticCurveTo(s * 22, 8, s * 10, 12);
+    ctx.quadraticCurveTo(s * 4, 4, 0, 2);
+    ctx.closePath();
+    ctx.fill();
+    // Salt crystal shards
+    ctx.fillStyle = salt;
+    ctx.strokeStyle = fry;
+    ctx.lineWidth = 1.1;
+    const shards = [[10, -10, 6], [18, -4, 5], [14, 4, 4.5], [22, -12, 4]];
+    for (const [cx, cy, r] of shards) {
+      ctx.beginPath();
+      ctx.moveTo(s * cx, cy - r);
+      ctx.lineTo(s * (cx + r * 0.7), cy);
+      ctx.lineTo(s * cx, cy + r * 0.6);
+      ctx.lineTo(s * (cx - r * 0.5), cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.fillStyle = ketLite;
+    ctx.beginPath();
+    ctx.arc(s * 28, -6, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  crystalWing(-1);
+  crystalWing(1);
+
+  // Massive ketchup throne-cape
+  ctx.fillStyle = ket;
+  ctx.beginPath();
+  ctx.moveTo(-10, -4);
+  ctx.quadraticCurveTo(-40, 10 + drip, -32, 44);
+  ctx.lineTo(32, 44);
+  ctx.quadraticCurveTo(40, 10 + drip, 10, -4);
+  ctx.fill();
+  // Drip lobes
+  for (const dx of [-22, -8, 8, 22]) {
+    ctx.beginPath();
+    ctx.ellipse(dx, 44 + drip * 0.5, 6, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Cape gold trim
+  ctx.strokeStyle = fry;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.moveTo(-10, -4);
+  ctx.quadraticCurveTo(-36, 12, -28, 40);
+  ctx.moveTo(10, -4);
+  ctx.quadraticCurveTo(36, 12, 28, 40);
+  ctx.stroke();
+
+  // Energy ketchup rings
+  ctx.strokeStyle = "rgba(255,90,90,.85)";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.ellipse(0, 12, 24, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(255,215,106,.75)";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(0, 12, 18, 5.5, 0.25, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Tall multi-fry body (bundle of fries = armor)
+  for (let i = -2; i <= 2; i++) {
+    ctx.fillStyle = i % 2 ? fry : "#ffe08a";
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(i * 5 - 3.5, -8, 7, 36, 3.5);
+    else ctx.rect(i * 5 - 3.5, -8, 7, 36);
+    ctx.fill();
+    ctx.stroke();
+  }
+  // Salt crystal armor flecks
+  ctx.fillStyle = salt;
+  for (let i = 0; i < 12; i++) {
+    const sx = ((i * 11) % 19) - 9;
+    const sy = ((i * 7) % 28) - 2;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 1.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Golden chest badge
+  ctx.fillStyle = fry;
+  ctx.beginPath();
+  ctx.moveTo(0, 2);
+  ctx.lineTo(-8, 10);
+  ctx.lineTo(0, 20);
+  ctx.lineTo(8, 10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = ket;
+  ctx.beginPath();
+  ctx.arc(0, 10, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Shoes
+  ctx.fillStyle = ketLite;
+  ctx.beginPath();
+  ctx.ellipse(-8, 30, 7, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(8, 30, 7, 3.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Head
+  oval(ctx, 0, -18, 11, 10, "#f4c2a8", ink, 1.2);
+  shine(ctx, -3.5, -22, 3.5, 2.2);
+  eye(ctx, -3.8, -19, 2.5, 2.7);
+  eye(ctx, 3.8, -19, 2.5, 2.7);
+  ctx.fillStyle = "rgba(255,120,120,.45)";
+  ctx.beginPath();
+  ctx.ellipse(-8, -15, 2.5, 1.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(8, -15, 2.5, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#c47a6a";
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.arc(0, -14, 3, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  // Ornate ketchup-bottle emperor crown
+  ctx.fillStyle = ket;
+  ctx.beginPath();
+  ctx.moveTo(-14, -26);
+  ctx.lineTo(14, -26);
+  ctx.lineTo(12, -32);
+  ctx.lineTo(-12, -32);
+  ctx.closePath();
+  ctx.fill();
+  // Bottle tip tower
+  ctx.fillRect(-5, -44, 10, 13);
+  ctx.beginPath();
+  ctx.moveTo(-5, -44);
+  ctx.lineTo(0, -56);
+  ctx.lineTo(5, -44);
+  ctx.closePath();
+  ctx.fill();
+  // Gold bands
+  ctx.fillStyle = fry;
+  ctx.fillRect(-5, -40, 10, 3);
+  ctx.fillRect(-14, -28, 28, 2.5);
+  // Crown jewels (salt crystals)
+  ctx.fillStyle = salt;
+  for (const jx of [-10, 0, 10]) {
+    ctx.beginPath();
+    ctx.moveTo(jx, -32);
+    ctx.lineTo(jx - 2.5, -38);
+    ctx.lineTo(jx + 2.5, -38);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Brim
+  ctx.fillStyle = ink;
+  ctx.fillRect(-16, -27, 32, 2.4);
+
+  // Arms holding ketchup scepter
+  oval(ctx, -14, 4, 4, 3, fry, ink, 1);
+  oval(ctx, 14, 4, 4, 3, fry, ink, 1);
+  ctx.strokeStyle = fryDark;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(16, 4);
+  ctx.lineTo(28, -24);
+  ctx.stroke();
+  ctx.fillStyle = ket;
+  ctx.fillRect(24, -36, 8, 14);
+  ctx.fillStyle = salt;
+  ctx.fillRect(25, -36, 6, 4);
+  star(ctx, 28, -40, 4, fry);
+
+  // Orbiting salt stars
+  for (let i = 0; i < 6; i++) {
+    const a = t / 7 + i * 1.05;
+    star(ctx, Math.cos(a) * 28, Math.sin(a) * 18, 2.8, i % 2 ? salt : fry);
+  }
+}

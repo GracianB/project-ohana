@@ -1,4 +1,4 @@
-// Sorpresas jugables: pez dorado, lluvia de estrellas, power-up secreto del hub.
+// Sorpresas jugables: pez dorado, lluvia de estrellas, GOD y power-ups de sala.
 import { showNotification } from "./notify.js";
 
 const GOLD_ROOMS = { beach: true, reef: true };
@@ -6,6 +6,7 @@ const STAR_DURATION = 480; // ~8s @ 60fps
 const STAR_DELAY_MIN = 90;
 const STAR_DELAY_MAX = 180;
 const AURA_SPARKLE_EVERY = 5;
+const GOD_BURST_FRAMES = 140;
 
 function emitStars(game, x, y, count, color) {
   if (!game || !game.fx) return;
@@ -23,6 +24,24 @@ function emitStars(game, x, y, count, color) {
   } catch (_) {}
 }
 
+function crownPosition(game, secret) {
+  if (game.roomId === "hub" && secret && !secret.taken) {
+    return { x: 120, y: 772 };
+  }
+
+  const orb = (game.orbs || []).find((o) => !o.taken);
+  if (orb) return { x: orb.x, y: Math.max(100, orb.y - 34) };
+
+  const elevated = (game.platforms || [])
+    .filter((pl) => pl.h <= 40 && pl.y > 120 && pl.y < 780)
+    .sort((a, b) => Math.abs(a.x + a.w / 2 - game.worldW / 2) - Math.abs(b.x + b.w / 2 - game.worldW / 2));
+  if (elevated.length) {
+    const pl = elevated[0];
+    return { x: pl.x + pl.w / 2, y: pl.y - 28 };
+  }
+  return { x: (game.worldW || 1600) / 2, y: (game.worldH || 900) - 128 };
+}
+
 export const Surprises = {
   // Pez dorado: como máximo uno marcado por sala al spawnear
   _goldenMarked: false,
@@ -36,7 +55,11 @@ export const Surprises = {
 
   // Power-up secreto (hub, 1× por run)
   secret: null, // {x,y,r,taken,secret:true} | null
-  flags: { secretHubTaken: false },
+  godCrown: null, // {x,y,r,taken,godCrown:true,roomId} | null
+  godBurst: 0,
+  godRings: [],
+  _godPulse: 0,
+  flags: { secretHubTaken: false, godBurstDone: false, godCrownTaken: false },
 
   reset() {
     this._goldenMarked = false;
@@ -46,7 +69,33 @@ export const Surprises = {
     this.starActive = false;
     this._skyPulse = 0;
     this.secret = null;
+    this.godCrown = null;
+    this.godBurst = 0;
+    this.godRings = [];
+    this._godPulse = 0;
     this.flags.secretHubTaken = false;
+    this.flags.godBurstDone = false;
+    this.flags.godCrownTaken = false;
+  },
+
+  /** Celebración única al alcanzar GOD (forma 5). */
+  onBecomeGod(game) {
+    if (!game || !game.player || this.flags.godBurstDone) return;
+    this.flags.godBurstDone = true;
+    this.godBurst = GOD_BURST_FRAMES;
+    this._godPulse = 0;
+    this.godRings = [
+      { r: 16, life: 75, maxLife: 75, maxR: 190, alpha: 0.82 },
+      { r: 10, life: 110, maxLife: 110, maxR: 280, alpha: 0.66 },
+      { r: 6, life: 145, maxLife: 145, maxR: 370, alpha: 0.5 },
+    ];
+    game.flash = Math.max(game.flash || 0, game.reduceMotion ? 5 : 10);
+    game.shake = Math.max(game.shake || 0, game.reduceMotion ? 4 : 8);
+    const p = game.player;
+    emitStars(game, p.x + p.w / 2, p.y + p.h / 2, 28, "#ffe66a");
+    try {
+      showNotification("¡GOD!", "El cielo te celebra.", "sala");
+    } catch (_) {}
   },
 
   /** Tras makeFoe: marca pez dorado en beach/reef (1/12, máx. 1 por sala). */
@@ -97,6 +146,13 @@ export const Surprises = {
     } else {
       this.secret = null;
     }
+
+    // Corona estelar: una oportunidad por sala, pero una sola recogida por run.
+    this.godCrown = null;
+    if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && !this.flags.godCrownTaken && Math.random() < 0.18) {
+      const pos = crownPosition(game, this.secret);
+      this.godCrown = { ...pos, r: 16, taken: false, godCrown: true, roomId: game.roomId };
+    }
   },
 
   /** Antes del heal genérico al matar. Pez dorado → bonus + aura cosmética. */
@@ -145,6 +201,31 @@ export const Surprises = {
         } catch (_) {}
       }
     }
+
+    // --- Burst GOD: estrellas locales + anillos expansivos ---
+    if (this.godBurst > 0) {
+      this.godBurst--;
+      this._godPulse++;
+      const every = game.reduceMotion ? 8 : 3;
+      if (this._godPulse % every === 0) {
+        emitStars(
+          game,
+          p.x + p.w / 2 + (Math.random() - 0.5) * 150,
+          p.y + p.h / 2 + (Math.random() - 0.5) * 100,
+          game.reduceMotion ? 2 : 6,
+          Math.random() < 0.5 ? "#ffe66a" : "#ffffff"
+        );
+      }
+      // Refuerzo leve y temporal; no bloquea el control ni la transición de sala.
+      game.shake = Math.max(game.shake || 0, game.reduceMotion ? 2 : 5);
+      if (this._godPulse < 18) game.flash = Math.max(game.flash || 0, game.reduceMotion ? 1 : 3);
+    }
+    for (const ring of this.godRings) {
+      if (ring.life <= 0) continue;
+      ring.life--;
+      ring.r = Math.min(ring.maxR, ring.r + ring.maxR / ring.maxLife);
+    }
+    this.godRings = this.godRings.filter((ring) => ring.life > 0);
 
     // --- Lluvia de estrellas (solo space) ---
     if (game.roomId === "space") {
@@ -222,6 +303,33 @@ export const Surprises = {
         this.secret = null;
       }
     }
+
+    // --- Corona estelar (GOD, 1× por run) ---
+    const crown = this.godCrown;
+    if (crown && !crown.taken && game.roomId === crown.roomId && p.evo >= 4 && !p.dead) {
+      const dx = p.x + p.w / 2 - crown.x;
+      const dy = p.y + p.h / 2 - crown.y;
+      if (Math.hypot(dx, dy) < 40) {
+        crown.taken = true;
+        this.flags.godCrownTaken = true;
+        p.invuln = Math.max(p.invuln || 0, 120);
+        p.health = p.maxHealth;
+        p.dash = 28;
+        game.score = (game.score || 0) + 100;
+        p._surpriseAura = Math.max(p._surpriseAura || 0, 600);
+        game.flash = Math.max(game.flash || 0, 12);
+        game.shake = Math.max(game.shake || 0, 8);
+        emitStars(game, crown.x, crown.y, 30, "#f0c040");
+        emitStars(game, crown.x, crown.y, 12, "#fff4b0");
+        try {
+          if (game.nums) game.nums.add(crown.x, crown.y, "+100", "#ffe66a");
+        } catch (_) {}
+        try {
+          showNotification("CORONA ESTELAR", "Solo los GOD brillan así.", "sala");
+        } catch (_) {}
+        this.godCrown = null;
+      }
+    }
   },
 
   draw(ctx, cam, t, game) {
@@ -233,6 +341,26 @@ export const Surprises = {
       ctx.save();
       ctx.fillStyle = `rgba(200,220,255,${a})`;
       ctx.fillRect(0, 0, ctx.canvas ? ctx.canvas.width : 1280, ctx.canvas ? ctx.canvas.height : 720);
+      ctx.restore();
+    }
+
+    // Anillos de energía del ascenso a GOD, centrados en el jugador.
+    const p = game && game.player;
+    if (p && this.godRings.length) {
+      const rings = game.reduceMotion ? this.godRings.slice(-2) : this.godRings;
+      const cx = p.x + p.w / 2 - cam.x;
+      const cy = p.y + p.h / 2 - cam.y;
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      rings.forEach((ring, i) => {
+        const alpha = ring.alpha * Math.max(0, ring.life / ring.maxLife);
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = i % 2 ? "#ffffff" : "#ffe66a";
+        ctx.lineWidth = game.reduceMotion ? 2 : 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
+        ctx.stroke();
+      });
       ctx.restore();
     }
 
@@ -273,6 +401,42 @@ export const Surprises = {
       ctx.lineTo(sx - 3, sy - 2);
       ctx.closePath();
       ctx.fill();
+      ctx.restore();
+    }
+
+    // Corona estelar: pickup dorado muy visible y flotante.
+    const crown = this.godCrown;
+    if (crown && !crown.taken && game) {
+      const cx = crown.x - cam.x;
+      const cy = crown.y - cam.y + Math.sin((t || 0) / 9) * 5;
+      const pulse = 0.75 + 0.25 * Math.sin((t || 0) / 7);
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = 0.3 + pulse * 0.2;
+      ctx.fillStyle = "#ffd84a";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 25 + pulse * 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.95;
+      ctx.strokeStyle = "#fff8bb";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy + 2, 18 + pulse * 2, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "#f0c040";
+      ctx.strokeStyle = "#fff4a8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 16, cy - 6);
+      ctx.lineTo(cx - 10, cy + 9);
+      ctx.lineTo(cx + 10, cy + 9);
+      ctx.lineTo(cx + 16, cy - 6);
+      ctx.lineTo(cx + 7, cy + 1);
+      ctx.lineTo(cx, cy - 11);
+      ctx.lineTo(cx - 7, cy + 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
       ctx.restore();
     }
   },

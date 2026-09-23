@@ -387,15 +387,22 @@ function capEnemy(e, vx) {
 
 const CASTERS = {
   ukulele(g) {
+    const evo = g.player.evo || 0;
     shot(g, { color: "#ffb347", w: 22, h: 22, dmg: 18, vx: 10, spin: true, shape: "note" });
-    if (g.player.evo >= 1) shot(g, { color: "#ffd36a", w: 16, h: 16, dmg: 10, vx: 8, vy: -2.6, spin: true, shape: "note" });
-    if (g.player.evo >= 2) shot(g, { color: "#ff8a3a", w: 16, h: 16, dmg: 10, vx: 8, vy: 2.6, spin: true, shape: "note" });
-    if (g.player.evo >= 3) shot(g, { color: "#fff1a8", w: 14, h: 14, dmg: 8, vx: 6, spin: true, shape: "leaf" });
-    boom(g, "#ffb347", 10);
+    if (evo >= 1) shot(g, { color: "#ffd36a", w: 16, h: 16, dmg: 10, vx: 8, vy: -2.6, spin: true, shape: "note" });
+    if (evo >= 2) shot(g, { color: "#ff8a3a", w: 16, h: 16, dmg: 10, vx: 8, vy: 2.6, spin: true, shape: "note" });
+    if (evo >= 3) shot(g, { color: "#fff1a8", w: 14, h: 14, dmg: 8, vx: 6, spin: true, shape: "leaf" });
+    if (evo >= 4) {
+      shot(g, { color: "#ffd76a", w: 28, h: 28, dmg: 22, vx: 12, spin: true, shape: "note" });
+      shot(g, { color: "#2ec9c0", w: 18, h: 18, dmg: 14, vx: 9, vy: -3.2, spin: true, shape: "leaf" });
+      shot(g, { color: "#ff4d78", w: 18, h: 18, dmg: 14, vx: 9, vy: 3.2, spin: true, shape: "leaf" });
+      boom(g, "#ffd76a", 22);
+    } else boom(g, "#ffb347", 10);
   },
   hula(g) {
-    g.player.invuln = Math.max(g.player.invuln, 18);
-    ringNova(g, "#ff6ad5", 15, 14);
+    const evo = g.player.evo || 0;
+    g.player.invuln = Math.max(g.player.invuln, 18 + (evo >= 4 ? 8 : 0));
+    ringNova(g, evo >= 4 ? "#ffd76a" : "#ff6ad5", evo >= 4 ? 22 : 15, evo >= 4 ? 18 : 14);
   },
   ohana(g) {
     const heal = 18 + g.player.evo * 6;
@@ -405,28 +412,42 @@ const CASTERS = {
     skyStrike(g, "#ffe66a", 42);
   },
   dash(g) {
+    const evo = g.player.evo || 0;
     shot(g, { color: "#66ccff", w: 28, h: 12, dmg: 20, vx: 13, shape: "bolt" });
-    if (g.player.evo >= 2) shot(g, { color: "#d6f4ff", w: 18, h: 10, dmg: 10, vx: 10, vy: -1.4, shape: "bolt" });
-    boom(g, "#6af", 8);
+    if (evo >= 2) shot(g, { color: "#d6f4ff", w: 18, h: 10, dmg: 10, vx: 10, vy: -1.4, shape: "bolt" });
+    if (evo >= 4) {
+      shot(g, { color: "#9ef0ff", w: 40, h: 16, dmg: 28, vx: 16, shape: "bolt" });
+      shot(g, { color: "#a064ff", w: 20, h: 20, dmg: 16, vx: 11, vy: -2.5, shape: "orb" });
+      shot(g, { color: "#a064ff", w: 20, h: 20, dmg: 16, vx: 11, vy: 2.5, shape: "orb" });
+      boom(g, "#9ef0ff", 20);
+    } else boom(g, "#6af", 8);
   },
   claws(g) {
-    g.player.vx = 10 * g.player.facing;
-    g.player.invuln = Math.max(g.player.invuln, 12);
-    ringNova(g, "#9cf", 14, 12);
+    const evo = g.player.evo || 0;
+    g.player.vx = (10 + (evo >= 4 ? 4 : 0)) * g.player.facing;
+    g.player.invuln = Math.max(g.player.invuln, 12 + (evo >= 4 ? 6 : 0));
+    ringNova(g, evo >= 4 ? "#9ef0ff" : "#9cf", evo >= 4 ? 22 : 14, evo >= 4 ? 16 : 12);
   },
   exp626(g) {
     skyStrike(g, "#66ccff", 44);
   },
   shock(g) {
+    const evo = g.player.evo || 0;
     shot(g, { color: "#ffe14a", w: 30, h: 14, dmg: 19, vx: 13, shape: "zap" });
-    if (g.player.evo >= 1) shot(g, { color: "#fff36a", w: 18, h: 10, dmg: 9, vx: 11, vy: -2.4, shape: "zap" });
-    if (g.player.evo >= 3) shot(g, { color: "#fff", w: 16, h: 10, dmg: 8, vx: 9, vy: 2.4, shape: "zap" });
-    boom(g, "#fff36a", 10);
+    if (evo >= 1) shot(g, { color: "#fff36a", w: 18, h: 10, dmg: 9, vx: 11, vy: -2.4, shape: "zap" });
+    if (evo >= 3) shot(g, { color: "#fff", w: 16, h: 10, dmg: 8, vx: 9, vy: 2.4, shape: "zap" });
+    if (evo >= 4) {
+      shot(g, { color: "#7ecbff", w: 48, h: 18, dmg: 30, vx: 16, shape: "zap" });
+      shot(g, { color: "#fff6a0", w: 24, h: 24, dmg: 16, vx: 10, vy: -3, shape: "orb" });
+      shot(g, { color: "#fff6a0", w: 24, h: 24, dmg: 16, vx: 10, vy: 3, shape: "orb" });
+      boom(g, "#7ecbff", 24);
+    } else boom(g, "#fff36a", 10);
   },
   quick(g) {
-    g.player.vx = 12 * g.player.facing;
-    g.player.invuln = Math.max(g.player.invuln, 12);
-    ringNova(g, "#fff36a", 13, 12);
+    const evo = g.player.evo || 0;
+    g.player.vx = (12 + (evo >= 4 ? 4 : 0)) * g.player.facing;
+    g.player.invuln = Math.max(g.player.invuln, 12 + (evo >= 4 ? 6 : 0));
+    ringNova(g, evo >= 4 ? "#7ecbff" : "#fff36a", evo >= 4 ? 20 : 13, evo >= 4 ? 16 : 12);
   },
   thunder(g) {
     skyStrike(g, "#ffe14a", 48);
@@ -462,34 +483,43 @@ const CASTERS = {
       }
       boom(g, "#c96b2a", 16);
     } else {
-      // GOD: short god-beam burst (compact, high punch)
-      shot(g, { color: "#ffe66a", w: 52, h: 14, dmg: 34, vx: 16, life: 16, shape: "bolt" });
-      shot(g, { color: "#fff8c8", w: 30, h: 8, dmg: 18, vx: 18, life: 12, shape: "bolt" });
-      shot(g, { color: "#c8ff7a", w: 18, h: 18, dmg: 12, vx: 12, vy: -1.5, life: 14, shape: "flame" });
-      shot(g, { color: "#c8ff7a", w: 18, h: 18, dmg: 12, vx: 12, vy: 1.5, life: 14, shape: "flame" });
-      boom(g, "#ffe66a", 18);
+      // GOD: emerald-gold comet beam + orbiting embers
+      shot(g, { color: "#ffd84a", w: 64, h: 18, dmg: 42, vx: 17, life: 20, shape: "bolt" });
+      shot(g, { color: "#fff1a0", w: 40, h: 10, dmg: 24, vx: 19, life: 16, shape: "bolt" });
+      shot(g, { color: "#2ecf7a", w: 22, h: 22, dmg: 18, vx: 13, vy: -2.2, life: 18, shape: "flame" });
+      shot(g, { color: "#2ecf7a", w: 22, h: 22, dmg: 18, vx: 13, vy: 2.2, life: 18, shape: "flame" });
+      shot(g, { color: "#0f8a4a", w: 16, h: 16, dmg: 12, vx: 10, vy: -3.5, life: 14, shape: "orb" });
+      shot(g, { color: "#0f8a4a", w: 16, h: 16, dmg: 12, vx: 10, vy: 3.5, life: 14, shape: "orb" });
+      boom(g, "#ffd84a", 28);
     }
   },
   wing(g) {
     const evo = g.player.evo || 0;
-    g.player.vy = -7 - (evo >= 4 ? 1.5 : 0);
-    g.player.invuln = Math.max(g.player.invuln, 12);
-    // GOD earns a tiny hop-glide on Aletazo only (forms themselves have no glide)
-    if (evo >= 4) g.player.gliding = Math.max(g.player.gliding || 0, 22);
-    ringNova(g, evo >= 4 ? "#ffe66a" : "#ff8844", 14 + evo, 12 + (evo >= 3 ? 2 : 0));
+    g.player.vy = -7 - (evo >= 4 ? 2.5 : 0);
+    g.player.invuln = Math.max(g.player.invuln, 12 + (evo >= 4 ? 6 : 0));
+    // GOD form already glides; Aletazo still grants a boosted hop-glide burst
+    if (evo >= 4) g.player.gliding = Math.max(g.player.gliding || 0, 36);
+    ringNova(g, evo >= 4 ? "#2ecf7a" : "#ff8844", 14 + evo + (evo >= 4 ? 8 : 0), 12 + (evo >= 3 ? 2 : 0) + (evo >= 4 ? 4 : 0));
   },
   rage(g) {
     skyStrike(g, "#ff4a20", 46);
   },
   claw(g) {
+    const evo = g.player.evo || 0;
     shot(g, { color: "#ff8ad4", vx: 11, w: 18, h: 18, dmg: 15, spin: true, shape: "yarn" });
-    if (g.player.evo >= 1) shot(g, { color: "#ffb6e4", vx: 9, vy: -2.2, w: 14, h: 14, dmg: 8, spin: true, shape: "yarn" });
-    if (g.player.evo >= 3) shot(g, { color: "#fff", vx: 7, vy: 2, w: 12, h: 12, dmg: 7, spin: true, shape: "crescent" });
-    boom(g, "#ff8ad4", 8);
+    if (evo >= 1) shot(g, { color: "#ffb6e4", vx: 9, vy: -2.2, w: 14, h: 14, dmg: 8, spin: true, shape: "yarn" });
+    if (evo >= 3) shot(g, { color: "#fff", vx: 7, vy: 2, w: 12, h: 12, dmg: 7, spin: true, shape: "crescent" });
+    if (evo >= 4) {
+      shot(g, { color: "#e8e0ff", vx: 13, w: 24, h: 24, dmg: 20, spin: true, shape: "heart" });
+      shot(g, { color: "#ff7ad8", vx: 10, vy: -3, w: 16, h: 16, dmg: 12, spin: true, shape: "yarn" });
+      shot(g, { color: "#ff7ad8", vx: 10, vy: 3, w: 16, h: 16, dmg: 12, spin: true, shape: "yarn" });
+      boom(g, "#ff7ad8", 20);
+    } else boom(g, "#ff8ad4", 8);
   },
   catdash(g) {
-    g.player.invuln = Math.max(g.player.invuln, 14);
-    ringNova(g, "#ff8ad4", 13, 12);
+    const evo = g.player.evo || 0;
+    g.player.invuln = Math.max(g.player.invuln, 14 + (evo >= 4 ? 8 : 0));
+    ringNova(g, evo >= 4 ? "#e8e0ff" : "#ff8ad4", evo >= 4 ? 20 : 13, evo >= 4 ? 16 : 12);
   },
   lives(g) {
     const heal = 16 + g.player.evo * 5;
@@ -532,13 +562,21 @@ const CASTERS = {
     g.fx.emit(tx, ty, { color: "#ffe6a0", count: 16, size: 4, speed: 4, star: true });
   },
   salt(g) {
+    const evo = g.player.evo || 0;
     shot(g, { color: "#fff3c0", vx: 11, w: 16, h: 16, dmg: 15, spin: true, shape: "yarn" });
-    if (g.player.evo >= 1) shot(g, { color: "#ffe08a", vx: 9, vy: -2, w: 12, h: 12, dmg: 8, spin: true, shape: "yarn" });
-    boom(g, "#fff3c0", 8);
+    if (evo >= 1) shot(g, { color: "#ffe08a", vx: 9, vy: -2, w: 12, h: 12, dmg: 8, spin: true, shape: "yarn" });
+    if (evo >= 4) {
+      shot(g, { color: "#ff5a3a", vx: 14, w: 28, h: 20, dmg: 26, shape: "flame" });
+      shot(g, { color: "#fff8e8", vx: 10, vy: -2.8, w: 14, h: 14, dmg: 12, spin: true, shape: "yarn" });
+      shot(g, { color: "#fff8e8", vx: 10, vy: 2.8, w: 14, h: 14, dmg: 12, spin: true, shape: "yarn" });
+      shot(g, { color: "#ffd76a", vx: 8, vy: -1.2, w: 12, h: 12, dmg: 10, spin: true, shape: "orb" });
+      boom(g, "#ff5a3a", 22);
+    } else boom(g, "#fff3c0", 8);
   },
   ketchup(g) {
-    g.player.invuln = Math.max(g.player.invuln, 12);
-    ringNova(g, "#e23b3b", 14, 12);
+    const evo = g.player.evo || 0;
+    g.player.invuln = Math.max(g.player.invuln, 12 + (evo >= 4 ? 8 : 0));
+    ringNova(g, evo >= 4 ? "#ff5a3a" : "#e23b3b", evo >= 4 ? 22 : 14, evo >= 4 ? 18 : 12);
   },
   fryer(g) {
     skyStrike(g, "#ffd36a", 42);

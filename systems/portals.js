@@ -85,6 +85,9 @@ export class Portals {
     this._kick = null; // { vx, vy, facing } post-aterrizaje
     this._visual = { scale: 1, alpha: 1 }; // flags para game.js
     this._lockNotifyCD = 0;
+    this.trailTicks = 0; // estela post-aterrizaje
+    this.trailType = null; // "catapult" | "blackhole"
+    this._landingType = null;
   }
 
   spawnFromRoom(room) {
@@ -94,6 +97,8 @@ export class Portals {
     this.charge = null;
     this.orbitals = [];
     this._visual = { scale: 1, alpha: 1 };
+    this.trailTicks = 0;
+    this.trailType = null;
     // Orbitals por cada BH
     for (const p of this.items) {
       if (p.type === "blackhole") {
@@ -107,7 +112,7 @@ export class Portals {
     return this.items[0];
   }
 
-  /** Evita reentrada inmediata al aterrizar. */
+  /** Evita reentrada inmediata al aterrizar. Marca trailTicks para estela. */
   armArrival() {
     this.cooldown = 110;
     this.pending = null;
@@ -116,6 +121,9 @@ export class Portals {
     this._visual = { scale: 1, alpha: 1 };
     this._overlay = null;
     this._kick = null;
+    this.trailType = this._landingType || this.trailType || "catapult";
+    this.trailTicks = this.trailType === "blackhole" ? 18 : 16;
+    this._landingType = null;
   }
 
   /**
@@ -130,6 +138,9 @@ export class Portals {
     this._visual = { scale: 1, alpha: 1 };
     this._overlay = null;
     this._kick = null;
+    this.trailTicks = 0;
+    this.trailType = null;
+    this._landingType = null;
     this.cooldown = 90;
     this.prompt = "";
     this.near = null;
@@ -201,6 +212,12 @@ export class Portals {
     this.prompt = "";
 
     const reduce = !!(game && game.reduceMotion);
+    // Estela post-aterrizaje (catapult ámbar / BH púrpura)
+    if (this.trailTicks > 0) {
+      this._emitLandingTrail(game, reduce);
+      this.trailTicks--;
+      if (this.trailTicks <= 0) this.trailType = null;
+    }
     const p = game && game.player;
     if (!p || p.dead) {
       // Evitar soft-lock: charge/pending/visual no se limpian si el player muere mid-viaje
@@ -210,6 +227,10 @@ export class Portals {
         this._visual = { scale: 1, alpha: 1 };
         this._overlay = null;
         this.cooldown = Math.max(this.cooldown, 40);
+      }
+      if (this.trailTicks > 0) {
+        this.trailTicks = 0;
+        this.trailType = null;
       }
       this._tickOrbitals(reduce);
       this._springArms(null, reduce);
@@ -275,10 +296,10 @@ export class Portals {
           const locked = isDestLocked(portal.dest, evo);
           if (locked) {
             const need = destNeedEvo(portal.dest);
-            this.prompt = "◉ Agujero · " + portal.label + " · Forma " + (need + 1);
+            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · bloqueado · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "◉ Agujero · " + portal.label;
+            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · acércate para viajar";
             if (this.cooldown <= 0) this._beginCharge(portal, "blackhole", reduce);
           }
           break;
@@ -291,10 +312,10 @@ export class Portals {
           const locked = isDestLocked(portal.dest, evo);
           if (locked) {
             const need = destNeedEvo(portal.dest);
-            this.prompt = "⚔ Catapulta · Forma " + (need + 1);
+            this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "⚔ Catapulta → " + portal.label + " · E o párate encima";
+            this.prompt = "⚔ CATAPULTA → " + portal.label + " · [E] o párate encima";
             // Auto-lanzamiento al pisar (grounded); cooldown bloquea re-absorción
             if (this.cooldown <= 0 && p.grounded) {
               this._beginCharge(portal, "catapult", reduce);
@@ -601,12 +622,13 @@ export class Portals {
 
   _makeKick(portal, type) {
     // Facing hacia el centro de la sala destino aproximado
+    this._landingType = type === "blackhole" ? "blackhole" : "catapult";
     const mid = portal.x + portal.w / 2;
     const facing = mid < 800 ? 1 : -1;
     if (type === "blackhole") {
-      return { vx: facing * 2.4, vy: -3.2, facing };
+      return { vx: facing * 2.4, vy: -3.2, facing, type: "blackhole" };
     }
-    return { vx: facing * 5.5, vy: -7.5, facing };
+    return { vx: facing * 5.5, vy: -7.5, facing, type: "catapult" };
   }
 
   _queue(portal) {
@@ -682,11 +704,51 @@ export class Portals {
     }
   }
 
+  /** Estela de partículas al aterrizar (ámbar / púrpura). Respeta reduceMotion. */
+  _emitLandingTrail(game, reduce) {
+    if (!game || !game.fx || !game.player || game.player.dead) return;
+    if (reduce && this.trailTicks % 3 !== 0) return;
+    const p = game.player;
+    const isBH = this.trailType === "blackhole";
+    const color = isBH ? "#c9a0ff" : "#ffc078";
+    const colorHi = isBH ? "#e8d0ff" : "#ffe8a0";
+    // Varios emit a lo largo del camino (atrás según velocidad)
+    const steps = reduce ? 1 : 3;
+    for (let i = 0; i < steps; i++) {
+      const k = (i + 1) / (steps + 1);
+      const px = p.x + p.w / 2 - (p.vx || 0) * k * 4;
+      const py = p.y + p.h / 2 - (p.vy || 0) * k * 4;
+      game.fx.emit(px, py, {
+        color: i % 2 ? colorHi : color,
+        count: reduce ? 1 : 2,
+        size: reduce ? 1.8 : 2.4,
+        up: 0.35 + Math.random() * 0.5,
+        speed: 0.9 + Math.random() * 0.8,
+        life: reduce ? 8 : 12 + Math.floor(Math.random() * 6),
+        gravity: 0.03
+      });
+    }
+    if (!reduce && this.trailTicks % 4 === 0) {
+      game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
+        color: "#fff",
+        count: 1,
+        size: 1.6,
+        up: 0.7,
+        speed: 1.4,
+        life: 10,
+        star: true
+      });
+    }
+  }
+
   draw(ctx, cam, t) {
     if (!ctx || !cam) return;
     for (const portal of this.items) {
       if (portal.type === "blackhole") drawBlackhole(ctx, cam, t, portal, this.orbitals, this.charge);
       else drawCatapult(ctx, cam, t, portal, this.charge);
+      if (this.near === portal && this.prompt) {
+        drawNearPrompt(ctx, cam, portal, this.prompt, t);
+      }
     }
   }
 }
@@ -857,6 +919,46 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
   ctx.fillText("◉ " + (portal.label || "Agujero"), cx, cy - r - 12);
+  ctx.restore();
+}
+
+/** Label grande encima del pad cuando el player está near (HUD #prompt es ~12px). */
+function drawNearPrompt(ctx, cam, portal, text, t) {
+  if (!text) return;
+  const isBH = portal.type === "blackhole";
+  let ax, ay;
+  if (isBH) {
+    const r = Math.min(portal.w, portal.h) * 0.48;
+    ax = portal.x + portal.w / 2 - cam.x;
+    ay = portal.y + portal.h / 2 - cam.y - r - 28;
+  } else {
+    ax = portal.x + portal.w / 2 - cam.x;
+    ay = portal.y - cam.y - 28;
+  }
+  const bob = Math.sin((t || 0) / 10) * 2;
+  const icon = isBH ? "◉" : "⚔";
+  const body = String(text).replace(/^[◉⚔]\s*/, "");
+  const fill = isBH ? "#f0e0ff" : "#ffe8c8";
+  const glow = isBH ? "rgba(160,80,255,.85)" : "rgba(255,180,60,.85)";
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "900 16px Outfit, system-ui, sans-serif";
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = "rgba(0,0,0,.6)";
+  ctx.fillText(icon + " " + body, ax + 1.5, ay + bob + 1.5);
+  ctx.fillStyle = fill;
+  ctx.fillText(icon + " " + body, ax, ay + bob);
+  ctx.shadowBlur = 0;
+  // Línea de acento bajo el texto
+  const tw = Math.min(220, 28 + body.length * 7.2);
+  ctx.strokeStyle = isBH ? "rgba(200,150,255,.55)" : "rgba(255,200,120,.55)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(ax - tw / 2, ay + bob + 4);
+  ctx.lineTo(ax + tw / 2, ay + bob + 4);
+  ctx.stroke();
   ctx.restore();
 }
 

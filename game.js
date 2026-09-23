@@ -186,15 +186,22 @@ function placeFrom(fromDir) {
     } else {
       p.x = safeX(180);
     }
-    // Kick ANTES de armArrival (armArrival limpia pending, no el kick)
+    // Kick ANTES de armArrival (armArrival limpia pending, no el kick; marca trailTicks)
     const kick = typeof portals.arrivalKick === "function" ? portals.arrivalKick() : null;
     portals.armArrival();
     if (kick) {
       p.vx = kick.vx || 0;
       p.vy = kick.vy || 0;
       if (kick.facing) p.facing = kick.facing;
+      if (kick.type) portals.trailType = kick.type;
     }
-    const col = (kick && Math.abs(kick.vy || 0) > 5) ? "#ffc078" : "#c9a0ff";
+    // Micro-shake al aterrizar (además del shake de salida)
+    game.shake = Math.min(14, (game.shake || 0) + (reduceMotion ? 3 : 5));
+    // reduceMotion: estela más corta
+    if (reduceMotion && portals.trailTicks > 0) {
+      portals.trailTicks = Math.min(portals.trailTicks, 8);
+    }
+    const col = (kick && (kick.type === "catapult" || Math.abs(kick.vy || 0) > 5)) ? "#ffc078" : "#c9a0ff";
     game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
       color: col, count: reduceMotion ? 10 : 22, size: 4, up: 1.8, speed: 3.2, life: 18, star: true
     });
@@ -215,6 +222,19 @@ function isAirFoe(e) {
     || e.kind === "brasita" || e.kind === "ufo"
     || (e.kind === "cucaracho" && e.evo >= 2)
     || (e.boss && e.airborne);
+}
+
+function applyElite(e) {
+  if (!e || e.elite) return e;
+  e.elite = true;
+  e.hp = Math.round(e.hp * 1.75);
+  e.max = e.hp;
+  e.w = Math.round(e.w * 1.1);
+  e.h = Math.round(e.h * 1.1);
+  // Tint saturado / dorado para que se note en juego
+  e.color = e.color || "#ffd24a";
+  e.eliteTint = "#ffd24a";
+  return e;
 }
 
 function makeFoe(x, y, kind, roomId, i, opts) {
@@ -304,7 +324,7 @@ function makeFoe(x, y, kind, roomId, i, opts) {
     return {
       x, y, w: 34, h: 28,
       vx: 0, vy: 0, hp, max: hp, kind: "rana", color: "#4caf50",
-      boss: false, shoot: 0, hopCd: 35 + i * 12, sitting: 0, telegraph: false,
+      boss: false, shoot: 0, hopCd: 35 + i * 12, sitting: 0, hopWind: 0, telegraph: false,
     };
   }
   if (kind === "cangrejo") {
@@ -313,7 +333,7 @@ function makeFoe(x, y, kind, roomId, i, opts) {
       x, y, w: 36, h: 24,
       vx: (i % 2 ? 1 : -1) * (1.5 + hard * 0.25),
       vy: 0, hp, max: hp, kind: "cangrejo", color: "#e07040",
-      boss: false, shoot: 0, claws: false, telegraph: false,
+      boss: false, shoot: 0, claws: false, clawCd: 40 + i * 10, clawWind: 0, clawSnap: 0, telegraph: false,
     };
   }
   if (kind === "gaviota") {
@@ -402,7 +422,11 @@ function loadRoom(id, fromDir) {
   game.platforms = r.plats.map((p) => ({ x: p[0], y: p[1], w: p[2], h: p[3] }));
   game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
   game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
-  game.enemies = (r.foes || []).map((f, i) => makeFoe(f[0], f[1], f[2], id, i));
+  game.enemies = (r.foes || []).map((f, i) => {
+    const e = makeFoe(f[0], f[1], f[2], id, i, f[3] ? { elite: true } : undefined);
+    if (f[3]) applyElite(e);
+    return e;
+  });
   for (const e of game.enemies) Surprises.onMakeFoe(e, id);
   for (const e of game.enemies) {
     if (isAirFoe(e)) continue;
@@ -503,11 +527,25 @@ function evolve(reason) {
   }
   p.evo += 1;
   applyForm(p);
-  game.shake = 12;
-  game.flash = 14;
+  if (p.evo === 4) Surprises.onBecomeGod(game);
+  const toGod = p.evo >= 4;
+  game.shake = toGod ? 26 : 12;
+  game.flash = toGod ? 32 : 14;
   beep("evo");
   showNotification("FORMA " + (p.evo + 1) + "/5", p.name);
-  game.fx.emit(p.x + p.w / 2, p.y, { color: p.color, count: 48, size: 6, up: 2 });
+  game.fx.emit(p.x + p.w / 2, p.y, {
+    color: p.color,
+    count: toGod ? 96 : 48,
+    size: toGod ? 10 : 6,
+    up: toGod ? 3.5 : 2,
+    speed: toGod ? 5.5 : undefined,
+    star: toGod || undefined,
+  });
+  if (toGod) {
+    game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
+      color: "#fff8c8", count: 48, size: 7, up: 2.5, speed: 4, star: true,
+    });
+  }
   save();
 }
 function respawn() {
@@ -595,10 +633,11 @@ function melee() {
       let d = dBase;
       if (e.boss) d = Math.ceil(d * 0.5);
       e.hp -= d;
-      e.vx = (e.boss ? 3.5 : 8 + evo) * p.facing;
-      e.vy = Math.min(e.vy || 0, -2 - evo * 0.4);
-      e.stun = Math.max(e.stun || 0, 12 + evo * 3);
-      if (!e.flash || e.flash < 10) e.flash = 10;
+      // Knockback + hitstun más perceptibles (sin soft-lock)
+      e.vx = (e.boss ? 4 : 12 + evo * 1.2) * p.facing;
+      e.vy = Math.min(e.vy || 0, (e.boss ? -2.2 : -4.2) - evo * 0.55);
+      e.stun = Math.max(e.stun || 0, Math.min(28, 16 + evo * 3));
+      e.flash = Math.max(e.flash || 0, 16);
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       punch(e.x, e.y, p.color);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
@@ -659,8 +698,10 @@ function melee() {
       // Near the bolt segment
       if (Math.abs(ey - oy) < 48 && ((p.facing > 0 && ex > ox && ex < tx + 20) || (p.facing < 0 && ex < ox && ex > tx - 20))) {
         e.hp -= boltDmg;
-        e.vx = 5 * p.facing;
-        if (!e.flash || e.flash < 8) e.flash = 8;
+        e.vx = 8 * p.facing;
+        e.vy = Math.min(e.vy || 0, -3);
+        e.stun = Math.max(e.stun || 0, 10);
+        e.flash = Math.max(e.flash || 0, 14);
         game.nums.add(e.x, e.y, "" + boltDmg, "#7ecbff", true);
         punch(e.x, e.y, "#7ecbff");
       }
@@ -673,9 +714,10 @@ function hurtPlayer(amount, label) {
   if (!p || p.dead || p.invuln > 0) return;
   p.health -= amount;
   p.invuln = 28;
-  p.vx = Math.sign(p.vx || p.facing || 1) * -6;
-  p.vy = -5;
-  game.shake = 10;
+  p.vx = Math.sign(p.vx || p.facing || 1) * -8;
+  p.vy = -6.5;
+  p.flash = Math.max(p.flash || 0, 10);
+  game.shake = 12;
   game.combo = 0;
   beep("hurt");
   game.nums.add(p.x, p.y, label || ("-" + Math.round(amount)), "#ff6a7a");
@@ -926,6 +968,17 @@ function updateEnemies() {
   if (!game.player) return;
   for (const e of game.enemies) {
     if (e.flash > 0) e.flash--;
+    if (e.stun > 0) {
+      e.stun--;
+      if (!e.boss && e.stun > 5) {
+        e.vx *= 0.4;
+        e.telegraph = false;
+        // Cancela wind-ups de ataque (sin soft-lock: stun acotado)
+        if (e.wind) e.wind = 0;
+        if (e.hopWind) e.hopWind = 0;
+        if (e.clawWind) e.clawWind = 0;
+      }
+    }
     if (e.kind === "phosquito" || e.kind === "mosquito" || (e.kind === "cucaracho" && e.evo >= 2)
       || e.kind === "gaviota" || e.kind === "murcielago") e.vy += 0.08;
     else if (e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
@@ -1278,7 +1331,7 @@ function updateEnemies() {
       }
     }
     // --- anguila: sine swim + zap telegraph bolt ---
-    if (e.kind === "anguila") {
+    if (e.kind === "anguila" && !(e.stun > 5)) {
       e.vy = 0;
       e.bob = (e.bob || 0) + 0.055;
       if (e.baseY == null) e.baseY = e.y;
@@ -1293,8 +1346,12 @@ function updateEnemies() {
       if (t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#40e0d0", count: 1, size: 1.8, up: 0.2, speed: 0.4, life: 12 });
       if (e.pulsezap > 0) {
         e.pulsezap--;
-        e.telegraph = e.pulsezap > 10;
-        if (e.pulsezap === 10 && game.player) {
+        e.telegraph = e.pulsezap > 12; // ~0.4s telegraph (pulsezap 36→12)
+        if (game.player && e.telegraph) {
+          e.aimDx = game.player.x - e.x;
+          e.aimDy = game.player.y - e.y;
+        }
+        if (e.pulsezap === 12 && game.player) {
           const dx = game.player.x - e.x, dy = game.player.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
           game.projectiles.push({
@@ -1305,45 +1362,77 @@ function updateEnemies() {
           });
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ee7ff", count: 8, size: 2.8, up: 1.0, star: true });
         }
-        if (e.pulsezap <= 0) e.zapCd = 110;
+        if (e.pulsezap <= 0) { e.zapCd = 110; e.aimDx = e.aimDy = null; }
       } else {
         e.telegraph = false;
+        e.aimDx = e.aimDy = null;
         e.zapCd = (e.zapCd || 0) - 1;
         if (e.zapCd <= 0 && game.player) {
           const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
-          if (dist < 320) e.pulsezap = 24;
+          if (dist < 320) e.pulsezap = 36;
           else e.zapCd = 18;
         }
       }
     }
-    // --- rana: hop toward player, sit between hops ---
-    if (e.kind === "rana") {
-      if (e.sitting > 0) {
+    // --- rana: telegraph crouch ~0.4s then hop toward player ---
+    if (e.kind === "rana" && !(e.stun > 5)) {
+      if (e.hopWind > 0) {
+        e.hopWind--;
+        e.telegraph = true;
+        e.vx *= 0.35;
+        e.sitting = Math.max(e.sitting || 0, 2);
+        if (e.hopWind <= 0 && game.player) {
+          e.telegraph = false;
+          e.sitting = 0;
+          e.hopCd = 52 + (t % 28);
+          e.vx = Math.sign(game.player.x - e.x || 1) * (3.2 + Math.random());
+          e.vy = -7.2;
+          e.flash = 5;
+          game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#6ad070", count: 6, size: 2.4, up: 1.1 });
+        }
+      } else if (e.sitting > 0) {
         e.sitting--;
         e.vx *= 0.7;
-        e.telegraph = e.sitting < 8;
+        e.telegraph = false;
       } else {
         e.hopCd = (e.hopCd || 0) - 1;
         if (e.hopCd <= 0 && game.player) {
-          e.hopCd = 50 + (t % 30);
-          e.sitting = 0;
-          e.vx = Math.sign(game.player.x - e.x || 1) * (3.2 + Math.random());
-          e.vy = -7.2;
-          e.flash = 4;
-          game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#6ad070", count: 5, size: 2.2, up: 1.0 });
+          e.hopWind = 24; // ~0.4s telegraph
+          e.telegraph = true;
         } else if (Math.abs(e.vy) < 0.2 && e.hopCd > 0 && e.hopCd < 40) {
-          e.sitting = 22;
+          e.sitting = 20;
           e.vx = 0;
         }
       }
     }
-    // --- cangrejo: side scuttle, claws up near player ---
-    if (e.kind === "cangrejo") {
-      if (game.player) {
-        const near = Math.abs(game.player.x - e.x) < 120 && Math.abs(game.player.y - e.y) < 80;
-        e.claws = near;
-        e.telegraph = near;
-        if (near) e.vx += Math.sign(game.player.x - e.x || 1) * 0.08;
+    // --- cangrejo: scuttle + pinza telegraph (~0.4s) then snap ---
+    if (e.kind === "cangrejo" && !(e.stun > 5)) {
+      e.clawCd = (e.clawCd || 0) - 1;
+      const near = game.player && Math.abs(game.player.x - e.x) < 130 && Math.abs(game.player.y - e.y) < 90;
+      if (e.clawWind > 0) {
+        e.clawWind--;
+        e.telegraph = true;
+        e.claws = true;
+        e.vx *= 0.55;
+        if (e.clawWind <= 0) {
+          e.telegraph = false;
+          e.clawSnap = 16;
+          e.clawCd = 55;
+          e.flash = 5;
+          game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8040", count: 8, size: 2.6, up: 1.0 });
+        }
+      } else if (e.clawSnap > 0) {
+        e.clawSnap--;
+        e.claws = true;
+        e.telegraph = false;
+        if (near && game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.14;
+      } else {
+        e.claws = !!near;
+        e.telegraph = false;
+        if (near && game.player) {
+          e.vx += Math.sign(game.player.x - e.x || 1) * 0.08;
+          if (e.clawCd <= 0) e.clawWind = 24; // ~0.4s telegraph
+        }
       }
       e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
     }
@@ -1455,7 +1544,7 @@ function updateEnemies() {
       if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
     }
     // --- ufo: hover, shoot slow projectile ~90f ---
-    if (e.kind === "ufo") {
+    if (e.kind === "ufo" && !(e.stun > 5)) {
       e.bob = (e.bob || 0) + 0.04;
       if (e.baseY == null) e.baseY = e.y;
       e.y = e.baseY + Math.sin(e.bob) * 14;
@@ -1468,7 +1557,8 @@ function updateEnemies() {
       e.baseY = Math.max(180, Math.min(520, e.baseY));
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
       e.shootCd = (e.shootCd || 0) - 1;
-      if (e.shootCd <= 12) e.telegraph = true;
+      // Telegraph ~0.5s antes del rayo
+      if (e.shootCd <= 30) e.telegraph = true;
       else e.telegraph = false;
       if (e.shootCd <= 0 && game.player) {
         e.shootCd = 90;
@@ -1516,7 +1606,7 @@ function updateEnemies() {
       else if (e.kind === "medusa") dmg = 10;
       else if (e.kind === "anguila") dmg = 10;
       else if (e.kind === "rana") dmg = 8;
-      else if (e.kind === "cangrejo") dmg = e.claws ? 11 : 8;
+      else if (e.kind === "cangrejo") dmg = (e.clawSnap > 0) ? 11 : 8;
       else if (e.kind === "gaviota") dmg = e.diving ? 10 : 7;
       else if (e.kind === "murcielago") dmg = e.diving ? 11 : 8;
       else if (e.kind === "arana") dmg = 9;
@@ -1527,11 +1617,12 @@ function updateEnemies() {
       else if (e.kind === "cucaracho" && e.evo >= 1) dmg = 10;
       else if (e.kind === "cucaracho") dmg = 7;
       else if (e.evo) dmg = 10;
+      if (e.elite) dmg = Math.round(dmg * 1.25);
       hurtPlayer(dmg, "-" + dmg);
       if (e.kind === "mosquito") {
         game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
       }
-      if (!p.dead) { p.vx = kb * 8; p.vy = -5; }
+      if (!p.dead) { p.vx = kb * 10; p.vy = -6.5; }
     }
   }
   game.enemies = game.enemies.filter((e) => {
@@ -1623,8 +1714,10 @@ function updateProjectiles() {
         if (!e.dying && !(e.invuln > 0) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
-          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.45 : 3); pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 3;
-          if (!e.flash || e.flash < 8) e.flash = 8;
+          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
+          e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
+          e.flash = Math.max(e.flash || 0, 14);
+          pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 3;
           game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
         }
       }
@@ -1735,6 +1828,17 @@ function render() {
     // side bevels
     ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.fillRect(x, y, 2, plat.h);
     ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x + plat.w - 2, y, 2, plat.h);
+    // world-driven outline (reef/aquatic readability)
+    if (world.platOutline) {
+      ctx.strokeStyle = world.platOutline;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 0.5, y + 0.5, plat.w - 1, plat.h - 1);
+      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = world.edge || "#8af8ff";
+      ctx.fillRect(x - 1, y - 1, 2, plat.h + 2);
+      ctx.fillRect(x + plat.w - 1, y - 1, 2, plat.h + 2);
+      ctx.globalAlpha = 1;
+    }
   }
   const r = room();
   drawSigns(ctx, r, game.cam, t, game.player.evo);

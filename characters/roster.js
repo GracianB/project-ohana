@@ -9,7 +9,8 @@ export const ROSTER = [
       { name: "Kilo", color: "#e23b3d", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 26, h: 34 },
       { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 32, h: 40 },
       { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 38, h: 46 },
-      { name: "KILO GOD", color: "#fff1a8", speed: 5.8, jump: 14.8, jumps: 3, hp: 190, w: 44, h: 52 }
+      // GOD: diosa Ohana — leaf/petal wings, floral armor, tall crown
+      { name: "KILO GOD", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 44, h: 54, aura: true }
     ]
   },
   {
@@ -22,7 +23,8 @@ export const ROSTER = [
       { name: "Glitch", color: "#3d9bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 32, h: 30 },
       { name: "Glitch cabreado", color: "#1540ff", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 38, h: 36 },
       { name: "Ñam-626", color: "#6af", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 44, h: 42 },
-      { name: "GLITCH GOD", color: "#d6f4ff", speed: 7.0, jump: 14.5, jumps: 3, hp: 200, w: 50, h: 48 }
+      // GOD: apex 626 — energy plate armor, membrane sails, tech crown
+      { name: "GLITCH GOD", color: "#4ec8ff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 52, h: 50, aura: true }
     ]
   },
   {
@@ -35,7 +37,8 @@ export const ROSTER = [
       { name: "Pika", color: "#ffe44a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 28, h: 30 },
       { name: "Chispa", color: "#f0a020", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 34, h: 36 },
       { name: "Rayo gordo", color: "#fff36a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 42 },
-      { name: "PIKA GOD", color: "#fffde8", speed: 7.2, jump: 15.2, jumps: 3, hp: 170, w: 46, h: 48 }
+      // GOD: deidad del rayo — black/gold armor, lightning wings, fork crown
+      { name: "PIKA GOD", color: "#ffd000", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 48, h: 52, aura: true }
     ]
   },
   {
@@ -48,7 +51,8 @@ export const ROSTER = [
       { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 28 },
       { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 34, h: 34 },
       { name: "Nueve vidas", color: "#f4f0ff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 40, h: 40 },
-      { name: "MICHI GOD", color: "#fff6ff", speed: 7.4, jump: 15.0, jumps: 3, hp: 165, w: 46, h: 46 }
+      // GOD: gato celestial — pointed ears, cloud wings, 3 comet tails, levitating
+      { name: "MICHI GOD", color: "#ff5ac8", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 48, h: 50, aura: true }
     ]
   },
   {
@@ -65,8 +69,8 @@ export const ROSTER = [
       { name: "Dino Pico", color: "#2ec4b6", speed: 5.4, jump: 13.2, jumps: 2, hp: 95, w: 18, h: 22, spikes: true },
       // Rex: tanky predator — clay/rust, slower & wider
       { name: "Dino Rex", color: "#c96b2a", speed: 3.5, jump: 10.6, jumps: 1, hp: 170, w: 24, h: 22 },
-      // GOD: balanced mythic titan — lime-gold; compact, no form.glide
-      { name: "DINO GOD", color: "#ffe66a", speed: 5.0, jump: 12.6, jumps: 2, hp: 175, w: 26, h: 28, aura: true }
+      // GOD: titán alado épico — real wings, crown, comet tail, glide (generous hitbox)
+      { name: "DINO GOD", color: "#ffd84a", speed: 6.2, jump: 14.8, jumps: 3, hp: 220, w: 44, h: 48, aura: true, glide: true }
     ]
     },
   {
@@ -79,7 +83,8 @@ export const ROSTER = [
       { name: "Frita", color: "#f0b43a", speed: 5.2, jump: 12.1, jumps: 3, hp: 105, w: 22, h: 32 },
       { name: "Capitán Kétchup", color: "#d42020", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
       { name: "Extra Crujiente", color: "#ffda70", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
-      { name: "KÉtchup GOD", color: "#fff1a0", speed: 7.2, jump: 14.5, jumps: 4, hp: 180, w: 34, h: 48 }
+      // GOD: titán fritura — salt-crystal wings, ketchup cape/armor, regal bottle crown
+      { name: "KÉtchup GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 38, h: 54, aura: true }
     ]
   }
 ];
@@ -123,7 +128,7 @@ export function applyForm(p, opts = {}) {
   }
 
   if (opts.silent || evo === 0) return;
-  p.evoBurst = 90;
+  p.evoBurst = evo >= 4 ? 140 : 90;
   try {
     window.dispatchEvent(new CustomEvent("ohana-evolve", {
       detail: { name: p.name, evo: p.evo, color: p.color, id: p.id }
