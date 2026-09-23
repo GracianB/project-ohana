@@ -6,6 +6,7 @@ const KIND_TINT = {
   mosquito: "#ff6a4a",
   phosquito: "#6ad0a8",
   avispa: "#f0c020",
+  abeja: "#ffcc33",
   cucaracho: "#c45a18",
   medusa: "#ff8ad0",
   planta: "#7dca5a",
@@ -30,7 +31,7 @@ export function drawEnemy(ctx, e, cam, t) {
   else if (e.kind === "medusa") drawMedusa(ctx, e, t);
   else if (e.kind === "pez") drawFish(ctx, e, t);
   else if (e.kind === "libelula") drawLibelula(ctx, e, t);
-  else if (e.kind === "avispa") drawAvispa(ctx, e, t);
+  else if (e.kind === "abeja" || e.kind === "avispa") drawAbeja(ctx, e, t);
   else drawCucaracho(ctx, e, t);
 
   ctx.filter = "none";
@@ -39,7 +40,7 @@ export function drawEnemy(ctx, e, cam, t) {
 }
 
 function telegraphColor(e) {
-  if (e.kind === "avispa") return ["rgba(255,200,40,.85)", "rgba(255,140,20,.45)"];
+  if (e.kind === "abeja" || e.kind === "avispa") return ["rgba(255,220,60,.9)", "rgba(40,40,40,.45)"];
   if (e.kind === "mosquito" || e.kind === "phosquito") return ["rgba(255,70,50,.85)", "rgba(255,40,80,.4)"];
   if (e.kind === "libelula") return ["rgba(80,255,180,.8)", "rgba(40,200,255,.4)"];
   if (e.kind === "medusa") return ["rgba(255,120,220,.85)", "rgba(180,100,255,.4)"];
@@ -217,7 +218,7 @@ function drawPhosquito(ctx, e, t) {
 function drawMosquito(ctx, e, t) {
   const flap = Math.sin(t / 1.9) * 13;
   const diving = e.diving || e.telegraph || (e.vy > 2);
-  const s = (e.baby ? 0.78 : 1.12) * (diving ? 0.88 : 1);
+  const s = (e.baby ? 0.95 : 1.45) * (diving ? 0.88 : 1);
   const stretch = diving ? 1.22 : 1;
   ctx.scale(s, s * stretch);
 
@@ -235,6 +236,10 @@ function drawMosquito(ctx, e, t) {
   ctx.strokeStyle = "rgba(255,100,60,.5)"; ctx.lineWidth = 1.2;
   ctx.beginPath(); ctx.ellipse(-12, -4, 12, 5.5 + flap * 0.2, -0.35, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.ellipse(8, -6, 11, 4.5 + flap * 0.18, 0.28, 0, Math.PI * 2); ctx.stroke();
+
+  // dark silhouette body stroke
+  ctx.strokeStyle = "rgba(20,0,0,.75)"; ctx.lineWidth = 3.2;
+  ctx.beginPath(); ctx.ellipse(0, 3, 9.6, 7.1, 0, 0, Math.PI * 2); ctx.stroke();
 
   const bg = ctx.createLinearGradient(-4, -2, 6, 8);
   bg.addColorStop(0, "#6a2828");
@@ -265,12 +270,19 @@ function drawFish(ctx, e, t) {
   const dir = e.vx >= 0 ? 1 : -1;
   const thrash = Math.sin(t / 3.2 + (e.bob || 0)) * (e.dashSwim > 0 ? 5 : 2.5);
   const stretch = e.dashSwim > 0 ? 1.14 : 1;
-  ctx.scale(dir * stretch, 1 / Math.sqrt(stretch));
+  // pop underwater: draw larger than hitbox
+  ctx.scale(dir * stretch * 1.4, (1 / Math.sqrt(stretch)) * 1.4);
   ctx.translate(0, bob);
 
-  // soft school-fin glow
-  ctx.fillStyle = "rgba(80,200,255,.14)";
-  ctx.beginPath(); ctx.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2); ctx.fill();
+  // thick underwater glow
+  ctx.fillStyle = "rgba(80,220,255,.35)";
+  ctx.beginPath(); ctx.ellipse(0, 0, 28, 18, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(180,250,255,.22)";
+  ctx.beginPath(); ctx.ellipse(0, 0, 20, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+  // dark silhouette stroke
+  ctx.strokeStyle = "rgba(5,20,40,.85)"; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.ellipse(0, 0, 17, 10, 0, 0, Math.PI * 2); ctx.stroke();
 
   // iridescent body
   const g = ctx.createLinearGradient(-14, -8, 14, 8);
@@ -281,20 +293,26 @@ function drawFish(ctx, e, t) {
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.ellipse(0, 0, 16, 9, 0, 0, Math.PI * 2); ctx.fill();
 
+  // thick bright outline so they pop
+  ctx.strokeStyle = "rgba(200,255,255,.95)"; ctx.lineWidth = 2.8;
+  ctx.beginPath(); ctx.ellipse(0, 0, 16, 9, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "rgba(120,230,255,.7)"; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.ellipse(0, 0, 17.5, 10.2, 0, 0, Math.PI * 2); ctx.stroke();
+
   // scale shimmer rows
-  ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 0.8;
   for (let row = -1; row <= 1; row++) {
     for (let col = -2; col <= 2; col++) {
       const sx = col * 4.5 - 2;
       const sy = row * 3.2;
       const shimmer = 0.15 + 0.2 * Math.max(0, Math.sin(t / 5 + col + row * 2));
       ctx.strokeStyle = `rgba(255,255,255,${shimmer})`;
+      ctx.lineWidth = 0.8;
       ctx.beginPath(); ctx.arc(sx, sy, 2.2, 0.2, Math.PI - 0.2); ctx.stroke();
     }
   }
 
   // belly highlight
-  ctx.fillStyle = "rgba(200,255,255,.35)";
+  ctx.fillStyle = "rgba(200,255,255,.4)";
   ctx.beginPath(); ctx.ellipse(2, 3, 9, 4, 0, 0, Math.PI * 2); ctx.fill();
 
   // tail thrash
@@ -305,7 +323,9 @@ function drawFish(ctx, e, t) {
   ctx.lineTo(-22, 0);
   ctx.lineTo(-24 - (e.dashSwim > 0 ? 3 : 0), 9 - thrash);
   ctx.closePath(); ctx.fill();
-  ctx.fillStyle = "rgba(126,231,255,.5)";
+  ctx.strokeStyle = "rgba(5,20,40,.8)"; ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(126,231,255,.55)";
   ctx.beginPath();
   ctx.moveTo(-14, 0);
   ctx.lineTo(-20, -4 + thrash * 0.5);
@@ -352,22 +372,24 @@ function drawLibelula(ctx, e, t) {
   const dir = e.vx >= 0 ? 1 : -1;
   const tilt = Math.max(-0.35, Math.min(0.35, (e.vy || 0) * 0.04 + Math.sin((e.bob || 0)) * 0.08));
   const squash = e.telegraph ? 0.92 : e.darting ? 1.15 : 1;
-  ctx.scale(dir, 1);
+  ctx.scale(dir * 1.4, 1.4);
   ctx.rotate(tilt * dir);
   ctx.scale(squash, 1 / Math.sqrt(squash));
 
   // iridescent wing veins (4 wings + blur)
   for (let i = 0; i < 2; i++) {
     const a = 0.4 - i * 0.12;
-    // top pair
     drawWing(ctx, -10 - i, -9 - flap * 0.18 - i, 15, 5.5, -0.5, `rgba(160,255,220,${a})`, t);
     drawWing(ctx, 8 + i, -9 + flap * 0.18 - i, 15, 5.5, 0.5, `rgba(160,255,220,${a})`, t);
-    // bottom pair
     drawWing(ctx, -8 - i, -2 + flap * 0.12, 13, 4.5, -0.35, `rgba(140,230,255,${a})`, t);
     drawWing(ctx, 6 + i, -2 - flap * 0.12, 13, 4.5, 0.35, `rgba(140,230,255,${a})`, t);
   }
 
-  // longer segmented abdomen
+  // dark silhouette around abdomen/thorax
+  ctx.strokeStyle = "rgba(0,30,20,.8)"; ctx.lineWidth = 3.4;
+  ctx.beginPath(); ctx.ellipse(0, 4, 5.2, 17, 0.08, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, -6, 5.8, 6.2, 0, 0, Math.PI * 2); ctx.stroke();
+
   const ab = ctx.createLinearGradient(0, -10, 0, 22);
   ab.addColorStop(0, "#4aba7a");
   ab.addColorStop(0.5, "#2a8a5a");
@@ -378,13 +400,11 @@ function drawLibelula(ctx, e, t) {
   for (let i = 0; i < 6; i++) {
     ctx.beginPath(); ctx.moveTo(-3.5, -2 + i * 3.5); ctx.lineTo(3.5, -2 + i * 3.5); ctx.stroke();
   }
-  // thorax
   ctx.fillStyle = "#3aaa6a";
   ctx.beginPath(); ctx.ellipse(0, -6, 5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(180,255,220,.35)";
   ctx.beginPath(); ctx.ellipse(0, -7, 3, 2.5, 0, 0, Math.PI * 2); ctx.fill();
 
-  // head tilt toward motion — big eyes
   ctx.fillStyle = "#2a6a4a";
   ctx.beginPath(); ctx.arc(0, -12, 5, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#fff";
@@ -410,67 +430,88 @@ function drawWing(ctx, x, y, rx, ry, rot, fill, t) {
 }
 
 function drawAvispa(ctx, e, t) {
-  const flap = Math.sin(t / 2.0) * 10;
-  const charging = e.charging > 0;
-  const stretch = charging ? 1.2 : e.telegraph ? 0.9 : 1;
+  // Alias: prefer abeja going forward
+  drawAbeja(ctx, e, t);
+}
+
+
+function drawAbeja(ctx, e, t) {
+  // Bee-like: fuzzier yellow, rounder body, LARGER (~1.45); avispa maps here too
+  const flap = Math.sin(t / 2.4) * 8;
+  const diving = e.diving > 0 || e.charging > 0;
+  const stretch = diving ? 1.2 : e.telegraph ? 0.9 : 1;
   const dir = e.vx >= 0 ? 1 : -1;
-  ctx.scale(dir, 1);
+  ctx.scale(dir * 1.45, 1.45);
   ctx.scale(1, stretch);
 
-  // wings with blur
+  // soft yellow glow
+  ctx.fillStyle = "rgba(255,220,80,.22)";
+  ctx.beginPath(); ctx.arc(0, 4, 22 + Math.sin(t * 0.2) * 2, 0, Math.PI * 2); ctx.fill();
+
+  // translucent wings
   for (let i = 0; i < 2; i++) {
-    ctx.fillStyle = `rgba(255,255,200,${0.4 - i * 0.12})`;
-    ctx.beginPath(); ctx.ellipse(-11 - i, -6 - i, 12, 5.5 + flap * 0.18, -0.4, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(9 + i, -6 - i, 12, 5.5 + flap * 0.18, 0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(255,255,230,${0.4 - i * 0.12})`;
+    ctx.beginPath(); ctx.ellipse(-11 - i, -7 - i, 12, 5.5 + flap * 0.18, -0.45, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(9 + i, -7 - i, 12, 5.5 + flap * 0.18, 0.45, 0, Math.PI * 2); ctx.fill();
   }
-  ctx.strokeStyle = "rgba(200,180,80,.5)"; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.ellipse(-11, -6, 12, 5.5 + flap * 0.15, -0.4, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(9, -6, 12, 5.5 + flap * 0.15, 0.4, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "rgba(180,160,60,.45)"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.ellipse(-11, -7, 12, 5.5 + flap * 0.15, -0.45, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(9, -7, 12, 5.5 + flap * 0.15, 0.45, 0, Math.PI * 2); ctx.stroke();
 
-  // thorax
-  const tg = ctx.createRadialGradient(0, -2, 1, 0, 0, 10);
-  tg.addColorStop(0, "#444");
-  tg.addColorStop(1, "#111");
+  // dark silhouette around rounder body
+  ctx.strokeStyle = "rgba(20,10,0,.85)"; ctx.lineWidth = 3.6;
+  ctx.beginPath(); ctx.ellipse(0, -1, 10.5, 9.5, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, 11, 9.5, 11.5, 0, 0, Math.PI * 2); ctx.stroke();
+
+  // fuzzy yellow thorax (rounder / fluffier)
+  const tg = ctx.createRadialGradient(0, -2, 1, 0, 0, 12);
+  tg.addColorStop(0, "#ffe066");
+  tg.addColorStop(0.45, "#f0c020");
+  tg.addColorStop(1, "#3a2a10");
   ctx.fillStyle = tg;
-  ctx.beginPath(); ctx.ellipse(0, 0, 8, 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, -1, 10, 9, 0, 0, Math.PI * 2); ctx.fill();
+  // fluff dots
+  ctx.fillStyle = "rgba(255,240,160,.4)";
+  ctx.beginPath(); ctx.arc(-4, -3, 2.6, 0, Math.PI * 2); ctx.arc(3.5, -2, 2.2, 0, Math.PI * 2); ctx.arc(0, 1, 1.8, 0, Math.PI * 2); ctx.fill();
 
-  // striped abdomen — pulse when telegraphing
-  const pulse = e.telegraph ? 1 + Math.sin(t * 0.55) * 0.12 : 1;
-  ctx.fillStyle = "#f0c020";
-  ctx.beginPath(); ctx.ellipse(0, 10, 7 * pulse, 9 * pulse, 0, 0, Math.PI * 2); ctx.fill();
-  const stripeA = e.telegraph ? 0.95 : 0.85;
-  ctx.fillStyle = `rgba(10,10,10,${stripeA})`;
-  const stripePulse = e.telegraph ? 1 + Math.sin(t * 0.7) * 0.15 : 1;
-  ctx.fillRect(-7 * stripePulse, 4, 14 * stripePulse, 3);
-  ctx.fillRect(-6 * stripePulse, 10, 12 * stripePulse, 3);
-  ctx.fillRect(-5 * stripePulse, 15, 10 * stripePulse, 2.5);
-  // shine
-  ctx.fillStyle = "rgba(255,255,200,.3)";
-  ctx.beginPath(); ctx.ellipse(-2, 8, 3, 5, 0, 0, Math.PI * 2); ctx.fill();
-
-  // head + angry eyes
-  ctx.fillStyle = "#1a1a1a";
-  ctx.beginPath(); ctx.arc(0, -8, 5.8, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = charging || e.telegraph ? "#ff2020" : "#ff4040";
-  ctx.beginPath(); ctx.arc(-2.6, -9, 1.8, 0, Math.PI * 2); ctx.arc(2.6, -9, 1.8, 0, Math.PI * 2); ctx.fill();
+  // bold yellow/black striped round abdomen
+  const pulse = e.telegraph ? 1 + Math.sin(t * 0.5) * 0.1 : 1;
+  ctx.fillStyle = "#ffcc33";
+  ctx.beginPath(); ctx.ellipse(0, 11, 9 * pulse, 11 * pulse, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#111";
-  ctx.beginPath(); ctx.arc(-2.6, -8.6, 0.8, 0, Math.PI * 2); ctx.arc(2.6, -8.6, 0.8, 0, Math.PI * 2); ctx.fill();
+  ctx.fillRect(-9, 5, 18, 3.4);
+  ctx.fillRect(-8.5, 11, 17, 3.4);
+  ctx.fillRect(-7.5, 17, 15, 3);
+  ctx.fillStyle = "#ffe066";
+  ctx.fillRect(-8, 8.4, 16, 2.4);
+  ctx.fillRect(-7.5, 14.4, 15, 2.2);
+  ctx.fillStyle = "rgba(255,255,200,.4)";
+  ctx.beginPath(); ctx.ellipse(-2, 9, 3.5, 5.5, 0, 0, Math.PI * 2); ctx.fill();
 
-  // stinger elongates on charge
-  const stingLen = charging ? 36 : 26;
-  ctx.fillStyle = "#333";
+  // round head
+  ctx.fillStyle = "#2a1a08";
+  ctx.beginPath(); ctx.arc(0, -10, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = diving || e.telegraph ? "#ff3030" : "#ffcc44";
+  ctx.beginPath(); ctx.arc(-2.6, -11, 1.9, 0, Math.PI * 2); ctx.arc(2.6, -11, 1.9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#111";
+  ctx.beginPath(); ctx.arc(-2.6, -10.5, 0.8, 0, Math.PI * 2); ctx.arc(2.6, -10.5, 0.8, 0, Math.PI * 2); ctx.fill();
+
+  // stinger
+  const stingLen = diving ? 36 : 26;
+  ctx.fillStyle = "#222";
   ctx.beginPath();
-  ctx.moveTo(-2.5, 18);
+  ctx.moveTo(-2.4, 20);
   ctx.lineTo(0, stingLen);
-  ctx.lineTo(2.5, 18);
+  ctx.lineTo(2.4, 20);
   ctx.closePath(); ctx.fill();
-  ctx.fillStyle = charging ? "#ff2020" : "#c81e1e";
-  ctx.beginPath(); ctx.arc(0, stingLen, charging ? 2.4 : 1.6, 0, Math.PI * 2); ctx.fill();
-  if (charging) {
-    ctx.strokeStyle = "rgba(255,80,20,.5)"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, stingLen + 4); ctx.stroke();
+  ctx.fillStyle = diving ? "#ff2020" : "#c84010";
+  ctx.beginPath(); ctx.arc(0, stingLen, diving ? 2.4 : 1.6, 0, Math.PI * 2); ctx.fill();
+  if (diving) {
+    ctx.strokeStyle = "rgba(255,180,40,.55)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, 22); ctx.lineTo(0, stingLen + 3); ctx.stroke();
   }
 }
+
 
 function drawPlanta(ctx, e, t) {
   ctx.fillStyle = "#2a6a28";

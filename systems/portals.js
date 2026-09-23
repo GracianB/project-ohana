@@ -1,6 +1,6 @@
 /**
  * Ohana Portales — catapultas y agujeros negros (feel premium).
- * API: spawnFromRoom, update, draw, tryUse, consume, armArrival, spawnPoint
+ * API: spawnFromRoom, update, draw, tryUse, consume, armArrival, abortTrip, spawnPoint
  * Extra: arrivalKick, getOverlay, isBusy, playerVisual
  * No toca enemies / roster / worlds / rain / death-fx.
  */
@@ -10,6 +10,16 @@ import { showNotification } from "./notify.js";
 
 function overlaps(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+/** Hitbox generosa para catapulta (E / pisar). */
+function catapultPad(portal) {
+  return {
+    x: portal.x - 14,
+    y: portal.y - 28,
+    w: portal.w + 28,
+    h: portal.h + 36
+  };
 }
 
 function destNeedEvo(dest) {
@@ -101,12 +111,47 @@ export class Portals {
 
   /** Evita reentrada inmediata al aterrizar. */
   armArrival() {
-    this.cooldown = 78;
+    this.cooldown = 110;
     this.pending = null;
     this.near = null;
     this.charge = null;
     this._visual = { scale: 1, alpha: 1 };
     this._overlay = null;
+    this._kick = null;
+  }
+
+  /**
+   * Abort de viaje fallido (loadRoom false tras consume).
+   * Resetea visual/overlay/charge y empuja al player fuera del portal.
+   */
+  abortTrip(game) {
+    const p = game && game.player;
+    let pad = this.near;
+    this.pending = null;
+    this.charge = null;
+    this._visual = { scale: 1, alpha: 1 };
+    this._overlay = null;
+    this._kick = null;
+    this.cooldown = 90;
+    this.prompt = "";
+    this.near = null;
+    if (!p) return;
+    if (!pad) {
+      pad =
+        this.items.find((it) =>
+          it.type === "blackhole" ? overlaps(p, it) : overlaps(p, catapultPad(it))
+        ) || this.items[0];
+    }
+    if (!pad) return;
+    const mid = pad.x + pad.w / 2;
+    const px = p.x + p.w / 2;
+    const side = px >= mid ? 1 : -1;
+    p.x = side > 0 ? pad.x + pad.w + 40 : pad.x - p.w - 40;
+    const ww = game.worldW || 1600;
+    p.x = Math.max(24, Math.min(p.x, ww - p.w - 24));
+    p.vx = 0;
+    p.vy = 0;
+    if (typeof game.snapToFloor === "function") game.snapToFloor(p);
   }
 
   /** Spawn desplazado para no solapar el portal. */
@@ -115,14 +160,14 @@ export class Portals {
     if (!pad) return null;
     const w = playerW || 24, h = playerH || 32;
     if (pad.type === "blackhole") {
-      // Empuja hacia el lado opuesto al centro de la sala
+      // Empuja hacia el lado opuesto al centro de la sala (+48px lateral)
       const mid = pad.x + pad.w / 2;
       const side = mid < 800 ? 1 : -1;
-      return { x: pad.x + (side > 0 ? pad.w + 32 : -w - 32), y: pad.y + pad.h / 2 - h / 2 };
+      return { x: pad.x + (side > 0 ? pad.w + 48 : -w - 48), y: pad.y + pad.h / 2 - h / 2 };
     }
-    // Catapulta: encima de la base, ligeramente hacia adelante
+    // Catapulta: encima de la base, offset mayor para no solapar hitbox
     const facing = pad.dest === "hub" ? 1 : -1;
-    return { x: pad.x + pad.w / 2 - w / 2 + facing * 8, y: pad.y - h - 4 };
+    return { x: pad.x + pad.w / 2 - w / 2 + facing * 24, y: pad.y - h - 12 };
   }
 
   /** Impulso sugerido al aterrizar (game.js aplica vx/vy). */
@@ -175,28 +220,8 @@ export class Portals {
 
     // Charge en curso: no buscar near nuevo
     if (this.charge) {
-      // Safety: charge colgado (nunca completa) → forzar cola o abortar
-      if (this.charge.t > this.charge.max + 40) {
-        const stuck = this.charge.portal;
-        const typ = this.charge.type;
-        if (stuck && stuck.dest && !isDestLocked(stuck.dest, p.evo || 0)) {
-          this._kick = this._makeKick(stuck, typ);
-          if (typ === "blackhole") stuck.swallow = 18;
-          this._overlay = { alpha: 0.7, color: typ === "blackhole" ? "90,40,160" : "255,160,60" };
-          this._queue(stuck);
-          this.charge = null;
-          this._visual = { scale: typ === "blackhole" ? 0.2 : 1, alpha: typ === "blackhole" ? 0.1 : 1 };
-        } else {
-          this.charge = null;
-          this.armArrival();
-          const mid = stuck ? stuck.x + stuck.w / 2 : p.x;
-          const dir = (p.x + p.w / 2) < mid ? -1 : 1;
-          p.vx = dir * 8;
-          p.vy = -4;
-        }
-      } else {
-        this._tickCharge(game, reduce);
-      }
+      // Safety delegate: _tickCharge fuerza queue si t > max+30
+      this._tickCharge(game, reduce);
       this._tickOrbitals(reduce);
       this._springArms(this.charge ? this.charge.portal : null, reduce);
       return;
@@ -261,22 +286,18 @@ export class Portals {
           break;
         }
       } else {
-        // Catapulta: zona de uso un poco generosa
-        const pad = {
-          x: portal.x - 6,
-          y: portal.y - 18,
-          w: portal.w + 12,
-          h: portal.h + 22
-        };
+        // Catapulta: hitbox generosa (E / pisar)
+        const pad = catapultPad(portal);
         if (overlaps(p, pad)) {
           this.near = portal;
           const locked = isDestLocked(portal.dest, evo);
           if (locked) {
             const need = destNeedEvo(portal.dest);
-            this.prompt = "E · Catapulta · Forma " + (need + 1);
+            this.prompt = "⚔ Catapulta · Forma " + (need + 1);
+            this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "E · Catapulta → " + portal.label;
-            // Auto-fire al estar grounded en el pad (además de tecla E)
+            this.prompt = "⚔ Catapulta → " + portal.label + " · E o párate encima";
+            // Auto-lanzamiento al pisar (grounded); cooldown bloquea re-absorción
             if (this.cooldown <= 0 && p.grounded) {
               this._beginCharge(portal, "catapult", reduce);
             }
@@ -329,7 +350,20 @@ export class Portals {
     const p = game.player;
     const portal = c.portal;
     c.t++;
-    const k = c.t / c.max; // 0→1
+    // Abort de seguridad: charge colgado → forzar queue (no dejar player invisible)
+    if (c.t > c.max + 30) {
+      this._overlay = this._overlay || {
+        alpha: 0.7,
+        color: c.type === "blackhole" ? "90,40,160" : "255,160,60"
+      };
+      this._kick = this._kick || this._makeKick(portal, c.type);
+      if (c.type === "blackhole") portal.swallow = 18;
+      this._queue(portal);
+      this.charge = null;
+      this._visual = { scale: 1, alpha: 1 };
+      return;
+    }
+    const k = Math.min(1, c.t / Math.max(1, c.max)); // 0→1
 
     this.near = portal;
     if (c.type === "blackhole") {
@@ -459,12 +493,7 @@ export class Portals {
     if (!player || player.dead || this.pending || this.charge || this.cooldown > 0) return false;
     const portal = this.near;
     if (!portal || portal.type !== "catapult") return false;
-    const pad = {
-      x: portal.x - 6,
-      y: portal.y - 18,
-      w: portal.w + 12,
-      h: portal.h + 22
-    };
+    const pad = catapultPad(portal);
     if (!overlaps(player, pad)) return false;
 
     const evo = player.evo || 0;

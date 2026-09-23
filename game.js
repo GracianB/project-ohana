@@ -11,6 +11,7 @@ import { Floaters } from "./systems/floaters.js";
 import { portals } from "./systems/portals.js";
 import { DeathFx } from "./systems/death-fx.js";
 import { Rain } from "./systems/rain.js";
+import { Surprises } from "./systems/surprises.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -208,7 +209,7 @@ function placeFrom(fromDir) {
 }
 function isAirFoe(e) {
   return e.kind === "phosquito" || e.kind === "mosquito" || e.kind === "medusa"
-    || e.kind === "pez" || e.kind === "libelula" || e.kind === "avispa"
+    || e.kind === "pez" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
     || (e.kind === "cucaracho" && e.evo >= 2);
 }
 
@@ -251,6 +252,16 @@ function makeFoe(x, y, kind, roomId, i, opts) {
       vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "avispa", color: "#f0c020",
       boss: false, shoot: 0, telegraph: false, wind: 0, charging: 0, cd: 40 + i * 18,
       bob: Math.random() * 6.28, baseY: 500 + (i % 2) * 40,
+    };
+  }
+  if (kind === "abeja") {
+    const hp = 24 + hard * 10;
+    const by = 460 + (i % 3) * 36;
+    return {
+      x, y: by, w: 28, h: 32,
+      vx: (i % 2 ? 1 : -1) * 1.15, vy: 0, hp, max: hp, kind: "abeja", color: "#ffcc33",
+      boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 50 + i * 16,
+      bob: Math.random() * 6.28, baseY: by,
     };
   }
   if (kind === "pez") {
@@ -309,6 +320,7 @@ function loadRoom(id, fromDir) {
   game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
   game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => makeFoe(f[0], f[1], f[2], id, i));
+  for (const e of game.enemies) Surprises.onMakeFoe(e, id);
   for (const e of game.enemies) {
     if (isAirFoe(e)) continue;
     let floor = null;
@@ -336,6 +348,7 @@ function loadRoom(id, fromDir) {
   showBanner(r.name);
   save();
   worldClear();
+  Surprises.onEnterRoom(game);
   return true;
 }
 function showMap() {
@@ -373,6 +386,7 @@ function start(def) {
   const resume = (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+  Surprises.reset();
   game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.won = false; game.summoned = false;
   game.running = true; closeOverlays();
   let roomId = "hub";
@@ -431,34 +445,141 @@ function melee() {
   const p = game.player;
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
-  p.melee = 12; p.meleeBuf = 0;
-  const box = { x: p.x + (p.facing > 0 ? p.w - 4 : -40), y: p.y - 6, w: 44 + p.evo * 6, h: p.h + 12 };
-  const kind = { lilo: "leaf", stitch: "claws", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
+  const evo = Number(p.evo) || 0;
+  // Snappier recovery as forms grow; still same F key
+  p.melee = Math.max(7, 13 - evo);
+  p.meleeBuf = 0;
+
+  const reach = 50 + evo * 12;
+  const box = {
+    x: p.x + (p.facing > 0 ? p.w - 6 : -reach),
+    y: p.y - 10 - evo * 2,
+    w: reach,
+    h: p.h + 16 + evo * 5,
+  };
+
+  const baseKind = { lilo: "leaf", stitch: "claws", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
+  // High-evo dino swings a bigger fan; others keep identity but grow
+  const kind = (p.id === "dragon" && evo >= 2) ? "fan" : baseKind;
+  const slashLife = 10 + Math.min(6, evo * 2);
+  const slashW = 50 + evo * 14;
+
   game.slashes.push({
-    x: p.x + p.w / 2 + p.facing * 12,
-    y: p.y + p.h * 0.45,
+    x: p.x + p.w / 2 + p.facing * (14 + evo * 4),
+    y: p.y + p.h * 0.42,
     facing: p.facing,
-    life: 12,
-    max: 12,
+    life: slashLife,
+    max: slashLife,
     color: p.color,
     kind,
-    w: 42 + p.evo * 10,
+    w: slashW,
   });
-  game.fx.emit(box.x + 10 * p.facing, box.y + 10, {
-    color: p.color, count: 14, size: 3.4, angle: p.facing > 0 ? 0 : Math.PI, spread: 1.1, star: true,
+
+  // Evo 2+: second trailing arc (reads as a heavier combo swing)
+  if (evo >= 2) {
+    game.slashes.push({
+      x: p.x + p.w / 2 + p.facing * (30 + evo * 5),
+      y: p.y + p.h * 0.32,
+      facing: p.facing,
+      life: Math.max(6, slashLife - 3),
+      max: Math.max(6, slashLife - 3),
+      color: evo >= 4 ? "#fff8c8" : "#fff",
+      kind: p.id === "pikachu" ? "zap" : (p.id === "stitch" || p.id === "cat" ? "claws" : "fan"),
+      w: 34 + evo * 10,
+    });
+  }
+
+  game.fx.emit(box.x + 12 * p.facing, box.y + box.h * 0.45, {
+    color: p.color,
+    count: 16 + evo * 5,
+    size: 3.5 + evo * 0.45,
+    angle: p.facing > 0 ? 0 : Math.PI,
+    spread: 1.15 + evo * 0.08,
+    star: true,
+    speed: 3.2 + evo * 0.35,
   });
+  game.shake = Math.min(16, (game.shake || 0) + 3 + evo);
+
+  let dBase = 34 + evo * 14;
+  if (evo >= 4) dBase += 10;
+
   for (const e of game.enemies) {
     if (e.invuln > 0 || e.dying) continue;
     if (aabb(box, e)) {
-      let d = 26 + p.evo * 10;
+      let d = dBase;
       if (e.boss) d = Math.ceil(d * 0.5);
       e.hp -= d;
-      e.vx = (e.boss ? 3 : 8) * p.facing;
-      if (!e.flash || e.flash < 8) e.flash = 8;
-      game.nums.add(e.x, e.y, "" + d, "#fff", d >= 40);
+      e.vx = (e.boss ? 3.5 : 8 + evo) * p.facing;
+      e.vy = Math.min(e.vy || 0, -2 - evo * 0.4);
+      e.stun = Math.max(e.stun || 0, 12 + evo * 3);
+      if (!e.flash || e.flash < 10) e.flash = 10;
+      game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       punch(e.x, e.y, p.color);
-      p.xp += 2;
+      p.xp += 2 + (evo >= 3 ? 1 : 0);
     }
+  }
+
+  // Evo 3+: ranged follow-through (flame for dino, zap/crescent otherwise)
+  if (evo >= 3) {
+    const isDino = p.id === "dragon";
+    const isPika = p.id === "pikachu";
+    game.projectiles.push({
+      x: p.x + p.w / 2 + p.facing * 10,
+      y: p.y + p.h * 0.32,
+      vx: (11 + evo) * p.facing,
+      vy: isDino ? -0.6 : 0,
+      w: isDino ? 30 : 18,
+      h: isDino ? 18 : 12,
+      life: 26 + evo * 5,
+      dmg: 12 + evo * 4,
+      color: isDino ? "#ff6a2a" : (isPika ? "#ffe14a" : p.color),
+      shape: isDino ? "flame" : (isPika ? "zap" : "crescent"),
+      owner: "player",
+      trail: true,
+    });
+    if (isDino && evo >= 4) {
+      // God form: twin breath
+      game.projectiles.push({
+        x: p.x + p.w / 2 + p.facing * 6,
+        y: p.y + p.h * 0.22,
+        vx: (9 + evo) * p.facing,
+        vy: -2.2,
+        w: 22, h: 14, life: 24,
+        dmg: 10 + evo * 3,
+        color: "#ffd36a",
+        shape: "flame",
+        owner: "player",
+        trail: true,
+      });
+    }
+  }
+
+  // Evo 4: short bolt shockwave in front (visual + chip damage)
+  if (evo >= 4) {
+    const ox = p.x + p.w / 2;
+    const oy = p.y + p.h * 0.35;
+    const tx = ox + p.facing * (100 + p.w);
+    const ty = oy;
+    game.bolts.push({ x1: ox, y1: oy, x2: tx, y2: ty, life: 14, dmg: 22 });
+    game.bolts.push({
+      x1: ox, y1: oy - 10,
+      x2: tx - p.facing * 18, y2: ty + 16,
+      life: 10, dmg: 10,
+    });
+    const boltDmg = 18;
+    for (const e of game.enemies) {
+      if (e.invuln > 0 || e.dying) continue;
+      const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
+      // Near the bolt segment
+      if (Math.abs(ey - oy) < 48 && ((p.facing > 0 && ex > ox && ex < tx + 20) || (p.facing < 0 && ex < ox && ex > tx - 20))) {
+        e.hp -= boltDmg;
+        e.vx = 5 * p.facing;
+        if (!e.flash || e.flash < 8) e.flash = 8;
+        game.nums.add(e.x, e.y, "" + boltDmg, "#7ecbff", true);
+        punch(e.x, e.y, "#7ecbff");
+      }
+    }
+    game.fx.emit(tx, ty, { color: "#fffde0", count: 14, size: 4, speed: 4, star: true, up: 1.4 });
   }
 }
 function hurtPlayer(amount, label) {
@@ -644,7 +765,7 @@ function updatePlayer() {
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
-      o.taken = true; p.xp += 4; game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+      o.taken = true; p.xp += 4 + Surprises.starOrbBonus(); game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
     }
   }
   for (const h of game.hearts) {
@@ -683,18 +804,15 @@ function updatePlayer() {
       game._portalFlash = flashKind;
       game._portalFadeMax = fadeLen;
     } else {
-      // Trip abortado (needEvo / dest inválido): sin armArrival el player
-      // queda scale~0.2 alpha~0.1 + overlay púrpura → soft-lock visual.
+      // Trip abortado (needEvo / dest inválido): reset visual + push-out
       game._portalFlash = null;
       game._portalFadeMax = 0;
       game.fading = 0;
-      portals.armArrival();
-      portals._visual = { scale: 1, alpha: 1 };
-      portals._overlay = null;
-      const dir = (p.facing || 1) >= 0 ? -1 : 1;
-      p.vx = dir * 9;
-      p.vy = -5;
-      p.x = Math.max(24, Math.min(p.x + dir * 56, game.worldW - p.w - 24));
+      game.flash = Math.min(game.flash || 0, 6);
+      if (typeof portals.abortTrip === "function") portals.abortTrip(game);
+      else portals.armArrival();
+      snapToFloor(p);
+      beep("hurt");
     }
   }
   const r = room();
@@ -711,7 +829,7 @@ function updateEnemies() {
   for (const e of game.enemies) {
     if (e.flash > 0) e.flash--;
     if (e.kind === "phosquito" || e.kind === "mosquito" || (e.kind === "cucaracho" && e.evo >= 2)) e.vy += 0.08;
-    else if (e.kind === "libelula" || e.kind === "avispa") e.vy += 0.05;
+    else if (e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja") e.vy += 0.05;
     else if (e.kind === "planta" || e.kind === "medusa" || e.kind === "pez") e.vy = 0;
     else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
@@ -965,6 +1083,56 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
     }
+    // --- abeja: gentle hover, brief buzz telegraph, then steeper stinger dive ---
+    if (e.kind === "abeja") {
+      e.bob = (e.bob || 0) + 0.07;
+      if (e.baseY == null) e.baseY = e.y;
+      e.cd = (e.cd || 0) - 1;
+      if (e.diving > 0) {
+        e.diving--;
+        e.telegraph = false;
+        e.charging = e.diving; // drives drawAbeja sting stretch
+        if (t % 3 === 0) game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: "#ffcc33" });
+        if (e.diving <= 0) {
+          e.cd = 80;
+          e.charging = 0;
+          e.vx *= 0.25;
+          e.vy *= 0.15;
+          e.baseY = Math.max(220, Math.min(620, e.y));
+        }
+      } else if (e.cd <= 0 && game.player) {
+        e.wind = (e.wind || 0) + 1;
+        e.telegraph = true;
+        e.vx *= 0.9;
+        e.vy = 0;
+        // hover wobble while winding up
+        e.y = e.baseY + Math.sin(e.bob * 1.6) * 10;
+        if (e.wind > 36) {
+          e.wind = 0;
+          e.telegraph = false;
+          e.diving = 26;
+          e.charging = 26;
+          const dx = game.player.x - e.x;
+          const dy = game.player.y - e.y + 12;
+          const len = Math.hypot(dx, dy) || 1;
+          // steeper dive than avispa (more vertical stinger plunge)
+          e.vx = (dx / len) * 6.2;
+          e.vy = (dy / len) * 8.4;
+          game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffcc33", count: 7, size: 2.6, up: 1.0 });
+        }
+      } else {
+        e.telegraph = false;
+        e.charging = 0;
+        e.vy = 0;
+        // idle hover — rounder bob than avispa
+        e.y = e.baseY + Math.sin(e.bob) * 16 + Math.sin(e.bob * 2.5) * 5;
+        if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.03;
+        e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
+        e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.18;
+        e.baseY = Math.max(220, Math.min(620, e.baseY));
+      }
+      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+    }
     // --- pez: school sine, dash burst, vertical hunt, dense bubbles ---
     if (e.kind === "pez") {
       e.vy = 0;
@@ -1048,6 +1216,7 @@ function updateEnemies() {
       if (e.boss) dmg = 22;
       else if (e.kind === "planta") dmg = 12;
       else if (e.kind === "avispa" && e.charging > 0) dmg = 14;
+      else if (e.kind === "abeja" && (e.diving > 0 || e.charging > 0)) dmg = 13;
       else if (e.kind === "mosquito") dmg = 9;
       else if (e.kind === "libelula") dmg = 8;
       else if (e.kind === "pez") dmg = 8;
@@ -1125,6 +1294,7 @@ function updateEnemies() {
       }
       return true;
     }
+    Surprises.onEnemyKilled(e, game);
     punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
     if (e.dropsOrb) {
       game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });
@@ -1265,6 +1435,7 @@ function render() {
   portals.draw(ctx, game.cam, t);
   Rain.draw(ctx, game.cam);
   Rain.drawPlayerHint(ctx, game.cam, game.player);
+  Surprises.draw(ctx, game.cam, t, game);
   for (const o of game.orbs) {
     if (o.taken) continue;
     drawCrystal(o);
@@ -1407,7 +1578,7 @@ function updateHUD() {
 function loop() {
   t++;
   if (game.running && !paused && !overlayOpen()) {
-    updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); updateCam(); if ((t & 3) === 0) updateHUD();
+    updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); Surprises.update(game, t); updateCam(); if ((t & 3) === 0) updateHUD();
   } else if (game.running && (t & 3) === 0) updateHUD();
   if (game.running) render();
   requestAnimationFrame(loop);

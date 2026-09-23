@@ -174,101 +174,96 @@ function babyFrita(ctx, t) {
 }
 
 function babyKoa(ctx, t) {
-  // Tiny baby dino (evo 0) — cute green oval, stubby legs, big eyes
-  const bob = Math.sin(t / 9) * 1.0;
-  const wag = Math.sin(t / 6) * 2.4;
-  ctx.translate(0, 3 + bob);
-  const green = "#7ee08a";
-  const belly = "#e8ffd8";
+  // Evo 0 — unmistakable hatchling: egg-blob body, sprout horn, no long snout.
+  const bob = Math.sin(t / 9) * 1.1;
+  const wag = Math.sin(t / 5) * 2.8;
+  ctx.translate(0, 2 + bob);
+  const green = "#9aeea8";
+  const belly = "#f0ffe4";
   const ink = "#1e4a22";
+  const sprout = "#3bb85a";
 
-  // Tiny tail
+  // Tiny curled stub tail (not a whip)
   ctx.strokeStyle = green;
-  ctx.lineWidth = 2.6;
+  ctx.lineWidth = 2.8;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-5, 4);
-  ctx.quadraticCurveTo(-9, 5 + wag * 0.3, -10.5, 2 + wag);
+  ctx.moveTo(-4, 6);
+  ctx.quadraticCurveTo(-7, 8 + wag * 0.2, -6.5, 4 + wag);
   ctx.stroke();
 
-  // Body oval
+  // Egg / potato body — rounder than any later form
   ctx.fillStyle = green;
   ctx.beginPath();
-  ctx.ellipse(0, 5, 7.2, 6.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 5.5, 8.4, 7.6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = belly;
   ctx.beginPath();
-  ctx.ellipse(0.6, 6.4, 4, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(0.4, 7.2, 5, 4.2, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Tiny legs
+  // Pudgy feet (no long legs)
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.ellipse(-3.5, 12.5, 2.6, 1.4, 0, 0, Math.PI * 2);
+  ctx.ellipse(3.5, 12.5, 2.6, 1.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Nub arms
   ctx.strokeStyle = green;
   ctx.lineWidth = 2.2;
   ctx.beginPath();
-  ctx.moveTo(-2.5, 9);
-  ctx.lineTo(-3, 12);
-  ctx.moveTo(2.5, 9);
-  ctx.lineTo(3, 12);
-  ctx.stroke();
-  ctx.fillStyle = green;
-  ctx.beginPath();
-  ctx.ellipse(-3.2, 12.2, 1.8, 0.9, 0, 0, Math.PI * 2);
-  ctx.ellipse(3.2, 12.2, 1.8, 0.9, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Little stubby arms
-  ctx.strokeStyle = green;
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.moveTo(-6, 4);
-  ctx.lineTo(-7.5, 6);
-  ctx.moveTo(6, 4);
-  ctx.lineTo(7.5, 6);
+  ctx.moveTo(-7, 5); ctx.lineTo(-9, 7);
+  ctx.moveTo(7, 5); ctx.lineTo(9, 7);
   ctx.stroke();
 
-  // Head bump / round snout area (same oval-ish head on body)
+  // Head is almost the same blob (no long neck / snout silhouette)
   ctx.fillStyle = green;
   ctx.beginPath();
-  ctx.ellipse(2.5, -1, 5.5, 5, 0, 0, Math.PI * 2);
+  ctx.ellipse(1.5, -1.5, 7.2, 6.6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = belly;
   ctx.beginPath();
-  ctx.ellipse(4.2, 0.2, 2.8, 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(2.4, 0.4, 3.6, 2.8, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Tiny crest
-  ctx.fillStyle = "#3bb85a";
+  // Single sprout horn (baby marker)
+  ctx.fillStyle = sprout;
   ctx.beginPath();
-  ctx.moveTo(0.5, -5);
-  ctx.lineTo(1.5, -9);
-  ctx.lineTo(3, -5);
+  ctx.moveTo(0.2, -6.5);
+  ctx.lineTo(1.4, -12);
+  ctx.lineTo(3.2, -6.2);
+  ctx.closePath();
+  ctx.fill();
+  // Leaf tip on sprout
+  ctx.beginPath();
+  ctx.ellipse(1.5, -12.4, 1.6, 1.1, -0.4, 0, Math.PI * 2);
   ctx.fill();
 
-  // Big cute eyes
+  // Oversized eyes
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.ellipse(1.2, -1.6, 2.4, 2.8, 0, 0, Math.PI * 2);
-  ctx.ellipse(4.6, -1.6, 2.4, 2.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(0.2, -2, 2.8, 3.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(4.4, -2, 2.8, 3.2, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#1a0c08";
   ctx.beginPath();
-  ctx.arc(1.5, -1.3, 1.15, 0, Math.PI * 2);
-  ctx.arc(4.9, -1.3, 1.15, 0, Math.PI * 2);
+  ctx.arc(0.6, -1.6, 1.35, 0, Math.PI * 2);
+  ctx.arc(4.8, -1.6, 1.35, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.beginPath();
-  ctx.arc(0.9, -2.2, 0.55, 0, Math.PI * 2);
-  ctx.arc(4.3, -2.2, 0.55, 0, Math.PI * 2);
+  ctx.arc(-0.1, -2.5, 0.65, 0, Math.PI * 2);
+  ctx.arc(4.1, -2.5, 0.65, 0, Math.PI * 2);
   ctx.fill();
 
-  blush(ctx, 2.5, 1.2, 0.7);
+  blush(ctx, 2, 1.4, 0.85);
 
-  // Tiny smile
   ctx.strokeStyle = ink;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1.1;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(3.6, 1.4, 1.5, 0.2, Math.PI - 0.2);
+  ctx.arc(2.6, 1.6, 1.8, 0.2, Math.PI - 0.2);
   ctx.stroke();
 }
 

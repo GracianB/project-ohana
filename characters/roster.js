@@ -53,17 +53,22 @@ export const ROSTER = [
   },
   {
     id: "dragon", name: "Dino", color: "#5ecf6a",
-    speed: 3.8, jumpPower: 10.6, maxJumps: 1, health: 90, w: 10, h: 10,
+    speed: 4.5, jumpPower: 11.4, maxJumps: 2, health: 72, w: 12, h: 12,
     abilities: ["breath", "wing", "rage"],
     evoNames: ["Dino Bebé", "Dino", "Dino Pico", "Dino Rex", "DINO GOD"],
     forms: [
-      { name: "Dino Bebé", color: "#7ee08a", speed: 3.8, jump: 10.6, jumps: 1, hp: 90, w: 10, h: 10 },
-      { name: "Dino", color: "#5ecf6a", speed: 4.2, jump: 11.1, jumps: 1, hp: 108, w: 14, h: 14 },
-      { name: "Dino Pico", color: "#3bb85a", speed: 4.7, jump: 11.7, jumps: 2, hp: 128, w: 18, h: 18 },
-      { name: "Dino Rex", color: "#2a9a48", speed: 5.1, jump: 12.2, jumps: 2, hp: 152, w: 22, h: 22 },
-      { name: "DINO GOD", color: "#c8ff7a", speed: 5.6, jump: 12.8, jumps: 3, hp: 180, w: 26, h: 26 }
+      // Bebé: agile/fragile hatchling — soft mint (no glide)
+      { name: "Dino Bebé", color: "#9ae8b8", speed: 4.5, jump: 11.4, jumps: 2, hp: 72, w: 12, h: 12 },
+      // Dino: biped runner — classic leaf green
+      { name: "Dino", color: "#5ecf6a", speed: 4.2, jump: 11.0, jumps: 1, hp: 105, w: 16, h: 16 },
+      // Pico: glass-cannon — teal, tall crest silhouette, frail
+      { name: "Dino Pico", color: "#2ec4b6", speed: 5.4, jump: 13.2, jumps: 2, hp: 95, w: 18, h: 22, spikes: true },
+      // Rex: tanky predator — clay/rust, slower & wider
+      { name: "Dino Rex", color: "#c96b2a", speed: 3.5, jump: 10.6, jumps: 1, hp: 170, w: 24, h: 22 },
+      // GOD: balanced mythic titan — lime-gold; compact, no form.glide
+      { name: "DINO GOD", color: "#ffe66a", speed: 5.0, jump: 12.6, jumps: 2, hp: 175, w: 26, h: 28, aura: true }
     ]
-  },
+    },
   {
     id: "frita", name: "Capitán Kétchup", color: "#f0b43a",
     speed: 4.6, jumpPower: 11.4, maxJumps: 2, health: 85, w: 18, h: 28,

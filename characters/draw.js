@@ -649,130 +649,457 @@ function drawCatOLD_UNUSED(ctx, p, t, evo) {
 }
 
 function drawDino(ctx, p, t, evo) {
-  // Compact pocket-dino: designed for ~10–26px hitboxes (relative units).
-  const unit = Math.max(8, Math.min(p.w || 14, p.h || 14));
+  // Five unmistakable silhouettes — soft size via hitbox scale only.
+  const unit = Math.max(10, Math.min(p.w || 14, p.h || 14));
   const s = unit / 18;
   ctx.scale(s, s);
-
-  const green = evo >= 4 ? "#c8ff7a" : evo >= 3 ? "#2a9a48" : evo >= 2 ? "#3bb85a" : "#5ecf6a";
-  const belly = evo >= 4 ? "#f4ffe8" : "#d8f8c8";
-  const ink = evo >= 4 ? "#3a6a28" : "#1e4a22";
-  const crest = evo >= 4 ? "#ffe66a" : evo >= 2 ? "#7ee08a" : "#3bb85a";
-  const wag = Math.sin(t / 7) * 2.2;
-  const bob = Math.sin(t / 9) * 0.6;
-
+  const bob = Math.sin(t / 9) * 0.55;
   ctx.translate(0, 1 + bob);
+  if (evo >= 4) drawDinoGod(ctx, t);
+  else if (evo >= 3) drawDinoRex(ctx, t);
+  else if (evo >= 2) drawDinoPico(ctx, t);
+  else drawDinoBase(ctx, t);
+}
 
-  // Tail
+function dinoEye(ctx, x, y, w, h, angry) {
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.ellipse(x, y, w, h, angry ? -0.2 * Math.sign(x || 1) : 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#1a0c08";
+  ctx.beginPath();
+  ctx.arc(x + w * 0.18, y + (angry ? 0.35 : 0), w * 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(x - w * 0.25, y - h * 0.3, w * 0.18, 0, Math.PI * 2);
+  ctx.fill();
+  if (angry) {
+    ctx.strokeStyle = "#1a0c08";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x - w, y - h * 1.15);
+    ctx.lineTo(x + w * 0.45, y - h * 0.15);
+    ctx.stroke();
+  }
+}
+
+function dinoOval(ctx, x, y, rx, ry, fill, stroke, lw) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1.1; ctx.stroke(); }
+}
+
+/** Evo 1 — classic bipedal pocket dino: long body, modest head, soft crest. */
+function drawDinoBase(ctx, t) {
+  const green = "#5ecf6a";
+  const belly = "#d8f8c8";
+  const ink = "#1e4a22";
+  const crest = "#3bb85a";
+  const wag = Math.sin(t / 7) * 2.4;
+
+  // Horizontal tail
   ctx.strokeStyle = green;
-  ctx.lineWidth = 3.2 + evo * 0.35;
+  ctx.lineWidth = 3.4;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(-4, 3);
-  ctx.quadraticCurveTo(-9, 4 + wag * 0.4, -11.5, 1 + wag);
+  ctx.moveTo(-5, 3);
+  ctx.quadraticCurveTo(-12, 5 + wag * 0.3, -15, 2 + wag);
   ctx.stroke();
-  if (evo >= 2) {
-    ctx.fillStyle = crest;
-    ctx.beginPath();
-    ctx.moveTo(-9.5, 2 + wag * 0.5);
-    ctx.lineTo(-12.2, -0.5 + wag);
-    ctx.lineTo(-10.2, 3.5 + wag * 0.3);
-    ctx.fill();
-  }
 
-  // Back legs
-  ctx.strokeStyle = green;
-  ctx.lineWidth = 2.4;
+  // Digging legs (rear-weighted)
+  ctx.lineWidth = 2.6;
   ctx.beginPath();
-  ctx.moveTo(-2.5, 5);
-  ctx.lineTo(-3.2, 8.2);
-  ctx.moveTo(2.8, 5);
-  ctx.lineTo(3.6, 8.2);
+  ctx.moveTo(-1, 5); ctx.lineTo(-2.5, 9);
+  ctx.moveTo(4, 5); ctx.lineTo(5.5, 9);
   ctx.stroke();
-  // Feet
   ctx.fillStyle = green;
   ctx.beginPath();
-  ctx.ellipse(-3.4, 8.4, 2.1, 1.1, 0, 0, Math.PI * 2);
-  ctx.ellipse(3.8, 8.4, 2.1, 1.1, 0, 0, Math.PI * 2);
+  ctx.ellipse(-2.8, 9.2, 2.4, 1.15, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.8, 9.2, 2.4, 1.15, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Body
-  oval(ctx, 0, 3.5, 6.2 + evo * 0.35, 5.2 + evo * 0.25, green, ink, 1.05);
-  oval(ctx, 0.4, 4.6, 3.6, 2.8, belly);
+  // Long horizontal torso
+  dinoOval(ctx, 1, 3.2, 7.4, 4.6, green, ink, 1.05);
+  dinoOval(ctx, 1.2, 4.4, 4.2, 2.4, belly);
 
   // Stubby arms
   ctx.strokeStyle = green;
-  ctx.lineWidth = 2.1;
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(-5.2, 2.2);
-  ctx.lineTo(-7.2, 4.4);
-  ctx.moveTo(5.2, 2.2);
-  ctx.lineTo(7.2, 4.4);
+  ctx.moveTo(-2, 1.5); ctx.lineTo(-5, 3.5);
+  ctx.moveTo(5, 1.5); ctx.lineTo(8, 3.2);
   ctx.stroke();
 
-  // Neck + round snout head
-  oval(ctx, 3.2, -2.8, 5.4 + evo * 0.25, 4.6 + evo * 0.2, green, ink, 1.05);
-  oval(ctx, 5.6, -1.6, 3.4 + evo * 0.15, 2.4, belly);
-  shine(ctx, 1.6, -4.2, 2.2, 1.4);
+  // Head forward on short neck
+  dinoOval(ctx, 7.2, -2.2, 5.2, 4.4, green, ink, 1.05);
+  dinoOval(ctx, 9.2, -1.2, 3.2, 2.2, belly);
 
-  // Little spikes / crest (grows subtly with evo)
-  const spikes = 1 + Math.min(3, evo);
+  // Soft 2-spike crest
   ctx.fillStyle = crest;
-  for (let i = 0; i < spikes; i++) {
-    const sx = -1.2 + i * 1.8;
-    const sh = 2.4 + evo * 0.45 + (i === 1 ? 0.6 : 0);
+  ctx.beginPath();
+  ctx.moveTo(4.5, -5); ctx.lineTo(5.5, -8.2); ctx.lineTo(6.8, -5); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(6.5, -5.2); ctx.lineTo(7.6, -8.8); ctx.lineTo(8.8, -5); ctx.fill();
+
+  dinoEye(ctx, 6.2, -2.8, 1.6, 1.75);
+  dinoEye(ctx, 9.2, -2.8, 1.6, 1.75);
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.arc(10.8, -1.2, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 0.95;
+  ctx.beginPath();
+  ctx.arc(8.6, -0.2, 1.5, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255,140,160,.38)";
+  ctx.beginPath();
+  ctx.ellipse(5.4, -0.8, 1.3, 0.85, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Evo 2 — Dino Pico: tall sail crest, upright neck, whip tail with blade tip. */
+function drawDinoPico(ctx, t) {
+  const green = "#2a9a48";
+  const belly = "#c8f0b8";
+  const ink = "#0e3a1a";
+  const sail = "#7ee08a";
+  const horn = "#b8ff6a";
+  const wag = Math.sin(t / 6) * 3;
+
+  // Long whip tail + blade tip
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 3.6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-4, 2);
+  ctx.quadraticCurveTo(-11, 6 + wag * 0.2, -18, 1 + wag);
+  ctx.stroke();
+  ctx.fillStyle = sail;
+  ctx.beginPath();
+  ctx.moveTo(-16, 1 + wag);
+  ctx.lineTo(-21, -2 + wag);
+  ctx.lineTo(-17.5, 3.5 + wag);
+  ctx.closePath();
+  ctx.fill();
+
+  // Tall rear legs
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-1.5, 4); ctx.lineTo(-3, 10);
+  ctx.moveTo(3.5, 4); ctx.lineTo(5, 10);
+  ctx.stroke();
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.ellipse(-3.4, 10.3, 2.8, 1.3, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.4, 10.3, 2.8, 1.3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Upright body
+  dinoOval(ctx, 0.5, 2.5, 6.2, 6.4, green, ink, 1.1);
+  dinoOval(ctx, 0.8, 4, 3.4, 3.2, belly);
+
+  // Back sail (tall triangles) — signature silhouette
+  ctx.fillStyle = sail;
+  const sails = [
+    [-3.2, -2.5, 4.2],
+    [-0.6, -3.5, 6.2],
+    [2.2, -2.8, 5.0],
+  ];
+  for (const [sx, sy, sh] of sails) {
     ctx.beginPath();
-    ctx.moveTo(sx - 1.1, -5.2);
-    ctx.lineTo(sx, -5.2 - sh);
-    ctx.lineTo(sx + 1.1, -5.2);
+    ctx.moveTo(sx - 1.4, sy);
+    ctx.lineTo(sx, sy - sh);
+    ctx.lineTo(sx + 1.4, sy);
     ctx.closePath();
     ctx.fill();
   }
 
-  // Eyes
-  eye(ctx, 2.2, -3.4, 1.55, 1.7);
-  eye(ctx, 5.4, -3.4, 1.55, 1.7);
-
-  // Tiny smile / nostril
-  ctx.fillStyle = ink;
+  // Arms
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 2.2;
   ctx.beginPath();
-  ctx.arc(7.4, -1.4, 0.55, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = ink;
-  ctx.lineWidth = 0.9;
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.arc(5.2, -0.4, 1.6, 0.15, Math.PI - 0.15);
+  ctx.moveTo(-4.5, 0); ctx.lineTo(-7.5, 2.5);
+  ctx.moveTo(4.5, 0); ctx.lineTo(7.5, 2.2);
   ctx.stroke();
 
-  // Cheek blush
-  ctx.fillStyle = "rgba(255,140,160,.4)";
+  // High neck + head
+  dinoOval(ctx, 2.5, -5.5, 3.2, 3.6, green, ink, 1);
+  dinoOval(ctx, 5.5, -7.2, 5.4, 4.2, green, ink, 1.1);
+  dinoOval(ctx, 7.4, -6.4, 3.2, 2.2, belly);
+
+  // Tall "pico" horn — unmistakable
+  ctx.fillStyle = horn;
   ctx.beginPath();
-  ctx.ellipse(1.2, -1.2, 1.4, 0.9, 0, 0, Math.PI * 2);
+  ctx.moveTo(4.2, -10);
+  ctx.lineTo(5.6, -18);
+  ctx.lineTo(7.4, -10.2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+
+  dinoEye(ctx, 4.2, -7.6, 1.7, 1.9, true);
+  dinoEye(ctx, 7.4, -7.6, 1.7, 1.9, true);
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.arc(9.2, -5.8, 0.55, 0, Math.PI * 2);
   ctx.fill();
 
-  // Evo flourishes (subtle)
-  if (evo >= 2) {
-    ctx.strokeStyle = "rgba(126,224,138,.55)";
-    ctx.lineWidth = 1.2;
+  // Soft green ring
+  ctx.strokeStyle = "rgba(126,224,138,.5)";
+  ctx.lineWidth = 1.3;
+  ctx.beginPath();
+  ctx.arc(2, -2, 11, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+/** Evo 3 — Dino Rex: massive jaws, tiny arms, thick legs, heavy predator. */
+function drawDinoRex(ctx, t) {
+  const green = "#1a6b3a";
+  const belly = "#9ed4a0";
+  const ink = "#0a2814";
+  const gum = "#4a2030";
+  const tooth = "#f4ffe8";
+  const wag = Math.sin(t / 8) * 1.6;
+
+  // Thick counterbalance tail
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 5.2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-3, 2);
+  ctx.quadraticCurveTo(-12, 4 + wag * 0.3, -17, 0 + wag);
+  ctx.stroke();
+  // Tail ridges
+  ctx.fillStyle = "#2a8a48";
+  for (let i = 0; i < 3; i++) {
+    const tx = -8 - i * 3;
     ctx.beginPath();
-    ctx.arc(2, -1, 8.5 + evo * 0.6, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.moveTo(tx, 1 + wag * 0.2);
+    ctx.lineTo(tx - 0.6, -2 + wag * 0.2);
+    ctx.lineTo(tx + 1.4, 1.5 + wag * 0.2);
+    ctx.fill();
   }
-  if (evo >= 3) {
-    ctx.fillStyle = crest;
-    for (let i = 0; i < 3; i++) {
-      const a = t / 10 + i * 2.1;
-      ctx.beginPath();
-      ctx.arc(Math.cos(a) * 9, Math.sin(a) * 6 - 1, 1.1, 0, Math.PI * 2);
-      ctx.fill();
-    }
+
+  // Massive tree-trunk legs
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 4.4;
+  ctx.beginPath();
+  ctx.moveTo(-2, 4); ctx.lineTo(-3.5, 11);
+  ctx.moveTo(4, 4); ctx.lineTo(5.8, 11);
+  ctx.stroke();
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.ellipse(-4, 11.4, 3.6, 1.6, 0, 0, Math.PI * 2);
+  ctx.ellipse(6.2, 11.4, 3.6, 1.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Heavy barrel body
+  dinoOval(ctx, 1, 2.2, 8.2, 6.8, green, ink, 1.2);
+  dinoOval(ctx, 1.4, 4, 4.8, 3.6, belly);
+
+  // Comically tiny T-rex arms
+  ctx.strokeStyle = green;
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(2, 0); ctx.lineTo(0.5, 2.2);
+  ctx.moveTo(4, 0); ctx.lineTo(5.2, 2);
+  ctx.stroke();
+  ctx.fillStyle = green;
+  ctx.beginPath();
+  ctx.arc(0.2, 2.5, 1.1, 0, Math.PI * 2);
+  ctx.arc(5.4, 2.3, 1.1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // HUGE head — silhouette hero
+  dinoOval(ctx, 8.5, -4.5, 8.5, 6.4, green, ink, 1.25);
+  // Snout
+  dinoOval(ctx, 14.5, -3.2, 5.2, 3.6, green, ink, 1.1);
+  dinoOval(ctx, 14.2, -2.2, 3.6, 2.2, belly);
+
+  // Open jaw wedge
+  ctx.fillStyle = gum;
+  ctx.beginPath();
+  ctx.moveTo(10, -0.5);
+  ctx.lineTo(18, 0.5);
+  ctx.lineTo(12, 3.5);
+  ctx.closePath();
+  ctx.fill();
+  // Teeth
+  ctx.fillStyle = tooth;
+  for (let i = 0; i < 4; i++) {
+    const tx = 11.5 + i * 1.7;
+    ctx.beginPath();
+    ctx.moveTo(tx, -0.2);
+    ctx.lineTo(tx + 0.55, 1.8);
+    ctx.lineTo(tx + 1.1, -0.2);
+    ctx.fill();
   }
-  if (evo >= 4) {
-    for (let i = 0; i < 4; i++) {
-      const a = t / 8 + i * 1.5;
-      star(ctx, Math.cos(a) * 10, Math.sin(a) * 7 - 2, 1.6, "#fff8c8");
+
+  // Brow crest
+  ctx.fillStyle = "#2a9a48";
+  ctx.beginPath();
+  ctx.moveTo(4, -8);
+  ctx.lineTo(7, -12.5);
+  ctx.lineTo(10, -8.5);
+  ctx.closePath();
+  ctx.fill();
+
+  dinoEye(ctx, 6.5, -5.5, 2.2, 2.4, true);
+  dinoEye(ctx, 11.2, -5.2, 2.0, 2.2, true);
+
+  // Nostril
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.ellipse(17.2, -3.6, 0.7, 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Menace particles
+  ctx.fillStyle = "#7ee08a";
+  for (let i = 0; i < 3; i++) {
+    const a = t / 10 + i * 2.1;
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * 12, Math.sin(a) * 7 - 2, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/** Evo 4 — DINO GOD: winged celestial dino, horn crown, ribbon tail, aura. */
+function drawDinoGod(ctx, t) {
+  const body = "#c8ff7a";
+  const belly = "#f4ffe8";
+  const ink = "#3a6a28";
+  const gold = "#ffe66a";
+  const wing = "rgba(180,255,140,.85)";
+  const flap = Math.sin(t / 5) * 4;
+  const wag = Math.sin(t / 6) * 2.5;
+
+  // Soft halo
+  ctx.save();
+  ctx.globalAlpha = 0.35 + Math.sin(t / 8) * 0.08;
+  dinoOval(ctx, 1, 0, 16, 13, "rgba(255,244,160,.45)");
+  ctx.restore();
+
+  // Twin wings — huge silhouette change
+  ctx.fillStyle = wing;
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 1.2;
+  // Left wing
+  ctx.beginPath();
+  ctx.moveTo(-2, -2);
+  ctx.quadraticCurveTo(-14, -10 + flap, -22, -2 + flap * 0.5);
+  ctx.quadraticCurveTo(-16, 2 + flap * 0.3, -8, 3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Right wing
+  ctx.beginPath();
+  ctx.moveTo(4, -2);
+  ctx.quadraticCurveTo(16, -12 - flap, 24, -4 - flap * 0.5);
+  ctx.quadraticCurveTo(18, 1 - flap * 0.3, 10, 3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Wing bones
+  ctx.strokeStyle = "rgba(255,230,120,.7)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(-2, -2); ctx.lineTo(-18, -4 + flap);
+  ctx.moveTo(4, -2); ctx.lineTo(20, -6 - flap);
+  ctx.stroke();
+
+  // Ribbon celestial tail
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 3.4;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(-4, 2);
+  ctx.quadraticCurveTo(-10, 8 + wag, -16, 4 + wag);
+  ctx.quadraticCurveTo(-20, 0 + wag, -18, -4 + wag);
+  ctx.stroke();
+  ctx.fillStyle = gold;
+  ctx.beginPath();
+  ctx.moveTo(-18, -4 + wag);
+  ctx.lineTo(-22, -7 + wag);
+  ctx.lineTo(-16, -6 + wag);
+  ctx.closePath();
+  ctx.fill();
+
+  // Graceful legs
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 2.8;
+  ctx.beginPath();
+  ctx.moveTo(-1, 5); ctx.lineTo(-2.2, 10);
+  ctx.moveTo(4, 5); ctx.lineTo(5.4, 10);
+  ctx.stroke();
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.ellipse(-2.5, 10.3, 2.4, 1.2, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.6, 10.3, 2.4, 1.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Luminous body
+  dinoOval(ctx, 1, 2.5, 7.2, 5.8, body, ink, 1.15);
+  dinoOval(ctx, 1.2, 3.8, 4.2, 3, belly);
+
+  // Arms reaching
+  ctx.strokeStyle = body;
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(-5, 0.5); ctx.lineTo(-9, -1);
+  ctx.moveTo(6, 0.5); ctx.lineTo(10, -1.5);
+  ctx.stroke();
+
+  // Noble head
+  dinoOval(ctx, 6.5, -4.5, 6.2, 5.2, body, ink, 1.15);
+  dinoOval(ctx, 9.2, -3.4, 3.6, 2.6, belly);
+
+  // Triple horn crown
+  ctx.fillStyle = gold;
+  const horns = [[3.5, -8, -14], [6.5, -9, -16.5], [9.5, -8, -13.5]];
+  for (const [hx, hy, tip] of horns) {
+    ctx.beginPath();
+    ctx.moveTo(hx - 1.2, hy);
+    ctx.lineTo(hx, tip);
+    ctx.lineTo(hx + 1.2, hy);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  dinoEye(ctx, 4.8, -5, 1.8, 2);
+  dinoEye(ctx, 8.6, -5, 1.8, 2);
+  ctx.fillStyle = ink;
+  ctx.beginPath();
+  ctx.arc(11.2, -2.8, 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(8.4, -1.6, 1.6, 0.15, Math.PI - 0.15);
+  ctx.stroke();
+
+  // Orbiting stars
+  for (let i = 0; i < 5; i++) {
+    const a = t / 7 + i * 1.25;
+    const sx = Math.cos(a) * 13;
+    const sy = Math.sin(a) * 9 - 1;
+    ctx.fillStyle = i % 2 ? "#fff8c8" : gold;
+    ctx.beginPath();
+    for (let k = 0; k < 5; k++) {
+      const ang = -Math.PI / 2 + k * ((Math.PI * 2) / 5);
+      const br = ang + Math.PI / 5;
+      const r = 1.8;
+      if (k === 0) ctx.moveTo(sx + Math.cos(ang) * r, sy + Math.sin(ang) * r);
+      else ctx.lineTo(sx + Math.cos(ang) * r, sy + Math.sin(ang) * r);
+      ctx.lineTo(sx + Math.cos(br) * r * 0.4, sy + Math.sin(br) * r * 0.4);
     }
+    ctx.closePath();
+    ctx.fill();
   }
 }
 

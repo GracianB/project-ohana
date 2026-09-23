@@ -31,3 +31,7 @@ Carry-away cinemático por fases (aparecer → reclamar → ascender → disolve
 ## portals.js
 Catapultas y agujeros negros como atajos entre salas (no reemplazan doors).
 API: `spawnFromRoom`, `update`, `draw`, `tryUse`. Datos en `map.js` → `room.portals`.
+
+## surprises.js
+Sorpresas positivas por sala (sin tocar progresión evo): pez dorado (beach/reef), lluvia de estrellas (space, orbs +XP), power-up secreto (hub, 1×/run).
+API: `onMakeFoe`, `onEnterRoom`, `onEnemyKilled`, `update`, `draw`, `starOrbBonus`, `reset`.

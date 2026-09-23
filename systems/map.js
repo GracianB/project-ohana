@@ -41,7 +41,7 @@ export const ROOMS = {
       [1000, 660, 160, 18],
       [1220, 540, 150, 18]
     ],
-    foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [1180, 340, "pez"], [1320, 400, "pez"]],
+    foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [420, 360, "pez"], [900, 420, "pez"], [1180, 380, "pez"], [1380, 460, "pez"]],
     orbs: [[220, 620], [1280, 480]],
     portals: [{ type: "catapult", x: 70, y: 778, w: 100, h: 34, dest: "hub", label: "Claro" }]
   },
@@ -52,7 +52,7 @@ export const ROOMS = {
     pit: true,
     hint: "Esquina derecha del mapa. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
-    foes: [[400, 420, "libelula"], [860, 380, "mosquito"], [1280, 460, "avispa"]],
+    foes: [[360, 440, "libelula"], [820, 480, "mosquito"], [1280, 460, "abeja"]],
     orbs: [[520, 420], [800, 180]],
     portals: [{ type: "blackhole", x: 1170, y: 710, w: 80, h: 80, dest: "volcano", label: "Caldera" }]
   },
@@ -98,7 +98,7 @@ export const ROOMS = {
     doors: { left: "space", right: null, up: null, down: null },
     hint: "Bajo el agua. Peces y medusas. Las medusas sueltan orbes. BH → Órbita.",
     plats: [[0, 810, 1600, 90], [200, 660, 190, 18], [560, 520, 190, 18], [920, 640, 190, 18], [1220, 480, 190, 18], [740, 360, 180, 18]],
-    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [780, 380, "pez"], [1280, 420, "pez"]],
+    foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [1320, 400, "pez"]],
     orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]],
     portals: [{ type: "blackhole", x: 90, y: 710, w: 80, h: 80, dest: "space", label: "Órbita" }]
   },

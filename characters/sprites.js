@@ -29,7 +29,7 @@ export function preloadSprites() {
 export function spriteFor(id, evo) {
   const e = Math.max(0, Math.min(4, Number(evo) || 0));
   if (e === 0) return null;
-  // Force procedural tiny Dino art (skip big dragon PNGs)
+  // Procedural art for dino (5 distinct evo silhouettes), pika & cat
   if (id === "dragon" || id === "pikachu" || id === "cat") return null;
   const row = FORM[id] || FORM.lilo;
   const stage = row[e];
