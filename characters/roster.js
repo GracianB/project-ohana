@@ -138,11 +138,13 @@ export function applyForm(p, opts = {}) {
   } catch (_) {}
 }
 
-/** Ease remaining fraction of evo size tween (~0.6s at 60fps). */
+/** Ease remaining fraction of evo size tween (~0.67s at 60fps for evo<4; GOD similar/slightly longer). */
 export function tickEvoTween(p, dtFrames = 1) {
   if (!p || !p.evoTween) return;
   const oldH = p.h;
-  p.evoTween = Math.max(0, p.evoTween - (dtFrames / 36));
+  // ~10% más suave que 36: evo 1→2→3 usan 40; GOD (>=4 ligeramente más largo (42)
+  const span = (Number(p.evo) || 0) >= 4 ? 42 : 40;
+  p.evoTween = Math.max(0, p.evoTween - (dtFrames / span));
   const u = 1 - p.evoTween;
   const s = u * u * (3 - 2 * u); // smoothstep
   const toW = p.evoToW;

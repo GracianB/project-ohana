@@ -537,7 +537,9 @@ function evolve(reason) {
   if (p.evo === 4) Surprises.onBecomeGod(game);
   const toGod = p.evo >= 4;
   game.shake = toGod ? 26 : 12;
-  game.flash = toGod ? 32 : 14;
+  // Flash tinted with character form color (reduceMotion: corto pero con color)
+  game.flashColor = p.color || (p.forms && p.forms[p.evo] && p.forms[p.evo].color) || "#fff";
+  game.flash = reduceMotion ? (toGod ? 12 : 8) : (toGod ? 32 : 14);
   beep("evo");
   showNotification("FORMA " + (p.evo + 1) + "/5", p.name);
   game.fx.emit(p.x + p.w / 2, p.y, {
@@ -640,9 +642,12 @@ function melee() {
       let d = dBase;
       if (e.boss) d = Math.ceil(d * 0.5);
       e.hp -= d;
-      // Knockback + hitstun más perceptibles (sin soft-lock)
-      e.vx = (e.boss ? 4 : 12 + evo * 1.2) * p.facing;
-      e.vy = Math.min(e.vy || 0, (e.boss ? -2.2 : -4.2) - evo * 0.55);
+      // Knockback + hitstun más perceptibles (sin soft-lock); GOD +5% knock only
+      let knX = (e.boss ? 4 : 12 + evo * 1.2) * p.facing;
+      let knY = (e.boss ? -2.2 : -4.2) - evo * 0.55;
+      if (evo >= 4) { knX *= 1.05; knY *= 1.05; }
+      e.vx = knX;
+      e.vy = Math.min(e.vy || 0, knY);
       e.stun = Math.max(e.stun || 0, Math.min(28, 16 + evo * 3));
       e.flash = Math.max(e.flash || 0, 16);
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
@@ -873,6 +878,26 @@ function updatePlayer() {
   }
   if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
   if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
+  // GOD glide dust trail: 2–3 partículas cada ~5 frames detrás/abajo
+  {
+    const holdGlide = !!(p.glide && !p.grounded && p.vy > 1 && jump);
+    const glideActive = holdGlide || (p.gliding > 0);
+    if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
+      const behind = p.x + p.w / 2 - p.facing * 10;
+      const under = p.y + p.h * 0.88;
+      game.fx.emit(behind, under, {
+        color: p.color || "#fff8e0",
+        count: 2 + (Math.random() < 0.45 ? 1 : 0),
+        size: 1.7,
+        up: 0.12,
+        speed: 0.85,
+        life: 12,
+        gravity: 0.035,
+        angle: Math.PI / 2 + (Math.random() - 0.5) * 0.8,
+        spread: 0.6,
+      });
+    }
+  }
   if (p.wall) p.vy = Math.min(p.vy, 2.2);
   p.vy = Math.min(14, p.vy + 0.52);
   p.grounded = false;
@@ -1752,7 +1777,10 @@ function updateCam() {
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
-  if (game.flash > 0) game.flash--;
+  if (game.flash > 0) {
+    game.flash--;
+    if (game.flash <= 0) game.flashColor = null;
+  }
   game.nums.update();
 }
 function drawPortal(px, py, label, kind) {
@@ -1943,11 +1971,19 @@ function render() {
   }
   if (game.flash > 0) {
     const fa = (reduceMotion ? Math.min(game.flash, 5) : game.flash) / 20;
-    let rgb = "255,255,220";
-    if (game._portalFlash === "purple") rgb = "200,150,255";
-    else if (game._portalFlash === "amber") rgb = "255,200,120";
-    ctx.fillStyle = "rgba(" + rgb + "," + fa + ")";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (game.flashColor && !game._portalFlash) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, fa);
+      ctx.fillStyle = game.flashColor || "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    } else {
+      let rgb = "255,255,220";
+      if (game._portalFlash === "purple") rgb = "200,150,255";
+      else if (game._portalFlash === "amber") rgb = "255,200,120";
+      ctx.fillStyle = "rgba(" + rgb + "," + fa + ")";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   }
   if (canvas.width >= 820) drawMinimap();
 }
@@ -1980,6 +2016,32 @@ function updateHUD() {
   if (worldEl) worldEl.textContent = room().name;
   const evoEl = document.getElementById("hud-evo");
   if (evoEl) evoEl.textContent = "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft;
+  // Mini forma: pips on/active + color del personaje
+  {
+    const pips = document.querySelectorAll("#form-pips b");
+    const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
+    const col = p.color || "#7ee7ff";
+    for (let i = 0; i < pips.length; i++) {
+      const pip = pips[i];
+      const filled = i <= evoIdx;
+      const active = i === evoIdx;
+      pip.classList.toggle("on", filled);
+      pip.classList.toggle("active", active);
+      if (active) {
+        pip.style.background = col;
+        pip.style.borderColor = col;
+        pip.style.boxShadow = "0 0 12px " + col;
+      } else if (filled) {
+        pip.style.background = "";
+        pip.style.borderColor = "";
+        pip.style.boxShadow = "";
+      } else {
+        pip.style.background = "";
+        pip.style.borderColor = "";
+        pip.style.boxShadow = "";
+      }
+    }
+  }
   const comboEl = document.getElementById("hud-combo");
   if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
   const chip = document.getElementById("combo-chip");

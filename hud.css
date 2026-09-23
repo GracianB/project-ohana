@@ -59,6 +59,14 @@ body.playing #hud {
   border-color: #c9f4ff;
   box-shadow: 0 0 10px rgba(126,231,255,.55);
 }
+.form-pips b.active {
+  width: 13px;
+  height: 13px;
+  transform: scale(1.15);
+  border-color: #fff;
+  box-shadow: 0 0 14px rgba(255,255,255,.65), 0 0 10px currentColor;
+  filter: brightness(1.25);
+}
 #top-actions {
   z-index: 12;
 }

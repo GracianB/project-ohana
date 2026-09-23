@@ -22,11 +22,26 @@ function tick() {
     block.classList.toggle("hurt", ratio <= 0.28);
   }
   const fm = evo.match(/Forma\s+(\d)/);
-  const level = fm ? Number(fm[1]) : 1;
+  const level = fm ? Number(fm[1]) : 1; // 1..5
+  const evoIdx = Math.max(0, Math.min(4, level - 1));
   const pips = document.querySelectorAll("#form-pips b");
-  for (let i = 0; i < pips.length; i++) pips[i].classList.toggle("on", i < level);
   const def = ROSTER.find((r) => name.startsWith(r.name) || (r.evoNames && r.evoNames.includes(name)));
   const tint = (def && (TINT[def.id] || def.color)) || "#7ee7ff";
+  for (let i = 0; i < pips.length; i++) {
+    const filled = i <= evoIdx;
+    const active = i === evoIdx;
+    pips[i].classList.toggle("on", filled);
+    pips[i].classList.toggle("active", active);
+    if (active) {
+      pips[i].style.background = tint;
+      pips[i].style.borderColor = tint;
+      pips[i].style.boxShadow = "0 0 12px " + tint;
+    } else {
+      pips[i].style.background = "";
+      pips[i].style.borderColor = "";
+      pips[i].style.boxShadow = "";
+    }
+  }
   hud.style.setProperty("--tint", tint);
   const av = document.getElementById("hud-avatar");
   if (av) av.style.setProperty("--tint", tint);

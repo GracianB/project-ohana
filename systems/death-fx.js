@@ -103,6 +103,7 @@ export const DeathFx = {
   wisps: null,
   orbit: null,
   _shakeOnce: false,
+  _claimSparkBurst: false,
   _flashOnce: false,
   _appearBurst: false,
   _liftoffBurst: false,
@@ -157,6 +158,7 @@ export const DeathFx = {
     this.frame = 0;
     this.duration = this.reduce ? DURATION_REDUCED : DURATION_FULL;
     this._shakeOnce = false;
+    this._claimSparkBurst = false;
     this._flashOnce = false;
     this._appearBurst = false;
     this._liftoffBurst = false;
@@ -285,14 +287,15 @@ export const DeathFx = {
     if (!this.playing || !this.deathGhost) return;
     const p = this.player || (game && game.player);
     const g = this.deathGhost;
+    const previousProgress = clamp01(this.frame / this.duration);
     this.frame++;
     const progress = clamp01(this.frame / this.duration);
     g.phase = progress;
 
-    if (!this._shakeOnce && game) {
+    if (!this._shakeOnce && game && previousProgress < PHASE.appear && progress >= PHASE.appear) {
       this._shakeOnce = true;
       const kick = this.reduce ? 3 : (this.reason === "void" ? 7 : 6);
-      game.shake = Math.max(game.shake || 0, kick);
+      game.shake = Math.max(game.shake || 0, kick, 1);
     }
 
     const liftMax = this.reduce ? 110 : 220;
@@ -340,6 +343,14 @@ export const DeathFx = {
       this._playerAlpha = lerp(1, 0.78, c);
       this._orbitActive = false;
       if (p) {
+        if (!this._claimSparkBurst) {
+          this._claimSparkBurst = true;
+          if (this.reason === "hurt") {
+            for (let i = 0; i < 2; i++) {
+              this._spawnSoul(p.x + p.w * 0.5, p.y + p.h * 0.4, true, false);
+            }
+          }
+        }
         // Soft settle toward ghost — feet still grounded
         p.y = g.grabY - c * 4;
         const tx = p.x + (g.facing > 0 ? -g.w * 0.15 : p.w - g.w * 0.85);
@@ -744,7 +755,7 @@ export const DeathFx = {
     if (!this.reduce && alpha > 0.05) {
       const vw = ctx.canvas ? ctx.canvas.width : 960;
       const vh = ctx.canvas ? ctx.canvas.height : 540;
-      const vigA = (this.reason === "void" ? 0.24 : 0.2) * alpha * Math.min(1, progress * 1.8);
+      const vigA = (this.reason === "void" ? 0.32 : 0.2) * alpha * Math.min(1, progress * 1.8);
       const vg = ctx.createRadialGradient(vw * 0.5, vh * 0.45, vh * 0.15, vw * 0.5, vh * 0.5, vw * 0.7);
       vg.addColorStop(0, rgba(pal.vignette, 0));
       vg.addColorStop(1, rgba(pal.vignette, vigA));
