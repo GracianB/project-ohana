@@ -46,6 +46,10 @@ const game = {
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 let viewW = 1280, viewH = 720, viewDpr = 1;
+const CAM_ZOOM = 1.3;
+function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
+function camW() { return viewW / camZoom(); }
+function camH() { return viewH / camZoom(); }
 function fit() {
   viewDpr = Math.min(2, window.devicePixelRatio || 1);
   viewW = Math.max(320, innerWidth | 0);
@@ -505,6 +509,46 @@ function hornPoke(p, evo, def) {
   game.fx.emit(box.x + box.w * 0.7, box.y + 8, { color: "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
   game.shake = Math.min(10, (game.shake || 0) + 3);
 }
+function showSwing(p, evo, def) {
+  const face = p.facing || 1;
+  const sig = signature(p.id);
+  p._thrust = sig.heavy ? 7 : 5;
+  p._thrustFace = face;
+  if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
+  const reach = Math.max(48, (def.reach || 64) + (sig.reach || 0));
+  const low = !!sig.low;
+  const box = low
+    ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
+    : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
+  const life = sig.heavy ? 13 : 10;
+  game.slashes.push({
+    x: p.x + p.w / 2 + face * (low ? 6 : 16),
+    y: low ? p.y + p.h * 0.7 : p.y + p.h * 0.32,
+    facing: face, life, max: life,
+    color: def.color || p.color,
+    kind: def.kind || "fan",
+    w: reach,
+  });
+  if (evo >= 2 || sig.heavy) {
+    const life2 = Math.max(6, life - 3);
+    game.slashes.push({
+      x: p.x + p.w / 2 + face * (26 + evo * 2),
+      y: p.y + p.h * (low ? 0.82 : 0.2),
+      facing: face, life: life2, max: life2,
+      color: "#fff", kind: def.kind || "fan", w: Math.round(reach * 0.72),
+    });
+  }
+  for (const e of game.enemies) {
+    if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+    if (aabb(box, e)) markHit(p, e, def.dmg, sig.kb || 1);
+  }
+  const tipX = face > 0 ? box.x + box.w - 6 : box.x + 6;
+  game.fx.emit(tipX, box.y + box.h * 0.45, {
+    color: def.color || p.color, count: sig.heavy ? 14 : 10, size: 3.2,
+    star: true, speed: 2.6, angle: face > 0 ? 0 : Math.PI, spread: 0.7,
+  });
+  game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
+}
 function attack() {
   const p = game.player;
   if (!p || p.dead) return;
@@ -519,64 +563,7 @@ function attack() {
     game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
   }
   if (p.id === "cuerno") { hornPoke(p, evo, def); return; }
-  const face = p.facing || 1;
-  if (def.heal) p.health = Math.min(p.maxHealth, p.health + def.heal);
-  if (def.style === "shot") {
-    const n = def.n || 1;
-    for (let i = 0; i < n; i++) {
-      const spread = (i - (n - 1) / 2) * 0.42;
-      game.projectiles.push({
-        x: p.x + p.w / 2 + face * 8,
-        y: p.y + p.h * 0.35,
-        vx: face * (def.speed || 9),
-        vy: spread * 4,
-        w: 16, h: 12,
-        life: 28,
-        dmg: def.dmg,
-        color: def.color || p.color,
-        shape: def.kind === "zap" ? "zap" : "crescent",
-        owner: "player",
-      });
-    }
-    return;
-  }
-  if (def.style === "nova") {
-    const r = def.r || 80;
-    game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: def.color || p.color, count: 18, size: 4, up: 1.4, star: true });
-    for (const e of game.enemies) {
-      if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
-      const dx = e.x + e.w / 2 - (p.x + p.w / 2);
-      const dy = e.y + e.h / 2 - (p.y + p.h / 2);
-      if (Math.hypot(dx, dy) <= r) markHit(p, e, def.dmg, def.kb);
-    }
-    return;
-  }
-  const reach = def.reach || 52;
-  const box = def.style === "slam"
-    ? { x: p.x - reach * 0.5, y: p.y + p.h - 18, w: p.w + reach, h: 32 }
-    : { x: p.x + (face > 0 ? p.w - 4 : -reach), y: p.y - 8, w: reach, h: p.h + 20 };
-  game.slashes.push({
-    x: p.x + p.w / 2 + face * 16,
-    y: def.style === "slam" ? p.y + p.h : p.y + p.h * 0.4,
-    facing: face,
-    life: 12,
-    max: 12,
-    color: def.color || p.color,
-    kind: def.kind || "crescent",
-    w: reach,
-  });
-  for (const e of game.enemies) {
-    if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
-    if (aabb(box, e)) markHit(p, e, def.dmg, def.kb);
-  }
-  if (def.shots) {
-    game.projectiles.push({
-      x: p.x + p.w / 2 + face * 10, y: p.y + p.h * 0.3,
-      vx: face * 7, vy: -1.2, w: 14, h: 12, life: 32,
-      dmg: Math.ceil(def.dmg * 0.6), color: def.color || p.color,
-      shape: "crescent", owner: "player",
-    });
-  }
+  showSwing(p, evo, def);
 }
 function melee() {
   const p = game.player;
@@ -1876,29 +1863,30 @@ function updateProjectiles() {
 }
 function updateCam() {
   const p = game.player; if (!p) return;
+  const vw = camW(), vh = camH();
   let lerp = 0.12;
-  let tx = p.x + p.facing * 80 - viewW / 2;
-  let ty = p.y - viewH * 0.58;
+  let tx = p.x + p.facing * 62 - vw / 2;
+  let ty = p.y - vh * 0.58;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   const fin = game.finale && game.finale.t > 0 ? game.finale : null;
   if (fin) {
-    tx = fin.x - viewW / 2;
-    ty = fin.y - viewH * 0.46;
+    tx = fin.x - vw / 2;
+    ty = fin.y - vh * 0.46;
     lerp = 0.07;
   } else if (boss) {
     const bx = boss.x + boss.w / 2;
     const by = boss.y + boss.h * 0.28;
     const px = p.x + p.w / 2;
     const py = p.y + p.h * 0.35;
-    tx = (px + bx) / 2 - viewW / 2;
-    ty = (py * 0.45 + by * 0.55) - viewH * 0.42;
+    tx = (px + bx) / 2 - vw / 2;
+    ty = (py * 0.45 + by * 0.55) - vh * 0.42;
     lerp = 0.18;
   }
   game.cam.x += (tx - game.cam.x) * lerp;
   game.cam.y += (ty - game.cam.y) * lerp;
   if (game.camPunch > 0) game.camPunch *= 0.82;
-  game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - viewW)));
-  game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - viewH + 80)));
+  game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - vw)));
+  game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
@@ -1949,10 +1937,13 @@ function render() {
   ctx.imageSmoothingEnabled = true;
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
-  ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewW, viewH);
+  const z = camZoom();
+  ctx.save();
+  ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  ctx.scale(z, z);
+  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
   else {
-    renderWorld(ctx, world, game.cam, t, viewW, viewH);
+    renderWorld(ctx, world, game.cam, t, camW(), camH());
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
