@@ -24,4 +24,13 @@ export function vfxSprite(name) {
   return img.complete && img.naturalWidth > 0 ? img : null;
 }
 
+const BODY_IDS = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"];
+const BODY_POSES = ["idle", "run", "jump", "atk"];
+
+export function paintedBody(id, pose) {
+  const img = load("bodies/" + id + "-" + pose);
+  return img.complete && img.naturalWidth > 0 ? img : null;
+}
+
+for (const id of BODY_IDS) for (const pose of BODY_POSES) load("bodies/" + id + "-" + pose);
 NAMES.forEach(load);

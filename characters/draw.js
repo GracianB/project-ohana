@@ -1,5 +1,6 @@
 import { computePose, R } from "./rig.js";
 import { ART } from "./art/index.js";
+import { paintedBody } from "./sprites.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -267,30 +268,36 @@ function presentCharacter(ctx, art, pose, flashCol, flashA) {
   ctx.drawImage(color, -U / 2, -U * 0.78, U, U);
 }
 
-function drawFlashed(ctx, art, pose, color, a) {
-  art.draw(ctx, pose, R);
-  try {
-    const m = ctx.getTransform();
-    const ps = Math.min(6, Math.max(0.5, Math.hypot(m.a, m.b)));
-    const U = 280; // unidades de diseño cubiertas (alas incluidas)
-    const W = Math.ceil(U * ps);
-    if (!flashCanvas) flashCanvas = document.createElement("canvas");
-    if (flashCanvas.width !== W) { flashCanvas.width = W; flashCanvas.height = W; }
-    const g = flashCanvas.getContext("2d");
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.clearRect(0, 0, W, W);
-    g.setTransform(ps, 0, 0, ps, W / 2, W * 0.78);
-    art.draw(g, pose, R);
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.globalCompositeOperation = "source-atop";
-    g.fillStyle = color;
-    g.fillRect(0, 0, W, W);
-    g.globalCompositeOperation = "source-over";
-    ctx.save();
-    ctx.globalAlpha *= a;
-    ctx.drawImage(flashCanvas, -U / 2, -U * 0.78, U, U);
-    ctx.restore();
-  } catch (_) {}
+function pickPainted(id, t, moving, air, atk) {
+  let pose = "idle";
+  if (atk > 0.15) pose = "atk";
+  else if (air) pose = "jump";
+  else if (moving) pose = (Math.floor(t / 7) % 2) ? "run" : "idle";
+  return paintedBody(id, pose) || paintedBody(id, "idle");
+}
+
+let tintCanvas = null;
+function drawPainted(ctx, img, x, y, w, h, flashCol, flashA) {
+  ctx.drawImage(img, x, y, w, h);
+  if (!flashCol || flashA <= 0) return;
+  const sw = img.naturalWidth, sh = img.naturalHeight;
+  if (!tintCanvas) tintCanvas = document.createElement("canvas");
+  if (tintCanvas.width !== sw || tintCanvas.height !== sh) {
+    tintCanvas.width = sw;
+    tintCanvas.height = sh;
+  }
+  const g = tintCanvas.getContext("2d");
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, sw, sh);
+  g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = "source-atop";
+  g.fillStyle = flashCol;
+  g.fillRect(0, 0, sw, sh);
+  g.globalCompositeOperation = "source-over";
+  ctx.save();
+  ctx.globalAlpha *= flashA;
+  ctx.drawImage(tintCanvas, x, y, w, h);
+  ctx.restore();
 }
 
 // ============================================================================
@@ -358,13 +365,21 @@ export function drawCharacter(ctx, p, cam, t) {
   let flashCol = null, flashA = 0;
   if (burstK > 0.35) { flashCol = "#ffffff"; flashA = ((burstK - 0.35) / 0.65) * 0.9; }
   else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
+  const painted = pickPainted(p.id, t, moving, air, atk);
   ctx.save();
   ctx.rotate(tilt * 0.5);
-  ctx.scale(sx * s, sy * s);
-  try { presentCharacter(ctx, art, pose, flashCol, flashA); }
-  catch (err) {
-    try { art.draw(ctx, pose, R); }
-    catch (e2) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }
+  if (painted) {
+    const ih = H * 1.05;
+    const iw = ih * (painted.naturalWidth / painted.naturalHeight);
+    ctx.scale(sx, sy);
+    drawPainted(ctx, painted, -iw / 2, -ih, iw, ih, flashCol, flashA);
+  } else {
+    ctx.scale(sx * s, sy * s);
+    try { presentCharacter(ctx, art, pose, flashCol, flashA); }
+    catch (err) {
+      try { art.draw(ctx, pose, R); }
+      catch (e2) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }
+    }
   }
   ctx.restore();
 
