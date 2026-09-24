@@ -626,7 +626,6 @@ export function playEvolution(detail = {}) {
     ctx.globalAlpha = fade;
     parts.draw(ctx);
     ctx.restore();
-
     const flashA = reduce ? 0.45 * (1 - seg(t, T.flash, T.flash + 0.3)) * (t >= T.flash ? 1 : 0)
       : (t < T.flash ? Math.pow(seg(t, T.flash - 0.14, T.flash), 2) : Math.pow(1 - seg(t, T.flash, T.flash + 0.32), 2));
     if (flashA > 0.001) {
