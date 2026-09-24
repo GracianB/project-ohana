@@ -341,7 +341,7 @@ export function drawCharacter(ctx, p, cam, t) {
 
   // Tamaño visual de la forma (con "pop" al evolucionar)
   let H = VISUAL_H[evo] * (CHAR_K[p.id] || 1) * (p.visualScale || 1);
-  if (getLook() === "paint") H = Math.max(H, (p.h || 28) * 1.42);
+  if (getLook() === "paint") H = Math.min(220, Math.max(H, (p.h || 28) * 3));
   const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
   if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 

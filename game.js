@@ -1884,7 +1884,7 @@ function render() {
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
   ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH);
+  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, canvas.width, canvas.height);
   else {
     renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
     drawTerrain(ctx, game.platforms, world, game.cam, t);

@@ -39,12 +39,18 @@ function tile(ctx, art, x, y, w, visH, lift, cam) {
 }
 
 /** Fondo, suelo, plataformas y la catapulta del Claro, alineados a la colisión. */
-export function drawPaintedHub(ctx, cam, worldW, worldH) {
+export function drawPaintedHub(ctx, cam, worldW, worldH, viewW, viewH) {
   const room = ROOMS.hub;
   const bg = img("bg");
-  const W = worldW || 1600;
-  const H = worldH || 900;
-  if (bg) ctx.drawImage(bg, -cam.x, -cam.y, W, H);
+  // El cuadro cubre la pantalla, no la sala entera. Si no, los árboles salen gigantes.
+  if (bg && viewW && viewH) {
+    const cover = Math.max(viewW / bg.naturalWidth, viewH / bg.naturalHeight) * 1.28;
+    const dw = bg.naturalWidth * cover;
+    const dh = bg.naturalHeight * cover;
+    ctx.drawImage(bg, (viewW - dw) / 2 - cam.x * 0.035, (viewH - dh) / 2 - cam.y * 0.03, dw, dh);
+  } else if (bg) {
+    ctx.drawImage(bg, -cam.x, -cam.y, worldW || 1600, worldH || 900);
+  }
   const ground = img("ground");
   const plate = img("plate");
   for (const p of room.plats) {
@@ -52,15 +58,14 @@ export function drawPaintedHub(ctx, cam, worldW, worldH) {
     const thick = p[3] > 40;
     const art = thick ? ground : plate;
     if (!art) continue;
-    const visH = thick ? h * 0.72 : Math.max(96, h + 48);
-    // La hierba ocupa el borde de arriba. Los pies caen en esa línea, no en la tierra.
-    const lift = thick ? 58 : Math.round(visH * 0.28);
+    const visH = thick ? 108 : 74;
+    const lift = thick ? 36 : 22;
     tile(ctx, art, x, y, w, visH, lift, cam);
   }
   const cat = img("catapult");
   const portal = (room.portals || []).find((p) => p.type === "catapult");
   if (cat && portal) {
-    const ih = 118 * PAINT_WORLD;
+    const ih = 190;
     const iw = ih * (cat.naturalWidth / cat.naturalHeight);
     const foot = (portal.y + portal.h) * PAINT_WORLD;
     const cx = (portal.x + portal.w / 2) * PAINT_WORLD;
