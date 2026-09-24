@@ -2,6 +2,7 @@ import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
+import { drawTerrain } from "./worlds/terrain.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -1868,49 +1869,7 @@ function render() {
   const shake = reduceMotion ? 0 : game.shake;
   ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
   renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
-  const grounds = game.platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
-  for (let i = 0; i < grounds.length - 1; i++) {
-    const a = grounds[i], b = grounds[i + 1];
-    const gap = b.x - (a.x + a.w);
-    if (gap < 40) continue;
-    const x = a.x + a.w - game.cam.x;
-    const y = a.y - game.cam.y;
-    const g = ctx.createLinearGradient(0, y, 0, y + 130);
-    g.addColorStop(0, "rgba(4,6,14,.2)");
-    g.addColorStop(1, "rgba(2,2,8,.85)");
-    ctx.fillStyle = g;
-    ctx.fillRect(x, y + 8, gap, 140);
-    ctx.fillStyle = "rgba(126,231,255," + (0.16 + Math.sin(t / 9) * 0.08) + ")";
-    ctx.fillRect(x, y + 6, gap, 3);
-  }
-  for (const plat of game.platforms) {
-    const x = plat.x - game.cam.x, y = plat.y - game.cam.y;
-    // drop shadow
-    ctx.fillStyle = "rgba(0,0,0,.28)"; ctx.fillRect(x + 6, y + 12, plat.w, plat.h);
-    // body + depth (darken lower half)
-    ctx.fillStyle = world.ground; ctx.fillRect(x, y, plat.w, plat.h);
-    ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.fillRect(x, y + Math.max(10, plat.h * 0.45), plat.w, plat.h);
-    // grassy/lit top cap
-    ctx.fillStyle = world.groundTop || "#8fd98a"; ctx.fillRect(x, y, plat.w, 10);
-    ctx.fillStyle = "rgba(255,255,255,.14)"; ctx.fillRect(x, y, plat.w, 3);
-    // world-accent glowing edge
-    ctx.globalAlpha = 0.5; ctx.fillStyle = world.edge || "#fff"; ctx.fillRect(x, y - 3, plat.w, 3); ctx.globalAlpha = 1;
-    ctx.fillStyle = world.edge || "#fff"; ctx.fillRect(x, y - 1, plat.w, 2);
-    // side bevels
-    ctx.fillStyle = "rgba(255,255,255,.10)"; ctx.fillRect(x, y, 2, plat.h);
-    ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(x + plat.w - 2, y, 2, plat.h);
-    // world-driven outline (reef/aquatic readability)
-    if (world.platOutline) {
-      ctx.strokeStyle = world.platOutline;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + 0.5, y + 0.5, plat.w - 1, plat.h - 1);
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = world.edge || "#8af8ff";
-      ctx.fillRect(x - 1, y - 1, 2, plat.h + 2);
-      ctx.fillRect(x + plat.w - 1, y - 1, 2, plat.h + 2);
-      ctx.globalAlpha = 1;
-    }
-  }
+  drawTerrain(ctx, game.platforms, world, game.cam, t);
   const r = room();
   drawSigns(ctx, r, game.cam, t, game.player.evo);
   portals.draw(ctx, game.cam, t);

@@ -788,71 +788,74 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   const y = portal.y - cam.y;
   const charging = charge && charge.portal === portal;
   const ck = charging ? Math.min(1, charge.t / Math.max(1, charge.max)) : 0;
-  const pulse = 0.5 + Math.sin(t / 9) * 0.22 + (charging ? 0.3 + ck * 0.4 : 0);
+  const ang = (portal.armAng != null ? portal.armAng : -0.42) + Math.sin(t / 16) * 0.04;
 
   ctx.save();
-  // Sombra
-  ctx.fillStyle = "rgba(0,0,0,.35)";
+  ctx.fillStyle = "rgba(0,0,0,.32)";
   ctx.beginPath();
-  ctx.ellipse(x + portal.w / 2, y + portal.h + 4, portal.w * 0.42, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + portal.w / 2, y + portal.h + 2, portal.w * 0.38, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Base madera (plataforma + patas)
-  ctx.fillStyle = "#3a2414";
-  ctx.fillRect(x + 6, y + 14, portal.w - 12, portal.h - 10);
-  ctx.fillStyle = "#5c3a1e";
-  ctx.fillRect(x + 4, y + 10, portal.w - 8, 10);
-  // Vetas
-  ctx.strokeStyle = "rgba(20,10,0,.35)";
-  ctx.lineWidth = 1;
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(x + 10 + i * 28, y + 12);
-    ctx.lineTo(x + 18 + i * 28, y + 18);
-    ctx.stroke();
-  }
-  // Pivote
-  ctx.fillStyle = "#2a1810";
+  // caballete de madera, no un bloque
+  const left = x + 14;
+  const right = x + portal.w - 14;
+  const foot = y + portal.h - 2;
+  const top = y + 16;
+  ctx.strokeStyle = "#4a2c16";
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.arc(x + portal.w * 0.28, y + 12, 7, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#c9a06a";
-  ctx.beginPath();
-  ctx.arc(x + portal.w * 0.28, y + 12, 3.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Brazo con spring
-  const ang = portal.armAng != null ? portal.armAng : -0.35 + Math.sin(t / 14) * 0.08;
-  ctx.save();
-  ctx.translate(x + portal.w * 0.28, y + 12);
-  ctx.rotate(ang);
-  ctx.fillStyle = "#6b3e1c";
-  ctx.fillRect(0, -5, portal.w * 0.62, 10);
-  ctx.fillStyle = "#c4894a";
-  ctx.fillRect(0, -5, portal.w * 0.62, 3);
-  const bx = portal.w * 0.6;
-  ctx.beginPath();
-  ctx.arc(bx, 0, 9 + ck * 3, 0, Math.PI * 2);
-  ctx.fillStyle = charging ? "#ffe08a" : "#d7c4a4";
-  ctx.fill();
-  ctx.strokeStyle = "#3a2414";
+  ctx.moveTo(left, foot); ctx.lineTo(left + 10, top);
+  ctx.moveTo(left + 22, foot); ctx.lineTo(left + 10, top);
+  ctx.moveTo(right, foot); ctx.lineTo(right - 10, top);
+  ctx.moveTo(right - 22, foot); ctx.lineTo(right - 10, top);
+  ctx.stroke();
+  ctx.strokeStyle = "#8a5a32";
   ctx.lineWidth = 2;
   ctx.stroke();
-  if (charging || portal.sparkT > 0) {
-    ctx.shadowColor = "rgba(255,180,60,.9)";
-    ctx.shadowBlur = 14 + ck * 10;
-    ctx.strokeStyle = "rgba(255,210,120," + (0.4 + ck * 0.4) + ")";
+
+  // eje
+  ctx.fillStyle = "#2a1810";
+  ctx.beginPath();
+  ctx.arc(left + 10, top, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#e6c48a";
+  ctx.beginPath();
+  ctx.arc(left + 10, top, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(left + 10, top);
+  ctx.rotate(ang);
+  ctx.fillStyle = "#6b3e1c";
+  ctx.fillRect(0, -4, portal.w * 0.55, 8);
+  ctx.fillStyle = "#c4894a";
+  ctx.fillRect(0, -4, portal.w * 0.55, 2.5);
+  const bx = portal.w * 0.52;
+  // cuerdas y cazo de tela, sin cuadrado
+  ctx.strokeStyle = "#d8c4a0";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(bx - 8, 0);
+  ctx.quadraticCurveTo(bx, 14 + ck * 6, bx + 10, 0);
+  ctx.stroke();
+  ctx.fillStyle = charging ? "#ffd27a" : "#c46a3a";
+  ctx.beginPath();
+  ctx.ellipse(bx, 8 + ck * 4, 8, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (charging) {
+    ctx.strokeStyle = "rgba(255,220,140," + (0.35 + ck * 0.5) + ")";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(bx, 0, 14 + ck * 6, 0, Math.PI * 2);
+    ctx.arc(bx, 6, 12 + ck * 8, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.shadowBlur = 0;
   }
   ctx.restore();
 
-  ctx.font = "800 12px Outfit, system-ui, sans-serif";
+  ctx.font = "800 11px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffe8c8";
-  ctx.fillText("⚔ " + (portal.label || "Catapulta"), x + portal.w / 2, y - 8);
+  ctx.fillText(portal.label || "Catapulta", x + portal.w / 2, y - 6);
   ctx.restore();
 }
 
@@ -907,6 +910,30 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
     }
     ctx.globalAlpha = 1;
   }
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-spin * 1.4);
+  ctx.strokeStyle = "rgba(255,236,255," + (0.35 + pulse * 0.25) + ")";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.72, 0.2, Math.PI * 1.15);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(120,200,255,.45)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.72, Math.PI * 1.4, Math.PI * 1.9);
+  ctx.stroke();
+  for (let i = 0; i < 5; i++) {
+    const a = spin * 2 + i * 1.25;
+    ctx.strokeStyle = "rgba(210,170,255,.35)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * r * 0.95, Math.sin(a) * r * 0.36);
+    ctx.lineTo(Math.cos(a) * r * 0.3, Math.sin(a) * r * 0.12);
+    ctx.stroke();
+  }
+  ctx.restore();
 
   // Núcleo
   const coreR = r * (0.32 + (charging ? 0.08 * (charge.t / charge.max) : 0));
