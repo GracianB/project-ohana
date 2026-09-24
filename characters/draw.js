@@ -1,6 +1,7 @@
 import { computePose, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
+import { getLook } from "./look.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -269,6 +270,7 @@ function presentCharacter(ctx, art, pose, flashCol, flashA) {
 }
 
 function pickPainted(id, t, moving, air, atk) {
+  if (getLook() !== "paint") return null;
   let pose = "idle";
   if (atk > 0.15) pose = "atk";
   else if (air) pose = "jump";

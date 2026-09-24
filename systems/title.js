@@ -1,6 +1,7 @@
 import { ROSTER } from "../characters/roster.js";
 import { canonId } from "./save.js";
 import { drawCharacter } from "../characters/draw.js";
+import { getLook, setLook } from "../characters/look.js";
 import { playIntro, playTitleIntro } from "./intro.js";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
@@ -172,6 +173,34 @@ function begin(kind) {
   playIntro(kind, name, startSelected, selectedId);
 }
 
+function applyLook() {
+  const paint = getLook() === "paint";
+  document.querySelectorAll(".look-switch button").forEach((b) => {
+    const on = b.dataset.look === (paint ? "paint" : "vector");
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  document.querySelectorAll(".portrait").forEach((box) => box.classList.toggle("has-art", paint));
+}
+
+function mountLook(wrap) {
+  if (wrap.querySelector(".look-switch")) return;
+  const label = wrap.querySelector(".pick-label");
+  const html = '<div class="look-switch" role="group" aria-label="Versión de personajes">'
+    + '<button type="button" data-look="vector">De antes</button>'
+    + '<button type="button" data-look="paint">Nuevos</button>'
+    + '</div>';
+  if (label) label.insertAdjacentHTML("afterend", html);
+  else wrap.insertAdjacentHTML("afterbegin", html);
+  wrap.querySelector(".look-switch").addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button[data-look]");
+    if (!btn) return;
+    setLook(btn.dataset.look);
+    applyLook();
+    sfx("ui");
+  });
+}
+
 function enhance() {
   const wrap = document.getElementById("chars");
   if (!wrap || !wrap.querySelector(".char-card")) {
@@ -198,6 +227,8 @@ function enhance() {
     el.addEventListener("pointerdown", () => mark(def.id));
     el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
   });
+  mountLook(wrap);
+  applyLook();
   buildDots();
   mark(selectedId);
   const play = document.getElementById("btn-play");

@@ -1401,6 +1401,7 @@ body.playing #ability-bar {
   z-index: 1;
 }
 .portrait img.portrait-art {
+  display: none;
   position: absolute;
   inset: 0;
   width: 100%;
@@ -1409,7 +1410,31 @@ body.playing #ability-bar {
   object-position: center 18%;
   z-index: 1;
 }
+.portrait.has-art img.portrait-art { display: block; }
 .portrait.has-art canvas { visibility: hidden; }
+
+.look-switch {
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+.look-switch button {
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d5e6f4;
+  background: rgba(8, 16, 28, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.look-switch button.on {
+  color: #1a1204;
+  background: #ffe27a;
+  border-color: #ffe27a;
+}
 
 /* Swatch de color */
 .swatch {
