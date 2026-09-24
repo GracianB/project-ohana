@@ -26,6 +26,7 @@ export function vfxSprite(name) {
 
 const BODY_IDS = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"];
 const BODY_POSES = ["idle", "run", "jump", "atk"];
+const KILO_POSES = ["idle", "blink", "run1", "run2", "run3", "rise", "fall", "hit", "j", "k", "l", "hurt"];
 
 export function paintedBody(id, pose) {
   const img = load("bodies/" + id + "-" + pose);
@@ -33,4 +34,5 @@ export function paintedBody(id, pose) {
 }
 
 for (const id of BODY_IDS) for (const pose of BODY_POSES) load("bodies/" + id + "-" + pose);
+for (const pose of KILO_POSES) load("bodies/kilo-" + pose);
 NAMES.forEach(load);

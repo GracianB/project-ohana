@@ -269,8 +269,26 @@ function presentCharacter(ctx, art, pose, flashCol, flashA) {
   ctx.drawImage(color, -U / 2, -U * 0.78, U, U);
 }
 
-function pickPainted(id, t, moving, air, atk) {
+function kiloPose(p, t, moving, air, atk) {
+  const cast = p._cast;
+  if (cast && t >= cast.t && t - cast.t < (cast.slot === 2 ? 34 : cast.slot === 1 ? 26 : 16)) {
+    return ["j", "k", "l"][cast.slot] || "j";
+  }
+  if ((p.invuln || 0) > 14) return "hurt";
+  if (atk > 0.12 || (p.melee || 0) > 0) return "hit";
+  if (air && (p.vy || 0) < -0.6) return "rise";
+  if (air) return "fall";
+  if (moving) return ["run1", "run2", "run3"][Math.floor(t / 6) % 3];
+  return (Math.floor(t / 46) % 11 === 0) ? "blink" : "idle";
+}
+
+function pickPainted(p, t, moving, air, atk) {
   if (getLook() !== "paint") return null;
+  const id = p.id;
+  if (id === "kilo") {
+    const pose = kiloPose(p, t, moving, air, atk);
+    return paintedBody("kilo", pose) || paintedBody("kilo", "idle");
+  }
   let pose = "idle";
   if (atk > 0.15) pose = "atk";
   else if (air) pose = "jump";
@@ -368,7 +386,7 @@ export function drawCharacter(ctx, p, cam, t) {
   let flashCol = null, flashA = 0;
   if (burstK > 0.35) { flashCol = "#ffffff"; flashA = ((burstK - 0.35) / 0.65) * 0.9; }
   else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
-  const painted = pickPainted(p.id, t, moving, air, atk);
+  const painted = pickPainted(p, t, moving, air, atk);
   ctx.save();
   ctx.rotate(tilt * 0.5);
   if (painted) {
