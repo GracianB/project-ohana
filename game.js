@@ -1,5 +1,5 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
-import { signature } from "./characters/signature.js";
+import { signature, markAt } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
@@ -88,7 +88,7 @@ addEventListener("keydown", (e) => {
   keys[k] = true;
   if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
   if (e.repeat) return;
-  if (e.key === "h" || e.key === "H" || e.key === "?") { toggleHelp(); return; }
+  if (e.key === "?" ) { toggleHelp(); return; }
   if (e.key === "n" || e.key === "N") {
     setMuted(!muted);
     showNotification("AUDIO", muted ? "Mute" : "On");
@@ -117,13 +117,14 @@ addEventListener("keydown", (e) => {
   }
   if (e.key === "r" || e.key === "R") respawn();
   if (e.key === "f" || e.key === "F") melee();
+  if (e.key === "h" || e.key === "H") markStrike();
   if (e.key === "Shift") dash();
 });
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
 canvas.addEventListener("pointerdown", (e) => {
   if (!game.running || paused || overlayOpen()) return;
   if (e.button === 2) { dash(); return; }
-  melee();
+  markStrike();
 });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 function toggleHelp() {
@@ -416,6 +417,92 @@ function dash() {
     game.fx.emit(p.x, p.y + p.h * 0.5, { color: "#ffe14a", count: 8, size: 2.4, star: true, speed: 2.2, life: 14 });
   }
   beep("dash");
+}
+function markHit(p, e, dmg, kb) {
+  const evo = Number(p.evo) || 0;
+  let d = dmg;
+  if (e.boss) d = Math.ceil(d * 0.55);
+  e.hp -= d;
+  const face = p.facing || 1;
+  const push = kb == null ? 1 : kb;
+  e.vx = face * (e.boss ? 3 : 8) * push;
+  e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
+  e.stun = Math.max(e.stun || 0, 10);
+  e.flash = 12;
+  e.invuln = Math.max(e.invuln || 0, 8);
+  game.nums.add(e.x, e.y, "" + d, p.color || "#fff");
+  punch(e.x, e.y, p.color);
+  hitStop(e.boss ? 6 : 4);
+  p.xp += 1;
+}
+function markStrike() {
+  const p = game.player;
+  if (!p || p.dead) return;
+  if ((p.markT || 0) > 0) return;
+  const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+  const def = markAt(p.id, evo);
+  p.markT = def.cd;
+  p.melee = 10;
+  beep("slash");
+  game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
+  const face = p.facing || 1;
+  if (def.heal) p.health = Math.min(p.maxHealth, p.health + def.heal);
+  if (def.style === "shot") {
+    const n = def.n || 1;
+    for (let i = 0; i < n; i++) {
+      const spread = (i - (n - 1) / 2) * 0.42;
+      game.projectiles.push({
+        x: p.x + p.w / 2 + face * 8,
+        y: p.y + p.h * 0.35,
+        vx: face * (def.speed || 9),
+        vy: spread * 4,
+        w: 16, h: 12,
+        life: 28,
+        dmg: def.dmg,
+        color: def.color || p.color,
+        shape: def.kind === "zap" ? "zap" : "crescent",
+        owner: "player",
+      });
+    }
+    return;
+  }
+  if (def.style === "nova") {
+    const r = def.r || 80;
+    game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: def.color || p.color, count: 18, size: 4, up: 1.4, star: true });
+    for (const e of game.enemies) {
+      if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+      const dx = e.x + e.w / 2 - (p.x + p.w / 2);
+      const dy = e.y + e.h / 2 - (p.y + p.h / 2);
+      if (Math.hypot(dx, dy) <= r) markHit(p, e, def.dmg, def.kb);
+    }
+    return;
+  }
+  const reach = def.reach || 52;
+  const box = def.style === "slam"
+    ? { x: p.x - reach * 0.5, y: p.y + p.h - 18, w: p.w + reach, h: 32 }
+    : { x: p.x + (face > 0 ? p.w - 4 : -reach), y: p.y - 8, w: reach, h: p.h + 20 };
+  game.slashes.push({
+    x: p.x + p.w / 2 + face * 16,
+    y: def.style === "slam" ? p.y + p.h : p.y + p.h * 0.4,
+    facing: face,
+    life: 12,
+    max: 12,
+    color: def.color || p.color,
+    kind: def.kind || "crescent",
+    w: reach,
+  });
+  for (const e of game.enemies) {
+    if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+    if (aabb(box, e)) markHit(p, e, def.dmg, def.kb);
+  }
+  if (def.shots) {
+    game.projectiles.push({
+      x: p.x + p.w / 2 + face * 10, y: p.y + p.h * 0.3,
+      vx: face * 7, vy: -1.2, w: 14, h: 12, life: 32,
+      dmg: Math.ceil(def.dmg * 0.6), color: def.color || p.color,
+      shape: "crescent", owner: "player",
+    });
+  }
 }
 function melee() {
   const p = game.player;
@@ -732,6 +819,7 @@ function tryDoors() {
 }
 function updatePlayer() {
   const p = game.player; if (p.dead) return;
+  if (p.markT > 0) p.markT--;
   if (game.doorHold > 0) {
     game.doorHold--;
     p.vx = 0;
@@ -2011,7 +2099,10 @@ function updateHUD() {
   const nameEl = document.getElementById("hud-name");
   if (nameEl) nameEl.textContent = p.name;
   const traitEl = document.getElementById("hud-trait");
-  if (traitEl) traitEl.textContent = (p.passive && p.passive.name) || "";
+  if (traitEl) {
+    const mk = markAt(p.id, p.evo);
+    traitEl.textContent = ((p.passive && p.passive.name) || "") + " · H " + mk.name;
+  }
   const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
   const orbsLeft = game.orbs.filter((o) => !o.taken).length;
   const meta = document.getElementById("hud-meta");

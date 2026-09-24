@@ -4,7 +4,7 @@ import { makeFoe, isAirFoe, applyElite, ROOM_HARD } from "../engine/foes.js";
 import { XP_NEED } from "../systems/xp.js";
 import { canonId, packSave, unpackSave } from "../systems/save.js";
 import { sense, think } from "../engine/foe-brain.js";
-import { signature } from "../characters/signature.js";
+import { signature, markAt } from "../characters/signature.js";
 import { resolveBody, hitsSolid } from "../engine/collide.js";
 
 const KINDS = ["phosquito", "mosquito", "libelula", "abeja", "pez", "planta", "medusa", "anguila", "rana", "cangrejo", "gaviota", "murcielago", "arana", "brasita", "escoria", "ufo", "cucaracho", "no-such"];
@@ -50,6 +50,10 @@ test("cada personaje pega distinto", () => {
   assert.equal(signature("kilo").kind, "leaf");
   assert.equal(signature("chispin").kind, "zap");
   assert.ok(signature("stitcho").dash > signature("dino").dash);
+  assert.notEqual(markAt("kilo", 0).name, markAt("kilo", 4).name);
+  assert.notEqual(markAt("dino", 2).style, markAt("chispin", 0).style);
+  assert.equal(markAt("pizza", 4).style, "nova");
+  assert.equal(markAt("dragon", 0).style, "shot");
 });
 
 test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {
