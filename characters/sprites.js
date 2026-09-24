@@ -1,181 +1,81 @@
 // ============================================================================
-// SISTEMA DE SPRITES - Project Ohana
-// Reemplaza dibujos procedurales con imágenes de pixel art
+// SISTEMA DE SPRITES PREMIUM - Project Ohana
 // ============================================================================
 
 const SPRITE_PATH = 'assets/sprites/';
 
-// Configuración de cada personaje
+// Configuración optimizada para sprites de 204.8x256 (1024/5)
 const SPRITE_CONFIG = {
-  stitch: {
-    file: 'stitch-sprites.png',
-    width: 204.8,  // 1024 / 5
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.8 } // Punto de anclaje para posicionamiento
-  },
-  lilo: {
-    file: 'lilo-sprites.png',
-    width: 204.8,
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.85 }
-  },
-  pikachu: {
-    file: 'pikachu-sprites.png',
-    width: 204.8,
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.8 }
-  },
-  dragon: {
-    file: 'dragon-sprites.png',
-    width: 204.8,
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.75 }
-  },
-  cat: {
-    file: 'cat-sprites.png',
-    width: 204.8,
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.9 }
-  },
-  frita: {
-    file: 'ketchup-sprites.png',
-    width: 204.8,
-    height: 256,
-    evolutions: 5,
-    anchor: { x: 0.5, y: 0.85 }
-  }
+  stitch:   { file: 'stitch-sprites.png',   frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.78 } },
+  lilo:     { file: 'lilo-sprites.png',       frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.82 } },
+  pikachu:  { file: 'pikachu-sprites.png',    frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.75 } },
+  dragon:   { file: 'dragon-sprites.png',     frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.72 } },
+  cat:      { file: 'cat-sprites.png',        frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.85 } },
+  frita:    { file: 'ketchup-sprites.png',    frameW: 204.8, frameH: 256, anchor: { x: 0.5, y: 0.80 } }
 };
 
-// Cache de imágenes cargadas
+// Cache de imágenes
 const imageCache = new Map();
-const loadingPromises = new Map();
 
-/**
- * Carga una imagen y la guarda en caché
- */
-function loadImage(src) {
-  if (imageCache.has(src)) {
-    return Promise.resolve(imageCache.get(src));
+/** Carga un sprite */
+export function loadSprite(characterId) {
+  const config = SPRITE_CONFIG[characterId];
+  if (!config) return Promise.resolve(null);
+  
+  const path = SPRITE_PATH + config.file;
+  
+  if (imageCache.has(path)) {
+    return Promise.resolve(imageCache.get(path));
   }
   
-  if (loadingPromises.has(src)) {
-    return loadingPromises.get(src);
-  }
-  
-  const promise = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      imageCache.set(src, img);
-      loadingPromises.delete(src);
+      imageCache.set(path, img);
       resolve(img);
     };
-    img.onerror = () => {
-      loadingPromises.delete(src);
-      reject(new Error(`Failed to load: ${src}`));
-    };
-    img.src = src;
+    img.onerror = () => resolve(null);
+    img.src = path;
   });
-  
-  loadingPromises.set(src, promise);
-  return promise;
 }
 
-/**
- * Precarga todos los sprites del juego
- */
-export async function preloadAllSprites() {
-  const promises = Object.values(SPRITE_CONFIG).map(config => 
-    loadImage(SPRITE_PATH + config.file)
-  );
+/** Precarga todos los sprites */
+export async function preloadAllSprites(onProgress) {
+  const ids = Object.keys(SPRITE_CONFIG);
+  const total = ids.length;
   
-  try {
-    await Promise.all(promises);
-    console.log('✅ All sprites loaded successfully');
-    return true;
-  } catch (err) {
-    console.error('❌ Error loading sprites:', err);
-    return false;
+  for (let i = 0; i < total; i++) {
+    await loadSprite(ids[i]);
+    if (onProgress) onProgress((i + 1) / total);
   }
+  
+  return true;
 }
 
-/**
- * Obtiene un sprite específico para un personaje y evolución
- */
-export function spriteFor(characterId, evolution) {
+/** Obtiene datos de un frame específico */
+export function getSpriteFrame(characterId, evolution) {
   const config = SPRITE_CONFIG[characterId];
   if (!config) return null;
   
   const img = imageCache.get(SPRITE_PATH + config.file);
-  if (!img || !img.complete) return null;
+  if (!img?.complete) return null;
+  
+  const evo = Math.min(Math.max(0, evolution), 4);
   
   return {
     image: img,
-    sx: evolution * config.width,  // Posición X en el sprite sheet
-    sy: 0,                          // Posición Y (siempre 0 en horizontal)
-    sw: config.width,               // Ancho del frame
-    sh: config.height,              // Alto del frame
+    sx: evo * config.frameW,
+    sy: 0,
+    sw: config.frameW,
+    sh: config.frameH,
     anchor: config.anchor
   };
 }
 
-/**
- * Dibuja un sprite en el canvas
- */
-export function drawSprite(ctx, sprite, x, y, width, height, flip = false) {
-  if (!sprite || !sprite.image) return false;
-  
-  ctx.save();
-  
-  if (flip) {
-    ctx.translate(x + width, y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(
-      sprite.image,
-      sprite.sx, sprite.sy, sprite.sw, sprite.sh,
-      0, 0, width, height
-    );
-  } else {
-    ctx.drawImage(
-      sprite.image,
-      sprite.sx, sprite.sy, sprite.sw, sprite.sh,
-      x - width * sprite.anchor.x, 
-      y - height * sprite.anchor.y,
-      width, 
-      height
-    );
-  }
-  
-  ctx.restore();
-  return true;
-}
-
-/**
- * Verifica si los sprites están listos
- */
-export function spritesReady() {
-  for (const config of Object.values(SPRITE_CONFIG)) {
-    const img = imageCache.get(SPRITE_PATH + config.file);
-    if (!img || !img.complete) return false;
-  }
-  return true;
-}
-
-/**
- * Obtiene el progreso de carga (0-1)
- */
-export function getLoadProgress() {
-  const total = Object.keys(SPRITE_CONFIG).length;
-  let loaded = 0;
-  
-  for (const config of Object.values(SPRITE_CONFIG)) {
-    const img = imageCache.get(SPRITE_PATH + config.file);
-    if (img && img.complete) loaded++;
-  }
-  
-  return loaded / total;
+/** Verifica si está cargado */
+export function isSpriteLoaded(characterId) {
+  const config = SPRITE_CONFIG[characterId];
+  if (!config) return false;
+  const img = imageCache.get(SPRITE_PATH + config.file);
+  return img?.complete === true;
 }
