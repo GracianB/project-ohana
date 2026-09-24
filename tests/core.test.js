@@ -4,6 +4,7 @@ import { makeFoe, isAirFoe, applyElite, ROOM_HARD } from "../engine/foes.js";
 import { XP_NEED } from "../systems/xp.js";
 import { canonId, packSave, unpackSave } from "../systems/save.js";
 import { sense, think } from "../engine/foe-brain.js";
+import { resolveBody, hitsSolid } from "../engine/collide.js";
 
 const KINDS = ["phosquito", "mosquito", "libelula", "abeja", "pez", "planta", "medusa", "anguila", "rana", "cangrejo", "gaviota", "murcielago", "arana", "brasita", "escoria", "ufo", "cucaracho", "no-such"];
 
@@ -39,6 +40,24 @@ test("elite no se aplica dos veces", () => {
 test("XP del juego es la curva absoluta", () => {
   assert.deepEqual(XP_NEED, [0, 55, 140, 260, 420]);
   for (let i = 1; i < XP_NEED.length; i++) assert.ok(XP_NEED[i] > XP_NEED[i - 1]);
+});
+
+test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {
+  const body = { x: 40, y: 18, w: 20, h: 20, vx: 0, vy: 8 };
+  const thin = [{ x: 0, y: 30, w: 100, h: 16 }];
+  const land = resolveBody(body, thin, { prevX: 40, prevY: 0 });
+  assert.equal(land.grounded, true);
+  assert.equal(body.y, 10);
+  const rising = { x: 40, y: 40, w: 20, h: 20, vx: 0, vy: -6 };
+  const up = resolveBody(rising, thin, { prevX: 40, prevY: 50 });
+  assert.equal(up.grounded, false);
+  const walker = { x: 90, y: 10, w: 20, h: 20, vx: 4, vy: 0 };
+  const thick = [{ x: 100, y: 0, w: 40, h: 80 }];
+  const side = resolveBody(walker, thick, { prevX: 70, prevY: 10 });
+  assert.equal(side.hitX, -1);
+  assert.equal(walker.x, 80);
+  assert.ok(hitsSolid({ x: 110, y: 10, w: 10, h: 10 }, thick));
+  assert.equal(hitsSolid({ x: 10, y: 10, w: 10, h: 10 }, thick), null);
 });
 
 test("cerebro: patrulla, ataca, se planta y la manada despierta", () => {

@@ -16,6 +16,7 @@ import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
+import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { packSave, unpackSave } from "./systems/save.js";
 import { Passives } from "./systems/passives.js";
@@ -794,8 +795,11 @@ function updatePlayer() {
   const input = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jump && !p._jumpPrev, t };
   p._jumpPrev = !!jump;
   Passives.update(game, input);
+  const wasGrounded = !!p.grounded;
   p.vy = Math.min(14, p.vy + 0.52);
   p.grounded = false;
+  const prevX = p.x;
+  const prevY = p.y;
   const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 6));
   for (let s = 0; s < steps; s++) {
     const prevBottom = p.y + p.h;
@@ -815,6 +819,12 @@ function updatePlayer() {
     }
     if (landed) break;
   }
+  const hit = resolveBody(p, game.platforms, {
+    prevX, prevY,
+    dropThroughY: drop && wasGrounded ? prevY + p.h + 10 : null,
+  });
+  if (hit.grounded && !p.grounded) landOn(p, { y: p.y + p.h });
+  if (hit.hitX && !p.grounded) p.wall = hit.hitX;
   Passives.afterMove(game, input);
   Magic.update(game);
   if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
@@ -917,35 +927,39 @@ function solidifyFoe(e) {
     return;
   }
   if (isAirFoe(e)) {
+    const hit = resolveBody(e, game.platforms, {
+      prevX: e.x - (e.vx || 0),
+      prevY: e.y - (e.vy || 0),
+      solidsOnly: true,
+    });
+    if (hit.hitY === 1) e.vy = -Math.abs(e.vy || 1.4);
+    if (hit.hitX) e.vx *= -1;
     e.y = Math.max(64, Math.min(ROOM_H - 190, e.y));
     e.grounded = false;
     return;
   }
   const rising = e.vy < -0.4 && (e.kind === "rana" || e.lunge > 0 || e.hop > 0);
+  const hit = resolveBody(e, game.platforms, {
+    prevX: e.x - (e.vx || 0),
+    prevY: e.y - (e.vy || 0),
+    solidsOnly: rising,
+  });
   if (rising) { e.grounded = false; return; }
-  let best = null;
-  const prevFeet = e.y + e.h - (e.vy || 0);
-  const feet = e.y + e.h;
-  for (const plat of game.platforms) {
-    if (e.x + e.w < plat.x + 6 || e.x > plat.x + plat.w - 6) continue;
-    const crossed = prevFeet <= plat.y + 4 && feet >= plat.y - 2;
-    const sunk = e.vy >= 0 && feet >= plat.y && feet <= plat.y + Math.min(plat.h, 36) + 10;
-    if ((crossed || sunk) && (!best || plat.y < best.y)) best = plat;
-  }
-  if (!best) {
+  if (!hit.grounded) {
     e.grounded = false;
     if (e.y > game.worldH) e.hp = 0;
     return;
   }
-  e.y = best.y - e.h;
-  e.vy = 0;
   e.grounded = true;
   if (e.kind === "arana") e.dropping = false;
   if (e.kind === "rana" && e.hopCd > 0 && !(e.sitting > 0)) e.sitting = 16;
-  const margin = 8;
-  if (e.kind !== "rana" && (e.x <= best.x + margin || e.x + e.w >= best.x + best.w - margin)) {
-    e.vx *= -1;
-    e.x = e.x <= best.x + margin ? best.x + margin : best.x + best.w - e.w - margin;
+  const under = game.platforms.find((plat) => overlapX(e.x, e.w, plat, 0) && Math.abs(e.y + e.h - plat.y) < 3);
+  if (under && e.kind !== "rana") {
+    const margin = 8;
+    if (e.x <= under.x + margin || e.x + e.w >= under.x + under.w - margin) {
+      e.vx *= -1;
+      e.x = e.x <= under.x + margin ? under.x + margin : under.x + under.w - e.w - margin;
+    }
   }
 }
 function updateEnemies() {
@@ -1633,6 +1647,10 @@ function updateProjectiles() {
   for (const pr of game.projectiles) {
     if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
     pr.x += pr.vx; pr.y += pr.vy; pr.life--;
+    if (hitsSolid(pr, game.platforms)) {
+      pr.life = 0;
+      game.fx.emit(pr.x, pr.y, { color: pr.color || "#fff", count: 4, size: 2, up: 0.6, life: 10 });
+    }
     if (pr.trail && pr.life % 2 === 0) {
       game.fx.emit(pr.x + pr.w / 2, pr.y + pr.h / 2, {
         color: pr.color, count: 1, size: 2, speed: 0.4, life: 8, gravity: 0, up: 0,
