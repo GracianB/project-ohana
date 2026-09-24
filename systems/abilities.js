@@ -343,26 +343,28 @@ const CASTERS = {
     const h = hand(p);
     const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
     for (let i = 0; i < n; i++) {
-      add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 11 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0 });
+      add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 11 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
     }
     boom(g, h.x, h.y, "#ffb347", 8, { star: true });
   },
   hula(g, p, evo) {
     S.hover = 60;
     if (p.vy > 0) p.vy = -2;
-    add({ kind: "hula", life: 60, r: 46 + evo * 6, dmg: 7 * pw(p) });
+    add({ kind: "hula", life: 60, r: 46 + evo * 6, dmg: 7 * pw(p), heal: evo >= 3 ? 3 : 0 });
     boom(g, cx(p), cy(p), "#ff5ad5", 12, { star: true });
   },
   ohana(g, p, evo) {
+    const god = evo >= 4;
     const heal = 20 + evo * 8;
     p.health = Math.min(p.maxHealth, p.health + heal);
     g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6", true);
     const R = Math.hypot(viewW(), viewH());
-    add({ kind: "ohana", x: cx(p), y: cy(p), r: 0, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4) * pw(p) });
-    g.flash = Math.max(g.flash || 0, 6);
+    add({ kind: "ohana", x: cx(p), y: cy(p), r: 0, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4) * pw(p), lifesteal: god ? 5 : 0 });
+    g.flash = Math.max(g.flash || 0, god ? 10 : 6);
     g.flashColor = "#ffe9a0";
-    g.shake = Math.min(18, (g.shake || 0) + 6);
-    boom(g, cx(p), cy(p), "#ffd36a", 10, { star: true, up: 2 });
+    g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
+    if (god) g.hitstop = Math.max(g.hitstop || 0, 5);
+    boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
   },
 
   // ======================= STITCHO =======================
@@ -617,6 +619,16 @@ const UPD = {
   note(g, f) {
     f.life--;
     f.vy += 0.38;
+    if (f.home) {
+      const e = nearestEnemy(g, f.x, f.y, 260, f.hit);
+      if (e) {
+        const dx = cx(e) - f.x, dy = cy(e) - f.y, d = Math.hypot(dx, dy) || 1;
+        f.vx += (dx / d) * 0.45;
+        f.vy += (dy / d) * 0.3;
+        const sp = Math.hypot(f.vx, f.vy), maxSp = 11;
+        if (sp > maxSp) { f.vx *= maxSp / sp; f.vy *= maxSp / sp; }
+      }
+    }
     f.rot = Math.sin(f.age * 0.25) * 0.35;
     const y0 = f.y + f.r;
     f.x += f.vx; f.y += f.vy;
@@ -655,6 +667,10 @@ const UPD = {
         pr.dmg = 12; pr.color = "#ff5ad5"; pr.life = 70; pr.shape = "heart"; pr.w = Math.max(pr.w, 14); pr.h = Math.max(pr.h, 14);
         g.nums.add(px, py - 8, "¡REFLEJO!", "#ff9ae6");
         boom(g, px, py, "#ff5ad5", 8, { star: true });
+        if (f.heal && p.health < p.maxHealth) {
+          p.health = Math.min(p.maxHealth, p.health + f.heal);
+          g.nums.add(cx(p), p.y - 14, "+" + f.heal, "#7de87a");
+        }
       }
     }
     for (const e of g.enemies) {
@@ -677,6 +693,10 @@ const UPD = {
         f.hit.add(e);
         hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
         boom(g, cx(e), cy(e), "#fff1b0", 8, { star: true, up: 2 });
+        if (f.lifesteal && p.health < p.maxHealth) {
+          p.health = Math.min(p.maxHealth, p.health + f.lifesteal);
+          g.nums.add(cx(p), p.y - 18, "+" + f.lifesteal, "#7de87a");
+        }
       }
     }
     return f.life > 0;

@@ -68,11 +68,26 @@ export const Passives = {
     p._gliding = false;
 
     if (id === "float") {
-      if (!p.grounded && input.jump && p.vy > 0) {
-        p.vy = Math.min(p.vy, 1.4 - 0.52);
-        p._pmove = "float";
-        const col = (input.t % 14) ? "#ff9ab0" : "#7de87a";
-        if ((input.t % 7) === 0) game.fx.emit(cx(p), p.y + p.h, { color: col, count: 1, size: 3, up: -0.2, speed: 0.8, life: 20, gravity: 0.03 });
+      p._flying = false;
+      if (evo >= 4 && p._butterfly == null) p._butterfly = 70;
+      if (!p.grounded) {
+        if (evo >= 4 && input.jump && (p._butterfly || 0) > 0 && p.vy > -2.2) {
+          p._butterfly--;
+          p.vy = Math.max(-2.2, p.vy - 0.55);
+          p._pmove = "float";
+          p._flying = true;
+          if ((input.t % 5) === 0) {
+            const col = (input.t % 10) ? "#ffe27a" : "#ff8fcf";
+            game.fx.emit(cx(p) - p.facing * 6, p.y + p.h * 0.55, { color: col, count: 2, size: 3, up: -0.4, speed: 1.1, life: 22, star: true });
+          }
+        } else if (input.jump && p.vy > 0) {
+          p.vy = Math.min(p.vy, (evo >= 3 ? 1.0 : 1.4) - 0.52);
+          p._pmove = "float";
+          const col = (input.t % 14) ? "#ff9ab0" : "#7de87a";
+          if ((input.t % 7) === 0) game.fx.emit(cx(p), p.y + p.h, { color: col, count: 1, size: 3, up: -0.2, speed: 0.8, life: 20, gravity: 0.03 });
+        }
+      } else if (evo >= 4) {
+        p._butterfly = Math.min(70, (p._butterfly || 0) + 1);
       }
     } else if (id === "hollow") {
       if (!p.grounded && p.vy > 0.4) p.vy = Math.min(13, p.vy + 0.22);

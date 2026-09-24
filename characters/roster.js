@@ -13,7 +13,7 @@ export const ALL_ROSTER = [
     id: "kilo", name: "Kilo", color: "#e23b3d",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
-    passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio." },
+    passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio. En KILO GOD, vuela un momento. El polen se recarga en el suelo." },
     evoNames: ["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "KILO GOD"],
     forms: [
       { name: "Kilo Bebé", color: "#ff9ab0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
