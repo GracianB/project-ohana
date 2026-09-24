@@ -116,10 +116,11 @@ export class Particles {
     }
     this.list = out;
   }
-  draw(ctx) {
+  draw(ctx, pred) {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     for (const p of this.list) {
+      if (pred && !pred(p)) continue;
       const k = p.life / p.max;
       const a = p.to ? Math.min(1, p.life * 4) : Math.sin(Math.min(1, k) * Math.PI) * (p.alpha || 1);
       if (a <= 0.01) continue;
@@ -435,13 +436,17 @@ export function playEvolution(detail = {}) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (god ? 900 : 700);
       const kind = i % 3 === 0 ? "star" : i % 3 === 1 ? "streak" : "dot";
+      const forward = Math.cos(a) > 0.2;
       parts.add({
-        x: L.cx, y: L.cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        x: L.cx + Math.cos(a) * L.target * 0.62,
+        y: L.cy + Math.sin(a) * L.target * 0.42,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
         drag: kind === "streak" ? 0.93 : 0.95, g: kind === "star" ? 160 : 0,
         max: 0.9 + Math.random() * (god ? 1.4 : 1.0),
         size: kind === "star" ? 5 + Math.random() * (L.target * 0.04) : kind === "streak" ? 2 + Math.random() * 2 : 2 + Math.random() * 3,
         rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8,
         kind, color: palette[i % palette.length],
+        behind: !forward,
       });
     }
   }
@@ -509,7 +514,7 @@ export function playEvolution(detail = {}) {
           x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r,
           vx: 0, vy: 0, to: { x: cx, y: cy }, swirl: (Math.random() < 0.5 ? -1 : 1) * 900,
           max: 3, size: 1.6 + Math.random() * 2.4, kind: Math.random() < 0.5 ? "streak" : "dot",
-          color: palette[(Math.random() * palette.length) | 0],
+          color: palette[(Math.random() * palette.length) | 0], behind: true,
         });
       }
     }
@@ -518,15 +523,24 @@ export function playEvolution(detail = {}) {
       sparkAcc += dt * (reduce ? 6 : god ? 40 : 24);
       while (sparkAcc > 1) {
         sparkAcc -= 1;
-        const a = Math.random() * Math.PI * 2;
-        const r = target * (0.45 + Math.random() * 0.75);
+        const back = 0.25 + Math.random() * 0.7;
         parts.add({
-          x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.9,
-          vx: 0, vy: -20 - Math.random() * 40, drag: 1, max: 0.7 + Math.random() * 0.7,
-          size: 3 + Math.random() * (target * 0.03), kind: "spark", color: palette[(Math.random() * palette.length) | 0],
+          x: cx - target * back, y: cy + (Math.random() - 0.45) * target * 0.7,
+          vx: -(40 + Math.random() * 90), vy: -24 - Math.random() * 50, drag: 0.99,
+          max: 0.7 + Math.random() * 0.7,
+          size: 3 + Math.random() * (target * 0.03), kind: "spark",
+          color: palette[(Math.random() * palette.length) | 0], behind: true,
         });
       }
     }
+
+    const covers = (p) => Math.abs(p.x - cx) < target * 0.36 && p.y < footY + 4 && p.y > cy - target * 0.8;
+    const behindSpark = (p) => p.behind || covers(p) || p.x < cx;
+    parts.update(dt);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    parts.draw(ctx, behindSpark);
+    ctx.restore();
 
     // 4 · personaje
     const oldIn = easeBack(seg(t, T.oldIn, T.oldIn + 0.45));
@@ -621,10 +635,9 @@ export function playEvolution(detail = {}) {
       }
       ctx.restore();
     }
-    parts.update(dt);
     ctx.save();
     ctx.globalAlpha = fade;
-    parts.draw(ctx);
+    parts.draw(ctx, (p) => !behindSpark(p));
     ctx.restore();
     const flashA = reduce ? 0.45 * (1 - seg(t, T.flash, T.flash + 0.3)) * (t >= T.flash ? 1 : 0)
       : (t < T.flash ? Math.pow(seg(t, T.flash - 0.14, T.flash), 2) : Math.pow(1 - seg(t, T.flash, T.flash + 0.32), 2));

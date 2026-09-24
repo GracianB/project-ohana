@@ -127,6 +127,8 @@ function drawGroundRing(ctx, H, color, t) {
 function drawFlavor(ctx, id, H, t, evo, front) {
   const fl = FLAVOR[id];
   if (!fl || evo < 2) return;
+  // En el plano corto de la cinemática, la capa de delante tapa la cara.
+  if (front && H > 140) return;
   const n = evo * 2 + (evo >= 4 ? 4 : 0);
   ctx.save();
   for (let i = 0; i < n; i++) {
