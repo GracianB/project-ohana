@@ -46,9 +46,9 @@ export const ABILITY_DEFS = {
   ofuda: { name: "Ofuda", key: "J", cd: 560, color: "#f2e6c8", desc: "Talismán de papel que se clava y estalla." },
   sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
   maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
-  gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Una estrella corta que sale de la punta." },
-  gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Un paso de luz hacia delante." },
-  rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete chispas en abanico, una de cada color." },
+  gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
+  gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embiste con el cuerno y no se para." },
+  rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
 };
 
 export function useAbility(game, index) {
@@ -83,17 +83,17 @@ export function useAbility(game, index) {
 // Estado de movimiento de habilidades (un solo jugador)
 // ---------------------------------------------------------------------------
 const FX = [];
-const S = { p: null, hover: 0, roll: 0, caos: 0, cvx: 0, charge: 0, pull: null };
+const S = { p: null, hover: 0, roll: 0, caos: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
 
 function syncState(p) {
   if (S.p === p) return;
-  S.p = p; S.hover = 0; S.roll = 0; S.caos = 0; S.charge = 0; S.pull = null;
+  S.p = p; S.hover = 0; S.roll = 0; S.caos = 0; S.charge = 0; S.pull = null; S.gallop = 0;
   FX.length = 0;
 }
 
 export function clearAbilityFx() {
   FX.length = 0;
-  S.hover = 0; S.roll = 0; S.caos = 0; S.charge = 0; S.pull = null;
+  S.hover = 0; S.roll = 0; S.caos = 0; S.charge = 0; S.pull = null; S.gallop = 0;
   if (S.p) S.p._abilMove = null;
 }
 
@@ -114,6 +114,14 @@ export function abilityPreMove(game, input) {
   if (S.charge > 0) {
     S.charge--;
     p.vx = p.facing * Math.max(11, p.speed * 2.4);
+    armor(p, 2);
+  }
+  if (S.gallop > 0) {
+    S.gallop--;
+    const face = S.gallopFace || p.facing || 1;
+    p.facing = face;
+    p.vx = face * Math.max(15, p.speed * 2.8);
+    if (p.grounded) p.vy = Math.min(p.vy || 0, -0.4);
     armor(p, 2);
   }
   if (S.caos > 0) {
@@ -177,6 +185,17 @@ export function updateAbilityFx(game) {
   if (S.charge > 0) {
     bodyHits(game, p, 26, { kx: 15, ky: -8, stun: 34, color: "#c8f04a", cd: 30, shake: 7 });
     if ((game.t % 3) === 0) game.fx.emit(cx(p) - p.facing * p.w * 0.6, p.y + p.h, { color: "#d8c7a4", count: 3, size: 3, up: 0.6, speed: 1.6 });
+  }
+  if (S.gallop > 0) {
+    const face = S.gallopFace || p.facing || 1;
+    const reach = p.w + 36;
+    const box = { x: face > 0 ? p.x + p.w * 0.2 : p.x - 36, y: p.y - 8, w: reach, h: p.h + 12 };
+    for (const e of game.enemies) {
+      if (!canHit(e) || !aabb(box, e) || (e._abHitT || 0) > game.t) continue;
+      e._abHitT = game.t + 10;
+      hitEnemy(game, e, 24 * pw(p), { kx: face * 14, ky: -6, stun: 18, color: "#ffe9a8", shake: 5 });
+    }
+    if ((game.t % 2) === 0) game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" });
   }
   p._abilMove = S.roll > 0 || S.caos > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
   for (let i = 0; i < FX.length; i++) {
@@ -616,32 +635,51 @@ const CASTERS = {
 
   // ======================= CUERNO =======================
   gleam(g, p, evo) {
-    const h = hand(p);
+    const face = p.facing || 1;
+    const y = p.y + p.h * 0.28;
     g.projectiles.push({
-      x: h.x - 4, y: h.y - 16, vx: 9.5 * p.facing, vy: -1.4,
-      w: 12, h: 12, life: 42, dmg: 8 + evo, color: "#ffe9a8", shape: "orb", owner: "player", trail: true,
+      x: cx(p) + face * (p.w * 0.4), y,
+      vx: (16 + evo) * face, vy: 0,
+      w: 26, h: 16, life: 40, dmg: 18, color: "#ffe9a8",
+      shape: "orb", owner: "player", trail: true, pierce: 3,
     });
-    boom(g, h.x, h.y - 14, "#ffe9a8", 6, { star: true });
+    p._thrust = 4;
+    p._thrustFace = face;
+    boom(g, cx(p) + face * 16, y, "#ffe9a8", 8, { star: true });
   },
   gallop(g, p, evo) {
-    p.vx = (p.facing || 1) * (10 + evo);
-    p.vy = Math.min(p.vy, -1.6);
-    armor(p, 8);
-    g.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#f7e7ff" });
-    boom(g, cx(p), cy(p), "#f2c1ff", 8, { star: true });
+    S.gallop = 16 + evo * 2;
+    S.gallopFace = p.facing || 1;
+    p.vy = Math.min(p.vy, -3.4);
+    armor(p, 18);
+    g.shake = Math.min(12, (g.shake || 0) + 4);
+    boom(g, cx(p), cy(p), "#f2c1ff", 10, { star: true });
   },
   rainbow(g, p, evo) {
+    const face = p.facing || 1;
     const colors = ["#ff8ad4", "#ffb15a", "#ffe14a", "#8ee07a", "#7ec8ff", "#c9b6ff", "#fff6c8"];
+    const y = p.y + p.h * 0.3;
     for (let i = 0; i < colors.length; i++) {
-      const a = -1.05 + (i / (colors.length - 1)) * 1.5;
+      const spread = (i - 3) * 0.38;
       g.projectiles.push({
-        x: cx(p) - 5, y: p.y - 4, vx: Math.cos(a) * (7.5 + evo * 0.3) * p.facing, vy: Math.sin(a) * 6.5 - 1,
-        w: 10, h: 10, life: 38, dmg: 7 + evo, color: colors[i], shape: "orb", owner: "player", trail: true,
+        x: cx(p) + face * (p.w * 0.45),
+        y: y + spread * 8,
+        vx: face * (13 + evo * 0.35),
+        vy: spread,
+        w: 16, h: 16, life: 52, dmg: 11, color: colors[i],
+        shape: "orb", owner: "player", trail: true, pierce: 4,
       });
     }
-    g.flash = Math.max(g.flash || 0, 6);
+    const reach = 78 + evo * 8;
+    const box = { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 18 };
+    for (const e of g.enemies) {
+      if (!canHit(e) || !aabb(box, e)) continue;
+      hitEnemy(g, e, (30 + evo * 4) * pw(p), { kx: face * 12, ky: -5, stun: 16, color: "#fff6c8", shake: 6 });
+    }
+    g.flash = Math.max(g.flash || 0, 8);
     g.flashColor = "#fff6ff";
-    boom(g, cx(p), p.y, "#fff6c8", 12, { star: true, up: 2 });
+    g.hitstop = Math.max(g.hitstop || 0, 6);
+    boom(g, cx(p) + face * 20, y, "#fff6c8", 14, { star: true });
   },
 };
 

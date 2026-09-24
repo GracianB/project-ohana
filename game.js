@@ -451,6 +451,49 @@ function markHit(p, e, dmg, kb) {
   hitStop(e.boss ? 6 : 4);
   p.xp += 1;
 }
+function hornPoke(p, evo, def) {
+  const face = p.facing || 1;
+  p._thrust = 6;
+  p._thrustFace = face;
+  const reach = 92 + evo * 12;
+  const box = {
+    x: face > 0 ? p.x + p.w - 6 : p.x - reach,
+    y: p.y - 2,
+    w: reach,
+    h: Math.max(22, p.h * 0.62),
+  };
+  game.slashes.push({
+    x: p.x + p.w / 2 + face * 20,
+    y: p.y + 4,
+    facing: face,
+    life: 9,
+    max: 9,
+    color: "#ffe9a8",
+    kind: "zap",
+    w: reach,
+  });
+  game.projectiles.push({
+    x: p.x + p.w / 2 + face * 8,
+    y: p.y + 2,
+    vx: face * 15,
+    vy: 0,
+    w: 18,
+    h: 10,
+    life: 14,
+    dmg: 12 + evo * 3,
+    color: "#ffe9a8",
+    shape: "orb",
+    owner: "player",
+    trail: true,
+    pierce: 2,
+  });
+  for (const e of game.enemies) {
+    if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+    if (aabb(box, e)) markHit(p, e, def.dmg, 1.2);
+  }
+  game.fx.emit(box.x + box.w * 0.7, box.y + 8, { color: "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
+  game.shake = Math.min(10, (game.shake || 0) + 3);
+}
 function attack() {
   const p = game.player;
   if (!p || p.dead) return;
@@ -464,6 +507,7 @@ function attack() {
     p._markName = def.name;
     game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
   }
+  if (p.id === "cuerno") { hornPoke(p, evo, def); return; }
   const face = p.facing || 1;
   if (def.heal) p.health = Math.min(p.maxHealth, p.health + def.heal);
   if (def.style === "shot") {
@@ -859,7 +903,11 @@ function updatePlayer() {
   if (p.melee > 0) p.melee--;
   if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
   if (p.meleeBuf > 0) { p.meleeBuf--; if (p.melee <= 0) melee(); }
-  if (left) { p.vx = -p.speed; p.facing = -1; }
+  if (p._thrust > 0) {
+    p._thrust--;
+    p.facing = p._thrustFace || p.facing || 1;
+    p.vx = p.facing * (p.speed + 5);
+  } else if (left) { p.vx = -p.speed; p.facing = -1; }
   else if (right) { p.vx = p.speed; p.facing = 1; }
   else p.vx *= 0.78;
   if (jump) p.buffer = 8; else if (p.buffer > 0) p.buffer--;
@@ -1790,13 +1838,18 @@ function updateProjectiles() {
     }
     if (pr.owner === "player") {
       for (const e of game.enemies) {
-        if (!e.dying && !(e.invuln > 0) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
+        if (!e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
           e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
           e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
           e.flash = Math.max(e.flash || 0, 14);
-          pr.life = 0; punch(e.x, e.y, pr.color); game.player.xp += 3;
+          if (pr.pierce) {
+            if (!pr.hit) pr.hit = new Set();
+            pr.hit.add(e);
+            if (pr.hit.size >= pr.pierce) pr.life = 0;
+          } else pr.life = 0;
+          punch(e.x, e.y, pr.color); game.player.xp += 3;
           game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
         }
       }

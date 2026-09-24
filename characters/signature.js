@@ -28,7 +28,7 @@ const HITS = {
   frita:   { name: "Corte", kind: "fan", color: "#f0b43a" },
   pizza:   { name: "Porcion", kind: "crescent", color: "#ffb43a" },
   yomi:    { name: "Fauces", kind: "fan", color: "#ff4466" },
-  cuerno:  { name: "Toque", kind: "leaf", color: "#f2c1ff" },
+  cuerno:  { name: "Puya", kind: "zap", color: "#ffe9a8" },
 };
 
 export const DIFFICULTY = {
