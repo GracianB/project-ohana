@@ -211,6 +211,62 @@ function drawBurst(ctx, H, color, k) {
  * auxiliar, se tiñe solo donde hay personaje y se compone encima.
  */
 let flashCanvas = null;
+let colorCanvas = null;
+let inkCanvas = null;
+
+function sheet(which, W) {
+  let c = which === "color" ? colorCanvas : which === "ink" ? inkCanvas : flashCanvas;
+  if (!c) c = document.createElement("canvas");
+  if (c.width !== W) { c.width = W; c.height = W; }
+  if (which === "color") colorCanvas = c;
+  else if (which === "ink") inkCanvas = c;
+  else flashCanvas = c;
+  return c;
+}
+
+/** Contorno de tinta alrededor del personaje, para que la silueta se lea. */
+function presentCharacter(ctx, art, pose, flashCol, flashA) {
+  const U = 280;
+  const ps = 2;
+  const W = U * ps;
+  const color = sheet("color", W);
+  const cg = color.getContext("2d");
+  cg.setTransform(1, 0, 0, 1, 0, 0);
+  cg.clearRect(0, 0, W, W);
+  cg.setTransform(ps, 0, 0, ps, W / 2, W * 0.78);
+  art.draw(cg, pose, R);
+  if (flashCol && flashA > 0) {
+    const flash = sheet("flash", W);
+    const fg = flash.getContext("2d");
+    fg.setTransform(1, 0, 0, 1, 0, 0);
+    fg.clearRect(0, 0, W, W);
+    fg.drawImage(color, 0, 0);
+    fg.globalCompositeOperation = "source-in";
+    fg.fillStyle = flashCol;
+    fg.fillRect(0, 0, W, W);
+    fg.globalCompositeOperation = "source-over";
+    cg.setTransform(1, 0, 0, 1, 0, 0);
+    cg.globalAlpha = flashA;
+    cg.drawImage(flash, 0, 0);
+    cg.globalAlpha = 1;
+  }
+  const ink = sheet("ink", W);
+  const ig = ink.getContext("2d");
+  ig.setTransform(1, 0, 0, 1, 0, 0);
+  ig.clearRect(0, 0, W, W);
+  ig.drawImage(color, 0, 0);
+  ig.globalCompositeOperation = "source-in";
+  ig.fillStyle = "#1a1022";
+  ig.fillRect(0, 0, W, W);
+  ig.globalCompositeOperation = "source-over";
+  const o = 3.4;
+  const dirs = [[o, 0], [-o, 0], [0, o], [0, -o], [o * 0.7, o * 0.7], [-o * 0.7, o * 0.7], [o * 0.7, -o * 0.7], [-o * 0.7, -o * 0.7]];
+  for (let i = 0; i < dirs.length; i++) {
+    ctx.drawImage(ink, -U / 2 + dirs[i][0], -U * 0.78 + dirs[i][1], U, U);
+  }
+  ctx.drawImage(color, -U / 2, -U * 0.78, U, U);
+}
+
 function drawFlashed(ctx, art, pose, color, a) {
   art.draw(ctx, pose, R);
   try {
@@ -305,10 +361,10 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.save();
   ctx.rotate(tilt * 0.5);
   ctx.scale(sx * s, sy * s);
-  if (flashCol) drawFlashed(ctx, art, pose, flashCol, flashA);
-  else {
+  try { presentCharacter(ctx, art, pose, flashCol, flashA); }
+  catch (err) {
     try { art.draw(ctx, pose, R); }
-    catch (err) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }
+    catch (e2) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }
   }
   ctx.restore();
 

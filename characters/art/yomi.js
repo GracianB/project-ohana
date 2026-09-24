@@ -50,6 +50,14 @@ function draw(ctx, pose, R) {
   ctx.restore();
 
   R.ellipse(ctx, 0, -h * 0.45, w, h * 0.5, paper);
+  ctx.strokeStyle = R.darken(paper, 0.4);
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.35, -h * 0.85);
+  ctx.lineTo(-w * 0.2, -h * 0.1);
+  ctx.moveTo(w * 0.35, -h * 0.85);
+  ctx.lineTo(w * 0.15, -h * 0.08);
+  ctx.stroke();
   rib(ctx, 0, -h * 0.15, w, h, R.darken(paper, 0.35));
 
   if (dread) {
@@ -92,6 +100,22 @@ function draw(ctx, pose, R) {
   ctx.beginPath();
   ctx.arc(0, -h * 0.98, 10 + f, Math.PI * 1.05, Math.PI * 1.95);
   ctx.stroke();
+  ctx.fillStyle = god ? "#ffd84a" : "#6a2a18";
+  ctx.beginPath();
+  ctx.arc(0, 4, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = god ? "#ffd84a" : "#3a2014";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, 4);
+  ctx.quadraticCurveTo(Math.sin(t * 0.18) * 6, 14, 0, 22);
+  ctx.stroke();
+  ctx.fillStyle = flame;
+  ctx.beginPath();
+  ctx.moveTo(-4, 20);
+  ctx.lineTo(0, 30);
+  ctx.lineTo(4, 20);
+  ctx.fill();
 
   if (f >= 2) R.star(ctx, w + 6, -h * 0.2, 4, flame);
   if (pose.flourish > 0 && !dread) R.sparkle(ctx, w + 4, -h, 3 + pose.flourish * 3);
