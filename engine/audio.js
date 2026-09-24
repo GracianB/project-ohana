@@ -29,6 +29,8 @@ export function setMuted(on) {
   if (master) master.gain.value = muted ? 0 : 0.9;
 }
 export function isMuted() { return muted; }
+/** Contexto y bus maestro compartidos (lo usa engine/music.js). */
+export function audioGraph() { const a = ac(); return a ? { ctx: a, master, noiseBuf } : null; }
 
 // --- primitivas -------------------------------------------------------------
 /** Tono con barrido de frecuencia. at = retardo (s). */

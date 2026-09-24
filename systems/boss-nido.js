@@ -39,6 +39,9 @@ export function createBossNido() {
     shockX: 0,
     shockY: 0,
     intro: true,
+    introT: 170,
+    introMax: 170,
+    introDrop: 700,
     phaseAnnounced: { 2: false, 3: false },
     spawnCd: 0,
     bob: 0,
@@ -78,10 +81,32 @@ export function updateBossNido(e, game, helpers) {
     });
   };
 
-  if (e.intro) {
-    e.intro = false;
-    showNotification("REINA DEL NIDO", "Mira el suelo. Espera el brillo rojo.", "sala");
+  // --- entrada cinematográfica: cae del cielo, aterriza y ruge ---
+  if (e.introT > 0) {
+    const landAt = e.introMax - 48, roarAt = 80;
+    e.introT--;
+    const done = e.introMax - e.introT;
+    e.introDrop = done < 48 ? 700 * Math.pow(1 - done / 48, 2) : 0;
+    e.vx = 0; e.vy = 0; e.telegraph = false; e.invuln = 2; e.contactDmg = 0;
+    if (e.introT === landAt) {
+      game.shake = Math.max(game.shake || 0, rm ? 6 : 26);
+      game.flash = Math.max(game.flash || 0, 10);
+      emit(cx, e.y + e.h, { color: "#c89070", count: 30, size: 6, up: 1.4, speed: 5 });
+      emit(cx, e.y + e.h, { color: "#ffcf6a", count: 14, size: 3, up: 2.5, speed: 4, star: true });
+      if (beep) try { beep("pound"); } catch (_) {}
+    }
+    if (e.introT === roarAt) {
+      game.shake = Math.max(game.shake || 0, rm ? 4 : 18);
+      if (beep) try { beep("boss"); } catch (_) {}
+    }
+    if (e.introT === 0) {
+      e.contactDmg = 22;
+      e.attackCd = 50;
+      showNotification("REINA DEL NIDO", "Mira el suelo. Espera el brillo rojo.", "sala");
+    }
+    return;
   }
+  e.intro = false;
 
   // --- phase transitions ---
   const ratio = e.hp / Math.max(1, e.max);

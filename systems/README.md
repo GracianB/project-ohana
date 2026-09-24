@@ -10,7 +10,7 @@ index.html
 │  ├─ characters/draw.js ...... render de personajes (pies anclados, auras, FX)
 │  │  ├─ characters/rig.js .... pose/animación compartida + kit de dibujo
 │  │  └─ characters/art/*.js .. un módulo vectorial animado por personaje
-│  ├─ characters/sprites.js ... PNG de efectos y del jefe
+│  ├─ characters/sprites.js ... PNG de efectos
 │  ├─ systems/passives.js ..... rasgo único de cada personaje
 │  ├─ systems/magic.js ........ objetos mágicos (6) y sus chips en el HUD
 │  ├─ worlds/index.js ......... fondos por mundo (parallax)
@@ -24,8 +24,10 @@ index.html
 │  ├─ systems/floaters.js ..... números de daño
 │  ├─ systems/notify.js ....... avisos y cine de evolución
 │  ├─ engine/enemies.js ....... dibujo de enemigos
+│  ├─ engine/boss-art.js ...... Reina del Nido vectorial + entrada cinematográfica
 │  ├─ engine/particles.js ..... partículas
-│  └─ engine/audio.js ......... efectos con WebAudio
+│  ├─ engine/audio.js ......... efectos con WebAudio (sfx)
+│  └─ engine/music.js ......... música procedural por mundo y jefe
 ├─ systems/title.js ... portada y selección (usa draw.js para los retratos)
 │  └─ systems/intro.js  cinemática corta al empezar
 ├─ systems/title-fx.js  fondo animado de la portada

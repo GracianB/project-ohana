@@ -1,12 +1,12 @@
 // ============================================================================
 // SPRITES · Project Ohana
 // Los personajes ya son vectoriales (characters/art). Aquí solo quedan las
-// imágenes de efectos y del jefe: assets/sprites/<nombre>.png
+// imágenes de efectos: assets/sprites/<nombre>.png
 //   vfxSprite(name) -> HTMLImageElement | null (si aún no ha cargado)
 // ============================================================================
 const SPRITE_PATH = "assets/sprites/";
 const cache = new Map();
-const NAMES = ["vfx-slash", "vfx-flame", "vfx-note", "boss-1", "boss-2"];
+const NAMES = ["vfx-slash", "vfx-flame", "vfx-note"];
 
 function load(name) {
   let img = cache.get(name);

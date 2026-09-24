@@ -5,6 +5,7 @@ import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from ".
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
+import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { Floaters } from "./systems/floaters.js";
@@ -51,6 +52,7 @@ function setMuted(on) {
 }
 function setPaused(on) {
   paused = !!on && game.running;
+  duckMusic(paused);
   document.getElementById("pause-overlay")?.classList.toggle("open", paused);
 }
 function closeOverlays() {
@@ -461,9 +463,9 @@ function loadRoom(id, fromDir) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
-  showNotification(r.name, r.hint || r.goal || "SALA");
-  showBanner(r.name);
+  if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); }
   beep(r.boss ? "boss" : "door");
+  playMusic(themeForRoom(id));
   save();
   worldClear();
   Surprises.onEnterRoom(game);
@@ -1017,6 +1019,7 @@ function updatePlayer() {
 }
 function updateEnemies() {
   if (!game.player) return;
+  { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
   if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
     if (e.flash > 0) e.flash--;
@@ -1659,6 +1662,7 @@ function updateEnemies() {
         game.shake = 18;
         punch(e.x + e.w / 2, e.y + e.h / 2, "#ffe66a");
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 48, size: 7, up: 3.4, star: true });
+        playMusic("victoria");
         dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
       }
       return false;
@@ -1747,8 +1751,20 @@ function updateProjectiles() {
 }
 function updateCam() {
   const p = game.player; if (!p) return;
-  game.cam.x += (p.x + p.facing * 80 - canvas.width / 2 - game.cam.x) * 0.12;
-  game.cam.y += (p.y - canvas.height * 0.58 - game.cam.y) * 0.12;
+  let tx = p.x + p.facing * 80 - canvas.width / 2;
+  let ty = p.y - canvas.height * 0.58;
+  // Jefe: encuadrar a los dos (y solo al jefe durante su entrada)
+  const boss = game.enemies.find((e) => e.boss && !e.fell);
+  if (boss) {
+    const bx = boss.x + boss.w / 2, bottom = boss.y + boss.h;
+    if (boss.introT > 0) { tx = bx - canvas.width / 2; ty = bottom + 70 - canvas.height; }
+    else {
+      tx = (p.x + bx) / 2 - canvas.width / 2;
+      ty = Math.min(p.y - 90, Math.max(ty, bottom + 60 - canvas.height));
+    }
+  }
+  game.cam.x += (tx - game.cam.x) * 0.12;
+  game.cam.y += (ty - game.cam.y) * 0.12;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
   game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - canvas.height + 80)));
   if (game.shake > 0) game.shake *= 0.86;
@@ -2128,6 +2144,7 @@ function setupSelect() {
   if (resume) resume.onclick = () => setPaused(false);
   if (quit) quit.onclick = () => {
     game.running = false;
+    playMusic("title");
     closeOverlays();
     document.body.classList.remove("playing", "boss-fight");
     document.getElementById("char-select")?.classList.remove("hidden");
@@ -2152,6 +2169,7 @@ function setupSelect() {
     }
     if (act === "roster") {
       game.running = false;
+      playMusic("title");
       closeOverlays();
       document.body.classList.remove("playing", "boss-fight");
       document.getElementById("char-select")?.classList.remove("hidden");

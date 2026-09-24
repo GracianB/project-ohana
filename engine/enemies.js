@@ -1,4 +1,4 @@
-import { vfxSprite } from "../characters/sprites.js";
+import { drawBossQueen } from "./boss-art.js";
 
 const KIND_TINT = {
   pez: "#3aa8d8",
@@ -30,7 +30,7 @@ export function drawEnemy(ctx, e, cam, t) {
   // Hit feedback: flash blanco fuerte, luego rojo
   if (e.flash > 10) ctx.filter = "brightness(4.2) saturate(0.12)";
   else if (e.flash > 0) ctx.filter = "brightness(2.6) sepia(0.55) hue-rotate(-25deg)";
-  else if (e.invuln > 0) ctx.filter = "brightness(2.0)";
+  else if (e.invuln > 0 && !e.boss) ctx.filter = "brightness(2.0)";
   ctx.fillStyle = "rgba(0,0,0,.28)";
   ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 2, e.w * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
 
@@ -1048,162 +1048,9 @@ function drawUfo(ctx, e, t) {
 }
 
 function drawBoss(ctx, e, t) {
-  const dyingMax = e.dyingMax || 120;
-  if (e.dying) {
-    const k = Math.max(0.12, e.dying / dyingMax);
-    ctx.globalAlpha = 0.3 + k * 0.7;
-    ctx.scale(0.55 + k * 0.55, 0.55 + k * 0.55);
-    ctx.rotate((dyingMax - e.dying) * 0.035);
-  }
-
-  if (e.telegraph && !e.dying) drawBossTelegraph(ctx, e, t);
-
-  const pulse = e.dying ? 1 : 1 + Math.sin(t / 7) * 0.045;
-  ctx.scale(pulse, pulse);
-  if ((e.facing || 1) < 0) ctx.scale(-1, 1);
-
-  const phase = e.phase || 1;
-  const bodyA = phase >= 3 ? "#ff1438" : phase === 2 ? "#e02040" : "#b01838";
-  const bodyB = phase >= 3 ? "#7a0818" : "#6a1020";
-  const wing = phase >= 3 ? "rgba(255,80,120,.42)" : "rgba(200,60,100,.38)";
-  const spine = phase >= 3 ? "#ffe66a" : "#2a0810";
-
-  const img = vfxSprite(phase >= 2 ? "boss-2" : "boss-1");
-  if (img) {
-    const a = ctx.globalAlpha || 1;
-    ctx.globalAlpha = a * 0.22;
-    ctx.drawImage(img, -52, -48, 104, 104);
-    ctx.globalAlpha = a;
-  }
-
-  if (phase >= 2) {
-    const flap = Math.sin(t * (phase >= 3 ? 0.55 : 0.35)) * 0.35;
-    ctx.fillStyle = wing;
-    ctx.beginPath();
-    ctx.moveTo(-8, -6);
-    ctx.quadraticCurveTo(-70, -40 + flap * 30, -78, 10 + flap * 10);
-    ctx.quadraticCurveTo(-40, 18, -10, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(8, -6);
-    ctx.quadraticCurveTo(70, -40 - flap * 30, 78, 10 - flap * 10);
-    ctx.quadraticCurveTo(40, 18, 10, 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,200,220,.35)";
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(-12, -2); ctx.lineTo(-60, -20 + flap * 20);
-    ctx.moveTo(12, -2); ctx.lineTo(60, -20 - flap * 20);
-    ctx.stroke();
-  }
-
-  const legs = phase >= 3 ? 6 : 5;
-  ctx.strokeStyle = bodyB;
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  for (let i = 0; i < legs; i++) {
-    const side = i % 2 === 0 ? -1 : 1;
-    const baseX = side * (14 + (i >> 1) * 7);
-    const baseY = 18 + (i >> 1) * 4;
-    const swing = Math.sin(t * 0.2 + i) * (e.mode === "charge" ? 10 : 5);
-    ctx.beginPath();
-    ctx.moveTo(baseX, baseY);
-    ctx.quadraticCurveTo(baseX + side * 18, baseY + 16, baseX + side * 10 + swing, baseY + 34);
-    ctx.stroke();
-    ctx.fillStyle = bodyB;
-    ctx.beginPath();
-    ctx.arc(baseX + side * 10 + swing, baseY + 34, 3.2, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  const grd = ctx.createRadialGradient(-8, -10, 6, 0, 6, 48);
-  grd.addColorStop(0, phase >= 3 ? "#ff6a7a" : "#e85068");
-  grd.addColorStop(0.55, bodyA);
-  grd.addColorStop(1, bodyB);
-  ctx.fillStyle = grd;
-  ctx.beginPath();
-  ctx.ellipse(0, 8, 40, 36, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(0,0,0,.28)";
-  ctx.lineWidth = 2;
-  for (let i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.ellipse(0, 8 + i * 10, 34 - Math.abs(i) * 4, 10, 0, 0.2, Math.PI - 0.2);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = bodyA;
-  ctx.beginPath();
-  ctx.ellipse(0, -22, 26, 22, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = spine;
-  const horns = [
-    [-18, -30, -28, -58, -8, -34],
-    [0, -34, 0, -66, 8, -34],
-    [18, -30, 28, -58, 8, -34],
-    [-10, -28, -16, -48, -2, -30],
-    [10, -28, 16, -48, 2, -30],
-  ];
-  for (const h of horns) {
-    ctx.beginPath();
-    ctx.moveTo(h[0], h[1]);
-    ctx.lineTo(h[2], h[3]);
-    ctx.lineTo(h[4], h[5]);
-    ctx.closePath();
-    ctx.fill();
-  }
-  if (phase >= 2) {
-    ctx.fillStyle = "#ffe66a";
-    ctx.beginPath();
-    ctx.moveTo(-4, -36); ctx.lineTo(0, -72); ctx.lineTo(4, -36);
-    ctx.fill();
-  }
-
-  const chomp = (e.mode === "spit" || e.teleKind === "spit") ? Math.sin(t * 0.6) * 6 : Math.sin(t * 0.15) * 2;
-  ctx.fillStyle = "#1a0508";
-  ctx.beginPath();
-  ctx.moveTo(-14, -8);
-  ctx.quadraticCurveTo(-28, 4 + chomp, -8, 14);
-  ctx.lineTo(-4, 2);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(14, -8);
-  ctx.quadraticCurveTo(28, 4 + chomp, 8, 14);
-  ctx.lineTo(4, 2);
-  ctx.closePath();
-  ctx.fill();
-
-  const eyeGlow = phase >= 3 ? "#ffe66a" : "#fff";
-  ctx.fillStyle = eyeGlow;
-  ctx.beginPath(); ctx.ellipse(-10, -24, 7, 8, -0.2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(10, -24, 7, 8, 0.2, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = phase >= 3 ? "#ff2020" : "#120208";
-  ctx.beginPath(); ctx.arc(-10, -23, 3.2, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(10, -23, 3.2, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.beginPath(); ctx.arc(-11, -25, 1.1, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(9, -25, 1.1, 0, Math.PI * 2); ctx.fill();
-
-  if (phase >= 2 && !e.dying) {
-    ctx.strokeStyle = phase >= 3 ? "rgba(255,80,40,.7)" : "rgba(255,60,30,.55)";
-    ctx.lineWidth = phase >= 3 ? 3.5 : 2.8;
-    ctx.beginPath();
-    ctx.arc(0, 4, 54 + Math.sin(t / 4) * 5, 0, Math.PI * 2);
-    ctx.stroke();
-    if (phase >= 3) {
-      ctx.strokeStyle = "rgba(255,220,80,.35)";
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(0, 4, 66 + Math.sin(t / 5) * 4, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-
+  // Arte vectorial animado de la Reina del Nido (engine/boss-art.js)
+  if (e.telegraph && !e.dying && !(e.introT > 0)) drawBossTelegraph(ctx, e, t);
+  drawBossQueen(ctx, e, t);
   if (e.shockT > 0 && e.shockR) {
     ctx.strokeStyle = "rgba(255,120,40,.55)";
     ctx.lineWidth = 3;

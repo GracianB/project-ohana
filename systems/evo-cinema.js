@@ -12,6 +12,7 @@
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
+import { duckMusic } from "../engine/music.js";
 
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
@@ -408,6 +409,7 @@ export function playEvolution(detail = {}) {
   el.classList.add("show");
   el.classList.toggle("god", god);
   sfx("evoCharge");
+  duckMusic(true);
   let fanfared = false;
 
   let t0 = performance.now();
@@ -713,6 +715,7 @@ export function playEvolution(detail = {}) {
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
     el.classList.remove("show", "god");
+    duckMusic(false);
     running = null;
     if (!silent) {
       document.querySelectorAll(".game-notification.evo").forEach((n) => n.click());
