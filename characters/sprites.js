@@ -1,45 +1,181 @@
-const cache = new Map();
+// ============================================================================
+// SISTEMA DE SPRITES - Project Ohana
+// Reemplaza dibujos procedurales con imágenes de pixel art
+// ============================================================================
 
-const FORM = {
-  lilo: [1, 1, 2, 2, 4],
-  stitch: [1, 1, 2, 2, 4],
-  dragon: [0, 1, 2, 2, 2],
-  pikachu: [1, 1, 1, 1, 1],
-  cat: [0, 1, 2, 4, 4],
-  frita: [0, 1, 2, 4, 4],
+const SPRITE_PATH = 'assets/sprites/';
+
+// Configuración de cada personaje
+const SPRITE_CONFIG = {
+  stitch: {
+    file: 'stitch-sprites.png',
+    width: 204.8,  // 1024 / 5
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.8 } // Punto de anclaje para posicionamiento
+  },
+  lilo: {
+    file: 'lilo-sprites.png',
+    width: 204.8,
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.85 }
+  },
+  pikachu: {
+    file: 'pikachu-sprites.png',
+    width: 204.8,
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.8 }
+  },
+  dragon: {
+    file: 'dragon-sprites.png',
+    width: 204.8,
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.75 }
+  },
+  cat: {
+    file: 'cat-sprites.png',
+    width: 204.8,
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.9 }
+  },
+  frita: {
+    file: 'ketchup-sprites.png',
+    width: 204.8,
+    height: 256,
+    evolutions: 5,
+    anchor: { x: 0.5, y: 0.85 }
+  }
 };
 
-function load(key) {
-  let img = cache.get(key);
-  if (!img) {
-    img = new Image();
-    img.src = "assets/sprites/" + key + ".png";
-    cache.set(key, img);
+// Cache de imágenes cargadas
+const imageCache = new Map();
+const loadingPromises = new Map();
+
+/**
+ * Carga una imagen y la guarda en caché
+ */
+function loadImage(src) {
+  if (imageCache.has(src)) {
+    return Promise.resolve(imageCache.get(src));
   }
-  return img;
-}
-
-export function preloadSprites() {
-  Object.entries(FORM).forEach(([id, row]) => {
-    new Set(row).forEach((stage) => load(id + "-" + stage));
+  
+  if (loadingPromises.has(src)) {
+    return loadingPromises.get(src);
+  }
+  
+  const promise = new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      loadingPromises.delete(src);
+      resolve(img);
+    };
+    img.onerror = () => {
+      loadingPromises.delete(src);
+      reject(new Error(`Failed to load: ${src}`));
+    };
+    img.src = src;
   });
-  ["vfx-slash", "vfx-flame", "vfx-note", "boss-1", "boss-2"].forEach((name) => load(name));
+  
+  loadingPromises.set(src, promise);
+  return promise;
 }
 
-export function spriteFor(id, evo) {
-  const e = Math.max(0, Math.min(4, Number(evo) || 0));
-  if (e === 0) return null;
-  // Procedural art for dino (5 distinct evo silhouettes), pika & cat
-  if (id === "dragon" || id === "pikachu" || id === "cat") return null;
-  const row = FORM[id] || FORM.lilo;
-  const stage = row[e];
-  const img = load(id + "-" + stage);
-  return img.complete && img.naturalWidth > 0 ? img : null;
+/**
+ * Precarga todos los sprites del juego
+ */
+export async function preloadAllSprites() {
+  const promises = Object.values(SPRITE_CONFIG).map(config => 
+    loadImage(SPRITE_PATH + config.file)
+  );
+  
+  try {
+    await Promise.all(promises);
+    console.log('✅ All sprites loaded successfully');
+    return true;
+  } catch (err) {
+    console.error('❌ Error loading sprites:', err);
+    return false;
+  }
 }
 
-export function vfxSprite(name) {
-  const img = load(name);
-  return img.complete && img.naturalWidth > 0 ? img : null;
+/**
+ * Obtiene un sprite específico para un personaje y evolución
+ */
+export function spriteFor(characterId, evolution) {
+  const config = SPRITE_CONFIG[characterId];
+  if (!config) return null;
+  
+  const img = imageCache.get(SPRITE_PATH + config.file);
+  if (!img || !img.complete) return null;
+  
+  return {
+    image: img,
+    sx: evolution * config.width,  // Posición X en el sprite sheet
+    sy: 0,                          // Posición Y (siempre 0 en horizontal)
+    sw: config.width,               // Ancho del frame
+    sh: config.height,              // Alto del frame
+    anchor: config.anchor
+  };
 }
 
-preloadSprites();
+/**
+ * Dibuja un sprite en el canvas
+ */
+export function drawSprite(ctx, sprite, x, y, width, height, flip = false) {
+  if (!sprite || !sprite.image) return false;
+  
+  ctx.save();
+  
+  if (flip) {
+    ctx.translate(x + width, y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(
+      sprite.image,
+      sprite.sx, sprite.sy, sprite.sw, sprite.sh,
+      0, 0, width, height
+    );
+  } else {
+    ctx.drawImage(
+      sprite.image,
+      sprite.sx, sprite.sy, sprite.sw, sprite.sh,
+      x - width * sprite.anchor.x, 
+      y - height * sprite.anchor.y,
+      width, 
+      height
+    );
+  }
+  
+  ctx.restore();
+  return true;
+}
+
+/**
+ * Verifica si los sprites están listos
+ */
+export function spritesReady() {
+  for (const config of Object.values(SPRITE_CONFIG)) {
+    const img = imageCache.get(SPRITE_PATH + config.file);
+    if (!img || !img.complete) return false;
+  }
+  return true;
+}
+
+/**
+ * Obtiene el progreso de carga (0-1)
+ */
+export function getLoadProgress() {
+  const total = Object.keys(SPRITE_CONFIG).length;
+  let loaded = 0;
+  
+  for (const config of Object.values(SPRITE_CONFIG)) {
+    const img = imageCache.get(SPRITE_PATH + config.file);
+    if (img && img.complete) loaded++;
+  }
+  
+  return loaded / total;
+}
