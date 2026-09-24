@@ -88,7 +88,7 @@ addEventListener("keydown", (e) => {
   keys[k] = true;
   if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
   if (e.repeat) return;
-  if (e.key === "?" ) { toggleHelp(); return; }
+  if (e.key === "º" || e.key === "ª" || e.code === "Backquote" || e.key === "?") { toggleHelp(); return; }
   if (e.key === "n" || e.key === "N") {
     setMuted(!muted);
     showNotification("AUDIO", muted ? "Mute" : "On");
@@ -116,15 +116,14 @@ addEventListener("keydown", (e) => {
     if (!portals.tryUse(game.player, game)) evolve("manual");
   }
   if (e.key === "r" || e.key === "R") respawn();
-  if (e.key === "f" || e.key === "F") melee();
-  if (e.key === "h" || e.key === "H") markStrike();
+  if (e.key === "h" || e.key === "H" || e.key === "f" || e.key === "F") attack();
   if (e.key === "Shift") dash();
 });
 addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
 canvas.addEventListener("pointerdown", (e) => {
   if (!game.running || paused || overlayOpen()) return;
   if (e.button === 2) { dash(); return; }
-  markStrike();
+  attack();
 });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 function toggleHelp() {
@@ -435,16 +434,19 @@ function markHit(p, e, dmg, kb) {
   hitStop(e.boss ? 6 : 4);
   p.xp += 1;
 }
-function markStrike() {
+function attack() {
   const p = game.player;
   if (!p || p.dead) return;
-  if ((p.markT || 0) > 0) return;
+  if (p.melee > 0) { p.meleeBuf = 8; return; }
   const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const def = markAt(p.id, evo);
-  p.markT = def.cd;
-  p.melee = 10;
+  p.melee = Math.max(7, 12 - evo);
+  p.meleeBuf = 0;
   beep("slash");
-  game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
+  if (p._markName !== def.name) {
+    p._markName = def.name;
+    game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
+  }
   const face = p.facing || 1;
   if (def.heal) p.health = Math.min(p.maxHealth, p.health + def.heal);
   if (def.style === "shot") {
@@ -2292,14 +2294,14 @@ function setupSelect() {
     }
   });
   const POWER_KEY = { j: 0, k: 1, l: 2 };
-  const momentary = { shift: 1, f: 1, j: 1, k: 1, l: 1 };
+  const momentary = { shift: 1, f: 1, h: 1, j: 1, k: 1, l: 1 };
   document.querySelectorAll(".touch-btn").forEach((btn) => {
     const k = btn.dataset.k;
     const down = (ev) => {
       ev.preventDefault();
       btn.classList.add("held");
       if (k === "shift") dash();
-      else if (k === "f") melee();
+      else if (k === "f" || k === "h") attack();
       else if (k in POWER_KEY) { if (game.running && !paused && !overlayOpen()) useAbility(game, POWER_KEY[k]); }
       else keys[k] = true;
     };

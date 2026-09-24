@@ -11,7 +11,7 @@ const HINTS = {
 };
 
 const STEPS = [
-  { id: "move", text: "Muévete con WASD. Shift = dash. F = golpe. H o clic = ataque de tu forma." },
+  { id: "move", text: "Izquierda WASD. Derecha: H ataque, J K L poderes. Ayuda con º." },
   { id: "orb", text: "Los orbes amarillos dan XP. Llena la barra y pulsa E." },
   { id: "evo", text: "5 formas: bebé → base → evo → final → GOD." },
   { id: "map", text: "M abre el mapa. Visita las 8 salas y el nido te llama." },
