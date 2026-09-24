@@ -4,6 +4,7 @@ import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
+import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -186,10 +187,10 @@ function placeFrom(fromDir) {
   const p = game.player;
   if (!p) return;
   if (fromDir === "right") p.x = game.roomId === "boss" ? 280 : 56;
-  else if (fromDir === "left") p.x = ROOM_W - 56 - p.w;
+  else if (fromDir === "left") p.x = game.worldW - 56 - p.w;
   else if (fromDir === "up") {
     p.x = safeX(220);
-    p.y = ROOM_H - 240;
+    p.y = game.worldH - 240;
   } else if (fromDir === "down") {
     p.x = safeX(220);
     p.y = 70;
@@ -251,13 +252,15 @@ function loadRoom(id, fromDir) {
   game.finale = null;
   game.visited[id] = true;
   game.worldIndex = r.world;
-  game.worldW = ROOM_W;
-  game.worldH = ROOM_H;
-  game.platforms = r.plats.map((p) => ({ x: p[0], y: p[1], w: p[2], h: p[3] }));
-  game.orbs = (r.orbs || []).map((o) => ({ x: o[0], y: o[1], r: 9, taken: false }));
-  game.hearts = first ? [{ x: 220, y: 760, taken: false }] : [];
+  const paint = getLook() === "paint";
+  const S = paint ? PAINT_WORLD : 1;
+  game.worldW = ROOM_W * S;
+  game.worldH = ROOM_H * S;
+  game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+  game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
+  game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => {
-    const e = makeFoe(f[0], f[1], f[2], id, i, f[3] ? { elite: true } : undefined);
+    const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined);
     if (f[3]) applyElite(e);
     return e;
   });
@@ -278,6 +281,14 @@ function loadRoom(id, fromDir) {
   game.bolts = [];
   game.slashes = [];
   portals.spawnFromRoom(r);
+  if (paint) {
+    for (const portal of portals.items) {
+      portal.x *= S;
+      portal.y *= S;
+      portal.w *= S;
+      portal.h *= S;
+    }
+  }
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
   game.fading = 16;
@@ -325,7 +336,9 @@ function showMap() {
 }
 function makePlayer(def) {
   const p = { ...def, x: 180, y: 500, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0, dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0 };
-  applyForm(p, { silent: true }); return p;
+  applyForm(p, { silent: true });
+  paintFit(p);
+  return p;
 }
 function start(def) {
   if (!def) return;
@@ -349,6 +362,7 @@ function start(def) {
         game.kills = u.kills;
         game.won = u.won;
         applyForm(game.player, { silent: true });
+        paintFit(game.player);
         if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
         if (u.nineUsed) game.player._nineUsed = true;
         game._magicSnap = u.magic;
@@ -374,6 +388,7 @@ function evolve(reason) {
   }
   p.evo += 1;
   applyForm(p);
+  paintFit(p);
   if (p.evo === 4) Surprises.onBecomeGod(game);
   const toGod = p.evo >= 4;
   game.shake = toGod ? 26 : 12;
@@ -813,10 +828,10 @@ function tryDoors() {
   const p = game.player; const r = room();
   const nestLocked = r.id === "boss" && !game.won;
   if (nestLocked && p.x < 72) p.x = 72;
-  if (p.x > ROOM_W - 24 && r.doors.right) loadRoom(r.doors.right, "right");
+  if (p.x > game.worldW - 24 && r.doors.right) loadRoom(r.doors.right, "right");
   else if (p.x < -8 && r.doors.left && !nestLocked) loadRoom(r.doors.left, "left");
   else if (p.y < 8 && r.doors.up && nearUpDoor(p)) loadRoom(r.doors.up, "up");
-  if (p.x > ROOM_W - 24 && !r.doors.right) p.x = ROOM_W - p.w;
+  if (p.x > game.worldW - 24 && !r.doors.right) p.x = game.worldW - p.w;
   if (p.x < -8 && (!r.doors.left || nestLocked)) p.x = nestLocked ? 72 : 0;
   if (nestLocked && p.x < 72) p.x = 72;
   if (p.y < 0 && !r.doors.up) p.y = 0;
@@ -996,11 +1011,11 @@ function updatePlayer() {
   }
   const r = room();
   if (portals.prompt) setPrompt(portals.prompt, true);
-  else if (p.x > ROOM_W - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
+  else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
   else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
   else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
   else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
-  else if (p.y > ROOM_H - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
+  else if (p.y > game.worldH - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
   else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
     const nxt = p.forms && p.forms[p.evo + 1];
     setPrompt("E · evolucionar" + (nxt ? " · " + nxt.name : ""), true);
@@ -1029,17 +1044,17 @@ function tickRam(p) {
 function solidifyFoe(e) {
   if (!e || e.boss) {
     if (e && e.boss && !e.dying) {
-      e.x = Math.max(48, Math.min(e.x, ROOM_W - e.w - 48));
-      e.y = Math.min(e.y, ROOM_H - 90 - e.h);
+      e.x = Math.max(48, Math.min(e.x, game.worldW - e.w - 48));
+      e.y = Math.min(e.y, game.worldH - 90 - e.h);
     }
     return;
   }
   if (e.x < 12) { e.x = 12; if (e.vx < 0) e.vx *= -1; }
-  if (e.x > ROOM_W - e.w - 12) { e.x = ROOM_W - e.w - 12; if (e.vx > 0) e.vx *= -1; }
+  if (e.x > game.worldW - e.w - 12) { e.x = game.worldW - e.w - 12; if (e.vx > 0) e.vx *= -1; }
   const water = e.kind === "pez" || e.kind === "medusa" || e.kind === "anguila";
   const planted = e.kind === "planta";
   if (water || planted) {
-    e.y = Math.max(180, Math.min(ROOM_H - 150, e.y));
+    e.y = Math.max(180, Math.min(game.worldH - 150, e.y));
     e.grounded = !!planted;
     return;
   }
@@ -1051,7 +1066,7 @@ function solidifyFoe(e) {
     });
     if (hit.hitY === 1) e.vy = -Math.abs(e.vy || 1.4);
     if (hit.hitX) e.vx *= -1;
-    e.y = Math.max(64, Math.min(ROOM_H - 190, e.y));
+    e.y = Math.max(64, Math.min(game.worldH - 190, e.y));
     e.grounded = false;
     return;
   }
@@ -1117,8 +1132,8 @@ function updateEnemies() {
     e.x += e.vx; e.y += e.vy;
     if (e.boss && e.fell) {
       e.vx = 0; e.vy = 0;
-      e.x += ((ROOM_W / 2 - e.w / 2) - e.x) * 0.14;
-      e.y += ((ROOM_H / 2 - 80 - e.h / 2) - e.y) * 0.14;
+      e.x += ((game.worldW / 2 - e.w / 2) - e.x) * 0.14;
+      e.y += ((game.worldH / 2 - 80 - e.h / 2) - e.y) * 0.14;
       e.dying = Math.max(0, (e.dying || 0) - 1);
       if (t % 3 === 0) {
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
@@ -1128,7 +1143,7 @@ function updateEnemies() {
     }
     if (e.boss) {
       updateBossNido(e, game, {
-        t, hurtPlayer, showNotification, makeFoe, ROOM_W, ROOM_H,
+        t, hurtPlayer, showNotification, makeFoe, game.worldW, game.worldH,
         reduceMotion: game.reduceMotion || reduceMotion,
         beep,
       });
@@ -1295,7 +1310,7 @@ function updateEnemies() {
         e.vx *= 0.988;
         e.vx = Math.max(-3.2, Math.min(3.2, e.vx));
       }
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
     // --- abeja/avispa: gentle hover, buzz telegraph, steeper stinger dive ---
     if (e.kind === "abeja" || e.kind === "avispa") {
@@ -1345,7 +1360,7 @@ function updateEnemies() {
         e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.18;
         e.baseY = Math.max(220, Math.min(620, e.baseY));
       }
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
     // --- pez: school sine, dash burst, vertical hunt, dense bubbles ---
     if (e.kind === "pez") {
@@ -1371,7 +1386,7 @@ function updateEnemies() {
       }
       e.vx = Math.max(e.dashSwim > 0 ? -4.6 : -2.4, Math.min(e.dashSwim > 0 ? 4.6 : 2.4, e.vx));
       e.baseY = Math.max(280, Math.min(560, e.baseY));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ec8f0", count: 2, size: 2.0, up: 0.28, speed: 0.5, life: 16 });
     }
     // --- medusa: near player pulse then pink soft zap projectile ---
@@ -1383,7 +1398,7 @@ function updateEnemies() {
       e.y = e.baseY + Math.sin(e.bob) * 40;
       if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.015;
       e.vx = Math.max(-1.4, Math.min(1.4, e.vx));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 8 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff9ad8", count: 1, size: 2, up: 0.4, speed: 0.5, life: 14 });
       if (e.pulsezap > 0) {
         e.pulsezap--;
@@ -1421,7 +1436,7 @@ function updateEnemies() {
       }
       e.vx = Math.max(-2.2, Math.min(2.2, e.vx));
       e.baseY = Math.max(260, Math.min(560, e.baseY));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#40e0d0", count: 1, size: 1.8, up: 0.2, speed: 0.4, life: 12 });
       if (e.pulsezap > 0) {
         e.pulsezap--;
@@ -1543,7 +1558,7 @@ function updateEnemies() {
         if (e.y > 560) e.baseY -= 0.4;
       }
       e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
     // --- murcielago: flap bob, dive at mid HP or on timer ---
     if (e.kind === "murcielago") {
@@ -1572,7 +1587,7 @@ function updateEnemies() {
         if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.07;
         e.vx = Math.max(-3.2, Math.min(3.2, e.vx));
       }
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
     // --- arana: crawl, occasional drop from above ---
     if (e.kind === "arana") {
@@ -1608,7 +1623,7 @@ function updateEnemies() {
       }
       e.vx = Math.max(-1.8, Math.min(1.8, e.vx));
       e.baseY = Math.max(220, Math.min(620, e.baseY));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8a30", count: 2, size: 2.4, up: 0.8, speed: 0.9, life: 16 });
     }
     // --- escoria: slow crawler, hotter/faster when low HP ---
@@ -1633,7 +1648,7 @@ function updateEnemies() {
       }
       e.vx = Math.max(-1.6, Math.min(1.6, e.vx));
       e.baseY = Math.max(180, Math.min(520, e.baseY));
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
+      if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       e.shootCd = (e.shootCd || 0) - 1;
       // Telegraph ~0.5s antes del rayo
       if (e.shootCd <= 30) e.telegraph = true;
@@ -1869,7 +1884,7 @@ function render() {
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
   ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam);
+  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH);
   else {
     renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
     drawTerrain(ctx, game.platforms, world, game.cam, t);
