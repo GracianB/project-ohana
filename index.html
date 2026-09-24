@@ -4,9 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   
-  <!-- Preconnect para recursos externos -->
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Precarga CORREGIDA -->
+  <link rel="preload" href="style.css?v=ohana-19" as="style">
+  <link rel="preload" href="game.js?v=ohana-19" as="script">  <!-- CORREGIDO: as="script" -->
+  <!-- QUITAR preload de favicon si no se usa inmediatamente, o dejarlo así: -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   
   <!-- Precarga crítica -->
   <link rel="preload" href="style.css?v=ohana-19" as="style">
