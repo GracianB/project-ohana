@@ -270,7 +270,7 @@ export function hitEnemy(g, e, dmg, o = {}) {
   if (o.stun != null) e.stun = Math.max(e.stun || 0, e.boss ? Math.min(6, o.stun) : o.stun);
   if (o.nums !== false) g.nums.add(cx(e) - 4, e.y, "" + d, o.color || "#ffe66a", d >= 40 || !!o.crit);
   g.combo = (g.combo || 0) + 1;
-  g.comboT = 100;
+  g.comboT = 210;
   g.score = (g.score || 0) + 10 * g.combo;
   g.fx.emit(cx(e), cy(e), { color: o.color || "#fff", count: o.parts ?? 8, size: 3, up: 1.2 });
   if (g.player) g.player.xp = (g.player.xp || 0) + (o.xp ?? 2);

@@ -669,6 +669,10 @@ body.playing #top-actions {
   opacity: 1;
   transform: translateX(-50%) scale(1);
 }
+#combo-chip.show .combo-value {
+  display: inline-block;
+  animation: combo-pop 0.28s ease;
+}
 
 .combo-value {
   display: inline-block;

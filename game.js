@@ -273,6 +273,7 @@ function loadRoom(id, fromDir) {
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
   game.fading = 16;
+  game.doorHold = reduceMotion ? 8 : 30;
   game.flash = Math.max(game.flash || 0, reduceMotion ? 4 : 8);
   if (first && game.player) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
@@ -483,7 +484,7 @@ function melee() {
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       beep(d >= 45 ? "crit" : "hit");
       punch(e.x, e.y, p.color);
-      hitStop(e.boss ? 7 : (d >= 45 ? 5 : 3));
+      hitStop(e.boss ? 8 : (d >= 45 ? 10 : 3));
       game.camPunch = Math.max(game.camPunch || 0, e.boss ? 0.08 : 0.045);
       buzz(e.boss ? 18 : 10);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
@@ -655,7 +656,7 @@ function checkVoidDeath() {
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function punch(x, y, color) {
-  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 100; game.score += 10 * game.combo;
+  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 210; game.score += 10 * game.combo;
   game.fx.emit(x, y, { color, count: 10, size: 3.2, up: 1.2 });
   game.fx.emit(x, y, { color: "#fff", count: 6, size: 2, up: 1.8, speed: 4.4, life: 16, star: true });
   beep("hit");
@@ -684,6 +685,12 @@ function tryDoors() {
 }
 function updatePlayer() {
   const p = game.player; if (p.dead) return;
+  if (game.doorHold > 0) {
+    game.doorHold--;
+    p.vx = 0;
+    p.vy = 0;
+    return;
+  }
   tickEvoTween(p);
   const left = keys["a"] || keys["arrowleft"];
   const right = keys["d"] || keys["arrowright"];
@@ -848,6 +855,17 @@ function updateEnemies() {
   { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
   if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
+    const molts = e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
+    const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
+    if (!e.boss && e.hp <= 0 && posed && !molts) {
+      if (e.dying == null) e.dying = 28;
+      e.deathHold = 1;
+      e.dying--;
+      e.vx = 0;
+      e.vy = Math.min(5, (e.vy || -2) + 0.4);
+      e.y += e.vy;
+      continue;
+    }
     if (e.flash > 0) e.flash--;
     if (e.stun > 0) {
       e.stun--;
@@ -1494,6 +1512,7 @@ function updateEnemies() {
       return false;
     }
     if (e.hp > 0) return true;
+    if (e.deathHold && e.dying > 0) return true;
     // Cucaracho muda: 1ª muerte → evo1, 2ª → evo2 flyer, 3ª → kill real
     if (e.kind === "cucaracho" && !e.baby && e.evo < 2) {
       e.evo += 1;
@@ -1903,9 +1922,11 @@ function updateHUD() {
   if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
   const chip = document.getElementById("combo-chip");
   if (chip) {
-    const show = game.combo > 1;
-    chip.textContent = show ? (game.combo + "  " + comboRank(game.combo)) : "";
+    const show = game.combo > 1 && game.comboT > 0;
+    const val = chip.querySelector(".combo-value");
+    if (val) val.textContent = show ? String(game.combo) : "0";
     chip.classList.toggle("show", show);
+    chip.classList.toggle("hidden", !show);
     chip.dataset.rank = show ? comboRank(game.combo) : "";
   }
   const boss = game.enemies.find((e) => e.boss);
