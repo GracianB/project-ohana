@@ -23,7 +23,6 @@ export function resolveBody(body, platforms, opts) {
   const o = opts || {};
   const prevX = o.prevX != null ? o.prevX : body.x;
   const prevY = o.prevY != null ? o.prevY : body.y;
-  const drop = !!o.drop;
   let grounded = false;
   let hitX = 0;
   let hitY = 0;
