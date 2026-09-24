@@ -1,5 +1,192 @@
 import { drawBaby } from "./baby.js";
 import { spriteFor } from "./sprites.js";
+import { spriteFor, drawSprite } from './sprites.js';
+
+// ============================================================================
+// SISTEMA DE DIBUJO CON SPRITES
+// ============================================================================
+
+// Efectos visuales que se dibujan ENCIMA de los sprites
+function drawEffects(ctx, p, t, evo) {
+  const x = p.x;
+  const y = p.y;
+  
+  // Aura para evoluciones altas
+  if (evo >= 2) {
+    ctx.save();
+    ctx.globalAlpha = 0.3 + Math.sin(t / 8) * 0.1;
+    
+    const gradient = ctx.createRadialGradient(x, y - 20, 0, x, y - 20, 40 + evo * 5);
+    gradient.addColorStop(0, p.color + '66'); // 40% alpha
+    gradient.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y - 20, 40 + evo * 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  
+  // Partículas para GOD form
+  if (evo >= 4) {
+    ctx.save();
+    for (let i = 0; i < 6; i++) {
+      const angle = t / 15 + (i / 6) * Math.PI * 2;
+      const dist = 35 + Math.sin(t / 5 + i) * 5;
+      const px = x + Math.cos(angle) * dist;
+      const py = y - 20 + Math.sin(angle) * dist * 0.5;
+      
+      ctx.globalAlpha = 0.6 + Math.sin(t / 3 + i) * 0.3;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(px, py, 2 + Math.sin(t / 2 + i), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+  
+  // Efecto de evolución (burst)
+  if (p.evoBurst > 0) {
+    const progress = p.evoBurst / (p.evoBurstMax || 90);
+    const radius = 10 + (1 - progress) * 150;
+    
+    ctx.save();
+    ctx.globalAlpha = progress * 0.8;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = 4 * progress;
+    ctx.beginPath();
+    ctx.arc(x, y - 20, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+    
+    p.evoBurst--;
+  }
+}
+
+// Sombra dinámica
+function drawShadow(ctx, p) {
+  ctx.save();
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(p.x, p.y + 5, p.w * 0.4, p.h * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ============================================================================
+// FUNCIÓN PRINCIPAL DE DIBUJO
+// ============================================================================
+
+export function drawCharacter(ctx, p, cam, t) {
+  const evo = Number(p.evo) || 0;
+  
+  // Obtener sprite
+  const sprite = spriteFor(p.id, Math.min(evo, 4));
+  
+  // Si no hay sprite, dibujar fallback simple
+  if (!sprite) {
+    drawFallback(ctx, p, cam, evo);
+    return;
+  }
+  
+  const x = p.x - cam.x;
+  const y = p.y - cam.y;
+  
+  // Calcular escala basada en evolución
+  const baseScale = 0.8 + evo * 0.08;
+  const animScale = 1 + Math.sin(t / 20) * 0.02; // Respiración sutil
+  
+  // Calcular dimensiones
+  const width = p.w * 2 * baseScale * animScale;
+  const height = p.h * 2.5 * baseScale * animScale;
+  
+  // Animaciones de movimiento
+  const speed = Math.abs(p.vx || 0);
+  const moving = !!p.grounded && speed > 0.5;
+  
+  let offsetY = 0;
+  let rotation = 0;
+  
+  if (moving) {
+    // Rebote al caminar
+    offsetY = Math.sin(t / 8) * 2;
+    rotation = Math.sin(t / 10) * 0.03 * (p.facing || 1);
+  } else if (!p.grounded) {
+    // Inclinación al saltar/caer
+    rotation = (p.vy || 0) * 0.01;
+    offsetY = Math.sin(t / 15) * 1; // Flotación sutil
+  }
+  
+  // Efecto de daño (parpadeo)
+  const hurt = (p.invuln || 0) > 0;
+  if (hurt && Math.floor(t / 4) % 2 === 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+  }
+  
+  // Dibujar sombra
+  drawShadow(ctx, { x, y: y + offsetY, w: p.w, h: p.h });
+  
+  // Dibujar sprite
+  ctx.save();
+  ctx.translate(x, y + offsetY);
+  ctx.rotate(rotation);
+  
+  // Flip según dirección
+  const flip = p.facing === -1;
+  
+  drawSprite(
+    ctx, 
+    sprite, 
+    flip ? -width/2 : width/2, 
+    height * 0.3, 
+    width, 
+    height, 
+    flip
+  );
+  
+  ctx.restore();
+  
+  // Restaurar alpha si estaba dañado
+  if (hurt && Math.floor(t / 4) % 2 === 0) {
+    ctx.restore();
+  }
+  
+  // Efectos visuales
+  p.x = x + cam.x; // Temporal para efectos
+  p.y = y + cam.y + offsetY;
+  drawEffects(ctx, p, t, evo);
+  p.x = x + cam.x; // Restaurar
+  
+  // Guardar animaciones para otros sistemas
+  p._anim = {
+    moving,
+    grounded: p.grounded,
+    facing: p.facing || 1
+  };
+}
+
+// ============================================================================
+// FALLBACK (si los sprites no cargan)
+// ============================================================================
+
+function drawFallback(ctx, p, cam, evo) {
+  const x = p.x - cam.x;
+  const y = p.y - cam.y;
+  
+  // Silueta simple coloreada
+  ctx.fillStyle = p.color || '#888';
+  ctx.beginPath();
+  ctx.ellipse(x, y, p.w/2, p.h/2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Indicador de evolución
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`E${evo}`, x, y);
+}
 
 // ============================================================================
 // SISTEMA DE UTILIDADES AVANZADAS
