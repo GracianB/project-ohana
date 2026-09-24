@@ -1,5 +1,4 @@
-import { drawBaby } from "./baby.js";
-import { spriteFor } from "./sprites.js";
+import { drawBaby } from "./baby.js"; 
 import { spriteFor, drawSprite } from './sprites.js';
 
 // ============================================================================
