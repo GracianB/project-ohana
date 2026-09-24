@@ -220,9 +220,15 @@ Doble clic en `index.html` no arranca: los módulos no cargan por `file://`.
 </td>
 <td width="42%" valign="top">
 
-<a href="https://github.com/GracianB/project-ohana">
-  <img src="https://github-readme-stats.vercel.app/api/pin/?username=GracianB&repo=project-ohana&theme=tokyonight&hide_border=true&bg_color=071226&border_color=102A43&title_color=7EE7FF&icon_color=C4A574&text_color=F4F3EE" alt="Tarjeta del repositorio project-ohana"/>
-</a>
+<p align="center">
+  <a href="https://github.com/GracianB/project-ohana"><img src="https://img.shields.io/badge/GracianB%2Fproject--ohana-071226?style=for-the-badge&logo=github&logoColor=7EE7FF&labelColor=102A43&color=071226" alt="Repositorio"/></a>
+  <br/><br/>
+  <img src="https://img.shields.io/github/stars/GracianB/project-ohana?style=for-the-badge&logo=github&label=estrellas&color=7EE7FF&labelColor=071226" alt="Estrellas"/>
+  <br/><br/>
+  <img src="https://img.shields.io/github/license/GracianB/project-ohana?style=for-the-badge&label=licencia&color=C4A574&labelColor=071226" alt="Licencia"/>
+  <br/><br/>
+  <img src="https://img.shields.io/github/last-commit/GracianB/project-ohana?style=for-the-badge&label=cambio&color=F4F3EE&labelColor=071226" alt="Último cambio"/>
+</p>
 
 </td>
 </tr>
