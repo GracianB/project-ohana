@@ -6,6 +6,7 @@
 // systems/passives.js ya los llama desde Passives.afterMove / Passives.draw.
 // ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
+import { sfx } from "../engine/audio.js";
 
 // cd en ms (se reduce con la forma: cd / (1 + evo*0.12)). J corto, K medio, L largo.
 export const ABILITY_DEFS = {
@@ -55,6 +56,7 @@ export function useAbility(game, index) {
   p.cds[id] = now + def.cd / (1 + (Number(p.evo) || 0) * 0.12);
   syncState(p);
   p._cast = { slot: index, t: game.t || 0 };
+  sfx(id);
   const fn = CASTERS[id];
   if (fn) fn(game, p, Number(p.evo) || 0);
 }

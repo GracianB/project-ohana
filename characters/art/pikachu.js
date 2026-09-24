@@ -8,15 +8,15 @@
 // ============================================================================
 
 const TAU = Math.PI * 2;
-const TQ = "#27d8c8";
+const TQ = "#b05cff"; // acento violeta eléctrico (distinto del cian de Stitcho)
 const BOLT = "#fff6a0";
 
 const PAL = [
-  { body: "#fff06a", belly: "#fffdf2", gill: "#3fe6d4", glow: "#9ffff4", inner: "#39d7c9" },
-  { body: "#ffd83a", belly: "#fffaf0", gill: "#2fdcc9", glow: "#9ffff4", inner: "#27cbbd" },
-  { body: "#ffa024", belly: "#fff1dc", gill: "#27d8c8", glow: "#b6fff6", inner: "#20bfb2" },
-  { body: "#ffe45a", belly: "#fffbef", gill: "#34e0cf", glow: "#a8fff5", inner: "#27cbbd" },
-  { body: "#fff4d2", belly: "#ffffff", gill: "#3aa8ff", glow: "#bfe6ff", inner: "#3aa8ff" },
+  { body: "#fff06a", belly: "#fffdf2", gill: "#c07bff", glow: "#ecd6ff", inner: "#b066ff" },
+  { body: "#ffd83a", belly: "#fffaf0", gill: "#b05cff", glow: "#e6ccff", inner: "#a04cf0" },
+  { body: "#ffa024", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
+  { body: "#ffe45a", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
+  { body: "#fff4d2", belly: "#ffffff", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
 ];
 
 const P = [
@@ -286,9 +286,10 @@ function figure(ctx, R, pose, f, S, C, o) {
       ctx.beginPath(); ctx.moveTo(ex - 4, ey - 3); ctx.lineTo(ex + 2, ey); ctx.lineTo(ex - 4, ey + 3); ctx.stroke();
     }
   } else {
-    const iris = f === 4 ? "#2a7bd8" : "#16808a";
-    R.eye(ctx, hr * 0.08, ey, S.eye * 0.9, pose, { iris, mood: o.eyes });
-    R.eye(ctx, hr * 0.6, ey + 0.5, S.eye, pose, { iris, mood: o.eyes });
+    // ojos de gominola ámbar, separados y con pestaña (nada de "gafas")
+    const iris = f === 4 ? "#d0409a" : "#d27a12";
+    R.eye(ctx, -hr * 0.02, ey + 1, S.eye * 0.82, pose, { iris, mood: o.eyes, lash: true });
+    R.eye(ctx, hr * 0.7, ey + 1.5, S.eye * 0.9, pose, { iris, mood: o.eyes, lash: true });
   }
   // mejillas "+"
   if (o.puff > 0) {

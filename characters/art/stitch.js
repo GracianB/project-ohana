@@ -152,7 +152,7 @@ function tailPart(ctx, R, x, y, ang, len, w, col, t, pose, glow) {
 }
 
 /** Ojo grande oscuro con borde cian. */
-function alienEye(ctx, R, x, y, rx, ry, pose, mood, rim, lookUp) {
+function alienEye(ctx, R, x, y, rx, ry, pose, mood, rim, lookUp, slant = 0.12) {
   const blink = mood === "closed" ? 1 : pose.blink;
   ctx.lineCap = "round";
   if (mood === "x") {
@@ -175,11 +175,11 @@ function alienEye(ctx, R, x, y, rx, ry, pose, mood, rim, lookUp) {
   const h = ry * (1 - blink * 0.85);
   const g = ctx.createLinearGradient(x, y - h, x, y + h);
   g.addColorStop(0, "#07081c"); g.addColorStop(1, "#1b2460");
-  const p = pEll(x, y, rx, h, 0.12);
+  const p = pEll(x, y, rx, h, slant);
   ctx.fillStyle = g; ctx.fill(p);
   ctx.save(); ctx.clip(p);
   ctx.strokeStyle = rim || CYAN; ctx.lineWidth = 1.7;
-  ctx.beginPath(); ctx.ellipse(x, y, rx - 1, h - 1, 0.12, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(x, y, rx - 1, h - 1, slant, 0, TAU); ctx.stroke();
   const lx = pose.look.x * rx * 0.18, ly = (lookUp ? -0.5 : pose.look.y) * h * 0.25;
   ctx.fillStyle = "rgba(90,120,255,0.35)";
   ctx.beginPath(); ctx.ellipse(x + lx, y + ly + h * 0.45, rx * 0.45, h * 0.22, 0, 0, TAU); ctx.fill();
@@ -366,8 +366,9 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   // --- cara
   const eyR = S.eye, mood = face.mood;
   const exF = rx * 0.5, exB = -rx * 0.1, ey = -ry * 0.14;
-  alienEye(ctx, R, exB, ey - 0.5, eyR * 0.78, eyR * 1.1, pose, mood, CYAN, face.lookUp);
-  alienEye(ctx, R, exF, ey, eyR * 0.9, eyR * 1.22, pose, mood, CYAN, face.lookUp);
+  // ojos de alien almendrados y rasgados, sin aro (no parecen gafas)
+  alienEye(ctx, R, exB - 1, ey - 0.5, eyR * 0.72, eyR * 1.05, pose, mood, "#5a2fb8", face.lookUp, -0.45);
+  alienEye(ctx, R, exF + 1, ey, eyR * 0.84, eyR * 1.15, pose, mood, "#5a2fb8", face.lookUp, 0.45);
   // fosas nasales mínimas
   ctx.fillStyle = R.INK;
   ctx.beginPath(); ctx.arc(rx * 0.93, ry * 0.12, 1, 0, TAU); ctx.arc(rx * 0.8, ry * 0.16, 0.9, 0, TAU); ctx.fill();

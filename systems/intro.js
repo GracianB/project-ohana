@@ -12,6 +12,7 @@ import {
   FONT_BODY, FONT_DISPLAY,
 } from "./evo-cinema.js";
 import { ROSTER } from "../characters/roster.js";
+import { sfx } from "../engine/audio.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -47,7 +48,7 @@ export function playTitleIntro() {
   const pal = [CYAN, GOLD, PINK, "#ffffff"];
   const T = reduce
     ? { core: 0, ring: 0, word: 0, flash: 0.1, tag: 0.1, out: 0.7, end: 1.1 }
-    : { core: 0.05, ring: 0.45, word: 0.6, flash: 1.25, tag: 1.3, out: 1.75, end: 2.35 };
+    : { core: 0.05, ring: 0.45, word: 0.6, flash: 1.25, tag: 1.3, out: 2.75, end: 3.35 }; // +1 s de final visible
   const letters = ["O", "H", "A", "N", "A"];
   const word = document.createElement("canvas");
   const wctx = word.getContext("2d");
@@ -227,7 +228,7 @@ export function playTitleIntro() {
     if (tag > 0) {
       ctx.save();
       ctx.globalAlpha = tag;
-      drawTitle(ctx, "Cuatro héroes. Un nido. Nadie se queda atrás.", cx, cy + size * 0.85 + (1 - easeOut(tag)) * 8,
+      drawTitle(ctx, "Cinco héroes. Un nido. Nadie se queda atrás.", cx, cy + size * 0.85 + (1 - easeOut(tag)) * 8,
         Math.max(13, size * 0.15), "#d6e6f6", { font: FONT_BODY, weight: 400, stroke: false, maxWidth: W * 0.9 });
       ctx.restore();
     }
@@ -293,6 +294,7 @@ export function playIntro(kind, name, done, id) {
   const ctx = fc.ctx;
   const reduce = reducedMotion();
   const def = ROSTER.find((r) => r.id === id) || ROSTER.find((r) => r.forms && r.forms[0] && r.forms[0].name === name) || ROSTER[0];
+  sfx("start");
   let evo = 0;
   if (kind === "resume") {
     try {
@@ -310,7 +312,7 @@ export function playIntro(kind, name, done, id) {
   const kicker = kind === "resume" ? "CONTINUAR" : "NUEVA PARTIDA";
   const sub = kind === "resume" ? "Se recupera tu forma y tu sala" : "Empiezas como bebé · Rumbo al Claro";
   el.querySelector(".intro-sr").textContent = kicker + ": " + title + ". " + sub;
-  const T = reduce ? { in: 0.2, out: 0.75, end: 0.95 } : { in: 0.5, out: 1.55, end: 1.95 };
+  const T = reduce ? { in: 0.2, out: 0.75, end: 0.95 } : { in: 0.5, out: 2.55, end: 2.95 }; // +1 s de final visible
 
   let t0 = 0, last = 0, raf = 0, skip = false, finished = false, burst = false, started = false;
 

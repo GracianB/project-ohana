@@ -1,6 +1,17 @@
 import { ROSTER } from "../characters/roster.js";
 import { drawCharacter } from "../characters/draw.js";
 import { playIntro, playTitleIntro } from "./intro.js";
+import { sfx } from "../engine/audio.js";
+
+// Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
+let titleJingle = false;
+function jingle() {
+  if (titleJingle || document.body.classList.contains("playing")) return;
+  titleJingle = true;
+  sfx("title");
+}
+addEventListener("pointerdown", jingle, { capture: true });
+addEventListener("keydown", jingle, { capture: true });
 
 const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Dragoncito", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita" };
 const VISUAL_H = [36, 48, 58, 68, 80];
@@ -180,6 +191,7 @@ function enhance() {
       }
     }
     el.addEventListener("pointerdown", () => mark(def.id));
+    el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
   });
   buildDots();
   mark(selectedId);

@@ -135,7 +135,7 @@ function apply(game, kind, x, y) {
   }
   if (game.nums) game.nums.add(cx, cy - 20, d.name, d.color);
   showNotification(d.name.toUpperCase(), d.desc);
-  play(kind === "fruit" ? "heal" : "evo");
+  play(kind === "fruit" ? "heal" : "magic");
   hudSig = "";
 }
 
@@ -564,7 +564,7 @@ export const Magic = {
         game.nums.add(p.x, p.y - 14, fx.shell > 0 ? "¡BLOQUEO!" : "¡POP!", "#7fe8ff");
       }
       if (fx.shell <= 0) { delete fx.shell; showNotification("CONCHA ROTA", "La burbuja de Hoku se ha roto"); }
-      play("land");
+      play("block");
       renderHud(false);
       return 0;
     }

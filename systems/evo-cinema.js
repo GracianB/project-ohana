@@ -11,6 +11,7 @@
 // ============================================================================
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
+import { sfx } from "../engine/audio.js";
 
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
@@ -393,7 +394,7 @@ export function playEvolution(detail = {}) {
   const k = god ? 1.32 : 1;
   const T = reduce
     ? { dark: 0.25, oldIn: 0, charge: 0, flip: 0, flash: 0.25, reveal: 0.25, out: 1.55, end: 1.85 }
-    : { dark: 0.35 * k, oldIn: 0.15 * k, charge: 0.45 * k, flip: 1.2 * k, flash: 1.95 * k, reveal: 1.95 * k, out: 2.75 * k + (god ? 0.35 : 0), end: 3.1 * k + (god ? 0.35 : 0) };
+    : { dark: 0.35 * k, oldIn: 0.15 * k, charge: 0.45 * k, flip: 1.2 * k, flash: 1.95 * k, reveal: 1.95 * k, out: 2.75 * k + (god ? 0.35 : 0) + 1, end: 3.1 * k + (god ? 0.35 : 0) + 1 }; // +1 s con la forma nueva a la vista
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
@@ -406,6 +407,8 @@ export function playEvolution(detail = {}) {
   st.sr.textContent = "¡Evolución! " + toName + ". Forma " + (evo + 1) + " de 5. " + upg;
   el.classList.add("show");
   el.classList.toggle("god", god);
+  sfx("evoCharge");
+  let fanfared = false;
 
   let t0 = performance.now();
   let last = t0;
@@ -592,7 +595,8 @@ export function playEvolution(detail = {}) {
     }
 
     // 5 · destello + onda + estallido
-    if (t >= T.flash && !flashed) { flashed = true; }
+    if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
+    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(god ? "godFanfare" : "evoFanfare"); }
     if (flashed && !burstDone) { burstDone = true; burst(L); }
     if (!reduce) {
       ctx.save();

@@ -37,7 +37,7 @@ index.html
 
 ## Personajes
 - 8 personajes en `ALL_ROSTER` (roster.js); los activos en la demo se eligen en `ACTIVE`
-  (ahora: Stitcho, Chispín, Dino, Frita). Kilo, Michi, Dragón y Pizza están listos pero ocultos.
+  (ahora: Michi, Stitcho, Chispín, Dino, Frita). Kilo, Dragón y Pizza están listos pero ocultos.
 - Cada uno: 5 formas, 3 habilidades (systems/abilities.js) y un pasivo (systems/passives.js).
 - Arte: `characters/art/<id>.js` recibe una pose de `rig.js` (idle, run, jump, attack,
   cast J/K/L, hurt, wall, glide, victory, gestos de espera...). Plantilla: `art/_template.js`.

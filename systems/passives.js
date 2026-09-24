@@ -9,6 +9,7 @@
 //   draw(ctx, game, t)    → capa de efectos (antes de proyectiles/jugador)
 // También hace de puente con las entidades de habilidades (systems/abilities.js).
 // ============================================================================
+import { sfx } from "../engine/audio.js";
 import { abilityPreMove, updateAbilityFx, drawAbilityFx, clearAbilityFx, hitEnemy } from "./abilities.js";
 
 const TAU = Math.PI * 2;
@@ -120,6 +121,7 @@ export const Passives = {
     } else if (id === "pound") {
       if (!p.grounded && dropPressed && !p._pound) {
         p._pound = true;
+        sfx("whoosh");
         p.vx *= 0.3;
         p.vy = -2;
         game.fx.emit(cx(p), cy(p), { color: "#c8f04a", count: 8, size: 3, speed: 2.4 });
@@ -136,6 +138,7 @@ export const Passives = {
       if (p._slideCd > 0) p._slideCd--;
       if (p.grounded && dropPressed && (input.left || input.right) && Math.abs(p.vx) > p.speed * 0.7 && !(p._slideCd > 0) && !(p._slideT > 0)) {
         p._slideT = 30;
+        sfx("slide");
         p._slideDir = p.facing;
         p._slideId = (p._slideId || 0) + 1;
         game.fx.emit(cx(p), p.y + p.h, { color: "#ffe8a0", count: 8, size: 3, speed: 2.4, up: 0.6 });
@@ -169,6 +172,7 @@ export const Passives = {
 
     if (id === "pound" && p._pound && p.grounded) {
       p._pound = false;
+      sfx("pound");
       const R = 110 + evo * 20;
       const fx = cx(p), fy = p.y + p.h;
       for (const e of game.enemies) {
@@ -206,6 +210,7 @@ export const Passives = {
         p.vy = -(input.jump ? p.jumpPower * 1.1 : p.jumpPower * 0.8);
         p.jumps = Math.min(p.jumps || 0, 1);
         p._bounceT = 14;
+        sfx("bounce");
         p._jumpHeld = true;
         armor(p, 10);
         rings.push({ x: cx(p), y: p.y + p.h, R: 40, life: 12, max: 12, color: "#ffd84a", flat: true });
@@ -252,6 +257,7 @@ export const Passives = {
     const p = game.player;
     if (!p || pid(p) !== "ninelives" || p._nineUsed) return false;
     p._nineUsed = true;
+    sfx("lives");
     p.health = 1;
     p.dead = false;
     p.invuln = 90;

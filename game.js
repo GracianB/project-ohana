@@ -4,7 +4,7 @@ import { WORLDS, renderWorld } from "./worlds/index.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
-import { sfx } from "./engine/audio.js";
+import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { Floaters } from "./systems/floaters.js";
@@ -38,13 +38,14 @@ const game = {
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 function fit() { const w = Math.min(1280, innerWidth|0), h = Math.min(720, innerHeight|0); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }
 addEventListener("resize", fit); fit();
-addEventListener("pointerdown", () => beep("orb"), { once: true });
+
 
 function overlayOpen() {
   return !!document.querySelector("#help.open, #map-overlay.open, #pause-overlay.open, #win-cinema.show, #evo-stage.show");
 }
 function setMuted(on) {
   muted = !!on;
+  setAudioMuted(muted);
   const btn = document.getElementById("btn-mute");
   if (btn) btn.textContent = muted ? "Mute · N" : "Sonido · N";
 }
@@ -418,7 +419,7 @@ function loadRoom(id, fromDir) {
   if (!r) return false;
   if (r.needEvo && game.player && game.player.evo < r.needEvo) {
     showNotification("CERRADO", "Necesitas forma " + (r.needEvo + 1));
-    beep("hurt");
+    beep("locked");
     bounceLocked(fromDir);
     return false;
   }
@@ -462,6 +463,7 @@ function loadRoom(id, fromDir) {
   }
   showNotification(r.name, r.hint || r.goal || "SALA");
   showBanner(r.name);
+  beep(r.boss ? "boss" : "door");
   save();
   worldClear();
   Surprises.onEnterRoom(game);
@@ -544,7 +546,6 @@ function evolve(reason) {
   // Flash tinted with character form color (reduceMotion: corto pero con color)
   game.flashColor = p.color || (p.forms && p.forms[p.evo] && p.forms[p.evo].color) || "#fff";
   game.flash = reduceMotion ? (toGod ? 12 : 8) : (toGod ? 32 : 14);
-  beep("evo");
   showNotification("FORMA " + (p.evo + 1) + "/5", p.name);
   game.fx.emit(p.x + p.w / 2, p.y, {
     color: p.color,
@@ -574,7 +575,7 @@ function dash() {
   if (p.dash > 0) { p.dashBuf = 8; return; }
   p.vx = 14 * p.facing; p.invuln = Math.max(p.invuln, 8); p.dash = 28; p.dashBuf = 0;
   game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 12, color: p.color });
-  beep("jump");
+  beep("dash");
 }
 function melee() {
   const p = game.player;
@@ -584,6 +585,7 @@ function melee() {
   // Snappier recovery as forms grow; still same F key
   p.melee = Math.max(7, 13 - evo);
   p.meleeBuf = 0;
+  beep("slash");
 
   // Reach grows with evo; Dino gets a bite of extra jaw-reach
   const reach = 46 + evo * 11 + (p.id === "dragon" ? 6 + evo * 2 : 0);
@@ -656,6 +658,7 @@ function melee() {
       e.stun = Math.max(e.stun || 0, Math.min(28, 16 + evo * 3));
       e.flash = Math.max(e.flash || 0, 16);
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
+      beep(d >= 45 ? "crit" : "hit");
       punch(e.x, e.y, p.color);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
     }
@@ -772,6 +775,7 @@ function lowestFloor(px, pw) {
   return best;
 }
 function landOn(p, plat) {
+  if (!p.grounded && p.vy > 7) beep("land");
   p.y = plat.y - p.h;
   p.vy = 0;
   p.grounded = true;
@@ -833,6 +837,7 @@ function worldClear() {
   if (game.won || game.summoned || game.roomId === "boss") return;
   if (!need.every((id) => game.visited[id])) return;
   game.summoned = true;
+  beep("alert");
   showNotification("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.", "sala");
   setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 2200);
 }
@@ -939,6 +944,7 @@ function updatePlayer() {
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
       o.taken = true; p.xp += 4 + Surprises.starOrbBonus(); game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+      if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); game.score += 100; }
     }
   }
   for (const h of game.hearts) {
@@ -1700,7 +1706,7 @@ function updateEnemies() {
         color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
       });
     }
-    punch(e.x, e.y, e.color); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
+    punch(e.x, e.y, e.color); beep("kill"); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
     if (e.dropsOrb) {
       game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });

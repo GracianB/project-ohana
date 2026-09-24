@@ -1267,8 +1267,9 @@ body.playing #ability-bar {
 }
 
 .chars-grid {
-  display: grid;
-  grid-template-columns: repeat(4, var(--card-w));
+  /* flex centrado: cualquier número de personajes queda centrado */
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--gap);
   justify-content: center;
   padding: 10px 4px 4px;
@@ -2196,6 +2197,7 @@ body:not(.intro-complete) #char-select h1 .ohana {
   #char-select { padding-top: 60px; }
   #chars { --portrait-h: clamp(100px, 17vh, 150px); --card-w: min(46vw, 200px); }
   .chars-grid {
+    display: grid;
     width: calc(100% + 2 * var(--space-md));
     margin: 0 calc(-1 * var(--space-md));
     grid-template-columns: none;
@@ -2232,3 +2234,8 @@ body:not(.intro-complete) #char-select h1 .ohana {
   transition: all var(--transition-fast);
 }
 .chars-dots i.on { width: 18px; border-radius: 3px; background: var(--dot, var(--accent-cyan)); }
+
+/* Tarjetas con ancho fijo dentro de la fila flex de escritorio */
+@media (min-width: 641px) {
+  .chars-grid > .char-card { flex: 0 0 var(--card-w); width: var(--card-w); }
+}
