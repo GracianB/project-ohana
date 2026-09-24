@@ -52,13 +52,14 @@ function eye(ctx, x, y, r, look, shut, iris) {
 export function foePose(e) {
   if (!e) return "idle";
   if (e.hp <= 0 || (e.dying > 0 && e.deathHold)) return "die";
-  if (e.telegraph || e.clawWind > 0 || e.diving) return "telegraph";
-  if (Math.abs(e.vx || 0) > 0.35 || e.lunge > 0) return "walk";
+  if (e.telegraph || e.clawWind > 0 || e.diving || e.hopWind > 0) return "telegraph";
+  if (e.lunge > 0 || e.clawSnap > 0) return "lunge";
+  if (Math.abs(e.vx || 0) > 0.35) return "walk";
   return "idle";
 }
 
 function drawCucaracho(ctx, e, t, pose) {
-  const walk = pose === "walk" ? Math.sin(t * 0.45) : Math.sin(t * 0.08) * 0.25;
+  const cycle = pose === "walk" ? Math.sin(t * 0.55) : pose === "lunge" ? 0.7 : Math.sin(t * 0.08) * 0.25;
   const shell = e.color || "#c45a18";
   const dark = "#3a1808";
   const die = pose === "die";
@@ -70,7 +71,8 @@ function drawCucaracho(ctx, e, t, pose) {
   if (tel) ctx.translate(3, -1);
   const legs = [[-11, 2, -17, 12], [-5, 3, -7, 13], [1, 3, 7, 13], [7, 2, 14, 11]];
   legs.forEach((L, i) => {
-    limb(ctx, L[0], L[1], L[2] + walk * (i % 2 ? 5 : -5), die ? 1 : L[3], 2.5, dark);
+    const amp = pose === "walk" ? 11 : pose === "lunge" ? 5 : 1.6;
+    limb(ctx, L[0], L[1], L[2] + cycle * (i % 2 ? amp : -amp), die ? 1 : L[3], 2.5, dark);
   });
   blob(ctx, -7, 2, 9, 6.4, dark);
   blob(ctx, -6, 1, 8, 5.5, shell);
@@ -102,15 +104,16 @@ function drawCucaracho(ctx, e, t, pose) {
   ctx.stroke();
   if (evo >= 2 && !die) {
     ctx.globalAlpha = 0.55;
-    blob(ctx, -4, -8 + walk * 2, 10, 3.6, "#6a3a12", -0.4);
-    blob(ctx, 2, -7 - walk * 2, 9, 3.2, "#6a3a12", 0.3);
+    blob(ctx, -4, -8 + cycle * 2, 10, 3.6, "#6a3a12", -0.4);
+    blob(ctx, 2, -7 - cycle * 2, 9, 3.2, "#6a3a12", 0.3);
     ctx.globalAlpha = 1;
   }
   ctx.restore();
 }
 
 function drawMosquito(ctx, e, t, pose) {
-  const flap = pose === "die" ? 0.2 : Math.sin(t * (pose === "telegraph" ? 1.1 : 0.6));
+  const rate = pose === "telegraph" ? 1.5 : pose === "walk" ? 1.1 : 0.32;
+  const flap = pose === "die" ? 0.15 : Math.sin(t * rate);
   const body = e.color || "#ff6a4a";
   const dark = "#6a140c";
   ctx.save();
@@ -118,8 +121,8 @@ function drawMosquito(ctx, e, t, pose) {
   if (pose === "telegraph") ctx.rotate(0.45);
   ctx.save();
   ctx.globalAlpha = pose === "die" ? 0.2 : 0.5;
-  blob(ctx, -2, -9, 14, 4.2 + flap * 2.4, "#f4fff8", -0.35 + flap * 0.2);
-  blob(ctx, 2, -7, 11, 3.4 + flap * 1.4, "#dff8ff", 0.4);
+  blob(ctx, -2, -9, 14, 3.2 + Math.abs(flap) * 7, "#f4fff8", -0.5 + flap * 0.55);
+  blob(ctx, 2, -7, 11, 2.6 + Math.abs(flap) * 5, "#dff8ff", 0.45 - flap * 0.4);
   ctx.restore();
   blob(ctx, -7, 3, 8, 4.2, dark);
   blob(ctx, -7, 3, 6.6, 3.2, body);
@@ -142,16 +145,16 @@ function drawMosquito(ctx, e, t, pose) {
 }
 
 function drawCangrejo(ctx, e, t, pose) {
-  const walk = pose === "walk" ? Math.sin(t * 0.28) : 0;
+  const step = pose === "walk" ? Math.sin(t * 0.48) : pose === "lunge" ? 1 : 0;
   const shell = e.color || "#e07040";
   const dark = "#6a2410";
-  const open = pose === "telegraph" ? 12 : pose === "die" ? 2 : 5;
+  const open = pose === "telegraph" || pose === "lunge" ? 14 : pose === "die" ? 2 : 4;
   ctx.save();
   if (pose === "die") { ctx.rotate(Math.PI); ctx.translate(0, -4); }
-  limb(ctx, -8, 5, -16 - walk * 4, 13, 2.6, dark);
-  limb(ctx, -3, 6, -8 + walk * 3, 14, 2.3, dark);
-  limb(ctx, 3, 6, 8 - walk * 3, 14, 2.3, dark);
-  limb(ctx, 8, 5, 16 + walk * 4, 13, 2.6, dark);
+  limb(ctx, -8, 5, -16 - step * 9, 13, 2.6, dark);
+  limb(ctx, -3, 6, -8 + step * 7, 14, 2.3, dark);
+  limb(ctx, 3, 6, 8 - step * 7, 14, 2.3, dark);
+  limb(ctx, 8, 5, 16 + step * 9, 13, 2.6, dark);
   blob(ctx, 0, 2, 15, 8, dark);
   blob(ctx, 0, 0, 14, 7.2, shell);
   ctx.strokeStyle = "rgba(255,220,160,.4)";
@@ -189,9 +192,27 @@ export function drawFoeRig(ctx, e, t) {
   const s = Math.max(1, Math.min(1.9, (e.h || 18) / 15));
   ctx.save();
   ctx.scale((e.vx || 0) >= 0 ? s : -s, s);
-  if (pose === "walk") ctx.translate(0, Math.sin(t * 0.5) * 0.6);
-  if (pose === "idle") ctx.translate(0, Math.sin(t * 0.12) * 0.8);
-  fn(ctx, e, t || 0, pose);
+  const tt = t || 0;
+  if (pose === "walk") {
+    const hop = Math.abs(Math.sin(tt * 0.5));
+    ctx.translate(0, -hop * 2.8);
+    ctx.rotate(Math.sin(tt * 0.5) * 0.07);
+  } else if (pose === "lunge") {
+    ctx.translate(6, -1);
+    ctx.scale(1.16, 0.82);
+  } else if (pose === "telegraph") {
+    const k = 0.5 + Math.sin(tt * 0.8) * 0.5;
+    ctx.translate(2, k);
+    ctx.scale(1 + k * 0.06, 1 - k * 0.1);
+  } else if (pose === "die") {
+    ctx.translate(0, 3);
+  } else {
+    const b = Math.sin(tt * 0.12);
+    ctx.translate(0, b * 0.9);
+    ctx.scale(1 + b * 0.02, 1 - b * 0.03);
+  }
+  if ((e.flash || 0) > 6) ctx.translate(-4, 1);
+  fn(ctx, e, tt, pose);
   ctx.restore();
   return true;
 }
