@@ -39,8 +39,8 @@ export function createBossNido() {
     shockX: 0,
     shockY: 0,
     intro: true,
-    introT: 170,
-    introMax: 170,
+    introT: 72,
+    introMax: 72,
     introDrop: 700,
     phaseAnnounced: { 2: false, 3: false },
     spawnCd: 0,
@@ -83,10 +83,10 @@ export function updateBossNido(e, game, helpers) {
 
   // --- entrada cinematográfica: cae del cielo, aterriza y ruge ---
   if (e.introT > 0) {
-    const landAt = e.introMax - 48, roarAt = 80;
+    const landAt = e.introMax - 22, roarAt = 26;
     e.introT--;
     const done = e.introMax - e.introT;
-    e.introDrop = done < 48 ? 700 * Math.pow(1 - done / 48, 2) : 0;
+    e.introDrop = done < 22 ? 280 * Math.pow(1 - done / 22, 2) : 0;
     e.vx = 0; e.vy = 0; e.telegraph = false; e.invuln = 2; e.contactDmg = 0;
     if (e.introT === landAt) {
       game.shake = Math.max(game.shake || 0, rm ? 6 : 26);

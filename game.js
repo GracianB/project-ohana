@@ -53,6 +53,7 @@ function setMuted(on) {
   if (btn) btn.textContent = muted ? "Mute · N" : "Sonido · N";
 }
 function setPaused(on) {
+  if (game.finale && game.finale.t > 0) return;
   paused = !!on && game.running;
   duckMusic(paused);
   document.getElementById("pause-overlay")?.classList.toggle("open", paused);
@@ -95,6 +96,7 @@ addEventListener("keydown", (e) => {
     return;
   }
   if (e.key === "Escape") {
+    if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
     const help = document.getElementById("help");
     const map = document.getElementById("map-overlay");
     if (help && help.classList.contains("open")) { help.classList.remove("open"); return; }
@@ -178,7 +180,7 @@ function snapToFloor(p) {
 function placeFrom(fromDir) {
   const p = game.player;
   if (!p) return;
-  if (fromDir === "right") p.x = 56;
+  if (fromDir === "right") p.x = game.roomId === "boss" ? 280 : 56;
   else if (fromDir === "left") p.x = ROOM_W - 56 - p.w;
   else if (fromDir === "up") {
     p.x = safeX(220);
@@ -241,6 +243,7 @@ function loadRoom(id, fromDir) {
   }
   const first = !game.visited[id];
   game.roomId = id;
+  game.finale = null;
   game.visited[id] = true;
   game.worldIndex = r.world;
   game.worldW = ROOM_W;
@@ -273,7 +276,7 @@ function loadRoom(id, fromDir) {
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
   game.fading = 16;
-  game.doorHold = reduceMotion ? 8 : 30;
+  game.doorHold = id === "boss" ? (reduceMotion ? 4 : 8) : (reduceMotion ? 8 : 30);
   game.flash = Math.max(game.flash || 0, reduceMotion ? 4 : 8);
   if (first && game.player) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
@@ -662,6 +665,37 @@ function punch(x, y, color) {
   game.fx.emit(x, y, { color: "#fff", count: 6, size: 2, up: 1.8, speed: 4.4, life: 16, star: true });
   beep("hit");
 }
+function beginFinale(e) {
+  game.finale = {
+    t: 220,
+    max: 220,
+    x: e.x + e.w / 2,
+    y: e.y + e.h * 0.4,
+  };
+  game.flash = 24;
+  game.shake = 28;
+  playMusic("victoria");
+}
+function tickFinale() {
+  const f = game.finale;
+  if (!f || f.t <= 0) return;
+  f.t--;
+  if (game.fx && (t % 2 === 0)) {
+    const hot = f.t > 120;
+    game.fx.emit(f.x + (Math.random() - 0.5) * 120, f.y + (Math.random() - 0.5) * 80, {
+      color: hot ? "#ff4060" : "#ffe66a",
+      count: game.reduceMotion ? 1 : 3,
+      size: hot ? 4 : 6,
+      up: 2.4,
+      star: true,
+    });
+  }
+  if (f.t === 100) game.flash = 30;
+  if (f.t === 0 && !game.won) {
+    game.won = true;
+    dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+  }
+}
 function worldClear() {
   const need = ["hub", "beach", "jungle", "cave", "lab", "ridge", "space", "volcano"];
   if (game.won || game.summoned || game.roomId === "boss") return;
@@ -677,17 +711,25 @@ function nearUpDoor(p) {
 }
 function tryDoors() {
   const p = game.player; const r = room();
+  const queenAlive = r.id === "boss" && game.enemies.some((e) => e.boss && !e.fell && e.hp > 0);
+  if (queenAlive && p.x < 48) p.x = 48;
   if (p.x > ROOM_W - 24 && r.doors.right) loadRoom(r.doors.right, "right");
-  else if (p.x < -8 && r.doors.left) loadRoom(r.doors.left, "left");
+  else if (p.x < -8 && r.doors.left && !queenAlive) loadRoom(r.doors.left, "left");
   else if (p.y < 8 && r.doors.up && nearUpDoor(p)) loadRoom(r.doors.up, "up");
   if (p.x > ROOM_W - 24 && !r.doors.right) p.x = ROOM_W - p.w;
   if (p.x < -8 && !r.doors.left) p.x = 0;
+  if (queenAlive && p.x < 48) p.x = 48;
   if (p.y < 0 && !r.doors.up) p.y = 0;
 }
 function updatePlayer() {
   const p = game.player; if (p.dead) return;
   if (game.doorHold > 0) {
     game.doorHold--;
+    p.vx = 0;
+    p.vy = 0;
+    return;
+  }
+  if (game.finale && game.finale.t > 0) {
     p.vx = 0;
     p.vy = 0;
     return;
@@ -1502,18 +1544,10 @@ function updateEnemies() {
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: game.reduceMotion ? 12 : 32, size: 6, up: 2.8, star: true });
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4060", count: game.reduceMotion ? 8 : 20, size: 4, up: 2, speed: 3.5 });
         showNotification("EL NIDO CAE", "La Reina se deshace.", "sala");
+        beginFinale(e);
         return true;
       }
-      if (e.dying > 0) return true;
-      if (!game.won) {
-        game.won = true;
-        game.flash = 28;
-        game.shake = 18;
-        punch(e.x + e.w / 2, e.y + e.h / 2, "#ffe66a");
-        game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 48, size: 7, up: 3.4, star: true });
-        playMusic("victoria");
-        dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
-      }
+      if (e.dying > 0 || (game.finale && game.finale.t > 0)) return true;
       return false;
     }
     if (e.hp > 0) return true;
@@ -1605,7 +1639,12 @@ function updateCam() {
   let tx = p.x + p.facing * 80 - canvas.width / 2;
   let ty = p.y - canvas.height * 0.58;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
-  if (boss) {
+  const fin = game.finale && game.finale.t > 0 ? game.finale : null;
+  if (fin) {
+    tx = fin.x - canvas.width / 2;
+    ty = fin.y - canvas.height * 0.46;
+    lerp = 0.07;
+  } else if (boss) {
     const bx = boss.x + boss.w / 2;
     const by = boss.y + boss.h * 0.28;
     const px = p.x + p.w / 2;
@@ -1806,6 +1845,27 @@ function render() {
       game._portalFadeMax = 0;
     }
   }
+  if (game.finale && game.finale.t > 0) {
+    const f = game.finale;
+    const k = 1 - f.t / f.max;
+    ctx.save();
+    ctx.fillStyle = "rgba(4,8,16," + Math.min(0.78, k * 0.95) + ")";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (k > 0.28) {
+      ctx.globalAlpha = Math.min(1, (k - 0.28) * 2.4);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#ffe66a";
+      ctx.font = "800 46px Fraunces, serif";
+      ctx.fillText("EL NIDO CAE", canvas.width / 2, canvas.height * 0.4);
+      ctx.font = "600 18px Outfit, sans-serif";
+      ctx.fillStyle = "#9ad7ff";
+      ctx.fillText("Nadie se queda atrás", canvas.width / 2, canvas.height * 0.4 + 36);
+      ctx.globalAlpha = 0.65;
+      ctx.font = "600 13px Outfit, sans-serif";
+      ctx.fillText("Esc para saltar", canvas.width / 2, canvas.height * 0.4 + 68);
+    }
+    ctx.restore();
+  }
   if (game.ult && game.ult.t > 0) {
     game.ult.t--;
     const u = game.ult.t / 42;
@@ -1944,6 +2004,8 @@ function updateHUD() {
     chip.classList.toggle("hidden", !show);
     chip.dataset.rank = show ? comboRank(game.combo) : "";
   }
+  const quit = document.getElementById("btn-quit");
+  if (quit) quit.classList.toggle("hidden", game.roomId === "boss" && !game.won);
   const boss = game.enemies.find((e) => e.boss);
   const wrap = document.getElementById("boss-wrap");
   document.body.classList.toggle("boss-fight", !!boss);
@@ -1996,6 +2058,7 @@ function loop() {
     return;
   }
   if (game.running && !paused && !overlayOpen()) {
+    tickFinale();
     updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); Surprises.update(game, t); updateCam(); if ((t & 3) === 0) updateHUD();
   } else if (game.running && (t & 3) === 0) updateHUD();
   if (game.running) render();

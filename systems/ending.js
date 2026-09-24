@@ -9,7 +9,7 @@ export function showEnding(detail = {}) {
         '<p class="win-kicker">Mundo 1 · Nido caído</p>' +
         '<h2>OHANA COMPLETADO</h2>' +
         '<p class="win-score"></p>' +
-        '<p class="win-jun">El monstruo se deshace.</p>' +
+        '<p class="win-jun">La Reina se apaga.</p>' +
         '<p class="win-sub">Nadie se queda atrás.</p>' +
         '<div class="win-actions">' +
           '<button type="button" id="win-continue">Continuar en este mundo</button>' +
