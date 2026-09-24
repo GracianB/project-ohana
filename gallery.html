@@ -1,25 +1,57 @@
-<!doctype html><html><body style="margin:0;background:#1d2a3a">
-<canvas id="c" width="1200" height="920"></canvas>
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Ohana · Galería de personajes</title>
+<style>body{margin:0;background:#1d2a3a;color:#cfe;font:12px system-ui}canvas{display:block}</style></head>
+<body>
+<canvas id="c"></canvas>
 <script type="module">
+// Galería: ?id=<personaje> muestra 5 formas × estados. Sin id: todas las formas de todos.
+// ?t=<frame> fija el tiempo, ?s=<escala>
 import { ROSTER } from "./characters/roster.js";
 import { drawCharacter } from "./characters/draw.js";
-const c=document.getElementById('c'), ctx=c.getContext('2d');
-const T = +(new URLSearchParams(location.search).get('t')||40);
-const S = +(new URLSearchParams(location.search).get("s")||2);
-function frame(){
-  ctx.fillStyle='#1d2a3a';ctx.fillRect(0,0,c.width,c.height);
-  ctx.save();ctx.scale(S,S);
-  ROSTER.forEach((r,row)=>{
-    r.forms.forEach((f,evo)=>{
-      const cx=60+evo*110, gy=66+row*74;
-      ctx.strokeStyle='#4a6';ctx.beginPath();ctx.moveTo(cx-40,gy);ctx.lineTo(cx+40,gy);ctx.stroke();
-      const p={id:r.id,evo,color:f.color,w:f.w,h:f.h,x:cx-f.w/2,y:gy-f.h,vx:0,vy:0,grounded:true,facing:1,melee:0,invuln:0};
-      ctx.strokeStyle='rgba(255,255,0,.35)';ctx.strokeRect(p.x,p.y,p.w,p.h);
-      drawCharacter(ctx,p,{x:0,y:0},T);
-    });
-  });
-  ctx.restore();
-  window.__done=true;
+const q = new URLSearchParams(location.search);
+const ID = q.get("id"), S = +(q.get("s") || 2), T0 = +(q.get("t") || 40);
+const c = document.getElementById("c"), ctx = c.getContext("2d");
+const STATES = ["idle", "blink", "run0", "run1", "run2", "run3", "jump", "fall", "attack", "cast", "hurt", "victory", "flourish", "wall"];
+
+function mk(r, f, evo, st, t) {
+  const p = { id: r.id, evo, color: f.color, w: f.w, h: f.h, vx: 0, vy: 0, grounded: true, facing: 1, melee: 0, invuln: 0, speed: f.speed };
+  p._rig = { sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 999, blinkT: 0, idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t };
+  if (st === "blink") p._rig.blinkT = 5;
+  if (st.startsWith("run")) { p.vx = f.speed; p._rig.phase = (+st[3]) * Math.PI / 2 - 0.3; p._rig.sway = -0.6; }
+  if (st === "jump") { p.grounded = false; p.vy = -9; p._rig.bounce = -0.6; }
+  if (st === "fall") { p.grounded = false; p.vy = 7; p._rig.bounce = 0.6; }
+  if (st === "attack") { p.melee = 5; p._rig.atkMax = 12; }
+  if (st === "cast") p._cast = { slot: 2, t: t - 12 };
+  if (st === "hurt") p.invuln = 27;
+  if (st === "victory") { p._poseOverride = "victory"; p._evoT = 0.8; }
+  if (st === "flourish") { p._rig.flourishT = 0.45; }
+  if (st === "wall") { p.grounded = false; p.wall = 1; p.vy = 2; }
+  return p;
 }
-setTimeout(frame,1200);
+function frame() {
+  const list = ID ? ROSTER.filter((r) => r.id === ID) : ROSTER;
+  const cols = ID ? STATES.length : 5, rows = ID ? 5 : list.length;
+  const CW = 100, RH = 96;
+  c.width = (cols * CW + 20) * S; c.height = (rows * RH + 30) * S;
+  ctx.fillStyle = "#1d2a3a"; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.save(); ctx.scale(S, S);
+  ctx.fillStyle = "#9bd"; ctx.font = "10px system-ui";
+  if (ID) STATES.forEach((s, i) => ctx.fillText(s, 20 + i * CW, 12));
+  for (let row = 0; row < rows; row++) {
+    const r = ID ? list[0] : list[row];
+    for (let col = 0; col < cols; col++) {
+      const evo = ID ? row : col, st = ID ? STATES[col] : "idle";
+      const f = r.forms[evo];
+      const cx = 50 + col * CW, gy = 26 + (row + 1) * RH - 12;
+      ctx.strokeStyle = "#3d6"; ctx.beginPath(); ctx.moveTo(cx - 44, gy); ctx.lineTo(cx + 44, gy); ctx.stroke();
+      const p = mk(r, f, evo, st, T0);
+      p.x = cx - f.w / 2; p.y = gy - f.h;
+      drawCharacter(ctx, p, { x: 0, y: 0 }, T0);
+      if (!ID || col === 0) { ctx.fillStyle = "#9bd"; ctx.fillText(f.name, cx - 44, gy + 10); }
+    }
+  }
+  ctx.restore();
+  window.__done = true;
+}
+setTimeout(frame, 300);
 </script></body></html>

@@ -1,7 +1,7 @@
 {
   "name": "Project Ohana",
   "short_name": "Ohana",
-  "description": "Demo de plataformas con evoluciones. 6 personajes, 5 formas, 1 nido.",
+  "description": "Demo de plataformas con evoluciones. 4 personajes, 5 formas, 1 nido.",
   "start_url": "/project-ohana/",
   "display": "standalone",
   "background_color": "#071226",

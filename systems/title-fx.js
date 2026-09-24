@@ -111,17 +111,20 @@ if (cv) {
     ctx.globalAlpha = 1;
 
     // Big moon with pointer-reactive halo.
-    const mx = W * 0.8, my = H * 0.2;
-    const halo = ctx.createRadialGradient(mx, my, 8, mx, my, 150);
+    // En pantallas estrechas la luna se aparta del título (esquina superior).
+    const narrow = W < 700;
+    const mR = narrow ? 30 : 58;
+    const mx = narrow ? W - 46 : W * 0.84, my = narrow ? 92 : H * 0.18;
+    const halo = ctx.createRadialGradient(mx, my, 8, mx, my, mR * 2.6);
     halo.addColorStop(0, "rgba(255,240,190,0.5)");
     halo.addColorStop(0.35, "rgba(255,220,140,0.18)");
     halo.addColorStop(1, "rgba(126,231,255,0)");
     ctx.fillStyle = halo;
-    ctx.beginPath(); ctx.arc(mx, my, 150, 0, Math.PI * 2); ctx.fill();
-    const mg = ctx.createRadialGradient(mx - 14, my - 14, 6, mx, my, 60);
+    ctx.beginPath(); ctx.arc(mx, my, mR * 2.6, 0, Math.PI * 2); ctx.fill();
+    const mg = ctx.createRadialGradient(mx - mR * 0.24, my - mR * 0.24, mR * 0.1, mx, my, mR * 1.03);
     mg.addColorStop(0, "#fff8e0"); mg.addColorStop(0.55, "#f2d590"); mg.addColorStop(1, "#c9a24a");
     ctx.fillStyle = mg;
-    ctx.beginPath(); ctx.arc(mx, my, 58, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(mx, my, mR, 0, Math.PI * 2); ctx.fill();
 
     // Spores drifting up.
     for (const sp of spores) {

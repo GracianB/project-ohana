@@ -1,89 +1,129 @@
-export const ROSTER = [
+// ============================================================================
+// ROSTER · 8 personajes × 5 formas
+// Cada personaje: stats por forma, 3 habilidades (J/K/L) y un rasgo pasivo único.
+// El arte está en characters/art/<id>.js (vectorial animado).
+// Los id antiguos se mantienen para no romper partidas guardadas.
+// ============================================================================
+// Personajes activos en la demo. Los demás siguen en ALL_ROSTER (con su arte),
+// solo se ocultan: para reactivarlos, añade su id aquí.
+const ACTIVE = ["stitch", "pikachu", "dino", "frita"];
+
+export const ALL_ROSTER = [
   {
     id: "lilo", name: "Kilo", color: "#e23b3d",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
+    passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio." },
     evoNames: ["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "KILO GOD"],
     forms: [
       { name: "Kilo Bebé", color: "#ff9ab0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
       { name: "Kilo", color: "#e23b3d", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 24, h: 34 },
-      // Lei + taller A-line — mid form unmistakably taller/slimmer than base
-      { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 30, h: 44 },
-      // Vestido ceremonial — más ancha, capa, silueta distinta a evo2
-      { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 40, h: 52 },
-      { name: "KILO GOD", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 44, h: 54, aura: true }
+      { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 28, h: 42 },
+      { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 32, h: 48 },
+      { name: "KILO GOD", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 36, h: 52, aura: true }
     ]
   },
   {
-    id: "stitch", name: "Stitcho", color: "#3b6cff",
-    speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 26, h: 24,
-    abilities: ["dash", "claws", "exp626"],
+    id: "stitch", name: "Stitcho", color: "#2f6bff",
+    speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 24, h: 24,
+    abilities: ["plasma", "rollo", "caos"],
+    passive: { id: "climb", name: "Trepador", desc: "Se agarra a las paredes y trepa por ellas." },
     evoNames: ["Mini Stitcho", "Stitcho", "Stitcho Bravo", "Experimento Ñam", "STITCHO GOD"],
     forms: [
-      { name: "Mini Stitcho", color: "#a8dcff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 26, h: 24 },
-      { name: "Stitcho", color: "#3d9bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 34, h: 30 },
-      // Angry claws — más ancho, stance agresivo
-      { name: "Stitcho Bravo", color: "#1540ff", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 42, h: 34 },
-      // Tech menace — más alto/placas, silueta distinta
-      { name: "Experimento Ñam", color: "#6af", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 46, h: 46 },
-      { name: "STITCHO GOD", color: "#4ec8ff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 52, h: 50, aura: true }
+      { name: "Mini Stitcho", color: "#7fb4ff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 24, h: 24 },
+      { name: "Stitcho", color: "#2f6bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 28, h: 30 },
+      { name: "Stitcho Bravo", color: "#1c3fd1", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 34, h: 32 },
+      { name: "Experimento Ñam", color: "#35d7ff", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 38, h: 40 },
+      { name: "STITCHO GOD", color: "#8f7bff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 42, h: 46, aura: true }
     ]
   },
   {
-    id: "pikachu", name: "Chispín", color: "#ffe44a",
-    speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 24,
-    abilities: ["shock", "quick", "thunder"],
+    id: "pikachu", name: "Chispín", color: "#ffd83a",
+    speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 22,
+    abilities: ["chain", "blink", "storm"],
+    passive: { id: "spark", name: "Chispa veloz", desc: "Tras correr un segundo va más rápido y deja chispas que dañan." },
     evoNames: ["Chispín Bebé", "Chispín", "Voltín", "Trueno Gordo", "CHISPÍN GOD"],
     forms: [
-      { name: "Chispín Bebé", color: "#fff36a", speed: 4.8, jump: 12.2, jumps: 2, hp: 78, w: 22, h: 22 },
-      { name: "Chispín", color: "#ffe44a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 28, h: 28 },
-      // Voltín — chispas + orejas hoja-rayo, más alto
-      { name: "Voltín", color: "#f0a020", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 34, h: 38 },
-      // Trueno Gordo — chibi gordo ancho, silueta muy distinta
-      { name: "Trueno Gordo", color: "#fff36a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 46, h: 40 },
-      { name: "CHISPÍN GOD", color: "#ffd000", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 48, h: 52, aura: true }
+      { name: "Chispín Bebé", color: "#fff06a", speed: 4.8, jump: 12.2, jumps: 2, hp: 78, w: 22, h: 22 },
+      { name: "Chispín", color: "#ffd83a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 26, h: 28 },
+      { name: "Voltín", color: "#ffa024", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 28, h: 36 },
+      { name: "Trueno Gordo", color: "#ffe45a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 38 },
+      { name: "CHISPÍN GOD", color: "#5fd8ff", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 40, h: 48, aura: true }
     ]
   },
   {
     id: "cat", name: "Michi", color: "#ffb6e4",
     speed: 5.0, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
-    abilities: ["claw", "catdash", "lives"],
+    abilities: ["yarn", "purr", "ninetails"],
+    passive: { id: "ninelives", name: "Nueve vidas", desc: "Sobrevive una vez por sala a un golpe mortal." },
     evoNames: ["Michito", "Michi", "Nube rosa", "Nueve vidas", "MICHI GOD"],
     forms: [
       { name: "Michito", color: "#ffd0ee", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
-      { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 28 },
-      { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 34, h: 34 },
-      { name: "Nueve vidas", color: "#9a6cff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 40, h: 40 },
-      { name: "MICHI GOD", color: "#ff5ac8", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 48, h: 50, aura: true }
+      { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 26 },
+      { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 32, h: 30 },
+      { name: "Nueve vidas", color: "#9a6cff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 36, h: 34 },
+      { name: "MICHI GOD", color: "#ff5ac8", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 40, h: 42, aura: true }
     ]
   },
   {
-    id: "dragon", name: "Dino", color: "#e8452f",
-    speed: 4.5, jumpPower: 11.4, maxJumps: 2, health: 72, w: 12, h: 12,
-    abilities: ["breath", "wing", "rage"],
+    id: "dragon", name: "Dragón", color: "#e8452f",
+    speed: 4.5, jumpPower: 11.4, maxJumps: 2, health: 80, w: 20, h: 22,
+    abilities: ["breath", "gust", "meteor"],
+    passive: { id: "glide", name: "Alas", desc: "Mantén salto en el aire para planear. En GOD, vuela." },
+    evoNames: ["Dragoncito", "Dragón", "Dragón Alado", "Dragón Real", "DRAGÓN GOD"],
+    forms: [
+      { name: "Dragoncito", color: "#ff8a74", speed: 4.5, jump: 11.4, jumps: 2, hp: 80, w: 20, h: 22 },
+      { name: "Dragón", color: "#e8452f", speed: 4.9, jump: 12.0, jumps: 2, hp: 105, w: 24, h: 28 },
+      { name: "Dragón Alado", color: "#ff6a2a", speed: 5.5, jump: 13.0, jumps: 2, hp: 130, w: 28, h: 34 },
+      { name: "Dragón Real", color: "#c7331f", speed: 5.9, jump: 13.4, jumps: 3, hp: 165, w: 34, h: 40 },
+      { name: "DRAGÓN GOD", color: "#ffd84a", speed: 6.6, jump: 14.8, jumps: 3, hp: 220, w: 40, h: 46, aura: true, glide: true }
+    ]
+  },
+  {
+    id: "dino", name: "Dino", color: "#4cbf56",
+    speed: 4.0, jumpPower: 11.0, maxJumps: 1, health: 100, w: 24, h: 26,
+    abilities: ["bite", "charge", "quake"],
+    passive: { id: "pound", name: "Pisotón", desc: "Pulsa ↓ en el aire para caer en picado con onda de choque." },
     evoNames: ["Dino Bebé", "Dino", "Dino Pico", "Dino Rex", "DINO GOD"],
     forms: [
-      { name: "Dino Bebé", color: "#ff8a74", speed: 4.5, jump: 11.4, jumps: 2, hp: 72, w: 12, h: 12 },
-      { name: "Dino", color: "#e8452f", speed: 4.2, jump: 11.0, jumps: 1, hp: 105, w: 16, h: 16 },
-      { name: "Dino Pico", color: "#ff7a2a", speed: 5.4, jump: 13.2, jumps: 2, hp: 95, w: 18, h: 22, spikes: true },
-      { name: "Dino Rex", color: "#c7331f", speed: 3.5, jump: 10.6, jumps: 1, hp: 170, w: 24, h: 22 },
-      { name: "DINO GOD", color: "#ffd84a", speed: 6.2, jump: 14.8, jumps: 3, hp: 220, w: 44, h: 48, aura: true, glide: true }
+      { name: "Dino Bebé", color: "#8ee07a", speed: 4.0, jump: 11.0, jumps: 1, hp: 100, w: 22, h: 24 },
+      { name: "Dino", color: "#4cbf56", speed: 4.3, jump: 11.6, jumps: 1, hp: 130, w: 26, h: 30 },
+      { name: "Dino Pico", color: "#2ea8a0", speed: 4.8, jump: 12.2, jumps: 2, hp: 160, w: 30, h: 34 },
+      { name: "Dino Rex", color: "#3f8f3a", speed: 5.1, jump: 12.6, jumps: 2, hp: 200, w: 38, h: 42 },
+      { name: "DINO GOD", color: "#c8f04a", speed: 6.0, jump: 14.0, jumps: 3, hp: 260, w: 42, h: 48, aura: true }
     ]
   },
   {
-    id: "frita", name: "Capitán Kétchup", color: "#f0b43a",
+    id: "frita", name: "Frita", color: "#f0b43a",
     speed: 4.6, jumpPower: 11.4, maxJumps: 2, health: 85, w: 18, h: 28,
     abilities: ["salt", "ketchup", "fryer"],
+    passive: { id: "slide", name: "Resbalón", desc: "Pulsa ↓ mientras corres para deslizarte y arrollar enemigos." },
     evoNames: ["Palito", "Frita", "Capitán Kétchup", "Extra Crujiente", "KÉTCHUP GOD"],
     forms: [
       { name: "Palito", color: "#ffe8a0", speed: 4.6, jump: 11.4, jumps: 2, hp: 85, w: 18, h: 28 },
       { name: "Frita", color: "#f0b43a", speed: 5.2, jump: 12.1, jumps: 3, hp: 105, w: 22, h: 32 },
       { name: "Capitán Kétchup", color: "#d42020", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
       { name: "Extra Crujiente", color: "#ffda70", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
-      { name: "KÉTCHUP GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 38, h: 54, aura: true }
+      { name: "KÉTCHUP GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 34, h: 50, aura: true }
+    ]
+  },
+  {
+    id: "pizza", name: "Pizza", color: "#ffb43a",
+    speed: 4.5, jumpPower: 11.8, maxJumps: 2, health: 88, w: 22, h: 26,
+    abilities: ["pepperoni", "cheese", "oven"],
+    passive: { id: "bounce", name: "Queso elástico", desc: "Caer sobre un enemigo lo aplasta y te hace rebotar." },
+    evoNames: ["Porcioncita", "Pizza", "Pizza Picante", "Pizza Familiar", "PIZZA GOD"],
+    forms: [
+      { name: "Porcioncita", color: "#ffd27a", speed: 4.5, jump: 11.8, jumps: 2, hp: 88, w: 22, h: 26 },
+      { name: "Pizza", color: "#ffb43a", speed: 5.0, jump: 12.4, jumps: 2, hp: 108, w: 26, h: 30 },
+      { name: "Pizza Picante", color: "#ff5a2a", speed: 5.6, jump: 13.1, jumps: 3, hp: 130, w: 30, h: 34 },
+      { name: "Pizza Familiar", color: "#ffcc4a", speed: 6.0, jump: 13.6, jumps: 3, hp: 165, w: 38, h: 40 },
+      { name: "PIZZA GOD", color: "#ffe27a", speed: 7.2, jump: 15.2, jumps: 4, hp: 210, w: 40, h: 46, aura: true }
     ]
   }
 ];
+
+export const ROSTER = ACTIVE.map((id) => ALL_ROSTER.find((r) => r.id === id)).filter(Boolean);
 
 function clearEvoTween(p) {
   p.evoTween = 0;

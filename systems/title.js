@@ -1,8 +1,10 @@
 import { ROSTER } from "../characters/roster.js";
 import { drawCharacter } from "../characters/draw.js";
-import { playIntro } from "./intro.js";
+import { playIntro, playTitleIntro } from "./intro.js";
 
-const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Dino Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito" };
+const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Dragoncito", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita" };
+const VISUAL_H = [36, 48, 58, 68, 80];
+const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
 let selectedId = "lilo";
 let tick = 0;
 let raf = 0;
@@ -23,7 +25,12 @@ function paintPortraits() {
       const def = ROSTER.find((r) => r.id === cv.dataset.id);
       if (!def) { idx++; return; }
       const c = cv.getContext("2d", { alpha: true });
+      fitCanvas(cv);
+      const dpr = cv._dpr || 1;
+      const bw = cv.width / dpr, bh = cv.height / dpr;
+      c.setTransform(1, 0, 0, 1, 0, 0);
       c.clearRect(0, 0, cv.width, cv.height);
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
       // Slower evolution cycle (~2.8s per form)
       const evo = Math.floor(tick / 170) % 5;
       // Evolve burst when the form changes
@@ -40,7 +47,7 @@ function paintPortraits() {
       const dummy = {
         id: def.id,
         x: -16,
-        y: -16,
+        y: -32,
         w: 32,
         h: 32,
         facing: 1,
@@ -51,12 +58,16 @@ function paintPortraits() {
         melee: cv._atk || 0,
         evoBurst: cv._burst || 0,
         evoBurstMax: 90,
-        visualScale: 1.15,
+        visualScale: 1,
       };
+      // Altura objetivo: bebé ~60 % del retrato → GOD ~80 %, limitada por el ancho
+      const want = Math.min(bh * (0.6 + 0.05 * evo), bw * (0.5 + 0.05 * evo));
+      dummy.visualScale = want / (VISUAL_H[evo] * (CHAR_K[def.id] || 1));
+      const footY = bh * 0.86;
       c.save();
-      c.translate(cv.width / 2, cv.height / 2 + 14 + bob);
+      c.translate(bw / 2, footY + bob * (bh / 128));
       c.rotate(sway);
-      c.scale(0.98, 0.98);
+      // drawCharacter ancla los pies en (x + w/2, y + h)
       drawCharacter(c, dummy, { x: 0, y: 0 }, at);
       c.restore();
       const role = cv.closest(".char-card")?.querySelector(".role");
@@ -67,9 +78,64 @@ function paintPortraits() {
   raf = requestAnimationFrame(paintPortraits);
 }
 
-function mark(id) {
+function fitCanvas(cv) {
+  const box = cv.parentElement || cv;
+  const w = Math.max(40, Math.round(box.clientWidth));
+  const h = Math.max(40, Math.round(box.clientHeight));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(w * dpr), H = Math.round(h * dpr);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  cv._dpr = dpr;
+}
+
+function mark(id, scroll) {
   selectedId = id;
   document.querySelectorAll(".char-card").forEach((el) => el.classList.toggle("selected", el.dataset.id === id));
+  const grid = document.getElementById("chars-grid");
+  const card = grid && grid.querySelector('.char-card[data-id="' + id + '"]');
+  if (scroll && card && grid.scrollWidth > grid.clientWidth + 4) {
+    grid.scrollTo({ left: card.offsetLeft - (grid.clientWidth - card.offsetWidth) / 2, behavior: "smooth" });
+  }
+  syncDots();
+}
+
+/** Puntos del carrusel (móvil): reflejan la tarjeta centrada. */
+function buildDots() {
+  const grid = document.getElementById("chars-grid");
+  const wrap = document.getElementById("chars");
+  if (!grid || !wrap || wrap.querySelector(".chars-dots")) return;
+  const dots = document.createElement("div");
+  dots.className = "chars-dots";
+  dots.setAttribute("aria-hidden", "true");
+  grid.querySelectorAll(".char-card").forEach((el) => {
+    const i = document.createElement("i");
+    i.dataset.id = el.dataset.id;
+    const def = ROSTER.find((r) => r.id === el.dataset.id);
+    if (def) i.style.setProperty("--dot", def.color);
+    dots.appendChild(i);
+  });
+  wrap.appendChild(dots);
+  let tm = 0;
+  grid.addEventListener("scroll", () => {
+    clearTimeout(tm);
+    tm = setTimeout(syncDots, 60);
+  }, { passive: true });
+}
+
+function syncDots() {
+  const grid = document.getElementById("chars-grid");
+  const dots = document.querySelector("#chars .chars-dots");
+  if (!grid || !dots) return;
+  let id = selectedId;
+  if (grid.scrollWidth > grid.clientWidth + 4) {
+    const mid = grid.scrollLeft + grid.clientWidth / 2;
+    let best = Infinity;
+    grid.querySelectorAll(".char-card").forEach((el) => {
+      const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
+      if (d < best) { best = d; id = el.dataset.id; }
+    });
+  }
+  dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id === id));
 }
 
 function startSelected() {
@@ -89,7 +155,7 @@ function begin(kind) {
   if (kind === "resume") {
     try { localStorage.setItem("ohana-resume", "1"); } catch (e) {}
   }
-  playIntro(kind, name, startSelected);
+  playIntro(kind, name, startSelected, selectedId);
 }
 
 function enhance() {
@@ -115,6 +181,7 @@ function enhance() {
     }
     el.addEventListener("pointerdown", () => mark(def.id));
   });
+  buildDots();
   mark(selectedId);
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
@@ -140,6 +207,7 @@ function enhance() {
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
     if (e.key !== "Enter") return;
+    if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show")) return;
     const save = readSave();
     if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
       selectedId = save.id;
@@ -154,4 +222,5 @@ function enhance() {
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   paintPortraits();
 }
+playTitleIntro();
 enhance();

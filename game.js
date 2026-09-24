@@ -13,6 +13,8 @@ import { DeathFx } from "./systems/death-fx.js";
 import { Rain } from "./systems/rain.js";
 import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
+import { Passives } from "./systems/passives.js";
+import { Magic } from "./systems/magic.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -39,7 +41,7 @@ addEventListener("resize", fit); fit();
 addEventListener("pointerdown", () => beep("orb"), { once: true });
 
 function overlayOpen() {
-  return !!document.querySelector("#help.open, #map-overlay.open, #pause-overlay.open, #win-cinema.show");
+  return !!document.querySelector("#help.open, #map-overlay.open, #pause-overlay.open, #win-cinema.show, #evo-stage.show");
 }
 function setMuted(on) {
   muted = !!on;
@@ -463,6 +465,8 @@ function loadRoom(id, fromDir) {
   save();
   worldClear();
   Surprises.onEnterRoom(game);
+  Passives.onRoom(game);
+  Magic.onRoom(game, id);
   return true;
 }
 function showMap() {
@@ -561,6 +565,7 @@ function respawn() {
   const p = game.player; if (!p) return;
   if (DeathFx.isPlaying()) DeathFx.cancel();
   p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
+  Magic.reset(game);
   loadRoom("hub");
 }
 function dash() {
@@ -724,6 +729,8 @@ function melee() {
 function hurtPlayer(amount, label) {
   const p = game.player;
   if (!p || p.dead || p.invuln > 0) return;
+  amount = Magic.onHurt(game, Passives.onHurt(game, amount));
+  if (!(amount > 0)) return;
   p.health -= amount;
   p.invuln = 28;
   p.vx = Math.sign(p.vx || p.facing || 1) * -8;
@@ -735,6 +742,7 @@ function hurtPlayer(amount, label) {
   game.nums.add(p.x, p.y, label || ("-" + Math.round(amount)), "#ff6a7a");
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
+  if (p.health <= 0 && Passives.onLethal(game)) return;
   if (p.health <= 0) {
     p.health = 0;
     p.dead = true;
@@ -899,6 +907,9 @@ function updatePlayer() {
     }
   }
   if (p.wall) p.vy = Math.min(p.vy, 2.2);
+  const input = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jump && !p._jumpPrev, t };
+  p._jumpPrev = !!jump;
+  Passives.update(game, input);
   p.vy = Math.min(14, p.vy + 0.52);
   p.grounded = false;
   const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 6));
@@ -920,6 +931,8 @@ function updatePlayer() {
     }
     if (landed) break;
   }
+  Passives.afterMove(game, input);
+  Magic.update(game);
   if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
   if (!p.grounded && p.coyote > 0) p.coyote--;
   if (p.invuln > 0) p.invuln--;
@@ -998,6 +1011,7 @@ function updatePlayer() {
 }
 function updateEnemies() {
   if (!game.player) return;
+  if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
     if (e.flash > 0) e.flash--;
     if (e.stun > 0) {
@@ -1842,6 +1856,8 @@ function render() {
     ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
   }
   for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
+  Magic.draw(ctx, game, t);
+  Passives.draw(ctx, game, t);
   for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
   for (const b of game.bolts) drawBolt(ctx, b, game.cam, t);
   for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
@@ -2067,6 +2083,7 @@ function updateHUD() {
 }
 function loop() {
   t++;
+  game.t = t;
   if (game.running && !paused && !overlayOpen()) {
     updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); Surprises.update(game, t); updateCam(); if ((t & 3) === 0) updateHUD();
   } else if (game.running && (t & 3) === 0) updateHUD();
@@ -2076,11 +2093,12 @@ function loop() {
 function setupSelect() {
   const wrap = document.getElementById("chars");
   if (!wrap) return;
-  wrap.innerHTML = ROSTER.map((c, i) => '<button class="char-card" data-id="' + c.id + '"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
-  wrap.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
+  const grid = document.getElementById("chars-grid") || wrap;
+  grid.innerHTML = ROSTER.map((c, i) => '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ' (tecla ' + (i + 1) + ')"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
+  grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
   addEventListener("keydown", (e) => {
     if (game.running) return;
-    if (e.key >= "1" && e.key <= "6") {
+    if (e.key >= "1" && e.key <= "8") {
       const c = ROSTER[Number(e.key) - 1];
       if (c) start(c);
     }

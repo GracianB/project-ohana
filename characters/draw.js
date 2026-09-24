@@ -1,5 +1,5 @@
-import { drawBaby } from "./baby.js";
-import { formArt, silhouette } from "./sprites.js";
+import { computePose, R } from "./rig.js";
+import { ART } from "./art/index.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -38,14 +38,13 @@ function star(ctx, x, y, r, fill) {
 //    → nadie flota ni se hunde en el suelo.
 // 2. Altura visual por forma (bebé → GOD) independiente de la hitbox, así las
 //    5 formas crecen de manera coherente aunque la hitbox sea pequeña (Dino).
-// 3. Forma 0 = bebé chibi (baby.js); formas 1-4 = PNG de assets/sprites.
-//    Si un PNG no ha cargado todavía, se muestra el bebé escalado como reserva.
+// 3. Cada personaje es un módulo vectorial animado (characters/art/<id>.js)
+//    que recibe una pose de rig.js: 5 formas, animaciones y gestos propios.
 // 4. Capas: sombra → aura/rayos → arte (squash & stretch) → flash → partículas.
 // ============================================================================
 
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.9, dragon: 0.95, frita: 1.06 };
-const MAX_RATIO = 1.9; // ancho máximo = 1.9 × alto (dragones muy anchos)
+const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
 
 const FLAVOR = {
   lilo:    { kind: "petal", colors: ["#ff9ab0", "#ffd36a", "#ffffff"] },
@@ -54,63 +53,9 @@ const FLAVOR = {
   cat:     { kind: "star",  colors: ["#ffd0ee", "#fff6a8", "#c9a8ff"] },
   dragon:  { kind: "ember", colors: ["#ff7a2a", "#ffd84a", "#ff3b2a"] },
   frita:   { kind: "salt",  colors: ["#ffffff", "#fff3c4", "#ff4a3a"] },
+  dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
+  pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
 };
-
-// ---------------------------------------------------------------------------
-// Normalizador de dibujos procedurales: los renderiza una vez fuera de pantalla,
-// mide su caja real y así podemos escalarlos y apoyarlos en el suelo igual que
-// un sprite.
-// ---------------------------------------------------------------------------
-const measured = new Map();
-function measure(key, draw) {
-  if (measured.has(key)) return measured.get(key);
-  let box = { top: -24, bottom: 20, left: -20, right: 20 };
-  try {
-    const S = 320, O = 160;
-    const c = document.createElement("canvas");
-    c.width = S; c.height = S;
-    const g = c.getContext("2d", { willReadFrequently: true });
-    g.translate(O, O);
-    draw(g);
-    const d = g.getImageData(0, 0, S, S).data;
-    let x0 = S, y0 = S, x1 = -1, y1 = -1;
-    for (let y = 0; y < S; y++) {
-      for (let x = 0; x < S; x++) {
-        if (d[(y * S + x) * 4 + 3] > 90) {
-          if (x < x0) x0 = x; if (x > x1) x1 = x;
-          if (y < y0) y0 = y; if (y > y1) y1 = y;
-        }
-      }
-    }
-    if (x1 > x0 && y1 > y0) box = { top: y0 - O, bottom: y1 - O, left: x0 - O, right: x1 - O };
-  } catch (_) {}
-  measured.set(key, box);
-  return box;
-}
-
-function stubPlayer(p, evo) {
-  return {
-    id: p.id, evo, color: p.color, w: p.w, h: p.h, facing: 1, vx: 0, vy: 0,
-    grounded: true, melee: 0, invuln: 0,
-    _anim: { step: 0, moving: false, idle: true, air: false, legL: 0, legR: 0, armL: 0, armR: 0 },
-  };
-}
-
-/**
- * Bebé chibi (baby.js) con los pies en (0,0) y altura H.
- * También hace de reserva mientras el PNG de una forma adulta termina de cargar.
- */
-function drawProceduralNormalized(ctx, p, t, evo, H) {
-  const fn = (g, pp, tt) => drawBaby(g, pp, tt);
-  const key = "baby:" + p.id;
-  const box = measure(key, (g) => fn(g, stubPlayer(p, 0), 0));
-  const s = H / Math.max(8, box.bottom - box.top);
-  ctx.save();
-  ctx.scale(s, s);
-  ctx.translate(-(box.left + box.right) / 2, -box.bottom);
-  fn(ctx, p, t);
-  ctx.restore();
-}
 
 /** "#rgb" | "#rrggbb" → rgba() con alfa. Otros formatos se devuelven tal cual. */
 function withAlpha(color, a) {
@@ -208,6 +153,10 @@ function drawFlavor(ctx, id, H, t, evo, front) {
       ctx.stroke();
     } else if (fl.kind === "star") {
       star(ctx, x, y, s * 1.5, col);
+    } else if (fl.kind === "leaf") {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(a * 1.5);
+      ctx.beginPath(); ctx.ellipse(0, 0, s * 1.5, s * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
     } else if (fl.kind === "salt") {
       ctx.save(); ctx.translate(x, y); ctx.rotate(a);
       ctx.fillRect(-s * 0.6, -s * 0.6, s * 1.2, s * 1.2);
@@ -253,6 +202,37 @@ function drawBurst(ctx, H, color, k) {
   ctx.restore();
 }
 
+/**
+ * Dibuja el personaje teñido (flash de daño/evolución): se pinta en un lienzo
+ * auxiliar, se tiñe solo donde hay personaje y se compone encima.
+ */
+let flashCanvas = null;
+function drawFlashed(ctx, art, pose, color, a) {
+  art.draw(ctx, pose, R);
+  try {
+    const m = ctx.getTransform();
+    const ps = Math.min(6, Math.max(0.5, Math.hypot(m.a, m.b)));
+    const U = 280; // unidades de diseño cubiertas (alas incluidas)
+    const W = Math.ceil(U * ps);
+    if (!flashCanvas) flashCanvas = document.createElement("canvas");
+    if (flashCanvas.width !== W) { flashCanvas.width = W; flashCanvas.height = W; }
+    const g = flashCanvas.getContext("2d");
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, W, W);
+    g.setTransform(ps, 0, 0, ps, W / 2, W * 0.78);
+    art.draw(g, pose, R);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.globalCompositeOperation = "source-atop";
+    g.fillStyle = color;
+    g.fillRect(0, 0, W, W);
+    g.globalCompositeOperation = "source-over";
+    ctx.save();
+    ctx.globalAlpha *= a;
+    ctx.drawImage(flashCanvas, -U / 2, -U * 0.78, U, U);
+    ctx.restore();
+  } catch (_) {}
+}
+
 // ============================================================================
 // FUNCIÓN PRINCIPAL EXPORTADA
 // ============================================================================
@@ -266,11 +246,8 @@ export function drawCharacter(ctx, p, cam, t) {
   const speed = Math.abs(p.vx || 0);
   const moving = !!p.grounded && speed > 0.55;
   const air = !p.grounded;
-  const idle = !!p.grounded && !moving;
   const ascending = air && (p.vy || 0) < -1.2;
   const falling = air && (p.vy || 0) > 1.5;
-  const runT = t * (0.52 + speed * 0.16);
-  const step = Math.sin(runT);
   const atk = p.melee > 0 ? Math.sin(Math.min(1, (12 - p.melee) / 12) * Math.PI) : 0;
   const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
   const hurtFresh = (p.invuln || 0) > 18;
@@ -280,42 +257,30 @@ export function drawCharacter(ctx, p, cam, t) {
   const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
   if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 
-  // Squash & stretch anclado en los pies
+  // Squash & stretch global (suave; cada personaje anima sus partes)
   let sx = 1, sy = 1;
-  if (ascending) { sx = 0.9; sy = 1.1; }
-  else if (falling) { sx = 1.05; sy = 0.95; }
-  else if (moving) { sx = 1 + Math.abs(step) * 0.05; sy = 1 - Math.abs(step) * 0.05; }
-  else { const b = Math.sin(t * 0.08); sx = 1 - b * 0.018; sy = 1 + b * 0.025; }
+  if (ascending) { sx = 0.94; sy = 1.06; }
+  else if (falling) { sx = 1.03; sy = 0.97; }
   if (p.grounded && p._wasAir) p._land = 8;
   p._wasAir = air;
   if (p._land > 0) {
     const k = p._land / 8;
-    sx *= 1 + 0.16 * k; sy *= 1 - 0.14 * k;
+    sx *= 1 + 0.12 * k; sy *= 1 - 0.1 * k;
     p._land--;
   }
-  if (atk) { sx *= 1 + atk * 0.1; sy *= 1 - atk * 0.05; }
 
-  const hop = moving ? -Math.abs(step) * H * 0.05 : 0;
-  const tilt = moving ? 0.06 + step * 0.03 : air ? (ascending ? -0.06 : 0.08) : Math.sin(t * 0.05) * 0.015;
-  const lunge = atk * H * 0.1;
+  const tilt = moving ? 0.05 : air ? (ascending ? -0.04 : 0.05) : 0;
+  const lunge = atk * H * 0.08;
   const recoilX = hurtFresh ? -H * 0.08 : 0;
 
-  // Estado de animación para dibujadores procedurales (compatibilidad)
-  p._anim = {
-    step, moving, idle, air, ascending, falling, hurt, hurtFresh,
-    legL: moving ? step * 7 : (air ? (ascending ? -3 : 4) : Math.sin(t * 0.08) * 1.2),
-    legR: moving ? -step * 7 : (air ? (ascending ? -3 : 4) : -Math.sin(t * 0.08) * 1.2),
-    armL: moving ? -step * 5 : (atk ? -8 : Math.sin(t * 0.09) * 2),
-    armR: moving ? step * 5 : (atk ? 10 : -Math.sin(t * 0.09) * 2),
-  };
-
   const color = p.color || "#ffffff";
-  const art = formArt(p.id, evo);
+  const art = ART[p.id] || ART.lilo;
+  const pose = computePose(p, t);
 
   ctx.save();
   ctx.translate(footX, footY);
 
-  // 1 · sombra (se queda en el suelo aunque salte el personaje en el sprite)
+  // 1 · sombra (se queda en el suelo)
   drawShadow(ctx, 0, 0, H * 0.3 * (air ? 0.7 : 1), H * 0.06 * (air ? 0.7 : 1));
 
   ctx.scale(facing, 1);
@@ -328,43 +293,18 @@ export function drawCharacter(ctx, p, cam, t) {
   drawFlavor(ctx, p.id, H, t, evo, false);
   if (moving) drawDust(ctx, H, t, speed);
 
-  // 3 · personaje
+  // 3 · personaje (vectorial animado, 100 unidades de alto)
+  const s = H / 100;
+  let flashCol = null, flashA = 0;
+  if (burstK > 0.35) { flashCol = "#ffffff"; flashA = ((burstK - 0.35) / 0.65) * 0.9; }
+  else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
   ctx.save();
-  ctx.translate(0, hop);
-  ctx.rotate(tilt + atk * 0.12);
-  ctx.scale(sx, sy);
-  if (art) {
-    const img = art.img;
-    const iw = img.width || img.naturalWidth, ih = img.height || img.naturalHeight;
-    let h = H * art.sy;
-    let w = h * (iw / ih) * art.sx;
-    const maxW = H * MAX_RATIO;
-    if (w > maxW) { h *= maxW / w; w = maxW; }
-    ctx.drawImage(img, -w / 2, -h, w, h);
-    // flash: daño (rojo parpadeante) o evolución (blanco)
-    let flashCol = null, flashA = 0;
-    if (burstK > 0.35) { flashCol = "#ffffff"; flashA = (burstK - 0.35) / 0.65 * 0.9; }
-    else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.6 : 0.35; }
-    if (flashCol) {
-      const sil = silhouette(img, flashCol);
-      if (sil) {
-        ctx.save();
-        ctx.globalAlpha *= flashA;
-        ctx.drawImage(sil, -w / 2, -h, w, h);
-        ctx.restore();
-      }
-    }
-  } else {
-    drawProceduralNormalized(ctx, p, t, evo, H);
-    if (hurt && (hurtFresh || (p.invuln || 0) % 8 < 4)) {
-      ctx.save();
-      ctx.globalAlpha *= 0.25;
-      ctx.fillStyle = "#ff3030";
-      ctx.beginPath();
-      ctx.ellipse(0, -H * 0.5, H * 0.45, H * 0.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+  ctx.rotate(tilt * 0.5);
+  ctx.scale(sx * s, sy * s);
+  if (flashCol) drawFlashed(ctx, art, pose, flashCol, flashA);
+  else {
+    try { art.draw(ctx, pose, R); }
+    catch (err) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }
   }
   ctx.restore();
 

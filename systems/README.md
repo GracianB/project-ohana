@@ -1,15 +1,18 @@
 # PROJECT OHANA · Mapa del código
 
 Todo es JavaScript con módulos ES nativos (sin bundler). `index.html` carga
-seis puntos de entrada; cualquier fichero que no cuelgue de ellos sobra.
+siete puntos de entrada; cualquier fichero que no cuelgue de ellos sobra.
 
 ```
 index.html
 ├─ game.js ............ bucle principal, física, cámara, salas, enemigos, HUD
-│  ├─ characters/roster.js .... 6 personajes × 5 formas (stats, colores, hitbox)
+│  ├─ characters/roster.js .... 8 personajes × 5 formas, pasivos (activos: ACTIVE)
 │  ├─ characters/draw.js ...... render de personajes (pies anclados, auras, FX)
-│  │  ├─ characters/sprites.js  carga/recorte/tinte de assets/sprites/*.png
-│  │  └─ characters/baby.js ... bebés chibi procedurales (forma 1)
+│  │  ├─ characters/rig.js .... pose/animación compartida + kit de dibujo
+│  │  └─ characters/art/*.js .. un módulo vectorial animado por personaje
+│  ├─ characters/sprites.js ... PNG de efectos y del jefe
+│  ├─ systems/passives.js ..... rasgo único de cada personaje
+│  ├─ systems/magic.js ........ objetos mágicos (6) y sus chips en el HUD
 │  ├─ worlds/index.js ......... fondos por mundo (parallax)
 │  ├─ systems/map.js .......... 8 salas, puertas y carteles
 │  ├─ systems/abilities.js .... J / K / L de cada personaje, proyectiles
@@ -28,14 +31,17 @@ index.html
 ├─ systems/title-fx.js  fondo animado de la portada
 ├─ systems/hud.js ..... tinte y pips del HUD
 ├─ systems/ending.js .. pantalla "OHANA COMPLETADO"
-└─ systems/demo.js .... pistas por sala y cinta DEMO
+├─ systems/demo.js .... pistas por sala y cinta DEMO
+└─ systems/evo-cinema.js  evolución a pantalla completa en el centro
 ```
 
 ## Personajes
-- Forma 1 (bebé): `baby.js`. Formas 2-5: PNG de `assets/sprites/<id>-<fase>.png`.
-- La tabla `FORMS` de `sprites.js` decide qué PNG usa cada forma y si lleva tinte.
-- `draw.js` escala por **altura visual** (`VISUAL_H`), no por hitbox.
-- `gallery.html` muestra las 30 formas juntas para revisarlas.
+- 8 personajes en `ALL_ROSTER` (roster.js); los activos en la demo se eligen en `ACTIVE`
+  (ahora: Stitcho, Chispín, Dino, Frita). Kilo, Michi, Dragón y Pizza están listos pero ocultos.
+- Cada uno: 5 formas, 3 habilidades (systems/abilities.js) y un pasivo (systems/passives.js).
+- Arte: `characters/art/<id>.js` recibe una pose de `rig.js` (idle, run, jump, attack,
+  cast J/K/L, hurt, wall, glide, victory, gestos de espera...). Plantilla: `art/_template.js`.
+- `gallery.html` = todas las formas; `gallery.html?id=dino` = 5 formas × 14 estados.
 
 ## Reglas
 - Nada de scripts `APPLY-*.ps1` que parcheen código por texto: se edita el fichero.

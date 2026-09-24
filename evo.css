@@ -1,152 +1,29 @@
-/* Evolution cinema — Digimon/Pokémon-like fullscreen (~3s) */
-#evo-cinema {
+/* Cinemática de evolución (systems/evo-cinema.js): todo se dibuja en el canvas. */
+#evo-stage {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  pointer-events: none;
+  z-index: 80;
   display: none;
-  align-items: center;
-  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#evo-stage.show { display: block; }
+#evo-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#evo-stage .evo-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
-#evo-cinema.play { display: flex; }
-
-#evo-cinema .evo-wash {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--evo, #ffe66a) 70%, #000) 0%, transparent 42%),
-    radial-gradient(circle at 50% 50%, rgba(0,0,0,.55), rgba(0,0,0,.88));
-  animation: evoWash 3s ease forwards;
-}
-
-#evo-cinema .evo-sil {
-  position: absolute;
-  width: min(220px, 42vw);
-  height: min(260px, 50vw);
-  left: 50%; top: 46%;
-  transform: translate(-50%, -50%);
-  border-radius: 48% 48% 42% 42%;
-  background: #000;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--evo, #ffe66a) 80%, #fff),
-    0 0 48px var(--evo, #ffe66a),
-    0 0 120px color-mix(in srgb, var(--evo, #ffe66a) 55%, transparent);
-  animation: evoSil 3s ease forwards;
-  opacity: 0;
-}
-
-#evo-cinema .evo-flash {
-  position: absolute; inset: 0;
-  background: #fff;
-  opacity: 0;
-  animation: evoFlash 3s ease forwards;
-}
-
-#evo-cinema .evo-ring {
-  position: absolute;
-  width: 90px; height: 90px;
-  border-radius: 50%;
-  border: 3px solid var(--evo, #ffe66a);
-  box-shadow: 0 0 28px var(--evo, #ffe66a);
-  animation: evoRing 2.4s ease-out forwards;
-  opacity: 0;
-}
-#evo-cinema .r2 { animation-delay: .12s; border-color: #fff; }
-#evo-cinema .r3 { animation-delay: .24s; }
-#evo-cinema .r4 {
-  animation-delay: .36s;
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--evo, #ffe66a) 70%, #fff);
-}
-
-#evo-cinema .evo-stars {
-  position: absolute; inset: 0;
-  pointer-events: none;
-}
-#evo-cinema .evo-star {
-  position: absolute;
-  width: 10px; height: 10px;
-  background: #fff6a8;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  animation: evoStar 2.6s ease-out forwards;
-  opacity: 0;
-  filter: drop-shadow(0 0 6px var(--evo, #ffe66a));
-}
-
-#evo-cinema .evo-copy {
-  position: relative;
-  text-align: center;
-  z-index: 2;
-  animation: evoPop 0.85s cubic-bezier(.2,1.45,.3,1) both;
-  animation-delay: .55s;
-  opacity: 0;
-}
-#evo-cinema .evo-kicker {
-  letter-spacing: .38em;
-  text-transform: uppercase;
-  font-size: clamp(14px, 2.4vw, 22px);
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 10px;
-  text-shadow: 0 0 24px var(--evo, #ffe66a), 0 4px 18px rgba(0,0,0,.7);
-}
-#evo-cinema .evo-name {
-  font-family: Fredoka, system-ui, sans-serif;
-  font-size: clamp(40px, 8vw, 92px);
-  line-height: 1.05;
-  color: #fff;
-  text-shadow:
-    0 0 28px var(--evo, #ffe66a),
-    0 12px 40px rgba(0,0,0,.55),
-    0 2px 0 rgba(0,0,0,.35);
-}
-#evo-cinema .evo-stage {
-  margin-top: 12px;
-  letter-spacing: .28em;
-  color: var(--evo, #ffe66a);
-  font-weight: 800;
-  font-size: clamp(12px, 2vw, 16px);
-  text-shadow: 0 2px 12px rgba(0,0,0,.6);
-}
-
-@keyframes evoWash {
-  0% { opacity: 0; }
-  12% { opacity: 1; }
-  78% { opacity: 1; }
-  100% { opacity: 0; }
-}
-@keyframes evoSil {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4) rotate(-8deg); filter: blur(8px); }
-  18% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: blur(0); }
-  42% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); filter: brightness(1.4); }
-  48% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); filter: brightness(2.4) blur(2px); }
-  55% { opacity: 0.15; transform: translate(-50%, -50%) scale(1.6); filter: brightness(3) blur(6px); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); filter: blur(12px); }
-}
-@keyframes evoFlash {
-  0%, 40% { opacity: 0; }
-  46% { opacity: .95; }
-  54% { opacity: .15; }
-  58% { opacity: .55; }
-  70%, 100% { opacity: 0; }
-}
-@keyframes evoRing {
-  0% { transform: scale(.15); opacity: 0; }
-  12% { opacity: 1; }
-  100% { transform: scale(9); opacity: 0; }
-}
-@keyframes evoStar {
-  0% { opacity: 0; transform: translate(0, 0) scale(.2) rotate(0deg); }
-  20% { opacity: 1; }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(160deg); }
-}
-@keyframes evoPop {
-  from { transform: scale(.55) translateY(18px); opacity: 0; }
-  to { transform: none; opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #evo-cinema .evo-wash { animation-duration: 1.2s; }
-  #evo-cinema .evo-sil, #evo-cinema .evo-flash, #evo-cinema .evo-ring, #evo-cinema .evo-star { animation-duration: 1.2s; }
-  #evo-cinema .evo-copy { animation-duration: .4s; animation-delay: 0s; }
-}
+/* La tarjeta "FORMA N/5" no compite con la cinemática */
+body:has(#evo-stage.show) #notification-container { visibility: hidden; }

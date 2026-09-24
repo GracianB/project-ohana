@@ -9,14 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
 
   <!-- Precarga crítica -->
-  <link rel="preload" href="style.css?v=ohana-20" as="style">
-  <link rel="modulepreload" href="game.js?v=ohana-20">
+  <link rel="preload" href="style.css?v=ohana-21" as="style">
+  <link rel="modulepreload" href="game.js?v=ohana-21">
   
   <!-- Meta tags optimizados -->
   <title>PROJECT OHANA — Demo Mundo 1 · Gracián Baena</title>
-  <meta name="description" content="Demo final de Project Ohana. Seis personajes, cinco evoluciones, ocho salas, un nido. Juega ahora en tu navegador.">
+  <meta name="description" content="Demo final de Project Ohana. Cuatro personajes, cinco evoluciones, ocho salas, un nido. Juega ahora en tu navegador.">
   <meta name="author" content="Gracián Baena">
   <meta name="theme-color" content="#071226">
   <meta name="color-scheme" dark>
@@ -25,7 +26,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Project Ohana">
   <meta property="og:title" content="PROJECT OHANA — Demo Mundo 1">
-  <meta property="og:description" content="Seis formas. Cinco evoluciones. Un nido. Nadie se queda atrás. Juega gratis en tu navegador.">
+  <meta property="og:description" content="Cuatro héroes. Cinco evoluciones. Un nido. Nadie se queda atrás. Juega gratis en tu navegador.">
   <meta property="og:url" content="https://gracianb.github.io/project-ohana/">
   <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   <meta property="og:image:width" content="1200">
@@ -35,7 +36,7 @@
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="PROJECT OHANA — Demo Mundo 1">
-  <meta name="twitter:description" content="Seis formas. Cinco evoluciones. Un nido. Juega ahora.">
+  <meta name="twitter:description" content="Cuatro héroes. Cinco evoluciones. Un nido. Juega ahora.">
   <meta name="twitter:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   
   <!-- PWA Manifest (recomendado crear) -->
@@ -58,16 +59,16 @@
   </style>
   
   <!-- CSS principal (async para no bloquear) -->
-  <link rel="stylesheet" href="style.css?v=ohana-20" media="screen">
-  <link rel="stylesheet" href="hud.css?v=ohana-20" media="screen">
-  <link rel="stylesheet" href="evo.css?v=ohana-20" media="screen">
-  <link rel="stylesheet" href="ending.css?v=ohana-20" media="screen">
-  <link rel="stylesheet" href="intro.css?v=ohana-20" media="screen">
-  <link rel="stylesheet" href="demo.css?v=ohana-20" media="screen">
+  <link rel="stylesheet" href="style.css?v=ohana-21" media="screen">
+  <link rel="stylesheet" href="hud.css?v=ohana-21" media="screen">
+  <link rel="stylesheet" href="evo.css?v=ohana-21" media="screen">
+  <link rel="stylesheet" href="ending.css?v=ohana-21" media="screen">
+  <link rel="stylesheet" href="intro.css?v=ohana-21" media="screen">
+  <link rel="stylesheet" href="demo.css?v=ohana-21" media="screen">
   
   <!-- Prefetch de recursos que se usarán pronto -->
-  <link rel="prefetch" href="systems/title.js?v=ohana-20" as="script">
-  <link rel="prefetch" href="systems/hud.js?v=ohana-20" as="script">
+  <link rel="prefetch" href="systems/title.js?v=ohana-21" as="script">
+  <link rel="prefetch" href="systems/hud.js?v=ohana-21" as="script">
 </head>
 
 <body data-theme="dark">
@@ -296,21 +297,8 @@
 
   <!-- Menú principal -->
   <main id="char-select" aria-label="Menú principal">
-    <!-- Intro cinemática -->
-    <div id="ohana-intro" aria-hidden="true">
-      <div class="oi-backdrop"></div>
-      <div class="oi-ring"></div>
-      <div class="oi-ring two"></div>
-      <div class="oi-particles"></div>
-      <div class="oi-inner">
-        <p class="oi-kicker">Project</p>
-        <h2 class="oi-word">
-          <span class="char">O</span><span class="char">H</span><span class="char">A</span><span class="char">N</span><span class="char">A</span>
-        </h2>
-        <p class="oi-tag">Seis formas. Un nido. Nadie se queda atrás.</p>
-      </div>
-      <button class="oi-skip" aria-label="Saltar introducción">Toca para entrar</button>
-    </div>
+    <!-- Intro cinemática (la dibuja systems/intro.js en canvas) -->
+    <div id="ohana-intro" aria-hidden="true"></div>
 
     <!-- Navegación marca -->
     <nav class="brand-bar" aria-label="Ecosistema GracianB">
@@ -350,7 +338,7 @@
         <span class="word ohana" data-text="OHANA">OHANA</span>
       </h1>
       
-      <p class="tagline">Seis formas. Un nido. Nadie se queda atrás.</p>
+      <p class="tagline">Cuatro héroes. Cinco formas. Un nido. Nadie se queda atrás.</p>
       
       <div class="title-badges">
         <span class="badge" title="8 salas explorables">8 salas</span>
@@ -472,7 +460,6 @@
       'use strict';
       
       const loading = document.getElementById('loading-screen');
-      const intro = document.getElementById('ohana-intro');
       let resourcesLoaded = 0;
       const totalResources = 6; // Ajustar según necesidad
       
@@ -490,33 +477,15 @@
         }
       };
       
-      // Gestión de intro
-      let introSkipped = false;
-      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      
-      function endIntro(skip) {
-        if (introSkipped || !intro) return;
-        introSkipped = true;
-        
-        if (skip) intro.classList.add('no-anim');
-        intro.classList.add('done');
-        
-        setTimeout(() => {
-          intro.remove();
+      // Intro de portada: la gestiona systems/intro.js. Red de seguridad si
+      // los módulos no cargan: no dejar la portada tapada.
+      setTimeout(function() {
+        if (!document.body.classList.contains('intro-complete')) {
           document.body.classList.add('intro-complete');
-        }, reduceMotion ? 300 : 900);
-      }
-      
-      // Eventos de skip
-      intro?.addEventListener('pointerdown', () => endIntro(true), { passive: true });
-      addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
-          endIntro(true);
+          var oi = document.getElementById('ohana-intro');
+          if (oi && !oi.querySelector('canvas')) oi.remove();
         }
-      });
-      
-      // Auto-skip
-      setTimeout(() => endIntro(false), reduceMotion ? 600 : 3400);
+      }, 8000);
 
       // Quitar el loader cuando todo (módulos + sprites) ha cargado.
       // Red de seguridad: si algo falla, no dejar la pantalla negra.
@@ -531,11 +500,12 @@
   </script>
   
   <!-- Módulos principales -->
-  <script type="module" src="game.js?v=ohana-20"></script>
-  <script type="module" src="systems/title.js?v=ohana-20"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-20"></script>
-  <script type="module" src="systems/hud.js?v=ohana-20"></script>
-  <script type="module" src="systems/ending.js?v=ohana-20"></script>
-  <script type="module" src="systems/demo.js?v=ohana-20"></script>
+  <script type="module" src="game.js?v=ohana-21"></script>
+  <script type="module" src="systems/title.js?v=ohana-21"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-21"></script>
+  <script type="module" src="systems/hud.js?v=ohana-21"></script>
+  <script type="module" src="systems/ending.js?v=ohana-21"></script>
+  <script type="module" src="systems/demo.js?v=ohana-21"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-21"></script>
 </body>
 </html>
