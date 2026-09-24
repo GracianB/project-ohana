@@ -6,7 +6,7 @@
 // ============================================================================
 // Personajes activos en la demo. Los demás siguen en ALL_ROSTER (con su arte),
 // solo se ocultan: para reactivarlos, añade su id aquí.
-const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza"];
+const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"];
 
 export const ALL_ROSTER = [
   {
@@ -119,6 +119,20 @@ export const ALL_ROSTER = [
       { name: "Pizza Picante", color: "#ff5a2a", speed: 5.6, jump: 13.1, jumps: 3, hp: 130, w: 30, h: 34 },
       { name: "Pizza Familiar", color: "#ffcc4a", speed: 6.0, jump: 13.6, jumps: 3, hp: 165, w: 38, h: 40 },
       { name: "PIZZA GOD", color: "#ffe27a", speed: 7.2, jump: 15.2, jumps: 4, hp: 210, w: 40, h: 46, aura: true }
+    ]
+  },
+  {
+    id: "yomi", name: "Yomi", color: "#ff7ab8",
+    speed: 4.7, jumpPower: 12.4, maxJumps: 2, health: 76, w: 20, h: 30,
+    abilities: ["ukulele", "blink", "ohana"],
+    passive: { id: "petal", name: "Pétalos", desc: "Mantén salto en el aire para caer entre pétalos." },
+    evoNames: ["Yomi", "Yomi Lazo", "Yomi Estrella", "Yomi Grieta", "YOMI GOD"],
+    forms: [
+      { name: "Yomi", color: "#ff9ec8", speed: 4.7, jump: 12.4, jumps: 2, hp: 76, w: 20, h: 30 },
+      { name: "Yomi Lazo", color: "#ff7ab8", speed: 5.2, jump: 13.0, jumps: 2, hp: 96, w: 22, h: 34 },
+      { name: "Yomi Estrella", color: "#ff4aa0", speed: 5.8, jump: 13.6, jumps: 3, hp: 116, w: 24, h: 38 },
+      { name: "Yomi Grieta", color: "#e0235a", speed: 6.3, jump: 14.2, jumps: 3, hp: 140, w: 26, h: 40 },
+      { name: "YOMI GOD", color: "#ffd6f0", speed: 7.2, jump: 15.4, jumps: 4, hp: 188, w: 28, h: 44, aura: true }
     ]
   }
 ];

@@ -24,7 +24,7 @@ function pw(p) { return 1 + evoOf(p) * 0.35; }
 function canHit(e) { return !!e && !e.dying && e.hp > 0 && !(e.invuln > 0); }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function pid(p) { return (p.passive && p.passive.id) || PASSIVE_BY_ID[p.id] || null; }
-const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce" };
+const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce", yomi: "petal" };
 
 function reset(p) {
   sparks.length = 0;
@@ -67,11 +67,12 @@ export const Passives = {
     p._pmove = null;
     p._gliding = false;
 
-    if (id === "float") {
+    if (id === "float" || id === "petal") {
       if (!p.grounded && input.jump && p.vy > 0) {
         p.vy = Math.min(p.vy, 1.4 - 0.52);
         p._pmove = "float";
-        if ((input.t % 7) === 0) game.fx.emit(cx(p), p.y + p.h, { color: (input.t % 14) ? "#ff9ab0" : "#7de87a", count: 1, size: 3, up: -0.2, speed: 0.8, life: 20, gravity: 0.03 });
+        const col = id === "petal" ? "#ff8ad4" : ((input.t % 14) ? "#ff9ab0" : "#7de87a");
+        if ((input.t % 7) === 0) game.fx.emit(cx(p), p.y + p.h, { color: col, count: 1, size: 3, up: -0.2, speed: 0.8, life: 20, gravity: 0.03 });
       }
     } else if (id === "climb") {
       const w = !p.grounded || p._climbT > 0 ? findWall(game, p, input) : null;

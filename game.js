@@ -2199,7 +2199,7 @@ function setupSelect() {
   grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
   addEventListener("keydown", (e) => {
     if (game.running) return;
-    if (e.key >= "1" && e.key <= "8") {
+    if (e.key >= "1" && e.key <= "9") {
       const c = ROSTER[Number(e.key) - 1];
       if (c) start(c);
     }
