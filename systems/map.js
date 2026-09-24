@@ -26,7 +26,7 @@ export const ROOMS = {
     plats: [[0, 810, 1600, 90], [80, 680, 160, 18], [300, 620, 150, 18], ...stairs(760)],
     foes: [[620, 200, "cucaracho"], [980, 200, "cucaracho"], [1180, 200, "phosquito"]],
     orbs: [[400, 500], [900, 200]],
-    portals: [{ type: "catapult", x: 1310, y: 778, w: 100, h: 34, dest: "beach", label: "Costa" }]
+    portals: [{ type: "catapult", x: 330, y: 586, w: 100, h: 34, dest: "beach", label: "Costa" }]
   },
   beach: {
     id: "beach", name: "Costa Hoku", short: "Costa", world: 0,
@@ -44,8 +44,7 @@ export const ROOMS = {
     foes: [[280, 200, "cucaracho"], [980, 200, "planta"], [420, 200, "cangrejo", true], [1180, 200, "cangrejo"], [560, 380, "gaviota"], [1280, 320, "gaviota"]],
     orbs: [[220, 620], [1280, 480]],
     portals: [
-      { type: "catapult", x: 70, y: 778, w: 100, h: 34, dest: "hub", label: "Claro" },
-      { type: "catapult", x: 500, y: 778, w: 100, h: 34, dest: "reef", label: "↓ Arrecife" }
+      { type: "catapult", x: 185, y: 646, w: 100, h: 34, dest: "hub", label: "Claro" }
     ]
   },
   jungle: {
@@ -105,7 +104,7 @@ export const ROOMS = {
     orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]],
     portals: [
       { type: "blackhole", x: 90, y: 710, w: 80, h: 80, dest: "space", label: "← Órbita" },
-      { type: "catapult", x: 720, y: 778, w: 100, h: 34, dest: "beach", label: "↑ Costa" }
+      { type: "catapult", x: 1280, y: 446, w: 100, h: 34, dest: "beach", label: "Costa" }
     ]
   },
   volcano: {

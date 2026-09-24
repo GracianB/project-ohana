@@ -7,6 +7,7 @@
 // ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
 import { sfx } from "../engine/audio.js";
+import { showNotification } from "./notify.js";
 
 // cd en ms (se reduce con la forma: cd / (1 + evo*0.12)). J corto, K medio, L largo.
 export const ABILITY_DEFS = {
@@ -52,11 +53,22 @@ export function useAbility(game, index) {
   if (!def) return;
   const now = performance.now();
   p.cds = p.cds || {};
+  p.cdDur = p.cdDur || {};
   if ((p.cds[id] || 0) > now) return;
-  p.cds[id] = now + def.cd / (1 + (Number(p.evo) || 0) * 0.12);
+  const dur = def.cd / (1 + (Number(p.evo) || 0) * 0.12);
+  p.cds[id] = now + dur;
+  p.cdDur[id] = dur;
   syncState(p);
   p._cast = { slot: index, t: game.t || 0 };
   sfx(id);
+  if (index === 2) {
+    game.ult = { t: 46, color: def.color, name: def.name };
+    game.flashColor = def.color;
+    game.flash = Math.max(game.flash || 0, 14);
+    game.shake = Math.min(18, (game.shake || 0) + 7);
+    game.hitstop = Math.max(game.hitstop || 0, 8);
+    showNotification(def.name, def.desc, "sala");
+  }
   const fn = CASTERS[id];
   if (fn) fn(game, p, Number(p.evo) || 0);
 }

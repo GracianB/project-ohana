@@ -337,11 +337,7 @@ export class Portals {
             this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "⚔ CATAPULTA → " + portal.label + " · Saltar [E]";
-            // Auto-lanzamiento al pisar (grounded este frame o grace 1); cooldown bloquea re-absorción
-            if (this.cooldown <= 0 && groundedOk) {
-              this._beginCharge(portal, "catapult", reduce);
-            }
+            this.prompt = "E · catapulta → " + portal.label;
           }
           break;
         }
@@ -830,38 +826,29 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.save();
   ctx.translate(x + portal.w * 0.28, y + 12);
   ctx.rotate(ang);
-  // Madera del brazo
-  ctx.fillStyle = "#8b5a2b";
-  ctx.fillRect(0, -6, portal.w * 0.58, 12);
-  ctx.fillStyle = "#a8723a";
-  ctx.fillRect(2, -4, portal.w * 0.54, 4);
-  // Cubo / piedra
-  const bx = portal.w * 0.58;
-  ctx.fillStyle = charging ? "#e8c898" : "#9a9aaa";
-  ctx.fillRect(bx - 8, -11, 18, 18);
-  ctx.fillStyle = charging ? "#fff0c8" : "#c8c8d0";
-  ctx.fillRect(bx - 5, -8, 8, 6);
-  // Glow ámbar en la piedra
+  ctx.fillStyle = "#6b3e1c";
+  ctx.fillRect(0, -5, portal.w * 0.62, 10);
+  ctx.fillStyle = "#c4894a";
+  ctx.fillRect(0, -5, portal.w * 0.62, 3);
+  const bx = portal.w * 0.6;
+  ctx.beginPath();
+  ctx.arc(bx, 0, 9 + ck * 3, 0, Math.PI * 2);
+  ctx.fillStyle = charging ? "#ffe08a" : "#d7c4a4";
+  ctx.fill();
+  ctx.strokeStyle = "#3a2414";
+  ctx.lineWidth = 2;
+  ctx.stroke();
   if (charging || portal.sparkT > 0) {
-    ctx.shadowColor = "rgba(255,180,60,.95)";
-    ctx.shadowBlur = 18 + ck * 14;
-    ctx.fillStyle = "rgba(255,200,100," + (0.5 + ck * 0.35) + ")";
+    ctx.shadowColor = "rgba(255,180,60,.9)";
+    ctx.shadowBlur = 14 + ck * 10;
+    ctx.strokeStyle = "rgba(255,210,120," + (0.4 + ck * 0.4) + ")";
     ctx.beginPath();
-    ctx.arc(bx + 1, -2, 12 + ck * 8, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.arc(bx, 0, 14 + ck * 6, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.shadowBlur = 0;
   }
   ctx.restore();
 
-  // Glow perímetro
-  ctx.shadowColor = "rgba(255,180,80," + pulse + ")";
-  ctx.shadowBlur = 16;
-  ctx.strokeStyle = "rgba(255,200,120," + (0.45 + pulse * 0.4) + ")";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x + 1, y + 4, portal.w - 2, portal.h + 2);
-  ctx.shadowBlur = 0;
-
-  // Label
   ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffe8c8";

@@ -812,8 +812,21 @@ body.playing #ability-bar {
   display: block;
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--accent-cyan), #6b8cff);
+  background: linear-gradient(90deg, var(--abil, var(--accent-cyan)), #fff);
   transition: width 0.1s linear;
+}
+
+.ability-slot .cd-sec {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #ffe08a;
+}
+
+.ability-slot.cooling {
+  filter: saturate(0.7);
 }
 
 /* ─── Menú Principal ───────────────────────────────────────────────────── */

@@ -357,10 +357,12 @@ function start(def) {
 function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
   p.evo = Number(p.evo) || 0;
+  if (reason !== "xp" && reason !== "manual") return;
   if (p.evo >= 4) { if (reason === "manual") showNotification("MAX", "Ya eres GOD (forma 5)."); return; }
-  if (reason !== "manual") {
-    const need = XP_NEED[p.evo + 1];
-    if (need == null || p.xp < need) return;
+  const need = XP_NEED[p.evo + 1];
+  if (need == null || p.xp < need) {
+    if (reason === "manual") showNotification("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
+    return;
   }
   p.evo += 1;
   applyForm(p);
@@ -370,7 +372,6 @@ function evolve(reason) {
   // Flash tinted with character form color (reduceMotion: corto pero con color)
   game.flashColor = p.color || (p.forms && p.forms[p.evo] && p.forms[p.evo].color) || "#fff";
   game.flash = reduceMotion ? (toGod ? 12 : 8) : (toGod ? 32 : 14);
-  showNotification("FORMA " + (p.evo + 1) + "/5", p.name);
   game.fx.emit(p.x + p.w / 2, p.y, {
     color: p.color,
     count: toGod ? 96 : 48,
@@ -847,6 +848,10 @@ function updatePlayer() {
   else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
   else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
   else if (p.y > ROOM_H - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
+  else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
+    const nxt = p.forms && p.forms[p.evo + 1];
+    setPrompt("E · evolucionar" + (nxt ? " · " + nxt.name : ""), true);
+  }
   else setPrompt("", false);
   while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 }
@@ -1601,21 +1606,13 @@ function updateCam() {
   let ty = p.y - canvas.height * 0.58;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   if (boss) {
-    const bx = boss.x + boss.w / 2, by = boss.y + boss.h * 0.45, bottom = boss.y + boss.h;
-    if ((boss.introT || 0) > 0) {
-      tx = bx - canvas.width / 2;
-      ty = bottom + 40 - canvas.height;
-      lerp = 0.06;
-    } else {
-      tx = (p.x * 0.42 + bx * 0.58) - canvas.width / 2;
-      ty = Math.min(p.y, by) - canvas.height * 0.52;
-      ty = Math.min(ty, bottom + 50 - canvas.height);
-      lerp = game.hitstop > 0 ? 0.04 : 0.08;
-    }
-    if (game.camPunch > 0) {
-      tx += (bx - (p.x + p.w / 2)) * game.camPunch * 0.15;
-      ty += 18 * game.camPunch;
-    }
+    const bx = boss.x + boss.w / 2;
+    const by = boss.y + boss.h * 0.28;
+    const px = p.x + p.w / 2;
+    const py = p.y + p.h * 0.35;
+    tx = (px + bx) / 2 - canvas.width / 2;
+    ty = (py * 0.45 + by * 0.55) - canvas.height * 0.42;
+    lerp = 0.18;
   }
   game.cam.x += (tx - game.cam.x) * lerp;
   game.cam.y += (ty - game.cam.y) * lerp;
@@ -1809,6 +1806,24 @@ function render() {
       game._portalFadeMax = 0;
     }
   }
+  if (game.ult && game.ult.t > 0) {
+    game.ult.t--;
+    const u = game.ult.t / 42;
+    ctx.save();
+    ctx.strokeStyle = game.ult.color || "#ffe66a";
+    ctx.globalAlpha = Math.min(0.85, u + 0.15);
+    ctx.lineWidth = 8;
+    const rad = (1 - u) * Math.max(canvas.width, canvas.height) * 0.72;
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, rad, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.font = "800 28px Fraunces, serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = game.ult.color || "#fff";
+    ctx.globalAlpha = Math.min(1, u * 2);
+    ctx.fillText(game.ult.name || "", canvas.width / 2, canvas.height * 0.28);
+    ctx.restore();
+  }
   if (game.flash > 0) {
     const fa = (reduceMotion ? Math.min(game.flash, 5) : game.flash) / 20;
     if (game.flashColor && !game._portalFlash) {
@@ -1833,7 +1848,7 @@ function renderAbilityBar() {
   bar.innerHTML = (game.player.abilities || []).map((id) => {
     const d = ABILITY_DEFS[id];
     if (!d) return "";
-    return '<div class="ability-slot" data-id="' + id + '"><div class="key">' + d.key + " · " + d.name + '</div><div class="cd"><i></i></div></div>';
+    return '<div class="ability-slot" data-id="' + id + '" style="--abil:' + d.color + '"><div class="key">' + d.key + '</div><div class="name">' + d.name + '</div><div class="cd"><i class="cd-fill"></i></div><b class="cd-sec"></b></div>';
   }).join("");
 }
 // Retrato vivo del personaje en el HUD (misma pipeline que el juego)
@@ -1944,8 +1959,14 @@ function updateHUD() {
     const def = ABILITY_DEFS[slot.dataset.id];
     const fill = slot.querySelector("i");
     if (!def || !fill) return;
-    const left = Math.max(0, (p.cds[slot.dataset.id] || 0) - now);
-    fill.style.width = (100 - (left / def.cd) * 100) + "%";
+    const readyAt = p.cds[slot.dataset.id] || 0;
+    const dur = (p.cdDur && p.cdDur[slot.dataset.id]) || def.cd;
+    const left = Math.max(0, readyAt - now);
+    const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+    fill.style.width = pct + "%";
+    const sec = slot.querySelector(".cd-sec");
+    if (sec) sec.textContent = left > 80 ? (left / 1000).toFixed(1) : "";
+    slot.classList.toggle("cooling", left > 80);
   });
   // Touch power buttons: label + cooldown ring
   const PWIDX = { j: 0, k: 1, l: 2 };
@@ -1955,9 +1976,12 @@ function updateHUD() {
     if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); return; }
     btn.classList.remove("off");
     if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
-    const left = Math.max(0, (p.cds[id] || 0) - now);
-    btn.classList.toggle("cooling", left > 0);
-    btn.style.setProperty("--cd", Math.max(0, 100 - (left / def.cd) * 100) + "%");
+    const readyAt = p.cds[id] || 0;
+    const dur = (p.cdDur && p.cdDur[id]) || def.cd;
+    const left = Math.max(0, readyAt - now);
+    const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+    btn.classList.toggle("cooling", left > 80);
+    btn.style.setProperty("--cd", pct + "%");
   });
 }
 function loop() {
