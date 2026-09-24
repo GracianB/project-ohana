@@ -15,6 +15,7 @@ import { Rain } from "./systems/rain.js";
 import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
+import { sense, think } from "./engine/foe-brain.js";
 import { XP_NEED } from "./systems/xp.js";
 import { packSave, unpackSave } from "./systems/save.js";
 import { Passives } from "./systems/passives.js";
@@ -1001,6 +1002,17 @@ function updateEnemies() {
         beep,
       });
     } else {
+    const s = sense(e, game.player);
+    let pack = 0;
+    for (const o of game.enemies) {
+      if (o !== e && o.kind === e.kind && (o.aggro || 0) > 20 && Math.abs(o.x - e.x) < 240) pack++;
+    }
+    const next = think(e, s, pack);
+    if (next !== "patrol" && (e.mode || "patrol") === "patrol") e.alertPing = 16;
+    e.mode = next;
+    e._dx = s.dx;
+    e._over = s.over;
+    if (e.alertPing > 0) e.alertPing--;
     e.shoot = (e.shoot || 0) + 1;
     const rate = e.kind === "planta" ? 70 : 9999;
     if (e.kind === "planta" && e.up) {
@@ -1058,7 +1070,7 @@ function updateEnemies() {
       e.telegraph = false;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
       e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
-      if (e.grounded && (e.hop || 0) <= 0 && (t + Math.floor(e.x)) % 70 === 0) {
+      if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && (t + Math.floor(e.x)) % 70 === 0) {
         e.vy = -6.2;
         e.hop = 18;
         e.flash = 4;
@@ -1072,7 +1084,7 @@ function updateEnemies() {
         if (e.lunge <= 0) e.vx *= 0.4;
       } else {
         e.lungeCd = (e.lungeCd || 0) - 1;
-        if (e.evo >= 1 && e.lungeCd <= 0 && game.player) {
+        if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike") {
           e.lungeCd = 90;
           e.lunge = 18;
           e.vx = Math.sign(game.player.x - e.x || 1) * 5.2;
@@ -1096,7 +1108,7 @@ function updateEnemies() {
         e.diving--;
         e.telegraph = false;
         if (e.diving <= 0) { e.spiral = 28; e.diveCd = 48; }
-      } else if (e.diveCd <= 0 && game.player) {
+      } else if (e.diveCd <= 0 && game.player && e.mode === "strike") {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.85;
@@ -1332,7 +1344,7 @@ function updateEnemies() {
         e.telegraph = false;
       } else {
         e.hopCd = (e.hopCd || 0) - 1;
-        if (e.hopCd <= 0 && game.player) {
+        if (e.hopCd <= 0 && game.player && (e.mode === "chase" || e.mode === "strike")) {
           e.hopWind = 24; // ~0.4s telegraph
           e.telegraph = true;
         } else if (Math.abs(e.vy) < 0.2 && e.hopCd > 0 && e.hopCd < 40) {
@@ -1365,10 +1377,9 @@ function updateEnemies() {
       } else {
         e.claws = !!near;
         e.telegraph = false;
-        if (near && game.player) {
-          e.vx += Math.sign(game.player.x - e.x || 1) * 0.08;
-          if (e.clawCd <= 0) e.clawWind = 24; // ~0.4s telegraph
-        }
+        if (e.mode === "hold" || e.mode === "patrol") e.vx *= 0.86;
+        else if (e.mode === "strike" && e.clawCd <= 0) e.clawWind = 24;
+        else if (e.mode === "chase") e.vx += Math.sign(e._dx || 1) * 0.1;
       }
       e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
     }

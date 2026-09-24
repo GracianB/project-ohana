@@ -32,6 +32,12 @@ export function drawEnemy(ctx, e, cam, t) {
   if (e.flash > 10) ctx.filter = "brightness(4.2) saturate(0.12)";
   else if (e.flash > 0) ctx.filter = "brightness(2.6) sepia(0.55) hue-rotate(-25deg)";
   else if (e.invuln > 0 && !e.boss) ctx.filter = "brightness(2.0)";
+  if (e.alertPing > 0 && !e.boss) {
+    ctx.fillStyle = "#ffe66a";
+    ctx.font = "800 16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("!", 0, -e.h / 2 - 10);
+  }
   ctx.fillStyle = "rgba(0,0,0,.28)";
   ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 2, e.w * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
 
