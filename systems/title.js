@@ -183,7 +183,9 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait has-art"><img class="portrait-art" alt="" src="assets/portraits/' + def.id + '.jpg"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
+      const img = el.querySelector(".portrait-art");
+      if (img) img.addEventListener("error", () => { img.remove(); el.querySelector(".portrait")?.classList.remove("has-art"); });
       const role = document.createElement("div");
       role.className = "role";
       role.textContent = ROLES[def.id] || "Bebé";
