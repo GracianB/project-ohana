@@ -24,7 +24,7 @@ function pw(p) { return 1 + evoOf(p) * 0.35; }
 function canHit(e) { return !!e && !e.dying && e.hp > 0 && !(e.invuln > 0); }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function pid(p) { return (p.passive && p.passive.id) || PASSIVE_BY_ID[p.id] || null; }
-const PASSIVE_BY_ID = { lilo: "float", stitch: "climb", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce" };
+const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce" };
 
 function reset(p) {
   sparks.length = 0;

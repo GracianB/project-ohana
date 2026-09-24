@@ -2006,6 +2006,9 @@ body.boss-fight::after {
   
   #touch {
     display: flex;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
   }
   
   body.playing #ability-bar {
@@ -2052,6 +2055,19 @@ body.boss-fight::after {
   
   body.boss-fight #combo-chip {
     top: 118px;
+  }
+}
+
+@media (max-width: 820px) and (orientation: portrait) {
+  #touch .col.move {
+    flex-direction: column;
+  }
+  .touch-btn {
+    width: 64px;
+    height: 64px;
+  }
+  #game {
+    max-height: 62dvh;
   }
 }
 

@@ -14,6 +14,9 @@ import { DeathFx } from "./systems/death-fx.js";
 import { Rain } from "./systems/rain.js";
 import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
+import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
+import { XP_NEED } from "./systems/xp.js";
+import { packSave, unpackSave } from "./systems/save.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 
@@ -21,7 +24,6 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
 const keys = {};
 let t = 0;
-const XP_NEED = [0, 55, 140, 260, 420];
 let muted = false;
 let paused = false;
 // Accessibility: honor prefers-reduced-motion (dampen shake + flashes)
@@ -33,7 +35,7 @@ const game = {
   player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -60,6 +62,16 @@ function closeOverlays() {
   document.getElementById("map-overlay")?.classList.remove("open");
   setPaused(false);
 }
+function hitStop(frames) {
+  if (!frames) return;
+  if (game.reduceMotion) frames = Math.max(1, Math.ceil(frames * 0.35));
+  game.hitstop = Math.max(game.hitstop || 0, frames | 0);
+}
+function buzz(ms) {
+  if (game.reduceMotion) return;
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+}
+
 function comboRank(n) {
   if (n > 12) return "S";
   if (n > 7) return "A";
@@ -133,16 +145,7 @@ function setPrompt(text, on) {
 }
 function room() { return ROOMS[game.roomId] || ROOMS.hub; }
 function save() {
-  try {
-    localStorage.setItem("ohana", JSON.stringify({
-      roomId: game.roomId,
-      visited: game.visited,
-      score: game.score,
-      evo: game.player && game.player.evo,
-      id: game.player && game.player.id,
-      xp: game.player && game.player.xp
-    }));
-  } catch (e) {}
+  try { localStorage.setItem("ohana", JSON.stringify(packSave(game, Magic))); } catch (e) {}
 }
 function bounceLocked(fromDir) {
   const p = game.player;
@@ -227,195 +230,6 @@ function placeFrom(fromDir) {
   p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
   if (fromDir !== "down") snapToFloor(p);
 }
-function isAirFoe(e) {
-  return e.kind === "phosquito" || e.kind === "mosquito" || e.kind === "medusa"
-    || e.kind === "pez" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
-    || e.kind === "anguila" || e.kind === "gaviota" || e.kind === "murcielago"
-    || e.kind === "brasita" || e.kind === "ufo"
-    || (e.kind === "cucaracho" && e.evo >= 2)
-    || (e.boss && e.airborne);
-}
-
-function applyElite(e) {
-  if (!e || e.elite) return e;
-  e.elite = true;
-  e.hp = Math.round(e.hp * 1.75);
-  e.max = e.hp;
-  e.w = Math.round(e.w * 1.1);
-  e.h = Math.round(e.h * 1.1);
-  // Tint saturado / dorado para que se note en juego
-  e.color = e.color || "#ffd24a";
-  e.eliteTint = "#ffd24a";
-  return e;
-}
-
-function makeFoe(x, y, kind, roomId, i, opts) {
-  const hard = { hub: 0, beach: 1, cave: 1, ridge: 1, lab: 2, space: 2, jungle: 2, volcano: 3, reef: 2 }[roomId] || 1;
-  const baby = !!(opts && opts.baby);
-  if (kind === "phosquito") {
-    const hp = baby ? 14 : 24 + hard * 14;
-    return {
-      x, y: 620 + (i % 3) * 24, w: baby ? 22 : 32, h: baby ? 18 : 26,
-      vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.28),
-      vy: -0.6, hp, max: hp, kind, color: "#6ad0a8",
-      boss: false, shoot: 0, canSplit: !baby && hard >= 1 && Math.random() < 0.55, split: false, baby,
-      diveCd: 50 + i * 10, diving: false, telegraph: false,
-    };
-  }
-  if (kind === "mosquito") {
-    const hp = baby ? 12 : 18 + hard * 10;
-    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 3) * 20));
-    return {
-      x, y: spawnY, w: baby ? 28 : 40, h: baby ? 22 : 34,
-      vx: (i % 2 ? 1 : -1) * (2.4 + hard * 0.35),
-      vy: -0.8, hp, max: hp, kind: "mosquito", color: "#ff6a4a",
-      boss: false, shoot: 0, baby, diveCd: 40 + i * 12, diving: false, telegraph: false, spiral: 0,
-    };
-  }
-  if (kind === "libelula") {
-    const hp = 16 + hard * 8;
-    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 3) * 24));
-    return {
-      x, y: spawnY, w: 40, h: 42,
-      vx: (i % 2 ? 1 : -1) * (2.2 + hard * 0.3),
-      vy: -0.4, hp, max: hp, kind: "libelula", color: "#4aba7a",
-      boss: false, shoot: 0, dart: 40 + i * 15, bob: Math.random() * 6.28,
-      telegraph: false, wind: 0, darting: false, baseY: spawnY,
-    };
-  }
-  if (kind === "abeja" || kind === "avispa") {
-    const hp = 28 + hard * 12;
-    const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 2) * 28));
-    return {
-      x, y: spawnY, w: 42, h: 48,
-      vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "abeja", color: "#f0c020",
-      boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 40 + i * 18,
-      bob: Math.random() * 6.28, baseY: spawnY,
-    };
-  }
-  if (kind === "pez") {
-    const hp = 22 + hard * 10;
-    const by = Math.max(280, Math.min(560, y || 380));
-    return {
-      x, y: by, w: 28, h: 18,
-      vx: (i % 2 ? 1 : -1) * (1.1 + hard * 0.2),
-      vy: 0, hp, max: hp, kind: "pez", color: "#3aa8d8",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: by,
-      dashSwim: 0, dashCd: 50 + i * 20,
-    };
-  }
-  if (kind === "planta") {
-    const hp = 36 + hard * 18;
-    return {
-      x, y, w: 34, h: 48, vx: 0, vy: 0, hp, max: hp, kind, color: "#e23b3d",
-      boss: false, shoot: 0, rooted: true, up: true, hide: 40 + i * 20, plant: true,
-    };
-  }
-  if (kind === "medusa") {
-    const hp = baby ? 20 : 32 + hard * 12;
-    return {
-      x, y: y || 340, w: 30, h: 34, vx: (i % 2 ? 1 : -1) * 0.5, vy: 0,
-      hp, max: hp, kind: "medusa", color: "#ff8ad0",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: (y || 340), dropsOrb: true,
-      zapCd: 60 + i * 25, pulsezap: 0, telegraph: false,
-    };
-  }
-  if (kind === "anguila") {
-    const hp = 28 + hard * 12;
-    const by = Math.max(280, Math.min(560, y || 380));
-    return {
-      x, y: by, w: 48, h: 18,
-      vx: (i % 2 ? 1 : -1) * (1.0 + hard * 0.18),
-      vy: 0, hp, max: hp, kind: "anguila", color: "#40e0d0",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: by,
-      zapCd: 70 + i * 22, pulsezap: 0, telegraph: false,
-    };
-  }
-  if (kind === "rana") {
-    const hp = 24 + hard * 12;
-    return {
-      x, y, w: 34, h: 28,
-      vx: 0, vy: 0, hp, max: hp, kind: "rana", color: "#4caf50",
-      boss: false, shoot: 0, hopCd: 35 + i * 12, sitting: 0, hopWind: 0, telegraph: false,
-    };
-  }
-  if (kind === "cangrejo") {
-    const hp = 30 + hard * 14;
-    return {
-      x, y, w: 36, h: 24,
-      vx: (i % 2 ? 1 : -1) * (1.5 + hard * 0.25),
-      vy: 0, hp, max: hp, kind: "cangrejo", color: "#e07040",
-      boss: false, shoot: 0, claws: false, clawCd: 40 + i * 10, clawWind: 0, clawSnap: 0, telegraph: false,
-    };
-  }
-  if (kind === "gaviota") {
-    const hp = 22 + hard * 10;
-    const spawnY = Math.max(280, Math.min(480, (y || 360) + (i % 3) * 20));
-    return {
-      x, y: spawnY, w: 40, h: 28,
-      vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.25),
-      vy: -0.3, hp, max: hp, kind: "gaviota", color: "#f0f4f8",
-      boss: false, shoot: 0, diveCd: 55 + i * 14, diving: false, telegraph: false,
-      bob: Math.random() * 6.28, baseY: spawnY, wind: 0,
-    };
-  }
-  if (kind === "murcielago") {
-    const hp = 20 + hard * 10;
-    const spawnY = Math.max(220, Math.min(420, (y || 280) + (i % 3) * 24));
-    return {
-      x, y: spawnY, w: 34, h: 26,
-      vx: (i % 2 ? 1 : -1) * (1.6 + hard * 0.28),
-      vy: -0.4, hp, max: hp, kind: "murcielago", color: "#4a3060",
-      boss: false, shoot: 0, diveCd: 60 + i * 16, diving: false, telegraph: false,
-      bob: Math.random() * 6.28, baseY: spawnY, wind: 0,
-    };
-  }
-  if (kind === "arana") {
-    const hp = 26 + hard * 12;
-    return {
-      x, y, w: 30, h: 22,
-      vx: (i % 2 ? 1 : -1) * (1.2 + hard * 0.22),
-      vy: 0, hp, max: hp, kind: "arana", color: "#2a1a18",
-      boss: false, shoot: 0, dropCd: 90 + i * 20, dropping: false, telegraph: false,
-    };
-  }
-  if (kind === "brasita") {
-    const hp = 18 + hard * 8;
-    const spawnY = Math.max(260, Math.min(520, (y || 360) + (i % 3) * 28));
-    return {
-      x, y: spawnY, w: 22, h: 22,
-      vx: (i % 2 ? 1 : -1) * 0.9, vy: 0, hp, max: hp, kind: "brasita", color: "#ff6a20",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: spawnY, telegraph: false,
-    };
-  }
-  if (kind === "escoria") {
-    const hp = 34 + hard * 16;
-    return {
-      x, y, w: 32, h: 20,
-      vx: (i % 2 ? 1 : -1) * (0.7 + hard * 0.15),
-      vy: 0, hp, max: hp, kind: "escoria", color: "#c04010",
-      boss: false, shoot: 0, telegraph: false,
-    };
-  }
-  if (kind === "ufo") {
-    const hp = 30 + hard * 12;
-    const spawnY = Math.max(220, Math.min(480, (y || 280) + (i % 2) * 30));
-    return {
-      x, y: spawnY, w: 36, h: 22,
-      vx: (i % 2 ? 1 : -1) * 0.8, vy: 0, hp, max: hp, kind: "ufo", color: "#7ee7ff",
-      boss: false, shoot: 0, shootCd: 40 + i * 20, bob: Math.random() * 6.28, baseY: spawnY, telegraph: false,
-    };
-  }
-  const hp = baby ? 16 : 26 + hard * 16;
-  return {
-    x, y, w: baby ? 22 : 30, h: baby ? 14 : 18,
-    vx: (i % 2 ? 1 : -1) * (1.35 + hard * 0.3),
-    vy: 0, hp, max: hp, kind: "cucaracho", color: "#6a3a12",
-    boss: false, shoot: 0, evo: 0, baby,
-    lungeCd: 70 + i * 15, lunge: 0, diveCd: 60, diving: false, telegraph: false, invuln: 0,
-  };
-}
-
 function loadRoom(id, fromDir) {
   const r = ROOMS[id];
   if (!r) return false;
@@ -458,7 +272,8 @@ function loadRoom(id, fromDir) {
   portals.spawnFromRoom(r);
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
-  game.fading = 12;
+  game.fading = 16;
+  game.flash = Math.max(game.flash || 0, reduceMotion ? 4 : 8);
   if (first && game.player) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
@@ -515,15 +330,20 @@ function start(def) {
   if (resume) {
     try {
       const s = JSON.parse(localStorage.getItem("ohana") || "null");
-      if (s && s.id === def.id) {
-        game.player.evo = Math.max(0, Math.min(4, Number(s.evo) || 0));
-        game.player.xp = Math.max(0, Number(s.xp) || 0);
-        const vis = s.visited && typeof s.visited === "object" && !Array.isArray(s.visited) ? s.visited : { hub: true };
+      const u = unpackSave(s, def.id);
+      if (u) {
+        game.player.evo = u.evo;
+        game.player.xp = u.xp;
         game.visited = { hub: true };
-        for (const key of Object.keys(vis)) if (ROOMS[key]) game.visited[key] = true;
-        game.score = Math.max(0, Number(s.score) || 0);
+        for (const key of Object.keys(u.visited)) if (ROOMS[key]) game.visited[key] = true;
+        game.score = u.score;
+        game.kills = u.kills;
+        game.won = u.won;
         applyForm(game.player, { silent: true });
-        roomId = ROOMS[s.roomId] ? s.roomId : "hub";
+        if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
+        if (u.nineUsed) game.player._nineUsed = true;
+        game._magicSnap = u.magic;
+        roomId = ROOMS[u.roomId] ? u.roomId : "hub";
       }
     } catch (e) {}
   }
@@ -531,6 +351,7 @@ function start(def) {
   document.getElementById("char-select")?.classList.add("hidden");
   renderAbilityBar();
   if (!loadRoom(roomId)) loadRoom("hub");
+  if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 }
 function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
@@ -598,7 +419,7 @@ function melee() {
     h: p.h + 16 + evo * 5,
   };
 
-  const baseKind = { lilo: "leaf", stitch: "claws", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
+  const baseKind = { kilo: "leaf", lilo: "leaf", stitcho: "claws", stitch: "claws", chispin: "zap", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
   // High-evo dino swings a bigger fan; others keep identity but grow
   const kind = (p.id === "dragon" && evo >= 2) ? "fan" : baseKind;
   const slashLife = 10 + Math.min(6, evo * 2);
@@ -624,7 +445,7 @@ function melee() {
       life: Math.max(6, slashLife - 3),
       max: Math.max(6, slashLife - 3),
       color: evo >= 4 ? "#fff8c8" : "#fff",
-      kind: p.id === "pikachu" ? "zap" : (p.id === "stitch" || p.id === "cat" ? "claws" : "fan"),
+      kind: (p.id === "chispin" || p.id === "pikachu") ? "zap" : ((p.id === "stitcho" || p.id === "stitch" || p.id === "cat") ? "claws" : "fan"),
       w: 34 + evo * 10,
     });
   }
@@ -662,6 +483,9 @@ function melee() {
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       beep(d >= 45 ? "crit" : "hit");
       punch(e.x, e.y, p.color);
+      hitStop(e.boss ? 7 : (d >= 45 ? 5 : 3));
+      game.camPunch = Math.max(game.camPunch || 0, e.boss ? 0.08 : 0.045);
+      buzz(e.boss ? 18 : 10);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
     }
   }
@@ -669,7 +493,7 @@ function melee() {
   // Evo 3+: ranged follow-through (flame for dino, zap/crescent otherwise)
   if (evo >= 3) {
     const isDino = p.id === "dragon";
-    const isPika = p.id === "pikachu";
+    const isPika = p.id === "chispin" || p.id === "pikachu";
     game.projectiles.push({
       x: p.x + p.w / 2 + p.facing * 10,
       y: p.y + p.h * 0.32,
@@ -744,6 +568,8 @@ function hurtPlayer(amount, label) {
   game.shake = 12;
   game.combo = 0;
   beep("hurt");
+  buzz(24);
+  hitStop(2);
   game.nums.add(p.x, p.y, label || ("-" + Math.round(amount)), "#ff6a7a");
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
@@ -1751,20 +1577,30 @@ function updateProjectiles() {
 }
 function updateCam() {
   const p = game.player; if (!p) return;
+  let lerp = 0.12;
   let tx = p.x + p.facing * 80 - canvas.width / 2;
   let ty = p.y - canvas.height * 0.58;
-  // Jefe: encuadrar a los dos (y solo al jefe durante su entrada)
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   if (boss) {
-    const bx = boss.x + boss.w / 2, bottom = boss.y + boss.h;
-    if (boss.introT > 0) { tx = bx - canvas.width / 2; ty = bottom + 70 - canvas.height; }
-    else {
-      tx = (p.x + bx) / 2 - canvas.width / 2;
-      ty = Math.min(p.y - 90, Math.max(ty, bottom + 60 - canvas.height));
+    const bx = boss.x + boss.w / 2, by = boss.y + boss.h * 0.45, bottom = boss.y + boss.h;
+    if ((boss.introT || 0) > 0) {
+      tx = bx - canvas.width / 2;
+      ty = bottom + 40 - canvas.height;
+      lerp = 0.06;
+    } else {
+      tx = (p.x * 0.42 + bx * 0.58) - canvas.width / 2;
+      ty = Math.min(p.y, by) - canvas.height * 0.52;
+      ty = Math.min(ty, bottom + 50 - canvas.height);
+      lerp = game.hitstop > 0 ? 0.04 : 0.08;
+    }
+    if (game.camPunch > 0) {
+      tx += (bx - (p.x + p.w / 2)) * game.camPunch * 0.15;
+      ty += 18 * game.camPunch;
     }
   }
-  game.cam.x += (tx - game.cam.x) * 0.12;
-  game.cam.y += (ty - game.cam.y) * 0.12;
+  game.cam.x += (tx - game.cam.x) * lerp;
+  game.cam.y += (ty - game.cam.y) * lerp;
+  if (game.camPunch > 0) game.camPunch *= 0.82;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
   game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - canvas.height + 80)));
   if (game.shake > 0) game.shake *= 0.86;
@@ -2106,6 +1942,14 @@ function updateHUD() {
 function loop() {
   t++;
   game.t = t;
+  if (game.hitstop > 0) {
+    game.hitstop--;
+    if (game.shake > 0) game.shake *= 0.92;
+    if (game.flash > 0) game.flash--;
+    if (game.running) render();
+    requestAnimationFrame(loop);
+    return;
+  }
   if (game.running && !paused && !overlayOpen()) {
     updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); Surprises.update(game, t); updateCam(); if ((t & 3) === 0) updateHUD();
   } else if (game.running && (t & 3) === 0) updateHUD();

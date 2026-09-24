@@ -1,4 +1,5 @@
 import { ROSTER } from "../characters/roster.js";
+import { canonId } from "./save.js";
 import { drawCharacter } from "../characters/draw.js";
 import { playIntro, playTitleIntro } from "./intro.js";
 import { sfx } from "../engine/audio.js";
@@ -15,10 +16,10 @@ function jingle() {
 addEventListener("pointerdown", jingle, { capture: true });
 addEventListener("keydown", jingle, { capture: true });
 
-const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Dragoncito", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita" };
+const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispín Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita" };
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
-let selectedId = "lilo";
+const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
+let selectedId = "kilo";
 let tick = 0;
 let raf = 0;
 
@@ -208,10 +209,11 @@ function enhance() {
     const save = readSave();
     const cont = document.getElementById("btn-continue");
     if (!cont) return;
-    if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
+    const id = save && canonId(save.id);
+    if (id && ROSTER.some((r) => r.id === id)) {
       cont.classList.remove("hidden");
       cont.disabled = false;
-      cont.onclick = () => { selectedId = save.id; mark(save.id); begin("resume"); };
+      cont.onclick = () => { selectedId = id; mark(id); begin("resume"); };
     } else {
       cont.classList.add("hidden");
       cont.disabled = true;
@@ -223,9 +225,10 @@ function enhance() {
     if (e.key !== "Enter") return;
     if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show")) return;
     const save = readSave();
-    if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
-      selectedId = save.id;
-      mark(save.id);
+    const id = save && canonId(save.id);
+    if (id && ROSTER.some((r) => r.id === id)) {
+      selectedId = id;
+      mark(id);
       begin("resume");
     } else begin("new");
   });

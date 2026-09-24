@@ -9,8 +9,8 @@ import frita from "./frita.js";
 import pizza from "./pizza.js";
 
 export const ART = {
-  lilo: kilo, kilo,
-  stitch,
-  pikachu: chispin, chispin,
+  kilo, lilo: kilo,
+  stitcho: stitch, stitch,
+  chispin, pikachu: chispin,
   cat, dragon, dino, frita, pizza
 };

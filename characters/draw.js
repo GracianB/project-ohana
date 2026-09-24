@@ -44,11 +44,14 @@ function star(ctx, x, y, r, fill) {
 // ============================================================================
 
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
+const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
 
 const FLAVOR = {
+  kilo:    { kind: "petal", colors: ["#ff9ab0", "#ffd36a", "#ffffff"] },
   lilo:    { kind: "petal", colors: ["#ff9ab0", "#ffd36a", "#ffffff"] },
+  stitcho: { kind: "spark", colors: ["#7ef0ff", "#3fa8ff", "#ffffff"] },
   stitch:  { kind: "spark", colors: ["#7ef0ff", "#3fa8ff", "#ffffff"] },
+  chispin: { kind: "bolt",  colors: ["#fff36a", "#ffd000", "#ffffff"] },
   pikachu: { kind: "bolt",  colors: ["#fff36a", "#ffd000", "#ffffff"] },
   cat:     { kind: "star",  colors: ["#ffd0ee", "#fff6a8", "#c9a8ff"] },
   dragon:  { kind: "ember", colors: ["#ff7a2a", "#ffd84a", "#ff3b2a"] },
@@ -274,7 +277,7 @@ export function drawCharacter(ctx, p, cam, t) {
   const recoilX = hurtFresh ? -H * 0.08 : 0;
 
   const color = p.color || "#ffffff";
-  const art = ART[p.id] || ART.lilo;
+  const art = ART[p.id] || ART.kilo;
   const pose = computePose(p, t);
 
   ctx.save();

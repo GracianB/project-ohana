@@ -12,6 +12,7 @@ import {
   FONT_BODY, FONT_DISPLAY,
 } from "./evo-cinema.js";
 import { ROSTER } from "../characters/roster.js";
+import { canonId } from "./save.js";
 import { sfx } from "../engine/audio.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
@@ -299,7 +300,7 @@ export function playIntro(kind, name, done, id) {
   if (kind === "resume") {
     try {
       const sv = JSON.parse(localStorage.getItem("ohana") || "null");
-      if (sv && sv.id === def.id) evo = clamp(Number(sv.evo) || 0, 0, 4);
+      if (sv && canonId(sv.id) === def.id) evo = clamp(Number(sv.evo) || 0, 0, 4);
     } catch (_) {}
   }
   const form = (def.forms && def.forms[evo]) || def;

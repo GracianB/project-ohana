@@ -129,9 +129,9 @@ FINAL
 GOD
 ```
 
-XP thresholds:
+XP thresholds (absolutos, forma siguiente):
 
-`18 → 40 → 70 → 110`
+`55 → 140 → 260 → 420`
 
 Con la barra llena:
 

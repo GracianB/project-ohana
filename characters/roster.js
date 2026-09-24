@@ -6,11 +6,11 @@
 // ============================================================================
 // Personajes activos en la demo. Los demás siguen en ALL_ROSTER (con su arte),
 // solo se ocultan: para reactivarlos, añade su id aquí.
-const ACTIVE = ["cat", "stitch", "pikachu", "dino", "frita"];
+const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza"];
 
 export const ALL_ROSTER = [
   {
-    id: "lilo", name: "Kilo", color: "#e23b3d",
+    id: "kilo", name: "Kilo", color: "#e23b3d",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
     passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio." },
@@ -24,7 +24,7 @@ export const ALL_ROSTER = [
     ]
   },
   {
-    id: "stitch", name: "Stitcho", color: "#2f6bff",
+    id: "stitcho", name: "Stitcho", color: "#2f6bff",
     speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 24, h: 24,
     abilities: ["plasma", "rollo", "caos"],
     passive: { id: "climb", name: "Trepador", desc: "Se agarra a las paredes y trepa por ellas." },
@@ -38,7 +38,7 @@ export const ALL_ROSTER = [
     ]
   },
   {
-    id: "pikachu", name: "Chispín", color: "#ffd83a",
+    id: "chispin", name: "Chispín", color: "#ffd83a",
     speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 22,
     abilities: ["chain", "blink", "storm"],
     passive: { id: "spark", name: "Chispa veloz", desc: "Tras correr un segundo va más rápido y deja chispas que dañan." },

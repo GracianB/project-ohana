@@ -575,6 +575,25 @@ export const Magic = {
     clearAll(game || lastGame);
     items = [];
   },
+
+  snapshot() {
+    const out = {};
+    for (const k of Object.keys(fx)) out[k] = fx[k];
+    return { fx: out };
+  },
+
+  restore(snap) {
+    if (!snap || !snap.fx || typeof snap.fx !== "object") return;
+    for (const k of Object.keys(fx)) delete fx[k];
+    for (const k of Object.keys(snap.fx)) {
+      const n = Number(snap.fx[k]);
+      if (n > 0 && DEFS[k] && k !== "fruit") fx[k] = n;
+    }
+    const p = lastPlayer || (lastGame && lastGame.player);
+    if (p && fx.feather > 0) feathered(p);
+    if (lastGame && fx.hourglass > 0) lastGame.enemySlow = fx.hourglass;
+    renderHud(true);
+  },
 };
 
 // Depuración: window.__ohanaMagic.give("star")

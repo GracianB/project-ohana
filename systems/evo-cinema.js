@@ -15,7 +15,7 @@ import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
 
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { lilo: 1.0, stitch: 0.95, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
+const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98 };
 export const FONT_DISPLAY = "Fredoka, 'Baloo 2', system-ui, sans-serif";
 export const FONT_BODY = "Outfit, system-ui, sans-serif";
 const GOLD = "#ffd84a";
@@ -375,7 +375,7 @@ export function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
 
-  const id = detail.id || "lilo";
+  const id = detail.id || "kilo";
   const evo = clamp(Number(detail.evo) || 1, 1, 4);
   const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
   const newForm = (def.forms && def.forms[evo]) || {};

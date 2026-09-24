@@ -23,6 +23,10 @@ index.html
 │  ├─ systems/surprises.js .... pez dorado, lluvia de estrellas, power-ups
 │  ├─ systems/floaters.js ..... números de daño
 │  ├─ systems/notify.js ....... avisos y cine de evolución
+│  ├─ systems/save.js ......... save v2 + ids viejos
+│  ├─ systems/xp.js ........... umbrales 55/140/260/420
+│  ├─ engine/foes.js .......... fábrica makeFoe
+│  ├─ engine/foe-rig.js ....... crawler / flyer / brute
 │  ├─ engine/enemies.js ....... dibujo de enemigos
 │  ├─ engine/boss-art.js ...... Reina del Nido vectorial + entrada cinematográfica
 │  ├─ engine/particles.js ..... partículas

@@ -1,4 +1,5 @@
 import { drawBossQueen } from "./boss-art.js";
+import { drawFoeRig } from "./foe-rig.js";
 
 const KIND_TINT = {
   pez: "#3aa8d8",
@@ -38,6 +39,7 @@ export function drawEnemy(ctx, e, cam, t) {
   if (e.elite) drawEliteAura(ctx, e, t);
 
   if (e.kind === "boss") drawBoss(ctx, e, t);
+  else if (drawFoeRig(ctx, e, t)) { /* crawler / flyer / brute */ }
   else if (e.kind === "phosquito") drawPhosquito(ctx, e, t);
   else if (e.kind === "mosquito") drawMosquito(ctx, e, t);
   else if (e.kind === "planta") drawPlanta(ctx, e, t);

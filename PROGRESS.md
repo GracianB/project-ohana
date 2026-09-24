@@ -1,38 +1,24 @@
 # PROJECT OHANA · Progreso
 
-Última actualización: 24/09/2026 (pass Grok)
+Última actualización: 24/09/2026
 
 ## Hecho
 
 | Fecha | Qué |
 |---|---|
-| 24/09 | **makeFoe extraído** a `engine/foes.js`. Hitstop + cámara de director en el Nido. Rig vectorial crawler/flyer/brute. Elenco completo activo. Arte `kilo.js` / `chispin.js` (alias). |
-| 24/09 | **Arreglo integral**: exports rotos, loader infinito, Continuar. Limpieza de módulos huérfanos. |
-| 24/09 | **Personajes vectoriales animados** (`characters/rig.js` + `characters/art/*.js`). |
-| 24/09 | **Michi kawaii**, SFX, intro/evo. |
-| 24/09 | **Punto 1 · Música**: 11 temas procedurales. |
-| 24/09 | **Punto 3 · Jefe**: Reina del Nido vectorial en 3 fases. |
+| 24/09 | **Fábrica** `engine/foes.js` (makeFoe fuera de game.js). Hitstop, vibración, cámara de director en el Nido. Rig crawler/flyer/brute. Save v2 (hp, nueve vidas, magia, kills). Ids `kilo` / `stitcho` / `chispin` con migración de saves viejos. XP del README alineada (`55 → 140 → 260 → 420`). Tests `node --test tests/core.test.js`. Móvil: botón bajar + layout vertical. |
+| 24/09 | Arreglo integral: el juego vuelve a cargar. |
+| 24/09 | Personajes vectoriales, música procedural, Reina del Nido. |
 
 ## Personajes
 
-- **Activos**: Kilo, Stitcho, Chispín, Michi, Dragón, Dino, Frita, Pizza.
-- Ids internos se mantienen (`lilo`, `pikachu`, …) para no romper saves. Ficheros alias: `kilo.js`, `chispin.js`.
+- Activos: Kilo, Stitcho, Chispín, Michi, Dragón, Dino, Frita, Pizza.
+- Saves antiguos (`lilo`, `stitch`, `pikachu`) se leen solos.
 
-## Hoja de ruta (los 7 puntos)
+## Tests
 
-| # | Punto | Estado |
-|---|---|---|
-| 1 | Música de fondo por mundo y jefe | ✅ Hecho |
-| 2 | Recuperar a Kilo, Dragón y Pizza | ✅ Hecho |
-| 3 | Jefe final vectorial, 3 fases | ✅ Hecho |
-| 4 | Enemigos animados al nivel de los personajes | 🟡 3 arquetipos |
-| 5 | Móvil de verdad | ⬜ Pendiente |
-| 6 | Más contenido | ⬜ Pendiente |
-| 7 | Pulido (hitstop, cámara, combos) | 🟡 hitstop + cam Nido |
+```bash
+node --test tests/core.test.js
+```
 
-## Cómo trabajar
-
-- Copia local: `X:\GitHub\project-ohana`.
-- Galería: `gallery.html` y `gallery.html?id=<id>`.
-- Mapa del código: `systems/README.md`.
-- Cache bust en `index.html`: ahora `ohana-24`.
+Cache: `?v=ohana-25` en index.html.
