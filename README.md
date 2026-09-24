@@ -2,38 +2,31 @@
 
 <a href="https://gracianb.github.io/project-ohana/">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=230&color=0:071226,45:102A43,75:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=58&fontAlignY=37&desc=PLAY%20%C2%B7%20CANVAS%202D%20%C2%B7%20EVOLUTION%20%C2%B7%20ISLA%20HOKU&descAlignY=61&descSize=17&animation=fadeIn" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&height=230&color=0:071226,45:102A43,75:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=58&fontAlignY=37&desc=PLAY%20%C2%B7%20CANVAS%202D%20%C2%B7%2010%20PERSONAJES%20%C2%B7%20ISLA%20HOKU&descAlignY=61&descSize=16&animation=fadeIn" width="100%"/>
 
 </a>
 
 <br/>
 
-[![Typing](https://readme-typing-svg.demolab.com?font=Fraunces\&weight=500\&size=28\&duration=2800\&pause=800\&color=7EE7FF\&center=true\&vCenter=true\&width=920\&height=58\&lines=PROJECT+OHANA;No+te+lo+explico.+P%C3%BAlsalo.;Lani+%C2%B7+Tiko+%C2%B7+Koa+%C2%B7+Bellota+%C2%B7+Frita;Beb%C3%A9+%E2%86%92+GOD;8+salas+%C2%B7+5+formas+%C2%B7+1+jefe;OHANA+COMPLETADO+%C2%B7+2026)](https://gracianb.github.io/project-ohana/)
+[![Typing](https://readme-typing-svg.demolab.com?font=Fraunces&weight=500&size=26&duration=2800&pause=800&color=7EE7FF&center=true&vCenter=true&width=920&height=58&lines=PROJECT+OHANA;No+te+lo+explico.+P%C3%BAlsalo.;Kilo+%C2%B7+Stitcho+%C2%B7+Chisp%C3%ADn+%C2%B7+Michi+%C2%B7+Drag%C3%B3n;Dino+%C2%B7+Frita+%C2%B7+Pizza+%C2%B7+Yomi+%C2%B7+Cuerno;Beb%C3%A9+%E2%86%92+GOD;10+salas+%C2%B7+5+formas+%C2%B7+1+nido)](https://gracianb.github.io/project-ohana/)
 
-# **PROJECT OHANA**
+# PROJECT OHANA
 
-### `PLAY · CANVAS 2D · GAME SYSTEM`
+**Un platformer que se abre en el navegador.** Isla, combate cuerpo a cuerpo y cinco formas. Sin instalar nada.
 
-**Un juego que se abre en el navegador.**
-
-`EXPLORE` · `FIGHT` · `EVOLVE` · `SURVIVE` · `COMPLETE`
+[![Jugar ahora](https://img.shields.io/badge/JUGAR_AHORA-7EE7FF?style=for-the-badge&labelColor=071226)](https://gracianb.github.io/project-ohana/)
+[![Systems Lab](https://img.shields.io/badge/02-SYSTEMS_LAB-7AF3FF?style=for-the-badge&labelColor=071226)](https://gracianb.github.io/systems-lab/)
+[![Hub](https://img.shields.io/badge/00-GRACIANB-C4A574?style=for-the-badge&labelColor=071226)](https://gracianb.github.io/GracianB/)
 
 <br/>
-
-[![🚀 JUGAR AHORA](https://img.shields.io/badge/%F0%9F%9A%80_JUGAR_AHORA-7EE7FF?style=for-the-badge\&labelColor=071226)](https://gracianb.github.io/project-ohana/)
-[![02 · SYSTEMS LAB](https://img.shields.io/badge/02-SYSTEMS_LAB-7AF3FF?style=for-the-badge\&labelColor=071226)](https://gracianb.github.io/systems-lab/)
-[![00 · HUB](https://img.shields.io/badge/00-GRACIANB-C4A574?style=for-the-badge\&labelColor=071226)](https://gracianb.github.io/GracianB/)
-[![01 · EXPERIENCE](https://img.shields.io/badge/01-EXPERIENCE-F4F3EE?style=for-the-badge\&labelColor=071226)](https://gracianb.github.io/professional-deck/)
-[![03 · YOGA](https://img.shields.io/badge/03-YOGA-7DCAA5?style=for-the-badge\&labelColor=071226)](https://gracianb.github.io/yoga-instructor/)
-
-<br/><br/>
 
 <img src="https://img.shields.io/badge/LIVE-PLAYABLE-7EE7FF?style=flat-square&labelColor=071226"/>
 <img src="https://img.shields.io/badge/ENGINE-CANVAS_2D-7EE7FF?style=flat-square&labelColor=071226"/>
 <img src="https://img.shields.io/badge/WORLD-ISLA_HOKU-C4A574?style=flat-square&labelColor=071226"/>
-<img src="https://img.shields.io/badge/ROOMS-8-F4F3EE?style=flat-square&labelColor=071226"/>
-<img src="https://img.shields.io/badge/CHARACTERS-5-7EE7FF?style=flat-square&labelColor=071226"/>
-<img src="https://img.shields.io/badge/BOSS-1-EA6A6A?style=flat-square&labelColor=071226"/>
+<img src="https://img.shields.io/badge/ROOMS-10-F4F3EE?style=flat-square&labelColor=071226"/>
+<img src="https://img.shields.io/badge/CHARACTERS-10-7EE7FF?style=flat-square&labelColor=071226"/>
+<img src="https://img.shields.io/badge/FORMS-5-F4F3EE?style=flat-square&labelColor=071226"/>
+<img src="https://img.shields.io/badge/BOSS-REINA_DEL_NIDO-EA6A6A?style=flat-square&labelColor=071226"/>
 
 </div>
 
@@ -41,509 +34,162 @@
 
 <div align="center">
 
-# 🎮 `NO TE LO EXPLICO. PÚLSALO.`
+### [Jugar Project Ohana](https://gracianb.github.io/project-ohana/)
 
-### **[🚀 JUGAR PROJECT OHANA →](https://gracianb.github.io/project-ohana/)**
-
-`LIVE · BROWSER · NO INSTALLATION`
-
-<br/>
-
-**Nueva partida → Bebé**
-
-**Continuar → Tu forma + tu sala**
-
-**Nido derrotado → OHANA COMPLETADO**
+Nueva partida empieza en bebé, en el Claro. Continuar vuelve a tu forma y a tu sala. Si la Reina cae, la partida queda como Ohana completado.
 
 </div>
 
 ---
 
-# 01 · WHAT IS OHANA?
+## Qué es
 
-**Project Ohana** es un prototipo jugable desarrollado como parte del mundo **PLAY** de GracianB.
+Project Ohana es un platformer de Canvas 2D. Caminas por Isla Hoku, pegas, ganas experiencia y cambias de forma. Cada forma se dibuja distinta. El mapa son salas unidas por puertas, catapultas y vórtices.
 
-Es un **platformer Canvas 2D** con:
+No es una captura ni un mockup. Es el juego.
 
-* exploración
-* combate
-* evolución
-* mapa conectado
-* salas
-* estados persistentes
-* personajes originales
-* jefe final
-* controles desktop y táctiles
-
-La idea es sencilla:
-
-> **Entrar. Jugar. Descubrir. Evolucionar. Llegar al nido.**
-
-No es una captura.
-
-No es una animación.
-
-No es un mockup.
-
-**Es jugable.**
+Parte del mundo PLAY de [GracianB](https://gracianb.github.io/GracianB/).
 
 ---
 
-# 02 · THE GAME LOOP
+## El bucle
 
 ```text
-        ENTER
-          ↓
-        BABY
-          ↓
-       EXPLORE
-          ↓
-        FIGHT
-          ↓
-          XP
-          ↓
-       EVOLVE
-          ↓
-      EXPLORE MORE
-          ↓
-       8 ROOMS
-          ↓
-        BOSS
-          ↓
-      DEFEAT NEST
-          ↓
-   OHANA COMPLETED
+Claro  →  explorar  →  pegar  →  XP  →  evolucionar  →  salas nuevas  →  Nido  →  Reina
 ```
 
-### Five forms
+Cinco formas, en este orden:
+
+| Forma | Nombre en juego | XP para llegar |
+| :---: | --- | ---: |
+| 1 | Bebé | empiezas aquí |
+| 2 | Base | 55 |
+| 3 | Evo | 140 |
+| 4 | Final | 260 |
+| 5 | GOD | 420 |
+
+Los números son absolutos: al llegar a 420 estás en GOD, no hace falta sumar los anteriores. Con la barra llena, **E** evoluciona. Hay una cinemática. Las chispas pasan por detrás de la cara.
+
+---
+
+## Elenco
+
+Diez personajes jugables. Todos originales. La **H** es siempre un golpe cercano. El nombre del golpe no cambia al evolucionar. **J**, **K** y **L** sí: son los tres poderes de esa forma.
+
+La dificultad es la de la portada. Fácil se lee pronto. Difícil pide más la sala.
+
+| Personaje | Dificultad | Golpe (H) | Pasiva | Forma GOD |
+| --- | :---: | --- | --- | --- |
+| **Kilo** | Fácil | Nota | Caída lenta. En GOD, un vuelo corto | KILO GOD |
+| **Pizza** | Fácil | Porción | Aplastar a un bicho al caer te hace rebotar | PIZZA GOD |
+| **Michi** | Fácil | Zarpazo | Aguanta un golpe mortal por sala | MICHI GOD |
+| **Cuerno** | Fácil | Puya | Al caer, el cuerno brilla y te da un saltito | CUERNO GOD |
+| **Chispín** | Media | Chispa | Tras correr un segundo va más rápido y deja chispas | CHISPÍN GOD |
+| **Stitcho** | Media | Zarpa | Se agarra a las paredes y trepa | STITCHO GOD |
+| **Dragón** | Media | Garra | Mantén el salto para planear. En GOD, vuela | DRAGÓN GOD |
+| **Dino** | Difícil | Mordisco | ↓ en el aire: picado con onda | DINO GOD |
+| **Frita** | Difícil | Corte | ↓ corriendo: se desliza y arrolla | KÉTCHUP GOD |
+| **Yomi** | Difícil | Fauces | Cae más rápido. En el aire, salto = un paso espectral | YOMI FAUCES |
+
+Un golpe normal para un instante el mundo. Un golpe gordo (forma alta, Dino, o un poder de 40 o más) lo para más rato y el número sale en dorado.
+
+El combo se queda en pantalla desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar.
+
+---
+
+## Isla Hoku
+
+Diez salas. Visitar las ocho de la ruta (Claro, Costa, Jungla, Caldera, Cueva, Lab, Cumbre, Órbita) despierta el Nido.
 
 ```text
-BABY
-  ↓
-BASE
-  ↓
-EVO
-  ↓
-FINAL
-  ↓
-GOD
+                 CUMBRE ── ÓRBITA
+                    │         │
+   LAB ── CUEVA ── CLARO ── COSTA ── JUNGLA
+                    │         │         │
+                    │      ARRECIFE   CALDERA ── NIDO
 ```
 
-XP thresholds (absolutos, forma siguiente):
+| Sala | Qué pasa |
+| --- | --- |
+| **Claro Ohana** | Centro. Este a la costa, oeste a la cueva, arriba a la cumbre. |
+| **Costa Hoku** | El hueco del centro baja al Arrecife. Este, la jungla, pide forma 3. |
+| **Jungla Alta** | Pide forma 3. El hueco, o el vórtice, baja a la Caldera. |
+| **Caldera** | Pide forma 4. Este es el Nido. |
+| **Nido Final** | La Reina. No sales hasta terminar. La puerta espera medio segundo antes de soltarte en cualquier sala. |
+| **Cueva Azul** | Oeste, el Lab, pide forma 2. |
+| **Alien Lab** | Solo se vuelve por el este. |
+| **Cumbre** | El hueco devuelve al Claro. Este, la Órbita. |
+| **Órbita** | Pide forma 2. Un vórtice secreto baja al Arrecife. |
+| **Arrecife Abismo** | Agua. Arriba vuelve a la Costa. |
 
-`55 → 140 → 260 → 420`
-
-Con la barra llena:
-
-**`E` → EVOLVE**
-
----
-
-# 03 · THE CAST
-
-### Original characters
-
-Todos los personajes, nombres, sprites y evoluciones utilizados en el proyecto forman parte del universo original de Ohana.
-
-|  #  | Character           | Role                | Evolution                         |
-| :-: | :------------------ | :------------------ | :-------------------------------- |
-|  01 | **Kilo**            | Exploradora Ohana   | Super Kilo → **KILO GOD**         |
-|  02 | **Stitcho**         | Experimento alien   | Ñam-626 → **STITCHO GOD**         |
-|  03 | **Chispín**         | Chispa Ohana        | Trueno Gordo → **CHISPÍN GOD**    |
-|  04 | **Michi**           | Gato kawaii         | Nueve vidas → **MICHI GOD**       |
-|  05 | **Dino**            | Dragón de bolsillo  | Dino Rex → **DINO GOD**           |
-|  06 | **Capitán Kétchup** | Palito con rango    | Extra Crujiente → **KÉtchup GOD** |
-
-### The evolution system
-
-```text
-        ┌─────────┐
-        │  BEBÉ   │
-        └────┬────┘
-             ↓
-        ┌─────────┐
-        │  BASE   │
-        └────┬────┘
-             ↓
-        ┌─────────┐
-        │   EVO   │
-        └────┬────┘
-             ↓
-        ┌─────────┐
-        │  FINAL  │
-        └────┬────┘
-             ↓
-        ┌─────────┐
-        │   GOD   │
-        └─────────┘
-```
-
-Cinco personajes.
-
-Cinco líneas evolutivas.
-
-Una cantidad preocupante de formas GOD.
+Catapulta: te lanza a otra sala. Vórtice: también, y a veces no está en la puerta.
 
 ---
 
-# 04 · WORLD 1 · ISLA HOKU
+## Controles
 
-```text
-                         CUMBRE
-                            │
-                         ÓRBITA
-                            │
-                            │
-LAB ───── CUEVA ───── CLARO ───── COSTA
-                                      │
-                                    JUNGLA
-                                      │
-                                   CALDERA
-                                      │
-                                     NIDO
-```
+La izquierda mueve. La derecha pega.
 
-### Eight rooms
+| Tecla | Acción |
+| :---: | --- |
+| `W` `A` `S` `D` o flechas | Mover. `W` o espacio, saltar |
+| `S` o `↓` | Caer de una plataforma. En el aire, la pasiva de algunos |
+| `Shift` | Dash |
+| `H` | Golpe normal. También vale `F` |
+| `J` `K` `L` | Poder corto, medio y definitivo. Cambian con el personaje y con la forma |
+| `E` | Evolucionar, si la barra está llena. También usa catapulta o vórtice |
+| `R` | Volver al Claro |
+| `M` | Mapa |
+| `º` | Ayuda. También `` ` `` |
+| `N` | Silencio |
+| `Esc` | Pausa |
 
-| Area                | Function              |
-| :------------------ | :-------------------- |
-| **Claro**           | Centro del mapa       |
-| **Costa**           | Exploración + peligro |
-| **Jungla**          | Acceso a Caldera      |
-| **Caldera**         | Zona avanzada         |
-| **Nido**            | Final / boss          |
-| **Cueva**           | Exploración           |
-| **Lab**             | Área especial         |
-| **Cumbre / Órbita** | Zona superior         |
-
-### World logic
-
-* **Costa:** el hueco central es mortal.
-* **Jungla:** el hueco central conduce a Caldera.
-* **Cumbre / Órbita:** el hueco devuelve al Claro.
-* **8 salas visitadas:** activa el encuentro final.
+En el teléfono hay botones en pantalla. El juego está pensado primero para teclado.
 
 ---
 
-# 05 · CONTROLS
+## Partida guardada
 
-|    Key    | Action                |
-| :-------: | :-------------------- |
-| `W A S D` | Move / jump           |
-|  `SHIFT`  | Dash                  |
-|    `F`    | Attack                |
-|    `J`    | Long attack           |
-|    `K`    | Medium attack         |
-|    `L`    | Ultimate              |
-|    `E`    | Evolve                |
-|    `S`    | Drop through platform |
-|    `R`    | Return to Claro       |
-|    `M`    | Map                   |
-|    `H`    | Help                  |
-|    `N`    | Mute                  |
-|   `ESC`   | Pause                 |
+Al cruzar una sala se guarda la versión 2: personaje, forma, XP, vida, sala, salas visitadas, puntuación, bajas, si el nido ya cayó, la vida extra de Michi y la magia de esa forma.
 
-### Mobile
+Continuar no mezcla personajes. Una partida de Kilo no abre a Dino.
 
-**Touch controls supported.**
-
-Porque limitar un juego de navegador a teclado en 2026 sería una pequeña tragedia tecnológica.
+Ids viejos de pruebas (`lilo`, `stitch`, `pikachu`) se leen como Kilo, Stitcho y Chispín.
 
 ---
 
-# 06 · SAVE / CONTINUE
+## Cómo está hecho
 
-Ohana diferencia entre una partida nueva y una partida continuada.
+| Capa | Qué es |
+| --- | --- |
+| Dibujo | Canvas 2D, a la resolución de la pantalla |
+| Reglas | JavaScript, módulos, sin framework |
+| Interfaz | HTML y CSS |
+| Mando | Teclado y botones táctiles |
+| Publicación | GitHub Pages |
 
-```text
-NEW GAME
-   ↓
-BABY
-   ↓
-EXPLORE
-   ↓
-PROGRESS
-```
+Personajes en vector, animados. Cucaracho, mosquito y cangrejo tienen cara, paso, aviso y embestida. El resto de bichos tiene su propio dibujo. El jefe es la Reina del Nido.
 
-Mientras que:
-
-```text
-CONTINUE
-   ↓
-PREVIOUS FORM
-   +
-PREVIOUS ROOM
-```
-
-El objetivo es conservar la sensación de que **el mundo recuerda lo que has hecho**.
-
----
-
-# 07 · GAME SYSTEM
-
-```text
-┌──────────────────────────────────────┐
-│              PLAYER                 │
-├──────────────────────────────────────┤
-│ Position                             │
-│ Velocity                             │
-│ Health                               │
-│ XP                                   │
-│ Form                                 │
-│ Attack state                         │
-│ Current room                         │
-└──────────────────┬───────────────────┘
-                   ↓
-┌──────────────────────────────────────┐
-│              WORLD                  │
-├──────────────────────────────────────┤
-│ Rooms                                │
-│ Platforms                            │
-│ Hazards                              │
-│ Transitions                          │
-│ Boss state                           │
-└──────────────────┬───────────────────┘
-                   ↓
-┌──────────────────────────────────────┐
-│             EVOLUTION               │
-├──────────────────────────────────────┤
-│ XP threshold                         │
-│ Form                                 │
-│ Visual state                         │
-│ Abilities                            │
-└──────────────────────────────────────┘
-```
-
-El juego no es solamente un personaje moviéndose por una pantalla.
-
-Es un conjunto de **estados que interactúan**.
-
----
-
-# 08 · TECHNICAL LAYER
-
-| Layer            | Technology                  |
-| :--------------- | :-------------------------- |
-| **Rendering**    | HTML Canvas 2D              |
-| **Logic**        | Vanilla JavaScript          |
-| **UI**           | HTML + CSS                  |
-| **Game State**   | JavaScript state management |
-| **Input**        | Keyboard + Touch            |
-| **Deployment**   | GitHub Pages                |
-| **Architecture** | Client-side                 |
-| **Dependencies** | Minimal / browser-native    |
-
-### Runtime
-
-```text
-BROWSER
-   ↓
-HTML
-   ↓
-CSS
-   ↓
-JAVASCRIPT
-   ↓
-CANVAS
-   ↓
-GAME LOOP
-   ↓
-PLAYER + WORLD + STATE
-```
-
-Sin instalación.
-
-Sin launcher.
-
-Sin engine propietario.
-
-**Abres el navegador y juegas.**
-
----
-
-# 09 · DESIGN SYSTEM
-
-Ohana pertenece visualmente al universo **PLAY**, pero tiene una identidad propia dentro del juego.
-
-```text
-GRACIANB
-   ↓
-SYSTEMS LAB
-   ↓
-PROJECT OHANA
-```
-
-### Visual language
-
-| Token          | Role                    |
-| :------------- | :---------------------- |
-| `#071226`      | Deep space / background |
-| `#7EE7FF`      | Ice / interaction       |
-| `#C4A574`      | Island / Hub bridge     |
-| `#F4F3EE`      | Light contrast          |
-| `#EA6A6A`      | Danger / boss           |
-| Fraunces       | Display                 |
-| Inter          | UI                      |
-| JetBrains Mono | Technical               |
-
----
-
-# 10 · DEVELOPMENT LOOP
-
-```text
-IDEA
- ↓
-CHARACTER
- ↓
-MOVEMENT
- ↓
-COMBAT
- ↓
-ROOM
- ↓
-EVOLUTION
- ↓
-BOSS
- ↓
-POLISH
- ↓
-PLAYTEST
- ↓
-SHIP
-```
-
-La regla del proyecto:
-
-> **If it isn't playable, it isn't finished.**
-
----
-
-# 11 · PROJECT STATUS
-
-| Component        |  Status |
-| :--------------- | :-----: |
-| Browser launch   | 🟢 LIVE |
-| Canvas renderer  | 🟢 LIVE |
-| Movement         | 🟢 LIVE |
-| Combat           | 🟢 LIVE |
-| Evolution        | 🟢 LIVE |
-| 8-room map       | 🟢 LIVE |
-| Character roster | 🟢 LIVE |
-| Boss             | 🟢 LIVE |
-| Save / Continue  | 🟢 LIVE |
-| Mobile controls  | 🟢 LIVE |
-| Ohana completion | 🟢 LIVE |
-
-### Current state
-
-**OHANA COMPLETADO**
-
-The world exists.
-
-The characters evolve.
-
-The boss can be defeated.
-
-The browser does the rest.
-
----
-
-# 12 · WHY OHANA EXISTS
-
-Porque no todo tiene que ser un dashboard.
-
-A veces hay que construir un juego para aprender sobre:
-
-**state · interaction · rendering · feedback · progression · systems**
-
-Ohana funciona como laboratorio técnico disfrazado de juego.
-
-```text
-GAME
- ↓
-INTERACTION
- ↓
-STATE
- ↓
-SYSTEM
- ↓
-EXPERIENCE
-```
-
-Y también porque construir un personaje que evoluciona a GOD es una forma perfectamente razonable de pasar una tarde.
-
----
-
-# 13 · ECOSYSTEM
-
-```text
-                         GRACIANB
-                            HUB
-                             │
-            ┌────────────────┼────────────────┐
-            │                │                │
-            ▼                ▼                ▼
-       EXPERIENCE          PLAY             YOGA
-     professional-deck  systems-lab    yoga-instructor
-                            │
-                   ┌────────┴────────┐
-                   │                 │
-                   ▼                 ▼
-                OHANA             VÓRTICE
-                   │
-                   ▼
-             THIS REPOSITORY
-```
-
-### Navigation
-
-| World               | Role                | Link                                                               |
-| :------------------ | :------------------ | :----------------------------------------------------------------- |
-| **00 · Hub**        | Personal ecosystem  | [GracianB](https://gracianb.github.io/GracianB/)                   |
-| **01 · Experience** | Professional        | [Professional Deck](https://gracianb.github.io/professional-deck/) |
-| **02 · Play**       | Technical           | [Systems Lab](https://gracianb.github.io/systems-lab/)             |
-| **03 · Yoga**       | Personal / teaching | [Yoga Instructor](https://gracianb.github.io/yoga-instructor/)     |
-| **PLAY**            | This game           | [Project Ohana](https://gracianb.github.io/project-ohana/)         |
-| **PLAY**            | WebGL experiment    | [Vórtice](https://vortex-gilt-xi.vercel.app/)                      |
-
----
-
-# 14 · LOCAL DEVELOPMENT
+Para jugar en local hace falta un servidor. Doble clic en `index.html` no vale: los módulos no cargan por `file://`.
 
 ```powershell
 cd project-ohana
 python -m http.server 8080
 ```
 
-Then open:
+Abre [http://localhost:8080](http://localhost:8080).
 
-```text
-http://localhost:8080
+```powershell
+node --test tests/core.test.js
 ```
 
-### Important
-
-No abras `index.html` directamente con doble clic.
-
-El proyecto necesita servirse mediante HTTP.
-
 ---
 
-# 15 · ORIGINAL WORK
+## Trabajo original
 
-Los personajes, nombres, mapas, sprites y elementos visuales de Ohana forman parte del proyecto original.
+Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afiliación con ninguna.
 
-No se utilizan marcas de terceros ni existe afiliación, licencia o endorsement de terceros.
-
-Los arquetipos generales pertenecen al lenguaje habitual del género:
-
-**isla · criatura · dragón · ardilla · palito · evolución · boss**
-
-El universo concreto es **Ohana**.
-
----
-
-# 16 · LICENSE
+Isla, criatura, dragón, evolución y jefe son el lenguaje del género. El universo concreto es este.
 
 **MIT © 2026 Gracián Baena**
 
@@ -551,33 +197,19 @@ El universo concreto es **Ohana**.
 
 <div align="center">
 
-# `READY?`
+### [Jugar Project Ohana](https://gracianb.github.io/project-ohana/)
 
-## [🎮 JUGAR PROJECT OHANA →](https://gracianb.github.io/project-ohana/)
+Bebé, base, evo, final, GOD.
 
-`LIVE · CANVAS · BROWSER · PLAY`
-
-<br/>
-
-**BEBÉ → BASE → EVO → FINAL → GOD**
+10 salas · 10 personajes · 1 Reina
 
 <br/>
 
-`8 ROOMS · 5 CHARACTERS · 1 BOSS`
+[Hub](https://gracianb.github.io/GracianB/) · [Systems Lab](https://gracianb.github.io/systems-lab/) · [Experience](https://gracianb.github.io/professional-deck/) · [Yoga](https://gracianb.github.io/yoga-instructor/)
 
-<br/><br/>
+<sub>PLAY · Murcia · 2026</sub>
 
----
-
-### `PLAY × TÉCNICA`
-
-**PROJECT OHANA**
-
-<sub>
-Part of the GracianB ecosystem · Murcia · Spain · 2026
-</sub>
-
-<br/><br/>
+<br/>
 
 <a href="https://gracianb.github.io/systems-lab/">
 
