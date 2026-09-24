@@ -769,11 +769,12 @@ export class Portals {
     }
   }
 
-  draw(ctx, cam, t) {
+  draw(ctx, cam, t, opt) {
     if (!ctx || !cam) return;
+    const skipCatapult = !!(opt && opt.skipCatapult);
     for (const portal of this.items) {
       if (portal.type === "blackhole") drawBlackhole(ctx, cam, t, portal, this.orbitals, this.charge);
-      else drawCatapult(ctx, cam, t, portal, this.charge);
+      else if (!skipCatapult) drawCatapult(ctx, cam, t, portal, this.charge);
       if (this.near === portal && this.prompt) {
         drawNearPrompt(ctx, cam, portal, this.prompt, t);
       }

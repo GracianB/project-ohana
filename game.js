@@ -3,6 +3,7 @@ import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
+import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -1868,11 +1869,14 @@ function render() {
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
   ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
-  drawTerrain(ctx, game.platforms, world, game.cam, t);
+  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam);
+  else {
+    renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
+    drawTerrain(ctx, game.platforms, world, game.cam, t);
+  }
   const r = room();
   drawSigns(ctx, r, game.cam, t, game.player.evo);
-  portals.draw(ctx, game.cam, t);
+  portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
   Rain.draw(ctx, game.cam);
   Rain.drawPlayerHint(ctx, game.cam, game.player);
   Surprises.draw(ctx, game.cam, t, game);

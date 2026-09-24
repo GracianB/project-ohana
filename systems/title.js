@@ -187,8 +187,8 @@ function mountLook(wrap) {
   if (wrap.querySelector(".look-switch")) return;
   const label = wrap.querySelector(".pick-label");
   const html = '<div class="look-switch" role="group" aria-label="Versión de personajes">'
-    + '<button type="button" data-look="vector">De antes</button>'
-    + '<button type="button" data-look="paint">Nuevos</button>'
+    + '<button type="button" data-look="vector">Normal</button>'
+    + '<button type="button" data-look="paint">Realista</button>'
     + '</div>';
   if (label) label.insertAdjacentHTML("afterend", html);
   else wrap.insertAdjacentHTML("afterbegin", html);

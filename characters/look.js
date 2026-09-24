@@ -1,4 +1,4 @@
-// Qué elenco se ve: "vector" (los de antes) o "paint" (los retratos).
+// Qué versión se ve: "vector" (Normal) o "paint" (Realista).
 const KEY = "ohana-look";
 
 export function getLook() {
