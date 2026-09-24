@@ -24,7 +24,7 @@ function pw(p) { return 1 + evoOf(p) * 0.35; }
 function canHit(e) { return !!e && !e.dying && e.hp > 0 && !(e.invuln > 0); }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function pid(p) { return (p.passive && p.passive.id) || PASSIVE_BY_ID[p.id] || null; }
-const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce", yomi: "hollow" };
+const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce", yomi: "hollow", cuerno: "punta" };
 
 function reset(p) {
   sparks.length = 0;
@@ -181,6 +181,10 @@ export const Passives = {
         if ((input.t % 2) === 0) game.fx.emit(cx(p) - p._slideDir * p.w * 0.5, p.y + p.h, { color: "#e8d8a8", count: 2, size: 2.5, up: 0.8, speed: 1.4, life: 14 });
         if (p._slideT === 0) p._slideCd = 18;
       }
+    } else if (id === "punta") {
+      if (!p.grounded && (input.t % 6) === 0) {
+        game.fx.emit(cx(p) + (p.facing || 1) * 6, p.y + 2, { color: "#ffe9a8", count: 1, size: 2.4, up: -0.4, life: 14, star: true });
+      }
     }
   },
 
@@ -248,6 +252,13 @@ export const Passives = {
       }
     }
     if (p._bounceT > 0) { p._bounceT--; p._pmove = "bounce"; }
+
+    if (id === "punta" && p.grounded && p._preVy > 3.2 && !p.dead) {
+      rings.push({ x: cx(p), y: p.y + p.h, R: 26, life: 10, max: 10, color: "#ffe9a8", flat: true });
+      if (p.vy > -1) p.vy = -3.4;
+      p._pmove = "punta";
+      game.fx.emit(cx(p), p.y + 2, { color: "#fff6c8", count: 6, size: 2.5, up: 1.2, star: true });
+    }
 
     // chispas de Chispín
     if (sparks.length) {

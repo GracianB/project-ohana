@@ -46,6 +46,9 @@ export const ABILITY_DEFS = {
   ofuda: { name: "Ofuda", key: "J", cd: 560, color: "#f2e6c8", desc: "Talismán de papel que se clava y estalla." },
   sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
   maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
+  gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Una estrella corta que sale de la punta." },
+  gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Un paso de luz hacia delante." },
+  rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete chispas en abanico, una de cada color." },
 };
 
 export function useAbility(game, index) {
@@ -609,6 +612,36 @@ const CASTERS = {
     g.flash = Math.max(g.flash || 0, 8);
     g.flashColor = "#ff2244";
     g.shake = Math.min(18, (g.shake || 0) + 8);
+  },
+
+  // ======================= CUERNO =======================
+  gleam(g, p, evo) {
+    const h = hand(p);
+    g.projectiles.push({
+      x: h.x - 4, y: h.y - 16, vx: 9.5 * p.facing, vy: -1.4,
+      w: 12, h: 12, life: 42, dmg: 8 + evo, color: "#ffe9a8", shape: "orb", owner: "player", trail: true,
+    });
+    boom(g, h.x, h.y - 14, "#ffe9a8", 6, { star: true });
+  },
+  gallop(g, p, evo) {
+    p.vx = (p.facing || 1) * (10 + evo);
+    p.vy = Math.min(p.vy, -1.6);
+    armor(p, 8);
+    g.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#f7e7ff" });
+    boom(g, cx(p), cy(p), "#f2c1ff", 8, { star: true });
+  },
+  rainbow(g, p, evo) {
+    const colors = ["#ff8ad4", "#ffb15a", "#ffe14a", "#8ee07a", "#7ec8ff", "#c9b6ff", "#fff6c8"];
+    for (let i = 0; i < colors.length; i++) {
+      const a = -1.05 + (i / (colors.length - 1)) * 1.5;
+      g.projectiles.push({
+        x: cx(p) - 5, y: p.y - 4, vx: Math.cos(a) * (7.5 + evo * 0.3) * p.facing, vy: Math.sin(a) * 6.5 - 1,
+        w: 10, h: 10, life: 38, dmg: 7 + evo, color: colors[i], shape: "orb", owner: "player", trail: true,
+      });
+    }
+    g.flash = Math.max(g.flash || 0, 6);
+    g.flashColor = "#fff6ff";
+    boom(g, cx(p), p.y, "#fff6c8", 12, { star: true, up: 2 });
   },
 };
 

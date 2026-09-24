@@ -6,7 +6,7 @@
 // ============================================================================
 // Personajes activos en la demo. Los demás siguen en ALL_ROSTER (con su arte),
 // solo se ocultan: para reactivarlos, añade su id aquí.
-const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"];
+const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"];
 
 export const ALL_ROSTER = [
   {
@@ -133,6 +133,20 @@ export const ALL_ROSTER = [
       { name: "Yomi Manga", color: "#d09060", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
       { name: "Yomi Grieta", color: "#c4503a", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
       { name: "YOMI FAUCES", color: "#ff4466", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true }
+    ]
+  },
+  {
+    id: "cuerno", name: "Cuerno", color: "#f2c1ff",
+    speed: 4.2, jumpPower: 12.4, maxJumps: 2, health: 86, w: 22, h: 26,
+    abilities: ["gleam", "gallop", "rainbow"],
+    passive: { id: "punta", name: "Punta de luz", desc: "Al caer, el cuerno suelta un brillo y te da un saltito. No pincha." },
+    evoNames: ["Cuernín", "Cuerno", "Cuerno Iris", "Cuerno Estelar", "CUERNO GOD"],
+    forms: [
+      { name: "Cuernín", color: "#ffe0f4", speed: 4.2, jump: 12.4, jumps: 2, hp: 86, w: 22, h: 26 },
+      { name: "Cuerno", color: "#f2c1ff", speed: 4.7, jump: 13.0, jumps: 2, hp: 104, w: 24, h: 30 },
+      { name: "Cuerno Iris", color: "#c9b6ff", speed: 5.2, jump: 13.6, jumps: 2, hp: 124, w: 26, h: 34 },
+      { name: "Cuerno Estelar", color: "#9ad7ff", speed: 5.8, jump: 14.2, jumps: 3, hp: 150, w: 28, h: 38 },
+      { name: "CUERNO GOD", color: "#fff6c4", speed: 6.6, jump: 15.4, jumps: 3, hp: 198, w: 32, h: 44, aura: true }
     ]
   }
 ];

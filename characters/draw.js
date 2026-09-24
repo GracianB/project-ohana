@@ -46,7 +46,7 @@ function star(ctx, x, y, r, fill) {
 // ============================================================================
 
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
+const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96, cuerno: 1.0 };
 
 const FLAVOR = {
   kilo:    { kind: "petal", colors: ["#ff9ab0", "#ffd36a", "#ffffff"] },
@@ -61,6 +61,7 @@ const FLAVOR = {
   dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
   pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
   yomi:    { kind: "ember", colors: ["#6a3cff", "#ff4466", "#1a0828"] },
+  cuerno:  { kind: "star", colors: ["#ffe9a8", "#f2c1ff", "#ffffff"] },
 };
 
 /** "#rgb" | "#rrggbb" → rgba() con alfa. Otros formatos se devuelven tal cual. */

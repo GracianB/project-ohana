@@ -102,15 +102,16 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   ctx.fillRect(x + 4, y + 1, w - 8, 2);
 
   if (id === "jungle" || id === "grove" || id === "beach") {
-    ctx.fillStyle = id === "beach" ? "#6aaa58" : "#3f9a3a";
-    const n = Math.max(2, Math.floor(w / 18));
+    const n = Math.max(2, Math.floor(w / 22));
     for (let i = 0; i < n; i++) {
-      const tx = x + 6 + ((i + 0.5) * (w - 12)) / n;
-      const th = 5 + hash(plat.x + i * 3) * 6;
+      const tx = x + 8 + ((i + 0.5) * (w - 16)) / n;
+      const tw = 6 + hash(plat.x + i) * 4;
+      const th = 2.5 + hash(plat.x + i * 5) * 2.5;
+      ctx.fillStyle = id === "beach" ? "#8fbf62" : (i % 2 ? "#8ed56a" : "#63b84e");
       ctx.beginPath();
-      ctx.moveTo(tx - 4, y + 2);
-      ctx.lineTo(tx, y - th);
-      ctx.lineTo(tx + 4, y + 2);
+      ctx.moveTo(tx - tw, y + 1);
+      ctx.quadraticCurveTo(tx, y - th, tx + tw, y + 1);
+      ctx.closePath();
       ctx.fill();
     }
   } else if (id === "volcano") {

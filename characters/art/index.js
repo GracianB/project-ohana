@@ -8,10 +8,11 @@ import dino from "./dino.js";
 import frita from "./frita.js";
 import pizza from "./pizza.js";
 import yomi from "./yomi.js";
+import cuerno from "./cuerno.js";
 
 export const ART = {
   kilo, lilo: kilo,
   stitcho: stitch, stitch,
   chispin, pikachu: chispin,
-  cat, dragon, dino, frita, pizza, yomi
+  cat, dragon, dino, frita, pizza, yomi, cuerno
 };

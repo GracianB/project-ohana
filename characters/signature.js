@@ -9,6 +9,7 @@ export const SIGNATURE = {
   frita:   { reach: 12, dmg: 0, kb: 1, kind: "fan", dash: 14, iframe: 8, low: true },
   pizza:   { reach: 0, dmg: 2, kb: 1.25, kind: "crescent", dash: 13, iframe: 8, hop: -3.2 },
   yomi:    { reach: 10, dmg: 4, kb: 1.15, kind: "fan", dash: 12, iframe: 8 },
+  cuerno:  { reach: 6, dmg: 0, kb: 1.05, kind: "leaf", dash: 14, iframe: 8, hop: -2 },
 };
 
 export function signature(id) {
@@ -27,10 +28,11 @@ const HITS = {
   frita:   { name: "Corte", kind: "fan", color: "#f0b43a" },
   pizza:   { name: "Porcion", kind: "crescent", color: "#ffb43a" },
   yomi:    { name: "Fauces", kind: "fan", color: "#ff4466" },
+  cuerno:  { name: "Toque", kind: "leaf", color: "#f2c1ff" },
 };
 
 export const DIFFICULTY = {
-  kilo: 1, pizza: 1, cat: 1,
+  kilo: 1, pizza: 1, cat: 1, cuerno: 1,
   chispin: 2, stitcho: 2, dragon: 2,
   dino: 3, frita: 3, yomi: 3,
 };
