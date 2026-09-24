@@ -14,69 +14,41 @@ export function signature(id) {
   return SIGNATURE[id] || SIGNATURE.kilo;
 }
 
-// Ataque de clic / tecla H. Uno por forma (0 bebe -> 4 GOD).
-export const MARKS = {
-  kilo: [
-    { name: "Nota", style: "arc", kind: "leaf", dmg: 16, reach: 52, cd: 26 },
-    { name: "Acorde", style: "arc", kind: "leaf", dmg: 22, reach: 60, cd: 26, shots: 1 },
-    { name: "Coro", style: "shot", dmg: 14, n: 3, cd: 28, color: "#ff9ab0" },
-    { name: "Circulo", style: "nova", dmg: 28, r: 88, cd: 34 },
-    { name: "Himno", style: "nova", dmg: 40, r: 120, cd: 32, heal: 8 },
-  ],
-  stitcho: [
-    { name: "Zarpa", style: "arc", kind: "claws", dmg: 20, reach: 46, cd: 20 },
-    { name: "Doble zarpa", style: "arc", kind: "claws", dmg: 18, reach: 58, cd: 22, kb: 1.2 },
-    { name: "Plasma", style: "shot", dmg: 22, n: 1, cd: 20, color: "#5ad1ff" },
-    { name: "Rafaga", style: "shot", dmg: 16, n: 3, cd: 22, color: "#5ad1ff", speed: 11 },
-    { name: "Estallido", style: "nova", dmg: 36, r: 100, cd: 30 },
-  ],
-  chispin: [
-    { name: "Chispa", style: "shot", dmg: 16, n: 1, cd: 18, color: "#ffe14a", speed: 12 },
-    { name: "Latigazo", style: "arc", kind: "zap", dmg: 24, reach: 70, cd: 22 },
-    { name: "Salto", style: "nova", dmg: 22, r: 70, cd: 24 },
-    { name: "Rayo", style: "shot", dmg: 18, n: 3, cd: 24, color: "#fff6a0", speed: 13 },
-    { name: "Tormenta", style: "nova", dmg: 34, r: 130, cd: 32 },
-  ],
-  cat: [
-    { name: "Zarpazo", style: "arc", kind: "claws", dmg: 22, reach: 40, cd: 16 },
-    { name: "Doble", style: "arc", kind: "claws", dmg: 18, reach: 48, cd: 18, kb: 0.8 },
-    { name: "Giro", style: "nova", dmg: 20, r: 64, cd: 24 },
-    { name: "Cazadora", style: "arc", kind: "claws", dmg: 32, reach: 62, cd: 20 },
-    { name: "Nueve", style: "nova", dmg: 30, r: 110, cd: 28, heal: 4 },
-  ],
-  dragon: [
-    { name: "Soplo", style: "shot", dmg: 18, n: 1, cd: 20, color: "#ff6a2a", speed: 8 },
-    { name: "Lengua", style: "shot", dmg: 26, n: 1, cd: 22, color: "#ff8a3a", speed: 9 },
-    { name: "Cono", style: "arc", kind: "fan", dmg: 28, reach: 78, cd: 24 },
-    { name: "Aliento", style: "shot", dmg: 16, n: 3, cd: 26, color: "#ff4a20", speed: 8 },
-    { name: "Infierno", style: "nova", dmg: 42, r: 116, cd: 34 },
-  ],
-  dino: [
-    { name: "Mordisco", style: "arc", kind: "fan", dmg: 26, reach: 44, cd: 24, kb: 1.4 },
-    { name: "Coletazo", style: "arc", kind: "fan", dmg: 22, reach: 70, cd: 26, kb: 1.7 },
-    { name: "Pisoton", style: "slam", dmg: 30, reach: 80, cd: 28, kb: 1.3 },
-    { name: "Rugido", style: "nova", dmg: 24, r: 96, cd: 32, kb: 1.8 },
-    { name: "Temblor", style: "slam", dmg: 44, reach: 120, cd: 34, kb: 1.6 },
-  ],
-  frita: [
-    { name: "Sal", style: "arc", kind: "fan", dmg: 14, reach: 64, cd: 16 },
-    { name: "Corte", style: "arc", kind: "fan", dmg: 22, reach: 58, cd: 18 },
-    { name: "Ketchup", style: "shot", dmg: 20, n: 1, cd: 22, color: "#e23b3b", speed: 7 },
-    { name: "Rocion", style: "shot", dmg: 12, n: 3, cd: 22, color: "#ff5a4a", speed: 8 },
-    { name: "Freidora", style: "nova", dmg: 32, r: 100, cd: 30 },
-  ],
-  pizza: [
-    { name: "Porcion", style: "shot", dmg: 16, n: 1, cd: 18, color: "#ffb43a", speed: 8 },
-    { name: "Disco", style: "shot", dmg: 22, n: 1, cd: 20, color: "#e0402a", speed: 9 },
-    { name: "Queso", style: "arc", kind: "crescent", dmg: 18, reach: 66, cd: 20, kb: -0.6 },
-    { name: "Horno", style: "shot", dmg: 14, n: 3, cd: 24, color: "#ff8a2a", speed: 8 },
-    { name: "Familiar", style: "nova", dmg: 36, r: 124, cd: 32, heal: 6 },
-  ],
+// H es siempre un golpe cercano. La forma solo pega un poco más fuerte y un poco más lejos.
+// El disparo y el área se quedan en J K L, para que el nivel no dependa del botón básico.
+const HITS = {
+  kilo:    { name: "Nota", kind: "leaf", color: "#ff9ab0" },
+  stitcho: { name: "Zarpa", kind: "claws", color: "#7eb6ff" },
+  chispin: { name: "Chispa", kind: "zap", color: "#ffe14a" },
+  cat:     { name: "Zarpazo", kind: "claws", color: "#ffb6e4" },
+  dragon:  { name: "Garra", kind: "fan", color: "#ff6a2a" },
+  dino:    { name: "Mordisco", kind: "fan", color: "#8ee07a" },
+  frita:   { name: "Corte", kind: "fan", color: "#f0b43a" },
+  pizza:   { name: "Porcion", kind: "crescent", color: "#ffb43a" },
 };
 
-export function markAt(id, evo) {
-  const list = MARKS[id] || MARKS.kilo;
-  const i = Math.max(0, Math.min(list.length - 1, Number(evo) || 0));
-  return list[i];
+export const DIFFICULTY = {
+  kilo: 1, pizza: 1, cat: 1,
+  chispin: 2, stitcho: 2, dragon: 2,
+  dino: 3, frita: 3,
+};
+
+export function difficulty(id) {
+  return DIFFICULTY[id] || 2;
 }
+
+export function markAt(id, evo) {
+  const base = HITS[id] || HITS.kilo;
+  const i = Math.max(0, Math.min(4, Number(evo) || 0));
+  return {
+    name: base.name,
+    kind: base.kind,
+    color: base.color,
+    style: "arc",
+    dmg: 20 + i * 4,
+    reach: 64 + i * 3,
+    kb: id === "dino" ? 1.2 : 1,
+  };
+}
+
 

@@ -1,5 +1,5 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
-import { signature, markAt } from "./characters/signature.js";
+import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
@@ -2231,7 +2231,12 @@ function setupSelect() {
   const wrap = document.getElementById("chars");
   if (!wrap) return;
   const grid = document.getElementById("chars-grid") || wrap;
-  grid.innerHTML = ROSTER.map((c, i) => '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ' (tecla ' + (i + 1) + ')"><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>').join("");
+  const RANKS = ["", "Fácil", "Media", "Difícil"];
+  grid.innerHTML = ROSTER.map((c, i) => {
+    const rank = difficulty(c.id);
+    const hit = markAt(c.id, 0).name;
+    return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>';
+  }).join("");
   grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
   addEventListener("keydown", (e) => {
     if (game.running) return;

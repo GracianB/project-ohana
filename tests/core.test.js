@@ -50,10 +50,12 @@ test("cada personaje pega distinto", () => {
   assert.equal(signature("kilo").kind, "leaf");
   assert.equal(signature("chispin").kind, "zap");
   assert.ok(signature("stitcho").dash > signature("dino").dash);
-  assert.notEqual(markAt("kilo", 0).name, markAt("kilo", 4).name);
-  assert.notEqual(markAt("dino", 2).style, markAt("chispin", 0).style);
-  assert.equal(markAt("pizza", 4).style, "nova");
-  assert.equal(markAt("dragon", 0).style, "shot");
+  assert.equal(markAt("kilo", 0).name, markAt("kilo", 4).name);
+  assert.equal(markAt("kilo", 0).style, "arc");
+  assert.equal(markAt("dino", 2).style, "arc");
+  assert.equal(markAt("frita", 4).style, "arc");
+  assert.ok(markAt("dino", 4).dmg > markAt("dino", 0).dmg);
+  assert.ok(Math.abs(markAt("dino", 0).reach - markAt("frita", 0).reach) < 8);
 });
 
 test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {
