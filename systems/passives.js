@@ -24,7 +24,7 @@ function pw(p) { return 1 + evoOf(p) * 0.35; }
 function canHit(e) { return !!e && !e.dying && e.hp > 0 && !(e.invuln > 0); }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function pid(p) { return (p.passive && p.passive.id) || PASSIVE_BY_ID[p.id] || null; }
-const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce", yomi: "petal" };
+const PASSIVE_BY_ID = { kilo: "float", lilo: "float", stitcho: "climb", stitch: "climb", chispin: "spark", pikachu: "spark", cat: "ninelives", dragon: "glide", dino: "pound", frita: "slide", pizza: "bounce", yomi: "hollow" };
 
 function reset(p) {
   sparks.length = 0;
@@ -67,13 +67,25 @@ export const Passives = {
     p._pmove = null;
     p._gliding = false;
 
-    if (id === "float" || id === "petal") {
+    if (id === "float") {
       if (!p.grounded && input.jump && p.vy > 0) {
         p.vy = Math.min(p.vy, 1.4 - 0.52);
         p._pmove = "float";
-        const col = id === "petal" ? "#ff8ad4" : ((input.t % 14) ? "#ff9ab0" : "#7de87a");
+        const col = (input.t % 14) ? "#ff9ab0" : "#7de87a";
         if ((input.t % 7) === 0) game.fx.emit(cx(p), p.y + p.h, { color: col, count: 1, size: 3, up: -0.2, speed: 0.8, life: 20, gravity: 0.03 });
       }
+    } else if (id === "hollow") {
+      if (!p.grounded && p.vy > 0.4) p.vy = Math.min(13, p.vy + 0.22);
+      if (!p.grounded && input.jumpPressed && !(p._specter > 0)) {
+        p._specter = 10;
+        p.x += (p.facing || 1) * (28 + evoOf(p) * 6);
+        p.vy = Math.min(p.vy, 1.2);
+        p.invuln = Math.max(p.invuln || 0, 8);
+        p._pmove = "hollow";
+        game.fx.emit(cx(p), cy(p), { color: "#6a3cff", count: 8, size: 3, up: 0.4, life: 14 });
+        game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#1a0828" });
+      }
+      if (p._specter > 0) p._specter--;
     } else if (id === "climb") {
       const w = !p.grounded || p._climbT > 0 ? findWall(game, p, input) : null;
       if (w && input.jump) {

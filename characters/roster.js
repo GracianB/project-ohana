@@ -122,17 +122,17 @@ export const ALL_ROSTER = [
     ]
   },
   {
-    id: "yomi", name: "Yomi", color: "#ff7ab8",
-    speed: 4.7, jumpPower: 12.4, maxJumps: 2, health: 76, w: 20, h: 30,
-    abilities: ["ukulele", "blink", "ohana"],
-    passive: { id: "petal", name: "Pétalos", desc: "Mantén salto en el aire para caer entre pétalos." },
-    evoNames: ["Yomi", "Yomi Lazo", "Yomi Estrella", "Yomi Grieta", "YOMI GOD"],
+    id: "yomi", name: "Yomi", color: "#e8c090",
+    speed: 4.4, jumpPower: 12.0, maxJumps: 2, health: 84, w: 26, h: 36,
+    abilities: ["ofuda", "sleeve", "maw"],
+    passive: { id: "hollow", name: "Paso hueco", desc: "Cae más rápido. En el aire, pulsa salto para un paso espectral." },
+    evoNames: ["Farol", "Yomi", "Yomi Manga", "Yomi Grieta", "YOMI FAUCES"],
     forms: [
-      { name: "Yomi", color: "#ff9ec8", speed: 4.7, jump: 12.4, jumps: 2, hp: 76, w: 20, h: 30 },
-      { name: "Yomi Lazo", color: "#ff7ab8", speed: 5.2, jump: 13.0, jumps: 2, hp: 96, w: 22, h: 34 },
-      { name: "Yomi Estrella", color: "#ff4aa0", speed: 5.8, jump: 13.6, jumps: 3, hp: 116, w: 24, h: 38 },
-      { name: "Yomi Grieta", color: "#e0235a", speed: 6.3, jump: 14.2, jumps: 3, hp: 140, w: 26, h: 40 },
-      { name: "YOMI GOD", color: "#ffd6f0", speed: 7.2, jump: 15.4, jumps: 4, hp: 188, w: 28, h: 44, aura: true }
+      { name: "Farol", color: "#f4e2c4", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
+      { name: "Yomi", color: "#e8c090", speed: 4.8, jump: 12.6, jumps: 2, hp: 104, w: 28, h: 40 },
+      { name: "Yomi Manga", color: "#d09060", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
+      { name: "Yomi Grieta", color: "#c4503a", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
+      { name: "YOMI FAUCES", color: "#ff4466", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true }
     ]
   }
 ];

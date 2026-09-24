@@ -156,6 +156,9 @@ const BANK = {
   climb: () => tone(700, 900, 0.04, 0.02, "square"),
   spark: () => noise(0.08, 0.04, 0, { type: "highpass", f0: 6000 }),
   lives: () => { arp([N(12), N(7), N(12), N(19)], 0.08, 0.3, 0.06, "triangle"); },
+  ofuda: () => tone(880, 440, 0.08, 0.05, "square"),
+  sleeve: () => tone(220, 90, 0.16, 0.06, "sawtooth"),
+  maw: () => noise(0.18, 0.08, 0, { type: "lowpass", f0: 400 }),
 };
 
 /** Toca un efecto por nombre (ignora nombres desconocidos). */

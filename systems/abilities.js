@@ -43,6 +43,9 @@ export const ABILITY_DEFS = {
   pepperoni: { name: "Disco pepperoni", key: "J", cd: 620, color: "#e0402a", desc: "Disco que rebota en paredes y suelo." },
   cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
   oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
+  ofuda: { name: "Ofuda", key: "J", cd: 560, color: "#f2e6c8", desc: "Talismán de papel que se clava y estalla." },
+  sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
+  maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
 };
 
 export function useAbility(game, index) {
@@ -585,6 +588,26 @@ const CASTERS = {
     g.flashColor = "#ffb060";
     g.shake = Math.min(18, (g.shake || 0) + 6);
   },
+
+  ofuda(g, p, evo) {
+    const h = hand(p);
+    add({
+      kind: "ofuda", x: h.x, y: h.y,
+      vx: (8 + evo) * p.facing, vy: -0.4,
+      life: 90, stuck: 0, dmg: (18 + evo * 3) * pw(p),
+    });
+    boom(g, h.x, h.y, "#f2e6c8", 6);
+  },
+  sleeve(g, p, evo) {
+    add({ kind: "sleeve", life: 18, evo, face: p.facing || 1 });
+    boom(g, cx(p), cy(p), "#6a3cff", 8);
+  },
+  maw(g, p, evo) {
+    add({ kind: "maw", life: 16, max: 16, evo, face: p.facing || 1, hit: new Set(), dmg: (36 + evo * 6) * pw(p) });
+    g.flash = Math.max(g.flash || 0, 8);
+    g.flashColor = "#ff2244";
+    g.shake = Math.min(18, (g.shake || 0) + 8);
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -997,6 +1020,60 @@ const UPD = {
     }
     if (done) { boom(g, f.x, f.y, "#ffcf4a", 8, { up: 1.6 }); boom(g, f.x, f.y, "#e0402a", 4); return false; }
     return f.life > 0 && f.y < (g.worldH || 900) + 40;
+  },
+  ofuda(g, f) {
+    f.life--;
+    if (!f.stuck) {
+      f.x += f.vx;
+      f.y += f.vy;
+      for (const e of g.enemies) {
+        if (canHit(e) && circleHit(f.x, f.y, 14, e)) {
+          f.stuck = 16;
+          f.vx = 0;
+          hitEnemy(g, e, f.dmg * 0.45, { kx: Math.sign(f.vx || 1) * 2, ky: -1, stun: 10, color: "#f2e6c8" });
+          break;
+        }
+      }
+    } else if (--f.stuck <= 0) {
+      for (const e of g.enemies) {
+        if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < 72) {
+          hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) || 1, ky: -4, stun: 16, color: "#ff4466" });
+        }
+      }
+      boom(g, f.x, f.y, "#ff4466", 12, { star: true });
+      return false;
+    }
+    return f.life > 0;
+  },
+  sleeve(g, f, p) {
+    f.life--;
+    const x = cx(p), y = cy(p);
+    for (const e of g.enemies) {
+      if (!canHit(e)) continue;
+      const dx = x - cx(e), dy = y - cy(e);
+      const dist = Math.hypot(dx, dy);
+      if (dist > 210 || dist < 8) continue;
+      if (Math.sign(dx) !== (p.facing || 1) && Math.abs(dx) > 24) continue;
+      e.vx += (dx / dist) * 2.1;
+      e.vy += (dy / dist) * 0.8;
+    }
+    return f.life > 0;
+  },
+  maw(g, f, p) {
+    f.life--;
+    if (f.life === f.max - 1) {
+      for (const e of g.enemies) {
+        if (!canHit(e) || f.hit.has(e)) continue;
+        const dx = cx(e) - cx(p);
+        const dy = cy(e) - cy(p);
+        if (Math.sign(dx || f.face) !== f.face && Math.abs(dx) > 16) continue;
+        if (Math.abs(dx) < 120 && Math.abs(dy) < 54) {
+          f.hit.add(e);
+          hitEnemy(g, e, f.dmg, { kx: f.face * 8, ky: -3, stun: 20, color: "#ff2244" });
+        }
+      }
+    }
+    return f.life > 0;
   },
 };
 
@@ -1608,6 +1685,49 @@ const DRW = {
     ctx.translate(f.x - cam.x, f.y - cam.y);
     ctx.rotate(f.rot);
     drawSlice(ctx, 1);
+  },
+  ofuda(ctx, f, cam) {
+    ctx.save();
+    ctx.translate(f.x - cam.x, f.y - cam.y);
+    ctx.rotate(f.stuck ? 0.2 : Math.atan2(f.vy, f.vx || 1));
+    ctx.fillStyle = "#f4ead2";
+    ctx.fillRect(-8, -12, 16, 24);
+    ctx.strokeStyle = "#c23a3a";
+    ctx.lineWidth = 1.4;
+    ctx.strokeRect(-8, -12, 16, 24);
+    ctx.beginPath();
+    ctx.moveTo(0, -6);
+    ctx.lineTo(0, 6);
+    ctx.moveTo(-4, 0);
+    ctx.lineTo(4, 0);
+    ctx.stroke();
+    ctx.restore();
+  },
+  sleeve(ctx, f, cam, t, g, p) {
+    if (!p) return;
+    const x = cx(p) - cam.x, y = cy(p) - cam.y;
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = "#b9a6ff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(x, y, 40 + (18 - f.life) * 6, (p.facing || 1) > 0 ? -0.8 : Math.PI - 0.8, (p.facing || 1) > 0 ? 0.8 : Math.PI + 0.8);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  },
+  maw(ctx, f, cam, t, g, p) {
+    if (!p) return;
+    const x = cx(p) - cam.x + (f.face || 1) * 36;
+    const y = cy(p) - cam.y;
+    const k = 1 - f.life / f.max;
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "#1a0410";
+    ctx.beginPath();
+    ctx.ellipse(x, y, 18 + k * 28, 10 + k * 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#ff4466";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
   },
 };
 

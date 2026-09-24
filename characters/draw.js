@@ -58,7 +58,7 @@ const FLAVOR = {
   frita:   { kind: "salt",  colors: ["#ffffff", "#fff3c4", "#ff4a3a"] },
   dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
   pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
-  yomi:    { kind: "petal", colors: ["#ff8ad4", "#fff4a8", "#ffffff"] },
+  yomi:    { kind: "ember", colors: ["#6a3cff", "#ff4466", "#1a0828"] },
 };
 
 /** "#rgb" | "#rrggbb" → rgba() con alfa. Otros formatos se devuelven tal cual. */
