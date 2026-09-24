@@ -212,9 +212,16 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait has-art"><img class="portrait-art" alt="" src="assets/portraits/' + def.id + '.jpg"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><img class="portrait-art" alt="" src="assets/portraits/' + def.id + '.jpg"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
       const img = el.querySelector(".portrait-art");
-      if (img) img.addEventListener("error", () => { img.remove(); el.querySelector(".portrait")?.classList.remove("has-art"); });
+      const box = el.querySelector(".portrait");
+      if (img && box) {
+        const show = () => box.classList.add("has-art");
+        const hide = () => { img.remove(); box.classList.remove("has-art"); };
+        img.addEventListener("load", show);
+        img.addEventListener("error", hide);
+        if (img.complete) { if (img.naturalWidth) show(); else hide(); }
+      }
       const role = document.createElement("div");
       role.className = "role";
       role.textContent = ROLES[def.id] || "Bebé";
