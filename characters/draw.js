@@ -198,23 +198,7 @@ function createRadialGradient(ctx, x, y, rInner, rOuter, colorInner, colorOuter)
   g.addColorStop(1, colorOuter);
   return g;
 }
-
-function drawShadow(ctx, x, y, w, h, alpha = 0.3) {
-  ctx.save();function drawPulseGlow(ctx, x, y, r, color, t, speed = 8) {
-  const pulse = 0.6 + Math.sin(t / speed) * 0.4;
-  ctx.save();
-  ctx.globalAlpha = pulse * 0.5;
-  
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, color);
-  g.addColorStop(1, "transparent");
-  
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
+ 
 
 /** Dibuja un aura de energía - VERSIÓN ÚNICA */
 function drawEnergyAura(ctx, x, y, r, color, t, particleCount = 6) {
