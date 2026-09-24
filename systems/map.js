@@ -130,13 +130,6 @@ export const ROOMS = {
   }
 };
 
-function doorLabel(id, arrow, evo) {
-  const dest = ROOMS[id];
-  if (!dest) return arrow;
-  const lock = dest.needEvo != null && (evo || 0) < dest.needEvo;
-  if (lock) return arrow + " F" + (dest.needEvo + 1);
-  return arrow + " " + (dest.short || dest.name || id);
-}
 
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();

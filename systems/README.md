@@ -1,43 +1,43 @@
-# PROJECT OHANA · Systems Layer
+# PROJECT OHANA · Mapa del código
 
-## combat.js
-Centraliza habilidades, daño y combos.
+Todo es JavaScript con módulos ES nativos (sin bundler). `index.html` carga
+seis puntos de entrada; cualquier fichero que no cuelgue de ellos sobra.
 
-## collectibles.js
-Gestiona recursos recogibles y su conexión con inventario.
+```
+index.html
+├─ game.js ............ bucle principal, física, cámara, salas, enemigos, HUD
+│  ├─ characters/roster.js .... 6 personajes × 5 formas (stats, colores, hitbox)
+│  ├─ characters/draw.js ...... render de personajes (pies anclados, auras, FX)
+│  │  ├─ characters/sprites.js  carga/recorte/tinte de assets/sprites/*.png
+│  │  └─ characters/baby.js ... bebés chibi procedurales (forma 1)
+│  ├─ worlds/index.js ......... fondos por mundo (parallax)
+│  ├─ systems/map.js .......... 8 salas, puertas y carteles
+│  ├─ systems/abilities.js .... J / K / L de cada personaje, proyectiles
+│  ├─ systems/portals.js ...... catapultas y agujeros negros
+│  ├─ systems/boss-nido.js .... jefe final (3 fases)
+│  ├─ systems/death-fx.js ..... cinemática de muerte
+│  ├─ systems/rain.js ......... lluvia + paraguas (Costa)
+│  ├─ systems/surprises.js .... pez dorado, lluvia de estrellas, power-ups
+│  ├─ systems/floaters.js ..... números de daño
+│  ├─ systems/notify.js ....... avisos y cine de evolución
+│  ├─ engine/enemies.js ....... dibujo de enemigos
+│  ├─ engine/particles.js ..... partículas
+│  └─ engine/audio.js ......... efectos con WebAudio
+├─ systems/title.js ... portada y selección (usa draw.js para los retratos)
+│  └─ systems/intro.js  cinemática corta al empezar
+├─ systems/title-fx.js  fondo animado de la portada
+├─ systems/hud.js ..... tinte y pips del HUD
+├─ systems/ending.js .. pantalla "OHANA COMPLETADO"
+└─ systems/demo.js .... pistas por sala y cinta DEMO
+```
 
-## quests.js
-Sistema extensible de misiones con progreso y recompensas.
+## Personajes
+- Forma 1 (bebé): `baby.js`. Formas 2-5: PNG de `assets/sprites/<id>-<fase>.png`.
+- La tabla `FORMS` de `sprites.js` decide qué PNG usa cada forma y si lleva tinte.
+- `draw.js` escala por **altura visual** (`VISUAL_H`), no por hitbox.
+- `gallery.html` muestra las 30 formas juntas para revisarlas.
 
-## inventory.js
-Inventario basado en Map, preparado para serialización.
-
-## dialogue.js
-Colas y secuencias de diálogo.
-
-## camera.js
-Seguimiento, offset y screen shake.
-
-## particles.js
-Partículas procedurales para impactos, cristales y habilidades.
-
-## audio.js
-Registro de música y efectos. El juego funciona aunque todavía no existan
-archivos de audio físicos dentro de assets/audio.
-
-## death-fx.js
-Carry-away cinemático por fases (aparecer → reclamar → ascender → disolver, ~4.9s / ~1.8s con reduced motion): reaper con capucha, motas de alma, tether y afterimages locales (nunca `game.ghosts`). Variantes `hurt`/`void`. API: `DeathFx.start(player,onDone,opts?)/update/draw/isPlaying/cancel/playerAlpha`.
-
-Lote 30: pulido de muerte con shake al reclamar, más motas hurt y vignette void reforzada.
-
-## portals.js
-Catapultas y agujeros negros como atajos entre salas (no reemplazan doors).
-API: `spawnFromRoom`, `update`, `draw`, `tryUse`. Datos en `map.js` → `room.portals`.
-
-## surprises.js
-Sorpresas positivas por sala (sin tocar progresión evo): pez dorado (beach/reef), lluvia de estrellas (space, orbs +XP), burst GOD al llegar a forma 5 y Corona estelar (GOD, 1×/run).
-API: `onMakeFoe`, `onEnterRoom`, `onBecomeGod`, `onEnemyKilled`, `update`, `draw`, `starOrbBonus`, `reset`.
-
-## boss-nido.js
-Reina del Nido: jefe final en 3 fases (suelo → alas → enloquece) con telegraphs, charge/swoop/slam/spit.
-API: `createBossNido()`, `updateBossNido(e, game, helpers)`. Silueta procedural en `engine/enemies.js` → `drawBoss`.
+## Reglas
+- Nada de scripts `APPLY-*.ps1` que parcheen código por texto: se edita el fichero.
+- Si añades un módulo, impórtalo desde un punto de entrada o no se cargará.
+- Al cambiar CSS/JS de entrada, sube `?v=ohana-NN` en `index.html`.

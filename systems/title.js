@@ -2,7 +2,7 @@ import { ROSTER } from "../characters/roster.js";
 import { drawCharacter } from "../characters/draw.js";
 import { playIntro } from "./intro.js";
 
-const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Cría Mucho", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito" };
+const ROLES = { lilo: "Kilo Bebé", stitch: "Mini Stitcho", dragon: "Dino Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito" };
 let selectedId = "lilo";
 let tick = 0;
 let raf = 0;
@@ -50,6 +50,8 @@ function paintPortraits() {
         color: form.color || def.color,
         melee: cv._atk || 0,
         evoBurst: cv._burst || 0,
+        evoBurstMax: 90,
+        visualScale: 1.15,
       };
       c.save();
       c.translate(cv.width / 2, cv.height / 2 + 14 + bob);
@@ -127,9 +129,11 @@ function enhance() {
     if (!cont) return;
     if (save && save.id && ROSTER.some((r) => r.id === save.id)) {
       cont.classList.remove("hidden");
+      cont.disabled = false;
       cont.onclick = () => { selectedId = save.id; mark(save.id); begin("resume"); };
     } else {
       cont.classList.add("hidden");
+      cont.disabled = true;
     }
   }
   refreshContinue();

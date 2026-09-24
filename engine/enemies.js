@@ -576,11 +576,6 @@ function drawWing(ctx, x, y, rx, ry, rot, fill, t) {
   ctx.stroke();
 }
 
-function drawAvispa(ctx, e, t) {
-  // Alias: prefer abeja going forward
-  drawAbeja(ctx, e, t);
-}
-
 
 function drawAbeja(ctx, e, t) {
   // Bee-like: fuzzier yellow, rounder body, LARGER (~1.45); avispa maps here too

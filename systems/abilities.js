@@ -526,15 +526,6 @@ const CASTERS = {
     g.player.health = Math.min(g.player.maxHealth, g.player.health + heal);
     if (g.nums) g.nums.add(g.player.x, g.player.y, "+" + heal, "#6f6");
     skyStrike(g, "#ff8ad4", 40);
-    return;
-    for (let i = 0; i < 6; i++) {
-      const a = (Math.PI * 2 * i) / 6;
-      g.projectiles.push({
-        x: g.player.x + g.player.w / 2, y: g.player.y + g.player.h / 2,
-        vx: Math.cos(a) * 2.6, vy: Math.sin(a) * 2.6,
-        w: 14, h: 14, life: 34, dmg: 6, color: "#ff8ad4", shape: "heart", owner: "player", spin: true, trail: false,
-      });
-    }
   },
   acorn(g) {
     shot(g, { color: "#c4783a", vx: 12, w: 18, h: 18, dmg: 17, spin: true, shape: "orb" });

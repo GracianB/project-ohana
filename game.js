@@ -1207,49 +1207,6 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
     }
-    // --- avispa legacy AI disabled (routed to abeja) ---
-    if (false && e.kind === "avispa") {
-      e.bob = (e.bob || 0) + 0.05;
-      if (e.baseY == null) e.baseY = e.y;
-      e.cd = (e.cd || 0) - 1;
-      if (e.charging > 0) {
-        e.charging--;
-        e.telegraph = false;
-        if (t % 2 === 0) game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 9, color: "#f0c020" });
-        if (e.charging <= 0) {
-          e.cd = 70;
-          e.vx *= 0.2;
-          e.vy *= 0.2;
-          e.baseY = Math.max(240, Math.min(640, e.y));
-        }
-      } else if (e.cd <= 0 && game.player) {
-        e.wind = (e.wind || 0) + 1;
-        e.telegraph = true;
-        e.vx *= 0.86;
-        e.vy = 0;
-        e.y = e.baseY + Math.sin(e.bob) * 8;
-        if (e.wind > 48) {
-          e.wind = 0;
-          e.telegraph = false;
-          e.charging = 30;
-          const dx = game.player.x - e.x;
-          const dy = game.player.y - e.y;
-          const len = Math.hypot(dx, dy) || 1;
-          e.vx = (dx / len) * 9.0;
-          e.vy = (dy / len) * 6.8;
-          game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#f0c020", count: 8, size: 3, up: 1.2 });
-        }
-      } else {
-        e.telegraph = false;
-        e.vy = 0;
-        e.y = e.baseY + Math.sin(e.bob) * 22;
-        if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.04;
-        e.vx = Math.max(-2.4, Math.min(2.4, e.vx));
-        e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.22;
-        e.baseY = Math.max(240, Math.min(640, e.baseY));
-      }
-      if (e.x < 30 || e.x > ROOM_W - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(ROOM_W - 30 - e.w, e.x)); }
-    }
     // --- abeja/avispa: gentle hover, buzz telegraph, steeper stinger dive ---
     if (e.kind === "abeja" || e.kind === "avispa") {
       e.bob = (e.bob || 0) + 0.07;
@@ -1783,20 +1740,7 @@ function updateCam() {
   }
   game.nums.update();
 }
-function drawPortal(px, py, label, kind) {
-  // Legacy/simple pad; portals.draw usa dibujo rico. Mantenido por compat.
-  if (kind === "blackhole" || kind === "catapult") {
-    // Delega en el sistema si hay items en esa zona (no-op visual aquí).
-  }
-  const x = px - game.cam.x, y = py - game.cam.y;
-  const a = 0.2 + Math.sin(t / 10) * 0.12;
-  const col = kind === "blackhole" ? "160,100,255" : kind === "catapult" ? "255,180,80" : "80,220,255";
-  ctx.fillStyle = "rgba(" + col + "," + a + ")"; ctx.fillRect(x, y, 86, 22);
-  ctx.strokeStyle = kind === "blackhole" ? "#c9a0ff" : kind === "catapult" ? "#ffc078" : "#7ee7ff";
-  ctx.strokeRect(x, y, 86, 22);
-  ctx.fillStyle = "#e8ffff"; ctx.font = "700 11px Outfit,sans-serif"; ctx.textAlign = "center";
-  ctx.fillText(label, x + 43, y + 15);
-}
+
 function drawMinimap() {
   const layout = MAP_LAYOUT || [];
   const ox = canvas.width - 196, oy = canvas.height - 118;

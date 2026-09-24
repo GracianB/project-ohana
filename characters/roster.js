@@ -53,20 +53,20 @@ export const ROSTER = [
       { name: "Michito", color: "#ffd0ee", speed: 5.0, jump: 12.0, jumps: 2, hp: 72, w: 22, h: 22 },
       { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 28 },
       { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 34, h: 34 },
-      { name: "Nueve vidas", color: "#f4f0ff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 40, h: 40 },
+      { name: "Nueve vidas", color: "#9a6cff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 40, h: 40 },
       { name: "MICHI GOD", color: "#ff5ac8", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 48, h: 50, aura: true }
     ]
   },
   {
-    id: "dragon", name: "Dino", color: "#5ecf6a",
+    id: "dragon", name: "Dino", color: "#e8452f",
     speed: 4.5, jumpPower: 11.4, maxJumps: 2, health: 72, w: 12, h: 12,
     abilities: ["breath", "wing", "rage"],
     evoNames: ["Dino Bebé", "Dino", "Dino Pico", "Dino Rex", "DINO GOD"],
     forms: [
-      { name: "Dino Bebé", color: "#9ae8b8", speed: 4.5, jump: 11.4, jumps: 2, hp: 72, w: 12, h: 12 },
-      { name: "Dino", color: "#5ecf6a", speed: 4.2, jump: 11.0, jumps: 1, hp: 105, w: 16, h: 16 },
-      { name: "Dino Pico", color: "#2ec4b6", speed: 5.4, jump: 13.2, jumps: 2, hp: 95, w: 18, h: 22, spikes: true },
-      { name: "Dino Rex", color: "#c96b2a", speed: 3.5, jump: 10.6, jumps: 1, hp: 170, w: 24, h: 22 },
+      { name: "Dino Bebé", color: "#ff8a74", speed: 4.5, jump: 11.4, jumps: 2, hp: 72, w: 12, h: 12 },
+      { name: "Dino", color: "#e8452f", speed: 4.2, jump: 11.0, jumps: 1, hp: 105, w: 16, h: 16 },
+      { name: "Dino Pico", color: "#ff7a2a", speed: 5.4, jump: 13.2, jumps: 2, hp: 95, w: 18, h: 22, spikes: true },
+      { name: "Dino Rex", color: "#c7331f", speed: 3.5, jump: 10.6, jumps: 1, hp: 170, w: 24, h: 22 },
       { name: "DINO GOD", color: "#ffd84a", speed: 6.2, jump: 14.8, jumps: 3, hp: 220, w: 44, h: 48, aura: true, glide: true }
     ]
   },
@@ -74,13 +74,13 @@ export const ROSTER = [
     id: "frita", name: "Capitán Kétchup", color: "#f0b43a",
     speed: 4.6, jumpPower: 11.4, maxJumps: 2, health: 85, w: 18, h: 28,
     abilities: ["salt", "ketchup", "fryer"],
-    evoNames: ["Palito", "Frita", "Capitán Kétchup", "Extra Crujiente", "KÉtchup GOD"],
+    evoNames: ["Palito", "Frita", "Capitán Kétchup", "Extra Crujiente", "KÉTCHUP GOD"],
     forms: [
       { name: "Palito", color: "#ffe8a0", speed: 4.6, jump: 11.4, jumps: 2, hp: 85, w: 18, h: 28 },
       { name: "Frita", color: "#f0b43a", speed: 5.2, jump: 12.1, jumps: 3, hp: 105, w: 22, h: 32 },
       { name: "Capitán Kétchup", color: "#d42020", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
       { name: "Extra Crujiente", color: "#ffda70", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
-      { name: "KÉtchup GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 38, h: 54, aura: true }
+      { name: "KÉTCHUP GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 38, h: 54, aura: true }
     ]
   }
 ];

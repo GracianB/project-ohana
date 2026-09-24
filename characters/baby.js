@@ -424,10 +424,10 @@ function babyKoa(ctx, t) {
   const bob = Math.sin(t / 9) * 1.1;
   const wag = Math.sin(t / 5) * 2.8;
   ctx.translate(0, 2 + bob);
-  const green = "#9ae8b8";
-  const belly = "#f0ffe4";
-  const ink = "#1e4a22";
-  const sprout = "#3bb85a";
+  const green = "#ff8a74"; // escamas rojizas (misma paleta que Dino adulto)
+  const belly = "#fff0c4";
+  const ink = "#6a1a12";
+  const sprout = "#ffc23a";
 
   // Tiny curled stub tail (not a whip)
   ctx.strokeStyle = green;
