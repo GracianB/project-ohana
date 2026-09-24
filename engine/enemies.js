@@ -29,9 +29,8 @@ export function drawEnemy(ctx, e, cam, t) {
   ctx.save();
   ctx.translate(x + e.w / 2, y + e.h / 2);
   // Hit feedback: flash blanco fuerte, luego rojo
-  if (e.flash > 10) ctx.filter = "brightness(4.2) saturate(0.12)";
-  else if (e.flash > 0) ctx.filter = "brightness(2.6) sepia(0.55) hue-rotate(-25deg)";
-  else if (e.invuln > 0 && !e.boss) ctx.filter = "brightness(2.0)";
+  if (e.flash > 12) ctx.filter = "brightness(2.2)";
+  else if (e.invuln > 0 && !e.boss && (e.invuln % 8) < 4) ctx.filter = "brightness(1.45)";
   if (e.alertPing > 0 && !e.boss) {
     ctx.fillStyle = "#ffe66a";
     ctx.font = "800 16px sans-serif";
@@ -66,13 +65,13 @@ export function drawEnemy(ctx, e, cam, t) {
 
   ctx.filter = "none";
   // Overlay de golpe: blanco → rojo corto
-  if (e.flash > 0) {
-    const a = Math.min(0.72, e.flash / 14);
-    ctx.globalAlpha = a;
-    ctx.fillStyle = e.flash > 9 ? "#ffffff" : "#ff4040";
+  if (e.flash > 0 && !e.boss) {
+    ctx.globalAlpha = Math.min(0.85, e.flash / 12);
+    ctx.strokeStyle = e.flash > 9 ? "#ffffff" : "#ff4040";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(0, 0, e.w * 0.52, e.h * 0.52, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.ellipse(0, 0, e.w * 0.46, e.h * 0.58, 0, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.globalAlpha = 1;
   }
   drawHpBar(ctx, e);
