@@ -1143,7 +1143,7 @@ function updateEnemies() {
     }
     if (e.boss) {
       updateBossNido(e, game, {
-        t, hurtPlayer, showNotification, makeFoe, game.worldW, game.worldH,
+        t, hurtPlayer, showNotification, makeFoe, ROOM_W: game.worldW, ROOM_H: game.worldH,
         reduceMotion: game.reduceMotion || reduceMotion,
         beep,
       });
