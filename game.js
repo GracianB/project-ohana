@@ -45,7 +45,18 @@ const game = {
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
-function fit() { const w = Math.min(1280, innerWidth|0), h = Math.min(720, innerHeight|0); if (canvas.width !== w) canvas.width = w; if (canvas.height !== h) canvas.height = h; }
+let viewW = 1280, viewH = 720, viewDpr = 1;
+function fit() {
+  viewDpr = Math.min(2, window.devicePixelRatio || 1);
+  viewW = Math.max(320, innerWidth | 0);
+  viewH = Math.max(240, innerHeight | 0);
+  const bw = Math.round(viewW * viewDpr);
+  const bh = Math.round(viewH * viewDpr);
+  if (canvas.width !== bw) canvas.width = bw;
+  if (canvas.height !== bh) canvas.height = bh;
+  canvas.style.width = viewW + "px";
+  canvas.style.height = viewH + "px";
+}
 addEventListener("resize", fit); fit();
 
 
@@ -1866,28 +1877,28 @@ function updateProjectiles() {
 function updateCam() {
   const p = game.player; if (!p) return;
   let lerp = 0.12;
-  let tx = p.x + p.facing * 80 - canvas.width / 2;
-  let ty = p.y - canvas.height * 0.58;
+  let tx = p.x + p.facing * 80 - viewW / 2;
+  let ty = p.y - viewH * 0.58;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   const fin = game.finale && game.finale.t > 0 ? game.finale : null;
   if (fin) {
-    tx = fin.x - canvas.width / 2;
-    ty = fin.y - canvas.height * 0.46;
+    tx = fin.x - viewW / 2;
+    ty = fin.y - viewH * 0.46;
     lerp = 0.07;
   } else if (boss) {
     const bx = boss.x + boss.w / 2;
     const by = boss.y + boss.h * 0.28;
     const px = p.x + p.w / 2;
     const py = p.y + p.h * 0.35;
-    tx = (px + bx) / 2 - canvas.width / 2;
-    ty = (py * 0.45 + by * 0.55) - canvas.height * 0.42;
+    tx = (px + bx) / 2 - viewW / 2;
+    ty = (py * 0.45 + by * 0.55) - viewH * 0.42;
     lerp = 0.18;
   }
   game.cam.x += (tx - game.cam.x) * lerp;
   game.cam.y += (ty - game.cam.y) * lerp;
   if (game.camPunch > 0) game.camPunch *= 0.82;
-  game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - canvas.width)));
-  game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - canvas.height + 80)));
+  game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - viewW)));
+  game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - viewH + 80)));
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
@@ -1900,7 +1911,7 @@ function updateCam() {
 
 function drawMinimap() {
   const layout = MAP_LAYOUT || [];
-  const ox = canvas.width - 196, oy = canvas.height - 118;
+  const ox = viewW - 196, oy = viewH - 118;
   ctx.fillStyle = "rgba(6,10,16,.62)"; ctx.fillRect(ox - 8, oy - 8, 188, 104);
   ctx.strokeStyle = "rgba(126,231,255,.28)"; ctx.strokeRect(ox - 8.5, oy - 8.5, 189, 105);
   layout.forEach((row, cy) => {
@@ -1934,12 +1945,14 @@ function drawCrystal(o) {
 }
 function render() {
   if (!game.player) return;
+  ctx.setTransform(viewDpr, 0, 0, viewDpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
   ctx.save(); ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, canvas.width, canvas.height);
+  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewW, viewH);
   else {
-    renderWorld(ctx, world, game.cam, t, canvas.width, canvas.height);
+    renderWorld(ctx, world, game.cam, t, viewW, viewH);
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
@@ -1995,9 +2008,9 @@ function render() {
   // Skip low-HP edge vignette during death FX — at health=0 it was ~60% opaque over the ghost
   if (!DeathFx.isPlaying()) {
     const low = 1 - Math.max(0, game.player.health / Math.max(1, game.player.maxHealth));
-    const vg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.3, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+    const vg = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
     vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
-    ctx.fillStyle = vg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, viewW, viewH);
   }
   {
     const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
@@ -2010,26 +2023,26 @@ function render() {
       else if (game._portalFlash === "amber") tint = "255,160,60";
       // Tint fuerte + ligera vignette tipada
       ctx.fillStyle = "rgba(" + tint + "," + Math.min(0.92, fa * 0.95) + ")";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
       const vgA = fa * 0.35;
       if (vgA > 0.02) {
-        const g = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.2, canvas.width / 2, canvas.height / 2, canvas.width * 0.7);
+        const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.2, viewW / 2, viewH / 2, viewW * 0.7);
         g.addColorStop(0, "rgba(0,0,0,0)");
         g.addColorStop(1, "rgba(" + tint + "," + vgA + ")");
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, viewW, viewH);
       }
     } else if (ov && ov.alpha > 0.02) {
       // Overlay durante charge (antes del fade de viaje)
       const a = Math.min(0.9, ov.alpha);
       ctx.fillStyle = "rgba(" + (ov.color || "0,0,0") + "," + a + ")";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
       if (ov.vignette > 0.05) {
-        const g = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.height * 0.18, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+        const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.18, viewW / 2, viewH / 2, viewW * 0.72);
         g.addColorStop(0, "rgba(0,0,0,0)");
         g.addColorStop(1, "rgba(" + (ov.color || "0,0,0") + "," + (ov.vignette * 0.55) + ")");
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, viewW, viewH);
       }
     } else if (game._portalFlash && game.flash <= 0) {
       game._portalFlash = null;
@@ -2041,19 +2054,19 @@ function render() {
     const k = 1 - f.t / f.max;
     ctx.save();
     ctx.fillStyle = "rgba(4,8,16," + Math.min(0.78, k * 0.95) + ")";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, viewW, viewH);
     if (k > 0.28) {
       ctx.globalAlpha = Math.min(1, (k - 0.28) * 2.4);
       ctx.textAlign = "center";
       ctx.fillStyle = "#ffe66a";
       ctx.font = "800 46px Fraunces, serif";
-      ctx.fillText("EL NIDO CAE", canvas.width / 2, canvas.height * 0.4);
+      ctx.fillText("EL NIDO CAE", viewW / 2, viewH * 0.4);
       ctx.font = "600 18px Outfit, sans-serif";
       ctx.fillStyle = "#9ad7ff";
-      ctx.fillText("Nadie se queda atrás", canvas.width / 2, canvas.height * 0.4 + 36);
+      ctx.fillText("Nadie se queda atrás", viewW / 2, viewH * 0.4 + 36);
       ctx.globalAlpha = 0.65;
       ctx.font = "600 13px Outfit, sans-serif";
-      ctx.fillText("Esc para saltar", canvas.width / 2, canvas.height * 0.4 + 68);
+      ctx.fillText("Esc para saltar", viewW / 2, viewH * 0.4 + 68);
     }
     ctx.restore();
   }
@@ -2064,15 +2077,15 @@ function render() {
     ctx.strokeStyle = game.ult.color || "#ffe66a";
     ctx.globalAlpha = Math.min(0.85, u + 0.15);
     ctx.lineWidth = 8;
-    const rad = (1 - u) * Math.max(canvas.width, canvas.height) * 0.72;
+    const rad = (1 - u) * Math.max(viewW, viewH) * 0.72;
     ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, rad, 0, Math.PI * 2);
+    ctx.arc(viewW / 2, viewH / 2, rad, 0, Math.PI * 2);
     ctx.stroke();
     ctx.font = "800 28px Fraunces, serif";
     ctx.textAlign = "center";
     ctx.fillStyle = game.ult.color || "#fff";
     ctx.globalAlpha = Math.min(1, u * 2);
-    ctx.fillText(game.ult.name || "", canvas.width / 2, canvas.height * 0.28);
+    ctx.fillText(game.ult.name || "", viewW / 2, viewH * 0.28);
     ctx.restore();
   }
   if (game.flash > 0) {
@@ -2081,17 +2094,17 @@ function render() {
       ctx.save();
       ctx.globalAlpha = Math.min(1, fa);
       ctx.fillStyle = game.flashColor || "#fff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
       ctx.restore();
     } else {
       let rgb = "255,255,220";
       if (game._portalFlash === "purple") rgb = "200,150,255";
       else if (game._portalFlash === "amber") rgb = "255,200,120";
       ctx.fillStyle = "rgba(" + rgb + "," + fa + ")";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
     }
   }
-  if (canvas.width >= 820) drawMinimap();
+  if (viewW >= 820) drawMinimap();
 }
 function renderAbilityBar() {
   const bar = document.getElementById("ability-bar");
