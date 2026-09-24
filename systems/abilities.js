@@ -305,13 +305,19 @@ export function hitEnemy(g, e, dmg, o = {}) {
     if (o.ky) e.vy = Math.min(e.vy || 0, o.ky);
   }
   if (o.stun != null) e.stun = Math.max(e.stun || 0, e.boss ? Math.min(6, o.stun) : o.stun);
-  if (o.nums !== false) g.nums.add(cx(e) - 4, e.y, "" + d, o.color || "#ffe66a", d >= 40 || !!o.crit);
+  const crit = !!o.crit || d >= 40;
+  if (o.nums !== false) g.nums.add(cx(e) - 4, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (o.color || "#ffe66a"), crit);
   g.combo = (g.combo || 0) + 1;
-  g.comboT = 210;
+  g.comboT = 480;
   g.score = (g.score || 0) + 10 * g.combo;
-  g.fx.emit(cx(e), cy(e), { color: o.color || "#fff", count: o.parts ?? 8, size: 3, up: 1.2 });
+  g.fx.emit(cx(e), cy(e), { color: o.color || "#fff", count: o.parts ?? (crit ? 14 : 8), size: crit ? 4 : 3, up: 1.2, star: !!crit });
   if (g.player) g.player.xp = (g.player.xp || 0) + (o.xp ?? 2);
-  g.shake = Math.min(18, (g.shake || 0) + (o.shake ?? 3));
+  g.shake = Math.min(18, (g.shake || 0) + (o.shake ?? 3) + (crit ? 4 : 0));
+  const stop = crit ? 9 : (d >= 18 ? 4 : 0);
+  if (stop) {
+    const frames = g.reduceMotion ? Math.max(1, Math.ceil(stop * 0.35)) : stop;
+    g.hitstop = Math.max(g.hitstop || 0, frames);
+  }
   return true;
 }
 

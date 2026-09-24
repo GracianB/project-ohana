@@ -307,7 +307,8 @@ function loadRoom(id, fromDir) {
   if (game.player) placeFrom(fromDir);
   game.cam.x = 0;
   game.fading = 16;
-  game.doorHold = id === "boss" ? (reduceMotion ? 4 : 8) : (reduceMotion ? 8 : 30);
+  game.doorHold = reduceMotion ? 4 : 8;
+  game.doorWait = null;
   game.flash = Math.max(game.flash || 0, reduceMotion ? 4 : 8);
   if (first && game.player) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
@@ -452,18 +453,24 @@ function dash() {
 function markHit(p, e, dmg, kb) {
   const evo = Number(p.evo) || 0;
   let d = dmg;
+  const push = kb == null ? 1 : kb;
+  const crit = d >= 32 || push >= 1.5;
   if (e.boss) d = Math.ceil(d * 0.55);
   e.hp -= d;
   const face = p.facing || 1;
-  const push = kb == null ? 1 : kb;
   e.vx = face * (e.boss ? 3 : 8) * push;
   e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
   e.stun = Math.max(e.stun || 0, 10);
   e.flash = 12;
   e.invuln = Math.max(e.invuln || 0, 8);
-  game.nums.add(e.x, e.y, "" + d, p.color || "#fff");
-  punch(e.x, e.y, p.color);
-  hitStop(e.boss ? 6 : 4);
+  game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
+  punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+  hitStop(e.boss ? (crit ? 11 : 6) : (crit ? 9 : 4));
+  if (crit) {
+    game.shake = Math.min(16, (game.shake || 0) + 5);
+    game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 4);
+    game.flashColor = "#fff6c8";
+  }
   p.xp += 1;
 }
 function hornPoke(p, evo, def) {
@@ -729,6 +736,7 @@ function hurtPlayer(amount, label) {
   p.flash = Math.max(p.flash || 0, 10);
   game.shake = 12;
   game.combo = 0;
+  game.comboT = 0;
   beep("hurt");
   buzz(24);
   hitStop(2);
@@ -817,7 +825,7 @@ function checkVoidDeath() {
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function punch(x, y, color) {
-  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 210; game.score += 10 * game.combo;
+  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 480; game.score += 10 * game.combo;
   game.fx.emit(x, y, { color, count: 10, size: 3.2, up: 1.2 });
   game.fx.emit(x, y, { color: "#fff", count: 6, size: 2, up: 1.8, speed: 4.4, life: 16, star: true });
   beep("hit");
@@ -870,16 +878,38 @@ function tryDoors() {
   const p = game.player; const r = room();
   const nestLocked = r.id === "boss" && !game.won;
   if (nestLocked && p.x < 72) p.x = 72;
-  if (p.x > game.worldW - 24 && r.doors.right) loadRoom(r.doors.right, "right");
-  else if (p.x < -8 && r.doors.left && !nestLocked) loadRoom(r.doors.left, "left");
-  else if (p.y < 8 && r.doors.up && nearUpDoor(p)) loadRoom(r.doors.up, "up");
+  let dest = null, dir = null;
+  if (p.x > game.worldW - 24 && r.doors.right) { dest = r.doors.right; dir = "right"; }
+  else if (p.x < -8 && r.doors.left && !nestLocked) { dest = r.doors.left; dir = "left"; }
+  else if (p.y < 8 && r.doors.up && nearUpDoor(p)) { dest = r.doors.up; dir = "up"; }
   if (p.x > game.worldW - 24 && !r.doors.right) p.x = game.worldW - p.w;
   if (p.x < -8 && (!r.doors.left || nestLocked)) p.x = nestLocked ? 72 : 0;
   if (nestLocked && p.x < 72) p.x = 72;
   if (p.y < 0 && !r.doors.up) p.y = 0;
+  if (!dest || game.doorWait) return;
+  const next = ROOMS[dest];
+  if (next && next.needEvo && p.evo < next.needEvo) { loadRoom(dest, dir); return; }
+  const hold = reduceMotion ? 8 : 30;
+  game.doorWait = { id: dest, dir, t: hold, max: hold };
+  p.vx = 0;
+  p.vy = 0;
+  if (dir === "right") p.x = Math.min(p.x, game.worldW - p.w - 2);
+  else if (dir === "left") p.x = Math.max(p.x, 2);
+  else if (dir === "up") p.y = Math.max(p.y, 6);
 }
 function updatePlayer() {
   const p = game.player; if (p.dead) return;
+  if (game.doorWait) {
+    p.vx = 0;
+    p.vy = 0;
+    game.doorWait.t--;
+    if (game.doorWait.t <= 0) {
+      const w = game.doorWait;
+      game.doorWait = null;
+      loadRoom(w.id, w.dir);
+    }
+    return;
+  }
   if (p.markT > 0) p.markT--;
   if (game.doorHold > 0) {
     game.doorHold--;
@@ -2040,6 +2070,12 @@ function render() {
       game._portalFadeMax = 0;
     }
   }
+  if (game.doorWait) {
+    const w = game.doorWait;
+    const k = 1 - w.t / Math.max(1, w.max || 30);
+    ctx.fillStyle = "rgba(4,8,16," + (0.12 + k * 0.62) + ")";
+    ctx.fillRect(0, 0, viewW, viewH);
+  }
   if (game.finale && game.finale.t > 0) {
     const f = game.finale;
     const k = 1 - f.t / f.max;
@@ -2197,9 +2233,17 @@ function updateHUD() {
   if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
   const chip = document.getElementById("combo-chip");
   if (chip) {
-    const show = game.combo > 1 && game.comboT > 0;
+    const show = game.combo >= 1 && game.comboT > 0;
     const val = chip.querySelector(".combo-value");
-    if (val) val.textContent = show ? String(game.combo) : "0";
+    const text = show ? String(game.combo) : "";
+    if (val && val.textContent !== text) {
+      val.textContent = text;
+      if (show) {
+        val.style.animation = "none";
+        void val.offsetWidth;
+        val.style.animation = "";
+      }
+    }
     chip.classList.toggle("show", show);
     chip.classList.toggle("hidden", !show);
     chip.dataset.rank = show ? comboRank(game.combo) : "";
