@@ -711,14 +711,14 @@ function nearUpDoor(p) {
 }
 function tryDoors() {
   const p = game.player; const r = room();
-  const queenAlive = r.id === "boss" && game.enemies.some((e) => e.boss && !e.fell && e.hp > 0);
-  if (queenAlive && p.x < 48) p.x = 48;
+  const nestLocked = r.id === "boss" && !game.won;
+  if (nestLocked && p.x < 72) p.x = 72;
   if (p.x > ROOM_W - 24 && r.doors.right) loadRoom(r.doors.right, "right");
-  else if (p.x < -8 && r.doors.left && !queenAlive) loadRoom(r.doors.left, "left");
+  else if (p.x < -8 && r.doors.left && !nestLocked) loadRoom(r.doors.left, "left");
   else if (p.y < 8 && r.doors.up && nearUpDoor(p)) loadRoom(r.doors.up, "up");
   if (p.x > ROOM_W - 24 && !r.doors.right) p.x = ROOM_W - p.w;
-  if (p.x < -8 && !r.doors.left) p.x = 0;
-  if (queenAlive && p.x < 48) p.x = 48;
+  if (p.x < -8 && (!r.doors.left || nestLocked)) p.x = nestLocked ? 72 : 0;
+  if (nestLocked && p.x < 72) p.x = 72;
   if (p.y < 0 && !r.doors.up) p.y = 0;
 }
 function updatePlayer() {
@@ -887,6 +887,7 @@ function updatePlayer() {
   const r = room();
   if (portals.prompt) setPrompt(portals.prompt, true);
   else if (p.x > ROOM_W - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
+  else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
   else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
   else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
   else if (p.y > ROOM_H - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
@@ -896,6 +897,55 @@ function updatePlayer() {
   }
   else setPrompt("", false);
   while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+}
+function solidifyFoe(e) {
+  if (!e || e.boss) {
+    if (e && e.boss && !e.dying) {
+      e.x = Math.max(48, Math.min(e.x, ROOM_W - e.w - 48));
+      e.y = Math.min(e.y, ROOM_H - 90 - e.h);
+    }
+    return;
+  }
+  if (e.x < 12) { e.x = 12; if (e.vx < 0) e.vx *= -1; }
+  if (e.x > ROOM_W - e.w - 12) { e.x = ROOM_W - e.w - 12; if (e.vx > 0) e.vx *= -1; }
+  const water = e.kind === "pez" || e.kind === "medusa" || e.kind === "anguila";
+  const planted = e.kind === "planta";
+  if (water || planted) {
+    e.y = Math.max(180, Math.min(ROOM_H - 150, e.y));
+    e.grounded = !!planted;
+    return;
+  }
+  if (isAirFoe(e)) {
+    e.y = Math.max(64, Math.min(ROOM_H - 190, e.y));
+    e.grounded = false;
+    return;
+  }
+  const rising = e.vy < -0.4 && (e.kind === "rana" || e.lunge > 0 || e.hop > 0);
+  if (rising) { e.grounded = false; return; }
+  let best = null;
+  const prevFeet = e.y + e.h - (e.vy || 0);
+  const feet = e.y + e.h;
+  for (const plat of game.platforms) {
+    if (e.x + e.w < plat.x + 6 || e.x > plat.x + plat.w - 6) continue;
+    const crossed = prevFeet <= plat.y + 4 && feet >= plat.y - 2;
+    const sunk = e.vy >= 0 && feet >= plat.y && feet <= plat.y + Math.min(plat.h, 36) + 10;
+    if ((crossed || sunk) && (!best || plat.y < best.y)) best = plat;
+  }
+  if (!best) {
+    e.grounded = false;
+    if (e.y > game.worldH) e.hp = 0;
+    return;
+  }
+  e.y = best.y - e.h;
+  e.vy = 0;
+  e.grounded = true;
+  if (e.kind === "arana") e.dropping = false;
+  if (e.kind === "rana" && e.hopCd > 0 && !(e.sitting > 0)) e.sitting = 16;
+  const margin = 8;
+  if (e.kind !== "rana" && (e.x <= best.x + margin || e.x + e.w >= best.x + best.w - margin)) {
+    e.vx *= -1;
+    e.x = e.x <= best.x + margin ? best.x + margin : best.x + best.w - e.w - margin;
+  }
 }
 function updateEnemies() {
   if (!game.player) return;
@@ -925,7 +975,7 @@ function updateEnemies() {
         if (e.clawWind) e.clawWind = 0;
       }
     }
-    if (e.kind === "phosquito" || e.kind === "mosquito" || (e.kind === "cucaracho" && e.evo >= 2)
+    if (e.kind === "phosquito" || e.kind === "mosquito"
       || e.kind === "gaviota" || e.kind === "murcielago") e.vy += 0.08;
     else if (e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
       || e.kind === "brasita" || e.kind === "ufo") e.vy += 0.05;
@@ -1003,34 +1053,17 @@ function updateEnemies() {
       }
       e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
     }
-    // --- cucaracho evo2: fly + dive like phosquito, red trail + ghosts ---
+    // --- cucaracho evo2: sigue en el suelo, más rápido, con saltos cortos ---
     if (e.kind === "cucaracho" && e.evo >= 2) {
-      e.diveCd = (e.diveCd || 0) - 1;
-      if (e.diving) {
-        e.diving--;
-        e.telegraph = false;
-        if (t % 2 === 0) {
-          game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: "#ff4020" });
-          game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4a20", count: 2, size: 2.2, up: 0.3, speed: 0.8, life: 10 });
-        }
-        if (e.diving <= 0) e.diveCd = 55;
-      } else if (e.diveCd <= 0 && game.player) {
-        e.wind = (e.wind || 0) + 1;
-        e.telegraph = true;
-        e.vx *= 0.88;
-        if (e.wind > 10) {
-          e.wind = 0; e.telegraph = false; e.diving = 30;
-          e.vx = Math.sign(game.player.x - e.x || 1) * 3.2;
-          e.vy = 4.0;
-        }
-      } else {
-        e.telegraph = false;
-        e.vy += 0.05;
-        if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.06;
-        if (e.y < 500) e.vy += 0.5;
-        if (e.y > 720) e.vy = -2.2;
+      e.telegraph = false;
+      if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
+      e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
+      if (e.grounded && (e.hop || 0) <= 0 && (t + Math.floor(e.x)) % 70 === 0) {
+        e.vy = -6.2;
+        e.hop = 18;
+        e.flash = 4;
       }
-      e.vx = Math.max(-4.0, Math.min(4.0, e.vx));
+      if (e.hop > 0) e.hop--;
     }
     // --- cucaracho evo0 patrol / evo1 lunge ---
     if (e.kind === "cucaracho" && e.evo < 2) {
@@ -1477,24 +1510,7 @@ function updateEnemies() {
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
-    for (const plat of game.platforms) {
-      if (isAirFoe(e)) break;
-      if (e.x + e.w > plat.x && e.x < plat.x + plat.w) {
-        if (e.y + e.h > plat.y && e.y + e.h < plat.y + 28 && e.vy >= 0) {
-          e.y = plat.y - e.h; e.vy = 0;
-          if (e.kind === "arana") e.dropping = false;
-          if (e.kind === "rana" && e.hopCd > 0 && e.sitting <= 0) e.sitting = 20;
-        }
-      }
-    }
-    if (e.y > game.worldH && !e.boss) e.hp = 0;
-    if (e.boss && !e.dying) {
-      e.x = Math.max(48, Math.min(e.x, ROOM_W - e.w - 48));
-      e.y = Math.min(e.y, ROOM_H - 90 - e.h);
-    }
-    const on = game.platforms.find((plat) => e.x + e.w > plat.x && e.x < plat.x + plat.w && Math.abs(e.y + e.h - plat.y) < 4);
-    if (on && ((e.kind === "cucaracho" && e.evo < 2) || e.kind === "cangrejo" || e.kind === "escoria" || (e.kind === "arana" && !e.dropping))
-      && (e.x < on.x || e.x + e.w > on.x + on.w)) e.vx *= -1;
+    solidifyFoe(e);
     const p = game.player;
     const solid = !(e.kind === "planta" && !e.up);
     if (p && !p.dead && !e.dying && solid && aabb(p, e)) {
@@ -2004,8 +2020,6 @@ function updateHUD() {
     chip.classList.toggle("hidden", !show);
     chip.dataset.rank = show ? comboRank(game.combo) : "";
   }
-  const quit = document.getElementById("btn-quit");
-  if (quit) quit.classList.toggle("hidden", game.roomId === "boss" && !game.won);
   const boss = game.enemies.find((e) => e.boss);
   const wrap = document.getElementById("boss-wrap");
   document.body.classList.toggle("boss-fight", !!boss);

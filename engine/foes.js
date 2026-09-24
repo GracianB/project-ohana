@@ -10,7 +10,6 @@ export function isAirFoe(e) {
     || e.kind === "pez" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
     || e.kind === "anguila" || e.kind === "gaviota" || e.kind === "murcielago"
     || e.kind === "brasita" || e.kind === "ufo"
-    || (e.kind === "cucaracho" && e.evo >= 2)
     || (e.boss && e.airborne);
 }
 
