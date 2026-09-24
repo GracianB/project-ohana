@@ -199,31 +199,24 @@ function createRadialGradient(ctx, x, y, rInner, rOuter, colorInner, colorOuter)
   return g;
 }
 
-/** Dibuja una sombra suave bajo el personaje */
 function drawShadow(ctx, x, y, w, h, alpha = 0.3) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = createRadialGradient(ctx, x, y, 0, Math.max(w, h), 
-    "rgba(0,0,0,0.4)", "rgba(0,0,0,0)");
-  ctx.beginPath();
-  ctx.ellipse(x, y, w, h * 0.4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-/** Efecto de brillo pulsante */
-function drawPulseGlow(ctx, x, y, r, color, t, speed = 8) {
+  ctx.save();function drawPulseGlow(ctx, x, y, r, color, t, speed = 8) {
   const pulse = 0.6 + Math.sin(t / speed) * 0.4;
   ctx.save();
   ctx.globalAlpha = pulse * 0.5;
-  ctx.fillStyle = createRadialGradient(ctx, x, y, 0, r, color, "transparent");
+  
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color);
+  g.addColorStop(1, "transparent");
+  
+  ctx.fillStyle = g;
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
-/** Dibuja un aura de energía con partículas orbitantes */
+/** Dibuja un aura de energía - VERSIÓN ÚNICA */
 function drawEnergyAura(ctx, x, y, r, color, t, particleCount = 6) {
   // Aura base
   drawPulseGlow(ctx, x, y, r, color, t, 10);
@@ -251,6 +244,7 @@ function drawEnergyAura(ctx, x, y, r, color, t, particleCount = 6) {
   }
   ctx.restore();
 }
+
 
 /** Dibuja un ojo detallado con parpadeo */
 function drawAdvancedEye(ctx, x, y, w, h, lookDir = {x: 0, y: 0}, blinkState = 0, style = "normal") {
