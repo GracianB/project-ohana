@@ -1,0 +1,25 @@
+<!doctype html><html><body style="margin:0;background:#1d2a3a">
+<canvas id="c" width="1200" height="920"></canvas>
+<script type="module">
+import { ROSTER } from "./characters/roster.js";
+import { drawCharacter } from "./characters/draw.js";
+const c=document.getElementById('c'), ctx=c.getContext('2d');
+const T = +(new URLSearchParams(location.search).get('t')||40);
+const S = +(new URLSearchParams(location.search).get("s")||2);
+function frame(){
+  ctx.fillStyle='#1d2a3a';ctx.fillRect(0,0,c.width,c.height);
+  ctx.save();ctx.scale(S,S);
+  ROSTER.forEach((r,row)=>{
+    r.forms.forEach((f,evo)=>{
+      const cx=60+evo*110, gy=66+row*74;
+      ctx.strokeStyle='#4a6';ctx.beginPath();ctx.moveTo(cx-40,gy);ctx.lineTo(cx+40,gy);ctx.stroke();
+      const p={id:r.id,evo,color:f.color,w:f.w,h:f.h,x:cx-f.w/2,y:gy-f.h,vx:0,vy:0,grounded:true,facing:1,melee:0,invuln:0};
+      ctx.strokeStyle='rgba(255,255,0,.35)';ctx.strokeRect(p.x,p.y,p.w,p.h);
+      drawCharacter(ctx,p,{x:0,y:0},T);
+    });
+  });
+  ctx.restore();
+  window.__done=true;
+}
+setTimeout(frame,1200);
+</script></body></html>

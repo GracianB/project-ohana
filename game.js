@@ -1999,6 +1999,31 @@ function renderAbilityBar() {
     return '<div class="ability-slot" data-id="' + id + '"><div class="key">' + d.key + " · " + d.name + '</div><div class="cd"><i></i></div></div>';
   }).join("");
 }
+// Retrato vivo del personaje en el HUD (misma pipeline que el juego)
+function drawHudAvatar(p) {
+  const av = document.getElementById("hud-avatar");
+  if (!av) return;
+  let cv = av.querySelector("canvas");
+  if (!cv) {
+    cv = document.createElement("canvas");
+    cv.width = 88; cv.height = 88;
+    cv.style.cssText = "position:relative;z-index:1;width:100%;height:100%;display:block";
+    av.appendChild(cv);
+  }
+  const c = cv.getContext("2d");
+  c.clearRect(0, 0, cv.width, cv.height);
+  const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+  const dummy = {
+    id: p.id, evo, color: p.color, x: -10, y: -20, w: 20, h: 20, facing: 1,
+    grounded: true, vx: 0, vy: 0, melee: 0, invuln: 0,
+    visualScale: 70 / [36, 48, 58, 68, 80][evo],
+  };
+  c.save();
+  c.translate(cv.width / 2, cv.height - 8);
+  drawCharacter(c, dummy, { x: 0, y: 0 }, t);
+  c.restore();
+}
+
 function updateHUD() {
   const p = game.player; if (!p) return;
   const nameEl = document.getElementById("hud-name");
@@ -2008,12 +2033,23 @@ function updateHUD() {
   const meta = document.getElementById("hud-meta");
   if (meta) meta.textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 4 ? "/" + need : "");
   const hpBar = document.getElementById("hp-bar");
-  if (hpBar) hpBar.style.width = Math.max(0, (p.health / Math.max(1, p.maxHealth)) * 100) + "%";
+  const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
+  if (hpBar) {
+    hpBar.style.width = hpPct + "%";
+    hpBar.parentElement?.setAttribute("aria-valuenow", String(Math.round(hpPct)));
+  }
+  const hpText = document.getElementById("hp-text");
+  if (hpText) hpText.textContent = Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth;
+  drawHudAvatar(p);
   const xpEl = document.getElementById("xp-bar");
   if (xpEl) {
     const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
     const prev = XP_NEED[p.evo] || 0;
-    xpEl.style.width = p.evo >= 4 ? "100%" : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100)) + "%";
+    const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100));
+    xpEl.style.width = xpPct + "%";
+    xpEl.parentElement?.setAttribute("aria-valuenow", String(Math.round(xpPct)));
+    const xpText = document.getElementById("xp-text");
+    if (xpText) xpText.textContent = p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%";
   }
   const worldEl = document.getElementById("hud-world");
   if (worldEl) worldEl.textContent = room().name;
