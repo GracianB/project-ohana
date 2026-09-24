@@ -787,6 +787,14 @@ body.playing #ability-bar {
   box-shadow: var(--shadow-glow);
 }
 
+.hud-trait {
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #ffe08a;
+  opacity: 0.9;
+}
+
 .ability-slot .key {
   opacity: 0.78;
   font-weight: 700;

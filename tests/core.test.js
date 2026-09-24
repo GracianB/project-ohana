@@ -4,6 +4,7 @@ import { makeFoe, isAirFoe, applyElite, ROOM_HARD } from "../engine/foes.js";
 import { XP_NEED } from "../systems/xp.js";
 import { canonId, packSave, unpackSave } from "../systems/save.js";
 import { sense, think } from "../engine/foe-brain.js";
+import { signature } from "../characters/signature.js";
 import { resolveBody, hitsSolid } from "../engine/collide.js";
 
 const KINDS = ["phosquito", "mosquito", "libelula", "abeja", "pez", "planta", "medusa", "anguila", "rana", "cangrejo", "gaviota", "murcielago", "arana", "brasita", "escoria", "ufo", "cucaracho", "no-such"];
@@ -40,6 +41,15 @@ test("elite no se aplica dos veces", () => {
 test("XP del juego es la curva absoluta", () => {
   assert.deepEqual(XP_NEED, [0, 55, 140, 260, 420]);
   for (let i = 1; i < XP_NEED.length; i++) assert.ok(XP_NEED[i] > XP_NEED[i - 1]);
+});
+
+test("cada personaje pega distinto", () => {
+  assert.equal(signature("dino").heavy, true);
+  assert.equal(signature("dino").ram, true);
+  assert.ok(signature("cat").reach < signature("dragon").reach);
+  assert.equal(signature("kilo").kind, "leaf");
+  assert.equal(signature("chispin").kind, "zap");
+  assert.ok(signature("stitcho").dash > signature("dino").dash);
 });
 
 test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {

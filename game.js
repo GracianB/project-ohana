@@ -1,4 +1,5 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
+import { signature } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
@@ -403,8 +404,17 @@ function dash() {
   const p = game.player;
   if (!p || p.dead) return;
   if (p.dash > 0) { p.dashBuf = 8; return; }
-  p.vx = 14 * p.facing; p.invuln = Math.max(p.invuln, 8); p.dash = 28; p.dashBuf = 0;
-  game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 12, color: p.color });
+  const sig = signature(p.id);
+  p.vx = sig.dash * p.facing;
+  p.invuln = Math.max(p.invuln, sig.iframe);
+  p.dash = 20 + Math.round(sig.dash * 0.35);
+  p.dashBuf = 0;
+  if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
+  if (sig.ram) p._ram = 8;
+  game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: sig.heavy ? 16 : 12, color: p.color });
+  if (sig.spark) {
+    game.fx.emit(p.x, p.y + p.h * 0.5, { color: "#ffe14a", count: 8, size: 2.4, star: true, speed: 2.2, life: 14 });
+  }
   beep("dash");
 }
 function melee() {
@@ -412,24 +422,20 @@ function melee() {
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
   const evo = Number(p.evo) || 0;
-  // Snappier recovery as forms grow; still same F key
-  p.melee = Math.max(7, 13 - evo);
+  const sig = signature(p.id);
+  p.melee = Math.max(7, 13 - evo - (sig.air ? 1 : 0));
   p.meleeBuf = 0;
   beep("slash");
 
-  // Reach grows with evo; Dino gets a bite of extra jaw-reach
-  const reach = 46 + evo * 11 + (p.id === "dragon" ? 6 + evo * 2 : 0);
+  const reach = 46 + evo * 11 + sig.reach;
   const box = {
     x: p.x + (p.facing > 0 ? p.w - 6 : -reach),
-    y: p.y - 10 - evo * 2,
+    y: p.y + (sig.low ? p.h * 0.35 : -10 - evo * 2),
     w: reach,
-    h: p.h + 16 + evo * 5,
+    h: (sig.low ? p.h * 0.7 : p.h + 16 + evo * 5),
   };
-
-  const baseKind = { kilo: "leaf", lilo: "leaf", stitcho: "claws", stitch: "claws", chispin: "zap", pikachu: "zap", cat: "claw", dragon: "fan", frita: "fan" }[p.id] || "crescent";
-  // High-evo dino swings a bigger fan; others keep identity but grow
-  const kind = (p.id === "dragon" && evo >= 2) ? "fan" : baseKind;
-  const slashLife = 10 + Math.min(6, evo * 2);
+  const kind = sig.kind;
+  const slashLife = 10 + Math.min(6, evo * 2) + (sig.heavy ? 3 : 0);
   const slashW = 50 + evo * 14;
 
   game.slashes.push({
@@ -469,8 +475,8 @@ function melee() {
   game.shake = Math.min(16, (game.shake || 0) + 3 + evo);
 
   // Damage: linear + soft quadratic (evo 0→4 ≈ 28, 42, 60, 82, 110)
-  let dBase = 28 + evo * 12 + evo * evo * 2;
-  if (p.id === "dragon") dBase += 2 + evo; // jaw bonus
+  let dBase = 28 + evo * 12 + evo * evo * 2 + sig.dmg;
+  if (sig.air && !p.grounded) dBase = Math.round(dBase * sig.air);
   if (evo >= 4) dBase += 8;
 
   for (const e of game.enemies) {
@@ -480,8 +486,8 @@ function melee() {
       if (e.boss) d = Math.ceil(d * 0.5);
       e.hp -= d;
       // Knockback + hitstun más perceptibles (sin soft-lock); GOD +5% knock only
-      let knX = (e.boss ? 4 : 12 + evo * 1.2) * p.facing;
-      let knY = (e.boss ? -2.2 : -4.2) - evo * 0.55;
+      let knX = (e.boss ? 4 : 12 + evo * 1.2) * p.facing * sig.kb;
+      let knY = ((e.boss ? -2.2 : -4.2) - evo * 0.55) * (sig.heavy ? 1.25 : 1);
       if (evo >= 4) { knX *= 1.05; knY *= 1.05; }
       e.vx = knX;
       e.vy = Math.min(e.vy || 0, knY);
@@ -490,7 +496,7 @@ function melee() {
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       beep(d >= 45 ? "crit" : "hit");
       punch(e.x, e.y, p.color);
-      hitStop(e.boss ? 8 : (d >= 45 ? 10 : 3));
+      hitStop(e.boss ? 8 : (sig.heavy ? 8 : (d >= 45 ? 10 : 3)));
       game.camPunch = Math.max(game.camPunch || 0, e.boss ? 0.08 : 0.045);
       buzz(e.boss ? 18 : 10);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
@@ -499,19 +505,20 @@ function melee() {
 
   // Evo 3+: ranged follow-through (flame for dino, zap/crescent otherwise)
   if (evo >= 3) {
-    const isDino = p.id === "dragon";
+    const isDino = p.id === "dino";
+    const isDragon = p.id === "dragon";
     const isPika = p.id === "chispin" || p.id === "pikachu";
     game.projectiles.push({
       x: p.x + p.w / 2 + p.facing * 10,
       y: p.y + p.h * 0.32,
       vx: (11 + evo) * p.facing,
-      vy: isDino ? -0.6 : 0,
-      w: isDino ? 30 : 18,
-      h: isDino ? 18 : 12,
+      vy: isDino ? -0.4 : (isDragon ? -0.8 : 0),
+      w: isDino || isDragon ? 30 : 18,
+      h: isDino || isDragon ? 18 : 12,
       life: 26 + evo * 5,
       dmg: 12 + evo * 4,
-      color: isDino ? "#ff6a2a" : (isPika ? "#ffe14a" : p.color),
-      shape: isDino ? "flame" : (isPika ? "zap" : "crescent"),
+      color: isDino || isDragon ? "#ff6a2a" : (isPika ? "#ffe14a" : p.color),
+      shape: isDino || isDragon ? "flame" : (isPika ? "zap" : "crescent"),
       owner: "player",
       trail: true,
     });
@@ -908,6 +915,24 @@ function updatePlayer() {
   }
   else setPrompt("", false);
   while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+  tickRam(p);
+}
+function tickRam(p) {
+  if (!p || !(p._ram > 0)) return;
+  p._ram--;
+  const box = { x: p.x - 8, y: p.y + 4, w: p.w + 16, h: p.h - 4 };
+  for (const e of game.enemies) {
+    if (e._rammed > 0) e._rammed--;
+    if (e._rammed > 0 || e.dying || e.hp <= 0 || e.invuln > 0) continue;
+    if (!aabb(box, e)) continue;
+    e._rammed = 12;
+    const d = 10 + (Number(p.evo) || 0) * 4;
+    e.hp -= e.boss ? Math.ceil(d * 0.45) : d;
+    e.vx = p.facing * 7;
+    e.vy = Math.min(e.vy || 0, -2);
+    e.flash = 12;
+    punch(e.x, e.y, p.color);
+  }
 }
 function solidifyFoe(e) {
   if (!e || e.boss) {
@@ -1985,6 +2010,8 @@ function updateHUD() {
   const p = game.player; if (!p) return;
   const nameEl = document.getElementById("hud-name");
   if (nameEl) nameEl.textContent = p.name;
+  const traitEl = document.getElementById("hud-trait");
+  if (traitEl) traitEl.textContent = (p.passive && p.passive.name) || "";
   const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
   const orbsLeft = game.orbs.filter((o) => !o.taken).length;
   const meta = document.getElementById("hud-meta");
