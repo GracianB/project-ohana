@@ -488,8 +488,8 @@ function hornPoke(p, evo, def) {
     x: p.x + p.w / 2 + face * 20,
     y: p.y + 4,
     facing: face,
-    life: 9,
-    max: 9,
+    life: 14,
+    max: 14,
     color: "#ffe9a8",
     kind: "poke",
     w: reach,
@@ -512,7 +512,7 @@ function showSwing(p, evo, def) {
   const box = low
     ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
     : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
-  const life = sig.heavy ? 13 : 10;
+  const life = sig.heavy ? 20 : 16;
   game.slashes.push({
     x: p.x + p.w / 2 + face * (low ? 6 : 16),
     y: low ? p.y + p.h * 0.7 : p.y + p.h * 0.32,

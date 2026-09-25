@@ -1997,112 +1997,198 @@ export function drawProjectile(ctx, pr, cam, t) {
   ctx.restore();
 }
 
+function swingArc(ctx, r, a0, a1, width, color, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.max(8, r), a0, a1);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function drawSlash(ctx, s, cam) {
-  const k = s.life / s.max;
+  const k = Math.max(0.001, s.life / s.max);
+  const open = 1 - k;
+  const fade = k < 0.28 ? k / 0.28 : 1;
   const x = s.x - cam.x;
   const y = s.y - cam.y;
+  const reach = Math.max(46, (s.w || 72) * 1.05);
+  const kind = s.kind || "slice";
+  const col = s.color || "#fff";
+  const a0 = -1.2;
+  const a1 = a0 + Math.max(0.35, open) * 2.2;
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s.facing || 1, 1);
-  ctx.globalAlpha = Math.min(1, k * 1.4);
-  ctx.strokeStyle = s.color;
-  ctx.fillStyle = s.color;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  const r = (s.w || 42) * (1.15 - k * 0.15);
-  const kind = s.kind || "slice";
+
   if (kind === "claws") {
-    ctx.lineWidth = 3.4;
-    for (let i = -1; i <= 1; i++) {
-      ctx.beginPath();
-      ctx.moveTo(4, i * 9);
-      ctx.quadraticCurveTo(r * 0.55, i * 4, r, i * 11);
-      ctx.stroke();
+    for (let i = 0; i < 3; i++) {
+      const rr = reach * (0.58 + i * 0.16);
+      swingArc(ctx, rr, a0, a1, 9 - i, col, 0.28 * fade);
+      swingArc(ctx, rr, a0, a1, 3.4, "#f7fbff", 0.95 * fade);
     }
   } else if (kind === "spark") {
-    ctx.lineWidth = 3;
+    swingArc(ctx, reach * 0.82, a0, a1, 14, col, 0.22 * fade);
+    ctx.save();
+    ctx.globalAlpha = 0.95 * fade;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 3.4;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     ctx.beginPath();
-    ctx.moveTo(0, -r * 0.55);
-    ctx.lineTo(r * 0.28, -r * 0.08);
-    ctx.lineTo(r * 0.08, r * 0.05);
-    ctx.lineTo(r * 0.7, r * 0.55);
+    const steps = 7;
+    for (let i = 0; i <= steps; i++) {
+      const u = i / steps;
+      const ang = a0 + (a1 - a0) * u;
+      const jag = (i % 2 ? 1 : -1) * reach * 0.14;
+      const px = Math.cos(ang) * (reach * 0.74) + Math.cos(ang + 1.2) * jag;
+      const py = Math.sin(ang) * (reach * 0.74) + Math.sin(ang + 1.2) * jag;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
     ctx.stroke();
+    ctx.strokeStyle = "#fffbe8";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
   } else if (kind === "paw") {
-    ctx.beginPath();
-    ctx.ellipse(r * 0.35, 2, r * 0.28, r * 0.22, 0.2, 0, Math.PI * 2);
-    ctx.fill();
+    swingArc(ctx, reach * 0.8, a0, a1, 18, col, 0.32 * fade);
+    swingArc(ctx, reach * 0.8, a0, a1, 7, "#fff", 0.92 * fade);
     for (let i = -1; i <= 1; i++) {
+      ctx.save();
+      ctx.rotate(a1);
+      ctx.translate(reach * 0.8, i * 9);
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = "#fff";
       ctx.beginPath();
-      ctx.arc(r * 0.15 + i * 8, -r * 0.22, 4.5, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 8, 3.4, 0.35, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     }
   } else if (kind === "flame") {
-    for (let i = -1; i <= 1; i++) {
+    swingArc(ctx, reach * 0.72, a0, a1, 20, "#ff5a1f", 0.34 * fade);
+    swingArc(ctx, reach * 0.72, a0, a1, 8, "#ffe14a", 0.95 * fade);
+    for (let i = 1; i <= 5; i++) {
+      const ang = a0 + (a1 - a0) * (i / 5);
+      ctx.save();
+      ctx.translate(Math.cos(ang) * reach * 0.72, Math.sin(ang) * reach * 0.72);
+      ctx.rotate(ang);
+      ctx.globalAlpha = 0.9 * fade;
+      ctx.fillStyle = i % 2 ? "#ff7a32" : "#fff0a0";
       ctx.beginPath();
-      ctx.moveTo(6, i * 6);
-      ctx.quadraticCurveTo(r * 0.45, i * 16 - 10, r, i * 8);
-      ctx.quadraticCurveTo(r * 0.5, i * 4, 6, i * 6);
+      ctx.moveTo(-2, 0);
+      ctx.quadraticCurveTo(10, -9, 18, 0);
+      ctx.quadraticCurveTo(10, 8, -2, 0);
       ctx.fill();
+      ctx.restore();
     }
   } else if (kind === "bite") {
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(r * 0.35, -6, r * 0.55, 0.25, Math.PI - 0.25);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(r * 0.35, 8, r * 0.55, Math.PI + 0.25, -0.25);
-    ctx.stroke();
+    const gap = 1.05 - open * 0.75;
+    swingArc(ctx, reach * 0.78, -gap - 0.2, -0.08, 9, col, fade);
+    swingArc(ctx, reach * 0.78, 0.08, gap + 0.2, 9, col, fade);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = "#f3fff0";
+    for (const side of [-1, 1]) {
+      for (let i = 0; i < 4; i++) {
+        const ang = side * (0.14 + i * 0.18);
+        const px = Math.cos(ang) * reach * 0.66;
+        const py = Math.sin(ang) * reach * 0.66;
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + 7, py + side * 6);
+        ctx.lineTo(px - 5, py + side * 3);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
   } else if (kind === "slice") {
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, 4);
-    ctx.lineTo(r, -2);
-    ctx.stroke();
+    swingArc(ctx, reach * 0.96, a0, a1, 9, col, 0.22 * fade);
+    swingArc(ctx, reach * 0.96, a0, a1, 2.6, "#fff8dc", fade);
   } else if (kind === "wedge") {
+    ctx.save();
+    ctx.rotate(a1);
+    ctx.globalAlpha = 0.96 * fade;
+    ctx.fillStyle = "#ffb43a";
     ctx.beginPath();
     ctx.moveTo(0, 0);
-    ctx.arc(0, 0, r * 0.85, -0.7, 0.7);
+    ctx.arc(0, 0, reach * 0.82, -0.46, 0.46);
     ctx.closePath();
     ctx.fill();
-  } else if (kind === "fang") {
-    ctx.beginPath();
-    ctx.moveTo(8, -r * 0.15);
-    ctx.lineTo(r * 0.45, r * 0.55);
-    ctx.lineTo(r * 0.2, -r * 0.05);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(r * 0.35, -r * 0.35);
-    ctx.lineTo(r * 0.85, r * 0.35);
-    ctx.lineTo(r * 0.5, -r * 0.2);
-    ctx.fill();
-  } else if (kind === "poke") {
-    ctx.lineWidth = 3.2;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(r, 0);
+    ctx.strokeStyle = "#c45a12";
+    ctx.lineWidth = 5;
     ctx.stroke();
+    ctx.fillStyle = "#ffe7a2";
     ctx.beginPath();
-    ctx.moveTo(r, 0);
-    ctx.lineTo(r - 10, -5);
-    ctx.lineTo(r - 10, 5);
+    ctx.arc(reach * 0.46, 0, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e23b3d";
+    ctx.beginPath();
+    ctx.arc(reach * 0.3, -8, 3.5, 0, Math.PI * 2);
+    ctx.arc(reach * 0.55, 8, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  } else if (kind === "fang") {
+    swingArc(ctx, reach * 0.62, -1.25, -0.1, 7, col, 0.95 * fade);
+    swingArc(ctx, reach * 0.86, -0.15, 1.05, 7, "#ffd6dc", 0.8 * fade);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(reach * 0.5, -10);
+    ctx.lineTo(reach * 0.82, 18);
+    ctx.lineTo(reach * 0.36, 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(reach * 0.22, -18);
+    ctx.lineTo(reach * 0.52, 12);
+    ctx.lineTo(reach * 0.08, -2);
+    ctx.fill();
+    ctx.restore();
+  } else if (kind === "poke") {
+    const len = reach * (0.28 + open * 0.78);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 6;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(len, 0);
+    ctx.stroke();
+    ctx.strokeStyle = "#fffef6";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = "#fff6c8";
+    ctx.beginPath();
+    ctx.moveTo(len + 12, 0);
+    ctx.lineTo(len - 4, -7);
+    ctx.lineTo(len - 4, 7);
     ctx.closePath();
     ctx.fill();
-  } else if (kind === "note") {
+    ctx.restore();
+  } else {
+    swingArc(ctx, reach * 0.8, a0, a1, 14, col, 0.3 * fade);
+    swingArc(ctx, reach * 0.8, a0, a1, 4.5, "#fff", fade);
+    ctx.save();
+    ctx.translate(Math.cos(a1) * reach * 0.8, Math.sin(a1) * reach * 0.8);
+    ctx.rotate(a1);
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = col;
     ctx.beginPath();
-    ctx.ellipse(10, 6, 7, 5, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(0, 5, 9, 6, -0.4, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = "#fff";
     ctx.lineWidth = 2.4;
     ctx.beginPath();
-    ctx.moveTo(16, 4);
-    ctx.lineTo(16, -r * 0.45);
-    ctx.quadraticCurveTo(r * 0.55, -r * 0.55, r * 0.7, -r * 0.2);
+    ctx.moveTo(7, 2);
+    ctx.lineTo(7, -18);
+    ctx.quadraticCurveTo(20, -20, 18, -6);
     ctx.stroke();
-  } else {
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, 4);
-    ctx.lineTo(r, -2);
-    ctx.stroke();
+    ctx.restore();
   }
   ctx.restore();
 }
