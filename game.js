@@ -465,7 +465,7 @@ function markHit(p, e, dmg, kb) {
   e.invuln = Math.max(e.invuln || 0, 8);
   game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
-  hitStop(e.boss ? (crit ? 11 : 6) : (crit ? 9 : 4));
+  hitStop(e.boss ? (crit ? 3 : 2) : (crit ? 8 : 4));
   if (crit) {
     game.shake = Math.min(16, (game.shake || 0) + 5);
     game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 4);
@@ -627,7 +627,7 @@ function melee() {
       game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
       beep(d >= 45 ? "crit" : "hit");
       punch(e.x, e.y, p.color);
-      hitStop(e.boss ? 8 : (sig.heavy ? 8 : (d >= 45 ? 10 : 3)));
+      hitStop(e.boss ? 2 : (sig.heavy ? 6 : (d >= 45 ? 8 : 3)));
       game.camPunch = Math.max(game.camPunch || 0, e.boss ? 0.08 : 0.045);
       buzz(e.boss ? 18 : 10);
       p.xp += 2 + (evo >= 3 ? 1 : 0);
@@ -808,30 +808,38 @@ function punch(x, y, color) {
 }
 function beginFinale(e) {
   game.finale = {
-    t: 220,
-    max: 220,
+    t: 420,
+    max: 420,
     x: e.x + e.w / 2,
-    y: e.y + e.h * 0.4,
+    y: e.y + e.h * 0.42,
   };
-  game.flash = 24;
-  game.shake = 28;
+  game.hitstop = 0;
+  game.flash = 18;
+  game.flashColor = "#fff6c8";
+  game.shake = 20;
+  game.projectiles = [];
+  game.bolts = [];
+  game.slashes = [];
   playMusic("victoria");
 }
 function tickFinale() {
   const f = game.finale;
   if (!f || f.t <= 0) return;
   f.t--;
-  if (game.fx && (t % 2 === 0)) {
-    const hot = f.t > 120;
-    game.fx.emit(f.x + (Math.random() - 0.5) * 120, f.y + (Math.random() - 0.5) * 80, {
-      color: hot ? "#ff4060" : "#ffe66a",
-      count: game.reduceMotion ? 1 : 3,
-      size: hot ? 4 : 6,
-      up: 2.4,
+  if (game.fx && f.t % 5 === 0 && f.t > 80) {
+    game.fx.emit(f.x + (Math.random() - 0.5) * 160, f.y + (Math.random() - 0.5) * 90, {
+      color: f.t > 240 ? "#ff4060" : "#ffe66a",
+      count: 2,
+      size: 4,
+      up: 2.2,
       star: true,
+      life: 18,
     });
   }
-  if (f.t === 100) game.flash = 30;
+  if (f.t === 300 || f.t === 160) {
+    game.flash = 12;
+    game.flashColor = f.t === 300 ? "#fff" : "#ffe66a";
+  }
   if (f.t === 0 && !game.won) {
     game.won = true;
     dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
@@ -1865,6 +1873,7 @@ function updateProjectiles() {
   game.projectiles = game.projectiles.filter((pr) => pr.life > 0);
   game.bolts = game.bolts.filter((b) => --b.life > 0);
   game.slashes = (game.slashes || []).filter((s) => --s.life > 0);
+  if (game.slashes.length > 6) game.slashes.splice(0, game.slashes.length - 6);
   game.ghosts = game.ghosts.filter((g) => --g.life > 0);
 }
 function updateCam() {
@@ -2055,22 +2064,51 @@ function render() {
   if (game.finale && game.finale.t > 0) {
     const f = game.finale;
     const k = 1 - f.t / f.max;
+    const sx = f.x - game.cam.x;
+    const sy = f.y - game.cam.y;
     ctx.save();
-    ctx.fillStyle = "rgba(4,8,16," + Math.min(0.78, k * 0.95) + ")";
+    ctx.fillStyle = "rgba(4, 6, 14, " + Math.min(0.82, 0.15 + k * 0.8) + ")";
     ctx.fillRect(0, 0, viewW, viewH);
-    if (k > 0.28) {
-      ctx.globalAlpha = Math.min(1, (k - 0.28) * 2.4);
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#ffe66a";
-      ctx.font = "800 46px Fraunces, serif";
-      ctx.fillText("EL NIDO CAE", viewW / 2, viewH * 0.4);
-      ctx.font = "600 18px Outfit, sans-serif";
-      ctx.fillStyle = "#9ad7ff";
-      ctx.fillText("Nadie se queda atrás", viewW / 2, viewH * 0.4 + 36);
-      ctx.globalAlpha = 0.65;
-      ctx.font = "600 13px Outfit, sans-serif";
-      ctx.fillText("Esc para saltar", viewW / 2, viewH * 0.4 + 68);
+    const beam = ctx.createLinearGradient(sx, 0, sx, viewH);
+    beam.addColorStop(0, "rgba(255, 230, 140, 0)");
+    beam.addColorStop(0.45, "rgba(255, 210, 120, " + (0.18 + Math.sin(f.t * 0.2) * 0.06) + ")");
+    beam.addColorStop(1, "rgba(255, 80, 90, 0)");
+    ctx.fillStyle = beam;
+    ctx.fillRect(sx - 70, 0, 140, viewH);
+    ctx.strokeStyle = "rgba(255, 220, 140, 0.85)";
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 3; i++) {
+      const rad = ((k * 3 + i * 0.33) % 1) * Math.max(viewW, viewH) * 0.55;
+      ctx.globalAlpha = 1 - ((k * 3 + i * 0.33) % 1);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 20 + rad, 0, Math.PI * 2);
+      ctx.stroke();
     }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "center";
+    if (k > 0.18) {
+      const a = Math.min(1, (k - 0.18) * 3);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = "#ffe66a";
+      ctx.font = "800 " + Math.round(40 + (1 - a) * 18) + "px Fraunces, serif";
+      ctx.fillText("LA REINA CAE", viewW / 2, viewH * 0.36);
+    }
+    if (k > 0.4) {
+      ctx.globalAlpha = Math.min(1, (k - 0.4) * 3);
+      ctx.fillStyle = "#fff";
+      ctx.font = "600 20px Outfit, sans-serif";
+      ctx.fillText("El nido se queda en silencio", viewW / 2, viewH * 0.36 + 42);
+    }
+    if (k > 0.62) {
+      ctx.globalAlpha = Math.min(1, (k - 0.62) * 3.2);
+      ctx.fillStyle = "#9ad7ff";
+      ctx.font = "600 16px Outfit, sans-serif";
+      ctx.fillText("Nadie se queda atrás", viewW / 2, viewH * 0.36 + 74);
+    }
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = "#c9d7e8";
+    ctx.font = "600 12px Outfit, sans-serif";
+    ctx.fillText("Esc para seguir", viewW / 2, viewH * 0.36 + 112);
     ctx.restore();
   }
   if (game.ult && game.ult.t > 0) {
@@ -2269,6 +2307,8 @@ function loop() {
   game.t = t;
   if (game.hitstop > 0) {
     game.hitstop--;
+    const fp = game.player;
+    if (fp && fp.melee > 0) fp.melee--;
     if (game.shake > 0) game.shake *= 0.92;
     if (game.flash > 0) game.flash--;
     if (game.running) render();
