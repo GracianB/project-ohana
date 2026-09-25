@@ -1412,11 +1412,7 @@ body.playing #ability-bar {
 .portrait.has-art img.portrait-art { display: block; }
 .portrait.has-art canvas { visibility: hidden; }
 
-.look-switch {
-  display: flex;
-  gap: 8px;
-  z-index: 2;
-}
+.look-switch { display: none; }
 .look-switch button {
   font: inherit;
   font-size: 12px;
@@ -2318,7 +2314,12 @@ body:not(.intro-complete) #char-select h1 .ohana {
 }
 .chars-dots i.on { width: 18px; border-radius: 3px; background: var(--dot, var(--accent-cyan)); }
 
-/* Tarjetas con ancho fijo dentro de la fila flex de escritorio */
+/* Diez fichas: dos filas de cinco, mismo ancho, centradas */
 @media (min-width: 641px) {
-  .chars-grid > .char-card { flex: 0 0 var(--card-w); width: var(--card-w); }
+  .chars-grid {
+    display: grid;
+    width: min(1180px, 100%);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .chars-grid > .char-card { width: auto; flex: none; }
 }

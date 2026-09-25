@@ -184,21 +184,9 @@ function applyLook() {
 }
 
 function mountLook(wrap) {
-  if (wrap.querySelector(".look-switch")) return;
-  const label = wrap.querySelector(".pick-label");
-  const html = '<div class="look-switch" role="group" aria-label="Versión de personajes">'
-    + '<button type="button" data-look="vector">Normal</button>'
-    + '<button type="button" data-look="paint">Realista</button>'
-    + '</div>';
-  if (label) label.insertAdjacentHTML("afterend", html);
-  else wrap.insertAdjacentHTML("afterbegin", html);
-  wrap.querySelector(".look-switch").addEventListener("click", (ev) => {
-    const btn = ev.target.closest("button[data-look]");
-    if (!btn) return;
-    setLook(btn.dataset.look);
-    applyLook();
-    sfx("ui");
-  });
+  const old = wrap.querySelector(".look-switch");
+  if (old) old.remove();
+  setLook("vector");
 }
 
 function enhance() {
