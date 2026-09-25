@@ -331,7 +331,10 @@ function bodyHits(g, p, base, o) {
   }
 }
 
-function hand(p) { return { x: cx(p) + p.facing * (p.w * 0.45), y: p.y + p.h * 0.4 }; }
+function hand(p) {
+  const face = p.facing || 1;
+  return { x: cx(p) + face * (p.w * 0.45), y: p.y + p.h * 0.4 };
+}
 function add(f) { FX.push(f); return f; }
 function boom(g, x, y, color, n, extra) {
   g.fx.emit(x, y, Object.assign({ color, count: n || 10, size: 4, up: 1.2, speed: 3.2 }, extra || {}));
@@ -584,12 +587,27 @@ const CASTERS = {
 
   // ======================= PIZZA =======================
   pepperoni(g, p, evo) {
+    if (!p.facing) p.facing = 1;
+    const face = p.facing;
     const h = hand(p);
-    add({ kind: "disc", x: h.x, y: h.y, vx: (9 + evo * 0.6) * p.facing, vy: -1.5, r: 11 + evo, bounces: 0, maxB: 7 + evo, life: 180, dmg: (14 + evo * 2) * pw(p), rot: 0 });
+    add({
+      kind: "disc",
+      x: h.x, y: h.y,
+      vx: (9 + evo * 0.6) * face,
+      vy: -1.5,
+      r: 11 + evo,
+      bounces: 0,
+      maxB: 7 + evo,
+      life: 180,
+      dmg: (14 + evo * 2) * pw(p),
+      rot: 0,
+    });
     boom(g, h.x, h.y, "#e0402a", 6);
   },
   cheese(g, p, evo) {
-    const e = nearestEnemy(g, cx(p), cy(p), 280 + evo * 20, null, p.facing);
+    if (!p.facing) p.facing = 1;
+    const face = p.facing;
+    const e = nearestEnemy(g, cx(p), cy(p), 280 + evo * 20, null, face);
     if (e) {
       S.pull = { e, t: 20 };
       add({ kind: "cheese", e, life: 26, ax: cx(e), ay: cy(e) });
@@ -603,14 +621,15 @@ const CASTERS = {
       if (!best || pl.y > best.y) best = pl;
     }
     if (best) {
-      const ax = clamp(cx(p) + p.facing * 40, best.x + 12, best.x + best.w - 12);
+      const ax = clamp(cx(p) + face * 40, best.x + 12, best.x + best.w - 12);
       S.pull = { ax, ay: best.y, t: 26 };
       add({ kind: "cheese", life: 30, ax, ay: best.y });
     } else {
-      add({ kind: "cheese", life: 14, ax: cx(p) + p.facing * 120, ay: p.y - 60, miss: true });
+      add({ kind: "cheese", life: 14, ax: cx(p) + face * 120, ay: p.y - 60, miss: true });
     }
   },
   oven(g, p, evo) {
+    if (!p.facing) p.facing = 1;
     add({ kind: "heat", life: 26, R: 170 + evo * 20, hit: new Set(), dmg: (20 + evo * 3) * pw(p) });
     add({ kind: "slices", n: 6 + evo * 2, i: 0, next: 8, x: cx(p), dmg: (16 + evo * 2) * pw(p) });
     g.flash = Math.max(g.flash || 0, 5);
@@ -2203,17 +2222,4 @@ export function drawBolt(ctx, b, cam, t) {
   ctx.strokeStyle = "#fffde0";
   ctx.lineWidth = 5 * Math.min(1, k);
   ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  const segs = 7;
-  for (let i = 1; i <= segs; i++) {
-    const u = i / segs;
-    const jx = (Math.random() - 0.5) * 18 * (i < segs ? 1 : 0);
-    const jy = (Math.random() - 0.5) * 18 * (i < segs ? 1 : 0);
-    ctx.lineTo(x1 + (x2 - x1) * u + jx, y1 + (y2 - y1) * u + jy);
-  }
-  ctx.stroke();
-  ctx.strokeStyle = "#7ecbff";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  ctx.restore();
-}
+  
