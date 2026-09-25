@@ -70,7 +70,7 @@ export const ROOMS = {
     id: "lab", name: "Alien Lab", short: "Lab", world: 4,
     doors: { right: "cave", left: null, up: null, down: null },
     needEvo: 1,
-    hint: "Solo salida ESTE.",
+    hint: "Solo salida ESTE. Si llueve, el paraguas está en el suelo.",
     plats: [[0, 810, 1600, 90], [180, 660, 180, 18], [480, 520, 180, 18], [860, 380, 180, 18], [1220, 540, 180, 18]],
     foes: [[400, 200, "planta"], [820, 200, "phosquito"], [1240, 200, "cucaracho"], [640, 200, "cucaracho"], [1000, 280, "arana"], [280, 280, "murcielago"]],
     orbs: [[520, 440], [900, 300]]

@@ -19,7 +19,7 @@ index.html
 │  ├─ systems/portals.js ...... catapultas y agujeros negros
 │  ├─ systems/boss-nido.js .... jefe final (3 fases)
 │  ├─ systems/death-fx.js ..... cinemática de muerte
-│  ├─ systems/rain.js ......... lluvia + paraguas (Costa)
+│  ├─ systems/rain.js ......... lluvia radiactiva + paraguas (Lab)
 │  ├─ systems/surprises.js .... pez dorado, lluvia de estrellas, power-ups
 │  ├─ systems/floaters.js ..... números de daño
 │  ├─ systems/notify.js ....... avisos y cine de evolución

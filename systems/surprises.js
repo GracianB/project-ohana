@@ -243,7 +243,7 @@ export const Surprises = {
 
     // --- Lluvia: transiciones y burst local al recoger el paraguas ---
     if (Rain.active && !this._rainWasActive && !Rain._grabNotify) {
-      try { showNotification("¡LLUEVE!", "Busca el paraguas rojo en la Costa", "sala"); } catch (_) {}
+      try { showNotification("LLUVIA", "Radiactiva. El paraguas está en el Lab", "sala"); } catch (_) {}
     }
     if (Rain.hasUmbrella && !this._hadUmbrella) this.umbrellaBurst = UMBRELLA_BURST_FRAMES;
     this._hadUmbrella = !!Rain.hasUmbrella;

@@ -1,14 +1,14 @@
-// Beach rain + collectible umbrella. Damage via callback (hurtPlayer is local to game.js).
+// Lluvia radiactiva del Alien Lab + paraguas. En la Costa no cae.
 import { showNotification } from "./notify.js";
 
-const DROP_COUNT = 90;
-const DAMAGE_EVERY = 36; // ~1 HP every ~36 frames if raining without umbrella
+const ROOM = "lab";
+const DROP_COUNT = 110;
+const DAMAGE_EVERY = 36;
 const START_DELAY_MIN = 35;
 const START_DELAY_MAX = 75;
-const PICKUP_PAD = 16; // expand player AABB for generous pickup
-
-// Solid left-beach sand (ground 0–600); pit gap is 600–880 — never spawn there.
-const UMBRELLA_SPAWN = { x: 420, y: 768, w: 72, h: 52 };
+const PICKUP_PAD = 16;
+// Suelo del Lab en y 810. El paraguas apoya ahí, a la izquierda.
+const UMBRELLA_SPAWN = { x: 250, y: 748, w: 86, h: 62 };
 
 function spawnDrops(w, h) {
   const drops = [];
@@ -16,9 +16,10 @@ function spawnDrops(w, h) {
     drops.push({
       x: Math.random() * (w + 200) - 40,
       y: Math.random() * h,
-      len: 8 + Math.random() * 12,
-      spd: 9 + Math.random() * 8,
-      drift: -1.2 - Math.random() * 1.4,
+      len: 10 + Math.random() * 16,
+      spd: 10 + Math.random() * 8,
+      drift: -0.4 - Math.random() * 0.8,
+      hot: Math.random() < 0.18,
     });
   }
   return drops;
@@ -35,24 +36,21 @@ function spawnUmbrella() {
 export const Rain = {
   active: false,
   drops: [],
-  umbrella: null, // {x,y,w,h} or null
+  umbrella: null,
   hasUmbrella: false,
   tick: 0,
   _delay: 0,
-  _inBeach: false,
+  _inRoom: false,
   _grabNotify: false,
 
   start() {
     this.active = true;
     this.tick = 0;
     this.drops = spawnDrops(1600, 900);
-    // Umbrella already spawned on beach enter; only create if somehow missing
-    if (!this.hasUmbrella && !this.umbrella) {
-      this.umbrella = spawnUmbrella();
-    }
+    if (!this.hasUmbrella && !this.umbrella) this.umbrella = spawnUmbrella();
     if (!this._grabNotify) {
       this._grabNotify = true;
-      try { showNotification("¡LLUEVE!", "Busca el paraguas rojo en la Costa", "sala"); } catch (_) {}
+      try { showNotification("LLUVIA", "Radiactiva. El paraguas está en el Lab", "sala"); } catch (_) {}
     }
   },
 
@@ -68,38 +66,38 @@ export const Rain = {
 
   _tryPickup(p) {
     if (!this.umbrella || !p || p.dead || this.hasUmbrella) return;
-    const pw = (p.w || 40) + PICKUP_PAD * 2;
-    const ph = (p.h || 40) + PICKUP_PAD * 2;
-    const box = { x: p.x - PICKUP_PAD, y: p.y - PICKUP_PAD, w: pw, h: ph };
+    const box = {
+      x: p.x - PICKUP_PAD,
+      y: p.y - PICKUP_PAD,
+      w: (p.w || 40) + PICKUP_PAD * 2,
+      h: (p.h || 40) + PICKUP_PAD * 2,
+    };
     if (aabb(box, this.umbrella)) {
       this.hasUmbrella = true;
       this.umbrella = null;
-      try { showNotification("PARAGUAS", "La lluvia ya no te hace daño", "item"); } catch (_) {}
+      try { showNotification("PARAGUAS", "La lluvia ya no te toca", "item"); } catch (_) {}
     }
   },
 
   update(game, opts) {
     const onTickDamage = opts && opts.onTickDamage;
-    const inBeach = game && game.roomId === "beach";
+    const here = game && game.roomId === ROOM;
 
-    if (!inBeach) {
-      if (this.active || this.hasUmbrella || this.umbrella || this._inBeach) this.stop();
-      this._inBeach = false;
+    if (!here) {
+      if (this.active || this.hasUmbrella || this.umbrella || this._inRoom) this.stop();
+      this._inRoom = false;
       return;
     }
 
-    if (!this._inBeach) {
-      // Just entered beach: spawn umbrella immediately on solid ground, then delay rain
-      this._inBeach = true;
+    if (!this._inRoom) {
+      this._inRoom = true;
       this._delay = START_DELAY_MIN + Math.floor(Math.random() * (START_DELAY_MAX - START_DELAY_MIN + 1));
       this._grabNotify = false;
       if (!this.hasUmbrella) this.umbrella = spawnUmbrella();
     }
 
     const p = game.player;
-    // Pickup works before/during rain
     this._tryPickup(p);
-    // Quiet tick so umbrella bob/ring animate before rain starts
     if (!this.active) this.tick++;
 
     if (!this.active) {
@@ -113,18 +111,16 @@ export const Rain = {
     this.tick++;
     const roomW = game.worldW || 1600;
     const roomH = game.worldH || 900;
-
     for (const d of this.drops) {
       d.y += d.spd;
       d.x += d.drift;
       if (d.y > roomH + 20) {
-        d.y = -20 - Math.random() * 40;
+        d.y = -20 - Math.random() * 80;
         d.x = Math.random() * (roomW + 200) - 40;
       }
       if (d.x < -60) d.x = roomW + 40;
     }
 
-    // Rain damage
     if (!this.hasUmbrella && p && !p.dead && (p.invuln || 0) <= 0 && onTickDamage) {
       if (this.tick % DAMAGE_EVERY === 0) onTickDamage(1);
     }
@@ -132,78 +128,105 @@ export const Rain = {
 
   draw(ctx, cam) {
     if (!ctx || !cam) return;
-
     ctx.save();
 
     if (this.active) {
-      ctx.strokeStyle = "rgba(160,210,255,.55)";
-      ctx.lineWidth = 1.5;
-      ctx.lineCap = "round";
+      const w = ctx.canvas.width;
+      const h = ctx.canvas.height;
+      const wash = ctx.createLinearGradient(0, 0, 0, h);
+      wash.addColorStop(0, "rgba(140, 255, 70, 0.10)");
+      wash.addColorStop(1, "rgba(40, 80, 10, 0.05)");
+      ctx.fillStyle = wash;
+      ctx.fillRect(0, 0, w, h);
+
       for (const d of this.drops) {
         const x = d.x - cam.x;
         const y = d.y - cam.y;
+        ctx.strokeStyle = d.hot ? "rgba(220, 255, 120, 0.95)" : "rgba(120, 230, 60, 0.72)";
+        ctx.lineWidth = d.hot ? 2.4 : 1.4;
+        ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + d.drift * 0.6, y + d.len);
+        ctx.lineTo(x + d.drift * 1.4, y + d.len);
         ctx.stroke();
+        if (d.hot) {
+          ctx.fillStyle = "rgba(190, 255, 80, 0.9)";
+          ctx.beginPath();
+          ctx.arc(x + d.drift * 1.4, y + d.len, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
-      ctx.lineCap = "butt";
     }
 
-    // World umbrella pickup (visible as soon as beach enter, even before rain)
     if (this.umbrella) {
       const u = this.umbrella;
-      const bob = Math.sin((this.tick || 0) / 10) * 4;
+      const bob = Math.sin((this.tick || 0) / 10) * 3;
       const x = u.x - cam.x;
       const y = u.y - cam.y + bob;
       const cx = x + u.w / 2;
-      const cy = y + u.h / 2;
-      // soft ground ring so it's obvious
+      const cy = y + 22;
       ctx.beginPath();
-      ctx.ellipse(cx, y + u.h - 4 - bob, 28, 8, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(126,231,255," + (0.22 + Math.sin((this.tick || 0) / 8) * 0.1) + ")";
+      ctx.ellipse(cx, y + u.h - 6, 30, 7, 0, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(180, 255, 60, 0.28)";
       ctx.fill();
-      drawUmbrellaIcon(ctx, cx, cy, 1.45);
+      drawUmbrella(ctx, cx, cy, 1.15);
     }
 
     ctx.restore();
   },
 
-  /** Optional: call from render with player screen/world pos */
   drawPlayerHint(ctx, cam, player) {
     if (!this.hasUmbrella || !player || !ctx || !cam) return;
-    const x = player.x - cam.x + (player.w || 20) / 2;
-    const y = player.y - cam.y - 18;
-    drawUmbrellaIcon(ctx, x, y, 0.55);
+    const face = player.facing || 1;
+    const x = player.x - cam.x + (player.w || 24) / 2 + face * 6;
+    const y = player.y - cam.y + 2;
+    drawUmbrella(ctx, x, y, 1.05);
   },
 };
 
-function drawUmbrellaIcon(ctx, cx, cy, scale) {
+function drawUmbrella(ctx, cx, cy, scale) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
-  // canopy
-  ctx.fillStyle = "#e23b3d";
+  const gores = 8;
+  const R = 36;
+  for (let i = 0; i < gores; i++) {
+    const a0 = Math.PI + (i / gores) * Math.PI;
+    const a1 = Math.PI + ((i + 1) / gores) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.arc(0, 4, R, a0, a1);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 ? "#ffe14a" : "#f0a400";
+    ctx.fill();
+  }
   ctx.beginPath();
-  ctx.moveTo(-18, 2);
-  ctx.quadraticCurveTo(-18, -16, 0, -18);
-  ctx.quadraticCurveTo(18, -16, 18, 2);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,.25)";
+  ctx.arc(0, 4, R, Math.PI, 0);
+  ctx.strokeStyle = "#241c0e";
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(28, 22, 10, 0.55)";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= gores; i++) {
+    const a = Math.PI + (i / gores) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.lineTo(Math.cos(a) * R, 4 + Math.sin(a) * R);
+    ctx.stroke();
+  }
+  ctx.fillStyle = "#fff8dc";
   ctx.beginPath();
-  ctx.moveTo(-6, 0);
-  ctx.quadraticCurveTo(-4, -12, 0, -14);
-  ctx.quadraticCurveTo(2, -8, 0, 0);
+  ctx.arc(0, 4, 3.4, 0, Math.PI * 2);
   ctx.fill();
-  // stem
-  ctx.strokeStyle = "#c8a060";
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = "#3a2a18";
+  ctx.lineWidth = 2.6;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(0, 2);
-  ctx.lineTo(0, 16);
-  ctx.quadraticCurveTo(4, 20, 8, 16);
+  ctx.moveTo(0, 4);
+  ctx.lineTo(0, 30);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(7, 30, 7, Math.PI, 0.15, true);
   ctx.stroke();
   ctx.restore();
 }
