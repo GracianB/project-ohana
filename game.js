@@ -351,7 +351,16 @@ function showMap() {
   overlay.classList.add("open");
 }
 function makePlayer(def) {
-  const p = { ...def, x: 180, y: 500, vx: 0, vy: 0, facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0, cds: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0, dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0 };
+  const p = {
+    ...def,
+    x: 180, y: 500, vx: 0, vy: 0,
+    facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0,
+    cds: {}, cdDur: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0,
+    dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0,
+    // Garantiza abilities del roster (Pizza: pepperoni/cheese/oven)
+    abilities: Array.isArray(def.abilities) ? def.abilities.slice() : (def.abilities || []),
+  };
+  if (!p.facing) p.facing = 1;
   applyForm(p, { silent: true });
   paintFit(p);
   return p;
@@ -536,6 +545,8 @@ function attack() {
   const p = game.player;
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
+  // facing nunca 0: Pizza y proyectiles dependen de esto
+  if (!p.facing) p.facing = 1;
   const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const def = markAt(p.id, evo);
   p.melee = Math.max(7, 12 - evo);
@@ -914,7 +925,8 @@ function updatePlayer() {
   if (p.dash > 0) p.dash--;
   if (p.melee > 0) p.melee--;
   if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
-  if (p.meleeBuf > 0) { p.meleeBuf--; if (p.melee <= 0) melee(); }
+  // Buffer usa el mismo camino que F/click (attack), no el melee legacy
+  if (p.meleeBuf > 0) { p.meleeBuf--; if (p.melee <= 0) attack(); }
   if (p._thrust > 0) {
     p._thrust--;
     p.facing = p._thrustFace || p.facing || 1;
@@ -1182,32 +1194,63 @@ function updateEnemies() {
         if (e.clawWind) e.clawWind = 0;
       }
     }
+
+    // --- BOSS: IA primero, movimiento después (sin gravedad genérica) ---
+    // Evita el soft-lock: antes se aplicaba gravedad + move ANTES de updateBossNido,
+    // lo que desincronizaba slam/swoop/charge y dejaba a la Reina congelada.
+    if (e.boss) {
+      if (e.fell) {
+        e.vx = 0; e.vy = 0;
+        e.x += ((game.worldW / 2 - e.w / 2) - e.x) * 0.14;
+        e.y += ((game.worldH / 2 - 80 - e.h / 2) - e.y) * 0.14;
+        e.dying = Math.max(0, (e.dying || 0) - 1);
+        if (t % 3 === 0) {
+          game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
+          game.flash = 4;
+        }
+        continue;
+      }
+      if (e.invuln > 0) e.invuln--;
+      try {
+        updateBossNido(e, game, {
+          t, hurtPlayer, showNotification, makeFoe,
+          ROOM_W: game.worldW, ROOM_H: game.worldH,
+          reduceMotion: game.reduceMotion || reduceMotion,
+          beep,
+        });
+      } catch (err) {
+        // Nunca congelar el loop entero si el boss falla un frame
+        console.warn("[Ohana] boss update:", err);
+        e.mode = "idle";
+        e.telegraph = false;
+        e.attackCd = Math.max(e.attackCd || 0, 30);
+      }
+      // Integrar velocidad que acaba de fijar la state machine
+      e.x += e.vx || 0;
+      e.y += e.vy || 0;
+      e.x = Math.max(40, Math.min(e.x, game.worldW - e.w - 40));
+      e.y = Math.max(80, Math.min(e.y, game.worldH - 90 - e.h));
+      // Contacto con el jugador
+      const pBoss = game.player;
+      if (pBoss && !pBoss.dead && !e.dying && e.contactDmg > 0 && aabb(pBoss, e)) {
+        const dmg = e.contactDmg || 22;
+        hurtPlayer(dmg, "-" + dmg);
+        if (!pBoss.dead) {
+          pBoss.vx = Math.sign(pBoss.x - e.x || 1) * 10;
+          pBoss.vy = -6.5;
+        }
+      }
+      continue;
+    }
+
     if (e.kind === "phosquito" || e.kind === "mosquito"
       || e.kind === "gaviota" || e.kind === "murcielago") e.vy += 0.08;
     else if (e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
       || e.kind === "brasita" || e.kind === "ufo") e.vy += 0.05;
     else if (e.kind === "planta" || e.kind === "medusa" || e.kind === "pez" || e.kind === "anguila") e.vy = 0;
-    else if (e.boss && e.airborne) e.vy += 0.12;
     else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;
-    if (e.boss && e.fell) {
-      e.vx = 0; e.vy = 0;
-      e.x += ((game.worldW / 2 - e.w / 2) - e.x) * 0.14;
-      e.y += ((game.worldH / 2 - 80 - e.h / 2) - e.y) * 0.14;
-      e.dying = Math.max(0, (e.dying || 0) - 1);
-      if (t % 3 === 0) {
-        game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
-        game.flash = 4;
-      }
-      continue;
-    }
-    if (e.boss) {
-      updateBossNido(e, game, {
-        t, hurtPlayer, showNotification, makeFoe, ROOM_W: game.worldW, ROOM_H: game.worldH,
-        reduceMotion: game.reduceMotion || reduceMotion,
-        beep,
-      });
-    } else {
+    {
     const s = sense(e, game.player);
     let pack = 0;
     for (const o of game.enemies) {
