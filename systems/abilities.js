@@ -297,22 +297,34 @@ export function hitEnemy(g, e, dmg, o = {}) {
   d = Math.max(1, Math.round(d));
   e.hp -= d;
   e.flash = Math.max(e.flash || 0, 14);
+  
   if (e.boss) {
     if (o.kx) e.vx = (e.vx || 0) + clamp(o.kx, -8, 8) * 0.08;
   } else {
     if (o.kx) e.vx = clamp(o.kx, -16, 16);
     if (o.ky) e.vy = Math.min(e.vy || 0, o.ky);
   }
+  
   if (o.stun != null) e.stun = Math.max(e.stun || 0, e.boss ? Math.min(6, o.stun) : o.stun);
+  
   const crit = !!o.crit || d >= 40;
   if (o.nums !== false) g.nums.add(cx(e) - 4, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (o.color || "#ffe66a"), crit);
+  
   g.combo = (g.combo || 0) + 1;
   g.comboT = 480;
   g.score = (g.score || 0) + 10 * g.combo;
   g.fx.emit(cx(e), cy(e), { color: o.color || "#fff", count: o.parts ?? (crit ? 14 : 8), size: crit ? 4 : 3, up: 1.2, star: !!crit });
+  
   if (g.player) g.player.xp = (g.player.xp || 0) + (o.xp ?? 2);
   g.shake = Math.min(18, (g.shake || 0) + (o.shake ?? 3) + (crit ? 4 : 0));
-  const stop = crit ? 9 : (d >= 18 ? 4 : 0);
+  
+  // Modificación: Permitir que stop sea reasignado
+  let stop = crit ? 9 : (d >= 18 ? 4 : 0);
+  
+  // Los jefes encajan decenas de golpes en un solo combate.
+  // Limitamos el hitstop a un máximo de 2 fotogramas para no ralentizar el juego.
+  if (e.boss) stop = Math.min(2, stop);
+  
   if (stop) {
     const frames = g.reduceMotion ? Math.max(1, Math.ceil(stop * 0.35)) : stop;
     g.hitstop = Math.max(g.hitstop || 0, frames);
