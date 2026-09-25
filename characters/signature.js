@@ -19,16 +19,16 @@ export function signature(id) {
 // H es siempre un golpe cercano. La forma solo pega un poco más fuerte y un poco más lejos.
 // El disparo y el área se quedan en J K L, para que el nivel no dependa del botón básico.
 const HITS = {
-  kilo:    { name: "Nota", kind: "leaf", color: "#ff9ab0" },
+  kilo:    { name: "Nota", kind: "note", color: "#ff9ab0" },
   stitcho: { name: "Zarpa", kind: "claws", color: "#7eb6ff" },
-  chispin: { name: "Chispa", kind: "zap", color: "#ffe14a" },
-  cat:     { name: "Zarpazo", kind: "claws", color: "#ffb6e4" },
-  dragon:  { name: "Garra", kind: "fan", color: "#ff6a2a" },
-  dino:    { name: "Mordisco", kind: "fan", color: "#8ee07a" },
-  frita:   { name: "Corte", kind: "fan", color: "#f0b43a" },
-  pizza:   { name: "Porcion", kind: "crescent", color: "#ffb43a" },
-  yomi:    { name: "Fauces", kind: "fan", color: "#ff4466" },
-  cuerno:  { name: "Puya", kind: "zap", color: "#ffe9a8" },
+  chispin: { name: "Chispa", kind: "spark", color: "#ffe14a" },
+  cat:     { name: "Zarpazo", kind: "paw", color: "#ffb6e4" },
+  dragon:  { name: "Garra", kind: "flame", color: "#ff6a2a" },
+  dino:    { name: "Mordisco", kind: "bite", color: "#8ee07a" },
+  frita:   { name: "Corte", kind: "slice", color: "#f0b43a" },
+  pizza:   { name: "Porcion", kind: "wedge", color: "#ffb43a" },
+  yomi:    { name: "Fauces", kind: "fang", color: "#ff4466" },
+  cuerno:  { name: "Puya", kind: "poke", color: "#ffe9a8" },
 };
 
 export const DIFFICULTY = {

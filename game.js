@@ -491,23 +491,8 @@ function hornPoke(p, evo, def) {
     life: 9,
     max: 9,
     color: "#ffe9a8",
-    kind: "zap",
+    kind: "poke",
     w: reach,
-  });
-  game.projectiles.push({
-    x: p.x + p.w / 2 + face * 8,
-    y: p.y + 2,
-    vx: face * 15,
-    vy: 0,
-    w: 18,
-    h: 10,
-    life: 14,
-    dmg: 12 + evo * 3,
-    color: "#ffe9a8",
-    shape: "orb",
-    owner: "player",
-    trail: true,
-    pierce: 2,
   });
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
@@ -533,18 +518,9 @@ function showSwing(p, evo, def) {
     y: low ? p.y + p.h * 0.7 : p.y + p.h * 0.32,
     facing: face, life, max: life,
     color: def.color || p.color,
-    kind: def.kind || "fan",
+    kind: def.kind || "slice",
     w: reach,
   });
-  if (evo >= 2 || sig.heavy) {
-    const life2 = Math.max(6, life - 3);
-    game.slashes.push({
-      x: p.x + p.w / 2 + face * (26 + evo * 2),
-      y: p.y + p.h * (low ? 0.82 : 0.2),
-      facing: face, life: life2, max: life2,
-      color: "#fff", kind: def.kind || "fan", w: Math.round(reach * 0.72),
-    });
-  }
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
     if (aabb(box, e)) markHit(p, e, def.dmg, sig.kb || 1);

@@ -1860,7 +1860,7 @@ export function drawProjectile(ctx, pr, cam, t) {
     ctx.restore();
     return;
   }
-  const vfxName = shape === "flame" ? "vfx-flame" : shape === "note" ? "vfx-note" : (shape === "claw" || shape === "crescent" || shape === "slash") ? "vfx-slash" : null;
+  const vfxName = shape === "flame" ? "vfx-flame" : shape === "note" ? "vfx-note" : null;
   const vfx = vfxName ? vfxSprite(vfxName) : null;
   if (vfx) {
     const s = Math.max(w, h) * 2.1;
@@ -2004,74 +2004,104 @@ export function drawSlash(ctx, s, cam) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s.facing || 1, 1);
-  const slashImg = vfxSprite("vfx-slash");
-  if (slashImg) {
-    const size = (s.w || 42) * 2.4 * (1.1 - k * 0.15);
-    ctx.globalAlpha = Math.min(1, k * 1.3);
-    ctx.drawImage(slashImg, 0, -size / 2, size, size);
-    ctx.restore();
-    return;
-  }
   ctx.globalAlpha = Math.min(1, k * 1.4);
   ctx.strokeStyle = s.color;
   ctx.fillStyle = s.color;
   ctx.lineCap = "round";
-  const r = (s.w || 42) * (1.25 - k * 0.2);
-  ctx.save();
-  ctx.globalAlpha = 0.22 * k;
-  ctx.beginPath();
-  ctx.arc(8, 0, r * 1.05, -1.2, 1);
-  ctx.lineTo(8, 0);
-  ctx.fill();
-  ctx.restore();
-  if (s.kind === "claws") {
-    ctx.lineWidth = 3.2;
+  ctx.lineJoin = "round";
+  const r = (s.w || 42) * (1.15 - k * 0.15);
+  const kind = s.kind || "slice";
+  if (kind === "claws") {
+    ctx.lineWidth = 3.4;
     for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
-      ctx.arc(8, i * 10, r, -0.9, 0.7);
+      ctx.moveTo(4, i * 9);
+      ctx.quadraticCurveTo(r * 0.55, i * 4, r, i * 11);
       ctx.stroke();
     }
-  } else if (s.kind === "zap") {
-    ctx.lineWidth = 2.6;
-    ctx.beginPath();
-    ctx.moveTo(4, -r * 0.7);
-    ctx.lineTo(r * 0.4, -r * 0.15);
-    ctx.lineTo(r * 0.15, r * 0.1);
-    ctx.lineTo(r, r * 0.55);
-    ctx.stroke();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-  } else if (s.kind === "fan") {
-    ctx.globalAlpha = k * 0.85;
-    for (let i = -2; i <= 2; i++) {
-      ctx.beginPath();
-      ctx.moveTo(4, 0);
-      ctx.quadraticCurveTo(r * 0.5, i * 10, r, i * 14);
-      ctx.lineTo(r * 0.6, i * 6);
-      ctx.closePath();
-      ctx.fill();
-    }
-  } else if (s.kind === "leaf") {
+  } else if (kind === "spark") {
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(6, 0, r, -1.1, 0.9);
+    ctx.moveTo(0, -r * 0.55);
+    ctx.lineTo(r * 0.28, -r * 0.08);
+    ctx.lineTo(r * 0.08, r * 0.05);
+    ctx.lineTo(r * 0.7, r * 0.55);
+    ctx.stroke();
+  } else if (kind === "paw") {
+    ctx.beginPath();
+    ctx.ellipse(r * 0.35, 2, r * 0.28, r * 0.22, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.arc(r * 0.15 + i * 8, -r * 0.22, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (kind === "flame") {
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(6, i * 6);
+      ctx.quadraticCurveTo(r * 0.45, i * 16 - 10, r, i * 8);
+      ctx.quadraticCurveTo(r * 0.5, i * 4, 6, i * 6);
+      ctx.fill();
+    }
+  } else if (kind === "bite") {
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(r * 0.35, -6, r * 0.55, 0.25, Math.PI - 0.25);
     ctx.stroke();
     ctx.beginPath();
-    ctx.ellipse(r * 0.55, -8, 5, 9, 0.6, 0, Math.PI * 2);
+    ctx.arc(r * 0.35, 8, r * 0.55, Math.PI + 0.25, -0.25);
+    ctx.stroke();
+  } else if (kind === "slice") {
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.lineTo(r, -2);
+    ctx.stroke();
+  } else if (kind === "wedge") {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, r * 0.85, -0.7, 0.7);
+    ctx.closePath();
+    ctx.fill();
+  } else if (kind === "fang") {
+    ctx.beginPath();
+    ctx.moveTo(8, -r * 0.15);
+    ctx.lineTo(r * 0.45, r * 0.55);
+    ctx.lineTo(r * 0.2, -r * 0.05);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(r * 0.7, 10, 4, 8, -0.5, 0, Math.PI * 2);
+    ctx.moveTo(r * 0.35, -r * 0.35);
+    ctx.lineTo(r * 0.85, r * 0.35);
+    ctx.lineTo(r * 0.5, -r * 0.2);
     ctx.fill();
+  } else if (kind === "poke") {
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(r, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(r - 10, -5);
+    ctx.lineTo(r - 10, 5);
+    ctx.closePath();
+    ctx.fill();
+  } else if (kind === "note") {
+    ctx.beginPath();
+    ctx.ellipse(10, 6, 7, 5, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(16, 4);
+    ctx.lineTo(16, -r * 0.45);
+    ctx.quadraticCurveTo(r * 0.55, -r * 0.55, r * 0.7, -r * 0.2);
+    ctx.stroke();
   } else {
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(6, 2, r, -1.05, 0.85);
-    ctx.stroke();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.6;
-    ctx.beginPath();
-    ctx.arc(8, 2, r * 0.72, -0.9, 0.7);
+    ctx.moveTo(0, 4);
+    ctx.lineTo(r, -2);
     ctx.stroke();
   }
   ctx.restore();
