@@ -1,12 +1,6 @@
 // ============================================================================
-// DINO · dinosaurio verde cabezón tipo T-rex (diseño original)
-// Manchas naranjas, bracitos cortos, barriga amarilla clara. Sin alas.
-//   0 Dino Bebé · saliendo del huevo (media cáscara abajo, otra en la cabeza)
-//   1 Dino      · pequeño T-rex, bracitos diminutos, cola gruesa
-//   2 Dino Pico · placas dorsales y cola con pinchos (turquesa)
-//   3 Dino Rex  · grande y pesado, verde oscuro, gola, cuerno frontal y armadura
-//   4 DINO GOD  · verde-dorado con grietas volcánicas y corona de cristal
-// pose.move: "pound" (caída en picado), "charge" (embestida, igual que cast K).
+// DINO · Dinosaurio verde cabezón tipo T-rex (Versión Ultra Pulida)
+// 0 Dino Bebé | 1 Dino | 2 Dino Pico | 3 Dino Rex | 4 DINO GOD
 // ============================================================================
 
 const PI = Math.PI;
@@ -23,9 +17,8 @@ const PAL = [
   { body: "#a9d83e", spot: "#ffd84a", belly: "#fff6b8", claw: "#fffbe8", plate: "#bff4ff", plate2: "#e8fdff" },
 ];
 
-// proporciones: hw/hh = semiejes de la cabeza
 const F = [
-  { hw: 31, hh: 26, bw: 17, bh: 24, legL: 6, legW: 12, armL: 9, tail: 12, tw: 8 },
+  { hw: 31, hh: 26, bw: 17, bh: 24, legL: 6,  legW: 12, armL: 9,  tail: 12, tw: 8 },
   { hw: 25, hh: 19, bw: 16, bh: 24, legL: 11, legW: 13, armL: 10, tail: 32, tw: 17 },
   { hw: 25, hh: 19, bw: 17, bh: 27, legL: 13, legW: 14, armL: 11, tail: 38, tw: 18 },
   { hw: 27, hh: 20, bw: 21, bh: 30, legL: 14, legW: 17, armL: 12, tail: 44, tw: 22 },
@@ -33,6 +26,9 @@ const F = [
 ];
 
 // ---------------------------------------------------------------------------
+// FUNCIONES AUXILIARES DE RENDERIZADO
+// ---------------------------------------------------------------------------
+
 function chain(x, y, len, a0, wave, n) {
   const pts = [];
   let a = a0, px = x, py = y;
@@ -45,7 +41,6 @@ function chain(x, y, len, a0, wave, n) {
   return pts;
 }
 
-/** Cola cónica suave a partir de una cadena. */
 function taperTail(ctx, R, pts, w0, color) {
   const n = pts.length - 1;
   const L = [], Rt = [];
@@ -63,10 +58,13 @@ function taperTail(ctx, R, pts, w0, color) {
 
 function spikeAt(ctx, R, x, y, a, len, wd, col, lw = 1.8) {
   const nx = Math.cos(a + PI / 2), ny = Math.sin(a + PI / 2);
-  R.poly(ctx, [[x + nx * wd, y + ny * wd], [x + Math.cos(a) * len, y + Math.sin(a) * len], [x - nx * wd, y - ny * wd]], col, { lw });
+  R.poly(ctx, [
+    [x + nx * wd, y + ny * wd],
+    [x + Math.cos(a) * len, y + Math.sin(a) * len],
+    [x - nx * wd, y - ny * wd]
+  ], col, { lw });
 }
 
-/** Placa de estegosaurio (rombo redondeado) apuntando en dirección a. */
 function plateAt(ctx, R, x, y, a, len, wd, col) {
   const nx = Math.cos(a + PI / 2), ny = Math.sin(a + PI / 2);
   const ux = Math.cos(a), uy = Math.sin(a);
@@ -94,28 +92,27 @@ function crystal(ctx, R, x, y, a, len, wd) {
   g.addColorStop(0.6, "#bff4ff");
   g.addColorStop(1, "#ffffff");
   R.poly(ctx, pts, g, { lw: 2, ink: "#1d3c5c" });
-  ctx.strokeStyle = "rgba(255,255,255,0.85)";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 1.4;
   ctx.beginPath();
   ctx.moveTo(x + ux * len * 0.15 + nx * wd * 0.3, y + uy * len * 0.15 + ny * wd * 0.3);
   ctx.lineTo(x + ux * len * 0.8 + nx * wd * 0.3, y + uy * len * 0.8 + ny * wd * 0.3);
   ctx.stroke();
 }
 
-/** Grieta volcánica brillante (polilínea). */
 function crack(ctx, pts, t, seed) {
-  const glow = 0.75 + Math.sin(t * 0.12 + seed) * 0.25;
+  const glow = 0.75 + Math.sin(t * 0.15 + seed) * 0.25;
   ctx.save();
   ctx.lineCap = "round"; ctx.lineJoin = "round";
-  ctx.shadowColor = "#ff9a1a"; ctx.shadowBlur = 5;
-  ctx.strokeStyle = "rgba(255,120,20," + (0.9 * glow).toFixed(2) + ")";
-  ctx.lineWidth = 3.2;
+  ctx.shadowColor = "#ff9a1a"; ctx.shadowBlur = 7;
+  ctx.strokeStyle = "rgba(255,120,20," + (0.95 * glow).toFixed(2) + ")";
+  ctx.lineWidth = 3.5;
   ctx.beginPath();
   pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.stroke();
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = "#fff4a0";
-  ctx.lineWidth = 1.3;
+  ctx.strokeStyle = "#fff7c0";
+  ctx.lineWidth = 1.4;
   ctx.stroke();
   ctx.restore();
 }
@@ -133,7 +130,6 @@ function foot(ctx, R, x, y, w, col, claw) {
 
 function leg(ctx, R, x, y, len, ang, w, col, claw, bend) {
   const e = R.swingLimb(ctx, x, y, len, ang, bend, w * 0.78, col, { hand: false });
-  // muslo gordito
   R.ellipse(ctx, x + Math.sin(ang) * len * 0.15, y + Math.cos(ang) * len * 0.1, w * 0.68, w * 0.82, col, { rot: ang * 0.6 });
   foot(ctx, R, e[0], e[1], w * 0.85, col, claw);
 }
@@ -153,7 +149,6 @@ function tinyArm(ctx, R, x, y, len, ang, w, col, claw) {
 }
 
 function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
-  // top: true = mitad superior (tapa), false = mitad inferior
   ctx.beginPath();
   if (top) ctx.ellipse(cx, cy, rx, ry, 0, PI, PI * 2);
   else ctx.ellipse(cx, cy, rx, ry, 0, 0, PI);
@@ -168,7 +163,7 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
   ctx.fillStyle = R.volume(ctx, cx - rx * 0.2, cy - ry * 0.3, Math.max(rx, ry), "#fff8ea");
   ctx.fill();
   ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.lineJoin = "round"; ctx.stroke();
-  // motitas
+  
   const sy = top ? -1 : 1;
   R.ellipse(ctx, cx - rx * 0.4, cy + sy * ry * 0.5, 2.6, 2, "#9fd88a", { line: false, shade: false });
   R.ellipse(ctx, cx + rx * 0.35, cy + sy * ry * 0.35, 2, 1.6, "#ffb07a", { line: false, shade: false });
@@ -177,11 +172,14 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 }
 
 // ---------------------------------------------------------------------------
+// DIBUJO PRINCIPAL DE DINO
+// ---------------------------------------------------------------------------
+
 function draw(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const { hh, bw, bh } = P;
   const god = f === 4, baby = f === 0;
-  const dark = R.darken(c.body, 0.2);
+  const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = pose.flourishN % 3;
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
@@ -196,6 +194,7 @@ function draw(ctx, pose, R) {
   let roarK = 0, chomp = 0, speedLines = 0, shock = 0, stomp = 0, apple = 0, lookUp = 0, rawr = 0;
   let shellRot = 0;
 
+  // LÓGICA DE ESTADOS Y ANIMACIÓN
   if (charging) {
     const ph = pose.phase * 1.3, s = Math.sin(ph);
     legF = s * 0.9; legB = -s * 0.9;
@@ -207,18 +206,17 @@ function draw(ctx, pose, R) {
     tailA = -0.25 + Math.sin(ph) * 0.1;
     shellRot = Math.sin(ph) * 0.12;
   } else if (st === "run") {
-    // pisotones pesados
     const ph = pose.phase, s = Math.sin(ph), cs = Math.cos(ph);
     const a = 0.7 * s;
     legF = a; legB = -a;
     lenF = 1 - Math.max(0, cs) * 0.4; lenB = 1 - Math.max(0, -cs) * 0.4;
     bendF = 3 + Math.max(0, cs) * 5; bendB = 3 + Math.max(0, -cs) * 5;
-    const upDown = Math.abs(cs); // 1 = piernas cruzadas (arriba), 0 = pisotón
+    const upDown = Math.abs(cs);
     bob = P.legL * (1 - Math.cos(a)) * 0.95 - upDown * (baby ? 3 : 5);
     lean = 0.14 + upDown * 0.04;
     headRot = 0.08 - upDown * 0.1; hdy = (1 - upDown) * 2.5;
     armF = 1.0 + Math.sin(ph * 2) * 0.8; armB = 1.0 - Math.sin(ph * 2) * 0.8;
-    tailA = -0.15 + (1 - upDown) * 0.2 + pose.sway * 0.3; // contrapeso
+    tailA = -0.15 + (1 - upDown) * 0.2 + pose.sway * 0.3;
     stomp = Math.max(0, 1 - upDown * 4);
     jaw = 0.12 + upDown * 0.1;
     shellRot = s * 0.14;
@@ -257,9 +255,8 @@ function draw(ctx, pose, R) {
       legF = 0.35 * e; legB = -0.35 * e;
       roarK = e; eyeMood = "angry";
       tailA = 0.3 * e + Math.sin(t * 0.8) * 0.08 * e;
-      hdy = Math.sin(t * 1.3) * 0.8 * e; // temblor
+      hdy = Math.sin(t * 1.3) * 0.8 * e;
     } else {
-      // slot 2: salto-pisotón
       const up = ease(seg(k, 0, 0.45)), down = seg(k, 0.45, 0.55), rc = seg(k, 0.7, 1);
       if (k < 0.5) {
         const jumpH = Math.sin(up * PI * 0.5) * 22;
@@ -285,7 +282,6 @@ function draw(ctx, pose, R) {
     armF = 2.1; armB = 1.9; legF = 1.0; lenF = 0.8; legB = 0.6; lenB = 0.8;
     tailA = -0.8 + Math.sin(t * 0.08) * 0.1;
   } else if (st === "dead") {
-    // K.O. sentado: patas estiradas, cabeza caída, ojos en X
     bob = P.legL * 0.85; lean = -0.3; headRot = 0.9; hdx = 2; hdy = 3;
     armF = 0.2; armB = 0.1; legF = 1.45; legB = 1.25; lenF = 0.9; lenB = 0.9;
     jaw = 0.3; deadEyes = true; tailA = -0.9;
@@ -299,20 +295,20 @@ function draw(ctx, pose, R) {
     tailA = 0.5 + Math.sin(t * 0.3) * 0.3;
   }
 
-  // gestos de espera
+  // GESTOS DE ESPERA
   if (fl > 0 && st === "idle" && !pound && !charging) {
-    if (flN === 0) { // intenta alcanzar algo con los bracitos
+    if (flN === 0) {
       apple = flE; lookUp = -flE;
       lean = lerp(lean, 0.3, flE); headRot = -0.1 * flE; hdx += 2 * flE;
       armF = lerp(armF, 2.05 + Math.sin(t * 0.9) * 0.2, flE); armB = lerp(armB, 1.9 - Math.sin(t * 0.9) * 0.2, flE);
       legF = 0.25 * flE; legB = -0.2 * flE;
       jaw = 0.12 * flE; eyeMood = "normal";
-    } else if (flN === 1) { // rugidito adorable
+    } else if (flN === 1) {
       const r2 = seg(fl, 0.3, 0.8);
       jaw = 0.6 * Math.sin(r2 * PI); rawr = Math.sin(r2 * PI);
       headRot = -0.2 * flE; armF = lerp(armF, 1.9, flE); armB = lerp(armB, 1.7, flE);
       eyeMood = rawr > 0.3 ? "closed" : "normal";
-    } else { // mueve la cola como un perro
+    } else {
       tailWag = flE; eyeMood = "happy"; jaw = 0.25 * flE;
       bob += Math.abs(Math.sin(t * 0.6)) * -1.5 * flE;
       headRot = Math.sin(t * 0.3) * 0.08 * flE;
@@ -329,33 +325,46 @@ function draw(ctx, pose, R) {
   const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 
-  // ---- líneas de velocidad (detrás)
+  // AURA DINO GOD (EFECTO EXCLUSIVO MEJORADO)
+  if (god) {
+    ctx.save();
+    const auraGlow = 0.5 + Math.sin(t * 0.1) * 0.25;
+    ctx.shadowColor = "#ffaa00";
+    ctx.shadowBlur = 15 * auraGlow;
+    ctx.fillStyle = "rgba(255, 170, 0, " + (0.15 * auraGlow).toFixed(2) + ")";
+    ctx.beginPath();
+    ctx.ellipse(0, hipY - bh * 0.5, bw * 1.8, bh * 1.5, 0, 0, PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // LÍNEAS DE VELOCIDAD
   if (speedLines === 1) {
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineCap = "round"; ctx.lineWidth = 2.2;
+    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineCap = "round"; ctx.lineWidth = 2.4;
     for (let i = 0; i < 4; i++) {
-      const y = -20 - i * 14, off = (t * 3 + i * 11) % 18;
-      ctx.beginPath(); ctx.moveTo(-bw - 12 - off, y); ctx.lineTo(-bw - 30 - off, y); ctx.stroke();
+      const y = -20 - i * 14, off = (t * 3.5 + i * 11) % 20;
+      ctx.beginPath(); ctx.moveTo(-bw - 12 - off, y); ctx.lineTo(-bw - 32 - off, y); ctx.stroke();
     }
     ctx.restore();
   } else if (speedLines === 2) {
     ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineCap = "round"; ctx.lineWidth = 2.4;
+    ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineCap = "round"; ctx.lineWidth = 2.6;
     for (let i = 0; i < 5; i++) {
-      const x = -24 + i * 12, off = (t * 4 + i * 9) % 16;
-      ctx.beginPath(); ctx.moveTo(x, -bh - hh * 2.2 - off); ctx.lineTo(x, -bh - hh * 2.2 - 16 - off); ctx.stroke();
+      const x = -24 + i * 12, off = (t * 4.5 + i * 9) % 18;
+      ctx.beginPath(); ctx.moveTo(x, -bh - hh * 2.2 - off); ctx.lineTo(x, -bh - hh * 2.2 - 18 - off); ctx.stroke();
     }
     ctx.restore();
   }
 
-  // ---- cola
+  // COLA
   let tpts = null;
   if (!baby) {
     ctx.save(); upper();
     const wagA = tailWag > 0 ? Math.sin(t * 0.75) * 0.9 * tailWag : 0;
     const base = PI * 0.96 - tailA - wagA * 0.6;
     tpts = chain(-bw * 0.7, -bh * 0.22, P.tail, base, (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12, 8);
-    // placas de la cola (detrás)
+    
     if (f === 2 || god) {
       for (let i = 2; i <= 3; i++) {
         const p = tpts[i], a = p[2] + PI / 2 + 0.25;
@@ -364,13 +373,13 @@ function draw(ctx, pose, R) {
       }
     }
     const sides = taperTail(ctx, R, tpts, P.tw, c.body);
-    // manchas en la cola
+    
     ctx.fillStyle = R.alpha(c.spot, 0.9);
     for (let i = 2; i < 7; i += 2) {
       const p = sides.top[i], q = tpts[i];
       ctx.beginPath(); ctx.ellipse(lerp(p[0], q[0], 0.45), lerp(p[1], q[1], 0.45), P.tw * 0.15 * (1 - i / 10), P.tw * 0.1, q[2], 0, PI * 2); ctx.fill();
     }
-    // pinchos de la cola (Pico, GOD)
+    
     if (f === 2 || god) {
       for (let i = 6; i <= 7; i++) {
         const p = sides.top[i], a = tpts[i][2];
@@ -378,7 +387,7 @@ function draw(ctx, pose, R) {
         spikeAt(ctx, R, p[0], p[1], a - PI / 2 + 0.1, 7, 2.2, god ? "#e8fdff" : c.claw);
       }
     }
-    // armadura en la cola (Rex)
+    
     if (f === 3) {
       for (let i = 1; i < 7; i += 2) {
         const p = sides.top[i], q = tpts[i];
@@ -393,22 +402,19 @@ function draw(ctx, pose, R) {
     ctx.restore();
   }
 
-  // ---- bebé: media cáscara inferior + cuerpo dentro
+  // DINO BEBÉ: CÁSCARA Y PIERNAS
   if (baby) {
-    // piernas asomando por debajo
     const lb = [-6, hipY], lf = [6, hipY];
     leg(ctx, R, lb[0], lb[1], P.legL * lenB, legB, P.legW, dark, c.claw, bendB);
     leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
     ctx.save(); upper();
     ctx.rotate(shellRot);
-    // colita que asoma por detrás
     const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15);
     R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * 1.5 + tw * 4, -bh * 1.3 - tw * 3], [-bw * 1.2 + tw * 3, -bh * 0.9], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
-    // brazo trasero
     tinyArm(ctx, R, bw * 0.3, -bh * 1.0, P.armL, armB, 5, dark, c.claw);
     ctx.restore();
   } else {
-    // ---- placas dorsales (detrás del cuerpo)
+    // PLACAS DORSALES
     ctx.save(); upper();
     if (f === 2 || god) {
       for (let i = 0; i < 4; i++) {
@@ -421,21 +427,19 @@ function draw(ctx, pose, R) {
     }
     ctx.restore();
 
-    // ---- pierna trasera
+    // PIERNA TRASERA Y BRAZO TRASERO
     leg(ctx, R, -5, hipY, P.legL * lenB, legB, P.legW, dark, c.claw, bendB);
-
-    // ---- brazo trasero
     ctx.save(); upper();
     tinyArm(ctx, R, bw * 0.45, -bh * 0.66, P.armL, armB, 4.5 + f * 0.4, dark, c.claw);
     ctx.restore();
 
-    // ---- cuerpo
+    // CUERPO PRINCIPAL
     ctx.save(); upper();
     const body = [[-bw * 1.0, -bh * 0.15], [-bw * 0.8, -bh * 0.7], [-bw * 0.15, -bh * 1.02], [bw * 0.65, -bh * 0.92], [bw * 1.02, -bh * 0.45], [bw * 0.85, -bh * 0.02], [0, bw * 0.3]];
     R.blob(ctx, body, c.body);
     const bel = [[bw * 0.2, -bh * 0.85], [bw * 0.75, -bh * 0.76], [bw * 0.95, -bh * 0.4], [bw * 0.72, -bh * 0.02], [bw * 0.1, bw * 0.16], [-bw * 0.15, -bh * 0.4]];
     R.blob(ctx, bel, c.belly, { lw: 1.6 });
-    // rayitas de barriga
+    
     ctx.save();
     R.blob(ctx, bel, null, { line: false, shade: false }); ctx.clip();
     ctx.strokeStyle = R.alpha(R.darken(c.belly, 0.3), 0.6); ctx.lineWidth = 1.4;
@@ -444,12 +448,12 @@ function draw(ctx, pose, R) {
       ctx.beginPath(); ctx.moveTo(-bw * 0.2, y - 1); ctx.quadraticCurveTo(bw * 0.45, y + 3, bw * 1.0, y - 1.5); ctx.stroke();
     }
     ctx.restore();
-    // manchas
+
     ctx.fillStyle = c.spot;
     ctx.beginPath(); ctx.ellipse(-bw * 0.5, -bh * 0.55, bw * 0.2, bw * 0.13, -0.4, 0, PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(-bw * 0.62, -bh * 0.25, bw * 0.13, bw * 0.09, -0.2, 0, PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(-bw * 0.2, -bh * 0.82, bw * 0.12, bw * 0.08, -0.1, 0, PI * 2); ctx.fill();
-    // armadura Rex
+
     if (f === 3) {
       for (let i = 0; i < 4; i++) {
         const a = -PI * 0.5 - 0.1 - i * 0.34;
@@ -465,11 +469,11 @@ function draw(ctx, pose, R) {
     R.shine(ctx, -bw * 0.35, -bh * 0.78, bw * 0.25, bh * 0.1, 0.35);
     ctx.restore();
 
-    // ---- pierna delantera
+    // PIERNA DELANTERA
     leg(ctx, R, 6, hipY, P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
   }
 
-  // ---- cabeza
+  // CABEZA
   ctx.save(); upper();
   if (baby) ctx.rotate(shellRot * 0.6);
   ctx.translate(headX, headY + pose.bounce * 1.5);
@@ -477,7 +481,7 @@ function draw(ctx, pose, R) {
   drawHead(ctx, R, pose, { f, c, P, t, god, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp });
   ctx.restore();
 
-  // ---- brazo delantero
+  // BRAZO DELANTERO
   ctx.save(); upper();
   if (baby) {
     ctx.rotate(shellRot);
@@ -488,7 +492,7 @@ function draw(ctx, pose, R) {
   }
   ctx.restore();
 
-  // ---- manzana inalcanzable (gesto 0)
+  // ACCESORIO DE GESTO: MANZANA INALCANZABLE
   if (apple > 0.05) {
     ctx.save();
     ctx.globalAlpha *= clamp(apple * 2, 0, 1);
@@ -502,7 +506,7 @@ function draw(ctx, pose, R) {
     ctx.restore();
   }
 
-  // ---- onda del pisotón (cast L)
+  // ONDA DE IMPACTO (PISOTÓN / CAST L)
   if (shock > 0) {
     ctx.save();
     for (let i = 0; i < 2; i++) {
@@ -519,7 +523,8 @@ function draw(ctx, pose, R) {
     }
     ctx.restore();
   }
-  // ---- polvo de pisotón al correr
+
+  // POLVO AL CORRER
   if (stomp > 0 && !baby) {
     ctx.save();
     ctx.globalAlpha *= stomp * 0.8;
@@ -532,12 +537,14 @@ function draw(ctx, pose, R) {
 }
 
 // ---------------------------------------------------------------------------
+// DIBUJO DETALLADO DE LA CABEZA
+// ---------------------------------------------------------------------------
+
 function drawHead(ctx, R, pose, o) {
   const { f, c, P, t, god, baby, jaw } = o;
   const hw = P.hw, hh = P.hh;
   const dark = R.darken(c.body, 0.2);
 
-  // gola (Rex)
   if (f === 3) {
     const cx = -hw * 0.55, cy = -hh * 0.35, rr = hh * 1.15;
     ctx.beginPath();
@@ -558,12 +565,11 @@ function drawHead(ctx, R, pose, o) {
       R.ellipse(ctx, cx + Math.cos(a) * rr * 0.68, cy + Math.sin(a) * rr * 0.68, 2.6, 2.6, "#ffe07a", { lw: 1.4 });
     }
   }
-  // corona de cristal (GOD) — parte trasera
+
   if (god) {
     R.halo(ctx, -hw * 0.1, -hh * 1.35, hw * 0.7, t, "#fff27a");
   }
 
-  // mandíbula + boca
   const hx = -hw * 0.55, hy = hh * 0.22;
   const ja = jaw * 0.85;
   const jl = hw * 1.45;
@@ -577,19 +583,20 @@ function drawHead(ctx, R, pose, o) {
     ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.stroke();
     R.ellipse(ctx, hx + Math.cos(ja * 0.6) * jl * 0.62, hy + Math.sin(ja * 0.6) * jl * 0.62, hw * 0.35, hh * 0.1, "#ff7a8a", { line: false, shade: false, rot: ja * 0.7 });
   }
+
   ctx.save();
   ctx.translate(hx, hy);
   ctx.rotate(ja);
   const jawPts = [[-hw * 0.2, -hh * 0.12], [jl * 0.95, -hh * 0.08], [jl, hh * 0.12], [jl * 0.8, hh * 0.38], [hw * 0.2, hh * 0.5], [-hw * 0.25, hh * 0.25]];
   R.blob(ctx, jawPts, c.body);
-  // parte inferior clara
+
   ctx.save();
   R.blob(ctx, jawPts, null, { line: false, shade: false }); ctx.clip();
   ctx.fillStyle = c.belly;
   ctx.beginPath(); ctx.ellipse(jl * 0.45, hh * 0.45, jl * 0.6, hh * 0.24, -0.05, 0, PI * 2); ctx.fill();
   ctx.restore();
   R.blob(ctx, jawPts, null, { shade: false });
-  // dientes inferiores
+
   if (jaw > 0.12) {
     ctx.fillStyle = "#ffffff"; ctx.strokeStyle = R.INK; ctx.lineWidth = 1;
     for (let i = 0; i < 3; i++) {
@@ -599,9 +606,9 @@ function drawHead(ctx, R, pose, o) {
   }
   ctx.restore();
 
-  // cabeza superior
   const skull = [[-hw * 0.95, -hh * 0.05], [-hw * 0.8, -hh * 0.78], [-hw * 0.1, -hh * 1.02], [hw * 0.6, -hh * 0.88], [hw * 1.0, -hh * 0.45], [hw * 1.02, hh * 0.08], [hw * 0.35, hh * 0.28], [-hw * 0.6, hh * 0.32]];
   R.blob(ctx, skull, c.body);
+
   ctx.save();
   R.blob(ctx, skull, null, { line: false, shade: false }); ctx.clip();
   ctx.fillStyle = c.spot;
@@ -610,9 +617,10 @@ function drawHead(ctx, R, pose, o) {
   ctx.beginPath(); ctx.ellipse(hw * 0.35, -hh * 0.9, hw * 0.09, hh * 0.07, 0.2, 0, PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-hw * 0.78, -hh * 0.2, hw * 0.08, hh * 0.08, 0, 0, PI * 2); ctx.fill();
   ctx.restore();
+
   R.blob(ctx, skull, null, { shade: false });
   R.shine(ctx, -hw * 0.35, -hh * 0.7, hw * 0.25, hh * 0.12, 0.45);
-  // dientes superiores
+
   ctx.fillStyle = "#ffffff"; ctx.strokeStyle = R.INK; ctx.lineWidth = 1.1;
   const nT = jaw > 0.12 ? 4 : 2;
   for (let i = 0; i < nT; i++) {
@@ -620,13 +628,12 @@ function drawHead(ctx, R, pose, o) {
     const ty = lerp(hh * 0.3, hh * 0.18, (tx + hw) / (2 * hw));
     ctx.beginPath(); ctx.moveTo(tx - 2.3, ty - 1); ctx.lineTo(tx, ty + 4.5); ctx.lineTo(tx + 2.3, ty - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
   }
-  // sonrisa (boca cerrada)
+
   if (jaw <= 0.03) {
     ctx.strokeStyle = R.INK; ctx.lineWidth = 2; ctx.lineCap = "round";
     ctx.beginPath(); ctx.arc(hx + hw * 0.15, hy - hh * 0.12, hh * 0.13, 0.2, 1.8); ctx.stroke();
   }
 
-  // cáscara en la cabeza (bebé)
   if (baby) {
     ctx.save();
     ctx.translate(-hw * 0.3, -hh * 0.92);
@@ -634,15 +641,16 @@ function drawHead(ctx, R, pose, o) {
     eggShell(ctx, R, 0, 0, hw * 0.7, hh * 0.5, true, t);
     ctx.restore();
   }
-  // cuerno frontal (Rex)
+
   if (f === 3) {
     R.blob(ctx, [[hw * 0.45, -hh * 0.82], [hw * 0.72, -hh * 1.45], [hw * 0.82, -hh * 0.62]], c.plate, { lw: 2.2 });
     R.blob(ctx, [[-hw * 0.2, -hh * 0.95], [-hw * 0.25, -hh * 1.4], [hw * 0.05, -hh * 0.98]], c.plate, { lw: 2 });
   }
+
   if (f === 2) {
-    // pequeña cresta de pinchos
     for (let i = 0; i < 3; i++) spikeAt(ctx, R, -hw * (0.25 + i * 0.25), -hh * (0.98 - i * 0.12), -PI / 2 - 0.4 - i * 0.25, 7 - i, 2.4, c.plate);
   }
+
   if (god) {
     for (let i = 0; i < 5; i++) {
       const a = -PI / 2 - 0.9 + i * 0.4;
@@ -656,7 +664,6 @@ function drawHead(ctx, R, pose, o) {
     crack(ctx, [[-hw * 0.9, -hh * 0.35], [-hw * 0.6, -hh * 0.3], [-hw * 0.5, -hh * 0.05], [-hw * 0.25, hh * 0.05]], t, 4);
   }
 
-  // ojo
   const ex = -hw * 0.08, ey = -hh * 0.42, er = hh * (baby ? 0.46 : 0.4);
   if (o.hurtEyes) {
     ctx.strokeStyle = R.INK; ctx.lineWidth = 2.6; ctx.lineCap = "round";
@@ -673,16 +680,16 @@ function drawHead(ctx, R, pose, o) {
     const lp = o.lookUp !== 0 ? { ...pose, look: { x: 1, y: 0.4 } } : pose;
     R.eye(ctx, ex, ey, er, lp, { iris: god ? "#ff9a1a" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
   }
+
   if ((f >= 3 || o.eyeMood === "angry") && !o.hurtEyes && !o.deadEyes && o.eyeMood !== "happy" && o.eyeMood !== "closed") {
     ctx.strokeStyle = R.darken(c.body, 0.45); ctx.lineWidth = 3.2; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(ex - er * 0.9, ey - er * 1.2); ctx.lineTo(ex + er * 0.9, ey - er * (o.eyeMood === "angry" ? 0.75 : 1.1)); ctx.stroke();
   }
-  // nariz
+
   R.ellipse(ctx, hw * 0.8, -hh * 0.45, 1.8, 1.3, R.INK, { line: false, shade: false, rot: -0.3 });
   R.blush(ctx, hw * 0.3, -hh * 0.02, hh * 0.18, "#ff6a7a");
   void dark;
 
-  // rugido: ondas de sonido
   const mx = hw * 1.1, my = hh * 0.25;
   if (o.roarK > 0.15) {
     ctx.save();
@@ -695,7 +702,7 @@ function drawHead(ctx, R, pose, o) {
     }
     ctx.restore();
   }
-  // rugidito
+
   if (o.rawr > 0.2) {
     ctx.save();
     ctx.globalAlpha *= o.rawr;
@@ -705,7 +712,7 @@ function drawHead(ctx, R, pose, o) {
     R.star(ctx, mx + 12, my - 12, 3.5, "#ffd0e0", { lw: 1.2 });
     ctx.restore();
   }
-  // mordisco
+
   if (o.chomp > 0.2) {
     ctx.save();
     ctx.globalAlpha *= o.chomp;
