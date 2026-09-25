@@ -792,7 +792,7 @@ const UPD = {
 
     return f.life > 0;
   }
-};
+};,
   ohana(g, f, p) {
     f.life--;
     f.x = cx(p); f.y = cy(p);
