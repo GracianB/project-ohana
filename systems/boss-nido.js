@@ -109,14 +109,28 @@ export function updateBossNido(e, game, helpers) {
   e.intro = false;
 
   // --- phase transitions ---
+  // Al cambiar de fase se limpian contadores de ataque para no quedar
+  // a medias en charge/swoop/slam (causa frecuente de soft-lock).
   const ratio = e.hp / Math.max(1, e.max);
+  function resetAttackState() {
+    e.mode = "idle";
+    e.telegraph = false;
+    e.teleKind = "";
+    e.wind = 0;
+    e.windMax = 0;
+    e.chargeLeft = 0;
+    e.swoopLeft = 0;
+    e.spitLeft = 0;
+    e.slam = 0;
+    e.slamHang = 0;
+    e.vx = (e.vx || 0) * 0.3;
+  }
   if (ratio <= 0.33 && e.phase < 3) {
     e.phase = 3;
     e.color = "#ff1040";
     e.contactDmg = 25;
     e.airborne = true;
-    e.mode = "idle";
-    e.telegraph = false;
+    resetAttackState();
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
       e.phaseAnnounced[3] = true;
@@ -132,8 +146,7 @@ export function updateBossNido(e, game, helpers) {
     e.color = "#ff2848";
     e.contactDmg = 23;
     e.airborne = true;
-    e.mode = "idle";
-    e.telegraph = false;
+    resetAttackState();
     e.attackCd = 50;
     e.hoverY = 460;
     if (!e.phaseAnnounced[2]) {
