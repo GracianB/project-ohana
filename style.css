@@ -2439,3 +2439,7 @@ body:not(.intro-complete) #char-select h1 .ohana {
   #chars .char-card.is-next { transform: translate(calc(-50% + 28vw), -46%) scale(0.72); }
   .roster-arrow { width: 44px; height: 44px; font-size: 28px; }
 }
+
+#chars .char-card h3 { order: 4; }
+#chars .char-card .role { order: 5; margin: 8px 0 0; }
+#chars .char-card .h-move { order: 6; }

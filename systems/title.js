@@ -5,6 +5,7 @@ import { getLook, setLook } from "../characters/look.js";
 import { playIntro, playTitleIntro } from "./intro.js";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
+import { difficulty } from "../characters/signature.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -162,7 +163,7 @@ function startSelected() {
 
 function begin(kind) {
   const def = ROSTER.find((r) => r.id === selectedId);
-  const name = def && def.forms && def.forms[0] ? def.forms[0].name : "Ohana";
+  const name = def ? def.name : "Ohana";
   if (kind === "new") {
     try {
       localStorage.removeItem("ohana");
@@ -204,7 +205,15 @@ function enhance() {
     if (!el.querySelector("canvas")) {
       el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
       const title = el.querySelector("h3");
-      if (title) title.textContent = (def.forms && def.forms[0] && def.forms[0].name) || def.name;
+      if (title) title.textContent = def.name;
+      const role = el.querySelector(".role");
+      if (role) {
+        const rank = difficulty(def.id);
+        const label = rank === 1 ? "Fácil" : rank === 3 ? "Difícil" : "Media";
+        role.textContent = label;
+        role.classList.remove("r1", "r2", "r3");
+        role.classList.add("r" + rank);
+      }
     }
     el.addEventListener("pointerdown", () => mark(def.id));
     el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
