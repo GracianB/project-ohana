@@ -700,9 +700,6 @@ const CASTERS = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// UPDATE de entidades
-// ---------------------------------------------------------------------------
 // ============================================================================
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
@@ -741,58 +738,9 @@ const UPD = {
         hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color });
       }
     }
-    if (f.age % 3 === 0) g.fx.emit(f.x, f.y, { color: f.color, count: 1, size: 2, speed: 0.4, life: 12, gravity: 0 });
-    return f.life > 0 && f.x > -40 && f.x < (g.worldW || 1600) + 40 && f.y < (g.worldH || 900) + 40;
-  },
-
-  ripple(g, f) { 
-    return --f.life > 0; 
-  },
-
-  hula(g, f, p) {
-    f.life--;
-    const x = cx(p), y = cy(p);
-
-    // 1. Reflejar proyectiles enemigos que entren en el radio del Hula
-    for (const pr of g.projectiles) {
-      if (pr.owner === "player") continue;
-      const px = pr.x + pr.w / 2, py = pr.y + pr.h / 2;
-      
-      if (Math.hypot(px - x, py - y) <= f.r) {
-        pr.owner = "player";
-        pr.vx = -pr.vx * 1.3; // Invierte y acelera el proyectil
-        pr.vy = -pr.vy * 1.3;
-        pr.color = "#ff5ad5";
-        boom(g, px, py, "#ff5ad5", 5, { star: true });
-      }
-    }
-
-    // 2. Dañar enemigos cercanos y aplicar curación si aplica
-    for (const e of g.enemies) {
-      if (!canHit(e)) continue;
-      if (Math.hypot(cx(e) - x, cy(e) - y) <= f.r) {
-        if ((g.t % 8) === 0) { // Aplica daño cada 8 fotogramas
-          hitEnemy(g, e, f.dmg, { kx: p.facing * 5, ky: -3, stun: 12, color: "#ff5ad5" });
-          
-          if (f.heal > 0 && p.health < p.maxHealth) {
-            p.health = Math.min(p.maxHealth, p.health + f.heal);
-            g.nums.add(cx(p), p.y - 10, "+" + f.heal, "#6f6");
-          }
-        }
-      }
-    }
-
-    // Emitir partículas estéticas alrededor del aro
-    if (g.t % 2 === 0) {
-      const angle = Math.random() * Math.PI * 2;
-      const px = x + Math.cos(angle) * f.r;
-      const py = y + Math.sin(angle) * f.r;
-      g.fx.emit(px, py, { color: "#ff5ad5", count: 1, size: 2, speed: 0.5 });
-    }
-
     return f.life > 0;
-  }
-};,
+  },
+};
   ohana(g, f, p) {
     f.life--;
     f.x = cx(p); f.y = cy(p);
