@@ -1,11 +1,11 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
-import { drawCharacter } from "./characters/draw.js";
+import { drawCharacter } from "./characters/draw.js?v=ohana-67";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js?v=ohana-67";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";

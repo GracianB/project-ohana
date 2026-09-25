@@ -1,5 +1,5 @@
 import { computePose, R } from "./rig.js";
-import { ART } from "./art/index.js";
+import { ART } from "./art/index.js?v=ohana-67";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
 

@@ -6,7 +6,7 @@ import cat from "./cat.js";
 import dragon from "./dragon.js";
 import dino from "./dino.js";
 import frita from "./frita.js";
-import pizza from "./pizza.js";
+import pizza from "./pizza.js?v=ohana-67";
 import yomi from "./yomi.js";
 import cuerno from "./cuerno.js";
 
