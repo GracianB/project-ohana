@@ -608,16 +608,17 @@ function attack() {
       def.color || p.color || "#ffe66a"
     );
   }
-
+  
   if (p.id === "cuerno") {
     hornPoke(p, evo, def);
     return;
   }
-
+  
   if (p.id === "pizza") {
     pizzaRangedAttack(p, evo, def);
     return;
   }
+   
 
   showSwing(p, evo, def);
 }
