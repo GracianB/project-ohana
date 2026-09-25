@@ -73,7 +73,6 @@ export function useAbility(game, index) {
     game.flash = Math.max(game.flash || 0, 14);
     game.shake = Math.min(18, (game.shake || 0) + 7);
     game.hitstop = Math.max(game.hitstop || 0, 8);
-    showNotification(def.name, def.desc, "sala");
   }
   const fn = CASTERS[id];
   if (fn) fn(game, p, Number(p.evo) || 0);

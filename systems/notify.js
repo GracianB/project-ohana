@@ -16,28 +16,33 @@ export function dismissNotifications() {
   });
 }
 
+let lastNote = { title: "", at: 0 };
+
 export function showNotification(title, message, kind) {
+  const now = performance.now();
+  if (lastNote.title === title && now - lastNote.at < 900) return;
+  lastNote = { title: String(title || ""), at: now };
   const parent = box();
-  while (parent.children.length > 2) parent.firstChild.remove();
+  parent.replaceChildren();
   const type = kind || guessKind(title);
   const el = document.createElement("div");
   el.className = "game-notification " + type;
-  el.innerHTML =
-    '<button class="notification-close" type="button" aria-label="Cerrar">✕</button>' +
-    '<div class="badge">' + typeLabel(type) + "</div>" +
-    "<h2>" + title + "</h2>" +
-    "<p>" + (message || "") + "</p>" +
-    "<small>Pulsa cualquier tecla o haz clic para cerrar</small>";
+  const head = document.createElement("h2");
+  head.textContent = title || "";
+  el.appendChild(head);
+  if (message) {
+    const p = document.createElement("p");
+    p.textContent = message;
+    el.appendChild(p);
+  }
   parent.appendChild(el);
-  const close = (ev) => {
-    if (ev) ev.stopPropagation();
-    if (el.classList.contains("closing")) return;
+  const close = () => {
+    if (!el.isConnected || el.classList.contains("closing")) return;
     el.classList.add("closing");
-    setTimeout(() => el.remove(), 260);
+    setTimeout(() => el.remove(), 220);
   };
-  el.querySelector(".notification-close").addEventListener("click", close);
   el.addEventListener("click", close);
-  setTimeout(close, 5200);
+  setTimeout(close, 2200);
 }
 
 function guessKind(title) {
@@ -46,13 +51,6 @@ function guessKind(title) {
   if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "hurt";
   if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("SALA") || t.includes("MAPA") || t.includes("NIDO")) return "sala";
   return "info";
-}
-
-function typeLabel(type) {
-  if (type === "evo") return "✦ EVOLUCIÓN";
-  if (type === "hurt") return "⚠ PELIGRO";
-  if (type === "sala") return "⚑ SALA";
-  return "• OHANA";
 }
 
 if (!window.__ohanaNotifyBound) {
