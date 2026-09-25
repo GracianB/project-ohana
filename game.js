@@ -541,6 +541,86 @@ function showSwing(p, evo, def) {
   });
   game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
 }
+
+function pizzaRangedAttack(p, evo, def) {
+  const face = p.facing || 1;
+  const handX = p.x + p.w / 2 + face * Math.max(14, p.w * 0.62);
+  const handY = p.y + p.h * 0.34;
+  const speed = 14 + evo * 0.8;
+  const damage = 10 + evo * 2;
+
+  game.projectiles.push({
+    x: handX - 15,
+    y: handY - 11,
+    vx: speed * face,
+    vy: -0.15,
+    w: 30,
+    h: 22,
+    life: 42,
+    dmg: damage,
+    color: def.color || "#ffb43a",
+    shape: "wedge",
+    owner: "player",
+    trail: true,
+    spin: true,
+    rot: face > 0 ? 0 : Math.PI,
+  });
+
+  p._thrust = 4;
+  p._thrustFace = face;
+
+  game.fx.emit(handX, handY, {
+    color: def.color || "#ffb43a",
+    count: 9,
+    size: 3,
+    speed: 2.8,
+    angle: face > 0 ? 0 : Math.PI,
+    spread: 0.45,
+    star: true,
+    life: 14,
+  });
+
+  game.shake = Math.min(10, (game.shake || 0) + 2);
+}
+
+function attack() {
+  const p = game.player;
+  if (!p || p.dead) return;
+  if (p.melee > 0) { p.meleeBuf = 8; return; }
+
+  // facing nunca 0
+  if (!p.facing) p.facing = 1;
+
+  const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+  const def = markAt(p.id, evo);
+
+  p.melee = Math.max(7, 12 - evo);
+  p.meleeBuf = 0;
+
+  beep("slash");
+
+  if (p._markName !== def.name) {
+    p._markName = def.name;
+    game.nums.add(
+      p.x,
+      p.y - 18,
+      def.name,
+      def.color || p.color || "#ffe66a"
+    );
+  }
+
+  if (p.id === "cuerno") {
+    hornPoke(p, evo, def);
+    return;
+  }
+
+  if (p.id === "pizza") {
+    pizzaRangedAttack(p, evo, def);
+    return;
+  }
+
+  showSwing(p, evo, def);
+}
 function attack() {
   const p = game.player;
   if (!p || p.dead) return;
