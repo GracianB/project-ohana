@@ -622,24 +622,7 @@ function attack() {
 
   showSwing(p, evo, def);
 }
-function attack() {
-  const p = game.player;
-  if (!p || p.dead) return;
-  if (p.melee > 0) { p.meleeBuf = 8; return; }
-  // facing nunca 0: Pizza y proyectiles dependen de esto
-  if (!p.facing) p.facing = 1;
-  const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
-  const def = markAt(p.id, evo);
-  p.melee = Math.max(7, 12 - evo);
-  p.meleeBuf = 0;
-  beep("slash");
-  if (p._markName !== def.name) {
-    p._markName = def.name;
-    game.nums.add(p.x, p.y - 18, def.name, def.color || p.color || "#ffe66a");
-  }
-  if (p.id === "cuerno") { hornPoke(p, evo, def); return; }
-  showSwing(p, evo, def);
-}
+ 
 function melee() {
   const p = game.player;
   if (!p || p.dead) return;
