@@ -2215,8 +2215,29 @@ a:focus-visible {
 
 /* ─── Portada v21: composición centrada · 8 tarjetas ───────────────────── */
 .cta.hidden { display: none; }
-.title-stack { margin-top: auto; }
-.legal { margin-bottom: auto; padding-top: 4px; }
+.title-stack { margin-top: 0; }
+.legal { margin-bottom: 0; padding-top: 0; }
+.logo-mark { display: none; }
+#char-select {
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 52px 16px 8px;
+  overflow: hidden;
+}
+#char-select h1 { flex-direction: row; align-items: baseline; gap: 12px; }
+#char-select h1 .project { font-size: 12px; letter-spacing: 0.42em; text-indent: 0; }
+#char-select h1 .ohana { font-size: clamp(34px, 4.4vw, 56px) !important; }
+.tagline { margin: 2px 0 0; font-size: 13px; }
+.title-badges { margin-top: 6px; }
+#chars {
+  --portrait-h: clamp(78px, 15vh, 132px);
+  flex: 1;
+  min-height: 0;
+  width: min(1100px, 100%);
+  justify-content: center;
+}
+#chars .char-card { padding: 8px 8px 10px; }
+#chars .char-card h3 { margin-top: 6px; font-size: clamp(15px, 1.3vw, 18px); }
 .pick-label { margin-top: 0; }
 
 /* Las animaciones de entrada esperan a que termine la intro */
@@ -2229,7 +2250,7 @@ body:not(.intro-complete) #char-select h1 .ohana {
 }
 .legal { animation: title-rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.6s both; }
 
-#char-select h1 .ohana { font-size: clamp(52px, min(11vw, 12vh), 132px); }
+#char-select h1 .ohana { font-size: clamp(34px, 4.4vw, 56px); }
 .char-card .h-move {
   display: block;
   margin-top: 2px;
@@ -2273,7 +2294,8 @@ body:not(.intro-complete) #char-select h1 .ohana {
 
 /* Móvil: carrusel horizontal con snap (solo scroll dentro del carrusel) */
 @media (max-width: 640px) {
-  #char-select { padding-top: 60px; }
+  #char-select { padding-top: 60px; overflow-y: auto; }
+  #char-select h1 { flex-direction: column; align-items: center; }
   #chars { --portrait-h: clamp(100px, 17vh, 150px); --card-w: min(46vw, 200px); }
   .chars-grid {
     display: grid;

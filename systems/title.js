@@ -200,24 +200,9 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><img class="portrait-art" alt="" src="assets/portraits/' + def.id + '.jpg"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
-      const img = el.querySelector(".portrait-art");
-      const box = el.querySelector(".portrait");
-      if (img && box) {
-        const show = () => box.classList.add("has-art");
-        const hide = () => { img.remove(); box.classList.remove("has-art"); };
-        img.addEventListener("load", show);
-        img.addEventListener("error", hide);
-        if (img.complete) { if (img.naturalWidth) show(); else hide(); }
-      }
-      const role = document.createElement("div");
-      role.className = "role";
-      role.textContent = ROLES[def.id] || "Bebé";
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
       const title = el.querySelector("h3");
-      if (title) {
-        title.textContent = (def.forms && def.forms[0] && def.forms[0].name) || def.name;
-        title.after(role);
-      }
+      if (title) title.textContent = (def.forms && def.forms[0] && def.forms[0].name) || def.name;
     }
     el.addEventListener("pointerdown", () => mark(def.id));
     el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
