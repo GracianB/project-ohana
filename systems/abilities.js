@@ -704,43 +704,43 @@ const CASTERS = {
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
 const UPD = {
-  note(g, f) {
-    f.life--;
-    f.vy += 0.38;
-    if (f.home) {
-      const e = nearestEnemy(g, f.x, f.y, 260, f.hit);
-      if (e) {
-        const dx = cx(e) - f.x, dy = cy(e) - f.y, d = Math.hypot(dx, dy) || 1;
-        f.vx += (dx / d) * 0.45;
-        f.vy += (dy / d) * 0.3;
-        const sp = Math.hypot(f.vx, f.vy), maxSp = 11;
-        if (sp > maxSp) { f.vx *= maxSp / sp; f.vy *= maxSp / sp; }
+    note(g, f) {
+      f.life--;
+      f.vy += 0.38;
+      if (f.home) {
+        const e = nearestEnemy(g, f.x, f.y, 260, f.hit);
+        if (e) {
+          const dx = cx(e) - f.x, dy = cy(e) - f.y, d = Math.hypot(dx, dy) || 1;
+          f.vx += (dx / d) * 0.45;
+          f.vy += (dy / d) * 0.3;
+          const sp = Math.hypot(f.vx, f.vy), maxSp = 11;
+          if (sp > maxSp) { f.vx *= maxSp / sp; f.vy *= maxSp / sp; }
+        }
       }
-    }
-    f.rot = Math.sin(f.age * 0.25) * 0.35;
-    const y0 = f.y + f.r;
-    f.x += f.vx; f.y += f.vy;
-    if (f.vy > 0) {
-      const top = crossTop(g, f.x, y0, f.y + f.r);
-      if (top !== null) {
-        f.y = top - f.r;
-        f.bounces++;
-        f.hit.clear();
-        boom(g, f.x, top, f.color, 6, { up: 0.8, speed: 2 });
-        add({ kind: "ripple", x: f.x, y: top, life: 14, color: f.color });
-        if (f.bounces > f.maxB) { boom(g, f.x, f.y, f.color, 10, { star: true }); return false; }
-        f.vy = -7.4;
+      f.rot = Math.sin(f.age * 0.25) * 0.35;
+      const y0 = f.y + f.r;
+      f.x += f.vx; f.y += f.vy;
+      if (f.vy > 0) {
+        const top = crossTop(g, f.x, y0, f.y + f.r);
+        if (top !== null) {
+          f.y = top - f.r;
+          f.bounces++;
+          f.hit.clear();
+          boom(g, f.x, top, f.color, 6, { up: 0.8, speed: 2 });
+          add({ kind: "ripple", x: f.x, y: top, life: 14, color: f.color });
+          if (f.bounces > f.maxB) { boom(g, f.x, f.y, f.color, 10, { star: true }); return false; }
+          f.vy = -7.4;
+        }
       }
-    }
-    for (const e of g.enemies) {
-      if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
-        f.hit.add(e);
-        hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color });
+      for (const e of g.enemies) {
+        if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
+          f.hit.add(e);
+          hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color });
+        }
       }
-    }
-    return f.life > 0;
-  },
-};
+   return f.life > 0;
+   },
+ 
   ohana(g, f, p) {
     f.life--;
     f.x = cx(p); f.y = cy(p);
