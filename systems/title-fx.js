@@ -113,8 +113,8 @@ if (cv) {
     // Big moon with pointer-reactive halo.
     // En pantallas estrechas la luna se aparta del título (esquina superior).
     const narrow = W < 700;
-    const mR = narrow ? 30 : 58;
-    const mx = narrow ? W - 46 : W * 0.84, my = narrow ? 92 : H * 0.18;
+    const mR = narrow ? 46 : Math.min(92, H * 0.11);
+    const mx = W * 0.5, my = H * 0.16;
     const halo = ctx.createRadialGradient(mx, my, 8, mx, my, mR * 2.6);
     halo.addColorStop(0, "rgba(255,240,190,0.5)");
     halo.addColorStop(0.35, "rgba(255,220,140,0.18)");
@@ -125,6 +125,11 @@ if (cv) {
     mg.addColorStop(0, "#fff8e0"); mg.addColorStop(0.55, "#f2d590"); mg.addColorStop(1, "#c9a24a");
     ctx.fillStyle = mg;
     ctx.beginPath(); ctx.arc(mx, my, mR, 0, Math.PI * 2); ctx.fill();
+    const reflect = ctx.createRadialGradient(mx, H * 0.78, 4, mx, H * 0.78, mR * 3.2);
+    reflect.addColorStop(0, "rgba(255,236,180,0.28)");
+    reflect.addColorStop(1, "rgba(255,236,180,0)");
+    ctx.fillStyle = reflect;
+    ctx.beginPath(); ctx.ellipse(mx, H * 0.8, mR * 2.4, mR * 0.55, 0, 0, Math.PI * 2); ctx.fill();
 
     // Spores drifting up.
     for (const sp of spores) {

@@ -103,15 +103,27 @@ function fitCanvas(cv) {
   cv._dpr = dpr;
 }
 
-function mark(id, scroll) {
+function mark(id) {
   selectedId = id;
-  document.querySelectorAll(".char-card").forEach((el) => el.classList.toggle("selected", el.dataset.id === id));
-  const grid = document.getElementById("chars-grid");
-  const card = grid && grid.querySelector('.char-card[data-id="' + id + '"]');
-  if (scroll && card && grid.scrollWidth > grid.clientWidth + 4) {
-    grid.scrollTo({ left: card.offsetLeft - (grid.clientWidth - card.offsetWidth) / 2, behavior: "smooth" });
-  }
+  const cards = [...document.querySelectorAll("#chars-grid .char-card")];
+  const ids = cards.map((el) => el.dataset.id);
+  const i = Math.max(0, ids.indexOf(id));
+  const prev = ids[(i - 1 + ids.length) % ids.length];
+  const next = ids[(i + 1) % ids.length];
+  cards.forEach((el) => {
+    el.classList.toggle("selected", el.dataset.id === id);
+    el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
+    el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
+  });
   syncDots();
+}
+
+function stepRoster(dir) {
+  const ids = [...document.querySelectorAll("#chars-grid .char-card")].map((el) => el.dataset.id);
+  if (!ids.length) return;
+  const i = Math.max(0, ids.indexOf(selectedId));
+  mark(ids[(i + dir + ids.length) % ids.length]);
+  sfx("ui");
 }
 
 /** Puntos del carrusel (móvil): reflejan la tarjeta centrada. */
@@ -138,19 +150,9 @@ function buildDots() {
 }
 
 function syncDots() {
-  const grid = document.getElementById("chars-grid");
   const dots = document.querySelector("#chars .chars-dots");
-  if (!grid || !dots) return;
-  let id = selectedId;
-  if (grid.scrollWidth > grid.clientWidth + 4) {
-    const mid = grid.scrollLeft + grid.clientWidth / 2;
-    let best = Infinity;
-    grid.querySelectorAll(".char-card").forEach((el) => {
-      const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
-      if (d < best) { best = d; id = el.dataset.id; }
-    });
-  }
-  dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id === id));
+  if (!dots) return;
+  dots.querySelectorAll("i").forEach((i) => i.classList.toggle("on", i.dataset.id === selectedId));
 }
 
 function startSelected() {
@@ -210,6 +212,10 @@ function enhance() {
   mountLook(wrap);
   applyLook();
   buildDots();
+  const prevBtn = document.getElementById("roster-prev");
+  const nextBtn = document.getElementById("roster-next");
+  if (prevBtn) prevBtn.onclick = () => stepRoster(-1);
+  if (nextBtn) nextBtn.onclick = () => stepRoster(1);
   mark(selectedId);
   const play = document.getElementById("btn-play");
   const neu = document.getElementById("btn-new");
@@ -235,6 +241,12 @@ function enhance() {
   refreshContinue();
   addEventListener("keydown", (e) => {
     if (document.body.classList.contains("playing")) return;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      if (!document.body.classList.contains("intro-complete")) return;
+      e.preventDefault();
+      stepRoster(e.key === "ArrowLeft" ? -1 : 1);
+      return;
+    }
     if (e.key !== "Enter") return;
     if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show")) return;
     const save = readSave();
