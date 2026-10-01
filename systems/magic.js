@@ -2283,6 +2283,226 @@ function drawEffects(ctx, game, t) {
     ctx.restore();
   }
 }
+// ---------- HUD de chips ----------
+const CSS = `
+#magic-chips{position:fixed;top:54px;left:50%;transform:translateX(-50%);display:none;gap:6px;z-index:30;pointer-events:none;flex-wrap:wrap;justify-content:center;max-width:min(94vw,720px)}
+body.playing #magic-chips.has{display:flex}
+#magic-chips .mchip{display:flex;align-items:center;gap:6px;padding:4px 9px 4px 4px;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(7,12,20,.82));border:1px solid rgba(255,255,255,.18);box-shadow:0 6px 18px rgba(0,0,0,.35),0 0 10px var(--c,#fff3);backdrop-filter:blur(10px);font:700 11px/1 Fredoka,system-ui,sans-serif;color:#f4f8ff;animation:mchipIn .28s ease-out}
+#magic-chips .mchip img{width:24px;height:24px;display:block;filter:drop-shadow(0 0 4px var(--c,#fff))}
+#magic-chips .mbar{width:46px;height:5px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden}
+#magic-chips .mbar i{display:block;height:100%;width:100%;border-radius:9px;background:var(--c,#fff);box-shadow:0 0 6px var(--c,#fff);transform-origin:left;transition:transform .25s linear}
+#magic-chips .mt{min-width:22px;text-align:right;font-variant-numeric:tabular-nums}
+#magic-chips .mchip.low{animation:mchipBlink .5s steps(2) infinite}
+#magic-chips .pips{display:flex;gap:3px}
+#magic-chips .pips b{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 5px var(--c)}
+#magic-chips .pips b.off{background:rgba(255,255,255,.15);box-shadow:none}
+@keyframes mchipIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes mchipBlink{50%{opacity:.45}}
+@media (max-width:820px){#magic-chips{gap:4px}#magic-chips .mchip{padding:3px 7px 3px 3px;font-size:10px}#magic-chips .mchip img{width:20px;height:20px}#magic-chips .mbar{width:30px}}
+@media (max-width:480px){#magic-chips .mbar{display:none}}
+`;
+
+function iconURL(kind) {
+  if (iconCache[kind]) return iconCache[kind];
+  try {
+    const c = document.createElement("canvas");
+    c.width = c.height = 48;
+    const x = c.getContext("2d");
+    x.translate(24, 24); x.scale(1.4, 1.4);
+    drawIcon(x, kind, 0);
+    iconCache[kind] = c.toDataURL();
+  } catch { iconCache[kind] = ""; }
+  return iconCache[kind];
+}
+
+function ensureHud() {
+  if (hudEl && hudEl.isConnected) return hudEl;
+  if (typeof document === "undefined") return null;
+  if (!document.getElementById("magic-chips-css")) {
+    const st = document.createElement("style");
+    st.id = "magic-chips-css"; st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+  hudEl = document.getElementById("magic-chips");
+  if (!hudEl) {
+    hudEl = document.createElement("div");
+    hudEl.id = "magic-chips";
+    hudEl.setAttribute("aria-live", "polite");
+    document.body.appendChild(hudEl);
+  }
+  if (!resizeHooked) {
+    resizeHooked = true;
+    addEventListener("resize", () => layoutHud(hudEl));
+    document.addEventListener("fullscreenchange", () => layoutHud(hudEl));
+  }
+  hudSig = "";
+  return hudEl;
+}
+
+// Coloca la fila bajo la barra superior evitando los paneles del HUD / barra del jefe (solo al cambiar)
+function layoutHud(el) {
+  if (!el || !el.classList.contains("has")) return;
+  const ta = document.getElementById("top-actions");
+  let top = 54;
+  if (ta) { const r = ta.getBoundingClientRect(); if (r.height) top = r.bottom + 8; }
+  el.style.top = top + "px";
+  const me = el.getBoundingClientRect();
+  const avoid = document.querySelectorAll("#hud .hud-block, #boss-wrap:not(.hidden)");
+  let push = top;
+  for (const n of avoid) {
+    const r = n.getBoundingClientRect();
+    if (!r.height) continue;
+    if (r.left < me.right && r.right > me.left && r.top < me.bottom && r.bottom > me.top) push = Math.max(push, r.bottom + 6);
+  }
+  if (push !== top) el.style.top = push + "px";
+}
+
+function renderHud(force) {
+  const el = ensureHud(); if (!el) return;
+  const active = KINDS.filter((k) => fx[k] > 0);
+  const sig = active.join(",");
+  if (force || sig !== hudSig) {
+    hudSig = sig;
+    el.innerHTML = active.map((k) => {
+      const d = DEFS[k];
+      const body = k === "shell"
+        ? '<span class="pips">' + [0, 1, 2].map((i) => '<b data-i="' + i + '"></b>').join("") + "</span>"
+        : '<span class="mbar"><i></i></span><span class="mt"></span>';
+      return '<div class="mchip" data-k="' + k + '" style="--c:' + d.color + '" title="' + d.name + '"><img alt="" src="' + iconURL(k) + '">' + body + "</div>";
+    }).join("");
+    el.classList.toggle("has", active.length > 0);
+    layoutHud(el);
+  }
+  for (const chip of el.children) {
+    const k = chip.dataset.k; const v = fx[k] || 0;
+    if (k === "shell") {
+      chip.querySelectorAll("b").forEach((b, i) => b.classList.toggle("off", i >= v));
+      continue;
+    }
+    const i = chip.querySelector("i"); const tx = chip.querySelector(".mt");
+    if (i) i.style.transform = "scaleX(" + Math.max(0, v / DEFS[k].dur).toFixed(3) + ")";
+    if (tx) tx.textContent = Math.ceil(v / FPS) + "s";
+    chip.classList.toggle("low", v < 3 * FPS);
+  }
+}
+
+// ---------- API ----------
+// ---------- API ----------
+export const Magic = {
+  onRoom(game, roomId) {
+    lastGame = game;
+    if (game.player !== lastPlayer) { clearAll(game); lastPlayer = game.player; }
+    items = placeItems(game, roomId);
+    ensureHud();
+  },
+
+  update(game) {
+    lastGame = game;
+    const p = game.player; if (!p) return;
+    if (p !== lastPlayer) { clearAll(game); lastPlayer = p; }
+    frame++;
+    if (p.dead) { if (Object.keys(fx).length) clearAll(game); return; }
+    // recogida
+    const pcx = p.x + p.w / 2, pcy = p.y + p.h / 2;
+    for (const it of items) {
+      if (it.taken) continue;
+      if (Math.abs(pcx - it.x) < 26 + p.w / 2 && Math.abs(pcy - it.y) < 26 + p.h / 2) {
+        it.taken = true;
+        apply(game, it.kind, it.x, it.y);
+      }
+    }
+    // temporizadores
+    for (const k of ["feather", "hourglass", "magnet", "star"]) {
+      if (!(fx[k] > 0)) continue;
+      fx[k]--;
+      if (fx[k] <= 0) {
+        delete fx[k];
+        if (k === "feather") unfeather(p);
+        if (k === "hourglass") game.enemySlow = 0;
+        if (game.nums) game.nums.add(p.x, p.y - 20, DEFS[k].name + " ✕", "#aab");
+      }
+    }
+    if (fx.hourglass > 0) game.enemySlow = fx.hourglass;
+    if (fx.feather > 0) {
+      feathered(p);
+      if (!p.grounded && p.vy > 3.2) p.vy = 3.2 + (p.vy - 3.2) * 0.55; // caída suave
+    }
+    if (fx.magnet > 0) {
+      for (const o of game.orbs) {
+        if (o.taken) continue;
+        const dx = pcx - o.x, dy = pcy - o.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 520 || dist < 1) { o._mag = false; continue; }
+        o._mag = true;
+        const sp = Math.min(dist, 3 + (520 - dist) * 0.02);
+        o.x += (dx / dist) * sp; o.y += (dy / dist) * sp;
+      }
+    }
+    if (fx.star > 0) starHits(game, p);
+    if (shellCrack > 0) shellCrack--;
+    if ((frame & 7) === 0) renderHud(false);
+  },
+
+  draw(ctx, game, t) {
+    const p = game.player;
+    if (p && p.dead && Object.keys(fx).length) clearAll(game);
+    const cam = game.cam;
+    const vw = ctx.canvas.width;
+    for (const it of items) {
+      if (it.taken) continue;
+      const sx = it.x - cam.x;
+      if (sx < -60 || sx > vw + 60) continue;
+      drawItem(ctx, it, cam, t);
+    }
+    drawEffects(ctx, game, t);
+  },
+
+  onHurt(game, amount) {
+    const p = game.player;
+    if (!(amount > 0)) return amount;
+    if (fx.star > 0) return 0;
+    if (fx.shell > 0) {
+      fx.shell--;
+      shellCrack = 14;
+      if (p) {
+        p.invuln = Math.max(p.invuln || 0, 40);
+        const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+        game.fx.emit(cx, cy, { color: "#bff6ff", count: fx.shell > 0 ? 10 : 26, size: 3.5, speed: 3.5, star: fx.shell <= 0 });
+        game.nums.add(p.x, p.y - 14, fx.shell > 0 ? "¡BLOQUEO!" : "¡POP!", "#7fe8ff");
+      }
+      if (fx.shell <= 0) { delete fx.shell; showNotification("CONCHA ROTA", "La burbuja de Hoku se ha roto"); }
+      play("block");
+      renderHud(false);
+      return 0;
+    }
+    return amount;
+  },
+
+  reset(game) {
+    clearAll(game || lastGame);
+    items = [];
+  },
+
+  snapshot() {
+    const out = {};
+    for (const k of Object.keys(fx)) out[k] = fx[k];
+    return { fx: out };
+  },
+
+  restore(snap) {
+    if (!snap || !snap.fx || typeof snap.fx !== "object") return;
+    for (const k of Object.keys(fx)) delete fx[k];
+    for (const k of Object.keys(snap.fx)) {
+      const n = Number(snap.fx[k]);
+      if (n > 0 && DEFS[k] && k !== "fruit") fx[k] = n;
+    }
+    const p = lastPlayer || (lastGame && lastGame.player);
+    if (p && fx.feather > 0) feathered(p);
+    if (lastGame && fx.hourglass > 0) lastGame.enemySlow = fx.hourglass;
+    renderHud(true);
+  },
+};
+
 // ---------- depuración opcional ----------
 //
 // En consola:
