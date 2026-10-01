@@ -2422,7 +2422,7 @@ export const Magic = {
         if (game.nums) game.nums.add(p.x, p.y - 20, DEFS[k].name + " ✕", "#aab");
       }
     }
-    if (fx.hourglass > 0) game.enemySlow = fx.hourglass;
+    if (fx.hourglass > 0) game.enemySlow = 2; // flag: updateEnemies salta 1 de cada 2 frames
     if (fx.feather > 0) {
       feathered(p);
       if (!p.grounded && p.vy > 3.2) p.vy = 3.2 + (p.vy - 3.2) * 0.55; // caída suave
@@ -2498,7 +2498,7 @@ export const Magic = {
     }
     const p = lastPlayer || (lastGame && lastGame.player);
     if (p && fx.feather > 0) feathered(p);
-    if (lastGame && fx.hourglass > 0) lastGame.enemySlow = fx.hourglass;
+    if (lastGame && fx.hourglass > 0) lastGame.enemySlow = 2;
     renderHud(true);
   },
 };

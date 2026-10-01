@@ -72,7 +72,7 @@ export function useAbility(game, index) {
     game.flashColor = def.color;
     game.flash = Math.max(game.flash || 0, 14);
     game.shake = Math.min(18, (game.shake || 0) + 7);
-    game.hitstop = Math.max(game.hitstop || 0, 8);
+    game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
   }
   const fn = CASTERS[id];
   if (fn) fn(game, p, Number(p.evo) || 0);
@@ -325,9 +325,12 @@ export function hitEnemy(g, e, dmg, o = {}) {
   // Limitamos el hitstop a un máximo de 2 fotogramas para no ralentizar el juego.
   if (e.boss) stop = Math.min(2, stop);
   
+  if (o.hitstop === 0) stop = 0;
+  else if (o.hitstop != null) stop = o.hitstop;
   if (stop) {
     const frames = g.reduceMotion ? Math.max(1, Math.ceil(stop * 0.35)) : stop;
-    g.hitstop = Math.max(g.hitstop || 0, frames);
+    // Cap duro: varios proyectiles no deben congelar el juego
+    g.hitstop = Math.min(5, Math.max(g.hitstop || 0, frames));
   }
   return true;
 }
@@ -382,7 +385,7 @@ const CASTERS = {
     const h = hand(p);
     const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
     for (let i = 0; i < n; i++) {
-      add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 11 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
+      add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
     }
     boom(g, h.x, h.y, "#ffb347", 8, { star: true });
   },
@@ -402,7 +405,7 @@ const CASTERS = {
     g.flash = Math.max(g.flash || 0, god ? 10 : 6);
     g.flashColor = "#ffe9a0";
     g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
-    if (god) g.hitstop = Math.max(g.hitstop || 0, 5);
+    if (god) g.hitstop = Math.min(5, Math.max(g.hitstop || 0, 3));
     boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
   },
 
@@ -735,7 +738,7 @@ const UPD = {
       for (const e of g.enemies) {
         if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
           f.hit.add(e);
-          hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color });
+          hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 });
         }
       }
    return f.life > 0;

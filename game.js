@@ -1,11 +1,11 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
-import { drawCharacter } from "./characters/draw.js?v=ohana-67";
+import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js?v=ohana-67";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -87,7 +87,7 @@ function closeOverlays() {
 function hitStop(frames) {
   if (!frames) return;
   if (game.reduceMotion) frames = Math.max(1, Math.ceil(frames * 0.35));
-  game.hitstop = Math.max(game.hitstop || 0, frames | 0);
+  game.hitstop = Math.min(5, Math.max(game.hitstop || 0, frames | 0));
 }
 function buzz(ms) {
   if (game.reduceMotion) return;
