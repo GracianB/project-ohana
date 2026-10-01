@@ -51,7 +51,8 @@ function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
 function fit() {
-  viewDpr = Math.min(2, window.devicePixelRatio || 1);
+  // Cap DPR: retina×2 mataba el FPS; reduceMotion → 1
+  viewDpr = reduceMotion ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
   viewW = Math.max(320, innerWidth | 0);
   viewH = Math.max(240, innerHeight | 0);
   const bw = Math.round(viewW * viewDpr);
@@ -2119,11 +2120,15 @@ function render() {
   }
   ctx.restore();
   // Skip low-HP edge vignette during death FX — at health=0 it was ~60% opaque over the ghost
+  // También skip si HP > 65%: evita createRadialGradient cada frame cuando está sano
   if (!DeathFx.isPlaying()) {
-    const low = 1 - Math.max(0, game.player.health / Math.max(1, game.player.maxHealth));
-    const vg = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
-    vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
-    ctx.fillStyle = vg; ctx.fillRect(0, 0, viewW, viewH);
+    const hpRatio = game.player.health / Math.max(1, game.player.maxHealth);
+    if (hpRatio <= 0.65) {
+      const low = 1 - Math.max(0, hpRatio);
+      const vg = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
+      vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, viewW, viewH);
+    }
   }
   {
     const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;

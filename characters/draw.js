@@ -218,6 +218,8 @@ function drawBurst(ctx, H, color, k) {
 let flashCanvas = null;
 let colorCanvas = null;
 let inkCanvas = null;
+let presentCanvas = null;
+let presentLastKey = "";
 
 function sheet(which, W) {
   let c = which === "color" ? colorCanvas : which === "ink" ? inkCanvas : flashCanvas;
@@ -229,11 +231,48 @@ function sheet(which, W) {
   return c;
 }
 
-/** Contorno de tinta alrededor del personaje, para que la silueta se lea. */
-function presentCharacter(ctx, art, pose, flashCol, flashA) {
+/** Huella barata y estable de la pose (invalida el cache solo si el arte cambiaría). */
+function poseFingerprint(pose) {
+  const q = (v, s) => Math.round((Number(v) || 0) * s);
+  return [
+    pose.state || "",
+    pose.move || "",
+    pose.form | 0,
+    q(pose.phase, 6),
+    q(pose.speed, 8),
+    q(pose.vy, 8),
+    pose.air ? 1 : 0,
+    q(pose.land, 8),
+    q(pose.atk, 10),
+    q(pose.cast, 10),
+    pose.castSlot | 0,
+    q(pose.hurt, 8),
+    q(pose.blink, 4),
+    q(pose.sway, 8),
+    q(pose.bounce, 8),
+    q(pose.breath, 6),
+    q(pose.flourish, 8),
+    pose.flourishN | 0,
+    q(pose.evoT, 12),
+    q(pose.look && pose.look.y, 6),
+  ].join("|");
+}
+
+/**
+ * Contorno de tinta + color. Cachea el bitmap compuesto cuando
+ * (id, evo, pose, flash) no cambian — evita redibujar vector a 560² cada frame.
+ */
+function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
   const U = 280;
-  const ps = 2;
-  const W = U * ps;
+  const ps = 1.5;
+  const W = Math.round(U * ps);
+  const faBucket = Math.round((flashA || 0) * 20);
+  const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket;
+  if (key === presentLastKey && presentCanvas && presentCanvas.width === W) {
+    ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
+    return;
+  }
+
   const color = sheet("color", W);
   const cg = color.getContext("2d");
   cg.setTransform(1, 0, 0, 1, 0, 0);
@@ -264,12 +303,21 @@ function presentCharacter(ctx, art, pose, flashCol, flashA) {
   ig.fillStyle = "#1a1022";
   ig.fillRect(0, 0, W, W);
   ig.globalCompositeOperation = "source-over";
-  const o = 3.4;
-  const dirs = [[o, 0], [-o, 0], [0, o], [0, -o], [o * 0.7, o * 0.7], [-o * 0.7, o * 0.7], [o * 0.7, -o * 0.7], [-o * 0.7, -o * 0.7]];
+
+  if (!presentCanvas) presentCanvas = document.createElement("canvas");
+  if (presentCanvas.width !== W) { presentCanvas.width = W; presentCanvas.height = W; }
+  const pg = presentCanvas.getContext("2d");
+  pg.setTransform(1, 0, 0, 1, 0, 0);
+  pg.clearRect(0, 0, W, W);
+  // 4 dirs (antes 8) — silueta legible, mitad de blit de outline
+  const o = 3.4 * ps;
+  const dirs = [[o, 0], [-o, 0], [0, o], [0, -o]];
   for (let i = 0; i < dirs.length; i++) {
-    ctx.drawImage(ink, -U / 2 + dirs[i][0], -U * 0.78 + dirs[i][1], U, U);
+    pg.drawImage(ink, dirs[i][0], dirs[i][1]);
   }
-  ctx.drawImage(color, -U / 2, -U * 0.78, U, U);
+  pg.drawImage(color, 0, 0);
+  presentLastKey = key;
+  ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
 }
 
 function kiloPose(p, t, moving, air, atk) {
@@ -399,7 +447,7 @@ export function drawCharacter(ctx, p, cam, t) {
     drawPainted(ctx, painted, -iw / 2, -ih, iw, ih, flashCol, flashA);
   } else {
     ctx.scale(sx * s, sy * s);
-    try { presentCharacter(ctx, art, pose, flashCol, flashA); }
+    try { presentCharacter(ctx, art, pose, flashCol, flashA, p.id); }
     catch (err) {
       try { art.draw(ctx, pose, R); }
       catch (e2) { if (!drawCharacter._warned) { drawCharacter._warned = true; console.warn("[ohana] dibujo", p.id, err); } }

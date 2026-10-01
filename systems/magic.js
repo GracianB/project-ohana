@@ -1568,138 +1568,49 @@ function drawItem(ctx, it, cam, t) {
 
   ctx.fill();
 
-  // Halo.
+  // Glow barato: círculo sólido (sin rays ni createRadialGradient).
   ctx.globalCompositeOperation =
     "lighter";
 
-  const glow =
-    ctx.createRadialGradient(
-      x,
-      y,
-      1,
-      x,
-      y,
-      38,
-    );
-
-  glow.addColorStop(
-    0,
-    d.glow,
-  );
-
-  glow.addColorStop(
-    0.3,
-    d.color + "99",
-  );
-
-  glow.addColorStop(
-    1,
-    d.color + "00",
-  );
-
   ctx.globalAlpha =
-    (0.46 +
-      pulse * 0.18) *
+    (0.28 +
+      pulse * 0.14) *
     lifeIn;
 
-  ctx.fillStyle = glow;
+  ctx.fillStyle =
+    d.glow || d.color || "#fff";
 
   ctx.beginPath();
 
   ctx.arc(
     x,
     y,
-    38,
+    22,
     0,
     TAU,
   );
 
   ctx.fill();
 
-  // Anillo exterior.
   ctx.globalAlpha =
-    0.34 *
-    pulse *
+    (0.18 +
+      pulse * 0.1) *
     lifeIn;
 
-  ctx.strokeStyle =
-    d.glow;
-
-  ctx.lineWidth = 1.2;
+  ctx.fillStyle =
+    d.color || "#fff";
 
   ctx.beginPath();
 
   ctx.arc(
     x,
     y,
-    22 +
-      Math.sin(
-        t * 0.05 +
-        it.phase,
-      ) * 2,
+    14,
     0,
     TAU,
   );
 
-  ctx.stroke();
-
-  // Rayos.
-  ctx.globalAlpha =
-    0.16 +
-    0.1 * pulse;
-
-  ctx.fillStyle =
-    d.glow;
-
-  const rot =
-    t * 0.015 +
-    it.phase;
-
-  for (
-    let i = 0;
-    i < 6;
-    i++
-  ) {
-    const a =
-      rot +
-      (i * TAU) / 6;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      x,
-      y,
-    );
-
-    ctx.lineTo(
-      x +
-        Math.cos(
-          a - 0.11,
-        ) *
-          31,
-      y +
-        Math.sin(
-          a - 0.11,
-        ) *
-          31,
-    );
-
-    ctx.lineTo(
-      x +
-        Math.cos(
-          a + 0.11,
-        ) *
-          31,
-      y +
-        Math.sin(
-          a + 0.11,
-        ) *
-          31,
-    );
-
-    ctx.closePath();
-    ctx.fill();
-  }
+  ctx.fill();
 
   ctx.globalCompositeOperation =
     "source-over";
@@ -1722,66 +1633,6 @@ function drawItem(ctx, it, cam, t) {
     it.kind,
     t,
   );
-
-  ctx.restore();
-
-  // Destellos.
-  ctx.save();
-
-  ctx.fillStyle =
-    "#fff";
-
-  for (
-    let i = 0;
-    i < 3;
-    i++
-  ) {
-    const k =
-      (
-        t * 0.02 +
-        i / 3 +
-        it.phase
-      ) % 1;
-
-    const a =
-      it.phase +
-      i * 2.1;
-
-    const sx =
-      x +
-      Math.cos(a) *
-        (14 + k * 11);
-
-    const sy =
-      y +
-      Math.sin(a) *
-        (12 + k * 9) -
-      k * 6;
-
-    const s =
-      Math.sin(
-        k * Math.PI,
-      ) * 3.2;
-
-    if (s < 0.3) continue;
-
-    ctx.globalAlpha =
-      Math.sin(
-        k * Math.PI,
-      ) * lifeIn;
-
-    starPath(
-      ctx,
-      sx,
-      sy,
-      s,
-      s * 0.3,
-      4,
-      0,
-    );
-
-    ctx.fill();
-  }
 
   ctx.restore();
 }
@@ -1827,38 +1678,20 @@ function drawEffects(ctx, game, t) {
         ? 0.22
         : 0.48;
 
-    const g =
-      ctx.createRadialGradient(
-        cx,
-        cy,
-        4,
-        cx,
-        cy,
-        R + 18,
-      );
-
-    g.addColorStop(
-      0,
+    // Glow barato (sin radial gradient)
+    ctx.fillStyle =
       "hsla(" +
-        hue +
-        ",100%,86%,.95)",
-    );
-
-    g.addColorStop(
-      1,
-      "hsla(" +
-        ((hue + 120) % 360) +
-        ",100%,60%,0)",
-    );
-
-    ctx.fillStyle = g;
+      hue +
+      ",100%,78%," +
+      (blink ? "0.28" : "0.42") +
+      ")";
 
     ctx.beginPath();
 
     ctx.arc(
       cx,
       cy,
-      R + 18,
+      R + 14,
       0,
       TAU,
     );
@@ -1933,34 +1766,10 @@ function drawEffects(ctx, game, t) {
 
     ctx.save();
 
-    const g =
-      ctx.createRadialGradient(
-        cx -
-          r * 0.35,
-        cy -
-          r * 0.4,
-        r * 0.1,
-        cx,
-        cy,
-        r,
-      );
+    // Caparazón: fill + stroke baratos
+    ctx.fillStyle =
+      "rgba(127,232,255,.22)";
 
-    g.addColorStop(
-      0,
-      "rgba(255,255,255,.38)",
-    );
-
-    g.addColorStop(
-      0.72,
-      "rgba(127,232,255,.11)",
-    );
-
-    g.addColorStop(
-      1,
-      "rgba(127,232,255,.46)",
-    );
-
-    ctx.fillStyle = g;
 
     ctx.beginPath();
 

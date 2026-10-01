@@ -2,7 +2,8 @@
 import { showNotification } from "./notify.js";
 
 const ROOM = "lab";
-const DROP_COUNT = 110;
+const DROP_COUNT = 48;
+const DROP_COUNT_RM = 36;
 const DAMAGE_EVERY = 36;
 const START_DELAY_MIN = 35;
 const START_DELAY_MAX = 75;
@@ -10,9 +11,10 @@ const PICKUP_PAD = 16;
 // Suelo del Lab en y 810. El paraguas apoya ahí, a la izquierda.
 const UMBRELLA_SPAWN = { x: 250, y: 748, w: 86, h: 62 };
 
-function spawnDrops(w, h) {
+function spawnDrops(w, h, count) {
   const drops = [];
-  for (let i = 0; i < DROP_COUNT; i++) {
+  const n = count || DROP_COUNT;
+  for (let i = 0; i < n; i++) {
     drops.push({
       x: Math.random() * (w + 200) - 40,
       y: Math.random() * h,
@@ -43,10 +45,11 @@ export const Rain = {
   _inRoom: false,
   _grabNotify: false,
 
-  start() {
+  start(game) {
     this.active = true;
     this.tick = 0;
-    this.drops = spawnDrops(1600, 900);
+    const rm = !!(game && game.reduceMotion);
+    this.drops = spawnDrops(1600, 900, rm ? DROP_COUNT_RM : DROP_COUNT);
     if (!this.hasUmbrella && !this.umbrella) this.umbrella = spawnUmbrella();
     if (!this._grabNotify) {
       this._grabNotify = true;
@@ -103,7 +106,7 @@ export const Rain = {
     if (!this.active) {
       if (this._delay > 0) {
         this._delay--;
-        if (this._delay <= 0) this.start();
+        if (this._delay <= 0) this.start(game);
       }
       return;
     }
