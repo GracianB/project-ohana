@@ -55,11 +55,11 @@ function paintPortraits(now = performance.now()) {
       if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
       cv._burst = Math.max(0, (cv._burst || 0) - 2);
       cv._atk = Math.max(0, (cv._atk || 0) - 2);
-      if ((tick + idx * 47) % 380 === 0) cv._atk = 12;
+      if (hero && tick % 640 === 0) cv._atk = 14;
       const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
       const at = tick * 0.5 + idx * 24;
-      const bob = Math.sin(tick * 0.03 + idx) * 4;
-      const sway = Math.sin(tick * 0.02 + idx * 1.3) * 0.05;
+      const bob = Math.sin(tick * 0.03 + idx) * (hero ? 5 : 2);
+      const sway = Math.sin(tick * 0.02 + idx * 1.3) * 0.035;
       const dummy = {
         id: def.id,
         x: -16,
@@ -76,26 +76,36 @@ function paintPortraits(now = performance.now()) {
         evoBurstMax: 90,
         visualScale: 1,
       };
-      const want = Math.min(bh * (hero ? 0.78 : 0.7), bw * 0.72);
+      const want = Math.min(bh * (hero ? 0.82 : 0.76), bw * (hero ? 0.9 : 0.82));
       dummy.visualScale = want / (VISUAL_H[evo] * (CHAR_K[def.id] || 1));
-      const footY = bh * 0.9;
+      const footY = bh * (hero ? 0.9 : 0.86);
       c.save();
       c.translate(bw / 2, footY);
-      c.scale(1, 0.28);
+      c.scale(1, 0.22);
+      const glow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
+      glow.addColorStop(0, hero ? "rgba(255, 214, 120, 0.72)" : "rgba(0,0,0,0.35)");
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      c.fillStyle = glow;
       c.beginPath();
-      c.ellipse(0, 0, Math.max(18, bw * 0.22), 18, 0, 0, Math.PI * 2);
-      c.fillStyle = "rgba(0,0,0,0.35)";
+      c.arc(0, 0, Math.max(36, bw * 0.42), 0, Math.PI * 2);
       c.fill();
       c.restore();
       c.save();
-      c.translate(bw / 2, footY + bob * (bh / 160));
-      c.rotate(hero ? sway * 0.6 : 0);
+      c.translate(bw / 2, footY + bob * (bh / 220));
+      if (hero) c.rotate(sway);
       drawCharacter(c, dummy, { x: 0, y: 0 }, at);
       c.restore();
       const role = card && card.querySelector(".role");
       if (role) {
         const en = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
         role.textContent = hero ? en : def.name;
+      }
+      const rail = card && card.querySelector(".form-rail");
+      if (rail) {
+        rail.querySelectorAll("i").forEach((dot, n) => {
+          dot.classList.toggle("on", hero && n <= evo);
+          dot.classList.toggle("now", hero && n === evo);
+        });
       }
       idx++;
     });
@@ -216,7 +226,7 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="320" height="220"></canvas></div>');
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="420" height="320"></canvas></div>');
       const title = el.querySelector("h3");
       if (title) title.textContent = def.name;
       const role = el.querySelector(".role");
@@ -227,6 +237,13 @@ function enhance() {
         role.classList.remove("r1", "r2", "r3");
         role.classList.add("r" + rank);
       }
+    }
+    if (!el.querySelector(".form-rail")) {
+      const rail = document.createElement("span");
+      rail.className = "form-rail";
+      rail.setAttribute("aria-hidden", "true");
+      rail.innerHTML = "<i></i><i></i><i></i><i></i><i></i>";
+      el.appendChild(rail);
     }
     el.addEventListener("pointerdown", () => mark(def.id));
     el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
