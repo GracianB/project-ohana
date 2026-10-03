@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro, playTitleIntro } from "./intro.js";
+import { playIntro, playTitleIntro } from "./intro.js?v=ohana-78";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { difficulty } from "../characters/signature.js";
@@ -287,7 +287,7 @@ function enhance() {
       return;
     }
     if (e.key !== "Enter" || e.repeat || document.activeElement?.closest("button, a")) return;
-    if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show") || document.querySelector("[data-dialog].open, [data-dialog].show")) return;
+    if (document.querySelector("#start-intro.show") || document.querySelector("[data-dialog].open, [data-dialog].show")) return;
     const save = readSave();
     const id = save && canonId(save.id);
     if (id && ROSTER.some((r) => r.id === id)) {
@@ -303,5 +303,12 @@ function enhance() {
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
   paintPortraits();
 }
+function armMenu() {
+  const play = document.getElementById("btn-play");
+  const neu = document.getElementById("btn-new");
+  if (play) play.onclick = () => begin("new");
+  if (neu) neu.onclick = () => begin("new");
+}
+armMenu();
 playTitleIntro();
 enhance();

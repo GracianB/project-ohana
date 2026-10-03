@@ -2240,14 +2240,7 @@ a:focus-visible {
 #chars .char-card h3 { margin-top: 6px; font-size: clamp(15px, 1.3vw, 18px); }
 .pick-label { margin-top: 0; }
 
-/* Las animaciones de entrada esperan a que termine la intro */
-body:not(.intro-complete) .title-stack,
-body:not(.intro-complete) #menu-row,
-body:not(.intro-complete) #chars,
-body:not(.intro-complete) .legal,
-body:not(.intro-complete) #char-select h1 .ohana {
-  animation-play-state: paused;
-}
+/* La intro ya no congela el menú: si el canvas falla, los botones siguen vivos. */
 .legal { animation: title-rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.6s both; }
 
 #char-select h1 .ohana { font-size: clamp(34px, 4.4vw, 56px); }

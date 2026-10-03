@@ -37,7 +37,9 @@ function iris(ctx, W, H, cx, cy, k) {
 export function playTitleIntro() {
   const el = document.getElementById("ohana-intro");
   const finishClasses = () => document.body.classList.add("intro-complete");
-  if (!el) { finishClasses(); return; }
+  // El menú no espera a esta cinemática. Si el canvas peta, los botones siguen.
+  finishClasses();
+  if (!el) return;
   if (el._played) return;
   el._played = true;
   el.innerHTML = '<canvas aria-hidden="true"></canvas><button class="oi-skip" type="button">Toca para entrar</button>';
@@ -130,6 +132,7 @@ export function playTitleIntro() {
   }
 
   function frame(now) {
+    try {
     if (!t0) { t0 = now; last = now; }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
@@ -250,6 +253,7 @@ export function playTitleIntro() {
     ctx.restore();
     if (t >= T.end) { end(); return; }
     raf = requestAnimationFrame(frame);
+    } catch (err) { end(); }
   }
 
   function onSkip(e) {
@@ -276,7 +280,7 @@ export function playTitleIntro() {
   if (document.readyState === "complete") setTimeout(go, 180);
   else addEventListener("load", () => setTimeout(go, 180), { once: true });
   // Red de seguridad
-  setTimeout(() => { if (!done && !t0) end(); }, 7000);
+  setTimeout(() => { if (!done) end(); }, 7000);
 }
 
 // ---------------------------------------------------------------------------
@@ -313,11 +317,17 @@ export function playIntro(kind, name, done, id) {
   const kicker = kind === "resume" ? "CONTINUAR" : "NUEVA PARTIDA";
   const sub = kind === "resume" ? "Se recupera tu forma y tu sala" : "Empiezas como bebé · Rumbo al Claro";
   el.querySelector(".intro-sr").textContent = kicker + ": " + title + ". " + sub;
-  const T = reduce ? { in: 0.2, out: 0.75, end: 0.95 } : { in: 0.5, out: 2.55, end: 2.95 }; // +1 s de final visible
+  const T = reduce ? { in: 0.12, out: 0.35, end: 0.5 } : { in: 0.28, out: 0.7, end: 0.95 };
 
   let t0 = 0, last = 0, raf = 0, skip = false, finished = false, burst = false, started = false;
+  function startGame() {
+    if (started) return;
+    started = true;
+    try { if (done) done(); } catch (err) {}
+  }
 
   function frame(now) {
+    try {
     if (!t0) { t0 = now; last = now; }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
@@ -330,8 +340,7 @@ export function playIntro(kind, name, done, id) {
     const footY = cy + target * 0.5;
     const outK = seg(t, T.out, T.end);
     const fade = 1 - easeInOut(outK);
-    // la partida arranca debajo y la cortina se desvanece encima
-    if (outK > 0 && !started) { started = true; if (done) done(); }
+    if (outK > 0) startGame();
     ctx.save();
     ctx.clearRect(0, 0, W, H);
     const inK = easeOut(seg(t, 0, 0.3));
@@ -398,6 +407,7 @@ export function playIntro(kind, name, done, id) {
     ctx.restore();
     if (t >= T.end) { finish(); return; }
     raf = requestAnimationFrame(frame);
+    } catch (err) { startGame(); finish(); }
   }
 
   function onSkip(e) {
@@ -416,10 +426,11 @@ export function playIntro(kind, name, done, id) {
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
     el.classList.remove("show");
-    if (!started) { started = true; if (done) done(); }
+    startGame();
   }
 
   el.classList.add("show");
+  startGame();
   el.addEventListener("pointerdown", onSkip, { passive: true });
   addEventListener("keydown", onSkip);
   raf = requestAnimationFrame(frame);
