@@ -8,19 +8,30 @@ const lastPlay = new Map(); // anti-spam por efecto
 
 function ac() {
   if (!ctx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
+    const host = typeof window === "undefined" ? null : window;
+    const AC = host && (host.AudioContext || host.webkitAudioContext);
     if (!AC) return null;
-    ctx = new AC();
-    const comp = ctx.createDynamicsCompressor();
-    comp.threshold.value = -16; comp.knee.value = 18; comp.ratio.value = 4;
-    master = ctx.createGain();
-    master.gain.value = 0.9;
-    master.connect(comp); comp.connect(ctx.destination);
-    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 1.2, ctx.sampleRate);
-    const d = noiseBuf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    try {
+      const audioCtx = new AC();
+      const comp = audioCtx.createDynamicsCompressor();
+      comp.threshold.value = -16; comp.knee.value = 18; comp.ratio.value = 4;
+      const masterNode = audioCtx.createGain();
+      masterNode.gain.value = 0.9;
+      masterNode.connect(comp); comp.connect(audioCtx.destination);
+      const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1.2, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      ctx = audioCtx;
+      master = masterNode;
+      noiseBuf = buffer;
+    } catch (_) {
+      ctx = master = noiseBuf = null;
+      return null;
+    }
   }
-  if (ctx.state === "suspended") ctx.resume();
+  if (ctx.state === "suspended") {
+    try { ctx.resume()?.catch(() => {}); } catch (_) {}
+  }
   return ctx;
 }
 

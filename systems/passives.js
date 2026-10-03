@@ -30,7 +30,7 @@ function reset(p) {
   sparks.length = 0;
   rings.length = 0;
   if (!p) return;
-  p._move = null; p._gliding = false; p._pound = false; p._slideT = 0; p._runT = 0; p._climbT = 0; p._bounceT = 0;
+  p._move = null; p._gliding = false; p._pound = false; p._slideT = 0; p._runT = 0; p._climbT = 0; p._bounceT = 0; p._puntT = 0;
 }
 
 // Pared trepable: lado de una plataforma (también ligeramente por debajo de un
@@ -253,9 +253,11 @@ export const Passives = {
     }
     if (p._bounceT > 0) { p._bounceT--; p._pmove = "bounce"; }
 
+    if (p._puntT > 0) p._puntT--;
     if (id === "punta" && p.grounded && p._preVy > 3.2 && !p.dead) {
       rings.push({ x: cx(p), y: p.y + p.h, R: 26, life: 10, max: 10, color: "#ffe9a8", flat: true });
       if (p.vy > -1) p.vy = -3.4;
+      p._puntT = 12;
       p._pmove = "punta";
       game.fx.emit(cx(p), p.y + 2, { color: "#fff6c8", count: 6, size: 2.5, up: 1.2, star: true });
     }
@@ -283,7 +285,7 @@ export const Passives = {
       if ((p._nineT % 5) === 0) game.fx.emit(cx(p), cy(p), { color: "#ffd0ee", count: 2, size: 2.5, up: 1, speed: 1.2, star: true, life: 18 });
     }
     if (p._armorT > 0) p._armorT--;
-    p._move = p._abilMove || p._pmove || null;
+    p._move = p._abilMove || p._pmove || (p._puntT > 0 ? "punta" : null);
   },
 
   onHurt(game, amount) {
@@ -318,6 +320,7 @@ export const Passives = {
     if (!p) return;
     p._nineUsed = false;
     p._pound = false;
+    p._puntT = 0;
     p._slideT = 0;
     p._climbT = 0;
     p._runT = 0;

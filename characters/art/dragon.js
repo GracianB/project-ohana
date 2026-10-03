@@ -317,7 +317,7 @@ function draw(ctx, pose, R) {
     lean = 0.34; headRot = -0.1;
     legF = -0.55; legB = -0.85;
     armF = 0.9; armB = 0.6;
-    if (st === "glide" && pose.move !== "fly") { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
+    if (st === "glide" && !god) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
     else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4; }
     wOpen = 1; eyeMood = "happy";
     tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;

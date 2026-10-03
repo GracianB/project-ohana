@@ -23,6 +23,7 @@ function drawShadow(ctx, x, y, rx, ry) {
 function star(ctx, x, y, r, fill) {
   ctx.fillStyle = fill || "#fff6a8";
   ctx.beginPath();
+  ctx.moveTo(x, y - r);
   for (let i = 0; i < 5; i++) {
     const a = -Math.PI / 2 + i * ((Math.PI * 2) / 5);
     const b = a + Math.PI / 5;
@@ -254,6 +255,7 @@ function poseFingerprint(pose) {
     q(pose.flourish, 8),
     pose.flourishN | 0,
     q(pose.evoT, 12),
+    pose.nineLives > 0 ? 1 : 0,
     q(pose.look && pose.look.y, 6),
   ].join("|");
 }
@@ -386,7 +388,8 @@ export function drawCharacter(ctx, p, cam, t) {
   const air = !p.grounded;
   const ascending = air && (p.vy || 0) < -1.2;
   const falling = air && (p.vy || 0) > 1.5;
-  const atk = p.melee > 0 ? Math.sin(Math.min(1, (12 - p.melee) / 12) * Math.PI) : 0;
+  const pose = computePose(p, t);
+  const atk = pose.atk;
   const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
   const hurtFresh = (p.invuln || 0) > 18;
 
@@ -414,7 +417,6 @@ export function drawCharacter(ctx, p, cam, t) {
 
   const color = p.color || "#ffffff";
   const art = ART[p.id] || ART.kilo;
-  const pose = computePose(p, t);
 
   ctx.save();
   ctx.translate(footX, footY);

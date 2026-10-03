@@ -52,8 +52,8 @@ function eye(ctx, x, y, r, look, shut, iris) {
 export function foePose(e) {
   if (!e) return "idle";
   if (e.hp <= 0 || (e.dying > 0 && e.deathHold)) return "die";
-  if (e.telegraph || e.clawWind > 0 || e.diving || e.hopWind > 0) return "telegraph";
-  if (e.lunge > 0 || e.clawSnap > 0) return "lunge";
+  if (e.telegraph || e.clawWind > 0 || e.hopWind > 0) return "telegraph";
+  if (e.lunge > 0 || e.clawSnap > 0 || e.diving) return "lunge";
   if (Math.abs(e.vx || 0) > 0.35) return "walk";
   return "idle";
 }

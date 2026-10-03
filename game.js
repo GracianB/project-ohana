@@ -595,7 +595,7 @@ function pizzaRangedAttack(p, evo, def) {
   const handX = p.x + p.w / 2 + face * Math.max(14, p.w * 0.62);
   const handY = p.y + p.h * 0.34;
   const speed = 14 + evo * 0.8;
-  const damage = 10 + evo * 2;
+  const damage = Math.max(1, Math.round(def.dmg * 0.5));
 
   game.projectiles.push({
     x: handX - 15,
@@ -1993,8 +1993,9 @@ function updateEnemies() {
 function updateProjectiles() {
   for (const pr of game.projectiles) {
     if (pr.homing && game.enemies[0]) { pr.vx += Math.sign(game.enemies[0].x - pr.x) * 0.35; pr.vy += Math.sign(game.enemies[0].y - pr.y) * 0.35; }
+    const previous = { x: pr.x, y: pr.y };
     pr.x += pr.vx; pr.y += pr.vy; pr.life--;
-    if (hitsSolid(pr, game.platforms)) {
+    if (hitsSolid(pr, game.platforms, previous)) {
       pr.life = 0;
       game.fx.emit(pr.x, pr.y, { color: pr.color || "#fff", count: 4, size: 2, up: 0.6, life: 10 });
     }

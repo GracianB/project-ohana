@@ -507,6 +507,15 @@ function draw(ctx, pose, R) {
     bolt(ctx, tip[0], tip[1], tip[0] - 14, tip[1] - 40, Math.floor(t / 2) + 7, C.glow, 1.8, false);
     sparkBurst(ctx, tip[0], tip[1], 12, t, 5, "#ffffff");
   }
+  if (st === "cast" && pose.castSlot === 2 && o.skyBolt > 0) {
+    const stormX = S.hx * 0.15 + 4;
+    const stormY = S.hy - S.hr * 1.2 - 15;
+    ctx.save();
+    ctx.globalAlpha *= Math.min(1, o.skyBolt * 1.5);
+    cloud(ctx, R, stormX, stormY, 18, "#ffffff", true);
+    bolt(ctx, stormX, stormY + 12, stormX - 3, stormY + 29, Math.floor(t / 2), BOLT, 2.4, true);
+    ctx.restore();
+  }
   // chispas alrededor
   if (o.sparks > 0) {
     ctx.save();
@@ -527,4 +536,4 @@ function draw(ctx, pose, R) {
   }
 }
 
-export default { id: "pikachu", draw };
+export default { id: "chispin", draw };

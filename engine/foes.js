@@ -27,7 +27,7 @@ export function applyElite(e) {
 }
 
 export function makeFoe(x, y, kind, roomId, i, opts) {
-  const hard = ROOM_HARD[roomId] || 1;
+  const hard = ROOM_HARD[roomId] ?? 1;
   const baby = !!(opts && opts.baby);
   if (kind === "phosquito") {
     const hp = baby ? 14 : 24 + hard * 14;

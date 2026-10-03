@@ -44,12 +44,13 @@ export function difficulty(id) {
 export function markAt(id, evo) {
   const base = HITS[id] || HITS.kilo;
   const i = Math.max(0, Math.min(4, Number(evo) || 0));
+  const sig = signature(id);
   return {
     name: base.name,
     kind: base.kind,
     color: base.color,
     style: "arc",
-    dmg: 20 + i * 4,
+    dmg: 20 + i * 4 + sig.dmg,
     reach: 64 + i * 3,
     kb: id === "dino" ? 1.2 : 1,
   };

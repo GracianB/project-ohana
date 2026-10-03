@@ -25,14 +25,14 @@ export const ALL_ROSTER = [
   },
   {
     id: "stitcho", name: "Stitcho", color: "#2f6bff",
-    speed: 4.4, jumpPower: 11.0, maxJumps: 1, health: 90, w: 24, h: 24,
+    speed: 4.4, jumpPower: 11.0, maxJumps: 2, health: 90, w: 24, h: 24,
     abilities: ["plasma", "rollo", "caos"],
     passive: { id: "climb", name: "Trepador", desc: "Se agarra a las paredes y trepa por ellas." },
     evoNames: ["Mini Stitcho", "Stitcho", "Stitcho Bravo", "Experimento Ñam", "STITCHO GOD"],
     forms: [
-      { name: "Mini Stitcho", color: "#7fb4ff", speed: 4.4, jump: 11.0, jumps: 1, hp: 90, w: 24, h: 24 },
+      { name: "Mini Stitcho", color: "#7fb4ff", speed: 4.4, jump: 11.0, jumps: 2, hp: 90, w: 24, h: 24 },
       { name: "Stitcho", color: "#2f6bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 28, h: 30 },
-      { name: "Stitcho Bravo", color: "#1c3fd1", speed: 5.5, jump: 12.6, jumps: 2, hp: 135, w: 34, h: 32 },
+      { name: "Stitcho Bravo", color: "#1c3fd1", speed: 5.5, jump: 12.6, jumps: 3, hp: 135, w: 34, h: 32 },
       { name: "Experimento Ñam", color: "#35d7ff", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 38, h: 40 },
       { name: "STITCHO GOD", color: "#8f7bff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 42, h: 46, aura: true }
     ]

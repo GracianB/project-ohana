@@ -183,6 +183,7 @@ function draw(ctx, pose, R) {
   if (st === "hurt") tilt = -0.28;
   if (st === "cast" && pose.castSlot === 1) tilt = 0.18;
   if (pose.flourish > 0 && pose.flourishN % 3 === 1) tilt = Math.sin(pose.flourish * TAU * 2) * 0.25; // mira a la mariposa
+  if (pose.nineLives > 0) tilt = Math.sin(t * 0.16) * 0.08;
 
   ctx.save();
   ctx.translate(0, hop);
@@ -248,10 +249,8 @@ function draw(ctx, pose, R) {
   ctx.translate(0, bodyY + bodyRY);
   ctx.scale(1 / squash, squash);
   ctx.translate(0, -bodyRY);
-  if (f > 0 || true) {
-    oval(ctx, R, 0, 0, bodyRX, bodyRY, c.fur);
-    oval(ctx, R, bodyRX * 0.25, bodyRY * 0.25, bodyRX * 0.55, bodyRY * 0.55, c.belly, { line: false, flat: true });
-  }
+  oval(ctx, R, 0, 0, bodyRX, bodyRY, c.fur);
+  oval(ctx, R, bodyRX * 0.25, bodyRY * 0.25, bodyRX * 0.55, bodyRY * 0.55, c.belly, { line: false, flat: true });
   // melena nube (Nube rosa)
   if (f === 2) {
     for (let i = 0; i < 6; i++) {
@@ -314,9 +313,10 @@ function draw(ctx, pose, R) {
 
   // cara (desplazada hacia +x)
   let mood = "normal";
-  if (st === "hurt") mood = "hurt";
-  else if (st === "dead") mood = "swirl";
+  if (st === "dead") mood = "swirl";
   else if (st === "victory") mood = "heart";
+  else if (pose.nineLives > 0) mood = "heart";
+  else if (st === "hurt") mood = "hurt";
   else if ((st === "cast" && pose.castSlot === 1) || (pose.flourish > 0 && pose.flourishN % 3 === 0)) mood = "happy";
   else if (pose.flourish > 0 && pose.flourishN % 3 === 2 && pose.flourish > 0.3 && pose.flourish < 0.7) mood = "closed";
   const er = headR * 0.27;
@@ -332,6 +332,7 @@ function draw(ctx, pose, R) {
   else if (st === "victory") open = 0.7;
   else if (st === "cast" && pose.castSlot !== 1) open = 0.55;
   else if (pose.flourish > 0 && pose.flourishN % 3 === 2) open = Math.sin(pose.flourish * Math.PI) * 0.9; // bostezo
+  if (pose.nineLives > 0) open = 0.55 + Math.sin(t * 0.18) * 0.15;
   kittyMouth(ctx, fx + headR * 0.03, headR * 0.42, headR * 0.2, open);
   // bigotes
   ctx.globalAlpha = 0.7;
@@ -397,6 +398,15 @@ function draw(ctx, pose, R) {
       const a = (i / 9) * TAU + t * 0.1;
       twinkle(ctx, Math.cos(a) * 44, bodyY - 20 + Math.sin(a) * 28, 3 + pose.cast * 3, i % 2 ? "#fff6c0" : "#ffb6e4");
     }
+  }
+  if (pose.nineLives > 0) {
+    const fade = Math.min(1, pose.nineLives / 18);
+    ctx.globalAlpha = fade;
+    for (let i = 0; i < 9; i++) {
+      const a = t * 0.08 + (i / 9) * TAU;
+      heart(ctx, headX + Math.cos(a) * (headR + 8), headY - headR * 0.12 + Math.sin(a) * headR * 0.58, 2.6, i % 2 ? "#fff6c0" : "#ff8fcf", false);
+    }
+    ctx.globalAlpha = 1;
   }
   // zarpazo: estela de corazoncitos
   if (st === "attack") {

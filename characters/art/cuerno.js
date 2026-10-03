@@ -30,7 +30,8 @@ function draw(ctx, pose, R) {
   const t = pose.t;
   const god = f === 4;
   const run = pose.state === "run";
-  const bob = Math.sin(t * 0.08) * 2 + (run ? -Math.abs(Math.cos(pose.phase)) * 3 : pose.breath);
+  const punta = pose.move === "punta";
+  const bob = Math.sin(t * 0.08) * 2 + (run ? -Math.abs(Math.cos(pose.phase)) * 3 : pose.breath) - (punta ? 3 : 0);
   const step = run ? Math.sin(pose.phase) : 0;
   const coat = COAT[f];
   const hornC = HORN[f];
@@ -78,7 +79,15 @@ function draw(ctx, pose, R) {
   horn(ctx, len, hornC, Math.sin(t * 0.12) * 0.6);
   ctx.restore();
 
-  if (pose.state === "cast" || god) R.sparkle(ctx, 8, -34 - len, 3 + f);
+  if (pose.state === "cast" || god || punta) R.sparkle(ctx, 8, -34 - len, punta ? 5 + f : 3 + f);
+  if (punta) {
+    const pulse = 0.75 + Math.sin(t * 0.7) * 0.25;
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = "#fff6c8";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.ellipse(0, 1, 15 + f * 2, 3 + f * 0.3, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   if (f >= 2) R.star(ctx, 16, -18, 3.2, mane);
   ctx.restore();
 }

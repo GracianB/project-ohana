@@ -32,7 +32,7 @@ export const ABILITY_DEFS = {
   gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
   meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
   // Dino
-  bite: { name: "Mordisco", key: "J", cd: 700, color: "#e8ffe0", desc: "Mordisco corto, muy fuerte y con gran retroceso." },
+  bite: { name: "Mordisco", key: "J", cd: 700, color: "#e8ffe0", desc: "Mordisco demoledor y huesos a distancia; evoluciona en abanico." },
   charge: { name: "Embestida", key: "K", cd: 2200, color: "#4cbf56", desc: "Carga blindada: invulnerable mientras dura." },
   quake: { name: "Terremoto", key: "L", cd: 6000, color: "#c8a060", desc: "Onda por el suelo que lanza por los aires." },
   // Frita
@@ -196,15 +196,17 @@ export function updateAbilityFx(game) {
     }
     if ((game.t % 2) === 0) game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" });
   }
-  p._abilMove = S.roll > 0 || S.caos > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
-  for (let i = 0; i < FX.length; i++) {
+  p._abilMove = S.caos > 0 ? "chaos" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+  const updateCount = FX.length;
+  for (let i = 0; i < updateCount; i++) {
     const f = FX[i];
     f.age = (f.age || 0) + 1;
     const keep = UPD[f.kind] ? UPD[f.kind](game, f, p) : false;
     if (!keep) f.dead = true;
   }
   let w = 0;
-  for (let i = 0; i < FX.length; i++) if (!FX[i].dead) FX[w++] = FX[i];
+  for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
+  for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
   FX.length = w;
 }
 
@@ -452,7 +454,13 @@ const CASTERS = {
     const W = g.worldW || 1600;
     const x0 = p.x, y0 = p.y;
     const dist = 150 + evo * 18;
-    const nx = clamp(p.x + p.facing * dist, 30, W - p.w - 30);
+    let nx = clamp(p.x + p.facing * dist, 30, W - p.w - 30);
+    const direction = Math.sign(nx - x0);
+    const steps = Math.ceil(Math.abs(nx - x0) / 8);
+    for (let i = 0; i < steps; i++) {
+      if (!g.platforms.some((pl) => aabb({ x: nx, y: y0, w: p.w, h: p.h }, pl))) break;
+      nx -= direction * Math.min(8, Math.abs(nx - x0));
+    }
     p.x = nx;
     const pl = solidAt(g, cx(p), p.y + p.h - 2) || solidAt(g, cx(p), cy(p));
     if (pl) { p.y = pl.y - p.h; p.vy = 0; }
@@ -548,6 +556,20 @@ const CASTERS = {
       }
     }
     if (any) { g.shake = Math.min(18, (g.shake || 0) + 4); p.vx -= p.facing * 3; }
+    const shots = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
+    const speed = 11 + evo * 0.7;
+    const mouthX = cx(p) + p.facing * p.w * 0.58;
+    const mouthY = p.y + p.h * 0.38;
+    for (let i = 0; i < shots; i++) {
+      const angle = (i - (shots - 1) / 2) * 0.16;
+      g.projectiles.push({
+        x: mouthX - 10, y: mouthY - 7,
+        vx: Math.cos(angle) * speed * p.facing, vy: Math.sin(angle) * speed,
+        w: 20 + evo * 1.5, h: 14 + evo,
+        life: 44 + evo * 5, dmg: (6 + evo * 1.5) / shots,
+        color: evo >= 4 ? "#e8fdff" : "#e8ffe0", shape: "bone", owner: "player", trail: true,
+      });
+    }
     add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
   },
   charge(g, p, evo) {
@@ -1110,12 +1132,24 @@ const UPD = {
       for (const e of g.enemies) {
         if (canHit(e) && circleHit(f.x, f.y, 14, e)) {
           f.stuck = 16;
+          const direction = Math.sign(f.vx) || 1;
           f.vx = 0;
-          hitEnemy(g, e, f.dmg * 0.45, { kx: Math.sign(f.vx || 1) * 2, ky: -1, stun: 10, color: "#f2e6c8" });
+          f.vy = 0;
+          hitEnemy(g, e, f.dmg * 0.45, { kx: direction * 2, ky: -1, stun: 10, color: "#f2e6c8" });
           break;
         }
       }
-    } else if (--f.stuck <= 0) {
+      const floor = f.vy >= 0 ? crossTop(g, f.x, f.y - f.vy, f.y) : null;
+      const wall = solidAt(g, f.x, f.y);
+      const outside = f.x < 0 || f.x > (g.worldW || 1600) || f.y > (g.worldH || 900);
+      if (!f.stuck && (floor !== null || wall || outside)) {
+        f.stuck = 16;
+        f.vx = 0;
+        f.vy = 0;
+      }
+    }
+    if (!f.stuck && f.life <= 0) f.stuck = 1;
+    if (f.stuck && --f.stuck <= 0) {
       for (const e of g.enemies) {
         if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < 72) {
           hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) || 1, ky: -4, stun: 16, color: "#ff4466" });
@@ -1124,7 +1158,7 @@ const UPD = {
       boom(g, f.x, f.y, "#ff4466", 12, { star: true });
       return false;
     }
-    return f.life > 0;
+    return f.stuck > 0 || f.life > 0;
   },
   sleeve(g, f, p) {
     f.life--;
@@ -1860,6 +1894,24 @@ export function drawProjectile(ctx, pr, cam, t) {
   ctx.restore();
   if (shape === "note") {
     drawNoteGlyph(ctx, 1, pr.color);
+  } else if (shape === "bone") {
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.28, -h * 0.16);
+    ctx.bezierCurveTo(-w * 0.62, -h * 0.52, -w * 0.64, -h * 0.08, -w * 0.34, 0);
+    ctx.lineTo(w * 0.34, 0);
+    ctx.bezierCurveTo(w * 0.64, -h * 0.08, w * 0.62, -h * 0.52, w * 0.28, -h * 0.16);
+    ctx.lineTo(w * 0.28, h * 0.16);
+    ctx.bezierCurveTo(w * 0.62, h * 0.52, w * 0.64, h * 0.08, w * 0.34, 0);
+    ctx.lineTo(-w * 0.34, 0);
+    ctx.bezierCurveTo(-w * 0.64, h * 0.08, -w * 0.62, h * 0.52, -w * 0.28, h * 0.16);
+    ctx.closePath();
+    ctx.fillStyle = pr.color || "#e8ffe0";
+    ctx.strokeStyle = "#53634a";
+    ctx.lineWidth = 1.5;
+    ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.8)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-w * 0.18, -h * 0.04); ctx.lineTo(w * 0.2, -h * 0.04); ctx.stroke();
   } else if (shape === "bolt") {
     ctx.beginPath();
     ctx.moveTo(-w / 2, 0);

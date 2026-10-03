@@ -698,14 +698,14 @@ function drawGallop(ctx, R, pose, f, S, C) {
   if (S.tech) shoulderPlate(ctx, R, hipF[0], hipF[1] - 2, 7, false);
 }
 
-function drawBall(ctx, R, pose, f, S, C) {
+function drawBall(ctx, R, pose, f, S, C, chaos = false) {
   const t = pose.t, r = S.egg ? 22 : 20 + f * 1.2;
   const moving = pose.state === "run" || pose.speed > 0.1;
   const rot = t * (moving ? 0.35 : 0.5);
   const cy = -r - (pose.state === "cast" ? Math.abs(Math.sin(pose.cast * Math.PI)) * 6 : 0);
   // estela
   ctx.save();
-  ctx.strokeStyle = "rgba(160,230,255,0.7)"; ctx.lineWidth = 2; ctx.lineCap = "round";
+  ctx.strokeStyle = chaos ? "rgba(186,140,255,0.9)" : "rgba(160,230,255,0.7)"; ctx.lineWidth = chaos ? 2.8 : 2; ctx.lineCap = "round";
   for (let i = 0; i < 3; i++) {
     ctx.beginPath(); ctx.arc(0, cy, r + 5 + i * 4, Math.PI * 0.7 + i * 0.1, Math.PI * 1.25 - i * 0.05); ctx.stroke();
   }
@@ -714,12 +714,13 @@ function drawBall(ctx, R, pose, f, S, C) {
   skin(ctx, R, bp, f, 0, cy, r, C.body, t, () => {
     ctx.save();
     ctx.translate(0, cy); ctx.rotate(rot);
-    ctx.strokeStyle = C.stripe; ctx.lineWidth = 3.6; ctx.lineCap = "round";
+    ctx.strokeStyle = chaos ? "#d3a6ff" : C.stripe; ctx.lineWidth = chaos ? 4.2 : 3.6; ctx.lineCap = "round";
     for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, 0, r * (0.45 + i * 0.2), -0.7, 0.7); ctx.stroke(); }
     // cola y bulbos girando con la bola
-    R.ellipse(ctx, -r * 0.55, r * 0.35, 3, 3, CYAN, { lw: 1.6 });
-    R.ellipse(ctx, -r * 0.2, -r * 0.7, 2.6, 2.6, CYAN, { lw: 1.4 });
-    R.ellipse(ctx, r * 0.1, -r * 0.78, 2.6, 2.6, CYAN, { lw: 1.4 });
+    const glow = chaos ? "#d6a8ff" : CYAN;
+    R.ellipse(ctx, -r * 0.55, r * 0.35, 3, 3, glow, { lw: 1.6 });
+    R.ellipse(ctx, -r * 0.2, -r * 0.7, 2.6, 2.6, glow, { lw: 1.4 });
+    R.ellipse(ctx, r * 0.1, -r * 0.78, 2.6, 2.6, glow, { lw: 1.4 });
     // garras
     for (let i = 0; i < 3; i++) {
       const a = Math.PI * 0.35 + i * 0.25;
@@ -731,25 +732,35 @@ function drawBall(ctx, R, pose, f, S, C) {
     ctx.beginPath(); ctx.ellipse(r * 0.3, cy + r * 0.5, r, r * 0.6, 0, 0, TAU); ctx.fill();
   });
   R.shine(ctx, -r * 0.35, cy - r * 0.5, r * 0.3, r * 0.14, 0.55);
+  if (chaos) {
+    ctx.save();
+    for (let i = 0; i < 4; i++) {
+      const a = t * 0.34 + i * (TAU / 4);
+      const x = Math.cos(a) * (r + 6), y = cy + Math.sin(a) * (r + 6);
+      zap(ctx, x, y, a + Math.PI / 2, 8 + (i % 2) * 3, i % 2 ? CYAN : "#d6a8ff", 2.2);
+    }
+    ctx.restore();
+  }
   // ojo asomando
   const ea = rot % TAU, show = Math.cos(ea);
-  if (show > 0.2) alienEye(ctx, R, Math.sin(ea) * r * 0.55, cy - Math.cos(ea) * r * 0.1, 3.4 * show, 4.2, pose, "normal");
+  if (show > 0.2) alienEye(ctx, R, Math.sin(ea) * r * 0.55, cy - Math.cos(ea) * r * 0.1, 3.4 * show, 4.2, pose, chaos ? "angry" : "normal");
 }
 
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], st = pose.state;
-  const roll = pose.move === "roll" || (st === "cast" && pose.castSlot === 1);
+  const chaos = pose.move === "chaos" || (st === "cast" && pose.castSlot === 2);
+  const roll = pose.move === "roll" || (st === "cast" && pose.castSlot === 1) || chaos;
   const gallop = f >= 2 && st === "run" && !roll;
   const pr = { ...pose };
   if (pose.move === "climb" && st !== "dead" && st !== "hurt") pr.state = "wall";
   const ringY = roll ? -24 : gallop ? -34 : S.by - 6;
   ctx.save();
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, false);
-  if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C);
+  if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C, chaos);
   else if (gallop) drawGallop(ctx, R, pr, f, S, C);
   else drawBiped(ctx, R, pr, f, S, C);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, true);
   ctx.restore();
 }
 
-export default { id: "stitch", draw };
+export default { id: "stitcho", draw };

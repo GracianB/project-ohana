@@ -56,21 +56,26 @@ export class ParticleSystem {
 
   render(ctx, cam) {
     const list = this.items;
-    for (let i = 0; i < list.length; i++) {
-      const p = list[i];
-      const a = p.life / p.max;
-      const sx = p.x - cam.x;
-      const sy = p.y - cam.y;
-      ctx.globalAlpha = a;
-      ctx.fillStyle = p.color;
-      const s = p.size * (0.6 + a * 0.5);
-      if (p.star) {
-        ctx.fillRect(sx - s, sy - 0.6, s * 2, 1.2);
-        ctx.fillRect(sx - 0.6, sy - s, 1.2, s * 2);
-      } else {
-        ctx.fillRect(sx - s, sy - s, s * 2, s * 2);
+    ctx.save();
+    const baseAlpha = ctx.globalAlpha;
+    try {
+      for (let i = 0; i < list.length; i++) {
+        const p = list[i];
+        const a = p.life / p.max;
+        const sx = p.x - cam.x;
+        const sy = p.y - cam.y;
+        ctx.globalAlpha = baseAlpha * a;
+        ctx.fillStyle = p.color;
+        const s = p.size * (0.6 + a * 0.5);
+        if (p.star) {
+          ctx.fillRect(sx - s, sy - 0.6, s * 2, 1.2);
+          ctx.fillRect(sx - 0.6, sy - s, 1.2, s * 2);
+        } else {
+          ctx.fillRect(sx - s, sy - s, s * 2, s * 2);
+        }
       }
+    } finally {
+      ctx.restore();
     }
-    ctx.globalAlpha = 1;
   }
 }

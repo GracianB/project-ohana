@@ -6,33 +6,67 @@
 // ============================================================================
 const SPRITE_PATH = "assets/sprites/";
 const cache = new Map();
-const NAMES = ["vfx-slash", "vfx-flame", "vfx-note"];
+const RETRY_DELAY_MS = 5000;
+const NAMES = Object.freeze(["vfx-slash", "vfx-flame", "vfx-note"]);
+const BODY_IDS = Object.freeze(["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"]);
+const BODY_POSES = Object.freeze(["idle", "run", "jump", "atk"]);
+const KILO_POSES = Object.freeze(["idle", "blink", "run1", "run2", "run3", "rise", "fall", "hit", "j", "k", "l", "hurt"]);
+const BODY_ALIASES = Object.freeze({ lilo: "kilo", stitch: "stitcho", pikachu: "chispin" });
+const POSES_BY_BODY = new Map(BODY_IDS.map((id) => [id, new Set(id === "kilo" ? [...BODY_POSES, ...KILO_POSES] : BODY_POSES)]));
 
 function load(name) {
-  let img = cache.get(name);
-  if (!img) {
+  let entry = cache.get(name);
+  const now = Date.now();
+  if (entry && entry.image) {
+    if (!entry.image.complete || entry.image.naturalWidth > 0) return entry.image;
+    entry.image = null;
+    entry.retryAt = now + RETRY_DELAY_MS;
+  }
+  if (entry && entry.retryAt > now) return null;
+  if (typeof Image === "undefined") return null;
+
+  let img;
+  try {
     img = new Image();
-    img.decoding = "async";
+  } catch (_) {
+    return null;
+  }
+  entry = { image: img, retryAt: 0 };
+  cache.set(name, entry);
+  img.decoding = "async";
+  img.onload = () => {
+    if (cache.get(name) === entry) entry.retryAt = 0;
+  };
+  img.onerror = () => {
+    if (cache.get(name) === entry) {
+      entry.image = null;
+      entry.retryAt = Date.now() + RETRY_DELAY_MS;
+    }
+  };
+  try {
     img.src = SPRITE_PATH + name + ".png";
-    cache.set(name, img);
+  } catch (_) {
+    entry.image = null;
+    entry.retryAt = Date.now() + RETRY_DELAY_MS;
+    return null;
   }
   return img;
 }
 
-export function vfxSprite(name) {
+function ready(name) {
   const img = load(name);
-  return img.complete && img.naturalWidth > 0 ? img : null;
+  return img && img.complete && img.naturalWidth > 0 ? img : null;
 }
 
-const BODY_IDS = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi"];
-const BODY_POSES = ["idle", "run", "jump", "atk"];
-const KILO_POSES = ["idle", "blink", "run1", "run2", "run3", "rise", "fall", "hit", "j", "k", "l", "hurt"];
+export function vfxSprite(name) {
+  return NAMES.includes(name) ? ready(name) : null;
+}
 
 export function paintedBody(id, pose) {
-  const img = load("bodies/" + id + "-" + pose);
-  return img.complete && img.naturalWidth > 0 ? img : null;
+  const canonicalId = BODY_ALIASES[id] || id;
+  const poses = POSES_BY_BODY.get(canonicalId);
+  if (!poses || !poses.has(pose)) return null;
+  return ready("bodies/" + canonicalId + "-" + pose);
 }
 
-for (const id of BODY_IDS) for (const pose of BODY_POSES) load("bodies/" + id + "-" + pose);
-for (const pose of KILO_POSES) load("bodies/kilo-" + pose);
 NAMES.forEach(load);

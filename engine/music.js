@@ -241,7 +241,7 @@ function startTheme(name) {
   const dl = ctx.createDelay(0.5), fb = ctx.createGain(), wet = ctx.createGain();
   dl.delayTime.value = (60 / th.bpm) * 0.75; fb.gain.value = 0.25; wet.gain.value = 0.18;
   bus.connect(master); bus.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(master);
-  const st = { name, th, melody: buildMelody(th), bus, step: 0, next: ctx.currentTime + 0.1, g };
+  const st = { name, th, melody: buildMelody(th), bus, nodes: [bus, dl, fb, wet], step: 0, next: ctx.currentTime + 0.1, g };
   st.timer = setInterval(() => schedule(st), TICK_MS);
   current = st;
 }
@@ -255,7 +255,11 @@ function stopTheme(st, fade = 1) {
     st.bus.gain.setValueAtTime(Math.max(0.0001, st.bus.gain.value), ctx.currentTime);
     st.bus.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + fade);
   } catch (_) {}
-  setTimeout(() => { try { st.bus.disconnect(); } catch (_) {} }, fade * 1000 + 300);
+  setTimeout(() => {
+    for (const node of st.nodes || [st.bus]) {
+      try { node.disconnect(); } catch (_) {}
+    }
+  }, fade * 1000 + 300);
 }
 
 function schedule(st) {
@@ -325,5 +329,7 @@ function unlock() {
   const g = audioGraph();
   if (g && wanted && !current) startTheme(wanted);
 }
-addEventListener("pointerdown", unlock, { capture: true });
-addEventListener("keydown", unlock, { capture: true });
+if (typeof addEventListener === "function") {
+  addEventListener("pointerdown", unlock, { capture: true });
+  addEventListener("keydown", unlock, { capture: true });
+}

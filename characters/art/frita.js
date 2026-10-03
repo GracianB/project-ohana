@@ -138,6 +138,7 @@ function fryBody(ctx, R, sp, w, c, opt = {}) {
     ctx.fillStyle = KETCHUP;
     ctx.globalAlpha = opt.dipped;
     const d0 = off(at(sp, 0.84), -w * 0.5), d1 = off(at(sp, 0.86), w * 0.05), d2 = off(at(sp, 0.84), w * 0.5);
+    ctx.beginPath();
     ctx.moveTo(off(at(sp, 0.91), -w)[0], off(at(sp, 0.91), -w)[1]);
     ctx.quadraticCurveTo(d0[0], d0[1], d1[0], d1[1]);
     ctx.quadraticCurveTo(d2[0], d2[1], off(at(sp, 0.93), w)[0], off(at(sp, 0.93), w)[1]);

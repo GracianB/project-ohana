@@ -746,4 +746,4 @@ function draw(ctx, pose, R) {
   }
 }
 
-export default { id: "lilo", draw };
+export default { id: "kilo", draw };

@@ -10,7 +10,7 @@ export function sense(e, player) {
   const dx = player.x + (player.w || 0) / 2 - ex;
   const dy = player.y + (player.h || 0) / 2 - ey;
   const dist = Math.hypot(dx, dy) || 0.001;
-  const sight = e.sight || 320;
+  const sight = e.sight ?? 320;
   const see = dist < sight && Math.abs(dy) < 200;
   return {
     dx, dy, dist, see,

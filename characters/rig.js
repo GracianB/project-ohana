@@ -55,6 +55,7 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
  *   breath: -1..1 respiración lenta,
  *   flourish: 0..1 gesto propio de espera (0 = no activo). flourishN: nº de gesto (0,1,2...) para variar.
  *   evoT:   0..1 durante la cinemática de evolución (pose.state === "victory").
+ *   nineLives: frames restantes del salvavidas pasivo de Michi.
  * }
  */
 export function computePose(p, t) {
@@ -135,6 +136,7 @@ export function computePose(p, t) {
     state, move: p._move || null, form: clamp(Math.round(Number(p.evo) || 0), 0, 4), t, color: p.color || "#fff",
     phase: r.phase, speed: Math.min(1, speed), vy: clamp(vy / 12, -1, 1), air, land: r.land,
     atk, cast, castSlot, hurt, blink,
+    nineLives: Math.max(0, Number(p._nineT) || 0),
     look: { x: 1, y: clamp(vy / 14, -0.6, 0.6) },
     sway: r.sway, bounce: r.bounce, breath: Math.sin(t * 0.06),
     flourish, flourishN: r.flourishN,

@@ -443,13 +443,15 @@ function params(pose, f) {
     const q = clamp(-pose.vy * 0.3 + Math.sin(t * 0.35) * 0.1, -0.3, 0.3);
     P.sx = 1 - q;
     P.sy = 1 + q;
-    P.armF = { ang: 1.95, bend: 3 };
-    P.armB = { ang: -1.95, bend: -3 };
-    P.legF = [0.28, 2];
-    P.legB = [-0.28, -2];
-    P.mood = "happy";
-    P.mouth = "open";
-    P.fx = { kind: "boing", q };
+    if (st !== "cast" && st !== "attack") {
+      P.armF = { ang: 1.95, bend: 3 };
+      P.armB = { ang: -1.95, bend: -3 };
+      P.legF = [0.28, 2];
+      P.legB = [-0.28, -2];
+      P.mood = "happy";
+      P.mouth = "open";
+    }
+    P.bounceFx = { q };
   }
 
   // idle flourishes
@@ -578,8 +580,6 @@ function orbit(ctx, R, F, t, front) {
 // FX de combate / habilidades
 // ---------------------------------------------------------------------------
 function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
-  const e = P.fx;
-
   if (P.sprinkle > 0 && hand) {
     for (let i = 0; i < 14; i++) {
       const life = frac(t * 0.03 + i * 0.071);
@@ -599,6 +599,23 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
       ctx.restore();
     }
   }
+
+  if (P.bounceFx) {
+    ctx.save();
+    ctx.strokeStyle = "rgba(255,255,255,0.8)";
+    ctx.lineWidth = 2.1;
+    ctx.lineCap = "round";
+    const k = Math.abs(P.bounceFx.q) * 3.2;
+    for (const dx of [-12, 0, 12]) {
+      ctx.beginPath();
+      ctx.moveTo(dx * (1 + k * 0.3), 4);
+      ctx.lineTo(dx * (1.55 + k), 9 + k * 2.2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  const e = P.fx;
 
   if (!e) return;
 
@@ -761,19 +778,6 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
         if (tw > 0) R.sparkle(ctx, x, y, 2.2 + tw * 3.6, "#fff6c0");
       }
     }
-  } else if (e.kind === "boing") {
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.8)";
-    ctx.lineWidth = 2.1;
-    ctx.lineCap = "round";
-    const k = Math.abs(e.q) * 3.2;
-    for (const dx of [-12, 0, 12]) {
-      ctx.beginPath();
-      ctx.moveTo(dx * (1 + k * 0.3), 4);
-      ctx.lineTo(dx * (1.55 + k), 9 + k * 2.2);
-      ctx.stroke();
-    }
-    ctx.restore();
   }
 }
 

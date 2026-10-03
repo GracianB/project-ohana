@@ -5,6 +5,23 @@ const PAPER = ["#f4e2c4", "#f0d2a4", "#e8c090", "#c9846a", "#2a121c"];
 const INK = ["#3a2418", "#4a2018", "#6a1830", "#ff4466", "#ffd0dc"];
 const FLAME = ["#ffb15a", "#ff8a3a", "#ff5a2a", "#ff2244", "#ffe14a"];
 
+function ofudaTag(ctx, R, x, y, scale, angle, alpha) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.scale(scale, scale);
+  ctx.globalAlpha *= alpha;
+  R.blob(ctx, [[-6, -10], [5, -10], [6, 8], [0, 11], [-6, 8]], "#fff2d8", { lw: 1.4, ink: "#8f3334" });
+  ctx.strokeStyle = "#c13b3c";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(0, -6); ctx.lineTo(0, 6);
+  ctx.moveTo(-3, -1); ctx.lineTo(3, -1);
+  ctx.moveTo(-2, 3); ctx.lineTo(2, 3);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function rib(ctx, x, y, w, h, color) {
   ctx.strokeStyle = color;
   ctx.lineWidth = 1.3;
@@ -22,12 +39,14 @@ function draw(ctx, pose, R) {
   const t = pose.t;
   const dread = f >= 3;
   const god = f === 4;
+  const castSlot = pose.state === "cast" ? pose.castSlot : -1;
+  const maw = castSlot === 2 ? pose.cast : 0;
   const paper = PAPER[f];
   const ink = INK[f];
   const flame = FLAME[f];
   const run = pose.state === "run";
   const bob = Math.sin(t * 0.07) * 3.2 + (run ? -Math.abs(Math.cos(pose.phase)) * 2 : pose.breath);
-  const open = pose.state === "attack" ? pose.atk : pose.state === "cast" ? 0.7 : god ? 0.25 + Math.sin(t * 0.1) * 0.08 : 0;
+  const open = pose.state === "attack" ? pose.atk : castSlot === 2 ? 0.55 + pose.cast * 0.45 : castSlot === 0 ? 0.38 : castSlot === 1 ? 0.18 : god ? 0.25 + Math.sin(t * 0.1) * 0.08 : 0;
   const h = 46 + f * 4;
   const w = 22 + f * 2;
 
@@ -37,15 +56,18 @@ function draw(ctx, pose, R) {
   R.tail(ctx, 0, 8, 28 + f * 4, Math.PI / 2,
     (k) => Math.sin(t * 0.16 + k * 3) * 3 + pose.sway * 2, 7, 1.5, god ? "#ff4466" : "#2a1848");
 
-  const sleeve = pose.state === "attack" ? -0.4 + pose.atk * 1.6 : Math.sin(t * 0.05) * 0.25;
+  const sleeve = pose.state === "attack" ? -0.4 + pose.atk * 1.6 : castSlot === 1 ? Math.sin(pose.cast * Math.PI) * 1.2 : Math.sin(t * 0.05) * 0.25;
+  const sleeveStretch = castSlot === 1 ? 1 + Math.sin(pose.cast * Math.PI) * 0.32 : 1;
   ctx.save();
   ctx.translate(-w * 0.7, -h * 0.35);
   ctx.rotate(-0.6 + sleeve * 0.3 + pose.sway * 0.2);
+  ctx.scale(sleeveStretch, 1);
   R.ellipse(ctx, 0, 10, 16, 8, R.darken(paper, 0.25));
   ctx.restore();
   ctx.save();
   ctx.translate(w * 0.85, -h * 0.4);
   ctx.rotate(0.5 - sleeve);
+  ctx.scale(sleeveStretch, 1);
   R.ellipse(ctx, 0, 8, 18, 9, paper);
   ctx.restore();
 
@@ -75,10 +97,10 @@ function draw(ctx, pose, R) {
   R.eye(ctx, 10, eyeY, dread ? 6.2 : 4.6, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
   if (dread) R.eye(ctx, 2, eyeY - 12, 3.4, pose, { iris: flame, mood });
 
-  const mouthW = 10 + open * 16 + (god ? 6 : 0);
+  const mouthW = 10 + open * 16 + maw * 14 + (god ? 6 : 0);
   ctx.fillStyle = god ? "#140208" : ink;
   ctx.beginPath();
-  ctx.ellipse(4, eyeY + 14, mouthW * 0.55, 3 + open * 10, 0.1, 0, Math.PI * 2);
+  ctx.ellipse(4, eyeY + 14, mouthW * 0.55, 3 + open * 10 + maw * 8, 0.1, 0, Math.PI * 2);
   ctx.fill();
   if (open > 0.2 || dread) {
     ctx.fillStyle = "#fff6ea";
@@ -91,6 +113,35 @@ function draw(ctx, pose, R) {
       ctx.lineTo(tx + 4, eyeY + 12);
       ctx.fill();
     }
+  }
+
+  if (castSlot === 0) {
+    const k = pose.cast;
+    ofudaTag(ctx, R, w * 0.72 + k * 20, -h * 0.28 - Math.sin(k * Math.PI) * 8, 1, -0.25 + k * 0.4, 1 - k * 0.55);
+    R.sparkle(ctx, w * 0.58, -h * 0.26, 2 + Math.sin(k * Math.PI) * 2, "#fff0c8");
+  } else if (castSlot === 1) {
+    const k = pose.cast;
+    ctx.save();
+    ctx.globalAlpha *= 0.75 * (1 - k * 0.35);
+    ctx.strokeStyle = god ? "#ff4466" : "#b69aff";
+    ctx.lineWidth = 2.2;
+    for (let i = 0; i < 3; i++) {
+      const r = 12 + k * 24 + i * 6;
+      ctx.beginPath();
+      ctx.arc(2, -h * 0.28, r, -0.8 + i * 0.18 + k, 0.8 + i * 0.18 + k);
+      ctx.stroke();
+    }
+    ctx.restore();
+  } else if (castSlot === 2) {
+    ctx.save();
+    ctx.globalAlpha *= Math.min(1, 0.35 + maw * 0.9);
+    ctx.strokeStyle = god ? "#ffe14a" : flame;
+    ctx.lineWidth = 2 + maw * 1.5;
+    ctx.beginPath();
+    ctx.ellipse(4, eyeY + 14, mouthW * 0.78, 8 + maw * 10, Math.sin(t * 0.25) * 0.08, -0.2, Math.PI * 1.2);
+    ctx.stroke();
+    R.sparkle(ctx, 4 + mouthW * 0.65, eyeY + 14, 2 + maw * 2.5, god ? "#fff6c0" : flame);
+    ctx.restore();
   }
 
   ctx.fillStyle = R.darken(paper, 0.45);
