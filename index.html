@@ -2,159 +2,61 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
-  
-  <!-- Preconnect -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-
-  <!-- Precarga crítica -->
-  <link rel="preload" href="style.css?v=ohana-69" as="style">
-  <link rel="modulepreload" href="game.js?v=ohana-69">
-  
-  <!-- Meta tags optimizados -->
-  <title>PROJECT OHANA — Demo Mundo 1 · Gracián Baena</title>
-  <meta name="description" content="Demo final de Project Ohana. Cinco personajes, cinco evoluciones, ocho salas, un nido. Juega ahora en tu navegador.">
+  <link rel="stylesheet" href="style.css?v=ohana-70">
+  <link rel="stylesheet" href="hud.css?v=ohana-70">
+  <link rel="stylesheet" href="evo.css?v=ohana-70">
+  <link rel="stylesheet" href="ending.css?v=ohana-70">
+  <link rel="stylesheet" href="intro.css?v=ohana-70">
+  <link rel="stylesheet" href="demo.css?v=ohana-70">
+  <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
+  <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
   <meta name="theme-color" content="#071226">
-  <meta name="color-scheme" dark>
-  
-  <!-- Open Graph mejorado -->
+  <meta name="color-scheme" content="dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Project Ohana">
-  <meta property="og:title" content="PROJECT OHANA — Demo Mundo 1">
-  <meta property="og:description" content="Cinco héroes. Cinco evoluciones. Un nido. Nadie se queda atrás. Juega gratis en tu navegador.">
+  <meta property="og:title" content="PROJECT OHANA — Isla Hoku">
+  <meta property="og:description" content="Diez héroes. Cinco formas. Un nido. Nadie se queda atrás.">
   <meta property="og:url" content="https://gracianb.github.io/project-ohana/">
   <meta property="og:image" content="https://gracianb.github.io/GracianB/og-cover.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="es_ES">
-  
-  <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PROJECT OHANA — Demo Mundo 1">
-  <meta name="twitter:description" content="Cinco héroes. Cinco evoluciones. Un nido. Juega ahora.">
+  <meta name="twitter:title" content="PROJECT OHANA — Isla Hoku">
+  <meta name="twitter:description" content="Diez héroes. Cinco formas. Un nido. Juega ahora.">
   <meta name="twitter:image" content="https://gracianb.github.io/GracianB/og-cover.png">
-  
-  <!-- PWA Manifest (recomendado crear) -->
-  <link rel="manifest" href="manifest.json">
-  
-  <!-- Favicon optimizado -->
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="favicon.svg">
-  
-  <!-- CSS crítico inline para renderizado rápido -->
   <style>
-    /* Reset mínimo crítico */
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
-    body{font-family:system-ui,-apple-system,sans-serif;background:#071226;color:#f4f3ee}
+    html,body{height:100%;background:#071226;color:#f4f3ee}
     #game{display:block;width:100%;height:100%}
-    #char-select{position:fixed;inset:0;z-index:100}
-    .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#071226;z-index:9999;transition:opacity .3s}
-    .loading.hidden{opacity:0;pointer-events:none}
+    #loading-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#071226;z-index:9999;transition:opacity .3s}
+    #loading-screen.hidden{opacity:0;pointer-events:none}
+    .loading-bar{width:180px;height:4px;margin-top:12px;background:#102a43;border-radius:4px;overflow:hidden}
+    .loading-progress{width:0;height:100%;background:#7ee7ff}
   </style>
-  
-  <!-- CSS principal (async para no bloquear) -->
-  <link rel="stylesheet" href="style.css?v=ohana-69" media="screen">
-  <link rel="stylesheet" href="hud.css?v=ohana-69" media="screen">
-  <link rel="stylesheet" href="evo.css?v=ohana-69" media="screen">
-  <link rel="stylesheet" href="ending.css?v=ohana-69" media="screen">
-  <link rel="stylesheet" href="intro.css?v=ohana-69" media="screen">
-  <link rel="stylesheet" href="demo.css?v=ohana-69" media="screen">
-  
-  <!-- Prefetch de recursos que se usarán pronto -->
-  <link rel="prefetch" href="systems/title.js?v=ohana-69" as="script">
-  <link rel="prefetch" href="systems/hud.js?v=ohana-69" as="script">
 </head>
-
 <body data-theme="dark">
-  <!-- Pantalla de carga inicial -->
-  <div id="loading-screen" class="loading">
-    <div class="loading-content">
-      <div class="spinner"></div>
+  <div id="loading-screen">
+    <div>
       <p>Cargando OHANA...</p>
       <div class="loading-bar"><div class="loading-progress"></div></div>
     </div>
   </div>
-
-  <!-- Fondo oceánico con capas parallax -->
-  <div id="ocean-bg" aria-hidden="true">
-    <div class="stars" data-parallax="0.1"></div>
-    <div class="aurora" data-parallax="0.2"></div>
-    <div class="ocean-glow" data-parallax="0.3"></div>
-    
-    <!-- Ondas SVG optimizadas -->
-    <svg class="wave-layer wave-back" viewBox="0 0 1600 200" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="waveBackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style="stop-color:#102a43;stop-opacity:0.6" />
-          <stop offset="100%" style="stop-color:#071226;stop-opacity:0.9" />
-        </linearGradient>
-      </defs>
-      <path d="M0,120 C200,180 400,60 600,110 C800,160 1000,50 1200,100 C1400,150 1500,90 1600,120 L1600,200 L0,200 Z" 
-            fill="url(#waveBackGrad)">
-        <animate attributeName="d" 
-                 values="M0,120 C200,180 400,60 600,110 C800,160 1000,50 1200,100 C1400,150 1500,90 1600,120 L1600,200 L0,200 Z;
-                         M0,130 C220,170 420,70 620,120 C820,150 1020,60 1220,90 C1420,140 1520,100 1600,110 L1600,200 L0,200 Z;
-                         M0,120 C200,180 400,60 600,110 C800,160 1000,50 1200,100 C1400,150 1500,90 1600,120 L1600,200 L0,200 Z"
-                 dur="8s" repeatCount="indefinite"/>
-      </path>
-    </svg>
-    
-    <svg class="wave-layer wave-front" viewBox="0 0 1600 200" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="waveFrontGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:0.8" />
-          <stop offset="100%" style="stop-color:#0d1b2a;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <path d="M0,140 C220,90 420,180 640,130 C860,80 1060,170 1280,120 C1420,90 1520,130 1600,110 L1600,200 L0,200 Z" 
-            fill="url(#waveFrontGrad)">
-        <animate attributeName="d" 
-                 values="M0,140 C220,90 420,180 640,130 C860,80 1060,170 1280,120 C1420,90 1520,130 1600,110 L1600,200 L0,200 Z;
-                         M0,130 C240,100 440,170 660,120 C880,90 1080,160 1300,110 C1440,100 1540,120 1600,120 L1600,200 L0,200 Z;
-                         M0,140 C220,90 420,180 640,130 C860,80 1060,170 1280,120 C1420,90 1520,130 1600,110 L1600,200 L0,200 Z"
-                 dur="6s" repeatCount="indefinite"/>
-      </path>
-    </svg>
-  </div>
-
-  <!-- Efecto de daño (vignette) -->
   <div id="fx-hurt" aria-hidden="true"></div>
-  
-  <!-- Partículas ambientales -->
-  <div id="ambient-particles" aria-hidden="true"></div>
-
-  <!-- Navegación superior -->
   <nav id="top-actions" aria-label="Acciones rápidas">
-    <button id="btn-help" type="button" aria-label="Ver ayuda (tecla º)">
-      <span class="icon">?</span>
-      <span class="label">Ayuda</span>
-      <kbd>º</kbd>
-    </button>
-    <button id="btn-map" type="button" aria-label="Ver mapa (tecla M)">
-      <span class="icon">🗺</span>
-      <span class="label">Mapa</span>
-      <kbd>M</kbd>
-    </button>
-    <button id="btn-full" type="button" aria-label="Pantalla completa">
-      <span class="icon">⛶</span>
-      <span class="label">Pantalla</span>
-    </button>
-    <button id="btn-mute" type="button" aria-label="Silenciar (tecla N)" aria-pressed="false">
-      <span class="icon">🔊</span>
-      <span class="label">Sonido</span>
-      <kbd>N</kbd>
-    </button>
+    <button id="btn-help" type="button" aria-label="Ver ayuda">Ayuda <kbd>º</kbd></button>
+    <button id="btn-map" type="button" aria-label="Ver mapa">Mapa <kbd>M</kbd></button>
+    <button id="btn-full" type="button" aria-label="Pantalla completa">Pantalla</button>
+    <button id="btn-mute" type="button" aria-label="Silenciar" aria-pressed="false">Sonido · N</button>
   </nav>
-
-  <!-- HUD del juego -->
   <header id="hud" role="status" aria-live="polite">
-    <!-- Panel de jugador -->
     <div class="hud-block player">
       <div class="hud-ident">
         <div class="hud-avatar" id="hud-avatar" role="img" aria-label="Avatar del personaje"></div>
@@ -164,8 +66,6 @@
           <div class="hud-trait" id="hud-trait"></div>
         </div>
       </div>
-      
-      <!-- Barras de estado -->
       <div class="bars-container">
         <div class="bar-row">
           <span class="bar-lab" aria-hidden="true">HP</span>
@@ -174,7 +74,6 @@
             <span class="bar-text" id="hp-text">100/100</span>
           </div>
         </div>
-        
         <div class="bar-row">
           <span class="bar-lab" aria-hidden="true">XP</span>
           <div class="bar xp" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Experiencia">
@@ -183,136 +82,62 @@
           </div>
         </div>
       </div>
-      
-      <div class="hud-meta" id="hud-meta">
-        <span class="level">Nv. 1</span>
-        <span class="separator">·</span>
-        <span class="form">Bebé</span>
-      </div>
+      <div class="hud-meta" id="hud-meta">HP 100/100 · XP 0/55</div>
     </div>
-
-    <!-- Panel derecho -->
     <div class="hud-block world">
       <div class="world-header">
-        <div class="hud-kicker">Demo · Mundo 1</div>
-        <div id="hud-world" class="world-name">Isla Hoku</div>
+        <div class="hud-kicker">Isla Hoku</div>
+        <div id="hud-world" class="world-name">Claro</div>
       </div>
-      
       <div class="evo-display">
         <div id="hud-evo" class="evo-text">Forma 1/5</div>
-        <div class="form-pips" id="form-pips" role="img" aria-label="Progreso de evolución: 1 de 5">
-          <span class="pip active" data-evo="0"></span>
-          <span class="pip" data-evo="1"></span>
-          <span class="pip" data-evo="2"></span>
-          <span class="pip" data-evo="3"></span>
-          <span class="pip" data-evo="4"></span>
+        <div class="form-pips" id="form-pips" role="img" aria-label="Progreso de evolución">
+          <b class="on active"></b><b></b><b></b><b></b><b></b>
         </div>
       </div>
-      
-      <div id="hud-combo" class="combo-display" aria-live="polite">
-        <span class="combo-count">Combo <span id="combo-num">0</span></span>
-        <span class="separator">·</span>
-        <span class="score">Score <span id="score-num">0</span></span>
-      </div>
+      <div id="hud-combo" class="combo-display">Combo 0 · Score 0</div>
     </div>
   </header>
-
-  <!-- Barra de jefe -->
   <div id="boss-wrap" class="hidden" role="status" aria-live="polite" aria-label="Jefe final">
-    <div class="boss-header">
-      <div class="boss-icon" aria-hidden="true">👑</div>
-      <div class="boss-label">REINA DEL NIDO</div>
-    </div>
+    <div class="boss-label">REINA DEL NIDO</div>
     <div class="bar boss" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Salud del jefe">
       <div class="bar-fill" id="boss-bar" style="width:100%"></div>
     </div>
   </div>
-
-  <!-- Combo flotante -->
   <div id="combo-chip" class="hidden" aria-live="polite" aria-atomic="true">
     <span class="combo-value">0</span>
-    <span class="combo-label">combo</span>
   </div>
-
-  <!-- Banner de sala -->
-  <div id="room-banner" class="hidden" role="status" aria-live="polite">
-    <span class="banner-text">CLARO OHANA</span>
-  </div>
-
-  <!-- Prompt contextual -->
-  <div id="prompt" class="hidden" role="status" aria-live="polite">
-    <span class="prompt-icon">➤</span>
-    <span class="prompt-text">Entra por ESTE</span>
-  </div>
-
-  <!-- Barra de habilidades -->
-  <div id="ability-bar" role="toolbar" aria-label="Habilidades disponibles">
-    <!-- Se llena dinámicamente -->
-  </div>
-
-  <!-- Canvas principal -->
+  <div id="room-banner" role="status" aria-live="polite"></div>
+  <div id="prompt" role="status" aria-live="polite"></div>
+  <div id="ability-bar" role="toolbar" aria-label="Habilidades"></div>
   <canvas id="game" width="1280" height="720" aria-label="Área de juego"></canvas>
-
-  <!-- Controles táctiles -->
   <div id="touch" role="group" aria-label="Controles táctiles">
     <div class="col move">
-      <button class="touch-btn dpad" data-k="a" aria-label="Mover izquierda">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-      </button>
-      <button class="touch-btn dpad" data-k="d" aria-label="Mover derecha">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-      </button>
-      <button class="touch-btn dpad" data-k="s" aria-label="Bajar de plataforma">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>
-      </button>
+      <button class="touch-btn" data-k="a" aria-label="Izquierda">◀</button>
+      <button class="touch-btn" data-k="d" aria-label="Derecha">▶</button>
+      <button class="touch-btn" data-k="s" aria-label="Bajar">▼</button>
     </div>
-    
     <div class="col act">
       <div class="act-row powers">
-        <button class="touch-btn pw" data-k="j" aria-label="Poder J">
-          <span class="pw-icon">⚡</span>
-          <kbd>J</kbd>
-        </button>
-        <button class="touch-btn pw" data-k="k" aria-label="Poder K">
-          <span class="pw-icon">🔥</span>
-          <kbd>K</kbd>
-        </button>
-        <button class="touch-btn pw" data-k="l" aria-label="Poder L">
-          <span class="pw-icon">💥</span>
-          <kbd>L</kbd>
-        </button>
+        <button class="touch-btn pw" data-k="j" aria-label="Poder J">J</button>
+        <button class="touch-btn pw" data-k="k" aria-label="Poder K">K</button>
+        <button class="touch-btn pw" data-k="l" aria-label="Poder L">L</button>
       </div>
-      
       <div class="act-row main">
-        <button class="touch-btn action" data-k="h" aria-label="Atacar">
-          <span class="btn-icon">⚔</span>
-          <span class="btn-label">H</span>
-        </button>
-        <button class="touch-btn action" data-k="shift" aria-label="Dash">
-          <span class="btn-icon">💨</span>
-          <span class="btn-label">⇢</span>
-        </button>
-        <button class="touch-btn jump" data-k=" " aria-label="Saltar">
-          <span class="btn-icon">▲</span>
-        </button>
+        <button class="touch-btn" data-k="h" aria-label="Atacar">H</button>
+        <button class="touch-btn" data-k="shift" aria-label="Dash">⇢</button>
+        <button class="touch-btn jump" data-k=" " aria-label="Saltar">▲</button>
       </div>
     </div>
   </div>
-
-  <!-- Menú principal -->
   <main id="char-select" aria-label="Menú principal">
-    <!-- Intro cinemática (la dibuja systems/intro.js en canvas) -->
     <div id="ohana-intro" aria-hidden="true"></div>
-
-    <!-- Navegación marca -->
     <nav class="brand-bar" aria-label="Ecosistema GracianB">
       <a class="brand-gb" href="https://gracianb.github.io/GracianB/" target="_blank" rel="noopener">GB</a>
       <a href="https://gracianb.github.io/systems-lab/" target="_blank" rel="noopener">PLAY</a>
       <a href="https://gracianb.github.io/professional-deck/" target="_blank" rel="noopener">Deck</a>
       <a href="https://gracianb.github.io/yoga-instructor/" target="_blank" rel="noopener">Yoga</a>
     </nav>
-
-    <!-- Escenario del título -->
     <div class="title-sky" aria-hidden="true">
       <canvas id="title-fx"></canvas>
       <div class="title-palm left"></div>
@@ -320,195 +145,74 @@
       <div class="title-haze"></div>
       <div class="title-stars"></div>
     </div>
-
-    <!-- Logo y título -->
     <div class="title-stack">
-      <div class="logo-mark" aria-hidden="true">
-        <div class="crest">
-          <div class="crest-inner"></div>
-        </div>
-      </div>
-      
-      <p class="eyebrow">
-        <span class="badge">Demo final</span>
-        <span class="separator">·</span>
-        <span>Mundo 1</span>
-        <span class="separator">·</span>
-        <span>Isla Hoku</span>
-      </p>
-      
+      <p class="eyebrow">Mundo 1 · Isla Hoku</p>
       <h1>
-        <span class="word project" data-text="PROJECT">PROJECT</span>
-        <span class="word ohana" data-text="OHANA">OHANA</span>
+        <span class="word project">PROJECT</span>
+        <span class="word ohana">OHANA</span>
       </h1>
-      
       <p class="tagline">Diez héroes. Cinco formas. Un nido. Nadie se queda atrás.</p>
-      
-      <div class="title-badges">
-        <span class="badge" title="8 salas explorables">8 salas</span>
-        <span class="badge" title="5 evoluciones por personaje">5 evoluciones</span>
-        <span class="badge" title="1 jefe final épico">1 jefe final</span>
-      </div>
     </div>
-
-    <!-- Botones de acción -->
     <div id="menu-row" role="group" aria-label="Acciones del menú">
-      <button id="btn-continue" type="button" class="cta ghost hidden" disabled>
-        <span class="cta-icon">↩</span>
-        <span class="cta-text">Continuar</span>
-      </button>
-      
-      <button id="btn-play" type="button" class="cta primary pulse">
-        <span class="cta-icon" aria-hidden="true">▶</span>
-        <span class="cta-text">Empezar</span>
-      </button>
-      
-      <button id="btn-new" type="button" class="cta ghost">
-        <span class="cta-icon">✦</span>
-        <span class="cta-text">Nueva partida</span>
-      </button>
+      <button id="btn-continue" type="button" class="cta ghost hidden" disabled>Continuar</button>
+      <button id="btn-play" type="button" class="cta primary">Empezar</button>
+      <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
     </div>
-
-    <!-- Selector de personajes -->
     <section id="chars" aria-label="Selección de personajes">
       <button type="button" class="roster-arrow prev" id="roster-prev" aria-label="Anterior">‹</button>
       <div class="chars-grid" id="chars-grid"></div>
       <button type="button" class="roster-arrow next" id="roster-next" aria-label="Siguiente">›</button>
     </section>
-
-    <!-- Footer -->
     <footer class="legal">
       <p>Elenco y arte originales · Sin afiliación con terceros</p>
-      <p>MIT License · <a href="https://github.com/GracianB" target="_blank" rel="noopener">Gracián Baena</a> · 2026</p>
+      <p>MIT · <a href="https://github.com/GracianB/project-ohana" target="_blank" rel="noopener">Gracián Baena</a> · 2026</p>
     </footer>
   </main>
-
-  <!-- Modales y overlays -->
-  
-  <!-- Ayuda -->
-  <div id="help" class="modal" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
-    <div class="modal-backdrop"></div>
+  <div id="help" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <div class="panel">
-      <button class="modal-close" aria-label="Cerrar ayuda">×</button>
-      <h2 id="help-title">Demo Mundo 1</h2>
-      
-      <div class="help-section">
-        <h3>Objetivo</h3>
-        <ul>
-          <li>Empiezas como <strong>bebé</strong>. Presiona <kbd>E</kbd> para evolucionar hasta <strong>GOD</strong> (5 formas).</li>
-          <li>Explora <strong>8 salas</strong> diferentes. La Costa tiene huecos mortales.</li>
-          <li>La Jungla te lleva a la Caldera si caes en el hueco central.</li>
-          <li>Visita todas las salas para desbloquear el <strong>Nido</strong>.</li>
-          <li>Derrota a la <strong>Reina del Nido</strong> para completar OHANA.</li>
-        </ul>
-      </div>
-      
-      <div class="help-section">
-        <h3>Controles</h3>
-        <div class="controls-grid">
-          <div class="control-item"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <span>Moverse</span></div>
-          <div class="control-item"><kbd>Shift</kbd> <span>Dash</span></div>
-          <div class="control-item"><kbd>H</kbd> <span>Ataque (tambien clic). Cambia al evolucionar</span></div>
-          <div class="control-item"><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> <span>Poderes</span></div>
-          <div class="control-item"><kbd>E</kbd> <span>Evolucionar</span></div>
-          <div class="control-item"><kbd>M</kbd> <span>Mapa</span></div>
-          <div class="control-item"><kbd>R</kbd> <span>Volver al Claro</span></div>
-          <div class="control-item"><kbd>Esc</kbd> <span>Pausa</span></div>
-        </div>
-      </div>
-      
-      <p class="note">Consejo: Guarda tu progreso automáticamente al salir.</p>
+      <h2 id="help-title">Isla Hoku</h2>
+      <ul>
+        <li>Empiezas bebé. <kbd>E</kbd> evoluciona hasta GOD, cinco formas.</li>
+        <li>Diez salas. Jungla pide forma 3. Caldera y Nido piden forma 4.</li>
+        <li>Derrota a la Reina del Nido.</li>
+      </ul>
+      <p><kbd>WASD</kbd> mover · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
     </div>
   </div>
-
-  <!-- Mapa -->
-  <div id="map-overlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="map-title" hidden>
-    <div class="modal-backdrop"></div>
+  <div id="map-overlay" role="dialog" aria-modal="true" aria-labelledby="map-title">
     <div class="panel">
-      <button class="modal-close" aria-label="Cerrar mapa">×</button>
       <h2 id="map-title">Archipiélago</h2>
-      <div id="map-grid" class="map-container"></div>
-      <div class="map-legend">
-        <span class="legend-item"><span class="dot visited"></span> Visitado</span>
-        <span class="legend-item"><span class="dot current"></span> Aquí</span>
-        <span class="legend-item"><span class="dot locked"></span> Por descubrir</span>
-      </div>
-      <p class="note">Presiona <kbd>M</kbd> o <kbd>Esc</kbd> para cerrar</p>
+      <div id="map-grid"></div>
     </div>
   </div>
-
-  <!-- Pausa -->
-  <div id="pause-overlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
-    <div class="modal-backdrop"></div>
+  <div id="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
     <div class="panel slim">
       <h2 id="pause-title">Pausa</h2>
-      <div class="pause-actions">
-        <button type="button" id="btn-resume" class="cta primary">
-          <span class="cta-icon">▶</span> Seguir jugando
-        </button>
-        <button type="button" id="btn-quit" class="cta ghost">
-          <span class="cta-icon">⌂</span> Volver al menú
-        </button>
-      </div>
+      <button type="button" id="btn-resume" class="cta primary">Seguir</button>
+      <button type="button" id="btn-quit" class="cta ghost">Menú</button>
     </div>
   </div>
-
-  <!-- Notificaciones -->
-  <div id="notification-container" role="status" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- Scripts optimizados -->
+  <div id="win-cinema" aria-hidden="true"></div>
+  <div id="evo-stage" aria-hidden="true"></div>
+  <div id="notification-container" role="status" aria-live="polite"></div>
   <script>
-    // Script crítico inline: gestión de carga e intro
-    (function() {
-      'use strict';
-      
-      const loading = document.getElementById('loading-screen');
-      let resourcesLoaded = 0;
-      const totalResources = 6; // Ajustar según necesidad
-      
-      // Actualizar barra de progreso
-      window.updateLoading = function(progress) {
-        const bar = document.querySelector('.loading-progress');
-        if (bar) bar.style.width = (progress * 100) + '%';
+    (function () {
+      var loading = document.getElementById("loading-screen");
+      window.hideLoading = function () {
+        if (!loading) return;
+        loading.classList.add("hidden");
+        setTimeout(function () { loading.remove(); }, 300);
       };
-      
-      // Ocultar pantalla de carga
-      window.hideLoading = function() {
-        if (loading) {
-          loading.classList.add('hidden');
-          setTimeout(() => loading.remove(), 300);
-        }
-      };
-      
-      // Intro de portada: la gestiona systems/intro.js. Red de seguridad si
-      // los módulos no cargan: no dejar la portada tapada.
-      setTimeout(function() {
-        if (!document.body.classList.contains('intro-complete')) {
-          document.body.classList.add('intro-complete');
-          var oi = document.getElementById('ohana-intro');
-          if (oi && !oi.querySelector('canvas')) oi.remove();
-        }
-      }, 8000);
-
-      // Quitar el loader cuando todo (módulos + sprites) ha cargado.
-      // Red de seguridad: si algo falla, no dejar la pantalla negra.
-      window.updateLoading(0.35);
-      addEventListener('load', () => { window.updateLoading(1); setTimeout(window.hideLoading, 150); });
-      setTimeout(window.hideLoading, 6000);
-      
-      // Prevenir zoom en móviles
-      document.addEventListener('gesturestart', (e) => e.preventDefault());
-      document.addEventListener('dblclick', (e) => e.preventDefault());
+      addEventListener("load", function () { setTimeout(window.hideLoading, 150); });
+      setTimeout(window.hideLoading, 4000);
     })();
   </script>
-  
-  <!-- Módulos principales -->
-  <script type="module" src="game.js?v=ohana-69"></script>
-  <script type="module" src="systems/title.js?v=ohana-69"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-69"></script>
-  <script type="module" src="systems/hud.js?v=ohana-69"></script>
-  <script type="module" src="systems/ending.js?v=ohana-69"></script>
-  <script type="module" src="systems/demo.js?v=ohana-69"></script>
-  <script type="module" src="systems/evo-cinema.js?v=ohana-69"></script>
+  <script type="module" src="game.js?v=ohana-70"></script>
+  <script type="module" src="systems/title.js?v=ohana-70"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-70"></script>
+  <script type="module" src="systems/hud.js?v=ohana-70"></script>
+  <script type="module" src="systems/ending.js?v=ohana-70"></script>
+  <script type="module" src="systems/demo.js?v=ohana-70"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-70"></script>
 </body>
 </html>
