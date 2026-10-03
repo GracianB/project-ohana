@@ -1,4 +1,6 @@
 // Ohana — world rendering · MAX visual pass (Fase 3+)
+// 2026-10-03: wrap() fix, 8 caustics, no particle pool, no shadowBlur.
+// API intact: WORLDS, renderWorld, drawGrove, drawAquatic. Boca del pozo 620–860 intacta.
 // Richer, layered, parallax backgrounds per world. Same public API:
 //   WORLDS[]  ·  renderWorld(ctx, world, cam, t, W, H)
 // Each world adds `edge` (platform glow accent) used by the platform draw.
@@ -15,6 +17,13 @@ export const WORLDS = [
 
 // deterministic pseudo-random for stable star/particle fields
 function pr(i) { const s = Math.sin(i * 127.1 + 43.7) * 43758.5; return s - Math.floor(s); }
+
+// JS % keeps the sign. Camera scrolling left made every parallax layer pop.
+function wrap(v, span) {
+  const m = v % span;
+  return m < 0 ? m + span : m;
+}
+function onScreen(x, pad, W) { return x > -pad && x < W + pad; }
 
 export function renderWorld(ctx, world, cam, t, W, H) {
   const sky = world.sky || ["#0a0a12", "#161630"];
@@ -54,7 +63,7 @@ function drawBeach(ctx, cam, t, W, H) {
 
   // distant island silhouettes (far parallax)
   for (let i = 0; i < 6; i++) {
-    const x = ((i * 480 - cam.x * 0.05) % (W + 480)) - 140;
+    const x = (wrap(i * 480 - cam.x * 0.05, W + 480)) - 140;
     const y = H * 0.48;
     ctx.fillStyle = i % 2 ? "rgba(55,105,135,.36)" : "rgba(70,125,155,.42)";
     ctx.beginPath();
@@ -66,7 +75,7 @@ function drawBeach(ctx, cam, t, W, H) {
 
   // soft clouds
   for (let i = 0; i < 7; i++) {
-    const x = ((i * 340 - cam.x * 0.1 + t * 0.18) % (W + 320)) - 140;
+    const x = (wrap(i * 340 - cam.x * 0.1 + t * 0.18, W + 320)) - 140;
     const y = 48 + (i % 3) * 32;
     const a = 0.55 - (i % 3) * 0.12;
     ctx.fillStyle = "rgba(255,255,255," + a + ")";
@@ -108,7 +117,7 @@ function drawBeach(ctx, cam, t, W, H) {
 
   // animated wave bands
   for (let i = 0; i < 8; i++) {
-    const x = ((i * 280 - cam.x * 0.2 + t * 0.35) % (W + 240)) - 80;
+    const x = (wrap(i * 280 - cam.x * 0.2 + t * 0.35, W + 240)) - 80;
     const yy = oceanY + 28 + i * 22 + Math.sin(t / 14 + i) * 5;
     ctx.fillStyle = "rgba(210,240,255," + (0.18 + (i % 3) * 0.06) + ")";
     ctx.beginPath(); ctx.ellipse(x, yy, 110 - i * 4, 8, 0, 0, Math.PI * 2); ctx.fill();
@@ -117,7 +126,7 @@ function drawBeach(ctx, cam, t, W, H) {
   // foam / shoreline where sand meets water
   ctx.fillStyle = "rgba(255,255,255,.55)";
   for (let i = 0; i < 14; i++) {
-    const x = ((i * 140 - cam.x * 0.35 + t * 0.6) % (W + 160)) - 40;
+    const x = (wrap(i * 140 - cam.x * 0.35 + t * 0.6, W + 160)) - 40;
     const bob = Math.sin(t / 10 + i * 0.9) * 3;
     ctx.beginPath();
     ctx.ellipse(x, oceanY + bob, 48 + (i % 3) * 10, 5 + (i % 2), 0, 0, Math.PI * 2);
@@ -149,7 +158,7 @@ function drawBeach(ctx, cam, t, W, H) {
   // light foam sparkle along shore (boost)
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 10; i++) {
-    const x = ((i * 140 - cam.x * 0.25 + t * 0.55) % (W + 160)) - 20;
+    const x = (wrap(i * 140 - cam.x * 0.25 + t * 0.55, W + 160)) - 20;
     const y = oceanY - 6 + Math.sin(t / 9 + i) * 3;
     ctx.fillStyle = "rgba(220,250,255," + (0.08 + (i % 3) * 0.04) + ")";
     ctx.beginPath(); ctx.ellipse(x, y, 28 + (i % 3) * 8, 5, 0, 0, Math.PI * 2); ctx.fill();
@@ -296,7 +305,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // far haze / light banks (extra subtle parallax)
   for (let i = 0; i < 5; i++) {
-    const x = ((i * 380 - cam.x * 0.03 + t * 0.06) % (W + 380)) - 80;
+    const x = (wrap(i * 380 - cam.x * 0.03 + t * 0.06, W + 380)) - 80;
     const y = 70 + (i % 3) * 36;
     const hg = ctx.createRadialGradient(x, y, 4, x, y, 90);
     hg.addColorStop(0, "rgba(255,250,210,.14)");
@@ -306,7 +315,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // distant soft hills
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 420 - cam.x * 0.06) % (W + 420)) - 100;
+    const x = (wrap(i * 420 - cam.x * 0.06, W + 420)) - 100;
     const y = H * 0.52;
     ctx.fillStyle = i % 2 ? "rgba(70,130,70,.28)" : "rgba(90,150,85,.34)";
     ctx.beginPath();
@@ -318,7 +327,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // far tree silhouettes (parallax)
   for (let i = 0; i < 10; i++) {
-    const x = ((i * 180 - cam.x * 0.14) % (W + 200)) - 40;
+    const x = (wrap(i * 180 - cam.x * 0.14, W + 200)) - 40;
     const trunkH = 70 + (i % 3) * 18;
     const base = H * 0.58;
     ctx.fillStyle = "rgba(40,70,35,.45)";
@@ -333,7 +342,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // mid-far canopy fronds (slower than mid trees)
   for (let i = 0; i < 8; i++) {
-    const x = ((i * 220 - cam.x * 0.1 + t * 0.04) % (W + 240)) - 50;
+    const x = (wrap(i * 220 - cam.x * 0.1 + t * 0.04, W + 240)) - 50;
     const y = H * 0.34 + (i % 3) * 18;
     ctx.strokeStyle = "rgba(50,100,45," + (0.18 + (i % 3) * 0.05) + ")";
     ctx.lineWidth = 2;
@@ -349,7 +358,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // mid trees (clearer)
   for (let i = 0; i < 7; i++) {
-    const x = ((i * 260 - cam.x * 0.28) % (W + 280)) - 60;
+    const x = (wrap(i * 260 - cam.x * 0.28, W + 280)) - 60;
     const base = H * 0.62;
     const trunkH = 110 + (i % 2) * 30;
     ctx.fillStyle = "#4a3420";
@@ -374,7 +383,7 @@ export function drawGrove(ctx, cam, t, W, H) {
   ctx.strokeStyle = "rgba(90,180,70,.58)";
   ctx.lineWidth = 1.5;
   for (let i = 0; i < 44; i++) {
-    const x = ((i * 48 - cam.x * 0.4 + t * 0.08) % (W + 60));
+    const x = (wrap(i * 48 - cam.x * 0.4 + t * 0.08, W + 60));
     const sway = Math.sin(t / 14 + i) * 4.5;
     ctx.beginPath();
     ctx.moveTo(x, grassY + 8 + (i % 5) * 6);
@@ -385,7 +394,7 @@ export function drawGrove(ctx, cam, t, W, H) {
   // juncos / reeds near low ground & low plats (subtle sway)
   ctx.lineCap = "round";
   for (let i = 0; i < 16; i++) {
-    const x = ((i * 110 - cam.x * 0.45 + t * 0.05) % (W + 120));
+    const x = (wrap(i * 110 - cam.x * 0.45 + t * 0.05, W + 120));
     const base = H * 0.72 + (i % 4) * 10;
     const sway = Math.sin(t / 18 + i * 0.7) * 5;
     const tall = 28 + (i % 4) * 8;
@@ -405,7 +414,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // soft clouds
   for (let i = 0; i < 5; i++) {
-    const x = ((i * 360 - cam.x * 0.08 + t * 0.12) % (W + 300)) - 120;
+    const x = (wrap(i * 360 - cam.x * 0.08 + t * 0.12, W + 300)) - 120;
     const y = 40 + (i % 3) * 28;
     ctx.fillStyle = "rgba(255,255,255," + (0.5 - (i % 3) * 0.1) + ")";
     cloud(ctx, x, y, 48 + (i % 2) * 20);
@@ -413,7 +422,7 @@ export function drawGrove(ctx, cam, t, W, H) {
 
   // floating light motes (fireflies / pollen)
   for (let i = 0; i < 22; i++) {
-    const x = (pr(i) * W - cam.x * 0.2 + t * (0.1 + pr(i) * 0.2) + W) % W;
+    const x = wrap(pr(i) * W - cam.x * 0.2 + t * (0.1 + pr(i) * 0.2) + W, W);
     const y = grassY * 0.35 + pr(i + 5) * (grassY * 0.55) + Math.sin(t / 20 + i) * 12;
     ctx.fillStyle = "rgba(255,255,180," + (0.25 + pr(i + 2) * 0.5) + ")";
     ctx.beginPath(); ctx.arc(x, y, 1.4 + pr(i) * 1.6, 0, Math.PI * 2); ctx.fill();
@@ -422,7 +431,7 @@ export function drawGrove(ctx, cam, t, W, H) {
   // soft sun shafts through canopy (light boost)
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 280 + 60 - cam.x * 0.05) % (W + 200));
+    const x = (wrap(i * 280 + 60 - cam.x * 0.05, W + 200));
     const sway = Math.sin(t / 40 + i) * 10;
     const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 40, H * 0.7);
     grd.addColorStop(0, "rgba(255,250,180,.10)");
@@ -457,7 +466,7 @@ function drawJungle(ctx, cam, t, W, H) {
   for (const L of layers) {
     ctx.fillStyle = L.col;
     for (let i = -1; i < W / L.step + 2; i++) {
-      const x = ((i * L.step - cam.x * L.p) % (W + L.step * 2));
+      const x = (wrap(i * L.step - cam.x * L.p, W + L.step * 2));
       ctx.fillRect(x + L.r * 0.4, H * L.y, 28, H);
       ctx.beginPath(); ctx.arc(x + L.r * 0.5, H * L.y, L.r, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(x - L.r * 0.25, H * L.y + 22, L.r * 0.72, 0, Math.PI * 2); ctx.fill();
@@ -471,7 +480,7 @@ function drawJungle(ctx, cam, t, W, H) {
   ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
   for (let i = 0; i < 8; i++) {
-    const x = ((i * 200 - cam.x * 0.35) % (W + 180));
+    const x = (wrap(i * 200 - cam.x * 0.35, W + 180));
     const sway = Math.sin(t / 22 + i) * 10;
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -483,7 +492,7 @@ function drawJungle(ctx, cam, t, W, H) {
   // green god rays (stronger)
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 6; i++) {
-    const x = (i * 300 + 80 - cam.x * 0.05 + Math.sin(t / 50 + i) * 12) % (W + 220);
+    const x = wrap(i * 300 + 80 - cam.x * 0.05 + Math.sin(t / 50 + i) * 12, W + 220);
     const grd = ctx.createLinearGradient(x, 0, x - 100, H);
     grd.addColorStop(0, "rgba(180,255,140,.18)");
     grd.addColorStop(0.5, "rgba(140,230,100,.05)");
@@ -495,7 +504,7 @@ function drawJungle(ctx, cam, t, W, H) {
 
   // floating spores (denser)
   for (let i = 0; i < 28; i++) {
-    const x = (pr(i) * W - cam.x * 0.3 + t * 0.15) % W;
+    const x = wrap(pr(i) * W - cam.x * 0.3 + t * 0.15, W);
     const y = (pr(i + 5) * H + Math.sin(t / 24 + i) * 14) % H;
     ctx.fillStyle = "rgba(180,240,150," + (0.2 + pr(i + 2) * 0.45) + ")";
     ctx.beginPath(); ctx.arc((x + W) % W, y, 1.5 + pr(i) * 1.8, 0, Math.PI * 2); ctx.fill();
@@ -503,7 +512,7 @@ function drawJungle(ctx, cam, t, W, H) {
 
   // canopy glitter motes (light boost)
   for (let i = 0; i < 12; i++) {
-    const x = (pr(i + 40) * W - cam.x * 0.22 + t * 0.22 + W) % W;
+    const x = wrap(pr(i + 40) * W - cam.x * 0.22 + t * 0.22 + W, W);
     const y = (pr(i + 41) * H * 0.55 + Math.sin(t / 18 + i) * 8) % (H * 0.55);
     ctx.fillStyle = "rgba(200,255,160," + (0.18 + pr(i + 42) * 0.35) + ")";
     ctx.beginPath(); ctx.arc(x, y, 1.2 + pr(i + 43), 0, Math.PI * 2); ctx.fill();
@@ -520,7 +529,7 @@ function drawJungle(ctx, cam, t, W, H) {
 function drawVolcano(ctx, cam, t, W, H) {
   // distant volcano silhouettes with glowing craters
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 420 - cam.x * 0.12) % (W + 420)) - 120;
+    const x = (wrap(i * 420 - cam.x * 0.12, W + 420)) - 120;
     const peak = H * (0.2 + (i % 3) * 0.04), base = H * 0.74;
     ctx.fillStyle = i % 2 ? "#1a0604" : "#240a06";
     ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x + 140, peak); ctx.lineTo(x + 280, base); ctx.closePath(); ctx.fill();
@@ -537,7 +546,7 @@ function drawVolcano(ctx, cam, t, W, H) {
   // lava rivers (simple streaks)
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 3; i++) {
-    const x = ((i * 380 - cam.x * 0.2) % (W + 300));
+    const x = (wrap(i * 380 - cam.x * 0.2, W + 300));
     const pulse = 0.35 + Math.sin(t / 8 + i) * 0.12;
     ctx.strokeStyle = "rgba(255,90,20," + pulse + ")";
     ctx.lineWidth = 6;
@@ -558,7 +567,7 @@ function drawVolcano(ctx, cam, t, W, H) {
   // heat shimmer bands (light boost)
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 5; i++) {
-    const x = ((i * 260 - cam.x * 0.12 + t * 0.3) % (W + 200));
+    const x = (wrap(i * 260 - cam.x * 0.12 + t * 0.3, W + 200));
     const y = H * 0.62 + Math.sin(t / 11 + i) * 12;
     const hg = ctx.createRadialGradient(x, y, 2, x, y, 50);
     hg.addColorStop(0, "rgba(255,140,40,.10)");
@@ -570,7 +579,7 @@ function drawVolcano(ctx, cam, t, W, H) {
   // rising embers (more / slightly clearer)
   for (let i = 0; i < 36; i++) {
     const life = (t * (0.6 + pr(i) * 0.8) + pr(i) * 900) % 900;
-    const x = (pr(i) * W + Math.sin(life / 40 + i) * 24 - cam.x * 0.2 + W) % W;
+    const x = wrap(pr(i) * W + Math.sin(life / 40 + i) * 24 - cam.x * 0.2 + W, W);
     const y = H - (life / 900) * H;
     const sz = 2.1 + pr(i + 3) * 2.5;
     ctx.fillStyle = "rgba(255," + (110 + ((i * 37) % 120)) + ",35," + (0.88 - life / 1200) + ")";
@@ -582,7 +591,7 @@ function drawVolcano(ctx, cam, t, W, H) {
     const life = (t * (1.1 + pr(i + 60) * 0.9) + pr(i + 60) * 240) % 240;
     if (life > 160) continue;
     const a = (1 - life / 160) * 0.88;
-    const x = (pr(i + 61) * W + Math.sin(life / 18 + i) * 14 - cam.x * 0.15 + W) % W;
+    const x = wrap(pr(i + 61) * W + Math.sin(life / 18 + i) * 14 - cam.x * 0.15 + W, W);
     const y = H * 0.55 - (life / 160) * (H * 0.5) + Math.cos(t / 20 + i) * 4;
     const sz = 1.6 + pr(i + 62) * 2.6;
     ctx.fillStyle = "rgba(255," + (150 + ((i * 29) % 90)) + ",55," + a + ")";
@@ -592,12 +601,12 @@ function drawVolcano(ctx, cam, t, W, H) {
   // smoke plumes (darker / thicker)
   ctx.fillStyle = "rgba(28,14,12,.55)";
   for (let i = 0; i < 5; i++) {
-    const x = ((i * 320 - cam.x * 0.1 + t * 0.08) % (W + 280));
+    const x = (wrap(i * 320 - cam.x * 0.1 + t * 0.08, W + 280));
     cloud(ctx, x, 55 + Math.sin(t / 28 + i) * 14, 58 + (i % 2) * 16);
   }
   ctx.fillStyle = "rgba(50,30,24,.35)";
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 360 - cam.x * 0.08 + t * 0.05) % (W + 300));
+    const x = (wrap(i * 360 - cam.x * 0.08 + t * 0.05, W + 300));
     cloud(ctx, x + 40, 90 + Math.sin(t / 35 + i) * 12, 70);
   }
 }
@@ -613,7 +622,7 @@ function drawSpace(ctx, cam, t, W, H) {
     ["rgba(80,255,200,.10)", 0.4, 0.75, 180],
   ];
   for (const [c, fx, fy, r] of neb) {
-    const nx = (W * fx - cam.x * 0.04 + Math.sin(t / 80) * 8 + W) % W;
+    const nx = wrap(W * fx - cam.x * 0.04 + Math.sin(t / 80) * 8 + W, W);
     const ny = H * fy;
     const rg = ctx.createRadialGradient(nx, ny, 8, nx, ny, r);
     rg.addColorStop(0, c); rg.addColorStop(1, "rgba(0,0,0,0)");
@@ -624,7 +633,7 @@ function drawSpace(ctx, cam, t, W, H) {
   // parallax stars (three depths)
   for (let i = 0; i < 70; i++) {
     const depth = i % 3 === 0 ? 0.03 : i % 3 === 1 ? 0.07 : 0.12;
-    const x = (i * 67 + cam.x * depth) % W;
+    const x = wrap(i * 67 + cam.x * depth, W);
     const y = (i * 49 + pr(i) * 40) % (H * 0.95);
     const tw = 0.35 + Math.abs(Math.sin(t / 10 + i)) * 0.65;
     ctx.fillStyle = "rgba(255,255,255," + tw + ")";
@@ -664,7 +673,7 @@ function drawSpace(ctx, cam, t, W, H) {
 
   // cosmic dust glitter (light boost)
   for (let i = 0; i < 16; i++) {
-    const x = (pr(i + 90) * W - cam.x * 0.05 + t * 0.08 + W) % W;
+    const x = wrap(pr(i + 90) * W - cam.x * 0.05 + t * 0.08 + W, W);
     const y = (pr(i + 91) * H + Math.sin(t / 25 + i) * 6) % H;
     const a = 0.15 + Math.abs(Math.sin(t / 8 + i)) * 0.45;
     ctx.fillStyle = "rgba(200,220,255," + a + ")";
@@ -676,7 +685,7 @@ function drawSpace(ctx, cam, t, W, H) {
     const life = (t * (0.9 + pr(i + 100) * 0.7) + pr(i + 100) * 180) % 180;
     if (life > 50) continue;
     const a = Math.sin((life / 50) * Math.PI) * (0.35 + pr(i + 101) * 0.45);
-    const x = (pr(i + 102) * W - cam.x * 0.04 + W) % W;
+    const x = wrap(pr(i + 102) * W - cam.x * 0.04 + W, W);
     const y = (pr(i + 103) * H * 0.9) % H;
     ctx.fillStyle = "rgba(220,235,255," + a + ")";
     const s = 1.1 + pr(i + 104) * 2.2;
@@ -710,7 +719,7 @@ function drawLab(ctx, cam, t, W, H) {
 
   // perspective grid (stronger cyan)
   ctx.strokeStyle = "rgba(60,224,255,.16)"; ctx.lineWidth = 1;
-  for (let x = -(cam.x * 0.2 % 64); x < W; x += 64) {
+  for (let x = -wrap(cam.x * 0.2, 64); x < W; x += 64) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
   }
   for (let y = 50; y < H; y += 52) {
@@ -724,7 +733,7 @@ function drawLab(ctx, cam, t, W, H) {
 
   // glowing tubes / monitors (parallax)
   for (let i = 0; i < 5; i++) {
-    const x = ((i * 310 - cam.x * 0.28) % (W + 280)) - 50;
+    const x = (wrap(i * 310 - cam.x * 0.28, W + 280)) - 50;
     const pulse = 0.5 + Math.sin(t / 6 + i) * 0.3;
     // tube frame
     ctx.fillStyle = "rgba(20,40,55,.7)";
@@ -758,7 +767,7 @@ function drawLab(ctx, cam, t, W, H) {
   ctx.strokeStyle = "rgba(80,160,180,.35)";
   ctx.lineWidth = 3;
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 280 - cam.x * 0.15) % (W + 200));
+    const x = (wrap(i * 280 - cam.x * 0.15, W + 200));
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.bezierCurveTo(x + 20, 40, x - 30, 80, x + 10, 120);
@@ -768,7 +777,7 @@ function drawLab(ctx, cam, t, W, H) {
   // data motes / hologram sparks
   ctx.fillStyle = "rgba(122,243,255,.55)";
   for (let i = 0; i < 24; i++) {
-    const x = (pr(i) * W - cam.x * 0.25 + t * 0.45 + W) % W;
+    const x = wrap(pr(i) * W - cam.x * 0.25 + t * 0.45 + W, W);
     const y = (pr(i + 4) * H + Math.sin(t / 15 + i) * 8) % H;
     ctx.globalAlpha = 0.2 + pr(i) * 0.55;
     ctx.fillRect(x, y, 2 + (i % 3 === 0 ? 2 : 0), 2);
@@ -814,7 +823,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // far marine snow / light motes (extra subtle parallax)
   for (let i = 0; i < 18; i++) {
-    const x = (pr(i + 70) * W - cam.x * 0.025 + t * 0.05 + W) % W;
+    const x = wrap(pr(i + 70) * W - cam.x * 0.025 + t * 0.05 + W, W);
     const y = (pr(i + 71) * H * 0.85 + Math.sin(t / 40 + i) * 8) % H;
     ctx.fillStyle = "rgba(160,220,255," + (0.08 + pr(i + 72) * 0.18) + ")";
     ctx.beginPath(); ctx.arc(x, y, 0.8 + pr(i + 73) * 1.4, 0, Math.PI * 2); ctx.fill();
@@ -822,7 +831,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // far soft light orbs drifting slower than scroll
   for (let i = 0; i < 4; i++) {
-    const x = ((i * 360 - cam.x * 0.04 + t * 0.07) % (W + 360)) - 60;
+    const x = (wrap(i * 360 - cam.x * 0.04 + t * 0.07, W + 360)) - 60;
     const y = H * (0.18 + (i % 3) * 0.16) + Math.sin(t / 35 + i) * 10;
     const og = ctx.createRadialGradient(x, y, 2, x, y, 70);
     og.addColorStop(0, "rgba(120,210,255,.10)");
@@ -832,7 +841,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // distant reef silhouettes (parallax back, denser)
   for (let i = 0; i < 8; i++) {
-    const x = ((i * 280 - cam.x * 0.07) % (W + 300)) - 90;
+    const x = (wrap(i * 280 - cam.x * 0.07, W + 300)) - 90;
     const y = H * 0.52 + (i % 3) * 22;
     ctx.fillStyle = i % 2 ? "rgba(6,40,58,.55)" : "rgba(4,28,48,.62)";
     ctx.beginPath();
@@ -847,7 +856,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // soft jelly silhouettes (far, gentle pulse)
   for (let j = 0; j < 3; j++) {
-    const jx = ((j * 420 + t * (0.12 + j * 0.04) - cam.x * 0.06) % (W + 200)) - 40;
+    const jx = wrap(j * 420 + t * (0.12 + j * 0.04) - cam.x * 0.06, W + 200) - 40;
     const jy = H * (0.22 + j * 0.14) + Math.sin(t / 28 + j) * 14;
     const pulse = 0.12 + Math.sin(t / 16 + j) * 0.05;
     ctx.fillStyle = "rgba(160,220,255," + pulse + ")";
@@ -870,7 +879,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   // mid coral / rock formations — denser & more colorful
   const coralCols = ["#c44a6a", "#e86838", "#3aaa78", "#e09030", "#7a48a8", "#2a8ab0", "#d45890"];
   for (let i = 0; i < 12; i++) {
-    const x = ((i * 170 - cam.x * 0.24) % (W + 220)) - 40;
+    const x = (wrap(i * 170 - cam.x * 0.24, W + 220)) - 40;
     const h = 70 + (i % 5) * 26;
     ctx.globalAlpha = 0.62 + (i % 3) * 0.08;
     ctx.fillStyle = coralCols[i % coralCols.length];
@@ -926,7 +935,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   for (let i = 0; i < 11; i++) {
-    const x = ((i * 175 + 24 - cam.x * 0.035) % (W + 280));
+    const x = (wrap(i * 175 + 24 - cam.x * 0.035, W + 280));
     const sway = Math.sin(t / 32 + i * 0.85) * 28;
     const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 90, H);
     grd.addColorStop(0, "rgba(160,240,255,.34)");
@@ -944,7 +953,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // caustic light ripples — mid + floor, more visible
   for (let i = 0; i < 18; i++) {
-    const cx = ((i * 130 - cam.x * 0.16 + t * 0.5) % (W + 200)) - 50;
+    const cx = (wrap(i * 130 - cam.x * 0.16 + t * 0.5, W + 200)) - 50;
     const cy = H * 0.4 + (i % 5) * 48 + Math.sin(t / 11 + i) * 10;
     const rad = 40 + (i % 4) * 12;
     const ca = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
@@ -958,7 +967,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   }
   // floor caustic sheet
   for (let i = 0; i < 8; i++) {
-    const cx = ((i * 200 - cam.x * 0.2 + t * 0.35) % (W + 220)) - 40;
+    const cx = (wrap(i * 200 - cam.x * 0.2 + t * 0.35, W + 220)) - 40;
     const cy = H - 30 + Math.sin(t / 14 + i) * 6;
     const ca = ctx.createRadialGradient(cx, cy, 2, cx, cy, 70);
     ca.addColorStop(0, "rgba(140,230,255,.16)");
@@ -972,7 +981,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // distant fish schools (cardúmenes)
   for (let s = 0; s < 5; s++) {
-    const bx = ((t * (0.28 + s * 0.09) + s * 340 - cam.x * 0.09) % (W + 360)) - 100;
+    const bx = wrap(t * (0.28 + s * 0.09) + s * 340 - cam.x * 0.09, W + 360) - 100;
     const by = H * (0.2 + s * 0.1);
     const dir = s % 2 === 0 ? 1 : -1;
     ctx.fillStyle = "rgba(120,200,235," + (0.18 + s * 0.05) + ")";
@@ -990,7 +999,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
     const life = (t * 0.7 + pr(i + 50) * 200) % 200;
     if (life < 28) {
       const a = (1 - life / 28) * 0.55;
-      const x = (pr(i + 51) * W - cam.x * 0.1 + W) % W;
+      const x = wrap(pr(i + 51) * W - cam.x * 0.1 + W, W);
       const y = pr(i + 52) * H * 0.55;
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
@@ -1003,11 +1012,28 @@ export function drawAquatic(ctx, cam, t, W, H) {
     }
   }
 
+  // caustics — few, no shadowBlur. Radial per mote was the Venice frame killer.
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 8; i++) {
+    const cx = wrap(i * 210 - cam.x * 0.16 + t * 0.45, W + 240) - 40;
+    const cy = H * 0.42 + (i % 4) * 56 + Math.sin(t / 11 + i) * 8;
+    const rad = 46 + (i % 3) * 10;
+    const ca = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
+    ca.addColorStop(0, "rgba(180,250,255,.16)");
+    ca.addColorStop(1, "rgba(60,150,220,0)");
+    ctx.fillStyle = ca;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rad + Math.sin(t / 9 + i) * 8, 14, Math.sin(t / 16 + i) * 0.35, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+
   // rising bubbles — multi-size layers (density bump)
   // layer A: tiny dense
   for (let i = 0; i < 52; i++) {
     const life = (t * (0.5 + pr(i) * 0.6) + pr(i) * 700) % 700;
-    const x = (pr(i) * W + Math.sin(life / 28 + i) * 16 - cam.x * 0.12 + W) % W;
+    const x = wrap(pr(i) * W + Math.sin(life / 28 + i) * 16 - cam.x * 0.12 + W, W);
     const y = H - (life / 700) * (H + 40);
     const r = 0.8 + pr(i + 2) * 2.2;
     const a = Math.max(0, 0.45 - life / 1400);
@@ -1018,7 +1044,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   // layer B: medium glossy
   for (let i = 0; i < 36; i++) {
     const life = (t * (0.4 + pr(i + 20) * 0.7) + pr(i + 20) * 900) % 900;
-    const x = (pr(i + 20) * W + Math.sin(life / 32 + i) * 22 - cam.x * 0.18 + W) % W;
+    const x = wrap(pr(i + 20) * W + Math.sin(life / 32 + i) * 22 - cam.x * 0.18 + W, W);
     const y = H - (life / 900) * (H + 60);
     const r = 2.2 + pr(i + 22) * 4.5;
     const a = Math.max(0, 0.65 - life / 1400);
@@ -1031,7 +1057,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   // layer C: large sparse
   for (let i = 0; i < 14; i++) {
     const life = (t * (0.28 + pr(i + 40) * 0.4) + pr(i + 40) * 1100) % 1100;
-    const x = (pr(i + 40) * W + Math.sin(life / 40 + i) * 30 - cam.x * 0.22 + W) % W;
+    const x = wrap(pr(i + 40) * W + Math.sin(life / 40 + i) * 30 - cam.x * 0.22 + W, W);
     const y = H - (life / 1100) * (H + 80);
     const r = 5 + pr(i + 42) * 6;
     const a = Math.max(0, 0.5 - life / 1600);
@@ -1044,7 +1070,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // swaying kelp / seaweed — denser & colorful
   for (let i = 0; i < 18; i++) {
-    const x = ((i * 110 - cam.x * 0.4) % (W + 160)) - 30;
+    const x = (wrap(i * 110 - cam.x * 0.4, W + 160)) - 30;
     const base = H - 4;
     const sway = Math.sin(t / 15 + i * 0.6) * 22;
     const tall = 140 + (i % 5) * 38;
@@ -1094,7 +1120,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
 
   // plankton / particulate motes (dense)
   for (let i = 0; i < 55; i++) {
-    const x = (pr(i) * W - cam.x * 0.18 + t * (0.08 + pr(i + 3) * 0.12) + W) % W;
+    const x = wrap(pr(i) * W - cam.x * 0.18 + t * (0.08 + pr(i + 3) * 0.12) + W, W);
     const y = (pr(i + 7) * H + Math.sin(t / 18 + i) * 14) % H;
     const a = 0.12 + pr(i + 3) * 0.45;
     ctx.fillStyle = "rgba(150,230,255," + a + ")";
