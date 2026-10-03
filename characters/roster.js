@@ -1,16 +1,28 @@
 // ============================================================================
-// ROSTER · 8 personajes × 5 formas
-// Cada personaje: stats por forma, 3 habilidades (J/K/L) y un rasgo pasivo único.
-// El arte está en characters/art/<id>.js (vectorial animado).
-// Los id antiguos se mantienen para no romper partidas guardadas.
+// ROSTER · 10 personajes × 5 formas
+// Stats, habilidades y pasiva. El arte vive en characters/art/<id>.js.
+// Los id antiguos se resuelven con aliasId(): pikachu → chispin, stitch → stitcho.
+// w/h son la hitbox. No se han tocado.
 // ============================================================================
-// Personajes activos en la demo. Los demás siguen en ALL_ROSTER (con su arte),
-// solo se ocultan: para reactivarlos, añade su id aquí.
+
 const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"];
+
+const ALIAS = {
+  pikachu: "chispin",
+  stitch: "stitcho",
+  michi: "cat",
+  lilo: "kilo",
+};
+
+export function aliasId(id) {
+  const key = String(id || "").toLowerCase();
+  return ALIAS[key] || key;
+}
 
 export const ALL_ROSTER = [
   {
-    id: "kilo", name: "Kilo", color: "#e23b3d",
+    id: "kilo", name: "Kilo", role: "control", tag: "Ukulele y polen",
+    color: "#e23b3d",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
     passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio. En KILO GOD, vuela un momento. El polen se recarga en el suelo." },
@@ -20,11 +32,12 @@ export const ALL_ROSTER = [
       { name: "Kilo", color: "#e23b3d", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 24, h: 34 },
       { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 28, h: 42 },
       { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 32, h: 48 },
-      { name: "KILO GOD", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 36, h: 52, aura: true }
-    ]
+      { name: "KILO GOD", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 36, h: 52, aura: true },
+    ],
   },
   {
-    id: "stitcho", name: "Stitcho", color: "#2f6bff",
+    id: "stitcho", name: "Stitcho", role: "acrobata", tag: "Plasma y paredes",
+    color: "#2f6bff",
     speed: 4.4, jumpPower: 11.0, maxJumps: 2, health: 90, w: 24, h: 24,
     abilities: ["plasma", "rollo", "caos"],
     passive: { id: "climb", name: "Trepador", desc: "Se agarra a las paredes y trepa por ellas." },
@@ -34,11 +47,12 @@ export const ALL_ROSTER = [
       { name: "Stitcho", color: "#2f6bff", speed: 4.9, jump: 11.8, jumps: 2, hp: 110, w: 28, h: 30 },
       { name: "Stitcho Bravo", color: "#1c3fd1", speed: 5.5, jump: 12.6, jumps: 3, hp: 135, w: 34, h: 32 },
       { name: "Experimento Ñam", color: "#35d7ff", speed: 6.2, jump: 13.5, jumps: 3, hp: 165, w: 38, h: 40 },
-      { name: "STITCHO GOD", color: "#8f7bff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 42, h: 46, aura: true }
-    ]
+      { name: "STITCHO GOD", color: "#8f7bff", speed: 7.4, jump: 15.0, jumps: 4, hp: 220, w: 42, h: 46, aura: true },
+    ],
   },
   {
-    id: "chispin", name: "Chispín", color: "#ffd83a",
+    id: "chispin", name: "Chispín", role: "asalto", tag: "Cadena y chispa",
+    color: "#ffd83a",
     speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 22,
     abilities: ["chain", "blink", "storm"],
     passive: { id: "spark", name: "Chispa veloz", desc: "Tras correr un segundo va más rápido y deja chispas que dañan." },
@@ -48,11 +62,12 @@ export const ALL_ROSTER = [
       { name: "Chispín", color: "#ffd83a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 26, h: 28 },
       { name: "Voltín", color: "#ffa024", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 28, h: 36 },
       { name: "Trueno Gordo", color: "#ffe45a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 38 },
-      { name: "CHISPÍN GOD", color: "#5fd8ff", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 40, h: 48, aura: true }
-    ]
+      { name: "CHISPÍN GOD", color: "#5fd8ff", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 40, h: 48, aura: true },
+    ],
   },
   {
-    id: "cat", name: "Michi", color: "#ffb6e4",
+    id: "cat", name: "Michi", role: "esquiva", tag: "Nueve vidas",
+    color: "#ffb6e4",
     speed: 5.0, jumpPower: 12.0, maxJumps: 2, health: 72, w: 22, h: 22,
     abilities: ["yarn", "purr", "ninetails"],
     passive: { id: "ninelives", name: "Nueve vidas", desc: "Sobrevive una vez por sala a un golpe mortal." },
@@ -62,11 +77,12 @@ export const ALL_ROSTER = [
       { name: "Michi", color: "#ffb6e4", speed: 5.5, jump: 12.7, jumps: 2, hp: 90, w: 28, h: 26 },
       { name: "Nube rosa", color: "#ff7ad0", speed: 6.1, jump: 13.4, jumps: 3, hp: 110, w: 32, h: 30 },
       { name: "Michi Luna", color: "#b594ff", speed: 6.7, jump: 14.2, jumps: 3, hp: 135, w: 36, h: 34 },
-      { name: "MICHI GOD", color: "#ff8fcf", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 40, h: 42, aura: true }
-    ]
+      { name: "MICHI GOD", color: "#ff8fcf", speed: 7.8, jump: 15.6, jumps: 4, hp: 185, w: 40, h: 42, aura: true },
+    ],
   },
   {
-    id: "dragon", name: "Dragón", color: "#e8452f",
+    id: "dragon", name: "Dragón", role: "zona", tag: "Alas y meteoro",
+    color: "#e8452f",
     speed: 4.5, jumpPower: 11.4, maxJumps: 2, health: 80, w: 20, h: 22,
     abilities: ["breath", "gust", "meteor"],
     passive: { id: "glide", name: "Alas", desc: "Mantén salto en el aire para planear. En GOD, vuela." },
@@ -76,11 +92,12 @@ export const ALL_ROSTER = [
       { name: "Dragón", color: "#e8452f", speed: 4.9, jump: 12.0, jumps: 2, hp: 105, w: 24, h: 28 },
       { name: "Dragón Alado", color: "#ff6a2a", speed: 5.5, jump: 13.0, jumps: 2, hp: 130, w: 28, h: 34 },
       { name: "Dragón Real", color: "#c7331f", speed: 5.9, jump: 13.4, jumps: 3, hp: 165, w: 34, h: 40 },
-      { name: "DRAGÓN GOD", color: "#ffd84a", speed: 6.6, jump: 14.8, jumps: 3, hp: 220, w: 40, h: 46, aura: true, glide: true }
-    ]
+      { name: "DRAGÓN GOD", color: "#ffd84a", speed: 6.6, jump: 14.8, jumps: 3, hp: 220, w: 40, h: 46, aura: true, glide: true },
+    ],
   },
   {
-    id: "dino", name: "Dino", color: "#4cbf56",
+    id: "dino", name: "Dino", role: "tanque", tag: "Mordisco y pisotón",
+    color: "#4cbf56",
     speed: 4.0, jumpPower: 11.0, maxJumps: 1, health: 100, w: 24, h: 26,
     abilities: ["bite", "charge", "quake"],
     passive: { id: "pound", name: "Pisotón", desc: "Pulsa ↓ en el aire para caer en picado con onda de choque." },
@@ -90,11 +107,12 @@ export const ALL_ROSTER = [
       { name: "Dino", color: "#4cbf56", speed: 4.3, jump: 11.6, jumps: 1, hp: 130, w: 26, h: 30 },
       { name: "Dino Pico", color: "#2ea8a0", speed: 4.8, jump: 12.2, jumps: 2, hp: 160, w: 30, h: 34 },
       { name: "Dino Rex", color: "#3f8f3a", speed: 5.1, jump: 12.6, jumps: 2, hp: 200, w: 38, h: 42 },
-      { name: "DINO GOD", color: "#c8f04a", speed: 6.0, jump: 14.0, jumps: 3, hp: 260, w: 42, h: 48, aura: true }
-    ]
+      { name: "DINO GOD", color: "#c8f04a", speed: 6.0, jump: 14.0, jumps: 3, hp: 260, w: 42, h: 48, aura: true },
+    ],
   },
   {
-    id: "frita", name: "Frita", color: "#f0b43a",
+    id: "frita", name: "Frita", role: "carrera", tag: "Resbalón y kétchup",
+    color: "#f0b43a",
     speed: 4.6, jumpPower: 11.4, maxJumps: 2, health: 85, w: 18, h: 28,
     abilities: ["salt", "ketchup", "fryer"],
     passive: { id: "slide", name: "Resbalón", desc: "Pulsa ↓ mientras corres para deslizarte y arrollar enemigos." },
@@ -104,11 +122,12 @@ export const ALL_ROSTER = [
       { name: "Frita", color: "#f0b43a", speed: 5.2, jump: 12.1, jumps: 3, hp: 105, w: 22, h: 32 },
       { name: "Capitán Kétchup", color: "#d42020", speed: 5.8, jump: 12.8, jumps: 3, hp: 125, w: 26, h: 36 },
       { name: "Extra Crujiente", color: "#ffda70", speed: 6.5, jump: 13.6, jumps: 4, hp: 150, w: 30, h: 42 },
-      { name: "KÉTCHUP GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 34, h: 50, aura: true }
-    ]
+      { name: "KÉTCHUP GOD", color: "#e82020", speed: 7.5, jump: 15.0, jumps: 4, hp: 200, w: 34, h: 50, aura: true },
+    ],
   },
   {
-    id: "pizza", name: "Pizza", color: "#ffb43a",
+    id: "pizza", name: "Pizza", role: "rebote", tag: "Queso y horno",
+    color: "#ffb43a",
     speed: 4.5, jumpPower: 11.8, maxJumps: 2, health: 88, w: 22, h: 26,
     abilities: ["pepperoni", "cheese", "oven"],
     passive: { id: "bounce", name: "Queso elástico", desc: "Caer sobre un enemigo lo aplasta y te hace rebotar." },
@@ -118,11 +137,12 @@ export const ALL_ROSTER = [
       { name: "Pizza", color: "#ffb43a", speed: 5.0, jump: 12.4, jumps: 2, hp: 108, w: 26, h: 30 },
       { name: "Pizza Picante", color: "#ff5a2a", speed: 5.6, jump: 13.1, jumps: 3, hp: 130, w: 30, h: 34 },
       { name: "Pizza Familiar", color: "#ffcc4a", speed: 6.0, jump: 13.6, jumps: 3, hp: 165, w: 38, h: 40 },
-      { name: "PIZZA GOD", color: "#ffe27a", speed: 7.2, jump: 15.2, jumps: 4, hp: 210, w: 40, h: 46, aura: true }
-    ]
+      { name: "PIZZA GOD", color: "#ffe27a", speed: 7.2, jump: 15.2, jumps: 4, hp: 210, w: 40, h: 46, aura: true },
+    ],
   },
   {
-    id: "yomi", name: "Yomi", color: "#e8c090",
+    id: "yomi", name: "Yomi", role: "espectro", tag: "Ofuda y paso hueco",
+    color: "#e8c090",
     speed: 4.4, jumpPower: 12.0, maxJumps: 2, health: 84, w: 26, h: 36,
     abilities: ["ofuda", "sleeve", "maw"],
     passive: { id: "hollow", name: "Paso hueco", desc: "Cae más rápido. En el aire, pulsa salto para un paso espectral." },
@@ -132,11 +152,12 @@ export const ALL_ROSTER = [
       { name: "Yomi", color: "#e8c090", speed: 4.8, jump: 12.6, jumps: 2, hp: 104, w: 28, h: 40 },
       { name: "Yomi Manga", color: "#d09060", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
       { name: "Yomi Grieta", color: "#c4503a", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
-      { name: "YOMI FAUCES", color: "#ff4466", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true }
-    ]
+      { name: "YOMI FAUCES", color: "#ff4466", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true },
+    ],
   },
   {
-    id: "cuerno", name: "Cuerno", color: "#f2c1ff",
+    id: "cuerno", name: "Cuerno", role: "luz", tag: "Galope y arcoíris",
+    color: "#f2c1ff",
     speed: 4.2, jumpPower: 12.4, maxJumps: 2, health: 86, w: 22, h: 26,
     abilities: ["gleam", "gallop", "rainbow"],
     passive: { id: "punta", name: "Punta de luz", desc: "Al caer, el cuerno suelta un brillo y te da un saltito. No pincha." },
@@ -146,12 +167,17 @@ export const ALL_ROSTER = [
       { name: "Cuerno", color: "#f2c1ff", speed: 4.7, jump: 13.0, jumps: 2, hp: 104, w: 24, h: 30 },
       { name: "Cuerno Iris", color: "#c9b6ff", speed: 5.2, jump: 13.6, jumps: 2, hp: 124, w: 26, h: 34 },
       { name: "Cuerno Estelar", color: "#9ad7ff", speed: 5.8, jump: 14.2, jumps: 3, hp: 150, w: 28, h: 38 },
-      { name: "CUERNO GOD", color: "#fff6c4", speed: 6.6, jump: 15.4, jumps: 3, hp: 198, w: 32, h: 44, aura: true }
-    ]
-  }
+      { name: "CUERNO GOD", color: "#fff6c4", speed: 6.6, jump: 15.4, jumps: 3, hp: 198, w: 32, h: 44, aura: true },
+    ],
+  },
 ];
 
 export const ROSTER = ACTIVE.map((id) => ALL_ROSTER.find((r) => r.id === id)).filter(Boolean);
+
+export function findRoster(id) {
+  const key = aliasId(id);
+  return ALL_ROSTER.find((r) => r.id === key) || null;
+}
 
 function clearEvoTween(p) {
   p.evoTween = 0;
@@ -198,26 +224,18 @@ export function applyForm(p, opts = {}) {
   p.evoBurst = burstFrames;
   try {
     window.dispatchEvent(new CustomEvent("ohana-evolve", {
-      detail: {
-        id: p.id,
-        evo: p.evo,
-        color: p.color,
-        fromName,
-        toName: f.name,
-        name: f.name
-      }
+      detail: { id: p.id, evo: p.evo, color: p.color, fromName, toName: f.name, name: f.name },
     }));
   } catch (_) {}
 }
 
-/** Ease remaining fraction of evo size tween (~0.67s at 60fps for evo<4; GOD similar/slightly longer). */
 export function tickEvoTween(p, dtFrames = 1) {
   if (!p || !p.evoTween) return;
   const oldH = p.h;
   const span = (Number(p.evo) || 0) >= 4 ? 42 : 40;
   p.evoTween = Math.max(0, p.evoTween - (dtFrames / span));
   const u = 1 - p.evoTween;
-  const s = u * u * (3 - 2 * u); // smoothstep
+  const s = u * u * (3 - 2 * u);
   const toW = p.evoToW;
   const toH = p.evoToH;
   const fromW = p.evoFromW;

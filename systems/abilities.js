@@ -1,5 +1,5 @@
 // ============================================================================
-// HABILIDADES · 8 personajes × 3 (J/K/L)
+// HABILIDADES · 10 personajes × 3 (J/K/L)
 // Cada habilidad tiene una mecánica propia. Las entidades especiales (notas que
 // rebotan, charcos, nubes, espíritus, géiseres…) viven en FX (este módulo) con su
 // propio update/draw: updateAbilityFx(game) y drawAbilityFx(ctx, game, t).
@@ -196,7 +196,7 @@ export function updateAbilityFx(game) {
     }
     if ((game.t % 2) === 0) game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" });
   }
-  p._abilMove = S.caos > 0 ? "chaos" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+  p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
   const updateCount = FX.length;
   for (let i = 0; i < updateCount; i++) {
     const f = FX[i];
@@ -349,7 +349,11 @@ function bodyHits(g, p, base, o) {
 }
 
 function hand(p) { return { x: cx(p) + p.facing * (p.w * 0.45), y: p.y + p.h * 0.4 }; }
-function add(f) { FX.push(f); return f; }
+function add(f) {
+  FX.push(f);
+  if (FX.length > 96) FX.splice(0, FX.length - 96);
+  return f;
+}
 function boom(g, x, y, color, n, extra) {
   g.fx.emit(x, y, Object.assign({ color, count: n || 10, size: 4, up: 1.2, speed: 3.2 }, extra || {}));
 }
@@ -2305,18 +2309,19 @@ export function drawBolt(ctx, b, cam, t) {
   const x2 = b.x2 - cam.x;
   const y2 = b.y2 - cam.y;
   const k = b.life / 14;
+  const seed = ((b.x1 || 0) * 13 + (b.y1 || 0) * 7 + (b.life || 0) * 17) | 0;
   ctx.save();
   ctx.globalAlpha = Math.max(0.3, Math.min(1, k));
-  ctx.strokeStyle = "#fffde0";
   ctx.lineWidth = 5 * Math.min(1, k);
+  ctx.strokeStyle = "#fffde0";
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   const segs = 7;
   for (let i = 1; i <= segs; i++) {
     const u = i / segs;
-    const jx = (Math.random() - 0.5) * 18 * (i < segs ? 1 : 0);
-    const jy = (Math.random() - 0.5) * 18 * (i < segs ? 1 : 0);
-    ctx.lineTo(x1 + (x2 - x1) * u + jx, y1 + (y2 - y1) * u + jy);
+    const n = Math.sin(seed * 0.17 + i * 2.3);
+    const j = (i < segs ? n : 0) * 9;
+    ctx.lineTo(x1 + (x2 - x1) * u + j, y1 + (y2 - y1) * u - j * 0.6);
   }
   ctx.stroke();
   ctx.strokeStyle = "#7ecbff";

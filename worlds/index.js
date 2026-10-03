@@ -1,5 +1,5 @@
 // Ohana — world rendering · MAX visual pass (Fase 3+)
-// 2026-10-03: wrap() fix, 8 caustics, no particle pool, no shadowBlur.
+// 2026-10-03: wrap() fix, un solo pase de causticos, burbujas con techo, no shadowBlur.
 // API intact: WORLDS, renderWorld, drawGrove, drawAquatic. Boca del pozo 620–860 intacta.
 // Richer, layered, parallax backgrounds per world. Same public API:
 //   WORLDS[]  ·  renderWorld(ctx, world, cam, t, W, H)
@@ -934,7 +934,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   // god rays from surface (strong / spectacular + depth pass)
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 11; i++) {
+  for (let i = 0; i < 7; i++) {
     const x = (wrap(i * 175 + 24 - cam.x * 0.035, W + 280));
     const sway = Math.sin(t / 32 + i * 0.85) * 28;
     const grd = ctx.createLinearGradient(x + sway, 0, x + sway - 90, H);
@@ -952,8 +952,8 @@ export function drawAquatic(ctx, cam, t, W, H) {
   }
 
   // caustic light ripples — mid + floor, more visible
-  for (let i = 0; i < 18; i++) {
-    const cx = (wrap(i * 130 - cam.x * 0.16 + t * 0.5, W + 200)) - 50;
+  for (let i = 0; i < 8; i++) {
+    const cx = (wrap(i * 210 - cam.x * 0.16 + t * 0.5, W + 200)) - 50;
     const cy = H * 0.4 + (i % 5) * 48 + Math.sin(t / 11 + i) * 10;
     const rad = 40 + (i % 4) * 12;
     const ca = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
@@ -966,8 +966,8 @@ export function drawAquatic(ctx, cam, t, W, H) {
     ctx.fill();
   }
   // floor caustic sheet
-  for (let i = 0; i < 8; i++) {
-    const cx = (wrap(i * 200 - cam.x * 0.2 + t * 0.35, W + 220)) - 40;
+  for (let i = 0; i < 4; i++) {
+    const cx = (wrap(i * 280 - cam.x * 0.2 + t * 0.35, W + 220)) - 40;
     const cy = H - 30 + Math.sin(t / 14 + i) * 6;
     const ca = ctx.createRadialGradient(cx, cy, 2, cx, cy, 70);
     ca.addColorStop(0, "rgba(140,230,255,.16)");
@@ -1012,26 +1012,9 @@ export function drawAquatic(ctx, cam, t, W, H) {
     }
   }
 
-  // caustics — few, no shadowBlur. Radial per mote was the Venice frame killer.
-  ctx.save();
-  ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 8; i++) {
-    const cx = wrap(i * 210 - cam.x * 0.16 + t * 0.45, W + 240) - 40;
-    const cy = H * 0.42 + (i % 4) * 56 + Math.sin(t / 11 + i) * 8;
-    const rad = 46 + (i % 3) * 10;
-    const ca = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
-    ca.addColorStop(0, "rgba(180,250,255,.16)");
-    ca.addColorStop(1, "rgba(60,150,220,0)");
-    ctx.fillStyle = ca;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rad + Math.sin(t / 9 + i) * 8, 14, Math.sin(t / 16 + i) * 0.35, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-
   // rising bubbles — multi-size layers (density bump)
   // layer A: tiny dense
-  for (let i = 0; i < 52; i++) {
+  for (let i = 0; i < 28; i++) {
     const life = (t * (0.5 + pr(i) * 0.6) + pr(i) * 700) % 700;
     const x = wrap(pr(i) * W + Math.sin(life / 28 + i) * 16 - cam.x * 0.12 + W, W);
     const y = H - (life / 700) * (H + 40);
@@ -1042,7 +1025,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
   }
   // layer B: medium glossy
-  for (let i = 0; i < 36; i++) {
+  for (let i = 0; i < 16; i++) {
     const life = (t * (0.4 + pr(i + 20) * 0.7) + pr(i + 20) * 900) % 900;
     const x = wrap(pr(i + 20) * W + Math.sin(life / 32 + i) * 22 - cam.x * 0.18 + W, W);
     const y = H - (life / 900) * (H + 60);
@@ -1055,7 +1038,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
     ctx.beginPath(); ctx.arc(x - r * 0.3, y - r * 0.3, r * 0.35, 0, Math.PI * 2); ctx.fill();
   }
   // layer C: large sparse
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < 6; i++) {
     const life = (t * (0.28 + pr(i + 40) * 0.4) + pr(i + 40) * 1100) % 1100;
     const x = wrap(pr(i + 40) * W + Math.sin(life / 40 + i) * 30 - cam.x * 0.22 + W, W);
     const y = H - (life / 1100) * (H + 80);
@@ -1069,8 +1052,8 @@ export function drawAquatic(ctx, cam, t, W, H) {
   }
 
   // swaying kelp / seaweed — denser & colorful
-  for (let i = 0; i < 18; i++) {
-    const x = (wrap(i * 110 - cam.x * 0.4, W + 160)) - 30;
+  for (let i = 0; i < 12; i++) {
+    const x = (wrap(i * 150 - cam.x * 0.4, W + 160)) - 30;
     const base = H - 4;
     const sway = Math.sin(t / 15 + i * 0.6) * 22;
     const tall = 140 + (i % 5) * 38;
@@ -1119,7 +1102,7 @@ export function drawAquatic(ctx, cam, t, W, H) {
   ctx.lineCap = "butt";
 
   // plankton / particulate motes (dense)
-  for (let i = 0; i < 55; i++) {
+  for (let i = 0; i < 28; i++) {
     const x = wrap(pr(i) * W - cam.x * 0.18 + t * (0.08 + pr(i + 3) * 0.12) + W, W);
     const y = (pr(i + 7) * H + Math.sin(t / 18 + i) * 14) % H;
     const a = 0.12 + pr(i + 3) * 0.45;

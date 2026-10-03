@@ -36,34 +36,24 @@ export function drawChasms(ctx, platforms, cam, t) {
     const g = ctx.createLinearGradient(0, y, 0, y + 220);
     g.addColorStop(0, "rgba(8,12,22,.18)");
     g.addColorStop(0.28, "rgba(4,6,16,.7)");
-    g.addColorStop(0.7, "rgba(1,1,6,.9)");
     g.addColorStop(1, "rgba(0,0,0,.96)");
     ctx.fillStyle = g;
     ctx.fillRect(x, y + 6, gap, 220);
 
-    // bruma del fondo
-    const mist = ctx.createLinearGradient(0, y + 40, 0, y + 160);
-    mist.addColorStop(0, "rgba(80,120,160,0)");
-    mist.addColorStop(0.5, "rgba(40,70,110,.12)");
-    mist.addColorStop(1, "rgba(10,16,28,0)");
-    ctx.fillStyle = mist;
-    ctx.fillRect(x, y + 40, gap, 120);
-
-    // labio de luz
     ctx.strokeStyle = "rgba(126,231,255," + (0.28 + Math.sin(t / 9) * 0.08) + ")";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, y + 8);
-    for (let k = 0; k <= 8; k++) {
-      const px = x + (gap * k) / 8;
+    const steps = gap > 280 ? 6 : 8;
+    for (let k = 0; k <= steps; k++) {
+      const px = x + (gap * k) / steps;
       const py = y + 8 + Math.sin(t / 11 + k + i) * 2 + (k % 2) * 2.5;
       ctx.lineTo(px, py);
     }
     ctx.stroke();
 
-    // estalactitas cortas, deterministas
     ctx.fillStyle = "rgba(16,14,24,.8)";
-    const teeth = Math.max(2, Math.floor(gap / 36));
+    const teeth = Math.max(2, Math.min(8, Math.floor(gap / 36)));
     for (let k = 1; k < teeth; k++) {
       const tx = x + (gap * k) / teeth;
       const th = 10 + hash(a.x + k * 17) * 22;
@@ -75,7 +65,6 @@ export function drawChasms(ctx, platforms, cam, t) {
       ctx.fill();
     }
 
-    // dientes de roca en los labios
     ctx.fillStyle = "rgba(20,16,28,.88)";
     for (let side = 0; side < 2; side++) {
       const sx = side ? x + gap : x;
@@ -101,8 +90,6 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   const thin = h <= 24;
 
   ctx.save();
-
-  // sombra de contacto, no cambia la hitbox
   ctx.fillStyle = "rgba(0,0,0,.28)";
   plate(ctx, x + 4, y + (thin ? 6 : 10), w, h, thin ? 5 : 8);
   ctx.fill();
@@ -115,7 +102,6 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   plate(ctx, x, y, w, h, thin ? 6 : 8);
   ctx.fill();
 
-  // cara del muro
   if (!thin) {
     ctx.save();
     ctx.beginPath();
@@ -127,17 +113,9 @@ export function drawPlatform(ctx, plat, world, cam, t) {
     for (let i = 0; i < w; i += step) {
       if (hash(plat.x + i) > 0.42) ctx.fillRect(x + i, y + 14, 2, h);
     }
-    // bloques sueltos
-    ctx.globalAlpha = 0.1;
-    for (let i = 0; i < 4; i++) {
-      const bx = x + hash(plat.x + i * 9) * (w - 18);
-      const by = y + 18 + hash(plat.y + i) * Math.max(8, h - 28);
-      ctx.fillRect(bx, by, 10 + hash(i + plat.w) * 14, 6);
-    }
     ctx.restore();
   }
 
-  // labio
   ctx.fillStyle = world.edge || "#fff";
   ctx.globalAlpha = 0.85;
   plate(ctx, x, y - 1, w, thin ? 6 : 9, 6);
@@ -147,7 +125,7 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   ctx.fillRect(x + 4, y + 1, Math.max(0, w - 8), 2);
 
   if (id === "jungle" || id === "grove" || id === "beach") {
-    const n = Math.max(2, Math.floor(w / 22));
+    const n = Math.max(2, Math.min(18, Math.floor(w / 22)));
     for (let i = 0; i < n; i++) {
       const tx = x + 8 + ((i + 0.5) * (w - 16)) / n;
       const sway = Math.sin(t / 16 + i + plat.x * 0.01) * 1.4;
@@ -160,17 +138,6 @@ export function drawPlatform(ctx, plat, world, cam, t) {
       ctx.closePath();
       ctx.fill();
     }
-    if (id !== "beach" && !thin) {
-      ctx.strokeStyle = "rgba(40,90,30,.35)";
-      ctx.lineWidth = 1.2;
-      for (let i = 0; i < 3; i++) {
-        const vx = x + 12 + hash(plat.x + i * 13) * (w - 24);
-        ctx.beginPath();
-        ctx.moveTo(vx, y + 8);
-        ctx.quadraticCurveTo(vx + 4, y - 10, vx + Math.sin(t / 20 + i) * 6, y - 16);
-        ctx.stroke();
-      }
-    }
   } else if (id === "volcano") {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -178,15 +145,12 @@ export function drawPlatform(ctx, plat, world, cam, t) {
     ctx.lineWidth = 1.4;
     for (let i = 0; i < 3; i++) {
       const cx = x + w * (0.2 + hash(plat.x + i) * 0.6);
-      const pulse = 0.55 + Math.sin(t / 8 + i) * 0.25;
-      ctx.globalAlpha = pulse;
+      ctx.globalAlpha = 0.55 + Math.sin(t / 8 + i) * 0.25;
       ctx.beginPath();
       ctx.moveTo(cx, y + 8);
       ctx.lineTo(cx + 6, y + h * 0.45);
       ctx.lineTo(cx - 2, y + h * 0.7);
       ctx.stroke();
-      ctx.fillStyle = "rgba(255,180,60,.7)";
-      ctx.fillRect(cx - 1, y + 6, 2, 2);
     }
     ctx.restore();
   } else if (id === "space" || id === "lab") {
@@ -199,25 +163,26 @@ export function drawPlatform(ctx, plat, world, cam, t) {
       ctx.stroke();
     }
     ctx.fillStyle = id === "lab" ? "#7af3ff" : "#c8b6ff";
-    for (let i = 10; i < w - 8; i += 26) {
-      const blink = 0.45 + Math.sin(t / 10 + i) * 0.35;
-      ctx.globalAlpha = blink;
+    const dots = Math.min(12, Math.floor((w - 18) / 26));
+    for (let i = 0; i < dots; i++) {
+      ctx.globalAlpha = 0.45 + Math.sin(t / 10 + i) * 0.35;
       ctx.beginPath();
-      ctx.arc(x + i, y + 14, 1.6, 0, Math.PI * 2);
+      ctx.arc(x + 10 + i * 26, y + 14, 1.6, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
   } else if (id === "aquatic") {
     ctx.fillStyle = "rgba(180,255,255,.35)";
-    for (let i = 0; i < w; i += 20) {
+    const bubbles = Math.min(10, Math.floor(w / 20));
+    for (let i = 0; i < bubbles; i++) {
       const bob = Math.sin(t / 14 + i) * 2;
       ctx.beginPath();
-      ctx.arc(x + 8 + i, y + 8 + bob, 2.2, 0, Math.PI * 2);
+      ctx.arc(x + 8 + i * 20, y + 8 + bob, 2.2, 0, Math.PI * 2);
       ctx.fill();
     }
     ctx.strokeStyle = "rgba(140,230,220,.4)";
     ctx.lineWidth = 1.4;
-    const kelp = Math.max(1, Math.floor(w / 48));
+    const kelp = Math.max(1, Math.min(6, Math.floor(w / 48)));
     for (let i = 0; i < kelp; i++) {
       const kx = x + 10 + ((i + 0.5) * (w - 20)) / kelp;
       const sway = Math.sin(t / 13 + i) * 5;
@@ -228,7 +193,6 @@ export function drawPlatform(ctx, plat, world, cam, t) {
     }
   }
 
-  // canto izquierdo claro, derecho oscuro
   ctx.fillStyle = "rgba(255,255,255,.08)";
   ctx.fillRect(x, y + 8, 3, Math.max(0, h - 10));
   ctx.fillStyle = "rgba(0,0,0,.22)";

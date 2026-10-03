@@ -1,9 +1,9 @@
-// Sorpresas jugables: pez dorado, lluvia de estrellas, GOD y power-ups de sala.
+// Sorpresas jugables. Mismos premios y mismas probabilidades. Fuera de cámara no se pinta.
 import { showNotification } from "./notify.js";
 import { Rain } from "./rain.js";
 
 const GOLD_ROOMS = { beach: true, reef: true };
-const STAR_DURATION = 480; // ~8s @ 60fps
+const STAR_DURATION = 480;
 const STAR_DELAY_MIN = 90;
 const STAR_DELAY_MAX = 180;
 const AURA_SPARKLE_EVERY = 5;
@@ -28,14 +28,14 @@ function emitStars(game, x, y, count, color) {
   } catch (_) {}
 }
 
-function crownPosition(game, secret) {
-  if (game.roomId === "hub" && secret && !secret.taken) {
-    return { x: 120, y: 772 };
-  }
+function onCam(x, y, cam) {
+  return x - cam.x > -80 && x - cam.x < 1360 && y - cam.y > -80 && y - cam.y < 800;
+}
 
+function crownPosition(game, secret) {
+  if (game.roomId === "hub" && secret && !secret.taken) return { x: 120, y: 772 };
   const orb = (game.orbs || []).find((o) => !o.taken);
   if (orb) return { x: orb.x, y: Math.max(100, orb.y - 34) };
-
   const elevated = (game.platforms || [])
     .filter((pl) => pl.h <= 40 && pl.y > 120 && pl.y < 780)
     .sort((a, b) => Math.abs(a.x + a.w / 2 - game.worldW / 2) - Math.abs(b.x + b.w / 2 - game.worldW / 2));
@@ -47,20 +47,15 @@ function crownPosition(game, secret) {
 }
 
 export const Surprises = {
-  // Pez dorado: como máximo uno marcado por sala al spawnear
   _goldenMarked: false,
   _goldRoom: null,
-
-  // Lluvia de estrellas (space)
   starDelay: 0,
   starLeft: 0,
   starActive: false,
   _skyPulse: 0,
-
-  // Power-up secreto (hub, 1× por run)
-  secret: null, // {x,y,r,taken,secret:true} | null
-  fruit: null, // {x,y,r,taken,fruit:true} | null
-  godCrown: null, // {x,y,r,taken,godCrown:true,roomId} | null
+  secret: null,
+  fruit: null,
+  godCrown: null,
   godBurst: 0,
   godRings: [],
   _godPulse: 0,
@@ -110,7 +105,6 @@ export const Surprises = {
     this.flags.crownCdNotified = false;
   },
 
-  /** Celebración única al alcanzar GOD (forma 5). */
   onBecomeGod(game) {
     if (!game || !game.player || this.flags.godBurstDone) return;
     this.flags.godBurstDone = true;
@@ -125,12 +119,9 @@ export const Surprises = {
     game.shake = Math.max(game.shake || 0, game.reduceMotion ? 4 : 8);
     const p = game.player;
     emitStars(game, p.x + p.w / 2, p.y + p.h / 2, 28, "#ffe66a");
-    try {
-      showNotification("¡GOD!", "El cielo te celebra.", "sala");
-    } catch (_) {}
+    try { showNotification("¡GOD!", "El cielo te celebra.", "sala"); } catch (_) {}
   },
 
-  /** Tras makeFoe: marca pez dorado en beach/reef (1/12, máx. 1 por sala). */
   onMakeFoe(e, roomId) {
     if (!e || e.kind !== "pez") return;
     if (!GOLD_ROOMS[roomId]) return;
@@ -148,38 +139,30 @@ export const Surprises = {
     e.max = Math.max(e.max || e.hp, e.hp);
   },
 
-  /** Final de loadRoom: programa eventos de sala. */
   onEnterRoom(game) {
     if (!game) return;
-    // Star rain: stop when leaving space
     if (game.roomId !== "space") {
       this.starDelay = 0;
       this.starLeft = 0;
       this.starActive = false;
       this._skyPulse = 0;
     } else {
-      // ~70% chance per visit; delay 90–180 frames
       this.starActive = false;
       this.starLeft = 0;
       this._skyPulse = 0;
       if (Math.random() < 0.7) {
-        this.starDelay =
-          STAR_DELAY_MIN +
-          Math.floor(Math.random() * (STAR_DELAY_MAX - STAR_DELAY_MIN + 1));
+        this.starDelay = STAR_DELAY_MIN + Math.floor(Math.random() * (STAR_DELAY_MAX - STAR_DELAY_MIN + 1));
       } else {
         this.starDelay = 0;
       }
     }
 
-    // Hub secret pickup — once per run
     if (game.roomId === "hub" && !this.flags.secretHubTaken) {
-      // Esquina SE del claro, sobre el suelo (y=810), lejos de la catapulta
       this.secret = { x: 1480, y: 772, r: 14, taken: false, secret: true };
     } else {
       this.secret = null;
     }
 
-    // Hub ambience: reset the quiet-player trigger for every visit.
     if (game.roomId === "hub") {
       this.hubGlowDone = false;
       this.hubLeafClock = 0;
@@ -192,13 +175,11 @@ export const Surprises = {
       this._hubLastY = null;
     }
 
-    // Jungle fruit: a light chance on each entry, but only one pickup per run.
     this.fruit = null;
     if (game.roomId === "jungle" && !this.flags.jungleFruitTaken && Math.random() < 0.22) {
       this.fruit = { x: 520, y: 400, r: 12, taken: false, fruit: true };
     }
 
-    // Corona estelar: una oportunidad por sala, pero una sola recogida por run.
     this.godCrown = null;
     this.crownCdFlash = 0;
     if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && this.flags.godCrownTaken) {
@@ -213,7 +194,6 @@ export const Surprises = {
     }
   },
 
-  /** Antes del heal genérico al matar. Pez dorado → bonus + aura cosmética. */
   onEnemyKilled(e, game) {
     if (!e || !e.golden || !game || !game.player) return;
     const p = game.player;
@@ -224,15 +204,10 @@ export const Surprises = {
     game.shake = Math.max(game.shake || 0, 8);
     emitStars(game, e.x + (e.w || 0) / 2, e.y + (e.h || 0) / 2, 22, "#f0c040");
     emitStars(game, e.x + (e.w || 0) / 2, e.y, 10, "#ffe8a0");
-    try {
-      if (game.nums) game.nums.add(e.x, e.y - 10, "+HP", "#f0c040");
-    } catch (_) {}
-    try {
-      showNotification("¡PEZ DORADO!", "Brillo temporal. +HP", "sala");
-    } catch (_) {}
+    try { if (game.nums) game.nums.add(e.x, e.y - 10, "+HP", "#f0c040"); } catch (_) {}
+    try { showNotification("¡PEZ DORADO!", "Brillo temporal. +HP", "sala"); } catch (_) {}
   },
 
-  /** Bonus XP extra por orb mientras dura la lluvia de estrellas. */
   starOrbBonus() {
     return this.starActive && this.starLeft > 0 ? 2 : 0;
   },
@@ -241,7 +216,6 @@ export const Surprises = {
     if (!game || !game.player) return;
     const p = game.player;
 
-    // --- Lluvia: transiciones y burst local al recoger el paraguas ---
     if (Rain.active && !this._rainWasActive && !Rain._grabNotify) {
       try { showNotification("LLUVIA", "Radiactiva. El paraguas está en el Lab", "sala"); } catch (_) {}
     }
@@ -256,7 +230,6 @@ export const Surprises = {
       }
     }
 
-    // --- Ambiente suave del hub ---
     if (game.roomId === "hub") {
       this.hubLeafClock++;
       if (!game.reduceMotion && this.hubLeafClock >= HUB_LEAF_EVERY && game.fx) {
@@ -264,13 +237,7 @@ export const Surprises = {
         try {
           game.fx.emit(Math.random() * (game.worldW || 1600), 80 + Math.random() * 130, {
             color: Math.random() < 0.5 ? "#9bdc8a" : "#ffe79a",
-            count: 1,
-            size: 2.4,
-            speed: 0.65,
-            angle: Math.PI / 2,
-            spread: 0.8,
-            life: 80,
-            gravity: 0.015,
+            count: 1, size: 2.4, speed: 0.65, angle: Math.PI / 2, spread: 0.8, life: 80, gravity: 0.015,
             star: Math.random() < 0.35,
           });
         } catch (_) {}
@@ -289,26 +256,17 @@ export const Surprises = {
 
     if (this.crownCdFlash > 0) this.crownCdFlash--;
 
-    // --- Aura cosmética (trail sparkles) ---
     if ((p._surpriseAura || 0) > 0) {
       p._surpriseAura--;
       if (!game.reduceMotion && (t % AURA_SPARKLE_EVERY === 0) && game.fx) {
         try {
           game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, {
-            color: "#f0c040",
-            count: 1,
-            size: 2.2,
-            up: 0.6,
-            speed: 0.9,
-            life: 12,
-            star: true,
-            gravity: 0.01,
+            color: "#f0c040", count: 1, size: 2.2, up: 0.6, speed: 0.9, life: 12, star: true, gravity: 0.01,
           });
         } catch (_) {}
       }
     }
 
-    // --- Burst GOD: estrellas locales + anillos expansivos ---
     if (this.godBurst > 0) {
       this.godBurst--;
       this._godPulse++;
@@ -322,7 +280,6 @@ export const Surprises = {
           Math.random() < 0.5 ? "#ffe66a" : "#ffffff"
         );
       }
-      // Refuerzo leve y temporal; no bloquea el control ni la transición de sala.
       game.shake = Math.max(game.shake || 0, game.reduceMotion ? 2 : 5);
       if (this._godPulse < 18) game.flash = Math.max(game.flash || 0, game.reduceMotion ? 1 : 3);
     }
@@ -333,7 +290,6 @@ export const Surprises = {
     }
     this.godRings = this.godRings.filter((ring) => ring.life > 0);
 
-    // --- Lluvia de estrellas (solo space) ---
     if (game.roomId === "space") {
       if (!this.starActive && this.starDelay > 0) {
         this.starDelay--;
@@ -341,13 +297,7 @@ export const Surprises = {
           this.starActive = true;
           this.starLeft = STAR_DURATION;
           this._skyPulse = 0;
-          try {
-            showNotification(
-              "LLUVIA DE ESTRELLAS",
-              "Órbita brilla. Cristales +XP",
-              "sala"
-            );
-          } catch (_) {}
+          try { showNotification("LLUVIA DE ESTRELLAS", "Órbita brilla. Cristales +XP", "sala"); } catch (_) {}
         }
       }
       if (this.starActive && this.starLeft > 0) {
@@ -356,10 +306,8 @@ export const Surprises = {
         const roomW = game.worldW || 1600;
         const every = game.reduceMotion ? 8 : 3;
         if (this._skyPulse % every === 0 && game.fx) {
-          const x = Math.random() * roomW;
-          const y = -10 - Math.random() * 40;
           try {
-            game.fx.emit(x, y, {
+            game.fx.emit(Math.random() * roomW, -10 - Math.random() * 40, {
               color: Math.random() < 0.5 ? "#ffe66a" : "#c8e8ff",
               count: game.reduceMotion ? 1 : 2,
               size: 2.5 + Math.random() * 2,
@@ -373,9 +321,7 @@ export const Surprises = {
             });
           } catch (_) {}
         }
-        if (this.starLeft <= 0) {
-          this.starActive = false;
-        }
+        if (this.starLeft <= 0) this.starActive = false;
       }
     } else if (this.starActive || this.starDelay > 0) {
       this.starActive = false;
@@ -383,12 +329,9 @@ export const Surprises = {
       this.starLeft = 0;
     }
 
-    // --- Power-up secreto (hub) ---
     const s = this.secret;
     if (s && !s.taken && game.roomId === "hub" && !p.dead) {
-      const dx = p.x + p.w / 2 - s.x;
-      const dy = p.y + p.h / 2 - s.y;
-      if (Math.hypot(dx, dy) < 36) {
+      if (Math.hypot(p.x + p.w / 2 - s.x, p.y + p.h / 2 - s.y) < 36) {
         s.taken = true;
         this.flags.secretHubTaken = true;
         game._secretHubTaken = true;
@@ -400,22 +343,15 @@ export const Surprises = {
         game.flash = Math.max(game.flash || 0, 8);
         emitStars(game, s.x, s.y, 16, "#a8e0ff");
         emitStars(game, s.x, s.y, 8, "#ffffff");
-        try {
-          if (game.nums) game.nums.add(s.x, s.y, "+!", "#a8e0ff");
-        } catch (_) {}
-        try {
-          showNotification("¡SORPRESA!", "Escudo corto + dash", "sala");
-        } catch (_) {}
+        try { if (game.nums) game.nums.add(s.x, s.y, "+!", "#a8e0ff"); } catch (_) {}
+        try { showNotification("¡SORPRESA!", "Escudo corto + dash", "sala"); } catch (_) {}
         this.secret = null;
       }
     }
 
-    // --- Fruto brillante de la jungla (1× por run) ---
     const fruit = this.fruit;
     if (fruit && !fruit.taken && game.roomId === "jungle" && !p.dead) {
-      const dx = p.x + p.w / 2 - fruit.x;
-      const dy = p.y + p.h / 2 - fruit.y;
-      if (Math.hypot(dx, dy) < 36) {
+      if (Math.hypot(p.x + p.w / 2 - fruit.x, p.y + p.h / 2 - fruit.y) < 36) {
         fruit.taken = true;
         this.flags.jungleFruitTaken = true;
         p.health = Math.min(p.maxHealth, p.health + 15);
@@ -432,12 +368,9 @@ export const Surprises = {
       }
     }
 
-    // --- Corona estelar (GOD, 1× por run) ---
     const crown = this.godCrown;
     if (crown && !crown.taken && game.roomId === crown.roomId && p.evo >= 4 && !p.dead) {
-      const dx = p.x + p.w / 2 - crown.x;
-      const dy = p.y + p.h / 2 - crown.y;
-      if (Math.hypot(dx, dy) < 40) {
+      if (Math.hypot(p.x + p.w / 2 - crown.x, p.y + p.h / 2 - crown.y) < 40) {
         crown.taken = true;
         this.flags.godCrownTaken = true;
         p.invuln = Math.max(p.invuln || 0, 120);
@@ -449,12 +382,8 @@ export const Surprises = {
         game.shake = Math.max(game.shake || 0, 8);
         emitStars(game, crown.x, crown.y, 30, "#f0c040");
         emitStars(game, crown.x, crown.y, 12, "#fff4b0");
-        try {
-          if (game.nums) game.nums.add(crown.x, crown.y, "+100", "#ffe66a");
-        } catch (_) {}
-        try {
-          showNotification("CORONA ESTELAR", "Solo los GOD brillan así.", "sala");
-        } catch (_) {}
+        try { if (game.nums) game.nums.add(crown.x, crown.y, "+100", "#ffe66a"); } catch (_) {}
+        try { showNotification("CORONA ESTELAR", "Solo los GOD brillan así.", "sala"); } catch (_) {}
         this.godCrown = null;
       }
     }
@@ -462,17 +391,14 @@ export const Surprises = {
 
   draw(ctx, cam, t, game) {
     if (!ctx || !cam) return;
-
-    // Cielo más brillante durante lluvia de estrellas
     if (this.starActive && this.starLeft > 0 && game && game.roomId === "space") {
       const a = 0.08 + 0.06 * Math.sin((this._skyPulse || 0) / 18);
       ctx.save();
-      ctx.fillStyle = `rgba(200,220,255,${a})`;
+      ctx.fillStyle = "rgba(200,220,255," + a + ")";
       ctx.fillRect(0, 0, ctx.canvas ? ctx.canvas.width : 1280, ctx.canvas ? ctx.canvas.height : 720);
       ctx.restore();
     }
 
-    // Anillos de energía del ascenso a GOD, centrados en el jugador.
     const p = game && game.player;
     if (p && this.godRings.length) {
       const rings = game.reduceMotion ? this.godRings.slice(-2) : this.godRings;
@@ -480,39 +406,31 @@ export const Surprises = {
       const cy = p.y + p.h / 2 - cam.y;
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      rings.forEach((ring, i) => {
-        const alpha = ring.alpha * Math.max(0, ring.life / ring.maxLife);
-        ctx.globalAlpha = alpha;
+      for (let i = 0; i < rings.length; i++) {
+        const ring = rings[i];
+        ctx.globalAlpha = ring.alpha * Math.max(0, ring.life / ring.maxLife);
         ctx.strokeStyle = i % 2 ? "#ffffff" : "#ffe66a";
         ctx.lineWidth = game.reduceMotion ? 2 : 3;
         ctx.beginPath();
         ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
         ctx.stroke();
-      });
+      }
       ctx.restore();
     }
 
-    // Cristal fantasma del hub
     const s = this.secret;
-    if (s && !s.taken) {
-      const p = game && game.player;
+    if (s && !s.taken && onCam(s.x, s.y, cam)) {
       const sx = s.x - cam.x;
       const sy = s.y - cam.y + Math.sin((t || 0) / 12) * 3;
       let near = 0;
-      if (p) {
-        const dist = Math.hypot(p.x + p.w / 2 - s.x, p.y + p.h / 2 - s.y);
-        near = Math.max(0, 1 - dist / 220);
-      }
+      if (p) near = Math.max(0, 1 - Math.hypot(p.x + p.w / 2 - s.x, p.y + p.h / 2 - s.y) / 220);
       const pulse = 0.5 + 0.5 * Math.sin((t || 0) / 10);
-      const alpha = 0.08 + near * 0.45 + pulse * 0.06;
       ctx.save();
-      ctx.globalAlpha = alpha;
-      // soft glow
+      ctx.globalAlpha = 0.08 + near * 0.45 + pulse * 0.06;
       ctx.fillStyle = "rgba(160,220,255,.35)";
       ctx.beginPath();
       ctx.arc(sx, sy, 12 + near * 4, 0, Math.PI * 2);
       ctx.fill();
-      // diamond crystal
       ctx.fillStyle = "#c8ecff";
       ctx.beginPath();
       ctx.moveTo(sx, sy - 10);
@@ -521,20 +439,11 @@ export const Surprises = {
       ctx.lineTo(sx - 7, sy);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = "rgba(255,255,255,.55)";
-      ctx.beginPath();
-      ctx.moveTo(sx, sy - 10);
-      ctx.lineTo(sx + 3, sy - 2);
-      ctx.lineTo(sx, sy + 2);
-      ctx.lineTo(sx - 3, sy - 2);
-      ctx.closePath();
-      ctx.fill();
       ctx.restore();
     }
 
-    // Fruto brillante: baya verde/rosa pulsante de la jungla.
     const fruit = this.fruit;
-    if (fruit && !fruit.taken && game && game.roomId === "jungle") {
+    if (fruit && !fruit.taken && game && game.roomId === "jungle" && onCam(fruit.x, fruit.y, cam)) {
       const fx = fruit.x - cam.x;
       const fy = fruit.y - cam.y + Math.sin((t || 0) / 9) * 3;
       const pulse = 0.75 + 0.25 * Math.sin((t || 0) / 7);
@@ -554,16 +463,9 @@ export const Surprises = {
       ctx.beginPath();
       ctx.ellipse(fx - 3, fy - 7, 6, 3.5, -0.35, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "#b9ff92";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(fx, fy - 7);
-      ctx.lineTo(fx + 2, fy - 12);
-      ctx.stroke();
       ctx.restore();
     }
 
-    // Feedback visual breve: esta partida ya reclamó la corona.
     if (p && this.crownCdFlash > 0 && game && game.roomId !== "boss") {
       const cx = p.x + p.w / 2 - cam.x;
       const cy = p.y + p.h / 2 - cam.y;
@@ -579,9 +481,8 @@ export const Surprises = {
       ctx.restore();
     }
 
-    // Corona estelar: pickup dorado muy visible y flotante.
     const crown = this.godCrown;
-    if (crown && !crown.taken && game) {
+    if (crown && !crown.taken && game && onCam(crown.x, crown.y, cam)) {
       const cx = crown.x - cam.x;
       const cy = crown.y - cam.y + Math.sin((t || 0) / 9) * 5;
       const pulse = 0.75 + 0.25 * Math.sin((t || 0) / 7);
@@ -593,11 +494,6 @@ export const Surprises = {
       ctx.arc(cx, cy, 25 + pulse * 5, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalAlpha = 0.95;
-      ctx.strokeStyle = "#fff8bb";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(cx, cy + 2, 18 + pulse * 2, 0, Math.PI * 2);
-      ctx.stroke();
       ctx.fillStyle = "#f0c040";
       ctx.strokeStyle = "#fff4a8";
       ctx.lineWidth = 2;

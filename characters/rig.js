@@ -1,24 +1,20 @@
 // ============================================================================
 // RIG · Project Ohana
 // ----------------------------------------------------------------------------
-// 1) computePose(p, t): traduce el estado del jugador a una "pose" animable
-//    (idle/run/jump/fall/attack/cast/hurt/...) + movimiento secundario
-//    (muelles para orejas, colas, pelo) + parpadeo + gesto de espera.
-// 2) R: kit de dibujo común para que los 8 personajes compartan estilo
-//    (contorno grueso tipo pegatina, sombreado cel, brillos, ojos chibi).
+// 1) computePose(p, t): estado lógico → pose animable.
+// 2) R: kit de dibujo compartido (contorno pegatina, cel, ojos chibi).
 //
 // CONTRATO DE ARTE (characters/art/<id>.js):
 //   export default { id, draw(ctx, pose, R) }
-//   · Origen (0,0) = centro de los PIES. Mira hacia +x (derecha).
-//   · Unidades de diseño: cada forma mide ~100 de alto (y de 0 a -100).
-//     draw.js escala a la altura visual de la forma. Alas, auras, etc.
-//     pueden salirse de ese rango.
-//   · No tocar globalAlpha global salvo con save/restore.
+//   · Origen (0,0) = centro de los PIES. Mira hacia +x.
+//   · Unidades de diseño: ~100 de alto (y de 0 a -100).
+//   · No tocar globalAlpha salvo con save/restore.
+//
+// Los campos viejos no cambian. Los nuevos (squash, stretch, bodyTilt,
+// armSwing, legSwing, anticipation, impact) son aditivos: el arte viejo
+// los ignora y el que quiera puede leerlos.
 // ============================================================================
 
-// Red de seguridad: un radio negativo en ellipse()/arc() lanza excepción y
-// pararía el bucle del juego. Los personajes animan radios con senos, así que
-// los recortamos a 0 de forma global.
 (function safeRadii() {
   const P = typeof CanvasRenderingContext2D !== "undefined" && CanvasRenderingContext2D.prototype;
   if (!P || P.__ohanaSafe) return;
@@ -33,32 +29,51 @@
   P.__ohanaSafe = true;
 })();
 
-// ---------------------------------------------------------------------------
-// Pose
-// ---------------------------------------------------------------------------
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+
+const PROFILES = {
+  kilo:    { freq: 1.18, bounce: 0.85, sway: 1.15, breath: 1.15, land: 0.85, weight: 0.8,  snap: 1.25 },
+  pizza:   { freq: 0.82, bounce: 1.45, sway: 1.35, breath: 1.35, land: 1.7,  weight: 1.25, snap: 0.85 },
+  michi:   { freq: 1.08, bounce: 0.6,  sway: 0.65, breath: 1.0,  land: 0.55, weight: 0.7,  snap: 1.45 },
+  cat:     { freq: 1.08, bounce: 0.6,  sway: 0.65, breath: 1.0,  land: 0.55, weight: 0.7,  snap: 1.45 },
+  cuerno:  { freq: 0.7,  bounce: 1.05, sway: 1.2,  breath: 0.85, land: 1.4,  weight: 1.45, snap: 0.7 },
+  chispin: { freq: 1.55, bounce: 0.8,  sway: 1.5,  breath: 1.25, land: 0.7,  weight: 0.65, snap: 1.55 },
+  pikachu: { freq: 1.55, bounce: 0.8,  sway: 1.5,  breath: 1.25, land: 0.7,  weight: 0.65, snap: 1.55 },
+  stitcho: { freq: 0.95, bounce: 0.7,  sway: 1.0,  breath: 1.0,  land: 0.85, weight: 0.9,  snap: 1.0 },
+  stitch:  { freq: 0.95, bounce: 0.7,  sway: 1.0,  breath: 1.0,  land: 0.85, weight: 0.9,  snap: 1.0 },
+  dragon:  { freq: 0.65, bounce: 0.85, sway: 1.1,  breath: 1.45, land: 1.15, weight: 1.3,  snap: 0.85 },
+  dino:    { freq: 0.62, bounce: 1.2,  sway: 1.3,  breath: 1.15, land: 1.7,  weight: 1.65, snap: 0.75 },
+  frita:   { freq: 1.2,  bounce: 0.55, sway: 1.35, breath: 1.0,  land: 0.65, weight: 0.8,  snap: 1.35 },
+  yomi:    { freq: 0.9,  bounce: 0.35, sway: 1.65, breath: 1.5,  land: 0.4,  weight: 0.55, snap: 1.6 },
+  lilo:    { freq: 1.05, bounce: 0.9,  sway: 1.05, breath: 1.05, land: 0.9,  weight: 0.95, snap: 1.05 },
+};
+const NEUTRAL = { freq: 1, bounce: 1, sway: 1, breath: 1, land: 1, weight: 1, snap: 1 };
+
+function profileOf(p) {
+  const id = String(p?.characterId || p?.id || p?.name || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+  if (PROFILES[id]) return PROFILES[id];
+  if (id.includes("chisp") || id.includes("pika") || id.includes("spark")) return PROFILES.chispin;
+  if (id.includes("stit")) return PROFILES.stitcho;
+  if (id.includes("michi") || id.includes("gato") || id.includes("cat")) return PROFILES.michi;
+  if (id.includes("drago")) return PROFILES.dragon;
+  return NEUTRAL;
+}
 
 /**
  * pose = {
- *   state:  "idle"|"run"|"jump"|"fall"|"attack"|"cast"|"hurt"|"wall"|"glide"|"dead"|"victory",
- *   move:   string|null  → movimiento especial del personaje (p._move): "slide","pound","climb","float","bounce","charge",...
- *   form:   0..4 (evolución), t: frames, color: color de la forma,
- *   phase:  fase del ciclo de carrera (radianes, avanza con la velocidad),
- *   speed:  0..1 velocidad horizontal normalizada, vy: -1..1 (negativo = subiendo),
- *   air:    bool, land: 0..1 aplastamiento tras aterrizar,
- *   atk:    0..1 progreso del ataque cuerpo a cuerpo (0 si no ataca),
- *   cast:   0..1 progreso de la habilidad, castSlot: 0 (J) | 1 (K) | 2 (L) | -1,
- *   hurt:   0..1 (1 = golpe reciente),
- *   blink:  0..1 (1 = ojos cerrados), look: {x,y} -1..1,
- *   sway:   -1..1 muelle horizontal (inercia: orejas/cola/pelo se van hacia atrás al correr),
- *   bounce: -1..1 muelle vertical (rebote al aterrizar/saltar),
- *   breath: -1..1 respiración lenta,
- *   flourish: 0..1 gesto propio de espera (0 = no activo). flourishN: nº de gesto (0,1,2...) para variar.
- *   evoT:   0..1 durante la cinemática de evolución (pose.state === "victory").
- *   nineLives: frames restantes del salvavidas pasivo de Michi.
+ *   state, move, form, t, color, phase, speed, vy, air, land,
+ *   atk, cast, castSlot, hurt, blink, nineLives, look,
+ *   sway, bounce, breath, flourish, flourishN, evoT,
+ *   squash, stretch, bodyTilt, headTilt, armSwing, legSwing,
+ *   anticipation, impact, secondary
  * }
  */
 export function computePose(p, t) {
+  const prof = profileOf(p);
   const r = p._rig || (p._rig = {
     sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 90 + Math.random() * 120, blinkT: 0,
     idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t,
@@ -70,36 +85,30 @@ export function computePose(p, t) {
   const air = !p.grounded;
   const speed = clamp(Math.abs(vx) / Math.max(3, p.speed || 5), 0, 1.4);
 
-  // ciclo de carrera
-  if (!air && speed > 0.08) r.phase += (0.16 + speed * 0.2) * dt;
+  if (!air && speed > 0.08) r.phase += (0.16 + speed * 0.2) * dt * prof.freq;
 
-  // aterrizaje
   if (!air && r.wasAir) r.land = 1;
   r.wasAir = air;
   r.land = Math.max(0, r.land - 0.12 * dt);
 
-  // muelles (movimiento secundario)
-  const swayTarget = clamp(-vx / 8, -1, 1);
+  const swayTarget = clamp(-vx / 8, -1, 1) * prof.sway;
   r.swayV += (swayTarget - r.sway) * 0.18 - r.swayV * 0.22;
-  r.sway = clamp(r.sway + r.swayV, -1.3, 1.3);
-  const bounceTarget = clamp(vy / 12, -1, 1) + (r.land > 0.8 ? 0.8 : 0);
+  r.sway = clamp(r.sway + r.swayV, -1.5, 1.5);
+  const bounceTarget = clamp(vy / 12, -1, 1) * prof.bounce + (r.land > 0.8 ? 0.8 * prof.land : 0);
   r.bounceV += (bounceTarget - r.bounce) * 0.2 - r.bounceV * 0.2;
-  r.bounce = clamp(r.bounce + r.bounceV, -1.3, 1.3);
+  r.bounce = clamp(r.bounce + r.bounceV, -1.5, 1.5);
 
-  // parpadeo
   r.blinkAt -= dt;
   if (r.blinkAt <= 0) { r.blinkT = 10; r.blinkAt = 110 + Math.random() * 180; }
   r.blinkT = Math.max(0, r.blinkT - dt);
   const blink = r.blinkT > 0 ? Math.sin((r.blinkT / 10) * Math.PI) : 0;
 
-  // ataque cuerpo a cuerpo
   let atk = 0;
   if (p.melee > 0) {
     if (!r.atkMax || p.melee > r.atkMax) r.atkMax = p.melee;
     atk = clamp(1 - p.melee / r.atkMax, 0, 1);
   } else r.atkMax = 0;
 
-  // habilidad (J/K/L): p._cast = { slot, t } lo pone systems/abilities.js
   let cast = 0, castSlot = -1;
   if (p._cast && t - p._cast.t < 26) {
     cast = clamp((t - p._cast.t) / 26, 0, 1);
@@ -108,7 +117,6 @@ export function computePose(p, t) {
 
   const hurt = (p.invuln || 0) > 18 ? clamp(((p.invuln || 0) - 18) / 10, 0, 1) : 0;
 
-  // estado principal
   let state = "idle";
   if (p.dead) state = "dead";
   else if (p._poseOverride) state = p._poseOverride;
@@ -120,7 +128,6 @@ export function computePose(p, t) {
   else if (air) state = vy < 0 ? "jump" : "fall";
   else if (speed > 0.08) state = "run";
 
-  // gesto de espera
   if (state === "idle") {
     r.idleT += dt;
     if (r.flourishT < 0 && r.idleT > 200) { r.flourishT = 0; r.idleT = 0; }
@@ -132,21 +139,32 @@ export function computePose(p, t) {
     else flourish = r.flourishT;
   }
 
+  const anticipation = atk > 0 && atk < 0.28 ? (0.28 - atk) / 0.28 : 0;
+  const impact = atk >= 0.28 && atk < 0.55 ? 1 - (atk - 0.28) / 0.27 : 0;
+  const stretch = air ? clamp(-vy / 14, -0.35, 0.45) * (state === "jump" ? 1 : 0.7) : 0;
+  const squash = r.land * 0.28 * prof.land;
+  const run = state === "run" ? speed : 0;
+
   return {
     state, move: p._move || null, form: clamp(Math.round(Number(p.evo) || 0), 0, 4), t, color: p.color || "#fff",
     phase: r.phase, speed: Math.min(1, speed), vy: clamp(vy / 12, -1, 1), air, land: r.land,
     atk, cast, castSlot, hurt, blink,
     nineLives: Math.max(0, Number(p._nineT) || 0),
     look: { x: 1, y: clamp(vy / 14, -0.6, 0.6) },
-    sway: r.sway, bounce: r.bounce, breath: Math.sin(t * 0.06),
+    sway: r.sway, bounce: r.bounce, breath: Math.sin(t * 0.06) * prof.breath,
     flourish, flourishN: r.flourishN,
     evoT: p._evoT || 0,
+    squash, stretch,
+    bodyTilt: clamp(-vx / 10, -1, 1) * 0.18 * prof.sway,
+    headTilt: clamp(-vx / 12, -1, 1) * 0.22,
+    armSwing: Math.sin(r.phase) * run * prof.snap,
+    legSwing: Math.sin(r.phase + Math.PI) * run,
+    anticipation: anticipation / prof.snap,
+    impact,
+    secondary: r.sway * prof.sway,
   };
 }
 
-// ---------------------------------------------------------------------------
-// Color
-// ---------------------------------------------------------------------------
 function hexToRgb(h) {
   h = String(h).replace("#", "");
   if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
@@ -156,7 +174,6 @@ function hexToRgb(h) {
 function rgbToHex(r, g, b) {
   return "#" + [r, g, b].map((v) => clamp(Math.round(v), 0, 255).toString(16).padStart(2, "0")).join("");
 }
-/** Mezcla dos colores hex (k = 0 → a, 1 → b). */
 function mix(a, b, k) {
   const A = hexToRgb(a), B = hexToRgb(b);
   return rgbToHex(A[0] + (B[0] - A[0]) * k, A[1] + (B[1] - A[1]) * k, A[2] + (B[2] - A[2]) * k);
@@ -168,13 +185,9 @@ function alpha(c, a) {
   return "rgba(" + r + "," + g + "," + b + "," + a + ")";
 }
 
-// ---------------------------------------------------------------------------
-// Kit de dibujo
-// ---------------------------------------------------------------------------
-const INK = "#241733";   // contorno por defecto (morado muy oscuro, más cálido que negro)
-const LINE = 3.2;        // grosor de contorno en unidades de diseño
+const INK = "#241733";
+const LINE = 3.2;
 
-/** Relleno con volumen: color base + luz arriba-izquierda + sombra abajo. */
 function volume(ctx, x, y, r, base) {
   const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.45, r * 0.08, x, y, r * 1.15);
   g.addColorStop(0, lighten(base, 0.32));
@@ -183,7 +196,6 @@ function volume(ctx, x, y, r, base) {
   return g;
 }
 
-/** Aplica relleno + contorno al path actual. */
 function paint(ctx, fill, opt = {}) {
   if (fill) { ctx.fillStyle = fill; ctx.fill(); }
   if (opt.line !== false) {
@@ -195,15 +207,14 @@ function paint(ctx, fill, opt = {}) {
   }
 }
 
-/** Elipse rellena con volumen (shade:true) o plana. */
 function ellipse(ctx, x, y, rx, ry, color, opt = {}) {
   ctx.beginPath();
   ctx.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), opt.rot || 0, 0, Math.PI * 2);
   paint(ctx, opt.shade === false ? color : volume(ctx, x, y, Math.max(rx, ry), color), opt);
 }
 
-/** Blob suave que pasa por los puntos [[x,y],...] (curva cerrada Catmull-Rom). */
 function blob(ctx, pts, color, opt = {}) {
+  if (!pts || pts.length < 2) return;
   const n = pts.length;
   ctx.beginPath();
   for (let i = 0; i < n; i++) {
@@ -221,18 +232,14 @@ function blob(ctx, pts, color, opt = {}) {
   paint(ctx, volume(ctx, cx, cy, rr, color), opt);
 }
 
-/** Polígono de puntas (pinchos, alas membrana...). */
 function poly(ctx, pts, color, opt = {}) {
+  if (!pts || pts.length < 2) return;
   ctx.beginPath();
   pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.closePath();
   paint(ctx, color, opt);
 }
 
-/**
- * Extremidad de 2 segmentos (hombro → codo → mano) con contorno y
- * extremo redondeado. w = grosor. Devuelve la posición final.
- */
 function limb(ctx, x1, y1, x2, y2, x3, y3, w, color, opt = {}) {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -252,7 +259,6 @@ function limb(ctx, x1, y1, x2, y2, x3, y3, w, color, opt = {}) {
   return [x3, y3];
 }
 
-/** Pierna/brazo simple a partir de ángulo y longitud (cómodo para ciclos). */
 function swingLimb(ctx, x, y, len, ang, bend, w, color, opt = {}) {
   const mx = x + Math.sin(ang) * len * 0.5 + Math.cos(ang) * bend;
   const my = y + Math.cos(ang) * len * 0.5;
@@ -261,10 +267,6 @@ function swingLimb(ctx, x, y, len, ang, bend, w, color, opt = {}) {
   return limb(ctx, x, y, mx, my, ex, ey, w, color, opt);
 }
 
-/**
- * Ojo chibi. r = radio. pose.blink cierra, pose.look mueve la pupila.
- * opt: { iris, pupil, mood: "happy"|"angry"|"sad"|"closed"|"star", lash, shine }
- */
 function eye(ctx, x, y, r, pose, opt = {}) {
   const blink = Math.max(pose ? pose.blink : 0, opt.mood === "closed" ? 1 : 0);
   const mood = opt.mood || "normal";
@@ -281,7 +283,7 @@ function eye(ctx, x, y, r, pose, opt = {}) {
   const ry = r * (1.12 - blink * 0.9);
   ctx.save();
   ctx.beginPath();
-  ctx.ellipse(x, y, r * 0.86, ry, 0, 0, Math.PI * 2);
+  ctx.ellipse(x, y, r * 0.86, Math.max(0.1, ry), 0, 0, Math.PI * 2);
   ctx.fillStyle = "#ffffff";
   ctx.fill();
   ctx.lineWidth = LINE * 0.8;
@@ -317,6 +319,14 @@ function eye(ctx, x, y, r, pose, opt = {}) {
     ctx.lineCap = "round";
     ctx.stroke();
   }
+  if (mood === "sad") {
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.9, y - r * 0.85);
+    ctx.quadraticCurveTo(x, y - r * 0.45, x + r * 0.9, y - r * 0.85);
+    ctx.lineWidth = Math.max(1.6, r * 0.22);
+    ctx.strokeStyle = INK;
+    ctx.stroke();
+  }
   if (opt.lash) {
     ctx.beginPath();
     ctx.moveTo(x + r * 0.6, y - r * 0.8); ctx.lineTo(x + r * 1.05, y - r * 1.15);
@@ -327,7 +337,6 @@ function eye(ctx, x, y, r, pose, opt = {}) {
   }
 }
 
-/** Boca. mood: "smile"|"open"|"grin"|"o"|"fang"|"flat"|"roar". */
 function mouth(ctx, x, y, w, mood = "smile", opt = {}) {
   ctx.lineWidth = Math.max(2, w * 0.18);
   ctx.strokeStyle = INK;
@@ -342,7 +351,6 @@ function mouth(ctx, x, y, w, mood = "smile", opt = {}) {
     ctx.ellipse(x, y, w * 0.22, w * 0.3, 0, 0, Math.PI * 2);
     ctx.fillStyle = opt.inside || "#6b1f2e"; ctx.fill(); ctx.stroke();
   } else {
-    // open / grin / fang / roar: boca abierta con lengua
     const h = mood === "roar" ? w * 0.75 : mood === "grin" ? w * 0.38 : w * 0.5;
     ctx.moveTo(x - w * 0.5, y - h * 0.2);
     ctx.quadraticCurveTo(x, y - h * 0.05, x + w * 0.5, y - h * 0.2);
@@ -366,7 +374,6 @@ function mouth(ctx, x, y, w, mood = "smile", opt = {}) {
   }
 }
 
-/** Mejillas sonrosadas. */
 function blush(ctx, x, y, r, color = "#ff7aa0") {
   ctx.save();
   ctx.fillStyle = alpha(color, 0.5);
@@ -374,7 +381,6 @@ function blush(ctx, x, y, r, color = "#ff7aa0") {
   ctx.restore();
 }
 
-/** Brillo especular (pegatina). */
 function shine(ctx, x, y, rx, ry, a = 0.55) {
   ctx.save();
   ctx.fillStyle = "rgba(255,255,255," + a + ")";
@@ -382,7 +388,6 @@ function shine(ctx, x, y, rx, ry, a = 0.55) {
   ctx.restore();
 }
 
-/** Estrella de n puntas. */
 function star(ctx, x, y, r, color, opt = {}) {
   const n = opt.points || 5, inner = opt.inner || 0.45;
   ctx.beginPath();
@@ -395,7 +400,6 @@ function star(ctx, x, y, r, color, opt = {}) {
   paint(ctx, color, opt);
 }
 
-/** Destello de 4 puntas (magia, GOD). */
 function sparkle(ctx, x, y, r, color = "#fff6c0") {
   ctx.save();
   ctx.fillStyle = color;
@@ -407,18 +411,17 @@ function sparkle(ctx, x, y, r, color = "#fff6c0") {
   ctx.restore();
 }
 
-/** Cola/tentáculo: cadena de n segmentos que ondula. pts se calculan con fn(i/n). */
 function tail(ctx, x, y, len, baseAng, wave, w0, w1, color, opt = {}) {
   const n = opt.segments || 10;
+  const waveAt = typeof wave === "function" ? wave : () => Number(wave) || 0;
   const pts = [];
   let a = baseAng, px = x, py = y;
   for (let i = 0; i <= n; i++) {
     pts.push([px, py]);
-    a += wave(i / n) / n;
+    a += waveAt(i / n) / n;
     px += Math.cos(a) * (len / n);
     py += Math.sin(a) * (len / n);
   }
-  // contorno
   for (const pass of [0, 1]) {
     for (let i = 0; i < n; i++) {
       const k = i / n;
@@ -435,20 +438,19 @@ function tail(ctx, x, y, len, baseAng, wave, w0, w1, color, opt = {}) {
   return pts[n];
 }
 
-/** Halo dorado (formas GOD). */
 function halo(ctx, x, y, rx, t, color = "#ffe27a") {
   ctx.save();
-  ctx.lineWidth = 3.5;
-  ctx.strokeStyle = color;
-  ctx.shadowColor = color;
-  ctx.shadowBlur = 10;
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = alpha(color, 0.28);
   ctx.beginPath();
   ctx.ellipse(x, y + Math.sin(t * 0.08) * 1.5, rx, rx * 0.28, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 3.2;
+  ctx.strokeStyle = color;
   ctx.stroke();
   ctx.restore();
 }
 
-/** Sombra cel (media luna oscura) dentro de una elipse ya dibujada. */
 function celShade(ctx, x, y, rx, ry, color, k = 0.18) {
   ctx.save();
   ctx.beginPath();

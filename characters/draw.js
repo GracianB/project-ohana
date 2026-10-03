@@ -5,21 +5,19 @@ import { getLook } from "./look.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
+// Pies en el suelo. La hitbox no se toca. El PNG solo entra si look === "paint".
 // ============================================================================
 
-// Sombra elíptica bajo los pies (coordenadas locales)
 function drawShadow(ctx, x, y, rx, ry) {
   ctx.save();
   ctx.globalAlpha *= 0.28;
-  ctx.fillStyle = '#000';
+  ctx.fillStyle = "#000";
   ctx.beginPath();
   ctx.ellipse(x || 0, y || 0, Math.max(1, rx || 10), Math.max(1, ry || 3), 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
-
-/** Estrella de 5 puntas (partículas de Michi, GOD). */
 function star(ctx, x, y, r, fill) {
   ctx.fillStyle = fill || "#fff6a8";
   ctx.beginPath();
@@ -34,20 +32,11 @@ function star(ctx, x, y, r, fill) {
   ctx.fill();
 }
 
-// ============================================================================
-// RENDER DE PERSONAJES · pipeline único
-// ----------------------------------------------------------------------------
-// 1. Todos los personajes se anclan por los PIES (centro inferior de la hitbox)
-//    → nadie flota ni se hunde en el suelo.
-// 2. Altura visual por forma (bebé → GOD) independiente de la hitbox, así las
-//    5 formas crecen de manera coherente aunque la hitbox sea pequeña (Dino).
-// 3. Cada personaje es un módulo vectorial animado (characters/art/<id>.js)
-//    que recibe una pose de rig.js: 5 formas, animaciones y gestos propios.
-// 4. Capas: sombra → aura/rayos → arte (squash & stretch) → flash → partículas.
-// ============================================================================
-
 const VISUAL_H = [36, 48, 58, 68, 80];
-const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96, cuerno: 1.0 };
+const CHAR_K = {
+  kilo: 1, lilo: 1, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92,
+  cat: 0.92, dragon: 1, frita: 1.04, dino: 1, pizza: 0.98, yomi: 0.96, cuerno: 1,
+};
 
 const FLAVOR = {
   kilo:    { kind: "petal", colors: ["#ff9ab0", "#ffd36a", "#ffffff"] },
@@ -62,10 +51,9 @@ const FLAVOR = {
   dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
   pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
   yomi:    { kind: "ember", colors: ["#6a3cff", "#ff4466", "#1a0828"] },
-  cuerno:  { kind: "star", colors: ["#ffe9a8", "#f2c1ff", "#ffffff"] },
+  cuerno:  { kind: "star",  colors: ["#ffe9a8", "#f2c1ff", "#ffffff"] },
 };
 
-/** "#rgb" | "#rrggbb" → rgba() con alfa. Otros formatos se devuelven tal cual. */
 function withAlpha(color, a) {
   let h = String(color || "#ffffff").trim();
   if (/^#[0-9a-f]{3}$/i.test(h)) h = "#" + h[1] + h[1] + h[2] + h[2] + h[3] + h[3];
@@ -74,9 +62,6 @@ function withAlpha(color, a) {
   return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
 }
 
-// ---------------------------------------------------------------------------
-// Capas de efectos (coordenadas locales: pies en 0,0; arriba = y negativo)
-// ---------------------------------------------------------------------------
 function drawAura(ctx, H, color, t, evo) {
   const cy = -H * 0.5;
   const r = H * (0.5 + evo * 0.09) * (1 + Math.sin(t / 9) * 0.05);
@@ -95,14 +80,13 @@ function drawAura(ctx, H, color, t, evo) {
 
 function drawGodRays(ctx, H, color, t) {
   const cy = -H * 0.55;
-  const n = 10;
   ctx.save();
   ctx.translate(0, cy);
   ctx.rotate(t / 90);
   ctx.globalAlpha *= 0.16 + Math.sin(t / 14) * 0.05;
   ctx.fillStyle = color;
-  for (let i = 0; i < n; i++) {
-    ctx.rotate((Math.PI * 2) / n);
+  for (let i = 0; i < 10; i++) {
+    ctx.rotate((Math.PI * 2) / 10);
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(-H * 0.07, -H * 0.95);
@@ -128,14 +112,13 @@ function drawGroundRing(ctx, H, color, t) {
 function drawFlavor(ctx, id, H, t, evo, front) {
   const fl = FLAVOR[id];
   if (!fl || evo < 2) return;
-  // En el plano corto de la cinemática, la capa de delante tapa la cara.
   if (front && H > 140) return;
   const n = evo * 2 + (evo >= 4 ? 4 : 0);
   ctx.save();
   for (let i = 0; i < n; i++) {
     const seed = i * 2.399;
     const a = t / (38 - evo * 4) + seed;
-    const z = Math.sin(a);                 // profundidad: >0 delante
+    const z = Math.sin(a);
     if ((z > 0) !== front) continue;
     const rx = H * (0.42 + (i % 3) * 0.08);
     let x = Math.cos(a) * rx;
@@ -184,7 +167,6 @@ function drawDust(ctx, H, t, speed) {
   ctx.save();
   for (let i = 0; i < 3; i++) {
     const k = ((t * 0.07 * (1 + speed * 0.1) + i / 3) % 1);
-    ctx.globalAlpha *= 1;
     ctx.globalAlpha = (1 - k) * 0.35;
     ctx.fillStyle = "#e8e2d0";
     ctx.beginPath();
@@ -195,7 +177,6 @@ function drawDust(ctx, H, t, speed) {
 }
 
 function drawBurst(ctx, H, color, k) {
-  // k: 1 → 0 durante la evolución
   const prog = 1 - k;
   ctx.save();
   ctx.globalAlpha *= k;
@@ -212,10 +193,6 @@ function drawBurst(ctx, H, color, k) {
   ctx.restore();
 }
 
-/**
- * Dibuja el personaje teñido (flash de daño/evolución): se pinta en un lienzo
- * auxiliar, se tiñe solo donde hay personaje y se compone encima.
- */
 let flashCanvas = null;
 let colorCanvas = null;
 let inkCanvas = null;
@@ -232,38 +209,19 @@ function sheet(which, W) {
   return c;
 }
 
-/** Huella barata y estable de la pose (invalida el cache solo si el arte cambiaría). */
 function poseFingerprint(pose) {
   const q = (v, s) => Math.round((Number(v) || 0) * s);
   return [
-    pose.state || "",
-    pose.move || "",
-    pose.form | 0,
-    q(pose.phase, 6),
-    q(pose.speed, 8),
-    q(pose.vy, 8),
-    pose.air ? 1 : 0,
-    q(pose.land, 8),
-    q(pose.atk, 10),
-    q(pose.cast, 10),
-    pose.castSlot | 0,
-    q(pose.hurt, 8),
-    q(pose.blink, 4),
-    q(pose.sway, 8),
-    q(pose.bounce, 8),
-    q(pose.breath, 6),
-    q(pose.flourish, 8),
-    pose.flourishN | 0,
-    q(pose.evoT, 12),
-    pose.nineLives > 0 ? 1 : 0,
-    q(pose.look && pose.look.y, 6),
+    pose.state || "", pose.move || "", pose.form | 0,
+    q(pose.phase, 6), q(pose.speed, 8), q(pose.vy, 8), pose.air ? 1 : 0,
+    q(pose.land, 8), q(pose.atk, 10), q(pose.cast, 10), pose.castSlot | 0,
+    q(pose.hurt, 8), q(pose.blink, 4), q(pose.sway, 8), q(pose.bounce, 8),
+    q(pose.breath, 6), q(pose.flourish, 8), pose.flourishN | 0, q(pose.evoT, 12),
+    pose.nineLives > 0 ? 1 : 0, q(pose.look && pose.look.y, 6),
+    q(pose.squash, 8), q(pose.stretch, 8), q(pose.bodyTilt, 8),
   ].join("|");
 }
 
-/**
- * Contorno de tinta + color. Cachea el bitmap compuesto cuando
- * (id, evo, pose, flash) no cambian — evita redibujar vector a 560² cada frame.
- */
 function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
   const U = 280;
   const ps = 1.5;
@@ -274,7 +232,6 @@ function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
     ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
     return;
   }
-
   const color = sheet("color", W);
   const cg = color.getContext("2d");
   cg.setTransform(1, 0, 0, 1, 0, 0);
@@ -305,18 +262,14 @@ function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
   ig.fillStyle = "#1a1022";
   ig.fillRect(0, 0, W, W);
   ig.globalCompositeOperation = "source-over";
-
   if (!presentCanvas) presentCanvas = document.createElement("canvas");
   if (presentCanvas.width !== W) { presentCanvas.width = W; presentCanvas.height = W; }
   const pg = presentCanvas.getContext("2d");
   pg.setTransform(1, 0, 0, 1, 0, 0);
   pg.clearRect(0, 0, W, W);
-  // 4 dirs (antes 8) — silueta legible, mitad de blit de outline
   const o = 3.4 * ps;
   const dirs = [[o, 0], [-o, 0], [0, o], [0, -o]];
-  for (let i = 0; i < dirs.length; i++) {
-    pg.drawImage(ink, dirs[i][0], dirs[i][1]);
-  }
+  for (let i = 0; i < dirs.length; i++) pg.drawImage(ink, dirs[i][0], dirs[i][1]);
   pg.drawImage(color, 0, 0);
   presentLastKey = key;
   ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
@@ -373,68 +326,52 @@ function drawPainted(ctx, img, x, y, w, h, flashCol, flashA) {
   ctx.restore();
 }
 
-// ============================================================================
-// FUNCIÓN PRINCIPAL EXPORTADA
-// ============================================================================
-
 export function drawCharacter(ctx, p, cam, t) {
   const evo = Math.max(0, Math.min(4, Math.round(Number(p.evo) || 0)));
   const facing = p.facing || 1;
   const footX = p.x + p.w / 2 - cam.x;
   const footY = p.y + p.h - cam.y;
-
   const speed = Math.abs(p.vx || 0);
   const moving = !!p.grounded && speed > 0.55;
   const air = !p.grounded;
-  const ascending = air && (p.vy || 0) < -1.2;
-  const falling = air && (p.vy || 0) > 1.5;
   const pose = computePose(p, t);
   const atk = pose.atk;
   const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
   const hurtFresh = (p.invuln || 0) > 18;
 
-  // Tamaño visual de la forma (con "pop" al evolucionar)
   let H = VISUAL_H[evo] * (CHAR_K[p.id] || 1) * (p.visualScale || 1);
   if (getLook() === "paint") H = Math.min(220, Math.max(H, (p.h || 28) * 3));
   const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
   if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 
-  // Squash & stretch global (suave; cada personaje anima sus partes)
-  let sx = 1, sy = 1;
-  if (ascending) { sx = 0.94; sy = 1.06; }
-  else if (falling) { sx = 1.03; sy = 0.97; }
+  // Squash del rig. Un solo aplaste: no se suma al contador viejo.
+  const squash = Math.max(0, Math.min(0.22, pose.squash || 0));
+  const stretch = Math.max(-0.12, Math.min(0.16, pose.stretch || 0));
+  let sx = 1 + squash * 0.9 - stretch * 0.35;
+  let sy = 1 - squash * 0.75 + stretch * 0.4;
   if (p.grounded && p._wasAir) p._land = 8;
   p._wasAir = air;
-  if (p._land > 0) {
-    const k = p._land / 8;
-    sx *= 1 + 0.12 * k; sy *= 1 - 0.1 * k;
-    p._land--;
-  }
+  if (p._land > 0) p._land--;
 
-  const tilt = moving ? 0.05 : air ? (ascending ? -0.04 : 0.05) : 0;
-  const lunge = atk * H * 0.08;
+  const tilt = (moving ? 0.05 : air ? ((p.vy || 0) < -1.2 ? -0.04 : 0.05) : 0) + (pose.bodyTilt || 0) * 0.35;
+  const lunge = atk * H * 0.08 + (pose.impact || 0) * H * 0.03;
   const recoilX = hurtFresh ? -H * 0.08 : 0;
-
   const color = p.color || "#ffffff";
   const art = ART[p.id] || ART.kilo;
+  const airK = air ? 0.62 + Math.min(0.2, Math.abs(p.vy || 0) / 40) : 1;
 
   ctx.save();
   ctx.translate(footX, footY);
-
-  // 1 · sombra (se queda en el suelo)
-  drawShadow(ctx, 0, 0, H * 0.3 * (air ? 0.7 : 1), H * 0.06 * (air ? 0.7 : 1));
-
+  drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
   ctx.scale(facing, 1);
   ctx.translate(recoilX + lunge, 0);
 
-  // 2 · capas traseras
   if (evo >= 4) drawGodRays(ctx, H, color, t);
   if (evo >= 2) drawAura(ctx, H, color, t, evo);
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
   if (moving) drawDust(ctx, H, t, speed);
 
-  // 3 · personaje (vectorial animado, 100 unidades de alto)
   const s = H / 100;
   let flashCol = null, flashA = 0;
   if (burstK > 0.35) { flashCol = "#ffffff"; flashA = ((burstK - 0.35) / 0.65) * 0.9; }
@@ -457,12 +394,10 @@ export function drawCharacter(ctx, p, cam, t) {
   }
   ctx.restore();
 
-  // 4 · capas delanteras
   drawFlavor(ctx, p.id, H, t, evo, true);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);
     p.evoBurst--;
   }
-
   ctx.restore();
 }
