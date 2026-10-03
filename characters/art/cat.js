@@ -1,3 +1,5 @@
+Archivos
+
 // ============================================================================
 // MICHI · gatita mochi kawaii (diseño original)
 // Cabeza enorme y redonda como un daifuku, cuerpo de panecillo, patitas
@@ -166,7 +168,8 @@ function draw(ctx, pose, R) {
   const run = st === "run", air = st === "jump" || st === "fall" || st === "glide";
 
   // proporciones: bebé = casi solo cabeza
-  const headR = [36, 33, 31, 30, 29][f];
+  const fSafe = Math.max(0, Math.min(4, Number(f) || 0));
+  const headR = [36, 33, 31, 30, 29][fSafe];
   const bodyRX = [15, 24, 27, 28, 29][f];
   const bodyRY = [11, 16, 18, 19, 20][f];
   const legL = [5, 8, 9, 10, 11][f];
@@ -231,10 +234,12 @@ function draw(ctx, pose, R) {
     const end = R.tail(ctx, -bodyRX * 0.85, bodyY - 2, 26 + f * 4, base - 0.4,
       (u) => (swing + 1.2) * (1 - u) * 1.4 + Math.sin(t * 0.12 + u * 4) * 0.5,
       7.5, 4.5, c.tail, { ink: INK, lw: LW, segments: 9 });
+    if (end) {
     if (f === 2) {
       oval(ctx, R, end[0], end[1], 9, 7, "#ffffff");
       oval(ctx, R, end[0] - 6, end[1] + 3, 6, 5, "#ffffff");
     } else heart(ctx, end[0], end[1], 5.5, f >= 3 ? "#ffd76a" : c.bow);
+    }
   }
 
   // patas traseras (lado lejano)
@@ -312,9 +317,11 @@ function draw(ctx, pose, R) {
   ctx.quadraticCurveTo(8, -headR * 1.16, 12, -headR * 0.82);
   stroke(ctx, 2.4);
   ctx.beginPath();
-  ctx.moveTo(fx * 0.2, -headR * 0.15); ctx.lineTo(fx * 0.2, headR * 0.08);
+  ctx.moveTo(2, -headR * 0.15); ctx.lineTo(2, headR * 0.08);
   stroke(ctx, 1.6);
 
+  // hocico claro para que la cara se lea
+  oval(ctx, R, headR * 0.12, headR * 0.28, headR * 0.55, headR * 0.42, c.belly, { line: false, flat: true });
   // cara (desplazada hacia +x)
   let mood = "normal";
   if (st === "dead") mood = "swirl";
@@ -323,7 +330,7 @@ function draw(ctx, pose, R) {
   else if (st === "hurt") mood = "hurt";
   else if ((st === "cast" && pose.castSlot === 1) || (pose.flourish > 0 && pose.flourishN % 3 === 0)) mood = "happy";
   else if (pose.flourish > 0 && pose.flourishN % 3 === 2 && pose.flourish > 0.3 && pose.flourish < 0.7) mood = "closed";
-  const er = headR * 0.27;
+  const er = headR * 0.38;
   const fx = headR * 0.14;
   kawaiiEye(ctx, R, fx - headR * 0.36, headR * 0.02, er, pose, c.iris, mood);
   kawaiiEye(ctx, R, fx + headR * 0.4, headR * 0.02, er * 0.95, pose, c.iris, mood);
