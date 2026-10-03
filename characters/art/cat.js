@@ -1,5 +1,3 @@
-Archivos
-
 // ============================================================================
 // MICHI · gatita mochi kawaii (diseño original)
 // Cabeza enorme y redonda como un daifuku, cuerpo de panecillo, patitas
@@ -79,26 +77,29 @@ function kawaiiEye(ctx, R, x, y, r, pose, iris, mood) {
     stroke(ctx, r * 0.18);
     return;
   }
-  const ry = r * 1.18 * (1 - blink * 0.85);
+  const ry = Math.max(1, r * 1.18 * (1 - blink * 0.85));
   ctx.save();
-  ctx.beginPath(); ctx.ellipse(x, y, r * 0.92, ry, 0, 0, TAU);
-  const g = ctx.createLinearGradient(x, y - ry, x, y + ry);
-  g.addColorStop(0, "#2a1636");
-  g.addColorStop(0.55, R.darken(iris, 0.15));
-  g.addColorStop(1, R.lighten(iris, 0.45));
-  ctx.fillStyle = g; ctx.fill();
-  stroke(ctx, 2.4);
+  ctx.beginPath(); ctx.ellipse(x, y, r * 0.95, ry, 0, 0, TAU);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  stroke(ctx, 2.6);
   ctx.clip();
   if (mood === "heart") {
-    heart(ctx, x, y + r * 0.1, r * 0.55, "#ff5c9a", false);
+    heart(ctx, x, y + r * 0.05, r * 0.5, "#ff5c9a", false);
+  } else {
+    ctx.beginPath();
+    ctx.ellipse(x, y + ry * 0.08, r * 0.52, ry * 0.62, 0, 0, TAU);
+    ctx.fillStyle = iris;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y + ry * 0.12, r * 0.24, 0, TAU);
+    ctx.fillStyle = "#1a1020";
+    ctx.fill();
   }
   const look = pose.look || { x: 0, y: 0 };
   const lx = look.x * r * 0.08, ly = look.y * r * 0.15;
   ctx.fillStyle = "#fff";
-  ctx.beginPath(); ctx.ellipse(x + lx - r * 0.3, y + ly - r * 0.45, r * 0.34, r * 0.4, -0.3, 0, TAU); ctx.fill();
-  ctx.beginPath(); ctx.arc(x + lx + r * 0.35, y + ly + r * 0.42, r * 0.16, 0, TAU); ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,.55)";
-  ctx.beginPath(); ctx.arc(x + lx + r * 0.1, y + ly + r * 0.72, r * 0.1, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + lx - r * 0.22, y + ly - r * 0.28, r * 0.22, r * 0.26, -0.3, 0, TAU); ctx.fill();
   ctx.restore();
   // pestañitas
   ctx.beginPath();
@@ -168,11 +169,10 @@ function draw(ctx, pose, R) {
   const run = st === "run", air = st === "jump" || st === "fall" || st === "glide";
 
   // proporciones: bebé = casi solo cabeza
-  const fSafe = Math.max(0, Math.min(4, Number(f) || 0));
-  const headR = [36, 33, 31, 30, 29][fSafe];
-  const bodyRX = [15, 24, 27, 28, 29][f];
-  const bodyRY = [11, 16, 18, 19, 20][f];
-  const legL = [5, 8, 9, 10, 11][f];
+  const headR = [36, 33, 31, 30, 29][f];
+  const bodyRX = [15, 24, 27, 28, 29][fSafe];
+  const bodyRY = [11, 16, 18, 19, 20][fSafe];
+  const legL = [5, 8, 9, 10, 11][fSafe];
 
   // rebote mochi: el cuerpo se aplasta y estira con la carrera y la respiración
   let squash = 1 + pose.breath * 0.025;
@@ -226,7 +226,7 @@ function draw(ctx, pose, R) {
   }
 
   // cola (muelle + punta de corazón; Nube = cola nube; GOD = 3 colitas)
-  const tails = [1, 1, 2, 3, 5][f] || 1;
+  const tails = [1, 1, 2, 3, 5][fSafe] || 1;
   for (let k = 0; k < tails; k++) {
     const spread = tails > 1 ? (k - 1) * 0.45 : 0;
     const swing = Math.sin(t * 0.09 + k) * 0.5 + pose.sway * 0.9 + (st === "hurt" ? -0.6 : 0) + (st === "cast" && pose.castSlot === 2 ? Math.sin(t * 0.4 + k) * 0.6 : 0);
@@ -234,12 +234,10 @@ function draw(ctx, pose, R) {
     const end = R.tail(ctx, -bodyRX * 0.85, bodyY - 2, 26 + f * 4, base - 0.4,
       (u) => (swing + 1.2) * (1 - u) * 1.4 + Math.sin(t * 0.12 + u * 4) * 0.5,
       7.5, 4.5, c.tail, { ink: INK, lw: LW, segments: 9 });
-    if (end) {
     if (f === 2) {
       oval(ctx, R, end[0], end[1], 9, 7, "#ffffff");
       oval(ctx, R, end[0] - 6, end[1] + 3, 6, 5, "#ffffff");
     } else heart(ctx, end[0], end[1], 5.5, f >= 3 ? "#ffd76a" : c.bow);
-    }
   }
 
   // patas traseras (lado lejano)
@@ -317,11 +315,9 @@ function draw(ctx, pose, R) {
   ctx.quadraticCurveTo(8, -headR * 1.16, 12, -headR * 0.82);
   stroke(ctx, 2.4);
   ctx.beginPath();
-  ctx.moveTo(2, -headR * 0.15); ctx.lineTo(2, headR * 0.08);
+  ctx.moveTo(fx * 0.2, -headR * 0.15); ctx.lineTo(fx * 0.2, headR * 0.08);
   stroke(ctx, 1.6);
 
-  // hocico claro para que la cara se lea
-  oval(ctx, R, headR * 0.12, headR * 0.28, headR * 0.55, headR * 0.42, c.belly, { line: false, flat: true });
   // cara (desplazada hacia +x)
   let mood = "normal";
   if (st === "dead") mood = "swirl";
@@ -330,7 +326,7 @@ function draw(ctx, pose, R) {
   else if (st === "hurt") mood = "hurt";
   else if ((st === "cast" && pose.castSlot === 1) || (pose.flourish > 0 && pose.flourishN % 3 === 0)) mood = "happy";
   else if (pose.flourish > 0 && pose.flourishN % 3 === 2 && pose.flourish > 0.3 && pose.flourish < 0.7) mood = "closed";
-  const er = headR * 0.38;
+  const er = headR * 0.27;
   const fx = headR * 0.14;
   kawaiiEye(ctx, R, fx - headR * 0.36, headR * 0.02, er, pose, c.iris, mood);
   kawaiiEye(ctx, R, fx + headR * 0.4, headR * 0.02, er * 0.95, pose, c.iris, mood);
