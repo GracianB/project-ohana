@@ -11,3 +11,4 @@ assets/sprites/_raw*.jpg
 Claude outputs/
 ohana-patch/
 
+.env

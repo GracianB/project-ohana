@@ -68,7 +68,7 @@ stateDiagram-v2
   Final --> GOD: 420
 ```
 
-Con la barra llena, <kbd>E</kbd> evoluciona. Hay cinemática. Las chispas pasan por detrás de la cara.
+Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E.
 
 Un golpe normal para el mundo un instante. Un golpe gordo —forma alta, Dino, o un poder de 40 o más— lo para más rato y el número sale en dorado. El combo se queda desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar. La puerta espera medio segundo y entonces te suelta.
 
@@ -168,7 +168,7 @@ La catapulta y el vórtice también cambian de sala. Se usan con <kbd>E</kbd>.
 | --- | --- |
 | <kbd>H</kbd> | Golpe normal. También vale <kbd>F</kbd> |
 | <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> | Poder corto, medio y definitivo |
-| <kbd>E</kbd> | Evolucionar, catapulta o vórtice |
+| <kbd>E</kbd> | Interactuar con catapulta o vórtice. La evolución es automática |
 | <kbd>R</kbd> | Volver al Claro |
 | <kbd>M</kbd> | Mapa |
 | <kbd>º</kbd> | Ayuda |
@@ -185,7 +185,7 @@ En el teléfono hay botones en pantalla. El juego está pensado primero para tec
 
 ## Qué recuerda la partida
 
-Al cruzar una puerta se guarda la versión 2.
+El guardado v2 conserva personaje, forma, sala, salud, magia y victoria. Se actualiza al cruzar puertas, evolucionar, completar el juego, pausar y volver al menú, y cada cinco segundos de simulación activa. Perder el foco pausa la partida y limpia las teclas; al ocultar o cerrar la página se intenta guardar. Si el navegador bloquea el almacenamiento, aparece un aviso y la partida puede seguir sin guardado persistente.
 
 ```mermaid
 %%{init: {'theme':'dark'}}%%
@@ -211,7 +211,7 @@ Continuar no mezcla personajes. Una partida de Kilo no abre a Dino. Los ids viej
 <tr>
 <td width="58%" valign="top">
 
-Canvas 2D a la resolución de la pantalla. JavaScript en módulos, sin framework. HTML y CSS para el marco. Teclado y botones táctiles. Publicado en GitHub Pages.
+Canvas 2D a la resolución de la pantalla. JavaScript en módulos, sin framework. La simulación tiene un paso fijo de 60 Hz, independiente de la frecuencia de la pantalla, con recuperación de atrasos limitada. HTML y CSS para el marco. Teclado y botones táctiles, incluido E para interactuar. Diálogos con foco contenido y barras de estado accesibles. Publicado en GitHub Pages después de pasar las pruebas.
 
 Los personajes son vector y se animan. Cucaracho, mosquito y cangrejo tienen cara, paso, aviso y embestida. El jefe es la Reina del Nido.
 
@@ -247,7 +247,7 @@ python -m http.server 8080
 Abre [http://localhost:8080](http://localhost:8080).
 
 ```powershell
-node --test tests/core.test.js
+node --test tests/core.test.js tests/runtime.test.js
 ```
 
 </details>

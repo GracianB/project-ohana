@@ -45,7 +45,7 @@ export function unpackSave(raw, defId) {
     score: Math.max(0, finiteNumber(raw.score)),
     kills: Math.max(0, finiteNumber(raw.kills)),
     won: !!raw.won,
-    evo: Math.max(0, Math.min(4, finiteNumber(raw.evo))),
+    evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),
     xp: Math.max(0, finiteNumber(raw.xp)),
     hp: raw.hp == null ? null : Math.max(0, finiteNumber(raw.hp)),
     nineUsed: !!raw.nineUsed,
@@ -53,3 +53,23 @@ export function unpackSave(raw, defId) {
     id
   };
 }
+
+export function createSaveStore(storage = () => globalThis.localStorage) {
+  const getStorage = typeof storage === "function" ? storage : () => storage;
+  return {
+    readRaw() {
+      try { return JSON.parse(getStorage().getItem("ohana") || "null"); }
+      catch (_) { return null; }
+    },
+    read(id) { return unpackSave(this.readRaw(), id); },
+    write(game, magic) {
+      if (!game?.player || game.player.dead) return false;
+      try {
+        getStorage().setItem("ohana", JSON.stringify(packSave(game, magic)));
+        return true;
+      } catch (_) { return false; }
+    }
+  };
+}
+
+export const saveStore = createSaveStore();

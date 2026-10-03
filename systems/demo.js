@@ -7,12 +7,13 @@ const HINTS = {
   "Cumbre": "Hueco ABAJO = Claro. ESTE = Órbita.",
   "Órbita": "Hueco ABAJO = Claro. No hay piso extra abajo.",
   "Caldera": "ESTE = Nido del jefe. OESTE = Jungla.",
-  "Nido Final": "El monstruo está aquí. Túmbalo. Luego eliges."
+  "Nido Final": "Derrota a la Reina. Después puedes seguir explorando o repetir el nido.",
+  "Arrecife Abismo": "Explora el agua. ARRIBA vuelve a la Costa. E usa el portal."
 };
 
 const STEPS = [
-  { id: "move", text: "Izquierda WASD. Derecha: H ataque, J K L poderes. Ayuda con º." },
-  { id: "orb", text: "Los orbes amarillos dan XP. Llena la barra y pulsa E." },
+  { id: "move", text: "WASD o controles táctiles para moverte. H ataca, J K L son poderes. E usa portales." },
+  { id: "orb", text: "Los orbes amarillos dan XP. Al llenar la barra evolucionas automáticamente." },
   { id: "evo", text: "5 formas: bebé → base → evo → final → GOD." },
   { id: "map", text: "M abre el mapa. Visita las 8 salas y el nido te llama." },
   { id: "boss", text: "Jungla ↓ Caldera → ESTE jefe. J K L son poderes distintos." }
@@ -52,16 +53,22 @@ function tick() {
 function boot() {
   ensure();
   let step = 0;
+  let playing = false;
+  let timer = 0;
   const play = () => {
     if (!document.body.classList.contains("playing")) return;
     if (step < STEPS.length) {
       showTut(STEPS[step].text);
       step++;
-      setTimeout(play, 5200);
+      timer = setTimeout(play, 5200);
     }
   };
   const mo = new MutationObserver(() => {
-    if (document.body.classList.contains("playing")) {
+    const next = document.body.classList.contains("playing");
+    if (next === playing) return;
+    playing = next;
+    clearTimeout(timer);
+    if (playing) {
       ensure();
       const ribbon = document.getElementById("demo-ribbon");
       if (ribbon) {
@@ -70,7 +77,7 @@ function boot() {
         ribbon._hide = setTimeout(() => ribbon.classList.add("gone"), 2600);
       }
       step = 0;
-      setTimeout(play, 800);
+      timer = setTimeout(play, 800);
     }
   });
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });

@@ -2347,12 +2347,13 @@ body:not(.intro-complete) #char-select h1 .ohana {
 }
 
 /* Carrusel: un personaje al centro, dos asomando, flechas. */
-.title-stack { display: none !important; }
+.title-stack { display: block; order: 0; flex: none; }
 #char-select {
-  justify-content: center;
-  gap: 0;
-  padding: 72px 8px 16px;
-  overflow: hidden;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 60px 12px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(900px 520px at 50% 8%, rgba(255, 214, 120, 0.22), transparent 58%),
     radial-gradient(700px 480px at 50% 78%, rgba(40, 160, 190, 0.28), transparent 62%),
@@ -2365,9 +2366,9 @@ body:not(.intro-complete) #char-select h1 .ohana {
   order: 1;
   position: relative;
   width: min(1040px, 100%);
-  height: min(62vh, 540px);
+  height: clamp(240px, 48dvh, 440px);
   flex: none;
-  --portrait-h: min(30vh, 240px);
+  --portrait-h: min(24dvh, 190px);
 }
 #chars .chars-grid {
   display: block;
@@ -2425,7 +2426,9 @@ body:not(.intro-complete) #char-select h1 .ohana {
 .roster-arrow:hover { background: rgba(126, 231, 255, 0.22); border-color: #7ee7ff; }
 #chars .chars-dots { display: flex; position: absolute; left: 0; right: 0; bottom: 0; }
 @media (max-width: 640px) {
-  #chars { height: min(58vh, 460px); --portrait-h: 28vh; }
+  #chars { height: clamp(240px, 40dvh, 400px); --portrait-h: min(22dvh, 170px); }
+  #char-select h1 { flex-direction: row; gap: 8px; }
+  .tagline { max-width: 300px; margin-inline: auto; }
   #chars .chars-grid {
     display: block;
     width: 100%;
@@ -2521,4 +2524,33 @@ body:not(.intro-complete) #char-select h1 .ohana {
 }
 #form-pips b.active {
   transform: scale(1.2);
+}
+
+body:not(.playing) #touch {
+  display: none !important;
+}
+.ability-slot {
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.touch-btn.interact {
+  color: #ffe6a6;
+  border-color: rgba(255, 214, 120, 0.65);
+}
+[data-dialog] .panel {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+@media (max-width: 820px) {
+  #touch .col,
+  #touch .act-row {
+    gap: 6px;
+  }
+  .touch-btn,
+  .touch-btn.pw {
+    width: clamp(44px, 11vw, 52px);
+    height: clamp(44px, 11vw, 52px);
+  }
 }

@@ -22,13 +22,19 @@ import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
-import { packSave, unpackSave } from "./systems/save.js";
+import { saveStore } from "./systems/save.js";
+import { createFixedClock } from "./engine/clock.js";
+import { bindInput } from "./engine/input.js";
+import { bindDialogs } from "./systems/dialogs.js";
+import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
-const keys = Object.create(null);
+let input;
+let keys;
+const clock = createFixedClock();
 const $ = (id) => document.getElementById(id);
 const DOM = {
   help: $("help"),
@@ -99,6 +105,7 @@ function fit() {
   canvas.style.width = viewW + "px";
   canvas.style.height = viewH + "px";
   ctx.imageSmoothingEnabled = false;
+  game.renderDirty = true;
 }
 addEventListener("resize", fit); fit();
 
@@ -116,10 +123,15 @@ function setMuted(on) {
   muted = !!on;
   setAudioMuted(muted);
   setText(DOM.mute, muted ? "Mute · N" : "Sonido · N");
+  DOM.mute?.setAttribute("aria-pressed", String(muted));
+  DOM.mute?.setAttribute("aria-label", muted ? "Activar sonido" : "Silenciar sonido");
 }
 function setPaused(on) {
   if (game.finale && game.finale.t > 0) return;
   paused = !!on && game.running;
+  input?.reset();
+  clock.reset();
+  if (paused) save();
   duckMusic(paused);
   DOM.pause?.classList.toggle("open", paused);
 }
@@ -145,47 +157,31 @@ function comboRank(n) {
   return "C";
 }
 
-addEventListener("keydown", (e) => {
-  const k = e.key.toLowerCase();
-  keys[k] = true;
-  if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
-  if (e.repeat) return;
-  if (e.key === "º" || e.key === "ª" || e.code === "Backquote" || e.key === "?") { toggleHelp(); return; }
-  if (e.key === "n" || e.key === "N") {
-    setMuted(!muted);
-    showNotification("AUDIO", muted ? "Mute" : "On");
-    return;
-  }
-  if (e.key === "m" || e.key === "M") {
-    if (game.running) showMap();
-    return;
-  }
-  if (e.key === "Escape") {
-    if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
-    if (DOM.help?.classList.contains("open")) { DOM.help.classList.remove("open"); return; }
-    if (DOM.map?.classList.contains("open")) { DOM.map.classList.remove("open"); return; }
-    setPaused(!paused);
-    return;
-  }
-  if (!game.running || paused || overlayOpen()) return;
-  if (e.key === "j" || e.key === "J") useAbility(game, 0);
-  if (e.key === "k" || e.key === "K") useAbility(game, 1);
-  if (e.key === "l" || e.key === "L") useAbility(game, 2);
-  if (e.code === "KeyE" || e.key === "e" || e.key === "E") {
-    e.preventDefault();
-    if (!portals.tryUse(game.player, game)) evolve("manual");
-  }
-  if (e.key === "r" || e.key === "R") respawn();
-  if (e.key === "h" || e.key === "H" || e.key === "f" || e.key === "F") attack();
-  if (e.key === "Shift") dash();
+function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
+function interact() {
+  if (!canAct()) return;
+  if (!portals.tryUse(game.player, game)) evolve("manual");
+}
+function escape() {
+  if (DOM.evoStage?.classList.contains("show") || DOM.finale?.classList.contains("show")) return;
+  if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
+  if (DOM.help?.classList.contains("open")) { DOM.help.classList.remove("open"); return; }
+  if (DOM.map?.classList.contains("open")) { DOM.map.classList.remove("open"); return; }
+  setPaused(!paused);
+}
+function suspend() {
+  input?.reset();
+  clock.reset();
+  if (!game.running) return;
+  save();
+  setPaused(true);
+}
+addEventListener("blur", suspend);
+addEventListener("pagehide", () => save());
+document.addEventListener("visibilitychange", () => {
+  clock.reset();
+  if (document.hidden) suspend();
 });
-addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
-canvas.addEventListener("pointerdown", (e) => {
-  if (!game.running || paused || overlayOpen()) return;
-  if (e.button === 2) { dash(); return; }
-  attack();
-});
-canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 function toggleHelp() {
   const help = DOM.help;
   if (!help) return;
@@ -209,8 +205,27 @@ function setPrompt(text, on) {
   el.classList.add("show");
 }
 function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
+let saveWarning = false;
 function save() {
-  try { localStorage.setItem("ohana", JSON.stringify(packSave(game, Magic))); } catch (e) {}
+  if (!game.player || game.player.dead) return;
+  const saved = saveStore.write(game, Magic);
+  if (!saved && !saveWarning) showNotification("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
+  saveWarning = !saved;
+  return saved;
+}
+function returnToMenu() {
+  save();
+  game.running = false;
+  input?.reset();
+  clock.reset();
+  playMusic("title");
+  closeOverlays();
+  document.body.classList.remove("playing", "boss-fight");
+  $("char-select")?.classList.remove("hidden");
+  DOM.bossWrap?.classList.add("hidden");
+  DOM.comboChip?.classList.remove("show");
+  setPrompt("", false);
+  document.querySelector(".char-card.selected")?.focus();
 }
 function bounceLocked(fromDir) {
   const p = game.player;
@@ -306,6 +321,7 @@ function loadRoom(id, fromDir) {
   }
   const first = !game.visited[id];
   game.roomId = id;
+  game.renderDirty = true;
   game.roomDef = r;
   game.finale = null;
   game.visited[id] = true;
@@ -335,7 +351,7 @@ function loadRoom(id, fromDir) {
     if (floor) e.y = floor.y - e.h;
   }
   game.boss = null;
-  if (r.boss) {
+  if (r.boss && !game.won) {
     game.boss = createBossNido();
     game.enemies.push(game.boss);
   }
@@ -417,6 +433,10 @@ function start(def) {
   if (!def) return;
   const resume = (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
+  input?.reset();
+  clock.reset();
+  game._magicSnap = null;
+  game.hitstop = 0;
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   Surprises.reset();
   game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.won = false; game.summoned = false;
@@ -424,8 +444,7 @@ function start(def) {
   let roomId = "hub";
   if (resume) {
     try {
-      const s = JSON.parse(localStorage.getItem("ohana") || "null");
-      const u = unpackSave(s, def.id);
+      const u = saveStore.read(def.id);
       if (u) {
         game.player.evo = u.evo;
         game.player.xp = u.xp;
@@ -448,6 +467,9 @@ function start(def) {
   renderAbilityBar();
   if (!loadRoom(roomId)) loadRoom("hub");
   if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
+  save();
+  updateHUD();
+  canvas.focus({ preventScroll: true });
 }
 function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
@@ -766,6 +788,7 @@ function tickFinale() {
   }
   if (f.t === 0 && !game.won) {
     game.won = true;
+    save();
     dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
   }
 }
@@ -2114,7 +2137,7 @@ function renderAbilityBar() {
   bar.innerHTML = (game.player.abilities || []).map((id) => {
     const d = ABILITY_DEFS[id];
     if (!d) return "";
-    return '<div class="ability-slot" data-id="' + id + '" style="--abil:' + d.color + '"><div class="key">' + d.key + '</div><div class="name">' + d.name + '</div><div class="cd"><i class="cd-fill"></i></div><b class="cd-sec"></b></div>';
+    return '<button type="button" class="ability-slot" data-id="' + id + '" aria-label="' + d.name + ' · ' + d.key + '" style="--abil:' + d.color + '"><span class="key">' + d.key + '</span><span class="name">' + d.name + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
   }).join("");
   abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -2167,10 +2190,10 @@ function updateHUD() {
     hudAvatarKey = avatarKey;
     drawHudAvatar(p);
   }
+  const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
+  const prev = XP_NEED[p.evo] || 0;
+  const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100));
   if (DOM.xpBar) {
-    const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
-    const prev = XP_NEED[p.evo] || 0;
-    const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100));
     const w = xpPct + "%";
     if (DOM.xpBar.style.width !== w) DOM.xpBar.style.width = w;
     setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
@@ -2223,6 +2246,7 @@ function updateHUD() {
   document.body.classList.toggle("boss-fight", !!boss);
   if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
   setText(DOM.bossLabel, boss ? ("REINA DEL NIDO  " + Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100)) + "%") : "REINA DEL NIDO");
+  syncHudStatus({ player: p, hp, xpPct, boss });
   const now = performance.now();
   for (let i = 0; i < abilitySlots.length; i++) {
     const item = abilitySlots[i];
@@ -2246,6 +2270,8 @@ function updateHUD() {
     if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
     btn.classList.remove("off");
     if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
+    const label = def.name + " · " + btn.dataset.k.toUpperCase();
+    if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
     const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
@@ -2253,7 +2279,8 @@ function updateHUD() {
     btn.style.setProperty("--cd", pct + "%");
   }
 }
-function loop() {
+function step() {
+  if (!canAct()) return;
   t++;
   game.t = t;
   if (game.hitstop > 0) {
@@ -2262,15 +2289,31 @@ function loop() {
     if (fp && fp.melee > 0) fp.melee--;
     if (game.shake > 0) game.shake *= 0.92;
     if (game.flash > 0) game.flash--;
-    if (game.running) render();
-    requestAnimationFrame(loop);
     return;
   }
-  if (game.running && !paused && !overlayOpen()) {
-    tickFinale();
-    updatePlayer(); updateEnemies(); updateProjectiles(); game.fx.update(); if (DeathFx.isPlaying()) DeathFx.update(game); Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") }); Surprises.update(game, t); updateCam(); if ((t & 3) === 0) updateHUD();
-  } else if (game.running && (t & 3) === 0) updateHUD();
-  if (game.running) render();
+  tickFinale();
+  if (!canAct()) return;
+  updatePlayer();
+  updateEnemies();
+  updateProjectiles();
+  game.fx.update();
+  if (DeathFx.isPlaying()) DeathFx.update(game);
+  Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
+  Surprises.update(game, t);
+  updateCam();
+  if ((t & 3) === 0) updateHUD();
+  if (t % 300 === 0) save();
+}
+let renderedTick = -1;
+function loop(now) {
+  if (game.running && !document.hidden) {
+    clock.advance(now, step);
+    if (game.renderDirty || renderedTick !== t) {
+      render();
+      renderedTick = t;
+      game.renderDirty = false;
+    }
+  } else clock.reset();
   requestAnimationFrame(loop);
 }
 function setupSelect() {
@@ -2283,12 +2326,13 @@ function setupSelect() {
     const hit = markAt(c.id, 0).name;
     return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>';
   }).join("");
-  grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => start(ROSTER.find((r) => r.id === el.dataset.id))));
+  grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => dispatchEvent(new CustomEvent("ohana-select", { detail: { id: el.dataset.id } }))));
+  addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
   addEventListener("keydown", (e) => {
-    if (game.running) return;
-    if (e.key >= "1" && e.key <= "9") {
-      const c = ROSTER[Number(e.key) - 1];
-      if (c) start(c);
+    if (game.running || overlayOpen() || e.repeat) return;
+    if (/^[0-9]$/.test(e.key)) {
+      const c = ROSTER[e.key === "0" ? 9 : Number(e.key) - 1];
+      if (c) dispatchEvent(new CustomEvent("ohana-select", { detail: { id: c.id } }));
     }
   });
   const helpBtn = document.getElementById("btn-help");
@@ -2308,16 +2352,9 @@ function setupSelect() {
   const resume = document.getElementById("btn-resume");
   const quit = document.getElementById("btn-quit");
   if (resume) resume.onclick = () => setPaused(false);
-  if (quit) quit.onclick = () => {
-    game.running = false;
-    playMusic("title");
-    closeOverlays();
-    document.body.classList.remove("playing", "boss-fight");
-    document.getElementById("char-select")?.classList.remove("hidden");
-    document.getElementById("boss-wrap")?.classList.add("hidden");
-    document.getElementById("combo-chip")?.classList.remove("show");
-    setPrompt("", false);
-  };
+  if (quit) quit.onclick = returnToMenu;
+  $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
+  $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
   addEventListener("ohana-after", (e) => {
     const act = e.detail && e.detail.action;
     if (act === "continue") {
@@ -2333,38 +2370,23 @@ function setupSelect() {
       loadRoom("boss", "right");
       return;
     }
-    if (act === "roster") {
-      game.running = false;
-      playMusic("title");
-      closeOverlays();
-      document.body.classList.remove("playing", "boss-fight");
-      document.getElementById("char-select")?.classList.remove("hidden");
-      document.getElementById("boss-wrap")?.classList.add("hidden");
-      document.getElementById("combo-chip")?.classList.remove("show");
-      setPrompt("", false);
+    if (act === "roster") returnToMenu();
+  });
+  input = bindInput({
+    target: window, canvas, buttons: document.querySelectorAll(".touch-btn"), canAct,
+    isRunning: () => game.running,
+    actions: {
+      attack, dash, interact, respawn, escape,
+      power: (index) => useAbility(game, index),
+      help: toggleHelp,
+      map: () => { if (game.running) showMap(); },
+      mute: () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); }
     }
   });
-  const POWER_KEY = { j: 0, k: 1, l: 2 };
-  const momentary = { shift: 1, f: 1, h: 1, j: 1, k: 1, l: 1 };
-  document.querySelectorAll(".touch-btn").forEach((btn) => {
-    const k = btn.dataset.k;
-    const down = (ev) => {
-      ev.preventDefault();
-      btn.classList.add("held");
-      if (k === "shift") dash();
-      else if (k === "f" || k === "h") attack();
-      else if (k in POWER_KEY) { if (game.running && !paused && !overlayOpen()) useAbility(game, POWER_KEY[k]); }
-      else keys[k] = true;
-    };
-    const up = (ev) => { ev.preventDefault(); btn.classList.remove("held"); if (!momentary[k]) keys[k] = false; };
-    btn.addEventListener("pointerdown", down);
-    btn.addEventListener("pointerup", up);
-    btn.addEventListener("pointercancel", up);
-    btn.addEventListener("pointerleave", up);
-  });
+  keys = input.keys;
   // Tappable ability slots (desktop + touch): cast by clicking the HUD pill.
   const abilityBar = document.getElementById("ability-bar");
-  abilityBar?.addEventListener("pointerdown", (ev) => {
+  abilityBar?.addEventListener("click", (ev) => {
     const slot = ev.target.closest(".ability-slot");
     if (!slot || !game.running || paused || overlayOpen()) return;
     ev.preventDefault();
@@ -2373,4 +2395,5 @@ function setupSelect() {
   });
 }
 setupSelect();
-loop();
+bindDialogs({ document, onChange: () => { input.reset(); clock.reset(); } });
+requestAnimationFrame(loop);

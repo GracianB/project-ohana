@@ -1,5 +1,6 @@
 import { ROSTER } from "../characters/roster.js";
-import { canonId } from "./save.js";
+import { canonId, saveStore } from "./save.js";
+import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
 import { playIntro, playTitleIntro } from "./intro.js";
@@ -24,18 +25,18 @@ const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.9
 let selectedId = "kilo";
 let tick = 0;
 let raf = 0;
+const portraitClock = createFixedClock({ stepMs: 1000 / 30, maxSteps: 1 });
 
-function readSave() {
-  try { return JSON.parse(localStorage.getItem("ohana") || "null"); } catch (e) { return null; }
-}
+function readSave() { return saveStore.readRaw(); }
 
-function paintPortraits() {
+function paintPortraits(now = performance.now()) {
   if (document.body.classList.contains("playing")) {
     raf = 0;
+    portraitClock.reset();
     return;
   }
-  tick++;
-  if (tick % 2 === 0) {
+  portraitClock.advance(now, () => {
+    tick += 2;
     let idx = 0;
     document.querySelectorAll(".char-card canvas").forEach((cv) => {
       const def = ROSTER.find((r) => r.id === cv.dataset.id);
@@ -90,7 +91,7 @@ function paintPortraits() {
       if (role) role.textContent = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
       idx++;
     });
-  }
+  });
   raf = requestAnimationFrame(paintPortraits);
 }
 
@@ -115,7 +116,13 @@ function mark(id) {
     el.classList.toggle("selected", el.dataset.id === id);
     el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
     el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
+    const visible = [id, prev, next].includes(el.dataset.id);
+    el.tabIndex = visible ? 0 : -1;
+    el.setAttribute("aria-hidden", String(!visible));
+    el.setAttribute("aria-pressed", String(el.dataset.id === id));
   });
+  const focused = document.activeElement;
+  if (focused?.classList.contains("char-card") && focused.getAttribute("aria-hidden") === "true") cards[i]?.focus();
   syncDots();
 }
 
@@ -157,8 +164,7 @@ function syncDots() {
 }
 
 function startSelected() {
-  const card = document.querySelector('#chars .char-card[data-id="' + selectedId + '"]');
-  if (card) card.click();
+  dispatchEvent(new CustomEvent("ohana-start", { detail: { id: selectedId } }));
 }
 
 function begin(kind) {
@@ -230,8 +236,8 @@ function enhance() {
   const neu = document.getElementById("btn-new");
   if (play) play.onclick = () => begin("new");
   if (neu) neu.onclick = () => begin("new");
-  wrap.querySelectorAll(".char-card").forEach((el) => {
-    el.addEventListener("click", () => {}, true);
+  addEventListener("ohana-select", (e) => {
+    if (!document.body.classList.contains("playing") && ROSTER.some((r) => r.id === e.detail?.id)) mark(e.detail.id);
   });
   function refreshContinue() {
     const save = readSave();
@@ -256,8 +262,8 @@ function enhance() {
       stepRoster(e.key === "ArrowLeft" ? -1 : 1);
       return;
     }
-    if (e.key !== "Enter") return;
-    if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show")) return;
+    if (e.key !== "Enter" || e.repeat || document.activeElement?.closest("button, a")) return;
+    if (document.getElementById("ohana-intro") || document.querySelector("#start-intro.show") || document.querySelector("[data-dialog].open, [data-dialog].show")) return;
     const save = readSave();
     const id = save && canonId(save.id);
     if (id && ROSTER.some((r) => r.id === id)) {

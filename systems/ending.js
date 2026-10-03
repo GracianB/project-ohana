@@ -3,11 +3,17 @@ export function showEnding(detail = {}) {
   if (!layer) {
     layer = document.createElement("div");
     layer.id = "win-cinema";
+    document.body.appendChild(layer);
+  }
+  if (!layer.querySelector(".win-card")) {
+    layer.setAttribute("role", "dialog");
+    layer.setAttribute("aria-modal", "true");
+    layer.setAttribute("aria-labelledby", "win-title");
     layer.innerHTML =
       '<div class="win-wash"></div>' +
       '<div class="win-card">' +
         '<p class="win-kicker">Mundo 1 · Nido caído</p>' +
-        '<h2>OHANA COMPLETADO</h2>' +
+        '<h2 id="win-title">OHANA COMPLETADO</h2>' +
         '<p class="win-score"></p>' +
         '<p class="win-jun">La Reina se apaga.</p>' +
         '<p class="win-sub">Nadie se queda atrás.</p>' +
@@ -17,7 +23,6 @@ export function showEnding(detail = {}) {
           '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>' +
         "</div>" +
       "</div>";
-    document.body.appendChild(layer);
     layer.querySelector("#win-continue").onclick = () => {
       layer.classList.remove("show");
       dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "continue" } }));

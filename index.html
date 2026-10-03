@@ -9,12 +9,12 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-71">
-  <link rel="stylesheet" href="hud.css?v=ohana-71">
-  <link rel="stylesheet" href="evo.css?v=ohana-71">
-  <link rel="stylesheet" href="ending.css?v=ohana-71">
-  <link rel="stylesheet" href="intro.css?v=ohana-71">
-  <link rel="stylesheet" href="demo.css?v=ohana-71">
+  <link rel="stylesheet" href="style.css?v=ohana-72">
+  <link rel="stylesheet" href="hud.css?v=ohana-72">
+  <link rel="stylesheet" href="evo.css?v=ohana-72">
+  <link rel="stylesheet" href="ending.css?v=ohana-72">
+  <link rel="stylesheet" href="intro.css?v=ohana-72">
+  <link rel="stylesheet" href="demo.css?v=ohana-72">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -56,7 +56,7 @@
     <button id="btn-full" type="button" aria-label="Pantalla completa">Pantalla</button>
     <button id="btn-mute" type="button" aria-label="Silenciar" aria-pressed="false">Sonido · N</button>
   </nav>
-  <header id="hud" role="status" aria-live="polite">
+  <header id="hud" aria-label="Estado de la partida">
     <div class="hud-block player">
       <div class="hud-ident">
         <div class="hud-avatar" id="hud-avatar" role="img" aria-label="Avatar del personaje"></div>
@@ -109,8 +109,8 @@
   </div>
   <div id="room-banner" role="status" aria-live="polite"></div>
   <div id="prompt" role="status" aria-live="polite"></div>
-  <div id="ability-bar" role="toolbar" aria-label="Habilidades"></div>
-  <canvas id="game" width="1280" height="720" aria-label="Área de juego"></canvas>
+  <div id="ability-bar" role="group" aria-label="Habilidades"></div>
+  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="Área de juego. WASD para moverse, espacio para saltar, H para atacar y E para interactuar."></canvas>
   <div id="touch" role="group" aria-label="Controles táctiles">
     <div class="col move">
       <button class="touch-btn" data-k="a" aria-label="Izquierda">◀</button>
@@ -119,6 +119,7 @@
     </div>
     <div class="col act">
       <div class="act-row powers">
+        <button class="touch-btn interact" data-k="e" aria-label="Interactuar con portal o evolucionar" title="Interactuar · E">E</button>
         <button class="touch-btn pw" data-k="j" aria-label="Poder J">J</button>
         <button class="touch-btn pw" data-k="k" aria-label="Poder K">K</button>
         <button class="touch-btn pw" data-k="l" aria-label="Poder L">L</button>
@@ -168,32 +169,35 @@
       <p>MIT · <a href="https://github.com/GracianB/project-ohana" target="_blank" rel="noopener">Gracián Baena</a> · 2026</p>
     </footer>
   </main>
-  <div id="help" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div id="help" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="help-title">
     <div class="panel">
       <h2 id="help-title">Isla Hoku</h2>
       <ul>
-        <li>Empiezas bebé. <kbd>E</kbd> evoluciona hasta GOD, cinco formas.</li>
+        <li>Empiezas bebé y evolucionas automáticamente al reunir XP, hasta GOD: cinco formas.</li>
+        <li><kbd>E</kbd> usa portales y catapultas. En móvil, pulsa el botón E.</li>
         <li>Diez salas. Jungla pide forma 3. Caldera y Nido piden forma 4.</li>
         <li>Derrota a la Reina del Nido.</li>
       </ul>
-      <p><kbd>WASD</kbd> mover · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
+      <p><kbd>WASD</kbd> mover · espacio saltar · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>E</kbd> interactuar · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
+      <button type="button" id="btn-close-help" class="cta ghost">Cerrar ayuda</button>
     </div>
   </div>
-  <div id="map-overlay" role="dialog" aria-modal="true" aria-labelledby="map-title">
+  <div id="map-overlay" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="map-title">
     <div class="panel">
       <h2 id="map-title">Archipiélago</h2>
       <div id="map-grid"></div>
+      <button type="button" id="btn-close-map" class="cta ghost">Cerrar mapa</button>
     </div>
   </div>
-  <div id="pause-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+  <div id="pause-overlay" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pause-title">
     <div class="panel slim">
       <h2 id="pause-title">Pausa</h2>
       <button type="button" id="btn-resume" class="cta primary">Seguir</button>
       <button type="button" id="btn-quit" class="cta ghost">Menú</button>
     </div>
   </div>
-  <div id="win-cinema" aria-hidden="true"></div>
-  <div id="evo-stage" aria-hidden="true"></div>
+  <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
+  <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
   <script>
     (function () {
@@ -207,12 +211,11 @@
       setTimeout(window.hideLoading, 4000);
     })();
   </script>
-  <script type="module" src="game.js?v=ohana-71"></script>
-  <script type="module" src="systems/title.js?v=ohana-71"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-71"></script>
-  <script type="module" src="systems/hud.js?v=ohana-71"></script>
-  <script type="module" src="systems/ending.js?v=ohana-71"></script>
-  <script type="module" src="systems/demo.js?v=ohana-71"></script>
-  <script type="module" src="systems/evo-cinema.js?v=ohana-71"></script>
+  <script type="module" src="game.js?v=ohana-72"></script>
+  <script type="module" src="systems/title.js?v=ohana-72"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-72"></script>
+  <script type="module" src="systems/ending.js?v=ohana-72"></script>
+  <script type="module" src="systems/demo.js?v=ohana-72"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-72"></script>
 </body>
 </html>

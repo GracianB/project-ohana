@@ -360,12 +360,15 @@ let running = null;
 
 function ensureStage() {
   if (stage) return stage;
-  const el = document.createElement("div");
+  const el = document.getElementById("evo-stage") || document.createElement("div");
   el.id = "evo-stage";
+  el.dataset.dialog = "show";
   el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-labelledby", "evo-description");
   el.setAttribute("aria-live", "assertive");
-  el.innerHTML = '<canvas aria-hidden="true"></canvas><p class="evo-sr"></p>';
-  document.body.appendChild(el);
+  el.innerHTML = '<canvas aria-hidden="true"></canvas><p class="evo-sr" id="evo-description"></p>';
+  if (!el.isConnected) document.body.appendChild(el);
   const fc = fullCanvas(el.querySelector("canvas"));
   stage = { el, fc, sr: el.querySelector(".evo-sr") };
   addEventListener("resize", () => { if (stage) stage.fc.resize(); });
