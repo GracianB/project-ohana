@@ -143,9 +143,11 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-76`
+`ohana-77`
 
 Las referencias documentales se mantienen alineadas con esta versión.
+
+El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no se lo come el hitstop, pisas al caer y el roce ya no te lanza en bucle.
 
 ## Pendiente técnico
 

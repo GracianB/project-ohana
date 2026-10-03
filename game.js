@@ -89,7 +89,7 @@ const game = {
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 let viewW = 1280, viewH = 720, viewDpr = 1;
-const CAM_ZOOM = 1.3;
+const CAM_ZOOM = 1.05;
 function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
@@ -517,7 +517,9 @@ function dash() {
   if (!p || p.dead) return;
   if (p.dash > 0) { p.dashBuf = 8; return; }
   const sig = signature(p.id);
-  p.vx = sig.dash * p.facing;
+  p._dashFace = p.facing || 1;
+  p._dashGo = 11;
+  p.vx = sig.dash * p._dashFace;
   p.invuln = Math.max(p.invuln, sig.iframe);
   p.dash = 20 + Math.round(sig.dash * 0.35);
   p.dashBuf = 0;
@@ -573,9 +575,13 @@ function hornPoke(p, evo, def) {
     kind: "poke",
     w: reach,
   });
+  p._swing = { reach, low: false, dmg: def.dmg, kb: 1.2, hit: new Set() };
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
-    if (aabb(box, e)) markHit(p, e, def.dmg, 1.2);
+    if (aabb(box, e)) {
+      p._swing.hit.add(e);
+      markHit(p, e, def.dmg, 1.2);
+    }
   }
   game.fx.emit(box.x + box.w * 0.7, box.y + 8, { color: "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
   game.shake = Math.min(10, (game.shake || 0) + 3);
@@ -601,9 +607,13 @@ function showSwing(p, evo, def) {
     kind: def.kind || "slice",
     w: reach,
   });
+  p._swing = { reach, low, dmg: def.dmg, kb: sig.kb || 1, hit: new Set() };
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
-    if (aabb(box, e)) markHit(p, e, def.dmg, sig.kb || 1);
+    if (aabb(box, e)) {
+      p._swing.hit.add(e);
+      markHit(p, e, def.dmg, sig.kb || 1);
+    }
   }
   const tipX = face > 0 ? box.x + box.w - 6 : box.x + 6;
   game.fx.emit(tipX, box.y + box.h * 0.45, {
@@ -611,6 +621,22 @@ function showSwing(p, evo, def) {
     star: true, speed: 2.6, angle: face > 0 ? 0 : Math.PI, spread: 0.7,
   });
   game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
+}
+
+function tickSwing(p) {
+  const s = p._swing;
+  if (!s || !(p.melee > 0)) { p._swing = null; return; }
+  const face = p.facing || 1;
+  const reach = s.reach;
+  const box = s.low
+    ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
+    : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
+  for (const e of game.enemies) {
+    if (!e || e.dying || e.hp <= 0 || e.invuln > 0 || s.hit.has(e)) continue;
+    if (!aabb(box, e)) continue;
+    s.hit.add(e);
+    markHit(p, e, s.dmg, s.kb);
+  }
 }
 
 function attack() {
@@ -652,7 +678,7 @@ function hurtPlayer(amount, label) {
   amount = Magic.onHurt(game, Passives.onHurt(game, amount));
   if (!(amount > 0)) return;
   p.health -= amount;
-  p.invuln = 28;
+  p.invuln = 42;
   p.vx = Math.sign(p.vx || p.facing || 1) * -8;
   p.vy = -6.5;
   p.flash = Math.max(p.flash || 0, 10);
@@ -859,6 +885,7 @@ function updatePlayer() {
   const jump = keys["w"] || keys["arrowup"] || keys[" "];
   const drop = keys["s"] || keys["arrowdown"];
   if (p.dash > 0) p.dash--;
+  if (p._dashGo > 0) p._dashGo--;
   if (p.melee > 0) p.melee--;
   if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
   // Buffer usa el mismo camino que F/click (attack), no el melee legacy
@@ -866,11 +893,28 @@ function updatePlayer() {
   if (p._thrust > 0) {
     p._thrust--;
     p.facing = p._thrustFace || p.facing || 1;
-    p.vx = p.facing * (p.speed + 5);
-  } else if (left) { p.vx = -p.speed; p.facing = -1; }
-  else if (right) { p.vx = p.speed; p.facing = 1; }
-  else p.vx *= 0.78;
-  if (jump) p.buffer = 8; else if (p.buffer > 0) p.buffer--;
+    const burst = p.facing * (p.speed + 4);
+    if (p._dashGo > 0) {
+      const dv = signature(p.id).dash * (p._dashFace || p.facing || 1);
+      p.vx = Math.abs(dv) >= Math.abs(burst) ? dv : burst;
+    } else p.vx = burst;
+  } else if (p._dashGo > 0) {
+    const face = p._dashFace || p.facing || 1;
+    const oppose = (face > 0 && left && !right) || (face < 0 && right && !left);
+    if (oppose) {
+      p._dashGo = 0;
+      p.vx *= 0.35;
+    } else {
+      p.vx = face * signature(p.id).dash;
+      p.facing = face;
+    }
+  } else if (left !== right) {
+    const target = right ? p.speed : -p.speed;
+    const k = p.grounded ? 0.62 : 0.32;
+    p.vx += (target - p.vx) * k;
+    p.facing = target > 0 ? 1 : -1;
+  } else p.vx *= p.grounded ? 0.5 : 0.92;
+  if (jump) p.buffer = 10; else if (p.buffer > 0) p.buffer--;
   p.wall = 0;
   if (!p.grounded) {
     for (const plat of game.platforms) {
@@ -918,35 +962,33 @@ function updatePlayer() {
   p._jumpPrev = !!jump;
   Passives.update(game, input);
   const wasGrounded = !!p.grounded;
-  p.vy = Math.min(14, p.vy + 0.52);
+  const incoming = p.vy;
+  p.vy = Math.min(14, p.vy + (p._dashGo > 0 ? 0.14 : 0.5));
   p.grounded = false;
-  const prevX = p.x;
-  const prevY = p.y;
-  const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 6));
+  const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
+  let wall = 0;
   for (let s = 0; s < steps; s++) {
-    const prevBottom = p.y + p.h;
-    const prevX = p.x;
+    const sx = p.x;
+    const sy = p.y;
     p.x += p.vx / steps;
     p.y += p.vy / steps;
-    let landed = false;
-    for (const plat of game.platforms) {
-      const standingOn = Math.abs(prevBottom - plat.y) < 22 && overlapX(prevX, p.w, plat, 0);
-      if (drop && plat.h <= 22 && standingOn) continue;
-      if (!overlapX(p.x, p.w, plat, 0)) continue;
-      if (p.vy >= -0.2 && prevBottom <= plat.y + 22 && p.y + p.h >= plat.y) {
-        landOn(p, plat);
-        landed = true;
-        break;
-      }
+    const hit = resolveBody(p, game.platforms, {
+      prevX: sx,
+      prevY: sy,
+      dropThroughY: drop && wasGrounded && s === 0 ? sy + p.h + 10 : null,
+    });
+    if (hit.grounded) {
+      if (!p.grounded && incoming > 7) beep("land");
+      p.vy = 0;
+      p.grounded = true;
+      p.jumps = 0;
+      p.coyote = 10;
     }
-    if (landed) break;
+    if (hit.hitX) wall = hit.hitX;
+    if (hit.hitY === -1) break;
   }
-  const hit = resolveBody(p, game.platforms, {
-    prevX, prevY,
-    dropThroughY: drop && wasGrounded ? prevY + p.h + 10 : null,
-  });
-  if (hit.grounded && !p.grounded) landOn(p, { y: p.y + p.h });
-  if (hit.hitX && !p.grounded) p.wall = hit.hitX;
+  if (wall && !p.grounded) p.wall = wall;
+  tickSwing(p);
   Passives.afterMove(game, input);
   Magic.update(game);
   if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
@@ -1101,6 +1143,31 @@ function solidifyFoe(e) {
       e.x = e.x <= under.x + margin ? under.x + margin : under.x + under.w - e.w - margin;
     }
   }
+}
+function dmgFor(e) {
+  let dmg = 7;
+  if (e.boss) dmg = e.contactDmg || 22;
+  else if (e.kind === "planta") dmg = 12;
+  else if ((e.kind === "abeja" || e.kind === "avispa") && (e.diving > 0 || e.charging > 0)) dmg = 14;
+  else if (e.kind === "mosquito") dmg = 9;
+  else if (e.kind === "libelula") dmg = 8;
+  else if (e.kind === "pez") dmg = 8;
+  else if (e.kind === "medusa") dmg = 10;
+  else if (e.kind === "anguila") dmg = 10;
+  else if (e.kind === "rana") dmg = 8;
+  else if (e.kind === "cangrejo") dmg = (e.clawSnap > 0) ? 11 : 8;
+  else if (e.kind === "gaviota") dmg = e.diving ? 10 : 7;
+  else if (e.kind === "murcielago") dmg = e.diving ? 11 : 8;
+  else if (e.kind === "arana") dmg = 9;
+  else if (e.kind === "brasita") dmg = 9;
+  else if (e.kind === "escoria") dmg = e.hp < e.max * 0.4 ? 12 : 9;
+  else if (e.kind === "ufo") dmg = 8;
+  else if (e.kind === "cucaracho" && e.evo >= 2) dmg = 12;
+  else if (e.kind === "cucaracho" && e.evo >= 1) dmg = 10;
+  else if (e.kind === "cucaracho") dmg = 7;
+  else if (e.evo) dmg = 10;
+  if (e.elite) dmg = Math.round(dmg * 1.25);
+  return dmg;
 }
 function updateEnemies() {
   if (!game.player) return;
@@ -1710,34 +1777,47 @@ function updateEnemies() {
     const p = game.player;
     const solid = !(e.kind === "planta" && !e.up);
     if (p && !p.dead && !e.dying && solid && aabb(p, e)) {
-      const kb = Math.sign(p.x - e.x || 1);
-      let dmg = 7;
-      if (e.boss) dmg = e.contactDmg || 22;
-      else if (e.kind === "planta") dmg = 12;
-      else if ((e.kind === "abeja" || e.kind === "avispa") && (e.diving > 0 || e.charging > 0)) dmg = 14;
-      else if (e.kind === "mosquito") dmg = 9;
-      else if (e.kind === "libelula") dmg = 8;
-      else if (e.kind === "pez") dmg = 8;
-      else if (e.kind === "medusa") dmg = 10;
-      else if (e.kind === "anguila") dmg = 10;
-      else if (e.kind === "rana") dmg = 8;
-      else if (e.kind === "cangrejo") dmg = (e.clawSnap > 0) ? 11 : 8;
-      else if (e.kind === "gaviota") dmg = e.diving ? 10 : 7;
-      else if (e.kind === "murcielago") dmg = e.diving ? 11 : 8;
-      else if (e.kind === "arana") dmg = 9;
-      else if (e.kind === "brasita") dmg = 9;
-      else if (e.kind === "escoria") dmg = e.hp < e.max * 0.4 ? 12 : 9;
-      else if (e.kind === "ufo") dmg = 8;
-      else if (e.kind === "cucaracho" && e.evo >= 2) dmg = 12;
-      else if (e.kind === "cucaracho" && e.evo >= 1) dmg = 10;
-      else if (e.kind === "cucaracho") dmg = 7;
-      else if (e.evo) dmg = 10;
-      if (e.elite) dmg = Math.round(dmg * 1.25);
-      hurtPlayer(dmg, "-" + dmg);
-      if (e.kind === "mosquito") {
-        game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
+      const kb = Math.sign((p.x + p.w / 2) - (e.x + e.w / 2) || p.facing || 1);
+      const feet = p.y + p.h;
+      const stomp = p.vy > 1.5 && feet < e.y + Math.min(28, e.h * 0.5) && p.y < e.y + 8;
+      if (stomp) {
+        p.vy = -9.4;
+        p.grounded = false;
+        p.jumps = Math.max(0, (p.jumps || 1) - 1);
+        p.invuln = Math.max(p.invuln || 0, 10);
+        if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
+          const dmg = 8 + (Number(p.evo) || 0) * 2;
+          e.hp -= dmg;
+          e.vy = 2.4;
+          e.stun = Math.max(e.stun || 0, 10);
+          e.flash = 10;
+          e.invuln = Math.max(e.invuln || 0, 10);
+          game.nums.add(e.x, e.y - 6, "" + dmg, "#fff");
+          punch(e.x, e.y, p.color || "#fff");
+          hitStop(2);
+        } else {
+          e.flash = Math.max(e.flash || 0, 6);
+          game.shake = Math.min(10, (game.shake || 0) + 3);
+          beep("land");
+        }
+        game.fx.emit(p.x + p.w / 2, feet, { color: "#fff", count: 6, size: 2, up: 0.4, life: 12 });
+      } else {
+        const hp0 = p.health;
+        hurtPlayer(dmgFor(e), "-" + dmgFor(e));
+        const took = p.health < hp0;
+        if (took && !p.dead) {
+          p.vx = kb * 11;
+          p.vy = -6.6;
+          p.x += kb * 5;
+          if (!e.boss) e.x -= kb * 7;
+        } else if (!p.dead && !(p._dashGo > 0) && !(p.invuln > 0)) {
+          p.x += kb * 2.4;
+          if (!e.boss) e.x -= kb * 1.6;
+        }
+        if (e.kind === "mosquito" && took) {
+          game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
+        }
       }
-      if (!p.dead) { p.vx = kb * 10; p.vy = -6.5; }
     }
   }
   game.enemies = game.enemies.filter((e) => {
@@ -1859,9 +1939,10 @@ function updateProjectiles() {
 function updateCam() {
   const p = game.player; if (!p) return;
   const vw = camW(), vh = camH();
-  let lerp = 0.12;
-  let tx = p.x + p.facing * 62 - vw / 2;
-  let ty = p.y - vh * 0.58;
+  let lerp = 0.18;
+  const look = p._dashGo > 0 ? 110 : Math.min(64, 22 + Math.abs(p.vx) * 6);
+  let tx = p.x + p.w / 2 + (p.facing || 1) * look - vw / 2;
+  let ty = p.y + p.h * 0.45 - vh * 0.52;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   const fin = game.finale && game.finale.t > 0 ? game.finale : null;
   if (fin) {
@@ -2285,8 +2366,6 @@ function step() {
   game.t = t;
   if (game.hitstop > 0) {
     game.hitstop--;
-    const fp = game.player;
-    if (fp && fp.melee > 0) fp.melee--;
     if (game.shake > 0) game.shake *= 0.92;
     if (game.flash > 0) game.flash--;
     return;
