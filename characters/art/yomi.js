@@ -1,175 +1,79 @@
-// Yomi · farol yokai. No es una niña: es una máscara de papel que flota.
-// Al evolucionar el papel se raja y dentro hay fauces.
-
+// Yomi · farol. El papel se raja y salen fauces. Flota, no anda.
 const PAPER = ["#f4e2c4", "#f0d2a4", "#e8c090", "#c9846a", "#2a121c"];
 const INK = ["#3a2418", "#4a2018", "#6a1830", "#ff4466", "#ffd0dc"];
 const FLAME = ["#ffb15a", "#ff8a3a", "#ff5a2a", "#ff2244", "#ffe14a"];
 
-function ofudaTag(ctx, R, x, y, scale, angle, alpha) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(angle);
-  ctx.scale(scale, scale);
-  ctx.globalAlpha *= alpha;
-  R.blob(ctx, [[-6, -10], [5, -10], [6, 8], [0, 11], [-6, 8]], "#fff2d8", { lw: 1.4, ink: "#8f3334" });
-  ctx.strokeStyle = "#c13b3c";
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(0, -6); ctx.lineTo(0, 6);
-  ctx.moveTo(-3, -1); ctx.lineTo(3, -1);
-  ctx.moveTo(-2, 3); ctx.lineTo(2, 3);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function rib(ctx, x, y, w, h, color) {
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 1.3;
-  ctx.globalAlpha = 0.45;
-  for (let i = 1; i <= 3; i++) {
-    ctx.beginPath();
-    ctx.ellipse(x, y - h * 0.5 + (h * i) / 4, w * 0.92, 3.2, 0, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-}
-
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
-  const t = pose.t;
-  const dread = f >= 3;
+  const t = pose.t || 0;
   const god = f === 4;
+  const dread = f >= 3;
   const castSlot = pose.state === "cast" ? pose.castSlot : -1;
-  const maw = castSlot === 2 ? pose.cast : 0;
+  const open = pose.state === "attack" ? pose.atk : castSlot === 2 ? 0.6 + pose.cast * 0.4 : god ? 0.22 : 0.04;
   const paper = PAPER[f];
   const ink = INK[f];
   const flame = FLAME[f];
-  const run = pose.state === "run";
-  const bob = Math.sin(t * 0.07) * 3.2 + (run ? -Math.abs(Math.cos(pose.phase)) * 2 : pose.breath);
-  const open = pose.state === "attack" ? pose.atk : castSlot === 2 ? 0.55 + pose.cast * 0.45 : castSlot === 0 ? 0.38 : castSlot === 1 ? 0.18 : god ? 0.25 + Math.sin(t * 0.1) * 0.08 : 0;
-  const h = 46 + f * 4;
-  const w = 22 + f * 2;
+  const bob = Math.sin(t * 0.07) * 3 + (pose.breath || 0);
+  const h = 52 + f * 4;
+  const w = 24 + f * 2;
 
   ctx.save();
-  ctx.translate(0, bob - 6);
+  ctx.translate(0, bob - 8);
+  if (god) R.halo(ctx, 0, -h * 0.4, 26, t, flame);
 
-  R.tail(ctx, 0, 8, 28 + f * 4, Math.PI / 2,
-    (k) => Math.sin(t * 0.16 + k * 3) * 3 + pose.sway * 2, 7, 1.5, god ? "#ff4466" : "#2a1848");
+  R.tail(ctx, 0, 10, 30 + f * 3, Math.PI / 2, (k) => Math.sin(t * 0.16 + k * 3) * 4, 8, 2, god ? "#ff4466" : "#2a1848");
 
-  const sleeve = pose.state === "attack" ? -0.4 + pose.atk * 1.6 : castSlot === 1 ? Math.sin(pose.cast * Math.PI) * 1.2 : Math.sin(t * 0.05) * 0.25;
-  const sleeveStretch = castSlot === 1 ? 1 + Math.sin(pose.cast * Math.PI) * 0.32 : 1;
   ctx.save();
-  ctx.translate(-w * 0.7, -h * 0.35);
-  ctx.rotate(-0.6 + sleeve * 0.3 + pose.sway * 0.2);
-  ctx.scale(sleeveStretch, 1);
-  R.ellipse(ctx, 0, 10, 16, 8, R.darken(paper, 0.25));
+  ctx.translate(-w * 0.8, -h * 0.35);
+  ctx.rotate(-0.5 + Math.sin(t * 0.08) * 0.1);
+  R.ellipse(ctx, 0, 12, 16, 8, R.darken(paper, 0.2));
   ctx.restore();
   ctx.save();
-  ctx.translate(w * 0.85, -h * 0.4);
-  ctx.rotate(0.5 - sleeve);
-  ctx.scale(sleeveStretch, 1);
-  R.ellipse(ctx, 0, 8, 18, 9, paper);
+  ctx.translate(w * 0.9, -h * 0.4);
+  ctx.rotate(0.45);
+  R.ellipse(ctx, 0, 10, 18, 9, paper);
   ctx.restore();
 
-  R.ellipse(ctx, 0, -h * 0.45, w, h * 0.5, paper);
-  ctx.strokeStyle = R.darken(paper, 0.4);
+  R.ellipse(ctx, 0, -h * 0.42, w, h * 0.48, paper);
+  R.celShade(ctx, 0, -h * 0.42, w, h * 0.48, paper, 0.14);
+  ctx.strokeStyle = R.darken(paper, 0.35);
   ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(-w * 0.35, -h * 0.85);
-  ctx.lineTo(-w * 0.2, -h * 0.1);
-  ctx.moveTo(w * 0.35, -h * 0.85);
-  ctx.lineTo(w * 0.15, -h * 0.08);
-  ctx.stroke();
-  rib(ctx, 0, -h * 0.15, w, h, R.darken(paper, 0.35));
-
-  if (dread) {
-    ctx.globalAlpha = 0.55 + open * 0.4;
-    ctx.fillStyle = flame;
+  for (let i = 1; i <= 3; i++) {
     ctx.beginPath();
-    ctx.ellipse(2, -h * 0.35, w * 0.45, h * 0.22, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.ellipse(0, -h * 0.2 + i * 8, w * 0.8, 2.4, 0, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   const eyeY = -h * 0.62;
   const mood = pose.state === "hurt" || pose.state === "dead" ? "closed" : "normal";
-  R.eye(ctx, -6, eyeY, dread ? 5.5 : 4.2, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
-  R.eye(ctx, 10, eyeY, dread ? 6.2 : 4.6, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
-  if (dread) R.eye(ctx, 2, eyeY - 12, 3.4, pose, { iris: flame, mood });
+  R.eye(ctx, -7, eyeY, dread ? 5.6 : 4.4, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
+  R.eye(ctx, 10, eyeY, dread ? 6.2 : 4.8, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
+  if (dread) R.eye(ctx, 2, eyeY - 11, 3.2, pose, { iris: flame, mood });
 
-  const mouthW = 10 + open * 16 + maw * 14 + (god ? 6 : 0);
+  const mouthW = 8 + open * 14;
   ctx.fillStyle = god ? "#140208" : ink;
   ctx.beginPath();
-  ctx.ellipse(4, eyeY + 14, mouthW * 0.55, 3 + open * 10 + maw * 8, 0.1, 0, Math.PI * 2);
+  ctx.ellipse(3, eyeY + 14, mouthW * 0.5, 3 + open * 9, 0.08, 0, Math.PI * 2);
   ctx.fill();
-  if (open > 0.2 || dread) {
+  if (open > 0.15 || dread) {
     ctx.fillStyle = "#fff6ea";
-    const teeth = god ? 6 : 4;
-    for (let i = 0; i < teeth; i++) {
-      const tx = 4 - mouthW * 0.4 + (i * mouthW * 0.8) / teeth;
+    for (let i = 0; i < (god ? 6 : 4); i++) {
+      const tx = 3 - mouthW * 0.35 + i * 4;
       ctx.beginPath();
       ctx.moveTo(tx, eyeY + 12);
-      ctx.lineTo(tx + 2, eyeY + 12 + 4 + open * 6);
+      ctx.lineTo(tx + 2, eyeY + 16 + open * 5);
       ctx.lineTo(tx + 4, eyeY + 12);
       ctx.fill();
     }
   }
 
-  if (castSlot === 0) {
-    const k = pose.cast;
-    ofudaTag(ctx, R, w * 0.72 + k * 20, -h * 0.28 - Math.sin(k * Math.PI) * 8, 1, -0.25 + k * 0.4, 1 - k * 0.55);
-    R.sparkle(ctx, w * 0.58, -h * 0.26, 2 + Math.sin(k * Math.PI) * 2, "#fff0c8");
-  } else if (castSlot === 1) {
-    const k = pose.cast;
-    ctx.save();
-    ctx.globalAlpha *= 0.75 * (1 - k * 0.35);
-    ctx.strokeStyle = god ? "#ff4466" : "#b69aff";
-    ctx.lineWidth = 2.2;
-    for (let i = 0; i < 3; i++) {
-      const r = 12 + k * 24 + i * 6;
-      ctx.beginPath();
-      ctx.arc(2, -h * 0.28, r, -0.8 + i * 0.18 + k, 0.8 + i * 0.18 + k);
-      ctx.stroke();
-    }
-    ctx.restore();
-  } else if (castSlot === 2) {
-    ctx.save();
-    ctx.globalAlpha *= Math.min(1, 0.35 + maw * 0.9);
-    ctx.strokeStyle = god ? "#ffe14a" : flame;
-    ctx.lineWidth = 2 + maw * 1.5;
-    ctx.beginPath();
-    ctx.ellipse(4, eyeY + 14, mouthW * 0.78, 8 + maw * 10, Math.sin(t * 0.25) * 0.08, -0.2, Math.PI * 1.2);
-    ctx.stroke();
-    R.sparkle(ctx, 4 + mouthW * 0.65, eyeY + 14, 2 + maw * 2.5, god ? "#fff6c0" : flame);
-    ctx.restore();
-  }
-
-  ctx.fillStyle = R.darken(paper, 0.45);
-  ctx.fillRect(-8, -h * 0.95, 16, 6);
-  ctx.strokeStyle = god ? "#ffd84a" : "#6a3a18";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(0, -h * 0.98, 10 + f, Math.PI * 1.05, Math.PI * 1.95);
-  ctx.stroke();
-  ctx.fillStyle = god ? "#ffd84a" : "#6a2a18";
-  ctx.beginPath();
-  ctx.arc(0, 4, 3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = god ? "#ffd84a" : "#3a2014";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(0, 4);
-  ctx.quadraticCurveTo(Math.sin(t * 0.18) * 6, 14, 0, 22);
-  ctx.stroke();
   ctx.fillStyle = flame;
   ctx.beginPath();
-  ctx.moveTo(-4, 20);
-  ctx.lineTo(0, 30);
-  ctx.lineTo(4, 20);
+  ctx.moveTo(-5, 18);
+  ctx.quadraticCurveTo(0, 34 + Math.sin(t * 0.2) * 3, 5, 18);
   ctx.fill();
-
-  if (f >= 2) R.star(ctx, w + 6, -h * 0.2, 4, flame);
-  if (pose.flourish > 0 && !dread) R.sparkle(ctx, w + 4, -h, 3 + pose.flourish * 3);
+  if (f >= 2) R.star(ctx, w + 4, -h * 0.2, 3.6, flame);
+  if (pose.flourish > 0) R.sparkle(ctx, w, -h, 3 + pose.flourish * 2, flame);
   ctx.restore();
 }
 
