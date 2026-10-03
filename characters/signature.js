@@ -1,34 +1,41 @@
 // Cómo pega y cómo sale cada personaje. El arte ya los distingue; esto, el tacto.
+// H sigue siendo un golpe cercano. J K L no viven aquí.
+
+const ALIAS = { pikachu: "chispin", stitch: "stitcho", michi: "cat", lilo: "kilo" };
+
+function canon(id) {
+  const key = String(id || "").toLowerCase();
+  return ALIAS[key] || key;
+}
+
 export const SIGNATURE = {
-  kilo:    { reach: 6, dmg: -6, kb: 1.35, kind: "leaf", dash: 12, iframe: 8, hop: -1.4 },
-  stitcho: { reach: 2, dmg: 2, kb: 1.05, kind: "claws", dash: 18, iframe: 12 },
-  chispin: { reach: 8, dmg: 2, kb: 0.85, kind: "zap", dash: 15, iframe: 8, spark: true },
-  cat:     { reach: -8, dmg: 4, kb: 0.9, kind: "claws", dash: 14, iframe: 10, air: 1.35 },
-  dragon:  { reach: 16, dmg: 4, kb: 1.15, kind: "fan", dash: 13, iframe: 8, fire: true },
-  dino:    { reach: 8, dmg: 10, kb: 1.6, kind: "fan", dash: 10, iframe: 6, heavy: true, ram: true },
-  frita:   { reach: 12, dmg: 0, kb: 1, kind: "fan", dash: 14, iframe: 8, low: true },
-  pizza:   { reach: 4, dmg: 2, kb: 1.25, kind: "wedge", dash: 13, iframe: 8, hop: -1.4 },
-  yomi:    { reach: 10, dmg: 4, kb: 1.15, kind: "fan", dash: 12, iframe: 8 },
-  cuerno:  { reach: 6, dmg: 0, kb: 1.05, kind: "leaf", dash: 14, iframe: 8, hop: -2 },
+  kilo:    { reach: 6,  dmg: -6, kb: 1.35, kind: "leaf",  dash: 12, iframe: 8,  hop: -1.4 },
+  stitcho: { reach: 2,  dmg: 2,  kb: 1.05, kind: "claws", dash: 18, iframe: 12 },
+  chispin: { reach: 8,  dmg: 2,  kb: 0.85, kind: "zap",   dash: 15, iframe: 8,  spark: true },
+  cat:     { reach: -8, dmg: 4,  kb: 0.9,  kind: "claws", dash: 14, iframe: 10, air: 1.35 },
+  dragon:  { reach: 16, dmg: 4,  kb: 1.15, kind: "fan",   dash: 13, iframe: 8,  fire: true },
+  dino:    { reach: 8,  dmg: 10, kb: 1.6,  kind: "fan",   dash: 10, iframe: 6,  heavy: true, ram: true },
+  frita:   { reach: 12, dmg: 0,  kb: 1,    kind: "fan",   dash: 14, iframe: 8,  low: true },
+  pizza:   { reach: 4,  dmg: 2,  kb: 1.25, kind: "wedge", dash: 13, iframe: 8,  hop: -1.4 },
+  yomi:    { reach: 10, dmg: 4,  kb: 1.15, kind: "fan",   dash: 12, iframe: 8 },
+  cuerno:  { reach: 6,  dmg: 0,  kb: 1.05, kind: "leaf",  dash: 14, iframe: 8,  hop: -2 },
 };
 
 export function signature(id) {
-  return SIGNATURE[id] || SIGNATURE.kilo;
+  return SIGNATURE[canon(id)] || SIGNATURE.kilo;
 }
 
-// H es siempre un golpe cercano. La forma solo pega un poco más fuerte y un poco más lejos.
-// El disparo y el área se quedan en J K L, para que el nivel no dependa del botón básico.
 const HITS = {
-  kilo:    { name: "Nota", kind: "note", color: "#ff9ab0" },
-  stitcho: { name: "Zarpa", kind: "claws", color: "#7eb6ff" },
-  chispin: { name: "Chispa", kind: "spark", color: "#ffe14a" },
-  cat:     { name: "Zarpazo", kind: "paw", color: "#ffb6e4" },
-  dragon:  { name: "Garra", kind: "flame", color: "#ff6a2a" },
-  dino:    { name: "Mordisco", kind: "bite", color: "#8ee07a" },
-  frita:   { name: "Corte", kind: "slice", color: "#f0b43a" },
-  pizza:   { name: "Porcion", kind: "wedge", color: "#ffb43a" },
-  yomi:    { name: "Fauces", kind: "fang", color: "#ff4466" },
-  cuerno:  { name: "Puya", kind: "poke", color: "#ffe9a8" },
+  kilo:    { name: "Nota",     kind: "note",  color: "#ff9ab0" },
+  stitcho: { name: "Zarpa",    kind: "claws", color: "#7eb6ff" },
+  chispin: { name: "Chispa",   kind: "spark", color: "#ffe14a" },
+  cat:     { name: "Zarpazo",  kind: "paw",   color: "#ffb6e4" },
+  dragon:  { name: "Garra",    kind: "flame", color: "#ff6a2a" },
+  dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },
+  frita:   { name: "Corte",    kind: "slice", color: "#f0b43a" },
+  pizza:   { name: "Porcion",  kind: "wedge", color: "#ffb43a" },
+  yomi:    { name: "Fauces",   kind: "fang",  color: "#ff4466" },
+  cuerno:  { name: "Puya",     kind: "poke",  color: "#ffe9a8" },
 };
 
 export const DIFFICULTY = {
@@ -38,22 +45,28 @@ export const DIFFICULTY = {
 };
 
 export function difficulty(id) {
-  return DIFFICULTY[id] || 2;
+  return DIFFICULTY[canon(id)] || 2;
 }
 
 export function markAt(id, evo) {
-  const base = HITS[id] || HITS.kilo;
+  const key = canon(id);
+  const base = HITS[key] || HITS.kilo;
   const i = Math.max(0, Math.min(4, Number(evo) || 0));
-  const sig = signature(id);
+  const sig = signature(key);
   return {
     name: base.name,
     kind: base.kind,
     color: base.color,
     style: "arc",
     dmg: 20 + i * 4 + sig.dmg,
-    reach: 64 + i * 3,
-    kb: id === "dino" ? 1.2 : 1,
+    reach: 64 + i * 3 + sig.reach,
+    kb: sig.kb,
+    dash: sig.dash,
+    iframe: sig.iframe,
+    hop: sig.hop || 0,
+    low: !!sig.low,
+    heavy: !!sig.heavy,
+    spark: !!sig.spark,
+    fire: !!sig.fire,
   };
 }
-
-

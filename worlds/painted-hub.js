@@ -9,15 +9,31 @@ const SRC = {
   catapult: "assets/worlds/hub-catapult.png",
 };
 const cache = new Map();
+const RETRY_MS = 5000;
 
 function img(name) {
-  let el = cache.get(name);
-  if (!el) {
-    el = new Image();
-    el.decoding = "async";
-    el.src = SRC[name];
-    cache.set(name, el);
+  const now = Date.now();
+  let entry = cache.get(name);
+  if (entry && entry.image) {
+    const el = entry.image;
+    if (el.complete && el.naturalWidth > 0) return el;
+    if (!el.complete) return null;
+    entry.image = null;
+    entry.retryAt = now + RETRY_MS;
   }
+  if (entry && entry.retryAt > now) return null;
+  if (typeof Image === "undefined") return null;
+  const el = new Image();
+  el.decoding = "async";
+  entry = { image: el, retryAt: 0 };
+  cache.set(name, entry);
+  el.onerror = () => {
+    if (cache.get(name) === entry) {
+      entry.image = null;
+      entry.retryAt = Date.now() + RETRY_MS;
+    }
+  };
+  el.src = SRC[name];
   return el.complete && el.naturalWidth > 0 ? el : null;
 }
 
@@ -25,11 +41,14 @@ export function paintedHubOn(roomId) {
   return getLook() === "paint" && roomId === "hub" && !!img("bg");
 }
 
-function tile(ctx, art, x, y, w, visH, lift, cam) {
+function tile(ctx, art, x, y, w, visH, lift, cam, viewW) {
   const tileW = visH * (art.naturalWidth / art.naturalHeight);
+  const top = y - lift;
+  const screenL = x - cam.x;
+  const screenR = x + w - cam.x;
+  if (screenR < -8 || screenL > viewW + 8) return;
   let left = x;
   const end = x + w;
-  const top = y - lift;
   while (left < end - 0.5) {
     const dw = Math.min(tileW, end - left);
     const sw = art.naturalWidth * (dw / tileW);
@@ -38,11 +57,11 @@ function tile(ctx, art, x, y, w, visH, lift, cam) {
   }
 }
 
-/** Fondo, suelo, plataformas y la catapulta del Claro, alineados a la colisión. */
 export function drawPaintedHub(ctx, cam, worldW, worldH, viewW, viewH) {
+  if (getLook() !== "paint") return;
   const room = ROOMS.hub;
+  if (!room) return;
   const bg = img("bg");
-  // El cuadro cubre la pantalla, no la sala entera. Si no, los árboles salen gigantes.
   if (bg && viewW && viewH) {
     const cover = Math.max(viewW / bg.naturalWidth, viewH / bg.naturalHeight) * 1.28;
     const dw = bg.naturalWidth * cover;
@@ -53,14 +72,13 @@ export function drawPaintedHub(ctx, cam, worldW, worldH, viewW, viewH) {
   }
   const ground = img("ground");
   const plate = img("plate");
-  for (const p of room.plats) {
-    const x = p[0] * PAINT_WORLD, y = p[1] * PAINT_WORLD, w = p[2] * PAINT_WORLD, h = p[3] * PAINT_WORLD;
+  const vw = viewW || 1280;
+  for (const p of room.plats || []) {
+    const x = p[0] * PAINT_WORLD, y = p[1] * PAINT_WORLD, w = p[2] * PAINT_WORLD;
     const thick = p[3] > 40;
     const art = thick ? ground : plate;
     if (!art) continue;
-    const visH = thick ? 108 : 74;
-    const lift = thick ? 36 : 22;
-    tile(ctx, art, x, y, w, visH, lift, cam);
+    tile(ctx, art, x, y, w, thick ? 108 : 74, thick ? 36 : 22, cam, vw);
   }
   const cat = img("catapult");
   const portal = (room.portals || []).find((p) => p.type === "catapult");
