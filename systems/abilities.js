@@ -25,8 +25,8 @@ export const ABILITY_DEFS = {
   storm: { name: "Nube tormenta", key: "L", cd: 6000, color: "#9cf", desc: "Nube que persigue enemigos lanzando rayos." },
   // Michi
   yarn: { name: "Ovillo bumerán", key: "J", cd: 600, color: "#ff8ad4", desc: "Ovillo que va y vuelve atravesando enemigos." },
-  purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Duerme a los enemigos cercanos y te cura un poco." },
-  ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 espíritus de cola que persiguen enemigos." },
+  purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Onda grande que duerme a lo que alcanza y te cura." },
+  ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 colas brillantes que serpentean y persiguen." },
   // Dragón
   breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
   gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
@@ -488,37 +488,29 @@ const CASTERS = {
     add({ kind: "yarn", x: h.x, y: h.y, vx: (12 + evo) * p.facing, vy: 0, out: true, life: 130, hitA: new Set(), hitB: new Set(), r: 10 + evo, dmg: (15 + evo * 2) * pw(p), rot: 0 });
   },
   purr(g, p, evo) {
-    const R = 150 + evo * 18;
-    const heal = 6 + evo * 3;
+    const R = 320 + evo * 70;
+    const heal = 8 + evo * 4;
+    const stun = 200 + evo * 30;
     p.health = Math.min(p.maxHealth, p.health + heal);
     g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6");
     const slept = [];
-    for (const e of g.enemies) {
-      if (!canHit(e)) continue;
-      if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > R) continue;
-      const st = 150 + evo * 20;
-      hitEnemy(g, e, 4 * pw(p), { stun: st, color: "#ffb6e4", shake: 0, xp: 1, parts: 4 });
-      if (!e.boss) { e.vx = 0; e.telegraph = false; }
-      e._sleepUntil = (g.t || 0) + (e.boss ? 20 : st);
-      slept.push(e);
-    }
-    add({ kind: "purr", life: 40, R });
-    if (slept.length) add({ kind: "zzz", list: slept, life: 150 + evo * 20 });
-    boom(g, cx(p), cy(p), "#ffb6e4", 10, { star: true });
+    add({ kind: "purr", life: 72, max: 72, R, hit: new Set(), slept, dmg: 6 * pw(p), stun, evo });
+    boom(g, cx(p), cy(p), "#ffb6e4", 16, { star: true });
   },
   ninetails(g, p, evo) {
     const targets = g.enemies.filter(canHit).sort((a, b) => Math.hypot(cx(a) - cx(p), cy(a) - cy(p)) - Math.hypot(cx(b) - cx(p), cy(b) - cy(p)));
     for (let i = 0; i < 9; i++) {
-      const a = -Math.PI / 2 - p.facing * (0.3 + (i / 8) * 2.2) * 1;
-      const sp = 3.5 + (i % 3) * 0.6;
+      const fan = -1.25 + (i / 8) * 2.5;
+      const a = p.facing > 0 ? fan : Math.PI - fan;
+      const sp = 10 + (i % 3) * 1.8 + evo * 0.35;
       add({
-        kind: "wisp", x: cx(p) - p.facing * 8, y: cy(p), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        life: 170, target: targets.length ? targets[i % targets.length] : null, dmg: (13 + evo * 2) * pw(p),
-        color: i % 3 === 0 ? "#b78bff" : i % 3 === 1 ? "#ff8ad4" : "#9ae0ff", trail: [], delay: 8 + i * 2, idx: i, tail: true,
+        kind: "wisp", x: cx(p) - p.facing * 6, y: cy(p) - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        life: 230, target: targets.length ? targets[i % targets.length] : null, dmg: (13 + evo * 2) * pw(p),
+        color: i % 3 === 0 ? "#d7b0ff" : i % 3 === 1 ? "#ff7ad4" : "#b6f0ff", trail: [], delay: i * 1.2, idx: i, tail: true,
       });
     }
-    g.shake = Math.min(18, (g.shake || 0) + 4);
-    boom(g, cx(p), cy(p), "#b78bff", 10, { star: true, up: 2 });
+    g.shake = Math.min(18, (g.shake || 0) + 6);
+    boom(g, cx(p), cy(p), "#b78bff", 18, { star: true, up: 3 });
   },
 
   // ======================= DRAGÓN =======================
@@ -874,7 +866,26 @@ const UPD = {
     }
     return f.life > 0;
   },
-  purr(g, f) { return --f.life > 0; },
+  purr(g, f, p) {
+    f.life--;
+    const u = 1 - f.life / (f.max || 72);
+    const rad = Math.min(f.R, 36 + u * f.R);
+    for (const e of g.enemies) {
+      if (f.hit.has(e) || !canHit(e)) continue;
+      if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > rad) continue;
+      f.hit.add(e);
+      const st = e.boss ? 40 + f.evo * 8 : f.stun;
+      hitEnemy(g, e, f.dmg, { stun: st, color: "#ffb6e4", shake: 0, xp: 1, parts: 6 });
+      if (!e.boss) { e.vx = 0; e.telegraph = false; }
+      e._sleepUntil = (g.t || 0) + st;
+      f.slept.push(e);
+      if (!f._zzz) {
+        f._zzz = true;
+        add({ kind: "zzz", list: f.slept, life: f.stun });
+      }
+    }
+    return f.life > 0;
+  },
   zzz(g, f) {
     f.life--;
     f.list = f.list.filter((e) => alive(e) && (e._sleepUntil || 0) > g.t);
@@ -883,22 +894,32 @@ const UPD = {
   wisp(g, f, p) {
     f.life--;
     f.trail.push({ x: f.x, y: f.y });
-    if (f.trail.length > 8) f.trail.shift();
+    const trailMax = f.tail ? 30 : 8;
+    if (f.trail.length > trailMax) f.trail.shift();
     if (f.delay > 0) {
       f.delay--;
-      f.vx *= 0.95; f.vy *= 0.95;
+      f.vx *= f.tail ? 0.985 : 0.95;
+      f.vy *= f.tail ? 0.985 : 0.95;
     } else {
-      if (!alive(f.target)) f.target = nearestEnemy(g, f.x, f.y, 900, null, 0);
+      if (!alive(f.target)) f.target = nearestEnemy(g, f.x, f.y, 1100, null, 0);
       let tx, ty;
       if (f.target) { tx = cx(f.target); ty = cy(f.target); }
       else {
-        const a = f.age * 0.08 + f.idx * 0.7;
-        tx = cx(p) + Math.cos(a) * 60; ty = cy(p) - 30 + Math.sin(a) * 30;
+        const a = f.age * 0.11 + f.idx * 0.7;
+        tx = cx(p) + Math.cos(a) * (f.tail ? 140 : 60);
+        ty = cy(p) - 20 + Math.sin(a * 1.3) * (f.tail ? 70 : 30);
       }
       const dx = tx - f.x, dy = ty - f.y, d = Math.hypot(dx, dy) || 1;
-      const sp = f.target ? 9.5 : 4;
-      f.vx += ((dx / d) * sp - f.vx) * 0.14;
-      f.vy += ((dy / d) * sp - f.vy) * 0.14;
+      const sp = f.target ? (f.tail ? 14.5 : 9.5) : (f.tail ? 7 : 4);
+      const steer = f.tail ? 0.075 : 0.14;
+      f.vx += ((dx / d) * sp - f.vx) * steer;
+      f.vy += ((dy / d) * sp - f.vy) * steer;
+    }
+    if (f.tail) {
+      const ang = Math.atan2(f.vy, f.vx);
+      const wob = Math.sin(f.age * 0.55 + f.idx * 1.3) * (f.delay > 0 ? 1.6 : 5.2);
+      f.vx += Math.cos(ang + Math.PI / 2) * wob * 0.22;
+      f.vy += Math.sin(ang + Math.PI / 2) * wob * 0.22;
     }
     f.x += f.vx; f.y += f.vy;
     if (f.delay <= 0) {
@@ -1293,24 +1314,51 @@ function drawWisp(ctx, f, cam, t) {
   const x = f.x - cam.x, y = f.y - cam.y;
   const pts = f.trail || [];
   if (f.tail && pts.length > 1) {
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#5b2f4f";
-    ctx.lineWidth = 10;
+    const ribbon = (width, color, alpha) => {
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x - cam.x, pts[0].y - cam.y);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x - cam.x, pts[i].y - cam.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    };
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ribbon(26, f.color, 0.28);
+    ribbon(12, "#fff6ff", 0.55);
+    ribbon(5, f.color, 0.95);
+    for (let i = 0; i < pts.length; i += 2) {
+      const k = (i + 1) / pts.length;
+      const wob = Math.sin(t * 0.6 + i + f.idx) * (1 - k) * 3;
+      ctx.globalAlpha = 0.25 + k * 0.7;
+      ctx.fillStyle = i % 4 === 0 ? "#fff" : f.color;
+      ctx.beginPath();
+      ctx.arc(pts[i].x - cam.x + wob, pts[i].y - cam.y, 1.4 + k * 3.2, 0, TAU);
+      ctx.fill();
+    }
+    const pulse = 22 + Math.sin(t * 0.45 + f.idx) * 6;
+    glow(ctx, x, y, pulse, f.color, 0.9);
+    glow(ctx, x, y, pulse * 0.45, "#fff", 0.8);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.translate(x, y);
+    ctx.rotate(Math.atan2(f.vy, f.vx) + Math.PI / 2);
+    const flick = Math.sin(t * 0.5 + f.idx) * 3;
+    ctx.fillStyle = f.color;
     ctx.beginPath();
-    ctx.moveTo(pts[0].x - cam.x, pts[0].y - cam.y);
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x - cam.x, pts[i].y - cam.y);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.strokeStyle = f.color;
-    ctx.lineWidth = 6;
-    ctx.stroke();
-    ctx.fillStyle = "#ff5c9a";
-    ctx.beginPath();
-    ctx.moveTo(x, y + 6);
-    ctx.bezierCurveTo(x - 7, y - 1, x - 4, y - 7, x, y - 2);
-    ctx.bezierCurveTo(x + 4, y - 7, x + 7, y - 1, x, y + 6);
+    ctx.moveTo(0, -12);
+    ctx.quadraticCurveTo(9, 2, 0, 20 + flick);
+    ctx.quadraticCurveTo(-9, 2, 0, -12);
     ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.ellipse(0, -1, 3.2, 5, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
     return;
   }
   ctx.globalCompositeOperation = "lighter";
@@ -1487,26 +1535,35 @@ const DRW = {
   },
   purr(ctx, f, cam, t, g, p) {
     const x = cx(p) - cam.x, y = cy(p) - cam.y;
-    const k = 1 - f.life / 40;
-    for (let i = 0; i < 3; i++) {
-      const u = Math.min(1, k * 1.4 - i * 0.18);
-      if (u <= 0) continue;
-      ctx.globalAlpha = (1 - u) * 0.9;
-      ctx.strokeStyle = i === 1 ? "#fff" : "#ffb6e4";
-      ctx.lineWidth = 4 - i;
-      ctx.beginPath(); ctx.arc(x, y, f.R * u, 0, TAU); ctx.stroke();
-    }
-    ctx.globalAlpha = 1 - k;
-    ctx.fillStyle = "#ff8ad4";
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * TAU + k * 2;
-      const hx = x + Math.cos(a) * f.R * k * 0.7, hy = y + Math.sin(a) * f.R * k * 0.7;
+    const u = 1 - f.life / (f.max || 72);
+    const rad = Math.min(f.R, 36 + u * f.R);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 0.18 * (1 - u * 0.35);
+    ctx.fillStyle = "#ffb6e4";
+    ctx.beginPath(); ctx.arc(x, y, rad, 0, TAU); ctx.fill();
+    ctx.globalAlpha = 0.9;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#fff";
+    ctx.beginPath(); ctx.arc(x, y, Math.max(1, rad), 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 0.45;
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "#ff8ad4";
+    ctx.beginPath(); ctx.arc(x, y, Math.max(1, rad * 0.62), 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 0.85;
+    ctx.fillStyle = "#ffd0ee";
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * TAU + t * 0.04;
+      const hx = x + Math.cos(a) * rad * 0.92;
+      const hy = y + Math.sin(a) * rad * 0.92;
       ctx.beginPath();
-      ctx.moveTo(hx, hy + 4);
-      ctx.bezierCurveTo(hx - 7, hy - 2, hx - 4, hy - 7, hx, hy - 3);
-      ctx.bezierCurveTo(hx + 4, hy - 7, hx + 7, hy - 2, hx, hy + 4);
+      ctx.moveTo(hx, hy + 5);
+      ctx.bezierCurveTo(hx - 8, hy - 2, hx - 5, hy - 9, hx, hy - 3);
+      ctx.bezierCurveTo(hx + 5, hy - 9, hx + 8, hy - 2, hx, hy + 5);
       ctx.fill();
     }
+    ctx.restore();
   },
   zzz(ctx, f, cam, t) {
     ctx.font = "800 14px Outfit,sans-serif";

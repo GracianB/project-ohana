@@ -143,7 +143,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-75`
+`ohana-76`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
