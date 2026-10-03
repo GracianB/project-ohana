@@ -5,6 +5,11 @@ export function canonId(id) {
   return ID_LEGACY[id] || id || "";
 }
 
+function finiteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
 export function packSave(game, MagicMod) {
   const p = game && game.player;
   let magic = null;
@@ -35,14 +40,14 @@ export function unpackSave(raw, defId) {
   if (defId && id !== canonId(defId)) return null;
   const vis = raw.visited && typeof raw.visited === "object" && !Array.isArray(raw.visited) ? raw.visited : { hub: true };
   return {
-    roomId: raw.roomId || "hub",
+    roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
     visited: vis,
-    score: Math.max(0, Number(raw.score) || 0),
-    kills: Math.max(0, Number(raw.kills) || 0),
+    score: Math.max(0, finiteNumber(raw.score)),
+    kills: Math.max(0, finiteNumber(raw.kills)),
     won: !!raw.won,
-    evo: Math.max(0, Math.min(4, Number(raw.evo) || 0)),
-    xp: Math.max(0, Number(raw.xp) || 0),
-    hp: raw.hp == null ? null : Math.max(0, Number(raw.hp) || 0),
+    evo: Math.max(0, Math.min(4, finiteNumber(raw.evo))),
+    xp: Math.max(0, finiteNumber(raw.xp)),
+    hp: raw.hp == null ? null : Math.max(0, finiteNumber(raw.hp)),
     nineUsed: !!raw.nineUsed,
     magic: raw.magic && typeof raw.magic === "object" ? raw.magic : null,
     id

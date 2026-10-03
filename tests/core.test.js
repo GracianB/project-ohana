@@ -91,6 +91,40 @@ test("audio y música no fallan cuando Web Audio no existe", async () => {
   await import("../engine/music.js");
 });
 
+test("Magic.restore limpia efectos previos y limita snapshots corruptos", async () => {
+  const originals = { window: globalThis.window, addEventListener: globalThis.addEventListener };
+  globalThis.window = globalThis.window || {};
+  globalThis.addEventListener = globalThis.addEventListener || (() => {});
+  let Magic;
+  try {
+    ({ Magic } = await import("../systems/magic.js"));
+  } finally {
+    if (originals.window === undefined) delete globalThis.window;
+    else globalThis.window = originals.window;
+    if (originals.addEventListener === undefined) delete globalThis.addEventListener;
+    else globalThis.addEventListener = originals.addEventListener;
+  }
+
+  const player = { id: "kilo", evo: 0, maxJumps: 1, x: 0, y: 0, w: 20, h: 28 };
+  const game = { player, enemySlow: 0, enemies: [], orbs: [], t: 0 };
+  Magic.update(game);
+  Magic.restore({ fx: { feather: 30, hourglass: 30, shell: 99, star: Infinity, fruit: 200 } });
+  assert.equal(player.maxJumps, 2);
+  assert.equal(game.enemySlow, 2);
+  assert.deepEqual(Magic.snapshot().fx, { feather: 30, hourglass: 30, shell: 3 });
+
+  player.evo = 1;
+  player.maxJumps = 2;
+  Magic.update(game);
+  assert.equal(player.maxJumps, 3);
+
+  Magic.restore({ fx: {} });
+  assert.equal(player.maxJumps, 2);
+  assert.equal(game.enemySlow, 0);
+  assert.deepEqual(Magic.snapshot().fx, {});
+  Magic.reset(game);
+});
+
 test("partículas respetan y restauran el alfa del canvas", () => {
   const particles = new ParticleSystem();
   particles.emit(10, 20, { count: 1, life: 10 });
@@ -265,6 +299,20 @@ test("save canoniza ids viejos y no mezcla personajes", () => {
   assert.equal(ok.evo, 2);
   assert.equal(ok.hp, 40);
   assert.equal(unpackSave(raw, "stitcho"), null);
+});
+
+test("save descarta números no finitos y sala mal formada", () => {
+  const loaded = unpackSave({
+    id: "kilo", roomId: { unexpected: true }, visited: [],
+    score: Infinity, kills: NaN, evo: Infinity, xp: -Infinity, hp: Infinity,
+  }, "kilo");
+  assert.equal(loaded.roomId, "hub");
+  assert.deepEqual(loaded.visited, { hub: true });
+  assert.equal(loaded.score, 0);
+  assert.equal(loaded.kills, 0);
+  assert.equal(loaded.evo, 0);
+  assert.equal(loaded.xp, 0);
+  assert.equal(loaded.hp, 0);
 });
 
 test("stopMusic desconecta todo el grafo de delay del tema", async () => {

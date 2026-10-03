@@ -474,9 +474,7 @@ function feathered(p) {
     featherBase == null ||
     featherEvo !== p.evo
   ) {
-    featherBase =
-      Math.max(0, finite(p.maxJumps, 0) - 1);
-
+    featherBase = Math.max(0, finite(p.maxJumps, 0));
     featherEvo = p.evo;
   }
 
@@ -495,13 +493,9 @@ function unfeather(p) {
     featherPlayer === p &&
     featherBase != null
   ) {
-    p.maxJumps = Math.max(
-      0,
-      finite(
-        p.maxJumps,
-        featherBase + 1,
-      ) - 1,
-    );
+    p.maxJumps = featherEvo === p.evo
+      ? featherBase
+      : Math.max(0, finite(p.maxJumps, featherBase));
   }
 
   featherBase = null;
@@ -2299,11 +2293,13 @@ export const Magic = {
   },
 
   restore(snap) {
-    if (!snap || !snap.fx || typeof snap.fx !== "object") return;
-    for (const k of Object.keys(fx)) delete fx[k];
+    clearAll(lastGame);
+    if (!snap || !snap.fx || typeof snap.fx !== "object" || Array.isArray(snap.fx)) return;
     for (const k of Object.keys(snap.fx)) {
       const n = Number(snap.fx[k]);
-      if (n > 0 && DEFS[k] && k !== "fruit") fx[k] = n;
+      const def = DEFS[k];
+      if (!def || k === "fruit" || !Number.isFinite(n) || n <= 0) continue;
+      fx[k] = k === "shell" ? Math.min(def.hits, Math.floor(n)) : Math.min(def.dur, n);
     }
     const p = lastPlayer || (lastGame && lastGame.player);
     if (p && fx.feather > 0) feathered(p);
