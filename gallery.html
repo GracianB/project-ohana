@@ -1,57 +1,134 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><title>Ohana · Galería de personajes</title>
-<style>body{margin:0;background:#1d2a3a;color:#cfe;font:12px system-ui}canvas{display:block}</style></head>
-<body>
-<canvas id="c"></canvas>
-<script type="module">
-// Galería: ?id=<personaje> muestra 5 formas × estados. Sin id: todas las formas de todos.
-// ?t=<frame> fija el tiempo, ?s=<escala>
-import { ROSTER } from "./characters/roster.js";
-import { drawCharacter } from "./characters/draw.js";
-const q = new URLSearchParams(location.search);
-const ID = q.get("id"), S = +(q.get("s") || 2), T0 = +(q.get("t") || 40);
-const c = document.getElementById("c"), ctx = c.getContext("2d");
-const STATES = ["idle", "blink", "run0", "run1", "run2", "run3", "jump", "fall", "attack", "cast", "hurt", "victory", "flourish", "wall"];
-
-function mk(r, f, evo, st, t) {
-  const p = { id: r.id, evo, color: f.color, w: f.w, h: f.h, vx: 0, vy: 0, grounded: true, facing: 1, melee: 0, invuln: 0, speed: f.speed };
-  p._rig = { sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 999, blinkT: 0, idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t };
-  if (st === "blink") p._rig.blinkT = 5;
-  if (st.startsWith("run")) { p.vx = f.speed; p._rig.phase = (+st[3]) * Math.PI / 2 - 0.3; p._rig.sway = -0.6; }
-  if (st === "jump") { p.grounded = false; p.vy = -9; p._rig.bounce = -0.6; }
-  if (st === "fall") { p.grounded = false; p.vy = 7; p._rig.bounce = 0.6; }
-  if (st === "attack") { p.melee = 5; p._rig.atkMax = 12; }
-  if (st === "cast") p._cast = { slot: 2, t: t - 12 };
-  if (st === "hurt") p.invuln = 27;
-  if (st === "victory") { p._poseOverride = "victory"; p._evoT = 0.8; }
-  if (st === "flourish") { p._rig.flourishT = 0.45; }
-  if (st === "wall") { p.grounded = false; p.wall = 1; p.vy = 2; }
-  return p;
-}
-function frame() {
-  const list = ID ? ROSTER.filter((r) => r.id === ID) : ROSTER;
-  const cols = ID ? STATES.length : 5, rows = ID ? 5 : list.length;
-  const CW = 100, RH = 96;
-  c.width = (cols * CW + 20) * S; c.height = (rows * RH + 30) * S;
-  ctx.fillStyle = "#1d2a3a"; ctx.fillRect(0, 0, c.width, c.height);
-  ctx.save(); ctx.scale(S, S);
-  ctx.fillStyle = "#9bd"; ctx.font = "10px system-ui";
-  if (ID) STATES.forEach((s, i) => ctx.fillText(s, 20 + i * CW, 12));
-  for (let row = 0; row < rows; row++) {
-    const r = ID ? list[0] : list[row];
-    for (let col = 0; col < cols; col++) {
-      const evo = ID ? row : col, st = ID ? STATES[col] : "idle";
-      const f = r.forms[evo];
-      const cx = 50 + col * CW, gy = 26 + (row + 1) * RH - 12;
-      ctx.strokeStyle = "#3d6"; ctx.beginPath(); ctx.moveTo(cx - 44, gy); ctx.lineTo(cx + 44, gy); ctx.stroke();
-      const p = mk(r, f, evo, st, T0);
-      p.x = cx - f.w / 2; p.y = gy - f.h;
-      drawCharacter(ctx, p, { x: 0, y: 0 }, T0);
-      if (!ID || col === 0) { ctx.fillStyle = "#9bd"; ctx.fillText(f.name, cx - 44, gy + 10); }
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ohana · Galería</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #071226;
+      color: #d5e4f5;
+      font: 14px/1.4 Outfit, system-ui, sans-serif;
     }
-  }
-  ctx.restore();
-  window.__done = true;
-}
-setTimeout(frame, 300);
-</script></body></html>
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    h1 { margin: 0; font: 700 18px Fredoka, system-ui, sans-serif; letter-spacing: .08em; }
+    nav { display: flex; flex-wrap: wrap; gap: 6px; }
+    a, button {
+      color: #d5e4f5;
+      background: #102033;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      padding: 6px 10px;
+      text-decoration: none;
+      font: 700 12px/1 inherit;
+      cursor: pointer;
+    }
+    a.on { border-color: #7ee7ff; color: #fff; }
+    main { padding: 16px; overflow: auto; }
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      background: #1d2a3a;
+      border-radius: 16px;
+    }
+    p { margin: 0 0 12px; color: #8eabc4; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GALERÍA</h1>
+    <nav id="nav"></nav>
+  </header>
+  <main>
+    <p id="hint">Cargando elenco…</p>
+    <canvas id="c"></canvas>
+  </main>
+  <script type="module">
+    import { ROSTER } from "./characters/roster.js";
+    import { drawCharacter } from "./characters/draw.js";
+    const q = new URLSearchParams(location.search);
+    const ID = q.get("id");
+    const S = +(q.get("s") || 2);
+    const T0 = +(q.get("t") || 40);
+    const c = document.getElementById("c");
+    const ctx = c.getContext("2d");
+    const STATES = ["idle", "blink", "run0", "run1", "run2", "run3", "jump", "fall", "attack", "cast", "hurt", "victory", "flourish", "wall"];
+    const nav = document.getElementById("nav");
+    nav.innerHTML = '<a href="./gallery.html"' + (ID ? "" : ' class="on"') + ">Todos</a>" +
+      ROSTER.map((r) => '<a href="?id=' + r.id + '"' + (r.id === ID ? ' class="on"' : "") + ">" + r.name + "</a>").join("");
+    document.getElementById("hint").textContent = ID
+      ? "5 formas × 14 estados. Clic en el lienzo para volver a todos."
+      : "Una fila por héroe, cinco formas en idle.";
+    c.addEventListener("click", () => { if (ID) location.href = "./gallery.html"; });
+
+    function mk(r, f, evo, st, t) {
+      const p = { id: r.id, evo, color: f.color, w: f.w, h: f.h, vx: 0, vy: 0, grounded: true, facing: 1, melee: 0, invuln: 0, speed: f.speed };
+      p._rig = { sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 999, blinkT: 0, idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t };
+      if (st === "blink") p._rig.blinkT = 5;
+      if (st.startsWith("run")) { p.vx = f.speed; p._rig.phase = (+st[3]) * Math.PI / 2 - 0.3; p._rig.sway = -0.6; }
+      if (st === "jump") { p.grounded = false; p.vy = -9; p._rig.bounce = -0.6; }
+      if (st === "fall") { p.grounded = false; p.vy = 7; p._rig.bounce = 0.6; }
+      if (st === "attack") { p.melee = 5; p._rig.atkMax = 12; }
+      if (st === "cast") p._cast = { slot: 2, t: t - 12 };
+      if (st === "hurt") p.invuln = 27;
+      if (st === "victory") { p._poseOverride = "victory"; p._evoT = 0.8; }
+      if (st === "flourish") { p._rig.flourishT = 0.45; }
+      if (st === "wall") { p.grounded = false; p.wall = 1; p.vy = 2; }
+      return p;
+    }
+    function frame() {
+      const list = ID ? ROSTER.filter((r) => r.id === ID) : ROSTER;
+      const cols = ID ? STATES.length : 5;
+      const rows = ID ? 5 : list.length;
+      const CW = 110, RH = 104;
+      c.width = (cols * CW + 28) * S;
+      c.height = (rows * RH + 36) * S;
+      ctx.fillStyle = "#1d2a3a";
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.save();
+      ctx.scale(S, S);
+      ctx.fillStyle = "#9bd";
+      ctx.font = "11px system-ui";
+      if (ID) STATES.forEach((s, i) => ctx.fillText(s, 24 + i * CW, 16));
+      for (let row = 0; row < rows; row++) {
+        const r = ID ? list[0] : list[row];
+        if (!r) continue;
+        for (let col = 0; col < cols; col++) {
+          const evo = ID ? row : col;
+          const st = ID ? STATES[col] : "idle";
+          const f = r.forms[evo];
+          if (!f) continue;
+          const cx = 58 + col * CW;
+          const gy = 30 + (row + 1) * RH - 14;
+          ctx.strokeStyle = "rgba(61,214,160,.45)";
+          ctx.beginPath();
+          ctx.moveTo(cx - 46, gy);
+          ctx.lineTo(cx + 46, gy);
+          ctx.stroke();
+          const p = mk(r, f, evo, st, T0);
+          p.x = cx - f.w / 2;
+          p.y = gy - f.h;
+          drawCharacter(ctx, p, { x: 0, y: 0 }, T0);
+          if (!ID || col === 0) {
+            ctx.fillStyle = "#9bd";
+            ctx.fillText(f.name, cx - 46, gy + 14);
+          }
+        }
+      }
+      ctx.restore();
+    }
+    setTimeout(frame, 300);
+  </script>
+</body>
+</html>

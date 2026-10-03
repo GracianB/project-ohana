@@ -1,25 +1,73 @@
-/* Cinemática corta al empezar (systems/intro.js): se dibuja en canvas. */
-#start-intro {
+/* Cinemática de arranque. El dibujo lo hace systems/intro.js en canvas. */
+#start-intro,
+#ohana-intro {
   position: fixed;
   inset: 0;
   z-index: 90;
   display: none;
+  overflow: hidden;
   cursor: pointer;
   touch-action: none;
+  background: #040a18;
+  pointer-events: auto;
 }
-#start-intro.show { display: block; }
-#start-intro canvas {
+#start-intro.show,
+#ohana-intro.show,
+body.intro-playing #ohana-intro {
+  display: block;
+}
+#start-intro canvas,
+#ohana-intro canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+  pointer-events: none;
 }
-#start-intro .intro-sr {
+#start-intro .intro-sr,
+#ohana-intro .intro-sr {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+#start-intro .oi-skip,
+#ohana-intro .oi-skip,
+#start-intro .intro-skip {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 2;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(7, 14, 28, 0.62);
+  color: #d5e4f5;
+  font: 700 11px/1 Outfit, system-ui, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+#start-intro .oi-skip:hover,
+#ohana-intro .oi-skip:hover,
+#start-intro .intro-skip:hover {
+  border-color: #7ee7ff;
+  color: #fff;
+}
+body.intro-complete #start-intro,
+body.intro-complete #ohana-intro,
+body.playing #start-intro,
+body.playing #ohana-intro {
+  display: none !important;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #start-intro,
+  #ohana-intro {
+    display: none !important;
+  }
 }

@@ -1,21 +1,27 @@
-/* Cinemática de evolución (systems/evo-cinema.js): todo se dibuja en el canvas. */
+/* Cinemática de evolución. El dibujo lo hace systems/evo-cinema.js. */
 #evo-stage {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 85;
   display: none;
+  overflow: hidden;
   cursor: pointer;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  background: #040a18;
+  pointer-events: auto;
 }
-#evo-stage.show { display: block; }
+#evo-stage.show {
+  display: block;
+}
 #evo-stage canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+  pointer-events: none;
 }
 #evo-stage .evo-sr {
   position: absolute;
@@ -25,5 +31,30 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
-/* La tarjeta "FORMA N/5" no compite con la cinemática */
-body:has(#evo-stage.show) #notification-container { visibility: hidden; }
+#evo-stage .evo-skip {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 2;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(7, 14, 28, 0.62);
+  color: #d5e4f5;
+  font: 700 11px/1 Outfit, system-ui, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+body:has(#evo-stage.show) #notification-container,
+body:has(#evo-stage.show) #room-banner,
+body:has(#evo-stage.show) #prompt {
+  visibility: hidden;
+}
+body.playing #evo-stage:not(.show) {
+  display: none !important;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #evo-stage { display: none !important; }
+}
