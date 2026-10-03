@@ -48,7 +48,7 @@ export const ABILITY_DEFS = {
   maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
   gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
   gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embiste con el cuerno y no se para." },
-  rainbow: { name: "Ronda", key: "L", cd: 5600, color: "#fff6c8", desc: "Bolas que giran alrededor y luego se disparan." },
+  rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
 };
 
 export function useAbility(game, index) {
@@ -514,7 +514,7 @@ const CASTERS = {
       add({
         kind: "wisp", x: cx(p) - p.facing * 8, y: cy(p), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
         life: 170, target: targets.length ? targets[i % targets.length] : null, dmg: (13 + evo * 2) * pw(p),
-        color: i % 3 === 0 ? "#b78bff" : i % 3 === 1 ? "#ff8ad4" : "#9ae0ff", trail: [], delay: 10 + i * 2, idx: i,
+        color: i % 3 === 0 ? "#b78bff" : i % 3 === 1 ? "#ff8ad4" : "#9ae0ff", trail: [], delay: 8 + i * 2, idx: i, tail: true,
       });
     }
     g.shake = Math.min(18, (g.shake || 0) + 4);
@@ -702,22 +702,30 @@ const CASTERS = {
     boom(g, cx(p), cy(p), "#f2c1ff", 10, { star: true });
   },
   rainbow(g, p, evo) {
+    const face = p.facing || 1;
     const colors = ["#ff8ad4", "#ffb15a", "#ffe14a", "#8ee07a", "#7ec8ff", "#c9b6ff", "#fff6c8"];
-    const n = Math.min(colors.length, 4 + evo);
-    add({
-      kind: "orbit",
-      n,
-      colors: colors.slice(0, n),
-      spin: 36,
-      r: 28 + evo * 3,
-      dmg: 12 + evo * 2,
-      face: p.facing || 1,
-      hit: new Set(),
-      life: 36 + 28,
-    });
-    g.flash = Math.max(g.flash || 0, 6);
+    const y = p.y + p.h * 0.3;
+    for (let i = 0; i < colors.length; i++) {
+      const spread = (i - 3) * 0.38;
+      g.projectiles.push({
+        x: cx(p) + face * (p.w * 0.45),
+        y: y + spread * 8,
+        vx: face * (13 + evo * 0.35),
+        vy: spread,
+        w: 16, h: 16, life: 52, dmg: 11, color: colors[i],
+        shape: "orb", owner: "player", trail: true, pierce: 4,
+      });
+    }
+    const reach = 78 + evo * 8;
+    const box = { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 18 };
+    for (const e of g.enemies) {
+      if (!canHit(e) || !aabb(box, e)) continue;
+      hitEnemy(g, e, (30 + evo * 4) * pw(p), { kx: face * 12, ky: -5, stun: 16, color: "#fff6c8", shake: 6 });
+    }
+    g.flash = Math.max(g.flash || 0, 8);
     g.flashColor = "#fff6ff";
-    boom(g, cx(p), p.y, "#fff6c8", 10, { star: true });
+    g.hitstop = Math.max(g.hitstop || 0, 6);
+    boom(g, cx(p) + face * 20, y, "#fff6c8", 14, { star: true });
   },
 };
 
@@ -725,43 +733,6 @@ const CASTERS = {
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
 const UPD = {
-  orbit(g, f, p) {
-    f.life--;
-    f.spin--;
-    const face = f.face || p.facing || 1;
-    if (f.spin > 0) {
-      for (const e of g.enemies) {
-        if (f.hit.has(e) || !canHit(e)) continue;
-        for (let i = 0; i < f.n; i++) {
-          const a = f.age * 0.22 + (i / f.n) * Math.PI * 2;
-          const x = cx(p) + Math.cos(a) * f.r;
-          const y = cy(p) - 8 + Math.sin(a) * f.r * 0.72;
-          if (circleHit(x, y, 12, e)) {
-            f.hit.add(e);
-            hitEnemy(g, e, f.dmg * 0.6, { kx: face * 4, ky: -3, stun: 10, color: f.colors[i] });
-            break;
-          }
-        }
-      }
-      return true;
-    }
-    if (!f.shot) {
-      f.shot = true;
-      for (let i = 0; i < f.n; i++) {
-        const a = f.age * 0.22 + (i / f.n) * Math.PI * 2;
-        const x = cx(p) + Math.cos(a) * f.r;
-        const y = cy(p) - 8 + Math.sin(a) * f.r * 0.72;
-        g.projectiles.push({
-          x, y, vx: face * (12 + i * 0.3), vy: Math.sin(a) * 2.2,
-          w: 14, h: 14, life: 46, dmg: f.dmg, color: f.colors[i],
-          shape: "orb", owner: "player", trail: true, pierce: 2,
-        });
-      }
-      g.shake = Math.min(10, (g.shake || 0) + 4);
-    }
-    return f.life > 0;
-  },
-
     note(g, f) {
       f.life--;
       f.vy += 0.38;
@@ -1320,10 +1291,32 @@ function drawCloud(ctx, x, y, s, t) {
 
 function drawWisp(ctx, f, cam, t) {
   const x = f.x - cam.x, y = f.y - cam.y;
+  const pts = f.trail || [];
+  if (f.tail && pts.length > 1) {
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#5b2f4f";
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x - cam.x, pts[0].y - cam.y);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x - cam.x, pts[i].y - cam.y);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.fillStyle = "#ff5c9a";
+    ctx.beginPath();
+    ctx.moveTo(x, y + 6);
+    ctx.bezierCurveTo(x - 7, y - 1, x - 4, y - 7, x, y - 2);
+    ctx.bezierCurveTo(x + 4, y - 7, x + 7, y - 1, x, y + 6);
+    ctx.fill();
+    return;
+  }
   ctx.globalCompositeOperation = "lighter";
-  for (let i = 0; i < f.trail.length; i++) {
-    const tr = f.trail[i];
-    const k = (i + 1) / f.trail.length;
+  for (let i = 0; i < pts.length; i++) {
+    const tr = pts[i];
+    const k = (i + 1) / pts.length;
     ctx.globalAlpha = k * 0.45;
     ctx.fillStyle = f.color;
     ctx.beginPath();
@@ -1364,22 +1357,6 @@ function drawSlice(ctx, s) {
 }
 
 const DRW = {
-  orbit(ctx, f, cam, t, g, p) {
-    if (!p) return;
-    for (let i = 0; i < f.n; i++) {
-      const a = (t || f.age) * 0.22 + (i / f.n) * Math.PI * 2;
-      const x = cx(p) + Math.cos(a) * f.r - cam.x;
-      const y = cy(p) - 8 + Math.sin(a) * f.r * 0.72 - cam.y;
-      ctx.fillStyle = f.colors[i];
-      ctx.beginPath();
-      ctx.arc(x, y, 6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#fff6ea";
-      ctx.lineWidth = 1.4;
-      ctx.stroke();
-    }
-  },
-
   note(ctx, f, cam) {
     const x = f.x - cam.x, y = f.y - cam.y;
     glow(ctx, x, y, f.r * 2.2, f.color, 0.55);
