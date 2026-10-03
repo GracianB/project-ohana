@@ -357,7 +357,7 @@ function crown(ctx,x,y){
   stroke(ctx,1.8);
 }
 
-function body(ctx,p,c,form,state,time,rx,ry,bodyY,leg){
+function drawBody(ctx,p,c,form,state,time,rx,ry,bodyY,leg){
   const phase=v(p,"phase",0);
   const run=state==="run";
   const air=["jump","fall","glide"].includes(state);
