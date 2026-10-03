@@ -48,18 +48,17 @@ function paintPortraits(now = performance.now()) {
       c.setTransform(1, 0, 0, 1, 0, 0);
       c.clearRect(0, 0, cv.width, cv.height);
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // Slower evolution cycle (~2.8s per form)
-      const evo = Math.floor(tick / 170) % 5;
-      // Evolve burst when the form changes
+      const card = cv.closest(".char-card");
+      const hero = card && card.classList.contains("selected");
+      const evo = hero ? Math.floor(tick / 220) % 5 : 1;
       if (cv._evo === undefined) cv._evo = evo;
       if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
       cv._burst = Math.max(0, (cv._burst || 0) - 2);
-      // Occasional little attack flash, phase-shifted per card
       cv._atk = Math.max(0, (cv._atk || 0) - 2);
       if ((tick + idx * 47) % 380 === 0) cv._atk = 12;
       const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
-      const at = tick * 0.5 + idx * 24;                 // half-speed, staggered
-      const bob = Math.sin(tick * 0.03 + idx) * 4;      // gentle float
+      const at = tick * 0.5 + idx * 24;
+      const bob = Math.sin(tick * 0.03 + idx) * 4;
       const sway = Math.sin(tick * 0.02 + idx * 1.3) * 0.05;
       const dummy = {
         id: def.id,
@@ -69,7 +68,7 @@ function paintPortraits(now = performance.now()) {
         h: 32,
         facing: 1,
         grounded: true,
-        vx: 0.4,                                        // idle, not running
+        vx: 0.4,
         evo,
         color: form.color || def.color,
         melee: cv._atk || 0,
@@ -77,18 +76,27 @@ function paintPortraits(now = performance.now()) {
         evoBurstMax: 90,
         visualScale: 1,
       };
-      // Altura objetivo: bebé ~60 % del retrato → GOD ~80 %, limitada por el ancho
-      const want = Math.min(bh * (0.6 + 0.05 * evo), bw * (0.5 + 0.05 * evo));
+      const want = Math.min(bh * (hero ? 0.78 : 0.7), bw * 0.72);
       dummy.visualScale = want / (VISUAL_H[evo] * (CHAR_K[def.id] || 1));
-      const footY = bh * 0.86;
+      const footY = bh * 0.9;
       c.save();
-      c.translate(bw / 2, footY + bob * (bh / 128));
-      c.rotate(sway);
-      // drawCharacter ancla los pies en (x + w/2, y + h)
+      c.translate(bw / 2, footY);
+      c.scale(1, 0.28);
+      c.beginPath();
+      c.ellipse(0, 0, Math.max(18, bw * 0.22), 18, 0, 0, Math.PI * 2);
+      c.fillStyle = "rgba(0,0,0,0.35)";
+      c.fill();
+      c.restore();
+      c.save();
+      c.translate(bw / 2, footY + bob * (bh / 160));
+      c.rotate(hero ? sway * 0.6 : 0);
       drawCharacter(c, dummy, { x: 0, y: 0 }, at);
       c.restore();
-      const role = cv.closest(".char-card")?.querySelector(".role");
-      if (role) role.textContent = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
+      const role = card && card.querySelector(".role");
+      if (role) {
+        const en = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
+        role.textContent = hero ? en : def.name;
+      }
       idx++;
     });
   });
@@ -134,7 +142,6 @@ function stepRoster(dir) {
   sfx("ui");
 }
 
-/** Puntos del carrusel (móvil): reflejan la tarjeta centrada. */
 function buildDots() {
   const grid = document.getElementById("chars-grid");
   const wrap = document.getElementById("chars");
@@ -209,7 +216,7 @@ function enhance() {
     if (!def) return;
     el.style.setProperty("--tint", def.color);
     if (!el.querySelector("canvas")) {
-      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="212" height="128"></canvas></div>');
+      el.insertAdjacentHTML("afterbegin", '<div class="portrait"><canvas data-id="' + def.id + '" width="320" height="220"></canvas></div>');
       const title = el.querySelector("h3");
       if (title) title.textContent = def.name;
       const role = el.querySelector(".role");
