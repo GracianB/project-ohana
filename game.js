@@ -569,10 +569,11 @@ function showSwing(p, evo, def) {
   const box = low
     ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
     : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
+  const mouth = p.id === "dino" || p.id === "yomi";
   const life = sig.heavy ? 20 : 16;
   game.slashes.push({
-    x: p.x + p.w / 2 + face * (low ? 6 : 16),
-    y: low ? p.y + p.h * 0.7 : p.y + p.h * 0.32,
+    x: p.x + p.w / 2 + face * (low ? 8 : 18),
+    y: low ? p.y + p.h * 0.72 : (mouth ? p.y + p.h * 0.4 : p.y + p.h * 0.32),
     facing: face, life, max: life,
     color: def.color || p.color,
     kind: def.kind || "slice",
@@ -588,47 +589,6 @@ function showSwing(p, evo, def) {
     star: true, speed: 2.6, angle: face > 0 ? 0 : Math.PI, spread: 0.7,
   });
   game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
-}
-
-function pizzaRangedAttack(p, evo, def) {
-  const face = p.facing || 1;
-  const handX = p.x + p.w / 2 + face * Math.max(14, p.w * 0.62);
-  const handY = p.y + p.h * 0.34;
-  const speed = 14 + evo * 0.8;
-  const damage = Math.max(1, Math.round(def.dmg * 0.5));
-
-  game.projectiles.push({
-    x: handX - 15,
-    y: handY - 11,
-    vx: speed * face,
-    vy: -0.15,
-    w: 30,
-    h: 22,
-    life: 42,
-    dmg: damage,
-    color: def.color || "#ffb43a",
-    shape: "wedge",
-    owner: "player",
-    trail: true,
-    spin: true,
-    rot: face > 0 ? 0 : Math.PI,
-  });
-
-  p._thrust = 4;
-  p._thrustFace = face;
-
-  game.fx.emit(handX, handY, {
-    color: def.color || "#ffb43a",
-    count: 9,
-    size: 3,
-    speed: 2.8,
-    angle: face > 0 ? 0 : Math.PI,
-    spread: 0.45,
-    star: true,
-    life: 14,
-  });
-
-  game.shake = Math.min(10, (game.shake || 0) + 2);
 }
 
 function attack() {
@@ -661,167 +621,8 @@ function attack() {
     hornPoke(p, evo, def);
     return;
   }
-  
-  if (p.id === "pizza") {
-    pizzaRangedAttack(p, evo, def);
-    return;
-  }
-   
 
   showSwing(p, evo, def);
-}
- 
-function melee() {
-  const p = game.player;
-  if (!p || p.dead) return;
-  if (p.melee > 0) { p.meleeBuf = 8; return; }
-  const evo = Number(p.evo) || 0;
-  const sig = signature(p.id);
-  p.melee = Math.max(7, 13 - evo - (sig.air ? 1 : 0));
-  p.meleeBuf = 0;
-  beep("slash");
-
-  const reach = 46 + evo * 11 + sig.reach;
-  const box = {
-    x: p.x + (p.facing > 0 ? p.w - 6 : -reach),
-    y: p.y + (sig.low ? p.h * 0.35 : -10 - evo * 2),
-    w: reach,
-    h: (sig.low ? p.h * 0.7 : p.h + 16 + evo * 5),
-  };
-  const kind = sig.kind;
-  const slashLife = 10 + Math.min(6, evo * 2) + (sig.heavy ? 3 : 0);
-  const slashW = 50 + evo * 14;
-
-  game.slashes.push({
-    x: p.x + p.w / 2 + p.facing * (14 + evo * 4),
-    y: p.y + p.h * 0.42,
-    facing: p.facing,
-    life: slashLife,
-    max: slashLife,
-    color: p.color,
-    kind,
-    w: slashW,
-  });
-
-  // Evo 2+: second trailing arc (reads as a heavier combo swing)
-  if (evo >= 2) {
-    game.slashes.push({
-      x: p.x + p.w / 2 + p.facing * (30 + evo * 5),
-      y: p.y + p.h * 0.32,
-      facing: p.facing,
-      life: Math.max(6, slashLife - 3),
-      max: Math.max(6, slashLife - 3),
-      color: evo >= 4 ? "#fff8c8" : "#fff",
-      kind: (p.id === "chispin" || p.id === "pikachu") ? "zap" : ((p.id === "stitcho" || p.id === "stitch" || p.id === "cat") ? "claws" : "fan"),
-      w: 34 + evo * 10,
-    });
-  }
-
-  game.fx.emit(box.x + 12 * p.facing, box.y + box.h * 0.45, {
-    color: p.color,
-    count: 16 + evo * 5,
-    size: 3.5 + evo * 0.45,
-    angle: p.facing > 0 ? 0 : Math.PI,
-    spread: 1.15 + evo * 0.08,
-    star: true,
-    speed: 3.2 + evo * 0.35,
-  });
-  game.shake = Math.min(16, (game.shake || 0) + 3 + evo);
-
-  // Damage: linear + soft quadratic (evo 0→4 ≈ 28, 42, 60, 82, 110)
-  let dBase = 28 + evo * 12 + evo * evo * 2 + sig.dmg;
-  if (sig.air && !p.grounded) dBase = Math.round(dBase * sig.air);
-  if (evo >= 4) dBase += 8;
-
-  for (const e of game.enemies) {
-    if (e.invuln > 0 || e.dying) continue;
-    if (aabb(box, e)) {
-      let d = dBase;
-      if (e.boss) d = Math.ceil(d * 0.5);
-      e.hp -= d;
-      // Knockback + hitstun más perceptibles (sin soft-lock); GOD +5% knock only
-      let knX = (e.boss ? 4 : 12 + evo * 1.2) * p.facing * sig.kb;
-      let knY = ((e.boss ? -2.2 : -4.2) - evo * 0.55) * (sig.heavy ? 1.25 : 1);
-      if (evo >= 4) { knX *= 1.05; knY *= 1.05; }
-      e.vx = knX;
-      e.vy = Math.min(e.vy || 0, knY);
-      e.stun = Math.max(e.stun || 0, Math.min(28, 16 + evo * 3));
-      e.flash = Math.max(e.flash || 0, 16);
-      game.nums.add(e.x, e.y, "" + d, evo >= 3 ? "#ffe66a" : "#fff", d >= 45);
-      beep(d >= 45 ? "crit" : "hit");
-      punch(e.x, e.y, p.color);
-      hitStop(e.boss ? 2 : (sig.heavy ? 6 : (d >= 45 ? 8 : 3)));
-      game.camPunch = Math.max(game.camPunch || 0, e.boss ? 0.08 : 0.045);
-      buzz(e.boss ? 18 : 10);
-      p.xp += 2 + (evo >= 3 ? 1 : 0);
-    }
-  }
-
-  // Evo 3+: ranged follow-through (flame for dino, zap/crescent otherwise)
-  if (evo >= 3) {
-    const isDino = p.id === "dino";
-    const isDragon = p.id === "dragon";
-    const isPika = p.id === "chispin" || p.id === "pikachu";
-    game.projectiles.push({
-      x: p.x + p.w / 2 + p.facing * 10,
-      y: p.y + p.h * 0.32,
-      vx: (11 + evo) * p.facing,
-      vy: isDino ? -0.4 : (isDragon ? -0.8 : 0),
-      w: isDino || isDragon ? 30 : 18,
-      h: isDino || isDragon ? 18 : 12,
-      life: 26 + evo * 5,
-      dmg: 12 + evo * 4,
-      color: isDino || isDragon ? "#ff6a2a" : (isPika ? "#ffe14a" : p.color),
-      shape: isDino || isDragon ? "flame" : (isPika ? "zap" : "crescent"),
-      owner: "player",
-      trail: true,
-    });
-    if (isDino && evo >= 4) {
-      // God form: twin breath
-      game.projectiles.push({
-        x: p.x + p.w / 2 + p.facing * 6,
-        y: p.y + p.h * 0.22,
-        vx: (9 + evo) * p.facing,
-        vy: -2.2,
-        w: 22, h: 14, life: 24,
-        dmg: 10 + evo * 3,
-        color: "#ffd36a",
-        shape: "flame",
-        owner: "player",
-        trail: true,
-      });
-    }
-  }
-
-  // Evo 4: short bolt shockwave in front (visual + chip damage)
-  if (evo >= 4) {
-    const ox = p.x + p.w / 2;
-    const oy = p.y + p.h * 0.35;
-    const tx = ox + p.facing * (100 + p.w);
-    const ty = oy;
-    game.bolts.push({ x1: ox, y1: oy, x2: tx, y2: ty, life: 14, dmg: 22 });
-    game.bolts.push({
-      x1: ox, y1: oy - 10,
-      x2: tx - p.facing * 18, y2: ty + 16,
-      life: 10, dmg: 10,
-    });
-    const boltDmg = 18;
-    for (const e of game.enemies) {
-      if (e.invuln > 0 || e.dying) continue;
-      const ex = e.x + e.w / 2, ey = e.y + e.h / 2;
-      // Near the bolt segment
-      if (Math.abs(ey - oy) < 48 && ((p.facing > 0 && ex > ox && ex < tx + 20) || (p.facing < 0 && ex < ox && ex > tx - 20))) {
-        e.hp -= boltDmg;
-        e.vx = 8 * p.facing;
-        e.vy = Math.min(e.vy || 0, -3);
-        e.stun = Math.max(e.stun || 0, 10);
-        e.flash = Math.max(e.flash || 0, 14);
-        game.nums.add(e.x, e.y, "" + boltDmg, "#7ecbff", true);
-        punch(e.x, e.y, "#7ecbff");
-      }
-    }
-    game.fx.emit(tx, ty, { color: "#fffde0", count: 14, size: 4, speed: 4, star: true, up: 1.4 });
-  }
 }
 function hurtPlayer(amount, label) {
   const p = game.player;

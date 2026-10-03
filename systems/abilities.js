@@ -1582,40 +1582,6 @@ const DRW = {
     ctx.lineWidth = 6 * (1 - k) + 1;
     ctx.beginPath(); ctx.arc(x, y, f.R * (0.3 + k * 0.8), 0, TAU); ctx.stroke();
   },
-  jaws(ctx, f, cam, t, g, p) {
-    const k = f.life / 14;
-    const open = k > 0.55 ? (k - 0.55) / 0.45 : 0;
-    const x = cx(p) - cam.x + p.facing * (p.w / 2 + f.reach * 0.55), y = p.y + p.h * 0.45 - cam.y;
-    const s = f.size;
-    ctx.translate(x, y);
-    ctx.scale(p.facing, 1);
-    ctx.globalAlpha = Math.min(1, k * 2.5);
-    if (open === 0) glow(ctx, 0, 0, s * 1.4, "#ffffff", 0.5 * k);
-    for (const side of [-1, 1]) {
-      const off = side * (4 + open * s * 0.7);
-      ctx.fillStyle = "#e8ffe0";
-      ctx.strokeStyle = "#2d6a30";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(-s * 0.8, off);
-      ctx.quadraticCurveTo(0, off + side * s * 0.6, s * 0.8, off);
-      for (let i = 4; i >= 0; i--) {
-        const tx = -s * 0.8 + (i / 4) * s * 1.6;
-        ctx.lineTo(tx + s * 0.2, off);
-        ctx.lineTo(tx, off - side * s * 0.28);
-      }
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
-    }
-    if (open === 0 && f.life > 4) {
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2;
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * TAU;
-        ctx.beginPath(); ctx.moveTo(Math.cos(a) * s * 0.9, Math.sin(a) * s * 0.9); ctx.lineTo(Math.cos(a) * s * 1.3, Math.sin(a) * s * 1.3); ctx.stroke();
-      }
-    }
-  },
   quake(ctx, f, cam) {
     for (const s of f.spikes) {
       const u = s.life / 26;
@@ -1843,6 +1809,50 @@ const DRW = {
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.globalAlpha = 1;
+  },
+  jaws(ctx, f, cam, t, g, p) {
+    if (!p) return;
+    const k = Math.min(1, 1 - f.life / 14);
+    const snap = Math.sin(k * Math.PI);
+    const gap = 5 + snap * (f.size || 28);
+    const reach = f.reach || 48;
+    const x = cx(p) - cam.x + (p.facing || 1) * (p.w * 0.72);
+    const y = p.y + p.h * 0.4 - cam.y;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(p.facing || 1, 1);
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "#24140c";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(reach * 0.85, -gap);
+    ctx.lineTo(reach * 0.85, gap);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#8ee07a";
+    ctx.lineWidth = 5;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(2, -3);
+    ctx.lineTo(reach * 0.8, -gap);
+    ctx.moveTo(2, 3);
+    ctx.lineTo(reach * 0.8, gap);
+    ctx.stroke();
+    ctx.fillStyle = "#f4fff0";
+    for (let i = 0; i < 3; i++) {
+      const tx = reach * (0.35 + i * 0.16);
+      ctx.beginPath();
+      ctx.moveTo(tx, -gap * 0.82);
+      ctx.lineTo(tx + 6, -gap * 0.35);
+      ctx.lineTo(tx - 3, -gap * 0.45);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(tx, gap * 0.82);
+      ctx.lineTo(tx + 6, gap * 0.35);
+      ctx.lineTo(tx - 3, gap * 0.45);
+      ctx.fill();
+    }
+    ctx.restore();
   },
 };
 
@@ -2122,67 +2132,127 @@ export function drawSlash(ctx, s, cam) {
       ctx.restore();
     }
   } else if (kind === "bite") {
-    const gap = 1.05 - open * 0.75;
-    swingArc(ctx, reach * 0.78, -gap - 0.2, -0.08, 9, col, fade);
-    swingArc(ctx, reach * 0.78, 0.08, gap + 0.2, 9, col, fade);
+    const snap = 1 - open;
+    const gap = 0.12 + snap * 0.9;
     ctx.save();
     ctx.globalAlpha = fade;
-    ctx.fillStyle = "#f3fff0";
-    for (const side of [-1, 1]) {
-      for (let i = 0; i < 4; i++) {
-        const ang = side * (0.14 + i * 0.18);
-        const px = Math.cos(ang) * reach * 0.66;
-        const py = Math.sin(ang) * reach * 0.66;
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(px + 7, py + side * 6);
-        ctx.lineTo(px - 5, py + side * 3);
-        ctx.fill();
-      }
-    }
-    ctx.restore();
-  } else if (kind === "slice") {
-    swingArc(ctx, reach * 0.96, a0, a1, 9, col, 0.22 * fade);
-    swingArc(ctx, reach * 0.96, a0, a1, 2.6, "#fff8dc", fade);
-  } else if (kind === "wedge") {
-    ctx.save();
-    ctx.rotate(a1);
-    ctx.globalAlpha = 0.96 * fade;
-    ctx.fillStyle = "#ffb43a";
+    ctx.fillStyle = "#2a120c";
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, reach * 0.82, -0.46, 0.46);
+    ctx.moveTo(10, 0);
+    ctx.lineTo(reach * 0.7, -gap * reach * 0.4);
+    ctx.lineTo(reach * 0.7, gap * reach * 0.4);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = "#c45a12";
-    ctx.lineWidth = 5;
-    ctx.stroke();
-    ctx.fillStyle = "#ffe7a2";
+    const jaw = (sign) => {
+      ctx.beginPath();
+      ctx.moveTo(6, sign * 3);
+      ctx.lineTo(reach * 0.82, sign * (4 + gap * reach * 0.36));
+      ctx.quadraticCurveTo(reach * 0.5, sign * (gap * reach * 0.12), reach * 0.2, sign * 2);
+      ctx.closePath();
+      ctx.fillStyle = "#3f8f3a";
+      ctx.fill();
+      ctx.strokeStyle = "#1d4a22";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#f4fff0";
+      for (let i = 0; i < 4; i++) {
+        const u = 0.32 + i * 0.14;
+        const px = reach * 0.78 * u;
+        const py = sign * (3 + gap * reach * 0.32 * u);
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + 7, py + sign * 8);
+        ctx.lineTo(px - 4, py + sign * 2);
+        ctx.fill();
+      }
+    };
+    jaw(-1);
+    jaw(1);
+    ctx.restore();
+  } else if (kind === "slice") {
+    const len = reach * (0.32 + open * 0.72);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.translate(0, 6);
+    ctx.fillStyle = "#ffe08a";
     ctx.beginPath();
-    ctx.arc(reach * 0.46, 0, 6, 0, Math.PI * 2);
+    ctx.moveTo(0, -4);
+    ctx.lineTo(len, -2);
+    ctx.lineTo(len + 14, 0);
+    ctx.lineTo(len, 2);
+    ctx.lineTo(0, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#e23b3b";
+    ctx.fillRect(8, -2.2, Math.max(8, len * 0.7), 4.4);
+    ctx.fillStyle = "#fff";
+    for (let i = 0; i < 5; i++) ctx.fillRect(14 + i * (len / 6), (i % 2 ? 5 : -8), 3, 3);
+    ctx.restore();
+  } else if (kind === "wedge") {
+    const len = reach * (0.42 + open * 0.55);
+    ctx.save();
+    ctx.globalAlpha = 0.96 * fade;
+    ctx.rotate(-0.2 + open * 0.4);
+    ctx.fillStyle = "#c45a12";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, len, -0.48, 0.48);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#ffd36a";
+    ctx.beginPath();
+    ctx.moveTo(len * 0.16, 0);
+    ctx.arc(0, 0, len * 0.82, -0.36, 0.36);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#ffe9a8";
+    ctx.beginPath();
+    ctx.moveTo(len * 0.28, 0);
+    ctx.arc(0, 0, len * 0.62, -0.28, 0.28);
+    ctx.closePath();
     ctx.fill();
     ctx.fillStyle = "#e23b3d";
     ctx.beginPath();
-    ctx.arc(reach * 0.3, -8, 3.5, 0, Math.PI * 2);
-    ctx.arc(reach * 0.55, 8, 3, 0, Math.PI * 2);
+    ctx.arc(len * 0.5, -len * 0.08, 5.5, 0, Math.PI * 2);
+    ctx.arc(len * 0.66, len * 0.1, 4, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = "#ffe9a8";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(len * 0.72, len * 0.16);
+    ctx.quadraticCurveTo(len * 0.64, len * 0.36, len * 0.76, len * 0.3 + open * 10);
+    ctx.stroke();
     ctx.restore();
   } else if (kind === "fang") {
-    swingArc(ctx, reach * 0.62, -1.25, -0.1, 7, col, 0.95 * fade);
-    swingArc(ctx, reach * 0.86, -0.15, 1.05, 7, "#ffd6dc", 0.8 * fade);
+    const snap = 1 - open;
+    const gap = 7 + snap * 24;
     ctx.save();
     ctx.globalAlpha = fade;
-    ctx.fillStyle = col;
+    ctx.fillStyle = "#14040c";
     ctx.beginPath();
-    ctx.moveTo(reach * 0.5, -10);
-    ctx.lineTo(reach * 0.82, 18);
-    ctx.lineTo(reach * 0.36, 2);
+    ctx.moveTo(4, 0);
+    ctx.lineTo(reach * 0.72, -gap);
+    ctx.lineTo(reach * 0.72, gap);
+    ctx.closePath();
     ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(reach * 0.22, -18);
-    ctx.lineTo(reach * 0.52, 12);
-    ctx.lineTo(reach * 0.08, -2);
-    ctx.fill();
+    const fang = (sign) => {
+      ctx.fillStyle = "#ff4466";
+      ctx.beginPath();
+      ctx.moveTo(6, sign * 2);
+      ctx.lineTo(reach * 0.5, sign * gap);
+      ctx.lineTo(reach * 0.86, sign * gap * 0.12);
+      ctx.lineTo(reach * 0.38, sign * 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#fff4f0";
+      ctx.beginPath();
+      ctx.moveTo(reach * 0.48, sign * gap * 0.82);
+      ctx.lineTo(reach * 0.74, sign * gap * 0.18);
+      ctx.lineTo(reach * 0.42, sign * gap * 0.12);
+      ctx.fill();
+    };
+    fang(-1);
+    fang(1);
     ctx.restore();
   } else if (kind === "poke") {
     const len = reach * (0.28 + open * 0.78);
