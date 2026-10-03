@@ -1,657 +1,571 @@
 // ============================================================================
-// MICHI · GATO KAWAII · RENDER V3
-// ============================================================================
-// Diseño visual:
-//   - Kawaii extremo: cabeza enorme, cuerpo mini, ojos tipo anime.
-//   - Silueta redonda/adorable, patas diminutas y barriga visible.
-//   - Orejas suaves, mejillas rosadas, nariz corazón y boca pequeña.
-//   - Accesorios pastel por evolución.
-//   - Animaciones compatibles con idle/run/jump/fall/glide/attack/cast/victory/
-//     hurt/dead/wall.
-//   - Sin dependencias obligatorias del renderer auxiliar.
+// PROJECT OHANA · MICHI / CAT · KAWAII PREMIUM RENDER
+// ----------------------------------------------------------------------------
+// Renderer vectorial autocontenido.
+// Contrato: draw(ctx, pose, R), origen en el centro de los pies.
+// No modifica estado global sin restaurarlo.
 // ============================================================================
 
 const TAU = Math.PI * 2;
-const INK = "#48263f";
-const SOFT_INK = "#80536f";
+const INK = "#3b2337";
+const SOFT = "#8b5775";
 
-const PAL = [
-  { fur:"#ffd9eb", belly:"#fff8fc", ear:"#ff9cc8", inner:"#ffc1dc", accent:"#ff5f9e", iris:"#7952d9", tail:"#ff9cc8" },
-  { fur:"#ffc7e2", belly:"#fff5fa", ear:"#ff8fbe", inner:"#ffb8d6", accent:"#ff4d92", iris:"#7046df", tail:"#ff8fbe" },
-  { fur:"#ffb9dc", belly:"#fff2f9", ear:"#ff7db5", inner:"#ffa9cf", accent:"#6dd8ff", iris:"#397fe5", tail:"#ff8bc0" },
-  { fur:"#d9c8ff", belly:"#faf6ff", ear:"#ae91ff", inner:"#cbb9ff", accent:"#ffd85b", iris:"#5d49d3", tail:"#ae91ff" },
-  { fur:"#fff9fd", belly:"#ffffff", ear:"#ffb5d8", inner:"#ffd5e8", accent:"#ffd04d", iris:"#df4a9d", tail:"#ffd0e6" }
-];
+const FORMS = Object.freeze([
+  { fur:"#ffd8ea", belly:"#fff8fc", ear:"#ff9bc6", inner:"#ffc0da", iris:"#6f4bd8", accent:"#ff5c9c", tail:"#ff9bc6" },
+  { fur:"#ffc4df", belly:"#fff4fa", ear:"#ff88ba", inner:"#ffacd0", iris:"#6842d6", accent:"#ff4b91", tail:"#ff86b8" },
+  { fur:"#ffb5d9", belly:"#fff0f8", ear:"#ff72ae", inner:"#ff9dcc", iris:"#367fe2", accent:"#65d8ff", tail:"#ff82b8" },
+  { fur:"#d8c7ff", belly:"#faf7ff", ear:"#a88cff", inner:"#c6b4ff", iris:"#5b49cf", accent:"#ffd85a", tail:"#a98bff" },
+  { fur:"#fff9fd", belly:"#ffffff", ear:"#ffafd2", inner:"#ffd0e4", iris:"#d44898", accent:"#ffd14e", tail:"#ffc7df" }
+]);
 
-function num(v, d=0){ return Number.isFinite(v) ? v : d; }
-function clamp(v,a,b){ return Math.max(a, Math.min(b, num(v,a))); }
-function formOf(p){ return clamp(Math.floor(num(p?.form,0)),0,PAL.length-1); }
-function timeOf(p){ return num(p?.t,0); }
-function stateOf(p){ return typeof p?.state === "string" ? p.state : "idle"; }
-function val(p,k,d=0){ return num(p?.[k],d); }
+const N = (v,d=0) => Number.isFinite(Number(v)) ? Number(v) : d;
+const clamp = (v,a,b) => Math.max(a, Math.min(b, N(v,a)));
+const formOf = p => Math.round(clamp(p?.form,0,4));
+const stateOf = p => typeof p?.state === "string" ? p.state : "idle";
+const tOf = p => N(p?.t,0);
+const v = (p,k,d=0) => N(p?.[k],d);
 
-function line(ctx,w=2.5,color=INK){
-  ctx.lineWidth=w;
-  ctx.strokeStyle=color;
-  ctx.lineJoin="round";
-  ctx.lineCap="round";
+function stroke(ctx, width=2.5, color=INK){
+  ctx.lineWidth = width;
+  ctx.strokeStyle = color;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
   ctx.stroke();
 }
 
-function ellipse(ctx,x,y,rx,ry,fill,rot=0,lw=2.5){
+function ellipse(ctx,x,y,rx,ry,fill,rot=0,width=2.5,color=INK){
   ctx.beginPath();
   ctx.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),rot,0,TAU);
-  ctx.fillStyle=fill;
+  ctx.fillStyle = fill;
   ctx.fill();
-  if(lw>0) line(ctx,lw);
+  if(width>0) stroke(ctx,width,color);
 }
 
-function circle(ctx,x,y,r,fill,lw=0){
+function circle(ctx,x,y,r,fill,width=0,color=INK){
   ctx.beginPath();
   ctx.arc(x,y,Math.max(.1,r),0,TAU);
-  ctx.fillStyle=fill;
+  ctx.fillStyle = fill;
   ctx.fill();
-  if(lw>0) line(ctx,lw);
+  if(width>0) stroke(ctx,width,color);
 }
 
-function gradient(ctx,x,y,r,color,R){
-  if(!R?.lighten || !R?.darken) return color;
-  const g=ctx.createRadialGradient(x-r*.35,y-r*.42,r*.04,x,y,r*1.12);
-  g.addColorStop(0,R.lighten(color,.35));
-  g.addColorStop(.58,color);
-  g.addColorStop(1,R.darken(color,.10));
-  return g;
-}
-
-function heart(ctx,x,y,s,fill){
-  s=Math.max(.5,num(s,1));
+function roundBlob(ctx, points, fill, width=2.5){
+  if(!points || points.length<3) return;
   ctx.beginPath();
-  ctx.moveTo(x,y+s*.92);
-  ctx.bezierCurveTo(x-s*1.35,y-s*.05,x-s*.72,y-s*1.08,x,y-s*.30);
-  ctx.bezierCurveTo(x+s*.72,y-s*1.08,x+s*1.35,y-s*.05,x,y+s*.92);
+  for(let i=0;i<points.length;i++){
+    const a=points[i], b=points[(i+1)%points.length];
+    if(i===0) ctx.moveTo(a[0],a[1]);
+    ctx.quadraticCurveTo(a[0]*.35+b[0]*.65,a[1]*.35+b[1]*.65,b[0],b[1]);
+  }
   ctx.closePath();
   ctx.fillStyle=fill;
   ctx.fill();
-  line(ctx,Math.max(1,s*.18));
+  stroke(ctx,width);
+}
+
+function shaded(ctx,x,y,r,color,R){
+  if(!R?.lighten || !R?.darken) return color;
+  const g=ctx.createRadialGradient(x-r*.38,y-r*.5,r*.05,x,y,r*1.15);
+  g.addColorStop(0,R.lighten(color,.38));
+  g.addColorStop(.56,color);
+  g.addColorStop(1,R.darken(color,.12));
+  return g;
+}
+
+function heart(ctx,x,y,s,fill="#ff68a7",width=1.6){
+  s=Math.max(.6,N(s,1));
+  ctx.beginPath();
+  ctx.moveTo(x,y+s*.9);
+  ctx.bezierCurveTo(x-s*1.3,y-s*.05,x-s*.72,y-s*1.08,x,y-s*.28);
+  ctx.bezierCurveTo(x+s*.72,y-s*1.08,x+s*1.3,y-s*.05,x,y+s*.9);
+  ctx.closePath();
+  ctx.fillStyle=fill;
+  ctx.fill();
+  stroke(ctx,width);
+}
+
+function sparkle(ctx,x,y,s,fill="#fff"){
+  s=Math.max(1,N(s,1));
+  ctx.beginPath();
+  ctx.moveTo(x,y-s);
+  ctx.quadraticCurveTo(x,y,x+s,y);
+  ctx.quadraticCurveTo(x,y,x,y+s);
+  ctx.quadraticCurveTo(x,y,x-s,y);
+  ctx.quadraticCurveTo(x,y,x,y-s);
+  ctx.fillStyle=fill;
+  ctx.fill();
 }
 
 function star(ctx,x,y,r,fill){
   ctx.beginPath();
   for(let i=0;i<10;i++){
     const a=-Math.PI/2+i*Math.PI/5;
-    const rr=i%2?r:r*.42;
+    const rr=(i%2===0)?r:r*.42;
     const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
     i?ctx.lineTo(px,py):ctx.moveTo(px,py);
   }
   ctx.closePath();
   ctx.fillStyle=fill;
   ctx.fill();
-  line(ctx,1.5);
+  stroke(ctx,1.3);
 }
 
-function sparkle(ctx,x,y,s,fill="#fff"){
-  s=Math.max(1,num(s,1));
-  ctx.beginPath();
-  ctx.moveTo(x,y-s); ctx.quadraticCurveTo(x,y,x+s,y);
-  ctx.quadraticCurveTo(x,y,x,y+s); ctx.quadraticCurveTo(x,y,x-s,y);
-  ctx.quadraticCurveTo(x,y,x,y-s); ctx.fillStyle=fill; ctx.fill();
-}
-
-function drawEar(ctx,x,y,s,side,c,state,time){
-  const flap=state==="hurt" ? .28 : Math.sin(time*.07+side)>.985 ? .12 : 0;
+function ear(ctx,x,y,r,side,c,state,time){
+  const flap = state==="hurt" ? .22 : Math.sin(time*.08+side*1.7)>0.992 ? .16 : 0;
   ctx.save();
   ctx.translate(x,y);
   ctx.rotate(side*flap);
-  ctx.beginPath();
-  ctx.moveTo(-s*.48,s*.34);
-  ctx.quadraticCurveTo(-s*.42,-s*.48,0,-s*.78);
-  ctx.quadraticCurveTo(s*.42,-s*.48,s*.48,s*.34);
-  ctx.quadraticCurveTo(0,s*.58,-s*.48,s*.34);
-  ctx.closePath();
-  ctx.fillStyle=gradient(ctx,0,0,s,c.ear,null);
-  ctx.fill();
-  line(ctx,2.7);
 
   ctx.beginPath();
-  ctx.moveTo(-s*.25,s*.20);
-  ctx.quadraticCurveTo(-s*.20,-s*.32,0,-s*.52);
-  ctx.quadraticCurveTo(s*.20,-s*.32,s*.25,s*.20);
-  ctx.quadraticCurveTo(0,s*.34,-s*.25,s*.20);
+  ctx.moveTo(-r*.48,r*.43);
+  ctx.quadraticCurveTo(-r*.43,-r*.18,0,-r);
+  ctx.quadraticCurveTo(r*.43,-r*.18,r*.48,r*.43);
+  ctx.quadraticCurveTo(0,r*.62,-r*.48,r*.43);
+  ctx.closePath();
+  ctx.fillStyle=shaded(ctx,0,0,r,c.ear,null);
+  ctx.fill();
+  stroke(ctx,3);
+
+  ctx.beginPath();
+  ctx.moveTo(-r*.25,r*.28);
+  ctx.quadraticCurveTo(-r*.22,-r*.16,0,-r*.62);
+  ctx.quadraticCurveTo(r*.22,-r*.16,r*.25,r*.28);
+  ctx.quadraticCurveTo(0,r*.38,-r*.25,r*.28);
   ctx.closePath();
   ctx.fillStyle=c.inner;
   ctx.fill();
-  line(ctx,1.2,SOFT_INK);
+  stroke(ctx,1.2,SOFT);
+
   ctx.restore();
 }
 
-function drawEye(ctx,x,y,r,iris,mood,side,blink=0){
-  r=Math.max(5,num(r,5));
+function eye(ctx,x,y,r,c,side,pose,mood){
   if(mood==="heart"){
-    heart(ctx,x,y,r*.62,side<0?"#ff5a9d":"#ff7ab5");
+    heart(ctx,x,y,r*.62,side<0?"#ff5b9e":"#ff79b4",1.2);
     return;
   }
-  if(mood==="hurt"){
+  if(mood==="dead"){
     ctx.beginPath();
-    ctx.moveTo(x-r*.55,y-r*.48); ctx.lineTo(x+r*.55,y+r*.48);
-    ctx.moveTo(x+r*.55,y-r*.48); ctx.lineTo(x-r*.55,y+r*.48);
-    line(ctx,r*.22);
+    ctx.moveTo(x-r*.62,y-r*.62); ctx.lineTo(x+r*.62,y+r*.62);
+    ctx.moveTo(x+r*.62,y-r*.62); ctx.lineTo(x-r*.62,y+r*.62);
+    stroke(ctx,Math.max(2,r*.2));
     return;
   }
-  if(mood==="closed" || blink>.78){
+  const blink=clamp(pose?.blink,0,1);
+  if(mood==="happy" || blink>.82){
     ctx.beginPath();
-    ctx.arc(x,y+r*.08,r*.72,Math.PI*1.10,Math.PI*1.90);
-    line(ctx,r*.20);
-    return;
-  }
-  if(mood==="swirl"){
-    ctx.beginPath();
-    for(let i=0;i<24;i++){
-      const a=i*.48, rr=r*.04+i*r*.022;
-      const px=x+Math.cos(a)*rr,py=y+Math.sin(a)*rr;
-      i?ctx.lineTo(px,py):ctx.moveTo(px,py);
-    }
-    line(ctx,1.7);
+    ctx.arc(x,y+r*.12,r*.72,Math.PI*1.08,Math.PI*1.92);
+    stroke(ctx,Math.max(2,r*.18));
     return;
   }
 
-  const h=r*1.15*(1-clamp(blink,0,1)*.68);
+  const h=r*1.22*(1-blink*.68);
   ctx.save();
   ctx.beginPath();
   ctx.ellipse(x,y,r*.92,Math.max(1,h),0,0,TAU);
   ctx.fillStyle="#fff";
   ctx.fill();
-  line(ctx,Math.max(1.7,r*.14));
+  stroke(ctx,Math.max(1.8,r*.13));
   ctx.clip();
 
+  const lx=v(pose,"lookX",0)*r*.22;
+  const ly=v(pose,"lookY",0)*r*.24;
   ctx.beginPath();
-  ctx.ellipse(x,y+h*.06,r*.50,h*.64,0,0,TAU);
-  ctx.fillStyle=iris;
+  ctx.ellipse(x+lx,y+ly+h*.07,r*.53,h*.68,0,0,TAU);
+  ctx.fillStyle=c.iris;
   ctx.fill();
 
   ctx.beginPath();
-  ctx.ellipse(x,y+h*.11,r*.235,h*.42,0,0,TAU);
-  ctx.fillStyle="#17111b";
+  ctx.ellipse(x+lx,y+ly+h*.10,r*.25,h*.44,0,0,TAU);
+  ctx.fillStyle="#160f1a";
   ctx.fill();
 
-  circle(ctx,x-r*.23,y-r*.29,r*.21,"#fff");
-  circle(ctx,x+r*.22,y+r*.18,r*.085,"#fff");
+  circle(ctx,x+lx-r*.25,y+ly-r*.30,r*.22,"#fff");
+  circle(ctx,x+lx+r*.20,y+ly+r*.20,r*.09,"#fff");
   ctx.restore();
 
   ctx.beginPath();
-  ctx.moveTo(x+side*r*.58,y-r*.66);
-  ctx.lineTo(x+side*r*.93,y-r*.87);
-  line(ctx,Math.max(1.2,r*.10));
+  ctx.moveTo(x+side*r*.55,y-r*.72);
+  ctx.lineTo(x+side*r*.95,y-r*.93);
+  stroke(ctx,Math.max(1.3,r*.1));
 }
 
-function drawMouth(ctx,y,size,open,mood){
-  size=Math.max(2,num(size,5));
-  if(mood==="hurt"){
-    ctx.beginPath();
-    ctx.moveTo(-size*.65,y+2);
-    ctx.quadraticCurveTo(0,y-size*.35,size*.65,y+2);
-    line(ctx,1.8);
-    return;
-  }
-  if(open>.08){
-    const h=size*(.50+open*1.0);
-    ctx.beginPath();
-    ctx.moveTo(-size*.65,y);
-    ctx.quadraticCurveTo(0,y+h,size*.65,y);
-    ctx.closePath();
-    ctx.fillStyle="#a9345c";
-    ctx.fill();
-    line(ctx,1.7);
-    ellipse(ctx,0,y+h*.70,size*.30,size*.18,"#ff8eae",0,0);
-    return;
-  }
-  ctx.beginPath();
-  ctx.moveTo(-size*.58,y);
-  ctx.quadraticCurveTo(-size*.25,y+size*.43,0,y+size*.03);
-  ctx.quadraticCurveTo(size*.25,y+size*.43,size*.58,y);
-  line(ctx,1.8);
-}
-
-function drawCheekTufts(ctx,r,c,state){
-  const a = state === "hurt" ? 0.45 : 0.18;
-  ctx.save();
-  ctx.globalAlpha = 0.9;
-  for (const side of [-1,1]) {
-    for (let i=0;i<3;i++) {
-      const yy = r*.16 + i*r*.11;
-      ctx.beginPath();
-      ctx.moveTo(side*r*.82, yy);
-      ctx.quadraticCurveTo(side*r*(1.00+i*.035), yy-r*.06, side*r*(.88+i*.06), yy+r*.10);
-      ctx.quadraticCurveTo(side*r*(1.06+i*.04), yy+r*.05, side*r*.84, yy+r*.18);
-      ctx.closePath();
-      ctx.fillStyle = c.fur;
-      ctx.globalAlpha = 0.82-a+i*.06;
-      ctx.fill();
-      line(ctx,1.35);
-    }
-  }
-  ctx.restore();
-}
-
-function drawChestFluff(ctx,r,c){
-  ctx.save();
-  ctx.fillStyle = c.belly;
-  ctx.beginPath();
-  ctx.moveTo(-r*.34,r*.70);
-  ctx.quadraticCurveTo(-r*.20,r*.96,0,r*.88);
-  ctx.quadraticCurveTo(r*.20,r*.96,r*.34,r*.70);
-  ctx.quadraticCurveTo(r*.18,r*.80,0,r*.70);
-  ctx.quadraticCurveTo(-r*.18,r*.80,-r*.34,r*.70);
-  ctx.closePath();
-  ctx.fill();
-  line(ctx,1.8,SOFT_INK);
-  ctx.restore();
-}
-
-function drawEyeBrow(ctx,x,y,r,side,emotion){
-  ctx.save();
-  ctx.strokeStyle = SOFT_INK;
-  ctx.lineWidth = Math.max(1.1,r*.075);
-  ctx.lineCap = "round";
-  ctx.beginPath();
-  if(emotion === "sad") {
-    ctx.moveTo(x-side*r*.32,y);
-    ctx.quadraticCurveTo(x,y+side*r*.12,x+side*r*.32,y-r*.02);
-  } else {
-    ctx.moveTo(x-side*r*.30,y+side*r*.03);
-    ctx.quadraticCurveTo(x,y-r*.10,x+side*r*.30,y+side*r*.03);
-  }
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawHeadHighlight(ctx,r){
-  ctx.save();
-  ctx.globalAlpha=.24;
-  ctx.fillStyle="#fff";
-  ctx.beginPath();
-  ctx.ellipse(-r*.42,-r*.43,r*.20,r*.11,-.35,0,TAU);
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawFace(ctx,p,c,r,state,form,time){
+function face(ctx,p,c,r,state,time){
   let mood="normal";
-  if(state==="dead") mood="swirl";
-  else if(state==="hurt") mood="hurt";
-  else if(state==="victory" || val(p,"nineLives",0)>0) mood="heart";
-  else if(state==="idle" && Math.sin(time*.035)>.995) mood="closed";
+  if(state==="dead") mood="dead";
+  else if(state==="victory" || v(p,"nineLives",0)>0) mood="heart";
+  else if(state==="hurt") mood="dead";
+  else if(state==="idle" && Math.sin(time*.045)>.993) mood="happy";
 
-  const er=r*.285;
-  drawEye(ctx,-r*.37,0,er,c.iris,mood,-1,val(p,"blink",0));
-  drawEye(ctx, r*.37,0,er,c.iris,mood, 1,val(p,"blink",0));
+  const eyeR=r*.255;
+  const lookY=clamp(v(p,"vy",0)*.18,-.24,.24);
+  p.lookX = N(p.look?.x,0);
+  p.lookY = N(p.look?.y,lookY);
+
+  eye(ctx,-r*.38,-r*.01,eyeR,c,-1,p,mood);
+  eye(ctx, r*.38,-r*.01,eyeR,c, 1,p,mood);
+
+  ctx.globalAlpha=.72;
+  ellipse(ctx,-r*.62,r*.29,r*.145,r*.08,"#ff79ad",0,0);
+  ellipse(ctx, r*.62,r*.29,r*.145,r*.08,"#ff79ad",0,0);
+  ctx.globalAlpha=1;
+
+  heart(ctx,0,r*.30,r*.065,"#ff659d",1.2);
+
+  const atk=clamp(v(p,"atk",0),0,1);
+  const cast=clamp(v(p,"cast",0),0,1);
+  let open=0;
+  if(state==="attack") open=.34+.40*Math.sin(atk*Math.PI);
+  if(state==="cast") open=.26+.16*Math.sin(cast*Math.PI);
+  if(state==="victory") open=.55;
+  if(state==="hurt") open=.20;
 
   ctx.save();
-  ctx.globalAlpha=.34;
-  circle(ctx,-r*.60,r*.31,r*.145,"#ff75a9");
-  circle(ctx, r*.60,r*.31,r*.145,"#ff75a9");
+  ctx.translate(0,r*.44);
+  if(open>.08){
+    const w=r*.18, h=r*(.14+open*.12);
+    ctx.beginPath();
+    ctx.ellipse(0,0,w,h,0,0,TAU);
+    ctx.fillStyle="#9c3157";
+    ctx.fill();
+    stroke(ctx,1.5);
+    ellipse(ctx,0,h*.55,w*.55,h*.25,"#ff8ca9",0,0);
+  }else{
+    ctx.beginPath();
+    ctx.moveTo(-r*.11,0);
+    ctx.quadraticCurveTo(0,r*.10,r*.11,0);
+    stroke(ctx,1.7);
+  }
   ctx.restore();
 
-  heart(ctx,0,r*.30,Math.max(2.5,r*.065),"#ff659d");
-
-  let open=0;
-  if(state==="attack") open=.45+Math.sin(clamp(val(p,"atk",0),0,1)*Math.PI)*.35;
-  if(state==="hurt") open=.35;
-  if(state==="victory") open=.65;
-  if(state==="cast") open=.30;
-
-  drawMouth(ctx,r*.46,r*.19,open,mood);
-
+  // Bigote suave, para que de verdad parezca gato y no peluche genérico.
   ctx.save();
-  ctx.globalAlpha=.72;
-  ctx.strokeStyle=SOFT_INK;
+  ctx.globalAlpha=.56;
   ctx.lineWidth=1.15;
+  ctx.strokeStyle=SOFT;
   for(const side of [-1,1]){
     for(let i=0;i<3;i++){
-      const yy=r*.36+(i-1)*5;
       ctx.beginPath();
-      ctx.moveTo(side*r*.48,yy);
-      ctx.quadraticCurveTo(side*r*.76,yy-2,side*r*(1.02+i*.035),yy+(i-1)*4);
+      ctx.moveTo(side*r*.47,r*(.36+i*.07));
+      ctx.quadraticCurveTo(side*r*.76,r*(.33+i*.035),side*r*(.98+i*.05),r*(.28+i*.07));
       ctx.stroke();
     }
   }
   ctx.restore();
 }
 
-function drawBow(ctx,x,y,color){
-  for(const side of [-1,1]){
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.quadraticCurveTo(x+side*13,y-11,x+side*14,y);
-    ctx.quadraticCurveTo(x+side*11,y+8,x,y);
-    ctx.closePath();
-    ctx.fillStyle=color;
-    ctx.fill();
-    line(ctx,1.5);
-  }
-  circle(ctx,x,y,3.6,"#ffd84d",1.3);
-}
-
-function drawCrown(ctx,x,y){
-  ctx.beginPath();
-  ctx.moveTo(x-17,y+8); ctx.lineTo(x-13,y-8); ctx.lineTo(x-5,y+1);
-  ctx.lineTo(x,y-12); ctx.lineTo(x+5,y+1); ctx.lineTo(x+14,y-8); ctx.lineTo(x+17,y+8);
-  ctx.closePath();
-  ctx.fillStyle="#ffd65a"; ctx.fill();
-  line(ctx,1.8);
-}
-
-function drawAccessory(ctx,form,r,time){
-  if(form===0 || form===1){
-    drawBow(ctx,-r*.64,-r*.70,PAL[form].accent);
-  } else if(form===2){
-    sparkle(ctx,-r*.60,-r*.78,7,"#70d8ff");
-    sparkle(ctx,r*.76,-r*.65,4,"#fff2a8");
-  } else if(form===3){
-    drawCrown(ctx,-r*.45,-r*.78);
-  } else {
-    drawCrown(ctx,0,-r*.88);
-    ctx.beginPath();
-    ctx.arc(0,-r*1.22,r*.70,0,TAU);
-    line(ctx,2.5,"#ffd65a");
-    for(let i=0;i<8;i++){
-      const a=time*.03+i*TAU/8;
-      sparkle(ctx,Math.cos(a)*r*1.05,-r*1.22+Math.sin(a)*r*.82,2.5,"#fff3a8");
-    }
-  }
-}
-
-function drawTail(ctx,x,y,length,angle,color,time,form){
-  const sway=Math.sin(time*.09)*.20;
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.rotate(angle+sway);
-  ctx.lineCap="round";
-  ctx.lineWidth=14+form*1.8;
-  ctx.strokeStyle=INK;
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.bezierCurveTo(length*.25,-length*.18,length*.62,length*.18,length,0);
-  ctx.stroke();
-  ctx.lineWidth=9+form*1.5;
-  ctx.strokeStyle=color;
-  ctx.beginPath();
-  ctx.moveTo(0,0);
-  ctx.bezierCurveTo(length*.25,-length*.18,length*.62,length*.18,length,0);
-  ctx.stroke();
-  ctx.restore();
-  return [x+Math.cos(angle+sway)*length,y+Math.sin(angle+sway)*length];
-}
-
-function paw(ctx,x,y,len,angle,color){
+function paw(ctx,x,y,size,color,angle=0){
   ctx.save();
   ctx.translate(x,y);
   ctx.rotate(angle);
   ctx.beginPath();
-  ctx.moveTo(-5,0);
-  ctx.quadraticCurveTo(-7,len*.72,-4,len);
-  ctx.quadraticCurveTo(0,len+3,4,len);
-  ctx.quadraticCurveTo(7,len*.72,5,0);
+  ctx.moveTo(-size*.36,0);
+  ctx.quadraticCurveTo(-size*.48,size*.72,0,size);
+  ctx.quadraticCurveTo(size*.48,size*.72,size*.36,0);
   ctx.closePath();
   ctx.fillStyle=color;
   ctx.fill();
-  line(ctx,2.3);
-  circle(ctx,0,len-2,2.2,"#ff8db6");
+  stroke(ctx,2.2);
+  circle(ctx,0,size*.78,size*.16,"#ff8db6");
   ctx.restore();
 }
 
-function raisedPaw(ctx,x,y,angle,len,color){
-  const ex=x+Math.sin(angle)*len, ey=y-Math.cos(angle)*len;
+function raisedPaw(ctx,x,y,size,color,angle){
+  const ex=x+Math.sin(angle)*size*1.45;
+  const ey=y-Math.cos(angle)*size*1.45;
   ctx.save();
   ctx.lineCap="round";
-  ctx.lineWidth=15; ctx.strokeStyle=INK;
+  ctx.lineWidth=size*.58+5;
+  ctx.strokeStyle=INK;
   ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(ex,ey); ctx.stroke();
-  ctx.lineWidth=10; ctx.strokeStyle=color;
+  ctx.lineWidth=size*.58;
+  ctx.strokeStyle=color;
   ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(ex,ey); ctx.stroke();
-  circle(ctx,ex,ey,4,"#ff8db6");
-  circle(ctx,ex-3,ey-4,1.3,"#ff8db6");
-  circle(ctx,ex,ey-5,1.3,"#ff8db6");
-  circle(ctx,ex+3,ey-4,1.3,"#ff8db6");
+  circle(ctx,ex,ey,size*.34,"#ff8db6",1.6);
   ctx.restore();
 }
 
-function drawBody(ctx,p,c,form,state,time,rx,ry,bodyY,leg){
-  const phase=val(p,"phase",0);
+function tail(ctx,x,y,len,color,angle,form,time){
+  const sway=Math.sin(time*.075)*.16;
+  const a=angle+sway;
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(a);
+  ctx.lineCap="round";
+  ctx.lineWidth=17+form*1.8;
+  ctx.strokeStyle=INK;
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.bezierCurveTo(len*.18,-len*.28,len*.58,len*.18,len,0);
+  ctx.stroke();
+  ctx.lineWidth=11+form*1.5;
+  ctx.strokeStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.bezierCurveTo(len*.18,-len*.28,len*.58,len*.18,len,0);
+  ctx.stroke();
+  ctx.restore();
+  return [x+Math.cos(a)*len,y+Math.sin(a)*len];
+}
+
+function collar(ctx,r,c){
+  ctx.beginPath();
+  ctx.moveTo(-r*.30,r*.88);
+  ctx.quadraticCurveTo(0,r*1.02,r*.30,r*.88);
+  stroke(ctx,4,c.accent);
+  circle(ctx,0,r*.96,4.8,"#ffd84d",1.6);
+  circle(ctx,0,r*.97,1.1,"#7a582a");
+}
+
+function accessory(ctx,form,r,time,c){
+  if(form<=1){
+    ctx.save();
+    ctx.translate(-r*.55,-r*.70);
+    for(const side of [-1,1]){
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.quadraticCurveTo(side*15,-13,side*18,-1);
+      ctx.quadraticCurveTo(side*14,11,0,0);
+      ctx.closePath();
+      ctx.fillStyle=c.accent;
+      ctx.fill();
+      stroke(ctx,1.4);
+    }
+    circle(ctx,0,0,4,"#ffd84d",1.2);
+    ctx.restore();
+  }else if(form===2){
+    sparkle(ctx,-r*.77,-r*.76,7,c.accent);
+    sparkle(ctx,r*.82,-r*.63,4,"#fff0a8");
+  }else if(form===3){
+    crown(ctx,0,-r*.83);
+  }else{
+    crown(ctx,0,-r*.91);
+    for(let i=0;i<8;i++){
+      const a=time*.025+i*TAU/8;
+      sparkle(ctx,Math.cos(a)*r*1.08,-r*1.14+Math.sin(a)*r*.72,2.6,i%2?"#fff0a6":"#ffd3ea");
+    }
+  }
+}
+
+function crown(ctx,x,y){
+  ctx.beginPath();
+  ctx.moveTo(x-18,y+8); ctx.lineTo(x-14,y-9); ctx.lineTo(x-5,y+1);
+  ctx.lineTo(x,y-13); ctx.lineTo(x+5,y+1); ctx.lineTo(x+14,y-9); ctx.lineTo(x+18,y+8);
+  ctx.closePath();
+  ctx.fillStyle="#ffd45a";
+  ctx.fill();
+  stroke(ctx,1.8);
+}
+
+function body(ctx,p,c,form,state,time,rx,ry,bodyY,leg){
+  const phase=v(p,"phase",0);
   const run=state==="run";
   const air=["jump","fall","glide"].includes(state);
-  const swing=(off)=>run?Math.sin(phase*2+off)*.42:air?(val(p,"vy",0)<0?-.22:.22):0;
+  const runAmp=run ? .33 : air ? .12 : 0;
+  const s1=Math.sin(phase*2)*runAmp;
+  const s2=Math.sin(phase*2+Math.PI)*runAmp;
 
-  // Cola primero, porque las extremidades no deberían salir mágicamente por delante.
+  // Cola grande, visible y claramente felina.
   const tails=form===0?1:form===1?1:form===2?2:form===3?3:4;
   for(let i=0;i<tails;i++){
-    const spread=(i-(tails-1)/2)*.27;
-    const end=drawTail(ctx,-rx*.72,bodyY-ry*.05,28+form*5,-Math.PI/2-.48+spread,c.tail,time,form);
-    heart(ctx,end[0],end[1],4.6,form>=3?"#ffd65a":c.accent);
+    const spread=(i-(tails-1)/2)*.30;
+    const end=tail(ctx,-rx*.82,bodyY-ry*.05,34+form*5,c.tail,-1.45+spread,form,time);
+    heart(ctx,end[0],end[1],4.4,form>=3?"#ffd45a":c.accent,1.1);
   }
 
-  // Patas traseras pequeñas, redondeadas.
-  paw(ctx,-rx*.48,0,leg+2,swing(Math.PI),c.fur);
-  paw(ctx, rx*.48,0,leg+2,swing(0),c.fur);
+  const rearY=0;
+  paw(ctx,-rx*.52,rearY+2,leg+2,c.fur,s1);
+  paw(ctx, rx*.52,rearY+2,leg+2,c.fur,s2);
 
-  // Cuerpo mini y muy redondo.
-  const breath=clamp(val(p,"breath",0),-1,1);
+  // Cuerpo corto: la cabeza debe dominar visualmente.
   ctx.save();
   ctx.translate(0,bodyY+ry);
-  const squ=state==="dead"?.68:1+breath*.018;
-  ctx.scale(1/squ,squ);
-  ctx.translate(0,-ry);
-  ellipse(ctx,0,0,rx,ry,gradient(ctx,0,0,Math.max(rx,ry),c.fur,null),0,2.8);
-  ellipse(ctx,rx*.10,ry*.20,rx*.54,ry*.52,c.belly,0,0);
+  ctx.scale(1+Math.sin(time*.055)*.015,1-Math.sin(time*.055)*.012);
+  ellipse(ctx,0,0,rx,ry,shaded(ctx,0,0,Math.max(rx,ry),c.fur,null),0,2.8);
+  ellipse(ctx,rx*.07,ry*.12,rx*.55,ry*.55,c.belly,0,0);
   ctx.restore();
 
-  // Barriga/corazón decorativo.
-  if(form>=2){
-    heart(ctx,rx*.10,bodyY+ry*.22,3.8,form===4?"#ffd65a":"#ffb1d4");
-  }
+  // Pecho mullido.
+  ctx.beginPath();
+  ctx.moveTo(-rx*.34,bodyY+ry*.62);
+  ctx.quadraticCurveTo(-rx*.18,bodyY+ry*.94,0,bodyY+ry*.78);
+  ctx.quadraticCurveTo(rx*.18,bodyY+ry*.94,rx*.34,bodyY+ry*.62);
+  stroke(ctx,1.5,SOFT);
 
-  // Patas delanteras.
-  paw(ctx,-rx*.38,0,leg+2,swing(Math.PI*.5),c.fur);
-
-  const atk=clamp(val(p,"atk",0),0,1);
-  const cast=clamp(val(p,"cast",0),0,1);
-  const slot=Math.floor(val(p,"castSlot",0));
+  const atk=clamp(v(p,"atk",0),0,1);
+  const cast=clamp(v(p,"cast",0),0,1);
+  const slot=Math.floor(v(p,"castSlot",0));
   let raised=null;
+  if(state==="attack") raised=[-.4+atk*2.3,leg+4];
+  else if(state==="cast" && slot===0) raised=[2.15-cast*1.25,leg+4];
+  else if(state==="cast" && slot===2) raised=[2.65,leg+4];
+  else if(state==="victory") raised=[2.45+Math.sin(time*.28)*.28,leg+4];
+  else if(state==="wall") raised=[1.35,leg+3];
 
-  if(state==="attack") raised=[-.30+atk*2.25,20];
-  else if(state==="cast" && slot===0) raised=[2.25-cast*1.45,20];
-  else if(state==="cast" && slot===2) raised=[2.75,21];
-  else if(state==="victory") raised=[2.55+Math.sin(time*.28)*.35,20];
-  else if(state==="wall") raised=[1.35,18];
+  if(raised) raisedPaw(ctx,rx*.46,bodyY-2,raised[1],c.fur,raised[0]);
+  else paw(ctx,rx*.42,bodyY+ry*.10,leg+2,c.fur,-s1*.55);
 
-  if(raised) raisedPaw(ctx,rx*.48,bodyY-2,raised[0],raised[1]+form,c.fur);
-  else paw(ctx,rx*.40,0,leg+2,swing(Math.PI),c.fur);
+  if(form>=2) heart(ctx,rx*.06,bodyY+ry*.22,3.8,form===4?"#ffd45a":"#ff9fc8",1);
 }
 
-function drawHead(ctx,p,c,form,r,x,y,tilt,state,time){
+function head(ctx,p,c,form,r,x,y,tilt,state,time){
   ctx.save();
   ctx.translate(x,y);
   ctx.rotate(tilt);
 
-  // Orejas detrás.
-  drawEar(ctx,-r*.59,-r*.61,r*.74,-1,c,state,time);
-  drawEar(ctx, r*.59,-r*.61,r*.74, 1,c,state,time);
+  ear(ctx,-r*.68,-r*.55,r*.82,-1,c,state,time);
+  ear(ctx, r*.68,-r*.55,r*.82, 1,c,state,time);
 
-  // Cabeza enorme. El objetivo es parecer un mochi, no un gato de anatomía realista.
-  ellipse(ctx,0,0,r*1.14,r,c.fur,0,3.1);
+  // Contorno exterior más ancho y más redondo.
+  ellipse(ctx,0,0,r*1.30,r*1.08,shaded(ctx,0,0,r,c.fur,null),0,3.5);
 
-  // Luz central para efecto de peluche.
+  // Mancha de luz de peluche.
   ctx.save();
-  ctx.globalAlpha=.18;
-  ellipse(ctx,-r*.10,-r*.04,r*.82,r*.68,"#fff",-.05,0);
+  ctx.globalAlpha=.23;
+  ellipse(ctx,-r*.36,-r*.42,r*.46,r*.22,"#fff",-0.32,0);
   ctx.restore();
 
-  // Mechoncito superior.
+  // Dos pequeños mechones que rompen la forma circular.
   ctx.beginPath();
-  ctx.moveTo(-r*.28,-r*.82);
-  ctx.quadraticCurveTo(-r*.12,-r*1.05,0,-r*.84);
-  ctx.quadraticCurveTo(r*.15,-r*1.06,r*.30,-r*.80);
-  line(ctx,2.1);
+  ctx.moveTo(-r*.34,-r*.89);
+  ctx.quadraticCurveTo(-r*.16,-r*1.08,0,-r*.90);
+  ctx.quadraticCurveTo(r*.18,-r*1.08,r*.34,-r*.87);
+  stroke(ctx,2.1);
 
-  drawCheekTufts(ctx,r,c,state);\n  drawFace(ctx,p,c,r,state,form,time);\n  drawChestFluff(ctx,r,c);\n  drawHeadHighlight(ctx,r);
-  drawAccessory(ctx,form,r,time);
+  // Mejillas laterales suaves.
+  ctx.save();
+  ctx.globalAlpha=.8;
+  ellipse(ctx,-r*.88,r*.22,r*.16,r*.11,"#ff84b1",-0.1,0);
+  ellipse(ctx, r*.88,r*.22,r*.16,r*.11,"#ff84b1", 0.1,0);
+  ctx.restore();
 
-  // Collar/cascabel.
-  if(form<=2){
+  face(ctx,p,c,r,state,time);
+
+  // Rayas discretas en la frente, más felino en vez de simple bola rosa.
+  ctx.save();
+  ctx.globalAlpha=.36;
+  ctx.strokeStyle=SOFT;
+  ctx.lineWidth=2;
+  for(const side of [-1,0,1]){
     ctx.beginPath();
-    ctx.moveTo(-r*.28,r*.86);
-    ctx.quadraticCurveTo(0,r*1.02,r*.28,r*.86);
-    line(ctx,4,c.accent);
-    circle(ctx,0,r*.94,4.5,"#ffd84d",1.5);
-    circle(ctx,0,r*.96,1.1,"#8a5a22");
+    ctx.moveTo(side*r*.19,-r*.70);
+    ctx.quadraticCurveTo(side*r*.13,-r*.58,side*r*.11,-r*.48);
+    ctx.stroke();
   }
+  ctx.restore();
 
-  if(state==="hurt"){
-    ctx.beginPath();
-    ctx.moveTo(-r*.42,r*.34);
-    ctx.quadraticCurveTo(-r*.50,r*.52,-r*.39,r*.59);
-    ctx.quadraticCurveTo(-r*.29,r*.51,-r*.42,r*.34);
-    ctx.fillStyle="#86d9ff"; ctx.fill();
-  }
-
+  collar(ctx,r,c);
+  accessory(ctx,form,r,time,c);
   ctx.restore();
 }
 
-function castEffects(ctx,p,form,x,y,r,bodyY,state,time){
-  if(state!=="cast") return;
-  const slot=Math.floor(val(p,"castSlot",0));
-  const cast=clamp(val(p,"cast",0),0,1);
-
-  if(slot===0){
-    const px=x+22+cast*26, py=bodyY-28-Math.sin(cast*Math.PI)*15;
-    heart(ctx,px,py,4.5,"#ff79b2");
-    sparkle(ctx,px+10,py-10,2.5,"#fff");
-  } else if(slot===1){
-    for(let i=0;i<5;i++){
-      const k=(cast+i*.20)%1;
-      heart(ctx,x+12+i*7,y-r-k*30,2.8+k*1.7,i%2?"#ffc2df":"#ff8ab9");
-    }
-  } else {
-    for(let i=0;i<10;i++){
-      const a=i/10*TAU+time*.10;
-      sparkle(ctx,x+Math.cos(a)*46,bodyY-18+Math.sin(a)*32,2.5+cast*2,i%2?"#fff0a8":"#ffb6df");
+function effects(ctx,p,form,r,headX,headY,bodyY,state,time){
+  if(state==="attack"){
+    const a=clamp(v(p,"atk",0),0,1);
+    const k=Math.sin(a*Math.PI);
+    if(k>0){
+      ctx.save();
+      ctx.globalAlpha=.85*k;
+      ctx.beginPath();
+      ctx.arc(headX+18,bodyY-16,30,-1.25,.60);
+      stroke(ctx,4.3,"#ff8fbd");
+      heart(ctx,headX+48,bodyY-27,4.2,"#ff5a9e",1);
+      ctx.restore();
     }
   }
-}
 
-function attackEffect(ctx,p,x,bodyY,state){
-  if(state!=="attack") return;
-  const a=clamp(val(p,"atk",0),0,1);
-  const alpha=Math.sin(a*Math.PI);
-  if(alpha<=0) return;
-  ctx.save();
-  ctx.globalAlpha=alpha;
-  ctx.beginPath();
-  ctx.arc(x+8,bodyY-12,28,-1.2,.65);
-  line(ctx,4.5,"#ff9fd0");
-  heart(ctx,x+37,bodyY-23,4.2,"#ff579d");
-  ctx.restore();
-}
-
-function victoryEffects(ctx,form,time){
-  for(let i=0;i<7;i++){
-    const a=time*.045+i*TAU/7;
-    sparkle(ctx,Math.cos(a)*55,-65+Math.sin(a*1.25)*38,2.5+Math.sin(time*.2+i)*1.1,i%2?"#fff1b0":"#ffd1e7");
-  }
-  if(form===4){
-    for(let i=0;i<3;i++) heart(ctx,Math.cos(time*.04+i)*35,-45+Math.sin(time*.07+i)*22,3.5,"#ffb6d9");
-  }
-}
-
-function nineLives(ctx,p,x,y,r,time){
-  const life=clamp(val(p,"nineLives",0),0,100);
-  if(life<=0) return;
-  ctx.save();
-  ctx.globalAlpha=clamp(life/18,0,1);
-  for(let i=0;i<9;i++){
-    const a=time*.08+i*TAU/9;
-    heart(ctx,x+Math.cos(a)*(r+10),y-r*.10+Math.sin(a)*r*.58,2.7,i%2?"#fff0ad":"#ff91c7");
-  }
-  ctx.restore();
-}
-
-function idleFlourish(ctx,p,form,x,y,r,time,state){
-  if(state!=="idle") return;
-  const f=clamp(val(p,"flourish",0),0,1);
-  if(f<=0) return;
-  const n=Math.floor(val(p,"flourishN",0));
-
-  if(n%3===1){
-    const bx=x+28+Math.sin(f*TAU*2)*14;
-    const by=y-r-8+Math.cos(f*TAU*3)*8;
-    const wing=Math.abs(Math.sin(time*.6))*5+2;
-    ellipse(ctx,bx-wing*.6,by,wing,4,"#a9e5ff",-0.4,0);
-    ellipse(ctx,bx+wing*.6,by,wing,4,"#ffc0df",0.4,0);
-    line(ctx,1.3);
+  if(state==="cast"){
+    const slot=Math.floor(v(p,"castSlot",0));
+    const k=clamp(v(p,"cast",0),0,1);
+    if(slot===0){
+      heart(ctx,headX+28+k*24,bodyY-34-Math.sin(k*Math.PI)*16,5,"#ff75b4",1.2);
+      sparkle(ctx,headX+42+k*24,bodyY-48,2.5,"#fff");
+    }else if(slot===1){
+      for(let i=0;i<6;i++){
+        const a=k*TAU+i*TAU/6;
+        heart(ctx,headX+Math.cos(a)*32,bodyY-26+Math.sin(a)*18,3,"#ff9dc8",1);
+      }
+    }else{
+      for(let i=0;i<10;i++){
+        const a=time*.08+i*TAU/10;
+        sparkle(ctx,headX+Math.cos(a)*(r*.98),headY+Math.sin(a)*(r*.70),2.5+k*2,i%2?"#fff1a8":"#ffb7db");
+      }
+    }
   }
 
-  if(form===2){
-    sparkle(ctx,-34,-r-38,3,"#fff");
-    sparkle(ctx,34,-r-34,4,"#dff7ff");
+  if(state==="victory"){
+    for(let i=0;i<8;i++){
+      const a=time*.04+i*TAU/8;
+      star(ctx,headX+Math.cos(a)*r*1.12,headY+Math.sin(a*1.3)*r*.72,3.8,"#ffd66a");
+    }
+  }
+
+  const lives=clamp(v(p,"nineLives",0),0,100);
+  if(lives>0){
+    ctx.save();
+    ctx.globalAlpha=clamp(lives/16,0,1);
+    for(let i=0;i<9;i++){
+      const a=time*.07+i*TAU/9;
+      heart(ctx,headX+Math.cos(a)*(r+11),headY+Math.sin(a)*r*.72,2.8,i%2?"#fff0ad":"#ff94c7",1);
+    }
+    ctx.restore();
+  }
+
+  const fl=clamp(v(p,"flourish",0),0,1);
+  if(state==="idle" && fl>0){
+    sparkle(ctx,headX+r*1.02,headY-r*.28,4,"#fff1b2");
+    sparkle(ctx,headX-r*1.08,headY-r*.55,3,"#ffd0e8");
   }
 }
 
 function draw(ctx,pose={},R={}){
-  if(!ctx?.save) return;
+  if(!ctx || typeof ctx.save!=="function") return;
 
   const form=formOf(pose);
-  const c=PAL[form];
+  const c=FORMS[form];
   const state=stateOf(pose);
-  const time=timeOf(pose);
+  const time=tOf(pose);
+
+  const headR=[57,60,64,68,73][form];
+  const bodyRX=[19,22,25,28,32][form];
+  const bodyRY=[15,17,20,22,25][form];
+  const leg=[8,9,10,11,12][form];
+
+  const phase=v(pose,"phase",0);
+  const bounce=v(pose,"bounce",0);
   const run=state==="run";
 
-  const headR=[54,57,60,63,67][form];
-  const bodyRX=[22,25,28,31,35][form];
-  const bodyRY=[17,19,22,25,28][form];
-  const leg=[9,10,11,12,13][form];
-
-  const phase=val(pose,"phase",0);
-  const bounce=val(pose,"bounce",0);
-
   let hop=0;
-  if(run) hop=-Math.max(0,Math.sin(phase*2))*5;
-  if(state==="victory") hop=-Math.abs(Math.sin(time*.18))*10;
-  if(state==="dead") hop=4;
+  if(run) hop=-Math.max(0,Math.sin(phase*2))*5.5;
+  else if(state==="victory") hop=-Math.abs(Math.sin(time*.18))*10;
+  else if(state==="dead") hop=4;
 
-  const bodyY=-leg-bodyRY*.82;
+  const bodyY=-leg-bodyRY*.72+hop;
   const headX=4+(run?2:0);
-  let headY=bodyY-bodyRY*.22-headR*.72+bounce*1.6;
-  if(form===0) headY+=5;
+  let headY=bodyY-bodyRY*.12-headR*.76+bounce*1.8;
+  if(form===0) headY+=4;
 
-  let tilt=Math.sin(time*.045)*.045+val(pose,"sway",0)*.04;
-  if(state==="hurt") tilt=-.16;
-  if(state==="cast") tilt=.07;
-  if(state==="victory") tilt=Math.sin(time*.13)*.06;
+  let tilt=Math.sin(time*.045)*.035+v(pose,"sway",0)*.035;
+  if(state==="hurt") tilt=-.17;
+  if(state==="cast") tilt=.06;
+  if(state==="victory") tilt=Math.sin(time*.13)*.065;
 
   ctx.save();
   try{
-    ctx.translate(0,hop);
     if(state==="dead"){ ctx.translate(0,4); ctx.rotate(.10); }
 
-    ctx.save();\n    ctx.globalAlpha=.12;\n    ellipse(ctx,0,bodyY+bodyRY+leg*.72,bodyRX*1.25,bodyRY*.20,"#6f4260",0,0);\n    ctx.restore();\n    drawBody(ctx,pose,c,form,state,time,bodyRX,bodyRY,bodyY,leg);
-    drawHead(ctx,pose,c,form,headR,headX,headY,tilt,state,time);
+    // Sombra del propio arte. No altera hitbox ni posición lógica.
+    ctx.save();
+    ctx.globalAlpha=.10;
+    ellipse(ctx,0,3,bodyRX*1.32,bodyRY*.18,"#633f58",0,0);
+    ctx.restore();
 
-    castEffects(ctx,pose,form,headX,headY,headR,bodyY,state,time);
-    attackEffect(ctx,pose,headX,bodyY,state);
-    nineLives(ctx,pose,headX,headY,headR,time);
-
-    if(state==="victory") victoryEffects(ctx,form,time);
-    idleFlourish(ctx,pose,form,headX,headY,headR,time,state);
-
-    if(form===4){
-      ctx.save();
-      ctx.globalAlpha=.18;
-      ctx.beginPath();
-      ctx.arc(headX,headY,headR*1.34,0,TAU);
-      line(ctx,3,"#ffd65a");
-      ctx.restore();
-    }
-  } finally {
+    drawBody(ctx,pose,c,form,state,time,bodyRX,bodyRY,bodyY,leg);
+    head(ctx,pose,c,form,headR,headX,headY,tilt,state,time);
+    effects(ctx,pose,form,headR,headX,headY,bodyY,state,time);
+  } finally{
     ctx.restore();
   }
 }
 
-export default { id:"cat", draw };
+export default Object.freeze({ id:"cat", draw });
