@@ -211,6 +211,69 @@ function drawMouth(ctx,y,size,open,mood){
   line(ctx,1.8);
 }
 
+function drawCheekTufts(ctx,r,c,state){
+  const a = state === "hurt" ? 0.45 : 0.18;
+  ctx.save();
+  ctx.globalAlpha = 0.9;
+  for (const side of [-1,1]) {
+    for (let i=0;i<3;i++) {
+      const yy = r*.16 + i*r*.11;
+      ctx.beginPath();
+      ctx.moveTo(side*r*.82, yy);
+      ctx.quadraticCurveTo(side*r*(1.00+i*.035), yy-r*.06, side*r*(.88+i*.06), yy+r*.10);
+      ctx.quadraticCurveTo(side*r*(1.06+i*.04), yy+r*.05, side*r*.84, yy+r*.18);
+      ctx.closePath();
+      ctx.fillStyle = c.fur;
+      ctx.globalAlpha = 0.82-a+i*.06;
+      ctx.fill();
+      line(ctx,1.35);
+    }
+  }
+  ctx.restore();
+}
+
+function drawChestFluff(ctx,r,c){
+  ctx.save();
+  ctx.fillStyle = c.belly;
+  ctx.beginPath();
+  ctx.moveTo(-r*.34,r*.70);
+  ctx.quadraticCurveTo(-r*.20,r*.96,0,r*.88);
+  ctx.quadraticCurveTo(r*.20,r*.96,r*.34,r*.70);
+  ctx.quadraticCurveTo(r*.18,r*.80,0,r*.70);
+  ctx.quadraticCurveTo(-r*.18,r*.80,-r*.34,r*.70);
+  ctx.closePath();
+  ctx.fill();
+  line(ctx,1.8,SOFT_INK);
+  ctx.restore();
+}
+
+function drawEyeBrow(ctx,x,y,r,side,emotion){
+  ctx.save();
+  ctx.strokeStyle = SOFT_INK;
+  ctx.lineWidth = Math.max(1.1,r*.075);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  if(emotion === "sad") {
+    ctx.moveTo(x-side*r*.32,y);
+    ctx.quadraticCurveTo(x,y+side*r*.12,x+side*r*.32,y-r*.02);
+  } else {
+    ctx.moveTo(x-side*r*.30,y+side*r*.03);
+    ctx.quadraticCurveTo(x,y-r*.10,x+side*r*.30,y+side*r*.03);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawHeadHighlight(ctx,r){
+  ctx.save();
+  ctx.globalAlpha=.24;
+  ctx.fillStyle="#fff";
+  ctx.beginPath();
+  ctx.ellipse(-r*.42,-r*.43,r*.20,r*.11,-.35,0,TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawFace(ctx,p,c,r,state,form,time){
   let mood="normal";
   if(state==="dead") mood="swirl";
@@ -428,7 +491,7 @@ function drawHead(ctx,p,c,form,r,x,y,tilt,state,time){
   ctx.quadraticCurveTo(r*.15,-r*1.06,r*.30,-r*.80);
   line(ctx,2.1);
 
-  drawFace(ctx,p,c,r,state,form,time);
+  drawCheekTufts(ctx,r,c,state);\n  drawFace(ctx,p,c,r,state,form,time);\n  drawChestFluff(ctx,r,c);\n  drawHeadHighlight(ctx,r);
   drawAccessory(ctx,form,r,time);
 
   // Collar/cascabel.
@@ -540,10 +603,10 @@ function draw(ctx,pose={},R={}){
   const time=timeOf(pose);
   const run=state==="run";
 
-  const headR=[48,50,52,54,57][form];
-  const bodyRX=[15,19,22,25,28][form];
-  const bodyRY=[12,14,16,18,20][form];
-  const leg=[7,8,9,10,11][form];
+  const headR=[54,57,60,63,67][form];
+  const bodyRX=[22,25,28,31,35][form];
+  const bodyRY=[17,19,22,25,28][form];
+  const leg=[9,10,11,12,13][form];
 
   const phase=val(pose,"phase",0);
   const bounce=val(pose,"bounce",0);
@@ -568,7 +631,7 @@ function draw(ctx,pose={},R={}){
     ctx.translate(0,hop);
     if(state==="dead"){ ctx.translate(0,4); ctx.rotate(.10); }
 
-    drawBody(ctx,pose,c,form,state,time,bodyRX,bodyRY,bodyY,leg);
+    ctx.save();\n    ctx.globalAlpha=.12;\n    ellipse(ctx,0,bodyY+bodyRY+leg*.72,bodyRX*1.25,bodyRY*.20,"#6f4260",0,0);\n    ctx.restore();\n    drawBody(ctx,pose,c,form,state,time,bodyRX,bodyRY,bodyY,leg);
     drawHead(ctx,pose,c,form,headR,headX,headY,tilt,state,time);
 
     castEffects(ctx,pose,form,headX,headY,headR,bodyY,state,time);
