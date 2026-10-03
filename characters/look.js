@@ -1,7 +1,8 @@
 // Qué versión se ve: "vector" (Normal) o "paint" (Realista).
+// Esta partida sigue en vector. Paint solo si se pide a propósito.
+
 const KEY = "ohana-look";
 
-// La sala de líneas es para un muñeco chico. En Realista el mundo y el cuerpo crecen juntos.
 export const PAINT_WORLD = 2.2;
 export const PAINT_BODY = 2;
 
@@ -11,8 +12,14 @@ export function getLook() {
 }
 
 export function setLook(value) {
-  try { localStorage.setItem(KEY, value === "paint" ? "paint" : "vector"); }
+  const next = value === "paint" ? "paint" : "vector";
+  try { localStorage.setItem(KEY, next); }
   catch (e) {}
+  return next;
+}
+
+export function isPaint() {
+  return getLook() === "paint";
 }
 
 /** Ajusta el cuerpo al tamaño pintado. Llamar justo después de applyForm. */
@@ -20,10 +27,8 @@ export function paintFit(p) {
   if (!p || getLook() !== "paint") return;
   const f = p.forms && p.forms[Number(p.evo) || 0];
   if (!f) return;
-  const jump = f.jump * Math.sqrt(PAINT_WORLD);
-  const speed = f.speed * 1.35;
-  p.jumpPower = jump;
-  p.speed = speed;
+  p.jumpPower = f.jump * Math.sqrt(PAINT_WORLD);
+  p.speed = f.speed * 1.35;
   if (p.evoTween) {
     p.evoToW = f.w * PAINT_BODY;
     p.evoToH = f.h * PAINT_BODY;
