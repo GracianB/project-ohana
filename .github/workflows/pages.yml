@@ -1,26 +1,100 @@
 name: pages
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   test:
+    name: Tests + consistency
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/core.test.js tests/runtime.test.js
+
+      - name: Run regression suites
+        run: node --test tests/core.test.js tests/runtime.test.js
+
+      - name: Validate project consistency
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const read = (file) => fs.readFileSync(file, "utf8");
+          const manifest = JSON.parse(read("manifest.json"));
+          const index = read("index.html");
+          const progress = read("PROGRESS.md");
+          const improvements = read("IMPROVEMENTS.md");
+          const readme = read("README.md");
+          const errors = [];
+
+          if (!/10\s+personajes/i.test(manifest.description || "")) {
+            errors.push("manifest.json: falta la referencia a 10 personajes");
+          }
+
+          if (!/10\s+salas/i.test(manifest.description || "")) {
+            errors.push("manifest.json: falta la referencia a 10 salas");
+          }
+
+          const versions = [...index.matchAll(/ohana-(\d+)/g)].map((m) => m[0]);
+          const uniqueVersions = [...new Set(versions)];
+
+          if (uniqueVersions.length !== 1) {
+            errors.push("index.html: hay varias versiones ohana-*");
+          }
+
+          const currentVersion = uniqueVersions[0] || "";
+
+          if (currentVersion && !progress.includes(currentVersion)) {
+            errors.push(`PROGRESS.md: no refleja la caché ${currentVersion}`);
+          }
+
+          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js")) {
+            errors.push("PROGRESS.md: no documenta las dos suites del CI");
+          }
+
+          if (!/10\s+salas/i.test(progress)) {
+            errors.push("PROGRESS.md: no refleja 10 salas");
+          }
+
+          if (!/10\s+salas/i.test(improvements)) {
+            errors.push("IMPROVEMENTS.md: no refleja 10 salas");
+          }
+
+          if (!/10\s+personajes/i.test(readme) || !/10\s+salas/i.test(readme)) {
+            errors.push("README.md: faltan cifras maestras");
+          }
+
+          if (errors.length) {
+            console.error("[OHANA] Consistency check FAILED");
+            for (const error of errors) console.error(" - " + error);
+            process.exit(1);
+          }
+
+          console.log("[OHANA] Consistency check PASS");
+          console.log(" - " + (manifest.description || "sin descripción"));
+          console.log(" - cache: " + (currentVersion || "sin versión"));
+          console.log(" - CI: core + runtime");
+          console.log(" - docs: 10 personajes / 5 formas / 10 salas");
+          NODE
+
   deploy:
     if: github.event_name != 'pull_request'
     needs: test
@@ -29,12 +103,19 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
         with:
           enablement: true
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: .
-      - id: deployment
+
+      - name: Deploy Pages
+        id: deployment
         uses: actions/deploy-pages@v4
