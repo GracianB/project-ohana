@@ -28,7 +28,44 @@ import { Magic } from "./systems/magic.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
-const keys = {};
+const keys = Object.create(null);
+const $ = (id) => document.getElementById(id);
+const DOM = {
+  help: $("help"),
+  map: $("map-overlay"),
+  mapGrid: $("map-grid"),
+  pause: $("pause-overlay"),
+  finale: $("win-cinema"),
+  evoStage: $("evo-stage"),
+  roomBanner: $("room-banner"),
+  prompt: $("prompt"),
+  mute: $("btn-mute"),
+  abilityBar: $("ability-bar"),
+  hudAvatar: $("hud-avatar"),
+  hudName: $("hud-name"),
+  hudTrait: $("hud-trait"),
+  hudMeta: $("hud-meta"),
+  hpBar: $("hp-bar"),
+  hpText: $("hp-text"),
+  xpBar: $("xp-bar"),
+  xpText: $("xp-text"),
+  hudWorld: $("hud-world"),
+  hudEvo: $("hud-evo"),
+  combo: $("hud-combo"),
+  comboChip: $("combo-chip"),
+  comboValue: document.querySelector("#combo-chip .combo-value"),
+  bossWrap: $("boss-wrap"),
+  bossBar: $("boss-bar"),
+  bossLabel: document.querySelector("#boss-wrap .boss-label"),
+  formPips: document.querySelectorAll("#form-pips b"),
+};
+let abilitySlots = [];
+let touchPowers = [];
+let hudAvatarKey = "";
+let pipKey = "";
+function setText(el, text) {
+  if (el && el.textContent !== text) el.textContent = text;
+}
 let t = 0;
 let muted = false;
 let paused = false;
@@ -61,28 +98,34 @@ function fit() {
   if (canvas.height !== bh) canvas.height = bh;
   canvas.style.width = viewW + "px";
   canvas.style.height = viewH + "px";
+  ctx.imageSmoothingEnabled = false;
 }
 addEventListener("resize", fit); fit();
 
 
 function overlayOpen() {
-  return !!document.querySelector("#help.open, #map-overlay.open, #pause-overlay.open, #win-cinema.show, #evo-stage.show");
+  return !!(
+    DOM.help?.classList.contains("open") ||
+    DOM.map?.classList.contains("open") ||
+    DOM.pause?.classList.contains("open") ||
+    DOM.finale?.classList.contains("show") ||
+    DOM.evoStage?.classList.contains("show")
+  );
 }
 function setMuted(on) {
   muted = !!on;
   setAudioMuted(muted);
-  const btn = document.getElementById("btn-mute");
-  if (btn) btn.textContent = muted ? "Mute · N" : "Sonido · N";
+  setText(DOM.mute, muted ? "Mute · N" : "Sonido · N");
 }
 function setPaused(on) {
   if (game.finale && game.finale.t > 0) return;
   paused = !!on && game.running;
   duckMusic(paused);
-  document.getElementById("pause-overlay")?.classList.toggle("open", paused);
+  DOM.pause?.classList.toggle("open", paused);
 }
 function closeOverlays() {
-  document.getElementById("help")?.classList.remove("open");
-  document.getElementById("map-overlay")?.classList.remove("open");
+  DOM.help?.classList.remove("open");
+  DOM.map?.classList.remove("open");
   setPaused(false);
 }
 function hitStop(frames) {
@@ -119,10 +162,8 @@ addEventListener("keydown", (e) => {
   }
   if (e.key === "Escape") {
     if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
-    const help = document.getElementById("help");
-    const map = document.getElementById("map-overlay");
-    if (help && help.classList.contains("open")) { help.classList.remove("open"); return; }
-    if (map && map.classList.contains("open")) { map.classList.remove("open"); return; }
+    if (DOM.help?.classList.contains("open")) { DOM.help.classList.remove("open"); return; }
+    if (DOM.map?.classList.contains("open")) { DOM.map.classList.remove("open"); return; }
     setPaused(!paused);
     return;
   }
@@ -146,28 +187,28 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 function toggleHelp() {
-  const help = document.getElementById("help");
+  const help = DOM.help;
   if (!help) return;
   const open = !help.classList.contains("open");
-  document.getElementById("map-overlay")?.classList.remove("open");
+  DOM.map?.classList.remove("open");
   if (open) setPaused(false);
   help.classList.toggle("open", open);
 }
 function showBanner(name) {
-  const el = document.getElementById("room-banner");
+  const el = DOM.roomBanner;
   if (!el) return;
   el.textContent = name.toUpperCase();
   el.classList.add("show");
   setTimeout(() => el.classList.remove("show"), 1400);
 }
 function setPrompt(text, on) {
-  const el = document.getElementById("prompt");
+  const el = DOM.prompt;
   if (!el) return;
   if (!on) { el.classList.remove("show"); return; }
-  el.textContent = text;
+  setText(el, text);
   el.classList.add("show");
 }
-function room() { return ROOMS[game.roomId] || ROOMS.hub; }
+function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
 function save() {
   try { localStorage.setItem("ohana", JSON.stringify(packSave(game, Magic))); } catch (e) {}
 }
@@ -265,6 +306,7 @@ function loadRoom(id, fromDir) {
   }
   const first = !game.visited[id];
   game.roomId = id;
+  game.roomDef = r;
   game.finale = null;
   game.visited[id] = true;
   game.worldIndex = r.world;
@@ -292,10 +334,15 @@ function loadRoom(id, fromDir) {
     }
     if (floor) e.y = floor.y - e.h;
   }
-  if (r.boss) game.enemies.push(createBossNido());
-  game.projectiles = [];
-  game.bolts = [];
-  game.slashes = [];
+  game.boss = null;
+  if (r.boss) {
+    game.boss = createBossNido();
+    game.enemies.push(game.boss);
+  }
+  game.projectiles.length = 0;
+  game.bolts.length = 0;
+  game.slashes.length = 0;
+  game.ghosts.length = 0;
   portals.spawnFromRoom(r);
   if (paint) {
     for (const portal of portals.items) {
@@ -318,16 +365,16 @@ function loadRoom(id, fromDir) {
   if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); }
   beep(r.boss ? "boss" : "door");
   playMusic(themeForRoom(id));
-  save();
   worldClear();
   Surprises.onEnterRoom(game);
   Passives.onRoom(game);
   Magic.onRoom(game, id);
+  save();
   return true;
 }
 function showMap() {
-  const overlay = document.getElementById("map-overlay");
-  const grid = document.getElementById("map-grid");
+  const overlay = DOM.map;
+  const grid = DOM.mapGrid;
   if (!overlay || !grid) {
     showNotification("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
     return;
@@ -336,7 +383,7 @@ function showMap() {
     overlay.classList.remove("open");
     return;
   }
-  document.getElementById("help")?.classList.remove("open");
+  DOM.help?.classList.remove("open");
   setPaused(false);
   const layout = MAP_LAYOUT || [];
   grid.innerHTML = layout.map((row) => row.map((id) => {
@@ -2260,17 +2307,21 @@ function render() {
   if (viewW >= 820) drawMinimap();
 }
 function renderAbilityBar() {
-  const bar = document.getElementById("ability-bar");
+  const bar = DOM.abilityBar;
   if (!bar || !game.player) return;
   bar.innerHTML = (game.player.abilities || []).map((id) => {
     const d = ABILITY_DEFS[id];
     if (!d) return "";
     return '<div class="ability-slot" data-id="' + id + '" style="--abil:' + d.color + '"><div class="key">' + d.key + '</div><div class="name">' + d.name + '</div><div class="cd"><i class="cd-fill"></i></div><b class="cd-sec"></b></div>';
   }).join("");
+  abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
+    slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
+  }));
+  touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
 }
 // Retrato vivo del personaje en el HUD (misma pipeline que el juego)
 function drawHudAvatar(p) {
-  const av = document.getElementById("hud-avatar");
+  const av = DOM.hudAvatar;
   if (!av) return;
   let cv = av.querySelector("canvas");
   if (!cv) {
@@ -2295,45 +2346,41 @@ function drawHudAvatar(p) {
 
 function updateHUD() {
   const p = game.player; if (!p) return;
-  const nameEl = document.getElementById("hud-name");
-  if (nameEl) nameEl.textContent = p.name;
-  const traitEl = document.getElementById("hud-trait");
-  if (traitEl) {
-    const mk = markAt(p.id, p.evo);
-    traitEl.textContent = ((p.passive && p.passive.name) || "") + " · H " + mk.name;
-  }
+  setText(DOM.hudName, p.name);
+  const mk = markAt(p.id, p.evo);
+  setText(DOM.hudTrait, ((p.passive && p.passive.name) || "") + " · H " + mk.name);
   const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
-  const orbsLeft = game.orbs.filter((o) => !o.taken).length;
-  const meta = document.getElementById("hud-meta");
-  if (meta) meta.textContent = "HP " + Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 4 ? "/" + need : "");
-  const hpBar = document.getElementById("hp-bar");
+  let orbsLeft = 0;
+  for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
+  const hp = Math.max(0, Math.ceil(p.health));
+  setText(DOM.hudMeta, "HP " + hp + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 4 ? "/" + need : ""));
   const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
-  if (hpBar) {
-    hpBar.style.width = hpPct + "%";
-    hpBar.parentElement?.setAttribute("aria-valuenow", String(Math.round(hpPct)));
+  if (DOM.hpBar) {
+    const w = hpPct + "%";
+    if (DOM.hpBar.style.width !== w) DOM.hpBar.style.width = w;
   }
-  const hpText = document.getElementById("hp-text");
-  if (hpText) hpText.textContent = Math.max(0, Math.ceil(p.health)) + "/" + p.maxHealth;
-  drawHudAvatar(p);
-  const xpEl = document.getElementById("xp-bar");
-  if (xpEl) {
+  setText(DOM.hpText, hp + "/" + p.maxHealth);
+  const avatarKey = p.id + ":" + p.evo;
+  if (avatarKey !== hudAvatarKey || (t & 31) === 0) {
+    hudAvatarKey = avatarKey;
+    drawHudAvatar(p);
+  }
+  if (DOM.xpBar) {
     const nxt = p.evo >= 4 ? 1 : XP_NEED[p.evo + 1];
     const prev = XP_NEED[p.evo] || 0;
     const xpPct = p.evo >= 4 ? 100 : Math.max(0, Math.min(100, ((p.xp - prev) / Math.max(1, nxt - prev)) * 100));
-    xpEl.style.width = xpPct + "%";
-    xpEl.parentElement?.setAttribute("aria-valuenow", String(Math.round(xpPct)));
-    const xpText = document.getElementById("xp-text");
-    if (xpText) xpText.textContent = p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%";
+    const w = xpPct + "%";
+    if (DOM.xpBar.style.width !== w) DOM.xpBar.style.width = w;
+    setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
   }
-  const worldEl = document.getElementById("hud-world");
-  if (worldEl) worldEl.textContent = room().name;
-  const evoEl = document.getElementById("hud-evo");
-  if (evoEl) evoEl.textContent = "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft;
-  // Mini forma: pips on/active + color del personaje
-  {
-    const pips = document.querySelectorAll("#form-pips b");
-    const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
-    const col = p.color || "#7ee7ff";
+  setText(DOM.hudWorld, room().name);
+  setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
+  const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
+  const col = p.color || "#7ee7ff";
+  const nextPip = evoIdx + ":" + col;
+  if (nextPip !== pipKey) {
+    pipKey = nextPip;
+    const pips = DOM.formPips;
     for (let i = 0; i < pips.length; i++) {
       const pip = pips[i];
       const filled = i <= evoIdx;
@@ -2344,10 +2391,6 @@ function updateHUD() {
         pip.style.background = col;
         pip.style.borderColor = col;
         pip.style.boxShadow = "0 0 12px " + col;
-      } else if (filled) {
-        pip.style.background = "";
-        pip.style.borderColor = "";
-        pip.style.boxShadow = "";
       } else {
         pip.style.background = "";
         pip.style.borderColor = "";
@@ -2355,64 +2398,58 @@ function updateHUD() {
       }
     }
   }
-  const comboEl = document.getElementById("hud-combo");
-  if (comboEl) comboEl.textContent = "Combo " + game.combo + " · Score " + game.score;
-  const chip = document.getElementById("combo-chip");
+  setText(DOM.combo, "Combo " + game.combo + " · Score " + game.score);
+  const chip = DOM.comboChip;
   if (chip) {
     const show = game.combo >= 1 && game.comboT > 0;
-    const val = chip.querySelector(".combo-value");
     const text = show ? String(game.combo) : "";
-    if (val && val.textContent !== text) {
-      val.textContent = text;
+    if (DOM.comboValue && DOM.comboValue.textContent !== text) {
+      DOM.comboValue.textContent = text;
       if (show) {
-        val.style.animation = "none";
-        void val.offsetWidth;
-        val.style.animation = "";
+        DOM.comboValue.style.animation = "none";
+        void DOM.comboValue.offsetWidth;
+        DOM.comboValue.style.animation = "";
       }
     }
     chip.classList.toggle("show", show);
     chip.classList.toggle("hidden", !show);
-    chip.dataset.rank = show ? comboRank(game.combo) : "";
+    const rank = show ? comboRank(game.combo) : "";
+    if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
   }
-  const boss = game.enemies.find((e) => e.boss);
-  const wrap = document.getElementById("boss-wrap");
+  const boss = game.boss || game.enemies.find((e) => e.boss);
+  if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
   document.body.classList.toggle("boss-fight", !!boss);
-  if (wrap) {
-    wrap.classList.toggle("hidden", !boss);
-    const bar = document.getElementById("boss-bar");
-    const lab = wrap.querySelector(".boss-label");
-    if (boss && bar) bar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
-    if (lab) lab.textContent = boss ? ("REINA DEL NIDO  " + Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100)) + "%") : "REINA DEL NIDO";
-  }
+  if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
+  setText(DOM.bossLabel, boss ? ("REINA DEL NIDO  " + Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100)) + "%") : "REINA DEL NIDO");
   const now = performance.now();
-  document.querySelectorAll(".ability-slot").forEach((slot) => {
-    const def = ABILITY_DEFS[slot.dataset.id];
-    const fill = slot.querySelector("i");
-    if (!def || !fill) return;
-    const readyAt = p.cds[slot.dataset.id] || 0;
-    const dur = (p.cdDur && p.cdDur[slot.dataset.id]) || def.cd;
-    const left = Math.max(0, readyAt - now);
+  for (let i = 0; i < abilitySlots.length; i++) {
+    const item = abilitySlots[i];
+    const id = item.slot.dataset.id;
+    const def = ABILITY_DEFS[id];
+    if (!def || !item.fill) continue;
+    const left = Math.max(0, (p.cds[id] || 0) - now);
+    const dur = (p.cdDur && p.cdDur[id]) || def.cd;
     const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-    fill.style.width = pct + "%";
-    const sec = slot.querySelector(".cd-sec");
-    if (sec) sec.textContent = left > 80 ? (left / 1000).toFixed(1) : "";
-    slot.classList.toggle("cooling", left > 80);
-  });
-  // Touch power buttons: label + cooldown ring
+    const w = pct + "%";
+    if (item.fill.style.width !== w) item.fill.style.width = w;
+    const sec = left > 80 ? (left / 1000).toFixed(1) : "";
+    if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
+    item.slot.classList.toggle("cooling", left > 80);
+  }
   const PWIDX = { j: 0, k: 1, l: 2 };
-  document.querySelectorAll(".touch-btn.pw").forEach((btn) => {
+  for (let i = 0; i < touchPowers.length; i++) {
+    const btn = touchPowers[i];
     const id = (p.abilities || [])[PWIDX[btn.dataset.k]];
     const def = id && ABILITY_DEFS[id];
-    if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); return; }
+    if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
     btn.classList.remove("off");
     if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
-    const readyAt = p.cds[id] || 0;
+    const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-    const left = Math.max(0, readyAt - now);
     const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
     btn.classList.toggle("cooling", left > 80);
     btn.style.setProperty("--cd", pct + "%");
-  });
+  }
 }
 function loop() {
   t++;
