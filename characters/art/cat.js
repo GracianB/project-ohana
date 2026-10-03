@@ -1544,7 +1544,7 @@ function drawBody(ctx, R, pose, c, form, state, time, bodyRX, bodyRY, bodyY, leg
       bodyRX * 0.54,
       0,
       legL + 3,
-      frontSwing(Math.PI),
+      legSwing(Math.PI),
       c.fur,
       true
     );
