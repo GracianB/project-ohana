@@ -1,5 +1,7 @@
 # 50 mejoras · Demo Mundo 1
 
+## Jugabilidad y presentación
+
 1. Portada océano + CTA
 2. Cartas con bebés chibi
 3. Intro al pulsar Jugar
@@ -18,7 +20,7 @@
 16. Pozo mortal rotulado en Costa
 17. Hueco Jungla ↓ Caldera
 18. Hueco Cumbre ↓ Claro
-19. Hueco Órbita ↓ Claro
+19. Hueco Órbita ↓ Arrecife
 20. No saltar dos pisos
 21. Caer de plataforma ≠ morir
 22. Solo pozos matan
@@ -33,7 +35,7 @@
 31. Enemigos crawler / flyer / brute
 32. Jefe con fases visuales
 33. Barra de jefe
-34. 8 salas → tele al nido
+34. **10 salas → Nido**
 35. Ending Ohana completado
 36. Notificaciones cerrables
 37. Cine de evolución
@@ -42,7 +44,7 @@
 40. Mute N
 41. Fullscreen
 42. Toque móvil
-43. Canvas tope 1280×720
+43. Canvas responsive
 44. Partículas cap 72
 45. Fondos ligeros
 46. Save localStorage
@@ -50,3 +52,15 @@
 48. README demo
 49. Ruta Mundo 1 cerrada
 50. Versión DEMO jugable online
+
+## Cifras maestras
+
+La demo publicada se documenta con estas cifras:
+
+- **10 personajes**
+- **5 formas por personaje**
+- **10 salas**
+- **1 Reina del Nido**
+- **3 habilidades por personaje: J / K / L**
+
+Estas cifras deben permanecer alineadas entre el código, manifest.json, README.md, PROGRESS.md y el pipeline de GitHub Pages.
