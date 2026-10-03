@@ -90,7 +90,8 @@ function kawaiiEye(ctx, R, x, y, r, pose, iris, mood) {
   if (mood === "heart") {
     heart(ctx, x, y + r * 0.1, r * 0.55, "#ff5c9a", false);
   }
-  const lx = pose.look.x * r * 0.08, ly = pose.look.y * r * 0.15;
+  const look = pose.look || { x: 0, y: 0 };
+  const lx = look.x * r * 0.08, ly = look.y * r * 0.15;
   ctx.fillStyle = "#fff";
   ctx.beginPath(); ctx.ellipse(x + lx - r * 0.3, y + ly - r * 0.45, r * 0.34, r * 0.4, -0.3, 0, TAU); ctx.fill();
   ctx.beginPath(); ctx.arc(x + lx + r * 0.35, y + ly + r * 0.42, r * 0.16, 0, TAU); ctx.fill();
@@ -222,7 +223,7 @@ function draw(ctx, pose, R) {
   }
 
   // cola (muelle + punta de corazón; Nube = cola nube; GOD = 3 colitas)
-  const tails = f === 4 ? 3 : 1;
+  const tails = [1, 1, 2, 3, 5][f] || 1;
   for (let k = 0; k < tails; k++) {
     const spread = tails > 1 ? (k - 1) * 0.45 : 0;
     const swing = Math.sin(t * 0.09 + k) * 0.5 + pose.sway * 0.9 + (st === "hurt" ? -0.6 : 0) + (st === "cast" && pose.castSlot === 2 ? Math.sin(t * 0.4 + k) * 0.6 : 0);
@@ -262,7 +263,7 @@ function draw(ctx, pose, R) {
 
   // patas delanteras (lado cercano)
   const frontSwing = (o) => legSwing(o + Math.PI * 0.5);
-  paw(ctx, R, -bodyRX * 0.35, 0, legL + 3, frontSwing(0), c.fur, f === 0);
+  paw(ctx, R, -bodyRX * 0.35, 0, legL + 3, frontSwing(0), c.fur, true);
   let pawUp = null;
   if (st === "attack") pawUp = { ang: -0.3 + pose.atk * 2.4, len: 18 };
   else if (st === "cast" && pose.castSlot === 0) pawUp = { ang: 2.2 - pose.cast * 1.6, len: 18 };
@@ -271,7 +272,7 @@ function draw(ctx, pose, R) {
   else if (st === "wall") pawUp = { ang: 1.4, len: 16 };
   else if (pose.flourish > 0 && pose.flourishN % 3 === 0) pawUp = { ang: 2.2 + Math.sin(pose.flourish * TAU * 3) * 0.35, len: 16 }; // lavarse la cara
   if (pawUp) raisedPaw(ctx, R, bodyRX * 0.45, bodyY - 2, pawUp.ang, pawUp.len + f, c.fur);
-  else paw(ctx, R, bodyRX * 0.55, 0, legL + 3, frontSwing(Math.PI), c.fur, f === 0);
+  else paw(ctx, R, bodyRX * 0.55, 0, legL + 3, frontSwing(Math.PI), c.fur, true);
 
   // cascabel
   if (f <= 2) {
@@ -305,11 +306,14 @@ function draw(ctx, pose, R) {
   }
   // cabeza mochi (un poco más ancha que alta)
   oval(ctx, R, 0, 0, headR * 1.08, headR * 0.94, c.fur);
-  // mofletes y mechón
+  // mechón y raya
   ctx.beginPath();
-  ctx.moveTo(-6, -headR * 0.9); ctx.quadraticCurveTo(-2, -headR * 1.12, 3, -headR * 0.92);
-  ctx.quadraticCurveTo(6, -headR * 1.1, 10, -headR * 0.86);
-  stroke(ctx, 2.2);
+  ctx.moveTo(-8, -headR * 0.88); ctx.quadraticCurveTo(-2, -headR * 1.18, 4, -headR * 0.9);
+  ctx.quadraticCurveTo(8, -headR * 1.16, 12, -headR * 0.82);
+  stroke(ctx, 2.4);
+  ctx.beginPath();
+  ctx.moveTo(fx * 0.2, -headR * 0.15); ctx.lineTo(fx * 0.2, headR * 0.08);
+  stroke(ctx, 1.6);
 
   // cara (desplazada hacia +x)
   let mood = "normal";
