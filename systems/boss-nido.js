@@ -4,6 +4,7 @@ function bossRng(e) {
 
 import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, patternLabel } from "./boss-combat.js";
 import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorLabel } from "./boss-behavior.js";
+import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat, counterplayLabel } from "./boss-counterplay.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -81,6 +82,9 @@ export function createBossNido() {
     behaviorLabel: "LEE NEUTRO",
     punishAwarded: false,
     punishHits: 0,
+    counterplay: createBossCounterplay(),
+    counterBreak: 0,
+    lastCounterplay: null,
   };
 }
 
@@ -104,6 +108,7 @@ export function updateBossNido(e, game, helpers) {
   const cy = e.y + e.h / 2;
   e.behavior = observeBossBehavior(e.behavior, p, game);
   e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
+  e.counterplay = observeBossThreat(e.counterplay, e, p, p.health);
   const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
 
   if (e.introT > 0) {
@@ -381,6 +386,20 @@ function updateSpit(e, game, floorY) {
 
 function finishBossAttack(e, game, delay = 6) {
   e.lastAttack = e.teleKind || e.mode || "";
+  const p = game?.player;
+  const counterResult = resolveBossThreat(e.counterplay, p, p?.health);
+  if (counterResult) {
+    e.lastCounterplay = counterResult;
+    e.counterBreak = counterResult.openBonus;
+    if (game) {
+      game.score = (Number(game.score) || 0) + counterResult.reward;
+      game.nums?.add(e.x, e.y - 28, counterplayLabel(counterResult) + " +" + counterResult.reward, "#ffe66a", true);
+      game.bossFx?.counterplay?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, counterResult);
+    }
+  } else {
+    e.lastCounterplay = null;
+    e.counterBreak = 0;
+  }
   const next = Array.isArray(e.pattern) ? e.pattern.length : 0;
   if (e.patternStep >= 0 && e.patternStep < next - 1) {
     e.patternStep++;
@@ -397,7 +416,7 @@ function finishBossAttack(e, game, delay = 6) {
   e.telegraph = false;
   e.teleKind = "";
   e.mode = "recovery";
-  e.recoveryMax = recoveryFrames(e.phase);
+  e.recoveryMax = recoveryFrames(e.phase) + Math.min(14, Number(e.counterBreak) || 0);
   e.recoveryT = e.recoveryMax;
   e.vulnerable = true;
   e.invuln = 0;
@@ -445,6 +464,7 @@ function updateRecovery(e, game, helpers, floorY) {
   if (e.recoveryT <= 0) {
     e.recoveryT = 0;
     e.recoveryMax = 0;
+    e.counterBreak = 0;
     e.vulnerable = false;
     e.mode = "idle";
     e.attackCd = e.phase >= 3 ? 18 : e.phase === 2 ? 30 : 42;
