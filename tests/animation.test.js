@@ -367,7 +367,7 @@ test("BossFX mantiene cola limitada, determinismo y renderer seguro", () => {
     globalAlpha: 1, globalCompositeOperation: "source-over",
     strokeStyle: "#fff", fillStyle: "#fff", lineWidth: 1,
     lineCap: "round", lineJoin: "round",
-    textAlign: "center", textBaseline: "middle", font: "12px sans-serif",
+    textAlign: "center", textBaseline: "middle", font: "12px sans-serif", setLineDash() {},
   };
   const boss = {
     x: 400, y: 500, w: 110, h: 130, phase: 3,
