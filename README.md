@@ -327,3 +327,7 @@ GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, ejecuta el p
 ## RNG Domain Separation
 
 El RNG de simulación no es consumido por el render ni por VFX de presentación. La cámara, partículas y cinemáticas usan una semilla determinista derivada del tick, manteniendo la reproducibilidad del combate independiente de la frecuencia de render.
+
+## Deterministic Gameplay Core · Phase 33
+
+Las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación. La convocatoria del Nido utiliza 132 ticks de simulación en lugar de `setTimeout`, por lo que la espera se pausa con la partida y no depende del reloj de pared.
