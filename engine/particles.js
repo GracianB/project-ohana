@@ -1,26 +1,57 @@
 const MAX = 72;
 
+function unit(seed) {
+  const value = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453123;
+  return value - Math.floor(value);
+}
+
+function finite(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export class ParticleSystem {
-  constructor() { this.items = []; }
+  constructor() { this.items = []; this.sequence = 0; }
+
+  clear() {
+    this.items.length = 0;
+    this.sequence = 0;
+  }
 
   emit(x, y, opts = {}) {
-    let n = Math.min(opts.count ?? 6, 10);
+    let n = finite(opts.count ?? 6, 6);
+    n = Math.max(0, Math.min(10, Math.floor(n)));
+    if (!n) return;
     const room = MAX - this.items.length;
-    if (room <= 0) {
-      this.items.splice(0, n);
-    } else if (n > room) n = room;
+    if (room <= 0) this.items.splice(0, Math.min(n, this.items.length));
+    if (n > room) n = Math.max(0, room);
+    if (!n) return;
+
+    const ox = finite(x, 0);
+    const oy = finite(y, 0);
+    const angle = opts.angle == null ? null : finite(opts.angle, 0);
+    const spread = Math.max(0, finite(opts.spread, Math.PI * 2));
+    const speed = finite(opts.speed ?? 2.4, 2.4);
+    const up = finite(opts.up, 0);
+    const life = Math.max(1, Math.round(finite(opts.life, 22)));
+    const size = Math.max(0, finite(opts.size, 3));
+    const gravity = finite(opts.gravity, 0.05);
+    const seed = ox * 17.31 + oy * 7.91 + this.sequence++ * 53.17 + n * 0.73;
+
     for (let i = 0; i < n; i++) {
-      const a = opts.angle != null ? opts.angle + (Math.random() - 0.5) * (opts.spread ?? Math.PI * 2) : Math.random() * Math.PI * 2;
-      const s = (opts.speed ?? 2.4) * (0.35 + Math.random());
+      const a = angle != null
+        ? angle + (unit(seed + i * 3.17) - 0.5) * spread
+        : unit(seed + i * 7.31) * Math.PI * 2;
+      const s = speed * (0.35 + unit(seed + i * 11.73));
       this.items.push({
-        x, y,
+        x: ox, y: oy,
         vx: Math.cos(a) * s,
-        vy: Math.sin(a) * s - (opts.up ?? 0),
-        life: opts.life ?? 22,
-        max: opts.life ?? 22,
-        size: (opts.size ?? 3) * (0.6 + Math.random() * 0.7),
+        vy: Math.sin(a) * s - up,
+        life,
+        max: life,
+        size: size * (0.6 + unit(seed + i * 19.21) * 0.7),
         color: opts.color ?? "#fff",
-        gravity: opts.gravity ?? 0.05,
+        gravity,
         star: !!opts.star
       });
     }
