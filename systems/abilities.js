@@ -1737,7 +1737,8 @@ const DRW = {
       ctx.globalAlpha = (0.55 - u * 0.3) * k;
       ctx.fillStyle = u < 0.25 ? "#fff3b0" : u < 0.55 ? "#ffb347" : u < 0.8 ? "#ff6a2a" : "#d8301a";
       ctx.beginPath();
-      const jitter = 0.85 + 0.3 * deterministicUnit(f.age * 3.17 + i * 7.13 + f.len * 0.019);\n      ctx.arc(px, py, r * jitter, 0, TAU);
+      const jitter = 0.85 + 0.3 * deterministicUnit(f.age * 3.17 + i * 7.13 + f.len * 0.019);
+      ctx.arc(px, py, r * jitter, 0, TAU);
       ctx.fill();
     }
     ctx.globalCompositeOperation = "source-over";
