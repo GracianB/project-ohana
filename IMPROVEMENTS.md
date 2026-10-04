@@ -1,4 +1,4 @@
-# 65 mejoras · Demo Mundo 1
+# 67 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -84,3 +84,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 65. Phase 27: firewall de mutaciones de combate; daño, XP, puntuación y bajas se normalizan con valores finitos y se eliminan operaciones aritméticas directas sobre estado crítico.
 
 66. Phase 28: presupuesto de runtime para colecciones transitorias, números flotantes acotados y VFX de portales deterministas, sin `Math.random()` ni `performance.now()`.
+
+67. Phase 29: Runtime Integrity Guard para sanear estado crítico antes de cada paso y evitar propagación de valores no finitos en juego y colecciones.
