@@ -63,3 +63,16 @@ test('phase 16: boss read y punish quedan aislados y deterministas', () => {
   assert.match(game, /PUNISH \+"/);
   assert.match(sw, /boss-behavior\.js\?v=" \+ VERSION/);
 });
+
+ 
+test('phase 17: counterplay queda separado de daño e hitbox y usa módulo precacheado', () => {
+  const counter = fs.readFileSync('./systems/boss-counterplay.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(counter, /e\.hp\s*[-+]=/);
+  assert.doesNotMatch(counter, /w\s*=|h\s*=/);
+  assert.match(boss, /startBossThreat/);
+  assert.match(boss, /resolveBossThreat/);
+  assert.match(boss, /counterBreak/);
+  assert.match(sw, /boss-counterplay\.js\?v=" \+ VERSION/);
+});
