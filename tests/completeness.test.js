@@ -391,7 +391,7 @@ test('phase 21: la preferencia de longitud nunca abandona el repertorio autoriza
 
 test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentro del aro', () => {
   const g = {
-    player: { id: 'kilo', x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
+    player: { id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
     enemies: [{ x: 112, y: 100, w: 24, h: 24, hp: 100, max: 100, kind: 'cucaracho', dying: 0, invuln: 0, vy: 0 }],
     nums: { add() {} },
     fx: { emit() {} },
@@ -416,7 +416,7 @@ test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentr
 
 test('Pizza: las tres habilidades ejecutan su efecto y queso no deja el control secuestrado', () => {
   const basePlayer = () => ({
-    id: 'pizza', x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2,
+    id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2,
     health: 100, maxHealth: 130, vy: 0, vx: 0, grounded: true, cds: {}, cdDur: {}
   });
   const makeGame = (enemyX = 180) => ({
