@@ -2686,5 +2686,100 @@ addEventListener("ohana-evolve-done", (e) => {
 });
 
 setupSelect();
+
+if (new URLSearchParams(location.search).has("e2e")) {
+  window.__OHANA_E2E = {
+    state() {
+      const p = game.player;
+      const boss = game.boss || game.enemies.find((e) => e.boss);
+      return {
+        running: !!game.running,
+        roomId: game.roomId,
+        evo: p ? p.evo : -1,
+        xp: p ? p.xp : 0,
+        hp: p ? p.health : 0,
+        maxHealth: p ? p.maxHealth : 0,
+        score: game.score,
+        kills: game.kills,
+        combo: game.combo,
+        projectiles: game.projectiles.length,
+        ghosts: game.ghosts.length,
+        bolts: game.bolts.length,
+        slashes: game.slashes.length,
+        rain: !!Rain.active,
+        umbrella: !!Rain.hasUmbrella,
+        starBonus: Surprises.starOrbBonus(),
+        boss: boss ? {
+          hp: boss.hp,
+          max: boss.max,
+          phase: boss.phase,
+          vulnerable: !!boss.vulnerable,
+          dying: !!boss.dying,
+        } : null,
+      };
+    },
+    step(frames = 1) {
+      const n = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
+      for (let i = 0; i < n; i++) step();
+      updateHUD();
+      return this.state();
+    },
+    start(id = "kilo") {
+      const def = ROSTER.find((r) => r.id === id);
+      start(def);
+      return this.state();
+    },
+    loadRoom(id) {
+      loadRoom(String(id), "e2e");
+      return this.state();
+    },
+    cast(index) {
+      useAbility(game, Math.max(0, Math.min(2, Math.floor(Number(index) || 0))));
+      return this.state();
+    },
+    attack() {
+      attack();
+      return this.state();
+    },
+    dash() {
+      dash();
+      return this.state();
+    },
+    setXp(value) {
+      if (!game.player) return this.state();
+      game.player.xp = Math.max(0, Number(value) || 0);
+      return this.step(1);
+    },
+    setEvo(value) {
+      if (!game.player) return this.state();
+      game.player.evo = Math.max(0, Math.min(4, Math.floor(Number(value) || 0)));
+      applyForm(game.player, { silent: true });
+      paintFit(game.player);
+      return this.step(1);
+    },
+    setPlayer(x, y) {
+      if (!game.player) return this.state();
+      game.player.x = Number.isFinite(Number(x)) ? Number(x) : game.player.x;
+      game.player.y = Number.isFinite(Number(y)) ? Number(y) : game.player.y;
+      game.player.vx = 0;
+      game.player.vy = 0;
+      return this.step(1);
+    },
+    setInvulnerable(frames = 600) {
+      if (game.player) game.player.invuln = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
+      return this.state();
+    },
+    forceRain() {
+      Rain.start(game);
+      return this.state();
+    },
+    setBossHp(value) {
+      const boss = game.boss || game.enemies.find((e) => e.boss);
+      if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
+      return this.state();
+    },
+  };
+}
+
 bindDialogs({ document, onChange: () => { input.reset(); clock.reset(); } });
 requestAnimationFrame(loop);
