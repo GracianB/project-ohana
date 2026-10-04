@@ -165,6 +165,7 @@ function resetAttackState(e) {
   e.recoveryMax = 0;
   e.vulnerable = false;
   e.lastAttack = "";
+  e.patternLabel = "";
   e.vx = (e.vx || 0) * 0.3;
   land(e, 70);
 }
@@ -387,6 +388,7 @@ function finishBossAttack(e, game, delay = 6) {
   e.recoveryT = e.recoveryMax;
   e.vulnerable = true;
   e.invuln = 0;
+  e.patternLabel = "";
   e.vx *= 0.12;
   land(e, 1);
   if (game?.bossFx?.recovery) game.bossFx.recovery(e.x + e.w / 2, e.y + e.h / 2, e.phase);
