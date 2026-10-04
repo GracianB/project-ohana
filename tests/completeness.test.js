@@ -594,3 +594,291 @@ test('phase 20: un CEBO fuera de peligro no altera el tempo', () => {
   assert.equal(baitFeedbackLabel(state), '');
   assert.equal(feedbackAttackDelay(18, state), 18);
 });
+
+
+function contractGame(overrides = {}) {
+  const player = {
+    id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'],
+    x: 100, y: 260, w: 28, h: 34, facing: 1, evo: 2,
+    speed: 4.8, jumpPower: 10, grounded: true, vy: 0, vx: 0,
+    health: 60, maxHealth: 125, cds: {}, cdDur: {}, dead: false, xp: 0,
+  };
+  const enemy = {
+    x: 175, y: 260, w: 34, h: 40, hp: 500, max: 500,
+    kind: 'cucaracho', dying: false, invuln: 0, vx: 0, vy: 0,
+    stun: 0, flash: 0, evo: 0,
+  };
+  return {
+    player,
+    enemies: [enemy],
+    projectiles: [],
+    ghosts: [],
+    platforms: [{ x: 0, y: 300, w: 900, h: 40 }],
+    cam: { x: 0, y: 0 },
+    worldW: 1600, worldH: 900,
+    t: 0, reduceMotion: true, shake: 0, flash: 0,
+    nums: { add() {} },
+    fx: { emit() {} },
+    ...overrides,
+  };
+}
+
+function advanceAbility(g, frames = 60, input = { left: false, right: false, jump: false }) {
+  for (let i = 0; i < frames; i++) {
+    g.t++;
+    abilityPreMove(g, input);
+    updateAbilityFx(g);
+  }
+}
+
+test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
+  // Kilo: nota rebota y el anillo realmente cura/daña.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 80);
+    assert.ok(g.enemies[0].hp < 500, 'Kilo ukulele debe impactar tras el lanzamiento');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], health: 40 } });
+    g.enemies[0].x = 130;
+    useAbility(g, 2);
+    advanceAbility(g, 44);
+    assert.ok(g.enemies[0].hp < 500, 'Kilo Ohana debe dañar en área');
+    assert.ok(g.player.health > 40, 'Kilo Ohana debe curar al jugador');
+    clearAbilityFx();
+  }
+
+  // Stitcho: plasma crea tres disparos; rollo/caos son estados ofensivos con final.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 20);
+    assert.equal(g.projectiles.length, 3, 'Stitcho plasma debe crear tres disparos');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
+    useAbility(g, 1);
+    advanceAbility(g, 44);
+    assert.equal(g.player._abilMove, null, 'Rollo debe terminar y liberar el movimiento');
+    assert.ok(g.enemies[0].hp < 500, 'Rollo debe dañar por contacto');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
+    useAbility(g, 2);
+    assert.ok(g.player.vy < 0 && g.player._armorT > 0, 'Caos debe impulsar y blindar al iniciar');
+    advanceAbility(g, 140);
+    assert.equal(g.player._abilMove, null, 'Caos debe tener fin de estado');
+    clearAbilityFx();
+  }
+
+  // Chispín: cadena, blink y nube deben conservar sus contratos.
+  clearAbilityFx();
+  {
+    const enemies = Array.from({ length: 5 }, (_, i) => ({
+      x: 165 + i * 70, y: 260, w: 30, h: 36, hp: 100, max: 100,
+      kind: 'cucaracho', dying: false, invuln: 0, vx: 0, vy: 0, stun: 0, flash: 0,
+    }));
+    const g = contractGame({ enemies, player: { ...contractGame().player, id: 'chispin', abilities: ['chain', 'blink', 'storm'] } });
+    useAbility(g, 0);
+    assert.equal(enemies.filter((e) => e.hp < 100).length, 4, 'Rayo en cadena debe alcanzar hasta cuatro objetivos');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'chispin', abilities: ['chain', 'blink', 'storm'] } });
+    const x0 = g.player.x;
+    useAbility(g, 1);
+    assert.ok(g.player.x > x0, 'Blink debe cambiar realmente la posición');
+    assert.ok(g.player.invuln > 0, 'Blink debe conceder invulnerabilidad corta');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'chispin', abilities: ['chain', 'blink', 'storm'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 45);
+    assert.ok(g.enemies[0].hp < 500, 'Storm debe lanzar al menos un rayo contra el objetivo');
+    clearAbilityFx();
+  }
+
+  // Michi: bumerán de ida/vuelta, sueño y colas perseguidoras.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'michi', abilities: ['yarn', 'purr', 'ninetails'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 70);
+    assert.ok(g.enemies[0].hp < 500, 'Yarn debe golpear durante su ciclo');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'michi', abilities: ['yarn', 'purr', 'ninetails'], health: 40 } });
+    useAbility(g, 1);
+    assert.ok(g.player.health > 40, 'Purr debe curar');
+    advanceAbility(g, 10);
+    assert.ok(g.enemies[0]._sleepUntil > g.t, 'Purr debe aplicar sueño');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'michi', abilities: ['yarn', 'purr', 'ninetails'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 36);
+    assert.ok(g.enemies[0].hp < 500, 'Nueve colas debe perseguir y golpear');
+    clearAbilityFx();
+  }
+
+  // Dragón: fuego continuo, ráfaga defensiva y meteoros.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'dragon', abilities: ['breath', 'gust', 'meteor'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 10);
+    assert.ok(g.enemies[0].hp < 500, 'Breath debe infligir daño continuo');
+    clearAbilityFx();
+  }
+  {
+    const hostile = { x: 150, y: 255, w: 8, h: 8, vx: -3, vy: 0, life: 20, dmg: 9, owner: 'enemy' };
+    const g = contractGame({ projectiles: [hostile], player: { ...contractGame().player, id: 'dragon', abilities: ['breath', 'gust', 'meteor'] } });
+    useAbility(g, 1);
+    assert.ok(g.player.vy < 0, 'Gust debe impulsar al jugador hacia arriba');
+    assert.equal(hostile.life, 0, 'Gust debe limpiar proyectiles hostiles en su cono');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'dragon', abilities: ['breath', 'gust', 'meteor'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 65);
+    assert.ok(g.enemies[0].hp < 500, 'Meteor debe resolver al menos una explosión dañina');
+    clearAbilityFx();
+  }
+
+  // Dino: mordisco híbrido, embestida blindada y terremoto terrestre.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
+    useAbility(g, 0);
+    assert.ok(g.projectiles.length >= 1, 'Bite debe crear huesos a distancia');
+    assert.ok(g.enemies[0].hp < 500, 'Bite debe tener impacto cuerpo a cuerpo');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
+    useAbility(g, 1);
+    assert.ok(g.player._armorT > 0, 'Charge debe activar blindaje');
+    advanceAbility(g, 45);
+    assert.equal(g.player._abilMove, null, 'Charge debe terminar');
+    clearAbilityFx();
+  }
+  {
+    const air = { ...contractGame().enemy, kind: 'mosquito', x: 175, y: 180 };
+    const ground = { ...contractGame().enemy, x: 175, y: 260 };
+    const g = contractGame({ enemies: [air, ground], player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 40);
+    assert.equal(air.hp, 500, 'Quake no debe golpear objetivos aéreos');
+    assert.ok(ground.hp < 500, 'Quake debe golpear objetivos terrestres');
+    clearAbilityFx();
+  }
+
+  // Frita: proyectiles, charco persistente y línea de géiseres.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'frita', abilities: ['salt', 'ketchup', 'fryer'] } });
+    useAbility(g, 0);
+    assert.equal(g.projectiles.length, 7, 'Salt en evo 2 debe crear siete granos');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'frita', abilities: ['salt', 'ketchup', 'fryer'] } });
+    useAbility(g, 1);
+    advanceAbility(g, 80);
+    assert.ok(g.enemies[0].hp < 500, 'Ketchup debe convertir el impacto en daño persistente');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'frita', abilities: ['salt', 'ketchup', 'fryer'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 45);
+    assert.ok(g.enemies[0].hp < 500, 'Fryer debe producir al menos un géiser dañino');
+    clearAbilityFx();
+  }
+
+  // Pizza: disco rebotable, agarre escapable y ultimate híbrida.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 30);
+    assert.ok(g.enemies[0].hp < 500, 'Pepperoni debe impactar');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'] } });
+    g.enemies[0].x = 220;
+    useAbility(g, 1);
+    advanceAbility(g, 24, { left: true, right: false, jump: false });
+    assert.ok(g.player.vx <= 0, 'Cheese debe permitir contramovimiento');
+    assert.equal(g.player._abilMove, null, 'Cheese debe liberar el control al terminar');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'], health: 100, maxHealth: 130 } });
+    useAbility(g, 2);
+    advanceAbility(g, 35);
+    assert.ok(g.enemies[0].hp < 500, 'Oven debe aplicar la ola de calor');
+    assert.ok(g.player._cast?.id === 'oven', 'Oven debe registrar su casteo');
+    clearAbilityFx();
+  }
+
+  // Círculo final de los otros tres héroes: talismán, succión/fauces y cuerno.
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
+    useAbility(g, 0);
+    advanceAbility(g, 35);
+    assert.ok(g.enemies[0].hp < 500, 'Ofuda debe clavar y explotar con daño');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
+    const x0 = g.enemies[0].x;
+    useAbility(g, 1);
+    advanceAbility(g, 10);
+    assert.ok(g.enemies[0].x < x0, 'Manga debe atraer al enemigo hacia la máscara');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
+    useAbility(g, 2);
+    advanceAbility(g, 4);
+    assert.ok(g.enemies[0].hp < 500, 'Fauces debe morder delante del personaje');
+    clearAbilityFx();
+  }
+
+  clearAbilityFx();
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
+    useAbility(g, 0);
+    assert.equal(g.projectiles.length, 1, 'Gleam debe crear su estrella recta');
+    assert.ok(g.player._thrust > 0, 'Gleam debe activar el impulso corto');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
+    useAbility(g, 1);
+    advanceAbility(g, 20);
+    assert.equal(g.player._abilMove, null, 'Gallop debe terminar y devolver el control');
+    assert.ok(g.enemies[0].hp < 500, 'Gallop debe impactar con el cuerno');
+    clearAbilityFx();
+  }
+  {
+    const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
+    useAbility(g, 2);
+    assert.equal(g.projectiles.length, 7, 'Rainbow debe crear siete estrellas');
+    assert.ok(g.enemies[0].hp < 500, 'Rainbow debe conservar el golpe frontal inmediato');
+    clearAbilityFx();
+  }
+});
