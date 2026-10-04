@@ -2710,6 +2710,8 @@ if (new URLSearchParams(location.search).has("e2e")) {
         umbrella: !!Rain.hasUmbrella,
         starBonus: Surprises.starOrbBonus(),
         boss: boss ? {
+          x: boss.x,
+          y: boss.y,
           hp: boss.hp,
           max: boss.max,
           phase: boss.phase,
