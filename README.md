@@ -285,3 +285,16 @@ Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afi
 <sub>PLAY · Murcia · 2026</sub>
 
 </div>
+
+
+## Boss Director · Phases 15–19
+
+La Reina del Nido evoluciona en capas deterministas de dirección de combate:
+
+- **Phase 15 · Combat Director**: rutinas encadenadas, selección contextual y recuperación vulnerable.
+- **Phase 16 · Reactive Director**: memoria de dash/aire/presión y respuesta contextual.
+- **Phase 17 · Counterplay**: DASH/AIRE/DISTANCIA, racha defensiva y BREAK.
+- **Phase 18 · Adaptive Encounter**: memoria corta de respuestas repetidas y cambio de preferencia dentro del repertorio autorizado.
+- **Phase 19 · Adaptive Bait**: dos respuestas iguales arman un CEBO de un solo uso; el patrón señuelo ya existe en la tabla de rutinas de la fase y no cambia daño ni hitboxes.
+
+La adaptación es determinista, acotada y separada de la simulación física. El objetivo es aumentar la lectura del combate, no hacer trampas cambiando reglas invisibles.
