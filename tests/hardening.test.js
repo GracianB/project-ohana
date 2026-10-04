@@ -193,6 +193,30 @@ test('phase 26: partículas reproducibles, acotadas y recuperables ante datos co
 });
 
 
+test('phase 32: RNG de simulación y VFX permanecen en dominios separados', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function vfxUnit\(seed\)/);
+  assert.match(game, /function vfxRandom\(salt = 0\)/);
+  assert.match(game, /vfxRandom\(5\)/);
+  assert.match(game, /vfxRandom\(6\)/);
+  assert.equal((game.match(/ctx\.translate\(\(game\.rng\(\) - 0\.5\)/g) || []).length, 0);
+
+  const renderStart = game.indexOf('function render()');
+  const renderEnd = game.indexOf('function drawMinimap()', renderStart);
+  const render = game.slice(renderStart, renderEnd);
+  assert.equal((render.match(/game\.rng\(\)/g) || []).length, 0, 'render no debe consumir RNG de simulación');
+
+  const updateStart = game.indexOf('function updatePlayer()');
+  const updateEnd = game.indexOf('function tickRam(', updateStart);
+  const updatePlayer = game.slice(updateStart, updateEnd);
+  assert.equal((updatePlayer.match(/game\.rng\(\)/g) || []).length, 0, 'updatePlayer no debe consumir RNG compartido para VFX');
+
+  const finaleStart = game.indexOf('function tickFinale()');
+  const finaleEnd = game.indexOf('function worldClear()', finaleStart);
+  const finale = game.slice(finaleStart, finaleEnd);
+  assert.equal((finale.match(/game\.rng\(\)/g) || []).length, 0, 'finale no debe consumir RNG compartido para VFX');
+});
+
 test('phase 30: el bucle de runtime contiene fallos de simulación y render', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
   assert.match(game, /function containRuntimeFault\(scope, error\)/);
