@@ -212,11 +212,11 @@ export function playTitleIntro() {
     ctx.clearRect(0, 0, W, H);
 
     // fondo
-    drawIslandScene(t, L);
     const bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, "#040a18"); bg.addColorStop(0.55, "#071427"); bg.addColorStop(1, "#040912");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
+    drawIslandScene(t, L);
     const flashK = reduce ? 0 : seg(t, T.flash, T.flash + 0.6);
     drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, 0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0));
     drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.7, CYAN, 0.28 * seg(t, T.ring, T.ring + 0.6), reduce ? 0 : t * 0.22, 16);
