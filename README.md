@@ -78,7 +78,7 @@ La Reina del Nido ya no selecciona golpes aislados. Cada fase usa rutinas encade
 - **Fase 1 · TERRITORIO**: secuencias cortas de presión y respuesta.
 - **Fase 2 · ASCENSO**: zambullida, proyectil y embestida se combinan en rutas de tres pasos.
 - **Fase 3 · APOCALIPSIS**: cadenas de hasta cuatro ataques con menos hueco entre movimientos.
-Tras cada rutina existe una **ventana de castigo** claramente telegráfica. La selección considera distancia y altura del jugador y evita repetir la misma rutina consecutivamente.
+Tras cada rutina existe una **ventana de castigo** claramente telegráfica. La selección considera distancia y altura del jugador, recuerda el comportamiento reciente del jugador (dash, aire y presión) y evita repetir la misma rutina consecutivamente. En fase 3, con la Reina por debajo del 22% de vida, entra en **desesperación** y prioriza una presión final determinista. Golpear durante la ventana de castigo activa un **PUNISH** único por ciclo y recompensa puntuación sin alterar el daño del ataque.
 
 Un golpe normal para el mundo un instante. Un golpe gordo —forma alta, Dino, o un poder de 40 o más— lo para más rato y el número sale en dorado. El combo se queda desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar. La puerta espera medio segundo y entonces te suelta.
 
