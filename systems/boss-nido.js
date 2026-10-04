@@ -6,6 +6,7 @@ import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, pattern
 import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorLabel } from "./boss-behavior.js";
 import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat, counterplayLabel } from "./boss-counterplay.js";
 import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationLabel } from "./boss-adaptation.js";
+import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-bait.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -88,6 +89,7 @@ export function createBossNido() {
     lastCounterplay: null,
     adaptation: createBossAdaptation(),
     adaptationLabel: "ADAPTACIÓN NEUTRA",
+    bait: createBossBait(),
   };
 }
 
@@ -111,7 +113,9 @@ export function updateBossNido(e, game, helpers) {
   const cy = e.y + e.h / 2;
   e.behavior = observeBossBehavior(e.behavior, p, game);
   e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
+  armBossBait(e.bait, e.adaptation);
   e.adaptationLabel = adaptationLabel(e.adaptation, e.hp / Math.max(1, e.max));
+  e.baitLabel = baitLabel(e.bait);
   e.counterplay = observeBossThreat(e.counterplay, e, p, p.health);
   const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
 
@@ -238,6 +242,10 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.behaviorLabel = "LEE NEUTRO";
     e.adaptation = createBossAdaptation();
     e.adaptationLabel = "ADAPTACIÓN NEUTRA";
+    e.bait = createBossBait();
+    e.baitLabel = baitLabel(e.bait);
+    e.bait = createBossBait();
+    e.baitLabel = baitLabel(e.bait);
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
@@ -518,6 +526,8 @@ function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
 }
 
 function pickAttack(e) {
+  const baitPattern = consumeBossBait(e.bait, e.phase);
+  if (baitPattern) e.baitLabel = "CEBO CONSUMIDO";
   const p = e._lastPlayer || null;
   const cx = e.x + e.w / 2;
   const px = p ? p.x + p.w / 2 : cx;
@@ -533,6 +543,7 @@ function pickAttack(e) {
       behavior: e.behavior,
       reactivePreference: reactiveAttackPreference(e.phase, e.behavior, e.hp / Math.max(1, e.max)),
       adaptivePreference: adaptiveAttackPreference(e.phase, e.adaptation, e.hp / Math.max(1, e.max)),
+      baitPattern,
     }
   );
   e.pattern = pattern;

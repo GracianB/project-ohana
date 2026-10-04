@@ -29,6 +29,7 @@ export function createBossAdaptation() {
     target: "",
     level: 0,
     successfulReads: 0,
+    baitArmed: false,
     ticks: 0,
   };
 }
@@ -80,6 +81,7 @@ export function observeBossAdaptation(state = createBossAdaptation(), event = {}
     ? dominant.type
     : "";
   next.level = next.target ? Math.max(1, Math.min(3, Math.ceil(dominant.score))) : 0;
+  next.baitArmed = !!next.target && Number(next.repeat) >= 2 && !next.baitConsumed;
   next.ticks = (Number(next.ticks) || 0) + 1;
   next.pressure = pressure;
   return next;
