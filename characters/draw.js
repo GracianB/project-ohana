@@ -2,7 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
-import { applyEvolutionPose, drawEvolutionSignatureFX } from "./evolution.js";
+import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX } from "./evolution.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -1051,6 +1051,7 @@ export function drawCharacter(ctx, p, cam, t) {
   if (evo >= 2) drawAura(ctx, H, color, t, evo);
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
+  drawEvolutionDesignFX(ctx, p, H, pose, t, false);
   if (moving) drawDust(ctx, H, t, speed);
 
   const s = H / 100;
@@ -1076,6 +1077,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.restore();
 
   drawFlavor(ctx, p.id, H, t, evo, true);
+  drawEvolutionDesignFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
