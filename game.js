@@ -2688,6 +2688,17 @@ addEventListener("ohana-evolve-done", (e) => {
 setupSelect();
 
 if (new URLSearchParams(location.search).has("e2e")) {
+  const dismissE2EOverlays = () => {
+    DOM.help?.classList.remove("open");
+    DOM.map?.classList.remove("open");
+    DOM.pause?.classList.remove("open");
+    DOM.finale?.classList.remove("show");
+    DOM.evoStage?.classList.remove("show");
+    paused = false;
+    input?.reset();
+    clock.reset();
+  };
+
   window.__OHANA_E2E = {
     state() {
       const p = game.player;
@@ -2729,6 +2740,7 @@ if (new URLSearchParams(location.search).has("e2e")) {
     start(id = "kilo") {
       const def = ROSTER.find((r) => r.id === id);
       start(def);
+      dismissE2EOverlays();
       return this.state();
     },
     loadRoom(id) {
@@ -2750,7 +2762,9 @@ if (new URLSearchParams(location.search).has("e2e")) {
     setXp(value) {
       if (!game.player) return this.state();
       game.player.xp = Math.max(0, Number(value) || 0);
-      return this.step(1);
+      const state = this.step(1);
+      dismissE2EOverlays();
+      return state;
     },
     setEvo(value) {
       if (!game.player) return this.state();
