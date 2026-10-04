@@ -15,6 +15,7 @@ const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
 const { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationSnapshot, adaptationLabel } = await import('../systems/boss-adaptation.js');
+const { createBossBait, armBossBait, consumeBossBait, baitSnapshot, BAIT_PATTERNS } = await import('../systems/boss-bait.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -273,4 +274,50 @@ test('phase 18: el cambio de respuesta reinicia la racha de repetición y mantie
   assert.ok(state.recent.length <= 6);
   assert.equal(state.ticks, 23);
   assert.ok(Object.values(state.pressure).every((value) => Number.isFinite(value) && value >= 0 && value <= 4));
+});
+
+
+test('phase 19: el CEBO transforma una repetición en una rutina autorizada de un solo uso', () => {
+  const adaptation = createBossAdaptation();
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
+
+  const bait = createBossBait();
+  armBossBait(bait, adaptation);
+  assert.equal(bait.armed, true);
+  assert.equal(bait.type, 'DASH');
+
+  const pattern = consumeBossBait(bait, 2);
+  assert.deepEqual(pattern, BAIT_PATTERNS[2].DASH);
+  assert.equal(bait.armed, false);
+  assert.equal(bait.uses, 1);
+  assert.deepEqual(baitSnapshot(bait), {
+    armed: false, type: 'DASH', uses: 1, lastPattern: 'slam>spit>swoop'
+  });
+
+  armBossBait(bait, adaptation);
+  assert.equal(bait.armed, false);
+});
+
+test('phase 19: cambiar la respuesta rearma el CEBO y la fase final sigue cerrada', () => {
+  const adaptation = createBossAdaptation();
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
+  const bait = createBossBait();
+  armBossBait(bait, adaptation);
+  consumeBossBait(bait, 1);
+  adaptation.baitConsumed = true;
+
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
+  assert.equal(adaptation.baitConsumed, false);
+
+  const final = createBossAdaptation();
+  assert.equal(adaptiveAttackPreference(3, final, 0.2), 'charge');
+  for (const phase of [1, 2, 3]) {
+    for (const pattern of Object.values(BAIT_PATTERNS[phase])) {
+      assert.ok(BOSS_COMBAT_PROFILES[phase].patterns.some((candidate) =>
+        candidate.length === pattern.length && candidate.every((kind, i) => kind === pattern[i])
+      ));
+    }
+  }
 });
