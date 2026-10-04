@@ -12,6 +12,12 @@ const UMBRELLA_BURST_FRAMES = 20;
 const CROWN_CD_FRAMES = 90;
 const HUB_LEAF_EVERY = 40;
 
+function gameRandom(game) {
+  const source = typeof game?.rng === "function" ? game.rng : Math.random;
+  const value = Number(source.call(game));
+  return Number.isFinite(value) ? Math.max(0, Math.min(0.999999999, value)) : 0.5;
+}
+
 function emitStars(game, x, y, count, color) {
   if (!game || !game.fx) return;
   const n = game.reduceMotion ? Math.max(2, Math.floor(count / 3)) : count;
@@ -122,7 +128,7 @@ export const Surprises = {
     try { showNotification("¡GOD!", "El cielo te celebra.", "sala"); } catch (_) {}
   },
 
-  onMakeFoe(e, roomId) {
+  onMakeFoe(e, roomId, game) {
     if (!e || e.kind !== "pez") return;
     if (!GOLD_ROOMS[roomId]) return;
     if (this._goldRoom !== roomId) {
@@ -130,7 +136,7 @@ export const Surprises = {
       this._goldenMarked = false;
     }
     if (this._goldenMarked) return;
-    if (Math.random() >= 1 / 12) return;
+    if (gameRandom(game) >= 1 / 12) return;
     this._goldenMarked = true;
     e.golden = true;
     e.color = "#f0c040";
@@ -150,8 +156,8 @@ export const Surprises = {
       this.starActive = false;
       this.starLeft = 0;
       this._skyPulse = 0;
-      if (Math.random() < 0.7) {
-        this.starDelay = STAR_DELAY_MIN + Math.floor(Math.random() * (STAR_DELAY_MAX - STAR_DELAY_MIN + 1));
+      if (gameRandom(game) < 0.7) {
+        this.starDelay = STAR_DELAY_MIN + Math.floor(gameRandom(game) * (STAR_DELAY_MAX - STAR_DELAY_MIN + 1));
       } else {
         this.starDelay = 0;
       }
@@ -176,7 +182,7 @@ export const Surprises = {
     }
 
     this.fruit = null;
-    if (game.roomId === "jungle" && !this.flags.jungleFruitTaken && Math.random() < 0.22) {
+    if (game.roomId === "jungle" && !this.flags.jungleFruitTaken && gameRandom(game) < 0.22) {
       this.fruit = { x: 520, y: 400, r: 12, taken: false, fruit: true };
     }
 
@@ -188,7 +194,7 @@ export const Surprises = {
         this.flags.crownCdNotified = true;
         try { showNotification("CORONA", "Ya brillas esta partida.", "sala"); } catch (_) {}
       }
-    } else if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && Math.random() < 0.18) {
+    } else if (game.player && game.player.evo >= 4 && game.roomId !== "boss" && gameRandom(game) < 0.18) {
       const pos = crownPosition(game, this.secret);
       this.godCrown = { ...pos, r: 16, taken: false, godCrown: true, roomId: game.roomId };
     }
