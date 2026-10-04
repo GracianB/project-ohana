@@ -232,8 +232,9 @@ test('phase 30: el bucle de runtime contiene fallos de simulación y render', ()
  
 test('phase 29: runtime integrity guard protege estado crítico y colecciones', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
-  assert.match(game, /const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
-  assert.match(game, /function boundedFinite\(value, fallback, min, max\)/);
+  const runtime = fs.readFileSync('./systems/runtime.js', 'utf8');
+  assert.match(runtime, /export const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
+  assert.match(runtime, /export function boundedFinite\(value, fallback, min, max\)/);
   assert.match(game, /function sanitizeRuntimeState\(\)/);
   assert.match(game, /sanitizeRuntimeState\(\);/);
   assert.match(game, /game\.score = boundedFinite\(game\.score, 0, 0, MAX_RUNTIME_SAFE\)/);
@@ -249,10 +250,11 @@ test('phase 28: runtime transitorio acotado y VFX de portales deterministas', ()
   const floaters = fs.readFileSync('./systems/floaters.js', 'utf8');
   const portals = fs.readFileSync('./systems/portals.js', 'utf8');
 
-  assert.match(game, /MAX_RUNTIME_PROJECTILES\s*=\s*128/);
-  assert.match(game, /MAX_RUNTIME_GHOSTS\s*=\s*48/);
-  assert.match(game, /MAX_RUNTIME_ORBS\s*=\s*64/);
-  assert.match(game, /function pushRuntime\(list, item, max\)/);
+  const runtime = fs.readFileSync('./systems/runtime.js', 'utf8');
+  assert.match(runtime, /MAX_RUNTIME_PROJECTILES\s*=\s*128/);
+  assert.match(runtime, /MAX_RUNTIME_GHOSTS\s*=\s*48/);
+  assert.match(runtime, /MAX_RUNTIME_ORBS\s*=\s*64/);
+  assert.match(runtime, /function pushRuntime\(list, item, max\)/);
   assert.equal((game.match(/game\.projectiles\.push\(/g) || []).length, 0);
   assert.equal((game.match(/game\.ghosts\.push\(/g) || []).length, 0);
   assert.equal((game.match(/game\.orbs\.push\(/g) || []).length, 0);
@@ -345,4 +347,33 @@ test('phase 34: las mutaciones críticas pasan por la capa global compartida', (
   assert.match(mutations, /function addCombo/);
   assert.match(mutations, /function scaleEnemyHealth/);
   assert.match(mutations, /Number\.MAX_SAFE_INTEGER/);
+});
+
+
+test('phase 35: presupuesto runtime compartido y compactación sin crecimiento', async () => {
+  const runtime = await import('../systems/runtime.js');
+  const list = [];
+  for (let i = 0; i < runtime.MAX_RUNTIME_BOLTS + 20; i++) {
+    runtime.pushRuntime(list, { id: i }, runtime.MAX_RUNTIME_BOLTS);
+  }
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list[0].id, 20);
+
+  list.push(null, 0, undefined, { id: 100 });
+  runtime.compactRuntimeList(list, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.at(-1).id, 100);
+
+  const caps = [
+    runtime.MAX_RUNTIME_ENEMIES,
+    runtime.MAX_RUNTIME_PROJECTILES,
+    runtime.MAX_RUNTIME_GHOSTS,
+    runtime.MAX_RUNTIME_ORBS,
+    runtime.MAX_RUNTIME_BOLTS,
+    runtime.MAX_RUNTIME_SLASHES,
+  ];
+  assert.ok(caps.every((value) => Number.isInteger(value) && value > 0));
+  assert.equal(runtime.MAX_RUNTIME_SAFE, Number.MAX_SAFE_INTEGER);
+  assert.equal(runtime.boundedFinite(NaN, 7, 0, 10), 7);
+  assert.equal(runtime.boundedFinite(99, 7, 0, 10), 10);
 });
