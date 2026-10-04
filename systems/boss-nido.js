@@ -6,7 +6,7 @@ import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, pattern
 import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorLabel } from "./boss-behavior.js";
 import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat, counterplayLabel } from "./boss-counterplay.js";
 import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationLabel } from "./boss-adaptation.js";
-import { createBossBait, armBossBait, consumeBossBait } from "./boss-bait.js";
+import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-bait.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -115,6 +115,7 @@ export function updateBossNido(e, game, helpers) {
   e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
   armBossBait(e.bait, e.adaptation);
   e.adaptationLabel = adaptationLabel(e.adaptation, e.hp / Math.max(1, e.max));
+  e.baitLabel = baitLabel(e.bait);
   e.counterplay = observeBossThreat(e.counterplay, e, p, p.health);
   const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
 
@@ -242,6 +243,9 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.adaptation = createBossAdaptation();
     e.adaptationLabel = "ADAPTACIÓN NEUTRA";
     e.bait = createBossBait();
+    e.baitLabel = baitLabel(e.bait);
+    e.bait = createBossBait();
+    e.baitLabel = baitLabel(e.bait);
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
