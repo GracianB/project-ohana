@@ -60,6 +60,7 @@ export function createBossNido() {
     introMax: 72,
     introDrop: 700,
     phaseAnnounced: { 2: false, 3: false },
+    bossFxSeed: 0,
     spawnCd: 0,
     bob: 0,
     flash: 0,
@@ -166,6 +167,8 @@ function handleIntro(e, game, helpers, cx, floorY) {
     game.shake = Math.max(game.shake || 0, reduceMotion ? 6 : 26);
     game.flash = Math.max(game.flash || 0, 10);
     emitParticles(game, cx, e.y + e.h, { color: "#c89070", count: 30, size: 6, up: 1.4, speed: 5 }, reduceMotion);
+    game.bossFx?.landing?.(cx, e.y + e.h, e.phase, 130);
+    game.bossFx?.intro?.(cx, e.y + e.h);
     emitParticles(game, cx, e.y + e.h, { color: "#ffcf6a", count: 14, size: 3, up: 2.5, speed: 4, star: true }, reduceMotion);
     safeBeep(beep, "pound");
   }
@@ -195,6 +198,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
       game.flash = Math.max(game.flash || 0, 14);
       game.shake = Math.max(game.shake || 0, 20);
       emitParticles(game, cx, cy, { color: "#ff2040", count: 28, size: 5.5, up: 2.4, star: true }, reduceMotion);
+      game.bossFx?.phaseTransition?.(cx, cy, 3);
       if (showNotification) showNotification("FASE FINAL", "Se posa. El vuelo es el ataque.", "hurt");
       safeBeep(beep, "hurt");
     }
@@ -209,6 +213,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
       game.flash = Math.max(game.flash || 0, 12);
       game.shake = Math.max(game.shake || 0, 16);
       emitParticles(game, cx, cy, { color: "#ff2848", count: 24, size: 5, up: 2.2, star: true }, reduceMotion);
+      game.bossFx?.phaseTransition?.(cx, cy, 2);
       if (showNotification) showNotification("FASE 2", "Abre las alas, pero vuelve al nido.", "hurt");
       safeBeep(beep, "hurt");
     }
@@ -285,6 +290,7 @@ function updateSwoop(e, game, floorY, cx, cy) {
     if (e.y >= floorY - 8) {
       game.shake = Math.max(game.shake || 0, 8);
       emitParticles(game, cx, e.y + e.h, { color: "#f84", count: 12, size: 3.5, up: 1.6 }, reduceMotion);
+      game.bossFx?.landing?.(cx, e.y + e.h, e.phase, e.phase >= 3 ? 190 : 145);
     }
   }
 }
@@ -401,6 +407,7 @@ function beginAttack(e, game, helpers, floorY) {
   const cy = e.y + e.h / 2;
   const kind = e.teleKind;
   const dmg = e.phase >= 3 ? 16 : 15;
+  game.bossFx?.attackRelease?.(cx, cy, kind, e.phase, e.facing);
   if (kind === "charge") {
     e.mode = "charge";
     e.chargeLeft = e.phase >= 3 ? 28 : 24;
@@ -458,6 +465,7 @@ function spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion) {
       baby.max = baby.hp;
       game.enemies.push(baby);
       emitParticles(game, cx, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 }, reduceMotion);
+      game.bossFx?.spawn?.(cx, e.y, e.phase);
       if (showNotification) showNotification("CRÍA", "Un phosquito nace del nido.", "sala");
     }
   }
