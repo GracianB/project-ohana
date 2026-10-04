@@ -17,6 +17,7 @@ const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behav
 const { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationSnapshot, adaptationLabel } = await import('../systems/boss-adaptation.js');
 const { createBossBait, armBossBait, consumeBossBait, baitSnapshot, BAIT_PATTERNS } = await import('../systems/boss-bait.js');
 const { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackSnapshot, baitFeedbackLabel } = await import('../systems/boss-bait-feedback.js');
+const { createBossEncounterMemory, observeBossEncounter, encounterPreference, encounterSnapshot, encounterLabel } = await import('../systems/boss-encounter-memory.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -337,6 +338,54 @@ test('phase 19: el CEBO no puede saltarse la protección anti-repetición del di
   assert.notDeepEqual(pattern, bait);
 });
 
+
+
+
+test('phase 21: la memoria del encuentro convierte respuestas en ritmo corto o largo', () => {
+  const pressure = createBossEncounterMemory();
+  observeBossEncounter(pressure, { outcome: 'counter_failed', type: 'DASH' });
+  observeBossEncounter(pressure, { outcome: 'bait_trapped', type: 'DASH' });
+  assert.equal(encounterPreference(pressure), 'LONG');
+  assert.equal(encounterLabel(pressure), 'RITMO · ACELERA');
+  assert.equal(encounterSnapshot(pressure).failed, 1);
+  assert.equal(encounterSnapshot(pressure).baitTrapped, 1);
+
+  const read = createBossEncounterMemory();
+  observeBossEncounter(read, { outcome: 'counter_clean', type: 'AIRE' });
+  observeBossEncounter(read, { outcome: 'bait_read', type: 'AIRE' });
+  assert.equal(encounterPreference(read), 'SHORT');
+  assert.equal(encounterLabel(read), 'RITMO · RESPIRA');
+});
+
+test('phase 21: la memoria está acotada y no conserva más de ocho observaciones', () => {
+  const state = createBossEncounterMemory();
+  for (let i = 0; i < 14; i++) {
+    observeBossEncounter(state, {
+      outcome: i % 2 ? 'counter_failed' : 'counter_clean',
+      type: i % 2 ? 'DASH' : 'AIRE',
+    });
+  }
+  assert.equal(state.history.length, 8);
+  assert.ok(state.momentum >= -2 && state.momentum <= 2);
+});
+
+test('phase 21: la preferencia de longitud nunca abandona el repertorio autorizado', () => {
+  const short = createBossEncounterMemory();
+  observeBossEncounter(short, { outcome: 'counter_clean', type: 'AIRE' });
+  observeBossEncounter(short, { outcome: 'bait_read', type: 'AIRE' });
+
+  const long = createBossEncounterMemory();
+  observeBossEncounter(long, { outcome: 'counter_failed', type: 'DASH' });
+  observeBossEncounter(long, { outcome: 'bait_trapped', type: 'DASH' });
+
+  const shortPattern = chooseBossPattern(3, -1, () => 0, { encounterPreference: encounterPreference(short) });
+  const longPattern = chooseBossPattern(3, -1, () => 0, { encounterPreference: encounterPreference(long) });
+  assert.ok(Array.isArray(shortPattern));
+  assert.ok(Array.isArray(longPattern));
+  assert.ok(shortPattern.length <= longPattern.length);
+  assert.ok(BOSS_COMBAT_PROFILES[3].patterns.some((candidate) => JSON.stringify(candidate) === JSON.stringify(shortPattern)));
+  assert.ok(BOSS_COMBAT_PROFILES[3].patterns.some((candidate) => JSON.stringify(candidate) === JSON.stringify(longPattern)));
+});
 
 test('phase 20: el resultado del CEBO cambia el tempo de forma determinista y acotada', () => {
   const read = createBossBaitFeedback();
