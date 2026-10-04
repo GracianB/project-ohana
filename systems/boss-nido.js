@@ -229,6 +229,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.patternStep = -1;
     e.patternIndex = -1;
     e.contactDmg = 25;
+    e.counterplay = createBossCounterplay();
     e.behavior = createBossBehavior();
     e.behaviorLabel = "LEE NEUTRO";
     resetAttackState(e);
@@ -249,6 +250,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.patternStep = -1;
     e.patternIndex = -1;
     e.contactDmg = 23;
+    e.counterplay = createBossCounterplay();
     e.behavior = createBossBehavior();
     e.behaviorLabel = "LEE NEUTRO";
     resetAttackState(e);
