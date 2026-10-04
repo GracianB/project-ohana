@@ -40,12 +40,6 @@ export function bossAttackProfile(kind = "charge") {
   return BOSS_ATTACK_PROFILES[kind] || BOSS_ATTACK_PROFILES.charge;
 }
 
-function pathPolygon(ctx, points) {
-  ctx.beginPath();
-  points.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-  ctx.closePath();
-}
-
 export class BossFX {
   constructor() {
     this.items = [];
@@ -98,13 +92,14 @@ export class BossFX {
     }
   }
 
-  render(ctx, cam, t = 0, viewport = {}, boss = null) {
+  render(ctx, cam, t = 0, viewport = {}, boss = null, reduceMotion = false) {
     if (!ctx) return;
     const vx = Number(viewport.width) || ctx.canvas?.width || 1280;
     const vy = Number(viewport.height) || ctx.canvas?.height || 720;
 
     ctx.save();
     ctx.lineCap = "round";
+    if (reduceMotion) ctx.globalAlpha = 0.65;
     ctx.lineJoin = "round";
 
     if (boss && !boss.dying && !boss.fell) this.renderBossState(ctx, boss, cam, t);
@@ -294,6 +289,20 @@ export class BossFX {
       for (let i = 0; i < 7; i++) {
         const xx = x + (i - 3) * r * 0.28;
         ctx.beginPath(); ctx.moveTo(xx, y); ctx.lineTo(xx + (i % 2 ? 9 : -9), y + 24 + u * 30); ctx.stroke();
+      }
+    } else if (item.type === "intro") {
+      const r = 22 + u * 150;
+      ctx.globalAlpha = alpha * 0.62;
+      ctx.strokeStyle = item.color;
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = alpha * 0.45;
+      for (let i = 0; i < 6; i++) {
+        const a = i * TAU / 6;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a) * 18, y + Math.sin(a) * 18);
+        ctx.lineTo(x + Math.cos(a) * (r * 0.82), y + Math.sin(a) * (r * 0.82));
+        ctx.stroke();
       }
     } else if (item.type === "spawn") {
       const r = 10 + u * 46;
