@@ -56,7 +56,7 @@ index.html
 ## Reglas
 - Nada de scripts `APPLY-*.ps1` que parcheen código por texto: se edita el fichero.
 - Si añades un módulo, impórtalo desde un punto de entrada o no se cargará.
-- Al cambiar CSS/JS de entrada, sube `?v=ohana-NN` en `index.html` (actual: `ohana-111`).
+- Al cambiar CSS/JS de entrada, sube `?v=ohana-NN` en `index.html` (actual: `ohana-112`).
 - El guardado usa `saveStore`; las acciones de teclado y táctiles comparten `bindInput`.
 - `systems/hud.js` recibe el estado del jugador: no lee textos del DOM ni usa intervalos.
 - Las pruebas de `tests/core.test.js` y `tests/runtime.test.js` deben pasar antes del despliegue.
