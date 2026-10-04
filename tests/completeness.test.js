@@ -308,6 +308,7 @@ test('phase 19: cambiar la respuesta rearma el CEBO y la fase final sigue cerrad
   consumeBossBait(bait, 1);
 
   observeBossAdaptation(adaptation, { outcome: 'success', type: 'AIRE' });
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'AIRE' });
   armBossBait(bait, adaptation);
   assert.equal(bait.armed, true);
   assert.equal(bait.type, 'AIRE');
