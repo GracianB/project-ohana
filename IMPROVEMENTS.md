@@ -1,4 +1,4 @@
-# 70 mejoras · Demo Mundo 1
+# 71 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -92,3 +92,4 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 69. Phase 31: pipeline CI actualizado a actions/checkout@v7 y setup-node@v7, con timeouts explícitos para evitar jobs colgados.
 
 70. Phase 32: separación de dominios RNG para impedir que render/VFX alteren la reproducibilidad de la simulación.
+71. Phase 33: decisiones jugables de sorpresas y lluvia pasan por RNG inyectable y la llegada del Nido queda ligada al reloj fijo de simulación, sin temporizador de pared.
