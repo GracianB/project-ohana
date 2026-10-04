@@ -124,6 +124,41 @@ function drawCastFX(ctx, H, color, pose, slot, abilityId) {
   ctx.restore();
 }
 
+function drawLocomotionFX(ctx, H, color, pose, t) {
+  const turn = Math.max(0, Math.min(1, pose.turnPulse || 0));
+  const brake = Math.max(0, Math.min(1, pose.brake || 0));
+  if (turn > 0.02) {
+    ctx.save();
+    ctx.globalAlpha = turn * 0.42;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.2, H * 0.017);
+    const dir = pose.bodyTilt >= 0 ? 1 : -1;
+    for (let i = 0; i < 3; i++) {
+      const a0 = dir > 0 ? -0.95 - i * 0.11 : Math.PI + 0.95 + i * 0.11;
+      const a1 = dir > 0 ? -0.35 - i * 0.11 : Math.PI + 0.35 + i * 0.11;
+      ctx.beginPath();
+      ctx.arc(-H * 0.10, -H * (0.25 + i * 0.10), H * (0.24 + i * 0.035), a0, a1);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  if (brake > 0.02) {
+    ctx.save();
+    ctx.globalAlpha = brake * 0.36;
+    ctx.strokeStyle = "#fff4c4";
+    ctx.lineWidth = Math.max(1.2, H * 0.014);
+    for (let i = 0; i < 3; i++) {
+      const y = -H * (0.04 + i * 0.07);
+      const len = H * (0.12 + brake * 0.24) * (1 - i * 0.14);
+      ctx.beginPath();
+      ctx.moveTo(-H * 0.12 - len, y);
+      ctx.lineTo(-H * 0.12, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
 function drawAttackFX(ctx, H, color, pose) {
   if (pose.state !== "attack") return;
   const a = Math.max(0, Math.min(1, pose.atk || 0));
@@ -167,6 +202,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   const prof = motionProfile(p);
   const intensity = Math.min(1.35, (pose.speed || 0) * (0.55 + prof.pace * 0.45));
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
+  drawLocomotionFX(ctx, H, color, pose, t);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
   drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);

@@ -81,3 +81,14 @@ test("el casteo genera una pose corporal propia", () => {
   assert.equal(pose.castSlot, 2);
   assert.ok(Math.abs(pose.headTilt) > 0 || Math.abs(pose.bodyTilt) > 0);
 });
+
+test("cambio de dirección produce un pulso visual de giro y frenada", () => {
+  const actor = { ...basePlayer, id: "cat", vx: 4.5 };
+  computePose(actor, 10, { rng: () => 0 });
+  actor.vx = -4.5;
+  const turn = enhancePose(computePose(actor, 11, { rng: () => 0 }), actor);
+  assert.ok(turn.turnPulse > 0);
+  actor.vx = -1.0;
+  const brake = enhancePose(computePose(actor, 12, { rng: () => 0 }), actor);
+  assert.ok(brake.brake > 0);
+});
