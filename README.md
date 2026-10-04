@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:071226,40:102A43,78:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=56&fontAlignY=34&desc=ISLA%20HOKU%20%C2%B7%20CANVAS%202D%20%C2%B7%20BEB%C3%89%20%E2%86%92%20GOD&descAlignY=58&descSize=16&animation=twinkling" width="100%" alt="Project Ohana, isla Hoku, de bebé a GOD"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:071226,40:102A43,78:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=56&fontAlignY=34&desc=ISLA%20HOKU%20%C2%B7%20CANVAS%202D%20%C2%B7%20BEB%C3%89%20%E2%86%92%20GOD&descAlignY=58&descSize=16&animation=twinkling" width="100%" alt="Project Ohana, isla Hoku, de bebé a forma final"/>
 </a>
 
 <a href="https://gracianb.github.io/project-ohana/">
@@ -69,7 +69,7 @@ stateDiagram-v2
   Bebe --> Base: 55
   Base --> Evo: 140
   Evo --> Final: 260
-  Final --> GOD: 420
+  Final --> forma final: 420
 ```
 
 Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E. Cada forma tiene además una lectura propia de postura, escalado visual y firma de evolución; las 50 combinaciones personaje × forma se mantienen separadas de la hitbox y la física. En combate, las firmas de H/J/K/L también escalan visualmente por forma sin alterar daño, alcance ni hitbox.
@@ -99,17 +99,17 @@ Diez personajes originales. La <kbd>H</kbd> es siempre un golpe cercano y no cam
 </tr>
 </table>
 
-| Personaje | Golpe con H | Pasiva | GOD |
+| Personaje | Golpe con H | Pasiva | forma final |
 | --- | --- | --- | --- |
-| **Kilo** | Nota | Caída lenta. En GOD, un vuelo corto | KILO GOD |
-| **Pizza** | Porción | Caer sobre un bicho lo aplasta y te rebota | PIZZA GOD |
-| **Michi** | Zarpazo | Aguanta un golpe mortal por sala | MICHI GOD |
-| **Cuerno** | Puya | Al caer, el cuerno brilla y te da un saltito | CUERNO GOD |
-| **Chispín** | Chispa | Tras correr un segundo va más rápido y deja chispas | CHISPÍN GOD |
-| **Stitcho** | Zarpa | Se agarra a las paredes y trepa | STITCHO GOD |
-| **Dragón** | Garra | Mantén el salto para planear. En GOD, vuela | DRAGÓN GOD |
-| **Dino** | Mordisco | Abajo en el aire: picado con onda | DINO GOD |
-| **Frita** | Corte | Abajo mientras corres: se desliza y arrolla | KÉTCHUP GOD |
+| **Kilo** | Nota | Caída lenta. En forma final, un vuelo corto | KILO forma final |
+| **Pizza** | Porción | Caer sobre un bicho lo aplasta y te rebota | PIZZA forma final |
+| **Michi** | Zarpazo | Aguanta un golpe mortal por sala | MICHI forma final |
+| **Cuerno** | Puya | Al caer, el cuerno brilla y te da un saltito | CUERNO forma final |
+| **Chispín** | Chispa | Tras correr un segundo va más rápido y deja chispas | CHISPÍN forma final |
+| **Stitcho** | Zarpa | Se agarra a las paredes y trepa | STITCHO forma final |
+| **Dragón** | Garra | Mantén el salto para planear. En forma final, vuela | DRAGÓN forma final |
+| **Dino** | Mordisco | Abajo en el aire: picado con onda | DINO forma final |
+| **Frita** | Corte | Abajo mientras corres: se desliza y arrolla | KÉTCHUP forma final |
 | **Yomi** | Fauces | Cae más rápido. En el aire, salto es un paso espectral | YOMI FAUCES |
 
 La dificultad es la de la portada. Fácil se lee pronto. Difícil pide más la sala.
@@ -269,7 +269,7 @@ Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afi
 <div align="center">
 
 <a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=110&section=footer&color=0:7EE7FF,45:102A43,100:071226&reversal=true&text=BEB%C3%89%20%E2%86%92%20GOD&fontColor=F4F3EE&fontSize=28&fontAlignY=62&animation=fadeIn" width="100%" alt="De bebé a GOD"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=110&section=footer&color=0:7EE7FF,45:102A43,100:071226&reversal=true&text=BEB%C3%89%20%E2%86%92%20GOD&fontColor=F4F3EE&fontSize=28&fontAlignY=62&animation=fadeIn" width="100%" alt="De bebé a forma final"/>
 </a>
 
 <br/>
