@@ -537,6 +537,21 @@ function dash() {
   }
   beep("dash");
 }
+function registerBossPunish(e) {
+  if (!e?.boss || !e.vulnerable || e.dying) return false;
+  e.punishHits = (Number(e.punishHits) || 0) + 1;
+  if (e.punishAwarded) return true;
+
+  e.punishAwarded = true;
+  const reward = 50 + Math.max(1, Math.min(3, Number(e.phase) || 1)) * 25;
+  game.score = (Number(game.score) || 0) + reward;
+  game.shake = Math.min(14, (game.shake || 0) + 5);
+  game.flash = Math.max(game.flash || 0, 4);
+  game.flashColor = "#fff6c8";
+  game.nums.add(e.x, e.y - 12, "PUNISH +" + reward, "#ffe66a", true);
+  game.bossFx?.counter?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, reward);
+  return true;
+}
 function markHit(p, e, dmg, kb) {
   const evo = Number(p.evo) || 0;
   let d = dmg;
@@ -544,6 +559,7 @@ function markHit(p, e, dmg, kb) {
   const crit = d >= 32 || push >= 1.5;
   if (e.boss) d = Math.ceil(d * 0.55);
   e.hp -= d;
+  registerBossPunish(e);
   const face = p.facing || 1;
   e.vx = face * (e.boss ? 3 : 8) * push;
   e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
@@ -1103,6 +1119,7 @@ function tickRam(p) {
     e._rammed = 12;
     const d = 10 + (Number(p.evo) || 0) * 4;
     e.hp -= e.boss ? Math.ceil(d * 0.45) : d;
+    registerBossPunish(e);
     e.vx = p.facing * 7;
     e.vy = Math.min(e.vy || 0, -2);
     e.flash = 12;
@@ -1808,6 +1825,7 @@ function updateEnemies() {
         if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
           const dmg = 8 + (Number(p.evo) || 0) * 2;
           e.hp -= dmg;
+          registerBossPunish(e);
           e.vy = 2.4;
           e.stun = Math.max(e.stun || 0, 10);
           e.flash = 10;
@@ -1933,7 +1951,7 @@ function updateProjectiles() {
         if (!e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
-          e.hp -= dmg; e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
+          e.hp -= dmg; registerBossPunish(e); e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
           e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
           e.flash = Math.max(e.flash || 0, 14);
           if (pr.pierce) {
@@ -2356,7 +2374,8 @@ function updateHUD() {
     const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
     const patternText = boss.patternLabel ? " · RUTINA " + (Number(boss.patternStep) + 1) + "/" + Math.max(1, boss.pattern.length) : "";
     const recoveryText = boss.vulnerable ? " · CASTIGA" : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + attackText + " · " + pct + "%");
+    const readText = boss.behaviorLabel ? " · " + boss.behaviorLabel : "";
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + attackText + " · " + pct + "%");
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
