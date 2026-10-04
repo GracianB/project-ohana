@@ -3,6 +3,7 @@ function bossRng(e) {
 }
 
 import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, patternLabel } from "./boss-combat.js";
+import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorLabel } from "./boss-behavior.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -76,6 +77,10 @@ export function createBossNido() {
     recoveryMax: 0,
     vulnerable: false,
     lastAttack: "",
+    behavior: createBossBehavior(),
+    behaviorLabel: "LEE NEUTRO",
+    punishAwarded: false,
+    punishHits: 0,
   };
 }
 
@@ -97,6 +102,8 @@ export function updateBossNido(e, game, helpers) {
 
   const cx = e.x + e.w / 2;
   const cy = e.y + e.h / 2;
+  e.behavior = observeBossBehavior(e.behavior, p, game);
+  e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
   const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
 
   if (e.introT > 0) {
@@ -166,6 +173,8 @@ function resetAttackState(e) {
   e.vulnerable = false;
   e.lastAttack = "";
   e.patternLabel = "";
+  e.punishAwarded = false;
+  e.punishHits = 0;
   e.vx = (e.vx || 0) * 0.3;
   land(e, 70);
 }
@@ -215,6 +224,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.patternStep = -1;
     e.patternIndex = -1;
     e.contactDmg = 25;
+    e.behavior = createBossBehavior();
+    e.behaviorLabel = "LEE NEUTRO";
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
@@ -233,6 +244,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.patternStep = -1;
     e.patternIndex = -1;
     e.contactDmg = 23;
+    e.behavior = createBossBehavior();
+    e.behaviorLabel = "LEE NEUTRO";
     resetAttackState(e);
     e.attackCd = 50;
     if (!e.phaseAnnounced[2]) {
@@ -389,6 +402,8 @@ function finishBossAttack(e, game, delay = 6) {
   e.vulnerable = true;
   e.invuln = 0;
   e.patternLabel = "";
+  e.punishAwarded = false;
+  e.punishHits = 0;
   e.vx *= 0.12;
   land(e, 1);
   if (game?.bossFx?.recovery) game.bossFx.recovery(e.x + e.w / 2, e.y + e.h / 2, e.phase);
@@ -478,9 +493,16 @@ function pickAttack(e) {
     e.phase,
     e.patternIndex,
     bossRng.bind(null, e),
-    { distance: Math.abs(px - cx), vertical: py - (e.y + e.h / 2) }
+    {
+      distance: Math.abs(px - cx),
+      vertical: py - (e.y + e.h / 2),
+      hpRatio: e.hp / Math.max(1, e.max),
+      behavior: e.behavior,
+      reactivePreference: reactiveAttackPreference(e.phase, e.behavior, e.hp / Math.max(1, e.max)),
+    }
   );
   e.pattern = pattern;
+  e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
   const profiles = bossCombatProfile(e.phase);
   e.patternIndex = profiles.patterns.findIndex((candidate) => candidate.length === pattern.length && candidate.every((kind, i) => kind === pattern[i]));
   e.patternStep = 0;

@@ -51,16 +51,25 @@ export function chooseBossPattern(phase = 1, previous = -1, rng = () => 0, conte
   const profile = bossCombatProfile(phase);
   const patterns = profile.patterns;
   if (!patterns.length) return [];
+
+  const p = Math.max(1, Math.min(3, Number(phase) || 1));
   const distance = Math.abs(Number(context.distance) || 0);
   const vertical = Number(context.vertical) || 0;
+  const hpRatio = Math.max(0, Math.min(1, Number(context.hpRatio) || 1));
+  const behavior = context.behavior || {};
 
   let preferred = null;
-  if (phase === 1) {
+  if (p === 1) {
     preferred = distance > 260 ? "charge" : "spit";
-  } else if (phase === 2) {
+  } else if (p === 2) {
     preferred = vertical < -70 ? "swoop" : distance < 180 ? "slam" : "swoop";
   } else {
     preferred = vertical < -70 ? "swoop" : distance < 200 ? "slam" : "charge";
+  }
+
+  const reactive = context.reactivePreference;
+  if (typeof reactive === "string" && patterns.some((pattern) => pattern[0] === reactive)) {
+    preferred = reactive;
   }
 
   const candidates = patterns
@@ -71,7 +80,11 @@ export function chooseBossPattern(phase = 1, previous = -1, rng = () => 0, conte
   const pool = preferredCandidates.length ? preferredCandidates : candidates.length ? candidates : [{ pattern: patterns[0], index: 0 }];
   const raw = Number(rng());
   const safe = Number.isFinite(raw) ? Math.max(0, Math.min(0.999999, raw)) : 0;
-  return pool[Math.floor(safe * pool.length)].pattern.slice();
+  const selected = pool[Math.floor(safe * pool.length)];
+
+  // Cuando el boss está en su tramo final, evita degradar la lectura del patrón:
+  // siempre devuelve una copia plana y estable para que el combate siga testeable.
+  return selected.pattern.slice();
 }
 
 export function patternLabel(pattern = []) {

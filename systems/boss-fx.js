@@ -89,6 +89,11 @@ export class BossFX {
     this.add("recovery-end", { x, y, phase, color: p.color, life: 18 });
   }
 
+  counter(x, y, phase, reward = 75) {
+    const p = bossPhaseProfile(phase);
+    this.add("counter", { x, y, phase, reward, color: p.glow, life: 36 });
+  }
+
   intro(x, y) {
     this.add("intro", { x, y, color: "#ffd37a", life: 54 });
   }
@@ -345,6 +350,30 @@ export class BossFX {
       ctx.strokeStyle = item.color;
       ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+    } else if (item.type === "counter") {
+      const r = 18 + u * 62;
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.strokeStyle = item.color;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3.5;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+      ctx.shadowBlur = 0;
+      for (let i = 0; i < 10; i++) {
+        const a = i * TAU / 10 - u * 1.5;
+        const inner = r * 0.72;
+        const outer = r * (1.05 + (i % 2) * 0.22);
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a) * inner, y + Math.sin(a) * inner);
+        ctx.lineTo(x + Math.cos(a) * outer, y + Math.sin(a) * outer);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = item.color;
+      ctx.font = "900 15px Outfit,sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("PUNISH +" + item.reward, x, y - r - 14);
     } else if (item.type === "spawn") {
       const r = 10 + u * 46;
       ctx.globalAlpha = alpha * 0.7;

@@ -1,4 +1,4 @@
-# 54 mejoras · Demo Mundo 1
+# 56 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -58,6 +58,7 @@
 54. Rediseño de formas finales: nombres únicos y siluetas ornamentales específicas para cada personaje
 
 55. **Director de combate del boss**: rutinas encadenadas, selección contextual, recuperación vulnerable y fase 3 con presión creciente
+56. **Boss Reactive Director**: memoria de dash/aire/presión, adaptación por patrón, desesperación determinista y recompensa de `PUNISH` en ventanas vulnerables
 
 ## Cifras maestras
 

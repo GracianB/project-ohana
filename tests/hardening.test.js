@@ -48,3 +48,18 @@ test('la experiencia final no conserva terminología divina genérica ni identif
   }
   assert.match(fs.readFileSync('./engine/audio.js', 'utf8'), /evoFinalFanfare/);
 });
+
+ 
+test('phase 16: boss read y punish quedan aislados y deterministas', () => {
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const behavior = fs.readFileSync('./systems/boss-behavior.js', 'utf8');
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.match(boss, /observeBossBehavior/);
+  assert.match(boss, /reactiveAttackPreference/);
+  assert.match(boss, /punishAwarded/);
+  assert.doesNotMatch(behavior, /Math\.random\(/);
+  assert.match(game, /function registerBossPunish\(e\)/);
+  assert.match(game, /PUNISH \+"/);
+  assert.match(sw, /boss-behavior\.js\?v=" \+ VERSION/);
+});
