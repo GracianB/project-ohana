@@ -847,10 +847,9 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   }
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
-    const x0 = g.enemies[0].x;
     useAbility(g, 1);
     advanceAbility(g, 10);
-    assert.ok(g.enemies[0].x < x0, 'Manga debe atraer al enemigo hacia la máscara');
+    assert.ok(g.enemies[0].vx < 0, 'Manga debe orientar la velocidad del enemigo hacia la máscara');
     clearAbilityFx();
   }
   {
