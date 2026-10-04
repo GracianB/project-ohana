@@ -662,8 +662,9 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   }
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
+    g.enemies[0].x = 120;
     useAbility(g, 1);
-    advanceAbility(g, 44);
+    advanceAbility(g, 54);
     assert.equal(g.player._abilMove, null, 'Rollo debe terminar y liberar el movimiento');
     assert.ok(g.enemies[0].hp < 500, 'Rollo debe dañar por contacto');
     clearAbilityFx();
