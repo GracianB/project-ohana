@@ -149,15 +149,15 @@ test("las 5 formas tienen identidad visual y cinética propia para los 10 person
   }
 });
 
-test("los estilos de evolución conservan una separación fuerte entre bebé, alto y GOD", () => {
+test("los estilos de evolución conservan una separación fuerte entre bebé, alta y forma final", () => {
   for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
     const baby = applyEvolutionPose({ state:"idle", form:0, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:0 });
     const high = applyEvolutionPose({ state:"idle", form:3, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:3 });
-    const god = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
+    const final = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
 
     assert.ok(Math.abs(high.bodyTilt) >= Math.abs(baby.bodyTilt));
-    assert.ok(Math.abs(god.bodyTilt) >= Math.abs(high.bodyTilt));
-    assert.ok(god.evolutionPulse === 0);
+    assert.ok(Math.abs(final.bodyTilt) >= Math.abs(high.bodyTilt));
+    assert.ok(final.evolutionPulse === 0);
   }
 });
 
@@ -179,6 +179,17 @@ test("la progresión de evolución también escala la lectura del combate sin to
   }
 });
 
+
+
+test("la etapa final usa diseño por personaje y se nombra como forma final", () => {
+  assert.equal(EVOLUTION_STAGES[4].name, "final");
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const motifs = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.motif);
+  assert.equal(new Set(motifs).size, ids.length);
+  for (const id of ids) {
+    assert.ok(evolutionProfile({ id, evo: 4 }).finalDesign.span > 0, id);
+  }
+});
 test("la identidad de personaje modula combate sin colapsar las cinco etapas", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
   const e2 = ids.map((id) => evolutionProfile({ id, evo: 2 }).combat.attack);
