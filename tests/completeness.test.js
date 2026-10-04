@@ -414,6 +414,45 @@ test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentr
   clearAbilityFx();
 });
 
+test('Kilo hula: refleja proyectiles hostiles y no rebota dos veces el mismo proyectil', () => {
+  const reflected = { x: 112, y: 104, w: 8, h: 8, vx: -6, vy: 1, life: 30, dmg: 12, owner: 'enemy' };
+  const untouched = { x: 260, y: 260, w: 8, h: 8, vx: -6, vy: 1, life: 30, dmg: 12, owner: 'enemy' };
+  const g = {
+    player: { id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
+    enemies: [],
+    projectiles: [reflected, untouched],
+    nums: { add() {} },
+    fx: { emit() {} },
+    ghosts: [],
+    cam: { x: 0, y: 0 },
+    worldW: 1600,
+    worldH: 900,
+    t: 0,
+    reduceMotion: true,
+    shake: 0,
+  };
+
+  clearAbilityFx();
+  useAbility(g, 1);
+  g.t = 1;
+  updateAbilityFx(g);
+
+  assert.equal(reflected.owner, 'player');
+  assert.equal(reflected.reflected, true);
+  assert.equal(reflected.vx, 6);
+  assert.equal(reflected.vy, -1);
+  assert.ok(reflected._hulaReflectUntil > g.t);
+  assert.equal(untouched.owner, 'enemy');
+
+  const vx = reflected.vx;
+  const vy = reflected.vy;
+  g.t = 2;
+  updateAbilityFx(g);
+  assert.equal(reflected.vx, vx);
+  assert.equal(reflected.vy, vy);
+  clearAbilityFx();
+});
+
 test('Pizza: las tres habilidades ejecutan su efecto y queso no deja el control secuestrado', () => {
   const basePlayer = () => ({
     id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2,
