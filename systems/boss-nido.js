@@ -117,7 +117,7 @@ export function updateBossNido(e, game, helpers) {
     case "charge": updateCharge(e, game, floorY); break;
     case "swoop": updateSwoop(e, game, floorY, cx, cy); break;
     case "slam": updateSlam(e, game, helpers, cx, floorY); break;
-    case "spit": updateSpit(e, floorY); break;
+    case "spit": updateSpit(e, game, floorY); break;
     case "chain": updateChain(e, game, helpers); break;
     case "recovery": updateRecovery(e, game, helpers, floorY); break;
     default: updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY); break;
@@ -354,7 +354,7 @@ function updateSlam(e, game, helpers, cx, floorY) {
   }
 }
 
-function updateSpit(e, floorY) {
+function updateSpit(e, game, floorY) {
   e.vx *= 0.7;
   e.airborne = false;
   e.vy = 0;
