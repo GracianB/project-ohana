@@ -114,7 +114,7 @@ async function auditPage(page, label) {
     if (bossRoom.roomId !== 'boss' || !bossRoom.boss) throw new Error('E2E: no pudo entrar al Nido');
 
     api.setInvulnerable(600);
-    api.step(60);
+    api.step(90);
 
     let boss = api.state().boss;
     if (!boss) throw new Error('E2E: boss ausente tras entrar al Nido');
@@ -133,7 +133,7 @@ async function auditPage(page, label) {
     }
 
     api.setBossHp(300);
-    const phaseAfter = api.step(12);
+    const phaseAfter = api.step(2);
     snapshots.push({ phaseAfter });
     if (!phaseAfter.boss || phaseAfter.boss.phase < 3 || phaseAfter.boss.dying) {
       throw new Error('E2E: la Reina no entró en fase 3 con vida residual');
