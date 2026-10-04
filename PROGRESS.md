@@ -116,7 +116,7 @@ La vista por defecto es **vector**.
 El CI ejecuta **las cuatro suites de regresión más un E2E real de navegador**:
 
 ```bash
-node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js
+node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js
 node tests/browser/e2e.mjs
 ```
 
