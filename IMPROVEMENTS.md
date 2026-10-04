@@ -57,6 +57,8 @@
 53. Cinemática de evolución 2.0: firma gráfica por héroe y etapa, medidor 0→forma final y reveal reforzado
 54. Rediseño de formas finales: nombres únicos y siluetas ornamentales específicas para cada personaje
 
+55. **Director de combate del boss**: rutinas encadenadas, selección contextual, recuperación vulnerable y fase 3 con presión creciente
+
 ## Cifras maestras
 
 La demo publicada se documenta con estas cifras:
