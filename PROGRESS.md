@@ -167,7 +167,7 @@ El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 | 05/10 | **Runtime Integrity Guard · Phase 29**: saneamiento preventivo de estado crítico y colecciones antes de cada paso de simulación; límites finitos para HP, XP, score, movimiento, proyectiles, enemigos y FX; recompensa `PUNISH` vuelve al guard de puntuación; caché `ohana-104`. |
 | 05/10 | **Runtime Fail-Closed · Phase 30**: el bucle principal contiene errores de simulación o render, registra el contexto, limpia input/reloj y pausa de forma segura sin matar el `requestAnimationFrame`; caché `ohana-105`. |
 | 05/10 | **CI Hardening · Phase 31**: GitHub Actions actualizado a `actions/checkout@v7` y `actions/setup-node@v7`, con límite de 10 minutos para test y deploy; elimina el warning de Node 20 de las actions antiguas. |
-| 05/10 | **RNG Domain Separation · Phase 32**: VFX de celebración, glide, cámara y overlays usan una fuente determinista separada del RNG de simulación; la IA/combate conserva el RNG compartido exclusivamente; caché `ohana-106`. |
+| 05/10 | **RNG Domain Separation · Phase 32**: VFX de celebración, glide, cámara y overlays usan una fuente determinista separada del RNG de simulación; la IA/combate conserva el RNG compartido exclusivamente; caché `ohana-106`. |\n| 05/10 | **Deterministic Gameplay Core · Phase 33**: las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación; la convocatoria del Nido abandona `setTimeout` y usa 132 ticks a 60 Hz, pausables y reproducibles; caché `ohana-107`. |
 
 ## Publicación y caché
 
@@ -183,7 +183,7 @@ El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no s
 
 ## Pendiente técnico
 
-La auditoría actual cierra los huecos de determinismo, renderers y coherencia de cifras. No bloquean la demo vectorial, pero quedan identificadas para una siguiente pasada:
+La auditoría actual cubre determinismo de gameplay, renderers, runtime y coherencia de cifras. Las capas que siguen pendientes son mejoras estructurales y de calidad, no deuda crítica:
 
 - incorporar sprites pintados de Cuerno si se quiere soporte completo de `paint`
 - reforzar el versionado de caché de módulos ES internos
