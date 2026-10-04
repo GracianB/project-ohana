@@ -116,12 +116,14 @@ La vista por defecto es **vector**.
 El CI ejecuta **las dos suites de regresión**:
 
 ```bash
-node --test tests/core.test.js tests/runtime.test.js
+node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js
 ```
 
 Las pruebas cubren, entre otras áreas:
 
 - fábrica y comportamiento de enemigos
+- RNG inyectable para enemigos y poses, con escenarios reproducibles
+- smoke test de los 10 personajes × 5 formas ejecutando realmente cada renderer vectorial
 - XP
 - roster y aliases
 - guardado
@@ -151,11 +153,11 @@ El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no s
 
 ## Pendiente técnico
 
-No bloquean la demo vectorial, pero quedan identificadas para una siguiente pasada:
+La auditoría actual cierra los huecos de determinismo, renderers y coherencia de cifras. No bloquean la demo vectorial, pero quedan identificadas para una siguiente pasada:
 
 - incorporar sprites pintados de Cuerno si se quiere soporte completo de `paint`
 - reforzar el versionado de caché de módulos ES internos
-- añadir una prueba de humo que cargue y ejecute cada renderer de `characters/art/`
+- mantener la prueba de humo de renderers y ampliar el mock si aparece una nueva API gráfica
 
 ## Regla de mantenimiento
 
