@@ -49,7 +49,7 @@ test("la mejora de pose conserva el estado base y aumenta el lenguaje corporal",
 });
 
 test("ataque añade anticipación e impacto diferenciados por peso", () => {
-  const actor = { ...basePlayer, id: "dino", melee: 8 };
+  const actor = { ...basePlayer, id: "dino", melee: 7 };
   const early = enhancePose(computePose(actor, 1, { rng: () => 0 }), actor);
   actor.melee = 4;
   const impact = enhancePose(computePose(actor, 2, { rng: () => 0 }), actor);
