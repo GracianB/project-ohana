@@ -13,6 +13,23 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
+  const moduleProbe = await page.evaluate(async () => {
+    const paths = ['/characters/rig.js', '/characters/draw.js', '/systems/abilities.js', '/engine/input.js'];
+    const results = [];
+    for (const path of paths) {
+      try {
+        await import(path + '?probe=1');
+        results.push({ path, ok: true });
+      } catch (error) {
+        results.push({ path, ok: false, message: error?.message || String(error), stack: error?.stack || '' });
+      }
+    }
+    return results;
+  });
+  const failedModules = moduleProbe.filter((item) => !item.ok);
+  if (failedModules.length) {
+    throw new Error(label + ': module probe failed\n' + failedModules.map((item) => item.path + ' · ' + item.message + '\n' + item.stack).join('\n'));
+  }
   const sw = await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) return { supported:false };
     const reg = await navigator.serviceWorker.ready;
