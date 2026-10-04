@@ -656,7 +656,7 @@ const CASTERS = {
         w: 20 + evo * 1.5, h: 14 + evo,
         life: 44 + evo * 5, dmg: (6 + evo * 1.5) / shots,
         color: evo >= 4 ? "#e8fdff" : "#e8ffe0", shape: "bone", owner: "player", trail: true,
-      });
+      }, MAX_RUNTIME_PROJECTILES);
     }
     add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
   },
@@ -686,7 +686,7 @@ const CASTERS = {
       pushRuntime(g.projectiles, {
         x: h.x - 4, y: h.y - 4, vx: Math.cos(a) * sp * p.facing, vy: Math.sin(a) * sp,
         w: 8, h: 8, life: 14 + (gameRand(g) * 5 | 0), dmg: 6, color: "#fff8e0", shape: "salt", spin: true, rot: gameRand(g) * 6, owner: "player", trail: false,
-      });
+      }, MAX_RUNTIME_PROJECTILES);
     }
     add({ kind: "muzzle", life: 8, color: "#fff3c0" });
     p.vx -= p.facing * 2.5;
@@ -772,7 +772,7 @@ const CASTERS = {
       vx: (16 + evo) * face, vy: 0,
       w: 26, h: 16, life: 40, dmg: 18, color: "#ffe9a8",
       shape: "orb", owner: "player", trail: true, pierce: 3,
-    });
+    }, MAX_RUNTIME_PROJECTILES);
     p._thrust = 4;
     p._thrustFace = face;
     boom(g, cx(p) + face * 16, y, "#ffe9a8", 8, { star: true });
@@ -798,7 +798,7 @@ const CASTERS = {
         vy: spread,
         w: 16, h: 16, life: 52, dmg: 11, color: colors[i],
         shape: "orb", owner: "player", trail: true, pierce: 4,
-      });
+      }, MAX_RUNTIME_PROJECTILES);
     }
     const reach = 78 + evo * 8;
     const box = { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 18 };
@@ -933,7 +933,7 @@ const UPD = {
     pushRuntime(g.projectiles, {
       x: h.x - 9, y: h.y - 5 + k * 3, vx: 14 * p.facing, vy: k * 0.35,
       w: 20, h: 10, life: 42, dmg: 9, color: f.i % 2 ? "#9ef0ff" : "#5ad1ff", shape: "bolt", owner: "player", trail: true,
-    });
+    }, MAX_RUNTIME_PROJECTILES);
     g.fx.emit(h.x, h.y, { color: "#9ef0ff", count: 4, size: 2.5, angle: p.facing > 0 ? 0 : Math.PI, spread: 0.8, speed: 3, star: true });
     p.vx -= p.facing * 0.8;
     f.i++;
