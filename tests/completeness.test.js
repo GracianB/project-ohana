@@ -206,3 +206,16 @@ test('boss counterplay anula una defensa si el jugador recibe daño', async () =
   assert.equal(resolveBossThreat(state, player, 90), null);
   assert.equal(state.streak, 0);
 });
+
+
+test('boss counterplay: estar fuera de peligro no rompe una racha existente', async () => {
+  const { createBossCounterplay, startBossThreat, resolveBossThreat } =
+    await import('../systems/boss-counterplay.js');
+  const boss = { x: 500, y: 500, w: 110, h: 130, phase: 1 };
+  const player = { x: 550, y: 600, w: 28, h: 34, grounded: true, vy: 0, _dashGo: 6 };
+  const state = createBossCounterplay();
+  state.streak = 2;
+  startBossThreat(state, boss, { ...player, x: 1200, _dashGo: 0 }, 100, 'charge');
+  assert.equal(resolveBossThreat(state, player, 100), null);
+  assert.equal(state.streak, 2);
+});
