@@ -32,7 +32,7 @@ function makeCanvasContext() {
     "createLinearGradient", "createRadialGradient", "ellipse", "fill",
     "fillRect", "getLineDash", "isPointInPath", "isPointInStroke",
     "lineTo", "measureText", "moveTo", "quadraticCurveTo", "restore",
-    "rotate", "save", "scale", "stroke", "strokeRect", "translate",
+    "rotate", "roundRect", "save", "scale", "stroke", "strokeRect", "translate",
   ]);
   return new Proxy(state, {
     get(target, prop) {
