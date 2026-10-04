@@ -199,7 +199,7 @@ function makeEvolutionCinemaContext() {
     lineJoin: "round",
     save() {}, restore() {}, translate() {}, rotate() {},
     beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
-    ellipse() {}, arc() {}, fill() {}, stroke() {}, fillRect() {},
+    ellipse() {}, arc() {}, quadraticCurveTo() {}, fill() {}, stroke() {}, fillRect() {},
   };
 }
 
