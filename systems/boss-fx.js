@@ -102,6 +102,14 @@ export class BossFX {
     });
   }
 
+  baitFeedback(x, y, phase, result = {}) {
+    const p = bossPhaseProfile(phase);
+    this.add("bait-feedback", {
+      x, y, phase, result, color: result?.outcome === "trapped" ? "#ffcf6a" : p.glow,
+      life: 42,
+    });
+  }
+
   intro(x, y) {
     this.add("intro", { x, y, color: "#ffd37a", life: 54 });
   }
@@ -401,6 +409,25 @@ export class BossFX {
       ctx.textBaseline = "middle";
       const label = item.result?.break ? "BREAK" : (item.result?.type || "ESQUIVA");
       ctx.fillText(label + " +" + (item.result?.reward || 0), x, y - r - 14);
+    } else if (item.type === "bait-feedback") {
+      const r = 18 + u * (item.result?.outcome === "trapped" ? 72 : 58);
+      ctx.globalAlpha = alpha * 0.72;
+      ctx.strokeStyle = item.color;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = item.color;
+      ctx.font = "900 15px Outfit,sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        item.result?.outcome === "trapped" ? "CEBO EFICAZ" : "CEBO LEÍDO",
+        x,
+        y - r - 14
+      );
     } else if (item.type === "spawn") {
       const r = 10 + u * 46;
       ctx.globalAlpha = alpha * 0.7;
