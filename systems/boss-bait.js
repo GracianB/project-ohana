@@ -40,7 +40,8 @@ export function armBossBait(state = createBossBait(), adaptation = {}) {
   const next = state && typeof state === "object" ? state : createBossBait();
   const type = validType(adaptation?.target);
   const repeat = Number(adaptation?.repeat) || 0;
-  if (!next.armed && type && repeat >= 2) {
+  const consumed = !!adaptation?.baitConsumed;
+  if (!next.armed && !consumed && type && repeat >= 2) {
     next.armed = true;
     next.type = type;
   }
