@@ -355,6 +355,8 @@ test("BossFX mantiene cola limitada, determinismo y renderer seguro", () => {
   fx.recovery(420, 560, 3);
   fx.recoveryEnd(420, 560, 3);
   fx.intro(420, 630);
+  fx.counterplay(420, 560, 3, { type: "DASH", reward: 60, break: false });
+  fx.counterplay(420, 560, 3, { type: "AIRE", reward: 95, break: true });
   for (let i = 0; i < 100; i++) fx.add("release", { x: i, y: i, kind: "charge", phase: 1, dir: 1, life: 12 });
   assert.ok(fx.items.length <= 64);
 
