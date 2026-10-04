@@ -61,18 +61,17 @@ export const EVOLUTION_COMBAT_STAGES = Object.freeze([
 ]);
 
 export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
-  kilo:    Object.freeze({ motif: "petal",  span: 0.92, spin: 0.30, nodes: 6 }),
-  stitcho: Object.freeze({ motif: "seam",   span: 0.88, spin: -0.28, nodes: 5 }),
-  chispin: Object.freeze({ motif: "bolt",   span: 0.96, spin: 0.16, nodes: 7 }),
-  cat:     Object.freeze({ motif: "eclipse",span: 0.84, spin: 0.22, nodes: 6 }),
-  dragon:  Object.freeze({ motif: "flame",  span: 1.10, spin: -0.14, nodes: 5 }),
-  dino:    Object.freeze({ motif: "crystal",span: 0.98, spin: 0.08, nodes: 7 }),
-  frita:   Object.freeze({ motif: "fries",  span: 0.90, spin: -0.20, nodes: 7 }),
-  pizza:   Object.freeze({ motif: "crust",  span: 1.02, spin: 0.10, nodes: 6 }),
-  yomi:    Object.freeze({ motif: "maw",    span: 0.88, spin: 0.00, nodes: 5 }),
-  cuerno:  Object.freeze({ motif: "aurora", span: 1.00, spin: 0.18, nodes: 7 }),
+  kilo:    Object.freeze({ motif: "petal",    silhouette: "crown",    span: 0.98, spin: 0.30, nodes: 7, accent: "#ffd36a", profile: "garden-crown" }),
+  stitcho: Object.freeze({ motif: "seam",     silhouette: "cape",     span: 1.02, spin: -0.28, nodes: 6, accent: "#67ddff", profile: "nebula-cape" }),
+  chispin: Object.freeze({ motif: "bolt",     silhouette: "mane",     span: 1.00, spin: 0.16, nodes: 8, accent: "#fff29a", profile: "storm-mane" }),
+  cat:     Object.freeze({ motif: "eclipse",  silhouette: "crescent", span: 0.94, spin: 0.22, nodes: 7, accent: "#ffb8e8", profile: "eclipse-collar" }),
+  dragon:  Object.freeze({ motif: "flame",    silhouette: "wing",     span: 1.16, spin: -0.14, nodes: 6, accent: "#ff8a45", profile: "solar-wing" }),
+  dino:    Object.freeze({ motif: "crystal",  silhouette: "back",     span: 1.10, spin: 0.08, nodes: 8, accent: "#b8ef6b", profile: "crystal-spine" }),
+  frita:   Object.freeze({ motif: "fries",    silhouette: "crest",    span: 1.04, spin: -0.20, nodes: 8, accent: "#fff1b3", profile: "crisp-crest" }),
+  pizza:   Object.freeze({ motif: "crust",    silhouette: "ring",     span: 1.10, spin: 0.10, nodes: 7, accent: "#ffd84a", profile: "volcanic-ring" }),
+  yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
+  cuerno:  Object.freeze({ motif: "aurora",   silhouette: "mane",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
-
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
   stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
