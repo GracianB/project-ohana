@@ -3,7 +3,7 @@
 #ohana-intro {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: var(--z-intro);
   display: none;
   overflow: hidden;
   cursor: pointer;
@@ -57,6 +57,12 @@ body.intro-playing #ohana-intro {
 #start-intro .intro-skip:hover {
   border-color: #7ee7ff;
   color: #fff;
+}
+
+#ohana-intro .oi-skip {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  box-shadow: 0 8px 30px rgba(0,0,0,.24);
 }
 body.intro-complete #start-intro,
 body.intro-complete #ohana-intro,

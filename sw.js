@@ -1,4 +1,4 @@
-const VERSION = "ohana-79";
+const VERSION = "ohana-80";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -13,11 +13,13 @@ const PRECACHE = [
   "./intro.css?v=" + VERSION,
   "./demo.css?v=" + VERSION,
   "./game.js?v=" + VERSION,
+  "./engine/input.js?v=" + VERSION,
+  "./systems/intro.js?v=" + VERSION,
+  "./systems/evo-cinema.js?v=" + VERSION,
   "./systems/title.js?v=" + VERSION,
   "./systems/title-fx.js?v=" + VERSION,
   "./systems/ending.js?v=" + VERSION,
-  "./systems/demo.js?v=" + VERSION,
-  "./systems/evo-cinema.js?v=" + VERSION
+  "./systems/demo.js?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {
@@ -41,6 +43,24 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  const isScript = url.pathname.endsWith(".js");
+
+  if (isScript) {
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response.ok && response.type === "basic") {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
+        }
+        return response;
+      }).catch(() =>
+        caches.match(request, { ignoreSearch: true })
+          .then((cached) => cached || caches.match("./index.html"))
+      )
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request, { ignoreSearch: true }).then((cached) => {

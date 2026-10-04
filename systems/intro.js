@@ -1,7 +1,7 @@
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
 // ----------------------------------------------------------------------------
-// playTitleIntro(): intro de portada en #ohana-intro (~2.2 s, saltable).
+// playTitleIntro(): intro cinematográfica de portada en #ohana-intro (~3.3 s).
 // playIntro(kind, name, done, id): cinemática corta al pulsar Empezar /
 //   Continuar (~1.8 s, saltable). API compatible con title.js.
 // Ambas en canvas, con el mismo kit visual que la cinemática de evolución.
@@ -36,14 +36,22 @@ function iris(ctx, W, H, cx, cy, k) {
 // ---------------------------------------------------------------------------
 export function playTitleIntro() {
   const el = document.getElementById("ohana-intro");
-  const finishClasses = () => document.body.classList.add("intro-complete");
-  // El menú no espera a esta cinemática. Si el canvas peta, los botones siguen.
-  finishClasses();
+  const finishClasses = () => {
+    document.body.classList.remove("intro-playing");
+    document.body.classList.add("intro-complete");
+    el?.classList.remove("show");
+    el?.setAttribute("aria-hidden", "true");
+  };
   if (!el) return;
   if (el._played) return;
   el._played = true;
-  el.innerHTML = '<canvas aria-hidden="true"></canvas><button class="oi-skip" type="button">Toca para entrar</button>';
-  el.setAttribute("aria-hidden", "true");
+  el.innerHTML = '<canvas aria-hidden="true"></canvas><button class="oi-skip" type="button" aria-label="Saltar introducción">Saltar intro · Esc</button>';
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", "Introducción cinematográfica de Project Ohana");
+  el.setAttribute("aria-hidden", "false");
+  el.classList.add("show");
+  document.body.classList.add("intro-playing");
   const fc = fullCanvas(el.querySelector("canvas"));
   const ctx = fc.ctx;
   const reduce = reducedMotion();
@@ -65,6 +73,66 @@ export function playTitleIntro() {
     const W = fc.W, H = fc.H;
     const size = Math.min(W * 0.17, H * 0.2, 170);
     return { W, H, cx: W / 2, cy: H * 0.46, size };
+  }
+
+  function drawIslandScene(t, L) {
+    const { W, H, cx, cy } = L;
+    const horizon = H * 0.74;
+    const sunK = easeOut(seg(t, 0.15, 1.15));
+    const seaK = seg(t, 0.1, 1.0);
+    if (seaK <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = 0.86 * seaK;
+
+    const sea = ctx.createLinearGradient(0, horizon, 0, H);
+    sea.addColorStop(0, "rgba(7,42,62,0.12)");
+    sea.addColorStop(0.55, "rgba(5,28,46,0.62)");
+    sea.addColorStop(1, "rgba(2,8,18,0.98)");
+    ctx.fillStyle = sea;
+    ctx.fillRect(0, horizon, W, H - horizon);
+
+    if (sunK > 0) {
+      const sr = Math.min(W, H) * (0.045 + sunK * 0.055);
+      const sg = ctx.createRadialGradient(cx, horizon - sr * 0.35, 0, cx, horizon - sr * 0.35, sr * 2.8);
+      sg.addColorStop(0, rgba(GOLD, 0.42 * sunK));
+      sg.addColorStop(0.55, rgba(GOLD, 0.08 * sunK));
+      sg.addColorStop(1, rgba(GOLD, 0));
+      ctx.fillStyle = sg;
+      ctx.fillRect(cx - sr * 3, horizon - sr * 3, sr * 6, sr * 6);
+
+      ctx.fillStyle = GOLD;
+      ctx.globalAlpha = 0.35 * sunK;
+      ctx.beginPath();
+      ctx.arc(cx, horizon - sr * 0.35, sr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 0.9 * seaK;
+    ctx.fillStyle = "rgba(1,6,12,0.94)";
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, horizon + 40);
+    ctx.quadraticCurveTo(W * 0.12, horizon - 24, W * 0.24, horizon + 10);
+    ctx.quadraticCurveTo(W * 0.34, horizon + 34, W * 0.46, horizon - 6);
+    ctx.quadraticCurveTo(W * 0.58, horizon - 34, W * 0.68, horizon + 6);
+    ctx.quadraticCurveTo(W * 0.84, horizon + 30, W, horizon - 2);
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.globalAlpha = 0.18 * seaK;
+    ctx.strokeStyle = CYAN;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      const yy = horizon + 20 + i * 20;
+      const off = ((t * (16 + i * 5)) % (W + 220)) - 110;
+      ctx.beginPath();
+      ctx.moveTo(off, yy);
+      ctx.lineTo(off + 120, yy);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function drawWord(L, t) {
@@ -148,6 +216,7 @@ export function playTitleIntro() {
     bg.addColorStop(0, "#040a18"); bg.addColorStop(0.55, "#071427"); bg.addColorStop(1, "#040912");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
+    drawIslandScene(t, L);
     const flashK = reduce ? 0 : seg(t, T.flash, T.flash + 0.6);
     drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, 0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0));
     drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.7, CYAN, 0.28 * seg(t, T.ring, T.ring + 0.6), reduce ? 0 : t * 0.22, 16);
@@ -214,6 +283,37 @@ export function playTitleIntro() {
     parts.update(dt);
     parts.draw(ctx);
 
+    // rótulos narrativos
+    const islandK = reduce ? 0 : seg(t, 0.15, 0.85);
+    if (islandK > 0) {
+      ctx.save();
+      ctx.globalAlpha = islandK * (1 - seg(t, 0.85, 1.15));
+      drawTitle(ctx, "ISLA HOKU", cx, H * 0.16, Math.max(12, size * 0.16), "#d8ebff", {
+        font: FONT_BODY, weight: 800, spacing: "0.42em", stroke: false, glow: "rgba(126,231,255,0.7)"
+      });
+      ctx.restore();
+    }
+
+    const omen = reduce ? 0 : seg(t, 1.55, 2.15);
+    if (omen > 0) {
+      ctx.save();
+      ctx.globalAlpha = omen * (1 - seg(t, 2.15, 2.45));
+      drawTitle(ctx, "DIEZ HÉROES · CINCO FORMAS", cx, H * 0.81, Math.max(13, size * 0.16), "#e7f4ff", {
+        font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.88
+      });
+      ctx.restore();
+    }
+
+    const threat = reduce ? 0 : seg(t, 2.05, 2.7);
+    if (threat > 0) {
+      ctx.save();
+      ctx.globalAlpha = threat;
+      drawTitle(ctx, "EL NIDO HA DESPERTADO", cx, H * 0.88, Math.max(13, size * 0.15), PINK, {
+        font: FONT_BODY, weight: 800, spacing: "0.16em", stroke: false, glow: "rgba(255,106,168,0.72)"
+      });
+      ctx.restore();
+    }
+
     // rótulos
     const kick = reduce ? 1 : seg(t, T.word - 0.1, T.word + 0.3);
     if (kick > 0) {
@@ -258,6 +358,7 @@ export function playTitleIntro() {
 
   function onSkip(e) {
     if (e.type === "keydown" && !["Enter", " ", "Escape"].includes(e.key)) return;
+    if (e.type === "keydown") e.preventDefault();
     skip = true;
   }
   function end() {
@@ -273,12 +374,10 @@ export function playTitleIntro() {
   addEventListener("keydown", onSkip);
 
   const go = () => {
-    const wait = new Promise((r) => setTimeout(r, 450));
+    const wait = new Promise((r) => setTimeout(r, 120));
     Promise.race([loadFonts(), wait]).then(() => { raf = requestAnimationFrame(frame); });
   };
-  // Espera a que se retire la pantalla de carga
-  if (document.readyState === "complete") setTimeout(go, 180);
-  else addEventListener("load", () => setTimeout(go, 180), { once: true });
+  go();
   // Red de seguridad
   setTimeout(() => { if (!done) end(); }, 7000);
 }

@@ -12,6 +12,13 @@ async function auditPage(page, label) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
+  // La intro de portada es temporal. No dependemos de su visibilidad porque
+  // puede terminar entre networkidle y el siguiente tick del test.
+  const introSkip = page.locator('#ohana-intro .oi-skip');
+  if (await introSkip.count()) {
+    await introSkip.evaluate((el) => el.click());
+    await page.waitForFunction(() => document.body.classList.contains('intro-complete'), null, { timeout: 5000 });
+  }
   await page.waitForSelector('#btn-play');
   const moduleProbe = await page.evaluate(async () => {
     const paths = [

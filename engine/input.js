@@ -6,6 +6,30 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   const keys = Object.create(null);
   const held = new Map();
   const listeners = [];
+  const keyboardHeldAt = new Map();
+  const KEYBOARD_STALE_MS = 1200;
+  let keyboardWatchdog = null;
+
+  function nowMs() {
+    return typeof performance !== "undefined" && typeof performance.now === "function" ? performance.now() : Date.now();
+  }
+
+  function scheduleKeyboardWatchdog() {
+    if (keyboardWatchdog != null || typeof window === "undefined") return;
+    keyboardWatchdog = window.setTimeout(() => {
+      keyboardWatchdog = null;
+      const now = nowMs();
+      for (const [source, stamp] of keyboardHeldAt) {
+        if (now - stamp > KEYBOARD_STALE_MS) {
+          const key = held.get(source);
+          held.delete(source);
+          keyboardHeldAt.delete(source);
+          if (key) keys[key] = [...held.values()].includes(key);
+        }
+      }
+      if (keyboardHeldAt.size) scheduleKeyboardWatchdog();
+    }, 400);
+  }
 
   function listen(el, event, handler, options) {
     el.addEventListener(event, handler, options);
@@ -19,8 +43,16 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   function hold(key, source, down) {
     key = normalize(key);
     if (!MOVEMENT.has(key)) return;
-    if (down) held.set(source, key);
-    else held.delete(source);
+    if (down) {
+      held.set(source, key);
+      if (String(source).startsWith("keyboard:")) {
+        keyboardHeldAt.set(source, nowMs());
+        scheduleKeyboardWatchdog();
+      }
+    } else {
+      held.delete(source);
+      if (String(source).startsWith("keyboard:")) keyboardHeldAt.delete(source);
+    }
     keys[key] = [...held.values()].includes(key);
   }
 
@@ -35,6 +67,11 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   }
 
   function reset() {
+    if (keyboardWatchdog != null && typeof window !== "undefined") {
+      window.clearTimeout(keyboardWatchdog);
+      keyboardWatchdog = null;
+    }
+    keyboardHeldAt.clear();
     held.clear();
     for (const key of Object.keys(keys)) keys[key] = false;
     for (const button of buttons) button.classList.remove("held");
@@ -94,6 +131,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   listen(target, "touchend", () => releasePointerSources());
   listen(target, "touchcancel", () => releasePointerSources());
   listen(target, "blur", reset);
+  listen(target, "focus", reset);
   if (typeof document !== "undefined") listen(document, "visibilitychange", () => {
     if (document.hidden) reset();
   });

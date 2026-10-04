@@ -1941,7 +1941,9 @@ function updateCam() {
   const p = game.player; if (!p) return;
   const vw = camW(), vh = camH();
   let lerp = 0.18;
-  const look = p._dashGo > 0 ? 110 : Math.min(64, 22 + Math.abs(p.vx) * 6);
+  const look = p._dashGo > 0
+    ? 110
+    : Math.sign(p.vx || 0) * Math.min(64, 22 + Math.abs(p.vx) * 6);
   let tx = p.x + p.w / 2 + (p.facing || 1) * look - vw / 2;
   let ty = p.y + p.h * 0.45 - vh * 0.52;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
