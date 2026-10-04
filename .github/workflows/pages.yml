@@ -42,11 +42,14 @@ jobs:
           import fs from "node:fs";
           import { ROSTER } from "./characters/roster.js";
           import { ROOMS } from "./systems/map.js";
+          import { EVOLUTION_STAGES, EVOLUTION_SIGNATURES } from "./characters/evolution.js";
 
           const read = (file) => fs.readFileSync(file, "utf8");
           const activeCharacters = ROSTER.length;
           const formsPerCharacter = ROSTER.length ? Math.min(...ROSTER.map((character) => character.forms.length)) : 0;
           const roomCount = Object.keys(ROOMS).length;
+          const evolutionStageCount = EVOLUTION_STAGES.length;
+          const evolutionSignatureCount = EVOLUTION_SIGNATURES.length;
           const manifest = JSON.parse(read("manifest.json"));
           const index = read("index.html");
           const progress = read("PROGRESS.md");
@@ -64,6 +67,14 @@ jobs:
 
           if (roomCount !== 10) {
             errors.push(`código: se esperaban 10 salas, hay ${roomCount}`);
+          }
+
+          if (evolutionStageCount !== 5 || ROSTER.some((character) => character.forms.length !== evolutionStageCount)) {
+            errors.push(`evolución: se esperaban 5 formas por personaje, hay ${evolutionStageCount}`);
+          }
+
+          if (evolutionSignatureCount !== 50 || new Set(EVOLUTION_SIGNATURES).size !== evolutionSignatureCount) {
+            errors.push(`evolución: se esperaban 50 firmas únicas, hay ${evolutionSignatureCount}`);
           }
 
           const masterPatterns = [
@@ -117,6 +128,7 @@ jobs:
           console.log(" - cache: " + (currentVersion || "sin versión"));
           console.log(" - CI: core + runtime + renderer + completeness + browser E2E");
           console.log(` - código: ${activeCharacters} personajes / ${formsPerCharacter} formas / ${roomCount} salas`);
+          console.log(` - evolución: ${evolutionStageCount} formas / ${evolutionSignatureCount} firmas`);
           console.log(" - docs: código ↔ manifest ↔ README ↔ PROGRESS ↔ IMPROVEMENTS");
           NODE
 
