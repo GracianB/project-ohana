@@ -85,7 +85,7 @@ export function reactiveAttackPreference(phase = 1, state = {}, hpRatio = 1) {
 
 export function behaviorLabel(state = {}, hpRatio = 1) {
   const tag = bossBehaviorTag(state);
-  if (Number(hpRatio) <= 0.22 && tag !== BOSS_READS.NEUTRAL) return "DESESPERACIÓN · " + tag;
+  if (Number(hpRatio) <= 0.22) return tag === BOSS_READS.NEUTRAL ? "DESESPERACIÓN" : "DESESPERACIÓN · " + tag;
   return {
     [BOSS_READS.DASH]: "LEE DASH",
     [BOSS_READS.AIR]: "LEE AIRE",
