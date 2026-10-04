@@ -10,7 +10,7 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 globalThis.CustomEvent ||= class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } };
 const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.js');
 const { ROOMS } = await import('../systems/map.js');
-const { ABILITY_DEFS, useAbility, updateAbilityFx, abilityPreMove, clearAbilityFx } = await import('../systems/abilities.js');
+const { ABILITY_DEFS, useAbility, updateAbilityFx, abilityPreMove, clearAbilityFx, hitEnemy } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
@@ -885,4 +885,127 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     assert.ok(g.enemies[0].hp < 500, 'Rainbow debe conservar el golpe frontal inmediato');
     clearAbilityFx();
   }
+});
+
+test('phase 25: cooldown de habilidad usa tiempo de simulación y no reloj de pared', () => {
+  clearAbilityFx();
+  const player = {
+    id: 'kilo', abilities: ['ukulele'], x: 100, y: 260, w: 28, h: 34,
+    facing: 1, evo: 2, speed: 4.8, health: 80, maxHealth: 125,
+    cds: {}, cdDur: {}, dead: false, xp: 0,
+  };
+  const game = {
+    player, enemies: [], projectiles: [], ghosts: [], platforms: [],
+    worldW: 1600, worldH: 900, cam: { x: 0, y: 0 },
+    t: 0, reduceMotion: true, shake: 0, flash: 0,
+    nums: { add() {} }, fx: { emit() {} }, rng: () => 0.5,
+  };
+  useAbility(game, 0);
+  const until = player.cds.ukulele;
+  useAbility(game, 0);
+  assert.equal(player.cds.ukulele, until, 'un segundo casteo en el mismo tick debe quedar bloqueado');
+  game.t = 30;
+  useAbility(game, 0);
+  assert.ok(player.cds.ukulele > until, 'la habilidad debe rearmarse por tiempo de simulación');
+  clearAbilityFx();
+});
+
+test('phase 25: RNG inyectado hace reproducible un cast con proyectiles', () => {
+  const run = () => {
+    clearAbilityFx();
+    const sequence = [0.05, 0.2, 0.4, 0.8, 0.6, 0.3, 0.9, 0.1];
+    let i = 0;
+    const game = {
+      player: {
+        id: 'frita', abilities: ['salt'], x: 100, y: 260, w: 28, h: 34,
+        facing: 1, evo: 2, speed: 4.8, health: 80, maxHealth: 125,
+        cds: {}, cdDur: {}, dead: false, xp: 0,
+      },
+      enemies: [], projectiles: [], ghosts: [], platforms: [],
+      worldW: 1600, worldH: 900, cam: { x: 0, y: 0 },
+      t: 0, reduceMotion: true, shake: 0, flash: 0,
+      nums: { add() {} }, fx: { emit() {} }, rng: () => sequence[i++ % sequence.length],
+    };
+    useAbility(game, 0);
+    return game.projectiles.map((p) => ({
+      x: p.x, y: p.y, vx: p.vx, vy: p.vy, life: p.life, rot: p.rot,
+    }));
+  };
+  assert.deepEqual(run(), run());
+  clearAbilityFx();
+});
+
+test('phase 25: limpiar FX transitorios revoca movimiento forzado y blindaje', () => {
+  clearAbilityFx();
+  const game = {
+    player: {
+      id: 'stitcho', abilities: ['rollo'], x: 100, y: 260, w: 28, h: 34,
+      facing: 1, evo: 2, speed: 4.8, health: 80, maxHealth: 125,
+      cds: {}, cdDur: {}, dead: false, xp: 0,
+    },
+    enemies: [], projectiles: [], ghosts: [], platforms: [],
+    worldW: 1600, worldH: 900, cam: { x: 0, y: 0 },
+    t: 0, reduceMotion: true, shake: 0, flash: 0,
+    nums: { add() {} }, fx: { emit() {} }, rng: () => 0.5,
+  };
+  useAbility(game, 0);
+  updateAbilityFx(game);
+  assert.equal(game.player._abilMove, 'roll');
+  assert.ok(game.player._armorT > 0);
+  clearAbilityFx();
+  assert.equal(game.player._abilMove, null);
+  assert.equal(game.player._armorT, 0);
+});
+
+test('phase 25: daño corrupto no puede contaminar HP y el daño válido no baja de cero', () => {
+  const game = {
+    player: { xp: 0 }, combo: 0, score: 0, shake: 0, reduceMotion: true,
+    nums: { add() {} }, fx: { emit() {} },
+  };
+  const enemy = { x: 10, y: 10, w: 20, h: 20, hp: 10, dying: false, invuln: 0 };
+  assert.equal(hitEnemy(game, enemy, NaN), false);
+  assert.equal(enemy.hp, 10);
+  assert.equal(hitEnemy(game, enemy, 100), true);
+  assert.equal(enemy.hp, 0);
+});
+
+test('phase 25: proyectiles de habilidades quedan acotados bajo saturación', () => {
+  clearAbilityFx();
+  const projectiles = Array.from({ length: 110 }, (_, i) => ({
+    x: i, y: 0, vx: 1, vy: 0, w: 8, h: 8, life: 20, owner: 'player',
+  }));
+  const game = {
+    player: {
+      id: 'kilo', abilities: ['ukulele'], x: 100, y: 260, w: 28, h: 34,
+      facing: 1, evo: 2, speed: 4.8, health: 80, maxHealth: 125,
+      cds: {}, cdDur: {}, dead: false, xp: 0,
+    },
+    enemies: [], projectiles, ghosts: [], platforms: [],
+    worldW: 1600, worldH: 900, cam: { x: 0, y: 0 },
+    t: 0, reduceMotion: true, shake: 0, flash: 0,
+    nums: { add() {} }, fx: { emit() {} }, rng: () => 0.5,
+  };
+  useAbility(game, 0);
+  assert.ok(game.projectiles.filter((p) => p.owner === 'player').length <= 96);
+  clearAbilityFx();
+});
+
+test('phase 25: useAbility rechaza contratos corruptos sin consumir cooldown', () => {
+  clearAbilityFx();
+  const g = contractGame();
+  g.player.abilities = ['missing-caster'];
+  ABILITY_DEFS['missing-caster'] = { name: 'Missing', key: 'J', cd: 500 };
+  useAbility(g, 0);
+  assert.equal(g.player.cds['missing-caster'], undefined, 'caster inexistente no debe consumir cooldown');
+
+  g.player.abilities = ['ukulele'];
+  g.player.evo = 999;
+  g.player.cds.ukulele = Infinity;
+  useAbility(g, 0);
+  assert.ok(Number.isFinite(g.player.cds.ukulele), 'cooldown corrupto debe recuperarse');
+  assert.equal(g.player._cast.form, 4, 'evolución debe quedar limitada a la forma final');
+  assert.doesNotThrow(() => useAbility(g, -1));
+  assert.doesNotThrow(() => useAbility(g, 3));
+  delete ABILITY_DEFS['missing-caster'];
+  clearAbilityFx();
 });

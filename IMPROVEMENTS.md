@@ -1,4 +1,4 @@
-# 60 mejoras · Demo Mundo 1
+# 63 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -78,3 +78,4 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 60. **Boss Bait Feedback**: el boss registra si el jugador leyó o cayó en el CEBO y ajusta el tempo siguiente de forma determinista y acotada
 61. **Boss Encounter Memory**: memoria acotada del encuentro que usa el historial reciente para orientar rutinas cortas o largas sin salir del repertorio autorizado
 62. **Ability Reliability**: corrección del updater ausente de Kilo Hula y endurecimiento del agarre de queso de Pizza para evitar bloqueo de control
+63. Phase 25: abilities endurecido con cooldown determinista a 60 Hz, RNG inyectable, VFX reproducible, limpieza de estados, hitboxes seguras y límite de proyectiles.

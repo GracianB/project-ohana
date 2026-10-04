@@ -2392,7 +2392,7 @@ function updateHUD() {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
   syncHudStatus({ player: p, hp, xpPct, boss });
-  const now = performance.now();
+  const now = Number.isFinite(Number(game.t)) ? Number(game.t) * (1000 / 60) : 0;
   for (let i = 0; i < abilitySlots.length; i++) {
     const item = abilitySlots[i];
     const id = item.slot.dataset.id;
