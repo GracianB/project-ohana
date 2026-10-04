@@ -15,12 +15,16 @@ test('input y Service Worker no conservan movimiento horizontal fantasma', () =>
   const input = fs.readFileSync('./engine/input.js', 'utf8');
   const sw = fs.readFileSync('./sw.js', 'utf8');
   const game = fs.readFileSync('./game.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
   assert.match(input, /KEYBOARD_STALE_MS\s*=\s*1200/);
   assert.match(input, /keyboardWatchdog/);
   assert.match(input, /listen\(target, "focus", reset\)/);
-  assert.match(sw, /ohana-87/);
-  assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+  assert.match(sw, new RegExp("\\./engine/input\\.js\\?v=" + version.replace("-", "\\-")));
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
+  assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
   assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* Math\.min\(64/);
 });
 
