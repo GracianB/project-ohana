@@ -1370,7 +1370,8 @@ function updateEnemies() {
           vy: -1.2,
           w: 10, h: 10, life: 80,
           dmg: 9, color: "#7dca5a",
-          owner: "enemy",\n  }, MAX_RUNTIME_PROJECTILES);
+          owner: "enemy",
+  }, MAX_RUNTIME_PROJECTILES);
       }
     }
     }
@@ -1607,7 +1608,8 @@ function updateEnemies() {
             x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
             vx: aim * 1.6, vy: (game.player.y - e.y) * 0.012,
             w: 12, h: 12, life: 90, dmg: 10, color: "#ff8ad0",
-            owner: "enemy", trail: true,\n  }, MAX_RUNTIME_PROJECTILES);
+            owner: "enemy", trail: true,
+  }, MAX_RUNTIME_PROJECTILES);
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8ad0", count: 10, size: 3, up: 1.2, star: true });
         }
         if (e.pulsezap <= 0) e.zapCd = 100;
@@ -1649,7 +1651,8 @@ function updateEnemies() {
             x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
             vx: (dx / len) * 2.4, vy: (dy / len) * 2.0,
             w: 11, h: 11, life: 80, dmg: 10, color: "#ff8ad0",
-            owner: "enemy", trail: true,\n  }, MAX_RUNTIME_PROJECTILES);
+            owner: "enemy", trail: true,
+  }, MAX_RUNTIME_PROJECTILES);
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ee7ff", count: 8, size: 2.8, up: 1.0, star: true });
         }
         if (e.pulsezap <= 0) { e.zapCd = 110; e.aimDx = e.aimDy = null; }
@@ -1858,7 +1861,8 @@ function updateEnemies() {
           x: e.x + e.w / 2 - 6, y: e.y + e.h,
           vx: (dx / len) * 1.8, vy: (dy / len) * 1.5 + 0.4,
           w: 12, h: 12, life: 110, dmg: 9, color: "#7ee7ff",
-          owner: "enemy", trail: true,\n  }, MAX_RUNTIME_PROJECTILES);
+          owner: "enemy", trail: true,
+  }, MAX_RUNTIME_PROJECTILES);
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
