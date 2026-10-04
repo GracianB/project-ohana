@@ -168,7 +168,7 @@ test('phase 26: VFX de pasivos y partículas no consumen RNG global', () => {
   assert.doesNotMatch(passives, /Math\.random\(/);
   assert.doesNotMatch(particles, /Math\.random\(/);
   assert.match(passives, /function vfxUnit\(seed\)/);
-  assert.match(particles, /function unit\\(seed\\)/);
+  assert.match(particles, /function unit\(seed\)/);
   assert.match(particles, /sequence/);
 });
 
