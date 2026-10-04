@@ -57,15 +57,21 @@ export function useAbility(game, index) {
   const id = p.abilities && p.abilities[index];
   const def = ABILITY_DEFS[id];
   if (!def) return;
+  const fn = CASTERS[id];
+  if (typeof fn !== "function") return;
+  const baseCd = Number(def.cd);
+  if (!Number.isFinite(baseCd) || baseCd <= 0) return;
   const now = abilityNow(game);
   p.cds = p.cds || {};
   p.cdDur = p.cdDur || {};
-  if ((p.cds[id] || 0) > now) return;
-  const dur = def.cd / (1 + (Number(p.evo) || 0) * 0.12);
+  const currentUntil = Number(p.cds[id]);
+  if (Number.isFinite(currentUntil) && currentUntil > now) return;
+  const evo = clamp(Number(p.evo) || 0, 0, 4);
+  const dur = baseCd / (1 + evo * 0.12);
   p.cds[id] = now + dur;
   p.cdDur[id] = dur;
   syncState(p);
-  p._cast = { slot: index, t: game.t || 0, id, form: Number(p.evo) || 0 };
+  p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
   sfx(id);
   if (index === 2) {
     game.ult = { t: 46, color: def.color, name: def.name };
@@ -78,8 +84,7 @@ export function useAbility(game, index) {
   // temporal de una habilidad no debe secuestrar el siguiente input del jugador.
   if (S.pull && id !== "cheese") S.pull = null;
 
-  const fn = CASTERS[id];
-  if (fn) fn(game, p, Number(p.evo) || 0);
+  if (fn) fn(game, p, clamp(Number(p.evo) || 0, 0, 4));
   trimAbilityProjectiles(game);
 }
 
@@ -98,7 +103,7 @@ function abilityNow(game) {
 function gameRand(game) {
   const source = typeof game?.rng === "function" ? game.rng : null;
   if (!source) return 0.5;
-  const value = Number(source());
+  const value = Number(source.call(game));
   return Number.isFinite(value) ? Math.max(0, Math.min(0.999999999, value)) : 0.5;
 }
 
