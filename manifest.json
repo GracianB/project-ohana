@@ -9,7 +9,10 @@
   "background_color": "#071226",
   "theme_color": "#071226",
   "orientation": "landscape",
-  "categories": ["games", "entertainment"],
+  "categories": [
+    "games",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "favicon.svg",
@@ -17,5 +20,7 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "./",
+  "scope": "./"
 }
