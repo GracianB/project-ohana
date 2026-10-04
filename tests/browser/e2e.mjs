@@ -192,6 +192,15 @@ try {
   const desktop = await chromium.launch({ headless:true });
   const page = await desktop.newPage({ viewport:{width:1280,height:720}, deviceScaleFactor:1 });
   await auditPage(page, 'desktop');
+
+  // La auditoría de gameplay manipula deliberadamente el estado. Reiniciamos
+  // antes de comprobar pausa/entrada normal para no mezclar ambos escenarios.
+  await page.reload({ waitUntil:'networkidle' });
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  await page.locator('#btn-play').click();
+  await page.waitForTimeout(500);
+
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
   await page.locator('#game').focus();
   await page.keyboard.press('ArrowRight');
