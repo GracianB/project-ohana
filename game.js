@@ -25,6 +25,7 @@ import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill } from "./systems/mutations.js";
+import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
 import { bindInput } from "./engine/input.js";
 import { bindDialogs } from "./systems/dialogs.js";
@@ -105,25 +106,7 @@ function vfxUnit(seed) {
 function vfxRandom(salt = 0) {
   return vfxUnit(game.t * 31.73 + Number(salt) * 17.11);
 }
-const MAX_RUNTIME_ENEMIES = 32;
-const MAX_RUNTIME_PROJECTILES = 128;
-const MAX_RUNTIME_GHOSTS = 48;
-const MAX_RUNTIME_ORBS = 64;
-function pushRuntime(list, item, max) {
-  if (!Array.isArray(list) || !item) return false;
-  const cap = Math.max(1, Number(max) || 1);
-  if (list.length >= cap) list.splice(0, list.length - cap + 1);
-  list.push(item);
-  return true;
-}
-
-const MAX_RUNTIME_SAFE = Number.MAX_SAFE_INTEGER;
-
-function boundedFinite(value, fallback, min, max) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
-}
+function boundedFinite(value, fallback, min, max) { return runtimeBoundedFinite(value, fallback, min, max); }
 
 function sanitizeRuntimeState() {
   game.t = boundedFinite(game.t, 0, 0, MAX_RUNTIME_SAFE);
@@ -156,7 +139,7 @@ function sanitizeRuntimeState() {
     p.melee = Math.floor(boundedFinite(p.melee, 0, 0, 120));
   }
 
-  game.enemies = (game.enemies || []).filter((e) => e && typeof e === "object").slice(-MAX_RUNTIME_ENEMIES);
+  compactRuntimeList(game.enemies, MAX_RUNTIME_ENEMIES);
   for (const e of game.enemies) {
     e.x = boundedFinite(e.x, 0, -2048, game.worldW + 2048);
     e.y = boundedFinite(e.y, 0, -2048, game.worldH + 2048);
@@ -171,7 +154,7 @@ function sanitizeRuntimeState() {
     e.dying = Math.floor(boundedFinite(e.dying, 0, 0, 240));
   }
 
-  game.projectiles = (game.projectiles || []).filter((pr) => pr && typeof pr === "object").slice(-MAX_RUNTIME_PROJECTILES);
+  compactRuntimeList(game.projectiles, MAX_RUNTIME_PROJECTILES);
   for (const pr of game.projectiles) {
     pr.x = boundedFinite(pr.x, 0, -4096, game.worldW + 4096);
     pr.y = boundedFinite(pr.y, 0, -4096, game.worldH + 4096);
@@ -183,7 +166,7 @@ function sanitizeRuntimeState() {
     pr.dmg = boundedFinite(pr.dmg, 0, 0, 100000);
   }
 
-  game.ghosts = (game.ghosts || []).filter((g) => g && typeof g === "object").slice(-MAX_RUNTIME_GHOSTS);
+  compactRuntimeList(game.ghosts, MAX_RUNTIME_GHOSTS);
   for (const g of game.ghosts) {
     g.x = boundedFinite(g.x, 0, -4096, game.worldW + 4096);
     g.y = boundedFinite(g.y, 0, -4096, game.worldH + 4096);
@@ -192,7 +175,7 @@ function sanitizeRuntimeState() {
     g.life = Math.floor(boundedFinite(g.life, 0, 0, 120));
   }
 
-  game.orbs = (game.orbs || []).filter((o) => o && typeof o === "object").slice(-MAX_RUNTIME_ORBS);
+  compactRuntimeList(game.orbs, MAX_RUNTIME_ORBS);
   for (const o of game.orbs) {
     o.x = boundedFinite(o.x, 0, -4096, game.worldW + 4096);
     o.y = boundedFinite(o.y, 0, -4096, game.worldH + 4096);
@@ -473,6 +456,7 @@ function loadRoom(id, fromDir) {
   }
   game.projectiles.length = 0;
   game.bolts.length = 0;
+  game.slashes.length = 0;
   game.fx.clear?.();
   game.slashes.length = 0;
   game.ghosts.length = 0;
@@ -711,7 +695,7 @@ function hornPoke(p, evo, def) {
     w: reach,
     h: Math.max(22, p.h * 0.62),
   };
-  game.slashes.push({
+  pushRuntime(game.slashes, {
     x: p.x + p.w / 2 + face * 20,
     y: p.y + 4,
     facing: face,
@@ -720,7 +704,7 @@ function hornPoke(p, evo, def) {
     color: "#ffe9a8",
     kind: "poke",
     w: reach,
-  });
+  }, MAX_RUNTIME_SLASHES);
   p._swing = { reach, low: false, dmg: def.dmg, kb: 1.2, hit: new Set() };
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
@@ -745,14 +729,14 @@ function showSwing(p, evo, def) {
     : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
   const mouth = p.id === "dino" || p.id === "yomi";
   const life = sig.heavy ? 20 : 16;
-  game.slashes.push({
+  pushRuntime(game.slashes, {
     x: p.x + p.w / 2 + face * (low ? 8 : 18),
     y: low ? p.y + p.h * 0.72 : (mouth ? p.y + p.h * 0.4 : p.y + p.h * 0.32),
     facing: face, life, max: life,
     color: def.color || p.color,
     kind: def.kind || "slice",
     w: reach,
-  });
+  }, MAX_RUNTIME_SLASHES);
   p._swing = { reach, low, dmg: def.dmg, kb: sig.kb || 1, hit: new Set() };
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
@@ -2101,7 +2085,7 @@ function updateProjectiles() {
     }
   }
   game.projectiles = game.projectiles.filter((pr) => pr.life > 0);
-  game.bolts = game.bolts.filter((b) => --b.life > 0);
+  game.bolts = game.bolts.filter((b) => --b.life > 0).slice(-MAX_RUNTIME_BOLTS);
   game.slashes = (game.slashes || []).filter((s) => --s.life > 0);
   if (game.slashes.length > 6) game.slashes.splice(0, game.slashes.length - 6);
   game.ghosts = game.ghosts.filter((g) => --g.life > 0);
