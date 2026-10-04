@@ -1,4 +1,4 @@
-# 75 mejoras · Demo Mundo 1
+# 76 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -100,3 +100,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 74. Phase 36: E2E de gameplay en navegador con secuencia reproducible de inicio, habilidades, evolución, lluvia, Nido, daño real al boss y transición a fase 3.
 
 75. Phase 37: aislamiento del harness E2E para impedir que la API de pruebas se exponga en el dominio publicado.
+
+76. Phase 38: cierre final del firewall de mutaciones, incluyendo combo, para eliminar la última aritmética directa sobre un contador crítico de combate.
