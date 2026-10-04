@@ -11,6 +11,12 @@ const PICKUP_PAD = 16;
 // Suelo del Lab en y 810. El paraguas apoya ahí, a la izquierda.
 const UMBRELLA_SPAWN = { x: 250, y: 748, w: 86, h: 62 };
 
+function gameRandom(game) {
+  const source = typeof game?.rng === "function" ? game.rng : Math.random;
+  const value = Number(source.call(game));
+  return Number.isFinite(value) ? Math.max(0, Math.min(0.999999999, value)) : 0.5;
+}
+
 function spawnDrops(w, h, count) {
   const drops = [];
   const n = count || DROP_COUNT;
@@ -94,7 +100,7 @@ export const Rain = {
 
     if (!this._inRoom) {
       this._inRoom = true;
-      this._delay = START_DELAY_MIN + Math.floor(Math.random() * (START_DELAY_MAX - START_DELAY_MIN + 1));
+      this._delay = START_DELAY_MIN + Math.floor(gameRandom(game) * (START_DELAY_MAX - START_DELAY_MIN + 1));
       this._grabNotify = false;
       if (!this.hasUmbrella) this.umbrella = spawnUmbrella();
     }
