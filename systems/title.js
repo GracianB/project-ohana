@@ -6,6 +6,7 @@ import { getLook, setLook } from "../characters/look.js";
 import { playIntro, playTitleIntro } from "./intro.js?v=ohana-81";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
+import { motionProfile } from "../characters/rig.js";
 import { difficulty } from "../characters/signature.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
@@ -58,8 +59,15 @@ function paintPortraits(now = performance.now()) {
       if (hero && tick % 640 === 0) cv._atk = 14;
       const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
       const at = tick * 0.5 + idx * 24;
-      const bob = Math.sin(tick * 0.03 + idx) * (hero ? 5 : 2);
-      const sway = Math.sin(tick * 0.02 + idx * 1.3) * 0.035;
+      const profile = motionProfile(def);
+      const showcaseT = (at + idx * 28) % 360;
+      const showcasePhase = showcaseT % 120;
+      const showcaseSlot = Math.floor(showcaseT / 120) % 3;
+      const casting = hero && showcasePhase >= 72 && showcasePhase < 98;
+      const attacking = hero && showcasePhase >= 103 && showcasePhase < 115;
+      const bob = Math.sin(tick * 0.03 * profile.pace + idx + profile.sway) * (hero ? 4.5 : 2);
+      const sway = Math.sin(tick * 0.02 * profile.pace + idx * 1.3) * 0.035 * profile.sway;
+      const showcaseSpeed = Math.max(0.6, Math.min(2.8, (form.speed || def.speed || 4) * 0.38));
       const dummy = {
         id: def.id,
         x: -16,
@@ -68,14 +76,23 @@ function paintPortraits(now = performance.now()) {
         h: 32,
         facing: 1,
         grounded: true,
-        vx: 0.4,
+        vx: casting || attacking ? 0 : (hero ? showcaseSpeed : 0.4),
         evo,
         color: form.color || def.color,
-        melee: cv._atk || 0,
+        melee: attacking ? Math.max(1, 10 - (showcasePhase - 103)) : (cv._atk || 0),
         evoBurst: cv._burst || 0,
         evoBurstMax: 90,
         visualScale: 1,
       };
+      if (casting) {
+        const abilityId = def.abilities && def.abilities[showcaseSlot];
+        dummy._cast = {
+          slot: showcaseSlot,
+          id: abilityId,
+          form: evo,
+          t: at - (showcasePhase - 72),
+        };
+      }
       const want = Math.min(bh * (hero ? 0.82 : 0.76), bw * (hero ? 0.9 : 0.82));
       dummy.visualScale = want / (VISUAL_H[evo] * (CHAR_K[def.id] || 1));
       const footY = bh * (hero ? 0.9 : 0.86);
