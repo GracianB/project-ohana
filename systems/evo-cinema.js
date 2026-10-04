@@ -13,6 +13,7 @@ import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
+import { drawEvolutionCinemaFX } from "../characters/evolution.js";
 
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -561,6 +562,8 @@ export function playEvolution(detail = {}) {
           useNew = Math.floor(ph) % 2 === 1;
         }
         const pp = useNew ? pNew : pOld;
+        const stageFx = useNew ? evo : Math.max(0, evo - 1);
+        const stageColor = useNew ? accent : oldColor;
         const pulse = 1 + Math.sin(t * (10 + charge * 30)) * 0.02 * charge;
         const sc = scale * oldIn * pulse;
         const box = target * 2.2;
@@ -569,6 +572,10 @@ export function playEvolution(detail = {}) {
         ctx.save();
         ctx.globalAlpha = seg(t, T.oldIn, T.oldIn + 0.2) * fade;
         if (whiten < 1) drawDummy(ctx, pp, fx, fy, sc, tf);
+        drawEvolutionCinemaFX(
+          ctx, pp.id, stageFx, fx, fy - target * 0.5, target,
+          tf, stageColor, (0.35 + charge * 0.90) * (useNew ? 1 : 0.52)
+        );
         // glow + silueta blanca
         const img = sil.render(pp, sc, tf, box, fc.dpr, "#ffffff");
         ctx.globalAlpha *= whiten;
@@ -603,6 +610,10 @@ export function playEvolution(detail = {}) {
       ctx.globalCompositeOperation = "source-over";
       ctx.globalAlpha = fade;
       drawDummy(ctx, pNew, cx, footY + bob, sc, tf);
+      drawEvolutionCinemaFX(
+        ctx, pNew.id, evo, cx, cy + bob, target,
+        tf, accent, 1.0 + revealK * 0.55
+      );
       // resto de silueta blanca que se desvanece
       const wash = 1 - seg(t, T.reveal, T.reveal + (reduce ? 0.3 : 0.45));
       if (wash > 0) {

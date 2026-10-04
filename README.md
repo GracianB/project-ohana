@@ -31,7 +31,11 @@
 
 <div align="center">
 
-### [Abrir el juego](https://gracianb.github.io/project-ohana/)
+#### Evolución
+
+La cinemática de evolución refuerza la identidad de cada héroe y etapa con firmas visuales específicas durante la transformación.
+
+## [Abrir el juego](https://gracianb.github.io/project-ohana/)
 
 Nueva partida: bebé, en el Claro. Continuar: tu forma y tu sala. Si la Reina cae, la partida queda como Ohana completado.
 

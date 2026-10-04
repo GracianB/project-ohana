@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionKey, evolutionProfile, applyEvolutionPose } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -185,4 +185,34 @@ test("la identidad de personaje modula combate sin colapsar las cinco etapas", (
   assert.equal(new Set(e2).size, ids.length);
   const e4 = ids.map((id) => evolutionProfile({ id, evo: 4 }).combat.cast);
   assert.equal(new Set(e4).size, ids.length);
+});
+
+
+function makeEvolutionCinemaContext() {
+  return {
+    globalAlpha: 1,
+    globalCompositeOperation: "source-over",
+    strokeStyle: "#fff",
+    fillStyle: "#fff",
+    lineWidth: 1,
+    lineCap: "round",
+    lineJoin: "round",
+    save() {}, restore() {}, translate() {}, rotate() {},
+    beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
+    ellipse() {}, arc() {}, quadraticCurveTo() {}, fill() {}, stroke() {}, fillRect() {},
+  };
+}
+
+test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etapa", () => {
+  assert.equal(typeof drawEvolutionCinemaFX, "function");
+  const ctx = makeEvolutionCinemaContext();
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+
+  for (const id of ids) {
+    for (let evo = 0; evo < 5; evo++) {
+      assert.doesNotThrow(() => drawEvolutionCinemaFX(
+        ctx, id, evo, 640, 300, 100, 60, "#ffd84a", 1
+      ), id + ":e" + evo);
+    }
+  }
 });
