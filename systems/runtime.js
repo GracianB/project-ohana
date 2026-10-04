@@ -22,15 +22,17 @@ export function pushRuntime(list, item, max) {
 export function compactRuntimeList(list, max) {
   if (!Array.isArray(list)) return [];
   const cap = Math.max(1, Number(max) || 1);
-  let start = Math.max(0, list.length - cap);
   let write = 0;
 
-  for (let i = start; i < list.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     const item = list[i];
     if (!item || typeof item !== "object") continue;
     list[write++] = item;
   }
-  list.length = write;
+
+  const start = Math.max(0, write - cap);
+  if (start > 0) list.copyWithin(0, start, write);
+  list.length = write - start;
   return list;
 }
 
