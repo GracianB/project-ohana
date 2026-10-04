@@ -374,7 +374,7 @@ test("BossFX mantiene cola limitada, determinismo y renderer seguro", () => {
     telegraph: true, teleKind: "slam", wind: 12, windMax: 34,
     facing: -1, dying: 0, fell: false,
   };
-  assert.doesNotThrow(() => fx.render(ctx, { x: 0, y: 0 }, 60, { width: 1280, height: 720 }, boss));
+  assert.doesNotThrow(() => fx.render(ctx, { x: 0, y: 0 }, 60, { width: 1280, height: 720 }, boss, false));
   fx.update();
   assert.ok(fx.items.length > 0);
 });
