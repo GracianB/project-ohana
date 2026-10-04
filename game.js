@@ -541,6 +541,47 @@ function dash() {
   }
   beep("dash");
 }
+function finiteOr(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+function damageEnemy(e, amount) {
+  if (!e) return false;
+  const d = Number(amount);
+  if (!Number.isFinite(d) || d <= 0) return false;
+  const hp = Math.max(0, finiteOr(e.hp, 0));
+  e.hp = Math.max(0, hp - d);
+  return true;
+}
+function healPlayer(p, amount) {
+  if (!p) return false;
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return false;
+  p.health = Math.min(finiteOr(p.maxHealth, finiteOr(p.health, 0)), Math.max(0, finiteOr(p.health, 0) + n));
+  return true;
+}
+function damagePlayer(p, amount) {
+  if (!p) return false;
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return false;
+  p.health = Math.max(0, finiteOr(p.health, 0) - n);
+  return true;
+}
+function addPlayerXp(p, amount) {
+  if (!p) return false;
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return false;
+  p.xp = Math.max(0, finiteOr(p.xp, 0) + n);
+  return true;
+}
+function addScore(amount) {
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n === 0) return;
+  game.score = Math.max(0, finiteOr(game.score, 0) + n);
+}
+function addKill() {
+  game.kills = Math.max(0, finiteOr(game.kills, 0) + 1);
+}
 function registerBossPunish(e) {
   if (!e?.boss || !e.vulnerable || e.dying) return false;
   e.punishHits = (Number(e.punishHits) || 0) + 1;
@@ -562,7 +603,7 @@ function markHit(p, e, dmg, kb) {
   const push = kb == null ? 1 : kb;
   const crit = d >= 32 || push >= 1.5;
   if (e.boss) d = Math.ceil(d * 0.55);
-  e.hp -= d;
+  damageEnemy(e, d);
   registerBossPunish(e);
   const face = p.facing || 1;
   e.vx = face * (e.boss ? 3 : 8) * push;
@@ -583,7 +624,7 @@ function markHit(p, e, dmg, kb) {
     game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 4);
     game.flashColor = "#fff6c8";
   }
-  p.xp += 1;
+  addPlayerXp(p, 1);
 }
 function hornPoke(p, evo, def) {
   const face = p.facing || 1;
@@ -708,7 +749,7 @@ function hurtPlayer(amount, label) {
   if (!p || p.dead || p.invuln > 0) return;
   amount = Magic.onHurt(game, Passives.onHurt(game, amount));
   if (!(amount > 0)) return;
-  p.health -= amount;
+  damagePlayer(p, amount);
   p.invuln = 42;
   p.vx = Math.sign(p.vx || p.facing || 1) * -8;
   p.vy = -6.5;
@@ -807,7 +848,7 @@ function punch(x, y, color, dir = 1) {
   game.shake = Math.min(18, game.shake + 6);
   game.combo += 1;
   game.comboT = 480;
-  game.score += 10 * game.combo;
+  addScore(10 * game.combo);
   const tier = combatTier(game.combo);
   const label = tier >= 4 ? "RÁFAGA" : tier === 3 ? "IMPACTO" : tier === 2 ? "COMBO" : "";
   game.combatFx?.add(x, y, color || "#fff", { tier, dir, label, seed: game.combo });
@@ -1034,13 +1075,13 @@ function updatePlayer() {
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
-      o.taken = true; p.xp += 4 + Surprises.starOrbBonus(); game.score += 25; beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
-      if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); game.score += 100; }
+      o.taken = true; addPlayerXp(p, 4 + Surprises.starOrbBonus()); addScore(25); beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+      if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); addScore(100); }
     }
   }
   for (const h of game.hearts) {
     if (!h.taken && Math.hypot(p.x + p.w / 2 - h.x, p.y + p.h / 2 - h.y) < 36) {
-      h.taken = true; p.health = Math.min(p.maxHealth, p.health + 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("orb");
+      h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("orb");
     }
   }
   if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
@@ -1122,7 +1163,7 @@ function tickRam(p) {
     if (!aabb(box, e)) continue;
     e._rammed = 12;
     const d = 10 + (Number(p.evo) || 0) * 4;
-    e.hp -= e.boss ? Math.ceil(d * 0.45) : d;
+    damageEnemy(e, e.boss ? Math.ceil(d * 0.45) : d);
     registerBossPunish(e);
     e.vx = p.facing * 7;
     e.vy = Math.min(e.vy || 0, -2);
@@ -1828,7 +1869,7 @@ function updateEnemies() {
         p.invuln = Math.max(p.invuln || 0, 10);
         if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
           const dmg = 8 + (Number(p.evo) || 0) * 2;
-          e.hp -= dmg;
+          damageEnemy(e, dmg);
           registerBossPunish(e);
           e.vy = 2.4;
           e.stun = Math.max(e.stun || 0, 10);
@@ -1928,7 +1969,7 @@ function updateEnemies() {
         color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
       });
     }
-    punch(e.x, e.y, e.color); beep("kill"); game.kills++; game.player.health = Math.min(game.player.maxHealth, game.player.health + 4);
+    punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
     if (e.dropsOrb) {
       game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -1955,7 +1996,7 @@ function updateProjectiles() {
         if (!e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
-          e.hp -= dmg; registerBossPunish(e); e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
+          damageEnemy(e, dmg); registerBossPunish(e); e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
           e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
           e.flash = Math.max(e.flash || 0, 14);
           if (pr.pierce) {
@@ -1963,7 +2004,7 @@ function updateProjectiles() {
             pr.hit.add(e);
             if (pr.hit.size >= pr.pierce) pr.life = 0;
           } else pr.life = 0;
-          punch(e.x, e.y, pr.color); game.player.xp += 3;
+          punch(e.x, e.y, pr.color); addPlayerXp(game.player, 3);
           game.nums.add(e.x, e.y, "" + dmg, "#ffe66a", dmg >= 40);
         }
       }

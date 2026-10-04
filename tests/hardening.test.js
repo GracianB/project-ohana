@@ -191,3 +191,19 @@ test('phase 26: partículas reproducibles, acotadas y recuperables ante datos co
   ps.clear();
   assert.equal(ps.items.length, 0);
 });
+
+
+test('phase 27: game runtime centraliza mutaciones de combate y evita contaminación numérica', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function finiteOr\(value, fallback = 0\)/);
+  assert.match(game, /function damageEnemy\(e, amount\)/);
+  assert.match(game, /function damagePlayer\(p, amount\)/);
+  assert.match(game, /function addPlayerXp\(p, amount\)/);
+  assert.match(game, /function addScore\(amount\)/);
+  assert.match(game, /function addKill\(\)/);
+  assert.equal((game.match(/\.hp\s*[-+]=/g) || []).length, 0);
+  assert.equal((game.match(/\.health\s*[-+]=/g) || []).length, 0);
+  assert.equal((game.match(/\.xp\s*\+=/g) || []).length, 0);
+  assert.equal((game.match(/game\.score\s*\+=/g) || []).length, 0);
+  assert.equal((game.match(/game\.kills\+\+/g) || []).length, 0);
+});
