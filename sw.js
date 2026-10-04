@@ -1,4 +1,4 @@
-const VERSION = "ohana-95";
+const VERSION = "ohana-96";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -25,7 +25,8 @@ const PRECACHE = [
   "./systems/boss-behavior.js?v=" + VERSION,
   "./systems/boss-counterplay.js?v=" + VERSION,
   "./systems/boss-adaptation.js?v=" + VERSION,
-  "./systems/boss-bait.js?v=" + VERSION
+  "./systems/boss-bait.js?v=" + VERSION,
+  "./systems/boss-bait-feedback.js?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {
