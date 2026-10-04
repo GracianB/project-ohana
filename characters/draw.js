@@ -555,7 +555,8 @@ export function drawCharacter(ctx, p, cam, t) {
   }
   ctx.restore();
 
-  drawFlavor(ctx, p.id, H, t, evo, true);\n  drawCharacterMotionFX(ctx, p, H, pose, t);
+  drawFlavor(ctx, p.id, H, t, evo, true);
+  drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);
     p.evoBurst--;
