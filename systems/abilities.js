@@ -9,6 +9,7 @@ import { vfxSprite } from "../characters/sprites.js";
 import { sfx } from "../engine/audio.js";
 import { showNotification } from "./notify.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
+import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
 // cd en ms (se reduce con la forma: cd / (1 + evo*0.12)). J corto, K medio, L largo.
 export const ABILITY_DEFS = {
@@ -224,7 +225,7 @@ export function updateAbilityFx(game) {
   if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
   if (S.caos > 0) {
     bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
-    if ((game.t & 1) === 0) game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" });
+    if ((game.t & 1) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" }, MAX_RUNTIME_GHOSTS);
   }
   if (S.charge > 0) {
     bodyHits(game, p, 26, { kx: 15, ky: -8, stun: 34, color: "#c8f04a", cd: 30, shake: 7 });
@@ -239,7 +240,7 @@ export function updateAbilityFx(game) {
       e._abHitT = game.t + 10;
       hitEnemy(game, e, 24 * pw(p), { kx: face * 14, ky: -6, stun: 18, color: "#ffe9a8", shake: 5 });
     }
-    if ((game.t % 2) === 0) game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" });
+    if ((game.t % 2) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" }, MAX_RUNTIME_GHOSTS);
   }
   p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
   const updateCount = FX.length;
@@ -562,7 +563,7 @@ const CASTERS = {
     p.invuln = Math.max(p.invuln || 0, 12);
     for (let i = 0; i < 4; i++) {
       const u = i / 4;
-      g.ghosts.push({ x: x0 + (p.x - x0) * u, y: y0 + (p.y - y0) * u, w: p.w, h: p.h, life: 10 + i * 2, color: "#ffe14a" });
+      pushRuntime(g.ghosts, { x: x0 + (p.x - x0) * u, y: y0 + (p.y - y0) * u, w: p.w, h: p.h, life: 10 + i * 2, color: "#ffe14a" }, MAX_RUNTIME_GHOSTS);
     }
     add({ kind: "trail", x1: x0 + p.w / 2, y1: y0 + p.h / 2, x2: cx(p), y2: cy(p), life: 42, hit: new Set(), dmg: (22 + evo * 2) * pw(p) });
     boom(g, x0 + p.w / 2, y0 + p.h / 2, "#fff3a0", 10, { star: true });
@@ -649,7 +650,7 @@ const CASTERS = {
     const mouthY = p.y + p.h * 0.38;
     for (let i = 0; i < shots; i++) {
       const angle = (i - (shots - 1) / 2) * 0.16;
-      g.projectiles.push({
+      pushRuntime(g.projectiles, {
         x: mouthX - 10, y: mouthY - 7,
         vx: Math.cos(angle) * speed * p.facing, vy: Math.sin(angle) * speed,
         w: 20 + evo * 1.5, h: 14 + evo,
@@ -682,7 +683,7 @@ const CASTERS = {
     for (let i = 0; i < n; i++) {
       const a = (i / (n - 1) - 0.5) * 0.8 + (gameRand(g) - 0.5) * 0.08;
       const sp = 10 + gameRand(g) * 3;
-      g.projectiles.push({
+      pushRuntime(g.projectiles, {
         x: h.x - 4, y: h.y - 4, vx: Math.cos(a) * sp * p.facing, vy: Math.sin(a) * sp,
         w: 8, h: 8, life: 14 + (gameRand(g) * 5 | 0), dmg: 6, color: "#fff8e0", shape: "salt", spin: true, rot: gameRand(g) * 6, owner: "player", trail: false,
       });
@@ -766,7 +767,7 @@ const CASTERS = {
   gleam(g, p, evo) {
     const face = p.facing || 1;
     const y = p.y + p.h * 0.28;
-    g.projectiles.push({
+    pushRuntime(g.projectiles, {
       x: cx(p) + face * (p.w * 0.4), y,
       vx: (16 + evo) * face, vy: 0,
       w: 26, h: 16, life: 40, dmg: 18, color: "#ffe9a8",
@@ -790,7 +791,7 @@ const CASTERS = {
     const y = p.y + p.h * 0.3;
     for (let i = 0; i < colors.length; i++) {
       const spread = (i - 3) * 0.38;
-      g.projectiles.push({
+      pushRuntime(g.projectiles, {
         x: cx(p) + face * (p.w * 0.45),
         y: y + spread * 8,
         vx: face * (13 + evo * 0.35),
@@ -929,7 +930,7 @@ const UPD = {
     if (f.next-- > 0) return true;
     const h = hand(p);
     const k = f.i - (f.n - 1) / 2;
-    g.projectiles.push({
+    pushRuntime(g.projectiles, {
       x: h.x - 9, y: h.y - 5 + k * 3, vx: 14 * p.facing, vy: k * 0.35,
       w: 20, h: 10, life: 42, dmg: 9, color: f.i % 2 ? "#9ef0ff" : "#5ad1ff", shape: "bolt", owner: "player", trail: true,
     });
