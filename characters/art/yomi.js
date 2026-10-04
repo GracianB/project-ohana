@@ -6,10 +6,10 @@ const FLAME = ["#ffb15a", "#ff8a3a", "#ff5a2a", "#ff2244", "#ffe14a"];
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   const t = pose.t || 0;
-  const god = f === 4;
+  const final = f === 4;
   const dread = f >= 3;
   const castSlot = pose.state === "cast" ? pose.castSlot : -1;
-  const open = pose.state === "attack" ? pose.atk : castSlot === 2 ? 0.6 + pose.cast * 0.4 : god ? 0.22 : 0.04;
+  const open = pose.state === "attack" ? pose.atk : castSlot === 2 ? 0.6 + pose.cast * 0.4 : final ? 0.22 : 0.04;
   const paper = PAPER[f];
   const ink = INK[f];
   const flame = FLAME[f];
@@ -19,9 +19,9 @@ function draw(ctx, pose, R) {
 
   ctx.save();
   ctx.translate(0, bob - 8);
-  if (god) R.halo(ctx, 0, -h * 0.4, 26, t, flame);
+  if (final) R.halo(ctx, 0, -h * 0.4, 26, t, flame);
 
-  R.tail(ctx, 0, 10, 30 + f * 3, Math.PI / 2, (k) => Math.sin(t * 0.16 + k * 3) * 4, 8, 2, god ? "#ff4466" : "#2a1848");
+  R.tail(ctx, 0, 10, 30 + f * 3, Math.PI / 2, (k) => Math.sin(t * 0.16 + k * 3) * 4, 8, 2, final ? "#ff4466" : "#2a1848");
 
   ctx.save();
   ctx.translate(-w * 0.8, -h * 0.35);
@@ -46,18 +46,18 @@ function draw(ctx, pose, R) {
 
   const eyeY = -h * 0.62;
   const mood = pose.state === "hurt" || pose.state === "dead" ? "closed" : "normal";
-  R.eye(ctx, -7, eyeY, dread ? 5.6 : 4.4, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
-  R.eye(ctx, 10, eyeY, dread ? 6.2 : 4.8, pose, { iris: god ? "#ffe14a" : "#1a1020", mood });
+  R.eye(ctx, -7, eyeY, dread ? 5.6 : 4.4, pose, { iris: final ? "#ffe14a" : "#1a1020", mood });
+  R.eye(ctx, 10, eyeY, dread ? 6.2 : 4.8, pose, { iris: final ? "#ffe14a" : "#1a1020", mood });
   if (dread) R.eye(ctx, 2, eyeY - 11, 3.2, pose, { iris: flame, mood });
 
   const mouthW = 8 + open * 14;
-  ctx.fillStyle = god ? "#140208" : ink;
+  ctx.fillStyle = final ? "#140208" : ink;
   ctx.beginPath();
   ctx.ellipse(3, eyeY + 14, mouthW * 0.5, 3 + open * 9, 0.08, 0, Math.PI * 2);
   ctx.fill();
   if (open > 0.15 || dread) {
     ctx.fillStyle = "#fff6ea";
-    for (let i = 0; i < (god ? 6 : 4); i++) {
+    for (let i = 0; i < (final ? 6 : 4); i++) {
       const tx = 3 - mouthW * 0.35 + i * 4;
       ctx.beginPath();
       ctx.moveTo(tx, eyeY + 12);
