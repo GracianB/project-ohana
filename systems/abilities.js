@@ -744,6 +744,32 @@ const UPD = {
     f.life--;
     f.pulse = (Number(f.pulse) || 0) + 1;
     const rad = f.r + Math.sin(f.pulse * 0.22) * 5;
+
+    // El giro es también un escudo activo: cualquier proyectil hostil que entra
+    // en el aro se devuelve al emisor. Se marca una ventana corta para impedir
+    // que el mismo proyectil rebote varias veces mientras sigue dentro del aro.
+    for (const pr of g.projectiles) {
+      if (!pr || pr.life <= 0 || pr.owner === "player" || pr._hulaReflectUntil > (g.t || 0)) continue;
+      const px = pr.x + (pr.w || 0) / 2;
+      const py = pr.y + (pr.h || 0) / 2;
+      const rr = rad + Math.max(pr.w || 0, pr.h || 0) / 2 + 8;
+      if (Math.hypot(px - cx(p), py - cy(p)) > rr) continue;
+
+      const speed = Math.hypot(pr.vx || 0, pr.vy || 0) || 7;
+      if ((pr.vx || 0) === 0 && (pr.vy || 0) === 0) {
+        pr.vx = (p.facing || 1) * speed;
+        pr.vy = 0;
+      } else {
+        pr.vx = -(pr.vx || 0);
+        pr.vy = -(pr.vy || 0);
+      }
+      pr.owner = "player";
+      pr.reflected = true;
+      pr._hulaReflectUntil = (g.t || 0) + 8;
+      if (pr.hit && typeof pr.hit.clear === "function") pr.hit.clear();
+      boom(g, px, py, "#ff5ad5", 5, { star: true, up: 0.4, speed: 2.5 });
+    }
+
     if (f.pulse % 8 === 0) {
       f.hit.clear();
       for (const e of g.enemies) {
