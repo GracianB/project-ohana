@@ -43,8 +43,8 @@ export const EVOLUTION_STAGES = Object.freeze([
     ornament: 1.10,
   }),
   Object.freeze({
-    id: 4, name: "god", scaleX: 1.13, scaleY: 1.12,
-    sway: 1.22, bounce: 0.78, lean: 1.42, head: 1.24,
+    id: 4, name: "final", scaleX: 1.11, scaleY: 1.09,
+    sway: 1.28, bounce: 0.76, lean: 1.52, head: 1.28,
     arms: 1.28, legs: 1.22, air: 1.30, pulse: 1.65,
     ornament: 1.34,
   }),
@@ -59,6 +59,19 @@ export const EVOLUTION_COMBAT_STAGES = Object.freeze([
   Object.freeze({ id: 3, attack: 1.18, cast: 1.26, impact: 1.24, trail: 1.28, glow: 1.30, density: 1.24, snap: 1.20 }),
   Object.freeze({ id: 4, attack: 1.30, cast: 1.44, impact: 1.38, trail: 1.46, glow: 1.58, density: 1.42, snap: 1.34 }),
 ]);
+
+const FINAL_DESIGNS = Object.freeze({
+  kilo:    Object.freeze({ motif: "petal",  span: 0.92, spin: 0.30, nodes: 6 }),
+  stitcho: Object.freeze({ motif: "seam",   span: 0.88, spin: -0.28, nodes: 5 }),
+  chispin: Object.freeze({ motif: "bolt",   span: 0.96, spin: 0.16, nodes: 7 }),
+  cat:     Object.freeze({ motif: "eclipse",span: 0.84, spin: 0.22, nodes: 6 }),
+  dragon:  Object.freeze({ motif: "flame",  span: 1.10, spin: -0.14, nodes: 5 }),
+  dino:    Object.freeze({ motif: "crystal",span: 0.98, spin: 0.08, nodes: 7 }),
+  frita:   Object.freeze({ motif: "fries",  span: 0.90, spin: -0.20, nodes: 7 }),
+  pizza:   Object.freeze({ motif: "crust",  span: 1.02, spin: 0.10, nodes: 6 }),
+  yomi:    Object.freeze({ motif: "maw",    span: 0.88, spin: 0.00, nodes: 5 }),
+  cuerno:  Object.freeze({ motif: "aurora", span: 1.00, spin: 0.18, nodes: 7 }),
+});
 
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
@@ -86,6 +99,7 @@ export function evolutionProfile(pOrId, evoOverride) {
   const stage = EVOLUTION_STAGES[evo];
   const combatStage = EVOLUTION_COMBAT_STAGES[evo];
   const style = CHARACTER_STYLES[id] || CHARACTER_STYLES.kilo;
+  const finalDesign = FINAL_DESIGNS[id] || FINAL_DESIGNS.kilo;
   return Object.freeze({
     ...stage,
     id,
@@ -96,6 +110,7 @@ export function evolutionProfile(pOrId, evoOverride) {
     swing: style.swing,
     float: style.float,
     combatCharacter: style.combat,
+    finalDesign,
     combat: Object.freeze({
       attack: combatStage.attack * style.combat,
       cast: combatStage.cast * style.combat,
@@ -436,5 +451,175 @@ export function drawEvolutionCinemaFX(ctx, id, evo, cx, cy, H, t, color, strengt
     ctx.fill();
   }
 
+  ctx.restore();
+}
+
+
+export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
+  const e = evolutionProfile(p, pose?.form);
+  const stage = e.evo;
+  if (stage < 2) return;
+
+  const d = e.finalDesign;
+  const color = p?.color || "#fff6c8";
+  const hot = stage >= 4 ? "#fff7d0" : color;
+  const strength = stage === 2 ? 0.34 : stage === 3 ? 0.58 : 0.86;
+  const pulse = 1 + Math.sin((Number(t) || 0) * 0.032 * e.pulse) * 0.06;
+  const span = H * d.span * (stage === 2 ? 0.72 : stage === 3 ? 0.88 : 1.0);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = strength * (front ? 0.68 : 0.82);
+  ctx.translate(0, -H * 0.42);
+
+  if (!front) {
+    switch (d.motif) {
+      case "petal":
+        for (let i = 0; i < d.nodes; i++) {
+          const a = (Number(t) || 0) * 0.018 + i * Math.PI * 2 / d.nodes;
+          drawGlyph(ctx, "petal", Math.cos(a) * span * 0.36, Math.sin(a) * span * 0.16 - H * 0.18, H * (0.035 + stage * 0.007), i % 2 ? hot : color, a);
+        }
+        break;
+      case "seam":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(1.2, H * (0.010 + stage * 0.002));
+        for (let i = -2; i <= 2; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * H * 0.12, -H * 0.10);
+          ctx.lineTo(i * H * 0.19 + Math.sin((Number(t) || 0) * 0.025 + i) * H * 0.03, -H * 0.52);
+          ctx.stroke();
+        }
+        break;
+      case "bolt":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(1.5, H * 0.014);
+        for (let i = 0; i < d.nodes; i++) {
+          const x = (i - (d.nodes - 1) / 2) * H * 0.12;
+          const h = span * (0.24 + (i % 3) * 0.035);
+          ctx.beginPath();
+          ctx.moveTo(x - H * 0.05, -H * 0.24);
+          ctx.lineTo(x, -H * 0.24 - h);
+          ctx.lineTo(x + H * 0.05, -H * 0.24);
+          ctx.stroke();
+        }
+        break;
+      case "eclipse":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(1.3, H * 0.014);
+        ctx.beginPath();
+        ctx.arc(0, -H * 0.22, span * 0.46 * pulse, Math.PI * 0.18, Math.PI * 1.74);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, -H * 0.22, span * 0.62, -0.72, 0.72);
+        ctx.stroke();
+        break;
+      case "flame":
+        for (let i = 0; i < d.nodes; i++) {
+          const x = (i - 2) * H * 0.20;
+          const h = span * (0.22 + (i % 2) * 0.06);
+          ctx.fillStyle = i % 2 ? hot : color;
+          ctx.beginPath();
+          ctx.moveTo(x, -H * 0.08);
+          ctx.quadraticCurveTo(x - H * 0.08, -H * 0.24, x, -H * 0.24 - h);
+          ctx.quadraticCurveTo(x + H * 0.08, -H * 0.24, x, -H * 0.08);
+          ctx.fill();
+        }
+        break;
+      case "crystal":
+        for (let i = 0; i < d.nodes; i++) {
+          const x = (i - (d.nodes - 1) / 2) * H * 0.11;
+          const h = span * (0.20 + (i % 2) * 0.06);
+          ctx.fillStyle = i % 2 ? hot : color;
+          ctx.beginPath();
+          ctx.moveTo(x, -H * 0.04);
+          ctx.lineTo(x + H * 0.06, -H * 0.04 - h);
+          ctx.lineTo(x, -H * 0.04 - h * 1.18);
+          ctx.lineTo(x - H * 0.06, -H * 0.04 - h);
+          ctx.closePath();
+          ctx.fill();
+        }
+        break;
+      case "fries":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(2, H * 0.024);
+        for (let i = 0; i < d.nodes; i++) {
+          const x = (i - 3) * H * 0.11;
+          ctx.beginPath();
+          ctx.moveTo(x, -H * 0.04);
+          ctx.lineTo(x + Math.sin((Number(t) || 0) * 0.02 + i) * H * 0.03, -H * (0.30 + (i % 3) * 0.06));
+          ctx.stroke();
+        }
+        break;
+      case "crust":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(1.5, H * 0.018);
+        ctx.beginPath();
+        ctx.ellipse(0, -H * 0.17, span * 0.50 * pulse, H * 0.18, 0, Math.PI, Math.PI * 2);
+        ctx.stroke();
+        for (let i = 0; i < 4; i++) {
+          const x = (i - 1.5) * H * 0.20;
+          ctx.beginPath();
+          ctx.moveTo(x, -H * 0.28);
+          ctx.quadraticCurveTo(x + H * 0.08, -H * 0.48, x + H * 0.02, -H * 0.60);
+          ctx.stroke();
+        }
+        break;
+      case "maw":
+        ctx.strokeStyle = hot;
+        ctx.lineWidth = Math.max(1.5, H * 0.018);
+        ctx.beginPath();
+        ctx.arc(0, -H * 0.18, span * 0.38, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let i = 0; i < d.nodes; i++) {
+          const a = i * Math.PI * 2 / d.nodes;
+          const x = Math.cos(a) * span * 0.42;
+          const y = -H * 0.18 + Math.sin(a) * span * 0.28;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x * 1.12, y - H * 0.09);
+          ctx.stroke();
+        }
+        break;
+      case "aurora":
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeStyle = ["#ff79c6","#8fdcff","#fff4a8"][i];
+          ctx.lineWidth = Math.max(1.2, H * 0.012);
+          ctx.beginPath();
+          ctx.ellipse(0, -H * 0.20, span * (0.48 + i * 0.08), H * (0.18 + i * 0.025), d.spin * (i - 1), Math.PI * 1.04, Math.PI * 1.96);
+          ctx.stroke();
+        }
+        break;
+    }
+  } else {
+    // Capa frontal: emblema central + pequeños nodos. Evita tapar la cara completa.
+    ctx.fillStyle = hot;
+    ctx.globalAlpha *= 0.72;
+    switch (d.motif) {
+      case "petal":
+        drawGlyph(ctx, "petal", 0, H * 0.02, H * 0.045, hot, Math.sin((Number(t) || 0) * 0.02) * 0.18);
+        break;
+      case "seam":
+        ctx.strokeStyle = hot; ctx.lineWidth = Math.max(1.1, H * 0.012);
+        ctx.beginPath(); ctx.moveTo(-H * 0.15, 0); ctx.lineTo(0, H * 0.10); ctx.lineTo(H * 0.15, 0); ctx.stroke();
+        break;
+      case "bolt":
+        drawGlyph(ctx, "bolt", H * 0.20, -H * 0.02, H * 0.050, hot, d.spin);
+        break;
+      case "eclipse":
+        ctx.strokeStyle = hot; ctx.lineWidth = Math.max(1.2, H * 0.012);
+        ctx.beginPath(); ctx.arc(0, H * 0.02, H * 0.10, Math.PI * 0.2, Math.PI * 1.8); ctx.stroke();
+        break;
+      case "flame":
+      case "crystal":
+      case "fries":
+      case "crust":
+      case "maw":
+      case "aurora":
+        drawGlyph(ctx, d.motif === "crystal" ? "shard" : d.motif === "aurora" ? "horn" : e.kind, H * 0.18, -H * 0.02, H * 0.045, hot, d.spin);
+        break;
+    }
+  }
   ctx.restore();
 }
