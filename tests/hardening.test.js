@@ -150,3 +150,12 @@ test('habilidades: Kilo hula tiene updater y Pizza no conserva un bloqueo de mov
   assert.match(abilities, /id !== "cheese"/);
   assert.match(abilities, /const steer = input\?\.right === input\?\.left/);
 });
+
+test('phase 25: abilities elimina RNG y reloj no deterministas del runtime', () => {
+  const abilities = fs.readFileSync('./systems/abilities.js', 'utf8');
+  assert.doesNotMatch(abilities, /Math\\.random\\(/);
+  assert.doesNotMatch(abilities, /performance\\.now\\(/);
+  assert.match(abilities, /function abilityNow\\(game\\)/);
+  assert.match(abilities, /typeof game\\?\\.rng === "function"/);
+  assert.match(abilities, /MAX_ABILITY_PROJECTILES = 96/);
+});
