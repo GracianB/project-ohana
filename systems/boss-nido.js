@@ -7,6 +7,7 @@ import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, beha
 import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat, counterplayLabel } from "./boss-counterplay.js";
 import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationLabel } from "./boss-adaptation.js";
 import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-bait.js";
+import { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackLabel } from "./boss-bait-feedback.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -90,6 +91,8 @@ export function createBossNido() {
     adaptation: createBossAdaptation(),
     adaptationLabel: "ADAPTACIÓN NEUTRA",
     bait: createBossBait(),
+    baitFeedback: createBossBaitFeedback(),
+    baitFeedbackLabel: "",
   };
 }
 
@@ -244,8 +247,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.adaptationLabel = "ADAPTACIÓN NEUTRA";
     e.bait = createBossBait();
     e.baitLabel = baitLabel(e.bait);
-    e.bait = createBossBait();
-    e.baitLabel = baitLabel(e.bait);
+    e.baitFeedback = createBossBaitFeedback();
+    e.baitFeedbackLabel = "";
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
@@ -403,7 +406,10 @@ function updateSpit(e, game, floorY) {
 function finishBossAttack(e, game, delay = 6) {
   e.lastAttack = e.teleKind || e.mode || "";
   const p = game?.player;
+  const baitThreatWasReal = !!e.counterplay?.active?.initialInDanger;
   const counterResult = resolveBossThreat(e.counterplay, p, p?.health);
+  const baitFeedbackResult = resolveBossBaitFeedback(e.baitFeedback, counterResult, baitThreatWasReal);
+  e.baitFeedbackLabel = baitFeedbackLabel(e.baitFeedback);
   e.adaptation = observeBossAdaptation(
     e.adaptation,
     counterResult ? { outcome: "success", type: counterResult.type } : { outcome: "tick" }
@@ -417,7 +423,17 @@ function finishBossAttack(e, game, delay = 6) {
       game.nums?.add(e.x, e.y - 28, counterplayLabel(counterResult) + " +" + counterResult.reward, "#ffe66a", true);
       game.bossFx?.counterplay?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, counterResult);
     }
-  } else {
+  }
+  if (baitFeedbackResult && baitFeedbackResult.outcome !== "neutral" && game) {
+    game.nums?.add(
+      e.x,
+      e.y - 48,
+      baitFeedbackLabel(e.baitFeedback),
+      baitFeedbackResult.outcome === "trapped" ? "#ffcf6a" : "#86e7ff",
+      true
+    );
+    game.bossFx?.baitFeedback?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, baitFeedbackResult);
+  } else if (!counterResult) {
     e.lastCounterplay = null;
     e.counterBreak = 0;
   }
@@ -488,7 +504,8 @@ function updateRecovery(e, game, helpers, floorY) {
     e.counterBreak = 0;
     e.vulnerable = false;
     e.mode = "idle";
-    e.attackCd = e.phase >= 3 ? 18 : e.phase === 2 ? 30 : 42;
+    const baseDelay = e.phase >= 3 ? 18 : e.phase === 2 ? 30 : 42;
+    e.attackCd = feedbackAttackDelay(baseDelay, e.baitFeedback);
     e.invuln = 0;
     // Tras una ventana de castigo, recupera el control rápido.
     // El reposo es visual/IA, no modifica hitbox ni daño.
@@ -526,8 +543,12 @@ function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
 }
 
 function pickAttack(e) {
+  const baitType = e.bait.type;
   const baitPattern = consumeBossBait(e.bait, e.phase);
-  if (baitPattern) e.baitLabel = "CEBO CONSUMIDO";
+  if (baitPattern) {
+    beginBossBaitFeedback(e.baitFeedback, baitType);
+    e.baitLabel = "CEBO CONSUMIDO";
+  }
   const p = e._lastPlayer || null;
   const cx = e.x + e.w / 2;
   const px = p ? p.x + p.w / 2 : cx;
