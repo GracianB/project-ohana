@@ -113,7 +113,7 @@ La vista por defecto es **vector**.
 
 ## Tests
 
-El CI ejecuta **las dos suites de regresión**:
+El CI ejecuta **las tres suites de regresión**:
 
 ```bash
 node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js
