@@ -53,6 +53,7 @@
 49. Ruta Mundo 1 cerrada
 50. Versión DEMO jugable online
 51. Evolución visual por forma: silueta, postura y firma 0 → GOD
+52. Evolución aplicada al combate: H/J/K/L escalan su lectura por forma y héroe
 
 ## Cifras maestras
 

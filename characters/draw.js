@@ -162,6 +162,9 @@ function drawLocomotionFX(ctx, H, color, pose, t) {
 
 function drawAttackFX(ctx, H, color, pose) {
   if (pose.state !== "attack") return;
+  const evoCombat = pose.evolutionCombat || {};
+  const attackScale = Number(evoCombat.attack) || 1;
+  const impactScale = Number(evoCombat.impact) || 1;
   const a = Math.max(0, Math.min(1, pose.atk || 0));
   const charge = Math.max(0, Math.min(1, pose.anticipation || 0));
   const impact = Math.max(0, Math.min(1.2, pose.impact || 0));
@@ -177,11 +180,11 @@ function drawAttackFX(ctx, H, color, pose) {
     }
   }
   if (impact > 0) {
-    const len = H * (0.26 + impact * 0.52);
+    const len = H * (0.26 + impact * 0.52) * (0.92 + attackScale * 0.08);
     ctx.strokeStyle = color;
     ctx.lineCap = "round";
-    ctx.globalAlpha = Math.min(0.85, 0.22 + impact * 0.48);
-    ctx.lineWidth = Math.max(1.4, H * 0.022);
+    ctx.globalAlpha = Math.min(0.92, (0.20 + impact * 0.50) * impactScale);
+    ctx.lineWidth = Math.max(1.4, H * (0.020 + 0.002 * Math.min(1.5, attackScale)));
     for (let i = 0; i < 5; i++) {
       const y = -H * 0.72 + i * H * 0.14;
       const start = H * 0.04 + (i % 2) * H * 0.04;
@@ -226,14 +229,16 @@ function drawAbilitySignatureFX(ctx, p, H, pose, t) {
   if (k < 0.05) return;
   const color = ABILITY_ACCENTS[id] || accentFor(p);
   const f = p.facing || 1;
-  const pulse = 1 + k * 0.18;
-  const r = H * (0.14 + k * 0.24);
+  const evoCombat = pose.evolutionCombat || {};
+  const castScale = Number(evoCombat.cast) || 1;
+  const pulse = 1 + k * 0.18 * castScale;
+  const r = H * (0.14 + k * 0.24) * (0.92 + (castScale - 0.84) * 0.28);
 
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.globalAlpha = 0.18 + k * 0.52;
+  ctx.globalAlpha = Math.min(0.92, (0.16 + k * 0.52) * (Number(evoCombat.glow) || 1));
 
   switch (kind) {
     case "note-bounce":
@@ -442,11 +447,14 @@ function drawBasicAttackSignatureFX(ctx, p, H, pose, t) {
   if (k < 0.06) return;
   const color = (p?.color || accentFor(p));
   const f = p?.facing || 1;
-  const reach = H * (0.42 + k * 0.42);
+  const evoCombat = pose.evolutionCombat || {};
+  const attackScale = Number(evoCombat.attack) || 1;
+  const density = Number(evoCombat.density) || 1;
+  const reach = H * (0.42 + k * 0.42) * (0.92 + (attackScale - 0.82) * 0.16);
 
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
-  ctx.globalAlpha = 0.20 + k * 0.55;
+  ctx.globalAlpha = Math.min(0.92, (0.18 + k * 0.54) * (Number(evoCombat.glow) || 1));
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.strokeStyle = color;
@@ -489,6 +497,22 @@ function drawBasicAttackSignatureFX(ctx, p, H, pose, t) {
       star(ctx, f * reach * 0.86, -H * 0.50, H * 0.06, "#fff6c8");
       break;
   }
+  if (k > 0.18 && (Number(pose.form) || 0) >= 2) {
+    ctx.save();
+    const evo = Number(pose.form) || 0;
+    ctx.globalAlpha = Math.min(0.62, k * 0.24 * (Number(evoCombat.glow) || 1));
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.1, H * 0.012);
+    const n = Math.max(2, Math.min(5, Math.round(evo + density - 0.5)));
+    for (let i = 0; i < n; i++) {
+      const a = -0.95 + i * (1.9 / Math.max(1, n - 1));
+      ctx.beginPath();
+      ctx.arc(f * reach * 0.72, -H * 0.48, H * (0.08 + evo * 0.018), a, a + 0.22);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   ctx.restore();
 }
 
@@ -501,12 +525,13 @@ function drawSignatureFX(ctx, p, H, pose, t) {
   const attackU = pose.state === "attack" ? Math.max(0, Math.min(1, pose.atk || 0)) : 0;
   const attack = attackU ? Math.sin(attackU * Math.PI) : 0;
   const dash = p?.dash > 0 ? Math.min(1, p.dash / 12) : 0;
-  const energy = Math.max(run * 0.72, cast, attack, dash * 0.9);
+  const evoCombat = pose.evolutionCombat || {};
+  const energy = Math.max(run * 0.72 * (Number(evoCombat.trail) || 1), cast, attack * (Number(evoCombat.attack) || 1), dash * 0.9);
   if (energy < 0.06) return;
 
   const color = accentFor(p);
   const phase = t * (0.12 + m.pace * 0.035) + m.sway * 1.7;
-  const amp = H * (0.035 + energy * 0.045);
+  const amp = H * (0.032 + energy * 0.047) * (0.92 + ((Number(evoCombat.trail) || 1) - 0.7) * 0.16);
   ctx.save();
   ctx.globalCompositeOperation = "lighter";
   ctx.lineCap = "round";

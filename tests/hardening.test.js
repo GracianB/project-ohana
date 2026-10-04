@@ -18,7 +18,7 @@ test('input y Service Worker no conservan movimiento horizontal fantasma', () =>
   assert.match(input, /KEYBOARD_STALE_MS\s*=\s*1200/);
   assert.match(input, /keyboardWatchdog/);
   assert.match(input, /listen\(target, "focus", reset\)/);
-  assert.match(sw, /ohana-84/);
+  assert.match(sw, /ohana-85/);
   assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* Math\.min\(64/);

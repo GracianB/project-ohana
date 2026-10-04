@@ -42,13 +42,14 @@ jobs:
           import fs from "node:fs";
           import { ROSTER } from "./characters/roster.js";
           import { ROOMS } from "./systems/map.js";
-          import { EVOLUTION_STAGES, EVOLUTION_SIGNATURES } from "./characters/evolution.js";
+          import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionProfile } from "./characters/evolution.js";
 
           const read = (file) => fs.readFileSync(file, "utf8");
           const activeCharacters = ROSTER.length;
           const formsPerCharacter = ROSTER.length ? Math.min(...ROSTER.map((character) => character.forms.length)) : 0;
           const roomCount = Object.keys(ROOMS).length;
           const evolutionStageCount = EVOLUTION_STAGES.length;
+          const evolutionCombatStageCount = EVOLUTION_COMBAT_STAGES.length;
           const evolutionSignatureCount = EVOLUTION_SIGNATURES.length;
           const manifest = JSON.parse(read("manifest.json"));
           const index = read("index.html");
@@ -73,8 +74,19 @@ jobs:
             errors.push(`evolución: se esperaban 5 formas por personaje, hay ${evolutionStageCount}`);
           }
 
+          if (evolutionCombatStageCount !== 5) {
+            errors.push(`evolución: se esperaban 5 etapas de combate, hay ${evolutionCombatStageCount}`);
+          }
+
           if (evolutionSignatureCount !== 50 || new Set(EVOLUTION_SIGNATURES).size !== evolutionSignatureCount) {
             errors.push(`evolución: se esperaban 50 firmas únicas, hay ${evolutionSignatureCount}`);
+          }
+
+          const evolutionCombatValues = ROSTER.flatMap((character) =>
+            EVOLUTION_COMBAT_STAGES.map((stage) => evolutionProfile({ id: character.id, evo: stage.id }).combat.attack)
+          );
+          if (evolutionCombatValues.some((value) => !Number.isFinite(value) || value <= 0)) {
+            errors.push("evolución: hay parámetros de combate no válidos");
           }
 
           const masterPatterns = [
@@ -128,7 +140,7 @@ jobs:
           console.log(" - cache: " + (currentVersion || "sin versión"));
           console.log(" - CI: core + runtime + renderer + completeness + browser E2E");
           console.log(` - código: ${activeCharacters} personajes / ${formsPerCharacter} formas / ${roomCount} salas`);
-          console.log(` - evolución: ${evolutionStageCount} formas / ${evolutionSignatureCount} firmas`);
+          console.log(` - evolución: ${evolutionStageCount} formas / ${evolutionSignatureCount} firmas / ${evolutionCombatStageCount} etapas de combate`);
           console.log(" - docs: código ↔ manifest ↔ README ↔ PROGRESS ↔ IMPROVEMENTS");
           NODE
 

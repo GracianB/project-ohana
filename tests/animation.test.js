@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_SIGNATURES, evolutionKey, applyEvolutionPose } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionKey, evolutionProfile, applyEvolutionPose } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -159,4 +159,30 @@ test("los estilos de evolución conservan una separación fuerte entre bebé, al
     assert.ok(Math.abs(god.bodyTilt) >= Math.abs(high.bodyTilt));
     assert.ok(god.evolutionPulse === 0);
   }
+});
+
+
+test("la progresión de evolución también escala la lectura del combate sin tocar la lógica", () => {
+  assert.equal(EVOLUTION_COMBAT_STAGES.length, 5);
+  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
+    const profiles = EVOLUTION_COMBAT_STAGES.map((stage, evo) => evolutionProfile({ id, evo }));
+    for (const p of profiles) {
+      for (const key of ["attack","cast","impact","trail","glow","density","snap"]) {
+        assert.ok(Number.isFinite(p.combat[key]), id + ":e" + p.evo + ":" + key);
+        assert.ok(p.combat[key] > 0, id + ":e" + p.evo + ":" + key);
+      }
+    }
+    assert.ok(profiles[0].combat.attack < profiles[4].combat.attack, id + ":attack");
+    assert.ok(profiles[0].combat.cast < profiles[4].combat.cast, id + ":cast");
+    assert.ok(profiles[0].combat.impact < profiles[4].combat.impact, id + ":impact");
+    assert.ok(profiles[0].combat.glow < profiles[4].combat.glow, id + ":glow");
+  }
+});
+
+test("la identidad de personaje modula combate sin colapsar las cinco etapas", () => {
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const e2 = ids.map((id) => evolutionProfile({ id, evo: 2 }).combat.attack);
+  assert.equal(new Set(e2).size, ids.length);
+  const e4 = ids.map((id) => evolutionProfile({ id, evo: 4 }).combat.cast);
+  assert.equal(new Set(e4).size, ids.length);
 });
