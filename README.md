@@ -217,6 +217,8 @@ Continuar no mezcla personajes. Una partida de Kilo no abre a Dino. Los ids viej
 
 ## Hardening de runtime
 
+El bucle principal también contiene fallos inesperados de simulación o render: registra el error, limpia el estado de entrada y pausa la partida en lugar de dejar morir el ciclo de animación.
+
 El runtime aplica un guard de integridad antes de cada paso de simulación para normalizar HP, XP, puntuación, movimiento y colecciones transitorias ante valores no finitos o estados corruptos. Los límites de runtime y los VFX de portales deterministas se mantienen separados de la lógica de gameplay.
 
 ## Hecho en el navegador

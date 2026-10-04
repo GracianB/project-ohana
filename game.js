@@ -91,7 +91,7 @@ const game = {
   rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, runtimeFaults: 0, lastRuntimeFault: ""
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -2589,14 +2589,36 @@ function step() {
   if ((t & 3) === 0) updateHUD();
   if (t % 300 === 0) save();
 }
+function containRuntimeFault(scope, error) {
+  game.runtimeFaults = Math.min(32, Math.max(0, Number(game.runtimeFaults) || 0) + 1);
+  game.lastRuntimeFault = String(scope) + ": " + (error?.stack || error?.message || String(error));
+  try { console.error("[OHANA runtime fault]", scope, error); } catch (_) {}
+  try { input?.reset(); } catch (_) {}
+  try { clock.reset(); } catch (_) {}
+  game.hitstop = 0;
+  game.renderDirty = true;
+  if (game.running) {
+    paused = true;
+    try { DOM.pause?.classList.add("open"); } catch (_) {}
+  }
+}
+
 let renderedTick = -1;
 function loop(now) {
   if (game.running && !document.hidden) {
-    clock.advance(now, step);
-    if (game.renderDirty || renderedTick !== t) {
-      render();
-      renderedTick = t;
-      game.renderDirty = false;
+    try {
+      clock.advance(now, step);
+    } catch (error) {
+      containRuntimeFault("simulation", error);
+    }
+    if ((game.renderDirty || renderedTick !== t) && !paused) {
+      try {
+        render();
+        renderedTick = t;
+        game.renderDirty = false;
+      } catch (error) {
+        containRuntimeFault("render", error);
+      }
     }
   } else clock.reset();
   requestAnimationFrame(loop);
