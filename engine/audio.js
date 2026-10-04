@@ -130,7 +130,7 @@ const BANK = {
   evoCharge: () => { tone(120, 900, 1.3, 0.05, "sawtooth", 0, { attack: 0.3 }); tone(180, 1350, 1.3, 0.03, "square", 0, { attack: 0.3 }); noise(1.3, 0.05, 0, { f0: 300, f1: 6000, q: 2, attack: 0.4 }); },
   evoFlash: () => { noise(0.9, 0.2, 0, { type: "lowpass", f0: 3000, f1: 200 }); tone(80, 40, 0.8, 0.16, "sine"); tone(1600, 400, 0.4, 0.05, "square"); },
   evoFanfare: () => { arp([N(0), N(4), N(7), N(12)], 0.09, 0.3, 0.07, "square"); chord([N(12), N(16), N(19)], 1.6, 0.06, "triangle", 0.38); arp([N(24), N(28), N(31)], 0.06, 0.25, 0.03, "sine", 0.4); },
-  godFanfare: () => { arp([N(0), N(4), N(7), N(11), N(14)], 0.1, 0.4, 0.07, "square"); chord([N(12), N(16), N(19), N(23)], 2.4, 0.07, "triangle", 0.5); chord([N(24), N(28), N(31)], 2.0, 0.03, "sine", 0.6); noise(2, 0.03, 0.5, { type: "highpass", f0: 6000 }); },
+  evoFinalFanfare: () => { arp([N(0), N(4), N(7), N(11), N(14)], 0.1, 0.4, 0.07, "square"); chord([N(12), N(16), N(19), N(23)], 2.4, 0.07, "triangle", 0.5); chord([N(24), N(28), N(31)], 2.0, 0.03, "sine", 0.6); noise(2, 0.03, 0.5, { type: "highpass", f0: 6000 }); },
   // portada
   title: () => { chord([N(-12), N(-5), N(0)], 2.2, 0.05, "triangle"); arp([N(12), N(16), N(19), N(24), N(19), N(16)], 0.16, 0.5, 0.035, "sine", 0.3); },
   whoosh: () => noise(0.5, 0.08, 0, { f0: 300, f1: 3000, q: 0.8, attack: 0.15 }),
