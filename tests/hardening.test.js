@@ -91,3 +91,18 @@ test('phase 18: boss adaptation queda aislado, acotado y precacheado', () => {
   assert.match(combat, /adaptivePreference/);
   assert.match(sw, /boss-adaptation\.js\?v=" \+ VERSION/);
 });
+
+
+test('phase 19: adaptive bait queda aislado y limitado al repertorio del boss', () => {
+  const bait = fs.readFileSync('./systems/boss-bait.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(bait, /Math\.random\(/);
+  assert.doesNotMatch(bait, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(bait, /\.w\s*=|\.h\s*=/);
+  assert.match(boss, /consumeBossBait/);
+  assert.match(boss, /baitPattern/);
+  assert.match(combat, /baitPattern/);
+  assert.match(sw, /boss-bait\.js\?v=" \+ VERSION/);
+});
