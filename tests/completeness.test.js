@@ -321,3 +321,15 @@ test('phase 19: cambiar la respuesta rearma el CEBO y la fase final sigue cerrad
     }
   }
 });
+
+
+test('phase 19: el CEBO no puede saltarse la protección anti-repetición del director', () => {
+  const bait = BAIT_PATTERNS[2].DASH;
+  const pattern = chooseBossPattern(2, 1, () => 0, {
+    distance: 500,
+    vertical: 0,
+    hpRatio: 0.8,
+    baitPattern: bait,
+  });
+  assert.notDeepEqual(pattern, bait);
+});
