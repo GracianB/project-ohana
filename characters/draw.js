@@ -992,17 +992,23 @@ export function drawCharacter(ctx, p, cam, t) {
   // Squash del rig. Un solo aplaste: no se suma al contador viejo.
   const squash = Math.max(0, Math.min(0.22, pose.squash || 0));
   const stretch = Math.max(-0.12, Math.min(0.16, pose.stretch || 0));
+  const evoVis = pose.evolutionVisual || { bodyX: 1, bodyY: 1, stance: 0, lift: 0 };
   let sx = 1 + squash * 0.9 - stretch * 0.35;
   let sy = 1 - squash * 0.75 + stretch * 0.4;
-  sx *= pose.evolutionScaleX || 1;
-  sy *= pose.evolutionScaleY || 1;
+  // El arte de cada forma ya cambia su geometría. Este segundo nivel ajusta
+  // la lectura corporal por personaje sin alterar jamás w/h de la hitbox.
+  sx *= (pose.evolutionScaleX || 1) * (evoVis.bodyX || 1);
+  sy *= (pose.evolutionScaleY || 1) * (evoVis.bodyY || 1);
   if (p.grounded && p._wasAir) p._land = 8;
   p._wasAir = air;
   if (p._land > 0) p._land--;
 
-  const tilt = (moving ? 0.05 : air ? ((p.vy || 0) < -1.2 ? -0.04 : 0.05) : 0) + (pose.bodyTilt || 0) * 0.35;
+  const stageLean = Number(evoVis.stance) || 0;
+  const dynamicLean = moving ? 0.05 : air ? ((p.vy || 0) < -1.2 ? -0.04 : 0.05) : 0;
+  const tilt = dynamicLean + (pose.bodyTilt || 0) * 0.35 + stageLean * (moving ? 1.35 : 0.92);
   const lunge = atk * H * 0.08 + (pose.impact || 0) * H * 0.03;
   const recoilX = hurtFresh ? -H * 0.08 : 0;
+  const formLift = air ? (evoVis.lift || 0) * H * 0.35 : (pose.state === "idle" || pose.state === "cast" ? (evoVis.lift || 0) * H * 0.55 : 0);
   const color = p.color || "#ffffff";
   const art = ART[p.id] || ART.kilo;
   const airK = air ? 0.62 + Math.min(0.2, Math.abs(p.vy || 0) / 40) : 1;
@@ -1011,7 +1017,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.translate(footX, footY);
   drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
   ctx.scale(facing, 1);
-  ctx.translate(recoilX + lunge, 0);
+  ctx.translate(recoilX + lunge, -formLift);
 
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
