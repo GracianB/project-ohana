@@ -17,7 +17,7 @@ Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, c
 
 ## Hecho
 
-| 04/10 | Infra de release: caché activa alineada en `ohana-92` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
+| 04/10 | Infra de release: caché activa alineada en `ohana-93` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
 | Fecha | Qué |
 |---|---|
 | 04/10 | Intro cinematográfica de portada activa, con escena de Isla Hoku, aviso del Nido y salida por iris; eliminada la pantalla de carga básica. |
@@ -151,6 +151,7 @@ El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 
 | 04/10 | **Boss Combat Director · Phase 15**: la Reina encadena rutinas de 2–4 ataques según fase y contexto del jugador, evita repetir patrón, reduce la ventana de reacción en la fase final y abre una ventana de castigo claramente telegráfica tras cada cadena; sin cambiar hitboxes ni daño base; caché `ohana-91`. |
 | 04/10 | **Boss Reactive Director · Phase 16**: memoria determinista del jugador (dash, aire y presión), selección reactiva por patrón autorizado, desesperación de fase 3 al 22% de vida y recompensa `PUNISH` única durante cada ventana vulnerable; sin alterar daño base ni hitboxes; caché `ohana-92`. |
+| 04/10 | **Boss Counterplay · Phase 17**: defensas limpias por DASH/AIRE/DISTANCIA generan racha de respuesta; tres respuestas consecutivas activan `BREAK` y amplían la recuperación vulnerable. La respuesta fallida reinicia la racha solo cuando el jugador estaba realmente expuesto; sin modificar daño base ni hitboxes; caché `ohana-93`. |
 
 ## Publicación y caché
 
