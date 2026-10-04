@@ -197,9 +197,169 @@ function drawAttackFX(ctx, H, color, pose) {
   ctx.restore();
 }
 
+function drawSignatureFX(ctx, p, H, pose, t) {
+  const id = String(p?.id || "").toLowerCase();
+  const m = motionProfile(p);
+  const run = pose.state === "run" ? Math.max(0, Math.min(1, pose.speed || 0)) : 0;
+  const castU = pose.state === "cast" ? Math.max(0, Math.min(1, pose.cast || 0)) : 0;
+  const cast = castU ? Math.sin(castU * Math.PI) : 0;
+  const attackU = pose.state === "attack" ? Math.max(0, Math.min(1, pose.atk || 0)) : 0;
+  const attack = attackU ? Math.sin(attackU * Math.PI) : 0;
+  const dash = p?.dash > 0 ? Math.min(1, p.dash / 12) : 0;
+  const energy = Math.max(run * 0.72, cast, attack, dash * 0.9);
+  if (energy < 0.06) return;
+
+  const color = accentFor(p);
+  const phase = t * (0.12 + m.pace * 0.035) + m.sway * 1.7;
+  const amp = H * (0.035 + energy * 0.045);
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  switch (id) {
+    case "kilo":
+      ctx.globalAlpha = 0.18 + energy * 0.42;
+      ctx.fillStyle = color;
+      for (let i = 0; i < 3; i++) {
+        const a = phase + i * 2.1;
+        const x = -H * 0.12 + Math.cos(a) * H * (0.25 + energy * 0.12);
+        const y = -H * 0.48 + Math.sin(a * 1.35) * H * 0.18;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(a + Math.PI / 2);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, amp * 0.82, amp * 0.36, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      break;
+
+    case "stitcho":
+      ctx.globalAlpha = 0.22 + energy * 0.42;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = Math.max(1, H * 0.018);
+      for (let i = 0; i < 4; i++) {
+        const y = -H * (0.20 + i * 0.13);
+        const x = -H * 0.42 - (i % 2) * H * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + H * 0.07, y + H * 0.035);
+        ctx.lineTo(x + H * 0.14, y - H * 0.015);
+        ctx.stroke();
+      }
+      break;
+
+    case "chispin":
+      ctx.globalAlpha = 0.24 + energy * 0.48;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = Math.max(1.1, H * 0.018);
+      for (let i = 0; i < 2; i++) {
+        const y = -H * (0.28 + i * 0.18);
+        const x = -H * (0.16 + i * 0.12);
+        const z = Math.sin(phase * 2 + i) * amp * 0.55;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + amp * 0.5, y - amp * 0.35 + z);
+        ctx.lineTo(x + amp * 0.18, y + amp * 0.08);
+        ctx.lineTo(x + amp * 0.72, y - amp * 0.10 + z);
+        ctx.stroke();
+      }
+      break;
+
+    case "cat":
+      ctx.globalAlpha = 0.18 + energy * 0.36;
+      for (let i = 0; i < 2; i++) {
+        const a = phase * 0.7 + i * Math.PI;
+        star(ctx, H * 0.24 + Math.cos(a) * amp * 2.2, -H * 0.55 + Math.sin(a) * amp * 1.3, Math.max(2, amp * 0.42), i ? "#fff6a8" : color);
+      }
+      break;
+
+    case "dragon":
+      ctx.globalAlpha = 0.16 + energy * 0.44;
+      ctx.fillStyle = color;
+      for (let i = 0; i < 4; i++) {
+        const q = (phase * 0.7 + i * 1.7) % 3.8;
+        const x = -H * 0.12 + Math.sin(q * 1.8 + i) * H * 0.24;
+        const y = -H * 0.16 - q * H * 0.16;
+        ctx.beginPath();
+        ctx.arc(x, y, Math.max(1.3, amp * (0.22 + (i % 2) * 0.15)), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+
+    case "dino":
+      ctx.globalAlpha = 0.16 + energy * 0.40;
+      ctx.fillStyle = "#d5c7a0";
+      for (let i = 0; i < 3; i++) {
+        const x = -H * (0.08 + i * 0.13);
+        const y = -H * 0.04 - Math.abs(Math.sin(phase + i)) * amp * 0.8;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((i - 1) * 0.35);
+        ctx.fillRect(-amp * 0.28, -amp * 0.16, amp * 0.56, amp * 0.32);
+        ctx.restore();
+      }
+      break;
+
+    case "frita":
+      ctx.globalAlpha = 0.20 + energy * 0.42;
+      ctx.fillStyle = "#fff3c0";
+      for (let i = 0; i < 4; i++) {
+        const a = phase + i * 1.4;
+        const x = -H * 0.35 + Math.cos(a) * H * 0.20;
+        const y = -H * 0.16 + Math.sin(a * 1.7) * H * 0.13;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(a);
+        ctx.fillRect(-amp * 0.22, -amp * 0.22, amp * 0.44, amp * 0.44);
+        ctx.restore();
+      }
+      break;
+
+    case "pizza":
+      ctx.globalAlpha = 0.18 + energy * 0.40;
+      ctx.strokeStyle = "#ffe27a";
+      ctx.lineWidth = Math.max(1.1, H * 0.016);
+      for (let i = 0; i < 2; i++) {
+        const y = -H * (0.18 + i * 0.16);
+        ctx.beginPath();
+        ctx.moveTo(H * 0.08, y);
+        ctx.quadraticCurveTo(H * 0.26, y + Math.sin(phase + i) * amp, H * 0.44, y + H * 0.03);
+        ctx.stroke();
+      }
+      break;
+
+    case "yomi":
+      ctx.globalAlpha = 0.14 + energy * 0.34;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = Math.max(1.1, H * 0.015);
+      for (let i = 0; i < 2; i++) {
+        const r = H * (0.18 + i * 0.08) + energy * H * 0.08;
+        ctx.beginPath();
+        ctx.ellipse(H * 0.10, -H * 0.52, r, r * 0.35, phase * 0.25 + i, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      break;
+
+    case "cuerno":
+      ctx.globalAlpha = 0.20 + energy * 0.42;
+      ctx.strokeStyle = "#fff6c8";
+      ctx.lineWidth = Math.max(1.1, H * 0.016);
+      ctx.beginPath();
+      ctx.arc(H * 0.18, -H * 0.60, H * (0.18 + energy * 0.10), -1.9, -0.35);
+      ctx.stroke();
+      star(ctx, H * 0.34, -H * 0.72, Math.max(2.5, amp * 0.55), color);
+      break;
+  }
+
+  ctx.restore();
+}
+
 function drawCharacterMotionFX(ctx, p, H, pose, t) {
   const color = accentFor(p);
   const prof = motionProfile(p);
+  drawSignatureFX(ctx, p, H, pose, t);
   const intensity = Math.min(1.35, (pose.speed || 0) * (0.55 + prof.pace * 0.45));
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
   drawLocomotionFX(ctx, H, color, pose, t);
