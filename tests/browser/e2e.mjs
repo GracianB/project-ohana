@@ -133,7 +133,7 @@ async function auditPage(page, label) {
     }
 
     api.setBossHp(300);
-    const phaseAfter = api.step(2);
+    const phaseAfter = api.step(12);
     snapshots.push({ phaseAfter });
     if (!phaseAfter.boss || phaseAfter.boss.phase < 3 || phaseAfter.boss.dying) {
       throw new Error('E2E: la Reina no entró en fase 3 con vida residual');
