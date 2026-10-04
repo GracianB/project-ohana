@@ -193,6 +193,19 @@ test('phase 26: partículas reproducibles, acotadas y recuperables ante datos co
 });
 
 
+test('phase 30: el bucle de runtime contiene fallos de simulación y render', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function containRuntimeFault\(scope, error\)/);
+  assert.match(game, /game\.runtimeFaults = Math\.min\(32/);
+  assert.match(game, /lastRuntimeFault = String\(scope\)/);
+  assert.match(game, /containRuntimeFault\("simulation", error\)/);
+  assert.match(game, /containRuntimeFault\("render", error\)/);
+  assert.match(game, /input\?\.reset\(\)/);
+  assert.match(game, /clock\.reset\(\)/);
+  assert.match(game, /paused = true/);
+  assert.match(game, /requestAnimationFrame\(loop\)/);
+});
+ 
 test('phase 29: runtime integrity guard protege estado crítico y colecciones', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
   assert.match(game, /const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
