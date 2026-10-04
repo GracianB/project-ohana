@@ -65,7 +65,7 @@ export function useAbility(game, index) {
   p.cds[id] = now + dur;
   p.cdDur[id] = dur;
   syncState(p);
-  p._cast = { slot: index, t: game.t || 0 };
+  p._cast = { slot: index, t: game.t || 0, id, form: Number(p.evo) || 0 };
   sfx(id);
   if (index === 2) {
     game.ult = { t: 46, color: def.color, name: def.name };
