@@ -387,3 +387,13 @@ test('phase 37: el harness E2E queda aislado del dominio publicado', () => {
   const hook = game.slice(hookStart, hookEnd);
   assert.match(hook, /window\.__OHANA_E2E/);
 });
+
+
+test('phase 38: combo también queda dentro del firewall global', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const mutations = fs.readFileSync('./systems/mutations.js', 'utf8');
+  assert.match(game, /function addCombo\(amount = 1\)/);
+  assert.match(game, /addCombo\(1\);/);
+  assert.equal((game.match(/game\.combo\s*\+=/g) || []).length, 0);
+  assert.match(mutations, /function addCombo/);
+});

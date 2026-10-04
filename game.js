@@ -24,7 +24,7 @@ import { sense, think } from "./engine/foe-brain.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
-import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill } from "./systems/mutations.js";
+import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
 import { bindInput } from "./engine/input.js";
@@ -640,6 +640,7 @@ function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
 function addScore(amount) { return safeAddScore(game, amount); }
 function addKill() { return safeAddKill(game); }
+function addCombo(amount = 1) { return safeAddCombo(game, amount); }
 function registerBossPunish(e) {
   if (!e?.boss || !e.vulnerable || e.dying) return false;
   e.punishHits = (Number(e.punishHits) || 0) + 1;
@@ -904,7 +905,7 @@ function checkVoidDeath() {
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function punch(x, y, color, dir = 1) {
   game.shake = Math.min(18, game.shake + 6);
-  game.combo += 1;
+  addCombo(1);
   game.comboT = 480;
   addScore(10 * game.combo);
   const tier = combatTier(game.combo);
