@@ -2687,7 +2687,10 @@ addEventListener("ohana-evolve-done", (e) => {
 
 setupSelect();
 
-if (new URLSearchParams(location.search).has("e2e")) {
+const e2eParams = new URLSearchParams(location.search);
+const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+
+if (e2eEnabled) {
   const dismissE2EOverlays = () => {
     DOM.help?.classList.remove("open");
     DOM.map?.classList.remove("open");

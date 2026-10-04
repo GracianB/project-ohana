@@ -377,3 +377,13 @@ test('phase 35: presupuesto runtime compartido y compactación sin crecimiento',
   assert.equal(runtime.boundedFinite(NaN, 7, 0, 10), 7);
   assert.equal(runtime.boundedFinite(99, 7, 0, 10), 10);
 });
+
+test('phase 37: el harness E2E queda aislado del dominio publicado', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /const e2eEnabled = location\.hostname === "127\.0\.0\.1" && e2eParams\.has\("e2e"\)/);
+  const hookStart = game.indexOf('if (e2eEnabled) {');
+  const hookEnd = game.indexOf('bindDialogs({ document', hookStart);
+  assert.ok(hookStart > 0 && hookEnd > hookStart);
+  const hook = game.slice(hookStart, hookEnd);
+  assert.match(hook, /window\.__OHANA_E2E/);
+});
