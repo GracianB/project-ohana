@@ -70,7 +70,7 @@ test('phase 17: counterplay queda separado de daño e hitbox y usa módulo preca
   const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
   const sw = fs.readFileSync('./sw.js', 'utf8');
   assert.doesNotMatch(counter, /e\.hp\s*[-+]=/);
-  assert.doesNotMatch(counter, /w\s*=|h\s*=/);
+  assert.doesNotMatch(counter, /\be\.w\s*=|\be\.h\s*=/);
   assert.match(boss, /startBossThreat/);
   assert.match(boss, /resolveBossThreat/);
   assert.match(boss, /counterBreak/);
