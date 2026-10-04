@@ -23,6 +23,7 @@ async function auditPage(page, label) {
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
+  if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
   const audit = await page.evaluate(async () => {
     const [{ ROSTER }, { ROOMS }, { ABILITY_DEFS }] = await Promise.all([
