@@ -149,7 +149,7 @@ Las pruebas cubren, entre otras áreas:
 
 El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 
-| 04/10 | **Boss Spectacle 2.0**: la Reina del Nido recibe tres identidades de fase, telegráficos específicos por ataque, transiciones cinematográficas, ondas de aterrizaje y presentación independiente determinista; sin tocar IA, daño ni hitboxes; caché `ohana-90`. |
+| 04/10 | **Boss Combat Director · Phase 15**: la Reina encadena rutinas de 2–4 ataques según fase y contexto del jugador, evita repetir patrón, reduce la ventana de reacción en la fase final y abre una ventana de castigo claramente telegráfica tras cada cadena; sin cambiar hitboxes ni daño base; caché `ohana-91`. |
 
 ## Publicación y caché
 
@@ -157,7 +157,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-90`
+`ohana-91`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
