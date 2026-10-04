@@ -240,7 +240,7 @@ test("las formas 2-4 tienen siluetas finales distintas y FX de combate dibujable
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
   const ctx = makeEvolutionCinemaContext();
   const silhouettes = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.silhouette);
-  assert.equal(new Set(silhouettes).size, 9);
+  assert.equal(new Set(silhouettes).size, 10);
   for (const id of ids) {
     for (let evo = 2; evo < 5; evo++) {
       assert.doesNotThrow(() => drawEvolutionSilhouetteFX(
