@@ -13,8 +13,6 @@ async function auditPage(page, label) {
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
   await page.waitForTimeout(700);
-  await page.locator('#btn-help').click();
-  await page.locator('#btn-close-help').click();
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
 
