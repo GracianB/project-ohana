@@ -21,7 +21,18 @@ async function auditPage(page, label) {
         await import(path + '?probe=1');
         results.push({ path, ok: true });
       } catch (error) {
-        results.push({ path, ok: false, message: error?.message || String(error), stack: error?.stack || '' });
+        let parse = null;
+        try {
+          const response = await fetch(path + '?source-probe=1', { cache: 'no-store' });
+          const source = await response.text();
+          const normalized = source
+            .replace(/^import[^;]+;\\s*$/gm, '')
+            .replace(/\\bexport\\s+(?=(const|let|var|function|class))/g, '');
+          new Function(normalized);
+        } catch (parseError) {
+          parse = { message: parseError?.message || String(parseError), stack: parseError?.stack || '' };
+        }
+        results.push({ path, ok: false, message: error?.message || String(error), stack: error?.stack || '', parse });
       }
     }
     return results;
