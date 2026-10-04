@@ -28,6 +28,18 @@ export function drawEnemy(ctx, e, cam, t) {
   const y = e.y - cam.y;
   ctx.save();
   ctx.translate(x + e.w / 2, y + e.h / 2);
+  const hitMax = Math.max(1, e._hitMax || 10);
+  const hitK = Math.max(0, Math.min(1, (e._hitT || 0) / hitMax));
+  if (hitK > 0.001) {
+    const dir = e._hitDir || (e.vx >= 0 ? 1 : -1);
+    const recoil = hitK * (e.boss ? 1.2 : 2.8);
+    ctx.translate(-dir * recoil, 0);
+    ctx.rotate(-dir * hitK * (e._hitCrit ? 0.055 : 0.032));
+    ctx.scale(
+      1 + hitK * (e._hitCrit ? 0.065 : 0.04),
+      1 - hitK * (e._hitCrit ? 0.055 : 0.032)
+    );
+  }
   // Hit feedback: flash blanco fuerte, luego rojo
   if (e.flash > 12) ctx.filter = "brightness(2.2)";
   else if (e.invuln > 0 && !e.boss && (e.invuln % 8) < 4) ctx.filter = "brightness(1.45)";
@@ -73,6 +85,31 @@ export function drawEnemy(ctx, e, cam, t) {
     ctx.ellipse(0, 0, e.w * 0.46, e.h * 0.58, 0, 0, Math.PI * 2);
     ctx.stroke();
     ctx.globalAlpha = 1;
+  }
+  if (hitK > 0.001 && !e.boss) {
+    const dir = e._hitDir || (e.vx >= 0 ? 1 : -1);
+    const c = e._hitColor || (e._hitCrit ? "#ffe66a" : "#ffffff");
+    const n = e._hitCrit ? 9 : 6;
+    ctx.save();
+    ctx.globalAlpha = hitK * 0.72;
+    ctx.strokeStyle = c;
+    ctx.lineCap = "round";
+    ctx.lineWidth = Math.max(1.2, e.w * 0.05);
+    const ox = dir * e.w * 0.38;
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + t * 0.08;
+      const inner = e.w * 0.18;
+      const outer = inner + e.w * (0.18 + hitK * 0.28);
+      ctx.beginPath();
+      ctx.moveTo(ox + Math.cos(a) * inner, Math.sin(a) * inner);
+      ctx.lineTo(ox + Math.cos(a) * outer, Math.sin(a) * outer);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = hitK * 0.35;
+    ctx.beginPath();
+    ctx.arc(ox, 0, e.w * (0.18 + hitK * 0.26), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
   drawHpBar(ctx, e);
   ctx.restore();
