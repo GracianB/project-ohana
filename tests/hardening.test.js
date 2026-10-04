@@ -291,3 +291,28 @@ test('phase 27: game runtime centraliza mutaciones de combate y evita contaminac
   assert.equal((game.match(/game\.score\s*\+=/g) || []).length, 0);
   assert.equal((game.match(/game\.kills\+\+/g) || []).length, 0);
 });
+
+
+test('phase 33: gameplay determinista y convocatoria del Nido ligada al reloj de simulación', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const surprises = fs.readFileSync('./systems/surprises.js', 'utf8');
+  const rain = fs.readFileSync('./systems/rain.js', 'utf8');
+
+  assert.match(surprises, /function gameRandom\(game\)/);
+  const surpriseGameplay = surprises.slice(surprises.indexOf('onMakeFoe(e, roomId, game)'), surprises.indexOf('onEnemyKilled(e, game)'));
+  assert.equal((surpriseGameplay.match(/Math\\.random\\(/g) || []).length, 0, 'sorpresas de gameplay no deben usar Math.random directamente');
+  assert.match(surpriseGameplay, /gameRandom\(game\)/);
+
+  assert.match(rain, /function gameRandom\(game\)/);
+  const rainGameplay = rain.slice(rain.indexOf('_inRoom = true'), rain.indexOf('const p = game.player'));
+  assert.equal((rainGameplay.match(/Math\\.random\\(/g) || []).length, 0, 'el retraso jugable de lluvia no debe usar Math.random directamente');
+  assert.match(rainGameplay, /gameRandom\(game\)/);
+
+  const worldClearStart = game.indexOf('function worldClear()');
+  const worldClearEnd = game.indexOf('function nearUpDoor(', worldClearStart);
+  const worldClear = game.slice(worldClearStart, worldClearEnd);
+  assert.doesNotMatch(worldClear, /setTimeout\(/, 'la llegada del boss debe depender de ticks');
+  assert.match(worldClear, /game\\.summonDelay = 132/);
+  assert.match(game, /function tickWorldSummon\(\)/);
+  assert.match(game, /tickWorldSummon\(\);/);
+});
