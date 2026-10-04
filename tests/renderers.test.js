@@ -21,21 +21,19 @@ function gradient() {
 
 function makeCanvasContext() {
   const state = {
-    globalAlpha: 1,
-    globalCompositeOperation: "source-over",
-    fillStyle: "#000",
-    strokeStyle: "#000",
-    lineWidth: 1,
-    lineCap: "butt",
-    lineJoin: "miter",
-    font: "10px sans-serif",
-    textAlign: "start",
-    textBaseline: "alphabetic",
-    shadowColor: "#000",
-    shadowBlur: 0,
-    filter: "none",
+    globalAlpha: 1, globalCompositeOperation: "source-over",
+    fillStyle: "#000", strokeStyle: "#000", lineWidth: 1,
+    lineCap: "butt", lineJoin: "miter", font: "10px sans-serif",
+    textAlign: "start", textBaseline: "alphabetic",
+    shadowColor: "#000", shadowBlur: 0, filter: "none",
   };
-  const fn = () => {};
+  const methods = new Set([
+    "arc", "arcTo", "beginPath", "bezierCurveTo", "clip", "closePath",
+    "createLinearGradient", "createRadialGradient", "ellipse", "fill",
+    "fillRect", "getLineDash", "isPointInPath", "isPointInStroke",
+    "lineTo", "measureText", "moveTo", "quadraticCurveTo", "restore",
+    "rotate", "save", "scale", "stroke", "strokeRect", "translate",
+  ]);
   return new Proxy(state, {
     get(target, prop) {
       if (prop === "createLinearGradient" || prop === "createRadialGradient") return gradient;
@@ -43,9 +41,11 @@ function makeCanvasContext() {
       if (prop === "getLineDash") return () => [];
       if (prop === "isPointInPath" || prop === "isPointInStroke") return () => false;
       if (prop in target) return target[prop];
-      return fn;
+      if (methods.has(prop)) return () => {};
+      throw new Error("Canvas API no declarada en smoke mock: " + String(prop));
     },
     set(target, prop, value) {
+      if (!(prop in target)) throw new Error("Canvas state no declarada en smoke mock: " + String(prop));
       target[prop] = value;
       return true;
     },
