@@ -396,3 +396,4 @@ test("RNG del rig de poses es inyectable y reproducible", async () => {
   assert.equal(a._rig.blinkAt, 89);
   assert.equal(b._rig.blinkAt, 89);
 });
+
