@@ -336,7 +336,7 @@ export function drawEvolutionCinemaFX(ctx, id, evo, cx, cy, H, t, color, strengt
   if (power <= 0.01) return;
 
   const main = stage >= 4 ? "#ffd84a" : color || "#fff6c8";
-  const hot = stage >= 4 ? "#fff4b5" : (() => {\n    const h = String(main).replace("#", "");\n    if (!/^[0-9a-fA-F]{6}$/.test(h)) return main;\n    const n = parseInt(h, 16);\n    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;\n    return "#" + [r,g,b].map(v => Math.round(v + (255 - v) * 0.42).toString(16).padStart(2, "0")).join("");\n  })();
+  const hot = stage >= 4 ? "#fff4b5" : (() => {\n    const h = String(main).replace("#", "");\n    if (!/^[0-9a-fA-F]{6}$/.test(h)) return main;\n    const n = parseInt(h, 16);\n    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;\n    return "#" + [r, g, b].map((v) => Math.round(v + (255 - v) * 0.42).toString(16).padStart(2, "0")).join("");\n  })();
   const orbit = base * (0.48 + stage * 0.045);
   const y = cy - base * 0.02;
 
