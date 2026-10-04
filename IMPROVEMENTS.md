@@ -1,4 +1,4 @@
-# 72 mejoras · Demo Mundo 1
+# 73 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -94,3 +94,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 70. Phase 32: separación de dominios RNG para impedir que render/VFX alteren la reproducibilidad de la simulación.
 71. Phase 33: decisiones jugables de sorpresas y lluvia pasan por RNG inyectable y la llegada del Nido queda ligada al reloj fijo de simulación, sin temporizador de pared.
 72. Phase 34: firewall global de mutaciones críticas mediante `systems/mutations.js`; los sistemas de gameplay comparten daño, curación, XP, puntuación, combo y escalado seguro de vida.
+
+73. Phase 35: presupuesto runtime compartido para colecciones transitorias, caps para bolts/slashes y compactación in-place sin reconstruir arrays válidos en cada tick.
