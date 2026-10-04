@@ -72,6 +72,11 @@ export function chooseBossPattern(phase = 1, previous = -1, rng = () => 0, conte
     preferred = reactive;
   }
 
+  const adaptive = context.adaptivePreference;
+  if (typeof adaptive === "string" && patterns.some((pattern) => pattern[0] === adaptive)) {
+    preferred = adaptive;
+  }
+
   const candidates = patterns
     .map((pattern, index) => ({ pattern, index }))
     .filter(({ index }) => index !== previous);
