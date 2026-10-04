@@ -1,4 +1,4 @@
-# 57 mejoras · Demo Mundo 1
+# 58 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -60,6 +60,7 @@
 55. **Director de combate del boss**: rutinas encadenadas, selección contextual, recuperación vulnerable y fase 3 con presión creciente
 56. **Boss Reactive Director**: memoria de dash/aire/presión, adaptación por patrón, desesperación determinista y recompensa de `PUNISH` en ventanas vulnerables
 57. **Boss Counterplay**: esquivas DASH/AIRE/DISTANCIA, racha defensiva, `BREAK` tras tres respuestas y recompensa de ejecución limpia
+58. **Boss Adaptive Encounter**: memoria de respuestas, presión por repetición, CEBO y cambio determinista de preferencia sin abandonar patrones autorizados
 
 ## Cifras maestras
 
