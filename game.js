@@ -91,7 +91,7 @@ const game = {
   rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, runtimeFaults: 0, lastRuntimeFault: ""
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -452,7 +452,7 @@ function loadRoom(id, fromDir) {
     if (f[3]) applyElite(e);
     return e;
   });
-  for (const e of game.enemies) Surprises.onMakeFoe(e, id);
+  for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
   for (const e of game.enemies) {
     if (isAirFoe(e)) continue;
     let floor = null;
@@ -1009,9 +1009,22 @@ function worldClear() {
   if (game.won || game.summoned || game.roomId === "boss") return;
   if (!need.every((id) => game.visited[id])) return;
   game.summoned = true;
+  game.summonDelay = 132; // 2.2 s a 60 Hz, pausables y reproducibles.
   beep("alert");
   showNotification("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.", "sala");
-  setTimeout(() => { if (!game.won && game.running) loadRoom("boss", "right"); }, 2200);
+}
+
+function tickWorldSummon() {
+  if (!(game.summonDelay > 0)) return;
+  if (game.won || game.roomId === "boss" || !game.running) {
+    if (game.roomId === "boss" || game.won) game.summonDelay = 0;
+    return;
+  }
+  game.summonDelay--;
+  if (game.summonDelay <= 0) {
+    game.summonDelay = 0;
+    if (!game.won && game.running) loadRoom("boss", "right");
+  }
 }
 function nearUpDoor(p) {
   const cx = p.x + p.w / 2;
@@ -2585,6 +2598,7 @@ function step() {
     return;
   }
   tickFinale();
+  tickWorldSummon();
   if (!canAct()) return;
   updatePlayer();
   updateEnemies();
