@@ -42,7 +42,7 @@ jobs:
           import fs from "node:fs";
           import { ROSTER } from "./characters/roster.js";
           import { ROOMS } from "./systems/map.js";
-          import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionProfile } from "./characters/evolution.js";
+          import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionProfile } from "./characters/evolution.js";
 
           const read = (file) => fs.readFileSync(file, "utf8");
           const activeCharacters = ROSTER.length;
@@ -80,6 +80,14 @@ jobs:
 
           if (evolutionSignatureCount !== 50 || new Set(EVOLUTION_SIGNATURES).size !== evolutionSignatureCount) {
             errors.push(`evolución: se esperaban 50 firmas únicas, hay ${evolutionSignatureCount}`);
+          }
+
+          if (Object.keys(EVOLUTION_FINAL_DESIGNS).length !== 10) {
+            errors.push(`evolución: se esperaban 10 diseños finales, hay ${Object.keys(EVOLUTION_FINAL_DESIGNS).length}`);
+          }
+          const finalMotifs = Object.values(EVOLUTION_FINAL_DESIGNS).map((design) => design.motif);
+          if (new Set(finalMotifs).size !== 10) {
+            errors.push("evolución: los 10 personajes deben conservar motivos finales distintos");
           }
 
           const evolutionCombatValues = ROSTER.flatMap((character) =>
