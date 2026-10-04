@@ -31,7 +31,7 @@ import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
-import { BossFX } from "./systems/boss-fx.js";
+import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -1189,6 +1189,7 @@ function dmgFor(e) {
 }
 function updateEnemies() {
   if (!game.player) return;
+  game.bossFx?.update();
   { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
   if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
@@ -1247,7 +1248,6 @@ function updateEnemies() {
         e.telegraph = false;
         e.attackCd = Math.max(e.attackCd || 0, 30);
       }
-      game.bossFx?.update();
       // Integrar velocidad que acaba de fijar la state machine
       e.x += e.vx || 0;
       e.y += e.vy || 0;
@@ -2349,7 +2349,15 @@ function updateHUD() {
   if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
   document.body.classList.toggle("boss-fight", !!boss);
   if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
-  setText(DOM.bossLabel, boss ? ("REINA DEL NIDO  " + Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100)) + "%") : "REINA DEL NIDO");
+  if (boss) {
+    const phase = bossPhaseProfile(boss.phase);
+    const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
+    const pct = Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100));
+    const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + attackText + " · " + pct + "%");
+  } else {
+    setText(DOM.bossLabel, "REINA DEL NIDO");
+  }
   syncHudStatus({ player: p, hp, xpPct, boss });
   const now = performance.now();
   for (let i = 0; i < abilitySlots.length; i++) {
