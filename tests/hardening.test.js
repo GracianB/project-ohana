@@ -22,7 +22,7 @@ test('input y Service Worker no conservan movimiento horizontal fantasma', () =>
   const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
   assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
   const version = versionMatch[1];
-  assert.match(sw, new RegExp("\\./engine/input\\.js\\?v=" + version.replace("-", "\\-")));
+  assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
   assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* Math\.min\(64/);
