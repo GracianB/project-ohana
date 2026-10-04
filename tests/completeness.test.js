@@ -306,7 +306,6 @@ test('phase 19: cambiar la respuesta rearma el CEBO y la fase final sigue cerrad
   const bait = createBossBait();
   armBossBait(bait, adaptation);
   consumeBossBait(bait, 1);
-  adaptation.baitConsumed = true;
 
   observeBossAdaptation(adaptation, { outcome: 'success', type: 'AIRE' });
   armBossBait(bait, adaptation);
