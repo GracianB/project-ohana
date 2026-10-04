@@ -298,3 +298,7 @@ La Reina del Nido evoluciona en capas deterministas de dirección de combate:
 - **Phase 19 · Adaptive Bait**: dos respuestas iguales arman un CEBO de un solo uso; el patrón señuelo ya existe en la tabla de rutinas de la fase y no cambia daño ni hitboxes.
 
 La adaptación es determinista, acotada y separada de la simulación física. El objetivo es aumentar la lectura del combate, no hacer trampas cambiando reglas invisibles.
+
+## Boss Director · Phase 20
+
+Phase 20 añade feedback de resultado al sistema de adaptación: un CEBO que el jugador identifica reduce el tempo de la Reina, mientras un CEBO eficaz lo incrementa. El efecto está limitado a la cadencia de decisión del siguiente ciclo y no modifica daño, hitboxes, física ni RNG.
