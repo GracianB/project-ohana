@@ -17,7 +17,7 @@ Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, c
 
 ## Hecho
 
-| 04/10 | Infra de release: caché activa alineada en `ohana-89` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
+| 04/10 | Infra de release: caché activa alineada en `ohana-90` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
 | Fecha | Qué |
 |---|---|
 | 04/10 | Intro cinematográfica de portada activa, con escena de Isla Hoku, aviso del Nido y salida por iris; eliminada la pantalla de carga básica. |
@@ -149,13 +149,15 @@ Las pruebas cubren, entre otras áreas:
 
 El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 
+| 04/10 | **Boss Spectacle 2.0**: la Reina del Nido recibe tres identidades de fase, telegráficos específicos por ataque, transiciones cinematográficas, ondas de aterrizaje y presentación independiente determinista; sin tocar IA, daño ni hitboxes; caché `ohana-90`. |
+
 ## Publicación y caché
 
 GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-87`
+`ohana-90`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 

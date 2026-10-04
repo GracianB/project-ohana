@@ -31,6 +31,7 @@ import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -87,7 +88,7 @@ const game = {
   rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -353,6 +354,7 @@ function loadRoom(id, fromDir) {
     }
     if (floor) e.y = floor.y - e.h;
   }
+  game.bossFx?.clear();
   game.boss = null;
   if (r.boss && !game.won) {
     game.boss = createBossNido();
@@ -1187,6 +1189,7 @@ function dmgFor(e) {
 }
 function updateEnemies() {
   if (!game.player) return;
+  game.bossFx?.update();
   { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
   if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
@@ -2058,6 +2061,7 @@ function render() {
   for (const g of game.ghosts) {
     ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
   }
+  game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
   for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
   Magic.draw(ctx, game, t);
   Passives.draw(ctx, game, t);
@@ -2345,7 +2349,15 @@ function updateHUD() {
   if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
   document.body.classList.toggle("boss-fight", !!boss);
   if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
-  setText(DOM.bossLabel, boss ? ("REINA DEL NIDO  " + Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100)) + "%") : "REINA DEL NIDO");
+  if (boss) {
+    const phase = bossPhaseProfile(boss.phase);
+    const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
+    const pct = Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100));
+    const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + attackText + " · " + pct + "%");
+  } else {
+    setText(DOM.bossLabel, "REINA DEL NIDO");
+  }
   syncHudStatus({ player: p, hp, xpPct, boss });
   const now = performance.now();
   for (let i = 0; i < abilitySlots.length; i++) {

@@ -314,6 +314,10 @@ export function drawBossQueen(ctx, e, t) {
   }
   if ((e.facing || 1) < 0) ctx.scale(-1, 1);
   ctx.rotate(lean);
+  // Escala visual de fase: solo canvas, nunca hitbox/física.
+  const phaseScale = phase === 3 ? 1.12 : phase === 2 ? 1.06 : 1;
+  const pulseScale = phase >= 3 ? 1 + Math.sin(t * 0.18) * 0.018 : 1;
+  ctx.scale(phaseScale * pulseScale, phaseScale * pulseScale);
 
   // aura de fase
   if (phase >= 2 && !e.dying) {
@@ -337,6 +341,19 @@ export function drawBossQueen(ctx, e, t) {
 
   body(ctx, c, t, st);
   head(ctx, c, t, st);
+
+  // Halo de corona: en fase final la gema se convierte en foco de amenaza.
+  if (phase >= 2 && !e.dying) {
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = phase === 3 ? 0.72 : 0.38;
+    ctx.strokeStyle = c.glow;
+    ctx.lineWidth = phase === 3 ? 3 : 2;
+    ctx.beginPath();
+    ctx.arc(0, -94, 22 + Math.sin(t * 0.22) * 4, 0, TAU);
+    ctx.stroke();
+    ctx.restore();
+  }
 
   // esquirlas de espina orbitando (fase 3)
   if (phase >= 3 && !e.dying) {
