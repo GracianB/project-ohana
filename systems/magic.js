@@ -20,6 +20,7 @@
 import { showNotification } from "./notify.js";
 import { sfx } from "../engine/audio.js";
 import { ROOMS, ROOM_W } from "./map.js";
+import { setPlayerHealth, addPlayerXp, damageEnemy } from "./mutations.js";
 
 const TAU = Math.PI * 2;
 const FPS = 60;
@@ -517,10 +518,9 @@ function apply(game, kind, x, y) {
     fx.shell = d.hits;
     shellCrack = 0;
   } else if (kind === "fruit") {
-    p.health = p.maxHealth;
+    setPlayerHealth(p, p.maxHealth);
 
-    p.xp =
-      Math.max(0, finite(p.xp, 0)) + 20;
+    addPlayerXp(p, 20);
 
     numberPopup(
       game,
@@ -673,7 +673,7 @@ function starHits(game, p) {
       dmg = Math.ceil(dmg * 0.35);
     }
 
-    e.hp -= dmg;
+    damageEnemy(e, dmg);
 
     const playerMid =
       p.x + p.w * 0.5;
