@@ -22,10 +22,8 @@ export class ParticleSystem {
     let n = finite(opts.count ?? 6, 6);
     n = Math.max(0, Math.min(10, Math.floor(n)));
     if (!n) return;
-    const room = MAX - this.items.length;
-    if (room <= 0) this.items.splice(0, Math.min(n, this.items.length));
-    if (n > room) n = Math.max(0, room);
-    if (!n) return;
+    const overflow = this.items.length + n - MAX;
+    if (overflow > 0) this.items.splice(0, overflow);
 
     const ox = finite(x, 0);
     const oy = finite(y, 0);
