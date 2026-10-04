@@ -54,19 +54,26 @@ function makePortal(def) {
 }
 
 /** Partículas orbitales locales (BH). */
-function spawnOrbitals(portal, n) {
+function unit(seed) {
+  const x = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function spawnOrbitals(portal, n, seedBase = 0) {
   const out = [];
   const r = Math.min(portal.w, portal.h) * 0.48;
   for (let i = 0; i < n; i++) {
     out.push({
       portal,
-      a: Math.random() * Math.PI * 2,
-      r: r * (0.4 + Math.random() * 0.85),
-      speed: 0.05 + Math.random() * 0.08,
-      size: 1.6 + Math.random() * 2.8,
-      life: 50 + Math.random() * 90,
+      seed: seedBase + i * 17.17,
+      cycle: 0,
+      a: unit(seedBase + i * 17.17 + 1) * Math.PI * 2,
+      r: r * (0.4 + unit(seedBase + i * 17.17 + 2) * 0.85),
+      speed: 0.05 + unit(seedBase + i * 17.17 + 3) * 0.08,
+      size: 1.6 + unit(seedBase + i * 17.17 + 4) * 2.8,
+      life: 50 + unit(seedBase + i * 17.17 + 5) * 90,
       max: 100,
-      z: Math.random()
+      z: unit(seedBase + i * 17.17 + 6)
     });
   }
   return out;
@@ -85,6 +92,7 @@ export class Portals {
     this._kick = null; // { vx, vy, facing } post-aterrizaje
     this._visual = { scale: 1, alpha: 1 }; // flags para game.js
     this._lockNotifyCD = 0;
+    this._simT = 0;
     this.trailTicks = 0; // estela post-aterrizaje
     this.trailType = null; // "catapult" | "blackhole" | "water"
     this.trailColor = null; // override (ej. cyan agua en reef)
@@ -104,12 +112,14 @@ export class Portals {
     this.trailType = null;
     this.trailColor = null;
     this._groundGrace = 0;
-    // Orbitals por cada BH
-    for (const p of this.items) {
+    this._simT = 0;
+    // Orbitals deterministas: misma sala + mismo portal = misma distribución visual.
+    this.items.forEach((p, i) => {
       if (p.type === "blackhole") {
-        this.orbitals.push(...spawnOrbitals(p, 22));
+        const seedBase = p.x * 0.13 + p.y * 0.17 + p.w * 0.19 + i * 101;
+        this.orbitals.push(...spawnOrbitals(p, 22, seedBase));
       }
-    }
+    });
   }
 
   landingPad() {
@@ -220,6 +230,7 @@ export class Portals {
   }
 
   update(game) {
+    this._simT = (Number.isFinite(Number(this._simT)) ? Number(this._simT) : 0) + 1;
     if (this.cooldown > 0) this.cooldown--;
     if (this._lockNotifyCD > 0) this._lockNotifyCD--;
     this.near = null;
@@ -300,7 +311,7 @@ export class Portals {
             p.vx += ((cx - px) / Math.max(d, 1)) * strength;
             p.vy += ((cy - py) / Math.max(d, 1)) * strength * 0.85;
             // Chispas de atracción ocasionales
-            if (!reduce && game.fx && Math.random() < 0.18) {
+            if (!reduce && game.fx && unit(this._simT + portal.x * 0.07 + portal.y * 0.11) < 0.18) {
               game.fx.emit(px, py, {
                 color: "#c9a0ff",
                 count: 1,
@@ -370,10 +381,10 @@ export class Portals {
       type === "blackhole"
         ? reduce
           ? 14
-          : 28 + Math.floor(Math.random() * 18) // 28–45
+          : 28 + Math.floor(unit(this._simT + portal.x * 0.17 + portal.y * 0.23) * 18) // 28–45
         : reduce
           ? 10
-          : 20 + Math.floor(Math.random() * 17); // 20–36
+          : 20 + Math.floor(unit(this._simT + portal.x * 0.29 + portal.y * 0.31) * 17); // 20–36
     this.charge = { portal, type, t: 0, max, snapped: false, freezeLeft: 0 };
     this._visual = { scale: 1, alpha: 1 };
     this._overlay = {
@@ -705,8 +716,10 @@ export class Portals {
       o.life -= step;
       if (o.life <= 0) {
         o.life = o.max;
-        o.a = Math.random() * Math.PI * 2;
-        o.r = Math.min(o.portal.w, o.portal.h) * (0.35 + Math.random() * 0.55) * 0.5;
+        o.cycle = (o.cycle || 0) + 1;
+        const seed = o.seed + o.cycle * 37.31;
+        o.a = unit(seed + 1) * Math.PI * 2;
+        o.r = Math.min(o.portal.w, o.portal.h) * (0.35 + unit(seed + 2) * 0.55) * 0.5;
       }
     }
   }
@@ -716,7 +729,7 @@ export class Portals {
       if (portal.type !== "catapult") continue;
       if (this.charge && this.charge.portal === portal) continue;
       // Idle angular spring
-      const idle = -0.35 + Math.sin((performance.now() || 0) / 420) * 0.08;
+      const idle = -0.35 + Math.sin(this._simT / 12.6) * 0.08;
       const k = reduce ? 0.08 : 0.14;
       portal.armVel += (idle - portal.armAng) * k;
       portal.armVel *= 0.86;
@@ -744,15 +757,16 @@ export class Portals {
     const steps = reduce ? 1 : 3;
     for (let i = 0; i < steps; i++) {
       const k = (i + 1) / (steps + 1);
+      const seed = this._simT * 17.31 + this.trailTicks * 7.19 + i * 31.7;
       const px = p.x + p.w / 2 - (p.vx || 0) * k * 4;
       const py = p.y + p.h / 2 - (p.vy || 0) * k * 4;
       game.fx.emit(px, py, {
         color: i % 2 ? colorHi : color,
         count: reduce ? 1 : 2,
         size: reduce ? 1.8 : 2.4,
-        up: 0.35 + Math.random() * 0.5,
-        speed: 0.9 + Math.random() * 0.8,
-        life: reduce ? 8 : 12 + Math.floor(Math.random() * 6),
+        up: 0.35 + unit(seed + 1) * 0.5,
+        speed: 0.9 + unit(seed + 2) * 0.8,
+        life: reduce ? 8 : 12 + Math.floor(unit(seed + 3) * 6),
         gravity: 0.03
       });
     }
