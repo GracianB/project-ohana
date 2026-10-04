@@ -322,3 +322,8 @@ Se corrigió una regresión de habilidades: el segundo ataque de Kilo (`Giro hul
 ## CI Hardening
 
 GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, ejecuta el pipeline con límites de tiempo y conserva regresión, E2E de navegador y consistencia antes de publicar.
+
+
+## RNG Domain Separation
+
+El RNG de simulación no es consumido por el render ni por VFX de presentación. La cámara, partículas y cinemáticas usan una semilla determinista derivada del tick, manteniendo la reproducibilidad del combate independiente de la frecuencia de render.

@@ -95,6 +95,15 @@ const game = {
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
+
+function vfxUnit(seed) {
+  const value = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453123;
+  return value - Math.floor(value);
+}
+
+function vfxRandom(salt = 0) {
+  return vfxUnit(game.t * 31.73 + Number(salt) * 17.11);
+}
 const MAX_RUNTIME_ENEMIES = 32;
 const MAX_RUNTIME_PROJECTILES = 128;
 const MAX_RUNTIME_GHOSTS = 48;
@@ -976,7 +985,7 @@ function tickFinale() {
   if (!f || f.t <= 0) return;
   f.t--;
   if (game.fx && f.t % 5 === 0 && f.t > 80) {
-    game.fx.emit(f.x + (game.rng() - 0.5) * 160, f.y + (game.rng() - 0.5) * 90, {
+    game.fx.emit(f.x + (vfxRandom(1) - 0.5) * 160, f.y + (vfxRandom(2) - 0.5) * 90, {
       color: f.t > 240 ? "#ff4060" : "#ffe66a",
       count: 2,
       size: 4,
@@ -1123,13 +1132,13 @@ function updatePlayer() {
       const under = p.y + p.h * 0.88;
       game.fx.emit(behind, under, {
         color: p.color || "#fff8e0",
-        count: 2 + (game.rng() < 0.45 ? 1 : 0),
+        count: 2 + (vfxRandom(3) < 0.45 ? 1 : 0),
         size: 1.7,
         up: 0.12,
         speed: 0.85,
         life: 12,
         gravity: 0.035,
-        angle: Math.PI / 2 + (game.rng() - 0.5) * 0.8,
+        angle: Math.PI / 2 + (vfxRandom(4) - 0.5) * 0.8,
         spread: 0.6,
       });
     }
@@ -2198,7 +2207,7 @@ function render() {
   const shake = reduceMotion ? 0 : game.shake;
   const z = camZoom();
   ctx.save();
-  ctx.translate((game.rng() - 0.5) * shake, (game.rng() - 0.5) * shake);
+  ctx.translate((vfxRandom(5) - 0.5) * shake, (vfxRandom(6) - 0.5) * shake);
   ctx.scale(z, z);
   if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
   else {
