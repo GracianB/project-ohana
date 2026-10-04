@@ -1,4 +1,4 @@
-# 64 mejoras · Demo Mundo 1
+# 65 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -80,3 +80,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 62. **Ability Reliability**: corrección del updater ausente de Kilo Hula y endurecimiento del agarre de queso de Pizza para evitar bloqueo de control
 63. Phase 25: abilities endurecido con cooldown determinista a 60 Hz, RNG inyectable, VFX reproducible, limpieza de estados, hitboxes seguras y límite de proyectiles.
 64. Phase 26: VFX de pasivos y partículas deterministas, sin `Math.random()`, partículas acotadas a 72 y sanitización de valores numéricos.
+
+65. Phase 27: firewall de mutaciones de combate; daño, XP, puntuación y bajas se normalizan con valores finitos y se eliminan operaciones aritméticas directas sobre estado crítico.
