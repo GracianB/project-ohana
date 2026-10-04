@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -95,6 +95,26 @@ test("cambio de dirección produce un pulso visual de giro y frenada", () => {
   assert.ok(brake.brake > 0);
 });
 
+test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", () => {
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  assert.equal(EVOLUTION_STAGE_COPY.length, 5);
+  assert.equal(Object.keys(EVOLUTION_MESSAGES).length, 10);
+
+  for (const id of ids) {
+    const lines = [];
+    for (let evo = 1; evo < 5; evo++) {
+      const m = evolutionMessage(id, evo);
+      assert.equal(m.stage, evo);
+      assert.ok(m.kicker);
+      assert.ok(m.label);
+      assert.ok(m.tone);
+      assert.ok(m.line);
+      lines.push(m.line);
+    }
+    assert.equal(new Set(lines).size, 4, id + ":message uniqueness");
+  }
+});
+ 
 test("los 10 golpes básicos y las 30 habilidades tienen firmas visuales estables", () => {
   assert.equal(Object.keys(BASIC_ATTACK_SIGNATURES).length, 10);
   assert.equal(Object.values(BASIC_ATTACK_SIGNATURES).length, new Set(Object.values(BASIC_ATTACK_SIGNATURES)).size);

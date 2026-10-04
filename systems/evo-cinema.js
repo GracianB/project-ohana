@@ -13,7 +13,7 @@ import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
-import { drawEvolutionCinemaFX } from "../characters/evolution.js";
+import { drawEvolutionCinemaFX, evolutionMessage } from "../characters/evolution.js";
 
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -392,6 +392,7 @@ export function playEvolution(detail = {}) {
   const light = tint(accent, 0.55);
   const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
+  const story = evolutionMessage(def.id, evo);
   const title = "¡" + toName.toUpperCase() + "!";
   const upg = upgradeLine(def.id, evo);
   const reduce = reducedMotion();
@@ -410,7 +411,7 @@ export function playEvolution(detail = {}) {
   const { el, fc } = st;
   const ctx = fc.ctx;
 
-  st.sr.textContent = "¡Evolución! " + toName + ". Forma " + (evo + 1) + " de 5. " + upg;
+  st.sr.textContent = story.kicker + ". " + toName + ". " + story.line + " Forma " + (evo + 1) + " de 5. " + upg;
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
   sfx("evoCharge");
@@ -676,7 +677,7 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
       // kicker
-      drawTitle(ctx, finalForm ? "✦ FORMA FIRMA ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
+      drawTitle(ctx, "✦ " + story.kicker + " ✦", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
       // nombre
       ctx.save();
@@ -705,10 +706,15 @@ export function playEvolution(detail = {}) {
         ctx.fillStyle = i <= evo ? (i === evo ? "#ffffff" : accent) : "rgba(255,255,255,0.18)";
         ctx.fill();
       }
+      // Frase de identidad: cada personaje tiene una lectura propia de la evolución.
+      const quoteU = reduce ? 1 : seg(t, T.reveal + 0.42, T.reveal + 0.78);
+      ctx.globalAlpha = quoteU * fade;
+      drawTitle(ctx, story.line, cx, pipY + size * 0.46 + (1 - easeOut(quoteU)) * 8, Math.max(12, size * 0.24),
+        "#eef6ff", { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.9 });
       if (upg) {
-        const u = reduce ? 1 : seg(t, T.reveal + 0.5, T.reveal + 0.9);
+        const u = reduce ? 1 : seg(t, T.reveal + 0.58, T.reveal + 0.95);
         ctx.globalAlpha = u * fade;
-        drawTitle(ctx, upg, cx, pipY + size * 0.48 + (1 - easeOut(u)) * 10, Math.max(13, size * 0.26), tint(accent, 0.7),
+        drawTitle(ctx, upg, cx, pipY + size * 0.82 + (1 - easeOut(u)) * 10, Math.max(11, size * 0.22), tint(accent, 0.7),
           { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.9 });
       }
       ctx.restore();

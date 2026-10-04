@@ -72,6 +72,89 @@ export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
   yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
   cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
+export const EVOLUTION_STAGE_COPY = Object.freeze([
+  Object.freeze({ kicker: "DESPERTAR", label: "Forma 1", tone: "Nace una nueva lectura del héroe." }),
+  Object.freeze({ kicker: "EVOLUCIÓN", label: "Forma 2", tone: "El personaje ya no se mueve igual." }),
+  Object.freeze({ kicker: "DESPERTAR", label: "Forma 3", tone: "La firma del personaje empieza a imponerse." }),
+  Object.freeze({ kicker: "ASCENSO", label: "Forma 4", tone: "La silueta y el combate entran en otra liga." }),
+  Object.freeze({ kicker: "FORMA FIRMA", label: "Forma 5", tone: "Esta es la identidad definitiva del personaje." }),
+]);
+
+export const EVOLUTION_MESSAGES = Object.freeze({
+  kilo: [
+    "El jardín despierta.",
+    "Ohana responde al ritmo.",
+    "Las raíces ya no pueden contenerlo.",
+    "La flor solar abre su corona.",
+  ],
+  stitcho: [
+    "Las costuras empiezan a brillar.",
+    "El caos aprende a girar.",
+    "La nebulosa se cose alrededor de Stitcho.",
+    "El Experimento Ñam encuentra su forma.",
+  ],
+  chispin: [
+    "La chispa encuentra voltaje.",
+    "El cuerpo se convierte en relámpago.",
+    "La tormenta empieza a seguirle.",
+    "Ya no corre con la tormenta. Es la tormenta.",
+  ],
+  cat: [
+    "La sombra aprende a sonreír.",
+    "La luna despierta bajo el pelaje.",
+    "El eclipse empieza a cerrarse.",
+    "Nueve vidas. Una sola silueta.",
+  ],
+  dragon: [
+    "El fuego aprende a volar.",
+    "Las alas encuentran su propio cielo.",
+    "La llama toma forma de leyenda.",
+    "El cielo acaba de ganar un dragón.",
+  ],
+  dino: [
+    "El pequeño rugido se hace grande.",
+    "La tierra empieza a sentir cada paso.",
+    "El cuerpo pide espacio.",
+    "Cuando pisa, la sala escucha.",
+  ],
+  frita: [
+    "La sal empieza a chispear.",
+    "El crujido se vuelve velocidad.",
+    "La freidora alcanza temperatura de combate.",
+    "Crujiente, rápida y peligrosamente dorada.",
+  ],
+  pizza: [
+    "El queso empieza a estirarse.",
+    "La masa entra en calor.",
+    "El horno ya no puede contenerla.",
+    "El volcán acaba de salir del horno.",
+  ],
+  yomi: [
+    "El farol mira hacia el otro lado.",
+    "La grieta empieza a respirar.",
+    "Algo enorme mira desde dentro.",
+    "La luna tiene una nueva razón para temer.",
+  ],
+  cuerno: [
+    "El brillo encuentra un color.",
+    "El arcoíris empieza a galopar.",
+    "Las estrellas siguen la punta del cuerno.",
+    "La aurora ya tiene dueño.",
+  ],
+});
+
+export function evolutionMessage(id, evo) {
+  const key = CANON(id);
+  const stage = Math.max(1, Math.min(4, Math.round(Number(evo) || 1)));
+  const copy = EVOLUTION_STAGE_COPY[stage] || EVOLUTION_STAGE_COPY[4];
+  const lines = EVOLUTION_MESSAGES[key] || EVOLUTION_MESSAGES.kilo;
+  return Object.freeze({
+    ...copy,
+    line: lines[stage - 1] || lines[lines.length - 1],
+    stage,
+  });
+}
+
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
   stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
