@@ -2,6 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
+import { applyEvolutionPose, drawEvolutionSignatureFX } from "./evolution.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -987,7 +988,7 @@ export function drawCharacter(ctx, p, cam, t) {
   const speed = Math.abs(p.vx || 0);
   const moving = !!p.grounded && speed > 0.55;
   const air = !p.grounded;
-  const pose = enhancePose(computePose(p, t, { rng: p.rng }), p);
+  const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng }), p), p);
   const atk = pose.atk;
   const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
   const hurtFresh = (p.invuln || 0) > 18;
@@ -1002,6 +1003,8 @@ export function drawCharacter(ctx, p, cam, t) {
   const stretch = Math.max(-0.12, Math.min(0.16, pose.stretch || 0));
   let sx = 1 + squash * 0.9 - stretch * 0.35;
   let sy = 1 - squash * 0.75 + stretch * 0.4;
+  sx *= pose.evolutionScaleX || 1;
+  sy *= pose.evolutionScaleY || 1;
   if (p.grounded && p._wasAir) p._land = 8;
   p._wasAir = air;
   if (p._land > 0) p._land--;
@@ -1048,6 +1051,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.restore();
 
   drawFlavor(ctx, p.id, H, t, evo, true);
+  drawEvolutionSignatureFX(ctx, p, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);

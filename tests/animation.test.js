@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
+import { EVOLUTION_STAGES, EVOLUTION_SIGNATURES, evolutionKey, applyEvolutionPose } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -101,4 +102,61 @@ test("los 10 golpes básicos y las 30 habilidades tienen firmas visuales estable
   assert.equal(Object.values(ABILITY_VISUAL_SIGNATURES).length, new Set(Object.values(ABILITY_VISUAL_SIGNATURES)).size);
   for (const kind of Object.values(BASIC_ATTACK_SIGNATURES)) assert.ok(kind);
   for (const kind of Object.values(ABILITY_VISUAL_SIGNATURES)) assert.ok(kind);
+});
+
+
+test("las 5 formas tienen identidad visual y cinética propia para los 10 personajes", () => {
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  assert.equal(EVOLUTION_STAGES.length, 5);
+  assert.equal(EVOLUTION_SIGNATURES.length, 50);
+  assert.equal(new Set(EVOLUTION_SIGNATURES).size, 50);
+
+  for (const id of ids) {
+    const keys = [];
+    const poses = [];
+    for (let evo = 0; evo < 5; evo++) {
+      keys.push(evolutionKey(id, evo));
+      const pose = applyEvolutionPose({
+        state: "run",
+        form: evo,
+        t: 40,
+        speed: 0.9,
+        air: false,
+        land: 0,
+        bodyTilt: 0,
+        headTilt: 0,
+        armSwing: 1,
+        legSwing: -1,
+        sway: 1,
+        bounce: 1,
+        stretch: 0,
+        squash: 0,
+        anticipation: 0,
+        impact: 0,
+      }, { id, evo });
+      poses.push(pose);
+      assert.equal(pose.evolutionSignature, keys[evo]);
+      assert.ok(pose.evolutionScaleX > 0);
+      assert.ok(pose.evolutionScaleY > 0);
+    }
+
+    assert.equal(new Set(keys).size, 5);
+    assert.ok(poses[0].evolutionScaleX < poses[1].evolutionScaleX);
+    assert.ok(poses[1].evolutionScaleX < poses[2].evolutionScaleX);
+    assert.ok(poses[2].evolutionScaleX < poses[3].evolutionScaleX);
+    assert.ok(poses[3].evolutionScaleX < poses[4].evolutionScaleX);
+    assert.ok(poses[0].evolutionScaleY < poses[4].evolutionScaleY);
+  }
+});
+
+test("los estilos de evolución conservan una separación fuerte entre bebé, alto y GOD", () => {
+  for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
+    const baby = applyEvolutionPose({ state:"idle", form:0, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:0 });
+    const high = applyEvolutionPose({ state:"idle", form:3, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:3 });
+    const god = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
+
+    assert.ok(Math.abs(high.bodyTilt) >= Math.abs(baby.bodyTilt));
+    assert.ok(Math.abs(god.bodyTilt) >= Math.abs(high.bodyTilt));
+    assert.ok(god.evolutionPulse === 0);
+  }
 });
