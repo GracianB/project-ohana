@@ -2,7 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
-import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX } from "./evolution.js";
+import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "./evolution.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -687,6 +687,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   drawLocomotionFX(ctx, H, color, pose, t);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
+  drawEvolutionCombatFX(ctx, p, H, pose, t);
   drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
   if (pose.state === "jump" && pose.stretch > 0.12) {
     ctx.save();
@@ -1014,6 +1015,7 @@ export function drawCharacter(ctx, p, cam, t) {
 
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
+  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, false);
   drawEvolutionDesignFX(ctx, p, H, pose, t, false);
   if (moving) drawDust(ctx, H, t, speed);
 
@@ -1041,6 +1043,7 @@ export function drawCharacter(ctx, p, cam, t) {
 
   drawFlavor(ctx, p.id, H, t, evo, true);
   drawEvolutionDesignFX(ctx, p, H, pose, t, true);
+  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
