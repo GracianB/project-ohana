@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, EVOLUTION_FORM_PROFILES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -112,6 +112,31 @@ test("las 40 transiciones de evolución tienen mensaje y escalera narrativa", ()
       lines.push(m.line);
     }
     assert.equal(new Set(lines).size, 4, id + ":message uniqueness");
+  }
+});
+ 
+test("las 50 formas tienen transformación corporal progresiva por personaje", () => {
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  assert.equal(Object.keys(EVOLUTION_FORM_PROFILES).length, 10);
+
+  for (const id of ids) {
+    const profile = EVOLUTION_FORM_PROFILES[id];
+    for (const key of ["bodyX", "bodyY", "stance", "lift", "combat"]) {
+      assert.equal(profile[key].length, 5, id + ":" + key);
+      profile[key].forEach((v) => assert.ok(Number.isFinite(v), id + ":" + key));
+    }
+
+    const shapes = [];
+    for (let evo = 0; evo < 5; evo++) {
+      const visual = evolutionProfile({ id, evo }).visual;
+      shapes.push([visual.bodyX, visual.bodyY, visual.stance, visual.lift].join(":"));
+      assert.equal(visual.bodyX, profile.bodyX[evo]);
+      assert.equal(visual.bodyY, profile.bodyY[evo]);
+    }
+
+    assert.equal(new Set(shapes).size, 5, id + ":unique body stages");
+    assert.ok(profile.bodyY[0] < profile.bodyY[4], id + ":growth");
+    assert.ok(profile.combat[0] < profile.combat[4], id + ":combat growth");
   }
 });
  
