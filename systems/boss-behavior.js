@@ -33,7 +33,7 @@ export function observeBossBehavior(state = createBossBehavior(), player = {}, g
   const combo = Math.max(0, Number(game?.combo) || 0);
   const activeSlash = Array.isArray(game?.slashes) && game.slashes.some((slash) => Number(slash?.life) > 0);
   const dashing = Number(player?._dashGo) > 0 || Number(player?.dashBuf) > 0;
-  const airborne = !player?.grounded || Number(player?.vy) < -1.8 || Number(player?.jumps) < Number(player?.maxJumps);
+  const airborne = player?.grounded === false || Number(player?.vy) < -1.8 || (Number.isFinite(Number(player?.jumps)) && Number.isFinite(Number(player?.maxJumps)) && Number(player.jumps) < Number(player.maxJumps));
   const aggressive = combo >= 4 || activeSlash;
 
   next.dash = smooth(next.dash, dashing, 0.82);
