@@ -165,8 +165,8 @@ test('phase 25: abilities elimina RNG y reloj no deterministas del runtime', () 
 test('phase 26: VFX de pasivos y partículas no consumen RNG global', () => {
   const passives = fs.readFileSync('./systems/passives.js', 'utf8');
   const particles = fs.readFileSync('./engine/particles.js', 'utf8');
-  assert.doesNotMatch(passives, /Math\\.random\\(/);
-  assert.doesNotMatch(particles, /Math\\.random\\(/);
+  assert.doesNotMatch(passives, /Math\.random\(/);
+  assert.doesNotMatch(particles, /Math\.random\(/);
   assert.match(passives, /function vfxUnit\\(seed\\)/);
   assert.match(particles, /function unit\\(seed\\)/);
   assert.match(particles, /sequence/);
