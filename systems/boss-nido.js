@@ -8,6 +8,7 @@ import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossT
 import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationLabel } from "./boss-adaptation.js";
 import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-bait.js";
 import { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackLabel } from "./boss-bait-feedback.js";
+import { createBossEncounterMemory, observeBossEncounter, encounterPreference, encounterLabel } from "./boss-encounter-memory.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -93,6 +94,8 @@ export function createBossNido() {
     bait: createBossBait(),
     baitFeedback: createBossBaitFeedback(),
     baitFeedbackLabel: "",
+    encounterMemory: createBossEncounterMemory(),
+    encounterLabel: "MEMORIA NEUTRA",
   };
 }
 
@@ -249,6 +252,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.baitLabel = baitLabel(e.bait);
     e.baitFeedback = createBossBaitFeedback();
     e.baitFeedbackLabel = "";
+    e.encounterMemory = createBossEncounterMemory();
+    e.encounterLabel = "MEMORIA NEUTRA";
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
@@ -270,6 +275,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.counterplay = createBossCounterplay();
     e.behavior = createBossBehavior();
     e.behaviorLabel = "LEE NEUTRO";
+    e.encounterMemory = createBossEncounterMemory();
+    e.encounterLabel = "MEMORIA NEUTRA";
     resetAttackState(e);
     e.attackCd = 50;
     if (!e.phaseAnnounced[2]) {
@@ -406,10 +413,27 @@ function updateSpit(e, game, floorY) {
 function finishBossAttack(e, game, delay = 6) {
   e.lastAttack = e.teleKind || e.mode || "";
   const p = game?.player;
+  const activeThreatType = e.counterplay?.active?.type || "";
   const baitThreatWasReal = !!e.counterplay?.active?.initialInDanger;
   const counterResult = resolveBossThreat(e.counterplay, p, p?.health);
   const baitFeedbackResult = resolveBossBaitFeedback(e.baitFeedback, counterResult, baitThreatWasReal);
   e.baitFeedbackLabel = baitFeedbackLabel(e.baitFeedback);
+
+  const encounterEvent = baitFeedbackResult && baitFeedbackResult.outcome !== "neutral"
+    ? {
+      outcome: baitFeedbackResult.outcome === "read" ? "bait_read" : "bait_trapped",
+      type: baitFeedbackResult.type,
+    }
+    : baitThreatWasReal
+      ? {
+        outcome: counterResult ? "counter_clean" : "counter_failed",
+        type: counterResult?.type || activeThreatType,
+      }
+      : null;
+  if (encounterEvent) {
+    e.encounterMemory = observeBossEncounter(e.encounterMemory, encounterEvent);
+    e.encounterLabel = encounterLabel(e.encounterMemory);
+  }
   e.adaptation = observeBossAdaptation(
     e.adaptation,
     counterResult ? { outcome: "success", type: counterResult.type } : { outcome: "tick" }
@@ -564,6 +588,7 @@ function pickAttack(e) {
       behavior: e.behavior,
       reactivePreference: reactiveAttackPreference(e.phase, e.behavior, e.hp / Math.max(1, e.max)),
       adaptivePreference: adaptiveAttackPreference(e.phase, e.adaptation, e.hp / Math.max(1, e.max)),
+      encounterPreference: encounterPreference(e.encounterMemory),
       baitPattern,
     }
   );
