@@ -140,3 +140,13 @@ test('phase 20: bait feedback no puede tocar daño, hitbox ni superar su límite
   assert.match(boss, /feedbackAttackDelay/);
   assert.match(boss, /resolveBossBaitFeedback/);
 });
+
+
+test('habilidades: Kilo hula tiene updater y Pizza no conserva un bloqueo de movimiento indefinido', () => {
+  const abilities = fs.readFileSync('./systems/abilities.js', 'utf8');
+  assert.match(abilities, /hula\(g, f, p\)/);
+  assert.match(abilities, /f\.pulse % 8 === 0/);
+  assert.match(abilities, /S\.pull = \{ e, t: 16, maxT: 16 \}/);
+  assert.match(abilities, /id !== "cheese"/);
+  assert.match(abilities, /const steer = input\?\.right === input\?\.left/);
+});
