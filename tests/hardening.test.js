@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { ParticleSystem } from '../engine/particles.js';
 
 test('game runtime: RNG centralizado e hitstop del boss endurecido', () => {
   const source = fs.readFileSync('./game.js', 'utf8');
@@ -158,4 +159,35 @@ test('phase 25: abilities elimina RNG y reloj no deterministas del runtime', () 
   assert.match(abilities, /function abilityNow\(game\)/);
   assert.match(abilities, /typeof game\?\.rng === "function"/);
   assert.match(abilities, /MAX_ABILITY_PROJECTILES = 96/);
+});
+
+
+test('phase 26: VFX de pasivos y partículas no consumen RNG global', () => {
+  const passives = fs.readFileSync('./systems/passives.js', 'utf8');
+  const particles = fs.readFileSync('./engine/particles.js', 'utf8');
+  assert.doesNotMatch(passives, /Math\\.random\\(/);
+  assert.doesNotMatch(particles, /Math\\.random\\(/);
+  assert.match(passives, /function vfxUnit\\(seed\\)/);
+  assert.match(particles, /function unit\\(seed\\)/);
+  assert.match(particles, /sequence/);
+});
+
+test('phase 26: partículas reproducibles, acotadas y recuperables ante datos corruptos', () => {
+  const build = () => {
+    const ps = new ParticleSystem();
+    ps.emit(120, 80, { count: 10, speed: 3, spread: 2.2, size: 4 });
+    ps.emit(120, 80, { count: 6, angle: 1.1, speed: 2, size: 3 });
+    return ps.items.map(p => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy, life: p.life, size: p.size }));
+  };
+  assert.deepEqual(build(), build());
+
+  const ps = new ParticleSystem();
+  for (let i = 0; i < 20; i++) ps.emit(i, i, { count: 10 });
+  assert.equal(ps.items.length, 72);
+  ps.emit(NaN, Infinity, { count: Infinity, speed: NaN, size: NaN, life: NaN, gravity: NaN });
+  assert.equal(ps.items.length, 72);
+  assert.ok(ps.items.every(p => Object.values(p).every(v => typeof v === 'string' || typeof v === 'boolean' || Number.isFinite(v))));
+
+  ps.clear();
+  assert.equal(ps.items.length, 0);
 });
