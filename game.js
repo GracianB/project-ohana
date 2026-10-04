@@ -2061,7 +2061,7 @@ function render() {
   for (const g of game.ghosts) {
     ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
   }
-  game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss);
+  game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
   for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
   Magic.draw(ctx, game, t);
   Passives.draw(ctx, game, t);
