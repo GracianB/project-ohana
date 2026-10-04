@@ -115,3 +115,15 @@ test('phase 19: el HUD solo expone CEBO cuando está realmente armado', () => {
   assert.match(game, /boss\.adaptationLabel/);
   assert.match(boss, /baitLabel\(e\.bait\)/);
 });
+
+
+test('phase 20: bait feedback no puede tocar daño, hitbox ni superar su límite de tempo', () => {
+  const feedback = fs.readFileSync('./systems/boss-bait-feedback.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  assert.doesNotMatch(feedback, /Math\.random\(/);
+  assert.doesNotMatch(feedback, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(feedback, /\.w\s*=|\.h\s*=/);
+  assert.match(feedback, /Math\.max\(-2, Math\.min\(2/);
+  assert.match(boss, /feedbackAttackDelay/);
+  assert.match(boss, /resolveBossBaitFeedback/);
+});
