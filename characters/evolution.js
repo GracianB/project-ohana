@@ -70,7 +70,7 @@ export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
   frita:   Object.freeze({ motif: "fries",    silhouette: "crest",    span: 1.04, spin: -0.20, nodes: 8, accent: "#fff1b3", profile: "crisp-crest" }),
   pizza:   Object.freeze({ motif: "crust",    silhouette: "ring",     span: 1.10, spin: 0.10, nodes: 7, accent: "#ffd84a", profile: "volcanic-ring" }),
   yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
-  cuerno:  Object.freeze({ motif: "aurora",   silhouette: "mane",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
+  cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
@@ -335,6 +335,18 @@ export function drawEvolutionSilhouetteFX(ctx, p, H, pose, t, front = false) {
       ctx.beginPath();ctx.ellipse(0,-H*0.40,S*0.60,S*0.20,0.12*Math.sin((Number(t)||0)*0.03),0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha*=0.45;ctx.lineWidth*=0.45;
       ctx.beginPath();ctx.ellipse(0,-H*0.40,S*0.46,S*0.14,-0.16*Math.sin((Number(t)||0)*0.03),0,Math.PI*2);ctx.stroke();
+      break;
+    case "antler":
+      ctx.strokeStyle=stroke; ctx.lineWidth=Math.max(1.6,H*0.020);
+      for (const side of [-1,1]) {
+        ctx.beginPath();
+        ctx.moveTo(side*S*0.08,-H*0.38);
+        ctx.quadraticCurveTo(side*S*0.34,-H*0.72,side*S*0.42,-H*0.98);
+        ctx.quadraticCurveTo(side*S*0.30,-H*0.80,side*S*0.18,-H*0.72);
+        ctx.moveTo(side*S*0.28,-H*0.72); ctx.lineTo(side*S*0.52,-H*0.82);
+        ctx.moveTo(side*S*0.34,-H*0.64); ctx.lineTo(side*S*0.56,-H*0.58);
+        ctx.stroke();
+      }
       break;
     case "mantle":
       ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(1.4,H*0.017);
