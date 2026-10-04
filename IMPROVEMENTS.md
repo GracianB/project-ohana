@@ -1,4 +1,4 @@
-# 51 mejoras · Demo Mundo 1
+# 53 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -54,6 +54,7 @@
 50. Versión DEMO jugable online
 51. Evolución visual por forma: silueta, postura y firma 0 → GOD
 52. Evolución aplicada al combate: H/J/K/L escalan su lectura por forma y héroe
+53. Cinemática de evolución 2.0: firma gráfica por héroe y etapa, medidor 0→GOD y reveal reforzado
 
 ## Cifras maestras
 
