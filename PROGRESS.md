@@ -17,6 +17,7 @@ Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, c
 
 ## Hecho
 
+| 04/10 | Pase de personajes: perfiles cinéticos por personaje, squash/stretch, anticipación e impacto de ataques, feedback de aterrizaje/dash y casteo de habilidades con color propio; nueva suite de regresión de animación en CI; caché `ohana-79`. |\n
 | Fecha | Qué |
 |---|---|
 | 04/10 | Auditoría de coherencia del proyecto. Manifest alineado con 10 personajes, 5 formas y 10 salas. Documentación de progreso alineada con la ejecución real del CI. Referencias de caché y pruebas actualizadas. Añadida validación automática de consistencia en GitHub Actions. |
@@ -113,10 +114,10 @@ La vista por defecto es **vector**.
 
 ## Tests
 
-El CI ejecuta **las cuatro suites de regresión más un E2E real de navegador**:
+El CI ejecuta **las seis suites de regresión más un E2E real de navegador**:
 
 ```bash
-node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js
+node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js
 node tests/browser/e2e.mjs
 ```
 
@@ -146,7 +147,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-78`
+`ohana-79`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
