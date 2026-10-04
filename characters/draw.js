@@ -2,6 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
+import { ABILITY_DEFS } from "../systems/abilities.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -86,7 +87,10 @@ function drawLandingImpact(ctx, H, color, pose) {
   ctx.restore();
 }
 
-function drawCastFX(ctx, H, color, pose, slot) {
+function drawCastFX(ctx, H, color, pose, slot, abilityId) {
+  const ability = abilityId && ABILITY_DEFS[abilityId];
+  const abilityColor = ability?.color || color;
+  color = abilityColor;
   if (pose.state !== "cast" || pose.cast <= 0 || pose.cast >= 1.02) return;
   const u = Math.max(0, Math.min(1, pose.cast));
   const pulse = Math.sin(u * Math.PI);
@@ -165,7 +169,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
-  drawCastFX(ctx, H, color, pose, pose.castSlot | 0);
+  drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast?.id);
   if (pose.state === "jump" && pose.stretch > 0.12) {
     ctx.save();
     ctx.globalAlpha = 0.22 + pose.stretch * 0.18;
