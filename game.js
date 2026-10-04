@@ -687,7 +687,7 @@ function registerBossPunish(e) {
 
   e.punishAwarded = true;
   const reward = 50 + Math.max(1, Math.min(3, Number(e.phase) || 1)) * 25;
-  game.score = (Number(game.score) || 0) + reward;
+  addScore(reward);
   game.shake = Math.min(14, (game.shake || 0) + 5);
   game.flash = Math.max(game.flash || 0, 4);
   game.flashColor = "#fff6c8";
