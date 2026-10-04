@@ -318,10 +318,13 @@ export class BossFX {
       const r = item.radius * (0.65 + u * 0.45);
       ctx.globalAlpha = alpha * 0.72;
       ctx.strokeStyle = item.color;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = 8;
       ctx.lineWidth = 3;
       ctx.setLineDash([8, 7]);
       ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
       ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
       ctx.globalAlpha = alpha * 0.42;
       for (let i = 0; i < 8; i++) {
         const a = i * TAU / 8 + t * 0.015;
