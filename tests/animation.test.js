@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
 import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, EVOLUTION_FORM_PROFILES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
+import { CombatFX, combatTier } from "../systems/combat-fx.js";
 
 const basePlayer = {
   grounded: true,
@@ -243,6 +244,33 @@ test("la identidad de personaje modula combate sin colapsar las cinco etapas", (
   assert.equal(new Set(e4).size, ids.length);
 });
 
+
+test("combat FX escala por combo y mantiene un límite seguro de partículas", () => {
+  assert.deepEqual([1,2,4,8,13].map((n) => combatTier(n)), [0,1,2,3,4]);
+  assert.equal(combatTier(2, true), 4);
+
+  const fx = new CombatFX();
+  for (let tier = 0; tier < 5; tier++) {
+    fx.add(100, 200, "#7ee7ff", { tier, dir: 1, label: tier >= 2 ? "COMBO" : "", seed: tier });
+  }
+  assert.equal(fx.items.length, 5);
+  assert.ok(fx.items.every((item) => item.life > 0 && item.max >= 14));
+  for (let i = 0; i < 50; i++) fx.add(i, i, "#fff", { tier: 4, seed: i });
+  assert.ok(fx.items.length <= 40);
+
+  const ctx = {
+    globalAlpha: 1, globalCompositeOperation: "source-over",
+    strokeStyle: "#fff", fillStyle: "#fff", lineWidth: 1,
+    lineCap: "round", lineJoin: "round",
+    textAlign: "center", textBaseline: "middle",
+    font: "12px sans-serif",
+    save() {}, restore() {}, beginPath() {}, arc() {}, moveTo() {}, lineTo() {},
+    stroke() {}, fill() {}, strokeText() {}, fillText() {},
+  };
+  assert.doesNotThrow(() => fx.render(ctx, { x: 0, y: 0 }));
+  fx.update();
+  assert.ok(fx.items.length > 0);
+});
 
 function makeEvolutionCinemaContext() {
   return {
