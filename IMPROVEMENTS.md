@@ -1,4 +1,4 @@
-# 67 mejoras · Demo Mundo 1
+# 68 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -86,3 +86,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 66. Phase 28: presupuesto de runtime para colecciones transitorias, números flotantes acotados y VFX de portales deterministas, sin `Math.random()` ni `performance.now()`.
 
 67. Phase 29: Runtime Integrity Guard para sanear estado crítico antes de cada paso y evitar propagación de valores no finitos en juego y colecciones.
+
+68. Phase 30: bucle runtime fail-closed con captura separada de fallos de simulación y render, registro, reset y pausa segura.
