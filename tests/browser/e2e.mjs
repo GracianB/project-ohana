@@ -77,6 +77,7 @@ try {
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
   await desktop.close();
