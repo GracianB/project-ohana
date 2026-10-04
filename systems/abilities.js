@@ -1262,7 +1262,7 @@ const UPD = {
       const dx = x - cx(e), dy = y - cy(e);
       const dist = Math.hypot(dx, dy);
       if (dist > 210 || dist < 8) continue;
-      if (Math.sign(dx) !== (p.facing || 1) && Math.abs(dx) > 24) continue;
+      if (Math.sign(-dx) !== (p.facing || 1) && Math.abs(dx) > 24) continue;
       e.vx += (dx / dist) * 2.1;
       e.vy += (dy / dist) * 0.8;
     }
