@@ -307,3 +307,7 @@ Phase 20 añade feedback de resultado al sistema de adaptación: un CEBO que el 
 ## Boss Director · Phase 21
 
 Phase 21 añade memoria corta del encuentro. Las respuestas limpias y los CEBO leídos relajan la selección hacia rutinas más cortas; los fallos y CEBO eficaces elevan la presión hacia rutinas más largas. El historial está limitado a ocho observaciones y la selección sigue cerrada a los patrones autorizados de cada fase.
+
+## Ability Fix · Kilo + Pizza
+
+Se corrigió una regresión de habilidades: el segundo ataque de Kilo (`Giro hula`) ahora tiene ciclo de impacto real y el agarre de queso de Pizza tiene duración limitada, permite contramovimiento y se cancela al lanzar otra habilidad. Las tres habilidades de Pizza quedan cubiertas por pruebas de impacto. Caché `ohana-98`.
