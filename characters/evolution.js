@@ -327,7 +327,7 @@ export function drawEvolutionSilhouetteFX(ctx, p, H, pose, t, front = false) {
       ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(1.3,H*0.015);
       for(let i=0;i<7;i++){
         const x=(i-3)*H*0.105, h=H*(0.18+(i%2)*0.07);
-        ctx.beginPath();ctx.roundRect(x-H*0.028,-H*(0.42+h),H*0.056,h, H*0.018);ctx.fill();ctx.stroke();
+        ctx.beginPath();ctx.rect(x-H*0.028,-H*(0.42+h),H*0.056,h);ctx.fill();ctx.stroke();
       }
       break;
     case "ring":
@@ -341,8 +341,6 @@ export function drawEvolutionSilhouetteFX(ctx, p, H, pose, t, front = false) {
       ctx.beginPath();ctx.moveTo(-S*0.38,-H*0.30);ctx.quadraticCurveTo(-S*0.72,-H*0.12,-S*0.42,H*0.10);ctx.quadraticCurveTo(0,H*0.25,S*0.42,H*0.10);ctx.quadraticCurveTo(S*0.72,-H*0.12,S*0.38,-H*0.30);ctx.closePath();ctx.fill();ctx.stroke();
       ctx.globalAlpha*=0.55;
       for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*S*0.12,-H*0.20);ctx.lineTo(i*S*0.16,H*0.04);ctx.stroke();}
-      break;
-    case "mane":
       break;
   }
 
