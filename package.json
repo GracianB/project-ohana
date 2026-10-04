@@ -1,0 +1,12 @@
+{
+  "name": "project-ohana",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js",
+    "test:browser": "node tests/browser/e2e.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
