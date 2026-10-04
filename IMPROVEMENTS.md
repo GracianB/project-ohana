@@ -1,4 +1,4 @@
-# 50 mejoras · Demo Mundo 1
+# 51 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -52,6 +52,7 @@
 48. README demo
 49. Ruta Mundo 1 cerrada
 50. Versión DEMO jugable online
+51. Evolución visual por forma: silueta, postura y firma 0 → GOD
 
 ## Cifras maestras
 
