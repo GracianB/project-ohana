@@ -122,21 +122,21 @@ async function auditPage(page, label) {
     api.setPlayer(boss.x - 42, boss.y + 8);
     boss = api.state().boss;
     const hpBeforeHit = boss.hp;
-    api.setBossHp(60);
+    api.setBossHp(600);
     api.setPlayer(boss.x - 42, boss.y + 8);
     api.attack();
     const combatAfter = api.step(4);
     snapshots.push({ hpBeforeHit, combatAfter });
 
-    if (!combatAfter.boss || !(combatAfter.boss.hp < 60)) {
-      throw new Error('E2E: el ataque real no dañó a la Reina del Nido');
+    if (!combatAfter.boss || !(combatAfter.boss.hp < 600) || combatAfter.boss.hp <= 0) {
+      throw new Error('E2E: el ataque real no dañó a la Reina del Nido sin matarla');
     }
 
     api.setBossHp(300);
     const phaseAfter = api.step(12);
     snapshots.push({ phaseAfter });
-    if (!phaseAfter.boss || phaseAfter.boss.phase < 3) {
-      throw new Error('E2E: la Reina no entró en fase 3 al bajar a ≤22% de vida');
+    if (!phaseAfter.boss || phaseAfter.boss.phase < 3 || phaseAfter.boss.dying) {
+      throw new Error('E2E: la Reina no entró en fase 3 con vida residual');
     }
 
     return snapshots;
