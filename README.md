@@ -68,7 +68,7 @@ stateDiagram-v2
   Final --> GOD: 420
 ```
 
-Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E. Cada forma tiene además una lectura propia de postura, escalado visual y firma de evolución; las 50 combinaciones personaje × forma se mantienen separadas de la hitbox y la física.
+Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E. Cada forma tiene además una lectura propia de postura, escalado visual y firma de evolución; las 50 combinaciones personaje × forma se mantienen separadas de la hitbox y la física. En combate, las firmas de H/J/K/L también escalan visualmente por forma sin alterar daño, alcance ni hitbox.
 
 Un golpe normal para el mundo un instante. Un golpe gordo —forma alta, Dino, o un poder de 40 o más— lo para más rato y el número sale en dorado. El combo se queda desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar. La puerta espera medio segundo y entonces te suelta.
 
