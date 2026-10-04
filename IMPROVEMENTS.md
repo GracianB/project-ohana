@@ -55,6 +55,7 @@
 51. Evolución visual por forma: silueta, postura y firma 0 → forma final
 52. Evolución aplicada al combate: H/J/K/L escalan su lectura por forma y héroe
 53. Cinemática de evolución 2.0: firma gráfica por héroe y etapa, medidor 0→forma final y reveal reforzado
+54. Rediseño de formas finales: nombres únicos y siluetas ornamentales específicas para cada personaje
 
 ## Cifras maestras
 
