@@ -1,4 +1,4 @@
-# 69 mejoras · Demo Mundo 1
+# 70 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -90,3 +90,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 68. Phase 30: bucle runtime fail-closed con captura separada de fallos de simulación y render, registro, reset y pausa segura.
 
 69. Phase 31: pipeline CI actualizado a actions/checkout@v7 y setup-node@v7, con timeouts explícitos para evitar jobs colgados.
+
+70. Phase 32: separación de dominios RNG para impedir que render/VFX alteren la reproducibilidad de la simulación.
