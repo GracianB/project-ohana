@@ -14,7 +14,25 @@ async function auditPage(page, label) {
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
   const moduleProbe = await page.evaluate(async () => {
-    const paths = ['/characters/rig.js', '/characters/draw.js', '/systems/abilities.js', '/engine/input.js'];
+    const paths = [
+      '/characters/rig.js',
+      '/characters/draw.js',
+      '/characters/art/index.js',
+      '/characters/art/kilo.js',
+      '/characters/art/stitcho.js',
+      '/characters/art/chispin.js',
+      '/characters/art/cat.js',
+      '/characters/art/dragon.js',
+      '/characters/art/dino.js',
+      '/characters/art/frita.js',
+      '/characters/art/pizza.js',
+      '/characters/art/yomi.js',
+      '/characters/art/cuerno.js',
+      '/characters/sprites.js',
+      '/characters/look.js',
+      '/systems/abilities.js',
+      '/engine/input.js'
+    ];
     const results = [];
     for (const path of paths) {
       try {
