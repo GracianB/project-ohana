@@ -1,4 +1,4 @@
-# 73 mejoras · Demo Mundo 1
+# 74 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -96,3 +96,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 72. Phase 34: firewall global de mutaciones críticas mediante `systems/mutations.js`; los sistemas de gameplay comparten daño, curación, XP, puntuación, combo y escalado seguro de vida.
 
 73. Phase 35: presupuesto runtime compartido para colecciones transitorias, caps para bolts/slashes y compactación in-place sin reconstruir arrays válidos en cada tick.
+
+74. Phase 36: E2E de gameplay en navegador con secuencia reproducible de inicio, habilidades, evolución, lluvia, Nido, daño real al boss y transición a fase 3.
