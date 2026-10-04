@@ -219,5 +219,14 @@
   <script type="module" src="systems/ending.js?v=ohana-78"></script>
   <script type="module" src="systems/demo.js?v=ohana-78"></script>
   <script type="module" src="systems/evo-cinema.js?v=ohana-78"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js", { scope: "./" }).catch(function (error) {
+          console.error("OHANA service worker:", error);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

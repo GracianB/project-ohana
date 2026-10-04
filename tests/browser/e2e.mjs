@@ -12,6 +12,14 @@ async function auditPage(page, label) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
+  const sw = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return { supported:false };
+    const reg = await navigator.serviceWorker.ready;
+    return { supported:true, active:!!reg.active, scope:reg.scope };
+  });
+  assert.ok(sw.supported, label + ': Service Worker no soportado');
+  assert.ok(sw.active, label + ': Service Worker no activo');
+  assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
@@ -57,12 +65,19 @@ try {
   const page = await desktop.newPage({ viewport:{width:1280,height:720}, deviceScaleFactor:1 });
   await auditPage(page, 'desktop');
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
+  await page.locator('#game').focus();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
+  await page.reload({ waitUntil:'networkidle' });
+  await page.context().setOffline(true);
+  await page.reload({ waitUntil:'domcontentloaded' });
+  await page.waitForSelector('#btn-play');
+  await page.context().setOffline(false);
   await desktop.close();
 
   const mobile = await chromium.launch({ headless:true });
