@@ -330,11 +330,11 @@ test('phase 34: las mutaciones críticas pasan por la capa global compartida', (
   ];
   const sources = files.map((file) => fs.readFileSync(file, 'utf8'));
   for (const source of sources) {
-    assert.match(source, /mutations\\.js/);
-    assert.doesNotMatch(source, /\\.hp\\s*[-+]=/);
-    assert.doesNotMatch(source, /\\.health\\s*[-+]=/);
-    assert.doesNotMatch(source, /\\.xp\\s*\\+=/);
-    assert.doesNotMatch(source, /game\\.score\\s*[-+]=/);
+    assert.match(source, /mutations\.js/);
+    assert.doesNotMatch(source, /\.hp\s*[-+]=/);
+    assert.doesNotMatch(source, /\.health\s*[-+]=/);
+    assert.doesNotMatch(source, /\.xp\s*\+=/);
+    assert.doesNotMatch(source, /game\.score\s*[-+]=/);
   }
   assert.match(mutations, /function damageEnemy/);
   assert.match(mutations, /function healPlayer/);
@@ -344,5 +344,5 @@ test('phase 34: las mutaciones críticas pasan por la capa global compartida', (
   assert.match(mutations, /function addKill/);
   assert.match(mutations, /function addCombo/);
   assert.match(mutations, /function scaleEnemyHealth/);
-  assert.match(mutations, /Number\\.MAX_SAFE_INTEGER/);
+  assert.match(mutations, /Number\.MAX_SAFE_INTEGER/);
 });
