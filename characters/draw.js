@@ -2,7 +2,6 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
-import { ABILITY_DEFS } from "../systems/abilities.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -34,6 +33,8 @@ function star(ctx, x, y, r, fill) {
 }
 
 const VISUAL_H = [36, 48, 58, 68, 80];
+const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", plasma:"#5ad1ff", rollo:"#2f6bff", caos:"#8f7bff", chain:"#ffe14a", blink:"#fff3a0", storm:"#99ccff", yarn:"#ff8ad4", purr:"#ffb6e4", ninetails:"#b78bff", breath:"#ff6a2a", gust:"#bfefff", meteor:"#ff4a20", bite:"#e8ffe0", charge:"#4cbf56", quake:"#c8a060", salt:"#fff3c0", ketchup:"#e23b3b", fryer:"#ffd36a", pepperoni:"#e0402a", cheese:"#ffd84a", oven:"#ff8a2a", ofuda:"#f2e6c8", sleeve:"#6a3cff", maw:"#ff2244", gleam:"#ffe9a8", gallop:"#f2c1ff", rainbow:"#fff6c8" };
+
 const CHARACTER_ACCENTS = {
   kilo: "#ffd36a", stitcho: "#67ddff", chispin: "#fff29a", cat: "#ffb8e8",
   dragon: "#ff8a45", dino: "#b8ef6b", frita: "#fff1b3", pizza: "#ffd84a",
@@ -41,8 +42,8 @@ const CHARACTER_ACCENTS = {
 };
 
 function accentFor(p) {
-  const base = p?.id || "";
-  return CHARACTER_ACCENTS[base] || p?.color || "#ffe66a";
+  const base = p && p.id || "";
+  return CHARACTER_ACCENTS[base] || (p && p.color) || "#ffe66a";
 }
 
 function drawSpeedLines(ctx, H, color, t, intensity) {
@@ -88,8 +89,7 @@ function drawLandingImpact(ctx, H, color, pose) {
 }
 
 function drawCastFX(ctx, H, color, pose, slot, abilityId) {
-  const ability = abilityId && ABILITY_DEFS[abilityId];
-  const abilityColor = ability?.color || color;
+  const abilityColor = (abilityId && ABILITY_ACCENTS[abilityId]) || color;
   color = abilityColor;
   if (pose.state !== "cast" || pose.cast <= 0 || pose.cast >= 1.02) return;
   const u = Math.max(0, Math.min(1, pose.cast));
@@ -169,7 +169,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
-  drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast?.id);
+  drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
   if (pose.state === "jump" && pose.stretch > 0.12) {
     ctx.save();
     ctx.globalAlpha = 0.22 + pose.stretch * 0.18;
