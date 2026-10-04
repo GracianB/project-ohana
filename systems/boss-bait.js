@@ -33,6 +33,7 @@ export function createBossBait() {
     type: "",
     uses: 0,
     lastPattern: "",
+    lastRead: 0,
   };
 }
 
@@ -40,10 +41,11 @@ export function armBossBait(state = createBossBait(), adaptation = {}) {
   const next = state && typeof state === "object" ? state : createBossBait();
   const type = validType(adaptation?.target);
   const repeat = Number(adaptation?.repeat) || 0;
-  const consumed = !!adaptation?.baitConsumed;
-  if (!next.armed && !consumed && type && repeat >= 2) {
+  const reads = Math.max(0, Number(adaptation?.successfulReads) || 0);
+  if (!next.armed && type && repeat >= 2 && reads > next.lastRead) {
     next.armed = true;
     next.type = type;
+    next.lastRead = reads;
   }
   return next;
 }
@@ -74,5 +76,6 @@ export function baitSnapshot(state = {}) {
     type: validType(state?.type),
     uses: Math.max(0, Number(state?.uses) || 0),
     lastPattern: String(state?.lastPattern || ""),
+    lastRead: Math.max(0, Number(state?.lastRead) || 0),
   });
 }
