@@ -19,8 +19,7 @@ const PRECACHE = [
   "./systems/title.js?v=" + VERSION,
   "./systems/title-fx.js?v=" + VERSION,
   "./systems/ending.js?v=" + VERSION,
-  "./systems/demo.js?v=" + VERSION,
-  "./systems/evo-cinema.js?v=" + VERSION
+  "./systems/demo.js?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {
