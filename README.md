@@ -287,7 +287,7 @@ Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afi
 </div>
 
 
-## Boss Director · Phases 15–19
+## Boss Director · Phases 15–21
 
 La Reina del Nido evoluciona en capas deterministas de dirección de combate:
 
@@ -296,9 +296,14 @@ La Reina del Nido evoluciona en capas deterministas de dirección de combate:
 - **Phase 17 · Counterplay**: DASH/AIRE/DISTANCIA, racha defensiva y BREAK.
 - **Phase 18 · Adaptive Encounter**: memoria corta de respuestas repetidas y cambio de preferencia dentro del repertorio autorizado.
 - **Phase 19 · Adaptive Bait**: dos respuestas iguales arman un CEBO de un solo uso; el patrón señuelo ya existe en la tabla de rutinas de la fase y no cambia daño ni hitboxes.
+- **Phase 21 · Encounter Memory**: la Reina conserva una memoria de ocho observaciones como máximo y ajusta la longitud de la siguiente rutina hacia corta o larga según la lectura del jugador, siempre dentro del repertorio autorizado.
 
 La adaptación es determinista, acotada y separada de la simulación física. El objetivo es aumentar la lectura del combate, no hacer trampas cambiando reglas invisibles.
 
 ## Boss Director · Phase 20
 
 Phase 20 añade feedback de resultado al sistema de adaptación: un CEBO que el jugador identifica reduce el tempo de la Reina, mientras un CEBO eficaz lo incrementa. El efecto está limitado a la cadencia de decisión del siguiente ciclo y no modifica daño, hitboxes, física ni RNG.
+
+## Boss Director · Phase 21
+
+Phase 21 añade memoria corta del encuentro. Las respuestas limpias y los CEBO leídos relajan la selección hacia rutinas más cortas; los fallos y CEBO eficaces elevan la presión hacia rutinas más largas. El historial está limitado a ocho observaciones y la selección sigue cerrada a los patrones autorizados de cada fase.
