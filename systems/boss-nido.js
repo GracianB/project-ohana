@@ -5,6 +5,7 @@ function bossRng(e) {
 import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, patternLabel } from "./boss-combat.js";
 import { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorLabel } from "./boss-behavior.js";
 import { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat, counterplayLabel } from "./boss-counterplay.js";
+import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationLabel } from "./boss-adaptation.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -85,6 +86,8 @@ export function createBossNido() {
     counterplay: createBossCounterplay(),
     counterBreak: 0,
     lastCounterplay: null,
+    adaptation: createBossAdaptation(),
+    adaptationLabel: "ADAPTACIÓN NEUTRA",
   };
 }
 
@@ -108,6 +111,7 @@ export function updateBossNido(e, game, helpers) {
   const cy = e.y + e.h / 2;
   e.behavior = observeBossBehavior(e.behavior, p, game);
   e.behaviorLabel = behaviorLabel(e.behavior, e.hp / Math.max(1, e.max));
+  e.adaptationLabel = adaptationLabel(e.adaptation, e.hp / Math.max(1, e.max));
   e.counterplay = observeBossThreat(e.counterplay, e, p, p.health);
   const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
 
@@ -232,6 +236,8 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
     e.counterplay = createBossCounterplay();
     e.behavior = createBossBehavior();
     e.behaviorLabel = "LEE NEUTRO";
+    e.adaptation = createBossAdaptation();
+    e.adaptationLabel = "ADAPTACIÓN NEUTRA";
     resetAttackState(e);
     e.attackCd = 40;
     if (!e.phaseAnnounced[3]) {
@@ -390,6 +396,11 @@ function finishBossAttack(e, game, delay = 6) {
   e.lastAttack = e.teleKind || e.mode || "";
   const p = game?.player;
   const counterResult = resolveBossThreat(e.counterplay, p, p?.health);
+  e.adaptation = observeBossAdaptation(
+    e.adaptation,
+    counterResult ? { outcome: "success", type: counterResult.type } : { outcome: "tick" }
+  );
+  e.adaptationLabel = adaptationLabel(e.adaptation, e.hp / Math.max(1, e.max));
   if (counterResult) {
     e.lastCounterplay = counterResult;
     e.counterBreak = counterResult.openBonus;
@@ -521,6 +532,7 @@ function pickAttack(e) {
       hpRatio: e.hp / Math.max(1, e.max),
       behavior: e.behavior,
       reactivePreference: reactiveAttackPreference(e.phase, e.behavior, e.hp / Math.max(1, e.max)),
+      adaptivePreference: adaptiveAttackPreference(e.phase, e.adaptation, e.hp / Math.max(1, e.max)),
     }
   );
   e.pattern = pattern;

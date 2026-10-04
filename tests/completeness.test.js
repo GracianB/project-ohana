@@ -14,6 +14,7 @@ const { ABILITY_DEFS } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
+const { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationSnapshot, adaptationLabel } = await import('../systems/boss-adaptation.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -218,4 +219,58 @@ test('boss counterplay: estar fuera de peligro no rompe una racha existente', as
   startBossThreat(state, boss, { ...player, x: 1200, _dashGo: 0 }, 100, 'charge');
   assert.equal(resolveBossThreat(state, player, 100), null);
   assert.equal(state.streak, 2);
+});
+
+
+test('phase 18: la adaptación aprende respuestas repetidas sin salir del repertorio autorizado', () => {
+  const state = createBossAdaptation();
+  observeBossAdaptation(state, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(state, { outcome: 'success', type: 'DASH' });
+
+  assert.equal(state.target, 'DASH');
+  assert.ok(state.level >= 2);
+  assert.equal(adaptiveAttackPreference(2, state, 0.7), 'slam');
+
+  const pattern = chooseBossPattern(2, -1, () => 0, {
+    distance: 500,
+    vertical: 0,
+    hpRatio: 0.7,
+    adaptivePreference: adaptiveAttackPreference(2, state, 0.7),
+  });
+  assert.equal(pattern[0], 'slam');
+  assert.ok(BOSS_COMBAT_PROFILES[2].patterns.some((candidate) =>
+    candidate.length === pattern.length && candidate.every((kind, i) => kind === pattern[i])
+  ));
+  assert.match(adaptationLabel(state, 0.7), /ADAPTA DASH/);
+  assert.deepEqual(Object.keys(adaptationSnapshot(state)), ['dash', 'air', 'space', 'target', 'level', 'repeat']);
+});
+
+test('phase 18: respuestas mezcladas enfrían la adaptación y el tramo final conserva la desesperación', () => {
+  const mixed = createBossAdaptation();
+  observeBossAdaptation(mixed, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(mixed, { outcome: 'success', type: 'AIRE' });
+  observeBossAdaptation(mixed, { outcome: 'success', type: 'DISTANCIA' });
+  assert.equal(mixed.target, '');
+
+  const finalState = createBossAdaptation();
+  observeBossAdaptation(finalState, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(finalState, { outcome: 'success', type: 'DASH' });
+  assert.equal(adaptiveAttackPreference(3, finalState, 0.2), 'charge');
+});
+
+test('phase 18: el cambio de respuesta reinicia la racha de repetición y mantiene memoria acotada', () => {
+  const state = createBossAdaptation();
+  observeBossAdaptation(state, { outcome: 'success', type: 'DASH' });
+  observeBossAdaptation(state, { outcome: 'success', type: 'DASH' });
+  assert.equal(state.repeat, 2);
+  observeBossAdaptation(state, { outcome: 'success', type: 'AIRE' });
+  assert.equal(state.repeat, 1);
+  assert.equal(state.lastType, 'AIRE');
+
+  for (let i = 0; i < 20; i++) {
+    observeBossAdaptation(state, { outcome: 'success', type: i % 2 ? 'DASH' : 'AIRE' });
+  }
+  assert.ok(state.recent.length <= 6);
+  assert.equal(state.ticks, 23);
+  assert.ok(Object.values(state.pressure).every((value) => Number.isFinite(value) && value >= 0 && value <= 4));
 });

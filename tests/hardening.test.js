@@ -76,3 +76,18 @@ test('phase 17: counterplay queda separado de daño e hitbox y usa módulo preca
   assert.match(boss, /counterBreak/);
   assert.match(sw, /boss-counterplay\.js\?v=" \+ VERSION/);
 });
+
+
+test('phase 18: boss adaptation queda aislado, acotado y precacheado', () => {
+  const adaptation = fs.readFileSync('./systems/boss-adaptation.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(adaptation, /Math\.random\(/);
+  assert.doesNotMatch(adaptation, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(adaptation, /\.w\s*=|\.h\s*=/);
+  assert.match(boss, /adaptiveAttackPreference/);
+  assert.match(boss, /observeBossAdaptation/);
+  assert.match(combat, /adaptivePreference/);
+  assert.match(sw, /boss-adaptation\.js\?v=" \+ VERSION/);
+});
