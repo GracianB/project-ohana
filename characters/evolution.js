@@ -155,6 +155,34 @@ export function evolutionMessage(id, evo) {
   });
 }
 
+// Perfil anatómico visual por personaje.
+// No altera la hitbox: solo modifica la lectura del cuerpo ya dibujado por cada art.
+export const EVOLUTION_FORM_PROFILES = Object.freeze({
+  kilo:    Object.freeze({ bodyX:[0.90,0.98,1.04,1.10,1.16], bodyY:[0.92,1.00,1.08,1.16,1.22], stance:[-0.015,0.00,0.035,0.060,0.085], lift:[0.00,0.00,0.006,0.010,0.016], combat:[0.86,0.98,1.08,1.18,1.30] }),
+  stitcho: Object.freeze({ bodyX:[0.88,0.96,1.00,1.05,1.10], bodyY:[0.90,1.00,1.10,1.18,1.27], stance:[0.025,0.035,0.075,0.115,0.15], lift:[0.00,0.00,0.008,0.014,0.022], combat:[0.90,1.02,1.12,1.24,1.38] }),
+  chispin:Object.freeze({ bodyX:[0.90,0.96,1.00,1.07,1.12], bodyY:[0.90,1.00,1.07,1.15,1.23], stance:[0.050,0.065,0.105,0.15,0.19], lift:[0.00,0.00,0.00,0.006,0.012], combat:[0.92,1.05,1.18,1.30,1.44] }),
+  cat:     Object.freeze({ bodyX:[0.98,1.02,1.08,1.14,1.20], bodyY:[0.88,0.96,1.04,1.12,1.18], stance:[-0.015,-0.010,0.020,0.040,0.060], lift:[0.00,0.010,0.016,0.024,0.036], combat:[0.84,0.94,1.05,1.16,1.28] }),
+  dragon:  Object.freeze({ bodyX:[0.86,0.94,1.00,1.08,1.15], bodyY:[0.92,1.03,1.12,1.22,1.32], stance:[0.020,0.025,0.055,0.085,0.12], lift:[0.00,0.00,0.010,0.022,0.038], combat:[0.90,1.04,1.16,1.30,1.46] }),
+  dino:    Object.freeze({ bodyX:[0.94,1.00,1.08,1.15,1.23], bodyY:[0.96,1.04,1.10,1.18,1.27], stance:[0.055,0.065,0.090,0.12,0.15], lift:[0.00,0.00,0.00,0.004,0.008], combat:[0.96,1.08,1.20,1.34,1.50] }),
+  frita:   Object.freeze({ bodyX:[0.78,0.88,0.94,1.00,1.08], bodyY:[0.94,1.04,1.13,1.23,1.33], stance:[0.035,0.045,0.075,0.11,0.145], lift:[0.00,0.00,0.004,0.010,0.018], combat:[0.90,1.04,1.16,1.30,1.44] }),
+  pizza:   Object.freeze({ bodyX:[0.98,1.04,1.10,1.20,1.27], bodyY:[0.94,1.00,1.06,1.12,1.18], stance:[-0.035,-0.025,0.00,0.025,0.045], lift:[0.00,0.00,0.004,0.008,0.014], combat:[0.88,0.98,1.08,1.20,1.34] }),
+  yomi:    Object.freeze({ bodyX:[0.90,0.96,1.00,1.05,1.11], bodyY:[0.98,1.05,1.13,1.22,1.31], stance:[0.00,0.010,0.030,0.060,0.090], lift:[0.014,0.020,0.028,0.036,0.048], combat:[0.90,1.02,1.14,1.28,1.42] }),
+  cuerno:  Object.freeze({ bodyX:[0.92,1.00,1.05,1.11,1.18], bodyY:[0.90,0.98,1.06,1.14,1.23], stance:[-0.020,-0.015,0.010,0.040,0.070], lift:[0.008,0.010,0.016,0.024,0.034], combat:[0.86,0.98,1.08,1.20,1.34] }),
+});
+
+function formVisualProfile(id, evo) {
+  const key = CANON(id);
+  const profile = EVOLUTION_FORM_PROFILES[key] || EVOLUTION_FORM_PROFILES.kilo;
+  const i = Math.max(0, Math.min(4, evo | 0));
+  return Object.freeze({
+    bodyX: profile.bodyX[i],
+    bodyY: profile.bodyY[i],
+    stance: profile.stance[i],
+    lift: profile.lift[i],
+    combat: profile.combat[i],
+  });
+}
+
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
   stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
@@ -193,12 +221,13 @@ export function evolutionProfile(pOrId, evoOverride) {
     float: style.float,
     combatCharacter: style.combat,
     finalDesign,
+    visual: formVisualProfile(id, evo),
     combat: Object.freeze({
       attack: combatStage.attack * style.combat,
       cast: combatStage.cast * style.combat,
       impact: combatStage.impact * style.combat,
       trail: combatStage.trail * style.combat,
-      glow: combatStage.glow * style.combat,
+      glow: combatStage.glow * style.combat * formVisualProfile(id, evo).combat,
       density: combatStage.density,
       snap: combatStage.snap,
     }),
@@ -230,6 +259,7 @@ export function applyEvolutionPose(pose, p) {
   out.evolutionScaleY = e.scaleY;
   out.evolutionPulse = pulse;
   out.evolutionCombat = e.combat;
+  out.evolutionVisual = e.visual;
 
   const body = active ? 1 : 0.62;
   out.bodyTilt = Number(out.bodyTilt || 0) + e.characterLean * e.lean * (0.70 + body * 0.30);
@@ -238,6 +268,10 @@ export function applyEvolutionPose(pose, p) {
   out.legSwing = Number(out.legSwing || 0) * e.legs * e.swing;
   out.sway = Number(out.sway || 0) * e.sway;
   out.bounce = Number(out.bounce || 0) * e.bounce;
+  out.bodyWidth = e.visual.bodyX;
+  out.bodyHeight = e.visual.bodyY;
+  out.formStance = e.visual.stance;
+  out.formLift = e.visual.lift;
 
   if (pose.air) {
     out.stretch = Number(out.stretch || 0) + pulse * e.float * 0.08;
