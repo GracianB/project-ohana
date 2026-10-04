@@ -100,7 +100,7 @@ export function computePose(p, t, opts = {}) {
   r.bounce = clamp(r.bounce + r.bounceV, -1.5, 1.5);
 
   r.blinkAt -= dt;
-  if (r.blinkAt <= 0) { r.blinkT = 10; r.blinkAt = 110 + Math.random() * 180; }
+  if (r.blinkAt <= 0) { r.blinkT = 10; r.blinkAt = 110 + rng() * 180; }
   r.blinkT = Math.max(0, r.blinkT - dt);
   const blink = r.blinkT > 0 ? Math.sin((r.blinkT / 10) * Math.PI) : 0;
 
