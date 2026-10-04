@@ -77,6 +77,11 @@ export function chooseBossPattern(phase = 1, previous = -1, rng = () => 0, conte
     preferred = adaptive;
   }
 
+  const bait = Array.isArray(context.baitPattern)
+    ? patterns.find((pattern) => pattern.length === context.baitPattern.length && pattern.every((kind, i) => kind === context.baitPattern[i]))
+    : null;
+  if (bait) return bait.slice();
+
   const candidates = patterns
     .map((pattern, index) => ({ pattern, index }))
     .filter(({ index }) => index !== previous);
