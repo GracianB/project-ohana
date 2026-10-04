@@ -2354,7 +2354,9 @@ function updateHUD() {
     const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
     const pct = Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100));
     const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + attackText + " · " + pct + "%");
+    const patternText = boss.patternLabel ? " · RUTINA " + (Number(boss.patternStep) + 1) + "/" + Math.max(1, boss.pattern.length) : "";
+    const recoveryText = boss.vulnerable ? " · CASTIGA" : "";
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + attackText + " · " + pct + "%");
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
