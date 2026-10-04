@@ -364,3 +364,36 @@ test("stopMusic desconecta todo el grafo de delay del tema", async () => {
     globalThis.setTimeout = originalTimeout;
   }
 });
+
+
+test("RNG de enemigos es inyectable y reproducible", () => {
+  const alwaysLow = () => 0;
+  const alwaysHigh = () => 0.999999;
+  const lowA = makeFoe(100, 400, "phosquito", "jungle", 1, { rng: alwaysLow });
+  const lowB = makeFoe(100, 400, "phosquito", "jungle", 1, { rng: alwaysLow });
+  const high = makeFoe(100, 400, "phosquito", "jungle", 1, { rng: alwaysHigh });
+  assert.equal(lowA.canSplit, true);
+  assert.deepEqual(lowA, lowB);
+  assert.equal(high.canSplit, false);
+
+  const bobA = makeFoe(100, 400, "libelula", "jungle", 1, { rng: alwaysLow });
+  const bobB = makeFoe(100, 400, "libelula", "jungle", 1, { rng: alwaysLow });
+  assert.equal(bobA.bob, 0);
+  assert.equal(bobA.bob, bobB.bob);
+});
+
+test("RNG del rig de poses es inyectable y reproducible", async () => {
+  const { computePose } = await import("../characters/rig.js");
+  const makePlayer = () => ({
+    id: "kilo", grounded: true, vx: 0, vy: 0, speed: 4,
+    _rig: undefined,
+  });
+  const a = makePlayer();
+  const b = makePlayer();
+  const poseA = computePose(a, 1, { rng: () => 0 });
+  const poseB = computePose(b, 1, { rng: () => 0 });
+  assert.deepEqual(poseA, poseB);
+  assert.equal(a._rig.blinkAt, 89);
+  assert.equal(b._rig.blinkAt, 89);
+});
+

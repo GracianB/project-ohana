@@ -72,10 +72,11 @@ function profileOf(p) {
  *   anticipation, impact, secondary
  * }
  */
-export function computePose(p, t) {
+export function computePose(p, t, opts = {}) {
   const prof = profileOf(p);
+  const rng = typeof opts.rng === "function" ? opts.rng : (typeof p.rng === "function" ? p.rng : Math.random);
   const r = p._rig || (p._rig = {
-    sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 90 + Math.random() * 120, blinkT: 0,
+    sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 90 + rng() * 120, blinkT: 0,
     idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t,
   });
   const dt = clamp(t - r.lastT, 0, 4) || 1;
@@ -99,7 +100,7 @@ export function computePose(p, t) {
   r.bounce = clamp(r.bounce + r.bounceV, -1.5, 1.5);
 
   r.blinkAt -= dt;
-  if (r.blinkAt <= 0) { r.blinkT = 10; r.blinkAt = 110 + Math.random() * 180; }
+  if (r.blinkAt <= 0) { r.blinkT = 10; r.blinkAt = 110 + rng() * 180; }
   r.blinkT = Math.max(0, r.blinkT - dt);
   const blink = r.blinkT > 0 ? Math.sin((r.blinkT / 10) * Math.PI) : 0;
 

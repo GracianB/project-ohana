@@ -30,14 +30,23 @@ jobs:
           node-version: 22
 
       - name: Run regression suites
-        run: node --test tests/core.test.js tests/runtime.test.js
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js
+          node tests/browser/e2e.mjs
 
       - name: Validate project consistency
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
+          import { ROSTER } from "./characters/roster.js";
+          import { ROOMS } from "./systems/map.js";
 
           const read = (file) => fs.readFileSync(file, "utf8");
+          const activeCharacters = ROSTER.length;
+          const formsPerCharacter = ROSTER.length ? Math.min(...ROSTER.map((character) => character.forms.length)) : 0;
+          const roomCount = Object.keys(ROOMS).length;
           const manifest = JSON.parse(read("manifest.json"));
           const index = read("index.html");
           const progress = read("PROGRESS.md");
@@ -45,12 +54,35 @@ jobs:
           const readme = read("README.md");
           const errors = [];
 
-          if (!/10\s+personajes/i.test(manifest.description || "")) {
-            errors.push("manifest.json: falta la referencia a 10 personajes");
+          if (activeCharacters !== 10) {
+            errors.push(`código: se esperaban 10 personajes activos, hay ${activeCharacters}`);
           }
 
-          if (!/10\s+salas/i.test(manifest.description || "")) {
-            errors.push("manifest.json: falta la referencia a 10 salas");
+          if (formsPerCharacter !== 5 || ROSTER.some((character) => character.forms.length !== 5)) {
+            errors.push("código: no todos los personajes tienen exactamente 5 formas");
+          }
+
+          if (roomCount !== 10) {
+            errors.push(`código: se esperaban 10 salas, hay ${roomCount}`);
+          }
+
+          const masterPatterns = [
+            [new RegExp(activeCharacters + "\\s+personajes", "i"), "10 personajes"],
+            [new RegExp(formsPerCharacter + "\\s+formas", "i"), "5 formas"],
+            [new RegExp(roomCount + "\\s+salas", "i"), "10 salas"],
+          ];
+
+          for (const [pattern, label] of masterPatterns) {
+            for (const [file, content] of [
+              ["manifest.json", manifest.description || ""],
+              ["README.md", readme],
+              ["PROGRESS.md", progress],
+              ["IMPROVEMENTS.md", improvements],
+            ]) {
+              if (!pattern.test(content)) {
+                errors.push(`${file}: falta la cifra maestra ${label}`);
+              }
+            }
           }
 
           const versions = [...index.matchAll(/ohana-(\d+)/g)].map((m) => m[0]);
@@ -66,20 +98,12 @@ jobs:
             errors.push(`PROGRESS.md: no refleja la caché ${currentVersion}`);
           }
 
-          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js")) {
-            errors.push("PROGRESS.md: no documenta las dos suites del CI");
+          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js")) {
+            errors.push("PROGRESS.md: no documenta las cuatro suites del CI");
           }
 
-          if (!/10\s+salas/i.test(progress)) {
-            errors.push("PROGRESS.md: no refleja 10 salas");
-          }
-
-          if (!/10\s+salas/i.test(improvements)) {
-            errors.push("IMPROVEMENTS.md: no refleja 10 salas");
-          }
-
-          if (!/10\s+personajes/i.test(readme) || !/10\s+salas/i.test(readme)) {
-            errors.push("README.md: faltan cifras maestras");
+          if (!progress.includes("node tests/browser/e2e.mjs")) {
+            errors.push("PROGRESS.md: no documenta el E2E real del navegador");
           }
 
           if (errors.length) {
@@ -91,8 +115,9 @@ jobs:
           console.log("[OHANA] Consistency check PASS");
           console.log(" - " + (manifest.description || "sin descripción"));
           console.log(" - cache: " + (currentVersion || "sin versión"));
-          console.log(" - CI: core + runtime");
-          console.log(" - docs: 10 personajes / 5 formas / 10 salas");
+          console.log(" - CI: core + runtime + renderer + completeness + browser E2E");
+          console.log(` - código: ${activeCharacters} personajes / ${formsPerCharacter} formas / ${roomCount} salas`);
+          console.log(" - docs: código ↔ manifest ↔ README ↔ PROGRESS ↔ IMPROVEMENTS");
           NODE
 
   deploy:
@@ -119,3 +144,13 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployed GitHub Pages
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          test -n "$PAGE_URL"
+          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors "$PAGE_URL" -o /tmp/ohana.html
+          grep -q "PROJECT OHANA" /tmp/ohana.html
+          grep -q "ohana-" /tmp/ohana.html
+          echo "[OHANA] GitHub Pages deployment verified: $PAGE_URL"

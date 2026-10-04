@@ -1,3 +1,7 @@
+function bossRng(e) {
+  return typeof e?._rng === "function" ? e._rng() : Math.random();
+}
+
 /**
  * Reina del Nido — se posa. Volar es un ataque, no el estado normal.
  * API: createBossNido() · updateBossNido(e, game, helpers)
@@ -65,6 +69,7 @@ export function createBossNido() {
 }
 
 export function updateBossNido(e, game, helpers) {
+  e._rng = typeof helpers?.rng === "function" ? helpers.rng : Math.random;
   const {
     t = 0,
     hurtPlayer,
@@ -105,7 +110,7 @@ export function updateBossNido(e, game, helpers) {
     default: updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY); break;
   }
 
-  if (e.phase >= 3 && e.spawnCd <= 0 && Math.random() < 0.012) {
+  if (e.phase >= 3 && e.spawnCd <= 0 && bossRng(e) < 0.012) {
     spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion);
   }
 
@@ -312,7 +317,7 @@ function updateSlam(e, game, helpers, cx, floorY) {
     game.shake = Math.max(game.shake || 0, e.phase >= 3 ? 18 : 12);
     game.flash = Math.max(game.flash || 0, e.phase >= 3 ? 8 : 4);
     emitParticles(game, cx, e.y + e.h, { color: "#ff8040", count: 18, size: 4.5, up: 2.2 }, reduceMotion);
-    if (e.phase >= 3 || Math.random() < 0.55) {
+    if (e.phase >= 3 || bossRng(e) < 0.55) {
       e.shockT = 22;
       e.shockR = 40;
       e.shockX = cx;
@@ -358,14 +363,14 @@ function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
     e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
   }
   if (e.phase >= 3 && !reduceMotion && t % 8 === 0) {
-    emitParticles(game, cx + (Math.random() - 0.5) * 60, cy, { color: "#ffe66a", count: 2, size: 2, up: 1.2, star: true }, reduceMotion);
+    emitParticles(game, cx + (bossRng(e) - 0.5) * 60, cy, { color: "#ffe66a", count: 2, size: 2, up: 1.2, star: true }, reduceMotion);
   }
   e.attackCd--;
   if (e.attackCd <= 0 && e.perch <= 0) pickAttack(e);
 }
 
 function pickAttack(e) {
-  const roll = Math.random();
+  const roll = bossRng(e);
   let kind = "charge";
   if (e.phase === 1) kind = roll < 0.55 ? "charge" : "spit";
   else if (e.phase === 2) {
@@ -428,7 +433,7 @@ function beginAttack(e, game, helpers, floorY) {
   e.spitLeft = 12;
   e.airborne = false;
   const aim = Math.sign((p.x + p.w / 2) - cx) || 1;
-  const shots = e.phase === 1 ? (2 + (Math.random() < 0.5 ? 1 : 0)) : 5;
+  const shots = e.phase === 1 ? (2 + (bossRng(e) < 0.5 ? 1 : 0)) : 5;
   const baseSpeed = e.phase >= 3 ? 5.2 : 4.4;
   if (Array.isArray(game.projectiles)) {
     for (let s = 0; s < shots; s++) {
