@@ -393,6 +393,7 @@ test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentr
   const g = {
     player: { id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
     enemies: [{ x: 112, y: 100, w: 24, h: 24, hp: 100, max: 100, kind: 'cucaracho', dying: 0, invuln: 0, vy: 0 }],
+    projectiles: [],
     nums: { add() {} },
     fx: { emit() {} },
     ghosts: [],
