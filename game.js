@@ -365,6 +365,7 @@ function loadRoom(id, fromDir) {
   }
   game.projectiles.length = 0;
   game.bolts.length = 0;
+  game.fx.clear?.();
   game.slashes.length = 0;
   game.ghosts.length = 0;
   portals.spawnFromRoom(r);
@@ -448,7 +449,7 @@ function start(def) {
   game.combatFx?.clear();
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   Surprises.reset();
-  game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.won = false; game.summoned = false;
+  game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
   game.running = true; closeOverlays();
   let roomId = "hub";
   if (resume) {

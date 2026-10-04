@@ -20,6 +20,10 @@ let lastP = null;
 function cx(o) { return o.x + o.w / 2; }
 function cy(o) { return o.y + o.h / 2; }
 function evoOf(p) { return Number(p.evo) || 0; }
+function vfxUnit(seed) {
+  const value = Math.sin(Number(seed) * 12.9898 + 78.233) * 43758.5453123;
+  return value - Math.floor(value);
+}
 function pw(p) { return 1 + evoOf(p) * 0.35; }
 function canHit(e) { return !!e && !e.dying && e.hp > 0 && !(e.invuln > 0); }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
@@ -131,7 +135,7 @@ export const Passives = {
       if (p._runT >= 60) {
         if (running && Math.abs(p.vx) <= p.speed * 1.01) p.vx *= 1.35;
         p._pmove = "spark";
-        if ((input.t % 3) === 0) sparks.push({ x: cx(p) - p.facing * p.w * 0.3, y: p.y + p.h - 6, life: 45, r: 12 + evo * 1.5, seed: Math.random() * 10 });
+        if ((input.t % 3) === 0) sparks.push({ x: cx(p) - p.facing * p.w * 0.3, y: p.y + p.h - 6, life: 45, r: 12 + evo * 1.5, seed: (Number(input.t) || 0) * 17.13 + cx(p) * 0.31 + cy(p) * 0.17 + (p._runT || 0) * 3.7 + sparks.length * 1.19 });
         if (p._runT === 60) { game.fx.emit(cx(p), cy(p), { color: "#ffe14a", count: 10, size: 3, star: true, speed: 3 }); game.nums.add(cx(p), p.y - 10, "¡ZAS!", "#ffe14a"); }
       }
     } else if (id === "glide") {
@@ -345,7 +349,7 @@ export const Passives = {
         const a = s.seed + i * 2.1 + t * 0.3;
         const r = s.r * (0.5 + 0.5 * k);
         ctx.moveTo(x, y);
-        ctx.lineTo(x + Math.cos(a) * r * 0.5 + (Math.random() - 0.5) * 3, y + Math.sin(a) * r * 0.5);
+        ctx.lineTo(x + Math.cos(a) * r * 0.5 + (vfxUnit(s.seed + i * 17 + Math.floor(t * 0.5)) - 0.5) * 3, y + Math.sin(a) * r * 0.5);
         ctx.lineTo(x + Math.cos(a + 0.4) * r, y + Math.sin(a + 0.4) * r);
       }
       ctx.stroke();
@@ -410,7 +414,7 @@ export const Passives = {
         const x0 = cx(p) - cam.x - p.facing * (p.w * 0.5 + 4 + i * 8), y0 = cy(p) - cam.y + (i - 0.5) * 10;
         ctx.beginPath();
         ctx.moveTo(x0, y0);
-        ctx.lineTo(x0 - p.facing * 6, y0 - 4 + Math.random() * 3);
+        ctx.lineTo(x0 - p.facing * 6, y0 - 4 + vfxUnit((Number(t) || 0) * 1.7 + i * 11.3 + p.x * 0.07 + p.y * 0.13) * 3);
         ctx.lineTo(x0 - p.facing * 12, y0 + 3);
         ctx.lineTo(x0 - p.facing * 18, y0 - 2);
         ctx.stroke();
