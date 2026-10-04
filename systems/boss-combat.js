@@ -88,9 +88,19 @@ export function chooseBossPattern(phase = 1, previous = -1, rng = () => 0, conte
 
   const preferredCandidates = candidates.filter(({ pattern }) => pattern[0] === preferred);
   const pool = preferredCandidates.length ? preferredCandidates : candidates.length ? candidates : [{ pattern: patterns[0], index: 0 }];
+
+  const encounterPreference = context.encounterPreference;
+  let shapedPool = pool;
+  if (encounterPreference === "LONG" || encounterPreference === "SHORT") {
+    const lengths = pool.map(({ pattern }) => pattern.length);
+    const targetLength = encounterPreference === "LONG" ? Math.max(...lengths) : Math.min(...lengths);
+    const shaped = pool.filter(({ pattern }) => pattern.length === targetLength);
+    if (shaped.length) shapedPool = shaped;
+  }
+
   const raw = Number(rng());
   const safe = Number.isFinite(raw) ? Math.max(0, Math.min(0.999999, raw)) : 0;
-  const selected = pool[Math.floor(safe * pool.length)];
+  const selected = shapedPool[Math.floor(safe * shapedPool.length)];
 
   // Cuando el boss está en su tramo final, evita degradar la lectura del patrón:
   // siempre devuelve una copia plana y estable para que el combate siga testeable.
