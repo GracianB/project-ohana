@@ -30,7 +30,8 @@ jobs:
           node-version: 22
 
       - name: Run regression suites
-        run: npm install --no-audit --no-fund
+        run: |
+          npm install --no-audit --no-fund
           npx playwright install --with-deps chromium
           node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js
           node tests/browser/e2e.mjs
