@@ -95,7 +95,7 @@ function abilityNow(game) {
   return Number.isFinite(tick) ? tick * FIXED_DT_MS : 0;
 }
 
-function rand(game) {
+function gameRand(game) {
   const source = typeof game?.rng === "function" ? game.rng : null;
   if (!source) return 0.5;
   const value = Number(source());
@@ -535,7 +535,7 @@ const CASTERS = {
       from = { x: cx(e), y: cy(e) };
       dmg *= 0.85;
     }
-    if (pts.length === 1) pts.push({ x: h.x + p.facing * 150, y: h.y + (rand(g) - 0.5) * 20 });
+    if (pts.length === 1) pts.push({ x: h.x + p.facing * 150, y: h.y + (deterministicUnit((g.t || 0) * 0.91 + h.x * 0.07 + h.y * 0.013) - 0.5) * 20 });
     add({ kind: "chain", pts, life: 18 });
     boom(g, h.x, h.y, "#ffe14a", 8, { star: true });
   },
@@ -674,11 +674,11 @@ const CASTERS = {
     const h = hand(p);
     const n = 5 + (evo >= 2 ? 2 : 0) + (evo >= 4 ? 2 : 0);
     for (let i = 0; i < n; i++) {
-      const a = (i / (n - 1) - 0.5) * 0.8 + (rand(g) - 0.5) * 0.08;
-      const sp = 10 + rand(g) * 3;
+      const a = (i / (n - 1) - 0.5) * 0.8 + (gameRand(g) - 0.5) * 0.08;
+      const sp = 10 + gameRand(g) * 3;
       g.projectiles.push({
         x: h.x - 4, y: h.y - 4, vx: Math.cos(a) * sp * p.facing, vy: Math.sin(a) * sp,
-        w: 8, h: 8, life: 14 + (rand(g) * 5 | 0), dmg: 6, color: "#fff8e0", shape: "salt", spin: true, rot: rand(g) * 6, owner: "player", trail: false,
+        w: 8, h: 8, life: 14 + (gameRand(g) * 5 | 0), dmg: 6, color: "#fff8e0", shape: "salt", spin: true, rot: gameRand(g) * 6, owner: "player", trail: false,
       });
     }
     add({ kind: "muzzle", life: 8, color: "#fff3c0" });
@@ -949,7 +949,7 @@ const UPD = {
       }
     }
     if (f.age % 3 === 0) {
-      const u = rand(g);
+      const u = deterministicUnit(f.age * 3.17 + f.x1 * 0.17 + f.y1 * 0.31 + f.x2 * 0.53 + f.y2 * 0.79);
       g.fx.emit(f.x1 + (f.x2 - f.x1) * u, f.y1 + (f.y2 - f.y1) * u, { color: "#ffe14a", count: 2, size: 2, speed: 2, life: 10, star: true });
     }
     return f.life > 0;
@@ -966,7 +966,7 @@ const UPD = {
     f.bolts = f.bolts.filter((b) => b.life > 0);
     if (--f.next <= 0 && f.life > 8) {
       f.next = 20;
-      const bx = f.x + (rand(g) - 0.5) * 30;
+      const bx = f.x + (gameRand(g) - 0.5) * 30;
       let by = groundBelow(g, bx, f.y + 20);
       if (by === null) by = f.y + 400;
       let struck = false;
@@ -1086,7 +1086,12 @@ const UPD = {
         }
       }
     }
-    if (f.age % 2 === 0) g.fx.emit(f.x + f.f * f.len * (0.6 + rand(g) * 0.4), f.y + (rand(g) - 0.5) * 30, { color: rand(g) < 0.5 ? "#ffb347" : "#666", count: 1, size: 3, up: 1, speed: 1, life: 16 });
+    if (f.age % 2 === 0) {
+      const n0 = deterministicUnit(f.age * 2.13 + f.len * 0.017);
+      const n1 = deterministicUnit(f.age * 3.71 + f.x * 0.011);
+      const n2 = deterministicUnit(f.age * 5.23 + f.y * 0.013);
+      g.fx.emit(f.x + f.f * f.len * (0.6 + n0 * 0.4), f.y + (n1 - 0.5) * 30, { color: n2 < 0.5 ? "#ffb347" : "#666", count: 1, size: 3, up: 1, speed: 1, life: 16 });
+    }
     return f.life > 0;
   },
   gust(g, f) { return --f.life > 0; },
@@ -1095,10 +1100,10 @@ const UPD = {
     f.next = 7;
     const cands = g.enemies.filter((e) => canHit(e) && inView(g, e));
     let tx;
-    if (cands.length) { const e = cands[f.i % cands.length]; tx = cx(e) + (rand(g) - 0.5) * 30; }
-    else tx = cx(p) + f.f * (80 + rand(g) * 420);
+    if (cands.length) { const e = cands[f.i % cands.length]; tx = cx(e) + (gameRand(g) - 0.5) * 30; }
+    else tx = cx(p) + f.f * (80 + gameRand(g) * 420);
     const dir = f.f;
-    add({ kind: "meteor", x: tx - dir * 150, y: (g.cam.y || 0) - 60, vx: dir * 3.2, vy: 10.5, r: 11 + rand(g) * 5, dmg: f.dmg, R: f.r, life: 160, rot: rand(g) * 6 });
+    add({ kind: "meteor", x: tx - dir * 150, y: (g.cam.y || 0) - 60, vx: dir * 3.2, vy: 10.5, r: 11 + gameRand(g) * 5, dmg: f.dmg, R: f.r, life: 160, rot: gameRand(g) * 6 });
     f.i++;
     return f.i < f.n;
   },
@@ -1111,7 +1116,7 @@ const UPD = {
     const top = crossTop(g, f.x, y0 + f.r * 0.5, f.y + f.r * 0.5);
     if (top !== null) { f.y = top - f.r * 0.5; hitNow = true; }
     if (!hitNow) for (const e of g.enemies) if (canHit(e) && circleHit(f.x, f.y, f.r, e)) { hitNow = true; break; }
-    if (f.age % 2 === 0) g.fx.emit(f.x, f.y, { color: rand(g) < 0.5 ? "#ff6a2a" : "#ffd36a", count: 2, size: 3, speed: 0.8, life: 14, gravity: -0.02 });
+    if (f.age % 2 === 0) { const n = deterministicUnit(f.age * 4.17 + f.x * 0.009 + f.y * 0.007); g.fx.emit(f.x, f.y, { color: n < 0.5 ? "#ff6a2a" : "#ffd36a", count: 2, size: 3, speed: 0.8, life: 14, gravity: -0.02 }); }
     if (hitNow) {
       for (const e of g.enemies) {
         if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.R + Math.max(e.w, e.h) / 2) {
@@ -1137,7 +1142,7 @@ const UPD = {
       const top = groundNear(g, fr.x, fr.y, 70);
       if (top === null) { fr.on = false; boom(g, fr.x, fr.y, "#c8a060", 6); continue; }
       fr.y = top;
-      f.spikes.push({ x: fr.x, y: top, life: 26, h: 16 + rand(g) * 16, lean: (rand(g) - 0.5) * 0.4 });
+      const n0 = deterministicUnit(fr.x * 0.041 + f.age * 1.73); const n1 = deterministicUnit(fr.x * 0.083 + f.age * 2.91); f.spikes.push({ x: fr.x, y: top, life: 26, h: 16 + n0 * 16, lean: (n1 - 0.5) * 0.4 });
       if (f.age % 2 === 0) g.fx.emit(fr.x, top, { color: "#b89060", count: 2, size: 3, up: 1.6, speed: 1.6, life: 18 });
       for (const e of g.enemies) {
         if (f.hit.has(e) || !canHit(e) || isAir(e) || !onGround(g, e)) continue;
@@ -1198,7 +1203,7 @@ const UPD = {
     if (f.delay > 0) { f.delay--; return true; }
     if (f.warn > 0) {
       f.warn--;
-      if (f.warn % 3 === 0) g.fx.emit(f.x + (rand(g) - 0.5) * 24, f.y, { color: "#c89020", count: 2, size: 2.4, up: 0.8, speed: 0.6, life: 12 });
+      if (f.warn % 3 === 0) { const n = deterministicUnit(f.x * 0.057 + f.warn * 2.31); g.fx.emit(f.x + (n - 0.5) * 24, f.y, { color: "#c89020", count: 2, size: 2.4, up: 0.8, speed: 0.6, life: 12 }); }
       if (f.warn === 0) { g.shake = Math.min(16, (g.shake || 0) + 3); boom(g, f.x, f.y, "#ffd36a", 10, { up: 3, speed: 3 }); }
       return true;
     }
@@ -1209,9 +1214,9 @@ const UPD = {
     for (const e of g.enemies) {
       if (f.hit.has(e) || !canHit(e) || !aabb(box, e)) continue;
       f.hit.add(e);
-      hitEnemy(g, e, f.dmg, { kx: (rand(g) - 0.5) * 4, ky: -10, stun: 30, color: "#ffd36a" });
+      hitEnemy(g, e, f.dmg, { kx: (gameRand(g) - 0.5) * 4, ky: -10, stun: 30, color: "#ffd36a" });
     }
-    if (f.up % 2 === 0) g.fx.emit(f.x, f.y - f.h, { color: rand(g) < 0.5 ? "#ffd36a" : "#fff0b0", count: 2, size: 3, up: 2, speed: 2, life: 18, gravity: 0.2 });
+    if (f.up % 2 === 0) { const n = deterministicUnit(f.x * 0.031 + f.up * 2.17); g.fx.emit(f.x, f.y - f.h, { color: n < 0.5 ? "#ffd36a" : "#fff0b0", count: 2, size: 3, up: 2, speed: 2, life: 18, gravity: 0.2 }); }
     return f.up > 0;
   },
   disc(g, f) {
@@ -1263,8 +1268,8 @@ const UPD = {
   slices(g, f, p) {
     if (f.next-- > 0) return true;
     f.next = 5;
-    const x = f.x + (rand(g) * 2 - 1) * 320;
-    add({ kind: "slice", x, y: (g.cam.y || 0) - 30 - rand(g) * 60, vx: (rand(g) - 0.5) * 1.5, vy: 4 + rand(g) * 2, rot: rand(g) * 6, spin: (rand(g) - 0.5) * 0.3, dmg: f.dmg, life: 200 });
+    const x = f.x + (gameRand(g) * 2 - 1) * 320;
+    add({ kind: "slice", x, y: (g.cam.y || 0) - 30 - gameRand(g) * 60, vx: (gameRand(g) - 0.5) * 1.5, vy: 4 + gameRand(g) * 2, rot: gameRand(g) * 6, spin: (gameRand(g) - 0.5) * 0.3, dmg: f.dmg, life: 200 });
     f.i++;
     return f.i < f.n;
   },
