@@ -40,7 +40,10 @@ async function auditPage(page, label) {
     const js = resources.filter((r) => r.name.includes('.js')).reduce((n,r) => n + (r.transferSize || 0), 0);
     const css = resources.filter((r) => r.name.includes('.css')).reduce((n,r) => n + (r.transferSize || 0), 0);
     const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0;
-    return { chars:ROSTER.length, forms:ROSTER.reduce((n,p)=>n+p.forms.length,0), powers:ROSTER.reduce((n,p)=>n+p.forms.length*p.abilities.length,0), abilityDefs:Object.keys(ABILITY_DEFS).length, rooms:Object.keys(ROOMS).length, route, nonZero, sum, js, css, fcp, title:document.title };
+    const buttons = [...document.querySelectorAll('button')].map((b) => ({ name: b.getAttribute('aria-label') || b.textContent.trim() || b.getAttribute('title') || '', disabled: b.disabled }));
+    const dialogs = [...document.querySelectorAll('[role="dialog"]')].map((d) => ({ labelled: !!d.getAttribute('aria-label') || !!d.getAttribute('aria-labelledby'), modal: d.getAttribute('aria-modal') === 'true' }));
+    const bars = [...document.querySelectorAll('[role="progressbar"]')].map((b) => Number(b.getAttribute('aria-valuenow')));
+    return { chars:ROSTER.length, forms:ROSTER.reduce((n,p)=>n+p.forms.length,0), powers:ROSTER.reduce((n,p)=>n+p.forms.length*p.abilities.length,0), abilityDefs:Object.keys(ABILITY_DEFS).length, rooms:Object.keys(ROOMS).length, route, nonZero, sum, js, css, fcp, title:document.title, buttons, dialogs, bars, canvasLabel:canvas?.getAttribute('aria-label') || '' };
   });
 
   assert.equal(audit.chars, 10, label + ': personajes');
@@ -55,6 +58,10 @@ async function auditPage(page, label) {
   assert.ok(audit.css < 500000, label + ': CSS > 500 KB');
   assert.ok(audit.fcp < 4000, label + ': FCP > 4 s');
   assert.match(audit.title, /PROJECT OHANA/i);
+  assert.ok(audit.canvasLabel.length > 0, label + ': Canvas sin aria-label');
+  assert.ok(audit.buttons.every((b) => b.name.length > 0), label + ': botón sin nombre accesible');
+  assert.ok(audit.dialogs.every((d) => d.labelled && d.modal), label + ': diálogo sin etiquetado/modal accesible');
+  assert.ok(audit.bars.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), label + ': progressbar fuera de rango');
   await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 }
