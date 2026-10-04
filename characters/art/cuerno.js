@@ -30,7 +30,7 @@ function horn(ctx, len, color, wobble) {
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   const t = pose.t || 0;
-  const god = f === 4;
+  const final = f === 4;
   const run = pose.state === "run";
   const air = pose.air;
   const punta = pose.move === "punta";
@@ -43,7 +43,7 @@ function draw(ctx, pose, R) {
 
   ctx.save();
   ctx.translate(0, bob);
-  if (god) R.halo(ctx, 0, -48, 24, t, "#fff6c8");
+  if (final) R.halo(ctx, 0, -48, 24, t, "#fff6c8");
 
   const leg = (x, phase) => {
     ctx.save();
@@ -85,7 +85,7 @@ function draw(ctx, pose, R) {
   horn(ctx, len, hornC, Math.sin(t * 0.12) * 0.7);
   ctx.restore();
 
-  if (pose.state === "cast" || god || punta) R.sparkle(ctx, 10, -36 - len, punta ? 6 + f : 3 + f, hornC);
+  if (pose.state === "cast" || final || punta) R.sparkle(ctx, 10, -36 - len, punta ? 6 + f : 3 + f, hornC);
   if (punta) {
     ctx.globalAlpha = 0.7 + Math.sin(t * 0.7) * 0.2;
     ctx.strokeStyle = "#fff6c8";

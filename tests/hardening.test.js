@@ -18,8 +18,29 @@ test('input y Service Worker no conservan movimiento horizontal fantasma', () =>
   assert.match(input, /KEYBOARD_STALE_MS\s*=\s*1200/);
   assert.match(input, /keyboardWatchdog/);
   assert.match(input, /listen\(target, "focus", reset\)/);
-  assert.match(sw, /ohana-86/);
+  assert.match(sw, /ohana-87/);
   assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* Math\.min\(64/);
+});
+
+
+test('la experiencia final no conserva terminología divina genérica ni identificadores antiguos', () => {
+  const files = [
+    './characters/roster.js',
+    './characters/evolution.js',
+    './characters/draw.js',
+    './systems/evo-cinema.js',
+    './engine/audio.js',
+    './index.html',
+    './README.md',
+    './PROGRESS.md',
+    './IMPROVEMENTS.md',
+  ];
+  for (const file of files) {
+    const source = fs.readFileSync(file, 'utf8');
+    const legacyTerm = new RegExp('\\b' + ['G', 'O', 'D'].join('') + '\\b', 'i');
+    assert.doesNotMatch(source, legacyTerm, file + ' conserva terminología divina antigua');
+  }
+  assert.match(fs.readFileSync('./engine/audio.js', 'utf8'), /evoFinalFanfare/);
 });

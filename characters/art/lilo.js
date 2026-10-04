@@ -5,7 +5,7 @@
 //         1 Kilo (muumuu rojo con flores, ukelele a la espalda)
 //         2 Kilo Ohana (corona de flores, lei, falda de hula)
 //         3 Super Kilo (vestido ceremonial, capa, bastón luminoso)
-//         4 KILO GOD (vestido blanco-dorado, alas de mariposa, halo, pelo flotante)
+//         4 KILO FORMA FINAL (vestido blanco-dorado, alas de mariposa, halo, pelo flotante)
 // pose.move === "float" (o state "glide"): falda en paracaídas, brazos abiertos.
 // ============================================================================
 

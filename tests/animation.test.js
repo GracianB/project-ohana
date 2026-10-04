@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -149,15 +149,15 @@ test("las 5 formas tienen identidad visual y cinética propia para los 10 person
   }
 });
 
-test("los estilos de evolución conservan una separación fuerte entre bebé, alto y GOD", () => {
+test("los estilos de evolución conservan una separación fuerte entre bebé, alta y forma final", () => {
   for (const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]) {
     const baby = applyEvolutionPose({ state:"idle", form:0, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:0 });
     const high = applyEvolutionPose({ state:"idle", form:3, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:3 });
-    const god = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
+    const final = applyEvolutionPose({ state:"idle", form:4, t:0, bodyTilt:0, headTilt:0, armSwing:0, legSwing:0, sway:1, bounce:1, stretch:0, squash:0 }, { id, evo:4 });
 
     assert.ok(Math.abs(high.bodyTilt) >= Math.abs(baby.bodyTilt));
-    assert.ok(Math.abs(god.bodyTilt) >= Math.abs(high.bodyTilt));
-    assert.ok(god.evolutionPulse === 0);
+    assert.ok(Math.abs(final.bodyTilt) >= Math.abs(high.bodyTilt));
+    assert.ok(final.evolutionPulse === 0);
   }
 });
 
@@ -179,6 +179,17 @@ test("la progresión de evolución también escala la lectura del combate sin to
   }
 });
 
+
+
+test("la etapa final usa diseño por personaje y se nombra como forma final", () => {
+  assert.equal(EVOLUTION_STAGES[4].name, "final");
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const motifs = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.motif);
+  assert.equal(new Set(motifs).size, ids.length);
+  for (const id of ids) {
+    assert.ok(evolutionProfile({ id, evo: 4 }).finalDesign.span > 0, id);
+  }
+});
 test("la identidad de personaje modula combate sin colapsar las cinco etapas", () => {
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
   const e2 = ids.map((id) => evolutionProfile({ id, evo: 2 }).combat.attack);
@@ -205,6 +216,8 @@ function makeEvolutionCinemaContext() {
 
 test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etapa", () => {
   assert.equal(typeof drawEvolutionCinemaFX, "function");
+  assert.equal(typeof drawEvolutionDesignFX, "function");
+  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 10);
   const ctx = makeEvolutionCinemaContext();
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
 
@@ -212,7 +225,10 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
     for (let evo = 0; evo < 5; evo++) {
       assert.doesNotThrow(() => drawEvolutionCinemaFX(
         ctx, id, evo, 640, 300, 100, 60, "#ffd84a", 1
-      ), id + ":e" + evo);
+      ), id + ":cinema:e" + evo);
+      assert.doesNotThrow(() => drawEvolutionDesignFX(
+        ctx, { id, evo }, 80, { form: evo, state: "idle" }, 60
+      ), id + ":design:e" + evo);
     }
   }
 });

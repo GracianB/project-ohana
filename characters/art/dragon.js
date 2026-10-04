@@ -6,8 +6,8 @@
 //   1 Dragón      · pequeño, bípedo, alas pequeñas
 //   2 Dragón Alado· alas grandes, cresta dorada, más esbelto
 //   3 Dragón Real · armadura dorada en pecho y cabeza, cuernos grandes, cola con púas
-//   4 DRAGÓN GOD  · dorado, alas de fuego, corona de llamas y ojos brillantes
-// pose.move: "fly" se dibuja como planeo batiendo alas (GOD vuela).
+//   4 DRAGÓN FORMA FINAL  · dorado, alas de fuego, corona de llamas y ojos brillantes
+// pose.move: "fly" se dibuja como planeo batiendo alas (FORMA FINAL vuela).
 // ============================================================================
 
 const PI = Math.PI;
@@ -93,7 +93,7 @@ function flame(ctx, R, x, y, s, ang, t, seed, opt = {}) {
 }
 
 /** Ala de membrana. rot 0 = ala hacia arriba; + hacia delante, - hacia atrás. */
-function wing(ctx, R, x, y, L, rot, open, c, god, t, far) {
+function wing(ctx, R, x, y, L, rot, open, c, final, t, far) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(rot);
@@ -119,7 +119,7 @@ function wing(ctx, R, x, y, L, rot, open, c, god, t, far) {
   scal(tips[2], P);
   ctx.closePath();
   const g = ctx.createRadialGradient(W[0], W[1], L * 0.05, W[0], W[1], L * 0.65);
-  if (god) {
+  if (final) {
     g.addColorStop(0, "#ff5a1a");
     g.addColorStop(0.55, "#ffa02a");
     g.addColorStop(1, "#ffe86a");
@@ -131,12 +131,12 @@ function wing(ctx, R, x, y, L, rot, open, c, god, t, far) {
   ctx.fillStyle = g;
   ctx.fill();
   ctx.lineWidth = R.LINE;
-  ctx.strokeStyle = god ? "#8a2a10" : R.INK;
+  ctx.strokeStyle = final ? "#8a2a10" : R.INK;
   ctx.lineJoin = "round";
   ctx.stroke();
   // huesos
-  const bone = god ? "#ffe27a" : far ? R.darken(c.bone, 0.22) : c.bone;
-  const bw = Math.max(2.2, L * (god ? 0.045 : 0.07));
+  const bone = final ? "#ffe27a" : far ? R.darken(c.bone, 0.22) : c.bone;
+  const bw = Math.max(2.2, L * (final ? 0.045 : 0.07));
   ctx.lineCap = "round";
   for (let pass = 0; pass < 2; pass++) {
     ctx.strokeStyle = pass ? bone : R.INK;
@@ -153,7 +153,7 @@ function wing(ctx, R, x, y, L, rot, open, c, god, t, far) {
   // garrita del ala
   const cs = Math.max(3, L * 0.08);
   R.poly(ctx, [[W[0] - cs * 0.4, W[1]], [W[0] + cs * 0.7, W[1] - cs], [W[0] + cs * 0.5, W[1] + cs * 0.3]], c.gold, { lw: 1.6 });
-  if (god) {
+  if (final) {
     for (let i = 0; i < 3; i++) flame(ctx, R, tips[i][0], tips[i][1], 3.4 + (i === 0 ? 1.2 : 0), tips[i][2], t, i + (far ? 5 : 0));
     // lenguas de fuego en el borde
     for (let i = 1; i < 3; i++) {
@@ -210,7 +210,7 @@ function puff(ctx, R, x, y, r, a) {
 function draw(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const r = P.r, bw = P.bw, bh = P.bh;
-  const god = f === 4;
+  const final = f === 4;
   const dark = R.darken(c.body, 0.2);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = pose.flourishN % 3;
@@ -317,7 +317,7 @@ function draw(ctx, pose, R) {
     lean = 0.34; headRot = -0.1;
     legF = -0.55; legB = -0.85;
     armF = 0.9; armB = 0.6;
-    if (st === "glide" && !god) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
+    if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
     else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4; }
     wOpen = 1; eyeMood = "happy";
     tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
@@ -354,7 +354,7 @@ function draw(ctx, pose, R) {
 
   // ---- ala lejana
   if (st !== "dead") { ctx.save(); upper();
-  wing(ctx, R, wingX + 7, wingY - 3, P.wing * 0.9, wRotFar !== null ? wRotFar : wRot + 0.3, wOpen, c, god, t, true);
+  wing(ctx, R, wingX + 7, wingY - 3, P.wing * 0.9, wRotFar !== null ? wRotFar : wRot + 0.3, wOpen, c, final, t, true);
   ctx.restore(); }
 
   // ---- cola
@@ -374,7 +374,7 @@ function draw(ctx, pose, R) {
     }
   }
   const tip = tpts[tpts.length - 1];
-  flame(ctx, R, tip[0], tip[1], 3 + f * 0.7, tip[2], t, 3, god ? { outer: "#ff8a1a", mid: "#ffe45a" } : {});
+  flame(ctx, R, tip[0], tip[1], 3 + f * 0.7, tip[2], t, 3, final ? { outer: "#ff8a1a", mid: "#ffe45a" } : {});
   ctx.restore();
 
   // ---- pierna trasera
@@ -389,7 +389,7 @@ function draw(ctx, pose, R) {
 
   // ---- ala cercana
   if (st !== "dead") { ctx.save(); upper();
-  wing(ctx, R, wingX, wingY, P.wing, wRot, wOpen, c, god, t, false);
+  wing(ctx, R, wingX, wingY, P.wing, wRot, wOpen, c, final, t, false);
   ctx.restore(); }
 
   // ---- cuerpo
@@ -427,7 +427,7 @@ function draw(ctx, pose, R) {
     R.shine(ctx, bw * 0.45, -bh * 0.72, 1.2, 1.6, 0.9);
     R.shine(ctx, bw * 0.2, -bh * 0.82, 4, 1.6, 0.6);
   }
-  if (god) {
+  if (final) {
     R.star(ctx, bw * 0.45, -bh * 0.66, 5, "#fff8d0", { lw: 1.6 });
   }
   R.shine(ctx, -bw * 0.4, -bh * 0.75, bw * 0.22, bh * 0.1, 0.35);
@@ -458,7 +458,7 @@ function draw(ctx, pose, R) {
   ctx.save(); upper();
   ctx.translate(neckX, neckY + pose.bounce * 1.5);
   ctx.rotate(headRot);
-  drawHead(ctx, R, pose, { f, c, P, r, t, god, jaw, eyeMood, brow, hurtEyes, smoke, breath, breathUp, roar, rings, fl, dark });
+  drawHead(ctx, R, pose, { f, c, P, r, t, final, jaw, eyeMood, brow, hurtEyes, smoke, breath, breathUp, roar, rings, fl, dark });
   ctx.restore();
 
   if (scratch) frontLeg();
@@ -500,7 +500,7 @@ function draw(ctx, pose, R) {
 
 // ---------------------------------------------------------------------------
 function drawHead(ctx, R, pose, o) {
-  const { f, c, P, r, t, god, jaw, eyeMood, hurtEyes } = o;
+  const { f, c, P, r, t, final, jaw, eyeMood, hurtEyes } = o;
   const sn = P.sn;
   const snX = r * (0.45 + sn * 0.45), snY = r * 0.3, snRx = r * (0.3 + sn * 0.4), snRy = r * 0.4;
   const tipX = snX + snRx;
@@ -509,7 +509,7 @@ function drawHead(ctx, R, pose, o) {
   // cuerno lejano
   if (f >= 1) horn(ctx, R, r * 0.28, -r * 0.05, r, P.horn * 0.85, R.darken(c.gold, 0.18), f);
   // cresta dorada
-  if (f >= 2 && !god) {
+  if (f >= 2 && !final) {
     for (let i = 0; i < 4; i++) {
       const a = -PI * 0.62 - i * 0.26;
       const ex = Math.cos(a) * r * 0.95, ey = Math.sin(a) * r * 0.88;
@@ -629,7 +629,7 @@ function drawHead(ctx, R, pose, o) {
 
   // ojo
   const ex = r * 0.3, ey = -r * 0.12, er = r * (f === 0 ? 0.34 : 0.3);
-  if (god) {
+  if (final) {
     ctx.save();
     ctx.shadowColor = "#fff080"; ctx.shadowBlur = 10;
     ctx.fillStyle = R.alpha("#fff6a0", 0.5);
@@ -642,7 +642,7 @@ function drawHead(ctx, R, pose, o) {
     ctx.moveTo(ex - er * 0.6, ey - er * 0.6); ctx.lineTo(ex + er * 0.5, ey); ctx.lineTo(ex - er * 0.6, ey + er * 0.6);
     ctx.stroke();
   } else {
-    R.eye(ctx, ex, ey, er, pose, { iris: god ? "#ffb400" : c.iris, pupil: god ? "#8a3a00" : "#1a0a10", mood: eyeMood });
+    R.eye(ctx, ex, ey, er, pose, { iris: final ? "#ffb400" : c.iris, pupil: final ? "#8a3a00" : "#1a0a10", mood: eyeMood });
   }
   // ceja/cresta ósea
   if (f >= 2 && eyeMood !== "angry" && eyeMood !== "happy" && !hurtEyes) {
@@ -670,8 +670,8 @@ function drawHead(ctx, R, pose, o) {
     }
   }
 
-  // corona de llamas (GOD)
-  if (god) {
+  // corona de llamas (FORMA FINAL)
+  if (final) {
     R.halo(ctx, -r * 0.05, -r * 1.25, r * 0.85, t, "#ffe27a");
     for (let i = 0; i < 5; i++) {
       const a = -PI * 0.82 + i * PI * 0.16;
@@ -717,7 +717,7 @@ function drawHead(ctx, R, pose, o) {
       const s = (2.5 + i * 1.6 + f * 0.3) * (0.6 + 0.4 * k);
       const wob = Math.sin(t * 0.6 + i * 1.9) * 2 * (i / n);
       flame(ctx, R, mouthX + d, mouthY + wob + d * 0.12, s, 0.12 + wob * 0.04, t, i * 1.3,
-        god ? { outer: "#ff9a1a", mid: "#fff06a", ink: "#b0400a" } : {});
+        final ? { outer: "#ff9a1a", mid: "#fff06a", ink: "#b0400a" } : {});
     }
   }
   // rugido

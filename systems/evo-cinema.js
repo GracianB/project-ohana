@@ -385,22 +385,22 @@ export function playEvolution(detail = {}) {
   const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
   const newForm = (def.forms && def.forms[evo]) || {};
   const oldForm = (def.forms && def.forms[evo - 1]) || {};
-  const god = evo >= 4;
+  const finalForm = evo >= 4;
   const color = detail.color || newForm.color || def.color || "#7ee7ff";
   const oldColor = oldForm.color || color;
-  const accent = god ? GOLD : color;
+  const accent = finalForm ? GOLD : color;
   const light = tint(accent, 0.55);
-  const palette = god ? [GOLD, "#fff3b0", "#ffffff", color] : [color, light, "#ffffff"];
+  const palette = finalForm ? [GOLD, "#fff3b0", "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
   const upg = upgradeLine(def.id, evo);
   const reduce = reducedMotion();
 
-  // Línea de tiempo (s). GOD dura más.
-  const k = god ? 1.32 : 1;
+  // Línea de tiempo (s). FINAL dura más.
+  const k = finalForm ? 1.32 : 1;
   const T = reduce
     ? { dark: 0.25, oldIn: 0, charge: 0, flip: 0, flash: 0.25, reveal: 0.25, out: 1.55, end: 1.85 }
-    : { dark: 0.35 * k, oldIn: 0.15 * k, charge: 0.45 * k, flip: 1.2 * k, flash: 1.95 * k, reveal: 1.95 * k, out: 2.75 * k + (god ? 0.35 : 0) + 1, end: 3.1 * k + (god ? 0.35 : 0) + 1 }; // +1 s con la forma nueva a la vista
+    : { dark: 0.35 * k, oldIn: 0.15 * k, charge: 0.45 * k, flip: 1.2 * k, flash: 1.95 * k, reveal: 1.95 * k, out: 2.75 * k + (finalForm ? 0.35 : 0) + 1, end: 3.1 * k + (finalForm ? 0.35 : 0) + 1 }; // +1 s con la forma nueva a la vista
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
@@ -412,7 +412,7 @@ export function playEvolution(detail = {}) {
 
   st.sr.textContent = "¡Evolución! " + toName + ". Forma " + (evo + 1) + " de 5. " + upg;
   el.classList.add("show");
-  el.classList.toggle("god", god);
+  el.classList.toggle("finale", finalForm);
   sfx("evoCharge");
   duckMusic(true);
   let fanfared = false;
@@ -435,10 +435,10 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 18 : god ? 110 : 70;
+    const n = reduce ? 18 : finalForm ? 110 : 70;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
-      const sp = (reduce ? 160 : 420) + Math.random() * (god ? 900 : 700);
+      const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
       const kind = i % 3 === 0 ? "star" : i % 3 === 1 ? "streak" : "dot";
       const forward = Math.cos(a) > 0.2;
       parts.add({
@@ -446,7 +446,7 @@ export function playEvolution(detail = {}) {
         y: L.cy + Math.sin(a) * L.target * 0.42,
         vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
         drag: kind === "streak" ? 0.93 : 0.95, g: kind === "star" ? 160 : 0,
-        max: 0.9 + Math.random() * (god ? 1.4 : 1.0),
+        max: 0.9 + Math.random() * (finalForm ? 1.4 : 1.0),
         size: kind === "star" ? 5 + Math.random() * (L.target * 0.04) : kind === "streak" ? 2 + Math.random() * 2 : 2 + Math.random() * 3,
         rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8,
         kind, color: palette[i % palette.length],
@@ -473,9 +473,9 @@ export function playEvolution(detail = {}) {
     const fade = 1 - easeInOut(out);
 
     // sacudida
-    const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (god ? 0.6 : 0.42));
+    const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (finalForm ? 0.6 : 0.42));
     if (shakeK > 0 && shakeK < 1) {
-      const amp = (1 - shakeK) * (god ? 18 : 11);
+      const amp = (1 - shakeK) * (finalForm ? 18 : 11);
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
 
@@ -487,8 +487,8 @@ export function playEvolution(detail = {}) {
     const rayA = (0.35 + charge * 0.35 + revealK * 0.6) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
-    drawRays(ctx, cx, cy, R, accent, rayA, spin, god ? 18 : 14);
-    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, god ? color : light, rayA * 0.5, -spin * 0.7, 9);
+    drawRays(ctx, cx, cy, R, accent, rayA, spin, finalForm ? 18 : 14);
+    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.5, -spin * 0.7, 9);
 
     // 2 · anillos de energía durante la carga
     if (!reduce && t < T.flash) {
@@ -509,7 +509,7 @@ export function playEvolution(detail = {}) {
 
     // 3 · partículas que convergen
     if (!reduce && t > T.oldIn && t < T.flash - 0.08) {
-      spawnAcc += dt * (40 + charge * 220) * (god ? 1.5 : 1);
+      spawnAcc += dt * (40 + charge * 220) * (finalForm ? 1.5 : 1);
       while (spawnAcc > 1) {
         spawnAcc -= 1;
         const a = Math.random() * Math.PI * 2;
@@ -524,7 +524,7 @@ export function playEvolution(detail = {}) {
     }
     // destellos de ambiente tras la revelación
     if (t > T.reveal && t < T.out) {
-      sparkAcc += dt * (reduce ? 6 : god ? 40 : 24);
+      sparkAcc += dt * (reduce ? 6 : finalForm ? 40 : 24);
       while (sparkAcc > 1) {
         sparkAcc -= 1;
         const back = 0.25 + Math.random() * 0.7;
@@ -626,7 +626,7 @@ export function playEvolution(detail = {}) {
 
     // 5 · destello + onda + estallido
     if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
-    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(god ? "godFanfare" : "evoFanfare"); }
+    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(finalForm ? "evoFinalFanfare" : "evoFanfare"); }
     if (flashed && !burstDone) { burstDone = true; burst(L); }
     if (!reduce) {
       ctx.save();
@@ -636,7 +636,7 @@ export function playEvolution(detail = {}) {
       drawRing(ctx, cx, cy, maxR, seg(dt2, 0, 0.9), "#ffffff", target * 0.08);
       drawRing(ctx, cx, cy, maxR * 0.8, seg(dt2, 0.08, 1.0), accent, target * 0.05);
       drawRing(ctx, cx, footY, target * 1.6, seg(dt2, 0.0, 0.8), light, target * 0.035, 0.22);
-      if (god) {
+      if (finalForm) {
         drawRing(ctx, cx, cy, maxR * 1.1, seg(dt2, 0.2, 1.3), GOLD, target * 0.06);
         drawRing(ctx, cx, cy, maxR * 0.5, seg(dt2, 0.35, 1.2), "#fff3b0", target * 0.04);
       }
@@ -676,14 +676,14 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
       // kicker
-      drawTitle(ctx, god ? "✦ FORMA DIVINA ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
+      drawTitle(ctx, finalForm ? "✦ FORMA FINAL ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
       // nombre
       ctx.save();
       ctx.translate(cx, ty);
       const s = lerp(1.6, 1, slam);
       ctx.scale(s, s);
-      drawTitle(ctx, title, 0, 0, size, god ? ["#fff6c8", GOLD, "#ffb03a"] : ["#ffffff", light, accent],
+      drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", GOLD, "#ffb03a"] : ["#ffffff", light, accent],
         { maxWidth: W * 0.92 / s, glow: rgba(accent, 0.9) });
       ctx.restore();
       // barra y forma
@@ -740,7 +740,7 @@ export function playEvolution(detail = {}) {
     el.removeEventListener("pointerdown", onSkip);
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
-    el.classList.remove("show", "god");
+    el.classList.remove("show", "finale");
     duckMusic(false);
     running = null;
     if (!silent) {

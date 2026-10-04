@@ -7,7 +7,7 @@
 //   1 Frita         · una patata esbelta
 //   2 Capitán       · capa con goterones de kétchup, antifaz, espada-tenedor
 //   3 Extra Crujiente · tres patatas fundidas, muy crujiente, gafas de sol
-//   4 KÉTCHUP GOD   · dorada con purpurina, corona, aura de llamas doradas
+//   4 KÉTCHUP FORMA FINAL   · dorada con purpurina, corona, aura de llamas doradas
 // pose.move "slide" → tumbada surfeando con los brazos hacia delante.
 // ============================================================================
 
@@ -718,7 +718,7 @@ function draw(ctx, pose, R) {
   if (f === 0 && !P.lying) drawCone(ctx, R, coneBase(legBase));
   if (f === 0 && P.lying) drawConeLying(ctx, R, legBase, P.lying);
 
-  // glitter GOD
+  // glitter FORMA FINAL
   if (f === 4) {
     for (let i = 0; i < 6; i++) {
       const tw = Math.sin(t * 0.18 + i * 1.7);

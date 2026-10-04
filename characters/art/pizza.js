@@ -7,7 +7,7 @@
 //   1 Pizza       · pepperonis + aceitunas
 //   2 Picante     · jalapeños, cuernos-guindilla, llamitas
 //   3 Familiar    · ancha, doble corteza, gorro de chef
-//   4 PIZZA GOD   · halo dorado, queso luminoso, pepperonis en órbita
+//   4 PIZZA FORMA FINAL   · halo dorado, queso luminoso, pepperonis en órbita
 // pose.move "bounce" → squash/stretch al rebotar sobre enemigos.
 // ============================================================================
 const TAU = Math.PI * 2;
@@ -551,7 +551,7 @@ function faceDraw(ctx, R, pose, P, F, tipY, f) {
 }
 
 // ---------------------------------------------------------------------------
-// Órbita GOD
+// Órbita FORMA FINAL
 // ---------------------------------------------------------------------------
 function orbit(ctx, R, F, t, front) {
   for (let i = 0; i < 4; i++) {
@@ -803,7 +803,7 @@ function draw(ctx, pose, R) {
   ctx.rotate(P.roll);
   if (P.sx !== 1 || P.sy !== 1) ctx.scale(P.sx, P.sy);
 
-  // --- halo GOD (detrás) ---
+  // --- halo FORMA FINAL (detrás) ---
   if (f === 4 && !P.dead) {
     ctx.save();
     ctx.lineWidth = 5;

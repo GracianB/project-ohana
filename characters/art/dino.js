@@ -1,6 +1,6 @@
 // ============================================================================
 // DINO · Dinosaurio verde cabezón tipo T-rex (Versión Ultra Pulida)
-// 0 Dino Bebé | 1 Dino | 2 Dino Pico | 3 Dino Rex | 4 DINO GOD
+// 0 Dino Bebé | 1 Dino | 2 Dino Pico | 3 Dino Rex | 4 DINO FORMA FINAL
 // ============================================================================
 
 const PI = Math.PI;
@@ -178,7 +178,7 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 function draw(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const { hh, bw, bh } = P;
-  const god = f === 4, baby = f === 0;
+  const final = f === 4, baby = f === 0;
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = pose.flourishN % 3;
@@ -325,8 +325,8 @@ function draw(ctx, pose, R) {
   const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 
-  // AURA DINO GOD (EFECTO EXCLUSIVO MEJORADO)
-  if (god) {
+  // AURA DINO FORMA FINAL (EFECTO EXCLUSIVO MEJORADO)
+  if (final) {
     ctx.save();
     const auraGlow = 0.5 + Math.sin(t * 0.1) * 0.25;
     ctx.shadowColor = "#ffaa00";
@@ -365,10 +365,10 @@ function draw(ctx, pose, R) {
     const base = PI * 0.96 - tailA - wagA * 0.6;
     tpts = chain(-bw * 0.7, -bh * 0.22, P.tail, base, (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12, 8);
     
-    if (f === 2 || god) {
+    if (f === 2 || final) {
       for (let i = 2; i <= 3; i++) {
         const p = tpts[i], a = p[2] + PI / 2 + 0.25;
-        if (god) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
+        if (final) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
         else plateAt(ctx, R, p[0], p[1], a, 15 - i * 2, 6, i % 2 ? c.plate : c.plate2);
       }
     }
@@ -380,11 +380,11 @@ function draw(ctx, pose, R) {
       ctx.beginPath(); ctx.ellipse(lerp(p[0], q[0], 0.45), lerp(p[1], q[1], 0.45), P.tw * 0.15 * (1 - i / 10), P.tw * 0.1, q[2], 0, PI * 2); ctx.fill();
     }
     
-    if (f === 2 || god) {
+    if (f === 2 || final) {
       for (let i = 6; i <= 7; i++) {
         const p = sides.top[i], a = tpts[i][2];
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 - 0.5, 9, 2.4, god ? "#e8fdff" : c.claw);
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 + 0.1, 7, 2.2, god ? "#e8fdff" : c.claw);
+        spikeAt(ctx, R, p[0], p[1], a - PI / 2 - 0.5, 9, 2.4, final ? "#e8fdff" : c.claw);
+        spikeAt(ctx, R, p[0], p[1], a - PI / 2 + 0.1, 7, 2.2, final ? "#e8fdff" : c.claw);
       }
     }
     
@@ -396,7 +396,7 @@ function draw(ctx, pose, R) {
       const e = tpts[8];
       spikeAt(ctx, R, e[0], e[1], e[2] - 0.2, 7, 3, c.plate);
     }
-    if (god) {
+    if (final) {
       crack(ctx, [[tpts[1][0], tpts[1][1] - 3], [tpts[2][0] + 2, tpts[2][1] + 2], [tpts[3][0], tpts[3][1] - 2], [tpts[4][0] - 1, tpts[4][1] + 2]], t, 1);
     }
     ctx.restore();
@@ -416,12 +416,12 @@ function draw(ctx, pose, R) {
   } else {
     // PLACAS DORSALES
     ctx.save(); upper();
-    if (f === 2 || god) {
+    if (f === 2 || final) {
       for (let i = 0; i < 4; i++) {
         const a = -PI * 0.5 - 0.25 - i * 0.32;
         const px = Math.cos(a) * bw * 0.85, py = -bh * 0.5 + Math.sin(a) * bh * 0.52;
-        const len = (god ? 17 : 18) - Math.abs(i - 1.2) * 2.5;
-        if (god) crystal(ctx, R, px, py, a - 0.15, len + 2, 4.5);
+        const len = (final ? 17 : 18) - Math.abs(i - 1.2) * 2.5;
+        if (final) crystal(ctx, R, px, py, a - 0.15, len + 2, 4.5);
         else plateAt(ctx, R, px, py, a - 0.15, len, 7, i % 2 ? c.plate2 : c.plate);
       }
     }
@@ -462,7 +462,7 @@ function draw(ctx, pose, R) {
         spikeAt(ctx, R, px + Math.cos(a) * 2, py + Math.sin(a) * 2, a - 0.2, 6, 2.2, R.lighten(c.plate, 0.3), 1.5);
       }
     }
-    if (god) {
+    if (final) {
       crack(ctx, [[-bw * 0.9, -bh * 0.4], [-bw * 0.55, -bh * 0.52], [-bw * 0.62, -bh * 0.72], [-bw * 0.25, -bh * 0.88]], t, 2);
       crack(ctx, [[-bw * 0.7, -bh * 0.1], [-bw * 0.38, -bh * 0.22], [-bw * 0.3, -bh * 0.05]], t, 3);
     }
@@ -478,7 +478,7 @@ function draw(ctx, pose, R) {
   if (baby) ctx.rotate(shellRot * 0.6);
   ctx.translate(headX, headY + pose.bounce * 1.5);
   ctx.rotate(headRot);
-  drawHead(ctx, R, pose, { f, c, P, t, god, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp });
+  drawHead(ctx, R, pose, { f, c, P, t, final, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp });
   ctx.restore();
 
   // BRAZO DELANTERO
@@ -541,7 +541,7 @@ function draw(ctx, pose, R) {
 // ---------------------------------------------------------------------------
 
 function drawHead(ctx, R, pose, o) {
-  const { f, c, P, t, god, baby, jaw } = o;
+  const { f, c, P, t, final, baby, jaw } = o;
   const hw = P.hw, hh = P.hh;
   const dark = R.darken(c.body, 0.2);
 
@@ -566,7 +566,7 @@ function drawHead(ctx, R, pose, o) {
     }
   }
 
-  if (god) {
+  if (final) {
     R.halo(ctx, -hw * 0.1, -hh * 1.35, hw * 0.7, t, "#fff27a");
   }
 
@@ -651,7 +651,7 @@ function drawHead(ctx, R, pose, o) {
     for (let i = 0; i < 3; i++) spikeAt(ctx, R, -hw * (0.25 + i * 0.25), -hh * (0.98 - i * 0.12), -PI / 2 - 0.4 - i * 0.25, 7 - i, 2.4, c.plate);
   }
 
-  if (god) {
+  if (final) {
     for (let i = 0; i < 5; i++) {
       const a = -PI / 2 - 0.9 + i * 0.4;
       const bx = -hw * 0.15 + Math.cos(a) * hw * 0.5, by = -hh * 0.72 + Math.sin(a) * hh * 0.35;
@@ -678,7 +678,7 @@ function drawHead(ctx, R, pose, o) {
     ctx.stroke();
   } else {
     const lp = o.lookUp !== 0 ? { ...pose, look: { x: 1, y: 0.4 } } : pose;
-    R.eye(ctx, ex, ey, er, lp, { iris: god ? "#ff9a1a" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
+    R.eye(ctx, ex, ey, er, lp, { iris: final ? "#ff9a1a" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
   }
 
   if ((f >= 3 || o.eyeMood === "angry") && !o.hurtEyes && !o.deadEyes && o.eyeMood !== "happy" && o.eyeMood !== "closed") {
