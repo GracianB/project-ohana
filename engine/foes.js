@@ -26,8 +26,9 @@ export function applyElite(e) {
   return e;
 }
 
-export function makeFoe(x, y, kind, roomId, i, opts) {
+export function makeFoe(x, y, kind, roomId, i, opts = {}) {
   const hard = ROOM_HARD[roomId] ?? 1;
+  const rng = typeof opts.rng === "function" ? opts.rng : Math.random;
   const baby = !!(opts && opts.baby);
   if (kind === "phosquito") {
     const hp = baby ? 14 : 24 + hard * 14;
@@ -35,7 +36,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       x, y: 620 + (i % 3) * 24, w: baby ? 22 : 32, h: baby ? 18 : 26,
       vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.28),
       vy: -0.6, hp, max: hp, kind, color: "#6ad0a8",
-      boss: false, shoot: 0, canSplit: !baby && hard >= 1 && Math.random() < 0.55, split: false, baby,
+      boss: false, shoot: 0, canSplit: !baby && hard >= 1 && rng() < 0.55, split: false, baby,
       diveCd: 50 + i * 10, diving: false, telegraph: false,
     };
   }
@@ -56,7 +57,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       x, y: spawnY, w: 40, h: 42,
       vx: (i % 2 ? 1 : -1) * (2.2 + hard * 0.3),
       vy: -0.4, hp, max: hp, kind: "libelula", color: "#4aba7a",
-      boss: false, shoot: 0, dart: 40 + i * 15, bob: Math.random() * 6.28,
+      boss: false, shoot: 0, dart: 40 + i * 15, bob: rng() * 6.28,
       telegraph: false, wind: 0, darting: false, baseY: spawnY,
     };
   }
@@ -67,7 +68,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       x, y: spawnY, w: 42, h: 48,
       vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "abeja", color: "#f0c020",
       boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 40 + i * 18,
-      bob: Math.random() * 6.28, baseY: spawnY,
+      bob: rng() * 6.28, baseY: spawnY,
     };
   }
   if (kind === "pez") {
@@ -77,7 +78,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       x, y: by, w: 28, h: 18,
       vx: (i % 2 ? 1 : -1) * (1.1 + hard * 0.2),
       vy: 0, hp, max: hp, kind: "pez", color: "#3aa8d8",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: by,
+      boss: false, shoot: 0, bob: rng() * 6.28, baseY: by,
       dashSwim: 0, dashCd: 50 + i * 20,
     };
   }
@@ -93,7 +94,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
     return {
       x, y: y || 340, w: 30, h: 34, vx: (i % 2 ? 1 : -1) * 0.5, vy: 0,
       hp, max: hp, kind: "medusa", color: "#ff8ad0",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: (y || 340), dropsOrb: true,
+      boss: false, shoot: 0, bob: rng() * 6.28, baseY: (y || 340), dropsOrb: true,
       zapCd: 60 + i * 25, pulsezap: 0, telegraph: false,
     };
   }
@@ -104,7 +105,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       x, y: by, w: 48, h: 18,
       vx: (i % 2 ? 1 : -1) * (1.0 + hard * 0.18),
       vy: 0, hp, max: hp, kind: "anguila", color: "#40e0d0",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: by,
+      boss: false, shoot: 0, bob: rng() * 6.28, baseY: by,
       zapCd: 70 + i * 22, pulsezap: 0, telegraph: false,
     };
   }
@@ -133,7 +134,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       vx: (i % 2 ? 1 : -1) * (1.8 + hard * 0.25),
       vy: -0.3, hp, max: hp, kind: "gaviota", color: "#f0f4f8",
       boss: false, shoot: 0, diveCd: 55 + i * 14, diving: false, telegraph: false,
-      bob: Math.random() * 6.28, baseY: spawnY, wind: 0,
+      bob: rng() * 6.28, baseY: spawnY, wind: 0,
     };
   }
   if (kind === "murcielago") {
@@ -144,7 +145,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
       vx: (i % 2 ? 1 : -1) * (1.6 + hard * 0.28),
       vy: -0.4, hp, max: hp, kind: "murcielago", color: "#4a3060",
       boss: false, shoot: 0, diveCd: 60 + i * 16, diving: false, telegraph: false,
-      bob: Math.random() * 6.28, baseY: spawnY, wind: 0,
+      bob: rng() * 6.28, baseY: spawnY, wind: 0,
     };
   }
   if (kind === "arana") {
@@ -162,7 +163,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
     return {
       x, y: spawnY, w: 22, h: 22,
       vx: (i % 2 ? 1 : -1) * 0.9, vy: 0, hp, max: hp, kind: "brasita", color: "#ff6a20",
-      boss: false, shoot: 0, bob: Math.random() * 6.28, baseY: spawnY, telegraph: false,
+      boss: false, shoot: 0, bob: rng() * 6.28, baseY: spawnY, telegraph: false,
     };
   }
   if (kind === "escoria") {
@@ -180,7 +181,7 @@ export function makeFoe(x, y, kind, roomId, i, opts) {
     return {
       x, y: spawnY, w: 36, h: 22,
       vx: (i % 2 ? 1 : -1) * 0.8, vy: 0, hp, max: hp, kind: "ufo", color: "#7ee7ff",
-      boss: false, shoot: 0, shootCd: 40 + i * 20, bob: Math.random() * 6.28, baseY: spawnY, telegraph: false,
+      boss: false, shoot: 0, shootCd: 40 + i * 20, bob: rng() * 6.28, baseY: spawnY, telegraph: false,
     };
   }
   const hp = baby ? 16 : 26 + hard * 16;
