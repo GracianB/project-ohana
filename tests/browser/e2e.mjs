@@ -13,6 +13,12 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
+  const intro = page.locator('#ohana-intro');
+  const introSkip = intro.locator('.oi-skip');
+  if (await introSkip.count()) {
+    await introSkip.click({ force: true });
+    await page.waitForFunction(() => document.body.classList.contains('intro-complete'), null, { timeout: 5000 });
+  }
   const moduleProbe = await page.evaluate(async () => {
     const paths = [
       '/characters/rig.js',
