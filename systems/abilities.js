@@ -74,6 +74,10 @@ export function useAbility(game, index) {
     game.shake = Math.min(18, (game.shake || 0) + 7);
     game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
   }
+  // Lanzar otra habilidad cancela un agarre de queso en curso. El control
+  // temporal de una habilidad no debe secuestrar el siguiente input del jugador.
+  if (S.pull && id !== "cheese") S.pull = null;
+
   const fn = CASTERS[id];
   if (fn) fn(game, p, Number(p.evo) || 0);
 }
@@ -150,10 +154,11 @@ export function abilityPreMove(game, input) {
     } else { tx = pl.ax; ty = pl.ay - p.h / 2 - 14; }
     const dx = tx - cx(p), dy = ty - cy(p);
     const d = Math.hypot(dx, dy) || 1;
-    const sp = 15;
-    p.vx = (dx / d) * Math.min(sp, d);
-    p.vy = (dy / d) * Math.min(sp, d) - 0.52;
-    if (dx !== 0) p.facing = Math.sign(dx);
+    const sp = Math.min(11.5, 4.8 + d * 0.075);
+    const steer = input?.right === input?.left ? 0 : input?.right ? 2.8 : -2.8;
+    p.vx = clamp((dx / d) * Math.min(sp, d) + steer, -13, 13);
+    p.vy = clamp((dy / d) * Math.min(sp, d) - 0.35, -12, 12);
+    if (Math.abs(dx) > 4) p.facing = Math.sign(dx);
     if (pl.e) {
       const e = pl.e;
       if (d < Math.max(e.w, e.h) / 2 + p.w / 2 + 6 || pl.t <= 0) {
@@ -398,7 +403,17 @@ const CASTERS = {
   hula(g, p, evo) {
     S.hover = 60;
     if (p.vy > 0) p.vy = -2;
-    add({ kind: "hula", life: 60, r: 46 + evo * 6, dmg: 7 * pw(p), heal: evo >= 3 ? 3 : 0 });
+    add({
+      kind: "hula",
+      life: 60,
+      age: 0,
+      r: 46 + evo * 6,
+      dmg: 9 * pw(p),
+      heal: evo >= 3 ? 3 : 0,
+      hit: new Set(),
+      pulse: 0,
+      evo,
+    });
     boom(g, cx(p), cy(p), "#ff5ad5", 12, { star: true });
   },
   ohana(g, p, evo) {
@@ -624,8 +639,8 @@ const CASTERS = {
   cheese(g, p, evo) {
     const e = nearestEnemy(g, cx(p), cy(p), 280 + evo * 20, null, p.facing);
     if (e) {
-      S.pull = { e, t: 20 };
-      add({ kind: "cheese", e, life: 26, ax: cx(e), ay: cy(e) });
+      S.pull = { e, t: 16, maxT: 16 };
+      add({ kind: "cheese", e, life: 22, ax: cx(e), ay: cy(e) });
       boom(g, cx(e), cy(e), "#ffd84a", 8);
       return;
     }
@@ -725,6 +740,34 @@ const CASTERS = {
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
 const UPD = {
+  hula(g, f, p) {
+    f.life--;
+    f.pulse = (Number(f.pulse) || 0) + 1;
+    const rad = f.r + Math.sin(f.pulse * 0.22) * 5;
+    if (f.pulse % 8 === 0) {
+      f.hit.clear();
+      for (const e of g.enemies) {
+        if (!canHit(e) || f.hit.has(e)) continue;
+        if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > rad + Math.max(e.w, e.h) / 2) continue;
+        f.hit.add(e);
+        hitEnemy(g, e, f.dmg, {
+          kx: Math.sign(cx(e) - cx(p)) * 7 || p.facing,
+          ky: -5,
+          stun: 20,
+          color: "#ff5ad5",
+          shake: 2,
+          xp: 1,
+        });
+        if (f.heal && p.health < p.maxHealth) {
+          p.health = Math.min(p.maxHealth, p.health + f.heal);
+          g.nums.add(cx(p), p.y - 18, "+" + f.heal, "#7de87a");
+        }
+      }
+      boom(g, cx(p), cy(p), "#ff8adf", 5, { star: true, up: 1 });
+    }
+    armor(p, 2);
+    return f.life > 0;
+  },
     note(g, f) {
       f.life--;
       f.vy += 0.38;

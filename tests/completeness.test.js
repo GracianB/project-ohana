@@ -10,7 +10,7 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 globalThis.CustomEvent ||= class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } };
 const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.js');
 const { ROOMS } = await import('../systems/map.js');
-const { ABILITY_DEFS } = await import('../systems/abilities.js');
+const { ABILITY_DEFS, useAbility, updateAbilityFx, abilityPreMove, clearAbilityFx } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
@@ -385,6 +385,83 @@ test('phase 21: la preferencia de longitud nunca abandona el repertorio autoriza
   assert.ok(shortPattern.length <= longPattern.length);
   assert.ok(BOSS_COMBAT_PROFILES[3].patterns.some((candidate) => JSON.stringify(candidate) === JSON.stringify(shortPattern)));
   assert.ok(BOSS_COMBAT_PROFILES[3].patterns.some((candidate) => JSON.stringify(candidate) === JSON.stringify(longPattern)));
+});
+
+
+
+test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentro del aro', () => {
+  const g = {
+    player: { id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
+    enemies: [{ x: 112, y: 100, w: 24, h: 24, hp: 100, max: 100, kind: 'cucaracho', dying: 0, invuln: 0, vy: 0 }],
+    nums: { add() {} },
+    fx: { emit() {} },
+    ghosts: [],
+    cam: { x: 0, y: 0 },
+    worldW: 1600,
+    worldH: 900,
+    t: 0,
+    reduceMotion: true,
+    shake: 0,
+  };
+  clearAbilityFx();
+  useAbility(g, 1);
+  const before = g.enemies[0].hp;
+  for (let i = 0; i < 12; i++) {
+    g.t++;
+    updateAbilityFx(g);
+  }
+  assert.ok(g.enemies[0].hp < before, 'el hula debe producir al menos un impacto');
+  clearAbilityFx();
+});
+
+test('Pizza: las tres habilidades ejecutan su efecto y queso no deja el control secuestrado', () => {
+  const basePlayer = () => ({
+    id: 'pizza', abilities: ['pepperoni', 'cheese', 'oven'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2,
+    health: 100, maxHealth: 130, vy: 0, vx: 0, grounded: true, cds: {}, cdDur: {}
+  });
+  const makeGame = (enemyX = 180) => ({
+    player: basePlayer(),
+    enemies: [{ x: enemyX, y: 100, w: 24, h: 24, hp: 200, max: 200, kind: 'cucaracho', dying: 0, invuln: 0, vy: 0 }],
+    nums: { add() {} },
+    fx: { emit() {} },
+    ghosts: [],
+    cam: { x: 0, y: 0 },
+    worldW: 1600,
+    worldH: 900,
+    platforms: [{ x: 0, y: 300, w: 600, h: 40 }],
+    t: 0,
+    reduceMotion: true,
+    shake: 0,
+  });
+
+  for (const [slot, frames] of [[0, 24], [1, 20], [2, 12]]) {
+    clearAbilityFx();
+    const g = makeGame();
+    const before = g.enemies[0].hp;
+    useAbility(g, slot);
+    for (let i = 0; i < frames; i++) {
+      g.t++;
+      abilityPreMove(g, { left: false, right: false, jump: false });
+      updateAbilityFx(g);
+    }
+    assert.ok(g.enemies[0].hp < before, 'Pizza slot ' + slot + ' debe producir impacto');
+  }
+
+  clearAbilityFx();
+  const g = makeGame(220);
+  useAbility(g, 1);
+  for (let i = 0; i < 8; i++) {
+    g.t++;
+    abilityPreMove(g, { left: true, right: false, jump: false });
+  }
+  const xAfterPull = g.player.x;
+  for (let i = 0; i < 12; i++) {
+    g.t++;
+    abilityPreMove(g, { left: true, right: false, jump: false });
+  }
+  assert.ok(g.player.vx <= 0, 'el agarre de queso debe permitir contramovimiento');
+  assert.notEqual(xAfterPull, undefined);
+  clearAbilityFx();
 });
 
 test('phase 20: el resultado del CEBO cambia el tempo de forma determinista y acotada', () => {
