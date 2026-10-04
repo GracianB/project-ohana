@@ -75,6 +75,75 @@ async function auditPage(page, label) {
   await page.waitForTimeout(800);
   if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
+  const gameplay = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    if (!api) throw new Error('E2E gameplay API ausente');
+    const snapshots = [];
+
+    snapshots.push(api.state());
+
+    const castStart = api.cast(0);
+    snapshots.push(castStart);
+    const castAfter = api.step(8);
+    snapshots.push(castAfter);
+
+    const dashBefore = api.state();
+    api.dash();
+    const dashAfter = api.step(4);
+    snapshots.push({ dashBefore, dashAfter });
+
+    const evolved = api.setXp(55);
+    snapshots.push(evolved);
+    if (evolved.evo < 1) throw new Error('E2E: la evolución 0→1 no se produjo al alcanzar XP');
+
+    const lab = api.loadRoom('lab');
+    snapshots.push(lab);
+    if (lab.roomId !== 'lab') throw new Error('E2E: no pudo entrar en Lab');
+
+    const rainStart = api.forceRain();
+    const rainAfter = api.step(36);
+    snapshots.push({ rainStart, rainAfter });
+    if (!rainAfter.rain) throw new Error('E2E: la lluvia radiactiva no arrancó');
+
+    const finalForm = api.setEvo(4);
+    snapshots.push(finalForm);
+    if (finalForm.evo !== 4) throw new Error('E2E: no pudo alcanzar forma final');
+
+    const bossRoom = api.loadRoom('boss');
+    snapshots.push(bossRoom);
+    if (bossRoom.roomId !== 'boss' || !bossRoom.boss) throw new Error('E2E: no pudo entrar al Nido');
+
+    api.setInvulnerable(600);
+    api.step(60);
+
+    let boss = api.state().boss;
+    if (!boss) throw new Error('E2E: boss ausente tras entrar al Nido');
+
+    api.setPlayer(boss.x - 42, boss.y + 8);
+    boss = api.state().boss;
+    const hpBeforeHit = boss.hp;
+    api.setBossHp(60);
+    api.setPlayer(boss.x - 42, boss.y + 8);
+    api.attack();
+    const combatAfter = api.step(4);
+    snapshots.push({ hpBeforeHit, combatAfter });
+
+    if (!combatAfter.boss || !(combatAfter.boss.hp < 60)) {
+      throw new Error('E2E: el ataque real no dañó a la Reina del Nido');
+    }
+
+    api.setBossHp(300);
+    const phaseAfter = api.step(12);
+    snapshots.push({ phaseAfter });
+    if (!phaseAfter.boss || phaseAfter.boss.phase < 3) {
+      throw new Error('E2E: la Reina no entró en fase 3 al bajar a ≤22% de vida');
+    }
+
+    return snapshots;
+  });
+
+  if (errors.length) throw new Error(label + ': runtime errors during gameplay audit\n' + errors.join('\n'));
+
   const audit = await page.evaluate(async () => {
     const [{ ROSTER }, { ROOMS }, { ABILITY_DEFS }] = await Promise.all([
       import('/characters/roster.js?e2e=1'),
@@ -108,6 +177,7 @@ async function auditPage(page, label) {
   assert.ok(audit.js < 1500000, label + ': JS > 1.5 MB');
   assert.ok(audit.css < 500000, label + ': CSS > 500 KB');
   assert.ok(audit.fcp < 4000, label + ': FCP > 4 s');
+  assert.ok(gameplay.length >= 10, label + ': secuencia de gameplay incompleta');
   assert.match(audit.title, /PROJECT OHANA/i);
   assert.ok(audit.canvasLabel.length > 0, label + ': Canvas sin aria-label');
   assert.ok(audit.buttons.every((b) => b.name.length > 0), label + ': botón sin nombre accesible');
