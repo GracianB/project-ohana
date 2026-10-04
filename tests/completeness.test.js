@@ -13,6 +13,7 @@ const { ROOMS } = await import('../systems/map.js');
 const { ABILITY_DEFS } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
+const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -131,4 +132,33 @@ test('director del boss evita repetir la misma rutina consecutivamente cuando ha
     assert.ok(second.length > 0);
     if (profile.patterns.length > 1) assert.notDeepEqual(second, profile.patterns[0]);
   }
+});
+
+
+test('boss lee al jugador y adapta el primer ataque sin abandonar patrones autorizados', () => {
+  const state = createBossBehavior();
+  const dashPlayer = { grounded: true, vx: 6, vy: 0, _dashGo: 6, jumps: 1, maxJumps: 1 };
+  for (let i = 0; i < 8; i++) observeBossBehavior(state, dashPlayer, { combo: 0 });
+  assert.equal(state.tag, 'DASH');
+  assert.equal(reactiveAttackPreference(2, state, 0.8), 'slam');
+  const pattern = chooseBossPattern(2, -1, () => 0, {
+    distance: 500, vertical: 0, behavior: state,
+    reactivePreference: reactiveAttackPreference(2, state, 0.8),
+  });
+  assert.equal(pattern[0], 'slam');
+  assert.ok(BOSS_COMBAT_PROFILES[2].patterns.some((candidate) =>
+    candidate.length === pattern.length && candidate.every((kind, i) => kind === pattern[i])
+  ));
+  assert.equal(behaviorLabel(state, 0.8), 'LEE DASH');
+  assert.deepEqual(Object.keys(behaviorSnapshot(state)), ['dash', 'air', 'aggressive', 'tag']);
+});
+
+test('boss entra en desesperación final de forma determinista cuando queda al 22% o menos', () => {
+  const state = createBossBehavior();
+  const pattern = chooseBossPattern(3, -1, () => 0, {
+    distance: 40, vertical: 0, behavior: state,
+    hpRatio: 0.2,
+    reactivePreference: reactiveAttackPreference(3, state, 0.2),
+  });
+  assert.equal(pattern[0], 'charge');
 });
