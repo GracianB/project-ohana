@@ -94,6 +94,14 @@ export class BossFX {
     this.add("counter", { x, y, phase, reward, color: p.glow, life: 36 });
   }
 
+  counterplay(x, y, phase, result = {}) {
+    const p = bossPhaseProfile(phase);
+    this.add("counterplay", {
+      x, y, phase, result, color: p.glow,
+      life: result?.break ? 52 : 34,
+    });
+  }
+
   intro(x, y) {
     this.add("intro", { x, y, color: "#ffd37a", life: 54 });
   }
@@ -374,6 +382,25 @@ export class BossFX {
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("PUNISH +" + item.reward, x, y - r - 14);
+    } else if (item.type === "counterplay") {
+      const r = 16 + u * (item.result?.break ? 78 : 56);
+      ctx.globalAlpha = alpha * 0.88;
+      ctx.strokeStyle = item.color;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = item.result?.break ? 14 : 8;
+      ctx.lineWidth = item.result?.break ? 4 : 3;
+      for (let i = 0; i < 2; i++) {
+        const rr = r * (0.72 + i * 0.22);
+        ctx.beginPath(); ctx.arc(x, y, rr, 0, TAU); ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = item.color;
+      ctx.font = item.result?.break ? "900 18px Outfit,sans-serif" : "900 14px Outfit,sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const label = item.result?.break ? "BREAK" : (item.result?.type || "ESQUIVA");
+      ctx.fillText(label + " +" + (item.result?.reward || 0), x, y - r - 14);
     } else if (item.type === "spawn") {
       const r = 10 + u * 46;
       ctx.globalAlpha = alpha * 0.7;

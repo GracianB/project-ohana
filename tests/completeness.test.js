@@ -162,3 +162,60 @@ test('boss entra en desesperación final de forma determinista cuando queda al 2
   });
   assert.equal(pattern[0], 'charge');
 });
+
+ 
+test('boss counterplay: una defensa limpia genera racha y BREAK al tercer éxito', async () => {
+  const {
+    createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat,
+  } = await import('../systems/boss-counterplay.js');
+  const boss = { x: 500, y: 500, w: 110, h: 130, phase: 2 };
+  const player = { x: 550, y: 600, w: 28, h: 34, grounded: true, vy: 0, _dashGo: 0 };
+
+  const state = createBossCounterplay();
+  for (let i = 0; i < 3; i++) {
+    player.x = 550;
+    player.grounded = true;
+    player.vy = 0;
+    player._dashGo = 0;
+    startBossThreat(state, boss, player, 100, 'charge');
+    player._dashGo = 8;
+    player.x = 430;
+    for (let f = 0; f < 3; f++) observeBossThreat(state, boss, player, 100);
+    const result = resolveBossThreat(state, player, 100);
+    assert.ok(result);
+    assert.equal(result.type, 'DASH');
+    if (i < 2) assert.equal(result.break, false);
+    else {
+      assert.equal(result.break, true);
+      assert.ok(result.openBonus > 0);
+    }
+  }
+  assert.equal(state.streak, 3);
+  assert.equal(state.bestStreak, 3);
+  assert.equal(state.total, 3);
+});
+
+test('boss counterplay anula una defensa si el jugador recibe daño', async () => {
+  const { createBossCounterplay, startBossThreat, observeBossThreat, resolveBossThreat } =
+    await import('../systems/boss-counterplay.js');
+  const boss = { x: 500, y: 500, w: 110, h: 130, phase: 1 };
+  const player = { x: 550, y: 600, w: 28, h: 34, grounded: true, vy: 0, _dashGo: 6 };
+  const state = createBossCounterplay();
+  startBossThreat(state, boss, player, 100, 'charge');
+  observeBossThreat(state, boss, { ...player, _dashGo: 7, x: 430 }, 90);
+  assert.equal(resolveBossThreat(state, player, 90), null);
+  assert.equal(state.streak, 0);
+});
+
+
+test('boss counterplay: estar fuera de peligro no rompe una racha existente', async () => {
+  const { createBossCounterplay, startBossThreat, resolveBossThreat } =
+    await import('../systems/boss-counterplay.js');
+  const boss = { x: 500, y: 500, w: 110, h: 130, phase: 1 };
+  const player = { x: 550, y: 600, w: 28, h: 34, grounded: true, vy: 0, _dashGo: 6 };
+  const state = createBossCounterplay();
+  state.streak = 2;
+  startBossThreat(state, boss, { ...player, x: 1200, _dashGo: 0 }, 100, 'charge');
+  assert.equal(resolveBossThreat(state, player, 100), null);
+  assert.equal(state.streak, 2);
+});
