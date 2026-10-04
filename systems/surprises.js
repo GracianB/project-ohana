@@ -1,6 +1,7 @@
 // Sorpresas jugables. Mismos premios y mismas probabilidades. Fuera de cámara no se pinta.
 import { showNotification } from "./notify.js";
 import { Rain } from "./rain.js";
+import { healPlayer, setPlayerHealth, addScore, addEnemyHealth } from "./mutations.js";
 
 const GOLD_ROOMS = { beach: true, reef: true };
 const STAR_DURATION = 480;
@@ -141,7 +142,7 @@ export const Surprises = {
     e.golden = true;
     e.color = "#f0c040";
     const boost = Math.max(1, Math.round(e.hp * 0.3));
-    e.hp += boost;
+    addEnemyHealth(e, boost, Math.max(e.max || 0, e.hp + boost));
     e.max = Math.max(e.max || e.hp, e.hp);
   },
 
@@ -203,8 +204,8 @@ export const Surprises = {
   onEnemyKilled(e, game) {
     if (!e || !e.golden || !game || !game.player) return;
     const p = game.player;
-    p.health = Math.min(p.maxHealth, p.health + 25);
-    game.score = (game.score || 0) + 80;
+    healPlayer(p, 25);
+    addScore(game, 80);
     p._surpriseAura = Math.max(p._surpriseAura || 0, 720);
     game.flash = Math.max(game.flash || 0, 10);
     game.shake = Math.max(game.shake || 0, 8);
@@ -344,7 +345,7 @@ export const Surprises = {
         p.invuln = Math.max(p.invuln || 0, 90);
         p.dash = 28;
         p.vx = 14 * (p.facing || 1);
-        game.score = (game.score || 0) + 50;
+        addScore(game, 50);
         p._surpriseAura = Math.max(p._surpriseAura || 0, 360);
         game.flash = Math.max(game.flash || 0, 8);
         emitStars(game, s.x, s.y, 16, "#a8e0ff");
@@ -360,8 +361,8 @@ export const Surprises = {
       if (Math.hypot(p.x + p.w / 2 - fruit.x, p.y + p.h / 2 - fruit.y) < 36) {
         fruit.taken = true;
         this.flags.jungleFruitTaken = true;
-        p.health = Math.min(p.maxHealth, p.health + 15);
-        game.score = (game.score || 0) + 40;
+        healPlayer(p, 15);
+        addScore(game, 40);
         p._surpriseAura = Math.max(p._surpriseAura || 0, 240);
         game.flash = Math.max(game.flash || 0, 7);
         emitStars(game, fruit.x, fruit.y, 18, "#ff82c8");
@@ -380,9 +381,9 @@ export const Surprises = {
         crown.taken = true;
         this.flags.godCrownTaken = true;
         p.invuln = Math.max(p.invuln || 0, 120);
-        p.health = p.maxHealth;
+        setPlayerHealth(p, p.maxHealth);
         p.dash = 28;
-        game.score = (game.score || 0) + 100;
+        addScore(game, 100);
         p._surpriseAura = Math.max(p._surpriseAura || 0, 600);
         game.flash = Math.max(game.flash || 0, 12);
         game.shake = Math.max(game.shake || 0, 8);
