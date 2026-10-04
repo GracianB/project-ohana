@@ -1377,7 +1377,7 @@ function updateEnemies() {
     }
     if (e.kind === "phosquito" && e.canSplit && !e.split && e.hp < e.max * 0.5) {
       e.split = true;
-      game.enemies.push(makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }));
+      pushRuntime(game.enemies, makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }), MAX_RUNTIME_ENEMIES);
       game.fx.emit(e.x, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 });
     }
     if (e.kind === "planta") {
