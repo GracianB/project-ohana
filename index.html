@@ -201,18 +201,6 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script>
-    (function () {
-      var loading = document.getElementById("loading-screen");
-      window.hideLoading = function () {
-        if (!loading) return;
-        loading.classList.add("hidden");
-        setTimeout(function () { loading.remove(); }, 300);
-      };
-      addEventListener("load", function () { setTimeout(window.hideLoading, 150); });
-      setTimeout(window.hideLoading, 4000);
-    })();
-  </script>
   <script type="module" src="game.js?v=ohana-80"></script>
   <script type="module" src="systems/title.js?v=ohana-80"></script>
   <script type="module" src="systems/title-fx.js?v=ohana-80"></script>
