@@ -8,10 +8,57 @@ const base = 'http://127.0.0.1:4173/';
 
 async function auditPage(page, label) {
   const errors = [];
-  page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  page.on('pageerror', (e) => errors.push('pageerror: ' + (e.stack || e.message)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+  page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
+  const moduleProbe = await page.evaluate(async () => {
+    const paths = [
+      '/characters/rig.js',
+      '/characters/draw.js',
+      '/characters/art/index.js',
+      '/characters/art/kilo.js',
+      '/characters/art/stitcho.js',
+      '/characters/art/chispin.js',
+      '/characters/art/cat.js',
+      '/characters/art/dragon.js',
+      '/characters/art/dino.js',
+      '/characters/art/frita.js',
+      '/characters/art/pizza.js',
+      '/characters/art/yomi.js',
+      '/characters/art/cuerno.js',
+      '/characters/sprites.js',
+      '/characters/look.js',
+      '/systems/abilities.js',
+      '/engine/input.js'
+    ];
+    const results = [];
+    for (const path of paths) {
+      try {
+        await import(path + '?probe=1');
+        results.push({ path, ok: true });
+      } catch (error) {
+        let parse = null;
+        try {
+          const response = await fetch(path + '?source-probe=1', { cache: 'no-store' });
+          const source = await response.text();
+          const normalized = source
+            .replace(/^import[^;]+;\\s*$/gm, '')
+            .replace(/\\bexport\\s+(?=(const|let|var|function|class))/g, '');
+          new Function(normalized);
+        } catch (parseError) {
+          parse = { message: parseError?.message || String(parseError), stack: parseError?.stack || '' };
+        }
+        results.push({ path, ok: false, message: error?.message || String(error), stack: error?.stack || '', parse });
+      }
+    }
+    return results;
+  });
+  const failedModules = moduleProbe.filter((item) => !item.ok);
+  if (failedModules.length) {
+    throw new Error(label + ': module probe failed\n' + failedModules.map((item) => item.path + ' · ' + item.message + '\n' + item.stack).join('\n'));
+  }
   const sw = await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) return { supported:false };
     const reg = await navigator.serviceWorker.ready;
@@ -23,6 +70,7 @@ async function auditPage(page, label) {
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
+  if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
   const audit = await page.evaluate(async () => {
     const [{ ROSTER }, { ROOMS }, { ABILITY_DEFS }] = await Promise.all([

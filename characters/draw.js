@@ -1,4 +1,4 @@
-import { computePose, R } from "./rig.js";
+import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
@@ -33,6 +33,167 @@ function star(ctx, x, y, r, fill) {
 }
 
 const VISUAL_H = [36, 48, 58, 68, 80];
+const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", plasma:"#5ad1ff", rollo:"#2f6bff", caos:"#8f7bff", chain:"#ffe14a", blink:"#fff3a0", storm:"#99ccff", yarn:"#ff8ad4", purr:"#ffb6e4", ninetails:"#b78bff", breath:"#ff6a2a", gust:"#bfefff", meteor:"#ff4a20", bite:"#e8ffe0", charge:"#4cbf56", quake:"#c8a060", salt:"#fff3c0", ketchup:"#e23b3b", fryer:"#ffd36a", pepperoni:"#e0402a", cheese:"#ffd84a", oven:"#ff8a2a", ofuda:"#f2e6c8", sleeve:"#6a3cff", maw:"#ff2244", gleam:"#ffe9a8", gallop:"#f2c1ff", rainbow:"#fff6c8" };
+
+const CHARACTER_ACCENTS = {
+  kilo: "#ffd36a", stitcho: "#67ddff", chispin: "#fff29a", cat: "#ffb8e8",
+  dragon: "#ff8a45", dino: "#b8ef6b", frita: "#fff1b3", pizza: "#ffd84a",
+  yomi: "#ff5b78", cuerno: "#f2c1ff",
+};
+
+function accentFor(p) {
+  const base = p && p.id || "";
+  return CHARACTER_ACCENTS[base] || (p && p.color) || "#ffe66a";
+}
+
+function drawSpeedLines(ctx, H, color, t, intensity) {
+  if (intensity <= 0) return;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineCap = "round";
+  const n = 2 + Math.round(Math.min(3, intensity * 2));
+  for (let i = 0; i < n; i++) {
+    const y = -H * (0.18 + i * 0.13);
+    const len = H * (0.18 + intensity * 0.30) * (1 + (i % 2) * 0.2);
+    const phase = Math.sin(t * 0.22 + i * 2.1) * H * 0.025;
+    ctx.globalAlpha = 0.16 + intensity * 0.16;
+    ctx.lineWidth = Math.max(1.2, H * 0.018);
+    ctx.beginPath();
+    ctx.moveTo(-H * 0.08 - len - phase, y);
+    ctx.lineTo(-H * 0.08 - phase, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawLandingImpact(ctx, H, color, pose) {
+  const k = Math.max(0, Math.min(1, pose.land || 0));
+  if (k <= 0) return;
+  const p = 1 - k;
+  ctx.save();
+  ctx.globalAlpha = k * 0.48;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1.2, H * 0.018);
+  ctx.beginPath();
+  ctx.ellipse(0, 1, H * (0.24 + p * 0.35), H * (0.045 + p * 0.06), 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = k * 0.30;
+  for (let i = -2; i <= 2; i++) {
+    const x = i * H * 0.10;
+    ctx.beginPath();
+    ctx.moveTo(x, 1);
+    ctx.lineTo(x + i * H * 0.10, -H * (0.06 + p * 0.12));
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCastFX(ctx, H, color, pose, slot, abilityId) {
+  const abilityColor = (abilityId && ABILITY_ACCENTS[abilityId]) || color;
+  color = abilityColor;
+  if (pose.state !== "cast" || pose.cast <= 0 || pose.cast >= 1.02) return;
+  const u = Math.max(0, Math.min(1, pose.cast));
+  const pulse = Math.sin(u * Math.PI);
+  const r = H * (0.28 + pulse * 0.28);
+  ctx.save();
+  ctx.translate(0, -H * 0.50);
+  ctx.rotate((pose.t || 0) * 0.035 * (slot === 1 ? -1 : 1));
+  ctx.globalAlpha = 0.18 + pulse * 0.42;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1.2, H * 0.018);
+  const parts = slot === 2 ? 8 : slot === 1 ? 4 : 3;
+  for (let i = 0; i < parts; i++) {
+    const a0 = (Math.PI * 2 * i) / parts + 0.14;
+    const a1 = (Math.PI * 2 * i) / parts + 0.52;
+    ctx.beginPath();
+    ctx.arc(0, 0, r + (i % 2) * H * 0.035, a0, a1);
+    ctx.stroke();
+  }
+  if (slot === 2) {
+    for (let i = 0; i < 5; i++) {
+      const a = (Math.PI * 2 * i) / 5 + (pose.t || 0) * 0.06;
+      const rr = r * 0.62;
+      const x = Math.cos(a) * rr, y = Math.sin(a) * rr;
+      ctx.globalAlpha = 0.32 + pulse * 0.36;
+      star(ctx, x, y, Math.max(2, H * 0.035), color);
+    }
+  } else {
+    ctx.globalAlpha = 0.16 + pulse * 0.30;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawAttackFX(ctx, H, color, pose) {
+  if (pose.state !== "attack") return;
+  const a = Math.max(0, Math.min(1, pose.atk || 0));
+  const charge = Math.max(0, Math.min(1, pose.anticipation || 0));
+  const impact = Math.max(0, Math.min(1.2, pose.impact || 0));
+  ctx.save();
+  if (charge > 0) {
+    ctx.globalAlpha = charge * 0.25;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.2, H * 0.016);
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(0, -H * 0.48, H * (0.18 + i * 0.05), -Math.PI * 0.95, -Math.PI * 0.3);
+      ctx.stroke();
+    }
+  }
+  if (impact > 0) {
+    const len = H * (0.26 + impact * 0.52);
+    ctx.strokeStyle = color;
+    ctx.lineCap = "round";
+    ctx.globalAlpha = Math.min(0.85, 0.22 + impact * 0.48);
+    ctx.lineWidth = Math.max(1.4, H * 0.022);
+    for (let i = 0; i < 5; i++) {
+      const y = -H * 0.72 + i * H * 0.14;
+      const start = H * 0.04 + (i % 2) * H * 0.04;
+      ctx.beginPath();
+      ctx.moveTo(start, y);
+      ctx.lineTo(start + len * (0.62 + (i % 3) * 0.16), y + (i - 2) * H * 0.035);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = Math.min(0.75, impact * 0.65);
+    ctx.strokeStyle = "#fffdf2";
+    ctx.lineWidth = Math.max(1, H * 0.012);
+    ctx.beginPath(); ctx.arc(H * 0.14, -H * 0.50, H * (0.12 + impact * 0.18), -0.85, 0.85); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawCharacterMotionFX(ctx, p, H, pose, t) {
+  const color = accentFor(p);
+  const prof = motionProfile(p);
+  const intensity = Math.min(1.35, (pose.speed || 0) * (0.55 + prof.pace * 0.45));
+  if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
+  drawLandingImpact(ctx, H, color, pose);
+  drawAttackFX(ctx, H, color, pose);
+  drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
+  if (pose.state === "jump" && pose.stretch > 0.12) {
+    ctx.save();
+    ctx.globalAlpha = 0.22 + pose.stretch * 0.18;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.2, H * 0.014);
+    ctx.beginPath();
+    ctx.arc(0, 1, H * 0.26, Math.PI * 0.10, Math.PI * 0.90);
+    ctx.stroke();
+    ctx.restore();
+  }
+  if (p.dash > 0) {
+    const d = Math.min(1, p.dash / 12);
+    ctx.save();
+    ctx.globalAlpha = 0.22 + d * 0.28;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(1.4, H * 0.02);
+    for (let i = 0; i < 4; i++) {
+      const y = -H * (0.2 + i * 0.15);
+      ctx.beginPath(); ctx.moveTo(-H * (0.12 + i * 0.025), y); ctx.lineTo(-H * (0.40 + d * 0.3), y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
 const CHAR_K = {
   kilo: 1, lilo: 1, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92,
   cat: 0.92, dragon: 1, frita: 1.04, dino: 1, pizza: 0.98, yomi: 0.96, cuerno: 1,
@@ -334,7 +495,7 @@ export function drawCharacter(ctx, p, cam, t) {
   const speed = Math.abs(p.vx || 0);
   const moving = !!p.grounded && speed > 0.55;
   const air = !p.grounded;
-  const pose = computePose(p, t);
+  const pose = enhancePose(computePose(p, t, { rng: p.rng }), p);
   const atk = pose.atk;
   const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
   const hurtFresh = (p.invuln || 0) > 18;
@@ -395,6 +556,7 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.restore();
 
   drawFlavor(ctx, p.id, H, t, evo, true);
+  drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);
     p.evoBurst--;

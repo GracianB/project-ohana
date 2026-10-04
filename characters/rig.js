@@ -468,3 +468,82 @@ export const R = {
   INK, LINE, clamp, mix, lighten, darken, alpha, volume, paint,
   ellipse, blob, poly, limb, swingLimb, eye, mouth, blush, shine, star, sparkle, tail, halo, celShade,
 };
+
+// ---------------------------------------------------------------------------
+// MOTION POLISH · identidad cinética por personaje
+// ---------------------------------------------------------------------------
+// Los artistas reciben una pose común, pero cada criatura tiene su propio
+// peso, cadencia, elasticidad y agresividad. Así evitamos diez muñecos con la
+// misma animación de PowerPoint.
+export const MOTION_PROFILES = {
+  kilo:    { pace: 0.96, sway: 1.18, bounce: 1.08, weight: 0.82, attack: 1.10, impact: 1.05, jump: 1.08, cast: 1.00, dash: 0.90 },
+  stitcho: { pace: 1.12, sway: 1.20, bounce: 0.92, weight: 0.68, attack: 1.18, impact: 1.05, jump: 1.18, cast: 1.08, dash: 1.32 },
+  chispin: { pace: 1.38, sway: 1.42, bounce: 0.74, weight: 0.54, attack: 1.28, impact: 1.18, jump: 1.28, cast: 1.22, dash: 1.48 },
+  cat:     { pace: 1.18, sway: 0.82, bounce: 0.62, weight: 0.48, attack: 1.32, impact: 0.98, jump: 1.22, cast: 1.10, dash: 1.38 },
+  dragon:  { pace: 0.74, sway: 1.06, bounce: 1.18, weight: 1.22, attack: 1.04, impact: 1.32, jump: 1.10, cast: 1.28, dash: 0.82 },
+  dino:    { pace: 0.70, sway: 1.16, bounce: 1.28, weight: 1.46, attack: 0.94, impact: 1.46, jump: 0.96, cast: 1.02, dash: 0.76 },
+  frita:   { pace: 1.10, sway: 1.30, bounce: 0.88, weight: 0.76, attack: 1.24, impact: 1.16, jump: 1.06, cast: 1.16, dash: 1.18 },
+  pizza:   { pace: 0.86, sway: 1.24, bounce: 1.46, weight: 1.34, attack: 1.02, impact: 1.34, jump: 0.88, cast: 1.12, dash: 0.86 },
+  yomi:    { pace: 0.92, sway: 1.62, bounce: 0.36, weight: 0.40, attack: 1.16, impact: 0.92, jump: 1.34, cast: 1.34, dash: 1.10 },
+  cuerno:  { pace: 0.82, sway: 1.28, bounce: 1.34, weight: 1.06, attack: 1.12, impact: 1.20, jump: 1.02, cast: 1.08, dash: 0.90 },
+};
+
+const MOTION_ALIAS = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin", michi: "cat" };
+export function motionProfile(actor) {
+  const raw = String(actor?.id || actor?.characterId || actor?.name || "")
+    .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+  return MOTION_PROFILES[MOTION_ALIAS[raw] || raw] || NEUTRAL;
+}
+
+export function enhancePose(pose, actor = {}) {
+  if (!pose) return pose;
+  const m = motionProfile(actor);
+  const form = clamp(Number(pose.form) || 0, 0, 4);
+  const tier = 1 + form * 0.045;
+  const q = { ...pose };
+  q.armSwing = (q.armSwing || 0) * m.pace * m.sway * tier;
+  q.legSwing = (q.legSwing || 0) * m.pace * tier;
+  q.sway = (q.sway || 0) * m.sway;
+  q.bounce = (q.bounce || 0) * m.bounce;
+  q.breath = (q.breath || 0) * (0.92 + m.pace * 0.08);
+  q.bodyTilt = clamp((q.bodyTilt || 0) * m.pace, -0.38, 0.38);
+  q.headTilt = clamp((q.headTilt || 0) * (1.05 + m.sway * 0.18), -0.34, 0.34);
+  q.anticipation = clamp((q.anticipation || 0) * m.attack, 0, 1);
+  q.impact = clamp((q.impact || 0) * m.impact, 0, 1.3);
+  q.squash = clamp((q.squash || 0) * m.weight, 0, 0.32);
+  q.stretch = clamp((q.stretch || 0) * m.jump, -0.45, 0.60);
+  q.motionPace = m.pace;
+  q.motionWeight = m.weight;
+  q.motionAccent = m.sway;
+
+  const face = Number(actor?.facing) || 1;
+  if (actor?.dash > 0) {
+    q.bodyTilt = clamp(q.bodyTilt + face * 0.16 * m.dash, -0.48, 0.48);
+    q.stretch = clamp(q.stretch + 0.12 * m.dash, -0.45, 0.72);
+    q.squash *= 0.65;
+  }
+  if (q.air) {
+    q.stretch = clamp(q.stretch + (q.state === "jump" ? 0.06 : 0.02) * m.jump, -0.45, 0.72);
+    q.headTilt = clamp(q.headTilt + (q.state === "fall" ? 0.035 : -0.025), -0.38, 0.38);
+  }
+  if (q.state === "attack") {
+    if (q.anticipation > 0) q.bodyTilt = clamp(q.bodyTilt - face * 0.10 * q.anticipation * m.attack, -0.50, 0.50);
+    if (q.impact > 0) {
+      q.bodyTilt = clamp(q.bodyTilt + face * 0.18 * q.impact, -0.58, 0.58);
+      q.stretch = clamp(q.stretch + 0.10 * q.impact, -0.45, 0.74);
+      q.squash = clamp(q.squash + 0.035 * q.impact * m.weight, 0, 0.34);
+    }
+  }
+  if (q.state === "cast") {
+    const castWave = Math.sin(clamp(q.cast || 0, 0, 1) * Math.PI);
+    q.bodyTilt = clamp(q.bodyTilt + face * 0.055 * castWave * m.cast, -0.45, 0.45);
+    q.headTilt = clamp(q.headTilt - 0.075 * castWave * m.cast, -0.40, 0.40);
+    q.stretch = clamp(q.stretch + 0.035 * castWave * m.cast, -0.45, 0.72);
+  }
+  if (q.state === "dead") {
+    q.bodyTilt = clamp(face * 0.34, -0.45, 0.45);
+    q.stretch = -0.12;
+    q.squash = clamp(q.squash + 0.08, 0, 0.34);
+  }
+  return q;
+}
