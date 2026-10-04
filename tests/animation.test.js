@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -216,6 +216,8 @@ function makeEvolutionCinemaContext() {
 
 test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etapa", () => {
   assert.equal(typeof drawEvolutionCinemaFX, "function");
+  assert.equal(typeof drawEvolutionDesignFX, "function");
+  assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 10);
   const ctx = makeEvolutionCinemaContext();
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
 
@@ -223,7 +225,10 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
     for (let evo = 0; evo < 5; evo++) {
       assert.doesNotThrow(() => drawEvolutionCinemaFX(
         ctx, id, evo, 640, 300, 100, 60, "#ffd84a", 1
-      ), id + ":e" + evo);
+      ), id + ":cinema:e" + evo);
+      assert.doesNotThrow(() => drawEvolutionDesignFX(
+        ctx, { id, evo }, 80, { form: evo, state: "idle" }, 60
+      ), id + ":design:e" + evo);
     }
   }
 });
