@@ -10,6 +10,7 @@ import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-
 import { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackLabel } from "./boss-bait-feedback.js";
 import { createBossEncounterMemory, observeBossEncounter, encounterPreference, encounterLabel } from "./boss-encounter-memory.js";
 import { addScore } from "./mutations.js";
+import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -163,7 +164,7 @@ function emitParticles(game, x, y, opts, reduceMotion) {
   game.fx.emit(x, y, { ...opts, count: reduceMotion ? Math.max(2, Math.floor(count / 3)) : count });
 }
 function addGhost(game, ghostData) {
-  if (Array.isArray(game.ghosts)) game.ghosts.push(ghostData);
+  if (Array.isArray(game.ghosts)) pushRuntime(game.ghosts, ghostData, MAX_RUNTIME_GHOSTS);
 }
 function safeBeep(beep, soundName) {
   if (typeof beep === "function") { try { beep(soundName); } catch (_) {} }
@@ -659,10 +660,10 @@ function beginAttack(e, game, helpers, floorY) {
   if (Array.isArray(game.projectiles)) {
     for (let s = 0; s < shots; s++) {
       const spread = (s - (shots - 1) / 2) * (e.phase === 1 ? 1.35 : 1.55);
-      game.projectiles.push({
+      pushRuntime(game.projectiles, {
         x: cx - 8, y: cy - 6, vx: aim * baseSpeed, vy: spread,
         w: 16, h: 12, life: 85, dmg, color: e.phase >= 3 ? "#ff4060" : "#ff5a6a", owner: "enemy",
-      });
+      }, MAX_RUNTIME_PROJECTILES);
     }
   }
   emitParticles(game, cx + aim * 30, cy, { color: "#ff5a6a", count: 6, size: 2.8, up: 0.6 }, reduceMotion);
@@ -677,7 +678,7 @@ function spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion) {
     if (baby) {
       baby.hp = Math.max(10, Math.round((baby.hp || 20) * 0.85));
       baby.max = baby.hp;
-      game.enemies.push(baby);
+      pushRuntime(game.enemies, baby, MAX_RUNTIME_ENEMIES);
       emitParticles(game, cx, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 }, reduceMotion);
       game.bossFx?.spawn?.(cx, e.y, e.phase);
       if (showNotification) showNotification("CRÍA", "Un phosquito nace del nido.", "sala");
