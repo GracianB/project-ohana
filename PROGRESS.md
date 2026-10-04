@@ -17,6 +17,7 @@ Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, c
 
 ## Hecho
 
+| 04/10 | Infra de release: caché activa alineada en `ohana-88` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
 | Fecha | Qué |
 |---|---|
 | 04/10 | Intro cinematográfica de portada activa, con escena de Isla Hoku, aviso del Nido y salida por iris; eliminada la pantalla de carga básica. |
