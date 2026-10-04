@@ -16,6 +16,7 @@ const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } 
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
 const { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, adaptationSnapshot, adaptationLabel } = await import('../systems/boss-adaptation.js');
 const { createBossBait, armBossBait, consumeBossBait, baitSnapshot, BAIT_PATTERNS } = await import('../systems/boss-bait.js');
+const { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackSnapshot, baitFeedbackLabel } = await import('../systems/boss-bait-feedback.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -334,4 +335,38 @@ test('phase 19: el CEBO no puede saltarse la protección anti-repetición del di
     baitPattern: bait,
   });
   assert.notDeepEqual(pattern, bait);
+});
+
+
+test('phase 20: el resultado del CEBO cambia el tempo de forma determinista y acotada', () => {
+  const read = createBossBaitFeedback();
+  beginBossBaitFeedback(read, 'DASH');
+  const readResult = resolveBossBaitFeedback(read, { type: 'DASH' }, true);
+  assert.deepEqual(readResult, { outcome: 'read', type: 'DASH', tempo: -1, delta: -1 });
+  assert.equal(baitFeedbackLabel(read), 'CEBO LEÍDO · RITMO -1');
+
+  const trap = createBossBaitFeedback();
+  beginBossBaitFeedback(trap, 'AIRE');
+  const trapResult = resolveBossBaitFeedback(trap, null, true);
+  assert.deepEqual(trapResult, { outcome: 'trapped', type: 'AIRE', tempo: 1, delta: 1 });
+  assert.equal(baitFeedbackLabel(trap), 'CEBO EFICAZ · RITMO +1');
+
+  for (let i = 0; i < 8; i++) {
+    beginBossBaitFeedback(trap, 'AIRE');
+    resolveBossBaitFeedback(trap, null, true);
+  }
+  assert.equal(trap.tempo, 2);
+  assert.equal(feedbackAttackDelay(18, trap), 12);
+  assert.deepEqual(baitFeedbackSnapshot(trap), {
+    active: false, attempts: 9, trapped: 9, read: 0, tempo: 2, last: 'trapped'
+  });
+});
+
+test('phase 20: un CEBO fuera de peligro no altera el tempo', () => {
+  const state = createBossBaitFeedback();
+  beginBossBaitFeedback(state, 'DISTANCIA');
+  const result = resolveBossBaitFeedback(state, null, false);
+  assert.deepEqual(result, { outcome: 'neutral', type: 'DISTANCIA', tempo: 0, delta: 0 });
+  assert.equal(baitFeedbackLabel(state), '');
+  assert.equal(feedbackAttackDelay(18, state), 18);
 });
