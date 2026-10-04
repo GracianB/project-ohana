@@ -39,7 +39,7 @@ test('la experiencia final no conserva terminología divina genérica ni identif
   ];
   for (const file of files) {
     const source = fs.readFileSync(file, 'utf8');
-    const legacyTerm = new RegExp('\\\\b' + ['G', 'O', 'D'].join('') + '\\\\b', 'i');
+    const legacyTerm = new RegExp('\\b' + ['G', 'O', 'D'].join('') + '\\b', 'i');
     assert.doesNotMatch(source, legacyTerm, file + ' conserva terminología divina antigua');
   }
   assert.match(fs.readFileSync('./engine/audio.js', 'utf8'), /evoFinalFanfare/);
