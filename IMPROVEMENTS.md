@@ -1,4 +1,4 @@
-# 53 mejoras · Demo Mundo 1
+# 54 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -9,7 +9,7 @@
 5. Continuar recupera forma y sala
 6. 5 formas reales
 7. Bebé sin cine de evo
-8. GOD al final
+8. forma final
 9. HUD cristal
 10. Pips 1/5
 11. Objetivo por sala (demo-obj)
@@ -52,9 +52,9 @@
 48. README demo
 49. Ruta Mundo 1 cerrada
 50. Versión DEMO jugable online
-51. Evolución visual por forma: silueta, postura y firma 0 → GOD
+51. Evolución visual por forma: silueta, postura y firma 0 → forma final
 52. Evolución aplicada al combate: H/J/K/L escalan su lectura por forma y héroe
-53. Cinemática de evolución 2.0: firma gráfica por héroe y etapa, medidor 0→GOD y reveal reforzado
+53. Cinemática de evolución 2.0: firma gráfica por héroe y etapa, medidor 0→forma final y reveal reforzado
 
 ## Cifras maestras
 
