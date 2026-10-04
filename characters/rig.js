@@ -491,7 +491,7 @@ export const MOTION_PROFILES = {
 const MOTION_ALIAS = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin", michi: "cat" };
 export function motionProfile(actor) {
   const raw = String(actor?.id || actor?.characterId || actor?.name || "")
-    .toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+    .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
   return MOTION_PROFILES[MOTION_ALIAS[raw] || raw] || NEUTRAL;
 }
 
