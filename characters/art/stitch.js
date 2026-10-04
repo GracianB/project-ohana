@@ -25,7 +25,7 @@ const P = [
   { hx: 4, hy: -58, hrx: 25, hry: 21, bx: -2, by: -31, brx: 15, bry: 17, legL: 13, legW: 8.5, armL: 16, armW: 6.5, hand: 5.4, antL: 27, ear: 9, eye: 9.4 },
   { hx: 13, hy: -52, hrx: 25, hry: 20, bx: -2, by: -30, brx: 19, bry: 17, lean: 0.32, legL: 12, legW: 10.5, armL: 20, armW: 8.5, hand: 7.5, antL: 29, ear: 10, eye: 9, spikes: true, bigClaw: true },
   { hx: 5, hy: -62, hrx: 25, hry: 21, bx: -2, by: -34, brx: 18, bry: 19, legL: 14, legW: 9.5, armL: 18, armW: 7.5, hand: 6, antL: 29, ear: 10, eye: 9.4, tech: true },
-  { hx: 5, hy: -66, hrx: 25, hry: 21, bx: -2, by: -36, brx: 18, bry: 20, legL: 15, legW: 9.5, armL: 19, armW: 7.5, hand: 6, antL: 31, ear: 10, eye: 9.4, god: true },
+  { hx: 5, hy: -66, hrx: 25, hry: 21, bx: -2, by: -36, brx: 18, bry: 20, legL: 15, legW: 9.5, armL: 19, armW: 7.5, hand: 6, antL: 31, ear: 10, eye: 9.4, final: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -253,16 +253,16 @@ function alienMouth(ctx, R, x, y, w, type, teeth) {
 }
 
 /** Antena-muelle. Devuelve la punta. */
-function antenna(ctx, R, bx, by, tx, ty, bend, w, bulb, glow, god, t, i) {
+function antenna(ctx, R, bx, by, tx, ty, bend, w, bulb, glow, final, t, i) {
   const mx = (bx + tx) / 2, my = (by + ty) / 2;
   const dx = tx - bx, dy = ty - by, d = Math.hypot(dx, dy) || 1;
   const cx = mx - (dy / d) * bend, cy = my + (dx / d) * bend;
-  stroke2(ctx, R, () => { ctx.moveTo(bx, by); ctx.quadraticCurveTo(cx, cy, tx, ty); }, w, god ? "#7a5cff" : "#3a78ff", 2.2);
+  stroke2(ctx, R, () => { ctx.moveTo(bx, by); ctx.quadraticCurveTo(cx, cy, tx, ty); }, w, final ? "#7a5cff" : "#3a78ff", 2.2);
   // anillo de muelle cerca de la base
   ctx.beginPath(); ctx.moveTo(bx + (cx - bx) * 0.35 - 2, by + (cy - by) * 0.35); ctx.lineTo(bx + (cx - bx) * 0.35 + 2, by + (cy - by) * 0.35);
   ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 1.2; ctx.stroke();
-  glowDot(ctx, tx, ty, bulb * (2.2 + glow), god ? "#ffe98a" : CYAN, 0.35 + glow * 0.45);
-  R.ellipse(ctx, tx, ty, bulb, bulb, god ? "#fff2a8" : CYAN, { lw: 2.2 });
+  glowDot(ctx, tx, ty, bulb * (2.2 + glow), final ? "#ffe98a" : CYAN, 0.35 + glow * 0.45);
+  R.ellipse(ctx, tx, ty, bulb, bulb, final ? "#fff2a8" : CYAN, { lw: 2.2 });
   ctx.save();
   ctx.globalAlpha *= Math.min(1, 0.4 + glow * 0.6);
   ctx.fillStyle = "#ffffff";
@@ -393,8 +393,8 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
     glowDot(ctx, exF + eyR * 1.2, ey - eyR * 1.1, 3, "#ff4a7a", 0.6 + 0.4 * Math.sin(t * 0.3));
   }
 
-  // --- corona de luz (GOD)
-  if (S.god) {
+  // --- corona de luz (FORMA FINAL)
+  if (S.final) {
     ctx.save();
     ctx.translate(0, -ry - 6 + Math.sin(t * 0.08) * 1.5);
     ctx.shadowColor = "#ffe27a"; ctx.shadowBlur = 8;
@@ -525,7 +525,7 @@ function shoulderPlate(ctx, R, x, y, s, back) {
   ctx.strokeStyle = "rgba(98,243,255,0.9)"; ctx.lineWidth = 1.5; ctx.stroke();
 }
 
-// Anillos orbitales (GOD): mitad trasera / delantera
+// Anillos orbitales (FORMA FINAL): mitad trasera / delantera
 function rings(ctx, R, cx, cy, t, front) {
   for (let i = 0; i < 2; i++) {
     const rx = 44 + i * 9, ry = 10 + i * 3, rot = i ? 0.42 : -0.28;
