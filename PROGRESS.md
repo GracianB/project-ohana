@@ -149,7 +149,7 @@ Las pruebas cubren, entre otras áreas:
 
 El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 
-| 04/10 | **Boss Spectacle 2.0**: la Reina del Nido recibe tres identidades de fase, telegráficos específicos por ataque, transiciones cinematográficas, ondas de aterrizaje y presentación independiente determinista; sin tocar IA, daño ni hitboxes; caché `ohana-90`. |\n\n## Publicación y caché
+| 04/10 | **Boss Spectacle 2.0**: la Reina del Nido recibe tres identidades de fase, telegráficos específicos por ataque, transiciones cinematográficas, ondas de aterrizaje y presentación independiente determinista; sin tocar IA, daño ni hitboxes; caché `ohana-90`. |\n## Publicación y caché
 
 GitHub Pages publica desde `main`.
 
