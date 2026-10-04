@@ -527,7 +527,7 @@ function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
 
 function pickAttack(e) {
   const baitPattern = consumeBossBait(e.bait, e.phase);
-  if (baitPattern) e.adaptation.baitConsumed = true;
+  if (baitPattern) e.baitLabel = "CEBO CONSUMIDO";
   const p = e._lastPlayer || null;
   const cx = e.x + e.w / 2;
   const px = p ? p.x + p.w / 2 : cx;
