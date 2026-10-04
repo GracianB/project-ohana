@@ -348,7 +348,6 @@ function upgradeLine(id, evo) {
   if (b.speed > a.speed) out.push("+velocidad");
   if (b.jump > a.jump && !(b.jumps > a.jumps)) out.push("+salto");
   if (b.jumps > a.jumps) out.push("+" + (b.jumps - a.jumps) + (b.jumps - a.jumps > 1 ? " saltos" : " salto"));
-  if (b.aura) out.push("aura divina");
   if (b.glide) out.push("planeo");
   return out.join("  ·  ");
 }
@@ -387,10 +386,11 @@ export function playEvolution(detail = {}) {
   const oldForm = (def.forms && def.forms[evo - 1]) || {};
   const finalForm = evo >= 4;
   const color = detail.color || newForm.color || def.color || "#7ee7ff";
+  const designAccent = newForm.accent || newForm.color || def.color || color;
   const oldColor = oldForm.color || color;
-  const accent = finalForm ? GOLD : color;
+  const accent = finalForm ? designAccent : color;
   const light = tint(accent, 0.55);
-  const palette = finalForm ? [GOLD, "#fff3b0", "#ffffff", color] : [color, light, "#ffffff"];
+  const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
   const upg = upgradeLine(def.id, evo);
@@ -637,8 +637,8 @@ export function playEvolution(detail = {}) {
       drawRing(ctx, cx, cy, maxR * 0.8, seg(dt2, 0.08, 1.0), accent, target * 0.05);
       drawRing(ctx, cx, footY, target * 1.6, seg(dt2, 0.0, 0.8), light, target * 0.035, 0.22);
       if (finalForm) {
-        drawRing(ctx, cx, cy, maxR * 1.1, seg(dt2, 0.2, 1.3), GOLD, target * 0.06);
-        drawRing(ctx, cx, cy, maxR * 0.5, seg(dt2, 0.35, 1.2), "#fff3b0", target * 0.04);
+        drawRing(ctx, cx, cy, maxR * 1.1, seg(dt2, 0.2, 1.3), accent, target * 0.06);
+        drawRing(ctx, cx, cy, maxR * 0.5, seg(dt2, 0.35, 1.2), light, target * 0.04);
       }
       // anillos lentos alrededor del personaje revelado
       if (t > T.reveal) {
@@ -676,14 +676,14 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
       // kicker
-      drawTitle(ctx, finalForm ? "✦ FORMA FINAL ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
+      drawTitle(ctx, finalForm ? "✦ FORMA FIRMA ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
       // nombre
       ctx.save();
       ctx.translate(cx, ty);
       const s = lerp(1.6, 1, slam);
       ctx.scale(s, s);
-      drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", GOLD, "#ffb03a"] : ["#ffffff", light, accent],
+      drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", accent, light] : ["#ffffff", light, accent],
         { maxWidth: W * 0.92 / s, glow: rgba(accent, 0.9) });
       ctx.restore();
       // barra y forma

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
-import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX } from "../characters/evolution.js";
+import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionKey, evolutionProfile, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
 
 const basePlayer = {
   grounded: true,
@@ -210,13 +210,15 @@ function makeEvolutionCinemaContext() {
     lineJoin: "round",
     save() {}, restore() {}, translate() {}, rotate() {},
     beginPath() {}, closePath() {}, moveTo() {}, lineTo() {},
-    ellipse() {}, arc() {}, quadraticCurveTo() {}, fill() {}, stroke() {}, fillRect() {},
+    ellipse() {}, arc() {}, quadraticCurveTo() {}, fill() {}, stroke() {}, fillRect() {}, rect() {},
   };
 }
 
 test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etapa", () => {
   assert.equal(typeof drawEvolutionCinemaFX, "function");
   assert.equal(typeof drawEvolutionDesignFX, "function");
+  assert.equal(typeof drawEvolutionSilhouetteFX, "function");
+  assert.equal(typeof drawEvolutionCombatFX, "function");
   assert.equal(Object.keys(EVOLUTION_FINAL_DESIGNS).length, 10);
   const ctx = makeEvolutionCinemaContext();
   const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
@@ -229,6 +231,25 @@ test("la cinemática de evolución puede dibujar las 50 firmas por héroe y etap
       assert.doesNotThrow(() => drawEvolutionDesignFX(
         ctx, { id, evo }, 80, { form: evo, state: "idle" }, 60
       ), id + ":design:e" + evo);
+    }
+  }
+});
+
+
+test("las formas 2-4 tienen siluetas finales distintas y FX de combate dibujables", () => {
+  const ids = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const ctx = makeEvolutionCinemaContext();
+  const silhouettes = ids.map((id) => evolutionProfile({ id, evo: 4 }).finalDesign.silhouette);
+  assert.equal(new Set(silhouettes).size, 10);
+  for (const id of ids) {
+    for (let evo = 2; evo < 5; evo++) {
+      assert.doesNotThrow(() => drawEvolutionSilhouetteFX(
+        ctx, { id, color: "#ffffff", evo }, 100, { form: evo, state: "idle" }, 60, false
+      ), id + ":silhouette:e" + evo);
+      assert.doesNotThrow(() => drawEvolutionCombatFX(
+        ctx, { id, color: "#ffffff", evo }, 100,
+        { form: evo, state: "attack", atk: 0.8, impact: 0.9 }, 60
+      ), id + ":combat:e" + evo);
     }
   }
 });

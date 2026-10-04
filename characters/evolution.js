@@ -61,18 +61,17 @@ export const EVOLUTION_COMBAT_STAGES = Object.freeze([
 ]);
 
 export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
-  kilo:    Object.freeze({ motif: "petal",  span: 0.92, spin: 0.30, nodes: 6 }),
-  stitcho: Object.freeze({ motif: "seam",   span: 0.88, spin: -0.28, nodes: 5 }),
-  chispin: Object.freeze({ motif: "bolt",   span: 0.96, spin: 0.16, nodes: 7 }),
-  cat:     Object.freeze({ motif: "eclipse",span: 0.84, spin: 0.22, nodes: 6 }),
-  dragon:  Object.freeze({ motif: "flame",  span: 1.10, spin: -0.14, nodes: 5 }),
-  dino:    Object.freeze({ motif: "crystal",span: 0.98, spin: 0.08, nodes: 7 }),
-  frita:   Object.freeze({ motif: "fries",  span: 0.90, spin: -0.20, nodes: 7 }),
-  pizza:   Object.freeze({ motif: "crust",  span: 1.02, spin: 0.10, nodes: 6 }),
-  yomi:    Object.freeze({ motif: "maw",    span: 0.88, spin: 0.00, nodes: 5 }),
-  cuerno:  Object.freeze({ motif: "aurora", span: 1.00, spin: 0.18, nodes: 7 }),
+  kilo:    Object.freeze({ motif: "petal",    silhouette: "crown",    span: 0.98, spin: 0.30, nodes: 7, accent: "#ffd36a", profile: "garden-crown" }),
+  stitcho: Object.freeze({ motif: "seam",     silhouette: "cape",     span: 1.02, spin: -0.28, nodes: 6, accent: "#67ddff", profile: "nebula-cape" }),
+  chispin: Object.freeze({ motif: "bolt",     silhouette: "mane",     span: 1.00, spin: 0.16, nodes: 8, accent: "#fff29a", profile: "storm-mane" }),
+  cat:     Object.freeze({ motif: "eclipse",  silhouette: "crescent", span: 0.94, spin: 0.22, nodes: 7, accent: "#ffb8e8", profile: "eclipse-collar" }),
+  dragon:  Object.freeze({ motif: "flame",    silhouette: "wing",     span: 1.16, spin: -0.14, nodes: 6, accent: "#ff8a45", profile: "solar-wing" }),
+  dino:    Object.freeze({ motif: "crystal",  silhouette: "back",     span: 1.10, spin: 0.08, nodes: 8, accent: "#b8ef6b", profile: "crystal-spine" }),
+  frita:   Object.freeze({ motif: "fries",    silhouette: "crest",    span: 1.04, spin: -0.20, nodes: 8, accent: "#fff1b3", profile: "crisp-crest" }),
+  pizza:   Object.freeze({ motif: "crust",    silhouette: "ring",     span: 1.10, spin: 0.10, nodes: 7, accent: "#ffd84a", profile: "volcanic-ring" }),
+  yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
+  cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
-
 const CHARACTER_STYLES = Object.freeze({
   kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
   stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
@@ -253,6 +252,137 @@ function drawGlyph(ctx, kind, x, y, s, color, rot = 0) {
   ctx.restore();
 }
 
+export function drawEvolutionSilhouetteFX(ctx, p, H, pose, t, front = false) {
+  const e = evolutionProfile(p, pose?.form);
+  const stage = e.evo;
+  if (stage < 2) return;
+
+  const d = e.finalDesign;
+  const color = p?.color || d.accent || "#fff6c8";
+  const hot = d.accent || color;
+  const k = stage === 2 ? 0.55 : stage === 3 ? 0.78 : 1;
+  const pulse = 1 + Math.sin((Number(t) || 0) * 0.028 * e.pulse) * 0.035;
+  const S = H * d.span * k;
+
+  ctx.save();
+  ctx.globalCompositeOperation = front ? "source-over" : "lighter";
+  ctx.globalAlpha = (front ? 0.72 : 0.62) * k;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  const fill = front ? withAlpha(color, 0.16 + stage * 0.025) : withAlpha(color, 0.12 + stage * 0.02);
+  const stroke = hot;
+
+  switch (d.silhouette) {
+    case "crown":
+      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(1.5, H * 0.018);
+      ctx.beginPath();
+      ctx.moveTo(-S*0.48,-H*0.58); ctx.lineTo(-S*0.34,-H*0.92); ctx.lineTo(-S*0.10,-H*0.66);
+      ctx.lineTo(0,-H*1.02); ctx.lineTo(S*0.10,-H*0.66); ctx.lineTo(S*0.34,-H*0.92);
+      ctx.lineTo(S*0.48,-H*0.58); ctx.closePath(); ctx.fill(); ctx.stroke();
+      break;
+    case "cape":
+      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(1.4, H * 0.016);
+      ctx.beginPath();
+      ctx.moveTo(-S*0.30,-H*0.34);
+      ctx.quadraticCurveTo(-S*0.62,-H*0.05,-S*0.54,H*0.03);
+      ctx.quadraticCurveTo(0,-H*0.16,S*0.54,H*0.03);
+      ctx.quadraticCurveTo(S*0.62,-H*0.05,S*0.30,-H*0.34);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(i*S*0.16,-H*0.28); ctx.lineTo(i*S*0.22,H*0.02); ctx.stroke(); }
+      break;
+    case "mane":
+      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(1.3, H * 0.015);
+      for(let i=0;i<9;i++){
+        const a=-1.15+i*0.287;
+        const x=Math.cos(a)*S*0.46, y=-H*0.56+Math.sin(a)*H*0.24;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+Math.cos(a)*H*0.20,y+Math.sin(a)*H*0.20); ctx.lineTo(x+Math.cos(a)*H*0.05,y+Math.sin(a)*H*0.31); ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+      break;
+    case "crescent":
+      ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(2, H * 0.035);
+      ctx.beginPath(); ctx.arc(0,-H*0.43,S*0.55,-1.05,1.05); ctx.stroke();
+      ctx.globalAlpha *= 0.55;
+      ctx.beginPath(); ctx.arc(0,-H*0.43,S*0.40,1.95,4.30); ctx.stroke();
+      break;
+    case "wing":
+      ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = Math.max(1.5, H * 0.018);
+      for(const side of [-1,1]){
+        ctx.beginPath();
+        ctx.moveTo(side*S*0.20,-H*0.30);
+        ctx.quadraticCurveTo(side*S*0.78,-H*0.72,side*S*0.72,-H*0.05);
+        ctx.quadraticCurveTo(side*S*0.50,H*0.02,side*S*0.18,H*0.05);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(side*S*(0.30+i*0.12),-H*0.28);ctx.lineTo(side*S*(0.58+i*0.10),-H*(0.46-i*0.05));ctx.stroke();}
+      }
+      break;
+    case "back":
+      ctx.fillStyle=fill; ctx.strokeStyle=stroke; ctx.lineWidth=Math.max(1.4,H*0.017);
+      for(let i=0;i<7;i++){
+        const x=(i-3)*H*0.12, hh=H*(0.12+(i%3)*0.055);
+        ctx.beginPath();ctx.moveTo(x-H*0.06,-H*0.10);ctx.lineTo(x,-H*(0.28+hh));ctx.lineTo(x+H*0.06,-H*0.10);ctx.closePath();ctx.fill();ctx.stroke();
+      }
+      break;
+    case "crest":
+      ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(1.3,H*0.015);
+      for(let i=0;i<7;i++){
+        const x=(i-3)*H*0.105, h=H*(0.18+(i%2)*0.07);
+        ctx.beginPath();ctx.rect(x-H*0.028,-H*(0.42+h),H*0.056,h);ctx.fill();ctx.stroke();
+      }
+      break;
+    case "ring":
+      ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(2,H*0.026);
+      ctx.beginPath();ctx.ellipse(0,-H*0.40,S*0.60,S*0.20,0.12*Math.sin((Number(t)||0)*0.03),0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha*=0.45;ctx.lineWidth*=0.45;
+      ctx.beginPath();ctx.ellipse(0,-H*0.40,S*0.46,S*0.14,-0.16*Math.sin((Number(t)||0)*0.03),0,Math.PI*2);ctx.stroke();
+      break;
+    case "antler":
+      ctx.strokeStyle=stroke; ctx.lineWidth=Math.max(1.6,H*0.020);
+      for (const side of [-1,1]) {
+        ctx.beginPath();
+        ctx.moveTo(side*S*0.08,-H*0.38);
+        ctx.quadraticCurveTo(side*S*0.34,-H*0.72,side*S*0.42,-H*0.98);
+        ctx.quadraticCurveTo(side*S*0.30,-H*0.80,side*S*0.18,-H*0.72);
+        ctx.moveTo(side*S*0.28,-H*0.72); ctx.lineTo(side*S*0.52,-H*0.82);
+        ctx.moveTo(side*S*0.34,-H*0.64); ctx.lineTo(side*S*0.56,-H*0.58);
+        ctx.stroke();
+      }
+      break;
+    case "mantle":
+      ctx.fillStyle=fill;ctx.strokeStyle=stroke;ctx.lineWidth=Math.max(1.4,H*0.017);
+      ctx.beginPath();ctx.moveTo(-S*0.38,-H*0.30);ctx.quadraticCurveTo(-S*0.72,-H*0.12,-S*0.42,H*0.10);ctx.quadraticCurveTo(0,H*0.25,S*0.42,H*0.10);ctx.quadraticCurveTo(S*0.72,-H*0.12,S*0.38,-H*0.30);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.globalAlpha*=0.55;
+      for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*S*0.12,-H*0.20);ctx.lineTo(i*S*0.16,H*0.04);ctx.stroke();}
+      break;
+  }
+
+  if (d.silhouette === "mane" && stage >= 4) {
+    ctx.strokeStyle = hot; ctx.lineWidth = Math.max(1.4,H*0.017);
+    for(let side of [-1,1]){
+      ctx.beginPath();
+      ctx.moveTo(side*S*0.12,-H*0.55);
+      ctx.quadraticCurveTo(side*S*0.65,-H*0.95,side*S*0.52,-H*0.28);
+      ctx.stroke();
+    }
+  }
+
+  if (stage >= 3 && !front) {
+    ctx.globalAlpha *= 0.48;
+    ctx.strokeStyle = hot;
+    ctx.lineWidth = Math.max(1,H*0.012);
+    ctx.beginPath();ctx.ellipse(0,-H*0.28,S*0.62,S*0.11,0,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function withAlpha(color, a) {
+  let h=String(color||"#ffffff").trim();
+  if(/^#[0-9a-f]{3}$/i.test(h)) h="#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  if(!/^#[0-9a-f]{6}$/i.test(h)) return "rgba(255,255,255,"+a+")";
+  const n=parseInt(h.slice(1),16);
+  return "rgba("+(n>>16)+","+((n>>8)&255)+","+(n&255)+","+a+")";
+}
+
 export function drawEvolutionSignatureFX(ctx, p, H, pose, t) {
   const e = evolutionProfile(p, pose?.form);
   const active = Math.max(
@@ -335,6 +465,50 @@ export function drawEvolutionSignatureFX(ctx, p, H, pose, t) {
   ctx.restore();
 }
 
+
+export function drawEvolutionCombatFX(ctx, p, H, pose, t) {
+  const e = evolutionProfile(p, pose?.form);
+  if (e.evo < 1 || pose?.state !== "attack") return;
+  const impact = Math.max(0, Math.min(1, Number(pose?.impact) || 0));
+  const atk = Math.max(0, Math.min(1, Number(pose?.atk) || 0));
+  const k = Math.max(impact, atk * 0.55);
+  if (k < 0.08) return;
+
+  const d = e.finalDesign;
+  const color = d.accent || p?.color || "#fff6c8";
+  const reach = H * (0.22 + e.evo * 0.045) * (0.8 + e.combat.impact * 0.2);
+  ctx.save();
+  ctx.globalCompositeOperation="lighter";
+  ctx.globalAlpha=Math.min(0.9, k * (0.28 + e.evo * 0.08));
+  ctx.strokeStyle=color;
+  ctx.lineCap="round";
+  ctx.lineWidth=Math.max(1.4,H*(0.012+e.evo*0.002));
+
+  const f=p?.facing||1;
+  if(d.motif==="bolt"){
+    for(let i=0;i<3+e.evo;i++){
+      ctx.beginPath();ctx.moveTo(f*H*0.05,-H*(0.52-i*0.09));ctx.lineTo(f*(H*0.20+reach),-H*(0.48-i*0.10));ctx.stroke();
+    }
+  } else if(d.motif==="flame" || d.motif==="ember"){
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(f*H*0.18,-H*0.46,reach*(0.55+i*0.16),-0.9+i*0.15,0.9-i*0.15);ctx.stroke();}
+  } else if(d.motif==="crystal"){
+    for(let i=0;i<3+e.evo;i++){const x=f*(H*0.14+i*H*0.06);ctx.beginPath();ctx.moveTo(x,-H*0.44);ctx.lineTo(x+f*H*0.10,-H*(0.62-i*0.035));ctx.lineTo(x+f*H*0.17,-H*0.42);ctx.stroke();}
+  } else if(d.motif==="maw"){
+    ctx.beginPath();ctx.arc(f*H*0.20,-H*0.48,reach*0.78,-0.75,0.75);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(f*H*0.34,-H*0.55);ctx.lineTo(f*(H*0.34+reach*0.35),-H*0.62);ctx.moveTo(f*H*0.34,-H*0.41);ctx.lineTo(f*(H*0.34+reach*0.35),-H*0.34);ctx.stroke();
+  } else if(d.motif==="fries" || d.motif==="salt"){
+    for(let i=0;i<5;i++){const x=f*(H*0.10+i*H*0.07);ctx.beginPath();ctx.moveTo(x,-H*0.42);ctx.lineTo(x+f*H*0.10,-H*(0.66+(i%2)*0.08));ctx.stroke();}
+  } else {
+    for(let i=0;i<3+e.evo;i++){const a=-0.72+i*(1.44/(2+e.evo));ctx.beginPath();ctx.arc(f*H*0.18,-H*0.48,reach*(0.55+i*0.10),a,a+0.24);ctx.stroke();}
+  }
+
+  if(impact>0.22){
+    ctx.globalAlpha*=0.7;
+    ctx.strokeStyle="#fffdf0";
+    ctx.beginPath();ctx.arc(f*(H*0.18+reach*0.9),-H*0.48,H*(0.06+impact*0.10),0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
 
 /**
  * FX específico de la cinemática de evolución.

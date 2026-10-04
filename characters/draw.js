@@ -2,7 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { getLook } from "./look.js";
-import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX } from "./evolution.js";
+import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "./evolution.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -687,6 +687,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   drawLocomotionFX(ctx, H, color, pose, t);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
+  drawEvolutionCombatFX(ctx, p, H, pose, t);
   drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
   if (pose.state === "jump" && pose.stretch > 0.12) {
     ctx.save();
@@ -739,41 +740,6 @@ function withAlpha(color, a) {
   if (!/^#[0-9a-f]{6}$/i.test(h)) return color;
   const n = parseInt(h.slice(1), 16);
   return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
-}
-
-function drawAura(ctx, H, color, t, evo) {
-  const cy = -H * 0.5;
-  const r = H * (0.5 + evo * 0.09) * (1 + Math.sin(t / 9) * 0.05);
-  ctx.save();
-  ctx.globalAlpha *= evo >= 4 ? 0.5 : 0.3;
-  const g = ctx.createRadialGradient(0, cy, r * 0.1, 0, cy, r);
-  g.addColorStop(0, withAlpha(color, 1));
-  g.addColorStop(0.55, withAlpha(color, 0.33));
-  g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(0, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawGodRays(ctx, H, color, t) {
-  const cy = -H * 0.55;
-  ctx.save();
-  ctx.translate(0, cy);
-  ctx.rotate(t / 90);
-  ctx.globalAlpha *= 0.16 + Math.sin(t / 14) * 0.05;
-  ctx.fillStyle = color;
-  for (let i = 0; i < 10; i++) {
-    ctx.rotate((Math.PI * 2) / 10);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-H * 0.07, -H * 0.95);
-    ctx.lineTo(H * 0.07, -H * 0.95);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.restore();
 }
 
 function drawGroundRing(ctx, H, color, t) {
@@ -1047,10 +1013,9 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.scale(facing, 1);
   ctx.translate(recoilX + lunge, 0);
 
-  if (evo >= 4) drawGodRays(ctx, H, color, t);
-  if (evo >= 2) drawAura(ctx, H, color, t, evo);
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
+  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, false);
   drawEvolutionDesignFX(ctx, p, H, pose, t, false);
   if (moving) drawDust(ctx, H, t, speed);
 
@@ -1078,6 +1043,7 @@ export function drawCharacter(ctx, p, cam, t) {
 
   drawFlavor(ctx, p.id, H, t, evo, true);
   drawEvolutionDesignFX(ctx, p, H, pose, t, true);
+  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
