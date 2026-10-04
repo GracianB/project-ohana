@@ -24,7 +24,7 @@ const P = [
   { hr: 24, hx: 3, hy: -60, brx: 19, bry: 20, bx: -1, by: -27, legW: 9, armL: 11, armW: 6.5, gillL: 13, gillW: 3.4, ear: 8.5, eye: 8.2, tail: 27, coil: 6, turns: 2.5 },
   { hr: 21, hx: 4, hy: -74, brx: 14, bry: 24, bx: 0, by: -37, legW: 8, armL: 15, armW: 6, gillL: 15, gillW: 3.4, ear: 7.5, eye: 7.6, tail: 33, coil: 5, turns: 3, crest: true },
   { hr: 24, hx: 7, hy: -60, brx: 30, bry: 27, bx: -2, by: -29, legW: 10, armL: 10, armW: 7, gillL: 21, gillW: 4.4, ear: 8.5, eye: 8, tail: 30, coil: 6, turns: 2.5, fat: true, clouds: true },
-  { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 8.5, eye: 8, tail: 34, coil: 5.5, turns: 3, god: true },
+  { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 8.5, eye: 8, tail: 34, coil: 5.5, turns: 3, final: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -313,8 +313,8 @@ function figure(ctx, R, pose, f, S, C, o) {
       gill(ctx, R, -hr * 0.88, -hr * 0.3 + i * 5.5, a, gL * (i === 1 ? 1.1 : 0.95), gW, gc, gg, ch, t, i);
     }
   }
-  // corona de nubes (GOD)
-  if (S.god) {
+  // corona de nubes (FORMA FINAL)
+  if (S.final) {
     ctx.save();
     ctx.translate(0, -hr - 10 + Math.sin(t * 0.07) * 1.5);
     for (let i = 0; i < 3; i++) {
@@ -358,7 +358,7 @@ function opts(pose, f, S) {
     eyes: "normal", mouth: "smile", mouthSpark: 0, puff: 0,
     lift: 0, rot: 0, rotY: -40, spinX: 1, stretchY: 1, sparks: 0, whip: 0, skyBolt: 0,
   };
-  if (S.god) o.charge = 0.8 + 0.2 * Math.sin(t * 0.15);
+  if (S.final) o.charge = 0.8 + 0.2 * Math.sin(t * 0.15);
   const hopRun = (spark) => {
     const ph = pose.phase * 0.6;
     const h = Math.abs(Math.sin(ph));
@@ -458,8 +458,8 @@ function draw(ctx, pose, R) {
     const a = t * 0.025 + i * (TAU / 3);
     if (Math.sin(a) < 0) cloud(ctx, R, Math.cos(a) * 50, -50 + Math.sin(a) * 22, 5, "#fff", false);
   }
-  // halo de rayos (GOD)
-  if (S.god) {
+  // halo de rayos (FORMA FINAL)
+  if (S.final) {
     ctx.save();
     ctx.translate(0, cy - 14);
     for (let i = 0; i < 8; i++) {
