@@ -82,3 +82,5 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 64. Phase 26: VFX de pasivos y partículas deterministas, sin `Math.random()`, partículas acotadas a 72 y sanitización de valores numéricos.
 
 65. Phase 27: firewall de mutaciones de combate; daño, XP, puntuación y bajas se normalizan con valores finitos y se eliminan operaciones aritméticas directas sobre estado crítico.
+
+66. Phase 28: presupuesto de runtime para colecciones transitorias, números flotantes acotados y VFX de portales deterministas, sin `Math.random()` ni `performance.now()`.
