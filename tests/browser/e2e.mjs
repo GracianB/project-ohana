@@ -56,13 +56,6 @@ async function auditPage(page, label) {
   assert.ok(audit.fcp < 4000, label + ': FCP > 4 s');
   assert.match(audit.title, /PROJECT OHANA/i);
   await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
-  if (label === 'desktop') {
-    await page.reload({ waitUntil:'networkidle' });
-    await page.context().setOffline(true);
-    await page.reload({ waitUntil:'domcontentloaded' });
-    await page.waitForSelector('#btn-play');
-    await page.context().setOffline(false);
-  }
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 }
 
@@ -80,6 +73,11 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
+  await page.reload({ waitUntil:'networkidle' });
+  await page.context().setOffline(true);
+  await page.reload({ waitUntil:'domcontentloaded' });
+  await page.waitForSelector('#btn-play');
+  await page.context().setOffline(false);
   await desktop.close();
 
   const mobile = await chromium.launch({ headless:true });
