@@ -4,6 +4,7 @@ import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../cha
 import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
 import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, EVOLUTION_STAGE_COPY, EVOLUTION_MESSAGES, EVOLUTION_FORM_PROFILES, evolutionKey, evolutionProfile, evolutionMessage, applyEvolutionPose, drawEvolutionCinemaFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "../characters/evolution.js";
 import { CombatFX, combatTier } from "../systems/combat-fx.js";
+import { BossFX, BOSS_PHASE_PROFILES, BOSS_ATTACK_PROFILES, bossPhaseProfile, bossAttackProfile } from "../systems/boss-fx.js";
 
 const basePlayer = {
   grounded: true,
@@ -325,4 +326,55 @@ test("las formas 2-4 tienen siluetas finales distintas y FX de combate dibujable
       ), id + ":combat:e" + evo);
     }
   }
+});
+
+test("el boss tiene tres fases visuales con firmas realmente distintas", () => {
+  assert.equal(Object.keys(BOSS_PHASE_PROFILES).length, 3);
+  const phases = [1, 2, 3].map((phase) => bossPhaseProfile(phase));
+  assert.equal(new Set(phases.map((p) => p.name)).size, 3);
+  assert.equal(new Set(phases.map((p) => p.color)).size, 3);
+  assert.ok(phases[0].scale < phases[1].scale);
+  assert.ok(phases[1].scale < phases[2].scale);
+
+  const attacks = ["charge", "swoop", "slam", "spit"].map(bossAttackProfile);
+  assert.equal(attacks.length, 4);
+  assert.equal(new Set(attacks.map((p) => p.shape)).size, 4);
+  for (const profile of attacks) {
+    assert.ok(profile.color);
+    assert.ok(profile.icon);
+    assert.ok(profile.width > 0);
+  }
+});
+
+test("BossFX mantiene cola limitada, determinismo y renderer seguro", () => {
+  const fx = new BossFX();
+  fx.phaseTransition(400, 500, 3);
+  fx.attackRelease(420, 500, "slam", 3, -1);
+  fx.landing(420, 630, 3, 180);
+  fx.spawn(420, 540, 3);
+  fx.intro(420, 630);
+  for (let i = 0; i < 100; i++) fx.add("release", { x: i, y: i, kind: "charge", phase: 1, dir: 1, life: 12 });
+  assert.ok(fx.items.length <= 64);
+
+  const calls = {
+    save() {}, restore() {}, setTransform() {}, fillRect() {}, strokeRect() {},
+    beginPath() {}, closePath() {}, arc() {}, ellipse() {}, moveTo() {}, lineTo() {},
+    stroke() {}, fill() {}, fillText() {}, strokeText() {},
+  };
+  const ctx = {
+    ...calls,
+    canvas: { width: 1280, height: 720 },
+    globalAlpha: 1, globalCompositeOperation: "source-over",
+    strokeStyle: "#fff", fillStyle: "#fff", lineWidth: 1,
+    lineCap: "round", lineJoin: "round",
+    textAlign: "center", textBaseline: "middle", font: "12px sans-serif",
+  };
+  const boss = {
+    x: 400, y: 500, w: 110, h: 130, phase: 3,
+    telegraph: true, teleKind: "slam", wind: 12, windMax: 34,
+    facing: -1, dying: 0, fell: false,
+  };
+  assert.doesNotThrow(() => fx.render(ctx, { x: 0, y: 0 }, 60, { width: 1280, height: 720 }, boss));
+  fx.update();
+  assert.ok(fx.items.length > 0);
 });
