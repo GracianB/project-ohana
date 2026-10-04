@@ -2375,7 +2375,8 @@ function updateHUD() {
     const patternText = boss.patternLabel ? " · RUTINA " + (Number(boss.patternStep) + 1) + "/" + Math.max(1, boss.pattern.length) : "";
     const recoveryText = boss.vulnerable ? " · CASTIGA" : "";
     const readText = boss.behaviorLabel ? " · " + boss.behaviorLabel : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + attackText + " · " + pct + "%");
+    const counterText = boss.counterplay?.streak ? " · RESPUESTA " + boss.counterplay.streak + "/3" + (boss.lastCounterplay?.break ? " · BREAK" : "") : "";
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + counterText + attackText + " · " + pct + "%");
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
