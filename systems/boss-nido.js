@@ -432,9 +432,11 @@ function updateRecovery(e, game, helpers, floorY) {
     e.recoveryMax = 0;
     e.vulnerable = false;
     e.mode = "idle";
-    e.attackCd = e.phase >= 3 ? 26 : e.phase === 2 ? 38 : 52;
+    e.attackCd = e.phase >= 3 ? 18 : e.phase === 2 ? 30 : 42;
     e.invuln = 0;
-    land(e, CONFIG.PERCH);
+    // Tras una ventana de castigo, recupera el control rápido.
+    // El reposo es visual/IA, no modifica hitbox ni daño.
+    land(e, e.phase >= 3 ? 10 : e.phase === 2 ? 14 : 18);
     game?.bossFx?.recoveryEnd?.(e.x + e.w / 2, e.y + e.h / 2, e.phase);
   }
 }
