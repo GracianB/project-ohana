@@ -389,6 +389,64 @@ test('phase 21: la preferencia de longitud nunca abandona el repertorio autoriza
 
 
 
+test('matriz runtime: las 30 habilidades pueden castearse y actualizarse sin romper el ciclo', () => {
+  const abilityByCharacter = ROSTER.flatMap((character) =>
+    character.abilities.map((id) => ({ character: character.id, id }))
+  );
+
+  assert.equal(abilityByCharacter.length, 30);
+  assert.equal(new Set(abilityByCharacter.map(({ id }) => id)).size, 30);
+
+  for (const { character, id } of abilityByCharacter) {
+    clearAbilityFx();
+    let emitted = 0;
+    const enemy = {
+      x: 160, y: 260, w: 34, h: 40, hp: 500, max: 500,
+      kind: 'cucaracho', dying: false, invuln: 0, vx: 0, vy: 0,
+      stun: 0, flash: 0,
+    };
+    const p = {
+      id: character,
+      abilities: [id],
+      x: 120, y: 260, w: 28, h: 34,
+      facing: 1, evo: 2, speed: 4.8, jumpPower: 10,
+      maxJumps: 1, jumps: 0, grounded: true,
+      vx: 0, vy: 0, health: 80, maxHealth: 125,
+      cds: {}, cdDur: {}, dead: false, xp: 0,
+    };
+    const game = {
+      player: p,
+      enemies: [enemy],
+      projectiles: [],
+      ghosts: [],
+      platforms: [{ x: 0, y: 300, w: 900, h: 40 }],
+      cam: { x: 0, y: 0 },
+      worldW: 1600, worldH: 900,
+      t: 0, reduceMotion: true, shake: 0, flash: 0,
+      nums: { add() {} },
+      fx: { emit() { emitted++; } },
+    };
+
+    assert.doesNotThrow(() => useAbility(game, 0), character + '/' + id + ' cast');
+    assert.equal(p._cast?.id, id);
+    assert.ok((p.cds?.[id] || 0) > 0, character + '/' + id + ' cooldown');
+
+    for (let frame = 0; frame < 72; frame++) {
+      game.t++;
+      assert.doesNotThrow(() => {
+        abilityPreMove(game, { left: false, right: false, jump: false });
+        updateAbilityFx(game);
+      }, character + '/' + id + ' frame ' + frame);
+    }
+
+    assert.ok(
+      emitted > 0 || game.projectiles.length > 0 || enemy.hp < enemy.max || p._abilMove || p._armorT > 0,
+      character + '/' + id + ' no produjo ninguna señal observable de habilidad'
+    );
+    clearAbilityFx();
+  }
+});
+
 test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentro del aro', () => {
   const g = {
     player: { id: 'kilo', abilities: ['ukulele', 'hula', 'ohana'], x: 100, y: 100, w: 28, h: 34, facing: 1, evo: 2, health: 80, maxHealth: 125, vy: 0, cds: {}, cdDur: {} },
