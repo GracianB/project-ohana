@@ -774,8 +774,9 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     clearAbilityFx();
   }
   {
-    const air = { ...contractGame().enemy, kind: 'mosquito', x: 175, y: 180 };
-    const ground = { ...contractGame().enemy, x: 175, y: 260 };
+    const baseEnemy = contractGame().enemies[0];
+    const air = { ...baseEnemy, kind: 'mosquito', x: 175, y: 180 };
+    const ground = { ...baseEnemy, x: 175, y: 260 };
     const g = contractGame({ enemies: [air, ground], player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
     useAbility(g, 2);
     advanceAbility(g, 40);
