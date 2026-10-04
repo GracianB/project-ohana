@@ -106,6 +106,93 @@ function pushRuntime(list, item, max) {
   list.push(item);
   return true;
 }
+
+const MAX_RUNTIME_SAFE = Number.MAX_SAFE_INTEGER;
+
+function boundedFinite(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function sanitizeRuntimeState() {
+  game.t = boundedFinite(game.t, 0, 0, MAX_RUNTIME_SAFE);
+  game.score = boundedFinite(game.score, 0, 0, MAX_RUNTIME_SAFE);
+  game.kills = Math.floor(boundedFinite(game.kills, 0, 0, MAX_RUNTIME_SAFE));
+  game.combo = Math.floor(boundedFinite(game.combo, 0, 0, 999));
+  game.comboT = Math.floor(boundedFinite(game.comboT, 0, 0, 600));
+  game.shake = boundedFinite(game.shake, 0, 0, 32);
+  game.hitstop = Math.floor(boundedFinite(game.hitstop, 0, 0, 8));
+  game.flash = Math.floor(boundedFinite(game.flash, 0, 0, 120));
+  game.fading = Math.floor(boundedFinite(game.fading, 0, 0, 120));
+  if (typeof game.rng !== "function") game.rng = Math.random;
+
+  const p = game.player;
+  if (p) {
+    p.x = boundedFinite(p.x, game.spawn?.x ?? 180, -2048, game.worldW + 2048);
+    p.y = boundedFinite(p.y, game.spawn?.y ?? 500, -2048, game.worldH + 2048);
+    p.w = boundedFinite(p.w, 32, 1, 256);
+    p.h = boundedFinite(p.h, 32, 1, 256);
+    p.vx = boundedFinite(p.vx, 0, -40, 40);
+    p.vy = boundedFinite(p.vy, 0, -40, 40);
+    p.maxHealth = boundedFinite(p.maxHealth, 100, 1, 100000);
+    p.health = boundedFinite(p.health, p.dead ? 0 : p.maxHealth, 0, p.maxHealth);
+    p.xp = boundedFinite(p.xp, 0, 0, MAX_RUNTIME_SAFE);
+    p.evo = Math.floor(boundedFinite(p.evo, 0, 0, 4));
+    p.invuln = Math.floor(boundedFinite(p.invuln, 0, 0, 600));
+    p.coyote = Math.floor(boundedFinite(p.coyote, 0, 0, 60));
+    p.buffer = Math.floor(boundedFinite(p.buffer, 0, 0, 60));
+    p.dash = Math.floor(boundedFinite(p.dash, 0, 0, 120));
+    p.melee = Math.floor(boundedFinite(p.melee, 0, 0, 120));
+  }
+
+  game.enemies = (game.enemies || []).filter((e) => e && typeof e === "object").slice(-MAX_RUNTIME_ENEMIES);
+  for (const e of game.enemies) {
+    e.x = boundedFinite(e.x, 0, -2048, game.worldW + 2048);
+    e.y = boundedFinite(e.y, 0, -2048, game.worldH + 2048);
+    e.w = boundedFinite(e.w, 32, 1, 512);
+    e.h = boundedFinite(e.h, 32, 1, 512);
+    e.vx = boundedFinite(e.vx, 0, -40, 40);
+    e.vy = boundedFinite(e.vy, 0, -40, 40);
+    e.max = boundedFinite(e.max, 1, 1, 100000);
+    e.hp = boundedFinite(e.hp, 0, 0, e.max);
+    e.invuln = Math.floor(boundedFinite(e.invuln, 0, 0, 600));
+    e.stun = Math.floor(boundedFinite(e.stun, 0, 0, 120));
+    e.dying = Math.floor(boundedFinite(e.dying, 0, 0, 240));
+  }
+
+  game.projectiles = (game.projectiles || []).filter((pr) => pr && typeof pr === "object").slice(-MAX_RUNTIME_PROJECTILES);
+  for (const pr of game.projectiles) {
+    pr.x = boundedFinite(pr.x, 0, -4096, game.worldW + 4096);
+    pr.y = boundedFinite(pr.y, 0, -4096, game.worldH + 4096);
+    pr.w = boundedFinite(pr.w, 8, 1, 256);
+    pr.h = boundedFinite(pr.h, 8, 1, 256);
+    pr.vx = boundedFinite(pr.vx, 0, -60, 60);
+    pr.vy = boundedFinite(pr.vy, 0, -60, 60);
+    pr.life = Math.floor(boundedFinite(pr.life, 0, 0, 600));
+    pr.dmg = boundedFinite(pr.dmg, 0, 0, 100000);
+  }
+
+  game.ghosts = (game.ghosts || []).filter((g) => g && typeof g === "object").slice(-MAX_RUNTIME_GHOSTS);
+  for (const g of game.ghosts) {
+    g.x = boundedFinite(g.x, 0, -4096, game.worldW + 4096);
+    g.y = boundedFinite(g.y, 0, -4096, game.worldH + 4096);
+    g.w = boundedFinite(g.w, 32, 1, 256);
+    g.h = boundedFinite(g.h, 32, 1, 256);
+    g.life = Math.floor(boundedFinite(g.life, 0, 0, 120));
+  }
+
+  game.orbs = (game.orbs || []).filter((o) => o && typeof o === "object").slice(-MAX_RUNTIME_ORBS);
+  for (const o of game.orbs) {
+    o.x = boundedFinite(o.x, 0, -4096, game.worldW + 4096);
+    o.y = boundedFinite(o.y, 0, -4096, game.worldH + 4096);
+    o.r = boundedFinite(o.r, 9, 1, 128);
+  }
+
+  game.cam.x = boundedFinite(game.cam?.x, 0, -4096, game.worldW + 4096);
+  game.cam.y = boundedFinite(game.cam?.y, 0, -4096, game.worldH + 4096);
+}
+
 let viewW = 1280, viewH = 720, viewDpr = 1;
 const CAM_ZOOM = 1.05;
 function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
@@ -600,7 +687,7 @@ function registerBossPunish(e) {
 
   e.punishAwarded = true;
   const reward = 50 + Math.max(1, Math.min(3, Number(e.phase) || 1)) * 25;
-  game.score = (Number(game.score) || 0) + reward;
+  addScore(reward);
   game.shake = Math.min(14, (game.shake || 0) + 5);
   game.flash = Math.max(game.flash || 0, 4);
   game.flashColor = "#fff6c8";
@@ -2481,6 +2568,7 @@ function step() {
   if (!canAct()) return;
   t++;
   game.t = t;
+  sanitizeRuntimeState();
   if (game.hitstop > 0) {
     game.hitstop--;
     if (game.shake > 0) game.shake *= 0.92;

@@ -193,6 +193,20 @@ test('phase 26: partículas reproducibles, acotadas y recuperables ante datos co
 });
 
 
+test('phase 29: runtime integrity guard protege estado crítico y colecciones', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
+  assert.match(game, /function boundedFinite\(value, fallback, min, max\)/);
+  assert.match(game, /function sanitizeRuntimeState\(\)/);
+  assert.match(game, /sanitizeRuntimeState\(\);/);
+  assert.match(game, /game\.score = boundedFinite\(game\.score, 0, 0, MAX_RUNTIME_SAFE\)/);
+  assert.match(game, /p\.health = boundedFinite\(p\.health/);
+  assert.match(game, /e\.hp = boundedFinite\(e\.hp/);
+  assert.match(game, /pr\.dmg = boundedFinite\(pr\.dmg/);
+  assert.match(game, /if \(typeof game\.rng !== "function"\) game\.rng = Math\.random/);
+  assert.equal((game.match(/game\.score\s*=\s*\(Number\(game\.score\)/g) || []).length, 0);
+});
+
 test('phase 28: runtime transitorio acotado y VFX de portales deterministas', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
   const floaters = fs.readFileSync('./systems/floaters.js', 'utf8');
