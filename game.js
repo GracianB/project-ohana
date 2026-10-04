@@ -30,6 +30,7 @@ import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
+import { CombatFX, combatTier } from "./systems/combat-fx.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -86,7 +87,7 @@ const game = {
   rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -439,6 +440,7 @@ function start(def) {
   clock.reset();
   game._magicSnap = null;
   game.hitstop = 0;
+  game.combatFx?.clear();
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   Surprises.reset();
   game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.won = false; game.summoned = false;
@@ -779,10 +781,17 @@ function checkVoidDeath() {
   if (p.y > game.worldH + 40) dieVoid(p);
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-function punch(x, y, color) {
-  game.shake = Math.min(18, game.shake + 6); game.combo += 1; game.comboT = 480; game.score += 10 * game.combo;
-  game.fx.emit(x, y, { color, count: 10, size: 3.2, up: 1.2 });
-  game.fx.emit(x, y, { color: "#fff", count: 6, size: 2, up: 1.8, speed: 4.4, life: 16, star: true });
+function punch(x, y, color, dir = 1) {
+  game.shake = Math.min(18, game.shake + 6);
+  game.combo += 1;
+  game.comboT = 480;
+  game.score += 10 * game.combo;
+  const tier = combatTier(game.combo);
+  const label = tier >= 4 ? "RÁFAGA" : tier === 3 ? "IMPACTO" : tier === 2 ? "COMBO" : "";
+  game.combatFx?.add(x, y, color || "#fff", { tier, dir, label, seed: game.combo });
+  game.fx.emit(x, y, { color, count: 10 + tier * 2, size: 3.2 + tier * 0.35, up: 1.2 + tier * 0.18 });
+  game.fx.emit(x, y, { color: "#fff", count: 6 + tier * 2, size: 2, up: 1.8, speed: 4.4 + tier * 0.3, life: 16, star: true });
+  if (tier >= 3) hitStop(tier === 4 ? 4 : 3);
   beep("hit");
 }
 function beginFinale(e) {
@@ -2055,7 +2064,7 @@ function render() {
   for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
   for (const b of game.bolts) drawBolt(ctx, b, game.cam, t);
   for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
-  game.fx.render(ctx, game.cam); game.nums.render(ctx, game.cam);
+  game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam);
   if (DeathFx.isPlaying()) {
     DeathFx.draw(ctx, game.cam, t);
     ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
@@ -2386,6 +2395,7 @@ function step() {
   updateEnemies();
   updateProjectiles();
   game.fx.update();
+  game.combatFx?.update();
   if (DeathFx.isPlaying()) DeathFx.update(game);
   Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
   Surprises.update(game, t);
