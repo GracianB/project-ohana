@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { computePose, enhancePose, motionProfile, MOTION_PROFILES } from "../characters/rig.js";
+import { BASIC_ATTACK_SIGNATURES, ABILITY_VISUAL_SIGNATURES } from "../characters/draw.js";
 
 const basePlayer = {
   grounded: true,
@@ -91,4 +92,13 @@ test("cambio de dirección produce un pulso visual de giro y frenada", () => {
   actor.vx = -1.0;
   const brake = enhancePose(computePose(actor, 12, { rng: () => 0 }), actor);
   assert.ok(brake.brake > 0);
+});
+
+test("los 10 golpes básicos y las 30 habilidades tienen firmas visuales estables", () => {
+  assert.equal(Object.keys(BASIC_ATTACK_SIGNATURES).length, 10);
+  assert.equal(Object.values(BASIC_ATTACK_SIGNATURES).length, new Set(Object.values(BASIC_ATTACK_SIGNATURES)).size);
+  assert.equal(Object.keys(ABILITY_VISUAL_SIGNATURES).length, 30);
+  assert.equal(Object.values(ABILITY_VISUAL_SIGNATURES).length, new Set(Object.values(ABILITY_VISUAL_SIGNATURES)).size);
+  for (const kind of Object.values(BASIC_ATTACK_SIGNATURES)) assert.ok(kind);
+  for (const kind of Object.values(ABILITY_VISUAL_SIGNATURES)) assert.ok(kind);
 });

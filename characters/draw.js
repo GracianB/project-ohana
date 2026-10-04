@@ -197,6 +197,300 @@ function drawAttackFX(ctx, H, color, pose) {
   ctx.restore();
 }
 
+export const BASIC_ATTACK_SIGNATURES = Object.freeze({
+  kilo: "note", stitcho: "claws", chispin: "bolt", cat: "paw", dragon: "flame",
+  dino: "bite", frita: "salt", pizza: "wedge", yomi: "fang", cuerno: "poke",
+});
+
+export const ABILITY_VISUAL_SIGNATURES = Object.freeze({
+  ukulele: "note-bounce", hula: "hula-ring", ohana: "ohana-halo",
+  plasma: "plasma-burst", rollo: "roll-trail", caos: "chaos-orbit",
+  chain: "chain-light", blink: "blink-gate", storm: "storm-cloud",
+  yarn: "yarn-loop", purr: "purr-wave", ninetails: "tail-fan",
+  breath: "breath-cone", gust: "gust-wing", meteor: "meteor-rain",
+  bite: "bite-jaw", charge: "charge-ram", quake: "quake-ring",
+  salt: "salt-shot", ketchup: "ketchup-pool", fryer: "fryer-geyser",
+  pepperoni: "pepperoni-disc", cheese: "cheese-tether", oven: "oven-heat",
+  ofuda: "ofuda-paper", sleeve: "sleeve-pull", maw: "maw-open",
+  gleam: "gleam-star", gallop: "gallop-horn", rainbow: "rainbow-arc",
+});
+
+function drawAbilitySignatureFX(ctx, p, H, pose, t) {
+  if (pose.state !== "cast" || pose.cast <= 0 || pose.cast >= 1.02) return;
+  const id = p?._cast?.id;
+  const kind = ABILITY_VISUAL_SIGNATURES[id];
+  if (!kind) return;
+  const u = Math.max(0, Math.min(1, pose.cast));
+  const k = Math.sin(u * Math.PI);
+  if (k < 0.05) return;
+  const color = ABILITY_ACCENTS[id] || accentFor(p);
+  const f = p.facing || 1;
+  const pulse = 1 + k * 0.18;
+  const r = H * (0.14 + k * 0.24);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = 0.18 + k * 0.52;
+
+  switch (kind) {
+    case "note-bounce":
+      for (let i = 0; i < 3; i++) {
+        const a = t * 0.09 + i * 2.1;
+        const x = f * H * 0.22 + Math.cos(a) * H * 0.15;
+        const y = -H * 0.45 + Math.sin(a) * H * 0.22;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0, 2, H * 0.035, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(H * 0.025, -H * 0.13, H * 0.018, H * 0.15);
+        ctx.restore();
+      }
+      break;
+    case "hula-ring":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.022);
+      ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 1.35, r * 0.72, t * 0.08, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 0.82, r * 0.44, -t * 0.11, 0, Math.PI * 2); ctx.stroke();
+      break;
+    case "ohana-halo":
+      ctx.strokeStyle = "#fff7d1"; ctx.lineWidth = Math.max(1.6, H * 0.025);
+      ctx.beginPath(); ctx.arc(0, -H * 0.52, r * 1.45, 0, Math.PI * 2); ctx.stroke();
+      for (let i = 0; i < 5; i++) {
+        const a = t * 0.05 + i * 1.256;
+        star(ctx, Math.cos(a) * r * 1.45, -H * 0.52 + Math.sin(a) * r * 1.45, H * 0.035, color);
+      }
+      break;
+
+    case "plasma-burst":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.2, H * 0.018);
+      for (let i = 0; i < 3; i++) {
+        const x = f * H * (0.12 + i * 0.08);
+        ctx.beginPath(); ctx.arc(x, -H * 0.48, r * (0.45 + i * 0.2), -1.3, 1.3); ctx.stroke();
+      }
+      break;
+    case "roll-trail":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.024);
+      for (let i = 0; i < 2; i++) {
+        ctx.beginPath(); ctx.arc(-f * H * (0.10 + i * 0.10), -H * 0.45, r * (0.85 + i * 0.18), 0.2, 2.5); ctx.stroke();
+      }
+      break;
+    case "chaos-orbit":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.021);
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.ellipse(0, -H * 0.45, r * (0.9 + i * 0.28), r * (0.35 + i * 0.12), t * 0.12 * (i % 2 ? -1 : 1), 0, Math.PI * 2); ctx.stroke();
+      }
+      break;
+
+    case "chain-light":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.2, H * 0.018);
+      ctx.beginPath(); ctx.moveTo(f * H * 0.06, -H * 0.45);
+      for (let i = 1; i <= 4; i++) {
+        ctx.lineTo(f * H * (0.06 + i * 0.16), -H * (0.45 + (i % 2 ? 0.10 : -0.04)) + Math.sin(t * 0.22 + i) * H * 0.04);
+      }
+      ctx.stroke();
+      break;
+    case "blink-gate":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.02);
+      ctx.beginPath(); ctx.arc(-f * H * 0.10, -H * 0.5, r * pulse, -1.3, 1.3); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-f * H * 0.24, -H * 0.5, r * 0.62, -1.1, 1.1); ctx.stroke();
+      break;
+    case "storm-cloud":
+      ctx.fillStyle = "#6e7fa8";
+      for (let i = 0; i < 5; i++) {
+        const x = -H * 0.22 + i * H * 0.11, y = -H * (0.68 - (i % 2) * 0.06);
+        ctx.beginPath(); ctx.arc(x, y, H * (0.06 + (i % 2) * 0.02), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, H * 0.014);
+      ctx.beginPath(); ctx.moveTo(f * H * 0.04, -H * 0.55); ctx.lineTo(f * H * 0.12, -H * 0.35); ctx.lineTo(f * H * 0.05, -H * 0.43); ctx.lineTo(f * H * 0.16, -H * 0.16); ctx.stroke();
+      break;
+
+    case "yarn-loop":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.3, H * 0.018);
+      ctx.beginPath(); ctx.moveTo(f * H * 0.05, -H * 0.42);
+      ctx.bezierCurveTo(f * H * 0.42, -H * 0.75, -f * H * 0.08, -H * 0.02, f * H * 0.34, -H * 0.25);
+      ctx.stroke();
+      break;
+    case "purr-wave":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.02);
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.arc(f * H * 0.04, -H * 0.45, r * (0.65 + i * 0.32), -0.85, 0.85); ctx.stroke();
+      }
+      break;
+    case "tail-fan":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.1, H * 0.016);
+      for (let i = 0; i < 9; i++) {
+        const a = -1.3 + i * 0.325 + Math.sin(t * 0.08 + i) * 0.03;
+        ctx.beginPath(); ctx.arc(f * H * 0.10, -H * 0.48, r * (0.65 + i * 0.04), a, a + 0.18); ctx.stroke();
+      }
+      break;
+
+    case "breath-cone":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.022);
+      ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.54); ctx.lineTo(f * H * 0.55, -H * 0.28); ctx.moveTo(f * H * 0.08, -H * 0.54); ctx.lineTo(f * H * 0.55, -H * 0.78); ctx.stroke();
+      break;
+    case "gust-wing":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.2, H * 0.018);
+      ctx.beginPath(); ctx.arc(f * H * 0.08, -H * 0.54, r * 1.5, -1.0, 0.3); ctx.stroke();
+      ctx.beginPath(); ctx.arc(f * H * 0.08, -H * 0.54, r * 1.1, 0.3, 1.4); ctx.stroke();
+      break;
+    case "meteor-rain":
+      ctx.strokeStyle = "#ff8a45"; ctx.lineWidth = Math.max(1.3, H * 0.02);
+      for (let i = 0; i < 4; i++) {
+        const x = -H * 0.34 + i * H * 0.20;
+        const y = -H * (0.85 - ((t * 0.07 + i * 0.23) % 0.35));
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + f * H * 0.10, y + H * 0.20); ctx.stroke();
+      }
+      break;
+
+    case "bite-jaw":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.3, H * 0.02);
+      ctx.beginPath(); ctx.arc(f * H * 0.20, -H * 0.45, r * 1.05, -0.7, 0.7); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(f * H * 0.40, -H * 0.48); ctx.lineTo(f * H * 0.52, -H * 0.56); ctx.moveTo(f * H * 0.40, -H * 0.42); ctx.lineTo(f * H * 0.52, -H * 0.34); ctx.stroke();
+      break;
+    case "charge-ram":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.6, H * 0.023);
+      ctx.beginPath(); ctx.moveTo(-f * H * 0.22, -H * 0.54); ctx.lineTo(f * H * 0.40, -H * 0.54); ctx.stroke();
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.moveTo(-f * H * (0.18 + i * 0.08), -H * (0.30 + i * 0.10)); ctx.lineTo(-f * H * (0.36 + i * 0.08), -H * (0.24 + i * 0.10)); ctx.stroke();
+      }
+      break;
+    case "quake-ring":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.022);
+      ctx.beginPath(); ctx.ellipse(0, 1, r * 1.9, r * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-r, 1); ctx.lineTo(-r * 0.7, -H * 0.14); ctx.moveTo(r * 0.2, 1); ctx.lineTo(r * 0.45, -H * 0.12); ctx.stroke();
+      break;
+
+    case "salt-shot":
+      ctx.fillStyle = color;
+      for (let i = 0; i < 9; i++) {
+        const a = -0.9 + i * 0.225;
+        const rr = H * (0.22 + ((i * 17) % 5) * 0.03);
+        ctx.beginPath(); ctx.arc(f * Math.cos(a) * rr, -H * 0.48 + Math.sin(a) * rr, H * 0.022, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    case "ketchup-pool":
+      ctx.fillStyle = "rgba(226,59,59,.35)"; ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, H * 0.014);
+      ctx.beginPath(); ctx.ellipse(f * H * 0.22, 1, r * 1.4, r * 0.25, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      break;
+    case "fryer-geyser":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.021);
+      for (let i = 0; i < 3; i++) {
+        const x = f * H * (0.12 + i * 0.20);
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.quadraticCurveTo(x + f * H * 0.04, -H * 0.32, x, -H * 0.62); ctx.stroke();
+      }
+      break;
+
+    case "pepperoni-disc":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.021);
+      ctx.beginPath(); ctx.arc(f * H * 0.24, -H * 0.45, r * 0.78, t * 0.12, t * 0.12 + 5.1); ctx.stroke();
+      break;
+    case "cheese-tether":
+      ctx.strokeStyle = "#ffe66a"; ctx.lineWidth = Math.max(1.1, H * 0.018);
+      ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.48);
+      ctx.bezierCurveTo(f * H * 0.22, -H * 0.70, f * H * 0.38, -H * 0.30, f * H * 0.52, -H * 0.52); ctx.stroke();
+      break;
+    case "oven-heat":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.3, H * 0.02);
+      for (let i = 0; i < 3; i++) {
+        const x = -H * 0.10 + i * H * 0.12;
+        ctx.beginPath(); ctx.moveTo(x, -H * 0.08); ctx.quadraticCurveTo(x + H * 0.08, -H * 0.26, x, -H * 0.46); ctx.stroke();
+      }
+      break;
+
+    case "ofuda-paper":
+      ctx.fillStyle = "#f2e6c8"; ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, H * 0.014);
+      ctx.save(); ctx.translate(f * H * 0.26, -H * 0.54); ctx.rotate(Math.sin(t * 0.14) * 0.16);
+      ctx.fillRect(-H * 0.07, -H * 0.14, H * 0.14, H * 0.28); ctx.strokeRect(-H * 0.07, -H * 0.14, H * 0.14, H * 0.28);
+      ctx.restore();
+      break;
+    case "sleeve-pull":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.3, H * 0.02);
+      ctx.beginPath(); ctx.arc(f * H * 0.24, -H * 0.48, r * 1.15, 1.2, 4.1); ctx.stroke();
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(f * H * 0.12, -H * (0.36 + i * 0.08)); ctx.lineTo(f * H * (0.34 + i * 0.06), -H * (0.40 + i * 0.08)); ctx.stroke(); }
+      break;
+    case "maw-open":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.8, H * 0.028);
+      ctx.beginPath(); ctx.arc(f * H * 0.18, -H * 0.48, r * 0.9, -0.8, 0.8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(f * H * 0.42, -H * 0.48); ctx.lineTo(f * H * 0.58, -H * 0.57); ctx.moveTo(f * H * 0.42, -H * 0.48); ctx.lineTo(f * H * 0.58, -H * 0.39); ctx.stroke();
+      break;
+
+    case "gleam-star":
+      for (let i = 0; i < 3; i++) star(ctx, f * H * (0.16 + i * 0.16), -H * (0.48 + (i % 2) * 0.10), H * (0.035 + k * 0.02), color);
+      break;
+    case "gallop-horn":
+      ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.4, H * 0.021);
+      ctx.beginPath(); ctx.arc(f * H * 0.20, -H * 0.50, r * 1.18, -1.1, 0.9); ctx.stroke();
+      break;
+    case "rainbow-arc":
+      const cols = ["#ff5a5f","#ffb347","#ffe66a","#7bd86a","#5ad1ff","#7a7cff","#c58cff"];
+      for (let i = 0; i < cols.length; i++) {
+        ctx.globalAlpha = 0.13 + k * 0.08;
+        ctx.strokeStyle = cols[i];
+        ctx.lineWidth = Math.max(1, H * 0.014);
+        ctx.beginPath(); ctx.arc(f * H * 0.05, -H * 0.50, r * (0.85 + i * 0.07), -0.95, 0.95); ctx.stroke();
+      }
+      break;
+  }
+  ctx.restore();
+}
+
+function drawBasicAttackSignatureFX(ctx, p, H, pose, t) {
+  if (pose.state !== "attack") return;
+  const kind = BASIC_ATTACK_SIGNATURES[String(p?.id || "").toLowerCase()];
+  if (!kind) return;
+  const k = Math.max(0, Math.min(1, pose.impact || 0));
+  if (k < 0.06) return;
+  const color = (p?.color || accentFor(p));
+  const f = p?.facing || 1;
+  const reach = H * (0.42 + k * 0.42);
+
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.globalAlpha = 0.20 + k * 0.55;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1.4, H * 0.022);
+
+  switch (kind) {
+    case "note":
+      for (let i = 0; i < 3; i++) { const a = -0.7 + i * 0.35; ctx.beginPath(); ctx.arc(f * reach * 0.45, -H * 0.45 + Math.sin(a) * H * 0.08, H * 0.04, 0, Math.PI * 2); ctx.stroke(); }
+      break;
+    case "claws":
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * H * 0.16, -H * (0.50 - i * 0.08), reach * (0.55 + i * 0.08), -0.95, 0.25); ctx.stroke(); }
+      break;
+    case "bolt":
+      ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.56); ctx.lineTo(f * H * 0.30, -H * 0.74); ctx.lineTo(f * H * 0.22, -H * 0.50); ctx.lineTo(f * H * 0.48, -H * 0.62); ctx.stroke();
+      break;
+    case "paw":
+      ctx.beginPath(); ctx.arc(f * reach * 0.58, -H * 0.48, H * 0.12, 0, Math.PI * 2); ctx.stroke();
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * (reach * 0.58 + H * (0.10 + i * 0.04)), -H * 0.57 + i * H * 0.04, H * 0.035, 0, Math.PI * 2); ctx.stroke(); }
+      break;
+    case "flame":
+      for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.45 + i * 0.08), -H * (0.38 + i * 0.08), H * (0.10 + k * 0.04), -1.5, 1.1); ctx.stroke(); }
+      break;
+    case "bite":
+    case "fang":
+      ctx.beginPath(); ctx.arc(f * reach * 0.52, -H * 0.46, H * 0.15, -0.8, 0.8); ctx.stroke();
+      for (let i = 0; i < 3; i++) {
+        const x = f * (reach * 0.52 + H * (0.08 + i * 0.05));
+        ctx.beginPath(); ctx.moveTo(x, -H * 0.50); ctx.lineTo(x, -H * (0.42 - i * 0.03)); ctx.stroke();
+      }
+      break;
+    case "salt":
+      ctx.fillStyle = "#fff3c0";
+      for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.24 + i * 0.10), -H * (0.56 - i * 0.03), H * 0.022, 0, Math.PI * 2); ctx.fill(); }
+      break;
+    case "wedge":
+      ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.56); ctx.lineTo(f * reach * 0.75, -H * 0.38); ctx.lineTo(f * reach * 0.75, -H * 0.62); ctx.closePath(); ctx.stroke();
+      break;
+    case "poke":
+      ctx.beginPath(); ctx.moveTo(f * H * 0.10, -H * 0.50); ctx.lineTo(f * reach * 0.84, -H * 0.50); ctx.stroke();
+      star(ctx, f * reach * 0.86, -H * 0.50, H * 0.06, "#fff6c8");
+      break;
+  }
+  ctx.restore();
+}
+
 function drawSignatureFX(ctx, p, H, pose, t) {
   const id = String(p?.id || "").toLowerCase();
   const m = motionProfile(p);
@@ -360,6 +654,8 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   const color = accentFor(p);
   const prof = motionProfile(p);
   drawSignatureFX(ctx, p, H, pose, t);
+  drawAbilitySignatureFX(ctx, p, H, pose, t);
+  drawBasicAttackSignatureFX(ctx, p, H, pose, t);
   const intensity = Math.min(1.35, (pose.speed || 0) * (0.55 + prof.pace * 0.45));
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
   drawLocomotionFX(ctx, H, color, pose, t);
