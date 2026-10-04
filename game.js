@@ -545,6 +545,11 @@ function markHit(p, e, dmg, kb) {
   e.stun = Math.max(e.stun || 0, 10);
   e.flash = 12;
   e.invuln = Math.max(e.invuln || 0, 8);
+  e._hitT = crit ? 14 : 10;
+  e._hitMax = e._hitT;
+  e._hitDir = face;
+  e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
+  e._hitCrit = crit;
   game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
@@ -1187,6 +1192,7 @@ function updateEnemies() {
       continue;
     }
     if (e.flash > 0) e.flash--;
+    if (e._hitT > 0) e._hitT--;
     if (e.stun > 0) {
       e.stun--;
       if (!e.boss && e.stun > 5) {
