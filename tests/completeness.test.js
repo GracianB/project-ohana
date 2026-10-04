@@ -989,3 +989,23 @@ test('phase 25: proyectiles de habilidades quedan acotados bajo saturación', ()
   assert.ok(game.projectiles.filter((p) => p.owner === 'player').length <= 96);
   clearAbilityFx();
 });
+
+test('phase 25: useAbility rechaza contratos corruptos sin consumir cooldown', () => {
+  clearAbilityFx();
+  const g = contractGame();
+  g.player.abilities = ['missing-caster'];
+  ABILITY_DEFS['missing-caster'] = { name: 'Missing', key: 'J', cd: 500 };
+  useAbility(g, 0);
+  assert.equal(g.player.cds['missing-caster'], undefined, 'caster inexistente no debe consumir cooldown');
+
+  g.player.abilities = ['ukulele'];
+  g.player.evo = 999;
+  g.player.cds.ukulele = Infinity;
+  useAbility(g, 0);
+  assert.ok(Number.isFinite(g.player.cds.ukulele), 'cooldown corrupto debe recuperarse');
+  assert.equal(g.player._cast.form, 4, 'evolución debe quedar limitada a la forma final');
+  assert.doesNotThrow(() => useAbility(g, -1));
+  assert.doesNotThrow(() => useAbility(g, 3));
+  delete ABILITY_DEFS['missing-caster'];
+  clearAbilityFx();
+});
