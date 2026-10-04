@@ -346,3 +346,32 @@ test('phase 34: las mutaciones críticas pasan por la capa global compartida', (
   assert.match(mutations, /function scaleEnemyHealth/);
   assert.match(mutations, /Number\.MAX_SAFE_INTEGER/);
 });
+
+
+test('phase 35: presupuesto runtime compartido y compactación sin crecimiento', async () => {
+  const runtime = await import('../systems/runtime.js');
+  const list = [];
+  for (let i = 0; i < runtime.MAX_RUNTIME_BOLTS + 20; i++) {
+    runtime.pushRuntime(list, { id: i }, runtime.MAX_RUNTIME_BOLTS);
+  }
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list[0].id, 20);
+
+  list.push(null, 0, undefined, { id: 100 });
+  runtime.compactRuntimeList(list, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.at(-1).id, 100);
+
+  const caps = [
+    runtime.MAX_RUNTIME_ENEMIES,
+    runtime.MAX_RUNTIME_PROJECTILES,
+    runtime.MAX_RUNTIME_GHOSTS,
+    runtime.MAX_RUNTIME_ORBS,
+    runtime.MAX_RUNTIME_BOLTS,
+    runtime.MAX_RUNTIME_SLASHES,
+  ];
+  assert.ok(caps.every((value) => Number.isInteger(value) && value > 0));
+  assert.equal(runtime.MAX_RUNTIME_SAFE, Number.MAX_SAFE_INTEGER);
+  assert.equal(runtime.boundedFinite(NaN, 7, 0, 10), 7);
+  assert.equal(runtime.boundedFinite(99, 7, 0, 10), 10);
+});
