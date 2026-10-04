@@ -74,6 +74,12 @@ stateDiagram-v2
 
 Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E. Cada forma tiene además una lectura propia de postura, escalado visual y firma de evolución; las 50 combinaciones personaje × forma se mantienen separadas de la hitbox y la física. En combate, las firmas de H/J/K/L también escalan visualmente por forma sin alterar daño, alcance ni hitbox.
 
+La Reina del Nido ya no selecciona golpes aislados. Cada fase usa rutinas encadenadas:
+- **Fase 1 · TERRITORIO**: secuencias cortas de presión y respuesta.
+- **Fase 2 · ASCENSO**: zambullida, proyectil y embestida se combinan en rutas de tres pasos.
+- **Fase 3 · APOCALIPSIS**: cadenas de hasta cuatro ataques con menos hueco entre movimientos.
+Tras cada rutina existe una **ventana de castigo** claramente telegráfica. La selección considera distancia y altura del jugador y evita repetir la misma rutina consecutivamente.
+
 Un golpe normal para el mundo un instante. Un golpe gordo —forma alta, Dino, o un poder de 40 o más— lo para más rato y el número sale en dorado. El combo se queda desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar. La puerta espera medio segundo y entonces te suelta.
 
 ---

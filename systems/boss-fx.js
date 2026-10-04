@@ -79,6 +79,16 @@ export class BossFX {
     this.add("spawn", { x, y, phase, color: p.glow, life: 30 });
   }
 
+  recovery(x, y, phase) {
+    const p = bossPhaseProfile(phase);
+    this.add("recovery", { x, y, phase, color: p.glow, life: p.id === 3 ? 40 : 34, radius: p.id === 3 ? 72 : 58 });
+  }
+
+  recoveryEnd(x, y, phase) {
+    const p = bossPhaseProfile(phase);
+    this.add("recovery-end", { x, y, phase, color: p.color, life: 18 });
+  }
+
   intro(x, y) {
     this.add("intro", { x, y, color: "#ffd37a", life: 54 });
   }
@@ -304,6 +314,37 @@ export class BossFX {
         ctx.lineTo(x + Math.cos(a) * (r * 0.82), y + Math.sin(a) * (r * 0.82));
         ctx.stroke();
       }
+    } else if (item.type === "recovery") {
+      const r = item.radius * (0.65 + u * 0.45);
+      ctx.globalAlpha = alpha * 0.72;
+      ctx.strokeStyle = item.color;
+      ctx.shadowColor = item.color;
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 7]);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = alpha * 0.42;
+      for (let i = 0; i < 8; i++) {
+        const a = i * TAU / 8 + t * 0.015;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(a) * (r * 0.78), y + Math.sin(a) * (r * 0.78));
+        ctx.lineTo(x + Math.cos(a) * (r * 1.12), y + Math.sin(a) * (r * 1.12));
+        ctx.stroke();
+      }
+      ctx.globalAlpha = alpha * 0.88;
+      ctx.fillStyle = item.color;
+      ctx.font = "900 12px Outfit,sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("CASTIGA", x, y - r - 12);
+    } else if (item.type === "recovery-end") {
+      const r = 10 + u * 42;
+      ctx.globalAlpha = alpha * 0.7;
+      ctx.strokeStyle = item.color;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
     } else if (item.type === "spawn") {
       const r = 10 + u * 46;
       ctx.globalAlpha = alpha * 0.7;

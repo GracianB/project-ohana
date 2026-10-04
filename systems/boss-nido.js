@@ -2,8 +2,10 @@ function bossRng(e) {
   return typeof e?._rng === "function" ? e._rng() : Math.random();
 }
 
+import { chooseBossPattern, bossCombatProfile, recoveryFrames, chainGap, patternLabel } from "./boss-combat.js";
+
 /**
- * Reina del Nido — se posa. Volar es un ataque, no el estado normal.
+ * Reina del Nido — director de combate por rutinas.
  * API: createBossNido() · updateBossNido(e, game, helpers)
  */
 
@@ -66,6 +68,14 @@ export function createBossNido() {
     flash: 0,
     invuln: 0,
     perch: 0,
+    pattern: [],
+    patternStep: -1,
+    patternIndex: -1,
+    chainDelay: 0,
+    recoveryT: 0,
+    recoveryMax: 0,
+    vulnerable: false,
+    lastAttack: "",
   };
 }
 
@@ -107,7 +117,9 @@ export function updateBossNido(e, game, helpers) {
     case "charge": updateCharge(e, game, floorY); break;
     case "swoop": updateSwoop(e, game, floorY, cx, cy); break;
     case "slam": updateSlam(e, game, helpers, cx, floorY); break;
-    case "spit": updateSpit(e, floorY); break;
+    case "spit": updateSpit(e, game, floorY); break;
+    case "chain": updateChain(e, game, helpers); break;
+    case "recovery": updateRecovery(e, game, helpers, floorY); break;
     default: updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY); break;
   }
 
@@ -145,6 +157,15 @@ function resetAttackState(e) {
   e.spitLeft = 0;
   e.slam = 0;
   e.slamHang = 0;
+  e.pattern = [];
+  e.patternStep = -1;
+  e.patternIndex = -1;
+  e.chainDelay = 0;
+  e.recoveryT = 0;
+  e.recoveryMax = 0;
+  e.vulnerable = false;
+  e.lastAttack = "";
+  e.patternLabel = "";
   e.vx = (e.vx || 0) * 0.3;
   land(e, 70);
 }
@@ -190,6 +211,9 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
   if (ratio <= CONFIG.PHASE_THRESHOLDS.PHASE_3 && e.phase < 3) {
     e.phase = 3;
     e.color = "#ff1040";
+    e.pattern = [];
+    e.patternStep = -1;
+    e.patternIndex = -1;
     e.contactDmg = 25;
     resetAttackState(e);
     e.attackCd = 40;
@@ -205,6 +229,9 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
   } else if (ratio <= CONFIG.PHASE_THRESHOLDS.PHASE_2 && e.phase < 2) {
     e.phase = 2;
     e.color = "#ff2848";
+    e.pattern = [];
+    e.patternStep = -1;
+    e.patternIndex = -1;
     e.contactDmg = 23;
     resetAttackState(e);
     e.attackCd = 50;
@@ -264,10 +291,7 @@ function updateCharge(e, game, floorY) {
   e.y += (floorY - e.y) * 0.35;
   if (t % 2 === 0) addGhost(game, { x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: e.phase >= 3 ? "#ff1040" : "#f36" });
   if (e.chargeLeft <= 0) {
-    e.mode = "idle";
-    e.vx *= 0.3;
-    land(e, CONFIG.PERCH);
-    e.attackCd = e.phase >= 3 ? 45 : e.phase === 2 ? 55 : 70;
+    finishBossAttack(e, game, e.phase >= 3 ? 5 : e.phase === 2 ? 8 : 10);
   }
 }
 
@@ -282,11 +306,8 @@ function updateSwoop(e, game, floorY, cx, cy) {
     emitParticles(game, cx, cy + 20, { color: "#ff6a8a", count: 2, size: 2.2, up: 0.3, speed: 1.4 }, reduceMotion);
   }
   if (e.swoopLeft <= 0 || e.y >= floorY - 8) {
-    e.mode = "idle";
-    e.vx *= 0.4;
     e.y = Math.min(e.y, floorY);
-    land(e, CONFIG.PERCH);
-    e.attackCd = e.phase >= 3 ? 38 : 48;
+    finishBossAttack(e, game, e.phase >= 3 ? 4 : 7);
     if (e.y >= floorY - 8) {
       game.shake = Math.max(game.shake || 0, 8);
       emitParticles(game, cx, e.y + e.h, { color: "#f84", count: 12, size: 3.5, up: 1.6 }, reduceMotion);
@@ -316,10 +337,8 @@ function updateSlam(e, game, helpers, cx, floorY) {
   } else if (e.slam === 3 && e.y >= floorY - 4) {
     e.y = floorY;
     e.vy = 0;
-    e.mode = "idle";
     e.slam = 0;
-    land(e, CONFIG.PERCH);
-    e.attackCd = e.phase >= 3 ? 50 : 65;
+    finishBossAttack(e, game, e.phase >= 3 ? 5 : 8);
     game.shake = Math.max(game.shake || 0, e.phase >= 3 ? 18 : 12);
     game.flash = Math.max(game.flash || 0, e.phase >= 3 ? 8 : 4);
     emitParticles(game, cx, e.y + e.h, { color: "#ff8040", count: 18, size: 4.5, up: 2.2 }, reduceMotion);
@@ -335,21 +354,96 @@ function updateSlam(e, game, helpers, cx, floorY) {
   }
 }
 
-function updateSpit(e, floorY) {
+function updateSpit(e, game, floorY) {
   e.vx *= 0.7;
   e.airborne = false;
   e.vy = 0;
   e.y += (floorY - e.y) * 0.25;
   e.spitLeft--;
   if (e.spitLeft <= 0) {
+    finishBossAttack(e, game, e.phase >= 3 ? 5 : e.phase === 2 ? 8 : 10);
+  }
+}
+
+
+function finishBossAttack(e, game, delay = 6) {
+  e.lastAttack = e.teleKind || e.mode || "";
+  const next = Array.isArray(e.pattern) ? e.pattern.length : 0;
+  if (e.patternStep >= 0 && e.patternStep < next - 1) {
+    e.patternStep++;
+    e.chainDelay = delay;
+    e.mode = "chain";
+    e.telegraph = false;
+    e.teleKind = e.pattern[e.patternStep];
+    e.vx *= 0.25;
+    e.vy = 0;
+    return;
+  }
+  e.pattern = [];
+  e.patternStep = -1;
+  e.telegraph = false;
+  e.teleKind = "";
+  e.mode = "recovery";
+  e.recoveryMax = recoveryFrames(e.phase);
+  e.recoveryT = e.recoveryMax;
+  e.vulnerable = true;
+  e.invuln = 0;
+  e.patternLabel = "";
+  e.vx *= 0.12;
+  land(e, 1);
+  if (game?.bossFx?.recovery) game.bossFx.recovery(e.x + e.w / 2, e.y + e.h / 2, e.phase);
+}
+
+function updateChain(e, game, helpers) {
+  e.chainDelay--;
+  e.telegraph = e.chainDelay <= Math.max(1, chainGap(e.phase) - 3);
+  if (e.chainDelay <= 0) {
+    const floorY = (helpers.ROOM_H || 800) - CONFIG.FLOOR_OFFSET - e.h;
+    e.wind = 0;
+    e.windMax = Math.max(12, Math.round(({ charge: 28, slam: 34, swoop: 32, spit: 22 }[e.teleKind] || 22) * 0.72));
+    e.vx = 0;
+    beginChainedWindup(e, e.teleKind, floorY);
+  }
+}
+
+function beginChainedWindup(e, kind, floorY) {
+  e.mode = "windup";
+  e.teleKind = kind;
+  e.telegraph = true;
+  e.wind = 0;
+  e.windMax = Math.max(10, Math.round(({ charge: 28, slam: 34, swoop: 32, spit: 22 }[kind] || 22) * 0.72));
+  e.vx *= 0.3;
+  if (kind === "swoop" || kind === "slam") {
+    e.airborne = true;
+    e.hoverY = floorY - (e.phase >= 3 ? 150 : 110);
+  }
+}
+
+function updateRecovery(e, game, helpers, floorY) {
+  e.vx *= 0.72;
+  e.vy = 0;
+  e.y += (floorY - e.y) * 0.25;
+  e.airborne = false;
+  e.telegraph = false;
+  e.vulnerable = true;
+  e.recoveryT--;
+  if (e.recoveryT <= 0) {
+    e.recoveryT = 0;
+    e.recoveryMax = 0;
+    e.vulnerable = false;
     e.mode = "idle";
-    land(e, 80);
-    e.attackCd = e.phase >= 3 ? 40 : e.phase === 2 ? 50 : 60;
+    e.attackCd = e.phase >= 3 ? 18 : e.phase === 2 ? 30 : 42;
+    e.invuln = 0;
+    // Tras una ventana de castigo, recupera el control rápido.
+    // El reposo es visual/IA, no modifica hitbox ni daño.
+    land(e, e.phase >= 3 ? 10 : e.phase === 2 ? 14 : 18);
+    game?.bossFx?.recoveryEnd?.(e.x + e.w / 2, e.y + e.h / 2, e.phase);
   }
 }
 
 function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
   const p = game.player;
+  e._lastPlayer = p ? { x: p.x, y: p.y, w: p.w, h: p.h } : null;
   if (e.perch > 0) e.perch--;
   const grounded = e.phase < 3 || e.perch > 0;
   if (grounded) {
@@ -376,20 +470,26 @@ function updateIdle(e, game, helpers, cx, cy, reduceMotion, t, floorY) {
 }
 
 function pickAttack(e) {
-  const roll = bossRng(e);
-  let kind = "charge";
-  if (e.phase === 1) kind = roll < 0.55 ? "charge" : "spit";
-  else if (e.phase === 2) {
-    if (roll < 0.28) kind = "swoop";
-    else if (roll < 0.5) kind = "slam";
-    else if (roll < 0.75) kind = "spit";
-    else kind = "charge";
-  } else if (roll < 0.28) kind = "swoop";
-  else if (roll < 0.52) kind = "slam";
-  else if (roll < 0.74) kind = "spit";
-  else kind = "charge";
-  startWindup(e, kind);
+  const p = e._lastPlayer || null;
+  const cx = e.x + e.w / 2;
+  const px = p ? p.x + p.w / 2 : cx;
+  const py = p ? p.y + p.h / 2 : e.y + e.h / 2;
+  const pattern = chooseBossPattern(
+    e.phase,
+    e.patternIndex,
+    bossRng.bind(null, e),
+    { distance: Math.abs(px - cx), vertical: py - (e.y + e.h / 2) }
+  );
+  e.pattern = pattern;
+  const profiles = bossCombatProfile(e.phase);
+  e.patternIndex = profiles.patterns.findIndex((candidate) => candidate.length === pattern.length && candidate.every((kind, i) => kind === pattern[i]));
+  e.patternStep = 0;
+  e.teleKind = pattern[0] || "charge";
+  e.lastAttack = "";
+  e.patternLabel = patternLabel(pattern);
+  startWindup(e, e.teleKind);
 }
+
 
 function startWindup(e, kind) {
   e.mode = "windup";

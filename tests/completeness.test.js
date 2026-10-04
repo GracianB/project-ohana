@@ -12,6 +12,7 @@ const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.j
 const { ROOMS } = await import('../systems/map.js');
 const { ABILITY_DEFS } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
+const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
@@ -94,4 +95,40 @@ test('boss RNG inyectable: misma secuencia produce el mismo estado', () => {
     return { phase: e.phase, mode: e.mode, hp: e.hp, x: e.x, y: e.y, projectiles: g.projectiles.length, enemies: g.enemies.length };
   };
   assert.deepEqual(run(), run());
+});
+test('director del boss: las tres fases encadenan rutinas y abren ventanas de castigo', () => {
+  for (const phase of [1, 2, 3]) {
+    const profile = BOSS_COMBAT_PROFILES[phase];
+    assert.ok(profile.patterns.length >= 3);
+    assert.ok(profile.recovery > 0);
+    assert.ok(profile.chainGap > 0);
+    for (const pattern of profile.patterns) {
+      assert.ok(pattern.length >= 2);
+      assert.ok(pattern.every((kind) => ['charge', 'swoop', 'slam', 'spit'].includes(kind)));
+      assert.ok(patternLabel(pattern));
+    }
+  }
+
+  const far = chooseBossPattern(1, -1, () => 0, { distance: 500, vertical: 0 });
+  assert.equal(far[0], 'charge');
+
+  const high = chooseBossPattern(2, -1, () => 0, { distance: 220, vertical: -120 });
+  assert.equal(high[0], 'swoop');
+
+  const close = chooseBossPattern(3, -1, () => 0, { distance: 80, vertical: 10 });
+  assert.equal(close[0], 'slam');
+
+  assert.ok(recoveryFrames(1) > recoveryFrames(2));
+  assert.ok(recoveryFrames(2) > recoveryFrames(3));
+});
+
+test('director del boss evita repetir la misma rutina consecutivamente cuando hay alternativas', () => {
+  for (const phase of [1, 2, 3]) {
+    const profile = BOSS_COMBAT_PROFILES[phase];
+    const first = chooseBossPattern(phase, 0, () => 0, { distance: 350, vertical: 0 });
+    const second = chooseBossPattern(phase, 0, () => 0, { distance: 350, vertical: 0 });
+    assert.ok(first.length > 0);
+    assert.ok(second.length > 0);
+    if (profile.patterns.length > 1) assert.notDeepEqual(second, profile.patterns[0]);
+  }
 });
