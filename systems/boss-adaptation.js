@@ -68,7 +68,6 @@ export function observeBossAdaptation(state = createBossAdaptation(), event = {}
     next.recent.push(type);
     next.repeat = previousType === type ? Math.max(1, Number(next.repeat) || 0) + 1 : 1;
     next.lastType = type;
-    next.baitConsumed = false;
   } else if (outcome === "reset") {
     next.repeat = 0;
     next.lastType = "";
