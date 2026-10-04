@@ -348,7 +348,6 @@ function upgradeLine(id, evo) {
   if (b.speed > a.speed) out.push("+velocidad");
   if (b.jump > a.jump && !(b.jumps > a.jumps)) out.push("+salto");
   if (b.jumps > a.jumps) out.push("+" + (b.jumps - a.jumps) + (b.jumps - a.jumps > 1 ? " saltos" : " salto"));
-  if (b.aura) out.push("aura divina");
   if (b.glide) out.push("planeo");
   return out.join("  ·  ");
 }
