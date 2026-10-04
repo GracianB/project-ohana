@@ -78,6 +78,7 @@ export function computePose(p, t, opts = {}) {
   const r = p._rig || (p._rig = {
     sway: 0, swayV: 0, bounce: 0, bounceV: 0, blinkAt: 90 + rng() * 120, blinkT: 0,
     idleT: 0, flourishT: -1, flourishN: 0, atkMax: 0, phase: 0, land: 0, wasAir: false, lastT: t,
+    lastVx: 0, turn: 0, brake: 0,
   });
   const dt = clamp(t - r.lastT, 0, 4) || 1;
   r.lastT = t;
@@ -85,6 +86,13 @@ export function computePose(p, t, opts = {}) {
   const vx = p.vx || 0, vy = p.vy || 0;
   const air = !p.grounded;
   const speed = clamp(Math.abs(vx) / Math.max(3, p.speed || 5), 0, 1.4);
+  const prevVx = r.lastVx || 0;
+  const turning = !air && Math.abs(vx) > 1.2 && Math.abs(prevVx) > 1.2 && Math.sign(vx) !== Math.sign(prevVx);
+  const braking = !air && Math.abs(prevVx) > 2 && Math.abs(vx) < Math.abs(prevVx) * 0.72;
+  if (turning) r.turn = 1;
+  r.turn = Math.max(0, r.turn - 0.11 * dt);
+  r.brake = braking ? Math.min(1, Math.abs(prevVx - vx) / 7) : Math.max(0, r.brake - 0.16 * dt);
+  r.lastVx = vx;
 
   if (!air && speed > 0.08) r.phase += (0.16 + speed * 0.2) * dt * prof.freq;
 
@@ -162,6 +170,8 @@ export function computePose(p, t, opts = {}) {
     legSwing: Math.sin(r.phase + Math.PI) * run,
     anticipation: anticipation / prof.snap,
     impact,
+    turnPulse: r.turn,
+    brake: clamp(r.brake, 0, 1),
     secondary: r.sway * prof.sway,
   };
 }
