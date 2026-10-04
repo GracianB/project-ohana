@@ -1,4 +1,5 @@
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
+import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
@@ -2482,6 +2483,16 @@ function setupSelect() {
     if (idx >= 0) useAbility(game, idx);
   });
 }
+addEventListener("ohana-evolve-done", (e) => {
+  const detail = e?.detail || {};
+  const p = game.player;
+  if (!p || detail.id !== p.id) return;
+  const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
+  const story = evolutionMessage(p.id, evo);
+  showNotification("FORMA " + (evo + 1), p.name + " · " + story.line, "evo");
+  updateHUD();
+});
+
 setupSelect();
 bindDialogs({ document, onChange: () => { input.reset(); clock.reset(); } });
 requestAnimationFrame(loop);
