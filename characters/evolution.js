@@ -319,3 +319,122 @@ export function drawEvolutionSignatureFX(ctx, p, H, pose, t) {
 
   ctx.restore();
 }
+
+
+/**
+ * FX específico de la cinemática de evolución.
+ * Solo presentación: no modifica estado, daño, hitboxes ni física.
+ * Cada etapa conserva el glyph del héroe pero cambia su escala, órbita,
+ * densidad y geometría para que el salto de forma se lea incluso como silueta.
+ */
+export function drawEvolutionCinemaFX(ctx, id, evo, cx, cy, H, t, color, strength = 1) {
+  const e = evolutionProfile(id, evo);
+  const stage = e.evo;
+  const base = Math.max(1, H);
+  const pulse = 1 + Math.sin((Number(t) || 0) * 0.045 * e.pulse) * 0.08;
+  const power = Math.max(0, Math.min(1.35, Number(strength) || 0));
+  if (power <= 0.01) return;
+
+  const main = stage >= 4 ? "#ffd84a" : color || "#fff6c8";
+  const hot = stage >= 4 ? "#fff4b5" : tint(main, 0.42);
+  const orbit = base * (0.48 + stage * 0.045);
+  const y = cy - base * 0.02;
+
+  ctx.save();
+  ctx.translate(cx, y);
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.globalAlpha = power * (0.24 + stage * 0.075);
+
+  if (stage === 0) {
+    for (let i = 0; i < 2; i++) {
+      const a = (Number(t) || 0) * 0.024 + i * Math.PI;
+      const r = orbit * 0.58;
+      drawGlyph(ctx, e.kind, Math.cos(a) * r, -base * 0.70 + Math.sin(a) * base * 0.08, base * 0.035, main, a);
+    }
+  } else if (stage === 1) {
+    const drift = Math.sin((Number(t) || 0) * 0.04) * base * 0.025;
+    drawGlyph(ctx, e.kind, -orbit * 0.52, -base * 0.72 + drift, base * 0.042, main, -0.24);
+    drawGlyph(ctx, e.kind, orbit * 0.52, -base * 0.72 - drift, base * 0.042, hot, 0.24);
+
+    ctx.strokeStyle = main;
+    ctx.lineWidth = Math.max(1.4, base * 0.010);
+    ctx.beginPath();
+    ctx.ellipse(0, -base * 0.58, orbit * 0.92 * pulse, base * 0.12, 0, Math.PI * 0.16, Math.PI * 0.84);
+    ctx.stroke();
+  } else if (stage === 2) {
+    ctx.strokeStyle = main;
+    ctx.lineWidth = Math.max(1.6, base * 0.014);
+    ctx.beginPath();
+    ctx.ellipse(0, -base * 0.58, orbit * 1.05 * pulse, base * 0.16, e.characterLean * 1.8, 0, Math.PI * 2);
+    ctx.stroke();
+
+    for (let i = 0; i < 3; i++) {
+      const a = (Number(t) || 0) * (0.018 + i * 0.004) + i * (Math.PI * 2 / 3);
+      const r = orbit * (0.80 + i * 0.10);
+      drawGlyph(ctx, e.kind, Math.cos(a) * r, -base * 0.58 + Math.sin(a) * base * 0.16, base * (0.040 + i * 0.006), i === 1 ? hot : main, a);
+    }
+  } else if (stage === 3) {
+    ctx.strokeStyle = main;
+    ctx.lineWidth = Math.max(1.8, base * 0.018);
+
+    for (let i = 0; i < 4; i++) {
+      const a = -0.72 + i * 0.48 + Math.sin((Number(t) || 0) * 0.028 + i) * 0.035;
+      const x0 = Math.cos(a) * orbit * 0.82;
+      const y0 = -base * 0.40 + Math.sin(a) * base * 0.10;
+      const x1 = Math.cos(a) * orbit * 1.22;
+      const y1 = -base * (0.82 + (i % 2) * 0.10) + Math.sin(a) * base * 0.18;
+      ctx.globalAlpha = power * (0.16 + i * 0.025);
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = power * 0.30;
+    ctx.beginPath();
+    ctx.ellipse(0, -base * 0.55, orbit * 1.20 * pulse, base * 0.20, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    drawGlyph(ctx, e.kind, orbit * 1.10, -base * 0.78, base * 0.062, hot, (Number(t) || 0) * 0.038);
+  } else {
+    ctx.strokeStyle = hot;
+    ctx.lineWidth = Math.max(2, base * 0.022);
+    ctx.globalAlpha = power * 0.52;
+    ctx.beginPath();
+    ctx.ellipse(0, -base * 0.62, orbit * 1.28 * pulse, base * 0.23, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.globalAlpha = power * 0.34;
+    ctx.beginPath();
+    ctx.arc(0, -base * 0.62, orbit * 0.74 * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+
+    for (let i = 0; i < 8; i++) {
+      const a = (Number(t) || 0) * 0.020 + i * (Math.PI * 2 / 8);
+      const r = orbit * (1.02 + 0.10 * Math.sin(i * 2.7));
+      drawGlyph(ctx, e.kind, Math.cos(a) * r, -base * 0.62 + Math.sin(a) * base * 0.23, base * (0.045 + (i % 3) * 0.006), i % 2 ? main : hot, a);
+    }
+
+    ctx.globalAlpha = power * 0.24;
+    ctx.fillStyle = hot;
+    ctx.beginPath();
+    ctx.arc(0, -base * 0.62, base * 0.055, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Cinco marcas de progreso forman un sello visual común, con la etapa activa destacada.
+  const meterR = orbit * 0.76;
+  const meterY = base * 0.18;
+  for (let i = 0; i < 5; i++) {
+    const active = i <= stage;
+    ctx.beginPath();
+    ctx.arc((i - 2) * base * 0.085, meterY, base * (active && i === stage ? 0.022 : 0.014), 0, Math.PI * 2);
+    ctx.globalAlpha = power * (active ? (i === stage ? 0.85 : 0.42) : 0.10);
+    ctx.fillStyle = active ? (i === stage ? "#ffffff" : main) : "#ffffff";
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
