@@ -9,6 +9,7 @@ import { createBossAdaptation, observeBossAdaptation, adaptiveAttackPreference, 
 import { createBossBait, armBossBait, consumeBossBait, baitLabel } from "./boss-bait.js";
 import { createBossBaitFeedback, beginBossBaitFeedback, resolveBossBaitFeedback, feedbackAttackDelay, baitFeedbackLabel } from "./boss-bait-feedback.js";
 import { createBossEncounterMemory, observeBossEncounter, encounterPreference, encounterLabel } from "./boss-encounter-memory.js";
+import { addScore } from "./mutations.js";
 
 /**
  * Reina del Nido — director de combate por rutinas.
@@ -443,7 +444,7 @@ function finishBossAttack(e, game, delay = 6) {
     e.lastCounterplay = counterResult;
     e.counterBreak = counterResult.openBonus;
     if (game) {
-      game.score = (Number(game.score) || 0) + counterResult.reward;
+      addScore(game, counterResult.reward);
       game.nums?.add(e.x, e.y - 28, counterplayLabel(counterResult) + " +" + counterResult.reward, "#ffe66a", true);
       game.bossFx?.counterplay?.(e.x + e.w / 2, e.y + e.h / 2, e.phase, counterResult);
     }
