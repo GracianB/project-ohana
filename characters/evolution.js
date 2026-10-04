@@ -50,17 +50,27 @@ export const EVOLUTION_STAGES = Object.freeze([
   }),
 ]);
 
+
+
+export const EVOLUTION_COMBAT_STAGES = Object.freeze([
+  Object.freeze({ id: 0, attack: 0.82, cast: 0.84, impact: 0.80, trail: 0.70, glow: 0.65, density: 0.72, snap: 0.82 }),
+  Object.freeze({ id: 1, attack: 1.00, cast: 1.00, impact: 1.00, trail: 0.92, glow: 0.86, density: 0.92, snap: 1.00 }),
+  Object.freeze({ id: 2, attack: 1.08, cast: 1.12, impact: 1.10, trail: 1.10, glow: 1.08, density: 1.08, snap: 1.10 }),
+  Object.freeze({ id: 3, attack: 1.18, cast: 1.26, impact: 1.24, trail: 1.28, glow: 1.30, density: 1.24, snap: 1.20 }),
+  Object.freeze({ id: 4, attack: 1.30, cast: 1.44, impact: 1.38, trail: 1.46, glow: 1.58, density: 1.42, snap: 1.34 }),
+]);
+
 const CHARACTER_STYLES = Object.freeze({
-  kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08 }),
-  stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02 }),
-  chispin: Object.freeze({ kind: "bolt",  lean:  0.075, head: -0.028, swing: 1.25, float: 0.00 }),
-  cat:     Object.freeze({ kind: "star",  lean: -0.018, head: 0.036, swing: 0.96, float: 0.10 }),
-  dragon:  Object.freeze({ kind: "flame", lean:  0.020, head: -0.040, swing: 0.92, float: 0.18 }),
-  dino:    Object.freeze({ kind: "shard", lean:  0.090, head: -0.050, swing: 0.78, float: -0.04 }),
-  frita:   Object.freeze({ kind: "salt",  lean:  0.065, head: -0.022, swing: 1.12, float: 0.00 }),
-  pizza:   Object.freeze({ kind: "cheese",lean: -0.055, head: 0.020, swing: 0.84, float: 0.06 }),
-  yomi:    Object.freeze({ kind: "ofuda", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22 }),
-  cuerno:  Object.freeze({ kind: "horn",  lean: -0.030, head: -0.030, swing: 1.02, float: 0.14 }),
+  kilo:    Object.freeze({ kind: "petal", lean: -0.030, head: 0.020, swing: 1.08, float: 0.08, combat: 0.92 }),
+  stitcho: Object.freeze({ kind: "stitch", lean:  0.040, head: -0.018, swing: 1.15, float: 0.02, combat: 1.10 }),
+  chispin: Object.freeze({ kind: "bolt",  lean:  0.075, head: -0.028, swing: 1.25, float: 0.00, combat: 1.18 }),
+  cat:     Object.freeze({ kind: "star",  lean: -0.018, head: 0.036, swing: 0.96, float: 0.10, combat: 0.88 }),
+  dragon:  Object.freeze({ kind: "flame", lean:  0.020, head: -0.040, swing: 0.92, float: 0.18, combat: 1.14 }),
+  dino:    Object.freeze({ kind: "shard", lean:  0.090, head: -0.050, swing: 0.78, float: -0.04, combat: 1.24 }),
+  frita:   Object.freeze({ kind: "salt",  lean:  0.065, head: -0.022, swing: 1.12, float: 0.00, combat: 1.06 }),
+  pizza:   Object.freeze({ kind: "cheese",lean: -0.055, head: 0.020, swing: 0.84, float: 0.06, combat: 1.02 }),
+  yomi:    Object.freeze({ kind: "ofuda", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }),
+  cuerno:  Object.freeze({ kind: "horn",  lean: -0.030, head: -0.030, swing: 1.02, float: 0.14, combat: 0.98 }),
 });
 
 const CANON = (id) => {
@@ -74,6 +84,7 @@ export function evolutionProfile(pOrId, evoOverride) {
     evoOverride ?? (typeof pOrId === "object" ? pOrId?.evo : 0)
   ) || 0)));
   const stage = EVOLUTION_STAGES[evo];
+  const combatStage = EVOLUTION_COMBAT_STAGES[evo];
   const style = CHARACTER_STYLES[id] || CHARACTER_STYLES.kilo;
   return Object.freeze({
     ...stage,
@@ -84,6 +95,16 @@ export function evolutionProfile(pOrId, evoOverride) {
     characterHead: style.head,
     swing: style.swing,
     float: style.float,
+    combatCharacter: style.combat,
+    combat: Object.freeze({
+      attack: combatStage.attack * style.combat,
+      cast: combatStage.cast * style.combat,
+      impact: combatStage.impact * style.combat,
+      trail: combatStage.trail * style.combat,
+      glow: combatStage.glow * style.combat,
+      density: combatStage.density,
+      snap: combatStage.snap,
+    }),
   });
 }
 
@@ -111,6 +132,7 @@ export function applyEvolutionPose(pose, p) {
   out.evolutionScaleX = e.scaleX;
   out.evolutionScaleY = e.scaleY;
   out.evolutionPulse = pulse;
+  out.evolutionCombat = e.combat;
 
   const body = active ? 1 : 0.62;
   out.bodyTilt = Number(out.bodyTilt || 0) + e.characterLean * e.lean * (0.70 + body * 0.30);
