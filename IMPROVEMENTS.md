@@ -1,4 +1,4 @@
-# 59 mejoras · Demo Mundo 1
+# 60 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -75,3 +75,4 @@ La demo publicada se documenta con estas cifras:
 Estas cifras deben permanecer alineadas entre el código, manifest.json, README.md, PROGRESS.md y el pipeline de GitHub Pages.
 
 59. **Boss Adaptive Bait**: dos respuestas defensivas iguales arman un CEBO de un solo uso, con rutina autorizada por fase y rearme tras una nueva observación limpia
+60. **Boss Bait Feedback**: el boss registra si el jugador leyó o cayó en el CEBO y ajusta el tempo siguiente de forma determinista y acotada
