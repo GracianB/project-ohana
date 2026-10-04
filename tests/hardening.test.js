@@ -316,3 +316,33 @@ test('phase 33: gameplay determinista y convocatoria del Nido ligada al reloj de
   assert.match(game, /function tickWorldSummon\(\)/);
   assert.match(game, /tickWorldSummon\(\);/);
 });
+
+
+test('phase 34: las mutaciones críticas pasan por la capa global compartida', () => {
+  const mutations = fs.readFileSync('./systems/mutations.js', 'utf8');
+  const files = [
+    './systems/abilities.js',
+    './systems/magic.js',
+    './systems/surprises.js',
+    './systems/passives.js',
+    './systems/boss-nido.js',
+    './engine/foes.js',
+  ];
+  const sources = files.map((file) => fs.readFileSync(file, 'utf8'));
+  for (const source of sources) {
+    assert.match(source, /mutations\.js/);
+    assert.doesNotMatch(source, /\.hp\s*[-+]=/);
+    assert.doesNotMatch(source, /\.health\s*[-+]=/);
+    assert.doesNotMatch(source, /\.xp\s*\+=/);
+    assert.doesNotMatch(source, /game\.score\s*[-+]=/);
+  }
+  assert.match(mutations, /function damageEnemy/);
+  assert.match(mutations, /function healPlayer/);
+  assert.match(mutations, /function damagePlayer/);
+  assert.match(mutations, /function addPlayerXp/);
+  assert.match(mutations, /function addScore/);
+  assert.match(mutations, /function addKill/);
+  assert.match(mutations, /function addCombo/);
+  assert.match(mutations, /function scaleEnemyHealth/);
+  assert.match(mutations, /Number\.MAX_SAFE_INTEGER/);
+});

@@ -13,10 +13,12 @@ export function isAirFoe(e) {
     || (e.boss && e.airborne);
 }
 
+import { scaleEnemyHealth } from "../systems/mutations.js";
+
 export function applyElite(e) {
   if (!e || e.elite) return e;
   e.elite = true;
-  e.hp = Math.round(e.hp * 1.75);
+  scaleEnemyHealth(e, 1.75);
   e.max = e.hp;
   e.w = Math.round(e.w * 1.1);
   e.h = Math.round(e.h * 1.1);

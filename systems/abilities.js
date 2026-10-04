@@ -8,6 +8,7 @@
 import { vfxSprite } from "../characters/sprites.js";
 import { sfx } from "../engine/audio.js";
 import { showNotification } from "./notify.js";
+import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 
 // cd en ms (se reduce con la forma: cd / (1 + evo*0.12)). J corto, K medio, L largo.
 export const ABILITY_DEFS = {
@@ -360,7 +361,7 @@ export function hitEnemy(g, e, dmg, o = {}) {
   if (!Number.isFinite(d)) return false;
   if (e.boss) d *= 0.55;
   d = Math.max(1, Math.round(d));
-  e.hp = Math.max(0, Number.isFinite(e.hp) ? e.hp - d : 0);
+  damageEnemy(e, d);
   e.flash = Math.max(e.flash || 0, 14);
   
   if (e.boss) {
@@ -375,12 +376,12 @@ export function hitEnemy(g, e, dmg, o = {}) {
   const crit = !!o.crit || d >= 40;
   if (o.nums !== false) g.nums.add(cx(e) - 4, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (o.color || "#ffe66a"), crit);
   
-  g.combo = (Number.isFinite(g.combo) ? g.combo : 0) + 1;
+  addCombo(g, 1);
   g.comboT = 480;
-  g.score = (Number.isFinite(g.score) ? g.score : 0) + 10 * g.combo;
+  addScore(g, 10 * g.combo);
   g.fx.emit(cx(e), cy(e), { color: o.color || "#fff", count: o.parts ?? (crit ? 14 : 8), size: crit ? 4 : 3, up: 1.2, star: !!crit });
   
-  if (g.player) g.player.xp = (Number.isFinite(g.player.xp) ? g.player.xp : 0) + (Number.isFinite(o.xp) ? o.xp : 2);
+  if (g.player) addPlayerXp(g.player, Number.isFinite(o.xp) ? o.xp : 2);
   g.shake = Math.min(18, (g.shake || 0) + (o.shake ?? 3) + (crit ? 4 : 0));
   
   // Modificación: Permitir que stop sea reasignado
@@ -494,7 +495,7 @@ const CASTERS = {
   ohana(g, p, evo) {
     const god = evo >= 4;
     const heal = 20 + evo * 8;
-    p.health = Math.min(p.maxHealth, p.health + heal);
+    healPlayer(p, heal);
     g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6", true);
     const R = Math.hypot(viewW(), viewH());
     add({ kind: "ohana", x: cx(p), y: cy(p), r: 0, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4) * pw(p), lifesteal: god ? 5 : 0 });

@@ -16,6 +16,7 @@ index.html
 │  │  └─ characters/art/*.js .. un módulo vectorial animado por personaje
 │  ├─ characters/sprites.js ... PNG de efectos
 │  ├─ systems/passives.js ..... rasgo único de cada personaje
+│  ├─ systems/mutations.js ..... mutaciones seguras de HP, XP, score, combo y bajas
 │  ├─ systems/magic.js ........ objetos mágicos (6) y sus chips en el HUD
 │  ├─ worlds/index.js ......... fondos por mundo (parallax)
 │  ├─ systems/map.js .......... 10 salas, puertas y carteles
@@ -55,7 +56,7 @@ index.html
 ## Reglas
 - Nada de scripts `APPLY-*.ps1` que parcheen código por texto: se edita el fichero.
 - Si añades un módulo, impórtalo desde un punto de entrada o no se cargará.
-- Al cambiar CSS/JS de entrada, sube `?v=ohana-NN` en `index.html` (actual: `ohana-107`).
+- Al cambiar CSS/JS de entrada, sube `?v=ohana-NN` en `index.html` (actual: `ohana-108`).
 - El guardado usa `saveStore`; las acciones de teclado y táctiles comparten `bindInput`.
 - `systems/hud.js` recibe el estado del jugador: no lee textos del DOM ni usa intervalos.
 - Las pruebas de `tests/core.test.js` y `tests/runtime.test.js` deben pasar antes del despliegue.

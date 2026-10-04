@@ -10,6 +10,7 @@
 // También hace de puente con las entidades de habilidades (systems/abilities.js).
 // ============================================================================
 import { sfx } from "../engine/audio.js";
+import { setPlayerHealth } from "./mutations.js";
 import { abilityPreMove, updateAbilityFx, drawAbilityFx, clearAbilityFx, hitEnemy } from "./abilities.js";
 
 const TAU = Math.PI * 2;
@@ -303,7 +304,7 @@ export const Passives = {
     if (!p || pid(p) !== "ninelives" || p._nineUsed) return false;
     p._nineUsed = true;
     sfx("lives");
-    p.health = 1;
+    setPlayerHealth(p, 1);
     p.dead = false;
     p.invuln = 90;
     p._nineT = 90;

@@ -24,6 +24,7 @@ import { sense, think } from "./engine/foe-brain.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
+import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill } from "./systems/mutations.js";
 import { createFixedClock } from "./engine/clock.js";
 import { bindInput } from "./engine/input.js";
 import { bindDialogs } from "./systems/dialogs.js";
@@ -648,47 +649,13 @@ function dash() {
   }
   beep("dash");
 }
-function finiteOr(value, fallback = 0) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : fallback;
-}
-function damageEnemy(e, amount) {
-  if (!e) return false;
-  const d = Number(amount);
-  if (!Number.isFinite(d) || d <= 0) return false;
-  const hp = Math.max(0, finiteOr(e.hp, 0));
-  e.hp = Math.max(0, hp - d);
-  return true;
-}
-function healPlayer(p, amount) {
-  if (!p) return false;
-  const n = Number(amount);
-  if (!Number.isFinite(n) || n <= 0) return false;
-  p.health = Math.min(finiteOr(p.maxHealth, finiteOr(p.health, 0)), Math.max(0, finiteOr(p.health, 0) + n));
-  return true;
-}
-function damagePlayer(p, amount) {
-  if (!p) return false;
-  const n = Number(amount);
-  if (!Number.isFinite(n) || n <= 0) return false;
-  p.health = Math.max(0, finiteOr(p.health, 0) - n);
-  return true;
-}
-function addPlayerXp(p, amount) {
-  if (!p) return false;
-  const n = Number(amount);
-  if (!Number.isFinite(n) || n <= 0) return false;
-  p.xp = Math.max(0, finiteOr(p.xp, 0) + n);
-  return true;
-}
-function addScore(amount) {
-  const n = Number(amount);
-  if (!Number.isFinite(n) || n === 0) return;
-  game.score = Math.max(0, finiteOr(game.score, 0) + n);
-}
-function addKill() {
-  game.kills = Math.max(0, finiteOr(game.kills, 0) + 1);
-}
+function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
+function damageEnemy(e, amount) { return safeDamageEnemy(e, amount); }
+function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
+function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
+function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
+function addScore(amount) { return safeAddScore(game, amount); }
+function addKill() { return safeAddKill(game); }
 function registerBossPunish(e) {
   if (!e?.boss || !e.vulnerable || e.dying) return false;
   e.punishHits = (Number(e.punishHits) || 0) + 1;
