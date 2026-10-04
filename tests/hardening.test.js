@@ -117,6 +117,19 @@ test('phase 19: el HUD solo expone CEBO cuando está realmente armado', () => {
 });
 
 
+test('phase 21: encounter memory queda aislada y acotada', () => {
+  const memory = fs.readFileSync('./systems/boss-encounter-memory.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  assert.doesNotMatch(memory, /Math\.random\(/);
+  assert.doesNotMatch(memory, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(memory, /\.w\s*=|\.h\s*=/);
+  assert.match(memory, /Math\.max\(-2, Math\.min\(2/);
+  assert.match(boss, /createBossEncounterMemory/);
+  assert.match(boss, /encounterPreference/);
+  assert.match(combat, /context\.encounterPreference/);
+});
+
 test('phase 20: bait feedback no puede tocar daño, hitbox ni superar su límite de tempo', () => {
   const feedback = fs.readFileSync('./systems/boss-bait-feedback.js', 'utf8');
   const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
