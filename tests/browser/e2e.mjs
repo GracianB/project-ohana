@@ -72,6 +72,7 @@ try {
   const page = await desktop.newPage({ viewport:{width:1280,height:720}, deviceScaleFactor:1 });
   await auditPage(page, 'desktop');
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
+  await page.locator('#game').focus();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
