@@ -246,7 +246,7 @@ test("la identidad de personaje modula combate sin colapsar las cinco etapas", (
 
 
 test("combat FX escala por combo y mantiene un límite seguro de partículas", () => {
-  assert.deepEqual([1,2,4,8,13].map(combatTier), [0,1,2,3,4]);
+  assert.deepEqual([1,2,4,8,13].map((n) => combatTier(n)), [0,1,2,3,4]);
   assert.equal(combatTier(2, true), 4);
 
   const fx = new CombatFX();
