@@ -317,3 +317,8 @@ Phase 21 añade memoria corta del encuentro. Las respuestas limpias y los CEBO l
 ## Ability Fix · Kilo + Pizza
 
 Se corrigió una regresión de habilidades: el segundo ataque de Kilo (`Giro hula`) ahora tiene ciclo de impacto real y el agarre de queso de Pizza tiene duración limitada, permite contramovimiento y se cancela al lanzar otra habilidad. Las tres habilidades de Pizza quedan cubiertas por pruebas de impacto. Caché `ohana-98`.
+
+
+## CI Hardening
+
+GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, ejecuta el pipeline con límites de tiempo y conserva regresión, E2E de navegador y consistencia antes de publicar.

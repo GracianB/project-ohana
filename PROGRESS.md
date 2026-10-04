@@ -166,6 +166,7 @@ El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 | 05/10 | **Runtime Budget + Portal Determinism · Phase 28**: colecciones transitorias acotadas (enemigos/proyectiles/ghosts/orbs), números flotantes limitados a 96 y VFX de portales sin azar ni reloj de pared; caché `ohana-103`. |
 | 05/10 | **Runtime Integrity Guard · Phase 29**: saneamiento preventivo de estado crítico y colecciones antes de cada paso de simulación; límites finitos para HP, XP, score, movimiento, proyectiles, enemigos y FX; recompensa `PUNISH` vuelve al guard de puntuación; caché `ohana-104`. |
 | 05/10 | **Runtime Fail-Closed · Phase 30**: el bucle principal contiene errores de simulación o render, registra el contexto, limpia input/reloj y pausa de forma segura sin matar el `requestAnimationFrame`; caché `ohana-105`. |
+| 05/10 | **CI Hardening · Phase 31**: GitHub Actions actualizado a `actions/checkout@v7` y `actions/setup-node@v7`, con límite de 10 minutos para test y deploy; elimina el warning de Node 20 de las actions antiguas. |
 
 ## Publicación y caché
 
