@@ -30,7 +30,10 @@ jobs:
           node-version: 22
 
       - name: Run regression suites
-        run: node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js
+        run: npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js
+          node tests/browser/e2e.mjs
 
       - name: Validate project consistency
         run: |
@@ -94,8 +97,12 @@ jobs:
             errors.push(`PROGRESS.md: no refleja la caché ${currentVersion}`);
           }
 
-          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js")) {
-            errors.push("PROGRESS.md: no documenta las tres suites del CI");
+          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js")) {
+            errors.push("PROGRESS.md: no documenta las cuatro suites del CI");
+          }
+
+          if (!progress.includes("node tests/browser/e2e.mjs")) {
+            errors.push("PROGRESS.md: no documenta el E2E real del navegador");
           }
 
           if (errors.length) {
@@ -107,7 +114,7 @@ jobs:
           console.log("[OHANA] Consistency check PASS");
           console.log(" - " + (manifest.description || "sin descripción"));
           console.log(" - cache: " + (currentVersion || "sin versión"));
-          console.log(" - CI: core + runtime + renderer smoke");
+          console.log(" - CI: core + runtime + renderer + completeness + browser E2E");
           console.log(` - código: ${activeCharacters} personajes / ${formsPerCharacter} formas / ${roomCount} salas`);
           console.log(" - docs: código ↔ manifest ↔ README ↔ PROGRESS ↔ IMPROVEMENTS");
           NODE
@@ -136,3 +143,13 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify deployed GitHub Pages
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          test -n "$PAGE_URL"
+          curl --fail --silent --show-error --location --retry 12 --retry-delay 5 --retry-all-errors "$PAGE_URL" -o /tmp/ohana.html
+          grep -q "PROJECT OHANA" /tmp/ohana.html
+          grep -q "ohana-" /tmp/ohana.html
+          echo "[OHANA] GitHub Pages deployment verified: $PAGE_URL"
