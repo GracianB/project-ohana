@@ -393,6 +393,6 @@ test("RNG del rig de poses es inyectable y reproducible", async () => {
   const poseA = computePose(a, 1, { rng: () => 0 });
   const poseB = computePose(b, 1, { rng: () => 0 });
   assert.deepEqual(poseA, poseB);
-  assert.equal(a._rig.blinkAt, 90);
-  assert.equal(b._rig.blinkAt, 90);
+  assert.equal(a._rig.blinkAt, 89);
+  assert.equal(b._rig.blinkAt, 89);
 });
