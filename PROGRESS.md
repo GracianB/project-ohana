@@ -17,7 +17,8 @@ Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, c
 
 ## Hecho
 
-| 04/10 | Pase de personajes: perfiles cinéticos por personaje, squash/stretch, anticipación e impacto de ataques, feedback de aterrizaje/dash y casteo de habilidades con color propio; nueva suite de regresión de animación en CI; caché `ohana-80`. |\n
+| 04/10 | Pase de personajes: perfiles cinéticos por personaje, squash/stretch, anticipación e impacto de ataques, feedback de aterrizaje/dash y casteo de habilidades con color propio; nueva suite de regresión de animación en CI; caché `ohana-80`. |
+
 | Fecha | Qué |
 |---|---|
 | 04/10 | Intro cinematográfica de portada activa, con escena de Isla Hoku, aviso del Nido y salida por iris; eliminada la pantalla de carga básica. |
