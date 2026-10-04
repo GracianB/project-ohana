@@ -1,7 +1,21 @@
+const MAX_FLOATERS = 96;
+
 export class Floaters {
   constructor() { this.items = []; }
   add(x, y, text, color, crit) {
-    this.items.push({ x, y, text, color: color || "#fff", life: crit ? 52 : 40, max: crit ? 52 : 40, crit: !!crit });
+    if (!Number.isFinite(Number(x)) || !Number.isFinite(Number(y))) return false;
+    const life = crit ? 52 : 40;
+    if (this.items.length >= MAX_FLOATERS) this.items.splice(0, this.items.length - MAX_FLOATERS + 1);
+    this.items.push({
+      x: Number(x),
+      y: Number(y),
+      text: String(text ?? ""),
+      color: color || "#fff",
+      life,
+      max: life,
+      crit: !!crit
+    });
+    return true;
   }
   update() {
     this.items = this.items.filter((f) => {

@@ -95,6 +95,17 @@ const game = {
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
+const MAX_RUNTIME_ENEMIES = 32;
+const MAX_RUNTIME_PROJECTILES = 128;
+const MAX_RUNTIME_GHOSTS = 48;
+const MAX_RUNTIME_ORBS = 64;
+function pushRuntime(list, item, max) {
+  if (!Array.isArray(list) || !item) return false;
+  const cap = Math.max(1, Number(max) || 1);
+  if (list.length >= cap) list.splice(0, list.length - cap + 1);
+  list.push(item);
+  return true;
+}
 let viewW = 1280, viewH = 720, viewDpr = 1;
 const CAM_ZOOM = 1.05;
 function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
@@ -535,7 +546,7 @@ function dash() {
   p.dashBuf = 0;
   if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
   if (sig.ram) p._ram = 8;
-  game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: sig.heavy ? 16 : 12, color: p.color });
+  pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: sig.heavy ? 16 : 12, color: p.color }, MAX_RUNTIME_GHOSTS);
   if (sig.spark) {
     game.fx.emit(p.x, p.y + p.h * 0.5, { color: "#ffe14a", count: 8, size: 2.4, star: true, speed: 2.2, life: 14 });
   }
@@ -1353,20 +1364,20 @@ function updateEnemies() {
       if (e.shoot > rate) {
         e.shoot = 0;
         const aim = Math.sign(game.player.x - e.x) || 1;
-        game.projectiles.push({
+        pushRuntime(game.projectiles, {
           x: e.x + 10, y: e.y + 8,
           vx: aim * 4.2 * 0.7,
           vy: -1.2,
           w: 10, h: 10, life: 80,
           dmg: 9, color: "#7dca5a",
           owner: "enemy",
-        });
+  }, MAX_RUNTIME_PROJECTILES);
       }
     }
     }
     if (e.kind === "phosquito" && e.canSplit && !e.split && e.hp < e.max * 0.5) {
       e.split = true;
-      game.enemies.push(makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }));
+      pushRuntime(game.enemies, makeFoe(e.x + 18, e.y - 8, "phosquito", game.roomId, 1, { baby: true }), MAX_RUNTIME_ENEMIES);
       game.fx.emit(e.x, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 });
     }
     if (e.kind === "planta") {
@@ -1469,7 +1480,7 @@ function updateEnemies() {
       if (e.darting) {
         e.darting--;
         e.telegraph = false;
-        if (t % 2 === 0) game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" });
+        if (t % 2 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" }, MAX_RUNTIME_GHOSTS);
         if (e.darting <= 0) { e.dart = 55 + (t % 35); e.vx *= 0.35; }
       } else if (e.wind > 0 || (e.dart <= 0 && game.player)) {
         if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
@@ -1509,7 +1520,7 @@ function updateEnemies() {
         e.diving--;
         e.telegraph = false;
         e.charging = e.diving; // drives drawAbeja sting stretch
-        if (t % 3 === 0) game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: "#ffcc33" });
+        if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 8, color: "#ffcc33" }, MAX_RUNTIME_GHOSTS);
         if (e.diving <= 0) {
           e.cd = 80;
           e.charging = 0;
@@ -1593,12 +1604,12 @@ function updateEnemies() {
         e.telegraph = e.pulsezap > 8; // pulse ring visible ~0.4s (pulsezap 32→9)
         if (e.pulsezap === 8 && game.player) {
           const aim = Math.sign(game.player.x - e.x) || 1;
-          game.projectiles.push({
+          pushRuntime(game.projectiles, {
             x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
             vx: aim * 1.6, vy: (game.player.y - e.y) * 0.012,
             w: 12, h: 12, life: 90, dmg: 10, color: "#ff8ad0",
             owner: "enemy", trail: true,
-          });
+  }, MAX_RUNTIME_PROJECTILES);
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8ad0", count: 10, size: 3, up: 1.2, star: true });
         }
         if (e.pulsezap <= 0) e.zapCd = 100;
@@ -1636,12 +1647,12 @@ function updateEnemies() {
         if (e.pulsezap === 12 && game.player) {
           const dx = game.player.x - e.x, dy = game.player.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
-          game.projectiles.push({
+          pushRuntime(game.projectiles, {
             x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
             vx: (dx / len) * 2.4, vy: (dy / len) * 2.0,
             w: 11, h: 11, life: 80, dmg: 10, color: "#ff8ad0",
             owner: "enemy", trail: true,
-          });
+  }, MAX_RUNTIME_PROJECTILES);
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ee7ff", count: 8, size: 2.8, up: 1.0, star: true });
         }
         if (e.pulsezap <= 0) { e.zapCd = 110; e.aimDx = e.aimDy = null; }
@@ -1757,7 +1768,7 @@ function updateEnemies() {
       if (e.diving) {
         e.diving--;
         e.telegraph = false;
-        if (t % 3 === 0) game.ghosts.push({ x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" });
+        if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" }, MAX_RUNTIME_GHOSTS);
         if (e.diving <= 0) { e.diveCd = angry ? 40 : 65; e.vy = -2.4; e.baseY = Math.max(200, Math.min(500, e.y)); }
       } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player) {
         e.wind = (e.wind || 0) + 1;
@@ -1846,12 +1857,12 @@ function updateEnemies() {
         e.telegraph = false;
         const dx = game.player.x - e.x, dy = game.player.y - e.y;
         const len = Math.hypot(dx, dy) || 1;
-        game.projectiles.push({
+        pushRuntime(game.projectiles, {
           x: e.x + e.w / 2 - 6, y: e.y + e.h,
           vx: (dx / len) * 1.8, vy: (dy / len) * 1.5 + 0.4,
           w: 12, h: 12, life: 110, dmg: 9, color: "#7ee7ff",
           owner: "enemy", trail: true,
-        });
+  }, MAX_RUNTIME_PROJECTILES);
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
@@ -1971,7 +1982,7 @@ function updateEnemies() {
     }
     punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
     if (e.dropsOrb) {
-      game.orbs.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false });
+      pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
     }
     return false;
