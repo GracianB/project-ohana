@@ -292,7 +292,7 @@ test('phase 19: el CEBO transforma una repetición en una rutina autorizada de u
   assert.equal(bait.armed, false);
   assert.equal(bait.uses, 1);
   assert.deepEqual(baitSnapshot(bait), {
-    armed: false, type: 'DASH', uses: 1, lastPattern: 'slam>spit>swoop'
+    armed: false, type: 'DASH', uses: 1, lastPattern: 'slam>spit>swoop', lastRead: 2
   });
 
   armBossBait(bait, adaptation);
@@ -308,8 +308,10 @@ test('phase 19: cambiar la respuesta rearma el CEBO y la fase final sigue cerrad
   consumeBossBait(bait, 1);
   adaptation.baitConsumed = true;
 
-  observeBossAdaptation(adaptation, { outcome: 'success', type: 'DASH' });
-  assert.equal(adaptation.baitConsumed, false);
+  observeBossAdaptation(adaptation, { outcome: 'success', type: 'AIRE' });
+  armBossBait(bait, adaptation);
+  assert.equal(bait.armed, true);
+  assert.equal(bait.type, 'AIRE');
 
   const final = createBossAdaptation();
   assert.equal(adaptiveAttackPreference(3, final, 0.2), 'charge');
