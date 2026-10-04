@@ -34,6 +34,7 @@ import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { baitLabel } from "./systems/boss-bait.js";
 import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
+import { encounterLabel } from "./systems/boss-encounter-memory.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -2380,10 +2381,13 @@ function updateHUD() {
     const counterText = boss.counterplay?.streak ? " · RESPUESTA " + boss.counterplay.streak + "/3" + (boss.lastCounterplay?.break ? " · BREAK" : "") : "";
     const baitText = boss.bait?.armed ? " · " + baitLabel(boss.bait) : "";
     const feedbackText = boss.baitFeedback?.last ? " · " + baitFeedbackLabel(boss.baitFeedback) : "";
+    const encounterText = boss.encounterLabel && boss.encounterLabel !== "MEMORIA NEUTRA"
+      ? " · " + encounterLabel(boss.encounterMemory)
+      : "";
     const adaptationText = boss.adaptationLabel && boss.adaptationLabel !== "ADAPTACIÓN NEUTRA"
       ? " · " + boss.adaptationLabel
       : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + adaptationText + baitText + feedbackText + counterText + attackText + " · " + pct + "%");
+    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + adaptationText + baitText + feedbackText + encounterText + counterText + attackText + " · " + pct + "%");
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
