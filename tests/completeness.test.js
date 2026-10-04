@@ -870,10 +870,12 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   }
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
+    g.enemies[0].x = 125;
     useAbility(g, 1);
-    advanceAbility(g, 20);
-    assert.equal(g.player._abilMove, null, 'Gallop debe terminar y devolver el control');
+    advanceAbility(g, 1);
     assert.ok(g.enemies[0].hp < 500, 'Gallop debe impactar con el cuerno');
+    advanceAbility(g, 24);
+    assert.equal(g.player._abilMove, null, 'Gallop debe terminar y devolver el control');
     clearAbilityFx();
   }
   {
