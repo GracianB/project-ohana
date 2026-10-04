@@ -13,6 +13,8 @@ async function auditPage(page, label) {
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
   await page.waitForTimeout(700);
+  await page.locator('#btn-help').click();
+  await page.locator('#btn-close-help').click();
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
 
@@ -56,8 +58,6 @@ try {
   const desktop = await chromium.launch({ headless:true });
   const page = await desktop.newPage({ viewport:{width:1280,height:720}, deviceScaleFactor:1 });
   await auditPage(page, 'desktop');
-  await page.locator('#btn-help').click();
-  await page.locator('#btn-close-help').click();
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Space');
