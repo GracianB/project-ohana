@@ -385,8 +385,8 @@ export function playEvolution(detail = {}) {
   const newForm = (def.forms && def.forms[evo]) || {};
   const oldForm = (def.forms && def.forms[evo - 1]) || {};
   const finalForm = evo >= 4;
-  const designAccent = newForm.accent || newForm.color || def.color || color;
   const color = detail.color || newForm.color || def.color || "#7ee7ff";
+  const designAccent = newForm.accent || newForm.color || def.color || color;
   const oldColor = oldForm.color || color;
   const accent = finalForm ? designAccent : color;
   const light = tint(accent, 0.55);
