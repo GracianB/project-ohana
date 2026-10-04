@@ -31,13 +31,13 @@ export const EVOLUTION_STAGES = Object.freeze([
     ornament: 0.72,
   }),
   Object.freeze({
-    id: 2, name: "evolved", scaleX: 1.035, scaleY: 1.045,
+    id: 2, name: "awakened", scaleX: 1.035, scaleY: 1.045,
     sway: 1.06, bounce: 0.94, lean: 1.12, head: 1.08,
     arms: 1.08, legs: 1.08, air: 1.08, pulse: 1.18,
     ornament: 0.92,
   }),
   Object.freeze({
-    id: 3, name: "high", scaleX: 1.085, scaleY: 1.075,
+    id: 3, name: "ascended", scaleX: 1.085, scaleY: 1.075,
     sway: 1.14, bounce: 0.88, lean: 1.28, head: 1.16,
     arms: 1.18, legs: 1.14, air: 1.18, pulse: 1.38,
     ornament: 1.10,
@@ -60,7 +60,7 @@ export const EVOLUTION_COMBAT_STAGES = Object.freeze([
   Object.freeze({ id: 4, attack: 1.30, cast: 1.44, impact: 1.38, trail: 1.46, glow: 1.58, density: 1.42, snap: 1.34 }),
 ]);
 
-const FINAL_DESIGNS = Object.freeze({
+export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
   kilo:    Object.freeze({ motif: "petal",  span: 0.92, spin: 0.30, nodes: 6 }),
   stitcho: Object.freeze({ motif: "seam",   span: 0.88, spin: -0.28, nodes: 5 }),
   chispin: Object.freeze({ motif: "bolt",   span: 0.96, spin: 0.16, nodes: 7 }),
@@ -99,7 +99,7 @@ export function evolutionProfile(pOrId, evoOverride) {
   const stage = EVOLUTION_STAGES[evo];
   const combatStage = EVOLUTION_COMBAT_STAGES[evo];
   const style = CHARACTER_STYLES[id] || CHARACTER_STYLES.kilo;
-  const finalDesign = FINAL_DESIGNS[id] || FINAL_DESIGNS.kilo;
+  const finalDesign = EVOLUTION_FINAL_DESIGNS[id] || EVOLUTION_FINAL_DESIGNS.kilo;
   return Object.freeze({
     ...stage,
     id,
