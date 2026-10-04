@@ -98,7 +98,8 @@ export function resolveBossThreat(state = createBossCounterplay(), player = {}, 
   if (!threat) return null;
 
   next.active = null;
-  if (!threat.initialInDanger || !threat.escaped || Number(health) < threat.startHealth) {
+  if (!threat.initialInDanger) return null;
+  if (Number(health) < threat.startHealth || !threat.escaped) {
     next.streak = 0;
     return null;
   }
