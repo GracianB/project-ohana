@@ -62,13 +62,18 @@ async function auditPage(page, label) {
   if (failedModules.length) {
     throw new Error(label + ': module probe failed\n' + failedModules.map((item) => item.path + ' · ' + item.message + '\n' + item.stack).join('\n'));
   }
+  await page.waitForFunction(async () => {
+    if (!('serviceWorker' in navigator)) return true;
+    const reg = await navigator.serviceWorker.getRegistration();
+    return !!reg?.active;
+  }, null, { timeout:5000 }).catch(() => {});
   const sw = await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) return { supported:false };
-    const reg = await navigator.serviceWorker.ready;
-    return { supported:true, active:!!reg.active, scope:reg.scope };
+    const reg = await navigator.serviceWorker.getRegistration();
+    return { supported:true, active:!!reg?.active, scope:reg?.scope || '' };
   });
   assert.ok(sw.supported, label + ': Service Worker no soportado');
-  assert.ok(sw.active, label + ': Service Worker no activo');
+  assert.ok(sw.active, label + ': Service Worker no activo tras 5 s');
   assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
