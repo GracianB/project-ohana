@@ -626,7 +626,7 @@ export function playEvolution(detail = {}) {
 
     // 5 · destello + onda + estallido
     if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
-    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(finalForm ? "godFanfare" : "evoFanfare"); }
+    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(finalForm ? "evoFinalFanfare" : "evoFanfare"); }
     if (flashed && !burstDone) { burstDone = true; burst(L); }
     if (!reduce) {
       ctx.save();
@@ -676,7 +676,7 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
       // kicker
-      drawTitle(ctx, finalForm ? "✦ FORMA DIVINA ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
+      drawTitle(ctx, finalForm ? "✦ FORMA FINAL ✦" : "¡EVOLUCIÓN!", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
       // nombre
       ctx.save();
@@ -740,7 +740,7 @@ export function playEvolution(detail = {}) {
     el.removeEventListener("pointerdown", onSkip);
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
-    el.classList.remove("show", "finalForm");
+    el.classList.remove("show", "finale");
     duckMusic(false);
     running = null;
     if (!silent) {
