@@ -521,7 +521,7 @@ function makePlayer(def) {
     x: 180, y: 500, vx: 0, vy: 0,
     facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0,
     cds: {}, cdDur: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0,
-    dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0,
+    dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, attackChain: 0, attackChainT: 0, wall: 0,
     // Garantiza abilities del roster (Pizza: pepperoni/cheese/oven)
     abilities: Array.isArray(def.abilities) ? def.abilities.slice() : (def.abilities || []),
   };
@@ -729,21 +729,29 @@ function showSwing(p, evo, def) {
     ? { x: p.x - reach * 0.12, y: p.y + p.h * 0.42, w: p.w + reach, h: p.h * 0.7 }
     : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
   const mouth = p.id === "dino" || p.id === "yomi";
-  const life = sig.heavy ? 20 : 16;
+  const chain = Math.max(0, Math.min(2, Number(p.attackChain) || 0));
+  const chainReach = chain === 2 ? 8 : chain === 1 ? 3 : 0;
+  const chainDmg = def.dmg + chain * (sig.heavy ? 5 : 3);
+  const chainKb = sig.kb * (chain === 2 ? 1.32 : chain === 1 ? 1.08 : 1);
+  const life = sig.heavy ? 20 : (chain === 2 ? 18 : 16);
   pushRuntime(game.slashes, {
     x: p.x + p.w / 2 + face * (low ? 8 : 18),
     y: low ? p.y + p.h * 0.72 : (mouth ? p.y + p.h * 0.4 : p.y + p.h * 0.32),
     facing: face, life, max: life,
     color: def.color || p.color,
     kind: def.kind || "slice",
-    w: reach,
+    w: reach + chainReach,
+    chain,
+    finisher: chain === 2,
   }, MAX_RUNTIME_SLASHES);
-  p._swing = { reach, low, dmg: def.dmg, kb: sig.kb || 1, hit: new Set() };
+  p._swing = { reach: reach + chainReach, low, dmg: chainDmg, kb: chainKb || 1, hit: new Set(), chain, finisher: chain === 2 };
+  let hitCount = 0;
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
     if (aabb(box, e)) {
       p._swing.hit.add(e);
-      markHit(p, e, def.dmg, sig.kb || 1);
+      markHit(p, e, chainDmg, chainKb || 1);
+      hitCount++;
     }
   }
   const tipX = face > 0 ? box.x + box.w - 6 : box.x + 6;
@@ -751,7 +759,14 @@ function showSwing(p, evo, def) {
     color: def.color || p.color, count: sig.heavy ? 14 : 10, size: 3.2,
     star: true, speed: 2.6, angle: face > 0 ? 0 : Math.PI, spread: 0.7,
   });
-  game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
+  game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3) + chain * 1.5);
+  game.camPunch = Math.max(-18, Math.min(18, (game.camPunch || 0) + face * (2.5 + chain * 2.5)));
+  if (hitCount > 0 && chain === 2) {
+    game.camPunch = Math.max(-18, Math.min(18, (game.camPunch || 0) + face * 4));
+    hitStop(sig.heavy ? 8 : 6);
+    game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 5);
+    game.flashColor = def.color || p.color || "#fff";
+  }
 }
 
 function tickSwing(p) {
@@ -775,13 +790,17 @@ function attack() {
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
 
+  p.attackChain = (p.attackChainT > 0) ? ((Number(p.attackChain) || 0) + 1) % 3 : 0;
+  p.attackChainT = 24;
+
   // facing nunca 0
   if (!p.facing) p.facing = 1;
 
   const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const def = markAt(p.id, evo);
 
-  p.melee = Math.max(7, 12 - evo);
+  const chain = Math.max(0, Math.min(2, Number(p.attackChain) || 0));
+  p.melee = Math.max(7, 12 - evo + (chain === 2 ? 2 : chain === 1 ? 0 : 0));
   p.meleeBuf = 0;
 
   beep("slash");
@@ -1037,6 +1056,10 @@ function updatePlayer() {
   const drop = keys["s"] || keys["arrowdown"];
   if (p.dash > 0) p.dash--;
   if (p._dashGo > 0) p._dashGo--;
+  if (p.attackChainT > 0) {
+    p.attackChainT--;
+    if (p.attackChainT <= 0) p.attackChain = 0;
+  }
   if (p.melee > 0) p.melee--;
   if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
   // Buffer usa el mismo camino que F/click (attack), no el melee legacy
@@ -2117,7 +2140,10 @@ function updateCam() {
   }
   game.cam.x += (tx - game.cam.x) * lerp;
   game.cam.y += (ty - game.cam.y) * lerp;
+  game.cam.x += Math.max(-18, Math.min(18, Number(game.camPunch) || 0));
   if (game.camPunch > 0) game.camPunch *= 0.82;
+  else if (game.camPunch < 0) game.camPunch *= 0.82;
+  if (Math.abs(game.camPunch) < 0.05) game.camPunch = 0;
   game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - vw)));
   game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));
   if (game.shake > 0) game.shake *= 0.86;
