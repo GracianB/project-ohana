@@ -795,6 +795,7 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   }
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'frita', abilities: ['salt', 'ketchup', 'fryer'] } });
+    g.enemies[0].x = 300;
     useAbility(g, 1);
     advanceAbility(g, 80);
     assert.ok(g.enemies[0].hp < 500, 'Ketchup debe convertir el impacto en daño persistente');
