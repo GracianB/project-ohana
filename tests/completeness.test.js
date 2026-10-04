@@ -1,9 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ROSTER, applyForm, tickEvoTween } from '../characters/roster.js';
-import { ROOMS } from '../systems/map.js';
-import { ABILITY_DEFS } from '../systems/abilities.js';
-import { createBossNido, updateBossNido } from '../systems/boss-nido.js';
+globalThis.window = globalThis;
+globalThis.CustomEvent ||= class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } };
+const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.js');
+const { ROOMS } = await import('../systems/map.js');
+const { ABILITY_DEFS } = await import('../systems/abilities.js');
+const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 
 test('matriz completa: 10 personajes × 5 formas = 50 formas', () => {
   assert.equal(ROSTER.length, 10);
