@@ -82,6 +82,7 @@ try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches; game.red
 
 const game = {
   player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
+  rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
   shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false
@@ -143,7 +144,7 @@ function closeOverlays() {
 function hitStop(frames) {
   if (!frames) return;
   if (game.reduceMotion) frames = Math.max(1, Math.ceil(frames * 0.35));
-  game.hitstop = Math.min(5, Math.max(game.hitstop || 0, frames | 0));
+  game.hitstop = Math.min(8, Math.max(game.hitstop || 0, frames | 0));
 }
 function buzz(ms) {
   if (game.reduceMotion) return;
@@ -546,7 +547,7 @@ function markHit(p, e, dmg, kb) {
   e.invuln = Math.max(e.invuln || 0, 8);
   game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
-  hitStop(e.boss ? (crit ? 3 : 2) : (crit ? 8 : 4));
+  hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
   if (crit) {
     game.shake = Math.min(16, (game.shake || 0) + 5);
     game.flash = Math.max(game.flash || 0, reduceMotion ? 2 : 4);
@@ -799,7 +800,7 @@ function tickFinale() {
   if (!f || f.t <= 0) return;
   f.t--;
   if (game.fx && f.t % 5 === 0 && f.t > 80) {
-    game.fx.emit(f.x + (Math.random() - 0.5) * 160, f.y + (Math.random() - 0.5) * 90, {
+    game.fx.emit(f.x + (game.rng() - 0.5) * 160, f.y + (game.rng() - 0.5) * 90, {
       color: f.t > 240 ? "#ff4060" : "#ffe66a",
       count: 2,
       size: 4,
@@ -946,13 +947,13 @@ function updatePlayer() {
       const under = p.y + p.h * 0.88;
       game.fx.emit(behind, under, {
         color: p.color || "#fff8e0",
-        count: 2 + (Math.random() < 0.45 ? 1 : 0),
+        count: 2 + (game.rng() < 0.45 ? 1 : 0),
         size: 1.7,
         up: 0.12,
         speed: 0.85,
         life: 12,
         gravity: 0.035,
-        angle: Math.PI / 2 + (Math.random() - 0.5) * 0.8,
+        angle: Math.PI / 2 + (game.rng() - 0.5) * 0.8,
         spread: 0.6,
       });
     }
@@ -1402,7 +1403,7 @@ function updateEnemies() {
           const dx = game.player.x - e.x;
           const dy = game.player.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
-          e.vx = (dx / len) * 6.2 + (Math.random() - 0.5) * 1.5;
+          e.vx = (dx / len) * 6.2 + (game.rng() - 0.5) * 1.5;
           e.vy = (dy / len) * 4.5;
           e.baseY += Math.sign(game.player.y - e.baseY) * 36;
           e.baseY = Math.max(220, Math.min(620, e.baseY));
@@ -1585,7 +1586,7 @@ function updateEnemies() {
           e.telegraph = false;
           e.sitting = 0;
           e.hopCd = 52 + (t % 28);
-          e.vx = Math.sign(game.player.x - e.x || 1) * (3.2 + Math.random());
+          e.vx = Math.sign(game.player.x - e.x || 1) * (3.2 + game.rng());
           e.vy = -7.2;
           e.flash = 5;
           game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#6ad070", count: 6, size: 2.4, up: 1.1 });
@@ -2015,7 +2016,7 @@ function render() {
   const shake = reduceMotion ? 0 : game.shake;
   const z = camZoom();
   ctx.save();
-  ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+  ctx.translate((game.rng() - 0.5) * shake, (game.rng() - 0.5) * shake);
   ctx.scale(z, z);
   if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
   else {
