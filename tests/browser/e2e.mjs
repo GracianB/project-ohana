@@ -12,6 +12,14 @@ async function auditPage(page, label) {
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   await page.waitForSelector('#btn-play');
+  const sw = await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) return { supported:false };
+    const reg = await navigator.serviceWorker.ready;
+    return { supported:true, active:!!reg.active, scope:reg.scope };
+  });
+  assert.ok(sw.supported, label + ': Service Worker no soportado');
+  assert.ok(sw.active, label + ': Service Worker no activo');
+  assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
@@ -48,6 +56,13 @@ async function auditPage(page, label) {
   assert.ok(audit.fcp < 4000, label + ': FCP > 4 s');
   assert.match(audit.title, /PROJECT OHANA/i);
   await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
+  if (label === 'desktop') {
+    await page.reload({ waitUntil:'networkidle' });
+    await page.context().setOffline(true);
+    await page.reload({ waitUntil:'domcontentloaded' });
+    await page.waitForSelector('#btn-play');
+    await page.context().setOffline(false);
+  }
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 }
 
