@@ -741,41 +741,6 @@ function withAlpha(color, a) {
   return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
 }
 
-function drawAura(ctx, H, color, t, evo) {
-  const cy = -H * 0.5;
-  const r = H * (0.5 + evo * 0.09) * (1 + Math.sin(t / 9) * 0.05);
-  ctx.save();
-  ctx.globalAlpha *= evo >= 4 ? 0.5 : 0.3;
-  const g = ctx.createRadialGradient(0, cy, r * 0.1, 0, cy, r);
-  g.addColorStop(0, withAlpha(color, 1));
-  g.addColorStop(0.55, withAlpha(color, 0.33));
-  g.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(0, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawGodRays(ctx, H, color, t) {
-  const cy = -H * 0.55;
-  ctx.save();
-  ctx.translate(0, cy);
-  ctx.rotate(t / 90);
-  ctx.globalAlpha *= 0.16 + Math.sin(t / 14) * 0.05;
-  ctx.fillStyle = color;
-  for (let i = 0; i < 10; i++) {
-    ctx.rotate((Math.PI * 2) / 10);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-H * 0.07, -H * 0.95);
-    ctx.lineTo(H * 0.07, -H * 0.95);
-    ctx.closePath();
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
 function drawGroundRing(ctx, H, color, t) {
   const k = (t % 60) / 60;
   ctx.save();
@@ -1047,8 +1012,6 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.scale(facing, 1);
   ctx.translate(recoilX + lunge, 0);
 
-  if (evo >= 4) drawGodRays(ctx, H, color, t);
-  if (evo >= 2) drawAura(ctx, H, color, t, evo);
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
   drawEvolutionDesignFX(ctx, p, H, pose, t, false);
