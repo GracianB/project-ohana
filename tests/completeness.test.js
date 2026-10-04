@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 globalThis.window = globalThis;
+globalThis.addEventListener ||= (() => {});
+globalThis.removeEventListener ||= (() => {});
+globalThis.dispatchEvent ||= (() => true);
+globalThis.window.addEventListener = globalThis.addEventListener;
+globalThis.window.removeEventListener = globalThis.removeEventListener;
+globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 globalThis.CustomEvent ||= class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } };
 const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.js');
 const { ROOMS } = await import('../systems/map.js');
