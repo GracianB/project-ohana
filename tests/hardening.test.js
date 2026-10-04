@@ -193,6 +193,39 @@ test('phase 26: partículas reproducibles, acotadas y recuperables ante datos co
 });
 
 
+test('phase 28: runtime transitorio acotado y VFX de portales deterministas', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const floaters = fs.readFileSync('./systems/floaters.js', 'utf8');
+  const portals = fs.readFileSync('./systems/portals.js', 'utf8');
+
+  assert.match(game, /MAX_RUNTIME_PROJECTILES\s*=\s*128/);
+  assert.match(game, /MAX_RUNTIME_GHOSTS\s*=\s*48/);
+  assert.match(game, /MAX_RUNTIME_ORBS\s*=\s*64/);
+  assert.match(game, /function pushRuntime\(list, item, max\)/);
+  assert.equal((game.match(/game\.projectiles\.push\(/g) || []).length, 0);
+  assert.equal((game.match(/game\.ghosts\.push\(/g) || []).length, 0);
+  assert.equal((game.match(/game\.orbs\.push\(/g) || []).length, 0);
+
+  assert.match(floaters, /MAX_FLOATERS\s*=\s*96/);
+  assert.match(floaters, /Number\.isFinite\(Number\(x\)\)/);
+
+  assert.doesNotMatch(portals, /Math\.random\(/);
+  assert.doesNotMatch(portals, /performance\.now\(/);
+  assert.match(portals, /function unit\(seed\)/);
+  assert.match(portals, /same room|misma sala/i);
+});
+
+test('phase 28: Floaters conserva un presupuesto fijo y rechaza coordenadas corruptas', async () => {
+  const { Floaters } = await import('../systems/floaters.js');
+  const f = new Floaters();
+  for (let i = 0; i < 140; i++) f.add(i, i, 'x', '#fff', false);
+  assert.equal(f.items.length, 96);
+  f.add(NaN, 10, 'bad', '#fff', false);
+  f.add(10, Infinity, 'bad', '#fff', false);
+  assert.equal(f.items.length, 96);
+  assert.ok(f.items.every(v => Number.isFinite(v.x) && Number.isFinite(v.y)));
+});
+
 test('phase 27: game runtime centraliza mutaciones de combate y evita contaminación numérica', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
   assert.match(game, /function finiteOr\(value, fallback = 0\)/);
