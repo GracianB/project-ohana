@@ -401,7 +401,7 @@ export function playEvolution(detail = {}) {
   const k = finalForm ? 1.32 : 1;
   const T = reduce
     ? { dark: 0.25, oldIn: 0, charge: 0, flip: 0, flash: 0.25, reveal: 0.25, out: 1.55, end: 1.85 }
-    : { dark: 0.35 * k, oldIn: 0.15 * k, charge: 0.45 * k, flip: 1.2 * k, flash: 1.95 * k, reveal: 1.95 * k, out: 2.75 * k + (finalForm ? 0.35 : 0) + 1, end: 3.1 * k + (finalForm ? 0.35 : 0) + 1 }; // +1 s con la forma nueva a la vista
+    : { dark: 0.45 * k, oldIn: 0.2 * k, charge: 0.7 * k, flip: 1.55 * k, flash: 2.35 * k, reveal: 2.35 * k, out: 4.4 * k, end: 5.1 * k }; // +1 s con la forma nueva a la vista
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
@@ -447,7 +447,7 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 18 : finalForm ? 110 : 70;
+    const n = reduce ? 18 : finalForm ? 160 : 120;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
@@ -479,6 +479,9 @@ export function playEvolution(detail = {}) {
 
     ctx.save();
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H * 0.1);
+    ctx.fillRect(0, H * 0.9, W, H * 0.1);
 
     // salida
     const out = seg(t, T.out, T.end);
