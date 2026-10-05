@@ -34,6 +34,7 @@ import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
 import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
 import { encounterLabel } from "./systems/boss-encounter-memory.js";
@@ -93,7 +94,7 @@ const game = {
   rng: Math.random,
   fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
   worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
-  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
+  shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), experience: new ExperienceDirector(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
 };
 
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
@@ -550,6 +551,7 @@ function loadRoom(id, fromDir) {
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
   if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); }
+  game.experience?.room(id, r.name, !!r.boss);
   beep(r.boss ? "boss" : "door");
   playMusic(themeForRoom(id));
   worldClear();
@@ -629,6 +631,8 @@ function start(def) {
   game._magicSnap = null;
   game.hitstop = 0;
   game.combatFx?.clear();
+  game.experience?.reset();
+  game.experience?.mount();
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
   Surprises.reset();
   game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
@@ -695,6 +699,7 @@ function evolve(reason) {
       color: "#fff8c8", count: 48, size: 7, up: 2.5, speed: 4, star: true,
     });
   }
+  game.experience?.evolution(p, toGod);
   save();
 }
 function respawn() {
@@ -722,6 +727,7 @@ function dash() {
     game.fx.emit(p.x, p.y + p.h * 0.5, { color: "#ffe14a", count: 8, size: 2.4, star: true, speed: 2.2, life: 14 });
   }
   beep("dash");
+  game.experience?.dash(p);
 }
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
 function damageEnemy(e, amount) { return safeDamageEnemy(e, amount); }
@@ -767,6 +773,7 @@ function markHit(p, e, dmg, kb) {
   e._hitCrit = crit;
   game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+  game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
   if (crit) {
     game.shake = Math.min(16, (game.shake || 0) + 5);
@@ -875,6 +882,7 @@ function attack() {
   p.meleeBuf = 0;
 
   beep("slash");
+  game.experience?.attack(p, def);
 
   if (p._markName !== def.name) {
     p._markName = def.name;
@@ -909,6 +917,7 @@ function hurtPlayer(amount, label) {
   beep("hurt");
   buzz(24);
   hitStop(2);
+  game.experience?.hurt(p, amount);
   game.nums.add(p.x, p.y, label || ("-" + Math.round(amount)), "#ff6a7a");
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 220); }
@@ -942,7 +951,14 @@ function lowestFloor(px, pw) {
   return best;
 }
 function landOn(p, plat) {
-  if (!p.grounded && p.vy > 7) beep("land");
+  const wasAir = !p.grounded;
+  const impactSpeed = Number(p.vy) || 0;
+
+  if (wasAir && impactSpeed > 7) {
+    beep("land");
+    game.experience?.land(p, impactSpeed);
+  }
+
   p.y = plat.y - p.h;
   p.vy = 0;
   p.grounded = true;
@@ -2260,7 +2276,7 @@ function render() {
   ctx.imageSmoothingEnabled = true;
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
-  const z = camZoom();
+  const z = camZoom() * (game.experience?.zoomPulse(game) || 1);
   ctx.save();
   ctx.translate((vfxRandom(5) - 0.5) * shake, (vfxRandom(6) - 0.5) * shake);
   ctx.scale(z, z);
@@ -2458,6 +2474,7 @@ function render() {
       ctx.fillRect(0, 0, viewW, viewH);
     }
   }
+  game.experience?.render(ctx, game, viewW, viewH, t);
   if (viewW >= 820) drawMinimap();
 }
 function renderAbilityBar() {
@@ -2633,6 +2650,7 @@ function step() {
   t++;
   game.t = t;
   sanitizeRuntimeState();
+  game.experience?.update(game);
   if (game.hitstop > 0) {
     game.hitstop--;
     if (game.shake > 0) game.shake *= 0.92;
