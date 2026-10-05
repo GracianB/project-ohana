@@ -1682,26 +1682,75 @@ const DRW = {
   supreme(ctx, f, cam, t) {
     const x = f.x - cam.x, y = f.y - cam.y;
     const k = f.life / f.max;
-    const r = (1 - k) * 280;
+    const r = (1 - k) * 300;
+    const name = f.name || "";
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = k;
+    ctx.globalAlpha = Math.min(1, k * 1.2);
     ctx.strokeStyle = f.color;
-    ctx.lineWidth = 10 * k + 2;
+    ctx.fillStyle = f.color;
+    ctx.lineWidth = 8 * k + 2;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.stroke();
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(x, y, Math.max(0, r - 16), 0, TAU);
-    ctx.stroke();
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * TAU + t * 0.08;
+    if (name === "Jardín solar") {
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU;
+        ctx.beginPath();
+        ctx.ellipse(x + Math.cos(a) * r * 0.7, y + Math.sin(a) * r * 0.7, 10, 22, a, 0, TAU);
+        ctx.stroke();
+      }
+    } else if (name === "Big Bang") {
+      for (let i = 0; i < 6; i++) ctx.strokeRect(x - r + i * 20, y - r * 0.2, 14, r * 0.4);
+    } else if (name === "Relámpago") {
       ctx.beginPath();
-      ctx.moveTo(x + Math.cos(a) * r * 0.4, y + Math.sin(a) * r * 0.4);
-      ctx.lineTo(x + Math.cos(a) * (r + 24), y + Math.sin(a) * (r + 24));
+      ctx.moveTo(x - r, y);
+      ctx.lineTo(x - r * 0.2, y - 30);
+      ctx.lineTo(x, y + 10);
+      ctx.lineTo(x + r, y - 20);
+      ctx.stroke();
+    } else if (name === "Eclipse") {
+      ctx.beginPath();
+      ctx.arc(x, y, r * 0.55, 0.4, 5.4);
+      ctx.stroke();
+    } else if (name === "Supernova") {
+      ctx.beginPath();
+      ctx.arc(x, y, r * 0.35, 0, TAU);
+      ctx.fill();
+    } else if (name === "Impacto") {
+      ctx.beginPath();
+      ctx.ellipse(x, y + 20, r, 18, 0, 0, TAU);
+      ctx.stroke();
+    } else if (name === "Fritura") {
+      for (let i = 0; i < 9; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x - r + i * (r * 2 / 8), y + 10);
+        ctx.lineTo(x - r + i * (r * 2 / 8), y - 40 - (i % 2) * 16);
+        ctx.stroke();
+      }
+    } else if (name === "Horno real") {
+      ctx.beginPath();
+      ctx.moveTo(x, y - r);
+      ctx.lineTo(x + r * 0.7, y + 20);
+      ctx.lineTo(x - r * 0.5, y + 20);
+      ctx.closePath();
+      ctx.stroke();
+    } else if (name === "Devorar") {
+      ctx.beginPath();
+      ctx.moveTo(x - r * 0.6, y);
+      ctx.lineTo(x, y - 30);
+      ctx.lineTo(x + r * 0.6, y);
+      ctx.lineTo(x, y + 30);
+      ctx.closePath();
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.arc(x, y - 10, r * 0.8, 0.3, Math.PI - 0.3);
       ctx.stroke();
     }
+    ctx.fillStyle = "#fff";
+    ctx.font = "800 22px Outfit,sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(name, x, y - r - 16);
   },
   ohana(ctx, f, cam, t) {
     const x = f.x - cam.x, y = f.y - cam.y;
