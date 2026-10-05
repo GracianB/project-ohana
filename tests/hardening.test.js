@@ -480,3 +480,40 @@ test('phase 41: Cuerno cierra el contrato de render pintado con cuatro poses', (
 
   assert.doesNotMatch(sprites, /cuerno-(idle|run|jump|atk)\.png/);
 });
+
+test('phase 42: offline precache no tiene duplicados y mantiene cobertura total', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  const entries = [...sw.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)]
+    .map((match) => match[1])
+    .filter((value) => value && (value.endsWith('.js') || value.endsWith('.css') || value.endsWith('.svg') || value.endsWith('.html') || value.endsWith('.json')));
+
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+
+  assert.ok(index.includes('?v=' + version), 'index.html debe usar la versión declarada por sw.js');
+
+  const duplicates = entries.filter((value, index, all) => all.indexOf(value) !== index);
+  assert.deepEqual([...new Set(duplicates)].sort(), [], 'PRECACHE contiene entradas duplicadas');
+
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeFiles = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) runtimeFiles.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const jsPrecache = new Set(
+    [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
+  );
+  for (const file of runtimeFiles.sort()) {
+    const normalized = file.replace(/^\.\//, '');
+    assert.ok(jsPrecache.has(normalized), 'módulo JS fuera del precache: ' + normalized);
+  }
+  assert.ok(jsPrecache.size >= runtimeFiles.length, 'el precache JS debe cubrir todo el runtime');
+});
