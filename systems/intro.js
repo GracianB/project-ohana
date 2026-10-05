@@ -59,7 +59,7 @@ export function playTitleIntro() {
   const pal = [CYAN, GOLD, PINK, "#ffffff"];
   const T = reduce
     ? { core: 0, ring: 0, word: 0, flash: 0.1, tag: 0.1, out: 0.7, end: 1.1 }
-    : { core: 0.05, ring: 0.45, word: 0.6, flash: 1.25, tag: 1.3, out: 2.75, end: 3.35 }; // +1 s de final visible
+    : { core: 0.05, ring: 0.45, word: 0.6, flash: 1.25, tag: 1.3, out: 3.6, end: 4.4 }; // +1 s de final visible
   const letters = ["O", "H", "A", "N", "A"];
   const word = document.createElement("canvas");
   const wctx = word.getContext("2d");
@@ -121,6 +121,16 @@ export function playTitleIntro() {
     ctx.closePath();
     ctx.fill();
 
+    ctx.globalAlpha = 0.9 * seaK;
+    ctx.fillStyle = "#071018";
+    ctx.beginPath();
+    ctx.moveTo(W * 0.16, horizon + 8);
+    ctx.lineTo(W * 0.2, horizon - 90);
+    ctx.quadraticCurveTo(W * 0.28, horizon - 40, W * 0.18, horizon + 8);
+    ctx.moveTo(W * 0.82, horizon + 10);
+    ctx.lineTo(W * 0.78, horizon - 110);
+    ctx.quadraticCurveTo(W * 0.9, horizon - 50, W * 0.84, horizon + 10);
+    ctx.fill();
     ctx.globalAlpha = 0.18 * seaK;
     ctx.strokeStyle = CYAN;
     ctx.lineWidth = 2;

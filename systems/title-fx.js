@@ -77,6 +77,14 @@ if (cv) {
     pointer.x += (pointer.tx - pointer.x) * 0.05;
     pointer.y += (pointer.ty - pointer.y) * 0.05;
     ctx.clearRect(0, 0, W, H);
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, "#070b18");
+    sky.addColorStop(0.28, "#1a2450");
+    sky.addColorStop(0.52, "#c45a6a");
+    sky.addColorStop(0.68, "#f0a060");
+    sky.addColorStop(1, "#12344a");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
 
     // Aurora ribbons.
     if (!reduce) {
@@ -149,11 +157,12 @@ if (cv) {
     }
 
     // Water shimmer band.
-    const wl = ctx.createLinearGradient(0, H * 0.72, 0, H);
-    wl.addColorStop(0, "rgba(20,120,150,0)");
-    wl.addColorStop(1, "rgba(12,60,90,0.35)");
+    const wl = ctx.createLinearGradient(0, H * 0.62, 0, H);
+    wl.addColorStop(0, "rgba(240,160,96,0.18)");
+    wl.addColorStop(0.25, "rgba(20,80,110,0.35)");
+    wl.addColorStop(1, "rgba(4,16,28,0.92)");
     ctx.fillStyle = wl;
-    ctx.fillRect(0, H * 0.72, W, H * 0.28);
+    ctx.fillRect(0, H * 0.62, W, H * 0.38);
     if (!reduce) {
       ctx.strokeStyle = "rgba(150,230,255,0.10)";
       ctx.lineWidth = 1;
