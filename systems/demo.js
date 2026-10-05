@@ -1,4 +1,4 @@
-import { showNotification, setObjectiveMessage } from "./notify.js";
+import { showTutorialMessage, setPersistentObjective } from "./notify.js";
 
 const STEPS = [
   { id: "move", title: "MOVERSE", text: "WASD para moverte. H ataca. J, K y L desbloquean poderes. U usa el supremo en forma 5. E usa portales." },
@@ -25,7 +25,7 @@ function paintGoal(detail) {
   const goal = GOALS[detail?.id];
   if (!goal) return;
   const done = goal.done(detail);
-  setObjectiveMessage(goal.text, done);
+  setPersistentObjective(goal.text, done);
 }
 
 function boot() {
@@ -37,10 +37,8 @@ function boot() {
     if (!document.body.classList.contains("playing")) return;
     if (step < STEPS.length) {
       const item = STEPS[step++];
-      showNotification(item.title, item.text, "tutorial", {
-        key: "tutorial:" + item.id,
-        duration: 5200,
-        priority: 60
+      showTutorialMessage(item.title, item.text, {
+        key: "tutorial:" + item.id
       });
       timer = setTimeout(play, 5800);
     }
@@ -53,7 +51,7 @@ function boot() {
     clearTimeout(timer);
     if (playing) {
       step = 0;
-      setObjectiveMessage("Explora el Claro y abre la ruta hacia la costa.");
+      setPersistentObjective("Explora el Claro y abre la ruta hacia la costa.");
       timer = setTimeout(play, 1000);
     }
   });
