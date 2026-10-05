@@ -37,127 +37,8 @@ jobs:
           node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js
           node tests/browser/e2e.mjs
 
-      - name: Validate project consistency
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-          import { ROSTER } from "./characters/roster.js";
-          import { ROOMS } from "./systems/map.js";
-          import { EVOLUTION_STAGES, EVOLUTION_COMBAT_STAGES, EVOLUTION_SIGNATURES, EVOLUTION_FINAL_DESIGNS, evolutionProfile } from "./characters/evolution.js";
-
-          const read = (file) => fs.readFileSync(file, "utf8");
-          const activeCharacters = ROSTER.length;
-          const formsPerCharacter = ROSTER.length ? Math.min(...ROSTER.map((character) => character.forms.length)) : 0;
-          const roomCount = Object.keys(ROOMS).length;
-          const evolutionStageCount = EVOLUTION_STAGES.length;
-          const evolutionCombatStageCount = EVOLUTION_COMBAT_STAGES.length;
-          const evolutionSignatureCount = EVOLUTION_SIGNATURES.length;
-          const manifest = JSON.parse(read("manifest.json"));
-          const index = read("index.html");
-          const progress = read("PROGRESS.md");
-          const improvements = read("IMPROVEMENTS.md");
-          const sw = read("sw.js");
-          const readme = read("README.md");
-          const errors = [];
-
-          if (activeCharacters !== 10) {
-            errors.push(`código: se esperaban 10 personajes activos, hay ${activeCharacters}`);
-          }
-
-          if (formsPerCharacter !== 5 || ROSTER.some((character) => character.forms.length !== 5)) {
-            errors.push("código: no todos los personajes tienen exactamente 5 formas");
-          }
-
-          if (roomCount !== 10) {
-            errors.push(`código: se esperaban 10 salas, hay ${roomCount}`);
-          }
-
-          if (evolutionStageCount !== 5 || ROSTER.some((character) => character.forms.length !== evolutionStageCount)) {
-            errors.push(`evolución: se esperaban 5 formas por personaje, hay ${evolutionStageCount}`);
-          }
-
-          if (evolutionCombatStageCount !== 5) {
-            errors.push(`evolución: se esperaban 5 etapas de combate, hay ${evolutionCombatStageCount}`);
-          }
-
-          if (evolutionSignatureCount !== 50 || new Set(EVOLUTION_SIGNATURES).size !== evolutionSignatureCount) {
-            errors.push(`evolución: se esperaban 50 firmas únicas, hay ${evolutionSignatureCount}`);
-          }
-
-          if (Object.keys(EVOLUTION_FINAL_DESIGNS).length !== 10) {
-            errors.push(`evolución: se esperaban 10 diseños finales, hay ${Object.keys(EVOLUTION_FINAL_DESIGNS).length}`);
-          }
-          const finalMotifs = Object.values(EVOLUTION_FINAL_DESIGNS).map((design) => design.motif);
-          if (new Set(finalMotifs).size !== 10) {
-            errors.push("evolución: los 10 personajes deben conservar motivos finales distintos");
-          }
-
-          const evolutionCombatValues = ROSTER.flatMap((character) =>
-            EVOLUTION_COMBAT_STAGES.map((stage) => evolutionProfile({ id: character.id, evo: stage.id }).combat.attack)
-          );
-          if (evolutionCombatValues.some((value) => !Number.isFinite(value) || value <= 0)) {
-            errors.push("evolución: hay parámetros de combate no válidos");
-          }
-
-          const masterPatterns = [
-            [new RegExp(activeCharacters + "\\s+personajes", "i"), "10 personajes"],
-            [new RegExp(formsPerCharacter + "\\s+formas", "i"), "5 formas"],
-            [new RegExp(roomCount + "\\s+salas", "i"), "10 salas"],
-          ];
-
-          for (const [pattern, label] of masterPatterns) {
-            for (const [file, content] of [
-              ["manifest.json", manifest.description || ""],
-              ["README.md", readme],
-              ["PROGRESS.md", progress],
-              ["IMPROVEMENTS.md", improvements],
-            ]) {
-              if (!pattern.test(content)) {
-                errors.push(`${file}: falta la cifra maestra ${label}`);
-              }
-            }
-          }
-
-          const versions = [...index.matchAll(/ohana-(\d+)/g)].map((m) => m[0]);
-          const swVersionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
-          const swVersion = swVersionMatch ? swVersionMatch[1] : "";
-          if (swVersion !== (versions[0] || "")) {
-            errors.push("sw.js: no comparte la versión de caché con index.html");
-          }
-          const uniqueVersions = [...new Set(versions)];
-
-          if (uniqueVersions.length !== 1) {
-            errors.push("index.html: hay varias versiones ohana-*");
-          }
-
-          const currentVersion = uniqueVersions[0] || "";
-
-          if (currentVersion && !progress.includes(currentVersion)) {
-            errors.push(`PROGRESS.md: no refleja la caché ${currentVersion}`);
-          }
-
-          if (!progress.includes("node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js")) {
-            errors.push("PROGRESS.md: no documenta las cuatro suites del CI");
-          }
-
-          if (!progress.includes("node tests/browser/e2e.mjs")) {
-            errors.push("PROGRESS.md: no documenta el E2E real del navegador");
-          }
-
-          if (errors.length) {
-            console.error("[OHANA] Consistency check FAILED");
-            for (const error of errors) console.error(" - " + error);
-            process.exit(1);
-          }
-
-          console.log("[OHANA] Consistency check PASS");
-          console.log(" - " + (manifest.description || "sin descripción"));
-          console.log(" - cache: " + (currentVersion || "sin versión"));
-          console.log(" - CI: core + runtime + renderer + completeness + browser E2E");
-          console.log(` - código: ${activeCharacters} personajes / ${formsPerCharacter} formas / ${roomCount} salas`);
-          console.log(` - evolución: ${evolutionStageCount} formas / ${evolutionSignatureCount} firmas / ${evolutionCombatStageCount} etapas de combate`);
-          console.log(" - docs: código ↔ manifest ↔ README ↔ PROGRESS ↔ IMPROVEMENTS");
-          NODE
+      - name: Release gate
+        run: node tools/release-gate.mjs
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -194,3 +75,11 @@ jobs:
           grep -q "PROJECT OHANA" /tmp/ohana.html
           grep -q "ohana-" /tmp/ohana.html
           echo "[OHANA] GitHub Pages deployment verified: $PAGE_URL"
+
+      - name: Production browser smoke
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          node tests/browser/production-smoke.mjs
