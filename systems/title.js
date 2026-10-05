@@ -266,7 +266,7 @@ function applyLook() {
     b.classList.toggle("on", on);
     b.setAttribute("aria-pressed", on ? "true" : "false");
   });
-  document.querySelectorAll(".portrait").forEach((box) => box.classList.toggle("has-art", paint));
+  document.querySelectorAll(".portrait").forEach((box) => {\n    const hasPaintedArt = !!box.querySelector("img.portrait-art");\n    box.classList.toggle("has-art", paint && hasPaintedArt);\n  });
 }
 
 function mountLook(wrap) {
