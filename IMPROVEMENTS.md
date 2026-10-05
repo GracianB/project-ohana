@@ -116,3 +116,8 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 El arranque de una nueva partida no debe heredar estado transitorio de una sesión anterior. Se cubren countdown del Nido, finale, transiciones de puertas, cámara, flashes, pausa y runtime faults.
 
 La progresión persistente sigue restaurándose exclusivamente desde `saveStore`.
+
+
+## Phase 42 - Offline E2E Closure
+
+79. Phase 42: cierre del arranque offline real. Chromium recarga sin red tras activar el Service Worker, valida JS/CSS/SVG desde caché, inicia gameplay y el test rechaza duplicados en el precache.
