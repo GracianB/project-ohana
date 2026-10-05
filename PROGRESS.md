@@ -4,6 +4,24 @@
 
 ## Estado actual
 
+### 05/10/2026 · Experience Recovery Block
+
+El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
+
+- **MessageManager 2.0**: una sola salida visual activa, prioridades semánticas y fallback de objetivo.
+- **Room Voice**: la entrada a una sala tiene una única narración; el feedback visual de llegada no escribe texto.
+- **Tutorial contextual**: pistas disparadas por acciones reales, una vez por sesión, teclado y touch.
+- **Objetivos dinámicos**: cada sala tiene ID, destino y requisito; los bloqueos dependen del estado actual.
+- **Evolution Flow**: cinemática más corta y visual, narración posterior única, sin letterbox.
+- **HUD hierarchy**: objetivo persistente separado de mensajes temporales; boss HUD resumido.
+- **Hero Presence**: identidad idle reutilizando firmas existentes, sin marcadores artificiales.
+- **Combat Feel**: impacto visual prioritario y números de daño reservados para eventos relevantes.
+- **Enemy Readability**: telegraphs con dirección gráfica además del color.
+- **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
+- **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
+
+La caché canónica de esta línea de trabajo es `ohana-191`.
+
 Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, con:
 
 - **10 personajes activos**
