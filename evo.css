@@ -75,3 +75,13 @@ body.playing #evo-stage:not(.show) {
   box-shadow: inset 0 0 70px rgba(255, 216, 74, 0.08), 0 0 60px rgba(255, 216, 74, 0.06);
   pointer-events: none;
 }
+
+#evo-stage.show { background: #02060f; }
+#evo-stage.show::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#000 0 9%, transparent 9% 91%, #000 91%);
+  pointer-events: none;
+  z-index: 2;
+}
