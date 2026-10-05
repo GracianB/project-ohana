@@ -233,3 +233,10 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - También comprueba que JavaScript, CSS y un asset pintado se sirven desde caché.
 - El contrato de precache rechaza entradas duplicadas además de módulos runtime ausentes.
 - Cache: `ohana-116`.
+
+
+## Phase 43 - ESM Dependency Closure
+
+- El CI audita todas las importaciones locales relativas de los módulos JavaScript de runtime.
+- Se comprueban rutas directas, sufijo `.js` y `index.js`, rechazando dependencias locales sin destino.
+- Cache: `ohana-117`.
