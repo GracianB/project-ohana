@@ -214,9 +214,9 @@ try {
   const offlineRequestStart = errors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-116',
-      '/style.css?v=ohana-116',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-116',
+      '/game.js?v=ohana-119',
+      '/style.css?v=ohana-119',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-119',
     ];
     const results = [];
     for (const path of paths) {
