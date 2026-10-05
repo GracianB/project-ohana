@@ -256,3 +256,12 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - La limpieza afecta teclado, watchdog y punteros retenidos, sin depender de `keyup`.
 - Se mantiene el watchdog de 1200 ms para teclados que pierden su evento de liberación.
 - Cache: `ohana-119`.
+
+
+## Block B - Quality Closure · Phases 46-49
+
+- Phase 46: contratos de diálogo con Escape, foco, inert y restauración del foco de origen.
+- Phase 47: presupuestos runtime explícitos y prueba E2E de tiempo de simulación.
+- Phase 48: matriz navegador con desktop, touch y reduced-motion.
+- Phase 49: conexiones de puertas verificadas como recíprocas a nivel de grafo.
+- Cache: `ohana-120`.
