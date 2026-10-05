@@ -4,6 +4,7 @@ import {
   ExperienceDirector,
   experienceRank,
 } from "../systems/experience.js";
+import { evolutionTiming } from "../systems/evo-cinema.js";
 
 test("experience ranks escalate coherently", () => {
   assert.equal(experienceRank(0), "READY");
@@ -58,4 +59,18 @@ test("reduced motion disables cinematic zoom amplification", () => {
     fx.zoomPulse({ reduceMotion: true }),
     1
   );
+});
+
+
+test("evolution cinema has a bounded return-to-game timeline", () => {
+  const normal = evolutionTiming({ reduced: false, finalForm: false });
+  const final = evolutionTiming({ reduced: false, finalForm: true });
+  const reduced = evolutionTiming({ reduced: true, finalForm: true });
+
+  assert.ok(normal.end <= 4);
+  assert.ok(final.end <= 4.4);
+  assert.ok(reduced.end <= 1.5);
+  assert.ok(normal.flash <= normal.reveal);
+  assert.ok(normal.reveal < normal.out);
+  assert.ok(normal.out < normal.end);
 });
