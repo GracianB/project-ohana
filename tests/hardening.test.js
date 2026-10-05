@@ -27,7 +27,7 @@ test('input y Service Worker no conservan movimiento horizontal fantasma', () =>
   assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
-  assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* Math\.min\(64/);
+  assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* 18/);
 });
 
 
