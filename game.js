@@ -388,6 +388,7 @@ function returnToMenu() {
   game.cam.x = 0;
   game.cam.y = 0;
   playMusic("title");
+  game.experience?.reset();
   closeOverlays();
   document.body.classList.remove("playing", "boss-fight");
   $("char-select")?.classList.remove("hidden");
