@@ -77,3 +77,6 @@ body.playing #ohana-intro {
     display: none !important;
   }
 }
+
+#ohana-intro.show { background: #05070d; box-shadow: inset 0 8vh #05070d, inset 0 -8vh #05070d; }
+#ohana-intro .oi-skip { letter-spacing: 0.22em; }
