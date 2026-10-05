@@ -104,9 +104,7 @@ body.playing #hud {
   text-shadow: 0 8px 24px rgba(255, 210, 80, .45), 0 2px 0 #000, 0 0 12px #000;
 }
 #combo-chip.show { transform: translateX(-50%) scale(1.06); }
-body.boss-fight #combo-chip { top: 168px; }
-body.boss-fight #room-banner { top: 118px; }
-#room-banner {
+body.boss-fight #combo-chip { top: 168px; }#room-banner {
   top: 92px;
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(8,12,20,.78));
   border: 1px solid rgba(126,231,255,.28);
@@ -140,6 +138,4 @@ body.boss-fight #room-banner { top: 118px; }
   #ability-bar { bottom: 86px; }
   .ability-slot { min-width: 104px; padding: 8px; }
   body.playing #hud { top: 44px; }
-  body.boss-fight #combo-chip { top: 132px; }
-  body.boss-fight #room-banner { top: 78px; }
-}
+  body.boss-fight #combo-chip { top: 132px; }}
