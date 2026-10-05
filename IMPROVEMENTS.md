@@ -152,3 +152,9 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 88. Phase 51: integridad física de los recursos declarados por el precache.
 89. Phase 53: inyección de fallos numéricos y recuperación fail-closed mediante el harness E2E.
 90. Phase 54: reproducibilidad del gameplay con semilla de simulación fijada.
+
+
+## Block D - Release Closure
+
+91. Phase 52: release gate único para coherencia de versión, cifras, runtime precacheado, recursos y scripts.
+92. Phase 55: smoke de Chromium contra la URL real de GitHub Pages después del despliegue.
