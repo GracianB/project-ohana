@@ -2748,6 +2748,12 @@ export function drawSlash(ctx, s, cam) {
     ctx.stroke();
     ctx.restore();
   }
+  ctx.globalAlpha = 0.45 * fade;
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(reach * 0.45, 0, 10 + open * 16, 0, Math.PI * 2);
+  ctx.stroke();
   ctx.restore();
 }
 
