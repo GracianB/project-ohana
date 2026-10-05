@@ -485,9 +485,8 @@ test('phase 41: Cuerno cierra el contrato de render pintado con cuatro poses', (
 test('phase 42: offline precache no tiene duplicados y mantiene cobertura total', () => {
   const sw = fs.readFileSync('./sw.js', 'utf8');
   const index = fs.readFileSync('./index.html', 'utf8');
-  const entries = [...sw.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)]
-    .map((match) => match[1])
-    .filter((value) => value && (value.endsWith('.js') || value.endsWith('.css') || value.endsWith('.svg') || value.endsWith('.html') || value.endsWith('.json')));
+  const precacheBlock = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const entries = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)].map((match) => match[1]).filter(Boolean);
 
   const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
   assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
