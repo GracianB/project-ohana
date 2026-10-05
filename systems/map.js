@@ -1,5 +1,5 @@
-export const ROOM_W = 1600;
-export const ROOM_H = 900;
+export const ROOM_W = 2240;
+export const ROOM_H = 1260;
 
 function stairs(x) {
   return [
@@ -129,6 +129,24 @@ export const ROOMS = {
   }
 };
 
+const SCALE = 1.4;
+for (const room of Object.values(ROOMS)) {
+  room.plats = (room.plats || []).map(([x, y, w, h]) => {
+    const wide = w >= 1500;
+    return [Math.round(x * SCALE), Math.round(y * SCALE), wide ? ROOM_W - Math.round(x * SCALE) : Math.round(w * SCALE), Math.round(h * SCALE)];
+  });
+  room.foes = (room.foes || []).map((f) => [Math.round(f[0] * SCALE), Math.round(f[1] * SCALE), f[2], f[3]].filter((v) => v !== undefined));
+  room.orbs = (room.orbs || []).map(([x, y]) => [Math.round(x * SCALE), Math.round(y * SCALE)]);
+  for (const portal of room.portals || []) {
+    const floors = room.plats.filter((pl) => pl[3] > 40).sort((a, b) => a[0] - b[0]);
+    const floor = portal.type === "catapult" ? floors[0] : floors[floors.length - 1];
+    if (!floor) continue;
+    portal.w = portal.type === "blackhole" ? 96 : 120;
+    portal.h = portal.type === "blackhole" ? 96 : 36;
+    portal.x = portal.type === "catapult" ? floor[0] + 160 : floor[0] + Math.max(80, floor[2] - 280);
+    portal.y = floor[1] - portal.h;
+  }
+}
 
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -181,7 +199,7 @@ export function drawSigns(ctx, room, cam, t, evo) {
   }
   // Pit indicator (single): dark elliptical hole + swirl + label at bottom-centre gap.
   function pit(label, deadly) {
-    const x = 800 - cam.x, y = ROOM_H - 60 - cam.y;
+    const x = ROOM_W / 2 - cam.x, y = ROOM_H - 84 - cam.y;
     const c = deadly ? "255,120,140" : "126,231,255";
     const rim = deadly ? "40,8,14" : "6,28,40";
     ctx.save();
@@ -270,7 +288,7 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.restore();
   }
 
-  if (room.doors.right) sign(ROOM_W - 40, 356, "→", room.doors.right, "right"); else wall(ROOM_W - 16, 80, 20, 700);
+  if (room.doors.right) sign(ROOM_W - 56, 500, "→", room.doors.right, "right"); else wall(ROOM_W - 16, 80, 20, 700);
   if (room.doors.left) sign(40, 356, "←", room.doors.left, "left"); else wall(-4, 80, 20, 700);
   if (room.doors.up) sign(800, 22, "↑", room.doors.up, "center");
 

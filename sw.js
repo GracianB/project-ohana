@@ -1,4 +1,4 @@
-const VERSION = "ohana-152";
+const VERSION = "ohana-153";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",

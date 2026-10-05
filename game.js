@@ -2256,12 +2256,10 @@ function updateProjectiles() {
 function updateCam() {
   const p = game.player; if (!p) return;
   const vw = camW(), vh = camH();
-  let lerp = 0.18;
-  const look = p._dashGo > 0
-    ? 110
-    : Math.sign(p.vx || 0) * Math.min(64, 22 + Math.abs(p.vx) * 6);
+  let lerp = 0.24;
+  const look = p._dashGo > 0 ? 48 : Math.sign(p.vx || 0) * 18;
   let tx = p.x + p.w / 2 + (p.facing || 1) * look - vw / 2;
-  let ty = p.y + p.h * 0.45 - vh * 0.52;
+  let ty = p.y + p.h / 2 - vh / 2;
   const boss = game.enemies.find((e) => e.boss && !e.fell);
   const fin = game.finale && game.finale.t > 0 ? game.finale : null;
   if (fin) {
