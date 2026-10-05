@@ -1,4 +1,4 @@
-const VERSION = "ohana-114";
+const VERSION = "ohana-115";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -35,6 +35,7 @@ const PRECACHE = [
   "./characters/roster.js?v=" + VERSION,
   "./characters/signature.js?v=" + VERSION,
   "./characters/sprites.js?v=" + VERSION,
+  "./characters/sprites.js?v=" + VERSION,
   "./engine/audio.js?v=" + VERSION,
   "./engine/boss-art.js?v=" + VERSION,
   "./engine/clock.js?v=" + VERSION,
@@ -59,6 +60,7 @@ const PRECACHE = [
   "./systems/combat-fx.js?v=" + VERSION,
   "./systems/death-fx.js?v=" + VERSION,
   "./systems/demo.js?v=" + VERSION,
+  "./systems/demo.js?v=" + VERSION,
   "./systems/dialogs.js?v=" + VERSION,
   "./systems/ending.js?v=" + VERSION,
   "./systems/evo-cinema.js?v=" + VERSION,
@@ -80,7 +82,11 @@ const PRECACHE = [
   "./systems/xp.js?v=" + VERSION,
   "./worlds/index.js?v=" + VERSION,
   "./worlds/painted-hub.js?v=" + VERSION,
-  "./worlds/terrain.js?v=" + VERSION
+  "./worlds/terrain.js?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-idle.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-run.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-jump.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-atk.svg?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {
