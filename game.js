@@ -34,7 +34,7 @@ import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
-import { CombatFX } from "./systems/combat-fx.js";
+import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
