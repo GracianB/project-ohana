@@ -73,35 +73,38 @@ function limb(ctx, x, y, len, rot, color, w) {
 
 function poseAngles(pose) {
   const st = pose.state || "idle";
+  const id = pose.id || "";
   const sw = Math.sin(pose.phase || 0);
   const atk = pose.atk || 0;
   const ant = pose.anticipation || 0;
+  const weight = { dino: 0.6, dragon: 0.8, frita: 0.7, yomi: 1.15, chispin: 1.2, kilo: 1.1, cat: 1.05 }[id] || 1;
   let arm = 0.4;
   let leg = 0.15;
   let leg2 = -0.1;
   if (st === "run") {
-    arm = sw * 0.9;
-    leg = sw * 0.8;
-    leg2 = -sw * 0.8;
+    arm = sw * 0.9 * weight;
+    leg = sw * (id === "dino" ? 0.45 : 0.8);
+    leg2 = -sw * (id === "dino" ? 0.45 : 0.8);
   } else if (st === "jump") {
-    arm = -1.2;
-    leg = -0.9;
+    arm = id === "cat" ? -0.4 : -1.2;
+    leg = id === "dino" ? -0.3 : -0.9;
     leg2 = 0.4;
   } else if (st === "fall" || st === "glide") {
-    arm = 0.6;
+    arm = id === "dragon" ? 1.4 : 0.6;
     leg = 0.35;
     leg2 = -0.2;
   } else if (st === "attack") {
-    arm = -1.3 + ant * -0.8 + atk * 3.1;
-    leg = 0.2 + atk * 0.3;
+    arm = (id === "dino" ? -0.4 : -1.3) + ant * -0.8 + atk * (id === "yomi" ? 1.4 : 3.1);
+    leg = id === "dino" ? 0.55 : 0.2 + atk * 0.3;
   } else if (st === "cast") {
-    arm = -1.6;
-    leg = 0.1;
+    arm = id === "pizza" ? 0.2 : -1.6;
+    leg = id === "cuerno" ? -0.4 : 0.1;
   } else if (st === "hurt" || st === "dead") {
     arm = 0.8;
     leg = 0.5;
   }
-  return { arm, leg, leg2, bob: st === "idle" ? Math.sin((pose.t || 0) * 0.08) * 2.2 : st === "run" ? -Math.abs(sw) * 3 : 0 };
+  const bobAmp = id === "chispin" ? 3.4 : id === "dino" ? 1.1 : 2.2;
+  return { arm, leg, leg2, bob: st === "idle" ? Math.sin((pose.t || 0) * 0.08) * bobAmp : st === "run" ? -Math.abs(sw) * 3 : 0 };
 }
 
 function body(ctx, id, pose) {
@@ -583,7 +586,16 @@ const DRAW = { kilo, stitcho, chispin, cat, dragon, dino, frita, pizza, yomi, cu
 
 export function drawDefinitive(ctx, id, pose) {
   const draw = DRAW[id] || kilo;
+  const next = pose || {};
   ctx.save();
-  draw(ctx, pose || {});
+  draw(ctx, { ...next, id: next.id || id });
+  if (next.state === "cast") {
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, -28, 26, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   ctx.restore();
 }

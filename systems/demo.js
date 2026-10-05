@@ -12,7 +12,7 @@ const HINTS = {
 };
 
 const STEPS = [
-  { id: "move", text: "WASD o controles táctiles para moverte. H ataca, J K L son poderes. E usa portales." },
+  { id: "move", text: "WASD para moverte. H ataca. J desde el principio, K en forma 2, L en forma 3, U el supremo en forma 5. E usa portales." },
   { id: "orb", text: "Los orbes amarillos dan XP. Al llenar la barra evolucionas automáticamente." },
   { id: "evo", text: "5 formas: bebé → base → evo → final → GOD." },
   { id: "map", text: "M abre el mapa. Visita las 8 salas y el nido te llama." },
