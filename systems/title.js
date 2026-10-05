@@ -227,9 +227,19 @@ function applyLook() {
 }
 
 function mountLook(wrap) {
-  const old = wrap.querySelector(".look-switch");
-  if (old) old.remove();
-  setLook("vector");
+  let box = wrap.querySelector(".look-switch");
+  if (!box) {
+    box = document.createElement("div");
+    box.className = "look-switch";
+    box.innerHTML = '<span>Cara</span><button type="button" data-look="vector">Vector</button><button type="button" data-look="paint">Piloto Michi</button>';
+    wrap.appendChild(box);
+    box.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      setLook(btn.dataset.look);
+      applyLook();
+    });
+  }
 }
 
 function enhance() {

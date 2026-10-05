@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { makeFoe, isAirFoe, applyElite, ROOM_HARD } from "../engine/foes.js";
 import { XP_NEED } from "../systems/xp.js";
-import { canonId, packSave, unpackSave } from "../systems/save.js";
+import { canonId, clearRank, formatClear, packSave, rememberBest, unpackSave } from "../systems/save.js";
 import { sense, think } from "../engine/foe-brain.js";
 import { signature, markAt } from "../characters/signature.js";
 import { computePose } from "../characters/rig.js";
@@ -397,3 +397,16 @@ test("RNG del rig de poses es inyectable y reproducible", async () => {
   assert.equal(b._rig.blinkAt, 89);
 });
 
+
+test("claro de Mundo 1 guarda el mejor tiempo sin romper v2", () => {
+  assert.equal(clearRank(8 * 60 * 60), "S");
+  assert.equal(clearRank(14 * 60 * 60 + 1), "B");
+  assert.equal(formatClear(125 * 60), "2:05");
+  const best = rememberBest({ ticks: 90000, kills: 4, score: 10, evo: 4, rank: "C", id: "kilo" }, { ticks: 20000, kills: 8, score: 40, evo: 4, rank: "S", id: "kilo" });
+  assert.equal(best.rank, "S");
+  assert.equal(best.ticks, 20000);
+  const game = { roomId: "boss", visited: { hub: true }, score: 40, kills: 8, won: true, clearTicks: 20000, best, player: { evo: 4, id: "kilo", xp: 420, health: 20 } };
+  const raw = packSave(game);
+  assert.equal(raw.v, 2);
+  assert.equal(unpackSave(raw, "kilo").best.ticks, 20000);
+});

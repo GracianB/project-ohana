@@ -43,11 +43,34 @@ function showTut(text) {
   el._t = setTimeout(() => el.classList.remove("show"), 4200);
 }
 
+const GOALS = {
+  hub: { text: "Objetivo: abre la Costa por el este.", done: (d) => !!d.visited.beach },
+  beach: { text: "Objetivo: no caigas al pozo. La jungla pide forma 3.", done: (d) => !!d.visited.jungle },
+  jungle: { text: "Objetivo: baja a la Caldera. Pide forma 4.", done: (d) => !!d.visited.volcano },
+  volcano: { text: "Objetivo: entra al Nido por el este.", done: (d) => !!d.visited.boss },
+  boss: { text: "Objetivo: derrota a la Reina.", done: (d) => !!d.won },
+  cave: { text: "Objetivo: el Lab está al oeste. Pide forma 2.", done: (d) => !!d.visited.lab },
+  lab: { text: "Objetivo: sal por el este. No hay otra puerta.", done: (d) => !!d.visited.cave },
+  ridge: { text: "Objetivo: la Órbita está al este.", done: (d) => !!d.visited.space },
+  space: { text: "Objetivo: el vórtice secreto baja al Arrecife.", done: (d) => !!d.visited.reef },
+  reef: { text: "Objetivo: sube y vuelve a la Costa.", done: (d) => !!d.visited.beach }
+};
+
+function paintGoal(detail) {
+  const obj = document.getElementById("demo-obj");
+  if (!obj || !detail) return;
+  const goal = GOALS[detail.id];
+  if (!goal) return;
+  const done = goal.done(detail);
+  obj.textContent = (done ? "Hecho · " : "") + goal.text;
+  obj.classList.toggle("done", done);
+}
+
 function tick() {
   if (!document.body.classList.contains("playing")) return;
   const world = document.getElementById("hud-world")?.textContent || "";
   const obj = document.getElementById("demo-obj");
-  if (obj && HINTS[world]) obj.textContent = HINTS[world];
+  if (obj && !obj.dataset.live && HINTS[world]) obj.textContent = HINTS[world];
 }
 
 function boot() {
@@ -81,6 +104,11 @@ function boot() {
     }
   });
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  addEventListener("ohana-room", (e) => {
+    const obj = document.getElementById("demo-obj");
+    if (obj) obj.dataset.live = "1";
+    paintGoal(e.detail || {});
+  });
   setInterval(tick, 400);
 }
 

@@ -32,8 +32,47 @@ export function packSave(game, MagicMod) {
     xp: p ? p.xp : 0,
     hp: p ? p.health : null,
     nineUsed: !!(p && p._nineUsed),
-    magic
+    magic,
+    clearTicks: Math.max(0, finiteNumber(game.clearTicks)),
+    best: sanitizeBest(game.best)
   };
+}
+
+export function clearRank(ticks) {
+  const n = finiteNumber(ticks);
+  if (n <= 8 * 60 * 60) return "S";
+  if (n <= 14 * 60 * 60) return "A";
+  if (n <= 22 * 60 * 60) return "B";
+  return "C";
+}
+
+export function formatClear(ticks) {
+  const total = Math.max(0, Math.floor(finiteNumber(ticks) / 60));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+function sanitizeBest(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const ticks = Math.max(0, finiteNumber(raw.ticks));
+  if (!ticks) return null;
+  return {
+    ticks,
+    kills: Math.max(0, finiteNumber(raw.kills)),
+    score: Math.max(0, finiteNumber(raw.score)),
+    evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),
+    rank: ["S", "A", "B", "C"].includes(raw.rank) ? raw.rank : clearRank(ticks),
+    id: canonId(raw.id)
+  };
+}
+
+export function rememberBest(current, next) {
+  const fresh = sanitizeBest(next);
+  if (!fresh) return sanitizeBest(current);
+  const prev = sanitizeBest(current);
+  if (!prev || fresh.ticks < prev.ticks) return fresh;
+  return prev;
 }
 
 /** Devuelve campos listos o null si el save no es de este personaje. */
@@ -54,7 +93,9 @@ export function unpackSave(raw, defId) {
     hp: raw.hp == null ? null : Math.max(0, finiteNumber(raw.hp)),
     nineUsed: !!raw.nineUsed,
     magic: raw.magic && typeof raw.magic === "object" ? raw.magic : null,
-    id
+    id,
+    clearTicks: Math.max(0, finiteNumber(raw.clearTicks)),
+    best: sanitizeBest(raw.best)
   };
 }
 
