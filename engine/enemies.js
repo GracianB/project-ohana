@@ -1093,10 +1093,30 @@ function drawUfo(ctx, e, t) {
   }
 }
 
+let queenPlate = null;
+function queenImage() {
+  if (queenPlate) return queenPlate.complete && queenPlate.naturalWidth ? queenPlate : null;
+  if (typeof Image === "undefined") return null;
+  queenPlate = new Image();
+  queenPlate.src = "assets/sprites/boss-queen.png";
+  return null;
+}
 function drawBoss(ctx, e, t) {
-  // Arte vectorial animado de la Reina del Nido (engine/boss-art.js)
   if (e.telegraph && !e.dying && !(e.introT > 0)) drawBossTelegraph(ctx, e, t);
-  drawBossQueen(ctx, e, t);
+  const plate = queenImage();
+  if (plate && !e.dying) {
+    const h = e.h * 2.8;
+    const w = h * (plate.naturalWidth / plate.naturalHeight);
+    ctx.save();
+    if ((e.facing || 1) < 0) ctx.scale(-1, 1);
+    ctx.drawImage(plate, -w / 2, -h * 0.72, w, h);
+    ctx.restore();
+  } else drawBossQueen(ctx, e, t);
+  const names = ["", "Nido", "Alas", "Fuego"];
+  ctx.fillStyle = "#ffe66a";
+  ctx.font = "700 14px Outfit, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(names[e.phase] || "Reina", 0, -e.h * 0.95);
   if (e.shockT > 0 && e.shockR) {
     ctx.strokeStyle = "rgba(255,120,40,.55)";
     ctx.lineWidth = 3;
