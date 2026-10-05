@@ -843,10 +843,12 @@ function showSwing(p, evo, def) {
   }
   const tipX = face > 0 ? box.x + box.w - 6 : box.x + 6;
   game.fx.emit(tipX, box.y + box.h * 0.45, {
-    color: def.color || p.color, count: sig.heavy ? 14 : 10, size: 3.2,
-    star: true, speed: 2.6, angle: face > 0 ? 0 : Math.PI, spread: 0.7,
+    color: def.color || p.color, count: sig.heavy ? 18 : 12, size: 3.6,
+    star: true, speed: 3.4, angle: face > 0 ? 0 : Math.PI, spread: 0.8,
   });
-  game.shake = Math.min(12, (game.shake || 0) + (sig.heavy ? 5 : 3));
+  game.fx.emit(tipX, box.y + box.h * 0.45, { color: "#fff", count: 6, size: 2, speed: 2.2, life: 10 });
+  game.shake = Math.min(14, (game.shake || 0) + (sig.heavy ? 6 : 4));
+  if (sig.heavy) hitStop(2);
 }
 
 function tickSwing(p) {
@@ -2854,7 +2856,9 @@ addEventListener("ohana-evolve-done", (e) => {
   if (!p || detail.id !== p.id) return;
   const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
   const story = evolutionMessage(p.id, evo);
-  showNotification("FORMA " + (evo + 1), p.name + " · " + story.line, "evo");
+  const opened = evo === 1 ? "K abierto" : evo === 2 ? "L abierto" : evo === 4 ? "U, supremo" : "";
+  showNotification("FORMA " + (evo + 1), p.name + " · " + story.line + (opened ? " · " + opened : ""), "evo");
+  if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
   updateHUD();
 });
 
