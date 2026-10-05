@@ -582,6 +582,97 @@ function cuerno(ctx, pose) {
   }
 }
 
+
+function mark(ctx, id, pose) {
+  const f = fnum(pose);
+  const y = -42 - f * 2;
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  if (id === "kilo") {
+    ctx.fillStyle = "#5cbf6a";
+    ctx.beginPath();
+    ctx.ellipse(0, y - 16, 7, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (id === "stitcho") {
+    ctx.fillStyle = "#1d3f8f";
+    ctx.beginPath();
+    ctx.ellipse(-18, y - 4, 7, 16, -0.4, 0, Math.PI * 2);
+    ctx.ellipse(18, y - 4, 7, 16, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (id === "chispin") {
+    ctx.strokeStyle = "#fff29a";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-2, y - 10);
+    ctx.lineTo(4, y - 24);
+    ctx.lineTo(0, y - 24);
+    ctx.lineTo(6, y - 38);
+    ctx.stroke();
+  } else if (id === "cat" || id === "michi") {
+    ctx.fillStyle = "#ffb6e4";
+    ctx.beginPath();
+    ctx.moveTo(-12, y - 8);
+    ctx.lineTo(-18, y - 24);
+    ctx.lineTo(-4, y - 12);
+    ctx.moveTo(12, y - 8);
+    ctx.lineTo(18, y - 24);
+    ctx.lineTo(4, y - 12);
+    ctx.fill();
+    ctx.stroke();
+  } else if (id === "dragon") {
+    ctx.strokeStyle = "#ff6a2a";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-16, y + 8);
+    ctx.quadraticCurveTo(-36, y - 10, -18, y + 22);
+    ctx.moveTo(16, y + 8);
+    ctx.quadraticCurveTo(36, y - 10, 18, y + 22);
+    ctx.stroke();
+  } else if (id === "dino") {
+    ctx.fillStyle = "#3f8f3a";
+    ctx.beginPath();
+    ctx.moveTo(10, y + 18);
+    ctx.quadraticCurveTo(34, y + 8, 28, y + 28);
+    ctx.quadraticCurveTo(16, y + 24, 10, y + 18);
+    ctx.fill();
+    ctx.stroke();
+  } else if (id === "frita") {
+    ctx.fillStyle = "#f0b43a";
+    ctx.fillRect(-12, y - 18, 24, 6);
+    ctx.strokeRect(-12, y - 18, 24, 6);
+  } else if (id === "pizza") {
+    ctx.fillStyle = "#ffb43a";
+    ctx.beginPath();
+    ctx.moveTo(0, y - 20);
+    ctx.lineTo(12, y - 4);
+    ctx.lineTo(-12, y - 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else if (id === "yomi") {
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(-6, y + 6);
+    ctx.lineTo(-3, y + 14);
+    ctx.lineTo(0, y + 6);
+    ctx.lineTo(3, y + 14);
+    ctx.lineTo(6, y + 6);
+    ctx.fill();
+  } else if (id === "cuerno") {
+    ctx.fillStyle = "#ffe9a8";
+    ctx.beginPath();
+    ctx.moveTo(-4, y - 12);
+    ctx.lineTo(0, y - 32);
+    ctx.lineTo(4, y - 12);
+    ctx.fill();
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 const DRAW = { kilo, stitcho, chispin, cat, dragon, dino, frita, pizza, yomi, cuerno, lilo: kilo, stitch: stitcho, pikachu: chispin, michi: cat };
 
 export function drawDefinitive(ctx, id, pose) {
@@ -593,6 +684,7 @@ export function drawDefinitive(ctx, id, pose) {
   ctx.ellipse(0, 8, 14, 4, 0, 0, Math.PI * 2);
   ctx.fill();
   draw(ctx, { ...next, id: next.id || id });
+  mark(ctx, next.id || id, next);
   if (next.state === "cast") {
     ctx.globalAlpha = 0.55;
     ctx.strokeStyle = "#fff";
