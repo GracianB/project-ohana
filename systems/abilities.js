@@ -55,11 +55,12 @@ export const ABILITY_DEFS = {
 
 export function useAbility(game, index) {
   const p = game?.player;
-  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 2) return;
-  const id = p.abilities && p.abilities[index];
-  const def = ABILITY_DEFS[id];
+  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return;
+  const supreme = index === 3 ? SUPREME[p.id] : null;
+  const id = supreme ? supreme.id : p.abilities && p.abilities[index];
+  const def = supreme || ABILITY_DEFS[id];
   if (!def) return;
-  const fn = CASTERS[id];
+  const fn = index === 3 ? castSupreme : CASTERS[id];
   if (typeof fn !== "function") return;
   const baseCd = Number(def.cd);
   if (!Number.isFinite(baseCd) || baseCd <= 0) return;
@@ -88,9 +89,39 @@ export function useAbility(game, index) {
   // temporal de una habilidad no debe secuestrar el siguiente input del jugador.
   if (S.pull && id !== "cheese") S.pull = null;
 
-  if (fn) fn(game, p, clamp(Number(p.evo) || 0, 0, 4));
+  if (index === 3) castSupreme(game, p);
+  else fn(game, p, clamp(Number(p.evo) || 0, 0, 4));
   trimAbilityProjectiles(game);
 }
+
+const SUPREME = Object.freeze({
+  kilo:    { id: "solar", name: "Jardín solar", key: "U", cd: 9000, color: "#ffd36a" },
+  stitcho: { id: "bang", name: "Big Bang", key: "U", cd: 9000, color: "#8f7bff" },
+  chispin: { id: "boltgod", name: "Relámpago", key: "U", cd: 9000, color: "#ffe14a" },
+  cat:     { id: "eclipse", name: "Eclipse", key: "U", cd: 9000, color: "#ffb6e4" },
+  dragon:  { id: "nova", name: "Supernova", key: "U", cd: 9000, color: "#ff4a20" },
+  dino:    { id: "impact", name: "Impacto", key: "U", cd: 9000, color: "#c8f04a" },
+  frita:   { id: "frygod", name: "Fritura", key: "U", cd: 9000, color: "#ffd36a" },
+  pizza:   { id: "ovenking", name: "Horno real", key: "U", cd: 9000, color: "#ff8a2a" },
+  yomi:    { id: "devour", name: "Devorar", key: "U", cd: 9000, color: "#ff2244" },
+  cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8" },
+});
+
+function castSupreme(game, p) {
+  const def = SUPREME[p.id] || SUPREME.kilo;
+  const dmg = (70 + (Number(p.evo) || 0) * 12) * pw(p);
+  for (const e of game.enemies || []) {
+    if (!canHit(e)) continue;
+    hitEnemy(game, e, dmg, { kx: Math.sign(cx(e) - cx(p)) * 8, ky: -6, stun: 28, color: def.color, crit: true });
+  }
+  add({ kind: "supreme", x: cx(p), y: cy(p), life: 36, max: 36, color: def.color, name: def.name });
+  game.ult = { t: 70, color: def.color, name: def.name };
+  game.flashColor = def.color;
+  game.flash = Math.max(game.flash || 0, 18);
+  game.shake = Math.min(22, (game.shake || 0) + 12);
+  game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
+}
+
 
 // ---------------------------------------------------------------------------
 // Estado de movimiento de habilidades (un solo jugador)
@@ -1648,6 +1679,30 @@ const DRW = {
       ctx.restore();
     }
   },
+  supreme(ctx, f, cam, t) {
+    const x = f.x - cam.x, y = f.y - cam.y;
+    const k = f.life / f.max;
+    const r = (1 - k) * 280;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = k;
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = 10 * k + 2;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, TAU);
+    ctx.stroke();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(0, r - 16), 0, TAU);
+    ctx.stroke();
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * TAU + t * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r * 0.4, y + Math.sin(a) * r * 0.4);
+      ctx.lineTo(x + Math.cos(a) * (r + 24), y + Math.sin(a) * (r + 24));
+      ctx.stroke();
+    }
+  },
   ohana(ctx, f, cam, t) {
     const x = f.x - cam.x, y = f.y - cam.y;
     const k = f.life / 44;
@@ -2353,7 +2408,7 @@ export function drawSlash(ctx, s, cam) {
   const fade = k < 0.28 ? k / 0.28 : 1;
   const x = s.x - cam.x;
   const y = s.y - cam.y;
-  const reach = Math.max(46, (s.w || 72) * 1.05);
+  const reach = Math.max(58, (s.w || 72) * 1.28);
   const kind = s.kind || "slice";
   const col = s.color || "#fff";
   const a0 = -1.2;
