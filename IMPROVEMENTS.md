@@ -103,6 +103,10 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 
 76. Phase 38: cierre final del firewall de mutaciones, incluyendo combo, para eliminar la última aritmética directa sobre un contador crítico de combate.
 
+## Phase 41 - Cuerno Paint Closure
+
+78. Phase 41: cierre de `paint` para Cuerno con cuatro sprites SVG propios (`idle`, `run`, `jump`, `atk`), fallback específico en `characters/sprites.js`, precache y regresión estructural.
+
 ## Phase 40 - Cache Graph Closure
 
 77. Phase 40: cierre del grafo de caché del runtime; todos los módulos JavaScript de producción quedan precacheados con `ohana-114` y una regresión automática impide dejar módulos nuevos fuera del Service Worker.
@@ -112,3 +116,23 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 El arranque de una nueva partida no debe heredar estado transitorio de una sesión anterior. Se cubren countdown del Nido, finale, transiciones de puertas, cámara, flashes, pausa y runtime faults.
 
 La progresión persistente sigue restaurándose exclusivamente desde `saveStore`.
+
+
+## Phase 42 - Offline E2E Closure
+
+79. Phase 42: cierre del arranque offline real. Chromium recarga sin red tras activar el Service Worker, valida JS/CSS/SVG desde caché, inicia gameplay y el test rechaza duplicados en el precache.
+
+
+## Phase 43 - ESM Dependency Closure
+
+80. Phase 43: auditoría automática del grafo ESM local para impedir imports relativos rotos o huérfanos dentro del runtime.
+
+
+## Phase 44 - Save Transaction Closure
+
+81. Phase 44: guardado transaccional con staging, recuperación defensiva ante fallo de escritura y rechazo de versiones desconocidas.
+
+
+## Phase 45 - Input Lifecycle Closure
+
+82. Phase 45: ciclo de entrada cerrado para blur/focus/pagehide/visibilitychange, con limpieza de teclado, watchdog y punteros retenidos.

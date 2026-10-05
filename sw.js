@@ -1,4 +1,4 @@
-const VERSION = "ohana-114";
+const VERSION = "ohana-119";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -80,7 +80,11 @@ const PRECACHE = [
   "./systems/xp.js?v=" + VERSION,
   "./worlds/index.js?v=" + VERSION,
   "./worlds/painted-hub.js?v=" + VERSION,
-  "./worlds/terrain.js?v=" + VERSION
+  "./worlds/terrain.js?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-idle.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-run.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-jump.svg?v=" + VERSION,
+  "./assets/sprites/bodies/cuerno-atk.svg?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {

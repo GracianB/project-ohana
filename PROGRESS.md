@@ -181,7 +181,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-114`
+`ohana-115`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
@@ -191,7 +191,7 @@ El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no s
 
 La auditoría actual cubre determinismo de gameplay, renderers, runtime y coherencia de cifras. Las capas que siguen pendientes son mejoras estructurales y de calidad, no deuda crítica:
 
-- incorporar sprites pintados de Cuerno si se quiere soporte completo de `paint`
+- mantener ampliada la cobertura de sprites pintados si aparecen nuevas formas o poses
 - reforzar el versionado de caché de módulos ES internos
 - mantener la prueba de humo de renderers y ampliar el mock si aparece una nueva API gráfica
 
@@ -201,12 +201,20 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 
 `manifest.json` · `README.md` · `PROGRESS.md` · `IMPROVEMENTS.md` · CI
 
+## Phase 41 - Cuerno Paint Closure
+
+- Cuerno incorpora sprites pintados SVG para `idle`, `run`, `jump` y `atk`.
+- `characters/sprites.js` usa esta ruta únicamente para Cuerno y conserva PNG para el resto del catálogo.
+- El Service Worker precachea las cuatro variantes pintadas.
+- La regresión verifica existencia, estructura y contrato de carga de las cuatro poses.
+- Cache: `ohana-115`.
+
 ## Phase 40 - Cache Graph Closure
 
 - El Service Worker precachea los módulos JavaScript de runtime con la versión de caché actual.
 - El pipeline verifica que `index.html` y `sw.js` compartan la misma versión.
 - La regresión de hardening comprueba que ningún `.js` de runtime quede fuera del precache.
-- Cache: `ohana-114`.
+- Cache: `ohana-115`.
 
 ## Phase 39 - Session Reset Closure
 
@@ -216,3 +224,35 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Se reinician los contadores de fallos de runtime.
 - La progresión persistente continúa restaurándose mediante `saveStore`.
 - Cache: `ohana-113`.
+
+
+## Phase 42 - Offline E2E Closure
+
+- El arranque offline se verifica en Chromium después de instalar y activar el Service Worker.
+- La prueba recarga sin red y valida DOM, Canvas, control del SW y ejecución real del juego.
+- También comprueba que JavaScript, CSS y un asset pintado se sirven desde caché.
+- El contrato de precache rechaza entradas duplicadas además de módulos runtime ausentes.
+- Cache: `ohana-116`.
+
+
+## Phase 43 - ESM Dependency Closure
+
+- El CI audita todas las importaciones locales relativas de los módulos JavaScript de runtime.
+- Se comprueban rutas directas, sufijo `.js` y `index.js`, rechazando dependencias locales sin destino.
+- Cache: `ohana-117`.
+
+
+## Phase 44 - Save Transaction Closure
+
+- El guardado escribe primero en un staging `ohana.tmp` y solo lo confirma sobre `ohana` después.
+- Un fallo de quota/escritura no destruye el checkpoint previo y el staging puede servir como recuperación defensiva.
+- Los saves con una versión explícita desconocida se rechazan; v2 sigue siendo el contrato publicado.
+- Cache: `ohana-118`.
+
+
+## Phase 45 - Input Lifecycle Closure
+
+- El estado de entrada se limpia en `blur`, `focus`, `pagehide` y cualquier cambio de visibilidad.
+- La limpieza afecta teclado, watchdog y punteros retenidos, sin depender de `keyup`.
+- Se mantiene el watchdog de 1200 ms para teclados que pierden su evento de liberación.
+- Cache: `ohana-119`.

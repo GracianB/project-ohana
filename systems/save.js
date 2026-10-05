@@ -5,6 +5,9 @@ export function canonId(id) {
   return ID_LEGACY[id] || id || "";
 }
 
+const SAVE_KEY = "ohana";
+const SAVE_TMP_KEY = "ohana.tmp";
+
 function finiteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
@@ -36,6 +39,7 @@ export function packSave(game, MagicMod) {
 /** Devuelve campos listos o null si el save no es de este personaje. */
 export function unpackSave(raw, defId) {
   if (!raw || typeof raw !== "object") return null;
+  if (raw.v != null && raw.v !== 2) return null;
   const id = canonId(raw.id);
   if (defId && id !== canonId(defId)) return null;
   const vis = raw.visited && typeof raw.visited === "object" && !Array.isArray(raw.visited) ? raw.visited : { hub: true };
@@ -56,18 +60,36 @@ export function unpackSave(raw, defId) {
 
 export function createSaveStore(storage = () => globalThis.localStorage) {
   const getStorage = typeof storage === "function" ? storage : () => storage;
+
+  function parse(value) {
+    if (typeof value !== "string" || !value) return null;
+    try { return JSON.parse(value); } catch (_) { return null; }
+  }
+
   return {
     readRaw() {
-      try { return JSON.parse(getStorage().getItem("ohana") || "null"); }
-      catch (_) { return null; }
+      try {
+        const store = getStorage();
+        const primary = parse(store.getItem(SAVE_KEY));
+        if (primary) return primary;
+        return parse(store.getItem(SAVE_TMP_KEY));
+      } catch (_) {
+        return null;
+      }
     },
     read(id) { return unpackSave(this.readRaw(), id); },
     write(game, magic) {
       if (!game?.player || game.player.dead) return false;
+      const raw = JSON.stringify(packSave(game, magic));
       try {
-        getStorage().setItem("ohana", JSON.stringify(packSave(game, magic)));
+        const store = getStorage();
+        store.setItem(SAVE_TMP_KEY, raw);
+        store.setItem(SAVE_KEY, raw);
+        try { store.removeItem?.(SAVE_TMP_KEY); } catch (_) {}
         return true;
-      } catch (_) { return false; }
+      } catch (_) {
+        return false;
+      }
     }
   };
 }

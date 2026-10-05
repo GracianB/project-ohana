@@ -1,3 +1,4 @@
+import path from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -460,4 +461,131 @@ test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la ve
   }
 
   assert.ok(precache.size >= runtimeFiles.length, 'el precache debe cubrir al menos todo el runtime JS');
+});
+
+test('phase 41: Cuerno cierra el contrato de render pintado con cuatro poses', () => {
+  const sprites = fs.readFileSync('./characters/sprites.js', 'utf8');
+  const poses = ['idle', 'run', 'jump', 'atk'];
+
+  assert.match(sprites, /isCuernoPaint/);
+  assert.match(sprites, /cuerno-\(idle\|run\|jump\|atk\)/);
+
+  for (const pose of poses) {
+    const file = './assets/sprites/bodies/cuerno-' + pose + '.svg';
+    assert.equal(fs.existsSync(file), true, 'falta sprite pintado de Cuerno: ' + file);
+    const source = fs.readFileSync(file, 'utf8');
+    assert.match(source, /^<svg[\s\S]*<\/svg>$/);
+    assert.match(source, /<defs>/);
+    assert.match(source, /gradient/i);
+  }
+
+  assert.doesNotMatch(sprites, /cuerno-(idle|run|jump|atk)\.png/);
+});
+
+test('phase 42: offline precache no tiene duplicados y mantiene cobertura total', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  const precacheBlock = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const entries = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)].map((match) => match[1]).filter(Boolean);
+
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+
+  assert.ok(index.includes('?v=' + version), 'index.html debe usar la versión declarada por sw.js');
+
+  const duplicates = entries.filter((value, index, all) => all.indexOf(value) !== index);
+  assert.deepEqual([...new Set(duplicates)].sort(), [], 'PRECACHE contiene entradas duplicadas');
+
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeFiles = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) runtimeFiles.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const jsPrecache = new Set(
+    [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
+  );
+  for (const file of runtimeFiles.sort()) {
+    const normalized = file.replace(/^\.\//, '');
+    assert.ok(jsPrecache.has(normalized), 'módulo JS fuera del precache: ' + normalized);
+  }
+  assert.ok(jsPrecache.size >= runtimeFiles.length, 'el precache JS debe cubrir todo el runtime');
+});
+
+
+test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', () => {
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const files = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) files.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const all = new Set(files.map((file) => file.replace(/^\.\//, '')));
+  const missing = [];
+  const edges = [];
+
+  const resolveLocal = (from, spec) => {
+    const clean = spec.split(/[?#]/, 1)[0];
+    const base = path.posix.normalize(path.posix.join(path.posix.dirname(from), clean));
+    const candidates = [
+      base,
+      base + '.js',
+      base.replace(/\/$/, '') + '/index.js',
+    ];
+    return candidates.find((candidate) => all.has(candidate)) || null;
+  };
+
+  for (const file of files) {
+    const source = fs.readFileSync('./' + file.replace(/^\.\//, ''), 'utf8');
+    const regexes = [
+      /\b(?:from|import)\s*(?:\(\s*)?["']([^"']+)["']/g,
+      /\bexport\s+(?:\*\s+)?from\s*["']([^"']+)["']/g,
+    ];
+    for (const regex of regexes) {
+      let match;
+      while ((match = regex.exec(source))) {
+        const spec = match[1];
+        if (!spec.startsWith('.')) continue;
+        const target = resolveLocal(file, spec);
+        edges.push([file, spec, target]);
+        if (!target) missing.push(file + ' -> ' + spec);
+      }
+    }
+  }
+
+  assert.ok(edges.length > 0, 'el grafo ESM no contiene importaciones locales auditables');
+  assert.deepEqual(missing, [], 'importaciones ESM locales sin destino');
+});
+
+
+test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', () => {
+  const source = fs.readFileSync('./systems/save.js', 'utf8');
+  assert.match(source, /SAVE_KEY\s*=\s*"ohana"/);
+  assert.match(source, /SAVE_TMP_KEY\s*=\s*"ohana\.tmp"/);
+  assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
+  assert.match(source, /setItem\(SAVE_KEY, raw\)/);
+  assert.match(source, /raw\.v != null && raw\.v !== 2/);
+  assert.match(source, /return parse\(store\.getItem\(SAVE_TMP_KEY\)\)/);
+});
+
+
+test('phase 45: ciclo de vida de entrada resetea teclado en pérdida de foco y página', () => {
+  const source = fs.readFileSync('./engine/input.js', 'utf8');
+  assert.match(source, /listen\(target, "blur", reset\)/);
+  assert.match(source, /listen\(target, "focus", reset\)/);
+  assert.match(source, /listen\(target, "pagehide", reset\)/);
+  assert.match(source, /listen\(document, "visibilitychange", reset\)/);
+  assert.match(source, /KEYBOARD_STALE_MS\s*=\s*1200/);
+  assert.match(source, /releasePointerSources/);
 });
