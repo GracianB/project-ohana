@@ -126,3 +126,8 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 ## Phase 43 - ESM Dependency Closure
 
 80. Phase 43: auditoría automática del grafo ESM local para impedir imports relativos rotos o huérfanos dentro del runtime.
+
+
+## Phase 44 - Save Transaction Closure
+
+81. Phase 44: guardado transaccional con staging, recuperación defensiva ante fallo de escritura y rechazo de versiones desconocidas.
