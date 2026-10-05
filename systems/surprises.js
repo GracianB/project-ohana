@@ -304,7 +304,7 @@ export const Surprises = {
           this.starActive = true;
           this.starLeft = STAR_DURATION;
           this._skyPulse = 0;
-          try { showNotification("LLUVIA DE ESTRELLAS", "Órbita brilla. Cristales +XP", "sala"); } catch (_) {}
+          try { showNotification("LLUVIA DE ESTRELLAS", "Órbita brilla. Cristales +XP", "sala"); beep("pickup"); } catch (_) {}
         }
       }
       if (this.starActive && this.starLeft > 0) {
@@ -348,7 +348,7 @@ export const Surprises = {
         addScore(game, 50);
         p._surpriseAura = Math.max(p._surpriseAura || 0, 360);
         game.flash = Math.max(game.flash || 0, 8);
-        emitStars(game, s.x, s.y, 16, "#a8e0ff");
+        emitStars(game, s.x, s.y, 16, "#a8e0ff"); beep("pickup");
         emitStars(game, s.x, s.y, 8, "#ffffff");
         try { if (game.nums) game.nums.add(s.x, s.y, "+!", "#a8e0ff"); } catch (_) {}
         try { showNotification("¡SORPRESA!", "Escudo corto + dash", "sala"); } catch (_) {}
@@ -365,7 +365,7 @@ export const Surprises = {
         addScore(game, 40);
         p._surpriseAura = Math.max(p._surpriseAura || 0, 240);
         game.flash = Math.max(game.flash || 0, 7);
-        emitStars(game, fruit.x, fruit.y, 18, "#ff82c8");
+        emitStars(game, fruit.x, fruit.y, 18, "#ff82c8"); beep("pickup");
         emitStars(game, fruit.x, fruit.y, 8, "#a8f06a");
         try {
           if (game.nums) game.nums.add(fruit.x, fruit.y, "+15", "#a8f06a");
@@ -387,7 +387,7 @@ export const Surprises = {
         p._surpriseAura = Math.max(p._surpriseAura || 0, 600);
         game.flash = Math.max(game.flash || 0, 12);
         game.shake = Math.max(game.shake || 0, 8);
-        emitStars(game, crown.x, crown.y, 30, "#f0c040");
+        emitStars(game, crown.x, crown.y, 30, "#f0c040"); beep("pickup");
         emitStars(game, crown.x, crown.y, 12, "#fff4b0");
         try { if (game.nums) game.nums.add(crown.x, crown.y, "+100", "#ffe66a"); } catch (_) {}
         try { showNotification("CORONA ESTELAR", "Solo los GOD brillan así.", "sala"); } catch (_) {}

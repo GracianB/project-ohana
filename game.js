@@ -1319,13 +1319,13 @@ function updatePlayer() {
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
-      o.taken = true; addPlayerXp(p, 4 + Surprises.starOrbBonus()); addScore(25); beep("orb"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
+      o.taken = true; addPlayerXp(p, 4 + Surprises.starOrbBonus()); addScore(25); beep("pickup"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
       if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); addScore(100); }
     }
   }
   for (const h of game.hearts) {
     if (!h.taken && Math.hypot(p.x + p.w / 2 - h.x, p.y + p.h / 2 - h.y) < 36) {
-      h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("orb");
+      h.taken = true; healPlayer(p, 25); game.nums.add(h.x, h.y, "+HP", "#f66"); beep("pickup");
     }
   }
   if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
@@ -2243,7 +2243,7 @@ function updateProjectiles() {
     }
     if (pr.owner === "player") {
       for (const e of game.enemies) {
-        if (!e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
+        if (!pr.pickup && !e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
           let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
           dmg = Math.round(dmg);
           damageEnemy(e, dmg); registerBossPunish(e); e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
