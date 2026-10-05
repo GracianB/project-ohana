@@ -381,22 +381,46 @@ function dragon(ctx, pose) {
 }
 
 function dino(ctx, pose) {
-  const b = body(ctx, "dino", pose);
-  const y = b.hip - 36 * b.grow + b.a.bob;
-  head(ctx, 10, y, 16 + b.f, pose, b.fur);
-  for (let i = 0; i < 2 + b.f; i++) {
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#d8f5b0", "#8fd36a", "#5cbf56", "#3e9a45", "#c8f04a"][f];
+  const dark = "#245522";
+  ink(ctx, 3.4);
+  const hip = -14 - f;
+  limb(ctx, -7, hip, 16 + f, a.leg + 1.25, dark, 6);
+  limb(ctx, 7, hip, 16 + f, a.leg2 + 1.25, dark, 6);
+  blob(ctx, -4, hip - 18 + a.bob, 18 + f, 16 + f * 0.4, fur);
+  const y = hip - 32 - f * 2 + a.bob;
+  head(ctx, 12, y, 15 + f * 0.4, pose, fur);
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.moveTo(20, y + 2);
+  ctx.lineTo(32 + f, y + 4);
+  ctx.lineTo(18, y + 8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  const spines = 2 + f;
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = 3;
+  for (let i = 0; i < spines; i++) {
     ctx.beginPath();
-    ctx.moveTo(-8 + i * 6, y + 8);
-    ctx.lineTo(-6 + i * 6, y - 6 - i);
-    ctx.strokeStyle = b.dark;
-    ctx.lineWidth = 3;
+    ctx.moveTo(-10 + i * 6, y + 10);
+    ctx.lineTo(-8 + i * 6, y - 4 - (i % 2) * 6);
     ctx.stroke();
   }
-  ctx.strokeStyle = b.dark;
   ctx.beginPath();
-  ctx.moveTo(-12, b.hip);
-  ctx.quadraticCurveTo(-28, b.hip + 4, -22, b.hip + 14);
+  ctx.moveTo(-16, hip);
+  ctx.quadraticCurveTo(-32 - f * 2, hip + 2, -24, hip + 16);
   ctx.stroke();
+  if (pose.state === "attack") {
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(28, y + 2);
+    ctx.lineTo(40, y - 4);
+    ctx.lineTo(36, y + 6);
+    ctx.fill();
+  }
 }
 
 function frita(ctx, pose) {
