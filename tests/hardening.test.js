@@ -568,3 +568,14 @@ test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', 
   assert.ok(edges.length > 0, 'el grafo ESM no contiene importaciones locales auditables');
   assert.deepEqual(missing, [], 'importaciones ESM locales sin destino');
 });
+
+
+test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', () => {
+  const source = fs.readFileSync('./systems/save.js', 'utf8');
+  assert.match(source, /SAVE_KEY\s*=\s*"ohana"/);
+  assert.match(source, /SAVE_TMP_KEY\s*=\s*"ohana\.tmp"/);
+  assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
+  assert.match(source, /setItem\(SAVE_KEY, raw\)/);
+  assert.match(source, /raw\.v != null && raw\.v !== 2/);
+  assert.match(source, /return parse\(store\.getItem\(SAVE_TMP_KEY\)\)/);
+});
