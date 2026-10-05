@@ -132,9 +132,8 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   listen(target, "touchcancel", () => releasePointerSources());
   listen(target, "blur", reset);
   listen(target, "focus", reset);
-  if (typeof document !== "undefined") listen(document, "visibilitychange", () => {
-    if (document.hidden) reset();
-  });
+  listen(target, "pagehide", reset);
+  if (typeof document !== "undefined") listen(document, "visibilitychange", reset);
 
   if (canvas) {
     listen(canvas, "pointerdown", (event) => {
