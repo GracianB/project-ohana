@@ -1,12 +1,35 @@
 import { showTutorialMessage, setPersistentObjective } from "./notify.js";
 
-const STEPS = [
-  { id: "move", title: "MOVERSE", text: "WASD para moverte. H ataca. J, K y L desbloquean poderes. U usa el supremo en forma 5. E usa portales." },
-  { id: "orb", title: "EVOLUCIÓN", text: "Los orbes amarillos dan XP. Cuando llenas la barra, evolucionas automáticamente." },
-  { id: "evo", title: "CINCO FORMAS", text: "Cada personaje tiene cinco formas. Evoluciona para abrir nuevas habilidades y rutas." },
-  { id: "map", title: "RUMBO", text: "M abre el mapa. Explora las salas, reúne fuerzas y llega hasta el Nido." },
-  { id: "boss", title: "EL NIDO", text: "Jungla ↓ Caldera → Reina. Llega preparado y usa J, K y L según la situación." }
-];
+const HINTS = {
+  move: {
+    title: "MOVERSE",
+    text: "A/D para avanzar y retroceder. W salta y S baja por las rutas.",
+  },
+  attack: {
+    title: "ATAQUE",
+    text: "H ataca. Encadena golpes cuando tengas espacio y no pierdas de vista al enemigo.",
+  },
+  ability: {
+    title: "PODERES",
+    text: "J, K y L usan habilidades desbloqueadas por tu evolución. U reserva el supremo para la forma 5.",
+  },
+  interact: {
+    title: "PORTALES",
+    text: "E activa portales y catapultas. También puede iniciar una evolución manual cuando corresponda.",
+  },
+  map: {
+    title: "MAPA",
+    text: "M abre el mapa. Úsalo para orientarte, no para vivir dentro de él.",
+  },
+  dash: {
+    title: "DASH",
+    text: "Shift hace dash. Úsalo para cruzar huecos y salir de ataques peligrosos.",
+  },
+  evolution: {
+    title: "EVOLUCIÓN",
+    text: "Los cristales dan XP. Al llenar la barra evolucionas automáticamente y desbloqueas nuevas habilidades.",
+  },
+};
 
 const GOALS = {
   hub: { text: "Recoge los cristales y sigue por la costa hacia el este.", done: (d) => !!d.visited.beach },
@@ -21,45 +44,88 @@ const GOALS = {
   reef: { text: "Recoge los cristales del agua y vuelve a la costa por arriba.", done: (d) => !!d.visited.beach }
 };
 
+const KEY_HINTS = new Map([
+  ["a", "move"], ["d", "move"], ["w", "move"], ["s", "move"],
+  ["h", "attack"],
+  ["j", "ability"], ["k", "ability"], ["l", "ability"], ["u", "ability"],
+  ["e", "interact"],
+  ["m", "map"],
+  ["shift", "dash"],
+]);
+
+function overlaysBlockHints() {
+  return !!document.querySelector(
+    "#pause-overlay.open, #map-overlay.open, #help.open, #evo-stage.show, #win-cinema.show"
+  );
+}
+
 function paintGoal(detail) {
   const goal = GOALS[detail?.id];
   if (!goal) return;
-  const done = goal.done(detail);
-  setPersistentObjective(goal.text, done);
+  setPersistentObjective(goal.text, goal.done(detail));
 }
 
 function boot() {
-  let step = 0;
   let playing = false;
-  let timer = 0;
+  let evolutionHintShown = false;
+  const seen = new Set();
 
-  const play = () => {
-    if (!document.body.classList.contains("playing")) return;
-    if (step < STEPS.length) {
-      const item = STEPS[step++];
-      showTutorialMessage(item.title, item.text, {
-        key: "tutorial:" + item.id
-      });
-      timer = setTimeout(play, 5800);
-    }
+  const showHint = (id) => {
+    if (!playing || seen.has(id) || overlaysBlockHints()) return;
+    const hint = HINTS[id];
+    if (!hint) return;
+
+    seen.add(id);
+    showTutorialMessage(hint.title, hint.text, {
+      key: "tutorial:" + id,
+    });
+  };
+
+  const onKeyDown = (event) => {
+    if (event.repeat) return;
+    const key = String(event.key || "").toLowerCase();
+    const id = KEY_HINTS.get(key);
+    if (id) showHint(id);
+  };
+
+  const onPointerDown = (event) => {
+    const key = String(event.target?.closest?.(".touch-btn")?.dataset?.k || "").toLowerCase();
+    const id = KEY_HINTS.get(key);
+    if (id) showHint(id);
   };
 
   const mo = new MutationObserver(() => {
     const next = document.body.classList.contains("playing");
     if (next === playing) return;
+
     playing = next;
-    clearTimeout(timer);
+    seen.clear();
+    evolutionHintShown = false;
+
     if (playing) {
-      step = 0;
       setPersistentObjective("Explora el Claro y abre la ruta hacia la costa.");
-      timer = setTimeout(play, 1000);
+    } else {
+      setPersistentObjective("");
     }
   });
 
   mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  addEventListener("keydown", onKeyDown, true);
+  document.addEventListener("pointerdown", onPointerDown, true);
 
-  addEventListener("ohana-room", (e) => {
-    paintGoal(e.detail || {});
+  addEventListener("ohana-room", (event) => {
+    const detail = event.detail || {};
+    paintGoal(detail);
+
+    if (
+      playing &&
+      !evolutionHintShown &&
+      detail.id &&
+      detail.id !== "hub"
+    ) {
+      evolutionHintShown = true;
+      setTimeout(() => showHint("evolution"), 500);
+    }
   });
 }
 
