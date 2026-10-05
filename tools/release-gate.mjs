@@ -91,7 +91,7 @@ for (const asset of referencedAssets) {
   if (!fs.existsSync("./" + asset)) errors.push("recurso precacheado inexistente: " + asset);
 }
 
-if (packageJson.scripts?.test !== "node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js") {
+if (packageJson.scripts?.test !== "node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js tests/experience.test.js tests/v34-1-critical.test.js") {
   errors.push("package.json: script test inesperado");
 }
 if (packageJson.scripts?.["test:browser"] !== "node tests/browser/e2e.mjs") errors.push("package.json: falta test:browser esperado");
