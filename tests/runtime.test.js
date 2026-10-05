@@ -177,3 +177,30 @@ test("el HUD sincroniza salud, experiencia, jefe y forma sin leer textos del DOM
   assert.equal(elements["form-pips"].getAttribute("aria-label"), "Forma 3 de 5");
   assert.equal(elements.block.classList.contains("hurt"), true);
 });
+
+
+test("transaccion de guardado recupera staging y rechaza versiones desconocidas", () => {
+  const data = new Map();
+  const storage = {
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => data.set(key, value),
+    removeItem: (key) => data.delete(key)
+  };
+  const store = createSaveStore(storage);
+  assert.equal(store.write(makeGame()), true);
+  assert.equal(data.has("ohana.tmp"), false);
+  assert.equal(store.read("kilo").roomId, "boss");
+
+  const failing = {
+    getItem: (key) => data.get(key) ?? null,
+    setItem: (key, value) => {
+      if (key === "ohana") throw new Error("quota");
+      data.set(key, value);
+    },
+  };
+  const failed = createSaveStore(failing);
+  assert.equal(failed.write(makeGame()), false);
+  assert.ok(failed.read("kilo"), "el staging debe conservar un checkpoint recuperable");
+
+  assert.equal(unpackSave({ ...JSON.parse(data.get("ohana.tmp")), v: 999 }, "kilo"), null);
+});
