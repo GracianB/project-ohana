@@ -1,6 +1,7 @@
 import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
+import { drawCostume } from "./costume.js";
 import { getLook } from "./look.js";
 import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "./evolution.js";
 
@@ -1051,6 +1052,7 @@ export function drawCharacter(ctx, p, cam, t) {
   drawEvolutionDesignFX(ctx, p, H, pose, t, true);
   drawEvolutionSilhouetteFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
+  drawCostume(ctx, p.id, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);
