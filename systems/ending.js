@@ -17,7 +17,7 @@ export function showEnding(detail = {}) {
         '<p class="win-hero"></p>' +
         '<p class="win-score"></p>' +
         '<p class="win-jun">EL NIDO HA CAÍDO.</p>' +
-        '<p class="win-sub">Nadie se queda atrás.</p>' +
+        '<p class="win-sub">La Reina guardaba a quien no pudo evolucionar. Ahora salen. Nadie se queda atrás.</p>' +
         '<div class="win-actions">' +
           '<button type="button" id="win-continue">Continuar en este mundo</button>' +
           '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>' +

@@ -536,6 +536,15 @@ function loadRoom(id, fromDir) {
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
   if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); }
+  else {
+    game.bossIntro = { t: 220 };
+    game.storyLine = "La Reina sale del nido. No negocia.";
+    showNotification("EL NIDO", "Quien no evolucionó se quedó dentro.", "sala");
+    showBanner("REINA DEL NIDO");
+    game.flash = 16;
+    game.flashColor = "#ff4060";
+    game.shake = 12;
+  }
   game.experience?.room(id, r.name, !!r.boss);
   beep(r.boss ? "boss" : "door");
   playMusic(themeForRoom(id));
@@ -1030,11 +1039,17 @@ function punch(x, y, color, dir = 1) {
 }
 function beginFinale(e) {
   game.finale = {
-    t: 360,
-    max: 360,
+    t: 520,
+    max: 520,
     x: e.x + e.w / 2,
     y: e.y + e.h * 0.42,
+    lines: [
+      "El nido se abre.",
+      "Los que se quedaron atrás salen a la luz.",
+      "Ohana no es el poder. Es no dejar a nadie."
+    ]
   };
+  game.storyLine = "El nido se abre.";
   game.hitstop = 0;
   game.flash = 24;
   game.flashColor = "#fff6c8";
@@ -1067,9 +1082,11 @@ function tickFinale() {
       life: 18,
     });
   }
-  if (f.t === 300 || f.t === 160) {
+  if (f.t === 420) game.storyLine = f.lines[1];
+  if (f.t === 260) game.storyLine = f.lines[2];
+  if (f.t === 420 || f.t === 260 || f.t === 120) {
     game.flash = 12;
-    game.flashColor = f.t === 300 ? "#fff" : "#ffe66a";
+    game.flashColor = f.t === 120 ? "#ffe66a" : "#fff";
   }
   if (f.t === 0 && !game.won) {
     game.won = true;
@@ -2267,6 +2284,22 @@ function updateCam() {
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
+  if (game.storyLine && (game.bossIntro || game.finale)) {
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "rgba(4,8,16,.55)";
+    ctx.fillRect(0, viewH * 0.72, viewW, 64);
+    ctx.fillStyle = "#fff6c8";
+    ctx.font = "700 22px Outfit, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(game.storyLine, viewW / 2, viewH * 0.72 + 40);
+    ctx.restore();
+  }
+  if (game.bossIntro && game.bossIntro.t > 0) {
+    game.bossIntro.t--;
+    if (game.bossIntro.t === 120) game.storyLine = "Quien no llegó a la forma final sigue dentro.";
+    if (game.bossIntro.t === 0) game.storyLine = "";
+  }
   if (game.flash > 0) {
     game.flash--;
     if (game.flash <= 0) game.flashColor = null;
