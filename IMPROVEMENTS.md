@@ -136,3 +136,11 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 ## Phase 45 - Input Lifecycle Closure
 
 82. Phase 45: ciclo de entrada cerrado para blur/focus/pagehide/visibilitychange, con limpieza de teclado, watchdog y punteros retenidos.
+
+
+## Block B - Quality Closure
+
+83. Phase 46: accesibilidad de diálogos cerrada con Escape, foco, inert y restauración del foco.
+84. Phase 47: presupuestos runtime y prueba de tiempo de simulación endurecidos.
+85. Phase 48: cobertura E2E ampliada a touch y reduced-motion además de desktop.
+86. Phase 49: reciprocidad de las conexiones de puertas validada contra el grafo real del mundo.
