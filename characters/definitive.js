@@ -332,25 +332,51 @@ function cat(ctx, pose) {
 }
 
 function dragon(ctx, pose) {
-  const b = body(ctx, "dragon", pose);
-  const y = b.hip - 38 * b.grow + b.a.bob;
-  head(ctx, 8, y, 15, pose, b.fur);
-  ctx.fillStyle = b.dark;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#ffb08a", "#ff8a5b", "#ff6a3a", "#e8452f", "#ffd27a"][f];
+  ink(ctx, 3.2);
+  const hip = -16 - f;
+  limb(ctx, -6, hip, 14 + f, a.leg + 1.2, "#a8321c", 5);
+  limb(ctx, 6, hip, 14 + f, a.leg2 + 1.2, "#a8321c", 5);
+  blob(ctx, -2, hip - 16 + a.bob, 16 + f, 15, fur);
+  const y = hip - 34 - f * 2 + a.bob;
+  head(ctx, 8, y, 14, pose, fur);
+  ctx.fillStyle = "#a8321c";
   ctx.beginPath();
-  ctx.moveTo(18, y);
-  ctx.lineTo(28 + b.f, y + 2);
-  ctx.lineTo(16, y + 6);
+  ctx.moveTo(16, y);
+  ctx.lineTo(28 + f * 2, y + 2);
+  ctx.lineTo(14, y + 7);
+  ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  if (b.f >= 1) {
-    ctx.strokeStyle = b.accent;
+  if (f >= 1) {
+    ctx.strokeStyle = "#ffd27a";
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(-8, y + 8);
-    ctx.quadraticCurveTo(-26 - b.f * 3, y - 8, -18, y + 16);
-    ctx.moveTo(6, y + 6);
-    ctx.quadraticCurveTo(24 + b.f * 3, y - 10, 16, y + 14);
+    ctx.moveTo(-4, y - 12);
+    ctx.quadraticCurveTo(-2, y - 24 - f * 2, 4, y - 14);
     ctx.stroke();
+  }
+  if (f >= 2) {
+    ctx.fillStyle = "rgba(255,90,40,.55)";
+    ctx.beginPath();
+    ctx.moveTo(-8, y + 6);
+    ctx.quadraticCurveTo(-32 - f * 3, y - 16, -16, y + 18);
+    ctx.quadraticCurveTo(-18, y + 6, -8, y + 6);
+    ctx.moveTo(10, y + 4);
+    ctx.quadraticCurveTo(34 + f * 3, y - 18, 18, y + 16);
+    ctx.quadraticCurveTo(16, y + 4, 10, y + 4);
+    ctx.fill();
+    ctx.stroke();
+  }
+  if (pose.state === "attack" || pose.state === "cast") {
+    ctx.fillStyle = "#ffd36a";
+    ctx.beginPath();
+    ctx.moveTo(24, y + 2);
+    ctx.quadraticCurveTo(40, y - 6, 36, y + 8);
+    ctx.quadraticCurveTo(30, y + 4, 24, y + 2);
+    ctx.fill();
   }
 }
 

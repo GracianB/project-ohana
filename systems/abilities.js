@@ -2546,6 +2546,19 @@ export function drawSlash(ctx, s, cam) {
     fang(-1);
     fang(1);
     ctx.restore();
+  } else if (kind === "fan") {
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = "#ff6a2a";
+    for (let i = 0; i < 4; i++) {
+      const ang = a0 + (a1 - a0) * (0.2 + i * 0.2);
+      ctx.beginPath();
+      ctx.moveTo(8, 0);
+      ctx.quadraticCurveTo(Math.cos(ang) * reach * 0.6, Math.sin(ang) * reach * 0.6, Math.cos(ang) * reach, Math.sin(ang) * reach);
+      ctx.quadraticCurveTo(Math.cos(ang) * reach * 0.7, Math.sin(ang) * reach * 0.4, 8, 0);
+      ctx.fill();
+    }
+    ctx.restore();
   } else if (kind === "zap") {
     ctx.save();
     ctx.globalAlpha = fade;
