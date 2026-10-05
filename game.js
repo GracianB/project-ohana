@@ -34,7 +34,8 @@ import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
-import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { CombatFX } from "./systems/combat-fx.js";
+import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
@@ -790,9 +791,13 @@ function markHit(p, e, dmg, kb) {
   e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
   e._hitCrit = crit;
 
-  // Los golpes normales se entienden por animación/FX. El texto queda reservado
-  // a impactos realmente destacables para no convertir el combate en una lluvia de números.
-  if (crit || e.boss || (game.combo >= 4 && game.combo % 2 === 0)) {
+  const feedback = damageFeedback({
+    crit,
+    boss: !!e.boss,
+    combo: game.combo,
+  });
+
+  if (feedback.showNumber) {
     game.nums.add(
       e.x,
       e.y,
@@ -802,15 +807,14 @@ function markHit(p, e, dmg, kb) {
     );
   }
 
-  const tier = Math.max(combatTier(game.combo, crit), e.boss ? 2 : 0);
   game.combatFx?.add(
     e.x + e.w / 2,
     e.y + e.h / 2,
     crit ? "#ffe66a" : (p.color || "#fff"),
     {
-      tier,
+      tier: feedback.tier,
       dir: face,
-      label: crit ? "CRÍTICO" : (e.boss ? "IMPACTO" : ""),
+      label: feedback.label,
       seed: game.combo + (e.boss ? 11 : 0),
     }
   );
