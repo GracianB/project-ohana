@@ -536,6 +536,19 @@ function loadRoom(id, fromDir) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
+  const LINES = {
+    hub: "Aquí empieza Ohana. Nadie se queda en el claro.",
+    beach: "La costa abre el este. El hueco no perdona.",
+    jungle: "La jungla guarda la bajada a la caldera.",
+    cave: "La cueva es el oeste. El laboratorio espera forma.",
+    lab: "Llueve verde. El paraguas está en el suelo.",
+    ridge: "La cumbre mira al claro y a la órbita.",
+    space: "Aquí caen estrellas. El vórtice baja al agua.",
+    reef: "El arrecife devuelve a la costa.",
+    volcano: "La caldera es la puerta de la Reina.",
+    boss: "El nido. Quien no llegó sigue dentro."
+  };
+  if (first && LINES[id]) showNotification(r.name, LINES[id], "sala");
   if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name, r.short || ""); }
   else {
     game.bossIntro = { t: 220 };
@@ -2654,6 +2667,8 @@ function updateHUD() {
     setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
   }
   setText(DOM.hudWorld, room().name);
+  const seen = Object.keys(game.visited || {}).length;
+  setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
   setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
   const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const col = p.color || "#7ee7ff";
