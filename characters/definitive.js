@@ -234,19 +234,50 @@ function stitcho(ctx, pose) {
 }
 
 function chispin(ctx, pose) {
-  const b = body(ctx, "chispin", pose);
-  const y = b.hip - 40 * b.grow + b.a.bob;
-  head(ctx, 0, y, 17, pose, b.fur);
-  ctx.strokeStyle = b.accent;
-  ctx.lineWidth = 2.6;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#fff3a0", "#ffe56a", "#ffd23a", "#ffb703", "#fff"][f];
+  ink(ctx, 3.2);
+  const hip = -14 - f;
+  limb(ctx, -5, hip, 12 + f, a.leg + 1.2, "#c98412", 5);
+  limb(ctx, 5, hip, 12 + f, a.leg2 + 1.2, "#c98412", 5);
+  blob(ctx, 0, hip - 14 + a.bob, 15 + f * 0.6, 14 + f * 0.4, fur);
+  const y = hip - 36 - f * 2 + a.bob;
+  head(ctx, 0, y, 16, pose, fur);
+  blob(ctx, -12, y + 2, 4.5, 3.2, "#ff8a3a");
+  blob(ctx, 12, y + 2, 4.5, 3.2, "#ff8a3a");
+  ctx.strokeStyle = "#fff29a";
+  ctx.lineWidth = 2.8;
   ctx.beginPath();
-  ctx.moveTo(-4, y - 16);
-  ctx.lineTo(2, y - 28 - b.f * 2);
-  ctx.lineTo(-1, y - 28);
-  ctx.lineTo(6, y - 42 - b.f * 3);
+  ctx.moveTo(-3, y - 14);
+  ctx.lineTo(2, y - 26 - f * 2);
+  ctx.lineTo(-1, y - 26);
+  ctx.lineTo(5, y - 40 - f * 3);
   ctx.stroke();
-  blob(ctx, -12, y + 2, 4, 3, b.dark);
-  blob(ctx, 12, y + 2, 4, 3, b.dark);
+  if (f >= 2) {
+    ctx.beginPath();
+    ctx.moveTo(-18, y - 4);
+    ctx.lineTo(-28, y - 14);
+    ctx.moveTo(18, y - 2);
+    ctx.lineTo(28, y - 12);
+    ctx.stroke();
+  }
+  if (f >= 4) {
+    ctx.beginPath();
+    ctx.moveTo(-8, hip);
+    ctx.quadraticCurveTo(-20, hip + 8, -6, hip + 16);
+    ctx.moveTo(8, hip);
+    ctx.quadraticCurveTo(22, hip + 6, 8, hip + 18);
+    ctx.stroke();
+  }
+  if (pose.state === "attack" || pose.state === "cast") {
+    ctx.beginPath();
+    ctx.moveTo(14, y + 6);
+    ctx.lineTo(26, y - 4);
+    ctx.lineTo(22, y + 2);
+    ctx.lineTo(34, y + 10);
+    ctx.stroke();
+  }
 }
 
 function cat(ctx, pose) {
