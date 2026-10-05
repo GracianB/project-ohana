@@ -103,7 +103,7 @@ function poseAngles(pose) {
     arm = 0.8;
     leg = 0.5;
   }
-  const bobAmp = id === "chispin" ? 3.4 : id === "dino" ? 1.1 : 2.2;
+  const bobAmp = id === "chispin" ? 4.2 : id === "dino" ? 1.4 : 2.8;
   return { arm, leg, leg2, bob: st === "idle" ? Math.sin((pose.t || 0) * 0.08) * bobAmp : st === "run" ? -Math.abs(sw) * 3 : 0 };
 }
 
@@ -587,8 +587,22 @@ const DRAW = { kilo, stitcho, chispin, cat, dragon, dino, frita, pizza, yomi, cu
 export function drawDefinitive(ctx, id, pose) {
   const draw = DRAW[id] || kilo;
   const next = pose || {};
+  const f = Math.max(0, Math.min(4, Number(next.form != null ? next.form : next.evo) || 0));
   ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,.28)";
+  ctx.beginPath();
+  ctx.ellipse(0, 10, 14 + f * 3, 4.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.translate(0, -f * 1.5);
+  ctx.scale(1 + f * 0.045, 1 + f * 0.045);
   draw(ctx, { ...next, id: next.id || id });
+  if (f >= 4) {
+    ctx.strokeStyle = "rgba(255,230,140,.75)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, -48, 24, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.stroke();
+  }
   if (next.state === "cast") {
     ctx.globalAlpha = 0.55;
     ctx.strokeStyle = "#fff";
