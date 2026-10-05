@@ -1589,10 +1589,12 @@ function updateEnemies() {
       continue;
     }
 
-    if (e.kind === "phosquito" || e.kind === "mosquito"
-      || e.kind === "gaviota" || e.kind === "murcielago") e.vy += 0.08;
-    else if (e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja"
-      || e.kind === "brasita" || e.kind === "ufo") e.vy += 0.05;
+    const flyer = e.kind === "phosquito" || e.kind === "mosquito" || e.kind === "gaviota" || e.kind === "murcielago" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja" || e.kind === "brasita" || e.kind === "ufo";
+    if (flyer) {
+      const band = e.kind === "gaviota" ? 280 : 360;
+      if (e.y > band) e.vy = Math.min(e.vy || 0, -0.8);
+      else e.vy += 0.04;
+    }
     else if (e.kind === "planta" || e.kind === "medusa" || e.kind === "pez" || e.kind === "anguila") e.vy = 0;
     else e.vy += 0.5;
     e.x += e.vx; e.y += e.vy;

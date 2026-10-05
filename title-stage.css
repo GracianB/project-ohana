@@ -140,7 +140,7 @@
 #chars .char-card {
   position: absolute !important;
   left: 50% !important;
-  top: 48% !important;
+  top: 50% !important;
   width: min(460px, 40vw) !important;
   height: auto !important;
   margin: 0 !important;
@@ -178,7 +178,7 @@
   opacity: 1 !important;
   filter: none !important;
   pointer-events: auto !important;
-  transform: translate(-50%, -56%) scale(1) !important;
+  transform: translate(-50%, -50%) scale(1) !important;
 }
 
 #chars .char-card.is-prev,
@@ -190,11 +190,11 @@
 }
 
 #chars .char-card.is-prev {
-  transform: translate(calc(-50% - clamp(210px, 32vw, 460px)), -46%) scale(0.4) !important;
+  transform: translate(calc(-50% - clamp(240px, 34vw, 480px)), -50%) scale(0.42) !important;
 }
 
 #chars .char-card.is-next {
-  transform: translate(calc(-50% + clamp(210px, 32vw, 460px)), -46%) scale(0.4) !important;
+  transform: translate(calc(-50% + clamp(240px, 34vw, 480px)), -50%) scale(0.42) !important;
 }
 
 #chars .char-card:not(.selected) h3,

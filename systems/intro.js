@@ -72,7 +72,7 @@ export function playTitleIntro() {
   function layout() {
     const W = fc.W, H = fc.H;
     const size = Math.min(W * 0.17, H * 0.2, 170);
-    return { W, H, cx: W / 2, cy: H * 0.46, size };
+    return { W, H, cx: W / 2, cy: H * 0.42, size };
   }
 
   function drawIslandScene(t, L) {
@@ -141,6 +141,16 @@ export function playTitleIntro() {
       ctx.moveTo(off, yy);
       ctx.lineTo(off + 120, yy);
       ctx.stroke();
+    }
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H * 0.08);
+    ctx.fillRect(0, H * 0.92, W, H * 0.08);
+    if (t > 1.6) {
+      ctx.globalAlpha = Math.min(1, t - 1.6);
+      ctx.fillStyle = "#fff6c8";
+      ctx.font = "600 18px Outfit, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Nadie se queda atrás", cx, H * 0.78);
     }
     ctx.restore();
   }
