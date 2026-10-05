@@ -45,7 +45,7 @@ class FakeDocument {
   createElement() { return new FakeElement(); }
 }
 
-test("prioridades: evolución > jefe > combate > tutorial > sala > objetivo", () => {
+test("prioridades: evolución > jefe > combate > sala > tutorial > objetivo", () => {
   assert.ok(messagePriority("evolution") > messagePriority("boss"));
   assert.ok(messagePriority("boss") > messagePriority("combat"));
   assert.ok(messagePriority("combat") > messagePriority("tutorial"));
