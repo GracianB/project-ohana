@@ -2297,17 +2297,6 @@ function updateCam() {
   if (game.shake > 0) game.shake *= 0.86;
   if (game.comboT > 0) game.comboT--; else game.combo = 0;
   if (game.fading > 0) game.fading--;
-  if (game.storyLine && (game.bossIntro || game.finale)) {
-    ctx.save();
-    ctx.globalAlpha = 0.92;
-    ctx.fillStyle = "rgba(4,8,16,.55)";
-    ctx.fillRect(0, viewH * 0.72, viewW, 64);
-    ctx.fillStyle = "#fff6c8";
-    ctx.font = "700 22px Outfit, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(game.storyLine, viewW / 2, viewH * 0.72 + 40);
-    ctx.restore();
-  }
   if (game.bossIntro && game.bossIntro.t > 0) {
     game.bossIntro.t--;
     if (game.bossIntro.t === 120) game.storyLine = "Quien no llegó a la forma final sigue dentro.";
@@ -2427,6 +2416,17 @@ function render() {
     }
   }
   ctx.restore();
+  if (game.storyLine && (game.bossIntro || game.finale)) {
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "rgba(4,8,16,.55)";
+    ctx.fillRect(0, viewH * 0.72, viewW, 64);
+    ctx.fillStyle = "#fff6c8";
+    ctx.font = "700 22px Outfit, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(game.storyLine, viewW / 2, viewH * 0.72 + 40);
+    ctx.restore();
+  }
   // Skip low-HP edge vignette during death FX — at health=0 it was ~60% opaque over the ghost
   // También skip si HP > 65%: evita createRadialGradient cada frame cuando está sano
   if (!DeathFx.isPlaying()) {
