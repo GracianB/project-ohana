@@ -489,7 +489,7 @@ function loadRoom(id, fromDir) {
   game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
   game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => {
-    const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined);
+    const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
     if (f[3]) applyElite(e);
     return e;
   });
@@ -508,7 +508,7 @@ function loadRoom(id, fromDir) {
   game.bossFx?.clear();
   game.boss = null;
   if (r.boss && !game.won) {
-    game.boss = createBossNido();
+    game.boss = scaleFoe(createBossNido());
     game.enemies.push(game.boss);
   }
   game.projectiles.length = 0;
@@ -915,10 +915,24 @@ function attack() {
 
   showSwing(p, evo, def);
 }
+function gameDifficulty() {
+  try {
+    const v = localStorage.getItem("ohana-difficulty");
+    return v === "easy" || v === "hard" ? v : "normal";
+  } catch (e) { return "normal"; }
+}
+function scaleFoe(e) {
+  if (!e) return e;
+  const mul = gameDifficulty() === "easy" ? 0.7 : gameDifficulty() === "hard" ? 1.45 : 1;
+  e.max = Math.max(1, Math.ceil((e.max || e.hp || 1) * mul));
+  e.hp = e.max;
+  return e;
+}
 function hurtPlayer(amount, label) {
   const p = game.player;
   if (!p || p.dead || p.invuln > 0) return;
-  amount = Magic.onHurt(game, Passives.onHurt(game, amount));
+  const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard" ? 1.4 : 1;
+  amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
   if (!(amount > 0)) return;
   damagePlayer(p, amount);
   p.invuln = 42;

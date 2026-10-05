@@ -339,3 +339,23 @@ function armMenu() {
 armMenu();
 playTitleIntro();
 enhance();
+
+function paintDifficulty() {
+  let cur = "normal";
+  try { cur = localStorage.getItem("ohana-difficulty") || "normal"; } catch (e) {}
+  document.querySelectorAll("#difficulty button").forEach((b) => {
+    const on = b.dataset.diff === cur;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
+const diff = document.getElementById("difficulty");
+if (diff) {
+  diff.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    try { localStorage.setItem("ohana-difficulty", b.dataset.diff); } catch (err) {}
+    paintDifficulty();
+  });
+  paintDifficulty();
+}
