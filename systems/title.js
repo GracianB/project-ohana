@@ -140,6 +140,22 @@ function fitCanvas(cv) {
   cv._dpr = dpr;
 }
 
+function selectionStatus() {
+  const wrap = document.getElementById("chars");
+  if (!wrap) return null;
+
+  let el = wrap.querySelector(".character-selection-status");
+  if (!el) {
+    el = document.createElement("p");
+    el.className = "character-selection-status visually-hidden";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.setAttribute("aria-atomic", "true");
+    wrap.appendChild(el);
+  }
+  return el;
+}
+
 function mark(id) {
   selectedId = id;
   const cards = [...document.querySelectorAll("#chars-grid .char-card")];
@@ -147,17 +163,44 @@ function mark(id) {
   const i = Math.max(0, ids.indexOf(id));
   const prev = ids[(i - 1 + ids.length) % ids.length];
   const next = ids[(i + 1) % ids.length];
+
   cards.forEach((el) => {
-    el.classList.toggle("selected", el.dataset.id === id);
+    const selected = el.dataset.id === id;
+    const visible = [id, prev, next].includes(el.dataset.id);
+    el.classList.toggle("selected", selected);
     el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
     el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
-    const visible = [id, prev, next].includes(el.dataset.id);
     el.tabIndex = visible ? 0 : -1;
     el.setAttribute("aria-hidden", String(!visible));
-    el.setAttribute("aria-pressed", String(el.dataset.id === id));
+    el.setAttribute("aria-pressed", String(selected));
+    if (selected) el.setAttribute("aria-current", "true");
+    else el.removeAttribute("aria-current");
+
+    const def = ROSTER.find((item) => item.id === el.dataset.id);
+    if (def) {
+      const form = def.forms?.[0]?.name || "Forma inicial";
+      el.setAttribute(
+        "aria-label",
+        (selected ? "Seleccionado: " : "") +
+        def.name + ". " + form + ". " +
+        "Dificultad " + (difficulty(def.id) === 1 ? "fácil" : difficulty(def.id) === 3 ? "difícil" : "media")
+      );
+    }
   });
+
+  const selectedDef = ROSTER.find((item) => item.id === id);
+  const status = selectionStatus();
+  if (status && selectedDef) {
+    status.textContent =
+      "Personaje seleccionado: " + selectedDef.name +
+      ". " + (selectedDef.forms?.[0]?.name || "Forma inicial") +
+      ". Usa las flechas para cambiar.";
+  }
+
   const focused = document.activeElement;
-  if (focused?.classList.contains("char-card") && focused.getAttribute("aria-hidden") === "true") cards[i]?.focus();
+  if (focused?.classList.contains("char-card") && focused.getAttribute("aria-hidden") === "true") {
+    cards[i]?.focus();
+  }
   syncDots();
 }
 
