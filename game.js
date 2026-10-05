@@ -839,14 +839,16 @@ function showSwing(p, evo, def) {
     : { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 22 };
   const mouth = p.id === "dino" || p.id === "yomi";
   const life = sig.heavy ? 20 : 16;
-  pushRuntime(game.slashes, {
+  const slash = {
     x: p.x + p.w / 2 + face * (low ? 8 : 18),
     y: low ? p.y + p.h * 0.72 : (mouth ? p.y + p.h * 0.4 : p.y + p.h * 0.32),
     facing: face, life, max: life,
     color: def.color || p.color,
     kind: def.kind || "slice",
     w: reach,
-  }, MAX_RUNTIME_SLASHES);
+  };
+  pushRuntime(game.slashes, slash, MAX_RUNTIME_SLASHES);
+  pushRuntime(game.slashes, { ...slash, life: 8, max: 8, w: reach * 0.72, y: slash.y - 8 }, MAX_RUNTIME_SLASHES);
   p._swing = { reach, low, dmg: def.dmg, kb: sig.kb || 1, hit: new Set() };
   for (const e of game.enemies) {
     if (!e || e.dying || e.hp <= 0 || e.invuln > 0) continue;
