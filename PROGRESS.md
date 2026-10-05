@@ -224,3 +224,12 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Se reinician los contadores de fallos de runtime.
 - La progresión persistente continúa restaurándose mediante `saveStore`.
 - Cache: `ohana-113`.
+
+
+## Phase 42 - Offline E2E Closure
+
+- El arranque offline se verifica en Chromium después de instalar y activar el Service Worker.
+- La prueba recarga sin red y valida DOM, Canvas, control del SW y ejecución real del juego.
+- También comprueba que JavaScript, CSS y un asset pintado se sirven desde caché.
+- El contrato de precache rechaza entradas duplicadas además de módulos runtime ausentes.
+- Cache: `ohana-116`.
