@@ -92,7 +92,7 @@ function poseAngles(pose) {
     leg = 0.35;
     leg2 = -0.2;
   } else if (st === "attack") {
-    arm = -0.8 + ant * -0.6 + atk * 2.4;
+    arm = -1.3 + ant * -0.8 + atk * 3.1;
     leg = 0.2 + atk * 0.3;
   } else if (st === "cast") {
     arm = -1.6;
