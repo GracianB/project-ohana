@@ -1,6 +1,6 @@
 import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
-import { paintedBody } from "./sprites.js";
+import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
 import { getLook } from "./look.js";
@@ -938,6 +938,8 @@ function kiloPose(p, t, moving, air, atk) {
 function pickPainted(p, t, moving, air, atk) {
   if (getLook() !== "paint") return null;
   const id = p.id;
+  const plate = paintedForm(id, p.evo);
+  if (plate && !moving && !air && atk < 0.12) return plate;
   if (id === "kilo") {
     const pose = kiloPose(p, t, moving, air, atk);
     return paintedBody("kilo", pose) || paintedBody("kilo", "idle");
