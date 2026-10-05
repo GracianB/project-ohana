@@ -77,11 +77,3 @@ body.playing #evo-stage:not(.show) {
 }
 
 #evo-stage.show { background: #02060f; }
-#evo-stage.show::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(#000 0 9%, transparent 9% 91%, #000 91%);
-  pointer-events: none;
-  z-index: 2;
-}

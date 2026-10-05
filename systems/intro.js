@@ -142,9 +142,6 @@ export function playTitleIntro() {
       ctx.lineTo(off + 120, yy);
       ctx.stroke();
     }
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H * 0.08);
-    ctx.fillRect(0, H * 0.92, W, H * 0.08);
     if (t > 1.6) {
       ctx.globalAlpha = Math.min(1, t - 1.6);
       ctx.fillStyle = "#fff6c8";

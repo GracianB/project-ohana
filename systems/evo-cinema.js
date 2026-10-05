@@ -479,9 +479,6 @@ export function playEvolution(detail = {}) {
 
     ctx.save();
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H * 0.1);
-    ctx.fillRect(0, H * 0.9, W, H * 0.1);
 
     // salida
     const out = seg(t, T.out, T.end);
