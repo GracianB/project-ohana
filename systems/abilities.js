@@ -68,6 +68,8 @@ export function useAbility(game, index) {
   p.cdDur = p.cdDur || {};
   const currentUntil = Number(p.cds[id]);
   if (Number.isFinite(currentUntil) && currentUntil > now) return;
+  game.lastAbilityId = id;
+  game.lastAbilitySlot = index;
   const evo = clamp(Number(p.evo) || 0, 0, 4);
   const dur = baseCd / (1 + evo * 0.12);
   p.cds[id] = now + dur;
@@ -736,11 +738,37 @@ const CASTERS = {
     }
   },
   oven(g, p, evo) {
-    add({ kind: "heat", life: 26, R: 170 + evo * 20, hit: new Set(), dmg: (20 + evo * 3) * pw(p) });
-    add({ kind: "slices", n: 6 + evo * 2, i: 0, next: 8, x: cx(p), dmg: (16 + evo * 2) * pw(p) });
-    g.flash = Math.max(g.flash || 0, 5);
-    g.flashColor = "#ffb060";
-    g.shake = Math.min(18, (g.shake || 0) + 6);
+    const x = cx(p);
+    const y = cy(p);
+
+    add({
+      kind: "heat",
+      life: 38,
+      R: 220 + evo * 28,
+      r: 0,
+      hit: new Set(),
+      dmg: (24 + evo * 4) * pw(p),
+    });
+
+    add({
+      kind: "slices",
+      n: 10 + evo * 3,
+      i: 0,
+      next: 4,
+      x,
+      dmg: (18 + evo * 3) * pw(p),
+    });
+
+    g.flash = Math.max(g.flash || 0, 12);
+    g.flashColor = "#ff9a42";
+    g.shake = Math.min(18, (g.shake || 0) + 8);
+
+    boom(g, x, y, "#ffb347", 22, {
+      star: true,
+      up: 2.8,
+      speed: 4.2,
+      size: 5,
+    });
   },
 
   ofuda(g, p, evo) {
@@ -1978,21 +2006,27 @@ const DRW = {
     ctx.beginPath(); ctx.arc(x1, y1, 6, 0, TAU); ctx.fill();
   },
   heat(ctx, f, cam, t) {
-    const x = f.x - cam.x, y = f.y - cam.y;
-    const k = f.life / 26;
-    const gr = ctx.createRadialGradient(x, y, f.r * 0.2, x, y, Math.max(1, f.r));
+    const x = Number.isFinite(f.x) ? f.x - cam.x : -cam.x;
+    const y = Number.isFinite(f.y) ? f.y - cam.y : -cam.y;
+    const life = Number.isFinite(f.life) ? f.life : 0;
+    const maxLife = Number.isFinite(f.maxLife) && f.maxLife > 0 ? f.maxLife : 38;
+    const k = Math.max(0, Math.min(1, life / maxLife));
+    const rawR = Number.isFinite(f.r) ? f.r : 0;
+    const R = Number.isFinite(f.R) ? Math.max(0, f.R) : 0;
+    const radius = Math.max(1, rawR || R * Math.min(1, (Number.isFinite(f.age) ? f.age : 0) / 18));
+    const gr = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius);
     gr.addColorStop(0, "rgba(255,200,90,0)");
     gr.addColorStop(0.75, "rgba(255,140,40," + 0.25 * k + ")");
     gr.addColorStop(1, "rgba(255,90,20," + 0.5 * k + ")");
     ctx.fillStyle = gr;
-    ctx.beginPath(); ctx.arc(x, y, Math.max(1, f.r), 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, radius, 0, TAU); ctx.fill();
     ctx.globalAlpha = k;
     ctx.strokeStyle = "#ffcf6a";
     ctx.lineWidth = 4;
     ctx.beginPath();
     for (let i = 0; i <= 48; i++) {
       const a = (i / 48) * TAU;
-      const rr = f.r + Math.sin(a * 8 + t * 0.6) * 5;
+      const rr = radius + Math.sin(a * 8 + t * 0.6) * 5;
       if (i === 0) ctx.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); else ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
     }
     ctx.stroke();

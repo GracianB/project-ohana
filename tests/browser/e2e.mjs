@@ -244,10 +244,34 @@ try {
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
+
+  // V34.1 — Pizza L real.
+  await page.evaluate(() => window.__OHANA_E2E.start('pizza'));
+  await page.locator('#game').focus();
+  await page.keyboard.press('l');
+  await page.waitForTimeout(80);
+
+  const pizzaL = await page.evaluate(() => window.__OHANA_E2E.state());
+
+  assert.equal(
+    pizzaL.lastAbilityId,
+    'oven',
+    'desktop: Pizza L no dispara oven'
+  );
+
+  assert.equal(
+    pizzaL.lastAbilitySlot,
+    2,
+    'desktop: Pizza L no usa slot 2'
+  );
+
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'true', 'desktop: la pausa no se cierra al reanudar');
+  assert.equal(await page.locator('#pause-overlay').evaluate((el) => el.classList.contains('open')), false, 'desktop: overlay de pausa sigue abierto al reanudar');
 
   const helpButton = page.locator('#btn-help');
   await helpButton.click();

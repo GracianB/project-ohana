@@ -181,7 +181,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-115`
+`ohana-124`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
@@ -280,3 +280,13 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 ## V33 · EXPERIENCE
 - Cache: `ohana-122`
 - Combat feel, movement feedback, dynamic camera, boss presence y evolution presentation.
+
+
+## V34.1 · EXPERIENCE CRITICAL CLOSURE
+
+- Cámara de juego centrada en el viewport para evitar deriva lateral de mapa y mensajes.
+- Intro de la Reina con caída desde arriba, aterrizaje telegráfico y golpe de entrada.
+- La Reina derrotada deja de dibujarse desde el primer frame de muerte y no reaparece durante la finale.
+- Pizza L queda validada con teclado real y el VFX de Horno soporta el primer frame antes de la actualización de simulación.
+- Ocultar la pestaña pausa la sesión actual sin resetear sala, victoria, finale ni progreso persistente.
+- Cache: `ohana-124`

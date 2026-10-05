@@ -24,6 +24,8 @@ const KIND_TINT = {
 };
 
 export function drawEnemy(ctx, e, cam, t) {
+  if (e.boss && e.fell) return;
+
   const x = e.x - cam.x;
   const y = e.y - cam.y;
   ctx.save();

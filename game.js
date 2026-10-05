@@ -299,33 +299,16 @@ function escape() {
   setPaused(!paused);
 }
 function suspend() {
+  // Suspender la pestaña debe pausar la sesión actual, no reiniciarla.
+  // El checkpoint lo realiza setPaused(true) sobre el estado intacto.
   input?.reset();
   clock.reset();
-  // PHASE 39 - SESSION RESET CLOSURE
-  // Una nueva sesion nunca hereda estado transitorio anterior.
-  t = 0;
-  paused = false;
-  game.hitstop = 0;
-  game.camPunch = 0;
-  game.fading = 0;
-  game.flash = 0;
-  game.flashColor = null;
-  game.doorWait = null;
-  game.doorHold = 0;
-  game.finale = null;
-  game.summonDelay = 0;
-  game.roomId = "hub";
-  game.won = false;
-  game.summoned = false;
-  game.runtimeFaults = 0;
-  game.lastRuntimeFault = "";
-  game.cam.x = 0;
-  game.cam.y = 0;
   if (!game.running) return;
-  save();
   setPaused(true);
 }
-addEventListener("blur", suspend);
+// El cambio de foco de ventana no equivale necesariamente a ocultar la página.
+// Pausar por `blur` provoca carreras con botones/modal y con navegadores headless.
+// `visibilitychange` cubre el abandono real de la pestaña sin secuestrar la UI.
 addEventListener("pagehide", () => save());
 document.addEventListener("visibilitychange", () => {
   clock.reset();
@@ -604,6 +587,8 @@ function makePlayer(def) {
   return p;
 }
 function start(def) {
+  game.lastAbilityId = null;
+  game.lastAbilitySlot = null;
   if (!def) return;
   const resume = (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
@@ -1025,16 +1010,25 @@ function punch(x, y, color, dir = 1) {
 }
 function beginFinale(e) {
   game.finale = {
-    t: 420,
-    max: 420,
+    t: 360,
+    max: 360,
     x: e.x + e.w / 2,
     y: e.y + e.h * 0.42,
   };
   game.hitstop = 0;
-  game.flash = 18;
+  game.flash = 24;
   game.flashColor = "#fff6c8";
-  game.shake = 20;
+  game.shake = 26;
   game.projectiles = [];
+  game.fx?.emit(game.finale.x, game.finale.y, {
+    color: "#ffe66a",
+    count: game.reduceMotion ? 16 : 44,
+    size: 6,
+    up: 3.2,
+    speed: 4.6,
+    star: true,
+    life: 28,
+  });
   game.bolts = [];
   game.slashes = [];
   playMusic("victoria");
@@ -2101,7 +2095,7 @@ function updateEnemies() {
         beginFinale(e);
         return true;
       }
-      if (e.dying > 0 || (game.finale && game.finale.t > 0)) return true;
+      if (e.dying > 0) return true;
       return false;
     }
     if (e.hp > 0) return true;
@@ -2278,9 +2272,15 @@ function render() {
   const world = WORLDS[game.worldIndex] || WORLDS[0];
   const shake = reduceMotion ? 0 : game.shake;
   const z = camZoom() * (game.experience?.zoomPulse(game) || 1);
+  const centerX = viewW / 2;
+  const centerY = viewH / 2;
+  const shakeX = (vfxRandom(5) - 0.5) * shake;
+  const shakeY = (vfxRandom(6) - 0.5) * shake;
+
   ctx.save();
-  ctx.translate((vfxRandom(5) - 0.5) * shake, (vfxRandom(6) - 0.5) * shake);
+  ctx.translate(centerX + shakeX, centerY + shakeY);
   ctx.scale(z, z);
+  ctx.translate(-centerX, -centerY);
   if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
   else {
     renderWorld(ctx, world, game.cam, t, camW(), camH());
@@ -2895,6 +2895,8 @@ if (e2eEnabled) {
         rain: !!Rain.active,
         umbrella: !!Rain.hasUmbrella,
         starBonus: Surprises.starOrbBonus(),
+        lastAbilityId: game.lastAbilityId,
+        lastAbilitySlot: game.lastAbilitySlot,
         boss: boss ? {
           x: boss.x,
           y: boss.y,
