@@ -789,7 +789,32 @@ function markHit(p, e, dmg, kb) {
   e._hitDir = face;
   e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
   e._hitCrit = crit;
-  game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
+
+  // Los golpes normales se entienden por animación/FX. El texto queda reservado
+  // a impactos realmente destacables para no convertir el combate en una lluvia de números.
+  if (crit || e.boss || (game.combo >= 4 && game.combo % 2 === 0)) {
+    game.nums.add(
+      e.x,
+      e.y,
+      crit ? d + "!" : String(d),
+      crit ? "#ffe66a" : (p.color || "#fff"),
+      crit
+    );
+  }
+
+  const tier = Math.max(combatTier(game.combo, crit), e.boss ? 2 : 0);
+  game.combatFx?.add(
+    e.x + e.w / 2,
+    e.y + e.h / 2,
+    crit ? "#ffe66a" : (p.color || "#fff"),
+    {
+      tier,
+      dir: face,
+      label: crit ? "CRÍTICO" : (e.boss ? "IMPACTO" : ""),
+      seed: game.combo + (e.boss ? 11 : 0),
+    }
+  );
+
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
   game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
