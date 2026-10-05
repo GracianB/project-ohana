@@ -2932,7 +2932,14 @@ addEventListener("ohana-evolve-done", (e) => {
   const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
   const story = evolutionMessage(p.id, evo);
   const opened = evo === 1 ? "K abierto" : evo === 2 ? "L abierto" : evo === 4 ? "U, supremo" : "";
-  showEvolutionMessage("FORMA " + (evo + 1), p.name + " · " + story.line + (opened ? " · " + opened : ""));
+  showEvolutionMessage(
+    "NUEVA FORMA · " + (evo + 1) + "/5",
+    p.name + " · " + story.line + (opened ? " · " + opened : ""),
+    {
+      key: "evolution:" + p.id + ":" + evo,
+      duration: 3600
+    }
+  );
   if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
   updateHUD();
 });
