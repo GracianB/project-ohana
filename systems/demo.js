@@ -1,4 +1,5 @@
 import { showTutorialMessage, setPersistentObjective } from "./notify.js";
+import { formatObjective, objectiveForRoom } from "./objectives.js";
 
 const HINTS = {
   move: {
@@ -31,9 +32,20 @@ const HINTS = {
   },
 };
 
-import { formatObjective, objectiveForRoom } from "./objectives.js";
+const KEY_HINTS = new Map([
+  ["a", "move"], ["d", "move"], ["w", "move"], ["s", "move"],
+  ["h", "attack"],
+  ["j", "ability"], ["k", "ability"], ["l", "ability"], ["u", "ability"],
+  ["e", "interact"],
+  ["m", "map"],
+  ["shift", "dash"],
+]);
 
-
+function overlaysBlockHints() {
+  return !!document.querySelector(
+    "#pause-overlay.open, #map-overlay.open, #help.open, #evo-stage.show, #win-cinema.show"
+  );
+}
 
 function paintGoal(detail) {
   const objective = objectiveForRoom(detail?.id, detail);
@@ -68,7 +80,9 @@ function boot() {
   };
 
   const onPointerDown = (event) => {
-    const key = String(event.target?.closest?.(".touch-btn")?.dataset?.k || "").toLowerCase();
+    const key = String(
+      event.target?.closest?.(".touch-btn")?.dataset?.k || ""
+    ).toLowerCase();
     const id = KEY_HINTS.get(key);
     if (id) showHint(id);
   };
@@ -88,7 +102,11 @@ function boot() {
     }
   });
 
-  mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  mo.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
   addEventListener("keydown", onKeyDown, true);
   document.addEventListener("pointerdown", onPointerDown, true);
 
