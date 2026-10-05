@@ -20,7 +20,7 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-191`.
+La caché canónica de esta línea de trabajo es `ohana-193`.
 
 ### Phase 20 · World 1 Closure Candidate
 
