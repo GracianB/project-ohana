@@ -383,7 +383,7 @@ test('phase 37: el harness E2E queda aislado del dominio publicado', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
   assert.match(game, /const e2eEnabled = location\.hostname === "127\.0\.0\.1" && e2eParams\.has\("e2e"\)/);
   const hookStart = game.indexOf('if (e2eEnabled) {');
-  const hookEnd = game.indexOf('bindDialogs({ document', hookStart);
+  const hookEnd = game.indexOf('bindDialogs({', hookStart);
   assert.ok(hookStart > 0 && hookEnd > hookStart);
   const hook = game.slice(hookStart, hookEnd);
   assert.match(hook, /window\.__OHANA_E2E/);
@@ -588,4 +588,48 @@ test('phase 45: ciclo de vida de entrada resetea teclado en pérdida de foco y p
   assert.match(source, /listen\(document, "visibilitychange", reset\)/);
   assert.match(source, /KEYBOARD_STALE_MS\s*=\s*1200/);
   assert.match(source, /releasePointerSources/);
+});
+
+
+test('phase 46: contrato de diálogos accesibles mantiene Escape, foco e inert', () => {
+  const source = fs.readFileSync('./systems/dialogs.js', 'utf8');
+  assert.match(source, /onEscape = \(\) => \{\}/);
+  assert.match(source, /event\.key === "Escape"/);
+  assert.match(source, /onEscape\(active\)/);
+  assert.match(source, /el\.inert = el !== next/);
+  assert.match(source, /returnFocus\?\.isConnected/);
+  assert.match(source, /doc\.removeEventListener\("keydown", trap, true\)/);
+});
+
+test('phase 47: presupuestos runtime permanecen explícitos y acotados', async () => {
+  const runtime = await import('../systems/runtime.js');
+  assert.equal(runtime.MAX_RUNTIME_ENEMIES, 32);
+  assert.equal(runtime.MAX_RUNTIME_PROJECTILES, 128);
+  assert.equal(runtime.MAX_RUNTIME_GHOSTS, 48);
+  assert.equal(runtime.MAX_RUNTIME_ORBS, 64);
+  assert.equal(runtime.MAX_RUNTIME_BOLTS, 64);
+  assert.equal(runtime.MAX_RUNTIME_SLASHES, 6);
+  assert.equal(runtime.MAX_RUNTIME_SAFE, Number.MAX_SAFE_INTEGER);
+  assert.match(fs.readFileSync('./tests/browser/e2e.mjs', 'utf8'), /presupuesto de simulación excedido/);
+});
+
+test('phase 48: el E2E cubre desktop, touch y reduced-motion', () => {
+  const e2e = fs.readFileSync('./tests/browser/e2e.mjs', 'utf8');
+  assert.match(e2e, /devices\['iPhone 13'\]/);
+  assert.match(e2e, /hasTouch:true/);
+  assert.match(e2e, /emulateMedia\(\{ reducedMotion: 'reduce' \}\)/);
+  assert.match(e2e, /desktop: reduced motion no inicia/);
+});
+
+test('phase 49: las puertas físicas son recíprocas y las caídas mantienen destino válido', async () => {
+  const { ROOMS } = await import('../systems/map.js');
+  for (const [id, room] of Object.entries(ROOMS)) {
+    for (const [direction, destination] of Object.entries(room.doors || {})) {
+      if (!destination) continue;
+      assert.ok(ROOMS[destination], id + ' apunta a sala inexistente: ' + destination);
+      if (direction === 'down' && room.pit) continue;
+      const reverse = Object.values(ROOMS[destination].doors || {}).includes(id);
+      assert.equal(reverse, true, 'puerta física no recíproca: ' + id + ' -> ' + destination);
+    }
+  }
 });

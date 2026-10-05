@@ -2928,5 +2928,9 @@ if (e2eEnabled) {
   };
 }
 
-bindDialogs({ document, onChange: () => { input.reset(); clock.reset(); } });
+bindDialogs({
+  document,
+  onChange: () => { input.reset(); clock.reset(); },
+  onEscape: () => escape()
+});
 requestAnimationFrame(loop);

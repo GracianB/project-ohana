@@ -214,13 +214,45 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
+
+  const helpButton = page.locator('#btn-help');
+  await helpButton.click();
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('#help').getAttribute('aria-hidden'), 'false', 'desktop: ayuda');
+  assert.equal(await page.evaluate(() => document.activeElement?.closest?.('#help')?.id || ''), 'help', 'desktop: foco no entra en ayuda');
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press('Tab');
+    assert.equal(await page.evaluate(() => document.activeElement?.closest?.('#help')?.id || ''), 'help', 'desktop: Tab escapa del diálogo');
+  }
+  await page.locator('#btn-close-help').click();
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('#help').getAttribute('aria-hidden'), 'true', 'desktop: ayuda no se cierra');
+  assert.equal(await page.evaluate(() => document.activeElement?.id || ''), 'btn-help', 'desktop: foco no vuelve al disparador');
+
+  const reducedPage = page;
+  await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
+  await reducedPage.reload({ waitUntil:'networkidle' });
+  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
+  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
+  await reducedPage.locator('#btn-play').click();
+  await reducedPage.waitForTimeout(250);
+  assert.notEqual(await reducedPage.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: reduced motion no inicia');
+
+  const perfMs = await reducedPage.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    const start = performance.now();
+    api.step(120);
+    return performance.now() - start;
+  });
+  assert.ok(perfMs < 1000, 'desktop: presupuesto de simulación excedido · ' + perfMs.toFixed(1) + ' ms');
   const offlineErrorStart = secondaryErrors.length;
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-119',
-      '/style.css?v=ohana-119',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-119',
+      '/game.js?v=ohana-120',
+      '/style.css?v=ohana-120',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-120',
     ];
     const results = [];
     for (const path of paths) {

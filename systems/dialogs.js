@@ -1,4 +1,4 @@
-export function bindDialogs({ document: doc, onChange = () => {} }) {
+export function bindDialogs({ document: doc, onChange = () => {}, onEscape = () => {} }) {
   const layers = [...doc.querySelectorAll("[data-dialog]")];
   let active = null;
   let returnFocus = null;
@@ -32,7 +32,13 @@ export function bindDialogs({ document: doc, onChange = () => {} }) {
     }
   }
   function trap(event) {
-    if (!active || event.key !== "Tab") return;
+    if (!active) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      onEscape(active);
+      return;
+    }
+    if (event.key !== "Tab") return;
     const items = focusable(active);
     const index = items.indexOf(doc.activeElement);
     event.preventDefault();
@@ -44,5 +50,15 @@ export function bindDialogs({ document: doc, onChange = () => {} }) {
   observer.observe(doc.body, { childList: true });
   doc.addEventListener("keydown", trap, true);
   sync();
-  return { sync, destroy() { observer.disconnect(); doc.removeEventListener("keydown", trap, true); for (const [el, inert] of originalInert) el.inert = inert; } };
+  return {
+    sync,
+    destroy() {
+      observer.disconnect();
+      doc.removeEventListener("keydown", trap, true);
+      for (const [el, inert] of originalInert) el.inert = inert;
+      originalInert.clear();
+      active = null;
+      returnFocus = null;
+    }
+  };
 }
