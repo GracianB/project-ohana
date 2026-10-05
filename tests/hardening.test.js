@@ -517,3 +517,59 @@ test('phase 42: offline precache no tiene duplicados y mantiene cobertura total'
   }
   assert.ok(jsPrecache.size >= runtimeFiles.length, 'el precache JS debe cubrir todo el runtime');
 });
+
+
+test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', () => {
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const files = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) files.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const all = new Set(files.map((file) => file.replace(/^\.\//, '')));
+  const missing = [];
+  const edges = [];
+
+  const resolveLocal = (from, spec) => {
+    const clean = spec.split(/[?#]/, 1)[0];
+    const base = clean.startsWith('.')
+      ? clean
+      : './' + clean;
+    const normalized = ('./' + from.split('/').slice(0, -1).join('/') + '/' + base)
+      .replace(/\/+/g, '/')
+      .replace('/./', '/')
+      .replace(/^\.\//, '');
+    const candidates = [
+      normalized,
+      normalized + '.js',
+      normalized.replace(/\/$/, '') + '/index.js',
+    ];
+    return candidates.find((candidate) => all.has(candidate)) || null;
+  };
+
+  for (const file of files) {
+    const source = fs.readFileSync('./' + file.replace(/^\.\//, ''), 'utf8');
+    const regexes = [
+      /\b(?:from|import)\s*(?:\(\s*)?["']([^"']+)["']/g,
+      /\bexport\s+(?:\*\s+)?from\s*["']([^"']+)["']/g,
+    ];
+    for (const regex of regexes) {
+      let match;
+      while ((match = regex.exec(source))) {
+        const spec = match[1];
+        if (!spec.startsWith('.')) continue;
+        const target = resolveLocal(file, spec);
+        edges.push([file, spec, target]);
+        if (!target) missing.push(file + ' -> ' + spec);
+      }
+    }
+  }
+
+  assert.ok(edges.length > 0, 'el grafo ESM no contiene importaciones locales auditables');
+  assert.deepEqual(missing, [], 'importaciones ESM locales sin destino');
+});
