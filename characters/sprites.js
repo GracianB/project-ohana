@@ -97,7 +97,8 @@ function canonicalBodyId(id) {
 }
 
 function spritePath(name) {
-  return SPRITE_PATH + name + ".png";
+  const isCuernoPaint = /^bodies\/cuerno-(idle|run|jump|atk)$/.test(name);
+  return SPRITE_PATH + name + (isCuernoPaint ? ".svg" : ".png");
 }
 
 function canUseImage() {
