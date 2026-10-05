@@ -175,19 +175,60 @@ function kilo(ctx, pose) {
 }
 
 function stitcho(ctx, pose) {
-  const b = body(ctx, "stitcho", pose);
-  const y = b.hip - 40 * b.grow + b.a.bob;
-  head(ctx, 0, y, 16 + b.f, pose, b.fur);
-  blob(ctx, -16, y - 10, 7, 12 + b.f, b.dark, -0.4);
-  blob(ctx, 16, y - 10, 7, 12 + b.f, b.dark, 0.4);
-  if (b.f >= 2) {
-    ctx.strokeStyle = b.accent;
-    ctx.lineWidth = 3;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#9ec8ff", "#6aa7ff", "#3d7cff", "#2f6bff", "#d7e6ff"][f];
+  const dark = "#1d3f8f";
+  ink(ctx, 3.2);
+  const hip = -16 - f;
+  limb(ctx, -6, hip, 14 + f, a.leg + 1.2, dark, 5);
+  limb(ctx, 6, hip, 14 + f, a.leg2 + 1.2, dark, 5);
+  if (f >= 2) {
+    limb(ctx, -8, hip - 10, 12, a.arm + 0.4, dark, 4);
+    limb(ctx, 8, hip - 10, 12, -a.arm + 0.2, dark, 4);
+  }
+  blob(ctx, 0, hip - 16 + a.bob, 16 + f, 15 + f * 0.4, fur);
+  const y = hip - 38 - f * 2 + a.bob;
+  head(ctx, 0, y, 15, pose, fur);
+  blob(ctx, -16, y - 8, 6, 14 + f * 1.4, dark, -0.35);
+  blob(ctx, 16, y - 8, 6, 14 + f * 1.4, dark, 0.35);
+  ctx.strokeStyle = "#eaf4ff";
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(-6, y + 4);
+  ctx.lineTo(6, y + 10);
+  ctx.moveTo(-4, hip - 8);
+  ctx.lineTo(5, hip - 2);
+  ctx.stroke();
+  if (f >= 1) {
+    ctx.strokeStyle = "#67ddff";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-14, y + 16);
-    ctx.quadraticCurveTo(-28, y + 28, -12, y + 36);
-    ctx.moveTo(14, y + 16);
-    ctx.quadraticCurveTo(28, y + 28, 12, y + 36);
+    ctx.moveTo(0, y - 14);
+    ctx.lineTo(0, y - 24 - f * 2);
+    ctx.stroke();
+    blob(ctx, 0, y - 26 - f * 2, 3, 3, "#67ddff");
+  }
+  if (f >= 3) {
+    ctx.strokeStyle = "#8f7bff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-12, y + 14);
+    ctx.quadraticCurveTo(-30, y + 26, -14, y + 40);
+    ctx.moveTo(12, y + 14);
+    ctx.quadraticCurveTo(30, y + 26, 14, y + 40);
+    ctx.stroke();
+  }
+  if (pose.state === "attack") {
+    ctx.strokeStyle = "#dff4ff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(16, y + 6);
+    ctx.lineTo(28, y - 2);
+    ctx.moveTo(16, y + 10);
+    ctx.lineTo(30, y + 8);
+    ctx.moveTo(16, y + 14);
+    ctx.lineTo(28, y + 18);
     ctx.stroke();
   }
 }
