@@ -184,7 +184,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-125`
+`ohana-126`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
@@ -288,7 +288,7 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - La Reina derrotada deja de dibujarse desde el primer frame de muerte y no reaparece durante la finale.
 - Pizza L queda validada con teclado real y el VFX de Horno soporta el primer frame antes de la actualización de simulación.
 - Ocultar la pestaña pausa la sesión actual sin resetear sala, victoria, finale ni progreso persistente.
-- Cache: `ohana-125`
+- Cache: `ohana-126`
 
 
 ## Mundo 1 · contrato de cierre
@@ -296,4 +296,9 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Cada sala muestra un objetivo y lo marca hecho al cumplir la salida.
 - El claro (S/A/B/C) y el mejor tiempo se guardan en el save v2, sin cambiar la versión.
 - El ending nombra al héroe y a su forma. Vector sigue siendo la cara. Pintura es el piloto de Michi/Kilo, opt-in.
-- Cache: `ohana-125`.
+- Cache: `ohana-126`.
+
+
+## Parada
+
+El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cache `ohana-126`.

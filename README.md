@@ -16,7 +16,7 @@
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/LIVE-PLAYABLE-7EE7FF?style=flat-square&labelColor=071226" alt="Jugable"/>
+<img src="https://img.shields.io/badge/WORLD_1-7EE7FF?style=flat-square&labelColor=071226" alt="Mundo 1"/>
 <img src="https://img.shields.io/github/stars/GracianB/project-ohana?style=flat-square&label=STARS&color=7EE7FF&labelColor=071226" alt="Estrellas"/>
 <img src="https://img.shields.io/github/last-commit/GracianB/project-ohana?style=flat-square&label=LAST&color=F4F3EE&labelColor=071226" alt="Último commit"/>
 <img src="https://img.shields.io/github/license/GracianB/project-ohana?style=flat-square&color=C4A574&labelColor=071226" alt="Licencia"/>
@@ -44,6 +44,14 @@ Nueva partida: bebé, en el Claro. Continuar: tu forma y tu sala. Si la Reina ca
 </div>
 
 ---
+
+## En 20 segundos
+
+Ohana es un platformer de Canvas en Isla Hoku. Diez héroes, cinco formas, diez salas, una Reina. La H pega. J, K y L son los poderes. El Nido está al este de la Caldera, y la Caldera pide forma 4.
+
+Lo que demuestra no es un motor abierto: simulación fija a 60 Hz, director de combate determinista, save v2 y CI antes de Pages. La cara publicada es vector. Pintura es un piloto opt-in, no el elenco.
+
+El contrato de cierre está en [WORLD-1.md](WORLD-1.md). No hay Mundo 2 hasta que ese tag se respete.
 
 ## El bucle
 
