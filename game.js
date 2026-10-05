@@ -1466,7 +1466,11 @@ function updateEnemies() {
     const molts = e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
     const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
     if (!e.boss && e.hp <= 0 && posed && !molts) {
-      if (e.dying == null) e.dying = 28;
+      if (e.dying == null) {
+        e.dying = 28;
+        game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: e.color || "#fff", count: 16, size: 4, star: true, speed: 3.2, up: 1.6 });
+        game.nums.add(e.x, e.y - 10, "KO", "#fff6c8", true);
+      }
       e.deathHold = 1;
       e.dying--;
       e.vx = 0;
@@ -2172,6 +2176,8 @@ function updateEnemies() {
       return true;
     }
     Surprises.onEnemyKilled(e, game);
+    game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: e.color || "#fff6c8", count: 14, size: 4, star: true, speed: 3, up: 1.8 });
+    game.nums.add(e.x, e.y - 8, "KO", "#fff6c8", true);
     if (e.kind === "cucaracho") {
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
         color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
