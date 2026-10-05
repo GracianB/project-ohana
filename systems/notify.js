@@ -49,7 +49,7 @@ if (!globalThis.__ohanaMessageDismissBound) {
   globalThis.__ohanaMessageDismissBound = true;
 
   addEventListener("keydown", (event) => {
-    if (event.key === "Escape") return;
+    if (event.key !== "Escape") return;
     if (document.querySelector(".game-notification:not([data-persistent='1'])")) {
       dismissNotifications();
     }
