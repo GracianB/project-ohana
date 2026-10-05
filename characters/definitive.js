@@ -496,22 +496,41 @@ function pizza(ctx, pose) {
 }
 
 function yomi(ctx, pose) {
-  const b = body(ctx, "yomi", pose);
-  const y = b.hip - 46 * b.grow + b.a.bob;
-  blob(ctx, 0, y, 14, 20 + b.f, b.fur);
-  ctx.strokeStyle = b.accent;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const paper = ["#f2e6c8", "#e8c090", "#d7a36a", "#c98458", "#fff6df"][f];
+  ink(ctx, 3.2);
+  const hip = -10 - f;
+  limb(ctx, -4, hip, 10 + f, a.leg + 1.1, "#6a3cff", 4);
+  limb(ctx, 4, hip, 10 + f, a.leg2 + 1.1, "#6a3cff", 4);
+  const y = hip - 36 - f * 3 + a.bob;
+  blob(ctx, 0, y, 13, 20 + f * 2, paper);
+  if (f >= 2) {
+    ctx.fillStyle = "#6a3cff";
+    ctx.fillRect(-18, y - 4, 8, 22 + f * 2);
+    ctx.strokeRect(-18, y - 4, 8, 22 + f * 2);
+  }
+  eye(ctx, -5, y - 6, 2.8, pose);
+  eye(ctx, 5, y - 6, 2.8, pose);
+  const open = pose.state === "attack" || pose.state === "cast" ? 8 : 2;
+  ctx.strokeStyle = "#ff2244";
   ctx.lineWidth = 2.4;
   ctx.beginPath();
   ctx.moveTo(-8, y + 4);
-  ctx.quadraticCurveTo(0, y + 12 + (pose.state === "attack" ? 6 : 0), 8, y + 4);
+  ctx.quadraticCurveTo(0, y + 10 + open, 8, y + 4);
   ctx.stroke();
-  eye(ctx, -5, y - 6, 2.6, pose);
-  eye(ctx, 5, y - 6, 2.6, pose);
-  if (b.f >= 3) {
+  if (f >= 1) {
+    ctx.fillStyle = "#fff6df";
+    ctx.fillRect(14, y - 8, 8, 14);
+    ctx.strokeRect(14, y - 8, 8, 14);
+    ctx.fillStyle = "#ff2244";
+    ctx.fillRect(17, y - 4, 2, 8);
+  }
+  if (f >= 4) {
     ctx.beginPath();
     ctx.moveTo(0, y - 18);
-    ctx.lineTo(-6, y - 30);
-    ctx.lineTo(6, y - 30);
+    ctx.lineTo(-7, y - 32);
+    ctx.lineTo(7, y - 32);
     ctx.closePath();
     ctx.stroke();
   }
