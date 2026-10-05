@@ -961,6 +961,8 @@ function landOn(p, plat) {
   if (wasAir && impactSpeed > 7) {
     beep("land");
     game.experience?.land(p, impactSpeed);
+    game.fx.emit(p.x + p.w / 2, plat.y, { color: p.color || "#fff", count: impactSpeed > 11 ? 16 : 8, size: 3, speed: 2.4, up: 0.4, life: 14 });
+    if (impactSpeed > 11) game.shake = Math.min(10, (game.shake || 0) + 3);
   }
 
   p.y = plat.y - p.h;
