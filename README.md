@@ -319,6 +319,10 @@ Phase 21 añade memoria corta del encuentro. Las respuestas limpias y los CEBO l
 Se corrigió una regresión de habilidades: el segundo ataque de Kilo (`Giro hula`) ahora tiene ciclo de impacto real y el agarre de queso de Pizza tiene duración limitada, permite contramovimiento y se cancela al lanzar otra habilidad. Las tres habilidades de Pizza quedan cubiertas por pruebas de impacto. Caché `ohana-98`.
 
 
+## Cuerno Paint Closure · Phase 41
+
+Cuerno ya tiene una ruta pintada completa para las cuatro poses de combate usadas por el cargador (`idle`, `run`, `jump`, `atk`). Los assets SVG usan gradientes y volumen, se cargan solo para Cuerno y quedan precacheados junto con el runtime.
+
 ## Cache Graph Closure · Phase 40
 
 El Service Worker precachea el conjunto completo de módulos JavaScript del runtime con la versión actual de caché. El CI comprueba que `index.html` y `sw.js` usan la misma versión y que ningún módulo `.js` de producción queda fuera del precache.
