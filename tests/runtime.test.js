@@ -117,6 +117,15 @@ test("E funciona en teclado y táctil, pero las acciones no se ejecutan en pausa
   f.input.destroy();
 });
 
+test("pagehide limpia entradas retenidas aunque no exista keyup", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "d" });
+  assert.equal(f.input.keys.d, true);
+  send(f.target, "pagehide");
+  assert.equal(f.input.keys.d, false);
+  f.input.destroy();
+});
+
 test("desvincular controles elimina sus escuchadores", () => {
   const f = inputFixture();
   f.input.destroy();
