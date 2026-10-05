@@ -2507,13 +2507,29 @@ function render() {
   game.experience?.render(ctx, game, viewW, viewH, t);
   if (viewW >= 820) drawMinimap();
 }
+function castPower(index) {
+  const p = game.player;
+  if (!p) return;
+  const need = [0, 1, 2, 4][index] ?? 4;
+  if ((Number(p.evo) || 0) < need) {
+    game.nums.add(p.x, p.y - 12, "FORMA " + (need + 1), "#fff6c8");
+    return;
+  }
+  useAbility(game, index);
+}
 function renderAbilityBar() {
   const bar = DOM.abilityBar;
   if (!bar || !game.player) return;
-  bar.innerHTML = (game.player.abilities || []).map((id) => {
-    const d = ABILITY_DEFS[id];
+  const evo = Number(game.player.evo) || 0;
+  const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
+  slots.push({ id: "supreme", need: 4, supreme: true });
+  bar.innerHTML = slots.map((slot) => {
+    const d = slot.supreme
+      ? { name: "Supremo", key: "U", color: game.player.color || "#ffd36a" }
+      : ABILITY_DEFS[slot.id];
     if (!d) return "";
-    return '<button type="button" class="ability-slot" data-id="' + id + '" aria-label="' + d.name + ' · ' + d.key + '" style="--abil:' + d.color + '"><span class="key">' + d.key + '</span><span class="name">' + d.name + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+    const locked = evo < slot.need;
+    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + d.name + ' · ' + d.key + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + (locked ? "Forma " + (slot.need + 1) : d.name) + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
   }).join("");
   abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -2815,7 +2831,7 @@ input = bindInput({
     isRunning: () => game.running,
     actions: {
       attack, dash, interact, respawn, escape,
-      power: (index) => useAbility(game, index),
+      power: (index) => castPower(index),
       help: toggleHelp,
       map: () => { if (game.running) showMap(); },
       mute: () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); }
@@ -2828,8 +2844,8 @@ input = bindInput({
     const slot = ev.target.closest(".ability-slot");
     if (!slot || !game.running || paused || overlayOpen()) return;
     ev.preventDefault();
-    const idx = (game.player && game.player.abilities || []).indexOf(slot.dataset.id);
-    if (idx >= 0) useAbility(game, idx);
+    const idx = slot.dataset.supreme ? 3 : (game.player && game.player.abilities || []).indexOf(slot.dataset.id);
+    if (idx >= 0) castPower(idx);
   });
 }
 addEventListener("ohana-evolve-done", (e) => {
