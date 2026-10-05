@@ -1,65 +1,70 @@
-function box() {
-  let el = document.getElementById("notification-container");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "notification-container";
-    document.body.appendChild(el);
-  }
-  return el;
-}
+import { messageManager } from "./message-manager.js";
 
 export function dismissNotifications() {
-  document.querySelectorAll(".game-notification").forEach((el) => {
-    if (el.classList.contains("closing")) return;
-    el.classList.add("closing");
-    setTimeout(() => el.remove(), 260);
+  messageManager.dismiss();
+}
+
+export function showNotification(title, message, kind, options = {}) {
+  const type = kind || guessKind(title);
+  return messageManager.show({
+    type,
+    title,
+    text: message,
+    duration: options.duration,
+    priority: options.priority,
+    key: options.key,
+    dismissible: options.dismissible,
   });
 }
 
-let lastNote = { title: "", at: 0 };
+export function setObjectiveMessage(text, done = false) {
+  messageManager.setObjective(text, done);
+}
 
-export function showNotification(title, message, kind) {
-  const now = performance.now();
-  if (lastNote.title === title && now - lastNote.at < 900) return;
-  lastNote = { title: String(title || ""), at: now };
-  const parent = box();
-  parent.replaceChildren();
-  const type = kind || guessKind(title);
-  const el = document.createElement("div");
-  el.className = "game-notification " + type;
-  const head = document.createElement("h2");
-  head.textContent = title || "";
-  el.appendChild(head);
-  if (message) {
-    const p = document.createElement("p");
-    p.textContent = message;
-    el.appendChild(p);
-  }
-  parent.appendChild(el);
-  const close = () => {
-    if (!el.isConnected || el.classList.contains("closing")) return;
-    el.classList.add("closing");
-    setTimeout(() => el.remove(), 220);
-  };
-  el.addEventListener("click", close);
-  setTimeout(close, 2200);
+export function clearObjectiveMessage() {
+  messageManager.clearObjective();
+}
+
+export function showRoomMessage(title, text, options = {}) {
+  return messageManager.show({
+    type: "room",
+    title,
+    text,
+    duration: options.duration ?? 4200,
+    priority: options.priority ?? 50,
+    key: options.key,
+  });
 }
 
 function guessKind(title) {
-  const t = String(title).toUpperCase();
-  if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evo";
-  if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "hurt";
-  if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("SALA") || t.includes("MAPA") || t.includes("NIDO")) return "sala";
+  const t = String(title || "").toUpperCase();
+  if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evolution";
+  if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("MAPA")) return "system";
+  if (t.includes("NIDO") || t.includes("REINA")) return "boss";
+  if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "error";
   return "info";
 }
 
-if (!window.__ohanaNotifyBound) {
-  window.__ohanaNotifyBound = true;
-  addEventListener("keydown", () => {
-    if (document.querySelector(".game-notification")) dismissNotifications();
+if (!globalThis.__ohanaMessageDismissBound) {
+  globalThis.__ohanaMessageDismissBound = true;
+
+  addEventListener("keydown", (event) => {
+    if (event.key === "Escape") return;
+    if (document.querySelector(".game-notification:not([data-persistent='1'])")) {
+      dismissNotifications();
+    }
   }, true);
-  addEventListener("pointerdown", (e) => {
-    if (e.target.closest && e.target.closest("#top-actions, #ability-bar, #chars, .char-card, .touch-btn, #help, #map-overlay, #pause-overlay")) return;
-    if (document.querySelector(".game-notification")) dismissNotifications();
+
+  addEventListener("pointerdown", (event) => {
+    if (
+      event.target?.closest &&
+      event.target.closest(
+        "#top-actions, #ability-bar, #chars, .char-card, .touch-btn, #help, #map-overlay, #pause-overlay"
+      )
+    ) return;
+
+    if (document.querySelector(".game-notification:not([data-persistent='1'])")) {
+      dismissNotifications();
+    }
   }, true);
 }
