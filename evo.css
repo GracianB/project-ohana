@@ -47,7 +47,7 @@
   cursor: pointer;
 }
 body:has(#evo-stage.show) #notification-container,
-body:has(#evo-stage.show) #room-banner,
+body:has(#evo-stage.show) #experience-ribbon,
 body:has(#evo-stage.show) #prompt {
   visibility: hidden;
 }
