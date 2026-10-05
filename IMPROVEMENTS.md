@@ -144,3 +144,11 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 84. Phase 47: presupuestos runtime y prueba de tiempo de simulación endurecidos.
 85. Phase 48: cobertura E2E ampliada a touch y reduced-motion además de desktop.
 86. Phase 49: reciprocidad de las conexiones de puertas validada contra el grafo real del mundo.
+
+
+## Block C - Determinism Closure
+
+87. Phase 50: máquina de estados del boss endurecida por regresión de umbrales y transición de fases.
+88. Phase 51: integridad física de los recursos declarados por el precache.
+89. Phase 53: inyección de fallos numéricos y recuperación fail-closed mediante el harness E2E.
+90. Phase 54: reproducibilidad del gameplay con semilla de simulación fijada.
