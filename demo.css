@@ -38,3 +38,14 @@ body.playing #demo-obj { display: block; }
   #demo-obj { bottom: 148px; font-size: 12px; }
   #demo-tut { top: 96px; bottom: auto; left: 12px; right: 12px; max-width: none; }
 }
+
+#demo-obj.done { color: #b8f090; }
+.look-switch {
+  display: flex; gap: 8px; align-items: center; justify-content: center;
+  margin: 10px 0 4px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+}
+.look-switch button {
+  border: 1px solid rgba(126,231,255,.4); background: transparent; color: #f4f3ee;
+  border-radius: 999px; padding: 6px 12px; cursor: pointer;
+}
+.look-switch button.on { background: #7ee7ff; color: #071226; }

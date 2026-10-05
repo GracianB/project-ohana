@@ -14,6 +14,7 @@ export function showEnding(detail = {}) {
       '<div class="win-card">' +
         '<p class="win-kicker">Mundo 1 · Nido caído</p>' +
         '<h2 id="win-title">OHANA COMPLETADO</h2>' +
+        '<p class="win-hero"></p>' +
         '<p class="win-score"></p>' +
         '<p class="win-jun">EL NIDO HA CAÍDO.</p>' +
         '<p class="win-sub">Nadie se queda atrás.</p>' +
@@ -37,7 +38,16 @@ export function showEnding(detail = {}) {
     };
   }
   if (layer.classList.contains("show")) return;
-  layer.querySelector(".win-score").textContent = detail.score ? ("Score " + detail.score) : "El nido ha caído";
+  const hero = detail.hero || "Ohana";
+  const form = detail.form || "forma final";
+  const rank = detail.rank || "";
+  const time = detail.time || "";
+  const kills = Number.isFinite(Number(detail.kills)) ? Number(detail.kills) : 0;
+  const best = detail.best && detail.best !== time ? " · mejor " + detail.best : "";
+  const heroEl = layer.querySelector(".win-hero");
+  if (heroEl) heroEl.textContent = hero + " · " + form;
+  const score = layer.querySelector(".win-score");
+  score.textContent = (rank ? "Claro " + rank + " · " : "") + (time ? time + " · " : "") + kills + " bajas" + best;
   layer.classList.add("show");
 }
 

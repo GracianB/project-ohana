@@ -115,3 +115,9 @@
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-3px) scale(1.012); }
 }
+
+#win-cinema .win-hero {
+  margin: 8px 0 0;
+  font-size: 18px;
+  color: #fff6c8;
+}

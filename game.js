@@ -6,6 +6,7 @@ import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
+import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -543,6 +544,13 @@ function loadRoom(id, fromDir) {
   Passives.onRoom(game);
   Magic.onRoom(game, id);
   save();
+  dispatchEvent(new CustomEvent("ohana-room", { detail: {
+    id,
+    name: r.name,
+    visited: game.visited,
+    won: !!game.won,
+    evo: game.player ? game.player.evo : 0
+  }}));
   return true;
 }
 function showMap() {
@@ -620,6 +628,8 @@ function start(def) {
   game.experience?.reset();
   game.experience?.mount();
   game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+  game.clearTicks = 0;
+  game.best = null;
   Surprises.reset();
   game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
   game.running = true; closeOverlays();
@@ -639,6 +649,8 @@ function start(def) {
         paintFit(game.player);
         if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
         if (u.nineUsed) game.player._nineUsed = true;
+        game.clearTicks = u.clearTicks || 0;
+        game.best = u.best || null;
         game._magicSnap = u.magic;
         roomId = ROOMS[u.roomId] ? u.roomId : "hub";
       }
@@ -1053,8 +1065,25 @@ function tickFinale() {
   }
   if (f.t === 0 && !game.won) {
     game.won = true;
+    const p = game.player;
+    const ticks = game.clearTicks || 0;
+    const rank = clearRank(ticks);
+    game.best = rememberBest(game.best, {
+      ticks, kills: game.kills, score: game.score, evo: p ? p.evo : 0, rank, id: p ? p.id : ""
+    });
     save();
-    dispatchEvent(new CustomEvent("ohana-win", { detail: { score: game.score, kills: game.kills } }));
+    dispatchEvent(new CustomEvent("ohana-win", { detail: {
+      score: game.score,
+      kills: game.kills,
+      hero: p ? p.name : "Ohana",
+      form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
+      rank,
+      time: formatClear(ticks),
+      best: game.best ? formatClear(game.best.ticks) : ""
+    }}));
+    dispatchEvent(new CustomEvent("ohana-room", { detail: {
+      id: game.roomId, visited: game.visited, won: true, evo: p ? p.evo : 0
+    }}));
   }
 }
 function worldClear() {
@@ -2658,6 +2687,7 @@ function step() {
     if (game.flash > 0) game.flash--;
     return;
   }
+  if (!game.won) game.clearTicks = (game.clearTicks || 0) + 1;
   tickFinale();
   tickWorldSummon();
   if (!canAct()) return;
