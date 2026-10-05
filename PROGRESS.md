@@ -265,3 +265,12 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Phase 48: matriz navegador con desktop, touch y reduced-motion.
 - Phase 49: conexiones de puertas verificadas como recíprocas a nivel de grafo.
 - Cache: `ohana-120`.
+
+
+## Block C - Determinism Closure · Phases 50-54
+
+- Phase 50: transición verificable de Reina del Nido por umbrales 1→2→3.
+- Phase 51: todos los recursos declarados por el Service Worker deben existir físicamente.
+- Phase 53: el harness E2E inyecta corrupción numérica y verifica recuperación fail-closed.
+- Phase 54: el harness puede fijar una semilla de simulación y exige dos ejecuciones idénticas.
+- Cache: `ohana-121`.
