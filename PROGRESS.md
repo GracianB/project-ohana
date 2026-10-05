@@ -130,6 +130,8 @@ npm run test:browser
 npm run release:check
 ```
 
+El E2E real de navegador ejecuta `node tests/browser/e2e.mjs`.
+
 Las pruebas cubren, entre otras áreas:
 
 - fábrica y comportamiento de enemigos
