@@ -97,3 +97,14 @@ test("tutorial: no vuelve la secuencia temporal ni los overlays retirados", () =
   assert.match(source, /const KEY_HINTS\s*=\s*new Map/);
   assert.match(source, /showTutorialMessage/);
 });
+
+
+test("message accessibility: urgency changes the live region without changing the visual contract", () => {
+  const source = fs.readFileSync(
+    new URL("../systems/message-manager.js", import.meta.url),
+    "utf8"
+  );
+  assert.match(source, /aria-live/);
+  assert.match(source, /assertive/);
+  assert.match(source, /prefers-reduced-motion/);
+});
