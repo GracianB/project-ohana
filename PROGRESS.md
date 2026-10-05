@@ -20,7 +20,11 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-196`.
+La caché canónica de esta línea de trabajo es `ohana-197`.
+
+### 06/10/2026 · Hero Identity Recovery
+
+Se restauran las marcas visuales de identidad de los 10 héroes desde el snapshot histórico de `ohana-172`, manteniendo el runtime y el cierre actual de Mundo 1.
 
 ### Phase 20 · World 1 Closure Candidate
 
