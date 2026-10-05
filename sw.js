@@ -1,4 +1,4 @@
-const VERSION = "ohana-149";
+const VERSION = "ohana-150";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -88,7 +88,15 @@ const PRECACHE = [
   "./assets/sprites/bodies/cuerno-idle.svg?v=" + VERSION,
   "./assets/sprites/bodies/cuerno-run.svg?v=" + VERSION,
   "./assets/sprites/bodies/cuerno-jump.svg?v=" + VERSION,
-  "./assets/sprites/bodies/cuerno-atk.svg?v=" + VERSION
+  "./assets/sprites/bodies/cuerno-atk.svg?v=" + VERSION,
+  "./assets/sprites/forms/kilo-0.png?v=" + VERSION,
+  "./assets/sprites/forms/kilo-4.png?v=" + VERSION,
+  "./assets/sprites/forms/pizza-0.png?v=" + VERSION,
+  "./assets/sprites/forms/pizza-4.png?v=" + VERSION,
+  "./assets/sprites/forms/cat-0.png?v=" + VERSION,
+  "./assets/sprites/forms/cat-4.png?v=" + VERSION,
+  "./assets/sprites/forms/yomi-0.png?v=" + VERSION,
+  "./assets/sprites/forms/yomi-4.png?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {

@@ -240,6 +240,13 @@ export function vfxSprite(name) {
   return ready(normalized);
 }
 
+export function paintedForm(id, evo) {
+  const canonicalId = canonicalBodyId(id);
+  const form = Math.max(0, Math.min(4, Number(evo) || 0));
+  if (!VALID_BODY_IDS.has(canonicalId) || (form !== 0 && form !== 4)) return null;
+  if (!["kilo", "pizza", "cat", "yomi"].includes(canonicalId)) return null;
+  return ready("forms/" + canonicalId + "-" + form);
+}
 export function paintedBody(id, pose) {
   const canonicalId = canonicalBodyId(id);
   const normalizedPose = normalizeString(pose);

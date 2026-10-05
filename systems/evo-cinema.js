@@ -414,6 +414,17 @@ export function playEvolution(detail = {}) {
   st.sr.textContent = story.kicker + ". " + toName + ". " + story.line + " Forma " + (evo + 1) + " de 5. " + upg;
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
+  let ladder = el.querySelector(".form-ladder");
+  if (["kilo", "pizza", "cat", "yomi"].includes(def.id)) {
+    if (!ladder) {
+      ladder = document.createElement("div");
+      ladder.className = "form-ladder";
+      ladder.style.cssText = "position:absolute;left:50%;bottom:8vh;transform:translateX(-50%);display:flex;gap:10px;z-index:3;pointer-events:none";
+      el.appendChild(ladder);
+    }
+    ladder.innerHTML = [0, 4].map((f) => '<img alt="" src="assets/sprites/forms/' + def.id + '-' + f + '.png" style="height:18vh;width:auto;opacity:' + (f === evo ? 1 : 0.55) + ';filter:drop-shadow(0 8px 16px rgba(0,0,0,.45))">').join("");
+    ladder.hidden = false;
+  } else if (ladder) ladder.hidden = true;
   sfx("evoCharge");
   duckMusic(true);
   let fanfared = false;
