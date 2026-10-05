@@ -1,37 +1,24 @@
-# PROJECT OHANA · World 1
+# PROJECT OHANA · Mundo 1 cerrado
 
-Tag: `world-1`
-Rama activa: `main`
-Cara publicada: vector. Pintura solo si se pide.
+Tag: `v1.0.0`
+Cara de esta versión: vector.
+Los PNG y el arte pintado van en otra versión, después de esta.
 
-## Se puede decir
+## Qué es el cierre
 
-Mundo 1 tiene contrato de cierre. No es un motor en desarrollo.
+Diez héroes. Cinco formas. Diez salas. Una Reina.
+Fácil, Normal y Difícil en la portada.
+Objetivo en claro en cada sala.
+Salas de 2240×1260. Catapultas y vórtices en el suelo.
+Enemigos en su bioma. Golpe propio por héroe.
+148 tests en verde.
 
-- Objetivo visible por sala, marcado al cumplir la salida.
-- Progresión absoluta: 55, 140, 260, 420. Cinco formas. Diez salas. Una Reina.
-- Combate expresivo ya cerrado: H cuerpo a cuerpo, J/K/L por forma, combo, hitstop.
-- Boss legible: tres fases, rutinas, ventana de castigo, BREAK y CEBO. No se reabre.
-- Victoria: ending con héroe y forma. Claro S/A/B/C por tiempo de simulación. Mejor tiempo en save v2.
-- Portfolio: Systems Lab dice qué es, qué prueba y dónde jugar. El Nido está al este de la Caldera.
+## Qué no entra
 
-## No se dice
+Nada de Mundo 2. Nada de fase nueva. Nada de PNG en esta versión.
+Después del tag solo entra un bug demostrado.
 
-No se dice "World 1 complete" como partida humana certificada. Falta una pasada real de Kilo, Pizza, Michi y Yomi de bebé a Reina. Si esa pasada no rompe la lectura, el tag se queda. Si rompe, entra un bug, no una fase.
+## Lo que no puedo firmar
 
-## Congelado
-
-- Director de la Reina.
-- Firewall de mutaciones, RNG, runtime, save transaccional.
-- Cifras: 10 personajes, 5 formas, 10 salas, 1 jefe.
-- Hitboxes y física.
-
-## Permitido después del tag
-
-- Bug o regresión demostrable.
-- Un piloto pintado, Michi, sin cambiar hitbox.
-- Captura o GIF de la Reina en fase 3 para el lab.
-
-## Rechazado
-
-Cualquier Phase 56, sala nueva o Mundo 2. Si no mejora el juego ya terminado, no entra.
+No hay pasada humana certificada de Kilo, Pizza, Michi y Yomi de bebé a Reina.
+Si esa pasada rompe algo, es un bug, no una fase.
