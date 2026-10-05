@@ -125,17 +125,51 @@ function head(ctx, x, y, r, pose, fill) {
 }
 
 function kilo(ctx, pose) {
-  const b = body(ctx, "kilo", pose);
-  const y = b.hip - 42 * b.grow + b.a.bob;
-  head(ctx, 0, y, 18 + b.f * 1.2, pose, b.fur);
-  const n = 4 + b.f;
-  ctx.strokeStyle = b.accent;
-  ctx.lineWidth = 2.4;
-  for (let i = 0; i < n; i++) {
-    const ang = -Math.PI / 2 + (i / n) * Math.PI * 2;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const bob = a.bob;
+  const fur = ["#ffd0e4", "#ffb7d5", "#ff9ec8", "#ffe08a", "#fff6ea"][f];
+  const leaf = ["#7dce6a", "#5cbf6a", "#3ea86a", "#ffd36a", "#fff1a8"][f];
+  ink(ctx, 3.2);
+  const hip = -16 - f * 2;
+  limb(ctx, -5, hip, 12 + f * 2, a.leg + 1.15, "#e07aa8", 5);
+  limb(ctx, 5, hip, 12 + f * 2, a.leg2 + 1.15, "#e07aa8", 5);
+  blob(ctx, 0, hip - 14 + bob, 14 + f, 15 + f * 0.6, fur);
+  const y = hip - 36 - f * 3 + bob;
+  head(ctx, 0, y, 16 + f * 0.4, pose, fur);
+  ctx.fillStyle = leaf;
+  ctx.strokeStyle = INK;
+  const petals = 3 + f;
+  for (let i = 0; i < petals; i++) {
+    const ang = -Math.PI / 2 + (i / petals) * Math.PI * 2;
     ctx.beginPath();
-    ctx.moveTo(Math.cos(ang) * 8, y + Math.sin(ang) * 6);
-    ctx.lineTo(Math.cos(ang) * (16 + b.f * 2), y - 10 + Math.sin(ang) * 10);
+    ctx.ellipse(Math.cos(ang) * (10 + f * 2), y - 8 + Math.sin(ang) * (6 + f), 4 + f * 0.4, 8 + f, ang, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+  if (f >= 2) {
+    ctx.save();
+    ctx.translate(10, y + 8);
+    ctx.rotate(a.arm * 0.4);
+    ctx.fillStyle = "#c47a3a";
+    ctx.fillRect(-3, -2, 16, 8);
+    ctx.strokeRect(-3, -2, 16, 8);
+    ctx.strokeStyle = leaf;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(12, -2);
+    ctx.lineTo(12, -16);
+    ctx.stroke();
+    ctx.restore();
+  }
+  if (f >= 4) {
+    ctx.strokeStyle = "#ffd36a";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-16, y + 6);
+    ctx.quadraticCurveTo(-34, y - 8, -22, y + 18);
+    ctx.moveTo(16, y + 6);
+    ctx.quadraticCurveTo(34, y - 8, 22, y + 18);
     ctx.stroke();
   }
 }
