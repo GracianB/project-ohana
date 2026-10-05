@@ -202,6 +202,10 @@ try {
   await page.waitForTimeout(500);
 
   assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: HUD no aparece');
+  const secondaryErrors = [];
+  page.on('pageerror', (error) => secondaryErrors.push('pageerror: ' + (error.stack || error.message)));
+  page.on('console', (message) => { if (message.type() === 'error') secondaryErrors.push('console: ' + message.text()); });
+  page.on('requestfailed', (request) => secondaryErrors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   await page.locator('#game').focus();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Space');
@@ -210,8 +214,8 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
-  const offlineErrorStart = errors.length;
-  const offlineRequestStart = errors.filter((item) => item.startsWith('requestfailed:')).length;
+  const offlineErrorStart = secondaryErrors.length;
+  const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
       '/game.js?v=ohana-119',
@@ -245,8 +249,8 @@ try {
   assert.match(offline.title, /PROJECT OHANA/i, 'desktop: título offline ausente');
   assert.equal(offline.canvas, true, 'desktop: Canvas ausente offline');
   assert.ok(offline.results.every((item) => item.ok && item.status === 200), 'desktop: asset offline no servido: ' + JSON.stringify(offline.results));
-  assert.equal(errors.length, offlineErrorStart, 'desktop: errores durante arranque offline\\n' + errors.slice(offlineErrorStart).join('\\n'));
-  assert.equal(errors.filter((item) => item.startsWith('requestfailed:')).length, offlineRequestStart, 'desktop: request fallida durante arranque offline');
+  assert.equal(secondaryErrors.length, offlineErrorStart, 'desktop: errores durante arranque offline\\n' + secondaryErrors.slice(offlineErrorStart).join('\\n'));
+  assert.equal(secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length, offlineRequestStart, 'desktop: request fallida durante arranque offline');
 
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
