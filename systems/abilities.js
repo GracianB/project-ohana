@@ -118,7 +118,7 @@ function castSupreme(game, p) {
     if (!canHit(e)) continue;
     hitEnemy(game, e, dmg, { kx: Math.sign(cx(e) - cx(p)) * 8, ky: -6, stun: 28, color: def.color, crit: true });
   }
-  add({ kind: "supreme", x: cx(p), y: cy(p), life: 36, max: 36, color: def.color, name: def.name });
+  add({ kind: "supreme", x: cx(p), y: cy(p), life: 54, max: 54, color: def.color, name: def.name });
   game.ult = { t: 70, color: def.color, name: def.name };
   game.flashColor = def.color;
   game.flash = Math.max(game.flash || 0, 18);
