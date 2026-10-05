@@ -1,4 +1,4 @@
-const VERSION = "ohana-154";
+const VERSION = "ohana-155";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -100,7 +100,8 @@ const PRECACHE = [
   "./assets/worlds/beach-bg.jpg?v=" + VERSION,
   "./assets/worlds/jungle-bg.jpg?v=" + VERSION,
   "./assets/worlds/volcano-bg.jpg?v=" + VERSION,
-  "./assets/worlds/boss-bg.jpg?v=" + VERSION
+  "./assets/worlds/boss-bg.jpg?v=" + VERSION,
+  "./assets/sprites/boss-queen.png?v=" + VERSION
 ];
 
 self.addEventListener("install", (event) => {
