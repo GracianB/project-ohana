@@ -23,7 +23,7 @@ function ensure() {
   if (document.getElementById("demo-ribbon")) return;
   const ribbon = document.createElement("div");
   ribbon.id = "demo-ribbon";
-  ribbon.innerHTML = "<b>DEMO</b><span>Mundo 1 · Isla Hoku</span>";
+  ribbon.innerHTML = "<b>MUNDO 1</b><span>Isla Hoku · contrato cerrado</span>";
   document.body.appendChild(ribbon);
   const obj = document.createElement("div");
   obj.id = "demo-obj";
