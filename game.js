@@ -2911,7 +2911,7 @@ input = bindInput({
       power: (index) => castPower(index),
       help: toggleHelp,
       map: () => { if (game.running) showMap(); },
-      mute: () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); }
+      mute: () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); }
     }
   });
   keys = input.keys;
