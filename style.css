@@ -1689,6 +1689,16 @@ body.playing #ability-bar {
   pointer-events: none;
 }
 
+#notification-container:has(.game-notification.objective) {
+  top: auto;
+  bottom: 132px;
+  width: min(520px, 88vw);
+}
+
+body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
+  top: 116px;
+}
+
 .game-notification {
   position: relative;
   width: 100%;
@@ -2001,14 +2011,19 @@ body.boss-fight::after {
     top: 108px;
     font-size: 22px;
   }
-  
-  #room-banner {
-    top: 64px;
-  }
-  
+    
   #notification-container {
-    top: 64px;
-    max-width: min(320px, 90vw);
+    top: 88px;
+    max-width: min(340px, 90vw);
+  }
+
+  #notification-container:has(.game-notification.objective) {
+    top: auto;
+    bottom: 154px;
+  }
+
+  body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
+    top: 112px;
   }
   
   #boss-wrap {
