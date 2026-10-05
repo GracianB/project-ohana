@@ -762,9 +762,9 @@ function markHit(p, e, dmg, kb) {
   e.vx = face * (e.boss ? 3 : 8) * push;
   e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
   e.stun = Math.max(e.stun || 0, 10);
-  e.flash = 12;
+  e.flash = crit ? 18 : 14;
   e.invuln = Math.max(e.invuln || 0, 8);
-  e._hitT = crit ? 14 : 10;
+  e._hitT = crit ? 16 : 12;
   e._hitMax = e._hitT;
   e._hitDir = face;
   e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
@@ -779,6 +779,10 @@ function markHit(p, e, dmg, kb) {
     game.flashColor = "#fff6c8";
   }
   addPlayerXp(p, 1);
+  if (game.combo >= 5) {
+    game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: p.color || "#fff6c8", count: 8, size: 3, star: true, speed: 2.4 });
+    game.nums.add(e.x, e.y - 16, "x" + game.combo, "#fff6c8");
+  }
 }
 function hornPoke(p, evo, def) {
   const face = p.facing || 1;
