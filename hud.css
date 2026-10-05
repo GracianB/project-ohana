@@ -105,13 +105,6 @@ body.playing #hud {
 }
 #combo-chip.show { transform: translateX(-50%) scale(1.06); }
 body.boss-fight #combo-chip { top: 168px; }
-#room-banner {
-  top: 92px;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(8,12,20,.78));
-  border: 1px solid rgba(126,231,255,.28);
-  letter-spacing: .16em;
-  color: #e8f7ff;
-}
 #prompt {
   bottom: 96px;
   padding: 8px 16px;
