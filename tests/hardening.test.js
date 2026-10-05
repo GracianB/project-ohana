@@ -461,3 +461,22 @@ test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la ve
 
   assert.ok(precache.size >= runtimeFiles.length, 'el precache debe cubrir al menos todo el runtime JS');
 });
+
+test('phase 41: Cuerno cierra el contrato de render pintado con cuatro poses', () => {
+  const sprites = fs.readFileSync('./characters/sprites.js', 'utf8');
+  const poses = ['idle', 'run', 'jump', 'atk'];
+
+  assert.match(sprites, /isCuernoPaint/);
+  assert.match(sprites, /cuerno-\(idle\|run\|jump\|atk\)/);
+
+  for (const pose of poses) {
+    const file = './assets/sprites/bodies/cuerno-' + pose + '.svg';
+    assert.equal(fs.existsSync(file), true, 'falta sprite pintado de Cuerno: ' + file);
+    const source = fs.readFileSync(file, 'utf8');
+    assert.match(source, /^<svg[\s\S]*<\/svg>$/);
+    assert.match(source, /<defs>/);
+    assert.match(source, /gradient/i);
+  }
+
+  assert.doesNotMatch(sprites, /cuerno-(idle|run|jump|atk)\.png/);
+});
