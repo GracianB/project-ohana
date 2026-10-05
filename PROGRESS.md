@@ -274,3 +274,5 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Phase 53: el harness E2E inyecta corrupción numérica y verifica recuperación fail-closed.
 - Phase 54: el harness puede fijar una semilla de simulación y exige dos ejecuciones idénticas.
 - Cache: `ohana-121`.
+
+- Release Gate: `node tools/release-gate.mjs` / `release:check` antes de publicar.
