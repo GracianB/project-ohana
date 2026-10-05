@@ -78,6 +78,7 @@ export function useAbility(game, index) {
   syncState(p);
   p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
   sfx(id);
+  game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 22 : 10, size: 3, star: true, speed: 2.8, life: 14 });
   if (index === 2) {
     game.ult = { t: 46, color: def.color, name: def.name };
     game.flashColor = def.color;
