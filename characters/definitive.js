@@ -537,17 +537,46 @@ function yomi(ctx, pose) {
 }
 
 function cuerno(ctx, pose) {
-  const b = body(ctx, "cuerno", pose);
-  const y = b.hip - 40 * b.grow + b.a.bob;
-  head(ctx, 0, y, 16, pose, b.fur);
-  ctx.strokeStyle = b.accent;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#f8e6ff", "#f2c1ff", "#e59bff", "#d07af0", "#fff"][f];
+  ink(ctx, 3.2);
+  const hip = -14 - f;
+  limb(ctx, -5, hip, 14 + f, a.leg + 1.2, "#b56ad0", 5);
+  limb(ctx, 5, hip, 14 + f, a.leg2 + 1.2, "#b56ad0", 5);
+  blob(ctx, 0, hip - 14 + a.bob, 15 + f * 0.4, 14, fur);
+  const y = hip - 36 - f * 2 + a.bob;
+  head(ctx, 0, y, 15, pose, fur);
+  ctx.strokeStyle = "#fff6c8";
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.moveTo(-4, y - 12);
-  ctx.quadraticCurveTo(-16 - b.f * 2, y - 28, -6, y - 36 - b.f * 2);
+  ctx.quadraticCurveTo(-16 - f * 3, y - 30, -6, y - 38 - f * 3);
   ctx.moveTo(4, y - 12);
-  ctx.quadraticCurveTo(16 + b.f * 2, y - 28, 6, y - 36 - b.f * 2);
+  ctx.quadraticCurveTo(16 + f * 3, y - 30, 6, y - 38 - f * 3);
+  if (f >= 2) {
+    ctx.moveTo(-10, y - 24);
+    ctx.lineTo(-20, y - 30);
+    ctx.moveTo(10, y - 24);
+    ctx.lineTo(20, y - 30);
+  }
   ctx.stroke();
+  if (f >= 4) {
+    ctx.strokeStyle = "#7ee7ff";
+    ctx.beginPath();
+    ctx.arc(0, y - 8, 18, 0.4, Math.PI - 0.4);
+    ctx.stroke();
+  }
+  if (pose.state === "attack") {
+    ctx.fillStyle = "#ffe9a8";
+    ctx.beginPath();
+    ctx.moveTo(22, y);
+    ctx.lineTo(32, y - 4);
+    ctx.lineTo(26, y + 2);
+    ctx.lineTo(34, y + 6);
+    ctx.lineTo(22, y + 4);
+    ctx.fill();
+  }
 }
 
 const DRAW = { kilo, stitcho, chispin, cat, dragon, dino, frita, pizza, yomi, cuerno, lilo: kilo, stitch: stitcho, pikachu: chispin, michi: cat };
