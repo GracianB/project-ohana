@@ -2831,6 +2831,31 @@ if (e2eEnabled) {
   };
 
   window.__OHANA_E2E = {
+    setSeed(seed = 1) {
+      let state = (Number(seed) >>> 0) || 1;
+      game.rng = () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
+      return state;
+    },
+    injectFault(kind = "nan") {
+      if (kind === "nan") {
+        game.score = NaN;
+        game.kills = Infinity;
+        if (game.player) game.player.x = NaN;
+        pushRuntime(game.projectiles, { x: NaN, y: Infinity, w: NaN, h: NaN, vx: NaN, vy: NaN, life: NaN, dmg: NaN }, MAX_RUNTIME_PROJECTILES);
+      } else if (kind === "collection") {
+        game.projectiles[0] = null;
+        game.projectiles[1] = { x: NaN };
+        game.ghosts[0] = null;
+        game.ghosts[1] = { x: Infinity, y: NaN };
+        game.bolts[0] = null;
+        game.bolts[1] = { x: NaN };
+      }
+      this.step(1);
+      return this.state();
+    },
     state() {
       const p = game.player;
       const boss = game.boss || game.enemies.find((e) => e.boss);
