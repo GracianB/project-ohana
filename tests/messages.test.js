@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import {
   MessageManager,
   messagePriority,
@@ -82,4 +83,17 @@ test("el manager conserva un único mensaje y rechaza uno de menor prioridad", (
   const root = manager.mount();
   assert.equal(root.children.length, 1);
   assert.match(root.children[0].className, /boss/);
+});
+
+
+test("tutorial: no vuelve la secuencia temporal ni los overlays retirados", () => {
+  const source = fs.readFileSync(
+    new URL("../systems/demo.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.doesNotMatch(source, /const STEPS\s*=\s*\[/);
+  assert.doesNotMatch(source, /setTimeout\(play/);
+  assert.match(source, /const KEY_HINTS\s*=\s*new Map/);
+  assert.match(source, /showTutorialMessage/);
 });
