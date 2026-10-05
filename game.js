@@ -324,12 +324,12 @@ function toggleHelp() {
   if (open) setPaused(false);
   help.classList.toggle("open", open);
 }
-function showBanner(name) {
+function showBanner(name, line) {
   const el = DOM.roomBanner;
   if (!el) return;
-  el.textContent = name.toUpperCase();
+  el.textContent = line ? name.toUpperCase() + "  ·  " + line : name.toUpperCase();
   el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 1400);
+  setTimeout(() => el.classList.remove("show"), 1800);
 }
 function setPrompt(text, on) {
   const el = DOM.prompt;
@@ -536,7 +536,7 @@ function loadRoom(id, fromDir) {
     game.player.health = Math.min(game.player.maxHealth, game.player.health + 15);
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
-  if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name); }
+  if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name, r.short || ""); }
   else {
     game.bossIntro = { t: 220 };
     game.storyLine = "La Reina sale del nido. No negocia.";
