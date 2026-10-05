@@ -2545,3 +2545,21 @@ body:not(.playing) #touch {
   transform: none !important;
   max-width: min(760px, calc(100vw - 32px)) !important;
 }
+
+/* Cierre visual de Mundo 1 */
+.hud-block {
+  border-color: rgba(126, 231, 255, 0.28);
+  background: rgba(6, 12, 22, 0.72);
+}
+.bar { height: 12px; }
+.world-name { letter-spacing: 0.04em; }
+#room-banner, .room-banner {
+  letter-spacing: 0.16em;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.cta.primary {
+  box-shadow: 0 8px 24px rgba(126, 231, 255, 0.25);
+}
+#demo-obj {
+  letter-spacing: 0.02em;
+}
