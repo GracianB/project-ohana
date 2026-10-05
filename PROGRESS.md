@@ -22,6 +22,11 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 
 La caché canónica de esta línea de trabajo es `ohana-191`.
 
+### Phase 20 · World 1 Closure Candidate
+
+Existe una rama consolidada de cierre. El mundo **no se declara cerrado todavía**: la decisión depende de que `npm test`, `npm run test:browser`, `npm run test:visual` y `npm run release:check` terminen en PASS en CI.
+
+
 Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, con:
 
 - **10 personajes activos**
