@@ -4,7 +4,7 @@ import {
   ExperienceDirector,
   experienceRank,
 } from "../systems/experience.js";
-import { evolutionTiming } from "../systems/evo-cinema.js";
+import { evolutionTiming } from "../systems/evolution-timing.js";
 
 test("experience ranks escalate coherently", () => {
   assert.equal(experienceRank(0), "READY");
