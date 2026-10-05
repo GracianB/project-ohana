@@ -103,6 +103,10 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 
 76. Phase 38: cierre final del firewall de mutaciones, incluyendo combo, para eliminar la última aritmética directa sobre un contador crítico de combate.
 
+## Phase 41 - Cuerno Paint Closure
+
+78. Phase 41: cierre de `paint` para Cuerno con cuatro sprites SVG propios (`idle`, `run`, `jump`, `atk`), fallback específico en `characters/sprites.js`, precache y regresión estructural.
+
 ## Phase 40 - Cache Graph Closure
 
 77. Phase 40: cierre del grafo de caché del runtime; todos los módulos JavaScript de producción quedan precacheados con `ohana-114` y una regresión automática impide dejar módulos nuevos fuera del Service Worker.
