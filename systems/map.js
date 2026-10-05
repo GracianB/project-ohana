@@ -144,7 +144,18 @@ const LAYOUT = {
 };
 for (const room of Object.values(ROOMS)) {
   room.plats = LAYOUT[room.id] || room.plats;
-  room.foes = (room.foes || []).map((f) => [Math.round(f[0] * SCALE), Math.round(f[1] * SCALE), f[2], f[3]].filter((v) => v !== undefined));
+  const cast = {
+    hub: ["cucaracho", "cucaracho", "phosquito"],
+    beach: ["cangrejo", "cangrejo", "gaviota", "gaviota"],
+    jungle: ["libelula", "mosquito", "abeja", "rana"],
+    cave: ["murcielago", "arana", "arana", "murcielago"],
+    lab: ["phosquito", "ufo", "cucaracho"],
+    ridge: ["gaviota", "murcielago", "murcielago"],
+    space: ["ufo", "ufo", "phosquito"],
+    reef: ["medusa", "pez", "anguila", "pez"],
+    volcano: ["escoria", "escoria", "brasita", "brasita"]
+  }[room.id];
+  room.foes = (room.foes || []).map((f, i) => [Math.round(f[0] * SCALE), Math.round(f[1] * SCALE), cast ? cast[i % cast.length] : f[2], f[3]].filter((v) => v !== undefined));
   room.orbs = (room.orbs || []).map(([x, y]) => [Math.round(x * SCALE), Math.round(y * SCALE)]);
   for (const portal of room.portals || []) {
     const floors = room.plats.filter((pl) => pl[3] > 40).sort((a, b) => a[0] - b[0]);

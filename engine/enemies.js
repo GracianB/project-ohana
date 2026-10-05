@@ -702,6 +702,11 @@ function drawAbeja(ctx, e, t) {
 
 
 function drawPlanta(ctx, e, t) {
+  ctx.fillStyle = "#1d5a28";
+  ctx.beginPath();
+  ctx.ellipse(-14, 6, 10, 5, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(14, 8, 10, 5, 0.6, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = "#2a6a28";
   ctx.fillRect(-8, 10, 16, 16);
   ctx.fillStyle = "#3a8a30";
@@ -1014,6 +1019,8 @@ function drawBrasita(ctx, e, t) {
   // core
   ctx.fillStyle = "#ffe8a0";
   ctx.beginPath(); ctx.arc(0, -1, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#111";
+  ctx.beginPath(); ctx.arc(-2, -1, 1.1, 0, Math.PI * 2); ctx.arc(2, -1, 1.1, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#ff6a20";
   ctx.beginPath(); ctx.arc(0, 1, 7, 0, Math.PI * 2); ctx.fill();
   // flicker tips
@@ -1047,6 +1054,8 @@ function drawEscoria(ctx, e, t) {
   g.addColorStop(1, "#4a1008");
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.ellipse(0, 1, 13, 8, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#3a1008";
+  ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(5, -2); ctx.lineTo(-5, -2); ctx.fill();
   // cracks / lava veins
   ctx.strokeStyle = hot ? "rgba(255,220,80,.8)" : "rgba(255,120,40,.45)"; ctx.lineWidth = 1.2;
   ctx.beginPath();
