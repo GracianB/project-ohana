@@ -37,6 +37,7 @@ import { Magic } from "./systems/magic.js";
 import { CombatFX } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
 import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
@@ -2745,22 +2746,11 @@ function updateHUD() {
   if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
   if (boss) {
     const phase = bossPhaseProfile(boss.phase);
+    const status = formatBossStatus(boss, phase.name);
     const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
-    const pct = Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100));
-    const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
-    const patternText = boss.patternLabel ? " · RUTINA " + (Number(boss.patternStep) + 1) + "/" + Math.max(1, boss.pattern.length) : "";
-    const recoveryText = boss.vulnerable ? " · CASTIGA" : "";
-    const readText = boss.behaviorLabel ? " · " + boss.behaviorLabel : "";
-    const counterText = boss.counterplay?.streak ? " · RESPUESTA " + boss.counterplay.streak + "/3" + (boss.lastCounterplay?.break ? " · BREAK" : "") : "";
-    const baitText = boss.bait?.armed ? " · " + baitLabel(boss.bait) : "";
-    const feedbackText = boss.baitFeedback?.last ? " · " + baitFeedbackLabel(boss.baitFeedback) : "";
-    const encounterText = boss.encounterLabel && boss.encounterLabel !== "MEMORIA NEUTRA"
-      ? " · " + encounterLabel(boss.encounterMemory)
-      : "";
-    const adaptationText = boss.adaptationLabel && boss.adaptationLabel !== "ADAPTACIÓN NEUTRA"
-      ? " · " + boss.adaptationLabel
-      : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + adaptationText + baitText + feedbackText + encounterText + counterText + attackText + " · " + pct + "%");
+    const attackText = attack ? " · " + attack.icon : "";
+    setText(DOM.bossLabel, status.visible + attackText);
+    DOM.bossWrap?.setAttribute("aria-label", status.accessible + (attack ? " Ataque: " + boss.teleKind + "." : ""));
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
