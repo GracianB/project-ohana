@@ -2023,7 +2023,7 @@ body.boss-fight::after {
   }
 
   body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
-    top: 136px;
+    top: 176px;
   }
   
   #boss-wrap {
