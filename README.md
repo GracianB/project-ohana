@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:071226,40:102A43,78:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=56&fontAlignY=34&desc=ISLA%20HOKU%20%C2%B7%20CANVAS%202D%20%C2%B7%20BEB%C3%89%20%E2%86%92%20GOD&descAlignY=58&descSize=16&animation=twinkling" width="100%" alt="Project Ohana, isla Hoku, de bebé a forma final"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:071226,40:102A43,78:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=56&fontAlignY=34&desc=ISLA%20HOKU%20%C2%B7%20CANVAS%202D%20%C2%B7%20BEB%C3%89%20%E2%86%92%20FORMA%20FINAL&descAlignY=58&descSize=16&animation=twinkling" width="100%" alt="Project Ohana, isla Hoku, de bebé a forma final"/>
 </a>
 
 <a href="https://gracianb.github.io/project-ohana/">
@@ -263,7 +263,9 @@ python -m http.server 8080
 Abre [http://localhost:8080](http://localhost:8080).
 
 ```powershell
-node --test tests/core.test.js tests/runtime.test.js
+npm test
+npm run test:browser
+npm run release:check
 ```
 
 </details>
@@ -281,7 +283,7 @@ Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afi
 <div align="center">
 
 <a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=110&section=footer&color=0:7EE7FF,45:102A43,100:071226&reversal=true&text=BEB%C3%89%20%E2%86%92%20GOD&fontColor=F4F3EE&fontSize=28&fontAlignY=62&animation=fadeIn" width="100%" alt="De bebé a forma final"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=110&section=footer&color=0:7EE7FF,45:102A43,100:071226&reversal=true&text=BEB%C3%89%20%E2%86%92%20FORMA%20FINAL&fontColor=F4F3EE&fontSize=28&fontAlignY=62&animation=fadeIn" width="100%" alt="De bebé a forma final"/>
 </a>
 
 <br/>
