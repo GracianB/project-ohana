@@ -2546,6 +2546,21 @@ export function drawSlash(ctx, s, cam) {
     fang(-1);
     fang(1);
     ctx.restore();
+  } else if (kind === "zap") {
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.strokeStyle = "#ffe14a";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(8, -6);
+    ctx.lineTo(reach * 0.4, -16);
+    ctx.lineTo(reach * 0.45, 2);
+    ctx.lineTo(reach * 0.9, 8);
+    ctx.stroke();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.restore();
   } else if (kind === "leaf") {
     ctx.save();
     ctx.globalAlpha = fade;
