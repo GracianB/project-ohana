@@ -54,7 +54,6 @@ const DOM = {
   pause: $("pause-overlay"),
   finale: $("win-cinema"),
   evoStage: $("evo-stage"),
-  roomBanner: $("room-banner"),
   prompt: $("prompt"),
   mute: $("btn-mute"),
   abilityBar: $("ability-bar"),
