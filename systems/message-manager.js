@@ -202,6 +202,40 @@ export class MessageManager {
   }
 }
 
+function semantic(input, defaults) {
+  return messageManager.show({ ...defaults, ...input });
+}
+
+export const showSystemMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "system", priority: 20, duration: 2400 });
+
+export const showRoomMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "room", priority: 65, duration: 4200 });
+
+export const showObjectiveMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "objective", priority: 35, duration: 3200 });
+
+export const showTutorialMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "tutorial", priority: 45, duration: 5200 });
+
+export const showCombatMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "combat", priority: 55, duration: 1800 });
+
+export const showBossMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "boss", priority: 90, duration: 5200 });
+
+export const showEvolutionMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "evolution", priority: 100, duration: 5200 });
+
+export const showErrorMessage = (title, text, options = {}) =>
+  semantic({ ...options, title, text }, { type: "error", priority: 110, duration: 2600 });
+
+export const setPersistentObjective = (text, done = false) =>
+  messageManager.setObjective(text, done);
+
+export const clearPersistentObjective = () =>
+  messageManager.clearObjective();
+
 export const messageManager =
   new MessageManager({
     reducedMotion: () =>
