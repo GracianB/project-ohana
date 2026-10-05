@@ -439,3 +439,6 @@
   cursor: pointer;
 }
 #difficulty button.on { border-color: #ffe66a; color: #fff; background: rgba(255,214,120,.2); }
+
+.stage-title { letter-spacing: 0.08em; text-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.tagline { max-width: 36rem; }
