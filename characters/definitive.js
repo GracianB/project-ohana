@@ -456,22 +456,43 @@ function frita(ctx, pose) {
 }
 
 function pizza(ctx, pose) {
-  const b = body(ctx, "pizza", pose);
-  const y = b.hip - 36 * b.grow + b.a.bob;
-  ctx.fillStyle = b.fur;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  ink(ctx, 3.2);
+  const hip = -12 - f;
+  limb(ctx, -5, hip, 12 + f, a.leg + 1.2, "#c45a12", 5);
+  limb(ctx, 6, hip, 12 + f, a.leg2 + 1.2, "#c45a12", 5);
+  const y = hip - 30 - f * 2 + a.bob;
+  ctx.fillStyle = ["#ffd27a", "#ffb43a", "#ff9a2a", "#ff7a2a", "#ffe08a"][f];
   ctx.beginPath();
-  ctx.moveTo(0, y - 22 - b.f * 2);
-  ctx.lineTo(20 + b.f, y + 12);
-  ctx.lineTo(-16, y + 12);
+  ctx.moveTo(0, y - 24 - f * 2);
+  ctx.lineTo(22 + f * 2, y + 14);
+  ctx.lineTo(-18, y + 14);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = b.accent;
+  ctx.strokeStyle = "#f4e2b0";
+  ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.arc(-2, y - 2, 3, 0, Math.PI * 2);
-  ctx.arc(6, y + 2, 2.4, 0, Math.PI * 2);
-  ctx.fill();
-  eye(ctx, -2, y - 6, 3, pose);
+  ctx.moveTo(-16, y + 12);
+  ctx.lineTo(20 + f, y + 12);
+  ctx.stroke();
+  ctx.fillStyle = "#e0402a";
+  const dots = 2 + f;
+  for (let i = 0; i < dots; i++) {
+    ctx.beginPath();
+    ctx.arc(-6 + (i % 3) * 7, y - 2 + Math.floor(i / 3) * 6, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  eye(ctx, -2, y - 8, 3.2, pose);
+  if (pose.state === "attack" || pose.state === "cast") {
+    ctx.strokeStyle = "#ffd84a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(12, y + 4);
+    ctx.quadraticCurveTo(28, y - 6, 34, y + 8);
+    ctx.stroke();
+  }
 }
 
 function yomi(ctx, pose) {
