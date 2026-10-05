@@ -633,3 +633,46 @@ test('phase 49: las puertas físicas son recíprocas y las caídas mantienen des
     }
   }
 });
+
+
+test('phase 50: máquina de estados del boss conserva umbrales y cierre de recuperación', () => {
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  assert.match(boss, /PHASE_2:\s*0\.66/);
+  assert.match(boss, /PHASE_3:\s*0\.33/);
+  assert.match(boss, /e\.phase\s*=\s*3/);
+  assert.match(boss, /e\.phase\s*=\s*2/);
+  assert.match(boss, /e\.vulnerable\s*=\s*true/);
+  assert.match(boss, /e\.recoveryMax/);
+  assert.match(fs.readFileSync('./tests/browser/e2e.mjs', 'utf8'), /transición fase1→fase2 inválida/);
+});
+
+test('phase 51: todos los recursos declarados por el Service Worker existen en el árbol publicado', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const precacheBlock = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const resources = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)]
+    .map((match) => match[1])
+    .filter(Boolean);
+  const unique = [...new Set(resources)];
+  for (const resource of unique) {
+    const clean = resource.split(/[?#]/, 1)[0];
+    assert.equal(fs.existsSync('./' + clean), true, 'recurso del precache inexistente: ' + clean);
+  }
+});
+
+test('phase 53: los fallos inyectados siguen en modo fail-closed y recuperable', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /injectFault\(kind = "nan"\)/);
+  assert.match(game, /game\.score = NaN/);
+  assert.ok(game.includes("pushRuntime(game.projectiles"), "fault injection debe respetar pushRuntime");
+  assert.match(game, /sanitizeRuntimeState\(\)/);
+  assert.match(game, /containRuntimeFault\("simulation", error\)/);
+});
+
+test('phase 54: el harness E2E puede fijar una semilla de simulación', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const e2e = fs.readFileSync('./tests/browser/e2e.mjs', 'utf8');
+  assert.match(game, /setSeed\(seed = 1\)/);
+  assert.match(game, /1664525/);
+  assert.match(e2e, /123456789/);
+  assert.match(e2e, /gameplay no determinista con semilla idéntica/);
+});
