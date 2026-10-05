@@ -205,8 +205,11 @@ function handleIntro(e, game, helpers, cx, floorY) {
   const landAt = e.introMax - 22;
   const roarAt = 26;
   e.introT--;
-  const done = e.introMax - e.introT;
-  e.introDrop = done < 22 ? 280 * Math.pow(1 - done / 22, 2) : 0;
+  const done = Math.max(0, e.introMax - e.introT);
+  const landingFrames = 22;
+  const landingK = Math.max(0, Math.min(1, done / landingFrames));
+  const landingEase = 1 - Math.pow(1 - landingK, 3);
+  e.introDrop = (1 - landingEase) * 700;
   e.vx = 0;
   e.vy = 0;
   e.telegraph = false;
