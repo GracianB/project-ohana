@@ -89,6 +89,20 @@ const THEMES = {
     melody: { rhythm: "x.xx.xx.x.xx.xxx", inst: "lead", oct: 12, seed: 101 },
     drums: { k: "x.x.x.x.x.x.x.x.", s: "....x..x....x.xx", h: "xxxxxxxxxxxxxxxx" },
   },
+  lab: {
+    bpm: 102, root: 56, scale: "minor", swing: 0,
+    chords: [[0, "min"], [7, "maj"], [3, "maj"], [10, "min"]],
+    pad: 0.32, bass: "x..x..x.x..x..x.", arp: "x.x.x.x.x.x.x.x.", arpInst: "synth",
+    melody: { rhythm: "x...x.x...x.x...", inst: "bell", oct: 12, seed: 81 },
+    drums: { k: "x.......x.......", s: "....x.......x...", h: "x.x.x.x.x.x.x.x." },
+  },
+  orbita: {
+    bpm: 90, root: 58, scale: "minor", swing: 0,
+    chords: [[0, "min"], [5, "min"], [8, "maj"], [3, "maj"]],
+    pad: 0.5, bass: "x.......x...x...", arp: "x...x...x...x...", arpInst: "bell",
+    melody: { rhythm: "x.....x...x.....", inst: "flute", oct: 24, seed: 89 },
+    drums: { k: "x...........x...", s: null, h: "....x.......x..." },
+  },
   victoria: {
     bpm: 100, root: 60, scale: "major", swing: 0.08,
     chords: [[0, "maj"], [5, "maj"], [9, "min"], [7, "maj"]],
@@ -100,8 +114,8 @@ const THEMES = {
 
 // Sala → tema
 const ROOM_THEME = {
-  hub: "claro", beach: "costa", jungle: "jungla", cave: "cueva", lab: "cueva",
-  ridge: "cumbre", space: "cumbre", reef: "abismo", volcano: "caldera", boss: "jefe",
+  hub: "claro", beach: "costa", jungle: "jungla", cave: "cueva",
+  ridge: "cumbre", space: "orbita", reef: "abismo", volcano: "caldera", boss: "jefe", lab: "lab",
 };
 export function themeForRoom(id) { return ROOM_THEME[id] || "claro"; }
 
