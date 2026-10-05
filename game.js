@@ -9,7 +9,7 @@ import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
-import { showNotification, showRoomMessage } from "./systems/notify.js";
+import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
@@ -335,7 +335,7 @@ let saveWarning = false;
 function save() {
   if (!game.player || game.player.dead) return;
   const saved = saveStore.write(game, Magic);
-  if (!saved && !saveWarning) showNotification("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
+  if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
   saveWarning = !saved;
   return saved;
 }
@@ -461,7 +461,7 @@ function loadRoom(id, fromDir) {
   const r = ROOMS[id];
   if (!r) return false;
   if (r.needEvo && game.player && game.player.evo < r.needEvo) {
-    showNotification("CERRADO", "Necesitas forma " + (r.needEvo + 1));
+    showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
     beep("locked");
     bounceLocked(fromDir);
     return false;
@@ -549,7 +549,7 @@ function loadRoom(id, fromDir) {
   } else {
     game.bossIntro = { t: 220 };
     game.storyLine = "La Reina sale del nido. No negocia.";
-    showNotification("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 1.", "boss", {
+    showBossMessage("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 1.", {
       key: "boss:intro"
     });
     game.flash = 16;
@@ -577,7 +577,7 @@ function showMap() {
   const overlay = DOM.map;
   const grid = DOM.mapGrid;
   if (!overlay || !grid) {
-    showNotification("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
+    showSystemMessage("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
     return;
   }
   if (overlay.classList.contains("open")) {
@@ -689,10 +689,10 @@ function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
   p.evo = Number(p.evo) || 0;
   if (reason !== "xp" && reason !== "manual") return;
-  if (p.evo >= 4) { if (reason === "manual") showNotification("MAX", "Ya eres GOD (forma 5)."); return; }
+  if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
   const need = XP_NEED[p.evo + 1];
   if (need == null || p.xp < need) {
-    if (reason === "manual") showNotification("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
+    if (reason === "manual") showSystemMessage("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
     return;
   }
   p.evo += 1;
@@ -965,7 +965,7 @@ function hurtPlayer(amount, label) {
   if (p.health <= 0) {
     p.health = 0;
     p.dead = true;
-    showNotification("DERROTA", "R vuelve al claro", "hurt");
+    showErrorMessage("DERROTA", "R vuelve al claro");
     if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "hurt" });
   }
 }
@@ -1022,7 +1022,7 @@ function dieVoid(p) {
   p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
-  showNotification("VACÍO", "Pozo real. R vuelve al claro", "hurt");
+  showErrorMessage("VACÍO", "Pozo real. R vuelve al claro");
   game.fx.emit(p.x + p.w / 2, p.y, { color: "#7ee7ff", count: 28, size: 5, up: 2 });
   if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "void" });
 }
@@ -1145,7 +1145,7 @@ function worldClear() {
   game.summoned = true;
   game.summonDelay = 132; // 2.2 s a 60 Hz, pausables y reproducibles.
   beep("alert");
-  showNotification("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.", "sala");
+  showBossMessage("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.");
 }
 
 function tickWorldSummon() {
@@ -1330,7 +1330,7 @@ function updatePlayer() {
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
       o.taken = true; addPlayerXp(p, 4 + Surprises.starOrbBonus()); addScore(25); beep("pickup"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
-      if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); addScore(100); }
+      if (game.orbs.every((q) => q.taken)) { beep("objective"); showObjectiveMessage("CRISTALES COMPLETOS", room().name + " · todos los cristales recogidos"); addScore(100); }
     }
   }
   for (const h of game.hearts) {
@@ -1556,7 +1556,7 @@ function updateEnemies() {
       if (e.invuln > 0) e.invuln--;
       try {
         updateBossNido(e, game, {
-          t, hurtPlayer, showNotification, makeFoe,
+          t, hurtPlayer, showBossMessage, makeFoe,
           ROOM_W: game.worldW, ROOM_H: game.worldH,
           reduceMotion: game.reduceMotion || reduceMotion,
           beep,
@@ -2178,7 +2178,7 @@ function updateEnemies() {
         beep("win");
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: game.reduceMotion ? 12 : 32, size: 6, up: 2.8, star: true });
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4060", count: game.reduceMotion ? 8 : 20, size: 4, up: 2, speed: 3.5 });
-        showNotification("EL NIDO CAE", "La Reina se deshace.", "sala");
+        showBossMessage("EL NIDO CAE", "La Reina se deshace.");
         beginFinale(e);
         return true;
       }
@@ -2216,10 +2216,10 @@ function updateEnemies() {
         e.diveCd = 40;
         e.diving = false;
         e.telegraph = false;
-        showNotification("¡VUELA!", "Cucaracho alado.", "hurt");
+        showCombatMessage("¡VUELA!", "Cucaracho alado.");
       } else {
         e.lungeCd = 40;
-        showNotification("CUCARACHO+", "Ha mudado. Más cabreado.", "hurt");
+        showCombatMessage("CUCARACHO+", "Ha mudado. Más cabreado.");
       }
       return true;
     }
@@ -2856,7 +2856,7 @@ function setupSelect() {
   const help = document.getElementById("help");
   if (helpBtn) helpBtn.onclick = toggleHelp;
   if (mapBtn) mapBtn.onclick = () => { if (game.running) showMap(); };
-  if (muteBtn) muteBtn.onclick = () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); };
+  if (muteBtn) muteBtn.onclick = () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); };
   if (fullBtn) fullBtn.onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); };
   if (help) help.addEventListener("click", (e) => { if (e.target.id === "help") help.classList.remove("open"); });
   const map = document.getElementById("map-overlay");
@@ -2932,7 +2932,7 @@ addEventListener("ohana-evolve-done", (e) => {
   const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
   const story = evolutionMessage(p.id, evo);
   const opened = evo === 1 ? "K abierto" : evo === 2 ? "L abierto" : evo === 4 ? "U, supremo" : "";
-  showNotification("FORMA " + (evo + 1), p.name + " · " + story.line + (opened ? " · " + opened : ""), "evo");
+  showEvolutionMessage("FORMA " + (evo + 1), p.name + " · " + story.line + (opened ? " · " + opened : ""));
   if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
   updateHUD();
 });
