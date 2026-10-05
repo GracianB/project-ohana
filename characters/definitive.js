@@ -424,19 +424,34 @@ function dino(ctx, pose) {
 }
 
 function frita(ctx, pose) {
-  const b = body(ctx, "frita", pose);
-  const y = b.hip - 34 * b.grow + b.a.bob;
-  ctx.fillStyle = b.accent;
-  ctx.fillRect(-14, y - 16, 28, 28 + b.f * 2);
-  ctx.strokeRect(-14, y - 16, 28, 28 + b.f * 2);
-  head(ctx, 0, y - 8, 12, pose, b.fur);
-  ctx.strokeStyle = b.light;
-  ctx.lineWidth = 2;
-  for (let i = 0; i < 3 + b.f; i++) {
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  ink(ctx, 3.2);
+  const hip = -12 - f;
+  limb(ctx, -6, hip, 12 + f, a.leg + 1.2, "#c45e16", 5);
+  limb(ctx, 6, hip, 12 + f, a.leg2 + 1.2, "#c45e16", 5);
+  const y = hip - 28 - f * 2 + a.bob;
+  ctx.fillStyle = ["#f0b43a", "#e07a2f", "#ffb43a", "#ffd36a", "#fff1b3"][f];
+  ctx.fillRect(-16, y - 8, 32, 30 + f * 2);
+  ctx.strokeRect(-16, y - 8, 32, 30 + f * 2);
+  ctx.fillStyle = "#e23b3b";
+  ctx.fillRect(-16, y + 10, 32, 5);
+  ctx.strokeRect(-16, y + 10, 32, 5);
+  head(ctx, 0, y + 4, 10, pose, "#fff1b3");
+  ctx.strokeStyle = "#fff1b3";
+  ctx.lineWidth = 3;
+  const n = 4 + f;
+  for (let i = 0; i < n; i++) {
     ctx.beginPath();
-    ctx.moveTo(-10 + i * 5, y - 16);
-    ctx.lineTo(-10 + i * 5, y - 28 - (i % 2) * 4);
+    ctx.moveTo(-14 + i * (28 / (n - 1)), y - 8);
+    ctx.lineTo(-14 + i * (28 / (n - 1)), y - 22 - (i % 2) * 6);
     ctx.stroke();
+  }
+  if (pose.state === "attack") {
+    ctx.fillStyle = "#fff";
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect(16 + i * 4, y + 2 + (i % 2) * 4, 2, 2);
+    }
   }
 }
 
