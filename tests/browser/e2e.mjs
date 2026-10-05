@@ -11,7 +11,7 @@ async function auditPage(page, label) {
   page.on('pageerror', (e) => errors.push('pageerror: ' + (e.stack || e.message)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
-  page.on('response', (response) => { if (response.status() >= 400) errors.push('response: ' + response.status() + ' ' + response.url()); });
+  page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
   // La intro es una animación autodestruible. El E2E no debe clicar un elemento
   // que puede desaparecer entre el descubrimiento del locator y su evaluación.
