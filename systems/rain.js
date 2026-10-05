@@ -156,8 +156,13 @@ export const Rain = {
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + d.drift * 1.4, y + d.len);
+        ctx.lineTo(x + d.drift * 0.6, y + d.len);
         ctx.stroke();
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath();
+        ctx.arc(x + d.drift * 0.6, y + d.len + 2, 3, 0, Math.PI);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
         if (d.hot) {
           ctx.fillStyle = "rgba(190, 255, 80, 0.9)";
           ctx.beginPath();
@@ -197,45 +202,64 @@ function drawUmbrella(ctx, cx, cy, scale) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
-  const gores = 8;
-  const R = 36;
-  for (let i = 0; i < gores; i++) {
-    const a0 = Math.PI + (i / gores) * Math.PI;
-    const a1 = Math.PI + ((i + 1) / gores) * Math.PI;
+  const panels = 6;
+  const span = 42;
+  const crown = -18;
+  function rib(i) {
+    const k = i / panels - 0.5;
+    return { x: k * span * 2, y: 6 + Math.abs(k) * 10 };
+  }
+  ctx.beginPath();
+  ctx.moveTo(-span, 8);
+  for (let i = 0; i <= panels; i++) {
+    const p = rib(i);
+    ctx.quadraticCurveTo(p.x * 0.5, crown + 4, p.x, p.y);
+  }
+  ctx.quadraticCurveTo(0, 16, -span, 8);
+  ctx.fillStyle = "rgba(20, 40, 16, 0.35)";
+  ctx.fill();
+  for (let i = 0; i < panels; i++) {
+    const a = rib(i);
+    const b = rib(i + 1);
     ctx.beginPath();
-    ctx.moveTo(0, 4);
-    ctx.arc(0, 4, R, a0, a1);
-    ctx.closePath();
-    ctx.fillStyle = i % 2 ? "#ffe14a" : "#f0a400";
+    ctx.moveTo(0, crown);
+    ctx.quadraticCurveTo((a.x + b.x) / 2, crown + 8, b.x, b.y);
+    ctx.lineTo(a.x, a.y);
+    ctx.quadraticCurveTo((a.x + b.x) / 2, crown + 8, 0, crown);
+    ctx.fillStyle = i % 2 ? "#ffe56a" : "#f2b20e";
     ctx.fill();
   }
   ctx.beginPath();
-  ctx.arc(0, 4, R, Math.PI, 0);
-  ctx.strokeStyle = "#241c0e";
-  ctx.lineWidth = 1.8;
+  ctx.moveTo(-span, 8);
+  for (let i = 0; i <= panels; i++) {
+    const p = rib(i);
+    ctx.quadraticCurveTo(p.x * 0.55, crown + 2, p.x, p.y);
+  }
+  ctx.strokeStyle = "#2a220f";
+  ctx.lineWidth = 2.2;
   ctx.stroke();
-  ctx.strokeStyle = "rgba(28, 22, 10, 0.55)";
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= gores; i++) {
-    const a = Math.PI + (i / gores) * Math.PI;
+  ctx.strokeStyle = "rgba(40, 28, 10, 0.7)";
+  ctx.lineWidth = 1.3;
+  for (let i = 0; i <= panels; i++) {
+    const p = rib(i);
     ctx.beginPath();
-    ctx.moveTo(0, 4);
-    ctx.lineTo(Math.cos(a) * R, 4 + Math.sin(a) * R);
+    ctx.moveTo(0, crown + 2);
+    ctx.quadraticCurveTo(p.x * 0.4, crown + 6, p.x, p.y);
     ctx.stroke();
   }
-  ctx.fillStyle = "#fff8dc";
+  ctx.fillStyle = "#fff4c8";
   ctx.beginPath();
-  ctx.arc(0, 4, 3.4, 0, Math.PI * 2);
+  ctx.arc(0, crown, 3.2, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#3a2a18";
-  ctx.lineWidth = 2.6;
+  ctx.strokeStyle = "#6b4a22";
+  ctx.lineWidth = 3.2;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(0, 4);
-  ctx.lineTo(0, 30);
+  ctx.moveTo(0, crown);
+  ctx.lineTo(0, 28);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(7, 30, 7, Math.PI, 0.15, true);
+  ctx.arc(8, 28, 8, Math.PI, 0.2, true);
   ctx.stroke();
   ctx.restore();
 }
