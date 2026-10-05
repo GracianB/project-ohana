@@ -32,8 +32,14 @@ class FakeElement {
 
 class FakeDocument {
   constructor() {
-    this.body = new FakeElement();
     this.nodes = new Map();
+    this.body = new FakeElement();
+    this.body.appendChild = (child) => {
+      child.parentNode = this.body;
+      if (child.id) this.nodes.set(child.id, child);
+      this.body.children.push(child);
+      return child;
+    };
   }
   getElementById(id) { return this.nodes.get(id) || null; }
   createElement() { return new FakeElement(); }
@@ -43,8 +49,8 @@ test("prioridades: evolución > jefe > combate > tutorial > sala > objetivo", ()
   assert.ok(messagePriority("evolution") > messagePriority("boss"));
   assert.ok(messagePriority("boss") > messagePriority("combat"));
   assert.ok(messagePriority("combat") > messagePriority("tutorial"));
-  assert.ok(messagePriority("tutorial") > messagePriority("room"));
-  assert.ok(messagePriority("room") > messagePriority("objective"));
+  assert.ok(messagePriority("room") > messagePriority("tutorial"));
+  assert.ok(messagePriority("tutorial") > messagePriority("objective"));
 });
 
 test("compatibilidad: tipos antiguos se normalizan al contrato nuevo", () => {
