@@ -13,6 +13,13 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
+  const gameSource = await page.evaluate(async () => {
+    const response = await fetch('/game.js?v=ohana-192', { cache:'no-store' });
+    return { ok: response.ok, status: response.status, source: await response.text() };
+  });
+  assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
+  assert.equal(gameSource.status, 200, label + ': game.js HTTP inválido');
+  assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
   // La intro es una animación autodestruible. El E2E no debe clicar un elemento
   // que puede desaparecer entre el descubrimiento del locator y su evaluación.
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
@@ -359,9 +366,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-191',
-      '/style.css?v=ohana-191',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-191',
+      '/game.js?v=ohana-192',
+      '/style.css?v=ohana-192',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-192',
     ];
     const results = [];
     for (const path of paths) {
