@@ -1696,7 +1696,7 @@ body.playing #ability-bar {
 }
 
 body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
-  top: 128px;
+  top: 140px;
 }
 
 .game-notification {
@@ -2023,7 +2023,7 @@ body.boss-fight::after {
   }
 
   body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
-    top: 124px;
+    top: 136px;
   }
   
   #boss-wrap {
