@@ -200,7 +200,53 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   ctx.restore();
 }
 
+function dress(ctx, world, cam, t) {
+  const id = world && world.id;
+  ctx.save();
+  if (id === "beach") {
+    for (let i = 0; i < 4; i++) {
+      const x = 180 + i * 420 - cam.x;
+      ctx.fillStyle = "#6a4a28";
+      ctx.fillRect(x, 520 - cam.y, 10, 160);
+      ctx.fillStyle = "#2f8a3a";
+      ctx.beginPath();
+      ctx.ellipse(x + 5, 500 - cam.y, 34, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (id === "jungle") {
+    ctx.strokeStyle = "rgba(40,120,50,.7)";
+    ctx.lineWidth = 3;
+    for (let i = 0; i < 6; i++) {
+      const x = 120 + i * 280 - cam.x;
+      ctx.beginPath();
+      ctx.moveTo(x, 80 - cam.y);
+      ctx.quadraticCurveTo(x + 20, 200 - cam.y, x - 8, 420 - cam.y);
+      ctx.stroke();
+    }
+  } else if (id === "volcano") {
+    ctx.fillStyle = "rgba(255,80,20,.18)";
+    ctx.fillRect(0, 980 - cam.y, 2240, 40);
+  } else if (id === "space") {
+    ctx.fillStyle = "#fff";
+    for (let i = 0; i < 18; i++) {
+      const x = (i * 137) % 2000 - cam.x;
+      const y = 40 + (i * 53) % 280 - cam.y;
+      ctx.globalAlpha = 0.4 + (i % 3) * 0.2;
+      ctx.fillRect(x, y, 2, 2);
+    }
+  } else if (id === "aquatic") {
+    ctx.strokeStyle = "rgba(140,230,255,.35)";
+    for (let i = 0; i < 8; i++) {
+      const y = ((t * 0.4 + i * 90) % 700) - cam.y;
+      ctx.beginPath();
+      ctx.arc(160 + i * 240 - cam.x, y, 6 + (i % 3), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
 export function drawTerrain(ctx, platforms, world, cam, t) {
   drawChasms(ctx, platforms, cam, t);
   for (const plat of platforms) drawPlatform(ctx, plat, world, cam, t);
+  dress(ctx, world, cam, t);
 }
