@@ -58,6 +58,7 @@ const PRECACHE = [
   "./systems/boss-counterplay.js?v=" + VERSION,
   "./systems/boss-encounter-memory.js?v=" + VERSION,
   "./systems/boss-fx.js?v=" + VERSION,
+  "./systems/boss-hud.js?v=" + VERSION,
   "./systems/boss-nido.js?v=" + VERSION,
   "./systems/combat-fx.js?v=" + VERSION,
   "./systems/combat-feedback.js?v=" + VERSION,
