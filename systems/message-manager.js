@@ -18,10 +18,10 @@ const TYPE_ALIASES = {
 const PRIORITY = {
   system: 20,
   info: 30,
-  objective: 40,
-  room: 50,
-  tutorial: 60,
-  combat: 70,
+  objective: 35,
+  tutorial: 45,
+  combat: 55,
+  room: 65,
   boss: 90,
   evolution: 100,
   error: 110,
@@ -95,13 +95,15 @@ export class MessageManager {
 
   dismiss() {
     this.clearTimer();
-    if (!this.node) return;
-    const current = this.node.querySelector(".game-notification");
+    const current = this.node?.querySelector(".game-notification");
     if (current) current.classList.add("closing");
-    setTimeout(() => {
-      this.renderFallback();
-    }, 180);
+    const dismissedKey = this.current?.key || "";
     this.current = null;
+    setTimeout(() => {
+      if (!this.current && (!dismissedKey || this.lastKey === dismissedKey)) {
+        this.renderFallback();
+      }
+    }, 180);
   }
 
   setObjective(text, done = false) {
