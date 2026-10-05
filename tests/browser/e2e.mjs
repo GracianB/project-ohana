@@ -303,8 +303,12 @@ try {
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
 
-  // V34.1 — Pizza L real.
-  await page.evaluate(() => window.__OHANA_E2E.start('pizza'));
+  // V34.1 — Pizza L real. L se desbloquea en forma 3 (evo 2).
+  await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('pizza');
+    api.setEvo(2);
+  });
   await page.locator('#game').focus();
   await page.keyboard.press('l');
   await page.waitForTimeout(80);
