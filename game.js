@@ -5,6 +5,7 @@ import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
+import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
@@ -2359,7 +2360,8 @@ function render() {
   ctx.translate(-centerX, -centerY);
   if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
   else {
-    renderWorld(ctx, world, game.cam, t, camW(), camH());
+    const painted = drawPaintedRoom(ctx, game.roomId, camW(), camH());
+    if (!painted) renderWorld(ctx, world, game.cam, t, camW(), camH());
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
