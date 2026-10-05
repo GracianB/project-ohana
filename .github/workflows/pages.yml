@@ -56,6 +56,7 @@ jobs:
           const index = read("index.html");
           const progress = read("PROGRESS.md");
           const improvements = read("IMPROVEMENTS.md");
+          const sw = read("sw.js");
           const readme = read("README.md");
           const errors = [];
 
@@ -118,6 +119,11 @@ jobs:
           }
 
           const versions = [...index.matchAll(/ohana-(\d+)/g)].map((m) => m[0]);
+          const swVersionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+          const swVersion = swVersionMatch ? swVersionMatch[1] : "";
+          if (swVersion !== (versions[0] || "")) {
+            errors.push("sw.js: no comparte la versión de caché con index.html");
+          }
           const uniqueVersions = [...new Set(versions)];
 
           if (uniqueVersions.length !== 1) {

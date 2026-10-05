@@ -181,7 +181,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-113`
+`ohana-114`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
@@ -200,6 +200,13 @@ La auditoría actual cubre determinismo de gameplay, renderers, runtime y cohere
 Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar en la misma entrega:
 
 `manifest.json` · `README.md` · `PROGRESS.md` · `IMPROVEMENTS.md` · CI
+
+## Phase 40 - Cache Graph Closure
+
+- El Service Worker precachea los módulos JavaScript de runtime con la versión de caché actual.
+- El pipeline verifica que `index.html` y `sw.js` compartan la misma versión.
+- La regresión de hardening comprueba que ningún `.js` de runtime quede fuera del precache.
+- Cache: `ohana-114`.
 
 ## Phase 39 - Session Reset Closure
 

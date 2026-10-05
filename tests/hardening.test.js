@@ -427,3 +427,37 @@ test('phase 39: start() no hereda estado transitorio de una sesión anterior', (
   assert.match(block, /game\.cam\.x = 0;/);
   assert.match(block, /game\.cam\.y = 0;/);
 });
+
+test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la versión coherente', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeFiles = ['./game.js'];
+
+  const walk = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) runtimeFiles.push(path);
+    }
+  };
+
+  for (const dir of runtimeDirs) walk(dir);
+
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+  const precache = new Set(
+    [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
+  );
+
+  assert.ok(index.includes('?v=' + version), 'index.html debe usar la versión declarada por sw.js');
+
+  for (const file of runtimeFiles.sort()) {
+    const normalized = file.replace(/^\.\//, '');
+    assert.ok(precache.has(normalized), 'módulo JS fuera del precache: ' + normalized);
+  }
+
+  assert.ok(precache.size >= runtimeFiles.length, 'el precache debe cubrir al menos todo el runtime JS');
+});

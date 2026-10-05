@@ -103,6 +103,10 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 
 76. Phase 38: cierre final del firewall de mutaciones, incluyendo combo, para eliminar la última aritmética directa sobre un contador crítico de combate.
 
+## Phase 40 - Cache Graph Closure
+
+77. Phase 40: cierre del grafo de caché del runtime; todos los módulos JavaScript de producción quedan precacheados con `ohana-114` y una regresión automática impide dejar módulos nuevos fuera del Service Worker.
+
 ## Phase 39 - Session Reset Closure
 
 El arranque de una nueva partida no debe heredar estado transitorio de una sesión anterior. Se cubren countdown del Nido, finale, transiciones de puertas, cámara, flashes, pausa y runtime faults.
