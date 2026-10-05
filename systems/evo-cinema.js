@@ -13,7 +13,7 @@ import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
-import { drawEvolutionCinemaFX, evolutionMessage } from "../characters/evolution.js";
+import { drawEvolutionCinemaFX } from "../characters/evolution.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -336,23 +336,6 @@ export class Silhouette {
 }
 
 // ---------------------------------------------------------------------------
-// Texto de mejora (compara stats de la forma anterior y la nueva)
-// ---------------------------------------------------------------------------
-function upgradeLine(id, evo) {
-  const def = ROSTER.find((r) => r.id === id);
-  if (!def || !def.forms) return "";
-  const a = def.forms[evo - 1], b = def.forms[evo];
-  if (!a || !b) return "";
-  const out = [];
-  if (b.hp > a.hp) out.push("+" + (b.hp - a.hp) + " PS");
-  if (b.speed > a.speed) out.push("+velocidad");
-  if (b.jump > a.jump && !(b.jumps > a.jumps)) out.push("+salto");
-  if (b.jumps > a.jumps) out.push("+" + (b.jumps - a.jumps) + (b.jumps - a.jumps > 1 ? " saltos" : " salto"));
-  if (b.glide) out.push("planeo");
-  return out.join("  ·  ");
-}
-
-// ---------------------------------------------------------------------------
 // Cinemática
 // ---------------------------------------------------------------------------
 let stage = null;
@@ -392,16 +375,14 @@ export function playEvolution(detail = {}) {
   const light = tint(accent, 0.55);
   const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
-  const story = evolutionMessage(def.id, evo);
   const title = "¡" + toName.toUpperCase() + "!";
-  const upg = upgradeLine(def.id, evo);
   const reduce = reducedMotion();
 
-  // Línea de tiempo (s). FINAL dura más.
-  const k = finalForm ? 1.32 : 1;
+  // Línea de tiempo breve: impacto visual fuerte, regreso rápido al juego.
+  const k = finalForm ? 1.15 : 1;
   const T = reduce
-    ? { dark: 0.25, oldIn: 0, charge: 0, flip: 0, flash: 0.25, reveal: 0.25, out: 1.55, end: 1.85 }
-    : { dark: 0.45 * k, oldIn: 0.2 * k, charge: 0.7 * k, flip: 1.55 * k, flash: 2.35 * k, reveal: 2.35 * k, out: 4.4 * k, end: 5.1 * k }; // +1 s con la forma nueva a la vista
+    ? { dark: 0.18, oldIn: 0, charge: 0, flip: 0, flash: 0.20, reveal: 0.20, out: 1.05, end: 1.35 }
+    : { dark: 0.34 * k, oldIn: 0.15 * k, charge: 0.55 * k, flip: 1.20 * k, flash: 1.85 * k, reveal: 1.85 * k, out: 3.20 * k, end: 3.80 * k };
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
@@ -411,7 +392,7 @@ export function playEvolution(detail = {}) {
   const { el, fc } = st;
   const ctx = fc.ctx;
 
-  st.sr.textContent = story.kicker + ". " + toName + ". " + story.line + " Forma " + (evo + 1) + " de 5. " + upg;
+  st.sr.textContent = "Evolución completada: " + toName + ". Nueva forma " + (evo + 1) + " de 5.";
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
   let ladder = el.querySelector(".form-ladder");
@@ -717,21 +698,12 @@ export function playEvolution(detail = {}) {
         ctx.fillStyle = i <= evo ? (i === evo ? "#ffffff" : accent) : "rgba(255,255,255,0.18)";
         ctx.fill();
       }
-      // Frase de identidad: cada personaje tiene una lectura propia de la evolución.
-      const quoteU = reduce ? 1 : seg(t, T.reveal + 0.42, T.reveal + 0.78);
-      ctx.globalAlpha = quoteU * fade;
-      drawTitle(ctx, story.line, cx, pipY + size * 0.46 + (1 - easeOut(quoteU)) * 8, Math.max(12, size * 0.24),
-        "#eef6ff", { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.9 });
-      if (upg) {
-        const u = reduce ? 1 : seg(t, T.reveal + 0.58, T.reveal + 0.95);
-        ctx.globalAlpha = u * fade;
-        drawTitle(ctx, upg, cx, pipY + size * 0.82 + (1 - easeOut(u)) * 10, Math.max(11, size * 0.22), tint(accent, 0.7),
-          { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.9 });
-      }
+      // La cinemática solo comunica el cambio de forma.
+      // La historia y la habilidad desbloqueada se anuncian una sola vez por MessageManager.
       ctx.restore();
     }
-    // pista para saltar
-    if (t > 0.8 && t < T.out) {
+    // Pista mínima para continuar o saltar la cinemática.
+    if (t > 0.65 && t < T.out) {
       ctx.save();
       ctx.globalAlpha = 0.5 * seg(t, 0.8, 1.2);
       drawTitle(ctx, "Toca o pulsa una tecla para continuar", cx, H - 22, 11, "#cfe0f2",
