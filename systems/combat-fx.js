@@ -55,16 +55,20 @@ export class CombatFX {
       const fade = 1 - u;
       const x = item.x - cam.x;
       const y = item.y - cam.y;
-      const span = 12 + item.tier * 7;
+      const span = 18 + item.tier * 11;
       const alpha = fade * (0.64 + item.tier * 0.08);
 
       ctx.globalCompositeOperation = "lighter";
       ctx.globalAlpha = alpha;
       ctx.strokeStyle = item.color;
-      ctx.lineWidth = 1.6 + item.tier * 0.55;
+      ctx.lineWidth = 2.8 + item.tier * 0.9;
 
       ctx.beginPath();
       ctx.arc(x, y, span * (0.25 + e * 0.9), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      const sweep = -0.9 + item.dir * 0.2;
+      ctx.arc(x - item.dir * span * 0.15, y, span * (0.55 + e * 0.7), sweep, sweep + 1.7);
       ctx.stroke();
 
       const rays = 4 + item.tier * 2;

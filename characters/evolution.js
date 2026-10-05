@@ -19,45 +19,45 @@ const IDS = Object.freeze([
 
 export const EVOLUTION_STAGES = Object.freeze([
   Object.freeze({
-    id: 0, name: "baby", scaleX: 0.94, scaleY: 0.95,
-    sway: 0.86, bounce: 1.08, lean: 0.55, head: 0.80,
-    arms: 0.88, legs: 0.92, air: 0.82, pulse: 0.85,
-    ornament: 0.55,
+    id: 0, name: "baby", scaleX: 0.74, scaleY: 0.78,
+    sway: 1.05, bounce: 1.28, lean: 0.42, head: 1.08,
+    arms: 0.78, legs: 0.82, air: 0.74, pulse: 0.72,
+    ornament: 0.42,
   }),
   Object.freeze({
     id: 1, name: "base", scaleX: 1.00, scaleY: 1.00,
-    sway: 0.98, bounce: 1.00, lean: 0.92, head: 0.94,
-    arms: 1.00, legs: 1.00, air: 0.96, pulse: 1.00,
-    ornament: 0.72,
+    sway: 1.00, bounce: 1.00, lean: 0.92, head: 1.00,
+    arms: 1.00, legs: 1.00, air: 1.00, pulse: 1.00,
+    ornament: 0.78,
   }),
   Object.freeze({
-    id: 2, name: "awakened", scaleX: 1.035, scaleY: 1.045,
-    sway: 1.06, bounce: 0.94, lean: 1.12, head: 1.08,
-    arms: 1.08, legs: 1.08, air: 1.08, pulse: 1.18,
-    ornament: 0.92,
+    id: 2, name: "awakened", scaleX: 1.16, scaleY: 1.14,
+    sway: 1.12, bounce: 0.90, lean: 1.22, head: 1.12,
+    arms: 1.16, legs: 1.12, air: 1.16, pulse: 1.28,
+    ornament: 1.05,
   }),
   Object.freeze({
-    id: 3, name: "ascended", scaleX: 1.085, scaleY: 1.075,
-    sway: 1.14, bounce: 0.88, lean: 1.28, head: 1.16,
-    arms: 1.18, legs: 1.14, air: 1.18, pulse: 1.38,
-    ornament: 1.10,
+    id: 3, name: "ascended", scaleX: 1.32, scaleY: 1.26,
+    sway: 1.22, bounce: 0.82, lean: 1.42, head: 1.22,
+    arms: 1.28, legs: 1.20, air: 1.28, pulse: 1.52,
+    ornament: 1.28,
   }),
   Object.freeze({
-    id: 4, name: "final", scaleX: 1.11, scaleY: 1.09,
-    sway: 1.28, bounce: 0.76, lean: 1.52, head: 1.28,
-    arms: 1.28, legs: 1.22, air: 1.30, pulse: 1.65,
-    ornament: 1.34,
+    id: 4, name: "final", scaleX: 1.52, scaleY: 1.40,
+    sway: 1.34, bounce: 0.70, lean: 1.68, head: 1.36,
+    arms: 1.42, legs: 1.30, air: 1.46, pulse: 1.85,
+    ornament: 1.62,
   }),
 ]);
 
 
 
 export const EVOLUTION_COMBAT_STAGES = Object.freeze([
-  Object.freeze({ id: 0, attack: 0.82, cast: 0.84, impact: 0.80, trail: 0.70, glow: 0.65, density: 0.72, snap: 0.82 }),
+  Object.freeze({ id: 0, attack: 0.72, cast: 0.74, impact: 0.68, trail: 0.55, glow: 0.48, density: 0.62, snap: 0.78 }),
   Object.freeze({ id: 1, attack: 1.00, cast: 1.00, impact: 1.00, trail: 0.92, glow: 0.86, density: 0.92, snap: 1.00 }),
-  Object.freeze({ id: 2, attack: 1.08, cast: 1.12, impact: 1.10, trail: 1.10, glow: 1.08, density: 1.08, snap: 1.10 }),
-  Object.freeze({ id: 3, attack: 1.18, cast: 1.26, impact: 1.24, trail: 1.28, glow: 1.30, density: 1.24, snap: 1.20 }),
-  Object.freeze({ id: 4, attack: 1.30, cast: 1.44, impact: 1.38, trail: 1.46, glow: 1.58, density: 1.42, snap: 1.34 }),
+  Object.freeze({ id: 2, attack: 1.22, cast: 1.28, impact: 1.24, trail: 1.22, glow: 1.18, density: 1.16, snap: 1.16 }),
+  Object.freeze({ id: 3, attack: 1.46, cast: 1.52, impact: 1.48, trail: 1.50, glow: 1.46, density: 1.38, snap: 1.32 }),
+  Object.freeze({ id: 4, attack: 1.78, cast: 1.86, impact: 1.72, trail: 1.84, glow: 1.92, density: 1.66, snap: 1.48 }),
 ]);
 
 export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
@@ -372,18 +372,18 @@ function drawGlyph(ctx, kind, x, y, s, color, rot = 0) {
 export function drawEvolutionSilhouetteFX(ctx, p, H, pose, t, front = false) {
   const e = evolutionProfile(p, pose?.form);
   const stage = e.evo;
-  if (stage < 2) return;
+  if (stage < 0) return;
 
   const d = e.finalDesign;
   const color = p?.color || d.accent || "#fff6c8";
   const hot = d.accent || color;
-  const k = stage === 2 ? 0.55 : stage === 3 ? 0.78 : 1;
+  const k = [0.34, 0.52, 0.72, 0.88, 1][stage] || 1;
   const pulse = 1 + Math.sin((Number(t) || 0) * 0.028 * e.pulse) * 0.035;
   const S = H * d.span * k;
 
   ctx.save();
   ctx.globalCompositeOperation = front ? "source-over" : "lighter";
-  ctx.globalAlpha = (front ? 0.72 : 0.62) * k;
+  ctx.globalAlpha = (front ? 0.88 : 0.74) * (0.55 + k);
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
 
@@ -585,7 +585,7 @@ export function drawEvolutionSignatureFX(ctx, p, H, pose, t) {
 
 export function drawEvolutionCombatFX(ctx, p, H, pose, t) {
   const e = evolutionProfile(p, pose?.form);
-  if (e.evo < 1 || pose?.state !== "attack") return;
+  if (pose?.state !== "attack" && pose?.state !== "cast") return;
   const impact = Math.max(0, Math.min(1, Number(pose?.impact) || 0));
   const atk = Math.max(0, Math.min(1, Number(pose?.atk) || 0));
   const k = Math.max(impact, atk * 0.55);
@@ -593,13 +593,13 @@ export function drawEvolutionCombatFX(ctx, p, H, pose, t) {
 
   const d = e.finalDesign;
   const color = d.accent || p?.color || "#fff6c8";
-  const reach = H * (0.22 + e.evo * 0.045) * (0.8 + e.combat.impact * 0.2);
+  const reach = H * (0.34 + e.evo * 0.08) * (0.8 + e.combat.impact * 0.2);
   ctx.save();
   ctx.globalCompositeOperation="lighter";
   ctx.globalAlpha=Math.min(0.9, k * (0.28 + e.evo * 0.08));
   ctx.strokeStyle=color;
   ctx.lineCap="round";
-  ctx.lineWidth=Math.max(1.4,H*(0.012+e.evo*0.002));
+  ctx.lineWidth=Math.max(2.4,H*(0.028+e.evo*0.008));
 
   const f=p?.facing||1;
   if(d.motif==="bolt"){
@@ -749,7 +749,7 @@ export function drawEvolutionCinemaFX(ctx, id, evo, cx, cy, H, t, color, strengt
 export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
   const e = evolutionProfile(p, pose?.form);
   const stage = e.evo;
-  if (stage < 2) return;
+  if (stage < 0) return;
 
   const d = e.finalDesign;
   const color = p?.color || "#fff6c8";
