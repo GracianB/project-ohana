@@ -9,7 +9,7 @@ import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
-import { showNotification } from "./systems/notify.js";
+import { showNotification, showRoomMessage } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
@@ -324,13 +324,6 @@ function toggleHelp() {
   if (open) setPaused(false);
   help.classList.toggle("open", open);
 }
-function showBanner(name, line) {
-  const el = DOM.roomBanner;
-  if (!el) return;
-  el.textContent = line ? name.toUpperCase() + "  ·  " + line : name.toUpperCase();
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 1800);
-}
 function setPrompt(text, on) {
   const el = DOM.prompt;
   if (!el) return;
@@ -537,24 +530,29 @@ function loadRoom(id, fromDir) {
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
   const LINES = {
-    hub: "Aquí empieza Ohana. Nadie se queda en el claro.",
-    beach: "La costa abre el este. El hueco no perdona.",
-    jungle: "La jungla guarda la bajada a la caldera.",
-    cave: "La cueva es el oeste. El laboratorio espera forma.",
-    lab: "Llueve verde. El paraguas está en el suelo.",
-    ridge: "La cumbre mira al claro y a la órbita.",
-    space: "Aquí caen estrellas. El vórtice baja al agua.",
-    reef: "El arrecife devuelve a la costa.",
-    volcano: "La caldera es la puerta de la Reina.",
-    boss: "El nido. Quien no llegó sigue dentro."
+    hub: "Aquí empieza Ohana. Reúne fuerzas y abre la ruta por la costa.",
+    beach: "La costa abre el este. Cruza el hueco y sigue hacia la jungla.",
+    jungle: "La jungla guarda la bajada. Busca la forma necesaria para entrar en la caldera.",
+    cave: "La cueva protege la ruta oeste. El laboratorio queda al otro lado.",
+    lab: "El laboratorio guarda una ruta alternativa. Mira el paraguas y sigue adelante.",
+    ridge: "La cumbre conecta el claro con la órbita. El camino continúa hacia las estrellas.",
+    space: "Aquí caen estrellas. El vórtice abre la bajada al arrecife.",
+    reef: "El arrecife devuelve a la costa. Recoge lo que encuentres antes de volver.",
+    volcano: "La caldera es la última puerta. La Reina del Nido espera más adelante.",
+    boss: "La Reina ha despertado. Aquí termina la ruta de este Mundo."
   };
-  if (first && LINES[id]) showNotification(r.name, LINES[id], "sala");
-  if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name, r.short || ""); }
-  else {
+  if (!r.boss) {
+    const story = LINES[id] || "";
+    const objective = r.hint || r.goal || "";
+    showRoomMessage(r.name, first && story ? story + (objective ? " " + objective : "") : objective || story || "Explora la sala.", {
+      key: "room:" + id + ":" + (first ? "first" : "repeat")
+    });
+  } else {
     game.bossIntro = { t: 220 };
     game.storyLine = "La Reina sale del nido. No negocia.";
-    showNotification("EL NIDO", "Quien no evolucionó se quedó dentro.", "sala");
-    showBanner("REINA DEL NIDO");
+    showNotification("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 1.", "boss", {
+      key: "boss:intro"
+    });
     game.flash = 16;
     game.flashColor = "#ff4060";
     game.shake = 12;
