@@ -240,3 +240,11 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - El CI audita todas las importaciones locales relativas de los módulos JavaScript de runtime.
 - Se comprueban rutas directas, sufijo `.js` y `index.js`, rechazando dependencias locales sin destino.
 - Cache: `ohana-117`.
+
+
+## Phase 44 - Save Transaction Closure
+
+- El guardado escribe primero en un staging `ohana.tmp` y solo lo confirma sobre `ohana` después.
+- Un fallo de quota/escritura no destruye el checkpoint previo y el staging puede servir como recuperación defensiva.
+- Los saves con una versión explícita desconocida se rechazan; v2 sigue siendo el contrato publicado.
+- Cache: `ohana-118`.
