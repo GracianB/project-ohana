@@ -149,6 +149,7 @@ npm run release:check
 ```
 
 El E2E real de navegador ejecuta `node tests/browser/e2e.mjs`.
+La matriz visual ejecuta `node tests/browser/visual-regression.mjs`.
 
 Las pruebas cubren, entre otras áreas:
 
