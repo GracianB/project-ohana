@@ -51,8 +51,10 @@ export function drawEnemy(ctx, e, cam, t) {
     ctx.textAlign = "center";
     ctx.fillText("!", 0, -e.h / 2 - 10);
   }
-  ctx.fillStyle = "rgba(0,0,0,.28)";
-  ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 2, e.w * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
+  const bob = e.boss ? 0 : Math.sin(t / 7 + e.x * 0.02) * 1.4;
+  ctx.translate(0, bob);
+  ctx.fillStyle = "rgba(0,0,0,.34)";
+  ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 4 - bob, e.w * 0.48, 5, 0, 0, Math.PI * 2); ctx.fill();
 
   if (e.telegraph) drawTelegraph(ctx, e, t);
   if (e.elite) drawEliteAura(ctx, e, t);
@@ -77,6 +79,15 @@ export function drawEnemy(ctx, e, cam, t) {
   else if (e.kind === "ufo") drawUfo(ctx, e, t);
   else drawCucaracho(ctx, e, t);
 
+  if (!e.boss) {
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, e.w * 0.55, e.h * 0.62, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   ctx.filter = "none";
   // Overlay de golpe: blanco → rojo corto
   if (e.flash > 0 && !e.boss) {
