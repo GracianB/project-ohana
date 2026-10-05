@@ -39,7 +39,7 @@ Esta rama es el **candidato consolidado de cierre de Mundo 1**. No se declara el
 
 ## Criterio de cierre
 
-El cierre solo puede pasar a `main` cuando los cuatro comandos anteriores terminen en PASS en CI y la auditoría de navegador confirme:
+El cierre solo puede pasar a `main` cuando el workflow `quality` ejecute los cuatro comandos y todos terminen en PASS en CI y la auditoría de navegador confirme:
 
 1. una sola tarjeta de mensaje activa;
 2. ningún overlay legacy;
