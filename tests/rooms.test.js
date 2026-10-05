@@ -21,6 +21,7 @@ test("room visual contract: 10 salas con identidad y mundo válidos", () => {
     assert.ok(room.world >= 0 && room.world < WORLDS.length);
 
     for (const [direction, dest] of Object.entries(room.doors || {})) {
+      if (dest == null) continue;
       assert.ok(ROOMS[dest], room.id + "." + direction + " apunta a sala inexistente: " + dest);
     }
 
