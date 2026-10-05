@@ -276,3 +276,7 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Cache: `ohana-121`.
 
 - Release Gate: `node tools/release-gate.mjs` / `release:check` antes de publicar.
+
+## V33 · EXPERIENCE
+- Cache: `ohana-122`
+- Combat feel, movement feedback, dynamic camera, boss presence y evolution presentation.
