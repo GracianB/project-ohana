@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro, playTitleIntro } from "./intro.js?v=ohana-195";
+import { playIntro, playTitleIntro } from "./intro.js?v=ohana-196";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
