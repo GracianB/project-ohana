@@ -1,3 +1,4 @@
+import path from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -537,17 +538,11 @@ test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', 
 
   const resolveLocal = (from, spec) => {
     const clean = spec.split(/[?#]/, 1)[0];
-    const base = clean.startsWith('.')
-      ? clean
-      : './' + clean;
-    const normalized = ('./' + from.split('/').slice(0, -1).join('/') + '/' + base)
-      .replace(/\/+/g, '/')
-      .replace('/./', '/')
-      .replace(/^\.\//, '');
+    const base = path.posix.normalize(path.posix.join(path.posix.dirname(from), clean));
     const candidates = [
-      normalized,
-      normalized + '.js',
-      normalized.replace(/\/$/, '') + '/index.js',
+      base,
+      base + '.js',
+      base.replace(/\/$/, '') + '/index.js',
     ];
     return candidates.find((candidate) => all.has(candidate)) || null;
   };
