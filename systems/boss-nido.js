@@ -106,7 +106,7 @@ export function updateBossNido(e, game, helpers) {
   const {
     t = 0,
     hurtPlayer,
-    showNotification,
+    showBossMessage,
     makeFoe,
     ROOM_W = 1200,
     ROOM_H = 800,
@@ -152,7 +152,7 @@ export function updateBossNido(e, game, helpers) {
   }
 
   if (e.phase >= 3 && e.spawnCd <= 0 && bossRng(e) < 0.012) {
-    spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion);
+    spawnMinion(e, game, makeFoe, showBossMessage, cx, reduceMotion);
   }
 
   applyBoundsAndClamp(e, ROOM_W, ROOM_H, floorY);
@@ -201,7 +201,7 @@ function resetAttackState(e) {
 }
 
 function handleIntro(e, game, helpers, cx, floorY) {
-  const { reduceMotion, beep, showNotification } = helpers;
+  const { reduceMotion, beep, showBossMessage } = helpers;
   const landAt = e.introMax - 22;
   const roarAt = 26;
   e.introT--;
@@ -234,12 +234,12 @@ function handleIntro(e, game, helpers, cx, floorY) {
     e.contactDmg = 22;
     e.attackCd = 50;
     land(e, 40);
-    if (showNotification) showNotification("REINA DEL NIDO", "Mira el suelo. Espera el brillo rojo.", "sala");
+    if (showBossMessage) showBossMessage("REINA DEL NIDO", "Mira el suelo. Espera el brillo rojo.");
   }
 }
 
 function checkPhaseTransitions(e, game, helpers, cx, cy) {
-  const { reduceMotion, beep, showNotification } = helpers;
+  const { reduceMotion, beep, showBossMessage } = helpers;
   const ratio = e.hp / Math.max(1, e.max);
   if (ratio <= CONFIG.PHASE_THRESHOLDS.PHASE_3 && e.phase < 3) {
     e.phase = 3;
@@ -267,7 +267,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
       game.shake = Math.max(game.shake || 0, 20);
       emitParticles(game, cx, cy, { color: "#ff2040", count: 28, size: 5.5, up: 2.4, star: true }, reduceMotion);
       game.bossFx?.phaseTransition?.(cx, cy, 3);
-      if (showNotification) showNotification("FASE FINAL", "Se posa. El vuelo es el ataque.", "hurt");
+      if (showBossMessage) showBossMessage("FASE FINAL", "Se posa. El vuelo es el ataque.");
       safeBeep(beep, "hurt");
     }
   } else if (ratio <= CONFIG.PHASE_THRESHOLDS.PHASE_2 && e.phase < 2) {
@@ -290,7 +290,7 @@ function checkPhaseTransitions(e, game, helpers, cx, cy) {
       game.shake = Math.max(game.shake || 0, 16);
       emitParticles(game, cx, cy, { color: "#ff2848", count: 24, size: 5, up: 2.2, star: true }, reduceMotion);
       game.bossFx?.phaseTransition?.(cx, cy, 2);
-      if (showNotification) showNotification("FASE 2", "Abre las alas, pero vuelve al nido.", "hurt");
+      if (showBossMessage) showBossMessage("FASE 2", "Abre las alas, pero vuelve al nido.");
       safeBeep(beep, "hurt");
     }
   }
@@ -672,7 +672,7 @@ function beginAttack(e, game, helpers, floorY) {
   emitParticles(game, cx + aim * 30, cy, { color: "#ff5a6a", count: 6, size: 2.8, up: 0.6 }, reduceMotion);
 }
 
-function spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion) {
+function spawnMinion(e, game, makeFoe, showBossMessage, cx, reduceMotion) {
   if (typeof makeFoe !== "function" || !Array.isArray(game.enemies)) return;
   const babies = game.enemies.filter((x) => x.kind === "phosquito" && x.baby && x.hp > 0).length;
   if (babies < 2) {
@@ -684,7 +684,7 @@ function spawnMinion(e, game, makeFoe, showNotification, cx, reduceMotion) {
       pushRuntime(game.enemies, baby, MAX_RUNTIME_ENEMIES);
       emitParticles(game, cx, e.y, { color: "#6ad0a8", count: 10, size: 3, up: 1.4 }, reduceMotion);
       game.bossFx?.spawn?.(cx, e.y, e.phase);
-      if (showNotification) showNotification("CRÍA", "Un phosquito nace del nido.", "sala");
+      if (showBossMessage) showBossMessage("CRÍA", "Un phosquito nace del nido.");
     }
   }
 }

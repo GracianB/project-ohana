@@ -1,4 +1,4 @@
-# 76 mejoras · Demo Mundo 1
+# 110 mejoras · Demo Mundo 1
 
 ## Jugabilidad y presentación
 
@@ -158,3 +158,25 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 
 91. Phase 52: release gate único para coherencia de versión, cifras, runtime precacheado, recursos y scripts.
 92. Phase 55: smoke de Chromium contra la URL real de GitHub Pages después del despliegue.
+
+## Block E · Experience Recovery · 05/10/2026
+
+93. Message Manager 2.0: una sola salida visual y prioridades semánticas.
+94. Room Voice: una sola narración por entrada de sala.
+95. Tutorial contextual por acción real, sin secuencia automática.
+96. Objetivos dinámicos con destino y requisito según estado.
+97. Cinemática de evolución breve y sin letterbox.
+98. Separación de narración y VFX durante evolución.
+99. Blindaje de 10 salas y sus conexiones.
+100. Presencia idle individual de los 10 héroes sin marcadores artificiales.
+101. Combate visual-first con texto reducido.
+102. Telegraphs direccionales independientes del color.
+103. HUD con jerarquía entre objetivo, mensaje temporal y boss.
+104. Accesibilidad de live regions según prioridad.
+105. Contrato de mensajería contra regresión de overlays legacy.
+106. E2E de experiencia con singularidad de mensajes y solapes.
+107. Matriz visual de selección, salas, evolución, boss, mapa y ayuda.
+108. Release gate alineado con el nuevo `npm test` global.
+109. Grafo de caché consolidado en `ohana-191`.
+110. Documentación de cierre alineada con la arquitectura actual.
+

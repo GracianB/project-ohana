@@ -527,8 +527,17 @@ function drawSignatureFX(ctx, p, H, pose, t) {
   const attackU = pose.state === "attack" ? Math.max(0, Math.min(1, pose.atk || 0)) : 0;
   const attack = attackU ? Math.sin(attackU * Math.PI) : 0;
   const dash = p?.dash > 0 ? Math.min(1, p.dash / 12) : 0;
+  const flourish = pose.state === "idle"
+    ? Math.max(0, Math.min(1, Number(pose.flourish) || 0))
+    : 0;
   const evoCombat = pose.evolutionCombat || {};
-  const energy = Math.max(run * 0.72 * (Number(evoCombat.trail) || 1), cast, attack * (Number(evoCombat.attack) || 1), dash * 0.9);
+  const energy = Math.max(
+    run * 0.72 * (Number(evoCombat.trail) || 1),
+    cast,
+    attack * (Number(evoCombat.attack) || 1),
+    dash * 0.9,
+    flourish * 0.28
+  );
   if (energy < 0.06) return;
 
   const color = accentFor(p);

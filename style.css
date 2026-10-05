@@ -628,39 +628,38 @@ body.playing #top-actions {
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
-
-/* ─── Banner de Sala ────────────────────────────────────────────────────── */
-#room-banner {
+/* ─── Prompt ────────────────────────────────────────────────────────────── */
+#prompt {
   position: fixed;
-  top: 88px;
+  bottom: 92px;
   left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-full);
-  background: var(--surface-glass);
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: rgba(8, 12, 22, 0.7);
   border: 1px solid var(--border-subtle);
-  font: 700 13px var(--font-body);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  backdrop-filter: blur(12px);
+  font-size: 12px;
+  color: var(--text-secondary);
   z-index: var(--z-ui);
   pointer-events: none;
   opacity: 0;
-  transition: all var(--transition-slow);
+  transition: opacity var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
-#room-banner.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+#prompt.show { opacity: 1; }
+
+.prompt-icon {
+  color: var(--accent-cyan);
+  animation: prompt-blink 1.5s ease-in-out infinite;
 }
 
-.banner-text {
-  background: linear-gradient(90deg, var(--text-primary), var(--accent-cyan));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+@keyframes prompt-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
-
 /* ─── Prompt ────────────────────────────────────────────────────────────── */
 #prompt {
   position: fixed;
@@ -1676,117 +1675,91 @@ body.playing #ability-bar {
   margin-top: var(--space-md);
 }
 
-/* ─── Notificaciones ───────────────────────────────────────────────────── */
+/* ─── Mensajería del juego ─────────────────────────────────────────────── */
 #notification-container {
   position: fixed;
-  top: 76px;
+  top: 92px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: var(--z-ui);
-  width: max-content;
-  max-width: min(460px, 88vw);
+  width: min(620px, 92vw);
   pointer-events: none;
 }
 
+#notification-container:has(.game-notification.objective) {
+  top: auto;
+  bottom: 132px;
+  width: min(520px, 88vw);
+}
+
+body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
+  top: 140px;
+}
+
 .game-notification {
-  width: max-content;
-  max-width: min(460px, 88vw);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
   text-align: center;
-  background: rgba(8, 12, 20, 0.88);
-  border: 1px solid rgba(126, 231, 255, 0.28);
-  border-radius: 999px;
-  padding: 7px 16px 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 12px 18px 13px;
+  border: 1px solid rgba(126, 231, 255, 0.24);
+  border-radius: 18px;
+  background: rgba(8, 12, 20, 0.9);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(14px) saturate(140%);
   animation: notify-in 0.22s ease;
   cursor: pointer;
   pointer-events: auto;
 }
 
 .game-notification.closing {
-  animation: notify-out 0.24s ease forwards;
-}
-
-.game-notification.evo {
-  border-top-color: var(--accent-gold);
-}
-
-.game-notification.hurt {
-  border-top-color: var(--state-danger);
-}
-
-@keyframes notify-in {
-  from {
-    transform: translateY(-18px) scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: none;
-    opacity: 1;
-  }
-}
-
-@keyframes notify-out {
-  to {
-    transform: translateY(-12px) scale(0.96);
-    opacity: 0;
-  }
-}
-
-.notification-close {
-  position: absolute;
-  top: var(--space-xs);
-  right: var(--space-xs);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  border: 0;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: all var(--transition-fast);
-}
-
-.notification-close:hover {
-  background: rgba(255, 255, 255, 0.15);
+  animation: notify-out 0.18s ease forwards;
+  pointer-events: none;
 }
 
 .game-notification h2 {
-  font-size: 13px;
   margin: 0;
-  font-family: var(--font-display);
-  letter-spacing: 0.04em;
-}
-
-.game-notification p {
-  font-size: 12px;
-  margin: 2px 0 0;
-  color: var(--text-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.game-notification .badge {
+  font: 800 11px var(--font-body);
   letter-spacing: 0.16em;
-  font-size: 10px;
-  color: #9ad7ff;
-  margin-bottom: var(--space-xs);
   text-transform: uppercase;
 }
 
-.game-notification small {
-  display: block;
-  margin-top: var(--space-sm);
-  opacity: 0.55;
-  font-size: 11px;
+.game-notification p {
+  margin: 4px auto 0;
+  max-width: 56ch;
+  color: var(--text-secondary);
+  font: 600 13px/1.35 var(--font-body);
 }
 
+.game-notification.room { border-color: rgba(126, 231, 255, 0.38); }
+.game-notification.tutorial { border-color: rgba(255, 230, 106, 0.34); }
+.game-notification.objective { border-color: rgba(184, 240, 144, 0.34); }
+.game-notification.boss { border-color: rgba(255, 90, 104, 0.5); }
+.game-notification.evolution,
+.game-notification.evo { border-color: rgba(255, 230, 106, 0.55); }
+.game-notification.error,
+.game-notification.hurt { border-color: rgba(255, 100, 118, 0.55); }
+.game-notification.done { border-color: rgba(184, 240, 144, 0.55); }
+
+@keyframes notify-in {
+  from { transform: translateY(-16px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes notify-out {
+  to { transform: translateY(-10px) scale(0.98); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-notification,
+  .game-notification.closing,
+  .prompt-icon {
+    animation: none;
+  }
+}
 /* ─── Efectos ───────────────────────────────────────────────────────────── */
 #fx-hurt,
 #fx-heal {
@@ -2038,14 +2011,19 @@ body.boss-fight::after {
     top: 108px;
     font-size: 22px;
   }
-  
-  #room-banner {
-    top: 64px;
-  }
-  
+    
   #notification-container {
-    top: 64px;
-    max-width: min(320px, 90vw);
+    top: 88px;
+    max-width: min(340px, 90vw);
+  }
+
+  #notification-container:has(.game-notification.objective) {
+    top: auto;
+    bottom: 154px;
+  }
+
+  body.boss-fight #notification-container:has(.game-notification:not(.objective)) {
+    top: 176px;
   }
   
   #boss-wrap {

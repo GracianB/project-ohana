@@ -7,7 +7,6 @@
 // ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
 import { sfx } from "../engine/audio.js";
-import { showNotification } from "./notify.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 

@@ -4,6 +4,29 @@
 
 ## Estado actual
 
+### 05/10/2026 · Experience Recovery Block
+
+El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
+
+- **MessageManager 2.0**: una sola salida visual activa, prioridades semánticas y fallback de objetivo.
+- **Room Voice**: la entrada a una sala tiene una única narración; el feedback visual de llegada no escribe texto.
+- **Tutorial contextual**: pistas disparadas por acciones reales, una vez por sesión, teclado y touch.
+- **Objetivos dinámicos**: cada sala tiene ID, destino y requisito; los bloqueos dependen del estado actual.
+- **Evolution Flow**: cinemática más corta y visual, narración posterior única, sin letterbox.
+- **HUD hierarchy**: objetivo persistente separado de mensajes temporales; boss HUD resumido.
+- **Hero Presence**: identidad idle reutilizando firmas existentes, sin marcadores artificiales.
+- **Combat Feel**: impacto visual prioritario y números de daño reservados para eventos relevantes.
+- **Enemy Readability**: telegraphs con dirección gráfica además del color.
+- **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
+- **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
+
+La caché canónica de esta línea de trabajo es `ohana-196`.
+
+### Phase 20 · World 1 Closure Candidate
+
+Existe una rama consolidada de cierre. El mundo **no se declara cerrado todavía**: la decisión depende de que `npm test`, `npm run test:browser`, `npm run test:visual` y `npm run release:check` terminen en PASS en CI.
+
+
 Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, con:
 
 - **10 personajes activos**
@@ -131,6 +154,7 @@ npm run release:check
 ```
 
 El E2E real de navegador ejecuta `node tests/browser/e2e.mjs`.
+La matriz visual ejecuta `node tests/browser/visual-regression.mjs`.
 
 Las pruebas cubren, entre otras áreas:
 

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { R, computePose } from "../characters/rig.js";
+import { R, computePose, MOTION_PROFILES } from "../characters/rig.js";
 import { ART } from "../characters/art/index.js";
 import { ROSTER } from "../characters/roster.js";
 
@@ -106,4 +106,22 @@ test("smoke test: cada personaje activo ejecuta sus 5 renderers vectoriales", as
   assert.deepEqual(failures, []);
   assert.equal(ROSTER.length, 10);
   assert.ok(ROSTER.every((character) => character.forms.length === 5));
+});
+
+
+test("hero presence: los 10 personajes tienen perfil de movimiento completo", () => {
+  const ids = Object.keys(MOTION_PROFILES);
+  assert.equal(ids.length, 10);
+
+  for (const [id, profile] of Object.entries(MOTION_PROFILES)) {
+    assert.ok(profile.pace > 0, id);
+    assert.ok(profile.sway > 0, id);
+    assert.ok(profile.bounce > 0, id);
+    assert.ok(profile.weight > 0, id);
+    assert.ok(profile.attack > 0, id);
+    assert.ok(profile.impact > 0, id);
+    assert.ok(profile.jump > 0, id);
+    assert.ok(profile.cast > 0, id);
+    assert.ok(profile.dash > 0, id);
+  }
 });

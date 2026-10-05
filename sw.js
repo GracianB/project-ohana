@@ -1,4 +1,4 @@
-const VERSION = "ohana-174";
+const VERSION = "ohana-196";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -58,8 +58,10 @@ const PRECACHE = [
   "./systems/boss-counterplay.js?v=" + VERSION,
   "./systems/boss-encounter-memory.js?v=" + VERSION,
   "./systems/boss-fx.js?v=" + VERSION,
+  "./systems/boss-hud.js?v=" + VERSION,
   "./systems/boss-nido.js?v=" + VERSION,
   "./systems/combat-fx.js?v=" + VERSION,
+  "./systems/combat-feedback.js?v=" + VERSION,
   "./systems/death-fx.js?v=" + VERSION,
   "./systems/demo.js?v=" + VERSION,
   "./systems/dialogs.js?v=" + VERSION,
@@ -71,7 +73,10 @@ const PRECACHE = [
   "./systems/magic.js?v=" + VERSION,
   "./systems/map.js?v=" + VERSION,
   "./systems/mutations.js?v=" + VERSION,
+  "./systems/message-manager.js?v=" + VERSION,
   "./systems/notify.js?v=" + VERSION,
+  "./systems/evolution-timing.js?v=" + VERSION,
+  "./systems/objectives.js?v=" + VERSION,
   "./systems/passives.js?v=" + VERSION,
   "./systems/portals.js?v=" + VERSION,
   "./systems/rain.js?v=" + VERSION,

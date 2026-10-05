@@ -145,10 +145,39 @@ function telegraphColor(e) {
   return ["rgba(255,80,40,.75)", "rgba(255,160,80,.35)"];
 }
 
+export function telegraphDirection(e = {}) {
+  const dx = Number(e.aimDx);
+  if (Number.isFinite(dx) && Math.abs(dx) > 0.01) return dx < 0 ? -1 : 1;
+
+  const vx = Number(e.vx);
+  if (Number.isFinite(vx) && Math.abs(vx) > 0.05) return vx < 0 ? -1 : 1;
+
+  const face = Number(e.facing ?? e.dir);
+  return Number.isFinite(face) && face < 0 ? -1 : 1;
+}
+
 function drawTelegraph(ctx, e, t) {
   const [c1, c2] = telegraphColor(e);
   const pulse = 1 + Math.sin(t * 0.55) * 0.18;
   const r = e.w * 0.95 * pulse;
+  const direction = telegraphDirection(e);
+  // Dirección gráfica independiente del color: dos chevrons señalan hacia el peligro.
+  ctx.save();
+  ctx.strokeStyle = c1;
+  ctx.lineWidth = 2.6;
+  ctx.lineCap = "round";
+  const ax = direction * (r * 1.45);
+  for (let i = 0; i < 2; i++) {
+    const y = (i - 0.5) * 11;
+    ctx.beginPath();
+    ctx.moveTo(ax - direction * 13, y);
+    ctx.lineTo(ax, y);
+    ctx.lineTo(ax - direction * 6, y - 5);
+    ctx.moveTo(ax, y);
+    ctx.lineTo(ax - direction * 6, y + 5);
+    ctx.stroke();
+  }
+  ctx.restore();
   // Flash de relleno (muy legible)
   ctx.fillStyle = c2.replace(/,[\d.]+\)$/, ",.22)");
   ctx.beginPath(); ctx.arc(0, 0, r * 1.05, 0, Math.PI * 2); ctx.fill();

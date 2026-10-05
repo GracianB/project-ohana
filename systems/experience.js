@@ -338,10 +338,11 @@ export class ExperienceDirector {
 
     const combo = Math.max(0, Number(game?.combo) || 0);
     const boss = game?.boss || game?.enemies?.find?.((e) => e?.boss);
+    // Room arrivals are narrated exclusively by MessageManager.
+    // ExperienceDirector is visual/combat feedback, not a second narrator.
     const visible =
       combo >= 2 ||
       !!boss ||
-      this.state.roomT > 0 ||
       this.state.evoT > 0;
 
     this.ui.classList.toggle("show", visible);
@@ -361,7 +362,7 @@ export class ExperienceDirector {
           ? "REINA DEL NIDO"
           : combo >= 2
             ? "COMBO ×" + combo
-            : this.state.roomName || "READY";
+            : "READY";
     }
 
     if (this.uiBar) {
@@ -628,68 +629,18 @@ export class ExperienceDirector {
     }
 
     // ----------------------------------------------------------
-    // ROOM ARRIVAL CARD
+    // ROOM ARRIVAL PULSE
     // ----------------------------------------------------------
-
-    if (this.state.roomT > 0 && this.state.roomName) {
-      const progress =
-        1 - clamp(this.state.roomT / 72);
-
-      const alpha = Math.min(
-        1,
-        progress * 5,
-        this.state.roomT / 22
-      );
-
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = alpha;
-
-      ctx.fillStyle = "rgba(5,9,16,.66)";
-      ctx.fillRect(
-        W * 0.24,
-        H * 0.22,
-        W * 0.52,
-        74
-      );
-
-      ctx.strokeStyle =
-        game?.boss ? "#ff5a68" : "#7ee7ff";
-
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(
-        W * 0.24,
-        H * 0.22,
-        W * 0.52,
-        74
-      );
-
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      ctx.fillStyle =
-        game?.boss ? "#ffadb5" : "#9adfff";
-
-      ctx.font =
-        "700 10px Outfit, sans-serif";
-
-      ctx.fillText(
-        game?.boss
-          ? "ENCUENTRO"
-          : "NUEVA SALA",
-        W / 2,
-        H * 0.22 + 20
-      );
-
-      ctx.fillStyle = "#fff";
-
-      ctx.font =
-        "900 28px Fredoka, sans-serif";
-
-      ctx.fillText(
-        this.state.roomName,
-        W / 2,
-        H * 0.22 + 48
-      );
+    // La llegada sigue teniendo feedback visual, pero sin texto.
+    // El texto pertenece a MessageManager.
+    if (this.state.roomT > 0.03 && !reduced) {
+      const k = clamp(this.state.roomT / 72);
+      ctx.save();
+      ctx.globalAlpha = 0.16 * easeOut(1 - k);
+      ctx.strokeStyle = this.state.color || "#7ee7ff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(W * 0.27, H * 0.18, W * 0.46, H * 0.42);
+      ctx.restore();
     }
 
     // ----------------------------------------------------------

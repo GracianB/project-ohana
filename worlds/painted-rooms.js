@@ -8,11 +8,13 @@ const SRC = {
 const cache = new Map();
 export function paintedRoomOn(roomId) { return !!SRC[roomId]; }
 function img(id) {
+  const src = SRC[id];
+  if (!src) return null;
   let el = cache.get(id);
   if (el) return el.complete && el.naturalWidth ? el : null;
   if (typeof Image === "undefined") return null;
   el = new Image();
-  el.src = SRC[id];
+  el.src = src;
   cache.set(id, el);
   return null;
 }

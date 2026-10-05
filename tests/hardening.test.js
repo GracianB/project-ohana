@@ -110,11 +110,14 @@ test('phase 19: adaptive bait queda aislado y limitado al repertorio del boss', 
 });
 
 
-test('phase 19: el HUD solo expone CEBO cuando está realmente armado', () => {
+test('phase 19: el HUD del boss conserva el estado estratégico sin inflarlo visualmente', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
+  const bossHud = fs.readFileSync('./systems/boss-hud.js', 'utf8');
   const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
-  assert.match(game, /boss\.bait\?\.armed/);
-  assert.match(game, /boss\.adaptationLabel/);
+
+  assert.match(game, /formatBossStatus/);
+  assert.match(bossHud, /vulnerable/);
+  assert.match(bossHud, /ataque telegrafiado/);
   assert.match(boss, /baitLabel\(e\.bait\)/);
 });
 

@@ -11,7 +11,15 @@ async function auditPage(page, label) {
   page.on('pageerror', (e) => errors.push('pageerror: ' + (e.stack || e.message)));
   page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
+  page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
+  const gameSource = await page.evaluate(async () => {
+    const response = await fetch('/game.js?v=ohana-196', { cache:'no-store' });
+    return { ok: response.ok, status: response.status, source: await response.text() };
+  });
+  assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
+  assert.equal(gameSource.status, 200, label + ': game.js HTTP inválido');
+  assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
   // La intro es una animación autodestruible. El E2E no debe clicar un elemento
   // que puede desaparecer entre el descubrimiento del locator y su evaluación.
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
@@ -78,9 +86,25 @@ async function auditPage(page, label) {
   const gameplay = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
     if (!api) throw new Error('E2E gameplay API ausente');
-    const snapshots = [];
 
-    snapshots.push(api.state());
+    const messageSnapshot = () => {
+      const nodes = [...document.querySelectorAll('#notification-container .game-notification')];
+      return {
+        count: nodes.length,
+        classes: nodes.map((node) => node.className),
+        title: nodes[0]?.querySelector('h2')?.textContent || '',
+        text: nodes[0]?.querySelector('p')?.textContent || '',
+        objective: document.querySelector('#notification-container .game-notification.objective')?.textContent || '',
+      };
+    };
+
+    const snapshots = [];
+    snapshots.push({ state: api.state(), message: messageSnapshot() });
+
+    const beforeRoomMessages = messageSnapshot();
+    if (beforeRoomMessages.count > 1) {
+      throw new Error('E2E: más de un mensaje simultáneo al iniciar');
+    }
 
     const castStart = api.cast(0);
     snapshots.push(castStart);
@@ -93,12 +117,17 @@ async function auditPage(page, label) {
     snapshots.push({ dashBefore, dashAfter });
 
     const evolved = api.setXp(55);
-    snapshots.push(evolved);
+    snapshots.push({ evolved, message: messageSnapshot() });
     if (evolved.evo < 1) throw new Error('E2E: la evolución 0→1 no se produjo al alcanzar XP');
 
     const lab = api.loadRoom('lab');
-    snapshots.push(lab);
+    const labMessage = messageSnapshot();
+    snapshots.push({ lab, message: labMessage });
     if (lab.roomId !== 'lab') throw new Error('E2E: no pudo entrar en Lab');
+    if (labMessage.count !== 1) throw new Error('E2E: entrar en Lab debe mostrar exactamente un mensaje');
+    if (!/Lab/i.test(labMessage.title) || !labMessage.text) {
+      throw new Error('E2E: mensaje de sala incompleto: ' + JSON.stringify(labMessage));
+    }
 
     const rainStart = api.forceRain();
     const rainAfter = api.step(36);
@@ -106,11 +135,16 @@ async function auditPage(page, label) {
     if (!rainAfter.rain) throw new Error('E2E: la lluvia radiactiva no arrancó');
 
     const finalForm = api.setEvo(4);
-    snapshots.push(finalForm);
+    snapshots.push({ finalForm, message: messageSnapshot() });
     if (finalForm.evo !== 4) throw new Error('E2E: no pudo alcanzar forma final');
 
     const bossRoom = api.loadRoom('boss');
-    snapshots.push(bossRoom);
+    const bossMessage = messageSnapshot();
+    snapshots.push({ bossRoom, message: bossMessage });
+    if (bossMessage.count !== 1) throw new Error('E2E: entrada al boss debe mostrar un único mensaje');
+    if (!/REINA DEL NIDO/i.test(bossMessage.title)) {
+      throw new Error('E2E: título del mensaje de boss incorrecto: ' + bossMessage.title);
+    }
     if (bossRoom.roomId !== 'boss' || !bossRoom.boss) throw new Error('E2E: no pudo entrar al Nido');
 
     api.setInvulnerable(600);
@@ -150,6 +184,30 @@ async function auditPage(page, label) {
   });
 
   if (errors.length) throw new Error(label + ': runtime errors during gameplay audit\n' + errors.join('\n'));
+
+  const messageLayout = await page.evaluate(() => {
+    const node = document.querySelector('#notification-container .game-notification');
+    const box = node?.getBoundingClientRect();
+    const boss = document.querySelector('#boss-wrap');
+    const ability = document.querySelector('#ability-bar');
+    const touch = document.querySelector('#touch');
+    const intersects = (a, b) => !!a && !!b &&
+      a.left < b.right && a.right > b.left &&
+      a.top < b.bottom && a.bottom > b.top;
+    return {
+      messageCount: document.querySelectorAll('#notification-container .game-notification').length,
+      bossOverlap: intersects(box, boss?.getBoundingClientRect()),
+      abilityOverlap: intersects(box, ability?.getBoundingClientRect()),
+      touchOverlap: intersects(box, touch?.getBoundingClientRect()),
+    };
+  });
+
+  assert.ok(messageLayout.messageCount <= 1, label + ': más de un mensaje visual simultáneo');
+  assert.equal(messageLayout.bossOverlap, false, label + ': mensaje solapa la barra del boss');
+  assert.equal(messageLayout.abilityOverlap, false, label + ': mensaje solapa habilidades');
+  if (label === 'mobile') {
+    assert.equal(messageLayout.touchOverlap, false, label + ': mensaje solapa controles táctiles');
+  }
 
   const audit = await page.evaluate(async () => {
     const [{ ROSTER }, { ROOMS }, { ABILITY_DEFS }] = await Promise.all([
@@ -245,8 +303,12 @@ try {
   await page.keyboard.press('Space');
   await page.keyboard.press('KeyJ');
 
-  // V34.1 — Pizza L real.
-  await page.evaluate(() => window.__OHANA_E2E.start('pizza'));
+  // V34.1 — Pizza L real. L se desbloquea en forma 3 (evo 2).
+  await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('pizza');
+    api.setEvo(2);
+  });
   await page.locator('#game').focus();
   await page.keyboard.press('l');
   await page.waitForTimeout(80);
@@ -308,9 +370,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-121',
-      '/style.css?v=ohana-121',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-121',
+      '/game.js?v=ohana-196',
+      '/style.css?v=ohana-196',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-196',
     ];
     const results = [];
     for (const path of paths) {

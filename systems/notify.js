@@ -1,65 +1,72 @@
-function box() {
-  let el = document.getElementById("notification-container");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "notification-container";
-    document.body.appendChild(el);
-  }
-  return el;
-}
+import {
+  messageManager,
+  showSystemMessage,
+  showRoomMessage,
+  showObjectiveMessage,
+  showTutorialMessage,
+  showCombatMessage,
+  showBossMessage,
+  showEvolutionMessage,
+  showErrorMessage,
+  setPersistentObjective,
+  clearPersistentObjective,
+} from "./message-manager.js";
+
+export {
+  messageManager,
+  showSystemMessage,
+  showRoomMessage,
+  showObjectiveMessage,
+  showTutorialMessage,
+  showCombatMessage,
+  showBossMessage,
+  showEvolutionMessage,
+  showErrorMessage,
+  setPersistentObjective,
+  clearPersistentObjective,
+};
 
 export function dismissNotifications() {
-  document.querySelectorAll(".game-notification").forEach((el) => {
-    if (el.classList.contains("closing")) return;
-    el.classList.add("closing");
-    setTimeout(() => el.remove(), 260);
-  });
+  messageManager.dismiss();
 }
 
-let lastNote = { title: "", at: 0 };
-
-export function showNotification(title, message, kind) {
-  const now = performance.now();
-  if (lastNote.title === title && now - lastNote.at < 900) return;
-  lastNote = { title: String(title || ""), at: now };
-  const parent = box();
-  parent.replaceChildren();
-  const type = kind || guessKind(title);
-  const el = document.createElement("div");
-  el.className = "game-notification " + type;
-  const head = document.createElement("h2");
-  head.textContent = title || "";
-  el.appendChild(head);
-  if (message) {
-    const p = document.createElement("p");
-    p.textContent = message;
-    el.appendChild(p);
-  }
-  parent.appendChild(el);
-  const close = () => {
-    if (!el.isConnected || el.classList.contains("closing")) return;
-    el.classList.add("closing");
-    setTimeout(() => el.remove(), 220);
+// Compatibility bridge for legacy callers. New code should use semantic functions above.
+export function showNotification(title, message, kind, options = {}) {
+  const legacyMap = {
+    evo: showEvolutionMessage,
+    sala: showRoomMessage,
+    hurt: showErrorMessage,
+    boss: showBossMessage,
+    combat: showCombatMessage,
+    tutorial: showTutorialMessage,
+    objective: showObjectiveMessage,
+    system: showSystemMessage,
+    error: showErrorMessage,
   };
-  el.addEventListener("click", close);
-  setTimeout(close, 2200);
+  const fn = legacyMap[String(kind || "").toLowerCase()] || showSystemMessage;
+  return fn(title, message, options);
 }
 
-function guessKind(title) {
-  const t = String(title).toUpperCase();
-  if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evo";
-  if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "hurt";
-  if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("SALA") || t.includes("MAPA") || t.includes("NIDO")) return "sala";
-  return "info";
-}
+if (!globalThis.__ohanaMessageDismissBound) {
+  globalThis.__ohanaMessageDismissBound = true;
 
-if (!window.__ohanaNotifyBound) {
-  window.__ohanaNotifyBound = true;
-  addEventListener("keydown", () => {
-    if (document.querySelector(".game-notification")) dismissNotifications();
+  addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (document.querySelector(".game-notification:not([data-persistent='1'])")) {
+      dismissNotifications();
+    }
   }, true);
-  addEventListener("pointerdown", (e) => {
-    if (e.target.closest && e.target.closest("#top-actions, #ability-bar, #chars, .char-card, .touch-btn, #help, #map-overlay, #pause-overlay")) return;
-    if (document.querySelector(".game-notification")) dismissNotifications();
+
+  addEventListener("pointerdown", (event) => {
+    if (
+      event.target?.closest &&
+      event.target.closest(
+        "#top-actions, #ability-bar, #chars, .char-card, .touch-btn, #help, #map-overlay, #pause-overlay"
+      )
+    ) return;
+
+    if (document.querySelector(".game-notification:not([data-persistent='1'])")) {
+      dismissNotifications();
+    }
   }, true);
 }

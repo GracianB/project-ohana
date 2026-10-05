@@ -9,7 +9,7 @@ import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
-import { showNotification } from "./systems/notify.js";
+import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
@@ -35,7 +35,9 @@ import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
+import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
 import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
@@ -54,7 +56,6 @@ const DOM = {
   pause: $("pause-overlay"),
   finale: $("win-cinema"),
   evoStage: $("evo-stage"),
-  roomBanner: $("room-banner"),
   prompt: $("prompt"),
   mute: $("btn-mute"),
   abilityBar: $("ability-bar"),
@@ -324,13 +325,6 @@ function toggleHelp() {
   if (open) setPaused(false);
   help.classList.toggle("open", open);
 }
-function showBanner(name, line) {
-  const el = DOM.roomBanner;
-  if (!el) return;
-  el.textContent = line ? name.toUpperCase() + "  ·  " + line : name.toUpperCase();
-  el.classList.add("show");
-  setTimeout(() => el.classList.remove("show"), 1800);
-}
 function setPrompt(text, on) {
   const el = DOM.prompt;
   if (!el) return;
@@ -343,7 +337,7 @@ let saveWarning = false;
 function save() {
   if (!game.player || game.player.dead) return;
   const saved = saveStore.write(game, Magic);
-  if (!saved && !saveWarning) showNotification("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
+  if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
   saveWarning = !saved;
   return saved;
 }
@@ -469,7 +463,7 @@ function loadRoom(id, fromDir) {
   const r = ROOMS[id];
   if (!r) return false;
   if (r.needEvo && game.player && game.player.evo < r.needEvo) {
-    showNotification("CERRADO", "Necesitas forma " + (r.needEvo + 1));
+    showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
     beep("locked");
     bounceLocked(fromDir);
     return false;
@@ -537,24 +531,29 @@ function loadRoom(id, fromDir) {
     game.nums.add(game.player.x, game.player.y, "+15", "#6f6");
   }
   const LINES = {
-    hub: "Aquí empieza Ohana. Nadie se queda en el claro.",
-    beach: "La costa abre el este. El hueco no perdona.",
-    jungle: "La jungla guarda la bajada a la caldera.",
-    cave: "La cueva es el oeste. El laboratorio espera forma.",
-    lab: "Llueve verde. El paraguas está en el suelo.",
-    ridge: "La cumbre mira al claro y a la órbita.",
-    space: "Aquí caen estrellas. El vórtice baja al agua.",
-    reef: "El arrecife devuelve a la costa.",
-    volcano: "La caldera es la puerta de la Reina.",
-    boss: "El nido. Quien no llegó sigue dentro."
+    hub: "Aquí empieza Ohana. Reúne fuerzas y abre la ruta por la costa.",
+    beach: "La costa abre el este. Cruza el hueco y sigue hacia la jungla.",
+    jungle: "La jungla guarda la bajada. Busca la forma necesaria para entrar en la caldera.",
+    cave: "La cueva protege la ruta oeste. El laboratorio queda al otro lado.",
+    lab: "El laboratorio guarda una ruta alternativa. Mira el paraguas y sigue adelante.",
+    ridge: "La cumbre conecta el claro con la órbita. El camino continúa hacia las estrellas.",
+    space: "Aquí caen estrellas. El vórtice abre la bajada al arrecife.",
+    reef: "El arrecife devuelve a la costa. Recoge lo que encuentres antes de volver.",
+    volcano: "La caldera es la última puerta. La Reina del Nido espera más adelante.",
+    boss: "La Reina ha despertado. Aquí termina la ruta de este Mundo."
   };
-  if (first && LINES[id]) showNotification(r.name, LINES[id], "sala");
-  if (!r.boss) { showNotification(r.name, r.hint || r.goal || "SALA"); showBanner(r.name, r.short || ""); }
-  else {
+  if (!r.boss) {
+    const story = LINES[id] || "";
+    const objective = r.hint || r.goal || "";
+    showRoomMessage(r.name, first && story ? story + (objective ? " " + objective : "") : objective || story || "Explora la sala.", {
+      key: "room:" + id + ":" + (first ? "first" : "repeat")
+    });
+  } else {
     game.bossIntro = { t: 220 };
     game.storyLine = "La Reina sale del nido. No negocia.";
-    showNotification("EL NIDO", "Quien no evolucionó se quedó dentro.", "sala");
-    showBanner("REINA DEL NIDO");
+    showBossMessage("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 1.", {
+      key: "boss:intro"
+    });
     game.flash = 16;
     game.flashColor = "#ff4060";
     game.shake = 12;
@@ -580,7 +579,7 @@ function showMap() {
   const overlay = DOM.map;
   const grid = DOM.mapGrid;
   if (!overlay || !grid) {
-    showNotification("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
+    showSystemMessage("MAPA", Object.keys(game.visited).map((id) => (ROOMS[id] && ROOMS[id].name) || id).join(" · "));
     return;
   }
   if (overlay.classList.contains("open")) {
@@ -692,10 +691,10 @@ function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
   p.evo = Number(p.evo) || 0;
   if (reason !== "xp" && reason !== "manual") return;
-  if (p.evo >= 4) { if (reason === "manual") showNotification("MAX", "Ya eres GOD (forma 5)."); return; }
+  if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
   const need = XP_NEED[p.evo + 1];
   if (need == null || p.xp < need) {
-    if (reason === "manual") showNotification("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
+    if (reason === "manual") showSystemMessage("XP", "Te faltan " + Math.max(0, Math.ceil(need - p.xp)) + " para evolucionar.");
     return;
   }
   p.evo += 1;
@@ -792,7 +791,35 @@ function markHit(p, e, dmg, kb) {
   e._hitDir = face;
   e._hitColor = crit ? "#ffe66a" : (p.color || "#ffffff");
   e._hitCrit = crit;
-  game.nums.add(e.x, e.y, crit ? d + "!" : "" + d, crit ? "#ffe66a" : (p.color || "#fff"), crit);
+
+  const feedback = damageFeedback({
+    crit,
+    boss: !!e.boss,
+    combo: game.combo,
+  });
+
+  if (feedback.showNumber) {
+    game.nums.add(
+      e.x,
+      e.y,
+      crit ? d + "!" : String(d),
+      crit ? "#ffe66a" : (p.color || "#fff"),
+      crit
+    );
+  }
+
+  game.combatFx?.add(
+    e.x + e.w / 2,
+    e.y + e.h / 2,
+    crit ? "#ffe66a" : (p.color || "#fff"),
+    {
+      tier: feedback.tier,
+      dir: face,
+      label: feedback.label,
+      seed: game.combo + (e.boss ? 11 : 0),
+    }
+  );
+
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
   game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
@@ -968,7 +995,7 @@ function hurtPlayer(amount, label) {
   if (p.health <= 0) {
     p.health = 0;
     p.dead = true;
-    showNotification("DERROTA", "R vuelve al claro", "hurt");
+    showErrorMessage("DERROTA", "R vuelve al claro");
     if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "hurt" });
   }
 }
@@ -1025,7 +1052,7 @@ function dieVoid(p) {
   p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
-  showNotification("VACÍO", "Pozo real. R vuelve al claro", "hurt");
+  showErrorMessage("VACÍO", "Pozo real. R vuelve al claro");
   game.fx.emit(p.x + p.w / 2, p.y, { color: "#7ee7ff", count: 28, size: 5, up: 2 });
   if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "void" });
 }
@@ -1148,7 +1175,7 @@ function worldClear() {
   game.summoned = true;
   game.summonDelay = 132; // 2.2 s a 60 Hz, pausables y reproducibles.
   beep("alert");
-  showNotification("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.", "sala");
+  showBossMessage("EL NIDO DESPIERTA", "El monstruo te espera. Prepárate.");
 }
 
 function tickWorldSummon() {
@@ -1333,7 +1360,7 @@ function updatePlayer() {
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
       o.taken = true; addPlayerXp(p, 4 + Surprises.starOrbBonus()); addScore(25); beep("pickup"); game.nums.add(o.x, o.y, "+XP", "#ffe66a");
-      if (game.orbs.every((q) => q.taken)) { beep("objective"); showNotification("¡CRISTALES COMPLETOS!", room().name + " · todos los cristales recogidos"); addScore(100); }
+      if (game.orbs.every((q) => q.taken)) { beep("objective"); showObjectiveMessage("CRISTALES COMPLETOS", room().name + " · todos los cristales recogidos"); addScore(100); }
     }
   }
   for (const h of game.hearts) {
@@ -1559,7 +1586,7 @@ function updateEnemies() {
       if (e.invuln > 0) e.invuln--;
       try {
         updateBossNido(e, game, {
-          t, hurtPlayer, showNotification, makeFoe,
+          t, hurtPlayer, showBossMessage, makeFoe,
           ROOM_W: game.worldW, ROOM_H: game.worldH,
           reduceMotion: game.reduceMotion || reduceMotion,
           beep,
@@ -2181,7 +2208,7 @@ function updateEnemies() {
         beep("win");
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: game.reduceMotion ? 12 : 32, size: 6, up: 2.8, star: true });
         game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4060", count: game.reduceMotion ? 8 : 20, size: 4, up: 2, speed: 3.5 });
-        showNotification("EL NIDO CAE", "La Reina se deshace.", "sala");
+        showBossMessage("EL NIDO CAE", "La Reina se deshace.");
         beginFinale(e);
         return true;
       }
@@ -2219,10 +2246,10 @@ function updateEnemies() {
         e.diveCd = 40;
         e.diving = false;
         e.telegraph = false;
-        showNotification("¡VUELA!", "Cucaracho alado.", "hurt");
+        showCombatMessage("¡VUELA!", "Cucaracho alado.");
       } else {
         e.lungeCd = 40;
-        showNotification("CUCARACHO+", "Ha mudado. Más cabreado.", "hurt");
+        showCombatMessage("CUCARACHO+", "Ha mudado. Más cabreado.");
       }
       return true;
     }
@@ -2719,22 +2746,11 @@ function updateHUD() {
   if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
   if (boss) {
     const phase = bossPhaseProfile(boss.phase);
+    const status = formatBossStatus(boss, phase.name);
     const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
-    const pct = Math.max(0, Math.ceil((boss.hp / Math.max(1, boss.max)) * 100));
-    const attackText = attack ? " · " + attack.icon + " " + boss.teleKind.toUpperCase() : "";
-    const patternText = boss.patternLabel ? " · RUTINA " + (Number(boss.patternStep) + 1) + "/" + Math.max(1, boss.pattern.length) : "";
-    const recoveryText = boss.vulnerable ? " · CASTIGA" : "";
-    const readText = boss.behaviorLabel ? " · " + boss.behaviorLabel : "";
-    const counterText = boss.counterplay?.streak ? " · RESPUESTA " + boss.counterplay.streak + "/3" + (boss.lastCounterplay?.break ? " · BREAK" : "") : "";
-    const baitText = boss.bait?.armed ? " · " + baitLabel(boss.bait) : "";
-    const feedbackText = boss.baitFeedback?.last ? " · " + baitFeedbackLabel(boss.baitFeedback) : "";
-    const encounterText = boss.encounterLabel && boss.encounterLabel !== "MEMORIA NEUTRA"
-      ? " · " + encounterLabel(boss.encounterMemory)
-      : "";
-    const adaptationText = boss.adaptationLabel && boss.adaptationLabel !== "ADAPTACIÓN NEUTRA"
-      ? " · " + boss.adaptationLabel
-      : "";
-    setText(DOM.bossLabel, "REINA DEL NIDO · FASE " + boss.phase + " · " + phase.name + patternText + recoveryText + readText + adaptationText + baitText + feedbackText + encounterText + counterText + attackText + " · " + pct + "%");
+    const attackText = attack ? " · " + attack.icon : "";
+    setText(DOM.bossLabel, status.visible + attackText);
+    DOM.bossWrap?.setAttribute("aria-label", status.accessible + (attack ? " Ataque: " + boss.teleKind + "." : ""));
   } else {
     setText(DOM.bossLabel, "REINA DEL NIDO");
   }
@@ -2859,7 +2875,7 @@ function setupSelect() {
   const help = document.getElementById("help");
   if (helpBtn) helpBtn.onclick = toggleHelp;
   if (mapBtn) mapBtn.onclick = () => { if (game.running) showMap(); };
-  if (muteBtn) muteBtn.onclick = () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); };
+  if (muteBtn) muteBtn.onclick = () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); };
   if (fullBtn) fullBtn.onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); };
   if (help) help.addEventListener("click", (e) => { if (e.target.id === "help") help.classList.remove("open"); });
   const map = document.getElementById("map-overlay");
@@ -2914,7 +2930,7 @@ input = bindInput({
       power: (index) => castPower(index),
       help: toggleHelp,
       map: () => { if (game.running) showMap(); },
-      mute: () => { setMuted(!muted); showNotification("AUDIO", muted ? "Mute" : "On"); }
+      mute: () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); }
     }
   });
   keys = input.keys;
@@ -2935,7 +2951,14 @@ addEventListener("ohana-evolve-done", (e) => {
   const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
   const story = evolutionMessage(p.id, evo);
   const opened = evo === 1 ? "K abierto" : evo === 2 ? "L abierto" : evo === 4 ? "U, supremo" : "";
-  showNotification("FORMA " + (evo + 1), p.name + " · " + story.line + (opened ? " · " + opened : ""), "evo");
+  showEvolutionMessage(
+    "NUEVA FORMA · " + (evo + 1) + "/5",
+    p.name + " · " + story.line + (opened ? " · " + opened : ""),
+    {
+      key: "evolution:" + p.id + ":" + evo,
+      duration: 3600
+    }
+  );
   if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
   updateHUD();
 });
