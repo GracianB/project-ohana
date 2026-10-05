@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js",
-    "test:browser": "node tests/browser/e2e.mjs"
+    "test:browser": "node tests/browser/e2e.mjs",
+    "release:check": "node tools/release-gate.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
