@@ -131,3 +131,8 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 ## Phase 44 - Save Transaction Closure
 
 81. Phase 44: guardado transaccional con staging, recuperación defensiva ante fallo de escritura y rechazo de versiones desconocidas.
+
+
+## Phase 45 - Input Lifecycle Closure
+
+82. Phase 45: ciclo de entrada cerrado para blur/focus/pagehide/visibilitychange, con limpieza de teclado, watchdog y punteros retenidos.
