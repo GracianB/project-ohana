@@ -210,10 +210,54 @@ try {
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
   await page.locator('#btn-resume').click();
-  await page.reload({ waitUntil:'networkidle' });
+  const offlineErrorStart = errors.length;
+  const offlineRequestStart = errors.filter((item) => item.startsWith('requestfailed:')).length;
+  const offlineBoot = async () => page.evaluate(async () => {
+    const paths = [
+      '/game.js?v=ohana-116',
+      '/style.css?v=ohana-116',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-116',
+    ];
+    const results = [];
+    for (const path of paths) {
+      const response = await fetch(path, { cache: 'no-store' });
+      results.push({
+        path,
+        ok: response.ok,
+        status: response.status,
+        type: response.headers.get('content-type') || ''
+      });
+    }
+    const sw = navigator.serviceWorker;
+    return {
+      controller: !!sw.controller,
+      title: document.title,
+      results,
+      canvas: !!document.querySelector('#game')
+    };
+  });
+
   await page.context().setOffline(true);
   await page.reload({ waitUntil:'domcontentloaded' });
-  await page.waitForSelector('#btn-play');
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  const offline = await offlineBoot();
+  assert.equal(offline.controller, true, 'desktop: SW no controla la recarga offline');
+  assert.match(offline.title, /PROJECT OHANA/i, 'desktop: título offline ausente');
+  assert.equal(offline.canvas, true, 'desktop: Canvas ausente offline');
+  assert.ok(offline.results.every((item) => item.ok && item.status === 200), 'desktop: asset offline no servido: ' + JSON.stringify(offline.results));
+  assert.equal(errors.length, offlineErrorStart, 'desktop: errores durante arranque offline\\n' + errors.slice(offlineErrorStart).join('\\n'));
+  assert.equal(errors.filter((item) => item.startsWith('requestfailed:')).length, offlineRequestStart, 'desktop: request fallida durante arranque offline');
+
+  await page.locator('#btn-play').click();
+  await page.waitForTimeout(500);
+  assert.notEqual(await page.locator('#hud').getAttribute('aria-hidden'), 'true', 'desktop: gameplay no arranca offline');
+  const offlineGame = await page.evaluate(() => ({
+    hook: !!window.__OHANA_E2E,
+    canvasLabel: document.querySelector('#game')?.getAttribute('aria-label') || ''
+  }));
+  assert.equal(offlineGame.hook, true, 'desktop: E2E no arranca offline');
+  assert.ok(offlineGame.canvasLabel.length > 0, 'desktop: Canvas sin etiqueta offline');
+
   await page.context().setOffline(false);
   await desktop.close();
 
