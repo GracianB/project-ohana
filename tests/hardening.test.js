@@ -397,3 +397,33 @@ test('phase 38: combo también queda dentro del firewall global', () => {
   assert.equal((game.match(/game\.combo\s*\+=/g) || []).length, 0);
   assert.match(mutations, /function addCombo/);
 });
+
+test('phase 39: start() no hereda estado transitorio de una sesión anterior', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+
+  const start = game.indexOf('function start(def)');
+  const evolve = game.indexOf('function evolve(', start);
+
+  assert.ok(start > 0);
+  assert.ok(evolve > start);
+
+  const block = game.slice(start, evolve);
+
+  assert.match(block, /t = 0;/);
+  assert.match(block, /paused = false;/);
+  assert.match(block, /game\.hitstop = 0;/);
+  assert.match(block, /game\.camPunch = 0;/);
+  assert.match(block, /game\.fading = 0;/);
+  assert.match(block, /game\.flash = 0;/);
+  assert.match(block, /game\.doorWait = null;/);
+  assert.match(block, /game\.doorHold = 0;/);
+  assert.match(block, /game\.finale = null;/);
+  assert.match(block, /game\.summonDelay = 0;/);
+  assert.match(block, /game\.roomId = "hub";/);
+  assert.match(block, /game\.won = false;/);
+  assert.match(block, /game\.summoned = false;/);
+  assert.match(block, /game\.runtimeFaults = 0;/);
+  assert.match(block, /game\.lastRuntimeFault = "";/);
+  assert.match(block, /game\.cam\.x = 0;/);
+  assert.match(block, /game\.cam\.y = 0;/);
+});

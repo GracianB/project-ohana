@@ -173,7 +173,7 @@ El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 | 05/10 | **Runtime Budget 2 · Phase 35**: presupuestos y compactación de colecciones pasan a `systems/runtime.js`; se acotan `bolts` y `slashes`, y el guard evita asignaciones de arrays innecesarias en el fast path; caché `ohana-109`. |
 | 05/10 | **Browser Gameplay E2E · Phase 36**: el E2E de Chromium ejecuta una secuencia real de inicio, habilidad, dash, evolución, sala, lluvia, forma final y boss; verifica daño real y transición a fase 3 mediante el navegador; caché `ohana-110`. |
 | 05/10 | **Test Harness Isolation · Phase 37**: la API `window.__OHANA_E2E` solo se expone en `127.0.0.1` con `?e2e=1`; GitHub Pages no la activa aunque se añada el parámetro; caché `ohana-111`. |
-| 05/10 | **Mutation Closure · Phase 38**: el último incremento directo de combo pasa al firewall global `systems/mutations.js`; los contadores críticos de gameplay quedan sin aritmética directa externa; caché `ohana-112`. |
+| 05/10 | **Mutation Closure · Phase 38**: el último incremento directo de combo pasa al firewall global `systems/mutations.js`; los contadores críticos de gameplay quedan sin aritmética directa externa; caché `ohana-113`. |
 
 ## Publicación y caché
 
@@ -181,7 +181,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-112`
+`ohana-113`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
@@ -200,3 +200,12 @@ La auditoría actual cubre determinismo de gameplay, renderers, runtime y cohere
 Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar en la misma entrega:
 
 `manifest.json` · `README.md` · `PROGRESS.md` · `IMPROVEMENTS.md` · CI
+
+## Phase 39 - Session Reset Closure
+
+- `start()` limpia el estado transitorio antes de iniciar o resumir una partida.
+- `summonDelay` se reinicia a `0`.
+- Se reinician `doorWait`, `doorHold`, `finale`, `fading`, `flash`, `hitstop` y cámara.
+- Se reinician los contadores de fallos de runtime.
+- La progresión persistente continúa restaurándose mediante `saveStore`.
+- Cache: `ohana-113`.

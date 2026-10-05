@@ -226,14 +226,44 @@ function setMuted(on) {
 }
 function setPaused(on) {
   if (game.finale && game.finale.t > 0) return;
+
+  // PHASE 39 - PAUSE STATE CLOSURE
+  // El estado de pausa y su representacion accesible se comprometen de forma
+  // atomica antes de efectos secundarios. Ningun guardado, audio, input o reloj
+  // puede impedir que Escape abra la capa visual.
   paused = !!on && game.running;
-  input?.reset();
-  clock.reset();
-  if (paused) save();
-  duckMusic(paused);
-  DOM.pause?.classList.toggle("open", paused);
-}
-function closeOverlays() {
+
+  const pauseLayer = DOM.pause || document.getElementById("pause-overlay");
+
+  if (pauseLayer) {
+    pauseLayer.classList.toggle("open", paused);
+    pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
+  }
+
+  try {
+    input?.reset();
+  } catch (_) {}
+
+  try {
+    clock.reset();
+  } catch (_) {}
+
+  if (paused) {
+    try {
+      save();
+    } catch (_) {}
+  }
+
+  try {
+    duckMusic(paused);
+  } catch (_) {}
+
+  // Reafirma el contrato DOM despues de todos los efectos secundarios.
+  if (pauseLayer) {
+    pauseLayer.classList.toggle("open", paused);
+    pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
+  }
+}function closeOverlays() {
   DOM.help?.classList.remove("open");
   DOM.map?.classList.remove("open");
   setPaused(false);
@@ -270,6 +300,26 @@ function escape() {
 function suspend() {
   input?.reset();
   clock.reset();
+  // PHASE 39 - SESSION RESET CLOSURE
+  // Una nueva sesion nunca hereda estado transitorio anterior.
+  t = 0;
+  paused = false;
+  game.hitstop = 0;
+  game.camPunch = 0;
+  game.fading = 0;
+  game.flash = 0;
+  game.flashColor = null;
+  game.doorWait = null;
+  game.doorHold = 0;
+  game.finale = null;
+  game.summonDelay = 0;
+  game.roomId = "hub";
+  game.won = false;
+  game.summoned = false;
+  game.runtimeFaults = 0;
+  game.lastRuntimeFault = "";
+  game.cam.x = 0;
+  game.cam.y = 0;
   if (!game.running) return;
   save();
   setPaused(true);
@@ -316,6 +366,26 @@ function returnToMenu() {
   game.running = false;
   input?.reset();
   clock.reset();
+  // PHASE 39 - SESSION RESET CLOSURE
+  // Una nueva sesion nunca hereda estado transitorio anterior.
+  t = 0;
+  paused = false;
+  game.hitstop = 0;
+  game.camPunch = 0;
+  game.fading = 0;
+  game.flash = 0;
+  game.flashColor = null;
+  game.doorWait = null;
+  game.doorHold = 0;
+  game.finale = null;
+  game.summonDelay = 0;
+  game.roomId = "hub";
+  game.won = false;
+  game.summoned = false;
+  game.runtimeFaults = 0;
+  game.lastRuntimeFault = "";
+  game.cam.x = 0;
+  game.cam.y = 0;
   playMusic("title");
   closeOverlays();
   document.body.classList.remove("playing", "boss-fight");
@@ -536,6 +606,26 @@ function start(def) {
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
   input?.reset();
   clock.reset();
+  // PHASE 39 - SESSION RESET CLOSURE
+  // Una nueva sesion nunca hereda estado transitorio anterior.
+  t = 0;
+  paused = false;
+  game.hitstop = 0;
+  game.camPunch = 0;
+  game.fading = 0;
+  game.flash = 0;
+  game.flashColor = null;
+  game.doorWait = null;
+  game.doorHold = 0;
+  game.finale = null;
+  game.summonDelay = 0;
+  game.roomId = "hub";
+  game.won = false;
+  game.summoned = false;
+  game.runtimeFaults = 0;
+  game.lastRuntimeFault = "";
+  game.cam.x = 0;
+  game.cam.y = 0;
   game._magicSnap = null;
   game.hitstop = 0;
   game.combatFx?.clear();
@@ -2654,7 +2744,24 @@ function setupSelect() {
     }
     if (act === "roster") returnToMenu();
   });
-  input = bindInput({
+    // PHASE 39 - ESCAPE HARDENING DIRECT
+  // Escape debe abrir la pausa de forma determinista antes del adaptador
+  // generico de teclado. Se bloquea la propagacion para impedir doble toggle.
+  addEventListener("keydown", (event) => {
+    if (
+      event.key !== "Escape" ||
+      event.repeat ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.metaKey ||
+      event.target?.closest?.("input, textarea, select, [contenteditable='true']")
+    ) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    escape();
+  }, true);
+input = bindInput({
     target: window, canvas, buttons: document.querySelectorAll(".touch-btn"), canAct,
     isRunning: () => game.running,
     actions: {
@@ -2701,6 +2808,26 @@ if (e2eEnabled) {
     paused = false;
     input?.reset();
     clock.reset();
+  // PHASE 39 - SESSION RESET CLOSURE
+  // Una nueva sesion nunca hereda estado transitorio anterior.
+  t = 0;
+  paused = false;
+  game.hitstop = 0;
+  game.camPunch = 0;
+  game.fading = 0;
+  game.flash = 0;
+  game.flashColor = null;
+  game.doorWait = null;
+  game.doorHold = 0;
+  game.finale = null;
+  game.summonDelay = 0;
+  game.roomId = "hub";
+  game.won = false;
+  game.summoned = false;
+  game.runtimeFaults = 0;
+  game.lastRuntimeFault = "";
+  game.cam.x = 0;
+  game.cam.y = 0;
   };
 
   window.__OHANA_E2E = {
