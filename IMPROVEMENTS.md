@@ -102,3 +102,9 @@ Estas cifras deben permanecer alineadas entre el código, manifest.json, README.
 75. Phase 37: aislamiento del harness E2E para impedir que la API de pruebas se exponga en el dominio publicado.
 
 76. Phase 38: cierre final del firewall de mutaciones, incluyendo combo, para eliminar la última aritmética directa sobre un contador crítico de combate.
+
+## Phase 39 - Session Reset Closure
+
+El arranque de una nueva partida no debe heredar estado transitorio de una sesión anterior. Se cubren countdown del Nido, finale, transiciones de puertas, cámara, flashes, pausa y runtime faults.
+
+La progresión persistente sigue restaurándose exclusivamente desde `saveStore`.
