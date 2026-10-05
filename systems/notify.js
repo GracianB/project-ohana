@@ -1,48 +1,50 @@
-import { messageManager } from "./message-manager.js";
+import {
+  messageManager,
+  showSystemMessage,
+  showRoomMessage,
+  showObjectiveMessage,
+  showTutorialMessage,
+  showCombatMessage,
+  showBossMessage,
+  showEvolutionMessage,
+  showErrorMessage,
+  setPersistentObjective,
+  clearPersistentObjective,
+} from "./message-manager.js";
+
+export {
+  messageManager,
+  showSystemMessage,
+  showRoomMessage,
+  showObjectiveMessage,
+  showTutorialMessage,
+  showCombatMessage,
+  showBossMessage,
+  showEvolutionMessage,
+  showErrorMessage,
+  setPersistentObjective,
+  clearPersistentObjective,
+};
 
 export function dismissNotifications() {
   messageManager.dismiss();
 }
 
+// Compatibility bridge for legacy callers. New code should use semantic functions above.
 export function showNotification(title, message, kind, options = {}) {
-  const type = kind || guessKind(title);
-  return messageManager.show({
-    type,
-    title,
-    text: message,
-    duration: options.duration,
-    priority: options.priority,
-    key: options.key,
-    dismissible: options.dismissible,
-  });
-}
-
-export function setObjectiveMessage(text, done = false) {
-  messageManager.setObjective(text, done);
-}
-
-export function clearObjectiveMessage() {
-  messageManager.clearObjective();
-}
-
-export function showRoomMessage(title, text, options = {}) {
-  return messageManager.show({
-    type: "room",
-    title,
-    text,
-    duration: options.duration ?? 4200,
-    priority: options.priority ?? 50,
-    key: options.key,
-  });
-}
-
-function guessKind(title) {
-  const t = String(title || "").toUpperCase();
-  if (t.includes("EVO") || t.includes("MAX") || t.includes("FORMA")) return "evolution";
-  if (t.includes("VICTORIA") || t.includes("OHANA") || t.includes("MAPA")) return "system";
-  if (t.includes("NIDO") || t.includes("REINA")) return "boss";
-  if (t.includes("VAC") || t.includes("DERROTA") || t.includes("CERRADO") || t.includes("PELIGRO")) return "error";
-  return "info";
+  const legacyMap = {
+    evo: showEvolutionMessage,
+    sala: showRoomMessage,
+    hurt: showErrorMessage,
+    boss: showBossMessage,
+    combat: showCombatMessage,
+    tutorial: showTutorialMessage,
+    objective: showObjectiveMessage,
+    system: showSystemMessage,
+    error: showErrorMessage,
+  };
+  const fn = legacyMap[String(kind || "").toLowerCase()] || showSystemMessage;
+  return fn(title, message, options);
 }
 
 if (!globalThis.__ohanaMessageDismissBound) {
