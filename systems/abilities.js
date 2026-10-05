@@ -274,6 +274,29 @@ export function drawAbilityFx(ctx, game, t) {
   // Auras de movimiento
   if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
   if (S.charge > 0) drawChargeShield(ctx, p, cam, t);
+  drawCastSignature(ctx, p, cam, t);
+}
+
+function drawCastSignature(ctx, p, cam, t) {
+  const cast = p._cast;
+  if (!cast || t - cast.t > 28) return;
+  const k = 1 - (t - cast.t) / 28;
+  const x = p.x + p.w / 2 - cam.x;
+  const y = p.y + p.h * 0.4 - cam.y;
+  const face = p.facing || 1;
+  const color = p.color || "#fff6c8";
+  const slot = cast.slot | 0;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.globalAlpha = 0.85 * k;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = slot === 2 ? 6 : slot === 1 ? 4 : 2.5;
+  ctx.beginPath();
+  if (slot === 0) ctx.arc(x + face * 18, y, 16 + (1 - k) * 20, -0.8, 0.8);
+  else if (slot === 1) ctx.arc(x, y, 22 + (1 - k) * 36, 0, Math.PI * 2);
+  else ctx.arc(x, y, 34 + (1 - k) * 70, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------------------

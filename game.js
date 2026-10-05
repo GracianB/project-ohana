@@ -720,10 +720,10 @@ function dash() {
   p.dashBuf = 0;
   if (sig.hop) p.vy = Math.min(p.vy || 0, sig.hop);
   if (sig.ram) p._ram = 8;
-  pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: sig.heavy ? 16 : 12, color: p.color }, MAX_RUNTIME_GHOSTS);
-  if (sig.spark) {
-    game.fx.emit(p.x, p.y + p.h * 0.5, { color: "#ffe14a", count: 8, size: 2.4, star: true, speed: 2.2, life: 14 });
+  for (let i = 0; i < 3; i++) {
+    pushRuntime(game.ghosts, { x: p.x - p._dashFace * i * 10, y: p.y, w: p.w, h: p.h, life: 10 + i * 3, color: p.color }, MAX_RUNTIME_GHOSTS);
   }
+  game.fx.emit(p.x, p.y + p.h * 0.5, { color: p.color || "#fff", count: sig.heavy ? 14 : 10, size: 3, star: true, speed: 3.2, life: 16 });
   beep("dash");
   game.experience?.dash(p);
 }
@@ -1210,7 +1210,7 @@ function updatePlayer() {
     p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
     if (p.wall) p.vx = 8 * p.wall;
     p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
-    game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#fff", count: 6, size: 2 });
+    game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
   }
   if (!jump) {
     if (p._jumpHeld && p.vy < -4) p.vy *= 0.55;
