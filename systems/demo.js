@@ -1,15 +1,4 @@
-const HINTS = {
-  "Claro Ohana": "Objetivo: recoge orbes. ESTE = Costa. Centro + salto = Cumbre.",
-  "Costa Hoku": "No caigas al hueco del centro. ESTE pide forma 3.",
-  "Jungla Alta": "Hueco del centro ABAJO = Caldera. Pide forma 4.",
-  "Cueva Azul": "OESTE = Lab. ESTE = Claro.",
-  "Alien Lab": "Sala cerrada. Solo se sale por ESTE.",
-  "Cumbre": "Hueco ABAJO = Claro. ESTE = Órbita.",
-  "Órbita": "Hueco ABAJO = Claro. No hay piso extra abajo.",
-  "Caldera": "ESTE = Nido del jefe. OESTE = Jungla.",
-  "Nido Final": "Derrota a la Reina. Después puedes seguir explorando o repetir el nido.",
-  "Arrecife Abismo": "Explora el agua. ARRIBA vuelve a la Costa. E usa el portal."
-};
+const HINTS = {};
 
 const STEPS = [
   { id: "move", text: "WASD para moverte. H ataca. J desde el principio, K en forma 2, L en forma 3, U el supremo en forma 5. E usa portales." },
@@ -23,7 +12,7 @@ function ensure() {
   if (document.getElementById("demo-ribbon")) return;
   const ribbon = document.createElement("div");
   ribbon.id = "demo-ribbon";
-  ribbon.innerHTML = "<b>MUNDO 1</b><span>Isla Hoku · contrato cerrado</span>";
+  ribbon.innerHTML = "<b>MUNDO 1</b><span>Isla Hoku</span>";
   document.body.appendChild(ribbon);
   const obj = document.createElement("div");
   obj.id = "demo-obj";
@@ -44,16 +33,16 @@ function showTut(text) {
 }
 
 const GOALS = {
-  hub: { text: "Objetivo: abre la Costa por el este.", done: (d) => !!d.visited.beach },
-  beach: { text: "Objetivo: no caigas al pozo. La jungla pide forma 3.", done: (d) => !!d.visited.jungle },
-  jungle: { text: "Objetivo: baja a la Caldera. Pide forma 4.", done: (d) => !!d.visited.volcano },
-  volcano: { text: "Objetivo: entra al Nido por el este.", done: (d) => !!d.visited.boss },
-  boss: { text: "Objetivo: derrota a la Reina.", done: (d) => !!d.won },
-  cave: { text: "Objetivo: el Lab está al oeste. Pide forma 2.", done: (d) => !!d.visited.lab },
-  lab: { text: "Objetivo: sal por el este. No hay otra puerta.", done: (d) => !!d.visited.cave },
-  ridge: { text: "Objetivo: la Órbita está al este.", done: (d) => !!d.visited.space },
-  space: { text: "Objetivo: el vórtice secreto baja al Arrecife.", done: (d) => !!d.visited.reef },
-  reef: { text: "Objetivo: sube y vuelve a la Costa.", done: (d) => !!d.visited.beach }
+  hub: { text: "Recoge los cristales. La costa está a la derecha.", done: (d) => !!d.visited.beach },
+  beach: { text: "No caigas al hueco. La jungla, a la derecha, pide la forma 3.", done: (d) => !!d.visited.jungle },
+  jungle: { text: "El hueco del centro baja a la caldera. Pide la forma 4.", done: (d) => !!d.visited.volcano },
+  volcano: { text: "La Reina está a la derecha.", done: (d) => !!d.visited.boss },
+  boss: { text: "Derrota a la Reina del Nido.", done: (d) => !!d.won },
+  cave: { text: "El laboratorio está a la izquierda. Pide la forma 2.", done: (d) => !!d.visited.lab },
+  lab: { text: "Solo se sale por la derecha, de vuelta a la cueva.", done: (d) => !!d.visited.cave },
+  ridge: { text: "La órbita está a la derecha. El hueco baja al claro.", done: (d) => !!d.visited.space },
+  space: { text: "El vórtice de la derecha baja al arrecife.", done: (d) => !!d.visited.reef },
+  reef: { text: "Recoge los cristales del agua. Arriba vuelves a la costa.", done: (d) => !!d.visited.beach }
 };
 
 function paintGoal(detail) {
@@ -66,12 +55,7 @@ function paintGoal(detail) {
   obj.classList.toggle("done", done);
 }
 
-function tick() {
-  if (!document.body.classList.contains("playing")) return;
-  const world = document.getElementById("hud-world")?.textContent || "";
-  const obj = document.getElementById("demo-obj");
-  if (obj && !obj.dataset.live && HINTS[world]) obj.textContent = HINTS[world];
-}
+function tick() {}
 
 function boot() {
   ensure();
