@@ -107,6 +107,9 @@ const SUPREME = Object.freeze({
   cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8" },
 });
 
+export function supremeOf(id) {
+  return SUPREME[id] || SUPREME.kilo;
+}
 function castSupreme(game, p) {
   const def = SUPREME[p.id] || SUPREME.kilo;
   const dmg = (70 + (Number(p.evo) || 0) * 12) * pw(p);
@@ -2259,6 +2262,16 @@ export function drawProjectile(ctx, pr, cam, t) {
   const x = pr.x - cam.x + pr.w / 2;
   const y = pr.y - cam.y + pr.h / 2;
   ctx.save();
+  if ((pr.vx || pr.vy) && pr.shape !== "salt") {
+    ctx.globalAlpha = 0.45;
+    ctx.strokeStyle = pr.color || "#fff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - (pr.vx || 0) * 2.2, y - (pr.vy || 0) * 2.2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   ctx.translate(x, y);
   const ang = Math.atan2(pr.vy || 0, pr.vx || 1);
   if (pr.spin) ctx.rotate(t * 0.22 + (pr.rot || 0));

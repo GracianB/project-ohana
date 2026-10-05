@@ -7,7 +7,7 @@ import { drawTerrain } from "./worlds/terrain.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
 import { showNotification } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -2527,7 +2527,7 @@ function renderAbilityBar() {
   slots.push({ id: "supreme", need: 4, supreme: true });
   bar.innerHTML = slots.map((slot) => {
     const d = slot.supreme
-      ? { name: "Supremo", key: "U", color: game.player.color || "#ffd36a" }
+      ? supremeOf(game.player.id)
       : ABILITY_DEFS[slot.id];
     if (!d) return "";
     const locked = evo < slot.need;
