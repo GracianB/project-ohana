@@ -281,18 +281,54 @@ function chispin(ctx, pose) {
 }
 
 function cat(ctx, pose) {
-  const b = body(ctx, "cat", pose);
-  const y = b.hip - 40 * b.grow + b.a.bob;
-  head(ctx, 0, y, 16, pose, b.fur);
-  blob(ctx, -10, y - 16, 4, 8, b.fur, -0.2);
-  blob(ctx, 10, y - 16, 4, 8, b.fur, 0.2);
-  const wag = Math.sin((pose.t || 0) * 0.2) * 6;
-  ctx.strokeStyle = b.dark;
-  ctx.lineWidth = 4;
+  const f = fnum(pose);
+  const a = poseAngles(pose);
+  const fur = ["#ffe3b8", "#f29a3a", "#ffd0e8", "#c9b4ff", "#fff6ea"][f];
+  const dark = ["#e7b56a", "#c45e16", "#e888c0", "#6a4ec4", "#e4c07a"][f];
+  ink(ctx, 3.2);
+  const hip = -14 - f;
+  limb(ctx, -5, hip, 12 + f, a.leg + 1.15, dark, 4.5);
+  limb(ctx, 5, hip, 12 + f, a.leg2 + 1.15, dark, 4.5);
+  blob(ctx, 0, hip - 14 + a.bob, 14 + f * 0.5, 13 + f * 0.4, fur);
+  const y = hip - 34 - f * 2 + a.bob;
+  head(ctx, 0, y, 15, pose, fur);
+  blob(ctx, -9, y - 14, 3.4, 8 + f, fur, -0.25);
+  blob(ctx, 9, y - 14, 3.4, 8 + f, fur, 0.25);
+  ctx.fillStyle = "#ff8aa0";
   ctx.beginPath();
-  ctx.moveTo(8, b.hip);
-  ctx.quadraticCurveTo(-10, b.hip - 10, -16 + wag, b.hip - 24 - b.f * 2);
-  ctx.stroke();
+  ctx.moveTo(0, y + 4);
+  ctx.lineTo(-3, y + 8);
+  ctx.lineTo(3, y + 8);
+  ctx.fill();
+  const tails = f >= 4 ? 3 : 1;
+  const wag = Math.sin((pose.t || 0) * 0.22) * 6;
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = 4;
+  for (let i = 0; i < tails; i++) {
+    ctx.beginPath();
+    ctx.moveTo(6, hip - i * 3);
+    ctx.quadraticCurveTo(-8 - i * 4, hip - 8, -14 + wag + i * 4, hip - 22 - f * 2);
+    ctx.stroke();
+  }
+  if (f >= 2) {
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.arc(0, y - 20, 10 + f, 0.5, 2.6);
+    ctx.stroke();
+  }
+  if (pose.state === "attack") {
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(14, y + 8);
+    ctx.lineTo(26, y + 2);
+    ctx.moveTo(14, y + 12);
+    ctx.lineTo(28, y + 12);
+    ctx.moveTo(14, y + 16);
+    ctx.lineTo(26, y + 22);
+    ctx.stroke();
+  }
 }
 
 function dragon(ctx, pose) {
