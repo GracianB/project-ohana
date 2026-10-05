@@ -80,7 +80,7 @@ try {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
 
-  await page.goto(base + '?visual=1', { waitUntil: 'networkidle' });
+  await page.goto(base + '?visual=1&e2e=1', { waitUntil: 'networkidle' });
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
   await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
   await capture(page, '01-character-select');
