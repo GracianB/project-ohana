@@ -248,3 +248,11 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 - Un fallo de quota/escritura no destruye el checkpoint previo y el staging puede servir como recuperación defensiva.
 - Los saves con una versión explícita desconocida se rechazan; v2 sigue siendo el contrato publicado.
 - Cache: `ohana-118`.
+
+
+## Phase 45 - Input Lifecycle Closure
+
+- El estado de entrada se limpia en `blur`, `focus`, `pagehide` y cualquier cambio de visibilidad.
+- La limpieza afecta teclado, watchdog y punteros retenidos, sin depender de `keyup`.
+- Se mantiene el watchdog de 1200 ms para teclados que pierden su evento de liberación.
+- Cache: `ohana-119`.
