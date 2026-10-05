@@ -2269,7 +2269,7 @@ export function drawProjectile(ctx, pr, cam, t) {
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x - (pr.vx || 0) * 2.2, y - (pr.vy || 0) * 2.2);
+    ctx.lineTo(x - (pr.vx || 0) * 3.4, y - (pr.vy || 0) * 3.4);
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
@@ -2450,6 +2450,11 @@ export function drawProjectile(ctx, pr, cam, t) {
     ctx.arc(-2, -2, Math.max(2, w / 5), 0, Math.PI * 2);
     ctx.fill();
   }
+  ctx.globalAlpha = 0.85;
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.max(2, Math.min(w, h) * 0.18), 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 }
 
