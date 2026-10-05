@@ -122,11 +122,12 @@ La vista por defecto es **vector**.
 
 ## Tests
 
-El CI ejecuta **las seis suites de regresión más un E2E real de navegador**:
+El CI ejecuta **las ocho suites de regresión Node más un E2E real de navegador y el release gate**:
 
 ```bash
-node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js
-node tests/browser/e2e.mjs
+npm test
+npm run test:browser
+npm run release:check
 ```
 
 Las pruebas cubren, entre otras áreas:
@@ -166,7 +167,7 @@ El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
 | 05/10 | **Runtime Budget + Portal Determinism · Phase 28**: colecciones transitorias acotadas (enemigos/proyectiles/ghosts/orbs), números flotantes limitados a 96 y VFX de portales sin azar ni reloj de pared; caché `ohana-103`. |
 | 05/10 | **Runtime Integrity Guard · Phase 29**: saneamiento preventivo de estado crítico y colecciones antes de cada paso de simulación; límites finitos para HP, XP, score, movimiento, proyectiles, enemigos y FX; recompensa `PUNISH` vuelve al guard de puntuación; caché `ohana-104`. |
 | 05/10 | **Runtime Fail-Closed · Phase 30**: el bucle principal contiene errores de simulación o render, registra el contexto, limpia input/reloj y pausa de forma segura sin matar el `requestAnimationFrame`; caché `ohana-105`. |
-| 05/10 | **CI Hardening · Phase 31**: GitHub Actions actualizado a `actions/checkout@v7` y `actions/setup-node@v7`, con límite de 10 minutos para test y deploy; elimina el warning de Node 20 de las actions antiguas. |
+| 05/10 | **CI Hardening · Phase 31**: GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, con límites de 10 minutos para test y deploy. |
 | 05/10 | **RNG Domain Separation · Phase 32**: VFX de celebración, glide, cámara y overlays usan una fuente determinista separada del RNG de simulación; la IA/combate conserva el RNG compartido exclusivamente; caché `ohana-106`. |
 | 05/10 | **Deterministic Gameplay Core · Phase 33**: las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación; la convocatoria del Nido abandona `setTimeout` y usa 132 ticks a 60 Hz, pausables y reproducibles; caché `ohana-107`. |
 | 05/10 | **Global Mutation Firewall · Phase 34**: HP, XP, score, combo, bajas y escalados de vida críticos se enrutan por `systems/mutations.js`; los sistemas externos dejan de realizar aritmética directa sobre estado crítico; caché `ohana-108`. |
@@ -189,11 +190,7 @@ El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no s
 
 ## Pendiente técnico
 
-La auditoría actual cubre determinismo de gameplay, renderers, runtime y coherencia de cifras. Las capas que siguen pendientes son mejoras estructurales y de calidad, no deuda crítica:
-
-- mantener ampliada la cobertura de sprites pintados si aparecen nuevas formas o poses
-- reforzar el versionado de caché de módulos ES internos
-- mantener la prueba de humo de renderers y ampliar el mock si aparece una nueva API gráfica
+La auditoría y el gate actuales no dejan deuda crítica conocida. El mantenimiento futuro queda limitado a extender la cobertura cuando se incorporen nuevas formas, poses, sistemas o superficies de navegador.
 
 ## Regla de mantenimiento
 
