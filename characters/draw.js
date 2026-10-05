@@ -2,6 +2,7 @@ import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { paintedBody } from "./sprites.js";
 import { drawCostume } from "./costume.js";
+import { drawDefinitive } from "./definitive.js";
 import { getLook } from "./look.js";
 import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "./evolution.js";
 
@@ -883,7 +884,7 @@ function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
   cg.setTransform(1, 0, 0, 1, 0, 0);
   cg.clearRect(0, 0, W, W);
   cg.setTransform(ps, 0, 0, ps, W / 2, W * 0.78);
-  art.draw(cg, pose, R);
+  try { drawDefinitive(cg, charId || art.id, pose); } catch (e) { art.draw(cg, pose, R); }
   if (flashCol && flashA > 0) {
     const flash = sheet("flash", W);
     const fg = flash.getContext("2d");
@@ -1052,7 +1053,6 @@ export function drawCharacter(ctx, p, cam, t) {
   drawEvolutionDesignFX(ctx, p, H, pose, t, true);
   drawEvolutionSilhouetteFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
-  drawCostume(ctx, p.id, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {
     drawBurst(ctx, H, color, burstK);
