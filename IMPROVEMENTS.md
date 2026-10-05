@@ -121,3 +121,8 @@ La progresión persistente sigue restaurándose exclusivamente desde `saveStore`
 ## Phase 42 - Offline E2E Closure
 
 79. Phase 42: cierre del arranque offline real. Chromium recarga sin red tras activar el Service Worker, valida JS/CSS/SVG desde caché, inicia gameplay y el test rechaza duplicados en el precache.
+
+
+## Phase 43 - ESM Dependency Closure
+
+80. Phase 43: auditoría automática del grafo ESM local para impedir imports relativos rotos o huérfanos dentro del runtime.
