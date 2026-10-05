@@ -94,7 +94,7 @@ export function computePose(p, t, opts = {}) {
   r.brake = braking ? Math.min(1, Math.abs(prevVx - vx) / 7) : Math.max(0, r.brake - 0.16 * dt);
   r.lastVx = vx;
 
-  if (!air && speed > 0.08) r.phase += (0.16 + speed * 0.2) * dt * prof.freq;
+  if (!air && speed > 0.08) r.phase += (0.22 + speed * 0.28) * dt * prof.freq;
 
   if (!air && r.wasAir) r.land = 1;
   r.wasAir = air;
@@ -148,8 +148,8 @@ export function computePose(p, t, opts = {}) {
     else flourish = r.flourishT;
   }
 
-  const anticipation = atk > 0 && atk < 0.28 ? (0.28 - atk) / 0.28 : 0;
-  const impact = atk >= 0.28 && atk < 0.55 ? 1 - (atk - 0.28) / 0.27 : 0;
+  const anticipation = atk > 0 && atk < 0.34 ? (0.34 - atk) / 0.34 : 0;
+  const impact = atk >= 0.34 && atk < 0.52 ? 1 - (atk - 0.34) / 0.18 : 0;
   const stretch = air ? clamp(-vy / 14, -0.35, 0.45) * (state === "jump" ? 1 : 0.7) : 0;
   const squash = r.land * 0.28 * prof.land;
   const run = state === "run" ? speed : 0;
@@ -160,7 +160,7 @@ export function computePose(p, t, opts = {}) {
     atk, cast, castSlot, hurt, blink,
     nineLives: Math.max(0, Number(p._nineT) || 0),
     look: { x: 1, y: clamp(vy / 14, -0.6, 0.6) },
-    sway: r.sway, bounce: r.bounce, breath: Math.sin(t * 0.06) * prof.breath,
+    sway: r.sway, bounce: r.bounce, breath: Math.sin(t * 0.07) * prof.breath * 1.35,
     flourish, flourishN: r.flourishN,
     evoT: p._evoT || 0,
     squash, stretch,
