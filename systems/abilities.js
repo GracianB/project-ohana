@@ -2546,6 +2546,20 @@ export function drawSlash(ctx, s, cam) {
     fang(-1);
     fang(1);
     ctx.restore();
+  } else if (kind === "leaf") {
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = "#7dce6a";
+    ctx.strokeStyle = "#245522";
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const ang = a0 + (a1 - a0) * (0.3 + i * 0.25);
+      ctx.beginPath();
+      ctx.ellipse(Math.cos(ang) * reach * 0.7, Math.sin(ang) * reach * 0.7, 8, 16, ang, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
   } else if (kind === "poke") {
     const len = reach * (0.28 + open * 0.78);
     ctx.save();
