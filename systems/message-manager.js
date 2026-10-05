@@ -79,7 +79,6 @@ export class MessageManager {
     }
 
     root.setAttribute("role", "status");
-    root.setAttribute("aria-live", "polite");
     root.setAttribute("aria-atomic", "true");
     root.dataset.messageManager = "1";
     this.node = root;
@@ -157,7 +156,15 @@ export class MessageManager {
     root.replaceChildren(el);
     this.current = msg;
 
-    const duration = this.reducedMotion()
+    const urgent = msg.type === "error" || msg.type === "boss" || msg.type === "evolution";
+    root.setAttribute("aria-live", urgent ? "assertive" : "polite");
+
+    const reduced =
+      this.reducedMotion() ||
+      (typeof matchMedia === "function" &&
+        matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    const duration = reduced
       ? msg.duration * REDUCED_DURATION_FACTOR
       : msg.duration;
 
@@ -178,6 +185,8 @@ export class MessageManager {
   renderFallback() {
     const root = this.mount();
     if (!root) return;
+
+    root.setAttribute("aria-live", "polite");
 
     if (!this.objective) {
       root.replaceChildren();
