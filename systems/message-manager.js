@@ -9,6 +9,12 @@ const DEFAULT_DURATION = {
   error: 2600,
 };
 
+const TYPE_ALIASES = {
+  evo: "evolution",
+  sala: "room",
+  hurt: "error",
+};
+
 const PRIORITY = {
   system: 20,
   info: 30,
@@ -28,7 +34,8 @@ export function messagePriority(type = "info") {
 }
 
 export function normalizeMessage(input = {}) {
-  const type = String(input.type || "info").toLowerCase();
+  const requestedType = String(input.type || "info").toLowerCase();
+  const type = TYPE_ALIASES[requestedType] || requestedType;
   const title = String(input.title || "").trim();
   const text = String(input.text ?? input.message ?? "").trim();
   const duration = Number.isFinite(Number(input.duration))
