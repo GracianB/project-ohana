@@ -132,6 +132,13 @@ async function auditPage(page, label) {
       throw new Error('E2E: el ataque real no dañó a la Reina del Nido sin matarla');
     }
 
+    api.setBossHp(1000);
+    const phaseTwo = api.step(1);
+    snapshots.push({ phaseTwo });
+    if (!phaseTwo.boss || phaseTwo.boss.phase !== 2) {
+      throw new Error('E2E: transición fase1→fase2 inválida · ' + JSON.stringify(phaseTwo.boss));
+    }
+
     api.setBossHp(300);
     const phaseAfter = api.step(12);
     snapshots.push({ phaseAfter });
@@ -184,6 +191,33 @@ async function auditPage(page, label) {
   assert.ok(audit.dialogs.every((d) => d.labelled && d.modal), label + ': diálogo sin etiquetado/modal accesible');
   assert.ok(audit.bars.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), label + ': progressbar fuera de rango');
   await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
+  if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
+
+  const deterministic = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    const run = () => {
+      api.setSeed(123456789);
+      api.start('kilo');
+      api.setXp(55);
+      api.setEvo(2);
+      api.cast(1);
+      api.dash();
+      api.step(36);
+      return api.state();
+    };
+    return { first: run(), second: run() };
+  });
+  assert.deepEqual(deterministic.first, deterministic.second, label + ': gameplay no determinista con semilla idéntica');
+
+  const fault = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    return api.injectFault('nan');
+  });
+  assert.ok(Number.isFinite(fault.score), label + ': score no recuperado tras NaN');
+  assert.ok(Number.isFinite(fault.hp) && Number.isFinite(fault.xp), label + ': estado crítico no recuperado tras NaN');
+  assert.ok(fault.projectiles <= 128, label + ': colección no acotada tras inyección');
+
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 }
 
@@ -250,9 +284,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-120',
-      '/style.css?v=ohana-120',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-120',
+      '/game.js?v=ohana-121',
+      '/style.css?v=ohana-121',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-121',
     ];
     const results = [];
     for (const path of paths) {
