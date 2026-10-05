@@ -91,14 +91,38 @@ for (const asset of referencedAssets) {
   if (!fs.existsSync("./" + asset)) errors.push("recurso precacheado inexistente: " + asset);
 }
 
-if (packageJson.scripts?.test !== "node --test tests/core.test.js tests/runtime.test.js tests/renderers.test.js tests/completeness.test.js tests/hardening.test.js tests/animation.test.js tests/experience.test.js tests/v34-1-critical.test.js") {
+if (packageJson.scripts?.test !== "node --test tests/*.js") {
   errors.push("package.json: script test inesperado");
 }
 if (packageJson.scripts?.["test:browser"] !== "node tests/browser/e2e.mjs") errors.push("package.json: falta test:browser esperado");
+if (packageJson.scripts?.["test:visual"] !== "node tests/browser/visual-regression.mjs") errors.push("package.json: falta test:visual");
 if (packageJson.scripts?.["release:check"] !== "node tools/release-gate.mjs") errors.push("package.json: falta release:check");
 
 if (!progress.includes("node tests/browser/e2e.mjs")) errors.push("PROGRESS: falta E2E real");
+if (!progress.includes("node tests/browser/visual-regression.mjs")) errors.push("PROGRESS: falta matriz visual");
 if (!progress.includes("release:check")) errors.push("PROGRESS: falta release gate");
+
+const messageSources = [
+  ["game.js", read("game.js")],
+  ["systems/demo.js", read("systems/demo.js")],
+  ["systems/boss-nido.js", read("systems/boss-nido.js")],
+];
+for (const [file, source] of messageSources) {
+  if (/\bshowNotification\s*\(/.test(source)) errors.push(file + ": usa el legacy showNotification");
+}
+for (const [file, source] of [
+  ["index.html", index],
+  ["demo.css", read("demo.css")],
+]) {
+  if (/demo-ribbon|demo-obj|demo-tut|id=["']room-banner["']/.test(source)) {
+    errors.push(file + ": contiene overlay legacy retirado");
+  }
+}
+
+if (!fs.existsSync("./systems/message-manager.js")) errors.push("falta MessageManager");
+if (!fs.existsSync("./systems/objectives.js")) errors.push("falta objectives.js");
+if (!fs.existsSync("./systems/evolution-timing.js")) errors.push("falta evolution-timing.js");
+if (!fs.existsSync("./systems/combat-feedback.js")) errors.push("falta combat-feedback.js");
 
 if (errors.length) {
   console.error("[OHANA] RELEASE GATE FAIL");
