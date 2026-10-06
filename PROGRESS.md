@@ -1,6 +1,6 @@
 # PROJECT OHANA · Progreso
 
-Última actualización: 05/10/2026
+Última actualización: 06/10/2026
 
 ## Estado actual
 
@@ -20,7 +20,7 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-201`.
+La caché canónica de esta línea de trabajo es `ohana-210`.
 
 ### 06/10/2026 · Organic Hero Render Recovery
 
@@ -339,3 +339,12 @@ El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cac
 ## Polish Pass 2026-10-06
 
 Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-201.
+
+
+## 06/10/2026 · Foundation Polish 2
+
+- La portada queda bajo una única composición en `title-stage.css`; se elimina la cascada de layouts históricos que empujaba el carrusel y los CTA fuera de la zona segura.
+- Evolución: QA `Ctrl+Z`, retratos de portada sin burst artificial y removal de halos heredados de Kilo/Dino.
+- Mensajería: la entrada de sala limpia notificaciones temporales para evitar restos de otro contexto.
+- Jungla conserva el gate de forma 3 (índice de evolución 2), alineado con el contrato del Mundo 1.
+- Cache de release: `ohana-210`.
