@@ -59,7 +59,7 @@ export function useAbility(game, index) {
   const id = supreme ? supreme.id : p.abilities && p.abilities[index];
   const def = supreme || ABILITY_DEFS[id];
   if (!def) return;
-  const fn = index === 3 ? castSupreme : CASTERS[id];
+  const fn = CASTERS[id];
   if (typeof fn !== "function") return;
   const baseCd = Number(def.cd);
   if (!Number.isFinite(baseCd) || baseCd <= 0) return;

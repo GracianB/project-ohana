@@ -13,6 +13,7 @@ import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
 import { evolutionTiming } from "./evolution-timing.js";
+import { EVOLUTION_CINEMA_PROFILES } from "../characters/evolution.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };

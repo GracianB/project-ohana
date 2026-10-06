@@ -1,11 +1,10 @@
 // ============================================================================
 // REINA DEL NIDO · arte vectorial animado del jefe final (diseño original)
 // ----------------------------------------------------------------------------
-// Una reina-búho carmesí de plumas espinosas, corona de espinas con gema,
-// ojos enormes y pico dorado.
+// Una reina-búho carmesí de plumaje espinoso, cresta orgánica, ojos enormes y pico dorado.
 //   Fase 1: posada en su nido de zarzas (se arrastra con él).
 //   Fase 2: rompe el nido, despliega alas gigantes y vuela.
-//   Fase 3: arde. Grietas incandescentes, ojos al blanco, esquirlas orbitando.
+//   Fase 3: arde. Grietas incandescentes y firma evolucionada integrada en la silueta.
 // Origen (0,0) = centro de la hitbox (110×130); los pies en y = +65.
 // También dibuja la entrada cinematográfica (franjas + título) si e.introT > 0.
 // ============================================================================

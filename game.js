@@ -765,7 +765,7 @@ function dash() {
   game.experience?.dash(p);
 }
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
-function damageEnemy(e, amount) { return safeDamageEnemy(e, amount); }
+function damageEnemy(e, amount) { if (e.dying > 0) return true; return safeDamageEnemy(e, amount); }
 function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
 function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }

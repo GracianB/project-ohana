@@ -2319,7 +2319,7 @@ a:focus-visible {
   filter: none;
   z-index: 3;
   pointer-events: auto;
-  transform: translate(-50%, -54%) scale(1);
+  transform: translate(-50%, -46%) scale(1);
 }
 #chars .char-card h3 { font-size: clamp(22px, 2.4vw, 32px); margin-top: 10px; }
 .roster-arrow {
