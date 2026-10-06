@@ -9,7 +9,7 @@ import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -1373,6 +1373,11 @@ function updatePlayer() {
   Magic.update(game);
   if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
   if (!p.grounded && p.coyote > 0) p.coyote--;
+  if (p._specialFlightT > 0) {
+    p.grounded = false;
+    p.coyote = 0;
+    p.jumps = p.maxJumps;
+  }
   if (p.invuln > 0) p.invuln--;
   for (const o of game.orbs) {
     if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
@@ -2652,7 +2657,7 @@ function renderAbilityBar() {
       : ABILITY_DEFS[slot.id];
     if (!d) return "";
     const locked = evo < slot.need;
-    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + d.name + ' · ' + d.key + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + (locked ? "Forma " + (slot.need + 1) : d.name) + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + (locked ? "Forma " + (slot.need + 1) : (d.special || d.name)) + ' · ' + d.key + '" title="' + (slot.supreme ? (d.special || d.name) : d.name) + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + (locked ? "Forma " + (slot.need + 1) : (slot.supreme ? (d.special || d.name) : d.name)) + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
   }).join("");
   abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -2717,6 +2722,10 @@ function updateHUD() {
   const seen = Object.keys(game.visited || {}).length;
   setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
   setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
+  if (p.evo >= 4) {
+    const sp = specialOf(p.id);
+    DOM.hudEvo?.setAttribute("title", "Especial U: " + sp.name + " · " + sp.text);
+  }
   const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const col = p.color || "#7ee7ff";
   const nextPip = evoIdx + ":" + col;
@@ -2796,7 +2805,7 @@ function updateHUD() {
     if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
     btn.classList.remove("off");
     if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
-    const label = def.name + " · " + btn.dataset.k.toUpperCase();
+    const label = (def.special || def.name) + " · " + btn.dataset.k.toUpperCase();
     if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
