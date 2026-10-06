@@ -2856,3 +2856,90 @@ body:not(.playing) #controls-hint { display: none; }
     opacity: .34;
   }
 }
+
+/* ============================================================================
+   OHANA — MENU READABILITY PASS 2
+   Ten small corrections for spacing, layering and responsive stability.
+   ============================================================================ */
+
+/* 01. Brand navigation stays above decorative title FX. */
+#char-select .brand-bar {
+  position: relative;
+  z-index: 12;
+}
+
+/* 02. Decorative sky can never intercept menu interaction. */
+#char-select .title-sky {
+  pointer-events: none;
+}
+
+/* 03. Title stack gets a stable stacking context. */
+#char-select .title-stack {
+  z-index: 10;
+  position: relative;
+  isolation: isolate;
+}
+
+/* 04. Difficulty controls remain compact and do not grow into the hero rail. */
+#char-select #difficulty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+}
+
+/* 05. Action buttons stay on one coherent row on desktop. */
+#char-select #menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* 06. Hero rail cannot visually escape its own composition. */
+#char-select #chars {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* 07. Navigation arrows stay centered on the lowered hero rail. */
+#char-select #chars .roster-arrow {
+  z-index: 10;
+  transform: translateY(-50%);
+}
+
+/* 08. Legal copy never steals attention from the playable controls. */
+#char-select .legal {
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+/* 09. Prevent the main menu from becoming taller than the viewport. */
+#char-select {
+  overflow: hidden;
+}
+
+/* 10. Respect reduced motion without leaving transition artifacts. */
+@media (prefers-reduced-motion: reduce) {
+  #char-select *,
+  #char-select *::before,
+  #char-select *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #char-select #menu-row {
+    gap: 7px;
+  }
+  #char-select #menu-row .cta {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+}
