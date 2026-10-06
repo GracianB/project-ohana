@@ -3234,3 +3234,136 @@ body:not(.playing) #controls-hint { display: none; }
 #chars .roster-arrow.prev{left:12px;}
 /* IMPROVEMENT 100 */
 #chars .roster-arrow.next{right:12px;}
+
+/* ============================================================================
+   OHANA — ROSTER COMPOSITION RESET 218
+   One deliberate layout layer. The carousel is a stage, not a pile of cards.
+   ============================================================================ */
+#char-select {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto minmax(270px, 1fr) auto auto;
+  grid-template-areas:
+    "brand"
+    "title"
+    "difficulty"
+    "chars"
+    "menu"
+    "legal";
+  align-content: stretch;
+  justify-items: center;
+  gap: 0;
+  min-height: 100dvh;
+  padding: 68px 20px 18px;
+  overflow: hidden;
+}
+#char-select .brand-bar { grid-area: brand; position:absolute; top:16px; left:20px; right:20px; }
+#char-select .title-stack { grid-area: title; width:min(760px,100%); margin:0; transform:none; }
+#char-select #difficulty { grid-area:difficulty; margin:8px 0 0; }
+#char-select #chars {
+  grid-area:chars;
+  width:min(1180px,100%);
+  height:100%;
+  min-height:270px;
+  margin:0;
+  align-self:stretch;
+  justify-self:center;
+  overflow:visible;
+}
+#char-select #chars .chars-grid {
+  position:relative;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+#char-select #chars .char-card {
+  top:62%;
+}
+#char-select #chars .char-card.selected {
+  transform:translate(-50%,-50%) scale(1);
+}
+#char-select #chars .char-card.is-prev {
+  transform:translate(calc(-50% - min(27vw,310px)),-45%) scale(.72);
+}
+#char-select #chars .char-card.is-next {
+  transform:translate(calc(-50% + min(27vw,310px)),-45%) scale(.72);
+}
+#char-select #chars .char-card.is-prev2,
+#char-select #chars .char-card.is-next2 {
+  opacity:0;
+  pointer-events:none;
+}
+#char-select #chars .roster-arrow {
+  top:62%;
+  transform:translateY(-50%);
+}
+#char-select #menu-row {
+  grid-area:menu;
+  margin:8px 0 0;
+}
+#char-select .legal {
+  grid-area:legal;
+  margin-top:8px;
+}
+#char-select .chars-dots {
+  bottom:8px;
+}
+.touch-btn.special-u {
+  border-color:rgba(255,216,74,.48);
+  box-shadow:0 0 18px rgba(255,216,74,.14);
+  color:#fff4b0;
+}
+.touch-btn.special-u::after {
+  content:"★";
+  position:absolute;
+  top:3px;
+  right:5px;
+  font-size:7px;
+  opacity:.8;
+}
+.ability-slot[data-supreme="1"] {
+  border-color:color-mix(in srgb,var(--abil,#ffd84a) 58%,transparent);
+  box-shadow:0 0 22px color-mix(in srgb,var(--abil,#ffd84a) 18%,transparent);
+}
+.ability-slot[data-supreme="1"] .key {
+  color:#fff3a2;
+}
+@media (max-width:900px) and (min-width:641px) {
+  #char-select {
+    padding-inline:12px;
+    grid-template-rows:auto auto auto minmax(250px,1fr) auto auto;
+  }
+  #char-select #chars .char-card.is-prev {
+    transform:translate(calc(-50% - 25vw),-45%) scale(.68);
+  }
+  #char-select #chars .char-card.is-next {
+    transform:translate(calc(-50% + 25vw),-45%) scale(.68);
+  }
+}
+@media (max-width:640px) {
+  #char-select {
+    grid-template-rows:auto auto auto minmax(255px,1fr) auto auto;
+    padding:60px 10px 12px;
+  }
+  #char-select .brand-bar { left:10px; right:10px; top:12px; }
+  #char-select .title-stack { transform:none; }
+  #char-select #difficulty { margin-top:5px; }
+  #char-select #chars { min-height:255px; }
+  #char-select #chars .char-card {
+    width:min(260px,68vw);
+    max-height:min(370px,46dvh);
+    top:62%;
+  }
+  #char-select #chars .char-card.selected {
+    transform:translate(-50%,-50%) scale(1);
+  }
+  #char-select #chars .char-card.is-prev {
+    transform:translate(calc(-50% - 30vw),-45%) scale(.66);
+  }
+  #char-select #chars .char-card.is-next {
+    transform:translate(calc(-50% + 30vw),-45%) scale(.66);
+  }
+  #char-select #chars .roster-arrow { top:62%; }
+  #char-select #menu-row { margin-top:4px; }
+  #char-select .legal { margin-top:5px; }
+}
