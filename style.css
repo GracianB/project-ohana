@@ -2732,3 +2732,37 @@ body:not(.playing) #controls-hint { display: none; }
 
 /* Roster is a viewport rail. The card center is always the screen center. */
 #chars { width: 100vw; max-width: 100vw; }
+
+/* ============================================================================
+   OHANA — ROSTER LOWERING HOTFIX
+   Keep the title/difficulty cleanly separated from the selected hero.
+   ============================================================================ */
+#chars .char-card {
+  top: 64%;
+}
+#chars .char-card.is-prev {
+  transform: translate(calc(-50% - min(26vw, 300px)), -40%) scale(.78);
+}
+#chars .char-card.is-next {
+  transform: translate(calc(-50% + min(26vw, 300px)), -40%) scale(.78);
+}
+#chars .char-card.selected {
+  transform: translate(-50%, -46%) scale(1);
+}
+.roster-arrow {
+  top: 58%;
+}
+@media (max-width: 640px) {
+  #chars .char-card.is-prev {
+    transform: translate(calc(-50% - 31vw), -40%) scale(.72);
+  }
+  #chars .char-card.is-next {
+    transform: translate(calc(-50% + 31vw), -40%) scale(.72);
+  }
+  #chars .char-card.selected {
+    transform: translate(-50%, -46%) scale(1);
+  }
+  .roster-arrow {
+    top: 58%;
+  }
+}
