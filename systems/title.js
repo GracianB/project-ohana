@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro, playTitleIntro } from "./intro.js?v=ohana-199";
+import { playIntro, playTitleIntro } from "./intro.js?v=ohana-210";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
@@ -53,8 +53,8 @@ function paintPortraits(now = performance.now()) {
       const hero = card && card.classList.contains("selected");
       const evo = hero ? Math.floor(tick / 220) % 5 : 1;
       if (cv._evo === undefined) cv._evo = evo;
-      if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
-      cv._burst = Math.max(0, (cv._burst || 0) - 2);
+      if (cv._evo !== evo) { cv._burst = 0; cv._evo = evo; }
+      cv._burst = 0;
       cv._atk = Math.max(0, (cv._atk || 0) - 2);
       if (hero && tick % 640 === 0) cv._atk = 14;
       const form = (def.forms && def.forms[evo]) || { w: 28, h: 28, color: def.color };
