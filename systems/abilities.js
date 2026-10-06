@@ -94,23 +94,79 @@ export function useAbility(game, index) {
   trimAbilityProjectiles(game);
 }
 
+const SPECIALS = Object.freeze({
+  kilo:    { flight: true,  name: "Vuelo solar", text: "Vuelo libre: WASD controla el aire durante unos segundos." },
+  stitcho: { phase: true,   name: "Costura fantasma", text: "Cruza el peligro con intangibilidad breve." },
+  chispin: { boltDash: true,name: "Rayo veloz", text: "Impulso eléctrico horizontal con invulnerabilidad." },
+  cat:     { shadow: true,  name: "Paso sombra", text: "Desaparece y reaparece con invulnerabilidad." },
+  dragon:  { flight: true,  name: "Vuelo celestial", text: "Vuelo libre: WASD controla el aire durante unos segundos." },
+  dino:    { titan: true,   name: "Modo coloso", text: "Armadura y pisotón reforzado durante unos segundos." },
+  frita:   { turbo: true,   name: "Centella", text: "Velocidad extrema e inmunidad breve." },
+  pizza:   { bounce: true,  name: "Rebote volcánico", text: "Escudo y rebotes potenciados durante unos segundos." },
+  yomi:    { ghost: true,   name: "Paso del abismo", text: "Forma espectral: atraviesa peligros durante unos segundos." },
+  cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto mejorado durante unos segundos." },
+});
+
 const SUPREME = Object.freeze({
-  kilo:    { id: "solar", name: "Jardín solar", key: "U", cd: 9000, color: "#ffd36a" },
-  stitcho: { id: "bang", name: "Big Bang", key: "U", cd: 9000, color: "#8f7bff" },
-  chispin: { id: "boltgod", name: "Relámpago", key: "U", cd: 9000, color: "#ffe14a" },
-  cat:     { id: "eclipse", name: "Eclipse", key: "U", cd: 9000, color: "#ffb6e4" },
-  dragon:  { id: "nova", name: "Supernova", key: "U", cd: 9000, color: "#ff4a20" },
-  dino:    { id: "impact", name: "Impacto", key: "U", cd: 9000, color: "#c8f04a" },
-  frita:   { id: "frygod", name: "Fritura", key: "U", cd: 9000, color: "#ffd36a" },
-  pizza:   { id: "ovenking", name: "Horno real", key: "U", cd: 9000, color: "#ff8a2a" },
-  yomi:    { id: "devour", name: "Devorar", key: "U", cd: 9000, color: "#ff2244" },
-  cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8" },
+  kilo:    { id: "solar", name: "Jardín solar", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar" },
+  stitcho: { id: "bang", name: "Big Bang", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma" },
+  chispin: { id: "boltgod", name: "Relámpago", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz" },
+  cat:     { id: "eclipse", name: "Eclipse", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra" },
+  dragon:  { id: "nova", name: "Supernova", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial" },
+  dino:    { id: "impact", name: "Impacto", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso" },
+  frita:   { id: "frygod", name: "Fritura", key: "U", cd: 9000, color: "#ffd36a", special: "Centella" },
+  pizza:   { id: "ovenking", name: "Horno real", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico" },
+  yomi:    { id: "devour", name: "Devorar", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo" },
+  cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora" },
 });
 
 export function supremeOf(id) {
   return SUPREME[id] || SUPREME.kilo;
 }
+
+export function specialOf(id) {
+  return SPECIALS[id] || SPECIALS.kilo;
+}
+
+function activateSpecial(game, p) {
+  const s = specialOf(p.id);
+  const T = 210;
+  p._specialT = T;
+  p._specialId = p.id;
+  p._specialFlightT = s.flight ? T : 0;
+  p._specialArmorT = s.phase || s.boltDash || s.shadow || s.titan || s.turbo || s.bounce || s.ghost || s.aurora ? T : 0;
+  p._specialSpeedT = s.turbo ? T : 0;
+  p._specialBounceT = s.bounce ? T : 0;
+  p._specialGhostT = s.ghost ? T : 0;
+  p._specialShadowT = s.shadow ? T : 0;
+  p._specialTitanT = s.titan ? T : 0;
+  p._specialAuroraT = s.aurora ? T : 0;
+
+  if (s.flight) {
+    p.vy = -1;
+    p.grounded = false;
+    game.nums.add(cx(p), p.y - 18, s.name, "#fff6c8", true);
+  } else if (s.boltDash) {
+    p.vx = (p.facing || 1) * Math.max(14, p.speed * 3.4);
+    p.vy = -1.5;
+  } else if (s.shadow) {
+    p.invuln = Math.max(p.invuln || 0, 80);
+    p.x += (p.facing || 1) * 56;
+  } else if (s.titan) {
+    p.invuln = Math.max(p.invuln || 0, 60);
+    p.vy = -5;
+  } else if (s.turbo) {
+    p.vx = (p.facing || 1) * Math.max(12, p.speed * 2.8);
+  } else if (s.aurora) {
+    p.invuln = Math.max(p.invuln || 0, 80);
+    p.vy = -p.jumpPower * 1.2;
+  }
+
+  game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color || "#fff" };
+}
+
 function castSupreme(game, p) {
+  activateSpecial(game, p);
   const def = SUPREME[p.id] || SUPREME.kilo;
   const dmg = (70 + (Number(p.evo) || 0) * 12) * pw(p);
   for (const e of game.enemies || []) {
@@ -123,6 +179,7 @@ function castSupreme(game, p) {
   game.flash = Math.max(game.flash || 0, 18);
   game.shake = Math.min(22, (game.shake || 0) + 12);
   game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
+  game._specialName = specialOf(p.id).name;
 }
 
 
@@ -182,6 +239,30 @@ export function abilityPreMove(game, input) {
     return;
   }
   syncState(p);
+  const specialT = Number(p._specialT) || 0;
+  if (specialT > 0) {
+    p._specialT = specialT - 1;
+    if ((p._specialArmorT || 0) > 0) p._specialArmorT--;
+    if ((p._specialSpeedT || 0) > 0) p._specialSpeedT--;
+    if ((p._specialBounceT || 0) > 0) p._specialBounceT--;
+    if ((p._specialGhostT || 0) > 0) p._specialGhostT--;
+    if ((p._specialShadowT || 0) > 0) p._specialShadowT--;
+    if ((p._specialTitanT || 0) > 0) p._specialTitanT--;
+    if ((p._specialAuroraT || 0) > 0) p._specialAuroraT--;
+    if ((p._specialArmorT || 0) > 0) armor(p, 2);
+    if (p._specialSpeedT > 0) p.vx = (p.facing || 1) * Math.max(p.speed * 1.75, 8);
+    if (p._specialFlightT > 0) {
+      p._specialFlightT--;
+      p.grounded = false;
+      const ix = input?.right ? 1 : input?.left ? -1 : 0;
+      const iy = input?.jump ? -1 : input?.drop ? 1 : 0;
+      p.vx += (ix * p.speed * 0.9 - p.vx) * 0.35;
+      p.vy += (iy * p.speed * 0.85 - p.vy) * 0.35;
+      p.vy = clamp(p.vy, -8, 8);
+      p._pmove = "special-flight";
+      if ((input?.t || 0) % 4 === 0) game.fx.emit(cx(p) - (p.facing || 1) * 10, cy(p), { color: "#fff2a8", count: 3, size: 2.8, speed: 1.4, life: 16, star: true });
+    }
+  }
   if (S.hover > 0) {
     S.hover--;
     p.vy = Math.min(p.vy, -0.42);
