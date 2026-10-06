@@ -418,7 +418,7 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 18 : finalForm ? 160 : 120;
+    const n = reduce ? 12 : finalForm ? 90 : 70;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
@@ -458,7 +458,7 @@ export function playEvolution(detail = {}) {
     // sacudida
     const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (finalForm ? 0.6 : 0.42));
     if (shakeK > 0 && shakeK < 1) {
-      const amp = (1 - shakeK) * (finalForm ? 18 : 11);
+      const amp = (1 - shakeK) * (finalForm ? 8 : 6);
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
 
@@ -470,21 +470,21 @@ export function playEvolution(detail = {}) {
     const rayA = (0.35 + charge * 0.35 + revealK * 0.6) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
-    drawRays(ctx, cx, cy, R, accent, rayA, spin, finalForm ? 18 : 14);
-    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.5, -spin * 0.7, 9);
+    drawRays(ctx, cx, cy, R, accent, rayA * 0.24, spin, finalForm ? 10 : 8);
+    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.10, -spin * 0.7, 6);
 
     // 2 · anillos de energía durante la carga
     if (!reduce && t < T.flash) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         const kk = ((t * (1.1 + charge * 2.5) + i / 3) % 1);
         const ring = 1 - kk; // hacia dentro
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = seg(t, T.oldIn, T.charge) * Math.sin(kk * Math.PI) * 0.7;
+        ctx.globalAlpha = seg(t, T.oldIn, T.charge) * Math.sin(kk * Math.PI) * (0.22 + charge * 0.12);
         ctx.strokeStyle = i % 2 ? "#ffffff" : accent;
         ctx.lineWidth = 1.5 + charge * 2;
         ctx.beginPath();
-        ctx.ellipse(cx, cy, target * (0.35 + ring * 0.9), target * (0.35 + ring * 0.9), 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, target * (0.58 + ring * 0.42), target * (0.58 + ring * 0.42), 0, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
@@ -620,19 +620,19 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = fade;
       const dt2 = t - T.flash;
-      const maxR = Math.hypot(W, H) * 0.6;
+      const maxR = Math.hypot(W, H) * 0.42;
       drawRing(ctx, cx, cy, maxR, seg(dt2, 0, 0.9), "#ffffff", target * 0.08);
-      drawRing(ctx, cx, cy, maxR * 0.8, seg(dt2, 0.08, 1.0), accent, target * 0.05);
-      drawRing(ctx, cx, footY, target * 1.6, seg(dt2, 0.0, 0.8), light, target * 0.035, 0.22);
+      drawRing(ctx, cx, cy, maxR * 0.72, seg(dt2, 0.08, 1.0), accent, target * 0.035);
+      drawRing(ctx, cx, footY, target * 1.05, seg(dt2, 0.0, 0.72), light, target * 0.022, 0.22);
       if (finalForm) {
-        drawRing(ctx, cx, cy, maxR * 1.1, seg(dt2, 0.2, 1.3), accent, target * 0.06);
-        drawRing(ctx, cx, cy, maxR * 0.5, seg(dt2, 0.35, 1.2), light, target * 0.04);
+        drawRing(ctx, cx, cy, maxR * 0.95, seg(dt2, 0.2, 1.15), accent, target * 0.04);
+        drawRing(ctx, cx, cy, maxR * 0.42, seg(dt2, 0.35, 1.1), light, target * 0.028);
       }
       // anillos lentos alrededor del personaje revelado
       if (t > T.reveal) {
         for (let i = 0; i < 2; i++) {
           const kk = ((t - T.reveal) * 0.6 + i * 0.5) % 1;
-          drawRing(ctx, cx, footY, target * 1.2, kk, i ? "#ffffff" : accent, 3, 0.24);
+          drawRing(ctx, cx, footY, target * 0.88, kk, i ? "#ffffff" : accent, 2, 0.24);
         }
       }
       ctx.restore();
