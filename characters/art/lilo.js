@@ -409,7 +409,6 @@ function head(ctx, R, pose, f, hr, r) {
     ctx.beginPath(); ctx.arc(-hr * 0.08, hr * 0.02, hr * 0.92, -2.5, -0.55); ctx.stroke();
     ctx.strokeStyle = "#ffe27a"; ctx.lineWidth = hr * 0.09; ctx.stroke();
     hibiscus(ctx, R, -hr * 0.6, -hr * 0.7, hr * 0.3, "#ffffff", 0.3);
-    R.halo(ctx, -hr * 0.05, -hr * 1.3, hr * 0.7, t);
   }
 }
 
