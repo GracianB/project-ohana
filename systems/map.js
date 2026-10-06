@@ -50,7 +50,7 @@ export const ROOMS = {
   jungle: {
     id: "jungle", name: "Jungla Alta", short: "Jungla", world: 1,
     doors: { left: "beach", right: null, up: null, down: "volcano" },
-    needEvo: 2,
+    needEvo: 3,
     pit: true,
     hint: "Fila media, ESTE. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
