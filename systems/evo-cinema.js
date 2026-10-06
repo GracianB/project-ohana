@@ -357,7 +357,6 @@ export function playEvolution(detail = {}) {
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
   pOld._poseOverride = "idle";
-  const sil = new Silhouette();
   const parts = new Particles();
   const { el, fc } = st;
   const ctx = fc.ctx;
