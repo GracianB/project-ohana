@@ -495,7 +495,7 @@ export function playEvolution(detail = {}) {
 
       if (!reducedMotion() && !revealPlayed) {
         revealPlayed = true;
-        sfx("evoReveal");
+        sfx(finalForm ? "evoFinalFanfare" : "evoFanfare");
       }
 
       if (!reduce) {
