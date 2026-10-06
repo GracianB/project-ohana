@@ -893,7 +893,7 @@ function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
   cg.setTransform(1, 0, 0, 1, 0, 0);
   cg.clearRect(0, 0, W, W);
   cg.setTransform(ps, 0, 0, ps, W / 2, W * 0.78);
-  try { drawDefinitive(cg, charId || art.id, pose); } catch (e) { art.draw(cg, pose, R); }
+  try { art.draw(cg, pose, R); } catch (e) { drawDefinitive(cg, charId || art.id, pose); }
   if (flashCol && flashA > 0) {
     const flash = sheet("flash", W);
     const fg = flash.getContext("2d");
