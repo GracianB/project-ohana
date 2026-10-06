@@ -13,7 +13,7 @@ import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
 import { evolutionTiming } from "./evolution-timing.js";
-import { EVOLUTION_CINEMA_PROFILES } from "../characters/evolution.js";
+import { EVOLUTION_CINEMA_PROFILES, EVOLUTION_STAGE_COPY } from "../characters/evolution.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -345,11 +345,13 @@ export function playEvolution(detail = {}) {
   const color = detail.color || newForm.color || def.color || "#7ee7ff";
   const designAccent = newForm.accent || newForm.color || def.color || color;
   const oldColor = oldForm.color || color;
-  const accent = finalForm ? designAccent : color;
+  const accent = finalForm ? designAccent : (cinemaProfile.accent || color);
   const light = tint(accent, 0.55);
   const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
+  const cinemaProfile = EVOLUTION_CINEMA_PROFILES[def.id] || EVOLUTION_CINEMA_PROFILES.kilo;
+  const story = EVOLUTION_STAGE_COPY[evo] || EVOLUTION_STAGE_COPY[4] || { kicker: "EVOLUCIÓN" };
   const reduce = reducedMotion();
 
   // Línea de tiempo breve: impacto visual fuerte, regreso rápido al juego.
@@ -381,6 +383,8 @@ export function playEvolution(detail = {}) {
   let burstDone = false;
   let spawnAcc = 0;
   let sparkAcc = 0;
+  let finished = false;
+  let failSafe = 0;
 
   function layout() {
     const W = fc.W, H = fc.H;
@@ -412,7 +416,9 @@ export function playEvolution(detail = {}) {
   }
 
   function frame(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    if (finished) return;
+    try {
+      const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     let t = (now - t0) / 1000;
     if (skipAt >= 0 && t < T.out) { t0 -= (T.out - t) * 1000; t = T.out; }
@@ -672,6 +678,10 @@ export function playEvolution(detail = {}) {
     ctx.restore();
     if (t >= T.end) { finish(); return; }
     raf = requestAnimationFrame(frame);
+    } catch (err) {
+      console.error("[ohana] evolution cinema recovered from render error", { id: def.id, evo, err });
+      finish(true);
+    }
   }
 
   function onSkip(e) {
@@ -682,6 +692,9 @@ export function playEvolution(detail = {}) {
   }
 
   function finish(silent) {
+    if (finished) return;
+    finished = true;
+    if (failSafe) clearTimeout(failSafe);
     cancelAnimationFrame(raf);
     removeEventListener("keydown", onSkip, true);
     el.removeEventListener("pointerdown", onSkip);
@@ -700,6 +713,9 @@ export function playEvolution(detail = {}) {
   el.addEventListener("pointerdown", onSkip);
   running = { stop: finish };
   loadFonts();
+  // Fail-safe: a rendering exception, stalled RAF or browser hiccup must never
+  // leave #evo-stage visible and the gameplay permanently blocked.
+  failSafe = setTimeout(() => finish(true), Math.max(3500, (T.end + 1.5) * 1000));
   raf = requestAnimationFrame(frame);
 }
 
