@@ -9,14 +9,14 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-217">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-217">
-  <link rel="stylesheet" href="hud.css?v=ohana-217">
-  <link rel="stylesheet" href="evo.css?v=ohana-217">
-  <link rel="stylesheet" href="ending.css?v=ohana-217">
-  <link rel="stylesheet" href="intro.css?v=ohana-217">
-  <link rel="stylesheet" href="demo.css?v=ohana-217">
-  <link rel="stylesheet" href="experience.css?v=ohana-217">
+  <link rel="stylesheet" href="style.css?v=ohana-218">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-218">
+  <link rel="stylesheet" href="hud.css?v=ohana-218">
+  <link rel="stylesheet" href="evo.css?v=ohana-218">
+  <link rel="stylesheet" href="ending.css?v=ohana-218">
+  <link rel="stylesheet" href="intro.css?v=ohana-218">
+  <link rel="stylesheet" href="demo.css?v=ohana-218">
+  <link rel="stylesheet" href="experience.css?v=ohana-218">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -124,6 +124,7 @@
         <button class="touch-btn pw" data-k="j" aria-label="Poder J">J</button>
         <button class="touch-btn pw" data-k="k" aria-label="Poder K">K</button>
         <button class="touch-btn pw" data-k="l" aria-label="Poder L">L</button>
+        <button class="touch-btn pw special-u" data-k="u" aria-label="Especial U" title="Especial U">U</button>
       </div>
       <div class="act-row main">
         <button class="touch-btn" data-k="h" aria-label="Atacar">H</button>
@@ -184,7 +185,7 @@
         <li>Diez salas. Jungla pide forma 3. Caldera y Nido piden forma 4.</li>
         <li>Derrota a la Reina del Nido.</li>
       </ul>
-      <p><kbd>WASD</kbd> mover · espacio saltar · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>E</kbd> interactuar · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
+      <p><kbd>WASD</kbd> mover · espacio saltar · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>U</kbd> especial · <kbd>E</kbd> interactuar · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
       <button type="button" id="btn-close-help" class="cta ghost">Cerrar ayuda</button>
     </div>
   </div>
@@ -205,12 +206,12 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="game.js?v=ohana-217"></script>
-  <script type="module" src="systems/title.js?v=ohana-217"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-217"></script>
-  <script type="module" src="systems/ending.js?v=ohana-217"></script>
-  <script type="module" src="systems/demo.js?v=ohana-217"></script>
-  <script type="module" src="systems/evo-cinema.js?v=ohana-217"></script>
+  <script type="module" src="game.js?v=ohana-218"></script>
+  <script type="module" src="systems/title.js?v=ohana-218"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-218"></script>
+  <script type="module" src="systems/ending.js?v=ohana-218"></script>
+  <script type="module" src="systems/demo.js?v=ohana-218"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-218"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
