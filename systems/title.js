@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro, playTitleIntro } from "./intro.js?v=ohana-196";
+import { playIntro, playTitleIntro } from "./intro.js?v=ohana-199";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
@@ -161,15 +161,19 @@ function mark(id) {
   const cards = [...document.querySelectorAll("#chars-grid .char-card")];
   const ids = cards.map((el) => el.dataset.id);
   const i = Math.max(0, ids.indexOf(id));
+  const prev2 = ids[(i - 2 + ids.length) % ids.length];
   const prev = ids[(i - 1 + ids.length) % ids.length];
   const next = ids[(i + 1) % ids.length];
+  const next2 = ids[(i + 2) % ids.length];
 
   cards.forEach((el) => {
     const selected = el.dataset.id === id;
-    const visible = [id, prev, next].includes(el.dataset.id);
+    const visible = [id, prev, next, prev2, next2].includes(el.dataset.id);
     el.classList.toggle("selected", selected);
+    el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
     el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
     el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
+    el.classList.toggle("is-next2", el.dataset.id === next2 && ids.length > 3);
     el.tabIndex = visible ? 0 : -1;
     el.setAttribute("aria-hidden", String(!visible));
     el.setAttribute("aria-pressed", String(selected));
@@ -272,21 +276,7 @@ function applyLook() {
   });
 }
 
-function mountLook(wrap) {
-  let box = wrap.querySelector(".look-switch");
-  if (!box) {
-    box = document.createElement("div");
-    box.className = "look-switch";
-    box.innerHTML = '<span>Cara</span><button type="button" data-look="vector">Vector</button><button type="button" data-look="paint">Piloto Michi</button>';
-    wrap.appendChild(box);
-    box.addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
-      setLook(btn.dataset.look);
-      applyLook();
-    });
-  }
-}
+function mountLook(wrap) { wrap?.querySelector(".look-switch")?.remove(); }
 
 function enhance() {
   const wrap = document.getElementById("chars");

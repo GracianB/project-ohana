@@ -1,3 +1,4 @@
+import { getLook } from "../characters/look.js";
 // Fondos pintados de sala. El suelo de juego se dibuja encima.
 const SRC = {
   beach: "assets/worlds/beach-bg.jpg",
@@ -6,7 +7,7 @@ const SRC = {
   boss: "assets/worlds/boss-bg.jpg",
 };
 const cache = new Map();
-export function paintedRoomOn(roomId) { return !!SRC[roomId]; }
+export function paintedRoomOn(roomId) { return getLook() === "paint" && !!SRC[roomId]; }
 function img(id) {
   const src = SRC[id];
   if (!src) return null;
@@ -19,6 +20,7 @@ function img(id) {
   return null;
 }
 export function drawPaintedRoom(ctx, roomId, W, H) {
+  if (getLook() !== "paint") return false;
   const el = img(roomId);
   if (!el) return false;
   const scale = Math.max(W / el.naturalWidth, H / el.naturalHeight);

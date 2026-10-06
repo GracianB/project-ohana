@@ -1,0 +1,21 @@
+const TAU=Math.PI*2;
+function u(n){const x=Math.sin(n*91.17+17.31)*43758.5453;return x-Math.floor(x);}
+function w(v,s){const m=v%s;return m<0?m+s:m;}
+function vig(ctx,W,H,a){const g=ctx.createRadialGradient(W*.5,H*.44,H*.18,W*.5,H*.48,Math.max(W,H)*.78);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+a+")");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+export function drawRoomAtmosphere(ctx,id,cam,t,W,H){
+ ctx.save();ctx.globalCompositeOperation="source-over";
+ if(id==="hub") hub(ctx,cam,t,W,H); else if(id==="beach") beach(ctx,cam,t,W,H); else if(id==="jungle") jungle(ctx,cam,t,W,H);
+ else if(id==="cave") cave(ctx,cam,t,W,H); else if(id==="lab") lab(ctx,cam,t,W,H); else if(id==="ridge") ridge(ctx,cam,t,W,H);
+ else if(id==="space") space(ctx,cam,t,W,H); else if(id==="reef") reef(ctx,cam,t,W,H); else if(id==="volcano") volcano(ctx,cam,t,W,H); else if(id==="boss") boss(ctx,cam,t,W,H);
+ ctx.restore();
+}
+function hub(ctx,cam,t,W,H){ctx.globalAlpha=.25;ctx.strokeStyle="#ffe9ae";ctx.lineWidth=1.4;for(let i=0;i<9;i++){let x=w(i*240-cam.x*.18+t*.05,W+260)-130;ctx.beginPath();ctx.arc(x,H*.23+(i%3)*22,18+(i%4)*5,0,TAU);ctx.stroke();}vig(ctx,W,H,.12);}
+function beach(ctx,cam,t,W,H){ctx.globalAlpha=.15;ctx.strokeStyle="#fff8df";ctx.lineWidth=1.5;for(let i=0;i<7;i++){let x=w(i*210-cam.x*.3+t*.42,W+220)-110,y=H*.60+i*22;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+60,y-8,x+120,y);ctx.stroke();}vig(ctx,W,H,.08);}
+function jungle(ctx,cam,t,W,H){ctx.globalAlpha=.18;ctx.strokeStyle="#9bdc73";ctx.lineWidth=2;for(let i=0;i<8;i++){let x=w(i*190-cam.x*.32,W+240)-120;ctx.beginPath();ctx.moveTo(x,0);ctx.quadraticCurveTo(x+Math.sin(t*.02+i)*18,H*.18,x+40,H*.40);ctx.stroke();}ctx.globalAlpha=.12;ctx.fillStyle="#e7ffbf";for(let i=0;i<24;i++){let x=w(u(i+70)*W-cam.x*.22+t*.2,W),y=u(i+90)*H*.65;ctx.beginPath();ctx.arc(x,y,1.2+u(i+110)*1.6,0,TAU);ctx.fill();}vig(ctx,W,H,.18);}
+function cave(ctx,cam,t,W,H){ctx.globalAlpha=.18;ctx.fillStyle="#5db9ff";for(let i=0;i<6;i++){let x=w(i*340-cam.x*.16,W+360)-180,h=H*(.12+(i%3)*.05);ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+28,0);ctx.lineTo(x+12,h);ctx.closePath();ctx.fill();}ctx.globalAlpha=.16;ctx.strokeStyle="#a4e6ff";for(let i=0;i<7;i++){let x=w(i*260-cam.x*.25,W+300)-120,y=H*.72+(i%3)*18;ctx.beginPath();ctx.ellipse(x,y,45+(i%2)*20,12,0,0,TAU);ctx.stroke();}vig(ctx,W,H,.28);}
+function lab(ctx,cam,t,W,H){ctx.globalAlpha=.08;ctx.strokeStyle="#67e8ff";ctx.lineWidth=1;for(let x=0;x<W;x+=70){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}for(let y=0;y<H;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}ctx.globalAlpha=.18;ctx.lineWidth=2;for(let i=0;i<4;i++){let x=w(i*470-cam.x*.12,W+500)-250;ctx.beginPath();ctx.rect(x,H*.16,100,180);ctx.stroke();ctx.beginPath();ctx.arc(x+50,H*.25,34+Math.sin(t*.03+i)*6,0,TAU);ctx.stroke();}vig(ctx,W,H,.22);}
+function ridge(ctx,cam,t,W,H){ctx.globalAlpha=.15;ctx.strokeStyle="#e5f5ff";ctx.lineWidth=2;for(let i=0;i<6;i++){let y=H*(.18+i*.09)+Math.sin(t*.01+i)*8;ctx.beginPath();ctx.moveTo(0,y);ctx.quadraticCurveTo(W*.5,y-24,W,y+6);ctx.stroke();}vig(ctx,W,H,.10);}
+function space(ctx,cam,t,W,H){ctx.globalAlpha=.14;ctx.fillStyle="#9b8aff";ctx.beginPath();ctx.arc(W*.8,H*.2,H*.12,0,TAU);ctx.fill();ctx.globalAlpha=.34;ctx.fillStyle="#fff";for(let i=0;i<28;i++){let x=w(u(i+200)*W-cam.x*.05,W),y=u(i+230)*H*.7;ctx.fillRect(x,y,1.5+u(i+260)*2,1.5+u(i+270)*2);}vig(ctx,W,H,.18);}
+function reef(ctx,cam,t,W,H){ctx.globalAlpha=.14;ctx.strokeStyle="#6aeaff";ctx.lineWidth=2;for(let i=0;i<7;i++){let x=w(i*220-cam.x*.2,W+240)-120;ctx.beginPath();ctx.moveTo(x,H);ctx.quadraticCurveTo(x+40,H*.65,x+10,H*.42);ctx.stroke();}vig(ctx,W,H,.18);}
+function volcano(ctx,cam,t,W,H){ctx.globalAlpha=.14;ctx.fillStyle="#ff783d";for(let i=0;i<10;i++){let x=w(i*170-cam.x*.25+t*.18,W+220)-110,y=H*.8-u(i+300)*H*.46;ctx.beginPath();ctx.arc(x,y,2+u(i+320)*3,0,TAU);ctx.fill();}vig(ctx,W,H,.25);}
+function boss(ctx,cam,t,W,H){ctx.globalAlpha=.16;ctx.strokeStyle="#ff657d";ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(W*.5,H*.54,W*.33,H*.23,0,0,TAU);ctx.stroke();ctx.globalAlpha=.16;ctx.strokeStyle="#ffd86a";for(let i=0;i<8;i++){let a=t*.006+i*TAU/8;ctx.beginPath();ctx.arc(W*.5,H*.54,Math.min(W,H)*(.18+.02*(i%3)),a,a+.45);ctx.stroke();}vig(ctx,W,H,.30);}

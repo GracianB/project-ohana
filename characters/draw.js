@@ -4,7 +4,7 @@ import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
 import { getLook } from "./look.js";
-import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionDesignFX, drawEvolutionSilhouetteFX, drawEvolutionCombatFX } from "./evolution.js";
+import { applyEvolutionPose, drawEvolutionSignatureFX, drawEvolutionCombatFX } from "./evolution.js";
 
 // ============================================================================
 // PROJECT OHANA · dibujo de personajes (characters/draw.js)
@@ -1034,8 +1034,6 @@ export function drawCharacter(ctx, p, cam, t) {
 
   if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
   drawFlavor(ctx, p.id, H, t, evo, false);
-  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, false);
-  drawEvolutionDesignFX(ctx, p, H, pose, t, false);
   if (moving) drawDust(ctx, H, t, speed);
 
   const s = H / 100;
@@ -1061,8 +1059,6 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.restore();
 
   drawFlavor(ctx, p.id, H, t, evo, true);
-  drawEvolutionDesignFX(ctx, p, H, pose, t, true);
-  drawEvolutionSilhouetteFX(ctx, p, H, pose, t, true);
   drawEvolutionSignatureFX(ctx, p, H, pose, t);
   drawCharacterMotionFX(ctx, p, H, pose, t);
   if (burstK > 0) {

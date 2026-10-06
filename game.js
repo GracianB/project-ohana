@@ -4,6 +4,7 @@ import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
+import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
@@ -191,7 +192,7 @@ function sanitizeRuntimeState() {
 }
 
 let viewW = 1280, viewH = 720, viewDpr = 1;
-const CAM_ZOOM = 1.05;
+const CAM_ZOOM = 1.02;
 function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
@@ -722,6 +723,19 @@ function evolve(reason) {
   game.experience?.evolution(p, toGod);
   save();
 }
+function cheatEvolve() {
+  const p = game.player;
+  if (!p || p.dead || !game.running || paused || overlayOpen() || document.hidden) return;
+  if (p.evo >= 4) {
+    showSystemMessage("CHEAT", "Forma final ya desbloqueada.");
+    return;
+  }
+  const need = XP_NEED[p.evo + 1];
+  if (need != null) p.xp = Math.max(p.xp, need);
+  evolve("xp");
+  showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
+}
+
 function respawn() {
   const p = game.player; if (!p) return;
   if (DeathFx.isPlaying()) DeathFx.cancel();
@@ -1273,10 +1287,12 @@ function updatePlayer() {
     }
   } else if (left !== right) {
     const target = right ? p.speed : -p.speed;
-    const k = p.grounded ? 0.62 : 0.32;
-    p.vx += (target - p.vx) * k;
+    const k = p.grounded ? 0.78 : 0.42;
+    const reversing = Math.sign(p.vx || 0) !== Math.sign(target) && Math.abs(p.vx) > 0.2;
+    const accel = reversing ? Math.min(0.96, k + 0.18) : k;
+    p.vx += (target - p.vx) * accel;
     p.facing = target > 0 ? 1 : -1;
-  } else p.vx *= p.grounded ? 0.5 : 0.92;
+  } else p.vx *= p.grounded ? 0.62 : 0.90;
   if (jump) p.buffer = 10; else if (p.buffer > 0) p.buffer--;
   p.wall = 0;
   if (!p.grounded) {
@@ -2407,6 +2423,7 @@ function render() {
   else {
     const painted = drawPaintedRoom(ctx, game.roomId, camW(), camH());
     if (!painted) renderWorld(ctx, world, game.cam, t, camW(), camH());
+    drawRoomAtmosphere(ctx, game.roomId, game.cam, t, camW(), camH());
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
@@ -2460,7 +2477,7 @@ function render() {
     }
   }
   ctx.restore();
-  if (game.storyLine && (game.bossIntro || game.finale)) {
+  if (game.storyLine && (game.bossIntro || game.finale) && !document.querySelector("#notification-container .game-notification")) {
     ctx.save();
     ctx.globalAlpha = 0.92;
     ctx.fillStyle = "rgba(4,8,16,.55)";
@@ -2922,7 +2939,17 @@ function setupSelect() {
     event.stopImmediatePropagation();
     escape();
   }, true);
-input = bindInput({
+// QA-only shortcut: Ctrl+Z forces the next evolution without grinding XP.
+  addEventListener("keydown", (event) => {
+    const key = String(event.key || "").toLowerCase();
+    if (event.repeat || key !== "z" || !event.ctrlKey || event.altKey || event.metaKey) return;
+    if (!game.running || paused || overlayOpen() || document.hidden) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    cheatEvolve();
+  }, true);
+
+  input = bindInput({
     target: window, canvas, buttons: document.querySelectorAll(".touch-btn"), canAct,
     isRunning: () => game.running,
     actions: {

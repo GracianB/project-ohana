@@ -13,7 +13,6 @@ import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
-import { drawEvolutionCinemaFX } from "../characters/evolution.js";
 import { evolutionTiming } from "./evolution-timing.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
@@ -393,17 +392,10 @@ export function playEvolution(detail = {}) {
   st.sr.textContent = "Evolución completada: " + toName + ". Nueva forma " + (evo + 1) + " de 5.";
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
-  let ladder = el.querySelector(".form-ladder");
-  if (["kilo", "pizza", "cat", "yomi"].includes(def.id)) {
-    if (!ladder) {
-      ladder = document.createElement("div");
-      ladder.className = "form-ladder";
-      ladder.style.cssText = "position:absolute;left:50%;bottom:8vh;transform:translateX(-50%);display:flex;gap:10px;z-index:3;pointer-events:none";
-      el.appendChild(ladder);
-    }
-    ladder.innerHTML = [0, 4].map((f) => '<img alt="" src="assets/sprites/forms/' + def.id + '-' + f + '.png" style="height:18vh;width:auto;opacity:' + (f === evo ? 1 : 0.55) + ';filter:drop-shadow(0 8px 16px rgba(0,0,0,.45))">').join("");
-    ladder.hidden = false;
-  } else if (ladder) ladder.hidden = true;
+  // La cinemática usa un único personaje central. No se montan miniaturas ni
+  // sprites auxiliares debajo del héroe, evitando cast visuales ajenos al elenco activo.
+  const staleLadder = el.querySelector(".form-ladder");
+  if (staleLadder) staleLadder.remove();
   sfx("evoCharge");
   duckMusic(true);
   let fanfared = false;
@@ -426,7 +418,7 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 18 : finalForm ? 160 : 120;
+    const n = reduce ? 12 : finalForm ? 90 : 70;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
@@ -466,7 +458,7 @@ export function playEvolution(detail = {}) {
     // sacudida
     const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (finalForm ? 0.6 : 0.42));
     if (shakeK > 0 && shakeK < 1) {
-      const amp = (1 - shakeK) * (finalForm ? 18 : 11);
+      const amp = (1 - shakeK) * (finalForm ? 8 : 6);
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
 
@@ -478,21 +470,21 @@ export function playEvolution(detail = {}) {
     const rayA = (0.35 + charge * 0.35 + revealK * 0.6) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
-    drawRays(ctx, cx, cy, R, accent, rayA, spin, finalForm ? 18 : 14);
-    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.5, -spin * 0.7, 9);
+    drawRays(ctx, cx, cy, R, accent, rayA * 0.24, spin, finalForm ? 10 : 8);
+    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.10, -spin * 0.7, 6);
 
     // 2 · anillos de energía durante la carga
     if (!reduce && t < T.flash) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         const kk = ((t * (1.1 + charge * 2.5) + i / 3) % 1);
         const ring = 1 - kk; // hacia dentro
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = seg(t, T.oldIn, T.charge) * Math.sin(kk * Math.PI) * 0.7;
+        ctx.globalAlpha = seg(t, T.oldIn, T.charge) * Math.sin(kk * Math.PI) * (0.22 + charge * 0.12);
         ctx.strokeStyle = i % 2 ? "#ffffff" : accent;
         ctx.lineWidth = 1.5 + charge * 2;
         ctx.beginPath();
-        ctx.ellipse(cx, cy, target * (0.35 + ring * 0.9), target * (0.35 + ring * 0.9), 0, 0, Math.PI * 2);
+        ctx.ellipse(cx, cy, target * (0.58 + ring * 0.42), target * (0.58 + ring * 0.42), 0, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
@@ -538,82 +530,86 @@ export function playEvolution(detail = {}) {
     ctx.restore();
 
     // 4 · personaje
-    const oldIn = easeBack(seg(t, T.oldIn, T.oldIn + 0.45));
+    // Una sola fuente de verdad visual: el arte orgánico de characters/art.
+    // La transición es un crossfade continuo, no un parpadeo entre dos dibujos
+    // ni una silueta geométrica superpuesta.
+    const morphK = easeInOut(seg(t, T.charge, T.flash));
+    const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
+    const box = target * 2.2;
+    const bob = reduce ? 0 : Math.sin(t * 2.2) * target * 0.010;
+    const centerY = footY + bob;
+
+    ctx.save();
+    ctx.globalAlpha = fade;
+
+    // Sombra/halo muy limpio para anclar al héroe a la escena.
+    const ground = ctx.createRadialGradient(cx, footY, 0, cx, footY, target * 0.72);
+    ground.addColorStop(0, rgba(accent, 0.24));
+    ground.addColorStop(1, rgba(accent, 0));
+    ctx.fillStyle = ground;
+    ctx.beginPath();
+    ctx.ellipse(cx, footY, target * 0.72, target * 0.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     if (t < T.flash) {
-      if (!reduce) {
-        const flip = seg(t, T.flip, T.flash);
-        // temblor creciente
-        const tr = charge * charge * target * 0.025;
-        const jx = (Math.random() - 0.5) * tr, jy = (Math.random() - 0.5) * tr;
-        // latido: alterna vieja/nueva cada vez más rápido
-        let useNew = false;
-        if (flip > 0) {
-          const freq = 3 + flip * flip * 22;
-          const ph = (t - T.flip) * freq + flip * flip * flip * 8;
-          useNew = Math.floor(ph) % 2 === 1;
-        }
-        const pp = useNew ? pNew : pOld;
-        const stageFx = useNew ? evo : Math.max(0, evo - 1);
-        const stageColor = useNew ? accent : oldColor;
-        const pulse = 1 + Math.sin(t * (10 + charge * 30)) * 0.02 * charge;
-        const sc = scale * oldIn * pulse;
-        const box = target * 2.2;
-        const fx = cx + jx, fy = footY + jy;
-        const whiten = flip > 0 ? 1 : clamp(charge * 1.4, 0, 1) * 0.85;
+      // Forma anterior: entra y se mantiene estable, sin jitter aleatorio.
+      const oldAlpha = (1 - morphK) * clamp(introK + 0.18, 0, 1);
+      if (oldAlpha > 0.001) {
+        const oldScale = scale * (0.96 + introK * 0.04) * (1 - morphK * 0.035);
         ctx.save();
-        ctx.globalAlpha = seg(t, T.oldIn, T.oldIn + 0.2) * fade;
-        if (whiten < 1) drawDummy(ctx, pp, fx, fy, sc, tf);
-        drawEvolutionCinemaFX(
-          ctx, pp.id, stageFx, fx, fy - target * 0.5, target,
-          tf, stageColor, (0.35 + charge * 0.90) * (useNew ? 1 : 0.52)
-        );
-        // glow + silueta blanca
-        const img = sil.render(pp, sc, tf, box, fc.dpr, "#ffffff");
-        ctx.globalAlpha *= whiten;
-        ctx.shadowColor = accent;
-        ctx.shadowBlur = 20 + charge * 50;
-        ctx.drawImage(img, fx - box / 2, fy - box * 0.78, box, box);
-        ctx.shadowBlur = 0;
+        ctx.globalAlpha = oldAlpha;
+        drawDummy(ctx, pOld, cx, centerY, oldScale, tf);
+        ctx.restore();
+      }
+
+      // Forma nueva: aparece progresivamente desde una escala menor y ocupa
+      // exactamente el mismo centro y la misma línea de pies.
+      if (morphK > 0.001) {
+        const grow = easeOut(morphK);
+        const newAlpha = morphK;
+        const newScale = scale * (0.76 + 0.24 * grow);
+        ctx.save();
+        ctx.globalAlpha = newAlpha;
+        drawDummy(ctx, pNew, cx, centerY, newScale, tf);
+        ctx.restore();
+      }
+
+      // Un único anillo de carga para comunicar la transformación.
+      if (!reduce && morphK > 0.02) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.16 + morphK * 0.34;
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = Math.max(1.5, target * 0.018);
+        ctx.beginPath();
+        ctx.arc(cx, cy, target * (0.72 + morphK * 0.22), -Math.PI * 0.92, Math.PI * 0.92);
+        ctx.stroke();
         ctx.restore();
       }
     } else {
-      pNew._evoT = seg(t, T.reveal, T.out);
-      const pop = reduce ? 1 : easeBack(seg(t, T.reveal, T.reveal + 0.5));
-      const sc = scale * (0.7 + 0.3 * pop);
-      const bob = reduce ? 0 : Math.sin(t * 2.4) * target * 0.015;
-      const box = target * 2.2;
+      // Revelación: el nuevo diseño orgánico aparece una vez, limpio y legible.
+      const pop = reduce ? 1 : easeBack(revealK);
+      const sc = scale * (0.78 + 0.22 * pop);
+
       ctx.save();
-      ctx.globalAlpha = fade;
-      // halo bajo los pies
-      const hg = ctx.createRadialGradient(cx, footY, 0, cx, footY, target * 0.7);
-      hg.addColorStop(0, rgba(accent, 0.5));
-      hg.addColorStop(1, rgba(accent, 0));
-      ctx.fillStyle = hg;
-      ctx.beginPath(); ctx.ellipse(cx, footY, target * 0.7, target * 0.16, 0, 0, Math.PI * 2); ctx.fill();
-      // contorno luminoso
-      const img = sil.render(pNew, sc, tf, box, fc.dpr, tint(accent, 0.35));
-      ctx.globalCompositeOperation = "lighter";
-      ctx.shadowColor = accent;
-      ctx.shadowBlur = target * 0.12;
-      ctx.globalAlpha = fade * (0.55 + 0.25 * Math.sin(t * 5));
-      ctx.drawImage(img, cx - box / 2, footY + bob - box * 0.78, box, box);
-      ctx.shadowBlur = 0;
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = fade;
-      drawDummy(ctx, pNew, cx, footY + bob, sc, tf);
-      drawEvolutionCinemaFX(
-        ctx, pNew.id, evo, cx, cy + bob, target,
-        tf, accent, 1.0 + revealK * 0.55
-      );
-      // resto de silueta blanca que se desvanece
-      const wash = 1 - seg(t, T.reveal, T.reveal + (reduce ? 0.3 : 0.45));
-      if (wash > 0) {
-        const w = sil.render(pNew, sc, tf, box, fc.dpr, "#ffffff");
-        ctx.globalAlpha = wash * fade;
-        ctx.drawImage(w, cx - box / 2, footY + bob - box * 0.78, box, box);
-      }
+      ctx.globalAlpha = 1;
+      drawDummy(ctx, pNew, cx, centerY, sc, tf);
       ctx.restore();
+
+      if (!reduce) {
+        const ringK = easeOut(seg(t, T.reveal, T.reveal + 0.65));
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = (1 - ringK) * 0.52;
+        ctx.strokeStyle = light;
+        ctx.lineWidth = Math.max(1.5, target * 0.018);
+        ctx.beginPath();
+        ctx.arc(cx, footY, target * (0.72 + ringK * 0.46), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
+    ctx.restore();
 
     // 5 · destello + onda + estallido
     if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
@@ -623,19 +619,19 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = fade;
       const dt2 = t - T.flash;
-      const maxR = Math.hypot(W, H) * 0.6;
+      const maxR = Math.hypot(W, H) * 0.42;
       drawRing(ctx, cx, cy, maxR, seg(dt2, 0, 0.9), "#ffffff", target * 0.08);
-      drawRing(ctx, cx, cy, maxR * 0.8, seg(dt2, 0.08, 1.0), accent, target * 0.05);
-      drawRing(ctx, cx, footY, target * 1.6, seg(dt2, 0.0, 0.8), light, target * 0.035, 0.22);
+      drawRing(ctx, cx, cy, maxR * 0.72, seg(dt2, 0.08, 1.0), accent, target * 0.035);
+      drawRing(ctx, cx, footY, target * 1.05, seg(dt2, 0.0, 0.72), light, target * 0.022, 0.22);
       if (finalForm) {
-        drawRing(ctx, cx, cy, maxR * 1.1, seg(dt2, 0.2, 1.3), accent, target * 0.06);
-        drawRing(ctx, cx, cy, maxR * 0.5, seg(dt2, 0.35, 1.2), light, target * 0.04);
+        drawRing(ctx, cx, cy, maxR * 0.95, seg(dt2, 0.2, 1.15), accent, target * 0.04);
+        drawRing(ctx, cx, cy, maxR * 0.42, seg(dt2, 0.35, 1.1), light, target * 0.028);
       }
       // anillos lentos alrededor del personaje revelado
       if (t > T.reveal) {
         for (let i = 0; i < 2; i++) {
           const kk = ((t - T.reveal) * 0.6 + i * 0.5) % 1;
-          drawRing(ctx, cx, footY, target * 1.2, kk, i ? "#ffffff" : accent, 3, 0.24);
+          drawRing(ctx, cx, footY, target * 0.88, kk, i ? "#ffffff" : accent, 2, 0.24);
         }
       }
       ctx.restore();
@@ -644,8 +640,10 @@ export function playEvolution(detail = {}) {
     ctx.globalAlpha = fade;
     parts.draw(ctx, (p) => !behindSpark(p));
     ctx.restore();
-    const flashA = reduce ? 0.45 * (1 - seg(t, T.flash, T.flash + 0.3)) * (t >= T.flash ? 1 : 0)
-      : (t < T.flash ? Math.pow(seg(t, T.flash - 0.14, T.flash), 2) : Math.pow(1 - seg(t, T.flash, T.flash + 0.32), 2));
+    const flashA = reduce ? 0.34 * (1 - seg(t, T.flash, T.flash + 0.22)) * (t >= T.flash ? 1 : 0)
+      : (t < T.flash
+        ? Math.pow(seg(t, T.flash - 0.10, T.flash), 3)
+        : Math.pow(1 - seg(t, T.flash, T.flash + 0.24), 3));
     if (flashA > 0.001) {
       // destello radial (luz, no niebla): blanco en el centro, color hacia fuera
       const fr = Math.hypot(W, H) * 0.7;

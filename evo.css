@@ -60,20 +60,5 @@ body.playing #evo-stage:not(.show) {
 }
 
 
-/* La forma final tiene una presencia propia incluso antes del primer frame del canvas. */
-#evo-stage.finale {
-  background:
-    radial-gradient(circle at 50% 42%, rgba(255,216,74,.10), transparent 42%),
-    #040a18;
-}
-#evo-stage.finale::after {
-  content: "";
-  position: absolute;
-  inset: 18px;
-  border: 1px solid rgba(255, 236, 168, 0.12);
-  border-radius: 28px;
-  box-shadow: inset 0 0 70px rgba(255, 216, 74, 0.08), 0 0 60px rgba(255, 216, 74, 0.06);
-  pointer-events: none;
-}
-
+/* La cinemática final no añade una capa CSS encima del canvas. */
 #evo-stage.show { background: #02060f; }

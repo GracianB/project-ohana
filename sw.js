@@ -1,4 +1,4 @@
-const VERSION = "ohana-198";
+const VERSION = "ohana-201";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -88,6 +88,7 @@ const PRECACHE = [
   "./systems/experience.js?v=" + VERSION,
   "./systems/xp.js?v=" + VERSION,
   "./worlds/index.js?v=" + VERSION,
+  "./worlds/room-atmosphere.js?v=" + VERSION,
   "./worlds/painted-hub.js?v=" + VERSION,
   "./worlds/terrain.js?v=" + VERSION,
   "./worlds/painted-rooms.js?v=" + VERSION,

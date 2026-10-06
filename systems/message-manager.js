@@ -24,7 +24,7 @@ const PRIORITY = {
   room: 65,
   boss: 90,
   evolution: 100,
-  error: 110,
+  error: 72,
 };
 
 const REDUCED_DURATION_FACTOR = 0.85;
