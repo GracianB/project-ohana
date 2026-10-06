@@ -2943,3 +2943,90 @@ body:not(.playing) #controls-hint { display: none; }
     padding-inline: 12px;
   }
 }
+
+/* ============================================================================
+   OHANA — ROSTER FINISHING PASS
+   Ten restrained refinements for the character selector.
+   ============================================================================ */
+
+/* 01. Keyboard focus is visible without adding another permanent glow. */
+#chars .char-card:focus-visible,
+#chars .roster-arrow:focus-visible,
+#char-select #difficulty button:focus-visible,
+#char-select #menu-row button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* 02. Selected hero does not jump on pointer hover. */
+#chars .char-card.selected:hover {
+  border-color: var(--tint, var(--accent-cyan));
+}
+
+/* 03. Secondary portraits are quieter but remain readable. */
+#chars .char-card.is-prev .portrait,
+#chars .char-card.is-next .portrait {
+  filter: saturate(.82) brightness(.9);
+}
+
+/* 04. Character names get a stable optical baseline. */
+#chars .char-card h3 {
+  min-height: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 05. Role badges stay compact and never force card growth. */
+#chars .char-card .role {
+  max-width: 92%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 06. Description copy remains secondary to the portrait. */
+#chars .char-card small {
+  max-width: 24ch;
+  opacity: .86;
+}
+
+/* 07. Stats become a quiet information row rather than a second focal point. */
+#chars .char-card .stats {
+  opacity: .78;
+  transform: scale(.96);
+}
+
+/* 08. Hint pills do not overpower the selected hero. */
+#chars .char-card .hint {
+  opacity: .82;
+  box-shadow: none;
+}
+
+/* 09. Touch devices should not retain desktop hover amplification. */
+@media (hover: none) {
+  #chars .char-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-lg);
+  }
+  #chars .char-card.selected:hover {
+    box-shadow:
+      0 0 0 1px var(--tint, var(--accent-cyan)),
+      0 22px 52px rgba(0,0,0,.46),
+      0 0 28px color-mix(in srgb,var(--tint,var(--accent-cyan)) 24%,transparent);
+  }
+}
+
+/* 10. Very short screens preserve the hero before decorative copy. */
+@media (max-height: 720px) {
+  #char-select .title-stack {
+    transform: translateY(-12px) scale(.94);
+    transform-origin: center top;
+  }
+  #char-select #difficulty {
+    transform: scale(.94);
+  }
+  #char-select .legal {
+    margin-top: 2px;
+  }
+}
