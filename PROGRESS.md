@@ -20,7 +20,11 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-197`.
+La caché canónica de esta línea de trabajo es `ohana-198`.
+
+### 06/10/2026 · Organic Hero Render Recovery
+
+El renderer vuelve a priorizar los diseños orgánicos completos de `characters/art/`; `characters/definitive.js` queda como fallback. Se preservan hitboxes, poses, combate y el cierre de Mundo 1.
 
 ### 06/10/2026 · Hero Identity Recovery
 
