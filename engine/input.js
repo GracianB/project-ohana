@@ -40,6 +40,17 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     return String(key || "").toLowerCase();
   }
 
+  // Prefer physical keyboard codes for movement so WASD remains WASD across
+  // layouts. Keep event.key as a test/compatibility fallback.
+  function movementKey(event) {
+    const codeMap = {
+      KeyA: "a", KeyD: "d", KeyW: "w", KeyS: "s",
+      ArrowLeft: "arrowleft", ArrowRight: "arrowright",
+      ArrowUp: "arrowup", ArrowDown: "arrowdown", Space: " ",
+    };
+    return codeMap[event?.code] || normalize(event?.key);
+  }
+
   function hold(key, source, down) {
     key = normalize(key);
     if (!MOVEMENT.has(key)) return;
@@ -91,7 +102,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
       event.target?.closest?.("input, textarea, select, [contenteditable='true']")
     ) return;
 
-    const key = normalize(event.key);
+    const key = movementKey(event);
     const shortcut =
       event.code === "Backquote" ||
       ["º", "ª", "?"].includes(key)
@@ -117,7 +128,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   });
 
   listen(target, "keyup", (event) => {
-    const key = normalize(event.key);
+    const key = movementKey(event);
     if (!MOVEMENT.has(key)) return;
     event.preventDefault();
     hold(key, "keyboard:" + key, false);
