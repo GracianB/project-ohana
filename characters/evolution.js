@@ -72,6 +72,19 @@ export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
   yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
   cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
+export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
+  kilo:    Object.freeze({ camera:"orbit",   bg:"#2b160f", accent:"#ffd36a", motif:"petals",  pulse:"bloom",   reveal:"sunrise", speed:1.00 }),
+  stitcho: Object.freeze({ camera:"spiral",  bg:"#100d2b", accent:"#8f7bff", motif:"seams",   pulse:"nebula",  reveal:"rift",    speed:1.12 }),
+  chispin:Object.freeze({ camera:"snap",     bg:"#09182b", accent:"#ffe14a", motif:"bolts",   pulse:"storm",   reveal:"strike",  speed:1.28 }),
+  cat:     Object.freeze({ camera:"eclipse",  bg:"#170d20", accent:"#ffb6e4", motif:"moons",   pulse:"eclipse", reveal:"crescent",speed:0.88 }),
+  dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", motif:"embers",  pulse:"flame",   reveal:"nova",    speed:1.08 }),
+  dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
+  frita:   Object.freeze({ camera:"whip",     bg:"#24170b", accent:"#fff1b3", motif:"salt",    pulse:"crisp",   reveal:"fry",     speed:1.18 }),
+  pizza:   Object.freeze({ camera:"roll",     bg:"#281007", accent:"#ffd84a", motif:"cheese",  pulse:"oven",    reveal:"volcano", speed:0.92 }),
+  yomi:    Object.freeze({ camera:"pull",     bg:"#170510", accent:"#ff2244", motif:"ofuda",   pulse:"maw",     reveal:"devour",  speed:0.82 }),
+  cuerno:  Object.freeze({ camera:"rise",     bg:"#17102a", accent:"#f2c1ff", motif:"aurora",  pulse:"rainbow", reveal:"aurora",  speed:1.02 }),
+});
+
 export const EVOLUTION_STAGE_COPY = Object.freeze([
   Object.freeze({ kicker: "DESPERTAR", label: "Forma 1", tone: "Nace una nueva lectura del héroe." }),
   Object.freeze({ kicker: "EVOLUCIÓN", label: "Forma 2", tone: "El personaje ya no se mueve igual." }),

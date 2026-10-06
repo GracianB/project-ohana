@@ -776,6 +776,7 @@ export const DeathFx = {
     const vw = ctx.canvas ? ctx.canvas.width : 960;
     const vh = ctx.canvas ? ctx.canvas.height : 540;
     const progress = g.phase;
+    const deathAct = progress < 0.34 ? 1 : progress < 0.72 ? 2 : 3;
     // Keep pulse near 1 — prior 0.55 base made the silhouette almost invisible
     const pulse = 0.94 + Math.sin((t || this.frame) * 0.14) * 0.06;
     const alpha = Math.min(1, g.alpha * pulse);

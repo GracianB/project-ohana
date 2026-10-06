@@ -48,7 +48,19 @@ export function showEnding(detail = {}) {
   if (heroEl) heroEl.textContent = hero + " · " + form;
   const score = layer.querySelector(".win-score");
   score.textContent = (rank ? "Claro " + rank + " · " : "") + (time ? time + " · " : "") + kills + " bajas" + best;
+  layer.classList.remove("ending-phase-1", "ending-phase-2", "ending-phase-3");
+  layer.classList.add("ending-phase-1");
   layer.classList.add("show");
+  requestAnimationFrame(() => {
+    layer.classList.remove("ending-phase-1");
+    layer.classList.add("ending-phase-2");
+  });
+  window.setTimeout(() => {
+    if (layer.classList.contains("show")) {
+      layer.classList.remove("ending-phase-2");
+      layer.classList.add("ending-phase-3");
+    }
+  }, 720);
 }
 
 function watchVictory() {

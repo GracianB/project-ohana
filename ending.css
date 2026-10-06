@@ -121,3 +121,54 @@
   font-size: 18px;
   color: #fff6c8;
 }
+
+
+/* ==========================================================
+   V35 · THREE-BEAT ENDING REVEAL
+   ========================================================== */
+#win-cinema.ending-phase-1 .win-wash {
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,230,106,.18), transparent 34%),
+    rgba(2, 6, 12, .92);
+}
+#win-cinema.ending-phase-1 .win-card {
+  opacity: 0;
+  transform: translateY(18px) scale(.975);
+}
+#win-cinema.ending-phase-2 .win-card {
+  animation: ending-card-arrive .62s cubic-bezier(.2,.8,.2,1) both;
+}
+#win-cinema.ending-phase-2 .win-kicker,
+#win-cinema.ending-phase-2 .win-score,
+#win-cinema.ending-phase-2 .win-actions {
+  opacity: 0;
+  transform: translateY(8px);
+}
+#win-cinema.ending-phase-3 .win-kicker,
+#win-cinema.ending-phase-3 .win-score,
+#win-cinema.ending-phase-3 .win-actions {
+  animation: ending-detail-in .48s ease both;
+}
+#win-cinema.ending-phase-3 .win-score { animation-delay: .08s; }
+#win-cinema.ending-phase-3 .win-actions { animation-delay: .16s; }
+
+@keyframes ending-card-arrive {
+  0% { opacity: 0; transform: translateY(22px) scale(.965); }
+  65% { opacity: 1; transform: translateY(-2px) scale(1.006); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes ending-detail-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #win-cinema.ending-phase-2 .win-card,
+  #win-cinema.ending-phase-3 .win-kicker,
+  #win-cinema.ending-phase-3 .win-score,
+  #win-cinema.ending-phase-3 .win-actions {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}

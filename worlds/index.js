@@ -25,6 +25,41 @@ function wrap(v, span) {
 }
 function onScreen(x, pad, W) { return x > -pad && x < W + pad; }
 
+function cinematicGrade(ctx, world, W, H, t) {
+  const id = world?.id || "beach";
+  const profiles = {
+    beach:   ["rgba(255,225,165,.10)", "rgba(0,42,72,.18)"],
+    jungle:  ["rgba(180,255,145,.08)", "rgba(0,25,12,.28)"],
+    volcano: ["rgba(255,95,35,.12)", "rgba(35,0,0,.34)"],
+    space:   ["rgba(125,105,255,.10)", "rgba(0,0,22,.34)"],
+    lab:     ["rgba(70,230,255,.09)", "rgba(0,15,25,.28)"],
+    aquatic: ["rgba(80,230,255,.08)", "rgba(0,18,45,.30)"],
+    grove:   ["rgba(220,245,180,.08)", "rgba(10,35,15,.18)"]
+  };
+  const [top, bottom] = profiles[id] || profiles.beach;
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, top);
+  g.addColorStop(.48, "rgba(0,0,0,0)");
+  g.addColorStop(1, bottom);
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  const horizon = H * .48 + Math.sin(t * .004) * 3;
+  const hg = ctx.createLinearGradient(0,horizon-90,0,horizon+120);
+  hg.addColorStop(0,"rgba(255,255,255,0)");
+  hg.addColorStop(.55,"rgba(255,255,255,.025)");
+  hg.addColorStop(1,"rgba(0,0,0,.08)");
+  ctx.fillStyle = hg;
+  ctx.fillRect(0,horizon-90,W,210);
+
+  const vg = ctx.createRadialGradient(W*.5,H*.48,H*.18,W*.5,H*.5,Math.max(W,H)*.78);
+  vg.addColorStop(0,"rgba(0,0,0,0)");
+  vg.addColorStop(.68,"rgba(0,0,0,.025)");
+  vg.addColorStop(1,"rgba(0,0,0,.22)");
+  ctx.fillStyle = vg;
+  ctx.fillRect(0,0,W,H);
+}
+
 export function renderWorld(ctx, world, cam, t, W, H) {
   const sky = world.sky || ["#0a0a12", "#161630"];
   const g = ctx.createLinearGradient(0, 0, 0, H);

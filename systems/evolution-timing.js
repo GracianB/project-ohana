@@ -1,5 +1,5 @@
 export function evolutionTiming({ reduced = false, finalForm = false } = {}) {
-  const k = finalForm ? 1.08 : 1;
+  const k = finalForm ? 1 : 1;
   if (reduced) {
     return {
       dark: 0.08,
