@@ -3,9 +3,8 @@
 // ----------------------------------------------------------------------------
 // Escucha window "ohana-evolve" ({ id, evo, color, fromName, toName, name }) y
 // reproduce a pantalla completa, en un <canvas> propio:
-//   oscurecer + rayos → forma anterior cargándose (partículas que convergen)
-//   → silueta blanca que late alternando vieja/nueva → destello + onda + sacudida
-//   → forma nueva en pose de victoria, estrellas, anillos y rótulo.
+//   oscurecer breve → forma anterior + nueva en crossfade continuo
+//   → flash corto → forma nueva legible y retorno rápido al juego.
 // Mientras dura, #evo-stage tiene la clase "show" (game.js pausa la partida).
 // También exporta utilidades (partículas, rayos, texto) que reutiliza intro.js.
 // ============================================================================
