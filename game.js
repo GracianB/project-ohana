@@ -1075,25 +1075,42 @@ function checkVoidDeath() {
   const p = game.player;
   if (!p || p.dead) return;
   const r = room();
-  if (r.doors.down && r.pit && p.y > game.worldH - 40 && inPitX(p)) {
-    loadRoom(r.doors.down, "down");
-    return;
-  }
   const feet = p.y + p.h;
+
   const next = nearestBelow(p.x, p.w, feet - 8);
-  if (next && feet >= next.y) { landOn(p, next); return; }
+  if (next && feet >= next.y) {
+    landOn(p, next);
+    return;
+  }
+
   const low = lowestFloor(p.x, p.w);
-  if (low) {
-    if (feet > low.y) landOn(p, low);
+  if (low && feet > low.y && p.vy >= 0) {
+    landOn(p, low);
     return;
   }
+
   if (!r.pit) {
-    p.y = Math.min(p.y, game.worldH - p.h - 90);
-    p.vy = 0;
-    p.grounded = true;
+    const floorY = game.worldH - 90;
+    if (feet > floorY) {
+      p.y = floorY - p.h;
+      p.vy = 0;
+      p.grounded = true;
+    }
     return;
   }
-  if (p.y > game.worldH + 40) dieVoid(p);
+
+  // El vacío se determina por geometría, no por una única coordenada mágica.
+  const inGap = inPitX(p);
+  const crossedBottom = feet > game.worldH - 24;
+  const deepFall = p.y > game.worldH + 8;
+
+  if (inGap && crossedBottom) {
+    if (r.doors.down) loadRoom(r.doors.down, "down");
+    else dieVoid(p);
+    return;
+  }
+
+  if (deepFall) dieVoid(p);
 }
 function aabb(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function punch(x, y, color, dir = 1) {
@@ -1287,13 +1304,17 @@ function updatePlayer() {
       p.facing = face;
     }
   } else if (left !== right) {
-    const target = right ? p.speed : -p.speed;
-    const k = p.grounded ? 0.78 : 0.42;
-    const reversing = Math.sign(p.vx || 0) !== Math.sign(target) && Math.abs(p.vx) > 0.2;
-    const accel = reversing ? Math.min(0.96, k + 0.18) : k;
+    // Movimiento horizontal determinista y simétrico.
+    const target = right ? Math.abs(p.speed) : -Math.abs(p.speed);
+    const accel = p.grounded ? 0.34 : 0.20;
     p.vx += (target - p.vx) * accel;
+    if (Math.abs(target - p.vx) < 0.06) p.vx = target;
     p.facing = target > 0 ? 1 : -1;
-  } else p.vx *= p.grounded ? 0.62 : 0.90;
+  } else {
+    // Frenado corto y consistente, sin arrastre asimétrico.
+    p.vx *= p.grounded ? 0.72 : 0.94;
+    if (Math.abs(p.vx) < 0.04) p.vx = 0;
+  }
   if (jump) p.buffer = 10; else if (p.buffer > 0) p.buffer--;
   p.wall = 0;
   if (!p.grounded) {
