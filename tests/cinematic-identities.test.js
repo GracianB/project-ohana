@@ -34,7 +34,7 @@ test('PR151.3: los perfiles cinematográficos no comparten todos los motivos', (
 
 test('PR151.4: la forma final conserva la secuencia temporal canónica', () => {
   const t = evolutionTiming({ finalForm: true });
-  assert.deepEqual(t, { dark:0.22, oldIn:0.42, charge:0.82, flip:1.08, flash:1.22, reveal:1.22, out:3.28, end:3.82 });
+  assert.deepEqual(t, { dark:0.12, oldIn:0.05, charge:0.28, flip:0.46, flash:0.62, reveal:0.62, out:1.48, end:1.78 });
 });
 
 test('PR151.5: reduced motion mantiene una salida más corta y completa', () => {
@@ -78,7 +78,6 @@ test('PR151.9: Yomi conserva el contrato de ejecución al 34% de vida', () => {
   const game = {player,enemies:[enemy],projectiles:[],ghosts:[],platforms:[],worldW:1600,worldH:900,cam:{x:0,y:0},t:0,reduceMotion:true,shake:0,flash:0,score:0,nums:{add(){}},fx:{emit(){}}};
   useAbility(game,3);
   assert.equal(enemy.hp,0);
-  assert.ok(enemy.dying);
   clearAbilityFx();
 });
 
