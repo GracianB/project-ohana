@@ -442,3 +442,354 @@
 
 .stage-title { letter-spacing: 0.08em; text-shadow: 0 10px 30px rgba(0,0,0,.45); }
 .tagline { max-width: 36rem; }
+
+
+/* ==========================================================================
+   OHANA FINAL ROSTER · structural carousel
+   One layout model only. Three cards maximum. No overflow, no nested transforms.
+   ========================================================================== */
+@media (min-width: 641px) {
+  #char-select {
+    position: fixed !important;
+    inset: 0 !important;
+    display: block !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #char-select .brand-bar {
+    top: 12px !important;
+  }
+
+  #char-select .title-stack {
+    position: absolute !important;
+    top: 56px !important;
+    left: 20px !important;
+    right: 20px !important;
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  #char-select > #difficulty {
+    position: absolute !important;
+    top: 178px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 8 !important;
+    margin: 0 !important;
+  }
+
+  #char-select > #chars {
+    position: absolute !important;
+    top: 220px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(1020px, calc(100vw - 90px)) !important;
+    height: 250px !important;
+    margin: 0 !important;
+    z-index: 5 !important;
+  }
+
+  #chars .chars-grid {
+    position: relative !important;
+    inset: auto !important;
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1fr) minmax(320px, 390px) minmax(180px, 1fr) !important;
+    gap: 20px !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+    mask: none !important;
+    -webkit-mask: none !important;
+  }
+
+  #chars .chars-grid > .char-card {
+    position: relative !important;
+    left: auto !important;
+    top: 0 !important;
+    inset: auto !important;
+    width: 100% !important;
+    max-width: 220px !important;
+    height: 164px !important;
+    max-height: 164px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    transform: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    border-radius: 20px !important;
+    background: rgba(7, 16, 30, 0.72) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 18px 36px rgba(0,0,0,.22) !important;
+    display: none !important;
+    box-sizing: border-box !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev,
+  #chars .chars-grid > .char-card.is-next,
+  #chars .chars-grid > .char-card.selected {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev {
+    grid-column: 1 !important;
+    opacity: .48 !important;
+    pointer-events: auto !important;
+    filter: saturate(.75) brightness(.78) !important;
+  }
+
+  #chars .chars-grid > .char-card.selected {
+    grid-column: 2 !important;
+    max-width: 390px !important;
+    height: 220px !important;
+    max-height: 220px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    filter: none !important;
+    border-color: rgba(255,224,138,.28) !important;
+    background:
+      radial-gradient(circle at 50% 15%, rgba(255,220,150,.10), transparent 42%),
+      rgba(5, 14, 26, .84) !important;
+    box-shadow: 0 24px 50px rgba(0,0,0,.30), 0 0 0 1px rgba(255,230,160,.05) inset !important;
+  }
+
+  #chars .chars-grid > .char-card.is-next {
+    grid-column: 3 !important;
+    opacity: .48 !important;
+    pointer-events: auto !important;
+    filter: saturate(.75) brightness(.78) !important;
+  }
+
+  #chars .chars-grid > .char-card .portrait {
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    height: 86px !important;
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  #chars .chars-grid > .char-card.selected .portrait {
+    height: 128px !important;
+  }
+
+  #chars .chars-grid > .char-card .portrait canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #chars .chars-grid > .char-card h3 {
+    margin: 4px 0 0 !important;
+    max-width: 100% !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    color: #fff !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #chars .chars-grid > .char-card.selected h3 {
+    font-size: 28px !important;
+  }
+
+  #chars .chars-grid > .char-card .role {
+    margin: 4px 0 0 !important;
+    padding: 3px 9px !important;
+    max-width: 100% !important;
+    font-size: 9px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #chars .chars-grid > .char-card.selected .form-rail {
+    display: flex !important;
+    margin: 7px auto 0 !important;
+    transform: scale(.78) !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev .role,
+  #chars .chars-grid > .char-card.is-next .role,
+  #chars .chars-grid > .char-card.is-prev .form-rail,
+  #chars .chars-grid > .char-card.is-next .form-rail {
+    display: none !important;
+  }
+
+  #chars .roster-arrow {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 9 !important;
+  }
+
+  #chars .chars-dots {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: -12px !important;
+    justify-content: center !important;
+    z-index: 10 !important;
+  }
+
+  #char-select > #menu-row {
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 34px !important;
+    transform: translateX(-50%) !important;
+    z-index: 12 !important;
+    margin: 0 !important;
+  }
+
+  #char-select > .legal {
+    position: absolute !important;
+    left: 50% !important;
+    bottom: 6px !important;
+    transform: translateX(-50%) !important;
+    z-index: 3 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (min-width: 641px) and (max-height: 760px) {
+  #char-select .title-stack { top: 48px !important; }
+  #char-select > #difficulty { top: 158px !important; }
+  #char-select > #chars { top: 192px !important; height: 218px !important; }
+  #chars .chars-grid > .char-card { height: 148px !important; max-height: 148px !important; }
+  #chars .chars-grid > .char-card.selected { height: 196px !important; max-height: 196px !important; }
+  #chars .chars-grid > .char-card .portrait { height: 74px !important; }
+  #chars .chars-grid > .char-card.selected .portrait { height: 106px !important; }
+  #chars .chars-grid > .char-card.selected h3 { font-size: 24px !important; }
+  #char-select > #menu-row { bottom: 28px !important; }
+  #char-select > .legal { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  #char-select {
+    position: fixed !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 42px 10px 8px !important;
+    overflow: hidden !important;
+    gap: 4px !important;
+  }
+
+  #char-select .title-stack {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    flex: 0 0 auto !important;
+  }
+
+  #char-select > #difficulty {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  #char-select > #chars {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 220px !important;
+    flex: 0 0 220px !important;
+    margin: 0 !important;
+  }
+
+  #chars .chars-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1.35fr 1fr !important;
+    gap: 6px !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: visible !important;
+  }
+
+  #chars .chars-grid > .char-card {
+    position: relative !important;
+    inset: auto !important;
+    display: none !important;
+    width: 100% !important;
+    max-width: 170px !important;
+    height: 146px !important;
+    max-height: 146px !important;
+    margin: 0 !important;
+    padding: 7px !important;
+    transform: none !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: rgba(7,16,30,.70) !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    box-sizing: border-box !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev,
+  #chars .chars-grid > .char-card.is-next,
+  #chars .chars-grid > .char-card.selected {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev { grid-column: 1 !important; opacity: .44 !important; }
+  #chars .chars-grid > .char-card.selected { grid-column: 2 !important; max-width: 230px !important; height: 184px !important; max-height: 184px !important; opacity: 1 !important; border-color: rgba(255,224,138,.26) !important; }
+  #chars .chars-grid > .char-card.is-next { grid-column: 3 !important; opacity: .44 !important; }
+
+  #chars .chars-grid > .char-card .portrait { height: 74px !important; }
+  #chars .chars-grid > .char-card.selected .portrait { height: 96px !important; }
+
+  #chars .chars-grid > .char-card h3 {
+    margin-top: 4px !important;
+    font-size: 15px !important;
+  }
+  #chars .chars-grid > .char-card.selected h3 { font-size: 20px !important; }
+
+  #chars .chars-grid > .char-card .role,
+  #chars .chars-grid > .char-card .form-rail {
+    margin-top: 3px !important;
+  }
+
+  #chars .chars-grid > .char-card.is-prev .role,
+  #chars .chars-grid > .char-card.is-next .role,
+  #chars .chars-grid > .char-card.is-prev .form-rail,
+  #chars .chars-grid > .char-card.is-next .form-rail {
+    display: none !important;
+  }
+
+  #chars .roster-arrow {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 9 !important;
+  }
+
+  #chars .chars-dots {
+    bottom: -10px !important;
+  }
+
+  #char-select > #menu-row {
+    width: min(360px, 100%) !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  #char-select > .legal { display: none !important; }
+}

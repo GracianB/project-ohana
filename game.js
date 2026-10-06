@@ -10,7 +10,7 @@ import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf } from "./systems/abilities.js";
-import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage } from "./systems/notify.js";
+import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
@@ -471,6 +471,7 @@ function loadRoom(id, fromDir) {
   }
   const first = !game.visited[id];
   game.roomId = id;
+  dismissNotifications();
   game.renderDirty = true;
   game.roomDef = r;
   game.finale = null;

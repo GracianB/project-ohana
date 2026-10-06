@@ -1,24 +1,25 @@
 export function evolutionTiming({ reduced = false, finalForm = false } = {}) {
-  const k = finalForm ? 1.15 : 1;
-  return reduced
-    ? {
-        dark: 0.18,
-        oldIn: 0,
-        charge: 0,
-        flip: 0,
-        flash: 0.20,
-        reveal: 0.20,
-        out: 1.05,
-        end: 1.35,
-      }
-    : {
-        dark: 0.22 * k,
-        oldIn: 0.10 * k,
-        charge: 0.40 * k,
-        flip: 0.82 * k,
-        flash: 1.30 * k,
-        reveal: 1.30 * k,
-        out: 2.55 * k,
-        end: 3.05 * k,
-      };
+  const k = finalForm ? 1.08 : 1;
+  if (reduced) {
+    return {
+      dark: 0.08,
+      oldIn: 0,
+      charge: 0.03,
+      flip: 0.12,
+      flash: 0.22,
+      reveal: 0.22,
+      out: 0.88,
+      end: 1.12,
+    };
+  }
+  return {
+    dark: 0.12 * k,
+    oldIn: 0.05 * k,
+    charge: 0.28 * k,
+    flip: 0.46 * k,
+    flash: 0.62 * k,
+    reveal: 0.62 * k,
+    out: 1.48 * k,
+    end: 1.78 * k,
+  };
 }
