@@ -20,7 +20,7 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-201`.
+La caché canónica de esta línea de trabajo es `ohana-204`.
 
 ### 06/10/2026 · Organic Hero Render Recovery
 
@@ -338,4 +338,4 @@ El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cac
 
 ## Polish Pass 2026-10-06
 
-Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-201.
+Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-204.
