@@ -12,3 +12,5 @@ Claude outputs/
 ohana-patch/
 
 .env
+
+node_modules/
