@@ -308,32 +308,6 @@ export function drawDummy(ctx, p, fx, fy, scale, t) {
   drawCharacter(ctx, p, { x: 0, y: 0 }, t);
 }
 
-/** Silueta: el personaje dibujado en un lienzo auxiliar y rellenado con color. */
-export class Silhouette {
-  constructor() {
-    this.cv = document.createElement("canvas");
-    this.ctx = this.cv.getContext("2d");
-  }
-  render(p, scale, t, box, dpr, color) {
-    const S = Math.ceil(box * dpr);
-    if (this.cv.width !== S) { this.cv.width = S; this.cv.height = S; }
-    const c = this.ctx;
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.globalCompositeOperation = "source-over";
-    c.clearRect(0, 0, S, S);
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawDummy(c, p, box / 2, box * 0.78, scale, t);
-    if (color) {
-      c.setTransform(1, 0, 0, 1, 0, 0);
-      c.globalCompositeOperation = "source-in";
-      c.fillStyle = color;
-      c.fillRect(0, 0, S, S);
-      c.globalCompositeOperation = "source-over";
-    }
-    return this.cv;
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Cinemática
 // ---------------------------------------------------------------------------
