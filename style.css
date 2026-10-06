@@ -3140,3 +3140,17 @@ body:not(.playing) #controls-hint { display: none; }
   #chars .char-card h3 { font-size: 18px; margin-top: 4px; }
   #chars .form-rail { margin-top: 3px; transform: scale(.72); }
 }
+
+
+/* FINAL CAROUSEL POSITION · lift cards without transforms.
+   The structural grid owns transforms now, so vertical placement uses top. */
+@media (min-width: 641px) {
+  #chars .chars-grid > .char-card.selected { top: -46px; }
+  #chars .chars-grid > .char-card.is-prev,
+  #chars .chars-grid > .char-card.is-next { top: -38px; }
+}
+@media (max-width: 640px) {
+  #chars .chars-grid > .char-card.selected { top: -22px; }
+  #chars .chars-grid > .char-card.is-prev,
+  #chars .chars-grid > .char-card.is-next { top: -16px; }
+}
