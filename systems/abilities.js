@@ -182,20 +182,77 @@ function castSupreme(game, p) {
   activateSpecial(game, p);
   const def = SUPREME[p.id] || SUPREME.kilo;
   const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
-  const dmg = (70 + (Number(p.evo) || 0) * 12) * pw(p);
-  for (const e of game.enemies || []) {
-    if (!canHit(e)) continue;
-    hitEnemy(game, e, dmg, { kx: Math.sign(cx(e) - cx(p)) * 8, ky: -6, stun: 28, color: def.color, crit: true });
+  const evo = clamp(Number(p.evo) || 0, 0, 4);
+  const dmg = (70 + evo * 14) * pw(p);
+  const enemies = (game.enemies || []).filter(canHit);
+
+  if (p.id === "kilo") {
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.82, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 24, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.28);
+    p.invuln = Math.max(p.invuln || 0, 75);
+  } else if (p.id === "stitcho") {
+    const tx = cx(p), ty = cy(p);
+    for (const e of enemies) {
+      const dx = tx - cx(e), dy = ty - cy(e);
+      const d = Math.hypot(dx, dy) || 1;
+      hitEnemy(game, e, dmg, { kx: (dx / d) * 13, ky: (dy / d) * 8 - 5, stun: 52, color: def.color, crit: true });
+    }
+  } else if (p.id === "chispin") {
+    const ordered = enemies.slice().sort((a,b) =>
+      Math.hypot(cx(a)-cx(p),cy(a)-cy(p)) - Math.hypot(cx(b)-cx(p),cy(b)-cy(p))
+    ).slice(0, 6);
+    ordered.forEach((e,i) =>
+      hitEnemy(game, e, dmg * (1 - i * 0.08), { kx: 0, ky: -4, stun: 34, color: def.color, crit: i < 2 })
+    );
+  } else if (p.id === "cat") {
+    for (const e of enemies) {
+      hitEnemy(game, e, dmg * 0.9, { kx: 0, ky: -2, stun: 70, color: def.color, crit: true });
+      e._eclipseT = 90;
+      e.vx *= 0.2;
+      e.vy *= 0.2;
+    }
+    p.invuln = Math.max(p.invuln || 0, 55);
+  } else if (p.id === "dragon") {
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.25, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 42, color: def.color, crit: true });
+    game.shake = Math.min(28, (game.shake || 0) + 16);
+  } else if (p.id === "dino") {
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.12, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 62, color: def.color, crit: true });
+    game.shake = Math.min(30, (game.shake || 0) + 20);
+  } else if (p.id === "frita") {
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.78, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 34, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.16);
+    p._fryGodT = 120;
+  } else if (p.id === "pizza") {
+    for (const e of enemies) hitEnemy(game, e, dmg, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 48, color: def.color, crit: true });
+    p._ovenKingT = 120;
+    game.score = (game.score || 0) + enemies.length * 8;
+  } else if (p.id === "yomi") {
+    for (const e of enemies) {
+      const hp = Number(e.hp ?? e.health ?? 9999);
+      const maxHp = Number(e.maxHp ?? e.maxHealth ?? hp);
+      const finisher = hp <= maxHp * 0.34;
+      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.35, {
+        kx: Math.sign(cx(e)-cx(p)) * 6,
+        ky: -6,
+        stun: finisher ? 90 : 52,
+        color: def.color,
+        crit: true
+      });
+    }
+  } else if (p.id === "cuerno") {
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.9, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 38, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.12);
+    addPlayerXp(p, 24 + enemies.length * 4);
   }
-  add({ kind: "supreme", x: cx(p), y: cy(p), life: 54, max: 54, color: def.color, name: def.name, identity: identity.kind });
-  game.ult = { t: 70, color: def.color, name: def.name, identity: identity.kind };
+
+  add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
+  game.ult = { t: 82, color: def.color, name: def.name, identity: identity.kind };
   game.flashColor = def.color;
   game.flash = Math.max(game.flash || 0, 18);
-  game.shake = Math.min(22, (game.shake || 0) + 12);
+  game.shake = Math.min(24, (game.shake || 0) + 10);
   game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
   game._specialName = specialOf(p.id).name;
 }
-
 
 // ---------------------------------------------------------------------------
 // Estado de movimiento de habilidades (un solo jugador)
