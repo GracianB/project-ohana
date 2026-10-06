@@ -12,13 +12,13 @@ export function evolutionTiming({ reduced = false, finalForm = false } = {}) {
         end: 1.35,
       }
     : {
-        dark: 0.34 * k,
-        oldIn: 0.15 * k,
-        charge: 0.55 * k,
-        flip: 1.20 * k,
-        flash: 1.85 * k,
-        reveal: 1.85 * k,
-        out: 3.20 * k,
-        end: 3.80 * k,
+        dark: 0.22 * k,
+        oldIn: 0.10 * k,
+        charge: 0.40 * k,
+        flip: 0.82 * k,
+        flash: 1.30 * k,
+        reveal: 1.30 * k,
+        out: 2.55 * k,
+        end: 3.05 * k,
       };
 }
