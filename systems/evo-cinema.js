@@ -418,7 +418,7 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 12 : finalForm ? 90 : 70;
+    const n = reduce ? 4 : finalForm ? 22 : 16;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
@@ -467,11 +467,11 @@ export function playEvolution(detail = {}) {
     const charge = seg(t, T.charge, T.flash);
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
     drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
-    const rayA = (0.35 + charge * 0.35 + revealK * 0.6) * dark;
+    const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
-    drawRays(ctx, cx, cy, R, accent, rayA * 0.24, spin, finalForm ? 10 : 8);
-    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.10, -spin * 0.7, 6);
+    drawRays(ctx, cx, cy, R, accent, rayA * 0.07, spin, finalForm ? 6 : 5);
+    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.025, -spin * 0.7, 4);
 
     // 2 · anillos de energía durante la carga
     if (!reduce && t < T.flash) {
@@ -578,7 +578,7 @@ export function playEvolution(detail = {}) {
       if (!reduce && morphK > 0.02) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.16 + morphK * 0.34;
+        ctx.globalAlpha = 0.08 + morphK * 0.14;
         ctx.strokeStyle = accent;
         ctx.lineWidth = Math.max(1.5, target * 0.018);
         ctx.beginPath();
@@ -592,7 +592,7 @@ export function playEvolution(detail = {}) {
       const sc = scale * (0.78 + 0.22 * pop);
 
       ctx.save();
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = 0.98;
       drawDummy(ctx, pNew, cx, centerY, sc, tf);
       ctx.restore();
 
@@ -620,30 +620,19 @@ export function playEvolution(detail = {}) {
       ctx.globalAlpha = fade;
       const dt2 = t - T.flash;
       const maxR = Math.hypot(W, H) * 0.42;
-      drawRing(ctx, cx, cy, maxR, seg(dt2, 0, 0.9), "#ffffff", target * 0.08);
-      drawRing(ctx, cx, cy, maxR * 0.72, seg(dt2, 0.08, 1.0), accent, target * 0.035);
-      drawRing(ctx, cx, footY, target * 1.05, seg(dt2, 0.0, 0.72), light, target * 0.022, 0.22);
-      if (finalForm) {
-        drawRing(ctx, cx, cy, maxR * 0.95, seg(dt2, 0.2, 1.15), accent, target * 0.04);
-        drawRing(ctx, cx, cy, maxR * 0.42, seg(dt2, 0.35, 1.1), light, target * 0.028);
-      }
+      drawRing(ctx, cx, footY, target * 0.95, seg(dt2, 0.0, 0.55), light, target * 0.014, 0.20);
       // anillos lentos alrededor del personaje revelado
-      if (t > T.reveal) {
-        for (let i = 0; i < 2; i++) {
-          const kk = ((t - T.reveal) * 0.6 + i * 0.5) % 1;
-          drawRing(ctx, cx, footY, target * 0.88, kk, i ? "#ffffff" : accent, 2, 0.24);
-        }
-      }
+      // No additional rings after the reveal: keep the organic design readable.
       ctx.restore();
     }
     ctx.save();
     ctx.globalAlpha = fade;
     parts.draw(ctx, (p) => !behindSpark(p));
     ctx.restore();
-    const flashA = reduce ? 0.34 * (1 - seg(t, T.flash, T.flash + 0.22)) * (t >= T.flash ? 1 : 0)
+    const flashA = reduce ? 0.14 * (1 - seg(t, T.flash, T.flash + 0.14)) * (t >= T.flash ? 1 : 0)
       : (t < T.flash
-        ? Math.pow(seg(t, T.flash - 0.10, T.flash), 3)
-        : Math.pow(1 - seg(t, T.flash, T.flash + 0.24), 3));
+        ? Math.pow(seg(t, T.flash - 0.06, T.flash), 3) * 0.42
+        : Math.pow(1 - seg(t, T.flash, T.flash + 0.16), 3) * 0.36);
     if (flashA > 0.001) {
       // destello radial (luz, no niebla): blanco en el centro, color hacia fuera
       const fr = Math.hypot(W, H) * 0.7;
