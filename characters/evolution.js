@@ -510,7 +510,7 @@ export function drawEvolutionSignatureFX(ctx, p, H, pose, t) {
     Number(pose?.land) || 0
   );
   const stage = e.evo;
-  if (active < 0.06 && stage < 2) return;
+  if (active < 0.06) return;
 
   const color = p?.color || "#fff6c8";
   const pulse = 1 + Math.sin((Number(t) || 0) * 0.035 * e.pulse) * 0.08;
