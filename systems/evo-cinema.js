@@ -338,347 +338,262 @@ export function playEvolution(detail = {}) {
   const id = detail.id || "kilo";
   const evo = clamp(Number(detail.evo) || 1, 1, 4);
   const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
-  const newForm = (def.forms && def.forms[evo]) || {};
   const oldForm = (def.forms && def.forms[evo - 1]) || {};
+  const newForm = (def.forms && def.forms[evo]) || {};
   const finalForm = evo >= 4;
   const color = detail.color || newForm.color || def.color || "#7ee7ff";
-  const designAccent = newForm.accent || newForm.color || def.color || color;
+  const accent = newForm.accent || newForm.color || color;
+  const light = tint(accent, 0.62);
   const oldColor = oldForm.color || color;
-  const accent = finalForm ? designAccent : color;
-  const light = tint(accent, 0.55);
-  const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
   const reduce = reducedMotion();
-
-  // Línea de tiempo breve: impacto visual fuerte, regreso rápido al juego.
   const T = evolutionTiming({ reduced: reduce, finalForm });
 
-  const pOld = makeDummy(def.id, evo - 1, oldColor);
-  const pNew = makeDummy(def.id, evo, color);
-  pOld._poseOverride = "idle";
-  const sil = new Silhouette();
-  const parts = new Particles();
+  const oldP = makeDummy(def.id, evo - 1, oldColor);
+  const newP = makeDummy(def.id, evo, color);
+  oldP._poseOverride = "idle";
+  newP._poseOverride = "victory";
+
   const { el, fc } = st;
   const ctx = fc.ctx;
-
+  const parts = new Particles();
   st.sr.textContent = "Evolución completada: " + toName + ". Nueva forma " + (evo + 1) + " de 5.";
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
-  // La cinemática usa un único personaje central. No se montan miniaturas ni
-  // sprites auxiliares debajo del héroe, evitando cast visuales ajenos al elenco activo.
-  const staleLadder = el.querySelector(".form-ladder");
-  if (staleLadder) staleLadder.remove();
+  el.querySelector(".form-ladder")?.remove();
+
   sfx("evoCharge");
   duckMusic(true);
-  let fanfared = false;
 
   let t0 = performance.now();
   let last = t0;
   let raf = 0;
   let skipAt = -1;
-  let flashed = false;
-  let burstDone = false;
+  let impactPlayed = false;
+  let revealPlayed = false;
   let spawnAcc = 0;
-  let sparkAcc = 0;
 
   function layout() {
     const W = fc.W, H = fc.H;
     const portrait = H > W * 1.1;
-    const target = Math.min(H * (portrait ? 0.34 : 0.4), W * (portrait ? 0.62 : 0.5));
-    const cy = H * (portrait ? 0.38 : 0.37);
-    return { W, H, cx: W / 2, cy, target, footY: cy + target * 0.5, portrait };
+    const target = Math.min(H * (portrait ? 0.40 : 0.48), W * (portrait ? 0.66 : 0.46));
+    return {
+      W, H, cx: W / 2,
+      cy: H * (portrait ? 0.40 : 0.39),
+      target,
+      footY: H * (portrait ? 0.70 : 0.76),
+      portrait
+    };
   }
 
-  function burst(L) {
-    const n = reduce ? 4 : finalForm ? 22 : 16;
-    for (let i = 0; i < n; i++) {
+  function spawnOrbit(L, count) {
+    for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;
-      const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
-      const kind = i % 3 === 0 ? "star" : i % 3 === 1 ? "streak" : "dot";
-      const forward = Math.cos(a) > 0.2;
+      const r = L.target * (1.0 + Math.random() * 0.38);
       parts.add({
-        x: L.cx + Math.cos(a) * L.target * 0.62,
-        y: L.cy + Math.sin(a) * L.target * 0.42,
-        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-        drag: kind === "streak" ? 0.93 : 0.95, g: kind === "star" ? 160 : 0,
-        max: 0.9 + Math.random() * (finalForm ? 1.4 : 1.0),
-        size: kind === "star" ? 5 + Math.random() * (L.target * 0.04) : kind === "streak" ? 2 + Math.random() * 2 : 2 + Math.random() * 3,
-        rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8,
-        kind, color: palette[i % palette.length],
-        behind: !forward,
+        x: L.cx + Math.cos(a) * r,
+        y: L.cy + Math.sin(a) * r * 0.72,
+        vx: 0, vy: 0,
+        to: { x: L.cx, y: L.cy },
+        swirl: (i & 1 ? -1 : 1) * 260,
+        max: 0.9 + Math.random() * 0.55,
+        size: 1.4 + Math.random() * 2.4,
+        kind: i % 3 === 0 ? "spark" : "dot",
+        color: [accent, light, "#ffffff"][i % 3],
       });
     }
   }
 
+  function drawHero(p, alpha, scale, y, t, opts = {}) {
+    if (alpha <= 0.001) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    if (opts.ghost) ctx.globalCompositeOperation = "source-over";
+    drawDummy(ctx, p, L.cx, y, scale, t);
+    ctx.restore();
+  }
+
   function frame(now) {
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = Math.min(0.04, (now - last) / 1000);
     last = now;
     let t = (now - t0) / 1000;
-    if (skipAt >= 0 && t < T.out) { t0 -= (T.out - t) * 1000; t = T.out; }
-    const L = layout();
-    const { W, H, cx, cy, target, footY } = L;
-    const scale = target / baseHeight(def.id, evo);
-    const tf = t * 60; // tiempo en "frames" como el juego
+    if (skipAt >= 0 && t < T.out) {
+      t0 -= (T.out - t) * 1000;
+      t = T.out;
+    }
 
-    ctx.save();
+    const L = layout();
+    const { W, H } = L;
+    const fade = 1 - easeInOut(seg(t, T.out, T.end));
+    const charge = easeInOut(seg(t, T.charge, T.flip));
+    const morph = easeInOut(seg(t, T.flip, T.reveal));
+    const reveal = easeOut(seg(t, T.reveal, T.reveal + 0.30));
+    const titleK = easeOut(seg(t, T.reveal + 0.16, T.reveal + 0.62));
+
     ctx.clearRect(0, 0, W, H);
 
-    // salida
-    const out = seg(t, T.out, T.end);
-    const fade = 1 - easeInOut(out);
+    // 1. Escenario limpio. Nada de rayos radiales ocupando media pantalla.
+    ctx.fillStyle = "rgba(3, 7, 16," + (0.70 * fade) + ")";
+    ctx.fillRect(0, 0, W, H);
 
-    // sacudida
-    const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (finalForm ? 0.6 : 0.42));
-    if (shakeK > 0 && shakeK < 1) {
-      const amp = (1 - shakeK) * (finalForm ? 8 : 6);
-      ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
-    }
+    const halo = ctx.createRadialGradient(L.cx, L.cy, 0, L.cx, L.cy, L.target * 1.65);
+    halo.addColorStop(0, rgba(accent, (0.20 + charge * 0.18 + reveal * 0.18) * fade));
+    halo.addColorStop(0.48, rgba(accent, 0.055 * fade));
+    halo.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = halo;
+    ctx.fillRect(0, 0, W, H);
 
-    // 1 · fondo
-    const dark = easeOut(seg(t, 0, T.dark)) * fade;
-    const charge = seg(t, T.charge, T.flash);
-    const revealK = seg(t, T.reveal, T.reveal + 0.5);
-    drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
-    const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
-    const R = Math.hypot(W, H) * 0.75;
-    const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
-    drawRays(ctx, cx, cy, R, accent, rayA * 0.07, spin, finalForm ? 6 : 5);
-    if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.025, -spin * 0.7, 4);
-
-    // 2 · anillos de energía durante la carga
-    if (!reduce && t < T.flash) {
-      for (let i = 0; i < 2; i++) {
-        const kk = ((t * (1.1 + charge * 2.5) + i / 3) % 1);
-        const ring = 1 - kk; // hacia dentro
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = seg(t, T.oldIn, T.charge) * Math.sin(kk * Math.PI) * (0.22 + charge * 0.12);
-        ctx.strokeStyle = i % 2 ? "#ffffff" : accent;
-        ctx.lineWidth = 1.5 + charge * 2;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, target * (0.58 + ring * 0.42), target * (0.58 + ring * 0.42), 0, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    // 3 · partículas que convergen
-    if (!reduce && t > T.oldIn && t < T.flash - 0.08) {
-      spawnAcc += dt * (40 + charge * 220) * (finalForm ? 1.5 : 1);
-      while (spawnAcc > 1) {
-        spawnAcc -= 1;
-        const a = Math.random() * Math.PI * 2;
-        const r = Math.max(W, H) * (0.45 + Math.random() * 0.25);
-        parts.add({
-          x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r,
-          vx: 0, vy: 0, to: { x: cx, y: cy }, swirl: (Math.random() < 0.5 ? -1 : 1) * 900,
-          max: 3, size: 1.6 + Math.random() * 2.4, kind: Math.random() < 0.5 ? "streak" : "dot",
-          color: palette[(Math.random() * palette.length) | 0], behind: true,
-        });
-      }
-    }
-    // destellos de ambiente tras la revelación
-    if (t > T.reveal && t < T.out) {
-      sparkAcc += dt * (reduce ? 6 : finalForm ? 40 : 24);
-      while (sparkAcc > 1) {
-        sparkAcc -= 1;
-        const back = 0.25 + Math.random() * 0.7;
-        parts.add({
-          x: cx - target * back, y: cy + (Math.random() - 0.45) * target * 0.7,
-          vx: -(40 + Math.random() * 90), vy: -24 - Math.random() * 50, drag: 0.99,
-          max: 0.7 + Math.random() * 0.7,
-          size: 3 + Math.random() * (target * 0.03), kind: "spark",
-          color: palette[(Math.random() * palette.length) | 0], behind: true,
-        });
-      }
-    }
-
-    const covers = (p) => Math.abs(p.x - cx) < target * 0.36 && p.y < footY + 4 && p.y > cy - target * 0.8;
-    const behindSpark = (p) => p.behind || covers(p) || p.x < cx;
-    parts.update(dt);
+    // Línea de suelo. El personaje vuelve a tener un lugar físico.
     ctx.save();
-    ctx.globalAlpha = fade;
-    parts.draw(ctx, behindSpark);
+    ctx.globalAlpha = fade * 0.55;
+    const floor = ctx.createLinearGradient(L.cx - L.target, 0, L.cx + L.target, 0);
+    floor.addColorStop(0, rgba(accent, 0));
+    floor.addColorStop(0.5, rgba(accent, 0.75));
+    floor.addColorStop(1, rgba(accent, 0));
+    ctx.strokeStyle = floor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(L.cx, L.footY + 3, L.target * 0.60, L.target * 0.075, 0, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.restore();
 
-    // 4 · personaje
-    // Una sola fuente de verdad visual: el arte orgánico de characters/art.
-    // La transición es un crossfade continuo, no un parpadeo entre dos dibujos
-    // ni una silueta geométrica superpuesta.
-    const morphK = easeInOut(seg(t, T.charge, T.flash));
-    const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
-    const box = target * 2.2;
-    const bob = reduce ? 0 : Math.sin(t * 2.2) * target * 0.010;
-    const centerY = footY + bob;
+    // 2. Forma anterior: estable, reconocible, todavía presente.
+    const oldIn = seg(t, T.oldIn, T.charge);
+    const oldFade = 1 - morph;
+    const oldScale = (0.92 + charge * 0.04) * (1 - morph * 0.04);
+    if (t >= T.oldIn && t < T.flip) {
+      drawHero(oldP, oldIn * fade, L.target / baseHeight(def.id, evo - 1) * oldScale, L.footY, now * 0.02);
+    }
 
-    ctx.save();
-    ctx.globalAlpha = fade;
-
-    // Sombra/halo muy limpio para anclar al héroe a la escena.
-    const ground = ctx.createRadialGradient(cx, footY, 0, cx, footY, target * 0.72);
-    ground.addColorStop(0, rgba(accent, 0.24));
-    ground.addColorStop(1, rgba(accent, 0));
-    ctx.fillStyle = ground;
-    ctx.beginPath();
-    ctx.ellipse(cx, footY, target * 0.72, target * 0.15, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (t < T.flash) {
-      // Forma anterior: entra y se mantiene estable, sin jitter aleatorio.
-      const oldAlpha = (1 - morphK) * clamp(introK + 0.18, 0, 1);
-      if (oldAlpha > 0.001) {
-        const oldScale = scale * (0.96 + introK * 0.04) * (1 - morphK * 0.035);
-        ctx.save();
-        ctx.globalAlpha = oldAlpha;
-        drawDummy(ctx, pOld, cx, centerY, oldScale, tf);
-        ctx.restore();
-      }
-
-      // Forma nueva: aparece progresivamente desde una escala menor y ocupa
-      // exactamente el mismo centro y la misma línea de pies.
-      if (morphK > 0.001) {
-        const grow = easeOut(morphK);
-        const newAlpha = morphK;
-        const newScale = scale * (0.76 + 0.24 * grow);
-        ctx.save();
-        ctx.globalAlpha = newAlpha;
-        drawDummy(ctx, pNew, cx, centerY, newScale, tf);
-        ctx.restore();
-      }
-
-      // Un único anillo de carga para comunicar la transformación.
-      if (!reduce && morphK > 0.02) {
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.08 + morphK * 0.14;
-        ctx.strokeStyle = accent;
-        ctx.lineWidth = Math.max(1.5, target * 0.018);
-        ctx.beginPath();
-        ctx.arc(cx, cy, target * (0.72 + morphK * 0.22), -Math.PI * 0.92, Math.PI * 0.92);
-        ctx.stroke();
-        ctx.restore();
-      }
-    } else {
-      // Revelación: el nuevo diseño orgánico aparece una vez, limpio y legible.
-      const pop = reduce ? 1 : easeBack(revealK);
-      const sc = scale * (0.78 + 0.22 * pop);
+    // 3. Durante la transformación, la forma se comprime y la nueva aparece
+    // desde el mismo punto. Es una transformación, no dos Pokémon peleándose.
+    if (t >= T.flip && t < T.reveal + 0.04) {
+      const breathe = reduce ? 0 : Math.sin(t * 14) * 0.025;
+      const oldA = (1 - morph) * 0.72;
+      const newA = morph * 0.92;
+      const oldS = (1 - morph * 0.12) * (1 + breathe);
+      const newS = 0.90 + morph * 0.12;
 
       ctx.save();
-      ctx.globalAlpha = 0.98;
-      drawDummy(ctx, pNew, cx, centerY, sc, tf);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = fade * (0.10 + morph * 0.10);
+      ctx.fillStyle = rgba(accent, 0.35);
+      ctx.beginPath();
+      ctx.arc(L.cx, L.cy, L.target * (0.30 + morph * 0.38), 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
+
+      drawHero(oldP, oldA * fade, L.target / baseHeight(def.id, evo - 1) * oldS, L.footY, now * 0.02);
+      drawHero(newP, newA * fade, L.target / baseHeight(def.id, evo) * newS, L.footY, now * 0.02 + 8);
+    }
+
+    // 4. Revelación: golpe limpio y breve, con una sola onda.
+    if (t >= T.reveal) {
+      const newScale = (0.92 + easeOut(reveal) * 0.08);
+      drawHero(newP, reveal * fade, L.target / baseHeight(def.id, evo) * newScale, L.footY, now * 0.02 + 12);
+
+      if (!reducedMotion() && !revealPlayed) {
+        revealPlayed = true;
+        sfx("evoReveal");
+      }
 
       if (!reduce) {
-        const ringK = easeOut(seg(t, T.reveal, T.reveal + 0.65));
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = (1 - ringK) * 0.52;
-        ctx.strokeStyle = light;
-        ctx.lineWidth = Math.max(1.5, target * 0.018);
-        ctx.beginPath();
-        ctx.arc(cx, footY, target * (0.72 + ringK * 0.46), 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+        const ringK = seg(t, T.reveal, T.reveal + 0.42);
+        drawRing(ctx, L.cx, L.footY - L.target * 0.48, L.target * 1.05, ringK, light, 2.5, 0.22);
+      }
+
+      // Pequeños fragmentos salen después del impacto, no durante toda la escena.
+      if (!reduce && t < T.out) {
+        spawnAcc += dt * (finalForm ? 15 : 9);
+        while (spawnAcc > 1) {
+          spawnAcc -= 1;
+          const a = Math.random() * Math.PI * 2;
+          const r = L.target * (0.22 + Math.random() * 0.38);
+          parts.add({
+            x: L.cx + Math.cos(a) * r,
+            y: L.footY - L.target * 0.48 + Math.sin(a) * r * 0.45,
+            vx: Math.cos(a) * (80 + Math.random() * 130),
+            vy: Math.sin(a) * (80 + Math.random() * 130) - 55,
+            g: 90,
+            drag: 0.985,
+            max: 0.42 + Math.random() * 0.42,
+            size: 1.5 + Math.random() * 2,
+            kind: "spark",
+            color: [accent, light, "#ffffff"][Math.floor(Math.random() * 3)]
+          });
+        }
       }
     }
-    ctx.restore();
 
-    // 5 · destello + onda + estallido
-    if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
-    if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(finalForm ? "evoFinalFanfare" : "evoFanfare"); }
-    if (flashed && !burstDone) { burstDone = true; burst(L); }
-    if (!reduce) {
+    // 5. Una breve línea de energía durante la carga.
+    if (!reduce && t >= T.charge && t < T.flip) {
+      const k = seg(t, T.charge, T.flip);
+      ctx.save();
+      ctx.globalAlpha = fade * (0.15 + k * 0.28);
+      ctx.strokeStyle = light;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(L.cx, L.cy, L.target * (0.62 - k * 0.16), L.target * (0.62 - k * 0.16) * 0.28, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      if (!reduce && t < T.flip) {
+        const n = finalForm ? 10 : 7;
+        const expected = Math.floor(k * n);
+        if (expected > 0 && Math.random() < dt * 18) spawnOrbit(L, 1);
+      }
+    }
+
+    parts.update(dt);
+    parts.draw(ctx);
+
+    // 6. Flash único. Blanco muy breve, sin pantalla quemada.
+    if (t >= T.flash && t < T.flash + 0.10) {
+      const fk = 1 - seg(t, T.flash, T.flash + 0.10);
+      ctx.fillStyle = "rgba(255,255,255," + (fk * (finalForm ? 0.78 : 0.58)) + ")";
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // 7. Texto aparece DESPUÉS de que el jugador pueda ver la forma.
+    if (titleK > 0) {
+      const size = Math.max(27, Math.min(W * 0.075, H * 0.075, 82));
+      const ty = Math.min(H - size * 1.8, L.footY + L.target * 0.18);
+      ctx.save();
+      ctx.globalAlpha = titleK * fade;
+      drawTitle(ctx, "NUEVA FORMA", L.cx, ty - size * 0.70, Math.max(13, size * 0.25),
+        "#dcecff", { font: FONT_BODY, weight: 800, spacing: "0.22em", stroke: false });
+      drawTitle(ctx, title, L.cx, ty, size, finalForm ? ["#fff7d0", light, accent] : ["#ffffff", light, accent],
+        { maxWidth: W * 0.88, glow: rgba(accent, 0.65) });
+      drawTitle(ctx, "FORMA " + (evo + 1) + " / 5", L.cx, ty + size * 0.70,
+        Math.max(11, size * 0.22), "#bcd0e5", { font: FONT_BODY, weight: 700, spacing: "0.18em", stroke: false });
+      ctx.restore();
+    }
+
+    // 8. Saída. Nada queda pegado al gameplay.
+    if (t >= T.out) {
       ctx.save();
       ctx.globalAlpha = fade;
-      const dt2 = t - T.flash;
-      const maxR = Math.hypot(W, H) * 0.42;
-      drawRing(ctx, cx, footY, target * 0.95, seg(dt2, 0.0, 0.55), light, target * 0.014, 0.20);
-      // anillos lentos alrededor del personaje revelado
-      // No additional rings after the reveal: keep the organic design readable.
-      ctx.restore();
-    }
-    ctx.save();
-    ctx.globalAlpha = fade;
-    parts.draw(ctx, (p) => !behindSpark(p));
-    ctx.restore();
-    const flashA = reduce ? 0.14 * (1 - seg(t, T.flash, T.flash + 0.14)) * (t >= T.flash ? 1 : 0)
-      : (t < T.flash
-        ? Math.pow(seg(t, T.flash - 0.06, T.flash), 3) * 0.42
-        : Math.pow(1 - seg(t, T.flash, T.flash + 0.16), 3) * 0.36);
-    if (flashA > 0.001) {
-      // destello radial (luz, no niebla): blanco en el centro, color hacia fuera
-      const fr = Math.hypot(W, H) * 0.7;
-      const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, fr);
-      fg.addColorStop(0, "rgba(255,255,255," + flashA + ")");
-      fg.addColorStop(0.35, "rgba(255,255,255," + flashA * 0.85 + ")");
-      fg.addColorStop(1, rgba(light, flashA * 0.5));
-      ctx.fillStyle = fg;
-      ctx.fillRect(-40, -40, W + 80, H + 80);
-    }
-
-    // 6 · rótulos
-    const txt = seg(t, T.reveal + (reduce ? 0 : 0.12), T.reveal + (reduce ? 0.2 : 0.55));
-    if (txt > 0) {
-      const base = Math.min(W * (L.portrait ? 0.105 : 0.07), H * 0.088, 100);
-      const size = Math.max(30, base);
-      const slam = reduce ? 1 : easeBack(txt);
-      const ty = Math.min(H - size * 2.7, footY + target * 0.12 + size * 1.05);
-      ctx.save();
-      ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
-      // kicker
-      drawTitle(ctx, "✦ " + story.kicker + " ✦", cx, ty - size * 0.82, Math.max(13, size * 0.3),
-        tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
-      // nombre
-      ctx.save();
-      ctx.translate(cx, ty);
-      const s = lerp(1.6, 1, slam);
-      ctx.scale(s, s);
-      drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", accent, light] : ["#ffffff", light, accent],
-        { maxWidth: W * 0.92 / s, glow: rgba(accent, 0.9) });
-      ctx.restore();
-      // barra y forma
-      const sub = seg(t, T.reveal + 0.3, T.reveal + 0.7) * (reduce ? 0 : 1) + (reduce ? 1 : 0);
-      ctx.globalAlpha = sub * fade;
-      const y2 = ty + size * 0.85;
-      const bw = Math.min(W * 0.5, size * 4) * easeOut(sub);
-      const lg = ctx.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
-      lg.addColorStop(0, rgba(accent, 0)); lg.addColorStop(0.5, rgba(accent, 1)); lg.addColorStop(1, rgba(accent, 0));
-      ctx.fillStyle = lg;
-      ctx.fillRect(cx - bw / 2, y2 - 1, bw, 2);
-      drawTitle(ctx, "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.36, Math.max(13, size * 0.28), "#ffffff",
-        { font: FONT_BODY, weight: 800, spacing: "0.3em", stroke: false });
-      // pips de forma
-      const pipY = y2 + size * 0.72, pipR = Math.max(4, size * 0.07), gap = pipR * 3.2;
-      for (let i = 0; i < 5; i++) {
-        ctx.beginPath();
-        ctx.arc(cx + (i - 2) * gap, pipY, pipR, 0, Math.PI * 2);
-        ctx.fillStyle = i <= evo ? (i === evo ? "#ffffff" : accent) : "rgba(255,255,255,0.18)";
-        ctx.fill();
-      }
-      // La cinemática solo comunica el cambio de forma.
-      // La historia y la habilidad desbloqueada se anuncian una sola vez por MessageManager.
-      ctx.restore();
-    }
-    // Pista mínima para continuar o saltar la cinemática.
-    if (t > 0.65 && t < T.out) {
-      ctx.save();
-      ctx.globalAlpha = 0.5 * seg(t, 0.8, 1.2);
-      drawTitle(ctx, "Toca o pulsa una tecla para continuar", cx, H - 22, 11, "#cfe0f2",
-        { font: FONT_BODY, weight: 600, spacing: "0.16em", stroke: false });
+      ctx.fillStyle = "rgba(3,7,16," + (1 - fade) + ")";
+      ctx.fillRect(0, 0, W, H);
       ctx.restore();
     }
 
-    ctx.restore();
-    if (t >= T.end) { finish(); return; }
+    if (t >= T.end) {
+      finish();
+      return;
+    }
     raf = requestAnimationFrame(frame);
   }
 
   function onSkip(e) {
     const t = (performance.now() - t0) / 1000;
-    if (t < 0.8) return;
-    if (e && e.type === "keydown") { e.preventDefault(); e.stopPropagation(); }
-    if (skipAt < 0) skipAt = t;
+    if (t < 0.65) return;
+    if (e?.type === "keydown") {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    skipAt = t;
   }
 
   function finish(silent) {
@@ -692,7 +607,9 @@ export function playEvolution(detail = {}) {
     running = null;
     if (!silent) {
       document.querySelectorAll(".game-notification.evo").forEach((n) => n.click());
-      try { window.dispatchEvent(new CustomEvent("ohana-evolve-done", { detail: { id: def.id, evo } })); } catch (_) {}
+      try {
+        window.dispatchEvent(new CustomEvent("ohana-evolve-done", { detail: { id: def.id, evo } }));
+      } catch (_) {}
     }
   }
 
