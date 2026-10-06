@@ -3154,3 +3154,37 @@ body:not(.playing) #controls-hint { display: none; }
   #chars .chars-grid > .char-card.is-prev,
   #chars .chars-grid > .char-card.is-next { top: -16px; }
 }
+
+
+/* CAROUSEL CONTENT FIT · prevent the metadata from falling outside the card. */
+@media (min-width: 641px) {
+  #chars .char-card {
+    justify-content: flex-start;
+  }
+  #chars .char-card .h-move { display: none; }
+  #chars .char-card.selected .portrait { height: 78px; }
+  #chars .char-card.selected h3 {
+    margin-top: 5px;
+    font-size: 19px;
+    line-height: 1;
+  }
+  #chars .char-card.selected .role {
+    margin-top: 3px;
+    line-height: 1;
+  }
+  #chars .char-card.selected .form-rail {
+    margin-top: 5px;
+  }
+  #chars .char-card.is-prev,
+  #chars .char-card.is-next {
+    justify-content: flex-start;
+  }
+  #chars .char-card.is-prev .portrait,
+  #chars .char-card.is-next .portrait { height: 64px; }
+  #chars .char-card.is-prev h3,
+  #chars .char-card.is-next h3 { font-size: 15px; margin-top: 4px; }
+}
+@media (max-width: 640px) {
+  #chars .char-card .h-move { display: none; }
+  #chars .char-card.selected .portrait { height: 72px; }
+}
