@@ -4,6 +4,7 @@ import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
+import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
@@ -2422,6 +2423,7 @@ function render() {
   else {
     const painted = drawPaintedRoom(ctx, game.roomId, camW(), camH());
     if (!painted) renderWorld(ctx, world, game.cam, t, camW(), camH());
+    drawRoomAtmosphere(ctx, game.roomId, game.cam, t, camW(), camH());
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
