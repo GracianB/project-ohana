@@ -2951,3 +2951,41 @@ body:not(.playing) #controls-hint { display: none; }
   #char-select > #menu-row { margin-top: -2px; }
   #char-select > .legal { display: none; }
 }
+
+
+/* TITLE SCREEN · final vertical balance for 720p captures */
+@media (min-width: 641px) {
+  #char-select > #chars {
+    margin-top: -64px;
+    height: 210px;
+    flex-basis: 210px;
+  }
+  #chars .chars-grid { height: 210px; }
+  #chars .char-card {
+    top: 46%;
+    width: 330px;
+    height: 192px;
+    max-height: 192px;
+  }
+  #chars .char-card.selected {
+    width: 340px;
+    height: 198px;
+    max-height: 198px;
+  }
+  #chars .char-card .portrait { height: 96px; }
+  #chars .char-card h3 { font-size: 20px; margin-top: 4px; }
+  #chars .char-card .role { margin-top: 3px; padding: 2px 7px; }
+  #chars .form-rail { margin-top: 3px; }
+  #char-select > #menu-row { margin-top: -2px; }
+}
+@media (min-width: 641px) and (max-height: 780px) {
+  #char-select > #chars {
+    margin-top: -58px;
+    height: 198px;
+    flex-basis: 198px;
+  }
+  #chars .chars-grid { height: 198px; }
+  #chars .char-card { height: 182px; max-height: 182px; }
+  #chars .char-card.selected { height: 188px; max-height: 188px; }
+  #chars .char-card .portrait { height: 88px; }
+}
