@@ -20,7 +20,7 @@ El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
 - **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
 - **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
 
-La caché canónica de esta línea de trabajo es `ohana-201`.
+La caché canónica de esta línea de trabajo es `ohana-221`.
 
 ### 06/10/2026 · Organic Hero Render Recovery
 
@@ -216,7 +216,7 @@ GitHub Pages publica desde `main`.
 
 La versión de caché declarada actualmente en `index.html` es:
 
-`ohana-126`
+`ohana-221`
 
 Las referencias documentales se mantienen alineadas con esta versión.
 
