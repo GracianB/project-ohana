@@ -3188,3 +3188,72 @@ body:not(.playing) #controls-hint { display: none; }
   #chars .char-card .h-move { display: none; }
   #chars .char-card.selected .portrait { height: 72px; }
 }
+
+
+/* CAROUSEL METADATA · anchor labels inside their cards instead of in flex flow. */
+@media (min-width: 641px) {
+  #chars .chars-grid > .char-card.selected {
+    overflow: hidden;
+  }
+  #chars .chars-grid > .char-card.selected h3 {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 30px;
+    z-index: 5;
+    margin: 0;
+  }
+  #chars .chars-grid > .char-card.selected .role {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    z-index: 5;
+    margin: 0;
+  }
+  #chars .chars-grid > .char-card.selected .form-rail {
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    transform: translateX(-50%) scale(.72);
+    z-index: 5;
+    margin: 0;
+  }
+  #chars .chars-grid > .char-card.is-prev h3,
+  #chars .chars-grid > .char-card.is-next h3 {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    margin: 0;
+    font-size: 14px;
+    z-index: 4;
+  }
+  #chars .chars-grid > .char-card.is-prev .role,
+  #chars .chars-grid > .char-card.is-next .role,
+  #chars .chars-grid > .char-card.is-prev .form-rail,
+  #chars .chars-grid > .char-card.is-next .form-rail {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  #chars .chars-grid > .char-card.selected h3 {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 28px;
+    margin: 0;
+    z-index: 5;
+  }
+  #chars .chars-grid > .char-card.selected .role {
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 5;
+  }
+  #chars .chars-grid > .char-card.selected .form-rail {
+    display: none;
+  }
+}
