@@ -793,3 +793,47 @@
 
   #char-select > .legal { display: none !important; }
 }
+
+
+/* ==========================================================================
+   FINAL MENU FLOW · decorative layers never participate in layout
+   ========================================================================== */
+#char-select > #ohana-intro,
+#char-select > .title-sky {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+#char-select > .title-stack,
+#char-select > #difficulty,
+#char-select > #chars,
+#char-select > #menu-row,
+#char-select > .legal,
+#char-select > .brand-bar {
+  z-index: 5 !important;
+}
+
+#char-select > #chars {
+  isolation: isolate !important;
+}
+
+@media (max-width: 640px) {
+  #char-select > .title-sky {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
+  #char-select > .title-stack {
+    z-index: 6 !important;
+  }
+
+  #char-select > #difficulty,
+  #char-select > #chars,
+  #char-select > #menu-row {
+    z-index: 7 !important;
+  }
+}
