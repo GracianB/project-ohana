@@ -2477,7 +2477,7 @@ function render() {
     }
   }
   ctx.restore();
-  if (game.storyLine && (game.bossIntro || game.finale)) {
+  if (game.storyLine && (game.bossIntro || game.finale) && !document.querySelector("#notification-container .game-notification")) {
     ctx.save();
     ctx.globalAlpha = 0.92;
     ctx.fillStyle = "rgba(4,8,16,.55)";
