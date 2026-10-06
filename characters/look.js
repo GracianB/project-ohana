@@ -1,7 +1,7 @@
 // Qué versión se ve: "vector" (Normal) o "paint" (Realista).
 // Esta partida sigue en vector. Paint solo si se pide a propósito.
 
-const KEY = "ohana-look";
+const KEY = "ohana-look-v2";
 
 export const PAINT_WORLD = 2.2;
 export const PAINT_BODY = 2;
