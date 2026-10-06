@@ -2543,3 +2543,156 @@ body:not(.playing) #touch {
 }
 
 .journey { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #ffe66a; margin-top: 2px; }
+
+
+/* ==========================================================================
+   OHANA POLISH PASS · roster carousel + controls rail
+   ========================================================================== */
+#chars {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+#chars .chars-grid {
+  position: relative;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+#chars .char-card {
+  box-sizing: border-box;
+  overflow: hidden;
+  width: min(320px, 29vw);
+  max-height: min(390px, 44dvh);
+  padding: 14px 14px 15px;
+  transition:
+    transform .38s cubic-bezier(.2,.82,.2,1),
+    opacity .30s ease,
+    filter .30s ease,
+    box-shadow .30s ease;
+}
+
+#chars .char-card.is-prev2,
+#chars .char-card.is-next2 {
+  opacity: .25;
+  pointer-events: none;
+  filter: saturate(.72) blur(.15px);
+  z-index: 1;
+  transform: translate(calc(-50% - min(38vw, 420px)), -46%) scale(.60);
+}
+
+#chars .char-card.is-prev2 { transform: translate(calc(-50% - min(38vw, 420px)), -46%) scale(.60); }
+#chars .char-card.is-next2 { transform: translate(calc(-50% + min(38vw, 420px)), -46%) scale(.60); }
+
+#chars .char-card.is-prev,
+#chars .char-card.is-next {
+  opacity: .52;
+  filter: saturate(.84);
+  z-index: 2;
+  box-shadow: 0 16px 34px rgba(0,0,0,.30);
+}
+
+#chars .char-card.is-prev {
+  transform: translate(calc(-50% - min(25vw, 280px)), -47%) scale(.80);
+}
+#chars .char-card.is-next {
+  transform: translate(calc(-50% + min(25vw, 280px)), -47%) scale(.80);
+}
+
+#chars .char-card.selected {
+  transform: translate(-50%, -54%) scale(1);
+  opacity: 1;
+  filter: none;
+  z-index: 4;
+  box-shadow:
+    0 0 0 2px var(--tint, var(--accent-cyan)),
+    0 26px 64px rgba(0,0,0,.42),
+    0 0 38px color-mix(in srgb, var(--tint, var(--accent-cyan)) 42%, transparent);
+}
+
+#chars .portrait {
+  flex: 0 0 auto;
+  width: 100%;
+}
+#chars .char-card h3,
+#chars .char-card small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#chars .char-card .h-move { white-space: nowrap; }
+
+#controls-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: min(1100px, calc(100vw - 24px));
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  background: rgba(4,9,17,.74);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.28);
+  color: #d8e6f3;
+  font: 700 9px/1 Outfit, system-ui, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+#controls-hint span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+#controls-hint kbd {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 5px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font: 800 8px/1 Outfit, system-ui, sans-serif;
+}
+
+@media (max-width: 900px) {
+  #controls-hint { gap: 5px; font-size: 8px; }
+  #controls-hint span:nth-child(n+5) { display: none; }
+}
+@media (max-width: 640px) {
+  #chars { height: clamp(230px, 39dvh, 390px); }
+  #chars .char-card {
+    width: min(250px, 66vw);
+    max-height: min(360px, 42dvh);
+  }
+  #chars .char-card.is-prev2,
+  #chars .char-card.is-next2 {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #chars .char-card.is-prev,
+  #chars .char-card.is-next {
+    opacity: .50;
+  }
+  #chars .char-card.is-prev { transform: translate(calc(-50% - 31vw), -47%) scale(.72); }
+  #chars .char-card.is-next { transform: translate(calc(-50% + 31vw), -47%) scale(.72); }
+  #chars .char-card.selected { transform: translate(-50%, -54%) scale(1); }
+  #controls-hint {
+    bottom: max(6px, env(safe-area-inset-bottom));
+    max-width: calc(100vw - 12px);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  #controls-hint { display: none; }
+}
+body.playing #controls-hint { display: flex; }
+body:not(.playing) #controls-hint { display: none; }
