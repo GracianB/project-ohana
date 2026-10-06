@@ -986,6 +986,7 @@ function drawPainted(ctx, img, x, y, w, h, flashCol, flashA) {
 
 export function drawCharacter(ctx, p, cam, t) {
   const evo = Math.max(0, Math.min(4, Math.round(Number(p.evo) || 0)));
+  const cleanPresentation = p && p._presentation === "cinema";
   const facing = p.facing || 1;
   const footX = p.x + p.w / 2 - cam.x;
   const footY = p.y + p.h - cam.y;
@@ -1032,8 +1033,8 @@ export function drawCharacter(ctx, p, cam, t) {
   ctx.scale(facing, 1);
   ctx.translate(recoilX + lunge, -formLift);
 
-  if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
-  drawFlavor(ctx, p.id, H, t, evo, false);
+  if (!cleanPresentation && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
+  if (!cleanPresentation) drawFlavor(ctx, p.id, H, t, evo, false);
   if (moving) drawDust(ctx, H, t, speed);
 
   const s = H / 100;
@@ -1058,10 +1059,10 @@ export function drawCharacter(ctx, p, cam, t) {
   }
   ctx.restore();
 
-  drawFlavor(ctx, p.id, H, t, evo, true);
-  drawEvolutionSignatureFX(ctx, p, H, pose, t);
-  drawCharacterMotionFX(ctx, p, H, pose, t);
-  if (burstK > 0) {
+  if (!cleanPresentation) drawFlavor(ctx, p.id, H, t, evo, true);
+  if (!cleanPresentation) drawEvolutionSignatureFX(ctx, p, H, pose, t);
+  if (!cleanPresentation) drawCharacterMotionFX(ctx, p, H, pose, t);
+  if (!cleanPresentation && burstK > 0) {
     drawBurst(ctx, H, color, burstK);
     p.evoBurst--;
   }
