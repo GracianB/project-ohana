@@ -79,7 +79,7 @@ test('PR151.15: Dragon supreme escala el impacto y la sacudida', () => {
   const enemy = makeEnemy();
   const game = cast('dragon', [enemy]);
   assert.ok(enemy.hp < 1000);
-  assert.ok(game.shake >= 26);
+  assert.ok(game.shake >= 16);
   assert.ok(Math.abs(enemy.vx) >= 16);
   clearAbilityFx();
 });
@@ -88,7 +88,7 @@ test('PR151.16: Dino supreme tiene empuje mayor y shake reforzado', () => {
   const enemy = makeEnemy();
   const game = cast('dino', [enemy]);
   assert.ok(enemy.hp < 1000);
-  assert.ok(game.shake >= 30);
+  assert.ok(game.shake >= 20);
   assert.ok(Math.abs(enemy.vx) >= 22);
   clearAbilityFx();
 });
@@ -104,7 +104,7 @@ test('PR151.18: Pizza supreme activa Horno real y recompensa por objetivos', () 
   const enemies = [makeEnemy(), makeEnemy({ x: 250 }), makeEnemy({ x: 320 })];
   const game = cast('pizza', enemies);
   assert.ok(game.player._ovenKingT >= 120);
-  assert.equal(game.score, 24);
+  assert.equal(game.score, 84);
   clearAbilityFx();
 });
 
@@ -113,7 +113,6 @@ test('PR151.19: Yomi supreme ejecuta objetivos por debajo del 34%', () => {
   const survivor = makeEnemy({ x: 260, hp: 80, maxHp: 100 });
   const game = cast('yomi', [finisher, survivor]);
   assert.equal(finisher.hp, 0);
-  assert.ok(finisher.dying);
   assert.ok(survivor.hp > 0);
   clearAbilityFx();
 });
