@@ -336,6 +336,16 @@ Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar e
 El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cache `ohana-126`.
 
 
+
+## Polish Stabilization 2026-10-06
+
+- La versión publicada queda sincronizada en `ohana-209` entre `index.html`, módulos de portada y Service Worker.
+- El carrusel usa un único modelo estructural de tres columnas, con héroe central y laterales contenidos.
+- La evolución mantiene el arte orgánico como fuente visual y reduce rayos, anillos, partículas y flash para preservar la silueta.
+- Las notificaciones transitorias se limpian al cambiar de sala para impedir acumulación de mensajes fuera de contexto.
+- Lilo ya no recibe el halo dorado legado en su forma final.
+
+
 ## Polish Pass 2026-10-06
 
 Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-209.
