@@ -2696,3 +2696,35 @@ body:not(.playing) #touch {
 }
 body.playing #controls-hint { display: flex; }
 body:not(.playing) #controls-hint { display: none; }
+
+
+/* Final roster rail: simple three-card composition, no clipped labels. */
+#chars .char-card.is-prev2,
+#chars .char-card.is-next2 { opacity: 0; pointer-events: none; }
+#chars .char-card.is-prev,
+#chars .char-card.is-next {
+  width: min(300px, 24vw);
+  max-height: min(350px, 42dvh);
+}
+#chars .char-card.is-prev { transform: translate(calc(-50% - min(26vw, 300px)), -48%) scale(.78); }
+#chars .char-card.is-next { transform: translate(calc(-50% + min(26vw, 300px)), -48%) scale(.78); }
+#chars .char-card.selected {
+  width: min(340px, 27vw);
+  max-height: min(390px, 46dvh);
+}
+#chars .char-card h3 { overflow: visible; text-overflow: clip; }
+#chars .char-card small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#controls-hint {
+  bottom: 82px;
+  padding: 8px 14px;
+  font-size: 10px;
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  #controls-hint { bottom: 74px; }
+}
+@media (max-width: 640px) {
+  #chars .char-card.is-prev,
+  #chars .char-card.is-next { width: min(240px, 62vw); }
+  #chars .char-card.selected { width: min(270px, 70vw); }
+}
