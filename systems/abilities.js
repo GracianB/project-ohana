@@ -60,7 +60,7 @@ export function useAbility(game, index) {
   const def = supreme || ABILITY_DEFS[id];
   if (!def) return;
   const fn = CASTERS[id];
-  if (typeof fn !== "function") return;
+  if (index !== 3 && typeof fn !== "function") return;
   const baseCd = Number(def.cd);
   if (!Number.isFinite(baseCd) || baseCd <= 0) return;
   const now = abilityNow(game);
@@ -128,6 +128,19 @@ export function specialOf(id) {
   return SPECIALS[id] || SPECIALS.kilo;
 }
 
+export const SUPREME_IDENTITY = Object.freeze({
+  kilo:    { kind: "bloom",   line: "raíces",   text: "El jardín responde a Kilo." },
+  stitcho: { kind: "rift",    line: "costura",  text: "El caos queda cosido." },
+  chispin: { kind: "chain",   line: "tormenta", text: "La tormenta elige sus blancos." },
+  cat:     { kind: "eclipse", line: "eclipse",  text: "La luz desaparece alrededor de Michi." },
+  dragon:  { kind: "nova",    line: "cielo",    text: "El cielo arde." },
+  dino:    { kind: "quake",   line: "impacto",  text: "La tierra responde al rugido." },
+  frita:   { kind: "crisp",   line: "fritura",  text: "Todo queda crujiente." },
+  pizza:   { kind: "volcano", line: "horno",    text: "El horno entra en erupción." },
+  yomi:    { kind: "maw",     line: "abismo",   text: "La grieta abre sus fauces." },
+  cuerno:  { kind: "aurora",  line: "aurora",   text: "El cielo se llena de color." },
+});
+
 function activateSpecial(game, p) {
   const s = specialOf(p.id);
   const T = 210;
@@ -168,13 +181,14 @@ function activateSpecial(game, p) {
 function castSupreme(game, p) {
   activateSpecial(game, p);
   const def = SUPREME[p.id] || SUPREME.kilo;
+  const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
   const dmg = (70 + (Number(p.evo) || 0) * 12) * pw(p);
   for (const e of game.enemies || []) {
     if (!canHit(e)) continue;
     hitEnemy(game, e, dmg, { kx: Math.sign(cx(e) - cx(p)) * 8, ky: -6, stun: 28, color: def.color, crit: true });
   }
-  add({ kind: "supreme", x: cx(p), y: cy(p), life: 54, max: 54, color: def.color, name: def.name });
-  game.ult = { t: 70, color: def.color, name: def.name };
+  add({ kind: "supreme", x: cx(p), y: cy(p), life: 54, max: 54, color: def.color, name: def.name, identity: identity.kind });
+  game.ult = { t: 70, color: def.color, name: def.name, identity: identity.kind };
   game.flashColor = def.color;
   game.flash = Math.max(game.flash || 0, 18);
   game.shake = Math.min(22, (game.shake || 0) + 12);
