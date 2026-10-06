@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro, playTitleIntro } from "./intro.js?v=ohana-209";
+import { playIntro } from "./intro.js?v=ohana-210";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
@@ -373,7 +373,7 @@ function armMenu() {
   if (neu) neu.onclick = () => begin("new");
 }
 armMenu();
-playTitleIntro();
+// Title menu opens directly. Start/Continue keeps the dedicated cinematic.
 enhance();
 
 function paintDifficulty() {
