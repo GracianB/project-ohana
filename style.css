@@ -2728,3 +2728,7 @@ body:not(.playing) #controls-hint { display: none; }
   #chars .char-card.is-next { width: min(240px, 62vw); }
   #chars .char-card.selected { width: min(270px, 70vw); }
 }
+
+
+/* Roster is a viewport rail. The card center is always the screen center. */
+#chars { width: 100vw; max-width: 100vw; }
