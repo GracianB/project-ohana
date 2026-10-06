@@ -3257,3 +3257,23 @@ body:not(.playing) #controls-hint { display: none; }
     display: none;
   }
 }
+
+
+/* FINAL CARD FIT: keep portrait and metadata fully inside the selected card. */
+@media (min-width:641px){
+#chars .chars-grid>.char-card{box-sizing:border-box;overflow:hidden}
+#chars .chars-grid>.char-card.selected{height:190px;max-height:190px;top:-42px}
+#chars .chars-grid>.char-card.selected .portrait{height:68px}
+#chars .chars-grid>.char-card.selected h3{font-size:18px;line-height:20px;margin-top:4px}
+#chars .chars-grid>.char-card.selected .role{font-size:8px;line-height:1;margin-top:2px;padding:2px 7px}
+#chars .chars-grid>.char-card.selected .form-rail{margin-top:3px;transform:scale(.68)}
+#chars .chars-grid>.char-card.is-prev,#chars .chars-grid>.char-card.is-next{top:-34px;height:150px;max-height:150px}
+#chars .chars-grid>.char-card.is-prev .portrait,#chars .chars-grid>.char-card.is-next .portrait{height:58px}
+}
+@media (max-width:640px){
+#chars .chars-grid>.char-card{box-sizing:border-box;overflow:hidden}
+#chars .chars-grid>.char-card.selected{height:178px;max-height:178px;top:-18px}
+#chars .chars-grid>.char-card.selected .portrait{height:64px}
+#chars .chars-grid>.char-card.selected h3{font-size:17px;line-height:19px}
+#chars .chars-grid>.char-card.selected .form-rail{transform:scale(.64)}
+}
