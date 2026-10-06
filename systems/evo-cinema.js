@@ -297,7 +297,7 @@ export function makeDummy(id, evo, color) {
     id: def.id, evo, color: color || f.color || def.color,
     w: f.w || 24, h: f.h || 28, x: 0, y: 0,
     facing: 1, grounded: true, vx: 0, vy: 0, melee: 0, invuln: 0,
-    visualScale: 1, _poseOverride: "victory", _evoT: 0,
+    visualScale: 1, _poseOverride: "victory", _evoT: 0, _presentation: "cinema",
   };
 }
 
@@ -373,7 +373,7 @@ export function playEvolution(detail = {}) {
   const oldColor = oldForm.color || color;
   const accent = finalForm ? designAccent : color;
   const light = tint(accent, 0.55);
-  const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
+  const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
   const reduce = reducedMotion();
@@ -384,7 +384,6 @@ export function playEvolution(detail = {}) {
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
   pOld._poseOverride = "idle";
-  const sil = new Silhouette();
   const parts = new Particles();
   const { el, fc } = st;
   const ctx = fc.ctx;
@@ -418,7 +417,7 @@ export function playEvolution(detail = {}) {
   }
 
   function burst(L) {
-    const n = reduce ? 12 : finalForm ? 90 : 70;
+    const n = reduce ? 5 : finalForm ? 18 : 12;
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = (reduce ? 160 : 420) + Math.random() * (finalForm ? 900 : 700);
