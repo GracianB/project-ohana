@@ -2989,3 +2989,40 @@ body:not(.playing) #controls-hint { display: none; }
   #chars .char-card.selected { height: 188px; max-height: 188px; }
   #chars .char-card .portrait { height: 88px; }
 }
+
+
+/* FINAL VISUAL CORRECTION · move the carousel content into the open stage band.
+   The title and CTA keep their existing flow; only the three visible cards move. */
+@media (min-width: 641px) {
+  #chars .char-card.selected {
+    transform: translate(-50%, -50%) translateY(-82px);
+  }
+  #chars .char-card.is-prev {
+    transform: translate(calc(-50% - 265px), -50%) translateY(-72px) scale(.94);
+  }
+  #chars .char-card.is-next {
+    transform: translate(calc(-50% + 265px), -50%) translateY(-72px) scale(.94);
+  }
+}
+@media (min-width: 641px) and (max-height: 780px) {
+  #chars .char-card.selected {
+    transform: translate(-50%, -50%) translateY(-74px);
+  }
+  #chars .char-card.is-prev {
+    transform: translate(calc(-50% - 240px), -50%) translateY(-66px) scale(.9);
+  }
+  #chars .char-card.is-next {
+    transform: translate(calc(-50% + 240px), -50%) translateY(-66px) scale(.9);
+  }
+}
+@media (max-width: 640px) {
+  #chars .char-card.selected {
+    transform: translate(-50%, -50%) translateY(-34px);
+  }
+  #chars .char-card.is-prev {
+    transform: translate(calc(-50% - 118px), -50%) translateY(-28px) scale(.72);
+  }
+  #chars .char-card.is-next {
+    transform: translate(calc(-50% + 118px), -50%) translateY(-28px) scale(.72);
+  }
+}
