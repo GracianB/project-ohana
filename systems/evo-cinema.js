@@ -533,7 +533,6 @@ export function playEvolution(detail = {}) {
     // Una sola fuente de verdad visual: el arte orgánico de characters/art.
     // La transición es un crossfade continuo, no un parpadeo entre dos dibujos
     // ni una silueta geométrica superpuesta.
-    const revealK = seg(t, T.reveal, T.reveal + 0.5);
     const morphK = easeInOut(seg(t, T.charge, T.flash));
     const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
     const box = target * 2.2;
