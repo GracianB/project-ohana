@@ -567,7 +567,6 @@ function drawHead(ctx, R, pose, o) {
   }
 
   if (final) {
-    R.halo(ctx, -hw * 0.1, -hh * 1.35, hw * 0.7, t, "#fff27a");
   }
 
   const hx = -hw * 0.55, hy = hh * 0.22;
