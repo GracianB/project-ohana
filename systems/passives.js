@@ -12,6 +12,7 @@
 import { sfx } from "../engine/audio.js";
 import { setPlayerHealth } from "./mutations.js";
 import { abilityPreMove, updateAbilityFx, drawAbilityFx, clearAbilityFx, hitEnemy } from "./abilities.js";
+import { updateHeroMastery, afterMoveHeroMastery, onDinoPoundImpact, masteryHurt, onMasteryRoom, drawHeroMastery } from "./hero-mastery.js";
 
 const TAU = Math.PI * 2;
 const sparks = [];
@@ -191,6 +192,8 @@ export const Passives = {
         game.fx.emit(cx(p) + (p.facing || 1) * 6, p.y + 2, { color: "#ffe9a8", count: 1, size: 2.4, up: -0.4, life: 14, star: true });
       }
     }
+
+    updateHeroMastery(game, input);
   },
 
   afterMove(game, input) {
@@ -225,6 +228,7 @@ export const Passives = {
       game.fx.emit(fx, fy, { color: "#d8c7a4", count: 10, size: 4, up: 2.2, speed: 4 });
       game.fx.emit(fx, fy, { color: "#c8f04a", count: 10, size: 3, up: 1.4, speed: 5, star: true });
       armor(p, 10);
+      onDinoPoundImpact(game);
     }
     if (id !== "pound" && p._pound) p._pound = false;
 
@@ -290,13 +294,15 @@ export const Passives = {
       if ((p._nineT % 5) === 0) game.fx.emit(cx(p), cy(p), { color: "#ffd0ee", count: 2, size: 2.5, up: 1, speed: 1.2, star: true, life: 18 });
     }
     if (p._armorT > 0) p._armorT--;
-    p._move = p._abilMove || p._pmove || (p._puntT > 0 ? "punta" : null);
+    afterMoveHeroMastery(game, input);
+    p._move = p._abilMove || p._masteryMove || p._pmove || (p._puntT > 0 ? "punta" : null);
+    p._masteryMove = "";
   },
 
   onHurt(game, amount) {
     const p = game.player;
     if (p && p._armorT > 0) return 0;
-    return amount;
+    return masteryHurt(game, amount);
   },
 
   onLethal(game) {
@@ -329,11 +335,13 @@ export const Passives = {
     p._slideT = 0;
     p._climbT = 0;
     p._runT = 0;
+    onMasteryRoom(game);
   },
 
   draw(ctx, game, t) {
     const p = game.player;
     if (!p) return;
+    drawHeroMastery(ctx, game, t);
     const cam = game.cam;
     ctx.save();
     // chispas
