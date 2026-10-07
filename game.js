@@ -15,6 +15,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
+import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { Floaters } from "./systems/floaters.js";
 import { portals } from "./systems/portals.js";
@@ -598,17 +599,7 @@ function showMap() {
   }
   DOM.help?.classList.remove("open");
   setPaused(false);
-  const layout = MAP_LAYOUT || [];
-  grid.innerHTML = layout.map((row) => row.map((id) => {
-    if (!id) return '<div class="map-cell empty"></div>';
-    const dest = ROOMS[id];
-    const here = game.roomId === id;
-    const seen = !!game.visited[id];
-    const lock = dest && dest.needEvo != null && game.player && game.player.evo < dest.needEvo && !seen;
-    const cls = here ? "here" : seen ? "seen" : lock ? "lock" : "";
-    const label = dest ? (dest.short || dest.name) : id;
-    return '<div class="map-cell ' + cls + '">' + label + "</div>";
-  }).join("")).join("");
+  grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
   overlay.classList.add("open");
 }
 function makePlayer(def) {
@@ -2545,17 +2536,7 @@ function updateCam() {
 }
 
 function drawMinimap() {
-  const layout = MAP_LAYOUT || [];
-  const ox = viewW - 196, oy = viewH - 118;
-  ctx.fillStyle = "rgba(6,10,16,.62)"; ctx.fillRect(ox - 8, oy - 8, 188, 104);
-  ctx.strokeStyle = "rgba(126,231,255,.28)"; ctx.strokeRect(ox - 8.5, oy - 8.5, 189, 105);
-  layout.forEach((row, cy) => {
-    row.forEach((id, cx) => {
-      if (!id) return;
-      ctx.fillStyle = game.roomId === id ? "#7ee7ff" : game.visited[id] ? "#3a6" : "#1a222c";
-      ctx.fillRect(ox + cx * 28, oy + cy * 28, 22, 22);
-    });
-  });
+  drawWorldMinimap(ctx, game.roomId, game.visited, game.player?.evo || 0, viewW, viewH);
 }
 function drawCrystal(o) {
   const x = o.x - game.cam.x;
@@ -3335,6 +3316,7 @@ if (e2eEnabled) {
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
         mastery: masterySnapshot(game),
         masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
+        worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
         enemyDirector: game.enemyDirector ? {
           roomId: game.enemyDirector.roomId,
           hard: game.enemyDirector.hard,
