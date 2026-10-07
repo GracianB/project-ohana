@@ -354,6 +354,7 @@ function returnToMenu() {
   game.running = false;
   input?.reset();
   clock.reset();
+  if (DeathFx.isPlaying()) DeathFx.cancel();
   // PHASE 39 - SESSION RESET CLOSURE
   // Una nueva sesion nunca hereda estado transitorio anterior.
   t = 0;
