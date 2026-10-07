@@ -5,6 +5,7 @@ import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
+import { drawLivingWorld, livingWorldSnapshot } from "./worlds/living-worlds.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
@@ -2587,6 +2588,7 @@ function render() {
       camH(),
       game.player?.id
     );
+    drawLivingWorld(ctx, game, t, camW(), camH());
     drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
@@ -3317,6 +3319,7 @@ if (e2eEnabled) {
         mastery: masterySnapshot(game),
         masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
         worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
+        livingWorld: livingWorldSnapshot(game.roomId, p?.id || ""),
         enemyDirector: game.enemyDirector ? {
           roomId: game.enemyDirector.roomId,
           hard: game.enemyDirector.hard,
