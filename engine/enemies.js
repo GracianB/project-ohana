@@ -158,6 +158,16 @@ function drawEncounterRead(ctx, e, t) {
   ctx.ellipse(0, y, r, 4.5, 0, Math.PI * 1.08, Math.PI * 1.92);
   ctx.stroke();
 
+  if (e.enraged) {
+    const hot = 0.45 + Math.sin(t * 0.22) * 0.18;
+    ctx.globalAlpha = hot;
+    ctx.strokeStyle = "#ff5a2a";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.ellipse(0, y - 2, r * 1.12, 7, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
   if (permit && !e.telegraph) {
     const pulse = 0.5 + Math.sin(t * 0.14 + (e.spawnIndex || 0)) * 0.5;
     ctx.globalAlpha = 0.3 + pulse * 0.28;
@@ -292,6 +302,54 @@ function drawTelegraph(ctx, e, t) {
   ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
   ctx.strokeStyle = c2; ctx.lineWidth = 1.8;
   ctx.beginPath(); ctx.arc(0, 0, r * 1.4 + Math.sin(t * 0.7) * 4, 0, Math.PI * 2); ctx.stroke();
+
+  // V38: la forma del telegraph también comunica el rol, no solo el color.
+  const role = e.aiRole || "";
+  if (role === "BRUISER") {
+    ctx.strokeStyle = "rgba(255,220,120,.78)";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.ellipse(direction * r * 0.9, e.h * 0.55, r * 1.05, 6, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (role === "ARTILLERY") {
+    const dx = Number(e.aimDx);
+    const dy = Number(e.aimDy);
+    if (Number.isFinite(dx) && Number.isFinite(dy)) {
+      const len = Math.hypot(dx, dy) || 1;
+      ctx.strokeStyle = "rgba(220,190,255,.82)";
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo((dx / len) * Math.min(90, len), (dy / len) * Math.min(90, len));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  } else if (role === "DIVER") {
+    ctx.strokeStyle = "rgba(255,170,110,.82)";
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(-9, -r * 0.8);
+    ctx.lineTo(0, r * 1.2);
+    ctx.lineTo(9, -r * 0.8);
+    ctx.stroke();
+  } else if (role === "AMBUSHER") {
+    ctx.strokeStyle = "rgba(255,135,205,.72)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(-direction * r * 0.35, 0, r * 0.9, Math.PI * 0.2, Math.PI * 1.8);
+    ctx.stroke();
+  } else if (role === "SKIRMISHER") {
+    ctx.strokeStyle = "rgba(126,231,255,.72)";
+    ctx.lineWidth = 1.8;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * r * 0.65, -8);
+      ctx.lineTo(side * r * 1.25, 0);
+      ctx.lineTo(side * r * 0.65, 8);
+      ctx.stroke();
+    }
+  }
 
   // Marcadores extra para foes nuevos (salto / zap / pinza / rayo)
   const k = e.kind;
