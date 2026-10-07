@@ -4,6 +4,8 @@
 
 ## 07/10/2026 · Official Multiplayer Integration
 
+**Caché de integración:** `ohana-223` · sincronizada con `index.html` y `sw.js`.
+
 OHANA mantiene `project-ohana` como repositorio canónico y absorbe la línea de desarrollo de `project-ohana-multiplayer`. El mismo motor original soporta ahora juego individual y cooperativo online para 2 jugadores mediante salas, sincronización de pose/acciones/progreso, reconexión y estado compartido de victoria o derrota.
 
 La integración añade `node tests/browser/multiplayer-e2e.mjs` al contrato de navegador y mantiene `release:check` como gate final. La línea visual Character Odyssey y sus diez sectores de personaje pasan también al juego canónico, no quedan encerrados en el prototipo multiplayer.
