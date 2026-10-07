@@ -429,6 +429,10 @@ export function clearAbilityFx() {
   if (S.p) {
     S.p._abilMove = null;
     S.p._armorT = 0;
+    S.p._combatChain = [];
+    S.p._flowT = 0;
+    S.p._flowPowerT = 0;
+    S.p._flowPower = 1;
   }
 }
 
