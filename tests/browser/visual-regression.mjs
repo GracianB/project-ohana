@@ -133,6 +133,53 @@ try {
   await capture(page, '03-room-lab');
   await capture(page, '03b-enemy-intelligence');
 
+  // V39 · Cloudstep visible y físicamente activo.
+  const cloudSetup = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('chispin');
+    api.setEvo(2);
+    api.loadRoom('hub');
+    const state = api.state();
+    const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
+    if (!cloud) throw new Error('11-cloudstep: no hay nube de maestría');
+    api.setPlayer(cloud.x + 24, cloud.y - 96);
+    api.setPlayerVelocity(0, 7);
+    return cloud;
+  });
+  const cloudState = await page.evaluate(() => window.__OHANA_E2E.step(18));
+  assert.equal(cloudState.mastery?.cloud, true, '11-cloudstep: Chispín no pisa su nube');
+  assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
+  assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
+  await page.waitForTimeout(80);
+  await capture(page, '11-hero-mastery-cloudstep');
+
+  // V39 · Batida de Alas visible después de consumir los saltos normales.
+  await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('dragon');
+    api.setEvo(4);
+    api.setPlayer(520, 980);
+    api.step(10);
+  });
+  await page.locator('#game').focus();
+  for (let i = 0; i < 3; i++) {
+    await page.keyboard.down('Space');
+    await page.evaluate(() => window.__OHANA_E2E.step(1));
+    await page.keyboard.up('Space');
+    await page.evaluate(() => window.__OHANA_E2E.step(1));
+  }
+  await page.keyboard.down('Space');
+  const wingState = await page.evaluate(() => window.__OHANA_E2E.step(1));
+  assert.ok(wingState.mastery?.wingUsed >= 1, '12-wingbeat: Dragón no activa la batida extra');
+  assert.equal(wingState.mastery?.move, 'wingbeat', '12-wingbeat: señal visual de batida ausente');
+  await page.waitForTimeout(40);
+  await capture(page, '12-hero-mastery-wingbeat');
+  await page.keyboard.up('Space');
+  await page.evaluate(() => window.__OHANA_E2E.step(1));
+
+  // Recupera Kilo para continuar la matriz cinematográfica original.
+  await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
+
   await page.evaluate(() => {
     dispatchEvent(new CustomEvent('ohana-evolve', { detail: {
       id:'kilo', name:'Kilo', evo:1, fromEvo:0,
