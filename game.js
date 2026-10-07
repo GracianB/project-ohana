@@ -36,6 +36,7 @@ import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
+import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
@@ -1140,19 +1141,65 @@ function checkVoidDeath() {
   const r = room();
   const feet = p.y + p.h;
 
-  const next = nearestBelow(p.x, p.w, feet - 8);
-  if (next && feet >= next.y) {
-    landOn(p, next);
-    return;
+  // V40: un vacío explícito tiene prioridad sobre cualquier rescate de suelo.
+  // Mientras el centro del jugador esté sobre un hazard, no nearestBelow/lowestFloor.
+  const hazardAxis = hazardContainsX(game.roomId, p);
+  const hazard = hazardTrigger(game.roomId, p);
+
+  if (hazard) {
+    const hazardKey = game.roomId + ":" + hazard.id;
+
+    if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
+      p._hazardEscapeKey = "";
+      dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+        type: hazard.type, id: hazard.id, room: game.roomId, dest: hazard.dest, hero: p.id
+      }}));
+      loadRoom(hazard.dest, "down");
+      return;
+    }
+
+    if (hazard.type === HAZARD_TYPES.DEATH) {
+      // Una afinidad concreta puede salvar una caída una vez antes de tocar el fondo.
+      if (hazard.heroEscape && p.id === hazard.heroEscape && p._hazardEscapeKey !== hazardKey) {
+        p._hazardEscapeKey = hazardKey;
+        p.vy = -Math.max(9, p.jumpPower * 0.88);
+        p.vx += (p.facing || 1) * 1.8;
+        p.grounded = false;
+        p.coyote = 0;
+        p.jumps = Math.min(p.jumps || 0, Math.max(0, (p.maxJumps || 1) - 1));
+        p._masteryMove = "wingbeat";
+        game.flash = Math.max(game.flash || 0, 8);
+        game.shake = Math.min(14, (game.shake || 0) + 5);
+        game.fx?.emit(p.x + p.w / 2, p.y + p.h, {
+          color: hazard.color || "#ffd36a", count: 14, size: 3.5, up: 2.6, speed: 3.4, life: 18, star: true
+        });
+        game.nums?.add(p.x + p.w / 2, p.y - 14, "¡ÚLTIMA BATIDA!", "#ffe7a0", true);
+        return;
+      }
+      dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+        type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
+      }}));
+      dieVoid(p);
+      return;
+    }
   }
 
-  const low = lowestFloor(p.x, p.w);
-  if (low && feet > low.y && p.vy >= 0) {
-    landOn(p, low);
-    return;
+  if (!hazardAxis) {
+    p._hazardEscapeKey = "";
+    const next = nearestBelow(p.x, p.w, feet - 8);
+    if (next && feet >= next.y) {
+      landOn(p, next);
+      return;
+    }
+
+    const low = lowestFloor(p.x, p.w);
+    if (low && feet > low.y && p.vy >= 0) {
+      landOn(p, low);
+      return;
+    }
   }
 
-  if (!r.pit) {
+  if (!r.pit && !hazardAxis) {
     const floorY = game.worldH - 90;
     if (feet > floorY) {
       p.y = floorY - p.h;
@@ -1162,12 +1209,12 @@ function checkVoidDeath() {
     return;
   }
 
-  // El vacío se determina por geometría, no por una única coordenada mágica.
+  // Fallback de seguridad para gaps geométricos que todavía no tengan volumen V40.
   const inGap = inPitX(p);
   const crossedBottom = feet > game.worldH - 24;
   const deepFall = p.y > game.worldH + 8;
 
-  if (inGap && crossedBottom) {
+  if (!hazardAxis && inGap && crossedBottom) {
     if (r.doors.down) loadRoom(r.doors.down, "down");
     else dieVoid(p);
     return;
@@ -2559,6 +2606,7 @@ function render() {
       camH(),
       game.player?.id
     );
+    drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
