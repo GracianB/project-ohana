@@ -620,6 +620,9 @@ function makePlayer(def) {
   return p;
 }
 function start(def) {
+  // Online co-op receives the same room loader used by the single-player engine.
+  // Keep it as a narrow runtime adapter instead of duplicating room-transition logic.
+  game.loadRoom = loadRoom;
   game.lastAbilityId = null;
   game.lastAbilitySlot = null;
   if (!def) return;
