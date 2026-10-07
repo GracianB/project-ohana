@@ -3276,6 +3276,15 @@ if (e2eEnabled) {
       if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
       return this.state();
     },
+    die(reason = "hurt") {
+      const p = game.player;
+      if (!p) return this.state();
+      p.health = 0;
+      p.dead = true;
+      dispatchEvent(new CustomEvent("ohana-death", { detail: { reason, id: p.id, hero: p.name } }));
+      if (!DeathFx.isPlaying()) DeathFx.start(p, () => {}, { reason: reason === "void" ? "void" : "hurt" });
+      return this.state();
+    },
   };
 }
 
