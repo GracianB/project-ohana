@@ -54,32 +54,79 @@ export const ABILITY_DEFS = {
   rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
 };
 
+const FLOW_KEYS = ["H", "J", "K", "L", "U"];
+const FLOW_WINDOW = 180;
+
+export function registerCombatAction(game, key, id = "") {
+  const p = game?.player;
+  if (!p) return Object.freeze({ distinct: 0, combo: 0, multiplier: 1, assist: false, label: "" });
+  const now = Number.isFinite(Number(game.t)) ? Number(game.t) : 0;
+  const normalized = String(key || "").toUpperCase();
+  if (!FLOW_KEYS.includes(normalized)) return Object.freeze({ distinct: 0, combo: 0, multiplier: 1, assist: false, label: "" });
+  const chain = Array.isArray(p._combatChain) ? p._combatChain.filter((item) => now - item.t <= FLOW_WINDOW) : [];
+  const last = chain[chain.length - 1];
+  if (!last || last.key !== normalized || now - last.t > 16) chain.push({ key: normalized, id: String(id || ""), t: now });
+  while (chain.length > 6) chain.shift();
+  p._combatChain = chain;
+  const recent = chain.slice(-5);
+  const distinct = new Set(recent.map((item) => item.key)).size;
+  const combo = Math.max(0, Number(game.combo) || 0);
+  const multiplier = Math.min(1.38, 1 + Math.max(0, distinct - 1) * 0.055 + Math.min(combo, 20) * 0.006);
+  const assist = normalized === "U" && (distinct >= 4 || combo >= 10);
+  const label = distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : "";
+  game._combatFlow = { distinct, combo, multiplier, assist, label, keys: recent.map((item) => item.key), t: now };
+  if (label && normalized !== "H") {
+    p._flowT = 72;
+    p._flowLabel = label;
+  }
+  return Object.freeze({ distinct, combo, multiplier, assist, label });
+}
+
+function currentFlow(game, p) {
+  const now = Number.isFinite(Number(game?.t)) ? Number(game.t) : 0;
+  const chain = Array.isArray(p?._combatChain) ? p._combatChain.filter((item) => now - item.t <= FLOW_WINDOW) : [];
+  const distinct = new Set(chain.slice(-5).map((item) => item.key)).size;
+  const combo = Math.max(0, Number(game?.combo) || 0);
+  return Object.freeze({
+    distinct,
+    combo,
+    multiplier: Math.min(1.38, 1 + Math.max(0, distinct - 1) * 0.055 + Math.min(combo, 20) * 0.006),
+    assist: distinct >= 4 || combo >= 10,
+    label: distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : ""
+  });
+}
+
 export function useAbility(game, index) {
   const p = game?.player;
-  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return;
+  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return false;
   const supreme = index === 3 ? SUPREME[p.id] : null;
   const id = supreme ? supreme.id : p.abilities && p.abilities[index];
   const def = supreme || ABILITY_DEFS[id];
-  if (!def) return;
+  if (!def) return false;
   const fn = CASTERS[id];
-  if (index !== 3 && typeof fn !== "function") return;
+  if (index !== 3 && typeof fn !== "function") return false;
   const baseCd = Number(def.cd);
-  if (!Number.isFinite(baseCd) || baseCd <= 0) return;
+  if (!Number.isFinite(baseCd) || baseCd <= 0) return false;
   const now = abilityNow(game);
   p.cds = p.cds || {};
   p.cdDur = p.cdDur || {};
   const currentUntil = Number(p.cds[id]);
-  if (Number.isFinite(currentUntil) && currentUntil > now) return;
-  game.lastAbilityId = id;
-  game.lastAbilitySlot = index;
+  if (Number.isFinite(currentUntil) && currentUntil > now) return false;
+
+  const key = FLOW_KEYS[index + 1];
+  const preFlow = currentFlow(game, p);
   const evo = clamp(Number(p.evo) || 0, 0, 4);
-  const dur = baseCd / (1 + evo * 0.12);
+  const chainCd = index < 3 ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035) : 1;
+  const dur = baseCd / (1 + evo * 0.12) * chainCd;
   p.cds[id] = now + dur;
   p.cdDur[id] = dur;
+  game.lastAbilityId = id;
+  game.lastAbilitySlot = index;
   syncState(p);
   p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
   sfx(id);
-  game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 22 : 10, size: 3, star: true, speed: 2.8, life: 14 });
+  game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
+
   if (index === 2) {
     game.ult = { t: 46, color: def.color, name: def.name };
     game.flashColor = def.color;
@@ -87,13 +134,18 @@ export function useAbility(game, index) {
     game.shake = Math.min(18, (game.shake || 0) + 7);
     game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
   }
-  // Lanzar otra habilidad cancela un agarre de queso en curso. El control
-  // temporal de una habilidad no debe secuestrar el siguiente input del jugador.
-  if (S.pull && id !== "cheese") S.pull = null;
 
-  if (index === 3) castSupreme(game, p);
-  else fn(game, p, clamp(Number(p.evo) || 0, 0, 4));
+  if (S.pull && id !== "cheese") S.pull = null;
+  const flow = registerCombatAction(game, key, id);
+
+  if (index === 3) castSupreme(game, p, flow);
+  else fn(game, p, evo);
+
+  if (flow.label && index < 3) {
+    game.nums?.add(cx(p), p.y - 22, flow.label, def.color || p.color || "#fff6c8");
+  }
   trimAbilityProjectiles(game);
+  return true;
 }
 
 const SPECIALS = Object.freeze({
