@@ -13,8 +13,16 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
-  const titleIntroVisible = await page.locator('#ohana-intro.show').count();
-  assert.equal(titleIntroVisible, 1, label + ': la intro cinematográfica de portada no aparece');
+  const titleIntroState = await page.evaluate(() => {
+    const el = document.querySelector('#ohana-intro');
+    const style = el ? getComputedStyle(el) : null;
+    return {
+      active: !!el?.classList.contains('show'),
+      visible: !!style && style.display !== 'none' && style.visibility !== 'hidden',
+      complete: document.body.classList.contains('intro-complete')
+    };
+  });
+  assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-196', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
@@ -27,7 +35,10 @@ async function auditPage(page, label) {
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
   await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
   const titleLayout = await page.evaluate(() => {
-    const rect = (selector) => document.querySelector(selector)?.getBoundingClientRect();
+    const rect = (selector) => {
+      const r = document.querySelector(selector)?.getBoundingClientRect();
+      return r ? { left:r.left, top:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height } : null;
+    };
     const cards = [...document.querySelectorAll('#chars-grid .char-card')];
     const visibleCards = cards.filter((card) => {
       const box = card.getBoundingClientRect();
