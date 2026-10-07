@@ -709,6 +709,7 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(css, /char-card\.is-next2/);
   assert.match(css, /grid-template-areas:none!important/);
   assert.match(css, /#char-select \.title-stack\{[\s\S]*?grid-area:auto!important/);
+  assert.match(css, /#char-select \.title-stack\{[\s\S]*?max-width:none!important/);
   assert.match(css, /#char-select #difficulty\{[\s\S]*?grid-area:auto!important/);
   assert.match(title, /playTitleIntro\(\)/);
   assert.match(title, /const visible = \[id, prev, next\]/);
