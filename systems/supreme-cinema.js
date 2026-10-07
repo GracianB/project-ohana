@@ -22,6 +22,8 @@ function mount() {
   el.id = "supreme-cinema";
   el.setAttribute("aria-live", "polite");
   el.setAttribute("aria-hidden", "true");
+  el.dataset.state = "idle";
+  el.dataset.generation = "0";
   el.innerHTML =
     '<div class="sc-bars" aria-hidden="true"></div>' +
     '<div class="sc-wash" aria-hidden="true"></div>' +
@@ -57,11 +59,13 @@ function play(detail = {}) {
   assist.hidden = !assistText;
   el.setAttribute("aria-hidden", "false");
   el.dataset.state = "active";
+  el.dataset.generation = String(token);
   el.classList.remove("show");
   void el.offsetWidth;
   el.classList.add("show");
 
-  const visibleFor = reduced() ? 900 : 1800;
+  const visibleFor = reduced() ? 1400 : 2200;
+  el.dataset.duration = String(visibleFor);
   hideTimer = setTimeout(() => {
     if (token !== generation) return;
     el.dataset.state = "leaving";
