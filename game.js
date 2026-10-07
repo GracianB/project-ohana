@@ -9,7 +9,7 @@ import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -864,6 +864,8 @@ function markHit(p, e, dmg, kb) {
   );
 
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+  const flow = registerCombatAction(game, "H", def?.name || "H");
+  if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
   game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
   if (crit) {
@@ -1040,6 +1042,8 @@ function hurtPlayer(amount, label) {
   game.shake = 12;
   game.combo = 0;
   game.comboT = 0;
+  p._combatChain = [];
+  game._combatFlow = null;
   beep("hurt");
   buzz(24);
   hitStop(2);
@@ -2748,7 +2752,9 @@ function renderAbilityBar() {
       : ABILITY_DEFS[slot.id];
     if (!d) return "";
     const locked = evo < slot.need;
-    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + (locked ? "Forma " + (slot.need + 1) : (d.special || d.name)) + ' · ' + d.key + '" title="' + (slot.supreme ? (d.special || d.name) : d.name) + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + (locked ? "Forma " + (slot.need + 1) : (slot.supreme ? (d.special || d.name) : d.name)) + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+    const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
+    const detail = slot.supreme ? (d.name + " · " + (d.special || "Suprema")) : d.name;
+    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
   }).join("");
   abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -2814,8 +2820,9 @@ function updateHUD() {
   setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
   setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
   if (p.evo >= 4) {
+    const sup = supremeOf(p.id);
     const sp = specialOf(p.id);
-    DOM.hudEvo?.setAttribute("title", "Especial U: " + sp.name + " · " + sp.text);
+    DOM.hudEvo?.setAttribute("title", "Suprema U: " + sup.name + " · " + sp.name + " · " + sp.text);
   }
   const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const col = p.color || "#7ee7ff";
@@ -2888,15 +2895,20 @@ function updateHUD() {
     if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
     item.slot.classList.toggle("cooling", left > 80);
   }
-  const PWIDX = { j: 0, k: 1, l: 2 };
+  const PWIDX = { j: 0, k: 1, l: 2, u: 3 };
   for (let i = 0; i < touchPowers.length; i++) {
     const btn = touchPowers[i];
-    const id = (p.abilities || [])[PWIDX[btn.dataset.k]];
-    const def = id && ABILITY_DEFS[id];
+    const slotIndex = PWIDX[btn.dataset.k];
+    const isSupreme = slotIndex === 3;
+    const sup = isSupreme ? supremeOf(p.id) : null;
+    const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
+    const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
     if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-    btn.classList.remove("off");
-    if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
-    const label = (def.special || def.name) + " · " + btn.dataset.k.toUpperCase();
+    const locked = isSupreme && (Number(p.evo) || 0) < 4;
+    btn.classList.toggle("off", locked);
+    const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
+    if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
+    const label = (locked ? "Forma 5" : def.name) + " · " + btn.dataset.k.toUpperCase();
     if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
