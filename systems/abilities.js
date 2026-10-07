@@ -232,80 +232,153 @@ function activateSpecial(game, p) {
   game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color || "#fff" };
 }
 
-function castSupreme(game, p) {
+function emitSupremeEvent(game, p, def, identity, flow) {
+  if (typeof dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
+  const ally = flow.assist ? (SUPREME[p.id]?.ally || "") : "";
+  try {
+    dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
+      id: p.id,
+      hero: p.name || p.id,
+      name: def.name,
+      color: def.color,
+      kind: identity.kind,
+      line: identity.line,
+      text: identity.text,
+      multiplier: Number(flow.multiplier.toFixed(2)),
+      flow: flow.label || "",
+      combo: flow.combo,
+      assist: ally
+    }}));
+  } catch (_) {}
+}
+
+function summonAssist(game, p, allyId, damage, color) {
+  const ally = ROSTER.find((item) => item.id === allyId);
+  if (!ally) return;
+  add({
+    kind: "assist",
+    heroId: ally.id,
+    heroName: ally.name,
+    color: ally.color || color || "#fff",
+    x: cx(p) - (p.facing || 1) * 90,
+    y: p.y - 24,
+    facing: p.facing || 1,
+    life: 96,
+    max: 96,
+    next: 10,
+    strikes: 0,
+    dmg: Math.max(12, damage),
+  });
+  game._assist = { heroId: ally.id, heroName: ally.name, t: 96 };
+  game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#fff6c8", true);
+}
+
+function castSupreme(game, p, flow = currentFlow(game, p)) {
   activateSpecial(game, p);
   const def = SUPREME[p.id] || SUPREME.kilo;
   const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
   const evo = clamp(Number(p.evo) || 0, 0, 4);
-  const dmg = (70 + evo * 14) * pw(p);
+  const power = Math.max(1, Number(flow?.multiplier) || 1);
+  const dmg = (70 + evo * 14) * pw(p) * power;
   const enemies = (game.enemies || []).filter(canHit);
 
+  emitSupremeEvent(game, p, def, identity, flow);
+
   if (p.id === "kilo") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.82, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 24, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.28);
-    p.invuln = Math.max(p.invuln || 0, 75);
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.72, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 28, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.32);
+    p.invuln = Math.max(p.invuln || 0, 90);
   } else if (p.id === "stitcho") {
     const tx = cx(p), ty = cy(p);
     for (const e of enemies) {
       const dx = tx - cx(e), dy = ty - cy(e);
       const d = Math.hypot(dx, dy) || 1;
-      hitEnemy(game, e, dmg, { kx: (dx / d) * 13, ky: (dy / d) * 8 - 5, stun: 52, color: def.color, crit: true });
+      hitEnemy(game, e, dmg * 0.82, { kx: (dx / d) * 14, ky: (dy / d) * 9 - 5, stun: 60, color: def.color, crit: true });
+      e._stitchedT = Math.max(e._stitchedT || 0, 120);
     }
   } else if (p.id === "chispin") {
     const ordered = enemies.slice().sort((a,b) =>
       Math.hypot(cx(a)-cx(p),cy(a)-cy(p)) - Math.hypot(cx(b)-cx(p),cy(b)-cy(p))
-    ).slice(0, 6);
-    ordered.forEach((e,i) =>
-      hitEnemy(game, e, dmg * (1 - i * 0.08), { kx: 0, ky: -4, stun: 34, color: def.color, crit: i < 2 })
-    );
+    ).slice(0, 8);
+    ordered.forEach((e,i) => {
+      hitEnemy(game, e, dmg * Math.max(0.48, 1 - i * 0.07), { kx: 0, ky: -4, stun: 36, color: def.color, crit: i < 3 });
+      e._stormMarkedT = Math.max(e._stormMarkedT || 0, 150);
+    });
   } else if (p.id === "cat") {
     for (const e of enemies) {
-      hitEnemy(game, e, dmg * 0.9, { kx: 0, ky: -2, stun: 70, color: def.color, crit: true });
-      e._eclipseT = 90;
-      e.vx *= 0.2;
-      e.vy *= 0.2;
+      hitEnemy(game, e, dmg * 0.86, { kx: 0, ky: -2, stun: 78, color: def.color, crit: true });
+      e._eclipseT = 130;
+      e.vx *= 0.16;
+      e.vy *= 0.16;
     }
-    p.invuln = Math.max(p.invuln || 0, 55);
+    p.invuln = Math.max(p.invuln || 0, 80);
+    p._shadowCloneT = 150;
   } else if (p.id === "dragon") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 1.25, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 42, color: def.color, crit: true });
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.08, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 44, color: def.color, crit: true });
     game.shake = Math.min(28, (game.shake || 0) + 16);
+    p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
   } else if (p.id === "dino") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 1.12, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 62, color: def.color, crit: true });
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.06, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 68, color: def.color, crit: true });
     game.shake = Math.min(30, (game.shake || 0) + 20);
+    p._specialTitanT = Math.max(p._specialTitanT || 0, 260);
+    p._specialArmorT = Math.max(p._specialArmorT || 0, 260);
   } else if (p.id === "frita") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.78, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 34, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.16);
-    p._fryGodT = 120;
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.18);
+    p._fryGodT = 180;
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 260);
   } else if (p.id === "pizza") {
-    for (const e of enemies) hitEnemy(game, e, dmg, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 48, color: def.color, crit: true });
-    p._ovenKingT = 120;
-    game.score = (game.score || 0) + enemies.length * 8;
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.86, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 52, color: def.color, crit: true });
+    p._ovenKingT = 180;
+    addScore(game, enemies.length * 8);
+    p._specialBounceT = Math.max(p._specialBounceT || 0, 260);
   } else if (p.id === "yomi") {
     for (const e of enemies) {
       const hp = Number(e.hp ?? e.health ?? 9999);
       const maxHp = Number(e.maxHp ?? e.maxHealth ?? hp);
       const finisher = hp <= maxHp * 0.34;
-      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.35, {
-        kx: Math.sign(cx(e)-cx(p)) * 6,
-        ky: -6,
-        stun: finisher ? 90 : 52,
+      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.18, {
+        kx: Math.sign(cx(e)-cx(p)) * 5,
+        ky: -5,
+        stun: finisher ? 90 : 58,
         color: def.color,
         crit: true
       });
+      e._abyssMarkT = Math.max(e._abyssMarkT || 0, 150);
     }
+    p._specialGhostT = Math.max(p._specialGhostT || 0, 260);
   } else if (p.id === "cuerno") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.9, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 38, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.12);
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.76, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 42, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.16);
     addPlayerXp(p, 24 + enemies.length * 4);
+    p._specialAuroraT = Math.max(p._specialAuroraT || 0, 260);
+    p._specialArmorT = Math.max(p._specialArmorT || 0, 220);
   }
 
+  add({
+    kind: "supremeField",
+    mode: p.id,
+    x: cx(p),
+    y: cy(p),
+    life: p.id === "yomi" ? 170 : 150,
+    max: p.id === "yomi" ? 170 : 150,
+    pulse: 0,
+    dmg: dmg * 0.18,
+    color: def.color,
+    name: def.name,
+    hit: new Set(),
+  });
   add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
-  game.ult = { t: 82, color: def.color, name: def.name, identity: identity.kind };
+
+  if (flow.assist && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+
+  game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: flow.assist ? def.ally : "" };
   game.flashColor = def.color;
-  game.flash = Math.max(game.flash || 0, 18);
-  game.shake = Math.min(24, (game.shake || 0) + 10);
+  game.flash = Math.max(game.flash || 0, 20);
+  game.shake = Math.min(26, (game.shake || 0) + 12);
   game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
   game._specialName = specialOf(p.id).name;
+  game._supremeFlow = flow;
 }
 
 // ---------------------------------------------------------------------------
