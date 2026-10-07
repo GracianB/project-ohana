@@ -3261,6 +3261,12 @@ if (e2eEnabled) {
           x: p.x, y: p.y, vx: p.vx, vy: p.vy,
           grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
         } : null,
+        input: {
+          left: !!(input?.keys?.a || input?.keys?.arrowleft),
+          right: !!(input?.keys?.d || input?.keys?.arrowright),
+          jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
+          down: !!(input?.keys?.s || input?.keys?.arrowdown),
+        },
         score: game.score,
         kills: game.kills,
         combo: game.combo,
@@ -3359,6 +3365,10 @@ if (e2eEnabled) {
       if (!game.player) return this.state();
       game.player.vx = Number.isFinite(Number(vx)) ? Number(vx) : 0;
       game.player.vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
+      return this.state();
+    },
+    resetInput() {
+      input?.reset();
       return this.state();
     },
     setInvulnerable(frames = 600) {
