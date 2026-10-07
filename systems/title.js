@@ -8,6 +8,7 @@ import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
 import { difficulty } from "../characters/signature.js";
+import { masteryOf } from "./hero-mastery.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -22,16 +23,16 @@ addEventListener("keydown", jingle, { capture: true });
 
 const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispín Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
 const HERO_LINES = {
-  kilo: "Equilibrio, curiosidad y una última forma capaz de volar.",
-  stitcho: "Control, agarre a paredes y ascensos imposibles.",
-  chispin: "Velocidad pura, chispas y presión constante.",
-  cat: "Una segunda oportunidad y movilidad espectral.",
-  dragon: "Planeo, dominio aéreo y vuelo en la forma final.",
-  dino: "Peso, embestida y ondas de impacto.",
-  frita: "Carrera, deslizamiento y caos a ras de suelo.",
-  pizza: "Rebotes, golpes de caída y horno desatado.",
-  yomi: "Paso espectral, caída rápida y remates oscuros.",
-  cuerno: "Carga frontal, aguante y recuperación."
+  kilo: "Corrientes de polen, flotación y vuelo solar en las formas altas.",
+  stitcho: "Paredes, agarre, trepa y vaults para dominar rutas verticales.",
+  chispin: "Cloudstep: puede correr sobre nubes eléctricas y convertir altura en velocidad.",
+  cat: "Moon Pounce, nueve vidas y movilidad felina para corregir saltos imposibles.",
+  dragon: "Batidas extra, planeo y vuelo: el aire es una ruta, no una caída.",
+  dino: "Pisotón sísmico, ruptura de grietas y rebote colosal tras el impacto.",
+  frita: "Deslizamiento encadenado y carriles de impulso que conservan velocidad.",
+  pizza: "Rebotes sobre enemigos y respiraderos de horno convertidos en trampolines.",
+  yomi: "Paso Hueco: desplazamiento espectral e intangibilidad durante la fase.",
+  cuerno: "Aterrizajes fuertes proyectan puentes Aurora temporales hacia delante."
 };
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96, cuerno: 1.0 };
@@ -214,7 +215,11 @@ function mark(id) {
     if (heroName) heroName.textContent = selectedDef.name;
     if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
     if (heroDifficulty) heroDifficulty.textContent = "Dificultad " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
-    if (heroLine) heroLine.textContent = HERO_LINES[selectedDef.id] || "Cinco formas. Tres poderes. Una identidad propia.";
+    const mastery = masteryOf(selectedDef.id);
+    if (heroLine) {
+      heroLine.textContent = (HERO_LINES[selectedDef.id] || mastery.desc || "Cinco formas. Tres poderes. Una identidad propia.") + " · " + mastery.name;
+      heroLine.setAttribute("data-mastery", mastery.id);
+    }
     document.getElementById("char-select")?.style.setProperty("--hero-tint", selectedDef.color);
   }
   const status = selectionStatus();
