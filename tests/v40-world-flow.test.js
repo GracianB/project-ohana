@@ -4,6 +4,8 @@ import { ROOM_HAZARDS, HAZARD_TYPES, hazardAt, hazardContainsX, hazardTrigger } 
 import { WORLD_NODES, WORLD_EDGES, worldGraphSnapshot } from "../systems/world-graph.js";
 import { traversalProfile } from "../systems/traversal-nodes.js";
 import { ROOM_ART, livingWorldSnapshot } from "../worlds/living-worlds.js";
+import { ROOMS } from "../systems/map.js";
+import { WORLDS } from "../worlds/index.js";
 
 const p=(x,y,vy=8)=>({x,y,w:32,h:36,vy});
 
@@ -64,4 +66,13 @@ test("V40: cada sala tiene afinidad heroica canónica única",()=>{
     assert.equal(livingWorldSnapshot(room,hero).affinity,true,room);
     assert.equal(livingWorldSnapshot(room,"kilo").affinity,hero==="kilo",room+"/off-affinity");
   }
+});
+
+
+test("V40: las diez salas apuntan a diez bases procedurales distintas",()=>{
+  const rooms=["hub","beach","jungle","cave","lab","ridge","space","reef","volcano","boss"];
+  const indices=rooms.map((id)=>ROOMS[id].world);
+  assert.equal(new Set(indices).size,10);
+  const ids=indices.map((index)=>WORLDS[index]?.id);
+  assert.deepEqual(ids,["grove","beach","jungle","cave","lab","ridge","space","aquatic","volcano","boss"]);
 });
