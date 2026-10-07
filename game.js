@@ -2864,6 +2864,11 @@ function updateHUD() {
     chip.classList.toggle("hidden", !show);
     const rank = show ? comboRank(game.combo) : "";
     if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
+    const flow = show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
+      ? String(game._combatFlow.label || "")
+      : "";
+    if (chip.dataset.flow !== flow) chip.dataset.flow = flow;
+    chip.classList.toggle("flow", !!flow);
   }
   const boss = game.boss || game.enemies.find((e) => e.boss);
   if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
@@ -2883,8 +2888,10 @@ function updateHUD() {
   const now = Number.isFinite(Number(game.t)) ? Number(game.t) * (1000 / 60) : 0;
   for (let i = 0; i < abilitySlots.length; i++) {
     const item = abilitySlots[i];
-    const id = item.slot.dataset.id;
-    const def = ABILITY_DEFS[id];
+    const isSupreme = item.slot.dataset.supreme === "1";
+    const sup = isSupreme ? supremeOf(p.id) : null;
+    const id = isSupreme ? sup.id : item.slot.dataset.id;
+    const def = isSupreme ? sup : ABILITY_DEFS[id];
     if (!def || !item.fill) continue;
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
