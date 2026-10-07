@@ -864,7 +864,7 @@ function markHit(p, e, dmg, kb) {
   );
 
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
-  const flow = registerCombatAction(game, "H", def?.name || "H");
+  const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
   if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
   game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
