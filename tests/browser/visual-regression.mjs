@@ -171,14 +171,20 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.setCombo(10));
   const supremeState = await page.evaluate(() => window.__OHANA_E2E.cast(3));
-  await page.waitForTimeout(180);
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'active', null, { timeout: 1200 });
+  await page.waitForTimeout(260);
   assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
   assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
-  assert.equal(await page.locator('#supreme-cinema').evaluate((el) => el.classList.contains('show')), true, '09-supreme: cinemática U no visible');
+  const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
+    show: el.classList.contains('show'),
+    state: el.dataset.state,
+    hidden: el.getAttribute('aria-hidden')
+  }));
+  assert.deepEqual(supremeCinemaState, { show:true, state:'active', hidden:'false' }, '09-supreme: cinemática U no permanece activa');
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
   await capture(page, '09-supreme-u-assist');
 
-  await page.waitForTimeout(1250);
+  await page.waitForTimeout(2200);
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
   await page.waitForTimeout(100);
