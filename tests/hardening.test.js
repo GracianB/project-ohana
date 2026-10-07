@@ -858,8 +858,13 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   const livingModule = await import("../worlds/living-worlds.js");
   const graphModule = await import("../systems/world-graph.js");
 
+  const voidStart = game.indexOf("function checkVoidDeath()");
+  const voidEnd = game.indexOf("\nfunction ", voidStart + 24);
+  const voidBody = game.slice(voidStart, voidEnd > voidStart ? voidEnd : game.length);
+  assert.ok(voidStart >= 0, "checkVoidDeath debe existir");
   assert.ok(
-    game.indexOf("const hazardAxis = hazardContainsX") < game.indexOf("const next = nearestBelow"),
+    voidBody.indexOf("const hazardAxis = hazardContainsX") >= 0 &&
+    voidBody.indexOf("const hazardAxis = hazardContainsX") < voidBody.indexOf("const next = nearestBelow"),
     "hazard explícito debe evaluarse antes que floor rescue"
   );
   assert.match(game, /hazard\.type === HAZARD_TYPES\.TRANSFER/);
