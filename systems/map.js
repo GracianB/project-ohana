@@ -59,7 +59,7 @@ export const ROOMS = {
     portals: [{ type: "blackhole", x: 1170, y: 710, w: 80, h: 80, dest: "volcano", label: "Caldera" }]
   },
   cave: {
-    id: "cave", name: "Cueva Azul", short: "Cueva", world: 4,
+    id: "cave", name: "Cueva Azul", short: "Cueva", world: 8,
     doors: { right: "hub", left: "lab", up: null, down: null },
     hint: "OESTE lab (forma 2). ESTE claro.",
     plats: [[0, 810, 1600, 90], [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]],
@@ -76,7 +76,7 @@ export const ROOMS = {
     orbs: [[520, 440], [900, 300]]
   },
   ridge: {
-    id: "ridge", name: "Cumbre", short: "Cumbre", world: 3,
+    id: "ridge", name: "Cumbre", short: "Cumbre", world: 9,
     doors: { down: "hub", right: "space", left: null, up: null },
     pit: true,
     hint: "Hueco central ABAJO = Claro. ESTE = órbita.",
@@ -119,7 +119,7 @@ export const ROOMS = {
     portals: [{ type: "blackhole", x: 190, y: 710, w: 80, h: 80, dest: "jungle", label: "Jungla" }]
   },
   boss: {
-    id: "boss", name: "Nido Final", short: "Nido", world: 2,
+    id: "boss", name: "Nido Final", short: "Nido", world: 7,
     doors: { left: "volcano", right: null, up: null, down: null },
     needEvo: 3,
     hint: "El monstruo está aquí. Prepárate. OESTE huye.",
