@@ -172,3 +172,38 @@
     transform: none;
   }
 }
+
+/* V35 cinematic chapter director */
+#world-cinema{position:fixed;inset:0;z-index:58;pointer-events:none;display:grid;place-items:center;overflow:hidden;opacity:0;transition:opacity .5s ease;background:linear-gradient(180deg,rgba(2,8,20,.12),rgba(2,8,20,.38))}
+#world-cinema.show{opacity:1}
+#world-cinema .wc-bars::before,#world-cinema .wc-bars::after{content:"";position:absolute;left:0;right:0;height:clamp(34px,7vh,82px);background:#02050b;transform:scaleY(0);transition:transform .65s cubic-bezier(.2,.8,.2,1)}
+#world-cinema .wc-bars::before{top:0;transform-origin:top}#world-cinema .wc-bars::after{bottom:0;transform-origin:bottom}
+#world-cinema.show .wc-bars::before,#world-cinema.show .wc-bars::after{transform:scaleY(1)}
+#world-cinema .wc-vignette{position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,transparent 20%,rgba(0,0,0,.62) 110%)}
+#world-cinema .wc-copy{position:relative;text-align:center;max-width:min(820px,88vw);padding:28px;transform:translateY(18px) scale(.985);opacity:0;transition:transform .75s cubic-bezier(.16,1,.3,1),opacity .55s ease}
+#world-cinema.show .wc-copy{transform:none;opacity:1}
+#world-cinema .wc-kicker{margin:0 0 8px;color:#ffe39a;font:800 11px Outfit,sans-serif;letter-spacing:.32em;text-transform:uppercase}
+#world-cinema h2{margin:0;color:#fff;font:700 clamp(38px,8vw,94px) Fredoka,sans-serif;line-height:.92;letter-spacing:-.035em;text-shadow:0 8px 50px rgba(0,0,0,.55)}
+#world-cinema .wc-line{margin:14px 0 0;color:rgba(244,243,238,.78);font:600 clamp(13px,2vw,18px) Outfit,sans-serif;letter-spacing:.04em}
+#world-cinema .wc-rule{position:absolute;left:50%;bottom:clamp(64px,12vh,140px);width:min(240px,38vw);height:1px;background:linear-gradient(90deg,transparent,#ffe39a,transparent);transform:translateX(-50%) scaleX(0);transition:transform 1s .18s ease}
+#world-cinema.show .wc-rule{transform:translateX(-50%) scaleX(1)}
+#world-cinema.boss{background:radial-gradient(circle at 50% 45%,rgba(142,17,43,.18),rgba(1,3,9,.74))}
+#world-cinema.boss h2{color:#fff1e1;text-shadow:0 0 34px rgba(255,55,91,.28),0 10px 60px #000}
+#world-cinema.boss .wc-kicker{color:#ff6b82}
+@media(prefers-reduced-motion:reduce){#world-cinema,#world-cinema *{transition-duration:.01ms!important}}
+
+/* V35 boss-death epilogue */
+#win-cinema .win-rift{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+#win-cinema .win-rift i{position:absolute;width:min(72vw,820px);height:2px;background:linear-gradient(90deg,transparent,#fff4bf 35%,#ff6880 52%,#fff4bf 68%,transparent);box-shadow:0 0 18px #fff,0 0 70px #ff4266;transform:rotate(var(--r,0deg)) scaleX(0);opacity:0}
+#win-cinema .win-rift i:nth-child(1){--r:-18deg}#win-cinema .win-rift i:nth-child(2){--r:7deg}#win-cinema .win-rift i:nth-child(3){--r:31deg}
+#win-cinema.ending-phase-1 .win-rift i{animation:ohana-rift .9s cubic-bezier(.16,1,.3,1) both}
+#win-cinema.ending-phase-1 .win-rift i:nth-child(2){animation-delay:.08s}#win-cinema.ending-phase-1 .win-rift i:nth-child(3){animation-delay:.16s}
+#win-cinema .win-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#win-cinema .win-stars i{position:absolute;left:var(--x);top:var(--y);width:4px;height:4px;border-radius:50%;background:#fff1ad;box-shadow:0 0 12px #ffe070;opacity:0}
+#win-cinema.ending-phase-2 .win-stars i,#win-cinema.ending-phase-3 .win-stars i{animation:ohana-star-rise 2.4s var(--d) ease-out infinite}
+#win-cinema .win-act{margin:0 0 10px;color:#ff8a96;font:800 10px Outfit,sans-serif;letter-spacing:.3em;transition:letter-spacing .8s ease,color .8s ease}
+#win-cinema.ending-phase-3 .win-act{color:#ffe79b;letter-spacing:.42em}
+#win-cinema.ending-phase-3 #win-title{text-shadow:0 0 34px rgba(255,227,133,.34),0 10px 50px rgba(0,0,0,.55)}
+@keyframes ohana-rift{0%{transform:rotate(var(--r)) scaleX(0);opacity:0}35%{opacity:1}70%{transform:rotate(var(--r)) scaleX(1);opacity:.9}100%{transform:rotate(var(--r)) scaleX(1.12);opacity:0}}
+@keyframes ohana-star-rise{0%{transform:translateY(18px) scale(.4);opacity:0}22%{opacity:.85}100%{transform:translateY(-80px) scale(1.25);opacity:0}}
+@media(prefers-reduced-motion:reduce){#win-cinema .win-rift i,#win-cinema .win-stars i{animation:none!important}.win-stars{display:none}}

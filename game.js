@@ -545,6 +545,7 @@ function loadRoom(id, fromDir) {
     volcano: "La caldera es la última puerta. La Reina del Nido espera más adelante.",
     boss: "La Reina ha despertado. Aquí termina la ruta de este Mundo."
   };
+  dispatchEvent(new CustomEvent("ohana-cinema-room", { detail: { id, repeat: !first, boss: !!r.boss } }));
   if (!r.boss) {
     const story = LINES[id] || "";
     const objective = r.hint || r.goal || "";

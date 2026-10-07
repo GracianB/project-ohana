@@ -679,3 +679,19 @@ test('phase 54: el harness E2E puede fijar una semilla de simulación', () => {
   assert.match(e2e, /123456789/);
   assert.match(e2e, /gameplay no determinista con semilla idéntica/);
 });
+
+
+test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogue wired", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const index = fs.readFileSync("./index.html", "utf8");
+  const cinema = fs.readFileSync("./systems/world-cinema.js", "utf8");
+  const ending = fs.readFileSync("./systems/ending.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  assert.match(game, /ohana-cinema-room/);
+  assert.match(index, /selected-hero-name/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-224/);
+  assert.match(cinema, /EL NIDO/);
+  assert.match(cinema, /prefers-reduced-motion/);
+  assert.match(ending, /NADIE SE QUEDA ATRÁS/);
+  assert.match(title, /selected-hero-difficulty/);
+});
