@@ -141,48 +141,39 @@
       <a href="https://gracianb.github.io/professional-deck/" target="_blank" rel="noopener">Deck</a>
       <a href="https://gracianb.github.io/yoga-instructor/" target="_blank" rel="noopener">Yoga</a>
     </nav>
-    <div class="title-sky" aria-hidden="true">
-      <canvas id="title-fx"></canvas>
-      <div class="title-palm left"></div>
-      <div class="title-palm right"></div>
-      <div class="title-haze"></div>
-      <div class="title-stars"></div>
+    <div class="title-sky" aria-hidden="true"><canvas id="title-fx"></canvas></div>
+    <div class="title-shell">
+      <header class="title-stack">
+        <p class="eyebrow">Mundo 1 · Isla Hoku</p>
+        <h1><span class="word project">PROJECT</span><span class="word ohana">OHANA</span></h1>
+        <p class="tagline">Nadie se queda atrás.</p>
+      </header>
+      <section class="hero-stage" aria-label="Selección de personaje">
+        <button type="button" class="roster-arrow prev" id="roster-prev" aria-label="Personaje anterior">‹</button>
+        <div id="chars"><div class="chars-grid" id="chars-grid"></div></div>
+        <button type="button" class="roster-arrow next" id="roster-next" aria-label="Personaje siguiente">›</button>
+        <section class="hero-dossier" aria-live="polite" aria-atomic="true">
+          <span class="dossier-kicker">HÉROE</span>
+          <strong id="selected-hero-name">Kilo</strong>
+          <span id="selected-hero-form">Forma inicial</span>
+          <div class="dossier-meta"><span id="selected-hero-difficulty">Dificultad media</span><span>5 formas</span></div>
+        </section>
+      </section>
+      <div class="title-controls">
+        <div id="difficulty" role="group" aria-label="Dificultad">
+          <button type="button" data-diff="easy">Fácil</button>
+          <button type="button" data-diff="normal">Normal</button>
+          <button type="button" data-diff="hard">Difícil</button>
+        </div>
+        <div id="menu-row" role="group" aria-label="Acciones del menú">
+          <button id="btn-continue" type="button" class="cta ghost hidden" disabled>Continuar</button>
+          <button id="btn-play" type="button" class="cta primary">Jugar solo</button>
+          <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
+          <a id="btn-coop" class="cta ghost" href="./multiplayer.html">2 jugadores online</a>
+        </div>
+      </div>
     </div>
-    <div class="title-stack">
-      <p class="eyebrow">Mundo 1 · Isla Hoku</p>
-      <h1>
-        <span class="word project">PROJECT</span>
-        <span class="word ohana">OHANA</span>
-      </h1>
-      <p class="tagline">Diez héroes. Cinco formas. Un nido. Nadie se queda atrás.</p>
-      <div class="title-story" aria-hidden="true"><span>EXPLORA</span><i></i><span>EVOLUCIONA</span><i></i><span>PROTEGE A LA FAMILIA</span></div>
-    </div>
-    <section class="hero-dossier" aria-live="polite" aria-atomic="true">
-      <div class="dossier-kicker">HÉROE SELECCIONADO</div>
-      <strong id="selected-hero-name">Kilo</strong>
-      <span id="selected-hero-form">Forma inicial</span>
-      <div class="dossier-meta"><span id="selected-hero-difficulty">Dificultad media</span><span>5 evoluciones</span></div>
-    </section>
-    <div id="difficulty" role="group" aria-label="Dificultad">
-      <button type="button" data-diff="easy">Fácil</button>
-      <button type="button" data-diff="normal">Normal</button>
-      <button type="button" data-diff="hard">Difícil</button>
-    </div>
-    <div id="menu-row" role="group" aria-label="Acciones del menú">
-      <button id="btn-continue" type="button" class="cta ghost hidden" disabled>Continuar</button>
-      <button id="btn-play" type="button" class="cta primary">Jugar solo</button>
-      <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
-      <a id="btn-coop" class="cta ghost" href="./multiplayer.html">2 jugadores online</a>
-    </div>
-    <section id="chars" aria-label="Selección de personajes">
-      <button type="button" class="roster-arrow prev" id="roster-prev" aria-label="Anterior">‹</button>
-      <div class="chars-grid" id="chars-grid"></div>
-      <button type="button" class="roster-arrow next" id="roster-next" aria-label="Siguiente">›</button>
-    </section>
-    <footer class="legal">
-      <p>Elenco y arte originales · Sin afiliación con terceros</p>
-      <p>MIT · <a href="https://github.com/GracianB/project-ohana" target="_blank" rel="noopener">Gracián Baena</a> · 2026</p>
-    </footer>
+    <footer class="legal"><p>Elenco y arte originales · MIT · Gracián Baena · 2026</p></footer>
   </main>
   <div id="help" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="help-title">
     <div class="panel">
