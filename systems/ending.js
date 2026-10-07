@@ -19,7 +19,7 @@ export function showEnding(detail = {}) {
         '<h2 id="win-title">NADIE SE QUEDA ATRÁS</h2>' +
         '<p class="win-hero"></p>' +
         '<p class="win-score"></p>' +
-        '<p class="win-jun">LA REINA HA CAÍDO.</p>' +
+        '<p class="win-jun">EL NIDO HA CAÍDO · LA REINA HA CAÍDO.</p>' +
         '<p class="win-sub">La oscuridad se abre. Las formas perdidas regresan a la luz. Hoku respira otra vez.</p>' +
         '<div class="win-actions">' +
           '<button type="button" id="win-continue">Continuar en este mundo</button>' +
