@@ -140,7 +140,11 @@ try {
     api.setEvo(2);
     api.loadRoom('hub');
     api.setInvulnerable(600);
+    api.resetInput();
     const state = api.state();
+    if (state.input.left || state.input.right || state.input.jump || state.input.down) {
+      throw new Error('Cloudstep: input residual ' + JSON.stringify(state.input));
+    }
     const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
     if (!cloud) throw new Error('11-cloudstep: no hay nube de maestría');
     api.setPlayer(cloud.x + 24, cloud.y - 96);
@@ -156,7 +160,7 @@ try {
   assert.equal(
     cloudState.mastery?.cloud,
     true,
-    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery })
+    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input })
   );
   assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
   assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
