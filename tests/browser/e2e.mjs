@@ -404,7 +404,6 @@ try {
     api.loadRoom('hub');
     api.setInvulnerable(600);
     api.resetInput();
-    api.resetDebugTrace();
     const state = api.state();
     if (state.input.left || state.input.right || state.input.jump || state.input.down) {
       throw new Error('Cloudstep: input residual ' + JSON.stringify(state.input));
@@ -432,7 +431,7 @@ try {
   assert.equal(
     chispinCloud.mastery?.cloud,
     true,
-    'desktop: Chispín no aterriza sobre la nube de Cloudstep · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud, mastery:chispinCloud.mastery, input:chispinCloud.input, debug:chispinCloud.debug })
+    'desktop: Chispín no aterriza sobre la nube de Cloudstep · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud, mastery:chispinCloud.mastery, input:chispinCloud.input })
   );
   assert.equal(chispinCloud.player?.grounded, true, 'desktop: nube Cloudstep no sostiene al jugador');
   assert.ok(
