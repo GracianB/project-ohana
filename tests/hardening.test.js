@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-227/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-228/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -755,7 +755,35 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(cinema, /U · SUPREMA/);
   assert.match(cinema, /OHANA ASSIST/);
   assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
-  assert.match(html, /supreme\.css\?v=ohana-227/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-227/);
+  assert.match(html, /supreme\.css\?v=ohana-228/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-228/);
   assert.match(visual, /09-supreme-u-assist/);
+});
+
+
+test("V38 enemy intelligence is deterministic, bounded and visually auditable", () => {
+  const director = fs.readFileSync("./systems/enemy-director.js", "utf8");
+  const brain = fs.readFileSync("./engine/foe-brain.js", "utf8");
+  const enemies = fs.readFileSync("./engine/enemies.js", "utf8");
+  const game = fs.readFileSync("./game.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+
+  assert.doesNotMatch(director, /Math\.random\(/);
+  assert.doesNotMatch(director, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(director, /\.health\s*[-+]=/);
+  assert.match(director, /attackBudget/);
+  assert.match(director, /Math\.floor\(\(hard \+ Math\.max\(0, alive - 4\)\) \/ 2\)/);
+  assert.match(director, /aiAttackPermit/);
+  assert.match(director, /RETREAT/);
+  assert.match(director, /FLANK/);
+  assert.match(brain, /intent === "RETREAT"/);
+  assert.match(brain, /intent === "FLANK"/);
+  assert.match(enemies, /drawEncounterRead/);
+  assert.match(enemies, /drawDamageWear/);
+  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t\)/);
+  assert.match(game, /enemyCanCommit\(e\)/);
+  assert.match(game, /enemyDirectorSnapshot/);
+  assert.match(visual, /03b-enemy-intelligence/);
+  assert.match(sw, /systems\/enemy-director\.js/);
 });
