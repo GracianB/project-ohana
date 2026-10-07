@@ -40,7 +40,7 @@ body.playing #char-select{display:none!important}
 
 #char-select .title-stack{
   grid-area:auto!important;position:relative!important;inset:auto!important;grid-column:1!important;grid-row:1!important;
-  order:0!important;z-index:8!important;width:100%!important;margin:0!important;padding:0!important;
+  order:0!important;z-index:8!important;width:100%!important;max-width:none!important;min-width:0!important;margin:0!important;padding:0!important;justify-self:stretch!important;
   display:grid!important;justify-items:center!important;align-content:start!important;text-align:center!important;
   transform:none!important;filter:none!important;isolation:isolate;
 }
