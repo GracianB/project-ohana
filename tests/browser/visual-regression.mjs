@@ -117,7 +117,9 @@ try {
   await auditLayout(page, '02-hub');
   await capture(page, '02-hub');
 
-  await page.evaluate(() => window.__OHANA_E2E.loadRoom('lab'));
+  await page.evaluate(() => window.__OHANA_E2E.setEvo(1));
+  const labLoad = await page.evaluate(() => window.__OHANA_E2E.loadRoom('lab'));
+  assert.equal(labLoad.roomId, 'lab', '03-room-lab: no se pudo entrar al laboratorio con Forma 2');
   await page.evaluate(() => window.__OHANA_E2E.setInvulnerable(600));
   const enemyState = await page.evaluate(() => window.__OHANA_E2E.step(90));
   await page.waitForTimeout(100);
