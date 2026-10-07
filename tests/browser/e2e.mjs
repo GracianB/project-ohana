@@ -24,7 +24,7 @@ async function auditPage(page, label) {
   });
   assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
   const gameSource = await page.evaluate(async () => {
-    const response = await fetch('/game.js?v=ohana-229', { cache:'no-store' });
+    const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
   });
   assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
@@ -439,6 +439,66 @@ try {
     'desktop: Chispín atraviesa la nube · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud })
   );
 
+  // V40 — caída física Beach → Reef. El hueco tiene prioridad sobre floor rescue.
+  const beachDrop = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    api.loadRoom('beach');
+    api.resetInput();
+    api.setPlayer(1085, 1060);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 36 && state.roomId === 'beach'; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(beachDrop.roomId, 'reef', 'desktop: pozo Beach no transfiere realmente a Reef');
+
+  // V40 — magma real en Caldera.
+  const magmaDeath = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    api.setEvo(4);
+    api.loadRoom('volcano');
+    api.resetInput();
+    api.setPlayer(1120, 1120);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 24 && state.hp > 0; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(magmaDeath.roomId, 'volcano', 'desktop: magma cambia de sala inesperadamente');
+  assert.equal(magmaDeath.hp, 0, 'desktop: pozo mortal de magma no mata');
+
+  // V40 — Dragón obtiene una única salida heroica del mismo magma.
+  const dragonPit = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('dragon');
+    api.setEvo(4);
+    api.loadRoom('volcano');
+    api.resetInput();
+    api.setPlayer(1120, 1120);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 48 && state.hp > 0 && !state.hazardEscape; i++) state = api.step(1);
+    return state;
+  });
+  assert.ok(dragonPit.hp > 0, 'desktop: Dragón no sobrevive a su última batida en magma');
+  assert.match(dragonPit.hazardEscape || '', /magma-pit/, 'desktop: rescate de Dragón no registra el hazard real');
+  assert.ok(dragonPit.player?.vy < 0, 'desktop: última batida de Dragón no lo expulsa del pozo');
+
+  // V40 — World Graph avanzado reemplaza la vieja cuadrícula.
+  await page.locator('#btn-map').click();
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', 'desktop: mapa V40 no abre');
+  assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, 'desktop: World Graph V40 ausente');
+  assert.equal(await page.locator('#map-grid .wm-node').count(), 10, 'desktop: mapa V40 no contiene diez salas');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-catapult').count() >= 1, 'desktop: mapa no muestra catapultas');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-vortex').count() >= 1, 'desktop: mapa no muestra vórtices');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-drop').count() >= 1, 'desktop: mapa no muestra caídas');
+  assert.equal(await page.locator('#map-grid .wm-node.here').count(), 1, 'desktop: mapa no marca sala actual');
+  await page.locator('#btn-close-map').click();
+  await page.waitForTimeout(50);
+
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
@@ -482,9 +542,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-229',
-      '/style.css?v=ohana-229',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-229',
+      '/game.js?v=ohana-230',
+      '/style.css?v=ohana-230',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-230',
     ];
     const results = [];
     for (const path of paths) {

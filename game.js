@@ -5,6 +5,7 @@ import { drawCharacter } from "./characters/draw.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
+import { drawLivingWorld, livingWorldSnapshot } from "./worlds/living-worlds.js";
 import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
@@ -15,6 +16,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
+import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { Floaters } from "./systems/floaters.js";
 import { portals } from "./systems/portals.js";
@@ -36,6 +38,7 @@ import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
 import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
+import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
@@ -351,6 +354,7 @@ function returnToMenu() {
   game.running = false;
   input?.reset();
   clock.reset();
+  if (DeathFx.isPlaying()) DeathFx.cancel();
   // PHASE 39 - SESSION RESET CLOSURE
   // Una nueva sesion nunca hereda estado transitorio anterior.
   t = 0;
@@ -597,17 +601,7 @@ function showMap() {
   }
   DOM.help?.classList.remove("open");
   setPaused(false);
-  const layout = MAP_LAYOUT || [];
-  grid.innerHTML = layout.map((row) => row.map((id) => {
-    if (!id) return '<div class="map-cell empty"></div>';
-    const dest = ROOMS[id];
-    const here = game.roomId === id;
-    const seen = !!game.visited[id];
-    const lock = dest && dest.needEvo != null && game.player && game.player.evo < dest.needEvo && !seen;
-    const cls = here ? "here" : seen ? "seen" : lock ? "lock" : "";
-    const label = dest ? (dest.short || dest.name) : id;
-    return '<div class="map-cell ' + cls + '">' + label + "</div>";
-  }).join("")).join("");
+  grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
   overlay.classList.add("open");
 }
 function makePlayer(def) {
@@ -1140,19 +1134,65 @@ function checkVoidDeath() {
   const r = room();
   const feet = p.y + p.h;
 
-  const next = nearestBelow(p.x, p.w, feet - 8);
-  if (next && feet >= next.y) {
-    landOn(p, next);
-    return;
+  // V40: un vacío explícito tiene prioridad sobre cualquier rescate de suelo.
+  // Mientras el centro del jugador esté sobre un hazard, no nearestBelow/lowestFloor.
+  const hazardAxis = hazardContainsX(game.roomId, p);
+  const hazard = hazardTrigger(game.roomId, p);
+
+  if (hazard) {
+    const hazardKey = game.roomId + ":" + hazard.id;
+
+    if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
+      p._hazardEscapeKey = "";
+      dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+        type: hazard.type, id: hazard.id, room: game.roomId, dest: hazard.dest, hero: p.id
+      }}));
+      loadRoom(hazard.dest, "down");
+      return;
+    }
+
+    if (hazard.type === HAZARD_TYPES.DEATH) {
+      // Una afinidad concreta puede salvar una caída una vez antes de tocar el fondo.
+      if (hazard.heroEscape && p.id === hazard.heroEscape && p._hazardEscapeKey !== hazardKey) {
+        p._hazardEscapeKey = hazardKey;
+        p.vy = -Math.max(9, p.jumpPower * 0.88);
+        p.vx += (p.facing || 1) * 1.8;
+        p.grounded = false;
+        p.coyote = 0;
+        p.jumps = Math.min(p.jumps || 0, Math.max(0, (p.maxJumps || 1) - 1));
+        p._masteryMove = "wingbeat";
+        game.flash = Math.max(game.flash || 0, 8);
+        game.shake = Math.min(14, (game.shake || 0) + 5);
+        game.fx?.emit(p.x + p.w / 2, p.y + p.h, {
+          color: hazard.color || "#ffd36a", count: 14, size: 3.5, up: 2.6, speed: 3.4, life: 18, star: true
+        });
+        game.nums?.add(p.x + p.w / 2, p.y - 14, "¡ÚLTIMA BATIDA!", "#ffe7a0", true);
+        return;
+      }
+      dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
+        type: hazard.type, id: hazard.id, room: game.roomId, hero: p.id
+      }}));
+      dieVoid(p);
+      return;
+    }
   }
 
-  const low = lowestFloor(p.x, p.w);
-  if (low && feet > low.y && p.vy >= 0) {
-    landOn(p, low);
-    return;
+  if (!hazardAxis) {
+    p._hazardEscapeKey = "";
+    const next = nearestBelow(p.x, p.w, feet - 8);
+    if (next && feet >= next.y) {
+      landOn(p, next);
+      return;
+    }
+
+    const low = lowestFloor(p.x, p.w);
+    if (low && feet > low.y && p.vy >= 0) {
+      landOn(p, low);
+      return;
+    }
   }
 
-  if (!r.pit) {
+  if (!r.pit && !hazardAxis) {
     const floorY = game.worldH - 90;
     if (feet > floorY) {
       p.y = floorY - p.h;
@@ -1162,12 +1202,12 @@ function checkVoidDeath() {
     return;
   }
 
-  // El vacío se determina por geometría, no por una única coordenada mágica.
+  // Fallback de seguridad para gaps geométricos que todavía no tengan volumen V40.
   const inGap = inPitX(p);
   const crossedBottom = feet > game.worldH - 24;
   const deepFall = p.y > game.worldH + 8;
 
-  if (inGap && crossedBottom) {
+  if (!hazardAxis && inGap && crossedBottom) {
     if (r.doors.down) loadRoom(r.doors.down, "down");
     else dieVoid(p);
     return;
@@ -2498,17 +2538,7 @@ function updateCam() {
 }
 
 function drawMinimap() {
-  const layout = MAP_LAYOUT || [];
-  const ox = viewW - 196, oy = viewH - 118;
-  ctx.fillStyle = "rgba(6,10,16,.62)"; ctx.fillRect(ox - 8, oy - 8, 188, 104);
-  ctx.strokeStyle = "rgba(126,231,255,.28)"; ctx.strokeRect(ox - 8.5, oy - 8.5, 189, 105);
-  layout.forEach((row, cy) => {
-    row.forEach((id, cx) => {
-      if (!id) return;
-      ctx.fillStyle = game.roomId === id ? "#7ee7ff" : game.visited[id] ? "#3a6" : "#1a222c";
-      ctx.fillRect(ox + cx * 28, oy + cy * 28, 22, 22);
-    });
-  });
+  drawWorldMinimap(ctx, game.roomId, game.visited, game.player?.evo || 0, viewW, viewH);
 }
 function drawCrystal(o) {
   const x = o.x - game.cam.x;
@@ -2547,8 +2577,10 @@ function render() {
   ctx.translate(centerX + shakeX, centerY + shakeY);
   ctx.scale(z, z);
   ctx.translate(-centerX, -centerY);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
-  else {
+  if (paintedHubOn(game.roomId)) {
+    drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
+    drawLivingWorld(ctx, game, t, camW(), camH());
+  } else {
     renderWorld(ctx, world, game.cam, t, camW(), camH());
     drawRoomAtmosphere(
       ctx,
@@ -2559,6 +2591,8 @@ function render() {
       camH(),
       game.player?.id
     );
+    drawLivingWorld(ctx, game, t, camW(), camH());
+    drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
     drawTerrain(ctx, game.platforms, world, game.cam, t);
   }
   const r = room();
@@ -3285,8 +3319,11 @@ if (e2eEnabled) {
           multiplier: game._combatFlow.multiplier || 1,
         } : null,
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+        hazardEscape: p?._hazardEscapeKey || "",
         mastery: masterySnapshot(game),
         masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
+        worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
+        livingWorld: livingWorldSnapshot(game.roomId, p?.id || ""),
         enemyDirector: game.enemyDirector ? {
           roomId: game.enemyDirector.roomId,
           hard: game.enemyDirector.hard,

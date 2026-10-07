@@ -187,6 +187,43 @@ try {
   await page.keyboard.up('Space');
   await page.evaluate(() => window.__OHANA_E2E.step(1));
 
+  // V40 · Living Worlds: las diez salas se auditan con su héroe afín.
+  const livingPairs = [
+    ['hub','kilo'],
+    ['beach','frita'],
+    ['jungle','stitcho'],
+    ['cave','cat'],
+    ['lab','chispin'],
+    ['ridge','cuerno'],
+    ['space','yomi'],
+    ['reef','pizza'],
+    ['volcano','dragon'],
+    ['boss','dino'],
+  ];
+  for (const [room, hero] of livingPairs) {
+    const living = await page.evaluate(({ room, hero }) => {
+      const api = window.__OHANA_E2E;
+      api.start(hero);
+      api.setEvo(4);
+      api.loadRoom(room);
+      api.setInvulnerable(600);
+      api.step(4);
+      const cinema = document.querySelector('#world-cinema');
+      if (cinema) {
+        cinema.classList.remove('show');
+        cinema.setAttribute('aria-hidden', 'true');
+      }
+      const notice = document.querySelector('#notification-container');
+      if (notice) notice.replaceChildren();
+      return api.state();
+    }, { room, hero });
+    assert.equal(living.roomId, room, 'V40 living: sala incorrecta ' + room);
+    assert.equal(living.livingWorld?.hero, hero, 'V40 living: afinidad canónica incorrecta ' + room);
+    assert.equal(living.livingWorld?.affinity, true, 'V40 living: la sala no reacciona a ' + hero);
+    await page.waitForTimeout(45);
+    await capture(page, '13-living-' + room + '-' + hero);
+  }
+
   // Recupera Kilo para continuar la matriz cinematográfica original.
   await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
 
@@ -216,7 +253,12 @@ try {
   await page.locator('#btn-map').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', '06-map: mapa no visible');
+  assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, '06-map: World Graph V40 ausente');
+  assert.equal(await page.locator('#map-grid .wm-node').count(), 10, '06-map: World Graph incompleto');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-catapult').count() >= 1, '06-map: ruta catapulta ausente');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-vortex').count() >= 1, '06-map: ruta vórtice ausente');
   await capture(page, '06-map');
+  await capture(page, '14-world-graph-v40');
 
   await page.keyboard.press('Escape');
   await page.waitForTimeout(80);
@@ -239,25 +281,36 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.setCombo(10));
   const previousSupremeGeneration = await page.evaluate(() => Number(document.querySelector('#supreme-cinema')?.dataset.generation || 0));
-  const supremeState = await page.evaluate(() => window.__OHANA_E2E.cast(3));
-  await page.waitForFunction((previousGeneration) => {
+  const supremeAttempt = await page.evaluate(() => {
+    const state = window.__OHANA_E2E.cast(3);
     const el = document.querySelector('#supreme-cinema');
-    return Number(el?.dataset.generation || 0) > previousGeneration && el?.dataset.state === 'active';
-  }, previousSupremeGeneration, { timeout: 1200 });
-  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
-  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
+    return {
+      state,
+      cinema: el ? {
+        generation:Number(el.dataset.generation || 0),
+        state:el.dataset.state || '',
+        hidden:el.getAttribute('aria-hidden'),
+        show:el.classList.contains('show'),
+        duration:Number(el.dataset.duration || 0)
+      } : null
+    };
+  });
+  const supremeState = supremeAttempt.state;
+  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3 · ' + JSON.stringify(supremeAttempt));
+  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo · ' + JSON.stringify(supremeAttempt));
+  assert.ok(supremeAttempt.cinema?.generation > previousSupremeGeneration, '09-supreme: la cinemática U no incrementa generación · ' + JSON.stringify(supremeAttempt));
+  assert.equal(supremeAttempt.cinema?.state, 'active', '09-supreme: U no entra en active de forma síncrona · ' + JSON.stringify(supremeAttempt));
+  // La activación ya se valida de forma síncrona arriba. No esperamos aquí:
+  // un runner CI cargado puede reanudar Playwright después de que expire el
+  // temporizador real de la cinemática y convertir una prueba visual en una
+  // carrera de reloj de pared.
   const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
     show: el.classList.contains('show'),
     state: el.dataset.state,
     hidden: el.getAttribute('aria-hidden'),
     duration: Number(el.dataset.duration || 0)
   }));
-  assert.deepEqual(
-    { show:supremeCinemaState.show, state:supremeCinemaState.state, hidden:supremeCinemaState.hidden },
-    { show:true, state:'active', hidden:'false' },
-    '09-supreme: cinemática U no entra estable en active'
-  );
-  assert.ok(supremeCinemaState.duration >= 1400, '09-supreme: duración cinematográfica insuficiente');
+  assert.equal(supremeCinemaState.duration >= 1400, true, '09-supreme: duración cinematográfica insuficiente');
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
   await capture(page, '09-supreme-u-assist');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });

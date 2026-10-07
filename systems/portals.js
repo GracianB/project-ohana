@@ -7,6 +7,7 @@
 
 import { ROOMS } from "./map.js";
 import { showNotification } from "./notify.js";
+import { traversalProfile, traversalNodeSnapshot } from "./traversal-nodes.js";
 
 function overlaps(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -38,6 +39,7 @@ function makePortal(def) {
   const h = def.h != null ? def.h : type === "blackhole" ? 72 : 32;
   return {
     type,
+    roomId: def.roomId || "",
     x: def.x,
     y: def.y,
     w,
@@ -102,7 +104,8 @@ export class Portals {
   }
 
   spawnFromRoom(room) {
-    this.items = ((room && room.portals) || []).map(makePortal);
+    const roomId = room?.id || "";
+    this.items = ((room && room.portals) || []).map((def) => makePortal({ ...def, roomId }));
     this.near = null;
     this.prompt = "";
     this.charge = null;
@@ -307,9 +310,14 @@ export class Portals {
           }
           const locked = isDestLocked(portal.dest, evo);
           if (!locked) {
-            const strength = (1 - d / pullR) * (reduce ? 0.12 : 0.28);
-            p.vx += ((cx - px) / Math.max(d, 1)) * strength;
-            p.vy += ((cy - py) / Math.max(d, 1)) * strength * 0.85;
+            const profile = traversalProfile(portal.roomId, portal.dest, portal.type);
+            const pullScale = Number(profile.pull) || 1;
+            const twist = Number(profile.twist) || 0;
+            const strength = (1 - d / pullR) * (reduce ? 0.12 : 0.28) * pullScale;
+            const nx = (cx - px) / Math.max(d, 1);
+            const ny = (cy - py) / Math.max(d, 1);
+            p.vx += nx * strength + (-ny) * strength * 0.16 * twist;
+            p.vy += ny * strength * 0.85 + nx * strength * 0.08 * twist;
             // Chispas de atracción ocasionales
             if (!reduce && game.fx && unit(this._simT + portal.x * 0.07 + portal.y * 0.11) < 0.18) {
               game.fx.emit(px, py, {
@@ -329,10 +337,10 @@ export class Portals {
           const locked = isDestLocked(portal.dest, evo);
           if (locked) {
             const need = destNeedEvo(portal.dest);
-            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · bloqueado · Forma " + (need + 1);
+            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · bloqueado · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · acércate para viajar";
+            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · entra para viajar";
             if (this.cooldown <= 0) this._beginCharge(portal, "blackhole", reduce);
           }
           break;
@@ -348,7 +356,7 @@ export class Portals {
             this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "E · catapulta → " + portal.label;
+            this.prompt = "E · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " → " + portal.label;
           }
           break;
         }
@@ -650,14 +658,19 @@ export class Portals {
   }
 
   _makeKick(portal, type) {
-    // Facing hacia el centro de la sala destino aproximado
     this._landingType = type === "blackhole" ? "blackhole" : "catapult";
+    const profile = traversalProfile(portal?.roomId, portal?.dest, type);
     const mid = portal.x + portal.w / 2;
-    const facing = mid < 800 ? 1 : -1;
-    if (type === "blackhole") {
-      return { vx: facing * 2.4, vy: -3.2, facing, type: "blackhole" };
-    }
-    return { vx: facing * 5.5, vy: -7.5, facing, type: "catapult" };
+    const fallbackFacing = mid < 800 ? 1 : -1;
+    const facing = Math.sign(profile.vx || 0) || fallbackFacing;
+    return {
+      vx: Number(profile.vx) || fallbackFacing * (type === "blackhole" ? 2.4 : 5.5),
+      vy: Number(profile.vy) || (type === "blackhole" ? -3.2 : -7.5),
+      facing,
+      type: profile.kind === "vortex" ? "blackhole" : "catapult",
+      nodeLabel: profile.label,
+      color: profile.color,
+    };
   }
 
   _queue(portal, fromRoomId) {
@@ -673,6 +686,7 @@ export class Portals {
       from: "portal",
       type: portal.type,
       label: portal.label,
+      node: traversalNodeSnapshot(fromRoomId || portal.roomId, portal),
       fromRoom: fromRoomId || null,
       tint: portal.type === "blackhole" ? "90,40,160" : "255,160,60"
     };
@@ -712,7 +726,9 @@ export class Portals {
   _tickOrbitals(reduce) {
     const step = reduce ? 0.5 : 1;
     for (const o of this.orbitals) {
-      o.a += o.speed * step;
+      const profile = traversalProfile(o.portal?.roomId, o.portal?.dest, o.portal?.type);
+      const twist = Number(profile.twist) || 1;
+      o.a += o.speed * step * Math.sign(twist || 1) * Math.max(0.65, Math.min(1.65, Math.abs(twist)));
       o.life -= step;
       if (o.life <= 0) {
         o.life = o.max;
@@ -867,10 +883,28 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   }
   ctx.restore();
 
+  const profile = traversalProfile(portal.roomId, portal.dest, portal.type);
+  const previewA = charging ? 0.62 : 0.28 + (0.5 + Math.sin(t / 12) * 0.5) * 0.12;
+  ctx.globalAlpha = previewA;
+  ctx.strokeStyle = profile.color || "#ffc078";
+  ctx.lineWidth = charging ? 2.4 : 1.5;
+  ctx.setLineDash(charging ? [8,5] : [5,7]);
+  ctx.beginPath();
+  const sx = x + portal.w * 0.56;
+  const sy = y - 8;
+  const dir = Math.sign(Number(profile.vx) || 1) || 1;
+  const powerX = Math.min(150, Math.abs(Number(profile.vx) || 5.5) * 18);
+  const rise = Math.min(120, Math.abs(Number(profile.vy) || 7.5) * 11);
+  ctx.moveTo(sx, sy);
+  ctx.quadraticCurveTo(sx + dir * powerX * 0.52, sy - rise, sx + dir * powerX, sy - rise * 0.44);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
   ctx.font = "800 11px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ffe8c8";
-  ctx.fillText(portal.label || "Catapulta", x + portal.w / 2, y - 6);
+  ctx.fillStyle = profile.color || "#ffe8c8";
+  ctx.fillText(profile.label || portal.label || "Catapulta", x + portal.w / 2, y - 6);
   ctx.restore();
 }
 
@@ -880,7 +914,9 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   const r = Math.min(portal.w, portal.h) * 0.48;
   const charging = charge && charge.portal === portal;
   const ck = charging ? Math.min(1, charge.t / Math.max(1, charge.max)) : 0;
-  const spin = t / (16 - ck * 10); // anillos aceleran al absorber
+  const profile = traversalProfile(portal.roomId, portal.dest, portal.type);
+  const twist = Number(profile.twist) || 1;
+  const spin = (t / (16 - ck * 10)) * Math.sign(twist || 1) * Math.max(0.7, Math.min(1.6, Math.abs(twist))); // ruta define dirección
   const swallow = portal.swallow || 0;
   const pulse = 0.55 + Math.sin(t / 7) * 0.2 + (charging ? 0.3 + ck * 0.35 : 0) + swallow * 0.04;
 
@@ -979,7 +1015,8 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
-  ctx.fillText("◉ " + (portal.label || "Agujero"), cx, cy - r - 12);
+  ctx.fillStyle = profile.color || "#e8d6ff";
+  ctx.fillText("◉ " + profile.label, cx, cy - r - 12);
   ctx.restore();
 }
 

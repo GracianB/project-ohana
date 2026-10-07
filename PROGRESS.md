@@ -1,3 +1,35 @@
+## 08/10/2026 · V40 Living Worlds + Traversal Graph
+
+**Caché:** `ohana-230`.
+
+V40 transforma las diez salas de Isla Hoku en un mundo conectado, legible y reactivo, y corrige la antigua falsa seguridad de los pozos.
+
+- Los **pozos son geometría real**: los hazards explícitos se resuelven antes que `nearestBelow/lowestFloor`.
+- Costa → Arrecife, Jungla → Caldera, Cumbre → Claro y Órbita → Claro usan volúmenes de transferencia reales.
+- Caldera incorpora un **pozo de magma mortal** alineado con un hueco físico del suelo; Dragón dispone de una única Batida de emergencia por caída.
+- Catapultas y vórtices comparten una red de traversal con perfiles de ruta: impulso, arco, pull, torsión, color y nombre propios.
+- Las catapultas muestran su trayectoria antes del lanzamiento; los vórtices comunican dirección y destino mediante su movimiento.
+- **World Graph 2.0** reemplaza la cuadrícula plana del mapa: diez nodos, puertas, caídas, catapultas, vórtices, bloqueos de evolución, rutas principales, atajos y secretos.
+- El minimapa usa el mismo grafo canónico que el overlay grande.
+- **Living Worlds** añade identidad procedural a cada sala, inspirada en su héroe afín:
+  - Claro / Kilo · floración y polen.
+  - Costa / Frita · velocidad y líneas de flow.
+  - Jungla / Stitcho · lianas y costuras.
+  - Cueva / Michi · cristales lunares y sombras felinas.
+  - Lab / Chispín · nubes y electricidad.
+  - Cumbre / Cuerno · auroras.
+  - Órbita / Yomi · vacío y geometría astral.
+  - Arrecife / Pizza · coral, burbujas y elasticidad.
+  - Caldera / Dragón · térmicas y brasas.
+  - Nido / Dino · fracturas sísmicas.
+- Entrar con el héroe afín intensifica la respuesta ambiental sin alterar daño ni hitboxes.
+- Los fondos bitmap de mundo quedan retirados del runtime y del precache: V40 genera sus mundos en canvas.
+- Browser E2E prueba caída real, muerte por magma, rescate de Dragón y World Graph.
+- Visual Regression captura las diez combinaciones sala/héroe y el mapa avanzado.
+- Release Gate final: `npm run release:check` valida documentación, caché, precache y contratos de publicación.
+- Contrato de release V40: **10 personajes · 5 formas · 10 salas**.
+- QA final: `node tests/browser/e2e.mjs` · `node tests/browser/visual-regression.mjs` · `npm run release:check`.
+
 ## 07/10/2026 · V39 Hero Mastery
 
 **Caché:** `ohana-229`.

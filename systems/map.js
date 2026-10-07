@@ -59,7 +59,7 @@ export const ROOMS = {
     portals: [{ type: "blackhole", x: 1170, y: 710, w: 80, h: 80, dest: "volcano", label: "Caldera" }]
   },
   cave: {
-    id: "cave", name: "Cueva Azul", short: "Cueva", world: 4,
+    id: "cave", name: "Cueva Azul", short: "Cueva", world: 8,
     doors: { right: "hub", left: "lab", up: null, down: null },
     hint: "OESTE lab (forma 2). ESTE claro.",
     plats: [[0, 810, 1600, 90], [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]],
@@ -76,7 +76,7 @@ export const ROOMS = {
     orbs: [[520, 440], [900, 300]]
   },
   ridge: {
-    id: "ridge", name: "Cumbre", short: "Cumbre", world: 3,
+    id: "ridge", name: "Cumbre", short: "Cumbre", world: 9,
     doors: { down: "hub", right: "space", left: null, up: null },
     pit: true,
     hint: "Hueco central ABAJO = Claro. ESTE = órbita.",
@@ -109,6 +109,7 @@ export const ROOMS = {
   },
   volcano: {
     id: "volcano", name: "Caldera", short: "Caldera", world: 2,
+    pit: true,
     doors: { left: "jungle", up: "jungle", right: "boss", down: null },
     needEvo: 3,
     hint: "Llegaste por el hueco de la Jungla. ESTE = nido. BH → Jungla.",
@@ -118,7 +119,7 @@ export const ROOMS = {
     portals: [{ type: "blackhole", x: 190, y: 710, w: 80, h: 80, dest: "jungle", label: "Jungla" }]
   },
   boss: {
-    id: "boss", name: "Nido Final", short: "Nido", world: 2,
+    id: "boss", name: "Nido Final", short: "Nido", world: 7,
     doors: { left: "volcano", right: null, up: null, down: null },
     needEvo: 3,
     hint: "El monstruo está aquí. Prepárate. OESTE huye.",
@@ -130,8 +131,16 @@ export const ROOMS = {
 };
 
 const SIGNATURES = {
-  hub: "kilo", beach: "stitcho", jungle: "chispin", cave: "cat", lab: "dragon",
-  ridge: "dino", space: "frita", reef: "pizza", volcano: "yomi", boss: "cuerno"
+  hub: "kilo",
+  beach: "frita",
+  jungle: "stitcho",
+  cave: "cat",
+  lab: "chispin",
+  ridge: "cuerno",
+  space: "yomi",
+  reef: "pizza",
+  volcano: "dragon",
+  boss: "dino"
 };
 
 const SCALE = 1.4;
@@ -144,7 +153,7 @@ const LAYOUT = {
   ridge: [[0,1134,900,126],[1340,1134,900,126],[180,960,200,22],[440,760,200,22],[840,1000,200,22],[1040,920,180,22],[1500,900,200,22],[1780,700,200,22]],
   space: [[0,1134,900,126],[1340,1134,900,126],[200,960,200,22],[480,740,200,22],[840,1000,200,22],[1040,920,180,22],[1520,860,220,22],[1800,620,220,22]],
   reef: [[0,1134,2240,126],[200,980,220,22],[500,800,220,22],[860,620,220,22],[1200,800,220,22],[1560,600,220,22],[1880,420,220,22]],
-  volcano: [[0,1134,2240,126],[200,960,200,22],[1500,980,200,22],[1720,800,200,22],[1940,620,200,22],[1720,440,200,22],[1940,260,200,22]],
+  volcano: [[0,1134,1080,126],[1240,1134,1000,126],[200,960,200,22],[1500,980,200,22],[1720,800,200,22],[1940,620,200,22],[1720,440,200,22],[1940,260,200,22]],
   boss: [[0,1134,2240,126],[280,900,240,22],[980,720,280,22],[1680,900,240,22]]
 };
 for (const room of Object.values(ROOMS)) {
