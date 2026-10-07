@@ -7,6 +7,7 @@
 
 import { ROOMS } from "./map.js";
 import { showNotification } from "./notify.js";
+import { traversalProfile, traversalNodeSnapshot } from "./traversal-nodes.js";
 
 function overlaps(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -38,6 +39,7 @@ function makePortal(def) {
   const h = def.h != null ? def.h : type === "blackhole" ? 72 : 32;
   return {
     type,
+    roomId: def.roomId || "",
     x: def.x,
     y: def.y,
     w,
@@ -102,7 +104,8 @@ export class Portals {
   }
 
   spawnFromRoom(room) {
-    this.items = ((room && room.portals) || []).map(makePortal);
+    const roomId = room?.id || "";
+    this.items = ((room && room.portals) || []).map((def) => makePortal({ ...def, roomId }));
     this.near = null;
     this.prompt = "";
     this.charge = null;
@@ -329,10 +332,10 @@ export class Portals {
           const locked = isDestLocked(portal.dest, evo);
           if (locked) {
             const need = destNeedEvo(portal.dest);
-            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · bloqueado · Forma " + (need + 1);
+            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · bloqueado · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "◉ AGUJERO NEGRO · " + portal.label + " · acércate para viajar";
+            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · entra para viajar";
             if (this.cooldown <= 0) this._beginCharge(portal, "blackhole", reduce);
           }
           break;
@@ -348,7 +351,7 @@ export class Portals {
             this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
             this._maybeLockNotify(portal, need);
           } else {
-            this.prompt = "E · catapulta → " + portal.label;
+            this.prompt = "E · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " → " + portal.label;
           }
           break;
         }
@@ -650,14 +653,19 @@ export class Portals {
   }
 
   _makeKick(portal, type) {
-    // Facing hacia el centro de la sala destino aproximado
     this._landingType = type === "blackhole" ? "blackhole" : "catapult";
+    const profile = traversalProfile(portal?.roomId, portal?.dest, type);
     const mid = portal.x + portal.w / 2;
-    const facing = mid < 800 ? 1 : -1;
-    if (type === "blackhole") {
-      return { vx: facing * 2.4, vy: -3.2, facing, type: "blackhole" };
-    }
-    return { vx: facing * 5.5, vy: -7.5, facing, type: "catapult" };
+    const fallbackFacing = mid < 800 ? 1 : -1;
+    const facing = Math.sign(profile.vx || 0) || fallbackFacing;
+    return {
+      vx: Number(profile.vx) || fallbackFacing * (type === "blackhole" ? 2.4 : 5.5),
+      vy: Number(profile.vy) || (type === "blackhole" ? -3.2 : -7.5),
+      facing,
+      type: profile.kind === "vortex" ? "blackhole" : "catapult",
+      nodeLabel: profile.label,
+      color: profile.color,
+    };
   }
 
   _queue(portal, fromRoomId) {
@@ -673,6 +681,7 @@ export class Portals {
       from: "portal",
       type: portal.type,
       label: portal.label,
+      node: traversalNodeSnapshot(fromRoomId || portal.roomId, portal),
       fromRoom: fromRoomId || null,
       tint: portal.type === "blackhole" ? "90,40,160" : "255,160,60"
     };
@@ -979,7 +988,7 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
-  ctx.fillText("◉ " + (portal.label || "Agujero"), cx, cy - r - 12);
+  ctx.fillText("◉ " + traversalProfile(portal.roomId, portal.dest, portal.type).label, cx, cy - r - 12);
   ctx.restore();
 }
 
