@@ -95,3 +95,19 @@ test('PR151.10: los contratos de estado de Kilo/Frita/Cuerno se aplican en la su
   }
   clearAbilityFx();
 });
+
+test('V37: las diez U tienen nombre y pareja de asistencia propios', () => {
+  const names = CHARACTERS.map((id) => supremeOf(id).name);
+  const allies = CHARACTERS.map((id) => supremeOf(id).ally);
+  assert.equal(new Set(names).size, 10);
+  assert.equal(new Set(allies).size, 10);
+  for (const id of CHARACTERS) {
+    assert.match(supremeOf(id).name, /[A-ZÁÉÍÓÚÑ]/);
+    assert.ok(CHARACTERS.includes(supremeOf(id).ally), id + '/ally');
+  }
+});
+
+test('V37: las diez identidades supreme conservan una frase cinematográfica propia', () => {
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].line)).size, 10);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_IDENTITY[id].text)).size, 10);
+});
