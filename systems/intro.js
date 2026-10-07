@@ -305,7 +305,7 @@ export function playTitleIntro() {
     if (islandK > 0) {
       ctx.save();
       ctx.globalAlpha = islandK * (1 - seg(t, 0.85, 1.15));
-      drawTitle(ctx, "ISLA HOKU", cx, H * 0.16, Math.max(12, size * 0.16), "#d8ebff", {
+      drawTitle(ctx, "MUNDO 1 · ISLA HOKU", cx, H * 0.16, Math.max(12, size * 0.16), "#d8ebff", {
         font: FONT_BODY, weight: 800, spacing: "0.42em", stroke: false, glow: "rgba(126,231,255,0.7)"
       });
       ctx.restore();
@@ -315,7 +315,7 @@ export function playTitleIntro() {
     if (omen > 0) {
       ctx.save();
       ctx.globalAlpha = omen * (1 - seg(t, 2.15, 2.45));
-      drawTitle(ctx, "DIEZ HÉROES · CINCO FORMAS", cx, H * 0.81, Math.max(13, size * 0.16), "#e7f4ff", {
+      drawTitle(ctx, "DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS", cx, H * 0.81, Math.max(13, size * 0.16), "#e7f4ff", {
         font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.88
       });
       ctx.restore();
@@ -349,7 +349,7 @@ export function playTitleIntro() {
     if (tag > 0) {
       ctx.save();
       ctx.globalAlpha = tag;
-      drawTitle(ctx, "Cinco héroes. Un nido. Nadie se queda atrás.", cx, cy + size * 0.85 + (1 - easeOut(tag)) * 8,
+      drawTitle(ctx, "Diez héroes. Cinco formas. Un nido. Nadie se queda atrás.", cx, cy + size * 0.85 + (1 - easeOut(tag)) * 8,
         Math.max(13, size * 0.15), "#d6e6f6", { font: FONT_BODY, weight: 400, stroke: false, maxWidth: W * 0.9 });
       ctx.restore();
     }
