@@ -2576,8 +2576,10 @@ function render() {
   ctx.translate(centerX + shakeX, centerY + shakeY);
   ctx.scale(z, z);
   ctx.translate(-centerX, -centerY);
-  if (paintedHubOn(game.roomId)) drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
-  else {
+  if (paintedHubOn(game.roomId)) {
+    drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
+    drawLivingWorld(ctx, game, t, camW(), camH());
+  } else {
     renderWorld(ctx, world, game.cam, t, camW(), camH());
     drawRoomAtmosphere(
       ctx,
