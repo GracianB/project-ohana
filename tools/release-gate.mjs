@@ -95,6 +95,7 @@ if (packageJson.scripts?.test !== "node --test tests/*.js") {
   errors.push("package.json: script test inesperado");
 }
 if (packageJson.scripts?.["test:browser"] !== "node tests/browser/e2e.mjs") errors.push("package.json: falta test:browser esperado");
+if (packageJson.scripts?.["test:browser:multiplayer"] !== "node tests/browser/multiplayer-e2e.mjs") errors.push("package.json: falta test:browser:multiplayer");
 if (packageJson.scripts?.["test:visual"] !== "node tests/browser/visual-regression.mjs") errors.push("package.json: falta test:visual");
 if (packageJson.scripts?.["release:check"] !== "node tools/release-gate.mjs") errors.push("package.json: falta release:check");
 
@@ -135,4 +136,4 @@ console.log(" - cache: " + swVersion);
 console.log(" - " + activeCharacters + " personajes / " + formsPerCharacter + " formas / " + roomCount + " salas");
 console.log(" - " + runtimeFiles.length + " módulos JS runtime precacheados");
 console.log(" - " + referencedAssets.length + " recursos precacheados existentes");
-console.log(" - scripts: test + test:browser + release:check");
+console.log(" - scripts: test + test:browser + test:browser:multiplayer + release:check");
