@@ -79,11 +79,20 @@ try {
 
   await hostPage.locator("#game").waitFor({ state: "visible", timeout: 5000 });
   await guestPage.locator("#game").waitFor({ state: "visible", timeout: 5000 });
-  await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 7000 });
-  await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 7000 });
 
-  assert.equal(await hostPage.locator("body").getAttribute("data-game-mode"), "online");
-  assert.equal(await guestPage.locator("body").getAttribute("data-game-mode"), "online");
+  for (const [label, page] of [["host", hostPage], ["guest", guestPage]]) {
+    await page.waitForFunction(() => document.body.dataset.onlineState === "connected" || document.body.dataset.onlineState === "error", null, { timeout: 7000 });
+    const boot = await page.locator("body").evaluate((body) => ({
+      mode: body.dataset.gameMode || "",
+      state: body.dataset.onlineState || "",
+      error: body.dataset.onlineError || "",
+    }));
+    assert.equal(boot.state, "connected", label + " online boot failed: " + (boot.error || "unknown"));
+    assert.equal(boot.mode, "online", label + " must enter online game mode");
+  }
+
+  await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
+  await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
 
   await hostPage.keyboard.down("ArrowRight");
   await hostPage.waitForTimeout(900);
