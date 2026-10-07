@@ -439,6 +439,65 @@ try {
     'desktop: Chispín atraviesa la nube · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud })
   );
 
+  // V40 — caída física Beach → Reef. El hueco tiene prioridad sobre floor rescue.
+  const beachDrop = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    api.loadRoom('beach');
+    api.resetInput();
+    api.setPlayer(1085, 1060);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 36 && state.roomId === 'beach'; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(beachDrop.roomId, 'reef', 'desktop: pozo Beach no transfiere realmente a Reef');
+
+  // V40 — magma real en Caldera.
+  const magmaDeath = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    api.setEvo(4);
+    api.loadRoom('volcano');
+    api.resetInput();
+    api.setPlayer(1120, 1120);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 24 && state.hp > 0; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(magmaDeath.roomId, 'volcano', 'desktop: magma cambia de sala inesperadamente');
+  assert.equal(magmaDeath.hp, 0, 'desktop: pozo mortal de magma no mata');
+
+  // V40 — Dragón obtiene una única salida heroica del mismo magma.
+  const dragonPit = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('dragon');
+    api.setEvo(4);
+    api.loadRoom('volcano');
+    api.resetInput();
+    api.setPlayer(1120, 1120);
+    api.setPlayerVelocity(0, 8);
+    let state = api.state();
+    for (let i = 0; i < 12 && !(state.hp > 0 && state.player?.vy < -1); i++) state = api.step(1);
+    return state;
+  });
+  assert.ok(dragonPit.hp > 0, 'desktop: Dragón no sobrevive a su última batida en magma');
+  assert.ok(dragonPit.player?.vy < 0, 'desktop: última batida de Dragón no lo expulsa del pozo');
+
+  // V40 — World Graph avanzado reemplaza la vieja cuadrícula.
+  await page.locator('#btn-map').click();
+  await page.waitForTimeout(80);
+  assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', 'desktop: mapa V40 no abre');
+  assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, 'desktop: World Graph V40 ausente');
+  assert.equal(await page.locator('#map-grid .wm-node').count(), 10, 'desktop: mapa V40 no contiene diez salas');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-catapult').count() >= 1, 'desktop: mapa no muestra catapultas');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-vortex').count() >= 1, 'desktop: mapa no muestra vórtices');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-drop').count() >= 1, 'desktop: mapa no muestra caídas');
+  assert.equal(await page.locator('#map-grid .wm-node.here').count(), 1, 'desktop: mapa no marca sala actual');
+  await page.locator('#btn-close-map').click();
+  await page.waitForTimeout(50);
+
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
