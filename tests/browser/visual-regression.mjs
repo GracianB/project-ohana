@@ -141,6 +141,7 @@ try {
     api.loadRoom('hub');
     api.setInvulnerable(600);
     api.resetInput();
+    api.resetDebugTrace();
     const state = api.state();
     if (state.input.left || state.input.right || state.input.jump || state.input.down) {
       throw new Error('Cloudstep: input residual ' + JSON.stringify(state.input));
@@ -160,7 +161,7 @@ try {
   assert.equal(
     cloudState.mastery?.cloud,
     true,
-    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input })
+    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input, debug:cloudState.debug })
   );
   assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
   assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
