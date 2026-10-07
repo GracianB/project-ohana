@@ -1181,6 +1181,121 @@ const CASTERS = {
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
 const UPD = {
+  supremeField(g, f, p) {
+    f.life--;
+    f.pulse = (f.pulse || 0) + 1;
+    f.x = cx(p);
+    f.y = cy(p);
+    const mode = f.mode;
+    const pulseEvery = mode === "chispin" ? 12 : mode === "dragon" ? 18 : mode === "frita" ? 18 : 26;
+
+    if (mode === "stitcho") {
+      for (const e of g.enemies) {
+        if (!canHit(e) || e.boss) continue;
+        const dx = f.x - cx(e), dy = f.y - cy(e), d = Math.hypot(dx, dy) || 1;
+        if (d < 520) {
+          e.vx = clamp((e.vx || 0) + (dx / d) * 0.7, -10, 10);
+          e.vy = clamp((e.vy || 0) + (dy / d) * 0.35, -10, 10);
+        }
+      }
+    } else if (mode === "yomi") {
+      for (const e of g.enemies) {
+        if (!canHit(e) || e.boss) continue;
+        const dx = f.x - cx(e), dy = f.y - cy(e), d = Math.hypot(dx, dy) || 1;
+        if (d < 600) {
+          e.vx = clamp((e.vx || 0) + (dx / d) * 0.42, -8, 8);
+          e.vy = clamp((e.vy || 0) + (dy / d) * 0.2, -8, 8);
+        }
+      }
+    }
+
+    if (f.pulse % pulseEvery === 0) {
+      if (mode === "kilo") {
+        healPlayer(p, Math.max(2, p.maxHealth * 0.025));
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y) < 260) {
+          hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*4,ky:-5,stun:18,color:f.color,hitstop:1});
+        }
+      } else if (mode === "stitcho") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y) < 330) {
+          hitEnemy(g,e,f.dmg*0.9,{kx:Math.sign(f.x-cx(e))*8,ky:-4,stun:34,color:f.color,hitstop:1});
+        }
+      } else if (mode === "chispin") {
+        const targets = g.enemies.filter(canHit).sort((a,b)=>Math.hypot(cx(a)-f.x,cy(a)-f.y)-Math.hypot(cx(b)-f.x,cy(b)-f.y)).slice(0,3);
+        for (const e of targets) hitEnemy(g,e,f.dmg*0.85,{ky:-4,stun:22,color:f.color,crit:f.pulse%36===0,hitstop:1});
+      } else if (mode === "cat") {
+        const targets = g.enemies.filter(canHit).slice(0,4);
+        for (const e of targets) {
+          hitEnemy(g,e,f.dmg*0.72,{kx:0,ky:-2,stun:36,color:f.color,hitstop:1});
+          if (!e.boss) { e.vx *= 0.35; e.vy *= 0.35; }
+        }
+      } else if (mode === "dragon") {
+        const target = nearestEnemy(g,f.x,f.y,900,null,0);
+        const tx = target ? cx(target) : f.x + (p.facing||1) * 180;
+        add({kind:"meteor",x:tx-(p.facing||1)*120,y:(g.cam.y||0)-50,vx:(p.facing||1)*2.8,vy:11.5,r:15,dmg:f.dmg*1.35,R:72,life:150,rot:0});
+      } else if (mode === "dino") {
+        if (p.grounded) {
+          for (const e of g.enemies) if (canHit(e) && Math.abs(cx(e)-f.x)<360 && Math.abs((e.y+e.h)-(p.y+p.h))<90) {
+            hitEnemy(g,e,f.dmg*1.05,{kx:Math.sign(cx(e)-f.x)*10,ky:-12,stun:38,color:f.color,hitstop:1});
+          }
+          g.shake=Math.min(18,(g.shake||0)+5);
+        }
+      } else if (mode === "frita") {
+        const targets = g.enemies.filter(canHit).slice(0,5);
+        for (const e of targets) {
+          hitEnemy(g,e,f.dmg*0.8,{kx:Math.sign(cx(e)-f.x)*3,ky:-8,stun:20,color:f.color,hitstop:1});
+          e._friedT=Math.max(e._friedT||0,80);
+        }
+      } else if (mode === "pizza") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<430) {
+          hitEnemy(g,e,f.dmg*0.82,{kx:Math.sign(cx(e)-f.x)*9,ky:-10,stun:24,color:f.color,hitstop:1});
+        }
+        p.vy=Math.min(p.vy||0,-2.5);
+      } else if (mode === "yomi") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<390) {
+          const hp=Number(e.hp||0), max=Number(e.max||e.maxHp||e.maxHealth||hp||1);
+          const execute=hp>0&&hp<=max*0.22;
+          hitEnemy(g,e,execute?hp+9999:f.dmg*0.9,{kx:0,ky:-3,stun:44,color:f.color,crit:execute,hitstop:1});
+        }
+      } else if (mode === "cuerno") {
+        healPlayer(p,Math.max(2,p.maxHealth*0.018));
+        p.invuln=Math.max(p.invuln||0,10);
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<320) {
+          hitEnemy(g,e,f.dmg*0.76,{kx:Math.sign(cx(e)-f.x)*7,ky:-7,stun:24,color:f.color,hitstop:1});
+        }
+      }
+      boom(g,f.x,f.y,f.color,mode==="dragon"?8:5,{star:true,up:1.2,speed:2.4});
+    }
+    return f.life>0;
+  },
+  assist(g, f, p) {
+    f.life--;
+    const age=f.max-f.life;
+    const target=nearestEnemy(g,f.x,f.y,900,null,0);
+    const baseX=cx(p)-(p.facing||1)*54;
+    const baseY=p.y-18;
+    if(target){
+      const dx=cx(target)-f.x,dy=cy(target)-f.y,d=Math.hypot(dx,dy)||1;
+      const rush=(age%24)>8&&(age%24)<17;
+      const sp=rush?14:6.5;
+      f.x+=((dx/d)*sp);
+      f.y+=((dy/d)*sp);
+      f.facing=Math.sign(dx)||f.facing||1;
+    } else {
+      f.x+=(baseX-f.x)*0.12;
+      f.y+=(baseY-f.y)*0.12;
+    }
+    if(--f.next<=0&&f.strikes<3){
+      f.next=24;
+      const e=nearestEnemy(g,f.x,f.y,180,null,0);
+      if(e){
+        f.strikes++;
+        hitEnemy(g,e,f.dmg,{kx:(f.facing||1)*8,ky:-6,stun:22,color:f.color,crit:f.strikes===3,hitstop:1});
+        boom(g,cx(e),cy(e),f.color,7,{star:true,speed:3});
+      }
+    }
+    if(g._assist) g._assist.t=Math.max(0,f.life);
+    return f.life>0;
+  },
   hula(g, f, p) {
     f.life--;
     f.pulse = (Number(f.pulse) || 0) + 1;
