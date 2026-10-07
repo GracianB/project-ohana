@@ -3257,6 +3257,10 @@ if (e2eEnabled) {
         xp: p ? p.xp : 0,
         hp: p ? p.health : 0,
         maxHealth: p ? p.maxHealth : 0,
+        player: p ? {
+          x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+          grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
+        } : null,
         score: game.score,
         kills: game.kills,
         combo: game.combo,
