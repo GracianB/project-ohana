@@ -131,8 +131,10 @@ try {
   await page.waitForTimeout(220);
   assert.equal(await page.locator('#evo-stage').evaluate((el) => el.classList.contains('show')), true, '04-evolution: cinemática no visible');
   await capture(page, '04-evolution');
+  await page.waitForTimeout(700);
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(700);
+  assert.equal(await page.locator('#evo-stage').evaluate((el) => el.classList.contains('show')), false, '04-evolution: skip no devuelve al juego');
 
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.loadRoom('boss'));
@@ -159,7 +161,7 @@ try {
   await page.evaluate(() => dispatchEvent(new CustomEvent('ohana-win', { detail: {
     hero:'Kilo', form:'Forma final', rank:'S', time:'03:21', kills:42, best:'03:21'
   }})));
-  await page.waitForTimeout(1250);
+  await page.waitForTimeout(2450);
   assert.equal(await page.locator('#win-cinema').evaluate((el) => el.classList.contains('show')), true, '08-ending: final no visible');
   await capture(page, '08-ending');
   await page.locator('#win-continue').click();
