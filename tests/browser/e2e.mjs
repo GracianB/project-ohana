@@ -24,7 +24,7 @@ async function auditPage(page, label) {
   });
   assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
   const gameSource = await page.evaluate(async () => {
-    const response = await fetch('/game.js?v=ohana-229', { cache:'no-store' });
+    const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
   });
   assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
@@ -541,9 +541,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-229',
-      '/style.css?v=ohana-229',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-229',
+      '/game.js?v=ohana-230',
+      '/style.css?v=ohana-230',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-230',
     ];
     const results = [];
     for (const path of paths) {
