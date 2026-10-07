@@ -56,6 +56,7 @@ export function drawEnemy(ctx, e, cam, t) {
   ctx.fillStyle = "rgba(0,0,0,.34)";
   ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 4 - bob, e.w * 0.48, 5, 0, 0, Math.PI * 2); ctx.fill();
 
+  if (!e.boss) drawEncounterRead(ctx, e, t);
   if (e.telegraph) drawTelegraph(ctx, e, t);
   if (e.elite) drawEliteAura(ctx, e, t);
 
@@ -80,6 +81,7 @@ export function drawEnemy(ctx, e, cam, t) {
   else drawCucaracho(ctx, e, t);
 
   if (!e.boss) {
+    drawDamageWear(ctx, e, t);
     ctx.globalAlpha = 0.35;
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 1.4;
@@ -125,6 +127,111 @@ export function drawEnemy(ctx, e, cam, t) {
     ctx.restore();
   }
   drawHpBar(ctx, e);
+  ctx.restore();
+}
+
+
+const ROLE_COLOR = Object.freeze({
+  DIVER: "#ff9a66",
+  SKIRMISHER: "#7ee7ff",
+  ARTILLERY: "#d6a6ff",
+  BRUISER: "#ffd36a",
+  AMBUSHER: "#ff8ac8",
+  SWARM: "#91f0b4",
+});
+
+function drawEncounterRead(ctx, e, t) {
+  if (!(Number(e.aggro) > 0) || e.dying > 0) return;
+  const role = e.aiRole || "";
+  const intent = e.aiIntent || "";
+  const color = ROLE_COLOR[role] || "#cfe8ff";
+  const threat = Math.max(0, Math.min(1, Number(e.aiThreat) || 0));
+  const permit = e.aiAttackPermit !== false;
+  const y = e.h / 2 + 7;
+  const r = Math.max(11, e.w * 0.46);
+
+  ctx.save();
+  ctx.globalAlpha = 0.16 + threat * 0.2;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = permit ? 2 : 1.2;
+  ctx.beginPath();
+  ctx.ellipse(0, y, r, 4.5, 0, Math.PI * 1.08, Math.PI * 1.92);
+  ctx.stroke();
+
+  if (permit && !e.telegraph) {
+    const pulse = 0.5 + Math.sin(t * 0.14 + (e.spawnIndex || 0)) * 0.5;
+    ctx.globalAlpha = 0.3 + pulse * 0.28;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(-4, y + 3);
+    ctx.lineTo(0, y + 8 + pulse * 2);
+    ctx.lineTo(4, y + 3);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  if (intent === "FLANK") {
+    ctx.globalAlpha = 0.42;
+    for (const side of [-1, 1]) {
+      const a = t * 0.05 * side + side * 0.8;
+      const px = Math.cos(a) * (r + 6);
+      const py = Math.sin(a) * 5 + y;
+      ctx.beginPath();
+      ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+  } else if (intent === "RETREAT") {
+    const dir = Math.sign(Number(e._dx) || Number(e.vx) || 1);
+    ctx.globalAlpha = 0.5;
+    ctx.strokeStyle = "#b9e8ff";
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 2; i++) {
+      const x = -dir * (r + 5 + i * 6);
+      ctx.beginPath();
+      ctx.moveTo(x + dir * 4, y - 3);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + dir * 4, y + 3);
+      ctx.stroke();
+    }
+  } else if (intent === "HOLD") {
+    ctx.globalAlpha = 0.3;
+    ctx.strokeStyle = color;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.7, y + 2);
+    ctx.lineTo(r * 0.7, y + 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.restore();
+}
+
+function drawDamageWear(ctx, e, t) {
+  const max = Math.max(1, Number(e.max) || 1);
+  const hp = Math.max(0, Number(e.hp) || 0);
+  const ratio = hp / max;
+  if (ratio > 0.42 || e.baby) return;
+
+  const severity = 1 - ratio / 0.42;
+  const pulse = 0.7 + Math.sin(t * 0.13 + (e.spawnIndex || 0)) * 0.12;
+  ctx.save();
+  ctx.globalAlpha = (0.18 + severity * 0.3) * pulse;
+  ctx.strokeStyle = ratio < 0.2 ? "#ff7a66" : "#fff0c0";
+  ctx.lineWidth = 1.2 + severity * 0.8;
+  ctx.lineCap = "round";
+
+  const w = Math.max(8, e.w * 0.32);
+  const h = Math.max(7, e.h * 0.26);
+  ctx.beginPath();
+  ctx.moveTo(-w, -h * 0.6);
+  ctx.lineTo(-w * 0.25, -h * 0.05);
+  ctx.lineTo(-w * 0.55, h * 0.5);
+  ctx.moveTo(w * 0.2, -h);
+  ctx.lineTo(w * 0.45, -h * 0.2);
+  ctx.lineTo(w * 0.1, h * 0.55);
+  ctx.stroke();
   ctx.restore();
 }
 
