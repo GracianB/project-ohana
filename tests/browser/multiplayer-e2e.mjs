@@ -72,6 +72,11 @@ try {
   await hostPage.waitForURL(/index\.html\?online=1/, { timeout: 7000 });
   await guestPage.waitForURL(/index\.html\?online=1/, { timeout: 7000 });
 
+  for (const page of [hostPage, guestPage]) {
+    const transferredSession = await page.evaluate(() => JSON.parse(sessionStorage.getItem("ohana-coop-session") || "null"));
+    assert.equal(transferredSession?.originalEngine, true, "la sesión multiplayer debe conservar originalEngine al entrar en el motor oficial");
+  }
+
   await hostPage.locator("#game").waitFor({ state: "visible", timeout: 5000 });
   await guestPage.locator("#game").waitFor({ state: "visible", timeout: 5000 });
   await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 7000 });
