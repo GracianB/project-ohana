@@ -281,13 +281,26 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.setCombo(10));
   const previousSupremeGeneration = await page.evaluate(() => Number(document.querySelector('#supreme-cinema')?.dataset.generation || 0));
-  const supremeState = await page.evaluate(() => window.__OHANA_E2E.cast(3));
-  await page.waitForFunction((previousGeneration) => {
+  const supremeAttempt = await page.evaluate(() => {
+    const state = window.__OHANA_E2E.cast(3);
     const el = document.querySelector('#supreme-cinema');
-    return Number(el?.dataset.generation || 0) > previousGeneration && el?.dataset.state === 'active';
-  }, previousSupremeGeneration, { timeout: 1200 });
-  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
-  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
+    return {
+      state,
+      cinema: el ? {
+        generation:Number(el.dataset.generation || 0),
+        state:el.dataset.state || '',
+        hidden:el.getAttribute('aria-hidden'),
+        show:el.classList.contains('show'),
+        duration:Number(el.dataset.duration || 0)
+      } : null
+    };
+  });
+  const supremeState = supremeAttempt.state;
+  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3 · ' + JSON.stringify(supremeAttempt));
+  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo · ' + JSON.stringify(supremeAttempt));
+  assert.ok(supremeAttempt.cinema?.generation > previousSupremeGeneration, '09-supreme: la cinemática U no incrementa generación · ' + JSON.stringify(supremeAttempt));
+  assert.equal(supremeAttempt.cinema?.state, 'active', '09-supreme: U no entra en active de forma síncrona · ' + JSON.stringify(supremeAttempt));
+  await page.waitForTimeout(120);
   const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
     show: el.classList.contains('show'),
     state: el.dataset.state,
