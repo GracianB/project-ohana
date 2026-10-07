@@ -1,8 +1,12 @@
-const VERSION = "ohana-221";
+const VERSION = "ohana-223";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
   "./index.html",
+  "./multiplayer.html?v=" + VERSION,
+  "./multiplayer.css?v=" + VERSION,
+  "./multiplayer.js",
+  "./multiplayer/mission.js",
   "./manifest.json",
   "./favicon.svg",
   "./style.css?v=" + VERSION,
@@ -86,8 +90,10 @@ const PRECACHE = [
   "./systems/title-fx.js?v=" + VERSION,
   "./systems/title.js?v=" + VERSION,
   "./systems/experience.js?v=" + VERSION,
+  "./systems/online-coop.js?v=" + VERSION,
   "./systems/xp.js?v=" + VERSION,
   "./worlds/index.js?v=" + VERSION,
+  "./worlds/odyssey-sectors.js?v=" + VERSION,
   "./worlds/room-atmosphere.js?v=" + VERSION,
   "./worlds/painted-hub.js?v=" + VERSION,
   "./worlds/terrain.js?v=" + VERSION,
@@ -129,8 +135,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  if (request.method !== "GET") return;
   const url = new URL(request.url);
+  if (url.origin === self.location.origin && url.pathname.endsWith("/.netlify/functions/game")) return;
+  if (request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
   const isScript = url.pathname.endsWith(".js");

@@ -14,3 +14,7 @@ ohana-patch/
 .env
 
 node_modules/
+test-results/
+
+# Local Netlify folder
+.netlify
