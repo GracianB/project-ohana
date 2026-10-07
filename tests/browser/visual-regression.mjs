@@ -173,16 +173,12 @@ try {
     const api = window.__OHANA_E2E;
     api.start('dragon');
     api.setEvo(4);
-    api.setPlayer(520, 980);
-    api.step(10);
+    api.setPlayer(520, 920);
+    api.setPlayerVelocity(0, 2);
+    api.exhaustPlayerJumps();
+    api.resetInput();
   });
   await page.locator('#game').focus();
-  for (let i = 0; i < 3; i++) {
-    await page.keyboard.down('Space');
-    await page.evaluate(() => window.__OHANA_E2E.step(1));
-    await page.keyboard.up('Space');
-    await page.evaluate(() => window.__OHANA_E2E.step(1));
-  }
   await page.keyboard.down('Space');
   const wingState = await page.evaluate(() => window.__OHANA_E2E.step(1));
   assert.ok(wingState.mastery?.wingUsed >= 1, '12-wingbeat: Dragón no activa la batida extra');
