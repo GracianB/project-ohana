@@ -277,8 +277,12 @@ async function auditPage(page, label) {
     if (data) for (let i = 0; i < data.length; i += 32) { const v = data[i] + data[i+1] + data[i+2] + data[i+3]; sum += v; if (v > 12) nonZero++; }
     const route = (() => { const seen = new Set(['hub']), q = ['hub']; while (q.length) { const id = q.shift(); for (const d of Object.values(ROOMS[id].doors || {})) if (d && !seen.has(d)) { seen.add(d); q.push(d); } } return [...seen]; })();
     const resources = performance.getEntriesByType('resource');
-    const js = resources.filter((r) => r.name.includes('.js')).reduce((n,r) => n + (r.transferSize || 0), 0);
-    const css = resources.filter((r) => r.name.includes('.css')).reduce((n,r) => n + (r.transferSize || 0), 0);
+    const productionResources = resources.filter((r) => {
+      try { return !new URL(r.name).searchParams.has('e2e'); }
+      catch (_) { return true; }
+    });
+    const js = productionResources.filter((r) => r.name.includes('.js')).reduce((n,r) => n + (r.transferSize || 0), 0);
+    const css = productionResources.filter((r) => r.name.includes('.css')).reduce((n,r) => n + (r.transferSize || 0), 0);
     const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0;
     const buttons = [...document.querySelectorAll('button')].map((b) => ({ name: b.getAttribute('aria-label') || b.textContent.trim() || b.getAttribute('title') || '', disabled: b.disabled }));
     const dialogs = [...document.querySelectorAll('[role="dialog"]')].map((d) => ({ labelled: !!d.getAttribute('aria-label') || !!d.getAttribute('aria-labelledby'), modal: d.getAttribute('aria-modal') === 'true' }));
@@ -294,7 +298,7 @@ async function auditPage(page, label) {
   assert.equal(audit.route.length, 10, label + ': recorrido de salas');
   assert.ok(audit.nonZero > 100, label + ': Canvas vacío');
   assert.ok(audit.sum > 10000, label + ': Canvas sin señal visual');
-  assert.ok(audit.js < 1500000, label + ': JS > 1.5 MB');
+  assert.ok(audit.js < 1500000, label + ': JS > 1.5 MB · ' + audit.js + ' bytes');
   assert.ok(audit.css < 500000, label + ': CSS > 500 KB');
   assert.ok(audit.fcp < 4000, label + ': FCP > 4 s');
   assert.ok(gameplay.length >= 10, label + ': secuencia de gameplay incompleta');
