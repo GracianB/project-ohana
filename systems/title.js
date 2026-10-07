@@ -21,6 +21,18 @@ addEventListener("pointerdown", jingle, { capture: true });
 addEventListener("keydown", jingle, { capture: true });
 
 const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispín Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
+const HERO_LINES = {
+  kilo: "Equilibrio, curiosidad y una última forma capaz de volar.",
+  stitcho: "Control, agarre a paredes y ascensos imposibles.",
+  chispin: "Velocidad pura, chispas y presión constante.",
+  cat: "Una segunda oportunidad y movilidad espectral.",
+  dragon: "Planeo, dominio aéreo y vuelo en la forma final.",
+  dino: "Peso, embestida y ondas de impacto.",
+  frita: "Carrera, deslizamiento y caos a ras de suelo.",
+  pizza: "Rebotes, golpes de caída y horno desatado.",
+  yomi: "Paso espectral, caída rápida y remates oscuros.",
+  cuerno: "Carga frontal, aguante y recuperación."
+};
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96, cuerno: 1.0 };
 let selectedId = "kilo";
@@ -197,10 +209,12 @@ function mark(id) {
     const heroName = document.getElementById("selected-hero-name");
     const heroForm = document.getElementById("selected-hero-form");
     const heroDifficulty = document.getElementById("selected-hero-difficulty");
+    const heroLine = document.getElementById("selected-hero-line");
     const rank = difficulty(selectedDef.id);
     if (heroName) heroName.textContent = selectedDef.name;
     if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
     if (heroDifficulty) heroDifficulty.textContent = "Dificultad " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
+    if (heroLine) heroLine.textContent = HERO_LINES[selectedDef.id] || "Cinco formas. Tres poderes. Una identidad propia.";
     document.getElementById("char-select")?.style.setProperty("--hero-tint", selectedDef.color);
   }
   const status = selectionStatus();
