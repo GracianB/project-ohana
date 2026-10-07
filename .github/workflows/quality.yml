@@ -38,6 +38,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: Multiplayer E2E
+        run: npm run test:browser:multiplayer
+
       - name: Visual regression matrix
         run: npm run test:visual
 
