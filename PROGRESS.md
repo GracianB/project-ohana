@@ -2,6 +2,12 @@
 
 Última actualización: 05/10/2026
 
+## 07/10/2026 · V35 Cinematic Experience
+
+**Caché:** `ohana-224`.
+
+OHANA incorpora un director cinematográfico para la entrada inicial de cada mundo y una presentación específica del Nido. El final de la Reina pasa a una secuencia en tres actos: ruptura, liberación y epílogo. Todo respeta `prefers-reduced-motion` y queda separado de la simulación jugable.
+
 ## 07/10/2026 · Official Multiplayer Integration
 
 **Caché de integración:** `ohana-223` · sincronizada con `index.html` y `sw.js`.
