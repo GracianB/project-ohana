@@ -1,3 +1,22 @@
+## 07/10/2026 · V39 Hero Mastery
+
+**Caché:** `ohana-229`.
+
+V39 convierte los diez héroes en diez maneras distintas de atravesar Isla Hoku, preservando las U, enlaces J→K y OHANA Assist de V37.
+
+- **Kilo · Corriente de Polen:** floraciones del mundo sostienen el aire y recargan su vuelo.
+- **Stitcho · Wall Vault:** trepa y convierte paredes/cornisas en impulso vertical.
+- **Chispín · Cloudstep:** nubes eléctricas exclusivas funcionan como plataformas y rutas aéreas.
+- **Michi · Moon Pounce:** un impulso felino adicional por ciclo aéreo corrige saltos y abre rutas.
+- **Dragón · Batida de Alas:** después de sus saltos normales encadena batidas extra; las formas altas ganan más.
+- **Dino · Ruptura Sísmica:** el pisotón rompe grietas opcionales y devuelve un rebote colosal.
+- **Frita · Carril Crujiente:** el deslizamiento se engancha a carriles y conserva velocidad.
+- **Pizza · Rebote de Horno:** respiraderos exclusivos funcionan como trampolines.
+- **Yomi · Fase Hueca:** el Paso Hueco vuelve intangible su ventana espectral.
+- **Cuerno · Puente Aurora:** aterrizajes fuertes proyectan un puente de luz temporal.
+
+Las superficies de maestría existen únicamente en la colisión del jugador: no modifican la física de enemigos ni bloquean el recorrido para otros héroes. Browser E2E prueba Batida de Alas y Cloudstep con física real, y Visual Regression captura ambos estados.
+
 ## 07/10/2026 · V38 Enemy Intelligence & Combat Feel
 
 **Caché:** `ohana-228`.

@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-228/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-229/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -755,8 +755,8 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(cinema, /U · SUPREMA/);
   assert.match(cinema, /OHANA ASSIST/);
   assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
-  assert.match(html, /supreme\.css\?v=ohana-228/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-228/);
+  assert.match(html, /supreme\.css\?v=ohana-229/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-229/);
   assert.match(visual, /09-supreme-u-assist/);
 });
 
@@ -786,4 +786,55 @@ test("V38 enemy intelligence is deterministic, bounded and visually auditable", 
   assert.match(game, /enemyDirectorSnapshot/);
   assert.match(visual, /03b-enemy-intelligence/);
   assert.match(sw, /systems\/enemy-director\.js/);
+});
+
+
+test("V39 hero mastery gives all ten heroes unique traversal without contaminating enemy physics", async () => {
+  const mastery = fs.readFileSync("./systems/hero-mastery.js", "utf8");
+  const game = fs.readFileSync("./game.js", "utf8");
+  const passives = fs.readFileSync("./systems/passives.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  const draw = fs.readFileSync("./characters/draw.js", "utf8");
+  const browser = fs.readFileSync("./tests/browser/e2e.mjs", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  const module = await import("../systems/hero-mastery.js");
+
+  assert.equal(Object.keys(module.HERO_MASTERY).length, 10);
+  assert.equal(new Set(Object.values(module.HERO_MASTERY).map((entry) => entry.id)).size, 10);
+  assert.doesNotMatch(mastery, /Math\.random\(/);
+  assert.doesNotMatch(mastery, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(mastery, /\.health\s*[-+]=/);
+  assert.doesNotMatch(mastery, /\.w\s*=|\.h\s*=/);
+
+  assert.match(mastery, /cloudstep/);
+  assert.match(mastery, /wingbeat/);
+  assert.match(mastery, /moonpounce/);
+  assert.match(mastery, /seismicbreak/);
+  assert.match(mastery, /greaserail/);
+  assert.match(mastery, /ovenbounce/);
+  assert.match(mastery, /hollowphase/);
+  assert.match(mastery, /aurorabridge/);
+
+  assert.match(game, /playerMasteryPlatforms\(game\)/);
+  assert.match(game, /resolveBody\(p, playerPlatforms/);
+  assert.match(game, /resolveBody\(e, game\.platforms/);
+  assert.match(passives, /updateHeroMastery\(game, input\)/);
+  assert.match(passives, /afterMoveHeroMastery\(game, input\)/);
+  assert.match(title, /masteryOf\(selectedDef\.id\)/);
+  assert.match(draw, /drawMasteryMotionFX/);
+  assert.match(browser, /Dragón no consigue una batida extra/);
+  assert.match(browser, /Chispín no aterriza sobre la nube/);
+  assert.match(visual, /11-hero-mastery-cloudstep/);
+  assert.match(visual, /12-hero-mastery-wingbeat/);
+  assert.match(sw, /systems\/hero-mastery\.js/);
+});
+
+
+test("V39 movement input is boolean-normalized before left/right comparison", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  assert.match(game, /const left = !!\(keys\["a"\] \|\| keys\["arrowleft"\]\);/);
+  assert.match(game, /const right = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
+  assert.match(game, /const jump = !!\(keys\["w"\] \|\| keys\["arrowup"\] \|\| keys\[" "\]\);/);
+  assert.match(game, /const drop = !!\(keys\["s"\] \|\| keys\["arrowdown"\]\);/);
 });

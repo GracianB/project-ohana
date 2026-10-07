@@ -133,6 +133,63 @@ try {
   await capture(page, '03-room-lab');
   await capture(page, '03b-enemy-intelligence');
 
+  // V39 · Cloudstep visible y físicamente activo.
+  const cloudSetup = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('chispin');
+    api.setEvo(2);
+    api.loadRoom('hub');
+    api.setInvulnerable(600);
+    api.resetInput();
+    const state = api.state();
+    if (state.input.left || state.input.right || state.input.jump || state.input.down) {
+      throw new Error('Cloudstep: input residual ' + JSON.stringify(state.input));
+    }
+    const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
+    if (!cloud) throw new Error('11-cloudstep: no hay nube de maestría');
+    api.setPlayer(cloud.x + 24, cloud.y - 96);
+    api.setPlayerVelocity(0, 7);
+    return cloud;
+  });
+  const cloudState = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    let state = api.state();
+    for (let i = 0; i < 48 && !state.mastery?.cloud; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(
+    cloudState.mastery?.cloud,
+    true,
+    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input })
+  );
+  assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
+  assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
+  await page.waitForTimeout(80);
+  await capture(page, '11-hero-mastery-cloudstep');
+
+  // V39 · Batida de Alas visible después de consumir los saltos normales.
+  await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('dragon');
+    api.setEvo(4);
+    api.setPlayer(520, 920);
+    api.setPlayerVelocity(0, 2);
+    api.exhaustPlayerJumps();
+    api.resetInput();
+  });
+  await page.locator('#game').focus();
+  await page.keyboard.down('Space');
+  const wingState = await page.evaluate(() => window.__OHANA_E2E.step(1));
+  assert.ok(wingState.mastery?.wingUsed >= 1, '12-wingbeat: Dragón no activa la batida extra');
+  assert.equal(wingState.mastery?.move, 'wingbeat', '12-wingbeat: señal visual de batida ausente');
+  await page.waitForTimeout(40);
+  await capture(page, '12-hero-mastery-wingbeat');
+  await page.keyboard.up('Space');
+  await page.evaluate(() => window.__OHANA_E2E.step(1));
+
+  // Recupera Kilo para continuar la matriz cinematográfica original.
+  await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
+
   await page.evaluate(() => {
     dispatchEvent(new CustomEvent('ohana-evolve', { detail: {
       id:'kilo', name:'Kilo', evo:1, fromEvo:0,
@@ -187,15 +244,20 @@ try {
     const el = document.querySelector('#supreme-cinema');
     return Number(el?.dataset.generation || 0) > previousGeneration && el?.dataset.state === 'active';
   }, previousSupremeGeneration, { timeout: 1200 });
-  await page.waitForTimeout(120);
   assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
   assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
   const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
     show: el.classList.contains('show'),
     state: el.dataset.state,
-    hidden: el.getAttribute('aria-hidden')
+    hidden: el.getAttribute('aria-hidden'),
+    duration: Number(el.dataset.duration || 0)
   }));
-  assert.deepEqual(supremeCinemaState, { show:true, state:'active', hidden:'false' }, '09-supreme: cinemática U no permanece activa');
+  assert.deepEqual(
+    { show:supremeCinemaState.show, state:supremeCinemaState.state, hidden:supremeCinemaState.hidden },
+    { show:true, state:'active', hidden:'false' },
+    '09-supreme: cinemática U no entra estable en active'
+  );
+  assert.ok(supremeCinemaState.duration >= 1400, '09-supreme: duración cinematográfica insuficiente');
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
   await capture(page, '09-supreme-u-assist');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
