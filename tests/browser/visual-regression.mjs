@@ -130,8 +130,12 @@ try {
   assert.ok(Array.isArray(enemyState.enemyAI) && enemyState.enemyAI.length >= 3, '03-room-lab: snapshot IA ausente');
   assert.ok(enemyState.enemyAI.every((e) => e.role && e.intent), '03-room-lab: enemigo sin rol o intención');
   assert.ok(enemyState.enemyAI.filter((e) => e.permit).length <= enemyState.enemyDirector.budget + 1, '03-room-lab: dogpile fuera de presupuesto');
+  assert.equal(enemyState.enemyDirector?.ecology, 'circuit', '15-enemy-ecology: bioma de Lab incorrecto');
+  assert.equal(enemyState.enemyDirector?.formation, 'CIRCUIT', '15-enemy-ecology: formación de Lab incorrecta');
+  assert.ok(enemyState.enemyAI.every((e) => e.biome === 'circuit' && e.formation === 'CIRCUIT'), '15-enemy-ecology: lectura ecológica incompleta');
   await capture(page, '03-room-lab');
   await capture(page, '03b-enemy-intelligence');
+  await capture(page, '15-enemy-ecology-circuit');
 
   // V39 · Cloudstep visible y físicamente activo.
   const cloudSetup = await page.evaluate(() => {
