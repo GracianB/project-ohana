@@ -6,6 +6,8 @@
 // systems/passives.js ya los llama desde Passives.afterMove / Passives.draw.
 // ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
+import { drawCharacter } from "../characters/draw.js";
+import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
@@ -108,16 +110,16 @@ const SPECIALS = Object.freeze({
 });
 
 const SUPREME = Object.freeze({
-  kilo:    { id: "solar", name: "Jardín solar", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar" },
-  stitcho: { id: "bang", name: "Big Bang", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma" },
-  chispin: { id: "boltgod", name: "Relámpago", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz" },
-  cat:     { id: "eclipse", name: "Eclipse", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra" },
-  dragon:  { id: "nova", name: "Supernova", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial" },
-  dino:    { id: "impact", name: "Impacto", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso" },
-  frita:   { id: "frygod", name: "Fritura", key: "U", cd: 9000, color: "#ffd36a", special: "Centella" },
-  pizza:   { id: "ovenking", name: "Horno real", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico" },
-  yomi:    { id: "devour", name: "Devorar", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo" },
-  cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora" },
+  kilo:    { id: "solar", name: "OHANA SOLAR", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar", ally: "stitcho" },
+  stitcho: { id: "bang", name: "SINGULARIDAD COSIDA", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma", ally: "chispin" },
+  chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
+  cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
+  dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
+  dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso", ally: "frita" },
+  frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
+  pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
+  yomi:    { id: "devour", name: "PUERTA DEL ABISMO", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo", ally: "cuerno" },
+  cuerno:  { id: "aurora", name: "AURORA OHANA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
@@ -129,16 +131,16 @@ export function specialOf(id) {
 }
 
 export const SUPREME_IDENTITY = Object.freeze({
-  kilo:    { kind: "bloom",   line: "raíces",   text: "El jardín responde a Kilo." },
-  stitcho: { kind: "rift",    line: "costura",  text: "El caos queda cosido." },
-  chispin: { kind: "chain",   line: "tormenta", text: "La tormenta elige sus blancos." },
-  cat:     { kind: "eclipse", line: "eclipse",  text: "La luz desaparece alrededor de Michi." },
-  dragon:  { kind: "nova",    line: "cielo",    text: "El cielo arde." },
-  dino:    { kind: "quake",   line: "impacto",  text: "La tierra responde al rugido." },
-  frita:   { kind: "crisp",   line: "fritura",  text: "Todo queda crujiente." },
-  pizza:   { kind: "volcano", line: "horno",    text: "El horno entra en erupción." },
-  yomi:    { kind: "maw",     line: "abismo",   text: "La grieta abre sus fauces." },
-  cuerno:  { kind: "aurora",  line: "aurora",   text: "El cielo se llena de color." },
+  kilo:    { kind: "bloom",   line: "NADIE SE QUEDA ATRÁS", text: "El sol llama a toda la familia." },
+  stitcho: { kind: "rift",    line: "TODO CAOS TIENE COSTURA", text: "Cose el espacio y arrastra el combate al centro." },
+  chispin: { kind: "chain",   line: "NO HAY DONDE ESCONDERSE", text: "La tormenta marca y persigue cada blanco." },
+  cat:     { kind: "eclipse", line: "NUEVE VIDAS. UNA SOMBRA.", text: "El mundo se apaga y las sombras cazan." },
+  dragon:  { kind: "nova",    line: "EL CIELO TAMBIÉN LUCHA", text: "El vuelo abre una lluvia de estrellas de fuego." },
+  dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra se rompe bajo cada paso." },
+  frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
+  pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
+  yomi:    { kind: "maw",     line: "EL ABISMO TIENE HAMBRE", text: "La grieta atrae, marca y ejecuta a los débiles." },
+  cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
 });
 
 function activateSpecial(game, p) {
