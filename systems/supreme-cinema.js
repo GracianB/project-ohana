@@ -5,6 +5,15 @@ const reduced = () => {
 };
 
 let hideTimer = 0;
+let settleTimer = 0;
+let generation = 0;
+
+function clearCinemaTimers() {
+  clearTimeout(hideTimer);
+  clearTimeout(settleTimer);
+  hideTimer = 0;
+  settleTimer = 0;
+}
 
 function mount() {
   let el = document.getElementById("supreme-cinema");
@@ -30,7 +39,8 @@ function mount() {
 
 function play(detail = {}) {
   const el = mount();
-  clearTimeout(hideTimer);
+  clearCinemaTimers();
+  const token = ++generation;
   const kind = String(detail.kind || "bloom").replace(/[^a-z0-9-]/gi, "");
   el.className = "kind-" + kind;
   el.style.setProperty("--supreme", detail.color || "#ffe66a");
@@ -46,13 +56,22 @@ function play(detail = {}) {
   assist.textContent = assistText;
   assist.hidden = !assistText;
   el.setAttribute("aria-hidden", "false");
+  el.dataset.state = "active";
   el.classList.remove("show");
   void el.offsetWidth;
   el.classList.add("show");
+
+  const visibleFor = reduced() ? 900 : 1800;
   hideTimer = setTimeout(() => {
+    if (token !== generation) return;
+    el.dataset.state = "leaving";
     el.classList.remove("show");
-    setTimeout(() => el.setAttribute("aria-hidden", "true"), reduced() ? 20 : 380);
-  }, reduced() ? 520 : 1280);
+    settleTimer = setTimeout(() => {
+      if (token !== generation) return;
+      el.setAttribute("aria-hidden", "true");
+      el.dataset.state = "idle";
+    }, reduced() ? 30 : 380);
+  }, visibleFor);
 }
 
 if (!window.__ohanaSupremeCinema) {
