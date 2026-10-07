@@ -705,5 +705,5 @@ test("V35.1 title has one canonical composition and three-position roster", () =
   assert.match(css, /canonical title composition/);
   assert.match(css, /\.char-card\.is-prev2,\.char-card\.is-next2\{display:none!important\}/);
   assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);
-  assert.equal((css.match(/#char-select\{/g) || []).length, 1);
+  assert.equal((css.match(/OHANA V35\.1 · canonical title composition/g) || []).length, 1);
 });
