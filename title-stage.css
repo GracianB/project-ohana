@@ -3,7 +3,7 @@
 #char-select{
   --hero-tint:#ffd36a;
   position:fixed!important;inset:0!important;z-index:40!important;
-  display:grid!important;grid-template-rows:42px minmax(0,1fr) 22px!important;
+  display:grid!important;grid-template-rows:42px minmax(0,1fr) 22px!important;grid-template-areas:none!important;grid-auto-flow:row!important;
   width:100vw!important;height:100dvh!important;margin:0!important;padding:0!important;gap:0!important;
   overflow:hidden!important;isolation:isolate;background:#030712!important;color:#fff;
   font-family:Outfit,system-ui,sans-serif;
@@ -17,7 +17,7 @@ body.playing #char-select{display:none!important}
 #char-select::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 170px rgba(0,0,0,.44)}
 
 #char-select .brand-bar{
-  position:relative!important;inset:auto!important;top:auto!important;z-index:12!important;
+  grid-area:auto!important;position:relative!important;inset:auto!important;top:auto!important;z-index:12!important;
   order:0!important;width:auto!important;height:42px!important;margin:0!important;padding:0 28px!important;
   display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:18px!important;
   background:linear-gradient(180deg,rgba(2,5,13,.7),rgba(2,5,13,.28))!important;
@@ -39,7 +39,7 @@ body.playing #char-select{display:none!important}
 }
 
 #char-select .title-stack{
-  position:relative!important;inset:auto!important;grid-column:1!important;grid-row:1!important;
+  grid-area:auto!important;position:relative!important;inset:auto!important;grid-column:1!important;grid-row:1!important;
   order:0!important;z-index:8!important;width:100%!important;margin:0!important;padding:0!important;
   display:grid!important;justify-items:center!important;align-content:start!important;text-align:center!important;
   transform:none!important;filter:none!important;isolation:isolate;
@@ -62,7 +62,7 @@ body.playing #char-select{display:none!important}
 #char-select .tagline{position:relative!important;margin:11px 0 0!important;max-width:none!important;color:rgba(244,248,255,.83)!important;font:600 clamp(13px,1vw,16px)/1.25 Outfit,sans-serif!important;letter-spacing:.02em!important}
 
 #char-select .hero-stage{
-  position:relative!important;inset:auto!important;grid-column:1!important;grid-row:2!important;order:0!important;
+  grid-area:auto!important;position:relative!important;inset:auto!important;grid-column:1!important;grid-row:2!important;order:0!important;
   align-self:stretch!important;justify-self:stretch!important;display:grid!important;place-items:center!important;
   width:100%!important;height:auto!important;min-width:0!important;min-height:0!important;
   margin:0!important;padding:0!important;overflow:visible!important;isolation:isolate;
@@ -71,7 +71,7 @@ body.playing #char-select{display:none!important}
 #char-select .hero-stage::after{content:"";position:absolute;left:50%;bottom:8%;width:min(760px,58vw);height:1px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--hero-tint) 45%,transparent),transparent);opacity:.7;pointer-events:none}
 
 #char-select #chars{
-  position:absolute!important;inset:0!important;order:0!important;z-index:4!important;
+  grid-area:auto!important;position:absolute!important;inset:0!important;order:0!important;z-index:4!important;
   display:block!important;flex:none!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;
   margin:0!important;padding:0!important;overflow:visible!important;isolation:isolate!important;perspective:1400px;
   animation:none!important;transform:none!important;
@@ -143,7 +143,7 @@ body.playing #char-select{display:none!important}
 #char-select .chars-dots i.on{width:24px!important;background:var(--dot,#fff)!important;box-shadow:0 0 12px var(--dot,#fff)!important}
 
 #char-select .title-controls{
-  position:relative!important;inset:auto!important;grid-column:1!important;grid-row:3!important;order:0!important;z-index:11!important;
+  grid-area:auto!important;position:relative!important;inset:auto!important;grid-column:1!important;grid-row:3!important;order:0!important;z-index:11!important;
   width:min(920px,100%)!important;margin:0 auto!important;padding:9px 12px!important;
   display:grid!important;grid-template-columns:auto 1fr!important;align-items:center!important;justify-content:center!important;gap:12px!important;
   border:1px solid rgba(255,255,255,.09)!important;border-radius:18px!important;
@@ -151,13 +151,13 @@ body.playing #char-select{display:none!important}
   transform:none!important;
 }
 #char-select #difficulty{
-  position:static!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;
+  grid-area:auto!important;position:static!important;inset:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;
   min-height:0!important;margin:0!important;padding:3px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:99px!important;background:rgba(255,255,255,.035)!important;transform:none!important;
 }
 #char-select #difficulty button{min-height:34px!important;margin:0!important;padding:0 11px!important;border:0!important;border-radius:99px!important;background:transparent!important;color:rgba(255,255,255,.5)!important;font:800 8px/1 Outfit,sans-serif!important;letter-spacing:.1em!important;text-transform:uppercase!important}
 #char-select #difficulty button.on{background:rgba(255,255,255,.1)!important;color:#fff!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hero-tint) 52%,transparent)!important}
 #char-select #menu-row{
-  position:static!important;inset:auto!important;order:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;justify-content:stretch!important;gap:7px!important;
+  grid-area:auto!important;position:static!important;inset:auto!important;order:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;justify-content:stretch!important;gap:7px!important;
   width:100%!important;margin:0!important;padding:0!important;transform:none!important;
 }
 #char-select #menu-row .cta,#char-select .cta{
@@ -172,7 +172,7 @@ body.playing #char-select{display:none!important}
 #char-select .hidden{display:none!important}
 
 #char-select .legal{
-  position:relative!important;inset:auto!important;z-index:6!important;order:0!important;align-self:center!important;justify-self:center!important;
+  grid-area:auto!important;position:relative!important;inset:auto!important;z-index:6!important;order:0!important;align-self:center!important;justify-self:center!important;
   width:auto!important;height:auto!important;margin:0!important;padding:0!important;opacity:1!important;transform:none!important;animation:none!important;
   color:rgba(255,255,255,.27)!important;font:600 7px/1 Outfit,sans-serif!important;letter-spacing:.12em!important;text-transform:uppercase!important;text-align:center!important;
 }
