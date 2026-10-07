@@ -2035,6 +2035,72 @@ function drawSlice(ctx, s) {
 }
 
 const DRW = {
+  supremeField(ctx, f, cam, t, g, p) {
+    const x=f.x-cam.x,y=f.y-cam.y;
+    const u=1-f.life/f.max;
+    const fade=Math.min(1,f.life/18,Math.max(.15,u*4));
+    const pulse=.72+.28*Math.sin(t*.12);
+    const R=110+Math.sin(t*.07)*12;
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    ctx.globalAlpha=.16*fade;
+    const grd=ctx.createRadialGradient(x,y,8,x,y,R*1.35);
+    grd.addColorStop(0,f.color);
+    grd.addColorStop(.48,"rgba(255,255,255,.08)");
+    grd.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,R*1.35,0,TAU);ctx.fill();
+    ctx.globalAlpha=.68*fade;
+    ctx.strokeStyle=f.color;ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();
+
+    if(f.mode==="kilo"){
+      for(let i=0;i<8;i++){const a=i*TAU/8+t*.018;const rr=R*.78;ctx.save();ctx.translate(x+Math.cos(a)*rr,y+Math.sin(a)*rr);ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,0,5,14,0,0,TAU);ctx.stroke();ctx.restore();}
+    }else if(f.mode==="stitcho"){
+      ctx.setLineDash([12,8]);for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(x,y,R*(.5+i*.22),t*.02+i,-t*.025+i+Math.PI*1.3);ctx.stroke();}ctx.setLineDash([]);
+    }else if(f.mode==="chispin"){
+      for(let i=0;i<6;i++){const a=i*TAU/6+t*.035;zig(ctx,x,y,x+Math.cos(a)*R*1.15,y+Math.sin(a)*R*.72,10,5,f.color,1.8);}
+    }else if(f.mode==="cat"){
+      ctx.fillStyle="rgba(2,3,12,.72)";ctx.globalAlpha=.5*fade;ctx.beginPath();ctx.arc(x,y,R*.62,0,TAU);ctx.fill();ctx.globalAlpha=.8*fade;ctx.strokeStyle="#ffb6e4";ctx.beginPath();ctx.arc(x+R*.18,y-R*.08,R*.56,.4,5.6);ctx.stroke();
+    }else if(f.mode==="dragon"){
+      for(let i=0;i<7;i++){const a=i*TAU/7+t*.025;const rr=R*(.45+(i%2)*.3);ctx.fillStyle=i%2?"#fff3b0":f.color;ctx.globalAlpha=.55*fade;ctx.beginPath();ctx.arc(x+Math.cos(a)*rr,y+Math.sin(a)*rr,3+(i%3),0,TAU);ctx.fill();}
+    }else if(f.mode==="dino"){
+      ctx.globalAlpha=.6*fade;for(let i=-3;i<=3;i++){ctx.beginPath();ctx.moveTo(x+i*28,y+42);ctx.lineTo(x+i*32,y+42-(22+((i*i+3)%4)*8));ctx.stroke();}
+    }else if(f.mode==="frita"){
+      ctx.globalAlpha=.55*fade;for(let i=-4;i<=4;i++){const xx=x+i*22;ctx.beginPath();ctx.moveTo(xx,y+34);ctx.quadraticCurveTo(xx+8*Math.sin(t*.1+i),y-34,xx,y-72);ctx.stroke();}
+    }else if(f.mode==="pizza"){
+      ctx.globalAlpha=.65*fade;ctx.beginPath();ctx.moveTo(x,y-R*.75);ctx.lineTo(x+R*.7,y+R*.48);ctx.lineTo(x-R*.7,y+R*.48);ctx.closePath();ctx.stroke();for(let i=0;i<5;i++){const a=i*TAU/5+t*.015;ctx.beginPath();ctx.arc(x+Math.cos(a)*R*.42,y+Math.sin(a)*R*.34,6,0,TAU);ctx.stroke();}
+    }else if(f.mode==="yomi"){
+      ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
+    }else if(f.mode==="cuerno"){
+      const cols=["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];for(let i=0;i<4;i++){ctx.strokeStyle=cols[i];ctx.globalAlpha=.55*fade;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y+24,R*(.48+i*.12),Math.PI*1.08,Math.PI*1.92);ctx.stroke();}
+    }
+    ctx.restore();
+  },
+  assist(ctx, f, cam, t) {
+    const def=ROSTER.find((item)=>item.id===f.heroId);
+    if(!def)return;
+    const age=f.max-f.life;
+    const alpha=Math.min(1,age/10,f.life/14)*.78;
+    const x=f.x-cam.x,y=f.y-cam.y;
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    glow(ctx,x,y+18,52,f.color,alpha*.28);
+    ctx.globalCompositeOperation="source-over";
+    ctx.globalAlpha=alpha;
+    const form=(def.forms&&def.forms[4])||{};
+    const dummy={
+      ...def,id:def.id,evo:4,color:form.color||def.color,
+      x:-16,y:-38,w:32,h:38,facing:f.facing||1,grounded:false,
+      vx:(f.facing||1)*3,vy:0,melee:(age%24>9&&age%24<18)?8:0,
+      visualScale:1.12,invuln:1
+    };
+    ctx.translate(x,y+38);
+    drawCharacter(ctx,dummy,{x:0,y:0},t*1.3);
+    ctx.globalAlpha=alpha*.55;
+    ctx.strokeStyle=f.color;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,-22,34+Math.sin(t*.15)*4,0,TAU);ctx.stroke();
+    ctx.restore();
+  },
   note(ctx, f, cam) {
     const x = f.x - cam.x, y = f.y - cam.y;
     glow(ctx, x, y, f.r * 2.2, f.color, 0.55);
