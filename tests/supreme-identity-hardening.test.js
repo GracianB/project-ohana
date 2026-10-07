@@ -150,3 +150,18 @@ test('V37: combo alto puede invocar asistencia aunque la cadena sea corta', () =
   assert.equal(game._assist?.heroId, 'yomi');
   clearAbilityFx();
 });
+
+
+test('V37: Kilo aprende un enlace J→K visible y funcional', () => {
+  clearAbilityFx();
+  const game = makeGame('kilo', [makeEnemy({ x: 420 })]);
+  game.player.abilities = ['ukulele', 'hula', 'ohana'];
+  game.player.health = 40;
+  useAbility(game, 0);
+  useAbility(game, 1);
+  assert.equal(game._signatureLink?.name, 'SERENATA HULA');
+  assert.ok(game.player.health > 40);
+  assert.ok(game.player._specialT >= 100);
+  assert.ok(game.player._flowPower >= 1.14);
+  clearAbilityFx();
+});
