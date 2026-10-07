@@ -1750,11 +1750,7 @@ function updateEnemies() {
     e._over = s.over;
     const steering = enemySteering(e, game.player);
     e._aiSteer = steering.x;
-    if (!e.telegraph && !enemyCanCommit(e)) {
-      e.vx += steering.x * steering.scale;
-    } else if (!e.telegraph && (next === "retreat" || next === "flank")) {
-      e.vx += steering.x * steering.scale;
-    }
+    e._aiSteerScale = steering.scale;
     if (e.alertPing > 0) e.alertPing--;
     e.shoot = (e.shoot || 0) + 1;
     const rate = e.kind === "planta" ? 70 : 9999;
@@ -2279,6 +2275,17 @@ function updateEnemies() {
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
+    // V38 strategic steering is applied after species logic so RETREAT/FLANK
+    // cannot be overwritten by a local hover/chase routine.
+    if (!e.telegraph && game.player) {
+      const steer = enemySteering(e, game.player);
+      if (e.mode === "retreat" || e.mode === "flank") {
+        e.vx += steer.x * steer.scale;
+      } else if (e.mode === "hold" && !enemyCanCommit(e)) {
+        e.vx *= 0.94;
+      }
+    }
+
     solidifyFoe(e);
     const p = game.player;
     const solid = !(e.kind === "planta" && !e.up);
