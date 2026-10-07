@@ -13,7 +13,9 @@ export const WORLDS = [
   { id: "lab",     name: "Alien Lab", ground: "#15202a", groundTop: "#3ee0ff", edge: "#7af3ff", sky: ["#050d13", "#0a1a24", "#123646"] },
   { id: "aquatic", name: "Abismo",    ground: "#0a3a58", groundTop: "#3ec8e8", edge: "#8af8ff", platOutline: "rgba(150,245,255,.85)", sky: ["#010c1c", "#042848", "#0a4a78"] },
   { id: "grove",   name: "Claro",     ground: "#3a6a32", groundTop: "#7ec85a", edge: "#b8f090", sky: ["#6eb8e8", "#a8d8f0", "#e8f4c8"] },
-  { id: "boss",    name: "Nido",      ground: "#24131d", groundTop: "#6d3341", edge: "#ff8a6e", sky: ["#080612", "#1b0d1d", "#4b1726"] }
+  { id: "boss",    name: "Nido",      ground: "#24131d", groundTop: "#6d3341", edge: "#ff8a6e", sky: ["#080612", "#1b0d1d", "#4b1726"] },
+  { id: "cave",    name: "Cueva Azul", ground: "#17223a", groundTop: "#7194c8", edge: "#a9cfff", sky: ["#030817", "#0a1730", "#172c4f"] },
+  { id: "ridge",   name: "Cumbre",     ground: "#566471", groundTop: "#dceaf0", edge: "#f6fbff", sky: ["#4e86b8", "#92c7e6", "#eef8ff"] }
 ];
 
 // deterministic pseudo-random for stable star/particle fields
@@ -79,6 +81,8 @@ export function renderWorld(ctx, world, cam, t, W, H) {
   else if (world.id === "aquatic") drawAquatic(ctx, cam, t, W, H);
   else if (world.id === "grove") drawGrove(ctx, cam, t, W, H);
   else if (world.id === "boss") drawBossWorld(ctx, cam, t, W, H);
+  else if (world.id === "cave") drawCaveBase(ctx, cam, t, W, H);
+  else if (world.id === "ridge") drawRidgeBase(ctx, cam, t, W, H);
 
   drawWorldLandmarks(ctx, world, cam, t, W, H);
 
@@ -86,6 +90,69 @@ export function renderWorld(ctx, world, cam, t, W, H) {
   const tv = ctx.createLinearGradient(0, 0, 0, 160);
   tv.addColorStop(0, "rgba(0,0,0,.22)"); tv.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = tv; ctx.fillRect(0, 0, W, 160);
+}
+
+function drawCaveBase(ctx, cam, t, W, H) {
+  // Lunar cavern depth: stone arches, cold mist and slow crystal light.
+  ctx.save();
+  const mist = ctx.createLinearGradient(0,H*.38,0,H);
+  mist.addColorStop(0,"rgba(80,130,190,0)");
+  mist.addColorStop(1,"rgba(70,120,175,.16)");
+  ctx.fillStyle=mist;ctx.fillRect(0,H*.38,W,H*.62);
+  for(let i=0;i<7;i++){
+    const x=wrap(i*250-cam.x*.12,W+260)-100;
+    const base=H*.80;
+    const peak=H*(.18+(i%3)*.05);
+    ctx.fillStyle=i%2?"rgba(15,28,52,.62)":"rgba(22,38,66,.72)";
+    ctx.beginPath();
+    ctx.moveTo(x,base);
+    ctx.quadraticCurveTo(x+70,peak,x+140,base);
+    ctx.lineTo(x+210,base);
+    ctx.lineTo(x+210,H);ctx.lineTo(x,H);ctx.closePath();ctx.fill();
+  }
+  ctx.globalCompositeOperation="lighter";
+  for(let i=0;i<12;i++){
+    const x=wrap(i*173-cam.x*.22,W+190);
+    const y=H*.24+(i%4)*72;
+    const glow=.08+.06*Math.sin(t*.025+i);
+    ctx.globalAlpha=glow;
+    ctx.fillStyle=i%2?"#9ecbff":"#e0d5ff";
+    ctx.beginPath();ctx.moveTo(x,y-18);ctx.lineTo(x+7,y);ctx.lineTo(x,y+24);ctx.lineTo(x-7,y);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawRidgeBase(ctx, cam, t, W, H) {
+  // High-altitude ridge: distant peaks, cloud sea and fast clean wind.
+  ctx.save();
+  for(let layer=0;layer<3;layer++){
+    const par=.04+layer*.06;
+    const base=H*(.66+layer*.07);
+    ctx.fillStyle=["rgba(80,115,145,.30)","rgba(68,96,120,.40)","rgba(55,75,90,.52)"][layer];
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let x=-120;x<=W+140;x+=150){
+      const wx=wrap(x-cam.x*par,W+300)-120;
+      const peak=base-(90+layer*36+((x/150)%3)*24);
+      ctx.lineTo(wx,base);ctx.lineTo(wx+75,peak);ctx.lineTo(wx+150,base);
+    }
+    ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  }
+  const cloudY=H*.70;
+  ctx.globalAlpha=.28;
+  ctx.fillStyle="#eefbff";
+  for(let i=0;i<9;i++){
+    const x=wrap(i*220-cam.x*.08+t*.09,W+260)-100;
+    const y=cloudY+(i%2)*26;
+    cloud(ctx,x,y,60+(i%3)*18);
+  }
+  ctx.globalAlpha=.16;
+  ctx.strokeStyle="#ffffff";ctx.lineWidth=2;
+  for(let i=0;i<7;i++){
+    const y=90+i*52+Math.sin(t*.02+i)*8;
+    const x=wrap(t*1.4+i*190,W+240)-120;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+120+(i%3)*30,y-8);ctx.stroke();
+  }
+  ctx.restore();
 }
 
 /* ─────────────────────────  BEACH · Isla Hoku  ───────────────────────── */
@@ -207,7 +274,7 @@ function drawBeach(ctx, cam, t, W, H) {
 
   // pit-gap water mouth (~world x 620–860): foam + aqua lip so the hole reads as descent to reef
   {
-    const gapL = 620 - cam.x * 0.55, gapR = 860 - cam.x * 0.55;
+    const gapL = 900 - cam.x, gapR = 1340 - cam.x;
     const mid = (gapL + gapR) / 2;
     const mouthY = oceanY + 8;
     const mouth = ctx.createRadialGradient(mid, mouthY + 10, 4, mid, mouthY + 10, 110);
