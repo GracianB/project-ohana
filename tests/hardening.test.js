@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-229/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-230/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -755,8 +755,8 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(cinema, /U · SUPREMA/);
   assert.match(cinema, /OHANA ASSIST/);
   assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
-  assert.match(html, /supreme\.css\?v=ohana-229/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-229/);
+  assert.match(html, /supreme\.css\?v=ohana-230/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-230/);
   assert.match(visual, /09-supreme-u-assist/);
 });
 
@@ -837,4 +837,82 @@ test("V39 movement input is boolean-normalized before left/right comparison", ()
   assert.match(game, /const right = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
   assert.match(game, /const jump = !!\(keys\["w"\] \|\| keys\["arrowup"\] \|\| keys\[" "\]\);/);
   assert.match(game, /const drop = !!\(keys\["s"\] \|\| keys\["arrowdown"\]\);/);
+});
+
+
+test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and navigation canonical", async () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const hazards = fs.readFileSync("./systems/hazards.js", "utf8");
+  const graph = fs.readFileSync("./systems/world-graph.js", "utf8");
+  const nodes = fs.readFileSync("./systems/traversal-nodes.js", "utf8");
+  const portals = fs.readFileSync("./systems/portals.js", "utf8");
+  const living = fs.readFileSync("./worlds/living-worlds.js", "utf8");
+  const paintedHub = fs.readFileSync("./worlds/painted-hub.js", "utf8");
+  const paintedRooms = fs.readFileSync("./worlds/painted-rooms.js", "utf8");
+  const map = fs.readFileSync("./systems/map.js", "utf8");
+  const html = fs.readFileSync("./index.html", "utf8");
+  const mapCss = fs.readFileSync("./world-map.css", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  const browser = fs.readFileSync("./tests/browser/e2e.mjs", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const livingModule = await import("../worlds/living-worlds.js");
+  const graphModule = await import("../systems/world-graph.js");
+
+  assert.ok(
+    game.indexOf("const hazardAxis = hazardContainsX") < game.indexOf("const next = nearestBelow"),
+    "hazard explícito debe evaluarse antes que floor rescue"
+  );
+  assert.match(game, /hazard\.type === HAZARD_TYPES\.TRANSFER/);
+  assert.match(game, /hazard\.type === HAZARD_TYPES\.DEATH/);
+  assert.match(game, /¡ÚLTIMA BATIDA!/);
+  assert.match(game, /drawHazards\(/);
+  assert.match(game, /drawLivingWorld\(/);
+
+  assert.match(hazards, /magma-pit/);
+  assert.match(hazards, /heroEscape:"dragon"/);
+  assert.match(map, /\[0,1134,1080,126\]/);
+  assert.match(map, /\[1240,1134,1000,126\]/);
+
+  assert.equal(Object.keys(livingModule.ROOM_ART).length, 10);
+  assert.equal(Object.keys(graphModule.WORLD_NODES).length, 10);
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "door"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "drop"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "catapult"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "vortex"));
+
+  assert.doesNotMatch(hazards, /Math\.random\(/);
+  assert.doesNotMatch(graph, /Math\.random\(/);
+  assert.doesNotMatch(nodes, /Math\.random\(/);
+  assert.doesNotMatch(living, /Math\.random\(/);
+  assert.doesNotMatch(living, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(paintedHub, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(paintedRooms, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(sw, /assets\/worlds\/(?:beach|jungle|volcano|boss)-bg\.jpg/);
+
+  assert.match(portals, /traversalProfile\(/);
+  assert.match(portals, /traversalNodeSnapshot\(/);
+  assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
+  assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
+  assert.match(html, /world-map\.css\?v=ohana-230/);
+  assert.match(sw, /systems\/hazards\.js/);
+  assert.match(sw, /systems\/world-graph\.js/);
+  assert.match(sw, /systems\/traversal-nodes\.js/);
+  assert.match(sw, /worlds\/living-worlds\.js/);
+
+  assert.match(browser, /pozo Beach no transfiere realmente a Reef/);
+  assert.match(browser, /pozo mortal de magma no mata/);
+  assert.match(browser, /World Graph V40 ausente/);
+  for (const token of [
+    "13-living-hub-kilo",
+    "13-living-beach-frita",
+    "13-living-jungle-stitcho",
+    "13-living-cave-cat",
+    "13-living-lab-chispin",
+    "13-living-ridge-cuerno",
+    "13-living-space-yomi",
+    "13-living-reef-pizza",
+    "13-living-volcano-dragon",
+    "13-living-boss-dino",
+    "14-world-graph-v40"
+  ]) assert.match(visual, new RegExp(token));
 });
