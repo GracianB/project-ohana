@@ -1,3 +1,19 @@
+## 07/10/2026 · V36 Cinematic Direction Overhaul
+
+**Caché:** `ohana-226`.
+
+V36 reconstruye la capa de presentación de Mundo 1 como un sistema cinematográfico coherente, no como una colección de overlays aislados.
+
+- Opening de portada real y saltable: Mundo 1 → Isla Hoku → Project Ohana.
+- Selector canónico centrado, tres posiciones reales, dossier con fantasía jugable por héroe y controles en una única franja.
+- Diez entradas de capítulo numeradas 01/10–10/10 con tratamiento visual específico por mundo.
+- Evolución conectada al runtime mediante `ohana-evolve`; la cinemática existente deja de ser código huérfano.
+- Director narrativo global para derrota, vacío y caída de la Reina.
+- Death FX/fantasma enmarcado por lenguaje cinematográfico común.
+- Final reconstruido en cuatro beats: caída, ruptura, liberación y epílogo.
+- Contratos E2E de geometría para impedir otra portada con título, héroe, dossier y botones desalineados.
+- `prefers-reduced-motion` conserva toda la información sin exigir animación.
+
 ## 07/10/2026 · V35.1 Title Composition Fix
 
 **Caché:** `ohana-225`.
