@@ -610,12 +610,28 @@ function drawCastSignature(ctx, p, cam, t) {
   ctx.globalCompositeOperation = "lighter";
   ctx.globalAlpha = 0.85 * k;
   ctx.strokeStyle = color;
-  ctx.lineWidth = slot === 2 ? 6 : slot === 1 ? 4 : 2.5;
+  ctx.lineWidth = slot === 3 ? 7 : slot === 2 ? 6 : slot === 1 ? 4 : 2.5;
   ctx.beginPath();
   if (slot === 0) ctx.arc(x + face * 18, y, 16 + (1 - k) * 20, -0.8, 0.8);
   else if (slot === 1) ctx.arc(x, y, 22 + (1 - k) * 36, 0, Math.PI * 2);
-  else ctx.arc(x, y, 34 + (1 - k) * 70, 0, Math.PI * 2);
+  else if (slot === 2) ctx.arc(x, y, 34 + (1 - k) * 70, 0, Math.PI * 2);
+  else {
+    ctx.arc(x, y, 48 + (1 - k) * 96, 0, Math.PI * 2);
+    ctx.moveTo(x + 28, y);
+    ctx.arc(x, y, 28 + (1 - k) * 52, 0, Math.PI * 2);
+  }
   ctx.stroke();
+  if (slot === 3) {
+    ctx.globalAlpha = 0.55 * k;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) {
+      const a = i * TAU / 6 + t * 0.03;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * 34, y + Math.sin(a) * 34);
+      ctx.lineTo(x + Math.cos(a) * (72 + (1-k)*44), y + Math.sin(a) * (72 + (1-k)*44));
+      ctx.stroke();
+    }
+  }
   ctx.restore();
 }
 
@@ -2166,49 +2182,49 @@ const DRW = {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.stroke();
-    if (name === "Jardín solar") {
+    if (f.identity === "bloom") {
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * TAU;
         ctx.beginPath();
         ctx.ellipse(x + Math.cos(a) * r * 0.7, y + Math.sin(a) * r * 0.7, 10, 22, a, 0, TAU);
         ctx.stroke();
       }
-    } else if (name === "Big Bang") {
+    } else if (f.identity === "rift") {
       for (let i = 0; i < 6; i++) ctx.strokeRect(x - r + i * 20, y - r * 0.2, 14, r * 0.4);
-    } else if (name === "Relámpago") {
+    } else if (f.identity === "chain") {
       ctx.beginPath();
       ctx.moveTo(x - r, y);
       ctx.lineTo(x - r * 0.2, y - 30);
       ctx.lineTo(x, y + 10);
       ctx.lineTo(x + r, y - 20);
       ctx.stroke();
-    } else if (name === "Eclipse") {
+    } else if (f.identity === "eclipse") {
       ctx.beginPath();
       ctx.arc(x, y, r * 0.55, 0.4, 5.4);
       ctx.stroke();
-    } else if (name === "Supernova") {
+    } else if (f.identity === "nova") {
       ctx.beginPath();
       ctx.arc(x, y, r * 0.35, 0, TAU);
       ctx.fill();
-    } else if (name === "Impacto") {
+    } else if (f.identity === "quake") {
       ctx.beginPath();
       ctx.ellipse(x, y + 20, r, 18, 0, 0, TAU);
       ctx.stroke();
-    } else if (name === "Fritura") {
+    } else if (f.identity === "crisp") {
       for (let i = 0; i < 9; i++) {
         ctx.beginPath();
         ctx.moveTo(x - r + i * (r * 2 / 8), y + 10);
         ctx.lineTo(x - r + i * (r * 2 / 8), y - 40 - (i % 2) * 16);
         ctx.stroke();
       }
-    } else if (name === "Horno real") {
+    } else if (f.identity === "volcano") {
       ctx.beginPath();
       ctx.moveTo(x, y - r);
       ctx.lineTo(x + r * 0.7, y + 20);
       ctx.lineTo(x - r * 0.5, y + 20);
       ctx.closePath();
       ctx.stroke();
-    } else if (name === "Devorar") {
+    } else if (f.identity === "maw") {
       ctx.beginPath();
       ctx.moveTo(x - r * 0.6, y);
       ctx.lineTo(x, y - 30);
