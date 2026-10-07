@@ -689,9 +689,21 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-224/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-225/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
   assert.match(title, /selected-hero-difficulty/);
+});
+
+
+test("V35.1 title has one canonical composition and three-position roster", () => {
+  const html = fs.readFileSync("./index.html", "utf8");
+  const css = fs.readFileSync("./title-stage.css", "utf8");
+  assert.match(html, /class="title-shell"/);
+  assert.match(html, /class="hero-stage"/);
+  assert.match(css, /canonical title composition/);
+  assert.match(css, /\.char-card\.is-prev2,\.char-card\.is-next2\{display:none!important\}/);
+  assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);
+  assert.equal((css.match(/#char-select\{/g) || []).length, 1);
 });
