@@ -35,6 +35,7 @@ import { bindInput } from "./engine/input.js";
 import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
+import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/hero-mastery.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
@@ -1383,6 +1384,8 @@ function updatePlayer() {
     if (Math.abs(p.vx) < 0.04) p.vx = 0;
   }
   if (jump) p.buffer = 10; else if (p.buffer > 0) p.buffer--;
+  const masteryPlatforms = playerMasteryPlatforms(game);
+  const playerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
   p.wall = 0;
   if (!p.grounded) {
     for (const plat of game.platforms) {
@@ -1440,7 +1443,7 @@ function updatePlayer() {
     const sy = p.y;
     p.x += p.vx / steps;
     p.y += p.vy / steps;
-    const hit = resolveBody(p, game.platforms, {
+    const hit = resolveBody(p, playerPlatforms, {
       prevX: sx,
       prevY: sy,
       dropThroughY: drop && wasGrounded && s === 0 ? sy + p.h + 10 : null,
@@ -2830,7 +2833,9 @@ function updateHUD() {
   if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
   setText(DOM.hudName, p.name);
   const mk = markAt(p.id, p.evo);
-  setText(DOM.hudTrait, ((p.passive && p.passive.name) || "") + " · H " + mk.name);
+  const mastery = masteryOf(p.id);
+  setText(DOM.hudTrait, mastery.name + " · H " + mk.name);
+  DOM.hudTrait?.setAttribute("title", mastery.desc + ((p.passive && p.passive.name) ? " · Base: " + p.passive.name : ""));
   const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
   let orbsLeft = 0;
   for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
@@ -3270,6 +3275,8 @@ if (e2eEnabled) {
           multiplier: game._combatFlow.multiplier || 1,
         } : null,
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+        mastery: masterySnapshot(game),
+        masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
         enemyDirector: game.enemyDirector ? {
           roomId: game.enemyDirector.roomId,
           hard: game.enemyDirector.hard,
