@@ -2870,9 +2870,12 @@ function updateHUD() {
     chip.classList.toggle("hidden", !show);
     const rank = show ? comboRank(game.combo) : "";
     if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
-    const flow = show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
-      ? String(game._combatFlow.label || "")
+    const signature = show && game._signatureLink && (t - Number(game._signatureLink.t || 0) <= 90)
+      ? String(game._signatureLink.name || "")
       : "";
+    const flow = signature || (show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
+      ? String(game._combatFlow.label || "")
+      : "");
     if (chip.dataset.flow !== flow) chip.dataset.flow = flow;
     chip.classList.toggle("flow", !!flow);
   }
