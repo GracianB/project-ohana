@@ -24,7 +24,7 @@ async function auditPage(page, label) {
   });
   assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
   const gameSource = await page.evaluate(async () => {
-    const response = await fetch('/game.js?v=ohana-196', { cache:'no-store' });
+    const response = await fetch('/game.js?v=ohana-229', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
   });
   assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
@@ -90,6 +90,7 @@ async function auditPage(page, label) {
       '/characters/sprites.js',
       '/characters/look.js',
       '/systems/abilities.js',
+      '/systems/hero-mastery.js',
       '/engine/input.js'
     ];
     const results = [];
@@ -375,6 +376,49 @@ try {
     'desktop: Pizza L no usa slot 2'
   );
 
+  // V39 — Dragón: agota sus saltos normales y obtiene una Batida de Alas real.
+  await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('dragon');
+    api.setEvo(4);
+    api.setPlayer(520, 980);
+    api.step(10);
+  });
+  await page.locator('#game').focus();
+  for (let i = 0; i < 4; i++) {
+    await page.keyboard.down('Space');
+    await page.evaluate(() => window.__OHANA_E2E.step(1));
+    await page.keyboard.up('Space');
+    await page.evaluate(() => window.__OHANA_E2E.step(1));
+  }
+  const dragonMastery = await page.evaluate(() => window.__OHANA_E2E.state());
+  assert.equal(dragonMastery.mastery?.id, 'wingbeat', 'desktop: Dragón no expone Batida de Alas');
+  assert.ok(dragonMastery.mastery?.wingUsed >= 1, 'desktop: Dragón no consigue una batida extra tras agotar saltos');
+  assert.equal(dragonMastery.mastery?.move, 'wingbeat', 'desktop: la batida extra no deja señal de maestría');
+  assert.ok(dragonMastery.player?.vy < 0, 'desktop: la Batida de Alas no impulsa a Dragón');
+
+  // V39 — Chispín: una nube de Cloudstep entra en la física solo para él.
+  const chispinSetup = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('chispin');
+    api.setEvo(2);
+    api.loadRoom('hub');
+    const state = api.state();
+    const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
+    if (!cloud) throw new Error('Cloudstep: no hay nube en hub');
+    api.setPlayer(cloud.x + Math.min(28, cloud.w * 0.2), cloud.y - 96);
+    api.setPlayerVelocity(0, 7);
+    return { cloud };
+  });
+  const chispinCloud = await page.evaluate(() => window.__OHANA_E2E.step(18));
+  assert.equal(chispinCloud.mastery?.id, 'cloudstep', 'desktop: Chispín no expone Cloudstep');
+  assert.equal(chispinCloud.mastery?.cloud, true, 'desktop: Chispín no aterriza sobre la nube de Cloudstep');
+  assert.equal(chispinCloud.player?.grounded, true, 'desktop: nube Cloudstep no sostiene al jugador');
+  assert.ok(
+    Math.abs((chispinCloud.player.y + 36) - chispinSetup.cloud.y) < 12,
+    'desktop: Chispín atraviesa la nube · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud })
+  );
+
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
   assert.equal(await page.locator('#pause-overlay').getAttribute('aria-hidden'), 'false', 'desktop: pausa');
@@ -418,9 +462,9 @@ try {
   const offlineRequestStart = secondaryErrors.filter((item) => item.startsWith('requestfailed:')).length;
   const offlineBoot = async () => page.evaluate(async () => {
     const paths = [
-      '/game.js?v=ohana-196',
-      '/style.css?v=ohana-196',
-      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-196',
+      '/game.js?v=ohana-229',
+      '/style.css?v=ohana-229',
+      '/assets/sprites/bodies/cuerno-idle.svg?v=ohana-229',
     ];
     const results = [];
     for (const path of paths) {
