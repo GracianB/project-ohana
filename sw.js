@@ -17,6 +17,7 @@ const PRECACHE = [
   "./intro.css?v=" + VERSION,
   "./demo.css?v=" + VERSION,
   "./experience.css?v=" + VERSION,
+  "./cinematic-ui.css?v=" + VERSION,
   "./game.js?v=" + VERSION,
   "./characters/art/_template.js?v=" + VERSION,
   "./characters/art/cat.js?v=" + VERSION,
