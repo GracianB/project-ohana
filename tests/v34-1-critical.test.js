@@ -47,9 +47,11 @@ test("V34.1 Pizza L is slot 2", () => {
   assert.match(s, /game\.lastAbilitySlot = index/);
 });
 
-test("V34.1 ending is upgraded", () => {
+test("V36 ending supersedes V34.1 with a staged cinematic epilogue", () => {
   const ending = read("systems/ending.js");
   const css = read("ending.css");
-  assert.match(ending, /EL NIDO HA CAÍDO/);
-  assert.match(css, /win-breathe/);
+  assert.match(ending, /HOKU VUELVE A RESPIRAR/);
+  assert.match(ending, /ending-phase-4/);
+  assert.match(css, /v36-ending-card/);
+  assert.match(css, /v36-title-breathe/);
 });
