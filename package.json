@@ -6,9 +6,13 @@
     "test": "node --test tests/*.js",
     "test:browser": "node tests/browser/e2e.mjs",
     "test:visual": "node tests/browser/visual-regression.mjs",
-    "release:check": "node tools/release-gate.mjs"
+    "release:check": "node tools/release-gate.mjs",
+    "test:browser:multiplayer": "node tests/browser/multiplayer-e2e.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^10.5.0"
   }
 }
