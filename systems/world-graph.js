@@ -2,16 +2,16 @@
 // One canonical spatial graph for doors, drops, catapults and vortices.
 
 export const WORLD_NODES = Object.freeze({
-  lab:     Object.freeze({id:"lab",name:"Alien Lab",short:"LAB",x:8,y:46,hero:"chispin",tier:2}),
-  cave:    Object.freeze({id:"cave",name:"Cueva Azul",short:"CUEVA",x:27,y:46,hero:"cat",tier:1}),
-  ridge:   Object.freeze({id:"ridge",name:"Cumbre",short:"CUMBRE",x:35,y:17,hero:"cuerno",tier:1}),
-  hub:     Object.freeze({id:"hub",name:"Claro Ohana",short:"CLARO",x:48,y:47,hero:"kilo",tier:0}),
-  space:   Object.freeze({id:"space",name:"Órbita",short:"ÓRBITA",x:57,y:16,hero:"yomi",tier:2}),
-  beach:   Object.freeze({id:"beach",name:"Costa Hoku",short:"COSTA",x:67,y:47,hero:"frita",tier:0}),
-  reef:    Object.freeze({id:"reef",name:"Arrecife Abismo",short:"ARRECIFE",x:70,y:77,hero:"pizza",tier:1}),
-  jungle:  Object.freeze({id:"jungle",name:"Jungla Alta",short:"JUNGLA",x:84,y:47,hero:"stitcho",tier:3}),
-  volcano: Object.freeze({id:"volcano",name:"Caldera",short:"CALDERA",x:85,y:77,hero:"dragon",tier:4}),
-  boss:    Object.freeze({id:"boss",name:"Nido Final",short:"NIDO",x:96,y:77,hero:"dino",tier:4}),
+  lab:     Object.freeze({id:"lab",name:"Alien Lab",short:"LAB",x:8,y:46,hero:"chispin",needEvo:1}),
+  cave:    Object.freeze({id:"cave",name:"Cueva Azul",short:"CUEVA",x:27,y:46,hero:"cat",needEvo:0}),
+  ridge:   Object.freeze({id:"ridge",name:"Cumbre",short:"CUMBRE",x:35,y:17,hero:"cuerno",needEvo:0}),
+  hub:     Object.freeze({id:"hub",name:"Claro Ohana",short:"CLARO",x:48,y:47,hero:"kilo",needEvo:0}),
+  space:   Object.freeze({id:"space",name:"Órbita",short:"ÓRBITA",x:57,y:16,hero:"yomi",needEvo:1}),
+  beach:   Object.freeze({id:"beach",name:"Costa Hoku",short:"COSTA",x:67,y:47,hero:"frita",needEvo:0}),
+  reef:    Object.freeze({id:"reef",name:"Arrecife Abismo",short:"ARRECIFE",x:70,y:77,hero:"pizza",needEvo:0}),
+  jungle:  Object.freeze({id:"jungle",name:"Jungla Alta",short:"JUNGLA",x:82,y:47,hero:"stitcho",needEvo:2}),
+  volcano: Object.freeze({id:"volcano",name:"Caldera",short:"CALDERA",x:82,y:77,hero:"dragon",needEvo:3}),
+  boss:    Object.freeze({id:"boss",name:"Nido Final",short:"NIDO",x:93,y:77,hero:"dino",needEvo:3}),
 });
 
 export const WORLD_EDGES = Object.freeze([
@@ -51,7 +51,7 @@ export function isEdgeLocked(edge,evo=0){ return edge.needEvo!=null && Number(ev
 
 export function worldGraphSnapshot(current,visited={},evo=0){
   const nodes=Object.values(WORLD_NODES).map((n)=>Object.freeze({
-    ...n,current:n.id===current,visited:!!visited[n.id],locked:n.tier>Number(evo)+1 && !visited[n.id]
+    ...n,current:n.id===current,visited:!!visited[n.id],locked:Number(n.needEvo||0)>Number(evo) && !visited[n.id]
   }));
   const edges=WORLD_EDGES.map((e)=>Object.freeze({...e,locked:isEdgeLocked(e,evo)}));
   return Object.freeze({nodes:Object.freeze(nodes),edges:Object.freeze(edges)});
