@@ -182,6 +182,12 @@ async function auditPage(page, label) {
     const rainAfter = api.step(36);
     snapshots.push({ rainStart, rainAfter });
     if (!rainAfter.rain) throw new Error('E2E: la lluvia radiactiva no arrancó');
+    if (rainAfter.enemyDirector?.ecology !== 'circuit' || rainAfter.enemyDirector?.formation !== 'CIRCUIT') {
+      throw new Error('E2E V41: ecología de Lab incorrecta · ' + JSON.stringify(rainAfter.enemyDirector));
+    }
+    if (!Array.isArray(rainAfter.enemyAI) || !rainAfter.enemyAI.length || rainAfter.enemyAI.some((enemy) => enemy.biome !== 'circuit' || enemy.formation !== 'CIRCUIT')) {
+      throw new Error('E2E V41: enemigos de Lab sin identidad ecológica · ' + JSON.stringify(rainAfter.enemyAI));
+    }
 
     const finalForm = api.setEvo(4);
     snapshots.push({ finalForm, message: messageSnapshot() });
