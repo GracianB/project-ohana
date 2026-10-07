@@ -1,10 +1,16 @@
+## 07/10/2026 · V35.1 Title Composition Fix
+
+**Caché:** `ohana-225`.
+
+Portada reconstruida desde una sola composición: título, héroe, dossier, dificultad y acciones comparten el mismo escenario. Se elimina la cascada histórica de carruseles superpuestos y se limita el selector a anterior / seleccionado / siguiente.
+
 # PROJECT OHANA · Progreso
 
 Última actualización: 05/10/2026
 
 ## 07/10/2026 · V35 Cinematic Experience
 
-**Caché:** `ohana-224`.
+**Caché:** `ohana-225`.
 
 OHANA incorpora un director cinematográfico para la entrada inicial de cada mundo y una presentación específica del Nido. El final de la Reina pasa a una secuencia en tres actos: ruptura, liberación y epílogo. Todo respeta `prefers-reduced-motion` y queda separado de la simulación jugable.
 
