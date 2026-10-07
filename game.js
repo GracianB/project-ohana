@@ -24,7 +24,7 @@ import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
-import { directEnemyEncounter, enemyCanCommit, enemySteering } from "./systems/enemy-director.js";
+import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
@@ -3263,6 +3263,14 @@ if (e2eEnabled) {
           multiplier: game._combatFlow.multiplier || 1,
         } : null,
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+        enemyDirector: game.enemyDirector ? {
+          roomId: game.enemyDirector.roomId,
+          hard: game.enemyDirector.hard,
+          alive: game.enemyDirector.alive,
+          budget: game.enemyDirector.budget,
+          committed: game.enemyDirector.committed,
+        } : null,
+        enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
         boss: boss ? {
           x: boss.x,
           y: boss.y,
