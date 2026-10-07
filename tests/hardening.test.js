@@ -907,17 +907,18 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(browser, /pozo Beach no transfiere realmente a Reef/);
   assert.match(browser, /pozo mortal de magma no mata/);
   assert.match(browser, /World Graph V40 ausente/);
-  for (const token of [
-    "13-living-hub-kilo",
-    "13-living-beach-frita",
-    "13-living-jungle-stitcho",
-    "13-living-cave-cat",
-    "13-living-lab-chispin",
-    "13-living-ridge-cuerno",
-    "13-living-space-yomi",
-    "13-living-reef-pizza",
-    "13-living-volcano-dragon",
-    "13-living-boss-dino",
-    "14-world-graph-v40"
-  ]) assert.match(visual, new RegExp(token));
+  for (const pair of [
+    "['hub','kilo']",
+    "['beach','frita']",
+    "['jungle','stitcho']",
+    "['cave','cat']",
+    "['lab','chispin']",
+    "['ridge','cuerno']",
+    "['space','yomi']",
+    "['reef','pizza']",
+    "['volcano','dragon']",
+    "['boss','dino']"
+  ]) assert.ok(visual.includes(pair), "pareja Living World ausente: " + pair);
+  assert.match(visual, /capture\(page, '13-living-' \+ room \+ '-' \+ hero\)/);
+  assert.match(visual, /14-world-graph-v40/);
 });
