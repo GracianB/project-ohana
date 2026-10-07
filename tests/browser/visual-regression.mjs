@@ -167,11 +167,23 @@ try {
   await page.locator('#win-continue').click();
   await page.waitForTimeout(100);
 
+  await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
+  await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
+  await page.evaluate(() => window.__OHANA_E2E.setCombo(10));
+  const supremeState = await page.evaluate(() => window.__OHANA_E2E.cast(3));
+  await page.waitForTimeout(180);
+  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
+  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
+  assert.equal(await page.locator('#supreme-cinema').evaluate((el) => el.classList.contains('show')), true, '09-supreme: cinemática U no visible');
+  assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
+  await capture(page, '09-supreme-u-assist');
+
+  await page.waitForTimeout(1250);
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
   await page.waitForTimeout(100);
   assert.equal(await page.locator('#cinematic-beat').evaluate((el) => el.classList.contains('show')), true, '09-death: beat de muerte no visible');
-  await capture(page, '09-death-ghost');
+  await capture(page, '10-death-ghost');
 
   await browser.close();
   console.log('OHANA VISUAL MATRIX PASS');
