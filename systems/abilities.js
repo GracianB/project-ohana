@@ -75,9 +75,11 @@ export function registerCombatAction(game, key, id = "") {
   const assist = normalized === "U" && (distinct >= 4 || combo >= 10);
   const label = distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : "";
   game._combatFlow = { distinct, combo, multiplier, assist, label, keys: recent.map((item) => item.key), t: now };
-  if (label && normalized !== "H") {
+  if (label) {
     p._flowT = 72;
     p._flowLabel = label;
+    p._flowPower = Math.min(1.18, multiplier);
+    p._flowPowerT = 96;
   }
   return Object.freeze({ distinct, combo, multiplier, assist, label });
 }
@@ -116,7 +118,9 @@ export function useAbility(game, index) {
   const key = FLOW_KEYS[index + 1];
   const preFlow = currentFlow(game, p);
   const evo = clamp(Number(p.evo) || 0, 0, 4);
-  const chainCd = index < 3 ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035) : 1;
+  const chainCd = index < 3
+    ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035)
+    : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
   const dur = baseCd / (1 + evo * 0.12) * chainCd;
   p.cds[id] = now + dur;
   p.cdDur[id] = dur;
@@ -437,6 +441,9 @@ export function abilityPreMove(game, input) {
     return;
   }
   syncState(p);
+  if ((p._flowT || 0) > 0) p._flowT--;
+  if ((p._flowPowerT || 0) > 0) p._flowPowerT--;
+  else p._flowPower = 1;
   const specialT = Number(p._specialT) || 0;
   if (specialT > 0) {
     p._specialT = specialT - 1;
@@ -624,7 +631,11 @@ function clamp(v, a, b) {
   if (!Number.isFinite(n)) return a;
   return n < a ? a : n > b ? b : n;
 }
-function pw(p) { return 1 + (Number(p.evo) || 0) * 0.35; }
+function pw(p) {
+  const form = 1 + (Number(p.evo) || 0) * 0.35;
+  const flow = (p._flowPowerT || 0) > 0 ? clamp(Number(p._flowPower) || 1, 1, 1.18) : 1;
+  return form * flow;
+}
 function alive(e) { return !!e && !e.dying && e.hp > 0; }
 function canHit(e) { return alive(e) && !(e.invuln > 0); }
 function isAir(e) { return AIR.has(e.kind) || (e.kind === "cucaracho" && e.evo >= 2) || (e.boss && e.airborne); }
