@@ -369,6 +369,8 @@ function returnToMenu() {
   game.summoned = false;
   game.runtimeFaults = 0;
   game.lastRuntimeFault = "";
+  game._movementTrace = [];
+  game._lastHurt = null;
   game.cam.x = 0;
   game.cam.y = 0;
   playMusic("title");
@@ -1040,6 +1042,7 @@ function scaleFoe(e) {
 function hurtPlayer(amount, label) {
   const p = game.player;
   if (!p || p.dead || p.invuln > 0) return;
+  game._lastHurt = { t, amount:Number(amount)||0, label:String(label||""), x:Number(p.x)||0, vx:Number(p.vx)||0, invuln:Number(p.invuln)||0 };
   const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard" ? 1.4 : 1;
   amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
   if (!(amount > 0)) return;
@@ -1347,6 +1350,11 @@ function updatePlayer() {
   const right = keys["d"] || keys["arrowright"];
   const jump = keys["w"] || keys["arrowup"] || keys[" "];
   const drop = keys["s"] || keys["arrowdown"];
+  if (left || right) {
+    if (!Array.isArray(game._movementTrace)) game._movementTrace = [];
+    game._movementTrace.push({ t, left:!!left, right:!!right, vx:Number(p.vx)||0, x:Number(p.x)||0 });
+    if (game._movementTrace.length > 12) game._movementTrace.shift();
+  }
   if (p.dash > 0) p.dash--;
   if (p._dashGo > 0) p._dashGo--;
   if (p.melee > 0) p.melee--;
@@ -3267,6 +3275,17 @@ if (e2eEnabled) {
           jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
           down: !!(input?.keys?.s || input?.keys?.arrowdown),
         },
+        debug: {
+          movementTrace: Array.isArray(game._movementTrace) ? game._movementTrace.slice() : [],
+          lastHurt: game._lastHurt ? { ...game._lastHurt } : null,
+          invuln: p ? Number(p.invuln)||0 : 0,
+          dashGo: p ? Number(p._dashGo)||0 : 0,
+          thrust: p ? Number(p._thrust)||0 : 0,
+          specialT: p ? Number(p._specialT)||0 : 0,
+          specialSpeedT: p ? Number(p._specialSpeedT)||0 : 0,
+          portalBusy: !!(portals.isBusy && portals.isBusy()),
+          portalPrompt: String(portals.prompt||""),
+        },
         score: game.score,
         kills: game.kills,
         combo: game.combo,
@@ -3369,6 +3388,11 @@ if (e2eEnabled) {
     },
     resetInput() {
       input?.reset();
+      return this.state();
+    },
+    resetDebugTrace() {
+      game._movementTrace = [];
+      game._lastHurt = null;
       return this.state();
     },
     setInvulnerable(frames = 600) {
