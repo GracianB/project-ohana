@@ -131,8 +131,16 @@ export const ROOMS = {
 };
 
 const SIGNATURES = {
-  hub: "kilo", beach: "stitcho", jungle: "chispin", cave: "cat", lab: "dragon",
-  ridge: "dino", space: "frita", reef: "pizza", volcano: "yomi", boss: "cuerno"
+  hub: "kilo",
+  beach: "frita",
+  jungle: "stitcho",
+  cave: "cat",
+  lab: "chispin",
+  ridge: "cuerno",
+  space: "yomi",
+  reef: "pizza",
+  volcano: "dragon",
+  boss: "dino"
 };
 
 const SCALE = 1.4;
