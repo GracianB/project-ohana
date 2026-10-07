@@ -734,7 +734,7 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   assert.match(visual, /01-character-select-1680x900/);
   assert.match(visual, /04-evolution/);
   assert.match(visual, /08-ending/);
-  assert.match(visual, /09-death-ghost/);
+  assert.match(visual, /10-death-ghost/);
 });
 
 
