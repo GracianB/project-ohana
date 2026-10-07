@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-225/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-226/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -697,13 +697,33 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
 });
 
 
-test("V35.1 title has one canonical composition and three-position roster", () => {
+test("V36 title is one canonical cinematic composition with real opening", () => {
   const html = fs.readFileSync("./index.html", "utf8");
   const css = fs.readFileSync("./title-stage.css", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(html, /class="title-shell"/);
   assert.match(html, /class="hero-stage"/);
-  assert.match(css, /canonical title composition/);
-  assert.match(css, /\.char-card\.is-prev2,\.char-card\.is-next2\{display:none!important\}/);
+  assert.match(html, /selected-hero-line/);
+  assert.match(css, /OHANA V36 · CINEMATIC TITLE SYSTEM/);
+  assert.match(css, /char-card\.is-prev2/);
+  assert.match(css, /char-card\.is-next2/);
+  assert.match(title, /playTitleIntro\(\)/);
+  assert.match(title, /const visible = \[id, prev, next\]/);
   assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);
-  assert.equal((css.match(/OHANA V35\.1 · canonical title composition/g) || []).length, 1);
+});
+
+test("V36 cinematic director wires evolution death boss and ending presentation", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const director = fs.readFileSync("./systems/cinematic-director.js", "utf8");
+  const ending = fs.readFileSync("./ending.css", "utf8");
+  const intro = fs.readFileSync("./systems/intro.js", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  assert.match(game, /CustomEvent\("ohana-evolve"/);
+  assert.match(game, /CustomEvent\("ohana-death"/);
+  assert.match(game, /CustomEvent\("ohana-boss-fall"/);
+  assert.match(director, /ohana-death/);
+  assert.match(director, /ohana-boss-fall/);
+  assert.match(ending, /PROJECT OHANA V36 · CINEMATIC PRESENTATION SYSTEM/);
+  assert.match(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
+  assert.match(sw, /systems\/cinematic-director\.js/);
 });
