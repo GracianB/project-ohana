@@ -1759,17 +1759,31 @@ function updateEnemies() {
     e.shoot = (e.shoot || 0) + 1;
     const rate = e.kind === "planta" ? 70 : 9999;
     if (e.kind === "planta" && e.up) {
-      if (e.shoot > rate) {
+      if ((e.plantWind || 0) > 0) {
+        e.plantWind--;
+        e.telegraph = true;
+        e.aimDx = game.player.x - e.x;
+        e.aimDy = game.player.y - e.y;
+        if (e.plantWind <= 0) {
+          e.telegraph = false;
+          e.aimDx = e.aimDy = null;
+          const aim = Math.sign(game.player.x - e.x) || 1;
+          pushRuntime(game.projectiles, {
+            x: e.x + 10, y: e.y + 8,
+            vx: aim * 4.2 * 0.7,
+            vy: -1.2,
+            w: 10, h: 10, life: 80,
+            dmg: 9, color: "#7dca5a",
+            owner: "enemy",
+          }, MAX_RUNTIME_PROJECTILES);
+          game.fx.emit(e.x + e.w / 2, e.y + 10, { color: "#7dca5a", count: 5, size: 2.2, up: 0.8, life: 12 });
+        }
+      } else if (e.shoot > rate && enemyCanCommit(e)) {
         e.shoot = 0;
-        const aim = Math.sign(game.player.x - e.x) || 1;
-        pushRuntime(game.projectiles, {
-          x: e.x + 10, y: e.y + 8,
-          vx: aim * 4.2 * 0.7,
-          vy: -1.2,
-          w: 10, h: 10, life: 80,
-          dmg: 9, color: "#7dca5a",
-          owner: "enemy",
-  }, MAX_RUNTIME_PROJECTILES);
+        e.plantWind = 20;
+        e.telegraph = true;
+      } else if (!enemyCanCommit(e)) {
+        e.telegraph = false;
       }
     }
     }
@@ -1813,7 +1827,7 @@ function updateEnemies() {
       e.telegraph = false;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
       e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
-      if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && (t + Math.floor(e.x)) % 70 === 0) {
+      if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e) && (t + Math.floor(e.x)) % 70 === 0) {
         e.vy = -6.2;
         e.hop = 18;
         e.flash = 4;
@@ -1827,7 +1841,7 @@ function updateEnemies() {
         if (e.lunge <= 0) e.vx *= 0.4;
       } else {
         e.lungeCd = (e.lungeCd || 0) - 1;
-        if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike") {
+        if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike" && enemyCanCommit(e)) {
           e.lungeCd = 90;
           e.lunge = 18;
           e.vx = Math.sign(game.player.x - e.x || 1) * 5.2;
@@ -1880,7 +1894,7 @@ function updateEnemies() {
         e.telegraph = false;
         if (t % 2 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" }, MAX_RUNTIME_GHOSTS);
         if (e.darting <= 0) { e.dart = 55 + (t % 35); e.vx *= 0.35; }
-      } else if (e.wind > 0 || (e.dart <= 0 && game.player)) {
+      } else if (e.wind > 0 || (e.dart <= 0 && game.player && enemyCanCommit(e))) {
         if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
         e.wind++;
         e.telegraph = true;
@@ -2168,7 +2182,7 @@ function updateEnemies() {
         e.telegraph = false;
         if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" }, MAX_RUNTIME_GHOSTS);
         if (e.diving <= 0) { e.diveCd = angry ? 40 : 65; e.vy = -2.4; e.baseY = Math.max(200, Math.min(500, e.y)); }
-      } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player) {
+      } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.86;
@@ -2229,7 +2243,8 @@ function updateEnemies() {
       const spd = hot ? 2.4 : 1.1;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * (hot ? 0.12 : 0.04);
       e.vx = Math.max(-spd, Math.min(spd, e.vx));
-      e.telegraph = hot;
+      e.enraged = hot;
+      e.telegraph = false;
       e.color = hot ? "#ff4020" : "#c04010";
       if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
     }
@@ -2248,7 +2263,7 @@ function updateEnemies() {
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       e.shootCd = (e.shootCd || 0) - 1;
       // Telegraph ~0.5s antes del rayo
-      if (e.shootCd <= 30) e.telegraph = true;
+      if (e.shootCd <= 30 && enemyCanCommit(e)) e.telegraph = true;
       else e.telegraph = false;
       if (e.shootCd <= 0 && game.player && enemyCanCommit(e)) {
         e.shootCd = 90;
