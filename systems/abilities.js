@@ -150,6 +150,7 @@ function applySignatureLink(game, p, flow, key) {
     p._specialAuroraT = Math.max(p._specialAuroraT || 0, 72);
   }
 
+  p._specialT = Math.max(Number(p._specialT) || 0, 110);
   p._flowPower = Math.max(Number(p._flowPower) || 1, 1.14);
   p._flowPowerT = Math.max(Number(p._flowPowerT) || 0, 110);
   game.nums?.add(cx(p), p.y - 32, link.name, link.color, true);
