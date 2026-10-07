@@ -295,6 +295,7 @@ export const Passives = {
     }
     if (p._armorT > 0) p._armorT--;
     afterMoveHeroMastery(game, input);
+    if (p._masteryMove) p._masteryLastMove = { id: p._masteryMove, t: Number(game.t) || 0 };
     p._move = p._abilMove || p._masteryMove || p._pmove || (p._puntT > 0 ? "punta" : null);
     p._masteryMove = "";
   },
