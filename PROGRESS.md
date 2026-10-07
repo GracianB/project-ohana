@@ -1,3 +1,21 @@
+## 07/10/2026 · V38 Enemy Intelligence & Combat Feel
+
+**Caché:** `ohana-228`.
+
+V38 eleva los enemigos normales al nivel de intención del resto del juego y prepara su arquitectura para multiplayer.
+
+- Director de encuentros determinista: presupuesto de ataques simultáneos por dificultad y población.
+- Seis roles legibles: DIVER, SKIRMISHER, ARTILLERY, BRUISER, AMBUSHER y SWARM.
+- Intenciones compartidas: STRIKE, PRESS, FLANK, HOLD y RETREAT.
+- Los enemigos cercanos comparten alerta sin convertirse en una mente colmena global.
+- Artilleros frágiles pueden retirarse; élites y brutos mantienen presión.
+- Los ataques ya iniciados nunca se cancelan a mitad, pero los nuevos respetan el presupuesto del encuentro.
+- Planta recibe wind-up real; libélula, murciélago, cucaracho y demás especialistas quedan dentro del mismo contrato.
+- Telegraphs comunican también el rol mediante forma, no solo color.
+- Estado de daño visible y lectura sutil de amenaza/intención integrada en el dibujo.
+- E2E expone snapshot del director y Visual Regression captura un encuentro vivo con roles e intenciones.
+- Sin RNG nuevo, sin mutaciones de daño/salud y sin cambios de hitbox desde el director.
+
 ## 07/10/2026 · V37 Signature Supremes & Combat Flow
 
 **Caché:** `ohana-227`.
