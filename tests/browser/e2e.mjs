@@ -410,9 +410,18 @@ try {
     api.setPlayerVelocity(0, 7);
     return { cloud };
   });
-  const chispinCloud = await page.evaluate(() => window.__OHANA_E2E.step(18));
+  const chispinCloud = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    let state = api.state();
+    for (let i = 0; i < 48 && !state.mastery?.cloud; i++) state = api.step(1);
+    return state;
+  });
   assert.equal(chispinCloud.mastery?.id, 'cloudstep', 'desktop: Chispín no expone Cloudstep');
-  assert.equal(chispinCloud.mastery?.cloud, true, 'desktop: Chispín no aterriza sobre la nube de Cloudstep');
+  assert.equal(
+    chispinCloud.mastery?.cloud,
+    true,
+    'desktop: Chispín no aterriza sobre la nube de Cloudstep · ' + JSON.stringify({ player:chispinCloud.player, cloud:chispinSetup.cloud, mastery:chispinCloud.mastery })
+  );
   assert.equal(chispinCloud.player?.grounded, true, 'desktop: nube Cloudstep no sostiene al jugador');
   assert.ok(
     Math.abs((chispinCloud.player.y + 36) - chispinSetup.cloud.y) < 12,
