@@ -65,6 +65,7 @@ export function registerCombatAction(game, key, id = "") {
   if (!FLOW_KEYS.includes(normalized)) return Object.freeze({ distinct: 0, combo: 0, multiplier: 1, assist: false, label: "" });
   const chain = Array.isArray(p._combatChain) ? p._combatChain.filter((item) => now - item.t <= FLOW_WINDOW) : [];
   const last = chain[chain.length - 1];
+  const previous = last?.key || "";
   if (!last || last.key !== normalized || now - last.t > 16) chain.push({ key: normalized, id: String(id || ""), t: now });
   while (chain.length > 6) chain.shift();
   p._combatChain = chain;
@@ -81,7 +82,7 @@ export function registerCombatAction(game, key, id = "") {
     p._flowPower = Math.min(1.18, multiplier);
     p._flowPowerT = 96;
   }
-  return Object.freeze({ distinct, combo, multiplier, assist, label });
+  return Object.freeze({ distinct, combo, multiplier, assist, label, previous });
 }
 
 function currentFlow(game, p) {
@@ -97,6 +98,66 @@ function currentFlow(game, p) {
     label: distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : ""
   });
 }
+
+const SIGNATURE_LINKS = Object.freeze({
+  kilo:    { name: "SERENATA HULA", color: "#ffd36a" },
+  stitcho: { name: "PLASMA ROLL", color: "#67ddff" },
+  chispin: { name: "FLASH CHAIN", color: "#ffe14a" },
+  cat:     { name: "OVILLO SOMBRA", color: "#ffb6e4" },
+  dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
+  dino:    { name: "MORDISCO EN CARGA", color: "#c8f04a" },
+  frita:   { name: "SALSA TURBO", color: "#ffd36a" },
+  pizza:   { name: "PEPPERONI ELÁSTICO", color: "#ff8a2a" },
+  yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" },
+  cuerno:  { name: "BRILLO DE CARGA", color: "#fff6c8" },
+});
+
+function applySignatureLink(game, p, flow, key) {
+  if (!p || flow?.previous !== "J" || key !== "K") return null;
+  const link = SIGNATURE_LINKS[p.id];
+  if (!link) return null;
+
+  if (p.id === "kilo") {
+    healPlayer(p, 8);
+    S.hover = Math.max(S.hover || 0, 28);
+    armor(p, 8);
+  } else if (p.id === "stitcho") {
+    S.roll = Math.max(S.roll || 0, 58);
+    armor(p, 12);
+  } else if (p.id === "chispin") {
+    p.invuln = Math.max(p.invuln || 0, 18);
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 54);
+  } else if (p.id === "cat") {
+    p.invuln = Math.max(p.invuln || 0, 18);
+    p._specialShadowT = Math.max(p._specialShadowT || 0, 72);
+  } else if (p.id === "dragon") {
+    p._specialFlightT = Math.max(p._specialFlightT || 0, 96);
+  } else if (p.id === "dino") {
+    S.charge = Math.max(S.charge || 0, 72);
+    armor(p, 10);
+  } else if (p.id === "frita") {
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
+    p.invuln = Math.max(p.invuln || 0, 12);
+  } else if (p.id === "pizza") {
+    p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
+    armor(p, 10);
+  } else if (p.id === "yomi") {
+    p._specialGhostT = Math.max(p._specialGhostT || 0, 90);
+    p.invuln = Math.max(p.invuln || 0, 14);
+  } else if (p.id === "cuerno") {
+    S.gallop = Math.max(S.gallop || 0, 70);
+    S.gallopFace = p.facing || 1;
+    p._specialAuroraT = Math.max(p._specialAuroraT || 0, 72);
+  }
+
+  p._flowPower = Math.max(Number(p._flowPower) || 1, 1.14);
+  p._flowPowerT = Math.max(Number(p._flowPowerT) || 0, 110);
+  game.nums?.add(cx(p), p.y - 32, link.name, link.color, true);
+  game.fx?.emit(cx(p), cy(p), { color: link.color, count: 14, size: 3, star: true, speed: 3.2, life: 16 });
+  game._signatureLink = { id: p.id, name: link.name, t: Number(game.t) || 0 };
+  return link;
+}
+
 
 export function useAbility(game, index) {
   const p = game?.player;
@@ -141,9 +202,11 @@ export function useAbility(game, index) {
 
   if (S.pull && id !== "cheese") S.pull = null;
   const flow = registerCombatAction(game, key, id);
+  const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
 
   if (index === 3) castSupreme(game, p, flow);
   else fn(game, p, evo);
+  if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
   if (flow.label && index < 3) {
     game.nums?.add(cx(p), p.y - 22, flow.label, def.color || p.color || "#fff6c8");
