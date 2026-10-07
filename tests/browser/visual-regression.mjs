@@ -139,6 +139,7 @@ try {
     api.start('chispin');
     api.setEvo(2);
     api.loadRoom('hub');
+    api.setInvulnerable(600);
     const state = api.state();
     const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
     if (!cloud) throw new Error('11-cloudstep: no hay nube de maestría');
