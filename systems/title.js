@@ -193,6 +193,16 @@ function mark(id) {
   });
 
   const selectedDef = ROSTER.find((item) => item.id === id);
+  if (selectedDef) {
+    const heroName = document.getElementById("selected-hero-name");
+    const heroForm = document.getElementById("selected-hero-form");
+    const heroDifficulty = document.getElementById("selected-hero-difficulty");
+    const rank = difficulty(selectedDef.id);
+    if (heroName) heroName.textContent = selectedDef.name;
+    if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
+    if (heroDifficulty) heroDifficulty.textContent = "Dificultad " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
+    document.getElementById("char-select")?.style.setProperty("--hero-tint", selectedDef.color);
+  }
   const status = selectionStatus();
   if (status && selectedDef) {
     status.textContent =
