@@ -1346,10 +1346,10 @@ function updatePlayer() {
     return;
   }
   tickEvoTween(p);
-  const left = keys["a"] || keys["arrowleft"];
-  const right = keys["d"] || keys["arrowright"];
-  const jump = keys["w"] || keys["arrowup"] || keys[" "];
-  const drop = keys["s"] || keys["arrowdown"];
+  const left = !!(keys["a"] || keys["arrowleft"]);
+  const right = !!(keys["d"] || keys["arrowright"]);
+  const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
+  const drop = !!(keys["s"] || keys["arrowdown"]);
   if (left || right) {
     if (!Array.isArray(game._movementTrace)) game._movementTrace = [];
     game._movementTrace.push({ t, left:!!left, right:!!right, vx:Number(p.vx)||0, x:Number(p.x)||0 });
