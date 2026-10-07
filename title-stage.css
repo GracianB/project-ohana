@@ -126,6 +126,7 @@ body.playing #char-select{display:none!important}
 #char-select .hero-dossier strong{grid-column:1!important;grid-row:2/4!important;margin:0!important;color:#fff!important;font:700 clamp(27px,2.5vw,38px)/.92 Fredoka,sans-serif!important;text-shadow:0 8px 24px #000!important}
 #char-select .hero-dossier>span:not(.dossier-kicker){grid-column:2!important;grid-row:2!important;justify-self:start!important;color:rgba(255,255,255,.64)!important;font:600 10px/1.2 Outfit,sans-serif!important}
 #char-select .dossier-meta{grid-column:2!important;grid-row:3!important;display:flex!important;gap:6px!important;margin:3px 0 0!important;justify-self:start!important}
+#char-select .dossier-line{grid-column:1/-1!important;grid-row:4!important;max-width:390px!important;margin:6px 0 0!important;color:rgba(232,241,251,.58)!important;font:600 9px/1.35 Outfit,sans-serif!important;letter-spacing:.01em!important;text-align:center!important}
 #char-select .dossier-meta span{padding:3px 7px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:99px!important;background:rgba(0,0,0,.18)!important;color:rgba(255,255,255,.76)!important;font:800 7px/1 Outfit,sans-serif!important;letter-spacing:.08em!important;text-transform:uppercase}
 
 #char-select .roster-arrow{
