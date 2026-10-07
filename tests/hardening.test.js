@@ -718,6 +718,7 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   const ending = fs.readFileSync("./ending.css", "utf8");
   const intro = fs.readFileSync("./systems/intro.js", "utf8");
   const sw = fs.readFileSync("./sw.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
   assert.match(game, /CustomEvent\("ohana-evolve"/);
   assert.match(game, /CustomEvent\("ohana-death"/);
   assert.match(game, /CustomEvent\("ohana-boss-fall"/);
@@ -726,4 +727,8 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   assert.match(ending, /PROJECT OHANA V36 · CINEMATIC PRESENTATION SYSTEM/);
   assert.match(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
   assert.match(sw, /systems\/cinematic-director\.js/);
+  assert.match(visual, /01-character-select-1680x900/);
+  assert.match(visual, /04-evolution/);
+  assert.match(visual, /08-ending/);
+  assert.match(visual, /09-death-ghost/);
 });
