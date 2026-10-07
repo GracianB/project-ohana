@@ -412,7 +412,14 @@ try {
     }
     const cloud = state.masteryPlatforms.find((p) => p.mastery === 'cloudstep');
     if (!cloud) throw new Error('Cloudstep: no hay nube en hub');
-    api.setPlayer(cloud.x + Math.min(28, cloud.w * 0.2), cloud.y - 96);
+    const startX = cloud.x + Math.min(28, cloud.w * 0.2);
+    api.setPlayer(startX, cloud.y - 132);
+    api.setPlayerVelocity(0, 0);
+    const neutral = api.step(6);
+    if (Math.abs(neutral.player.x - startX) > 0.5) {
+      throw new Error('V39: deriva horizontal sin input · ' + JSON.stringify({ startX, player:neutral.player, input:neutral.input, debug:neutral.debug }));
+    }
+    api.setPlayer(startX, cloud.y - 96);
     api.setPlayerVelocity(0, 7);
     return { cloud };
   });
