@@ -3386,6 +3386,16 @@ if (e2eEnabled) {
       game.player.vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
       return this.state();
     },
+    exhaustPlayerJumps() {
+      if (!game.player) return this.state();
+      game.player.jumps = Math.max(0, Number(game.player.maxJumps) || 0);
+      game.player.grounded = false;
+      game.player.coyote = 0;
+      game.player.buffer = 0;
+      game.player._jumpHeld = false;
+      game.player._jumpPrev = false;
+      return this.state();
+    },
     resetInput() {
       input?.reset();
       return this.state();
