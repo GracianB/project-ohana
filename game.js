@@ -81,6 +81,7 @@ const DOM = {
 };
 let abilitySlots = [];
 let touchPowers = [];
+let abilityBarKey = "";
 let hudAvatarKey = "";
 let pipKey = "";
 function setText(el, text) {
@@ -2766,6 +2767,7 @@ function renderAbilityBar() {
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
   }));
   touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
+  abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",");
 }
 // Retrato vivo del personaje en el HUD (misma pipeline que el juego)
 function drawHudAvatar(p) {
@@ -2794,6 +2796,8 @@ function drawHudAvatar(p) {
 
 function updateHUD() {
   const p = game.player; if (!p) return;
+  const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",");
+  if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
   setText(DOM.hudName, p.name);
   const mk = markAt(p.id, p.evo);
   setText(DOM.hudTrait, ((p.passive && p.passive.name) || "") + " · H " + mk.name);
