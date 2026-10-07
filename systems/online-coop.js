@@ -107,12 +107,17 @@ class OnlineCoop {
 
     document.body.dataset.gameMode = "online";
     document.body.dataset.onlineRoom = this.roomId;
+    document.body.dataset.onlineState = "connecting";
+    delete document.body.dataset.onlineError;
 
     await this.poll(game, true);
     if (!this.snapshot) {
       this.enabled = false;
+      document.body.dataset.onlineState = "error";
+      document.body.dataset.onlineError = this.error || "initial-poll-failed";
       throw new Error(this.error || "No se pudo recuperar el estado inicial de la partida online.");
     }
+    document.body.dataset.onlineState = "connected";
 
     // Online mode reuses the original OHANA room/physics/rendering.
     // The lobby's synthetic 1280×720 coordinates are never applied to it.
