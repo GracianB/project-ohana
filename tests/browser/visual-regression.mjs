@@ -141,7 +141,6 @@ try {
     api.loadRoom('hub');
     api.setInvulnerable(600);
     api.resetInput();
-    api.resetDebugTrace();
     const state = api.state();
     if (state.input.left || state.input.right || state.input.jump || state.input.down) {
       throw new Error('Cloudstep: input residual ' + JSON.stringify(state.input));
@@ -161,7 +160,7 @@ try {
   assert.equal(
     cloudState.mastery?.cloud,
     true,
-    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input, debug:cloudState.debug })
+    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery, input:cloudState.input })
   );
   assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
   assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
@@ -245,15 +244,20 @@ try {
     const el = document.querySelector('#supreme-cinema');
     return Number(el?.dataset.generation || 0) > previousGeneration && el?.dataset.state === 'active';
   }, previousSupremeGeneration, { timeout: 1200 });
-  await page.waitForTimeout(120);
   assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3');
   assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo');
   const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
     show: el.classList.contains('show'),
     state: el.dataset.state,
-    hidden: el.getAttribute('aria-hidden')
+    hidden: el.getAttribute('aria-hidden'),
+    duration: Number(el.dataset.duration || 0)
   }));
-  assert.deepEqual(supremeCinemaState, { show:true, state:'active', hidden:'false' }, '09-supreme: cinemática U no permanece activa');
+  assert.deepEqual(
+    { show:supremeCinemaState.show, state:supremeCinemaState.state, hidden:supremeCinemaState.hidden },
+    { show:true, state:'active', hidden:'false' },
+    '09-supreme: cinemática U no entra estable en active'
+  );
+  assert.ok(supremeCinemaState.duration >= 1400, '09-supreme: duración cinematográfica insuficiente');
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
   await capture(page, '09-supreme-u-assist');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
