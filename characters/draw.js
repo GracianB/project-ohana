@@ -687,6 +687,126 @@ function drawSignatureFX(ctx, p, H, pose, t) {
   ctx.restore();
 }
 
+function drawMasteryMotionFX(ctx, p, H, t) {
+  const move = String(p?._move || "");
+  if (!move) return;
+  const f = p.facing || 1;
+  const color = accentFor(p);
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+
+  if (move === "wingbeat") {
+    const flap = 0.45 + Math.sin(t * 0.55) * 0.18;
+    ctx.globalAlpha = 0.72;
+    ctx.strokeStyle = p.evo >= 4 ? "#ffd84a" : "#fff0d0";
+    ctx.lineWidth = Math.max(1.8, H * 0.024);
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(-f * H * 0.04, -H * 0.55);
+      ctx.quadraticCurveTo(-f * H * (0.30 + flap) * side, -H * 0.78, -f * H * 0.44 * side, -H * 0.30);
+      ctx.stroke();
+    }
+  } else if (move === "cloudstep") {
+    ctx.globalAlpha = 0.78;
+    ctx.strokeStyle = "#ffe14a";
+    ctx.lineWidth = Math.max(1.4, H * 0.018);
+    ctx.beginPath();
+    ctx.moveTo(-H * 0.18, 0);
+    ctx.lineTo(-H * 0.04, -H * 0.12);
+    ctx.lineTo(H * 0.02, -H * 0.02);
+    ctx.lineTo(H * 0.18, -H * 0.18);
+    ctx.stroke();
+  } else if (move === "moonpounce") {
+    ctx.globalAlpha = 0.68;
+    ctx.strokeStyle = "#ffb6e4";
+    ctx.lineWidth = Math.max(1.5, H * 0.02);
+    ctx.beginPath();
+    ctx.arc(-f * H * 0.18, -H * 0.50, H * 0.42, -1.2, 1.25);
+    ctx.stroke();
+    ctx.globalAlpha = 0.36;
+    ctx.beginPath();
+    ctx.arc(-f * H * 0.32, -H * 0.50, H * 0.30, -1.2, 1.25);
+    ctx.stroke();
+  } else if (move === "bloomdraft") {
+    ctx.globalAlpha = 0.62;
+    ctx.fillStyle = "#ff9ad8";
+    for (let i = 0; i < 5; i++) {
+      const a = t * 0.12 + i * 1.26;
+      const x = Math.cos(a) * H * 0.24;
+      const y = -H * (0.10 + ((t * 0.025 + i * 0.17) % 0.75));
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(a);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, H * 0.035, H * 0.018, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  } else if (move === "wallvault") {
+    ctx.globalAlpha = 0.58;
+    ctx.strokeStyle = "#7edfff";
+    ctx.lineWidth = Math.max(1.4, H * 0.018);
+    for (let i = 0; i < 3; i++) {
+      const y = -H * (0.22 + i * 0.16);
+      ctx.beginPath();
+      ctx.moveTo(-f * H * 0.16, y + H * 0.06);
+      ctx.lineTo(-f * H * 0.34, y);
+      ctx.lineTo(-f * H * 0.18, y - H * 0.06);
+      ctx.stroke();
+    }
+  } else if (move === "seismicbreak") {
+    ctx.globalAlpha = 0.74;
+    ctx.strokeStyle = "#c8f04a";
+    ctx.lineWidth = Math.max(1.6, H * 0.022);
+    ctx.beginPath();
+    ctx.moveTo(-H * 0.42, 0);
+    ctx.lineTo(-H * 0.18, -H * 0.10);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(H * 0.20, -H * 0.12);
+    ctx.lineTo(H * 0.44, 0);
+    ctx.stroke();
+  } else if (move === "greaserail") {
+    ctx.globalAlpha = 0.58;
+    ctx.strokeStyle = "#ffd36a";
+    ctx.lineWidth = Math.max(1.5, H * 0.018);
+    for (let i = 0; i < 4; i++) {
+      const y = -H * (0.08 + i * 0.08);
+      ctx.beginPath();
+      ctx.moveTo(-f * H * (0.18 + i * 0.05), y);
+      ctx.lineTo(-f * H * (0.56 + i * 0.07), y + Math.sin(t * 0.2 + i) * H * 0.025);
+      ctx.stroke();
+    }
+  } else if (move === "ovenbounce") {
+    ctx.globalAlpha = 0.66;
+    ctx.strokeStyle = "#ffb43a";
+    ctx.lineWidth = Math.max(1.5, H * 0.02);
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(0, 0, H * (0.18 + i * 0.10), Math.PI * 0.10, Math.PI * 0.90);
+      ctx.stroke();
+    }
+  } else if (move === "hollowphase") {
+    ctx.globalAlpha = 0.42;
+    ctx.strokeStyle = "#ff5b78";
+    ctx.lineWidth = Math.max(1.4, H * 0.018);
+    for (let i = 1; i <= 3; i++) {
+      ctx.strokeRect(-f * H * (0.16 + i * 0.11), -H * 0.76, H * 0.12, H * 0.56);
+    }
+  } else if (move === "aurorabridge") {
+    ctx.globalAlpha = 0.72;
+    ctx.strokeStyle = "#fff6c8";
+    ctx.lineWidth = Math.max(1.4, H * 0.019);
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.arc(f * H * 0.04, -H * 0.28, H * (0.18 + i * 0.09), -1.1, 0.55);
+      ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
 function drawCharacterMotionFX(ctx, p, H, pose, t) {
   const color = accentFor(p);
   const prof = motionProfile(p);
@@ -696,6 +816,7 @@ function drawCharacterMotionFX(ctx, p, H, pose, t) {
   const intensity = Math.min(1.35, (pose.speed || 0) * (0.55 + prof.pace * 0.45));
   if (pose.state === "run" && intensity > 0.28) drawSpeedLines(ctx, H, color, t, intensity);
   drawLocomotionFX(ctx, H, color, pose, t);
+  drawMasteryMotionFX(ctx, p, H, t);
   drawLandingImpact(ctx, H, color, pose);
   drawAttackFX(ctx, H, color, pose);
   drawEvolutionCombatFX(ctx, p, H, pose, t);
