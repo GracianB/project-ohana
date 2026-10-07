@@ -60,13 +60,13 @@ try {
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
-  await hostPage.getByRole("button", { name: "Kilo", exact: true }).click();
+  await hostPage.getByRole("button", { name: "Seleccionar a Kilo", exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await guestPage.goto("http://127.0.0.1:4174/multiplayer.html");
   await guestPage.locator("#room-input").fill(roomId);
   await guestPage.getByRole("button", { name: "Unirse" }).click();
-  await guestPage.getByRole("button", { name: "Michi", exact: true }).click();
+  await guestPage.getByRole("button", { name: "Seleccionar a Michi", exact: true }).click();
   await guestPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await hostPage.waitForURL(/index\.html\?online=1/, { timeout: 7000 });
