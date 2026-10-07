@@ -74,6 +74,7 @@ class OnlineCoop {
         roomId: saved.roomId,
         identity: saved.identity,
         characterId: saved.characterId || saved.selectedCharacterId || "",
+        originalEngine: saved.originalEngine === true,
       };
     } catch (_) {
       return null;
