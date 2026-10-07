@@ -3351,6 +3351,12 @@ if (e2eEnabled) {
       game.player.vy = 0;
       return this.step(1);
     },
+    setPlayerVelocity(vx = 0, vy = 0) {
+      if (!game.player) return this.state();
+      game.player.vx = Number.isFinite(Number(vx)) ? Number(vx) : 0;
+      game.player.vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
+      return this.state();
+    },
     setInvulnerable(frames = 600) {
       if (game.player) game.player.invuln = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
       return this.state();
