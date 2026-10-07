@@ -3221,6 +3221,12 @@ if (e2eEnabled) {
         starBonus: Surprises.starOrbBonus(),
         lastAbilityId: game.lastAbilityId,
         lastAbilitySlot: game.lastAbilitySlot,
+        flow: game._combatFlow ? {
+          label: game._combatFlow.label || "",
+          distinct: game._combatFlow.distinct || 0,
+          multiplier: game._combatFlow.multiplier || 1,
+        } : null,
+        assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
         boss: boss ? {
           x: boss.x,
           y: boss.y,
@@ -3249,7 +3255,12 @@ if (e2eEnabled) {
       return this.state();
     },
     cast(index) {
-      useAbility(game, Math.max(0, Math.min(2, Math.floor(Number(index) || 0))));
+      useAbility(game, Math.max(0, Math.min(3, Math.floor(Number(index) || 0))));
+      return this.state();
+    },
+    setCombo(value) {
+      game.combo = Math.max(0, Math.min(99, Math.floor(Number(value) || 0)));
+      game.comboT = game.combo > 0 ? 480 : 0;
       return this.state();
     },
     attack() {
