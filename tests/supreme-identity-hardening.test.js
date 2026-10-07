@@ -9,7 +9,7 @@ globalThis.window.addEventListener = globalThis.addEventListener;
 globalThis.window.removeEventListener = globalThis.removeEventListener;
 globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 
-const { useAbility, clearAbilityFx } = await import('../systems/abilities.js');
+const { useAbility, clearAbilityFx, registerCombatAction, supremeOf } = await import('../systems/abilities.js');
 
 function makeEnemy(overrides = {}) {
   return {
@@ -57,11 +57,11 @@ test('PR151.12: Stitcho supreme aplica control fuerte al enemigo', () => {
   clearAbilityFx();
 });
 
-test('PR151.13: Chispin supreme respeta el máximo de seis objetivos', () => {
-  const enemies = Array.from({ length: 8 }, (_, i) => makeEnemy({ x: 180 + i * 70 }));
+test('V37: Chispin supreme encadena hasta ocho objetivos', () => {
+  const enemies = Array.from({ length: 10 }, (_, i) => makeEnemy({ x: 180 + i * 70 }));
   const game = cast('chispin', enemies);
   const damaged = enemies.filter((e) => e.hp < 1000);
-  assert.equal(damaged.length, 6);
+  assert.equal(damaged.length, 8);
   clearAbilityFx();
 });
 
@@ -121,5 +121,32 @@ test('PR151.20: Cuerno supreme cura y concede experiencia', () => {
   const game = cast('cuerno');
   assert.ok(game.player.health > 40);
   assert.ok(game.player.xp > 0);
+  clearAbilityFx();
+});
+
+test('V37: H→J→K→L→U activa OHANA FLOW y asistencia', () => {
+  clearAbilityFx();
+  const game = makeGame('kilo', [makeEnemy()]);
+  game.combo = 0;
+  game.comboT = 0;
+  registerCombatAction(game, 'H', 'golpe');
+  registerCombatAction(game, 'J', 'ukulele');
+  registerCombatAction(game, 'K', 'hula');
+  registerCombatAction(game, 'L', 'ohana');
+  useAbility(game, 3);
+  assert.equal(game._supremeFlow?.label, 'OHANA FLOW');
+  assert.equal(game._supremeFlow?.assist, true);
+  assert.equal(game._assist?.heroId, supremeOf('kilo').ally);
+  assert.ok(game._assist?.t > 0);
+  clearAbilityFx();
+});
+
+test('V37: combo alto puede invocar asistencia aunque la cadena sea corta', () => {
+  clearAbilityFx();
+  const game = makeGame('pizza', [makeEnemy()]);
+  game.combo = 10;
+  useAbility(game, 3);
+  assert.equal(game._supremeFlow?.assist, true);
+  assert.equal(game._assist?.heroId, 'yomi');
   clearAbilityFx();
 });
