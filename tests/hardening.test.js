@@ -682,11 +682,11 @@ test('phase 54: el harness E2E puede fijar una semilla de simulación', () => {
 
 
 test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogue wired", () => {
-  const game = read("game.js");
-  const index = read("index.html");
-  const cinema = read("systems/world-cinema.js");
-  const ending = read("systems/ending.js");
-  const title = read("systems/title.js");
+  const game = fs.readFileSync("./game.js", "utf8");
+  const index = fs.readFileSync("./index.html", "utf8");
+  const cinema = fs.readFileSync("./systems/world-cinema.js", "utf8");
+  const ending = fs.readFileSync("./systems/ending.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
   assert.match(index, /systems\/world-cinema\.js\?v=ohana-224/);
