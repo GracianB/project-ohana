@@ -76,3 +76,44 @@ export function renderWorldGraphHTML(current,visited={},evo=0){
   return '<div class="world-map-v40" role="img" aria-label="Mapa avanzado de Isla Hoku"><div class="wm-grid"></div>'+lines+nodes+
     '<div class="wm-legend"><span><i class="door"></i>Ruta</span><span><i class="drop"></i>Caída</span><span><i class="catapult"></i>Catapulta</span><span><i class="vortex"></i>Vórtice</span></div></div>';
 }
+
+
+export function drawWorldMinimap(ctx,current,visited={},evo=0,viewW=1280,viewH=720){
+  if(!ctx)return;
+  const state=worldGraphSnapshot(current,visited,evo);
+  const w=250,h=142;
+  const ox=viewW-w-18,oy=viewH-h-18;
+  ctx.save();
+  ctx.fillStyle="rgba(3,8,16,.74)";
+  ctx.strokeStyle="rgba(126,231,255,.18)";
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(ox,oy,w,h,14);ctx.fill();ctx.stroke();
+
+  const px=(n)=>ox+12+n.x/100*(w-24);
+  const py=(n)=>oy+12+n.y/100*(h-24);
+
+  for(const e of state.edges){
+    const a=WORLD_NODES[e.a],b=WORLD_NODES[e.b];if(!a||!b)continue;
+    const style=EDGE_STYLE[e.type]||EDGE_STYLE.door;
+    ctx.globalAlpha=e.locked?.18:(e.type==="vortex"||e.type==="catapult"?.55:.28);
+    ctx.strokeStyle=style.color;
+    ctx.lineWidth=e.route==="main"?2:1.2;
+    if(e.type==="vortex")ctx.setLineDash([3,4]);
+    else if(e.type==="catapult")ctx.setLineDash([7,4]);
+    else if(e.type==="drop")ctx.setLineDash([2,3]);
+    else ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(px(a),py(a));ctx.lineTo(px(b),py(b));ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  for(const n of state.nodes){
+    const x=px(n),y=py(n);
+    ctx.globalAlpha=n.locked?.28:1;
+    ctx.fillStyle=n.current?"#7ee7ff":n.visited?"#7fe39c":"#1c2a38";
+    ctx.strokeStyle=n.current?"#eaffff":n.visited?"#b8f0c4":"rgba(255,255,255,.18)";
+    ctx.lineWidth=n.current?2:1;
+    ctx.beginPath();ctx.arc(x,y,n.current?5.8:4.2,0,Math.PI*2);ctx.fill();ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  ctx.restore();
+}
