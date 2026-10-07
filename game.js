@@ -3319,6 +3319,7 @@ if (e2eEnabled) {
           multiplier: game._combatFlow.multiplier || 1,
         } : null,
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+        hazardEscape: p?._hazardEscapeKey || "",
         mastery: masterySnapshot(game),
         masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
         worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
