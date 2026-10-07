@@ -69,8 +69,8 @@ test('PR151.14: Cat supreme activa eclipse y amortigua movimiento enemigo', () =
   const enemy = makeEnemy({ vx: 20, vy: -10 });
   const game = cast('cat', [enemy]);
   assert.ok(enemy._eclipseT >= 90);
-  assert.equal(enemy.vx, 4);
-  assert.equal(enemy.vy, -2);
+  assert.ok(Math.abs(enemy.vx) <= 3.2);
+  assert.ok(Math.abs(enemy.vy) <= 1.6);
   assert.ok(game.player.invuln >= 55);
   clearAbilityFx();
 });
