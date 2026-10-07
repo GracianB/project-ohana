@@ -140,6 +140,90 @@ const ROLE_COLOR = Object.freeze({
   SWARM: "#91f0b4",
 });
 
+function drawEcologyRead(ctx, e, t, y, r) {
+  const formation = String(e.aiFormation || "");
+  if (!formation) return;
+  const color = e.aiEcoColor || "#cfe8ff";
+  const pulse = 0.35 + (Number(e.aiEcoPulse) || 0) * 0.35 + Math.sin(t * 0.06 + (e.spawnIndex || 0)) * 0.08;
+  const slot = Math.max(0, Number(e.aiFormationSlot) || 0);
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.globalAlpha = Math.max(0.16, Math.min(0.55, pulse));
+
+  if (formation === "TIDE") {
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.arc(0, y + i * 4, r + 5 + i * 4, Math.PI * 1.08, Math.PI * 1.92);
+      ctx.stroke();
+    }
+  } else if (formation === "CANOPY") {
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(side * (r + 5), y - 2, 4, 2.2, side * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (formation === "ECHO") {
+    for (let i = 0; i < 2; i++) {
+      ctx.beginPath();
+      ctx.arc(0, y, r + 5 + i * 5, Math.PI * 1.18, Math.PI * 1.82);
+      ctx.stroke();
+    }
+  } else if (formation === "CIRCUIT") {
+    for (const side of [-1, 1]) {
+      const x = side * (r + 7);
+      ctx.strokeRect(x - 2, y - 2, 4, 4);
+      ctx.beginPath();
+      ctx.moveTo(side * r * 0.55, y);
+      ctx.lineTo(x - side * 2, y);
+      ctx.stroke();
+    }
+  } else if (formation === "GALE") {
+    for (let i = -1; i <= 1; i++) {
+      const x = -r + (i + 1) * r;
+      ctx.beginPath();
+      ctx.moveTo(x - 5, y + 5);
+      ctx.lineTo(x + 4, y - 5);
+      ctx.stroke();
+    }
+  } else if (formation === "ORBIT") {
+    const a = t * 0.04 + slot * 1.2;
+    ctx.beginPath();
+    ctx.ellipse(0, y, r + 7, 6.5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * (r + 7), y + Math.sin(a) * 6.5, 2.3, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (formation === "SCHOOL") {
+    for (let i = -1; i <= 1; i++) {
+      const x = i * 7;
+      ctx.beginPath();
+      ctx.moveTo(x - 3, y);
+      ctx.lineTo(x + 3, y - 2.5);
+      ctx.lineTo(x + 3, y + 2.5);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (formation === "FURNACE") {
+    for (const side of [-1, 1]) {
+      const x = side * (r + 5);
+      ctx.beginPath();
+      ctx.moveTo(x, y + 4);
+      ctx.quadraticCurveTo(x - side * 4, y - 2, x, y - 7);
+      ctx.quadraticCurveTo(x + side * 5, y - 1, x, y + 4);
+      ctx.fill();
+    }
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, y, r + 5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 function drawEncounterRead(ctx, e, t) {
   if (!(Number(e.aggro) > 0) || e.dying > 0) return;
   const role = e.aiRole || "";
@@ -215,6 +299,7 @@ function drawEncounterRead(ctx, e, t) {
     ctx.setLineDash([]);
   }
 
+  drawEcologyRead(ctx, e, t, y, r);
   ctx.restore();
 }
 
