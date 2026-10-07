@@ -33,19 +33,23 @@ test("V41: la ecología no introduce RNG ni mutaciones de combate o hitbox", () 
 });
 
 test("V41: Costa prioriza amenaza móvil y Lab prioriza artillería", () => {
-  const beach = [foe("mosquito",0), foe("planta",1)];
+  const beach = [foe("mosquito",0), foe("planta",1), foe("planta",2)];
   const beachPlan = directEnemyEncounter(beach, player, "beach", 120);
   assert.equal(beachPlan.ecology, "tide");
   assert.equal(beachPlan.formation, "TIDE");
+  assert.equal(beachPlan.budget, 1);
   assert.equal(beach[0].aiAttackPermit, true);
   assert.equal(beach[1].aiAttackPermit, false);
+  assert.equal(beach[2].aiAttackPermit, false);
 
-  const lab = [foe("mosquito",0), foe("planta",1)];
+  const lab = [foe("mosquito",0), foe("planta",1), foe("planta",2)];
   const labPlan = directEnemyEncounter(lab, player, "lab", 120);
   assert.equal(labPlan.ecology, "circuit");
   assert.equal(labPlan.formation, "CIRCUIT");
+  assert.equal(labPlan.budget, 2);
   assert.equal(lab[0].aiAttackPermit, false);
   assert.equal(lab[1].aiAttackPermit, true);
+  assert.equal(lab[2].aiAttackPermit, true);
 });
 
 test("V41: Caldera conserva el techo histórico de tres atacantes", () => {
@@ -74,7 +78,7 @@ test("V41: las formaciones de espera producen steering distinto sin conceder per
   orbit.aiAttackPermit = false;
   orbit.aiFormation = "ORBIT";
   orbit.aiFormationSlot = 0;
-  const circuit = foe("planta",1,400);
+  const circuit = foe("planta",1,800);
   circuit.aiAttackPermit = false;
   circuit.aiFormation = "CIRCUIT";
   circuit.aiFormationSlot = 1;
