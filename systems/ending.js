@@ -28,15 +28,18 @@ export function showEnding(detail = {}) {
         "</div>" +
       "</div>";
     layer.querySelector("#win-continue").onclick = () => {
-      layer.classList.remove("show");
+      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
+      layer.setAttribute("aria-hidden", "true");
       dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "continue" } }));
     };
     layer.querySelector("#win-repeat").onclick = () => {
-      layer.classList.remove("show");
+      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
+      layer.setAttribute("aria-hidden", "true");
       dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "repeat" } }));
     };
     layer.querySelector("#win-roster").onclick = () => {
-      layer.classList.remove("show");
+      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
+      layer.setAttribute("aria-hidden", "true");
       dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "roster" } }));
     };
   }
@@ -64,6 +67,7 @@ export function showEnding(detail = {}) {
   layer.classList.remove("ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
   layer.classList.add("ending-phase-1");
   layer.classList.add("show");
+  layer.setAttribute("aria-hidden", "false");
   requestAnimationFrame(() => {
     layer.classList.remove("ending-phase-1");
     layer.classList.add("ending-phase-2");
