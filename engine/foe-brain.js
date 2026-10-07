@@ -62,9 +62,11 @@ export function sense(e, player) {
   const dx = px - ex;
   const dy = py - ey;
   const dist = Math.hypot(dx, dy) || 0.001;
-  const sight = Number(e.sight) || SIGHT[e.kind] || 320;
+  const explicitSight = Number(e.sight);
+  const explicitStrike = Number(e.strikeRange);
+  const sight = Number.isFinite(explicitSight) ? explicitSight : (SIGHT[e.kind] || 320);
   const verticalTolerance = FLY.has(e.kind) ? 260 : ARTILLERY.has(e.kind) ? 220 : 170;
-  const strike = Number(e.strikeRange) || STRIKE_RANGE[e.kind] || 110;
+  const strike = Number.isFinite(explicitStrike) ? explicitStrike : (STRIKE_RANGE[e.kind] || 110);
   const facing = Math.sign(Number(e.vx) || Number(e.facing) || 1) || 1;
 
   return {
