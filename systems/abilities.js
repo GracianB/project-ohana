@@ -6,6 +6,8 @@
 // systems/passives.js ya los llama desde Passives.afterMove / Passives.draw.
 // ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
+import { drawCharacter } from "../characters/draw.js";
+import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
@@ -52,32 +54,145 @@ export const ABILITY_DEFS = {
   rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
 };
 
+const FLOW_KEYS = ["H", "J", "K", "L", "U"];
+const FLOW_WINDOW = 180;
+
+export function registerCombatAction(game, key, id = "") {
+  const p = game?.player;
+  if (!p) return Object.freeze({ distinct: 0, combo: 0, multiplier: 1, assist: false, label: "" });
+  const now = Number.isFinite(Number(game.t)) ? Number(game.t) : 0;
+  const normalized = String(key || "").toUpperCase();
+  if (!FLOW_KEYS.includes(normalized)) return Object.freeze({ distinct: 0, combo: 0, multiplier: 1, assist: false, label: "" });
+  const chain = Array.isArray(p._combatChain) ? p._combatChain.filter((item) => now - item.t <= FLOW_WINDOW) : [];
+  const last = chain[chain.length - 1];
+  const previous = last?.key || "";
+  if (!last || last.key !== normalized || now - last.t > 16) chain.push({ key: normalized, id: String(id || ""), t: now });
+  while (chain.length > 6) chain.shift();
+  p._combatChain = chain;
+  const recent = chain.slice(-5);
+  const distinct = new Set(recent.map((item) => item.key)).size;
+  const combo = Math.max(0, Number(game.combo) || 0);
+  const multiplier = Math.min(1.38, 1 + Math.max(0, distinct - 1) * 0.055 + Math.min(combo, 20) * 0.006);
+  const assist = normalized === "U" && (distinct >= 4 || combo >= 10);
+  const label = distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : "";
+  game._combatFlow = { distinct, combo, multiplier, assist, label, keys: recent.map((item) => item.key), t: now };
+  if (label) {
+    p._flowT = 72;
+    p._flowLabel = label;
+    p._flowPower = Math.min(1.18, multiplier);
+    p._flowPowerT = 96;
+  }
+  return Object.freeze({ distinct, combo, multiplier, assist, label, previous });
+}
+
+function currentFlow(game, p) {
+  const now = Number.isFinite(Number(game?.t)) ? Number(game.t) : 0;
+  const chain = Array.isArray(p?._combatChain) ? p._combatChain.filter((item) => now - item.t <= FLOW_WINDOW) : [];
+  const distinct = new Set(chain.slice(-5).map((item) => item.key)).size;
+  const combo = Math.max(0, Number(game?.combo) || 0);
+  return Object.freeze({
+    distinct,
+    combo,
+    multiplier: Math.min(1.38, 1 + Math.max(0, distinct - 1) * 0.055 + Math.min(combo, 20) * 0.006),
+    assist: distinct >= 4 || combo >= 10,
+    label: distinct >= 5 ? "OHANA FLOW" : distinct >= 4 ? "FUSIÓN" : distinct >= 3 ? "CADENA" : distinct >= 2 ? "ENLACE" : ""
+  });
+}
+
+const SIGNATURE_LINKS = Object.freeze({
+  kilo:    { name: "SERENATA HULA", color: "#ffd36a" },
+  stitcho: { name: "PLASMA ROLL", color: "#67ddff" },
+  chispin: { name: "FLASH CHAIN", color: "#ffe14a" },
+  cat:     { name: "OVILLO SOMBRA", color: "#ffb6e4" },
+  dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
+  dino:    { name: "MORDISCO EN CARGA", color: "#c8f04a" },
+  frita:   { name: "SALSA TURBO", color: "#ffd36a" },
+  pizza:   { name: "PEPPERONI ELÁSTICO", color: "#ff8a2a" },
+  yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" },
+  cuerno:  { name: "BRILLO DE CARGA", color: "#fff6c8" },
+});
+
+function applySignatureLink(game, p, flow, key) {
+  if (!p || flow?.previous !== "J" || key !== "K") return null;
+  const link = SIGNATURE_LINKS[p.id];
+  if (!link) return null;
+
+  if (p.id === "kilo") {
+    healPlayer(p, 8);
+    S.hover = Math.max(S.hover || 0, 28);
+    armor(p, 8);
+  } else if (p.id === "stitcho") {
+    S.roll = Math.max(S.roll || 0, 58);
+    armor(p, 12);
+  } else if (p.id === "chispin") {
+    p.invuln = Math.max(p.invuln || 0, 18);
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 54);
+  } else if (p.id === "cat") {
+    p.invuln = Math.max(p.invuln || 0, 18);
+    p._specialShadowT = Math.max(p._specialShadowT || 0, 72);
+  } else if (p.id === "dragon") {
+    p._specialFlightT = Math.max(p._specialFlightT || 0, 96);
+  } else if (p.id === "dino") {
+    S.charge = Math.max(S.charge || 0, 72);
+    armor(p, 10);
+  } else if (p.id === "frita") {
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
+    p.invuln = Math.max(p.invuln || 0, 12);
+  } else if (p.id === "pizza") {
+    p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
+    armor(p, 10);
+  } else if (p.id === "yomi") {
+    p._specialGhostT = Math.max(p._specialGhostT || 0, 90);
+    p.invuln = Math.max(p.invuln || 0, 14);
+  } else if (p.id === "cuerno") {
+    S.gallop = Math.max(S.gallop || 0, 70);
+    S.gallopFace = p.facing || 1;
+    p._specialAuroraT = Math.max(p._specialAuroraT || 0, 72);
+  }
+
+  p._specialT = Math.max(Number(p._specialT) || 0, 110);
+  p._flowPower = Math.max(Number(p._flowPower) || 1, 1.14);
+  p._flowPowerT = Math.max(Number(p._flowPowerT) || 0, 110);
+  game.nums?.add(cx(p), p.y - 32, link.name, link.color, true);
+  game.fx?.emit(cx(p), cy(p), { color: link.color, count: 14, size: 3, star: true, speed: 3.2, life: 16 });
+  game._signatureLink = { id: p.id, name: link.name, t: Number(game.t) || 0 };
+  return link;
+}
+
+
 export function useAbility(game, index) {
   const p = game?.player;
-  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return;
+  if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return false;
   const supreme = index === 3 ? SUPREME[p.id] : null;
   const id = supreme ? supreme.id : p.abilities && p.abilities[index];
   const def = supreme || ABILITY_DEFS[id];
-  if (!def) return;
+  if (!def) return false;
   const fn = CASTERS[id];
-  if (index !== 3 && typeof fn !== "function") return;
+  if (index !== 3 && typeof fn !== "function") return false;
   const baseCd = Number(def.cd);
-  if (!Number.isFinite(baseCd) || baseCd <= 0) return;
+  if (!Number.isFinite(baseCd) || baseCd <= 0) return false;
   const now = abilityNow(game);
   p.cds = p.cds || {};
   p.cdDur = p.cdDur || {};
   const currentUntil = Number(p.cds[id]);
-  if (Number.isFinite(currentUntil) && currentUntil > now) return;
-  game.lastAbilityId = id;
-  game.lastAbilitySlot = index;
+  if (Number.isFinite(currentUntil) && currentUntil > now) return false;
+
+  const key = FLOW_KEYS[index + 1];
+  const preFlow = currentFlow(game, p);
   const evo = clamp(Number(p.evo) || 0, 0, 4);
-  const dur = baseCd / (1 + evo * 0.12);
+  const chainCd = index < 3
+    ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035)
+    : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
+  const dur = baseCd / (1 + evo * 0.12) * chainCd;
   p.cds[id] = now + dur;
   p.cdDur[id] = dur;
+  game.lastAbilityId = id;
+  game.lastAbilitySlot = index;
   syncState(p);
   p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
   sfx(id);
-  game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 22 : 10, size: 3, star: true, speed: 2.8, life: 14 });
+  game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
+
   if (index === 2) {
     game.ult = { t: 46, color: def.color, name: def.name };
     game.flashColor = def.color;
@@ -85,13 +200,20 @@ export function useAbility(game, index) {
     game.shake = Math.min(18, (game.shake || 0) + 7);
     game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
   }
-  // Lanzar otra habilidad cancela un agarre de queso en curso. El control
-  // temporal de una habilidad no debe secuestrar el siguiente input del jugador.
-  if (S.pull && id !== "cheese") S.pull = null;
 
-  if (index === 3) castSupreme(game, p);
-  else fn(game, p, clamp(Number(p.evo) || 0, 0, 4));
+  if (S.pull && id !== "cheese") S.pull = null;
+  const flow = registerCombatAction(game, key, id);
+  const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
+
+  if (index === 3) castSupreme(game, p, flow);
+  else fn(game, p, evo);
+  if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
+
+  if (flow.label && index < 3) {
+    game.nums?.add(cx(p), p.y - 22, flow.label, def.color || p.color || "#fff6c8");
+  }
   trimAbilityProjectiles(game);
+  return true;
 }
 
 const SPECIALS = Object.freeze({
@@ -108,16 +230,16 @@ const SPECIALS = Object.freeze({
 });
 
 const SUPREME = Object.freeze({
-  kilo:    { id: "solar", name: "Jardín solar", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar" },
-  stitcho: { id: "bang", name: "Big Bang", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma" },
-  chispin: { id: "boltgod", name: "Relámpago", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz" },
-  cat:     { id: "eclipse", name: "Eclipse", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra" },
-  dragon:  { id: "nova", name: "Supernova", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial" },
-  dino:    { id: "impact", name: "Impacto", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso" },
-  frita:   { id: "frygod", name: "Fritura", key: "U", cd: 9000, color: "#ffd36a", special: "Centella" },
-  pizza:   { id: "ovenking", name: "Horno real", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico" },
-  yomi:    { id: "devour", name: "Devorar", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo" },
-  cuerno:  { id: "aurora", name: "Aurora", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora" },
+  kilo:    { id: "solar", name: "OHANA SOLAR", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar", ally: "stitcho" },
+  stitcho: { id: "bang", name: "SINGULARIDAD COSIDA", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma", ally: "chispin" },
+  chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
+  cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
+  dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
+  dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso", ally: "frita" },
+  frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
+  pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
+  yomi:    { id: "devour", name: "PUERTA DEL ABISMO", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo", ally: "cuerno" },
+  cuerno:  { id: "aurora", name: "AURORA OHANA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
@@ -129,16 +251,16 @@ export function specialOf(id) {
 }
 
 export const SUPREME_IDENTITY = Object.freeze({
-  kilo:    { kind: "bloom",   line: "raíces",   text: "El jardín responde a Kilo." },
-  stitcho: { kind: "rift",    line: "costura",  text: "El caos queda cosido." },
-  chispin: { kind: "chain",   line: "tormenta", text: "La tormenta elige sus blancos." },
-  cat:     { kind: "eclipse", line: "eclipse",  text: "La luz desaparece alrededor de Michi." },
-  dragon:  { kind: "nova",    line: "cielo",    text: "El cielo arde." },
-  dino:    { kind: "quake",   line: "impacto",  text: "La tierra responde al rugido." },
-  frita:   { kind: "crisp",   line: "fritura",  text: "Todo queda crujiente." },
-  pizza:   { kind: "volcano", line: "horno",    text: "El horno entra en erupción." },
-  yomi:    { kind: "maw",     line: "abismo",   text: "La grieta abre sus fauces." },
-  cuerno:  { kind: "aurora",  line: "aurora",   text: "El cielo se llena de color." },
+  kilo:    { kind: "bloom",   line: "NADIE SE QUEDA ATRÁS", text: "El sol llama a toda la familia." },
+  stitcho: { kind: "rift",    line: "TODO CAOS TIENE COSTURA", text: "Cose el espacio y arrastra el combate al centro." },
+  chispin: { kind: "chain",   line: "NO HAY DONDE ESCONDERSE", text: "La tormenta marca y persigue cada blanco." },
+  cat:     { kind: "eclipse", line: "NUEVE VIDAS. UNA SOMBRA.", text: "El mundo se apaga y las sombras cazan." },
+  dragon:  { kind: "nova",    line: "EL CIELO TAMBIÉN LUCHA", text: "El vuelo abre una lluvia de estrellas de fuego." },
+  dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra se rompe bajo cada paso." },
+  frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
+  pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
+  yomi:    { kind: "maw",     line: "EL ABISMO TIENE HAMBRE", text: "La grieta atrae, marca y ejecuta a los débiles." },
+  cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
 });
 
 function activateSpecial(game, p) {
@@ -178,80 +300,153 @@ function activateSpecial(game, p) {
   game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color || "#fff" };
 }
 
-function castSupreme(game, p) {
+function emitSupremeEvent(game, p, def, identity, flow) {
+  if (typeof dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
+  const ally = flow.assist ? (SUPREME[p.id]?.ally || "") : "";
+  try {
+    dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
+      id: p.id,
+      hero: p.name || p.id,
+      name: def.name,
+      color: def.color,
+      kind: identity.kind,
+      line: identity.line,
+      text: identity.text,
+      multiplier: Number(flow.multiplier.toFixed(2)),
+      flow: flow.label || "",
+      combo: flow.combo,
+      assist: ally
+    }}));
+  } catch (_) {}
+}
+
+function summonAssist(game, p, allyId, damage, color) {
+  const ally = ROSTER.find((item) => item.id === allyId);
+  if (!ally) return;
+  add({
+    kind: "assist",
+    heroId: ally.id,
+    heroName: ally.name,
+    color: ally.color || color || "#fff",
+    x: cx(p) - (p.facing || 1) * 90,
+    y: p.y - 24,
+    facing: p.facing || 1,
+    life: 96,
+    max: 96,
+    next: 10,
+    strikes: 0,
+    dmg: Math.max(12, damage),
+  });
+  game._assist = { heroId: ally.id, heroName: ally.name, t: 96 };
+  game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#fff6c8", true);
+}
+
+function castSupreme(game, p, flow = currentFlow(game, p)) {
   activateSpecial(game, p);
   const def = SUPREME[p.id] || SUPREME.kilo;
   const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
   const evo = clamp(Number(p.evo) || 0, 0, 4);
-  const dmg = (70 + evo * 14) * pw(p);
+  const power = Math.max(1, Number(flow?.multiplier) || 1);
+  const dmg = (70 + evo * 14) * pw(p) * power;
   const enemies = (game.enemies || []).filter(canHit);
 
+  emitSupremeEvent(game, p, def, identity, flow);
+
   if (p.id === "kilo") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.82, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 24, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.28);
-    p.invuln = Math.max(p.invuln || 0, 75);
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.72, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 28, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.32);
+    p.invuln = Math.max(p.invuln || 0, 90);
   } else if (p.id === "stitcho") {
     const tx = cx(p), ty = cy(p);
     for (const e of enemies) {
       const dx = tx - cx(e), dy = ty - cy(e);
       const d = Math.hypot(dx, dy) || 1;
-      hitEnemy(game, e, dmg, { kx: (dx / d) * 13, ky: (dy / d) * 8 - 5, stun: 52, color: def.color, crit: true });
+      hitEnemy(game, e, dmg * 0.82, { kx: (dx / d) * 14, ky: (dy / d) * 9 - 5, stun: 60, color: def.color, crit: true });
+      e._stitchedT = Math.max(e._stitchedT || 0, 120);
     }
   } else if (p.id === "chispin") {
     const ordered = enemies.slice().sort((a,b) =>
       Math.hypot(cx(a)-cx(p),cy(a)-cy(p)) - Math.hypot(cx(b)-cx(p),cy(b)-cy(p))
-    ).slice(0, 6);
-    ordered.forEach((e,i) =>
-      hitEnemy(game, e, dmg * (1 - i * 0.08), { kx: 0, ky: -4, stun: 34, color: def.color, crit: i < 2 })
-    );
+    ).slice(0, 8);
+    ordered.forEach((e,i) => {
+      hitEnemy(game, e, dmg * Math.max(0.48, 1 - i * 0.07), { kx: 0, ky: -4, stun: 36, color: def.color, crit: i < 3 });
+      e._stormMarkedT = Math.max(e._stormMarkedT || 0, 150);
+    });
   } else if (p.id === "cat") {
     for (const e of enemies) {
-      hitEnemy(game, e, dmg * 0.9, { kx: 0, ky: -2, stun: 70, color: def.color, crit: true });
-      e._eclipseT = 90;
-      e.vx *= 0.2;
-      e.vy *= 0.2;
+      hitEnemy(game, e, dmg * 0.86, { kx: 0, ky: -2, stun: 78, color: def.color, crit: true });
+      e._eclipseT = 130;
+      e.vx *= 0.16;
+      e.vy *= 0.16;
     }
-    p.invuln = Math.max(p.invuln || 0, 55);
+    p.invuln = Math.max(p.invuln || 0, 80);
+    p._shadowCloneT = 150;
   } else if (p.id === "dragon") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 1.25, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 42, color: def.color, crit: true });
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.08, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 44, color: def.color, crit: true });
     game.shake = Math.min(28, (game.shake || 0) + 16);
+    p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
   } else if (p.id === "dino") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 1.12, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 62, color: def.color, crit: true });
+    for (const e of enemies) hitEnemy(game, e, dmg * 1.06, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 68, color: def.color, crit: true });
     game.shake = Math.min(30, (game.shake || 0) + 20);
+    p._specialTitanT = Math.max(p._specialTitanT || 0, 260);
+    p._specialArmorT = Math.max(p._specialArmorT || 0, 260);
   } else if (p.id === "frita") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.78, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 34, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.16);
-    p._fryGodT = 120;
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.18);
+    p._fryGodT = 180;
+    p._specialSpeedT = Math.max(p._specialSpeedT || 0, 260);
   } else if (p.id === "pizza") {
-    for (const e of enemies) hitEnemy(game, e, dmg, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 48, color: def.color, crit: true });
-    p._ovenKingT = 120;
-    game.score = (game.score || 0) + enemies.length * 8;
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.86, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 52, color: def.color, crit: true });
+    p._ovenKingT = 180;
+    addScore(game, enemies.length * 8);
+    p._specialBounceT = Math.max(p._specialBounceT || 0, 260);
   } else if (p.id === "yomi") {
     for (const e of enemies) {
       const hp = Number(e.hp ?? e.health ?? 9999);
       const maxHp = Number(e.maxHp ?? e.maxHealth ?? hp);
       const finisher = hp <= maxHp * 0.34;
-      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.35, {
-        kx: Math.sign(cx(e)-cx(p)) * 6,
-        ky: -6,
-        stun: finisher ? 90 : 52,
+      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.18, {
+        kx: Math.sign(cx(e)-cx(p)) * 5,
+        ky: -5,
+        stun: finisher ? 90 : 58,
         color: def.color,
         crit: true
       });
+      e._abyssMarkT = Math.max(e._abyssMarkT || 0, 150);
     }
+    p._specialGhostT = Math.max(p._specialGhostT || 0, 260);
   } else if (p.id === "cuerno") {
-    for (const e of enemies) hitEnemy(game, e, dmg * 0.9, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 38, color: def.color, crit: true });
-    healPlayer(p, p.maxHealth * 0.12);
+    for (const e of enemies) hitEnemy(game, e, dmg * 0.76, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 42, color: def.color, crit: true });
+    healPlayer(p, p.maxHealth * 0.16);
     addPlayerXp(p, 24 + enemies.length * 4);
+    p._specialAuroraT = Math.max(p._specialAuroraT || 0, 260);
+    p._specialArmorT = Math.max(p._specialArmorT || 0, 220);
   }
 
+  add({
+    kind: "supremeField",
+    mode: p.id,
+    x: cx(p),
+    y: cy(p),
+    life: p.id === "yomi" ? 170 : 150,
+    max: p.id === "yomi" ? 170 : 150,
+    pulse: 0,
+    dmg: dmg * 0.18,
+    color: def.color,
+    name: def.name,
+    hit: new Set(),
+  });
   add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
-  game.ult = { t: 82, color: def.color, name: def.name, identity: identity.kind };
+
+  if (flow.assist && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+
+  game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: flow.assist ? def.ally : "" };
   game.flashColor = def.color;
-  game.flash = Math.max(game.flash || 0, 18);
-  game.shake = Math.min(24, (game.shake || 0) + 10);
+  game.flash = Math.max(game.flash || 0, 20);
+  game.shake = Math.min(26, (game.shake || 0) + 12);
   game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
   game._specialName = specialOf(p.id).name;
+  game._supremeFlow = flow;
 }
 
 // ---------------------------------------------------------------------------
@@ -298,6 +493,10 @@ export function clearAbilityFx() {
   if (S.p) {
     S.p._abilMove = null;
     S.p._armorT = 0;
+    S.p._combatChain = [];
+    S.p._flowT = 0;
+    S.p._flowPowerT = 0;
+    S.p._flowPower = 1;
   }
 }
 
@@ -310,6 +509,9 @@ export function abilityPreMove(game, input) {
     return;
   }
   syncState(p);
+  if ((p._flowT || 0) > 0) p._flowT--;
+  if ((p._flowPowerT || 0) > 0) p._flowPowerT--;
+  else p._flowPower = 1;
   const specialT = Number(p._specialT) || 0;
   if (specialT > 0) {
     p._specialT = specialT - 1;
@@ -476,12 +678,28 @@ function drawCastSignature(ctx, p, cam, t) {
   ctx.globalCompositeOperation = "lighter";
   ctx.globalAlpha = 0.85 * k;
   ctx.strokeStyle = color;
-  ctx.lineWidth = slot === 2 ? 6 : slot === 1 ? 4 : 2.5;
+  ctx.lineWidth = slot === 3 ? 7 : slot === 2 ? 6 : slot === 1 ? 4 : 2.5;
   ctx.beginPath();
   if (slot === 0) ctx.arc(x + face * 18, y, 16 + (1 - k) * 20, -0.8, 0.8);
   else if (slot === 1) ctx.arc(x, y, 22 + (1 - k) * 36, 0, Math.PI * 2);
-  else ctx.arc(x, y, 34 + (1 - k) * 70, 0, Math.PI * 2);
+  else if (slot === 2) ctx.arc(x, y, 34 + (1 - k) * 70, 0, Math.PI * 2);
+  else {
+    ctx.arc(x, y, 48 + (1 - k) * 96, 0, Math.PI * 2);
+    ctx.moveTo(x + 28, y);
+    ctx.arc(x, y, 28 + (1 - k) * 52, 0, Math.PI * 2);
+  }
   ctx.stroke();
+  if (slot === 3) {
+    ctx.globalAlpha = 0.55 * k;
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) {
+      const a = i * TAU / 6 + t * 0.03;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * 34, y + Math.sin(a) * 34);
+      ctx.lineTo(x + Math.cos(a) * (72 + (1-k)*44), y + Math.sin(a) * (72 + (1-k)*44));
+      ctx.stroke();
+    }
+  }
   ctx.restore();
 }
 
@@ -497,7 +715,11 @@ function clamp(v, a, b) {
   if (!Number.isFinite(n)) return a;
   return n < a ? a : n > b ? b : n;
 }
-function pw(p) { return 1 + (Number(p.evo) || 0) * 0.35; }
+function pw(p) {
+  const form = 1 + (Number(p.evo) || 0) * 0.35;
+  const flow = (p._flowPowerT || 0) > 0 ? clamp(Number(p._flowPower) || 1, 1, 1.18) : 1;
+  return form * flow;
+}
 function alive(e) { return !!e && !e.dying && e.hp > 0; }
 function canHit(e) { return alive(e) && !(e.invuln > 0); }
 function isAir(e) { return AIR.has(e.kind) || (e.kind === "cucaracho" && e.evo >= 2) || (e.boss && e.airborne); }
@@ -1054,6 +1276,121 @@ const CASTERS = {
 // ACTUALIZADORES DE ENTIDADES (UPD)
 // ============================================================================
 const UPD = {
+  supremeField(g, f, p) {
+    f.life--;
+    f.pulse = (f.pulse || 0) + 1;
+    f.x = cx(p);
+    f.y = cy(p);
+    const mode = f.mode;
+    const pulseEvery = mode === "chispin" ? 12 : mode === "dragon" ? 18 : mode === "frita" ? 18 : 26;
+
+    if (mode === "stitcho") {
+      for (const e of g.enemies) {
+        if (!canHit(e) || e.boss) continue;
+        const dx = f.x - cx(e), dy = f.y - cy(e), d = Math.hypot(dx, dy) || 1;
+        if (d < 520) {
+          e.vx = clamp((e.vx || 0) + (dx / d) * 0.7, -10, 10);
+          e.vy = clamp((e.vy || 0) + (dy / d) * 0.35, -10, 10);
+        }
+      }
+    } else if (mode === "yomi") {
+      for (const e of g.enemies) {
+        if (!canHit(e) || e.boss) continue;
+        const dx = f.x - cx(e), dy = f.y - cy(e), d = Math.hypot(dx, dy) || 1;
+        if (d < 600) {
+          e.vx = clamp((e.vx || 0) + (dx / d) * 0.42, -8, 8);
+          e.vy = clamp((e.vy || 0) + (dy / d) * 0.2, -8, 8);
+        }
+      }
+    }
+
+    if (f.pulse % pulseEvery === 0) {
+      if (mode === "kilo") {
+        healPlayer(p, Math.max(2, p.maxHealth * 0.025));
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y) < 260) {
+          hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*4,ky:-5,stun:18,color:f.color,hitstop:1});
+        }
+      } else if (mode === "stitcho") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y) < 330) {
+          hitEnemy(g,e,f.dmg*0.9,{kx:Math.sign(f.x-cx(e))*8,ky:-4,stun:34,color:f.color,hitstop:1});
+        }
+      } else if (mode === "chispin") {
+        const targets = g.enemies.filter(canHit).sort((a,b)=>Math.hypot(cx(a)-f.x,cy(a)-f.y)-Math.hypot(cx(b)-f.x,cy(b)-f.y)).slice(0,3);
+        for (const e of targets) hitEnemy(g,e,f.dmg*0.85,{ky:-4,stun:22,color:f.color,crit:f.pulse%36===0,hitstop:1});
+      } else if (mode === "cat") {
+        const targets = g.enemies.filter(canHit).slice(0,4);
+        for (const e of targets) {
+          hitEnemy(g,e,f.dmg*0.72,{kx:0,ky:-2,stun:36,color:f.color,hitstop:1});
+          if (!e.boss) { e.vx *= 0.35; e.vy *= 0.35; }
+        }
+      } else if (mode === "dragon") {
+        const target = nearestEnemy(g,f.x,f.y,900,null,0);
+        const tx = target ? cx(target) : f.x + (p.facing||1) * 180;
+        add({kind:"meteor",x:tx-(p.facing||1)*120,y:(g.cam.y||0)-50,vx:(p.facing||1)*2.8,vy:11.5,r:15,dmg:f.dmg*1.35,R:72,life:150,rot:0});
+      } else if (mode === "dino") {
+        if (p.grounded) {
+          for (const e of g.enemies) if (canHit(e) && Math.abs(cx(e)-f.x)<360 && Math.abs((e.y+e.h)-(p.y+p.h))<90) {
+            hitEnemy(g,e,f.dmg*1.05,{kx:Math.sign(cx(e)-f.x)*10,ky:-12,stun:38,color:f.color,hitstop:1});
+          }
+          g.shake=Math.min(18,(g.shake||0)+5);
+        }
+      } else if (mode === "frita") {
+        const targets = g.enemies.filter(canHit).slice(0,5);
+        for (const e of targets) {
+          hitEnemy(g,e,f.dmg*0.8,{kx:Math.sign(cx(e)-f.x)*3,ky:-8,stun:20,color:f.color,hitstop:1});
+          e._friedT=Math.max(e._friedT||0,80);
+        }
+      } else if (mode === "pizza") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<430) {
+          hitEnemy(g,e,f.dmg*0.82,{kx:Math.sign(cx(e)-f.x)*9,ky:-10,stun:24,color:f.color,hitstop:1});
+        }
+        p.vy=Math.min(p.vy||0,-2.5);
+      } else if (mode === "yomi") {
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<390) {
+          const hp=Number(e.hp||0), max=Number(e.max||e.maxHp||e.maxHealth||hp||1);
+          const execute=hp>0&&hp<=max*0.22;
+          hitEnemy(g,e,execute?hp+9999:f.dmg*0.9,{kx:0,ky:-3,stun:44,color:f.color,crit:execute,hitstop:1});
+        }
+      } else if (mode === "cuerno") {
+        healPlayer(p,Math.max(2,p.maxHealth*0.018));
+        p.invuln=Math.max(p.invuln||0,10);
+        for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<320) {
+          hitEnemy(g,e,f.dmg*0.76,{kx:Math.sign(cx(e)-f.x)*7,ky:-7,stun:24,color:f.color,hitstop:1});
+        }
+      }
+      boom(g,f.x,f.y,f.color,mode==="dragon"?8:5,{star:true,up:1.2,speed:2.4});
+    }
+    return f.life>0;
+  },
+  assist(g, f, p) {
+    f.life--;
+    const age=f.max-f.life;
+    const target=nearestEnemy(g,f.x,f.y,900,null,0);
+    const baseX=cx(p)-(p.facing||1)*54;
+    const baseY=p.y-18;
+    if(target){
+      const dx=cx(target)-f.x,dy=cy(target)-f.y,d=Math.hypot(dx,dy)||1;
+      const rush=(age%24)>8&&(age%24)<17;
+      const sp=rush?14:6.5;
+      f.x+=((dx/d)*sp);
+      f.y+=((dy/d)*sp);
+      f.facing=Math.sign(dx)||f.facing||1;
+    } else {
+      f.x+=(baseX-f.x)*0.12;
+      f.y+=(baseY-f.y)*0.12;
+    }
+    if(--f.next<=0&&f.strikes<3){
+      f.next=24;
+      const e=nearestEnemy(g,f.x,f.y,180,null,0);
+      if(e){
+        f.strikes++;
+        hitEnemy(g,e,f.dmg,{kx:(f.facing||1)*8,ky:-6,stun:22,color:f.color,crit:f.strikes===3,hitstop:1});
+        boom(g,cx(e),cy(e),f.color,7,{star:true,speed:3});
+      }
+    }
+    if(g._assist) g._assist.t=Math.max(0,f.life);
+    return f.life>0;
+  },
   hula(g, f, p) {
     f.life--;
     f.pulse = (Number(f.pulse) || 0) + 1;
@@ -1793,6 +2130,72 @@ function drawSlice(ctx, s) {
 }
 
 const DRW = {
+  supremeField(ctx, f, cam, t, g, p) {
+    const x=f.x-cam.x,y=f.y-cam.y;
+    const u=1-f.life/f.max;
+    const fade=Math.min(1,f.life/18,Math.max(.15,u*4));
+    const pulse=.72+.28*Math.sin(t*.12);
+    const R=110+Math.sin(t*.07)*12;
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    ctx.globalAlpha=.16*fade;
+    const grd=ctx.createRadialGradient(x,y,8,x,y,R*1.35);
+    grd.addColorStop(0,f.color);
+    grd.addColorStop(.48,"rgba(255,255,255,.08)");
+    grd.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,R*1.35,0,TAU);ctx.fill();
+    ctx.globalAlpha=.68*fade;
+    ctx.strokeStyle=f.color;ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();
+
+    if(f.mode==="kilo"){
+      for(let i=0;i<8;i++){const a=i*TAU/8+t*.018;const rr=R*.78;ctx.save();ctx.translate(x+Math.cos(a)*rr,y+Math.sin(a)*rr);ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,0,5,14,0,0,TAU);ctx.stroke();ctx.restore();}
+    }else if(f.mode==="stitcho"){
+      ctx.setLineDash([12,8]);for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(x,y,R*(.5+i*.22),t*.02+i,-t*.025+i+Math.PI*1.3);ctx.stroke();}ctx.setLineDash([]);
+    }else if(f.mode==="chispin"){
+      for(let i=0;i<6;i++){const a=i*TAU/6+t*.035;zig(ctx,x,y,x+Math.cos(a)*R*1.15,y+Math.sin(a)*R*.72,10,5,f.color,1.8);}
+    }else if(f.mode==="cat"){
+      ctx.fillStyle="rgba(2,3,12,.72)";ctx.globalAlpha=.5*fade;ctx.beginPath();ctx.arc(x,y,R*.62,0,TAU);ctx.fill();ctx.globalAlpha=.8*fade;ctx.strokeStyle="#ffb6e4";ctx.beginPath();ctx.arc(x+R*.18,y-R*.08,R*.56,.4,5.6);ctx.stroke();
+    }else if(f.mode==="dragon"){
+      for(let i=0;i<7;i++){const a=i*TAU/7+t*.025;const rr=R*(.45+(i%2)*.3);ctx.fillStyle=i%2?"#fff3b0":f.color;ctx.globalAlpha=.55*fade;ctx.beginPath();ctx.arc(x+Math.cos(a)*rr,y+Math.sin(a)*rr,3+(i%3),0,TAU);ctx.fill();}
+    }else if(f.mode==="dino"){
+      ctx.globalAlpha=.6*fade;for(let i=-3;i<=3;i++){ctx.beginPath();ctx.moveTo(x+i*28,y+42);ctx.lineTo(x+i*32,y+42-(22+((i*i+3)%4)*8));ctx.stroke();}
+    }else if(f.mode==="frita"){
+      ctx.globalAlpha=.55*fade;for(let i=-4;i<=4;i++){const xx=x+i*22;ctx.beginPath();ctx.moveTo(xx,y+34);ctx.quadraticCurveTo(xx+8*Math.sin(t*.1+i),y-34,xx,y-72);ctx.stroke();}
+    }else if(f.mode==="pizza"){
+      ctx.globalAlpha=.65*fade;ctx.beginPath();ctx.moveTo(x,y-R*.75);ctx.lineTo(x+R*.7,y+R*.48);ctx.lineTo(x-R*.7,y+R*.48);ctx.closePath();ctx.stroke();for(let i=0;i<5;i++){const a=i*TAU/5+t*.015;ctx.beginPath();ctx.arc(x+Math.cos(a)*R*.42,y+Math.sin(a)*R*.34,6,0,TAU);ctx.stroke();}
+    }else if(f.mode==="yomi"){
+      ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
+    }else if(f.mode==="cuerno"){
+      const cols=["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];for(let i=0;i<4;i++){ctx.strokeStyle=cols[i];ctx.globalAlpha=.55*fade;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y+24,R*(.48+i*.12),Math.PI*1.08,Math.PI*1.92);ctx.stroke();}
+    }
+    ctx.restore();
+  },
+  assist(ctx, f, cam, t) {
+    const def=ROSTER.find((item)=>item.id===f.heroId);
+    if(!def)return;
+    const age=f.max-f.life;
+    const alpha=Math.min(1,age/10,f.life/14)*.78;
+    const x=f.x-cam.x,y=f.y-cam.y;
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    glow(ctx,x,y+18,52,f.color,alpha*.28);
+    ctx.globalCompositeOperation="source-over";
+    ctx.globalAlpha=alpha;
+    const form=(def.forms&&def.forms[4])||{};
+    const dummy={
+      ...def,id:def.id,evo:4,color:form.color||def.color,
+      x:-16,y:-38,w:32,h:38,facing:f.facing||1,grounded:false,
+      vx:(f.facing||1)*3,vy:0,melee:(age%24>9&&age%24<18)?8:0,
+      visualScale:1.12,invuln:1
+    };
+    ctx.translate(x,y+38);
+    drawCharacter(ctx,dummy,{x:0,y:0},t*1.3);
+    ctx.globalAlpha=alpha*.55;
+    ctx.strokeStyle=f.color;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,-22,34+Math.sin(t*.15)*4,0,TAU);ctx.stroke();
+    ctx.restore();
+  },
   note(ctx, f, cam) {
     const x = f.x - cam.x, y = f.y - cam.y;
     glow(ctx, x, y, f.r * 2.2, f.color, 0.55);
@@ -1847,49 +2250,49 @@ const DRW = {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, TAU);
     ctx.stroke();
-    if (name === "Jardín solar") {
+    if (f.identity === "bloom") {
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * TAU;
         ctx.beginPath();
         ctx.ellipse(x + Math.cos(a) * r * 0.7, y + Math.sin(a) * r * 0.7, 10, 22, a, 0, TAU);
         ctx.stroke();
       }
-    } else if (name === "Big Bang") {
+    } else if (f.identity === "rift") {
       for (let i = 0; i < 6; i++) ctx.strokeRect(x - r + i * 20, y - r * 0.2, 14, r * 0.4);
-    } else if (name === "Relámpago") {
+    } else if (f.identity === "chain") {
       ctx.beginPath();
       ctx.moveTo(x - r, y);
       ctx.lineTo(x - r * 0.2, y - 30);
       ctx.lineTo(x, y + 10);
       ctx.lineTo(x + r, y - 20);
       ctx.stroke();
-    } else if (name === "Eclipse") {
+    } else if (f.identity === "eclipse") {
       ctx.beginPath();
       ctx.arc(x, y, r * 0.55, 0.4, 5.4);
       ctx.stroke();
-    } else if (name === "Supernova") {
+    } else if (f.identity === "nova") {
       ctx.beginPath();
       ctx.arc(x, y, r * 0.35, 0, TAU);
       ctx.fill();
-    } else if (name === "Impacto") {
+    } else if (f.identity === "quake") {
       ctx.beginPath();
       ctx.ellipse(x, y + 20, r, 18, 0, 0, TAU);
       ctx.stroke();
-    } else if (name === "Fritura") {
+    } else if (f.identity === "crisp") {
       for (let i = 0; i < 9; i++) {
         ctx.beginPath();
         ctx.moveTo(x - r + i * (r * 2 / 8), y + 10);
         ctx.lineTo(x - r + i * (r * 2 / 8), y - 40 - (i % 2) * 16);
         ctx.stroke();
       }
-    } else if (name === "Horno real") {
+    } else if (f.identity === "volcano") {
       ctx.beginPath();
       ctx.moveTo(x, y - r);
       ctx.lineTo(x + r * 0.7, y + 20);
       ctx.lineTo(x - r * 0.5, y + 20);
       ctx.closePath();
       ctx.stroke();
-    } else if (name === "Devorar") {
+    } else if (f.identity === "maw") {
       ctx.beginPath();
       ctx.moveTo(x - r * 0.6, y);
       ctx.lineTo(x, y - 30);

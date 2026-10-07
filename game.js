@@ -9,7 +9,7 @@ import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -81,6 +81,7 @@ const DOM = {
 };
 let abilitySlots = [];
 let touchPowers = [];
+let abilityBarKey = "";
 let hudAvatarKey = "";
 let pipKey = "";
 function setText(el, text) {
@@ -768,6 +769,10 @@ function respawn() {
   const p = game.player; if (!p) return;
   if (DeathFx.isPlaying()) DeathFx.cancel();
   p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
+  p._combatChain = [];
+  game._combatFlow = null;
+  game._assist = null;
+  game._supremeFlow = null;
   Magic.reset(game);
   loadRoom("hub");
 }
@@ -864,6 +869,8 @@ function markHit(p, e, dmg, kb) {
   );
 
   punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+  const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
+  if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
   game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
   hitStop(e.boss ? (crit ? 5 : 3) : (crit ? 8 : 4));
   if (crit) {
@@ -1040,6 +1047,10 @@ function hurtPlayer(amount, label) {
   game.shake = 12;
   game.combo = 0;
   game.comboT = 0;
+  p._combatChain = [];
+  game._combatFlow = null;
+  game._assist = null;
+  game._supremeFlow = null;
   beep("hurt");
   buzz(24);
   hitStop(2);
@@ -2748,12 +2759,15 @@ function renderAbilityBar() {
       : ABILITY_DEFS[slot.id];
     if (!d) return "";
     const locked = evo < slot.need;
-    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + (locked ? "Forma " + (slot.need + 1) : (d.special || d.name)) + ' · ' + d.key + '" title="' + (slot.supreme ? (d.special || d.name) : d.name) + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + (locked ? "Forma " + (slot.need + 1) : (slot.supreme ? (d.special || d.name) : d.name)) + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+    const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
+    const detail = slot.supreme ? (d.name + " · " + (d.special || "Suprema")) : d.name;
+    return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
   }).join("");
   abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
     slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
   }));
   touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
+  abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",");
 }
 // Retrato vivo del personaje en el HUD (misma pipeline que el juego)
 function drawHudAvatar(p) {
@@ -2782,6 +2796,8 @@ function drawHudAvatar(p) {
 
 function updateHUD() {
   const p = game.player; if (!p) return;
+  const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",");
+  if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
   setText(DOM.hudName, p.name);
   const mk = markAt(p.id, p.evo);
   setText(DOM.hudTrait, ((p.passive && p.passive.name) || "") + " · H " + mk.name);
@@ -2814,8 +2830,9 @@ function updateHUD() {
   setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
   setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
   if (p.evo >= 4) {
+    const sup = supremeOf(p.id);
     const sp = specialOf(p.id);
-    DOM.hudEvo?.setAttribute("title", "Especial U: " + sp.name + " · " + sp.text);
+    DOM.hudEvo?.setAttribute("title", "Suprema U: " + sup.name + " · " + sp.name + " · " + sp.text);
   }
   const evoIdx = Math.max(0, Math.min(4, Number(p.evo) || 0));
   const col = p.color || "#7ee7ff";
@@ -2857,6 +2874,14 @@ function updateHUD() {
     chip.classList.toggle("hidden", !show);
     const rank = show ? comboRank(game.combo) : "";
     if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
+    const signature = show && game._signatureLink && (t - Number(game._signatureLink.t || 0) <= 90)
+      ? String(game._signatureLink.name || "")
+      : "";
+    const flow = signature || (show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
+      ? String(game._combatFlow.label || "")
+      : "");
+    if (chip.dataset.flow !== flow) chip.dataset.flow = flow;
+    chip.classList.toggle("flow", !!flow);
   }
   const boss = game.boss || game.enemies.find((e) => e.boss);
   if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
@@ -2876,8 +2901,10 @@ function updateHUD() {
   const now = Number.isFinite(Number(game.t)) ? Number(game.t) * (1000 / 60) : 0;
   for (let i = 0; i < abilitySlots.length; i++) {
     const item = abilitySlots[i];
-    const id = item.slot.dataset.id;
-    const def = ABILITY_DEFS[id];
+    const isSupreme = item.slot.dataset.supreme === "1";
+    const sup = isSupreme ? supremeOf(p.id) : null;
+    const id = isSupreme ? sup.id : item.slot.dataset.id;
+    const def = isSupreme ? sup : ABILITY_DEFS[id];
     if (!def || !item.fill) continue;
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
@@ -2888,15 +2915,20 @@ function updateHUD() {
     if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
     item.slot.classList.toggle("cooling", left > 80);
   }
-  const PWIDX = { j: 0, k: 1, l: 2 };
+  const PWIDX = { j: 0, k: 1, l: 2, u: 3 };
   for (let i = 0; i < touchPowers.length; i++) {
     const btn = touchPowers[i];
-    const id = (p.abilities || [])[PWIDX[btn.dataset.k]];
-    const def = id && ABILITY_DEFS[id];
+    const slotIndex = PWIDX[btn.dataset.k];
+    const isSupreme = slotIndex === 3;
+    const sup = isSupreme ? supremeOf(p.id) : null;
+    const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
+    const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
     if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-    btn.classList.remove("off");
-    if (btn.getAttribute("title") !== def.name) btn.setAttribute("title", def.name);
-    const label = (def.special || def.name) + " · " + btn.dataset.k.toUpperCase();
+    const locked = isSupreme && (Number(p.evo) || 0) < 4;
+    btn.classList.toggle("off", locked);
+    const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
+    if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
+    const label = (locked ? "Forma 5" : def.name) + " · " + btn.dataset.k.toUpperCase();
     if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
     const left = Math.max(0, (p.cds[id] || 0) - now);
     const dur = (p.cdDur && p.cdDur[id]) || def.cd;
@@ -3202,6 +3234,12 @@ if (e2eEnabled) {
         starBonus: Surprises.starOrbBonus(),
         lastAbilityId: game.lastAbilityId,
         lastAbilitySlot: game.lastAbilitySlot,
+        flow: game._combatFlow ? {
+          label: game._combatFlow.label || "",
+          distinct: game._combatFlow.distinct || 0,
+          multiplier: game._combatFlow.multiplier || 1,
+        } : null,
+        assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
         boss: boss ? {
           x: boss.x,
           y: boss.y,
@@ -3230,7 +3268,12 @@ if (e2eEnabled) {
       return this.state();
     },
     cast(index) {
-      useAbility(game, Math.max(0, Math.min(2, Math.floor(Number(index) || 0))));
+      useAbility(game, Math.max(0, Math.min(3, Math.floor(Number(index) || 0))));
+      return this.state();
+    },
+    setCombo(value) {
+      game.combo = Math.max(0, Math.min(99, Math.floor(Number(value) || 0)));
+      game.comboT = game.combo > 0 ? 480 : 0;
       return this.state();
     },
     attack() {

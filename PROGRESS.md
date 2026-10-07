@@ -1,3 +1,19 @@
+## 07/10/2026 · V37 Signature Supremes & Combat Flow
+
+**Caché:** `ohana-227`.
+
+V37 convierte la tecla **U** en una Suprema de identidad propia para cada uno de los diez héroes y reconstruye el combate alrededor de cadenas deliberadas.
+
+- Diez U con nombre, mecánica persistente, campo visual e identidad cinematográfica propios.
+- Cinemática no bloqueante de activación `U · SUPREMA`, con motivo visual por héroe.
+- `H/J/K/L/U` forman Combat Flow: ENLACE → CADENA → FUSIÓN → OHANA FLOW.
+- Combinar acciones distintas mejora temporalmente potencia y recuperación de habilidades.
+- Cada héroe incorpora un enlace característico J→K con efecto y nombre propios.
+- Cadenas avanzadas o combo alto activan **OHANA ASSIST**: entra otro héroe en forma final, ataca y se retira.
+- HUD y controles táctiles tratan U como una habilidad real: nombre, bloqueo de Forma 5, cooldown y estado de disponibilidad.
+- U deja de depender de nombres literales para su arte: los FX usan identidades semánticas estables.
+- Visual QA captura una U real con asistencia y exige su presencia en navegador.
+
 ## 07/10/2026 · V36 Cinematic Direction Overhaul
 
 **Caché:** `ohana-226`.

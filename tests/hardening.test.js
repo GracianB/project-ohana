@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-226/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-227/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -734,5 +734,28 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   assert.match(visual, /01-character-select-1680x900/);
   assert.match(visual, /04-evolution/);
   assert.match(visual, /08-ending/);
-  assert.match(visual, /09-death-ghost/);
+  assert.match(visual, /10-death-ghost/);
+});
+
+
+test("V37 signature U is cinematic, unique and regression-protected", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
+  const cinema = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const css = fs.readFileSync("./supreme.css", "utf8");
+  const html = fs.readFileSync("./index.html", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3 \}/);
+  assert.match(game, /registerCombatAction\(game, "H"/);
+  assert.match(game, /Math\.min\(3, Math\.floor/);
+  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U"\]/);
+  assert.match(abilities, /kind: "supremeField"/);
+  assert.match(abilities, /kind: "assist"/);
+  assert.match(abilities, /CustomEvent\("ohana-supreme"/);
+  assert.match(cinema, /U · SUPREMA/);
+  assert.match(cinema, /OHANA ASSIST/);
+  assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
+  assert.match(html, /supreme\.css\?v=ohana-227/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-227/);
+  assert.match(visual, /09-supreme-u-assist/);
 });
