@@ -381,17 +381,16 @@ try {
     const api = window.__OHANA_E2E;
     api.start('dragon');
     api.setEvo(4);
-    api.setPlayer(520, 980);
-    api.step(10);
+    api.setPlayer(520, 920);
+    api.setPlayerVelocity(0, 2);
+    api.exhaustPlayerJumps();
+    api.resetInput();
   });
   await page.locator('#game').focus();
-  for (let i = 0; i < 4; i++) {
-    await page.keyboard.down('Space');
-    await page.evaluate(() => window.__OHANA_E2E.step(1));
-    await page.keyboard.up('Space');
-    await page.evaluate(() => window.__OHANA_E2E.step(1));
-  }
-  const dragonMastery = await page.evaluate(() => window.__OHANA_E2E.state());
+  await page.keyboard.down('Space');
+  const dragonMastery = await page.evaluate(() => window.__OHANA_E2E.step(1));
+  await page.keyboard.up('Space');
+  await page.evaluate(() => window.__OHANA_E2E.step(1));
   assert.equal(dragonMastery.mastery?.id, 'wingbeat', 'desktop: Dragón no expone Batida de Alas');
   assert.ok(dragonMastery.mastery?.wingUsed >= 1, 'desktop: Dragón no consigue una batida extra tras agotar saltos');
   assert.equal(dragonMastery.mastery?.move, 'wingbeat', 'desktop: la batida extra no deja señal de maestría');
