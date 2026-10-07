@@ -1,440 +1,947 @@
-## 07/10/2026 · V39 Hero Mastery
-
-**Caché:** `ohana-229`.
-
-V39 convierte los diez héroes en diez maneras distintas de atravesar Isla Hoku, preservando las U, enlaces J→K y OHANA Assist de V37.
-
-- **Kilo · Corriente de Polen:** floraciones del mundo sostienen el aire y recargan su vuelo.
-- **Stitcho · Wall Vault:** trepa y convierte paredes/cornisas en impulso vertical.
-- **Chispín · Cloudstep:** nubes eléctricas exclusivas funcionan como plataformas y rutas aéreas.
-- **Michi · Moon Pounce:** un impulso felino adicional por ciclo aéreo corrige saltos y abre rutas.
-- **Dragón · Batida de Alas:** después de sus saltos normales encadena batidas extra; las formas altas ganan más.
-- **Dino · Ruptura Sísmica:** el pisotón rompe grietas opcionales y devuelve un rebote colosal.
-- **Frita · Carril Crujiente:** el deslizamiento se engancha a carriles y conserva velocidad.
-- **Pizza · Rebote de Horno:** respiraderos exclusivos funcionan como trampolines.
-- **Yomi · Fase Hueca:** el Paso Hueco vuelve intangible su ventana espectral.
-- **Cuerno · Puente Aurora:** aterrizajes fuertes proyectan un puente de luz temporal.
-
-Las superficies de maestría existen únicamente en la colisión del jugador: no modifican la física de enemigos ni bloquean el recorrido para otros héroes. Browser E2E prueba Batida de Alas y Cloudstep con física real, y Visual Regression captura ambos estados.
-
-## 07/10/2026 · V38 Enemy Intelligence & Combat Feel
-
-**Caché:** `ohana-228`.
-
-V38 eleva los enemigos normales al nivel de intención del resto del juego y prepara su arquitectura para multiplayer.
-
-- Director de encuentros determinista: presupuesto de ataques simultáneos por dificultad y población.
-- Seis roles legibles: DIVER, SKIRMISHER, ARTILLERY, BRUISER, AMBUSHER y SWARM.
-- Intenciones compartidas: STRIKE, PRESS, FLANK, HOLD y RETREAT.
-- Los enemigos cercanos comparten alerta sin convertirse en una mente colmena global.
-- Artilleros frágiles pueden retirarse; élites y brutos mantienen presión.
-- Los ataques ya iniciados nunca se cancelan a mitad, pero los nuevos respetan el presupuesto del encuentro.
-- Planta recibe wind-up real; libélula, murciélago, cucaracho y demás especialistas quedan dentro del mismo contrato.
-- Telegraphs comunican también el rol mediante forma, no solo color.
-- Estado de daño visible y lectura sutil de amenaza/intención integrada en el dibujo.
-- E2E expone snapshot del director y Visual Regression captura un encuentro vivo con roles e intenciones.
-- Sin RNG nuevo, sin mutaciones de daño/salud y sin cambios de hitbox desde el director.
-
-## 07/10/2026 · V37 Signature Supremes & Combat Flow
-
-**Caché:** `ohana-227`.
-
-V37 convierte la tecla **U** en una Suprema de identidad propia para cada uno de los diez héroes y reconstruye el combate alrededor de cadenas deliberadas.
-
-- Diez U con nombre, mecánica persistente, campo visual e identidad cinematográfica propios.
-- Cinemática no bloqueante de activación `U · SUPREMA`, con motivo visual por héroe.
-- `H/J/K/L/U` forman Combat Flow: ENLACE → CADENA → FUSIÓN → OHANA FLOW.
-- Combinar acciones distintas mejora temporalmente potencia y recuperación de habilidades.
-- Cada héroe incorpora un enlace característico J→K con efecto y nombre propios.
-- Cadenas avanzadas o combo alto activan **OHANA ASSIST**: entra otro héroe en forma final, ataca y se retira.
-- HUD y controles táctiles tratan U como una habilidad real: nombre, bloqueo de Forma 5, cooldown y estado de disponibilidad.
-- U deja de depender de nombres literales para su arte: los FX usan identidades semánticas estables.
-- Visual QA captura una U real con asistencia y exige su presencia en navegador.
-
-## 07/10/2026 · V36 Cinematic Direction Overhaul
-
-**Caché:** `ohana-226`.
-
-V36 reconstruye la capa de presentación de Mundo 1 como un sistema cinematográfico coherente, no como una colección de overlays aislados.
-
-- Opening de portada real y saltable: Mundo 1 → Isla Hoku → Project Ohana.
-- Selector canónico centrado, tres posiciones reales, dossier con fantasía jugable por héroe y controles en una única franja.
-- Diez entradas de capítulo numeradas 01/10–10/10 con tratamiento visual específico por mundo.
-- Evolución conectada al runtime mediante `ohana-evolve`; la cinemática existente deja de ser código huérfano.
-- Director narrativo global para derrota, vacío y caída de la Reina.
-- Death FX/fantasma enmarcado por lenguaje cinematográfico común.
-- Final reconstruido en cuatro beats: caída, ruptura, liberación y epílogo.
-- Contratos E2E de geometría para impedir otra portada con título, héroe, dossier y botones desalineados.
-- `prefers-reduced-motion` conserva toda la información sin exigir animación.
-
-## 07/10/2026 · V35.1 Title Composition Fix
-
-**Caché:** `ohana-225`.
-
-Portada reconstruida desde una sola composición: título, héroe, dossier, dificultad y acciones comparten el mismo escenario. Se elimina la cascada histórica de carruseles superpuestos y se limita el selector a anterior / seleccionado / siguiente.
-
-# PROJECT OHANA · Progreso
-
-Última actualización: 05/10/2026
-
-## 07/10/2026 · V35 Cinematic Experience
-
-**Caché:** `ohana-225`.
-
-OHANA incorpora un director cinematográfico para la entrada inicial de cada mundo y una presentación específica del Nido. El final de la Reina pasa a una secuencia en tres actos: ruptura, liberación y epílogo. Todo respeta `prefers-reduced-motion` y queda separado de la simulación jugable.
-
-## 07/10/2026 · Official Multiplayer Integration
-
-**Caché de integración:** `ohana-223` · sincronizada con `index.html` y `sw.js`.
-
-OHANA mantiene `project-ohana` como repositorio canónico y absorbe la línea de desarrollo de `project-ohana-multiplayer`. El mismo motor original soporta ahora juego individual y cooperativo online para 2 jugadores mediante salas, sincronización de pose/acciones/progreso, reconexión y estado compartido de victoria o derrota.
-
-La integración añade `node tests/browser/multiplayer-e2e.mjs` al contrato de navegador y mantiene `release:check` como gate final. La línea visual Character Odyssey y sus diez sectores de personaje pasan también al juego canónico, no quedan encerrados en el prototipo multiplayer.
-
-## Estado actual
-
-### 05/10/2026 · Experience Recovery Block
-
-El sistema de presentación del Mundo 1 ha sido reconstruido en capas separadas:
-
-- **MessageManager 2.0**: una sola salida visual activa, prioridades semánticas y fallback de objetivo.
-- **Room Voice**: la entrada a una sala tiene una única narración; el feedback visual de llegada no escribe texto.
-- **Tutorial contextual**: pistas disparadas por acciones reales, una vez por sesión, teclado y touch.
-- **Objetivos dinámicos**: cada sala tiene ID, destino y requisito; los bloqueos dependen del estado actual.
-- **Evolution Flow**: cinemática más corta y visual, narración posterior única, sin letterbox.
-- **HUD hierarchy**: objetivo persistente separado de mensajes temporales; boss HUD resumido.
-- **Hero Presence**: identidad idle reutilizando firmas existentes, sin marcadores artificiales.
-- **Combat Feel**: impacto visual prioritario y números de daño reservados para eventos relevantes.
-- **Enemy Readability**: telegraphs con dirección gráfica además del color.
-- **Accessibility Contract**: live regions por prioridad y reduced-motion aplicado desde infraestructura.
-- **Experience E2E + visual matrix**: validación de contenido, singularidad, geometría y estados clave.
-
-La caché canónica de esta línea de trabajo es `ohana-221`.
-
-### 06/10/2026 · Organic Hero Render Recovery
-
-El renderer vuelve a priorizar los diseños orgánicos completos de `characters/art/`; `characters/definitive.js` queda como fallback. Se preservan hitboxes, poses, combate y el cierre de Mundo 1.
-
-### 06/10/2026 · Hero Identity Recovery
-
-Se restauran las marcas visuales de identidad de los 10 héroes desde el snapshot histórico de `ohana-172`, manteniendo el runtime y el cierre actual de Mundo 1.
-
-### Phase 20 · World 1 Closure Candidate
-
-Existe una rama consolidada de cierre. El mundo **no se declara cerrado todavía**: la decisión depende de que `npm test`, `npm run test:browser`, `npm run test:visual` y `npm run release:check` terminen en PASS en CI.
-
-
-Project Ohana es una demo jugable en navegador de plataformas 2D sobre Canvas, con:
-
-- **10 personajes activos**
-- **5 formas por personaje**
-- **10 salas**
-- **1 jefe final: la Reina del Nido**
-- **3 habilidades por personaje (J / K / L)**
-- **guardado v2**
-- **simulación fija a 60 Hz**
-- **GitHub Pages + CI**
-
-## Hecho
-
-| 04/10 | Infra de release: caché activa alineada en `ohana-96` para forzar la carga de la Phase 11 y evitar artefactos servidos por Service Worker. |
-| Fecha | Qué |
-|---|---|
-| 04/10 | Intro cinematográfica de portada activa, con escena de Isla Hoku, aviso del Nido y salida por iris; eliminada la pantalla de carga básica. |
-| 04/10 | Pase de personajes: feedback de giro/frenada; perfiles cinéticos por personaje, squash/stretch, anticipación e impacto de ataques, feedback de aterrizaje/dash y casteo de habilidades con color propio; nueva suite de regresión de animación en CI; caché `ohana-81`. |
-| 04/10 | Pase de identidad de personajes: efectos cinéticos propios para los 10 héroes y showcase de sus habilidades en la pantalla de selección; caché `ohana-87`. |
-| 04/10 | Firma de combate: 10 ataques básicos y 30 habilidades reciben trazos visuales específicos por personaje/poder; la lectura del impacto deja de depender solo del efecto genérico; caché `ohana-87`. |
-| 04/10 | Identidad de evolución: las formas 0 → 4 ahora cambian lenguaje corporal, énfasis de silueta y firma visual por personaje; nueva capa aislada `characters/evolution.js`; 50 combinaciones forma/personaje cubiertas por regresión; caché `ohana-87`. |
-| 04/10 | Evolución en combate: H/J/K/L escalan visualmente por etapa y por identidad de personaje; la progresión aumenta impacto, brillo, estela y densidad sin tocar daño, alcance ni hitbox; caché `ohana-87`. |
-| 04/10 | Rediseño de evolución: se retira el concepto de forma divina y cada personaje recibe nombre y diseño de forma final propios, con siluetas/ornamentos diferenciados; caché `ohana-87`. |
-| 04/10 | Cinemática de evolución 2.0: firmas gráficas específicas por héroe y etapa, medidor visual 0→forma final y reveal reforzado; sin cambios de gameplay; caché `ohana-87`. |
-| 04/10 | Auditoría de coherencia del proyecto. Manifest alineado con 10 personajes, 5 formas y 10 salas. Documentación de progreso alineada con la ejecución real del CI. Referencias de caché y pruebas actualizadas. Añadida validación automática de consistencia en GitHub Actions. |
-| 03/10 | Simulación fija a 60 Hz; módulos de reloj, entrada y diálogos; guardado periódico y en victoria/menú/pausa; controles táctiles con E; título visible, HUD accesible y foco de diálogos; final y evolución reutilizan sus capas; pruebas de regresión y CI antes de publicar. |
-| 24/09 | **Fábrica** `engine/foes.js` (makeFoe fuera de game.js). Hitstop, vibración, cámara de director en el Nido. Rig crawler/flyer/brute. Save v2 (hp, nueve vidas, magia, kills). Ids `kilo` / `stitcho` / `chispin` con migración de saves viejos. XP alineada (`55 → 140 → 260 → 420`). Móvil: botón bajar + layout vertical. |
-| 24/09 | Arreglo integral: el juego vuelve a cargar. |
-| 24/09 | Personajes vectoriales, música procedural, Reina del Nido. |
-
-## Personajes
-
-Activos:
-
-1. Kilo
-2. Stitcho
-3. Chispín
-4. Michi
-5. Dragón
-6. Dino
-7. Frita
-8. Pizza
-9. Yomi
-10. Cuerno
-
-Aliases heredados compatibles:
-
-- `lilo` → `kilo`
-- `stitch` → `stitcho`
-- `pikachu` → `chispin`
-- `michi` → `cat`
-
-## Mundo
-
-Hay **10 salas** en el mundo publicado:
-
-1. Claro Ohana
-2. Costa Hoku
-3. Jungla Alta
-4. Caldera
-5. Nido Final
-6. Cueva Azul
-7. Alien Lab
-8. Cumbre
-9. Órbita
-10. Arrecife Abismo
-
-El Nido final requiere forma 4. El Arrecife funciona como desvío acuático y la Órbita conecta con él mediante vórtice.
-
-## Evolución
-
-La curva absoluta de XP es:
-
-`0 → 55 → 140 → 260 → 420`
-
-Las cinco formas son:
-
-`0 · bebé` → `1 · base` → `2 · evolución` → `3 · forma alta` → `4 · forma final`
-
-La evolución activa una cinemática y efectos visuales propios. Las cinco etapas culminan en formas finales únicas por personaje. La hitbox y el renderer visual permanecen conceptualmente separados.
-
-## Guardado
-
-Save v2 conserva, entre otros:
-
-- personaje e id canónico
-- forma y XP
-- salud
-- sala actual
-- salas visitadas
-- puntos y bajas
-- estado de victoria
-- magia y nueve vidas cuando corresponda
-
-Los datos corruptos o incompatibles se descartan de forma defensiva sin romper la partida.
-
-## Renderizado
-
-El arte vectorial vive en:
-
-`characters/art/`
-
-El registro central es:
-
-`characters/art/index.js`
-
-La ruta vectorial es:
-
-`game.js → characters/draw.js → characters/art/index.js → renderer del personaje`
-
-La ruta pintada es:
-
-`characters/draw.js → characters/sprites.js → assets/sprites/bodies/`
-
-La vista por defecto es **vector**.
-
-## Tests
-
-El CI ejecuta **las ocho suites de regresión Node más un E2E real de navegador y el release gate**:
-
-```bash
-npm test
-npm run test:browser
-npm run release:check
-```
-
-El E2E real de navegador ejecuta `node tests/browser/e2e.mjs`.
-La matriz visual ejecuta `node tests/browser/visual-regression.mjs`.
-
-Las pruebas cubren, entre otras áreas:
-
-- fábrica y comportamiento de enemigos
-- RNG inyectable para enemigos y poses, con escenarios reproducibles
-- smoke test de los 10 personajes × 5 formas ejecutando realmente cada renderer vectorial
-- XP
-- roster y aliases
-- guardado
-- colisiones
-- cerebro de enemigos
-- audio sin Web Audio
-- magia
-- partículas
-- entrada teclado/táctil
-- reloj fijo
-- HUD
-- habilidades
-
-El pipeline ejecuta las pruebas antes del despliegue de GitHub Pages.
-
-| 04/10 | **Boss Combat Director · Phase 15**: la Reina encadena rutinas de 2–4 ataques según fase y contexto del jugador, evita repetir patrón, reduce la ventana de reacción en la fase final y abre una ventana de castigo claramente telegráfica tras cada cadena; sin cambiar hitboxes ni daño base; caché `ohana-91`. |
-| 04/10 | **Boss Reactive Director · Phase 16**: memoria determinista del jugador (dash, aire y presión), selección reactiva por patrón autorizado, desesperación de fase 3 al 22% de vida y recompensa `PUNISH` única durante cada ventana vulnerable; sin alterar daño base ni hitboxes; caché `ohana-92`. |
-| 04/10 | **Boss Counterplay · Phase 17**: defensas limpias por DASH/AIRE/DISTANCIA generan racha de respuesta; tres respuestas consecutivas activan `BREAK` y amplían la recuperación vulnerable. La respuesta fallida reinicia la racha solo cuando el jugador estaba realmente expuesto; sin modificar daño base ni hitboxes; caché `ohana-93`. |
-
-| 04/10 | **Boss Adaptive Encounter · Phase 18**: memoria corta de respuestas defensivas, enfriamiento determinista y adaptación de la siguiente preferencia cuando el jugador repite DASH/AIRE/DISTANCIA; la Reina puede marcar CEBO, pero solo selecciona patrones ya autorizados por fase; sin modificar daño, hitboxes ni física; caché `ohana-94`. |\n\n| 04/10 | **Boss Adaptive Bait · Phase 19**: convierte dos respuestas defensivas iguales en un CEBO de un solo uso; la rutina se elige solo entre patrones existentes de la fase y obliga a volver a observar al jugador antes de rearmarse; sin modificar daño, hitboxes, física ni RNG; caché `ohana-95`. |
-
-| 04/10 | **Boss Bait Feedback · Phase 20**: registra el resultado real del CEBO; un CEBO leído reduce el tempo y uno eficaz lo aumenta dentro de ±2, haciendo la siguiente decisión ligeramente más rápida o lenta sin tocar daño, hitboxes, física ni RNG; feedback visual y HUD; caché `ohana-96`. |
-| 04/10 | **Boss Encounter Memory · Phase 21**: memoria acotada de ocho observaciones; las respuestas limpias y CEBO leídos relajan el siguiente patrón, mientras fallos y CEBO eficaces elevan la presión hacia rutinas largas. La selección sigue cerrada al repertorio autorizado y no modifica daño, hitboxes, física ni RNG; caché `ohana-98`. |
-
-| 04/10 | **Ability Fix · Kilo + Pizza**: restaurado el impacto funcional de `Giro hula`; Pizza ya no queda secuestrada por el agarre de queso y sus tres habilidades tienen cobertura de impacto; caché `ohana-98`. |
-| 04/10 | **Ability Contract Hardening · Phase 22**: `Giro hula` recupera también la reflexión real de proyectiles hostiles durante el aro activo; el rebote es de un solo uso por proyectil dentro de una ventana corta y queda cubierto por regresión; caché `ohana-99`. |
-| 05/10 | **Ability Runtime Hardening · Phase 25**: cooldown a 60 Hz, RNG inyectado, VFX deterministas, limpieza de estados, daño seguro y límite de proyectiles; caché `ohana-100`. |
-| 05/10 | **VFX Determinism · Phase 26**: pasivos y partículas dejan de consumir `Math.random()`; partículas reproducibles y acotadas a 72, con sanitización numérica y limpieza explícita entre salas/sesiones; caché `ohana-101`. |
-| 05/10 | **Combat Mutation Firewall · Phase 27**: daño de enemigos/jugador, XP, puntuación y bajas pasan por mutaciones numéricas seguras; se eliminan operaciones directas susceptibles de propagar `NaN`; caché `ohana-102`. |
-| 05/10 | **Runtime Budget + Portal Determinism · Phase 28**: colecciones transitorias acotadas (enemigos/proyectiles/ghosts/orbs), números flotantes limitados a 96 y VFX de portales sin azar ni reloj de pared; caché `ohana-103`. |
-| 05/10 | **Runtime Integrity Guard · Phase 29**: saneamiento preventivo de estado crítico y colecciones antes de cada paso de simulación; límites finitos para HP, XP, score, movimiento, proyectiles, enemigos y FX; recompensa `PUNISH` vuelve al guard de puntuación; caché `ohana-104`. |
-| 05/10 | **Runtime Fail-Closed · Phase 30**: el bucle principal contiene errores de simulación o render, registra el contexto, limpia input/reloj y pausa de forma segura sin matar el `requestAnimationFrame`; caché `ohana-105`. |
-| 05/10 | **CI Hardening · Phase 31**: GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, con límites de 10 minutos para test y deploy. |
-| 05/10 | **RNG Domain Separation · Phase 32**: VFX de celebración, glide, cámara y overlays usan una fuente determinista separada del RNG de simulación; la IA/combate conserva el RNG compartido exclusivamente; caché `ohana-106`. |
-| 05/10 | **Deterministic Gameplay Core · Phase 33**: las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación; la convocatoria del Nido abandona `setTimeout` y usa 132 ticks a 60 Hz, pausables y reproducibles; caché `ohana-107`. |
-| 05/10 | **Global Mutation Firewall · Phase 34**: HP, XP, score, combo, bajas y escalados de vida críticos se enrutan por `systems/mutations.js`; los sistemas externos dejan de realizar aritmética directa sobre estado crítico; caché `ohana-108`. |
-| 05/10 | **Runtime Budget 2 · Phase 35**: presupuestos y compactación de colecciones pasan a `systems/runtime.js`; se acotan `bolts` y `slashes`, y el guard evita asignaciones de arrays innecesarias en el fast path; caché `ohana-109`. |
-| 05/10 | **Browser Gameplay E2E · Phase 36**: el E2E de Chromium ejecuta una secuencia real de inicio, habilidad, dash, evolución, sala, lluvia, forma final y boss; verifica daño real y transición a fase 3 mediante el navegador; caché `ohana-110`. |
-| 05/10 | **Test Harness Isolation · Phase 37**: la API `window.__OHANA_E2E` solo se expone en `127.0.0.1` con `?e2e=1`; GitHub Pages no la activa aunque se añada el parámetro; caché `ohana-111`. |
-| 05/10 | **Mutation Closure · Phase 38**: el último incremento directo de combo pasa al firewall global `systems/mutations.js`; los contadores críticos de gameplay quedan sin aritmética directa externa; caché `ohana-113`. |
-
-## Publicación y caché
-
-GitHub Pages publica desde `main`.
-
-La versión de caché declarada actualmente en `index.html` es:
-
-`ohana-221`
-
-Las referencias documentales se mantienen alineadas con esta versión.
-
-El tacto (ohana-77): el dash es un sprint corto que puedes cortar, el golpe no se lo come el hitstop, pisas al caer y el roce ya no te lanza en bucle.
-
-## Pendiente técnico
-
-La auditoría y el gate actuales no dejan deuda crítica conocida. El mantenimiento futuro queda limitado a extender la cobertura cuando se incorporen nuevas formas, poses, sistemas o superficies de navegador.
-
-## Regla de mantenimiento
-
-Cuando cambien personajes, salas, formas, caché o suites de tests, actualizar en la misma entrega:
-
-`manifest.json` · `README.md` · `PROGRESS.md` · `IMPROVEMENTS.md` · CI
-
-## Phase 41 - Cuerno Paint Closure
-
-- Cuerno incorpora sprites pintados SVG para `idle`, `run`, `jump` y `atk`.
-- `characters/sprites.js` usa esta ruta únicamente para Cuerno y conserva PNG para el resto del catálogo.
-- El Service Worker precachea las cuatro variantes pintadas.
-- La regresión verifica existencia, estructura y contrato de carga de las cuatro poses.
-- Cache: `ohana-115`.
-
-## Phase 40 - Cache Graph Closure
-
-- El Service Worker precachea los módulos JavaScript de runtime con la versión de caché actual.
-- El pipeline verifica que `index.html` y `sw.js` compartan la misma versión.
-- La regresión de hardening comprueba que ningún `.js` de runtime quede fuera del precache.
-- Cache: `ohana-115`.
-
-## Phase 39 - Session Reset Closure
-
-- `start()` limpia el estado transitorio antes de iniciar o resumir una partida.
-- `summonDelay` se reinicia a `0`.
-- Se reinician `doorWait`, `doorHold`, `finale`, `fading`, `flash`, `hitstop` y cámara.
-- Se reinician los contadores de fallos de runtime.
-- La progresión persistente continúa restaurándose mediante `saveStore`.
-- Cache: `ohana-113`.
-
-
-## Phase 42 - Offline E2E Closure
-
-- El arranque offline se verifica en Chromium después de instalar y activar el Service Worker.
-- La prueba recarga sin red y valida DOM, Canvas, control del SW y ejecución real del juego.
-- También comprueba que JavaScript, CSS y un asset pintado se sirven desde caché.
-- El contrato de precache rechaza entradas duplicadas además de módulos runtime ausentes.
-- Cache: `ohana-116`.
-
-
-## Phase 43 - ESM Dependency Closure
-
-- El CI audita todas las importaciones locales relativas de los módulos JavaScript de runtime.
-- Se comprueban rutas directas, sufijo `.js` y `index.js`, rechazando dependencias locales sin destino.
-- Cache: `ohana-117`.
-
-
-## Phase 44 - Save Transaction Closure
-
-- El guardado escribe primero en un staging `ohana.tmp` y solo lo confirma sobre `ohana` después.
-- Un fallo de quota/escritura no destruye el checkpoint previo y el staging puede servir como recuperación defensiva.
-- Los saves con una versión explícita desconocida se rechazan; v2 sigue siendo el contrato publicado.
-- Cache: `ohana-118`.
-
-
-## Phase 45 - Input Lifecycle Closure
-
-- El estado de entrada se limpia en `blur`, `focus`, `pagehide` y cualquier cambio de visibilidad.
-- La limpieza afecta teclado, watchdog y punteros retenidos, sin depender de `keyup`.
-- Se mantiene el watchdog de 1200 ms para teclados que pierden su evento de liberación.
-- Cache: `ohana-119`.
-
-
-## Block B - Quality Closure · Phases 46-49
-
-- Phase 46: contratos de diálogo con Escape, foco, inert y restauración del foco de origen.
-- Phase 47: presupuestos runtime explícitos y prueba E2E de tiempo de simulación.
-- Phase 48: matriz navegador con desktop, touch y reduced-motion.
-- Phase 49: conexiones de puertas verificadas como recíprocas a nivel de grafo.
-- Cache: `ohana-120`.
-
-
-## Block C - Determinism Closure · Phases 50-54
-
-- Phase 50: transición verificable de Reina del Nido por umbrales 1→2→3.
-- Phase 51: todos los recursos declarados por el Service Worker deben existir físicamente.
-- Phase 53: el harness E2E inyecta corrupción numérica y verifica recuperación fail-closed.
-- Phase 54: el harness puede fijar una semilla de simulación y exige dos ejecuciones idénticas.
-- Cache: `ohana-121`.
-
-- Release Gate: `node tools/release-gate.mjs` / `release:check` antes de publicar.
-
-## V33 · EXPERIENCE
-- Cache: `ohana-122`
-- Combat feel, movement feedback, dynamic camera, boss presence y evolution presentation.
-
-
-## V34.1 · EXPERIENCE CRITICAL CLOSURE
-
-- Cámara de juego centrada en el viewport para evitar deriva lateral de mapa y mensajes.
-- Intro de la Reina con caída desde arriba, aterrizaje telegráfico y golpe de entrada.
-- La Reina derrotada deja de dibujarse desde el primer frame de muerte y no reaparece durante la finale.
-- Pizza L queda validada con teclado real y el VFX de Horno soporta el primer frame antes de la actualización de simulación.
-- Ocultar la pestaña pausa la sesión actual sin resetear sala, victoria, finale ni progreso persistente.
-- Cache: `ohana-126`
-
-
-## Mundo 1 · contrato de cierre
-
-- Cada sala muestra un objetivo y lo marca hecho al cumplir la salida.
-- El claro (S/A/B/C) y el mejor tiempo se guardan en el save v2, sin cambiar la versión.
-- El ending nombra al héroe y a su forma. Vector sigue siendo la cara. Pintura es el piloto de Michi/Kilo, opt-in.
-- Cache: `ohana-126`.
-
-
-## Parada
-
-El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cache `ohana-126`.
-
-
-
-## Polish Stabilization 2026-10-06
-
-- La versión publicada queda sincronizada en `ohana-209` entre `index.html`, módulos de portada y Service Worker.
-- El carrusel usa un único modelo estructural de tres columnas, con héroe central y laterales contenidos.
-- La evolución mantiene el arte orgánico como fuente visual y reduce rayos, anillos, partículas y flash para preservar la silueta.
-- Las notificaciones transitorias se limpian al cambiar de sala para impedir acumulación de mensajes fuera de contexto.
-- Lilo ya no recibe el halo dorado legado en su forma final.
-
-
-## Polish Pass 2026-10-06
-
-Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-209.
+## 08/10/2026 · V40 Living Worlds + Traversal Graph
+
+**Caché:** `ohana-230`.
+
+V40 transforma las diez salas de Isla Hoku en un mundo conectado, legible y reactivo, y corrige la antigua falsa seguridad de los pozos.
+
+- Los **pozos son geometría real**: los hazards explícitos se resuelven antes que `nearestBelow/lowestFloor`.
+- Costa → Arrecife, Jungla → Caldera, Cumbre → Claro y Órbita → Claro usan volúmenes de transferencia reales.
+- Caldera incorpora un **pozo de magma mortal** alineado con un hueco físico del suelo; Dragón dispone de una única Batida de emergencia por caída.
+- Catapultas y vórtices comparten una red de traversal con perfiles de ruta: impulso, arco, pull, torsión, color y nombre propios.
+- Las catapultas muestran su trayectoria antes del lanzamiento; los vórtices comunican dirección y destino mediante su movimiento.
+- **World Graph 2.0** reemplaza la cuadrícula plana del mapa: diez nodos, puertas, caídas, catapultas, vórtices, bloqueos de evolución, rutas principales, atajos y secretos.
+- El minimapa usa el mismo grafo canónico que el overlay grande.
+- **Living Worlds** añade identidad procedural a cada sala, inspirada en su héroe afín:
+  - Claro / Kilo · floración y polen.
+  - Costa / Frita · velocidad y líneas de flow.
+  - Jungla / Stitcho · lianas y costuras.
+  - Cueva / Michi · cristales lunares y sombras felinas.
+  - Lab / Chispín · nubes y electricidad.
+  - Cumbre / Cuerno · auroras.
+  - Órbita / Yomi · vacío y geometría astral.
+  - Arrecife / Pizza · coral, burbujas y elasticidad.
+  - Caldera / Dragón · térmicas y brasas.
+  - Nido / Dino · fracturas sísmicas.
+- Entrar con el héroe afín intensifica la respuesta ambiental sin alterar daño ni hitboxes.
+- Los fondos bitmap de mundo quedan retirados del runtime y del precache: V40 genera sus mundos en canvas.
+- Browser E2E prueba caída real, muerte por magma, rescate de Dragón y World Graph.
+- Visual Regression captura las diez combinaciones sala/héroe y el mapa avanzado.
+
+import path from 'node:path';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { ParticleSystem } from '../engine/particles.js';
+
+test('game runtime: RNG centralizado e hitstop del boss endurecido', () => {
+  const source = fs.readFileSync('./game.js', 'utf8');
+  assert.match(source, /rng:\s*Math\.random/);
+  assert.equal((source.match(/Math\.random\(/g) || []).length, 0, 'game.js debe usar game.rng()');
+  assert.match(source, /game\.rng\(\)/);
+  assert.match(source, /game\.hitstop\s*=\s*Math\.min\(8,/);
+  assert.match(source, /hitStop\(e\.boss \? \(crit \? 5 : 3\) : \(crit \? 8 : 4\)\)/);
+});
+
+test('input y Service Worker no conservan movimiento horizontal fantasma', () => {
+  const input = fs.readFileSync('./engine/input.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  assert.match(input, /KEYBOARD_STALE_MS\s*=\s*1200/);
+  assert.match(input, /keyboardWatchdog/);
+  assert.match(input, /listen\(target, "focus", reset\)/);
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+  assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
+  assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
+  assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
+  assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* 18/);
+});
+
+
+test('la experiencia final no conserva terminología divina genérica ni identificadores antiguos', () => {
+  const files = [
+    './characters/roster.js',
+    './characters/evolution.js',
+    './characters/draw.js',
+    './systems/evo-cinema.js',
+    './engine/audio.js',
+    './index.html',
+    './README.md',
+    './PROGRESS.md',
+    './IMPROVEMENTS.md',
+  ];
+  for (const file of files) {
+    const source = fs.readFileSync(file, 'utf8');
+    const legacyTerm = new RegExp('\\b' + ['G', 'O', 'D'].join('') + '\\b', 'i');
+    assert.doesNotMatch(source, legacyTerm, file + ' conserva terminología divina antigua');
+  }
+  assert.match(fs.readFileSync('./engine/audio.js', 'utf8'), /evoFinalFanfare/);
+});
+
+ 
+test('phase 16: boss read y punish quedan aislados y deterministas', () => {
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const behavior = fs.readFileSync('./systems/boss-behavior.js', 'utf8');
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.match(boss, /observeBossBehavior/);
+  assert.match(boss, /reactiveAttackPreference/);
+  assert.match(boss, /punishAwarded/);
+  assert.doesNotMatch(behavior, /Math\.random\(/);
+  assert.match(game, /function registerBossPunish\(e\)/);
+  assert.match(game, /PUNISH \+"/);
+  assert.match(sw, /boss-behavior\.js\?v=" \+ VERSION/);
+});
+
+ 
+test('phase 17: counterplay queda separado de daño e hitbox y usa módulo precacheado', () => {
+  const counter = fs.readFileSync('./systems/boss-counterplay.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(counter, /e\.hp\s*[-+]=/);
+  assert.doesNotMatch(counter, /\be\.w\s*=|\be\.h\s*=/);
+  assert.match(boss, /startBossThreat/);
+  assert.match(boss, /resolveBossThreat/);
+  assert.match(boss, /counterBreak/);
+  assert.match(sw, /boss-counterplay\.js\?v=" \+ VERSION/);
+});
+
+
+test('phase 18: boss adaptation queda aislado, acotado y precacheado', () => {
+  const adaptation = fs.readFileSync('./systems/boss-adaptation.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(adaptation, /Math\.random\(/);
+  assert.doesNotMatch(adaptation, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(adaptation, /\.w\s*=|\.h\s*=/);
+  assert.match(boss, /adaptiveAttackPreference/);
+  assert.match(boss, /observeBossAdaptation/);
+  assert.match(combat, /adaptivePreference/);
+  assert.match(sw, /boss-adaptation\.js\?v=" \+ VERSION/);
+});
+
+
+test('phase 19: adaptive bait queda aislado y limitado al repertorio del boss', () => {
+  const bait = fs.readFileSync('./systems/boss-bait.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  assert.doesNotMatch(bait, /Math\.random\(/);
+  assert.doesNotMatch(bait, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(bait, /\.w\s*=|\.h\s*=/);
+  assert.match(boss, /consumeBossBait/);
+  assert.match(boss, /baitPattern/);
+  assert.match(combat, /baitPattern/);
+  assert.match(sw, /boss-bait\.js\?v=" \+ VERSION/);
+});
+
+
+test('phase 19: el HUD del boss conserva el estado estratégico sin inflarlo visualmente', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const bossHud = fs.readFileSync('./systems/boss-hud.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+
+  assert.match(game, /formatBossStatus/);
+  assert.match(bossHud, /vulnerable/);
+  assert.match(bossHud, /ataque telegrafiado/);
+  assert.match(boss, /baitLabel\(e\.bait\)/);
+});
+
+
+test('phase 21: encounter memory queda aislada y acotada', () => {
+  const memory = fs.readFileSync('./systems/boss-encounter-memory.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  const combat = fs.readFileSync('./systems/boss-combat.js', 'utf8');
+  assert.doesNotMatch(memory, /Math\.random\(/);
+  assert.doesNotMatch(memory, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(memory, /\.w\s*=|\.h\s*=/);
+  assert.match(memory, /Math\.max\(-2, Math\.min\(2/);
+  assert.match(boss, /createBossEncounterMemory/);
+  assert.match(boss, /encounterPreference/);
+  assert.match(combat, /context\.encounterPreference/);
+});
+
+test('phase 20: bait feedback no puede tocar daño, hitbox ni superar su límite de tempo', () => {
+  const feedback = fs.readFileSync('./systems/boss-bait-feedback.js', 'utf8');
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  assert.doesNotMatch(feedback, /Math\.random\(/);
+  assert.doesNotMatch(feedback, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(feedback, /\.w\s*=|\.h\s*=/);
+  assert.match(feedback, /Math\.max\(-2, Math\.min\(2/);
+  assert.match(boss, /feedbackAttackDelay/);
+  assert.match(boss, /resolveBossBaitFeedback/);
+});
+
+
+test('habilidades: Kilo hula tiene updater y Pizza no conserva un bloqueo de movimiento indefinido', () => {
+  const abilities = fs.readFileSync('./systems/abilities.js', 'utf8');
+  assert.match(abilities, /hula\(g, f, p\)/);
+  assert.match(abilities, /f\.pulse % 8 === 0/);
+  assert.match(abilities, /S\.pull = \{ e, t: 16, maxT: 16 \}/);
+  assert.match(abilities, /id !== "cheese"/);
+  assert.match(abilities, /const steer = input\?\.right === input\?\.left/);
+});
+
+test('phase 25: abilities elimina RNG y reloj no deterministas del runtime', () => {
+  const abilities = fs.readFileSync('./systems/abilities.js', 'utf8');
+  assert.doesNotMatch(abilities, /Math\.random\(/);
+  assert.doesNotMatch(abilities, /performance\.now\(/);
+  assert.match(abilities, /function abilityNow\(game\)/);
+  assert.match(abilities, /typeof game\?\.rng === "function"/);
+  assert.match(abilities, /MAX_ABILITY_PROJECTILES = 96/);
+});
+
+
+test('phase 26: VFX de pasivos y partículas no consumen RNG global', () => {
+  const passives = fs.readFileSync('./systems/passives.js', 'utf8');
+  const particles = fs.readFileSync('./engine/particles.js', 'utf8');
+  assert.doesNotMatch(passives, /Math\.random\(/);
+  assert.doesNotMatch(particles, /Math\.random\(/);
+  assert.match(passives, /function vfxUnit\(seed\)/);
+  assert.match(particles, /function unit\(seed\)/);
+  assert.match(particles, /sequence/);
+});
+
+test('phase 26: partículas reproducibles, acotadas y recuperables ante datos corruptos', () => {
+  const build = () => {
+    const ps = new ParticleSystem();
+    ps.emit(120, 80, { count: 10, speed: 3, spread: 2.2, size: 4 });
+    ps.emit(120, 80, { count: 6, angle: 1.1, speed: 2, size: 3 });
+    return ps.items.map(p => ({ x: p.x, y: p.y, vx: p.vx, vy: p.vy, life: p.life, size: p.size }));
+  };
+  assert.deepEqual(build(), build());
+
+  const ps = new ParticleSystem();
+  for (let i = 0; i < 20; i++) ps.emit(i, i, { count: 10 });
+  assert.equal(ps.items.length, 72);
+  ps.emit(NaN, Infinity, { count: Infinity, speed: NaN, size: NaN, life: NaN, gravity: NaN });
+  assert.equal(ps.items.length, 72);
+  assert.ok(ps.items.every(p => Object.values(p).every(v => typeof v === 'string' || typeof v === 'boolean' || Number.isFinite(v))));
+
+  ps.clear();
+  assert.equal(ps.items.length, 0);
+});
+
+
+test('phase 32: RNG de simulación y VFX permanecen en dominios separados', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function vfxUnit\(seed\)/);
+  assert.match(game, /function vfxRandom\(salt = 0\)/);
+  assert.match(game, /vfxRandom\(5\)/);
+  assert.match(game, /vfxRandom\(6\)/);
+  assert.equal((game.match(/ctx\.translate\(\(game\.rng\(\) - 0\.5\)/g) || []).length, 0);
+
+  const renderStart = game.indexOf('function render()');
+  const renderEnd = game.indexOf('function drawMinimap()', renderStart);
+  const render = game.slice(renderStart, renderEnd);
+  assert.equal((render.match(/game\.rng\(\)/g) || []).length, 0, 'render no debe consumir RNG de simulación');
+
+  const updateStart = game.indexOf('function updatePlayer()');
+  const updateEnd = game.indexOf('function tickRam(', updateStart);
+  const updatePlayer = game.slice(updateStart, updateEnd);
+  assert.equal((updatePlayer.match(/game\.rng\(\)/g) || []).length, 0, 'updatePlayer no debe consumir RNG compartido para VFX');
+
+  const finaleStart = game.indexOf('function tickFinale()');
+  const finaleEnd = game.indexOf('function worldClear()', finaleStart);
+  const finale = game.slice(finaleStart, finaleEnd);
+  assert.equal((finale.match(/game\.rng\(\)/g) || []).length, 0, 'finale no debe consumir RNG compartido para VFX');
+});
+
+test('phase 30: el bucle de runtime contiene fallos de simulación y render', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function containRuntimeFault\(scope, error\)/);
+  assert.match(game, /game\.runtimeFaults = Math\.min\(32/);
+  assert.match(game, /lastRuntimeFault = String\(scope\)/);
+  assert.match(game, /containRuntimeFault\("simulation", error\)/);
+  assert.match(game, /containRuntimeFault\("render", error\)/);
+  assert.match(game, /input\?\.reset\(\)/);
+  assert.match(game, /clock\.reset\(\)/);
+  assert.match(game, /paused = true/);
+  assert.match(game, /requestAnimationFrame\(loop\)/);
+});
+ 
+test('phase 29: runtime integrity guard protege estado crítico y colecciones', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const runtime = fs.readFileSync('./systems/runtime.js', 'utf8');
+  assert.match(runtime, /export const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
+  assert.match(runtime, /export function boundedFinite\(value, fallback, min, max\)/);
+  assert.match(game, /function sanitizeRuntimeState\(\)/);
+  assert.match(game, /sanitizeRuntimeState\(\);/);
+  assert.match(game, /game\.score = boundedFinite\(game\.score, 0, 0, MAX_RUNTIME_SAFE\)/);
+  assert.match(game, /p\.health = boundedFinite\(p\.health/);
+  assert.match(game, /e\.hp = boundedFinite\(e\.hp/);
+  assert.match(game, /pr\.dmg = boundedFinite\(pr\.dmg/);
+  assert.match(game, /if \(typeof game\.rng !== "function"\) game\.rng = Math\.random/);
+  assert.equal((game.match(/game\.score\s*=\s*\(Number\(game\.score\)/g) || []).length, 0);
+});
+
+test('phase 28: runtime transitorio acotado y VFX de portales deterministas', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const floaters = fs.readFileSync('./systems/floaters.js', 'utf8');
+  const portals = fs.readFileSync('./systems/portals.js', 'utf8');
+
+  const runtime = fs.readFileSync('./systems/runtime.js', 'utf8');
+  assert.match(runtime, /MAX_RUNTIME_PROJECTILES\s*=\s*128/);
+  assert.match(runtime, /MAX_RUNTIME_GHOSTS\s*=\s*48/);
+  assert.match(runtime, /MAX_RUNTIME_ORBS\s*=\s*64/);
+  assert.match(runtime, /function pushRuntime\(list, item, max\)/);
+  assert.equal((game.match(/game\.projectiles\.push\(/g) || []).length, 0);
+  assert.equal((game.match(/game\.ghosts\.push\(/g) || []).length, 0);
+  assert.equal((game.match(/game\.orbs\.push\(/g) || []).length, 0);
+
+  assert.match(floaters, /MAX_FLOATERS\s*=\s*96/);
+  assert.match(floaters, /Number\.isFinite\(Number\(x\)\)/);
+
+  assert.doesNotMatch(portals, /Math\.random\(/);
+  assert.doesNotMatch(portals, /performance\.now\(/);
+  assert.match(portals, /function unit\(seed\)/);
+  assert.match(portals, /same room|misma sala/i);
+});
+
+test('phase 28: Floaters conserva un presupuesto fijo y rechaza coordenadas corruptas', async () => {
+  const { Floaters } = await import('../systems/floaters.js');
+  const f = new Floaters();
+  for (let i = 0; i < 140; i++) f.add(i, i, 'x', '#fff', false);
+  assert.equal(f.items.length, 96);
+  f.add(NaN, 10, 'bad', '#fff', false);
+  f.add(10, Infinity, 'bad', '#fff', false);
+  assert.equal(f.items.length, 96);
+  assert.ok(f.items.every(v => Number.isFinite(v.x) && Number.isFinite(v.y)));
+});
+
+test('phase 27: game runtime centraliza mutaciones de combate y evita contaminación numérica', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /function finiteOr\(value, fallback = 0\)/);
+  assert.match(game, /function damageEnemy\(e, amount\)/);
+  assert.match(game, /function damagePlayer\(p, amount\)/);
+  assert.match(game, /function addPlayerXp\(p, amount\)/);
+  assert.match(game, /function addScore\(amount\)/);
+  assert.match(game, /function addKill\(\)/);
+  assert.equal((game.match(/\.hp\s*[-+]=/g) || []).length, 0);
+  assert.equal((game.match(/\.health\s*[-+]=/g) || []).length, 0);
+  assert.equal((game.match(/\.xp\s*\+=/g) || []).length, 0);
+  assert.equal((game.match(/game\.score\s*\+=/g) || []).length, 0);
+  assert.equal((game.match(/game\.kills\+\+/g) || []).length, 0);
+});
+
+
+test('phase 33: gameplay determinista y convocatoria del Nido ligada al reloj de simulación', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const surprises = fs.readFileSync('./systems/surprises.js', 'utf8');
+  const rain = fs.readFileSync('./systems/rain.js', 'utf8');
+
+  assert.match(surprises, /function gameRandom\(game\)/);
+  const surpriseGameplay = surprises.slice(surprises.indexOf('onMakeFoe(e, roomId, game)'), surprises.indexOf('onEnemyKilled(e, game)'));
+  assert.equal((surpriseGameplay.match(/Math\.random\(/g) || []).length, 0, 'sorpresas de gameplay no deben usar Math.random directamente');
+  assert.match(surpriseGameplay, /gameRandom\(game\)/);
+
+  assert.match(rain, /function gameRandom\(game\)/);
+  const rainGameplay = rain.slice(rain.indexOf('_inRoom = true'), rain.indexOf('const p = game.player'));
+  assert.equal((rainGameplay.match(/Math\.random\(/g) || []).length, 0, 'el retraso jugable de lluvia no debe usar Math.random directamente');
+  assert.match(rainGameplay, /gameRandom\(game\)/);
+
+  const worldClearStart = game.indexOf('function worldClear()');
+  const worldClearEnd = game.indexOf('function nearUpDoor(', worldClearStart);
+  const worldClear = game.slice(worldClearStart, worldClearEnd);
+  assert.doesNotMatch(worldClear, /setTimeout\(/, 'la llegada del boss debe depender de ticks');
+  assert.match(worldClear, /game\.summonDelay = 132/);
+  assert.match(game, /function tickWorldSummon\(\)/);
+  assert.match(game, /tickWorldSummon\(\);/);
+});
+
+
+test('phase 34: las mutaciones críticas pasan por la capa global compartida', () => {
+  const mutations = fs.readFileSync('./systems/mutations.js', 'utf8');
+  const files = [
+    './systems/abilities.js',
+    './systems/magic.js',
+    './systems/surprises.js',
+    './systems/passives.js',
+    './systems/boss-nido.js',
+    './engine/foes.js',
+  ];
+  const sources = files.map((file) => fs.readFileSync(file, 'utf8'));
+  for (const source of sources) {
+    assert.match(source, /mutations\.js/);
+    assert.doesNotMatch(source, /\.hp\s*[-+]=/);
+    assert.doesNotMatch(source, /\.health\s*[-+]=/);
+    assert.doesNotMatch(source, /\.xp\s*\+=/);
+    assert.doesNotMatch(source, /game\.score\s*[-+]=/);
+  }
+  assert.match(mutations, /function damageEnemy/);
+  assert.match(mutations, /function healPlayer/);
+  assert.match(mutations, /function damagePlayer/);
+  assert.match(mutations, /function addPlayerXp/);
+  assert.match(mutations, /function addScore/);
+  assert.match(mutations, /function addKill/);
+  assert.match(mutations, /function addCombo/);
+  assert.match(mutations, /function scaleEnemyHealth/);
+  assert.match(mutations, /Number\.MAX_SAFE_INTEGER/);
+});
+
+
+test('phase 35: presupuesto runtime compartido y compactación sin crecimiento', async () => {
+  const runtime = await import('../systems/runtime.js');
+  const list = [];
+  for (let i = 0; i < runtime.MAX_RUNTIME_BOLTS + 20; i++) {
+    runtime.pushRuntime(list, { id: i }, runtime.MAX_RUNTIME_BOLTS);
+  }
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list[0].id, 20);
+
+  list.push(null, 0, undefined, { id: 100 });
+  runtime.compactRuntimeList(list, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.length, runtime.MAX_RUNTIME_BOLTS);
+  assert.equal(list.at(-1).id, 100);
+
+  const caps = [
+    runtime.MAX_RUNTIME_ENEMIES,
+    runtime.MAX_RUNTIME_PROJECTILES,
+    runtime.MAX_RUNTIME_GHOSTS,
+    runtime.MAX_RUNTIME_ORBS,
+    runtime.MAX_RUNTIME_BOLTS,
+    runtime.MAX_RUNTIME_SLASHES,
+  ];
+  assert.ok(caps.every((value) => Number.isInteger(value) && value > 0));
+  assert.equal(runtime.MAX_RUNTIME_SAFE, Number.MAX_SAFE_INTEGER);
+  assert.equal(runtime.boundedFinite(NaN, 7, 0, 10), 7);
+  assert.equal(runtime.boundedFinite(99, 7, 0, 10), 10);
+});
+
+test('phase 37: el harness E2E queda aislado del dominio publicado', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /const e2eEnabled = location\.hostname === "127\.0\.0\.1" && e2eParams\.has\("e2e"\)/);
+  const hookStart = game.indexOf('if (e2eEnabled) {');
+  const hookEnd = game.indexOf('bindDialogs({', hookStart);
+  assert.ok(hookStart > 0 && hookEnd > hookStart);
+  const hook = game.slice(hookStart, hookEnd);
+  assert.match(hook, /window\.__OHANA_E2E/);
+});
+
+
+test('phase 38: combo también queda dentro del firewall global', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const mutations = fs.readFileSync('./systems/mutations.js', 'utf8');
+  assert.match(game, /function addCombo\(amount = 1\)/);
+  assert.match(game, /addCombo\(1\);/);
+  assert.equal((game.match(/game\.combo\s*\+=/g) || []).length, 0);
+  assert.match(mutations, /function addCombo/);
+});
+
+test('phase 39: start() no hereda estado transitorio de una sesión anterior', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+
+  const start = game.indexOf('function start(def)');
+  const evolve = game.indexOf('function evolve(', start);
+
+  assert.ok(start > 0);
+  assert.ok(evolve > start);
+
+  const block = game.slice(start, evolve);
+
+  assert.match(block, /t = 0;/);
+  assert.match(block, /paused = false;/);
+  assert.match(block, /game\.hitstop = 0;/);
+  assert.match(block, /game\.camPunch = 0;/);
+  assert.match(block, /game\.fading = 0;/);
+  assert.match(block, /game\.flash = 0;/);
+  assert.match(block, /game\.doorWait = null;/);
+  assert.match(block, /game\.doorHold = 0;/);
+  assert.match(block, /game\.finale = null;/);
+  assert.match(block, /game\.summonDelay = 0;/);
+  assert.match(block, /game\.roomId = "hub";/);
+  assert.match(block, /game\.won = false;/);
+  assert.match(block, /game\.summoned = false;/);
+  assert.match(block, /game\.runtimeFaults = 0;/);
+  assert.match(block, /game\.lastRuntimeFault = "";/);
+  assert.match(block, /game\.cam\.x = 0;/);
+  assert.match(block, /game\.cam\.y = 0;/);
+});
+
+test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la versión coherente', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeFiles = ['./game.js'];
+
+  const walk = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) runtimeFiles.push(path);
+    }
+  };
+
+  for (const dir of runtimeDirs) walk(dir);
+
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+  const precache = new Set(
+    [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
+  );
+
+  assert.ok(index.includes('?v=' + version), 'index.html debe usar la versión declarada por sw.js');
+
+  for (const file of runtimeFiles.sort()) {
+    const normalized = file.replace(/^\.\//, '');
+    assert.ok(precache.has(normalized), 'módulo JS fuera del precache: ' + normalized);
+  }
+
+  assert.ok(precache.size >= runtimeFiles.length, 'el precache debe cubrir al menos todo el runtime JS');
+});
+
+test('phase 41: Cuerno cierra el contrato de render pintado con cuatro poses', () => {
+  const sprites = fs.readFileSync('./characters/sprites.js', 'utf8');
+  const poses = ['idle', 'run', 'jump', 'atk'];
+
+  assert.match(sprites, /isCuernoPaint/);
+  assert.match(sprites, /cuerno-\(idle\|run\|jump\|atk\)/);
+
+  for (const pose of poses) {
+    const file = './assets/sprites/bodies/cuerno-' + pose + '.svg';
+    assert.equal(fs.existsSync(file), true, 'falta sprite pintado de Cuerno: ' + file);
+    const source = fs.readFileSync(file, 'utf8');
+    assert.match(source, /^<svg[\s\S]*<\/svg>$/);
+    assert.match(source, /<defs>/);
+    assert.match(source, /gradient/i);
+  }
+
+  assert.doesNotMatch(sprites, /cuerno-(idle|run|jump|atk)\.png/);
+});
+
+test('phase 42: offline precache no tiene duplicados y mantiene cobertura total', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const index = fs.readFileSync('./index.html', 'utf8');
+  const precacheBlock = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const entries = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)].map((match) => match[1]).filter(Boolean);
+
+  const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
+  assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
+  const version = versionMatch[1];
+
+  assert.ok(index.includes('?v=' + version), 'index.html debe usar la versión declarada por sw.js');
+
+  const duplicates = entries.filter((value, index, all) => all.indexOf(value) !== index);
+  assert.deepEqual([...new Set(duplicates)].sort(), [], 'PRECACHE contiene entradas duplicadas');
+
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeFiles = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) runtimeFiles.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const jsPrecache = new Set(
+    [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
+  );
+  for (const file of runtimeFiles.sort()) {
+    const normalized = file.replace(/^\.\//, '');
+    assert.ok(jsPrecache.has(normalized), 'módulo JS fuera del precache: ' + normalized);
+  }
+  assert.ok(jsPrecache.size >= runtimeFiles.length, 'el precache JS debe cubrir todo el runtime');
+});
+
+
+test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', () => {
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const files = ['./game.js'];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const path = dir + '/' + entry.name;
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && entry.name.endsWith('.js')) files.push(path);
+    }
+  };
+  for (const dir of runtimeDirs) walk(dir);
+
+  const all = new Set(files.map((file) => file.replace(/^\.\//, '')));
+  const missing = [];
+  const edges = [];
+
+  const resolveLocal = (from, spec) => {
+    const clean = spec.split(/[?#]/, 1)[0];
+    const base = path.posix.normalize(path.posix.join(path.posix.dirname(from), clean));
+    const candidates = [
+      base,
+      base + '.js',
+      base.replace(/\/$/, '') + '/index.js',
+    ];
+    return candidates.find((candidate) => all.has(candidate)) || null;
+  };
+
+  for (const file of files) {
+    const source = fs.readFileSync('./' + file.replace(/^\.\//, ''), 'utf8');
+    const regexes = [
+      /\b(?:from|import)\s*(?:\(\s*)?["']([^"']+)["']/g,
+      /\bexport\s+(?:\*\s+)?from\s*["']([^"']+)["']/g,
+    ];
+    for (const regex of regexes) {
+      let match;
+      while ((match = regex.exec(source))) {
+        const spec = match[1];
+        if (!spec.startsWith('.')) continue;
+        const target = resolveLocal(file, spec);
+        edges.push([file, spec, target]);
+        if (!target) missing.push(file + ' -> ' + spec);
+      }
+    }
+  }
+
+  assert.ok(edges.length > 0, 'el grafo ESM no contiene importaciones locales auditables');
+  assert.deepEqual(missing, [], 'importaciones ESM locales sin destino');
+});
+
+
+test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', () => {
+  const source = fs.readFileSync('./systems/save.js', 'utf8');
+  assert.match(source, /SAVE_KEY\s*=\s*"ohana"/);
+  assert.match(source, /SAVE_TMP_KEY\s*=\s*"ohana\.tmp"/);
+  assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
+  assert.match(source, /setItem\(SAVE_KEY, raw\)/);
+  assert.match(source, /raw\.v != null && raw\.v !== 2/);
+  assert.match(source, /return parse\(store\.getItem\(SAVE_TMP_KEY\)\)/);
+});
+
+
+test('phase 45: ciclo de vida de entrada resetea teclado en pérdida de foco y página', () => {
+  const source = fs.readFileSync('./engine/input.js', 'utf8');
+  assert.match(source, /listen\(target, "blur", reset\)/);
+  assert.match(source, /listen\(target, "focus", reset\)/);
+  assert.match(source, /listen\(target, "pagehide", reset\)/);
+  assert.match(source, /listen\(document, "visibilitychange", reset\)/);
+  assert.match(source, /KEYBOARD_STALE_MS\s*=\s*1200/);
+  assert.match(source, /releasePointerSources/);
+});
+
+
+test('phase 46: contrato de diálogos accesibles mantiene Escape, foco e inert', () => {
+  const source = fs.readFileSync('./systems/dialogs.js', 'utf8');
+  assert.match(source, /onEscape = \(\) => \{\}/);
+  assert.match(source, /event\.key === "Escape"/);
+  assert.match(source, /onEscape\(active\)/);
+  assert.match(source, /el\.inert = el !== next/);
+  assert.match(source, /returnFocus\?\.isConnected/);
+  assert.match(source, /doc\.removeEventListener\("keydown", trap, true\)/);
+});
+
+test('phase 47: presupuestos runtime permanecen explícitos y acotados', async () => {
+  const runtime = await import('../systems/runtime.js');
+  assert.equal(runtime.MAX_RUNTIME_ENEMIES, 32);
+  assert.equal(runtime.MAX_RUNTIME_PROJECTILES, 128);
+  assert.equal(runtime.MAX_RUNTIME_GHOSTS, 48);
+  assert.equal(runtime.MAX_RUNTIME_ORBS, 64);
+  assert.equal(runtime.MAX_RUNTIME_BOLTS, 64);
+  assert.equal(runtime.MAX_RUNTIME_SLASHES, 6);
+  assert.equal(runtime.MAX_RUNTIME_SAFE, Number.MAX_SAFE_INTEGER);
+  assert.match(fs.readFileSync('./tests/browser/e2e.mjs', 'utf8'), /presupuesto de simulación excedido/);
+});
+
+test('phase 48: el E2E cubre desktop, touch y reduced-motion', () => {
+  const e2e = fs.readFileSync('./tests/browser/e2e.mjs', 'utf8');
+  assert.match(e2e, /devices\['iPhone 13'\]/);
+  assert.match(e2e, /hasTouch:true/);
+  assert.match(e2e, /emulateMedia\(\{ reducedMotion: 'reduce' \}\)/);
+  assert.match(e2e, /desktop: reduced motion no inicia/);
+});
+
+test('phase 49: las puertas físicas son recíprocas y las caídas mantienen destino válido', async () => {
+  const { ROOMS } = await import('../systems/map.js');
+  for (const [id, room] of Object.entries(ROOMS)) {
+    for (const [direction, destination] of Object.entries(room.doors || {})) {
+      if (!destination) continue;
+      assert.ok(ROOMS[destination], id + ' apunta a sala inexistente: ' + destination);
+      if (direction === 'down' && room.pit) continue;
+      const reverse = Object.values(ROOMS[destination].doors || {}).includes(id);
+      assert.equal(reverse, true, 'puerta física no recíproca: ' + id + ' -> ' + destination);
+    }
+  }
+});
+
+
+test('phase 50: máquina de estados del boss conserva umbrales y cierre de recuperación', () => {
+  const boss = fs.readFileSync('./systems/boss-nido.js', 'utf8');
+  assert.match(boss, /PHASE_2:\s*0\.66/);
+  assert.match(boss, /PHASE_3:\s*0\.33/);
+  assert.match(boss, /e\.phase\s*=\s*3/);
+  assert.match(boss, /e\.phase\s*=\s*2/);
+  assert.match(boss, /e\.vulnerable\s*=\s*true/);
+  assert.match(boss, /e\.recoveryMax/);
+  assert.match(fs.readFileSync('./tests/browser/e2e.mjs', 'utf8'), /transición fase1→fase2 inválida/);
+});
+
+test('phase 51: todos los recursos declarados por el Service Worker existen en el árbol publicado', () => {
+  const sw = fs.readFileSync('./sw.js', 'utf8');
+  const precacheBlock = sw.slice(sw.indexOf('const PRECACHE = ['), sw.indexOf('];', sw.indexOf('const PRECACHE = [')));
+  const resources = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERSION)?"/g)]
+    .map((match) => match[1])
+    .filter(Boolean);
+  const unique = [...new Set(resources)];
+  for (const resource of unique) {
+    const clean = resource.split(/[?#]/, 1)[0];
+    assert.equal(fs.existsSync('./' + clean), true, 'recurso del precache inexistente: ' + clean);
+  }
+});
+
+test('phase 53: los fallos inyectados siguen en modo fail-closed y recuperable', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  assert.match(game, /injectFault\(kind = "nan"\)/);
+  assert.match(game, /game\.score = NaN/);
+  assert.ok(game.includes("pushRuntime(game.projectiles"), "fault injection debe respetar pushRuntime");
+  assert.match(game, /sanitizeRuntimeState\(\)/);
+  assert.match(game, /containRuntimeFault\("simulation", error\)/);
+});
+
+test('phase 54: el harness E2E puede fijar una semilla de simulación', () => {
+  const game = fs.readFileSync('./game.js', 'utf8');
+  const e2e = fs.readFileSync('./tests/browser/e2e.mjs', 'utf8');
+  assert.match(game, /setSeed\(seed = 1\)/);
+  assert.match(game, /1664525/);
+  assert.match(e2e, /123456789/);
+  assert.match(e2e, /gameplay no determinista con semilla idéntica/);
+});
+
+
+test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogue wired", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const index = fs.readFileSync("./index.html", "utf8");
+  const cinema = fs.readFileSync("./systems/world-cinema.js", "utf8");
+  const ending = fs.readFileSync("./systems/ending.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  assert.match(game, /ohana-cinema-room/);
+  assert.match(index, /selected-hero-name/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-230/);
+  assert.match(cinema, /EL NIDO/);
+  assert.match(cinema, /prefers-reduced-motion/);
+  assert.match(ending, /NADIE SE QUEDA ATRÁS/);
+  assert.match(title, /selected-hero-difficulty/);
+});
+
+
+test("V36 title is one canonical cinematic composition with real opening", () => {
+  const html = fs.readFileSync("./index.html", "utf8");
+  const css = fs.readFileSync("./title-stage.css", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  assert.match(html, /class="title-shell"/);
+  assert.match(html, /class="hero-stage"/);
+  assert.match(html, /selected-hero-line/);
+  assert.match(css, /OHANA V36 · CINEMATIC TITLE SYSTEM/);
+  assert.match(css, /char-card\.is-prev2/);
+  assert.match(css, /char-card\.is-next2/);
+  assert.match(css, /grid-template-areas:none!important/);
+  assert.match(css, /#char-select \.title-stack\{[\s\S]*?grid-area:auto!important/);
+  assert.match(css, /#char-select \.title-stack\{[\s\S]*?max-width:none!important/);
+  assert.match(css, /#char-select #difficulty\{[\s\S]*?grid-area:auto!important/);
+  assert.match(title, /playTitleIntro\(\)/);
+  assert.match(title, /const visible = \[id, prev, next\]/);
+  assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);
+});
+
+test("V36 cinematic director wires evolution death boss and ending presentation", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const director = fs.readFileSync("./systems/cinematic-director.js", "utf8");
+  const ending = fs.readFileSync("./ending.css", "utf8");
+  const intro = fs.readFileSync("./systems/intro.js", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  assert.match(game, /CustomEvent\("ohana-evolve"/);
+  assert.match(game, /CustomEvent\("ohana-death"/);
+  assert.match(game, /CustomEvent\("ohana-boss-fall"/);
+  assert.match(director, /ohana-death/);
+  assert.match(director, /ohana-boss-fall/);
+  assert.match(ending, /PROJECT OHANA V36 · CINEMATIC PRESENTATION SYSTEM/);
+  assert.match(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
+  assert.match(sw, /systems\/cinematic-director\.js/);
+  assert.match(visual, /01-character-select-1680x900/);
+  assert.match(visual, /04-evolution/);
+  assert.match(visual, /08-ending/);
+  assert.match(visual, /10-death-ghost/);
+});
+
+
+test("V37 signature U is cinematic, unique and regression-protected", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
+  const cinema = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const css = fs.readFileSync("./supreme.css", "utf8");
+  const html = fs.readFileSync("./index.html", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3 \}/);
+  assert.match(game, /registerCombatAction\(game, "H"/);
+  assert.match(game, /Math\.min\(3, Math\.floor/);
+  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U"\]/);
+  assert.match(abilities, /kind: "supremeField"/);
+  assert.match(abilities, /kind: "assist"/);
+  assert.match(abilities, /CustomEvent\("ohana-supreme"/);
+  assert.match(cinema, /U · SUPREMA/);
+  assert.match(cinema, /OHANA ASSIST/);
+  assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
+  assert.match(html, /supreme\.css\?v=ohana-230/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-230/);
+  assert.match(visual, /09-supreme-u-assist/);
+});
+
+
+test("V38 enemy intelligence is deterministic, bounded and visually auditable", () => {
+  const director = fs.readFileSync("./systems/enemy-director.js", "utf8");
+  const brain = fs.readFileSync("./engine/foe-brain.js", "utf8");
+  const enemies = fs.readFileSync("./engine/enemies.js", "utf8");
+  const game = fs.readFileSync("./game.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+
+  assert.doesNotMatch(director, /Math\.random\(/);
+  assert.doesNotMatch(director, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(director, /\.health\s*[-+]=/);
+  assert.match(director, /attackBudget/);
+  assert.match(director, /Math\.floor\(\(hard \+ Math\.max\(0, alive - 4\)\) \/ 2\)/);
+  assert.match(director, /aiAttackPermit/);
+  assert.match(director, /RETREAT/);
+  assert.match(director, /FLANK/);
+  assert.match(brain, /intent === "RETREAT"/);
+  assert.match(brain, /intent === "FLANK"/);
+  assert.match(enemies, /drawEncounterRead/);
+  assert.match(enemies, /drawDamageWear/);
+  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t\)/);
+  assert.match(game, /enemyCanCommit\(e\)/);
+  assert.match(game, /enemyDirectorSnapshot/);
+  assert.match(visual, /03b-enemy-intelligence/);
+  assert.match(sw, /systems\/enemy-director\.js/);
+});
+
+
+test("V39 hero mastery gives all ten heroes unique traversal without contaminating enemy physics", async () => {
+  const mastery = fs.readFileSync("./systems/hero-mastery.js", "utf8");
+  const game = fs.readFileSync("./game.js", "utf8");
+  const passives = fs.readFileSync("./systems/passives.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  const draw = fs.readFileSync("./characters/draw.js", "utf8");
+  const browser = fs.readFileSync("./tests/browser/e2e.mjs", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  const module = await import("../systems/hero-mastery.js");
+
+  assert.equal(Object.keys(module.HERO_MASTERY).length, 10);
+  assert.equal(new Set(Object.values(module.HERO_MASTERY).map((entry) => entry.id)).size, 10);
+  assert.doesNotMatch(mastery, /Math\.random\(/);
+  assert.doesNotMatch(mastery, /\.hp\s*[-+]=/);
+  assert.doesNotMatch(mastery, /\.health\s*[-+]=/);
+  assert.doesNotMatch(mastery, /\.w\s*=|\.h\s*=/);
+
+  assert.match(mastery, /cloudstep/);
+  assert.match(mastery, /wingbeat/);
+  assert.match(mastery, /moonpounce/);
+  assert.match(mastery, /seismicbreak/);
+  assert.match(mastery, /greaserail/);
+  assert.match(mastery, /ovenbounce/);
+  assert.match(mastery, /hollowphase/);
+  assert.match(mastery, /aurorabridge/);
+
+  assert.match(game, /playerMasteryPlatforms\(game\)/);
+  assert.match(game, /resolveBody\(p, playerPlatforms/);
+  assert.match(game, /resolveBody\(e, game\.platforms/);
+  assert.match(passives, /updateHeroMastery\(game, input\)/);
+  assert.match(passives, /afterMoveHeroMastery\(game, input\)/);
+  assert.match(title, /masteryOf\(selectedDef\.id\)/);
+  assert.match(draw, /drawMasteryMotionFX/);
+  assert.match(browser, /Dragón no consigue una batida extra/);
+  assert.match(browser, /Chispín no aterriza sobre la nube/);
+  assert.match(visual, /11-hero-mastery-cloudstep/);
+  assert.match(visual, /12-hero-mastery-wingbeat/);
+  assert.match(sw, /systems\/hero-mastery\.js/);
+});
+
+
+test("V39 movement input is boolean-normalized before left/right comparison", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  assert.match(game, /const left = !!\(keys\["a"\] \|\| keys\["arrowleft"\]\);/);
+  assert.match(game, /const right = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
+  assert.match(game, /const jump = !!\(keys\["w"\] \|\| keys\["arrowup"\] \|\| keys\[" "\]\);/);
+  assert.match(game, /const drop = !!\(keys\["s"\] \|\| keys\["arrowdown"\]\);/);
+});
+
+
+test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and navigation canonical", async () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  const hazards = fs.readFileSync("./systems/hazards.js", "utf8");
+  const graph = fs.readFileSync("./systems/world-graph.js", "utf8");
+  const nodes = fs.readFileSync("./systems/traversal-nodes.js", "utf8");
+  const portals = fs.readFileSync("./systems/portals.js", "utf8");
+  const living = fs.readFileSync("./worlds/living-worlds.js", "utf8");
+  const paintedHub = fs.readFileSync("./worlds/painted-hub.js", "utf8");
+  const paintedRooms = fs.readFileSync("./worlds/painted-rooms.js", "utf8");
+  const map = fs.readFileSync("./systems/map.js", "utf8");
+  const html = fs.readFileSync("./index.html", "utf8");
+  const mapCss = fs.readFileSync("./world-map.css", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
+  const browser = fs.readFileSync("./tests/browser/e2e.mjs", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  const livingModule = await import("../worlds/living-worlds.js");
+  const graphModule = await import("../systems/world-graph.js");
+
+  assert.ok(
+    game.indexOf("const hazardAxis = hazardContainsX") < game.indexOf("const next = nearestBelow"),
+    "hazard explícito debe evaluarse antes que floor rescue"
+  );
+  assert.match(game, /hazard\.type === HAZARD_TYPES\.TRANSFER/);
+  assert.match(game, /hazard\.type === HAZARD_TYPES\.DEATH/);
+  assert.match(game, /¡ÚLTIMA BATIDA!/);
+  assert.match(game, /drawHazards\(/);
+  assert.match(game, /drawLivingWorld\(/);
+
+  assert.match(hazards, /magma-pit/);
+  assert.match(hazards, /heroEscape:"dragon"/);
+  assert.match(map, /\[0,1134,1080,126\]/);
+  assert.match(map, /\[1240,1134,1000,126\]/);
+
+  assert.equal(Object.keys(livingModule.ROOM_ART).length, 10);
+  assert.equal(Object.keys(graphModule.WORLD_NODES).length, 10);
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "door"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "drop"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "catapult"));
+  assert.ok(graphModule.WORLD_EDGES.some((edge) => edge.type === "vortex"));
+
+  assert.doesNotMatch(hazards, /Math\.random\(/);
+  assert.doesNotMatch(graph, /Math\.random\(/);
+  assert.doesNotMatch(nodes, /Math\.random\(/);
+  assert.doesNotMatch(living, /Math\.random\(/);
+  assert.doesNotMatch(living, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(paintedHub, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(paintedRooms, /\.(?:png|jpe?g|webp)["']/i);
+  assert.doesNotMatch(sw, /assets\/worlds\/(?:beach|jungle|volcano|boss)-bg\.jpg/);
+
+  assert.match(portals, /traversalProfile\(/);
+  assert.match(portals, /traversalNodeSnapshot\(/);
+  assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
+  assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
+  assert.match(html, /world-map\.css\?v=ohana-230/);
+  assert.match(sw, /systems\/hazards\.js/);
+  assert.match(sw, /systems\/world-graph\.js/);
+  assert.match(sw, /systems\/traversal-nodes\.js/);
+  assert.match(sw, /worlds\/living-worlds\.js/);
+
+  assert.match(browser, /pozo Beach no transfiere realmente a Reef/);
+  assert.match(browser, /pozo mortal de magma no mata/);
+  assert.match(browser, /World Graph V40 ausente/);
+  for (const token of [
+    "13-living-hub-kilo",
+    "13-living-beach-frita",
+    "13-living-jungle-stitcho",
+    "13-living-cave-cat",
+    "13-living-lab-chispin",
+    "13-living-ridge-cuerno",
+    "13-living-space-yomi",
+    "13-living-reef-pizza",
+    "13-living-volcano-dragon",
+    "13-living-boss-dino",
+    "14-world-graph-v40"
+  ]) assert.match(visual, new RegExp(token));
+});
