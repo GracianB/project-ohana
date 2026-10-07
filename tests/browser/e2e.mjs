@@ -479,10 +479,11 @@ try {
     api.setPlayer(1120, 1120);
     api.setPlayerVelocity(0, 8);
     let state = api.state();
-    for (let i = 0; i < 12 && !(state.hp > 0 && state.player?.vy < -1); i++) state = api.step(1);
+    for (let i = 0; i < 48 && state.hp > 0 && !state.hazardEscape; i++) state = api.step(1);
     return state;
   });
   assert.ok(dragonPit.hp > 0, 'desktop: Dragón no sobrevive a su última batida en magma');
+  assert.match(dragonPit.hazardEscape || '', /magma-pit/, 'desktop: rescate de Dragón no registra el hazard real');
   assert.ok(dragonPit.player?.vy < 0, 'desktop: última batida de Dragón no lo expulsa del pozo');
 
   // V40 — World Graph avanzado reemplaza la vieja cuadrícula.
