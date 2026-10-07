@@ -95,7 +95,7 @@ export function drawWorldMinimap(ctx,current,visited={},evo=0,viewW=1280,viewH=7
   for(const e of state.edges){
     const a=WORLD_NODES[e.a],b=WORLD_NODES[e.b];if(!a||!b)continue;
     const style=EDGE_STYLE[e.type]||EDGE_STYLE.door;
-    ctx.globalAlpha=e.locked?.18:(e.type==="vortex"||e.type==="catapult"?.55:.28);
+    ctx.globalAlpha=e.locked ? 0.18 : ((e.type==="vortex" || e.type==="catapult") ? 0.55 : 0.28);
     ctx.strokeStyle=style.color;
     ctx.lineWidth=e.route==="main"?2:1.2;
     if(e.type==="vortex")ctx.setLineDash([3,4]);
