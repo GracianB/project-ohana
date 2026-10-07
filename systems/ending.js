@@ -14,12 +14,12 @@ export function showEnding(detail = {}) {
       '<div class="win-rift" aria-hidden="true"><i></i><i></i><i></i></div>' +
       '<div class="win-stars" aria-hidden="true"></div>' +
       '<div class="win-card">' +
-        '<p class="win-kicker">Mundo 1 · La familia vuelve a casa</p>' +
-        '<p class="win-act">EL NIDO SE ROMPE</p>' +
+        '<p class="win-kicker">Mundo 1 completado · Isla Hoku</p>' +
+        '<p class="win-act">LA REINA CAE</p>' +
         '<h2 id="win-title">NADIE SE QUEDA ATRÁS</h2>' +
         '<p class="win-hero"></p>' +
         '<p class="win-score"></p>' +
-        '<p class="win-jun">EL NIDO HA CAÍDO · LA REINA HA CAÍDO.</p>' +
+        '<p class="win-jun">HOKU VUELVE A RESPIRAR</p>' +
         '<p class="win-sub">La oscuridad se abre. Las formas perdidas regresan a la luz. Hoku respira otra vez.</p>' +
         '<div class="win-actions">' +
           '<button type="button" id="win-continue">Continuar en este mundo</button>' +
@@ -61,19 +61,26 @@ export function showEnding(detail = {}) {
       stars.appendChild(s);
     }
   }
-  layer.classList.remove("ending-phase-1", "ending-phase-2", "ending-phase-3");
+  layer.classList.remove("ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
   layer.classList.add("ending-phase-1");
   layer.classList.add("show");
   requestAnimationFrame(() => {
     layer.classList.remove("ending-phase-1");
     layer.classList.add("ending-phase-2");
   });
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.setTimeout(() => {
     if (layer.classList.contains("show")) {
       layer.classList.remove("ending-phase-2");
       layer.classList.add("ending-phase-3");
     }
-  }, matchMedia("(prefers-reduced-motion: reduce)").matches ? 40 : 1050);
+  }, reduce ? 40 : 1050);
+  window.setTimeout(() => {
+    if (layer.classList.contains("show")) {
+      layer.classList.remove("ending-phase-3");
+      layer.classList.add("ending-phase-4");
+    }
+  }, reduce ? 80 : 2350);
 }
 
 function watchVictory() {
