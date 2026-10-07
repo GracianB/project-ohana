@@ -3,7 +3,7 @@ import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
 import { getLook, setLook } from "../characters/look.js";
-import { playIntro } from "./intro.js?v=ohana-210";
+import { playIntro, playTitleIntro } from "./intro.js?v=ohana-210";
 import { sfx } from "../engine/audio.js";
 import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
@@ -168,7 +168,7 @@ function mark(id) {
 
   cards.forEach((el) => {
     const selected = el.dataset.id === id;
-    const visible = [id, prev, next, prev2, next2].includes(el.dataset.id);
+    const visible = [id, prev, next].includes(el.dataset.id);
     el.classList.toggle("selected", selected);
     el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
     el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
@@ -383,7 +383,8 @@ function armMenu() {
   if (neu) neu.onclick = () => begin("new");
 }
 armMenu();
-// Title menu opens directly. Start/Continue keeps the dedicated cinematic.
+// V36: la portada tiene una entrada cinematográfica real. El selector se activa después del reveal.
+playTitleIntro();
 enhance();
 
 function paintDifficulty() {
