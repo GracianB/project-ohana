@@ -768,6 +768,10 @@ function respawn() {
   const p = game.player; if (!p) return;
   if (DeathFx.isPlaying()) DeathFx.cancel();
   p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
+  p._combatChain = [];
+  game._combatFlow = null;
+  game._assist = null;
+  game._supremeFlow = null;
   Magic.reset(game);
   loadRoom("hub");
 }
@@ -1044,6 +1048,8 @@ function hurtPlayer(amount, label) {
   game.comboT = 0;
   p._combatChain = [];
   game._combatFlow = null;
+  game._assist = null;
+  game._supremeFlow = null;
   beep("hurt");
   buzz(24);
   hitStop(2);
