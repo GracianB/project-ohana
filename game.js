@@ -24,6 +24,7 @@ import { Surprises } from "./systems/surprises.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
+import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
@@ -488,6 +489,8 @@ function loadRoom(id, fromDir) {
   game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
   game.enemies = (r.foes || []).map((f, i) => {
     const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
+    e.spawnIndex = i;
+    e.roomId = id;
     if (f[3]) applyElite(e);
     return e;
   });
@@ -1647,6 +1650,7 @@ function dmgFor(e) {
 function updateEnemies() {
   if (!game.player) return;
   game.bossFx?.update();
+  game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
   { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
   if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
   for (const e of game.enemies) {
@@ -1738,30 +1742,44 @@ function updateEnemies() {
     e.x += e.vx; e.y += e.vy;
     {
     const s = sense(e, game.player);
-    let pack = 0;
-    for (const o of game.enemies) {
-      if (o !== e && o.kind === e.kind && (o.aggro || 0) > 20 && Math.abs(o.x - e.x) < 240) pack++;
-    }
+    const pack = Math.max(0, Number(e.aiPack) || 0);
     const next = think(e, s, pack);
     if (next !== "patrol" && (e.mode || "patrol") === "patrol") e.alertPing = 16;
     e.mode = next;
     e._dx = s.dx;
     e._over = s.over;
+    const steering = enemySteering(e, game.player);
+    e._aiSteer = steering.x;
+    e._aiSteerScale = steering.scale;
     if (e.alertPing > 0) e.alertPing--;
     e.shoot = (e.shoot || 0) + 1;
     const rate = e.kind === "planta" ? 70 : 9999;
     if (e.kind === "planta" && e.up) {
-      if (e.shoot > rate) {
+      if ((e.plantWind || 0) > 0) {
+        e.plantWind--;
+        e.telegraph = true;
+        e.aimDx = game.player.x - e.x;
+        e.aimDy = game.player.y - e.y;
+        if (e.plantWind <= 0) {
+          e.telegraph = false;
+          e.aimDx = e.aimDy = null;
+          const aim = Math.sign(game.player.x - e.x) || 1;
+          pushRuntime(game.projectiles, {
+            x: e.x + 10, y: e.y + 8,
+            vx: aim * 4.2 * 0.7,
+            vy: -1.2,
+            w: 10, h: 10, life: 80,
+            dmg: 9, color: "#7dca5a",
+            owner: "enemy",
+          }, MAX_RUNTIME_PROJECTILES);
+          game.fx.emit(e.x + e.w / 2, e.y + 10, { color: "#7dca5a", count: 5, size: 2.2, up: 0.8, life: 12 });
+        }
+      } else if (e.shoot > rate && enemyCanCommit(e)) {
         e.shoot = 0;
-        const aim = Math.sign(game.player.x - e.x) || 1;
-        pushRuntime(game.projectiles, {
-          x: e.x + 10, y: e.y + 8,
-          vx: aim * 4.2 * 0.7,
-          vy: -1.2,
-          w: 10, h: 10, life: 80,
-          dmg: 9, color: "#7dca5a",
-          owner: "enemy",
-  }, MAX_RUNTIME_PROJECTILES);
+        e.plantWind = 20;
+        e.telegraph = true;
+      } else if (!enemyCanCommit(e)) {
+        e.telegraph = false;
       }
     }
     }
@@ -1783,7 +1801,7 @@ function updateEnemies() {
         e.diving--;
         e.telegraph = false;
         if (e.diving <= 0) e.diveCd = 70;
-      } else if (e.diveCd <= 0 && game.player) {
+      } else if (e.diveCd <= 0 && game.player && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.9;
@@ -1805,7 +1823,7 @@ function updateEnemies() {
       e.telegraph = false;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
       e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
-      if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && (t + Math.floor(e.x)) % 70 === 0) {
+      if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e) && (t + Math.floor(e.x)) % 70 === 0) {
         e.vy = -6.2;
         e.hop = 18;
         e.flash = 4;
@@ -1819,7 +1837,7 @@ function updateEnemies() {
         if (e.lunge <= 0) e.vx *= 0.4;
       } else {
         e.lungeCd = (e.lungeCd || 0) - 1;
-        if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike") {
+        if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike" && enemyCanCommit(e)) {
           e.lungeCd = 90;
           e.lunge = 18;
           e.vx = Math.sign(game.player.x - e.x || 1) * 5.2;
@@ -1843,7 +1861,7 @@ function updateEnemies() {
         e.diving--;
         e.telegraph = false;
         if (e.diving <= 0) { e.spiral = 28; e.diveCd = 48; }
-      } else if (e.diveCd <= 0 && game.player && e.mode === "strike") {
+      } else if (e.diveCd <= 0 && game.player && e.mode === "strike" && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.85;
@@ -1872,7 +1890,7 @@ function updateEnemies() {
         e.telegraph = false;
         if (t % 2 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" }, MAX_RUNTIME_GHOSTS);
         if (e.darting <= 0) { e.dart = 55 + (t % 35); e.vx *= 0.35; }
-      } else if (e.wind > 0 || (e.dart <= 0 && game.player)) {
+      } else if (e.wind > 0 || (e.dart <= 0 && game.player && enemyCanCommit(e))) {
         if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
         e.wind++;
         e.telegraph = true;
@@ -1918,7 +1936,7 @@ function updateEnemies() {
           e.vy *= 0.15;
           e.baseY = Math.max(220, Math.min(620, e.y));
         }
-      } else if (e.cd <= 0 && game.player) {
+      } else if (e.cd <= 0 && game.player && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.9;
@@ -1961,7 +1979,7 @@ function updateEnemies() {
         e.dashSwim--;
         if (t % 2 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#a0e8ff", count: 2, size: 2.2, up: 0.3, speed: 0.6, life: 14 });
         if (e.dashSwim <= 0) e.vx *= 0.45;
-      } else if (e.dashCd <= 0 && game.player) {
+      } else if (e.dashCd <= 0 && game.player && enemyCanCommit(e)) {
         e.dashCd = 90 + (t % 40);
         e.dashSwim = 18;
         e.vx = Math.sign(game.player.x - e.x || 1) * 4.4;
@@ -2006,7 +2024,7 @@ function updateEnemies() {
       } else {
         e.telegraph = false;
         e.zapCd = (e.zapCd || 0) - 1;
-        if (e.zapCd <= 0 && game.player) {
+        if (e.zapCd <= 0 && game.player && enemyCanCommit(e)) {
           const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
           if (dist < 280) e.pulsezap = 32; // ~0.4s telegraph before sting
           else e.zapCd = 20;
@@ -2050,7 +2068,7 @@ function updateEnemies() {
         e.telegraph = false;
         e.aimDx = e.aimDy = null;
         e.zapCd = (e.zapCd || 0) - 1;
-        if (e.zapCd <= 0 && game.player) {
+        if (e.zapCd <= 0 && game.player && enemyCanCommit(e)) {
           const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
           if (dist < 320) e.pulsezap = 36;
           else e.zapCd = 18;
@@ -2079,7 +2097,7 @@ function updateEnemies() {
         e.telegraph = false;
       } else {
         e.hopCd = (e.hopCd || 0) - 1;
-        if (e.hopCd <= 0 && game.player && (e.mode === "chase" || e.mode === "strike")) {
+        if (e.hopCd <= 0 && game.player && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e)) {
           e.hopWind = 24; // ~0.4s telegraph
           e.telegraph = true;
         } else if (Math.abs(e.vy) < 0.2 && e.hopCd > 0 && e.hopCd < 40) {
@@ -2113,7 +2131,7 @@ function updateEnemies() {
         e.claws = !!near;
         e.telegraph = false;
         if (e.mode === "hold" || e.mode === "patrol") e.vx *= 0.86;
-        else if (e.mode === "strike" && e.clawCd <= 0) e.clawWind = 24;
+        else if (e.mode === "strike" && e.clawCd <= 0 && enemyCanCommit(e)) e.clawWind = 24;
         else if (e.mode === "chase") e.vx += Math.sign(e._dx || 1) * 0.1;
       }
       e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
@@ -2127,7 +2145,7 @@ function updateEnemies() {
         e.diving--;
         e.telegraph = false;
         if (e.diving <= 0) { e.diveCd = 70; e.vy = -2.0; e.baseY = Math.max(240, Math.min(520, e.y)); }
-      } else if (e.diveCd <= 0 && game.player) {
+      } else if (e.diveCd <= 0 && game.player && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.88;
@@ -2160,7 +2178,7 @@ function updateEnemies() {
         e.telegraph = false;
         if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" }, MAX_RUNTIME_GHOSTS);
         if (e.diving <= 0) { e.diveCd = angry ? 40 : 65; e.vy = -2.4; e.baseY = Math.max(200, Math.min(500, e.y)); }
-      } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player) {
+      } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player && enemyCanCommit(e)) {
         e.wind = (e.wind || 0) + 1;
         e.telegraph = true;
         e.vx *= 0.86;
@@ -2186,7 +2204,7 @@ function updateEnemies() {
         e.vx *= 0.92;
         if (e.vy > 6) e.dropping = false;
         // stick when landing (vy zeroed by platform)
-      } else if (e.dropCd <= 0 && game.player && Math.abs(game.player.x - e.x) < 160) {
+      } else if (e.dropCd <= 0 && game.player && Math.abs(game.player.x - e.x) < 160 && enemyCanCommit(e)) {
         e.dropCd = 140;
         e.dropping = true;
         e.y = Math.max(80, e.y - 180);
@@ -2221,7 +2239,8 @@ function updateEnemies() {
       const spd = hot ? 2.4 : 1.1;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * (hot ? 0.12 : 0.04);
       e.vx = Math.max(-spd, Math.min(spd, e.vx));
-      e.telegraph = hot;
+      e.enraged = hot;
+      e.telegraph = false;
       e.color = hot ? "#ff4020" : "#c04010";
       if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
     }
@@ -2240,9 +2259,9 @@ function updateEnemies() {
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       e.shootCd = (e.shootCd || 0) - 1;
       // Telegraph ~0.5s antes del rayo
-      if (e.shootCd <= 30) e.telegraph = true;
+      if (e.shootCd <= 30 && enemyCanCommit(e)) e.telegraph = true;
       else e.telegraph = false;
-      if (e.shootCd <= 0 && game.player) {
+      if (e.shootCd <= 0 && game.player && enemyCanCommit(e)) {
         e.shootCd = 90;
         e.telegraph = false;
         const dx = game.player.x - e.x, dy = game.player.y - e.y;
@@ -2256,6 +2275,17 @@ function updateEnemies() {
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
+    // V38 strategic steering is applied after species logic so RETREAT/FLANK
+    // cannot be overwritten by a local hover/chase routine.
+    if (!e.telegraph && game.player) {
+      const steer = enemySteering(e, game.player);
+      if (e.mode === "retreat" || e.mode === "flank") {
+        e.vx += steer.x * steer.scale;
+      } else if (e.mode === "hold" && !enemyCanCommit(e)) {
+        e.vx *= 0.94;
+      }
+    }
+
     solidifyFoe(e);
     const p = game.player;
     const solid = !(e.kind === "planta" && !e.up);
@@ -3240,6 +3270,14 @@ if (e2eEnabled) {
           multiplier: game._combatFlow.multiplier || 1,
         } : null,
         assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
+        enemyDirector: game.enemyDirector ? {
+          roomId: game.enemyDirector.roomId,
+          hard: game.enemyDirector.hard,
+          alive: game.enemyDirector.alive,
+          budget: game.enemyDirector.budget,
+          committed: game.enemyDirector.committed,
+        } : null,
+        enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
         boss: boss ? {
           x: boss.x,
           y: boss.y,
