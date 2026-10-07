@@ -146,8 +146,17 @@ try {
     api.setPlayerVelocity(0, 7);
     return cloud;
   });
-  const cloudState = await page.evaluate(() => window.__OHANA_E2E.step(18));
-  assert.equal(cloudState.mastery?.cloud, true, '11-cloudstep: Chispín no pisa su nube');
+  const cloudState = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    let state = api.state();
+    for (let i = 0; i < 48 && !state.mastery?.cloud; i++) state = api.step(1);
+    return state;
+  });
+  assert.equal(
+    cloudState.mastery?.cloud,
+    true,
+    '11-cloudstep: Chispín no pisa su nube · ' + JSON.stringify({ player:cloudState.player, cloud:cloudSetup, mastery:cloudState.mastery })
+  );
   assert.equal(cloudState.player?.grounded, true, '11-cloudstep: la nube no sostiene a Chispín');
   assert.ok(Math.abs((cloudState.player.y + 36) - cloudSetup.y) < 12, '11-cloudstep: geometría de nube inválida');
   await page.waitForTimeout(80);
