@@ -46,7 +46,9 @@ function play(detail = {}) {
   assist.textContent = assistText;
   assist.hidden = !assistText;
   el.setAttribute("aria-hidden", "false");
-  requestAnimationFrame(() => el.classList.add("show"));
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
   hideTimer = setTimeout(() => {
     el.classList.remove("show");
     setTimeout(() => el.setAttribute("aria-hidden", "true"), reduced() ? 20 : 380);
