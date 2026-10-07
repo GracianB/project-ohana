@@ -122,10 +122,6 @@ const PRECACHE = [
   "./assets/sprites/forms/cat-4.png?v=" + VERSION,
   "./assets/sprites/forms/yomi-0.png?v=" + VERSION,
   "./assets/sprites/forms/yomi-4.png?v=" + VERSION,
-  "./assets/worlds/beach-bg.jpg?v=" + VERSION,
-  "./assets/worlds/jungle-bg.jpg?v=" + VERSION,
-  "./assets/worlds/volcano-bg.jpg?v=" + VERSION,
-  "./assets/worlds/boss-bg.jpg?v=" + VERSION,
   "./assets/sprites/boss-queen.png?v=" + VERSION
 ];
 
