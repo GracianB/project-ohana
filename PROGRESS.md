@@ -26,6 +26,7 @@ V40 transforma las diez salas de Isla Hoku en un mundo conectado, legible y reac
 - Los fondos bitmap de mundo quedan retirados del runtime y del precache: V40 genera sus mundos en canvas.
 - Browser E2E prueba caída real, muerte por magma, rescate de Dragón y World Graph.
 - Visual Regression captura las diez combinaciones sala/héroe y el mapa avanzado.
+- Release Gate final: `npm run release:check` valida documentación, caché, precache y contratos de publicación.
 
 import path from 'node:path';
 import test from 'node:test';
