@@ -13,6 +13,16 @@ async function auditPage(page, label) {
   page.on('requestfailed', (request) => errors.push('requestfailed: ' + request.url() + ' · ' + (request.failure()?.errorText || 'unknown')));
   page.on('response', (response) => { if (response.status() >= 400 && response.url().startsWith(base)) errors.push('response: ' + response.status() + ' ' + response.url()); });
   await page.goto(base + '?e2e=1', { waitUntil:'networkidle' });
+  const titleIntroState = await page.evaluate(() => {
+    const el = document.querySelector('#ohana-intro');
+    const style = el ? getComputedStyle(el) : null;
+    return {
+      active: !!el?.classList.contains('show'),
+      visible: !!style && style.display !== 'none' && style.visibility !== 'hidden',
+      complete: document.body.classList.contains('intro-complete')
+    };
+  });
+  assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-196', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
@@ -24,6 +34,44 @@ async function auditPage(page, label) {
   // que puede desaparecer entre el descubrimiento del locator y su evaluación.
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
   await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  const titleLayout = await page.evaluate(() => {
+    const rect = (selector) => {
+      const r = document.querySelector(selector)?.getBoundingClientRect();
+      return r ? { left:r.left, top:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height } : null;
+    };
+    const cards = [...document.querySelectorAll('#chars-grid .char-card')];
+    const visibleCards = cards.filter((card) => {
+      const box = card.getBoundingClientRect();
+      const style = getComputedStyle(card);
+      return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 2 && box.height > 2;
+    });
+    const selected = rect('#chars-grid .char-card.selected');
+    const title = rect('.title-stack');
+    const hero = rect('.hero-stage');
+    const controls = rect('.title-controls');
+    const dossier = rect('.hero-dossier');
+    const menu = rect('#char-select');
+    const center = (box) => box ? box.left + box.width / 2 : NaN;
+    return {
+      visibleCards: visibleCards.map((card) => card.dataset.id),
+      selected, title, hero, controls, dossier, menu,
+      selectedCenter: center(selected),
+      titleCenter: center(title),
+      viewport: { width: innerWidth, height: innerHeight },
+      scrollWidth: document.documentElement.scrollWidth,
+      scrollHeight: document.documentElement.scrollHeight,
+      introComplete: document.body.classList.contains('intro-complete')
+    };
+  });
+  assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
+  assert.equal(titleLayout.visibleCards.length, 3, label + ': el selector debe mostrar exactamente anterior/seleccionado/siguiente');
+  assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
+  assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
+  assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
+  assert.ok(titleLayout.controls.top > titleLayout.title.bottom, label + ': controles invaden la cabecera');
+  assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
+  assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
+  assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
   const moduleProbe = await page.evaluate(async () => {
     const paths = [
       '/characters/rig.js',

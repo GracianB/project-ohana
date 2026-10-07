@@ -1,16 +1,16 @@
 const RM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const ROOM_CINEMA = {
-  hub: ["ISLA HOKU", "CLARO OHANA", "Aquí empieza la familia."],
-  beach: ["CAPÍTULO II", "COSTA HOKU", "El mar abre el camino."],
-  jungle: ["CAPÍTULO III", "JUNGLA ALTA", "La isla empieza a defenderse."],
-  cave: ["CAPÍTULO IV", "CUEVA AZUL", "Bajo Hoku también hay memoria."],
-  lab: ["CAPÍTULO V", "ALIEN LAB", "Algo llegó antes que nosotros."],
-  ridge: ["CAPÍTULO VI", "CUMBRE", "Por encima de las nubes."],
-  space: ["CAPÍTULO VII", "ÓRBITA", "Hoku no termina en el cielo."],
-  reef: ["CAPÍTULO VIII", "ARRECIFE ABISMO", "Donde la luz aprende a nadar."],
-  volcano: ["CAPÍTULO IX", "CALDERA", "La última puerta arde."],
-  boss: ["FINAL", "EL NIDO", "La Reina ha despertado."]
+  hub: { n: "01", act: "ISLA HOKU", title: "CLARO OHANA", line: "Aquí empieza la familia." },
+  beach: { n: "02", act: "CAPÍTULO II", title: "COSTA HOKU", line: "El mar abre el camino." },
+  jungle: { n: "03", act: "CAPÍTULO III", title: "JUNGLA ALTA", line: "La isla empieza a defenderse." },
+  cave: { n: "04", act: "CAPÍTULO IV", title: "CUEVA AZUL", line: "Bajo Hoku también hay memoria." },
+  lab: { n: "05", act: "CAPÍTULO V", title: "ALIEN LAB", line: "Algo llegó antes que nosotros." },
+  ridge: { n: "06", act: "CAPÍTULO VI", title: "CUMBRE", line: "Por encima de las nubes." },
+  space: { n: "07", act: "CAPÍTULO VII", title: "ÓRBITA", line: "Hoku no termina en el cielo." },
+  reef: { n: "08", act: "CAPÍTULO VIII", title: "ARRECIFE ABISMO", line: "Donde la luz aprende a nadar." },
+  volcano: { n: "09", act: "CAPÍTULO IX", title: "CALDERA", line: "La última puerta arde." },
+  boss: { n: "10", act: "FINAL", title: "EL NIDO", line: "La Reina ha despertado." }
 };
 
 let timer = 0;
@@ -21,7 +21,7 @@ function layer() {
   el.id = "world-cinema";
   el.setAttribute("aria-live", "polite");
   el.setAttribute("aria-hidden", "true");
-  el.innerHTML = '<div class="wc-bars"></div><div class="wc-vignette"></div><div class="wc-copy"><p class="wc-kicker"></p><h2></h2><p class="wc-line"></p></div><div class="wc-rule"></div>';
+  el.innerHTML = '<div class="wc-bars"></div><div class="wc-vignette"></div><div class="wc-grid"></div><div class="wc-copy"><p class="wc-index"></p><p class="wc-kicker"></p><h2></h2><p class="wc-line"></p></div><div class="wc-rule"></div>';
   document.body.appendChild(el);
   return el;
 }
@@ -30,10 +30,11 @@ function play(detail={}) {
   if (!meta || detail.repeat) return;
   const el = layer();
   clearTimeout(timer);
-  el.querySelector(".wc-kicker").textContent = meta[0];
-  el.querySelector("h2").textContent = meta[1];
-  el.querySelector(".wc-line").textContent = meta[2];
-  el.className = detail.id === "boss" ? "boss" : "";
+  el.querySelector(".wc-index").textContent = meta.n + " / 10";
+  el.querySelector(".wc-kicker").textContent = meta.act;
+  el.querySelector("h2").textContent = meta.title;
+  el.querySelector(".wc-line").textContent = meta.line;
+  el.className = "room-" + detail.id + (detail.id === "boss" ? " boss" : "");
   el.setAttribute("aria-hidden", "false");
   requestAnimationFrame(() => el.classList.add("show"));
   timer = setTimeout(() => {

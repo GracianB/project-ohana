@@ -1,4 +1,4 @@
-const VERSION = "ohana-225";
+const VERSION = "ohana-226";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -17,6 +17,7 @@ const PRECACHE = [
   "./intro.css?v=" + VERSION,
   "./demo.css?v=" + VERSION,
   "./experience.css?v=" + VERSION,
+  "./cinematic-ui.css?v=" + VERSION,
   "./game.js?v=" + VERSION,
   "./characters/art/_template.js?v=" + VERSION,
   "./characters/art/cat.js?v=" + VERSION,
@@ -71,6 +72,7 @@ const PRECACHE = [
   "./systems/dialogs.js?v=" + VERSION,
   "./systems/ending.js?v=" + VERSION,
   "./systems/world-cinema.js?v=" + VERSION,
+  "./systems/cinematic-director.js?v=" + VERSION,
   "./systems/evo-cinema.js?v=" + VERSION,
   "./systems/floaters.js?v=" + VERSION,
   "./systems/hud.js?v=" + VERSION,

@@ -706,6 +706,8 @@ function start(def) {
 function evolve(reason) {
   const p = game.player; if (!p || p.dead) return;
   p.evo = Number(p.evo) || 0;
+  const fromEvo = p.evo;
+  const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
   if (reason !== "xp" && reason !== "manual") return;
   if (p.evo >= 4) { if (reason === "manual") showSystemMessage("MAX", "Ya eres GOD (forma 5)."); return; }
   const need = XP_NEED[p.evo + 1];
@@ -736,6 +738,17 @@ function evolve(reason) {
     });
   }
   game.experience?.evolution(p, toGod);
+  const toName = p.evoNames?.[p.evo] || p.forms?.[p.evo]?.name || p.name || "Nueva forma";
+  dispatchEvent(new CustomEvent("ohana-evolve", { detail: {
+    id: p.id,
+    name: p.name,
+    evo: p.evo,
+    fromEvo,
+    fromName,
+    toName,
+    color: p.color,
+    final: toGod
+  }}));
   save();
 }
 function cheatEvolve() {
@@ -1043,6 +1056,7 @@ function hurtPlayer(amount, label) {
   if (p.health <= 0) {
     p.health = 0;
     p.dead = true;
+    dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "hurt", id: p.id, hero: p.name } }));
     showErrorMessage("DERROTA", "R vuelve al claro");
     if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "hurt" });
   }
@@ -1098,6 +1112,7 @@ function inPitX(p) {
 function dieVoid(p) {
   if (!p || p.dead) return;
   p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
+  dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "void", id: p.id, hero: p.name } }));
   const hurt = document.getElementById("fx-hurt");
   if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
   showErrorMessage("VACÍO", "Pozo real. R vuelve al claro");
@@ -1160,6 +1175,11 @@ function punch(x, y, color, dir = 1) {
   beep("hit");
 }
 function beginFinale(e) {
+  dispatchEvent(new CustomEvent("ohana-boss-fall", { detail: {
+    hero: game.player?.name || "Ohana",
+    id: game.player?.id || "",
+    room: game.roomId
+  }}));
   game.finale = {
     t: 520,
     max: 520,
@@ -2997,6 +3017,7 @@ function setupSelect() {
     } else if (state === "lost" && !game.won) {
       game.player.dead = true;
       game.player.health = 0;
+      dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "online", id: game.player.id, hero: game.player.name } }));
       showErrorMessage("DERROTA", "La familia cae junta. R vuelve al claro.");
     }
   });
@@ -3253,6 +3274,15 @@ if (e2eEnabled) {
     setBossHp(value) {
       const boss = game.boss || game.enemies.find((e) => e.boss);
       if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
+      return this.state();
+    },
+    die(reason = "hurt") {
+      const p = game.player;
+      if (!p) return this.state();
+      p.health = 0;
+      p.dead = true;
+      dispatchEvent(new CustomEvent("ohana-death", { detail: { reason, id: p.id, hero: p.name } }));
+      if (!DeathFx.isPlaying()) DeathFx.start(p, () => {}, { reason: reason === "void" ? "void" : "hurt" });
       return this.state();
     },
   };
