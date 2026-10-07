@@ -187,6 +187,43 @@ try {
   await page.keyboard.up('Space');
   await page.evaluate(() => window.__OHANA_E2E.step(1));
 
+  // V40 · Living Worlds: las diez salas se auditan con su héroe afín.
+  const livingPairs = [
+    ['hub','kilo'],
+    ['beach','frita'],
+    ['jungle','stitcho'],
+    ['cave','cat'],
+    ['lab','chispin'],
+    ['ridge','cuerno'],
+    ['space','yomi'],
+    ['reef','pizza'],
+    ['volcano','dragon'],
+    ['boss','dino'],
+  ];
+  for (const [room, hero] of livingPairs) {
+    const living = await page.evaluate(({ room, hero }) => {
+      const api = window.__OHANA_E2E;
+      api.start(hero);
+      api.setEvo(4);
+      api.loadRoom(room);
+      api.setInvulnerable(600);
+      api.step(4);
+      const cinema = document.querySelector('#world-cinema');
+      if (cinema) {
+        cinema.classList.remove('show');
+        cinema.setAttribute('aria-hidden', 'true');
+      }
+      const notice = document.querySelector('#notification-container');
+      if (notice) notice.replaceChildren();
+      return api.state();
+    }, { room, hero });
+    assert.equal(living.roomId, room, 'V40 living: sala incorrecta ' + room);
+    assert.equal(living.livingWorld?.hero, hero, 'V40 living: afinidad canónica incorrecta ' + room);
+    assert.equal(living.livingWorld?.affinity, true, 'V40 living: la sala no reacciona a ' + hero);
+    await page.waitForTimeout(45);
+    await capture(page, '13-living-' + room + '-' + hero);
+  }
+
   // Recupera Kilo para continuar la matriz cinematográfica original.
   await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
 
@@ -216,7 +253,12 @@ try {
   await page.locator('#btn-map').click();
   await page.waitForTimeout(80);
   assert.equal(await page.locator('#map-overlay').getAttribute('aria-hidden'), 'false', '06-map: mapa no visible');
+  assert.equal(await page.locator('#map-grid .world-map-v40').count(), 1, '06-map: World Graph V40 ausente');
+  assert.equal(await page.locator('#map-grid .wm-node').count(), 10, '06-map: World Graph incompleto');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-catapult').count() >= 1, '06-map: ruta catapulta ausente');
+  assert.ok(await page.locator('#map-grid .wm-edge.wm-vortex').count() >= 1, '06-map: ruta vórtice ausente');
   await capture(page, '06-map');
+  await capture(page, '14-world-graph-v40');
 
   await page.keyboard.press('Escape');
   await page.waitForTimeout(80);
