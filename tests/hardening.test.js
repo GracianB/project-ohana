@@ -829,3 +829,12 @@ test("V39 hero mastery gives all ten heroes unique traversal without contaminati
   assert.match(visual, /12-hero-mastery-wingbeat/);
   assert.match(sw, /systems\/hero-mastery\.js/);
 });
+
+
+test("V39 movement input is boolean-normalized before left/right comparison", () => {
+  const game = fs.readFileSync("./game.js", "utf8");
+  assert.match(game, /const left = !!\(keys\["a"\] \|\| keys\["arrowleft"\]\);/);
+  assert.match(game, /const right = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
+  assert.match(game, /const jump = !!\(keys\["w"\] \|\| keys\["arrowup"\] \|\| keys\[" "\]\);/);
+  assert.match(game, /const drop = !!\(keys\["s"\] \|\| keys\["arrowdown"\]\);/);
+});
