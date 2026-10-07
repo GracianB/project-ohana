@@ -191,3 +191,19 @@
 #world-cinema.boss h2{color:#fff1e1;text-shadow:0 0 34px rgba(255,55,91,.28),0 10px 60px #000}
 #world-cinema.boss .wc-kicker{color:#ff6b82}
 @media(prefers-reduced-motion:reduce){#world-cinema,#world-cinema *{transition-duration:.01ms!important}}
+
+/* V35 boss-death epilogue */
+#win-cinema .win-rift{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+#win-cinema .win-rift i{position:absolute;width:min(72vw,820px);height:2px;background:linear-gradient(90deg,transparent,#fff4bf 35%,#ff6880 52%,#fff4bf 68%,transparent);box-shadow:0 0 18px #fff,0 0 70px #ff4266;transform:rotate(var(--r,0deg)) scaleX(0);opacity:0}
+#win-cinema .win-rift i:nth-child(1){--r:-18deg}#win-cinema .win-rift i:nth-child(2){--r:7deg}#win-cinema .win-rift i:nth-child(3){--r:31deg}
+#win-cinema.ending-phase-1 .win-rift i{animation:ohana-rift .9s cubic-bezier(.16,1,.3,1) both}
+#win-cinema.ending-phase-1 .win-rift i:nth-child(2){animation-delay:.08s}#win-cinema.ending-phase-1 .win-rift i:nth-child(3){animation-delay:.16s}
+#win-cinema .win-stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#win-cinema .win-stars i{position:absolute;left:var(--x);top:var(--y);width:4px;height:4px;border-radius:50%;background:#fff1ad;box-shadow:0 0 12px #ffe070;opacity:0}
+#win-cinema.ending-phase-2 .win-stars i,#win-cinema.ending-phase-3 .win-stars i{animation:ohana-star-rise 2.4s var(--d) ease-out infinite}
+#win-cinema .win-act{margin:0 0 10px;color:#ff8a96;font:800 10px Outfit,sans-serif;letter-spacing:.3em;transition:letter-spacing .8s ease,color .8s ease}
+#win-cinema.ending-phase-3 .win-act{color:#ffe79b;letter-spacing:.42em}
+#win-cinema.ending-phase-3 #win-title{text-shadow:0 0 34px rgba(255,227,133,.34),0 10px 50px rgba(0,0,0,.55)}
+@keyframes ohana-rift{0%{transform:rotate(var(--r)) scaleX(0);opacity:0}35%{opacity:1}70%{transform:rotate(var(--r)) scaleX(1);opacity:.9}100%{transform:rotate(var(--r)) scaleX(1.12);opacity:0}}
+@keyframes ohana-star-rise{0%{transform:translateY(18px) scale(.4);opacity:0}22%{opacity:.85}100%{transform:translateY(-80px) scale(1.25);opacity:0}}
+@media(prefers-reduced-motion:reduce){#win-cinema .win-rift i,#win-cinema .win-stars i{animation:none!important}.win-stars{display:none}}
