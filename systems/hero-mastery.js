@@ -387,7 +387,7 @@ export function masterySnapshot(game) {
   const s=ensureState(p);
   const m=masteryOf(p.id);
   return Object.freeze({
-    hero:heroId(p), id:m.id, name:m.name, move:p._masteryMove||"",
+    hero:heroId(p), id:m.id, name:m.name, move:p._masteryMove || ((p._masteryLastMove && (Number(game.t)||0) - Number(p._masteryLastMove.t||0) <= 18) ? p._masteryLastMove.id : "") || "",
     wingUsed:s.wingUsed, pounceUsed:!!s.pounceUsed,
     railTicks:s.railTicks, bridge:!!(s.bridge&&s.bridge.t>0),
     cloud:!!supportAt(game,p,"cloudstep"),
