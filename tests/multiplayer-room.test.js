@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRoomService, RoomError } from "../netlify/lib/room-service.mjs";
@@ -489,4 +490,11 @@ test("online orb signals are scoped to the current world position", async () => 
   assert.ok(event);
   assert.equal(event.payload.roomId, "beach");
   assert.equal(event.payload.xp, 8);
+});
+
+
+test("online engine integration exposes the canonical room loader", async () => {
+  const source = await readFile(new URL("../game.js", import.meta.url), "utf8");
+  assert.match(source, /game\.loadRoom\s*=\s*loadRoom/);
+  assert.match(source, /onlineCoop\.start\(game, def\)/);
 });
