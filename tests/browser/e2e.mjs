@@ -66,7 +66,7 @@ async function auditPage(page, label) {
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
   assert.equal(titleLayout.visibleCards.length, 3, label + ': el selector debe mostrar exactamente anterior/seleccionado/siguiente');
   assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
-  assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central');
+  assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
   assert.ok(titleLayout.controls.top > titleLayout.title.bottom, label + ': controles invaden la cabecera');
   assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
