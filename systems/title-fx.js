@@ -253,6 +253,8 @@ if (cv) {
   }).observe(document.body,{attributes:true,attributeFilter:["class"]});
 
   const initial=document.getElementById("char-select")?.dataset.hero||"kilo";
-  fromId=toId=initial;cv.dataset.heroScene=initial;
+  fromId=toId=initial;
+  cv.dataset.heroScene=initial;
+  cv.dataset.backdrop="hoku-gate";
   resize();frame();
 }
