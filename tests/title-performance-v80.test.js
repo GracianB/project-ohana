@@ -27,10 +27,10 @@ test("V80: fullscreen background has lower DPR and frame cadence",()=>{
 });
 test("V80: full family scene comes before the epilogue results card",()=>{
  for(const s of [
-  "const duration=reduce?1.6:12.0",
+  "const duration=reduce?1.6:14.5",
   "now-lastPaint<41",
   "if(k>=.77)",
-  "const titleK=seg(k,.84,.92)",
+  "const titleK=seg(k,.89,.97)",
   "if(k>=1){revealResults();return;}",
   'layer.querySelector(".win-skip").onclick=()=>revealResults()',
   'layer.dataset.resultsAt=String(Math.round(duration*1000))'
