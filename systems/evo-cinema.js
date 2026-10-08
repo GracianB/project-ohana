@@ -1,13 +1,3 @@
-// ============================================================================
-// PROJECT OHANA · Cinemática de evolución (systems/evo-cinema.js)
-// ----------------------------------------------------------------------------
-// Escucha window "ohana-evolve" ({ id, evo, color, fromName, toName, name }) y
-// reproduce a pantalla completa, en un <canvas> propio:
-//   oscurecer breve → forma anterior + nueva en crossfade continuo
-//   → flash corto → forma nueva legible y retorno rápido al juego.
-// Mientras dura, #evo-stage tiene la clase "show" (game.js pausa la partida).
-// También exporta utilidades (partículas, rayos, texto) que reutiliza intro.js.
-// ============================================================================
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -21,9 +11,6 @@ export const FONT_DISPLAY = "Fredoka, 'Baloo 2', system-ui, sans-serif";
 export const FONT_BODY = "Outfit, system-ui, sans-serif";
 const GOLD = "#ffd84a";
 
-// ---------------------------------------------------------------------------
-// Utilidades
-// ---------------------------------------------------------------------------
 export const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 export const lerp = (a, b, k) => a + (b - a) * k;
 /** Progreso 0..1 de t dentro de [a, b]. */
@@ -87,9 +74,6 @@ export function fullCanvas(cv) {
   return st;
 }
 
-// ---------------------------------------------------------------------------
-// Partículas
-// ---------------------------------------------------------------------------
 export class Particles {
   constructor() { this.list = []; }
   add(p) {
@@ -101,13 +85,11 @@ export class Particles {
       p.life += dt;
       if (p.life >= p.max) continue;
       if (p.to) {
-        // convergencia: aceleración hacia el objetivo
         const dx = p.to.x - p.x, dy = p.to.y - p.y;
         const d = Math.hypot(dx, dy) || 1;
         if (d < 10) continue;
         const acc = 2600 * dt;
         p.vx += (dx / d) * acc; p.vy += (dy / d) * acc;
-        // componente tangencial: espiral
         p.vx += (-dy / d) * p.swirl * dt; p.vy += (dx / d) * p.swirl * dt;
         p.vx *= 0.92; p.vy *= 0.92;
       }
@@ -182,9 +164,6 @@ export function drawSpark(ctx, x, y, r, color) {
   ctx.fill();
 }
 
-// ---------------------------------------------------------------------------
-// Capas de fondo
-// ---------------------------------------------------------------------------
 /** Rayos de luz giratorios desde (cx, cy). */
 export function drawRays(ctx, cx, cy, R, color, alpha, rot, n = 14) {
   if (alpha <= 0.005) return;
@@ -283,9 +262,6 @@ export function drawTitle(ctx, text, x, y, size, colors, opts = {}) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
-// Personaje grande
-// ---------------------------------------------------------------------------
 /** Altura visual (px) de un personaje/forma con visualScale = 1. */
 export function baseHeight(id, evo) {
   return VISUAL_H[clamp(evo | 0, 0, 4)] * (CHAR_K[id] || 1);
@@ -311,9 +287,6 @@ export function drawDummy(ctx, p, fx, fy, scale, t) {
   drawCharacter(ctx, p, { x: 0, y: 0 }, t);
 }
 
-// ---------------------------------------------------------------------------
-// Cinemática
-// ---------------------------------------------------------------------------
 let stage = null;
 let running = null;
 
@@ -402,7 +375,6 @@ export function playEvolution(detail = {}) {
   const story = evolutionMessage(def.id, evo) || EVOLUTION_STAGE_COPY[evo] || EVOLUTION_STAGE_COPY[4] || { kicker: "EVOLUCIÓN" };
   const reduce = reducedMotion();
 
-  // Línea de tiempo breve: impacto visual fuerte, regreso rápido al juego.
   const T = evolutionTiming({ reduced: reduce, finalForm });
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
@@ -418,8 +390,6 @@ export function playEvolution(detail = {}) {
   st.sr.textContent = "Evolución completada: " + toName + ". Nueva forma " + (evo + 1) + " de 5.";
   el.classList.add("show");
   el.classList.toggle("finale", finalForm);
-  // La cinemática usa un único personaje central. No se montan miniaturas ni
-  // sprites auxiliares debajo del héroe, evitando cast visuales ajenos al elenco activo.
   const staleLadder = el.querySelector(".form-ladder");
   if (staleLadder) staleLadder.remove();
   sfx("evoCharge");
@@ -490,7 +460,6 @@ export function playEvolution(detail = {}) {
     const chargeK = easeOut(seg(t, 0.30, T.flash - 0.10));
     if (chargeK <= 0) return;
 
-    // Vertical cocoon / beam. The character remains the subject; geometry is atmosphere.
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     const beam = ctx.createLinearGradient(cx, cy - target * 1.2, cx, footY + target * 0.65);
@@ -521,7 +490,6 @@ export function playEvolution(detail = {}) {
     }
     ctx.restore();
 
-    // The four previous forms appear as memories, then converge into the fifth.
     const converge = easeInOut(seg(t, 1.36, T.flash - .12));
     finalEchoes.forEach((echo, i) => {
       const appear = easeOut(seg(t, .40 + i*.22, .72 + i*.22));
@@ -541,7 +509,6 @@ export function playEvolution(detail = {}) {
       ctx.restore();
     });
 
-    // A readable silhouette-like whiteout right before the reveal.
     const whiteK = Math.sin(seg(t, T.flash - .34, T.flash) * Math.PI);
     if (whiteK > .001) {
       ctx.save();
@@ -572,18 +539,15 @@ export function playEvolution(detail = {}) {
     ctx.save();
     ctx.clearRect(0, 0, W, H);
 
-    // salida
     const out = seg(t, T.out, T.end);
     const fade = 1 - easeInOut(out);
 
-    // sacudida
     const shakeK = reduce ? 0 : seg(t, T.flash, T.flash + (finalForm ? 0.6 : 0.42));
     if (shakeK > 0 && shakeK < 1) {
       const amp = (1 - shakeK) * (finalForm ? 8 : 6);
       ctx.translate((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
     }
 
-    // 1 · fondo
     const dark = easeOut(seg(t, 0, T.dark)) * fade;
     const charge = seg(t, T.charge, T.flash);
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
@@ -598,7 +562,6 @@ export function playEvolution(detail = {}) {
     drawRays(ctx, cx, cy, R, accent, rayA * 0.07, spin, finalForm ? 6 : 5);
     if (!reduce) drawRays(ctx, cx, cy, R * 0.7, finalForm ? color : light, rayA * 0.025, -spin * 0.7, 4);
 
-    // 2 · anillos de energía durante la carga
     if (!reduce && t < T.flash) {
       for (let i = 0; i < 2; i++) {
         const kk = ((t * (1.1 + charge * 2.5) + i / 3) % 1);
@@ -615,7 +578,6 @@ export function playEvolution(detail = {}) {
       }
     }
 
-    // 3 · partículas que convergen
     if (!reduce && t > T.oldIn && t < T.flash - 0.08) {
       spawnAcc += dt * (40 + charge * 220) * (finalForm ? 1.5 : 1);
       while (spawnAcc > 1) {
@@ -630,7 +592,6 @@ export function playEvolution(detail = {}) {
         });
       }
     }
-    // destellos de ambiente tras la revelación
     if (t > T.reveal && t < T.out) {
       sparkAcc += dt * (reduce ? 6 : finalForm ? 40 : 24);
       while (sparkAcc > 1) {
@@ -654,10 +615,6 @@ export function playEvolution(detail = {}) {
     parts.draw(ctx, behindSpark);
     ctx.restore();
 
-    // 4 · personaje
-    // Una sola fuente de verdad visual: el arte orgánico de characters/art.
-    // La transición es un crossfade continuo, no un parpadeo entre dos dibujos
-    // ni una silueta geométrica superpuesta.
     const morphK = easeInOut(seg(t, T.charge, T.flash));
     const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
     const cam = evolutionCamera(t, target);
@@ -668,7 +625,6 @@ export function playEvolution(detail = {}) {
     ctx.save();
     ctx.globalAlpha = fade;
 
-    // Sombra/halo muy limpio para anclar al héroe a la escena.
     const ground = ctx.createRadialGradient(cx, footY, 0, cx, footY, target * 0.72);
     ground.addColorStop(0, rgba(accent, 0.24));
     ground.addColorStop(1, rgba(accent, 0));
@@ -678,7 +634,6 @@ export function playEvolution(detail = {}) {
     ctx.fill();
 
     if (t < T.flash) {
-      // Forma anterior: entra y se mantiene estable, sin jitter aleatorio.
       const oldAlpha = (1 - morphK) * clamp(introK + 0.18, 0, 1);
       if (oldAlpha > 0.001) {
         const oldScale = scale * (0.96 + introK * 0.04) * (1 - morphK * 0.035);
@@ -691,8 +646,6 @@ export function playEvolution(detail = {}) {
         ctx.restore();
       }
 
-      // Forma nueva: aparece progresivamente desde una escala menor y ocupa
-      // exactamente el mismo centro y la misma línea de pies.
       if (morphK > 0.001) {
         const grow = easeOut(morphK);
         const newAlpha = morphK;
@@ -706,7 +659,6 @@ export function playEvolution(detail = {}) {
         ctx.restore();
       }
 
-      // Un único anillo de carga para comunicar la transformación.
       if (!reduce && morphK > 0.02) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
@@ -719,7 +671,6 @@ export function playEvolution(detail = {}) {
         ctx.restore();
       }
     } else {
-      // Revelación: el nuevo diseño orgánico aparece una vez, limpio y legible.
       const pop = reduce ? 1 : easeBack(revealK);
       const sc = scale * (finalForm ? (0.72 + 0.34 * pop) : (0.78 + 0.22 * pop));
       pNew._poseOverride = EVOLUTION_REVEAL_POSE[def.id] || "victory";
@@ -751,7 +702,6 @@ export function playEvolution(detail = {}) {
     }
     ctx.restore();
 
-    // 5 · destello + onda + estallido
     if (t >= T.flash && !flashed) { flashed = true; sfx("evoFlash"); }
     if (flashed && !fanfared && t >= T.reveal + 0.25) { fanfared = true; sfx(finalForm ? "evoFinalFanfare" : "evoFanfare"); }
     if (flashed && !burstDone) { burstDone = true; burst(L); }
@@ -761,8 +711,6 @@ export function playEvolution(detail = {}) {
       const dt2 = t - T.flash;
       const maxR = Math.hypot(W, H) * 0.42;
       drawRing(ctx, cx, footY, target * 0.95, seg(dt2, 0.0, 0.55), light, target * 0.014, 0.20);
-      // anillos lentos alrededor del personaje revelado
-      // No additional rings after the reveal: keep the organic design readable.
       ctx.restore();
     }
     ctx.save();
@@ -774,7 +722,6 @@ export function playEvolution(detail = {}) {
         ? Math.pow(seg(t, T.flash - 0.06, T.flash), 3) * 0.42
         : Math.pow(1 - seg(t, T.flash, T.flash + 0.16), 3) * 0.36);
     if (flashA > 0.001) {
-      // destello radial (luz, no niebla): blanco en el centro, color hacia fuera
       const fr = Math.hypot(W, H) * 0.7;
       const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, fr);
       fg.addColorStop(0, "rgba(255,255,255," + flashA + ")");
@@ -784,7 +731,6 @@ export function playEvolution(detail = {}) {
       ctx.fillRect(-40, -40, W + 80, H + 80);
     }
 
-    // 6 · rótulos
     const txt = seg(t, T.reveal + (reduce ? 0 : 0.12), T.reveal + (reduce ? 0.2 : 0.55));
     if (txt > 0) {
       const base = Math.min(W * (L.portrait ? 0.105 : 0.07), H * 0.088, 100);
@@ -793,10 +739,8 @@ export function playEvolution(detail = {}) {
       const ty = Math.min(H - size * 2.7, footY + target * 0.12 + size * 1.05);
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
-      // kicker
       drawTitle(ctx, finalForm ? "✦ FORMA FIRMA · ASCENSIÓN ✦" : "✦ " + story.kicker + " ✦", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
-      // nombre
       ctx.save();
       ctx.translate(cx, ty);
       const s = lerp(1.6, 1, slam);
@@ -804,7 +748,6 @@ export function playEvolution(detail = {}) {
       drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", accent, light] : ["#ffffff", light, accent],
         { maxWidth: W * 0.92 / s, glow: rgba(accent, 0.9) });
       ctx.restore();
-      // barra y forma
       const sub = seg(t, T.reveal + 0.3, T.reveal + 0.7) * (reduce ? 0 : 1) + (reduce ? 1 : 0);
       ctx.globalAlpha = sub * fade;
       const y2 = ty + size * 0.85;
@@ -819,7 +762,6 @@ export function playEvolution(detail = {}) {
       }
       drawTitle(ctx, finalForm ? "FORMA 5/5 · IDENTIDAD COMPLETA" : "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.58, Math.max(13, size * 0.28), "#ffffff",
         { font: FONT_BODY, weight: 800, spacing: "0.3em", stroke: false });
-      // pips de forma
       const pipY = y2 + size * 0.92, pipR = Math.max(4, size * 0.07), gap = pipR * 3.2;
       for (let i = 0; i < 5; i++) {
         ctx.beginPath();
@@ -827,11 +769,8 @@ export function playEvolution(detail = {}) {
         ctx.fillStyle = i <= evo ? (i === evo ? "#ffffff" : accent) : "rgba(255,255,255,0.18)";
         ctx.fill();
       }
-      // La cinemática solo comunica el cambio de forma.
-      // La historia y la habilidad desbloqueada se anuncian una sola vez por MessageManager.
       ctx.restore();
     }
-    // Pista mínima para continuar o saltar la cinemática.
     if (t > 0.65 && t < T.out) {
       ctx.save();
       ctx.globalAlpha = 0.5 * seg(t, 0.8, 1.2);
@@ -878,8 +817,6 @@ export function playEvolution(detail = {}) {
   el.addEventListener("pointerdown", onSkip);
   running = { stop: finish };
   loadFonts();
-  // Fail-safe: a rendering exception, stalled RAF or browser hiccup must never
-  // leave #evo-stage visible and the gameplay permanently blocked.
   failSafe = setTimeout(() => finish(true), Math.max(3500, (T.end + 1.5) * 1000));
   raf = requestAnimationFrame(frame);
 }
