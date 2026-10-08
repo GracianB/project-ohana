@@ -112,6 +112,7 @@ try {
     };
     return {
       visible: visible.map((card) => card.dataset.id),
+      atriumOn: document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
       selected: box('#chars-grid .char-card.selected'),
       title: box('.title-stack'),
       controls: box('.title-controls'),
@@ -121,7 +122,7 @@ try {
       scrollWidth: document.documentElement.scrollWidth,
     };
   });
-  assert.equal(titleLayout.visible.length, 5, '01-character-select: V45 debe mostrar cinco héroes con profundidad');
+  assert.equal(titleLayout.visible.length, titleLayout.atriumOn ? 10 : 5, '01-character-select: profundidad Atrium/carrusel incorrecta');
   assert.ok(Math.abs((titleLayout.selected.left + titleLayout.selected.width / 2) - titleLayout.width / 2) < titleLayout.width * .1, '01-character-select: héroe fuera del centro');
   assert.ok(Math.abs((titleLayout.title.left + titleLayout.title.width / 2) - titleLayout.width / 2) < titleLayout.width * .08, '01-character-select: título fuera del centro');
   assert.ok(titleLayout.controls.bottom <= titleLayout.height + 2, '01-character-select: controles fuera del viewport');
