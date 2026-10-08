@@ -51,6 +51,44 @@ export const DINO_ACTING_TUNING = Object.freeze({
 });
 const T = DINO_ACTING_TUNING;
 
+// V79 · Dino is heavy, not stiff: five distinct secondary-motion rhythms.
+// Pure pose-derived geometry: no timers, randomness, globals or physics edits.
+export const DINO_MOTION_PROFILES = Object.freeze([
+  Object.freeze({ tail:.68, head:1.22, weight:.64, step:1.22, dorsal:.36, cheek:1.20 }), // egg: soft and curious
+  Object.freeze({ tail:.88, head:1.12, weight:.83, step:1.10, dorsal:.62, cheek:1.09 }), // youngster: lively
+  Object.freeze({ tail:1.08, head:1.02, weight:.98, step:1.04, dorsal:1.02, cheek:1.00 }), // crested: elastic
+  Object.freeze({ tail:1.17, head:.88, weight:1.22, step:.94, dorsal:.82, cheek:.91 }), // rex: hefty
+  Object.freeze({ tail:1.08, head:.78, weight:1.42, step:.88, dorsal:1.13, cheek:.86 }), // final: majestic
+]);
+export function dinoSecondaryMotion(pose={}) {
+  const bounded=(v,a,b)=>clamp(Number.isFinite(Number(v))?Number(v):0,a,b);
+  const form=clamp(Math.round(bounded(pose.form,0,4)),0,4);
+  const m=DINO_MOTION_PROFILES[form];
+  const phase=bounded(pose.phase,-5000,5000);
+  const speed=pose.state==="run"?bounded(pose.speed,0,1):0;
+  const land=bounded(pose.land,0,1);
+  const turn=bounded(pose.turnPulse,0,1);
+  const brake=bounded(pose.brake,0,1);
+  const sway=bounded(pose.sway,-1.5,1.5);
+  const impact=bounded(pose.impact,0,1.2);
+  const airtime=pose.state==="jump"||pose.state==="fall"?1:0;
+  const gait=Math.sin(phase*m.step);
+  const counter=clamp((-sway*.055-turn*.24+brake*.18+gait*speed*.07)*m.tail,-.37,.37);
+  const tip=clamp((Math.sin(phase-.7)*speed*.20 + turn*.32 - brake*.21)*m.tail,-.42,.42);
+  const settle=clamp((land*.86+brake*.22+impact*.13)*m.weight,0,1.6);
+  return Object.freeze({
+    form, tailCounter:counter, tailTip:tip,
+    hipDrop:clamp(settle*2.3,0,3.7),
+    squash:clamp(settle*.58,0,.92),
+    headFollow:clamp((-land*.10+gait*speed*.05-turn*.065+impact*.07)*m.head,-.22,.22),
+    headOffset:clamp((turn*.95-brake*.5+gait*speed*.42)*m.head,-2,2),
+    dorsalFlex:clamp((gait*speed*.055+land*.085+impact*.055)*m.dorsal,-.16,.16),
+    cheekBounce:clamp((speed*(.5+.5*Math.cos(phase*2))*.12 + land*.09)*m.cheek,0,.28),
+    eyeLook:clamp(1-turn*.72-brake*.38+(airtime ? .08 : 0),-.5,1),
+    landRipple:clamp((land-.12)*1.25*m.weight,0,1),
+  });
+}
+
 // V76 · A genuine compact rolling silhouette. Unlike rotating the standing
 // dinosaur, every part fits inside a readable spinning sphere at all five ages.
 function drawRolledDino(ctx, R, f, c, P, t) {
@@ -281,9 +319,15 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 // ---------------------------------------------------------------------------
 
 function draw(ctx, pose, R) {
-  const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0, st = pose.state;
+  const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0;
+  // U temporarily grants invulnerability. The shared rig classifies long
+  // invulnerability as "hurt" before "cast"; Dino must still *visibly awaken*
+  // during its own U without modifying the shared rig or other characters.
+  const st = pose.state === "hurt" && pose.castSlot === 3 && Number(pose.cast) > 0
+    ? "cast" : pose.state;
   const { hh, bw, bh } = P;
   const final = f === 4, baby = f === 0;
+  const motion = dinoSecondaryMotion(pose);
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = pose.flourishN % 3;
@@ -373,6 +417,39 @@ function draw(ctx, pose, R) {
       roarK = e; eyeMood = "angry";
       tailA = 0.3 * e + Math.sin(t * 0.8) * 0.08 * e;
       hdy = Math.sin(t * 1.3) * 0.8 * e;
+    } else if (slot === 2) {
+      // L · Extinción: brace the hips, rear up, then pound the earth.
+      // Unlike K, there is no airborne somersault or phantom body translation.
+      const brace=ease(seg(k,0,.37));
+      const slam=ease(seg(k,.37,.57));
+      const recover=1-ease(seg(k,.71,1));
+      bob=-9*brace*(1-slam)+7*slam*recover;
+      lean=-.12*brace+.27*slam*recover;
+      headRot=-.24*brace+.31*slam*recover;
+      hdx=-2*brace+4*slam*recover;hdy=-2*brace+4*slam*recover;
+      legF=-.27*brace+.63*slam*recover;legB=.19*brace-.42*slam*recover;
+      lenF=1-.16*brace+.10*slam*recover;lenB=1-.12*brace+.06*slam*recover;
+      armF=1.5*brace-.65*slam*recover;armB=1.35*brace-.55*slam*recover;
+      jaw=.21*brace+.48*slam*recover;eyeMood="angry";
+      shock=slam*(1-ease(seg(k,.73,1)));
+      tailA=.42*brace-.68*slam*recover;
+    } else if (slot === 3) {
+      // U · Corazón de Coloso: awake, open the chest, roar, then settle.
+      // This is a new character pose; the five-act film remains separate.
+      const awake=ease(seg(k,0,.34));
+      const release=ease(seg(k,.29,.66));
+      const soften=ease(seg(k,.7,1));
+      bob=-4*awake+2.5*release*soften;
+      lean=-.1*awake+.08*release;
+      headRot=-.25*awake+.26*release;
+      hdx=-2*awake+2*release;hdy=-3*awake+1.5*release;
+      legF=.18*awake-.12*release;legB=-.18*awake+.12*release;
+      armF=2.15*awake+.30*Math.sin(release*PI);
+      armB=2.05*awake+.28*Math.sin(release*PI);
+      jaw=.24*awake+.63*release*(1-soften*.55);
+      eyeMood=soften>.52?"happy":"angry";
+      roarK=release*(1-soften*.8);
+      tailA=.47*awake-.30*release;
     } else {
       const up = ease(seg(k, 0, 0.45)), down = seg(k, 0.45, 0.55), rc = seg(k, 0.7, 1);
       if (k < 0.5) {
@@ -432,8 +509,17 @@ function draw(ctx, pose, R) {
     }
   }
 
+  // Delayed centre-of-mass response. Bounded so the feet, head and spikes
+  // never jump outside their original silhouette or change the collision box.
+  if (!rolling && st !== "dead") {
+    tailA = clamp(tailA + motion.tailCounter,-1.04,.84);
+    headRot = clamp(headRot + motion.headFollow,-.85,1.02);
+    hdx += motion.headOffset;
+    hdy += motion.hipDrop * .54 + motion.cheekBounce;
+    jaw = clamp(jaw + motion.cheekBounce*.16,0,1.45);
+  }
   const legRoot = P.legL + P.legW * 0.5;
-  const hipY = -legRoot + bob;
+  const hipY = -legRoot + bob + (rolling || st === "dead" ? 0 : motion.hipDrop);
 
   ctx.save();
   if (rolling) {
@@ -450,7 +536,11 @@ function draw(ctx, pose, R) {
     return;
   }
 
-  const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
+  const upper = () => {
+    ctx.translate(0, hipY);
+    ctx.rotate(lean);
+    if (!rolling && motion.squash > 0) ctx.scale(1+motion.squash*.028,1-motion.squash*.028);
+  };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 
   // AURA DINO FORMA FINAL (EFECTO EXCLUSIVO MEJORADO)
@@ -494,8 +584,9 @@ function draw(ctx, pose, R) {
     // No changes to locomotion, collisions or the character's hitbox.
     const runLag = st === "run" ? Math.sin((pose.phase || 0) - 0.7) * 0.1 * T.tailLag[f] : 0;
     const base = PI * 0.96 - tailA - wagA * 0.6 * T.shell[f] + runLag;
-    tpts = chain(-bw * 0.7, -bh * 0.22, P.tail * T.tailLength[f] * (rolling ? .66 : 1), base,
-  (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12 * T.tailWave[f], 8);
+    tpts = chain(-bw * 0.7, -bh * 0.22, P.tail * T.tailLength[f], base,
+      (k) => -k * 1.02 * (1+clamp(tailA,-.85,.75)) - wagA*k*1.2
+        + Math.sin(t*.07+k*2)*.10*T.tailWave[f] + motion.tailTip*k, 8);
     const sides = taperTail(ctx, R, tpts, P.tw * T.tailWidth[f], c.body);
     
     ctx.fillStyle = R.alpha(c.spot, 0.9);
@@ -540,7 +631,7 @@ function draw(ctx, pose, R) {
     leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
     ctx.save(); upper();
     ctx.rotate(shellRot);
-    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15) * T.tailLag[f];
+    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15) * T.tailLag[f] + motion.tailTip*.52;
     R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * (1.42 + .08 * T.tailLength[f]) + tw * 4, -bh * 1.3 - tw * 3 * T.tailWave[f]], [-bw * 1.2 + tw * 3, -bh * (.9 + .04 * T.tailWidth[f])], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
     tinyArm(ctx, R, bw * 0.3, -bh * 1.0, P.armL, armB, 5, dark, c.claw);
     ctx.restore();
@@ -549,7 +640,7 @@ function draw(ctx, pose, R) {
     ctx.save(); upper();
     if (f === 2 || final) {
       for (let i = 0; i < 4; i++) {
-        const a = -PI * 0.5 - 0.25 - i * 0.32;
+        const a = -PI * 0.5 - 0.25 - i * 0.32 + motion.dorsalFlex*(1-i*.16);
         const px = Math.cos(a) * bw * 0.85, py = -bh * 0.5 + Math.sin(a) * bh * 0.52;
         const len = (final ? 17 : 18) - Math.abs(i - 1.2) * 2.5;
         if (final) crystal(ctx, R, px, py, a - 0.15, len + 2, 4.5);
@@ -589,7 +680,7 @@ function draw(ctx, pose, R) {
 
     if (f === 3) {
       for (let i = 0; i < 4; i++) {
-        const a = -PI * 0.5 - 0.1 - i * 0.34;
+        const a = -PI * 0.5 - 0.1 - i * 0.34 + motion.dorsalFlex*(1-i*.16);
         const px = Math.cos(a) * bw * 0.88, py = -bh * 0.5 + Math.sin(a) * bh * 0.5;
         R.ellipse(ctx, px, py, 5.5 - i * 0.4, 3.6, c.plate, { rot: a + PI / 2, lw: 1.8 });
         spikeAt(ctx, R, px + Math.cos(a) * 2, py + Math.sin(a) * 2, a - 0.2, 6, 2.2, R.lighten(c.plate, 0.3), 1.5);
@@ -611,7 +702,7 @@ function draw(ctx, pose, R) {
   if (baby) ctx.rotate(shellRot * 0.6);
   ctx.translate(headX, headY + pose.bounce * 1.5);
   ctx.rotate(headRot);
-  drawHead(ctx, R, pose, { f, c, P, t, final, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp });
+  drawHead(ctx, R, pose, { f, c, P, t, final, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp, eyeLook:motion.eyeLook });
   ctx.restore();
 
   // BRAZO DELANTERO
@@ -662,6 +753,17 @@ function draw(ctx, pose, R) {
   if (st === "victory") {
     ctx.save();ctx.globalAlpha = 0.72;
     R.sparkle(ctx, bw * 0.7, hipY - bh - P.hh * 2.1, 2.7 * T.sparkle[f], c.plate2);
+    ctx.restore();
+  }
+  // V79 · Grounded weight. One diegetic dust ripple from landing,
+  // smaller for hatchlings, deeper for Rex and the final crystal form.
+  if (motion.landRipple > .02 && st !== "dead" && !rolling) {
+    ctx.save();
+    const k=motion.landRipple;
+    ctx.globalAlpha*=.42*k;
+    ctx.strokeStyle=final?"#d5f6c0":f===2?"#9bdfce":"#d9ceaa";
+    ctx.lineWidth=1.5+f*.18;
+    ctx.beginPath();ctx.ellipse(0,-1,12+(1-k)*22+f*3,2.5+(1-k)*3,0,0,PI*2);ctx.stroke();
     ctx.restore();
   }
   // POLVO AL CORRER
@@ -817,7 +919,11 @@ function drawHead(ctx, R, pose, o) {
     ctx.moveTo(ex + er * 0.5, ey - er * 0.5); ctx.lineTo(ex - er * 0.5, ey + er * 0.5);
     ctx.stroke();
   } else {
-    const lp = o.lookUp !== 0 ? { ...pose, look: { x: 1, y: 0.4 } } : pose;
+    const look=pose.look||{x:1,y:0};
+    const lp = o.lookUp !== 0
+      ? { ...pose, look: {x:1,y:.4} }
+      : { ...pose, look: {x:clamp((Number(look.x)||0)*.7+o.eyeLook*.3,-1,1),
+        y:clamp(Number(look.y)||0,-1,1)} };
     R.eye(ctx, ex, ey, er, lp, { iris: final ? "#ff9a1a" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
   }
 
