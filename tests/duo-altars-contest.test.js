@@ -53,6 +53,6 @@ test("Contest: server and original engine use the same verified ritual contract"
  assert.match(server,/signalKind === "duo" \? null : player.id/);
  assert.match(client,/duoPlateState\(\[local,peer\]/);
  assert.match(client,/signal\(game,"duo"/);
- assert.match(sw,/multiplayer\/duo-altars\.js\?v=/);
+ assert.ok(sw.includes('"./multiplayer/duo-altars.js"'));
  assert.match(sw,/systems\/duo-altar-art\.js\?v=/);
 });

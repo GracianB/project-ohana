@@ -7,7 +7,7 @@ const PRECACHE = [
   "./multiplayer.css?v=" + VERSION,
   "./multiplayer.js",
   "./multiplayer/mission.js",
-  "./multiplayer/duo-altars.js?v=" + VERSION,
+  "./multiplayer/duo-altars.js",
   "./manifest.json",
   "./favicon.svg",
   "./style.css?v=" + VERSION,
