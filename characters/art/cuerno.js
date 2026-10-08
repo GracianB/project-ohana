@@ -111,7 +111,7 @@ export function cuernoWingPose(pose,form,t){
  const open=air?1:slot===3?1:slot===2?.89:cast?.84:victory?.95:
    state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
  const flutter=pose?.reduceMotion?0:air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
- const flap=Math.sin(time*.10+phase*.12)*flutter;
+ const flap=pose?.reduceMotion?0:Math.sin(time*.10+phase*.12)*flutter;
  return {open,flap,hinge:pose?.reduceMotion?0:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
 }
 // V78 pure Canvas motion contract for three equine forms.
