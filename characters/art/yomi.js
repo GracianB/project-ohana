@@ -40,6 +40,49 @@ function draw(ctx,pose,R){
     ctx.save();ctx.globalAlpha=.32+.15*pulse;
     crescent(ctx,0,faceY-4,36+2*pulse,"#ffd988");ctx.restore();
   }
+  // Each form changes its silhouette, not just a scale factor or decoration.
+  // F0: squat glowing seed. F1: tall wanderer. F2: winged ward.
+  // F3: angular night knight. F4: double-crescent moon guardian.
+  if(f===0){
+    ctx.fillStyle="#e8b17f";
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.ellipse(side*19,-31,10,17,side*.32,0,TAU);ctx.fill();
+      line(ctx,"#533b56",2.4);ctx.stroke();
+    }
+  }else if(f===1){
+    ctx.fillStyle=trim;
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*15,-44);
+      ctx.quadraticCurveTo(side*33,-34,side*33,-5);
+      ctx.quadraticCurveTo(side*21,-11,side*14,-15);ctx.closePath();ctx.fill();
+      line(ctx,"#52344e",2);ctx.stroke();
+    }
+  }else if(f===2){
+    ctx.fillStyle="#c9808a";
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*14,-58);
+      ctx.quadraticCurveTo(side*43,-65,side*51,-45);
+      ctx.lineTo(side*34,-32);ctx.lineTo(side*21,-40);
+      ctx.closePath();ctx.fill();line(ctx,"#563851",3);ctx.stroke();
+    }
+  }else if(f===3){
+    ctx.fillStyle="#753656";
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*14,-58);
+      ctx.lineTo(side*55,-75);ctx.lineTo(side*41,-40);
+      ctx.lineTo(side*56,-5);ctx.quadraticCurveTo(side*31,-16,side*19,-31);
+      ctx.closePath();ctx.fill();line(ctx,"#f4a0a4",2.5);ctx.stroke();
+    }
+  }else{
+    ctx.fillStyle="#563450";
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(side*16,-65);
+      ctx.quadraticCurveTo(side*54,-96,side*70,-82);
+      ctx.lineTo(side*51,-44);ctx.quadraticCurveTo(side*75,-18,side*61,1);
+      ctx.lineTo(side*23,-21);ctx.closePath();ctx.fill();
+      line(ctx,"#ffdaa4",3);ctx.stroke();
+    }
+  }
   // The growing cape makes five recognizable stages, from baby to moon guardian.
   ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-w*.71,shoulder+3);
   ctx.quadraticCurveTo(-w-8-swing*.2,-29,-w*.83,-5);
@@ -85,6 +128,35 @@ function draw(ctx,pose,R){
   }
   line(ctx,trim,3);ctx.beginPath();ctx.moveTo(-w*.67,-h+5);
   ctx.quadraticCurveTo(0,-h+1,w*.67,-h+5);ctx.stroke();
+  // Evolutions get different head architecture and proportions.
+  if(f===0){
+    ellipse(ctx,-9,-h+4,10,9,"#ffe2b2");
+    ellipse(ctx,10,-h+4,10,9,"#ffe2b2");
+  }
+  if(f===2){
+    ctx.fillStyle="#ad637e";
+    ctx.beginPath();ctx.moveTo(-w*.86,-h+9);
+    ctx.lineTo(-w*.45,-h-13);ctx.lineTo(0,-h-7);
+    ctx.lineTo(w*.45,-h-13);ctx.lineTo(w*.86,-h+9);
+    ctx.closePath();ctx.fill();line(ctx,"#5d3b59",2.5);ctx.stroke();
+  }
+  if(f===3){
+    ctx.fillStyle="#552f53";
+    ctx.beginPath();ctx.moveTo(-w-7,-h+17);
+    ctx.quadraticCurveTo(-w-9,-h-15,0,-h-22);
+    ctx.quadraticCurveTo(w+9,-h-15,w+7,-h+17);
+    ctx.lineTo(w*.58,-h+7);ctx.quadraticCurveTo(0,-h-7,-w*.58,-h+7);
+    ctx.closePath();ctx.fill();line(ctx,"#d98291",2.5);ctx.stroke();
+  }
+  if(f===4){
+    for(const side of [-1,1]){
+      ctx.save();ctx.translate(side*w*.54,-h-9);
+      ctx.scale(side,1);ctx.fillStyle="#ffd19a";ctx.beginPath();
+      ctx.moveTo(-5,8);ctx.quadraticCurveTo(-23,-9,-15,-31);
+      ctx.quadraticCurveTo(1,-25,8,-5);ctx.closePath();ctx.fill();
+      line(ctx,"#703754",2.5);ctx.stroke();ctx.restore();
+    }
+  }
   // Cap and top-knot: each evolution gets a clearer signature silhouette.
   ellipse(ctx,0,-h-2,w*.71,4.8,shadow);
   ellipse(ctx,0,-h-5,w*.42,3.3,glow);
