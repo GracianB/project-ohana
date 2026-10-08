@@ -74,7 +74,7 @@ async function auditPage(page, label) {
     };
   });
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
-  assert.equal(titleLayout.visibleCards.length, 3, label + ': el selector debe mostrar exactamente anterior/seleccionado/siguiente');
+  assert.equal(titleLayout.visibleCards.length, label === 'mobile' ? 3 : 5, label + ': selector V45 con profundidad incorrecta');
   assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
   assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
@@ -560,8 +560,11 @@ try {
   await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
   await reducedPage.reload({ waitUntil:'networkidle' });
   await reducedPage.waitForTimeout(1350);
-  await reducedPage.locator('#ohana-intro .oi-enter').click();
-  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  const reducedOpening = reducedPage.locator('#ohana-intro .oi-enter');
+  if (await reducedOpening.count()) {
+    await reducedOpening.click();
+    await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  }
   await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
   await reducedPage.locator('#btn-play').click();
