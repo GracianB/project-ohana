@@ -159,8 +159,12 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   listen(target, "pointerleave", (event) => {
     if (event.buttons === 0) releasePointerSources(event.pointerId);
   });
-  listen(target, "touchend", () => releasePointerSources());
-  listen(target, "touchcancel", () => releasePointerSources());
+  // Pointer Events already identify each finger independently. Legacy touch
+  // cleanup is fallback-only; otherwise lifting one finger would clear all.
+  if (typeof PointerEvent === "undefined") {
+    listen(target, "touchend", () => releasePointerSources());
+    listen(target, "touchcancel", () => releasePointerSources());
+  }
   listen(target, "blur", reset);
   listen(target, "focus", reset);
   listen(target, "pagehide", reset);
