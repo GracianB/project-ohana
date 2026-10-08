@@ -133,9 +133,12 @@ try {
   assert.equal(enemyState.enemyDirector?.ecology, 'circuit', '15-enemy-ecology: bioma de Lab incorrecto');
   assert.equal(enemyState.enemyDirector?.formation, 'CIRCUIT', '15-enemy-ecology: formación de Lab incorrecta');
   assert.ok(enemyState.enemyAI.every((e) => e.biome === 'circuit' && e.formation === 'CIRCUIT'), '15-enemy-ecology: lectura ecológica incompleta');
+  assert.ok(enemyState.enemyAI.every((e) => e.family && e.signature && e.variant && e.speciesMode), '16-enemy-species: identidad de especie incompleta');
+  assert.ok(enemyState.enemyAI.some((e) => e.relation && e.relation !== 'NONE'), '16-enemy-species: relaciones cooperativas ausentes');
   await capture(page, '03-room-lab');
   await capture(page, '03b-enemy-intelligence');
   await capture(page, '15-enemy-ecology-circuit');
+  await capture(page, '16-enemy-species-evolution');
 
   // V39 · Cloudstep visible y físicamente activo.
   const cloudSetup = await page.evaluate(() => {

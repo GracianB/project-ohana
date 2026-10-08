@@ -689,7 +689,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-231/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-232/);
   assert.match(cinema, /EL NIDO/);
   assert.match(cinema, /prefers-reduced-motion/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -755,8 +755,8 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(cinema, /U · SUPREMA/);
   assert.match(cinema, /OHANA ASSIST/);
   assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
-  assert.match(html, /supreme\.css\?v=ohana-231/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-231/);
+  assert.match(html, /supreme\.css\?v=ohana-232/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-232/);
   assert.match(visual, /09-supreme-u-assist/);
 });
 
@@ -898,7 +898,7 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(portals, /traversalNodeSnapshot\(/);
   assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
   assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
-  assert.match(html, /world-map\.css\?v=ohana-231/);
+  assert.match(html, /world-map\.css\?v=ohana-232/);
   assert.match(sw, /systems\/hazards\.js/);
   assert.match(sw, /systems\/world-graph\.js/);
   assert.match(sw, /systems\/traversal-nodes\.js/);
