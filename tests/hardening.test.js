@@ -709,8 +709,8 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
   assert.match(ending, /v80-delayed-finale/);
-  assert.match(ending, /const duration=reduce\?1\.6:10\.2/);
-  assert.match(ending, /const titleK=seg\(k,\.88,\.97\)/);
+  assert.match(ending, /const duration=reduce\?1\.6:12\.0/);
+  assert.match(ending, /const titleK=seg\(k,\.84,\.92\)/);
   assert.match(title, /selected-hero-difficulty/);
 });
 
