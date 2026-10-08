@@ -256,7 +256,7 @@ try {
   for(let i=0;i<9;i++) await page.locator('#roster-next').click();
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
-  for(const form of [0,1,2,4]){
+  for(const form of [0,1,2,3,4]){
     await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
     await page.waitForTimeout(220);
     const state=await page.evaluate(()=>{
@@ -271,6 +271,7 @@ try {
     assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
     await capture(page,'01i-cuerno-origin-form-'+(form+1));
     if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
+    if(form===3) await capture(page,'01k-cuerno-stellar-unicorn-adult');
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
@@ -620,6 +621,21 @@ try {
   await capture(page,'09f-yomi-l-visible-jaws');
   assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
   page.off('pageerror',onYomiError);
+
+  // V62 real adult motion and game transition: no browser exceptions at form 3.
+  const stellarErrors=[];
+  const onStellarError=err=>stellarErrors.push(String(err.message||err));
+  page.on('pageerror',onStellarError);
+  const stellar=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(3);api.setPlayerVelocity(7,-6);api.step(15);
+    return api.state();
+  });
+  assert.equal(stellar.evo,3,'09h-cuerno: falta la forma Estelar');
+  assert.ok(Number.isFinite(stellar.player?.x),'09h-cuerno: movimiento Estelar inválido');
+  await capture(page,'09h-cuerno-stellar-real-play');
+  assert.deepEqual(stellarErrors,[],'09h-cuerno: error dibujando Estelar en movimiento');
+  page.off('pageerror',onStellarError);
 
   // V60 actual gameplay: first metamorphosis must draw in motion, not only in the roster.
   const cuernoErrors=[];
