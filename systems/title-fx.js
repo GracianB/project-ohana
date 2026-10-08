@@ -21,10 +21,10 @@ if (cv) {
     cuerno:  { accent:"#f2c1ff", sky:"#544e98", kind:"aurora" },
   });
 
-  let W=0,H=0,dpr=1,t=0,raf=0;
+  let W=0,H=0,dpr=1,t=0,raf=0,lastFrame=0;
   let fromId="kilo",toId="kilo",mix=1;
   const pointer={x:.5,y:.38,tx:.5,ty:.38};
-  const seeds=Array.from({length:42},(_,i)=>({
+  const seeds=Array.from({length:28},(_,i)=>({
     x:((i*73)%997)/997,
     y:((i*191+37)%991)/991,
     s:.55+((i*29)%100)/100,
@@ -42,7 +42,9 @@ if (cv) {
   };
 
   function resize(){
-    dpr=Math.min(2,devicePixelRatio||1);
+    const pixels=(cv.clientWidth||innerWidth)*(cv.clientHeight||innerHeight);
+    const maxDpr=pixels>1400000?1.35:1.55;
+    dpr=Math.min(maxDpr,devicePixelRatio||1);
     W=cv.clientWidth||innerWidth;H=cv.clientHeight||innerHeight;
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -115,7 +117,7 @@ if (cv) {
 
   function gateFrame(accent,k){
     const cx=W*.5+(pointer.x-.5)*16,cy=H*.46+(pointer.y-.4)*9;
-    const R=Math.min(W*.22,H*.31);
+    const R=Math.min(W*.155,H*.225);
     ctx.save();
     const halo=ctx.createRadialGradient(cx,cy,R*.15,cx,cy,R*1.35);
     halo.addColorStop(0,rgba(accent,.08+.08*k));
@@ -203,8 +205,13 @@ if (cv) {
     },alpha);
   }
 
-  function frame(){
-    if(document.body.classList.contains("playing")){raf=0;return;}
+  function frame(now=performance.now()){
+    if(document.body.classList.contains("playing")){raf=0;lastFrame=0;return;}
+    if(!reduce && lastFrame && now-lastFrame<32){
+      raf=requestAnimationFrame(frame);
+      return;
+    }
+    lastFrame=now;
     t+=reduce?0:1;
     pointer.x+=(pointer.tx-pointer.x)*.045;
     pointer.y+=(pointer.ty-pointer.y)*.045;
@@ -222,7 +229,7 @@ if (cv) {
     biome(B,g,k);
 
     // Ground spotlight connects the gate to the selected hero.
-    const spot=ctx.createRadialGradient(g.cx,H*.72,0,g.cx,H*.72,Math.min(W,H)*.32);
+    const spot=ctx.createRadialGradient(g.cx,H*.72,0,g.cx,H*.72,Math.min(W,H)*.21);
     spot.addColorStop(0,rgba(B.accent,.13));
     spot.addColorStop(.48,rgba(B.accent,.045));
     spot.addColorStop(1,rgba(B.accent,0));
@@ -234,12 +241,14 @@ if (cv) {
     vign.addColorStop(1,"rgba(0,0,0,.50)");
     ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
 
+    if(reduce){raf=0;return;}
     raf=requestAnimationFrame(frame);
   }
 
   function select(id){
     if(!SCENES[id]||id===toId)return;
     fromId=toId;toId=id;mix=0;cv.dataset.heroScene=id;
+    if(!raf) raf=requestAnimationFrame(frame);
   }
 
   addEventListener("ohana-title-hero",(e)=>select(String(e.detail?.id||"kilo")));
