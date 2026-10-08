@@ -594,14 +594,17 @@ test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', 
 });
 
 
-test('phase 45: ciclo de vida de entrada resetea teclado en pérdida de foco y página', () => {
+test('V46: ciclo de vida de entrada conserva holds válidos y limpia contexto perdido', () => {
   const source = fs.readFileSync('./engine/input.js', 'utf8');
   assert.match(source, /listen\(target, "blur", reset\)/);
   assert.match(source, /listen\(target, "focus", reset\)/);
   assert.match(source, /listen\(target, "pagehide", reset\)/);
   assert.match(source, /listen\(document, "visibilitychange", \(\) => \{/);
   assert.match(source, /if \(document\.hidden\) reset\(\)/);
-  assert.match(source, /KEYBOARD_STALE_MS\s*=\s*1200/);
+  assert.doesNotMatch(source, /KEYBOARD_STALE_MS/);
+  assert.doesNotMatch(source, /keyboardWatchdog/);
+  assert.match(source, /pointerButtons = new Map\(\)/);
+  assert.match(source, /typeof PointerEvent === "undefined"/);
   assert.match(source, /releasePointerSources/);
 });
 
