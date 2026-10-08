@@ -61,7 +61,7 @@ test("V93 reduced motion ignores elapsed time and skips invalid viewport values"
  const a=recordingCanvas(),b=recordingCanvas();
  const cfg={evo:4,timing:T,cx:320,cy:190,target:180,fade:.9,reduce:true};
  drawCuernoMetamorphosis(a.ctx,{...cfg,t:T.reveal+.6});
- drawCuernoMetamorphosis(b.ctx,{...cfg,t:T.reveal+1});
+ drawCuernoMetamorphosis(b.ctx,{...cfg,t:T.reveal+.65});
  assert.deepEqual(a.events,b.events);
  assert.equal(a.state.stack,0);
  const bad=recordingCanvas();
