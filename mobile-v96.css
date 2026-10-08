@@ -1,0 +1,114 @@
+/* OHANA V96 · Mobile play surface. Keeps all E/J/K/L/U controls usable. */
+/* Loaded AFTER base styles. The rules change layout only, never input bindings. */
+@media (hover: none) and (pointer: coarse), (max-width: 640px) {
+  body.playing #touch {
+    position: fixed;
+    inset: auto max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none; /* Only the actual controls intercept game input. */
+    gap: 8px;
+  }
+  body.playing #touch .col {
+    pointer-events: none;
+  }
+  body.playing #touch button {
+    pointer-events: auto;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  body.playing #touch .col.move,
+  body.playing #touch .col.act {
+    padding: clamp(3px, 1vw, 7px);
+    gap: clamp(3px, 1vw, 7px);
+  }
+  body.playing #touch .act-row {
+    gap: clamp(3px, .9vw, 7px);
+  }
+  body.playing #touch button:focus-visible {
+    outline: 3px solid #fff2ae;
+    outline-offset: 2px;
+  }
+}
+/* Small portrait screens: two non-overlapping rows on the action side. */
+@media (max-width: 420px) and (orientation: portrait) {
+  body.playing #touch {
+    min-height: 116px;
+    align-items: flex-end;
+  }
+  body.playing #touch .col.move {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    flex-direction: row;
+    padding: 4px;
+  }
+  body.playing #touch .col.act {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    padding: 4px;
+  }
+  body.playing #touch .col.act .powers {
+    order: 0;
+    margin: 0 0 3px;
+  }
+  body.playing #touch .col.act .main {order: 1;}
+  body.playing #touch .col.move .touch-btn {
+    width: clamp(36px, 11.5vw, 46px);
+    height: clamp(42px, 12vw, 50px);
+  }
+  body.playing #touch .col.act .powers .touch-btn,
+  body.playing #touch .col.act .powers .touch-btn.pw {
+    width: clamp(31px, 9vw, 39px);
+    height: clamp(39px, 11vw, 44px);
+    min-width: 31px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+  body.playing #touch .col.act .main .touch-btn {
+    width: clamp(41px, 12vw, 52px);
+    height: clamp(43px, 13vw, 54px);
+    border-radius: 14px;
+  }
+  body.playing #touch .col.act .main .touch-btn.jump {
+    width: clamp(50px, 15vw, 60px);
+    height: clamp(50px, 15vw, 60px);
+  }
+  body.playing #prompt {
+    bottom: calc(134px + env(safe-area-inset-bottom));
+  }
+}
+/* Short landscape phones: keep ability row and movement accessible without
+   enlarging the controls into the playable area. */
+@media (max-height: 450px) and (orientation: landscape) and (pointer: coarse) {
+  body.playing #touch {
+    bottom: max(4px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+  }
+  body.playing #touch .col.move,
+  body.playing #touch .col.act {padding: 3px;gap: 3px}
+  body.playing #touch .act-row {gap: 3px}
+  body.playing #touch .touch-btn,
+  body.playing #touch .touch-btn.pw,
+  body.playing #touch .touch-btn.jump {
+    width: clamp(36px, 9vh, 48px);
+    height: clamp(38px, 11vh, 49px);
+    border-radius: 11px;
+  }
+  body.playing #touch .touch-btn.jump {
+    width: clamp(43px, 13vh, 56px);
+    height: clamp(43px, 13vh, 56px);
+  }
+  body.playing #prompt { bottom: 98px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.playing #touch button {transition: none !important;}
+}
