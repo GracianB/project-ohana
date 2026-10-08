@@ -131,10 +131,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Cuando pisa, la sala escucha.",
   ],
   frita: [
-    "La sal empieza a chispear.",
-    "El crujido se vuelve velocidad.",
-    "La freidora alcanza temperatura de combate.",
-    "Crujiente, rápida y peligrosamente dorada.",
+    "De un cucurucho tímido nace la patata que nunca se queda quieta.",
+    "Aprende a surfear las curvas sin perder ni un grano de sal.",
+    "Con capa y tenedor, rescata hasta la última patata perdida.",
+    "Tres crujidos se hacen uno. Ni el kétchup logra alcanzarla.",
   ],
   pizza: [
     "El queso empieza a estirarse.",
