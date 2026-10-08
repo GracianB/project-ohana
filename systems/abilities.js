@@ -394,7 +394,7 @@ function castSupreme(game, p, flow = currentFlow(game, p)) {
     // Bosses receive a capped percentage; ordinary marked foes are executed only if weakened.
     for (const e of enemies) {
       const hp=Math.max(0,Number(e.hp ?? e.health ?? 0));
-      const maxHp=Math.max(hp,Number(e.maxHp ?? e.maxHealth ?? hp));
+      const maxHp=Math.max(hp,Number(e.maxHp ?? e.maxHealth ?? e.max ?? hp));
       const marked=(Number(e._yomiMarkUntil)||0)>(Number(game.t)||0);
       const heavy=e.boss
         ? Math.min(maxHp * .20, dmg * 1.55) + maxHp * .04
