@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
+
+- Diseño táctil para 320–420 px en vertical y 450 px de altura en apaisado, con separación real entre poderes, movimiento y salto.
+- Mantiene botones E/J/K/L/U, safe areas, foco visible y movimiento reducido sin cambiar bindings ni física.
+- Se preservan los avisos de Reina, el director global y el cooperativo estable de V95. Candidata CI/Visual/Release Gate/Pages.
+
+
 ## 09/10/2026 · OHANA · CONCURSO SME · RITUALES DÚO
 
 - Nuevos **diez santuarios de cooperación**, uno por mundo: dos placas en lugares físicos distintos que requieren a los dos jugadores simultáneamente durante al menos 1,2 segundos. No se pueden activar en solitario.

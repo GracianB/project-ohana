@@ -61,8 +61,9 @@ test("V95 protocol, physics and character data remain unchanged",()=>{
 });
 test("V95 release is completely cached without losing V93 V94 and V90",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");
- assert.match(sw,/const VERSION = "ohana-295"/);
- assert.match(html,/ohana-295/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=295);
+ assert.ok(html.includes(version));
  for(const path of ["coop-v95-presence","boss-v94-readability",
   "cuerno-v93-metamorphosis","cuerno-v92-resonance","dino-stagecraft"]){
   assert.ok(sw.includes(path+".js?v="),path+" missing from offline cache");
