@@ -1,19 +1,5 @@
-// ============================================================================
 // RIG · Project Ohana
-// ----------------------------------------------------------------------------
-// 1) computePose(p, t): estado lógico → pose animable.
-// 2) R: kit de dibujo compartido (contorno pegatina, cel, ojos chibi).
-//
 // CONTRATO DE ARTE (characters/art/<id>.js):
-//   export default { id, draw(ctx, pose, R) }
-//   · Origen (0,0) = centro de los PIES. Mira hacia +x.
-//   · Unidades de diseño: ~100 de alto (y de 0 a -100).
-//   · No tocar globalAlpha salvo con save/restore.
-//
-// Los campos viejos no cambian. Los nuevos (squash, stretch, bodyTilt,
-// armSwing, legSwing, anticipation, impact) son aditivos: el arte viejo
-// los ignora y el que quiera puede leerlos.
-// ============================================================================
 
 (function safeRadii() {
   const P = typeof CanvasRenderingContext2D !== "undefined" && CanvasRenderingContext2D.prototype;
@@ -479,12 +465,6 @@ export const R = {
   ellipse, blob, poly, limb, swingLimb, eye, mouth, blush, shine, star, sparkle, tail, halo, celShade,
 };
 
-// ---------------------------------------------------------------------------
-// MOTION POLISH · identidad cinética por personaje
-// ---------------------------------------------------------------------------
-// Los artistas reciben una pose común, pero cada criatura tiene su propio
-// peso, cadencia, elasticidad y agresividad. Así evitamos diez muñecos con la
-// misma animación de PowerPoint.
 export const MOTION_PROFILES = {
   kilo:    { pace: 0.96, sway: 1.18, bounce: 1.08, weight: 0.82, attack: 1.10, impact: 1.05, jump: 1.08, cast: 1.00, dash: 0.90 },
   stitcho: { pace: 1.12, sway: 1.20, bounce: 0.92, weight: 0.68, attack: 1.18, impact: 1.05, jump: 1.18, cast: 1.08, dash: 1.32 },
