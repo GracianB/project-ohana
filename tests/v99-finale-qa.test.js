@@ -33,9 +33,10 @@ test("V99 Pages assets and release ledger share one version",()=>{
  const sw=fs.readFileSync("sw.js","utf8");
  const html=fs.readFileSync("index.html","utf8");
  const progress=fs.readFileSync("PROGRESS.md","utf8");
- assert.match(sw,/const VERSION = "ohana-299"/);
- assert.ok(html.includes("ohana-299"));
- assert.ok(progress.includes("ohana-299"));
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=299);
+ assert.ok(html.includes(version));
+ assert.ok(progress.includes(version));
  assert.match(sw,/render-v98-culling/);
  assert.match(sw,/a11y-v97/);
 });
