@@ -107,10 +107,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Stitcho Nébula cose el vacío y se ríe al otro lado.",
   ],
   chispin: [
-    "La chispa encuentra voltaje.",
-    "El cuerpo se convierte en relámpago.",
-    "La tormenta empieza a seguirle.",
-    "Ya no corre con la tormenta. Es la tormenta.",
+    "Descubre que su cola de muelle puede atrapar un rayo.",
+    "Cada salto deja una firma de luz violeta.",
+    "Aprende a dirigir nubes y relámpagos sin perder su sonrisa.",
+    "La corona aurora despierta: Chispín ya no persigue la tormenta, la dirige.",
   ],
   cat: [
     "La sombra aprende a sonreír.",
