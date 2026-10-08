@@ -37,7 +37,8 @@ test("V89 saves only sanitized, completed embers; no partial AFK charge",()=>{
 });
 test("V89 precaches resilience and deploys version increment",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");
- assert.match(sw,/const VERSION = "ohana-289"/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=289);
  assert.match(sw,/systems\/coop-resilience\.js\?v=/);
- assert.match(html,/ohana-289/);
+ assert.ok(html.includes(version));
 });
