@@ -857,7 +857,7 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   assert.match(stories, /PROJECT OHANA V48 · SUPREME STORYBOARDS/);
   for (const gag of [
     "pollen-bonk","rift-zipper","overcharge","deadpan-eclipse","tiny-sneeze",
-    "double-stomp","potato-catch","oven-too-hot","void-looks-back","tiny-rainbow"
+    "double-stomp","potato-catch","oven-too-hot","void-looks-back","dream-rainbow"
   ]) assert.match(stories, new RegExp(gag));
   assert.match(sw, /systems\/supreme-storyboards\.js\?v=/);
   assert.match(css, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);

@@ -867,7 +867,8 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
     useAbility(g, 0);
-    assert.equal(g.projectiles.length, 1, 'Gleam debe crear su estrella recta');
+    assert.equal(g.projectiles.length, 1, 'Lanza astral debe emitir un único proyectil');
+    assert.equal(g.projectiles[0].shape, 'auroraLance', 'La lanza debe dibujarse como lanza, no esfera');
     assert.ok(g.player._thrust > 0, 'Gleam debe activar el impulso corto');
     clearAbilityFx();
   }
@@ -884,8 +885,10 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'cuerno', abilities: ['gleam', 'gallop', 'rainbow'] } });
     useAbility(g, 2);
-    assert.equal(g.projectiles.length, 7, 'Rainbow debe crear siete estrellas');
-    assert.ok(g.enemies[0].hp < 500, 'Rainbow debe conservar el golpe frontal inmediato');
+    assert.equal(g.projectiles.length, 0, 'Círculo Iris ya no lanza siete bolas rectas');
+    assert.equal(g.enemies[0].hp, 500, 'Iris debe expandirse antes del impacto');
+    advanceAbility(g, 40);
+    assert.ok(g.enemies[0].hp < 500, 'El círculo expansivo debe impactar una sola vez al alcanzar al objetivo');
     clearAbilityFx();
   }
 });
