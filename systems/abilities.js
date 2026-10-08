@@ -715,6 +715,22 @@ function drawCastSignature(ctx, p, cam, t) {
       ctx.stroke();
     }
   }
+  if (p.id === "stitcho") {
+    ctx.strokeStyle = slot === 2 ? "#b38cff" : "#67ddff";
+    ctx.lineWidth = 1.8;
+    ctx.globalAlpha = Math.min(.86, .34 + k * .52);
+    const count = slot === 0 ? 3 : slot === 1 ? 5 : 7;
+    const span = 22 + slot * 9;
+    for (let i=0;i<count;i++) {
+      const yy = y + (i-(count-1)/2) * 8;
+      const xx = x + face * (18 + (i%2)*5);
+      ctx.beginPath();
+      ctx.moveTo(xx-face*span*.55,yy-3);
+      ctx.lineTo(xx-face*span*.12,yy+2);
+      ctx.lineTo(xx+face*span*.34,yy-2);
+      ctx.stroke();
+    }
+  }
   ctx.restore();
 }
 
@@ -2009,6 +2025,21 @@ function drawBallAura(ctx, p, cam, t, color) {
     ctx.moveTo(x - p.facing * (r + 4), yy);
     ctx.lineTo(x - p.facing * (r + 18 + (t * 7 + i * 13) % 14), yy);
     ctx.stroke();
+  }
+  // Stitcho no deja una estela genérica: "cose" el recorrido.
+  if (p.id === "stitcho") {
+    ctx.globalAlpha = .70;
+    ctx.strokeStyle = color === "#8f7bff" ? "#d8b7ff" : "#9cf6ff";
+    ctx.lineWidth = 1.8;
+    for (let i=0;i<6;i++) {
+      const xx = x - p.facing * (r + 12 + i * 13);
+      const yy = y + Math.sin(t*.20+i)*r*.36;
+      ctx.beginPath();
+      ctx.moveTo(xx-p.facing*6,yy-3);
+      ctx.lineTo(xx,yy+2);
+      ctx.lineTo(xx+p.facing*6,yy-2);
+      ctx.stroke();
+    }
   }
   ctx.restore();
 }
