@@ -563,6 +563,19 @@ try {
   assert.equal(await page.locator('#win-cinema').evaluate((el) => el.classList.contains('cinema-complete')), true, '08-ending: resultados no aparecen tras el cine');
   await page.locator('#win-continue').click();
   await page.waitForTimeout(100);
+  // V82: the ending dialog is reused. The keyboard must work on the
+  // second victory, without retaining stale event handlers from the first.
+  await page.evaluate(() => dispatchEvent(new CustomEvent('ohana-win', { detail: {
+    id:'cuerno', evo:4, hero:'Cuerno', form:'Unicornio Negro', rank:'S', time:'02:52', kills:12
+  }})));
+  await page.locator('#win-cinema').evaluate(el => {
+    if (typeof el.onkeydown !== 'function') throw new Error('V82: final keyboard handler not installed');
+    el.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+  });
+  assert.equal(await page.locator('#win-cinema').evaluate(el => el.classList.contains('cinema-complete')), true,
+    '08-ending: nueva victoria no admite salto por teclado');
+  await page.locator('#win-continue').click();
+  await page.waitForTimeout(100);
 
   await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
