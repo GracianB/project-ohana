@@ -1,15 +1,28 @@
 ## 08/10/2026 · DINO V78 · MEJORAS DE SENSACIÓN DE COMBATE
 
-**Rama aislada:** `feat/dino-v78-combat-feel-20261008`. **Base:** OHANA V77 publicado; Cuerno es propiedad de su desarrollo paralelo. **Cache propuesta:** `ohana-276`.
+**Rama aislada:** `feat/dino-v78-combat-feel-20261008`. **Base:** OHANA V77 publicado; Cuerno es propiedad de su desarrollo paralelo. **Cache propuesta:** `ohana-277`.
 
 - **J · Mocosaurio:** anticipación acotada de enemigos que se desplazan en horizontal o vertical; trayectoria curvada sin teletransporte. Al chocar contra una pared hace exactamente un «boing» con partículas y aro dorado y rebota hacia atrás; si vuelve a chocar, hace un único «splat» y desaparece. Las trazas siguen limitadas a 7 puntos (3 con movimiento reducido).
 - **K · Dino Rodillo:** choque frontal contra paredes con frenado físico y ligero rebote hacia atrás. Una onda de alcance muy corto puede impactar una sola vez a enemigos pegados al muro. Retroceso, polvo ajustado a reduced-motion y el mensaje «¡BOING!». Sin daño lejano ni bucles de impactos.
 - **L · Extinción:** los meteoritos anticipan un máximo de 68 px del movimiento del objetivo durante su caída. Las marcas proyectan la posición prevista de impacto, siguen buscando la plataforma real bajo el objetivo y el marcador es más legible en pantalla.
 - **U · Corazón de Coloso:** los cometas fósiles también consideran de forma limitada el movimiento del objetivo (máximo 52 px), con los mismos límites de daño y número de efectos. Se mantiene la película de cinco actos.
-- **Arquitectura:** únicamente `systems/dino-combat.js` y el tramo del rodillo en `systems/abilities.js`, test independiente `tests/dino-v78-combat-feel.test.js` y versión offline `ohana-276`. Los archivos propios de Cuerno no cambian.
+- **Arquitectura:** únicamente `systems/dino-combat.js` y el tramo del rodillo en `systems/abilities.js`, test independiente `tests/dino-v78-combat-feel.test.js` y versión offline `ohana-277`. Los archivos propios de Cuerno no cambian.
 - **Pruebas:** rebote finito J, seguimiento predictivo, marcador L/U con plataforma, máximo de meteoritos y choque K con daño solo local y una activación.
 
 **Fusionar únicamente con OHANA CI y quality completos: Unit, Browser E2E, Multiplayer E2E, Visual Regression y Release Gate.**
+
+
+## 08/10/2026 · CUERNO V78 · GALOPAR CON EL ALMA
+
+**Base:** main con Cuerno V75 y Dino V76/V77, caché de publicación `ohana-276`. Trabajo aislado en Cuerno: sin tocar arte, ataques ni lógica de Dino, ni alterar físicas, velocidad, salto o hitboxes.
+
+- **Canon:** Cuernín sigue siendo solo un cuerno; Destello solo cuerno + esfera. Potro Iris, Estelar y Unicornio Negro conservan exactamente cuatro patas, y las dos formas finales sus alas.
+- **Galope compartido:** una función pura articula fases independientes de los cuatro cascos, rodillas, recorrido de zancada y recogida durante el salto.
+- **Melena viva:** mechones que responden a ritmo, velocidad y suspensión en lugar de animaciones aisladas por evolución.
+- **Accesibilidad y rendimiento:** respuesta compatible con movimiento reducido; todas las oscilaciones están acotadas. Sin temporizadores, PNG, VFX persistentes ni estados globales nuevos.
+- **Calidad:** una nueva batería comprueba las cinco formas, siete estados, determinismo, articulación y cierre de Canvas. Las protecciones y hechizos J/K/L/U anteriores permanecen.
+
+**Condición de publicación:** Node + Browser E2E + Multiplayer E2E + regresión visual + Release Gate en verde.
 
 ## 08/10/2026 · DINO V77 · U «CORAZÓN DE COLOSO»
 
