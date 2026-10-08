@@ -1,3 +1,11 @@
+## 09/10/2026 · OHANA · CONCURSO SME · RITUALES DÚO
+
+- Nuevos **diez santuarios de cooperación**, uno por mundo: dos placas en lugares físicos distintos que requieren a los dos jugadores simultáneamente durante al menos 1,2 segundos. No se pueden activar en solitario.
+- **Validación en Netlify:** el servidor comprueba dos jugadores conectados, vivos, en la misma sala, posiciones recientes y placas diferentes. Estado de logros por sala compartido, recuperable al reconectar e imposible de repetir para acumular curación.
+- **Recompensa:** un vínculo de energía OHANA que cura hasta 15 puntos a cada jugador cuando recibe la confirmación del servidor. Las placas y el resultado se dibujan con Canvas limitado y accesible a movimiento reducido.
+- **Contrato multijugador original:** no se cambia la progresión de campaña, las físicas ni las estadísticas de personajes; los santuarios son opcionales y no bloquean puertas.
+- **Compatibilidad:** nuevas pruebas de escenarios negativos, 10 salas, continuidad, mensajes, Canvas, cola de señales y precaché offline. Preparado como PR de concurso independiente para coordinar el orden de versiones hasta V100.
+
 ## 09/10/2026 · OHANA V94 · ENEMIGOS LEGIBLES Y ESTABILIDAD GLOBAL · ohana-294
 
 - Los diez biomas comparten un **indicador contextual de amenaza**: solo los tres rivales prioritarios muestran señales sobre la cabeza; el aviso de ataque real queda claramente distinguido del mero permiso de ataque.

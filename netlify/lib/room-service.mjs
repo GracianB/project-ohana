@@ -1,4 +1,5 @@
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
+import { progressDuoRitual } from "../../multiplayer/duo-altars.js";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_RETRIES = 4;
@@ -59,6 +60,7 @@ function snapshot(room, viewerId) {
     })),
     combat: room.combat ? structuredClone(room.combat) : null,
     engineMode: !!room.engineMode,
+    duoAltars: structuredClone(room.duoAltars || {}),
     updatedAt: room.updatedAt,
   };
 }
@@ -84,6 +86,7 @@ function expireStalePlayers(room, now) {
   if (changed && room.phase === "playing") {
     room.phase = "lobby";
     if (room.combat && room.combat.pausedAt == null) room.combat.pausedAt = now;
+    room.duoChannel = null;
   }
   return changed;
 }
@@ -374,19 +377,29 @@ export function createRoomService(store, options = {}) {
           state.combat.scene = null;
           state.combat.enemies = [];
           state.combat.boss = null;
+          const requestedRoom = String(payload?.payload?.roomId || "");
+          // Server-owned puzzle: both real positions, one on each pad, same room.
+          // Other signals retain their original relay contract.
+          const duo = signalKind === "duo" ?
+            progressDuoRitual(state, requestedRoom, now()) : null;
+          const relay = signalKind !== "duo" || duo?.status === "lit";
+          if(relay){
           const event = {
             id: `online:${now()}:${crypto.randomUUID()}`,
             kind: "online-signal",
-            senderPlayerId: player.id,
+            senderPlayerId: signalKind === "duo" ? null : player.id,
             senderSlot: player.slot,
-            signalKind,
-            payload: structuredClone(payload?.payload || {}),
+            signalKind: signalKind === "duo" ? "duo-lit" : signalKind,
+            payload: signalKind === "duo"
+              ? {roomId:requestedRoom, name:duo.altar.name,heal:15}
+              : structuredClone(payload?.payload || {}),
             at: now(),
           };
           state.combat.eventSequence = (state.combat.eventSequence || 0) + 1;
           state.combat.events.push(event);
           if (state.combat.events.length > 64) state.combat.events.splice(0, state.combat.events.length - 64);
           state.combat.lastEvent = event;
+          }
         }
 
         player.lastSequence = seq;

@@ -2,6 +2,8 @@ import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
 import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
+import { drawDuoAltars } from "./duo-altar-art.js";
+import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
 const REMOTE_LERP = 0.22;
@@ -66,6 +68,8 @@ class OnlineCoop {
     this.lastOrbSignals = new Set();
     this.retryFailures = 0;
     this.retryAfter = 0;
+    this.nextDuoAt = 0;
+    this.duoApplied = new Set();
   }
 
   readSession() {
@@ -108,6 +112,8 @@ class OnlineCoop {
     this.pendingMutations = [];
     this.seenSignals.clear();
     this.lastOrbSignals.clear();
+    this.duoApplied.clear();
+    this.nextDuoAt=0;
     this.localStateSent = "";
     this.retryFailures = 0;
     this.retryAfter = 0;
@@ -423,6 +429,17 @@ class OnlineCoop {
       this.seenSignals.add(event.id);
       if (this.seenSignals.size > 128) this.seenSignals.delete(this.seenSignals.values().next().value);
 
+      if(event.signalKind === "duo-lit"){
+        const roomId=String(event.payload?.roomId||"");
+        if(roomId===game.roomId&&!this.duoApplied.has(roomId)){
+          this.duoApplied.add(roomId);
+          const p=game.player,amount=Math.max(0,Math.min(15,Number(event.payload?.heal)||0));
+          if(p&&!p.dead&&amount)p.health=Math.min(p.maxHealth,p.health+amount);
+          game.nums?.add?.(p.x+p.w*.5,p.y-25,"VÍNCULO OHANA +"+amount,"#fff1b6",true);
+          game.fx?.emit?.(p.x+p.w*.5,p.y,{color:"#ffe2a5",count:14,size:3,star:true,up:1.3,life:20});
+        }
+        continue;
+      }
       if (event.signalKind === "state") {
         const state = String(event.payload?.state || "");
         if (state === "lost") {
@@ -626,10 +643,25 @@ class OnlineCoop {
     }
 
     this.consumeSignals(game);
+    // One lightweight server-verified cooperative action every ~650 ms.
+    // The server requires both players on opposite plates for 1.2 seconds.
+    const room=String(game.roomId||"");
+    if(DUO_ALTARS[room]&&!this.snapshot?.duoAltars?.[room]&&this.remote&&
+      this.remoteWorld===room&&game.player&&!game.player.dead){
+      const now=performance.now();
+      const local={x:game.player.x,y:game.player.y,health:game.player.health,connected:true,worldRoomId:room,lastSeenAt:0};
+      const peer={x:this.remote.x,y:this.remote.y,health:this.remote.health,connected:true,worldRoomId:room,lastSeenAt:0};
+      if(duoPlateState([local,peer],room,0,1)?.ready && now>=this.nextDuoAt){
+        this.nextDuoAt=now+650;
+        void this.signal(game,"duo",{roomId:room});
+      }
+    }
   }
 
   render(ctx, game, t) {
-    if (!this.enabled || !this.remote || this.remoteWorld !== game.roomId) return;
+    if(!this.enabled)return;
+    drawDuoAltars(ctx,game,this.remote?{...this.remote,worldRoomId:this.remoteWorld}:null,this.snapshot,t,!!game.reduceMotion);
+    if (!this.remote || this.remoteWorld !== game.roomId) return;
     const definition = ROSTER.find((item) => item.id === this.remote.characterId);
     if (!definition) return;
     const evo = Math.max(0, Math.min(4, Number(this.remote.evolution) || 0));
