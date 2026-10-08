@@ -222,7 +222,7 @@ const SUPREME = Object.freeze({
   dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso", ally: "frita" },
   frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
   pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
-  yomi:    { id: "devour", name: "PUERTA DEL ABISMO", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo", ally: "cuerno" },
+  yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
   cuerno:  { id: "aurora", name: "AURORA OHANA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
