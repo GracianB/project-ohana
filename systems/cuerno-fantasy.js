@@ -1,4 +1,6 @@
 // CUERNO V84 · Fantasy geometry and rendering, isolated from combat/physics.
+import { drawCuernoHoofprints, drawCuernoEnchantClock, drawCuernoSevenHornCrest } from "./cuerno-v91-illusions.js";
+export { drawCuernoSevenHornCrest };
 // Ribbon lasts ten seconds after gallop ends. No RNG, no assets, no timers.
 export const CUERNO_FANTASY = Object.freeze({
   trailFrames:600, maxPoints:32, maxTrails:2, sampleEvery:2,
@@ -99,6 +101,7 @@ export function drawCuernoFantasyRibbon(ctx,f,cam,t,reduce=false){
     ctx.beginPath();ctx.moveTo(x-3,y);ctx.lineTo(x+3,y);
     ctx.moveTo(x,y-3);ctx.lineTo(x,y+3);ctx.stroke();
   }
+  drawCuernoHoofprints(ctx,pts,cam,f.life,reduce);
   ctx.restore();
 }
 
@@ -150,6 +153,7 @@ export function drawCuernoFantasyStatus(ctx,enemies,cam,t,reduce=false){
       ctx.beginPath();ctx.moveTo(xx-3,yy);ctx.lineTo(xx+3,yy);
       ctx.moveTo(xx,yy-3);ctx.lineTo(xx,yy+3);ctx.stroke();
     }
+    drawCuernoEnchantClock(ctx,e,cam,now,reduce);
     ctx.restore();
   }
 }

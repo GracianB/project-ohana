@@ -65,7 +65,10 @@ test("V84 K draws a deterministic 10-second capped rainbow ribbon touching the a
  drawCuernoFantasyRibbon(B.ctx,f,{x:50,y:60},150,true);
  A.verify();B.verify();
  assert.deepEqual(A.events,B.events,"Reduced motion must be deterministic");
- assert.equal(A.events.filter(x=>x[0]==="stroke").length,7+Math.ceil((pts.length-1)/4));
+ const strokes=A.events.filter(x=>x[0]==="stroke").length;
+ const original=7+Math.ceil((pts.length-1)/4);
+ assert.ok(strokes>original, "V91 hoofprints must visibly contribute");
+ assert.ok(strokes<=original+21, "V91 hoofprints must remain strictly capped");
 });
 
 test("V84 K actually creates a lasting hazard and applies capped fantasy DoT",()=>{
@@ -133,7 +136,7 @@ test("V84 fantasy markers render three bounded stars and disappear on expiry",()
  const fading=context();
  drawCuernoFantasyStatus(fading.ctx,[present],{x:0,y:0},115,true);
  fading.verify();
- assert.equal(fading.events.filter(x=>x[0]==="stroke").length,3);
+ assert.ok(fading.events.filter(x=>x[0]==="stroke").length>=4, "V91 adds enchantment countdown ring");
  const gone=context();
  drawCuernoFantasyStatus(gone.ctx,[present],{x:0,y:0},205,true);
  gone.verify();

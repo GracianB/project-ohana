@@ -3,7 +3,8 @@ import { createDinoEffects } from "./dino-combat.js";
 import { CUERNO_FANTASY, startCuernoFantasyTrail,
  updateCuernoFantasyTrail, tickCuernoFantasyStatus,
  drawCuernoFantasyRibbon, drawCuernoPrismCrown,
- drawCuernoFantasyStatus, drawCuernoGallopRibbons } from "./cuerno-fantasy.js";
+ drawCuernoFantasyStatus, drawCuernoGallopRibbons,
+ drawCuernoSevenHornCrest } from "./cuerno-fantasy.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -2287,14 +2288,8 @@ ctx.beginPath();ctx.arc(x,y,Math.max(1,radius-(3-i)*ctx.lineWidth),0,TAU);ctx.st
 // A precise ivory crest makes the growing hit wave readable without screen flash.
 ctx.globalAlpha=.35*opacity;ctx.lineWidth=1.4;ctx.strokeStyle="#fff9e9";
 ctx.beginPath();ctx.arc(x,y,Math.max(1,radius),0,TAU);ctx.stroke();
-// Seven tiny stars mark the crest only as it expands; hit geometry stays unchanged.
-if(radius>50){ctx.globalAlpha=.22*opacity;ctx.lineWidth=1.2;
-for(let i=0;i<7;i++){
- const a=i*TAU/7,xx=x+Math.cos(a)*radius,yy=y+Math.sin(a)*radius;
- ctx.strokeStyle=cols[i];ctx.beginPath();
- ctx.moveTo(xx-3,yy);ctx.lineTo(xx+3,yy);
- ctx.moveTo(xx,yy-3);ctx.lineTo(xx,yy+3);ctx.stroke();
-}}
+// V91: seven sculpted pearl horns mark the actual L impact wave.
+if(radius>50)drawCuernoSevenHornCrest(ctx,{x:f.x,y:f.y,radius,alpha:opacity},cam,t);
 ctx.restore();
 },
 supremeField(ctx, f, cam, t, g, p) {
