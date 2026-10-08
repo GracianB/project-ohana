@@ -856,7 +856,9 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
     useAbility(g, 2);
     advanceAbility(g, 4);
-    assert.ok(g.enemies[0].hp < 500, 'Fauces debe morder delante del personaje');
+    assert.equal(g.enemies[0].hp, 500, 'Mordida lunar debe anticipar antes de causar daño');
+    advanceAbility(g, 6);
+    assert.ok(g.enemies[0].hp < 500, 'Fauces debe morder delante del personaje tras cerrarse');
     clearAbilityFx();
   }
 
