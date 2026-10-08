@@ -465,6 +465,23 @@ export function playEvolution(detail = {}) {
   }
 
 
+
+  function evolutionCamera(t, target) {
+    if (reduce) return { dx:0, dy:0, rot:0, zoom:1 };
+    const q = seg(t, T.charge, T.reveal + 0.55);
+    const mode = cinemaProfile.camera || "orbit";
+    if (mode === "spiral") return { dx:Math.sin(t*4.2)*target*.035*q, dy:Math.cos(t*3.4)*target*.018*q, rot:Math.sin(t*3.1)*.045*q, zoom:1 };
+    if (mode === "snap") return { dx:Math.sin(t*8.0)*target*.018*q, dy:0, rot:0, zoom:1+Math.sin(q*Math.PI)*.055 };
+    if (mode === "eclipse") return { dx:0, dy:-Math.sin(q*Math.PI)*target*.055, rot:-.018*q, zoom:1+q*.025 };
+    if (mode === "sweep") return { dx:lerp(-target*.08,target*.04,easeInOut(q)), dy:-target*.018*q, rot:-.028*(1-q), zoom:1 };
+    if (mode === "impact") return { dx:0, dy:lerp(-target*.075,0,easeOut(q)), rot:0, zoom:.96+.04*easeOut(q) };
+    if (mode === "whip") return { dx:Math.sin(q*Math.PI*1.2)*target*.08, dy:0, rot:Math.sin(q*Math.PI)*.035, zoom:1 };
+    if (mode === "roll") return { dx:0, dy:Math.sin(t*2.5)*target*.018, rot:Math.sin(q*Math.PI)*.055, zoom:.98+.03*q };
+    if (mode === "pull") return { dx:0, dy:0, rot:0, zoom:1.08-.08*easeOut(q) };
+    if (mode === "rise") return { dx:0, dy:-easeOut(q)*target*.075, rot:0, zoom:.97+.05*q };
+    return { dx:Math.sin(t*2.1)*target*.028*q, dy:-Math.sin(t*1.5)*target*.018*q, rot:Math.sin(t*1.7)*.018*q, zoom:1 };
+  }
+
   function drawFinalAscension(t, L) {
     if (!finalForm || reduce) return;
     const { W, H, cx, cy, target, footY } = L;
@@ -533,7 +550,7 @@ export function playEvolution(detail = {}) {
       g.addColorStop(.30, rgba(light,.48));
       g.addColorStop(1, rgba(accent,0));
       ctx.fillStyle = g;
-      ctx.fillRect(cx-target,cy-target,cx+target,cy+target);
+      ctx.fillRect(cx-target,cy-target,target*2,target*2);
       ctx.restore();
     }
   }
@@ -570,7 +587,7 @@ export function playEvolution(detail = {}) {
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
     drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
     if (!finalForm) {
-      drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target, clamp((charge * 0.54 + revealK * 0.62), 0, 0.72), t, accent);
+      drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target * 1.08, clamp((charge * 0.20 + revealK * 0.24), 0, 0.28), t, accent);
     }
     drawFinalAscension(t, L);
     const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
@@ -641,6 +658,7 @@ export function playEvolution(detail = {}) {
     // ni una silueta geométrica superpuesta.
     const morphK = easeInOut(seg(t, T.charge, T.flash));
     const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
+    const cam = evolutionCamera(t, target);
     const box = target * 2.2;
     const bob = reduce ? 0 : Math.sin(t * 2.2) * target * 0.010;
     const centerY = footY + bob;
@@ -664,7 +682,10 @@ export function playEvolution(detail = {}) {
         const oldScale = scale * (0.96 + introK * 0.04) * (1 - morphK * 0.035);
         ctx.save();
         ctx.globalAlpha = oldAlpha;
-        drawDummy(ctx, pOld, cx, centerY, oldScale, tf);
+        ctx.translate(cx + cam.dx, centerY + cam.dy);
+        ctx.rotate(cam.rot * .65);
+        ctx.scale(cam.zoom, cam.zoom);
+        drawDummy(ctx, pOld, 0, 0, oldScale, tf);
         ctx.restore();
       }
 
@@ -676,7 +697,10 @@ export function playEvolution(detail = {}) {
         const newScale = scale * (0.76 + 0.24 * grow);
         ctx.save();
         ctx.globalAlpha = newAlpha;
-        drawDummy(ctx, pNew, cx, centerY, newScale, tf);
+        ctx.translate(cx + cam.dx, centerY + cam.dy);
+        ctx.rotate(cam.rot);
+        ctx.scale(cam.zoom, cam.zoom);
+        drawDummy(ctx, pNew, 0, 0, newScale, tf);
         ctx.restore();
       }
 
@@ -704,7 +728,10 @@ export function playEvolution(detail = {}) {
 
       ctx.save();
       ctx.globalAlpha = 0.98;
-      drawDummy(ctx, pNew, cx, centerY, sc, tf);
+      ctx.translate(cx + cam.dx, centerY + cam.dy);
+      ctx.rotate(cam.rot);
+      ctx.scale(cam.zoom, cam.zoom);
+      drawDummy(ctx, pNew, 0, 0, sc, tf);
       ctx.restore();
 
       if (!reduce) {
