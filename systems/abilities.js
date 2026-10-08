@@ -290,7 +290,7 @@ function activateSpecial(game, p, { launch = true } = {}) {
 
 function emitSupremeEvent(game, p, def, identity, flow) {
   if (typeof dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
-  const ally = flow.assist ? (SUPREME[p.id]?.ally || "") : "";
+  const ally = (flow.assist || p.id === "yomi") ? (SUPREME[p.id]?.ally || "") : "";
   try {
     dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
       id: p.id,
@@ -320,13 +320,13 @@ function summonAssist(game, p, allyId, damage, color) {
     x: cx(p) - (p.facing || 1) * 90,
     y: p.y - 24,
     facing: p.facing || 1,
-    life: 96,
-    max: 96,
+    life: p.id === "yomi" ? 240 : 96,
+    max: p.id === "yomi" ? 240 : 96,
     next: 10,
     strikes: 0,
     dmg: Math.max(12, damage),
   });
-  game._assist = { heroId: ally.id, heroName: ally.name, t: 96 };
+  game._assist = { heroId: ally.id, heroName: ally.name, t: p.id === "yomi" ? 240 : 96 };
   game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#fff6c8", true);
 }
 
@@ -427,9 +427,9 @@ function castSupreme(game, p, flow = currentFlow(game, p)) {
   });
   add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
 
-  if (flow.assist && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+  if ((flow.assist || p.id === "yomi") && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
 
-  game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: flow.assist ? def.ally : "" };
+  game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: (flow.assist || p.id === "yomi") ? def.ally : "" };
   game.flashColor = def.color;
   game.flash = Math.max(game.flash || 0, 20);
   game.shake = Math.min(26, (game.shake || 0) + 12);
@@ -1368,7 +1368,7 @@ const UPD = {
       f.x+=(baseX-f.x)*0.12;
       f.y+=(baseY-f.y)*0.12;
     }
-    if(--f.next<=0&&f.strikes<3){
+    if(--f.next<=0&&f.strikes<(f.heroId==="cuerno" && p.id==="yomi" ? 5 : 3)){
       f.next=24;
       const e=nearestEnemy(g,f.x,f.y,180,null,0);
       if(e){
