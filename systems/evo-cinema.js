@@ -74,9 +74,11 @@ export function fullCanvas(cv) {
   const ctx = cv.getContext("2d");
   const st = { cv, ctx, W: 0, H: 0, dpr: 1 };
   st.resize = () => {
-    st.dpr = Math.min(2, window.devicePixelRatio || 1);
     st.W = Math.max(1, window.innerWidth);
     st.H = Math.max(1, window.innerHeight);
+    const pixels = st.W * st.H;
+    const maxDpr = pixels > 1800000 ? 1.45 : pixels > 1000000 ? 1.6 : 1.8;
+    st.dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
     cv.width = Math.round(st.W * st.dpr);
     cv.height = Math.round(st.H * st.dpr);
     ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
