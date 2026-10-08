@@ -156,6 +156,30 @@ try {
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
   await page.waitForTimeout(120);
 
+  // V53 Dragon art audit: each evolutionary silhouette must draw in the selector.
+  for(let n=0;n<4;n++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(280);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'dragon','01e-dragon: selección no llega a Dragón');
+  for(let form=0;form<5;form++){
+    await page.evaluate((f)=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(160);
+    const image=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const data=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let signal=0;
+      if(data)for(let i=3;i<data.length;i+=64)if(data[i]>20)signal++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),signal};
+    });
+    assert.equal(image.form,form,'01e-dragon: forma no renderizada '+form);
+    assert.ok(image.scale>.2&&image.signal>10,'01e-dragon: silueta invisible o sin escala '+JSON.stringify(image));
+    await capture(page,'01e-dragon-solar-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let n=0;n<4;n++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(280);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01e-dragon: selector no vuelve a Kilo');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
