@@ -51,9 +51,12 @@ function taperTail(ctx, R, pts, w0, color) {
     Rt.push([pts[i][0] - Math.cos(a) * w, pts[i][1] - Math.sin(a) * w]);
   }
   const e = pts[n], ea = e[2];
-  const outline = L.concat([[e[0] + Math.cos(ea) * w0 * 0.12, e[1] + Math.sin(ea) * w0 * 0.12]], Rt.reverse());
+  // The left normal of a tail pointing backwards is its dorsal edge.
+  // Keep both edges in stable root-to-tip order: decorating the underside
+  // made plates disappear into the body when the tail swung upwards.
+  const outline = L.concat([[e[0] + Math.cos(ea) * w0 * 0.12, e[1] + Math.sin(ea) * w0 * 0.12]], [...Rt].reverse());
   R.blob(ctx, outline, color);
-  return { top: Rt.reverse(), bottom: L };
+  return { top: L, bottom: Rt };
 }
 
 function spikeAt(ctx, R, x, y, a, len, wd, col, lw = 1.8) {
@@ -326,7 +329,7 @@ function draw(ctx, pose, R) {
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 
   // AURA DINO FORMA FINAL (EFECTO EXCLUSIVO MEJORADO)
-  if (final) {
+  if (final && st !== "dead") {
     ctx.save();
     const auraGlow = 0.5 + Math.sin(t * 0.1) * 0.25;
     ctx.shadowColor = "#ffaa00";
@@ -362,16 +365,11 @@ function draw(ctx, pose, R) {
   if (!baby) {
     ctx.save(); upper();
     const wagA = tailWag > 0 ? Math.sin(t * 0.75) * 0.9 * tailWag : 0;
-    const base = PI * 0.96 - tailA - wagA * 0.6;
+    // A slight delayed counterbalance lets the tail follow the running hips.
+    // No changes to locomotion, collisions or the character's hitbox.
+    const runLag = st === "run" ? Math.sin((pose.phase || 0) - 0.7) * 0.1 : 0;
+    const base = PI * 0.96 - tailA - wagA * 0.6 + runLag;
     tpts = chain(-bw * 0.7, -bh * 0.22, P.tail, base, (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12, 8);
-    
-    if (f === 2 || final) {
-      for (let i = 2; i <= 3; i++) {
-        const p = tpts[i], a = p[2] + PI / 2 + 0.25;
-        if (final) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
-        else plateAt(ctx, R, p[0], p[1], a, 15 - i * 2, 6, i % 2 ? c.plate : c.plate2);
-      }
-    }
     const sides = taperTail(ctx, R, tpts, P.tw, c.body);
     
     ctx.fillStyle = R.alpha(c.spot, 0.9);
@@ -379,12 +377,19 @@ function draw(ctx, pose, R) {
       const p = sides.top[i], q = tpts[i];
       ctx.beginPath(); ctx.ellipse(lerp(p[0], q[0], 0.45), lerp(p[1], q[1], 0.45), P.tw * 0.15 * (1 - i / 10), P.tw * 0.1, q[2], 0, PI * 2); ctx.fill();
     }
-    
+
+    // Dorsal plates must be painted AFTER the solid tail, along its outer
+    // silhouette. Previously the skin covered most crystals and spikes.
     if (f === 2 || final) {
+      for (let i = 2; i <= 3; i++) {
+        const p = sides.top[i], a = tpts[i][2] + PI / 2 + 0.12;
+        if (final) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
+        else plateAt(ctx, R, p[0], p[1], a, 15 - i * 2, 6, i % 2 ? c.plate : c.plate2);
+      }
       for (let i = 6; i <= 7; i++) {
-        const p = sides.top[i], a = tpts[i][2];
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 - 0.5, 9, 2.4, final ? "#e8fdff" : c.claw);
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 + 0.1, 7, 2.2, final ? "#e8fdff" : c.claw);
+        const p = sides.top[i], a = tpts[i][2] + PI / 2;
+        spikeAt(ctx, R, p[0], p[1], a - 0.35, 9, 2.4, final ? "#e8fdff" : c.claw);
+        spikeAt(ctx, R, p[0], p[1], a + 0.13, 7, 2.2, final ? "#e8fdff" : c.claw);
       }
     }
     
