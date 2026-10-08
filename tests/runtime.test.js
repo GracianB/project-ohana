@@ -117,6 +117,47 @@ test("E funciona en teclado y táctil, pero las acciones no se ejecutan en pausa
   f.input.destroy();
 });
 
+test("saltar no cancela una dirección mantenida", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.axisX(), 1);
+  send(f.target, "keydown", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), true);
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.axisX(), 1);
+  send(f.target, "keyup", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.keys.arrowright, true);
+  send(f.target, "keyup", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.keys.arrowright, false);
+  f.input.destroy();
+});
+
+test("la última dirección física pulsada gana sin perder la otra tecla", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowRight", code: "ArrowRight" });
+  send(f.target, "keydown", { key: "ArrowLeft", code: "ArrowLeft" });
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.keys.arrowleft, true);
+  assert.equal(f.input.axisX(), -1);
+  send(f.target, "keyup", { key: "ArrowLeft", code: "ArrowLeft" });
+  assert.equal(f.input.axisX(), 1);
+  assert.equal(f.input.keys.arrowright, true);
+  send(f.target, "keyup", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.axisX(), 0);
+  f.input.destroy();
+});
+
+test("un toque rápido de salto queda latched una sola vez", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowUp", code: "ArrowUp" });
+  send(f.target, "keyup", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.keys.arrowup, false);
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), true);
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), false);
+  f.input.destroy();
+});
+
 test("pagehide limpia entradas retenidas aunque no exista keyup", () => {
   const f = inputFixture();
   send(f.target, "keydown", { key: "d" });
