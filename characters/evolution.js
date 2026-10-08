@@ -825,8 +825,12 @@ export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
           }
           ctx.beginPath();
           ctx.moveTo(-H * .18, -H * .08);
-          ctx.bezierCurveTo(-H * .30, -H * .28, -H * .38, -H * .52, 0, -H * .64);
-          ctx.bezierCurveTo(H * .38, -H * .52, H * .30, -H * .28, H * .18, -H * .08);
+          ctx.lineTo(-H * .26, -H * .24);
+          ctx.lineTo(-H * .34, -H * .43);
+          ctx.lineTo(0, -H * .64);
+          ctx.lineTo(H * .34, -H * .43);
+          ctx.lineTo(H * .26, -H * .24);
+          ctx.lineTo(H * .18, -H * .08);
           ctx.closePath();
           ctx.fill();
           ctx.restore();
