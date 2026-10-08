@@ -1,3 +1,16 @@
+## 08/10/2026 · DINO V78 · MEJORAS DE SENSACIÓN DE COMBATE
+
+**Rama aislada:** `feat/dino-v78-combat-feel-20261008`. **Base:** OHANA V77 publicado; Cuerno es propiedad de su desarrollo paralelo. **Cache propuesta:** `ohana-276`.
+
+- **J · Mocosaurio:** anticipación acotada de enemigos que se desplazan en horizontal o vertical; trayectoria curvada sin teletransporte. Al chocar contra una pared hace exactamente un «boing» con partículas y aro dorado y rebota hacia atrás; si vuelve a chocar, hace un único «splat» y desaparece. Las trazas siguen limitadas a 7 puntos (3 con movimiento reducido).
+- **K · Dino Rodillo:** choque frontal contra paredes con frenado físico y ligero rebote hacia atrás. Una onda de alcance muy corto puede impactar una sola vez a enemigos pegados al muro. Retroceso, polvo ajustado a reduced-motion y el mensaje «¡BOING!». Sin daño lejano ni bucles de impactos.
+- **L · Extinción:** los meteoritos anticipan un máximo de 68 px del movimiento del objetivo durante su caída. Las marcas proyectan la posición prevista de impacto, siguen buscando la plataforma real bajo el objetivo y el marcador es más legible en pantalla.
+- **U · Corazón de Coloso:** los cometas fósiles también consideran de forma limitada el movimiento del objetivo (máximo 52 px), con los mismos límites de daño y número de efectos. Se mantiene la película de cinco actos.
+- **Arquitectura:** únicamente `systems/dino-combat.js` y el tramo del rodillo en `systems/abilities.js`, test independiente `tests/dino-v78-combat-feel.test.js` y versión offline `ohana-276`. Los archivos propios de Cuerno no cambian.
+- **Pruebas:** rebote finito J, seguimiento predictivo, marcador L/U con plataforma, máximo de meteoritos y choque K con daño solo local y una activación.
+
+**Fusionar únicamente con OHANA CI y quality completos: Unit, Browser E2E, Multiplayer E2E, Visual Regression y Release Gate.**
+
 ## 08/10/2026 · DINO V77 · U «CORAZÓN DE COLOSO»
 
 **Rama de capítulo:** `feat/dino-v77-colossus-u-20261008`, derivada de la V76 de Dino. La U se publica **después** de integrar la PR #203; no se modifica a Cuerno ni se sobreescribe main. **Caché prevista:** `ohana-275`.
