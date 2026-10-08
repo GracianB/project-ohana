@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import Cuerno from "../characters/art/cuerno.js";
+import Cuerno,{cuernoWingPose,cuernoTailPose,cuernoLegPose} from "../characters/art/cuerno.js";
 import Dino,{dinoNeckBridgePoints} from "../characters/art/dino.js";
 
 function canvasAudit(){
@@ -126,5 +126,16 @@ test("V81 both characters maintain all five evolution stages without changing ph
      assert.ok(Number(f.w)>0&&Number(f.h)>0);
      assert.ok(Number(f.speed)>0&&Number(f.jump)>0);
    }
+ }
+});
+
+test("V81 jump and fall both use airborne wing, tail and folded hoof anatomy",()=>{
+ for(const form of [2,3,4]){
+  const common={form,t:140,phase:2.2,reduceMotion:false,speed:.8,air:false};
+  const jump=basicPose(form,"jump",common);
+  const fall=basicPose(form,"fall",common);
+  assert.deepEqual(cuernoTailPose(fall,form,140),cuernoTailPose(jump,form,140));
+  assert.deepEqual(cuernoLegPose(fall,form,140,.3),cuernoLegPose(jump,form,140,.3));
+  if(form>=3)assert.deepEqual(cuernoWingPose(fall,form,140),cuernoWingPose(jump,form,140));
  }
 });
