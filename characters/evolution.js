@@ -814,11 +814,15 @@ export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
         if (stage >= 4) {
           ctx.save();
           ctx.globalAlpha *= 0.72;
-          const g = ctx.createLinearGradient(0, -H * 0.62, 0, H * 0.02);
-          g.addColorStop(0, "rgba(103,221,255,0)");
-          g.addColorStop(.48, "rgba(143,123,255,.28)");
-          g.addColorStop(1, "rgba(240,140,255,0)");
-          ctx.fillStyle = g;
+          if (typeof ctx.createLinearGradient === "function") {
+            const g = ctx.createLinearGradient(0, -H * 0.62, 0, H * 0.02);
+            g.addColorStop(0, "rgba(103,221,255,0)");
+            g.addColorStop(.48, "rgba(143,123,255,.28)");
+            g.addColorStop(1, "rgba(240,140,255,0)");
+            ctx.fillStyle = g;
+          } else {
+            ctx.fillStyle = "rgba(143,123,255,.18)";
+          }
           ctx.beginPath();
           ctx.moveTo(-H * .18, -H * .08);
           ctx.bezierCurveTo(-H * .30, -H * .28, -H * .38, -H * .52, 0, -H * .64);
