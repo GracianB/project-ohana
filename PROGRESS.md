@@ -1,3 +1,13 @@
+## 09/10/2026 · OHANA V94 · Reina del Nido legible · ohana-294
+
+- Cuatro advertencias visuales asociadas a ataques reales con progreso de windup correcto y consejos accesibles.
+- Módulo `systems/boss-v94-readability.js` desacoplado de físicas, hitboxes y daño. Candidata sujeta a CI y Pages.
+
+## 09/10/2026 · OHANA V93 · Cuerno, cuatro metamorfosis · ohana-293
+
+- Cuatro rituales Canvas propios de Cuerno, sincronizados con las cuatro evoluciones; movimiento reducido y regresión de Dino V90 y Cuerno V92 cubiertos.
+- Cambios en `systems/cuerno-v93-metamorphosis.js` y `systems/evo-cinema.js`. Candidata de publicación sujeta a CI y Pages.
+
 ## 09/10/2026 · OHANA V92 · CUERNO: RESONANCIA PRISMÁTICA Y CONTACTO REAL · ohana-292
 
 - **K, contacto físico entre fotogramas:** la estela arcoíris ahora reconoce a enemigos rápidos que cruzan el camino entre actualizaciones. La comprobación usa el segmento de movimiento enemigo contra hasta 32 puntos de la cinta, con un límite de desplazamiento de 180 px para impedir impactos falsos por teletransportes. El daño, duración de 600 frames y máximo dos estelas permanecen intactos.
