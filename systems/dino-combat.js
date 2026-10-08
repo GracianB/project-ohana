@@ -1,4 +1,5 @@
 // Project OHANA · Dino-specific combat animation, isolated from the shared engine.
+import { drawDinoFossilForecast, drawDinoRollingShell } from "./dino-stagecraft.js";
 // Injecting helpers keeps the original cast/update contracts and JS budget intact.
 export function createDinoEffects(ops) {
  const { nearestEnemy, canHit, cx, cy, solidAt, circleHit, hitEnemy, boom,
@@ -220,17 +221,7 @@ dinoFossil(ctx,f,cam,t){
   ctx.lineTo(-f.r*.02,0);ctx.lineTo(f.r*.42,f.r*.14);ctx.stroke();
   ctx.restore();
 },
-dinoFossilMark(ctx,f,cam,t){
-  const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0),k=f.life/f.max;
-  ctx.save();ctx.globalAlpha=.30+.26*(1-k);
-  ctx.strokeStyle="#f8e7a1";ctx.lineWidth=2;
-  ctx.beginPath();ctx.ellipse(x,y,24+(1-k)*12,6+(1-k)*3,0,0,TAU);ctx.stroke();
-  for(let i=0;i<3;i++){
-    const a=i*TAU/3+t*.016;
-    ctx.beginPath();ctx.arc(x+Math.cos(a)*18,y+Math.sin(a)*5,2,0,TAU);ctx.fillStyle="#d6ffac";ctx.fill();
-  }
-  ctx.restore();
-},
+dinoFossilMark(ctx,f,cam,t,g){drawDinoFossilForecast(ctx,f,cam,t,!!g?.reduceMotion);},
 dinoFossilBlast(ctx,f,cam,t){
   const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
   const k=1-f.life/f.max;
@@ -269,28 +260,8 @@ dinoSplat(ctx,f,cam){
  ctx.globalAlpha=.65*(1-u);ctx.strokeStyle=f.color;ctx.lineWidth=2.5;
  ctx.beginPath();ctx.ellipse(x,y,f.radius*(1+u*2.2),f.radius*(.6+u),0,0,TAU);ctx.stroke();
 },
-dinoWarning(ctx,f,cam){
- const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0),k=Math.max(0,Math.min(1,f.life/f.max));
- ctx.globalAlpha=.22+.3*(1-k);ctx.strokeStyle="#bdfc96";ctx.lineWidth=2.3;
- ctx.beginPath();ctx.ellipse(x,y,20+(1-k)*12,5+(1-k)*3,0,0,TAU);ctx.stroke();
- ctx.beginPath();ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);ctx.stroke();
- ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke();
-},
+dinoWarning(ctx,f,cam,t,g){drawDinoFossilForecast(ctx,f,cam,t,!!g?.reduceMotion);},
    },
-   drawRollShell(ctx, p, cam, t) {
-const x = cx(p) - (cam?.x || 0), y = cy(p) - (cam?.y || 0);
-const r = Math.max(p.w, p.h) * 0.78;
-ctx.save(); ctx.globalAlpha = 0.8; ctx.strokeStyle = "#ebffac";
-ctx.lineWidth = 2.4; ctx.lineJoin = "round";
-for (let i = 0; i < 8; i++) {
- const a = i * TAU / 8 + t * 0.18;
- const nx = Math.cos(a), ny = Math.sin(a);
- ctx.beginPath(); ctx.moveTo(x + nx * r * 0.8, y + ny * r * 0.8);
- ctx.lineTo(x + nx * (r + 9), y + ny * (r + 9));
- ctx.lineTo(x + Math.cos(a + 0.3) * r * 0.8, y + Math.sin(a + 0.3) * r * 0.8);
- ctx.stroke();
-}
-ctx.restore();
-}
+   drawRollShell(ctx,p,cam,t,g){drawDinoRollingShell(ctx,p,cam,t,!!g?.reduceMotion);}
  };
 }

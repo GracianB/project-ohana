@@ -687,7 +687,7 @@ if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff
 if (S.charge > 0) {
 if (p.id === "dino") {
  drawBallAura(ctx, p, cam, t, "#a8f377");
- DINO_FX.drawRollShell(ctx, p, cam, t);
+ DINO_FX.drawRollShell(ctx, p, cam, t, game);
 } else drawChargeShield(ctx, p, cam, t);
 }
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);

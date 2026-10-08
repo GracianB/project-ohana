@@ -17,7 +17,7 @@ gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga qu
 meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
 bite: { name: "Mocosaurio", key: "J", cd: 700, color: "#bafa69", desc: "Escupe babitas con ojos que buscan enemigos; conserva un mordisco cercano." },
 charge: { name: "Dino Rodillo", key: "K", cd: 2200, color: "#7de66e", desc: "Se hace bola con púas, rueda protegido y frena al chocar con la pared." },
-quake: { name: "Extinción", key: "L", cd: 6000, color: "#ffc36c", desc: "Terremoto de dos ondas con meteoritos volcánicos dirigidos a enemigos." },
+quake: { name: "Extinción", key: "L", cd: 6000, color: "#ffc36c", desc: "Terremoto y fósiles que anuncian dónde caerán sus impactos." },
 salt: { name: "Escopetazo de sal", key: "J", cd: 600, color: "#fff3c0", desc: "Abanico de granos de sal a corta distancia." },
 ketchup: { name: "Charco kétchup", key: "K", cd: 2000, color: "#e23b3b", desc: "Charco que ralentiza y daña con el tiempo." },
 fryer: { name: "Géiseres de aceite", key: "L", cd: 6000, color: "#ffd36a", desc: "Columnas de aceite hirviendo brotan en fila." },
