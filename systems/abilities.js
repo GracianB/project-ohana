@@ -46,7 +46,7 @@ export const ABILITY_DEFS = {
   pepperoni: { name: "Disco pepperoni", key: "J", cd: 620, color: "#e0402a", desc: "Disco que rebota en paredes y suelo." },
   cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
   oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
-  ofuda: { name: "Ofuda", key: "J", cd: 560, color: "#f2e6c8", desc: "Talismán de papel que se clava y estalla." },
+  ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
   sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
   maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
   gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
@@ -1237,7 +1237,7 @@ const CASTERS = {
     const h = hand(p);
     add({
       kind: "ofuda", x: h.x, y: h.y,
-      vx: (8 + evo) * p.facing, vy: -0.4,
+      vx: (8 + evo) * (p.facing || 1), vy: 0,
       life: 90, stuck: 0, dmg: (18 + evo * 3) * pw(p),
     });
     boom(g, h.x, h.y, "#f2e6c8", 6);
@@ -2768,20 +2768,31 @@ const DRW = {
     drawSlice(ctx, 1);
   },
   ofuda(ctx, f, cam) {
-    ctx.save();
-    ctx.translate(f.x - cam.x, f.y - cam.y);
-    ctx.rotate(f.stuck ? 0.2 : Math.atan2(f.vy, f.vx || 1));
-    ctx.fillStyle = "#f4ead2";
-    ctx.fillRect(-8, -12, 16, 24);
-    ctx.strokeStyle = "#c23a3a";
-    ctx.lineWidth = 1.4;
-    ctx.strokeRect(-8, -12, 16, 24);
-    ctx.beginPath();
-    ctx.moveTo(0, -6);
-    ctx.lineTo(0, 6);
-    ctx.moveTo(-4, 0);
-    ctx.lineTo(4, 0);
-    ctx.stroke();
+    // Horizontal guardian seal (J): flight -> attachment -> visible timed blast.
+    const x=f.x-cam.x,y=f.y-cam.y,stuck=Number(f.stuck)||0;
+    ctx.save();ctx.translate(x,y);
+    if(stuck>0){
+      const k=1-Math.min(1,stuck/16);
+      ctx.globalAlpha=.22+.3*k;
+      ctx.strokeStyle="#f5b071";ctx.lineWidth=2+k*1.8;
+      ctx.beginPath();ctx.arc(0,0,22+50*k,0,TAU);ctx.stroke();
+      ctx.globalAlpha=1;
+    } else {
+      const dir=Math.sign(f.vx)||1;
+      ctx.strokeStyle="rgba(255,215,157,.55)";ctx.lineWidth=2;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.moveTo(-dir*(17+i*7),-3+i*5);
+        ctx.lineTo(-dir*(30+i*8),-3+i*5);ctx.stroke();
+      }
+    }
+    ctx.rotate(stuck?-.1:Math.atan2(f.vy,f.vx||1));
+    ctx.fillStyle="#fff1d0";ctx.strokeStyle="#a64f5d";ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(-13,-7);ctx.lineTo(13,-7);
+    ctx.lineTo(13,7);ctx.lineTo(-13,7);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle="#bd6c52";ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.moveTo(-5,-4);ctx.lineTo(-1,0);
+    ctx.lineTo(5,-4);ctx.lineTo(2,1);ctx.lineTo(7,4);ctx.stroke();
+    ctx.fillStyle="#ecbe79";ctx.beginPath();ctx.arc(-8,0,1.6,0,TAU);ctx.fill();
     ctx.restore();
   },
   sleeve(ctx, f, cam, t, g, p) {
