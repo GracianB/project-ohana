@@ -13,7 +13,7 @@ import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
 import { evolutionTiming } from "./evolution-timing.js";
-import { EVOLUTION_CINEMA_PROFILES, EVOLUTION_STAGE_COPY } from "../characters/evolution.js";
+import { EVOLUTION_CINEMA_PROFILES, EVOLUTION_STAGE_COPY, evolutionMessage } from "../characters/evolution.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -332,6 +332,52 @@ function ensureStage() {
   return stage;
 }
 
+
+const EVOLUTION_REVEAL_POSE = Object.freeze({
+  kilo:"victory", stitcho:"attack", chispin:"attack", cat:"idle", dragon:"victory",
+  dino:"attack", frita:"run", pizza:"jump", yomi:"idle", cuerno:"victory"
+});
+
+function drawEvolutionIdentity(ctx, id, profile, cx, cy, target, k, t, accent) {
+  if (k <= 0.001) return;
+  const motif = profile?.motif || "petals";
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.globalCompositeOperation = "lighter";
+  ctx.globalAlpha = (0.12 + k * 0.34);
+  ctx.strokeStyle = accent;
+  ctx.fillStyle = rgba(accent, 0.12 + k * 0.08);
+  ctx.lineWidth = Math.max(1.4, target * 0.012);
+  const R = target * (0.56 + k * 0.22);
+  const spin = t * (profile?.speed || 1) * 0.32;
+
+  if (motif === "petals") {
+    for (let i=0;i<7;i++){ctx.save();ctx.rotate(spin+i*Math.PI*2/7);ctx.beginPath();ctx.ellipse(0,-R*.62,target*.10,target*.24,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+  } else if (motif === "seams") {
+    for (let i=-3;i<=3;i++){ctx.beginPath();ctx.moveTo(-R*.9,i*target*.11);ctx.bezierCurveTo(-R*.25,i*target*.03,R*.28,-i*target*.07,R*.9,i*target*.10);ctx.stroke();}
+  } else if (motif === "bolts") {
+    for (let i=0;i<8;i++){ctx.save();ctx.rotate(spin+i*Math.PI/4);ctx.beginPath();ctx.moveTo(R*.25,0);ctx.lineTo(R*.48,-target*.07);ctx.lineTo(R*.40,target*.05);ctx.lineTo(R*.70,0);ctx.stroke();ctx.restore();}
+  } else if (motif === "moons") {
+    ctx.beginPath();ctx.arc(0,0,R*.74,0,Math.PI*2);ctx.stroke();
+    ctx.globalCompositeOperation="source-over";ctx.fillStyle="rgba(3,5,12,.82)";ctx.beginPath();ctx.arc(R*.20,-R*.05,R*.63,0,Math.PI*2);ctx.fill();
+  } else if (motif === "embers") {
+    for (let i=0;i<6;i++){ctx.save();ctx.rotate(spin+i*Math.PI/3);ctx.beginPath();ctx.moveTo(R*.22,0);ctx.quadraticCurveTo(R*.55,-target*.20,R*.78,0);ctx.quadraticCurveTo(R*.54,target*.14,R*.22,0);ctx.stroke();ctx.restore();}
+  } else if (motif === "shards") {
+    for (let i=0;i<8;i++){ctx.save();ctx.rotate(i*Math.PI/4);ctx.beginPath();ctx.moveTo(R*.22,0);ctx.lineTo(R*.52,-target*.10);ctx.lineTo(R*.72,0);ctx.lineTo(R*.50,target*.10);ctx.closePath();ctx.stroke();ctx.restore();}
+  } else if (motif === "salt") {
+    for (let i=0;i<18;i++){const a=i*2.399+spin,r=R*(.25+(i%5)*.11);ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r,2+(i%3),0,Math.PI*2);ctx.fill();}
+  } else if (motif === "cheese") {
+    ctx.beginPath();ctx.arc(0,0,R*.72,0,Math.PI*2);ctx.stroke();
+    for(let i=0;i<5;i++){const a=i*Math.PI*2/5+spin;ctx.beginPath();ctx.moveTo(Math.cos(a)*R*.3,Math.sin(a)*R*.3);ctx.quadraticCurveTo(Math.cos(a)*R*.62,Math.sin(a)*R*.62+target*.15,Math.cos(a)*R*.72,Math.sin(a)*R*.72);ctx.stroke();}
+  } else if (motif === "ofuda") {
+    for(let i=0;i<6;i++){const a=i*Math.PI*2/6-spin*.4;ctx.save();ctx.translate(Math.cos(a)*R*.72,Math.sin(a)*R*.45);ctx.rotate(a+Math.PI/2);ctx.strokeRect(-target*.045,-target*.12,target*.09,target*.24);ctx.restore();}
+  } else {
+    const cols=["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];
+    for(let i=0;i<4;i++){ctx.strokeStyle=cols[i];ctx.beginPath();ctx.arc(0,target*.08,R*(.46+i*.08),Math.PI*1.08,Math.PI*1.92);ctx.stroke();}
+  }
+  ctx.restore();
+}
+
 export function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
@@ -351,7 +397,7 @@ export function playEvolution(detail = {}) {
   const palette = finalForm ? [accent, light, "#ffffff", color] : [color, light, "#ffffff"];
   const toName = String(detail.toName || detail.name || newForm.name || "Nueva forma");
   const title = "¡" + toName.toUpperCase() + "!";
-  const story = EVOLUTION_STAGE_COPY[evo] || EVOLUTION_STAGE_COPY[4] || { kicker: "EVOLUCIÓN" };
+  const story = evolutionMessage(def.id, evo) || EVOLUTION_STAGE_COPY[evo] || EVOLUTION_STAGE_COPY[4] || { kicker: "EVOLUCIÓN" };
   const reduce = reducedMotion();
 
   // Línea de tiempo breve: impacto visual fuerte, regreso rápido al juego.
@@ -446,6 +492,7 @@ export function playEvolution(detail = {}) {
     const charge = seg(t, T.charge, T.flash);
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
     drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
+    drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target, clamp(charge * 0.72 + revealK, 0, 1), t, accent);
     const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
@@ -569,6 +616,11 @@ export function playEvolution(detail = {}) {
       // Revelación: el nuevo diseño orgánico aparece una vez, limpio y legible.
       const pop = reduce ? 1 : easeBack(revealK);
       const sc = scale * (0.78 + 0.22 * pop);
+      pNew._poseOverride = EVOLUTION_REVEAL_POSE[def.id] || "victory";
+      pNew.melee = pNew._poseOverride === "attack" ? 10 : 0;
+      pNew.grounded = pNew._poseOverride !== "jump";
+      pNew.vy = pNew._poseOverride === "jump" ? -3 : 0;
+      pNew.vx = pNew._poseOverride === "run" ? 4 : 0;
 
       ctx.save();
       ctx.globalAlpha = 0.98;
@@ -652,10 +704,14 @@ export function playEvolution(detail = {}) {
       lg.addColorStop(0, rgba(accent, 0)); lg.addColorStop(0.5, rgba(accent, 1)); lg.addColorStop(1, rgba(accent, 0));
       ctx.fillStyle = lg;
       ctx.fillRect(cx - bw / 2, y2 - 1, bw, 2);
-      drawTitle(ctx, "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.36, Math.max(13, size * 0.28), "#ffffff",
+      if (story.line) {
+        drawTitle(ctx, story.line, cx, y2 + size * 0.27, Math.max(11, size * 0.22), light,
+          { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.86 });
+      }
+      drawTitle(ctx, "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.58, Math.max(13, size * 0.28), "#ffffff",
         { font: FONT_BODY, weight: 800, spacing: "0.3em", stroke: false });
       // pips de forma
-      const pipY = y2 + size * 0.72, pipR = Math.max(4, size * 0.07), gap = pipR * 3.2;
+      const pipY = y2 + size * 0.92, pipR = Math.max(4, size * 0.07), gap = pipR * 3.2;
       for (let i = 0; i < 5; i++) {
         ctx.beginPath();
         ctx.arc(cx + (i - 2) * gap, pipY, pipR, 0, Math.PI * 2);
