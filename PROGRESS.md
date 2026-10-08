@@ -1,3 +1,13 @@
+## 08/10/2026 · OHANA V85 · DESCENSO SIN REBOTE · ohana-285
+
+**Base:** Cuerno V84 fusionado (`795cd4b2`). **Ruta a V100:** [V100-ROADMAP.md](V100-ROADMAP.md).
+
+- Flecha abajo / S sobre una plataforma fina: la atraviesa con colisión selectiva real durante todos los subpasos y frames necesarios.
+- El rescate de caídas no reposa al héroe sobre esa misma plataforma: recuerda exactamente la superficie ignorada hasta salir, saltar por encima o aterrizar debajo.
+- Los bloques sólidos y las plataformas más bajas mantienen intacta su colisión. Nada cambia en Dino, Cuerno, J/K/L/U o dificultad.
+- Módulo de físicas aislado `engine/platform-drop.js` y pruebas `tests/v85-platform-drop.test.js` (física, subpasos, rescate, suelo sólido, reinicio).
+- Precaché `ohana-285`. CI completo (Node + Browser E2E + Multiplayer E2E + Visual Regression + release:check) obligatorio antes de merge/Pages.
+
 ## 08/10/2026 · CUERNO V84 · ARCOÍRIS VIVO Y SIETE CUERNOS
 
 **Base:** Dino V83 `e051b357` publicado. **Versión de caché:** `ohana-284`.

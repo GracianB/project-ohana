@@ -146,7 +146,10 @@ test("V84 full release remains Cuerno-only with Dino and canonical evolutions un
  assert.equal(hero.forms.length,5);
  const precache=fs.readFileSync("sw.js","utf8");
  const html=fs.readFileSync("index.html","utf8");
- assert.match(precache,/const VERSION = "ohana-284"/);
+ assert.match(precache,/const VERSION = "ohana-\d+"/);
+ const cache=precache.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+ assert.ok(cache && Number(cache.slice(6)) >= 284, "V84 cache must not roll back");
+ assert.ok(html.includes(cache), "HTML and SW must use the same cache");
  assert.match(precache,/systems\/cuerno-fantasy\.js\?v=/);
  assert.doesNotMatch(html,/ohana-283/);
  const docs=fs.readFileSync("characters/art/dino.js","utf8");

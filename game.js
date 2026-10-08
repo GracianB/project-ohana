@@ -34,6 +34,7 @@ import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
 import { bindInput } from "./engine/input.js";
+import { beginPlatformDrop, dropIgnoresPlatform, advancePlatformDrop } from "./engine/platform-drop.js";
 import { bindDialogs } from "./systems/dialogs.js";
 import { syncHudStatus } from "./systems/hud.js";
 import { Passives } from "./systems/passives.js";
@@ -481,6 +482,8 @@ const S = paint ? PAINT_WORLD : 1;
 game.worldW = ROOM_W * S;
 game.worldH = ROOM_H * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+// Never carry a previous room's one-way ledge into the next room.
+if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
@@ -1161,13 +1164,13 @@ if (hazard.type === HAZARD_TYPES.DEATH) {
 if (!hazardAxis) {
 p._hazardEscapeKey = "";
 const next = nearestBelow(p.x, p.w, feet - 8);
-if (next && feet >= next.y) {
+if (next && feet >= next.y && !dropIgnoresPlatform(p, next)) {
   landOn(p, next);
   return;
 }
 
 const low = lowestFloor(p.x, p.w);
-if (low && feet > low.y && p.vy >= 0) {
+if (low && feet > low.y && p.vy >= 0 && !dropIgnoresPlatform(p, low)) {
   landOn(p, low);
   return;
 }
@@ -1459,6 +1462,7 @@ const inputState = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, j
 p._jumpPrev = !!jump;
 Passives.update(game, inputState);
 const wasGrounded = !!p.grounded;
+const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
 p.vy = Math.min(14, p.vy + (p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
@@ -1472,7 +1476,7 @@ p.y += p.vy / steps;
 const hit = resolveBody(p, playerPlatforms, {
   prevX: sx,
   prevY: sy,
-  dropThroughY: drop && wasGrounded && s === 0 ? sy + p.h + 10 : null,
+  dropThroughY,
 });
 if (hit.grounded) {
   if (!p.grounded && incoming > 7) beep("land");
@@ -1485,6 +1489,7 @@ if (hit.hitX) wall = hit.hitX;
 if (hit.hitY === -1) break;
 }
 if (wall && !p.grounded) p.wall = wall;
+advancePlatformDrop(p);
 tickSwing(p);
 Passives.afterMove(game, inputState);
 Magic.update(game);

@@ -623,6 +623,28 @@ try {
   });
   assert.equal(beachDrop.roomId, 'reef', 'desktop: pozo Beach no transfiere realmente a Reef');
 
+  // V85 — a real keyboard DOWN press must cross the thin hub platform and
+  // land on the solid floor below, without old fall rescue snapping upward.
+  const platformDropBefore = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    api.start('kilo');
+    api.loadRoom('hub');
+    api.resetInput();
+    api.setPlayer(270, 790);
+    api.setPlayerVelocity(0, 3);
+    return api.step(58);
+  });
+  assert.ok(platformDropBefore.player?.grounded && platformDropBefore.player.y < 960,
+    'desktop: V85 hero did not settle on the upper ledge');
+  await page.locator('#game').focus();
+  await page.keyboard.down('ArrowDown');
+  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(40));
+  await page.keyboard.up('ArrowDown');
+  assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
+    'desktop: V85 DOWN did not traverse the ledge / snapback detected');
+  assert.equal(platformDropAfter.player.grounded, true,
+    'desktop: V85 lower solid floor did not catch the descending hero');
+
   // V40 — magma real en Caldera.
   const magmaDeath = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
