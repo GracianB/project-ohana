@@ -803,6 +803,27 @@ function dragonSoul(ctx, pose, front) {
         ctx.stroke();
       }
     }
+    // Gust K bends warm wind around the wings; Roar L answers with two short echoes.
+    if(state==="cast" && p.castSlot===1){
+      const pulse=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(p.cast)||0)));
+      ctx.globalAlpha=.38*pulse;ctx.strokeStyle="#c9eaff";ctx.lineWidth=1.6;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.arc(-20-i*9,-40,20+i*6,-1.4,.62);ctx.stroke();
+      }
+    }
+    if(state==="cast" && p.castSlot===2){
+      const pulse=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(p.cast)||0)));
+      ctx.globalAlpha=.35*pulse;ctx.strokeStyle=f>=3?"#fff0b5":"#ffbd76";ctx.lineWidth=1.8;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.arc(29,-58,13+i*9,-.65,.65);ctx.stroke();
+      }
+    }
+    // First winged form leaves a tiny grounded flame-heel mark, not a new emitter.
+    if(f===1 && state==="run"){
+      const beat=.5+.5*Math.sin(Number(p.phase)||t*.1);
+      ctx.globalAlpha=.27*beat;ctx.fillStyle="#ffb568";
+      ctx.beginPath();ctx.ellipse(-13,0,5,1.5,0,0,Math.PI*2);ctx.fill();
+    }
     // Wingbeat vortex: ascending embers trace a restrained helix during flight.
     if (flight && f >= 2) {
       const count = f === 4 ? 7 : 4;
