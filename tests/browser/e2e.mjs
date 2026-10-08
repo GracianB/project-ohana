@@ -645,6 +645,23 @@ try {
   assert.equal(platformDropAfter.player.grounded, true,
     'desktop: V85 lower solid floor did not catch the descending hero');
 
+  // V87 · Dragon sanctuary is playable without locking co-op doors.
+  const dragonSanctuary=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('dragon');api.setEvo(4);api.loadRoom('volcano');
+    api.resetInput();api.setInvulnerable(600);
+    const steps=[];
+    for(const [x,y] of [[290,875],[1580,900],[2010,535]]){
+      api.setPlayer(x,y);
+      steps.push(api.step(2).dragonTrial?.count||0);
+    }
+    return {steps,trial:api.state().dragonTrial};
+  });
+  assert.deepEqual(dragonSanctuary.steps,[1,2,3],
+    'V87: dragon embers not collected in real engine · '+JSON.stringify(dragonSanctuary));
+  assert.equal(dragonSanctuary.trial?.completed,true,
+    'V87: three flames did not awaken the dragon sanctuary');
+
   // V40 — magma real en Caldera.
   const magmaDeath = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
