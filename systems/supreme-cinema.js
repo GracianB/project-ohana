@@ -1,5 +1,4 @@
 // PROJECT OHANA V48 · SUPREME CINEMA REBORN
-// Diez U, diez storyboards. El personaje y su gag son la escena; el texto remata.
 import {
   fullCanvas, reducedMotion, clamp, seg, easeOut, easeInOut, easeBack, lerp,
   rgba, tint, makeDummy, drawDummy, baseHeight, drawTitle, drawRing, drawRays,
@@ -163,7 +162,6 @@ function backdrop(ctx,W,H,cx,cy,color,story,k){
   bg.addColorStop(1,"rgba(1,3,8,.985)");
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 
-  // Film grain without randomness: stable scan texture.
   ctx.save();ctx.globalAlpha=.10;ctx.strokeStyle=rgba(color,.34);ctx.lineWidth=1;
   for(let y=0;y<H;y+=18){
     const off=((y*13)%31)-15;
@@ -279,7 +277,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawSpark(ctx,fx,fy,4+8*sneeze,"#ffd36a");
       for(let i=0;i<3;i++) circle(ctx,fx+i*8,fy-i*3,5+i*3,"#ff7b35",.22+.16*sneeze,true);
     }
-    // Dragon earns the Supernova with three wing crescents before the main blast.
     const ascent=seg(k,.33,.62);
     if(ascent>0){
       for(let i=0;i<3;i++){
@@ -289,7 +286,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       }
       drawRing(ctx,cx,cy+target*.12,target*(.22+.44*ascent),ascent,"#ffd690",2,.27);
     }
-    // The tiny sneeze escapes into a comet; the dragon follows before its royal nova.
     const chase=seg(k,.28,.57);
     if(chase>0&&chase<1){
       const x=cx+target*(.22+.23*chase),y=cy-target*(.29+.21*Math.sin(Math.PI*chase));
@@ -322,7 +318,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       ctx.beginPath();ctx.arc(cx+target*.18,cy-target*.28,3,0,Math.PI*2);ctx.fill();
     }
   }else if(id==="frita"){
-    // The runaway potato is caught on the fork, crowned, then turns into a crisp nova.
     const chase=seg(k,.06,.49);
     const px=lerp(cx-target*.82,cx+target*.19,easeInOut(chase));
     const py=cy-target*.34-Math.sin(chase*Math.PI)*target*.43;
@@ -502,7 +497,6 @@ function play(detail={}){
 
     drawAssist(ctx,ally,k,t,cx,cy,target,baseScale,color);
 
-    // Copy is a punctuation mark, not the scene.
     const copyK=easeOut(seg(k,.70,.84))*outK;
     if(copyK>.01){
       ctx.save();ctx.globalAlpha=copyK;
