@@ -1,3 +1,16 @@
+## 08/10/2026 · V58 YOMI FINAL · FASE 3/3 · JUEZ DEL UMBRAL
+
+**Caché:** `ohana-258`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino último. Grok intro intacta.**
+
+- **J · Sello guardián** sigue siendo un proyectil horizontal con cuenta atrás y explosión; ahora deja una marca ritual temporal en enemigos impactados.
+- **K · Campanada del Umbral:** onda audiovisual circular de escenario completo que golpea y marca a todos los enemigos vivos, con daño moderado (incluidos jefes con reducción).
+- **L · Mordida lunar:** anticipación frontal y cierre sincronizado; sobre un enemigo marcado inflige 1,9x y consume la marca.
+- **U · Juicio del Umbral:** Cuerno entra en escena y realiza una embestida aurora que alcanza a TODOS los enemigos; daño masivo con bonus por marca y ejecución de enemigos normales debilitados. Los jefes tienen una cantidad limitada de daño y no son ejecutados automáticamente.
+- Las cinco formas han dejado de ser cinco escalas del mismo farol: semilla, peregrino, guardián alado, caballero nocturno y juez de doble creciente. La expresión y el toque de campana son propios.
+- Cine Yomi + Cuerno: entrada temprana, sello de luz, carga real visible y cierre del juicio. Sigue durando 3,9 s y respeta movimiento reducido.
+- Pruebas de combate verifican J/K/L/U, daños en ambos lados, marcas, remates y protección de jefes; Chromium verifica el recorrido y errores de ejecución.
+- Mantener presupuesto estricto de JavaScript y cache `ohana-258`.
+
 ## 08/10/2026 · V57 YOMI REBORN · FASE 2/3 · PROPOSED
 
 **Caché:** `ohana-257`. **Contrato:** 10 personajes · 5 formas · 10 salas. Dino reservado para el último pase. Intro de Grok sin cambios.
