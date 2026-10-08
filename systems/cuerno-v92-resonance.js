@@ -13,6 +13,10 @@ const distPointToSegment2=(p,a,b)=>{
  return ex*ex+ey*ey;
 };
 const crosses=(a,b,c,d)=>{
+ // Zero-length movement is a point, not an intersecting line.
+ const ab=(b.x-a.x)**2+(b.y-a.y)**2;
+ const cd=(d.x-c.x)**2+(d.y-c.y)**2;
+ if(ab<1e-8||cd<1e-8)return false;
  const cross=(u,v,w)=>(v.x-u.x)*(w.y-u.y)-(v.y-u.y)*(w.x-u.x);
  const ab1=cross(a,b,c),ab2=cross(a,b,d),cd1=cross(c,d,a),cd2=cross(c,d,b);
  return ab1*ab2<=0&&cd1*cd2<=0;
