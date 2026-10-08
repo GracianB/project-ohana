@@ -1116,7 +1116,7 @@ function landOn(p, plat) {
   p.vy = 0;
   p.grounded = true;
   p.jumps = 0;
-  p.coyote = 10;
+  p.coyote = CONTROL_FEEL.coyoteFrames;
 }
 function inPitX(p) {
   const cx = p.x + p.w / 2;
