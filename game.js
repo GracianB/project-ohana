@@ -2326,6 +2326,7 @@ function updateEnemies() {
         e.vx += steer.x * steer.scale;
       } else if (e.mode === "hold" && !enemyCanCommit(e)) {
         e.vx *= 0.94;
+        e.vx += steer.x * steer.scale;
       }
     }
 
@@ -3330,6 +3331,8 @@ if (e2eEnabled) {
           alive: game.enemyDirector.alive,
           budget: game.enemyDirector.budget,
           committed: game.enemyDirector.committed,
+          ecology: game.enemyDirector.ecology || "",
+          formation: game.enemyDirector.formation || "",
         } : null,
         enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
         boss: boss ? {

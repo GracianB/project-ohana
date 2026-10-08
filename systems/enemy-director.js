@@ -4,6 +4,16 @@
 // and steering hints consumed by the existing per-species state machines.
 
 import { ROOM_HARD } from "../engine/foes.js";
+import {
+  applyEnemyEcology,
+  ecologyBudget,
+  ecologyFlankBias,
+  ecologyFlankDirection,
+  ecologyForRoom,
+  ecologyHoldSteering,
+  ecologyPreferredRange,
+  ecologyPriority,
+} from "./enemy-ecology.js";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value) || 0));
 
@@ -71,7 +81,7 @@ function hpRatio(e = {}) {
   return clamp((Number(e.hp) || 0) / Math.max(1, Number(e.max) || 1), 0, 1);
 }
 
-function scoreCandidate(e, player, hard, tick) {
+function scoreCandidate(e, player, hard, tick, roomId) {
   const role = enemyRole(e.kind);
   const profile = PROFILE[role];
   const dx = centerX(player) - centerX(e);
@@ -82,13 +92,15 @@ function scoreCandidate(e, player, hard, tick) {
   const eliteBonus = e.elite ? 0.8 : 0;
   const aggroBonus = clamp(Number(e.aggro) / 100, 0, 1) * 0.9;
   const stableTie = ((Number(e.spawnIndex) || 0) % 7) * 0.001 + (Number(tick) % 11) * 0.00001;
-  return telegraphBonus + profile.priority + proximity * (1.4 + hard * 0.12) + eliteBonus + aggroBonus + stableTie;
+  const ecologyBonus = ecologyPriority(roomId, role);
+  return telegraphBonus + profile.priority + ecologyBonus + proximity * (1.4 + hard * 0.12) + eliteBonus + aggroBonus + stableTie;
 }
 
-function attackBudget(alive, hard) {
+function attackBudget(alive, hard, roomId) {
   if (alive <= 1) return alive;
-  // Early rooms teach one readable threat. Late rooms can sustain three.
-  return clamp(1 + Math.floor((hard + Math.max(0, alive - 4)) / 2), 1, 3);
+  // Early rooms teach one readable threat. Caldera can briefly sustain one extra
+  // committed foe, still capped at the existing maximum of three.
+  return clamp(1 + Math.floor((hard + Math.max(0, alive - 4)) / 2) + ecologyBudget(roomId), 1, 3);
 }
 
 function lowHealthRetreat(e, role) {
@@ -121,9 +133,10 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   }
 
   const hard = ROOM_HARD[roomId] ?? 1;
-  const budget = attackBudget(alive.length, hard);
+  const ecology = ecologyForRoom(roomId);
+  const budget = attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
-    scoreCandidate(b, player, hard, tick) - scoreCandidate(a, player, hard, tick)
+    scoreCandidate(b, player, hard, tick, roomId) - scoreCandidate(a, player, hard, tick, roomId)
   );
 
   const committed = sorted.filter(enemyIsCommitted);
@@ -136,20 +149,24 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   for (const e of alive) {
     const role = enemyRole(e.kind);
     const profile = PROFILE[role];
+    const preferred = ecologyPreferredRange(roomId, role, profile.preferred);
+    const flankBias = ecologyFlankBias(roomId, role, profile.flank);
     const dx = centerX(player) - centerX(e);
     const dy = centerY(player) - centerY(e);
     const dist = Math.hypot(dx, dy);
     const nearby = alive.filter((o) => o !== e && Math.hypot(centerX(o) - centerX(e), centerY(o) - centerY(e)) < 300).length;
     const retreat = lowHealthRetreat(e, role);
     const permit = permits.has(e) || enemyIsCommitted(e);
-    const flank = !permit && !retreat && dist < 520 && profile.flank > 0.4;
-    const tooClose = dist < profile.preferred * 0.62;
+    const flank = !permit && !retreat && dist < 520 && flankBias > 0.4;
+    const tooClose = dist < preferred * 0.62;
 
     e.aiRole = role;
     e.aiPack = nearby;
     e.aiAttackPermit = permit;
-    e.aiFlankDir = flankDirection(e, player);
-    e.aiPreferredRange = profile.preferred;
+    const naturalFlank = flankDirection(e, player);
+    e.aiFlankDir = ecologyFlankDirection(roomId, e, tick, naturalFlank);
+    e.aiPreferredRange = preferred;
+    applyEnemyEcology(e, roomId, role, tick, permit);
     e.aiThreat = clamp(
       (permit ? 0.52 : 0.18) + hard * 0.1 + (e.elite ? 0.18 : 0) + clamp(Number(e.aggro) / 100, 0, 1) * 0.18,
       0,
@@ -158,7 +175,7 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
 
     if (retreat || (!permit && tooClose && role === ENEMY_ROLES.ARTILLERY)) e.aiIntent = "RETREAT";
     else if (flank) e.aiIntent = "FLANK";
-    else if (permit && dist <= Math.max(120, profile.preferred * 1.3)) e.aiIntent = "STRIKE";
+    else if (permit && dist <= Math.max(120, preferred * 1.3)) e.aiIntent = "STRIKE";
     else if (permit) e.aiIntent = "PRESS";
     else e.aiIntent = "HOLD";
 
@@ -176,6 +193,8 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
     alive: alive.length,
     budget,
     committed: permits.size,
+    ecology: ecology.id,
+    formation: ecology.formation,
     attacking: alive.filter((e) => e.aiAttackPermit).map((e) => e.spawnIndex ?? -1),
   });
 }
@@ -195,6 +214,10 @@ export function enemySteering(e = {}, player = null) {
   if (intent === "FLANK") return Object.freeze({ x: Number(e.aiFlankDir) || 1, scale: 0.09, intent });
   if (intent === "PRESS") return Object.freeze({ x: dir, scale: role === ENEMY_ROLES.BRUISER ? 0.12 : 0.065, intent });
   if (intent === "STRIKE") return Object.freeze({ x: dir, scale: 0.035, intent });
+  if (intent === "HOLD") {
+    const eco = ecologyHoldSteering(e, player);
+    return Object.freeze({ x: Math.sign(eco), scale: Math.abs(eco), intent });
+  }
   return Object.freeze({ x: 0, scale: 1, intent });
 }
 
@@ -206,5 +229,8 @@ export function enemyDirectorSnapshot(enemies = []) {
     permit: e.aiAttackPermit !== false,
     threat: Math.round(clamp(e.aiThreat, 0, 1) * 100),
     pack: Math.max(0, Number(e.aiPack) || 0),
+    biome: e.aiBiome || "",
+    formation: e.aiFormation || "",
+    ecoPressure: Math.round(clamp(e.aiEcoPressure, 0, 1) * 100),
   })));
 }

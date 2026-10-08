@@ -1,3 +1,26 @@
+## 08/10/2026 · V41 Enemy Ecology + Living Encounters
+
+**Caché:** `ohana-231`.
+
+V41 hace que los enemigos pertenezcan al mundo donde viven. Mantiene la inteligencia determinista de V38, pero añade prioridad táctica, formación, espaciado y lectura visual específicos por bioma.
+
+- **Claro · CORO DEL CLARO:** anillo estable que enseña lectura de amenazas sin saturar.
+- **Costa · MAREA:** divers y bruisers alternan presión lateral como una ola.
+- **Jungla · DOSSEL:** emboscadores y amenazas aéreas ganan prioridad desde el canopy.
+- **Cueva · ECO:** emboscadores espacian entradas y cambian flancos por pulso.
+- **Lab · CIRCUITO:** artillería toma prioridad, mantiene distancia y dibuja nodos enlazados.
+- **Cumbre · VENDAVAL:** skirmishers y divers cambian el vector lateral con el pulso del viento.
+- **Órbita · ÓRBITA:** artillería y hostigadores circulan mientras esperan permiso de ataque.
+- **Arrecife · CARDUMEN:** enemigos swarm se agrupan y avanzan como banco.
+- **Caldera · HORNO:** bruisers y brasas sostienen la presión máxima sin superar tres atacantes comprometidos.
+- **Nido · NIDO:** perfil reservado para coherencia del grafo, sin interferir con la Reina.
+- La ecología no modifica HP, daño, hitboxes ni usa RNG adicional.
+- El director expone `ecology`, `formation`, `biome` y `ecoPressure` para QA.
+- Browser E2E valida la formación CIRCUIT de Lab.
+- Visual Regression captura `15-enemy-ecology-circuit`.
+- Contrato de release V41: **10 personajes · 5 formas · 10 salas**.
+- QA final: `node tests/browser/e2e.mjs` · `node tests/browser/visual-regression.mjs` · `npm run release:check`.
+
 ## 08/10/2026 · V40 Living Worlds + Traversal Graph
 
 **Caché:** `ohana-230`.
