@@ -1297,6 +1297,8 @@ function tickFinale() {
     dispatchEvent(new CustomEvent("ohana-win", { detail: {
       score: game.score,
       kills: game.kills,
+      id: p ? p.id : "kilo",
+      evo: p ? p.evo : 4,
       hero: p ? p.name : "Ohana",
       form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
       rank,
