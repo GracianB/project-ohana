@@ -1,8 +1,9 @@
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
-import { CUERNO_FANTASY, addCuernoRibbonPoint, cuernoRibbonTouches,
- drawCuernoFantasyRibbon, drawCuernoPrismCrown, drawCuernoFantasyStatus
-} from "./cuerno-fantasy.js";
+import { CUERNO_FANTASY, startCuernoFantasyTrail,
+ updateCuernoFantasyTrail, tickCuernoFantasyStatus,
+ drawCuernoFantasyRibbon, drawCuernoPrismCrown,
+ drawCuernoFantasyStatus } from "./cuerno-fantasy.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -693,17 +694,7 @@ let w = 0;
 for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
-if(p.id==="cuerno") {
-  // A shared per-enemy cadence prevents stacked trails from multiplying DoT.
-  const now=Number(game.t)||0;
-  for(const enemy of game.enemies||[]){
-    if(!enemy || !(Number(enemy._cuernoFantasyUntil)>now) || !canHit(enemy))continue;
-    if(now < (Number(enemy._cuernoFantasyNext)||0))continue;
-    enemy._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
-    hitEnemy(game,enemy,Math.max(2,Number(enemy._cuernoFantasyDamage)||2),
-      {kx:0,ky:0,stun:0,color:"#ddbaff",parts:0,shake:0,hitstop:0,nums:false,xp:0});
-  }
-}
+tickCuernoFantasyStatus(game,p,canHit,hitEnemy);
 trimAbilityProjectiles(game);
 }
 
@@ -1337,12 +1328,7 @@ gallop(g,p,evo){
 S.gallop=17+evo*2;S.gallopFace=p.facing||1;
 p.vy=Math.min(p.vy||0,-3.4);
 armor(p,18);p._thrust=6;p._thrustFace=S.gallopFace;
-// Exactly two persistent ribbons maximum, even with K spam or bonuses.
-const existing=FX.filter(f=>f.kind==="cuernoFantasyTrail"&&!f.dead);
-if(existing.length>=CUERNO_FANTASY.maxTrails)existing[0].dead=true;
-add({kind:"cuernoFantasyTrail",life:CUERNO_FANTASY.trailFrames,max:CUERNO_FANTASY.trailFrames,
- points:[{x:cx(p),y:p.y+p.h*.72}],evo,
- dmg:(2.8+evo*.75)*pw(p),born:Number(g.t)||0,face:p.facing||1});
+startCuernoFantasyTrail(g,p,evo,FX,add,pw,cx);
 g.shake=Math.min(12,(g.shake||0)+3);
 boom(g,cx(p),cy(p),["#f5c9e8","#f2d9fa","#ccbffc","#afdef4","#fff0c1"][evo],6,{star:true});
 },
@@ -1362,27 +1348,8 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
 const UPD = {
 ...DINO_FX.update,
-cuernoFantasyTrail(g,f,p) {
- if(f.dead)return false;
- if(S.gallop>0 && p.id==="cuerno" && !p.dead) {
-   f.life=CUERNO_FANTASY.trailFrames;
-   if((f.age%CUERNO_FANTASY.sampleEvery)===0) {
-     f.points=addCuernoRibbonPoint(f.points,cx(p),p.y+p.h*.72);
-   }
- } else f.life--;
- if(f.life<=0)return false;
- const now=Number(g.t)||0;
- for(const e of g.enemies||[]){
-   if(!canHit(e)||!cuernoRibbonTouches(f.points,e))continue;
-   const first=!(Number(e._cuernoFantasyUntil)>now);
-   e._cuernoFantasyUntil=now+CUERNO_FANTASY.markFrames;
-   e._cuernoFantasyDamage=Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
-   if(first){
-     e._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
-     g.nums?.add?.(cx(e),e.y-10,"✦ FANTASÍA","#f0baff",false);
-   }
- }
- return true;
+cuernoFantasyTrail(g,f,p){
+ return updateCuernoFantasyTrail(g,f,p,S.gallop>0,canHit,cx,cy);
 },
 cuernoPrismCrown(g,f){return --f.life>0;},
 irisHalo(g,f){
