@@ -800,7 +800,7 @@ function draw(ctx, pose, R) {
   if (P.gag > 0) drawSaltCatch(ctx, tip, P.gag, f);
   if (P.fx) drawFx(ctx, R, P, sp, handF, t, f, w);
   if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, true);
-  if (P.lying === "slide") speedLines(ctx, R, sp, t, w);
+  if (P.lying === "slide") speedLines(ctx, R, sp, t, w, f);
   if (pose.state === "dead") dizzy(ctx, R, tip.x - 4, tip.y - w * 0.9, t);
 
   ctx.restore();
@@ -1003,7 +1003,7 @@ function drawFx(ctx, R, P, sp, hand, t, f, w) {
   }
 }
 
-function speedLines(ctx, R, sp, t, w) {
+function speedLines(ctx, R, sp, t, w, form) {
   const b = sp[0];
   ctx.save();
   ctx.strokeStyle = "rgba(255,255,255,0.7)";
@@ -1016,6 +1016,15 @@ function speedLines(ctx, R, sp, t, w) {
     ctx.beginPath(); ctx.moveTo(b.x - 20 - k * 30, y); ctx.lineTo(b.x - 32 - k * 40, y); ctx.stroke();
   }
   ctx.restore();
+  // Signature ketchup-red wake: a slide looks like Frita, not generic speed.
+  for(let i=0;i<3;i++){
+    const k=frac(t*.065+i/3);
+    const x=b.x-12-k*(27+form*2),y=b.y+3+i*3;
+    ctx.globalAlpha=.42*(1-k);
+    ctx.strokeStyle=i===1?"#ffe89b":"#e83b2d";ctx.lineWidth=1.6-k*.55;
+    ctx.beginPath();ctx.moveTo(x+7,y-2);ctx.quadraticCurveTo(x,y+1,x-9,y+2);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
   // chispas del suelo
   for (let i = 0; i < 3; i++) {
     const k = frac(t * 0.1 + i / 3);
