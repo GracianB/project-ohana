@@ -36,6 +36,36 @@ const HERO_LINES = {
 };
 const VISUAL_H = [36, 48, 58, 68, 80];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96, cuerno: 1.0 };
+
+// V47A · envelope visual real, no hitbox. Las formas altas necesitan espacio
+// para alas, cola, cuernos, aura y FX que no están representados por form.w/h.
+const PORTRAIT_ENVELOPE = Object.freeze({
+  kilo:    [1.00,1.08,1.18,1.30,1.52],
+  stitcho: [1.00,1.05,1.12,1.22,1.34],
+  chispin: [1.00,1.05,1.12,1.20,1.34],
+  cat:     [1.00,1.05,1.12,1.20,1.34],
+  dragon:  [1.00,1.08,1.22,1.38,1.62],
+  dino:    [1.00,1.06,1.14,1.28,1.42],
+  frita:   [1.00,1.04,1.10,1.20,1.34],
+  pizza:   [1.00,1.04,1.10,1.22,1.36],
+  yomi:    [1.00,1.08,1.16,1.28,1.46],
+  cuerno:  [1.00,1.06,1.14,1.28,1.48],
+});
+
+function portraitFit(def, evo, bw, bh, hero) {
+  const form = def.forms?.[evo] || {};
+  const baseH = VISUAL_H[evo] * (CHAR_K[def.id] || 1);
+  const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
+  const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
+  const visualAspect = Math.max(.72, geometryAspect * envelope);
+  const safeW = bw * (hero ? (evo >= 4 ? .72 : .82) : .72);
+  const safeH = bh * (hero ? (evo >= 4 ? .70 : .80) : .72);
+  const byHeight = safeH / Math.max(1, baseH);
+  const byWidth = safeW / Math.max(1, baseH * visualAspect);
+  const scale = Math.max(.34, Math.min(byHeight, byWidth));
+  const foot = bh * (hero ? (evo >= 3 ? .88 : .90) : .86);
+  return { scale, foot, visualAspect, envelope };
+}
 let selectedId = "kilo";
 let tick = 0;
 let raf = 0;
@@ -77,7 +107,10 @@ function paintPortraits(now = performance.now()) {
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
       const card = cv.closest(".char-card");
       const hero = card && card.classList.contains("selected");
-      const evo = hero ? Math.floor(tick / 220) % 5 : 1;
+      const qaEvo = new URLSearchParams(location.search).has("e2e") && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
+        ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
+        : null;
+      const evo = hero ? (qaEvo ?? (Math.floor(tick / 220) % 5)) : 1;
       if (cv._evo === undefined) cv._evo = evo;
       if (cv._evo !== evo) { cv._burst = 90; cv._evo = evo; }
       cv._burst = Math.max(0, (cv._burst || 0) - 2);
@@ -128,9 +161,12 @@ function paintPortraits(now = performance.now()) {
           t: at - (showcasePhase - 72),
         };
       }
-      const want = Math.min(bh * (hero ? 0.82 : 0.76), bw * (hero ? 0.9 : 0.82));
-      dummy.visualScale = want / (VISUAL_H[evo] * (CHAR_K[def.id] || 1));
-      const footY = bh * (hero ? 0.9 : 0.86);
+      const fit = portraitFit(def, evo, bw, bh, hero);
+      dummy.visualScale = fit.scale;
+      const footY = fit.foot;
+      cv.dataset.evo = String(evo);
+      cv.dataset.fitScale = fit.scale.toFixed(4);
+      cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
       c.save();
       c.translate(bw / 2, footY);
       c.scale(1, 0.22);
