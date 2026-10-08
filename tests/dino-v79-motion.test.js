@@ -8,11 +8,13 @@ function pose(form, state="run", extra={}) {
    castSlot:2,move:null,look:{x:1,y:0},flourish:0,flourishN:0,...extra};
 }
 function draw(form,state,extra={}) {
- const points=[];let saves=0,restores=0,eyes=0,paths=0;
+ const points=[],transforms=[];let saves=0,restores=0,eyes=0,paths=0;
  const ctx=new Proxy({globalAlpha:1,
    save(){saves++},restore(){restores++},
    createLinearGradient(){return {addColorStop(){}};},
-   beginPath(){paths++}}, {
+   beginPath(){paths++},
+   translate(x,y){transforms.push(["translate",x,y]);},
+   rotate(a){transforms.push(["rotate",a]);}}, {
    get(o,k){return k in o?o[k]:()=>{};},
    set(o,k,v){o[k]=v;return true;}
  });
@@ -32,7 +34,7 @@ function draw(form,state,extra={}) {
  assert.equal(saves,restores,"Canvas state leaks: "+form+" "+state);
  assert.ok(points.length>0,"Character disappeared");
  if(!["dead","hurt"].includes(state)&&extra.move!=="dino-roll")assert.ok(eyes>0,"Dino gaze lost");
- return {points,eyes,paths};
+ return {points,eyes,paths,transforms};
 }
 
 test("V79 · each of five Dino forms has an individual and immutable movement profile",()=>{
@@ -104,5 +106,16 @@ test("V79 · dinosaur's roll remains a contained shape and does not inherit stan
  for(let f=0;f<5;f++){
    const r=draw(f,"run",{move:"dino-roll",turnPulse:1,land:1,sway:1,brake:1});
    assert.ok(r.points.filter(x=>x.kind==="poly"&&x.vertices.length===3).length>=9);
+ }
+});
+
+test("V79 · L earthquake and U Colossus have distinct physical poses in all five forms",()=>{
+ for(let f=0;f<5;f++){
+   const quake=draw(f,"cast",{castSlot:2,cast:.47,turnPulse:0,land:0});
+   const colossus=draw(f,"cast",{castSlot:3,cast:.47,turnPulse:0,land:0});
+   const rolling=draw(f,"cast",{castSlot:1,cast:.47,turnPulse:0,land:0});
+   assert.notDeepEqual(quake.transforms,colossus.transforms,"L/U reuse the same body pose at form "+f);
+   assert.notDeepEqual(rolling.transforms,quake.transforms,"K/L reuse the same body pose at form "+f);
+   assert.notDeepEqual(rolling.transforms,colossus.transforms,"K/U reuse the same body pose at form "+f);
  }
 });
