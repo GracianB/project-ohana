@@ -7,6 +7,7 @@ drawSpark, drawStar, FONT_BODY, FONT_DISPLAY
 import { ROSTER } from "../characters/roster.js";
 import { SUPREME_STORYBOARDS } from "./supreme-storyboards.js";
 import { cuernoGrandStage } from "./supreme-storyboards.js";
+import { dinoColossusStage, drawDinoColossusFilm } from "./dino-ultimate-film.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
@@ -192,7 +193,10 @@ if(id==="stitcho") return {x:lerp(-target*.08,target*.03,e(seg(k,.18,.66))),y:0,
 if(id==="chispin") return {x:Math.sin(k*32)*target*.012*seg(k,.10,.48),y:-Math.sin(seg(k,.24,.55)*Math.PI)*target*.105-e(seg(k,.68,.88))*target*.025,scale:1+.09*e(seg(k,.50,.78)),rot:Math.sin(k*25)*.022*(1-seg(k,.69,.90))};
 if(id==="cat") return {x:k>.56?target*.06:Math.sin(k*19)*target*.008*seg(k,.14,.48),y:-Math.sin(seg(k,.36,.61)*Math.PI)*target*.07,scale:1+.055*e(seg(k,.64,.84)),rot:Math.sin(k*13)*.018*(1-seg(k,.7,.9))};
 if(id==="dragon") return {x:-Math.sin(seg(k,.26,.53)*Math.PI)*target*.025,y:-Math.sin(seg(k,.32,.84)*Math.PI)*target*.13,scale:1+.065*e(seg(k,.62,.87)),rot:-.035*Math.sin(seg(k,.3,.78)*Math.PI)};
-if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
+if(id==="dino") return {x:0,
+  y:-Math.sin(seg(k,.18,.44)*Math.PI)*target*.05 + Math.sin(seg(k,.42,.61)*Math.PI)*target*.055,
+  scale:1+.13*e(seg(k,.19,.42))+.025*e(seg(k,.65,.83)),
+  rot:Math.sin(k*21)*.012*(1-seg(k,.55,.72))};
 if(id==="frita") return {x:Math.sin(seg(k,.23,.58)*Math.PI)*target*.04,y:-Math.sin(seg(k,.28,.61)*Math.PI)*target*.055,scale:1+.055*e(seg(k,.63,.85)),rot:-.04*Math.sin(seg(k,.2,.55)*Math.PI)+.018*Math.sin(seg(k,.62,.86)*Math.PI)};
 if(id==="pizza") return {x:-Math.sin(seg(k,.40,.64)*Math.PI)*target*.055,y:-Math.sin(seg(k,.38,.68)*Math.PI)*target*.05,scale:1+.055*e(seg(k,.64,.86)),rot:-.04*Math.sin(seg(k,.38,.62)*Math.PI)};
 if(id==="yomi") return {x:0,y:e(seg(k,.48,.72))*target*.025,scale:1.08-.08*e(seg(k,.18,.70)),rot:0};
@@ -203,7 +207,7 @@ return {x:lerp(-target*.04,target*.035,e(seg(k,.18,.76))),y:-e(seg(k,.50,.80))*t
 
 function storyPose(id,k){
 if(id==="cat") return k<.58?"idle":k<.78?"attack":"victory";
-if(id==="dino") return (k>.18&&k<.36)||(k>.49&&k<.66)?"attack":k>.70?"victory":"idle";
+if(id==="dino") return k<.19?"idle":k<.42?"cast":k<.72?"attack":"victory";
 if(id==="dragon") return k<.32?"idle":k<.53?"jump":k<.78?"attack":"victory";
 if(id==="frita") return k<.24?"idle":k<.77?"attack":"victory";
 if(id==="pizza") return k<.40?"idle":k<.73?"attack":"victory";
@@ -319,16 +323,7 @@ if(id==="kilo"){
     circle(ctx,cx,cy,target*.16*(.5+nova),"#fff",.18+.22*nova,true);
   }
 }else if(id==="dino"){
-  const first=seg(k,.18,.36),second=seg(k,.50,.70);
-  if(first>0) quake(ctx,cx,cy+target*.48,target*.46,first,color,false);
-  if(second>0){
-    quake(ctx,cx,cy+target*.48,target*1.08,second,color,true);
-    drawRing(ctx,cx,cy+target*.42,target*.96,second,color,5,.26);
-  }
-  if(k>.37&&k<.49){
-    ctx.globalAlpha=.55;ctx.fillStyle="#fff";
-    ctx.beginPath();ctx.arc(cx+target*.18,cy-target*.28,3,0,Math.PI*2);ctx.fill();
-  }
+  drawDinoColossusFilm(ctx,k,t,cx,cy,target,color,false);
 }else if(id==="frita"){
   const chase=seg(k,.06,.49);
   const px=lerp(cx-target*.82,cx+target*.19,easeInOut(chase));
@@ -568,6 +563,7 @@ el.dataset.beat=story.beat;
 el.dataset.assist=allyDef?.id||"";
 el.dataset.dreamTargets=def.id==="cuerno"?String(Math.max(0,Number(detail.dreamTargets)||0)):"";
 el.dataset.cuernoFinal=def.id==="cuerno"&&evo===4?"aurora":"";
+el.dataset.dinoPhase=def.id==="dino"?"heartbeat":"";
 el.dataset.generation=String(token);
 el.dataset.state="active";
 el.dataset.duration=String(Math.round(duration*1000));
@@ -621,6 +617,7 @@ function frame(now){
     p._cuernoMagicSlot=k>=.22&&k<.76?3:-1;
     p._specialAuroraT=k>=.51?Math.round((1-k)*260):0;
   }else delete el.dataset.cuernoPhase;
+   if(def.id==="dino")el.dataset.dinoPhase=dinoColossusStage(k).name;
 
   let heroAlpha=vis;
   if(def.id==="cat"){
