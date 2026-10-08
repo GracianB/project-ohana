@@ -9,6 +9,7 @@
 // También dibuja la entrada cinematográfica (franjas + título) si e.introT > 0.
 // ============================================================================
 
+import { bossWindupProgress } from "../systems/boss-v94-readability.js";
 const TAU = Math.PI * 2;
 const INK = "#1c0610";
 
@@ -283,7 +284,7 @@ export function drawBossQueen(ctx, e, t) {
   const c = pal(phase);
   const mode = e.mode || "idle";
   const tele = e.telegraph ? e.teleKind : "";
-  const prog = e.windMax ? 1 - e.wind / e.windMax : 0;
+  const prog = bossWindupProgress(e);
   const intro = e.introT > 0;
   const roaring = intro && e.introT < 80 && e.introT > 20;
 
