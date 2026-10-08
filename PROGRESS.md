@@ -1,3 +1,33 @@
+## 08/10/2026 · V59 CUERNO ORIGIN · MENSAJE 1/10 · PROPOSED
+
+**Caché:** `ohana-259`. **Contrato:** diez héroes / cinco formas. **Intro de Grok y Dino:** no modificados.
+
+### Nueva fantasía
+Cuerno comienza siendo un **cuerno viviente de unicornio**, con mirada, espiral y base de perla, SIN caballo ni piernas. Con cada etapa nace un cuerpo real hasta llegar a Unicornio Aurora. Su nacimiento es mágico, la velocidad y el salto son naturales, no un poder dependiente de K.
+
+### Fase 1 implementada
+- Nueva ilustración Canvas exclusiva de Forma 0; silueta de cuerno de nácar, no bola cuadrúpeda.
+- El modo pintado también muestra el Cuerno vectorial nuevo, sin que un SVG antiguo tape el rediseño.
+- Estadísticas reales por forma: velocidad [6, 6.7, 7.4, 8.4, 9.6] y salto [14.6, 15.4, 16.2, 17.4, 18.6], en todos los niveles superiores a sus compañeros.
+- Pasiva `punta` conservada por compatibilidad, renombrada `Impulso innato`: velocidad y salto permanentes con estela ligera; mantiene el rebote y el puente aurora.
+- Rig de movimiento con frecuencia y respuesta de carrera rápida. Historia evolutiva y cinco nombres nuevos: Semilla → Naciente → Potro Iris → Unicornio Estelar → Unicornio Aurora.
+- Nuevas comprobaciones Node de velocidades y saltos, no cuatro patas en la forma inicial, y Chrome screenshot de Forma 0 y 4.
+- Caché coherente `ohana-259`; no se alteran ataques J/K/L/U ni físicos de otros héroes.
+
+### Roadmap de diez mensajes
+1. **V59 Origen:** cuerno viviente, velocidad y salto innatos, base gráfica y contrato ✅
+2. **V60 Naciente:** aparición orgánica del cuerpo y patas sin romper la identidad del cuerno
+3. **V61 Potro Iris:** anatomía y cuatro patas legibles, locomoción expresiva
+4. **V62 Unicornio Estelar:** melena, silueta, galope y carácter propio
+5. **V63 Unicornio Aurora:** criatura final, majestuosa y cinematográfica, sin crecer por crecer
+6. **V64 J:** disparos del cuerno con trayectorias mágicas e impactos distintos
+7. **V65 K:** embestida fantasía supersónica, controlable, sin salirse de pantalla
+8. **V66 L:** siete artes de luz y magia de área reconocible
+9. **V67 U:** secuencia suprema original, larga, legible y espectacular
+10. **V68 Cierre:** cinco formas, controles, rendimiento, navegador, balance, CI y release gate.
+
+**Dino permanece reservado para el proyecto sorpresa final.**
+
 ## 08/10/2026 · V58 YOMI FINAL · FASE 3/3 · JUEZ DEL UMBRAL
 
 **Caché:** `ohana-258`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino último. Grok intro intacta.**
