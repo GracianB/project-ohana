@@ -58,6 +58,79 @@ R.sparkle(ctx,x-4,born-24,3.5*k,"#d1f5e6");
 ctx.restore();
 }
 
+// V67: J/K/L/U originate at the real horn. Pure pose contract, no extra FX objects.
+const IRIS_COLORS=["#ffacbe","#ffc98f","#ffe8a5","#a6e8b8","#a7e5fb","#b8c4ff","#e0b9f6"];
+const HORN_TIPS=[[0,-65],[7,-88],[24,-100],[25,-120],[33,-139]];
+export function cuernoMagicPose(pose,form){
+if(pose?.state==="dead"||pose?.state==="hurt")return null;
+const forced=Number.isInteger(pose?.cuernoMagicSlot)&&pose.cuernoMagicSlot>=0&&pose.cuernoMagicSlot<=3;
+const cast=Number(pose?.cast)||0;
+const slot=forced?pose.cuernoMagicSlot:pose?.state==="cast"&&cast>0?pose?.castSlot:-1;
+const sleep=Number(pose?.cuernoDreamT)||0;
+if(slot<0||slot>3){if(sleep<=0)return null;
+return {slot:3,strength:Math.min(.22,sleep*.35),radius:0,continuous:true};}
+const strength=forced?.85:Math.sin(Math.PI*Math.min(1,Math.max(0,cast)));
+return {slot,strength:Math.max(0,strength),radius:(14+form*12)*(1+cast*.75),continuous:false};
+}
+function drawCuernoMagic(ctx,pose,R,form,t){
+const magic=cuernoMagicPose(pose,form);
+if(!magic||magic.strength<.04)return;
+const {slot,strength:k}=magic,tip=HORN_TIPS[form],x=tip[0],y=tip[1],TAU=Math.PI*2;
+ctx.save();ctx.globalCompositeOperation="lighter";ctx.lineCap="round";
+const colors=IRIS_COLORS;
+if(slot===0){
+// J: the astral lance grows from the horn's point, not from the belly.
+ctx.strokeStyle="#fff3cb";ctx.lineWidth=2.8;ctx.globalAlpha=.78*k;
+ctx.beginPath();ctx.moveTo(x-4,y+2);ctx.lineTo(x+13+form*5,y-5);
+ctx.lineTo(x+34+form*9,y-11);ctx.stroke();
+for(let i=0;i<3;i++){
+ctx.strokeStyle=colors[i*3];ctx.lineWidth=1.2;
+ctx.beginPath();ctx.moveTo(x+8,y+(i-1)*3);
+ctx.lineTo(x+23+form*5,y+(i-1)*6);ctx.stroke();
+}
+R.sparkle(ctx,x+27+form*8,y-10,2.5+3*k,"#fff6cf");
+}else if(slot===1){
+// K: galloping hooves pull a nacre comet trail behind the flank.
+const tailX=form<2?-14:-35,tailY=form<2?-20:-34;
+for(let i=0;i<4;i++){
+ctx.strokeStyle=colors[(i+form)%7];ctx.globalAlpha=(.32+i*.055)*k;
+ctx.lineWidth=2.2+i*.3;ctx.beginPath();ctx.moveTo(tailX,tailY+i*5);
+ctx.bezierCurveTo(tailX-12,tailY-12+i*6,tailX-26,tailY-2+i*9,tailX-40-form*3,tailY+i*9);
+ctx.stroke();
+}
+ctx.strokeStyle="#fff8d9";ctx.lineWidth=2;ctx.globalAlpha=.7*k;
+ctx.beginPath();ctx.arc(x,y,8+form*2,-1.35,1.1);ctx.stroke();
+}else if(slot===2){
+// L: seven blurred circular bands spread FROM the horn; the arena-wide iris is separate.
+const radius=magic.radius;
+for(let i=0;i<7;i++){
+ctx.strokeStyle=colors[i];ctx.lineWidth=2.8+form*.45;
+ctx.globalAlpha=(.16+.035*(i%3))*k;ctx.beginPath();
+ctx.arc(x-5,y+14,Math.max(2,radius-i*3.2),0,TAU);ctx.stroke();
+}
+R.sparkle(ctx,x,y,2.5+4*k,"#fff6dd");
+}else{
+// U: dream canopy and sleepy starlight. Keep the animal readable beneath it.
+const spread=20+form*10;
+for(let i=0;i<7;i++){
+const u=i-3;
+ctx.strokeStyle=colors[i];ctx.lineWidth=2.7+form*.2;
+ctx.globalAlpha=(.23+.04*(i%2))*k;
+ctx.beginPath();ctx.moveTo(x,y);
+ctx.quadraticCurveTo(x-5+u*8,y-22-form*4,x+u*spread*.50,y-33-form*5);
+ctx.stroke();
+}
+ctx.globalAlpha=.5*k;ctx.strokeStyle="#eee0ff";ctx.lineWidth=1.6;
+for(let i=0;i<3;i++){
+const zx=-35+i*12,zy=-52-i*8+Math.sin(t*.05+i)*2;
+ctx.beginPath();ctx.moveTo(zx-3,zy-4);ctx.lineTo(zx+3,zy-4);
+ctx.lineTo(zx-3,zy+4);ctx.lineTo(zx+3,zy+4);ctx.stroke();
+}
+if(!magic.continuous)R.sparkle(ctx,x,y,4+3*k,"#fff7dd");
+}
+ctx.restore();
+}
+
 function horn(ctx, len, color, wobble) {
   ctx.save();
   ctx.lineCap = "round";
@@ -127,6 +200,7 @@ function drawLivingHorn(ctx,pose,R,t){
   }
   ctx.restore();
 drawCuernoSoul(ctx,pose,R,0,t);
+drawCuernoMagic(ctx,pose,R,0,t);
 }
 
 // F1 Destello: the pearl horn grows a neck, ears, a muzzle and TWO tentative hooves.
@@ -196,6 +270,7 @@ function drawFirstBody(ctx,pose,R,t){
   }
   ctx.restore();
 drawCuernoSoul(ctx,pose,R,1,t);
+drawCuernoMagic(ctx,pose,R,1,t);
 }
 
 function drawRainbowFoal(ctx,pose,R,t){
@@ -283,6 +358,7 @@ ctx.restore();
 }
 ctx.restore();
 drawCuernoSoul(ctx,pose,R,2,t);
+drawCuernoMagic(ctx,pose,R,2,t);
 }
 
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
@@ -385,6 +461,7 @@ ctx.beginPath();ctx.arc(25,-121,9+18*flourish,-.6,2.7);ctx.stroke();ctx.restore(
 }
 ctx.restore();
 drawCuernoSoul(ctx,pose,R,3,t);
+drawCuernoMagic(ctx,pose,R,3,t);
 }
 
 // V64 F4: original adult Unicornio Aurora. Wings are a visual signature, not flight physics.
@@ -395,7 +472,8 @@ const hurt=pose.state==="hurt"||pose.state==="dead";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase),speed=Math.max(0,Number(pose.speed)||0);
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 const soul=cuernoSoulBeat(pose,4);
-const unfold=air?1:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
+const magic=cuernoMagicPose(pose,4);
+const unfold=air?1:magic?.slot===3?1:magic?.slot===2?.86:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
 const ink="#4d5478",coat="#fffaf0",shadow="#d6d6f0",gold="#f7d78a";
 const colors=["#f9d8b5","#f5b9e0","#b8d0ff","#a5ece4","#d9b8ff","#fff2b9"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
@@ -490,8 +568,8 @@ ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
 R.blush(ctx,45,-68,2.2,"#f6d5d7");
-R.eye(ctx,35,-79,5,pose,{iris:"#7e78b4",mood:hurt||soul==="sneeze"||soul==="bow"?"closed":cast?"angry":triumph?"happy":"normal"});
-R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":triumph?"happy":cast?"grin":"smile");
+R.eye(ctx,35,-79,5,pose,{iris:"#7e78b4",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":cast?"angry":triumph?"happy":"normal"});
+R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
 ctx.fillStyle="#a495a3";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
 // A crown-horn rises naturally from the brow with visible spiral relief.
 ctx.save();ctx.translate(33,-90);ctx.rotate(-.085+(cast?-.08:0));
@@ -518,6 +596,7 @@ ctx.restore();
 }
 ctx.restore();
 drawCuernoSoul(ctx,pose,R,4,t);
+drawCuernoMagic(ctx,pose,R,4,t);
 }
 
 function draw(ctx, pose, R) {

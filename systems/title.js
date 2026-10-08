@@ -132,12 +132,19 @@ function paintPortraits(now = performance.now()) {
       const poseIndex = showcasePhase < 44 ? 0 : showcasePhase < 88 ? 1 : 2;
       let showcasePose = hero ? personality[poseIndex] : "idle";
       let showcaseMove = null;
-      let stitchoBeat = "", cuernoBeat = "";
+      let stitchoBeat = "", cuernoBeat = "", cuernoMagicSlot = -1;
       if (hero && def.id === "cuerno" && TITLE_E2E) {
         const choice = window.__OHANA_TITLE_CUERNO_BEAT;
         if (["curious","shy","prance","stargaze","sneeze","bow"].includes(choice)) {
           cuernoBeat = choice;
           showcasePose = "idle";
+        }
+      }
+      if (hero && def.id === "cuerno" && TITLE_E2E) {
+        const forcedMagic = window.__OHANA_TITLE_CUERNO_MAGIC;
+        if (Number.isInteger(forcedMagic) && forcedMagic >= 0 && forcedMagic <= 3) {
+          showcasePose = "cast";
+          cuernoMagicSlot = forcedMagic;
         }
       }
       if (hero && def.id === "stitcho") {
@@ -171,13 +178,16 @@ function paintPortraits(now = performance.now()) {
         _poseOverride: showcasePose,
         _move: showcaseMove,
         _cuernoBeat: cuernoBeat,
+        _cuernoMagicSlot: cuernoMagicSlot,
       };
       if (hero && def.id === "cuerno") {
         cv.dataset.cuernoBeat = cuernoBeat;
-        if (card) card.dataset.cuernoBeat = cuernoBeat;
+        cv.dataset.cuernoMagic = String(cuernoMagicSlot);
+        if (card) { card.dataset.cuernoBeat = cuernoBeat; card.dataset.cuernoMagic = String(cuernoMagicSlot); }
       } else {
         delete cv.dataset.cuernoBeat;
-        if (card) delete card.dataset.cuernoBeat;
+        delete cv.dataset.cuernoMagic;
+        if (card) { delete card.dataset.cuernoBeat; delete card.dataset.cuernoMagic; }
       }
       if (hero && def.id === "stitcho") {
         cv.dataset.stitchoBeat = stitchoBeat;

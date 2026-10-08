@@ -1,3 +1,14 @@
+## 08/10/2026 · V67 CUERNO · MENSAJE 8/10 · MAGIA VIVA
+
+**Caché:** `ohana-266`. **Contrato:** 10 personajes, 5 evoluciones cada uno; Dino y Grok intactos. Sin mutar física/hitbox/boss ni J/K/L/U.
+
+- Cada J/K/L/U nace de la punta **real** del cuerno dibujado, con su propia geometría y paleta. J proyecta una lanza de nácar; K deja cuatro cintas de galope; L origina siete anillos difuminados que se expanden desde el asta; U extiende siete caminos de sueño y pequeñas Z de luz alrededor del unicornio.
+- La reacción evoluciona con Cuernín, Destello, Potro Iris, Estelar y Aurora: punta anclada a anatomía, amplitud creciente y arco/lenguaje propios, sin imágenes ni generadores de partículas.
+- La forma F4 coordina alas y expresión: despliega completamente en U, casi por completo en L y cierra los ojos serenamente durante el sueño, manteniendo sus cinco formas previas, animaciones cómicas y el animal legible.
+- Tras U, la aura de sueño local perdura discretamente durante el temporizador ya existente y se apaga automáticamente. No genera nuevas acciones, no reejecuta daño y no altera dirección ni salto; la inmunidad absoluta de jefes y el daño progresivo de la U siguen siendo responsabilidad exclusiva de `systems/abilities.js`.
+- `cuernoMagicPose` es un contrato puro, determinista y medible. Pruebas Node de los cuatro trazos, cinco formas, Canvas save/restore, estado herido/muerto y regresión mecánica; cuatro capturas Chromium reales J/K/L/U bajo fuerza QA exclusiva, con cache de retrato segura.
+- Presupuesto JS: compactación exclusivamente de indentación en tres assets sin backticks ni cambios semánticos. CI Node, E2E navegador y multijugador, regresión visual y release gate obligatorio antes de merge.
+
 ## 08/10/2026 · V66 CUERNO · MENSAJE 7/10 · ALMA DE UNICORNIO
 
 **Caché:** `ohana-265`. **Contrato:** 10 personajes / 5 formas, Dino y Grok intactos. Fases anteriores, Círculo Iris L y Sueño Arcoíris U preservados.

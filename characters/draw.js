@@ -990,6 +990,7 @@ function poseFingerprint(pose) {
 const q = (v, s) => Math.round((Number(v) || 0) * s);
 return [
 pose.state || "", pose.move || "", pose.form | 0, pose.cuernoBeat || "",
+  pose.cuernoMagicSlot ?? -1, q(pose.cuernoDreamT, 2),
 q(pose.phase, 6), q(pose.speed, 8), q(pose.vy, 8), pose.air ? 1 : 0,
 q(pose.land, 8), q(pose.atk, 10), q(pose.cast, 10), pose.castSlot | 0,
 q(pose.hurt, 8), q(pose.blink, 4), q(pose.sway, 8), q(pose.bounce, 8),
@@ -1117,7 +1118,11 @@ const speed = Math.abs(p.vx || 0);
 const moving = !!p.grounded && speed > 0.55;
 const air = !p.grounded;
 const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng }), p), p);
-if (p.id === "cuerno") pose.cuernoBeat = p._cuernoBeat || "";
+if (p.id === "cuerno") {
+  pose.cuernoBeat = p._cuernoBeat || "";
+  pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
+  pose.cuernoDreamT = Math.max(0, Number(p._specialAuroraT) || 0) / 260;
+}
 const atk = pose.atk;
 const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
 const hurtFresh = (p.invuln || 0) > 18;
