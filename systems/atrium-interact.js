@@ -33,7 +33,7 @@ if (stage && grid) {
   const greeted = new Set();
   const pointer = { x: innerWidth * .5, y: innerHeight * .4, on: false };
   let awake = null;
-  let gagAt = 0, lastAtriumFrame = 0, pointerPending = false;
+  let gagAt = 0, lastAtriumFrame = 0, pointerPending = false, fxRaf = 0;
   const ATRIUM_FRAME_INTERVAL_MS = 65; // ~15fps animated lines; heroes have separate budgets.
 
   const cards = () => [...grid.querySelectorAll(".char-card")];
@@ -183,31 +183,36 @@ if (stage && grid) {
     setTimeout(() => el.classList.remove("is-hop"), 420);
     gagAt = performance.now();
   }, 2600);
-  (function frame(now) {
-    if (!reduced && ctx && !document.body.classList.contains("playing") &&
-        document.visibilityState !== "hidden") {
-      if (lastAtriumFrame && now - lastAtriumFrame < ATRIUM_FRAME_INTERVAL_MS) {
-        requestAnimationFrame(frame);
-        return;
-      }
-      lastAtriumFrame = now;
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      const list = cards();
-      ctx.lineWidth = 1;
-      for (let i = 0; i < list.length; i++) {
-        const a = center(list[i]);
-        const b = center(list[(i + 1) % list.length]);
+  function frame(now) {
+    fxRaf = 0;
+    // Do not even schedule callbacks while the game is playing or tab is hidden.
+    // visibilitychange and the playing class mutation restart the scene later.
+    if (reduced || !ctx || document.body.classList.contains("playing") ||
+        document.visibilityState === "hidden") return;
+    if (lastAtriumFrame && now - lastAtriumFrame < ATRIUM_FRAME_INTERVAL_MS) {
+      fxRaf = requestAnimationFrame(frame);
+      return;
+    }
+    lastAtriumFrame = now;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const list = cards();
+    // Compute rectangles once per painted frame, never again for the ten lines.
+    const centers = list.map(center);
+    ctx.lineWidth = 1;
+    for (let i = 0; i < list.length; i++) {
+        const a = centers[i];
+        const b = centers[(i + 1) % list.length];
         ctx.strokeStyle = "rgba(190,230,255,.16)";
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
       if (awake) {
-        const c = center(awake);
+        const c = centers[list.indexOf(awake)] || center(awake);
         ctx.strokeStyle = "rgba(255,220,150,.55)";
         ctx.beginPath(); ctx.moveTo(pointer.x, pointer.y); ctx.lineTo(c.x, c.y); ctx.stroke();
       }
       const sel = list.find((el) => el.classList.contains("selected"));
       if (sel) {
-        const c = center(sel);
+        const c = centers[list.indexOf(sel)] || center(sel);
         for (let i = 0; i < 6; i++) {
           const a = now / 700 + i;
           ctx.fillStyle = "rgba(255,220,150,.8)";
@@ -231,7 +236,17 @@ if (stage && grid) {
         ctx.beginPath(); ctx.arc(p.x, p.y, 1.5 + p.life * 1.6, 0, 7); ctx.fill();
       }
       ctx.globalAlpha = 1;
-    }
-    requestAnimationFrame(frame);
-  })(0);
+    fxRaf = requestAnimationFrame(frame);
+  }
+  function resumeFx() {
+    if (reduced || fxRaf || document.body.classList.contains("playing") ||
+        document.visibilityState === "hidden") return;
+    lastAtriumFrame = 0;
+    fxRaf = requestAnimationFrame(frame);
+  }
+  document.addEventListener("visibilitychange", resumeFx);
+  new MutationObserver(resumeFx).observe(document.body, {
+    attributes: true, attributeFilter: ["class"]
+  });
+  resumeFx();
 }
