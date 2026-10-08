@@ -1,5 +1,6 @@
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
+import { CUERNO_V92, rememberCuernoEnemyPositions, drawCuernoPrismEcho } from "./cuerno-v92-resonance.js";
 import { CUERNO_FANTASY, startCuernoFantasyTrail,
  updateCuernoFantasyTrail, tickCuernoFantasyStatus,
  drawCuernoFantasyRibbon, drawCuernoPrismCrown,
@@ -666,6 +667,8 @@ let w = 0;
 for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
+if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
+ rememberCuernoEnemyPositions(game.enemies);
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
 }
@@ -1306,6 +1309,7 @@ cuernoFantasyTrail(g,f,p){
  return updateCuernoFantasyTrail(g,f,p,S.gallop>0,canHit,cx,cy);
 },
 cuernoPrismCrown(g,f){return --f.life>0;},
+cuernoPrismEcho(g,f){return --f.life>0;},
 irisHalo(g,f){
 f.life--;
 const progress=1-f.life/f.max;
@@ -1316,6 +1320,16 @@ if(Math.hypot(cx(e)-f.x,cy(e)-f.y)>wave)continue;
 f.hit.add(e);
 hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*5,ky:-4,stun:12,
 color:"#fff3cf",parts:3,shake:1,hitstop:0});
+// A K-enchanted enemy struck by L gets a clear, bounded resonance.
+// Same damage, one echo per enemy and max five per L cast.
+if(Number(e._cuernoFantasyUntil)>(Number(g.t)||0)
+   &&(f.resonances||0)<CUERNO_V92.maxEchoesPerCast){
+ f.resonances=(f.resonances||0)+1;
+ add({kind:"cuernoPrismEcho",x:cx(e),y:cy(e),
+  life:CUERNO_V92.echoFrames,max:CUERNO_V92.echoFrames});
+ if(!e.boss)e.stun=Math.max(Number(e.stun)||0,25);
+ g.nums?.add?.(cx(e),e.y-16,"✦ PRISMA","#fff0c7",false);
+}
 }
 return f.life>0;
 },
@@ -2264,6 +2278,9 @@ cuernoFantasyTrail(ctx,f,cam,t,g){
 },
 cuernoPrismCrown(ctx,f,cam,t,g){
  drawCuernoPrismCrown(ctx,f,cam,t,!!g?.reduceMotion);
+},
+cuernoPrismEcho(ctx,f,cam,t,g){
+ drawCuernoPrismEcho(ctx,f,cam,t,!!g?.reduceMotion);
 },
 irisHalo(ctx,f,cam,t){
 const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
