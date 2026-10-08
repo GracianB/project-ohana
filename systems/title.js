@@ -80,6 +80,9 @@ let selectedId = "kilo";
 let tick = 0;
 let raf = 0;
 let portraitCanvases = [];
+// Center character keeps 24fps; side previews refresh only when needed.
+let portraitResizeObserver = null;
+const SIDE_PREVIEW_INTERVAL_MS = 120;
 const portraitClock = createFixedClock({ stepMs: 1000 / 24, maxSteps: 1 });
 
 const HERO_SHOWCASE = Object.freeze({
@@ -98,7 +101,7 @@ cuerno:  ["idle","victory","jump"],
 function readSave() { return saveStore.readRaw(); }
 
 function paintPortraits(now = performance.now()) {
-if (document.body.classList.contains("playing")) {
+if (document.body.classList.contains("playing") || document.visibilityState === "hidden") {
   raf = 0;
   portraitClock.reset();
   return;
@@ -110,6 +113,9 @@ portraitClock.advance(now, () => {
     if (!card || card.getAttribute("aria-hidden") === "true") continue;
     const entry = ROSTER_BY_ID.get(cv.dataset.id);
     if (!entry) continue;
+    const hero = card.classList.contains("selected");
+    if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < SIDE_PREVIEW_INTERVAL_MS) continue;
+    cv._lastPaintAt = now;
     const { def, index: idx } = entry;
     const c = cv.getContext("2d", { alpha: true });
     fitCanvas(cv);
@@ -118,7 +124,6 @@ portraitClock.advance(now, () => {
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, cv.width, cv.height);
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const hero = card.classList.contains("selected");
     const qaEvo = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
       ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
       : null;
@@ -249,17 +254,21 @@ portraitClock.advance(now, () => {
     if (hero) c.rotate(sway);
     drawCharacter(c, dummy, { x: 0, y: 0 }, at);
     c.restore();
-    const role = card && card.querySelector(".role");
-    if (role) {
-      const en = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
-      role.textContent = hero ? en : def.name;
-    }
-    const rail = card && card.querySelector(".form-rail");
-    if (rail) {
-      rail.querySelectorAll("i").forEach((dot, n) => {
-        dot.classList.toggle("on", hero && n <= evo);
-        dot.classList.toggle("now", hero && n === evo);
-      });
+    // Labels and evolution dots change only when the selection/form does.
+    if (cv._labelEvo !== evo || cv._labelHero !== hero) {
+      cv._labelEvo = evo; cv._labelHero = hero;
+      const role = card.querySelector(".role");
+      if (role) {
+        const en = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
+        role.textContent = hero ? en : def.name;
+      }
+      const rail = card.querySelector(".form-rail");
+      if (rail) {
+        rail.querySelectorAll("i").forEach((dot, n) => {
+          dot.classList.toggle("on", hero && n <= evo);
+          dot.classList.toggle("now", hero && n === evo);
+        });
+      }
     }
   }
 });
@@ -267,6 +276,7 @@ raf = requestAnimationFrame(paintPortraits);
 }
 
 function fitCanvas(cv) {
+if (cv._needsFit === false) return;
 const box = cv.parentElement || cv;
 const w = Math.max(40, Math.round(box.clientWidth));
 const h = Math.max(40, Math.round(box.clientHeight));
@@ -275,6 +285,7 @@ const dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
 const W = Math.round(w * dpr), H = Math.round(h * dpr);
 if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
 cv._dpr = dpr;
+cv._needsFit = false;
 }
 
 function selectionStatus() {
@@ -305,12 +316,18 @@ const next2 = ids[(i + 2) % ids.length];
 
 cards.forEach((el) => {
   const selected = el.dataset.id === id;
-  const visible = [id, prev, next, prev2, next2].includes(el.dataset.id);
+  // Match keyboard and ARIA visibility to the actual three-card CSS carousel.
+  const visible = [id, prev, next].includes(el.dataset.id);
+  const wasVisible = el.getAttribute("aria-hidden") !== "true";
   el.classList.toggle("selected", selected);
   el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
   el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
   el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
   el.classList.toggle("is-next2", el.dataset.id === next2 && ids.length > 3);
+  if (selected || visible !== wasVisible) {
+    const canvas = el.querySelector("canvas");
+    if (canvas) { canvas._needsFit = true; canvas._lastPaintAt = 0; }
+  }
   el.tabIndex = visible ? 0 : -1;
   el.setAttribute("aria-hidden", String(!visible));
   el.setAttribute("aria-pressed", String(selected));
@@ -471,7 +488,21 @@ wrap.querySelectorAll(".char-card").forEach((el) => {
   el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
 });
 portraitCanvases = [...wrap.querySelectorAll(".char-card canvas")];
-portraitCanvases.forEach((cv, index) => { cv.dataset.order = String(index); });
+portraitCanvases.forEach((cv, index) => {
+  cv.dataset.order = String(index);
+  cv._needsFit = true;
+  cv._lastPaintAt = 0;
+});
+if (typeof ResizeObserver !== "undefined") {
+  portraitResizeObserver?.disconnect();
+  portraitResizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+      const cv = entry.target.querySelector("canvas");
+      if (cv) { cv._needsFit = true; cv._lastPaintAt = 0; }
+    }
+  });
+  for (const cv of portraitCanvases) portraitResizeObserver.observe(cv.parentElement || cv);
+}
 mountLook(wrap);
 applyLook();
 buildDots();
@@ -527,6 +558,13 @@ const mo = new MutationObserver(() => {
 mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
 paintPortraits();
 }
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && !raf && !document.body.classList.contains("playing")) {
+    portraitClock.reset();
+    for (const cv of portraitCanvases) cv._lastPaintAt = 0;
+    raf = requestAnimationFrame(paintPortraits);
+  }
+});
 function armMenu() {
 const play = document.getElementById("btn-play");
 const neu = document.getElementById("btn-new");

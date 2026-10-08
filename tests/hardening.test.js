@@ -708,7 +708,9 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   assert.match(cinema, /Fullscreen chapter cards were removed/);
   assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
-  assert.match(ending, /v44-true-ending/);
+  assert.match(ending, /v80-delayed-finale/);
+  assert.match(ending, /const duration=reduce\?1\.6:10\.2/);
+  assert.match(ending, /const titleK=seg\(k,\.88,\.97\)/);
   assert.match(title, /selected-hero-difficulty/);
 });
 
@@ -723,7 +725,9 @@ test("V47B selector and cinematics keep rendering cost bounded", () => {
   assert.match(title, /portraitCanvases/);
   assert.match(title, /aria-hidden.*=== "true"/);
   assert.match(title, /maxDpr = w \* h > 120000 \? 1\.45 : 1\.65/);
-  assert.match(titleFx, /now-lastFrame<32/);
+  assert.match(titleFx, /now-lastFrame<75/);
+  assert.match(title, /SIDE_PREVIEW_INTERVAL_MS = 120/);
+  assert.match(title, /new ResizeObserver\(/);
   assert.match(titleFx, /length:28/);
   assert.match(titleFx, /R=Math\.min\(W\*\.155,H\*\.225\)/);
   assert.match(evo, /pixels > 1800000 \? 1\.45/);
@@ -753,7 +757,8 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(css, /#char-select #difficulty\{[\s\S]*?grid-area:auto!important/);
   const intro = fs.readFileSync("./systems/intro.js", "utf8");
   assert.match(title, /playTitleIntro\(\)/);
-  assert.match(title, /const visible = \[id, prev, next, prev2, next2\]/);
+  assert.match(title, /const visible = \[id, prev, next\]/);
+  assert.match(title, /el\.setAttribute\("aria-hidden", String\(!visible\)\)/);
   assert.match(titleFx, /PROJECT OHANA V47A · HOKU HERO GATE/);
   assert.match(titleFx, /heroScene/);
   assert.match(titleFx, /backdrop="hoku-gate"/);
