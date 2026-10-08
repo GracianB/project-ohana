@@ -73,6 +73,9 @@ function showEnding(detail={}){
   const duration=reduce?1.6:12.0;
   const family=CAST.filter(id=>id!==hero.id);
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
+  // Keep the family framed on orientation / window changes, without raising DPR.
+  const onResize=()=>{if(!done&&!complete){fc.resize();lastPaint=0;}};
+  addEventListener("resize",onResize,{passive:true});
 
   layer.className="show cinema-running ending-phase-1";
   layer.dataset.ending="v44-true-ending";
@@ -92,13 +95,15 @@ function showEnding(detail={}){
   }
   function revealResults(){
     if(complete)return;complete=true;
+    removeEventListener("resize",onResize);
     layer.classList.remove("cinema-running","ending-phase-1","ending-phase-2","ending-phase-3");
     layer.classList.add("cinema-complete","ending-phase-4");
     layer.querySelector(".win-skip").hidden=true;
     duckMusic(false);
   }
   function stop(silent=false){
-    if(done)return;done=true;cancelAnimationFrame(raf);duckMusic(false);running=null;
+    if(done)return;done=true;cancelAnimationFrame(raf);
+    removeEventListener("resize",onResize);duckMusic(false);running=null;
     if(!silent)revealResults();
   }
   function frame(now){
@@ -165,7 +170,13 @@ function showEnding(detail={}){
     raf=requestAnimationFrame(frame);
   }
   layer.querySelector(".win-skip").onclick=()=>revealResults();
-  layer.addEventListener("keydown",(e)=>{if(e.key==="Escape"||e.key==="Enter"||e.key===" "){e.preventDefault();revealResults();}},{once:true});
+  // The same dialog node is reused on every victory: replace the handler
+  // rather than leaking one-shot listeners if the scene ended by mouse click.
+  layer.onkeydown=(e)=>{
+    if(!complete && (e.key==="Escape"||e.key==="Enter"||e.key===" ")){
+      e.preventDefault();revealResults();
+    }
+  };
   running={stop};raf=requestAnimationFrame(frame);
 }
 
