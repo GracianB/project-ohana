@@ -338,3 +338,70 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 @media(prefers-reduced-motion:reduce){
   #char-select #chars .char-card{transition-duration:.01ms!important}
 }
+
+
+/* ==========================================================================
+   V47A · CAROUSEL FIT + HOKU HERO GATE
+   The canvas is now a showcase window, not a crop box.
+   ========================================================================== */
+#char-select::before{
+  background:
+    radial-gradient(ellipse at 50% 44%,transparent 0 30%,rgba(2,7,15,.04) 58%,rgba(1,3,9,.42) 100%),
+    linear-gradient(180deg,rgba(1,4,12,.08),transparent 30%,transparent 72%,rgba(1,4,10,.58))!important;
+}
+#char-select::after{box-shadow:inset 0 0 130px rgba(0,0,0,.30)!important}
+#char-select .hero-stage{perspective-origin:50% 48%!important}
+#char-select .hero-stage::before{
+  top:70%!important;
+  width:min(680px,54vw)!important;
+  height:min(120px,14vh)!important;
+  background:
+    radial-gradient(ellipse at center,color-mix(in srgb,var(--hero-tint) 18%,rgba(255,255,255,.05)),transparent 64%),
+    radial-gradient(ellipse at center,rgba(0,0,0,.32),transparent 72%)!important;
+  filter:blur(10px)!important;
+}
+#char-select .hero-stage::after{
+  bottom:12%!important;
+  width:min(640px,52vw)!important;
+  opacity:.48!important;
+}
+#char-select #chars .char-card.selected{
+  width:min(430px,34vw)!important;
+  height:min(430px,50vh)!important;
+}
+#char-select #chars .char-card.selected .portrait{
+  display:grid!important;
+  place-items:center!important;
+  contain:layout paint style!important;
+}
+#char-select #chars .char-card.selected .portrait canvas{
+  width:100%!important;
+  height:100%!important;
+  filter:
+    drop-shadow(0 28px 24px rgba(0,0,0,.38))
+    drop-shadow(0 0 14px color-mix(in srgb,var(--hero-tint) 12%,transparent))!important;
+}
+#char-select #chars .char-card.selected[data-evo="4"] .portrait canvas{
+  filter:
+    drop-shadow(0 30px 26px rgba(0,0,0,.42))
+    drop-shadow(0 0 18px color-mix(in srgb,var(--hero-tint) 18%,transparent))!important;
+}
+#char-select .hero-dossier{
+  background:linear-gradient(180deg,rgba(5,12,20,.30),rgba(3,9,16,.66))!important;
+  border-color:color-mix(in srgb,var(--hero-tint) 16%,rgba(255,255,255,.10))!important;
+}
+#char-select .roster-arrow{
+  background:rgba(4,12,19,.36)!important;
+}
+@media(max-width:900px){
+  #char-select #chars .char-card.selected{
+    width:min(350px,58vw)!important;
+    height:min(350px,43vh)!important;
+  }
+}
+@media(max-width:560px){
+  #char-select #chars .char-card.selected{
+    width:245px!important;
+    height:min(260px,38vh)!important;
+  }
+}
