@@ -808,6 +808,31 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
 });
 
 
+test("V49 Stitcho Soul Pass keeps one coherent character language", () => {
+  const art = fs.readFileSync("./characters/art/stitch.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  const passives = fs.readFileSync("./systems/passives.js", "utf8");
+  const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
+  const evolution = fs.readFileSync("./characters/evolution.js", "utf8");
+  const supreme = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  assert.match(art, /drawSoulSeams/);
+  assert.match(art, /pose\.flourishN % 4/);
+  assert.match(art, /const peek = pose\.state === "idle"/);
+  assert.match(title, /__OHANA_TITLE_STITCHO_PHASE/);
+  assert.match(title, /wall-peek/);
+  assert.match(title, /plasma-roll/);
+  assert.match(title, /nebula-laugh/);
+  assert.match(passives, /_stitchoZipT/);
+  assert.match(passives, /"ZIP!"/);
+  assert.match(passives, /costura visible en pared\/vault/);
+  assert.match(abilities, /Stitcho no deja una estela genérica/);
+  assert.match(evolution, /Stitcho Nébula cose el vacío y se ríe al otro lado/);
+  assert.match(evolution, /const open = stage >= 4/);
+  assert.match(supreme, /comicBubble\(ctx,"NO\."/);
+  assert.match(visual, /01d-stitcho-plasma-roll/);
+});
+
 test("V48 signature U uses ten real storyboards and stays regression-protected", () => {
   const game = fs.readFileSync("./game.js", "utf8");
   const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
