@@ -52,16 +52,23 @@ pizza:   [1.00,1.04,1.10,1.22,1.36],
 yomi:    [1.00,1.08,1.16,1.28,1.46],
 cuerno:  [0.70,0.98,1.10,1.43,1.77],
 });
+// V75 · Geometry-led aspect ratios, not the collision width/height. F3 wings
+// and F4's high pinions sit outside the hitbox. Baby to adult must grow visibly.
+export const CUERNO_PORTRAIT_ASPECT = Object.freeze([.66,.81,1.16,1.52,1.60]);
+export const CUERNO_PORTRAIT_GROWTH = Object.freeze([.68,.77,.86,.94,1.00]);
+
 
 function portraitFit(def, evo, bw, bh, hero) {
 const form = def.forms?.[evo] || {};
 const baseH = def.id==="cuerno"?CUERNO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
 const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
 const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
-const visualAspect = Math.max(.72, geometryAspect * envelope);
+const visualAspect = def.id==="cuerno" ? CUERNO_PORTRAIT_ASPECT[evo] : Math.max(.72, geometryAspect * envelope);
 const safeW = bw * (hero ? (evo >= 4 ? .72 : .82) : .72);
-const safeH = bh * (hero ? (def.id==="cuerno"?[.75,.79,.82,.84,.86][evo]:evo>=4?.70:.80) : .72);
-const byHeight = safeH / Math.max(1, baseH * envelope);
+const safeH = bh * (hero ? (def.id==="cuerno"?.79:evo>=4?.70:.80) : .72);
+// A coherent progression, not five independent 'fill the frame' portraits.
+const growth = def.id==="cuerno" ? CUERNO_PORTRAIT_GROWTH[evo] : 1;
+const byHeight = safeH * growth / Math.max(1, baseH * envelope);
 const byWidth = safeW / Math.max(1, baseH * visualAspect);
 const scale = Math.max(.34, Math.min(byHeight, byWidth));
 const foot = bh * (hero ? (evo >= 3 ? .88 : .90) : .86);
@@ -223,12 +230,14 @@ portraitClock.advance(now, () => {
     cv.dataset.evo = String(evo);
     cv.dataset.fitScale = fit.scale.toFixed(4);
     cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
+    if(def.id==="cuerno")cv.dataset.cuernoGrowth=CUERNO_PORTRAIT_GROWTH[evo].toFixed(2);
+    else delete cv.dataset.cuernoGrowth;
     if (card) card.dataset.evo = String(evo);
     c.save();
     c.translate(bw / 2, footY);
     c.scale(1, 0.22);
     const glow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
-    glow.addColorStop(0, hero ? "rgba(255, 214, 120, 0.72)" : "rgba(0,0,0,0.35)");
+    glow.addColorStop(0, hero ? (def.id==="cuerno"&&evo===4 ? "rgba(177, 148, 236, 0.52)" : "rgba(255, 214, 120, 0.72)") : "rgba(0,0,0,0.35)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     c.fillStyle = glow;
     c.beginPath();
