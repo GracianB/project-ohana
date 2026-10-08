@@ -142,6 +142,28 @@ async function auditPage(page, label) {
   await page.waitForTimeout(800);
   if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
+  if (label === 'desktop') {
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(1350);
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(140);
+    const heldJump = await page.evaluate(() => window.__OHANA_E2E?.state());
+    assert.equal(heldJump?.input?.right, true, 'V46: ArrowUp cancela ArrowRight mantenido');
+    assert.equal(heldJump?.input?.axisX, 1, 'V46: intención horizontal se pierde al saltar');
+    assert.equal(heldJump?.input?.jump, true, 'V46: salto físico no queda activo');
+    assert.ok((heldJump?.player?.vx || 0) > 0, 'V46: el personaje pierde velocidad horizontal durante el salto');
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(120);
+    const afterJumpRelease = await page.evaluate(() => window.__OHANA_E2E?.state());
+    assert.equal(afterJumpRelease?.input?.right, true, 'V46: soltar salto también suelta la dirección');
+    assert.equal(afterJumpRelease?.input?.axisX, 1, 'V46: dirección mantenida no se recupera tras soltar salto');
+    await page.keyboard.up('ArrowRight');
+    await page.waitForTimeout(80);
+    const releasedDirection = await page.evaluate(() => window.__OHANA_E2E?.state());
+    assert.equal(releasedDirection?.input?.right, false, 'V46: ArrowRight queda atascado tras keyup');
+    assert.equal(releasedDirection?.input?.axisX, 0, 'V46: axisX no vuelve a cero tras keyup');
+  }
+
   const gameplay = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
     if (!api) throw new Error('E2E gameplay API ausente');
