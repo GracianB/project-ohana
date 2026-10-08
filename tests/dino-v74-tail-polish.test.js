@@ -73,3 +73,15 @@ test("Dino V74 tail is an anatomical, ornamented silhouette rather than hidden s
     render(4, state);
   }
 });
+
+
+test("Dino V76 K is a genuinely circular armoured creature at all five stages", () => {
+ for (let form = 0; form < 5; form++) {
+   const shapes = render(form, "run", { move: "dino-roll", phase: 3.2 });
+   assert.ok(shapes.filter(shape => shape.type === "poly" && shape.count === 3).length >= 9,
+     "Spinning sphere needs nine actual outer spikes at form " + form);
+   assert.ok(shapes.length >= 9, "Rolled silhouette must remain drawn at form " + form);
+   assert.deepEqual(shapes, render(form, "run", { move: "dino-roll", phase: 3.2 }),
+     "Rolling must be deterministic at form " + form);
+ }
+});
