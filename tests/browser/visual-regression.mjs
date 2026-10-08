@@ -784,6 +784,34 @@ try {
   assert.equal(crownV84.lastAbilityId,'rainbow','09t3-cuerno: L prism crown was not cast');
   await capture(page,'09t3-cuerno-v84-seven-horn-crown-l');
 
+  // V92: dedicated screenshot using the real seven-horn in-game renderer.
+  // The K→L live gameplay is separately checked by cuerno-v92-resonance.test.js.
+  const sevenHornView=await page.evaluate(async()=>{
+    const {drawCuernoPrismEcho}=await import('./systems/cuerno-v92-resonance.js');
+    const cv=document.createElement('canvas');
+    cv.id='cuerno-v92-seven-horn-resonance';
+    cv.width=innerWidth;cv.height=innerHeight;
+    cv.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483601;pointer-events:none';
+    document.body.appendChild(cv);
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#1e223d';ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.font='bold 19px sans-serif';ctx.fillStyle='#fff4d2';
+    ctx.textAlign='center';
+    ctx.fillText('CUERNO V92 · RESONANCIA PRISMÁTICA',cv.width/2,48);
+    const n=5;
+    for(let i=0;i<n;i++){
+      const x=cv.width*(i+1)/(n+1),y=cv.height*.52;
+      drawCuernoPrismEcho(ctx,{x,y,life:22-i*3,max:28},
+        {x:0,y:0},120,true);
+    }
+    return {n,ready:!!ctx};
+  });
+  assert.equal(sevenHornView.n,5,'V92: broken five-moment prism presentation');
+  assert.equal(sevenHornView.ready,true,'V92: no real Canvas context');
+  await capture(page,'09t4-cuerno-v92-prismatic-resonance-kl');
+  await page.evaluate(()=>document.querySelector('#cuerno-v92-seven-horn-resonance')?.remove());
+
+
 
   // Dino V75: browser-real J/K/L captures. His U is reserved for its own chapter.
   const dinoV75Errors=[];
