@@ -558,7 +558,7 @@ function params(pose, f, F) {
 
   // gesto de espera
   if (st === "idle" && pose.flourish > 0) {
-    const k = pose.flourish, n = pose.flourishN % 3;
+    const k = pose.flourish, n = (pose.flourishN || 0) % 4;
     const b = Math.sin(k * Math.PI);
     if (n === 0) {
       // se moja en kétchup
@@ -577,12 +577,24 @@ function params(pose, f, F) {
       P.flex = b; P.flexK = fl;
       P.mood = "angry"; P.mouth = "grin";
       P.legF = [0.3 * b, 2]; P.legB = [-0.3 * b, -2];
-    } else {
+    } else if (n === 2) {
       // hace girar el tenedor
       P.bend = Math.sin(k * TAU * 2) * 0.2; P.wig = 0.15;
       P.armF = { ang: 1.4 + Math.sin(k * TAU * 2) * 0.2, bend: 3 };
       P.item = "spin"; P.spin = k * TAU * 3;
       P.mood = "happy"; P.mouth = "smile";
+    } else {
+      // cuarta microescena: lanza una pizca de sal, falla y la atrapa al vuelo
+      const throwK = seg(k, 0.08, 0.31), catchK = seg(k, 0.58, 0.85);
+      P.bend = -0.3 * b + 0.23 * catchK;
+      P.a0 = -0.10 * b + 0.12 * catchK;
+      P.armF = { ang: 1.35 + 1.15 * throwK - 1.55 * catchK, bend: 3 };
+      P.armB = { ang: -0.7 - 0.6 * b, bend: -3 };
+      P.legF = [0.2 * b, 3]; P.legB = [-0.2 * b, -3];
+      P.mood = catchK > 0.8 ? "happy" : throwK > 0.5 ? "angry" : "normal";
+      P.mouth = catchK > 0.8 ? "grin" : "o";
+      P.item = withFork && catchK > 0.45 ? "forkUp" : null;
+      P.gag = k;
     }
   }
   return P;
@@ -785,11 +797,36 @@ function draw(ctx, pose, R) {
   }
 
   // ---------------- efectos ----------------
+  if (P.gag > 0) drawSaltCatch(ctx, tip, P.gag, f);
   if (P.fx) drawFx(ctx, R, P, sp, handF, t, f, w);
   if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, true);
   if (P.lying === "slide") speedLines(ctx, R, sp, t, w);
   if (pose.state === "dead") dizzy(ctx, R, tip.x - 4, tip.y - w * 0.9, t);
 
+  ctx.restore();
+}
+
+// Four-beat salt catch follows the actual flexible spine rather than screen space.
+function drawSaltCatch(ctx, tip, k, form) {
+  const t = Math.max(0,Math.min(1,Number(k)||0));
+  const rise=seg(t,.08,.34),fall=seg(t,.42,.83);
+  const arc=Math.sin(Math.PI*Math.max(0,Math.min(1,(t-.08)/.75)));
+  const x=tip.x+9+rise*22-fall*14;
+  const y=tip.y-14-arc*(24+form*2);
+  const alpha=Math.sin(Math.PI*t);
+  if(alpha<.01)return;
+  ctx.save();ctx.globalAlpha=.86*alpha;
+  ctx.translate(x,y);ctx.rotate(t*TAU*1.3);
+  ctx.fillStyle=form===4?"#fff5b1":"#fff9ee";
+  ctx.strokeStyle="#b9782b";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,-4);ctx.lineTo(3,0);ctx.lineTo(0,4);ctx.lineTo(-3,0);ctx.closePath();
+  ctx.fill();ctx.stroke();
+  if(t>.6&&t<.90){
+    const catchFade=Math.sin(Math.PI*seg(t,.6,.9));
+    ctx.globalAlpha=.36*catchFade;
+    ctx.strokeStyle="#ffe6a6";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,0,8,0,TAU);ctx.stroke();
+  }
   ctx.restore();
 }
 
