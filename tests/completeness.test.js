@@ -849,7 +849,8 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
     useAbility(g, 1);
     advanceAbility(g, 10);
-    assert.ok(g.enemies[0].vx < 0, 'Manga debe orientar la velocidad del enemigo hacia la máscara');
+    assert.ok(g.enemies[0].hp < 500, 'Campanada K debe dañar al enemigo');
+    assert.ok(g.enemies[0]._yomiMarkUntil > g.t, 'Campanada debe marcar para el remate L');
     clearAbilityFx();
   }
   {
@@ -1009,5 +1010,44 @@ test('phase 25: useAbility rechaza contratos corruptos sin consumir cooldown', (
   assert.doesNotThrow(() => useAbility(g, -1));
   assert.doesNotThrow(() => useAbility(g, 3));
   delete ABILITY_DEFS['missing-caster'];
+  clearAbilityFx();
+});
+
+test('V58: la campanada K golpea y marca a todos, incluso detrás de Yomi', () => {
+  clearAbilityFx();
+  const base=contractGame();
+  const second={...base.enemies[0],x:20,hp:500,vx:0,vy:0,stun:0,flash:0};
+  const g=contractGame({player:{...base.player,id:'yomi',abilities:['ofuda','sleeve','maw']},enemies:[base.enemies[0],second]});
+  assert.equal(useAbility(g,1),true);
+  assert.ok(g.enemies.every(e=>e.hp<500),'K debe dañar enemigos a ambos lados');
+  assert.ok(g.enemies.every(e=>e._yomiMarkUntil>g.t),'K debe marcar a todos los alcanzados');
+  clearAbilityFx();
+});
+test('V58: L consume la marca y aumenta su mordida, con anticipación visible', () => {
+  const make=()=>{
+    const b=contractGame();
+    return contractGame({player:{...b.player,id:'yomi',abilities:['ofuda','sleeve','maw']}});
+  };
+  clearAbilityFx();const normal=make();useAbility(normal,2);advanceAbility(normal,10);const normalDamage=500-normal.enemies[0].hp;
+  clearAbilityFx();const marked=make();marked.enemies[0]._yomiMarkUntil=240;useAbility(marked,2);
+  advanceAbility(marked,4);assert.equal(marked.enemies[0].hp,500,'L anticipa');
+  advanceAbility(marked,6);
+  assert.ok(500-marked.enemies[0].hp>normalDamage,'L debe ejecutar con daño adicional');
+  assert.equal(marked.enemies[0]._yomiMarkUntil,0,'L consume la marca');
+  clearAbilityFx();
+});
+test('V58: U de Yomi y Cuerno golpea a toda la sala sin ejecutar jefes sanos', () => {
+  clearAbilityFx();
+  const b=contractGame();
+  const behind={...b.enemies[0],x:10,hp:500,max:500};
+  const boss={...b.enemies[0],x:360,hp:4000,max:4000,boss:true,kind:'guardian'};
+  const g=contractGame({player:{...b.player,id:'yomi',abilities:['ofuda','sleeve','maw'],evo:4},enemies:[b.enemies[0],behind,boss]});
+  g.enemies[1]._yomiMarkUntil=200;
+  assert.equal(useAbility(g,3),true);
+  assert.ok(g.enemies.every(e=>e.hp<e.max),'U debe alcanzar los tres enemigos');
+  assert.ok(boss.hp>0,'jefe sano no debe morir automáticamente');
+  assert.equal(g._assist?.heroId,'cuerno','Cuerno debe intervenir realmente');
+  assert.equal(g._assist?.t,240,'Cuerno permanece en combate');
+  assert.ok(500-behind.hp>500-g.enemies[0].hp,'la marca potencia Juicio');
   clearAbilityFx();
 });

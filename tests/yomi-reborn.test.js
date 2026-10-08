@@ -38,7 +38,7 @@ test("V56 guardian identity retains J/K/L and explains all evolution stages",()=
  assert.match(abilities,/maw\(g, p, evo\)/);
  assert.match(abilities,/ofuda\(g, p, evo\)/);
  assert.match(evolution,/Una llamita tímida descubre/);
- assert.match(evolution,/Yomi decide qué debe quedarse fuera/);
+ assert.match(evolution,/El Juez del Umbral abre la puerta a Cuerno/);
 });
 
 test("V56 Yomi real Canvas portrait audit covers all five forms",()=>{

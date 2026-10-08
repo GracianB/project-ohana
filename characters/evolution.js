@@ -142,7 +142,7 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Una llamita tímida descubre cómo iluminar el camino.",
     "Las mangas ya no esconden miedo: protegen a los viajeros.",
     "El sello despierta y el farol aprende a defender sin herir por gusto.",
-    "La grieta deja de asustar: Yomi decide qué debe quedarse fuera.",
+    "El Juez del Umbral abre la puerta a Cuerno: juntos protegen todo OHANA.",
   ],
   cuerno: [
     "El brillo encuentra un color.",

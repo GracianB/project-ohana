@@ -1,21 +1,4 @@
 
-// Objetos mágicos de OHANA.
-//
-// Responsabilidades:
-// - Generar 1–2 objetos deterministas por sala.
-// - Recogerlos por proximidad.
-// - Aplicar efectos temporales sin acoplarse al loop principal.
-// - Pintar objetos, efectos y HUD.
-// - Persistir/restaurar únicamente el estado necesario.
-//
-// API pública mantenida para game.js:
-//   Magic.onRoom(game, roomId)
-//   Magic.update(game)
-//   Magic.draw(ctx, game, t)
-//   Magic.onHurt(game, amount)
-//   Magic.reset(game)
-//   Magic.snapshot()
-//   Magic.restore(snap)
 
 import { showNotification } from "./notify.js";
 import { sfx } from "../engine/audio.js";
@@ -115,7 +98,6 @@ const TIMED_KINDS = Object.freeze([
   "star",
 ]);
 
-// Estado del módulo.
 let items = [];
 let fx = Object.create(null);
 let shellCrack = 0;
@@ -133,7 +115,6 @@ let resizeHooked = false;
 
 const iconCache = Object.create(null);
 
-// ---------- utilidades ----------
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -227,7 +208,6 @@ function circleRectDistanceSq(x, y, rect) {
   return dx * dx + dy * dy;
 }
 
-// ---------- colocación ----------
 
 function spotFree(game, room, x, y, radius = 18) {
   const platforms = Array.isArray(game?.platforms)
@@ -393,7 +373,6 @@ function placeItems(game, roomId) {
       spot = { x, y };
     }
 
-    // Fallback determinista.
     if (!spot && candidates.length) {
       const ranked = candidates
         .map((pl) => {
@@ -460,7 +439,6 @@ function placeItems(game, roomId) {
   return out;
 }
 
-// ---------- efectos ----------
 
 function feathered(p) {
   if (!p) return;
@@ -736,7 +714,6 @@ function starHits(game, p) {
   }
 }
 
-// ---------- dibujo vectorial ----------
 
 function starPath(
   ctx,
@@ -773,7 +750,6 @@ function starPath(
   ctx.closePath();
 }
 
-// Dibuja el icono centrado en (0,0).
 function drawIcon(ctx, kind, t) {
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
@@ -1540,7 +1516,6 @@ function drawItem(ctx, it, cam, t) {
 
   ctx.save();
 
-  // Sombra.
   ctx.globalAlpha =
     0.22 +
     lifeIn * 0.08;
@@ -1562,7 +1537,6 @@ function drawItem(ctx, it, cam, t) {
 
   ctx.fill();
 
-  // Glow barato: círculo sólido (sin rays ni createRadialGradient).
   ctx.globalCompositeOperation =
     "lighter";
 
@@ -1611,7 +1585,6 @@ function drawItem(ctx, it, cam, t) {
 
   ctx.globalAlpha = 1;
 
-  // Icono.
   ctx.translate(
     x,
     y,
@@ -1672,7 +1645,6 @@ function drawEffects(ctx, game, t) {
         ? 0.22
         : 0.48;
 
-    // Glow barato (sin radial gradient)
     ctx.fillStyle =
       "hsla(" +
       hue +
@@ -1760,7 +1732,6 @@ function drawEffects(ctx, game, t) {
 
     ctx.save();
 
-    // Caparazón: fill + stroke baratos
     ctx.fillStyle =
       "rgba(127,232,255,.22)";
 
@@ -1906,7 +1877,6 @@ function drawEffects(ctx, game, t) {
       }
     }
 
-    // Micro-reflejo.
     ctx.globalAlpha = 0.5;
     ctx.strokeStyle = "#fff";
     ctx.lineWidth = 1;
@@ -2086,7 +2056,6 @@ function drawEffects(ctx, game, t) {
     ctx.restore();
   }
 }
-// ---------- HUD de chips ----------
 const CSS = `
 #magic-chips{position:fixed;top:54px;left:50%;transform:translateX(-50%);display:none;gap:6px;z-index:30;pointer-events:none;flex-wrap:wrap;justify-content:center;max-width:min(94vw,720px)}
 body.playing #magic-chips.has{display:flex}
@@ -2142,7 +2111,6 @@ function ensureHud() {
   return hudEl;
 }
 
-// Coloca la fila bajo la barra superior evitando los paneles del HUD / barra del jefe (solo al cambiar)
 function layoutHud(el) {
   if (!el || !el.classList.contains("has")) return;
   const ta = document.getElementById("top-actions");
@@ -2189,8 +2157,6 @@ function renderHud(force) {
   }
 }
 
-// ---------- API ----------
-// ---------- API ----------
 export const Magic = {
   onRoom(game, roomId) {
     lastGame = game;
@@ -2205,7 +2171,6 @@ export const Magic = {
     if (p !== lastPlayer) { clearAll(game); lastPlayer = p; }
     frame++;
     if (p.dead) { if (Object.keys(fx).length) clearAll(game); return; }
-    // recogida
     const pcx = p.x + p.w / 2, pcy = p.y + p.h / 2;
     for (const it of items) {
       if (it.taken) continue;
@@ -2214,7 +2179,6 @@ export const Magic = {
         apply(game, it.kind, it.x, it.y);
       }
     }
-    // temporizadores
     for (const k of ["feather", "hourglass", "magnet", "star"]) {
       if (!(fx[k] > 0)) continue;
       fx[k]--;
@@ -2308,16 +2272,6 @@ export const Magic = {
   },
 };
 
-// ---------- depuración opcional ----------
-//
-// En consola:
-//   window.__ohanaMagic.give("star")
-//   window.__ohanaMagic.give("shell")
-//   window.__ohanaMagic.state()
-//   window.__ohanaMagic.items()
-//   window.__ohanaMagic.active()
-//   window.__ohanaMagic.tp(0)
-//   window.__ohanaMagic.refresh()
 
 if (
   typeof window !==

@@ -9,14 +9,12 @@ const storyboards=fs.readFileSync("systems/supreme-storyboards.js","utf8");
 const browser=fs.readFileSync("tests/browser/visual-regression.mjs","utf8");
 const e2e=fs.readFileSync("tests/browser/e2e.mjs","utf8");
 
-test("V57 K is a forward 210-unit sleeve funnel with visible target connections",()=>{
-  assert.match(abilities,/name: "Mangas imán"/);
-  assert.match(abilities,/if \(ahead < 0 \|\| ahead > 210 \|\| dist < 8 \|\| dist > 210/);
-  assert.match(abilities,/e\.boss\) continue/);
-  assert.match(abilities,/e\.vx = Math\.max\(-9, Math\.min\(9/);
-  assert.match(abilities,/Only targets that the K logic can actually pull receive a visible tether/);
-  assert.match(abilities,/ctx\.setLineDash\(\[5,5\]\)/);
-  assert.match(art,/K brings both sleeves forward/);
+test("V58 K has evolved into a global ringing judgment and mark",()=>{
+  assert.match(abilities,/name: "Campanada del Umbral"/);
+  assert.match(abilities,/enemies=\(g\.enemies \|\| \[\]\)\.filter\(canHit\)/);
+  assert.match(abilities,/e\._yomiMarkUntil=Math\.max/);
+  assert.match(abilities,/Campanada del Umbral/);
+  assert.match(art,/Campanada: Yomi holds its lantern heart aloft/);
 });
 
 test("V57 L has a readable windup and strikes at visible jaw closure",()=>{
@@ -43,7 +41,7 @@ test("V57 five evolutions change the actual silhouette",()=>{
 
 test("V57 all U stories are readable and Cuerno assists Yomi for the full sequence",()=>{
   assert.match(storyboards,/yomi:.*duration:3\.90/);
-  assert.match(storyboards,/FAROL → CUERNO → SELLO DE LUZ → RESCATE/);
+  assert.match(storyboards,/FAROL → CUERNO → EMBESTIDA → JUICIO/);
   assert.match(cinema,/Math\.max\(2\.65,story\.duration\)/);
   assert.match(cinema,/inK=easeOut\(seg\(k,\.27,\.41\)\)/);
   assert.match(cinema,/outK=1-easeOut\(seg\(k,\.91,1\)\)/);

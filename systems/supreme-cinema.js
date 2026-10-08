@@ -403,6 +403,28 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
           (2+i%3)*a,i%2?"#ffb0a0":"#fff1c0");
       }
     }
+    // Cuerno's Aurora Stampede visibly crosses the seal before Yomi closes it.
+    const charge=seg(k,.68,.86);
+    if(charge>0&&charge<1){
+      const startX=cx+target*.85, impactX=cx-target*.65;
+      const front=lerp(startX,impactX,easeOut(charge));
+      const arcY=cy+target*(.21-.11*Math.sin(charge*Math.PI));
+      ctx.save();ctx.globalAlpha=.35+.5*Math.sin(charge*Math.PI);
+      const cols=["#ffe5a4","#ff8eae","#c69cff","#a2f0ff"];
+      for(let i=0;i<4;i++){
+        ctx.strokeStyle=cols[i];ctx.lineWidth=2.2+i*.5;
+        ctx.beginPath();ctx.moveTo(front+target*.09,arcY+(i-1.5)*9);
+        ctx.quadraticCurveTo(front+target*.48,arcY-15+i*5,front+target*.73,arcY+(i-1.5)*13);
+        ctx.stroke();
+      }
+      ctx.restore();
+      drawSpark(ctx,front,arcY,target*.07*Math.sin(charge*Math.PI),"#fff7d4");
+    }
+    const impact=seg(k,.79,.94);
+    if(impact>0){
+      drawRing(ctx,cx,cy+target*.12,target*(.38+.76*impact),impact,"#ffe3b0",4,.61);
+      drawRays(ctx,cx,cy+target*.12,target*1.15,"#ffbea1",.14+.30*Math.sin(impact*Math.PI),t*.04,12);
+    }
     if(rescue>0){
       const a=Math.sin(Math.PI*.5*rescue);
       arcRainbow(ctx,cx,cy+target*.31,target*(.30+.50*rescue),.15+.36*a,true);
@@ -430,7 +452,7 @@ function drawAssist(ctx,ally,k,t,cx,cy,target,scale,color){
   const outK=1-easeOut(seg(k,.91,1));
   const alpha=inK*outK;
   if(alpha<=.01)return;
-  const x=lerp(cx+target*1.15,cx+target*.64,inK);
+  const x=lerp(cx+target*1.15,cx+target*.64,inK) - (ally.id==="cuerno" ? target*.46*easeOut(seg(k,.69,.84)) : 0);
   const y=cy+target*.36-Math.sin(inK*Math.PI)*target*.05;
   ally.vx=0;ally.vy=0;ally.grounded=true;ally.facing=-1;
   ally._poseOverride=k<.47?"run":k<.77?"attack":"victory";

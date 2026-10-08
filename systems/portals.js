@@ -47,7 +47,6 @@ function makePortal(def) {
     dest: def.dest,
     label: def.label || def.dest || "?",
     needEvo: def.needEvo,
-    // anim state per portal
     armAng: type === "catapult" ? -0.42 : 0,
     armVel: 0,
     swallow: 0, // destello al tragar (BH)
@@ -195,12 +194,10 @@ export class Portals {
     if (!pad) return null;
     const w = playerW || 24, h = playerH || 32;
     if (pad.type === "blackhole") {
-      // Empuja hacia el lado opuesto al centro de la sala (+48px lateral)
       const mid = pad.x + pad.w / 2;
       const side = mid < 800 ? 1 : -1;
       return { x: pad.x + (side > 0 ? pad.w + 48 : -w - 48), y: pad.y + pad.h / 2 - h / 2 };
     }
-    // Catapulta: encima de la base, offset mayor para no solapar hitbox
     const midC = pad.x + pad.w / 2;
     const facing = midC < 800 ? 1 : -1;
     return { x: pad.x + pad.w / 2 - w / 2 + facing * 24, y: pad.y - h - 12 };
@@ -240,7 +237,6 @@ export class Portals {
     this.prompt = "";
 
     const reduce = !!(game && game.reduceMotion);
-    // Estela post-aterrizaje (catapult ámbar / BH púrpura)
     if (this.trailTicks > 0) {
       this._emitLandingTrail(game, reduce);
       this.trailTicks--;
@@ -251,7 +247,6 @@ export class Portals {
     }
     const p = game && game.player;
     if (!p || p.dead) {
-      // Evitar soft-lock: charge/pending/visual no se limpian si el player muere mid-viaje
       if (this.charge || this.pending) {
         this.charge = null;
         this.pending = null;
@@ -269,9 +264,7 @@ export class Portals {
       return;
     }
 
-    // Charge en curso: no buscar near nuevo
     if (this.charge) {
-      // Safety delegate: _tickCharge fuerza queue si t > max+30
       this._tickCharge(game, reduce);
       this._tickOrbitals(reduce);
       this._springArms(this.charge ? this.charge.portal : null, reduce);
@@ -285,7 +278,6 @@ export class Portals {
     }
 
     const evo = p.evo || 0;
-    // Grace 1 frame: grounded ahora → 1; si !grounded y grace>0 → permite este frame y luego --
     const groundedOk = !!(p.grounded || this._groundGrace > 0);
     if (p.grounded) this._groundGrace = 1;
     else if (this._groundGrace > 0) this._groundGrace--;
@@ -301,7 +293,6 @@ export class Portals {
       const d = Math.hypot(px - cx, py - cy);
 
       if (portal.type === "blackhole") {
-        // Pull suave en radio ~1.6×
         const pullR = pr * 1.6;
         if (d < pullR && d > 2 && this.cooldown <= 0) {
           if (d < closestDist) {
@@ -318,7 +309,6 @@ export class Portals {
             const ny = (cy - py) / Math.max(d, 1);
             p.vx += nx * strength + (-ny) * strength * 0.16 * twist;
             p.vy += ny * strength * 0.85 + nx * strength * 0.08 * twist;
-            // Chispas de atracción ocasionales
             if (!reduce && game.fx && unit(this._simT + portal.x * 0.07 + portal.y * 0.11) < 0.18) {
               game.fx.emit(px, py, {
                 color: "#c9a0ff",
@@ -346,7 +336,6 @@ export class Portals {
           break;
         }
       } else {
-        // Catapulta: hitbox generosa (E / pisar)
         const pad = catapultPad(portal);
         if (overlaps(p, pad)) {
           this.near = portal;
@@ -363,11 +352,9 @@ export class Portals {
       }
     }
 
-    // Idle spring brazos + orbitals
     this._tickOrbitals(reduce);
     this._springArms(null, reduce);
 
-    // Decay swallow flash
     for (const portal of this.items) {
       if (portal.swallow > 0) portal.swallow--;
       if (portal.sparkT > 0) portal.sparkT--;
@@ -384,7 +371,6 @@ export class Portals {
 
   _beginCharge(portal, type, reduce) {
     if (!portal || !portal.dest) return;
-    // Secuencias espectaculares; reduceMotion más cortas
     const max =
       type === "blackhole"
         ? reduce
@@ -414,7 +400,6 @@ export class Portals {
     const p = game.player;
     const portal = c.portal;
     c.t++;
-    // Abort de seguridad: charge colgado → forzar queue (no soft-lock)
     if (c.t > c.max + 30) {
       this._overlay = this._overlay || {
         alpha: 0.75,
@@ -431,7 +416,6 @@ export class Portals {
     const k = Math.min(1, c.t / Math.max(1, c.max)); // 0→1
     this.near = portal;
 
-    // Camera shake creciente (cap suave; reduceMotion casi plano)
     if (game) {
       const shakeCap = reduce ? 4 : 14;
       const shakeTarget = reduce
@@ -455,7 +439,6 @@ export class Portals {
     const cy = portal.y + portal.h / 2;
     const px = p.x + p.w / 2;
     const py = p.y + p.h / 2;
-    // Pull fuerte + lerp al núcleo (escala con k)
     const pull = 0.1 + k * 0.2;
     const lerp = 0.14 + k * 0.22;
     p.vx += (cx - px) * pull;
@@ -466,14 +449,12 @@ export class Portals {
       scale: Math.max(0.08, 1 - k * 0.95),
       alpha: Math.max(0.04, 1 - k * 0.98)
     };
-    // Overlay púrpura pulsante + vignette
     const pulse = 0.5 + Math.sin(c.t * 0.45) * 0.5;
     this._overlay = {
       alpha: Math.min(0.88, 0.12 + k * 0.62 + pulse * 0.1 * k),
       color: "90,40,160",
       vignette: 0.15 + k * 0.55
     };
-    // Swirl particles densos
     if (game.fx) {
       const dens = reduce ? (c.t % 3 === 0) : true;
       if (dens) {
@@ -501,7 +482,6 @@ export class Portals {
         }
       }
     }
-    // Orbitals acelera hacia el final
     if (!reduce) {
       for (const o of this.orbitals) {
         if (o.portal === portal) o.a += o.speed * (0.4 + k * 1.6);
@@ -542,7 +522,6 @@ export class Portals {
 
   _tickCatapultCharge(game, reduce, c, portal, p, k) {
     this.prompt = "⚔ ¡Lanzando!";
-    // Anclar player a la base
     const tx = portal.x + portal.w * 0.55 - p.w / 2;
     const ty = portal.y - p.h - 2;
     p.x += (tx - p.x) * 0.3;
@@ -550,7 +529,6 @@ export class Portals {
     p.vx *= 0.4;
     p.vy = Math.min(p.vy, 0);
 
-    // Freeze-frame post-snap: hold + luego queue
     if (c.snapped) {
       this._overlay = {
         alpha: 0.82,
@@ -569,20 +547,17 @@ export class Portals {
       return;
     }
 
-    // Wind-up exagerado del brazo
     portal.armAng += portal.armVel;
     portal.armVel *= 0.9;
     const target = -1.05 - k * 0.35; // más atrás al final
     portal.armAng += (target - portal.armAng) * (0.18 + k * 0.12);
     portal.armVel -= 0.01 + k * 0.02;
     this._visual = { scale: 1 + k * 0.1, alpha: 1 };
-    // Overlay ámbar ramp + vignette
     this._overlay = {
       alpha: Math.min(0.78, 0.06 + k * k * 0.58),
       color: "255,160,60",
       vignette: 0.1 + k * 0.5
     };
-    // Chispas densas + trail del player
     if (game && game.fx) {
       const every = reduce ? 3 : 1;
       if (c.t % every === 0) {
@@ -597,7 +572,6 @@ export class Portals {
           life: 12 + k * 8
         });
         if (!reduce) {
-          // Trail detrás del player
           game.fx.emit(p.x + p.w * 0.3, p.y + p.h * 0.6, {
             color: "#ffb060",
             count: 1,
@@ -621,7 +595,6 @@ export class Portals {
       }
     }
     if (c.t >= c.max) {
-      // Snap del brazo + burst + freeze-frame 1–2 ticks
       c.snapped = true;
       c.freezeLeft = reduce ? 1 : 2;
       portal.armVel = 0.62;
@@ -744,7 +717,6 @@ export class Portals {
     for (const portal of this.items) {
       if (portal.type !== "catapult") continue;
       if (this.charge && this.charge.portal === portal) continue;
-      // Idle angular spring
       const idle = -0.35 + Math.sin(this._simT / 12.6) * 0.08;
       const k = reduce ? 0.08 : 0.14;
       portal.armVel += (idle - portal.armAng) * k;
@@ -769,7 +741,6 @@ export class Portals {
         ? "#c9a0ff"
         : "#ffc078";
     const colorHi = isWater ? "#a8efff" : isBH ? "#e8d0ff" : "#ffe8a0";
-    // Varios emit a lo largo del camino (atrás según velocidad)
     const steps = reduce ? 1 : 3;
     for (let i = 0; i < steps; i++) {
       const k = (i + 1) / (steps + 1);
@@ -827,7 +798,6 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.ellipse(x + portal.w / 2, y + portal.h + 2, portal.w * 0.38, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // caballete de madera, no un bloque
   const left = x + 14;
   const right = x + portal.w - 14;
   const foot = y + portal.h - 2;
@@ -845,7 +815,6 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // eje
   ctx.fillStyle = "#2a1810";
   ctx.beginPath();
   ctx.arc(left + 10, top, 6, 0, Math.PI * 2);
@@ -863,7 +832,6 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.fillStyle = "#c4894a";
   ctx.fillRect(0, -4, portal.w * 0.55, 2.5);
   const bx = portal.w * 0.52;
-  // cuerdas y cazo de tela, sin cuadrado
   ctx.strokeStyle = "#d8c4a0";
   ctx.lineWidth = 1.4;
   ctx.beginPath();
@@ -922,7 +890,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
 
   ctx.save();
 
-  // Halo exterior púrpura
   const g = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r * 1.55);
   g.addColorStop(0, "rgba(30,5,50,.98)");
   g.addColorStop(0.35, "rgba(100,40,180," + (0.5 + pulse * 0.2) + ")");
@@ -933,7 +900,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.arc(cx, cy, r * 1.55, 0, Math.PI * 2);
   ctx.fill();
 
-  // Anillos de acreción elípticos (aceleran + se contraen en charge)
   for (let i = 0; i < 4; i++) {
     const shrink = charging ? ck * 0.12 * i : 0;
     const rr = r * (0.48 + i * 0.2 - shrink);
@@ -945,7 +911,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
     ctx.stroke();
   }
 
-  // Partículas orbitales (más visibles en charge)
   if (orbitals) {
     for (const o of orbitals) {
       if (o.portal !== portal) continue;
@@ -986,7 +951,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   }
   ctx.restore();
 
-  // Núcleo
   const coreR = r * (0.32 + (charging ? 0.08 * (charge.t / charge.max) : 0));
   const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR);
   core.addColorStop(0, "#000");
@@ -1000,7 +964,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.lineWidth = 1.8;
   ctx.stroke();
 
-  // Destello al tragar
   if (swallow > 0) {
     const sa = swallow / 18;
     ctx.globalAlpha = sa * 0.85;
@@ -1011,7 +974,6 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
     ctx.globalAlpha = 1;
   }
 
-  // Label
   ctx.font = "800 12px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
@@ -1049,7 +1011,6 @@ function drawNearPrompt(ctx, cam, portal, text, t) {
   ctx.fillStyle = fill;
   ctx.fillText(icon + " " + body, ax, ay + bob);
   ctx.shadowBlur = 0;
-  // Línea de acento bajo el texto
   const tw = Math.min(220, 28 + body.length * 7.2);
   ctx.strokeStyle = isBH ? "rgba(200,150,255,.55)" : "rgba(255,200,120,.55)";
   ctx.lineWidth = 2;

@@ -31,8 +31,8 @@ export const ABILITY_DEFS = {
   cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
   oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
   ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
-  sleeve: { name: "Mangas imán", key: "K", cd: 1800, color: "#ecad87", desc: "K: abre las mangas y atrae enemigos delante de Yomi para preparar L." },
-  maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: avisa, muerde en un cono frontal de 120 unidades y aturde." },
+  sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
+  maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
   gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
   gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embiste con el cuerno y no se para." },
   rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
@@ -222,7 +222,7 @@ const SUPREME = Object.freeze({
   dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso", ally: "frita" },
   frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
   pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
-  yomi:    { id: "devour", name: "PUERTA DEL ABISMO", key: "U", cd: 9000, color: "#ff2244", special: "Paso del abismo", ally: "cuerno" },
+  yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
   cuerno:  { id: "aurora", name: "AURORA OHANA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
@@ -243,7 +243,7 @@ export const SUPREME_IDENTITY = Object.freeze({
   dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra se rompe bajo cada paso." },
   frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
   pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
-  yomi:    { kind: "maw",     line: "EL ABISMO TIENE HAMBRE", text: "La grieta atrae, marca y ejecuta a los débiles." },
+  yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
   cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
 });
 
@@ -390,20 +390,26 @@ function castSupreme(game, p, flow = currentFlow(game, p)) {
     addScore(game, enemies.length * 8);
     p._specialBounceT = Math.max(p._specialBounceT || 0, 260);
   } else if (p.id === "yomi") {
+    // U · Juicio del Umbral: Cuerno's aurora charge hits every living foe.
+    // Bosses receive a capped percentage; ordinary marked foes are executed only if weakened.
     for (const e of enemies) {
-      const hp = Number(e.hp ?? e.health ?? 9999);
-      const maxHp = Number(e.maxHp ?? e.maxHealth ?? hp);
-      const finisher = hp <= maxHp * 0.34;
-      hitEnemy(game, e, finisher ? hp + 9999 : dmg * 1.18, {
-        kx: Math.sign(cx(e)-cx(p)) * 5,
-        ky: -5,
-        stun: finisher ? 90 : 58,
-        color: def.color,
-        crit: true
+      const hp=Math.max(0,Number(e.hp ?? e.health ?? 0));
+      const maxHp=Math.max(hp,Number(e.maxHp ?? e.maxHealth ?? e.max ?? hp));
+      const marked=(Number(e._yomiMarkUntil)||0)>(Number(game.t)||0);
+      const heavy=e.boss
+        ? Math.min(maxHp * .20, dmg * 1.55) + maxHp * .04
+        : Math.min(hp * (marked ? .92 : .82), dmg * (marked ? 1.90 : 1.42) + hp * (marked ? .27 : .14));
+      const execute=!e.boss && hp<=maxHp * (marked ? .42 : .34);
+      hitEnemy(game,e,execute?hp+100:heavy,{
+        kx:Math.sign(cx(e)-cx(p))*8,ky:-9,stun:64,
+        color:"#ffdc9d",crit:true,parts:12
       });
-      e._abyssMarkT = Math.max(e._abyssMarkT || 0, 150);
+      e._yomiMarkUntil=0;
+      e._abyssMarkT=Math.max(e._abyssMarkT||0,180);
     }
-    p._specialGhostT = Math.max(p._specialGhostT || 0, 260);
+    p._specialGhostT=Math.max(p._specialGhostT||0,260);
+    p.invuln=Math.max(p.invuln||0,120);
+    game.nums?.add(cx(p),p.y-58,"CUERNO · JUICIO DEL UMBRAL","#ffe6b5",true);
   } else if (p.id === "cuerno") {
     for (const e of enemies) hitEnemy(game, e, dmg * 0.76, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 42, color: def.color, crit: true });
     healPlayer(p, p.maxHealth * 0.16);
@@ -1204,8 +1210,17 @@ const CASTERS = {
     boom(g, h.x, h.y, "#f2e6c8", 6);
   },
   sleeve(g, p, evo) {
-    add({ kind: "sleeve", life: 18, evo, face: p.facing || 1 });
-    boom(g, cx(p), cy(p), "#6a3cff", 8);
+    // K · Campanada del Umbral. One clear screen-wide pulse, no invisible suction.
+    const enemies=(g.enemies || []).filter(canHit);
+    for (const e of enemies) {
+      const dir=Math.sign(cx(e)-cx(p)) || 1;
+      const dmg=(21 + evo * 5) * pw(p) * (e.boss ? .75 : 1);
+      hitEnemy(g,e,dmg,{kx:dir*4,ky:-3,stun:18,color:"#ffd99c",parts:6,hitstop:0});
+      e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+240);
+    }
+    add({ kind:"sleeve", life:28,max:28, evo, face:p.facing||1, targets:enemies.length });
+    boom(g,cx(p),cy(p),"#ffd99c",10,{star:true});
+    g.nums?.add(cx(p),p.y-48,"CAMPANADA · "+enemies.length,"#ffe9bc",true);
   },
   maw(g, p, evo) {
     add({ kind: "maw", life: 16, max: 16, evo, face: p.facing || 1, hit: new Set(), dmg: (36 + evo * 6) * pw(p) });
@@ -1871,6 +1886,7 @@ const UPD = {
           f.vx = 0;
           f.vy = 0;
           hitEnemy(g, e, f.dmg * 0.45, { kx: direction * 2, ky: -1, stun: 10, color: "#f2e6c8" });
+          e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+160);
           break;
         }
       }
@@ -1888,6 +1904,7 @@ const UPD = {
       for (const e of g.enemies) {
         if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < 72) {
           hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) || 1, ky: -4, stun: 16, color: "#ff4466" });
+          e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+160);
         }
       }
       boom(g, f.x, f.y, "#ff4466", 12, { star: true });
@@ -1897,20 +1914,6 @@ const UPD = {
   },
   sleeve(g, f, p) {
     f.life--;
-    if (!p) return false;
-    const x = cx(p), y = cy(p), face = f.face || p.facing || 1;
-    // K only pulls targets in the visible forward fan; it sets up a follow-up L.
-    for (const e of g.enemies) {
-      if (!canHit(e) || e.boss) continue;
-      const ex = cx(e), ey = cy(e);
-      const ahead = (ex - x) * face, dy = ey - y;
-      const dist = Math.hypot(ex - x, dy);
-      if (ahead < 0 || ahead > 210 || dist < 8 || dist > 210 || Math.abs(dy) > 46 + ahead * .38) continue;
-      const dx = x + face * 24 - ex, pullY = y - ey;
-      const force = .9 + .7 * (1 - dist / 210);
-      e.vx = Math.max(-9, Math.min(9, (e.vx || 0) + (dx / dist) * 2.15 * force));
-      e.vy = Math.max(-7, Math.min(7, (e.vy || 0) + (pullY / dist) * 1.15 * force));
-    }
     return f.life > 0;
   },
   maw(g, f, p) {
@@ -1925,7 +1928,9 @@ const UPD = {
         if (Math.sign(dx || f.face) !== f.face && Math.abs(dx) > 16) continue;
         if (Math.abs(dx) < 120 && Math.abs(dy) < 54) {
           f.hit.add(e);
-          hitEnemy(g, e, f.dmg, { kx: f.face * 8, ky: -3, stun: 20, color: "#e9768e" });
+          const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
+          hitEnemy(g, e, f.dmg * (marked ? 1.9 : 1), { kx: f.face * 8, ky: -3, stun: marked ? 40 : 20, color: "#e9768e", crit:marked });
+          if(marked) { e._yomiMarkUntil=0; g.nums?.add(cx(e),e.y-24,"JUICIO","#ffd99c",true); }
         }
       }
     }
@@ -2751,36 +2756,37 @@ const DRW = {
     ctx.restore();
   },
   sleeve(ctx, f, cam, t, g, p) {
-    if (!p) return;
-    const x = cx(p) - cam.x, y = cy(p) - cam.y, face = f.face || p.facing || 1;
-    const k = Math.max(0, Math.min(1, 1 - f.life / 18));
+    if(!p)return;
+    const x=cx(p)-cam.x,y=cy(p)-cam.y;
+    const k=Math.max(0,Math.min(1,1-f.life/f.max));
+    const radius=28+Math.min(1,k/.76)*Math.hypot(ctx.canvas?.width||800,ctx.canvas?.height||500);
     ctx.save();
-    ctx.translate(x + face * 19, y - 3);
-    ctx.scale(face, 1);
-    // K is a warm funnel visibly attached to the leading sleeve, not a detached ring.
-    for (let i=0;i<4;i++){
-      const reach=52+i*43, spread=18+reach*.38;
-      ctx.globalAlpha=(.46-i*.07)*Math.sin(Math.PI*(k*.72+.14));
-      ctx.strokeStyle=i%2?"#f4c994":"#f2a7bd";
-      ctx.lineWidth=3-i*.3;ctx.beginPath();
-      ctx.moveTo(i?reach-43:0,-10);
-      ctx.quadraticCurveTo(reach,-spread,reach,0);
-      ctx.quadraticCurveTo(reach,spread,i?reach-43:0,10);ctx.stroke();
+    // One luminous bell ring expanding across the entire visible arena.
+    ctx.globalAlpha=.78*(1-k);
+    ctx.strokeStyle="#ffe6ae";ctx.lineWidth=6-3*k;
+    ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
+    ctx.globalAlpha=.3*(1-k);
+    ctx.strokeStyle="#b96898";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(x,y,radius*.82,0,TAU);ctx.stroke();
+    for(let i=0;i<8;i++){
+      const angle=i*TAU/8+k*1.3;
+      const px=x+Math.cos(angle)*Math.min(radius,260);
+      const py=y+Math.sin(angle)*Math.min(radius,260);
+      ctx.globalAlpha=.54*(1-k);
+      ctx.fillStyle="#ffebc0";ctx.save();ctx.translate(px,py);ctx.rotate(angle);
+      ctx.fillRect(-3,-6,6,12);ctx.restore();
     }
     ctx.restore();
-    // Only targets that the K logic can actually pull receive a visible tether.
-    let shown=0;
-    for(const e of (g?.enemies || [])){
-      if(shown>=4 || !canHit(e) || e.boss) continue;
-      const ahead=(cx(e)-cx(p))*face,dy=cy(e)-cy(p);
-      const dist=Math.hypot(cx(e)-cx(p),dy);
-      if(ahead<0 || ahead>210 || dist<8 || dist>210 || Math.abs(dy)>46+ahead*.38) continue;
+    let visible=0;
+    for(const e of (g?.enemies||[])){
+      if(visible>=18 || !canHit(e) || (Number(e._yomiMarkUntil)||0)<=(Number(g?.t)||0))continue;
       const ex=cx(e)-cam.x,ey=cy(e)-cam.y;
-      ctx.save();ctx.globalAlpha=.34+.14*Math.sin(k*TAU);
-      ctx.strokeStyle="#ffe1a9";ctx.lineWidth=1.5;ctx.setLineDash([5,5]);
-      ctx.beginPath();ctx.moveTo(x+face*25,y-3);
-      ctx.quadraticCurveTo((ex+x)*.5,ey-14,ex,ey);ctx.stroke();
-      ctx.restore();shown++;
+      ctx.save();ctx.translate(ex,ey-26);
+      ctx.globalAlpha=.65+.20*Math.sin(t*.14);
+      ctx.strokeStyle="#ffe1a7";ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.arc(0,0,11,-2.9,.2);ctx.stroke();
+      ctx.fillStyle="#fff2ce";ctx.fillRect(-2,-5,4,9);ctx.restore();
+      visible++;
     }
   },
   maw(ctx, f, cam, t, g, p) {
