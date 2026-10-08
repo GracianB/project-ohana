@@ -446,7 +446,7 @@ test('phase 39: start() no hereda estado transitorio de una sesión anterior', (
 test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la versión coherente', () => {
   const sw = fs.readFileSync('./sw.js', 'utf8');
   const index = fs.readFileSync('./index.html', 'utf8');
-  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds', './multiplayer'];
   const runtimeFiles = ['./game.js'];
 
   const walk = (dir) => {
