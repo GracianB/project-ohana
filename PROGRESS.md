@@ -1,3 +1,19 @@
+## 08/10/2026 · V44 CINEMATIC REBUILD
+
+**Caché:** `ohana-235`.
+
+V44 redefine dónde usa cine Project OHANA y elimina overlays que parecían cinemática sin aportar emoción.
+
+- **Family Welcome:** la apertura ya no muestra logo, Nido ni cuenta atrás. Los diez héroes viven en una escena continua de Isla Hoku y el carrusel no aparece hasta una acción explícita del usuario.
+- La escena de bienvenida repite microhistorias: polen de Kilo, descarga Chispín/Stitcho, persecución Frita/Pizza, práctica de Dragón, aparición de Yomi, arcoíris de Cuerno, pisotón de Dino y Michi observando el caos.
+- **Supreme Shorts:** cada U monta un canvas fullscreen por encima del gameplay y dibuja al héroe real con una firma distinta por personaje; la forma actual se transmite al cine.
+- **Evolution Identity:** las diez firmas de evolución existentes pasan a ser visibles: pétalos, costuras, rayos, eclipse, brasas, cristales, sal, queso, ofuda y aurora. Cada héroe usa además una pose de revelado diferente y su línea narrativa propia.
+- **True Ending:** derrotar a la Reina dispara un final en tres actos antes de mostrar resultados: caída/ruptura, llegada de la familia y retrato final al amanecer con el héroe elegido como protagonista.
+- Eliminadas las tarjetas fullscreen de capítulos y muerte. Las salas permanecen dentro del mundo/HUD/mensajes y la muerte usa DeathFx.
+- El antiguo beat textual de caída de la Reina ya no compite con el final real.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+- Próximo bloque: V45 Living Hero Select / Soul pass sobre el carrusel y microacciones.
+
 ## 08/10/2026 · V43 OHANA MAGIC
 
 **Caché:** `ohana-234`.
