@@ -81,6 +81,10 @@ let tick = 0;
 let raf = 0;
 let portraitCanvases = [];
 const portraitClock = createFixedClock({ stepMs: 1000 / 24, maxSteps: 1 });
+// V80 · Draw only active + two neighbours; idle secondary cards at 8 fps.
+export const CAROUSEL_FRAME_BUDGET = Object.freeze({ activeStep: 2, neighbourStep: 6, maxAnimated: 3 });
+const carouselPerf = { active:0, neighbours:0, skipped:0, resizes:0 };
+if (TITLE_E2E) window.__OHANA_CAROUSEL_PERF = carouselPerf;
 
 const HERO_SHOWCASE = Object.freeze({
 kilo:    ["idle","victory","idle"],
@@ -98,27 +102,34 @@ cuerno:  ["idle","victory","jump"],
 function readSave() { return saveStore.readRaw(); }
 
 function paintPortraits(now = performance.now()) {
-if (document.body.classList.contains("playing")) {
-  raf = 0;
-  portraitClock.reset();
-  return;
+if (document.hidden || document.body.classList.contains("playing") ||
+    !document.body.classList.contains("intro-complete")) {
+  raf = 0; portraitClock.reset(); return;
 }
 portraitClock.advance(now, () => {
   tick += 2;
   for (const cv of portraitCanvases) {
-    const card = cv.closest(".char-card");
-    if (!card || card.getAttribute("aria-hidden") === "true") continue;
+    const card = cv._card || cv.closest(".char-card");
+    if (!card) continue;
+    const hero = card.classList.contains("selected");
+    const neighbour = card.classList.contains("is-prev") || card.classList.contains("is-next");
+    if (!hero && !neighbour) { carouselPerf.skipped++; continue; }
+    const step = hero ? CAROUSEL_FRAME_BUDGET.activeStep : CAROUSEL_FRAME_BUDGET.neighbourStep;
+    if (!cv._forcePaint && tick - (cv._lastPaintTick ?? -Infinity) < step) {
+      carouselPerf.skipped++; continue;
+    }
+    cv._forcePaint = false; cv._lastPaintTick = tick;
+    if (hero) carouselPerf.active++; else carouselPerf.neighbours++;
     const entry = ROSTER_BY_ID.get(cv.dataset.id);
     if (!entry) continue;
     const { def, index: idx } = entry;
-    const c = cv.getContext("2d", { alpha: true });
+    const c = cv._ctx || (cv._ctx = cv.getContext("2d", { alpha:true }));
     fitCanvas(cv);
     const dpr = cv._dpr || 1;
     const bw = cv.width / dpr, bh = cv.height / dpr;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, cv.width, cv.height);
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const hero = card.classList.contains("selected");
     const qaEvo = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
       ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
       : null;
@@ -267,14 +278,19 @@ raf = requestAnimationFrame(paintPortraits);
 }
 
 function fitCanvas(cv) {
+if (!cv._sizeDirty && cv._dpr) return;
 const box = cv.parentElement || cv;
 const w = Math.max(40, Math.round(box.clientWidth));
 const h = Math.max(40, Math.round(box.clientHeight));
-const maxDpr = w * h > 120000 ? 1.45 : 1.65;
+const maxDpr = w * h > 120000 ? 1.25 : 1.5;
 const dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
 const W = Math.round(w * dpr), H = Math.round(h * dpr);
-if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-cv._dpr = dpr;
+if (cv.width !== W || cv.height !== H) {
+  cv.width = W; cv.height = H;
+  cv._lastPaintKey = ""; cv._glow = null;
+  carouselPerf.resizes++;
+}
+cv._dpr = dpr; cv._sizeDirty = false;
 }
 
 function selectionStatus() {
@@ -304,6 +320,8 @@ const next = ids[(i + 1) % ids.length];
 const next2 = ids[(i + 2) % ids.length];
 
 cards.forEach((el) => {
+  const cv = el.querySelector("canvas");
+  if (cv) { cv._forcePaint = true; cv._sizeDirty = true; cv._lastPaintTick = -Infinity; }
   const selected = el.dataset.id === id;
   const visible = [id, prev, next, prev2, next2].includes(el.dataset.id);
   el.classList.toggle("selected", selected);
@@ -471,7 +489,17 @@ wrap.querySelectorAll(".char-card").forEach((el) => {
   el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
 });
 portraitCanvases = [...wrap.querySelectorAll(".char-card canvas")];
-portraitCanvases.forEach((cv, index) => { cv.dataset.order = String(index); });
+portraitCanvases.forEach((cv, index) => {
+  cv.dataset.order = String(index); cv._card = cv.closest(".char-card");
+  cv._sizeDirty = true; cv._forcePaint = true;
+});
+addEventListener("resize", () => portraitCanvases.forEach(cv => {
+  cv._sizeDirty = true; cv._forcePaint = true;
+}), {passive:true});
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && !raf && !document.body.classList.contains("playing"))
+    raf = requestAnimationFrame(paintPortraits);
+});
 mountLook(wrap);
 applyLook();
 buildDots();
