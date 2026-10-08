@@ -1,3 +1,25 @@
+## 08/10/2026 · V73 · CUERNO · EDICIÓN ESTRELLA FINAL, DEDICADA A LA SOBRINA
+
+**Caché:** `ohana-271`. Última V de Cuerno. El personaje y su evolución deben ser inolvidables, fáciles de leer y divertidos de manejar para jugar en familia; **Dino está muy avanzado y se reserva sin modificar**.
+
+### Evoluciones y colores
+- F0 Cuernín mantiene su silueta de **cuerno viviente**, F1 Destello nace con dos patas, F2 Potro Iris tiene cuatro, F3 Estelar es equino adulto y F4 Aurora despliega alas, cuatro apoyos y cabeza real.
+- Las **cinco formas** llevan ahora un pequeño corazón/joya de nácar en un punto anatómico diferente. Los tonos pastel se transforman con él: rosa fresa, lila, amatista, cielo y dorado de Aurora. Son piezas de Canvas dibujadas con geometría, no PNG ni pegatinas.
+- Cada forma esconde un gesto visual propio que responde a vuelo, sueño o victoria: halo curioso, orejas de Destello, herraduras de Potro, mapa estelar y corona de Aurora. El lienzo adulto tiene bordados opalescentes y alas más expresivas al lanzar poderes; todos los gestos siguen el movimiento del cuerpo.
+
+### Personalidad, ataques y pasiva
+- **Expresividad definida**: emociones puras `wonder/calm/dash/flight/focus/dream/joy/quiet`. Solo se representan cuando el personaje está activo, sin efectos alegres durante daño o muerte.
+- **J · Lanza Astral** sigue perforando a tres enemigos, pero su cuerpo de nácar contiene siete filamentos iridiscentes reales; proyectil único y misma hitbox/daño.
+- **K · Galope Radiante** sigue deteniéndose en las paredes y respetando el impulso; ahora deja cuatro cintas vectoriales tras sus apoyos con color vinculado a la evolución y menos sacudida.
+- **L · Círculo Iris** conserva siete arcos evolutivos y daño único al alcanzar la ola. Una constelación de siete pequeñas chispas marca la cresta de la onda.
+- **U · Sueño Arcoíris** preserva las cinco oleadas, la cúpula F4, el elenco de enemigos capturado al pulsar, la inmunidad de jefes y el modo movimiento reducido. La película ya dibuja símbolos de sueño solo según los objetivos reales; termina con una diadema de siete puntos y más expresividad de Aurora. Se corrige la elección del actor en la película: F0 no aparece por error como F4.
+- **Pasiva permanente · Impulso innato**: sigue siendo el personaje más rápido y el que salta más alto **en las cinco evoluciones**. F4 velocidad 9.6, impulso 18.6, cuatro saltos, sin depender de J/K/L/U. Carrera y saltos dibujan chispas de un color distinto por forma, limitadas por frame; cada aterrizaje marca un único anillo de cariño. No se alteran físicas, velocidades, daño ni colisiones.
+
+### Calidad y siguiente personaje
+- Prueba V73 de cinco formas y emociones, geometría de diseño, stack Canvas, J/K/L/U y pasiva, película y cinemática, rendimiento; capturas reales adicionales de **J** y **K**, manteniendo L/U y toda la matriz anterior.
+- CI Node, Browser E2E, Multiplayer E2E, Visual regression matrix, Release gate y GitHub Pages son condiciones de fusión/publicación. Presupuesto JS V70 de 3 MB permanece intacto.
+- **Siguiente paso, sin anticiparlo:** Dino tendrá una revisión especial propia, centrada en el disfrute de los sobrinos, aprovechando lo ya avanzado.
+
 ## 08/10/2026 · V72 · CUERNO FORMA 4 · LA ÚLTIMA AURORA
 
 **Caché:** `ohana-270`. Se completa específicamente **Unicornio Aurora F4** y su definitiva **U · Sueño Arcoíris** antes de dedicar una revisión adicional, orientada a niños, a Cuerno y a Dino.

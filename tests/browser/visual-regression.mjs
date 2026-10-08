@@ -741,6 +741,18 @@ try {
   await capture(page,'09j-cuerno-aurora-real-play');
   assert.deepEqual(auroraErrors,[],'09j-cuerno: draw error in final form');
   page.off('pageerror',onAuroraError);
+  // V73 child's final edition: capture the actual J/K choreography, not static art.
+  const finalJ=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(4);api.cast(0);api.step(5);return api.state();
+  });
+  assert.equal(finalJ.lastAbilityId,'gleam','09s-cuerno: astral lance J not cast');
+  await capture(page,'09s-cuerno-v73-pearlescent-j');
+  const finalK=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.cast(1);api.step(5);return api.state();
+  });
+  assert.equal(finalK.lastAbilityId,'gallop','09t-cuerno: radiant gallop K not cast');
+  await capture(page,'09t-cuerno-v73-ribbon-gallop-k');
 
   // V63 Potro Iris in real gameplay with error monitoring.
   const foalErrors=[];
