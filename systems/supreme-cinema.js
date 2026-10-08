@@ -1,3 +1,4 @@
+// PROJECT OHANA V48 · SUPREME CINEMA REBORN
 import {
   fullCanvas, reducedMotion, clamp, seg, easeOut, easeInOut, easeBack, lerp,
   rgba, tint, makeDummy, drawDummy, baseHeight, drawTitle, drawRing, drawRays,
