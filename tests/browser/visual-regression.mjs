@@ -267,7 +267,7 @@ try {
       const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
       let visible=0;
       if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),growth:Number(cv?.dataset.cuernoGrowth||0),visible};
     });
     assert.equal(state.form,form,'01i-cuerno: wrong form');
     assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
