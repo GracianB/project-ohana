@@ -562,8 +562,18 @@ armor(p, 2);
 }
 if (S.charge > 0) {
 S.charge--;
-p.vx = p.facing * Math.max(11, p.speed * 2.4);
-armor(p, 2);
+const rollingDino = p.id === "dino", face = p.facing || 1;
+const step = { x: p.x + face * 9, y: p.y + p.h * 0.22, w: p.w, h: p.h * 0.64 };
+const blocked = rollingDino && (step.x <= 0 ||
+ step.x + step.w >= (game.worldW || 1600) ||
+ (game.platforms || []).some(pl => aabb(step, pl)));
+if (blocked) {
+ S.charge = 0; p.vx = 0;
+ game.fx?.emit?.(cx(p), cy(p), { color: "#c9f47e", count: 5, size: 2.6, speed: 1.5, life: 10 });
+} else {
+ p.vx = face * Math.max(rollingDino ? 10.5 : 11, p.speed * (rollingDino ? 2.2 : 2.4));
+ armor(p, 2);
+}
 }
 if (S.gallop > 0) {
 S.gallop--;
@@ -636,8 +646,14 @@ bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
 if ((game.t & 1) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" }, MAX_RUNTIME_GHOSTS);
 }
 if (S.charge > 0) {
-bodyHits(game, p, 26, { kx: 15, ky: -8, stun: 34, color: "#c8f04a", cd: 30, shake: 7 });
-if ((game.t % 3) === 0) game.fx.emit(cx(p) - p.facing * p.w * 0.6, p.y + p.h, { color: "#d8c7a4", count: 3, size: 3, up: 0.6, speed: 1.6 });
+const dino = p.id === "dino";
+bodyHits(game, p, dino ? 22 : 26, { kx: dino ? 11 : 15, ky: dino ? -6 : -8,
+ stun: dino ? 29 : 34, color: "#c8f04a", cd: dino ? 23 : 30, shake: dino ? 4 : 7 });
+if ((game.t % (dino ? 5 : 3)) === 0) game.fx?.emit?.(cx(p) - p.facing * p.w * 0.6, p.y + p.h,
+ { color: dino ? "#b9f9a0" : "#d8c7a4", count: dino ? 2 : 3, size: 3, up: 0.6, speed: 1.6 });
+if (dino && game.t % 5 === 0) pushRuntime(game.ghosts, {
+ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#9be8ad"
+}, MAX_RUNTIME_GHOSTS);
 }
 if (S.gallop > 0) {
 const face = S.gallopFace || p.facing || 1;
@@ -650,7 +666,7 @@ for (const e of game.enemies) {
 }
 if ((game.t % 4) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#b6ebee" }, MAX_RUNTIME_GHOSTS);
 }
-p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
 const updateCount = FX.length;
 for (let i = 0; i < updateCount; i++) {
 const f = FX[i];
@@ -684,6 +700,22 @@ ctx.stroke();
 ctx.restore();
 }
 
+function drawDinoRollShell(ctx, p, cam, t) {
+const x = cx(p) - (cam?.x || 0), y = cy(p) - (cam?.y || 0);
+const r = Math.max(p.w, p.h) * 0.78;
+ctx.save(); ctx.globalAlpha = 0.8; ctx.strokeStyle = "#ebffac";
+ctx.lineWidth = 2.4; ctx.lineJoin = "round";
+for (let i = 0; i < 8; i++) {
+ const a = i * TAU / 8 + t * 0.18;
+ const nx = Math.cos(a), ny = Math.sin(a);
+ ctx.beginPath(); ctx.moveTo(x + nx * r * 0.8, y + ny * r * 0.8);
+ ctx.lineTo(x + nx * (r + 9), y + ny * (r + 9));
+ ctx.lineTo(x + Math.cos(a + 0.3) * r * 0.8, y + Math.sin(a + 0.3) * r * 0.8);
+ ctx.stroke();
+}
+ctx.restore();
+}
+
 export function drawAbilityFx(ctx, game, t) {
 const p = game.player;
 if (!p) return;
@@ -697,7 +729,12 @@ d(ctx, f, cam, t, game, p);
 ctx.restore();
 }
 if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
-if (S.charge > 0) drawChargeShield(ctx, p, cam, t);
+if (S.charge > 0) {
+if (p.id === "dino") {
+ drawBallAura(ctx, p, cam, t, "#a8f377");
+ drawDinoRollShell(ctx, p, cam, t);
+} else drawChargeShield(ctx, p, cam, t);
+}
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 drawCastSignature(ctx, p, cam, t);
 }
