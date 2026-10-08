@@ -25,11 +25,12 @@ test("V96 phone-first layout uses safe-area and bounded controls",()=>{
 test("V96 mobile override loads after primary CSS and precaches for Pages",()=>{
  const html=fs.readFileSync("index.html","utf8");
  const sw=fs.readFileSync("sw.js","utf8");
- assert.match(sw,/const VERSION = "ohana-296"/);
- assert.match(html,/mobile-v96\.css\?v=ohana-296/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=296);
+ assert.ok(html.includes("mobile-v96.css?v="+version));
  assert.match(sw,/\.\/mobile-v96\.css\?v=" \+ VERSION/);
- const world=html.indexOf("world-map.css?v=ohana-296");
- const mobile=html.indexOf("mobile-v96.css?v=ohana-296");
+ const world=html.indexOf("world-map.css?v="+version+"");
+ const mobile=html.indexOf("mobile-v96.css?v="+version+"");
  assert.ok(world>0 && mobile>world);
  const index=html.indexOf('<div id="touch"');
  assert.ok(index>0);

@@ -1,3 +1,4 @@
+import { announceAccessibleGameState } from "./a11y-v97.js";
 function setAttribute(el, name, value) {
   if (el && el.getAttribute(name) !== String(value)) el.setAttribute(name, value);
 }
@@ -23,6 +24,7 @@ export function syncHudStatus({ player, hp, xpPct, boss, document: doc = documen
   setAttribute(doc.getElementById("form-pips"), "aria-label", `Forma ${player.evo + 1} de 5`);
   setAttribute(doc.getElementById("hud-avatar"), "aria-label", player.name);
   hud.querySelector(".hud-block.player")?.classList.toggle("hurt", player.health / Math.max(1, player.maxHealth) <= 0.28);
+  announceAccessibleGameState(doc,player,boss);
   const tint = player.color || "#7ee7ff";
   if (hud.style.getPropertyValue("--tint") !== tint) hud.style.setProperty("--tint", tint);
 }

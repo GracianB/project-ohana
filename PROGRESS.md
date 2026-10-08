@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V97 · narración puntual accesible · ohana-297
+
+- Lector de pantalla: evolución, fase de la Reina y alertas de salud con histéresis; sin 60 anuncios/s.
+- HUD con región ARIA discreta y forced colors nativos. Conserva los controles V96 y los módulos de enemigos/cooperativo V95.
+- Candidata a release sujeta a CI y Pages.
+
+
 ## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
 
 - Diseño táctil para 320–420 px en vertical y 450 px de altura en apaisado, con separación real entre poderes, movimiento y salto.
