@@ -624,6 +624,26 @@ try {
   assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
   page.off('pageerror',onYomiError);
 
+  // V65 circular rainbow L and boss-safe sleep U: cast in the actual Chromium game.
+  const dreamErrors=[];
+  const onDreamError=err=>dreamErrors.push(String(err.message||err));
+  page.on('pageerror',onDreamError);
+  const irisL=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(4);api.cast(2);api.step(9);return api.state();
+  });
+  assert.equal(irisL.lastAbilityId,'rainbow','09k-cuerno: L did not cast rainbow');
+  assert.equal(irisL.lastAbilitySlot,2,'09k-cuerno: wrong L slot');
+  await capture(page,'09k-cuerno-iris-fullscreen-l');
+  const dreamU=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.cast(3);api.step(18);return api.state();
+  });
+  assert.equal(dreamU.lastAbilityId,'aurora','09l-cuerno: U not activated');
+  assert.equal(dreamU.lastAbilitySlot,3,'09l-cuerno: wrong U slot');
+  await capture(page,'09l-cuerno-rainbow-sleep-u');
+  assert.deepEqual(dreamErrors,[],'09k/09l: Cuerno L/U runtime exception');
+  page.off('pageerror',onDreamError);
+
   // V64 Aurora final in real gameplay. No physics or hitbox mutation.
   const auroraErrors=[];
   const onAuroraError=err=>auroraErrors.push(String(err.message||err));
