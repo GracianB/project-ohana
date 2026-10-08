@@ -37,12 +37,16 @@ function iris(ctx, W, H, cx, cy, k) {
 export function playTitleIntro() {
   const el = document.getElementById("ohana-intro");
   const finishClasses = () => {
-    document.body.classList.remove("intro-playing");
+    document.body.classList.remove("intro-playing", "intro-pending");
     document.body.classList.add("intro-complete");
     el?.classList.remove("show");
     el?.setAttribute("aria-hidden", "true");
   };
-  if (!el) return;
+  if (!el) {
+    document.body.classList.remove("intro-pending");
+    document.body.classList.add("intro-complete");
+    return;
+  }
   if (el._played) return;
   el._played = true;
   el.innerHTML = '<canvas aria-hidden="true"></canvas><button class="oi-skip" type="button" aria-label="Saltar introducción">Saltar intro · Esc</button>';
