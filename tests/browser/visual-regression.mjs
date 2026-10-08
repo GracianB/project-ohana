@@ -772,6 +772,19 @@ try {
   assert.equal(finalK.lastAbilityId,'gallop','09t-cuerno: radiant gallop K not cast');
   await capture(page,'09t-cuerno-v73-ribbon-gallop-k');
 
+  // Cuerno V84: real ten-second fantasy lane after dash, then seven-horn L.
+  const ribbonV84=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.step(30);return api.state();
+  });
+  assert.equal(ribbonV84.lastAbilityId,'gallop','09t2-cuerno: K trail cast was lost');
+  await capture(page,'09t2-cuerno-v84-persistent-rainbow-k');
+  const crownV84=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.cast(2);api.step(18);return api.state();
+  });
+  assert.equal(crownV84.lastAbilityId,'rainbow','09t3-cuerno: L prism crown was not cast');
+  await capture(page,'09t3-cuerno-v84-seven-horn-crown-l');
+
+
   // Dino V75: browser-real J/K/L captures. His U is reserved for its own chapter.
   const dinoV75Errors=[];
   const onDinoV75Error=err=>dinoV75Errors.push(String(err.message||err));
