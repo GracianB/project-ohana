@@ -1,3 +1,13 @@
+## 08/10/2026 · CUERNO V79 · ESPIRAL VERDADERA
+
+**Base:** main con Cuerno V78 y Dino V76/V77; caché `ohana-278`.
+
+- Potro Iris y Unicornio Estelar dejan atrás el zigzag afilado: el cuerno ahora tiene silueta cónica orgánica, cinco estrías nacaradas recortadas dentro del volumen y un único reflejo longitudinal. Cuernín y Destello conservan su pequeña espiral original; Unicornio Negro conserva su corona de obsidiana y marfil.
+- El módulo de arte de Cuerno lee la preferencia `prefers-reduced-motion` mediante un solo MediaQueryList de estado vivo. El galope, la melena, la cola y las alas del V78 pueden adaptar su movimiento sin cambiar a otros personajes ni añadir temporizadores.
+- Contrato de Canvas, articulación de cuatro patas, cinco formas, determinismo, equilibrio de contextos y límites validados en Node. Ninguna modificación en Dino, físicas, colisiones ni habilidades.
+
+**No publicar sin quality completo.**
+
 ## 08/10/2026 · DINO V78 · MEJORAS DE SENSACIÓN DE COMBATE
 
 **Rama aislada:** `feat/dino-v78-combat-feel-20261008`. **Base:** OHANA V77 publicado; Cuerno es propiedad de su desarrollo paralelo. **Cache propuesta:** `ohana-277`.
