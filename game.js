@@ -54,6 +54,16 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
 let input;
 let keys;
+const CONTROL_FEEL = Object.freeze({
+  jumpBufferFrames: 10,
+  coyoteFrames: 10,
+  groundAccel: 0.42,
+  airAccel: 0.26,
+  reverseGroundAccel: 0.58,
+  reverseAirAccel: 0.36,
+  groundBrake: 0.68,
+  airBrake: 0.94,
+});
 const clock = createFixedClock();
 const $ = (id) => document.getElementById(id);
 const DOM = {
@@ -1106,7 +1116,7 @@ function landOn(p, plat) {
   p.vy = 0;
   p.grounded = true;
   p.jumps = 0;
-  p.coyote = 10;
+  p.coyote = CONTROL_FEEL.coyoteFrames;
 }
 function inPitX(p) {
   const cx = p.x + p.w / 2;
@@ -1385,9 +1395,13 @@ function updatePlayer() {
     return;
   }
   tickEvoTween(p);
-  const left = !!(keys["a"] || keys["arrowleft"]);
-  const right = !!(keys["d"] || keys["arrowright"]);
+  const rawLeft = !!(keys["a"] || keys["arrowleft"]);
+  const rawRight = !!(keys["d"] || keys["arrowright"]);
+  const axisX = input?.axisX?.() ?? (rawLeft === rawRight ? 0 : rawRight ? 1 : -1);
+  const left = axisX < 0;
+  const right = axisX > 0;
   const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
+  const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
   const drop = !!(keys["s"] || keys["arrowdown"]);
   if (p.dash > 0) p.dash--;
   if (p._dashGo > 0) p._dashGo--;
@@ -1413,19 +1427,26 @@ function updatePlayer() {
       p.vx = face * signature(p.id).dash;
       p.facing = face;
     }
-  } else if (left !== right) {
-    // Movimiento horizontal determinista y simétrico.
-    const target = right ? Math.abs(p.speed) : -Math.abs(p.speed);
-    const accel = p.grounded ? 0.34 : 0.20;
+  } else if (axisX !== 0) {
+    // V46: intención horizontal independiente del salto. Si ambas direcciones
+    // están físicamente pulsadas, engine/input.js hace ganar a la última.
+    const target = axisX * Math.abs(p.speed);
+    const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
+    const accel = p.grounded
+      ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
+      : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
     p.vx += (target - p.vx) * accel;
     if (Math.abs(target - p.vx) < 0.06) p.vx = target;
-    p.facing = target > 0 ? 1 : -1;
+    p.facing = axisX;
   } else {
     // Frenado corto y consistente, sin arrastre asimétrico.
-    p.vx *= p.grounded ? 0.72 : 0.94;
+    p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
     if (Math.abs(p.vx) < 0.04) p.vx = 0;
   }
-  if (jump) p.buffer = 10; else if (p.buffer > 0) p.buffer--;
+  // V46: buffer por pulsación, no por tecla mantenida. Un toque rápido entre
+  // dos frames queda latched y se consume al primer salto válido.
+  if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
+  else if (p.buffer > 0) p.buffer--;
   const masteryPlatforms = playerMasteryPlatforms(game);
   const playerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
   p.wall = 0;
@@ -1438,7 +1459,7 @@ function updatePlayer() {
     }
   }
   const canJump = p.jumps < p.maxJumps || p.coyote > 0 || p.wall;
-  if (p.buffer > 0 && canJump && !p._jumpHeld) {
+  if (p.buffer > 0 && canJump) {
     p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
     if (p.wall) p.vx = 8 * p.wall;
     p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
@@ -1471,9 +1492,9 @@ function updatePlayer() {
     }
   }
   if (p.wall) p.vy = Math.min(p.vy, 2.2);
-  const input = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jump && !p._jumpPrev, t };
+  const inputState = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
   p._jumpPrev = !!jump;
-  Passives.update(game, input);
+  Passives.update(game, inputState);
   const wasGrounded = !!p.grounded;
   const incoming = p.vy;
   p.vy = Math.min(14, p.vy + (p._dashGo > 0 ? 0.14 : 0.5));
@@ -1495,14 +1516,14 @@ function updatePlayer() {
       p.vy = 0;
       p.grounded = true;
       p.jumps = 0;
-      p.coyote = 10;
+      p.coyote = CONTROL_FEEL.coyoteFrames;
     }
     if (hit.hitX) wall = hit.hitX;
     if (hit.hitY === -1) break;
   }
   if (wall && !p.grounded) p.wall = wall;
   tickSwing(p);
-  Passives.afterMove(game, input);
+  Passives.afterMove(game, inputState);
   Magic.update(game);
   if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
   if (!p.grounded && p.coyote > 0) p.coyote--;
@@ -3303,6 +3324,7 @@ if (e2eEnabled) {
           right: !!(input?.keys?.d || input?.keys?.arrowright),
           jump: !!(input?.keys?.w || input?.keys?.arrowup || input?.keys?.[" "]),
           down: !!(input?.keys?.s || input?.keys?.arrowdown),
+          axisX: input?.axisX?.() || 0,
         },
         score: game.score,
         kills: game.kills,

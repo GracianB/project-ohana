@@ -1,3 +1,24 @@
+## 08/10/2026 · V46 CONTROL FEEL + PLAYER INTERACTION
+
+**Caché:** `ohana-237`.
+
+V46 corrige la interacción base antes de seguir ampliando contenido.
+
+- Eliminado el watchdog temporal de teclado que podía soltar una dirección físicamente mantenida tras ~1,2 s.
+- Las teclas solo se liberan con su `keyup`, pérdida real de foco/contexto o salida de página.
+- **Última dirección pulsada gana** cuando izquierda y derecha están mantenidas simultáneamente; al soltarla, la otra sigue activa.
+- Nuevo `axisX()` en input para representar intención horizontal real sin perder teclas físicas retenidas.
+- Nuevo `consumePress()` con latch de pulsación: un toque corto de salto no se pierde aunque ocurra entre dos frames.
+- El jump buffer se activa por pulsación y deja de rellenarse cada frame mientras se mantiene `↑ / W / Espacio`.
+- Coyote time y jump buffer quedan centralizados en `CONTROL_FEEL`.
+- Aceleración de suelo/aire y cambio de dirección tienen perfiles separados para una respuesta más inmediata.
+- Multitáctil corregido: levantar un dedo ya no borra visualmente ni libera los demás controles.
+- `touchend` global queda como fallback solo cuando Pointer Events no existe.
+- Botones táctiles exponen `aria-pressed` real durante la pulsación.
+- Los hints muestran WASD + flechas y explican las alternativas de salto.
+- Browser E2E reproduce el bug original: mantiene `→` durante más de 1,2 s, pulsa `↑` y exige que dirección, `axisX` y velocidad horizontal sigan activos.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+
 ## 08/10/2026 · V45 LIVING HERO SELECT + FINAL ASCENSION
 
 **Caché:** `ohana-236`.

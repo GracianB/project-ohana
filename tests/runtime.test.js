@@ -66,13 +66,14 @@ function send(target, type, fields = {}) {
 function inputFixture() {
   const target = new EventTarget();
   const move = new Element("d");
+  const jump = new Element(" ");
   const interact = new Element("e");
   const canvas = new Element();
   let enabled = true;
   const calls = [];
-  const input = bindInput({ target, canvas, buttons: [move, interact], canAct: () => enabled,
+  const input = bindInput({ target, canvas, buttons: [move, jump, interact], canAct: () => enabled,
     actions: { interact: () => calls.push("interact"), attack: () => calls.push("attack"), escape: () => calls.push("escape") } });
-  return { target, move, interact, canvas, calls, input, disable() { enabled = false; } };
+  return { target, move, jump, interact, canvas, calls, input, disable() { enabled = false; } };
 }
 
 test("perder foco limpia teclado y botones sin dejar movimiento atascado", () => {
@@ -89,14 +90,33 @@ test("perder foco limpia teclado y botones sin dejar movimiento atascado", () =>
 test("las entradas táctiles capturan el puntero y respetan pulsaciones simultáneas", () => {
   const f = inputFixture();
   send(f.move, "pointerdown", { pointerId: 1 });
+  send(f.jump, "pointerdown", { pointerId: 2 });
   assert.equal(f.move.captured, 1);
+  assert.equal(f.jump.captured, 2);
+  assert.equal(f.move.classList.contains("held"), true);
+  assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.move.getAttribute("aria-pressed"), "true");
+  assert.equal(f.jump.getAttribute("aria-pressed"), "true");
+  assert.equal(f.input.keys.d, true);
+  assert.equal(f.input.keys[" "], true);
+
+  send(f.move, "pointerup", { pointerId: 1 });
+  assert.equal(f.move.classList.contains("held"), false);
+  assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.move.getAttribute("aria-pressed"), "false");
+  assert.equal(f.jump.getAttribute("aria-pressed"), "true");
+  assert.equal(f.input.keys.d, false);
+  assert.equal(f.input.keys[" "], true);
+
+  send(f.jump, "pointerup", { pointerId: 2 });
+  assert.equal(f.jump.classList.contains("held"), false);
+  assert.equal(f.input.keys[" "], false);
+
   send(f.target, "keydown", { key: "d" });
-  send(f.move, "pointercancel", { pointerId: 1 });
+  send(f.move, "pointerdown", { pointerId: 3 });
+  send(f.move, "pointercancel", { pointerId: 3 });
   assert.equal(f.input.keys.d, true);
   send(f.target, "keyup", { key: "d" });
-  assert.equal(f.input.keys.d, false);
-  send(f.move, "pointerdown", { pointerId: 2 });
-  send(f.move, "lostpointercapture", { pointerId: 2 });
   assert.equal(f.input.keys.d, false);
   f.input.destroy();
 });
@@ -114,6 +134,47 @@ test("E funciona en teclado y táctil, pero las acciones no se ejecutan en pausa
   send(f.target, "keydown", { key: "Escape" });
   assert.deepEqual(f.calls, ["interact", "interact", "escape"]);
   assert.notEqual(f.input.keys.d, true);
+  f.input.destroy();
+});
+
+test("saltar no cancela una dirección mantenida", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.axisX(), 1);
+  send(f.target, "keydown", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), true);
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.axisX(), 1);
+  send(f.target, "keyup", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.keys.arrowright, true);
+  send(f.target, "keyup", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.keys.arrowright, false);
+  f.input.destroy();
+});
+
+test("la última dirección física pulsada gana sin perder la otra tecla", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowRight", code: "ArrowRight" });
+  send(f.target, "keydown", { key: "ArrowLeft", code: "ArrowLeft" });
+  assert.equal(f.input.keys.arrowright, true);
+  assert.equal(f.input.keys.arrowleft, true);
+  assert.equal(f.input.axisX(), -1);
+  send(f.target, "keyup", { key: "ArrowLeft", code: "ArrowLeft" });
+  assert.equal(f.input.axisX(), 1);
+  assert.equal(f.input.keys.arrowright, true);
+  send(f.target, "keyup", { key: "ArrowRight", code: "ArrowRight" });
+  assert.equal(f.input.axisX(), 0);
+  f.input.destroy();
+});
+
+test("un toque rápido de salto queda latched una sola vez", () => {
+  const f = inputFixture();
+  send(f.target, "keydown", { key: "ArrowUp", code: "ArrowUp" });
+  send(f.target, "keyup", { key: "ArrowUp", code: "ArrowUp" });
+  assert.equal(f.input.keys.arrowup, false);
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), true);
+  assert.equal(f.input.consumePress(["w", "arrowup", " "]), false);
   f.input.destroy();
 });
 
