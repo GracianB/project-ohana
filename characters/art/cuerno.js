@@ -1,4 +1,4 @@
-// V75 IRIS FINALE · anatomical motion, rooted tails and hinged wings; V74's five-form canon is preserved.
+// V78 IRIS MOTION · shared gait, reactive manes, reduced movement; five-form canon preserved.
 // Character height is an optical reading aid, never a physics/hitbox change.
 export const CUERNO_VISUAL_H=Object.freeze([118,92,91,86,82]);
 // V66: Cuerno's personality is stage-specific and deterministic, never random FX.
@@ -76,11 +76,11 @@ export function cuernoTailPose(pose,form,t){
  const running=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
  if(pose?.state==="dead"||pose?.state==="hurt")return {swing:0,lift:0};
  const amplitude=f===4?6.2:f===3?5.4:4.2;
- const wave=Math.sin(time*.075+phase*.22)*amplitude*.55+
+ const wave=pose?.reduceMotion?0:Math.sin(time*.075+phase*.22)*amplitude*.55+
    (running?Math.sin(phase)*amplitude*.52:0);
  const speed=Math.max(0,Math.min(1,Number(pose?.speed)||0));
  return {swing:Math.max(-amplitude,Math.min(amplitude,wave)),
-   lift:air?7+f:running?1.8+speed*2.3:Math.sin(time*.055)*1.15};
+   lift:air?7+f:running?1.8+speed*2.3:pose?.reduceMotion?0:Math.sin(time*.055)*1.15};
 }
 function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
  const {swing,lift}=cuernoTailPose(pose,form,t);
@@ -110,9 +110,34 @@ export function cuernoWingPose(pose,form,t){
  const time=Number.isFinite(Number(t))?Number(t):0;
  const open=air?1:slot===3?1:slot===2?.89:cast?.84:victory?.95:
    state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
- const flutter=air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
- const flap=Math.sin(time*.10+phase*.12)*flutter;
- return {open,flap,hinge:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
+ const flutter=pose?.reduceMotion?0:air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
+ const flap=pose?.reduceMotion?0:Math.sin(time*.10+phase*.12)*flutter;
+ return {open,flap,hinge:pose?.reduceMotion?0:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
+}
+// V78 pure Canvas motion contract for three equine forms.
+export function cuernoLegPose(pose,form,t,clock=0,far=false){
+ const state=pose?.state||"idle",f=Math.max(2,Math.min(4,form|0));
+ if(state==="hurt"||state==="dead")return {reach:0,tuck:0,kneeLift:0,hoofLift:0};
+ const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
+ const speed=Math.max(0,Math.min(1,Number(pose?.speed)||0));
+ const run=state==="run",air=!!pose?.air||state==="jump"||state==="fall";
+ const step=Math.sin(phase+clock),tempo=.75+speed*.35;
+ const range=(f===2?(far?6:7.6):f===3?(far?7.8:10):far?8.7:11.5)*tempo;
+ const moving=run&&!pose?.reduceMotion;
+ return {reach:moving?step*range:0,tuck:air?(far?8:11)+(f-2)*1.2:0,
+  kneeLift:moving?Math.max(0,-step)*(f===2?1.3:2.2):0,
+  hoofLift:moving?Math.max(0,step)*((f-2)*1.25+2):0};
+}
+export function cuernoManePose(pose,form,t,index){
+ const f=Math.max(2,Math.min(4,form|0)),i=Math.max(0,Math.min(6,index|0));
+ if(pose?.reduceMotion||pose?.state==="hurt"||pose?.state==="dead")return 0;
+ const time=Number.isFinite(Number(t))?Number(t):0;
+ const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
+ const speed=Math.max(0,Math.min(1,Number(pose?.speed)||0));
+ const run=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
+ const breeze=Math.sin(time*(f===2?.13:.09)+i*(f===2?.83:f===3?.74:.57))*(f===2?1.8:3);
+ const wind=run?Math.sin(phase)*speed*(f===2?2.6:f===3?3.2:4):0;
+ return Math.max(-9,Math.min(9,breeze+wind+(air?(f===2?1.2:2.8):0)));
 }
 export function cuernoMagicPose(pose,form){
 if(pose?.state==="dead"||pose?.state==="hurt")return null;
@@ -371,11 +396,11 @@ const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
 // All four strands emerge from the croup; no detached tail during the gallop.
 drawRootedTail(ctx,pose,2,t,-29,-40,ribbons);
 function leg(x,clock,far){
-const stride=run?Math.sin(phase+clock):0,reach=stride*(far?6:7.6);
-const tuck=air?(far?8:10):(cuernoSoulBeat(pose,2)==="prance"&&!far?4:0);
-const anticipation=run&&stride<0?Math.max(0,-stride)*1.3:0;
-const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48-anticipation;
-const hoofX=x+reach+(far?-2:2),hoofY=2-tuck;
+const gait=cuernoLegPose(pose,2,t,clock,far);
+const {reach,kneeLift,hoofLift}=gait;
+const tuck=gait.tuck+(cuernoSoulBeat(pose,2)==="prance"&&!far&&!air?4:0);
+const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48-kneeLift;
+const hoofX=x+reach+(far?-2:2),hoofY=2-tuck-hoofLift;
 R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
 ctx.fillStyle=far?"#ad95c7":"#bb9dcc";ctx.strokeStyle=ink;ctx.lineWidth=1.35;
 ctx.beginPath();ctx.moveTo(hoofX-4.5,hoofY-3);
@@ -404,7 +429,7 @@ ctx.bezierCurveTo(19,-73,25,-65,26,-57);
 ctx.bezierCurveTo(24,-46,19,-37,15,-31);
 ctx.quadraticCurveTo(11,-28,3,-33);ctx.closePath();ctx.fill();ctx.stroke();
 for(let i=0;i<5;i++){
-const flutter=Math.sin(t*.13+i*.83)*2+(run?beat*2.8:0);
+const flutter=cuernoManePose(pose,2,t,i);
 ctx.strokeStyle=["#ffc0e0","#ffd98a","#a1e6db","#9dcbff","#d1aeff"][i];
 ctx.lineWidth=3.3-i*.19;ctx.lineCap="round";
 ctx.beginPath();ctx.moveTo(9+i*.7,-64+i*4);
@@ -456,11 +481,10 @@ ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
 function limb(x,clock,back){
-const beat=run?Math.sin(phase+clock):0,reach=run?beat*(back?7.5:10):0;
-const tuck=flight*(back?8:12);
-const bend=4+Math.max(0,-beat)*5;
-const kneeX=x+reach*.42+(back?-3:4),kneeY=-18+tuck*.45;
-const hoofX=x+reach+(back?-3:3),hoofY=5-tuck;
+const {reach,tuck,kneeLift,hoofLift}=cuernoLegPose(pose,3,t,clock,back);
+const bend=4+kneeLift*2;
+const kneeX=x+reach*.42+(back?-3:4),kneeY=-18+tuck*.45-kneeLift*.3;
+const hoofX=x+reach+(back?-3:3),hoofY=5-tuck-hoofLift;
 R.limb(ctx,x,-32,kneeX,kneeY,hoofX,hoofY,back?5.6:6.2,back?"#b6cee9":"#d2e4fc",{hand:false});
 ctx.fillStyle=back?"#8c9ac0":"#9eb1d2";ctx.strokeStyle=ink;ctx.lineWidth=1.7;
 ctx.beginPath();ctx.moveTo(hoofX-5.5,hoofY-3);
@@ -515,7 +539,7 @@ stellarWing(false);
 limb(rear+5,Math.PI*.02,false);
 limb(front+6,Math.PI*1.02,false);
 for(let i=0;i<5;i++){
-const drag=Math.sin(t*.11+i*.74)*3+(run?gallop*3:0);
+const drag=cuernoManePose(pose,3,t,i);
 ctx.strokeStyle=["#b1e7ff","#e0c0fb","#ffb4d5","#ffe3a3","#c5d8ff"][i];
 ctx.lineWidth=5.3-i*.24;ctx.lineCap="round";
 ctx.beginPath();ctx.moveTo(9+i*.8,-78+i*4);
@@ -598,9 +622,9 @@ ctx.restore();
 wing(true);
 // Four physically independent legs, different from the young foal and stellar gallop.
 function leg(x,clock,far){
-const step=run?Math.sin(phase+clock):0,reach=run?step*(far?9:12):0,tuck=air?(far?10:14):0;
-const kneeX=x+reach*.48+(far?-4:4),kneeY=-17+tuck*.5;
-const hoofX=x+reach+(far?-5:4),hoofY=6-tuck;
+const {reach,tuck,kneeLift,hoofLift}=cuernoLegPose(pose,4,t,clock,far);
+const kneeX=x+reach*.48+(far?-4:4),kneeY=-17+tuck*.5-kneeLift*.3;
+const hoofX=x+reach+(far?-5:4),hoofY=6-tuck-hoofLift;
 R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?"#363247":"#272431",{hand:false});
 ctx.fillStyle=far?"#57516b":"#66576d";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(hoofX-5.8,hoofY-3);
@@ -658,7 +682,7 @@ wing(false);
 leg(-20,Math.PI*.03,false);leg(20,Math.PI*1.04,false);
 // Seven locks of iridescent mane: reactive but bounded.
 for(let i=0;i<7;i++){
-const drag=Math.sin(t*.09+i*.57)*3.2+(run?beat*4:0)+(air?3:0);
+const drag=cuernoManePose(pose,4,t,i);
 ctx.strokeStyle=colors[(i+1)%colors.length];ctx.lineWidth=5.8-i*.40;
 ctx.lineCap="round";ctx.beginPath();ctx.moveTo(17+i*.75,-83+i*3.9);
 ctx.bezierCurveTo(7-i*1.6,-94+i*5,-8-i*2+drag,-70+i*5,-23-i*2+drag,-83+i*5);

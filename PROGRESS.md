@@ -1,3 +1,15 @@
+## 08/10/2026 · CUERNO V78 · GALOPAR CON EL ALMA
+
+**Base:** main con Cuerno V75 y Dino V76/V77, caché de publicación `ohana-276`. Trabajo aislado en Cuerno: sin tocar arte, ataques ni lógica de Dino, ni alterar físicas, velocidad, salto o hitboxes.
+
+- **Canon:** Cuernín sigue siendo solo un cuerno; Destello solo cuerno + esfera. Potro Iris, Estelar y Unicornio Negro conservan exactamente cuatro patas, y las dos formas finales sus alas.
+- **Galope compartido:** una función pura articula fases independientes de los cuatro cascos, rodillas, recorrido de zancada y recogida durante el salto.
+- **Melena viva:** mechones que responden a ritmo, velocidad y suspensión en lugar de animaciones aisladas por evolución.
+- **Accesibilidad y rendimiento:** respuesta compatible con movimiento reducido; todas las oscilaciones están acotadas. Sin temporizadores, PNG, VFX persistentes ni estados globales nuevos.
+- **Calidad:** una nueva batería comprueba las cinco formas, siete estados, determinismo, articulación y cierre de Canvas. Las protecciones y hechizos J/K/L/U anteriores permanecen.
+
+**Condición de publicación:** Node + Browser E2E + Multiplayer E2E + regresión visual + Release Gate en verde.
+
 ## 08/10/2026 · DINO V77 · U «CORAZÓN DE COLOSO»
 
 **Rama de capítulo:** `feat/dino-v77-colossus-u-20261008`, derivada de la V76 de Dino. La U se publica **después** de integrar la PR #203; no se modifica a Cuerno ni se sobreescribe main. **Caché prevista:** `ohana-275`.
