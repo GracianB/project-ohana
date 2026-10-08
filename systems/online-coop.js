@@ -2,9 +2,9 @@ import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
 import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
+import { remotePresenceCorrection } from "./coop-v95-presence.js";
 
 const ENDPOINT = "/.netlify/functions/game";
-const REMOTE_LERP = 0.22;
 const SEND_INTERVAL_MS = 125;
 const POLL_INTERVAL_MS = 180;
 const START_ROOM = "beach";
@@ -605,20 +605,17 @@ class OnlineCoop {
 
     if (this.remote) {
       const now = performance.now();
-      const sampleDt = Math.max(16, Math.min(180, (this.remote.sampleAt || now) - (this.remote.previousSampleAt || now)));
-      const vx = (this.remote.targetX - this.remote.previousX) / sampleDt;
-      const vy = (this.remote.targetY - this.remote.previousY) / sampleDt;
-      const leadX = this.remote.targetX + Math.max(-42, Math.min(42, vx * 54));
-      const leadY = this.remote.targetY + Math.max(-42, Math.min(42, vy * 54));
-      const blend = Math.max(0.16, Math.min(0.36, REMOTE_LERP * (16.67 / sampleDt)));
-      this.remote.x += (leadX - this.remote.x) * blend;
-      this.remote.y += (leadY - this.remote.y) * blend;
+      const correction = remotePresenceCorrection(this.remote, now);
+      this.remote.x += (correction.x - this.remote.x) * correction.blend;
+      this.remote.y += (correction.y - this.remote.y) * correction.blend;
+      this.remote.signalOpacity = correction.opacity;
+      this.remote.signalWeak = correction.stale;
       const pose = this.remote.pose || {};
       this.remote.melee = Math.max(0, this.remote.melee - 1);
       this.remote.dash = Math.max(0, this.remote.dash - 1);
       this.remote.invuln = Math.max(0, this.remote.invuln - 1);
       this.remote.grounded = pose.grounded !== false;
-      this.remote.phase += 0.7;
+      this.remote.phase += correction.stale ? 0.08 : 0.7;
       if (this.remote.actionUntil && now > this.remote.actionUntil) {
         this.remote.actionKind = null;
         this.remote.abilitySlot = null;
@@ -642,8 +639,8 @@ class OnlineCoop {
       y: this.remote.y,
       w: form.w,
       h: form.h,
-      vx: finite(this.remote.pose?.vx, 0),
-      vy: finite(this.remote.pose?.vy, 0),
+      vx: this.remote.signalWeak ? 0 : finite(this.remote.pose?.vx, 0),
+      vy: this.remote.signalWeak ? 0 : finite(this.remote.pose?.vy, 0),
       facing: this.remote.facing || 1,
       grounded: this.remote.grounded,
       evo,
@@ -657,6 +654,7 @@ class OnlineCoop {
     };
     ctx.save();
     if (this.remote.invuln > 0) ctx.globalAlpha = 0.72;
+    if (this.remote.signalWeak) ctx.globalAlpha *= Math.max(.44, Math.min(1, this.remote.signalOpacity || 1));
     drawCharacter(ctx, player, game.cam, t);
     ctx.globalAlpha = 1;
     const px = player.x + player.w / 2 - game.cam.x;
@@ -677,7 +675,7 @@ class OnlineCoop {
     ctx.strokeStyle = "rgba(4,8,16,.84)";
     ctx.lineWidth = 3;
     ctx.strokeText("J2 · " + (definition.name || "Jugador"), player.x + player.w / 2 - game.cam.x, player.y - 10 - game.cam.y);
-    ctx.fillText("J" + ((this.remote.slot ?? 1) + 1) + " · " + (definition.name || "Jugador"), player.x + player.w / 2 - game.cam.x, player.y - 10 - game.cam.y);
+    ctx.fillText("J" + ((this.remote.slot ?? 1) + 1) + " · " + (definition.name || "Jugador") + (this.remote.signalWeak ? " · SEÑAL RETRASADA" : ""), player.x + player.w / 2 - game.cam.x, player.y - 10 - game.cam.y);
     const hp = Math.max(0, finite(this.remote.health, this.remote.maxHealth || 1));
     const maxHp = Math.max(1, finite(this.remote.maxHealth, 1));
     const barW = 58;
