@@ -472,6 +472,9 @@ function stormSoul(ctx, pose, f, o, front) {
   const active = state === "cast" || state === "attack" || pose.move === "spark";
   const sky = state === "jump" || state === "fall" || state === "glide";
   const win = state === "victory";
+  const wall = state === "wall";
+  const charging = state === "cast" && pose.castSlot === 2;
+  const landing = state === "idle" && pose.bounce > .25;
   const gag = state === "idle" && pose.flourish > 0 && pose.flourishN % 4 === 3;
   const charge = active ? 1 : win ? .85 : sky ? .55 : gag ? Math.sin(Math.PI * pose.flourish) : .24;
   const warm = ["#fff9a0", "#ffd45a", "#ffab55", "#e6faff", "#fff1d7"][f] || "#fff9a0";
@@ -521,6 +524,44 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.stroke();
     }
   } else {
+    // Wall contact arcs crawl up the surface without changing physics.
+    if (wall) {
+      ctx.globalAlpha = .52;
+      ctx.strokeStyle = cold;
+      ctx.lineWidth = 1.65;
+      for (let i = 0; i < 3; i++) {
+        const yy = -16 - i * 21 + Math.sin(t * .13 + i) * 3;
+        ctx.beginPath();
+        ctx.moveTo(25, yy + 7);
+        ctx.lineTo(32, yy);
+        ctx.lineTo(28, yy - 5);
+        ctx.lineTo(36, yy - 13);
+        ctx.stroke();
+      }
+    }
+    // The charged tail becomes a conductor, visibly joining the storm crown.
+    if (charging) {
+      const k = Math.max(0, Math.min(1, pose.cast || 0));
+      ctx.globalAlpha = .30 + k * .48;
+      ctx.strokeStyle = f >= 4 ? "#ff70df" : "#fff5a8";
+      ctx.lineWidth = 1.7 + k;
+      ctx.beginPath();
+      ctx.moveTo(-28, -34);
+      ctx.lineTo(-39, -50 - k * 9);
+      ctx.lineTo(-32, -61 - k * 9);
+      ctx.lineTo(-43, -78 - k * 12);
+      ctx.stroke();
+    }
+    // A small landing shock ring, restrained to the character envelope.
+    if (landing) {
+      const k = Math.min(1, pose.bounce);
+      ctx.globalAlpha = .17 + k * .32;
+      ctx.strokeStyle = warm;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, -2, 18 + k * 13, 4 + k * 2, 0, 0, TAU);
+      ctx.stroke();
+    }
     // A short sequence of visible electrical nodes with phase-delayed motion.
     const n = active ? 7 : win ? 8 : sky ? 4 : f === 4 ? 3 : 0;
     for (let i = 0; i < n; i++) {
