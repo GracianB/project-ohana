@@ -704,7 +704,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-237/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-238/);
   assert.match(cinema, /Fullscreen chapter cards were removed/);
   assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -735,8 +735,13 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   const intro = fs.readFileSync("./systems/intro.js", "utf8");
   assert.match(title, /playTitleIntro\(\)/);
   assert.match(title, /const visible = \[id, prev, next, prev2, next2\]/);
-  assert.match(titleFx, /PROJECT OHANA V45 · LIVING HERO SELECT BACKDROP/);
+  assert.match(titleFx, /PROJECT OHANA V47A · HOKU HERO GATE/);
   assert.match(titleFx, /heroScene/);
+  assert.match(titleFx, /backdrop="hoku-gate"/);
+  assert.match(title, /PORTRAIT_ENVELOPE/);
+  assert.match(title, /portraitFit/);
+  assert.match(title, /fitEnvelope/);
+  assert.match(css, /V47A · CAROUSEL FIT \+ HOKU HERO GATE/);
   assert.match(titleFx, /kind:"volcano"/);
   assert.match(titleFx, /kind:"aurora"/);
   assert.match(html, /<body data-theme="dark" class="intro-pending">/);
@@ -803,8 +808,8 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(cinema, /dataset\.activeId/);
   assert.match(cinema, /dataset\.state="active"/);
   assert.match(css, /V44 · SUPREME SHORTS/);
-  assert.match(html, /supreme\.css\?v=ohana-237/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-237/);
+  assert.match(html, /supreme\.css\?v=ohana-238/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-238/);
   assert.match(visual, /09-supreme-u-assist/);
 });
 
@@ -948,7 +953,7 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(portals, /traversalNodeSnapshot\(/);
   assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
   assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
-  assert.match(html, /world-map\.css\?v=ohana-237/);
+  assert.match(html, /world-map\.css\?v=ohana-238/);
   assert.match(sw, /systems\/hazards\.js/);
   assert.match(sw, /systems\/world-graph\.js/);
   assert.match(sw, /systems\/traversal-nodes\.js/);

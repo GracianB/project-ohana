@@ -1,3 +1,20 @@
+## 08/10/2026 · V47A CAROUSEL FIT + HOKU HERO GATE
+
+**Caché:** `ohana-238`.
+
+V47A corrige el encuadre de evoluciones en el selector y sustituye el fondo del carrusel por una composición coherente de Isla Hoku.
+
+- **Safe Portrait Fit:** cada forma usa un envelope visual por héroe/evolución que reserva espacio para alas, colas, cuernos, aura y FX.
+- Forma 5 deja de usar el mismo supuesto de tamaño que las formas pequeñas; el fit limita ancho y alto antes de dibujar.
+- El canvas expone forma, escala y envelope para QA y Visual Regression.
+- Visual Regression fuerza Forma 5 y captura `01c-character-select-final-form-fit`.
+- **Hoku Hero Gate:** el selector siempre ocurre en Isla Hoku. Detrás del héroe aparece una ventana procedural hacia su afinidad, en vez de cambiar todo el fondo como diez wallpapers inconexos.
+- El gate conserva diez identidades: pradera, jungla, laboratorio, luna/cueva, volcán, tierra, costa, horno, vacío y aurora.
+- Fondo determinista para evitar ruido entre capturas de regresión.
+- Menos viñeta y overlays oscuros; más lectura del héroe central y del escenario.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+- Próximo bloque: **V47B · Kilo Soul Pass**, inicio del trabajo personaje a personaje.
+
 ## 08/10/2026 · V46 CONTROL FEEL + PLAYER INTERACTION
 
 **Caché:** `ohana-237`.
