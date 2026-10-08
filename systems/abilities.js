@@ -695,7 +695,7 @@ for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
 tickCuernoFantasyStatus(game,p,canHit,hitEnemy);
-trimAbilexport { drawCuernoGallopRibbons } from "./cuerno-fantasy.js";
+trimAbilexport { drawCuernoGallopRibbons };
 
 e();
 }
@@ -1321,7 +1321,6 @@ rainbow(g,p,evo){
 const radius=[170,260,400,610,Math.hypot(viewW(),viewH())*1.12][evo];
 add({kind:"irisHalo",x:cx(p),y:cy(p),r:radius,life:58,max:58,
 evo,color:"#fff6c8",hit:new Set(),dmg:(25+evo*6)*pw(p)});
-// Visual-only sculpted crown. The seven horns do not create seven hitboxes.
 add({kind:"cuernoPrismCrown",x:cx(p),y:cy(p),evo,
  life:CUERNO_FANTASY.crownFrames,max:CUERNO_FANTASY.crownFrames});
 p._auroraHaloT=58;
