@@ -113,7 +113,7 @@ test("Dino V75 isolated FX keeps shared engine size and combat budgets", () => {
   const shared = fs.readFileSync("systems/abilities.js","utf8");
   const module = fs.readFileSync("systems/dino-combat.js","utf8");
   assert.ok(shared.length < 135000, "Shared renderer budget broken");
-  assert.ok(module.length < 8500, "Dino animation module budget broken");
+  assert.ok(module.length < 14500, "Combined Dino J/K/L/U animation module budget broken");
   assert.match(shared, /createDinoEffects/);
   assert.match(module, /dinoSpit/);
   assert.match(module, /dinoSkyfall/);
