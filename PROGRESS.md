@@ -1,3 +1,30 @@
+## 08/10/2026 · V48 SUPREME CINEMA REBORN
+
+**Caché:** `ohana-240`.
+
+V48 dedica el sprint completo a la tecla U.
+
+- **Diez U, diez storyboards:** la vieja plantilla compartida `idle → attack → victory` desaparece.
+- **Kilo · pollen-bonk:** una mota lo golpea, la escena florece y termina en OHANA SOLAR.
+- **Stitcho · rift-zipper:** abre una grieta como cremallera, reacciona y cose el espacio.
+- **Chispín · overcharge:** se sobrecarga, recibe un calambre y descarga la tormenta.
+- **Michi · deadpan-eclipse:** espera impasible, entra el eclipse y desaparece en sombra.
+- **Dragón · tiny-sneeze:** una mini llamarada/estornudo rompe la pose solemne antes de la NOVA.
+- **Dino · double-stomp:** primera pisada casi ridícula, segunda pisada rompe el mundo.
+- **Frita · potato-catch:** una patata cruza la escena, la atrapa y detona la fritura.
+- **Pizza · oven-too-hot:** abre el horno, hay demasiado fuego, retrocede y termina en volcán.
+- **Yomi · void-looks-back:** mira al vacío, el vacío devuelve la mirada y se abre la fauce.
+- **Cuerno · tiny-rainbow:** aparece un arcoíris pequeño, lo aparta y libera la aurora completa.
+- Cada U tiene **cámara, gag, beat y duración propios** entre 1,5 y 1,8 s.
+- **OHANA ASSIST entra físicamente en el mini-film**, no como simple etiqueta.
+- El texto pasa a ser puntuación final; el personaje vuelve a ser el sujeto principal.
+- `supreme.css` se simplifica: se elimina toda la plantilla obsoleta de motivos CSS.
+- Se mantienen intactos daño, cooldown, identidad mecánica, combo y assist.
+- Browser E2E lanza las **10 U reales** y exige story/camera/beat únicos.
+- Visual Regression captura Kilo + Stitcho assist y Yomi como dos lenguajes cinematográficos distintos.
+- Reduced Motion conserva una versión abreviada.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+
 ## 08/10/2026 · V47B SUPREME CONTROL + PERFORMANCE PASS
 
 **Caché:** `ohana-239`.
