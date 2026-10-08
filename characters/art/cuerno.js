@@ -126,6 +126,7 @@ function drawLivingHorn(ctx,pose,R,t){
     R.sparkle(ctx,0,-66,4+2*aura,"#ffdc9b");
   }
   ctx.restore();
+drawCuernoSoul(ctx,pose,R,0,t);
 }
 
 // F1 Destello: the pearl horn grows a neck, ears, a muzzle and TWO tentative hooves.
@@ -194,6 +195,7 @@ function drawFirstBody(ctx,pose,R,t){
     for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-20-i*7,-7+i*5);ctx.lineTo(-31-i*8,-7+i*5);ctx.stroke();}
   }
   ctx.restore();
+drawCuernoSoul(ctx,pose,R,1,t);
 }
 
 function drawRainbowFoal(ctx,pose,R,t){
@@ -280,6 +282,7 @@ for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-42-i*8,-14-i*8);ctx.lineTo(-51-
 ctx.restore();
 }
 ctx.restore();
+drawCuernoSoul(ctx,pose,R,2,t);
 }
 
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
@@ -381,6 +384,7 @@ ctx.save();ctx.globalAlpha=.38*flourish;ctx.strokeStyle="#f8d0ff";ctx.lineWidth=
 ctx.beginPath();ctx.arc(25,-121,9+18*flourish,-.6,2.7);ctx.stroke();ctx.restore();
 }
 ctx.restore();
+drawCuernoSoul(ctx,pose,R,3,t);
 }
 
 // V64 F4: original adult Unicornio Aurora. Wings are a visual signature, not flight physics.
@@ -513,16 +517,16 @@ for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-51-i*8,-20-i*9);ctx.lineTo(-68-
 ctx.restore();
 }
 ctx.restore();
+drawCuernoSoul(ctx,pose,R,4,t);
 }
 
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
-  if (f === 0) drawLivingHorn(ctx,pose,R,pose.t||0);
-  else if (f === 1) drawFirstBody(ctx,pose,R,pose.t||0);
-  else if (f === 2) drawRainbowFoal(ctx,pose,R,pose.t||0);
-  else if (f === 3) drawStellarUnicorn(ctx,pose,R,pose.t||0);
-  else drawAuroraUnicorn(ctx,pose,R,pose.t||0);
-  drawCuernoSoul(ctx,pose,R,f,pose.t||0);
+  if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
+  if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
+  if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }
+  if (f === 3) { drawStellarUnicorn(ctx,pose,R,pose.t||0); return; }
+  drawAuroraUnicorn(ctx,pose,R,pose.t||0);
 }
 
 export default { id: "cuerno", draw };
