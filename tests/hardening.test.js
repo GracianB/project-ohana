@@ -704,7 +704,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-239/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-240/);
   assert.match(cinema, /Fullscreen chapter cards were removed/);
   assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -808,12 +808,14 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
 });
 
 
-test("V37 signature U is cinematic, unique and regression-protected", () => {
+test("V48 signature U uses ten real storyboards and stays regression-protected", () => {
   const game = fs.readFileSync("./game.js", "utf8");
   const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
   const cinema = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const stories = fs.readFileSync("./systems/supreme-storyboards.js", "utf8");
   const css = fs.readFileSync("./supreme.css", "utf8");
   const html = fs.readFileSync("./index.html", "utf8");
+  const sw = fs.readFileSync("./sw.js", "utf8");
   const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
   assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3 \}/);
   assert.match(game, /registerCombatAction\(game, "H"/);
@@ -822,14 +824,23 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(abilities, /kind: "supremeField"/);
   assert.match(abilities, /kind: "assist"/);
   assert.match(abilities, /CustomEvent\("ohana-supreme"/);
-  assert.match(cinema, /PROJECT OHANA V44 · SUPREME SHORTS/);
-  assert.match(cinema, /drawDummy/);
-  assert.match(cinema, /dataset\.activeId/);
-  assert.match(cinema, /dataset\.state="active"/);
-  assert.match(css, /V44 · SUPREME SHORTS/);
-  assert.match(html, /supreme\.css\?v=ohana-239/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-239/);
+  assert.match(cinema, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
+  assert.match(cinema, /import \{ SUPREME_STORYBOARDS \} from "\.\/supreme-storyboards\.js"/);
+  assert.match(cinema, /dataset\.mode="storyboard"/);
+  assert.match(cinema, /dataset\.story=story\.gag/);
+  assert.match(cinema, /drawAssist/);
+  assert.match(stories, /PROJECT OHANA V48 · SUPREME STORYBOARDS/);
+  for (const gag of [
+    "pollen-bonk","rift-zipper","overcharge","deadpan-eclipse","tiny-sneeze",
+    "double-stomp","potato-catch","oven-too-hot","void-looks-back","tiny-rainbow"
+  ]) assert.match(stories, new RegExp(gag));
+  assert.match(sw, /systems\/supreme-storyboards\.js\?v=/);
+  assert.match(css, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
+  assert.doesNotMatch(css, /sc-motif/);
+  assert.match(html, /supreme\.css\?v=ohana-240/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-240/);
   assert.match(visual, /09-supreme-u-assist/);
+  assert.match(visual, /09b-supreme-yomi-story/);
 });
 
 
@@ -972,7 +983,7 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(portals, /traversalNodeSnapshot\(/);
   assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
   assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
-  assert.match(html, /world-map\.css\?v=ohana-239/);
+  assert.match(html, /world-map\.css\?v=ohana-240/);
   assert.match(sw, /systems\/hazards\.js/);
   assert.match(sw, /systems\/world-graph\.js/);
   assert.match(sw, /systems\/traversal-nodes\.js/);
