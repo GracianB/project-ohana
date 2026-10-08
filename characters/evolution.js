@@ -145,7 +145,7 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "El Juez del Umbral abre la puerta a Cuerno: juntos protegen todo OHANA.",
   ],
   cuerno: [
-    "El cuerno vivo descubre una chispa que empieza a dibujar su primer cuerpo.",
+    "El nácar late: aparecen orejas, hocico y dos pezuñas. Destello aprende a sostener su propia luz.",
     "De la luz nace un potro Iris, con patas para galopar por primera vez.",
     "La melena estelar despierta: el potro se convierte en unicornio.",
     "Cuerno Aurora abre las alas de luz de su destino y galopa hacia el cielo.",
