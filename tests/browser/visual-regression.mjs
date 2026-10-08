@@ -795,12 +795,49 @@ try {
   assert.equal(dinoUltimate.film?.camera,'colossus','09x-dino-u: camera not specialized');
   assert.equal(dinoUltimate.film?.mode,'storyboard','09x-dino-u: storyboard missing');
   assert.ok(dinoUltimate.film?.duration>=3100,'09x-dino-u: epic is too short');
-  await capture(page,'09x-dino-v77-u-heartbeat');
-  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.dinoPhase==='comets',null,{timeout:3600});
-  await capture(page,'09y-dino-v77-u-fossil-comets');
-  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.dinoPhase==='heart',null,{timeout:3200});
-  await capture(page,'09z-dino-v77-u-big-heart');
-  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3800});
+  // Real U is validated from gameplay; full-page screenshots can take longer
+  // than a film's fleeting beat. Check the persistent *observed* act history,
+  // then render each actual film function at a deterministic frame.
+  await capture(page,'09x-dino-v77-u-runtime');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:6000});
+  const seenDinoActs=await page.locator('#supreme-cinema').evaluate(el=>(el.dataset.dinoPhasesSeen||'').split('|'));
+  assert.deepEqual(seenDinoActs,['heartbeat','awaken','rupture','comets','heart'],
+    '09x-dino-u: film must have actually visited five ordered acts');
+
+  for (const scene of [
+    {stage:.12,name:'09x-dino-v77-u-heartbeat'},
+    {stage:.28,name:'09x-dino-v77-u-awaken'},
+    {stage:.49,name:'09x-dino-v77-u-rupture'},
+    {stage:.71,name:'09y-dino-v77-u-fossil-comets'},
+    {stage:.91,name:'09z-dino-v77-u-big-heart'},
+  ]) {
+    const rendered=await page.evaluate(async (k)=>{
+      const {dinoColossusStage,drawDinoColossusFilm}=await import('./systems/dino-ultimate-film.js');
+      let canvas=document.getElementById('dino-u-stage-snapshot');
+      if(!canvas){
+        canvas=document.createElement('canvas');canvas.id='dino-u-stage-snapshot';
+        canvas.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483600;pointer-events:none';
+        document.body.appendChild(canvas);
+      }
+      canvas.width=innerWidth;canvas.height=innerHeight;
+      const ctx=canvas.getContext('2d');ctx.fillStyle='#0c1918';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      const x=canvas.width/2,y=canvas.height*.49;
+      const size=Math.min(canvas.height*.44,canvas.width*.3);
+      drawDinoColossusFilm(ctx,k,2.35,x,y,size,'#d3f59c',false);
+      ctx.fillStyle='#eaffbe';ctx.textAlign='center';ctx.font='bold 23px sans-serif';
+      ctx.fillText('DINO · CORAZÓN DE COLOSO',x,canvas.height*.13);
+      ctx.font='bold 14px sans-serif';
+      const act=dinoColossusStage(k);
+      ctx.fillText(act.caption,x,canvas.height*.88);
+      return act.name;
+    },scene.stage);
+    assert.equal(rendered,
+      scene.name.includes('heartbeat')?'heartbeat':scene.name.includes('awaken')?'awaken':
+      scene.name.includes('rupture')?'rupture':scene.name.includes('comets')?'comets':'heart');
+    await capture(page,scene.name);
+  }
+  await page.evaluate(()=>document.querySelector('#dino-u-stage-snapshot')?.remove());
 
   assert.deepEqual(dinoV75Errors,[],'09u/09v/09w: Dino V75 causes browser exceptions');
   page.off('pageerror',onDinoV75Error);
