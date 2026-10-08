@@ -66,13 +66,14 @@ function send(target, type, fields = {}) {
 function inputFixture() {
   const target = new EventTarget();
   const move = new Element("d");
+  const jump = new Element(" ");
   const interact = new Element("e");
   const canvas = new Element();
   let enabled = true;
   const calls = [];
-  const input = bindInput({ target, canvas, buttons: [move, interact], canAct: () => enabled,
+  const input = bindInput({ target, canvas, buttons: [move, jump, interact], canAct: () => enabled,
     actions: { interact: () => calls.push("interact"), attack: () => calls.push("attack"), escape: () => calls.push("escape") } });
-  return { target, move, interact, canvas, calls, input, disable() { enabled = false; } };
+  return { target, move, jump, interact, canvas, calls, input, disable() { enabled = false; } };
 }
 
 test("perder foco limpia teclado y botones sin dejar movimiento atascado", () => {
@@ -89,14 +90,29 @@ test("perder foco limpia teclado y botones sin dejar movimiento atascado", () =>
 test("las entradas táctiles capturan el puntero y respetan pulsaciones simultáneas", () => {
   const f = inputFixture();
   send(f.move, "pointerdown", { pointerId: 1 });
+  send(f.jump, "pointerdown", { pointerId: 2 });
   assert.equal(f.move.captured, 1);
+  assert.equal(f.jump.captured, 2);
+  assert.equal(f.move.classList.contains("held"), true);
+  assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.input.keys.d, true);
+  assert.equal(f.input.keys[" "], true);
+
+  send(f.move, "pointerup", { pointerId: 1 });
+  assert.equal(f.move.classList.contains("held"), false);
+  assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.input.keys.d, false);
+  assert.equal(f.input.keys[" "], true);
+
+  send(f.jump, "pointerup", { pointerId: 2 });
+  assert.equal(f.jump.classList.contains("held"), false);
+  assert.equal(f.input.keys[" "], false);
+
   send(f.target, "keydown", { key: "d" });
-  send(f.move, "pointercancel", { pointerId: 1 });
+  send(f.move, "pointerdown", { pointerId: 3 });
+  send(f.move, "pointercancel", { pointerId: 3 });
   assert.equal(f.input.keys.d, true);
   send(f.target, "keyup", { key: "d" });
-  assert.equal(f.input.keys.d, false);
-  send(f.move, "pointerdown", { pointerId: 2 });
-  send(f.move, "lostpointercapture", { pointerId: 2 });
   assert.equal(f.input.keys.d, false);
   f.input.destroy();
 });
