@@ -17,3 +17,12 @@ test("V53 dragon retains celestial flight and unique U",()=>{
  assert.match(abilities,/Vuelo celestial/);
  assert.match(dragon,/f===0 && state==="idle"/);
 });
+
+test("V53 solar ascent, halo and narrative are specific to Dragon",()=>{
+ const cinema=fs.readFileSync("systems/supreme-cinema.js","utf8");
+ const evolution=fs.readFileSync("characters/evolution.js","utf8");
+ assert.match(dragon,/Wingbeat vortex: ascending embers/);
+ assert.match(dragon,/f===4 && \(flight \|\| striking \|\| victorious\)/);
+ assert.match(cinema,/const ascent=seg\(k,\.33,\.62\)/);
+ assert.match(evolution,/La corona solar despierta/);
+});
