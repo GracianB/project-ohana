@@ -1,3 +1,13 @@
+## 08/10/2026 · V71 · CUERNO · SUPREMA: SUEÑO ARCOÍRIS VIVO
+
+**Caché:** `ohana-269`. Auditoría: las diez fases están implementadas; la fase 3 Potro Iris se recuperó en V63 después de la fase 4 Estelar V62. No falta ninguna fase numerada.
+
+- **U justa:** fija en `dreamTargets` del campo temporal solo los enemigos normales visibles cuando el jugador pulsa U. Jefes y enemigos inicialmente fuera de cámara quedan inmunes; los que entran después no son ejecutados por una U antigua. Los seleccionados siguen recibiendo las cinco oleadas si la cámara se desplaza. Se conservan los cinco pulsos, la curación y el blindaje de Cuerno.
+- **Magia individual:** cada enemigo realmente dormido dibuja tres arcos de iris de bajo brillo, luna de nácar, dos ojos cerrados y una pequeña z. Hasta seis hilos de aurora conectan los durmientes con el origen del hechizo. El dibujo utiliza solo Canvas y estados ya existentes, sin PNG ni objetos FX extra. Se respeta `reduceMotion`.
+- **La cinemática sabe quién duerme:** se envía el recuento verdadero de objetivos al evento `ohana-supreme` y al storyboard de Cuerno. Aparecen hasta nueve estrellas según los enemigos alcanzados, no constelaciones inventadas. El resto de las supremas no cambia.
+- **Pruebas nuevas:** objetivos capturados y recién llegados; objetivo que sale de cámara después del lanzamiento; jefe inmune; dibujo Canvas con conservación save/restore, act 3 ligado al recuento real y contrato de accesibilidad. Browser E2E, multijugador, regresión visual y Release Gate sin excepciones.
+- Mantener presupuesto V70: límite 3 MB JS, aviso 2,4 MB; CSS, FCP y simulación controlados. Dino aún sin modificar.
+
 ## 08/10/2026 · V70 · PRESUPUESTO ADAPTATIVO PARA DINO + MULTIJUGADOR
 
 - Se sustituye el tope rígido e histórico de `1.500.000` bytes JS por un máximo **3.000.000 bytes**, con **aviso a 2.400.000**. El nuevo contrato se centraliza en `tools/performance-budgets.mjs` para Browser E2E y Release Gate.

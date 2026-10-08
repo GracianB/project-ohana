@@ -706,11 +706,14 @@ try {
   // V68: the real U has its own four-stage cinematic, not just a generic overlay.
   const cuernoCinema=await page.locator('#supreme-cinema').evaluate(el=>({
     id:el.dataset.activeId,story:el.dataset.story,phase:el.dataset.cuernoPhase,
-    beat:el.dataset.beat,mode:el.dataset.mode
+    beat:el.dataset.beat,mode:el.dataset.mode,
+    dreamTargets:Number(el.dataset.dreamTargets||0)
   }));
   assert.equal(cuernoCinema.id,'cuerno','09p-cuerno: wrong cinematic hero');
   assert.equal(cuernoCinema.story,'dream-rainbow','09p-cuerno: wrong U sequence');
   assert.equal(cuernoCinema.mode,'storyboard','09p-cuerno: wrong cinematic mode');
+  assert.ok(Number.isInteger(cuernoCinema.dreamTargets)&&cuernoCinema.dreamTargets>=0,
+    '09q-cuerno: U cinema missing real sleeper count');
   assert.ok(['breath','iris','dream','aurora'].includes(cuernoCinema.phase),'09p-cuerno: four acts absent');
   assert.match(cuernoCinema.beat,/ALIENTO.*CÍRCULO.*SUEÑO.*AURORA/);
   await capture(page,'09p-cuerno-u-grand-spectacle');
