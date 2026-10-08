@@ -175,7 +175,7 @@ test("el rig de enemigos distingue aviso de zambullida activa", () => {
   assert.equal(foePose({ hp: 10, telegraph: false, diving: 8 }), "lunge");
 });
 
-test("Dino dispara huesos y Stitcho diferencia Caos de Rollo", async () => {
+test("Dino escupe Mocosaurio y Stitcho diferencia Caos de Rollo", async () => {
   const originals = Object.fromEntries(["Image", "window", "addEventListener"].map((key) => [key, globalThis[key]]));
   globalThis.Image = class { constructor() { this.complete = false; this.naturalWidth = 0; } };
   globalThis.window = globalThis.window || {};
@@ -190,22 +190,21 @@ test("Dino dispara huesos y Stitcho diferencia Caos de Rollo", async () => {
     }
   }
 
-  const castBite = (evo, facing) => {
+  const castSpit = (evo, facing) => {
     const game = {
-      player: { id: "dino", abilities: ["bite"], evo, facing, x: 100, y: 100, w: 32, h: 38, vx: 0 },
-      enemies: [], projectiles: [], t: 1,
+      player: { id: "dino", abilities: ["bite"], evo, facing, x: 100, y: 100,
+        w: 32, h: 38, vx: 0, speed: 4.3 },
+      enemies: [], projectiles: [], ghosts: [], platforms: [], worldW: 1600, worldH: 900,
+      cam: { x: 0, y: 0 }, fx: { emit() {} }, t: 1,
     };
     useAbility(game, 0);
-    return game.projectiles;
+    assert.equal(game.lastAbilityId, "bite");
+    assert.equal(game.projectiles.length, 0, "Mocosaurio uses bounded ability FX, not old bone projectiles");
+    return game;
   };
-  const baby = castBite(0, 1);
-  const god = castBite(4, -1);
-  assert.equal(baby.length, 1);
-  assert.equal(baby[0].shape, "bone");
-  assert.ok(baby[0].vx > 0);
-  assert.equal(god.length, 3);
-  assert.ok(god.every((projectile) => projectile.vx < 0));
-  assert.notEqual(god[0].vy, god[2].vy);
+  const baby = castSpit(0, 1), god = castSpit(4, -1);
+  assert.equal(baby.player.facing, 1);
+  assert.equal(god.player.facing, -1);
 
   const player = { id: "stitcho", abilities: ["plasma", "rollo", "caos"], evo: 0, facing: 1, x: 100, y: 100, w: 24, h: 24, speed: 4.4 };
   const chaosGame = { player, enemies: [], ghosts: [], projectiles: [], fx: { emit() {} }, t: 1 };
