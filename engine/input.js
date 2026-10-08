@@ -96,7 +96,11 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     else pointerButtons.delete(pointerId);
     for (const key of touched) keys[key] = logicalDown(key);
     const activeButtons = new Set(pointerButtons.values());
-    for (const button of buttons) button.classList.toggle("held", activeButtons.has(button));
+    for (const button of buttons) {
+      const active = activeButtons.has(button);
+      button.classList.toggle("held", active);
+      button.setAttribute?.("aria-pressed", active ? "true" : "false");
+    }
   }
 
   function reset() {
@@ -105,7 +109,10 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     pressed.clear();
     pointerButtons.clear();
     for (const key of Object.keys(keys)) keys[key] = false;
-    for (const button of buttons) button.classList.remove("held");
+    for (const button of buttons) {
+      button.classList.remove("held");
+      button.setAttribute?.("aria-pressed", "false");
+    }
   }
 
   function action(key) {
@@ -192,6 +199,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
       button.setPointerCapture?.(event.pointerId);
       pointerButtons.set(event.pointerId, button);
       button.classList.add("held");
+      button.setAttribute?.("aria-pressed", "true");
 
       if (MOVEMENT.has(key)) {
         hold(key, "pointer:" + event.pointerId, true);
