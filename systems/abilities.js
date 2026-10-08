@@ -31,8 +31,8 @@ export const ABILITY_DEFS = {
   cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
   oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
   ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
-  sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
-  maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
+  sleeve: { name: "Mangas imán", key: "K", cd: 1800, color: "#ecad87", desc: "K: abre las mangas y atrae enemigos delante de Yomi para preparar L." },
+  maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: avisa, muerde en un cono frontal de 120 unidades y aturde." },
   gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
   gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embiste con el cuerno y no se para." },
   rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
@@ -1897,29 +1897,35 @@ const UPD = {
   },
   sleeve(g, f, p) {
     f.life--;
-    const x = cx(p), y = cy(p);
+    if (!p) return false;
+    const x = cx(p), y = cy(p), face = f.face || p.facing || 1;
+    // K only pulls targets in the visible forward fan; it sets up a follow-up L.
     for (const e of g.enemies) {
-      if (!canHit(e)) continue;
-      const dx = x - cx(e), dy = y - cy(e);
-      const dist = Math.hypot(dx, dy);
-      if (dist > 210 || dist < 8) continue;
-      if (Math.sign(-dx) !== (p.facing || 1) && Math.abs(dx) > 24) continue;
-      e.vx += (dx / dist) * 2.1;
-      e.vy += (dy / dist) * 0.8;
+      if (!canHit(e) || e.boss) continue;
+      const ex = cx(e), ey = cy(e);
+      const ahead = (ex - x) * face, dy = ey - y;
+      const dist = Math.hypot(ex - x, dy);
+      if (ahead < 0 || ahead > 210 || dist < 8 || dist > 210 || Math.abs(dy) > 46 + ahead * .38) continue;
+      const dx = x + face * 24 - ex, pullY = y - ey;
+      const force = .9 + .7 * (1 - dist / 210);
+      e.vx = Math.max(-9, Math.min(9, (e.vx || 0) + (dx / dist) * 2.15 * force));
+      e.vy = Math.max(-7, Math.min(7, (e.vy || 0) + (pullY / dist) * 1.15 * force));
     }
     return f.life > 0;
   },
   maw(g, f, p) {
     f.life--;
-    if (f.life === f.max - 1) {
+    if (!p) return false;
+    // Six frames to read the threat; collision and impact happen at the visible snap.
+    const strikeFrame = Math.ceil(f.max * .55);
+    if (f.life === strikeFrame) {
       for (const e of g.enemies) {
         if (!canHit(e) || f.hit.has(e)) continue;
-        const dx = cx(e) - cx(p);
-        const dy = cy(e) - cy(p);
+        const dx = cx(e) - cx(p), dy = cy(e) - cy(p);
         if (Math.sign(dx || f.face) !== f.face && Math.abs(dx) > 16) continue;
         if (Math.abs(dx) < 120 && Math.abs(dy) < 54) {
           f.hit.add(e);
-          hitEnemy(g, e, f.dmg, { kx: f.face * 8, ky: -3, stun: 20, color: "#ff2244" });
+          hitEnemy(g, e, f.dmg, { kx: f.face * 8, ky: -3, stun: 20, color: "#e9768e" });
         }
       }
     }
@@ -2746,29 +2752,71 @@ const DRW = {
   },
   sleeve(ctx, f, cam, t, g, p) {
     if (!p) return;
-    const x = cx(p) - cam.x, y = cy(p) - cam.y;
-    ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = "#b9a6ff";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(x, y, 40 + (18 - f.life) * 6, (p.facing || 1) > 0 ? -0.8 : Math.PI - 0.8, (p.facing || 1) > 0 ? 0.8 : Math.PI + 0.8);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    const x = cx(p) - cam.x, y = cy(p) - cam.y, face = f.face || p.facing || 1;
+    const k = Math.max(0, Math.min(1, 1 - f.life / 18));
+    ctx.save();
+    ctx.translate(x + face * 19, y - 3);
+    ctx.scale(face, 1);
+    // K is a warm funnel visibly attached to the leading sleeve, not a detached ring.
+    for (let i=0;i<4;i++){
+      const reach=52+i*43, spread=18+reach*.38;
+      ctx.globalAlpha=(.46-i*.07)*Math.sin(Math.PI*(k*.72+.14));
+      ctx.strokeStyle=i%2?"#f4c994":"#f2a7bd";
+      ctx.lineWidth=3-i*.3;ctx.beginPath();
+      ctx.moveTo(i?reach-43:0,-10);
+      ctx.quadraticCurveTo(reach,-spread,reach,0);
+      ctx.quadraticCurveTo(reach,spread,i?reach-43:0,10);ctx.stroke();
+    }
+    ctx.restore();
+    // Only targets that the K logic can actually pull receive a visible tether.
+    let shown=0;
+    for(const e of (g?.enemies || [])){
+      if(shown>=4 || !canHit(e) || e.boss) continue;
+      const ahead=(cx(e)-cx(p))*face,dy=cy(e)-cy(p);
+      const dist=Math.hypot(cx(e)-cx(p),dy);
+      if(ahead<0 || ahead>210 || dist<8 || dist>210 || Math.abs(dy)>46+ahead*.38) continue;
+      const ex=cx(e)-cam.x,ey=cy(e)-cam.y;
+      ctx.save();ctx.globalAlpha=.34+.14*Math.sin(k*TAU);
+      ctx.strokeStyle="#ffe1a9";ctx.lineWidth=1.5;ctx.setLineDash([5,5]);
+      ctx.beginPath();ctx.moveTo(x+face*25,y-3);
+      ctx.quadraticCurveTo((ex+x)*.5,ey-14,ex,ey);ctx.stroke();
+      ctx.restore();shown++;
+    }
   },
   maw(ctx, f, cam, t, g, p) {
     if (!p) return;
-    const x = cx(p) - cam.x + (f.face || 1) * 36;
-    const y = cy(p) - cam.y;
-    const k = 1 - f.life / f.max;
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = "#1a0410";
-    ctx.beginPath();
-    ctx.ellipse(x, y, 18 + k * 28, 10 + k * 16, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = "#ff4466";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    const face=f.face || 1, x=cx(p)-cam.x, y=cy(p)-cam.y;
+    const k=Math.max(0,Math.min(1,1-f.life/f.max));
+    const open=Math.sin(Math.PI*Math.min(1,k/.48));
+    const snap=Math.max(0,1-Math.abs(k-.50)/.18);
+    const reach=120,halfH=54, warning=k<.42;
+    ctx.save();ctx.translate(x,y);ctx.scale(face,1);
+    // L: first show the exact 120 × 108 front hit region, then snap the jaws shut.
+    ctx.globalAlpha=warning?.12+.15*k:.16+.18*snap;
+    ctx.fillStyle="#f5bb93";ctx.beginPath();
+    ctx.moveTo(0,-halfH);ctx.lineTo(reach,-halfH);
+    ctx.lineTo(reach,halfH);ctx.lineTo(0,halfH);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=.92;ctx.fillStyle="#412740";ctx.strokeStyle="#ffcfaa";ctx.lineWidth=3;
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(8,side*7);
+      ctx.quadraticCurveTo(50,-side*(10+open*halfH),reach,-side*(12+open*halfH));
+      ctx.quadraticCurveTo(65,-side*6,8,side*7);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle="#fff1d7";
+      for(let i=0;i<5;i++){
+        const tx=24+i*19, yy=-side*(13+open*(10+i*3));
+        ctx.beginPath();ctx.moveTo(tx-5,yy-side*3);
+        ctx.lineTo(tx,yy+side*(8+open*3));
+        ctx.lineTo(tx+5,yy-side*3);ctx.fill();
+      }
+      ctx.fillStyle="#412740";
+    }
+    if(snap>0){
+      ctx.globalAlpha=.6*snap;ctx.strokeStyle="#ffe5bb";ctx.lineWidth=2;
+      for(let i=-1;i<=1;i++){
+        ctx.beginPath();ctx.moveTo(98,i*13);ctx.lineTo(126+snap*9,i*16);ctx.stroke();
+      }
+    }
+    ctx.restore();
   },
   jaws(ctx, f, cam, t, g, p) {
     if (!p) return;
