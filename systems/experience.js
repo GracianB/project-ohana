@@ -339,7 +339,6 @@ export class ExperienceDirector {
     const combo = Math.max(0, Number(game?.combo) || 0);
     const boss = game?.boss || game?.enemies?.find?.((e) => e?.boss);
     // Room arrivals are narrated exclusively by MessageManager.
-    // ExperienceDirector is visual/combat feedback, not a second narrator.
     const visible =
       combo >= 2 ||
       !!boss ||
@@ -410,9 +409,6 @@ export class ExperienceDirector {
 
     ctx.save();
 
-    // ----------------------------------------------------------
-    // VELOCITY TUNNEL
-    // ----------------------------------------------------------
 
     if (!reduced && dash > 0.035) {
       const a = clamp(dash * 0.55);
@@ -445,9 +441,6 @@ export class ExperienceDirector {
       }
     }
 
-    // ----------------------------------------------------------
-    // IMPACT CORE
-    // ----------------------------------------------------------
 
     if (impact > 0.035 || shock > 0.035) {
       const ix =
@@ -504,9 +497,6 @@ export class ExperienceDirector {
       }
     }
 
-    // ----------------------------------------------------------
-    // LANDING SHOCKWAVE
-    // ----------------------------------------------------------
 
     if (land > 0.035) {
       const k = 1 - land;
@@ -531,9 +521,6 @@ export class ExperienceDirector {
       ctx.stroke();
     }
 
-    // ----------------------------------------------------------
-    // EVOLUTION RADIANCE
-    // ----------------------------------------------------------
 
     if (evo > 0.03) {
       const k =
@@ -563,9 +550,6 @@ export class ExperienceDirector {
       }
     }
 
-    // ----------------------------------------------------------
-    // BOSS CINEMATIC LETTERBOX
-    // ----------------------------------------------------------
 
     if (boss > 0.035 || game?.boss) {
       const bossPresence = Math.max(
@@ -601,9 +585,6 @@ export class ExperienceDirector {
       ctx.stroke();
     }
 
-    // ----------------------------------------------------------
-    // HURT / DANGER VIGNETTE
-    // ----------------------------------------------------------
 
     if (hurt > 0.035 && !this.state.evo) {
       const g = ctx.createRadialGradient(
@@ -628,10 +609,6 @@ export class ExperienceDirector {
       ctx.fillRect(0, 0, W, H);
     }
 
-    // ----------------------------------------------------------
-    // ROOM ARRIVAL PULSE
-    // ----------------------------------------------------------
-    // La llegada sigue teniendo feedback visual, pero sin texto.
     // El texto pertenece a MessageManager.
     if (this.state.roomT > 0.03 && !reduced) {
       const k = clamp(this.state.roomT / 72);
@@ -643,9 +620,6 @@ export class ExperienceDirector {
       ctx.restore();
     }
 
-    // ----------------------------------------------------------
-    // FREE IMPULSE PARTICLES
-    // ----------------------------------------------------------
 
     for (const item of this.impulses) {
       const u = 1 - item.life / item.max;
