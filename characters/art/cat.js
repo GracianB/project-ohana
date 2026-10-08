@@ -409,6 +409,30 @@ function moonSoul(ctx, pose, form, front) {
         ctx.stroke();
       }
     }
+    // Three readable claw trails. No fullscreen flash, no detached PNGs.
+    if (state === "attack") {
+      const atk = Math.max(0, Math.min(1, pose.atk || 0));
+      const sweep = Math.sin(Math.PI * atk);
+      ctx.globalAlpha = .62 * sweep;
+      ctx.strokeStyle = form >= 3 ? "#ffe5b0" : "#f6b9ed";
+      ctx.lineWidth = 2.1;
+      for (let i=0;i<3;i++) {
+        const shift = i * 7;
+        ctx.beginPath();
+        ctx.moveTo(18 + shift, y - 8);
+        ctx.quadraticCurveTo(38 + shift, y + 6, 24 + shift, y + 23);
+        ctx.stroke();
+      }
+    }
+    // Victory reads as a feline leap with a compact crescent crown.
+    if (victory) {
+      ctx.globalAlpha = .4 + .2*Math.sin(t*.085);
+      ctx.strokeStyle = moon;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, y-11, 25 + form*3, Math.PI*1.14, Math.PI*1.86);
+      ctx.stroke();
+    }
     if (state === "wall") {
       ctx.globalAlpha = .45; ctx.strokeStyle = shadow; ctx.lineWidth = 1.5;
       for (let i=0; i<3; i++) {

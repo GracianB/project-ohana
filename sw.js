@@ -1,4 +1,4 @@
-const VERSION = "ohana-241";
+const VERSION = "ohana-252";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -11,6 +11,7 @@ const PRECACHE = [
   "./favicon.svg",
   "./style.css?v=" + VERSION,
   "./title-stage.css?v=" + VERSION,
+  "./atrium-interact.css?v=" + VERSION,
   "./hud.css?v=" + VERSION,
   "./evo.css?v=" + VERSION,
   "./ending.css?v=" + VERSION,
@@ -56,6 +57,7 @@ const PRECACHE = [
   "./engine/input.js?v=" + VERSION,
   "./engine/music.js?v=" + VERSION,
   "./engine/particles.js?v=" + VERSION,
+  "./systems/atrium-interact.js?v=" + VERSION,
   "./systems/abilities.js?v=" + VERSION,
   "./systems/boss-adaptation.js?v=" + VERSION,
   "./systems/boss-bait-feedback.js?v=" + VERSION,

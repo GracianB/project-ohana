@@ -70,11 +70,12 @@ async function auditPage(page, label) {
       viewport: { width: innerWidth, height: innerHeight },
       scrollWidth: document.documentElement.scrollWidth,
       scrollHeight: document.documentElement.scrollHeight,
-      introComplete: document.body.classList.contains('intro-complete')
+      introComplete: document.body.classList.contains('intro-complete'),
+      atriumOn: document.querySelector('#char-select')?.classList.contains('atrium-on') || false
     };
   });
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
-  assert.equal(titleLayout.visibleCards.length, label === 'mobile' ? 3 : 5, label + ': selector V45 con profundidad incorrecta');
+  assert.equal(titleLayout.visibleCards.length, titleLayout.atriumOn ? 10 : (label === 'mobile' ? 3 : 5), label + ': profundidad del selector/atrium incorrecta');
   assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
   assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');

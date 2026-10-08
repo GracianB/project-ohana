@@ -1,11 +1,3 @@
-// ============================================================================
-// CHISPÍN · "ajolote-hurón eléctrico" original
-// Cuerpo redondo amarillo sol con barriga blanca, orejas cortas redondeadas
-// (interior turquesa), 3 branquias plumosas por lado que brillan al cargarse,
-// cola larga en MUELLE con punta-pila turquesa, marcas "+" en las mejillas.
-// Corre a SALTITOS con los dos pies juntos.
-// pose.move: "spark" (corre rodeado de chispas).
-// ============================================================================
 
 const TAU = Math.PI * 2;
 const TQ = "#b05cff"; // acento violeta eléctrico (distinto del cian de Stitcho)
@@ -27,9 +19,6 @@ const P = [
   { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 8.5, eye: 8, tail: 34, coil: 5.5, turns: 3, final: true },
 ];
 
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
 function pEll(x, y, rx, ry, rot = 0) {
   const p = new Path2D();
   p.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU);
@@ -84,9 +73,6 @@ function cloud(ctx, R, x, y, s, col, dark) {
   ctx.fillStyle = g; ctx.fill(p);
 }
 
-// ---------------------------------------------------------------------------
-// partes
-// ---------------------------------------------------------------------------
 /** Branquia plumosa: tallo curvo + flecos. */
 function gill(ctx, R, x, y, ang, len, w, col, glowCol, charge, t, i) {
   const bend = Math.sin(t * 0.12 + i * 0.9) * 0.25;
@@ -145,7 +131,6 @@ function springTail(ctx, R, x, y, axis, len, amp, turns, col, f, t, glow) {
     ctx.strokeStyle = Math.cos(th) > 0 ? R.lighten(base, 0.15) : R.darken(base, 0.12);
     ctx.lineWidth = w; ctx.stroke();
   }
-  // punta-pila
   const [ex, ey] = pts[N];
   ctx.save();
   ctx.translate(ex, ey); ctx.rotate(axis);
@@ -197,31 +182,23 @@ function footOval(ctx, R, x, y, w, col, rot) {
   ctx.moveTo(x + w * 0.8, y - w * 0.12); ctx.lineTo(x + w * 0.8, y + w * 0.3); ctx.stroke();
 }
 
-// ---------------------------------------------------------------------------
-// figura
-// ---------------------------------------------------------------------------
 function figure(ctx, R, pose, f, S, C, o) {
   const t = pose.t;
   const hr = S.hr;
   const hipY = S.by + S.bry * 0.72;
 
-  // --- pies juntos (salto) / patitas
   const back = R.darken(C.body, 0.14);
   const footY = o.footY;
-  // cola (detrás de todo)
   const tailBase = [S.bx - S.brx * 0.85, S.by + S.bry * 0.35];
   const drawTail = () => springTail(ctx, R, tailBase[0], tailBase[1], o.tailAxis, S.tail * o.tailLen, S.coil * o.tailAmp, S.turns, C.body, f, t, o.tailGlow);
   let tip = o.whip > 0 ? null : drawTail();
 
-  // pierna trasera
   paw(ctx, R, S.bx - S.brx * 0.25, hipY, S.bx - S.brx * 0.25 + o.footX - 3, footY - 3, S.legW, back, o.legBend);
   footOval(ctx, R, S.bx - S.brx * 0.25 + o.footX - 4, footY - S.legW * 0.4, S.legW * 0.95, back);
-  // brazo trasero
   const shB = [S.bx - S.brx * 0.15, S.by - S.bry * 0.45];
   const ae = [shB[0] + Math.sin(o.armB) * S.armL, shB[1] + Math.cos(o.armB) * S.armL];
   paw(ctx, R, shB[0], shB[1], ae[0], ae[1], S.armW, back, 2);
 
-  // cuerpo
   const bp = pEll(S.bx, S.by, S.brx, S.bry);
   skin(ctx, R, bp, f, S.bx, S.by, Math.max(S.brx, S.bry), C.body, () => {
     ctx.fillStyle = C.belly;
@@ -229,23 +206,19 @@ function figure(ctx, R, pose, f, S, C, o) {
     ctx.fillStyle = "rgba(120,60,0,0.14)";
     ctx.beginPath(); ctx.ellipse(S.bx + S.brx * 0.2, S.by + S.bry * 1.05, S.brx * 1.1, S.bry * 0.45, 0, 0, TAU); ctx.fill();
     if (f === 2) {
-      // rayas de voltaje en el lomo
       ctx.strokeStyle = "rgba(160,70,0,0.55)"; ctx.lineWidth = 2.2;
       for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(S.bx - S.brx * 1.1, S.by - 8 + i * 8); ctx.lineTo(S.bx - S.brx * 0.6, S.by - 5 + i * 8); ctx.lineTo(S.bx - S.brx * 0.75, S.by - 2 + i * 8); ctx.stroke(); }
     }
   });
   R.shine(ctx, S.bx - S.brx * 0.35, S.by - S.bry * 0.5, S.brx * 0.2, S.bry * 0.1, 0.4);
 
-  // pierna delantera
   paw(ctx, R, S.bx + S.brx * 0.3, hipY, S.bx + S.brx * 0.3 + o.footX, footY - 3, S.legW, C.body, o.legBend);
   footOval(ctx, R, S.bx + S.brx * 0.3 + o.footX, footY - S.legW * 0.4, S.legW, C.body);
 
-  // --- cabeza
   ctx.save();
   ctx.translate(S.hx + o.headDX, S.hy + o.headDY);
   ctx.rotate(o.headRot);
   const gc = C.gill, gg = C.glow, ch = o.charge, gL = S.gillL * o.gillK, gW = S.gillW;
-  // branquias lejanas (detrás)
   const flare = o.gillFlare;
   if (S.crest) {
     for (let i = 0; i < 3; i++) {
@@ -258,9 +231,7 @@ function figure(ctx, R, pose, f, S, C, o) {
       gill(ctx, R, -hr * 0.2 - i * 3, -hr * 0.62 + i * 2.5, a, gL * (i === 1 ? 0.95 : 0.8), gW * 0.9, R.darken(gc, 0.16), gg, ch, t, i + 3);
     }
   }
-  // oreja trasera
   ear(ctx, R, -hr * 0.3, -hr * 0.86, S.ear, -0.35 + o.earA, C.body, C.inner, true);
-  // cabeza
   const hp = pEll(0, 0, hr * 1.05, hr * 0.94);
   skin(ctx, R, hp, f, 0, 0, hr, C.body, () => {
     ctx.fillStyle = R.alpha(C.belly, 0.8);
@@ -269,10 +240,8 @@ function figure(ctx, R, pose, f, S, C, o) {
     ctx.beginPath(); ctx.ellipse(-hr * 0.3, hr * 0.9, hr * 1.1, hr * 0.35, 0, 0, TAU); ctx.fill();
   });
   R.shine(ctx, -hr * 0.3, -hr * 0.55, hr * 0.28, hr * 0.14, 0.5);
-  // oreja delantera
   ear(ctx, R, hr * 0.35, -hr * 0.82, S.ear * 1.05, 0.3 + o.earA * 0.8, C.body, C.inner, false);
 
-  // cara
   const ey = -hr * 0.08;
   if (o.eyes === "swirl") {
     for (const [ex, r] of [[hr * 0.1, hr * 0.2], [hr * 0.6, hr * 0.22]]) {
@@ -286,12 +255,10 @@ function figure(ctx, R, pose, f, S, C, o) {
       ctx.beginPath(); ctx.moveTo(ex - 4, ey - 3); ctx.lineTo(ex + 2, ey); ctx.lineTo(ex - 4, ey + 3); ctx.stroke();
     }
   } else {
-    // ojos de gominola ámbar, separados y con pestaña (nada de "gafas")
     const iris = f === 4 ? "#d0409a" : "#d27a12";
     R.eye(ctx, -hr * 0.02, ey + 1, S.eye * 0.82, pose, { iris, mood: o.eyes, lash: true });
     R.eye(ctx, hr * 0.7, ey + 1.5, S.eye * 0.9, pose, { iris, mood: o.eyes, lash: true });
   }
-  // mejillas "+"
   if (o.puff > 0) {
     const pr = hr * 0.3 * o.puff;
     R.ellipse(ctx, hr * 0.78, hr * 0.38, pr, pr * 0.9, C.body, { lw: 2.4 });
@@ -300,11 +267,9 @@ function figure(ctx, R, pose, f, S, C, o) {
   const pc = ch > 0.3 ? C.glow : C.inner;
   plusMark(ctx, R, hr * 0.9, hr * 0.4, 2.6, pc);
   plusMark(ctx, R, -hr * 0.18, hr * 0.36, 2.2, pc);
-  // boca
   if (o.puff > 0.3) R.mouth(ctx, hr * 0.4, hr * 0.42, hr * 0.2, "flat");
   else R.mouth(ctx, hr * 0.38, hr * 0.34, hr * 0.36, o.mouth, { tongue: "#ff8fa6" });
 
-  // branquias cercanas (delante)
   if (S.crest) {
     for (let i = 0; i < 2; i++) gill(ctx, R, -hr * 0.92, -hr * 0.05 + i * 5, 2.9 + i * 0.35 + pose.sway * 0.2, gL * 0.6, gW * 0.85, gc, gg, ch, t, i);
   } else {
@@ -313,7 +278,6 @@ function figure(ctx, R, pose, f, S, C, o) {
       gill(ctx, R, -hr * 0.88, -hr * 0.3 + i * 5.5, a, gL * (i === 1 ? 1.1 : 0.95), gW, gc, gg, ch, t, i);
     }
   }
-  // corona de nubes (FORMA FINAL)
   if (S.final) {
     ctx.save();
     ctx.translate(0, -hr - 10 + Math.sin(t * 0.07) * 1.5);
@@ -328,7 +292,6 @@ function figure(ctx, R, pose, f, S, C, o) {
     }
     ctx.restore();
   }
-  // efectos de boca
   if (o.mouthSpark > 0) {
     const k = o.mouthSpark, mx = hr * 0.75 + 6 + Math.max(0, k - 0.5) * 60, my = hr * 0.35;
     const g = ctx.createRadialGradient(mx, my, 0, mx, my, 8 + k * 6);
@@ -338,7 +301,6 @@ function figure(ctx, R, pose, f, S, C, o) {
   }
   ctx.restore();
 
-  // brazo delantero
   const shF = [S.bx + S.brx * 0.4, S.by - S.bry * 0.4];
   const fe = o.armFTo || [shF[0] + Math.sin(o.armA) * S.armL, shF[1] + Math.cos(o.armA) * S.armL];
   paw(ctx, R, shF[0], shF[1], fe[0], fe[1], S.armW, C.body, -2);
@@ -346,7 +308,6 @@ function figure(ctx, R, pose, f, S, C, o) {
   return tip;
 }
 
-// ---------------------------------------------------------------------------
 function opts(pose, f, S) {
   const t = pose.t, st = pose.state;
   const o = {
@@ -485,7 +446,6 @@ function stormSoul(ctx, pose, f, o, front) {
   ctx.lineCap = "round";
 
   if (!front) {
-    // Character-specific grounded afterimage, rather than screen-sized flashes.
     if (active || sky || win) {
       ctx.globalAlpha = .13 + .17 * charge;
       ctx.fillStyle = cold;
@@ -505,7 +465,6 @@ function stormSoul(ctx, pose, f, o, front) {
         ctx.stroke();
       }
     }
-    // Cloudstep belongs only to the cloud form and never obscures the face.
     if (f === 3 && (sky || active || win)) {
       ctx.globalAlpha = .3 + charge * .24;
       ctx.fillStyle = "#d6f6ff";
@@ -524,7 +483,6 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.stroke();
     }
   } else {
-    // Wall contact arcs crawl up the surface without changing physics.
     if (wall) {
       ctx.globalAlpha = .52;
       ctx.strokeStyle = cold;
@@ -539,7 +497,6 @@ function stormSoul(ctx, pose, f, o, front) {
         ctx.stroke();
       }
     }
-    // The charged tail becomes a conductor, visibly joining the storm crown.
     if (charging) {
       const k = Math.max(0, Math.min(1, pose.cast || 0));
       ctx.globalAlpha = .30 + k * .48;
@@ -552,7 +509,6 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.lineTo(-43, -78 - k * 12);
       ctx.stroke();
     }
-    // A small landing shock ring, restrained to the character envelope.
     if (landing) {
       const k = Math.min(1, pose.bounce);
       ctx.globalAlpha = .17 + k * .32;
@@ -562,8 +518,7 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.ellipse(0, -2, 18 + k * 13, 4 + k * 2, 0, 0, TAU);
       ctx.stroke();
     }
-    // A distinct motif in every evolution form: orbit, filament, crest, cloud, aurora.
-    // Each stays inside the portrait-friendly character envelope.
+    // portrait-friendly character envelope
     if (active || win || sky) {
       ctx.globalAlpha = (.24 + .35 * charge) * (0.84 + .16 * Math.sin(t * .07));
       ctx.strokeStyle = f % 2 ? cold : warm;
@@ -590,7 +545,6 @@ function stormSoul(ctx, pose, f, o, front) {
       }
       ctx.stroke();
     }
-    // A short sequence of visible electrical nodes with phase-delayed motion.
     const n = active ? 7 : win ? 8 : sky ? 4 : f === 4 ? 3 : 0;
     for (let i = 0; i < n; i++) {
       const a = (i / Math.max(1,n)) * TAU + t * (f === 4 ? .014 : .025);
@@ -639,12 +593,10 @@ function draw(ctx, pose, R) {
   const cy = S.by - 4;
   stormSoul(ctx, pose, f, o, false);
 
-  // nubecitas (Trueno Gordo): detrás
   if (S.clouds) for (let i = 0; i < 3; i++) {
     const a = t * 0.025 + i * (TAU / 3);
     if (Math.sin(a) < 0) cloud(ctx, R, Math.cos(a) * 50, -50 + Math.sin(a) * 22, 5, "#fff", false);
   }
-  // halo de rayos (FORMA FINAL)
   if (S.final) {
     ctx.save();
     ctx.translate(0, cy - 14);
@@ -676,7 +628,6 @@ function draw(ctx, pose, R) {
     for (let i = 0; i < 5; i++) R.sparkle(ctx, Math.sin(i * 2.3 + t * 0.2) * 26, -20 - i * 16 * o.stretchY, 3 + (i % 2) * 2, i % 2 ? "#ffffff" : C.glow);
   } else tip = drawFig(1, 0);
 
-  // latigazo de cola: estela
   if (o.whip > 0) {
     ctx.save();
     ctx.lineCap = "round";
@@ -687,7 +638,6 @@ function draw(ctx, pose, R) {
     }
     ctx.restore();
   }
-  // rayo al cielo
   if (o.skyBolt > 0 && tip) {
     bolt(ctx, tip[0], tip[1], tip[0] + Math.sin(t) * 4, tip[1] - 60, Math.floor(t / 2), BOLT, 3.2, true);
     bolt(ctx, tip[0], tip[1], tip[0] - 14, tip[1] - 40, Math.floor(t / 2) + 7, C.glow, 1.8, false);
@@ -702,7 +652,6 @@ function draw(ctx, pose, R) {
     bolt(ctx, stormX, stormY + 12, stormX - 3, stormY + 29, Math.floor(t / 2), BOLT, 2.4, true);
     ctx.restore();
   }
-  // chispas alrededor
   if (o.sparks > 0) {
     ctx.save();
     ctx.globalAlpha *= Math.min(1, o.sparks);
@@ -716,7 +665,6 @@ function draw(ctx, pose, R) {
     ctx.restore();
   }
   stormSoul(ctx, pose, f, o, true);
-  // nubecitas: delante
   if (S.clouds) for (let i = 0; i < 3; i++) {
     const a = t * 0.025 + i * (TAU / 3);
     if (Math.sin(a) >= 0) cloud(ctx, R, Math.cos(a) * 50, -50 + Math.sin(a) * 22, 5.5, "#fff", false);

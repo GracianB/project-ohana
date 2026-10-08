@@ -112,6 +112,7 @@ try {
     };
     return {
       visible: visible.map((card) => card.dataset.id),
+      atriumOn: document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
       selected: box('#chars-grid .char-card.selected'),
       title: box('.title-stack'),
       controls: box('.title-controls'),
@@ -121,7 +122,7 @@ try {
       scrollWidth: document.documentElement.scrollWidth,
     };
   });
-  assert.equal(titleLayout.visible.length, 5, '01-character-select: V45 debe mostrar cinco héroes con profundidad');
+  assert.equal(titleLayout.visible.length, titleLayout.atriumOn ? 10 : 5, '01-character-select: profundidad Atrium/carrusel incorrecta');
   assert.ok(Math.abs((titleLayout.selected.left + titleLayout.selected.width / 2) - titleLayout.width / 2) < titleLayout.width * .1, '01-character-select: héroe fuera del centro');
   assert.ok(Math.abs((titleLayout.title.left + titleLayout.title.width / 2) - titleLayout.width / 2) < titleLayout.width * .08, '01-character-select: título fuera del centro');
   assert.ok(titleLayout.controls.bottom <= titleLayout.height + 2, '01-character-select: controles fuera del viewport');
@@ -160,6 +161,7 @@ try {
   await page.waitForTimeout(520);
   const livingSelect = await page.evaluate(() => ({
     hero:document.querySelector('#char-select')?.dataset.hero || '',
+    atriumOn:document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
     scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
     stitchoBeat:document.querySelector('#chars-grid .char-card.selected')?.dataset.stitchoBeat || '',
     visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
@@ -169,7 +171,7 @@ try {
   }));
   assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
   assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
-  assert.equal(livingSelect.visible.length, 5, '01b-living-select: coverflow pierde profundidad');
+  assert.equal(livingSelect.visible.length, livingSelect.atriumOn ? 10 : 5, '01b-living-select: profundidad Atrium/carrusel incorrecta');
   assert.equal(livingSelect.stitchoBeat, 'plasma-roll', '01d-stitcho: coreografía de selector incorrecta');
   await capture(page, '01b-character-select-stitcho-world');
   await capture(page, '01d-stitcho-plasma-roll');
