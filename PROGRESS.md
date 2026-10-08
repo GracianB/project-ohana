@@ -1,3 +1,14 @@
+## 08/10/2026 · V52 MICHI + CACHE HARDENING
+
+**Caché:** `ohana-252`. **Contrato:** 10 personajes · 5 formas por personaje · 10 salas.
+
+- V50 y V51 están integradas; V52 invalida correctamente versiones antiguas en index.html y Service Worker.
+- Precaché offline completo, incluido Atrium; portada coral de diez personajes mantenida sin alterar su lógica.
+- Michi: zarpazos lunares, remate de victoria, Paso Sombra y Eclipse de Nueve Vidas conservados.
+- Optimización de transferencia JavaScript mediante reducción de comentarios no ejecutables, sin modificar la mecánica.
+- QA automatizada: `node tests/browser/e2e.mjs`, `node tests/browser/visual-regression.mjs`, `release:check`.
+- Registro de propuestas PR #175 (cerrada) y PR #178 (rama limpia reconstruida sobre main).
+
 ## 08/10/2026 · V50 CHISPÍN SOUL PASS · PROPOSED
 
 - Chispín conserva su identidad de ajolote-hurón eléctrico: branquias, cola de muelle, saltitos y sonrisa.
