@@ -36,7 +36,9 @@ test("V91: Cuerno-only modular FX and offline release",()=>{
  assert.match(magic,/drawCuernoHoofprints/);assert.match(magic,/drawCuernoEnchantClock/);
  assert.match(eng,/drawCuernoSevenHornCrest\(ctx,/);
  assert.ok(eng.length<135000);
- assert.match(sw,/const VERSION = "ohana-291"/);
- assert.match(sw,/systems\/cuerno-v91-illusions\.js\?v=/);
- assert.match(html,/ohana-291/);
+ const version=/const VERSION = "(ohana-\d+)"/.exec(sw)?.[1];
+ assert.ok(version && Number(version.split("-")[1])>=291,
+   "Do not regress the V91 release cache");
+ assert.ok(sw.includes("systems/cuerno-v91-illusions.js?v="));
+ assert.ok(html.includes(version),"HTML and service worker cache must match");
 });
