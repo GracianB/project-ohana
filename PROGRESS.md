@@ -1,3 +1,14 @@
+## 08/10/2026 · OHANA V80 · CARRUSEL FLUIDO + CINE CON RESPIRACIÓN
+
+**Base:** Dino V79 + Cuerno V79 publicados, arte y mecánicas intactos. Caché `ohana-279`.
+
+1. **Carrusel:** se dibujan como máximo tres personajes (seleccionado 24 fps + vecinos 8 fps). Las otras siete tarjetas quedan sin trabajo Canvas. El dibujo se pausa si el menú no es visible, está la intro activa o la pestaña está en segundo plano. Al seleccionar, se invalidan solamente tamaño e imagen para obtener una primera imagen correcta. Se eliminan consultas de tamaño, gradientes y cambios de texto y cinco puntos de evolución en cada frame.
+2. **Composición:** se retiran filtros drop-shadow en Canvas dinámico, blur de cristales y transiciones de filter/box-shadow. Solo las tres tarjetas activas se promueven a capas de transform y opacity, con reduced-motion real.
+3. **Cinematografía:** el cierre de familia pasa de 7.4 s a 9.6 s (mantiene la ruta breve de reduced-motion), a 30 fps normales o 12 fps reducidos; evita aplicar tres clases en cada frame. El título final aparece más tarde y el cartel de resultados no se renderiza debajo de la película. La evolución 5/5 retrasa el título tras la aparición del personaje y mantiene su pose viva más tiempo (6.45 s frente a 5.18 s), con partículas acotadas a 128 y fullscreen Canvas de menor DPR.
+4. **Conservación:** el jugador puede saltarse la cinemática; teclado, móvil, multijugador y dos personajes siguen siendo accesibles. No cambia hitboxes, poderes, evolución ni arte.
+
+**Gates:** Node/funcionales, Browser E2E, Multiplayer E2E, Visual Regression y Release Gate. No publicar ni afirmar FPS reales sin esos resultados.
+
 ## 08/10/2026 · CUERNO V79 · ESPIRAL VERDADERA
 
 **Base:** main con Cuerno V78 y Dino V76/V77; caché `ohana-278`.
