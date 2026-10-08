@@ -220,7 +220,7 @@ stitcho: { id: "bang", name: "SINGULARIDAD COSIDA", key: "U", cd: 9000, color: "
 chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
 cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
 dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
-dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a", special: "Modo coloso", ally: "frita" },
+dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
 frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
 pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
 yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
@@ -241,7 +241,7 @@ stitcho: { kind: "rift",    line: "TODO CAOS TIENE COSTURA", text: "Cose el espa
 chispin: { kind: "chain",   line: "NO HAY DONDE ESCONDERSE", text: "La tormenta marca y persigue cada blanco." },
 cat:     { kind: "eclipse", line: "NUEVE VIDAS. UNA SOMBRA.", text: "El mundo se apaga y las sombras cazan." },
 dragon:  { kind: "nova",    line: "EL CIELO TAMBIÉN LUCHA", text: "El vuelo abre una lluvia de estrellas de fuego." },
-dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra se rompe bajo cada paso." },
+dino:    { kind: "quake",   line: "EL MÁS GRANDE TAMBIÉN TIENE CORAZÓN", text: "Dino despierta al coloso: cinco actos, cometas fósiles y un último gran abrazo." },
 frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
 pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
 yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
@@ -377,10 +377,7 @@ for (const e of enemies) hitEnemy(game, e, dmg * 1.08, { kx: Math.sign(cx(e)-cx(
 game.shake = Math.min(28, (game.shake || 0) + 16);
 p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
 } else if (p.id === "dino") {
-for (const e of enemies) hitEnemy(game, e, dmg * 1.06, { kx: Math.sign(cx(e)-cx(p)) * 22, ky: -16, stun: 68, color: def.color, crit: true });
-game.shake = Math.min(30, (game.shake || 0) + 20);
-p._specialTitanT = Math.max(p._specialTitanT || 0, 260);
-p._specialArmorT = Math.max(p._specialArmorT || 0, 260);
+DINO_FX.castUltimate(game,p,enemies,dmg,def.color);
 } else if (p.id === "frita") {
 for (const e of enemies) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
 healPlayer(p, p.maxHealth * 0.18);
@@ -428,7 +425,7 @@ p._specialArmorT=Math.max(p._specialArmorT||0,220);
 game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
 }
 
-add({
+if (p.id !== "dino") add({
 kind: "supremeField",
 mode: p.id,
 dreamTargets: p.id === "cuerno" ? dreamTargets : null,
@@ -1397,13 +1394,6 @@ if (f.pulse % pulseEvery === 0) {
     const target = nearestEnemy(g,f.x,f.y,900,null,0);
     const tx = target ? cx(target) : f.x + (p.facing||1) * 180;
     add({kind:"meteor",x:tx-(p.facing||1)*120,y:(g.cam.y||0)-50,vx:(p.facing||1)*2.8,vy:11.5,r:15,dmg:f.dmg*1.35,R:72,life:150,rot:0});
-  } else if (mode === "dino") {
-    if (p.grounded) {
-      for (const e of g.enemies) if (canHit(e) && Math.abs(cx(e)-f.x)<360 && Math.abs((e.y+e.h)-(p.y+p.h))<90) {
-        hitEnemy(g,e,f.dmg*1.05,{kx:Math.sign(cx(e)-f.x)*10,ky:-12,stun:38,color:f.color,hitstop:1});
-      }
-      g.shake=Math.min(18,(g.shake||0)+5);
-    }
   } else if (mode === "frita") {
     const targets = g.enemies.filter(canHit).slice(0,5);
     for (const e of targets) {
