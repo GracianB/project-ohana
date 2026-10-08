@@ -34,7 +34,7 @@ test("V94 four boss attacks have distinctive named counters and accessible label
 });
 test("V94 countdown increases toward release instead of shrinking",()=>{
  const boss=createBossNido();
- boss.telegraph=true;boss.mode="windup";boss.teleKind="charge";
+ boss.introT=0;boss.telegraph=true;boss.mode="windup";boss.teleKind="charge";
  boss.windMax=28;boss.wind=0;
  assert.equal(bossWindupProgress(boss),0);
  boss.wind=14;assert.equal(bossWindupProgress(boss),.5);
