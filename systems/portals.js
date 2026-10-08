@@ -115,6 +115,7 @@ export class Portals {
     this.trailColor = null;
     this._groundGrace = 0;
     this._simT = 0;
+    // Orbitals deterministas: misma sala + mismo portal = misma distribución visual.
     this.items.forEach((p, i) => {
       if (p.type === "blackhole") {
         const seedBase = p.x * 0.13 + p.y * 0.17 + p.w * 0.19 + i * 101;
