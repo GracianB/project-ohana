@@ -446,7 +446,7 @@ test('phase 39: start() no hereda estado transitorio de una sesión anterior', (
 test('phase 40: el Service Worker cierra el grafo JS de runtime y mantiene la versión coherente', () => {
   const sw = fs.readFileSync('./sw.js', 'utf8');
   const index = fs.readFileSync('./index.html', 'utf8');
-  const runtimeDirs = ['./characters', './engine', './systems', './worlds', './multiplayer'];
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
   const runtimeFiles = ['./game.js'];
 
   const walk = (dir) => {
@@ -534,7 +534,7 @@ test('phase 42: offline precache no tiene duplicados y mantiene cobertura total'
 
 
 test('phase 43: el grafo ESM local resuelve todas las importaciones relativas', () => {
-  const runtimeDirs = ['./characters', './engine', './systems', './worlds'];
+  const runtimeDirs = ['./characters', './engine', './systems', './worlds', './multiplayer'];
   const files = ['./game.js'];
   const walk = (dir) => {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
