@@ -1,3 +1,16 @@
+## 08/10/2026 · V56 YOMI REBORN · FASE 1/3
+
+**Caché:** `ohana-256`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** último personaje. **Intro de Grok:** no modificada.
+
+- Reconstrucción completa de Yomi como guardián-farol: silueta reconocible, rostro OHANA expresivo, cuerpo de papel iluminado y mangas animadas.
+- Las cinco formas tienen proporciones, tocado, hombros, mangas, grietas y corona lunar progresivas. Se conserva su identidad de espíritu, ahora cálida y legible.
+- Ataque **J · Sello guardián**: el talismán sale horizontalmente en dirección al enemigo, se fija y revela una cuenta atrás circular de 16 ticks antes de explotar en un radio de 72 unidades. La lógica de daño y enfriamiento se conserva.
+- Arte del lanzamiento J directamente en las manos de Yomi; el ataque ya no parece una carta que sube sin propósito.
+- Nueva historia evolutiva: Yomi aprende a alumbrar y proteger, no a convertirse en un monstruo desconectado del elenco.
+- Tests automatizados de rig, arte, J real en navegador, cinco capturas de evolución y límites de transferencias JS.
+- `ohana-256` sincronizada en Service Worker, HTML, regresiones y documentación.
+- **Siguiente fase:** rediseñar habilidades K (manga de succión), L (fauces) y retroalimentación de impacto. **Fase final:** cinematografía U y auditoría integral.
+
 ## 08/10/2026 · V55 PIZZA MOLTEN SOUL PASS · PROPOSED
 
 **Caché:** `ohana-255`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** reservado para el último pase.

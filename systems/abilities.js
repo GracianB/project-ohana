@@ -1,10 +1,3 @@
-// ============================================================================
-// HABILIDADES · 10 personajes × 3 (J/K/L)
-// Cada habilidad tiene una mecánica propia. Las entidades especiales (notas que
-// rebotan, charcos, nubes, espíritus, géiseres…) viven en FX (este módulo) con su
-// propio update/draw: updateAbilityFx(game) y drawAbilityFx(ctx, game, t).
-// systems/passives.js ya los llama desde Passives.afterMove / Passives.draw.
-// ============================================================================
 import { vfxSprite } from "../characters/sprites.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
@@ -12,41 +5,32 @@ import { sfx } from "../engine/audio.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
-// cd en ms (se reduce con la forma: cd / (1 + evo*0.12)). J corto, K medio, L largo.
 export const ABILITY_DEFS = {
-  // Kilo
   ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "Nota musical que rebota 3 veces en el suelo." },
   hula: { name: "Giro hula", key: "K", cd: 2100, color: "#ff5ad5", desc: "Giro que refleja proyectiles y te hace flotar." },
   ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Espíritus que curan y dañan a todo lo que hay en pantalla." },
-  // Stitcho
   plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
   rollo: { name: "Bola rodante", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos." },
   caos: { name: "Modo caos", key: "L", cd: 5600, color: "#8f7bff", desc: "Rebota por toda la sala arrollándolo todo." },
-  // Chispín
   chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Rayo que salta entre hasta 4 enemigos." },
   blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Teletransporte corto que deja una estela eléctrica." },
   storm: { name: "Nube tormenta", key: "L", cd: 6000, color: "#9cf", desc: "Nube que persigue enemigos lanzando rayos." },
-  // Michi
   yarn: { name: "Ovillo bumerán", key: "J", cd: 600, color: "#ff8ad4", desc: "Ovillo que va y vuelve atravesando enemigos." },
   purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Onda grande que duerme a lo que alcanza y te cura." },
   ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 colas brillantes que serpentean y persiguen." },
-  // Dragón
   breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
   gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
   meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
-  // Dino
   bite: { name: "Mordisco", key: "J", cd: 700, color: "#e8ffe0", desc: "Mordisco demoledor y huesos a distancia; evoluciona en abanico." },
   charge: { name: "Embestida", key: "K", cd: 2200, color: "#4cbf56", desc: "Carga blindada: invulnerable mientras dura." },
   quake: { name: "Terremoto", key: "L", cd: 6000, color: "#c8a060", desc: "Onda por el suelo que lanza por los aires." },
-  // Frita
   salt: { name: "Escopetazo de sal", key: "J", cd: 600, color: "#fff3c0", desc: "Abanico de granos de sal a corta distancia." },
   ketchup: { name: "Charco kétchup", key: "K", cd: 2000, color: "#e23b3b", desc: "Charco que ralentiza y daña con el tiempo." },
   fryer: { name: "Géiseres de aceite", key: "L", cd: 6000, color: "#ffd36a", desc: "Columnas de aceite hirviendo brotan en fila." },
-  // Pizza
   pepperoni: { name: "Disco pepperoni", key: "J", cd: 620, color: "#e0402a", desc: "Disco que rebota en paredes y suelo." },
   cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
   oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
-  ofuda: { name: "Ofuda", key: "J", cd: 560, color: "#f2e6c8", desc: "Talismán de papel que se clava y estalla." },
+  ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
   sleeve: { name: "Manga", key: "K", cd: 1800, color: "#6a3cff", desc: "La manga aspira a los enemigos hacia la máscara." },
   maw: { name: "Fauces", key: "L", cd: 5800, color: "#ff2244", desc: "La máscara se abre y muerde todo lo que tiene delante." },
   gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
@@ -454,9 +438,6 @@ function castSupreme(game, p, flow = currentFlow(game, p)) {
   game._supremeFlow = flow;
 }
 
-// ---------------------------------------------------------------------------
-// Estado de movimiento de habilidades (un solo jugador)
-// ---------------------------------------------------------------------------
 const FIXED_DT_MS = 1000 / 60;
 const MAX_FX = 96;
 const MAX_ABILITY_PROJECTILES = 96;
@@ -626,7 +607,6 @@ export function updateAbilityFx(game) {
   const p = game.player;
   if (!p) return;
   syncState(p);
-  // contacto de habilidades de cuerpo (rollo, caos, embestida)
   if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
   if (S.caos > 0) {
     bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
@@ -674,7 +654,6 @@ export function drawAbilityFx(ctx, game, t) {
     d(ctx, f, cam, t, game, p);
     ctx.restore();
   }
-  // Auras de movimiento
   if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
   if (S.charge > 0) drawChargeShield(ctx, p, cam, t);
   drawCastSignature(ctx, p, cam, t);
@@ -734,9 +713,6 @@ function drawCastSignature(ctx, p, cam, t) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 const TAU = Math.PI * 2;
 const AIR = new Set(["phosquito", "mosquito", "medusa", "pez", "libelula", "avispa", "abeja", "anguila", "gaviota", "murcielago", "brasita", "ufo"]);
 function cx(o) { return o.x + o.w / 2; }
@@ -849,18 +825,14 @@ export function hitEnemy(g, e, dmg, o = {}) {
   if (g.player) addPlayerXp(g.player, Number.isFinite(o.xp) ? o.xp : 2);
   g.shake = Math.min(18, (g.shake || 0) + (o.shake ?? 3) + (crit ? 4 : 0));
   
-  // Modificación: Permitir que stop sea reasignado
   let stop = crit ? 9 : (d >= 18 ? 4 : 0);
   
-  // Los jefes encajan decenas de golpes en un solo combate.
-  // Limitamos el hitstop a un máximo de 2 fotogramas para no ralentizar el juego.
   if (e.boss) stop = Math.min(2, stop);
   
   if (o.hitstop === 0) stop = 0;
   else if (o.hitstop != null) stop = o.hitstop;
   if (stop) {
     const frames = g.reduceMotion ? Math.max(1, Math.ceil(stop * 0.35)) : stop;
-    // Cap duro: varios proyectiles no deben congelar el juego
     g.hitstop = Math.min(5, Math.max(g.hitstop || 0, frames));
   }
   return true;
@@ -928,11 +900,7 @@ function zig(ctx, x1, y1, x2, y2, jit, segs, color, width) {
   ctx.strokeStyle = "#fff"; ctx.lineWidth = Math.max(1, width * 0.4); ctx.stroke();
 }
 
-// ---------------------------------------------------------------------------
-// CASTERS
-// ---------------------------------------------------------------------------
 const CASTERS = {
-  // ======================= KILO =======================
   ukulele(g, p, evo) {
     const h = hand(p);
     const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
@@ -971,7 +939,6 @@ const CASTERS = {
     boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
   },
 
-  // ======================= STITCHO =======================
   plasma(g, p, evo) {
     add({ kind: "burst", n: evo >= 3 ? 4 : 3, i: 0, gap: 5, next: 0 });
   },
@@ -989,7 +956,6 @@ const CASTERS = {
     boom(g, cx(p), cy(p), "#8f7bff", 10, { star: true });
   },
 
-  // ======================= CHISPÍN =======================
   chain(g, p, evo) {
     const h = hand(p);
     const pts = [{ x: h.x, y: h.y }];
@@ -1038,7 +1004,6 @@ const CASTERS = {
     boom(g, cx(p), p.y - 60, "#9cf", 10);
   },
 
-  // ======================= MICHI =======================
   yarn(g, p, evo) {
     const h = hand(p);
     add({ kind: "yarn", x: h.x, y: h.y, vx: (12 + evo) * p.facing, vy: 0, out: true, life: 130, hitA: new Set(), hitB: new Set(), r: 10 + evo, dmg: (15 + evo * 2) * pw(p), rot: 0 });
@@ -1069,7 +1034,6 @@ const CASTERS = {
     boom(g, cx(p), cy(p), "#b78bff", 18, { star: true, up: 3 });
   },
 
-  // ======================= DRAGÓN =======================
   breath(g, p, evo) {
     add({ kind: "breath", life: 30 + evo * 4, max: 30 + evo * 4, len: 110 + evo * 22, dmg: 6 * pw(p) });
   },
@@ -1097,7 +1061,6 @@ const CASTERS = {
     g.shake = Math.min(18, (g.shake || 0) + 4);
   },
 
-  // ======================= DINO =======================
   bite(g, p, evo) {
     const reach = 42 + evo * 9;
     const box = { x: p.facing > 0 ? p.x + p.w - 4 : p.x - reach + 4, y: p.y - 6, w: reach, h: p.h + 12 };
@@ -1140,7 +1103,6 @@ const CASTERS = {
     boom(g, cx(p), oy, "#c8a060", 10, { up: 2 });
   },
 
-  // ======================= FRITA =======================
   salt(g, p, evo) {
     const h = hand(p);
     const n = 5 + (evo >= 2 ? 2 : 0) + (evo >= 4 ? 2 : 0);
@@ -1171,7 +1133,6 @@ const CASTERS = {
     g.shake = Math.min(18, (g.shake || 0) + 3);
   },
 
-  // ======================= PIZZA =======================
   pepperoni(g, p, evo) {
     const h = hand(p);
     add({ kind: "disc", x: h.x, y: h.y, vx: (9 + evo * 0.6) * p.facing, vy: -1.5, r: 11 + evo, bounces: 0, maxB: 7 + evo, life: 180, dmg: (14 + evo * 2) * pw(p), rot: 0 });
@@ -1237,7 +1198,7 @@ const CASTERS = {
     const h = hand(p);
     add({
       kind: "ofuda", x: h.x, y: h.y,
-      vx: (8 + evo) * p.facing, vy: -0.4,
+      vx: (8 + evo) * (p.facing || 1), vy: 0,
       life: 90, stuck: 0, dmg: (18 + evo * 3) * pw(p),
     });
     boom(g, h.x, h.y, "#f2e6c8", 6);
@@ -1303,9 +1264,6 @@ const CASTERS = {
   },
 };
 
-// ============================================================================
-// ACTUALIZADORES DE ENTIDADES (UPD)
-// ============================================================================
 const UPD = {
   supremeField(g, f, p) {
     f.life--;
@@ -1427,9 +1385,6 @@ const UPD = {
     f.pulse = (Number(f.pulse) || 0) + 1;
     const rad = f.r + Math.sin(f.pulse * 0.22) * 5;
 
-    // El giro es también un escudo activo: cualquier proyectil hostil que entra
-    // en el aro se devuelve al emisor. Se marca una ventana corta para impedir
-    // que el mismo proyectil rebote varias veces mientras sigue dentro del aro.
     for (const pr of g.projectiles) {
       if (!pr || pr.life <= 0 || pr.owner === "player" || pr._hulaReflectUntil > (g.t || 0)) continue;
       const px = pr.x + (pr.w || 0) / 2;
@@ -1836,7 +1791,6 @@ const UPD = {
     f.rot += f.vx * 0.06;
     f.vy += 0.2;
     const W = g.worldW || 1600;
-    // horizontal
     f.x += f.vx;
     if (solidAt(g, f.x + Math.sign(f.vx) * f.r, f.y) || f.x < f.r || f.x > W - f.r) {
       f.x -= f.vx; f.vx = -f.vx; f.bounces++;
@@ -1973,9 +1927,6 @@ const UPD = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// DRAW de entidades
-// ---------------------------------------------------------------------------
 function drawNoteGlyph(ctx, s, color) {
   ctx.fillStyle = color;
   ctx.strokeStyle = "rgba(60,20,0,.55)";
@@ -2015,7 +1966,6 @@ function drawBallAura(ctx, p, cam, t, color) {
   ctx.beginPath();
   ctx.arc(x, y, r - 3, a0 + 1, a0 + 1.9);
   ctx.stroke();
-  // estelas de velocidad
   ctx.globalAlpha = 0.55;
   ctx.strokeStyle = "#dff4ff";
   ctx.lineWidth = 2;
@@ -2768,20 +2718,30 @@ const DRW = {
     drawSlice(ctx, 1);
   },
   ofuda(ctx, f, cam) {
-    ctx.save();
-    ctx.translate(f.x - cam.x, f.y - cam.y);
-    ctx.rotate(f.stuck ? 0.2 : Math.atan2(f.vy, f.vx || 1));
-    ctx.fillStyle = "#f4ead2";
-    ctx.fillRect(-8, -12, 16, 24);
-    ctx.strokeStyle = "#c23a3a";
-    ctx.lineWidth = 1.4;
-    ctx.strokeRect(-8, -12, 16, 24);
-    ctx.beginPath();
-    ctx.moveTo(0, -6);
-    ctx.lineTo(0, 6);
-    ctx.moveTo(-4, 0);
-    ctx.lineTo(4, 0);
-    ctx.stroke();
+    const x=f.x-cam.x,y=f.y-cam.y,stuck=Number(f.stuck)||0;
+    ctx.save();ctx.translate(x,y);
+    if(stuck>0){
+      const k=1-Math.min(1,stuck/16);
+      ctx.globalAlpha=.22+.3*k;
+      ctx.strokeStyle="#f5b071";ctx.lineWidth=2+k*1.8;
+      ctx.beginPath();ctx.arc(0,0,22+50*k,0,TAU);ctx.stroke();
+      ctx.globalAlpha=1;
+    } else {
+      const dir=Math.sign(f.vx)||1;
+      ctx.strokeStyle="rgba(255,215,157,.55)";ctx.lineWidth=2;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.moveTo(-dir*(17+i*7),-3+i*5);
+        ctx.lineTo(-dir*(30+i*8),-3+i*5);ctx.stroke();
+      }
+    }
+    ctx.rotate(stuck?-.1:Math.atan2(f.vy,f.vx||1));
+    ctx.fillStyle="#fff1d0";ctx.strokeStyle="#a64f5d";ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(-13,-7);ctx.lineTo(13,-7);
+    ctx.lineTo(13,7);ctx.lineTo(-13,7);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.strokeStyle="#bd6c52";ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.moveTo(-5,-4);ctx.lineTo(-1,0);
+    ctx.lineTo(5,-4);ctx.lineTo(2,1);ctx.lineTo(7,4);ctx.stroke();
+    ctx.fillStyle="#ecbe79";ctx.beginPath();ctx.arc(-8,0,1.6,0,TAU);ctx.fill();
     ctx.restore();
   },
   sleeve(ctx, f, cam, t, g, p) {
@@ -2856,9 +2816,6 @@ const DRW = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Dibujo de proyectiles/cortes/rayos genéricos (usados por game.js)
-// ---------------------------------------------------------------------------
 export function drawProjectile(ctx, pr, cam, t) {
   const x = pr.x - cam.x + pr.w / 2;
   const y = pr.y - cam.y + pr.h / 2;
