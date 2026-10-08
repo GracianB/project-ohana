@@ -21,3 +21,10 @@ test('V51 Michi eclipse identity preserves ability and cinematic', () => {
   assert.match(cinematic, /if\(id==="cat"\) return/);
   assert.match(evolution, /bg:"#120b27"/);
 });
+
+test('V51 eclipse U renders nine independent moon marks', () => {
+  assert.match(abilities, /for\(let i=0;i<9;i\+\+\)/);
+  assert.match(abilities, /f\.mode==="cat"/);
+  assert.match(cinematic, /const lives=seg\(k,\.24,\.69\)/);
+  assert.match(cinematic, /i<9;i\+\+/);
+});
