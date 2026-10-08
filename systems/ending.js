@@ -73,7 +73,8 @@ function showEnding(detail={}){
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
 
   layer.className="show cinema-running ending-phase-1";
-  layer.dataset.ending="v80-delayed-finale";
+  layer.dataset.ending="v44-true-ending";
+  layer.dataset.pacing="v80-delayed-finale";
   layer.dataset.duration=String(Math.round(duration*1000));
   layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
