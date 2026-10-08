@@ -141,10 +141,121 @@ function drawFirstBody(ctx,pose,R,t){
   ctx.restore();
 }
 
+// F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
+// Every appendage attaches to a horse-shaped torso; no old round ball is reused.
+function drawStellarUnicorn(ctx,pose,R,t){
+  const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air;
+  const phase=Number(pose.phase)||0,speed=Math.max(0,Math.min(1.4,Number(pose.speed)||0));
+  const gallop=run?Math.sin(phase):0,flight=air?1:0;
+  const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1);
+  const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe49e";
+  const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
+  const flourish=Math.sin(Math.PI*flare);
+  const angry=pose.state==="attack"||pose.state==="cast";
+  ctx.save();ctx.translate(0,bounce);ctx.rotate((air?-.075:0)+(run?-.025*gallop:0));
+  // Seven fine strands describe a moving comet-tail, not a cloud of particles.
+  for(let i=0;i<5;i++){
+    const sw=Math.sin(t*.105+i*.65)*3+(run?gallop*5:0);
+    ctx.save();ctx.globalAlpha=.88-i*.10;
+    ctx.strokeStyle=["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"][i];
+    ctx.lineWidth=3.7-i*.25;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(-34,-45+i*.9);
+    ctx.bezierCurveTo(-53-sw*.4,-43+i*3,-51-sw,-27+i*3,-61-sw,-30+i*4);
+    ctx.stroke();ctx.restore();
+  }
+  // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
+  function limb(x,clock,back){
+    const beat=run?Math.sin(phase+clock):0,reach=run?beat*(back?7.5:10):0;
+    const tuck=flight*(back?8:12);
+    const bend=4+Math.max(0,-beat)*5;
+    const kneeX=x+reach*.42+(back?-3:4),kneeY=-18+tuck*.45;
+    const hoofX=x+reach+(back?-3:3),hoofY=5-tuck;
+    R.limb(ctx,x,-32,kneeX,kneeY,hoofX,hoofY,back?5.6:6.2,back?"#b6cee9":"#d2e4fc",{hand:false});
+    ctx.fillStyle=back?"#8c9ac0":"#9eb1d2";ctx.strokeStyle=ink;ctx.lineWidth=1.7;
+    ctx.beginPath();ctx.moveTo(hoofX-5.5,hoofY-3);
+    ctx.quadraticCurveTo(hoofX+1,hoofY-6-bend*.05,hoofX+6,hoofY-2);
+    ctx.lineTo(hoofX+6,hoofY+3);ctx.lineTo(hoofX-5.5,hoofY+3);
+    ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  limb(rear-5,Math.PI*.77,true);
+  limb(front-2,Math.PI*1.74,true);
+  // Genuine long barrel, raised hindquarters, pronounced shoulder and chest.
+  ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(-37,-46);
+  ctx.bezierCurveTo(-29,-58,-12,-56,5,-49);
+  ctx.bezierCurveTo(19,-51,27,-41,22,-31);
+  ctx.bezierCurveTo(16,-20,5,-22,-5,-23);
+  ctx.bezierCurveTo(-18,-19,-35,-27,-37,-46);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.save();ctx.globalAlpha=.52;ctx.fillStyle=shade;ctx.beginPath();
+  ctx.ellipse(-12,-32,20,7,-.13,0,TAU);ctx.fill();ctx.restore();
+  // Breast and rising S-curve neck are continuous and physically joined to the body.
+  ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(4,-35);
+  ctx.bezierCurveTo(3,-52,9,-70,13,-78);
+  ctx.bezierCurveTo(19,-88,30,-80,32,-69);
+  ctx.bezierCurveTo(29,-56,26,-44,21,-35);
+  ctx.quadraticCurveTo(13,-28,4,-35);ctx.closePath();ctx.fill();ctx.stroke();
+  // A constellation on the flank: discreet embroidered stars in motion.
+  ctx.fillStyle="#8ba8dc";
+  for(const [x,y] of [[-24,-43],[-14,-39],[-5,-44]]){
+    ctx.beginPath();ctx.arc(x,y,1.4,0,TAU);ctx.fill();
+  }
+  ctx.strokeStyle="#a1bde5";ctx.lineWidth=1.2;ctx.beginPath();
+  ctx.moveTo(-24,-43);ctx.lineTo(-14,-39);ctx.lineTo(-5,-44);ctx.stroke();
+  // The far-side and near-side legs overlap the torso in separate depth layers.
+  limb(rear+5,Math.PI*.02,false);
+  limb(front+6,Math.PI*1.02,false);
+  // Flowing ribbon mane has its own wave and never covers the expressive face.
+  for(let i=0;i<5;i++){
+    const drag=Math.sin(t*.11+i*.74)*3+(run?gallop*3:0);
+    ctx.strokeStyle=["#b1e7ff","#e0c0fb","#ffb4d5","#ffe3a3","#c5d8ff"][i];
+    ctx.lineWidth=5.3-i*.24;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(9+i*.8,-78+i*4);
+    ctx.bezierCurveTo(1-i*2,-82+i*5,-7-i*2+drag,-68+i*6,-18-i*2+drag,-75+i*5);
+    ctx.stroke();
+  }
+  // Ears and cheeks establish a grown unicorn, not a floating round face.
+  for(const side of [-1,1]){
+    const x=20+side*8;
+    ctx.fillStyle="#ecf4ff";ctx.strokeStyle=ink;ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.moveTo(x-4,-76);ctx.quadraticCurveTo(x+side*4,-94,x+side*9,-78);
+    ctx.quadraticCurveTo(x+3,-73,x-4,-76);ctx.fill();ctx.stroke();
+  }
+  ctx.fillStyle="#ecf4ff";ctx.strokeStyle=ink;ctx.lineWidth=3;
+  ctx.beginPath();ctx.ellipse(30,-72,14,13,-.17,0,TAU);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(33,-70);ctx.bezierCurveTo(43,-73,47,-65,46,-59);
+  ctx.quadraticCurveTo(41,-52,31,-56);ctx.closePath();ctx.fill();ctx.stroke();
+  R.blush(ctx,37,-65,2.6,"#f2afcf");
+  const mood=pose.state==="hurt"||pose.state==="dead"?"closed":angry?"angry":pose.state==="victory"?"happy":"normal";
+  R.eye(ctx,29,-73,5,pose,{iris:"#5667ad",mood});
+  R.mouth(ctx,40,-56,4.2,pose.state==="victory"?"happy":angry?"grin":"smile");
+  ctx.fillStyle="#7c7ca3";ctx.beginPath();ctx.arc(43,-64,1.8,0,TAU);ctx.fill();
+  // A faceted spiral horn grows directly from the brow; the pearl core survives.
+  ctx.save();ctx.translate(25,-83);
+  ctx.rotate(-.06+(angry?-.12*Math.sin(Math.PI*(Number(pose.cast)||Number(pose.atk)||0)):0));
+  horn(ctx,37,"#9ad7ff",Math.sin(t*.12)*.48);
+  ctx.restore();
+  if(angry||pose.state==="victory"){
+    R.sparkle(ctx,25,-124,5+2*Math.sin(t*.07),"#ffdfa2");
+  }
+  // Local speed signature. Never add world-position movement or change hitboxes.
+  if(run&&speed>.23){
+    ctx.save();ctx.strokeStyle=gold;ctx.lineWidth=1.8;ctx.globalAlpha=.35+.25*speed;
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-47-i*9,-25-i*9);ctx.lineTo(-61-i*9,-24-i*9);ctx.stroke();}
+    ctx.restore();
+  }
+  if(flourish>.05){
+    ctx.save();ctx.globalAlpha=.38*flourish;ctx.strokeStyle="#f8d0ff";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(25,-121,9+18*flourish,-.6,2.7);ctx.stroke();ctx.restore();
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
+  if (f === 3) { drawStellarUnicorn(ctx,pose,R,pose.t||0); return; }
   const t = pose.t || 0;
   const final = f === 4;
   const run = pose.state === "run";

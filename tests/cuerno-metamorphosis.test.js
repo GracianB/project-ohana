@@ -53,7 +53,7 @@ test("V60 form names and gameplay still preserve innate speed and jump",()=>{
   assert.deepEqual(cuerno.abilities,["gleam","gallop","rainbow"]);
 });
 test("V60 browser audits the newborn, its two-hoof stage and Potro",()=>{
-  assert.match(visual,/for\(const form of \[0,1,2,4\]\)/);
+  assert.match(visual,/for\(const form of \[0,1,2,3,4\]\)/);
   assert.match(visual,/01j-cuerno-destello-first-metamorphosis/);
   assert.match(visual,/09g-cuerno-naciente-gameplay/);
 });
