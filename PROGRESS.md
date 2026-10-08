@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V98 · renderizado selectivo · ohana-298
+
+- Culling conservador de orbes, corazones, fantasmas, enemigos no-jefe, proyectiles y rayos fuera del viewport; margen de 192 px para prevenir recortes.
+- La Reina conserva su intro aunque esté fuera de pantalla. No cambian simulación, hitboxes, físicas, IA ni red.
+- Nuevo módulo determinista con pruebas de bordes y viewport; release sujeta a CI, visual y Pages.
+
 ## 09/10/2026 · OHANA V97 · juego accesible · ohana-297
 
 - Avisos puntuales de evolución, entrada/fases de la Reina y umbrales de salud, sin saturar lectores de pantalla a 60 Hz.
