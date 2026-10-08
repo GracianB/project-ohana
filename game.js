@@ -482,6 +482,8 @@ const S = paint ? PAINT_WORLD : 1;
 game.worldW = ROOM_W * S;
 game.worldH = ROOM_H * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+// Never carry a previous room's one-way ledge into the next room.
+if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
