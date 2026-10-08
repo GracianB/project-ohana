@@ -834,12 +834,23 @@ function dragonSoul(ctx, pose, front) {
         ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x+2,y);ctx.moveTo(x,y-2);ctx.lineTo(x,y+2);ctx.stroke();
       }
     }
-    // The baby dragon sneezes a tiny harmless ember instead of a giant nova.
-    if(f===0 && state==="idle" && (p.flourishN % 4)===3 && p.flourish>0){
-      const k=Math.sin(Math.PI*Math.max(0,Math.min(1,p.flourish)));
-      ctx.globalAlpha=.65*k;
-      ctx.fillStyle="#ffc542";
-      ctx.beginPath();ctx.ellipse(29 + k*18,-48-k*13,3+3*k,4+5*k,-.2,0,Math.PI*2);ctx.fill();
+    // Four-beat idle comedy: sneeze, airborne ember, attempted catch, royal composure.
+    if (state==="idle" && (p.flourishN % 4)===3 && p.flourish>0) {
+      const u=Math.max(0,Math.min(1,p.flourish));
+      const k=Math.sin(Math.PI*u), catchUp=Math.max(0,Math.min(1,(u-.48)*3));
+      const x=29+u*(f===0?18:25), y=-48-f*6-k*(13+f*2);
+      ctx.globalAlpha=.72*k;
+      ctx.fillStyle=f>=3?"#fff5ad":"#ffc542";
+      ctx.beginPath();ctx.ellipse(x,y,2.5+3*k+f*.35,4+4*k+f*.4,-.2,0,Math.PI*2);ctx.fill();
+      if(f>=1) {
+        ctx.strokeStyle=f===4?"#fff5ce":"#ff9862";ctx.lineWidth=1.1;
+        ctx.globalAlpha=.46*k*(1-catchUp*.7);
+        ctx.beginPath();ctx.moveTo(x-8,y+3);ctx.quadraticCurveTo(x-13,y+9,x-17,y+6);ctx.stroke();
+      }
+      if(f>=3&&catchUp>.1) {
+        ctx.strokeStyle="#ffe6a2";ctx.lineWidth=1.5;ctx.globalAlpha=.5*k;
+        ctx.beginPath();ctx.arc(x,y,9+f,Math.PI*.05,Math.PI*1.28);ctx.stroke();
+      }
     }
   }
   ctx.restore();
