@@ -49,15 +49,7 @@ addEventListener("ohana-death", (event) => {
   });
 });
 
-addEventListener("ohana-boss-fall", () => {
-  play({
-    type: "boss-fall",
-    kicker: "FINAL · EL NIDO",
-    title: "LA REINA CAE",
-    line: "La oscuridad se rompe.",
-    duration: 2200,
-  });
-});
+// V44: el final completo pertenece a systems/ending.js; no se antepone una tarjeta de texto.
 
 addEventListener("ohana-evolve", (event) => {
   const d = event.detail || {};
