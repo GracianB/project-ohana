@@ -35,3 +35,9 @@ test('V51 Shadow Step is a bounded hand-drawn afterimage', () => {
   assert.match(art, /const x = -21 - i \* 11 - k \* 9/);
   assert.match(art, /fl > \.45 \? "happy"/);
 });
+
+test('V51 moon evolution and claw crescents retain story identity', () => {
+  assert.match(evolution, /Nueve vidas, un solo guardián/);
+  assert.match(cinematic, /const claws=seg\(k,\.34,\.65\)/);
+  assert.match(cinematic, /i<3;i\+\+/);
+});
