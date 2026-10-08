@@ -184,7 +184,7 @@ function storyMotion(id,k,target){
   if(id==="stitcho") return {x:lerp(-target*.08,target*.03,e(seg(k,.18,.66))),y:0,scale:1+.03*e(seg(k,.52,.80)),rot:-.025+e(k)*.03};
   if(id==="chispin") return {x:Math.sin(k*32)*target*.012*seg(k,.10,.48),y:-Math.sin(seg(k,.24,.55)*Math.PI)*target*.105-e(seg(k,.68,.88))*target*.025,scale:1+.09*e(seg(k,.50,.78)),rot:Math.sin(k*25)*.022*(1-seg(k,.69,.90))};
   if(id==="cat") return {x:k>.56?target*.06:Math.sin(k*19)*target*.008*seg(k,.14,.48),y:-Math.sin(seg(k,.36,.61)*Math.PI)*target*.07,scale:1+.055*e(seg(k,.64,.84)),rot:Math.sin(k*13)*.018*(1-seg(k,.7,.9))};
-  if(id==="dragon") return {x:-Math.sin(seg(k,.18,.42)*Math.PI)*target*.055,y:-e(seg(k,.50,.78))*target*.09,scale:1+.08*e(seg(k,.55,.80)),rot:-.02+e(k)*.02};
+  if(id==="dragon") return {x:-Math.sin(seg(k,.26,.53)*Math.PI)*target*.025,y:-Math.sin(seg(k,.32,.84)*Math.PI)*target*.13,scale:1+.065*e(seg(k,.62,.87)),rot:-.035*Math.sin(seg(k,.3,.78)*Math.PI)};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
   if(id==="frita") return {x:Math.sin(seg(k,.26,.62)*Math.PI)*target*.06,y:-Math.sin(seg(k,.36,.60)*Math.PI)*target*.05,scale:1+.05*e(seg(k,.56,.78)),rot:Math.sin(k*Math.PI*2)*.035};
   if(id==="pizza") return {x:-Math.sin(seg(k,.40,.62)*Math.PI)*target*.08,y:-Math.sin(seg(k,.42,.64)*Math.PI)*target*.035,scale:1+.05*e(seg(k,.58,.82)),rot:-.035*seg(k,.40,.58)};
@@ -195,7 +195,7 @@ function storyMotion(id,k,target){
 function storyPose(id,k){
   if(id==="cat") return k<.58?"idle":k<.78?"attack":"victory";
   if(id==="dino") return (k>.18&&k<.36)||(k>.49&&k<.66)?"attack":k>.70?"victory":"idle";
-  if(id==="dragon") return k<.34?"idle":k<.58?"attack":"victory";
+  if(id==="dragon") return k<.32?"idle":k<.53?"jump":k<.78?"attack":"victory";
   if(id==="pizza") return k<.42?"idle":k<.70?"attack":"victory";
   if(id==="yomi") return k<.54?"idle":k<.78?"attack":"victory";
   return k<.34?"idle":k<.72?"attack":"victory";
@@ -278,7 +278,32 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawSpark(ctx,fx,fy,4+8*sneeze,"#ffd36a");
       for(let i=0;i<3;i++) circle(ctx,fx+i*8,fy-i*3,5+i*3,"#ff7b35",.22+.16*sneeze,true);
     }
-    const nova=seg(k,.50,.90);
+    // Dragon earns the Supernova with three wing crescents before the main blast.
+    const ascent=seg(k,.33,.62);
+    if(ascent>0){
+      for(let i=0;i<3;i++){
+        const a=-Math.PI*.72+i*.56;
+        const px=cx+Math.cos(a)*target*(.32+i*.10),py=cy+Math.sin(a)*target*(.35+i*.07);
+        drawSpark(ctx,px,py,(3+i*2)*ascent,i===1?"#fff5bb":"#ffaf63");
+      }
+      drawRing(ctx,cx,cy+target*.12,target*(.22+.44*ascent),ascent,"#ffd690",2,.27);
+    }
+    // The tiny sneeze escapes into a comet; the dragon follows before its royal nova.
+    const chase=seg(k,.28,.57);
+    if(chase>0&&chase<1){
+      const x=cx+target*(.22+.23*chase),y=cy-target*(.29+.21*Math.sin(Math.PI*chase));
+      drawSpark(ctx,x,y,3+4*Math.sin(chase*Math.PI),"#fff1b2");
+      drawRing(ctx,x,y,target*.08,Math.sin(chase*Math.PI),"#ffaf62",1.1,.2);
+    }
+    const crown=seg(k,.59,.79);
+    if(crown>0){
+      for(let i=0;i<5;i++){
+        const a=-Math.PI*.83+i*Math.PI*.165;
+        const x=cx+Math.cos(a)*target*.5,y=cy-target*.23+Math.sin(a)*target*.36;
+        drawSpark(ctx,x,y,(2.5+(i%2))*crown,i===2?"#fffbe0":"#ffcf7c");
+      }
+    }
+    const nova=seg(k,.63,.92);
     if(nova>0){
       drawRays(ctx,cx,cy,target*1.38,"#ff7b35",.18+.34*nova,-t*.25,12);
       drawRing(ctx,cx,cy,target*1.05,nova,"#ffd36a",5,.72);

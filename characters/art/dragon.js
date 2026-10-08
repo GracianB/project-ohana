@@ -207,13 +207,13 @@ function puff(ctx, R, x, y, r, a) {
 }
 
 // ---------------------------------------------------------------------------
-function draw(ctx, pose, R) {
+function drawBase(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const r = P.r, bw = P.bw, bh = P.bh;
   const final = f === 4;
   const dark = R.darken(c.body, 0.2);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
-  const flN = pose.flourishN % 3;
+  const flN = (pose.flourishN || 0) % 4;
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const flying = st === "glide" || pose.move === "fly" || pose.move === "float";
 
@@ -314,11 +314,12 @@ function draw(ctx, pose, R) {
     breathUp = 1; eyeMood = "happy";
     tailWave = 1.4 + Math.sin(t * 0.2) * 0.5;
   } else if (flying) {
-    lean = 0.34; headRot = -0.1;
+    const climb = clamp(-(Number(pose.vy) || 0), -1, 1);
+    lean = 0.34 - climb * .09; headRot = -0.1 - climb * .06;
     legF = -0.55; legB = -0.85;
     armF = 0.9; armB = 0.6;
-    if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
-    else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4; }
+    if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03 - climb * .13; wRotFar = -0.35 - climb * .1; }
+    else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4 - climb * .12; }
     wOpen = 1; eyeMood = "happy";
     tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
   }
@@ -332,11 +333,21 @@ function draw(ctx, pose, R) {
       lean = -0.15 * flE; headRot = -0.35 * flE; jaw = 0.55 * flE;
       armF = lerp(armF, 2.6, flE); armB = lerp(armB, 2.3, flE);
       eyeMood = flE > 0.4 ? "closed" : "normal";
-    } else { // se rasca con la pata trasera
+    } else if (flN === 2) { // se rasca con la pata trasera
       lean = -0.3 * flE; bob += 4 * flE;
       legF = lerp(0, -2.75 + Math.sin(t * 1.1) * 0.22 * flE, flE); lenF = 1 + 0.9 * flE; armF = 0.9; armB = 0.5;
       headRot = -0.3 * flE; eyeMood = flE > 0.3 ? "happy" : "normal";
       wRot = -0.2; tailWave = Math.sin(t * 0.4) * 0.6;
+    } else { // cuarta microescena: estornuda, persigue una brasa y finge dominarla
+      const start = ease(seg(fl, .12, .44)), recover = ease(seg(fl, .60, .9));
+      bob -= 2.5 * flE;
+      lean = -.12 * flE; headRot = -.25 * flE + .16 * start * (1 - recover);
+      jaw = (.2 + .34 * start) * flE;
+      armF = lerp(armF, 1.7, flE); armB = lerp(armB, 1.1, flE);
+      wRot = lerp(wRot, -.18, flE); wOpen = lerp(wOpen, .92, flE);
+      eyeMood = recover > .5 ? "happy" : start > .45 ? "closed" : "normal";
+      tailWave = .3 + Math.sin(t * .22) * .42 * flE;
+      smoke = false;
     }
   }
 
@@ -749,6 +760,127 @@ function horn(ctx, R, ox, oy, r, h, col, f) {
       ctx.beginPath(); ctx.moveTo(mx - 1, my - 3.5 + k * 2); ctx.lineTo(mx + 3.5 - k * 2, my + 1); ctx.stroke();
     }
   }
+}
+
+
+/** Solar soul is local to Dragon's canvas. No persistent particles or timers. */
+function dragonSoul(ctx, pose, front) {
+  const p = pose || {};
+  const f = Math.max(0, Math.min(4, Number.isFinite(p.form) ? p.form|0 : 0));
+  const t = Number.isFinite(p.t) ? p.t : 0;
+  const state = p.state || "idle";
+  const flight = state === "glide" || state === "jump" || p.move === "fly";
+  const striking = state === "attack" || state === "cast";
+  const victorious = state === "victory";
+  const color = f === 4 ? "#fff4a3" : f >= 2 ? "#ffc368" : "#ffe4a2";
+  ctx.save();
+  ctx.lineCap = "round";
+  if (!front) {
+    if (flight) {
+      // Flight path follows the actor; no false displacement of the hitbox.
+      const n = f >= 3 ? 5 : 3;
+      for (let i = 0; i < n; i++) {
+        const k = (i + 1) / n;
+        const x = -16 - 15 * k - 3 * Math.sin(t * .08 + i);
+        const y = -23 + Math.sin(t * .11 + i * 1.5) * (4 + 7 * k);
+        ctx.globalAlpha = (.17 + .18 * (1-k)) * (f === 4 ? 1 : .75);
+        ctx.strokeStyle = i % 2 ? "#fa6b3c" : color;
+        ctx.lineWidth = 1.1 + (1-k)*1.6;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x-9, y+5, x-14, y+2); ctx.stroke();
+      }
+    }
+  } else {
+    if (striking) {
+      // Three flame tongues emanate from the snout rather than full-screen flashes.
+      const power = state === "attack" ? Math.sin(Math.PI * Math.max(0,Math.min(1,Number(p.atk)||0))) : .8;
+      for (let i=0;i<3;i++) {
+        ctx.globalAlpha = (.25+i*.12)*power;
+        ctx.strokeStyle = i===1 ? "#fff3aa" : "#ff9348";
+        ctx.lineWidth = 1.5 + i*.55;
+        ctx.beginPath();
+        ctx.moveTo(30,-54+i*5);
+        ctx.quadraticCurveTo(44 + i*6,-60+i*5+Math.sin(t*.12+i)*4,52+i*10,-54+i*8);
+        ctx.stroke();
+      }
+    }
+    // Gust K bends warm wind around the wings; Roar L answers with two short echoes.
+    if(state==="cast" && p.castSlot===1){
+      const pulse=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(p.cast)||0)));
+      ctx.globalAlpha=.38*pulse;ctx.strokeStyle="#c9eaff";ctx.lineWidth=1.6;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.arc(-20-i*9,-40,20+i*6,-1.4,.62);ctx.stroke();
+      }
+    }
+    if(state==="cast" && p.castSlot===2){
+      const pulse=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(p.cast)||0)));
+      ctx.globalAlpha=.35*pulse;ctx.strokeStyle=f>=3?"#fff0b5":"#ffbd76";ctx.lineWidth=1.8;
+      for(let i=0;i<2;i++){
+        ctx.beginPath();ctx.arc(29,-58,13+i*9,-.65,.65);ctx.stroke();
+      }
+    }
+    // First winged form leaves a tiny grounded flame-heel mark, not a new emitter.
+    if(f===1 && state==="run"){
+      const beat=.5+.5*Math.sin(Number(p.phase)||t*.1);
+      ctx.globalAlpha=.27*beat;ctx.fillStyle="#ffb568";
+      ctx.beginPath();ctx.ellipse(-13,0,5,1.5,0,0,Math.PI*2);ctx.fill();
+    }
+    // Wingbeat vortex: ascending embers trace a restrained helix during flight.
+    if (flight && f >= 2) {
+      const count = f === 4 ? 7 : 4;
+      for(let i=0;i<count;i++){
+        const phase=t*.045+i*2.39996;
+        const spread=13+f*3;
+        const x=Math.sin(phase)*spread;
+        const yy=-37-Math.cos(phase*.64+i)*13-i*3.2;
+        ctx.globalAlpha=(.20+.22*Math.sin(phase)**2)*(1-i/(count+2));
+        ctx.fillStyle=i%3===0?"#fff4ac":f>=4?"#ff9b36":"#ffd17b";
+        ctx.beginPath();ctx.ellipse(x,yy,1.4+(i%2),2.4+(f*.28),phase,0,Math.PI*2);ctx.fill();
+      }
+    }
+    // The final form gets a compact solar halo, never a second character.
+    if (f===4 && (flight || striking || victorious)){
+      const beat=.5+.5*Math.sin(t*.035);
+      ctx.globalAlpha=.22+.13*beat;
+      ctx.strokeStyle="#ffe99a";ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.ellipse(0,-51,48+beat*3,15+beat*2,-.11,0,Math.PI*2);ctx.stroke();
+    }
+    if (victorious && f >= 2) {
+      ctx.globalAlpha = .35+.2*Math.sin(t*.09)**2;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0,-68,23+f*5,Math.PI*1.10,Math.PI*1.88); ctx.stroke();
+      for(let i=0;i<3;i++){
+        const a=-Math.PI*.83 + i*.35;
+        const x=Math.cos(a)*(27+f*5),y=-68+Math.sin(a)*(27+f*5);
+        ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x+2,y);ctx.moveTo(x,y-2);ctx.lineTo(x,y+2);ctx.stroke();
+      }
+    }
+    // Four-beat idle comedy: sneeze, airborne ember, attempted catch, royal composure.
+    if (state==="idle" && (p.flourishN % 4)===3 && p.flourish>0) {
+      const u=Math.max(0,Math.min(1,p.flourish));
+      const k=Math.sin(Math.PI*u), catchUp=Math.max(0,Math.min(1,(u-.48)*3));
+      const x=29+u*(f===0?18:25), y=-48-f*6-k*(13+f*2);
+      ctx.globalAlpha=.72*k;
+      ctx.fillStyle=f>=3?"#fff5ad":"#ffc542";
+      ctx.beginPath();ctx.ellipse(x,y,2.5+3*k+f*.35,4+4*k+f*.4,-.2,0,Math.PI*2);ctx.fill();
+      if(f>=1) {
+        ctx.strokeStyle=f===4?"#fff5ce":"#ff9862";ctx.lineWidth=1.1;
+        ctx.globalAlpha=.46*k*(1-catchUp*.7);
+        ctx.beginPath();ctx.moveTo(x-8,y+3);ctx.quadraticCurveTo(x-13,y+9,x-17,y+6);ctx.stroke();
+      }
+      if(f>=3&&catchUp>.1) {
+        ctx.strokeStyle="#ffe6a2";ctx.lineWidth=1.5;ctx.globalAlpha=.5*k;
+        ctx.beginPath();ctx.arc(x,y,9+f,Math.PI*.05,Math.PI*1.28);ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+function draw(ctx, pose, R) {
+  const safe = pose || {};
+  dragonSoul(ctx, safe, false);
+  drawBase(ctx, safe, R);
+  dragonSoul(ctx, safe, true);
 }
 
 export default { id: "dragon", draw };
