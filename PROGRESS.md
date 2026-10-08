@@ -1,3 +1,7 @@
+## 08/10/2026 · V81 · ENTREGADA DINO + CUERNO / CACHÉ OHANA-281
+
+**Estado:** fusionadas V81 rendimiento (PR #212) y V81 anatomía Dino/Cuerno (PR #211) en el mismo `main`, commit `cbef5e6b`. La actualización `ohana-281` invalida el caché anterior `ohana-280` después de publicar las nuevas formas y movimientos, sin alterar los archivos del juego. `sw.js`, `index.html` y sus pruebas usan la misma versión. Este lanzamiento sigue condicionado al Release Gate completo.
+
 ## 08/10/2026 · V81 · PERFORMANCE ARCHITECTURE / VICTORY REUNION
 
 **Base de integración:** `be8070e3` (V80 publicada con Dino y Cuerno V79); caché `ohana-280`. Cambios de infraestructura/selector/fin exclusivamente. Sin editar `characters/art/dino.js` ni `characters/art/cuerno.js`.
