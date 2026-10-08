@@ -555,6 +555,7 @@ el.dataset.camera=story.camera;
 el.dataset.beat=story.beat;
 el.dataset.assist=allyDef?.id||"";
 el.dataset.dreamTargets=def.id==="cuerno"?String(Math.max(0,Number(detail.dreamTargets)||0)):"";
+el.dataset.cuernoFinal=def.id==="cuerno"&&evo===4?"aurora":"";
 el.dataset.generation=String(token);
 el.dataset.state="active";
 el.dataset.duration=String(Math.round(duration*1000));
@@ -589,6 +590,13 @@ function frame(now){
   ctx.clearRect(0,0,W,H);
   backdrop(ctx,W,H,cx,cy,color,story,k);
   drawStory(ctx,def.id,k,t,cx,cy,target,color,detail.dreamTargets);
+  // F4's final pearl crown is an extra quiet cue, not an additional explosion.
+  if(def.id==="cuerno"&&evo===4&&k>.76){
+    const a=Math.min(1,(k-.76)/.12)*(1-Math.min(1,Math.max(0,(k-.94)/.06)));
+    ctx.save();ctx.strokeStyle="#fff6d9";ctx.globalAlpha=.24*a;ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy-target*.45,target*(.20+.07*a),Math.PI*.88,Math.PI*2.12);ctx.stroke();
+    ctx.restore();
+  }
 
   const motion=storyMotion(def.id,k,target);
   p.vx=0;p.vy=0;p.grounded=true;

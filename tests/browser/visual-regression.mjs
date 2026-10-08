@@ -707,16 +707,22 @@ try {
   const cuernoCinema=await page.locator('#supreme-cinema').evaluate(el=>({
     id:el.dataset.activeId,story:el.dataset.story,phase:el.dataset.cuernoPhase,
     beat:el.dataset.beat,mode:el.dataset.mode,
-    dreamTargets:Number(el.dataset.dreamTargets||0)
+    dreamTargets:Number(el.dataset.dreamTargets||0),
+    finalForm:el.dataset.cuernoFinal
   }));
   assert.equal(cuernoCinema.id,'cuerno','09p-cuerno: wrong cinematic hero');
   assert.equal(cuernoCinema.story,'dream-rainbow','09p-cuerno: wrong U sequence');
+  assert.equal(cuernoCinema.finalForm,'aurora','09r-cuerno: F4 film lacks final form crest');
   assert.equal(cuernoCinema.mode,'storyboard','09p-cuerno: wrong cinematic mode');
   assert.ok(Number.isInteger(cuernoCinema.dreamTargets)&&cuernoCinema.dreamTargets>=0,
     '09q-cuerno: U cinema missing real sleeper count');
   assert.ok(['breath','iris','dream','aurora'].includes(cuernoCinema.phase),'09p-cuerno: four acts absent');
   assert.match(cuernoCinema.beat,/ALIENTO.*CÍRCULO.*SUEÑO.*AURORA/);
   await capture(page,'09p-cuerno-u-grand-spectacle');
+  // Let the U film close, then inspect the separate real in-world Aurora canopy.
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:4400});
+  await page.evaluate(()=>window.__OHANA_E2E.step(62));
+  await capture(page,'09r-cuerno-aurora-final-u-canopy');
   assert.deepEqual(dreamErrors,[],'09k/09l: Cuerno L/U runtime exception');
   page.off('pageerror',onDreamError);
 
