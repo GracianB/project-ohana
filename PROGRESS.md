@@ -1,3 +1,19 @@
+## 08/10/2026 · V45 LIVING HERO SELECT + FINAL ASCENSION
+
+**Caché:** `ohana-236`.
+
+V45 lleva personalidad y transformación al primer plano.
+
+- **Comic Family Welcome:** el bucle inicial pasa a 14 s y añade interacción real entre personajes: Stitcho y Chispín se pican, aparece un accidente eléctrico, Dragón estornuda fuego, Frita y Pizza discuten por una patata, Yomi asusta desde una sombra, Dino provoca otra reacción del grupo y aparecen bocadillos cómic procedurales.
+- **Living Hero Select:** selector inspirado en patrones coverflow públicos de GitHub, implementado de forma nativa con CSS 3D: cinco héroes visibles en desktop, profundidad, `translateZ`, `rotateY`, foco central y transición fluida.
+- **Hero Worlds:** el fondo del selector deja de ser genérico. Cada héroe activa un ambiente procedural distinto: pradera, jungla, laboratorio, cueva lunar, volcán, tierra quebrada, costa, horno, vacío y aurora.
+- **Microacciones:** el héroe central usa secuencias de pose distintas por identidad mientras muestra sus formas.
+- **Evolution Camera Language:** los perfiles orbit/spiral/snap/eclipse/sweep/impact/whip/roll/pull/rise pasan a modificar realmente el movimiento de cámara corporal.
+- **Final Ascension:** Forma 5 tiene timeline propio de más de 5 s. Las cuatro formas anteriores aparecen como ecos, convergen, forman una columna/capullo de energía y la quinta forma se revela con pose firma.
+- Los motivos gráficos de evolución se reducen a atmósfera para que el personaje vuelva a ser el sujeto.
+- Visual Regression añade `01b-character-select-stitcho-world` y `04b-final-evolution-ascension`.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+
 ## 08/10/2026 · V44 CINEMATIC REBUILD
 
 **Caché:** `ohana-235`.
