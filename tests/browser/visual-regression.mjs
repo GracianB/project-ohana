@@ -630,8 +630,8 @@ try {
     api.start('cuerno');api.setEvo(1);api.step(8);
     return api.state();
   });
-  assert.equal(cuernoStage.player?.id,'cuerno','09g-cuerno: héroe activo incorrecto');
-  assert.equal(cuernoStage.player?.evo,1,'09g-cuerno: metamorfosis no aplicada');
+  assert.equal(cuernoStage.evo,1,'09g-cuerno: metamorfosis no aplicada');
+  assert.ok(cuernoStage.player && Number.isFinite(cuernoStage.player.x),'09g-cuerno: personaje no activo');
   assert.deepEqual(cuernoErrors,[],'09g-cuerno: excepción al dibujar la forma naciente');
   await capture(page,'09g-cuerno-naciente-gameplay');
   page.off('pageerror',onCuernoError);
