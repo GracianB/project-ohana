@@ -112,7 +112,7 @@ export const ROOMS = {
     pit: true,
     doors: { left: "jungle", up: "jungle", right: "boss", down: null },
     needEvo: 3,
-    hint: "Llegaste por el hueco de la Jungla. ESTE = nido. BH → Jungla.",
+    hint: "Santuario del Dragón: tres brasas en distintas alturas. Enciéndelas para recibir su bendición. ESTE = Nido. BH → Jungla.",
     plats: [[0, 810, 1600, 90], ...stairs(760)],
     foes: [[480, 200, "planta"], [720, 200, "escoria", true], [1100, 200, "escoria"], [560, 360, "brasita"], [1280, 300, "brasita"]],
     orbs: [[660, 200], [1100, 540]],

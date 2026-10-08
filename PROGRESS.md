@@ -1,3 +1,10 @@
+## 08/10/2026 · OHANA V87 · SANTUARIO DEL DRAGÓN + U IMPACTO EN VIVO · ohana-287
+
+- La Caldera incluye tres Brasas del Dragón colocadas a distintas alturas. Al tocarlas se despiertan; la tercera concede cura limitada y puntuación. Sigue siendo opcional: nunca bloquea una puerta por estado no sincronizado en multijugador.
+- Las brazas son Canvas vectorial y una enorme silueta de alas en el fondo. No se introducen sprites PNG ni efectos incontrolados.
+- Durante las U, la escena cinematográfica muestra una ventana acotada del combate real, sin crear otro bucle ni modificar el estado de juego; se omite con movimiento reducido.
+- Nuevos tests de geometría, progresión, estabilidad y precaché de la versión `ohana-287`. Mantiene el lanzamiento solo tras Browser/Multiplayer/Visual/Release Gate.
+
 ## 08/10/2026 · V86 · EL CIELO VUELVE A SER CIELO · ohana-286
 
 - Intro: marca OHANA central, el reparto original sigue jugando y Cuerno bebé recobra proporción.

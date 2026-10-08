@@ -45,6 +45,7 @@ import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { drawBossFallScene } from "./systems/boss-fall-scene.js";
+import { newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
@@ -472,6 +473,7 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+game.dragonTrial = id === "volcano" ? newDragonTrial() : null;
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
@@ -1494,6 +1496,18 @@ if (wall && !p.grounded) p.wall = wall;
 advancePlatformDrop(p);
 tickSwing(p);
 Passives.afterMove(game, inputState);
+const dragonEmber = updateDragonTrial(game);
+if(dragonEmber){
+ const s=dragonEmber.ember;
+ game.fx?.emit?.(s.x,s.y,{color:s.color,count:game.reduceMotion?9:20,size:3,star:true,up:2.4,life:22});
+ game.nums?.add?.(s.x,s.y-32,"BRASA "+dragonEmber.count+"/3",s.color,true);
+ if(dragonEmber.complete){
+  healPlayer(p,25);addScore(350);
+  showObjectiveMessage("ASCENSO DEL DRAGÓN","Tres brasas despiertas. El Dragón te presta su fuego.");
+ }else{
+  showObjectiveMessage("PRUEBA DEL DRAGÓN","Brasa "+dragonEmber.count+" de 3 · "+s.title);
+ }
+}
 Magic.update(game);
 if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
 if (!p.grounded && p.coyote > 0) p.coyote--;
@@ -2549,6 +2563,7 @@ drawLivingWorld(ctx, game, t, camW(), camH());
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
+drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
@@ -3255,6 +3270,7 @@ state() {
     assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
     hazardEscape: p?._hazardEscapeKey || "",
     mastery: masterySnapshot(game),
+    dragonTrial: game.roomId==="volcano" ? dragonTrialSnapshot(game.dragonTrial) : null,
     masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
     worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
     livingWorld: livingWorldSnapshot(game.roomId, p?.id || ""),
