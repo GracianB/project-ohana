@@ -2,7 +2,8 @@ name: quality
 
 on:
   pull_request:
-    branches: [main]
+    # Stacked character PRs also need Browser/Visual/Release gates.
+    branches: [main, 'feat/**', 'fix/**']
   workflow_dispatch:
 
 permissions:
