@@ -319,7 +319,12 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 // ---------------------------------------------------------------------------
 
 function draw(ctx, pose, R) {
-  const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0, st = pose.state;
+  const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0;
+  // U temporarily grants invulnerability. The shared rig classifies long
+  // invulnerability as "hurt" before "cast"; Dino must still *visibly awaken*
+  // during its own U without modifying the shared rig or other characters.
+  const st = pose.state === "hurt" && pose.castSlot === 3 && Number(pose.cast) > 0
+    ? "cast" : pose.state;
   const { hh, bw, bh } = P;
   const final = f === 4, baby = f === 0;
   const motion = dinoSecondaryMotion(pose);
