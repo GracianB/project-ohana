@@ -741,7 +741,7 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   assert.match(director, /ohana-death/);
   assert.match(director, /ohana-boss-fall/);
   assert.match(ending, /PROJECT OHANA V36 · CINEMATIC PRESENTATION SYSTEM/);
-  assert.match(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
+  assert.match(intro, /V43 OHANA MAGIC/);
   assert.match(sw, /systems\/cinematic-director\.js/);
   assert.match(visual, /01-character-select-1680x900/);
   assert.match(visual, /04-evolution/);
