@@ -61,6 +61,7 @@ const PRECACHE = [
   "./systems/atrium-interact.js?v=" + VERSION,
   "./systems/abilities.js?v=" + VERSION,
   "./systems/ability-catalog.js?v=" + VERSION,
+  "./systems/boss-fall-scene.js?v=" + VERSION,
   "./systems/dino-combat.js?v=" + VERSION,
   "./systems/cuerno-fantasy.js?v=" + VERSION,
   "./systems/dino-ultimate-film.js?v=" + VERSION,

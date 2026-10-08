@@ -5,6 +5,7 @@
 - Playa: fuera palmeras flotantes; quedan costas, islas, espuma, conchas y rocas.
 - Refactor: las 30 definiciones de habilidades salen de abilities.js a systems/ability-catalog.js. API inalterada.
 - Las U ganan cuatro o cinco actos visibles con duración propia de 4.8 a 6.3 s. La versión de movimiento reducido dura 1.2 s. Sin cambiar daño, cooldown ni desplazamiento.
+- El Nido tras la muerte de la Reina ya no mantiene el boss ni un círculo amarillo: se abre una grieta alada luminosa con fragmentos. Se conserva el final de 12 segundos y sus resultados.
 - Entrega sujeta a Unit/Browser/Multiplayer/Visual/Release Gate.
 
 ## 08/10/2026 · OHANA V85 · DESCENSO SIN REBOTE · ohana-285
