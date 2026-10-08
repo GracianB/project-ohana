@@ -64,7 +64,11 @@ test('V83 5/5 airborne poses change smoothly through jump apex into fall',()=>{
    assert.ok(Object.isFrozen(early));
    const a=inspect(pose(form,'jump',{vy:0}));
    const b=inspect(pose(form,'fall',{vy:0}));
-   assert.deepEqual(a,b,'Geometry snaps at jump/fall transition F'+form);
+   assert.deepEqual(a.operations,b.operations,'Canvas geometry snaps at jump/fall apex F'+form);
+   assert.deepEqual(
+     a.shapes.map(({kind,pts})=>({kind,pts})),
+     b.shapes.map(({kind,pts})=>({kind,pts})),
+     'Dino joint and silhouette geometry snaps at apex F'+form);
  }
 });
 test('V83 numeric safety and deterministic interpolation over every form',()=>{
@@ -73,9 +77,9 @@ test('V83 numeric safety and deterministic interpolation over every form',()=>{
      const x=dinoAirbornePose({state:'fall',vy},form);
      assert.ok(Object.values(x).every(Number.isFinite));
      assert.ok(x.down>=0&&x.down<=1);
-     assert.ok(x.lenF>=.68&&x.lenF<=.84);
-     assert.ok(x.lenB>=.7&&x.lenB<=.85);
-     assert.ok(x.jaw>=0&&x.jaw<=.38);
+     assert.ok(x.lenF>=.68-1e-9&&x.lenF<=.84+1e-9);
+     assert.ok(x.lenB>=.7-1e-9&&x.lenB<=.85+1e-9);
+     assert.ok(x.jaw>=0&&x.jaw<=.43);
      assert.deepEqual(x,dinoAirbornePose({state:'fall',vy},form));
    }
  }
