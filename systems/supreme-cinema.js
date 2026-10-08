@@ -256,6 +256,9 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawSpark(ctx,cx-target*.06,cy-target*.23,4,"#fff");
       drawSpark(ctx,cx+target*.06,cy-target*.23,4,"#fff");
     }
+    // Nine lives appear one by one before the lunar vanish.
+    const lives=seg(k,.24,.69);
+    for(let i=0;i<9;i++){const a=-Math.PI*.86+i*TAU/9;const px=cx+Math.cos(a)*target*.59,py=cy+Math.sin(a)*target*.43;const onset=seg(lives,i/11,(i+2)/11);if(onset>0){circle(ctx,px,py,target*.013+onset*target*.008,i%3===0?"#ffe7ae":"#f8c0ff",.12+.5*onset,false);}}
     const vanish=Math.sin(seg(k,.52,.75)*Math.PI);
     if(vanish>0) drawRing(ctx,cx,cy,target*.62,vanish,color,2,.40);
   }else if(id==="dragon"){
