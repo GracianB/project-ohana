@@ -83,15 +83,15 @@ try {
   await page.goto(base + '?visual=1&e2e=1', { waitUntil: 'networkidle' });
   const opening = page.locator('#ohana-intro');
   await opening.waitFor({ state:'visible', timeout:2500 });
-  await page.waitForTimeout(1450);
+  await page.waitForTimeout(2020);
   const openingState = await opening.evaluate((el) => ({
-    cast:Number(el.dataset.v44Cast || 0),
+    cast:Number(el.dataset.v45Cast || 0),
     shown:el.classList.contains('show'),
     ready:el.classList.contains('ready'),
     mode:el.dataset.openingMode || '',
     complete:document.body.classList.contains('intro-complete')
   }));
-  assert.equal(openingState.cast, 10, '00-opening-family: V44 no expone los 10 héroes');
+  assert.equal(openingState.cast, 10, '00-opening-family: V45 no expone los 10 héroes');
   assert.equal(openingState.shown, true, '00-opening-family: bienvenida no visible');
   assert.equal(openingState.ready, true, '00-opening-family: entrada no preparada');
   assert.equal(openingState.complete, false, '00-opening-family: avanza sola al carrusel');
@@ -121,13 +121,29 @@ try {
       scrollWidth: document.documentElement.scrollWidth,
     };
   });
-  assert.equal(titleLayout.visible.length, 3, '01-character-select: deben verse exactamente tres héroes');
+  assert.equal(titleLayout.visible.length, 5, '01-character-select: V45 debe mostrar cinco héroes con profundidad');
   assert.ok(Math.abs((titleLayout.selected.left + titleLayout.selected.width / 2) - titleLayout.width / 2) < titleLayout.width * .1, '01-character-select: héroe fuera del centro');
   assert.ok(Math.abs((titleLayout.title.left + titleLayout.title.width / 2) - titleLayout.width / 2) < titleLayout.width * .08, '01-character-select: título fuera del centro');
   assert.ok(titleLayout.controls.bottom <= titleLayout.height + 2, '01-character-select: controles fuera del viewport');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, '01-character-select: dossier invade controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.width + 2, '01-character-select: overflow horizontal');
   await capture(page, '01-character-select-1680x900');
+  await page.locator('#roster-next').click();
+  await page.waitForTimeout(520);
+  const livingSelect = await page.evaluate(() => ({
+    hero:document.querySelector('#char-select')?.dataset.hero || '',
+    scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
+    visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
+      const s=getComputedStyle(card),r=card.getBoundingClientRect();
+      return s.display!=='none' && s.visibility!=='hidden' && r.width>2 && r.height>2;
+    }).map((card)=>card.dataset.id)
+  }));
+  assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
+  assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
+  assert.equal(livingSelect.visible.length, 5, '01b-living-select: coverflow pierde profundidad');
+  await capture(page, '01b-character-select-stitcho-world');
+  await page.locator('#roster-prev').click();
+  await page.waitForTimeout(420);
 
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
@@ -264,6 +280,18 @@ try {
   await page.keyboard.press('Enter');
   await page.waitForTimeout(700);
   assert.equal(await page.locator('#evo-stage').evaluate((el) => el.classList.contains('show')), false, '04-evolution: skip no devuelve al juego');
+
+  await page.evaluate(() => {
+    dispatchEvent(new CustomEvent('ohana-evolve', { detail: {
+      id:'dragon', name:'Dragón', evo:4, fromEvo:3,
+      fromName:'Dragón Ascendido', toName:'Dragón Nova', color:'#ff8a45', final:true
+    }}));
+  });
+  await page.waitForTimeout(1750);
+  assert.equal(await page.locator('#evo-stage').evaluate((el) => el.classList.contains('show')), true, '04b-final-evolution: ascensión no visible');
+  await capture(page, '04b-final-evolution-ascension');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(900);
 
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.loadRoom('boss'));
