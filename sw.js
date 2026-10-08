@@ -1,4 +1,4 @@
-const VERSION = "ohana-284";
+const VERSION = "ohana-285";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -55,6 +55,7 @@ const PRECACHE = [
   "./engine/foe-rig.js?v=" + VERSION,
   "./engine/foes.js?v=" + VERSION,
   "./engine/input.js?v=" + VERSION,
+  "./engine/platform-drop.js?v=" + VERSION,
   "./engine/music.js?v=" + VERSION,
   "./engine/particles.js?v=" + VERSION,
   "./systems/atrium-interact.js?v=" + VERSION,
