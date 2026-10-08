@@ -14,6 +14,14 @@ import {
   ecologyPreferredRange,
   ecologyPriority,
 } from "./enemy-ecology.js";
+import {
+  prepareSpeciesEvolution,
+  speciesFlankBias,
+  speciesFlankDirection,
+  speciesHoldSteering,
+  speciesPreferredRange,
+  speciesPriority,
+} from "./enemy-species.js";
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, Number(value) || 0));
 
@@ -93,7 +101,8 @@ function scoreCandidate(e, player, hard, tick, roomId) {
   const aggroBonus = clamp(Number(e.aggro) / 100, 0, 1) * 0.9;
   const stableTie = ((Number(e.spawnIndex) || 0) % 7) * 0.001 + (Number(tick) % 11) * 0.00001;
   const ecologyBonus = ecologyPriority(roomId, role);
-  return telegraphBonus + profile.priority + ecologyBonus + proximity * (1.4 + hard * 0.12) + eliteBonus + aggroBonus + stableTie;
+  const speciesBonus = speciesPriority(e, role);
+  return telegraphBonus + profile.priority + ecologyBonus + speciesBonus + proximity * (1.4 + hard * 0.12) + eliteBonus + aggroBonus + stableTie;
 }
 
 function attackBudget(alive, hard, roomId) {
@@ -134,6 +143,7 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
 
   const hard = ROOM_HARD[roomId] ?? 1;
   const ecology = ecologyForRoom(roomId);
+  prepareSpeciesEvolution(alive, roomId, tick, enemyRole);
   const budget = attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
     scoreCandidate(b, player, hard, tick, roomId) - scoreCandidate(a, player, hard, tick, roomId)
@@ -149,8 +159,10 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   for (const e of alive) {
     const role = enemyRole(e.kind);
     const profile = PROFILE[role];
-    const preferred = ecologyPreferredRange(roomId, role, profile.preferred);
-    const flankBias = ecologyFlankBias(roomId, role, profile.flank);
+    const ecologyRange = ecologyPreferredRange(roomId, role, profile.preferred);
+    const preferred = speciesPreferredRange(e, ecologyRange);
+    const ecologyFlank = ecologyFlankBias(roomId, role, profile.flank);
+    const flankBias = speciesFlankBias(e, ecologyFlank);
     const dx = centerX(player) - centerX(e);
     const dy = centerY(player) - centerY(e);
     const dist = Math.hypot(dx, dy);
@@ -164,7 +176,8 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
     e.aiPack = nearby;
     e.aiAttackPermit = permit;
     const naturalFlank = flankDirection(e, player);
-    e.aiFlankDir = ecologyFlankDirection(roomId, e, tick, naturalFlank);
+    const biomeFlank = ecologyFlankDirection(roomId, e, tick, naturalFlank);
+    e.aiFlankDir = speciesFlankDirection(e, biomeFlank);
     e.aiPreferredRange = preferred;
     applyEnemyEcology(e, roomId, role, tick, permit);
     e.aiThreat = clamp(
@@ -216,7 +229,9 @@ export function enemySteering(e = {}, player = null) {
   if (intent === "STRIKE") return Object.freeze({ x: dir, scale: 0.035, intent });
   if (intent === "HOLD") {
     const eco = ecologyHoldSteering(e, player);
-    return Object.freeze({ x: Math.sign(eco), scale: Math.abs(eco), intent });
+    const species = speciesHoldSteering(e, player);
+    const combined = clamp(eco + species, -0.18, 0.18);
+    return Object.freeze({ x: Math.sign(combined), scale: Math.abs(combined), intent });
   }
   return Object.freeze({ x: 0, scale: 1, intent });
 }
@@ -232,5 +247,11 @@ export function enemyDirectorSnapshot(enemies = []) {
     biome: e.aiBiome || "",
     formation: e.aiFormation || "",
     ecoPressure: Math.round(clamp(e.aiEcoPressure, 0, 1) * 100),
+    family: e.aiSpeciesFamily || "",
+    signature: e.aiSpeciesSignature || "",
+    variant: e.aiSpeciesVariant || "",
+    speciesMode: e.aiSpeciesMode || "",
+    relation: e.aiSpeciesRelation || "NONE",
+    partner: Number.isFinite(Number(e.aiSpeciesPartner)) ? Number(e.aiSpeciesPartner) : -1,
   })));
 }
