@@ -5,6 +5,7 @@ const read=p=>fs.readFileSync(p,"utf8");
 const atrium=read("systems/atrium-interact.js");
 const title=read("systems/title.js");
 const ending=read("systems/ending.js");
+const game=read("game.js");
 const visual=read("tests/browser/visual-regression.mjs");
 
 test("V82 Atrium truly stops scheduling frames during gameplay/background",()=>{
@@ -40,4 +41,6 @@ test("V82 finale handles resizes, removes handlers and survives two victories",(
   assert.match(visual,/nueva victoria no admite salto por teclado/);
   assert.match(ending,/const duration=reduce\?1\.6:12\.0/);
   assert.match(ending,/const titleK=seg\(k,\.84,\.92\)/);
+  assert.match(game,/endingOverlay\?\.classList\.contains\("cinema-running"\)/);
+  assert.match(game,/endingOverlay\.querySelector\("\.win-skip"\)\?\.click\(\)/);
 });
