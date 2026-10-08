@@ -564,10 +564,11 @@ function faceFor(pose, S) {
     else if (pose.castSlot === 2) { face.mood = "angry"; face.mouth = "roar"; face.ant = "up"; face.glow = 1.2; face.waves = pose.cast; }
   }
   if (st === "idle" && pose.flourish > 0) {
-    const n = pose.flourishN % 3;
+    const n = pose.flourishN % 4;
     if (n === 0) { face.mood = "happy"; face.mouth = "tongue"; face.earFlick = Math.sin(pose.t * 0.9) * 0.25; }
     else if (n === 1) { face.mood = "squint"; face.mouth = "tongue"; }
-    else { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
+    else if (n === 2) { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
+    else { face.mouth = "smirk"; face.ant = "forward"; face.crackle = true; face.glow = 1.15; }
   }
   return face;
 }
@@ -621,10 +622,11 @@ function drawBiped(ctx, R, pose, f, S, C) {
     legA = 1.2 - c * 0.25; legB = 0.95 + c * 0.25; legBendA = -7; legBendB = -7;
     lean += 0.12; headRot = -0.12; bob = c * 1.5;
   } else if (st === "idle" && pose.flourish > 0) {
-    const n = pose.flourishN % 3, k = Math.sin(pose.flourish * Math.PI);
+    const n = pose.flourishN % 4, k = Math.sin(pose.flourish * Math.PI);
     if (n === 0) { scratch = Math.min(1, k * 2); lean += 0.12 * scratch; headRot = -0.18 * scratch; armA = 0.6; armB = -0.6; }
     else if (n === 1) { headRot = Math.sin(t * 0.25) * 0.14; armA = 1.6; armB = 1.3; bendA = -6; }
-    else { headRot = -0.12; armA = 0.8 + Math.sin(t * 0.3) * 0.2; armB = -0.4; }
+    else if (n === 2) { headRot = -0.12; armA = 0.8 + Math.sin(t * 0.3) * 0.2; armB = -0.4; }
+    else { lean += 0.09 * k; headRot = -0.08; armA = 1.9 - k * 0.35; armB = -1.55 + k * 0.22; bendA = -4; bendB = 4; }
   }
 
   ctx.save();
@@ -746,6 +748,79 @@ function drawBall(ctx, R, pose, f, S, C, chaos = false) {
   if (show > 0.2) alienEye(ctx, R, Math.sin(ea) * r * 0.55, cy - Math.cos(ea) * r * 0.1, 3.4 * show, 4.2, pose, chaos ? "angry" : "normal");
 }
 
+
+function drawSoulSeams(ctx, pose, f, front = false) {
+  const move = pose.move || "";
+  const wall = pose.state === "wall" || move === "climb";
+  const roll = move === "roll";
+  const chaos = move === "chaos";
+  const victory = pose.state === "victory";
+  const peek = pose.state === "idle" && pose.flourish > 0 && (pose.flourishN % 4) === 3;
+  if (!wall && !roll && !chaos && !victory && !peek) return;
+
+  const t = Number(pose.t) || 0;
+  const col = f >= 4 ? "#f2b3ff" : "#67ddff";
+  const hot = f >= 4 ? "#fff2a8" : "#dffcff";
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  if (!front && (wall || roll || chaos)) {
+    ctx.strokeStyle = col;
+    ctx.lineWidth = chaos ? 3.2 : 2.1;
+    ctx.globalAlpha = chaos ? .72 : .48;
+    const baseX = wall ? -30 : -22;
+    const baseY = wall ? -50 : -30;
+    for (let i=0;i<(chaos?7:5);i++) {
+      const y = baseY + i * (wall ? 13 : 9);
+      const x = baseX - i * (wall ? 1.5 : 6);
+      ctx.beginPath();
+      ctx.moveTo(x-8,y-3);
+      ctx.lineTo(x-2,y+2);
+      ctx.lineTo(x+5,y-2);
+      ctx.stroke();
+    }
+  }
+
+  if (peek) {
+    const k = Math.sin(Math.max(0,Math.min(1,pose.flourish))*Math.PI);
+    const x = 34, y = -52, h = 26*k;
+    ctx.globalAlpha = .25 + .55*k;
+    ctx.fillStyle = "rgba(7,4,20,.88)";
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2.1;
+    ctx.beginPath();
+    ctx.ellipse(x,y,7+h*.12,Math.max(2,h),-.08,0,TAU);
+    ctx.fill();ctx.stroke();
+    if(k>.42){
+      ctx.fillStyle = hot;
+      ctx.beginPath();ctx.ellipse(x+1,y,2.4,4.2*k,0,0,TAU);ctx.fill();
+    }
+    ctx.strokeStyle = hot;
+    ctx.globalAlpha = .56*k;
+    for(let i=-2;i<=2;i++){
+      const yy=y+i*6;
+      ctx.beginPath();ctx.moveTo(x-13,yy);ctx.lineTo(x-8,yy+2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x+8,yy-1);ctx.lineTo(x+13,yy+1);ctx.stroke();
+    }
+  }
+
+  if (front && victory) {
+    const pulse = .5 + .5*Math.sin(t*.16);
+    ctx.globalAlpha = .34 + .24*pulse;
+    ctx.strokeStyle = hot;
+    ctx.lineWidth = 1.7;
+    for(let i=0;i<4;i++){
+      const a=t*.025+i*TAU/4;
+      const x=Math.cos(a)*30,y=-46+Math.sin(a)*14;
+      ctx.beginPath();ctx.moveTo(x-5,y-3);ctx.lineTo(x,y+2);ctx.lineTo(x+5,y-2);ctx.stroke();
+    }
+  }
+
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], st = pose.state;
   const chaos = pose.move === "chaos" || (st === "cast" && pose.castSlot === 2);
@@ -755,11 +830,13 @@ function draw(ctx, pose, R) {
   if (pose.move === "climb" && st !== "dead" && st !== "hurt") pr.state = "wall";
   const ringY = roll ? -24 : gallop ? -34 : S.by - 6;
   ctx.save();
+  drawSoulSeams(ctx, pr, f, false);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, false);
   if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C, chaos);
   else if (gallop) drawGallop(ctx, R, pr, f, S, C);
   else drawBiped(ctx, R, pr, f, S, C);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, true);
+  drawSoulSeams(ctx, pr, f, true);
   ctx.restore();
 }
 
