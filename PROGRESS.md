@@ -1,3 +1,16 @@
+## 08/10/2026 · CUERNO V84 · ARCOÍRIS VIVO Y SIETE CUERNOS
+
+**Base:** Dino V83 `e051b357` publicado. **Versión de caché:** `ohana-284`.
+
+- **K Galope encantado:** conserva el galope, choque con muros y los cuatro lazos de movimiento originales. Añade una cinta arcoíris física y persistente **600 frames ≈ 10 segundos después de terminar K**. 7 franjas suaves, reflejos nacarados limitados y hasta 32 puntos por senda. Como máximo dos cintas simultáneas; volver a lanzar K nunca hace que la cinta anterior siga al personaje.
+- **Fantasía venenosa:** al rozar la cinta, los enemigos quedan encantados. Efecto visual de tres estrellas sobre su cabeza y daño progresivo cada 30 ticks (≈ 0,5 s); el estado permanece 90 frames tras el último contacto y expira por sí mismo. Un único reloj por enemigo impide acumular daño descontrolado al superponer cintas. Jefe recibe el balance general de daño a jefes; no se altera su IA.
+- **L Corona de los Siete Cuernos:** mantiene el único `irisHalo` con su onda y daño anteriores. Como puesta en escena se añade un effecto `cuernoPrismCrown` de 68 frames: 7 cuernos curvos de nácar, sus espirales y tres arcos de siete colores. La corona no genera hitboxes ni daños adicionales.
+- **Rendimiento y seguridad:** toda la geometría, el contacto y la cadencia del veneno están en `systems/cuerno-fantasy.js`. `systems/abilities.js` permanece bajo su límite estricto de 135 KB y sin tocar arte de Dino, física de ninguno, carrusel ni cinemáticas globales.
+- **QA:** `tests/cuerno-v84-fantasy.test.js` cubre 10 s, 7 colores, contacto real, daño progresivo, K consecutivas, geometría reducida, L visual y caducidad. La matriz visual de Chromium incorpora K persistente y L de cuernos.
+- **Offline:** `index.html` y `sw.js` usan `ohana-284`; el nuevo módulo se incorpora a la precaché.
+
+**Contrato:** Node, Browser E2E, Multiplayer E2E, Visual Regression y Release Gate antes de merge, y GitHub Pages después. No publicar si falla alguno.
+
 ## 08/10/2026 · DINO V83 · ANATOMÍA AÉREA Y ARTICULACIONES
 
 **Base:** OHANA V82 `ba8b0b5f` publicado. **Caché:** `ohana-283`.
