@@ -792,6 +792,26 @@ function dragonSoul(ctx, pose, front) {
         ctx.stroke();
       }
     }
+    // Wingbeat vortex: ascending embers trace a restrained helix during flight.
+    if (flight && f >= 2) {
+      const count = f === 4 ? 7 : 4;
+      for(let i=0;i<count;i++){
+        const phase=t*.045+i*2.39996;
+        const spread=13+f*3;
+        const x=Math.sin(phase)*spread;
+        const yy=-37-Math.cos(phase*.64+i)*13-i*3.2;
+        ctx.globalAlpha=(.20+.22*Math.sin(phase)**2)*(1-i/(count+2));
+        ctx.fillStyle=i%3===0?"#fff4ac":f>=4?"#ff9b36":"#ffd17b";
+        ctx.beginPath();ctx.ellipse(x,yy,1.4+(i%2),2.4+(f*.28),phase,0,Math.PI*2);ctx.fill();
+      }
+    }
+    // The final form gets a compact solar halo, never a second character.
+    if (f===4 && (flight || striking || victorious)){
+      const beat=.5+.5*Math.sin(t*.035);
+      ctx.globalAlpha=.22+.13*beat;
+      ctx.strokeStyle="#ffe99a";ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.ellipse(0,-51,48+beat*3,15+beat*2,-.11,0,Math.PI*2);ctx.stroke();
+    }
     if (victorious && f >= 2) {
       ctx.globalAlpha = .35+.2*Math.sin(t*.09)**2;
       ctx.strokeStyle = color;
