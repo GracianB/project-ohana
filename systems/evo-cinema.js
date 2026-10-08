@@ -64,7 +64,7 @@ export function fullCanvas(cv) {
     st.W = Math.max(1, window.innerWidth);
     st.H = Math.max(1, window.innerHeight);
     const pixels = st.W * st.H;
-    const maxDpr = pixels > 1800000 ? 1.45 : pixels > 1000000 ? 1.6 : 1.8;
+    const maxDpr = pixels > 1800000 ? 1.25 : pixels > 1000000 ? 1.4 : 1.5;
     st.dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
     cv.width = Math.round(st.W * st.dpr);
     cv.height = Math.round(st.H * st.dpr);
