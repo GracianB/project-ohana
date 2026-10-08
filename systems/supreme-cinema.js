@@ -181,7 +181,7 @@ function storyMotion(id,k,target){
   const e=easeInOut;
   if(id==="kilo") return {x:Math.sin(k*Math.PI)*target*.018,y:-e(seg(k,.45,.76))*target*.06,scale:1+.05*e(seg(k,.52,.78)),rot:0};
   if(id==="stitcho") return {x:lerp(-target*.08,target*.03,e(seg(k,.18,.66))),y:0,scale:1+.03*e(seg(k,.52,.80)),rot:-.025+e(k)*.03};
-  if(id==="chispin") return {x:Math.sin(k*35)*target*.014*seg(k,.18,.50),y:-Math.sin(seg(k,.34,.52)*Math.PI)*target*.08,scale:1+.06*e(seg(k,.42,.70)),rot:Math.sin(k*30)*.018};
+  if(id==="chispin") return {x:Math.sin(k*32)*target*.012*seg(k,.10,.48),y:-Math.sin(seg(k,.24,.55)*Math.PI)*target*.105-e(seg(k,.68,.88))*target*.025,scale:1+.09*e(seg(k,.50,.78)),rot:Math.sin(k*25)*.022*(1-seg(k,.69,.90))};
   if(id==="cat") return {x:k>.56?target*.08:0,y:0,scale:1+.03*e(seg(k,.66,.88)),rot:0};
   if(id==="dragon") return {x:-Math.sin(seg(k,.18,.42)*Math.PI)*target*.055,y:-e(seg(k,.50,.78))*target*.09,scale:1+.08*e(seg(k,.55,.80)),rot:-.02+e(k)*.02};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
