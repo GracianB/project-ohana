@@ -422,6 +422,7 @@ function moonSoul(ctx, pose, form, front) {
         ctx.stroke();
       }
     }
+    // Victory reads as a feline leap with a compact crescent crown.
     if (victory) {
       ctx.globalAlpha = .4 + .2*Math.sin(t*.085);
       ctx.strokeStyle = moon;
