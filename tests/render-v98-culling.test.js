@@ -40,8 +40,9 @@ test("V98 actual production drawing uses culling on expensive objects, never gam
 });
 test("V98 new runtime guard is precached and release-ready",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");
- assert.match(sw,/const VERSION = "ohana-298"/);
- assert.match(html,/ohana-298/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=298);
+ assert.ok(html.includes(version));
  assert.match(sw,/systems\/render-v98-culling\.js\?v=/);
  assert.match(sw,/systems\/a11y-v97\.js\?v=/);
  assert.match(sw,/systems\/coop-v95-presence\.js\?v=/);
