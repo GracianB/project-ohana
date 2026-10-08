@@ -181,7 +181,7 @@ function storyMotion(id,k,target){
   const e=easeInOut;
   if(id==="kilo") return {x:Math.sin(k*Math.PI)*target*.018,y:-e(seg(k,.45,.76))*target*.06,scale:1+.05*e(seg(k,.52,.78)),rot:0};
   if(id==="stitcho") return {x:lerp(-target*.08,target*.03,e(seg(k,.18,.66))),y:0,scale:1+.03*e(seg(k,.52,.80)),rot:-.025+e(k)*.03};
-  if(id==="chispin") return {x:Math.sin(k*35)*target*.014*seg(k,.18,.50),y:-Math.sin(seg(k,.34,.52)*Math.PI)*target*.08,scale:1+.06*e(seg(k,.42,.70)),rot:Math.sin(k*30)*.018};
+  if(id==="chispin") return {x:Math.sin(k*32)*target*.012*seg(k,.10,.48),y:-Math.sin(seg(k,.24,.55)*Math.PI)*target*.105-e(seg(k,.68,.88))*target*.025,scale:1+.09*e(seg(k,.50,.78)),rot:Math.sin(k*25)*.022*(1-seg(k,.69,.90))};
   if(id==="cat") return {x:k>.56?target*.08:0,y:0,scale:1+.03*e(seg(k,.66,.88)),rot:0};
   if(id==="dragon") return {x:-Math.sin(seg(k,.18,.42)*Math.PI)*target*.055,y:-e(seg(k,.50,.78))*target*.09,scale:1+.08*e(seg(k,.55,.80)),rot:-.02+e(k)*.02};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
@@ -242,6 +242,7 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     if(k>.34&&k<.49){
       lightning(ctx,cx-target*.12,cy-target*.42,cx+target*.10,cy-target*.15,"#fff",7,.86);
     }
+    const crown=seg(k,.19,.56);for(let i=0;i<5;i++){const a=-Math.PI*.88+i*Math.PI*.19;const nx=cx+Math.cos(a)*target*(.24+.15*crown),ny=cy-target*.23+Math.sin(a)*target*(.18+.12*crown);lightning(ctx,nx,ny,nx+Math.cos(a)*target*.09,ny-target*.07,i%2?"#ba75ff":"#fff5ab",i+t,.12+.23*crown);}if(k>.55&&k<.82){const beat=Math.sin(seg(k,.55,.82)*Math.PI);drawRing(ctx,cx,cy,target*.56,beat,"#d59bff",2.1,.34);}
     const blast=seg(k,.52,.88);
     if(blast>0){
       drawRays(ctx,cx,cy,target*1.25,color,.16+.32*blast,t*1.8,16);

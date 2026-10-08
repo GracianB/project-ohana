@@ -75,7 +75,7 @@ export const EVOLUTION_FINAL_DESIGNS = Object.freeze({
 export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
   kilo:    Object.freeze({ camera:"orbit",   bg:"#2b160f", accent:"#ffd36a", motif:"petals",  pulse:"bloom",   reveal:"sunrise", speed:1.00 }),
   stitcho: Object.freeze({ camera:"spiral",  bg:"#100d2b", accent:"#8f7bff", motif:"seams",   pulse:"nebula",  reveal:"rift",    speed:1.12 }),
-  chispin:Object.freeze({ camera:"snap",     bg:"#09182b", accent:"#ffe14a", motif:"bolts",   pulse:"storm",   reveal:"strike",  speed:1.28 }),
+  chispin:Object.freeze({ camera:"snap",     bg:"#09132f", accent:"#ffe14a", motif:"bolts",   pulse:"storm",   reveal:"strike",  speed:1.22 }),
   cat:     Object.freeze({ camera:"eclipse",  bg:"#170d20", accent:"#ffb6e4", motif:"moons",   pulse:"eclipse", reveal:"crescent",speed:0.88 }),
   dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", motif:"embers",  pulse:"flame",   reveal:"nova",    speed:1.08 }),
   dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
@@ -107,10 +107,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Stitcho Nébula cose el vacío y se ríe al otro lado.",
   ],
   chispin: [
-    "La chispa encuentra voltaje.",
-    "El cuerpo se convierte en relámpago.",
-    "La tormenta empieza a seguirle.",
-    "Ya no corre con la tormenta. Es la tormenta.",
+    "Descubre que su cola de muelle puede atrapar un rayo.",
+    "Cada salto deja una firma de luz violeta.",
+    "Aprende a dirigir nubes y relámpagos sin perder su sonrisa.",
+    "La corona aurora despierta: Chispín ya no persigue la tormenta, la dirige.",
   ],
   cat: [
     "La sombra aprende a sonreír.",
