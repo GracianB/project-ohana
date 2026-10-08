@@ -562,6 +562,34 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.ellipse(0, -2, 18 + k * 13, 4 + k * 2, 0, 0, TAU);
       ctx.stroke();
     }
+    // A distinct motif in every evolution form: orbit, filament, crest, cloud, aurora.
+    // Each stays inside the portrait-friendly character envelope.
+    if (active || win || sky) {
+      ctx.globalAlpha = (.24 + .35 * charge) * (0.84 + .16 * Math.sin(t * .07));
+      ctx.strokeStyle = f % 2 ? cold : warm;
+      ctx.lineWidth = 1.35;
+      ctx.beginPath();
+      if (f === 0) {
+        ctx.arc(-2, cy, 25, -Math.PI * .85, -Math.PI * .2);
+      } else if (f === 1) {
+        ctx.moveTo(-26, cy + 15);
+        ctx.lineTo(-36, cy + 5); ctx.lineTo(-29, cy - 7);
+        ctx.lineTo(-37, cy - 17);
+      } else if (f === 2) {
+        ctx.moveTo(-23, cy - 8);
+        ctx.lineTo(-12, cy - 20); ctx.lineTo(0, cy - 11);
+        ctx.lineTo(12, cy - 22); ctx.lineTo(24, cy - 9);
+      } else if (f === 3) {
+        ctx.ellipse(0, -6, 32, 7, 0, Math.PI * 1.07, Math.PI * 1.91);
+      } else {
+        ctx.arc(0, cy, 34, -Math.PI * .78, -Math.PI * .22);
+        ctx.moveTo(-19, cy - 25);
+        ctx.lineTo(-12, cy - 35); ctx.lineTo(-4, cy - 27);
+        ctx.lineTo(4, cy - 38); ctx.lineTo(12, cy - 27);
+        ctx.lineTo(19, cy - 25);
+      }
+      ctx.stroke();
+    }
     // A short sequence of visible electrical nodes with phase-delayed motion.
     const n = active ? 7 : win ? 8 : sky ? 4 : f === 4 ? 3 : 0;
     for (let i = 0; i < n; i++) {
