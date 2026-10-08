@@ -202,22 +202,26 @@ portraitClock.advance(now, () => {
       _cuernoMagicSlot: cuernoMagicSlot,
     };
     if (hero && def.id === "cuerno") {
-      cv.dataset.cuernoBeat = cuernoBeat;
-      cv.dataset.cuernoMagic = String(cuernoMagicSlot);
-      cv.dataset.cuernoState = showcasePose;
-      if (card) { card.dataset.cuernoBeat = cuernoBeat; card.dataset.cuernoMagic = String(cuernoMagicSlot); card.dataset.cuernoState=showcasePose; }
+      if (cv.dataset.cuernoBeat !== cuernoBeat) cv.dataset.cuernoBeat = cuernoBeat;
+      if (cv.dataset.cuernoMagic !== String(cuernoMagicSlot)) cv.dataset.cuernoMagic = String(cuernoMagicSlot);
+      if (cv.dataset.cuernoState !== showcasePose) cv.dataset.cuernoState = showcasePose;
+      if (card.dataset.cuernoBeat !== cuernoBeat) card.dataset.cuernoBeat = cuernoBeat;
+      if (card.dataset.cuernoMagic !== String(cuernoMagicSlot)) card.dataset.cuernoMagic = String(cuernoMagicSlot);
+      if (card.dataset.cuernoState !== showcasePose) card.dataset.cuernoState = showcasePose;
     } else {
-      delete cv.dataset.cuernoBeat;
-      delete cv.dataset.cuernoMagic;
-      delete cv.dataset.cuernoState;
-      if (card) { delete card.dataset.cuernoBeat; delete card.dataset.cuernoMagic; delete card.dataset.cuernoState; }
+      if (cv.hasAttribute("data-cuerno-beat")) delete cv.dataset.cuernoBeat;
+      if (cv.hasAttribute("data-cuerno-magic")) delete cv.dataset.cuernoMagic;
+      if (cv.hasAttribute("data-cuerno-state")) delete cv.dataset.cuernoState;
+      if (card.hasAttribute("data-cuerno-beat")) delete card.dataset.cuernoBeat;
+      if (card.hasAttribute("data-cuerno-magic")) delete card.dataset.cuernoMagic;
+      if (card.hasAttribute("data-cuerno-state")) delete card.dataset.cuernoState;
     }
     if (hero && def.id === "stitcho") {
-      cv.dataset.stitchoBeat = stitchoBeat;
-      card.dataset.stitchoBeat = stitchoBeat;
+      if (cv.dataset.stitchoBeat !== stitchoBeat) cv.dataset.stitchoBeat = stitchoBeat;
+      if (card.dataset.stitchoBeat !== stitchoBeat) card.dataset.stitchoBeat = stitchoBeat;
     } else {
-      delete cv.dataset.stitchoBeat;
-      if (card) delete card.dataset.stitchoBeat;
+      if (cv.hasAttribute("data-stitcho-beat")) delete cv.dataset.stitchoBeat;
+      if (card.hasAttribute("data-stitcho-beat")) delete card.dataset.stitchoBeat;
     }
     if (showcasePose === "jump") {
       dummy.grounded = false;
@@ -236,12 +240,18 @@ portraitClock.advance(now, () => {
     const fit = portraitFit(def, evo, bw, bh, hero);
     dummy.visualScale = fit.scale;
     const footY = fit.foot;
-    cv.dataset.evo = String(evo);
-    cv.dataset.fitScale = fit.scale.toFixed(4);
-    cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
-    if(def.id==="cuerno")cv.dataset.cuernoGrowth=CUERNO_PORTRAIT_GROWTH[evo].toFixed(2);
-    else delete cv.dataset.cuernoGrowth;
-    if (card) card.dataset.evo = String(evo);
+    // Canvas draw state changes on every frame, but DOM attributes should not.
+    // Writing dataset on every 24-fps tick causes unnecessary style invalidation.
+    const fitStamp = evo + ":" + fit.scale.toFixed(4) + ":" + fit.envelope.toFixed(2);
+    if (cv._fitStamp !== fitStamp) {
+      cv._fitStamp = fitStamp;
+      cv.dataset.evo = String(evo);
+      cv.dataset.fitScale = fit.scale.toFixed(4);
+      cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
+      if (def.id === "cuerno") cv.dataset.cuernoGrowth = CUERNO_PORTRAIT_GROWTH[evo].toFixed(2);
+      else if (cv.hasAttribute("data-cuerno-growth")) delete cv.dataset.cuernoGrowth;
+      card.dataset.evo = String(evo);
+    }
     c.save();
     c.translate(bw / 2, footY);
     c.scale(1, 0.22);
