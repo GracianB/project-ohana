@@ -448,8 +448,9 @@ game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, f
 game.flashColor = def.color;
 // Aurora F4 feels majestic rather than stroboscopic; other U effects are untouched.
 const gentleAurora=p.id==="cuerno"&&evo===4;
-game.flash = Math.max(game.flash || 0, gentleAurora ? 5 : 20);
-game.shake = Math.min(26, (game.shake || 0) + (gentleAurora ? 3 : 12));
+const dinoColossus=p.id==="dino";
+game.flash = Math.max(game.flash || 0, gentleAurora ? 5 : dinoColossus ? 8 : 20);
+game.shake = Math.min(dinoColossus ? 16 : 26, (game.shake || 0) + (gentleAurora ? 3 : dinoColossus ? 4 : 12));
 game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
