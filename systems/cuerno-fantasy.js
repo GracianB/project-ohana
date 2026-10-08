@@ -157,15 +157,17 @@ export function drawCuernoFantasyStatus(ctx,enemies,cam,t,reduce=false){
 export function startCuernoFantasyTrail(g,p,evo,activeFx,add,pw,cx){
  const living=activeFx.filter(f=>f.kind==="cuernoFantasyTrail"&&!f.dead);
  if(living.length>=CUERNO_FANTASY.maxTrails)living[0].dead=true;
- return add({kind:"cuernoFantasyTrail",
+ const trail=add({kind:"cuernoFantasyTrail",
   life:CUERNO_FANTASY.trailFrames,max:CUERNO_FANTASY.trailFrames,
   points:[{x:cx(p),y:p.y+p.h*.72}],evo,
   dmg:(2.8+evo*.75)*pw(p),born:Number(g.t)||0,face:p.facing||1});
+ p._cuernoFantasyActiveTrail=trail;
+ return trail;
 }
 
 export function updateCuernoFantasyTrail(g,f,p,galloping,canHit,cx,cy){
  if(f.dead)return false;
- if(galloping && p.id==="cuerno" && !p.dead){
+ if(galloping && p.id==="cuerno" && !p.dead && p._cuernoFantasyActiveTrail===f){
    f.life=CUERNO_FANTASY.trailFrames;
    if(f.age%CUERNO_FANTASY.sampleEvery===0)
      f.points=addCuernoRibbonPoint(f.points,cx(p),p.y+p.h*.72);
