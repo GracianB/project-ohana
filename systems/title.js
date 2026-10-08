@@ -77,7 +77,7 @@ const portraitClock = createFixedClock({ stepMs: 1000 / 24, maxSteps: 1 });
 const HERO_SHOWCASE = Object.freeze({
   kilo:    ["idle","victory","idle"],
   stitcho: ["idle","attack","victory"],
-  chispin: ["idle","attack","victory"],
+  chispin: ["idle","cast","victory"],
   cat:     ["idle","idle","victory"],
   dragon:  ["idle","jump","victory"],
   dino:    ["idle","attack","victory"],
