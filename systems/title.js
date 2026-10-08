@@ -78,7 +78,7 @@ const HERO_SHOWCASE = Object.freeze({
   kilo:    ["idle","victory","idle"],
   stitcho: ["idle","attack","victory"],
   chispin: ["idle","cast","victory"],
-  cat:     ["idle","idle","victory"],
+  cat:     ["idle","attack","victory"],
   dragon:  ["idle","jump","victory"],
   dino:    ["idle","attack","victory"],
   frita:   ["run","attack","victory"],
