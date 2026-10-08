@@ -1,7 +1,7 @@
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
 // ----------------------------------------------------------------------------
-// playTitleIntro(): intro cinematográfica de portada en #ohana-intro (~3.3 s).
+// playTitleIntro(): V43 OHANA MAGIC — familia, humor, amenaza y título (~6 s).
 // playIntro(kind, name, done, id): cinemática corta al pulsar Empezar /
 //   Continuar (~1.8 s, saltable). API compatible con title.js.
 // Ambas en canvas, con el mismo kit visual que la cinemática de evolución.
@@ -62,12 +62,20 @@ export function playTitleIntro() {
   const parts = new Particles();
   const pal = [CYAN, GOLD, PINK, "#ffffff"];
   const T = reduce
-    ? { core: 0, ring: 0, word: 0, flash: 0.1, tag: 0.1, out: 0.7, end: 1.1 }
-    : { core: 0.05, ring: 0.45, word: 0.6, flash: 1.25, tag: 1.3, out: 3.6, end: 4.4 }; // +1 s de final visible
+    ? { family: 0, threat: 0.08, core: 0.12, ring: 0.14, word: 0.16, flash: 0.24, tag: 0.26, out: 0.72, end: 1.08 }
+    : { family: 0.28, threat: 2.92, core: 3.78, ring: 3.92, word: 4.08, flash: 4.72, tag: 4.88, out: 5.52, end: 6.18 };
   const letters = ["O", "H", "A", "N", "A"];
   const word = document.createElement("canvas");
   const wctx = word.getContext("2d");
 
+  const V43_INTRO_CAST = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const introActors = Object.fromEntries(V43_INTRO_CAST.map((id) => {
+    const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
+    const p = makeDummy(id, 0, def.color);
+    p._poseOverride = "idle";
+    return [id, p];
+  }));
+  el.dataset.v43Cast = String(V43_INTRO_CAST.length);
   let t0 = 0, last = 0, raf = 0, skip = false, burst = false, revealed = false, done = false;
 
   function onResize() { fc.resize(); }
@@ -146,14 +154,192 @@ export function playTitleIntro() {
       ctx.lineTo(off + 120, yy);
       ctx.stroke();
     }
-    if (t > 1.6) {
-      ctx.globalAlpha = Math.min(1, t - 1.6);
-      ctx.fillStyle = "#fff6c8";
-      ctx.font = "600 18px Outfit, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("Nadie se queda atrás", cx, H * 0.78);
-    }
+
     ctx.restore();
+  }
+
+
+  function drawIntroActor(id, x, footY, targetH, tf, opts = {}) {
+    const p = introActors[id];
+    if (!p) return;
+    const scale = targetH / Math.max(1, baseHeight(id, 0));
+    p.facing = opts.facing || 1;
+    p.grounded = opts.grounded !== false;
+    p.vx = Number(opts.vx || 0);
+    p.vy = Number(opts.vy || 0);
+    p.melee = Number(opts.melee || 0);
+    p._poseOverride = opts.pose || "";
+    ctx.save();
+    ctx.translate(x, footY);
+    if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
+    if (opts.rotate) ctx.rotate(opts.rotate);
+    drawDummy(ctx, p, 0, 0, scale, tf);
+    ctx.restore();
+  }
+
+  function drawTinyBolt(x1, y1, x2, y2, k) {
+    if (k <= 0) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = "rgba(255,232,86," + (0.30 + k * 0.70) + ")";
+    ctx.lineWidth = 2.4;
+    ctx.shadowColor = "#ffe85a";
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    for (let i = 0; i <= 7; i++) {
+      const u = i / 7;
+      const x = lerp(x1, x2, u);
+      const y = lerp(y1, y2, u) + (i > 0 && i < 7 ? Math.sin(i * 9.7) * 6 * k : 0);
+      if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawTinyRainbow(x, y, radius, k) {
+    if (k <= 0) return;
+    const cols = ["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];
+    ctx.save();
+    ctx.globalAlpha = 0.72 * k;
+    ctx.lineCap = "round";
+    cols.forEach((col, i) => {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, radius + i * 5, Math.PI * 1.08, Math.PI * 1.92);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  function drawFamilyScene(t, L) {
+    if (reduce || t < T.family || t >= T.core + 0.05) return;
+    const { W, H } = L;
+    const floor = H * 0.79;
+    const tf = t * 60;
+    const enter = easeOut(seg(t, T.family, T.family + 0.45));
+    const threatIn = seg(t, T.threat, T.threat + 0.55);
+    const familyAlpha = enter * (1 - threatIn * 0.18);
+    const heroH = clamp(Math.min(W, H) * 0.105, 58, 92);
+
+    ctx.save();
+    ctx.globalAlpha = familyAlpha;
+
+    // Kilo keeps a pollen light afloat while the others do their own thing.
+    const pollen = seg(t, 0.55, 1.10) * (1 - seg(t, 1.55, 1.80));
+    drawIntroActor("kilo", W * 0.34, floor, heroH * 1.04, tf, { facing: 1, pose: pollen > .12 ? "victory" : "idle" });
+    if (pollen > 0) {
+      const px = W * 0.405, py = floor - heroH * 0.86 - Math.sin(t * 8) * 8;
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = "#ffe66a";
+      ctx.shadowColor = "#ffe66a";
+      ctx.shadowBlur = 24;
+      ctx.beginPath(); ctx.arc(px, py, 5 + pollen * 2, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    // Chispín accidentally zaps Stitcho.
+    const zap = Math.sin(clamp(seg(t, 0.92, 1.36), 0, 1) * Math.PI);
+    drawIntroActor("stitcho", W * 0.51, floor + 2, heroH, tf, { facing: -1, pose: zap > .08 ? "attack" : "idle", melee: zap > .08 ? 10 : 0, rotate: -zap * .08 });
+    drawIntroActor("chispin", W * 0.61, floor + 1, heroH * .93, tf, { facing: -1, pose: zap > .08 ? "victory" : "idle" });
+    drawTinyBolt(W * .59, floor - heroH * .52, W * .525, floor - heroH * .50, zap);
+
+    // Michi judges the entire situation from the foreground.
+    const catLook = seg(t, 1.08, 1.72);
+    drawIntroActor("cat", W * 0.72, floor + 3, heroH * .82, tf, { facing: catLook > .45 ? -1 : 1, pose: "idle" });
+
+    // Frita chases a potato, Pizza bounces after it.
+    const chase = seg(t, 1.38, 2.52);
+    if (chase > 0 && chase < 1) {
+      const px = lerp(W * 0.14, W * 0.82, easeInOut(chase));
+      const py = floor - 12 - Math.abs(Math.sin(chase * Math.PI * 5)) * 18;
+      ctx.fillStyle = "#e9bd55";
+      ctx.strokeStyle = "#704b21";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(px, py, 10, 7, chase * 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      drawIntroActor("frita", px - 50, floor + 3, heroH * .82, tf, { facing: 1, vx: 6, pose: "run" });
+      drawIntroActor("pizza", px - 105, floor - Math.abs(Math.sin(chase * Math.PI * 4)) * 18, heroH * .86, tf, { facing: 1, grounded: false, vy: -2, pose: "jump" });
+    }
+
+    // Dragón tries to look impressive. The tiny sneeze is... less impressive.
+    const sneeze = Math.sin(clamp(seg(t, 1.72, 2.05), 0, 1) * Math.PI);
+    drawIntroActor("dragon", W * .17, floor + 1, heroH * .98, tf, { facing: 1, pose: sneeze > .05 ? "attack" : "idle", melee: sneeze > .05 ? 8 : 0 });
+    if (sneeze > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = "rgba(255,126,58," + sneeze + ")";
+      ctx.shadowColor = "#ff7e3a"; ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.moveTo(W*.205, floor-heroH*.48);
+      ctx.quadraticCurveTo(W*.225, floor-heroH*.70, W*.242, floor-heroH*.48);
+      ctx.quadraticCurveTo(W*.225, floor-heroH*.38, W*.205, floor-heroH*.48);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Yomi appears from a shadow that should not physically fit them.
+    const yomiK = easeOut(seg(t, 1.92, 2.38));
+    if (yomiK > 0) {
+      ctx.save();
+      ctx.globalAlpha *= .60 * yomiK;
+      ctx.fillStyle = "#03040a";
+      ctx.beginPath(); ctx.ellipse(W*.83, floor+6, 34*yomiK, 9, 0, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+      drawIntroActor("yomi", W*.83, floor, heroH * .95, tf, { facing: -1, pose: "idle", alpha: yomiK });
+    }
+
+    // Cuerno manages a tiny rainbow. Dino arrives one beat too heavily.
+    const rainbow = easeOut(seg(t, 2.02, 2.55)) * (1 - threatIn);
+    drawIntroActor("cuerno", W*.90, floor+1, heroH*.78, tf, { facing: -1, pose: rainbow > .2 ? "victory" : "idle" });
+    drawTinyRainbow(W*.887, floor-heroH*.74, 22, rainbow);
+
+    const dinoK = easeOut(seg(t, 2.12, 2.68));
+    drawIntroActor("dino", W*.075, floor+2, heroH*1.02, tf, { facing: 1, pose: dinoK > .68 ? "victory" : "idle", alpha: dinoK });
+    if (dinoK > .72 && threatIn < .12) {
+      const q = seg(dinoK, .72, 1);
+      ctx.save();
+      ctx.globalAlpha = .26 * q;
+      ctx.strokeStyle = "#b8d57b";
+      ctx.lineWidth = 2;
+      for (let i=0;i<3;i++) {
+        ctx.beginPath();
+        ctx.moveTo(W*.075, floor+4);
+        ctx.lineTo(W*(.075 + .035 + i*.018), floor+10+i*5);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    ctx.restore();
+
+    // The Nido interrupts the joke. Everyone freezes and looks toward it.
+    if (threatIn > 0) {
+      const nx = W * .50, ny = H * .26;
+      ctx.save();
+      const glow = ctx.createRadialGradient(nx, ny, 0, nx, ny, Math.min(W,H)*.27);
+      glow.addColorStop(0, "rgba(255,57,91," + (.28*threatIn) + ")");
+      glow.addColorStop(.34, "rgba(142,22,56," + (.18*threatIn) + ")");
+      glow.addColorStop(1, "rgba(4,7,14,0)");
+      ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle = "rgba(255,104,126," + (.55*threatIn) + ")";
+      ctx.lineWidth = 3;
+      ctx.shadowColor = "#ff4968"; ctx.shadowBlur = 22;
+      ctx.beginPath();
+      ctx.moveTo(nx, ny - 40);
+      ctx.bezierCurveTo(nx-28,ny-15,nx-26,ny+18,nx,ny+46);
+      ctx.bezierCurveTo(nx+30,ny+12,nx+26,ny-18,nx,ny-40);
+      ctx.stroke();
+      ctx.restore();
+
+      const lineupY = floor + 1;
+      const ids = V43_INTRO_CAST;
+      ids.forEach((id, i) => {
+        const x = lerp(W*.18, W*.82, i/(ids.length-1));
+        const h = heroH * (id==="dino" ? .82 : id==="cat" ? .72 : .76);
+        drawIntroActor(id, x, lineupY, h, tf, { facing: x < nx ? 1 : -1, pose: "idle", alpha: threatIn });
+      });
+    }
   }
 
   function drawWord(L, t) {
@@ -238,13 +424,14 @@ export function playTitleIntro() {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
     drawIslandScene(t, L);
+    drawFamilyScene(t, L);
     const flashK = reduce ? 0 : seg(t, T.flash, T.flash + 0.6);
     drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, 0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0));
     drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.7, CYAN, 0.28 * seg(t, T.ring, T.ring + 0.6), reduce ? 0 : t * 0.22, 16);
     if (!reduce) drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.55, PINK, 0.22 * seg(t, T.ring + 0.2, T.ring + 0.8), -t * 0.16, 10);
 
     // partículas que convergen en el núcleo
-    if (!reduce && t < T.flash - 0.1) {
+    if (!reduce && t >= T.core - 0.1 && t < T.flash - 0.1) {
       const n = Math.round(dt * 160);
       for (let i = 0; i < n; i++) {
         const a = Math.random() * Math.PI * 2;
@@ -304,33 +491,16 @@ export function playTitleIntro() {
     parts.update(dt);
     parts.draw(ctx);
 
-    // rótulos narrativos
-    const islandK = reduce ? 0 : seg(t, 0.15, 0.85);
-    if (islandK > 0) {
-      ctx.save();
-      ctx.globalAlpha = islandK * (1 - seg(t, 0.85, 1.15));
-      drawTitle(ctx, "MUNDO 1 · ISLA HOKU", cx, H * 0.16, Math.max(12, size * 0.16), "#d8ebff", {
-        font: FONT_BODY, weight: 800, spacing: "0.42em", stroke: false, glow: "rgba(126,231,255,0.7)"
-      });
-      ctx.restore();
-    }
-
-    const omen = reduce ? 0 : seg(t, 1.55, 2.15);
-    if (omen > 0) {
-      ctx.save();
-      ctx.globalAlpha = omen * (1 - seg(t, 2.15, 2.45));
-      drawTitle(ctx, "DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS", cx, H * 0.81, Math.max(13, size * 0.16), "#e7f4ff", {
-        font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.88
-      });
-      ctx.restore();
-    }
-
-    const threat = reduce ? 0 : seg(t, 2.05, 2.7);
+    // V43: primero conocemos a la familia; el texto llega solo cuando el Nido rompe la calma.
+    const threat = reduce ? 0 : seg(t, T.threat + 0.22, T.core - 0.04);
     if (threat > 0) {
       ctx.save();
-      ctx.globalAlpha = threat;
-      drawTitle(ctx, "EL NIDO HA DESPERTADO", cx, H * 0.88, Math.max(13, size * 0.15), PINK, {
-        font: FONT_BODY, weight: 800, spacing: "0.16em", stroke: false, glow: "rgba(255,106,168,0.72)"
+      ctx.globalAlpha = threat * (1 - seg(t, T.core - 0.18, T.core + 0.02));
+      drawTitle(ctx, "EL NIDO HA DESPERTADO", cx, H * 0.16, Math.max(13, size * 0.16), PINK, {
+        font: FONT_BODY, weight: 800, spacing: "0.18em", stroke: false, glow: "rgba(255,106,168,0.78)"
+      });
+      drawTitle(ctx, "Y ESTA VEZ, VAN TODOS.", cx, H * 0.84, Math.max(12, size * 0.135), "#e7f4ff", {
+        font: FONT_BODY, weight: 700, spacing: "0.12em", stroke: false, maxWidth: W * 0.88
       });
       ctx.restore();
     }
@@ -400,7 +570,7 @@ export function playTitleIntro() {
   };
   go();
   // Red de seguridad
-  setTimeout(() => { if (!done) end(); }, 7000);
+  setTimeout(() => { if (!done) end(); }, 8500);
 }
 
 // ---------------------------------------------------------------------------
