@@ -433,25 +433,142 @@ function opts(pose, f, S) {
     }
     o.sparks = 1; o.charge = 1; o.tailGlow = 1; o.tailAxis = -2.0; o.gillFlare = 0.6;
   } else if (st === "idle" && pose.flourish > 0) {
-    const n = pose.flourishN % 3, k = Math.sin(pose.flourish * Math.PI);
+    const n = pose.flourishN % 4, k = Math.sin(pose.flourish * Math.PI);
     if (n === 0) { // se sacude
       o.rot = Math.sin(t * 1.3) * 0.16 * k; o.headRot = Math.sin(t * 1.3 + 1) * 0.25 * k;
       o.eyes = "squeeze"; o.mouth = "flat"; o.sparks = k; o.charge = 0.4 + k * 0.6; o.gillFlare = Math.sin(t * 1.3) * k; o.earA = Math.sin(t * 1.3) * 0.4 * k;
     } else if (n === 1) { // persigue su cola
       o.spinX = Math.cos(t * 0.28); o.lift = -Math.abs(Math.sin(t * 0.28)) * 5;
       o.tailAxis = -1.2; o.tailLen = 0.8; o.headRot = -0.25; o.mouth = "open"; o.armA = 1.3;
-    } else { // infla los mofletes
+    } else if (n === 2) { // infla los mofletes
       o.puff = Math.min(1, k * 1.8); o.eyes = k > 0.6 ? "squeeze" : "normal"; o.headDY -= k * 2;
       if (pose.flourish > 0.85) { o.sparks = 1; o.puff = 0; o.mouth = "open"; o.eyes = "happy"; }
+    } else { // intenta capturar un relámpago, el muelle le da calambre y lo convierte en música
+      o.eyes = pose.flourish < .42 ? "normal" : "squeeze";
+      o.mouth = pose.flourish < .5 ? "o" : "happy";
+      o.headRot = Math.sin(t * .48) * .24 * k;
+      o.earA = Math.sin(t * .7) * .32 * k;
+      o.tailAxis = -1.5 - k * 1.2;
+      o.tailLen = 1 + k * .42;
+      o.gillFlare = k;
+      o.sparks = .3 + k * .85;
+      o.charge = .45 + k;
+      o.lift = -Math.abs(Math.sin(t * .32)) * 7 * k;
+      o.armA = 1.4 + Math.sin(t * .42) * .3;
+      o.armB = -2.0 - Math.sin(t * .42) * .3;
+      o.rot = Math.sin(t * .42) * .12 * k;
     }
   }
   return o;
+}
+
+
+/* V50 · Chispín Soul Pass. Bounded, deterministic canvas choreography.
+   Four identities: spring spark, copper arc, cloud conductor, aurora crown.
+   All visuals are local to the character. No global particles or timers. */
+function stormSoul(ctx, pose, f, o, front) {
+  const t = Number.isFinite(pose.t) ? pose.t : 0;
+  const state = pose.state || "idle";
+  const active = state === "cast" || state === "attack" || pose.move === "spark";
+  const sky = state === "jump" || state === "fall" || state === "glide";
+  const win = state === "victory";
+  const gag = state === "idle" && pose.flourish > 0 && pose.flourishN % 4 === 3;
+  const charge = active ? 1 : win ? .85 : sky ? .55 : gag ? Math.sin(Math.PI * pose.flourish) : .24;
+  const warm = ["#fff9a0", "#ffd45a", "#ffab55", "#e6faff", "#fff1d7"][f] || "#fff9a0";
+  const cold = ["#ad68ff", "#a45aff", "#ec68d9", "#80dafa", "#ff60d6"][f] || "#ad68ff";
+  const cy = f === 0 ? -42 : f === 1 ? -54 : f === 2 ? -68 : f === 3 ? -59 : -68;
+  ctx.save();
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  if (!front) {
+    // Character-specific grounded afterimage, rather than screen-sized flashes.
+    if (active || sky || win) {
+      ctx.globalAlpha = .13 + .17 * charge;
+      ctx.fillStyle = cold;
+      ctx.beginPath();
+      ctx.ellipse(-3, -3, 24 + f * 4 + charge * 7, 3.5, 0, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = .24 + .25 * charge;
+      ctx.strokeStyle = cold;
+      ctx.lineWidth = 1.2 + charge;
+      for (let i = 0; i < (f >= 3 ? 3 : 2); i++) {
+        const y = cy + i * 13;
+        const x = -29 - i * 9 - Math.sin(t * .19 + i) * 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 7 - charge * 8, y + 5);
+        ctx.lineTo(x - 14 - charge * 8, y + 2);
+        ctx.stroke();
+      }
+    }
+    // Cloudstep belongs only to the cloud form and never obscures the face.
+    if (f === 3 && (sky || active || win)) {
+      ctx.globalAlpha = .3 + charge * .24;
+      ctx.fillStyle = "#d6f6ff";
+      for (let i = 0; i < 3; i++) {
+        const x = (i - 1) * 16 + Math.sin(t * .055 + i) * 3;
+        const y = 0 + Math.cos(t * .055 + i) * 2;
+        ctx.beginPath(); ctx.ellipse(x, y, 13, 5, 0, 0, TAU); ctx.fill();
+      }
+    }
+    if (f === 4) {
+      ctx.globalAlpha = .15 + .16 * Math.sin(t * .037) ** 2 + charge * .18;
+      ctx.strokeStyle = cold;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(0, cy, 35 + Math.sin(t * .038) * 2, 47, -.08, 0, TAU);
+      ctx.stroke();
+    }
+  } else {
+    // A short sequence of visible electrical nodes with phase-delayed motion.
+    const n = active ? 7 : win ? 8 : sky ? 4 : f === 4 ? 3 : 0;
+    for (let i = 0; i < n; i++) {
+      const a = (i / Math.max(1,n)) * TAU + t * (f === 4 ? .014 : .025);
+      const radius = 28 + f * 3 + Math.sin(t * .095 + i * 2.1) * 5;
+      const x = Math.cos(a) * radius;
+      const y = cy + Math.sin(a) * radius * 1.05;
+      const size = 1.4 + (i % 3) * .7;
+      ctx.globalAlpha = (.3 + charge * .42) * (.65 + .35 * Math.sin(t * .16 + i) ** 2);
+      ctx.strokeStyle = i % 2 ? cold : warm;
+      ctx.lineWidth = f === 4 ? 1.8 : 1.4;
+      ctx.beginPath();
+      ctx.moveTo(x - size, y - size);
+      ctx.lineTo(x + size * .2, y);
+      ctx.lineTo(x - size * .4, y + size);
+      ctx.lineTo(x + size, y + size * .3);
+      ctx.stroke();
+    }
+    if (gag) {
+      const k = Math.sin(Math.PI * Math.max(0,Math.min(1,pose.flourish)));
+      ctx.globalAlpha = .22 + k * .6;
+      ctx.strokeStyle = warm;
+      ctx.lineWidth = 2;
+      const x = 32, y = -81 - k * 9;
+      ctx.beginPath();
+      ctx.moveTo(x-5,y-8); ctx.lineTo(x+3,y-1);
+      ctx.lineTo(x-3,y+4); ctx.lineTo(x+5,y+10);
+      ctx.stroke();
+      ctx.fillStyle = cold;
+      ctx.beginPath(); ctx.arc(x + Math.sin(t*.2)*3,y-13,2.3,0,TAU); ctx.fill();
+    }
+    if (win || (f === 4 && active)) {
+      ctx.globalAlpha = .48 + .18 * Math.sin(t * .11);
+      ctx.strokeStyle = warm;
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      ctx.arc(0, cy, 32 + f * 2, -Math.PI * .81, -Math.PI * .19);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], t = pose.t, st = pose.state;
   const o = opts(pose, f, S);
   const cy = S.by - 4;
+  stormSoul(ctx, pose, f, o, false);
 
   // nubecitas (Trueno Gordo): detrás
   if (S.clouds) for (let i = 0; i < 3; i++) {
@@ -529,6 +646,7 @@ function draw(ctx, pose, R) {
     }
     ctx.restore();
   }
+  stormSoul(ctx, pose, f, o, true);
   // nubecitas: delante
   if (S.clouds) for (let i = 0; i < 3; i++) {
     const a = t * 0.025 + i * (TAU / 3);
