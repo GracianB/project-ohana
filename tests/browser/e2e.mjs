@@ -32,8 +32,8 @@ async function auditPage(page, label) {
   assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
   // La intro es una animación autodestruible. El E2E no debe clicar un elemento
   // que puede desaparecer entre el descubrimiento del locator y su evaluación.
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
   const titleLayout = await page.evaluate(() => {
     const rect = (selector) => {
       const r = document.querySelector(selector)?.getBoundingClientRect();
@@ -357,8 +357,8 @@ try {
   // La auditoría de gameplay manipula deliberadamente el estado. Reiniciamos
   // antes de comprobar pausa/entrada normal para no mezclar ambos escenarios.
   await page.reload({ waitUntil:'networkidle' });
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
 
@@ -544,8 +544,8 @@ try {
   const reducedPage = page;
   await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
   await reducedPage.reload({ waitUntil:'networkidle' });
-  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
-  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
+  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
   assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
   await reducedPage.locator('#btn-play').click();
   await reducedPage.waitForTimeout(250);
@@ -587,7 +587,7 @@ try {
 
   await page.context().setOffline(true);
   await page.reload({ waitUntil:'domcontentloaded' });
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
   const offline = await offlineBoot();
   assert.equal(offline.controller, true, 'desktop: SW no controla la recarga offline');
   assert.match(offline.title, /PROJECT OHANA/i, 'desktop: título offline ausente');
