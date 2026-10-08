@@ -2,9 +2,10 @@
 // V66: Cuerno's personality is stage-specific and deterministic, never random FX.
 const SOUL_BEATS=["curious","shy","prance","stargaze","sneeze","bow"];
 export function cuernoSoulBeat(pose,form){
+const state=pose?.state||"idle";
+if(state==="hurt"||state==="dead")return "";
 const forced=pose?.cuernoBeat;
 if(typeof forced==="string"&&SOUL_BEATS.includes(forced))return forced;
-const state=pose?.state||"idle";
 if(state==="victory")return form>=4?"bow":form>=2?"prance":"curious";
 if(state==="cast"&&form>=3&&pose?.castSlot===3)return "stargaze";
 if(state!=="idle"||!(Number(pose?.flourish)>.06&&Number(pose?.flourish)<.94))return "";
@@ -14,8 +15,10 @@ return form===4?(Number(pose.flourishN)%2?"bow":"sneeze"):SOUL_BEATS[form];
 function drawCuernoSoul(ctx,pose,R,form,t){
 const beat=cuernoSoulBeat(pose,form);if(!beat)return;
 const born=[-65,-90,-106,-124,-142][form],x=[1,12,24,25,32][form];
-const forced=!!pose.cuernoBeat;
-const amp=forced?.77:Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
+const forced=!!pose.cuernoBeat,state=pose?.state||"idle";
+// Victory and U were unreachable: rig flourishes only in idle. Give them a real beat.
+const amp=forced?.77:state==="victory"?.83:state==="cast"?.68:
+Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 if(amp<=.08)return;
 const k=Math.max(0,Math.min(1,amp)),TAU=Math.PI*2;
 ctx.save();ctx.globalAlpha=.66*k;ctx.lineCap="round";
@@ -133,6 +136,13 @@ if(!magic.continuous)R.sparkle(ctx,x,y,4+3*k,"#fff7dd");
 ctx.restore();
 }
 
+function drawCuernoOverlays(ctx,pose,R,form,t,lift,tilt){
+ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
+drawCuernoSoul(ctx,pose,R,form,t);
+drawCuernoMagic(ctx,pose,R,form,t);
+ctx.restore();
+}
+
 function horn(ctx, len, color, wobble) {
   ctx.save();
   ctx.lineCap = "round";
@@ -201,8 +211,7 @@ function drawLivingHorn(ctx,pose,R,t){
     R.sparkle(ctx,0,-66,4+2*aura,"#ffdc9b");
   }
   ctx.restore();
-drawCuernoSoul(ctx,pose,R,0,t);
-drawCuernoMagic(ctx,pose,R,0,t);
+drawCuernoOverlays(ctx,pose,R,0,t,bounce,tilt);
 }
 
 // F1 Destello: the pearl horn grows a neck, ears, a muzzle and TWO tentative hooves.
@@ -215,7 +224,8 @@ function drawFirstBody(ctx,pose,R,t){
   const shy=pose.flourishN%3===0?flourish:0;
   const proud=pose.flourishN%3===2?flourish:0;
   const sway=Math.sin(t*.08)*2+(run?beat*3:0);
-  ctx.save();ctx.translate(0,lift);ctx.rotate((air?-.10:0)+(run?-.055*beat:0)-shy*.09);
+  const tilt=(air?-.10:0)+(run?-.055*beat:0)-shy*.09;
+  ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
   // A liquid rainbow tail flows from the unfinished hindquarters.
   ctx.fillStyle="#ce9cf1";ctx.strokeStyle="#654977";ctx.lineWidth=2.1;
   ctx.beginPath();ctx.moveTo(-13,-28);ctx.quadraticCurveTo(-34,-35,-34-sway,-19);
@@ -271,8 +281,7 @@ function drawFirstBody(ctx,pose,R,t){
     for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-20-i*7,-7+i*5);ctx.lineTo(-31-i*8,-7+i*5);ctx.stroke();}
   }
   ctx.restore();
-drawCuernoSoul(ctx,pose,R,1,t);
-drawCuernoMagic(ctx,pose,R,1,t);
+drawCuernoOverlays(ctx,pose,R,1,t,lift,tilt);
 }
 
 function drawRainbowFoal(ctx,pose,R,t){
@@ -283,8 +292,8 @@ const hurt=pose.state==="hurt"||pose.state==="dead";
 const cast=pose.state==="cast"||pose.state==="attack";
 const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35);
 const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
-ctx.save();ctx.translate(0,spring);
-ctx.rotate((air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0));
+const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0);
+ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
 const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
 for(let i=0;i<4;i++){
 const sway=Math.sin(t*.105+i*.68)*2.2+(run?beat*4:0);
@@ -359,8 +368,7 @@ for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-42-i*8,-14-i*8);ctx.lineTo(-51-
 ctx.restore();
 }
 ctx.restore();
-drawCuernoSoul(ctx,pose,R,2,t);
-drawCuernoMagic(ctx,pose,R,2,t);
+drawCuernoOverlays(ctx,pose,R,2,t,spring,tilt);
 }
 
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
@@ -373,7 +381,8 @@ const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe4
 const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
 const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
-ctx.save();ctx.translate(0,bounce);ctx.rotate((air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0));
+const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0);
+ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 for(let i=0;i<5;i++){
 const sw=Math.sin(t*.105+i*.65)*3+(run?gallop*5:0);
 ctx.save();ctx.globalAlpha=.88-i*.10;
@@ -462,8 +471,7 @@ ctx.save();ctx.globalAlpha=.38*flourish;ctx.strokeStyle="#f8d0ff";ctx.lineWidth=
 ctx.beginPath();ctx.arc(25,-121,9+18*flourish,-.6,2.7);ctx.stroke();ctx.restore();
 }
 ctx.restore();
-drawCuernoSoul(ctx,pose,R,3,t);
-drawCuernoMagic(ctx,pose,R,3,t);
+drawCuernoOverlays(ctx,pose,R,3,t,bounce,tilt);
 }
 
 // V64 F4: original adult Unicornio Aurora. Wings are a visual signature, not flight physics.
@@ -479,8 +487,8 @@ const unfold=air?1:magic?.slot===3?1:magic?.slot===2?.86:cast?.9:triumph?1:run?.
 const ink="#4d5478",coat="#fffaf0",shadow="#d6d6f0",gold="#f7d78a";
 const colors=["#f9d8b5","#f5b9e0","#b8d0ff","#a5ece4","#d9b8ff","#fff2b9"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
-ctx.save();ctx.translate(0,bounce);
-ctx.rotate((air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0));
+const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0);
+ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 // Six trailing strands rise from the living comet tail of Unicornio Estelar.
 for(let i=0;i<6;i++){
 const sway=Math.sin(t*.068+i*.53)*3+(run?beat*4:0);
@@ -597,8 +605,7 @@ for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-51-i*8,-20-i*9);ctx.lineTo(-68-
 ctx.restore();
 }
 ctx.restore();
-drawCuernoSoul(ctx,pose,R,4,t);
-drawCuernoMagic(ctx,pose,R,4,t);
+drawCuernoOverlays(ctx,pose,R,4,t,bounce,tilt);
 }
 
 function draw(ctx, pose, R) {

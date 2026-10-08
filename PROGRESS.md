@@ -1,3 +1,13 @@
+## 08/10/2026 · V69 · CUERNO 10/10 · LA LEYENDA DEL ARCOÍRIS
+
+**Caché:** `ohana-268` · Fase definitiva de Cuerno. Dino y Grok intactos.
+
+- **Bug real corregido:** los gestos de victoria y la contemplación durante U estaban declarados en `cuernoSoulBeat`, pero se dibujaban con intensidad nula porque el rig solo activa `flourish` en estado `idle`. Ahora `victory` y `cast` tienen intensidad propia, sin temporizadores, y no se permite la comedia cuando Cuerno está herido o derrotado. Un gesto de victoria existe realmente en sus cinco formas.
+- **Anclaje anatómico:** los gestos, la lanza, las estelas, los siete anillos y el dosel U siguen exactamente la traslación vertical y la inclinación usadas para pintar el cuerpo de Cuernín, Destello, Potro Iris, Estelar y Aurora. Un único wrapper Canvas guardado/restaurado evita magia desacoplada del cuerno en salto, trote o caída. Las geometrías y físicas no se alteran.
+- **Cierre audiovisual:** F4 inclina la cabeza y el cuerpo durante una reverencia; durante U despliega alas, mira a las estrellas y crea el sueño de arcoíris sin desplazar el jugador. El criterio principal es personaje legible, menos destellos redundantes, un gag coherente por forma.
+- **QA decisivo:** cinco capturas `01p-cuerno-victory-form-N` reales en navegador, forzadas únicamente bajo `TITLE_E2E`; se compara por píxeles cada victoria con su variante herida, en las cinco formas. Nuevas pruebas Node inspeccionan que el acto de victoria se dibuja con `flourish=0`, que herida/muerte no liberan magia y que el equilibrio Canvas `save/restore` se conserva en todos los estados y habilidades. Suite heredada J/K/L/U, jefes inmunes a sueño, multijugador, visual y release gate obligatoria.
+- **Política de integración:** PR → CI + Quality PASS → merge → CI sobre `main` + Pages desplegado y verificado. No modificar Dino para hacer el cierre de Cuerno.
+
 ## 08/10/2026 · V68 CUERNO · MENSAJE 9/10 · EL GRAN ESPECTÁCULO
 
 **Caché:** `ohana-267`. El gameplay y la biología ya están cerrados; esta etapa depura puesta en escena, ritmo, legibilidad y accesibilidad.

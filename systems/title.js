@@ -147,6 +147,10 @@ function paintPortraits(now = performance.now()) {
           cuernoMagicSlot = forcedMagic;
         }
       }
+      // V69 QA-only posture audit, never an input in normal gameplay.
+      if (hero && def.id === "cuerno" && TITLE_E2E &&
+        ["victory","hurt","dead"].includes(window.__OHANA_TITLE_CUERNO_STATE))
+        showcasePose = window.__OHANA_TITLE_CUERNO_STATE;
       if (hero && def.id === "stitcho") {
         const forced = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_STITCHO_PHASE)
           ? Math.max(0, Math.min(119, window.__OHANA_TITLE_STITCHO_PHASE))
@@ -183,11 +187,13 @@ function paintPortraits(now = performance.now()) {
       if (hero && def.id === "cuerno") {
         cv.dataset.cuernoBeat = cuernoBeat;
         cv.dataset.cuernoMagic = String(cuernoMagicSlot);
-        if (card) { card.dataset.cuernoBeat = cuernoBeat; card.dataset.cuernoMagic = String(cuernoMagicSlot); }
+        cv.dataset.cuernoState = showcasePose;
+        if (card) { card.dataset.cuernoBeat = cuernoBeat; card.dataset.cuernoMagic = String(cuernoMagicSlot); card.dataset.cuernoState=showcasePose; }
       } else {
         delete cv.dataset.cuernoBeat;
         delete cv.dataset.cuernoMagic;
-        if (card) { delete card.dataset.cuernoBeat; delete card.dataset.cuernoMagic; }
+        delete cv.dataset.cuernoState;
+        if (card) { delete card.dataset.cuernoBeat; delete card.dataset.cuernoMagic; delete card.dataset.cuernoState; }
       }
       if (hero && def.id === "stitcho") {
         cv.dataset.stitchoBeat = stitchoBeat;
