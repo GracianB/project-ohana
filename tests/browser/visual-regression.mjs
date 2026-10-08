@@ -155,11 +155,13 @@ try {
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
   await page.waitForTimeout(120);
 
+  await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
   const livingSelect = await page.evaluate(() => ({
     hero:document.querySelector('#char-select')?.dataset.hero || '',
     scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
+    stitchoBeat:document.querySelector('#chars-grid .char-card.selected')?.dataset.stitchoBeat || '',
     visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
       const s=getComputedStyle(card),r=card.getBoundingClientRect();
       return s.display!=='none' && s.visibility!=='hidden' && r.width>2 && r.height>2;
@@ -168,7 +170,10 @@ try {
   assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
   assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
   assert.equal(livingSelect.visible.length, 5, '01b-living-select: coverflow pierde profundidad');
+  assert.equal(livingSelect.stitchoBeat, 'plasma-roll', '01d-stitcho: coreografía de selector incorrecta');
   await capture(page, '01b-character-select-stitcho-world');
+  await capture(page, '01d-stitcho-plasma-roll');
+  await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = null; });
   await page.locator('#roster-prev').click();
   await page.waitForTimeout(420);
 
