@@ -178,7 +178,7 @@ export function updateCuernoFantasyTrail(g,f,p,galloping,canHit,cx,cy){
    if(!canHit(e)||!cuernoRibbonTouches(f.points,e))continue;
    const first=!(Number(e._cuernoFantasyUntil)>now);
    e._cuernoFantasyUntil=now+CUERNO_FANTASY.markFrames;
-   e._cuernoFantasyDamage=Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
+   e._cuernoFantasyDamage=first?f.dmg:Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
    if(first){
      e._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
      g.nums?.add?.(cx(e),e.y-10,"✦ FANTASÍA","#f0baff",false);
@@ -187,16 +187,18 @@ export function updateCuernoFantasyTrail(g,f,p,galloping,canHit,cx,cy){
  return true;
 }
 
-export function tickCuernoFantasyStatus(game,p,canHit,hitEnemy){
+export function tickCuernoFantasyStatus(game,p,canHit,damageEnemy){
  if(p.id!=="cuerno")return;
  const now=Number(game.t)||0;
  for(const enemy of game.enemies||[]){
    if(!enemy || !(Number(enemy._cuernoFantasyUntil)>now)||!canHit(enemy))continue;
    if(now<(Number(enemy._cuernoFantasyNext)||0))continue;
    enemy._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
-   hitEnemy(game,enemy,Math.max(2,Number(enemy._cuernoFantasyDamage)||2),
-      {kx:0,ky:0,stun:0,color:"#ddbaff",parts:0,shake:0,
-        hitstop:0,nums:false,xp:0});
+   // True status damage, not a normal hit: no infinite score/combo or hitstop.
+   const raw=Math.max(2,Number(enemy._cuernoFantasyDamage)||2);
+   const damage=Math.max(1,Math.round(raw*(enemy.boss?.55:1)));
+   damageEnemy(enemy,damage);
+   enemy.flash=Math.max(enemy.flash||0,5);
  }
 }
 
