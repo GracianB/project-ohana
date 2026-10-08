@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V99 · final sin cartel prematuro · ohana-299
+
+- La carta de resultados y sus acciones dejan de aparecer durante la llegada de los diez héroes; la escena dura 14,5 s salvo movimiento reducido, y el retrato precede al título.
+- El botón de salto sigue visible y accesible; el panel de resultados recupera el foco al terminar. Se retira la línea de unión horizontal que atravesaba el cielo del selector.
+- Regresión de V86 Reina y V80 final, semántica `inert`/`aria-hidden` y Release Gate antes de Pages.
+
 ## 09/10/2026 · OHANA V98 · renderizado selectivo · ohana-298
 
 - Culling conservador de orbes, corazones, fantasmas, enemigos no-jefe, proyectiles y rayos fuera del viewport; margen de 192 px para prevenir recortes.
