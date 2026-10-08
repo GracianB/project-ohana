@@ -84,6 +84,29 @@ async function auditPage(page, label) {
   assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
+  // V81: verify the separate ten-hero Atrium keeps all ten portraits
+  // while using filter-free Canvas and a low-frequency effects layer.
+  if (label === 'desktop' && titleLayout.atriumOn) {
+    await page.waitForTimeout(600);
+    const atriumAudit=await page.evaluate(()=>{
+      const all=[...document.querySelectorAll('#chars-grid .char-card')];
+      const live=all.filter(el=>getComputedStyle(el).display!=='none');
+      const accessible=all.filter(el=>el.getAttribute('aria-hidden')==='false');
+      const rendered=live.filter(el=>{
+        const cv=el.querySelector('canvas');
+        return cv && cv.width>1 && cv.height>1;
+      });
+      const selected=document.querySelector('#chars-grid .char-card.selected');
+      const cv=selected?.querySelector('canvas');
+      return {live:live.length,accessible:accessible.length,rendered:rendered.length,
+        filter:selected?getComputedStyle(selected).filter:'',
+        canvasFilter:cv?getComputedStyle(cv).filter:''};
+    });
+    assert.deepEqual([atriumAudit.live,atriumAudit.accessible,atriumAudit.rendered],
+      [10,10,10], label+': Atrium ten-hero rendering mismatch '+JSON.stringify(atriumAudit));
+    assert.equal(atriumAudit.filter,'none',label+': Atrium legacy filter still active');
+    assert.equal(atriumAudit.canvasFilter,'none',label+': Atrium Canvas filter still active');
+  }
   // V81: real browser stress test. Cycle every hero and verify GPU backing
   // stores, computed CSS and ARIA stay in sync after fast navigation.
   if (label === 'desktop' && !titleLayout.atriumOn) {
