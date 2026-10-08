@@ -167,6 +167,7 @@ function paintPortraits(now = performance.now()) {
       cv.dataset.evo = String(evo);
       cv.dataset.fitScale = fit.scale.toFixed(4);
       cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
+      if (card) card.dataset.evo = String(evo);
       c.save();
       c.translate(bw / 2, footY);
       c.scale(1, 0.22);
