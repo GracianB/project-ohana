@@ -564,6 +564,7 @@ el.dataset.assist=allyDef?.id||"";
 el.dataset.dreamTargets=def.id==="cuerno"?String(Math.max(0,Number(detail.dreamTargets)||0)):"";
 el.dataset.cuernoFinal=def.id==="cuerno"&&evo===4?"aurora":"";
 el.dataset.dinoPhase=def.id==="dino"?"heartbeat":"";
+el.dataset.dinoPhasesSeen=def.id==="dino"?"heartbeat":"";
 el.dataset.generation=String(token);
 el.dataset.state="active";
 el.dataset.duration=String(Math.round(duration*1000));
@@ -617,7 +618,12 @@ function frame(now){
     p._cuernoMagicSlot=k>=.22&&k<.76?3:-1;
     p._specialAuroraT=k>=.51?Math.round((1-k)*260):0;
   }else delete el.dataset.cuernoPhase;
-   if(def.id==="dino")el.dataset.dinoPhase=dinoColossusStage(k).name;
+   if(def.id==="dino"){
+     const stage=dinoColossusStage(k).name;
+     el.dataset.dinoPhase=stage;
+     const seen=(el.dataset.dinoPhasesSeen||"").split("|");
+     if(!seen.includes(stage)) el.dataset.dinoPhasesSeen=seen.concat(stage).join("|");
+   }
 
   let heroAlpha=vis;
   if(def.id==="cat"){
