@@ -1,3 +1,16 @@
+## 08/10/2026 · DINO V83 · ANATOMÍA AÉREA Y ARTICULACIONES
+
+**Base:** OHANA V82 `ba8b0b5f` publicado. **Caché:** `ohana-283`.
+
+- Cinco evoluciones: salto y caída comparten una pose suave gobernada por la velocidad vertical normalizada. En el ápice (`vy=0`) no se produce un cambio brusco de postura, cabeza, cola, patas ni brazos.
+- Uniones de cadera y hombro en las formas Dino Joven, Pico, Rex y Coloso: pliegues del mismo color del cuerpo y sin contorno duro sobre el nacimiento de las extremidades, manteniendo los volúmenes de cada evolución.
+- Bebé F0 conserva su casco; el rodillo de K continúa siendo una esfera compacta, sin articulaciones de pie añadidas mientras rueda.
+- Función pura `dinoAirbornePose`, determinista, acotada, sin RNG, sin timers ni cambios de física/hitbox.
+- `tests/dino-v83-airborne-joints.test.js` revisa continuidad real del dibujo, límites de anatomía, cadera/hombro y K; `tests/browser/visual-regression.mjs` añade una captura 5×3 con el renderizador Canvas auténtico.
+- Sin cambios en los archivos de Cuerno, carrusel, motor de rendimiento, combate J/K/L/U ni balance.
+
+**Contrato de fusión:** Node, Browser E2E, Multiplayer E2E, matriz visual y Release Gate, y publicación de GitHub Pages sobre el nuevo `main` tras fusionar.
+
 ## 08/10/2026 · OHANA V82 · OPTIMIZACIÓN DE SESIONES LARGAS Y ÚLTIMO CINE
 
 **Base:** `main` tras integrar V81 rendimiento y la anatomía de Dino y Cuerno, commit `4c2ec0b3`. Versión de caché `ohana-282`.
