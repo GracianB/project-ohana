@@ -182,7 +182,7 @@ function storyMotion(id,k,target){
   if(id==="kilo") return {x:Math.sin(k*Math.PI)*target*.018,y:-e(seg(k,.45,.76))*target*.06,scale:1+.05*e(seg(k,.52,.78)),rot:0};
   if(id==="stitcho") return {x:lerp(-target*.08,target*.03,e(seg(k,.18,.66))),y:0,scale:1+.03*e(seg(k,.52,.80)),rot:-.025+e(k)*.03};
   if(id==="chispin") return {x:Math.sin(k*32)*target*.012*seg(k,.10,.48),y:-Math.sin(seg(k,.24,.55)*Math.PI)*target*.105-e(seg(k,.68,.88))*target*.025,scale:1+.09*e(seg(k,.50,.78)),rot:Math.sin(k*25)*.022*(1-seg(k,.69,.90))};
-  if(id==="cat") return {x:k>.56?target*.08:0,y:0,scale:1+.03*e(seg(k,.66,.88)),rot:0};
+  if(id==="cat") return {x:k>.56?target*.06:Math.sin(k*19)*target*.008*seg(k,.14,.48),y:-Math.sin(seg(k,.36,.61)*Math.PI)*target*.07,scale:1+.055*e(seg(k,.64,.84)),rot:Math.sin(k*13)*.018*(1-seg(k,.7,.9))};
   if(id==="dragon") return {x:-Math.sin(seg(k,.18,.42)*Math.PI)*target*.055,y:-e(seg(k,.50,.78))*target*.09,scale:1+.08*e(seg(k,.55,.80)),rot:-.02+e(k)*.02};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
   if(id==="frita") return {x:Math.sin(seg(k,.26,.62)*Math.PI)*target*.06,y:-Math.sin(seg(k,.36,.60)*Math.PI)*target*.05,scale:1+.05*e(seg(k,.56,.78)),rot:Math.sin(k*Math.PI*2)*.035};
@@ -255,6 +255,18 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     if(k>.48&&k<.70){
       drawSpark(ctx,cx-target*.06,cy-target*.23,4,"#fff");
       drawSpark(ctx,cx+target*.06,cy-target*.23,4,"#fff");
+    }
+    // Nine lives appear one by one before the lunar vanish.
+    const lives=seg(k,.24,.69);
+    for(let i=0;i<9;i++){const a=-Math.PI*.86+i*TAU/9;const px=cx+Math.cos(a)*target*.59,py=cy+Math.sin(a)*target*.43;const onset=seg(lives,i/11,(i+2)/11);if(onset>0){circle(ctx,px,py,target*.013+onset*target*.008,i%3===0?"#ffe7ae":"#f8c0ff",.12+.5*onset,false);}}
+    // V51: three claw crescents frame the nine lives, then close into eclipse.
+    const claws=seg(k,.34,.65);
+    if(claws>0){
+      for(let i=0;i<3;i++){
+        const spread=(i-1)*target*.18;
+        const rr=target*(.28+i*.07);
+        drawRing(ctx,cx+spread,cy+target*.1,rr,claws,i===1?"#ffe6b0":"#f1bcff",1.4,.16);
+      }
     }
     const vanish=Math.sin(seg(k,.52,.75)*Math.PI);
     if(vanish>0) drawRing(ctx,cx,cy,target*.62,vanish,color,2,.40);
