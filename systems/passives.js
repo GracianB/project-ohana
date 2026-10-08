@@ -73,6 +73,17 @@ export const Passives = {
     p._pmove = null;
     p._gliding = false;
 
+    if (id === "punta") {
+      // Speed and height come from roster stats, always on, never gated by K.
+      // A restrained pearl wake makes the naturally faster movement readable.
+      const tick=Number(input.t)||Number(game.t)||0;
+      if ((input.left||input.right) && Math.abs(p.vx||0)>p.speed*.72 && tick%9===0) {
+        game.fx?.emit?.(cx(p)-(p.facing||1)*p.w*.42,p.y+p.h*.72,{
+          color:evo>=3?"#ffe5a8":"#f6bde6",count:2,size:2.1,
+          speed:1.2,up:.25,life:13,star:evo>=2
+        });
+      }
+    }
     if (id === "float") {
       p._flying = false;
       if (evo >= 4 && p._butterfly == null) p._butterfly = 70;
