@@ -273,6 +273,7 @@ try {
     if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
     if(form===2) await capture(page,'01l-cuerno-rainbow-foal-complete');
     if(form===3) await capture(page,'01k-cuerno-stellar-unicorn-adult');
+    if(form===4) await capture(page,'01m-cuerno-aurora-final');
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
@@ -622,6 +623,21 @@ try {
   await capture(page,'09f-yomi-l-visible-jaws');
   assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
   page.off('pageerror',onYomiError);
+
+  // V64 Aurora final in real gameplay. No physics or hitbox mutation.
+  const auroraErrors=[];
+  const onAuroraError=err=>auroraErrors.push(String(err.message||err));
+  page.on('pageerror',onAuroraError);
+  const aurora=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(4);api.setPlayerVelocity(9,-8);api.step(16);
+    return api.state();
+  });
+  assert.equal(aurora.evo,4,'09j-cuerno: missing Unicornio Aurora');
+  assert.ok(Number.isFinite(aurora.player?.x),'09j-cuerno: invalid movement');
+  await capture(page,'09j-cuerno-aurora-real-play');
+  assert.deepEqual(auroraErrors,[],'09j-cuerno: draw error in final form');
+  page.off('pageerror',onAuroraError);
 
   // V63 Potro Iris in real gameplay with error monitoring.
   const foalErrors=[];

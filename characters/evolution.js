@@ -148,7 +148,7 @@ cuerno: [
   "El nácar late: aparecen orejas, hocico y dos pezuñas. Destello aprende a sostener su propia luz.",
   "De la luz nace un potro Iris, con patas para galopar por primera vez.",
   "Potro Iris alza el cuello: cuatro pezuñas encuentran el ritmo, la melena dibuja constelaciones y nace Unicornio Estelar.",
-  "Cuerno Aurora abre las alas de luz de su destino y galopa hacia el cielo.",
+  "La luz de Cuernín encontró su cuerpo y su voz. Aurora abre sus alas sin abandonar la tierra: corre por los suyos, y hasta las estrellas lo siguen.",
 ],
 });
 
