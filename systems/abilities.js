@@ -2759,7 +2759,7 @@ const DRW = {
     if(!p)return;
     const x=cx(p)-cam.x,y=cy(p)-cam.y;
     const k=Math.max(0,Math.min(1,1-f.life/f.max));
-    const radius=28+Math.min(1,k/.76)*Math.hypot(ctx.canvas.width||800,ctx.canvas.height||500);
+    const radius=28+Math.min(1,k/.76)*Math.hypot(ctx.canvas?.width||800,ctx.canvas?.height||500);
     ctx.save();
     // One luminous bell ring expanding across the entire visible arena.
     ctx.globalAlpha=.78*(1-k);
