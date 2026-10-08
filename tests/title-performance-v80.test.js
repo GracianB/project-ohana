@@ -39,10 +39,10 @@ test("V80: full family scene comes before the epilogue results card",()=>{
  assert.ok(finalCss.includes("#win-cinema.cinema-complete .win-card{visibility:visible"));
 });
 test("V80+: offline cache and HTML asset versions agree across releases",()=>{
- const match=sw.match(/const VERSION = "(ohana-\\d+)"/);
+ const match=sw.match(/const VERSION = "(ohana-\d+)"/);
  assert.ok(match,"service worker must have a valid version");
  const version=match[1];
  assert.ok(page.includes("title-stage.css?v="+version));
- assert.ok([...page.matchAll(/ohana-\\d+/g)].every(m=>m[0]===version),
+ assert.ok([...page.matchAll(/ohana-\d+/g)].every(m=>m[0]===version),
    "HTML references and Service Worker version are out of sync");
 });
