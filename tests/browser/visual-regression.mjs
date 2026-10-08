@@ -288,9 +288,28 @@ try {
     assert.equal(actual.evo,4,'01n-cuerno: final form absent');
     await capture(page,'01n-cuerno-soul-'+beat);
   }
+  // V67 four real horn-origin spells in the selector at final evolution.
+  await page.evaluate(()=>{window.__OHANA_TITLE_CUERNO_BEAT=null;});
+  for(const slot of [0,1,2,3]){
+    await page.evaluate(n=>{
+      window.__OHANA_TITLE_EVO_OVERRIDE=4;
+      window.__OHANA_TITLE_CUERNO_MAGIC=n;
+    },slot);
+    await page.waitForTimeout(180);
+    const actual=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas');
+      return {hero:card?.dataset.id||card?.querySelector('canvas')?.dataset.id,
+        slot:Number(cv?.dataset.cuernoMagic),form:Number(cv?.dataset.evo)};
+    });
+    assert.equal(actual.slot,slot,'01o-cuerno: wrong magic slot');
+    assert.equal(actual.form,4,'01o-cuerno: missing Aurora');
+    await capture(page,'01o-cuerno-magia-viva-'+['j','k','l','u'][slot]);
+  }
   await page.evaluate(()=>{
     window.__OHANA_TITLE_EVO_OVERRIDE=null;
     window.__OHANA_TITLE_CUERNO_BEAT=null;
+    window.__OHANA_TITLE_CUERNO_MAGIC=null;
   });
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
   await page.waitForTimeout(250);
