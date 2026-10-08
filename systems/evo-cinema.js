@@ -57,7 +57,7 @@ export function loadFonts() {
 loadFonts();
 
 /** Canvas a pantalla completa con DPR; devuelve { cv, ctx, W, H, resize }. */
-export function fullCanvas(cv) {
+export function fullCanvas(cv, dprCap = Infinity) {
   const ctx = cv.getContext("2d");
   const st = { cv, ctx, W: 0, H: 0, dpr: 1 };
   st.resize = () => {
@@ -65,7 +65,7 @@ export function fullCanvas(cv) {
     st.H = Math.max(1, window.innerHeight);
     const pixels = st.W * st.H;
     const maxDpr = pixels > 1800000 ? 1.45 : pixels > 1000000 ? 1.6 : 1.8;
-    st.dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
+    st.dpr = Math.min(maxDpr, dprCap, window.devicePixelRatio || 1);
     cv.width = Math.round(st.W * st.dpr);
     cv.height = Math.round(st.H * st.dpr);
     ctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);

@@ -114,7 +114,11 @@ portraitClock.advance(now, () => {
     const entry = ROSTER_BY_ID.get(cv.dataset.id);
     if (!entry) continue;
     const hero = card.classList.contains("selected");
-    if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < SIDE_PREVIEW_INTERVAL_MS) continue;
+    // Atrium shows all ten; its distant characters are stills with rare
+    // refreshes, while immediate neighbors retain their short 120ms cadence.
+    const neighbor = card.classList.contains("is-prev") || card.classList.contains("is-next");
+    const previewInterval = neighbor ? SIDE_PREVIEW_INTERVAL_MS : 550;
+    if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < previewInterval) continue;
     cv._lastPaintAt = now;
     const { def, index: idx } = entry;
     const c = cv.getContext("2d", { alpha: true });
@@ -281,7 +285,10 @@ const box = cv.parentElement || cv;
 const w = Math.max(40, Math.round(box.clientWidth));
 const h = Math.max(40, Math.round(box.clientHeight));
 const maxDpr = w * h > 120000 ? 1.45 : 1.65;
-const dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
+// Side silhouettes are smaller, dimmed and need a single physical pixel per
+// CSS pixel. The selected hero retains its high-resolution authored artwork.
+const sidePreview = !cv.closest(".char-card")?.classList.contains("selected");
+const dpr = Math.min(sidePreview ? 1 : maxDpr, window.devicePixelRatio || 1);
 const W = Math.round(w * dpr), H = Math.round(h * dpr);
 if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
 cv._dpr = dpr;
@@ -313,11 +320,12 @@ const prev2 = ids[(i - 2 + ids.length) % ids.length];
 const prev = ids[(i - 1 + ids.length) % ids.length];
 const next = ids[(i + 1) % ids.length];
 const next2 = ids[(i + 2) % ids.length];
+const atriumMode = document.getElementById("char-select")?.classList.contains("atrium-on") || false;
 
 cards.forEach((el) => {
   const selected = el.dataset.id === id;
   // Match keyboard and ARIA visibility to the actual three-card CSS carousel.
-  const visible = [id, prev, next].includes(el.dataset.id);
+  const visible = atriumMode || [id, prev, next].includes(el.dataset.id);
   const wasVisible = el.getAttribute("aria-hidden") !== "true";
   el.classList.toggle("selected", selected);
   el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
@@ -327,6 +335,15 @@ cards.forEach((el) => {
   if (selected || visible !== wasVisible) {
     const canvas = el.querySelector("canvas");
     if (canvas) { canvas._needsFit = true; canvas._lastPaintAt = 0; }
+  }
+  // Release GPU memory when a card drops out of the three visible slots.
+  // Resizing a canvas to 1x1 clears its backing store, but never deletes it.
+  const canvas = el.querySelector("canvas");
+  if (!visible && canvas && (canvas.width > 1 || canvas.height > 1)) {
+    canvas.width = 1;
+    canvas.height = 1;
+    canvas._needsFit = true;
+    canvas._lastPaintAt = 0;
   }
   el.tabIndex = visible ? 0 : -1;
   el.setAttribute("aria-hidden", String(!visible));

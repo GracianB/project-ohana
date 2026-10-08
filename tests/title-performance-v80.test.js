@@ -12,7 +12,7 @@ test("V80: active hero stays at full animation while side previews are throttled
   "!hero && !cv._needsFit && now - (cv._lastPaintAt || 0)",
   "if (cv._needsFit === false) return",
   "new ResizeObserver(",
-  "const visible = [id, prev, next]",
+  "const visible = atriumMode || [id, prev, next]",
   "cv._labelEvo !== evo || cv._labelHero !== hero",
   "document.visibilityState === \"hidden\""
  ])assert.ok(title.includes(s),"missing: "+s);
@@ -27,10 +27,10 @@ test("V80: fullscreen background has lower DPR and frame cadence",()=>{
 });
 test("V80: full family scene comes before the epilogue results card",()=>{
  for(const s of [
-  "const duration=reduce?1.6:10.2",
+  "const duration=reduce?1.6:12.0",
   "now-lastPaint<41",
   "if(k>=.77)",
-  "const titleK=seg(k,.88,.97)",
+  "const titleK=seg(k,.84,.92)",
   "if(k>=1){revealResults();return;}",
   'layer.querySelector(".win-skip").onclick=()=>revealResults()',
   'layer.dataset.resultsAt=String(Math.round(duration*1000))'
@@ -38,8 +38,11 @@ test("V80: full family scene comes before the epilogue results card",()=>{
  assert.ok(finalCss.includes("#win-cinema.cinema-running .win-card{visibility:hidden"));
  assert.ok(finalCss.includes("#win-cinema.cinema-complete .win-card{visibility:visible"));
 });
-test("V80: offline cache and HTML asset versions agree",()=>{
- assert.ok(sw.includes('const VERSION = "ohana-279"'));
- assert.ok(!page.includes("ohana-278"));
- assert.ok(page.includes("title-stage.css?v=ohana-279"));
+test("V80+: offline cache and HTML asset versions agree across releases",()=>{
+ const match=sw.match(/const VERSION = "(ohana-\d+)"/);
+ assert.ok(match,"service worker must have a valid version");
+ const version=match[1];
+ assert.ok(page.includes("title-stage.css?v="+version));
+ assert.ok([...page.matchAll(/ohana-\d+/g)].every(m=>m[0]===version),
+   "HTML references and Service Worker version are out of sync");
 });
