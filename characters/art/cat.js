@@ -36,6 +36,7 @@ function solve(pose) {
   else if (slot === 1) mood = "happy";
   else if (st === "hurt") mood = "sad";
   else if (st === "attack" || slot === 2) mood = "angry";
+  else if (st === "idle" && fl > 0 && (pose.flourishN % 4) === 3) mood = fl > .45 ? "happy" : "normal";
   return {
     st, slot, t, run, atk, cast, fl, arm, leg, mood,
     bob: st === "run" ? -Math.abs(run) * 3.4 : st === "jump" ? -5 : st === "idle" ? Math.sin(t * 0.07) * 1.7 : 0,
@@ -347,6 +348,7 @@ function moonSoul(ctx, pose, form, front) {
   const flourish = state === "idle" && pose.flourish > 0;
   const gag = flourish && (pose.flourishN % 4) === 3;
   const intensity = attack ? .9 : victory ? .7 : airborne ? .44 : gag ? .6 : .16;
+  const shadowStep = state === "cast" && pose.castSlot === 1;
   const y = [-32,-44,-53,-64,-61][form];
   const moon = form >= 3 ? "#ffe7a6" : "#ffb6e4";
   const shadow = form >= 3 ? "#9076e8" : "#cb8cf4";
@@ -391,6 +393,21 @@ function moonSoul(ctx, pose, form, front) {
       ctx.beginPath(); ctx.arc(x + 3, yy - 2, 5, 0, TAU); ctx.fill();
       ctx.strokeStyle = moon; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(17, y + 4); ctx.lineTo(23 - k * 6, y - 13); ctx.stroke();
+    }
+    // Shadow Step: three diminishing feline silhouettes, never extra sprites.
+    if (shadowStep) {
+      const k = Math.max(0, Math.min(1, pose.cast || 0));
+      ctx.strokeStyle = shadow;
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const x = -21 - i * 11 - k * 9, yy = y + 13 + i * 3;
+        ctx.globalAlpha = (.30 - i * .075) * Math.sin(Math.PI * k);
+        ctx.beginPath();
+        ctx.arc(x, yy, 5 + i, Math.PI * 1.05, Math.PI * 1.95);
+        ctx.moveTo(x - 4, yy - 3); ctx.lineTo(x - 6, yy - 8);
+        ctx.moveTo(x + 4, yy - 3); ctx.lineTo(x + 6, yy - 8);
+        ctx.stroke();
+      }
     }
     if (state === "wall") {
       ctx.globalAlpha = .45; ctx.strokeStyle = shadow; ctx.lineWidth = 1.5;
