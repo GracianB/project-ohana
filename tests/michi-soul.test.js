@@ -41,3 +41,15 @@ test('V51 moon evolution and claw crescents retain story identity', () => {
   assert.match(cinematic, /const claws=seg\(k,\.34,\.65\)/);
   assert.match(cinematic, /i<3;i\+\+/);
 });
+
+test('V52 Michi attack, victory and cache release guards', () => {
+  const index = fs.readFileSync('index.html', 'utf8');
+  const sw = fs.readFileSync('sw.js', 'utf8');
+  assert.match(art, /Three readable claw trails/);
+  assert.match(art, /Victory reads as a feline leap/);
+  assert.match(art, /ctx\.quadraticCurveTo\(38 \+ shift/);
+  assert.match(sw, /const VERSION = "ohana-252"/);
+  assert.match(index, /game\.js\?v=ohana-252/);
+  assert.match(index, /sw\.js\?v=ohana-252/);
+  assert.doesNotMatch(index, /ohana-241/);
+});
