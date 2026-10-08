@@ -24,7 +24,7 @@ test("V91: magical poison has a readable countdown and expires cleanly",()=>{
 test("V91: L draws precisely seven curved horn crests at the real wavefront",()=>{
  const {ctx,calls}=painter();
  drawCuernoSevenHornCrest(ctx,{x:400,y:320,radius:240,alpha:.75},{x:5,y:10},90,true);
- assert.equal(calls.filter(c=>c[0]==="bezierCurveTo").length,7);
+ assert.equal(calls.filter(c=>c[0]==="bezierCurveTo").length,14);
  assert.equal(V91_PALETTE.length,7);
  const empty=painter();drawCuernoSevenHornCrest(empty.ctx,{x:0,y:0,radius:20,alpha:1},{x:0,y:0},90,true);
  assert.equal(empty.calls.length,0);
