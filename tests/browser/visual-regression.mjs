@@ -180,6 +180,30 @@ try {
   await page.waitForTimeout(280);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01e-dragon: selector no vuelve a Kilo');
 
+  // V54 Frita: capture each form without modifying the parallel Atrium intro.
+  for(let n=0;n<6;n++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(240);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'frita','01f-frita: selección no llega a Frita');
+  for(let form=0;form<5;form++){
+    await page.evaluate((f)=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(180);
+    const image=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const data=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let pixels=0;
+      if(data)for(let i=3;i<data.length;i+=64)if(data[i]>20)pixels++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),pixels};
+    });
+    assert.equal(image.form,form,'01f-frita: forma incorrecta '+form);
+    assert.ok(image.scale>.2&&image.pixels>10,'01f-frita: silueta invisible '+JSON.stringify(image));
+    await capture(page,'01f-frita-crispy-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let n=0;n<6;n++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01f-frita: selector no vuelve a Kilo');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);

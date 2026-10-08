@@ -1,15 +1,5 @@
-// ============================================================================
 // FRITA · "Capitán Kétchup" (patata frita, diseño original)
-// ----------------------------------------------------------------------------
 // Rasgo propio: el cuerpo es una "columna" flexible (spine) que se curva como
-// un fideo: con pose.sway, al correr, al atacar y en los gestos.
-//   0 Palito        · patatita regordeta en un cucurucho rojo y blanco
-//   1 Frita         · una patata esbelta
-//   2 Capitán       · capa con goterones de kétchup, antifaz, espada-tenedor
-//   3 Extra Crujiente · tres patatas fundidas, muy crujiente, gafas de sol
-//   4 KÉTCHUP FORMA FINAL   · dorada con purpurina, corona, aura de llamas doradas
-// pose.move "slide" → tumbada surfeando con los brazos hacia delante.
-// ============================================================================
 
 const PAL = [
   { fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a" },
@@ -25,9 +15,6 @@ const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const seg = (k, a, b) => ease((k - a) / (b - a));
 const frac = (x) => x - Math.floor(x);
 
-// ---------------------------------------------------------------------------
-// Columna flexible: puntos {x,y,a}; a = ángulo desde la vertical (+ = hacia +x)
-// ---------------------------------------------------------------------------
 function spine(x, y, a0, L, bend, wig, N = 10) {
   const pts = [];
   let px = x, py = y;
@@ -104,18 +91,14 @@ function fryBody(ctx, R, sp, w, c, opt = {}) {
   ctx.fill();
   ctx.save();
   ctx.clip();
-  // cara lateral (sección cuadrada de la patata)
   strokeAlong(ctx, sp, w * 0.4, 0, 1, w * 0.34, R.alpha(c.edge, 0.45));
-  // tostado de las puntas
   const tp = sp[sp.length - 1];
   ctx.fillStyle = R.alpha(c.edge, opt.crisp ? 0.75 : 0.55);
   ctx.beginPath();
   const tt = along(tp, w * 0.1);
   ctx.ellipse(tt[0], tt[1], w * 0.62, w * 0.24, tp.a, 0, TAU);
   ctx.fill();
-  // brillo vertical
   strokeAlong(ctx, sp, -w * 0.24, 0.12, 0.86, Math.max(2, w * 0.13), "rgba(255,255,255,0.45)");
-  // motitas crujientes
   const nd = opt.dots || 10;
   for (let i = 0; i < nd; i++) {
     const s = 0.06 + frac(i * 0.618 + (opt.seed || 0.1)) * 0.88;
@@ -134,7 +117,6 @@ function fryBody(ctx, R, sp, w, c, opt = {}) {
     }
   }
   if (opt.dipped > 0) {
-    // punta mojada en kétchup
     ctx.fillStyle = KETCHUP;
     ctx.globalAlpha = opt.dipped;
     const d0 = off(at(sp, 0.84), -w * 0.5), d1 = off(at(sp, 0.86), w * 0.05), d2 = off(at(sp, 0.84), w * 0.5);
@@ -158,9 +140,6 @@ function fryBody(ctx, R, sp, w, c, opt = {}) {
   R.paint(ctx, null, { lw: R.LINE });
 }
 
-// ---------------------------------------------------------------------------
-// Piezas
-// ---------------------------------------------------------------------------
 function thinLimb(ctx, R, x1, y1, x3, y3, bend, c, hand) {
   const mx = (x1 + x3) / 2, my = (y1 + y3) / 2;
   const dx = x3 - x1, dy = y3 - y1, d = Math.hypot(dx, dy) || 1;
@@ -217,7 +196,6 @@ function fork(ctx, R, x, y, ang, len, gold) {
   fillBar(-len * 0.3, 0, len * 0.55, 0, 3.4);
   fillBar(len * 0.55, -4.6, len * 0.55, 4.6, 3);
   for (const ty of tines) fillBar(len * 0.56, ty, len, ty, 1.8);
-  // empuñadura roja (espada)
   R.ellipse(ctx, -len * 0.02, 0, 2.2, 6.5, gold ? "#e82020" : "#d42020", { lw: 1.8 });
   ctx.fillStyle = "rgba(255,255,255,0.8)";
   ctx.fillRect(len * 0.1, -1.1, len * 0.35, 0.9);
@@ -242,7 +220,6 @@ function ketchupBottle(ctx, R, x, y, rot, squeeze) {
   ctx.translate(x, y);
   ctx.rotate(rot);
   const sq = 1 - squeeze * 0.35;
-  // apunta a +x
   R.blob(ctx, [[-10, -6 * sq], [4, -6.5 * sq], [8, -3], [8, 3], [4, 6.5 * sq], [-10, 6 * sq]], KETCHUP, { lw: 2.2 });
   R.poly(ctx, [[8, -3], [13, -1.2], [13, 1.2], [8, 3]], "#ffffff", { lw: 2 });
   ctx.fillStyle = "#ffffff";
@@ -333,7 +310,6 @@ function capeShape(ctx, R, sp, w, c, o) {
   ctx.fillStyle = g;
   ctx.fill();
   R.paint(ctx, null, { lw: R.LINE });
-  // goterones de kétchup en el borde
   const drips = [[0.3, 0], [0.6, 1], [0.85, 2]];
   for (const [k, i] of drips) {
     const x = pts[3][0] + (pts[5][0] - pts[3][0]) * k;
@@ -341,19 +317,14 @@ function capeShape(ctx, R, sp, w, c, o) {
     const dl = 3 + 3 * frac(i * 0.61) + Math.sin(t * 0.08 + i * 2) * 1.5;
     R.blob(ctx, [[x - 2.4, y - 2], [x + 2.4, y - 2], [x + 2, y + dl], [x, y + dl + 2.5], [x - 2, y + dl]], KETCHUP, { lw: 1.6, shade: false });
   }
-  // cierre
   R.ellipse(ctx, neck.x + Math.cos(neck.a) * w * 0.1, neck.y + Math.sin(neck.a) * w * 0.1, 3, 3, o.gold ? "#ffe27a" : "#ffd24a", { lw: 1.6 });
 }
 
-// ---------------------------------------------------------------------------
-// Cara (marco local: origen = centro de la cara, mira a +x)
-// ---------------------------------------------------------------------------
 function face(ctx, R, pose, w, f, mood, mouthM, t) {
   const er = f === 0 ? 7.6 : f === 3 ? 5.4 : 5.2;
   const e1 = [-w * 0.1, 0], e2 = [w * 0.3, -0.3];
   const iris = f === 4 ? "#c07a10" : "#5a3418";
   if (f === 2) {
-    // antifaz
     const tailW = Math.sin(t * 0.3) * 2 + pose.sway * 3;
     ctx.save();
     R.blob(ctx, [[-w * 0.5 - 1, -er * 0.3], [-w * 0.5 - 9, -er * 0.9 + tailW], [-w * 0.5 - 8, er * 0.2 + tailW]], "#b81414", { lw: 1.6, shade: false });
@@ -368,7 +339,6 @@ function face(ctx, R, pose, w, f, mood, mouthM, t) {
     ctx.restore();
   }
   if (f === 3 && mood !== "hurt") {
-    // gafas de sol
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(-w * 0.55, -er * 0.4); ctx.lineTo(w * 0.62, -er * 0.4);
@@ -381,7 +351,6 @@ function face(ctx, R, pose, w, f, mood, mouthM, t) {
       ctx.closePath(); ctx.fill();
     }
     ctx.restore();
-    // ceja segura
     if (mood === "angry") {
       ctx.beginPath(); ctx.moveTo(-w * 0.3, -er * 1.4); ctx.lineTo(w * 0.45, -er * 0.9);
       ctx.lineWidth = 2; ctx.strokeStyle = R.INK; ctx.stroke();
@@ -409,9 +378,6 @@ function face(ctx, R, pose, w, f, mood, mouthM, t) {
   R.mouth(ctx, w * 0.12, er * 1.55, f === 0 ? 7 : 6.5, mouthM);
 }
 
-// ---------------------------------------------------------------------------
-// Pose → parámetros del cuerpo
-// ---------------------------------------------------------------------------
 const FORM = [
   { w: 30, L: 50, legL: 10, fs: 0.62 },
   { w: 20, L: 72, legL: 20, fs: 0.74 },
@@ -420,7 +386,6 @@ const FORM = [
   { w: 23, L: 70, legL: 20, fs: 0.74 },
 ];
 
-// cuánto puede doblarse para mojar la punta en el cuenco (sin atravesar el suelo)
 const DIP = [];
 function dipInfo(f, F) {
   if (DIP[f]) return DIP[f];
@@ -480,7 +445,6 @@ function params(pose, f, F) {
     const ant = seg(k, 0, 0.3), hit = seg(k, 0.3, 0.5), rec = seg(k, 0.65, 1);
     P.mood = "angry"; P.mouth = hit > 0.5 && rec < 0.5 ? "grin" : "open";
     if (!withFork) {
-      // latigazo con todo el cuerpo
       P.a0 = -0.25 * ant + 0.45 * hit - 0.2 * rec;
       P.bend = -0.7 * ant + 1.5 * hit - 0.8 * rec;
       P.wig = 0.2 * hit;
@@ -488,7 +452,6 @@ function params(pose, f, F) {
       P.armF = { ang: -1.2 * ant + 1.8 * hit, bend: 3 }; P.armB = { ang: -1.4 * hit - 0.3, bend: -3 };
       if (hit > 0.3 && rec < 0.8) P.fx = { kind: "whack", k: hit * (1 - rec) };
     } else {
-      // estocada con la espada-tenedor
       P.a0 = -0.15 * ant + 0.4 * hit - 0.3 * rec;
       P.bend = -0.25 * ant + 0.35 * hit - 0.2 * rec;
       P.bx = 6 * hit - 6 * rec;
@@ -502,14 +465,12 @@ function params(pose, f, F) {
   } else if (st === "cast") {
     const k = pose.cast, slot = pose.castSlot;
     if (slot === 0) {
-      // sacude un salero
       P.bend = -0.25; P.a0 = -0.05;
       P.armF = { ang: 2.75 + Math.sin(t * 1.3) * 0.2, bend: 3 };
       P.armB = { ang: -0.6, bend: -3 };
       P.item = "salt"; P.fx = { kind: "salt", k };
       P.mood = "happy"; P.mouth = "open";
     } else if (slot === 1) {
-      // aprieta un bote de kétchup
       const sq = 0.5 + Math.sin(t * 0.8) * 0.5;
       P.a0 = 0.12; P.bend = 0.3 + sq * 0.1;
       P.armF = { ang: 1.35, bend: 4, len: 0.95 }; P.armB = { ang: 1.2, bend: 5, len: 0.9 };
@@ -517,7 +478,6 @@ function params(pose, f, F) {
       P.mood = "angry"; P.mouth = "grin";
       P.legF = [0.35, 3]; P.legB = [-0.35, -3];
     } else {
-      // salta dentro de burbujas de aceite
       const j = Math.sin(Math.min(1, k * 1.4) * Math.PI);
       P.lift = -16 * j;
       P.bend = -0.7 * j + Math.sin(t * 0.5) * 0.15; P.wig = 0.4 * j;
@@ -556,12 +516,10 @@ function params(pose, f, F) {
     P.mood = "happy"; P.mouth = "grin";
   }
 
-  // gesto de espera
   if (st === "idle" && pose.flourish > 0) {
-    const k = pose.flourish, n = pose.flourishN % 3;
+    const k = pose.flourish, n = (pose.flourishN || 0) % 4;
     const b = Math.sin(k * Math.PI);
     if (n === 0) {
-      // se moja en kétchup
       const d = seg(k, 0.05, 0.4) * (1 - seg(k, 0.6, 0.9)) * dipInfo(f, F).d;
       P.a0 = 0.9 * d; P.bend = 1.55 * d; P.wig = 0.2 * d;
       P.legF = [0.1, 2]; P.legB = [-0.25 * d - 0.1, -2];
@@ -571,26 +529,33 @@ function params(pose, f, F) {
       P.mood = d > 0.8 ? "closed" : k > 0.6 ? "happy" : "normal";
       P.mouth = k > 0.6 ? "open" : "o";
     } else if (n === 1) {
-      // saca bíceps
       const fl = Math.sin(k * Math.PI * 4) * 0.5 + 0.5;
       P.bend = -0.2 * b; P.wig = -0.15 * b;
       P.flex = b; P.flexK = fl;
       P.mood = "angry"; P.mouth = "grin";
       P.legF = [0.3 * b, 2]; P.legB = [-0.3 * b, -2];
-    } else {
-      // hace girar el tenedor
+    } else if (n === 2) {
       P.bend = Math.sin(k * TAU * 2) * 0.2; P.wig = 0.15;
       P.armF = { ang: 1.4 + Math.sin(k * TAU * 2) * 0.2, bend: 3 };
       P.item = "spin"; P.spin = k * TAU * 3;
       P.mood = "happy"; P.mouth = "smile";
+    } else {
+      // cuarta microescena: lanza una pizca de sal, falla y la atrapa al vuelo
+      const throwK = seg(k, 0.08, 0.31), catchK = seg(k, 0.58, 0.85);
+      P.bend = -0.3 * b + 0.23 * catchK;
+      P.a0 = -0.10 * b + 0.12 * catchK;
+      P.armF = { ang: 1.35 + 1.15 * throwK - 1.55 * catchK, bend: 3 };
+      P.armB = { ang: -0.7 - 0.6 * b, bend: -3 };
+      P.legF = [0.2 * b, 3]; P.legB = [-0.2 * b, -3];
+      P.mood = catchK > 0.8 ? "happy" : throwK > 0.5 ? "angry" : "normal";
+      P.mouth = catchK > 0.8 ? "grin" : "o";
+      P.item = withFork && catchK > 0.45 ? "forkUp" : null;
+      P.gag = k;
     }
   }
   return P;
 }
 
-// ---------------------------------------------------------------------------
-// Dibujo principal
-// ---------------------------------------------------------------------------
 function draw(ctx, pose, R) {
   const f = pose.form, c = PAL[f], F = FORM[f], t = pose.t;
   const P = params(pose, f, F);
@@ -599,7 +564,6 @@ function draw(ctx, pose, R) {
 
   ctx.save();
 
-  // ---------------- columna (cuerpo) ----------------
   let sp, legBase;
   let hipY = -F.legL + P.lift;
   let coneTilt = 0;
@@ -623,7 +587,6 @@ function draw(ctx, pose, R) {
   const tip = sp[sp.length - 1];
   const faceQ = at(sp, F.fs);
 
-  // ---------------- detrás ----------------
   if (f === 4) goldFlames(ctx, R, sp, w + 6, t, P.lying ? 0.45 : 1);
   if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, false);
   if (P.cup > 0) {
@@ -636,13 +599,11 @@ function draw(ctx, pose, R) {
     });
   }
 
-  // hombros
   const shQ = at(sp, f === 0 ? 0.3 : 0.52);
   const sideW = multi ? w * 1.2 : w * 0.5;
   const shF = off(shQ, sideW - 1), shB = off(shQ, -sideW + 2);
   const armLen = [14, 20, 21, 22, 23][f];
 
-  // brazo trasero
   const drawArm = (sh, A, front) => {
     if (!A) return null;
     const len = armLen * (A.len || 1);
@@ -650,10 +611,8 @@ function draw(ctx, pose, R) {
     return thinLimb(ctx, R, sh[0], sh[1], ex, ey, A.bend, c, front ? true : 3.8);
   };
 
-  // extremidades según estado especial
   let handF = null;
   if (P.lying === "slide") {
-    // piernas atrás, brazos adelante
     const lb = legBase;
     leg(ctx, R, lb.x - 2, lb.y - 3, F.legL + 2, -1.75 + Math.sin(t * 0.3) * 0.1, 3, c);
     leg(ctx, R, lb.x - 2, lb.y + 3, F.legL + 2, -1.45 + Math.sin(t * 0.3 + 1) * 0.1, -3, c);
@@ -681,7 +640,6 @@ function draw(ctx, pose, R) {
     } else drawArm(shB, P.armB, false);
   }
 
-  // cucurucho trasero + patatas de fondo (forma 0)
   if (f === 0 && !P.lying) {
     const cb = coneBase(legBase);
     ctx.save();
@@ -696,7 +654,6 @@ function draw(ctx, pose, R) {
     fryBody(ctx, R, bk2, 12, c, { dots: 3, seed: 0.6 });
   }
 
-  // ---------------- cuerpo ----------------
   const bodyOpt = {
     dots: [8, 12, 12, 16, 10][f], crisp: f === 3, dipped: P.dipped, seed: 0.1, glow: f === 4, t,
   };
@@ -705,7 +662,6 @@ function draw(ctx, pose, R) {
     const spR = spine(sp[0].x + Math.cos(sp[0].a) * w * 0.82, sp[0].y + Math.sin(sp[0].a) * w * 0.82 + 1, sp[0].a + 0.04, F.L * 0.94, P.bend, P.wig);
     fryBody(ctx, R, spL, w, c, { ...bodyOpt, seed: 0.35 });
     fryBody(ctx, R, spR, w, c, { ...bodyOpt, seed: 0.7 });
-    // bloque fundido: rellena las juntas
     ctx.save();
     ctx.globalAlpha = 0.85;
     strokeAlong(ctx, shift(sp, -w * 0.45), 0, 0.04, 0.8, 4, R.darken(c.fry, 0.05));
@@ -714,11 +670,9 @@ function draw(ctx, pose, R) {
   }
   fryBody(ctx, R, sp, w, c, bodyOpt);
 
-  // cucurucho delantero (forma 0)
   if (f === 0 && !P.lying) drawCone(ctx, R, coneBase(legBase));
   if (f === 0 && P.lying) drawConeLying(ctx, R, legBase, P.lying);
 
-  // glitter FORMA FINAL
   if (f === 4) {
     for (let i = 0; i < 6; i++) {
       const tw = Math.sin(t * 0.18 + i * 1.7);
@@ -728,7 +682,6 @@ function draw(ctx, pose, R) {
     }
   }
 
-  // ---------------- cara ----------------
   ctx.save();
   ctx.translate(faceQ.x, faceQ.y);
   let fr = faceQ.a;
@@ -743,7 +696,6 @@ function draw(ctx, pose, R) {
     crown(ctx, R, ct[0], ct[1], tip.a, t);
   }
 
-  // ---------------- delante ----------------
   if (!P.lying && !P.wall) {
     const lbx = legBase.x, lby = legBase.y;
     const legW = f === 0 ? 5 : multi ? w * 0.7 : w * 0.24;
@@ -764,7 +716,6 @@ function draw(ctx, pose, R) {
     handF = thinLimb(ctx, R, s0[0], s0[1], s0[0] + 4, s0[1] - 14 + Math.sin(t * 0.2) * 2, 3, c, true);
   }
 
-  // objeto en la mano delantera
   if (handF) {
     const [hx, hy] = handF;
     const gold = f === 4;
@@ -784,12 +735,35 @@ function draw(ctx, pose, R) {
     glove(ctx, R, hx, hy, 4.2);
   }
 
-  // ---------------- efectos ----------------
+  if (P.gag > 0) drawSaltCatch(ctx, tip, P.gag, f);
   if (P.fx) drawFx(ctx, R, P, sp, handF, t, f, w);
   if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, true);
-  if (P.lying === "slide") speedLines(ctx, R, sp, t, w);
+  if (P.lying === "slide") speedLines(ctx, R, sp, t, w, f);
   if (pose.state === "dead") dizzy(ctx, R, tip.x - 4, tip.y - w * 0.9, t);
 
+  ctx.restore();
+}
+
+function drawSaltCatch(ctx, tip, k, form) {
+  const t = Math.max(0,Math.min(1,Number(k)||0));
+  const rise=seg(t,.08,.34),fall=seg(t,.42,.83);
+  const arc=Math.sin(Math.PI*Math.max(0,Math.min(1,(t-.08)/.75)));
+  const x=tip.x+9+rise*22-fall*14;
+  const y=tip.y-14-arc*(24+form*2);
+  const alpha=Math.sin(Math.PI*t);
+  if(alpha<.01)return;
+  ctx.save();ctx.globalAlpha=.86*alpha;
+  ctx.translate(x,y);ctx.rotate(t*TAU*1.3);
+  ctx.fillStyle=form===4?"#fff5b1":"#fff9ee";
+  ctx.strokeStyle="#b9782b";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,-4);ctx.lineTo(3,0);ctx.lineTo(0,4);ctx.lineTo(-3,0);ctx.closePath();
+  ctx.fill();ctx.stroke();
+  if(t>.6&&t<.90){
+    const catchFade=Math.sin(Math.PI*seg(t,.6,.9));
+    ctx.globalAlpha=.36*catchFade;
+    ctx.strokeStyle="#ffe6a6";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,0,8,0,TAU);ctx.stroke();
+  }
   ctx.restore();
 }
 
@@ -800,7 +774,6 @@ function flexArm(ctx, R, sh, side, P, armLen, c) {
   const ex = sh[0] + side * armLen * 0.75, ey = sh[1] - 2 * P.flex;
   const hx = ex - side * 2, hy = ey - armLen * 0.7 * P.flex - up * 0.2;
   thinLimb(ctx, R, sh[0], sh[1], ex, ey, side * 2, c, false);
-  // bíceps
   const bx = (sh[0] + ex) / 2, by = (sh[1] + ey) / 2 - 2.5;
   R.ellipse(ctx, bx, by, 4 + P.flexK * 1.5, 3 + P.flexK * 1.8, c.limb, { lw: 1.4 });
   thinLimb(ctx, R, ex, ey, hx, hy, 0, c, side > 0 ? false : 3.8);
@@ -846,11 +819,9 @@ function drawCone(ctx, R, cb) {
   ctx.quadraticCurveTo(0, -35, -22, -40);
   ctx.closePath();
   R.paint(ctx, null, { lw: R.LINE });
-  // ribete del borde
   ctx.beginPath();
   ctx.moveTo(-22, -40); ctx.quadraticCurveTo(0, -35, 22, -40);
   ctx.lineWidth = 2.4; ctx.strokeStyle = "#ffffff"; ctx.stroke();
-  // estrellita (logo)
   R.star(ctx, 0, -18, 5, "#ffd84a", { lw: 1.4 });
   ctx.restore();
 }
@@ -889,7 +860,6 @@ function drawOil(ctx, R, sp, k, t, front) {
     ctx.restore();
   }
   if (!front) {
-    // charco de aceite chisporroteante bajo los pies
     ctx.save();
     ctx.globalAlpha = Math.sin(Math.min(1, k * 1.2) * Math.PI) * 0.8;
     R.ellipse(ctx, 0, -1, 26, 4.5, "#ffc93a", { lw: 2, shade: false });
@@ -954,7 +924,6 @@ function drawFx(ctx, R, P, sp, hand, t, f, w) {
       const tw = Math.sin(t * 0.2 + i * 1.3);
       if (tw > 0) R.sparkle(ctx, Math.cos(a) * 40, -55 + Math.sin(a) * 36, 2 + tw * 3.5, i % 2 ? "#fff6c0" : "#ffffff");
     }
-    // líneas de viento
     ctx.save();
     ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 1.6; ctx.lineCap = "round";
     for (let i = 0; i < 3; i++) {
@@ -966,7 +935,7 @@ function drawFx(ctx, R, P, sp, hand, t, f, w) {
   }
 }
 
-function speedLines(ctx, R, sp, t, w) {
+function speedLines(ctx, R, sp, t, w, form) {
   const b = sp[0];
   ctx.save();
   ctx.strokeStyle = "rgba(255,255,255,0.7)";
@@ -979,7 +948,15 @@ function speedLines(ctx, R, sp, t, w) {
     ctx.beginPath(); ctx.moveTo(b.x - 20 - k * 30, y); ctx.lineTo(b.x - 32 - k * 40, y); ctx.stroke();
   }
   ctx.restore();
-  // chispas del suelo
+  // Signature ketchup-red wake: a slide looks like Frita, not generic speed.
+  for(let i=0;i<3;i++){
+    const k=frac(t*.065+i/3);
+    const x=b.x-12-k*(27+form*2),y=b.y+3+i*3;
+    ctx.globalAlpha=.42*(1-k);
+    ctx.strokeStyle=i===1?"#ffe89b":"#e83b2d";ctx.lineWidth=1.6-k*.55;
+    ctx.beginPath();ctx.moveTo(x+7,y-2);ctx.quadraticCurveTo(x,y+1,x-9,y+2);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
   for (let i = 0; i < 3; i++) {
     const k = frac(t * 0.1 + i / 3);
     R.sparkle(ctx, b.x - 8 - k * 26, -2 - k * 6, 2.4 * (1 - k), "#fff3c4");
