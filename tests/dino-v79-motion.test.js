@@ -119,3 +119,16 @@ test("V79 · L earthquake and U Colossus have distinct physical poses in all fiv
    assert.notDeepEqual(rolling.transforms,colossus.transforms,"K/U reuse the same body pose at form "+f);
  }
 });
+
+test("V79 · Colossus U remains visible during its invulnerability, without masking real hurt",()=>{
+ for(let f=0;f<5;f++){
+   const guard={castSlot:3,cast:.46,land:0,turnPulse:0,brake:0,speed:0,sway:0};
+   const cast=draw(f,"cast",guard);
+   const armored=draw(f,"hurt",guard);
+   const wounded=draw(f,"hurt",{...guard,cast:0});
+   assert.deepEqual(armored.transforms,cast.transforms,
+     "U awakening was wrongly replaced with a hurt animation at evolution "+f);
+   assert.notDeepEqual(wounded.transforms,cast.transforms,
+     "Real hurt must remain distinct when U is no longer casting at evolution "+f);
+ }
+});
