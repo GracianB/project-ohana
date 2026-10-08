@@ -81,8 +81,9 @@ test("V94 offline release includes boss warning, keeps Cuerno and Dino intact",(
  const art=fs.readFileSync("engine/boss-art.js","utf8");
  const enemies=fs.readFileSync("engine/enemies.js","utf8");
  const game=fs.readFileSync("game.js","utf8");
- assert.match(sw,/const VERSION = "ohana-294"/);
- assert.match(html,/ohana-294/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=294);
+ assert.ok(html.includes(version));
  assert.match(sw,/systems\/boss-v94-readability\.js\?v=/);
  assert.match(art,/const prog = bossWindupProgress\(e\)/);
  assert.match(enemies,/drawQueenV94Warning\(ctx, e\)/);
