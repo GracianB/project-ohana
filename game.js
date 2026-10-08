@@ -45,6 +45,7 @@ import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { bossAttackCue } from "./systems/boss-v94-readability.js";
 import { drawBossFallScene } from "./systems/boss-fall-scene.js";
 import { newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
@@ -2913,7 +2914,8 @@ const status = formatBossStatus(boss, phase.name);
 const attack = boss.telegraph && boss.teleKind ? bossAttackProfile(boss.teleKind) : null;
 const attackText = attack ? " · " + attack.icon : "";
 setText(DOM.bossLabel, status.visible + attackText);
-DOM.bossWrap?.setAttribute("aria-label", status.accessible + (attack ? " Ataque: " + boss.teleKind + "." : ""));
+const voiceCue = attack ? bossAttackCue(boss.teleKind) : null;
+DOM.bossWrap?.setAttribute("aria-label", status.accessible + (voiceCue ? " Ataque: " + voiceCue.label + ". " + voiceCue.hint + "." : ""));
 } else {
 setText(DOM.bossLabel, "REINA DEL NIDO");
 }

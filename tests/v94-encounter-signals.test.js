@@ -47,8 +47,9 @@ test("V94 canvas signals deterministic and muted with reduced motion",()=>{
 test("V94 integrated in game and precached for offline; no old-version lock",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),game=fs.readFileSync("game.js","utf8"),html=fs.readFileSync("index.html","utf8");
  assert.match(game,/drawEncounterSignals\(ctx,game\.enemies/);
- assert.match(sw,/const VERSION = "ohana-294"/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+  assert.ok(version && Number(version.slice(6))>=294);
  for(const module of ["encounter-spatial","encounter-signals"])
   assert.ok(sw.includes("./systems/"+module+'.js?v='));
- assert.match(html,/ohana-294/);
+ assert.ok(html.includes(version));
 });

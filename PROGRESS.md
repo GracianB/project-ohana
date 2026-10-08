@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V95 · cooperativo estable y avisos precisos · ohana-295
+
+- Los cuatro indicadores de intención de la Reina se suman a la señalización global e índice espacial V94, sin alterar el director ni las hitboxes.
+- Cooperativo con predicción limitada, sin carreras fantasma tras pérdida de paquetes, etiqueta «SEÑAL RETRASADA» y recuperación automática.
+- Se preservan todos los archivos y tests del V94 publicado. Release candidata sujeta a Node, navegador, multijugador, visual y Release Gate.
+
 ## 09/10/2026 · OHANA V94 · ENEMIGOS LEGIBLES Y ESTABILIDAD GLOBAL · ohana-294
 
 - Los diez biomas comparten un **indicador contextual de amenaza**: solo los tres rivales prioritarios muestran señales sobre la cabeza; el aviso de ataque real queda claramente distinguido del mero permiso de ataque.
