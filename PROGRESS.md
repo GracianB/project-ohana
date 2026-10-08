@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V97 · juego accesible · ohana-297
+
+- Avisos puntuales de evolución, entrada/fases de la Reina y umbrales de salud, sin saturar lectores de pantalla a 60 Hz.
+- Reducer determinista `systems/a11y-v97.js`, live region discreta y modo de colores forzados nativo en HUD y controles.
+- Candidata sujeta a CI, regresión visual y publicación GitHub Pages.
+
 ## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
 
 - Distribución diferenciada para móviles verticales estrechos y horizontales de poca altura; botones reales E/J/K/L/U y movimiento siguen operativos.
