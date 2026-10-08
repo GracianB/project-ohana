@@ -51,6 +51,82 @@ export const DINO_ACTING_TUNING = Object.freeze({
 });
 const T = DINO_ACTING_TUNING;
 
+// V76 · A genuine compact rolling silhouette. Unlike rotating the standing
+// dinosaur, every part fits inside a readable spinning sphere at all five ages.
+function drawRolledDino(ctx, R, f, c, P, t) {
+  const radius = 25 + f * 2.15, y = -32;
+  const TAU = PI * 2;
+  const rollingInk = R.INK || "#274b35";
+  ctx.save();
+  // Eight independent silhouettes mark actual external spikes, not a sticker.
+  for (let i = 0; i < 9; i++) {
+    const a = i * TAU / 9;
+    const nx = Math.cos(a), ny = Math.sin(a);
+    const px = nx * (radius - 3), py = y + ny * (radius - 3);
+    const length = 6 + (f >= 2 ? 3 : 0) + (f === 4 ? 3 : 0);
+    R.poly(ctx, [
+      [px + ny * 4.1, py - nx * 4.1],
+      [px + nx * length, py + ny * length],
+      [px - ny * 4.1, py + nx * 4.1],
+    ], f === 4 ? "#bff4ff" : f === 0 ? c.belly : c.plate2, { lw: 1.45 });
+  }
+
+  ctx.fillStyle = R.volume(ctx, -radius * .38, y - radius * .45, radius * 1.35, c.body);
+  ctx.strokeStyle = rollingInk; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(0, y, radius, 0, TAU); ctx.fill(); ctx.stroke();
+
+  // The belly and tail form a single curled S-shape: no stray limbs or neck.
+  ctx.strokeStyle = c.belly; ctx.lineWidth = radius * .29; ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(-radius * .15, y + radius * .11, radius * .53, -.15, PI * 1.22);
+  ctx.stroke();
+  ctx.strokeStyle = R.darken(c.body, .22); ctx.lineWidth = 2.1;
+  ctx.beginPath(); ctx.arc(-radius * .15, y + radius * .11, radius * .53, -.15, PI * 1.22); ctx.stroke();
+
+  // Armor grows with the five evolutions. The egg keeps its original cracked
+  // shell language while mature stages develop clean sculpted dorsal ridges.
+  if (f === 0) {
+    ctx.fillStyle = c.belly; ctx.globalAlpha = .85;
+    ctx.beginPath(); ctx.arc(-radius * .13, y + radius * .43, radius * .46, .04, PI * .96); ctx.fill();
+    ctx.globalAlpha = 1;
+  } else {
+    for (let i = 0; i < Math.min(4, 1 + f); i++) {
+      const a = PI * (1.02 + i * .19);
+      const xx = Math.cos(a) * radius * .74, yy = y + Math.sin(a) * radius * .74;
+      R.ellipse(ctx, xx, yy, 3.3 + f * .3, 2.2 + f * .23,
+        f === 4 ? "#bff4ff" : c.plate, { rot: a, lw: 1.35 });
+    }
+  }
+
+  // The big eyes stay identifiable while the character revolves.
+  const eyeY = y - radius * .22, spread = radius * .28;
+  for (let i = -1; i <= 1; i += 2) {
+    R.ellipse(ctx, i * spread, eyeY, radius * .205, radius * .25,
+      "#fffdf2", { lw: 1.6 });
+    R.ellipse(ctx, i * spread + radius * .052, eyeY + radius * .038,
+      radius * .085, radius * .13, f === 4 ? "#c47f26" : "#2b573b", { lw: 1 });
+    R.ellipse(ctx, i * spread + radius * .069, eyeY - radius * .02,
+      radius * .037, radius * .044, "#ffffff", { line: false, shade: false });
+  }
+  ctx.strokeStyle = rollingInk; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0, y + radius * .18, radius * .28, .14, PI - .14); ctx.stroke();
+  R.ellipse(ctx, -radius * .55, y + radius * .1, radius * .11, radius * .09, c.spot, { line: false });
+  R.ellipse(ctx, radius * .55, y + radius * .1, radius * .11, radius * .09, c.spot, { line: false });
+
+  if (f === 4) {
+    ctx.save(); ctx.globalAlpha = .9;
+    R.sparkle(ctx, radius * .68, y - radius * .78, 3.5 + Math.sin(t * .16) * .7, "#fff8be");
+    ctx.restore();
+  }
+  // A small, contained specular highlight preserves the original glossy art.
+  ctx.globalAlpha = .45;
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath(); ctx.ellipse(-radius * .32, y - radius * .62,
+    radius * .2, radius * .077, -.55, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+
 // ---------------------------------------------------------------------------
 // FUNCIONES AUXILIARES DE RENDERIZADO
 // ---------------------------------------------------------------------------
@@ -369,8 +445,9 @@ function draw(ctx, pose, R) {
   const SC = [1.3, 1.36, 1.32, 1.28, 1.26][f];
   ctx.scale(SC, SC);
   if (rolling) {
-    ctx.save(); ctx.globalAlpha = 0.14 * T.rollGlow[f]; ctx.fillStyle = "#b9ff8d";
-    ctx.beginPath(); ctx.ellipse(0,-37,41,43,0,0,PI*2); ctx.fill(); ctx.restore();
+    drawRolledDino(ctx, R, f, c, P, t);
+    ctx.restore();
+    return;
   }
 
   const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
