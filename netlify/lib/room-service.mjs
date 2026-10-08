@@ -1,5 +1,5 @@
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
-import { progressDuoRitual } from "../../multiplayer/duo-altars.js";
+import { progressDuoRitual, duoPlateState } from "../../multiplayer/duo-altars.js";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_RETRIES = 4;
@@ -295,6 +295,8 @@ export function createRoomService(store, options = {}) {
           };
           player.lastSequence = seq;
           player.lastSeenAt = currentTime;
+          // Leaving either plate breaks the continuous hold immediately.
+          if (state.duoChannel && !duoPlateState(state.players,state.duoChannel.roomId,currentTime)?.ready) state.duoChannel=null;
           const moveResult = { accepted: true, cinematic: false };
           player.actions = [...player.actions.slice(-(ACTION_HISTORY_LIMIT - 1)), { id: actionId, sequence: seq, result: moveResult }];
           return { ...moveResult, replayed: false };
