@@ -5,6 +5,7 @@ import { useAbility, abilityPreMove, clearAbilityFx, updateAbilityFx } from "../
 
 // All tests run the actual Dino combat update logic. Enemy collision and
 // projectile paths are not asserted with brittle source-string checks.
+const cx=o=>o.x+(o.w||0)/2;
 function setupDino(terrain=()=>null){
   const spawned=[],hit=[],particles=[];
   const cx=o=>o.x+(o.w||0)/2,cy=o=>o.y+(o.h||0)/2;
