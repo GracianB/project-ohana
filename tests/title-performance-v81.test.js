@@ -11,7 +11,7 @@ test("V81 fixes CSS order, NOT just early V80 rules overridden later",()=>{
  const i=css.lastIndexOf("V81 · RENDERING CONTRACT");
  assert.ok(i>css.indexOf("V47B · SELECTOR PERFORMANCE"),"V81 must be last");
  const final=css.slice(i);
- assert.match(final,/\.char-card\.is-prev2,[\s\S]*?display:none!important/);
+ assert.match(final,/#char-select:not\(\.atrium-on\) #chars \.char-card\.is-prev2,[\s\S]*?display:none!important/);
  assert.match(final,/\.char-card\.selected\[data-evo="4"\] \.portrait canvas\{\s*filter:none!important/);
  assert.match(final,/\.char-card\.is-prev,[\s\S]*?will-change:transform,opacity/);
  assert.match(final,/backdrop-filter:none!important/);
@@ -19,12 +19,18 @@ test("V81 fixes CSS order, NOT just early V80 rules overridden later",()=>{
 });
 
 test("V81 Canvas memory: only three live cards and one DPR for side previews",()=>{
- assert.match(title,/const visible = \[id, prev, next\]/);
+ assert.match(title,/const visible = atriumMode \|\| \[id, prev, next\]/);
  assert.match(title,/canvas\.width = 1;\s*canvas\.height = 1;/);
  assert.match(title,/const sidePreview = !cv\.closest\("\.char-card"\)\?\.classList\.contains\("selected"\)/);
  assert.match(title,/Math\.min\(sidePreview \? 1 : maxDpr, window\.devicePixelRatio \|\| 1\)/);
  assert.match(title,/SIDE_PREVIEW_INTERVAL_MS = 120/);
  assert.match(browser,/offscreenBuffers/);
+ const atrium=read("systems/atrium-interact.js");
+ const atriumCss=read("atrium-interact.css");
+ assert.match(atrium,/ATRIUM_FRAME_INTERVAL_MS = 65/);
+ assert.match(atrium,/pointerPending = true/);
+ assert.match(atrium,/document\.body\.classList\.contains\("playing"\)/);
+ assert.match(atriumCss,/#char-select\.atrium-on #chars \.char-card\.selected,[\s\S]*?filter:none!important/);
  assert.match(browser,/assert\.equal\(carouselAudit\.canvasFilter,'none'/);
  assert.match(visual,/titleLayout\.atriumOn \? 10 : 3/);
 });
