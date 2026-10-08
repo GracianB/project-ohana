@@ -169,6 +169,21 @@ function drawRolledDino(ctx, R, f, c, P, t) {
 // FUNCIONES AUXILIARES DE RENDERIZADO
 // ---------------------------------------------------------------------------
 
+// V81 · Soft neck/chest bridge occupies the space between the body
+// silhouette and the independently acting skull. Draw under both contours:
+// no rectangular neck, detached jaw or ink seam during L/U movements.
+export function dinoNeckBridgePoints(P,headX,headY) {
+ const bw=P.bw,bh=P.bh,hw=P.hw,hh=P.hh;
+ const hx=clamp(Number.isFinite(headX)?headX:0,-bw*.6,bw*2.2);
+ const hy=clamp(Number.isFinite(headY)?headY:-bh,-bh*2.9,-bh*.5);
+ return [
+   [bw*.35,-bh*.78],
+   [hx-hw*.38,hy+hh*.31],
+   [hx+hw*.26,hy+hh*.47],
+   [bw*.98,-bh*.41],
+   [bw*.70,-bh*.27],
+ ];
+}
 function chain(x, y, len, a0, wave, n) {
   const pts = [];
   let a = a0, px = x, py = y;
@@ -657,6 +672,10 @@ function draw(ctx, pose, R) {
 
     // CUERPO PRINCIPAL
     ctx.save(); upper();
+    // Neck is under the torso and the subsequently drawn head. It seals
+    // the small gap created when Dino follows a jump, quake or U roar.
+    const junction=dinoNeckBridgePoints(P,headX,headY);
+    R.blob(ctx,junction,c.body,{line:false,shade:false});
     const body = [[-bw * 1.0, -bh * 0.15], [-bw * 0.8, -bh * 0.7], [-bw * 0.15, -bh * 1.02], [bw * 0.65, -bh * 0.92], [bw * 1.02, -bh * 0.45], [bw * 0.85, -bh * 0.02], [0, bw * 0.3]];
     R.blob(ctx, body, c.body);
     const bel = [[bw * 0.2, -bh * 0.85], [bw * 0.75, -bh * 0.76], [bw * 0.95, -bh * 0.4], [bw * 0.72, -bh * 0.02], [bw * 0.1, bw * 0.16], [-bw * 0.15, -bh * 0.4]];
