@@ -242,6 +242,7 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     if(k>.34&&k<.49){
       lightning(ctx,cx-target*.12,cy-target*.42,cx+target*.10,cy-target*.15,"#fff",7,.86);
     }
+    const crown=seg(k,.19,.56);for(let i=0;i<5;i++){const a=-Math.PI*.88+i*Math.PI*.19;const nx=cx+Math.cos(a)*target*(.24+.15*crown),ny=cy-target*.23+Math.sin(a)*target*(.18+.12*crown);lightning(ctx,nx,ny,nx+Math.cos(a)*target*.09,ny-target*.07,i%2?"#ba75ff":"#fff5ab",i+t,.12+.23*crown);}if(k>.55&&k<.82){const beat=Math.sin(seg(k,.55,.82)*Math.PI);drawRing(ctx,cx,cy,target*.56,beat,"#d59bff",2.1,.34);}
     const blast=seg(k,.52,.88);
     if(blast>0){
       drawRays(ctx,cx,cy,target*1.25,color,.16+.32*blast,t*1.8,16);
