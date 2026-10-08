@@ -687,7 +687,6 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const cinema = fs.readFileSync("./systems/world-cinema.js", "utf8");
   const ending = fs.readFileSync("./systems/ending.js", "utf8");
   const title = fs.readFileSync("./systems/title.js", "utf8");
-  const titleFx = fs.readFileSync("./systems/title-fx.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
   assert.match(index, /systems\/world-cinema\.js\?v=ohana-235/);
@@ -703,6 +702,7 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   const html = fs.readFileSync("./index.html", "utf8");
   const css = fs.readFileSync("./title-stage.css", "utf8");
   const title = fs.readFileSync("./systems/title.js", "utf8");
+  const titleFx = fs.readFileSync("./systems/title-fx.js", "utf8");
   assert.match(html, /class="title-shell"/);
   assert.match(html, /class="hero-stage"/);
   assert.match(html, /selected-hero-line/);
