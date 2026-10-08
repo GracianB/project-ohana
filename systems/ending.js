@@ -67,11 +67,15 @@ function showEnding(detail={}){
     const d=ROSTER.find(r=>r.id===id)||ROSTER[0];
     return [id,makeDummy(id,id===hero.id?evo:1,d.color)];
   }));
-  const duration=reduce?1.6:7.4;
-  let t0=0,raf=0,done=false,complete=false;
+  // The whole family reunites before the results card is allowed to appear.
+  const duration=reduce?1.6:10.2;
+  const family=CAST.filter(id=>id!==hero.id);
+  let t0=0,raf=0,done=false,complete=false,lastPaint=0;
 
   layer.className="show cinema-running ending-phase-1";
-  layer.dataset.ending="v44-true-ending";
+  layer.dataset.ending="v80-delayed-finale";
+  layer.dataset.duration=String(Math.round(duration*1000));
+  layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
   const score=layer.querySelector(".win-score");
   layer.querySelector(".win-hero").textContent=(detail.hero||hero.name)+" · "+(detail.form||"forma final");
@@ -96,6 +100,9 @@ function showEnding(detail={}){
   }
   function frame(now){
     if(done||complete)return;if(!t0)t0=now;
+    // Ten Canvas actors are expensive. Elapsed time, not frame count, drives the story.
+    if(!reduce && lastPaint && now-lastPaint<41){raf=requestAnimationFrame(frame);return;}
+    lastPaint=now;
     const t=(now-t0)/1000,k=clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*.78,tf=t*60;
     ctx.clearRect(0,0,W,H);
     const dawn=seg(k,.48,.92);
@@ -107,8 +114,8 @@ function showEnding(detail={}){
     ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
 
     // ACT I · Queen fall / rift collapses around selected hero.
-    if(k<.34){
-      const q=seg(k,0,.34),rift=1-seg(k,.22,.34);
+    if(k<.30){
+      const q=seg(k,0,.30),rift=1-seg(k,.19,.30);
       drawRift(ctx,cx,H*.38,Math.min(W,H)*.38,rift);
       const h=Math.min(H*.44,W*.28);
       heroActor._poseOverride=q<.45?"attack":"victory";heroActor.melee=q<.45?10:0;
@@ -120,29 +127,30 @@ function showEnding(detail={}){
     }
 
     // ACT II · family arrives, one by one, around the protagonist.
-    if(k>=.28&&k<.70){
+    if(k>=.27&&k<.80){
       layer.classList.remove("ending-phase-1");layer.classList.add("ending-phase-2");
-      const group=seg(k,.28,.62),heroH=Math.min(H*.31,W*.17);
+      const group=seg(k,.27,.72),heroH=Math.min(H*.31,W*.17);
       actor(heroActor,cx,ground,heroH*1.08,tf,{pose:"victory"});
-      CAST.filter(id=>id!==hero.id).forEach((id,i)=>{
+      family.forEach((id,i)=>{
         const p=actors[id],side=i%2?-1:1,row=Math.floor(i/2),x=cx+side*(heroH*.78+row*heroH*.42);
         const enter=easeOut(seg(group,i*.055,.30+i*.055));
         const y=ground+18*(1-enter);
         actor(p,x,y,heroH*(.68+(i%3)*.05),tf,{facing:x<cx?1:-1,pose:i===2&&enter>.7?"run":"idle",alpha:enter});
       });
-      const copy=seg(k,.43,.61)*(1-seg(k,.63,.70));
+      const copy=seg(k,.59,.72)*(1-seg(k,.77,.81));
       if(copy>0){ctx.save();ctx.globalAlpha=copy;drawTitle(ctx,"TODOS LLEGAN.",cx,H*.14,Math.max(24,Math.min(50,W*.038)),"#fff0b5",{font:FONT_DISPLAY,weight:700,stroke:false});ctx.restore();}
     }
 
     // ACT III · sunrise family portrait.
-    if(k>=.64){
+    if(k>=.77){
       layer.classList.remove("ending-phase-2");layer.classList.add("ending-phase-3");
       const heroH=Math.min(H*.28,W*.15),spread=Math.min(W*.72,heroH*7.8);
       CAST.forEach((id,i)=>{
         const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1)),chosen=id===hero.id;
         actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
       });
-      const titleK=seg(k,.70,.86);
+      // Text appears after the full family portrait, not during the arrival.
+      const titleK=seg(k,.88,.97);
       if(titleK>0){
         ctx.save();ctx.globalAlpha=titleK;
         drawTitle(ctx,"NADIE SE QUEDA ATRÁS",cx,H*.16,Math.max(30,Math.min(68,W*.052)),["#fff8d8","#ffe08c"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ffe39a",maxWidth:W*.9});
