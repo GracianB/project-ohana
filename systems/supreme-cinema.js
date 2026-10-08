@@ -153,7 +153,7 @@ function voidEye(ctx,cx,cy,R,k,color){
 function backdrop(ctx,W,H,cx,cy,color,story,k){
   const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.hypot(W,H)*.62);
   const hot=story.scene==="nova"||story.scene==="oven"||story.scene==="crisp";
-  bg.addColorStop(0,rgba(color,hot?.26:.20));
+  bg.addColorStop(0,rgba(color,hot ? .26 : .20));
   bg.addColorStop(.36,hot?"rgba(24,8,5,.90)":"rgba(5,10,20,.90)");
   bg.addColorStop(1,"rgba(1,3,8,.985)");
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
@@ -286,7 +286,7 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     if(hot>0){
       const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,target*.72);
       glow.addColorStop(0,rgba("#ff9b3d",.44*hot));glow.addColorStop(1,rgba("#ff5a22",0));
-      ctx.fillStyle=glow;ctx.fillRect(cx-target,cy-target,cx+target,cy+target);
+      ctx.fillStyle=glow;ctx.fillRect(cx-target,cy-target,target*2,target*2);
     }
     const eruption=seg(k,.62,.94);
     if(eruption>0){
@@ -361,7 +361,7 @@ function play(detail={}){
   const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
   const ally=allyDef?actor(allyDef,Math.min(4,Math.max(2,evo)),allyDef.color):null;
   const reduce=reducedMotion();
-  const duration=reduce?.78:story.duration;
+  const duration=reduce ? .78 : story.duration;
   let t0=0,raf=0,done=false;
   const token=++generation;
 
