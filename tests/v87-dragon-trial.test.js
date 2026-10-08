@@ -53,7 +53,8 @@ test("V87 U cinema shows actual gameplay without spawning secondary simulation",
  assert.match(s,/IMPACTO REAL EN LA ARENA/);
  assert.match(game,/updateDragonTrial\(game\)/);
  assert.match(game,/dragonTrialSnapshot\(game\.dragonTrial\)/);
- assert.match(sw,/const VERSION = "ohana-28[0-9]"/);
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=287);
  assert.match(sw,/systems\/dragon-trial\.js\?v=/);
- assert.match(html,/ohana-28[0-9]/);
+ assert.ok(html.includes(version));
 });

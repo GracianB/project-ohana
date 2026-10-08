@@ -1,3 +1,10 @@
+## 09/10/2026 · V90 · DINO: RODILLO VIVO Y FÓSILES LEGIBLES · ohana-290
+
+- K: nueva bola de ocho placas, ojos y sonrisa, con giro adaptado a movimiento reducido.
+- L y U: preavisos fósiles que muestran exactamente dónde caerá cada proyectil, con un marcador de avance creciente.
+- Refactor visual independiente en `systems/dino-stagecraft.js`, sin aumentar daño, hitboxes ni cargas multijugador.
+- Test Canvas y precaché `ohana-290`. CI + E2E + Visual + Release Gate obligatorios.
+
 ## 08/10/2026 · OHANA V89 · COOPERATIVO RESILIENTE + GUARDADO · ohana-289
 
 - Se elimina el reintento instantáneo infinito de las mutaciones de red: reintentos controlados de 200–3600 ms desde el tick normal; señales importantes esperan sin crear microtareas sin límite.
