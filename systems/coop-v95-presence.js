@@ -25,7 +25,7 @@ export function remotePresenceCorrection(remote,now){
   (V95_PRESENCE.fadedAt-V95_PRESENCE.weakAt),0,1);
  return {
   x:tx+leadX, y:ty+leadY,
-  opacity:1-(1-V95_PRESENCE.minAlpha)*weakness,
+  opacity:Math.max(V95_PRESENCE.minAlpha,1-(1-V95_PRESENCE.minAlpha)*weakness),
   stale:age>=V95_PRESENCE.weakAt,
   age, sampleDt, blend:bound(V95_PRESENCE.blend*(16.67/sampleDt),.16,.36),
  };
