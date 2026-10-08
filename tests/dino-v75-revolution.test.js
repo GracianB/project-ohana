@@ -16,6 +16,7 @@ function harness() {
         .sort((a,b) => Math.hypot(cx(a)-x,cy(a)-y)-Math.hypot(cx(b)-x,cy(b)-y))
         .find(e => Math.hypot(cx(e)-x,cy(e)-y) < range) || null,
     solidAt: () => null, inView: () => true,
+    groundBelow: (g, x, y) => g.platforms?.find(pl => x >= pl.x && x <= pl.x + pl.w && pl.y >= y)?.y ?? null,
     circleHit: (x,y,r,e) => Math.hypot(Math.max(e.x,Math.min(x,e.x+e.w))-x,
       Math.max(e.y,Math.min(y,e.y+e.h))-y) <= r,
     hitEnemy: (g,e,dmg) => { e.hp -= dmg; hits.push(e); return true; },
@@ -79,6 +80,33 @@ test("Dino V75 has 100 actual form-specific art tuning values, all used by its r
   assert.match(art, /pose\.move === "dino-roll"/);
   assert.match(art, /ctx\.rotate\(\(\(Number\(pose\.phase\)/);
   assert.doesNotMatch(art,/Math\.random|requestAnimationFrame|setTimeout/);
+});
+
+test("Dino V76 swept collision hits small enemies and keeps reduced-motion history bounded", () => {
+ const h=harness();
+ const little={x:41,y:29,w:4,h:4,hp:100};
+ const g={enemies:[little],worldW:1600,worldH:900,reduceMotion:true};
+ const f={x:32,y:31,vx:12,vy:0,radius:1.5,face:1,evo:4,
+  life:16,delay:0,target:little,age:1,trail:[],color:"#e6ff9b",dmg:15};
+ const alive=h.api.update.dinoSpit(g,f);
+ assert.equal(alive,false,"High-speed narrow foe was tunneled through");
+ assert.ok(little.hp<100);
+ assert.equal(h.hits.length,1);
+ assert.ok(f.trail.length<=3);
+});
+
+test("Dino V76 meteor warnings are anchored to actual ground under flying targets", () => {
+ const h=harness();
+ const sky={x:300,y:100,w:24,h:20,hp:500};
+ const g={enemies:[sky],cam:{x:0,y:0},worldW:1600,
+   platforms:[{x:200,y:360,w:240,h:24}]};
+ h.api.update.dinoSkyfall(g,{n:1,i:0,next:0,evo:4,face:1,origin:120,
+   dmg:30,radius:60},{x:100,y:200,w:30,h:38});
+ const meteor=h.created.find(o=>o.kind==="meteor");
+ const marker=h.created.find(o=>o.kind==="dinoWarning");
+ assert.ok(meteor);
+ assert.ok(marker);
+ assert.equal(marker.y,360,"Warning must match the landing platform");
 });
 
 test("Dino V75 isolated FX keeps shared engine size and combat budgets", () => {
