@@ -516,6 +516,27 @@ try {
   await capture(page, '09b-supreme-yomi-story');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
 
+  // V55 real U smoke test: catch runtime errors while Pizza's oven cinema draws.
+  const pizzaCinemaErrors=[];
+  const onPizzaError=(error)=>pizzaCinemaErrors.push(String(error.message||error));
+  page.on('pageerror',onPizzaError);
+  await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('pizza');api.setEvo(4);api.setCombo(0);api.cast(3);
+  });
+  await page.waitForTimeout(520);
+  const pizzaU=await page.locator('#supreme-cinema').evaluate(el=>({
+    active:el.dataset.activeId||'',story:el.dataset.story||'',mode:el.dataset.mode||''
+  }));
+  assert.equal(pizzaU.active,'pizza','09c-pizza-u: actor incorrecto');
+  assert.equal(pizzaU.story,'oven-too-hot','09c-pizza-u: storyboard incorrecto');
+  assert.equal(pizzaU.mode,'storyboard','09c-pizza-u: formato incorrecto');
+  assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime en cinema');
+  await capture(page,'09c-supreme-pizza-molten');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3600});
+  page.off('pageerror',onPizzaError);
+  assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime al finalizar');
+
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
   await page.waitForTimeout(100);
