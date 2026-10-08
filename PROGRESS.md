@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
+
+- Distribución diferenciada para móviles verticales estrechos y horizontales de poca altura; botones reales E/J/K/L/U y movimiento siguen operativos.
+- Estilos aislados `mobile-v96.css`, áreas táctiles reales, indicadores de foco y respeto al movimiento reducido, sin cambiar motor ni entradas.
+- Candidata de publicación pendiente de CI, regresión visual y Pages.
+
 ## 09/10/2026 · OHANA V95 · Cooperativo con señal resistente · ohana-295
 
 - Predicción visual remota acotada, retirada progresiva cuando falta señal y aviso de retraso sin alterar posiciones autoritativas.
