@@ -1,0 +1,47 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read=p=>fs.readFileSync(p,"utf8");
+const title=read("systems/title.js"),css=read("title-stage.css");
+const ending=read("systems/ending.js"),cinema=read("systems/evo-cinema.js");
+const browser=read("tests/browser/e2e.mjs"),visual=read("tests/browser/visual-regression.mjs");
+const sw=read("sw.js"),index=read("index.html");
+
+test("V81 fixes CSS order, NOT just early V80 rules overridden later",()=>{
+ const i=css.lastIndexOf("V81 · RENDERING CONTRACT");
+ assert.ok(i>css.indexOf("V47B · SELECTOR PERFORMANCE"),"V81 must be last");
+ const final=css.slice(i);
+ assert.match(final,/\.char-card\.is-prev2,[\s\S]*?display:none!important/);
+ assert.match(final,/\.char-card\.selected\[data-evo="4"\] \.portrait canvas\{\s*filter:none!important/);
+ assert.match(final,/\.char-card\.is-prev,[\s\S]*?will-change:transform,opacity/);
+ assert.match(final,/backdrop-filter:none!important/);
+ assert.doesNotMatch(final,/drop-shadow\(|blur\(1[0-9]px\)/);
+});
+
+test("V81 Canvas memory: only three live cards and one DPR for side previews",()=>{
+ assert.match(title,/const visible = \[id, prev, next\]/);
+ assert.match(title,/canvas\.width = 1;\s*canvas\.height = 1;/);
+ assert.match(title,/const sidePreview = !cv\.closest\("\.char-card"\)\?\.classList\.contains\("selected"\)/);
+ assert.match(title,/Math\.min\(sidePreview \? 1 : maxDpr, window\.devicePixelRatio \|\| 1\)/);
+ assert.match(title,/SIDE_PREVIEW_INTERVAL_MS = 120/);
+ assert.match(browser,/offscreenBuffers/);
+ assert.match(browser,/assert\.equal\(carouselAudit\.canvasFilter,'none'/);
+ assert.match(visual,/titleLayout\.atriumOn \? 10 : 3/);
+});
+
+test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
+ assert.match(cinema,/export function fullCanvas\(cv, dprCap = Infinity\)/);
+ assert.match(cinema,/Math\.min\(maxDpr, dprCap, window\.devicePixelRatio \|\| 1\)/);
+ assert.match(ending,/fullCanvas\(canvas,reduce\?1:1\.2\)/);
+ assert.match(ending,/const duration=reduce\?1\.6:12\.0/);
+ assert.match(ending,/const titleK=seg\(k,\.84,\.92\)/);
+ assert.match(ending,/layer\.dataset\.ending="v44-true-ending"/);
+ assert.match(ending,/layer\.dataset\.pacing="v80-delayed-finale"/);
+ assert.match(ending,/layer\.querySelector\("\.win-skip"\)\.onclick=\(\)=>revealResults/);
+});
+
+test("V81 offline cache and live HTML references are identical",()=>{
+ assert.match(sw,/const VERSION = "ohana-280"/);
+ assert.match(index,/title-stage\.css\?v=ohana-280/);
+ assert.doesNotMatch(index,/ohana-279/);
+});
