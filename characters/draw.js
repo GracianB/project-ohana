@@ -1,5 +1,6 @@
 import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
+import { CUERNO_VISUAL_H } from "./art/cuerno.js";
 import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
@@ -1127,8 +1128,10 @@ const atk = pose.atk;
 const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
 const hurtFresh = (p.invuln || 0) > 18;
 
-let H = VISUAL_H[evo] * (CHAR_K[p.id] || 1) * (p.visualScale || 1);
-if (getLook() === "paint") H = Math.min(220, Math.max(H, (p.h || 28) * 3));
+// Cuerno V74 is already drawn in five different anatomical sizes. Do NOT
+// multiply their growth again by generic evolution scaling or old sprite size.
+let H = (p.id==="cuerno"?CUERNO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[p.id]||1))*(p.visualScale||1);
+if (getLook() === "paint" && p.id!=="cuerno") H = Math.min(220, Math.max(H, (p.h || 28) * 3));
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
 if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 
@@ -1140,8 +1143,10 @@ let sx = 1 + squash * 0.9 - stretch * 0.35;
 let sy = 1 - squash * 0.75 + stretch * 0.4;
 // El arte de cada forma ya cambia su geometría. Este segundo nivel ajusta
 // la lectura corporal por personaje sin alterar jamás w/h de la hitbox.
+if(p.id!=="cuerno"){
 sx *= (pose.evolutionScaleX || 1) * (evoVis.bodyX || 1);
 sy *= (pose.evolutionScaleY || 1) * (evoVis.bodyY || 1);
+}
 if (p.grounded && p._wasAir) p._land = 8;
 p._wasAir = air;
 if (p._land > 0) p._land--;

@@ -40,7 +40,7 @@ test("V73 family seal evolves across five unique biological forms",()=>{
   assert.ok(joy.sparks>a.sparks,"missing joy in form "+form);
   assert.ok(a.eyes>=1,"character must retain expressive eyes "+form);
  }
- assert.deepEqual([0,1,2,3,4].map(f=>sample(f).limbs),[0,2,4,4,4]);
+ assert.deepEqual([0,1,2,3,4].map(f=>sample(f).limbs),[0,0,4,4,4]);
 });
 test("V73 personality respects eight real states and quiet injuries",()=>{
  assert.equal(cuernoEmotion({state:"idle"},0),"wonder");

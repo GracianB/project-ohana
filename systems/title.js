@@ -2,6 +2,7 @@ import { ROSTER } from "../characters/roster.js";
 import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
 import { drawCharacter } from "../characters/draw.js";
+import { CUERNO_VISUAL_H } from "../characters/art/cuerno.js";
 import { getLook, setLook } from "../characters/look.js";
 import { playIntro, playTitleIntro } from "./intro.js";
 import { sfx } from "../engine/audio.js";
@@ -49,17 +50,17 @@ dino:    [1.00,1.06,1.14,1.28,1.42],
 frita:   [1.00,1.04,1.10,1.20,1.34],
 pizza:   [1.00,1.04,1.10,1.22,1.36],
 yomi:    [1.00,1.08,1.16,1.28,1.46],
-cuerno:  [1.00,1.06,1.14,1.28,1.68],
+cuerno:  [0.70,0.98,1.10,1.43,1.77],
 });
 
 function portraitFit(def, evo, bw, bh, hero) {
 const form = def.forms?.[evo] || {};
-const baseH = VISUAL_H[evo] * (CHAR_K[def.id] || 1);
+const baseH = def.id==="cuerno"?CUERNO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
 const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
 const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
 const visualAspect = Math.max(.72, geometryAspect * envelope);
 const safeW = bw * (hero ? (evo >= 4 ? .72 : .82) : .72);
-const safeH = bh * (hero ? (evo >= 4 ? .70 : .80) : .72);
+const safeH = bh * (hero ? (def.id==="cuerno"?[.75,.79,.82,.84,.86][evo]:evo>=4?.70:.80) : .72);
 const byHeight = safeH / Math.max(1, baseH * envelope);
 const byWidth = safeW / Math.max(1, baseH * visualAspect);
 const scale = Math.max(.34, Math.min(byHeight, byWidth));

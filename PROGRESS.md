@@ -1,3 +1,17 @@
+## 08/10/2026 · V74 · CUERNO RECONSTRUCCIÓN CANÓNICA
+
+**Caché** `ohana-272` · Rediseño ordenado por petición expresa; V73 no era la definitiva. El canon visual es obligatorio.
+
+- **F0:** Cuernín es solo un cuerno vivo. Ojos y boca se integran en la superficie del cono, sin bola, torso, collar ni patas.
+- **F1:** Destello es literalmente **el mismo cuerno con UNA cara esférica**, dos ojos y boca. **CERO patas, cuello, hocico o torso equino**. El rebote y el squash se aplican a la cabeza redonda, sin simular pasos.
+- **F2:** aparece por primera vez el cuerpo de Potro Iris con **exactamente cuatro patas articuladas**. Conserva gesto, melena, hocico y salto recogido.
+- **F3:** Unicornio Estelar sigue teniendo cuatro patas y ahora desarrolla **dos alas geométricas** desde la espalda; tienen plumas, transparencias y apertura dependiente de salto/cast/victoria. No se añade vuelo físico ni cambios a las físicas.
+- **F4:** renace como **Unicornio Negro** (pelo obsidiana `#1b1a28`, cuello S orgánico de anchura decreciente, alas tinta nocturna, mirada lila, melena iris). Se reemplaza el contorno de cuello ancho-rectangular por curvas de Bézier cónicas que unen pecho, crin y cabeza. No cambia la inmunidad de jefes.
+- **Proporciones corregidas en el origen del error:** antes Cuerno recibía un multiplicador por altura de forma, otro de evolución general y otro de `evolutionVisual`; la ampliación era acumulativa. Ahora usa `CUERNO_VISUAL_H=[118,92,91,86,82]` para compensar geometría real, con **una sola escala óptica**, compartida por juego y retratos, sin alterar la hitbox. F0 deja de ser diminuto y F4 deja de ser un gigante.
+- **Conservación del juego:** Cuerno sigue siendo el más rápido y el que más alto salta de los 10 personajes en F0–F4. No se modifica J/K/L/U, incluida la U Aurora con sueño por objetivos seleccionados, cinco pulsos, inmunidad de jefes y cinemática. Se conserva el modo reduced motion.
+- **QA:** revisados tests antiguos para que no exijan patas en F1 (ya prohibidas); regresión de 5 formas con conteo real de patas, presencia y ausencia de alas, color negro de F4, geometría de cuello, escalas ópticas, render Canvas balanceado, J/K/L/U y las capturas reales Chromium. Dino y multijugador sin modificación.
+- No fusionar sin Node, Browser E2E, Multiplayer E2E, Visual regression matrix, Release Gate SUCCESS; luego verificar Pages y CI de main.
+
 ## 08/10/2026 · V73 · CUERNO · EDICIÓN ESTRELLA FINAL, DEDICADA A LA SOBRINA
 
 **Caché:** `ohana-271`. Última V de Cuerno. El personaje y su evolución deben ser inolvidables, fáciles de leer y divertidos de manejar para jugar en familia; **Dino está muy avanzado y se reserva sin modificar**.

@@ -55,7 +55,7 @@ test("V62 keeps innate fastest speed/jump, powers and the newborn unchanged",()=
   assert.equal(hero.forms[3].jump,17.4);
   assert.deepEqual(hero.abilities,["gleam","gallop","rainbow"]);
   assert.equal(frame(0).limbs.length,0,"F0 pure horn");
-  assert.equal(frame(1).limbs.length,2,"F1 growing limbs");
+  assert.equal(frame(1).limbs.length,0,"F1 is a round face without legs");
 });
 test("V62 performance is bounded and real Chromium captures verify stage 3",()=>{
   const body=src.split("function drawStellarUnicorn(")[1].split("function draw(ctx, pose, R)")[0];

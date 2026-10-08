@@ -28,13 +28,13 @@ function render(form,state="idle",phase=0,flourish=0){
   assert.ok(seen.commands>8,"The artwork did not draw its body");
   return seen;
 }
-test("V60 first metamorphosis is drawable, with two new hooves and a face",()=>{
+test("V74 first metamorphosis is exactly a horn plus a round face, without hooves",()=>{
   assert.match(source,/function drawFirstBody\(ctx,pose,R,t\)/);
-  assert.match(source,/F1 Destello: the pearl horn grows a neck, ears, a muzzle and TWO tentative hooves/);
+  assert.match(source,/F1 · Destello: a SINGLE spherical face grows around Cuernín's horn. Zero legs/);
   assert.match(source,/if \(f === 1\) \{ drawFirstBody\(ctx,pose,R,pose\.t\|\|0\); return; \}/);
   assert.equal(render(0).legs,0,"Cuernín must still be only a living horn");
   const juvenile=render(1);
-  assert.equal(juvenile.legs,2,"Destello must have precisely two growing limbs");
+  assert.equal(juvenile.legs,0,"Destello must not have limbs before F2");
   assert.equal(juvenile.eyes,2);
   assert.equal(juvenile.mouths,1);
   assert.equal(render(2).legs,4,"Potro Iris has its own completed four-leg stage");
@@ -52,7 +52,7 @@ test("V60 form names and gameplay still preserve innate speed and jump",()=>{
   assert.equal(cuerno.forms[1].jump,15.4);
   assert.deepEqual(cuerno.abilities,["gleam","gallop","rainbow"]);
 });
-test("V60 browser audits the newborn, its two-hoof stage and Potro",()=>{
+test("V74 browser audits the lone horn, round face and first four-hoof Potro",()=>{
   assert.match(visual,/for\(const form of \[0,1,2,3,4\]\)/);
   assert.match(visual,/01j-cuerno-destello-first-metamorphosis/);
   assert.match(visual,/09g-cuerno-naciente-gameplay/);
