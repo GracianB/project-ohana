@@ -1,3 +1,11 @@
+## 09/10/2026 · OHANA V94 · ENEMIGOS LEGIBLES Y ESTABILIDAD GLOBAL · ohana-294
+
+- Los diez biomas comparten un **indicador contextual de amenaza**: solo los tres rivales prioritarios muestran señales sobre la cabeza; el aviso de ataque real queda claramente distinguido del mero permiso de ataque.
+- **Rendimiento del director de enemigos**: búsqueda espacial por celdas para grupos grandes (>12), con distancias euclídeas exactas. Combate, daño, hitboxes, IA, agresividad y presupuestos de ataques quedan idénticos.
+- Canvas sin efectos persistentes, sin temporizadores, sin RNG y compatible con movimiento reducido; oculta enemigos fuera de cámara y no interfiere en el jefe ni el final.
+- Pruebas de vecindad, comportamiento, accesibilidad, señales, precaché y contratos de V93 en preparación.
+- `ROADMAP_V100.md` fija los criterios de salida de V95 a V100. Las fases CI + Browser + Multiplayer + Visual + Release Gate son obligatorias antes del merge.
+
 ## 09/10/2026 · OHANA V93 · CUERNO · METAMORFOSIS COMPLETA · ohana-293
 
 - Cuatro rituales de transición, sincronizados con la cinemática de evolución: cuerno vivo que abraza su futura cara, nacimiento de cuatro patas, dos alas con plumas y Aurora final con siete arcos y cuernos nacarados.
