@@ -380,7 +380,12 @@ try {
         state:el.dataset.state || '',
         hidden:el.getAttribute('aria-hidden'),
         show:el.classList.contains('show'),
-        duration:Number(el.dataset.duration || 0)
+        duration:Number(el.dataset.duration || 0),
+        mode:el.dataset.mode || '',
+        story:el.dataset.story || '',
+        camera:el.dataset.camera || '',
+        beat:el.dataset.beat || '',
+        assist:el.dataset.assist || ''
       } : null
     };
   });
@@ -397,11 +402,39 @@ try {
     show: el.classList.contains('show'),
     state: el.dataset.state,
     hidden: el.getAttribute('aria-hidden'),
-    duration: Number(el.dataset.duration || 0)
+    duration: Number(el.dataset.duration || 0),
+    mode:el.dataset.mode || '',
+    story:el.dataset.story || '',
+    camera:el.dataset.camera || '',
+    beat:el.dataset.beat || '',
+    assist:el.dataset.assist || ''
   }));
-  assert.equal(supremeCinemaState.duration >= 1400, true, '09-supreme: duración cinematográfica insuficiente');
+  assert.equal(supremeCinemaState.duration >= 1500, true, '09-supreme: duración cinematográfica insuficiente');
+  assert.equal(supremeCinemaState.mode, 'storyboard', '09-supreme: no usa gramática V48');
+  assert.equal(supremeCinemaState.story, 'pollen-bonk', '09-supreme: storyboard de Kilo incorrecto');
+  assert.equal(supremeCinemaState.camera, 'rise', '09-supreme: cámara de Kilo incorrecta');
+  assert.equal(supremeCinemaState.assist, 'stitcho', '09-supreme: assist no entra en el mini-film');
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
+  await page.waitForTimeout(620);
   await capture(page, '09-supreme-u-assist');
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+
+  await page.evaluate(() => {
+    const api=window.__OHANA_E2E;
+    api.start('yomi');
+    api.setEvo(4);
+    api.setCombo(0);
+    api.cast(3);
+  });
+  await page.waitForTimeout(620);
+  const yomiSupreme = await page.locator('#supreme-cinema').evaluate((el) => ({
+    mode:el.dataset.mode || '',story:el.dataset.story || '',camera:el.dataset.camera || '',active:el.dataset.activeId || ''
+  }));
+  assert.equal(yomiSupreme.active, 'yomi', '09b-supreme: héroe incorrecto');
+  assert.equal(yomiSupreme.mode, 'storyboard', '09b-supreme: Yomi no usa storyboard');
+  assert.equal(yomiSupreme.story, 'void-looks-back', '09b-supreme: gag de Yomi incorrecto');
+  assert.equal(yomiSupreme.camera, 'pull', '09b-supreme: cámara de Yomi incorrecta');
+  await capture(page, '09b-supreme-yomi-story');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
 
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
