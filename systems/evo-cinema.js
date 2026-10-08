@@ -77,6 +77,8 @@ export function fullCanvas(cv) {
 export class Particles {
   constructor() { this.list = []; }
   add(p) {
+    // Bounded alpha-compositing budget during the final ascension.
+    if (this.list.length >= 128) return;
     this.list.push(Object.assign({ life: 0, max: 1, vx: 0, vy: 0, drag: 0.985, g: 0, size: 3, rot: 0, vr: 0, kind: "dot", color: "#fff", to: null }, p));
   }
   update(dt) {
@@ -398,6 +400,7 @@ export function playEvolution(detail = {}) {
 
   let t0 = performance.now();
   let last = t0;
+  let lastPaint = 0;
   let raf = 0;
   let skipAt = -1;
   let flashed = false;
@@ -526,6 +529,11 @@ export function playEvolution(detail = {}) {
 
   function frame(now) {
     if (finished) return;
+    if(lastPaint && now-lastPaint < (reduce?1000/12:1000/30) &&
+       (now-t0)/1000 < T.end){
+      raf=requestAnimationFrame(frame);return;
+    }
+    lastPaint=now;
     try {
       const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
@@ -731,7 +739,9 @@ export function playEvolution(detail = {}) {
       ctx.fillRect(-40, -40, W + 80, H + 80);
     }
 
-    const txt = seg(t, T.reveal + (reduce ? 0 : 0.12), T.reveal + (reduce ? 0.2 : 0.55));
+    // Preserve a quiet full-body reveal before the final title arrives.
+    const titleWait=finalForm && !reduce ? .65 : reduce ? 0 : .12;
+    const txt = seg(t, T.reveal + titleWait, T.reveal + titleWait + (reduce ? .2 : .43));
     if (txt > 0) {
       const base = Math.min(W * (L.portrait ? 0.105 : 0.07), H * 0.088, 100);
       const size = Math.max(30, base);
@@ -748,7 +758,7 @@ export function playEvolution(detail = {}) {
       drawTitle(ctx, title, 0, 0, size, finalForm ? ["#fff6c8", accent, light] : ["#ffffff", light, accent],
         { maxWidth: W * 0.92 / s, glow: rgba(accent, 0.9) });
       ctx.restore();
-      const sub = seg(t, T.reveal + 0.3, T.reveal + 0.7) * (reduce ? 0 : 1) + (reduce ? 1 : 0);
+      const sub = seg(t, T.reveal + titleWait + .18, T.reveal + titleWait + .57) * (reduce ? 0 : 1) + (reduce ? 1 : 0);
       ctx.globalAlpha = sub * fade;
       const y2 = ty + size * 0.85;
       const bw = Math.min(W * 0.5, size * 4) * easeOut(sub);
