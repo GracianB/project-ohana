@@ -1,3 +1,13 @@
+## 08/10/2026 · V66 CUERNO · MENSAJE 7/10 · ALMA DE UNICORNIO
+
+**Caché:** `ohana-265`. **Contrato:** 10 personajes / 5 formas, Dino y Grok intactos. Fases anteriores, Círculo Iris L y Sueño Arcoíris U preservados.
+
+- Cuerno tiene ahora pantomimas individuales en Canvas, con origen en los estados reales del rig: F0 Cuernín curioso y juguetón; F1 Destello tímido; F2 Potro Iris que hace cabriolas; F3 Unicornio Estelar que contempla constelaciones; F4 Unicornio Aurora que estornuda nácar o se inclina majestuosamente.
+- Seis secuencias visuales reutilizables pero con identidad por etapa: `curious`, `shy`, `prance`, `stargaze`, `sneeze`, `bow`. Controles del rig `idle`, `victory`, y casteo U, pulsos `flourish` periódicos y `flourishN`, sin RNG/temporizadores/recursos externos. La forma final cierra los ojos al estornudar o saludar e inclina su anatomía real; el potro recoge los cascos al jugar.
+- El carrusel de personajes incorpora una prueba visual forzada no productiva, con seis capturas PNG en navegador real y control de `dataset.cuernoBeat`/cache render. Se respetan el tiempo de animación, el contorno del personaje y el dibujo de rostro.
+- Cobertura específica Node de comportamientos, silencio en combate o herida, estados de victoria y U, determinismo de píxeles por estados y equilibrio `ctx.save/restore`. No se modifica física, hitboxes, cifras, enemigos ni otros personajes.
+- Ajuste exclusivamente de sangría en `characters/draw.js` y `characters/art/pizza.js` para respetar el límite de JavaScript de 1.5 MB, sin modificar su ejecución. Calidad Node/Chromium/Firefox/Safari donde corresponda, multiplayer, visual y release gate.
+
 ## 08/10/2026 · V65 CUERNO · MENSAJE 6/10 · CÍRCULO IRIS Y SUEÑO ARCOÍRIS
 
 **Caché:** `ohana-264`. **Contrato:** 10 personajes / 5 formas, Dino y Grok sin cambios.
