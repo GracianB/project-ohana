@@ -9,7 +9,7 @@ globalThis.window.addEventListener = globalThis.addEventListener;
 globalThis.window.removeEventListener = globalThis.removeEventListener;
 globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 
-const { useAbility, clearAbilityFx, registerCombatAction, supremeOf } = await import('../systems/abilities.js');
+const { useAbility, clearAbilityFx, registerCombatAction, supremeOf, abilityPreMove } = await import('../systems/abilities.js');
 
 function makeEnemy(overrides = {}) {
   return {
@@ -41,6 +41,36 @@ function cast(id, enemies) {
   useAbility(game, 3);
   return game;
 }
+
+test('V47B: U no desplaza automáticamente a ningún héroe', () => {
+  for (const id of ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno']) {
+    clearAbilityFx();
+    const game = makeGame(id, []);
+    game.player.facing = -1;
+    game.player.x = 240;
+    game.player.vx = 0;
+    game.player.vy = 0;
+    useAbility(game, 3);
+    assert.equal(game.player.x, 240, id + ': U cambia x sin input');
+    assert.equal(game.player.vx, 0, id + ': U lanza horizontalmente sin input');
+    assert.equal(game.player.vy, 0, id + ': U lanza verticalmente sin input');
+  }
+  clearAbilityFx();
+});
+
+test('V47B: turbo de Frita obedece input y no la arrastra por facing', () => {
+  clearAbilityFx();
+  const game = makeGame('frita', []);
+  game.player.speed = 6;
+  game.player.facing = -1;
+  useAbility(game, 3);
+  abilityPreMove(game, { left:false, right:false, jump:false, drop:false, t:1 });
+  assert.equal(game.player.vx, 0);
+  abilityPreMove(game, { left:false, right:true, jump:false, drop:false, t:2 });
+  assert.equal(game.player.facing, 1);
+  assert.ok(game.player.vx > 0);
+  clearAbilityFx();
+});
 
 test('PR151.11: Kilo supreme cura y concede invulnerabilidad', () => {
   const game = cast('kilo');

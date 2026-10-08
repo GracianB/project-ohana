@@ -405,3 +405,33 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
     height:min(260px,38vh)!important;
   }
 }
+
+
+/* ==========================================================================
+   V47B · SELECTOR PERFORMANCE + TIGHTER SPOTLIGHT
+   Keep atmosphere, stop spending GPU on invisible glass.
+   ========================================================================== */
+#char-select .hero-stage::before{
+  top:72%!important;
+  width:min(420px,32vw)!important;
+  height:min(82px,9vh)!important;
+  filter:blur(7px)!important;
+}
+#char-select .hero-stage::after{width:min(500px,40vw)!important}
+#char-select .brand-bar,
+#char-select .hero-dossier,
+#char-select .title-controls{backdrop-filter:blur(8px)!important}
+#char-select .roster-arrow,
+#char-select #menu-row .cta{backdrop-filter:none!important}
+#char-select #chars .portrait canvas{
+  filter:drop-shadow(0 24px 20px rgba(0,0,0,.36))!important;
+}
+#char-select #chars .char-card.selected .portrait canvas{
+  filter:drop-shadow(0 26px 22px rgba(0,0,0,.40))!important;
+}
+@media(max-width:900px){
+  #char-select .hero-stage::before{width:min(340px,48vw)!important;height:72px!important}
+}
+@media(max-width:560px){
+  #char-select .hero-stage::before{width:230px!important;height:58px!important}
+}

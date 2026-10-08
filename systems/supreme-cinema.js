@@ -30,7 +30,9 @@ function mount(){
 function heroDef(id){return ROSTER.find(r=>r.id===id)||ROSTER[0];}
 function actor(def,evo,color){
   const p=makeDummy(def.id,clamp(Number(evo)||0,0,4),color||def.color);
-  p._poseOverride="idle";return p;
+  p._poseOverride="idle";
+  p.vx=0;p.vy=0;p.grounded=true;p.facing=1;
+  return p;
 }
 function motif(ctx,id,cx,cy,R,k,color,t){
   if(k<=0)return;
@@ -94,10 +96,11 @@ function play(detail={}){
     ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
     const inK=easeOut(seg(k,0,.22)),outK=1-easeOut(seg(k,.76,1)),vis=inK*outK;
     motif(ctx,def.id,cx,cy,target*.92,inK,color,t);
+    p.vx=0;p.vy=0;p.grounded=true;
     p._poseOverride=k<.34?"idle":k<.72?"attack":"victory";p.melee=k>.34&&k<.72?10:0;
     ctx.save();ctx.globalAlpha=vis;const pop=lerp(.78,1,easeBack(seg(k,.08,.45)));drawDummy(ctx,p,cx,cy+target*.5,scale*pop,t*60);ctx.restore();
     if(ally&&k>.44&&k<.86){
-      ally._poseOverride="attack";ally.melee=8;ctx.save();ctx.globalAlpha=vis*.78;drawDummy(ctx,ally,cx-target*.72,cy+target*.42,scale*.62,t*60);ctx.restore();
+      ally.vx=0;ally.vy=0;ally.grounded=true;ally._poseOverride="attack";ally.melee=8;ctx.save();ctx.globalAlpha=vis*.78;drawDummy(ctx,ally,cx-target*.72,cy+target*.42,scale*.62,t*60);ctx.restore();
     }
     if(k>.16){
       ctx.save();ctx.globalAlpha=vis;

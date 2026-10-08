@@ -1,3 +1,22 @@
+## 08/10/2026 · V47B SUPREME CONTROL + PERFORMANCE PASS
+
+**Caché:** `ohana-239`.
+
+V47B corrige la deriva lateral de algunas Supremas y reduce el coste visual del selector/cinemáticas.
+
+- **U sin auto-movimiento:** lanzar una Suprema ya no aplica impulso horizontal, teletransporte, salto o dash automático por heredar el especial del personaje.
+- Chispín y Frita dejan de salir disparados según `facing`; el turbo de Frita solo acelera cuando el jugador marca dirección.
+- Supreme Shorts fuerzan `vx=0`, `vy=0` y locomoción neutral en héroe/assist para que el rig no interprete carrera accidental.
+- Browser E2E reproduce el bug real con Chispín y Frita en Forma 5 y exige `vx≈0` tras U sin input.
+- **Spotlight más pequeño:** Hero Gate y halo de suelo reducidos para que el personaje domine el carrusel.
+- **Selector más ligero:** retratos a 24 fps, solo se dibujan las cinco tarjetas visibles, lookup de roster cacheado y DPR limitado por tamaño del canvas.
+- **Backdrop más ligero:** 30 fps, 28 motas deterministas, DPR adaptativo y gate más pequeño.
+- **Cinemáticas fullscreen:** DPR adaptativo en pantallas grandes para evitar renderizar millones de píxeles sin ganancia perceptible.
+- Menos `backdrop-filter` y sombras apiladas en controles del selector.
+- Simulación/juego permanece a 60 Hz; las optimizaciones afectan solo a presentación.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+- Próximo bloque: **Kilo Soul Pass**.
+
 ## 08/10/2026 · V47A CAROUSEL FIT + HOKU HERO GATE
 
 **Caché:** `ohana-238`.
