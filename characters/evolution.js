@@ -113,10 +113,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "La corona aurora despierta: Chispín ya no persigue la tormenta, la dirige.",
   ],
   cat: [
-    "La sombra aprende a sonreír.",
-    "La luna despierta bajo el pelaje.",
-    "El eclipse empieza a cerrarse.",
-    "Nueve vidas. Una sola silueta.",
+    "Michi descubre que hasta su sombra quiere jugar.",
+    "Aprende a saltar entre reflejos de luna sin tocar el suelo.",
+    "El eclipse responde a sus zarpas: nueve huellas, ninguna igual.",
+    "Nueve vidas, un solo guardián. Y todavía exige caricias.",
   ],
   dragon: [
     "El fuego aprende a volar.",
