@@ -473,9 +473,10 @@ if(id==="kilo"){
     veil.addColorStop(1,"rgba(216,207,255,0)");
     ctx.fillStyle=veil;ctx.fillRect(cx-target*.8,hornY-target*.8,target*1.6,target*1.6);
     ctx.save();ctx.lineWidth=Math.max(1.4,target*.007);ctx.lineCap="round";
-    for(let i=0;i<5;i++){
-      const x=cx+(i-2)*target*.23,y=cy-target*.17-drift*(.38+(i%2)*.27);
-      ctx.globalAlpha=.32+.36*Math.sin(Math.PI*q);ctx.strokeStyle=rainbow[i+1];
+    const symbols=Math.min(5,Math.max(0,Math.floor(Number(dreamCount)||0)));
+    for(let i=0;i<symbols;i++){
+      const x=cx+(i-(symbols-1)/2)*target*.23,y=cy-target*.17-drift*(.38+(i%2)*.27);
+      ctx.globalAlpha=.32+.36*Math.sin(Math.PI*q);ctx.strokeStyle=rainbow[(i+1)%7];
       ctx.beginPath();ctx.moveTo(x-5,y-6);ctx.lineTo(x+5,y-6);
       ctx.lineTo(x-5,y+6);ctx.lineTo(x+5,y+6);ctx.stroke();
       drawSpark(ctx,x+9,y-12,target*.012*(1+q),rainbow[(i+4)%7]);
@@ -505,6 +506,17 @@ if(id==="kilo"){
       const a=i*TAU/5+t*.10;
       drawSpark(ctx,cx+Math.cos(a)*target*.51,cy+Math.sin(a)*target*.31,
         target*.012*fade,rainbow[(i+2)%7]);
+    }
+    // One final quiet diadem, celebrating the unicorn rather than the screen.
+    if(fade>.03){
+      ctx.save();ctx.strokeStyle="#fff5d4";ctx.globalAlpha=.30*fade;ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(cx,cy-target*.45,target*.25,Math.PI*1.07,Math.PI*1.93);ctx.stroke();
+      for(let i=0;i<7;i++){
+        const a=Math.PI*1.1+i*Math.PI*.8/6;
+        drawSpark(ctx,cx+Math.cos(a)*target*.25,cy-target*.45+Math.sin(a)*target*.25,
+          target*.009*fade,rainbow[i]);
+      }
+      ctx.restore();
     }
   }
 }
@@ -537,7 +549,7 @@ if(active) active.stop();
 const el=mount(),cv=el.querySelector("canvas"),fc=fullCanvas(cv),ctx=fc.ctx;
 const def=heroDef(String(detail.id||"kilo"));
 const story=SUPREME_STORYBOARDS[def.id]||SUPREME_STORYBOARDS.kilo;
-const evo=clamp(Number(detail.evo)||4,0,4);
+const evo=clamp(detail.evo==null?4:Number(detail.evo),0,4);
 const color=detail.color||def.color||"#ffe66a";
 const p=actor(def,evo,color);
 const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
@@ -607,7 +619,7 @@ function frame(now){
     const stage=cuernoGrandStage(k);
     el.dataset.cuernoPhase=stage.name;
     p._cuernoMagicSlot=k>=.22&&k<.76?3:-1;
-    p._specialAuroraT=k>=.76?Math.round((1-k)*180):0;
+    p._specialAuroraT=k>=.51?Math.round((1-k)*260):0;
   }else delete el.dataset.cuernoPhase;
 
   let heroAlpha=vis;

@@ -75,12 +75,14 @@ export const Passives = {
 
     if (id === "punta") {
       // Speed and height come from roster stats, always on, never gated by K.
-      // A restrained pearl wake makes the naturally faster movement readable.
+      // V73 · Six times less visual clutter than a continuous particle spray.
+      // Innate speed/jump always come from the roster, never K/U or particle counts.
       const tick=Number(input.t)||Number(game.t)||0;
-      if ((input.left||input.right) && Math.abs(p.vx||0)>p.speed*.72 && tick%9===0) {
-        game.fx?.emit?.(cx(p)-(p.facing||1)*p.w*.42,p.y+p.h*.72,{
-          color:evo>=3?"#ffe5a8":"#f6bde6",count:2,size:2.1,
-          speed:1.2,up:.25,life:13,star:evo>=2
+      const colors=["#f6b9e4","#e9c0f5","#cebcff","#b6e6f5","#ffe2ab"];
+      const running=(input.left||input.right)&&Math.abs(p.vx||0)>p.speed*.72;
+      if(running&&tick%(evo>=3?8:10)===0){
+        game.fx?.emit?.(cx(p)-(p.facing||1)*p.w*.42,p.y+p.h*.74,{
+          color:colors[evo],count:2,size:2.1,speed:1.1,up:.3,life:12,star:evo>=2
         });
       }
     }
@@ -206,8 +208,12 @@ export const Passives = {
         if (p._slideT === 0) p._slideCd = 18;
       }
     } else if (id === "punta") {
-      if (!p.grounded && (input.t % 6) === 0) {
-        game.fx.emit(cx(p) + (p.facing || 1) * 6, p.y + 2, { color: "#ffe9a8", count: 1, size: 2.4, up: -0.4, life: 14, star: true });
+      // A trail of one soft pearl follows the highest innate jump.
+      if(!p.grounded && (Number(input.t)||0)%8===0){
+        game.fx?.emit?.(cx(p)+(p.facing||1)*6,p.y+2,{
+          color:["#ffc4e4","#eed1ff","#d3c8ff","#c0e6ff","#fff0bd"][evo],
+          count:1,size:2.3,up:-.4,life:14,star:true
+        });
       }
     }
 
@@ -282,11 +288,13 @@ export const Passives = {
 
     if (p._puntT > 0) p._puntT--;
     if (id === "punta" && p.grounded && p._preVy > 3.2 && !p.dead) {
-      rings.push({ x: cx(p), y: p.y + p.h, R: 26, life: 10, max: 10, color: "#ffe9a8", flat: true });
+      // A playful pearly landing ring, one per landing, never a continuous hazard.
+      const tone=["#f7b8e1","#efd0fa","#cfc0f7","#b6e6f7","#fff2c4"][evo];
+      rings.push({ x: cx(p), y: p.y + p.h, R: 24+evo*2, life: 11, max: 11, color: tone, flat: true });
       if (p.vy > -1) p.vy = -3.4;
       p._puntT = 12;
       p._pmove = "punta";
-      game.fx.emit(cx(p), p.y + 2, { color: "#fff6c8", count: 6, size: 2.5, up: 1.2, star: true });
+      game.fx?.emit?.(cx(p), p.y+2, { color: tone, count: 5, size: 2.5, up: 1.2, star: true });
     }
 
     // chispas de Chispín

@@ -33,9 +33,9 @@ oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de
 ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
 sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
 maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
-gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "Una lanza nacarada que atraviesa hasta tres enemigos." },
-gallop: { name: "Galope radiante", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embestida luminosa de cuerno, limitada por los bordes del mundo." },
-rainbow: { name: "Círculo Iris", key: "L", cd: 5600, color: "#fff6c8", desc: "Arcoíris circular difuminado: cada evolución amplía el alcance hasta llenar la pantalla." },
+gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "J: cuerno de nácar con estela iris. Atraviesa hasta tres enemigos." },
+gallop: { name: "Galope radiante", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: galope de cuatro apoyos y cuatro cintas mágicas. Frena al llegar al muro." },
+rainbow: { name: "Círculo Iris", key: "L", cd: 5600, color: "#fff6c8", desc: "L: siete colores en círculo. Crece contigo y Aurora cubre la pantalla." },
 };
 
 const FLOW_KEYS = ["H", "J", "K", "L", "U"];
@@ -244,7 +244,7 @@ dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra
 frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
 pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
 yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
-cuerno:  { kind: "aurora",  line: "QUE SUEÑE TODO OHANA", text: "La aurora duerme a todos los enemigos normales y los disuelve en oleadas de luz. El jefe resiste." },
+cuerno:  { kind: "aurora",  line: "LOS SUEÑOS TAMBIÉN VUELAN", text: "Cuerno despierta siete colores. Los enemigos visibles se duermen entre estrellas, salvo el jefe." },
 });
 
 function activateSpecial(game, p, { launch = true } = {}) {
@@ -665,6 +665,25 @@ FX.length = w;
 trimAbilityProjectiles(game);
 }
 
+// V73: four ribbons dance behind Cuerno's four-hoof gallop, at most four curves.
+// Pure visual feedback: the dash still obeys walls and never grants flight.
+export function drawCuernoGallopRibbons(ctx,p,cam,t,remaining){
+if(p?.id!=="cuerno"||!(remaining>0)||p.dead)return;
+const evo=Math.max(0,Math.min(4,Number(p.evo)||0)),face=p.facing||1;
+const x=p.x+p.w*.5-cam.x,y=p.y+p.h*.63-cam.y;
+const palette=["#f5afd7","#ffdd9b","#b8e5f0","#c4b6fb"];
+const alpha=Math.min(.53,remaining/15*.5);
+ctx.save();ctx.translate(x,y);ctx.scale(face,1);ctx.lineCap="round";
+for(let i=0;i<4;i++){
+const lag=(i+1)*(14+evo*3),wobble=Math.sin(t*.18+i*1.35)*3;
+ctx.globalAlpha=alpha*(1-i*.14);ctx.strokeStyle=palette[i];ctx.lineWidth=2.5-i*.25;
+ctx.beginPath();ctx.moveTo(-p.w*.46,(-2+i*5));
+ctx.bezierCurveTo(-18-lag*.22,-15+i*5+wobble,-lag*.66,4+i*6,-lag,(-6+i*6)+wobble);
+ctx.stroke();
+}
+ctx.restore();
+}
+
 export function drawAbilityFx(ctx, game, t) {
 const p = game.player;
 if (!p) return;
@@ -679,6 +698,7 @@ ctx.restore();
 }
 if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
 if (S.charge > 0) drawChargeShield(ctx, p, cam, t);
+if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 drawCastSignature(ctx, p, cam, t);
 }
 
@@ -1255,21 +1275,21 @@ w:30+evo*2,h:10,life:38,dmg:(19+evo*3)*pw(p),
 color:"#ffeab5",shape:"auroraLance",owner:"player",trail:true,pierce:3
 },MAX_RUNTIME_PROJECTILES);
 p._thrust=5;p._thrustFace=face;
-boom(g,cx(p)+face*16,y,"#ffeab5",5,{star:true});
+boom(g,cx(p)+face*16,y,["#ffe6ac","#f3c9eb","#d6ceff","#b7e9f4","#fff1ad"][evo],5,{star:true});
 },
 gallop(g,p,evo){
 S.gallop=17+evo*2;S.gallopFace=p.facing||1;
 p.vy=Math.min(p.vy||0,-3.4);
 armor(p,18);p._thrust=6;p._thrustFace=S.gallopFace;
-g.shake=Math.min(12,(g.shake||0)+4);
-boom(g,cx(p),cy(p),"#b6ebee",7,{star:true});
+g.shake=Math.min(12,(g.shake||0)+3);
+boom(g,cx(p),cy(p),["#f5c9e8","#f2d9fa","#ccbffc","#afdef4","#fff0c1"][evo],6,{star:true});
 },
 rainbow(g,p,evo){
 const radius=[170,260,400,610,Math.hypot(viewW(),viewH())*1.12][evo];
 add({kind:"irisHalo",x:cx(p),y:cy(p),r:radius,life:58,max:58,
 evo,color:"#fff6c8",hit:new Set(),dmg:(25+evo*6)*pw(p)});
 p._auroraHaloT=58;
-boom(g,cx(p),cy(p),"#c6dcff",5,{star:true});
+boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{star:true});
 },
 
 };
@@ -2256,6 +2276,14 @@ ctx.beginPath();ctx.arc(x,y,Math.max(1,radius-(3-i)*ctx.lineWidth),0,TAU);ctx.st
 // A precise ivory crest makes the growing hit wave readable without screen flash.
 ctx.globalAlpha=.35*opacity;ctx.lineWidth=1.4;ctx.strokeStyle="#fff9e9";
 ctx.beginPath();ctx.arc(x,y,Math.max(1,radius),0,TAU);ctx.stroke();
+// Seven tiny stars mark the crest only as it expands; hit geometry stays unchanged.
+if(radius>50){ctx.globalAlpha=.22*opacity;ctx.lineWidth=1.2;
+for(let i=0;i<7;i++){
+ const a=i*TAU/7,xx=x+Math.cos(a)*radius,yy=y+Math.sin(a)*radius;
+ ctx.strokeStyle=cols[i];ctx.beginPath();
+ ctx.moveTo(xx-3,yy);ctx.lineTo(xx+3,yy);
+ ctx.moveTo(xx,yy-3);ctx.lineTo(xx,yy+3);ctx.stroke();
+}}
 ctx.restore();
 },
 supremeField(ctx, f, cam, t, g, p) {
@@ -3057,13 +3085,22 @@ ctx.arc(0, 0, Math.max(w, h) * 0.72, 0, Math.PI * 2);
 ctx.fill();
 ctx.restore();
 if (shape === "auroraLance") {
+// Seven filaments twist within the same hitbox; no projectile or damage duplication.
+ctx.fillStyle="#fff7d6";ctx.strokeStyle="#c5a8dc";ctx.lineWidth=1.4;
 ctx.beginPath();ctx.moveTo(-w*.55,0);
 ctx.quadraticCurveTo(-w*.22,-h*.72,w*.22,-h*.3);
 ctx.lineTo(w*.64,0);ctx.lineTo(w*.22,h*.3);
 ctx.quadraticCurveTo(-w*.22,h*.72,-w*.55,0);
 ctx.fill();ctx.stroke();
-ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.beginPath();
-ctx.moveTo(-w*.23,0);ctx.lineTo(w*.37,0);ctx.stroke();
+const colors=["#f8a7d3","#ffdaa4","#f8efba","#adedd4","#b9e5f5","#c5d0fa","#e3bdfa"];
+ctx.lineCap="round";
+for(let i=0;i<7;i++){
+ ctx.strokeStyle=colors[i];ctx.lineWidth=.75;ctx.globalAlpha=.73;
+ ctx.beginPath();ctx.moveTo(-w*.43,-h*.25+i*h*.08);
+ ctx.quadraticCurveTo(0,(i-3)*h*.11,w*.43,-h*.12+i*h*.04);ctx.stroke();
+}
+ctx.globalAlpha=1;ctx.strokeStyle="#fff";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(-w*.23,0);ctx.lineTo(w*.40,0);ctx.stroke();
 } else if (shape === "note") {
 drawNoteGlyph(ctx, 1, pr.color);
 } else if (shape === "bone") {

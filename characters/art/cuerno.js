@@ -136,8 +136,59 @@ if(!magic.continuous)R.sparkle(ctx,x,y,4+3*k,"#fff7dd");
 ctx.restore();
 }
 
+// V73 · Each evolution has the same tender family emblem, grown with its anatomy.
+export const CUERNO_FAMILY_COLORS=Object.freeze(["#f3a4d7","#ecc5fa","#bba7f5","#a6d9f4","#fff0b3"]);
+export function cuernoEmotion(pose,form){
+ const state=pose?.state||"idle";
+ if(state==="dead"||state==="hurt")return "quiet";
+ if(state==="victory")return "joy";
+ if(state==="cast")return Number(pose.castSlot)===3?"dream":"focus";
+ if(state==="jump"||state==="fall"||pose?.air)return "flight";
+ if(state==="run")return "dash";
+ return form===0?"wonder":"calm";
+}
+function drawCuernoFamilySeal(ctx,pose,R,form,t){
+ const emotion=cuernoEmotion(pose,form),anchors=[[0,-15],[0,-38],[10,-37],[12,-40],[15,-44]];
+ const [x,y]=anchors[form],col=CUERNO_FAMILY_COLORS[form],TAU=Math.PI*2;
+ const living=emotion!=="quiet",sway=emotion==="dash"?Math.sin(Number(pose.phase)||0):0;
+ const pulse=emotion==="joy"?.42:emotion==="dream"?.34:emotion==="flight"?.2:.1;
+ ctx.save();ctx.translate(x+sway*.6,y);
+ ctx.globalAlpha=living?.9:.52;ctx.fillStyle=form===4?"#fffcdf":"#fff9fb";
+ ctx.strokeStyle=form===4?"#c3a6d7":"#ad93c9";ctx.lineWidth=1.3;
+ ctx.beginPath();ctx.moveTo(0,-6);ctx.quadraticCurveTo(6,-1,0,7);
+ ctx.quadraticCurveTo(-6,-1,0,-6);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle=col;ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(0,.2,1.8+form*.14,0,TAU);ctx.fill();
+ if(pulse>.15){ctx.globalAlpha=.28+pulse*.3;ctx.strokeStyle=col;ctx.lineWidth=1.3;
+ ctx.beginPath();ctx.arc(0,0,9+4*pulse,Math.PI*.15,Math.PI*1.85);ctx.stroke();}
+ ctx.restore();
+ // An original surprise on each stage, with authored geometry and bounded motion.
+ if(living&&(emotion==="joy"||emotion==="dream"||emotion==="flight")){
+   ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.35;ctx.globalAlpha=.36;
+   if(form===0){ // Cuernín imagines its first tiny halo.
+     ctx.beginPath();ctx.ellipse(0,-44,13,4,Math.sin(t*.035)*.1,0,TAU);ctx.stroke();
+   }else if(form===1){ // Destello's growing ears hear its own first song.
+     for(const dx of [-1,1]){ctx.beginPath();ctx.arc(10+dx*10,-75,5,-1.45,-.45);ctx.stroke();}
+   }else if(form===2){ // Potro Iris prances with little silver horseshoes.
+     for(const dx of [-22,14]){ctx.beginPath();ctx.arc(dx,4,7,.25,2.9);ctx.stroke();}
+   }else if(form===3){ // Estelar carries a tiny map of its first night.
+     ctx.beginPath();ctx.moveTo(-26,-74);ctx.lineTo(-14,-82);ctx.lineTo(-3,-75);ctx.stroke();
+   }else{ // Aurora's crown rises between fully opened pinions.
+     ctx.beginPath();ctx.arc(-2,-101,13,Math.PI*1.12,Math.PI*1.90);ctx.stroke();
+   }
+   ctx.restore();
+ }
+ if(!living)return;
+ const glint=emotion==="joy"?3:emotion==="dream"?2:emotion==="flight"?2:emotion==="focus"?1:0;
+ const tip=HORN_TIPS[form];
+ for(let i=0;i<glint;i++){
+ const ox=(i-1)*13+Math.sin(t*.055+i)*2,oy=-13-i*11-(emotion==="flight"?4:0);
+ R.sparkle(ctx,tip[0]+ox,tip[1]+oy,1.7+form*.3+(emotion==="joy"?.7:0),IRIS_COLORS[(i+form*2)%7]);
+ }
+}
+
 function drawCuernoOverlays(ctx,pose,R,form,t,lift,tilt){
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
+drawCuernoFamilySeal(ctx,pose,R,form,t);
 drawCuernoSoul(ctx,pose,R,form,t);
 drawCuernoMagic(ctx,pose,R,form,t);
 ctx.restore();
@@ -484,8 +535,8 @@ const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0))
 const soul=cuernoSoulBeat(pose,4);
 const magic=cuernoMagicPose(pose,4);
 const unfold=air?1:magic?.slot===3?1:magic?.slot===2?.86:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
-const ink="#4d5478",coat="#fffaf0",shadow="#d6d6f0",gold="#f7d78a";
-const colors=["#f9d8b5","#f5b9e0","#b8d0ff","#a5ece4","#d9b8ff","#fff2b9"];
+const ink="#55506e",coat="#fffaf2",shadow="#d4d4f1",gold="#f8d994";
+const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
 const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0);
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
@@ -500,7 +551,7 @@ ctx.stroke();ctx.restore();
 }
 // Translucent aurora pinions: folded while resting, unfolding for jumps and casting.
 function wing(far){
-const flap=Math.sin(t*.10+(far?1:0))*2.1*(.25+unfold);
+const flap=Math.sin(t*.10+(far?1:0))*2.1*(.25+unfold)+(cast?-1.2:0);
 ctx.save();ctx.translate(far?-12:0,-52);
 ctx.rotate((far?-.24:.05)-unfold*.24);
 ctx.globalAlpha=far?.45:.68;
@@ -541,8 +592,15 @@ ctx.bezierCurveTo(-37,-62,-18,-61,-3,-53);
 ctx.bezierCurveTo(17,-57,30,-45,23,-30);
 ctx.bezierCurveTo(10,-22,-8,-23,-26,-26);
 ctx.bezierCurveTo(-39,-27,-46,-37,-43,-45);ctx.closePath();ctx.fill();ctx.stroke();
-ctx.fillStyle=shadow;ctx.globalAlpha=.58;ctx.beginPath();
+ctx.fillStyle=shadow;ctx.globalAlpha=.46;ctx.beginPath();
 ctx.ellipse(-11,-31,27,6,-.06,0,TAU);ctx.fill();ctx.globalAlpha=1;
+// An opalescent embroidery on Aurora's flank, never a second drawn character.
+ctx.save();ctx.strokeStyle="#e9c7e9";ctx.lineWidth=1.3;ctx.globalAlpha=.64;
+for(let i=0;i<3;i++){
+ ctx.beginPath();ctx.moveTo(-27+i*9,-48+i*.7);
+ ctx.quadraticCurveTo(-24+i*9,-44+i*.5,-20+i*9,-47+i*.5);ctx.stroke();
+}
+ctx.restore();
 // The flanks carry their own narrow starmap, not a ring of visual clutter.
 ctx.strokeStyle="#b5a2d6";ctx.lineWidth=1.5;ctx.beginPath();
 ctx.moveTo(-28,-45);ctx.lineTo(-18,-40);ctx.lineTo(-9,-46);ctx.lineTo(0,-40);ctx.stroke();
@@ -578,7 +636,7 @@ ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
 R.blush(ctx,45,-68,2.2,"#f6d5d7");
-R.eye(ctx,35,-79,5,pose,{iris:"#7e78b4",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":cast?"angry":triumph?"happy":"normal"});
+R.eye(ctx,35,-79,5,pose,{iris:"#8071b5",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":triumph?"happy":cast?"angry":"normal"});
 R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
 ctx.fillStyle="#a495a3";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
 // A crown-horn rises naturally from the brow with visible spiral relief.
