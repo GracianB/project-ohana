@@ -542,9 +542,9 @@ try {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
     assert.equal(item.mode, 'storyboard', 'V48: U sigue usando hero-short · ' + JSON.stringify(item));
     assert.ok(item.story && item.camera && item.beat.includes('→'), 'V48: storyboard incompleto · ' + JSON.stringify(item));
-    assert.ok(item.duration >= 2600 && item.duration <= 4200, 'V57: la U no permite leer la acción · ' + JSON.stringify(item));
+    assert.ok(item.duration >= 4800 && item.duration <= 6500, 'V86: la U no permite leer los actos · ' + JSON.stringify(item));
   }
-  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 8500 });
 
   // V39 — Dragón: agota sus saltos normales y obtiene una Batida de Alas real.
   await page.evaluate(() => {

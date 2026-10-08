@@ -4,6 +4,7 @@
 - Atrium: sin cables entre retratos, ni efectos sobre la intro. Se conservan chispas y reacciones.
 - Playa: fuera palmeras flotantes; quedan costas, islas, espuma, conchas y rocas.
 - Refactor: las 30 definiciones de habilidades salen de abilities.js a systems/ability-catalog.js. API inalterada.
+- Las U ganan cuatro o cinco actos visibles con duración propia de 4.8 a 6.3 s. La versión de movimiento reducido dura 1.2 s. Sin cambiar daño, cooldown ni desplazamiento.
 - Entrega sujeta a Unit/Browser/Multiplayer/Visual/Release Gate.
 
 ## 08/10/2026 · OHANA V85 · DESCENSO SIN REBOTE · ohana-285

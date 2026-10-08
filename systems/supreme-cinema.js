@@ -550,7 +550,7 @@ const p=actor(def,evo,color);
 const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
 const ally=allyDef?actor(allyDef,Math.min(4,Math.max(2,evo)),allyDef.color):null;
 const reduce=reducedMotion();
-const duration=reduce ? .78 : Math.max(2.65,story.duration);
+const duration=reduce ? 1.20 : Math.max(4.8,story.duration);
 let t0=0,raf=0,done=false;
 const token=++generation;
 
@@ -591,6 +591,11 @@ function frame(now){
   const k=clamp(t/duration,0,1);
   const W=fc.W,H=fc.H,cx=W/2,cy=H*.49;
   const target=Math.min(H*.48,W*.33);
+  // A readable chapter for each visual beat, not a blink-and-you-miss-it U.
+  const acts=story.beat.split("→").map(s=>s.trim()).filter(Boolean);
+  const actIndex=Math.min(acts.length-1,Math.floor(k*acts.length));
+  el.dataset.act=String(actIndex+1);
+  el.dataset.actLabel=acts[actIndex]||"";
   const baseScale=target/baseHeight(def.id,evo);
   const inK=easeOut(seg(k,0,.10));
   const outK=1-easeOut(seg(k,.90,1));
@@ -641,6 +646,15 @@ function frame(now){
 
   drawAssist(ctx,ally,k,t,cx,cy,target,baseScale,color);
 
+  // For all ten heroes, explain the unfolding action inside the cinema.
+  const captionIn=easeOut(seg(k,.04,.13));
+  if(captionIn>.01&&k<.90){
+    ctx.save();ctx.globalAlpha=captionIn*(1-easeOut(seg(k,.84,.92)));
+    drawTitle(ctx,"ACTO "+(actIndex+1)+" / "+acts.length+" · "+(acts[actIndex]||"SUPREMA"),
+      cx,H*.88,Math.max(12,Math.min(20,W*.015)),"#fff1d8",
+      {font:FONT_BODY,weight:900,stroke:false,maxWidth:W*.88});
+    ctx.restore();
+  }
   const copyK=easeOut(seg(k,.70,.84))*outK;
   if(copyK>.01){
     ctx.save();ctx.globalAlpha=copyK;
