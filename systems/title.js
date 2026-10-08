@@ -66,6 +66,7 @@ function portraitFit(def, evo, bw, bh, hero) {
   const foot = bh * (hero ? (evo >= 3 ? .88 : .90) : .86);
   return { scale, foot, visualAspect, envelope };
 }
+const TITLE_E2E = new URLSearchParams(location.search).has("e2e");
 let selectedId = "kilo";
 let tick = 0;
 let raf = 0;
@@ -107,7 +108,7 @@ function paintPortraits(now = performance.now()) {
       c.setTransform(dpr, 0, 0, dpr, 0, 0);
       const card = cv.closest(".char-card");
       const hero = card && card.classList.contains("selected");
-      const qaEvo = new URLSearchParams(location.search).has("e2e") && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
+      const qaEvo = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_EVO_OVERRIDE)
         ? Math.max(0, Math.min(4, window.__OHANA_TITLE_EVO_OVERRIDE))
         : null;
       const evo = hero ? (qaEvo ?? (Math.floor(tick / 220) % 5)) : 1;
