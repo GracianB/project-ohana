@@ -178,6 +178,16 @@ async function auditPage(page, label) {
       throw new Error('E2E: mensaje de sala incompleto: ' + JSON.stringify(labMessage));
     }
 
+    const speciesStart = api.step(1);
+    snapshots.push({ speciesStart });
+    if (!Array.isArray(speciesStart.enemyAI) || !speciesStart.enemyAI.length ||
+        speciesStart.enemyAI.some((enemy) => !enemy.family || !enemy.signature || !enemy.variant || !enemy.speciesMode)) {
+      throw new Error('E2E V42: identidad de especie incompleta · ' + JSON.stringify(speciesStart.enemyAI));
+    }
+    if (!speciesStart.enemyAI.some((enemy) => enemy.relation && enemy.relation !== 'NONE')) {
+      throw new Error('E2E V42: no emerge ninguna relación entre especies · ' + JSON.stringify(speciesStart.enemyAI));
+    }
+
     const rainStart = api.forceRain();
     const rainAfter = api.step(36);
     snapshots.push({ rainStart, rainAfter });
