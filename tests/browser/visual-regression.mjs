@@ -204,6 +204,30 @@ try {
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01f-frita: selector no vuelve a Kilo');
 
+  // V55 Pizza: five genuine Canvas portraits at every evolution stage.
+  for(let n=0;n<7;n++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'pizza','01g-pizza: selector does not reach Pizza');
+  for(let form=0;form<5;form++){
+    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(180);
+    const rendered=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let visible=0;
+      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+    });
+    assert.equal(rendered.form,form,'01g-pizza: unexpected form '+form);
+    assert.ok(rendered.scale>.2&&rendered.visible>10,'01g-pizza: missing slice pixels '+JSON.stringify(rendered));
+    await capture(page,'01g-pizza-molten-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let n=0;n<7;n++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01g-pizza: selector did not return to Kilo');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
