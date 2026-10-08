@@ -567,8 +567,21 @@ const blocked = rollingDino && (step.x <= 0 ||
  step.x + step.w >= (game.worldW || 1600) ||
  (game.platforms || []).some(pl => aabb(step, pl)));
 if (blocked) {
- S.charge = 0; p.vx = 0;
- game.fx?.emit?.(cx(p), cy(p), { color: "#c9f47e", count: 5, size: 2.6, speed: 1.5, life: 10 });
+ // Dino's roll ends in one readable wall-bonk, not silent braking. The
+ // recoil moves backward and the little shockwave hits only nearby foes.
+ S.charge = 0;
+ const edge = face > 0 ? p.x + p.w : p.x;
+ p.vx = -face * 2.4;
+ p.vy = Math.min(Number(p.vy) || 0, -2.6);
+ for (const e of game.enemies || []) {
+   if (!canHit(e) || Math.abs(cx(e) - edge) > 56 ||
+     Math.abs(cy(e) - cy(p)) > Math.max(42, p.h * 1.1)) continue;
+   hitEnemy(game, e, 14 * pw(p), { kx: face * 6, ky: -5,
+     stun: 16, color: "#d8ffb3", shake: 1, hitstop: 0, parts: 4 });
+ }
+ game.fx?.emit?.(edge, cy(p), { color: "#c9f47e",
+   count: game.reduceMotion ? 3 : 8, size: 2.6, speed: 1.5, life: 10 });
+ game.nums?.add?.(edge, p.y - 12, "¡BOING!", "#eaffad", false);
 } else {
  p.vx = face * Math.max(rollingDino ? 10.5 : 11, p.speed * (rollingDino ? 2.2 : 2.4));
  armor(p, 2);
