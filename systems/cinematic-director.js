@@ -51,6 +51,10 @@ addEventListener("ohana-death", (event) => {
 
 // V44: el final completo pertenece a systems/ending.js; no se antepone una tarjeta de texto.
 
+addEventListener("ohana-boss-fall", () => {
+  // V44: no text-card here. systems/ending.js owns the full final sequence.
+});
+
 addEventListener("ohana-evolve", (event) => {
   const d = event.detail || {};
   document.body.classList.toggle("cinema-final-evolution", !!d.final);
