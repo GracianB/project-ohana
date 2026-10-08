@@ -782,6 +782,56 @@ try {
   assert.equal(dinoL.lastAbilityId,'quake','09w-dino: skyfall quake L did not cast');
   await capture(page,'09w-dino-v75-quake-meteors-l');
 
+  // Dino V79 · The authentic procedural actor, five forms × idle/run,
+  // in one comparable screenshot. No placeholder PNGs, no synthetic art.
+  const v79EvolutionAudit=await page.evaluate(async()=>{
+    const [{default:Dino,dinoSecondaryMotion},{R}]=await Promise.all([
+      import('./characters/art/dino.js'),import('./characters/rig.js')]);
+    let canvas=document.getElementById('dino-v79-evolution-matrix');
+    if(!canvas){
+      canvas=document.createElement('canvas');
+      canvas.id='dino-v79-evolution-matrix';
+      canvas.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483600;pointer-events:none';
+      document.body.appendChild(canvas);
+    }
+    canvas.width=innerWidth;canvas.height=innerHeight;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#112524';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.textAlign='center';ctx.fillStyle='#edffce';
+    ctx.font='bold 26px sans-serif';
+    ctx.fillText('DINO · CINCO EVOLUCIONES / V79',canvas.width/2,51);
+    const colors=['#8ee07a','#4cbf56','#2ea8a0','#3f8f3a','#a9d83e'];
+    const profiles=[];
+    for(let form=0;form<5;form++){
+      const x=(form+.5)*canvas.width/5;
+      ctx.font='bold 14px sans-serif';ctx.fillStyle=colors[form];
+      ctx.fillText(['BEBÉ','DINO','PICO','REX','COLOSO'][form],x,90);
+      for(const [row,state]of ['idle','run'].entries()){
+        const y=row===0?canvas.height*.48:canvas.height*.85;
+        const phase=2.6+form*.13;
+        const pose={form,state,t:84,phase,speed:row?.9:0,
+          land:row?.62:.16,turnPulse:row?.30:.08,brake:row?.14:0,
+          sway:row?.35:.12,breath:.35,bounce:0,
+          look:{x:1,y:0},flourish:0,flourishN:0,atk:0,cast:0,castSlot:0};
+        const motion=dinoSecondaryMotion(pose);
+        if(!profiles.some(v=>v.form===motion.form))profiles.push(motion);
+        ctx.save();ctx.translate(x,y);
+        ctx.scale(Math.min(1.45,canvas.width/1200),Math.min(1.45,canvas.width/1200));
+        Dino.draw(ctx,pose,R);
+        ctx.restore();
+      }
+    }
+    ctx.font='12px sans-serif';ctx.fillStyle='#d8eccc';
+    ctx.fillText('ARRIBA: RESPIRACIÓN / ABAJO: CARRERA + INERCIA + ATERRIZAJE',
+      canvas.width/2,canvas.height*.96);
+    return {count:profiles.length,distinct: new Set(profiles.map(p=>p.hipDrop)).size};
+  });
+  assert.equal(v79EvolutionAudit.count,5,'Dino V79: not all five evolutions rendered');
+  assert.equal(v79EvolutionAudit.distinct,5,'Dino V79: five forms should have different mass');
+  await capture(page,'09w2-dino-v79-five-form-motion-matrix');
+  await page.evaluate(()=>document.querySelector('#dino-v79-evolution-matrix')?.remove());
+
+
   // V77 U · Five-act Colossus with real gameplay and film; Cuerno untouched.
   const dinoUltimate=await page.evaluate(()=>{
     const api=window.__OHANA_E2E;
