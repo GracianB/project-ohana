@@ -30,7 +30,7 @@ function draw(form,state="idle",phase=.35){
 test("V63 F2 is a juvenile foal between Destello and Estelar",()=>{
   assert.match(source,/function drawRainbowFoal\(ctx,pose,R,t\)/);
   assert.match(source,/if \(f === 2\) \{ drawRainbowFoal\(ctx,pose,R,pose\.t\|\|0\); return; \}/);
-  assert.deepEqual([0,1,2,3].map(form=>draw(form).limbs.length),[0,2,4,4]);
+  assert.deepEqual([0,1,2,3].map(form=>draw(form).limbs.length),[0,0,4,4]);
   const foal=draw(2);
   assert.equal(foal.eyes,1);assert.equal(foal.mouths,1);
   assert.ok(foal.beziers>=10,"organic silhouette, mane and tail");

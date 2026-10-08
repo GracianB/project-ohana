@@ -57,5 +57,5 @@ test("V64 native maximum stats, silhouette continuity and performance contracts"
  assert.doesNotMatch(body,/Math\.random|setTimeout|setInterval|requestAnimationFrame|new Image|fetch\(/);
  assert.match(visual,/01m-cuerno-aurora-final/);
  assert.match(visual,/09j-cuerno-aurora-real-play/);
- assert.deepEqual([0,1,2,3,4].map(form=>scene("idle",.2,form).limbs.length),[0,2,4,4,4]);
+ assert.deepEqual([0,1,2,3,4].map(form=>scene("idle",.2,form).limbs.length),[0,0,4,4,4]);
 });

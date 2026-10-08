@@ -515,7 +515,7 @@ ctx.restore();
 drawCuernoOverlays(ctx,pose,R,3,t,bounce,tilt);
 }
 
-// V64 F4: original adult Unicornio Aurora. Wings are a visual signature, not flight physics.
+// V74 F4: elegant OBSIDIAN BLACK unicorn, not a scaled-up white foal.
 function drawAuroraUnicorn(ctx,pose,R,t){
 const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump";
 const cast=pose.state==="cast"||pose.state==="attack",triumph=pose.state==="victory";

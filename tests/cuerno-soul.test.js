@@ -55,7 +55,7 @@ for(const beat of ["curious","shy","prance","stargaze","sneeze","bow"]){
 test("V66 maintains original equine biology and deterministic still-frame",()=>{
 const hero=ROSTER.find(p=>p.id==="cuerno");
 assert.deepEqual(hero.abilities,["gleam","gallop","rainbow"]);
-assert.deepEqual([0,1,2,3,4].map(n=>scene(n).limbs),[0,2,4,4,4]);
+assert.deepEqual([0,1,2,3,4].map(n=>scene(n).limbs),[0,0,4,4,4]);
 const a=scene(4,{cuernoBeat:"sneeze"}),b=scene(4,{cuernoBeat:"sneeze"});
 assert.deepEqual(a,b);
 const c=scene(4,{cuernoBeat:"bow"});

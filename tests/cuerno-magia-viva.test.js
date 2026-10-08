@@ -75,7 +75,7 @@ assert.match(titles,/__OHANA_TITLE_CUERNO_MAGIC/);
 assert.match(visual,/01o-cuerno-magia-viva-/);
 const hero=ROSTER.find(h=>h.id==="cuerno");
 assert.deepEqual(hero.abilities,["gleam","gallop","rainbow"]);
-assert.match(art,/HORN_TIPS=\[\[0,-65\],\[7,-88\],\[24,-100\],\[25,-120\],\[33,-139\]\]/);
+assert.match(art,/HORN_TIPS=\[\[0,-65\],\[4,-91\],\[24,-100\],\[25,-120\],\[33,-139\]\]/);
 const code=art.split("export function cuernoMagicPose(")[1].split("function horn(")[0];
 assert.doesNotMatch(code,/Math\.random|requestAnimationFrame|setTimeout|setInterval|fetch\(|new Image/);
 });

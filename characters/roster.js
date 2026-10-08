@@ -156,18 +156,18 @@ export const ALL_ROSTER = [
     ],
   },
   {
-    id: "cuerno", name: "Cuerno", role: "luz", tag: "Cuerno viviente → Unicornio aurora",
+    id: "cuerno", name: "Cuerno", role: "luz", tag: "Cuerno viviente → Unicornio negro alado",
     color: "#f2c1ff",
     speed: 6.0, jumpPower: 14.6, maxJumps: 2, health: 86, w: 22, h: 26,
     abilities: ["gleam", "gallop", "rainbow"],
     passive: { id: "punta", name: "Impulso innato", desc: "El más rápido de OHANA. Corre sin activar poderes, salta más alto y transforma cada aterrizaje en impulso de luz." },
-    evoNames: ["Cuernín · Semilla", "Destello · Naciente", "Potro Iris", "Unicornio Estelar", "Unicornio Aurora"],
+    evoNames: ["Cuernín · Semilla", "Destello · Naciente", "Potro Iris", "Unicornio Estelar", "Unicornio Negro"],
     forms: [
       { name: "Cuernín · Semilla", color: "#ffe0f4", speed: 6.0, jump: 14.6, jumps: 2, hp: 86, w: 22, h: 26 },
       { name: "Destello · Naciente", color: "#f2c1ff", speed: 6.7, jump: 15.4, jumps: 2, hp: 104, w: 24, h: 30 },
       { name: "Potro Iris", color: "#c9b6ff", speed: 7.4, jump: 16.2, jumps: 3, hp: 124, w: 26, h: 34 },
       { name: "Unicornio Estelar", color: "#9ad7ff", speed: 8.4, jump: 17.4, jumps: 3, hp: 150, w: 28, h: 38 },
-      { name: "Unicornio Aurora", color: "#fff6c4", speed: 9.6, jump: 18.6, jumps: 4, hp: 198, w: 32, h: 44, aura: true },
+      { name: "Unicornio Negro", color: "#252132", speed: 9.6, jump: 18.6, jumps: 4, hp: 198, w: 32, h: 44, aura: true },
     ],
   },
 ];
