@@ -525,7 +525,7 @@ const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0))
 const soul=cuernoSoulBeat(pose,4);
 const magic=cuernoMagicPose(pose,4);
 const unfold=air?1:magic?.slot===3?1:magic?.slot===2?.86:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
-const ink="#55506e",coat="#fffaf2",shadow="#d4d4f1",gold="#f8d994";
+const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
 const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
 const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0);
@@ -545,8 +545,8 @@ const flap=Math.sin(t*.10+(far?1:0))*2.1*(.25+unfold)+(cast?-1.2:0);
 ctx.save();ctx.translate(far?-12:0,-52);
 ctx.rotate((far?-.24:.05)-unfold*.24);
 ctx.globalAlpha=far?.45:.68;
-ctx.fillStyle=far?"#c0d6ff":"#d5f8f1";
-ctx.strokeStyle=far?"#a6b6e9":"#91d3cd";ctx.lineWidth=1.6;
+ctx.fillStyle=far?"#373653":"#343650";
+ctx.strokeStyle=far?"#8f82ba":"#b5a6cb";ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(0,0);
 ctx.bezierCurveTo(-9,-14,-27,-25-unfold*12,-34,-34-unfold*36+flap);
 ctx.bezierCurveTo(-48,-60-unfold*32,-34,-80-unfold*20,-20,-62-unfold*28);
@@ -565,8 +565,8 @@ function leg(x,clock,far){
 const step=run?Math.sin(phase+clock):0,reach=run?step*(far?9:12):0,tuck=air?(far?10:14):0;
 const kneeX=x+reach*.48+(far?-4:4),kneeY=-17+tuck*.5;
 const hoofX=x+reach+(far?-5:4),hoofY=6-tuck;
-R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?"#d6d8ef":"#fff0ea",{hand:false});
-ctx.fillStyle=far?"#aab2d5":"#e5c6b8";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?"#363247":"#272431",{hand:false});
+ctx.fillStyle=far?"#57516b":"#66576d";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(hoofX-5.8,hoofY-3);
 ctx.quadraticCurveTo(hoofX+.5,hoofY-6,hoofX+6,hoofY-2);
 ctx.lineTo(hoofX+6,hoofY+3);ctx.lineTo(hoofX-5.8,hoofY+3);
@@ -585,25 +585,30 @@ ctx.bezierCurveTo(-39,-27,-46,-37,-43,-45);ctx.closePath();ctx.fill();ctx.stroke
 ctx.fillStyle=shadow;ctx.globalAlpha=.46;ctx.beginPath();
 ctx.ellipse(-11,-31,27,6,-.06,0,TAU);ctx.fill();ctx.globalAlpha=1;
 // An opalescent embroidery on Aurora's flank, never a second drawn character.
-ctx.save();ctx.strokeStyle="#e9c7e9";ctx.lineWidth=1.3;ctx.globalAlpha=.64;
+ctx.save();ctx.strokeStyle="#a998cb";ctx.lineWidth=1.3;ctx.globalAlpha=.66;
 for(let i=0;i<3;i++){
  ctx.beginPath();ctx.moveTo(-27+i*9,-48+i*.7);
  ctx.quadraticCurveTo(-24+i*9,-44+i*.5,-20+i*9,-47+i*.5);ctx.stroke();
 }
 ctx.restore();
 // The flanks carry their own narrow starmap, not a ring of visual clutter.
-ctx.strokeStyle="#b5a2d6";ctx.lineWidth=1.5;ctx.beginPath();
+ctx.strokeStyle="#c2a2d9";ctx.lineWidth=1.5;ctx.beginPath();
 ctx.moveTo(-28,-45);ctx.lineTo(-18,-40);ctx.lineTo(-9,-46);ctx.lineTo(0,-40);ctx.stroke();
 for(const [x,y] of [[-28,-45],[-18,-40],[-9,-46],[0,-40]]){
 ctx.fillStyle=gold;ctx.beginPath();ctx.arc(x,y,1.7,0,TAU);ctx.fill();
 }
 // Proud swan-neck and true chest, joining the mature equine body organically.
+// The swan-neck tapers from chest to poll: two unequal S-curves, no rectangle.
 ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=2.8;
-ctx.beginPath();ctx.moveTo(6,-34);
-ctx.bezierCurveTo(7,-50,14,-72,18,-85);
-ctx.bezierCurveTo(24,-94,35,-89,35,-76);
-ctx.bezierCurveTo(32,-58,27,-41,22,-33);
-ctx.quadraticCurveTo(14,-27,6,-34);ctx.closePath();ctx.fill();ctx.stroke();
+ctx.beginPath();ctx.moveTo(3,-34);
+ctx.bezierCurveTo(5,-49,6,-71,22,-85);
+ctx.bezierCurveTo(27,-91,35,-88,35,-79);
+ctx.bezierCurveTo(37,-70,29,-65,26,-56);
+ctx.bezierCurveTo(22,-45,29,-38,26,-31);
+ctx.quadraticCurveTo(13,-25,3,-34);ctx.closePath();ctx.fill();ctx.stroke();
+ctx.save();ctx.strokeStyle="#867d9e";ctx.lineWidth=1.3;ctx.globalAlpha=.62;
+ctx.beginPath();ctx.moveTo(9,-42);ctx.bezierCurveTo(14,-51,15,-67,22,-76);ctx.stroke();
+ctx.restore();
 wing(false);
 leg(-20,Math.PI*.03,false);leg(20,Math.PI*1.04,false);
 // Seven locks of iridescent mane: reactive but bounded.
@@ -616,19 +621,19 @@ ctx.stroke();
 }
 // Expressive adult head: ear silhouette, broad forehead, proper equine muzzle.
 for(const side of [-1,1]){
-const x=28+side*8;ctx.fillStyle="#fff8ed";ctx.strokeStyle=ink;ctx.lineWidth=1.9;
+const x=28+side*8;ctx.fillStyle="#292634";ctx.strokeStyle=ink;ctx.lineWidth=1.9;
 ctx.beginPath();ctx.moveTo(x-4,-81);ctx.quadraticCurveTo(x+side*5,-101,x+side*9,-84);
 ctx.quadraticCurveTo(x+2,-77,x-4,-81);ctx.fill();ctx.stroke();
 }
-ctx.fillStyle="#fffdf6";ctx.strokeStyle=ink;ctx.lineWidth=2.9;
+ctx.fillStyle="#292735";ctx.strokeStyle=ink;ctx.lineWidth=2.9;
 ctx.beginPath();ctx.ellipse(37,-77,14.5,13,-.12,0,TAU);ctx.fill();ctx.stroke();
-ctx.beginPath();ctx.moveTo(39,-75);
+ctx.fillStyle="#3e3648";ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
-R.blush(ctx,45,-68,2.2,"#f6d5d7");
-R.eye(ctx,35,-79,5,pose,{iris:"#8071b5",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":triumph?"happy":cast?"angry":"normal"});
+R.blush(ctx,45,-68,2.0,"#bb7d99");
+R.eye(ctx,35,-79,5,pose,{iris:"#dcc3ff",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":triumph?"happy":cast?"angry":"normal"});
 R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
-ctx.fillStyle="#a495a3";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
+ctx.fillStyle="#e7c9e2";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
 // A crown-horn rises naturally from the brow with visible spiral relief.
 ctx.save();ctx.translate(33,-90);ctx.rotate(-.085+(cast?-.08:0));
 ctx.fillStyle="#fff5ce";ctx.strokeStyle="#9e9bc1";ctx.lineWidth=1.7;
@@ -660,7 +665,7 @@ ctx.arc(33,-139,8+17*flourish,-.8,2.5);ctx.stroke();ctx.restore();
 R.sparkle(ctx,32,-144,4+flourish*4,gold);
 }
 if(run&&speed>.25){
-ctx.save();ctx.globalAlpha=.45;ctx.strokeStyle=gold;ctx.lineWidth=1.5;
+ctx.save();ctx.globalAlpha=.40;ctx.strokeStyle=gold;ctx.lineWidth=1.5;
 for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-51-i*8,-20-i*9);ctx.lineTo(-68-i*8,-19-i*9);ctx.stroke();}
 ctx.restore();
 }
