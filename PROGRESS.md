@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V98 · Canvas eficiente · ohana-298
+
+- Orbes, corazones, enemigos no-jefe, proyectiles y fantasmas fuera del viewport se omiten únicamente en el dibujo, nunca en física o multiplayer.
+- Se mantienen las señales de amenaza globales, los relojes de Reina, el acceso móvil y los eventos ARIA de V97.
+- Margen conservador de 192px con pruebas. Candidata CI/Visual/Release Gate/Pages.
+
+
 ## 09/10/2026 · OHANA V97 · narración puntual accesible · ohana-297
 
 - Lector de pantalla: evolución, fase de la Reina y alertas de salud con histéresis; sin 60 anuncios/s.

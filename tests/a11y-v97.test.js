@@ -46,8 +46,9 @@ test("V97 live region and HUD remain part of offline runtime",()=>{
  const html=fs.readFileSync("index.html","utf8");
  const hud=fs.readFileSync("systems/hud.js","utf8");
  const css=fs.readFileSync("hud.css","utf8");
- assert.match(sw,/const VERSION = "ohana-297"/);
- assert.ok(html.includes("ohana-297"));
+ const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
+ assert.ok(version && Number(version.slice(6))>=297);
+ assert.ok(html.includes(version));
  assert.match(sw,/systems\/a11y-v97\.js\?v=/);
  assert.match(html,/id="a11y-game-announcements"[^>]+aria-live="polite"/);
  assert.match(hud,/announceAccessibleGameState\(doc,player,boss\)/);

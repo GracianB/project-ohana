@@ -18,6 +18,7 @@ import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
+import { visibleForRender } from "./systems/render-v98-culling.js";
 import { Floaters } from "./systems/floaters.js";
 import { portals } from "./systems/portals.js";
 import { DeathFx } from "./systems/death-fx.js";
@@ -2576,23 +2577,24 @@ Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
 for (const o of game.orbs) {
-if (o.taken) continue;
+if (o.taken || !visibleForRender(o,game.cam,camW(),camH())) continue;
 drawCrystal(o);
 }
 for (const h of game.hearts) {
-if (h.taken) continue;
+if (h.taken || !visibleForRender(h,game.cam,camW(),camH())) continue;
 ctx.fillStyle = "#f45"; ctx.beginPath(); ctx.arc(h.x - game.cam.x, h.y - game.cam.y, 8, 0, Math.PI * 2); ctx.fill();
 }
 for (const g of game.ghosts) {
+if (!visibleForRender(g,game.cam,camW(),camH())) continue;
 ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
 }
 if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
-for (const e of game.enemies) if (!game.finale || !e.boss) drawEnemy(ctx, e, game.cam, t);
+for (const e of game.enemies) if ((!game.finale || !e.boss) && (e.boss || visibleForRender(e,game.cam,camW(),camH()))) drawEnemy(ctx, e, game.cam, t);
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
-for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
-for (const b of game.bolts) drawBolt(ctx, b, game.cam, t);
+for (const pr of game.projectiles) if (visibleForRender(pr,game.cam,camW(),camH())) drawProjectile(ctx, pr, game.cam, t);
+for (const b of game.bolts) if (visibleForRender(b,game.cam,camW(),camH())) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
 game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam);
