@@ -613,17 +613,18 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
   }
 
   if (P.bounceFx) {
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.8)";
-    ctx.lineWidth = 2.1;
-    ctx.lineCap = "round";
-    const k = Math.abs(P.bounceFx.q) * 3.2;
-    for (const dx of [-12, 0, 12]) {
-      ctx.beginPath();
-      ctx.moveTo(dx * (1 + k * 0.3), 4);
-      ctx.lineTo(dx * (1.55 + k), 9 + k * 2.2);
-      ctx.stroke();
+    // Elastic landing: the cheese stretches down to the actual impact footprint.
+    const k = clamp(Math.abs(P.bounceFx.q) * 3.2, 0, 1);
+    ctx.save();ctx.lineCap = "round";
+    for(let i=-1;i<=1;i++){
+      const x=i*(11+k*4);
+      ctx.globalAlpha=.38+.34*k;
+      ctx.strokeStyle=i===0?"#fff3bc":"#ffb54d";
+      ctx.lineWidth=2.2-k*.4;
+      ctx.beginPath();ctx.moveTo(x,-3);ctx.quadraticCurveTo(x+i*7,7+k*5,x+i*(7+k*4),11+k*6);ctx.stroke();
     }
+    ctx.globalAlpha=.32*k;ctx.strokeStyle="#ffdf87";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.ellipse(0,4,19+k*14,3.5+k*1.5,0,0,TAU);ctx.stroke();
     ctx.restore();
   }
 
@@ -1027,6 +1028,15 @@ function draw(ctx, pose, R) {
   ctx.restore(); // spin
 
   if (f === 4 && !P.dead) orbit(ctx, R, F, t, true);
+
+  // The volcanic form gets an oven-core heartbeat only when actively casting.
+  if (f === 4 && pose.state === "cast" && pose.castSlot === 2) {
+    const heat = Math.sin(Math.PI * clamp(Number(pose.cast) || 0, 0, 1));
+    ctx.save();ctx.globalAlpha = .26 * heat;
+    ctx.strokeStyle="#fff5a4";ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.ellipse(0,F.top*.62,F.W*.45,F.W*.24,0,0,TAU);ctx.stroke();
+    ctx.restore();
+  }
 
   // --- FX ---
   if (P.gag > 0) drawPepperoniCatch(ctx, R, F, tipY, P.gag, f);
