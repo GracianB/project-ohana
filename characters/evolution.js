@@ -140,7 +140,7 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Porcioncita descubre que hasta un trocito pequeño puede rebotar.",
     "Aprende a lanzar pepperoni y recuperar lo que ama con queso.",
     "El picante le da coraje; su fuego nunca quema a los amigos.",
-    "Pizza Familiar convierte cada rescate en una fiesta compartida.",
+    "Pizza Volcánica descubre un fuego capaz de proteger a toda la familia.",
   ],
   yomi: [
     "El farol mira hacia el otro lado.",
