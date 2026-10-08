@@ -1,3 +1,12 @@
+## 09/10/2026 · OHANA V92 · CUERNO: RESONANCIA PRISMÁTICA Y CONTACTO REAL · ohana-292
+
+- **K, contacto físico entre fotogramas:** la estela arcoíris ahora reconoce a enemigos rápidos que cruzan el camino entre actualizaciones. La comprobación usa el segmento de movimiento enemigo contra hasta 32 puntos de la cinta, con un límite de desplazamiento de 180 px para impedir impactos falsos por teletransportes. El daño, duración de 600 frames y máximo dos estelas permanecen intactos.
+- **L, interacción auténtica K→L:** al alcanzar con la onda Iris a un enemigo previamente encantado por K aparece una resonancia de **siete cuernitos** alrededor del enemigo y el texto `✦ PRISMA`. Recibe un pequeño aturdimiento visualmente legible; **sin daño adicional**. Máximo cinco resonancias por lanzamiento de L.
+- **Arte:** trazos nacarados, anillo ovalado y animaciones puramente deterministas, sin PNG, sin partículas dinámicas ni filtros costosos; admite movimiento reducido.
+- **Aislamiento:** nueva geometría en `systems/cuerno-v92-resonance.js` y pruebas `tests/cuerno-v92-resonance.test.js`. No cambia el dibujo ni la física de Dino V90, tampoco carrusel, jefes ni la U.
+- **Offline:** `index.html` y `sw.js` sincronizados a `ohana-292`, nuevo módulo registrado en precaché.
+- **Release Gate:** pruebas Node, Browser E2E, Multiplayer E2E, regresión visual, release y después GitHub Pages.
+
 ## 09/10/2026 · OHANA V91 · CUERNO · MAGIA CON SIGNIFICADO · ohana-291
 
 - K: huellas de cascos nacaradas en el arcoíris, como máximo siete por estela; conservan los 10 segundos y dos rastros simultáneos.

@@ -1,5 +1,6 @@
 // CUERNO V84 · Fantasy geometry and rendering, isolated from combat/physics.
 import { drawCuernoHoofprints, drawCuernoEnchantClock, drawCuernoSevenHornCrest } from "./cuerno-v91-illusions.js";
+import { cuernoSweptRibbonTouches } from "./cuerno-v92-resonance.js";
 export { drawCuernoSevenHornCrest };
 // Ribbon lasts ten seconds after gallop ends. No RNG, no assets, no timers.
 export const CUERNO_FANTASY = Object.freeze({
@@ -179,7 +180,8 @@ export function updateCuernoFantasyTrail(g,f,p,galloping,canHit,cx,cy){
  if(f.life<=0)return false;
  const now=Number(g.t)||0;
  for(const e of g.enemies||[]){
-   if(!canHit(e)||!cuernoRibbonTouches(f.points,e))continue;
+   if(!canHit(e)||!(cuernoRibbonTouches(f.points,e)||
+     cuernoSweptRibbonTouches(f.points,e,{x:e._cuernoFantasyPrevX,y:e._cuernoFantasyPrevY})))continue;
    const first=!(Number(e._cuernoFantasyUntil)>now);
    e._cuernoFantasyUntil=now+CUERNO_FANTASY.markFrames;
    e._cuernoFantasyDamage=first?f.dmg:Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
