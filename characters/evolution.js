@@ -143,10 +143,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Pizza Volcánica descubre un fuego capaz de proteger a toda la familia.",
   ],
   yomi: [
-    "El farol mira hacia el otro lado.",
-    "La grieta empieza a respirar.",
-    "Algo enorme mira desde dentro.",
-    "La luna tiene una nueva razón para temer.",
+    "Una llamita tímida descubre cómo iluminar el camino.",
+    "Las mangas ya no esconden miedo: protegen a los viajeros.",
+    "El sello despierta y el farol aprende a defender sin herir por gusto.",
+    "La grieta deja de asustar: Yomi decide qué debe quedarse fuera.",
   ],
   cuerno: [
     "El brillo encuentra un color.",
