@@ -1,3 +1,11 @@
+## 08/10/2026 · V86 · EL CIELO VUELVE A SER CIELO · ohana-286
+
+- Intro: marca OHANA central, el reparto original sigue jugando y Cuerno bebé recobra proporción.
+- Atrium: sin cables entre retratos, ni efectos sobre la intro. Se conservan chispas y reacciones.
+- Playa: fuera palmeras flotantes; quedan costas, islas, espuma, conchas y rocas.
+- Refactor: las 30 definiciones de habilidades salen de abilities.js a systems/ability-catalog.js. API inalterada.
+- Entrega sujeta a Unit/Browser/Multiplayer/Visual/Release Gate.
+
 ## 08/10/2026 · OHANA V85 · DESCENSO SIN REBOTE · ohana-285
 
 **Base:** Cuerno V84 fusionado (`795cd4b2`). **Ruta a V100:** [V100-ROADMAP.md](V100-ROADMAP.md).

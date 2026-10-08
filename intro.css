@@ -42,7 +42,7 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 }
 #ohana-intro.ready .oi-welcome{opacity:1;transform:none}
 #ohana-intro .oi-welcome span{font:800 9px/1 Outfit,sans-serif;letter-spacing:.28em;color:#9be7ee}
-#ohana-intro .oi-welcome strong{font:700 clamp(24px,3.2vw,44px)/1 Fredoka,sans-serif;color:#fff6d5;letter-spacing:-.03em}
+#ohana-intro .oi-welcome strong{font:700 clamp(42px,7vw,88px)/1 Fredoka,sans-serif;color:#fff6d5;letter-spacing:.015em;text-shadow:0 0 38px rgba(255,223,161,.18)}
 #ohana-intro .oi-welcome small{font:600 12px/1.35 Outfit,sans-serif;color:rgba(236,245,244,.68)}
 #ohana-intro .oi-enter{
   position:absolute;right:clamp(18px,4vw,64px);bottom:clamp(26px,7vh,78px);z-index:7;

@@ -305,13 +305,8 @@ function drawBeach(ctx, cam, t, W, H) {
     }
   }
 
-  // palms ONLY on land — never in pit gap
-  const palmSpots = [90, 260, 480, 980, 1180, 1420];
-  for (let i = 0; i < palmSpots.length; i++) {
-    const wx = palmSpots[i];
-    const x = wx - cam.x * 0.55;
-    palm(ctx, x, sandY + 4, t + i * 7, i);
-  }
+  // Clear seaside silhouettes: remove unexplained oversized palms.
+  // Foam, sand shells and distant islands establish the beach.
 
   // drifting light motes above sand / sky
   ctx.fillStyle = "rgba(255,250,220,.55)";

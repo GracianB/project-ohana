@@ -10,38 +10,9 @@ import { sfx } from "../engine/audio.js";
 import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./mutations.js";
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
-export const ABILITY_DEFS = {
-ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "Nota musical que rebota 3 veces en el suelo." },
-hula: { name: "Giro hula", key: "K", cd: 2100, color: "#ff5ad5", desc: "Giro que refleja proyectiles y te hace flotar." },
-ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Espíritus que curan y dañan a todo lo que hay en pantalla." },
-plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
-rollo: { name: "Bola rodante", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos." },
-caos: { name: "Modo caos", key: "L", cd: 5600, color: "#8f7bff", desc: "Rebota por toda la sala arrollándolo todo." },
-chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Rayo que salta entre hasta 4 enemigos." },
-blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Teletransporte corto que deja una estela eléctrica." },
-storm: { name: "Nube tormenta", key: "L", cd: 6000, color: "#9cf", desc: "Nube que persigue enemigos lanzando rayos." },
-yarn: { name: "Ovillo bumerán", key: "J", cd: 600, color: "#ff8ad4", desc: "Ovillo que va y vuelve atravesando enemigos." },
-purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Onda grande que duerme a lo que alcanza y te cura." },
-ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 colas brillantes que serpentean y persiguen." },
-breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
-gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
-meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
-bite: { name: "Mocosaurio", key: "J", cd: 700, color: "#bafa69", desc: "Escupe babitas con ojos que buscan enemigos; conserva un mordisco cercano." },
-charge: { name: "Dino Rodillo", key: "K", cd: 2200, color: "#7de66e", desc: "Se hace bola con púas, rueda protegido y frena al chocar con la pared." },
-quake: { name: "Extinción", key: "L", cd: 6000, color: "#ffc36c", desc: "Terremoto de dos ondas con meteoritos volcánicos dirigidos a enemigos." },
-salt: { name: "Escopetazo de sal", key: "J", cd: 600, color: "#fff3c0", desc: "Abanico de granos de sal a corta distancia." },
-ketchup: { name: "Charco kétchup", key: "K", cd: 2000, color: "#e23b3b", desc: "Charco que ralentiza y daña con el tiempo." },
-fryer: { name: "Géiseres de aceite", key: "L", cd: 6000, color: "#ffd36a", desc: "Columnas de aceite hirviendo brotan en fila." },
-pepperoni: { name: "Disco pepperoni", key: "J", cd: 620, color: "#e0402a", desc: "Disco que rebota en paredes y suelo." },
-cheese: { name: "Hilo de queso", key: "K", cd: 1600, color: "#ffd84a", desc: "Te engancha a un enemigo o a la plataforma de arriba." },
-oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de calor y lluvia de porciones." },
-ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
-sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
-maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
-gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "J: cuerno de nácar con estela iris. Atraviesa hasta tres enemigos." },
-gallop: { name: "Galope encantado", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: deja un camino arcoíris 10 s que encanta y desgasta a los enemigos que lo pisan." },
-rainbow: { name: "Corona de los Siete Cuernos", key: "L", cd: 5600, color: "#fff6c8", desc: "L: invoca siete cuernos de luz y tres arcos iris. Una onda de siete colores golpea el área." },
-};
+import { ABILITY_DEFS } from "./ability-catalog.js";
+export { ABILITY_DEFS };
+
 
 const FLOW_KEYS = ["H", "J", "K", "L", "U"];
 const FLOW_WINDOW = 180;
