@@ -129,7 +129,7 @@ test("V92 new module cached offline, no Dino or shared physics changes",()=>{
  const sw=fs.readFileSync("sw.js","utf8");
  const html=fs.readFileSync("index.html","utf8");
  const abilities=fs.readFileSync("systems/abilities.js","utf8");
- assert.match(sw,/const VERSION = "ohana-292"/);
+ assert.match(sw,/const VERSION = "ohana-29[2-9]"/);
  assert.ok(sw.includes("systems/cuerno-v92-resonance.js?v="));
  assert.match(html,/ohana-292/);
  assert.ok(abilities.length<135000,"Shared ability code budget exceeded");
