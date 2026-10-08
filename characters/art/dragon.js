@@ -314,7 +314,7 @@ function drawBase(ctx, pose, R) {
     breathUp = 1; eyeMood = "happy";
     tailWave = 1.4 + Math.sin(t * 0.2) * 0.5;
   } else if (flying) {
-    const climb = clamp(-(Number(pose.vy) || 0) / 9, -1, 1);
+    const climb = clamp(-(Number(pose.vy) || 0), -1, 1);
     lean = 0.34 - climb * .09; headRot = -0.1 - climb * .06;
     legF = -0.55; legB = -0.85;
     armF = 0.9; armB = 0.6;
