@@ -407,6 +407,7 @@ function moonSoul(ctx, pose, form, front) {
         ctx.stroke();
       }
     }
+    // Three readable claw trails.
     if (state === "attack") {
       const atk = Math.max(0, Math.min(1, pose.atk || 0));
       const sweep = Math.sin(Math.PI * atk);
