@@ -119,10 +119,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Nueve vidas, un solo guardián. Y todavía exige caricias.",
   ],
   dragon: [
-    "El fuego aprende a volar.",
-    "Las alas encuentran su propio cielo.",
-    "La llama toma forma de leyenda.",
-    "El cielo acaba de ganar un dragón.",
+    "Sus pequeñas alas vencen al suelo por primera vez.",
+    "Aprende a dibujar caminos de fuego sin quemar su hogar.",
+    "El dragón real protege el cielo: la fuerza ya tiene propósito.",
+    "La corona solar despierta. No conquista el cielo: lo comparte.",
   ],
   dino: [
     "El pequeño rugido se hace grande.",
