@@ -10,7 +10,10 @@ function overlapsHorizontally(a, b) {
 
 export function beginPlatformDrop(player, platforms, down, wasGrounded) {
   if (!player) return null;
-  if (!player._dropPlatform && down && wasGrounded) {
+  // Edge-triggered: holding DOWN must cross one ledge, not every ledge below.
+  const freshPress = !!down && !player._dropWasHeld;
+  player._dropWasHeld = !!down;
+  if (!player._dropPlatform && freshPress && wasGrounded) {
     const feet = player.y + player.h;
     const support = (platforms || []).find((plat) =>
       plat && plat.h <= 24 && plat.h > 0 &&
