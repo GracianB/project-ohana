@@ -152,7 +152,7 @@ if (cv) {
       const bg=ctx.createLinearGradient(0,cy-R,0,cy+R);
       bg.addColorStop(0,scene.sky);
       bg.addColorStop(1,"#071219");
-      ctx.fillStyle=bg;ctx.fillRect(cx-R,cy-R,cx+R,cy+R);
+      ctx.fillStyle=bg;ctx.fillRect(cx-R,cy-R,R*2,R*2);
 
       if(scene.kind==="meadow"){
         ctx.fillStyle="#173c2e";ctx.fillRect(cx-R,cy+R*.34,R*2,R);
