@@ -15,7 +15,7 @@ test("V53 dragon art uses bounded local five-form solar animation",()=>{
 test("V53 dragon retains celestial flight and unique U",()=>{
  assert.match(abilities,/SUPERNOVA CELESTE/);
  assert.match(abilities,/Vuelo celestial/);
- assert.match(dragon,/f===0 && state==="idle"/);
+ assert.match(dragon,/state==="idle" && \(p.flourishN % 4\)===3/);
 });
 
 test("V53 solar ascent, halo and narrative are specific to Dragon",()=>{
