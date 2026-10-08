@@ -599,7 +599,8 @@ test('phase 45: ciclo de vida de entrada resetea teclado en pérdida de foco y p
   assert.match(source, /listen\(target, "blur", reset\)/);
   assert.match(source, /listen\(target, "focus", reset\)/);
   assert.match(source, /listen\(target, "pagehide", reset\)/);
-  assert.match(source, /listen\(document, "visibilitychange", reset\)/);
+  assert.match(source, /listen\(document, "visibilitychange", \(\) => \{/);
+  assert.match(source, /if \(document\.hidden\) reset\(\)/);
   assert.match(source, /KEYBOARD_STALE_MS\s*=\s*1200/);
   assert.match(source, /releasePointerSources/);
 });
