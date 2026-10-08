@@ -19,7 +19,11 @@ const crosses=(a,b,c,d)=>{
  if(ab<1e-8||cd<1e-8)return false;
  const cross=(u,v,w)=>(v.x-u.x)*(w.y-u.y)-(v.y-u.y)*(w.x-u.x);
  const ab1=cross(a,b,c),ab2=cross(a,b,d),cd1=cross(c,d,a),cd2=cross(c,d,b);
- return ab1*ab2<=0&&cd1*cd2<=0;
+ return ab1*ab2<=0&&cd1*cd2<=0&&
+   Math.max(Math.min(a.x,b.x),Math.min(c.x,d.x))<=
+     Math.min(Math.max(a.x,b.x),Math.max(c.x,d.x))&&
+   Math.max(Math.min(a.y,b.y),Math.min(c.y,d.y))<=
+     Math.min(Math.max(a.y,b.y),Math.max(c.y,d.y));
 };
 const distanceSegments2=(a,b,c,d)=>{
  if(crosses(a,b,c,d))return 0;
