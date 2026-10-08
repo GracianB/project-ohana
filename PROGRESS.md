@@ -4,11 +4,21 @@
 - HUD con región ARIA discreta y forced colors nativos. Conserva los controles V96 y los módulos de enemigos/cooperativo V95.
 - Candidata a release sujeta a CI y Pages.
 
+
 ## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
 
 - Diseño táctil para 320–420 px en vertical y 450 px de altura en apaisado, con separación real entre poderes, movimiento y salto.
 - Mantiene botones E/J/K/L/U, safe areas, foco visible y movimiento reducido sin cambiar bindings ni física.
 - Se preservan los avisos de Reina, el director global y el cooperativo estable de V95. Candidata CI/Visual/Release Gate/Pages.
+
+
+## 09/10/2026 · OHANA · CONCURSO SME · RITUALES DÚO
+
+- Nuevos **diez santuarios de cooperación**, uno por mundo: dos placas en lugares físicos distintos que requieren a los dos jugadores simultáneamente durante al menos 1,2 segundos. No se pueden activar en solitario.
+- **Validación en Netlify:** el servidor comprueba dos jugadores conectados, vivos, en la misma sala, posiciones recientes y placas diferentes. Estado de logros por sala compartido, recuperable al reconectar e imposible de repetir para acumular curación.
+- **Recompensa:** un vínculo de energía OHANA que cura hasta 15 puntos a cada jugador cuando recibe la confirmación del servidor. Las placas y el resultado se dibujan con Canvas limitado y accesible a movimiento reducido.
+- **Contrato multijugador original:** no se cambia la progresión de campaña, las físicas ni las estadísticas de personajes; los santuarios son opcionales y no bloquean puertas.
+- **Compatibilidad:** nuevas pruebas de escenarios negativos, 10 salas, continuidad, mensajes, Canvas, cola de señales y precaché offline. Preparado como PR de concurso independiente para coordinar el orden de versiones hasta V100.
 
 ## 09/10/2026 · OHANA V95 · cooperativo estable y avisos precisos · ohana-295
 
