@@ -33,7 +33,8 @@ if (stage && grid) {
   const greeted = new Set();
   const pointer = { x: innerWidth * .5, y: innerHeight * .4, on: false };
   let awake = null;
-  let gagAt = 0;
+  let gagAt = 0, lastAtriumFrame = 0, pointerPending = false;
+  const ATRIUM_FRAME_INTERVAL_MS = 65; // ~15fps animated lines; heroes have separate budgets.
 
   const cards = () => [...grid.querySelectorAll(".char-card")];
   const muted = () => document.getElementById("btn-mute")?.getAttribute("aria-pressed") === "true";
@@ -140,15 +141,22 @@ if (stage && grid) {
       }, dist * 70);
     });
   }
+  // At most one DOM/layout update per display frame, regardless of pointer Hz.
   stage.addEventListener("pointermove", (e) => {
     pointer.x = e.clientX; pointer.y = e.clientY; pointer.on = fine;
-    orb.style.left = e.clientX + "px"; orb.style.top = e.clientY + "px";
-    plate.style.left = e.clientX + "px"; plate.style.top = (e.clientY - 16) + "px";
-    orb.classList.add("on");
-    if (Math.random() < .55) sparks.push({ x: e.clientX, y: e.clientY, vx: (Math.random()-.5)*.8, vy: -0.5, life: .65, color: "rgba(200,245,255,.95)" });
-    lean();
-    wake(hit(e.clientX, e.clientY));
-  });
+    if (pointerPending) return;
+    pointerPending = true;
+    requestAnimationFrame(() => {
+      pointerPending = false;
+      if (document.body.classList.contains("playing") || document.visibilityState === "hidden") return;
+      orb.style.left = pointer.x + "px"; orb.style.top = pointer.y + "px";
+      plate.style.left = pointer.x + "px"; plate.style.top = (pointer.y - 16) + "px";
+      orb.classList.add("on");
+      if (Math.random() < .4) sparks.push({ x: pointer.x, y: pointer.y, vx: (Math.random()-.5)*.8, vy: -.5, life:.65, color:"rgba(200,245,255,.95)" });
+      lean();
+      wake(hit(pointer.x, pointer.y));
+    });
+  }, { passive:true });
   stage.addEventListener("pointerleave", () => { pointer.on = false; orb.classList.remove("on"); wake(null); });
   stage.addEventListener("pointerdown", (e) => {
     const el = hit(e.clientX, e.clientY);
@@ -176,7 +184,13 @@ if (stage && grid) {
     gagAt = performance.now();
   }, 2600);
   (function frame(now) {
-    if (!reduced && ctx) {
+    if (!reduced && ctx && !document.body.classList.contains("playing") &&
+        document.visibilityState !== "hidden") {
+      if (lastAtriumFrame && now - lastAtriumFrame < ATRIUM_FRAME_INTERVAL_MS) {
+        requestAnimationFrame(frame);
+        return;
+      }
+      lastAtriumFrame = now;
       ctx.clearRect(0, 0, cv.width, cv.height);
       const list = cards();
       ctx.lineWidth = 1;
