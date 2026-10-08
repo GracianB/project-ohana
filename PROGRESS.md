@@ -1,3 +1,8 @@
+## 09/10/2026 · OHANA V94 · Reina del Nido legible · ohana-294
+
+- Cuatro advertencias visuales asociadas a ataques reales con progreso de windup correcto y consejos accesibles.
+- Módulo `systems/boss-v94-readability.js` desacoplado de físicas, hitboxes y daño. Candidata sujeta a CI y Pages.
+
 ## 09/10/2026 · OHANA V93 · CUERNO · METAMORFOSIS COMPLETA · ohana-293
 
 - Cuatro rituales de transición, sincronizados con la cinemática de evolución: cuerno vivo que abraza su futura cara, nacimiento de cuatro patas, dos alas con plumas y Aurora final con siete arcos y cuernos nacarados.

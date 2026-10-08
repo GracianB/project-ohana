@@ -1,4 +1,4 @@
-const VERSION = "ohana-293";
+const VERSION = "ohana-294";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -77,6 +77,7 @@ const PRECACHE = [
   "./systems/boss-behavior.js?v=" + VERSION,
   "./systems/boss-combat.js?v=" + VERSION,
   "./systems/boss-counterplay.js?v=" + VERSION,
+  "./systems/boss-v94-readability.js?v=" + VERSION,
   "./systems/boss-encounter-memory.js?v=" + VERSION,
   "./systems/boss-fx.js?v=" + VERSION,
   "./systems/boss-hud.js?v=" + VERSION,
