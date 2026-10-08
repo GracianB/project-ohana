@@ -5,7 +5,8 @@ import {
   drawSpark, drawStar, FONT_BODY, FONT_DISPLAY
 } from "./evo-cinema.js";
 import { ROSTER } from "../characters/roster.js";
-import { SUPREME_STORYBOARDS, cuernoGrandStage } from "./supreme-storyboards.js";
+import { SUPREME_STORYBOARDS } from "./supreme-storyboards.js";
+import { cuernoGrandStage } from "./supreme-storyboards.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
