@@ -1,5 +1,3 @@
-// Qué versión se ve: "vector" (Normal) o "paint" (Realista).
-// Esta partida sigue en vector. Paint solo si se pide a propósito.
 
 const KEY = "ohana-look-v2";
 

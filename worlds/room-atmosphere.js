@@ -61,7 +61,6 @@ function drawCharacterOdyssey(ctx,roomId,characterId,signatureId,cam,t,W,H){
  const pulse=.5+.5*Math.sin(t*.02);
  ctx.save();
 
- // Large architectural "sky object" for depth and identity, never a bitmap.
  if(theme.motif==="sun"){
    const sx=W*.78,sy=H*.16;
    const rg=ctx.createRadialGradient(sx,sy,8,sx,sy,260);
@@ -140,7 +139,6 @@ function drawCharacterOdyssey(ctx,roomId,characterId,signatureId,cam,t,W,H){
    ctx.globalAlpha=1;
  }
 
- // Character "home lane": a readable landmark on the ground that changes the room's identity.
  const laneY=H*.74;
  const lx=w(240-cam.x*.44+t*.03,W+W)-W*.18;
  ctx.globalAlpha=.18;
@@ -148,7 +146,6 @@ function drawCharacterOdyssey(ctx,roomId,characterId,signatureId,cam,t,W,H){
  ctx.beginPath();ctx.moveTo(lx,laneY);ctx.quadraticCurveTo(cx,laneY-60,lx+W*.65,laneY);ctx.stroke();
  ctx.globalAlpha=1;
 
- // room-specific monumental silhouette
  const monumentSeed=({hub:1,beach:2,jungle:3,cave:4,lab:5,ridge:6,space:7,reef:8,volcano:9,boss:10}[roomId]||1);
  const mw=220+monumentSeed*12, mh=130+(monumentSeed%4)*30;
  const mx=(W*(.18+.06*(monumentSeed%5))) - cam.x*.10;
@@ -159,7 +156,6 @@ function drawCharacterOdyssey(ctx,roomId,characterId,signatureId,cam,t,W,H){
  ctx.lineTo(mx+mw*.78,my+34);ctx.lineTo(mx+mw,my+mh);ctx.closePath();ctx.fill();
  ctx.restore();
 
- // tiny ambient particles, seeded, stable, camera-aware.
  for(let i=0;i<26;i++){
    const x=w(u(i+1000)*W-cam.x*.22+t*(.06+u(i+1010)*.18),W+40);
    const y=u(i+1020)*H*.72+Math.sin(t*.015+i)*7;

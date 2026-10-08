@@ -22,7 +22,7 @@ const PROFILES = {
   pizza:   { freq: 0.82, bounce: 1.45, sway: 1.35, breath: 1.35, land: 1.7,  weight: 1.25, snap: 0.85 },
   michi:   { freq: 1.08, bounce: 0.6,  sway: 0.65, breath: 1.0,  land: 0.55, weight: 0.7,  snap: 1.45 },
   cat:     { freq: 1.08, bounce: 0.6,  sway: 0.65, breath: 1.0,  land: 0.55, weight: 0.7,  snap: 1.45 },
-  cuerno:  { freq: 0.7,  bounce: 1.05, sway: 1.2,  breath: 0.85, land: 1.4,  weight: 1.45, snap: 0.7 },
+  cuerno:  { freq: 1.55, bounce: 0.78, sway: 0.9, breath: 1.05, land: 0.95, weight: 0.68, snap: 1.42 },
   chispin: { freq: 1.55, bounce: 0.8,  sway: 1.5,  breath: 1.25, land: 0.7,  weight: 0.65, snap: 1.55 },
   pikachu: { freq: 1.55, bounce: 0.8,  sway: 1.5,  breath: 1.25, land: 0.7,  weight: 0.65, snap: 1.55 },
   stitcho: { freq: 0.95, bounce: 0.7,  sway: 1.0,  breath: 1.0,  land: 0.85, weight: 0.9,  snap: 1.0 },

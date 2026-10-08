@@ -1,4 +1,4 @@
-// Cuerno · bolita con cuerno. El cuerno es el personaje, no un caballo.
+// Cuerno V59 · born as a sentient unicorn horn; a unicorn body emerges later.
 const COAT = ["#fff6ea", "#ffe9f6", "#f7e7ff", "#e7f4ff", "#fff8d8"];
 const HORN = ["#f2c1ff", "#ffb0e0", "#ffe14a", "#9ad7ff", "#fff"];
 const MANE = ["#ffb7d8", "#d9a6ff", "#8fd0ff", "#ffe14a", "#fff"];
@@ -27,8 +27,55 @@ function horn(ctx, len, color, wobble) {
   ctx.restore();
 }
 
+// F0 Cuernín: the HORN is alive. No horse body, legs or oversized round head.
+function drawLivingHorn(ctx,pose,R,t){
+  const TAU=Math.PI*2;
+  const moving=pose.state==="run",air=!!pose.air;
+  const k=moving?Math.sin(pose.phase||t*.15):Math.sin(t*.06);
+  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0);
+  const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3);
+  ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
+  const aura=.5+.5*Math.sin(t*.085);
+  ctx.globalAlpha=.19+.09*aura;ctx.fillStyle="#ffe3f5";
+  ctx.beginPath();ctx.ellipse(0,-35,17,31,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
+  // One tapered pearl cone, rather than a unicorn already fully formed.
+  ctx.fillStyle="#fff7e9";ctx.strokeStyle="#694c82";ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(-13,-17);ctx.bezierCurveTo(-12,-30,-6,-49,1,-65);
+  ctx.bezierCurveTo(10,-49,12,-30,13,-17);
+  ctx.quadraticCurveTo(0,-8,-13,-17);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.save();ctx.beginPath();ctx.moveTo(-12,-17);ctx.lineTo(1,-65);ctx.lineTo(13,-17);ctx.closePath();ctx.clip();
+  ctx.strokeStyle="#e6a6ea";ctx.lineWidth=3;
+  for(let i=0;i<5;i++){
+    const y=-20-i*8,w=10-i*1.45;
+    ctx.beginPath();ctx.moveTo(-w,y-2);ctx.quadraticCurveTo(0,y+3,w,y-5);ctx.stroke();
+  }
+  ctx.restore();
+  // Embryonic pearl below the horn is a collar, not a quadruped.
+  R.ellipse(ctx,0,-17,11,7.2,"#f6bedf");
+  R.celShade(ctx,0,-17,11,7.2,"#f6bedf",.12);
+  ctx.fillStyle="#fff2d5";ctx.beginPath();ctx.arc(0,-65,3.2,0,TAU);ctx.fill();
+  const mood=pose.state==="hurt"||pose.state==="dead"?"closed":pose.state==="attack"?"happy":"normal";
+  R.eye(ctx,-5,-24,3.5,pose,{iris:"#623d85",mood});
+  R.eye(ctx,6,-24,3.5,pose,{iris:"#623d85",mood});
+  R.mouth(ctx,.5,-16,3.4,pose.state==="attack"?"happy":"smile");
+  // The newborn hops by magic. When it runs, its own tip pulls it forward.
+  if(moving||air){
+    ctx.strokeStyle="#ffe3a3";ctx.lineWidth=1.8;ctx.globalAlpha=.65;
+    for(let i=0;i<3;i++){
+      const y=-10+i*4;
+      ctx.beginPath();ctx.moveTo(-13-i*4,y);ctx.lineTo(-21-i*5,y+1);ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  if(pose.state==="cast"||pose.state==="victory"){
+    R.sparkle(ctx,0,-66,4+2*aura,"#ffdc9b");
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
+  if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   const t = pose.t || 0;
   const final = f === 4;
   const run = pose.state === "run";

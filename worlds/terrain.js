@@ -1,6 +1,3 @@
-// Suelos, muros y precipicios. La hitbox no cambia: solo el dibujo.
-// API: drawChasms · drawPlatform · drawTerrain
-// Sin shadowBlur. El pozo sigue siendo el hueco entre suelos h>40.
 
 function plate(ctx, x, y, w, h, r) {
   const rad = Math.max(0, Math.min(r, h / 2, w / 2));

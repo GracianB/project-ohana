@@ -1,6 +1,3 @@
-// PROJECT OHANA V40 · HAZARD VOLUMES
-// Explicit traversal hazards. These run before floor rescue so a visual gap is
-// finally a real gap instead of an invisible safety net.
 
 export const HAZARD_TYPES = Object.freeze({
   TRANSFER: "transfer",

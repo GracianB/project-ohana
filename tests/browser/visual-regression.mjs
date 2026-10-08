@@ -252,6 +252,30 @@ try {
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01h-yomi: selector did not return to Kilo');
 
+  // V59 Cuerno: the baby is a living horn, not a four-legged ball.
+  for(let i=0;i<9;i++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(250);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
+  for(const form of [0,4]){
+    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(220);
+    const state=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let visible=0;
+      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+    });
+    assert.equal(state.form,form,'01i-cuerno: wrong form');
+    assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
+    await capture(page,'01i-cuerno-origin-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(250);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01i-cuerno: selector did not restore');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);

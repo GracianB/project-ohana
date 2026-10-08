@@ -1,6 +1,3 @@
-// PROJECT OHANA V38 · shared foe brain.
-// The room director assigns strategic intent; this module converts perception
-// into a compact mode consumed by species-specific movement/attack code.
 
 const FLY = new Set(["mosquito", "phosquito", "gaviota", "murcielago", "libelula", "abeja", "avispa", "brasita", "ufo"]);
 const GROUND = new Set(["cangrejo", "escoria", "planta", "arana"]);

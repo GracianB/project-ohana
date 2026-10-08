@@ -1068,6 +1068,9 @@ function kiloPose(p, t, moving, air, atk) {
 function pickPainted(p, t, moving, air, atk) {
   if (getLook() !== "paint") return null;
   const id = p.id;
+  // Cuerno's V59+ metamorphosis is authored in Canvas in every look mode.
+  // Never revive the obsolete four-legged baby SVG over the living horn.
+  if (id === "cuerno") return null;
   const plate = paintedForm(id, p.evo);
   if (plate && !moving && !air && atk < 0.12) return plate;
   if (id === "kilo") {

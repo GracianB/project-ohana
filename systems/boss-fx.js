@@ -1,8 +1,3 @@
-// ============================================================================
-// OHANA · BOSS SPECTACLE FX
-// Presentación pura de la Reina del Nido. No modifica daño, hitbox, IA ni física.
-// Todo es determinista: el renderer usa fase, modo, tiempo y semillas estables.
-// ============================================================================
 
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -146,7 +141,6 @@ export class BossFX {
     const y = e.y + e.h / 2 - cam.y;
     const pulse = 1 + Math.sin(t * 0.18 * p.speed) * 0.06;
 
-    // Aura por fases, cada una con geometría distinta.
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     ctx.globalAlpha = p.aura;
@@ -181,7 +175,6 @@ export class BossFX {
       }
     }
 
-    // Telegráfico grande y específico por ataque.
     if (e.telegraph && e.teleKind) this.renderTelegraph(ctx, e, x, y, t);
     ctx.restore();
   }
