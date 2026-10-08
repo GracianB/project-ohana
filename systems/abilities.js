@@ -263,7 +263,7 @@ export const SUPREME_IDENTITY = Object.freeze({
   cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
 });
 
-function activateSpecial(game, p) {
+function activateSpecial(game, p, { launch = true } = {}) {
   const s = specialOf(p.id);
   const T = 210;
   p._specialT = T;
@@ -278,23 +278,27 @@ function activateSpecial(game, p) {
   p._specialAuroraT = s.aurora ? T : 0;
 
   if (s.flight) {
-    p.vy = -1;
-    p.grounded = false;
+    if (launch) {
+      p.vy = -1;
+      p.grounded = false;
+    }
     game.nums.add(cx(p), p.y - 18, s.name, "#fff6c8", true);
   } else if (s.boltDash) {
-    p.vx = (p.facing || 1) * Math.max(14, p.speed * 3.4);
-    p.vy = -1.5;
+    if (launch) {
+      p.vx = (p.facing || 1) * Math.max(14, p.speed * 3.4);
+      p.vy = -1.5;
+    }
   } else if (s.shadow) {
     p.invuln = Math.max(p.invuln || 0, 80);
-    p.x += (p.facing || 1) * 56;
+    if (launch) p.x += (p.facing || 1) * 56;
   } else if (s.titan) {
     p.invuln = Math.max(p.invuln || 0, 60);
-    p.vy = -5;
+    if (launch) p.vy = -5;
   } else if (s.turbo) {
-    p.vx = (p.facing || 1) * Math.max(12, p.speed * 2.8);
+    if (launch) p.vx = (p.facing || 1) * Math.max(12, p.speed * 2.8);
   } else if (s.aurora) {
     p.invuln = Math.max(p.invuln || 0, 80);
-    p.vy = -p.jumpPower * 1.2;
+    if (launch) p.vy = -p.jumpPower * 1.2;
   }
 
   game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color || "#fff" };
@@ -343,7 +347,7 @@ function summonAssist(game, p, allyId, damage, color) {
 }
 
 function castSupreme(game, p, flow = currentFlow(game, p)) {
-  activateSpecial(game, p);
+  activateSpecial(game, p, { launch: false });
   const def = SUPREME[p.id] || SUPREME.kilo;
   const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
   const evo = clamp(Number(p.evo) || 0, 0, 4);
@@ -524,7 +528,17 @@ export function abilityPreMove(game, input) {
     if ((p._specialTitanT || 0) > 0) p._specialTitanT--;
     if ((p._specialAuroraT || 0) > 0) p._specialAuroraT--;
     if ((p._specialArmorT || 0) > 0) armor(p, 2);
-    if (p._specialSpeedT > 0) p.vx = (p.facing || 1) * Math.max(p.speed * 1.75, 8);
+    if (p._specialSpeedT > 0) {
+      const ix = input?.right ? 1 : input?.left ? -1 : 0;
+      if (ix) {
+        p.facing = ix;
+        const target = ix * Math.max(p.speed * 1.75, 8);
+        p.vx += (target - p.vx) * 0.55;
+      } else {
+        p.vx *= 0.82;
+        if (Math.abs(p.vx) < 0.05) p.vx = 0;
+      }
+    }
     if (p._specialFlightT > 0) {
       p._specialFlightT--;
       p.grounded = false;
