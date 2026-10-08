@@ -207,7 +207,7 @@ function puff(ctx, R, x, y, r, a) {
 }
 
 // ---------------------------------------------------------------------------
-function draw(ctx, pose, R) {
+function drawBase(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const r = P.r, bw = P.bw, bh = P.bh;
   const final = f === 4;
@@ -749,6 +749,75 @@ function horn(ctx, R, ox, oy, r, h, col, f) {
       ctx.beginPath(); ctx.moveTo(mx - 1, my - 3.5 + k * 2); ctx.lineTo(mx + 3.5 - k * 2, my + 1); ctx.stroke();
     }
   }
+}
+
+
+/** Solar soul is local to Dragon's canvas. No persistent particles or timers. */
+function dragonSoul(ctx, pose, front) {
+  const p = pose || {};
+  const f = Math.max(0, Math.min(4, Number.isFinite(p.form) ? p.form|0 : 0));
+  const t = Number.isFinite(p.t) ? p.t : 0;
+  const state = p.state || "idle";
+  const flight = state === "glide" || state === "jump" || p.move === "fly";
+  const striking = state === "attack" || state === "cast";
+  const victorious = state === "victory";
+  const color = f === 4 ? "#fff4a3" : f >= 2 ? "#ffc368" : "#ffe4a2";
+  ctx.save();
+  ctx.lineCap = "round";
+  if (!front) {
+    if (flight) {
+      // Flight path follows the actor; no false displacement of the hitbox.
+      const n = f >= 3 ? 5 : 3;
+      for (let i = 0; i < n; i++) {
+        const k = (i + 1) / n;
+        const x = -16 - 15 * k - 3 * Math.sin(t * .08 + i);
+        const y = -23 + Math.sin(t * .11 + i * 1.5) * (4 + 7 * k);
+        ctx.globalAlpha = (.17 + .18 * (1-k)) * (f === 4 ? 1 : .75);
+        ctx.strokeStyle = i % 2 ? "#fa6b3c" : color;
+        ctx.lineWidth = 1.1 + (1-k)*1.6;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x-9, y+5, x-14, y+2); ctx.stroke();
+      }
+    }
+  } else {
+    if (striking) {
+      // Three flame tongues emanate from the snout rather than full-screen flashes.
+      const power = state === "attack" ? Math.sin(Math.PI * Math.max(0,Math.min(1,Number(p.atk)||0))) : .8;
+      for (let i=0;i<3;i++) {
+        ctx.globalAlpha = (.25+i*.12)*power;
+        ctx.strokeStyle = i===1 ? "#fff3aa" : "#ff9348";
+        ctx.lineWidth = 1.5 + i*.55;
+        ctx.beginPath();
+        ctx.moveTo(30,-54+i*5);
+        ctx.quadraticCurveTo(44 + i*6,-60+i*5+Math.sin(t*.12+i)*4,52+i*10,-54+i*8);
+        ctx.stroke();
+      }
+    }
+    if (victorious && f >= 2) {
+      ctx.globalAlpha = .35+.2*Math.sin(t*.09)**2;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0,-68,23+f*5,Math.PI*1.10,Math.PI*1.88); ctx.stroke();
+      for(let i=0;i<3;i++){
+        const a=-Math.PI*.83 + i*.35;
+        const x=Math.cos(a)*(27+f*5),y=-68+Math.sin(a)*(27+f*5);
+        ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x+2,y);ctx.moveTo(x,y-2);ctx.lineTo(x,y+2);ctx.stroke();
+      }
+    }
+    // The baby dragon sneezes a tiny harmless ember instead of a giant nova.
+    if(f===0 && state==="idle" && (p.flourishN % 4)===3 && p.flourish>0){
+      const k=Math.sin(Math.PI*Math.max(0,Math.min(1,p.flourish)));
+      ctx.globalAlpha=.65*k;
+      ctx.fillStyle="#ffc542";
+      ctx.beginPath();ctx.ellipse(29 + k*18,-48-k*13,3+3*k,4+5*k,-.2,0,Math.PI*2);ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+function draw(ctx, pose, R) {
+  const safe = pose || {};
+  dragonSoul(ctx, safe, false);
+  drawBase(ctx, safe, R);
+  dragonSoul(ctx, safe, true);
 }
 
 export default { id: "dragon", draw };
