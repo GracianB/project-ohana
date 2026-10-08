@@ -437,10 +437,19 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       const sw=seg(k,.34,.52);
       ctx.save();ctx.globalAlpha=.45*(1-sw);ctx.translate(target*.55*sw,-target*.18*sw);arcRainbow(ctx,cx,cy-target*.02,target*.28,1,false);ctx.restore();
     }
-    const aur=seg(k,.52,.94);
+    const aur=seg(k,.48,.97);
     if(aur>0){
-      arcRainbow(ctx,cx,cy+target*.20,target*(.64+.24*aur),.28+.44*aur,true);
-      drawRays(ctx,cx,cy,target*1.18,color,.10+.20*aur,t*.18,10);
+      arcRainbow(ctx,cx,cy+target*.20,target*(.72+.38*aur),.24+.40*aur,true);
+      drawRays(ctx,cx,cy,target*1.08,color,.08+.12*aur,t*.10,8);
+      // Calm luminous sleep symbols drift in place before the final dissolve.
+      ctx.save();ctx.strokeStyle="#e7d7ff";ctx.lineWidth=2;
+      ctx.globalAlpha=.5*Math.sin(aur*Math.PI);
+      for(let i=0;i<5;i++){
+        const xx=cx+target*(i-2)*.23,yy=cy-target*(.16+.26*aur)+(i%2)*target*.08;
+        ctx.beginPath();ctx.moveTo(xx-5,yy-5);ctx.lineTo(xx+5,yy-5);
+        ctx.lineTo(xx-5,yy+5);ctx.lineTo(xx+5,yy+5);ctx.stroke();
+      }
+      ctx.restore();
     }
   }
   ctx.restore();

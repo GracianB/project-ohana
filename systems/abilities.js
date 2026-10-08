@@ -33,9 +33,9 @@ oven: { name: "Horno total", key: "L", cd: 6500, color: "#ff8a2a", desc: "Ola de
 ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J: talismán horizontal, se pega y explota tras una breve cuenta atrás." },
 sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
 maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
-gleam: { name: "Brillo", key: "J", cd: 480, color: "#ffe9a8", desc: "Estrella recta que atraviesa a varios." },
-gallop: { name: "Galope", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embiste con el cuerno y no se para." },
-rainbow: { name: "Arco", key: "L", cd: 5600, color: "#fff6c8", desc: "Siete estrellas rectas, una de cada color." },
+gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "Una lanza nacarada que atraviesa hasta tres enemigos." },
+gallop: { name: "Galope radiante", key: "K", cd: 1600, color: "#f2c1ff", desc: "Embestida luminosa de cuerno, limitada por los bordes del mundo." },
+rainbow: { name: "Círculo Iris", key: "L", cd: 5600, color: "#fff6c8", desc: "Arcoíris circular difuminado: cada evolución amplía el alcance hasta llenar la pantalla." },
 };
 
 const FLOW_KEYS = ["H", "J", "K", "L", "U"];
@@ -223,7 +223,7 @@ dino:    { id: "impact", name: "EXTINCIÓN", key: "U", cd: 9000, color: "#c8f04a
 frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
 pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
 yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
-cuerno:  { id: "aurora", name: "AURORA OHANA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
+cuerno:  { id: "aurora", name: "SUEÑO ARCOÍRIS", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
@@ -244,7 +244,7 @@ dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra
 frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
 pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
 yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
-cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
+cuerno:  { kind: "aurora",  line: "QUE SUEÑE TODO OHANA", text: "La aurora duerme a todos los enemigos normales y los disuelve en oleadas de luz. El jefe resiste." },
 });
 
 function activateSpecial(game, p, { launch = true } = {}) {
@@ -410,12 +410,20 @@ for (const e of enemies) {
 p._specialGhostT=Math.max(p._specialGhostT||0,260);
 p.invuln=Math.max(p.invuln||0,120);
 game.nums?.add(cx(p),p.y-58,"CUERNO · JUICIO DEL UMBRAL","#ffe6b5",true);
-} else if (p.id === "cuerno") {
-for (const e of enemies) hitEnemy(game, e, dmg * 0.76, { kx: Math.sign(cx(e)-cx(p)) * 7, ky: -8, stun: 42, color: def.color, crit: true });
-healPlayer(p, p.maxHealth * 0.16);
-addPlayerXp(p, 24 + enemies.length * 4);
-p._specialAuroraT = Math.max(p._specialAuroraT || 0, 260);
-p._specialArmorT = Math.max(p._specialArmorT || 0, 220);
+ } else if (p.id === "cuerno") {
+// Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
+const sleepers=enemies.filter(e=>!e.boss&&inView(game,e));
+for(const e of sleepers){
+e.stun=Math.max(e.stun||0,156);
+e._auroraSleepT=156;
+e.vx=0;
+}
+game._auroraDreamTargets=sleepers.length;
+healPlayer(p,p.maxHealth*.16);
+addPlayerXp(p,24+sleepers.length*4);
+p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
+p._specialArmorT=Math.max(p._specialArmorT||0,220);
+game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
 }
 
 add({
@@ -555,10 +563,14 @@ armor(p, 2);
 if (S.gallop > 0) {
 S.gallop--;
 const face = S.gallopFace || p.facing || 1;
+const wall = (face < 0 && p.x <= 12) || (face > 0 && p.x + p.w >= (game.worldW || 1600) - 12);
+if (wall) { S.gallop = 0; p.vx = 0; }
+else {
 p.facing = face;
-p.vx = face * Math.max(15, p.speed * 2.8);
+p.vx = face * Math.max(15, p.speed * 2.55);
 if (p.grounded) p.vy = Math.min(p.vy || 0, -0.4);
 armor(p, 2);
+}
 }
 if (S.caos > 0) {
 S.caos--;
@@ -631,7 +643,7 @@ for (const e of game.enemies) {
   e._abHitT = game.t + 10;
   hitEnemy(game, e, 24 * pw(p), { kx: face * 14, ky: -6, stun: 18, color: "#ffe9a8", shake: 5 });
 }
-if ((game.t % 2) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#f7e7ff" }, MAX_RUNTIME_GHOSTS);
+if ((game.t % 4) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#b6ebee" }, MAX_RUNTIME_GHOSTS);
 }
 p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
 const updateCount = FX.length;
@@ -1229,57 +1241,48 @@ g.flashColor = "#ff2244";
 g.shake = Math.min(18, (g.shake || 0) + 8);
 },
 
-// ======================= CUERNO =======================
-gleam(g, p, evo) {
-const face = p.facing || 1;
-const y = p.y + p.h * 0.28;
-pushRuntime(g.projectiles, {
-  x: cx(p) + face * (p.w * 0.4), y,
-  vx: (16 + evo) * face, vy: 0,
-  w: 26, h: 16, life: 40, dmg: 18, color: "#ffe9a8",
-  shape: "orb", owner: "player", trail: true, pierce: 3,
-}, MAX_RUNTIME_PROJECTILES);
-p._thrust = 4;
-p._thrustFace = face;
-boom(g, cx(p) + face * 16, y, "#ffe9a8", 8, { star: true });
+// CUERNO · V65 · Luz precisa, embestida y círculos difuminados.
+gleam(g,p,evo){
+const face=p.facing||1,y=p.y+p.h*.34;
+pushRuntime(g.projectiles,{
+x:cx(p)+face*p.w*.5,y,vx:face*(18+evo*.75),vy:0,
+w:30+evo*2,h:10,life:38,dmg:(19+evo*3)*pw(p),
+color:"#ffeab5",shape:"auroraLance",owner:"player",trail:true,pierce:3
+},MAX_RUNTIME_PROJECTILES);
+p._thrust=5;p._thrustFace=face;
+boom(g,cx(p)+face*16,y,"#ffeab5",5,{star:true});
 },
-gallop(g, p, evo) {
-S.gallop = 16 + evo * 2;
-S.gallopFace = p.facing || 1;
-p.vy = Math.min(p.vy, -3.4);
-armor(p, 18);
-g.shake = Math.min(12, (g.shake || 0) + 4);
-boom(g, cx(p), cy(p), "#f2c1ff", 10, { star: true });
+gallop(g,p,evo){
+S.gallop=17+evo*2;S.gallopFace=p.facing||1;
+p.vy=Math.min(p.vy||0,-3.4);
+armor(p,18);p._thrust=6;p._thrustFace=S.gallopFace;
+g.shake=Math.min(12,(g.shake||0)+4);
+boom(g,cx(p),cy(p),"#b6ebee",7,{star:true});
 },
-rainbow(g, p, evo) {
-const face = p.facing || 1;
-const colors = ["#ff8ad4", "#ffb15a", "#ffe14a", "#8ee07a", "#7ec8ff", "#c9b6ff", "#fff6c8"];
-const y = p.y + p.h * 0.3;
-for (let i = 0; i < colors.length; i++) {
-  const spread = (i - 3) * 0.38;
-  pushRuntime(g.projectiles, {
-    x: cx(p) + face * (p.w * 0.45),
-    y: y + spread * 8,
-    vx: face * (13 + evo * 0.35),
-    vy: spread,
-    w: 16, h: 16, life: 52, dmg: 11, color: colors[i],
-    shape: "orb", owner: "player", trail: true, pierce: 4,
-  }, MAX_RUNTIME_PROJECTILES);
-}
-const reach = 78 + evo * 8;
-const box = { x: face > 0 ? p.x + p.w - 8 : p.x - reach, y: p.y - 10, w: reach, h: p.h + 18 };
-for (const e of g.enemies) {
-  if (!canHit(e) || !aabb(box, e)) continue;
-  hitEnemy(g, e, (30 + evo * 4) * pw(p), { kx: face * 12, ky: -5, stun: 16, color: "#fff6c8", shake: 6 });
-}
-g.flash = Math.max(g.flash || 0, 8);
-g.flashColor = "#fff6ff";
-g.hitstop = Math.max(g.hitstop || 0, 6);
-boom(g, cx(p) + face * 20, y, "#fff6c8", 14, { star: true });
+rainbow(g,p,evo){
+const radius=[170,260,400,610,Math.hypot(viewW(),viewH())*1.12][evo];
+add({kind:"irisHalo",x:cx(p),y:cy(p),r:radius,life:58,max:58,
+evo,color:"#fff6c8",hit:new Set(),dmg:(25+evo*6)*pw(p)});
+p._auroraHaloT=58;
+boom(g,cx(p),cy(p),"#c6dcff",5,{star:true});
 },
+
 };
 
 const UPD = {
+irisHalo(g,f){
+f.life--;
+const progress=1-f.life/f.max;
+const wave=f.r*(1-Math.pow(1-progress,2));
+for(const e of g.enemies||[]){
+if(!canHit(e)||f.hit.has(e)||!inView(g,e))continue;
+if(Math.hypot(cx(e)-f.x,cy(e)-f.y)>wave)continue;
+f.hit.add(e);
+hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*5,ky:-4,stun:12,
+color:"#fff3cf",parts:3,shake:1,hitstop:0});
+}
+return f.life>0;
+},
 supremeField(g, f, p) {
 f.life--;
 f.pulse = (f.pulse || 0) + 1;
@@ -1305,6 +1308,12 @@ if (mode === "stitcho") {
       e.vx = clamp((e.vx || 0) + (dx / d) * 0.42, -8, 8);
       e.vy = clamp((e.vy || 0) + (dy / d) * 0.2, -8, 8);
     }
+  }
+} else if (mode === "cuerno") {
+  for(const e of g.enemies||[]) if(canHit(e)&&!e.boss&&inView(g,e)){
+    e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
+    e.stun=Math.max(e.stun||0,3);
+    e.vx=0;
   }
 }
 
@@ -1356,10 +1365,15 @@ if (f.pulse % pulseEvery === 0) {
       hitEnemy(g,e,execute?hp+9999:f.dmg*0.9,{kx:0,ky:-3,stun:44,color:f.color,crit:execute,hitstop:1});
     }
   } else if (mode === "cuerno") {
-    healPlayer(p,Math.max(2,p.maxHealth*0.018));
+    healPlayer(p,Math.max(2,p.maxHealth*.013));
     p.invuln=Math.max(p.invuln||0,10);
-    for (const e of g.enemies) if (canHit(e) && Math.hypot(cx(e)-f.x,cy(e)-f.y)<320) {
-      hitEnemy(g,e,f.dmg*0.76,{kx:Math.sign(cx(e)-f.x)*7,ky:-7,stun:24,color:f.color,hitstop:1});
+    for(const e of g.enemies||[]) if(canHit(e)&&!e.boss&&inView(g,e)){
+      const cap=Math.max(1,Number(e.maxHp??e.maxHealth??e.max??e.hp)||1);
+      hitEnemy(g,e,Math.max(cap*.28,f.dmg*.2),{
+        kx:0,ky:0,stun:70,color:"#d7c3ff",parts:2,hitstop:0,shake:0
+      });
+      e.stun=Math.max(e.stun||0,50);
+      e._auroraSleepT=Math.max(e._auroraSleepT||0,50);
     }
   }
   boom(g,f.x,f.y,f.color,mode==="dragon"?8:5,{star:true,up:1.2,speed:2.4});
@@ -2137,6 +2151,26 @@ ctx.fillRect(-12 * s, -11 * s, 24 * s, 4 * s);
 }
 
 const DRW = {
+irisHalo(ctx,f,cam,t){
+const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
+const radius=f.r*(1-Math.pow(1-progress,2));
+const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"];
+const opacity=Math.min(1,f.life/18)*.8;
+ctx.save();ctx.globalCompositeOperation="lighter";
+if(f.evo===4){
+const w=viewW(),h=viewH(),grad=ctx.createRadialGradient(x,y,8,x,y,Math.max(radius,10));
+cols.forEach((c,i)=>grad.addColorStop(i/7,c));
+grad.addColorStop(1,"rgba(221,185,247,0)");
+ctx.globalAlpha=.18*opacity;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+}
+ctx.lineCap="round";
+for(let i=0;i<7;i++){
+ctx.strokeStyle=cols[i];ctx.globalAlpha=(.22+.10*(i%3))*opacity;
+ctx.lineWidth=Math.max(5,Math.min(27,radius*.018));
+ctx.beginPath();ctx.arc(x,y,Math.max(1,radius-(3-i)*ctx.lineWidth),0,TAU);ctx.stroke();
+}
+ctx.restore();
+},
 supremeField(ctx, f, cam, t, g, p) {
 const x=f.x-cam.x,y=f.y-cam.y;
 const u=1-f.life/f.max;
@@ -2173,8 +2207,23 @@ if(f.mode==="kilo"){
   ctx.globalAlpha=.65*fade;ctx.beginPath();ctx.moveTo(x,y-R*.75);ctx.lineTo(x+R*.7,y+R*.48);ctx.lineTo(x-R*.7,y+R*.48);ctx.closePath();ctx.stroke();for(let i=0;i<5;i++){const a=i*TAU/5+t*.015;ctx.beginPath();ctx.arc(x+Math.cos(a)*R*.42,y+Math.sin(a)*R*.34,6,0,TAU);ctx.stroke();}
 }else if(f.mode==="yomi"){
   ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
-}else if(f.mode==="cuerno"){
-  const cols=["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];for(let i=0;i<4;i++){ctx.strokeStyle=cols[i];ctx.globalAlpha=.55*fade;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y+24,R*(.48+i*.12),Math.PI*1.08,Math.PI*1.92);ctx.stroke();}
+ }else if(f.mode==="cuerno"){
+  const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"];
+  const w=viewW(),h=viewH(),grad=ctx.createLinearGradient(0,0,w,h);
+  cols.forEach((c,i)=>grad.addColorStop(i/6,c));
+  ctx.globalAlpha=.11*fade;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+  ctx.lineCap="round";
+  for(let i=0;i<7;i++){
+    ctx.strokeStyle=cols[i];ctx.globalAlpha=.46*fade;
+    ctx.lineWidth=7;ctx.beginPath();
+    ctx.arc(x,y+24,R*(.75+i*.14),Math.PI*.02,Math.PI*1.98);ctx.stroke();
+  }
+  ctx.globalCompositeOperation="source-over";
+  ctx.textAlign="center";ctx.font="700 16px sans-serif";ctx.fillStyle="#ddd1ff";
+  for(const e of g.enemies||[])if(canHit(e)&&!e.boss&&e._auroraSleepT>0&&inView(g,e)){
+    ctx.globalAlpha=.65*fade;
+    ctx.fillText("Z",cx(e)-cam.x, e.y-cam.y-13);
+  }
 }
 ctx.restore();
 },
@@ -2923,7 +2972,15 @@ ctx.beginPath();
 ctx.arc(0, 0, Math.max(w, h) * 0.72, 0, Math.PI * 2);
 ctx.fill();
 ctx.restore();
-if (shape === "note") {
+if (shape === "auroraLance") {
+ctx.beginPath();ctx.moveTo(-w*.55,0);
+ctx.quadraticCurveTo(-w*.22,-h*.72,w*.22,-h*.3);
+ctx.lineTo(w*.64,0);ctx.lineTo(w*.22,h*.3);
+ctx.quadraticCurveTo(-w*.22,h*.72,-w*.55,0);
+ctx.fill();ctx.stroke();
+ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.beginPath();
+ctx.moveTo(-w*.23,0);ctx.lineTo(w*.37,0);ctx.stroke();
+} else if (shape === "note") {
 drawNoteGlyph(ctx, 1, pr.color);
 } else if (shape === "bone") {
 ctx.beginPath();

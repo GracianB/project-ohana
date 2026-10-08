@@ -1,3 +1,14 @@
+## 08/10/2026 · V65 CUERNO · MENSAJE 6/10 · CÍRCULO IRIS Y SUEÑO ARCOÍRIS
+
+**Caché:** `ohana-264`. **Contrato:** 10 personajes / 5 formas, Dino y Grok sin cambios.
+
+- **L · Círculo Iris**: ya no son siete bolas rectas; emite un arcoíris circular difuminado que crece y alcanza enemigos una vez por ola. Radios dependientes de evolución: 170, 260, 400, 610 y diagonal de pantalla ×1.12 en F4. El arcoíris F4 cubre visualmente todo el viewport con un gradiente suave y siete anillos, sin estrobos ni efectos sin límite.
+- **U · Sueño Arcoíris**: todos los enemigos normales visibles entran en sueño (stun) y reciben cinco pulsos progresivos hasta quedar derrotados. Los jefes son inmunes a este efecto: ni dormidos ni dañados. Fuera de pantalla no hay ejecución global invisible. La U mantiene su protección y curación existentes.
+- **J · Lanza astral**: una forma nacarada afilada y perforante en Canvas sustituye la bola genérica. **K · Galope radiante**: embestida con cuatro apoyos, estela de menor frecuencia y parada en el borde. Sin nuevo movimiento involuntario al pulsar U.
+- Storyboard U más lento y calmado, símbolos de sueño y lluvia de luz circular; nombre y copy de poderes adaptados.
+- Tests Node reales de física K, L por formas 0–4, sueño gradual, inmunidad absoluta del jefe y offscreen; capturas Chromium L/U en una partida real.
+- Presupuesto JS de <1.5 MB protegido por compactación de sangría sin cambios semánticos en `game.js`; CI, E2E, multijugador, regresión visual y release gate obligatorios.
+
 ## 08/10/2026 · V64 CUERNO · MENSAJE 5/10 · UNICORNIO AURORA
 
 **Caché:** `ohana-263`. **Contrato:** 10 personajes / 5 formas; Dino y la intro de Grok intactos.
