@@ -13,14 +13,25 @@ test('game runtime: RNG centralizado e hitstop del boss endurecido', () => {
   assert.match(source, /hitStop\(e\.boss \? \(crit \? 5 : 3\) : \(crit \? 8 : 4\)\)/);
 });
 
-test('input y Service Worker no conservan movimiento horizontal fantasma', () => {
+test('V46 input conserva teclas mantenidas y evita movimiento fantasma', () => {
   const input = fs.readFileSync('./engine/input.js', 'utf8');
   const sw = fs.readFileSync('./sw.js', 'utf8');
   const game = fs.readFileSync('./game.js', 'utf8');
   const index = fs.readFileSync('./index.html', 'utf8');
-  assert.match(input, /KEYBOARD_STALE_MS\s*=\s*1200/);
-  assert.match(input, /keyboardWatchdog/);
-  assert.match(input, /listen\(target, "focus", reset\)/);
+  assert.doesNotMatch(input, /KEYBOARD_STALE_MS/);
+  assert.doesNotMatch(input, /keyboardWatchdog/);
+  assert.match(input, /const heldOrder = new Map\(\)/);
+  assert.match(input, /function axisX\(\)/);
+  assert.match(input, /function consumePress\(candidates\)/);
+  assert.match(input, /Key repeat must never create a new logical press/);
+  assert.match(input, /listen\(target, "blur", reset\)/);
+  assert.match(input, /listen\(target, "pagehide", reset\)/);
+  assert.match(input, /if \(document\.hidden\) reset\(\)/);
+  assert.match(game, /CONTROL_FEEL/);
+  assert.match(game, /jumpBufferFrames:\s*10/);
+  assert.match(game, /coyoteFrames:\s*10/);
+  assert.match(game, /input\?\.axisX\?\.\(\)/);
+  assert.match(game, /input\?\.consumePress\?\.\(\["w", "arrowup", " "\]\)/);
   const versionMatch = sw.match(/const VERSION = "(ohana-\d+)"/);
   assert.ok(versionMatch, 'sw.js debe declarar una versión OHANA válida');
   const version = versionMatch[1];
@@ -864,12 +875,14 @@ test("V39 hero mastery gives all ten heroes unique traversal without contaminati
 });
 
 
-test("V39 movement input is boolean-normalized before left/right comparison", () => {
+test("V46 movement intent is normalized, ordered and jump-latched", () => {
   const game = fs.readFileSync("./game.js", "utf8");
-  assert.match(game, /const left = !!\(keys\["a"\] \|\| keys\["arrowleft"\]\);/);
-  assert.match(game, /const right = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
-  assert.match(game, /const jump = !!\(keys\["w"\] \|\| keys\["arrowup"\] \|\| keys\[" "\]\);/);
-  assert.match(game, /const drop = !!\(keys\["s"\] \|\| keys\["arrowdown"\]\);/);
+  assert.match(game, /const rawLeft = !!\(keys\["a"\] \|\| keys\["arrowleft"\]\);/);
+  assert.match(game, /const rawRight = !!\(keys\["d"\] \|\| keys\["arrowright"\]\);/);
+  assert.match(game, /const axisX = input\?\.axisX\?\.\(\)/);
+  assert.match(game, /const jumpPressed = input\?\.consumePress/);
+  assert.match(game, /if \(jumpPressed\) p\.buffer = CONTROL_FEEL\.jumpBufferFrames/);
+  assert.match(game, /p\.coyote = CONTROL_FEEL\.coyoteFrames/);
 });
 
 
