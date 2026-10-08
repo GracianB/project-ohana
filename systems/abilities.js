@@ -1324,7 +1324,7 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 
 };
 
-const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView});
+const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
 const UPD = {
 ...DINO_FX.update,
 irisHalo(g,f){
