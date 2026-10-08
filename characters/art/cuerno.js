@@ -298,6 +298,34 @@ function horn(ctx, len, color, wobble) {
  ctx.restore();
 }
 
+// V81 · Soft scapular fold. Wings now grow from the shoulder rather than
+// ending in a geometric hinge. No extra assets, timers, or geometry outside
+// the original silhouette.
+function drawWingScapula(ctx,x,y,fill,shine) {
+ ctx.save();ctx.fillStyle=fill;
+ ctx.beginPath();ctx.moveTo(x-8,y+1);
+ ctx.bezierCurveTo(x-8,y-8,x+2,y-9,x+9,y-2);
+ ctx.bezierCurveTo(x+12,y+3,x+4,y+8,x-5,y+7);
+ ctx.closePath();ctx.fill();
+ ctx.globalAlpha=.5;ctx.strokeStyle=shine;ctx.lineWidth=1.25;
+ ctx.beginPath();ctx.moveTo(x-6,y-2);
+ ctx.quadraticCurveTo(x+1,y-7,x+7,y-2);ctx.stroke();
+ ctx.restore();
+}
+// V81 · Near-side haunch and shoulder sockets overlap the top of each leg.
+// Without this, round limb ends create cut seams against the equine barrel.
+function blendLegRoots(ctx,hipX,shoulderX,y,coat,highlight){
+ ctx.save();ctx.fillStyle=coat;
+ for(const x of [hipX,shoulderX]){
+  ctx.beginPath();ctx.ellipse(x,y,6.6,4.8,-.22,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=.38;ctx.strokeStyle=highlight;ctx.lineWidth=1.15;
+ for(const x of [hipX,shoulderX]){
+  ctx.beginPath();ctx.moveTo(x-4,y-1.7);
+  ctx.quadraticCurveTo(x,y-4,x+3,y-1.5);ctx.stroke();
+ }
+ ctx.restore();
+}
 // F0 Cuernín: the HORN is alive. No horse body, legs or oversized round head.
 function drawLivingHorn(ctx,pose,R,t){
   const TAU=Math.PI*2;
@@ -441,6 +469,7 @@ ctx.beginPath();ctx.moveTo(9+i*.7,-64+i*4);
 ctx.bezierCurveTo(0-i*1.5,-68+i*4,-4+flutter-i,-59+i*5,-9+flutter-i,-64+i*5);ctx.stroke();
 }
 leg(-16,Math.PI*.04,false);leg(15,Math.PI*1.04,false);
+blendLegRoots(ctx,-16,15,-27,coat,"#d5c0e5");
 for(const side of [-1,1]){
 const x=22+side*6;
 ctx.fillStyle="#ffecfa";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
@@ -473,7 +502,7 @@ drawCuernoOverlays(ctx,pose,R,2,t,spring,tilt);
 
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
 function drawStellarUnicorn(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air;
+const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,speed=Math.max(0,Math.min(1.4,Number(pose.speed)||0));
 const gallop=run?Math.sin(phase):0,flight=air?1:0;
 const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1);
@@ -541,8 +570,10 @@ ctx.beginPath();ctx.arc(x,y,1.4,0,TAU);ctx.fill();
 ctx.strokeStyle="#a1bde5";ctx.lineWidth=1.2;ctx.beginPath();
 ctx.moveTo(-24,-43);ctx.lineTo(-14,-39);ctx.lineTo(-5,-44);ctx.stroke();
 stellarWing(false);
+drawWingScapula(ctx,-6,-48,"#d0e7f9","#effaff");
 limb(rear+5,Math.PI*.02,false);
 limb(front+6,Math.PI*1.02,false);
+blendLegRoots(ctx,rear+5,front+6,-33,coat,"#9cbeda");
 for(let i=0;i<5;i++){
 const drag=cuernoManePose(pose,3,t,i);
 ctx.strokeStyle=["#b1e7ff","#e0c0fb","#ffb4d5","#ffe3a3","#c5d8ff"][i];
@@ -684,7 +715,9 @@ ctx.strokeStyle="#6d668c";ctx.lineWidth=1.1;ctx.globalAlpha=.56;
 ctx.beginPath();ctx.moveTo(24,-57);ctx.bezierCurveTo(19,-47,26,-38,20,-32);ctx.stroke();
 ctx.restore();
 wing(false);
+drawWingScapula(ctx,0,-52,"#343347","#c6b7dc");
 leg(-20,Math.PI*.03,false);leg(20,Math.PI*1.04,false);
+blendLegRoots(ctx,-20,20,-34,coat,"#8f7ea5");
 // Seven locks of iridescent mane: reactive but bounded.
 for(let i=0;i<7;i++){
 const drag=cuernoManePose(pose,4,t,i);
@@ -758,6 +791,10 @@ drawCuernoOverlays(ctx,pose,R,4,t,bounce,tilt);
 const CUERNO_MOTION_MEDIA=typeof window!=="undefined"&&typeof window.matchMedia==="function"
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 function draw(ctx, pose, R) {
+  // When U protects the character, rig invulnerability can shadow "cast"
+  // with "hurt". Keep the unicorn's dream visible, never mask real damage.
+  if(pose.state==="hurt"&&pose.castSlot===3&&Number(pose.cast)>0)
+    pose={...pose,state:"cast"};
   if(CUERNO_MOTION_MEDIA?.matches&&!pose?.reduceMotion)pose={...pose,reduceMotion:true};
   const f = Math.max(0, Math.min(4, pose.form | 0));
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
