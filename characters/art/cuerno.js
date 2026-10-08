@@ -438,6 +438,24 @@ ctx.bezierCurveTo(16,-20,5,-22,-5,-23);
 ctx.bezierCurveTo(-18,-19,-35,-27,-37,-46);ctx.closePath();ctx.fill();ctx.stroke();
 ctx.save();ctx.globalAlpha=.52;ctx.fillStyle=shade;ctx.beginPath();
 ctx.ellipse(-12,-32,20,7,-.13,0,TAU);ctx.fill();ctx.restore();
+// V74: wings are born in F3, not first in the final form.
+const spread=flight?1:angry?.88:pose.state==="victory"?.95:.32;
+function stellarWing(far){
+ const flutter=(flight?2.8:1.1)*Math.sin(t*.11+(far?.8:0));
+ ctx.save();ctx.translate(far?-17:-6,-48);ctx.rotate(-.13-spread*.20);
+ ctx.fillStyle=far?"#c6d9f6":"#d1ecfb";ctx.strokeStyle="#839dd2";
+ ctx.globalAlpha=far?.56:.88;ctx.lineWidth=1.8;
+ ctx.beginPath();ctx.moveTo(0,0);
+ ctx.bezierCurveTo(-19,-10,-31-spread*11,-27,-39,-29-spread*21+flutter);
+ ctx.bezierCurveTo(-50,-47-spread*22,-33,-56-spread*20,-21,-46-spread*13);
+ ctx.bezierCurveTo(-10,-26,5,-16,8,-3);ctx.closePath();ctx.fill();ctx.stroke();
+ for(let i=0;i<4;i++){ctx.strokeStyle=["#ffd9ea","#c8d4ff","#bbece6","#ffe3b5"][i];
+ ctx.lineWidth=2.5-i*.3;ctx.beginPath();ctx.moveTo(-2+i*2,-5-i*4);
+ ctx.quadraticCurveTo(-23-i*3,-25-spread*10,-29-i*3,-29-spread*(25-i*5)+flutter);
+ ctx.stroke();}
+ ctx.restore();
+}
+stellarWing(true);
 ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=3;
 ctx.beginPath();ctx.moveTo(4,-35);
 ctx.bezierCurveTo(3,-52,9,-70,13,-78);
@@ -451,6 +469,7 @@ ctx.beginPath();ctx.arc(x,y,1.4,0,TAU);ctx.fill();
 }
 ctx.strokeStyle="#a1bde5";ctx.lineWidth=1.2;ctx.beginPath();
 ctx.moveTo(-24,-43);ctx.lineTo(-14,-39);ctx.lineTo(-5,-44);ctx.stroke();
+stellarWing(false);
 limb(rear+5,Math.PI*.02,false);
 limb(front+6,Math.PI*1.02,false);
 for(let i=0;i<5;i++){
