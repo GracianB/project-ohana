@@ -3,7 +3,7 @@ import { createDinoEffects } from "./dino-combat.js";
 import { CUERNO_FANTASY, startCuernoFantasyTrail,
  updateCuernoFantasyTrail, tickCuernoFantasyStatus,
  drawCuernoFantasyRibbon, drawCuernoPrismCrown,
- drawCuernoFantasyStatus } from "./cuerno-fantasy.js";
+ drawCuernoFantasyStatus, drawCuernoGallopRibbons } from "./cuerno-fantasy.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -695,24 +695,9 @@ for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
 tickCuernoFantasyStatus(game,p,canHit,hitEnemy);
-trimAbilityProjectiles(game);
-}
+trimAbilexport { drawCuernoGallopRibbons } from "./cuerno-fantasy.js";
 
-// V73: four ribbons dance behind Cuerno's four-hoof gallop, at most four curves.
-// Pure visual feedback: the dash still obeys walls and never grants flight.
-export function drawCuernoGallopRibbons(ctx,p,cam,t,remaining){
-if(p?.id!=="cuerno"||!(remaining>0)||p.dead)return;
-const evo=Math.max(0,Math.min(4,Number(p.evo)||0)),face=p.facing||1;
-const x=p.x+p.w*.5-cam.x,y=p.y+p.h*.63-cam.y;
-const palette=["#f5afd7","#ffdd9b","#b8e5f0","#c4b6fb"];
-const alpha=Math.min(.53,remaining/15*.5);
-ctx.save();ctx.translate(x,y);ctx.scale(face,1);ctx.lineCap="round";
-for(let i=0;i<4;i++){
-const lag=(i+1)*(14+evo*3),wobble=Math.sin(t*.18+i*1.35)*3;
-ctx.globalAlpha=alpha*(1-i*.14);ctx.strokeStyle=palette[i];ctx.lineWidth=2.5-i*.25;
-ctx.beginPath();ctx.moveTo(-p.w*.46,(-2+i*5));
-ctx.bezierCurveTo(-18-lag*.22,-15+i*5+wobble,-lag*.66,4+i*6,-lag,(-6+i*6)+wobble);
-ctx.stroke();
+e();
 }
 ctx.restore();
 }
