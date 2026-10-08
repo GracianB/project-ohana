@@ -719,10 +719,11 @@ try {
   assert.ok(['breath','iris','dream','aurora'].includes(cuernoCinema.phase),'09p-cuerno: four acts absent');
   assert.match(cuernoCinema.beat,/ALIENTO.*CÍRCULO.*SUEÑO.*AURORA/);
   await capture(page,'09p-cuerno-u-grand-spectacle');
-  // Let the U film close, then inspect the separate real in-world Aurora canopy.
-  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:4400});
-  await page.evaluate(()=>window.__OHANA_E2E.step(62));
+  // QA-only: briefly hide the film to capture the actual world while U is still alive.
+  // Waiting until the 2.12 s film ends would miss a 150-tick gameplay field.
+  const cinemaMask=await page.addStyleTag({content:'#supreme-cinema{visibility:hidden!important}'});
   await capture(page,'09r-cuerno-aurora-final-u-canopy');
+  await cinemaMask.evaluate(tag=>tag.remove());
   assert.deepEqual(dreamErrors,[],'09k/09l: Cuerno L/U runtime exception');
   page.off('pageerror',onDreamError);
 
