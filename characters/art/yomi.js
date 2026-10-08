@@ -56,8 +56,10 @@ function draw(ctx,pose,R){
   // Two animated open sleeves. K's suction visibly pulls them forward.
   for(const side of [-1,1]){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
-    ctx.rotate(side*((cast===1?.48:run?.22:.12)+Math.sin(t*.075+side)*.07));
-    const sleeveLen=19+f*2.9+(cast===1?9:0);
+    // K brings both sleeves forward; L winds the leading sleeve back for the bite.
+    const leading=side===1,windup=cast===2 && leading ? .44*Math.sin(Math.PI*clamp(Number(p.cast)||0,0,1)) : 0;
+    ctx.rotate(side*((cast===1?.56:run?.22:.12)+Math.sin(t*.075+side)*.07)-windup);
+    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0);
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
@@ -110,6 +112,16 @@ function draw(ctx,pose,R){
   }
   ctx.fillStyle=angry?"#592943":"#94536b";ctx.beginPath();
   ctx.ellipse(1,faceY+13,angry?6+open*8:4.8,angry?4+open*7:2.4,0,0,TAU);ctx.fill();
+  // The L bite grows from Yomi's expression, not an unrelated monster sprite.
+  if(cast===2){
+    const k=clamp(Number(p.cast)||0,0,1),snap=Math.max(0,1-Math.abs(k-.5)/.22);
+    ctx.save();ctx.globalAlpha=.48+.24*snap;line(ctx,glow,2);
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(1,faceY+13+side*5);
+      ctx.quadraticCurveTo(w*.65,faceY+13+side*(10+open*6),w*.94,faceY+13+side*(3+snap*5));ctx.stroke();
+    }
+    ctx.restore();
+  }
   if(angry&&f>=3){
     ctx.fillStyle="#fff4d8";for(let i=-1;i<=1;i++){
       ctx.beginPath();ctx.moveTo(i*6,faceY+8);ctx.lineTo(i*6+2,faceY+12+open*5);
@@ -134,8 +146,14 @@ function draw(ctx,pose,R){
     ctx.quadraticCurveTo(w+3,shoulder+10,x-8,shoulder+13);ctx.stroke();
   }
   if(cast===1){
-    ctx.save();ctx.globalAlpha=.35+.22*pulse;line(ctx,"#f6c39f",2);
-    ctx.beginPath();ctx.ellipse(w+10,shoulder+18,14+5*pulse,9+3*pulse,0,0,TAU);ctx.stroke();ctx.restore();
+    const k=clamp(Number(p.cast)||0,0,1),wave=Math.sin(Math.PI*k);
+    ctx.save();ctx.globalAlpha=.33+.32*wave;line(ctx,"#f6c39f",2);
+    ctx.beginPath();ctx.ellipse(w+10,shoulder+18,12+10*wave,8+5*wave,0,0,TAU);ctx.stroke();
+    for(let i=0;i<3;i++){
+      const reach=w+20+i*9, yy=shoulder+14+(i-1)*5;
+      ctx.beginPath();ctx.moveTo(reach+9,yy);ctx.lineTo(reach,yy+2);ctx.stroke();
+    }
+    ctx.restore();
   }
   if(st==="victory"||((p.flourishN||0)%4===3&&p.flourish>0)){
     const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
