@@ -44,6 +44,7 @@ import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
+import { drawBossFallScene } from "./systems/boss-fall-scene.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
@@ -1235,6 +1236,7 @@ game.flash = 24;
 game.flashColor = "#fff6c8";
 game.shake = 26;
 game.projectiles = [];
+game.bossFx?.clear(); // Kill stale boss circling effects before the victory story.
 game.fx?.emit(game.finale.x, game.finale.y, {
 color: "#ffe66a",
 count: game.reduceMotion ? 16 : 44,
@@ -2564,8 +2566,8 @@ ctx.fillStyle = "#f45"; ctx.beginPath(); ctx.arc(h.x - game.cam.x, h.y - game.ca
 for (const g of game.ghosts) {
 ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
 }
-game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
-for (const e of game.enemies) drawEnemy(ctx, e, game.cam, t);
+if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
+for (const e of game.enemies) if (!game.finale || !e.boss) drawEnemy(ctx, e, game.cam, t);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
 for (const pr of game.projectiles) drawProjectile(ctx, pr, game.cam, t);
@@ -2663,26 +2665,8 @@ ctx.fillRect(0, 0, viewW, viewH);
 if (game.finale && game.finale.t > 0) {
 const f = game.finale;
 const k = 1 - f.t / f.max;
-const sx = f.x - game.cam.x;
-const sy = f.y - game.cam.y;
 ctx.save();
-ctx.fillStyle = "rgba(4, 6, 14, " + Math.min(0.82, 0.15 + k * 0.8) + ")";
-ctx.fillRect(0, 0, viewW, viewH);
-const beam = ctx.createLinearGradient(sx, 0, sx, viewH);
-beam.addColorStop(0, "rgba(255, 230, 140, 0)");
-beam.addColorStop(0.45, "rgba(255, 210, 120, " + (0.18 + Math.sin(f.t * 0.2) * 0.06) + ")");
-beam.addColorStop(1, "rgba(255, 80, 90, 0)");
-ctx.fillStyle = beam;
-ctx.fillRect(sx - 70, 0, 140, viewH);
-ctx.strokeStyle = "rgba(255, 220, 140, 0.85)";
-ctx.lineWidth = 3;
-for (let i = 0; i < 3; i++) {
-  const rad = ((k * 3 + i * 0.33) % 1) * Math.max(viewW, viewH) * 0.55;
-  ctx.globalAlpha = 1 - ((k * 3 + i * 0.33) % 1);
-  ctx.beginPath();
-  ctx.arc(sx, sy, 20 + rad, 0, Math.PI * 2);
-  ctx.stroke();
-}
+drawBossFallScene(ctx, f, game.cam, { w: viewW, h: viewH }, reduceMotion || game.reduceMotion);
 ctx.globalAlpha = 1;
 ctx.textAlign = "center";
 if (k > 0.18) {

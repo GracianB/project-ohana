@@ -79,7 +79,7 @@ test("V85: game physics and void rescue share the same drop-through contract", (
   assert.ok((game.match(/!dropIgnoresPlatform\(p, (?:next|low)\)/g)||[]).length===2,
     "Both rescue paths must honor platform drop-through");
   assert.doesNotMatch(game,/drop && wasGrounded && s === 0/);
-  assert.match(sw,/const VERSION = "ohana-285"/);
+  assert.match(sw,/const VERSION = "ohana-\d+"/);
   assert.match(sw,/engine\/platform-drop\.js\?v=/);
-  assert.match(html,/ohana-285/);
+  assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\d+)"/)?.[1] || "__invalid__"));
 });

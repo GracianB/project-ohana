@@ -51,7 +51,7 @@ export function playTitleIntro() {
   el._played = true;
   el.innerHTML =
     '<canvas aria-hidden="true"></canvas>' +
-    '<div class="oi-welcome" aria-hidden="true"><span>ISLA HOKU</span><strong>La familia ya está aquí.</strong><small>Haz clic para entrar</small></div>' +
+    '<div class="oi-welcome" aria-hidden="true"><span>PROJECT OHANA · ISLA HOKU</span><strong>OHANA</strong><small>La familia ya está aquí. Y tiene ganas de jugar.</small></div>' +
     '<button class="oi-enter" type="button">ENTRAR EN HOKU ↗</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
@@ -91,7 +91,7 @@ export function playTitleIntro() {
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
     p._poseOverride = opts.pose || "idle";
-    const scale = h / Math.max(1, baseHeight(id, 0));
+    const scale = h / Math.max(1, baseHeight(id, 0)) * (id === "cuerno" ? .48 : 1);
     ctx.save();
     ctx.translate(x, footY);
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);

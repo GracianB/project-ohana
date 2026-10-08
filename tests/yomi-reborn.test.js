@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const art=fs.readFileSync("characters/art/yomi.js","utf8");
-const abilities=fs.readFileSync("systems/abilities.js","utf8");
+const abilities=fs.readFileSync("systems/abilities.js","utf8")+"\n"+fs.readFileSync("systems/ability-catalog.js","utf8");
 const evolution=fs.readFileSync("characters/evolution.js","utf8");
 const visual=fs.readFileSync("tests/browser/visual-regression.mjs","utf8");
 

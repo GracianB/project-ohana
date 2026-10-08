@@ -188,6 +188,8 @@ if (stage && grid) {
     // Do not even schedule callbacks while the game is playing or tab is hidden.
     // visibilitychange and the playing class mutation restart the scene later.
     if (reduced || !ctx || document.body.classList.contains("playing") ||
+        document.body.classList.contains("intro-playing") ||
+        document.body.classList.contains("intro-pending") ||
         document.visibilityState === "hidden") return;
     if (lastAtriumFrame && now - lastAtriumFrame < ATRIUM_FRAME_INTERVAL_MS) {
       fxRaf = requestAnimationFrame(frame);
@@ -198,18 +200,7 @@ if (stage && grid) {
     const list = cards();
     // Compute rectangles once per painted frame, never again for the ten lines.
     const centers = list.map(center);
-    ctx.lineWidth = 1;
-    for (let i = 0; i < list.length; i++) {
-        const a = centers[i];
-        const b = centers[(i + 1) % list.length];
-        ctx.strokeStyle = "rgba(190,230,255,.16)";
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-      }
-      if (awake) {
-        const c = centers[list.indexOf(awake)] || center(awake);
-        ctx.strokeStyle = "rgba(255,220,150,.55)";
-        ctx.beginPath(); ctx.moveTo(pointer.x, pointer.y); ctx.lineTo(c.x, c.y); ctx.stroke();
-      }
+    // No giant card-to-card polygon or pointer wires: just particles and ripples.
       const sel = list.find((el) => el.classList.contains("selected"));
       if (sel) {
         const c = centers[list.indexOf(sel)] || center(sel);
@@ -240,6 +231,8 @@ if (stage && grid) {
   }
   function resumeFx() {
     if (reduced || fxRaf || document.body.classList.contains("playing") ||
+        document.body.classList.contains("intro-playing") ||
+        document.body.classList.contains("intro-pending") ||
         document.visibilityState === "hidden") return;
     lastAtriumFrame = 0;
     fxRaf = requestAnimationFrame(frame);

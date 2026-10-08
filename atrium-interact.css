@@ -90,3 +90,10 @@
  #char-select.atrium-on #chars .char-card.is-hop,
  #char-select.atrium-on #chars .char-card.is-wave{animation:none!important;transition:none!important}
 }
+
+/* V86: effects belong to the selector, never the full-screen welcome. */
+body.intro-pending #atrium-fx,body.intro-playing #atrium-fx,
+body.intro-pending #atrium-orb,body.intro-playing #atrium-orb,
+body.intro-pending #atrium-plate,body.intro-playing #atrium-plate,
+body.intro-pending #atrium-banner,body.intro-playing #atrium-banner,
+body.intro-pending .atrium-gag,body.intro-playing .atrium-gag{display:none!important}

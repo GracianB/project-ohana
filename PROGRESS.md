@@ -1,3 +1,13 @@
+## 08/10/2026 · V86 · EL CIELO VUELVE A SER CIELO · ohana-286
+
+- Intro: marca OHANA central, el reparto original sigue jugando y Cuerno bebé recobra proporción.
+- Atrium: sin cables entre retratos, ni efectos sobre la intro. Se conservan chispas y reacciones.
+- Playa: fuera palmeras flotantes; quedan costas, islas, espuma, conchas y rocas.
+- Refactor: las 30 definiciones de habilidades salen de abilities.js a systems/ability-catalog.js. API inalterada.
+- Las U ganan cuatro o cinco actos visibles con duración propia de 4.8 a 6.3 s. La versión de movimiento reducido dura 1.2 s. Sin cambiar daño, cooldown ni desplazamiento.
+- El Nido tras la muerte de la Reina ya no mantiene el boss ni un círculo amarillo: se abre una grieta alada luminosa con fragmentos. Se conserva el final de 12 segundos y sus resultados.
+- Entrega sujeta a Unit/Browser/Multiplayer/Visual/Release Gate.
+
 ## 08/10/2026 · OHANA V85 · DESCENSO SIN REBOTE · ohana-285
 
 **Base:** Cuerno V84 fusionado (`795cd4b2`). **Ruta a V100:** [V100-ROADMAP.md](V100-ROADMAP.md).
