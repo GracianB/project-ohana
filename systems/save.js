@@ -7,6 +7,12 @@ export function canonId(id) {
 
 const SAVE_KEY = "ohana";
 const SAVE_TMP_KEY = "ohana.tmp";
+export function sanitizeDragonTrial(raw){
+ if(!raw||!Array.isArray(raw.lit)||raw.lit.length!==3)return null;
+ const lit=raw.lit.map(v=>v===true);
+ const count=lit.filter(Boolean).length;
+ return {lit,count,completed:count===3,charge:0,active:Math.min(2,count)};
+}
 
 function finiteNumber(value) {
   const number = Number(value);
@@ -32,6 +38,7 @@ export function packSave(game, MagicMod) {
     xp: p ? p.xp : 0,
     hp: p ? p.health : null,
     nineUsed: !!(p && p._nineUsed),
+    dragonTrial: sanitizeDragonTrial(game.dragonTrial),
     magic,
     clearTicks: Math.max(0, finiteNumber(game.clearTicks)),
     best: sanitizeBest(game.best)
@@ -92,6 +99,7 @@ export function unpackSave(raw, defId) {
     xp: Math.max(0, finiteNumber(raw.xp)),
     hp: raw.hp == null ? null : Math.max(0, finiteNumber(raw.hp)),
     nineUsed: !!raw.nineUsed,
+    dragonTrial: sanitizeDragonTrial(raw.dragonTrial),
     magic: raw.magic && typeof raw.magic === "object" ? raw.magic : null,
     id,
     clearTicks: Math.max(0, finiteNumber(raw.clearTicks)),
