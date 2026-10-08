@@ -1,3 +1,18 @@
+## 08/10/2026 · V75 · CUERNO IRIS FINAL · ANATOMÍA VIVA
+
+**Caché** `ohana-273` · Continuación sobre V74, no reinicio del personaje. El canon se mantiene: Cuernín es solo cuerno, Destello es cuerno con esfera sin patas, Potro Iris estrena cuatro patas, Estelar despliega alas y F4 es Unicornio Negro obsidiana.
+
+- **F1:** cara esférica y cuerno nacen del mismo pivote elástico; no se anticipan orejas ni pezuñas.
+- **F2:** cuatro patas con anticipación de trote y cola de cuatro cintas sujeta a la grupa. El golpe de aire no separa la cola del cuerpo.
+- **F3:** alas realmente articuladas, con apertura, bisagra y aleteo según carrera, salto, victoria o hechizo; cola anclada.
+- **F4:** pelaje negro obsidiana `#1b1a28`, cuello orgánico en S sin contorno rectangular, cara más definida, cuerno pulido, alas nocturnas reactivas y seis hebras de cola de movimiento limitado.
+- **Animación determinista:** `cuernoTailPose` y `cuernoWingPose` mantienen posiciones acotadas sin temporizadores, asignaciones de sprites ni efectos aleatorios. En daño o derrota, alas y colas quedan inmóviles.
+- **Relato unificado:** textos de las cuatro transformaciones actualizados en `characters/evolution.js` para que coincidan con lo que se ve. El nacimiento de las alas sucede en F3, no al final.
+- **Compatibilidad:** Cuerno mantiene la velocidad y salto natural superiores, sus cinco formas, las cuatro habilidades J/K/L/U (incluida la U de sueño) y sus hitboxes. **Dino no se modifica.**
+- **Regresión nueva:** `tests/cuerno-v75-final-anatomy.test.js` verifica cinco siluetas en ocho estados, balance de Canvas, cola limitada, alas dinámicas, esfera y cuerno unidos, textos y reposo al recibir daño. Se han eliminado expectativas de caché antigua en `tests/hardening.test.js` y `tests/michi-soul.test.js`.
+- **Calidad:** 370 pruebas Node PASS, `node tests/browser/e2e.mjs` PASS, Multiplayer E2E PASS y `node tests/browser/visual-regression.mjs` PASS con 92 capturas en rama V75. La fusión requiere también `release:check` PASS y comprobación final de GitHub Pages.
+- **Publicación:** `index.html` y `sw.js` comparten `ohana-273`; el historial V74/V73 se conserva debajo.
+
 ## 08/10/2026 · V74 · CUERNO RECONSTRUCCIÓN CANÓNICA
 
 **Caché** `ohana-272` · Rediseño ordenado por petición expresa; V73 no era la definitiva. El canon visual es obligatorio.
