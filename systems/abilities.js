@@ -694,7 +694,7 @@ let w = 0;
 for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
-tickCuernoFantasyStatus(game,p,canHit,hitEnemy);
+tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
 }
 
