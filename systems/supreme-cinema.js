@@ -212,7 +212,7 @@ if(id==="cuerno")return k<.22?"idle":k<.76?"cast":"victory";
 return k<.34?"idle":k<.72?"attack":"victory";
 }
 
-function drawStory(ctx,id,k,t,cx,cy,target,color){
+function drawStory(ctx,id,k,t,cx,cy,target,color,dreamCount=0){
 ctx.save();
 ctx.globalCompositeOperation="lighter";
 
@@ -481,6 +481,13 @@ if(id==="kilo"){
       drawSpark(ctx,x+9,y-12,target*.012*(1+q),rainbow[(i+4)%7]);
     }
     ctx.restore();
+    // Real dream targets become a constellation in the film, never invented foes.
+    const stars=Math.min(9,Math.max(0,Math.floor(Number(dreamCount)||0)));
+    for(let i=0;i<stars;i++){
+      const a=-Math.PI*.90+i*TAU/Math.max(3,stars),rr=target*(.28+.16*q);
+      drawSpark(ctx,cx+Math.cos(a)*rr,cy-target*.05+Math.sin(a)*rr*.58,
+        Math.max(1.5,target*.016)*(.6+.4*q),rainbow[(i+2)%7]);
+    }
     drawRing(ctx,cx,cy+target*.08,target*(.45+.45*q),q,"#e9dbff",2,.18);
   }else{
     const fade=1-q;
@@ -547,6 +554,7 @@ el.dataset.story=story.gag;
 el.dataset.camera=story.camera;
 el.dataset.beat=story.beat;
 el.dataset.assist=allyDef?.id||"";
+el.dataset.dreamTargets=def.id==="cuerno"?String(Math.max(0,Number(detail.dreamTargets)||0)):"";
 el.dataset.generation=String(token);
 el.dataset.state="active";
 el.dataset.duration=String(Math.round(duration*1000));
@@ -580,7 +588,7 @@ function frame(now){
 
   ctx.clearRect(0,0,W,H);
   backdrop(ctx,W,H,cx,cy,color,story,k);
-  drawStory(ctx,def.id,k,t,cx,cy,target,color);
+  drawStory(ctx,def.id,k,t,cx,cy,target,color,detail.dreamTargets);
 
   const motion=storyMotion(def.id,k,target);
   p.vx=0;p.vy=0;p.grounded=true;

@@ -288,7 +288,7 @@ if (launch) p.vy = -p.jumpPower * 1.2;
 game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color || "#fff" };
 }
 
-function emitSupremeEvent(game, p, def, identity, flow) {
+function emitSupremeEvent(game, p, def, identity, flow, dreamCount = 0) {
 if (typeof dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
 const ally = (flow.assist || p.id === "yomi") ? (SUPREME[p.id]?.ally || "") : "";
 try {
@@ -304,7 +304,8 @@ dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
   multiplier: Number(flow.multiplier.toFixed(2)),
   flow: flow.label || "",
   combo: flow.combo,
-  assist: ally
+  assist: ally,
+  dreamTargets: p.id === "cuerno" ? dreamCount : 0
 }}));
 } catch (_) {}
 }
@@ -338,8 +339,8 @@ const evo = clamp(Number(p.evo) || 0, 0, 4);
 const power = Math.max(1, Number(flow?.multiplier) || 1);
 const dmg = (70 + evo * 14) * pw(p) * power;
 const enemies = (game.enemies || []).filter(canHit);
-
-emitSupremeEvent(game, p, def, identity, flow);
+const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
+emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
 if (p.id === "kilo") {
 for (const e of enemies) hitEnemy(game, e, dmg * 0.72, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 28, color: def.color, crit: true });
@@ -412,7 +413,7 @@ p.invuln=Math.max(p.invuln||0,120);
 game.nums?.add(cx(p),p.y-58,"CUERNO · JUICIO DEL UMBRAL","#ffe6b5",true);
  } else if (p.id === "cuerno") {
 // Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
-const sleepers=enemies.filter(e=>!e.boss&&inView(game,e));
+const sleepers=dreamTargets;
 for(const e of sleepers){
 e.stun=Math.max(e.stun||0,156);
 e._auroraSleepT=156;
@@ -429,6 +430,7 @@ game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",tru
 add({
 kind: "supremeField",
 mode: p.id,
+dreamTargets: p.id === "cuerno" ? dreamTargets : null,
 x: cx(p),
 y: cy(p),
 life: p.id === "yomi" ? 170 : 150,
@@ -1310,7 +1312,7 @@ if (mode === "stitcho") {
     }
   }
 } else if (mode === "cuerno") {
-  for(const e of g.enemies||[]) if(canHit(e)&&!e.boss&&inView(g,e)){
+  for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
     e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
     e.stun=Math.max(e.stun||0,3);
     e.vx=0;
@@ -1367,7 +1369,7 @@ if (f.pulse % pulseEvery === 0) {
   } else if (mode === "cuerno") {
     healPlayer(p,Math.max(2,p.maxHealth*.013));
     p.invuln=Math.max(p.invuln||0,10);
-    for(const e of g.enemies||[]) if(canHit(e)&&!e.boss&&inView(g,e)){
+    for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
       const cap=Math.max(1,Number(e.maxHp??e.maxHealth??e.max??e.hp)||1);
       hitEnemy(g,e,Math.max(cap*.28,f.dmg*.2),{
         kx:0,ky:0,stun:70,color:"#d7c3ff",parts:2,hitstop:0,shake:0
@@ -2150,6 +2152,43 @@ ctx.fillStyle = "#a8662a";
 ctx.fillRect(-12 * s, -11 * s, 24 * s, 4 * s);
 }
 
+// Individual living dream seals; only the victims selected at U's cast-time.
+export function drawAuroraDreamTargets(ctx,f,cam,t,g){
+const targets=f.dreamTargets||[],colors=["#f9a8bd","#f7d6a4","#e9eeb8","#a9e9d6","#a6dbf8","#c2bdf8","#e7bbf0"];
+const fade=Math.min(1,f.life/16,(f.max-f.life)/12),reduced=!!g.reduceMotion;
+if(fade<=0)return;
+ctx.save();ctx.lineCap="round";
+let threads=0,halos=0;
+for(const e of targets){
+if(!canHit(e)||e.boss||!inView(g,e))continue;
+const x=cx(e)-cam.x,y=cy(e)-cam.y,w=Math.max(10,Number(e.w)||24),h=Math.max(12,Number(e.h)||32);
+const bob=reduced?0:Math.sin(t*.09+halos*1.7);
+const hp=Math.max(1,Number(e.maxHp??e.maxHealth??e.max??e.hp)||1);
+const glow=(.32+.12*(1-Math.min(1,Math.max(0,e.hp/hp))))*fade;
+if(threads<6){
+ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.11*fade;
+ctx.strokeStyle=colors[(threads*2)%7];ctx.lineWidth=1.25;
+ctx.beginPath();ctx.moveTo(f.x-cam.x,f.y-cam.y-32);
+ctx.quadraticCurveTo((f.x-cam.x+x)*.5,y-h-32,x,y-h*.62);ctx.stroke();threads++;
+}
+ctx.globalCompositeOperation="source-over";ctx.save();ctx.translate(x,y);
+for(let i=0;i<3;i++){
+ctx.globalAlpha=glow*(1-i*.14);ctx.lineWidth=1.5+i*.2;
+ctx.strokeStyle=colors[(halos+i*2)%7];ctx.beginPath();
+ctx.ellipse(0,0,w*(.66+i*.08)+bob*.6,h*(.67+i*.06)+bob*.4,-.06,Math.PI*.09,Math.PI*1.91);
+ctx.stroke();
+}
+ctx.strokeStyle="#f8e7ff";ctx.lineWidth=1.6;ctx.globalAlpha=.72*fade;
+ctx.beginPath();ctx.arc(0,-h*.78-4-bob,4.3,-.85,2.13);ctx.stroke();
+ctx.beginPath();ctx.moveTo(-w*.22,-h*.07);ctx.quadraticCurveTo(-w*.12,1,-w*.02,-h*.07);
+ctx.moveTo(w*.02,-h*.07);ctx.quadraticCurveTo(w*.12,1,w*.22,-h*.07);ctx.stroke();
+ctx.fillStyle=colors[(halos+5)%7];ctx.font="700 11px sans-serif";
+ctx.textAlign="center";ctx.globalAlpha=.68*fade;
+ctx.fillText("z",w*.34,-h*.68-(reduced?0:2*bob));ctx.restore();halos++;
+}
+ctx.restore();
+}
+
 const DRW = {
 irisHalo(ctx,f,cam,t){
 const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
@@ -2224,11 +2263,7 @@ if(f.mode==="kilo"){
     ctx.arc(x,y+24,R*(.75+i*.14),Math.PI*.02,Math.PI*1.98);ctx.stroke();
   }
   ctx.globalCompositeOperation="source-over";
-  ctx.textAlign="center";ctx.font="700 16px sans-serif";ctx.fillStyle="#ddd1ff";
-  for(const e of g.enemies||[])if(canHit(e)&&!e.boss&&e._auroraSleepT>0&&inView(g,e)){
-    ctx.globalAlpha=.65*fade;
-    ctx.fillText("Z",cx(e)-cam.x, e.y-cam.y-13);
-  }
+  drawAuroraDreamTargets(ctx,f,cam,t,g);
 }
 ctx.restore();
 },
