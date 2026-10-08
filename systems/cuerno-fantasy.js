@@ -153,3 +153,47 @@ export function drawCuernoFantasyStatus(ctx,enemies,cam,t,reduce=false){
     ctx.restore();
   }
 }
+
+export function startCuernoFantasyTrail(g,p,evo,activeFx,add,pw,cx){
+ const living=activeFx.filter(f=>f.kind==="cuernoFantasyTrail"&&!f.dead);
+ if(living.length>=CUERNO_FANTASY.maxTrails)living[0].dead=true;
+ return add({kind:"cuernoFantasyTrail",
+  life:CUERNO_FANTASY.trailFrames,max:CUERNO_FANTASY.trailFrames,
+  points:[{x:cx(p),y:p.y+p.h*.72}],evo,
+  dmg:(2.8+evo*.75)*pw(p),born:Number(g.t)||0,face:p.facing||1});
+}
+
+export function updateCuernoFantasyTrail(g,f,p,galloping,canHit,cx,cy){
+ if(f.dead)return false;
+ if(galloping && p.id==="cuerno" && !p.dead){
+   f.life=CUERNO_FANTASY.trailFrames;
+   if(f.age%CUERNO_FANTASY.sampleEvery===0)
+     f.points=addCuernoRibbonPoint(f.points,cx(p),p.y+p.h*.72);
+ }else f.life--;
+ if(f.life<=0)return false;
+ const now=Number(g.t)||0;
+ for(const e of g.enemies||[]){
+   if(!canHit(e)||!cuernoRibbonTouches(f.points,e))continue;
+   const first=!(Number(e._cuernoFantasyUntil)>now);
+   e._cuernoFantasyUntil=now+CUERNO_FANTASY.markFrames;
+   e._cuernoFantasyDamage=Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
+   if(first){
+     e._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
+     g.nums?.add?.(cx(e),e.y-10,"✦ FANTASÍA","#f0baff",false);
+   }
+ }
+ return true;
+}
+
+export function tickCuernoFantasyStatus(game,p,canHit,hitEnemy){
+ if(p.id!=="cuerno")return;
+ const now=Number(game.t)||0;
+ for(const enemy of game.enemies||[]){
+   if(!enemy || !(Number(enemy._cuernoFantasyUntil)>now)||!canHit(enemy))continue;
+   if(now<(Number(enemy._cuernoFantasyNext)||0))continue;
+   enemy._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
+   hitEnemy(game,enemy,Math.max(2,Number(enemy._cuernoFantasyDamage)||2),
+      {kx:0,ky:0,stun:0,color:"#ddbaff",parts:0,shake:0,
+        hitstop:0,nums:false,xp:0});
+ }
+}
