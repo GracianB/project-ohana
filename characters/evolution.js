@@ -76,7 +76,7 @@ export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
   kilo:    Object.freeze({ camera:"orbit",   bg:"#2b160f", accent:"#ffd36a", motif:"petals",  pulse:"bloom",   reveal:"sunrise", speed:1.00 }),
   stitcho: Object.freeze({ camera:"spiral",  bg:"#100d2b", accent:"#8f7bff", motif:"seams",   pulse:"nebula",  reveal:"rift",    speed:1.12 }),
   chispin:Object.freeze({ camera:"snap",     bg:"#09132f", accent:"#ffe14a", motif:"bolts",   pulse:"storm",   reveal:"strike",  speed:1.22 }),
-  cat:     Object.freeze({ camera:"eclipse",  bg:"#170d20", accent:"#ffb6e4", motif:"moons",   pulse:"eclipse", reveal:"crescent",speed:0.88 }),
+  cat:     Object.freeze({ camera:"eclipse",  bg:"#120b27", accent:"#ffb6e4", motif:"moons",   pulse:"eclipse", reveal:"crescent",speed:0.92 }),
   dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", motif:"embers",  pulse:"flame",   reveal:"nova",    speed:1.08 }),
   dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
   frita:   Object.freeze({ camera:"whip",     bg:"#24170b", accent:"#fff1b3", motif:"salt",    pulse:"crisp",   reveal:"fry",     speed:1.18 }),
