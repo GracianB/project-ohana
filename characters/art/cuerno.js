@@ -73,7 +73,7 @@ export function cuernoTailPose(pose,form,t){
  const f=Math.max(2,Math.min(4,form|0));
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
  const time=Number.isFinite(Number(t))?Number(t):0;
- const running=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
+ const running=pose?.state==="run",air=!!pose?.air||pose?.state==="jump"||pose?.state==="fall";
  if(pose?.state==="dead"||pose?.state==="hurt")return {swing:0,lift:0};
  const amplitude=f===4?6.2:f===3?5.4:4.2;
  const wave=pose?.reduceMotion?0:Math.sin(time*.075+phase*.22)*amplitude*.55+
@@ -102,7 +102,7 @@ function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
 }
 export function cuernoWingPose(pose,form,t){
  if(form<3)return {open:0,flap:0,hinge:0};
- const state=pose?.state||"idle",air=!!pose?.air||state==="jump";
+ const state=pose?.state||"idle",air=!!pose?.air||state==="jump"||state==="fall";
  if(state==="dead"||state==="hurt")return {open:.12,flap:0,hinge:0};
  const cast=state==="cast"||state==="attack",victory=state==="victory";
  const slot=cuernoMagicPose(pose,form)?.slot;
@@ -373,7 +373,7 @@ drawCuernoOverlays(ctx,pose,R,0,t,bounce,tilt);
 
 // F1 · Destello: a SINGLE spherical face grows around Cuernín's horn. Zero legs.
 function drawFirstBody(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump";
+const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase);
 const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.35);
 const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0);
@@ -416,7 +416,7 @@ drawCuernoOverlays(ctx,pose,R,1,t,lift,tilt);
 
 // F2 · First foal body, precisely FOUR articulated legs.
 function drawRainbowFoal(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump";
+const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase);
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 const hurt=pose.state==="hurt"||pose.state==="dead";
@@ -619,7 +619,7 @@ drawCuernoOverlays(ctx,pose,R,3,t,bounce,tilt);
 
 // V74 F4: elegant OBSIDIAN BLACK unicorn, not a scaled-up white foal.
 function drawAuroraUnicorn(ctx,pose,R,t){
-const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump";
+const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const cast=pose.state==="cast"||pose.state==="attack",triumph=pose.state==="victory";
 const hurt=pose.state==="hurt"||pose.state==="dead";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase),speed=Math.max(0,Number(pose.speed)||0);
