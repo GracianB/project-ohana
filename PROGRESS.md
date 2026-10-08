@@ -1,3 +1,22 @@
+## 08/10/2026 · V81 · PERFORMANCE ARCHITECTURE / VICTORY REUNION
+
+**Base de integración:** `be8070e3` (V80 publicada con Dino y Cuerno V79); caché `ohana-280`. Cambios de infraestructura/selector/fin exclusivamente. Sin editar `characters/art/dino.js` ni `characters/art/cuerno.js`.
+
+### Corrección de una regresión real de V80
+El final de `title-stage.css` volvía a activar filtros CSS `drop-shadow`, `saturate` y `brightness` sobre los Canvas de retratos, y presentaba cinco tarjetas en CSS aunque `title.js` solo dibujaba y exponía tres al lector de pantalla. El código V80 funcionaba, pero las reglas antiguas posteriores ganaban la cascada `!important`.
+
+### V81
+- Contrato de **tres tarjetas reales** en JS, CSS, teclado y ARIA; sin dos retratos fantasma invisibles para el renderizador, pero visibles para CSS.
+- Orden CSS explícito al final de la hoja; ninguna capa `drop-shadow` sobre Canvas animado ni filtros en tarjetas. Se conservan los focos radiales y el diseño dimensional.
+- Menos capas GPU: `will-change` solo para el protagonista y dos vecinos. Transiciones de posición/opacidad de coste acotado y movimiento reducido sin animaciones.
+- Buffer de los siete Canvas ocultos reducido a 1x1 al salir de la selección; se vuelve a crear en la entrada, sin eliminar el nodo/las pruebas de personaje. Los laterales emplean DPR 1, protagonista conserva su calidad V80.
+- Cinemática final con **12.0 s** y plano familiar sostenido antes de resultados. La tipografía entra antes del último tramo y permanece visible; el botón de omisión y reducción de movimiento (1.6 s) permanecen.
+- Nuevo límite opcional de DPR en `fullCanvas`: 1.2 para el final, sin modificar la resolución de la evolución ni las supremas de Dino/Cuerno.
+- Browser E2E real recorre diez personajes y verifica CSS calculado, buffers ocultos, Canvas central y coincidencia de accesibilidad. Visual regression valida las tres tarjetas.
+- Tests antiguos adaptados al comportamiento nuevo, manteniendo todas las verificaciones estructurales de cinemática y release.
+
+**Contrato de publicación:** Node, Browser E2E, Multiplayer E2E, Visual Regression, Release Gate y Pages, sin excepciones.
+
 ## 08/10/2026 · OHANA V80 · RENDIMIENTO DEL CARRUSEL Y EPÍLOGO
 
 **Base:** main con Dino y Cuerno V79 juntos (`8d15da20`). Caché nueva: `ohana-279`. Línea de trabajo de rendimiento compartido, sin tocar las ramas de personajes.
