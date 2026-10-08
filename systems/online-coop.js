@@ -1,6 +1,7 @@
 import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
+import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 
 const ENDPOINT = "/.netlify/functions/game";
 const REMOTE_LERP = 0.22;
@@ -60,10 +61,11 @@ class OnlineCoop {
     this.lastRoomId = "";
     this.lastLocalWorld = "";
     this.error = "";
-    this.pendingMutations = [];
     this.seenSignals = new Set();
     this.localStateSent = "";
     this.lastOrbSignals = new Set();
+    this.retryFailures = 0;
+    this.retryAfter = 0;
   }
 
   readSession() {
@@ -103,6 +105,13 @@ class OnlineCoop {
     this.mutationBusy = false;
     this.pendingPosition = null;
     this.pendingSignals = [];
+    this.pendingMutations = [];
+    this.seenSignals.clear();
+    this.lastOrbSignals.clear();
+    this.localStateSent = "";
+    this.retryFailures = 0;
+    this.retryAfter = 0;
+    this.lastRoomId = "";
     this.lastLocalWorld = "";
 
     document.body.dataset.gameMode = "online";
@@ -215,6 +224,8 @@ class OnlineCoop {
         y: targetY,
         targetX,
         targetY,
+        previousX:targetX,previousY:targetY,
+        sampleAt:performance.now(),previousSampleAt:performance.now()-180,
         facing: remote.facing || 1,
         grounded: true,
         melee: 0,
@@ -230,16 +241,13 @@ class OnlineCoop {
         actionUntil: 0,
       };
     } else {
-      this.remote.targetX = targetX;
-      this.remote.targetY = targetY;
-      this.remote.sampleAt = performance.now();
+      const sample=remoteMotionSample(this.remote,targetX,targetY,performance.now(),this.remoteWorld!==worldRoom);
+      Object.assign(this.remote,sample);
+      if(sample.teleport){this.remote.x=targetX;this.remote.y=targetY;}
       this.remote.characterId = remote.characterId;
       this.remote.evolution = remote.evolution ?? this.remote.evolution ?? 1;
       this.remote.facing = remote.facing || this.remote.facing || 1;
       this.remote.slot = remote.slot;
-      this.remote.previousX = this.remote.targetX;
-      this.remote.previousY = this.remote.targetY;
-      this.remote.previousSampleAt = this.remote.sampleAt || performance.now();
       this.remote.health = remote.health;
       this.remote.maxHealth = remote.maxHealth;
       this.remote.pose = structuredClone(remote.pose || this.remote.pose || { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 });
@@ -252,6 +260,7 @@ class OnlineCoop {
   async poll(game, immediate = false) {
     if (!this.enabled || this.polling || !this.roomId || !this.identity) return;
     const now = performance.now();
+    if (!immediate && now < this.retryAfter) return;
     if (!immediate && now - this.lastPoll < POLL_INTERVAL_MS) return;
 
     this.polling = true;
@@ -268,7 +277,7 @@ class OnlineCoop {
         this.sequence,
         this.currentPlayer(snapshot)?.lastSequence || 0
       );
-      this.error = "";
+      this.clearRetry();
 
       if (snapshot.phase === "lobby") {
         this.enabled = false;
@@ -285,9 +294,31 @@ class OnlineCoop {
         } catch (_) {}
       }
     } catch (error) {
-      this.error = error?.message || String(error);
+      this.markRetry(error);
     } finally {
       this.polling = false;
+    }
+  }
+
+  markRetry(error){
+    this.error=error?.message||String(error);
+    this.retryFailures=Math.min(6,(this.retryFailures||0)+1);
+    this.retryAfter=performance.now()+coopRetryDelay(this.retryFailures);
+    if(typeof document!=="undefined"){
+      document.body.dataset.onlineState="reconnecting";
+      const badge=document.getElementById("online-peer-badge");
+      if(badge)badge.textContent="ONLINE · RECONECTANDO";
+    }
+  }
+
+  clearRetry(){
+    this.error="";
+    this.retryFailures=0;
+    this.retryAfter=0;
+    if(this.enabled&&typeof document!=="undefined"){
+      document.body.dataset.onlineState="connected";
+      const badge=document.getElementById("online-peer-badge");
+      if(badge)badge.textContent="ONLINE · 2 JUGADORES";
     }
   }
 
@@ -337,7 +368,7 @@ class OnlineCoop {
   }
 
   async drainMutations(game) {
-    if (this.mutationBusy) return;
+    if (this.mutationBusy || performance.now() < this.retryAfter) return;
     this.mutationBusy = true;
     try {
       while (this.enabled && this.roomId && this.identity && this.pendingMutations.length) {
@@ -348,11 +379,13 @@ class OnlineCoop {
             this.snapshot = data;
             this.updateRemote(data, game);
           }
+          this.clearRetry();
         } catch (error) {
-          this.error = error?.message || String(error);
+          this.markRetry(error);
           if (error?.code === "STALE_SESSION" || error?.code === "INVALID_SESSION") {
             this.enabled = false;
             this.clearSession();
+            this.pendingMutations.length=0;
             location.href = "./multiplayer.html";
             break;
           }
@@ -362,7 +395,8 @@ class OnlineCoop {
       }
     } finally {
       this.mutationBusy = false;
-      if (this.pendingMutations.length) queueMicrotask(() => this.drainMutations(game));
+      // Never immediately reschedule failed requests: tick() uses retryAfter.
+      // Retain important signals for a bounded backoff, not a microtask storm.
     }
   }
 

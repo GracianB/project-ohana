@@ -1,3 +1,11 @@
+## 08/10/2026 · OHANA V89 · COOPERATIVO RESILIENTE + GUARDADO · ohana-289
+
+- Se elimina el reintento instantáneo infinito de las mutaciones de red: reintentos controlados de 200–3600 ms desde el tick normal; señales importantes esperan sin crear microtareas sin límite.
+- El estado online indica reconexión/recuperación y se reinician las colas y deduplicadores al comenzar una nueva sesión.
+- Interpolación J2 corregida: posición y tiempo previos se capturan ANTES del nuevo paquete. Cambios de sala/teletransportes se sitúan sin surcar todo el escenario.
+- La progresión del ritual de las tres brasas se guarda de forma compatible con el save v2; la carga parcial no se preserva ni permite explotar recompensas.
+- Tests de red determinista y guardado más matriz CI/Browser/Multiplayer/Visual/Release Gate obligatoria antes de merge.
+
 ## 08/10/2026 · OHANA V88 · RITO DEL DRAGÓN · ohana-288
 
 - Las tres brasas ahora se **canalizan en orden** Aliento → Batida → Ascenso: se necesita mantener proximidad durante 30 fotogramas por brasa. Alejarse reinicia solo la carga actual.

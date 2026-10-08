@@ -676,6 +676,7 @@ try {
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
     game._magicSnap = u.magic;
+    game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
   }
 } catch (e) {}
