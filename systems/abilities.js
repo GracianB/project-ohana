@@ -1976,6 +1976,7 @@ function drawBallAura(ctx, p, cam, t, color) {
     ctx.lineTo(x - p.facing * (r + 18 + (t * 7 + i * 13) % 14), yy);
     ctx.stroke();
   }
+  // Stitcho no deja una estela genérica: "cose" el recorrido.
   if (p.id === "stitcho") {
     ctx.globalAlpha = .70;
     ctx.strokeStyle = color === "#8f7bff" ? "#d8b7ff" : "#9cf6ff";
