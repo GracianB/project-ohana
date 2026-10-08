@@ -452,6 +452,36 @@ try {
     assert.ok(Math.abs(supremeDrift[id].player?.vx || 0) < 0.05, 'V47B: ' + id + ' sale corriendo al pulsar U');
   }
 
+  const supremeStories = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    const ids = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+    return ids.map((id) => {
+      api.start(id);
+      api.setEvo(4);
+      api.resetInput();
+      api.cast(3);
+      const el = document.querySelector('#supreme-cinema');
+      return {
+        id,
+        active:el?.dataset.activeId || '',
+        mode:el?.dataset.mode || '',
+        story:el?.dataset.story || '',
+        camera:el?.dataset.camera || '',
+        beat:el?.dataset.beat || '',
+        duration:Number(el?.dataset.duration || 0)
+      };
+    });
+  });
+  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 10, 'V48: las U comparten storyboard');
+  assert.equal(new Set(supremeStories.map((x) => x.camera)).size, 10, 'V48: las U comparten cámara');
+  for (const item of supremeStories) {
+    assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
+    assert.equal(item.mode, 'storyboard', 'V48: U sigue usando hero-short · ' + JSON.stringify(item));
+    assert.ok(item.story && item.camera && item.beat.includes('→'), 'V48: storyboard incompleto · ' + JSON.stringify(item));
+    assert.ok(item.duration >= 1500 && item.duration <= 1850, 'V48: timing fuera de rango · ' + JSON.stringify(item));
+  }
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+
   // V39 — Dragón: agota sus saltos normales y obtiene una Batida de Alas real.
   await page.evaluate(() => {
     const api = window.__OHANA_E2E;
