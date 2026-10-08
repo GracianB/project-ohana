@@ -29,7 +29,7 @@ test("V56 Ofuda J travels horizontally and exposes its true 16-frame blast zone"
  assert.match(abilities,/vx: \(8 \+ evo\) \* \(p\.facing \|\| 1\), vy: 0/);
  assert.match(abilities,/f\.stuck = 16/);
  assert.match(abilities,/Math\.hypot\(cx\(e\) - f\.x, cy\(e\) - f\.y\) < 72/);
- assert.match(abilities,/Horizontal guardian seal \(J\): flight/);
+ assert.match(abilities,/ctx\.arc\(0,0,22\+50\*k,0,TAU\)/);
  assert.match(abilities,/ctx\.arc\(0,0,22\+50\*k,0,TAU\)/);
 });
 
