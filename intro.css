@@ -30,3 +30,31 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 @media(prefers-reduced-motion:reduce){
   #start-intro,#ohana-intro{transition:none!important}
 }
+
+
+/* V44 · FAMILY WELCOME — no opening logo cinema, no auto-advance. */
+#ohana-intro.family-welcome::before,#ohana-intro.family-welcome::after{display:none!important}
+#ohana-intro.family-welcome{background:#0b2631!important}
+#ohana-intro .oi-welcome{
+  position:absolute;left:clamp(18px,4vw,64px);bottom:clamp(26px,7vh,78px);z-index:6;
+  display:grid;gap:5px;max-width:min(430px,72vw);pointer-events:none;
+  opacity:0;transform:translateY(10px);transition:opacity .55s ease,transform .55s ease;
+}
+#ohana-intro.ready .oi-welcome{opacity:1;transform:none}
+#ohana-intro .oi-welcome span{font:800 9px/1 Outfit,sans-serif;letter-spacing:.28em;color:#9be7ee}
+#ohana-intro .oi-welcome strong{font:700 clamp(24px,3.2vw,44px)/1 Fredoka,sans-serif;color:#fff6d5;letter-spacing:-.03em}
+#ohana-intro .oi-welcome small{font:600 12px/1.35 Outfit,sans-serif;color:rgba(236,245,244,.68)}
+#ohana-intro .oi-enter{
+  position:absolute;right:clamp(18px,4vw,64px);bottom:clamp(26px,7vh,78px);z-index:7;
+  min-height:48px;padding:0 19px;border:1px solid rgba(255,240,186,.42);border-radius:999px;
+  background:rgba(5,20,26,.66);backdrop-filter:blur(12px);color:#fff3c1;
+  font:800 10px/1 Outfit,sans-serif;letter-spacing:.15em;cursor:pointer;
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .55s ease,transform .55s ease,background .2s ease;
+}
+#ohana-intro.ready .oi-enter{opacity:1;transform:none;pointer-events:auto}
+#ohana-intro .oi-enter:hover,#ohana-intro .oi-enter:focus-visible{background:rgba(19,60,67,.88);outline:2px solid #ffe39b;outline-offset:3px}
+#ohana-intro.family-welcome .oi-skip{display:none!important}
+@media(max-width:640px){
+  #ohana-intro .oi-welcome{left:16px;right:16px;bottom:88px;max-width:none}
+  #ohana-intro .oi-enter{left:16px;right:auto;bottom:24px}
+}
