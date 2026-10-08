@@ -10,6 +10,7 @@ import { SUPREME_STORYBOARDS } from "./supreme-storyboards.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
+const TAU = Math.PI * 2;
 let active = null;
 let generation = 0;
 
