@@ -213,7 +213,7 @@ function drawBase(ctx, pose, R) {
   const final = f === 4;
   const dark = R.darken(c.body, 0.2);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
-  const flN = pose.flourishN % 3;
+  const flN = (pose.flourishN || 0) % 4;
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const flying = st === "glide" || pose.move === "fly" || pose.move === "float";
 
@@ -314,11 +314,12 @@ function drawBase(ctx, pose, R) {
     breathUp = 1; eyeMood = "happy";
     tailWave = 1.4 + Math.sin(t * 0.2) * 0.5;
   } else if (flying) {
-    lean = 0.34; headRot = -0.1;
+    const climb = clamp(-(Number(pose.vy) || 0) / 9, -1, 1);
+    lean = 0.34 - climb * .09; headRot = -0.1 - climb * .06;
     legF = -0.55; legB = -0.85;
     armF = 0.9; armB = 0.6;
-    if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03; wRotFar = -0.35; }
-    else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4; }
+    if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03 - climb * .13; wRotFar = -0.35 - climb * .1; }
+    else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4 - climb * .12; }
     wOpen = 1; eyeMood = "happy";
     tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
   }
@@ -332,11 +333,21 @@ function drawBase(ctx, pose, R) {
       lean = -0.15 * flE; headRot = -0.35 * flE; jaw = 0.55 * flE;
       armF = lerp(armF, 2.6, flE); armB = lerp(armB, 2.3, flE);
       eyeMood = flE > 0.4 ? "closed" : "normal";
-    } else { // se rasca con la pata trasera
+    } else if (flN === 2) { // se rasca con la pata trasera
       lean = -0.3 * flE; bob += 4 * flE;
       legF = lerp(0, -2.75 + Math.sin(t * 1.1) * 0.22 * flE, flE); lenF = 1 + 0.9 * flE; armF = 0.9; armB = 0.5;
       headRot = -0.3 * flE; eyeMood = flE > 0.3 ? "happy" : "normal";
       wRot = -0.2; tailWave = Math.sin(t * 0.4) * 0.6;
+    } else { // cuarta microescena: estornuda, persigue una brasa y finge dominarla
+      const start = ease(seg(fl, .12, .44)), recover = ease(seg(fl, .60, .9));
+      bob -= 2.5 * flE;
+      lean = -.12 * flE; headRot = -.25 * flE + .16 * start * (1 - recover);
+      jaw = (.2 + .34 * start) * flE;
+      armF = lerp(armF, 1.7, flE); armB = lerp(armB, 1.1, flE);
+      wRot = lerp(wRot, -.18, flE); wOpen = lerp(wOpen, .92, flE);
+      eyeMood = recover > .5 ? "happy" : start > .45 ? "closed" : "normal";
+      tailWave = .3 + Math.sin(t * .22) * .42 * flE;
+      smoke = false;
     }
   }
 
