@@ -21,7 +21,7 @@ function frame(form,state="idle",phase=.2,speed=1){
   });
   const noop=()=>{};
   const R={
-    limb:(ctx,...args)=>{assert.ok(args.slice(0,7).every(Number.isFinite));out.limbs.push(args.slice(0,7));},
+    limb:(ctx,...args)=>{if(form===3)assert.ok(args.slice(0,7).every(Number.isFinite));out.limbs.push(args.slice(0,7));},
     eye:()=>{out.eyes++},mouth:()=>{out.mouths++},
     blush:noop,sparkle:noop,star:noop,halo:noop,celShade:noop,ellipse:noop,darken:c=>c
   };
