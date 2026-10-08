@@ -216,7 +216,7 @@ if(id==="cuerno")return k<.22?"idle":k<.76?"cast":"victory";
 return k<.34?"idle":k<.72?"attack":"victory";
 }
 
-function drawStory(ctx,id,k,t,cx,cy,target,color,dreamCount=0){
+function drawStory(ctx,id,k,t,cx,cy,target,color,dreamCount=0,reduceMotion=false){
 ctx.save();
 ctx.globalCompositeOperation="lighter";
 
@@ -323,7 +323,7 @@ if(id==="kilo"){
     circle(ctx,cx,cy,target*.16*(.5+nova),"#fff",.18+.22*nova,true);
   }
 }else if(id==="dino"){
-  drawDinoColossusFilm(ctx,k,t,cx,cy,target,color,false);
+  drawDinoColossusFilm(ctx,k,t,cx,cy,target,color,reduceMotion);
 }else if(id==="frita"){
   const chase=seg(k,.06,.49);
   const px=lerp(cx-target*.82,cx+target*.19,easeInOut(chase));
@@ -597,7 +597,7 @@ function frame(now){
 
   ctx.clearRect(0,0,W,H);
   backdrop(ctx,W,H,cx,cy,color,story,k);
-  drawStory(ctx,def.id,k,t,cx,cy,target,color,detail.dreamTargets);
+  drawStory(ctx,def.id,k,t,cx,cy,target,color,detail.dreamTargets,reduce);
   // F4's final pearl crown is an extra quiet cue, not an additional explosion.
   if(def.id==="cuerno"&&evo===4&&k>.76){
     const a=Math.min(1,(k-.76)/.12)*(1-Math.min(1,Math.max(0,(k-.94)/.06)));
