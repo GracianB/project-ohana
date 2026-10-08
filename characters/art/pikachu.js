@@ -518,6 +518,7 @@ function stormSoul(ctx, pose, f, o, front) {
       ctx.ellipse(0, -2, 18 + k * 13, 4 + k * 2, 0, 0, TAU);
       ctx.stroke();
     }
+    // portrait-friendly character envelope
     if (active || win || sky) {
       ctx.globalAlpha = (.24 + .35 * charge) * (0.84 + .16 * Math.sin(t * .07));
       ctx.strokeStyle = f % 2 ? cold : warm;
