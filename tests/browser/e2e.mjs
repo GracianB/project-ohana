@@ -22,7 +22,18 @@ async function auditPage(page, label) {
       complete: document.body.classList.contains('intro-complete')
     };
   });
-  assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
+  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V44 family welcome no aparece');
+  await page.waitForTimeout(1350);
+  const heldOpening = await page.evaluate(() => ({
+    complete:document.body.classList.contains('intro-complete'),
+    mode:document.querySelector('#ohana-intro')?.dataset.openingMode || '',
+    cast:Number(document.querySelector('#ohana-intro')?.dataset.v44Cast || 0),
+    ready:document.querySelector('#ohana-intro')?.classList.contains('ready') || false
+  }));
+  assert.equal(heldOpening.complete, false, label + ': V44 avanza al carrusel sin acción del usuario');
+  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V44 incorrecto');
+  assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
+  assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
@@ -30,10 +41,9 @@ async function auditPage(page, label) {
   assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
   assert.equal(gameSource.status, 200, label + ': game.js HTTP inválido');
   assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
-  // La intro es una animación autodestruible. El E2E no debe clicar un elemento
-  // que puede desaparecer entre el descubrimiento del locator y su evaluación.
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await page.locator('#ohana-intro .oi-enter').click();
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   const titleLayout = await page.evaluate(() => {
     const rect = (selector) => {
       const r = document.querySelector(selector)?.getBoundingClientRect();
