@@ -453,8 +453,8 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
   filter:none!important;
   will-change:transform,opacity!important;
 }
-#char-select #chars .char-card.is-prev2,
-#char-select #chars .char-card.is-next2{
+#char-select:not(.atrium-on) #chars .char-card.is-prev2,
+#char-select:not(.atrium-on) #chars .char-card.is-next2{
   display:none!important;
   opacity:0!important;
   pointer-events:none!important;
