@@ -352,7 +352,7 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
   await page.waitForTimeout(100);
-  assert.equal(await page.locator('#cinematic-beat').evaluate((el) => el.classList.contains('show')), true, '09-death: beat de muerte no visible');
+  assert.equal(await page.locator('#cinematic-beat').count(), 0, '10-death-ghost: V44 no debe montar tarjeta fullscreen de muerte');
   await capture(page, '10-death-ghost');
 
   await browser.close();
