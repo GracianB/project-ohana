@@ -12,6 +12,7 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 const { EVOLUTION_CINEMA_PROFILES } = await import('../characters/evolution.js');
 const { evolutionTiming } = await import('../systems/evolution-timing.js');
 const { SUPREME_IDENTITY, supremeOf, useAbility, clearAbilityFx } = await import('../systems/abilities.js');
+const { SUPREME_STORYBOARDS } = await import('../systems/supreme-cinema.js');
 
 const CHARACTERS = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
 
@@ -46,6 +47,19 @@ test('V45: reduced motion mantiene la ascensión completa pero abreviada', () =>
   assert.ok(t.dark < 0.22);
   assert.ok(t.end < 1.6);
   assert.ok(t.end > t.reveal);
+});
+
+test('V48: las diez U tienen storyboard cinematográfico propio', () => {
+  assert.equal(Object.keys(SUPREME_STORYBOARDS).length, 10);
+  assert.deepEqual(Object.keys(SUPREME_STORYBOARDS).sort(), [...CHARACTERS].sort());
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].gag)).size, 10);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].camera)).size, 10);
+  assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].beat)).size, 10);
+  for (const id of CHARACTERS) {
+    const story = SUPREME_STORYBOARDS[id];
+    assert.ok(story.duration >= 1.5 && story.duration <= 1.85, id + '/duration');
+    assert.match(story.beat, /→/, id + '/beat');
+  }
 });
 
 test('PR151.6: existen 10 identidades supreme y todas son únicas', () => {
