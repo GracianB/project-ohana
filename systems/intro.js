@@ -1,7 +1,7 @@
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
 // ----------------------------------------------------------------------------
-// playTitleIntro(): V44 FAMILY WELCOME — escena viva que espera una acción explícita.
+// playTitleIntro(): V45 COMIC FAMILY WELCOME — escena viva, humor y acción explícita.
 // playIntro(kind, name, done, id): cinemática corta al pulsar Empezar /
 //   Continuar (~1.8 s, saltable). API compatible con title.js.
 // Ambas en canvas, con el mismo kit visual que la cinemática de evolución.
