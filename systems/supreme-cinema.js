@@ -380,20 +380,35 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawRing(ctx,cx,cy,target*.94,eruption,color,4,.56);
     }
   }else if(id==="yomi"){
-    const eyeK=seg(k,.08,.58);
-    voidEye(ctx,cx,cy-target*.06,target,eyeK,color);
-    if(k>.40&&k<.58){
-      drawSpark(ctx,cx-target*.06,cy-target*.20,3,"#fff");
-      drawSpark(ctx,cx+target*.06,cy-target*.20,3,"#fff");
+    // A guardian needs a story, not a giant anonymous eye.
+    // 1: candle awakens; 2: Cuerno crosses the threshold; 3: two lights join; 4: seal rescues.
+    const lamp=seg(k,.06,.30),welcome=seg(k,.22,.52),seal=seg(k,.49,.79),rescue=seg(k,.76,.96);
+    if(lamp>0){
+      const a=Math.sin(Math.PI*Math.min(1,lamp));
+      drawRing(ctx,cx,cy-target*.14,target*(.13+.17*lamp),lamp,"#ffe3ac",2,.36);
+      drawSpark(ctx,cx,cy-target*.21,target*.025*a,"#fff6cb");
     }
-    const maw=seg(k,.56,.94);
-    if(maw>0){
-      ctx.strokeStyle=color;ctx.lineWidth=3;ctx.globalAlpha=.30+.50*maw;
-      ctx.beginPath();ctx.ellipse(cx,cy+target*.28,target*(.28+.46*maw),target*(.08+.16*maw),0,0,Math.PI*2);ctx.stroke();
-      for(let i=-5;i<=5;i++){
-        const x=cx+i*target*.09*maw;
-        line(ctx,x,cy+target*.18,x+i*target*.015,cy+target*.34,color,2,.32+.38*maw);
+    if(welcome>0){
+      const r=target*(.20+.35*welcome);
+      ctx.save();ctx.strokeStyle="#ffd9ab";ctx.lineWidth=3;
+      ctx.globalAlpha=.32+.34*(1-Math.abs(welcome-.6));
+      ctx.beginPath();ctx.arc(cx,cy+target*.16,r,Math.PI*1.10,Math.PI*1.90);ctx.stroke();ctx.restore();
+      arcRainbow(ctx,cx+target*.40,cy-target*.04,target*.25,.30+.45*welcome,false);
+    }
+    if(seal>0){
+      const a=Math.sin(Math.PI*Math.min(1,seal));
+      const R=target*(.32+.35*seal);
+      drawRing(ctx,cx,cy+target*.16,R,seal,"#ffd7a4",2,.42);
+      for(let i=0;i<6;i++){
+        const angle=i*TAU/6+t*.32;
+        drawSpark(ctx,cx+Math.cos(angle)*R*.7,cy+target*.16+Math.sin(angle)*R*.45,
+          (2+i%3)*a,i%2?"#ffb0a0":"#fff1c0");
       }
+    }
+    if(rescue>0){
+      const a=Math.sin(Math.PI*.5*rescue);
+      arcRainbow(ctx,cx,cy+target*.31,target*(.30+.50*rescue),.15+.36*a,true);
+      drawRays(ctx,cx,cy-target*.07,target*.92,"#ffe3ac",.10+.14*a,t*.07,8);
     }
   }else{
     const tiny=seg(k,.06,.38);
@@ -413,20 +428,20 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
 
 function drawAssist(ctx,ally,k,t,cx,cy,target,scale,color){
   if(!ally) return;
-  const inK=easeOut(seg(k,.58,.72));
-  const outK=1-easeOut(seg(k,.90,1));
+  const inK=easeOut(seg(k,.27,.41));
+  const outK=1-easeOut(seg(k,.91,1));
   const alpha=inK*outK;
   if(alpha<=.01)return;
-  const x=lerp(cx+target*1.15,cx+target*.70,inK);
+  const x=lerp(cx+target*1.15,cx+target*.64,inK);
   const y=cy+target*.36-Math.sin(inK*Math.PI)*target*.05;
   ally.vx=0;ally.vy=0;ally.grounded=true;ally.facing=-1;
-  ally._poseOverride=k<.78?"attack":"victory";
-  ally.melee=k<.82?8:0;
-  ctx.save();ctx.globalAlpha=alpha*.90;
-  drawDummy(ctx,ally,x,y,scale*.58,t*60+19);
+  ally._poseOverride=k<.47?"run":k<.77?"attack":"victory";
+  ally.melee=k>.47&&k<.82?8:0;
+  ctx.save();ctx.globalAlpha=alpha*.95;
+  drawDummy(ctx,ally,x,y,scale*.81,t*60+19);
   ctx.restore();
-  if(k>.68&&k<.94){
-    drawTitle(ctx,"OHANA ASSIST",x,cy-target*.56,Math.max(10,target*.045),tint(color,.45),{
+  if(k>.37&&k<.94){
+    drawTitle(ctx,ally.id==="cuerno"?"CUERNO · COMPAÑERO":"OHANA ASSIST",x,cy-target*.67,Math.max(12,target*.056),tint(color,.45),{
       font:FONT_BODY,weight:900,spacing:".22em",stroke:false,maxWidth:target*.9
     });
   }
@@ -443,7 +458,8 @@ function play(detail={}){
   const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
   const ally=allyDef?actor(allyDef,Math.min(4,Math.max(2,evo)),allyDef.color):null;
   const reduce=reducedMotion();
-  const duration=reduce ? .78 : story.duration;
+  // Give every U time to be understood; Yomi's duet keeps its longer authored runtime.
+  const duration=reduce ? .78 : Math.max(2.65,story.duration);
   let t0=0,raf=0,done=false;
   const token=++generation;
 
