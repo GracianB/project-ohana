@@ -12,7 +12,7 @@ test("V80: active hero stays at full animation while side previews are throttled
   "!hero && !cv._needsFit && now - (cv._lastPaintAt || 0)",
   "if (cv._needsFit === false) return",
   "new ResizeObserver(",
-  "const visible = [id, prev, next]",
+  "const visible = atriumMode || [id, prev, next]",
   "cv._labelEvo !== evo || cv._labelHero !== hero",
   "document.visibilityState === \"hidden\""
  ])assert.ok(title.includes(s),"missing: "+s);
