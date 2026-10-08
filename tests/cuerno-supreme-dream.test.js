@@ -73,7 +73,7 @@ test("V71 reduced motion and true sleeper count are connected to film",()=>{
  assert.match(abilities,/dreamTargets: p\.id === "cuerno" \? dreamTargets : null/);
  assert.match(abilities,/for\(const e of f\.dreamTargets\|\|\[\]\) if\(canHit\(e\)&&!e\.boss\)/);
  assert.match(cinema,/el\.dataset\.dreamTargets=def\.id==="cuerno"/);
- assert.match(cinema,/drawStory\(ctx,def\.id,k,t,cx,cy,target,color,detail\.dreamTargets\)/);
+ assert.match(cinema,/drawStory\(ctx,def\.id,k,t,cx,cy,target,color,detail\.dreamTargets,reduce\)/);
  assert.match(visual,/09q-cuerno: U cinema missing real sleeper count/);
  assert.doesNotMatch(abilities.split("export function drawAuroraDreamTargets(")[1].split("const DRW =")[0],
   /Math\.random|new Image|setTimeout|setInterval|requestAnimationFrame/);
