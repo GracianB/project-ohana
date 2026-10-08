@@ -1,3 +1,19 @@
+## 08/10/2026 · V43 OHANA MAGIC
+
+**Caché:** `ohana-234`.
+
+V43 deja de tratar la apertura como un logo animado y presenta a OHANA como una familia antes de presentar el juego.
+
+- La intro usa los **10 héroes reales** del roster con el renderer canónico; no añade siluetas genéricas ni arte externo.
+- Primer acto · **FAMILIA:** Kilo juega con polen; Chispín descarga accidentalmente a Stitcho; Michi observa; Frita persigue una patata con Pizza rebotando detrás; Dragón intenta impresionar con una llamarada ridícula; Yomi aparece desde una sombra imposible; Cuerno abre un pequeño arcoíris; Dino aterriza demasiado fuerte.
+- Segundo acto · **RUPTURA:** el Nido interrumpe la escena, los gags desaparecen y los diez héroes se alinean mirando la amenaza.
+- Tercer acto · **IDENTIDAD:** solo después de conocer a los personajes entra PROJECT OHANA y el iris revela el selector.
+- Eliminado el rótulo corporativo temprano `DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS`; la narrativa visual precede al texto.
+- Reduced Motion mantiene una versión corta y accesible.
+- Visual Regression añade captura `00-opening-family` y exige los diez héroes en la apertura.
+- Release contract preservado: **10 personajes · 5 formas · 10 salas**.
+- Próximo bloque canónico: **V44 Living Hero Select**.
+
 ## 08/10/2026 · V42.1 Single Opening Flow
 
 **Caché:** `ohana-233`.

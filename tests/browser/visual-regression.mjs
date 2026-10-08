@@ -81,8 +81,20 @@ try {
   const page = await browser.newPage({ viewport: { width: 1680, height: 900 }, deviceScaleFactor: 1 });
 
   await page.goto(base + '?visual=1&e2e=1', { waitUntil: 'networkidle' });
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:7000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:7000 });
+  const opening = page.locator('#ohana-intro');
+  await opening.waitFor({ state:'visible', timeout:2500 }).catch(() => {});
+  if (await opening.count()) {
+    const openingState = await opening.evaluate((el) => ({
+      cast:Number(el.dataset.v43Cast || 0),
+      shown:el.classList.contains('show')
+    }));
+    assert.equal(openingState.cast, 10, '00-opening-family: V43 no expone los 10 héroes');
+    assert.equal(openingState.shown, true, '00-opening-family: intro no visible');
+    await page.waitForTimeout(1050);
+    await capture(page, '00-opening-family');
+  }
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
   const titleLayout = await page.evaluate(() => {
     const visible = [...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
       const box = card.getBoundingClientRect();
