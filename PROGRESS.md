@@ -1,3 +1,14 @@
+## 08/10/2026 · V68 CUERNO · MENSAJE 9/10 · EL GRAN ESPECTÁCULO
+
+**Caché:** `ohana-267`. El gameplay y la biología ya están cerrados; esta etapa depura puesta en escena, ritmo, legibilidad y accesibilidad.
+
+- **J/K/L/U en tres tiempos**: la magia del propio personaje ahora marca anticipación, liberación y eco visual, derivados del progreso real del casteo. J proyecta una lanza nacarada graduada; K lleva estelas de galope con recorrido variable; L abre círculos de radio creciente; U extiende un dosel que se abre antes del sueño. En F0-F4 la emisión sigue naciendo en el cuerno, no en un centro genérico de sprite. Sin alterar proyectiles, daño, movilidad ni bosses.
+- **L · Círculo Iris**: conserva el radio evolutivo, la única aplicación de daño por enemigo y el baño de arcoíris a pantalla completa en la forma máxima. Reordena la presentación visual: ataque de apertura breve, cresta marfil de la ola, siete anillos finos con opacidad contenida y reducción de tinte de fondo para mantener enemigos/balas legibles.
+- **U · Sueño Arcoíris**: mini-film exclusivo de cuatro actos codificados `breath → iris → dream → aurora`, sincronizados con la forma final y su cuerno. Aliento de estrellas, círculo de siete colores, cinco Z somnolientas y alba iridiscente. Aurora se eleva sutilmente sin desplazar al jugador, cambia su pose y despliega magia con su propio rig en el retrato de cine. Los efectos se dibujan **detrás** del personaje, y se respetan reduced-motion y el tiempo establecido de 2.12 s.
+- Los efectos persistentes de la U en el escenario tienen transparencia y anchura reducidas; los jefes siguen inmunes al sueño y al daño, exactamente como antes.
+- QA añadido: contrato de actos cinematográficos, ritmos de J/K/L/U, conteos de Canvas y estabilidad, escena real de la U en matriz visual del navegador. Tests previos de las 10 supremas, multi y release gate obligatorios para integrar.
+- Dino, Grok, enemigos, hitboxes y otros héroes sin cambios funcionales.
+
 ## 08/10/2026 · V67 CUERNO · MENSAJE 8/10 · MAGIA VIVA
 
 **Caché:** `ohana-266`. **Contrato:** 10 personajes, 5 evoluciones cada uno; Dino y Grok intactos. Sin mutar física/hitbox/boss ni J/K/L/U.

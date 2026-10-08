@@ -70,39 +70,41 @@ const sleep=Number(pose?.cuernoDreamT)||0;
 if(slot<0||slot>3){if(sleep<=0)return null;
 return {slot:3,strength:Math.min(.22,sleep*.35),radius:0,continuous:true};}
 const strength=forced?.85:Math.sin(Math.PI*Math.min(1,Math.max(0,cast)));
-return {slot,strength:Math.max(0,strength),radius:(14+form*12)*(1+cast*.75),continuous:false};
+const stage=forced?"release":cast<.26?"charge":cast<.76?"release":"echo";
+return {slot,strength:Math.max(0,strength),radius:(14+form*12)*(1+cast*.75),stage,continuous:false};
 }
 function drawCuernoMagic(ctx,pose,R,form,t){
 const magic=cuernoMagicPose(pose,form);
 if(!magic||magic.strength<.04)return;
 const {slot,strength:k}=magic,tip=HORN_TIPS[form],x=tip[0],y=tip[1],TAU=Math.PI*2;
+const tempo=magic.stage==="charge"?.48:magic.stage==="echo"?.7:1;
 ctx.save();ctx.globalCompositeOperation="lighter";ctx.lineCap="round";
 const colors=IRIS_COLORS;
 if(slot===0){
 // J: the astral lance grows from the horn's point, not from the belly.
 ctx.strokeStyle="#fff3cb";ctx.lineWidth=2.8;ctx.globalAlpha=.78*k;
-ctx.beginPath();ctx.moveTo(x-4,y+2);ctx.lineTo(x+13+form*5,y-5);
-ctx.lineTo(x+34+form*9,y-11);ctx.stroke();
+ctx.beginPath();ctx.moveTo(x-4,y+2);ctx.lineTo(x+(13+form*5)*tempo,y-5*tempo);
+ctx.lineTo(x+(34+form*9)*tempo,y-11*tempo);ctx.stroke();
 for(let i=0;i<3;i++){
 ctx.strokeStyle=colors[i*3];ctx.lineWidth=1.2;
 ctx.beginPath();ctx.moveTo(x+8,y+(i-1)*3);
-ctx.lineTo(x+23+form*5,y+(i-1)*6);ctx.stroke();
+ctx.lineTo(x+(23+form*5)*tempo,y+(i-1)*6*tempo);ctx.stroke();
 }
-R.sparkle(ctx,x+27+form*8,y-10,2.5+3*k,"#fff6cf");
+R.sparkle(ctx,x+(27+form*8)*tempo,y-10*tempo,2.5+3*k,"#fff6cf");
 }else if(slot===1){
 // K: galloping hooves pull a nacre comet trail behind the flank.
 const tailX=form<2?-14:-35,tailY=form<2?-20:-34;
 for(let i=0;i<4;i++){
 ctx.strokeStyle=colors[(i+form)%7];ctx.globalAlpha=(.32+i*.055)*k;
 ctx.lineWidth=2.2+i*.3;ctx.beginPath();ctx.moveTo(tailX,tailY+i*5);
-ctx.bezierCurveTo(tailX-12,tailY-12+i*6,tailX-26,tailY-2+i*9,tailX-40-form*3,tailY+i*9);
+ctx.bezierCurveTo(tailX-12*tempo,tailY-12+i*6,tailX-26*tempo,tailY-2+i*9,tailX-(40+form*3)*tempo,tailY+i*9);
 ctx.stroke();
 }
 ctx.strokeStyle="#fff8d9";ctx.lineWidth=2;ctx.globalAlpha=.7*k;
 ctx.beginPath();ctx.arc(x,y,8+form*2,-1.35,1.1);ctx.stroke();
 }else if(slot===2){
 // L: seven blurred circular bands spread FROM the horn; the arena-wide iris is separate.
-const radius=magic.radius;
+const radius=magic.radius*tempo;
 for(let i=0;i<7;i++){
 ctx.strokeStyle=colors[i];ctx.lineWidth=2.8+form*.45;
 ctx.globalAlpha=(.16+.035*(i%3))*k;ctx.beginPath();
@@ -111,7 +113,7 @@ ctx.arc(x-5,y+14,Math.max(2,radius-i*3.2),0,TAU);ctx.stroke();
 R.sparkle(ctx,x,y,2.5+4*k,"#fff6dd");
 }else{
 // U: dream canopy and sleepy starlight. Keep the animal readable beneath it.
-const spread=20+form*10;
+const spread=(20+form*10)*tempo;
 for(let i=0;i<7;i++){
 const u=i-3;
 ctx.strokeStyle=colors[i];ctx.lineWidth=2.7+form*.2;
