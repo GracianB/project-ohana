@@ -11,10 +11,12 @@ export function createDinoEffects(ops) {
    const list = visibleTargets(g).sort((a,b) =>
      Math.hypot(cx(a)-x,cy(a)-y)-Math.hypot(cx(b)-x,cy(b)-y));
    const e = list.length ? list[idx%Math.min(5,list.length)] : null;
-   const tx = e ? cx(e) : cx(p)+(p.facing||1)*(80+idx*54);
+   const rawX = e ? cx(e) : cx(p)+(p.facing||1)*(80+idx*54);
+   const lead = e ? cap((Number(e.vx)||0)*7,-52,52) : 0;
+   const tx = cap(rawX+lead,22,(g.worldW||1600)-22);
    const ty = e ? cy(e) : p.y+p.h;
    const floor = groundBelow(g,tx,ty) ?? (e ? e.y+e.h : p.y+p.h);
-   return {x:cap(tx,22,(g.worldW||1600)-22),y:floor};
+   return {x:tx,y:floor};
  };
  return {
    castUltimate(g,p,enemies,dmg,color) {
@@ -101,9 +103,17 @@ dinoSpit(g,f) {
  const range=590+f.evo*55;
  if(!f.target||!canHit(f.target)||Math.hypot(cx(f.target)-f.x,cy(f.target)-f.y)>range*1.5)
    f.target=nearestEnemy(g,f.x,f.y,range,null,f.face);
- if(f.target){
-   const dx=cx(f.target)-f.x,dy=cy(f.target)-f.y,d=Math.hypot(dx,dy)||1;
-   const v=7.5+f.evo*.62,k=.11+f.evo*.018;
+ if((f.wallDodge||0)>0) f.wallDodge--;
+ if(f.target && !(f.wallDodge>0)){
+   // Lead airborne / running enemies slightly so spit curves *to* them,
+   // without unfair teleporting or sudden 180-degree snaps.
+   const v=7.5+f.evo*.62;
+   const distance=Math.hypot(cx(f.target)-f.x,cy(f.target)-f.y);
+   const lookahead=cap(distance/v*.32,0,8);
+   const tx=cx(f.target)+cap(Number(f.target.vx)||0,-8,8)*lookahead;
+   const ty=cy(f.target)+cap(Number(f.target.vy)||0,-7,7)*lookahead;
+   const dx=tx-f.x,dy=ty-f.y,d=Math.hypot(dx,dy)||1;
+   const k=.11+f.evo*.018;
    f.vx+=((dx/d)*v-f.vx)*k;f.vy+=((dy/d)*v-f.vy)*k;
  }else f.vy+=Math.sin(f.age*.1)*.035;
  const speed=Math.hypot(f.vx,f.vy),limit=10.5+f.evo*.62;
@@ -117,6 +127,16 @@ dinoSpit(g,f) {
  for(let step=0;step<steps;step++){
    const nx=f.x+f.vx/steps,ny=f.y+f.vy/steps;
    if(solidAt(g,nx,ny)){
+     // One goofy boing, then a splat: deterministic and no infinite loops.
+     if(!(f.bounces>0) && f.life>14){
+       f.bounces=1;
+       f.vx=-f.vx*.82;
+       f.vy=-f.vy*.52-1.4;
+       f.wallDodge=16;
+       f.target=null;
+       boom(g,f.x,f.y,"#fff6bb",3,{size:2,speed:1.25});
+       return true;
+     }
      boom(g,f.x,f.y,f.color,4,{size:2.4,speed:1.3});
      add({kind:"dinoSplat",x:f.x,y:f.y,life:12,max:12,color:f.color,radius:f.radius});
      return false;
@@ -142,9 +162,12 @@ dinoSkyfall(g,f,p){
  const enemies=(g.enemies||[]).filter(e=>canHit(e)&&inView(g,e))
    .sort((a,b)=>Math.abs(cx(a)-f.origin)-Math.abs(cx(b)-f.origin));
  const target=enemies.length?enemies[f.i%enemies.length]:null;
- const tx=target?cx(target):clamp(f.origin+f.face*(85+f.i*55),32,(g.worldW||1600)-32);
+ const rawX=target?cx(target):f.origin+f.face*(85+f.i*55);
+ // Predict a limited amount of enemy movement during the descent.
+ const lead=target?clamp((Number(target.vx)||0)*9,-68,68):0;
+ const tx=clamp(rawX+lead,32,(g.worldW||1600)-32);
  const enemyY=target?cy(target):p.y+p.h;
- // The telegraph marks the actual floor impact, not the center of a flying foe.
+ // Every warning points to the actual terrain under its projected impact.
  const ty=groundBelow(g,tx,enemyY)??enemyY;
  const startY=Math.min((g.cam?.y||0)-70,ty-245);
  const travel=Math.max(1,(ty-startY)/10.5);
@@ -226,6 +249,8 @@ dinoSpit(ctx,f,cam,t){
  }
  ctx.globalAlpha=1;
  const wobble=Math.sin(t*.25+f.evo)*.13;
+ if(f.bounces>0){ctx.strokeStyle="#fff4ad";ctx.globalAlpha=.64;ctx.lineWidth=1.5;
+   ctx.beginPath();ctx.arc(x,y,f.radius*1.26,0,TAU);ctx.stroke();ctx.globalAlpha=1;}
  ctx.fillStyle=f.color;ctx.strokeStyle="#3a794b";ctx.lineWidth=1.7;
  ctx.beginPath();ctx.ellipse(x,y,f.radius*(1+wobble),f.radius*(1-wobble),0,0,TAU);ctx.fill();ctx.stroke();
  for(const dx of [-.31,.31]){
@@ -249,6 +274,7 @@ dinoWarning(ctx,f,cam){
  ctx.globalAlpha=.22+.3*(1-k);ctx.strokeStyle="#bdfc96";ctx.lineWidth=2.3;
  ctx.beginPath();ctx.ellipse(x,y,20+(1-k)*12,5+(1-k)*3,0,0,TAU);ctx.stroke();
  ctx.beginPath();ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke();
 },
    },
    drawRollShell(ctx, p, cam, t) {
