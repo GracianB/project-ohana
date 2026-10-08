@@ -1,35 +1,16 @@
 const POWERS = { j: 0, k: 1, l: 2, u: 3 };
 const MOVEMENT = new Set(["a", "d", "s", "w", " ", "arrowleft", "arrowright", "arrowup", "arrowdown"]);
 const ACTIONS = { h: "attack", f: "attack", shift: "dash", e: "interact", r: "respawn" };
+const LEFT_KEYS = new Set(["a", "arrowleft"]);
+const RIGHT_KEYS = new Set(["d", "arrowright"]);
 
 export function bindInput({ target, canvas, buttons = [], canAct, actions, isRunning = canAct }) {
   const keys = Object.create(null);
   const held = new Map();
+  const heldOrder = new Map();
+  const pressed = new Set();
   const listeners = [];
-  const keyboardHeldAt = new Map();
-  const KEYBOARD_STALE_MS = 1200;
-  let keyboardWatchdog = null;
-
-  function nowMs() {
-    return typeof performance !== "undefined" && typeof performance.now === "function" ? performance.now() : Date.now();
-  }
-
-  function scheduleKeyboardWatchdog() {
-    if (keyboardWatchdog != null || typeof window === "undefined") return;
-    keyboardWatchdog = window.setTimeout(() => {
-      keyboardWatchdog = null;
-      const now = nowMs();
-      for (const [source, stamp] of keyboardHeldAt) {
-        if (now - stamp > KEYBOARD_STALE_MS) {
-          const key = held.get(source);
-          held.delete(source);
-          keyboardHeldAt.delete(source);
-          if (key) keys[key] = [...held.values()].includes(key);
-        }
-      }
-      if (keyboardHeldAt.size) scheduleKeyboardWatchdog();
-    }, 400);
-  }
+  let pressSerial = 0;
 
   function listen(el, event, handler, options) {
     el.addEventListener(event, handler, options);
@@ -41,7 +22,7 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   }
 
   // Prefer physical keyboard codes for movement so WASD remains WASD across
-  // layouts. Keep event.key as a test/compatibility fallback.
+  // layouts. event.key stays as a compatibility/test fallback.
   function movementKey(event) {
     const codeMap = {
       KeyA: "a", KeyD: "d", KeyW: "w", KeyS: "s",
@@ -51,39 +32,73 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
     return codeMap[event?.code] || normalize(event?.key);
   }
 
+  function logicalDown(key) {
+    for (const value of held.values()) if (value === key) return true;
+    return false;
+  }
+
   function hold(key, source, down) {
     key = normalize(key);
     if (!MOVEMENT.has(key)) return;
+
     if (down) {
-      held.set(source, key);
-      if (String(source).startsWith("keyboard:")) {
-        keyboardHeldAt.set(source, nowMs());
-        scheduleKeyboardWatchdog();
+      const sourceAlreadyHeld = held.has(source);
+      const keyWasDown = logicalDown(key);
+      if (!sourceAlreadyHeld || held.get(source) !== key) {
+        held.set(source, key);
+        heldOrder.set(source, ++pressSerial);
       }
+      // Key repeat must never create a new logical press.
+      if (!keyWasDown) pressed.add(key);
     } else {
       held.delete(source);
-      if (String(source).startsWith("keyboard:")) keyboardHeldAt.delete(source);
+      heldOrder.delete(source);
     }
-    keys[key] = [...held.values()].includes(key);
+    keys[key] = logicalDown(key);
+  }
+
+  function axisX() {
+    let bestOrder = -1;
+    let axis = 0;
+    for (const [source, key] of held) {
+      const candidate = LEFT_KEYS.has(key) ? -1 : RIGHT_KEYS.has(key) ? 1 : 0;
+      if (!candidate) continue;
+      const order = heldOrder.get(source) || 0;
+      if (order > bestOrder) {
+        bestOrder = order;
+        axis = candidate;
+      }
+    }
+    return axis;
+  }
+
+  function consumePress(candidates) {
+    const wanted = Array.isArray(candidates) ? candidates.map(normalize) : [normalize(candidates)];
+    let hit = false;
+    for (const key of wanted) {
+      if (pressed.has(key)) hit = true;
+      pressed.delete(key);
+    }
+    return hit;
   }
 
   function releasePointerSources(pointerId = null) {
-    for (const [source, key] of held) {
+    const touched = new Set();
+    for (const [source, key] of [...held]) {
       if (!String(source).startsWith("pointer:")) continue;
       if (pointerId != null && source !== "pointer:" + pointerId) continue;
       held.delete(source);
-      keys[key] = [...held.values()].includes(key);
+      heldOrder.delete(source);
+      touched.add(key);
     }
+    for (const key of touched) keys[key] = logicalDown(key);
     for (const button of buttons) button.classList.remove("held");
   }
 
   function reset() {
-    if (keyboardWatchdog != null && typeof window !== "undefined") {
-      window.clearTimeout(keyboardWatchdog);
-      keyboardWatchdog = null;
-    }
-    keyboardHeldAt.clear();
     held.clear();
+    heldOrder.clear();
+    pressed.clear();
     for (const key of Object.keys(keys)) keys[key] = false;
     for (const button of buttons) button.classList.remove("held");
   }
@@ -144,7 +159,11 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
   listen(target, "blur", reset);
   listen(target, "focus", reset);
   listen(target, "pagehide", reset);
-  if (typeof document !== "undefined") listen(document, "visibilitychange", reset);
+  if (typeof document !== "undefined") {
+    listen(document, "visibilitychange", () => {
+      if (document.hidden) reset();
+    });
+  }
 
   if (canvas) {
     listen(canvas, "pointerdown", (event) => {
@@ -186,6 +205,8 @@ export function bindInput({ target, canvas, buttons = [], canAct, actions, isRun
 
   return {
     keys,
+    axisX,
+    consumePress,
     reset,
     destroy() {
       reset();
