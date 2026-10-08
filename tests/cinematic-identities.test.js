@@ -32,15 +32,19 @@ test('PR151.3: los perfiles cinematográficos no comparten todos los motivos', (
   assert.equal(new Set(CHARACTERS.map((id) => EVOLUTION_CINEMA_PROFILES[id].motif)).size, 10);
 });
 
-test('PR151.4: la forma final conserva la secuencia temporal canónica', () => {
-  const t = evolutionTiming({ finalForm: true });
-  assert.deepEqual(t, { dark:0.12, oldIn:0.05, charge:0.28, flip:0.46, flash:0.62, reveal:0.62, out:1.48, end:1.78 });
+test('V45: la forma final tiene una ascensión propia y sustancialmente más larga', () => {
+  const normal = evolutionTiming({ finalForm: false });
+  const final = evolutionTiming({ finalForm: true });
+  assert.ok(final.charge > normal.charge * 3);
+  assert.ok(final.flash > normal.flash * 3);
+  assert.ok(final.end >= 5);
+  assert.ok(final.out > final.reveal + 1.8);
 });
 
-test('PR151.5: reduced motion mantiene una salida más corta y completa', () => {
+test('V45: reduced motion mantiene la ascensión completa pero abreviada', () => {
   const t = evolutionTiming({ finalForm: true, reduced: true });
   assert.ok(t.dark < 0.22);
-  assert.ok(t.end < 1.2);
+  assert.ok(t.end < 1.6);
   assert.ok(t.end > t.reveal);
 });
 
