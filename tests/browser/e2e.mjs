@@ -368,8 +368,11 @@ try {
   // antes de comprobar pausa/entrada normal para no mezclar ambos escenarios.
   await page.reload({ waitUntil:'networkidle' });
   await page.waitForTimeout(1350);
-  await page.locator('#ohana-intro .oi-enter').click();
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  const reloadOpening = page.locator('#ohana-intro .oi-enter');
+  if (await reloadOpening.count()) {
+    await reloadOpening.click();
+    await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  }
   await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
