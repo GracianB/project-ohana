@@ -219,7 +219,7 @@ export function playTitleIntro() {
     const tf = t * 60;
     const enter = easeOut(seg(t, T.family, T.family + 0.45));
     const threatIn = seg(t, T.threat, T.threat + 0.55);
-    const familyAlpha = enter * (1 - threatIn * 0.18);
+    const familyAlpha = enter * (1 - threatIn);
     const heroH = clamp(Math.min(W, H) * 0.105, 58, 92);
 
     ctx.save();
@@ -426,7 +426,8 @@ export function playTitleIntro() {
     drawIslandScene(t, L);
     drawFamilyScene(t, L);
     const flashK = reduce ? 0 : seg(t, T.flash, T.flash + 0.6);
-    drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, 0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0));
+    const titleGlow = reduce ? 1 : seg(t, T.core - 0.12, T.core + 0.34);
+    drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, titleGlow * (0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0)));
     drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.7, CYAN, 0.28 * seg(t, T.ring, T.ring + 0.6), reduce ? 0 : t * 0.22, 16);
     if (!reduce) drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.55, PINK, 0.22 * seg(t, T.ring + 0.2, T.ring + 0.8), -t * 0.16, 10);
 
