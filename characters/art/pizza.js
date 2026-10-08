@@ -457,7 +457,7 @@ function params(pose, f) {
   // idle flourishes
   if (st === "idle" && pose.flourish > 0) {
     const k = pose.flourish;
-    const n = pose.flourishN % 3;
+    const n = (pose.flourishN || 0) % 4;
     const b = Math.sin(k * Math.PI);
     if (n === 0) {
       P.drool = k < 0.55 ? seg(k, 0.05, 0.5) : 1 - seg(k, 0.6, 0.85);
@@ -473,13 +473,25 @@ function params(pose, f) {
       P.mood = "happy";
       P.mouth = "open";
       P.dripK = -0.65 * b + 1 - b;
-    } else {
+    } else if (n === 2) {
       P.armF = { ang: 2.95, bend: -3, len: 1.12 };
       P.sprinkle = b;
       P.look = -0.65;
       P.mood = "happy";
       P.mouth = "smile";
       P.roll = -0.06 * b;
+    } else {
+      // V55: a pepperoni escapes; Pizza catches it with a stretchy cheese thread.
+      const toss = seg(k, 0.08, 0.34), catchK = seg(k, 0.55, 0.88);
+      P.armF = { ang: 1.05 + toss * 1.70 - catchK * 1.45, bend: 3 };
+      P.armB = { ang: -0.65 - b * 1.1, bend: -3 };
+      P.roll = -0.12 * b + catchK * 0.11;
+      P.lift = -b * 3;
+      P.mood = catchK > .72 ? "happy" : toss > .52 ? "angry" : "normal";
+      P.mouth = catchK > .72 ? "grin" : "o";
+      P.look = -.45 * b;
+      P.gag = k;
+      P.dripK = 1 + .4 * b;
     }
   }
 
@@ -1017,9 +1029,41 @@ function draw(ctx, pose, R) {
   if (f === 4 && !P.dead) orbit(ctx, R, F, t, true);
 
   // --- FX ---
+  if (P.gag > 0) drawPepperoniCatch(ctx, R, F, tipY, P.gag, f);
   fx(ctx, R, P, F, tipY, hand, t, c, shX, shY);
 
   ctx.restore();
+}
+
+// Single-frame, zero-allocation trail: catch is anchored to Pizza's own slice.
+function drawPepperoniCatch(ctx, R, F, tipY, progress, form) {
+  const k = clamp(Number(progress) || 0, 0, 1);
+  const throwK = seg(k, .08, .34), catchK = seg(k, .55, .88);
+  const arc = Math.sin(Math.PI * seg(k, .08, .90));
+  const x = F.W * .23 + throwK * 19 - catchK * 23;
+  const y = F.top - 14 - arc * (16 + form * 2) + catchK * 13;
+  const visibility = Math.sin(Math.PI * k);
+  if (visibility < .02) return;
+  ctx.save();
+  ctx.globalAlpha = .94 * visibility;
+  ctx.translate(x, y);
+  ctx.rotate(k * TAU * 1.3);
+  ctx.fillStyle = form === 4 ? "#f45a30" : PEP;
+  ctx.strokeStyle = "#71271d";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(0, 0, 5.8, 5.1, 0, 0, TAU);ctx.fill();ctx.stroke();
+  ctx.fillStyle = "#ffa28a";
+  ctx.beginPath();ctx.arc(-1.6, -1.3, 1.25, 0, TAU);ctx.fill();
+  ctx.restore();
+  if (catchK > .02 && catchK < 1) {
+    const tip = uv(F, tipY, .57, .58);
+    ctx.save();ctx.globalAlpha = .60 * visibility;
+    ctx.strokeStyle = form === 4 ? "#fff5b8" : "#ffda70";
+    ctx.lineWidth = 2.4;ctx.lineCap = "round";
+    ctx.beginPath();ctx.moveTo(tip[0], tip[1]);
+    ctx.quadraticCurveTo(x - 11, y + 9, x, y);ctx.stroke();
+    ctx.restore();
+  }
 }
 
 export default { id: "pizza", draw };
