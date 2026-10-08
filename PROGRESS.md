@@ -1,3 +1,25 @@
+## 08/10/2026 · V75 · DINO · MOCOSAURIO, RODILLO Y EXTINCIÓN
+
+**Caché propuesta:** `ohana-272`. PR #199, aislada en `feat/dino-v74-tail-polish-20261008`. No se modifica Cuerno, ni el resto de personajes, ni la cinemática U de Dino.
+
+### Tres habilidades reinventadas
+- **J · Mocosaurio:** se mantiene el mordisco cuerpo a cuerpo, pero desaparecen los huesos a distancia. Dino escupe 1, 2 o 3 glóbulos animados según su evolución; cada uno tiene ojos expresivos y sonrisa, trayectoria guiada a objetivo vivo con correcciones suaves, reacquisición, colisión con terreno, estela acotada de siete puntos y salpicadura limitada de área en las dos formas maduras. Se respeta el cooldown de 700 ms y la protección natural frente a impactos repetidos.
+- **K · Dino Rodillo:** usa el estado de carga ya existente sin alterar sus colisiones o hitbox, pero ahora se comprime visualmente, recoge extremidades, gira alrededor de su masa y proyecta caparazón de púas y estela limitada. 44–72 ticks según etapa, empuje y blindaje; golpea por contacto con enfriamiento y se frena ante paredes y plataformas. Su contrato se separa del Rollo de Stitcho.
+- **L · Extinción:** conserva el terremoto real y sus dos frentes de daño terrestre, agrega 3–7 meteoritos de piedra verde por forma, selecciona enemigos visibles, proyecta avisos discretos y reaprovecha la física validada del Dragón, con explosiones acotadas y tratamiento propio de colores y vibración. **La lluvia del Dragón permanece inalterada.**
+- **U · Impact / Modo Coloso:** no cambia. Tendrá capítulo propio.
+
+### Diseño del personaje y cien calibraciones reales
+- `characters/art/dino.js` conserva las cinco siluetas originales, huevo/cáscara, piernas, dientes, expresiones, placas, cristales y personalidad. La V74 también hace visibles las placas dorsales que antes quedaban enterradas bajo la cola.
+- `DINO_ACTING_TUNING` aporta **20 parámetros por cada una de las 5 formas = 100 ajustes**, todos usados en la ilustración Canvas: respiración, cabeceo, mandíbula, retardo/onda/longitud/anchura de cola, pisada, polvo, rubor, ojos, balanceo de cáscara, manchas, vientre, chispas, escala/velocidad/contracción/brillo del rodillo y salto de victoria.
+- La rotación de K ocurre solo visualmente. Nunca se modifica `w`, `h`, físicas, velocidades base, controles generales ni inmunidades de jefes.
+
+### Arquitectura, precarga y validación
+- Efectos exclusivos en `systems/dino-combat.js` para mantener `systems/abilities.js` por debajo de **135 kB**. Sin intervalos, temporizadores, imágenes externas ni objetos persistentes no acotados.
+- Precache offline del módulo nuevo, `index.html` y `sw.js` alineados en `ohana-272`.
+- Pruebas de trayectoria J real y daño único, siete meteoritos limitados, continuidad de U y del Dragón, 100 calibraciones activas, y regresión de las 5 formas.
+- Capturas browser reales: `09u-dino-v75-googly-homing-spit-j`, `09v-dino-v75-armoured-roller-k` y `09w-dino-v75-quake-meteors-l`.
+- **No fusionar hasta pasar OHANA CI, Browser E2E, Multiplayer, matriz Visual, Release Gate y revisión del arte.**
+
 ## 08/10/2026 · V73 · CUERNO · EDICIÓN ESTRELLA FINAL, DEDICADA A LA SOBRINA
 
 **Caché:** `ohana-271`. Última V de Cuerno. El personaje y su evolución deben ser inolvidables, fáciles de leer y divertidos de manejar para jugar en familia; **Dino está muy avanzado y se reserva sin modificar**.
