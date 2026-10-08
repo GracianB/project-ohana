@@ -82,7 +82,7 @@ test("V65 screen coverage is genuinely drawn, cinematic narrative and budgets re
  assert.match(source,/kind:"irisHalo"/);
  assert.match(source,/Math\.hypot\(viewW\(\),viewH\(\)\)\*1\.12/);
  assert.match(source,/ctx\.createRadialGradient\(x,y,8,x,y,Math\.max\(radius,10\)\)/);
- assert.match(source,/!e\.boss&&inView\(g,e\)/);
+ assert.match(source,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>!e\.boss&&inView\(game,e\)\) : \[\]/);
  assert.match(cinema,/dream|Dream|sleep|Sleep/);
  assert.match(captures,/09k-cuerno-iris-fullscreen-l/);
  assert.match(captures,/09l-cuerno-rainbow-sleep-u/);

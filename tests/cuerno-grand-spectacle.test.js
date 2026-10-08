@@ -37,7 +37,7 @@ test("V68 grand film uses four ordered and bounded acts",()=>{
  }
  assert.match(SUPREME_STORYBOARDS.cuerno.beat,/ALIENTO → CÍRCULO → SUEÑO → AURORA/);
  assert.equal(SUPREME_STORYBOARDS.cuerno.duration,2.12);
- assert.match(cinema,/drawStory\(ctx,def.id,k,t,cx,cy,target,color\)/);
+ assert.match(cinema,/drawStory\(ctx,def.id,k,t,cx,cy,target,color,detail\.dreamTargets\)/);
  assert.match(cinema,/el\.dataset\.cuernoPhase=stage\.name/);
  assert.match(cinema,/p\._cuernoMagicSlot=k>=\.22&&k<\.76\?3:-1/);
  assert.match(visual,/09p-cuerno-u-grand-spectacle/);
@@ -59,7 +59,7 @@ test("V68 J/K/L/U acquire three story beats without changing casts",()=>{
 test("V68 preserves iris geometry and cannot alter the boss-safe dream",()=>{
  assert.match(magic,/kind:"irisHalo"/);
  assert.match(magic,/Math\.hypot\(viewW\(\),viewH\(\)\)\*1\.12/);
- assert.match(magic,/!e\.boss&&inView\(g,e\)/);
+ assert.match(magic,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>!e\.boss&&inView\(game,e\)\) : \[\]/);
  assert.match(magic,/const opening=Math\.min\(1,progress\/\.10\),ending=Math\.min\(1,f\.life\/15\)/);
  assert.match(magic,/ctx\.globalAlpha=\.11\*opacity/);
  assert.match(magic,/ctx\.globalAlpha=\.07\*fade/);
