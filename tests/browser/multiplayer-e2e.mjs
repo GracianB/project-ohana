@@ -94,15 +94,28 @@ try {
   await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
   await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
 
-  await hostPage.keyboard.down("ArrowRight");
-  await hostPage.waitForTimeout(900);
-  await hostPage.keyboard.up("ArrowRight");
-  await guestPage.waitForTimeout(500);
+  // Two separate browser contexts can leave the host tab unfocused in CI.
+  // Assert real server-side displacement, not a brittle absolute spawn x.
+  await hostPage.bringToFront();
+  const initial = await service.poll(roomId, host.identity);
+  const initialHost = initial.players.find((player) => player.playerId === host.identity.playerId);
+  assert.ok(initialHost && Number.isFinite(initialHost.x), "host missing valid initial position");
 
-  const moved = await service.poll(roomId, host.identity);
-  const hostState = moved.players.find((player) => player.playerId === host.identity.playerId);
-  const guestView = await service.poll(roomId, host.identity);
-  assert.ok(hostState.x > 420, "el motor original online debe mover al jugador host dentro del mundo de 2240px");
+  await hostPage.keyboard.down("ArrowRight");
+  await hostPage.waitForTimeout(1250);
+  await hostPage.keyboard.up("ArrowRight");
+
+  let hostState = null;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const moved = await service.poll(roomId, host.identity);
+    hostState = moved.players.find((player) => player.playerId === host.identity.playerId);
+    if (hostState && hostState.x > initialHost.x + 12) break;
+    await hostPage.waitForTimeout(250);
+  }
+  assert.ok(hostState && hostState.x > initialHost.x + 12,
+    "host failed actual networked movement: start=" + initialHost.x +
+    ", current=" + (hostState?.x ?? "absent"));
+  assert.ok(hostState.x <= 2240 && hostState.x >= 0, "host escaped world bounds");
 
   await hostPage.keyboard.press("h");
   await hostPage.waitForTimeout(300);

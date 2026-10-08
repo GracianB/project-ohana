@@ -1,3 +1,18 @@
+## 08/10/2026 · DINO V76 · COMBATE CINEMÁTICO SIN PERDER EL PERSONAJE
+
+**Rama compatible con Cuerno V74:** `feat/dino-v76-cinematic-combat-20261008`. **Cache:** `ohana-274`.
+
+Dino conserva las cinco siluetas, colores, personalidad, 100 calibraciones de evolución y su habilidad U original (`impact` / Modo Coloso). Cuerno no se modifica.
+
+- **J · Mocosaurio:** disparos vivos con ojos animados que persiguen un enemigo, cambian de objetivo cuando muere o se aleja y atraviesan su trayectoria mediante subpasos para no saltarse enemigos diminutos ni paredes estrechas. Estela acotada a 7 puntos, o 3 en reduced-motion, y explosión cómica con daño único.
+- **K · Dino Rodillo:** reemplaza visualmente el mero giro del dinosaurio erguido por **una silueta circular propia**, con cola enrollada, barriga, nueve púas externas, ojos expresivos, dientes/sonrisa y armadura distinta en cada evolución. Usa el movimiento real protegido, frenando en colisiones sin modificar la hitbox.
+- **L · Extinción:** preserva las dos ondas del terremoto y añade meteoritos de roca verde/dorada con impactos explosivos. Los avisos de caída se anclan al suelo debajo del enemigo y reutilizan la física validada del Dragón sin alterar su habilidad.
+- **Sistema:** `systems/dino-combat.js` aislado, importado por `systems/abilities.js` sin superar presupuesto. Precache nuevo y contratos de la versión 273 actualizados. Nuevas pruebas de colisiones barridas, advertencias de meteorito y las cinco esferas articuladas.
+- **QA:** las pruebas de navegador incluyen capturas separadas de J, K y L, y el multijugador espera una variación real de posición con foco explícito y ventana limitada. No cambia el juego solo para hacer pasar el test.
+
+**Nota de integración:** se toma como base `main` después de fusionar Cuerno V74, manteniendo íntegra su evolución. No hacer merge sin CI, Browser E2E, Multiplayer, Visual Matrix y Release Gate completados.
+
+
 ## 08/10/2026 · V75 · CUERNO IRIS FINAL · ANATOMÍA VIVA
 
 **Caché** `ohana-273` · Continuación sobre V74, no reinicio del personaje. El canon se mantiene: Cuernín es solo cuerno, Destello es cuerno con esfera sin patas, Potro Iris estrena cuatro patas, Estelar despliega alas y F4 es Unicornio Negro obsidiana.

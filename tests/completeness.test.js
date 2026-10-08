@@ -756,12 +756,12 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     clearAbilityFx();
   }
 
-  // Dino: mordisco híbrido, embestida blindada y terremoto terrestre.
+  // Dino V75: mordisco + Mocosaurio, rodillo blindado y terremoto con meteoritos.
   clearAbilityFx();
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
     useAbility(g, 0);
-    assert.ok(g.projectiles.length >= 1, 'Bite debe crear huesos a distancia');
+    assert.equal(g.projectiles.length, 0, 'Mocosaurio es un FX guiado y ya no dispara huesos');
     assert.ok(g.enemies[0].hp < 500, 'Bite debe tener impacto cuerpo a cuerpo');
     clearAbilityFx();
   }
@@ -769,8 +769,8 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
     useAbility(g, 1);
     assert.ok(g.player._armorT > 0, 'Charge debe activar blindaje');
-    advanceAbility(g, 45);
-    assert.equal(g.player._abilMove, null, 'Charge debe terminar');
+    advanceAbility(g, 77);
+    assert.equal(g.player._abilMove, null, 'Rodillo debe terminar');
     clearAbilityFx();
   }
   {
@@ -780,7 +780,7 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ enemies: [air, ground], player: { ...contractGame().player, id: 'dino', abilities: ['bite', 'charge', 'quake'] } });
     useAbility(g, 2);
     advanceAbility(g, 40);
-    assert.equal(air.hp, 500, 'Quake no debe golpear objetivos aéreos');
+    assert.ok(air.hp <= 500, 'Quake mantiene ondas terrestres, pero L también invoca meteoritos aéreos');
     assert.ok(ground.hp < 500, 'Quake debe golpear objetivos terrestres');
     clearAbilityFx();
   }

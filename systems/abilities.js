@@ -1,4 +1,5 @@
 import { vfxSprite } from "../characters/sprites.js";
+import { createDinoEffects } from "./dino-combat.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -21,9 +22,9 @@ ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9
 breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
 gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
 meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
-bite: { name: "Mordisco", key: "J", cd: 700, color: "#e8ffe0", desc: "Mordisco demoledor y huesos a distancia; evoluciona en abanico." },
-charge: { name: "Embestida", key: "K", cd: 2200, color: "#4cbf56", desc: "Carga blindada: invulnerable mientras dura." },
-quake: { name: "Terremoto", key: "L", cd: 6000, color: "#c8a060", desc: "Onda por el suelo que lanza por los aires." },
+bite: { name: "Mocosaurio", key: "J", cd: 700, color: "#bafa69", desc: "Escupe babitas con ojos que buscan enemigos; conserva un mordisco cercano." },
+charge: { name: "Dino Rodillo", key: "K", cd: 2200, color: "#7de66e", desc: "Se hace bola con púas, rueda protegido y frena al chocar con la pared." },
+quake: { name: "Extinción", key: "L", cd: 6000, color: "#ffc36c", desc: "Terremoto de dos ondas con meteoritos volcánicos dirigidos a enemigos." },
 salt: { name: "Escopetazo de sal", key: "J", cd: 600, color: "#fff3c0", desc: "Abanico de granos de sal a corta distancia." },
 ketchup: { name: "Charco kétchup", key: "K", cd: 2000, color: "#e23b3b", desc: "Charco que ralentiza y daña con el tiempo." },
 fryer: { name: "Géiseres de aceite", key: "L", cd: 6000, color: "#ffd36a", desc: "Columnas de aceite hirviendo brotan en fila." },
@@ -89,7 +90,7 @@ stitcho: { name: "PLASMA ROLL", color: "#67ddff" },
 chispin: { name: "CADENA RELÁMPAGO", color: "#ffe14a" },
 cat:     { name: "OVILLO SOMBRA", color: "#ffb6e4" },
 dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
-dino:    { name: "MORDISCO EN CARGA", color: "#c8f04a" },
+dino:    { name: "MOCO + RODILLO", color: "#c8f04a" },
 frita:   { name: "SALSA TURBO", color: "#ffd36a" },
 pizza:   { name: "PEPPERONI ELÁSTICO", color: "#ff8a2a" },
 yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" },
@@ -562,8 +563,18 @@ armor(p, 2);
 }
 if (S.charge > 0) {
 S.charge--;
-p.vx = p.facing * Math.max(11, p.speed * 2.4);
-armor(p, 2);
+const rollingDino = p.id === "dino", face = p.facing || 1;
+const step = { x: p.x + face * 9, y: p.y + p.h * 0.22, w: p.w, h: p.h * 0.64 };
+const blocked = rollingDino && (step.x <= 0 ||
+ step.x + step.w >= (game.worldW || 1600) ||
+ (game.platforms || []).some(pl => aabb(step, pl)));
+if (blocked) {
+ S.charge = 0; p.vx = 0;
+ game.fx?.emit?.(cx(p), cy(p), { color: "#c9f47e", count: 5, size: 2.6, speed: 1.5, life: 10 });
+} else {
+ p.vx = face * Math.max(rollingDino ? 10.5 : 11, p.speed * (rollingDino ? 2.2 : 2.4));
+ armor(p, 2);
+}
 }
 if (S.gallop > 0) {
 S.gallop--;
@@ -636,8 +647,14 @@ bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
 if ((game.t & 1) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" }, MAX_RUNTIME_GHOSTS);
 }
 if (S.charge > 0) {
-bodyHits(game, p, 26, { kx: 15, ky: -8, stun: 34, color: "#c8f04a", cd: 30, shake: 7 });
-if ((game.t % 3) === 0) game.fx.emit(cx(p) - p.facing * p.w * 0.6, p.y + p.h, { color: "#d8c7a4", count: 3, size: 3, up: 0.6, speed: 1.6 });
+const dino = p.id === "dino";
+bodyHits(game, p, dino ? 22 : 26, { kx: dino ? 11 : 15, ky: dino ? -6 : -8,
+ stun: dino ? 29 : 34, color: "#c8f04a", cd: dino ? 23 : 30, shake: dino ? 4 : 7 });
+if ((game.t % (dino ? 5 : 3)) === 0) game.fx?.emit?.(cx(p) - p.facing * p.w * 0.6, p.y + p.h,
+ { color: dino ? "#b9f9a0" : "#d8c7a4", count: dino ? 2 : 3, size: 3, up: 0.6, speed: 1.6 });
+if (dino && game.t % 5 === 0) pushRuntime(game.ghosts, {
+ x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#9be8ad"
+}, MAX_RUNTIME_GHOSTS);
 }
 if (S.gallop > 0) {
 const face = S.gallopFace || p.facing || 1;
@@ -650,7 +667,7 @@ for (const e of game.enemies) {
 }
 if ((game.t % 4) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#b6ebee" }, MAX_RUNTIME_GHOSTS);
 }
-p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? "charge" : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
 const updateCount = FX.length;
 for (let i = 0; i < updateCount; i++) {
 const f = FX[i];
@@ -697,7 +714,12 @@ d(ctx, f, cam, t, game, p);
 ctx.restore();
 }
 if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
-if (S.charge > 0) drawChargeShield(ctx, p, cam, t);
+if (S.charge > 0) {
+if (p.id === "dino") {
+ drawBallAura(ctx, p, cam, t, "#a8f377");
+ DINO_FX.drawRollShell(ctx, p, cam, t);
+} else drawChargeShield(ctx, p, cam, t);
+}
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 drawCastSignature(ctx, p, cam, t);
 }
@@ -916,7 +938,7 @@ if (list[i]?.owner === "player") {
 }
 }
 function boom(g, x, y, color, n, extra) {
-g.fx.emit(x, y, Object.assign({ color, count: n || 10, size: 4, up: 1.2, speed: 3.2 }, extra || {}));
+g.fx?.emit?.(x, y, Object.assign({ color, count: n || 10, size: 4, up: 1.2, speed: 3.2 }, extra || {}));
 }
 function glow(ctx, x, y, r, color, a) {
 const gr = ctx.createRadialGradient(x, y, 0, x, y, r);
@@ -1105,47 +1127,55 @@ g.shake = Math.min(18, (g.shake || 0) + 4);
 },
 
 bite(g, p, evo) {
-const reach = 42 + evo * 9;
-const box = { x: p.facing > 0 ? p.x + p.w - 4 : p.x - reach + 4, y: p.y - 6, w: reach, h: p.h + 12 };
-let any = false;
-for (const e of g.enemies) {
-  if (canHit(e) && aabb(box, e)) {
-    any = hitEnemy(g, e, (34 + evo * 4) * pw(p), { kx: p.facing * 15, ky: -7, stun: 32, color: "#e8ffe0", shake: 8, crit: true }) || any;
-  }
-}
-if (any) { g.shake = Math.min(18, (g.shake || 0) + 4); p.vx -= p.facing * 3; }
-const shots = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
-const speed = 11 + evo * 0.7;
-const mouthX = cx(p) + p.facing * p.w * 0.58;
-const mouthY = p.y + p.h * 0.38;
-for (let i = 0; i < shots; i++) {
-  const angle = (i - (shots - 1) / 2) * 0.16;
-  pushRuntime(g.projectiles, {
-    x: mouthX - 10, y: mouthY - 7,
-    vx: Math.cos(angle) * speed * p.facing, vy: Math.sin(angle) * speed,
-    w: 20 + evo * 1.5, h: 14 + evo,
-    life: 44 + evo * 5, dmg: (6 + evo * 1.5) / shots,
-    color: evo >= 4 ? "#e8fdff" : "#e8ffe0", shape: "bone", owner: "player", trail: true,
-  }, MAX_RUNTIME_PROJECTILES);
-}
-add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
+ const reach = 42 + evo * 9;
+ const box = { x: p.facing > 0 ? p.x + p.w - 4 : p.x - reach + 4, y: p.y - 6, w: reach, h: p.h + 12 };
+ let any = false;
+ for (const e of g.enemies || []) {
+   if (canHit(e) && aabb(box, e)) {
+     any = hitEnemy(g, e, (34 + evo * 4) * pw(p), {
+       kx: p.facing * 15, ky: -7, stun: 32, color: "#e8ffe0", shake: 6, crit: true
+     }) || any;
+   }
+ }
+ if (any) { g.shake = Math.min(14, (g.shake || 0) + 3); p.vx -= p.facing * 3; }
+ const shots = evo >= 4 ? 3 : evo >= 3 ? 2 : 1;
+ const mouthX = cx(p) + (p.facing || 1) * p.w * 0.58;
+ const mouthY = p.y + p.h * 0.38;
+ for (let i = 0; i < shots; i++) {
+   const angle = (i - (shots - 1) / 2) * 0.33;
+   add({
+     kind: "dinoSpit", x: mouthX, y: mouthY + i * 4,
+     vx: Math.cos(angle) * (7.2 + evo * 0.5) * (p.facing || 1),
+     vy: Math.sin(angle) * 5 - 1.2, face: p.facing || 1,
+     radius: 7 + evo * 0.95, evo, life: 78 + evo * 7,
+     dmg: (12 + evo * 2) * pw(p) / Math.sqrt(shots),
+     color: ["#b9f989","#a4ee6d","#9aedd8","#cafa5b","#e6ff9b"][evo],
+     trail: [], delay: i * 3, target: null
+   });
+ }
+ add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
+ boom(g, mouthX, mouthY, "#d4ff9d", 6, { speed: 2, up: 0.5 });
 },
 charge(g, p, evo) {
-S.charge = 32 + evo * 3;
-armor(p, 8);
-g.shake = Math.min(18, (g.shake || 0) + 4);
-boom(g, cx(p), p.y + p.h, "#d8c7a4", 10);
+ S.charge = 44 + evo * 7;
+ armor(p, 12);
+ p._dinoRollStart = Number(g.t) || 0;
+ g.shake = Math.min(12, (g.shake || 0) + 2);
+ boom(g, cx(p), p.y + p.h, "#b6f58c", 8, { star: true });
 },
 quake(g, p, evo) {
-const oy = p.grounded ? p.y + p.h : (groundBelow(g, cx(p), p.y + p.h - 4) ?? p.y + p.h);
-add({
-  kind: "quake", ox: cx(p), oy, life: 90, speed: 9, maxD: 520 + evo * 60, hit: new Set(), dmg: (24 + evo * 3) * pw(p),
-  fronts: [{ x: cx(p), y: oy, dir: 1, on: true }, { x: cx(p), y: oy, dir: -1, on: true }], spikes: [],
-});
-g.shake = Math.min(20, (g.shake || 0) + 10);
-boom(g, cx(p), oy, "#c8a060", 10, { up: 2 });
+ const oy = p.grounded ? p.y + p.h : (groundBelow(g, cx(p), p.y + p.h - 4) ?? p.y + p.h);
+ add({
+   kind: "quake", ox: cx(p), oy, life: 90, speed: 9 + evo * 0.35,
+   maxD: 520 + evo * 60, hit: new Set(), dmg: (24 + evo * 3) * pw(p),
+   fronts: [{ x: cx(p), y: oy, dir: 1, on: true }, { x: cx(p), y: oy, dir: -1, on: true }], spikes: []
+ });
+ add({ kind: "dinoSkyfall", n: 3 + evo, i: 0, next: 12, evo,
+   face: p.facing || 1, origin: cx(p), dmg: (14 + evo * 2) * pw(p),
+   radius: 42 + evo * 5 });
+ g.shake = Math.min(14, (g.shake || 0) + 6);
+ boom(g, cx(p), oy, "#ffc36c", 10, { up: 2 });
 },
-
 salt(g, p, evo) {
 const h = hand(p);
 const n = 5 + (evo >= 2 ? 2 : 0) + (evo >= 4 ? 2 : 0);
@@ -1294,7 +1324,9 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 
 };
 
+const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
 const UPD = {
+...DINO_FX.update,
 irisHalo(g,f){
 f.life--;
 const progress=1-f.life/f.max;
@@ -1737,18 +1769,19 @@ let hitNow = false;
 const top = crossTop(g, f.x, y0 + f.r * 0.5, f.y + f.r * 0.5);
 if (top !== null) { f.y = top - f.r * 0.5; hitNow = true; }
 if (!hitNow) for (const e of g.enemies) if (canHit(e) && circleHit(f.x, f.y, f.r, e)) { hitNow = true; break; }
-if (f.age % 2 === 0) { const n = deterministicUnit(f.age * 4.17 + f.x * 0.009 + f.y * 0.007); g.fx.emit(f.x, f.y, { color: n < 0.5 ? "#ff6a2a" : "#ffd36a", count: 2, size: 3, speed: 0.8, life: 14, gravity: -0.02 }); }
+if (f.age % 3 === 0) { const n = deterministicUnit(f.age * 4.17 + f.x * 0.009 + f.y * 0.007);
+ g.fx?.emit?.(f.x,f.y,{color:f.dino?(n<.5?"#a4f6a1":"#ffd881"):(n<.5?"#ff6a2a":"#ffd36a"),count:f.dino?1:2,size:3,speed:.8,life:14,gravity:-.02}); }
 if (hitNow) {
   for (const e of g.enemies) {
     if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.R + Math.max(e.w, e.h) / 2) {
-      hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 8, ky: -6, stun: 24, color: "#ff6a2a" });
+      hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*8,ky:-6,stun:24,color:f.dino?"#b9f890":"#ff6a2a",shake:f.dino?2:3});
     }
   }
-  add({ kind: "blast", x: f.x, y: f.y, R: f.R, life: 16, color: "#ff6a2a" });
-  boom(g, f.x, f.y, "#ff6a2a", 10, { up: 2, speed: 4 });
-  boom(g, f.x, f.y, "#ffe36a", 8, { star: true, up: 2.4 });
-  g.shake = Math.min(20, (g.shake || 0) + 6);
-  return false;
+  add({kind:"blast",x:f.x,y:f.y,R:f.R,life:16,color:f.dino?"#9fea9b":"#ff6a2a"});
+ boom(g,f.x,f.y,f.dino?"#9fea9b":"#ff6a2a",f.dino?7:10,{up:2,speed:3.3});
+ boom(g,f.x,f.y,f.dino?"#ffe5a3":"#ffe36a",f.dino?5:8,{star:true,up:2.4});
+ g.shake=Math.min(20,(g.shake||0)+(f.dino?3:6));
+ return false;
 }
 return f.life > 0 && f.y < (g.worldH || 900) + 60;
 },
@@ -2253,6 +2286,7 @@ ctx.restore();
 }
 
 const DRW = {
+...DINO_FX.draw,
 irisHalo(ctx,f,cam,t){
 const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
 const radius=f.r*(1-Math.pow(1-progress,2));
@@ -2669,23 +2703,23 @@ const len = 60;
 const d = Math.hypot(f.vx, f.vy) || 1;
 const gx = x - (f.vx / d) * len, gy = y - (f.vy / d) * len;
 const gr = ctx.createLinearGradient(gx, gy, x, y);
-gr.addColorStop(0, "rgba(255,80,20,0)");
-gr.addColorStop(1, "rgba(255,200,80,.95)");
+gr.addColorStop(0, f.dino ? "rgba(130,240,130,0)" : "rgba(255,80,20,0)");
+gr.addColorStop(1, f.dino ? "rgba(190,255,130,.95)" : "rgba(255,200,80,.95)");
 ctx.strokeStyle = gr;
 ctx.lineCap = "round";
 ctx.lineWidth = f.r * 1.6;
 ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(x, y); ctx.stroke();
-glow(ctx, x, y, f.r * 3, "#ff8a2a", 0.7);
+glow(ctx, x, y, f.r * 3, f.dino ? "#b9f890" : "#ff8a2a", 0.7);
 ctx.translate(x, y);
 ctx.rotate(f.rot);
-ctx.fillStyle = "#5a2a1a";
+ctx.fillStyle = f.dino ? "#4e6540" : "#5a2a1a";
 ctx.beginPath();
 for (let i = 0; i < 7; i++) {
   const a = (i / 7) * TAU, rr = f.r * (0.8 + ((i * 37) % 5) / 12);
   if (i === 0) ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); else ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
 }
 ctx.closePath(); ctx.fill();
-ctx.strokeStyle = "#ffb347";
+ctx.strokeStyle = f.dino ? "#e9ffae" : "#ffb347";
 ctx.lineWidth = 2;
 ctx.beginPath(); ctx.moveTo(-f.r * 0.4, -f.r * 0.2); ctx.lineTo(f.r * 0.1, f.r * 0.2); ctx.lineTo(f.r * 0.4, -f.r * 0.1); ctx.stroke();
 },

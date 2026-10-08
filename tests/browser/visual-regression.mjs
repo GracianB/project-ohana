@@ -759,6 +759,34 @@ try {
   assert.equal(finalK.lastAbilityId,'gallop','09t-cuerno: radiant gallop K not cast');
   await capture(page,'09t-cuerno-v73-ribbon-gallop-k');
 
+  // Dino V75: browser-real J/K/L captures. His U is reserved for its own chapter.
+  const dinoV75Errors=[];
+  const onDinoV75Error=err=>dinoV75Errors.push(String(err.message||err));
+  page.on('pageerror',onDinoV75Error);
+  const dinoJ=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.start('dino');api.setEvo(4);
+    api.cast(0);api.step(8);return api.state();
+  });
+  assert.equal(dinoJ.lastAbilityId,'bite','09u-dino: guided slime J did not cast');
+  await capture(page,'09u-dino-v75-googly-homing-spit-j');
+  const dinoK=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.start('dino');api.setEvo(4);
+    api.cast(1);api.step(9);return api.state();
+  });
+  assert.equal(dinoK.lastAbilityId,'charge','09v-dino: rolling K did not cast');
+  await capture(page,'09v-dino-v75-armoured-roller-k');
+  const dinoL=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.start('dino');api.setEvo(4);
+    api.cast(2);api.step(24);return api.state();
+  });
+  assert.equal(dinoL.lastAbilityId,'quake','09w-dino: skyfall quake L did not cast');
+  await capture(page,'09w-dino-v75-quake-meteors-l');
+  assert.deepEqual(dinoV75Errors,[],'09u/09v/09w: Dino V75 causes browser exceptions');
+  page.off('pageerror',onDinoV75Error);
+
+
+
+
   // V63 Potro Iris in real gameplay with error monitoring.
   const foalErrors=[];
   const onFoalError=err=>foalErrors.push(String(err.message||err));
