@@ -11,7 +11,7 @@ test("V75 a black F4 must stay black even during its evolution reveal",()=>{
  const flash=between(draw,"// V75 · A white crossfade","else if (hurtFresh");
  assert.match(flash,/flashCol = p\.id === "cuerno" \? "#bba8f5" : "#ffffff"/);
  assert.match(flash,/flashA = intensity \* \(p\.id === "cuerno" \? 0\.075 : 0\.9\)/);
- assert.doesNotMatch(flash,/p\.id === "cuerno" \? .*0\.9/);
+ assert.ok(Number(flash.match(/cuerno" \? (0\.\d+) : 0\.9/)?.[1])<=.08,"black unicorn flash too bright");
  const coat=between(art,"function drawAuroraUnicorn(","function draw(ctx, pose, R)");
  assert.match(coat,/coat="#1b1a28"/);
  assert.match(coat,/ctx\.strokeStyle="#a7a1d8"/);
