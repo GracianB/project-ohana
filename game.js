@@ -105,7 +105,6 @@ function setText(el, text) {
 let t = 0;
 let muted = false;
 let paused = false;
-// Accessibility: honor prefers-reduced-motion (dampen shake + flashes)
 const RMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
 let reduceMotion = RMQ.matches;
 try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches; game.reduceMotion = reduceMotion; }); } catch (_) {}
@@ -214,7 +213,6 @@ function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
 function fit() {
-  // Cap DPR: retina×2 mataba el FPS; reduceMotion → 1
   viewDpr = reduceMotion ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
   viewW = Math.max(320, innerWidth | 0);
   viewH = Math.max(240, innerHeight | 0);
@@ -249,10 +247,6 @@ function setMuted(on) {
 function setPaused(on) {
   if (game.finale && game.finale.t > 0) return;
 
-  // PHASE 39 - PAUSE STATE CLOSURE
-  // El estado de pausa y su representacion accesible se comprometen de forma
-  // atomica antes de efectos secundarios. Ningun guardado, audio, input o reloj
-  // puede impedir que Escape abra la capa visual.
   paused = !!on && game.running;
 
   const pauseLayer = DOM.pause || document.getElementById("pause-overlay");
@@ -280,7 +274,6 @@ function setPaused(on) {
     duckMusic(paused);
   } catch (_) {}
 
-  // Reafirma el contrato DOM despues de todos los efectos secundarios.
   if (pauseLayer) {
     pauseLayer.classList.toggle("open", paused);
     pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
@@ -320,16 +313,11 @@ function escape() {
   setPaused(!paused);
 }
 function suspend() {
-  // Suspender la pestaña debe pausar la sesión actual, no reiniciarla.
-  // El checkpoint lo realiza setPaused(true) sobre el estado intacto.
   input?.reset();
   clock.reset();
   if (!game.running) return;
   setPaused(true);
 }
-// El cambio de foco de ventana no equivale necesariamente a ocultar la página.
-// Pausar por `blur` provoca carreras con botones/modal y con navegadores headless.
-// `visibilitychange` cubre el abandono real de la pestaña sin secuestrar la UI.
 addEventListener("pagehide", () => save());
 document.addEventListener("visibilitychange", () => {
   clock.reset();
@@ -365,8 +353,6 @@ function returnToMenu() {
   input?.reset();
   clock.reset();
   if (DeathFx.isPlaying()) DeathFx.cancel();
-  // PHASE 39 - SESSION RESET CLOSURE
-  // Una nueva sesion nunca hereda estado transitorio anterior.
   t = 0;
   paused = false;
   game.hitstop = 0;
@@ -442,7 +428,6 @@ function placeFrom(fromDir) {
     } else {
       p.x = safeX(180);
     }
-    // Kick ANTES de armArrival (armArrival limpia pending, no el kick; marca trailTicks)
     const kick = typeof portals.arrivalKick === "function" ? portals.arrivalKick() : null;
     portals.armArrival();
     if (kick) {
@@ -451,14 +436,11 @@ function placeFrom(fromDir) {
       if (kick.facing) p.facing = kick.facing;
       if (kick.type) portals.trailType = kick.type;
     }
-    // Reef: trail agua-cyan (override tipado en emit + burst de aterrizaje)
     if (game.roomId === "reef") {
       portals.trailColor = "#5ecfff";
       if (!portals.trailType || portals.trailType === "catapult") portals.trailType = "water";
     }
-    // Micro-shake al aterrizar (además del shake de salida)
     game.shake = Math.min(14, (game.shake || 0) + (reduceMotion ? 3 : 5));
-    // reduceMotion: estela más corta
     if (reduceMotion && portals.trailTicks > 0) {
       portals.trailTicks = Math.min(portals.trailTicks, 8);
     }
@@ -469,7 +451,6 @@ function placeFrom(fromDir) {
       color: col, count: reduceMotion ? 10 : 22, size: 4, up: 1.8, speed: 3.2, life: 18, star: true
     });
     game.flash = Math.max(game.flash || 0, 8);
-    // Kick ya aplicado; no pisar vx/vy ni snap forzado (catapulta aterriza en arco)
     if (!kick) { p.vx = 0; p.vy = 0; snapToFloor(p); }
     return;
   } else {
@@ -621,7 +602,6 @@ function makePlayer(def) {
     facing: 1, jumps: 0, grounded: false, evo: 0, dead: false, invuln: 0,
     cds: {}, cdDur: {}, gliding: 0, xp: 0, coyote: 0, buffer: 0,
     dash: 0, dashBuf: 0, melee: 0, meleeBuf: 0, wall: 0,
-    // Garantiza abilities del roster (Pizza: pepperoni/cheese/oven)
     abilities: Array.isArray(def.abilities) ? def.abilities.slice() : (def.abilities || []),
   };
   if (!p.facing) p.facing = 1;
@@ -630,8 +610,6 @@ function makePlayer(def) {
   return p;
 }
 function start(def) {
-  // Online co-op receives the same room loader used by the single-player engine.
-  // Keep it as a narrow runtime adapter instead of duplicating room-transition logic.
   game.loadRoom = loadRoom;
   game.lastAbilityId = null;
   game.lastAbilitySlot = null;
@@ -642,8 +620,6 @@ function start(def) {
   try { localStorage.removeItem("ohana-resume"); } catch (e) {}
   input?.reset();
   clock.reset();
-  // PHASE 39 - SESSION RESET CLOSURE
-  // Una nueva sesion nunca hereda estado transitorio anterior.
   t = 0;
   paused = false;
   game.hitstop = 0;
@@ -730,7 +706,6 @@ function evolve(reason) {
   if (p.evo === 4) Surprises.onBecomeGod(game);
   const toGod = p.evo >= 4;
   game.shake = toGod ? 26 : 12;
-  // Flash tinted with character form color (reduceMotion: corto pero con color)
   game.flashColor = p.color || (p.forms && p.forms[p.evo] && p.forms[p.evo].color) || "#fff";
   game.flash = reduceMotion ? (toGod ? 12 : 8) : (toGod ? 32 : 14);
   game.fx.emit(p.x + p.w / 2, p.y, {
@@ -994,7 +969,6 @@ function attack() {
   if (!p || p.dead) return;
   if (p.melee > 0) { p.meleeBuf = 8; return; }
 
-  // facing nunca 0
   if (!p.facing) p.facing = 1;
 
   const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
@@ -1144,8 +1118,6 @@ function checkVoidDeath() {
   const r = room();
   const feet = p.y + p.h;
 
-  // V40: un vacío explícito tiene prioridad sobre cualquier rescate de suelo.
-  // Mientras el centro del jugador esté sobre un hazard, no nearestBelow/lowestFloor.
   const hazardAxis = hazardContainsX(game.roomId, p);
   const hazard = hazardTrigger(game.roomId, p);
 
@@ -1162,7 +1134,6 @@ function checkVoidDeath() {
     }
 
     if (hazard.type === HAZARD_TYPES.DEATH) {
-      // Una afinidad concreta puede salvar una caída una vez antes de tocar el fondo.
       if (hazard.heroEscape && p.id === hazard.heroEscape && p._hazardEscapeKey !== hazardKey) {
         p._hazardEscapeKey = hazardKey;
         p.vy = -Math.max(9, p.jumpPower * 0.88);
@@ -1212,7 +1183,6 @@ function checkVoidDeath() {
     return;
   }
 
-  // Fallback de seguridad para gaps geométricos que todavía no tengan volumen V40.
   const inGap = inPitX(p);
   const crossedBottom = feet > game.worldH - 24;
   const deepFall = p.y > game.worldH + 8;
@@ -1407,7 +1377,6 @@ function updatePlayer() {
   if (p._dashGo > 0) p._dashGo--;
   if (p.melee > 0) p.melee--;
   if (p.dashBuf > 0) { p.dashBuf--; if (p.dash <= 0) dash(); }
-  // Buffer usa el mismo camino que F/click (attack), no el melee legacy
   if (p.meleeBuf > 0) { p.meleeBuf--; if (p.melee <= 0) attack(); }
   if (p._thrust > 0) {
     p._thrust--;
@@ -1428,8 +1397,6 @@ function updatePlayer() {
       p.facing = face;
     }
   } else if (axisX !== 0) {
-    // V46: intención horizontal independiente del salto. Si ambas direcciones
-    // están físicamente pulsadas, engine/input.js hace ganar a la última.
     const target = axisX * Math.abs(p.speed);
     const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
     const accel = p.grounded
@@ -1439,12 +1406,9 @@ function updatePlayer() {
     if (Math.abs(target - p.vx) < 0.06) p.vx = target;
     p.facing = axisX;
   } else {
-    // Frenado corto y consistente, sin arrastre asimétrico.
     p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
     if (Math.abs(p.vx) < 0.04) p.vx = 0;
   }
-  // V46: buffer por pulsación, no por tecla mantenida. Un toque rápido entre
-  // dos frames queda latched y se consume al primer salto válido.
   if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
   else if (p.buffer > 0) p.buffer--;
   const masteryPlatforms = playerMasteryPlatforms(game);
@@ -1471,7 +1435,6 @@ function updatePlayer() {
   }
   if (p.glide && !p.grounded && p.vy > 1 && jump) p.vy = 1.15;
   if (p.gliding > 0) { p.gliding--; p.vy = Math.min(p.vy, 1.3); }
-  // GOD glide dust trail: 2–3 partículas cada ~5 frames detrás/abajo
   {
     const holdGlide = !!(p.glide && !p.grounded && p.vy > 1 && jump);
     const glideActive = holdGlide || (p.gliding > 0);
@@ -1550,7 +1513,6 @@ function updatePlayer() {
   }
   if (!(portals.isBusy && portals.isBusy())) { tryDoors(); checkVoidDeath(); }
   portals.update(game);
-  // Charge en curso: refuerzo mínimo de shake/flash tipado (no reescribe trip)
   if (portals.isBusy && portals.isBusy() && portals.charge) {
     const ov = typeof portals.getOverlay === "function" ? portals.getOverlay() : null;
     const bh = portals.charge.type === "blackhole";
@@ -1564,7 +1526,6 @@ function updatePlayer() {
   }
   const trip = portals.consume();
   if (trip && trip.dest) {
-    // Transición portal: fade largo + flash tipado (nunca dieVoid)
     const bh = trip.type === "blackhole";
     game.fading = reduceMotion ? 16 : 24;
     game.flash = bh ? (reduceMotion ? 10 : 16) : (reduceMotion ? 8 : 12);
@@ -1585,13 +1546,11 @@ function updatePlayer() {
     const flashKind = game._portalFlash;
     const ok = loadRoom(trip.dest, "portal");
     if (ok) {
-      // loadRoom resetea fading=12; restaurar transición portal (tint vía _portalFlash)
       game.fading = fadeLen;
       game.flash = Math.max(game.flash || 0, flashLen);
       game._portalFlash = flashKind;
       game._portalFadeMax = fadeLen;
     } else {
-      // Trip abortado (needEvo / dest inválido): reset visual + push-out
       game._portalFlash = null;
       game._portalFadeMax = 0;
       game.fading = 0;
@@ -1742,16 +1701,12 @@ function updateEnemies() {
       if (!e.boss && e.stun > 5) {
         e.vx *= 0.4;
         e.telegraph = false;
-        // Cancela wind-ups de ataque (sin soft-lock: stun acotado)
         if (e.wind) e.wind = 0;
         if (e.hopWind) e.hopWind = 0;
         if (e.clawWind) e.clawWind = 0;
       }
     }
 
-    // --- BOSS: IA primero, movimiento después (sin gravedad genérica) ---
-    // Evita el soft-lock: antes se aplicaba gravedad + move ANTES de updateBossNido,
-    // lo que desincronizaba slam/swoop/charge y dejaba a la Reina congelada.
     if (e.boss) {
       if (e.fell) {
         e.vx = 0; e.vy = 0;
@@ -1773,18 +1728,15 @@ function updateEnemies() {
           beep,
         });
       } catch (err) {
-        // Nunca congelar el loop entero si el boss falla un frame
         console.warn("[Ohana] boss update:", err);
         e.mode = "idle";
         e.telegraph = false;
         e.attackCd = Math.max(e.attackCd || 0, 30);
       }
-      // Integrar velocidad que acaba de fijar la state machine
       e.x += e.vx || 0;
       e.y += e.vy || 0;
       e.x = Math.max(40, Math.min(e.x, game.worldW - e.w - 40));
       e.y = Math.max(80, Math.min(e.y, game.worldH - 90 - e.h));
-      // Contacto con el jugador
       const pBoss = game.player;
       if (pBoss && !pBoss.dead && !e.dying && e.contactDmg > 0 && aabb(pBoss, e)) {
         const dmg = e.contactDmg || 22;
@@ -1860,7 +1812,6 @@ function updateEnemies() {
       if (e.hide > 110) { e.hide = 0; e.up = !e.up; }
     }
     if (e.invuln > 0) e.invuln--;
-    // --- phosquito: dive telegraph + split kept ---
     if (e.kind === "phosquito") {
       e.diveCd = (e.diveCd || 0) - 1;
       if (e.diving) {
@@ -1884,7 +1835,6 @@ function updateEnemies() {
       }
       e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
     }
-    // --- cucaracho evo2: sigue en el suelo, más rápido, con saltos cortos ---
     if (e.kind === "cucaracho" && e.evo >= 2) {
       e.telegraph = false;
       if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
@@ -1896,7 +1846,6 @@ function updateEnemies() {
       }
       if (e.hop > 0) e.hop--;
     }
-    // --- cucaracho evo0 patrol / evo1 lunge ---
     if (e.kind === "cucaracho" && e.evo < 2) {
       if (e.lunge > 0) {
         e.lunge--;
@@ -1913,7 +1862,6 @@ function updateEnemies() {
         }
       }
     }
-    // --- mosquito: telegraph dive, steep dive, upward spiral recover ---
     if (e.kind === "mosquito") {
       e.diveCd = (e.diveCd || 0) - 1;
       if (e.spiral > 0) {
@@ -1946,7 +1894,6 @@ function updateEnemies() {
       }
       e.vx = Math.max(-5.0, Math.min(5.0, e.vx));
     }
-    // --- libelula: figure-8 hover, telegraph then zig-zag diagonal dash + afterimage ---
     if (e.kind === "libelula") {
       e.bob = (e.bob || 0) + 0.07;
       e.dart = (e.dart || 0) - 1;
@@ -1960,7 +1907,6 @@ function updateEnemies() {
         if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
         e.wind++;
         e.telegraph = true;
-        // zig-zag wind-up
         e.vx = Math.sin(e.wind * 0.7) * 1.8;
         e.y = e.baseY + Math.sin(e.bob) * 10;
         e.vy = 0;
@@ -1976,7 +1922,6 @@ function updateEnemies() {
         }
       } else {
         e.telegraph = false;
-        // figure-8 hover
         e.y = e.baseY + Math.sin(e.bob) * 16;
         e.x += Math.sin(e.bob * 2) * 0.55;
         e.vy = 0;
@@ -1985,7 +1930,6 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
-    // --- abeja/avispa: gentle hover, buzz telegraph, steeper stinger dive ---
     if (e.kind === "abeja" || e.kind === "avispa") {
       e.bob = (e.bob || 0) + 0.07;
       if (e.baseY == null) e.baseY = e.y;
@@ -2007,7 +1951,6 @@ function updateEnemies() {
         e.telegraph = true;
         e.vx *= 0.9;
         e.vy = 0;
-        // hover wobble while winding up
         e.y = e.baseY + Math.sin(e.bob * 1.6) * 10;
         if (e.wind > 36) {
           e.wind = 0;
@@ -2017,7 +1960,6 @@ function updateEnemies() {
           const dx = game.player.x - e.x;
           const dy = game.player.y - e.y + 12;
           const len = Math.hypot(dx, dy) || 1;
-          // steeper dive than avispa (more vertical stinger plunge)
           e.vx = (dx / len) * 6.2;
           e.vy = (dy / len) * 8.4;
           game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffcc33", count: 7, size: 2.6, up: 1.0 });
@@ -2026,7 +1968,6 @@ function updateEnemies() {
         e.telegraph = false;
         e.charging = 0;
         e.vy = 0;
-        // idle hover — rounder bob than avispa
         e.y = e.baseY + Math.sin(e.bob) * 16 + Math.sin(e.bob * 2.5) * 5;
         if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.03;
         e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
@@ -2035,7 +1976,6 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
-    // --- pez: school sine, dash burst, vertical hunt, dense bubbles ---
     if (e.kind === "pez") {
       e.vy = 0;
       e.bob = (e.bob || 0) + 0.06;
@@ -2051,7 +1991,6 @@ function updateEnemies() {
         e.vx = Math.sign(game.player.x - e.x || 1) * 4.4;
         e.baseY += Math.sign(game.player.y - e.baseY) * 28;
       }
-      // school-like sine offset
       e.y = e.baseY + Math.sin(e.bob) * 26 + Math.sin(e.bob * 2.2) * 8;
       if (game.player) {
         e.vx += Math.sign(game.player.x - e.x) * 0.035;
@@ -2062,7 +2001,6 @@ function updateEnemies() {
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#7ec8f0", count: 2, size: 2.0, up: 0.28, speed: 0.5, life: 16 });
     }
-    // --- medusa: near player pulse then pink soft zap projectile ---
     if (e.kind === "medusa") {
       e.vy = 0;
       e.bob = (e.bob || 0) + 0.04;
@@ -2097,7 +2035,6 @@ function updateEnemies() {
         }
       }
     }
-    // --- anguila: sine swim + zap telegraph bolt ---
     if (e.kind === "anguila" && !(e.stun > 5)) {
       e.vy = 0;
       e.bob = (e.bob || 0) + 0.055;
@@ -2141,7 +2078,6 @@ function updateEnemies() {
         }
       }
     }
-    // --- rana: telegraph crouch ~0.4s then hop toward player ---
     if (e.kind === "rana" && !(e.stun > 5)) {
       if (e.hopWind > 0) {
         e.hopWind--;
@@ -2172,7 +2108,6 @@ function updateEnemies() {
         }
       }
     }
-    // --- cangrejo: scuttle + pinza telegraph (~0.4s) then snap ---
     if (e.kind === "cangrejo" && !(e.stun > 5)) {
       e.clawCd = (e.clawCd || 0) - 1;
       const near = game.player && Math.abs(game.player.x - e.x) < 130 && Math.abs(game.player.y - e.y) < 90;
@@ -2202,7 +2137,6 @@ function updateEnemies() {
       }
       e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
     }
-    // --- gaviota: glide then softer dive like mosquito ---
     if (e.kind === "gaviota") {
       e.diveCd = (e.diveCd || 0) - 1;
       if (e.baseY == null) e.baseY = e.y;
@@ -2233,7 +2167,6 @@ function updateEnemies() {
       e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
-    // --- murcielago: flap bob, dive at mid HP or on timer ---
     if (e.kind === "murcielago") {
       e.diveCd = (e.diveCd || 0) - 1;
       if (e.baseY == null) e.baseY = e.y;
@@ -2262,14 +2195,12 @@ function updateEnemies() {
       }
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
     }
-    // --- arana: crawl, occasional drop from above ---
     if (e.kind === "arana") {
       e.dropCd = (e.dropCd || 0) - 1;
       if (e.dropping) {
         e.telegraph = true;
         e.vx *= 0.92;
         if (e.vy > 6) e.dropping = false;
-        // stick when landing (vy zeroed by platform)
       } else if (e.dropCd <= 0 && game.player && Math.abs(game.player.x - e.x) < 160 && enemyCanCommit(e)) {
         e.dropCd = 140;
         e.dropping = true;
@@ -2284,7 +2215,6 @@ function updateEnemies() {
       }
       if (!e.dropping && Math.abs(e.vy) < 0.15) e.dropping = false;
     }
-    // --- brasita: bob float, ember particles ---
     if (e.kind === "brasita") {
       e.bob = (e.bob || 0) + 0.08;
       if (e.baseY == null) e.baseY = e.y;
@@ -2299,7 +2229,6 @@ function updateEnemies() {
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8a30", count: 2, size: 2.4, up: 0.8, speed: 0.9, life: 16 });
     }
-    // --- escoria: slow crawler, hotter/faster when low HP ---
     if (e.kind === "escoria") {
       const hot = e.hp < e.max * 0.45;
       const spd = hot ? 2.4 : 1.1;
@@ -2310,7 +2239,6 @@ function updateEnemies() {
       e.color = hot ? "#ff4020" : "#c04010";
       if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
     }
-    // --- ufo: hover, shoot slow projectile ~90f ---
     if (e.kind === "ufo" && !(e.stun > 5)) {
       e.bob = (e.bob || 0) + 0.04;
       if (e.baseY == null) e.baseY = e.y;
@@ -2324,7 +2252,6 @@ function updateEnemies() {
       e.baseY = Math.max(180, Math.min(520, e.baseY));
       if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
       e.shootCd = (e.shootCd || 0) - 1;
-      // Telegraph ~0.5s antes del rayo
       if (e.shootCd <= 30 && enemyCanCommit(e)) e.telegraph = true;
       else e.telegraph = false;
       if (e.shootCd <= 0 && game.player && enemyCanCommit(e)) {
@@ -2341,8 +2268,6 @@ function updateEnemies() {
         game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
       }
     }
-    // V38 strategic steering is applied after species logic so RETREAT/FLANK
-    // cannot be overwritten by a local hover/chase routine.
     if (!e.telegraph && game.player) {
       const steer = enemySteering(e, game.player);
       if (e.mode === "retreat" || e.mode === "flank") {
@@ -2425,7 +2350,6 @@ function updateEnemies() {
     }
     if (e.hp > 0) return true;
     if (e.deathHold && e.dying > 0) return true;
-    // Cucaracho muda: 1ª muerte → evo1, 2ª → evo2 flyer, 3ª → kill real
     if (e.kind === "cucaracho" && !e.baby && e.evo < 2) {
       e.evo += 1;
       e.hp = Math.round(e.max * 0.9);
@@ -2438,7 +2362,6 @@ function updateEnemies() {
       e.invuln = 28;
       game.flash = Math.max(game.flash, 8);
       game.shake = Math.max(game.shake, e.evo >= 2 ? 14 : 10);
-      // shell-pop particles (+1 vs prior lote; cada death stage Design A)
       game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, {
         color: e.evo >= 2 ? "#ff4a20" : "#c45a18",
         count: e.evo >= 2 ? 29 : 21, size: 5, up: 2.4, star: true,
@@ -2682,8 +2605,6 @@ function render() {
     ctx.fillText(game.storyLine, viewW / 2, viewH * 0.72 + 40);
     ctx.restore();
   }
-  // Skip low-HP edge vignette during death FX — at health=0 it was ~60% opaque over the ghost
-  // También skip si HP > 65%: evita createRadialGradient cada frame cuando está sano
   if (!DeathFx.isPlaying()) {
     const hpRatio = game.player.health / Math.max(1, game.player.maxHealth);
     if (hpRatio <= 0.65) {
@@ -2702,7 +2623,6 @@ function render() {
       if (ov && ov.color) tint = ov.color;
       else if (game._portalFlash === "purple") tint = "90,40,160";
       else if (game._portalFlash === "amber") tint = "255,160,60";
-      // Tint fuerte + ligera vignette tipada
       ctx.fillStyle = "rgba(" + tint + "," + Math.min(0.92, fa * 0.95) + ")";
       ctx.fillRect(0, 0, viewW, viewH);
       const vgA = fa * 0.35;
@@ -2714,7 +2634,6 @@ function render() {
         ctx.fillRect(0, 0, viewW, viewH);
       }
     } else if (ov && ov.alpha > 0.02) {
-      // Overlay durante charge (antes del fade de viaje)
       const a = Math.min(0.9, ov.alpha);
       ctx.fillStyle = "rgba(" + (ov.color || "0,0,0") + "," + a + ")";
       ctx.fillRect(0, 0, viewW, viewH);
@@ -2860,7 +2779,6 @@ function renderAbilityBar() {
   touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
   abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",");
 }
-// Retrato vivo del personaje en el HUD (misma pipeline que el juego)
 function drawHudAvatar(p) {
   const av = DOM.hudAvatar;
   if (!av) return;
@@ -3164,9 +3082,6 @@ function setupSelect() {
     }
     if (act === "roster") returnToMenu();
   });
-    // PHASE 39 - ESCAPE HARDENING DIRECT
-  // Escape debe abrir la pausa de forma determinista antes del adaptador
-  // generico de teclado. Se bloquea la propagacion para impedir doble toggle.
   addEventListener("keydown", (event) => {
     if (
       event.key !== "Escape" ||
@@ -3181,7 +3096,6 @@ function setupSelect() {
     event.stopImmediatePropagation();
     escape();
   }, true);
-// QA-only shortcut: Ctrl+Z forces the next evolution without grinding XP.
   addEventListener("keydown", (event) => {
     const key = String(event.key || "").toLowerCase();
     if (event.repeat || key !== "z" || !event.ctrlKey || event.altKey || event.metaKey) return;
@@ -3203,7 +3117,6 @@ function setupSelect() {
     }
   });
   keys = input.keys;
-  // Tappable ability slots (desktop + touch): cast by clicking the HUD pill.
   const abilityBar = document.getElementById("ability-bar");
   abilityBar?.addEventListener("click", (ev) => {
     const slot = ev.target.closest(".ability-slot");
@@ -3257,8 +3170,6 @@ if (e2eEnabled) {
     paused = false;
     input?.reset();
     clock.reset();
-  // PHASE 39 - SESSION RESET CLOSURE
-  // Una nueva sesion nunca hereda estado transitorio anterior.
   t = 0;
   paused = false;
   game.hitstop = 0;
