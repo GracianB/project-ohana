@@ -82,19 +82,24 @@ try {
 
   await page.goto(base + '?visual=1&e2e=1', { waitUntil: 'networkidle' });
   const opening = page.locator('#ohana-intro');
-  await opening.waitFor({ state:'visible', timeout:2500 }).catch(() => {});
-  if (await opening.count()) {
-    const openingState = await opening.evaluate((el) => ({
-      cast:Number(el.dataset.v43Cast || 0),
-      shown:el.classList.contains('show')
-    }));
-    assert.equal(openingState.cast, 10, '00-opening-family: V43 no expone los 10 héroes');
-    assert.equal(openingState.shown, true, '00-opening-family: intro no visible');
-    await page.waitForTimeout(1050);
-    await capture(page, '00-opening-family');
-  }
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await opening.waitFor({ state:'visible', timeout:2500 });
+  await page.waitForTimeout(1450);
+  const openingState = await opening.evaluate((el) => ({
+    cast:Number(el.dataset.v44Cast || 0),
+    shown:el.classList.contains('show'),
+    ready:el.classList.contains('ready'),
+    mode:el.dataset.openingMode || '',
+    complete:document.body.classList.contains('intro-complete')
+  }));
+  assert.equal(openingState.cast, 10, '00-opening-family: V44 no expone los 10 héroes');
+  assert.equal(openingState.shown, true, '00-opening-family: bienvenida no visible');
+  assert.equal(openingState.ready, true, '00-opening-family: entrada no preparada');
+  assert.equal(openingState.complete, false, '00-opening-family: avanza sola al carrusel');
+  assert.equal(openingState.mode, 'family-welcome', '00-opening-family: modo visual incorrecto');
+  await capture(page, '00-opening-family');
+  await page.locator('#ohana-intro .oi-enter').click();
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   const titleLayout = await page.evaluate(() => {
     const visible = [...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
       const box = card.getBoundingClientRect();
@@ -288,11 +293,21 @@ try {
   await page.locator('#btn-close-help').click();
 
   await page.evaluate(() => dispatchEvent(new CustomEvent('ohana-win', { detail: {
-    hero:'Kilo', form:'Forma final', rank:'S', time:'03:21', kills:42, best:'03:21'
+    id:'kilo', evo:4, hero:'Kilo', form:'Kilo Flor Solar', rank:'S', time:'03:21', kills:42, best:'03:21'
   }})));
   await page.waitForTimeout(2450);
-  assert.equal(await page.locator('#win-cinema').evaluate((el) => el.classList.contains('show')), true, '08-ending: final no visible');
+  const endingState = await page.locator('#win-cinema').evaluate((el) => ({
+    show:el.classList.contains('show'),
+    running:el.classList.contains('cinema-running'),
+    mode:el.dataset.ending || ''
+  }));
+  assert.equal(endingState.show, true, '08-ending: final no visible');
+  assert.equal(endingState.running, true, '08-ending: resultados sustituyen al cine');
+  assert.equal(endingState.mode, 'v44-true-ending', '08-ending: final V44 no activo');
   await capture(page, '08-ending');
+  await page.locator('#win-cinema .win-skip').click();
+  await page.waitForTimeout(120);
+  assert.equal(await page.locator('#win-cinema').evaluate((el) => el.classList.contains('cinema-complete')), true, '08-ending: resultados no aparecen tras el cine');
   await page.locator('#win-continue').click();
   await page.waitForTimeout(100);
 
@@ -337,7 +352,7 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
   await page.waitForTimeout(100);
-  assert.equal(await page.locator('#cinematic-beat').evaluate((el) => el.classList.contains('show')), true, '09-death: beat de muerte no visible');
+  assert.equal(await page.locator('#cinematic-beat').count(), 0, '10-death-ghost: V44 no debe montar tarjeta fullscreen de muerte');
   await capture(page, '10-death-ghost');
 
   await browser.close();

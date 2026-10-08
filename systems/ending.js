@@ -1,98 +1,165 @@
-export function showEnding(detail = {}) {
-  let layer = document.getElementById("win-cinema");
-  if (!layer) {
-    layer = document.createElement("div");
-    layer.id = "win-cinema";
-    document.body.appendChild(layer);
+// PROJECT OHANA V44 · TRUE ENDING
+import {
+  fullCanvas, reducedMotion, clamp, seg, easeOut, easeInOut, lerp,
+  rgba, makeDummy, drawDummy, baseHeight, drawTitle, FONT_BODY, FONT_DISPLAY
+} from "./evo-cinema.js";
+import { ROSTER } from "../characters/roster.js";
+import { duckMusic } from "../engine/music.js";
+import { sfx } from "../engine/audio.js";
+
+let running=null;
+const CAST=["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+
+function heroBy(detail){
+  const id=String(detail.id||"").toLowerCase();
+  return ROSTER.find(r=>r.id===id)||ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.hero||"").toLowerCase())||ROSTER[0];
+}
+function buildLayer(){
+  let layer=document.getElementById("win-cinema");
+  if(!layer){layer=document.createElement("div");layer.id="win-cinema";document.body.appendChild(layer);}
+  layer.setAttribute("role","dialog");
+  layer.setAttribute("aria-modal","true");
+  layer.setAttribute("aria-labelledby","win-title");
+  layer.innerHTML=
+    '<canvas class="win-canvas" aria-hidden="true"></canvas>'+
+    '<button type="button" class="win-skip">SALTAR A RESULTADOS ↗</button>'+
+    '<div class="win-card">'+
+      '<p class="win-kicker">Mundo 1 completado · Isla Hoku</p>'+
+      '<p class="win-act">LA FAMILIA VUELVE A CASA</p>'+
+      '<h2 id="win-title">NADIE SE QUEDA ATRÁS</h2>'+
+      '<p class="win-hero"></p><p class="win-score"></p>'+
+      '<p class="win-jun">HOKU VUELVE A RESPIRAR</p>'+
+      '<p class="win-sub">La Reina cae. El Nido se abre. La familia regresa junta al Claro.</p>'+
+      '<div class="win-actions">'+
+        '<button type="button" id="win-continue">Continuar en este mundo</button>'+
+        '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>'+
+        '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>'+
+      '</div>'+
+    '</div>';
+  return layer;
+}
+function bindActions(layer){
+  const close=(action)=>{
+    if(running)running.stop(true);
+    layer.className="";
+    layer.setAttribute("aria-hidden","true");
+    dispatchEvent(new CustomEvent("ohana-after",{detail:{action}}));
+  };
+  layer.querySelector("#win-continue").onclick=()=>close("continue");
+  layer.querySelector("#win-repeat").onclick=()=>close("repeat");
+  layer.querySelector("#win-roster").onclick=()=>close("roster");
+}
+function drawRift(ctx,cx,cy,R,k){
+  ctx.save();ctx.globalCompositeOperation="lighter";ctx.globalAlpha=.82*k;
+  for(let i=0;i<5;i++){
+    ctx.strokeStyle=i%2?"#ff607b":"#fff0b5";ctx.lineWidth=2+i*.5;ctx.shadowColor=ctx.strokeStyle;ctx.shadowBlur=16;
+    ctx.beginPath();ctx.moveTo(cx-R*.06*i,cy-R*.62);
+    ctx.bezierCurveTo(cx-R*.25,cy-R*.25,cx+R*.26,cy+R*.10,cx+R*.03*i,cy+R*.58);ctx.stroke();
+  }ctx.restore();
+}
+function showEnding(detail={}){
+  if(running)running.stop(true);
+  const layer=buildLayer();bindActions(layer);
+  const canvas=layer.querySelector(".win-canvas"),fc=fullCanvas(canvas),ctx=fc.ctx;
+  const hero=heroBy(detail),evo=clamp(Number(detail.evo)||4,0,4),reduce=reducedMotion();
+  const heroActor=makeDummy(hero.id,evo,hero.color);
+  const actors=Object.fromEntries(CAST.map(id=>{
+    const d=ROSTER.find(r=>r.id===id)||ROSTER[0];
+    return [id,makeDummy(id,id===hero.id?evo:1,d.color)];
+  }));
+  const duration=reduce?1.6:7.4;
+  let t0=0,raf=0,done=false,complete=false;
+
+  layer.className="show cinema-running ending-phase-1";
+  layer.dataset.ending="v44-true-ending";
+  layer.setAttribute("aria-hidden","false");
+  const score=layer.querySelector(".win-score");
+  layer.querySelector(".win-hero").textContent=(detail.hero||hero.name)+" · "+(detail.form||"forma final");
+  score.textContent=(detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
+  duckMusic(true);try{sfx("victory");}catch(_){}
+
+  function actor(p,x,footY,h,tf,opts={}){
+    p.facing=opts.facing||1;p.grounded=opts.grounded!==false;p.vx=opts.vx||0;p.vy=opts.vy||0;p.melee=opts.melee||0;p._poseOverride=opts.pose||"idle";
+    ctx.save();if(opts.alpha!==undefined)ctx.globalAlpha*=opts.alpha;
+    drawDummy(ctx,p,x,footY,h/baseHeight(p.id,p.evo||0),tf);ctx.restore();
   }
-  if (!layer.querySelector(".win-card")) {
-    layer.setAttribute("role", "dialog");
-    layer.setAttribute("aria-modal", "true");
-    layer.setAttribute("aria-labelledby", "win-title");
-    layer.innerHTML =
-      '<div class="win-wash"></div>' +
-      '<div class="win-rift" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<div class="win-stars" aria-hidden="true"></div>' +
-      '<div class="win-card">' +
-        '<p class="win-kicker">Mundo 1 completado · Isla Hoku</p>' +
-        '<p class="win-act">LA REINA CAE</p>' +
-        '<h2 id="win-title">NADIE SE QUEDA ATRÁS</h2>' +
-        '<p class="win-hero"></p>' +
-        '<p class="win-score"></p>' +
-        '<p class="win-jun">HOKU VUELVE A RESPIRAR</p>' +
-        '<p class="win-sub">La oscuridad se abre. Las formas perdidas regresan a la luz. Hoku respira otra vez.</p>' +
-        '<div class="win-actions">' +
-          '<button type="button" id="win-continue">Continuar en este mundo</button>' +
-          '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>' +
-          '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>' +
-        "</div>" +
-      "</div>";
-    layer.querySelector("#win-continue").onclick = () => {
-      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
-      layer.setAttribute("aria-hidden", "true");
-      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "continue" } }));
-    };
-    layer.querySelector("#win-repeat").onclick = () => {
-      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
-      layer.setAttribute("aria-hidden", "true");
-      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "repeat" } }));
-    };
-    layer.querySelector("#win-roster").onclick = () => {
-      layer.classList.remove("show", "ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
-      layer.setAttribute("aria-hidden", "true");
-      dispatchEvent(new CustomEvent("ohana-after", { detail: { action: "roster" } }));
-    };
+  function revealResults(){
+    if(complete)return;complete=true;
+    layer.classList.remove("cinema-running","ending-phase-1","ending-phase-2","ending-phase-3");
+    layer.classList.add("cinema-complete","ending-phase-4");
+    layer.querySelector(".win-skip").hidden=true;
+    duckMusic(false);
   }
-  if (layer.classList.contains("show")) return;
-  const hero = detail.hero || "Ohana";
-  const form = detail.form || "forma final";
-  const rank = detail.rank || "";
-  const time = detail.time || "";
-  const kills = Number.isFinite(Number(detail.kills)) ? Number(detail.kills) : 0;
-  const best = detail.best && detail.best !== time ? " · mejor " + detail.best : "";
-  const heroEl = layer.querySelector(".win-hero");
-  if (heroEl) heroEl.textContent = hero + " · " + form;
-  const score = layer.querySelector(".win-score");
-  score.textContent = (rank ? "Claro " + rank + " · " : "") + (time ? time + " · " : "") + kills + " bajas" + best;
-  const stars = layer.querySelector(".win-stars");
-  if (stars && !stars.childElementCount) {
-    for (let i = 0; i < 28; i++) {
-      const s = document.createElement("i");
-      s.style.setProperty("--x", ((i * 37) % 100) + "%");
-      s.style.setProperty("--y", ((i * 61) % 100) + "%");
-      s.style.setProperty("--d", (i % 9) * 70 + "ms");
-      stars.appendChild(s);
-    }
+  function stop(silent=false){
+    if(done)return;done=true;cancelAnimationFrame(raf);duckMusic(false);running=null;
+    if(!silent)revealResults();
   }
-  layer.classList.remove("ending-phase-1", "ending-phase-2", "ending-phase-3", "ending-phase-4");
-  layer.classList.add("ending-phase-1");
-  layer.classList.add("show");
-  layer.setAttribute("aria-hidden", "false");
-  requestAnimationFrame(() => {
-    layer.classList.remove("ending-phase-1");
-    layer.classList.add("ending-phase-2");
-  });
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.setTimeout(() => {
-    if (layer.classList.contains("show")) {
-      layer.classList.remove("ending-phase-2");
-      layer.classList.add("ending-phase-3");
+  function frame(now){
+    if(done||complete)return;if(!t0)t0=now;
+    const t=(now-t0)/1000,k=clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*.78,tf=t*60;
+    ctx.clearRect(0,0,W,H);
+    const dawn=seg(k,.48,.92);
+    const bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,dawn>.1?"#264b63":"#050915");bg.addColorStop(.56,dawn>.1?"#bf8f69":"#180817");bg.addColorStop(1,"#061016");
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    const glow=ctx.createRadialGradient(cx,H*.32,0,cx,H*.32,Math.min(W,H)*.52);
+    glow.addColorStop(0,rgba(dawn>.1?"#ffe6a3":"#ff486a",.22+.22*dawn));glow.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+
+    // ACT I · Queen fall / rift collapses around selected hero.
+    if(k<.34){
+      const q=seg(k,0,.34),rift=1-seg(k,.22,.34);
+      drawRift(ctx,cx,H*.38,Math.min(W,H)*.38,rift);
+      const h=Math.min(H*.44,W*.28);
+      heroActor._poseOverride=q<.45?"attack":"victory";heroActor.melee=q<.45?10:0;
+      actor(heroActor,cx,ground,h,tf,{pose:heroActor._poseOverride});
+      ctx.save();ctx.globalAlpha=1-seg(q,.62,1);
+      drawTitle(ctx,"LA REINA CAE",cx,H*.15,Math.max(28,Math.min(62,W*.05)),["#fff4c6","#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ff5a72"});
+      ctx.restore();
+      layer.classList.add("ending-phase-1");
     }
-  }, reduce ? 40 : 1050);
-  window.setTimeout(() => {
-    if (layer.classList.contains("show")) {
-      layer.classList.remove("ending-phase-3");
-      layer.classList.add("ending-phase-4");
+
+    // ACT II · family arrives, one by one, around the protagonist.
+    if(k>=.28&&k<.70){
+      layer.classList.remove("ending-phase-1");layer.classList.add("ending-phase-2");
+      const group=seg(k,.28,.62),heroH=Math.min(H*.31,W*.17);
+      actor(heroActor,cx,ground,heroH*1.08,tf,{pose:"victory"});
+      CAST.filter(id=>id!==hero.id).forEach((id,i)=>{
+        const p=actors[id],side=i%2?-1:1,row=Math.floor(i/2),x=cx+side*(heroH*.78+row*heroH*.42);
+        const enter=easeOut(seg(group,i*.055,.30+i*.055));
+        const y=ground+18*(1-enter);
+        actor(p,x,y,heroH*(.68+(i%3)*.05),tf,{facing:x<cx?1:-1,pose:i===2&&enter>.7?"run":"idle",alpha:enter});
+      });
+      const copy=seg(k,.43,.61)*(1-seg(k,.63,.70));
+      if(copy>0){ctx.save();ctx.globalAlpha=copy;drawTitle(ctx,"TODOS LLEGAN.",cx,H*.14,Math.max(24,Math.min(50,W*.038)),"#fff0b5",{font:FONT_DISPLAY,weight:700,stroke:false});ctx.restore();}
     }
-  }, reduce ? 80 : 2350);
+
+    // ACT III · sunrise family portrait.
+    if(k>=.64){
+      layer.classList.remove("ending-phase-2");layer.classList.add("ending-phase-3");
+      const heroH=Math.min(H*.28,W*.15),spread=Math.min(W*.72,heroH*7.8);
+      CAST.forEach((id,i)=>{
+        const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1)),chosen=id===hero.id;
+        actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
+      });
+      const titleK=seg(k,.70,.86);
+      if(titleK>0){
+        ctx.save();ctx.globalAlpha=titleK;
+        drawTitle(ctx,"NADIE SE QUEDA ATRÁS",cx,H*.16,Math.max(30,Math.min(68,W*.052)),["#fff8d8","#ffe08c"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ffe39a",maxWidth:W*.9});
+        drawTitle(ctx,"MUNDO 1 COMPLETADO · ISLA HOKU",cx,H*.23,Math.max(10,Math.min(15,W*.011)),"#bdefff",{font:FONT_BODY,weight:800,spacing:".22em",stroke:false});
+        ctx.restore();
+      }
+    }
+    if(k>=1){revealResults();return;}
+    raf=requestAnimationFrame(frame);
+  }
+  layer.querySelector(".win-skip").onclick=()=>revealResults();
+  layer.addEventListener("keydown",(e)=>{if(e.key==="Escape"||e.key==="Enter"||e.key===" "){e.preventDefault();revealResults();}},{once:true});
+  running={stop};raf=requestAnimationFrame(frame);
 }
 
-function watchVictory() {
-  addEventListener("ohana-win", (e) => showEnding(e.detail || {}));
+if(!window.__ohanaWinBound){
+  window.__ohanaWinBound=true;
+  addEventListener("ohana-win",(e)=>showEnding(e.detail||{}));
 }
-
-if (!window.__ohanaWinBound) {
-  window.__ohanaWinBound = true;
-  if (document.readyState === "loading") addEventListener("DOMContentLoaded", watchVictory);
-  else watchVictory();
-}
+export { showEnding };

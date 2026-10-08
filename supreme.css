@@ -132,3 +132,10 @@
   #supreme-cinema.show .sc-copy{opacity:1!important;transform:none!important}
   #supreme-cinema .sc-motif i{opacity:.24!important;transform:translate(-50%,-50%) scale(1)!important}
 }
+
+
+/* V44 · SUPREME SHORTS — actual hero canvas above every gameplay layer. */
+#supreme-cinema{z-index:112!important;display:block!important;background:#02050c!important;opacity:0!important;visibility:hidden;pointer-events:none!important}
+#supreme-cinema.show{opacity:1!important;visibility:visible}
+#supreme-cinema canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:1}
+#supreme-cinema .sc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

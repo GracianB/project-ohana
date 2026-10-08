@@ -1,7 +1,7 @@
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
 // ----------------------------------------------------------------------------
-// playTitleIntro(): V43 OHANA MAGIC — familia, humor, amenaza y título (~6 s).
+// playTitleIntro(): V44 FAMILY WELCOME — escena viva que espera una acción explícita.
 // playIntro(kind, name, done, id): cinemática corta al pulsar Empezar /
 //   Continuar (~1.8 s, saltable). API compatible con title.js.
 // Ambas en canvas, con el mismo kit visual que la cinemática de evolución.
@@ -49,126 +49,49 @@ export function playTitleIntro() {
   }
   if (el._played) return;
   el._played = true;
-  el.innerHTML = '<canvas aria-hidden="true"></canvas><button class="oi-skip" type="button" aria-label="Saltar introducción">Saltar intro · Esc</button>';
+  el.innerHTML =
+    '<canvas aria-hidden="true"></canvas>' +
+    '<div class="oi-welcome" aria-hidden="true"><span>ISLA HOKU</span><strong>La familia ya está aquí.</strong><small>Haz clic para entrar</small></div>' +
+    '<button class="oi-enter" type="button">ENTRAR EN HOKU ↗</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
-  el.setAttribute("aria-label", "Introducción cinematográfica de Project Ohana");
+  el.setAttribute("aria-label", "Escena de bienvenida de Isla Hoku");
   el.setAttribute("aria-hidden", "false");
-  el.classList.add("show");
+  el.classList.add("show", "family-welcome");
   document.body.classList.add("intro-playing");
+
   const fc = fullCanvas(el.querySelector("canvas"));
   const ctx = fc.ctx;
   const reduce = reducedMotion();
-  const parts = new Particles();
-  const pal = [CYAN, GOLD, PINK, "#ffffff"];
-  const T = reduce
-    ? { family: 0, threat: 0.08, core: 0.12, ring: 0.14, word: 0.16, flash: 0.24, tag: 0.26, out: 0.72, end: 1.08 }
-    : { family: 0.28, threat: 2.92, core: 3.78, ring: 3.92, word: 4.08, flash: 4.72, tag: 4.88, out: 5.52, end: 6.18 };
-  const letters = ["O", "H", "A", "N", "A"];
-  const word = document.createElement("canvas");
-  const wctx = word.getContext("2d");
-
-  const V43_INTRO_CAST = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
-  const introActors = Object.fromEntries(V43_INTRO_CAST.map((id) => {
+  const CAST = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
-    const p = makeDummy(id, 0, def.color);
-    p._poseOverride = "idle";
-    return [id, p];
+    return [id, makeDummy(id, 0, def.color)];
   }));
-  el.dataset.v43Cast = String(V43_INTRO_CAST.length);
-  let t0 = 0, last = 0, raf = 0, skip = false, burst = false, revealed = false, done = false;
+  el.dataset.v44Cast = String(CAST.length);
+  el.dataset.openingMode = "family-welcome";
 
-  function onResize() { fc.resize(); }
-  addEventListener("resize", onResize);
+  let raf = 0, t0 = 0, last = 0, ready = false, done = false;
 
   function layout() {
     const W = fc.W, H = fc.H;
-    const size = Math.min(W * 0.17, H * 0.2, 170);
-    return { W, H, cx: W / 2, cy: H * 0.42, size };
+    return {
+      W, H,
+      floor: H * 0.80,
+      heroH: clamp(Math.min(W, H) * 0.11, 60, 102),
+    };
   }
 
-  function drawIslandScene(t, L) {
-    const { W, H, cx, cy } = L;
-    const horizon = H * 0.74;
-    const sunK = easeOut(seg(t, 0.15, 1.15));
-    const seaK = seg(t, 0.1, 1.0);
-    if (seaK <= 0) return;
-
-    ctx.save();
-    ctx.globalAlpha = 0.86 * seaK;
-
-    const sea = ctx.createLinearGradient(0, horizon, 0, H);
-    sea.addColorStop(0, "rgba(7,42,62,0.12)");
-    sea.addColorStop(0.55, "rgba(5,28,46,0.62)");
-    sea.addColorStop(1, "rgba(2,8,18,0.98)");
-    ctx.fillStyle = sea;
-    ctx.fillRect(0, horizon, W, H - horizon);
-
-    if (sunK > 0) {
-      const sr = Math.min(W, H) * (0.045 + sunK * 0.055);
-      const sg = ctx.createRadialGradient(cx, horizon - sr * 0.35, 0, cx, horizon - sr * 0.35, sr * 2.8);
-      sg.addColorStop(0, rgba(GOLD, 0.42 * sunK));
-      sg.addColorStop(0.55, rgba(GOLD, 0.08 * sunK));
-      sg.addColorStop(1, rgba(GOLD, 0));
-      ctx.fillStyle = sg;
-      ctx.fillRect(cx - sr * 3, horizon - sr * 3, sr * 6, sr * 6);
-
-      ctx.fillStyle = GOLD;
-      ctx.globalAlpha = 0.35 * sunK;
-      ctx.beginPath();
-      ctx.arc(cx, horizon - sr * 0.35, sr, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.globalAlpha = 0.9 * seaK;
-    ctx.fillStyle = "rgba(1,6,12,0.94)";
-    ctx.beginPath();
-    ctx.moveTo(0, H);
-    ctx.lineTo(0, horizon + 40);
-    ctx.quadraticCurveTo(W * 0.12, horizon - 24, W * 0.24, horizon + 10);
-    ctx.quadraticCurveTo(W * 0.34, horizon + 34, W * 0.46, horizon - 6);
-    ctx.quadraticCurveTo(W * 0.58, horizon - 34, W * 0.68, horizon + 6);
-    ctx.quadraticCurveTo(W * 0.84, horizon + 30, W, horizon - 2);
-    ctx.lineTo(W, H);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.globalAlpha = 0.9 * seaK;
-    ctx.fillStyle = "#071018";
-    ctx.beginPath();
-    ctx.moveTo(W * 0.16, horizon + 8);
-    ctx.lineTo(W * 0.2, horizon - 90);
-    ctx.quadraticCurveTo(W * 0.28, horizon - 40, W * 0.18, horizon + 8);
-    ctx.moveTo(W * 0.82, horizon + 10);
-    ctx.lineTo(W * 0.78, horizon - 110);
-    ctx.quadraticCurveTo(W * 0.9, horizon - 50, W * 0.84, horizon + 10);
-    ctx.fill();
-    ctx.globalAlpha = 0.18 * seaK;
-    ctx.strokeStyle = CYAN;
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 5; i++) {
-      const yy = horizon + 20 + i * 20;
-      const off = ((t * (16 + i * 5)) % (W + 220)) - 110;
-      ctx.beginPath();
-      ctx.moveTo(off, yy);
-      ctx.lineTo(off + 120, yy);
-      ctx.stroke();
-    }
-
-    ctx.restore();
-  }
-
-
-  function drawIntroActor(id, x, footY, targetH, tf, opts = {}) {
-    const p = introActors[id];
+  function actor(id, x, footY, h, tf, opts = {}) {
+    const p = actors[id];
     if (!p) return;
-    const scale = targetH / Math.max(1, baseHeight(id, 0));
     p.facing = opts.facing || 1;
     p.grounded = opts.grounded !== false;
     p.vx = Number(opts.vx || 0);
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
-    p._poseOverride = opts.pose || "";
+    p._poseOverride = opts.pose || "idle";
+    const scale = h / Math.max(1, baseHeight(id, 0));
     ctx.save();
     ctx.translate(x, footY);
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
@@ -177,401 +100,194 @@ export function playTitleIntro() {
     ctx.restore();
   }
 
-  function drawTinyBolt(x1, y1, x2, y2, k) {
+  function bolt(x1,y1,x2,y2,k) {
     if (k <= 0) return;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.strokeStyle = "rgba(255,232,86," + (0.30 + k * 0.70) + ")";
-    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = "rgba(255,232,86," + (0.3 + k * 0.7) + ")";
     ctx.shadowColor = "#ffe85a";
-    ctx.shadowBlur = 16;
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 2.4;
     ctx.beginPath();
-    for (let i = 0; i <= 7; i++) {
-      const u = i / 7;
-      const x = lerp(x1, x2, u);
-      const y = lerp(y1, y2, u) + (i > 0 && i < 7 ? Math.sin(i * 9.7) * 6 * k : 0);
-      if (!i) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    for (let i=0;i<=7;i++) {
+      const u=i/7, x=lerp(x1,x2,u);
+      const y=lerp(y1,y2,u)+(i>0&&i<7?Math.sin(i*9.7)*6*k:0);
+      if (!i) ctx.moveTo(x,y); else ctx.lineTo(x,y);
     }
     ctx.stroke();
     ctx.restore();
   }
 
-  function drawTinyRainbow(x, y, radius, k) {
+  function rainbow(x,y,r,k) {
     if (k <= 0) return;
-    const cols = ["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];
+    const cols=["#ff7aa8","#ffd36a","#7ee7ff","#b78bff"];
     ctx.save();
-    ctx.globalAlpha = 0.72 * k;
-    ctx.lineCap = "round";
-    cols.forEach((col, i) => {
-      ctx.strokeStyle = col;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(x, y, radius + i * 5, Math.PI * 1.08, Math.PI * 1.92);
-      ctx.stroke();
+    ctx.globalAlpha=.72*k;
+    ctx.lineCap="round";
+    cols.forEach((col,i)=>{
+      ctx.strokeStyle=col;ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(x,y,r+i*5,Math.PI*1.08,Math.PI*1.92);ctx.stroke();
     });
     ctx.restore();
   }
 
-  function drawFamilyScene(t, L) {
-    if (reduce || t < T.family || t >= T.core + 0.05) return;
-    const { W, H } = L;
-    const floor = H * 0.79;
-    const tf = t * 60;
-    const enter = easeOut(seg(t, T.family, T.family + 0.45));
-    const threatIn = seg(t, T.threat, T.threat + 0.55);
-    const familyAlpha = enter * (1 - threatIn);
-    const heroH = clamp(Math.min(W, H) * 0.105, 58, 92);
+  function island(t,L) {
+    const {W,H,floor}=L;
+    const horizon=H*.70;
+    const sky=ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,"#15364a");
+    sky.addColorStop(.46,"#285d6a");
+    sky.addColorStop(.72,"#cf9d65");
+    sky.addColorStop(1,"#07131b");
+    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
 
-    ctx.save();
-    ctx.globalAlpha = familyAlpha;
+    const sunX=W*.76, sunY=H*.23, sr=Math.min(W,H)*.075;
+    const sg=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,sr*3.8);
+    sg.addColorStop(0,"rgba(255,237,174,.74)");
+    sg.addColorStop(.28,"rgba(255,208,126,.22)");
+    sg.addColorStop(1,"rgba(255,195,110,0)");
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
 
-    // Kilo keeps a pollen light afloat while the others do their own thing.
-    const pollen = seg(t, 0.55, 1.10) * (1 - seg(t, 1.55, 1.80));
-    drawIntroActor("kilo", W * 0.34, floor, heroH * 1.04, tf, { facing: 1, pose: pollen > .12 ? "victory" : "idle" });
-    if (pollen > 0) {
-      const px = W * 0.405, py = floor - heroH * 0.86 - Math.sin(t * 8) * 8;
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.fillStyle = "#ffe66a";
-      ctx.shadowColor = "#ffe66a";
-      ctx.shadowBlur = 24;
-      ctx.beginPath(); ctx.arc(px, py, 5 + pollen * 2, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
+    ctx.fillStyle="#091e25";
+    ctx.beginPath();
+    ctx.moveTo(0,floor+10);ctx.lineTo(0,horizon+20);
+    ctx.quadraticCurveTo(W*.12,horizon-24,W*.25,horizon+14);
+    ctx.quadraticCurveTo(W*.39,horizon+38,W*.52,horizon-4);
+    ctx.quadraticCurveTo(W*.67,horizon-34,W*.82,horizon+10);
+    ctx.quadraticCurveTo(W*.92,horizon+26,W,horizon-2);
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
+
+    ctx.globalAlpha=.17;
+    ctx.strokeStyle="#9be7ee";ctx.lineWidth=1.6;
+    for(let i=0;i<6;i++){
+      const yy=horizon+18+i*18;
+      const off=((t*(12+i*2))%(W+180))-90;
+      ctx.beginPath();ctx.moveTo(off,yy);ctx.lineTo(off+110,yy);ctx.stroke();
     }
+    ctx.globalAlpha=1;
 
-    // Chispín accidentally zaps Stitcho.
-    const zap = Math.sin(clamp(seg(t, 0.92, 1.36), 0, 1) * Math.PI);
-    drawIntroActor("stitcho", W * 0.51, floor + 2, heroH, tf, { facing: -1, pose: zap > .08 ? "attack" : "idle", melee: zap > .08 ? 10 : 0, rotate: -zap * .08 });
-    drawIntroActor("chispin", W * 0.61, floor + 1, heroH * .93, tf, { facing: -1, pose: zap > .08 ? "victory" : "idle" });
-    drawTinyBolt(W * .59, floor - heroH * .52, W * .525, floor - heroH * .50, zap);
-
-    // Michi judges the entire situation from the foreground.
-    const catLook = seg(t, 1.08, 1.72);
-    drawIntroActor("cat", W * 0.72, floor + 3, heroH * .82, tf, { facing: catLook > .45 ? -1 : 1, pose: "idle" });
-
-    // Frita chases a potato, Pizza bounces after it.
-    const chase = seg(t, 1.38, 2.52);
-    if (chase > 0 && chase < 1) {
-      const px = lerp(W * 0.14, W * 0.82, easeInOut(chase));
-      const py = floor - 12 - Math.abs(Math.sin(chase * Math.PI * 5)) * 18;
-      ctx.fillStyle = "#e9bd55";
-      ctx.strokeStyle = "#704b21";
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.ellipse(px, py, 10, 7, chase * 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      drawIntroActor("frita", px - 50, floor + 3, heroH * .82, tf, { facing: 1, vx: 6, pose: "run" });
-      drawIntroActor("pizza", px - 105, floor - Math.abs(Math.sin(chase * Math.PI * 4)) * 18, heroH * .86, tf, { facing: 1, grounded: false, vy: -2, pose: "jump" });
-    }
-
-    // Dragón tries to look impressive. The tiny sneeze is... less impressive.
-    const sneeze = Math.sin(clamp(seg(t, 1.72, 2.05), 0, 1) * Math.PI);
-    drawIntroActor("dragon", W * .17, floor + 1, heroH * .98, tf, { facing: 1, pose: sneeze > .05 ? "attack" : "idle", melee: sneeze > .05 ? 8 : 0 });
-    if (sneeze > 0) {
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.fillStyle = "rgba(255,126,58," + sneeze + ")";
-      ctx.shadowColor = "#ff7e3a"; ctx.shadowBlur = 18;
-      ctx.beginPath();
-      ctx.moveTo(W*.205, floor-heroH*.48);
-      ctx.quadraticCurveTo(W*.225, floor-heroH*.70, W*.242, floor-heroH*.48);
-      ctx.quadraticCurveTo(W*.225, floor-heroH*.38, W*.205, floor-heroH*.48);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // Yomi appears from a shadow that should not physically fit them.
-    const yomiK = easeOut(seg(t, 1.92, 2.38));
-    if (yomiK > 0) {
-      ctx.save();
-      ctx.globalAlpha *= .60 * yomiK;
-      ctx.fillStyle = "#03040a";
-      ctx.beginPath(); ctx.ellipse(W*.83, floor+6, 34*yomiK, 9, 0, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
-      drawIntroActor("yomi", W*.83, floor, heroH * .95, tf, { facing: -1, pose: "idle", alpha: yomiK });
-    }
-
-    // Cuerno manages a tiny rainbow. Dino arrives one beat too heavily.
-    const rainbow = easeOut(seg(t, 2.02, 2.55)) * (1 - threatIn);
-    drawIntroActor("cuerno", W*.90, floor+1, heroH*.78, tf, { facing: -1, pose: rainbow > .2 ? "victory" : "idle" });
-    drawTinyRainbow(W*.887, floor-heroH*.74, 22, rainbow);
-
-    const dinoK = easeOut(seg(t, 2.12, 2.68));
-    drawIntroActor("dino", W*.075, floor+2, heroH*1.02, tf, { facing: 1, pose: dinoK > .68 ? "victory" : "idle", alpha: dinoK });
-    if (dinoK > .72 && threatIn < .12) {
-      const q = seg(dinoK, .72, 1);
-      ctx.save();
-      ctx.globalAlpha = .26 * q;
-      ctx.strokeStyle = "#b8d57b";
-      ctx.lineWidth = 2;
-      for (let i=0;i<3;i++) {
-        ctx.beginPath();
-        ctx.moveTo(W*.075, floor+4);
-        ctx.lineTo(W*(.075 + .035 + i*.018), floor+10+i*5);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    ctx.restore();
-
-    // The Nido interrupts the joke. Everyone freezes and looks toward it.
-    if (threatIn > 0) {
-      const nx = W * .50, ny = H * .26;
-      ctx.save();
-      const glow = ctx.createRadialGradient(nx, ny, 0, nx, ny, Math.min(W,H)*.27);
-      glow.addColorStop(0, "rgba(255,57,91," + (.28*threatIn) + ")");
-      glow.addColorStop(.34, "rgba(142,22,56," + (.18*threatIn) + ")");
-      glow.addColorStop(1, "rgba(4,7,14,0)");
-      ctx.fillStyle = glow; ctx.fillRect(0,0,W,H);
-      ctx.strokeStyle = "rgba(255,104,126," + (.55*threatIn) + ")";
-      ctx.lineWidth = 3;
-      ctx.shadowColor = "#ff4968"; ctx.shadowBlur = 22;
-      ctx.beginPath();
-      ctx.moveTo(nx, ny - 40);
-      ctx.bezierCurveTo(nx-28,ny-15,nx-26,ny+18,nx,ny+46);
-      ctx.bezierCurveTo(nx+30,ny+12,nx+26,ny-18,nx,ny-40);
-      ctx.stroke();
-      ctx.restore();
-
-      const lineupY = floor + 1;
-      const ids = V43_INTRO_CAST;
-      ids.forEach((id, i) => {
-        const x = lerp(W*.18, W*.82, i/(ids.length-1));
-        const h = heroH * (id==="dino" ? .82 : id==="cat" ? .72 : .76);
-        drawIntroActor(id, x, lineupY, h, tf, { facing: x < nx ? 1 : -1, pose: "idle", alpha: threatIn });
-      });
-    }
+    const grass=ctx.createLinearGradient(0,floor-20,0,H);
+    grass.addColorStop(0,"rgba(35,82,60,.82)");
+    grass.addColorStop(1,"rgba(7,20,19,.98)");
+    ctx.fillStyle=grass;ctx.fillRect(0,floor-8,W,H-floor+8);
   }
 
-  function drawWord(L, t) {
-    const { cx, cy, size } = L;
-    ctx.save();
-    ctx.font = "700 " + size + "px " + FONT_DISPLAY;
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "left";
-    const widths = letters.map((ch) => ctx.measureText(ch).width);
-    const total = widths.reduce((a, b) => a + b, 0) + size * 0.04 * (letters.length - 1);
-    // lienzo auxiliar para el brillo que barre las letras
-    const pad = size * 0.4;
-    const ww = Math.ceil((total + pad * 2) * fc.dpr), wh = Math.ceil(size * 1.6 * fc.dpr);
-    if (word.width !== ww || word.height !== wh) { word.width = ww; word.height = wh; }
-    wctx.setTransform(1, 0, 0, 1, 0, 0);
-    wctx.clearRect(0, 0, ww, wh);
-    wctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
-    wctx.font = ctx.font;
-    wctx.textBaseline = "middle";
-    wctx.textAlign = "center";
-    const grad = wctx.createLinearGradient(pad, 0, pad + total, 0);
-    grad.addColorStop(0, CYAN); grad.addColorStop(0.55, GOLD); grad.addColorStop(1, PINK);
-    let x = pad;
-    const midY = size * 0.8;
-    letters.forEach((ch, i) => {
-      const k = reduce ? 1 : seg(t, T.word + i * 0.085, T.word + i * 0.085 + 0.42);
-      const w = widths[i];
-      if (k > 0) {
-        const s = lerp(2.1, 1, easeBack(k));
-        wctx.save();
-        wctx.globalAlpha = clamp(k * 2.2, 0, 1);
-        wctx.translate(x + w / 2, midY - (1 - easeOut(k)) * size * 0.25);
-        wctx.scale(s, s);
-        wctx.lineJoin = "round";
-        wctx.lineWidth = size * 0.1;
-        wctx.strokeStyle = "rgba(3,8,20,0.85)";
-        wctx.strokeText(ch, 0, 0);
-        wctx.fillStyle = grad;
-        wctx.fillText(ch, 0, 0);
-        wctx.restore();
-      }
-      x += w + size * 0.04;
-    });
-    // barrido de luz
-    if (!reduce) {
-      const sw = seg(t, T.word + 0.55, T.word + 1.15);
-      if (sw > 0 && sw < 1) {
-        const bx = lerp(-size, total + pad * 2 + size, easeInOut(sw));
-        wctx.save();
-        wctx.globalCompositeOperation = "source-atop";
-        const lg = wctx.createLinearGradient(bx - size * 0.5, 0, bx + size * 0.5, size * 0.3);
-        lg.addColorStop(0, "rgba(255,255,255,0)");
-        lg.addColorStop(0.5, "rgba(255,255,255,0.85)");
-        lg.addColorStop(1, "rgba(255,255,255,0)");
-        wctx.fillStyle = lg;
-        wctx.fillRect(0, 0, total + pad * 2, size * 1.6);
-        wctx.restore();
-      }
+  function scene(t,L) {
+    const {W,floor,heroH}=L;
+    const tf=t*60;
+    const loop=t%10;
+
+    // Kilo: polen flotando y pequeñas celebraciones.
+    const pollen=0.55+0.45*Math.sin(t*1.8);
+    actor("kilo",W*.34,floor,heroH*1.02,tf,{facing:1,pose:pollen>.82?"victory":"idle"});
+    const px=W*.405,py=floor-heroH*.86-Math.sin(t*2.4)*9;
+    ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="#ffe66a";ctx.shadowColor="#ffe66a";ctx.shadowBlur=22;
+    ctx.beginPath();ctx.arc(px,py,4+pollen*3,0,Math.PI*2);ctx.fill();ctx.restore();
+
+    // Stitcho + Chispín: un accidente eléctrico cada ciclo.
+    const zap=Math.sin(clamp(seg(loop,1.15,1.62),0,1)*Math.PI);
+    actor("stitcho",W*.50,floor+2,heroH,tf,{facing:-1,pose:zap>.08?"attack":"idle",melee:zap>.08?10:0,rotate:-zap*.08});
+    actor("chispin",W*.60,floor+1,heroH*.92,tf,{facing:-1,pose:zap>.08?"victory":"idle"});
+    bolt(W*.585,floor-heroH*.50,W*.52,floor-heroH*.49,zap);
+
+    // Michi se limita a juzgar a todos.
+    const catFace=loop>4.8&&loop<6.7?-1:1;
+    actor("cat",W*.70,floor+3,heroH*.80,tf,{facing:catFace,pose:"idle"});
+
+    // Dragón practica. La primera llama del ciclo es ridículamente pequeña.
+    const sneeze=Math.sin(clamp(seg(loop,2.45,2.88),0,1)*Math.PI);
+    actor("dragon",W*.18,floor+1,heroH*.97,tf,{facing:1,pose:sneeze>.05?"attack":"idle",melee:sneeze>.05?8:0});
+    if(sneeze>0){
+      ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="rgba(255,126,58,"+sneeze+")";ctx.shadowColor="#ff7e3a";ctx.shadowBlur=18;
+      ctx.beginPath();ctx.moveTo(W*.215,floor-heroH*.47);ctx.quadraticCurveTo(W*.233,floor-heroH*.69,W*.247,floor-heroH*.48);ctx.quadraticCurveTo(W*.231,floor-heroH*.39,W*.215,floor-heroH*.47);ctx.fill();ctx.restore();
     }
-    const dw = ww / fc.dpr, dh = wh / fc.dpr;
-    ctx.shadowColor = "rgba(126,231,255,0.55)";
-    ctx.shadowBlur = size * 0.35;
-    ctx.drawImage(word, cx - dw / 2, cy - midY, dw, dh);
+
+    // Frita y Pizza cruzan la escena persiguiendo una patata.
+    const chase=seg(loop,3.15,5.80);
+    if(chase>0&&chase<1){
+      const x=lerp(W*.08,W*.92,easeInOut(chase));
+      const y=floor-12-Math.abs(Math.sin(chase*Math.PI*6))*20;
+      ctx.fillStyle="#e9bd55";ctx.strokeStyle="#704b21";ctx.lineWidth=2;
+      ctx.beginPath();ctx.ellipse(x,y,10,7,chase*9,0,Math.PI*2);ctx.fill();ctx.stroke();
+      actor("frita",x-48,floor+3,heroH*.80,tf,{facing:1,vx:6,pose:"run"});
+      actor("pizza",x-105,floor-Math.abs(Math.sin(chase*Math.PI*5))*20,heroH*.84,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
+    } else {
+      actor("frita",W*.77,floor+3,heroH*.76,tf,{facing:-1,pose:"idle"});
+      actor("pizza",W*.83,floor+2,heroH*.78,tf,{facing:-1,pose:"idle"});
+    }
+
+    // Yomi aparece y desaparece de una sombra imposible.
+    const yomiIn=easeOut(seg(loop,5.55,6.25))*(1-seg(loop,7.35,7.85));
+    if(yomiIn>0){
+      ctx.save();ctx.globalAlpha=.60*yomiIn;ctx.fillStyle="#02040a";
+      ctx.beginPath();ctx.ellipse(W*.90,floor+6,34*yomiIn,9,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      actor("yomi",W*.90,floor,heroH*.93,tf,{facing:-1,alpha:yomiIn,pose:"idle"});
+    }
+
+    // Cuerno dibuja una aurora minúscula y satisfecha.
+    const rk=Math.sin(clamp(seg(loop,6.35,7.55),0,1)*Math.PI);
+    actor("cuerno",W*.92,floor+1,heroH*.76,tf,{facing:-1,pose:rk>.2?"victory":"idle"});
+    rainbow(W*.905,floor-heroH*.72,22,rk);
+
+    // Dino cierra el ciclo con un pisotón que hace reaccionar a todos.
+    const stomp=Math.sin(clamp(seg(loop,8.0,8.65),0,1)*Math.PI);
+    actor("dino",W*.075,floor+2,heroH,tf,{facing:1,pose:stomp>.18?"victory":"idle"});
+    if(stomp>.05){
+      ctx.save();ctx.globalAlpha=.22*stomp;ctx.strokeStyle="#b8d57b";ctx.lineWidth=2;
+      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(W*.075,floor+4);ctx.lineTo(W*(.11+i*.018),floor+10+i*4);ctx.stroke();}
+      ctx.restore();
+    }
+
+    // Pequeños puntos de luz para que el claro respire sin parecer una intro de logo.
+    ctx.save();ctx.globalCompositeOperation="lighter";
+    for(let i=0;i<22;i++){
+      const u=(i*0.137+t*.018)%1;
+      const x=W*((i*0.073+t*.006*(i%3+1))%1);
+      const y=floor-heroH*(.25+u*1.65);
+      ctx.globalAlpha=.10+.12*Math.sin(t*1.4+i);
+      ctx.fillStyle=i%3?"#ffe5a1":"#9be7ee";
+      ctx.beginPath();ctx.arc(x,y,1.5+(i%4)*.45,0,Math.PI*2);ctx.fill();
+    }
     ctx.restore();
   }
 
-  function frame(now) {
-    try {
-    if (!t0) { t0 = now; last = now; }
-    const dt = Math.min(0.05, (now - last) / 1000);
-    last = now;
-    let t = (now - t0) / 1000;
-    if (skip && t < T.out) { t0 -= (T.out - t) * 1000; t = T.out; }
-    const L = layout();
-    const { W, H, cx, cy, size } = L;
-    ctx.save();
-    ctx.clearRect(0, 0, W, H);
-
-    // fondo
-    const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, "#040a18"); bg.addColorStop(0.55, "#071427"); bg.addColorStop(1, "#040912");
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-    drawIslandScene(t, L);
-    drawFamilyScene(t, L);
-    const flashK = reduce ? 0 : seg(t, T.flash, T.flash + 0.6);
-    const titleGlow = reduce ? 1 : seg(t, T.core - 0.12, T.core + 0.34);
-    drawBackdrop(ctx, W, H, cx, cy, CYAN, 0, titleGlow * (0.6 + (1 - flashK) * (t > T.flash ? 0.5 : 0)));
-    drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.7, CYAN, 0.28 * seg(t, T.ring, T.ring + 0.6), reduce ? 0 : t * 0.22, 16);
-    if (!reduce) drawRays(ctx, cx, cy, Math.hypot(W, H) * 0.55, PINK, 0.22 * seg(t, T.ring + 0.2, T.ring + 0.8), -t * 0.16, 10);
-
-    // partículas que convergen en el núcleo
-    if (!reduce && t >= T.core - 0.1 && t < T.flash - 0.1) {
-      const n = Math.round(dt * 160);
-      for (let i = 0; i < n; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const r = Math.max(W, H) * (0.5 + Math.random() * 0.2);
-        parts.add({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r, to: { x: cx, y: cy }, swirl: 700, max: 3,
-          size: 1.4 + Math.random() * 2, kind: Math.random() < 0.6 ? "streak" : "dot", color: pal[(Math.random() * 4) | 0] });
-      }
-    }
-    if (t >= T.flash && !burst) {
-      burst = true;
-      const n = reduce ? 0 : 70;
-      for (let i = 0; i < n; i++) {
-        const a = Math.random() * Math.PI * 2, sp = 300 + Math.random() * 700;
-        const kind = i % 3 ? (i % 3 === 1 ? "streak" : "spark") : "star";
-        parts.add({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, drag: 0.94, max: 0.8 + Math.random(),
-          size: kind === "star" ? 4 + Math.random() * 6 : kind === "spark" ? 4 + Math.random() * 5 : 2, kind, rot: Math.random() * 6, vr: 4, color: pal[i % 4] });
-      }
-    }
-
-    // núcleo y anillo-emblema
-    const core = easeOut(seg(t, T.core, T.ring + 0.2));
-    const ringK = easeBack(seg(t, T.ring, T.ring + 0.5));
-    const R = size * 1.9 * ringK;
-    if (core > 0) {
-      const cr = size * (0.25 + 0.6 * core) * (1 - flashK * 0.3);
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, cr * 2.2);
-      g.addColorStop(0, "rgba(255,248,220," + 0.95 * (1 - seg(t, T.word, T.flash)) + ")");
-      g.addColorStop(0.3, rgba(CYAN, 0.35));
-      g.addColorStop(1, rgba(CYAN, 0));
-      ctx.save(); ctx.globalCompositeOperation = "lighter";
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, cr * 2.2, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    }
-    if (R > 2) {
-      ctx.save();
-      ctx.globalCompositeOperation = "lighter";
-      ctx.translate(cx, cy);
-      ctx.rotate(reduce ? 0 : t * 0.9);
-      const cols = [CYAN, GOLD, PINK];
-      for (let i = 0; i < 3; i++) {
-        ctx.strokeStyle = cols[i];
-        ctx.lineWidth = Math.max(2, size * 0.035);
-        ctx.globalAlpha = 0.85;
-        ctx.beginPath();
-        ctx.arc(0, 0, R, (i / 3) * Math.PI * 2 + 0.12, ((i + 1) / 3) * Math.PI * 2 - 0.12);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 0.35;
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "#ffffff";
-      ctx.setLineDash([2, 10]);
-      ctx.beginPath(); ctx.arc(0, 0, R * 1.12, 0, Math.PI * 2); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-    }
-
-    parts.update(dt);
-    parts.draw(ctx);
-
-    // V43: primero conocemos a la familia; el texto llega solo cuando el Nido rompe la calma.
-    const threat = reduce ? 0 : seg(t, T.threat + 0.22, T.core - 0.04);
-    if (threat > 0) {
-      ctx.save();
-      ctx.globalAlpha = threat * (1 - seg(t, T.core - 0.18, T.core + 0.02));
-      drawTitle(ctx, "EL NIDO HA DESPERTADO", cx, H * 0.16, Math.max(13, size * 0.16), PINK, {
-        font: FONT_BODY, weight: 800, spacing: "0.18em", stroke: false, glow: "rgba(255,106,168,0.78)"
-      });
-      drawTitle(ctx, "Y ESTA VEZ, VAN TODOS.", cx, H * 0.84, Math.max(12, size * 0.135), "#e7f4ff", {
-        font: FONT_BODY, weight: 700, spacing: "0.12em", stroke: false, maxWidth: W * 0.88
-      });
-      ctx.restore();
-    }
-
-    // rótulos
-    const kick = reduce ? 1 : seg(t, T.word - 0.1, T.word + 0.3);
-    if (kick > 0) {
-      ctx.save();
-      ctx.globalAlpha = kick;
-      drawTitle(ctx, "PROJECT", cx, cy - size * 0.78, Math.max(13, size * 0.17), "#bfe0ff",
-        { font: FONT_BODY, weight: 600, spacing: "0.6em", stroke: false, glow: "rgba(126,231,255,0.6)" });
-      ctx.restore();
-    }
-    drawWord(L, t);
-    if (!reduce) {
-      drawRing(ctx, cx, cy, Math.hypot(W, H) * 0.6, seg(t, T.flash, T.flash + 0.9), "#ffffff", size * 0.06);
-      drawRing(ctx, cx, cy, Math.hypot(W, H) * 0.45, seg(t, T.flash + 0.08, T.flash + 1), GOLD, size * 0.04);
-    }
-    const tag = reduce ? 1 : seg(t, T.tag, T.tag + 0.4);
-    if (tag > 0) {
-      ctx.save();
-      ctx.globalAlpha = tag;
-      drawTitle(ctx, "Diez héroes. Cinco formas. Un nido. Nadie se queda atrás.", cx, cy + size * 0.85 + (1 - easeOut(tag)) * 8,
-        Math.max(13, size * 0.15), "#d6e6f6", { font: FONT_BODY, weight: 400, stroke: false, maxWidth: W * 0.9 });
-      ctx.restore();
-    }
-    // destello
-    const fa = reduce ? 0 : (t < T.flash ? Math.pow(seg(t, T.flash - 0.1, T.flash), 2) * 0.6 : 0.6 * Math.pow(1 - seg(t, T.flash, T.flash + 0.35), 2));
-    if (fa > 0.001) {
-      const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.hypot(W, H) * 0.7);
-      fg.addColorStop(0, "rgba(255,255,255," + fa + ")");
-      fg.addColorStop(1, "rgba(126,231,255," + fa * 0.25 + ")");
-      ctx.fillStyle = fg;
-      ctx.fillRect(0, 0, W, H);
-    }
-
-    // salida: iris que descubre la portada
-    const outK = seg(t, T.out, T.end);
-    if (outK > 0 && !revealed) { revealed = true; finishClasses(); }
-    iris(ctx, W, H, cx, cy, outK);
+  function frame(now){
+    if(done) return;
+    if(!t0){t0=now;last=now;}
+    last=now;
+    const t=(now-t0)/1000;
+    const L=layout();
+    ctx.save();ctx.clearRect(0,0,L.W,L.H);
+    island(t,L);
+    scene(reduce?0.7:t,L);
+    const vign=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
+    vign.addColorStop(0,"rgba(0,0,0,0)");vign.addColorStop(1,"rgba(0,0,0,.52)");
+    ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
     ctx.restore();
-    if (t >= T.end) { end(); return; }
-    raf = requestAnimationFrame(frame);
-    } catch (err) { end(); }
+    if(!ready&&t>1.1){ready=true;el.classList.add("ready");}
+    raf=requestAnimationFrame(frame);
   }
 
-  function onSkip(e) {
-    if (e.type === "keydown" && !["Enter", " ", "Escape"].includes(e.key)) return;
-    if (e.type === "keydown") e.preventDefault();
-    skip = true;
-  }
-  function end() {
-    if (done) return;
-    done = true;
+  function enter(e){
+    if(done||!ready) return;
+    if(e?.type==="keydown"&&!["Enter"," ","Escape"].includes(e.key)) return;
+    if(e?.type==="keydown"){e.preventDefault();e.stopPropagation();}
+    done=true;
     cancelAnimationFrame(raf);
+    removeEventListener("resize",onResize);
+    removeEventListener("keydown",enter,true);
+    el.removeEventListener("pointerdown",enter);
     finishClasses();
-    removeEventListener("resize", onResize);
-    removeEventListener("keydown", onSkip);
     el.remove();
   }
-  el.addEventListener("pointerdown", onSkip, { passive: true });
-  addEventListener("keydown", onSkip);
 
-  const go = () => {
-    const wait = new Promise((r) => setTimeout(r, 120));
-    Promise.race([loadFonts(), wait]).then(() => { raf = requestAnimationFrame(frame); });
-  };
-  go();
-  // Red de seguridad
-  setTimeout(() => { if (!done) end(); }, 8500);
+  function onResize(){fc.resize();}
+  addEventListener("resize",onResize);
+  addEventListener("keydown",enter,true);
+  el.addEventListener("pointerdown",enter);
+  el.querySelector(".oi-enter")?.addEventListener("click",enter);
+  loadFonts();
+  raf=requestAnimationFrame(frame);
 }
 
 // ---------------------------------------------------------------------------

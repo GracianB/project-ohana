@@ -689,10 +689,11 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-234/);
-  assert.match(cinema, /EL NIDO/);
-  assert.match(cinema, /prefers-reduced-motion/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-235/);
+  assert.match(cinema, /Fullscreen chapter cards were removed/);
+  assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
+  assert.match(ending, /v44-true-ending/);
   assert.match(title, /selected-hero-difficulty/);
 });
 
@@ -719,11 +720,11 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(html, /data-opening-guard="true"/);
   assert.match(intro, /classList\.remove\("intro-playing", "intro-pending"\)/);
   assert.doesNotMatch(title, /intro\.js\?v=ohana-/);
-  assert.match(intro, /V43 OHANA MAGIC/);
-  assert.match(intro, /V43_INTRO_CAST = \["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"\]/);
-  assert.match(intro, /drawFamilyScene\(t, L\)/);
-  assert.match(intro, /EL NIDO HA DESPERTADO/);
-  assert.match(intro, /Y ESTA VEZ, VAN TODOS\./);
+  assert.match(intro, /V44 FAMILY WELCOME/);
+  assert.match(intro, /const CAST = \["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"\]/);
+  assert.match(intro, /openingMode = "family-welcome"/);
+  assert.match(intro, /ENTRAR EN HOKU/);
+  assert.doesNotMatch(intro, /EL NIDO HA DESPERTADO/);
   assert.doesNotMatch(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
   assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);
 });
@@ -736,12 +737,14 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
   const sw = fs.readFileSync("./sw.js", "utf8");
   const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
   assert.match(game, /CustomEvent\("ohana-evolve"/);
+  assert.match(fs.readFileSync("./systems/evo-cinema.js", "utf8"), /drawEvolutionIdentity/);
+  assert.match(fs.readFileSync("./systems/evo-cinema.js", "utf8"), /EVOLUTION_REVEAL_POSE/);
   assert.match(game, /CustomEvent\("ohana-death"/);
   assert.match(game, /CustomEvent\("ohana-boss-fall"/);
   assert.match(director, /ohana-death/);
   assert.match(director, /ohana-boss-fall/);
   assert.match(ending, /PROJECT OHANA V36 · CINEMATIC PRESENTATION SYSTEM/);
-  assert.match(intro, /V43 OHANA MAGIC/);
+  assert.match(intro, /V44 FAMILY WELCOME/);
   assert.match(sw, /systems\/cinematic-director\.js/);
   assert.match(visual, /01-character-select-1680x900/);
   assert.match(visual, /04-evolution/);
@@ -764,11 +767,13 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(abilities, /kind: "supremeField"/);
   assert.match(abilities, /kind: "assist"/);
   assert.match(abilities, /CustomEvent\("ohana-supreme"/);
-  assert.match(cinema, /U · SUPREMA/);
-  assert.match(cinema, /OHANA ASSIST/);
-  assert.match(css, /PROJECT OHANA V37 · SUPREME CINEMA/);
-  assert.match(html, /supreme\.css\?v=ohana-234/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-234/);
+  assert.match(cinema, /PROJECT OHANA V44 · SUPREME SHORTS/);
+  assert.match(cinema, /drawDummy/);
+  assert.match(cinema, /dataset\.activeId/);
+  assert.match(cinema, /dataset\.state="active"/);
+  assert.match(css, /V44 · SUPREME SHORTS/);
+  assert.match(html, /supreme\.css\?v=ohana-235/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-235/);
   assert.match(visual, /09-supreme-u-assist/);
 });
 
@@ -910,7 +915,7 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(portals, /traversalNodeSnapshot\(/);
   assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
   assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
-  assert.match(html, /world-map\.css\?v=ohana-234/);
+  assert.match(html, /world-map\.css\?v=ohana-235/);
   assert.match(sw, /systems\/hazards\.js/);
   assert.match(sw, /systems\/world-graph\.js/);
   assert.match(sw, /systems\/traversal-nodes\.js/);

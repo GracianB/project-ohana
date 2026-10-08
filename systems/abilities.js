@@ -306,6 +306,7 @@ function emitSupremeEvent(game, p, def, identity, flow) {
   try {
     dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
       id: p.id,
+      evo: Number(p.evo || 0),
       hero: p.name || p.id,
       name: def.name,
       color: def.color,

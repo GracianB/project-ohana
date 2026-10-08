@@ -22,7 +22,18 @@ async function auditPage(page, label) {
       complete: document.body.classList.contains('intro-complete')
     };
   });
-  assert.ok(titleIntroState.complete || (titleIntroState.active && titleIntroState.visible), label + ': la intro cinematográfica de portada no aparece');
+  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V44 family welcome no aparece');
+  await page.waitForTimeout(1350);
+  const heldOpening = await page.evaluate(() => ({
+    complete:document.body.classList.contains('intro-complete'),
+    mode:document.querySelector('#ohana-intro')?.dataset.openingMode || '',
+    cast:Number(document.querySelector('#ohana-intro')?.dataset.v44Cast || 0),
+    ready:document.querySelector('#ohana-intro')?.classList.contains('ready') || false
+  }));
+  assert.equal(heldOpening.complete, false, label + ': V44 avanza al carrusel sin acción del usuario');
+  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V44 incorrecto');
+  assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
+  assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
@@ -30,10 +41,9 @@ async function auditPage(page, label) {
   assert.equal(gameSource.ok, true, label + ': game.js no servido por el servidor');
   assert.equal(gameSource.status, 200, label + ': game.js HTTP inválido');
   assert.match(gameSource.source, /CombatFX,\s*combatTier/, label + ': game.js servido no contiene combatTier');
-  // La intro es una animación autodestruible. El E2E no debe clicar un elemento
-  // que puede desaparecer entre el descubrimiento del locator y su evaluación.
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await page.locator('#ohana-intro .oi-enter').click();
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   const titleLayout = await page.evaluate(() => {
     const rect = (selector) => {
       const r = document.querySelector(selector)?.getBoundingClientRect();
@@ -357,8 +367,13 @@ try {
   // La auditoría de gameplay manipula deliberadamente el estado. Reiniciamos
   // antes de comprobar pausa/entrada normal para no mezclar ambos escenarios.
   await page.reload({ waitUntil:'networkidle' });
-  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await page.waitForTimeout(1350);
+  const reloadOpening = page.locator('#ohana-intro .oi-enter');
+  if (await reloadOpening.count()) {
+    await reloadOpening.click();
+    await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  }
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   await page.locator('#btn-play').click();
   await page.waitForTimeout(500);
 
@@ -544,8 +559,10 @@ try {
   const reducedPage = page;
   await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
   await reducedPage.reload({ waitUntil:'networkidle' });
-  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:8000 }).catch(() => {});
-  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await reducedPage.waitForTimeout(1350);
+  await reducedPage.locator('#ohana-intro .oi-enter').click();
+  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
   await reducedPage.locator('#btn-play').click();
   await reducedPage.waitForTimeout(250);
@@ -587,7 +604,10 @@ try {
 
   await page.context().setOffline(true);
   await page.reload({ waitUntil:'domcontentloaded' });
-  await page.waitForSelector('#btn-play', { state:'visible', timeout:8000 });
+  await page.waitForTimeout(1350);
+  await page.locator('#ohana-intro .oi-enter').click();
+  await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   const offline = await offlineBoot();
   assert.equal(offline.controller, true, 'desktop: SW no controla la recarga offline');
   assert.match(offline.title, /PROJECT OHANA/i, 'desktop: título offline ausente');
