@@ -82,6 +82,7 @@ test("V84 K actually creates a lasting hazard and applies capped fantasy DoT",()
  assert.equal(enemy.hp,240,"Fantasy damage should be periodic, not all upfront");
  simulate(g,33);
  assert.ok(enemy.hp<240,"Fantasy poison never dealt damage");
+ assert.equal(g.combo,0,"DoT must not farm combos or score");
  assert.ok(enemy.hp>220,"Damage too high for a 0.5-second tick");
  const prev=enemy.hp;
  simulate(g,27);
