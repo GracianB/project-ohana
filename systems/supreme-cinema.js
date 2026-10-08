@@ -185,7 +185,7 @@ function storyMotion(id,k,target){
   if(id==="dragon") return {x:-Math.sin(seg(k,.26,.53)*Math.PI)*target*.025,y:-Math.sin(seg(k,.32,.84)*Math.PI)*target*.13,scale:1+.065*e(seg(k,.62,.87)),rot:-.035*Math.sin(seg(k,.3,.78)*Math.PI)};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
   if(id==="frita") return {x:Math.sin(seg(k,.23,.58)*Math.PI)*target*.04,y:-Math.sin(seg(k,.28,.61)*Math.PI)*target*.055,scale:1+.055*e(seg(k,.63,.85)),rot:-.04*Math.sin(seg(k,.2,.55)*Math.PI)+.018*Math.sin(seg(k,.62,.86)*Math.PI)};
-  if(id==="pizza") return {x:-Math.sin(seg(k,.40,.62)*Math.PI)*target*.08,y:-Math.sin(seg(k,.42,.64)*Math.PI)*target*.035,scale:1+.05*e(seg(k,.58,.82)),rot:-.035*seg(k,.40,.58)};
+  if(id==="pizza") return {x:-Math.sin(seg(k,.40,.64)*Math.PI)*target*.055,y:-Math.sin(seg(k,.38,.68)*Math.PI)*target*.05,scale:1+.055*e(seg(k,.64,.86)),rot:-.04*Math.sin(seg(k,.38,.62)*Math.PI)};
   if(id==="yomi") return {x:0,y:e(seg(k,.48,.72))*target*.025,scale:1.08-.08*e(seg(k,.18,.70)),rot:0};
   return {x:lerp(-target*.04,target*.035,e(seg(k,.18,.76))),y:-e(seg(k,.50,.80))*target*.045,scale:1+.05*e(seg(k,.56,.82)),rot:Math.sin(k*Math.PI)*.025};
 }
@@ -195,7 +195,7 @@ function storyPose(id,k){
   if(id==="dino") return (k>.18&&k<.36)||(k>.49&&k<.66)?"attack":k>.70?"victory":"idle";
   if(id==="dragon") return k<.32?"idle":k<.53?"jump":k<.78?"attack":"victory";
   if(id==="frita") return k<.24?"idle":k<.77?"attack":"victory";
-  if(id==="pizza") return k<.42?"idle":k<.70?"attack":"victory";
+  if(id==="pizza") return k<.40?"idle":k<.73?"attack":"victory";
   if(id==="yomi") return k<.54?"idle":k<.78?"attack":"victory";
   return k<.34?"idle":k<.72?"attack":"victory";
 }
@@ -349,16 +349,31 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawRing(ctx,cx,cy,target*.88,fry,color,3,.46);
     }
   }else if(id==="pizza"){
-    const ok=seg(k,.08,.62);
+    // A sleepy slice opens the oven, recoils from its own heat, and becomes lava.
+    const yawning=seg(k,.08,.34);
+    if(yawning>0&&yawning<1){
+      for(let i=0;i<2;i++){
+        const px=cx+(i?1:-1)*target*.19,py=cy-target*(.18+.10*yawning);
+        drawSpark(ctx,px,py,(2.5+i)*Math.sin(yawning*Math.PI),"#fff0b0");
+      }
+    }
+    const ok=seg(k,.19,.65);
     oven(ctx,cx,cy-target*.02,target*.92,target*.72,ok,.56,color);
-    const hot=seg(k,.38,.70);
+    const hot=seg(k,.40,.70);
+    if(hot>0){
+      for(let i=0;i<3;i++){
+        const x=cx+(i-1)*target*.23;
+        line(ctx,x,cy+target*.10,x+Math.sin(t*3+i)*target*.06,cy-target*(.32+.12*hot),"#ffbd66",1.5,.10+.22*hot);
+      }
+    }
     if(hot>0){
       const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,target*.72);
       glow.addColorStop(0,rgba("#ff9b3d",.44*hot));glow.addColorStop(1,rgba("#ff5a22",0));
       ctx.fillStyle=glow;ctx.fillRect(cx-target,cy-target,target*2,target*2);
     }
-    const eruption=seg(k,.62,.94);
+    const eruption=seg(k,.65,.94);
     if(eruption>0){
+      // Six toppings arc with the eruption, staying inside the stage budget.
       for(let i=0;i<6;i++){
         const a=-Math.PI*.85+i*Math.PI*.14;
         const rr=target*(.30+.68*eruption);
