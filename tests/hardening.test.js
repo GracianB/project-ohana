@@ -721,12 +721,12 @@ test("V47B selector and cinematics keep rendering cost bounded", () => {
   const css = fs.readFileSync("./title-stage.css", "utf8");
   assert.match(title, /stepMs: 1000 \/ 24/);
   assert.match(title, /portraitCanvases/);
-  assert.match(title, /aria-hidden.*=== "true"/);
-  assert.match(title, /maxDpr = w \* h > 120000 \? 1\.45 : 1\.65/);
+  assert.match(title, /if \(!hero && !neighbour\)/);
+  assert.match(title, /maxDpr = w \* h > 120000 \? 1\.25 : 1\.5/);
   assert.match(titleFx, /now-lastFrame<32/);
   assert.match(titleFx, /length:28/);
   assert.match(titleFx, /R=Math\.min\(W\*\.155,H\*\.225\)/);
-  assert.match(evo, /pixels > 1800000 \? 1\.45/);
+  assert.match(evo, /pixels > 1800000 \? 1\.25/);
   assert.match(supreme, /p\.vx=0;p\.vy=0;p\.grounded=true/);
   assert.match(css, /V47B · SELECTOR PERFORMANCE \+ TIGHTER SPOTLIGHT/);
   assert.match(css, /roster-arrow,[\s\S]*?backdrop-filter:none!important/);
