@@ -46,9 +46,10 @@ for(let i=0;i<5;i++){
  const active=scene(i),silent=scene(i,{flourish:0});
  assert.ok(active.arcs+active.lines>silent.arcs+silent.lines,"form "+i);
 }
+const resting=scene(4,{flourish:0,state:"idle"});
 for(const beat of ["curious","shy","prance","stargaze","sneeze","bow"]){
  const p=scene(4,{cuernoBeat:beat,flourish:0,state:"idle"});
- assert.ok(p.arcs+p.lines>25,beat);
+ assert.ok(p.arcs+p.lines+p.ellipses>resting.arcs+resting.lines+resting.ellipses,beat);
 }
 });
 test("V66 maintains original equine biology and deterministic still-frame",()=>{
