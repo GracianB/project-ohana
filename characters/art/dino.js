@@ -89,6 +89,38 @@ export function dinoSecondaryMotion(pose={}) {
   });
 }
 
+// V83 · A continuous airborne silhouette. The rig supplies vertical velocity
+// normalized to [-1,1]; at the apex both jump and fall share the same pose.
+// These are DRAWING angles only: velocities, collisions and jump stats stay put.
+export function dinoAirbornePose(pose={},form=0) {
+  const evo=clamp(Number.isFinite(Number(form))?Math.round(Number(form)):0,0,4);
+  const raw=Number(pose.vy);
+  const vertical=Number.isFinite(raw)&&pose.vy!==null
+    ?clamp(raw,-1,1):(pose.state==="fall"?.6:-.6);
+  const down=ease(clamp((vertical+.3)/.6,0,1));
+  const weight=1+evo*.045;
+  return Object.freeze({
+    down,
+    legF:1.18-.67*down,legB:.78-.87*down,
+    lenF:.68+.16*down,lenB:.70+.15*down,
+    bendF:-2+down*.9,bendB:-2+down*.9,
+    armF:2.35+.20*down,armB:2.18+.18*down,
+    lean:.07+.10*down,headRot:-.15+.26*down,
+    jaw:(.27+.09*down)*weight,
+    tailA:.47-.78*down,
+    hdy:1+down*1.2,
+  });
+}
+// V83 · Soft, unoutlined attachments cover only the upper rim of the
+// foreground leg or arm. They share the actual coat color of that evolution.
+function softenDinoJoint(ctx,x,y,rx,ry,coat,highlight) {
+  ctx.save();
+  ctx.fillStyle=coat;
+  ctx.beginPath();ctx.ellipse(x,y,rx,ry,-.16,0,PI*2);ctx.fill();
+  ctx.globalAlpha=.36;ctx.strokeStyle=highlight;ctx.lineWidth=1.15;
+  ctx.beginPath();ctx.ellipse(x-.35,y-1,rx*.63,ry*.55,-.16,PI*1.12,PI*1.84);ctx.stroke();
+  ctx.restore();
+}
 // V76 · A genuine compact rolling silhouette. Unlike rotating the standing
 // dinosaur, every part fits inside a readable spinning sphere at all five ages.
 function drawRolledDino(ctx, R, f, c, P, t) {
@@ -401,16 +433,16 @@ function draw(ctx, pose, R) {
     armF = 2.4; armB = 2.2;
     lean = 0.28; headRot = 0.3; hdy = 2;
     eyeMood = "angry"; speedLines = 2; tailA = -0.9 + Math.sin(t * 0.5) * 0.08;
-  } else if (st === "jump") {
-    legF = 1.2; lenF = 0.7; bendF = -2; legB = 0.6; lenB = 0.8;
-    armF = 2.4 + Math.sin(t * 0.7) * 0.4; armB = 2.2 - Math.sin(t * 0.7) * 0.4;
-    headRot = -0.12; jaw = 0.35; tailA = 0.5 + pose.bounce * 0.3;
-    lean = 0.02;
-  } else if (st === "fall") {
-    legF = 0.3; legB = -0.35;
-    armF = 2.6 + Math.sin(t * 0.9) * 0.5; armB = 2.3 - Math.sin(t * 0.9) * 0.5;
-    headRot = 0.1; jaw = 0.4; tailA = -0.45 + pose.bounce * 0.3;
-    eyeMood = "normal";
+  } else if (st === "jump" || st === "fall") {
+    // A single articulated flight. No visual snap when gravity changes
+    // sign near the apex and no independently flailing arms in freefall.
+    const air=dinoAirbornePose(pose,f);
+    legF=air.legF;legB=air.legB;lenF=air.lenF;lenB=air.lenB;
+    bendF=air.bendF;bendB=air.bendB;
+    armF=air.armF;armB=air.armB;
+    lean=air.lean;headRot=air.headRot;
+    jaw=air.jaw;tailA=air.tailA;hdy=air.hdy;
+    eyeMood=air.down>.65?"normal":"happy";
   } else if (st === "attack") {
     const a = pose.atk, op = ease(seg(a, 0, 0.35)), sn = ease(seg(a, 0.35, 0.5)), rc = ease(seg(a, 0.6, 1));
     jaw = lerp(op * 1.3, 0, sn);
@@ -712,8 +744,10 @@ function draw(ctx, pose, R) {
     R.shine(ctx, -bw * 0.35, -bh * 0.78, bw * 0.25, bh * 0.1, 0.35);
     ctx.restore();
 
-    // PIERNA DELANTERA
+    // PIERNA DELANTERA: merge the upper leg into the waist.
     leg(ctx, R, 6, hipY, P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
+    softenDinoJoint(ctx,6,hipY,P.legW*.48,P.legW*.47,c.body,
+      R.lighten(c.body,.27));
   }
 
   // CABEZA
@@ -732,7 +766,10 @@ function draw(ctx, pose, R) {
     eggShell(ctx, R, 0, -bh * 0.9, bw * 1.5, bh * 0.85, false, t);ctx.restore();
     tinyArm(ctx, R, bw * 0.95, -bh * 1.0, P.armL, armF, 5.5, c.body, c.claw);
   } else {
-    tinyArm(ctx, R, bw * 0.7, -bh * 0.64, P.armL, armF, 5 + f * 0.4, c.body, c.claw);
+    const armX=bw*.7,armY=-bh*.64,armW=5+f*.4;
+    tinyArm(ctx, R, armX, armY, P.armL, armF, armW, c.body, c.claw);
+    softenDinoJoint(ctx,armX,armY,armW*.85,armW*.78,c.body,
+      R.lighten(c.body,.25));
   }
   ctx.restore();
 
