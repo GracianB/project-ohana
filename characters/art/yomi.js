@@ -99,9 +99,9 @@ function draw(ctx,pose,R){
   // Two animated open sleeves. K's suction visibly pulls them forward.
   for(const side of [-1,1]){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
-    // K brings both sleeves forward; L winds the leading sleeve back for the bite.
+    // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=cast===2 && leading ? .44*Math.sin(Math.PI*clamp(Number(p.cast)||0,0,1)) : 0;
-    ctx.rotate(side*((cast===1?.56:run?.22:.12)+Math.sin(t*.075+side)*.07)-windup);
+    ctx.rotate(side*((cast===1?.22:run?.22:.12)+Math.sin(t*.075+side)*.07)-windup);
     const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0);
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
@@ -204,6 +204,15 @@ function draw(ctx,pose,R){
     line(ctx,trim,1.8);ctx.beginPath();ctx.moveTo(w*.26,faceY-18);
     ctx.lineTo(w*.08,faceY-11);ctx.lineTo(w*.31,faceY-5);ctx.stroke();
   }
+  // Four different emotions make the guardian readable at first glance.
+  if(st==="idle"&&f<=1){
+    ctx.save();ctx.globalAlpha=.4+.2*pulse;line(ctx,glow,1);
+    ctx.beginPath();ctx.arc(0,faceY-17,7,-2.7,-.45);ctx.stroke();ctx.restore();
+  }
+  if(st==="victory" && f>=2){
+    ctx.save();ctx.globalAlpha=.60;line(ctx,"#ffe0ac",2);
+    ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
+  }
   // Warm lantern heart stays visible on every stage.
   ellipse(ctx,0,-25,7+f*.5,9+f*.3,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
@@ -218,13 +227,13 @@ function draw(ctx,pose,R){
     ctx.quadraticCurveTo(w+3,shoulder+10,x-8,shoulder+13);ctx.stroke();
   }
   if(cast===1){
-    const k=clamp(Number(p.cast)||0,0,1),wave=Math.sin(Math.PI*k);
-    ctx.save();ctx.globalAlpha=.33+.32*wave;line(ctx,"#f6c39f",2);
-    ctx.beginPath();ctx.ellipse(w+10,shoulder+18,12+10*wave,8+5*wave,0,0,TAU);ctx.stroke();
+    // Campanada: Yomi holds its lantern heart aloft, ringing one visible halo.
+    const k=clamp(Number(p.cast)||0,0,1),ring=Math.sin(Math.PI*k);
+    ctx.save();ctx.globalAlpha=.30+.50*ring;line(ctx,"#ffe3a2",2.4);
     for(let i=0;i<3;i++){
-      const reach=w+20+i*9, yy=shoulder+14+(i-1)*5;
-      ctx.beginPath();ctx.moveTo(reach+9,yy);ctx.lineTo(reach,yy+2);ctx.stroke();
+      ctx.beginPath();ctx.arc(0,-25,12+16*k+i*9,-Math.PI*.88,Math.PI*.22);ctx.stroke();
     }
+    ctx.fillStyle="#fff6d7";ctx.beginPath();ctx.arc(0,-25,3.5+2*ring,0,TAU);ctx.fill();
     ctx.restore();
   }
   if(st==="victory"||((p.flourishN||0)%4===3&&p.flourish>0)){
