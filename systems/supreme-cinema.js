@@ -72,6 +72,22 @@ function arcRainbow(ctx,cx,cy,R,alpha=.7,wide=false){
   });
   ctx.restore();
 }
+
+function comicBubble(ctx,text,x,y,alpha,color="#dffcff"){
+  if(alpha<=.02)return;
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.font="900 13px Outfit,system-ui,sans-serif";
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  const w=Math.max(48,ctx.measureText(text).width+22),h=30,r=10;
+  ctx.fillStyle="rgba(255,255,248,.96)";
+  ctx.strokeStyle=color;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,r);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-7,y+h/2-1);ctx.lineTo(x+2,y+h/2-1);ctx.lineTo(x-2,y+h/2+10);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle="#13202a";ctx.fillText(text,x,y+1);
+  ctx.restore();
+}
+
 function potato(ctx,x,y,r,rot,alpha=1){
   ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=alpha;
   ctx.fillStyle="#d7a95e";ctx.strokeStyle="#f2d18f";ctx.lineWidth=2;
@@ -199,10 +215,21 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     drawRing(ctx,cx,cy,target*.92,bloom,color,3,.62);
   }else if(id==="stitcho"){
     const open=seg(k,.08,.52),close=1-seg(k,.62,.90);
-    zipper(ctx,cx,cy,target,Math.min(open,close),color);
-    if(k>.34&&k<.72){
-      ctx.globalAlpha=.16+.26*Math.sin(seg(k,.34,.72)*Math.PI);
-      ctx.fillStyle=rgba(color,.32);ctx.fillRect(cx-target*.20,cy-target*.66,target*.40,target*1.32);
+    const seam=Math.min(open,close);
+    zipper(ctx,cx,cy,target,seam,color);
+    if(k>.30&&k<.68){
+      const peek=Math.sin(seg(k,.30,.68)*Math.PI);
+      ctx.globalAlpha=.16+.26*peek;
+      ctx.fillStyle=rgba(color,.28);ctx.fillRect(cx-target*.20,cy-target*.66,target*.40,target*1.32);
+      ctx.fillStyle="rgba(3,4,14,.94)";
+      ctx.beginPath();ctx.ellipse(cx+target*.07,cy-target*.10,target*.13,target*.085*peek,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle="#fff7d0";
+      ctx.beginPath();ctx.ellipse(cx+target*.09,cy-target*.10,target*.026,target*.050*peek,0,0,Math.PI*2);ctx.fill();
+      if(k>.39&&k<.57) comicBubble(ctx,"NO.",cx+target*.34,cy-target*.42,Math.sin(seg(k,.39,.57)*Math.PI),color);
+    }
+    if(k>.54&&k<.72){
+      const slam=Math.sin(seg(k,.54,.72)*Math.PI);
+      drawRing(ctx,cx,cy,target*(.34+.18*slam),slam,"#fff7d0",2.4,.30);
     }
     if(k>.72) drawRing(ctx,cx,cy,target*.74,seg(k,.72,.96),color,2,.35);
   }else if(id==="chispin"){

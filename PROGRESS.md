@@ -1,3 +1,21 @@
+## 08/10/2026 · V49 STITCHO SOUL PASS
+
+**Caché:** `ohana-241`.
+
+V49 inicia el pase personaje-a-personaje con Stitcho, usando a Kilo como referencia de calidad emocional pero conservando una identidad completamente distinta.
+
+- **Personalidad:** travieso, acrobático, espacial y descarado. Su lenguaje gira alrededor de costuras, cremalleras, grietas y caos controlado.
+- **Idle / flourish:** nueva cuarta microescena en la que abre una pequeña grieta, algo mira desde dentro y Stitcho reacciona con una sonrisa de pillo.
+- **Selector:** coreografía propia `smirk → wall-peek → plasma-roll → claw-swipe → nebula-laugh`; Visual Regression fuerza y captura `01d-stitcho-plasma-roll`.
+- **Wall-vault:** trepar y salir de pared deja una costura cian/violeta visible y el vault remata con **ZIP!**.
+- **Plasma / Bola / Caos:** los FX comparten ahora puntadas y costuras, de modo que sus tres habilidades parecen parte del mismo personaje.
+- **Evolución:** el motivo `seam` crece hasta una verdadera grieta/capa Nébula en Forma 5, con puntadas y apertura espacial.
+- Copy de evolución reescrito para contar la progresión de Stitcho hacia Nébula.
+- **U · SINGULARIDAD COSIDA:** abre una grieta, algo le devuelve la mirada, aparece un **NO.**, la cierra y convierte esa misma costura en el ataque.
+- Se preservan sus mecánicas existentes: Plasma, Bola rodante, Modo caos, trepa/vault, Costura fantasma y la Suprema de atracción.
+- Contrato preservado: **10 personajes · 5 formas · 10 salas**.
+- Próximo personaje: **Chispín Soul Pass**.
+
 ## 08/10/2026 · V48 SUPREME CINEMA REBORN
 
 **Caché:** `ohana-240`.

@@ -130,7 +130,19 @@ function paintPortraits(now = performance.now()) {
       const attacking = hero && showcasePhase >= 103 && showcasePhase < 115;
       const personality = HERO_SHOWCASE[def.id] || HERO_SHOWCASE.kilo;
       const poseIndex = showcasePhase < 44 ? 0 : showcasePhase < 88 ? 1 : 2;
-      const showcasePose = hero ? personality[poseIndex] : "idle";
+      let showcasePose = hero ? personality[poseIndex] : "idle";
+      let showcaseMove = null;
+      let stitchoBeat = "";
+      if (hero && def.id === "stitcho") {
+        const forced = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_STITCHO_PHASE)
+          ? Math.max(0, Math.min(119, window.__OHANA_TITLE_STITCHO_PHASE))
+          : showcasePhase;
+        if (forced < 26) { showcasePose = "idle"; stitchoBeat = "smirk"; }
+        else if (forced < 48) { showcasePose = "wall"; showcaseMove = "climb"; stitchoBeat = "wall-peek"; }
+        else if (forced < 72) { showcasePose = "run"; showcaseMove = "roll"; stitchoBeat = "plasma-roll"; }
+        else if (forced < 96) { showcasePose = "attack"; stitchoBeat = "claw-swipe"; }
+        else { showcasePose = "victory"; stitchoBeat = "nebula-laugh"; }
+      }
       const bob = Math.sin(tick * 0.03 * profile.pace + idx + profile.sway) * (hero ? 4.5 : 2);
       const sway = Math.sin(tick * 0.02 * profile.pace + idx * 1.3) * 0.035 * profile.sway;
       const showcaseSpeed = Math.max(0.6, Math.min(2.8, (form.speed || def.speed || 4) * 0.38));
@@ -150,12 +162,20 @@ function paintPortraits(now = performance.now()) {
         evoBurstMax: 90,
         visualScale: 1,
         _poseOverride: showcasePose,
+        _move: showcaseMove,
       };
+      if (hero && def.id === "stitcho") {
+        cv.dataset.stitchoBeat = stitchoBeat;
+        card.dataset.stitchoBeat = stitchoBeat;
+      } else {
+        delete cv.dataset.stitchoBeat;
+        if (card) delete card.dataset.stitchoBeat;
+      }
       if (showcasePose === "jump") {
         dummy.grounded = false;
         dummy.vy = -3;
       }
-      if (showcasePose === "run") dummy.vx = Math.max(dummy.vx, showcaseSpeed * 1.35);
+      if (showcasePose === "run") dummy.vx = def.id === "stitcho" ? 0 : Math.max(dummy.vx, showcaseSpeed * 1.35);
       if (casting) {
         const abilityId = def.abilities && def.abilities[showcaseSlot];
         dummy._cast = {

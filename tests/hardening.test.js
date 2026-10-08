@@ -704,7 +704,7 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
   const title = fs.readFileSync("./systems/title.js", "utf8");
   assert.match(game, /ohana-cinema-room/);
   assert.match(index, /selected-hero-name/);
-  assert.match(index, /systems\/world-cinema\.js\?v=ohana-240/);
+  assert.match(index, /systems\/world-cinema\.js\?v=ohana-241/);
   assert.match(cinema, /Fullscreen chapter cards were removed/);
   assert.match(cinema, /ohana-cinema-room/);
   assert.match(ending, /NADIE SE QUEDA ATRÁS/);
@@ -808,6 +808,31 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
 });
 
 
+test("V49 Stitcho Soul Pass keeps one coherent character language", () => {
+  const art = fs.readFileSync("./characters/art/stitch.js", "utf8");
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  const passives = fs.readFileSync("./systems/passives.js", "utf8");
+  const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
+  const evolution = fs.readFileSync("./characters/evolution.js", "utf8");
+  const supreme = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
+  assert.match(art, /drawSoulSeams/);
+  assert.match(art, /pose\.flourishN % 4/);
+  assert.match(art, /const peek = pose\.state === "idle"/);
+  assert.match(title, /__OHANA_TITLE_STITCHO_PHASE/);
+  assert.match(title, /wall-peek/);
+  assert.match(title, /plasma-roll/);
+  assert.match(title, /nebula-laugh/);
+  assert.match(passives, /_stitchoZipT/);
+  assert.match(passives, /"ZIP!"/);
+  assert.match(passives, /costura visible en pared\/vault/);
+  assert.match(abilities, /Stitcho no deja una estela genérica/);
+  assert.match(evolution, /Stitcho Nébula cose el vacío y se ríe al otro lado/);
+  assert.match(evolution, /const open = stage >= 4/);
+  assert.match(supreme, /comicBubble\(ctx,"NO\."/);
+  assert.match(visual, /01d-stitcho-plasma-roll/);
+});
+
 test("V48 signature U uses ten real storyboards and stays regression-protected", () => {
   const game = fs.readFileSync("./game.js", "utf8");
   const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
@@ -837,8 +862,8 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   assert.match(sw, /systems\/supreme-storyboards\.js\?v=/);
   assert.match(css, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
   assert.doesNotMatch(css, /sc-motif/);
-  assert.match(html, /supreme\.css\?v=ohana-240/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-240/);
+  assert.match(html, /supreme\.css\?v=ohana-241/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-241/);
   assert.match(visual, /09-supreme-u-assist/);
   assert.match(visual, /09b-supreme-yomi-story/);
 });
@@ -983,7 +1008,7 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(portals, /traversalNodeSnapshot\(/);
   assert.match(portals, /quadraticCurveTo\(sx \+ dir \* powerX/);
   assert.match(mapCss, /PROJECT OHANA V40 · WORLD GRAPH MAP/);
-  assert.match(html, /world-map\.css\?v=ohana-240/);
+  assert.match(html, /world-map\.css\?v=ohana-241/);
   assert.match(sw, /systems\/hazards\.js/);
   assert.match(sw, /systems\/world-graph\.js/);
   assert.match(sw, /systems\/traversal-nodes\.js/);

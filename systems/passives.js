@@ -36,7 +36,7 @@ function reset(p) {
   sparks.length = 0;
   rings.length = 0;
   if (!p) return;
-  p._move = null; p._gliding = false; p._pound = false; p._slideT = 0; p._runT = 0; p._climbT = 0; p._bounceT = 0; p._puntT = 0;
+  p._move = null; p._gliding = false; p._pound = false; p._slideT = 0; p._runT = 0; p._climbT = 0; p._stitchoZipT = 0; p._bounceT = 0; p._puntT = 0;
 }
 
 // Pared trepable: lado de una plataforma (también ligeramente por debajo de un
@@ -108,6 +108,7 @@ export const Passives = {
       }
       if (p._specter > 0) p._specter--;
     } else if (id === "climb") {
+      if (p._stitchoZipT > 0) p._stitchoZipT--;
       const w = !p.grounded || p._climbT > 0 ? findWall(game, p, input) : null;
       if (w && input.jump) {
         p._climbT = 6;
@@ -118,8 +119,12 @@ export const Passives = {
         p.jumps = 0;
         p.buffer = 0;
         p._pmove = "climb";
+        p._stitchoZipT = Math.max(p._stitchoZipT || 0, 8);
         if (w.plat && p.y + p.h - w.plat.y < 12) { p.vy = -6.5; p.vx = -w.dir * 3.5; }
-        if ((input.t % 6) === 0) game.fx.emit(w.dir === -1 ? p.x + p.w : p.x, p.y + p.h * 0.6, { color: "#bcd6ff", count: 2, size: 2, speed: 1, life: 12 });
+        if ((input.t % 6) === 0) {
+          const seamColor = (input.t % 12) ? "#67ddff" : "#b38cff";
+          game.fx.emit(w.dir === -1 ? p.x + p.w : p.x, p.y + p.h * 0.6, { color: seamColor, count: 2, size: 2, speed: 1, life: 12 });
+        }
       } else if (w && !input.jump && p.vy > 0) {
         p.vy = Math.min(p.vy, 1.2 - 0.52);
         p._pmove = "climb";
@@ -127,8 +132,10 @@ export const Passives = {
         p._climbT--;
         const away = p._climbWall;
         if (input.jumpPressed && ((away === 1 && input.right) || (away === -1 && input.left))) {
-          p.vy = -p.jumpPower; p.vx = 8 * away; p._climbT = 0;
-          game.fx.emit(cx(p), cy(p), { color: "#bcd6ff", count: 6, size: 2.5 });
+          p.vy = -p.jumpPower; p.vx = 8 * away; p._climbT = 0; p._stitchoZipT = 22;
+          game.fx.emit(cx(p), cy(p), { color: "#67ddff", count: 6, size: 2.5, star: true, speed: 2.4 });
+          game.fx.emit(cx(p), cy(p), { color: "#b38cff", count: 4, size: 2.1, speed: 1.6 });
+          game.nums?.add(cx(p), p.y - 12, "ZIP!", "#b9f6ff", true);
         }
       }
     } else if (id === "spark") {
@@ -335,6 +342,7 @@ export const Passives = {
     p._puntT = 0;
     p._slideT = 0;
     p._climbT = 0;
+    p._stitchoZipT = 0;
     p._runT = 0;
     onMasteryRoom(game);
   },
@@ -384,6 +392,30 @@ export const Passives = {
         ctx.stroke();
       }
     }
+    // Stitcho: costura visible en pared/vault. La trepa parece una habilidad,
+    // no un estado de colisión.
+    if (pid(p) === "climb" && ((p._climbT || 0) > 0 || (p._stitchoZipT || 0) > 0)) {
+      const life = Math.max(p._climbT || 0, p._stitchoZipT || 0);
+      const side = p._climbWall || -(p.facing || 1);
+      const x = (side === -1 ? p.x + p.w + 5 : p.x - 5) - cam.x;
+      const y = p.y + p.h * 0.55 - cam.y;
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = Math.min(.88, .28 + life / 30);
+      ctx.strokeStyle = life > 12 ? "#b38cff" : "#67ddff";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      for (let i=-3;i<=3;i++) {
+        const yy = y + i * 7;
+        ctx.beginPath();
+        ctx.moveTo(x - side * 7, yy - 2);
+        ctx.lineTo(x, yy + 2);
+        ctx.lineTo(x + side * 7, yy - 1);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     // nueve vidas: halo + contador
     if (p._nineT > 0 && !p.dead) {
       const k = p._nineT / 90;
