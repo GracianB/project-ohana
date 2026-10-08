@@ -128,6 +128,33 @@ try {
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, '01-character-select: dossier invade controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.width + 2, '01-character-select: overflow horizontal');
   await capture(page, '01-character-select-1680x900');
+
+  await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = 4; });
+  await page.waitForTimeout(220);
+  const finalFormFit = await page.evaluate(() => {
+    const card=document.querySelector('#chars-grid .char-card.selected');
+    const canvas=card?.querySelector('canvas');
+    const r=card?.getBoundingClientRect();
+    return {
+      evo:Number(canvas?.dataset.evo ?? -1),
+      scale:Number(canvas?.dataset.fitScale || 0),
+      envelope:Number(canvas?.dataset.fitEnvelope || 0),
+      cardEvo:card?.dataset.evo || '',
+      backdrop:document.querySelector('#title-fx')?.dataset.backdrop || '',
+      scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
+      card:r?{width:r.width,height:r.height}:null
+    };
+  });
+  assert.equal(finalFormFit.evo, 4, '01c-final-form-fit: no entra en Forma 5');
+  assert.equal(finalFormFit.cardEvo, '4', '01c-final-form-fit: tarjeta no conoce su evolución');
+  assert.ok(finalFormFit.envelope >= 1.3, '01c-final-form-fit: Forma 5 sin margen de silueta');
+  assert.ok(finalFormFit.scale >= .34, '01c-final-form-fit: escala inválida');
+  assert.equal(finalFormFit.backdrop, 'hoku-gate', '01c-final-form-fit: fondo V47A incorrecto');
+  assert.equal(finalFormFit.scene, 'kilo', '01c-final-form-fit: afinidad inicial incorrecta');
+  await capture(page, '01c-character-select-final-form-fit');
+  await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
+  await page.waitForTimeout(120);
+
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
   const livingSelect = await page.evaluate(() => ({
