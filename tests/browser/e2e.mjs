@@ -22,16 +22,16 @@ async function auditPage(page, label) {
       complete: document.body.classList.contains('intro-complete')
     };
   });
-  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V44 family welcome no aparece');
+  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V45 comic family welcome no aparece');
   await page.waitForTimeout(1350);
   const heldOpening = await page.evaluate(() => ({
     complete:document.body.classList.contains('intro-complete'),
     mode:document.querySelector('#ohana-intro')?.dataset.openingMode || '',
-    cast:Number(document.querySelector('#ohana-intro')?.dataset.v44Cast || 0),
+    cast:Number(document.querySelector('#ohana-intro')?.dataset.v45Cast || 0),
     ready:document.querySelector('#ohana-intro')?.classList.contains('ready') || false
   }));
-  assert.equal(heldOpening.complete, false, label + ': V44 avanza al carrusel sin acción del usuario');
-  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V44 incorrecto');
+  assert.equal(heldOpening.complete, false, label + ': V45 avanza al carrusel sin acción del usuario');
+  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V45 incorrecto');
   assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
   assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
   const gameSource = await page.evaluate(async () => {
