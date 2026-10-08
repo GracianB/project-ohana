@@ -1,3 +1,10 @@
+## 08/10/2026 · V70 · PRESUPUESTO ADAPTATIVO PARA DINO + MULTIJUGADOR
+
+- Se sustituye el tope rígido e histórico de `1.500.000` bytes JS por un máximo **3.000.000 bytes**, con **aviso a 2.400.000**. El nuevo contrato se centraliza en `tools/performance-budgets.mjs` para Browser E2E y Release Gate.
+- Se compara tanto la **transferencia JS real en navegador** como el **tamaño estático de todo el JavaScript de producción**, que no queda oculto por Service Worker o caché caliente.
+- Los demás límites siguen vigentes: CSS de 500 KB, FCP de 4 s, simulación de 1.000 ms, consola sin errores, QA de navegador, multijugador y regresión visual. No se sube el límite para disimular regresiones, sino para dar espacio consciente a Dino y a las próximas mejoras cooperativas.
+- El cierre V69 de Cuerno sigue en PR #195, con caché `ohana-268`, a la espera de CI y Quality PASS antes de publicar. **Dino todavía no está modificado.**
+
 ## 08/10/2026 · V69 · CUERNO 10/10 · LA LEYENDA DEL ARCOÍRIS
 
 **Caché:** `ohana-268` · Fase definitiva de Cuerno. Dino y Grok intactos.

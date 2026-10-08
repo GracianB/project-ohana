@@ -280,6 +280,12 @@ npm run release:check
 
 ---
 
+## Presupuesto de rendimiento · V70
+
+OHANA tiene margen para incorporar **Dino**, nuevas animaciones y el siguiente ciclo de **multijugador**. El antiguo tope de 1,5 MB de JavaScript se amplía a **3 MB (3.000.000 bytes)**; al llegar a **2,4 MB** aparece un aviso de revisión. El límite se define en `tools/performance-budgets.mjs` y se verifica desde **Browser E2E** (recursos JS transferidos) y **Release Gate** (suma de bytes fuente en módulos runtime, incluso con caché). No es una licencia para descargar 3 MB innecesarios.
+
+Siguen activos los controles de **CSS < 500 KB**, **first contentful paint < 4 s**, estabilidad de Canvas, errores de consola, rendimiento de simulación, pruebas multijugador y regresión visual. Para crecer de verdad, cargaremos lo pesado bajo demanda cuando corresponda, en lugar de recortar código a ciegas.
+
 ## Original
 
 Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afiliación con ninguna. Isla, criatura, dragón, evolución y jefe son el lenguaje del género. El universo concreto es este.
