@@ -1,3 +1,17 @@
+## 08/10/2026 · V60 CUERNO · MENSAJE 2/10 · PRIMERA METAMORFOSIS
+
+**Caché:** `ohana-260`. **Contrato:** diez héroes / cinco formas. Dino y la intro de Grok sin modificaciones.
+
+- **Destello · Naciente** deja de utilizar la antigua bola con cuatro patas. Tiene una silueta exclusiva Canvas: cuerpo de nácar en formación, cuello continuo, hocico, dos orejas, melena naciente, dos pezuñas animadas y cola arcoíris que aún es luz.
+- El cuerno de la forma 0 sigue siendo el núcleo anatómico, ahora arraigado en la frente. La forma 1 es un ser incompleto y expresivo, no un unicornio adulto reducido de tamaño.
+- Gestos propios: impulso al correr, pezuñas independientes, recogimiento en el aire, timidez al florecer y gesto de orgullo cuando descubre la punta del cuerno.
+- El texto evolutivo explica exactamente lo que nace, sin adornos genéricos.
+- Tests Node ejecutan `draw()` en las formas 0, 1 y 2 con un rig instrumentado. Verifican 0/2/4 patas, rostro visible, pila Canvas equilibrada y animaciones sin temporizadores ni aleatoriedad.
+- Capturas Chromium para formas 0, 1, 2 y 4; nueva captura exclusiva de Destello y prueba real de juego con evolución 1, vigilando errores JS.
+- No se modifican las velocidades, saltos ni ataques de V59; sigue siendo el héroe más rápido y con salto más alto.
+- JavaScript optimizado exclusivamente quitando sangría redundante en dos módulos para conservar el límite de 1,5 MB sin quitar efectos.
+- Siguiente: **3/10 Potro Iris**, su primera anatomía completa de cuatro patas, con galope físico legible.
+
 ## 08/10/2026 · V59 CUERNO ORIGIN · MENSAJE 1/10 · PROPOSED
 
 **Caché:** `ohana-259`. **Contrato:** diez héroes / cinco formas. **Intro de Grok y Dino:** no modificados.

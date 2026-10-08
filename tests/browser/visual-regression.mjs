@@ -256,7 +256,7 @@ try {
   for(let i=0;i<9;i++) await page.locator('#roster-next').click();
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
-  for(const form of [0,4]){
+  for(const form of [0,1,2,4]){
     await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
     await page.waitForTimeout(220);
     const state=await page.evaluate(()=>{
@@ -270,6 +270,7 @@ try {
     assert.equal(state.form,form,'01i-cuerno: wrong form');
     assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
     await capture(page,'01i-cuerno-origin-form-'+(form+1));
+    if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
@@ -619,6 +620,21 @@ try {
   await capture(page,'09f-yomi-l-visible-jaws');
   assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
   page.off('pageerror',onYomiError);
+
+  // V60 actual gameplay: first metamorphosis must draw in motion, not only in the roster.
+  const cuernoErrors=[];
+  const onCuernoError=err=>cuernoErrors.push(String(err.message||err));
+  page.on('pageerror',onCuernoError);
+  const cuernoStage=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(1);api.step(8);
+    return api.state();
+  });
+  assert.equal(cuernoStage.evo,1,'09g-cuerno: metamorfosis no aplicada');
+  assert.ok(cuernoStage.player && Number.isFinite(cuernoStage.player.x),'09g-cuerno: personaje no activo');
+  assert.deepEqual(cuernoErrors,[],'09g-cuerno: excepción al dibujar la forma naciente');
+  await capture(page,'09g-cuerno-naciente-gameplay');
+  page.off('pageerror',onCuernoError);
 
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));

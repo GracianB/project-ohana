@@ -15,7 +15,7 @@ test("V59 Cuerno starts as a living unicorn horn, not a quadruped",()=>{
   assert.match(src,/function drawLivingHorn\(ctx,pose,R,t\)/);
   assert.match(src,/if \(f === 0\) \{ drawLivingHorn\(ctx,pose,R,pose\.t\|\|0\); return; \}/);
   assert.match(src,/No horse body, legs or oversized round head/);
-  const baby=src.split("function drawLivingHorn(")[1].split("function draw(ctx, pose, R)")[0];
+  const baby=src.split("function drawLivingHorn(")[1].split("function drawFirstBody(")[0];
   assert.doesNotMatch(baby,/R\.limb|leg\(|Math\.random|setTimeout|requestAnimationFrame/);
   assert.match(baby,/ctx\.bezierCurveTo/);
   assert.match(baby,/R\.eye\(ctx,-5,-24/);

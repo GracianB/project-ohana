@@ -73,9 +73,78 @@ function drawLivingHorn(ctx,pose,R,t){
   ctx.restore();
 }
 
+// F1 Destello: the pearl horn grows a neck, ears, a muzzle and TWO tentative hooves.
+// Its back half is still a ribbon of light: a newborn creature, not a tiny horse.
+function drawFirstBody(ctx,pose,R,t){
+  const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air;
+  const beat=Math.sin(pose.phase||t*.14),lift=(pose.bounce||0)+(run?-2*Math.abs(beat):Math.sin(t*.07)*1.5);
+  const hurt=pose.state==="hurt"||pose.state==="dead";
+  const flourish=pose.flourish>0?Math.sin(Math.PI*pose.flourish):0;
+  const shy=pose.flourishN%3===0?flourish:0;
+  const proud=pose.flourishN%3===2?flourish:0;
+  const sway=Math.sin(t*.08)*2+(run?beat*3:0);
+  ctx.save();ctx.translate(0,lift);ctx.rotate((air?-.10:0)+(run?-.055*beat:0)-shy*.09);
+  // A liquid rainbow tail flows from the unfinished hindquarters.
+  ctx.fillStyle="#ce9cf1";ctx.strokeStyle="#654977";ctx.lineWidth=2.1;
+  ctx.beginPath();ctx.moveTo(-13,-28);ctx.quadraticCurveTo(-34,-35,-34-sway,-19);
+  ctx.quadraticCurveTo(-41-sway,-9,-31-sway,-7);ctx.quadraticCurveTo(-25,-13,-18,-14);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.strokeStyle="#fbd4ea";ctx.lineWidth=2;ctx.beginPath();
+  ctx.moveTo(-21,-25);ctx.quadraticCurveTo(-36-sway,-22,-33-sway,-10);ctx.stroke();
+  // Two sprouting hooves move independently; the body cannot gallop yet.
+  for(const [x,flip] of [[-9,-1],[12,1]]){
+    const step=run?beat*flip*7:air?flip*5:flourish*flip*2;
+    ctx.save();ctx.translate(x,-17);ctx.rotate(step*.055);
+    R.limb(ctx,0,0,step*.22,7,step*.36,14,4.6,"#f6e3f3",{hand:false});
+    R.ellipse(ctx,step*.36,14,5.4,3.2,flip===1?"#d8b4e7":"#e4c2ed");
+    ctx.strokeStyle="#694a80";ctx.lineWidth=1.4;ctx.beginPath();
+    ctx.moveTo(step*.36-4,14);ctx.lineTo(step*.36+4,14);ctx.stroke();ctx.restore();
+  }
+  // A curled foal seed grows from the collar of Cuernín; distinct from F0's cone.
+  ctx.fillStyle="#ffe8f5";ctx.strokeStyle="#624d80";ctx.lineWidth=2.8;
+  ctx.beginPath();ctx.moveTo(-16,-27);
+  ctx.bezierCurveTo(-20,-43,-8,-50,3,-46);
+  ctx.bezierCurveTo(12,-43,16,-30,15,-24);
+  ctx.quadraticCurveTo(0,-14,-16,-27);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle="#dbaae5";ctx.beginPath();ctx.ellipse(-3,-29,8,6,.1,0,TAU);ctx.fill();
+  // Neck is a continuous tapered shape joining the new head to the body.
+  ctx.fillStyle="#fff2ed";ctx.strokeStyle="#694a80";ctx.lineWidth=2.7;
+  ctx.beginPath();ctx.moveTo(1,-34);ctx.quadraticCurveTo(-9,-51,-3,-61);
+  ctx.quadraticCurveTo(8,-71,18,-56);ctx.lineTo(21,-37);
+  ctx.quadraticCurveTo(14,-34,1,-34);ctx.closePath();ctx.fill();ctx.stroke();
+  // Soft peach ear buds and a tiny mane (not an adult unicorn crest).
+  for(const [x,side] of [[-3,-1],[16,1]]){
+    ctx.fillStyle="#fae1ef";ctx.beginPath();ctx.moveTo(x,-56);
+    ctx.quadraticCurveTo(x+side*7,-78,x+side*11,-63);
+    ctx.quadraticCurveTo(x+side*9,-56,x,-56);ctx.fill();ctx.stroke();
+    ctx.fillStyle="#dfa3bf";ctx.beginPath();ctx.ellipse(x+side*6,-64,2.2,5,side*.23,0,TAU);ctx.fill();
+  }
+  ctx.fillStyle="#d9abeb";for(let i=0;i<3;i++){
+    ctx.beginPath();ctx.ellipse(-5-i*2,-53+i*7,3.5,5.5,-.35,0,TAU);ctx.fill();
+  }
+  // The original horn remains its soul, now anchored to the forehead.
+  ctx.save();ctx.translate(7,-62);ctx.rotate(.10+proud*.13+(run?beat*.04:0));
+  horn(ctx,26+2*proud,"#f4abd8",Math.sin(t*.11)*.36);ctx.restore();
+  // The muzzle finally begins to appear, with its own expression.
+  R.ellipse(ctx,14,-42,9.3,6.9,"#ffe5ec");
+  R.blush(ctx,18,-46,2.3,"#f8a6c5");
+  const mood=hurt?"closed":pose.state==="attack"?"angry":pose.state==="victory"?"happy":"normal";
+  R.eye(ctx,1,-50,4.3,pose,{iris:"#7852a2",mood});
+  R.eye(ctx,12,-49,3.8,pose,{iris:"#7852a2",mood});
+  R.mouth(ctx,15,-39,3.4,mood==="happy"?"happy":shy>0.25?"o":"smile");
+  if(proud>.1||pose.state==="cast")R.sparkle(ctx,12,-89,2+4*Math.max(proud,.3),"#ffe8a7");
+  // Jump gathers the unfinished limbs; speed produces tiny pearl beats.
+  if(run||air){
+    ctx.globalAlpha=.46;ctx.strokeStyle="#ffe0b0";ctx.lineWidth=1.8;
+    for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-20-i*7,-7+i*5);ctx.lineTo(-31-i*8,-7+i*5);ctx.stroke();}
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
+  if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
   const t = pose.t || 0;
   const final = f === 4;
   const run = pose.state === "run";
