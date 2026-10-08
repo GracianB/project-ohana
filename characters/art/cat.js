@@ -336,6 +336,73 @@ function drawGod(ctx, R, pose, r, c) {
   R.halo(ctx, 8, -98, 20, r.t, "#ffd76a");
 }
 
+
+// V51 · Michi Moon Soul Pass. Local Canvas-only animation, no timers or global particles.
+function moonSoul(ctx, pose, form, front) {
+  const t = Number.isFinite(pose.t) ? pose.t : 0;
+  const state = pose.state || "idle";
+  const attack = state === "attack" || state === "cast";
+  const airborne = state === "jump" || state === "glide" || state === "fall";
+  const victory = state === "victory";
+  const flourish = state === "idle" && pose.flourish > 0;
+  const gag = flourish && (pose.flourishN % 4) === 3;
+  const intensity = attack ? .9 : victory ? .7 : airborne ? .44 : gag ? .6 : .16;
+  const y = [-32,-44,-53,-64,-61][form];
+  const moon = form >= 3 ? "#ffe7a6" : "#ffb6e4";
+  const shadow = form >= 3 ? "#9076e8" : "#cb8cf4";
+  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  if (!front) {
+    if (attack || airborne || victory) {
+      ctx.globalAlpha = .13 + intensity * .22;
+      ctx.fillStyle = shadow;
+      ctx.beginPath(); ctx.ellipse(-3, -2, 20 + form * 3, 4, 0, 0, TAU); ctx.fill();
+    }
+    if (form >= 2) {
+      ctx.globalAlpha = .12 + intensity * .25;
+      ctx.strokeStyle = moon; ctx.lineWidth = 1.5;
+      const radius = 25 + form * 4;
+      ctx.beginPath(); ctx.arc(0, y, radius, -2.3, .85); ctx.stroke();
+      if (form === 4) {
+        ctx.globalAlpha = .30 + intensity * .26;
+        ctx.beginPath(); ctx.arc(0, y, radius + 6, -2.55, -.52); ctx.stroke();
+      }
+    }
+  } else {
+    if (attack || airborne || victory) {
+      for (let i = 0; i < (form >= 3 ? 6 : 4); i++) {
+        const a = t * .027 + i * TAU / (form >= 3 ? 6 : 4);
+        const rad = 25 + form * 4;
+        const x = Math.cos(a) * rad, yy = y + Math.sin(a) * rad * .78;
+        ctx.globalAlpha = (.22 + intensity * .40) * (.65 + Math.sin(t * .12 + i) ** 2 * .35);
+        ctx.strokeStyle = i % 2 ? shadow : moon;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x - 2.5, yy); ctx.lineTo(x + 2.5, yy);
+        ctx.moveTo(x, yy - 2.5); ctx.lineTo(x, yy + 2.5); ctx.stroke();
+      }
+    }
+    // The moon is a toy: Michi bats at it, misses, pretends nothing happened.
+    if (gag) {
+      const k = Math.sin(Math.PI * Math.max(0, Math.min(1, pose.flourish)));
+      const x = 30 - k * 9, yy = y - 23 - Math.sin(t * .14) * 3;
+      ctx.globalAlpha = .35 + .55 * k;
+      ctx.fillStyle = moon;
+      ctx.beginPath(); ctx.arc(x, yy, 6, 0, TAU); ctx.fill();
+      ctx.fillStyle = shadow;
+      ctx.beginPath(); ctx.arc(x + 3, yy - 2, 5, 0, TAU); ctx.fill();
+      ctx.strokeStyle = moon; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(17, y + 4); ctx.lineTo(23 - k * 6, y - 13); ctx.stroke();
+    }
+    if (state === "wall") {
+      ctx.globalAlpha = .45; ctx.strokeStyle = shadow; ctx.lineWidth = 1.5;
+      for (let i=0; i<3; i++) {
+        const yy = -14 - i * 13;
+        ctx.beginPath(); ctx.moveTo(21, yy); ctx.lineTo(29, yy - 5); ctx.lineTo(26, yy - 9); ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const src = pose || {};
   const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
@@ -343,6 +410,7 @@ function draw(ctx, pose, R) {
   const c = PAL[f];
   const r = solve(safe);
   ctx.save();
+  moonSoul(ctx, safe, f, false);
   ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
   if (r.st === "dead") {
     ctx.rotate(1.05);
@@ -357,6 +425,7 @@ function draw(ctx, pose, R) {
   else if (f === 2) drawCloud(ctx, R, safe, r, c);
   else if (f === 3) drawMoon(ctx, R, safe, r, c);
   else drawGod(ctx, R, safe, r, c);
+  moonSoul(ctx, safe, f, true);
   ctx.restore();
 }
 
