@@ -1,4 +1,63 @@
 // Cuerno V59 · born as a sentient unicorn horn; a unicorn body emerges later.
+// V66: Cuerno's personality is stage-specific and deterministic, never random FX.
+const SOUL_BEATS=["curious","shy","prance","stargaze","sneeze","bow"];
+export function cuernoSoulBeat(pose,form){
+const forced=pose?.cuernoBeat;
+if(typeof forced==="string"&&SOUL_BEATS.includes(forced))return forced;
+const state=pose?.state||"idle";
+if(state==="victory")return form>=4?"bow":form>=2?"prance":"curious";
+if(state==="cast"&&form>=3&&pose?.castSlot===3)return "stargaze";
+if(state!=="idle"||!(Number(pose?.flourish)>.06&&Number(pose?.flourish)<.94))return "";
+return form===4?(Number(pose.flourishN)%2?"bow":"sneeze"):SOUL_BEATS[form];
+}
+// Small pantomimes belong to the character, not world particles or physics.
+function drawCuernoSoul(ctx,pose,R,form,t){
+const beat=cuernoSoulBeat(pose,form);if(!beat)return;
+const born=[-65,-90,-106,-124,-142][form],x=[1,12,24,25,32][form];
+const forced=!!pose.cuernoBeat;
+const amp=forced?.77:Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
+if(amp<=.08)return;
+const k=Math.max(0,Math.min(1,amp)),TAU=Math.PI*2;
+ctx.save();ctx.globalAlpha=.66*k;ctx.lineCap="round";
+if(beat==="curious"){
+ctx.strokeStyle="#eab1da";ctx.lineWidth=2;
+ctx.beginPath();ctx.arc(x+14,born-2,6,Math.PI*.95,TAU*.88);ctx.stroke();
+ctx.beginPath();ctx.moveTo(x+16,born+6);ctx.lineTo(x+16,born+7);ctx.stroke();
+}else if(beat==="shy"){
+ctx.strokeStyle="#efb4d3";ctx.lineWidth=2;
+for(const dx of [-1,1]){ctx.beginPath();ctx.arc(x+dx*12,born+15,4,0,TAU);ctx.stroke();}
+ctx.beginPath();ctx.moveTo(x+5,born-5);ctx.quadraticCurveTo(x-4,born-15,x-8,born-7);
+ctx.quadraticCurveTo(x-14,born+2,x-20,born-7);ctx.stroke();
+}else if(beat==="prance"){
+ctx.strokeStyle="#b6c7ff";ctx.lineWidth=2;
+for(let i=0;i<3;i++){
+const yy=-5+i*6;ctx.beginPath();ctx.moveTo(-22-i*5,yy);
+ctx.quadraticCurveTo(-29-i*5,yy-3,-33-i*5,yy+3);ctx.stroke();
+}
+R.sparkle(ctx,-33,-14,3+2*k,"#ffe1ab");
+}else if(beat==="stargaze"){
+ctx.strokeStyle="#a8c9ec";ctx.lineWidth=1.6;
+ctx.beginPath();ctx.moveTo(x-20,born-22);ctx.lineTo(x-5,born-32);
+ctx.lineTo(x+17,born-22);ctx.stroke();
+for(const [dx,dy] of [[-20,-22],[-5,-32],[17,-22]])
+R.sparkle(ctx,x+dx,born+dy,2+2*k,"#ffe4b1");
+}else if(beat==="sneeze"){
+ctx.strokeStyle="#b1d9e9";ctx.lineWidth=1.8;
+for(let i=0;i<3;i++){
+const dx=17+i*12,dy=2-i*9;
+ctx.beginPath();ctx.ellipse(x+dx,born+dy,4+i*2,3+i,0,0,TAU);ctx.stroke();
+}
+R.sparkle(ctx,x+49,born-20,3.2*k,"#ffd7a6");
+}else if(beat==="bow"){
+ctx.strokeStyle="#f5c6df";ctx.lineWidth=2;
+for(let i=0;i<3;i++){
+ctx.beginPath();ctx.arc(x-2,born+1,15+i*8,Math.PI*.30,Math.PI*.80);ctx.stroke();
+}
+R.sparkle(ctx,x-4,born-24,3.5*k,"#d1f5e6");
+}
+ctx.restore();
+}
+
 function horn(ctx, len, color, wobble) {
   ctx.save();
   ctx.lineCap = "round";
@@ -28,7 +87,7 @@ function drawLivingHorn(ctx,pose,R,t){
   const TAU=Math.PI*2;
   const moving=pose.state==="run",air=!!pose.air;
   const k=moving?Math.sin(pose.phase||t*.15):Math.sin(t*.06);
-  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0);
+  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0);
   const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3);
   ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
   const aura=.5+.5*Math.sin(t*.085);
@@ -156,7 +215,7 @@ ctx.bezierCurveTo(-42,-45+i*2,-48-sway,-24+i*3,-51-sway,-23+i*4);ctx.stroke();
 }
 function leg(x,clock,far){
 const stride=run?Math.sin(phase+clock):0,reach=stride*(far?6:7.6);
-const tuck=air?(far?8:10):0;
+const tuck=air?(far?8:10):(cuernoSoulBeat(pose,2)==="prance"&&!far?4:0);
 const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48;
 const hoofX=x+reach+(far?-2:2),hoofY=2-tuck;
 R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
@@ -233,7 +292,7 @@ const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe4
 const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
 const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
-ctx.save();ctx.translate(0,bounce);ctx.rotate((air?-.075:0)+(run?-.025*gallop:0));
+ctx.save();ctx.translate(0,bounce);ctx.rotate((air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0));
 for(let i=0;i<5;i++){
 const sw=Math.sin(t*.105+i*.65)*3+(run?gallop*5:0);
 ctx.save();ctx.globalAlpha=.88-i*.10;
@@ -331,12 +390,13 @@ const cast=pose.state==="cast"||pose.state==="attack",triumph=pose.state==="vict
 const hurt=pose.state==="hurt"||pose.state==="dead";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase),speed=Math.max(0,Number(pose.speed)||0);
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
-const unfold=air?1:cast?.9:triumph?1:run?.48:.32;
+const soul=cuernoSoulBeat(pose,4);
+const unfold=air?1:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
 const ink="#4d5478",coat="#fffaf0",shadow="#d6d6f0",gold="#f7d78a";
 const colors=["#f9d8b5","#f5b9e0","#b8d0ff","#a5ece4","#d9b8ff","#fff2b9"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
 ctx.save();ctx.translate(0,bounce);
-ctx.rotate((air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0));
+ctx.rotate((air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0));
 // Six trailing strands rise from the living comet tail of Unicornio Estelar.
 for(let i=0;i<6;i++){
 const sway=Math.sin(t*.068+i*.53)*3+(run?beat*4:0);
@@ -426,8 +486,8 @@ ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
 R.blush(ctx,45,-68,2.2,"#f6d5d7");
-R.eye(ctx,35,-79,5,pose,{iris:"#7e78b4",mood:hurt?"closed":cast?"angry":triumph?"happy":"normal"});
-R.mouth(ctx,48,-61,4.1,triumph?"happy":cast?"grin":"smile");
+R.eye(ctx,35,-79,5,pose,{iris:"#7e78b4",mood:hurt||soul==="sneeze"||soul==="bow"?"closed":cast?"angry":triumph?"happy":"normal"});
+R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":triumph?"happy":cast?"grin":"smile");
 ctx.fillStyle="#a495a3";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
 // A crown-horn rises naturally from the brow with visible spiral relief.
 ctx.save();ctx.translate(33,-90);ctx.rotate(-.085+(cast?-.08:0));
@@ -457,11 +517,12 @@ ctx.restore();
 
 function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
-  if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
-  if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
-  if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }
-  if (f === 3) { drawStellarUnicorn(ctx,pose,R,pose.t||0); return; }
-  drawAuroraUnicorn(ctx,pose,R,pose.t||0);
+  if (f === 0) drawLivingHorn(ctx,pose,R,pose.t||0);
+  else if (f === 1) drawFirstBody(ctx,pose,R,pose.t||0);
+  else if (f === 2) drawRainbowFoal(ctx,pose,R,pose.t||0);
+  else if (f === 3) drawStellarUnicorn(ctx,pose,R,pose.t||0);
+  else drawAuroraUnicorn(ctx,pose,R,pose.t||0);
+  drawCuernoSoul(ctx,pose,R,f,pose.t||0);
 }
 
 export default { id: "cuerno", draw };
