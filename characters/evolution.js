@@ -101,10 +101,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "La flor solar abre su corona.",
   ],
   stitcho: [
-    "Las costuras empiezan a brillar.",
-    "El caos aprende a girar.",
-    "La nebulosa se cose alrededor de Stitcho.",
-    "El Experimento Ñam encuentra su forma.",
+    "Una costura se abre donde no debería.",
+    "Stitcho descubre que las paredes también tienen cremallera.",
+    "El Experimento Ñam aprende a doblar la habitación.",
+    "Stitcho Nébula cose el vacío y se ríe al otro lado.",
   ],
   chispin: [
     "La chispa encuentra voltaje.",
@@ -786,16 +786,49 @@ export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
           drawGlyph(ctx, "petal", Math.cos(a) * span * 0.36, Math.sin(a) * span * 0.16 - H * 0.18, H * (0.035 + stage * 0.007), i % 2 ? hot : color, a);
         }
         break;
-      case "seam":
+      case "seam": {
+        const tt = Number(t) || 0;
+        const open = stage >= 4 ? (0.16 + (0.5 + 0.5 * Math.sin(tt * 0.028)) * 0.10) : 0.10;
         ctx.strokeStyle = hot;
         ctx.lineWidth = Math.max(1.2, H * (0.010 + stage * 0.002));
         for (let i = -2; i <= 2; i++) {
+          const bx = i * H * 0.11;
+          const tx = i * H * (0.16 + open) + Math.sin(tt * 0.025 + i) * H * 0.025;
           ctx.beginPath();
-          ctx.moveTo(i * H * 0.12, -H * 0.10);
-          ctx.lineTo(i * H * 0.19 + Math.sin((Number(t) || 0) * 0.025 + i) * H * 0.03, -H * 0.52);
+          ctx.moveTo(bx, -H * 0.06);
+          ctx.lineTo(tx, -H * (0.46 + stage * 0.018));
           ctx.stroke();
+          if (stage >= 3) {
+            for (let j = 1; j <= 3; j++) {
+              const u = j / 4;
+              const x = bx + (tx - bx) * u;
+              const y = -H * 0.06 + (-H * (0.46 + stage * 0.018) + H * 0.06) * u;
+              ctx.beginPath();
+              ctx.moveTo(x - H * 0.035, y - H * 0.012);
+              ctx.lineTo(x, y + H * 0.010);
+              ctx.lineTo(x + H * 0.035, y - H * 0.010);
+              ctx.stroke();
+            }
+          }
+        }
+        if (stage >= 4) {
+          ctx.save();
+          ctx.globalAlpha *= 0.72;
+          const g = ctx.createLinearGradient(0, -H * 0.62, 0, H * 0.02);
+          g.addColorStop(0, "rgba(103,221,255,0)");
+          g.addColorStop(.48, "rgba(143,123,255,.28)");
+          g.addColorStop(1, "rgba(240,140,255,0)");
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.moveTo(-H * .18, -H * .08);
+          ctx.bezierCurveTo(-H * .30, -H * .28, -H * .38, -H * .52, 0, -H * .64);
+          ctx.bezierCurveTo(H * .38, -H * .52, H * .30, -H * .28, H * .18, -H * .08);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
         }
         break;
+      }
       case "bolt":
         ctx.strokeStyle = hot;
         ctx.lineWidth = Math.max(1.5, H * 0.014);
@@ -904,10 +937,24 @@ export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
       case "petal":
         drawGlyph(ctx, "petal", 0, H * 0.02, H * 0.045, hot, Math.sin((Number(t) || 0) * 0.02) * 0.18);
         break;
-      case "seam":
+      case "seam": {
         ctx.strokeStyle = hot; ctx.lineWidth = Math.max(1.1, H * 0.012);
-        ctx.beginPath(); ctx.moveTo(-H * 0.15, 0); ctx.lineTo(0, H * 0.10); ctx.lineTo(H * 0.15, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-H * 0.17, -H * 0.01); ctx.lineTo(0, H * 0.10); ctx.lineTo(H * 0.17, -H * 0.01); ctx.stroke();
+        if (stage >= 4) {
+          ctx.globalAlpha *= .82;
+          for (let i=-2;i<=2;i++) {
+            const y = -H * .18 + i * H * .07;
+            ctx.beginPath();
+            ctx.moveTo(-H * .07,y-H*.012);
+            ctx.lineTo(0,y+H*.012);
+            ctx.lineTo(H * .07,y-H*.010);
+            ctx.stroke();
+          }
+          ctx.fillStyle = "#fff7d0";
+          ctx.beginPath(); ctx.arc(0, -H * .35, H * .025, 0, Math.PI * 2); ctx.fill();
+        }
         break;
+      }
       case "bolt":
         drawGlyph(ctx, "bolt", H * 0.20, -H * 0.02, H * 0.050, hot, d.spin);
         break;
