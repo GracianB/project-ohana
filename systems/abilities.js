@@ -102,7 +102,7 @@ function currentFlow(game, p) {
 const SIGNATURE_LINKS = Object.freeze({
   kilo:    { name: "SERENATA HULA", color: "#ffd36a" },
   stitcho: { name: "PLASMA ROLL", color: "#67ddff" },
-  chispin: { name: "FLASH CHAIN", color: "#ffe14a" },
+  chispin: { name: "CADENA RELÁMPAGO", color: "#ffe14a" },
   cat:     { name: "OVILLO SOMBRA", color: "#ffb6e4" },
   dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
   dino:    { name: "MORDISCO EN CARGA", color: "#c8f04a" },
