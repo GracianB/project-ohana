@@ -238,18 +238,24 @@ portraitClock.advance(now, () => {
     const fit = portraitFit(def, evo, bw, bh, hero);
     dummy.visualScale = fit.scale;
     const footY = fit.foot;
-    cv.dataset.evo = String(evo);
-    cv.dataset.fitScale = fit.scale.toFixed(4);
-    cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
-    if(def.id==="cuerno")cv.dataset.cuernoGrowth=CUERNO_PORTRAIT_GROWTH[evo].toFixed(2);
-    else delete cv.dataset.cuernoGrowth;
-    if (card) card.dataset.evo = String(evo);
+    const paintKey = evo + "|" + (hero ? 1 : 0) + "|" + cv.width + "|" + cv.height;
+    if (cv._lastPaintKey !== paintKey) {
+      cv._lastPaintKey = paintKey;
+      cv.dataset.evo = String(evo);
+      cv.dataset.fitScale = fit.scale.toFixed(4);
+      cv.dataset.fitEnvelope = fit.envelope.toFixed(2);
+      if (def.id === "cuerno") cv.dataset.cuernoGrowth = CUERNO_PORTRAIT_GROWTH[evo].toFixed(2);
+      else delete cv.dataset.cuernoGrowth;
+      card.dataset.evo = String(evo);
+      const shadow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
+      shadow.addColorStop(0, hero ? (def.id==="cuerno"&&evo===4 ? "rgba(177, 148, 236, 0.52)" : "rgba(255, 214, 120, 0.72)") : "rgba(0,0,0,0.35)");
+      shadow.addColorStop(1, "rgba(0,0,0,0)");
+      cv._glow = shadow;
+    }
     c.save();
     c.translate(bw / 2, footY);
     c.scale(1, 0.22);
-    const glow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
-    glow.addColorStop(0, hero ? (def.id==="cuerno"&&evo===4 ? "rgba(177, 148, 236, 0.52)" : "rgba(255, 214, 120, 0.72)") : "rgba(0,0,0,0.35)");
-    glow.addColorStop(1, "rgba(0,0,0,0)");
+    const glow = cv._glow;
     c.fillStyle = glow;
     c.beginPath();
     c.arc(0, 0, Math.max(36, bw * 0.42), 0, Math.PI * 2);
@@ -260,17 +266,20 @@ portraitClock.advance(now, () => {
     if (hero) c.rotate(sway);
     drawCharacter(c, dummy, { x: 0, y: 0 }, at);
     c.restore();
-    const role = card && card.querySelector(".role");
-    if (role) {
-      const en = (def.evoNames && def.evoNames[evo]) || form.name || def.name;
-      role.textContent = hero ? en : def.name;
+    const roleText = hero ? ((def.evoNames && def.evoNames[evo]) || form.name || def.name) : def.name;
+    if (cv._lastRoleText !== roleText) {
+      const role = card.querySelector(".role");
+      if (role) role.textContent = roleText;
+      cv._lastRoleText = roleText;
     }
-    const rail = card && card.querySelector(".form-rail");
-    if (rail) {
-      rail.querySelectorAll("i").forEach((dot, n) => {
+    const railKey = hero ? evo : -1;
+    if (cv._lastRailKey !== railKey) {
+      cv._railDots ||= [...card.querySelectorAll(".form-rail i")];
+      cv._railDots.forEach((dot, n) => {
         dot.classList.toggle("on", hero && n <= evo);
         dot.classList.toggle("now", hero && n === evo);
       });
+      cv._lastRailKey = railKey;
     }
   }
 });
