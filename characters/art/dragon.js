@@ -1,14 +1,3 @@
-// ============================================================================
-// DRAGÓN · dragón rojo y dorado (diseño original)
-// Escamas rojas, barriga crema con placas, cuernos y bigotes dorados,
-// alas de membrana y cola con punta de llama.
-//   0 Dragoncito  · bebé cabezón con cáscara de huevo y alitas diminutas
-//   1 Dragón      · pequeño, bípedo, alas pequeñas
-//   2 Dragón Alado· alas grandes, cresta dorada, más esbelto
-//   3 Dragón Real · armadura dorada en pecho y cabeza, cuernos grandes, cola con púas
-//   4 DRAGÓN FORMA FINAL  · dorado, alas de fuego, corona de llamas y ojos brillantes
-// pose.move: "fly" se dibuja como planeo batiendo alas (FORMA FINAL vuela).
-// ============================================================================
 
 const PI = Math.PI;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -24,7 +13,6 @@ const PAL = [
   { body: "#ffcf3a", belly: "#fff6d2", plate: "#f0c060", gold: "#fff2a0", mem: "#ff7a1a", bone: "#ffb32a", iris: "#fff4a0" },
 ];
 
-// proporciones por forma
 const F = [
   { r: 30, bw: 14, bh: 22, legL: 9, legW: 10, armL: 9, wing: 22, tail: 20, horn: 3, sn: 0.5 },
   { r: 25, bw: 14, bh: 29, legL: 14, legW: 10, armL: 13, wing: 36, tail: 30, horn: 9, sn: 0.62 },
@@ -33,9 +21,6 @@ const F = [
   { r: 21, bw: 15, bh: 36, legL: 19, legW: 11, armL: 16, wing: 70, tail: 44, horn: 15, sn: 0.7 },
 ];
 
-// ---------------------------------------------------------------------------
-// helpers locales
-// ---------------------------------------------------------------------------
 function chain(x, y, len, a0, wave, n) {
   const pts = [];
   let a = a0, px = x, py = y;
@@ -134,7 +119,6 @@ function wing(ctx, R, x, y, L, rot, open, c, final, t, far) {
   ctx.strokeStyle = final ? "#8a2a10" : R.INK;
   ctx.lineJoin = "round";
   ctx.stroke();
-  // huesos
   const bone = final ? "#ffe27a" : far ? R.darken(c.bone, 0.22) : c.bone;
   const bw = Math.max(2.2, L * (final ? 0.045 : 0.07));
   ctx.lineCap = "round";
@@ -150,12 +134,10 @@ function wing(ctx, R, x, y, L, rot, open, c, final, t, far) {
   ctx.beginPath();
   for (let i = 1; i < 3; i++) { ctx.moveTo(W[0], W[1]); ctx.lineTo(lerp(W[0], tips[i][0], 0.92), lerp(W[1], tips[i][1], 0.92)); }
   ctx.stroke();
-  // garrita del ala
   const cs = Math.max(3, L * 0.08);
   R.poly(ctx, [[W[0] - cs * 0.4, W[1]], [W[0] + cs * 0.7, W[1] - cs], [W[0] + cs * 0.5, W[1] + cs * 0.3]], c.gold, { lw: 1.6 });
   if (final) {
     for (let i = 0; i < 3; i++) flame(ctx, R, tips[i][0], tips[i][1], 3.4 + (i === 0 ? 1.2 : 0), tips[i][2], t, i + (far ? 5 : 0));
-    // lenguas de fuego en el borde
     for (let i = 1; i < 3; i++) {
       const a = tips[i - 1], b = tips[i];
       const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
@@ -206,7 +188,6 @@ function puff(ctx, R, x, y, r, a) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
 function drawBase(ctx, pose, R) {
   const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
   const r = P.r, bw = P.bw, bh = P.bh;
@@ -217,7 +198,6 @@ function drawBase(ctx, pose, R) {
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const flying = st === "glide" || pose.move === "fly" || pose.move === "float";
 
-  // ---- pose base
   let bob = pose.breath * 1.1, lean = 0.04, headRot = Math.sin(t * 0.025) * 0.04, hdx = 0, hdy = 0;
   let legF = 0, legB = 0, lenF = 1, lenB = 1;
   let armF = 0.35 + pose.breath * 0.05, armB = -0.15;
@@ -324,7 +304,6 @@ function drawBase(ctx, pose, R) {
     tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
   }
 
-  // gestos de espera
   if (fl > 0) {
     if (flN === 0) { // anillos de humo
       headRot = -0.25 * flE; jaw = 0.3 * flE; rings = fl;
@@ -356,23 +335,19 @@ function drawBase(ctx, pose, R) {
   ctx.save();
   if (st === "dead") { ctx.translate(40, -bw - 3); ctx.rotate(-PI / 2); }
 
-  // frame superior (torso) alrededor de la cadera
   const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
   const neckX = bw * 0.28 + hdx, neckY = -bh - r * 0.5 + hdy;
   const shX = bw * 0.38, shY = -bh * 0.74;
   const wingX = f === 0 ? -bw * 0.75 : -bw * 0.55, wingY = f === 0 ? -bh * 0.55 : -bh * 0.8;
   if (f === 0) { wRot -= 0.45; if (wRotFar !== null) wRotFar -= 0.45; }
 
-  // ---- ala lejana
   if (st !== "dead") { ctx.save(); upper();
   wing(ctx, R, wingX + 7, wingY - 3, P.wing * 0.9, wRotFar !== null ? wRotFar : wRot + 0.3, wOpen, c, final, t, true);
   ctx.restore(); }
 
-  // ---- cola
   ctx.save(); upper();
   const tpts = chain(-bw * 0.7, -4, P.tail, PI * 0.86, (k) => tailWave * (0.3 + k) + k * 6.5 - 1.6 + Math.sin(t * 0.09 + k * 3) * 0.3, 9);
   strokeChain(ctx, R, tpts, P.legW * 0.95, 3.5, c.body);
-  // barriga de la cola (línea crema)
   if (f >= 3) {
     for (let i = 2; i < tpts.length - 1; i += 2) {
       const p = tpts[i], a = p[2] + PI / 2, len = 5 + (1 - i / tpts.length) * 6;
@@ -388,26 +363,21 @@ function drawBase(ctx, pose, R) {
   flame(ctx, R, tip[0], tip[1], 3 + f * 0.7, tip[2], t, 3, final ? { outer: "#ff8a1a", mid: "#ffe45a" } : {});
   ctx.restore();
 
-  // ---- pierna trasera
   const legCol = dark;
   const lb = R.swingLimb(ctx, -4, hipY, P.legL * lenB, legB, 3, P.legW, legCol, { hand: false });
   foot(ctx, R, lb[0], lb[1], P.legW * 0.95, legCol, c.belly);
 
-  // ---- brazo trasero
   ctx.save(); upper();
   arm(ctx, R, shX - 5, shY - 1, P.armL, armB, P.legW * 0.52, legCol, c.belly);
   ctx.restore();
 
-  // ---- ala cercana
   if (st !== "dead") { ctx.save(); upper();
   wing(ctx, R, wingX, wingY, P.wing, wRot, wOpen, c, final, t, false);
   ctx.restore(); }
 
-  // ---- cuerpo
   ctx.save(); upper();
   const body = [[-bw * 0.95, -bh * 0.05], [-bw * 0.85, -bh * 0.6], [-bw * 0.3, -bh * 1.02], [bw * 0.5, -bh * 0.98], [bw * 1.0, -bh * 0.5], [bw * 0.92, -bh * 0.02], [0, bw * 0.28]];
   R.blob(ctx, body, c.body);
-  // barriga con placas
   const bel = [[bw * 0.08, -bh * 0.88], [bw * 0.66, -bh * 0.84], [bw * 0.93, -bh * 0.42], [bw * 0.74, -bh * 0.02], [bw * 0.1, bw * 0.12], [-bw * 0.18, -bh * 0.42]];
   R.blob(ctx, bel, c.belly, { lw: 1.6 });
   ctx.save();
@@ -419,7 +389,6 @@ function drawBase(ctx, pose, R) {
     ctx.beginPath(); ctx.moveTo(-bw * 0.3, y - 2); ctx.quadraticCurveTo(bw * 0.4, y + 3, bw * 1.1, y - 2); ctx.stroke();
   }
   ctx.restore();
-  // espinas dorsales
   if (f >= 2) {
     const n = 3;
     for (let i = 0; i < n; i++) {
@@ -428,7 +397,6 @@ function drawBase(ctx, pose, R) {
       R.poly(ctx, [[bx + 2, by + 2], [bx - 6 - f, by - 3], [bx + 1, by - 5]], c.gold, { lw: 1.6 });
     }
   }
-  // armadura real
   if (f === 3) {
     const plate = [[bw * 0.0, -bh * 0.94], [bw * 0.7, -bh * 0.9], [bw * 1.05, -bh * 0.55], [bw * 0.7, -bh * 0.38], [bw * 0.1, -bh * 0.42], [-bw * 0.15, -bh * 0.7]];
     R.blob(ctx, plate, c.gold);
@@ -444,7 +412,6 @@ function drawBase(ctx, pose, R) {
   R.shine(ctx, -bw * 0.4, -bh * 0.75, bw * 0.22, bh * 0.1, 0.35);
   ctx.restore();
 
-  // ---- pierna delantera
   const scratch = fl > 0 && flN === 2;
   const frontLeg = () => {
     const lf = R.swingLimb(ctx, 5, hipY, P.legL * lenF, legF, scratch ? -4 : 3, P.legW, c.body, { hand: false });
@@ -465,7 +432,6 @@ function drawBase(ctx, pose, R) {
   };
   if (!scratch) frontLeg();
 
-  // ---- cabeza
   ctx.save(); upper();
   ctx.translate(neckX, neckY + pose.bounce * 1.5);
   ctx.rotate(headRot);
@@ -474,7 +440,6 @@ function drawBase(ctx, pose, R) {
 
   if (scratch) frontLeg();
 
-  // ---- brazo delantero
   ctx.save(); upper();
   arm(ctx, R, shX, shY, P.armL, armF, P.legW * 0.56, c.body, c.belly);
   if (f === 3) R.ellipse(ctx, shX - 1, shY - 1, 5.5, 4.6, c.gold, { lw: 2 });
@@ -492,7 +457,6 @@ function drawBase(ctx, pose, R) {
   }
   ctx.restore();
 
-  // ---- ráfaga de alas (cast K)
   if (gust > 0) {
     ctx.save();
     ctx.globalAlpha *= gust;
@@ -509,7 +473,6 @@ function drawBase(ctx, pose, R) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
 function drawHead(ctx, R, pose, o) {
   const { f, c, P, r, t, final, jaw, eyeMood, hurtEyes } = o;
   const sn = P.sn;
@@ -517,9 +480,7 @@ function drawHead(ctx, R, pose, o) {
   const tipX = snX + snRx;
   const swayK = pose.sway;
 
-  // cuerno lejano
   if (f >= 1) horn(ctx, R, r * 0.28, -r * 0.05, r, P.horn * 0.85, R.darken(c.gold, 0.18), f);
-  // cresta dorada
   if (f >= 2 && !final) {
     for (let i = 0; i < 4; i++) {
       const a = -PI * 0.62 - i * 0.26;
@@ -529,12 +490,10 @@ function drawHead(ctx, R, pose, o) {
       R.poly(ctx, [[ex + px * 4, ey + py * 4], [ex + Math.cos(a - 0.25) * sp, ey + Math.sin(a - 0.25) * sp], [ex - px * 4, ey - py * 4]], c.gold, { lw: 1.8 });
     }
   }
-  // aleta-oreja
   const fin = r * (f === 0 ? 0.3 : 0.45);
   const fs = swayK * 3 + Math.sin(t * 0.07) * 1.5;
   R.poly(ctx, [[-r * 0.55, -r * 0.2], [-r * 0.6 - fin * 1.5, -r * 0.5 - fin * 0.4 + fs], [-r * 0.65 - fin * 0.8, -r * 0.1], [-r * 0.65 - fin * 1.4, r * 0.25 + fs], [-r * 0.5, r * 0.2]], c.mem, { lw: 2.2 });
 
-  // mandíbula + interior de la boca
   const hx = r * 0.12, hy = r * 0.52;
   const ja = jaw * 0.7;
   const jt = [hx + Math.cos(ja) * (tipX - hx - r * 0.08), hy + Math.sin(ja) * (tipX - hx - r * 0.08)];
@@ -546,7 +505,6 @@ function drawHead(ctx, R, pose, o) {
     ctx.closePath();
     ctx.fillStyle = "#6b1420"; ctx.fill();
     ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.stroke();
-    // lengua
     R.ellipse(ctx, lerp(hx, jt[0], 0.55), lerp(hy, jt[1], 0.55) - r * 0.04, r * 0.22, r * 0.08, "#ff6f86", { line: false, shade: false, rot: ja });
   }
   ctx.save();
@@ -563,7 +521,6 @@ function drawHead(ctx, R, pose, o) {
   }
   ctx.restore();
 
-  // cabeza (unión cráneo + hocico sin costuras)
   const shapes = [
     () => { ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.92, 0, 0, PI * 2); },
     () => { ctx.beginPath(); ctx.ellipse(snX, snY, snRx, snRy, -0.08, 0, PI * 2); },
@@ -572,7 +529,6 @@ function drawHead(ctx, R, pose, o) {
   for (const s of shapes) { s(); ctx.stroke(); }
   const vol = R.volume(ctx, r * 0.1, -r * 0.05, r * 1.15, c.body);
   for (const s of shapes) { s(); ctx.fillStyle = vol; ctx.fill(); }
-  // hocico más claro por debajo
   ctx.save();
   shapes[1](); ctx.clip();
   ctx.fillStyle = R.alpha(c.belly, 0.55);
@@ -580,26 +536,21 @@ function drawHead(ctx, R, pose, o) {
   ctx.restore();
   R.shine(ctx, -r * 0.35, -r * 0.5, r * 0.28, r * 0.14, 0.45);
 
-  // colmillo
   if (f >= 1 && jaw < 0.15) {
     ctx.fillStyle = "#ffffff"; ctx.strokeStyle = R.INK; ctx.lineWidth = 1.2;
     const fx = tipX - r * 0.3, fy = snY + snRy * 0.92;
     ctx.beginPath(); ctx.moveTo(fx - 2.2, fy - 1); ctx.lineTo(fx, fy + 4); ctx.lineTo(fx + 2.2, fy - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
   }
-  // sonrisa (comisura)
   if (jaw < 0.1) {
     ctx.strokeStyle = R.INK; ctx.lineWidth = 2; ctx.lineCap = "round";
     ctx.beginPath(); ctx.arc(r * 0.24, hy - r * 0.08, r * 0.1, 0.2, 1.8); ctx.stroke();
   }
 
-  // cuerno cercano
   if (f >= 1) horn(ctx, R, 0, 0, r, P.horn, c.gold, f);
   else {
-    // cuernitos bebé
     R.ellipse(ctx, -r * 0.1, -r * 0.88, 3.5, 5, c.gold, { rot: -0.4, lw: 2 });
   }
 
-  // cáscara de huevo (bebé)
   if (f === 0) {
     ctx.save();
     ctx.rotate(-0.18);
@@ -622,7 +573,6 @@ function drawHead(ctx, R, pose, o) {
     ctx.restore();
   }
 
-  // casco real
   if (f === 3) {
     ctx.save();
     ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.92, 0, 0, PI * 2); ctx.clip();
@@ -638,7 +588,6 @@ function drawHead(ctx, R, pose, o) {
     R.shine(ctx, r * 0.2, -r * 0.68, 1, 1.4, 0.9);
   }
 
-  // ojo
   const ex = r * 0.3, ey = -r * 0.12, er = r * (f === 0 ? 0.34 : 0.3);
   if (final) {
     ctx.save();
@@ -655,16 +604,13 @@ function drawHead(ctx, R, pose, o) {
   } else {
     R.eye(ctx, ex, ey, er, pose, { iris: final ? "#ffb400" : c.iris, pupil: final ? "#8a3a00" : "#1a0a10", mood: eyeMood });
   }
-  // ceja/cresta ósea
   if (f >= 2 && eyeMood !== "angry" && eyeMood !== "happy" && !hurtEyes) {
     ctx.strokeStyle = R.darken(c.body, 0.35); ctx.lineWidth = 3; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(ex - er * 0.9, ey - er * 1.25); ctx.quadraticCurveTo(ex, ey - er * 1.5, ex + er * 0.9, ey - er * 1.05); ctx.stroke();
   }
-  // orificio nasal
   R.ellipse(ctx, tipX - r * 0.14, snY - snRy * 0.35, 1.8, 1.2, R.INK, { line: false, shade: false, rot: -0.4 });
   R.blush(ctx, r * 0.18, r * 0.36, r * 0.14, "#ff5a6a");
 
-  // bigotes dorados
   if (f >= 1) {
     const wl = [0, 0.7, 0.9, 1.0, 1.15][f] * r;
     const sx = tipX - r * 0.2, sy = snY + snRy * 0.55;
@@ -681,7 +627,6 @@ function drawHead(ctx, R, pose, o) {
     }
   }
 
-  // corona de llamas (FORMA FINAL)
   if (final) {
     R.halo(ctx, -r * 0.05, -r * 1.25, r * 0.85, t, "#ffe27a");
     for (let i = 0; i < 5; i++) {
@@ -692,7 +637,6 @@ function drawHead(ctx, R, pose, o) {
     R.sparkle(ctx, r * 0.9, -r * 0.95, 3.5 + Math.sin(t * 0.2) * 1.5);
   }
 
-  // humo por la nariz (idle)
   if (o.smoke) {
     const cyc = (t % 150) / 150;
     if (cyc < 0.5) {
@@ -703,7 +647,6 @@ function drawHead(ctx, R, pose, o) {
       }
     }
   }
-  // anillos de humo (gesto 0)
   if (o.rings > 0) {
     for (let i = 0; i < 3; i++) {
       const kk = clamp(o.rings * 1.7 - i * 0.32, 0, 1);
@@ -718,7 +661,6 @@ function drawHead(ctx, R, pose, o) {
     }
   }
 
-  // aliento de fuego
   const mouthX = tipX - r * 0.05, mouthY = snY + snRy * 0.95;
   if (o.breath > 0 || o.breathUp > 0) {
     const k = Math.max(o.breath, o.breathUp);
@@ -731,7 +673,6 @@ function drawHead(ctx, R, pose, o) {
         final ? { outer: "#ff9a1a", mid: "#fff06a", ink: "#b0400a" } : {});
     }
   }
-  // rugido
   if (o.roar > 0.2) {
     ctx.save();
     ctx.globalAlpha *= o.roar;
@@ -777,7 +718,6 @@ function dragonSoul(ctx, pose, front) {
   ctx.lineCap = "round";
   if (!front) {
     if (flight) {
-      // Flight path follows the actor; no false displacement of the hitbox.
       const n = f >= 3 ? 5 : 3;
       for (let i = 0; i < n; i++) {
         const k = (i + 1) / n;
@@ -791,7 +731,6 @@ function dragonSoul(ctx, pose, front) {
     }
   } else {
     if (striking) {
-      // Three flame tongues emanate from the snout rather than full-screen flashes.
       const power = state === "attack" ? Math.sin(Math.PI * Math.max(0,Math.min(1,Number(p.atk)||0))) : .8;
       for (let i=0;i<3;i++) {
         ctx.globalAlpha = (.25+i*.12)*power;
@@ -803,7 +742,6 @@ function dragonSoul(ctx, pose, front) {
         ctx.stroke();
       }
     }
-    // Gust K bends warm wind around the wings; Roar L answers with two short echoes.
     if(state==="cast" && p.castSlot===1){
       const pulse=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(p.cast)||0)));
       ctx.globalAlpha=.38*pulse;ctx.strokeStyle="#c9eaff";ctx.lineWidth=1.6;
@@ -818,7 +756,6 @@ function dragonSoul(ctx, pose, front) {
         ctx.beginPath();ctx.arc(29,-58,13+i*9,-.65,.65);ctx.stroke();
       }
     }
-    // First winged form leaves a tiny grounded flame-heel mark, not a new emitter.
     if(f===1 && state==="run"){
       const beat=.5+.5*Math.sin(Number(p.phase)||t*.1);
       ctx.globalAlpha=.27*beat;ctx.fillStyle="#ffb568";
@@ -837,7 +774,6 @@ function dragonSoul(ctx, pose, front) {
         ctx.beginPath();ctx.ellipse(x,yy,1.4+(i%2),2.4+(f*.28),phase,0,Math.PI*2);ctx.fill();
       }
     }
-    // The final form gets a compact solar halo, never a second character.
     if (f===4 && (flight || striking || victorious)){
       const beat=.5+.5*Math.sin(t*.035);
       ctx.globalAlpha=.22+.13*beat;
@@ -855,7 +791,6 @@ function dragonSoul(ctx, pose, front) {
         ctx.beginPath(); ctx.moveTo(x-2,y); ctx.lineTo(x+2,y);ctx.moveTo(x,y-2);ctx.lineTo(x,y+2);ctx.stroke();
       }
     }
-    // Four-beat idle comedy: sneeze, airborne ember, attempted catch, royal composure.
     if (state==="idle" && (p.flourishN % 4)===3 && p.flourish>0) {
       const u=Math.max(0,Math.min(1,p.flourish));
       const k=Math.sin(Math.PI*u), catchUp=Math.max(0,Math.min(1,(u-.48)*3));
