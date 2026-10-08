@@ -1,9 +1,5 @@
-// ============================================================================
 // EVOLUTION · identidad visual de forma
-// ----------------------------------------------------------------------------
 // La forma 0 → 4 cambia lenguaje corporal, énfasis de silueta y firma visual.
-// CONTRATO: solo presentación. No modifica hitbox, daño, alcance ni física.
-// ============================================================================
 
 const ALIAS = Object.freeze({
   lilo: "kilo",
@@ -168,8 +164,6 @@ export function evolutionMessage(id, evo) {
   });
 }
 
-// Perfil anatómico visual por personaje.
-// No altera la hitbox: solo modifica la lectura del cuerpo ya dibujado por cada art.
 export const EVOLUTION_FORM_PROFILES = Object.freeze({
   kilo:    Object.freeze({ bodyX:[0.90,0.98,1.04,1.10,1.16], bodyY:[0.92,1.00,1.08,1.16,1.22], stance:[-0.015,0.00,0.035,0.060,0.085], lift:[0.00,0.00,0.006,0.010,0.016], combat:[0.86,0.98,1.08,1.18,1.30] }),
   stitcho: Object.freeze({ bodyX:[0.88,0.96,1.00,1.05,1.10], bodyY:[0.90,1.00,1.10,1.18,1.27], stance:[0.025,0.035,0.075,0.115,0.15], lift:[0.00,0.00,0.008,0.014,0.022], combat:[0.90,1.02,1.12,1.24,1.38] }),
@@ -743,7 +737,6 @@ export function drawEvolutionCinemaFX(ctx, id, evo, cx, cy, H, t, color, strengt
     ctx.fill();
   }
 
-  // Cinco marcas de progreso forman un sello visual común, con la etapa activa destacada.
   const meterR = orbit * 0.76;
   const meterY = base * 0.18;
   for (let i = 0; i < 5; i++) {
@@ -938,7 +931,6 @@ export function drawEvolutionDesignFX(ctx, p, H, pose, t, front = false) {
         break;
     }
   } else {
-    // Capa frontal: emblema central + pequeños nodos. Evita tapar la cara completa.
     ctx.fillStyle = hot;
     ctx.globalAlpha *= 0.72;
     switch (d.motif) {
