@@ -1,3 +1,16 @@
+## 08/10/2026 · V54 FRITA CRISPY SOUL PASS · PROPOSED
+
+**Caché:** `ohana-254`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** reservado para el último personaje.
+
+- La cuarta microescena de espera hace malabares con sal: lanza un cristal, casi falla y lo atrapa; el efecto sigue su espina flexible.
+- El resbalón lleva estela propia de kétchup y oro, sin mover hitboxes ni duplicar sprites.
+- La U de Frita se organiza en cuatro escenas: patata fugitiva → captura en tenedor → remolino de kétchup → estallido crujiente.
+- Evoluciones con identidad: Palito tímido, Frita surfista, Capitán Kétchup, Extra Crujiente y Frita Centella.
+- Pruebas Unit y Browser/Visual capturan las cinco siluetas con comprobaciones reales de píxeles y escala.
+- Se preserva el identificador `potato-catch`, la intro/Atrium coral y el comportamiento del resto de personajes.
+- Contrato de assets `ohana-254` aplicado a index.html, Service Worker, tests y PROGRESS.
+- QA de cierre: `node tests/browser/e2e.mjs`, `node tests/browser/visual-regression.mjs`, `release:check`.
+
 ## 08/10/2026 · V53 DRAGÓN SOLAR SOUL PASS · PROPOSED
 
 **Caché:** `ohana-253`. **Contrato:** 10 personajes · 5 formas · 10 salas.
