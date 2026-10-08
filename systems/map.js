@@ -198,7 +198,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
   const pulse = 0.5 + Math.sin(t / 8) * 0.18;
   const stage = evo || 0;
 
-  // One clean, glowing sign per door. `anchor` = "left" | "right" | "center".
   function sign(wx, wy, arrow, destId, anchor) {
     const dest = ROOMS[destId];
     const lock = dest && dest.needEvo != null && stage < dest.needEvo;
@@ -241,7 +240,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // dark elliptical rim / mouth of the pit
     ctx.beginPath();
     ctx.ellipse(x, y + 36, 78, 28, 0, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(" + rim + ",.92)";
@@ -250,7 +248,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // depth mouth (radial): aqua descent vs black-hole mortal
     const hole = ctx.createRadialGradient(x, y + 36, 2, x, y + 36, 52);
     if (deadly) {
       hole.addColorStop(0, "rgba(0,0,0,.98)");
@@ -266,7 +263,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.beginPath();
     ctx.ellipse(x, y + 36, 58, 20, 0, 0, Math.PI * 2);
     ctx.fill();
-    // soft aqua glow ring for non-mortal descent
     if (!deadly) {
       ctx.strokeStyle = "rgba(126,231,255," + (0.4 + pulse * 0.4) + ")";
       ctx.lineWidth = 5;
@@ -275,7 +271,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
       ctx.stroke();
     }
 
-    // animated swirl / vortex arcs
     ctx.strokeStyle = "rgba(" + c + "," + (0.25 + pulse * 0.35) + ")";
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
@@ -288,7 +283,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
       ctx.stroke();
     }
 
-    // chevrons pointing down into the hole
     ctx.strokeStyle = "rgba(" + c + "," + (0.55 + pulse * 0.45) + ")";
     ctx.lineWidth = 3.5;
     for (let i = 0; i < 2; i++) {
@@ -301,7 +295,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
     }
     ctx.lineCap = "butt";
 
-    // high-visibility label plate
     ctx.font = "900 16px Outfit, system-ui, sans-serif";
     const tw = Math.max(110, ctx.measureText(label).width + 28);
     const th = 28;
@@ -327,7 +320,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
   if (room.doors.left) sign(40, 356, "←", room.doors.left, "left"); else wall(-4, 80, 20, 700);
   if (room.doors.up) sign(800, 22, "↑", room.doors.up, "center");
 
-  // Down / pit: exactly ONE indicator.
   if (room.doors.down) {
     if (room.pit) {
       const dest = ROOMS[room.doors.down];
@@ -336,7 +328,6 @@ export function drawSigns(ctx, room, cam, t, evo) {
       sign(800, ROOM_H - 56, "↓", room.doors.down, "center");
     }
   } else if (room.pit) {
-    // Beach pit = visual hint down to Arrecife (not lethal). Other lone pits stay deadly.
     if (room.id === "beach") pit("↓ ARRECIFE", false);
     else pit("POZO MORTAL", true);
   }
