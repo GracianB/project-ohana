@@ -161,6 +161,7 @@ try {
   await page.waitForTimeout(520);
   const livingSelect = await page.evaluate(() => ({
     hero:document.querySelector('#char-select')?.dataset.hero || '',
+    atriumOn:document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
     scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
     stitchoBeat:document.querySelector('#chars-grid .char-card.selected')?.dataset.stitchoBeat || '',
     visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
@@ -170,7 +171,7 @@ try {
   }));
   assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
   assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
-  assert.equal(livingSelect.visible.length, 5, '01b-living-select: coverflow pierde profundidad');
+  assert.equal(livingSelect.visible.length, livingSelect.atriumOn ? 10 : 5, '01b-living-select: profundidad Atrium/carrusel incorrecta');
   assert.equal(livingSelect.stitchoBeat, 'plasma-roll', '01d-stitcho: coreografía de selector incorrecta');
   await capture(page, '01b-character-select-stitcho-world');
   await capture(page, '01d-stitcho-plasma-roll');
