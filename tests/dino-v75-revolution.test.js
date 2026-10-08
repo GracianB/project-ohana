@@ -59,7 +59,7 @@ test("Dino V75 L spawns limited distinct mint meteors while preserving ground qu
   assert.ok(meteors.every(m => m.dino === true && m.vy > 0 && m.R === 62));
   assert.ok(meteors.every(m => Number.isFinite(m.x) && Number.isFinite(m.y)));
   assert.equal(ABILITY_DEFS.meteor.name, "Lluvia de meteoros", "Dragon must remain intact");
-  assert.equal(supremeOf("dino").id, "titan", "U remains reserved");
+  assert.equal(supremeOf("dino").id, "impact", "U remains reserved");
 });
 
 test("Dino V75 has 100 actual form-specific art tuning values, all used by its renderer", () => {
