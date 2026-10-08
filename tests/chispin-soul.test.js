@@ -25,3 +25,14 @@ test('V50 Chispín U and evolution preserve bespoke electrical identity', () => 
   assert.match(cinema, /const crown=seg\(k,\.19,\.56\)/);
   assert.match(evolution, /La corona aurora despierta/);
 });
+
+test('V50 all five forms have distinct bounded storm motifs', () => {
+  const scene = art.slice(art.indexOf('function stormSoul('), art.indexOf('\nfunction draw(', art.indexOf('function stormSoul(')));
+  assert.match(scene, /if \(f === 0\)/);
+  assert.match(scene, /else if \(f === 1\)/);
+  assert.match(scene, /else if \(f === 2\)/);
+  assert.match(scene, /else if \(f === 3\)/);
+  assert.match(scene, /ctx\.lineTo\(19, cy - 25\)/);
+  assert.match(scene, /portrait-friendly character envelope/);
+  assert.doesNotMatch(scene, /ctx\.filter\s*=|shadowBlur\s*=|setTimeout|setInterval/);
+});
