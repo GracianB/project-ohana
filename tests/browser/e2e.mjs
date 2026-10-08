@@ -433,6 +433,25 @@ try {
     'desktop: Pizza L no usa slot 2'
   );
 
+  // V47B — U nunca debe lanzar lateralmente al héroe sin input.
+  const supremeDrift = await page.evaluate(() => {
+    const api = window.__OHANA_E2E;
+    const out = {};
+    for (const id of ['chispin','frita']) {
+      api.start(id);
+      api.setEvo(4);
+      api.setPlayer(620, 900);
+      api.setPlayerVelocity(0, 0);
+      api.resetInput();
+      api.cast(3);
+      out[id] = api.step(4);
+    }
+    return out;
+  });
+  for (const id of ['chispin','frita']) {
+    assert.ok(Math.abs(supremeDrift[id].player?.vx || 0) < 0.05, 'V47B: ' + id + ' sale corriendo al pulsar U');
+  }
+
   // V39 — Dragón: agota sus saltos normales y obtiene una Batida de Alas real.
   await page.evaluate(() => {
     const api = window.__OHANA_E2E;
