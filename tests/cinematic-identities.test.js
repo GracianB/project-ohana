@@ -12,7 +12,7 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 const { EVOLUTION_CINEMA_PROFILES } = await import('../characters/evolution.js');
 const { evolutionTiming } = await import('../systems/evolution-timing.js');
 const { SUPREME_IDENTITY, supremeOf, useAbility, clearAbilityFx } = await import('../systems/abilities.js');
-const { SUPREME_STORYBOARDS } = await import('../systems/supreme-cinema.js');
+const { SUPREME_STORYBOARDS } = await import('../systems/supreme-storyboards.js');
 
 const CHARACTERS = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
 
