@@ -74,6 +74,7 @@ export function cuernoTailPose(pose,form,t){
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
  const time=Number.isFinite(Number(t))?Number(t):0;
  const running=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
+ if(pose?.state==="dead"||pose?.state==="hurt")return {swing:0,lift:0};
  const amplitude=f===4?6.2:f===3?5.4:4.2;
  const wave=Math.sin(time*.075+phase*.22)*amplitude*.55+
    (running?Math.sin(phase)*amplitude*.52:0);
@@ -102,6 +103,7 @@ function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
 export function cuernoWingPose(pose,form,t){
  if(form<3)return {open:0,flap:0,hinge:0};
  const state=pose?.state||"idle",air=!!pose?.air||state==="jump";
+ if(state==="dead"||state==="hurt")return {open:.12,flap:0,hinge:0};
  const cast=state==="cast"||state==="attack",victory=state==="victory";
  const slot=cuernoMagicPose(pose,form)?.slot;
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
@@ -214,8 +216,8 @@ function drawCuernoFamilySeal(ctx,pose,R,form,t){
    ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.35;ctx.globalAlpha=.36;
    if(form===0){ // Cuernín imagines its first tiny halo.
      ctx.beginPath();ctx.ellipse(0,-44,13,4,Math.sin(t*.035)*.1,0,TAU);ctx.stroke();
-   }else if(form===1){ // Destello's growing ears hear its own first song.
-     for(const dx of [-1,1]){ctx.beginPath();ctx.arc(10+dx*10,-75,5,-1.45,-.45);ctx.stroke();}
+   }else if(form===1){ // Destello has no ears or limbs yet: musical glints around its horn.
+     for(const dx of [-1,1]){ctx.beginPath();ctx.arc(4+dx*13,-69,3,-1.45,.45);ctx.stroke();}
    }else if(form===2){ // Potro Iris prances with little silver horseshoes.
      for(const dx of [-22,14]){ctx.beginPath();ctx.arc(dx,4,7,.25,2.9);ctx.stroke();}
    }else if(form===3){ // Estelar carries a tiny map of its first night.
