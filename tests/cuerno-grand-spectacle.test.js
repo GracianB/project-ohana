@@ -37,7 +37,7 @@ test("V68 grand film uses four ordered and bounded acts",()=>{
  }
  assert.match(SUPREME_STORYBOARDS.cuerno.beat,/ALIENTO → CÍRCULO → SUEÑO → AURORA/);
  assert.equal(SUPREME_STORYBOARDS.cuerno.duration,2.12);
- assert.match(cinema,/drawStory\(ctx,def.id,k,t,cx,cy,target,color,detail\.dreamTargets\)/);
+ assert.match(cinema,/drawStory\(ctx,def.id,k,t,cx,cy,target,color,detail\.dreamTargets,reduce\)/);
  assert.match(cinema,/el\.dataset\.cuernoPhase=stage\.name/);
  assert.match(cinema,/p\._cuernoMagicSlot=k>=\.22&&k<\.76\?3:-1/);
  assert.match(visual,/09p-cuerno-u-grand-spectacle/);
