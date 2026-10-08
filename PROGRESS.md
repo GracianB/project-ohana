@@ -1,3 +1,13 @@
+## 08/10/2026 · V50 CHISPÍN SOUL PASS · PROPOSED
+
+- Chispín conserva su identidad de ajolote-hurón eléctrico: branquias, cola de muelle, saltitos y sonrisa.
+- Nueva cuarta microescena en idle: intenta atrapar el relámpago, recibe un calambre y transforma la descarga en un pequeño baile.
+- Efectos SVG-free Canvas 2D según forma y estado: trazos violeta, huella eléctrica, Cloudstep en Trueno Gordo y corona aurora final.
+- Efectos contenidos alrededor del personaje, sin temporizadores ni sistemas de partículas persistentes.
+- Selector con pose de canalización y evolución con trayectoria narrativa individual.
+- Escena de U: movimiento vertical más legible y evolución narrativa hacia conductor de tormentas.
+- Pendiente: validación CI/browser/visual regression antes de considerar release.
+
 ## 08/10/2026 · V49 STITCHO SOUL PASS
 
 **Caché:** `ohana-241`.
