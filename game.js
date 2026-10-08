@@ -3092,6 +3092,15 @@ if (
   event.target?.closest?.("input, textarea, select, [contenteditable='true']")
 ) return;
 
+// A running victory film owns Escape: skip to its results instead of
+// opening the pause/menu handler underneath the cinematic overlay.
+const endingOverlay = document.getElementById("win-cinema");
+if (endingOverlay?.classList.contains("cinema-running")) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  endingOverlay.querySelector(".win-skip")?.click();
+  return;
+}
 event.preventDefault();
 event.stopImmediatePropagation();
 escape();

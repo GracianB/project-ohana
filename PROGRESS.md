@@ -1,3 +1,18 @@
+## 08/10/2026 · OHANA V82 · OPTIMIZACIÓN DE SESIONES LARGAS Y ÚLTIMO CINE
+
+**Base:** `main` tras integrar V81 rendimiento y la anatomía de Dino y Cuerno, commit `4c2ec0b3`. Versión de caché `ohana-282`.
+
+### Problemas corregidos
+- El bucle de efectos del Atrium solicitaba fotogramas constantemente aunque la pestaña estuviera oculta o el juego activo, aun sin pintar nada. V82 **detiene el propio bucle** y lo reinicia solo al volver al menú o hacerse visible la pestaña.
+- Cada fotograma de Atrium calculaba repetidamente la posición de las tarjetas al dibujar enlaces, héroes y estelas. Ahora utiliza **una lista de centros compartida por fotograma**, manteniendo el efecto y reduciendo lecturas de geometría.
+- Los retratos del selector reescribían atributos DOM `data-evo`, `data-fit-scale`, `data-fit-envelope` y estados de Cuerno/Stitcho en cada cuadro, incluso si el dibujo era el único cambio. Ahora se actualizan **solo al variar realmente la forma, encaje o pose**, sin reducir su frecuencia de renderizado.
+- El diálogo del final reutilizaba el mismo nodo y acumulaba escuchas de teclado si se saltaba la película con ratón. El manejador se reemplaza por película y no intercepta teclas cuando ya se muestran resultados. Además, Escape en captura global tenía prioridad indebida sobre la película: ahora, si el final está ejecutándose, el motor envía Escape directamente al botón de resultados antes de considerar la pausa, sin cambiar física, combate ni habilidades.
+- La cinemática adapta la resolución del lienzo a rotaciones/cambios de ventana y elimina el listener de redimensionamiento al terminar. Conserva los **12 segundos** de reunión, el salto y el modo de movimiento reducido.
+
+**QA V82:** pruebas unitarias específicas y regresión de navegador con dos victorias sucesivas (Kilo y Cuerno) y salto por teclado. Mantiene Node, Browser E2E, Multiplayer E2E, matriz visual y Release Gate. La publicación queda bloqueada hasta que todo pase.
+
+**Alcance:** infraestructura compartida, sin cambios en `characters/art/dino.js`, `characters/art/cuerno.js`, J/K/L/U, física ni hitboxes. Dino puede continuar tras merge/deploy.
+
 ## 08/10/2026 · V81 · ENTREGADA DINO + CUERNO / CACHÉ OHANA-281
 
 **Estado:** fusionadas V81 rendimiento (PR #212) y V81 anatomía Dino/Cuerno (PR #211) en el mismo `main`, commit `cbef5e6b`. La actualización `ohana-281` invalida el caché anterior `ohana-280` después de publicar las nuevas formas y movimientos, sin alterar los archivos del juego. `sw.js`, `index.html` y sus pruebas usan la misma versión. Este lanzamiento sigue condicionado al Release Gate completo.
