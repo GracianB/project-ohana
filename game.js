@@ -473,7 +473,8 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
-game.dragonTrial = id === "volcano" ? newDragonTrial() : null;
+// Keep the ritual when briefly leaving Caldera, never restart a completed reward.
+if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
@@ -651,6 +652,7 @@ game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
+game.dragonTrial = null;
 game.best = null;
 Surprises.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;

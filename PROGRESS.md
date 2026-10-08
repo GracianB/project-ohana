@@ -1,3 +1,10 @@
+## 08/10/2026 · OHANA V88 · RITO DEL DRAGÓN · ohana-288
+
+- Las tres brasas ahora se **canalizan en orden** Aliento → Batida → Ascenso: se necesita mantener proximidad durante 30 fotogramas por brasa. Alejarse reinicia solo la carga actual.
+- El lienzo dibuja un aro de progreso 0–100%, indica qué brasa sigue y el rito es viable para los 10 personajes.
+- Salir temporalmente de la Caldera ya no reinicia sus brasas; iniciar nueva partida sí. Recompensa única por sesión y sin bloqueos incompatibles con multiplayer.
+- Tests de lógica y E2E del recorrido actualizados, cache `ohana-288`.
+
 ## 08/10/2026 · OHANA V87 · SANTUARIO DEL DRAGÓN + U IMPACTO EN VIVO · ohana-287
 
 - La Caldera incluye tres Brasas del Dragón colocadas a distintas alturas. Al tocarlas se despiertan; la tercera concede cura limitada y puntuación. Sigue siendo opcional: nunca bloquea una puerta por estado no sincronizado en multijugador.
