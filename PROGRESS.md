@@ -1,3 +1,19 @@
+## 08/10/2026 · OHANA V80 · RENDIMIENTO DEL CARRUSEL Y EPÍLOGO
+
+**Base:** main con Dino y Cuerno V79 juntos (`8d15da20`). Caché nueva: `ohana-279`. Línea de trabajo de rendimiento compartido, sin tocar las ramas de personajes.
+
+- **Tres tarjetas de verdad:** el selector hace accesibles solo protagonista y dos vecinos, igual que su representación visual.
+- **Lienzos:** protagonista a 24 fps, vistas previas laterales a una frecuencia máxima aproximada de 8 fps y refresco inmediato tras cambiar de personaje. `ResizeObserver` invalida las dimensiones del lienzo sin forzar mediciones de layout en cada cuadro.
+- **Menos escritura en DOM:** nombre de forma e indicadores de evolución se actualizan cuando cambian forma o selección, no en cada fotograma.
+- **Fondo más ligero:** animación procedural a ~13 fps, con DPR máximo de 1.12–1.25 para evitar repintados gigantes. La mezcla de escenarios mantiene una transición de ritmo equivalente.
+- **Filtros:** retirados drop-shadow sobre Canvas y saturación/brillo de las tarjetas laterales, que obligaban a compositar imágenes animadas completas.
+- **Visibilidad:** bucles de portada dejan de dibujar en pestañas ocultas y se reanudan al regresar.
+- **Final más cinematográfico:** pasa de 7.4 a 10.2 segundos. La familia entra antes del plano general y el gran titular se reserva para el 88–97% de la escena, tras la reunión. El cartel de resultados permanece oculto hasta completar la secuencia, con salto manual y movimiento reducido a 1.6 segundos.
+- **Fotogramas de la cinemática:** 24 fps como máximo aunque los 10 personajes se dibujen juntos. La progresión se basa en tiempo transcurrido real.
+- **Seguridad:** tests específicos, CI de Node, E2E, multijugador, regresión visual y Release Gate. Sin modificaciones de arte, habilidades, físicas o hitboxes de Dino ni Cuerno.
+
+**Publicación condicionada a pruebas completas en verde.**
+
 ## 08/10/2026 · CUERNO V79 · ESPIRAL VERDADERA
 
 **Base:** main con Cuerno V78 y Dino V76/V77; caché `ohana-278`.
