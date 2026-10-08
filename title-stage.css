@@ -435,3 +435,47 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 @media(max-width:560px){
   #char-select .hero-stage::before{width:230px!important;height:58px!important}
 }
+
+
+/* ==========================================================================
+   V81 · RENDERING CONTRACT: THREE CARDS, ZERO FILTER PASSES
+   Applies AFTER V45/V47 selectors so legacy !important filters cannot override
+   V80's low-cost carousel. The radial spotlights preserve the magical finish.
+   ========================================================================== */
+#char-select #chars .char-card{
+  filter:none!important;
+  will-change:auto!important;
+  transition:transform .32s cubic-bezier(.2,.8,.2,1),opacity .25s ease!important;
+}
+#char-select #chars .char-card.selected,
+#char-select #chars .char-card.is-prev,
+#char-select #chars .char-card.is-next{
+  filter:none!important;
+  will-change:transform,opacity!important;
+}
+#char-select #chars .char-card.is-prev2,
+#char-select #chars .char-card.is-next2{
+  display:none!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
+}
+#char-select #chars .char-card .portrait canvas,
+#char-select #chars .char-card.selected .portrait canvas,
+#char-select #chars .char-card.selected[data-evo="4"] .portrait canvas{
+  filter:none!important;
+}
+#char-select #chars .char-card::before{
+  filter:none!important;
+  background:radial-gradient(circle,color-mix(in srgb,var(--tint) 19%,transparent),transparent 72%);
+}
+#char-select .hero-stage::before{
+  filter:none!important;
+  background:radial-gradient(ellipse at center,color-mix(in srgb,var(--hero-tint) 18%,transparent),transparent 75%)!important;
+}
+#char-select .hero-dossier,
+#char-select .title-controls,
+#char-select .brand-bar{backdrop-filter:none!important}
+@media(prefers-reduced-motion:reduce){
+ #char-select #chars .char-card{transition:none!important;will-change:auto!important}
+}
