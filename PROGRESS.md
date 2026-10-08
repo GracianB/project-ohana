@@ -1,3 +1,18 @@
+## 08/10/2026 · V62 CUERNO · MENSAJE 4/10 · UNICORNIO ESTELAR
+
+**Caché:** `ohana-261`. **Contrato:** 10 personajes / 5 formas. Dino e intro de Grok intactos.
+
+### Evolución 3: primera forma adulta de verdad
+- Forma 3 reconstruida desde cero en Canvas: lomo largo, grupa alta, pecho, cuello curvo unido al cuerpo, cabeza con hocico y orejas, melena de cinco mechones animados, cola astral, espiral de cuerno y constelación discreta en el flanco.
+- Galope de cuatro tiempos: pezuñas, rodillas y patas en fases independientes; animaciones diferentes de carrera, salto, ataque, victoria, idle y florecimiento. Sin PNG, sin timers, sin FX persistentes y sin mover la hitbox.
+- Legibilidad sin saturación: reflejos azules, rosas y dorados; tres líneas de velocidad ligadas a carrera, no un montón de partículas.
+- **Salto de fases explícito:** las fases 1/10 y 2/10 están fusionadas; la 3/10 Potro Iris no se ha realizado todavía y no se considera terminada. La forma 2 sigue siendo el arte provisional anterior.
+- Se conserva la forma 0 (cuerno mágico sin patas), la forma 1 (Destello de dos pezuñas), la velocidad 8.4 y salto 17.4 de la forma estelar, y los mismos poderes J/K/L/U.
+- Tests Node instrumentan el dibujo para contar articulaciones y comprobar cuatro fases de carrera, salto, identidad, Canvas balanceado y ausencia de efectos asíncronos.
+- Matriz visual Chromium: cinco formas 0-4, captura especial de Unicornio Estelar y prueba de gameplay de forma 3 con errores JS vigilados.
+- Optimización solo de sangría/espacios en dos módulos para mantener el presupuesto estricto de JavaScript (1,5 MB). Caché sincronizada `ohana-261`.
+- **Siguiente en orden solicitado:** 5/10 · Unicornio Aurora, diseño definitivo. **Pendiente por recuperar:** 3/10 · Potro Iris.
+
 ## 08/10/2026 · V60 CUERNO · MENSAJE 2/10 · PRIMERA METAMORFOSIS
 
 **Caché:** `ohana-260`. **Contrato:** diez héroes / cinco formas. Dino y la intro de Grok sin modificaciones.
