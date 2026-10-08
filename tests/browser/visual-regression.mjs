@@ -707,16 +707,23 @@ try {
   const cuernoCinema=await page.locator('#supreme-cinema').evaluate(el=>({
     id:el.dataset.activeId,story:el.dataset.story,phase:el.dataset.cuernoPhase,
     beat:el.dataset.beat,mode:el.dataset.mode,
-    dreamTargets:Number(el.dataset.dreamTargets||0)
+    dreamTargets:Number(el.dataset.dreamTargets||0),
+    finalForm:el.dataset.cuernoFinal
   }));
   assert.equal(cuernoCinema.id,'cuerno','09p-cuerno: wrong cinematic hero');
   assert.equal(cuernoCinema.story,'dream-rainbow','09p-cuerno: wrong U sequence');
+  assert.equal(cuernoCinema.finalForm,'aurora','09r-cuerno: F4 film lacks final form crest');
   assert.equal(cuernoCinema.mode,'storyboard','09p-cuerno: wrong cinematic mode');
   assert.ok(Number.isInteger(cuernoCinema.dreamTargets)&&cuernoCinema.dreamTargets>=0,
     '09q-cuerno: U cinema missing real sleeper count');
   assert.ok(['breath','iris','dream','aurora'].includes(cuernoCinema.phase),'09p-cuerno: four acts absent');
   assert.match(cuernoCinema.beat,/ALIENTO.*CÍRCULO.*SUEÑO.*AURORA/);
   await capture(page,'09p-cuerno-u-grand-spectacle');
+  // QA-only: briefly hide the film to capture the actual world while U is still alive.
+  // Waiting until the 2.12 s film ends would miss a 150-tick gameplay field.
+  const cinemaMask=await page.addStyleTag({content:'#supreme-cinema{visibility:hidden!important}'});
+  await capture(page,'09r-cuerno-aurora-final-u-canopy');
+  await cinemaMask.evaluate(tag=>tag.remove());
   assert.deepEqual(dreamErrors,[],'09k/09l: Cuerno L/U runtime exception');
   page.off('pageerror',onDreamError);
 

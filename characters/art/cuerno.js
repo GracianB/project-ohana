@@ -592,6 +592,18 @@ const y=-i*8,w=4.7-i*.55;ctx.beginPath();ctx.moveTo(-w,y+2);
 ctx.quadraticCurveTo(0,y+5,w,y-2);ctx.stroke();
 }
 ctx.restore();
+// F4 U is carried by the anatomy: the living horn crowns the quiet dream.
+if(magic?.slot===3){
+ctx.save();ctx.lineCap="round";
+const bloom=Math.max(.15,Math.min(1,magic.strength||.35));
+for(let i=0;i<7;i++){
+const angle=(i/7)*Math.PI*1.4-.25;
+ctx.strokeStyle=colors[i%colors.length];ctx.lineWidth=1.4;
+ctx.globalAlpha=(.22+i*.025)*bloom;
+ctx.beginPath();ctx.arc(33,-139,11+i*2,angle,angle+.62);ctx.stroke();
+}
+ctx.restore();
+}
 // Rare magical accents appear with actions, not perpetual particles.
 if(cast||triumph||flourish>.12){
 ctx.save();ctx.globalAlpha=.35+.3*Math.max(flourish,.1);

@@ -431,6 +431,7 @@ add({
 kind: "supremeField",
 mode: p.id,
 dreamTargets: p.id === "cuerno" ? dreamTargets : null,
+evo: p.id === "cuerno" ? evo : null,
 x: cx(p),
 y: cy(p),
 life: p.id === "yomi" ? 170 : 150,
@@ -447,8 +448,10 @@ if ((flow.assist || p.id === "yomi") && def.ally) summonAssist(game, p, def.ally
 
 game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: (flow.assist || p.id === "yomi") ? def.ally : "" };
 game.flashColor = def.color;
-game.flash = Math.max(game.flash || 0, 20);
-game.shake = Math.min(26, (game.shake || 0) + 12);
+// Aurora F4 feels majestic rather than stroboscopic; other U effects are untouched.
+const gentleAurora=p.id==="cuerno"&&evo===4;
+game.flash = Math.max(game.flash || 0, gentleAurora ? 5 : 20);
+game.shake = Math.min(26, (game.shake || 0) + (gentleAurora ? 3 : 12));
 game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
@@ -2178,6 +2181,12 @@ ctx.strokeStyle=colors[(halos+i*2)%7];ctx.beginPath();
 ctx.ellipse(0,0,w*(.66+i*.08)+bob*.6,h*(.67+i*.06)+bob*.4,-.06,Math.PI*.09,Math.PI*1.91);
 ctx.stroke();
 }
+// A visible but gentle echo of each of the five damage pulses, only in F4.
+if(Number(f.evo)===4&&!reduced){
+const k=Math.max(0,(Number(f.pulse)||0)%26)/26;
+ctx.globalAlpha=.18*(1-k)*fade;ctx.lineWidth=1.2;ctx.strokeStyle="#fff4d5";
+ctx.beginPath();ctx.ellipse(0,0,w*(.80+.24*k),h*(.82+.23*k),0,0,TAU);ctx.stroke();
+}
 ctx.strokeStyle="#f8e7ff";ctx.lineWidth=1.6;ctx.globalAlpha=.72*fade;
 ctx.beginPath();ctx.arc(0,-h*.78-4-bob,4.3,-.85,2.13);ctx.stroke();
 ctx.beginPath();ctx.moveTo(-w*.22,-h*.07);ctx.quadraticCurveTo(-w*.12,1,-w*.02,-h*.07);
@@ -2186,6 +2195,40 @@ ctx.fillStyle=colors[(halos+5)%7];ctx.font="700 11px sans-serif";
 ctx.textAlign="center";ctx.globalAlpha=.68*fade;
 ctx.fillText("z",w*.34,-h*.68-(reduced?0:2*bob));ctx.restore();halos++;
 }
+ctx.restore();
+}
+
+// V72 · F4 only. A quiet seven-colour horizon expands past every screen corner.
+// This is a renderer envelope, NEVER an extra gameplay hitbox or damage radius.
+export function cuernoAuroraDomePose(f,w,h){
+if(f?.mode!=="cuerno"||Number(f?.evo)!==4||!(Number(f?.life)>0))return null;
+const max=Math.max(1,Number(f.max)||150);
+const phase=Math.max(0,Math.min(1,1-f.life/max));
+const open=Math.min(1,phase/.55),ease=1-(1-open)**2;
+const diagonal=Math.hypot(Math.max(1,Number(w)||1),Math.max(1,Number(h)||1));
+const fade=Math.min(1,phase*12,Number(f.life)/20);
+return {radius:diagonal*(.08+1.10*ease),fade:Math.max(0,fade),phase};
+}
+export function drawCuernoAuroraDome(ctx,f,cam,t,g){
+const w=viewW(),h=viewH(),d=cuernoAuroraDomePose(f,w,h);
+if(!d||d.fade<=0)return;
+const x=f.x-cam.x,y=f.y-cam.y-28;
+const colors=["#ffadbe","#ffcba3","#fff0bc","#b7eaca","#a7e6f4","#bfc9ff","#e7caf6"];
+const sway=g?.reduceMotion?0:Math.sin(t*.035)*1.5;
+ctx.save();ctx.lineCap="round";ctx.globalCompositeOperation="source-over";
+// Background at <=4% opacity: enemies, platforms and the hero remain legible.
+const sky=ctx.createLinearGradient(0,0,w,h);
+sky.addColorStop(0,"#f5d0ef");sky.addColorStop(.48,"#d7f5ed");sky.addColorStop(1,"#c8d5ff");
+ctx.globalAlpha=.035*d.fade;ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+// A true viewport-covering iris, even from a screen corner, with seven light bands.
+for(let i=0;i<7;i++){
+ctx.strokeStyle=colors[i];ctx.globalAlpha=(.10+(i%3)*.02)*d.fade;
+ctx.lineWidth=3+(i%2)*.6;ctx.beginPath();
+ctx.arc(x,y,Math.max(1,d.radius-i*10+sway),0,TAU);ctx.stroke();
+}
+// Pearly leading edge identifies the wave without flicker.
+ctx.globalAlpha=.20*d.fade;ctx.lineWidth=1.4;ctx.strokeStyle="#fff9ea";
+ctx.beginPath();ctx.arc(x,y,Math.max(1,d.radius+3),0,TAU);ctx.stroke();
 ctx.restore();
 }
 
@@ -2252,7 +2295,8 @@ if(f.mode==="kilo"){
 }else if(f.mode==="yomi"){
   ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
  }else if(f.mode==="cuerno"){
-  const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"];
+  drawCuernoAuroraDome(ctx,f,cam,t,g);
+  const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#aeb9fb","#e5b9f4"];
   const w=viewW(),h=viewH(),grad=ctx.createLinearGradient(0,0,w,h);
   cols.forEach((c,i)=>grad.addColorStop(i/6,c));
   ctx.globalAlpha=.07*fade;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);

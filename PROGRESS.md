@@ -1,3 +1,15 @@
+## 08/10/2026 · V72 · CUERNO FORMA 4 · LA ÚLTIMA AURORA
+
+**Caché:** `ohana-270`. Se completa específicamente **Unicornio Aurora F4** y su definitiva **U · Sueño Arcoíris** antes de dedicar una revisión adicional, orientada a niños, a Cuerno y a Dino.
+
+- **Identidad innata verificada:** Cuerno continúa siendo más rápido y saltando más alto que los otros nueve héroes **en todas las formas**, sin K ni U. F4: velocidad `9.6`, impulso de salto `18.6`, cuatro saltos. Física, hitboxes, proyectiles, 150 ticks de U, cinco pulsos, protección y jefes inmunes se conservan.
+- **La cúpula real de F4:** el campo U guarda el índice de evolución en el instante del lanzamiento. **Solo la F4** despliega una aurora panorámica de siete bandas y un filo nacarado que alcanza hasta `1.18 × diagonal` del viewport. Se dibuja detrás del personaje sin ocultar enemigos: tinte de fondo máximo 3.5%, trazos de 10–14% de opacidad, sin flashes rítmicos, objetos persistentes ni PNG.
+- **Sueño con pulso reconocible:** los durmientes conservan sus sellos y hilos V71, y en Aurora F4 cada oleada de daño desencadena una ondulación sutil alrededor de cada enemigo. Reduce-motion desactiva ondulación y vaivén sin reducir daño.
+- **Cuerpo y película unificados:** siete segmentos iridiscentes coronan el cuerno de F4 mientras mantiene U; la escena del último acto añade un halo marfil discreto y declara `data-cuerno-final=aurora`. Las alas y los ojos responden como antes. En formas 0–3 sigue la U V71, pero sin gigantesca cúpula F4.
+- **Confort:** la U final evita sacudidas y destellos excesivos (flash 5 y shake 3 frente al estándar 20/12), dejando intactos daños y momentos de impacto para el resto del elenco.
+- **Nueva regresión:** pruebas de cobertura real de pantalla F4 y exclusión de F0–3; balance Canvas, reduced-motion, identidad máxima en velocidad/salto, jefe inmune y cast-time targets. Capture real `09r-cuerno-aurora-final-u-canopy` tras la cinemática; Quality, multijugador, Release Gate y Pages obligatorios.
+- **Próxima etapa separada:** revisión extra y cariñosa para la experiencia infantil con Cuerno; **Dino** queda reservado para su revisión profunda especial, pensando en los sobrinos, sin tocarlo ahora.
+
 ## 08/10/2026 · V71 · CUERNO · SUPREMA: SUEÑO ARCOÍRIS VIVO
 
 **Caché:** `ohana-269`. Auditoría: las diez fases están implementadas; la fase 3 Potro Iris se recuperó en V63 después de la fase 4 Estelar V62. No falta ninguna fase numerada.
