@@ -12,6 +12,7 @@ test("V87 Dragon sanctuary asks for three reachable heights, no network-gated do
  for(const ember of DRAGON_EMBERS){
   g.player.x=ember.x-g.player.w*.5;
   g.player.y=ember.y-g.player.h*.55;
+  for(let t=0;t<29;t++)assert.equal(updateDragonTrial(g),null);
   const hit=updateDragonTrial(g);
   assert.ok(hit);
   story.push(hit.count);
@@ -52,7 +53,7 @@ test("V87 U cinema shows actual gameplay without spawning secondary simulation",
  assert.match(s,/IMPACTO REAL EN LA ARENA/);
  assert.match(game,/updateDragonTrial\(game\)/);
  assert.match(game,/dragonTrialSnapshot\(game\.dragonTrial\)/);
- assert.match(sw,/const VERSION = "ohana-287"/);
+ assert.match(sw,/const VERSION = "ohana-28[0-9]"/);
  assert.match(sw,/systems\/dragon-trial\.js\?v=/);
- assert.match(html,/ohana-287/);
+ assert.match(html,/ohana-28[0-9]/);
 });

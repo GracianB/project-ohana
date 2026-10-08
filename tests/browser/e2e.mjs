@@ -654,7 +654,7 @@ try {
     const steps=[];
     for(const [x,y] of [[290,875],[1580,900],[2010,535]]){
       api.setPlayer(x,y);
-      steps.push(api.step(2).dragonTrial?.count||0);
+      steps.push(api.step(37).dragonTrial?.count||0);
     }
     return {steps,trial:api.state().dragonTrial};
   });

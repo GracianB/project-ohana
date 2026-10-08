@@ -6,28 +6,37 @@ export const DRAGON_EMBERS=Object.freeze([
  Object.freeze({x:1580,y:937,title:"BATIDA",color:"#ff8a65"}),
  Object.freeze({x:2010,y:572,title:"ASCENSO",color:"#ffe29b"}),
 ]);
+// V88: channel each ember in sequence; the ritual must be played, not grazed.
+export const DRAGON_CHANNEL_FRAMES=30;
 const TAU=Math.PI*2;
 const finite=n=>Number.isFinite(Number(n))?Number(n):0;
 export function newDragonTrial(){
- return {lit:[false,false,false],count:0,completed:false};
+ return {lit:[false,false,false],count:0,completed:false,charge:0,active:0};
 }
 export function dragonTrialSnapshot(state){
  const lit=Array.isArray(state?.lit)?state.lit.slice(0,3):[false,false,false];
- return Object.freeze({lit:lit.map(Boolean),count:lit.filter(Boolean).length,completed:lit.every(Boolean)});
+ return Object.freeze({lit:lit.map(Boolean),count:lit.filter(Boolean).length,completed:lit.every(Boolean),charge:Math.max(0,Math.min(1,(Number(state?.charge)||0)/DRAGON_CHANNEL_FRAMES)),next:Math.min(3,lit.filter(Boolean).length)});
 }
 export function updateDragonTrial(game){
  if(!game||game.roomId!=="volcano"||!game.player||game.player.dead)return null;
  const state=game.dragonTrial||(game.dragonTrial=newDragonTrial());
  const p=game.player;
  const cx=finite(p.x)+finite(p.w)*.5,cy=finite(p.y)+finite(p.h)*.55;
- for(let i=0;i<DRAGON_EMBERS.length;i++){
-  const ember=DRAGON_EMBERS[i];
-  if(state.lit[i]||Math.hypot(cx-ember.x,cy-ember.y)>68)continue;
-  state.lit[i]=true;
-  state.count=state.lit.filter(Boolean).length;
-  state.completed=state.count===DRAGON_EMBERS.length;
-  return Object.freeze({index:i,count:state.count,complete:state.completed,ember});
- }
+ if(state.completed)return null;
+ const i=state.count,ember=DRAGON_EMBERS[i];
+ if(!ember)return null;
+ const distance=Math.hypot(cx-ember.x,cy-ember.y);
+ // Walking away releases the flame: no remote holding, timers or passive AFK win.
+ if(distance>65){state.charge=0;state.active=i;return null;}
+ state.active=i;
+ state.charge=Math.min(DRAGON_CHANNEL_FRAMES,Math.max(0,Number(state.charge)||0)+1);
+ if(state.charge<DRAGON_CHANNEL_FRAMES)return null;
+ state.charge=0;
+ state.lit[i]=true;
+ state.count=i+1;
+ state.completed=state.count===DRAGON_EMBERS.length;
+ return Object.freeze({index:i,count:state.count,complete:state.completed,ember});
+
  return null;
 }
 export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
@@ -54,6 +63,7 @@ export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
   const s=DRAGON_EMBERS[i],x=s.x-ox,y=s.y-oy;
   if(x< -110||x>2600||y< -180||y>1550)continue;
   const lit=!!state.lit[i],pulse=reduce?0.5:.5+.5*Math.sin(t*.07+i*2);
+  const isNext=!lit&&i===(state.count||0),progress=isNext?Math.min(1,(state.charge||0)/DRAGON_CHANNEL_FRAMES):0;
   ctx.save();ctx.translate(x,y);
   const glow=ctx.createRadialGradient(0,0,2,0,0,68);
   glow.addColorStop(0,lit?"rgba(255,249,210,.54)":"rgba(255,132,66,.20)");
@@ -70,7 +80,17 @@ export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
   if(lit){ctx.fillStyle=s.color;ctx.fill();}else ctx.stroke();
   ctx.globalAlpha=1;ctx.fillStyle="#fff1d5";
   ctx.font="800 12px Outfit, sans-serif";ctx.textAlign="center";
-  ctx.fillText(lit?"✦ "+s.title:s.title,0,42);
+  ctx.fillText(lit?"✦ "+s.title:isNext?"⟡ "+s.title:s.title,0,42);
+  if(isNext){
+    ctx.globalAlpha=.88;ctx.lineWidth=4;ctx.strokeStyle="#51301f";
+    ctx.beginPath();ctx.arc(0,0,37,0,TAU);ctx.stroke();
+    if(progress>0){
+      ctx.strokeStyle="#fff2ad";ctx.lineCap="round";ctx.beginPath();
+      ctx.arc(0,0,37,-Math.PI/2,-Math.PI/2+TAU*progress);ctx.stroke();
+    }
+    ctx.fillStyle="#ffebb9";ctx.font="700 11px Outfit, sans-serif";
+    ctx.fillText(progress>0?"CANALIZANDO "+Math.floor(progress*100)+"%":"ACÉRCATE · MANTÉN LA LLAMA",0,62);
+  }
   ctx.restore();
  }
  ctx.restore();
