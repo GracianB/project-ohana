@@ -54,6 +54,7 @@ test("V85: the ignored ledge stays skipped by void rescue, not the lower ledge",
   assert.equal(p.grounded,true,"The lower platform must remain solid to the hero");
   assert.equal(p.y+p.h,lower.y);
   assert.equal(p._dropPlatform,null,"Drop memory is released after a lower landing");
+  assert.equal(p._dropWasHeld,true,"Holding DOWN must not immediately drop a second ledge");
 });
 
 test("V85: side exit and upward return clear the remembered ledge", () => {
@@ -61,6 +62,8 @@ test("V85: side exit and upward return clear the remembered ledge", () => {
   const p={x:30,y:70,w:24,h:30,grounded:true};
   beginPlatformDrop(p,[upper],true,true);
   p.x=400;advancePlatformDrop(p);assert.equal(p._dropPlatform,null);
+  // DOWN needs a fresh key press before allowing another descent.
+  beginPlatformDrop(p,[upper],false,false);
   p.x=30;beginPlatformDrop(p,[upper],true,true);
   p.y=45;p.grounded=false;advancePlatformDrop(p);
   assert.equal(p._dropPlatform,null);
