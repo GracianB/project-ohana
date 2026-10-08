@@ -38,8 +38,8 @@ test("V82 finale handles resizes, removes handlers and survives two victories",(
   assert.match(ending,/layer\.onkeydown=\(e\)=>/);
   assert.doesNotMatch(ending,/layer\.addEventListener\("keydown"/);
   assert.match(visual,/nueva victoria no admite salto por teclado/);
-  assert.match(ending,/const duration=reduce\?1\.6:12\.0/);
-  assert.match(ending,/const titleK=seg\(k,\.84,\.92\)/);
+  assert.match(ending,/const duration=reduce\?1\.6:14\.5/);
+  assert.match(ending,/const titleK=seg\(k,\.89,\.97\)/);
   assert.match(game,/endingOverlay\?\.classList\.contains\("cinema-running"\)/);
   assert.match(game,/endingOverlay\.querySelector\("\.win-skip"\)\?\.click\(\)/);
 });
