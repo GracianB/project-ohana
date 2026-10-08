@@ -479,3 +479,7 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 @media(prefers-reduced-motion:reduce){
  #char-select #chars .char-card{transition:none!important;will-change:auto!important}
 }
+
+/* V99 · The old horizontal bridge across the sky is not a character connection.
+   The radial hero stage retains depth without drawing a hairline across worlds. */
+#char-select .hero-stage::after { display: none !important; }

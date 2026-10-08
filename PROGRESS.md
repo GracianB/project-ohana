@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V99 · el cartel espera al final · ohana-299
+
+- Tarjeta de resultados y acciones inertes durante el film: solo aparecen al completar los 14,5 segundos; el botón de salto mantiene acceso a quien lo necesite.
+- Sin línea horizontal decorativa atravesando el cielo del selector. Se conservan efectos, trama, héroes y fixes V93–V98.
+- Contratos regresión heredados actualizados para la nueva duración. Release candidata hasta CI y Pages.
+
+
 ## 09/10/2026 · OHANA V98 · Canvas eficiente · ohana-298
 
 - Orbes, corazones, enemigos no-jefe, proyectiles y fantasmas fuera del viewport se omiten únicamente en el dibujo, nunca en física o multiplayer.

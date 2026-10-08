@@ -70,7 +70,7 @@ function showEnding(detail={}){
     return [id,makeDummy(id,id===hero.id?evo:1,d.color)];
   }));
   // The whole family reunites before the results card is allowed to appear.
-  const duration=reduce?1.6:12.0;
+  const duration=reduce?1.6:14.5; // V99: family portrait earns the full reveal before results
   const family=CAST.filter(id=>id!==hero.id);
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
   // Keep the family framed on orientation / window changes, without raising DPR.
@@ -78,6 +78,13 @@ function showEnding(detail={}){
   addEventListener("resize",onResize,{passive:true});
 
   layer.className="show cinema-running ending-phase-1";
+  // The results card is outside the narrative until ACT IV, including for
+  // assistive technology. Skip remains an accessible sibling button.
+  const card=layer.querySelector(".win-card");
+  card.inert=true;
+  card.setAttribute("aria-hidden","true");
+  layer.removeAttribute("aria-labelledby");
+  layer.setAttribute("aria-label","Cinemática final de OHANA");
   layer.dataset.ending="v44-true-ending";
   layer.dataset.pacing="v80-delayed-finale";
   layer.dataset.duration=String(Math.round(duration*1000));
@@ -98,7 +105,12 @@ function showEnding(detail={}){
     removeEventListener("resize",onResize);
     layer.classList.remove("cinema-running","ending-phase-1","ending-phase-2","ending-phase-3");
     layer.classList.add("cinema-complete","ending-phase-4");
+    card.inert=false;
+    card.setAttribute("aria-hidden","false");
+    layer.removeAttribute("aria-label");
+    layer.setAttribute("aria-labelledby","win-title");
     layer.querySelector(".win-skip").hidden=true;
+    layer.querySelector("#win-continue")?.focus({preventScroll:true});
     duckMusic(false);
   }
   function stop(silent=false){
@@ -158,7 +170,7 @@ function showEnding(detail={}){
         actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
       });
       // Text appears after the full family portrait, not during the arrival.
-      const titleK=seg(k,.84,.92);
+      const titleK=seg(k,.89,.97);
       if(titleK>0){
         ctx.save();ctx.globalAlpha=titleK;
         drawTitle(ctx,"NADIE SE QUEDA ATRÁS",cx,H*.16,Math.max(30,Math.min(68,W*.052)),["#fff8d8","#ffe08c"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ffe39a",maxWidth:W*.9});

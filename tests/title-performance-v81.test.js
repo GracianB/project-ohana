@@ -39,8 +39,8 @@ test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
  assert.match(cinema,/export function fullCanvas\(cv, dprCap = Infinity\)/);
  assert.match(cinema,/Math\.min\(maxDpr, dprCap, window\.devicePixelRatio \|\| 1\)/);
  assert.match(ending,/fullCanvas\(canvas,reduce\?1:1\.2\)/);
- assert.match(ending,/const duration=reduce\?1\.6:12\.0/);
- assert.match(ending,/const titleK=seg\(k,\.84,\.92\)/);
+ assert.match(ending,/const duration=reduce\?1\.6:14\.5/);
+ assert.match(ending,/const titleK=seg\(k,\.89,\.97\)/);
  assert.match(ending,/layer\.dataset\.ending="v44-true-ending"/);
  assert.match(ending,/layer\.dataset\.pacing="v80-delayed-finale"/);
  assert.match(ending,/layer\.querySelector\("\.win-skip"\)\.onclick=\(\)=>revealResults/);
