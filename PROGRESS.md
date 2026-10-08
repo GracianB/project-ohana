@@ -1,3 +1,11 @@
+## 09/10/2026 · OHANA V100 · diez héroes, diez celebraciones · ohana-300
+
+- Retrato final con diez coreografías deterministas y personales; no se multiplica el número de dibujos, las hitboxes ni el coste de la simulación.
+- El héroe elegido mantiene su pose y el modo movimiento reducido dispone de retrato estable. V99 evita que aparezca el cartel prematuramente.
+- Integra V93 Cuerno, V94 director de enemigos, V95 Reina/cooperativo, V96 móvil, V97 accesibilidad y V98 rendimiento.
+- **Estado: candidata**. Se declarará publicada únicamente al superar Node, Browser, Multiplayer, Visual, Release Gate y Pages.
+
+
 ## 09/10/2026 · OHANA V99 · el cartel espera al final · ohana-299
 
 - Tarjeta de resultados y acciones inertes durante el film: solo aparecen al completar los 14,5 segundos; el botón de salto mantiene acceso a quien lo necesite.
