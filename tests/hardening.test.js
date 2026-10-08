@@ -713,6 +713,25 @@ test("V35 cinematic contract keeps world chapters, hero dossier and boss epilogu
 });
 
 
+test("V47B selector and cinematics keep rendering cost bounded", () => {
+  const title = fs.readFileSync("./systems/title.js", "utf8");
+  const titleFx = fs.readFileSync("./systems/title-fx.js", "utf8");
+  const evo = fs.readFileSync("./systems/evo-cinema.js", "utf8");
+  const supreme = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
+  const css = fs.readFileSync("./title-stage.css", "utf8");
+  assert.match(title, /stepMs: 1000 \/ 24/);
+  assert.match(title, /portraitCanvases/);
+  assert.match(title, /aria-hidden.*=== "true"/);
+  assert.match(title, /maxDpr = w \* h > 120000 \? 1\.45 : 1\.65/);
+  assert.match(titleFx, /now-lastFrame<32/);
+  assert.match(titleFx, /length:28/);
+  assert.match(titleFx, /R=Math\.min\(W\*\.155,H\*\.225\)/);
+  assert.match(evo, /pixels > 1800000 \? 1\.45/);
+  assert.match(supreme, /p\.vx=0;p\.vy=0;p\.grounded=true/);
+  assert.match(css, /V47B · SELECTOR PERFORMANCE \+ TIGHTER SPOTLIGHT/);
+  assert.match(css, /roster-arrow,[\s\S]*?backdrop-filter:none!important/);
+});
+
 test("V36 title is one canonical cinematic composition with real opening", () => {
   const html = fs.readFileSync("./index.html", "utf8");
   const css = fs.readFileSync("./title-stage.css", "utf8");
