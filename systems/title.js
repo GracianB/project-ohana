@@ -60,7 +60,7 @@ function portraitFit(def, evo, bw, bh, hero) {
   const visualAspect = Math.max(.72, geometryAspect * envelope);
   const safeW = bw * (hero ? (evo >= 4 ? .72 : .82) : .72);
   const safeH = bh * (hero ? (evo >= 4 ? .70 : .80) : .72);
-  const byHeight = safeH / Math.max(1, baseH);
+  const byHeight = safeH / Math.max(1, baseH * envelope);
   const byWidth = safeW / Math.max(1, baseH * visualAspect);
   const scale = Math.max(.34, Math.min(byHeight, byWidth));
   const foot = bh * (hero ? (evo >= 3 ? .88 : .90) : .86);
