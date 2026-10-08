@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import Cuerno,{cuernoTailPose,cuernoWingPose,CUERNO_VISUAL_H} from "../characters/art/cuerno.js";
+import {evolutionMessage} from "../characters/evolution.js";
 
 const art=fs.readFileSync("characters/art/cuerno.js","utf8");
 const no=()=>{};
@@ -78,4 +79,18 @@ test("V75 Destello animates the horn and sphere as a single face",()=>{
   assert.deepEqual(render(form,"jump",1.2),render(form,"jump",1.2));
  }
  assert.doesNotMatch(art,/Math\.random|requestAnimationFrame|new Image\(|setInterval\(/);
+});
+
+test("V75 cinematic words follow the exact visible metamorphosis",()=>{
+ const stages=[1,2,3,4].map(i=>evolutionMessage("cuerno",i).line);
+ assert.match(stages[0],/redonda/);assert.match(stages[0],/no tiene patas/);
+ assert.match(stages[1],/Cuatro patas/);
+ assert.match(stages[2],/dos alas/);
+ assert.match(stages[3],/negro obsidiana/);
+ assert.match(stages[3],/Unicornio Negro/);
+ for(const form of [2,3,4]){
+  assert.deepEqual(cuernoTailPose({state:"dead"},form,321),{swing:0,lift:0});
+  assert.deepEqual(cuernoWingPose({state:"hurt"},form,321),form<3?
+    {open:0,flap:0,hinge:0}:{open:.12,flap:0,hinge:0});
+ }
 });
