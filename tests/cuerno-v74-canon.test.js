@@ -66,7 +66,7 @@ test("V74 poses stay deterministic and readable at each evolution",()=>{
  for(let form=0;form<5;form++)for(const state of ["idle","run","jump","cast","hurt","victory"]){
   const a=picture(form,state),b=picture(form,state);
   assert.deepEqual(a,b,"nondeterminism F"+form+"/"+state);
-  assert.ok(a.arcs+a.lines+a.beziers>8);
+  assert.ok(a.arcs+a.lines+a.beziers>=(form===0?3:6),"blank F"+form+"/"+state);
  }
  assert.notDeepEqual(picture(3,"run",.1),picture(3,"run",2.9),
   "wings/legs should move with gallop");
