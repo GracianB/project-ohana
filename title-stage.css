@@ -435,3 +435,36 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 @media(max-width:560px){
   #char-select .hero-stage::before{width:230px!important;height:58px!important}
 }
+
+
+/* V80 · Carousel GPU contract: shadows are painted inside canvas, never
+   GPU-filtered on an animated 2D bitmap. Only three cards need compositor
+   layers, and transform/opacity are the only transitioning properties. */
+#char-select #chars .char-card{
+  will-change:auto;
+  filter:none!important;
+  transition:transform .34s cubic-bezier(.20,.82,.20,1), opacity .28s ease!important;
+}
+#char-select #chars .char-card.selected,
+#char-select #chars .char-card.is-prev,
+#char-select #chars .char-card.is-next{
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+}
+#char-select #chars .portrait canvas,
+#char-select #chars .char-card.selected .portrait canvas,
+#char-select #chars .char-card.selected[data-evo="4"] .portrait canvas{
+  filter:none!important;
+}
+#char-select .brand-bar,
+#char-select .hero-dossier,
+#char-select .title-controls{
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#char-select .hero-dossier{
+  background:linear-gradient(180deg,rgba(5,12,20,.86),rgba(3,9,16,.96))!important;
+}
+@media (prefers-reduced-motion:reduce){
+  #char-select #chars .char-card{transition:none!important;will-change:auto!important}
+}
