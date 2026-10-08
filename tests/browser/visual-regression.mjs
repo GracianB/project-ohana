@@ -844,6 +844,51 @@ try {
   await capture(page,'09w2-dino-v79-five-form-motion-matrix');
   await page.evaluate(()=>document.querySelector('#dino-v79-evolution-matrix')?.remove());
 
+  // Dino V83: real procedural Canvas at ascent, exact apex and descent,
+  // across every evolution. Tests the geometry without touching the rig.
+  const flightAudit=await page.evaluate(async()=>{
+    const [{default:Dino,dinoAirbornePose},{R}]=await Promise.all([
+      import('./characters/art/dino.js'),import('./characters/rig.js')]);
+    const cv=document.createElement('canvas');
+    cv.id='dino-v83-airborne-matrix';
+    cv.width=innerWidth;cv.height=innerHeight;
+    cv.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483601;pointer-events:none';
+    document.body.appendChild(cv);
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#101f28';ctx.fillRect(0,0,cv.width,cv.height);
+    const rows=[['ASCENSO','jump',-.85],['CIMA','jump',0],['DESCENSO','fall',.85]];
+    let drawn=0,joins=0;
+    ctx.textAlign='center';ctx.fillStyle='#fff1cc';
+    ctx.font='bold 20px sans-serif';
+    ctx.fillText('DINO · ANATOMÍA EN VUELO / V83',cv.width/2,34);
+    const S=Math.min(1.08,Math.max(.46,cv.width/920));
+    for(let form=0;form<5;form++){
+      const x=(form+.5)*cv.width/5;
+      ctx.fillStyle='#c9ead6';ctx.font='bold 12px sans-serif';
+      ctx.fillText(['BEBÉ','JOVEN','PICO','REX','COLOSO'][form],x,54);
+      const apexUp=dinoAirbornePose({vy:0,state:'jump'},form);
+      const apexDown=dinoAirbornePose({vy:0,state:'fall'},form);
+      if(JSON.stringify(apexUp)===JSON.stringify(apexDown))joins++;
+      for(let row=0;row<3;row++){
+        const [name,state,vy]=rows[row];
+        const y=(row+.65)*cv.height/3+16;
+        if(form===0){ctx.fillStyle='#d7e8d9';ctx.font='11px sans-serif';ctx.fillText(name,x,y-91*S);}
+        ctx.save();ctx.translate(x,y);ctx.scale(S,S);
+        const pose={form,state,vy,t:84,phase:2.4,speed:.2,
+          land:0,turnPulse:0,brake:0,sway:0,bounce:0,breath:.16,
+          look:{x:1,y:0},flourish:0,flourishN:0,atk:0,cast:0,castSlot:0};
+        Dino.draw(ctx,pose,R);
+        ctx.restore();drawn++;
+      }
+    }
+    return {drawn,joins};
+  });
+  assert.equal(flightAudit.drawn,15,'Dino V83: expected 15 real Canvas poses');
+  assert.equal(flightAudit.joins,5,'Dino V83: all five apex poses must connect');
+  await capture(page,'09w3-dino-v83-five-form-airborne-continuity');
+  await page.evaluate(()=>document.querySelector('#dino-v83-airborne-matrix')?.remove());
+
+
 
   // V77 U · Five-act Colossus with real gameplay and film; Cuerno untouched.
   const dinoUltimate=await page.evaluate(()=>{
