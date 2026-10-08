@@ -1,4 +1,4 @@
-const VERSION = "ohana-294";
+const VERSION = "ohana-295";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -65,6 +65,7 @@ const PRECACHE = [
   "./systems/boss-fall-scene.js?v=" + VERSION,
   "./systems/dragon-trial.js?v=" + VERSION,
   "./systems/coop-resilience.js?v=" + VERSION,
+  "./systems/coop-v95-presence.js?v=" + VERSION,
   "./systems/dino-combat.js?v=" + VERSION,
   "./systems/dino-stagecraft.js?v=" + VERSION,
   "./systems/cuerno-fantasy.js?v=" + VERSION,
@@ -78,6 +79,7 @@ const PRECACHE = [
   "./systems/boss-behavior.js?v=" + VERSION,
   "./systems/boss-combat.js?v=" + VERSION,
   "./systems/boss-counterplay.js?v=" + VERSION,
+  "./systems/boss-v94-readability.js?v=" + VERSION,
   "./systems/boss-encounter-memory.js?v=" + VERSION,
   "./systems/boss-fx.js?v=" + VERSION,
   "./systems/boss-hud.js?v=" + VERSION,

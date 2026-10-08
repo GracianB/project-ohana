@@ -1,4 +1,5 @@
 import { drawBossQueen } from "./boss-art.js";
+import { drawQueenV94Warning } from "../systems/boss-v94-readability.js";
 import { drawFoeRig } from "./foe-rig.js";
 
 const KIND_TINT = {
@@ -1490,6 +1491,7 @@ function drawUfo(ctx, e, t) {
 function drawBoss(ctx, e, t) {
   if (e.telegraph && !e.dying && !(e.introT > 0)) drawBossTelegraph(ctx, e, t);
   drawBossQueen(ctx, e, t);
+  if (e.telegraph && !e.dying) drawQueenV94Warning(ctx, e);
   // La forma comunica su fase por anatomía y firma visual, igual que los héroes evolucionados.
   if (e.shockT > 0 && e.shockR) {
     ctx.strokeStyle = "rgba(255,120,40,.48)";
@@ -1503,7 +1505,7 @@ function drawBoss(ctx, e, t) {
 function drawBossTelegraph(ctx, e, t) {
   const kind = e.teleKind || "";
   const prog = e.windMax ? e.wind / e.windMax : 0.5;
-  const pulse = 1 + Math.sin(t * 0.5) * 0.1;
+  const pulse = 1; // V94: no strobing or misleading geometry during windup
   const face = e.facing || 1;
 
   if (kind === "charge") {
