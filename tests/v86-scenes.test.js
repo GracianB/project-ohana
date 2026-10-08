@@ -38,7 +38,7 @@ test("V86 boss finale opens wings, never placeholder concentric circles",()=>{
 });
 test("V86 every new module is offline cached",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");
- assert.ok(sw.includes('const VERSION = "ohana-286"'));
+ assert.match(sw,/const VERSION = "ohana-\\d+"/);
  for(const p of ["ability-catalog","boss-fall-scene"])assert.ok(sw.includes('systems/'+p+'.js?v='));
- assert.ok(html.includes("ohana-286"));
+ assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\\d+)"/)?.[1]||"__invalid__"));
 });

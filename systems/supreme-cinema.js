@@ -645,13 +645,32 @@ function frame(now){
   ctx.restore();
 
   drawAssist(ctx,ally,k,t,cx,cy,target,baseScale,color);
+  // Reveal what the actual U does in the live arena, not just the storyboard.
+  // A bounded Canvas copy, no extra game loop, no network state or new assets.
+  const live=document.getElementById("game");
+  const showLive=!reduce&&k>.16&&k<.76&&live&&live.width>0&&live.height>0;
+  el.dataset.livePreview=showLive?"visible":"hidden";
+  if(showLive){
+    const ww=Math.min(W*.65,920),hh=Math.min(H*.19,165);
+    const xx=(W-ww)*.5,yy=H*.69;
+    ctx.save();ctx.fillStyle="rgba(4,10,20,.9)";
+    ctx.fillRect(xx-8,yy-8,ww+16,hh+16);
+    try{ctx.drawImage(live,xx,yy,ww,hh);}
+    catch(_){el.dataset.livePreview="unavailable";}
+    ctx.strokeStyle="rgba(255,232,182,.72)";
+    ctx.lineWidth=2;ctx.strokeRect(xx-8,yy-8,ww+16,hh+16);
+    drawTitle(ctx,"IMPACTO REAL EN LA ARENA",cx,yy-16,
+      Math.max(10,Math.min(15,W*.012)),"#fff6d5",
+      {font:FONT_BODY,weight:900,stroke:false,maxWidth:W*.82});
+    ctx.restore();
+  }
 
   // For all ten heroes, explain the unfolding action inside the cinema.
   const captionIn=easeOut(seg(k,.04,.13));
   if(captionIn>.01&&k<.90){
     ctx.save();ctx.globalAlpha=captionIn*(1-easeOut(seg(k,.84,.92)));
     drawTitle(ctx,"ACTO "+(actIndex+1)+" / "+acts.length+" · "+(acts[actIndex]||"SUPREMA"),
-      cx,H*.88,Math.max(12,Math.min(20,W*.015)),"#fff1d8",
+      cx,H*.93,Math.max(12,Math.min(20,W*.015)),"#fff1d8",
       {font:FONT_BODY,weight:900,stroke:false,maxWidth:W*.88});
     ctx.restore();
   }
