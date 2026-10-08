@@ -1,3 +1,18 @@
+## 08/10/2026 · V42.1 Single Opening Flow
+
+**Caché:** `ohana-233`.
+
+La apertura deja de mostrar el selector dos veces durante la carga.
+
+- El primer frame arranca en `intro-pending` y oculta todo el contenido de `#char-select` excepto `#ohana-intro`.
+- `#ohana-intro` cubre la pantalla desde el HTML inicial, antes de que carguen los módulos.
+- La intro cinematográfica elimina `intro-pending` únicamente al revelar la portada definitiva.
+- Si el nodo de intro faltase, el flujo falla abierto y muestra el selector en vez de dejar una pantalla negra.
+- El selector canónico sigue siendo uno solo: fondo procedural de Isla Hoku + carrusel de héroes.
+- Eliminado el pin obsoleto `intro.js?v=ohana-230` desde `systems/title.js`.
+- Contrato de release V42.1: **10 personajes · 5 formas · 10 salas**.
+- QA final: `node tests/browser/e2e.mjs` · `node tests/browser/visual-regression.mjs` · `npm run release:check`.
+
 ## 08/10/2026 · V42 Enemy Species Evolution
 
 **Caché:** `ohana-232`.
