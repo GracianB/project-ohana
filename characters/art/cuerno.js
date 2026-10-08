@@ -161,6 +161,22 @@ function drawCuernoFamilySeal(ctx,pose,R,form,t){
  if(pulse>.15){ctx.globalAlpha=.28+pulse*.3;ctx.strokeStyle=col;ctx.lineWidth=1.3;
  ctx.beginPath();ctx.arc(0,0,9+4*pulse,Math.PI*.15,Math.PI*1.85);ctx.stroke();}
  ctx.restore();
+ // An original surprise on each stage, with authored geometry and bounded motion.
+ if(living&&(emotion==="joy"||emotion==="dream"||emotion==="flight")){
+   ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.35;ctx.globalAlpha=.36;
+   if(form===0){ // Cuernín imagines its first tiny halo.
+     ctx.beginPath();ctx.ellipse(0,-44,13,4,Math.sin(t*.035)*.1,0,TAU);ctx.stroke();
+   }else if(form===1){ // Destello's growing ears hear its own first song.
+     for(const dx of [-1,1]){ctx.beginPath();ctx.arc(10+dx*10,-75,5,-1.45,-.45);ctx.stroke();}
+   }else if(form===2){ // Potro Iris prances with little silver horseshoes.
+     for(const dx of [-22,14]){ctx.beginPath();ctx.arc(dx,4,7,.25,2.9);ctx.stroke();}
+   }else if(form===3){ // Estelar carries a tiny map of its first night.
+     ctx.beginPath();ctx.moveTo(-26,-74);ctx.lineTo(-14,-82);ctx.lineTo(-3,-75);ctx.stroke();
+   }else{ // Aurora's crown rises between fully opened pinions.
+     ctx.beginPath();ctx.arc(-2,-101,13,Math.PI*1.12,Math.PI*1.90);ctx.stroke();
+   }
+   ctx.restore();
+ }
  if(!living)return;
  const glint=emotion==="joy"?3:emotion==="dream"?2:emotion==="flight"?2:emotion==="focus"?1:0;
  const tip=HORN_TIPS[form];
