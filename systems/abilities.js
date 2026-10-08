@@ -1,5 +1,8 @@
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
+import { CUERNO_FANTASY, addCuernoRibbonPoint, cuernoRibbonTouches,
+ drawCuernoFantasyRibbon, drawCuernoPrismCrown, drawCuernoFantasyStatus
+} from "./cuerno-fantasy.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -35,8 +38,8 @@ ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J:
 sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
 maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
 gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "J: cuerno de nácar con estela iris. Atraviesa hasta tres enemigos." },
-gallop: { name: "Galope radiante", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: galope de cuatro apoyos y cuatro cintas mágicas. Frena al llegar al muro." },
-rainbow: { name: "Círculo Iris", key: "L", cd: 5600, color: "#fff6c8", desc: "L: siete colores en círculo. Crece contigo y Aurora cubre la pantalla." },
+gallop: { name: "Galope encantado", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: deja un camino arcoíris 10 s que encanta y desgasta a los enemigos que lo pisan." },
+rainbow: { name: "Corona de los Siete Cuernos", key: "L", cd: 5600, color: "#fff6c8", desc: "L: invoca siete cuernos de luz y tres arcos iris. Una onda de siete colores golpea el área." },
 };
 
 const FLOW_KEYS = ["H", "J", "K", "L", "U"];
@@ -690,6 +693,17 @@ let w = 0;
 for (let i = 0; i < updateCount; i++) if (!FX[i].dead) FX[w++] = FX[i];
 for (let i = updateCount; i < FX.length; i++) FX[w++] = FX[i];
 FX.length = w;
+if(p.id==="cuerno") {
+  // A shared per-enemy cadence prevents stacked trails from multiplying DoT.
+  const now=Number(game.t)||0;
+  for(const enemy of game.enemies||[]){
+    if(!enemy || !(Number(enemy._cuernoFantasyUntil)>now) || !canHit(enemy))continue;
+    if(now < (Number(enemy._cuernoFantasyNext)||0))continue;
+    enemy._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
+    hitEnemy(game,enemy,Math.max(2,Number(enemy._cuernoFantasyDamage)||2),
+      {kx:0,ky:0,stun:0,color:"#ddbaff",parts:0,shake:0,hitstop:0,nums:false,xp:0});
+  }
+}
 trimAbilityProjectiles(game);
 }
 
@@ -732,6 +746,7 @@ if (p.id === "dino") {
 } else drawChargeShield(ctx, p, cam, t);
 }
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
+if (p.id==="cuerno")drawCuernoFantasyStatus(ctx,game.enemies,cam,game.t||t,!!game.reduceMotion);
 drawCastSignature(ctx, p, cam, t);
 }
 
@@ -1322,6 +1337,12 @@ gallop(g,p,evo){
 S.gallop=17+evo*2;S.gallopFace=p.facing||1;
 p.vy=Math.min(p.vy||0,-3.4);
 armor(p,18);p._thrust=6;p._thrustFace=S.gallopFace;
+// Exactly two persistent ribbons maximum, even with K spam or bonuses.
+const existing=FX.filter(f=>f.kind==="cuernoFantasyTrail"&&!f.dead);
+if(existing.length>=CUERNO_FANTASY.maxTrails)existing[0].dead=true;
+add({kind:"cuernoFantasyTrail",life:CUERNO_FANTASY.trailFrames,max:CUERNO_FANTASY.trailFrames,
+ points:[{x:cx(p),y:p.y+p.h*.72}],evo,
+ dmg:(2.8+evo*.75)*pw(p),born:Number(g.t)||0,face:p.facing||1});
 g.shake=Math.min(12,(g.shake||0)+3);
 boom(g,cx(p),cy(p),["#f5c9e8","#f2d9fa","#ccbffc","#afdef4","#fff0c1"][evo],6,{star:true});
 },
@@ -1329,6 +1350,9 @@ rainbow(g,p,evo){
 const radius=[170,260,400,610,Math.hypot(viewW(),viewH())*1.12][evo];
 add({kind:"irisHalo",x:cx(p),y:cy(p),r:radius,life:58,max:58,
 evo,color:"#fff6c8",hit:new Set(),dmg:(25+evo*6)*pw(p)});
+// Visual-only sculpted crown. The seven horns do not create seven hitboxes.
+add({kind:"cuernoPrismCrown",x:cx(p),y:cy(p),evo,
+ life:CUERNO_FANTASY.crownFrames,max:CUERNO_FANTASY.crownFrames});
 p._auroraHaloT=58;
 boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{star:true});
 },
@@ -1338,6 +1362,29 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
 const UPD = {
 ...DINO_FX.update,
+cuernoFantasyTrail(g,f,p) {
+ if(f.dead)return false;
+ if(S.gallop>0 && p.id==="cuerno" && !p.dead) {
+   f.life=CUERNO_FANTASY.trailFrames;
+   if((f.age%CUERNO_FANTASY.sampleEvery)===0) {
+     f.points=addCuernoRibbonPoint(f.points,cx(p),p.y+p.h*.72);
+   }
+ } else f.life--;
+ if(f.life<=0)return false;
+ const now=Number(g.t)||0;
+ for(const e of g.enemies||[]){
+   if(!canHit(e)||!cuernoRibbonTouches(f.points,e))continue;
+   const first=!(Number(e._cuernoFantasyUntil)>now);
+   e._cuernoFantasyUntil=now+CUERNO_FANTASY.markFrames;
+   e._cuernoFantasyDamage=Math.max(Number(e._cuernoFantasyDamage)||0,f.dmg);
+   if(first){
+     e._cuernoFantasyNext=now+CUERNO_FANTASY.damageEvery;
+     g.nums?.add?.(cx(e),e.y-10,"✦ FANTASÍA","#f0baff",false);
+   }
+ }
+ return true;
+},
+cuernoPrismCrown(g,f){return --f.life>0;},
 irisHalo(g,f){
 f.life--;
 const progress=1-f.life/f.max;
@@ -2291,6 +2338,12 @@ ctx.restore();
 
 const DRW = {
 ...DINO_FX.draw,
+cuernoFantasyTrail(ctx,f,cam,t,g){
+ drawCuernoFantasyRibbon(ctx,f,cam,t,!!g?.reduceMotion);
+},
+cuernoPrismCrown(ctx,f,cam,t,g){
+ drawCuernoPrismCrown(ctx,f,cam,t,!!g?.reduceMotion);
+},
 irisHalo(ctx,f,cam,t){
 const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
 const radius=f.r*(1-Math.pow(1-progress,2));
