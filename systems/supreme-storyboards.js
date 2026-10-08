@@ -6,7 +6,7 @@ export const SUPREME_STORYBOARDS = Object.freeze({
   chispin: { duration:1.58, camera:"snap",    gag:"overcharge",     scene:"storm",   beat:"CARGA → CALAMBRE → RAYO" },
   cat:     { duration:1.76, camera:"still",   gag:"deadpan-eclipse",scene:"eclipse", beat:"SILENCIO → ECLIPSE → SOMBRA" },
   dragon:  { duration:1.72, camera:"push",    gag:"tiny-sneeze",    scene:"nova",    beat:"ESTORNUDO → PERSECUCIÓN → CORONA → SUPERNOVA" },
-  dino:    { duration:1.70, camera:"impact",  gag:"double-stomp",   scene:"quake",   beat:"PISADA → NADA → EXTINCIÓN" },
+  dino:    { duration:3.22, camera:"colossus",gag:"heart-of-colossus",scene:"quake",beat:"LATIDO → DESPERTAR → FRACTURA → COMETAS → CORAZÓN" },
   frita:   { duration:1.64, camera:"whip",    gag:"potato-catch",   scene:"crisp",   beat:"PATATA → CAPTURA → KÉTCHUP → CRUJIDO" },
   pizza:   { duration:1.70, camera:"recoil",  gag:"oven-too-hot",   scene:"oven",    beat:"BOSTEZO → HORNO → ¡QUEMA! → VOLCÁN" },
   yomi:    { duration:3.90, camera:"pull",    gag:"void-looks-back",scene:"maw",     beat:"FAROL → CUERNO → EMBESTIDA → JUICIO" },

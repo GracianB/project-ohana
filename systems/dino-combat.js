@@ -4,8 +4,97 @@ export function createDinoEffects(ops) {
  const { nearestEnemy, canHit, cx, cy, solidAt, circleHit, hitEnemy, boom,
    add, clamp, inView, groundBelow } = ops;
  const TAU = Math.PI * 2;
+ // The U is its own gameplay system; the shared ability engine only calls in.
+ const cap = (v,a,b) => Math.max(a,Math.min(b,v));
+ const visibleTargets = (g) => (g.enemies || []).filter(e => canHit(e) && inView(g,e));
+ const chooseFossilTarget = (g,x,y,p,idx) => {
+   const list = visibleTargets(g).sort((a,b) =>
+     Math.hypot(cx(a)-x,cy(a)-y)-Math.hypot(cx(b)-x,cy(b)-y));
+   const e = list.length ? list[idx%Math.min(5,list.length)] : null;
+   const tx = e ? cx(e) : cx(p)+(p.facing||1)*(80+idx*54);
+   const ty = e ? cy(e) : p.y+p.h;
+   const floor = groundBelow(g,tx,ty) ?? (e ? e.y+e.h : p.y+p.h);
+   return {x:cap(tx,22,(g.worldW||1600)-22),y:floor};
+ };
  return {
+   castUltimate(g,p,enemies,dmg,color) {
+     // Keep the original immediate Colossus hit and boss handling. New
+     // aftershocks follow, rather than multiplying one-frame screen damage.
+     for(const e of enemies) hitEnemy(g,e,dmg*1.06,{
+       kx:Math.sign(cx(e)-cx(p))*15,ky:-12,stun:62,
+       color,crit:true,shake:2,parts:8
+     });
+     const span=260;
+     p._specialT=Math.max(Number(p._specialT)||0,span);
+     p._specialTitanT=Math.max(Number(p._specialTitanT)||0,span);
+     p._specialArmorT=Math.max(Number(p._specialArmorT)||0,span);
+     p.invuln=Math.max(Number(p.invuln)||0,72);
+     g._dinoUltimate={beats:5,version:77,remaining:span};
+     add({kind:"dinoColossus",x:cx(p),y:cy(p),life:span,max:span,
+       nextPulse:28,nextFossil:34,beat:0,stones:0,
+       dmg:dmg*.17,color:color||"#c8f04a",evo:cap(Number(p.evo)||0,0,4)});
+     g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO!","#eaffb5",true);
+     g.shake=Math.min(18,(g.shake||0)+9);
+     boom(g,cx(p),p.y+p.h,"#eaffb5",9,{up:1.6,star:true});
+   },
    update: {
+ dinoColossus(g,f,p){
+   if(--f.life<=0){if(g._dinoUltimate)g._dinoUltimate.remaining=0;return false;}
+   f.x=cx(p);f.y=cy(p);
+   const elapsed=f.max-f.life;
+   const maxStones=g.reduceMotion?3:Math.min(8,4+f.evo);
+   if(--f.nextPulse<=0){
+     f.nextPulse=34;
+     f.beat++;
+     const range=245+f.evo*46;
+     for(const e of visibleTargets(g)){
+       if(Math.hypot(cx(e)-f.x,cy(e)-f.y)>range+Math.max(e.w,e.h)*.5)continue;
+       hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*5,ky:-6,stun:21,
+         color:"#bbff97",hitstop:0,shake:0,parts:3});
+     }
+     if(!g.reduceMotion)g.shake=Math.min(10,(g.shake||0)+2);
+     boom(g,f.x,p.y+p.h,"#c6fa87",g.reduceMotion?2:5,{speed:1.6,up:.6});
+   }
+   if(elapsed>=37&&f.stones<maxStones&&--f.nextFossil<=0){
+     const dest=chooseFossilTarget(g,f.x,f.y,p,f.stones);
+     const dir=f.stones%2===0?1:-1;
+     const spawnY=Math.min((g.cam?.y||0)-48,dest.y-225);
+     const vx=dir*(1.8+f.evo*.18);
+     const time=Math.max(16,(dest.y-spawnY)/11);
+     add({kind:"dinoFossil",x:dest.x-vx*time,y:spawnY,
+       vx,vy:11,landX:dest.x,landY:dest.y,
+       r:10+f.evo*1.2,dmg:f.dmg*1.22,R:48+f.evo*6,
+       life:120,age:0,rot:f.stones*.93});
+     const frames=cap(Math.round(time),18,48);
+     add({kind:"dinoFossilMark",x:dest.x,y:dest.y,life:frames,max:frames});
+     f.stones++;
+     f.nextFossil=g.reduceMotion?45:25;
+   }
+   if(g._dinoUltimate)g._dinoUltimate.remaining=f.life;
+   return true;
+ },
+ dinoFossil(g,f) {
+   if(--f.life<=0)return false;
+   f.rot+=.08;f.age++;
+   f.x+=f.vx;f.y+=f.vy;
+   const enemy=(g.enemies||[]).some(e=>canHit(e)&&circleHit(f.x,f.y,f.r*.85,e));
+   const terrain=f.y+f.r>=f.landY-3;
+   if(!enemy&&!terrain)return f.y<(g.worldH||900)+100;
+   const y=terrain?Math.min(f.y,f.landY):f.y;
+   // One finite area impact; no persistent damage loops or boss executions.
+   for(const e of (g.enemies||[])){
+     if(!canHit(e)||Math.hypot(cx(e)-f.x,cy(e)-y)>f.R+Math.max(e.w,e.h)*.5)continue;
+     hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*6,ky:-6,stun:20,
+       color:"#d1ffa0",shake:1,hitstop:0,parts:4});
+   }
+   add({kind:"dinoFossilBlast",x:f.x,y,life:17,max:17,r:f.R});
+   boom(g,f.x,y,"#c7ff95",g.reduceMotion?3:7,{up:1.3,star:true});
+   g.shake=Math.min(13,(g.shake||0)+(g.reduceMotion?1:3));
+   return false;
+ },
+ dinoFossilMark(g,f){return --f.life>0;},
+ dinoFossilBlast(g,f){return --f.life>0;},
+
 dinoSpit(g,f) {
  if(f.delay>0){f.delay--;return true;}
  if(--f.life<=0)return false;
@@ -69,6 +158,64 @@ dinoSkyfall(g,f,p){
 dinoWarning(g,f){return --f.life>0;},
    },
    draw: {
+dinoColossus(ctx,f,cam,t,g,p){
+  const x=f.x-(cam?.x||0), y=f.y-(cam?.y||0),fade=cap(f.life/24,0,1);
+  const phase=(f.max-f.life)/f.max;
+  ctx.save();ctx.globalCompositeOperation="lighter";
+  ctx.strokeStyle="#cbff9a";ctx.lineWidth=3;ctx.globalAlpha=.38*fade;
+  for(let i=0;i<3;i++){
+    const a=(phase*5-i/3)%1,rr=35+a*(125+f.evo*24);
+    if(a<=0)continue;
+    ctx.globalAlpha=(1-a)*fade*.38;
+    ctx.beginPath();ctx.ellipse(x,y+18,rr,rr*.32,0,0,TAU);ctx.stroke();
+  }
+  const scale=1+.12*Math.sin(t*.085);
+  ctx.globalAlpha=(.09+.05*Math.sin(t*.11))*fade;
+  ctx.fillStyle="#ddffad";ctx.beginPath();
+  ctx.ellipse(x,y,38*scale,51*scale,0,0,TAU);ctx.fill();
+  ctx.restore();
+},
+dinoFossil(ctx,f,cam,t){
+  const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
+  ctx.save();
+  const sp=Math.hypot(f.vx,f.vy)||1,ex=x-f.vx/sp*46,ey=y-f.vy/sp*46;
+  const grad=ctx.createLinearGradient(ex,ey,x,y);
+  grad.addColorStop(0,"rgba(130,250,135,0)");
+  grad.addColorStop(1,"rgba(245,255,165,.92)");
+  ctx.strokeStyle=grad;ctx.lineWidth=f.r*1.25;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(x,y);ctx.stroke();
+  ctx.translate(x,y);ctx.rotate(f.rot);
+  ctx.fillStyle="#556645";ctx.strokeStyle="#d9ff9c";ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let i=0;i<7;i++){const a=i*TAU/7,r=f.r*(.86+(i%3)*.08);
+    if(i===0)ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);
+    else ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+  }
+  ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.strokeStyle="#fff4b2";ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(-f.r*.4,-f.r*.32);
+  ctx.lineTo(-f.r*.02,0);ctx.lineTo(f.r*.42,f.r*.14);ctx.stroke();
+  ctx.restore();
+},
+dinoFossilMark(ctx,f,cam,t){
+  const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0),k=f.life/f.max;
+  ctx.save();ctx.globalAlpha=.30+.26*(1-k);
+  ctx.strokeStyle="#f8e7a1";ctx.lineWidth=2;
+  ctx.beginPath();ctx.ellipse(x,y,24+(1-k)*12,6+(1-k)*3,0,0,TAU);ctx.stroke();
+  for(let i=0;i<3;i++){
+    const a=i*TAU/3+t*.016;
+    ctx.beginPath();ctx.arc(x+Math.cos(a)*18,y+Math.sin(a)*5,2,0,TAU);ctx.fillStyle="#d6ffac";ctx.fill();
+  }
+  ctx.restore();
+},
+dinoFossilBlast(ctx,f,cam,t){
+  const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
+  const k=1-f.life/f.max;
+  ctx.save();ctx.globalAlpha=(1-k)*.78;
+  ctx.strokeStyle="#d9ffad";ctx.lineWidth=4*(1-k)+1;
+  ctx.beginPath();ctx.ellipse(x,y,f.r*(.34+k*.9),f.r*(.17+k*.5),0,0,TAU);ctx.stroke();
+  ctx.restore();
+},
 dinoSpit(ctx,f,cam,t){
  if(f.delay>0)return;
  const ox=cam?.x||0,oy=cam?.y||0,x=f.x-ox,y=f.y-oy;

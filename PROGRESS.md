@@ -1,3 +1,32 @@
+## 08/10/2026 · DINO V77 · U «CORAZÓN DE COLOSO»
+
+**Rama de capítulo:** `feat/dino-v77-colossus-u-20261008`, derivada de la V76 de Dino. La U se publica **después** de integrar la PR #203; no se modifica a Cuerno ni se sobreescribe main. **Caché prevista:** `ohana-275`.
+
+### Cinematografía de cinco actos
+1. **LATIDO:** la tierra vibra y aparecen dos ojos diminutos.
+2. **DESPERTAR:** Dino se engrandece y se levantan columnas de piedra como una armadura viva.
+3. **FRACTURA:** dos grietas avanzan desde su cuerpo mientras el escenario responde.
+4. **COMETAS FÓSILES:** cinco rocas luminosas cruzan el aire, con trayectorias y aviso de impacto.
+5. **CORAZÓN:** una pequeña estrella tropieza con el Coloso; aparece un corazón luminoso y la escena termina de forma tierna, no con un flash cegador.
+
+La película se dibuja con Canvas procedural y tiene función `dinoColossusStage(k)` pura para reproducción reproducible y contrato de browser. Duración 3.22 s en animación normal y accesibilidad reduced-motion sin vibración excesiva.
+
+### Mecánica U renovada, compatible con sus poderes J/K/L
+- Se mantiene el identificador `impact`, la U de la tecla 3, su cooldown, el impacto inicial y el especial **Modo Coloso**.
+- **260 ticks reales** de protección, armadura y aura corporal; se evita que un temporizador termine prematuramente dejando otro colgado.
+- Pulsos sísmicos periódicos de daño moderado en alcance limitado, sin repetir el antiguo campo supremo genérico de Dino, para no duplicar daño.
+- Entre **3 y 8 meteoritos fósiles** como segunda fase, según evolución y `reducedMotion`: el terreno marca el destino y cada meteorito explota una vez; objetivos visibles y daño con los controles estándar frente a jefes.
+- Efectos con memoria, partículas y recuentos estrictamente acotados; sin nuevas dependencias, PNG ni controles ajenos.
+
+### QA y mantenimiento
+- Módulos dedicados `systems/dino-combat.js` y `systems/dino-ultimate-film.js`.
+- `systems/abilities.js` permanece bajo 135 kB.
+- Pruebas de Node: cinco actos, duración, salida, U original, controles de daño, meteoritos, reducción de movimiento, equilibrio de transformaciones Canvas.
+- Browser: capturas del latido, el desfile de cometas y el corazón final.
+- Precarga offline completa con la versión `ohana-275`.
+- **No fusionar** si falla alguna etapa de Unit, Browser E2E, Multiplayer E2E, Visual Regression o Release Gate.
+
+
 ## 08/10/2026 · DINO V76 · COMBATE CINEMÁTICO SIN PERDER EL PERSONAJE
 
 **Rama compatible con Cuerno V74:** `feat/dino-v76-cinematic-combat-20261008`. **Cache:** `ohana-274`.

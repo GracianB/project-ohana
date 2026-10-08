@@ -114,12 +114,14 @@ test('PR151.15: Dragon supreme escala el impacto y la sacudida', () => {
   clearAbilityFx();
 });
 
-test('PR151.16: Dino supreme tiene empuje mayor y shake reforzado', () => {
+test('Dino V77: supreme conserva impacto, protege al Coloso y respeta vibración acotada', () => {
   const enemy = makeEnemy();
   const game = cast('dino', [enemy]);
   assert.ok(enemy.hp < 1000);
-  assert.ok(game.shake >= 20);
-  assert.ok(Math.abs(enemy.vx) >= 16);
+  assert.ok(game.shake >= 9 && game.shake <= 18);
+  assert.ok(Math.abs(enemy.vx) >= 14);
+  assert.ok(game.player._specialTitanT >= 260);
+  assert.ok(game.player._specialArmorT >= 260);
   clearAbilityFx();
 });
 
