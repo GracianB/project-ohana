@@ -1,49 +1,72 @@
-/* Atrium interactions. Does not restyle character art. */
+/* Atrium: stage, not a menu. Character art stays untouched. */
 #char-select.atrium-on{cursor:none}
 #char-select.atrium-on .hero-stage{cursor:none}
+#atrium-fx{position:fixed;inset:0;z-index:70;pointer-events:none}
 #atrium-orb{
-  position:fixed;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;
-  pointer-events:none;z-index:80;opacity:0;
-  background:radial-gradient(circle,#fff 0 18%,#9ee7ff 28%,rgba(126,231,255,.15) 62%,transparent 72%);
-  box-shadow:0 0 18px rgba(126,231,255,.55);
-  transition:opacity .2s ease, transform .08s linear;
+  position:fixed;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;
+  pointer-events:none;z-index:82;opacity:0;
+  background:radial-gradient(circle,#fff 0 12%,#b9f3ff 26%,rgba(126,231,255,.2) 58%,transparent 72%);
+  box-shadow:0 0 22px rgba(158,231,255,.7), 0 0 60px rgba(255,210,120,.25);
+  mix-blend-mode:screen;
 }
 #atrium-orb.on{opacity:1}
-#atrium-orb.hot{transform:scale(1.35)}
-#atrium-name{
-  position:fixed;z-index:81;pointer-events:none;opacity:0;transform:translate(-50%,-140%);
-  padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
-  background:rgba(6,12,22,.72);color:#f4f8ff;font:800 11px/1 Outfit,sans-serif;letter-spacing:.14em;
-  text-transform:uppercase;backdrop-filter:blur(10px);
+#atrium-orb.hot{transform:scale(1.45)}
+#atrium-plate{
+  position:fixed;z-index:83;pointer-events:none;opacity:0;transform:translate(-50%,-150%) scale(.96);
+  min-width:140px;padding:8px 14px 9px;border-radius:16px;text-align:center;
+  border:1px solid rgba(255,255,255,.2);
+  background:linear-gradient(180deg,rgba(8,16,30,.78),rgba(8,14,24,.55));
+  box-shadow:0 16px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter:blur(12px);transition:opacity .16s ease, transform .16s ease;
 }
-#atrium-name.on{opacity:1}
+#atrium-plate.on{opacity:1;transform:translate(-50%,-160%) scale(1)}
+#atrium-plate b{display:block;color:#fff;font:800 13px/1.1 Outfit,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+#atrium-plate span{display:block;margin-top:4px;color:rgba(244,248,255,.72);font:600 10px/1.2 Outfit,sans-serif;letter-spacing:.04em}
+
+#char-select.atrium-on .hero-stage::before{
+  width:min(860px,70vw)!important;height:min(220px,24vh)!important;top:68%!important;
+  background:radial-gradient(ellipse,rgba(255,214,140,.28),rgba(126,231,255,.08) 42%,transparent 72%)!important;
+  animation:atrium-floor 3.4s ease-in-out infinite;
+}
+@keyframes atrium-floor{50%{opacity:.55;transform:translate(-50%,-50%) scale(1.04)}}
 
 #char-select.atrium-on #chars .char-card{
-  display:flex!important;opacity:.34!important;filter:saturate(.25) brightness(.5)!important;
-  width:min(132px,12vw)!important;height:min(176px,22vh)!important;z-index:3!important;
-  pointer-events:auto!important;aria-hidden:false;
-  transform:translate(-50%,-50%) rotate(var(--ang,0deg)) translateY(calc(var(--rad,180px) * -1)) rotate(calc(var(--ang,0deg) * -1)) scale(.86)!important;
-  transition:transform .35s cubic-bezier(.16,1,.3,1), opacity .25s ease, filter .25s ease!important;
+  display:flex!important;opacity:.42!important;filter:saturate(.35) brightness(.55)!important;
+  width:min(148px,13vw)!important;height:min(190px,24vh)!important;z-index:3!important;
+  pointer-events:auto!important;
+  transform:translate(-50%,-50%) rotate(var(--ang,0deg)) translateY(calc(var(--rad,200px) * -1)) rotate(calc(var(--ang,0deg) * -1)) scale(.9)!important;
+  transition:transform .42s cubic-bezier(.16,1,.3,1), opacity .22s ease, filter .22s ease!important;
+  animation:atrium-bob 3.6s ease-in-out infinite;
+  animation-delay:var(--bob,0s);
 }
+@keyframes atrium-bob{50%{translate:0 -7px}}
 #char-select.atrium-on #chars .char-card h3,
 #char-select.atrium-on #chars .char-card .role,
 #char-select.atrium-on #chars .char-card small,
 #char-select.atrium-on #chars .char-card .hint{opacity:0!important}
 #char-select.atrium-on #chars .char-card.selected{
   opacity:1!important;filter:none!important;z-index:8!important;
-  width:min(300px,26vw)!important;height:min(340px,42vh)!important;
-  transform:translate(-50%,-46%) scale(1)!important;
+  width:min(320px,28vw)!important;height:min(360px,44vh)!important;
+  transform:translate(-50%,-42%) scale(1.04)!important;
+  animation:atrium-chosen 2.8s ease-in-out infinite;
 }
+@keyframes atrium-chosen{50%{filter:drop-shadow(0 18px 24px rgba(255,210,120,.28))}}
 #char-select.atrium-on #chars .char-card.selected h3{opacity:1!important}
 #char-select.atrium-on #chars .char-card.is-awake:not(.selected){
-  opacity:.95!important;filter:saturate(.9) brightness(.95)!important;z-index:7!important;
-  transform:translate(-50%,-50%) rotate(var(--ang,0deg)) translateY(calc(var(--rad,180px) * -1)) rotate(calc(var(--ang,0deg) * -1)) scale(1.06)!important;
+  opacity:1!important;filter:saturate(1.05) brightness(1.05)!important;z-index:7!important;
+  transform:translate(-50%,-50%) rotate(var(--ang,0deg)) translateY(calc(var(--rad,200px) * -1.08)) rotate(calc(var(--ang,0deg) * -1)) scale(1.12)!important;
 }
 #char-select.atrium-on #chars .char-card.is-awake h3{opacity:1!important}
+#char-select.atrium-on #chars .char-card.is-cheer{animation:atrium-cheer .46s cubic-bezier(.16,1,.3,1)}
+@keyframes atrium-cheer{
+  0%{filter:brightness(1.4) saturate(1.2)}
+  40%{transform:translate(-50%,-58%) scale(1.08)}
+  100%{filter:none}
+}
 @media (prefers-reduced-motion: reduce){
-  #atrium-orb,#char-select.atrium-on #chars .char-card{transition:none!important}
+  #char-select.atrium-on #chars .char-card,#char-select.atrium-on .hero-stage::before{animation:none!important}
 }
 @media (max-width:800px){
   #char-select.atrium-on{cursor:auto}
-  #atrium-orb{display:none}
+  #atrium-orb,#atrium-fx{display:none}
 }
