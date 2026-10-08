@@ -412,6 +412,39 @@ function draw(ctx, pose, R) {
       roarK = e; eyeMood = "angry";
       tailA = 0.3 * e + Math.sin(t * 0.8) * 0.08 * e;
       hdy = Math.sin(t * 1.3) * 0.8 * e;
+    } else if (slot === 2) {
+      // L · Extinción: brace the hips, rear up, then pound the earth.
+      // Unlike K, there is no airborne somersault or phantom body translation.
+      const brace=ease(seg(k,0,.37));
+      const slam=ease(seg(k,.37,.57));
+      const recover=1-ease(seg(k,.71,1));
+      bob=-9*brace*(1-slam)+7*slam*recover;
+      lean=-.12*brace+.27*slam*recover;
+      headRot=-.24*brace+.31*slam*recover;
+      hdx=-2*brace+4*slam*recover;hdy=-2*brace+4*slam*recover;
+      legF=-.27*brace+.63*slam*recover;legB=.19*brace-.42*slam*recover;
+      lenF=1-.16*brace+.10*slam*recover;lenB=1-.12*brace+.06*slam*recover;
+      armF=1.5*brace-.65*slam*recover;armB=1.35*brace-.55*slam*recover;
+      jaw=.21*brace+.48*slam*recover;eyeMood="angry";
+      shock=slam*(1-ease(seg(k,.73,1)));
+      tailA=.42*brace-.68*slam*recover;
+    } else if (slot === 3) {
+      // U · Corazón de Coloso: awake, open the chest, roar, then settle.
+      // This is a new character pose; the five-act film remains separate.
+      const awake=ease(seg(k,0,.34));
+      const release=ease(seg(k,.29,.66));
+      const soften=ease(seg(k,.7,1));
+      bob=-4*awake+2.5*release*soften;
+      lean=-.1*awake+.08*release;
+      headRot=-.25*awake+.26*release;
+      hdx=-2*awake+2*release;hdy=-3*awake+1.5*release;
+      legF=.18*awake-.12*release;legB=-.18*awake+.12*release;
+      armF=2.15*awake+.30*Math.sin(release*PI);
+      armB=2.05*awake+.28*Math.sin(release*PI);
+      jaw=.24*awake+.63*release*(1-soften*.55);
+      eyeMood=soften>.52?"happy":"angry";
+      roarK=release*(1-soften*.8);
+      tailA=.47*awake-.30*release;
     } else {
       const up = ease(seg(k, 0, 0.45)), down = seg(k, 0.45, 0.55), rc = seg(k, 0.7, 1);
       if (k < 0.5) {
