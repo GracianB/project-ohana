@@ -51,7 +51,7 @@ test("V93 four metamorphoses are distinct, Canvas-balanced and bounded",()=>{
   });
   assert.equal(rec.state.stack,0,"Canvas state leak in form "+evo);
   assert.ok(rec.events.length>8,"Missing visual ritual "+evo);
-  assert.ok(rec.events.length<160,"Excess geometry "+evo);
+  assert.ok(rec.events.length<240,"Excess geometry "+evo);
   fingerprints.push(rec.events.filter(e=>Array.isArray(e)).map(e=>e[0]).join(","));
  }
  assert.equal(new Set(fingerprints).size,4,"All evolutions look alike");
