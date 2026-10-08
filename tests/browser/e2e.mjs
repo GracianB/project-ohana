@@ -76,7 +76,7 @@ async function auditPage(page, label) {
     };
   });
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
-  assert.equal(titleLayout.visibleCards.length, titleLayout.atriumOn ? 10 : (label === 'mobile' ? 3 : 5), label + ': profundidad del selector/atrium incorrecta');
+  assert.equal(titleLayout.visibleCards.length, titleLayout.atriumOn ? 10 : 3, label + ': selector debe mantener solo 3 tarjetas renderizadas');
   assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
   assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
@@ -84,6 +84,44 @@ async function auditPage(page, label) {
   assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
+  // V81: real browser stress test. Cycle every hero and verify GPU backing
+  // stores, computed CSS and ARIA stay in sync after fast navigation.
+  if (label === 'desktop' && !titleLayout.atriumOn) {
+    for (let turn=0;turn<10;turn++) await page.locator('#roster-next').click();
+    await page.waitForTimeout(200);
+    const carouselAudit=await page.evaluate(()=>{
+      const all=[...document.querySelectorAll('#chars-grid .char-card')];
+      const displayed=all.filter(card=>{
+        const st=getComputedStyle(card);
+        return st.display!=='none'&&st.visibility!=='hidden';
+      });
+      const accessible=all.filter(card=>card.getAttribute('aria-hidden')==='false');
+      const offscreen=all.filter(card=>card.getAttribute('aria-hidden')==='true');
+      const oversized=offscreen.filter(card=>{
+        const cv=card.querySelector('canvas');
+        return cv&&(cv.width>1||cv.height>1);
+      });
+      const selected=document.querySelector('#chars-grid .char-card.selected');
+      const cv=selected?.querySelector('canvas');
+      return {
+        displayed:displayed.length,accessible:accessible.length,
+        offscreenBuffers:oversized.length,
+        selected:selected?.dataset.id,
+        selectedPixels:cv?.width*cv?.height||0,
+        canvasFilter:cv?getComputedStyle(cv).filter:'',
+        cardFilter:selected?getComputedStyle(selected).filter:'',
+        backdropDpr:(()=>{const fx=document.querySelector('#title-fx');return fx?fx.width/Math.max(1,fx.clientWidth):0})()
+      };
+    });
+    assert.deepEqual(
+      [carouselAudit.displayed,carouselAudit.accessible,carouselAudit.offscreenBuffers],
+      [3,3,0],label+': render/ARIA/GPU disagree: '+JSON.stringify(carouselAudit));
+    assert.equal(carouselAudit.selected,'kilo',label+': carousel does not wrap back to Kilo');
+    assert.ok(carouselAudit.selectedPixels>10000,label+': selected portrait lost backing canvas');
+    assert.equal(carouselAudit.canvasFilter,'none',label+': legacy CSS reenabled costly Canvas filter');
+    assert.equal(carouselAudit.cardFilter,'none',label+': legacy CSS reenabled costly card filter');
+    assert.ok(carouselAudit.backdropDpr<=1.30,label+': backdrop DPR unexpectedly high');
+  }
   const moduleProbe = await page.evaluate(async () => {
     const paths = [
       '/characters/rig.js',
