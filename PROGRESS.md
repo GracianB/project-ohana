@@ -3,10 +3,12 @@
 - Cuatro advertencias visuales asociadas a ataques reales con progreso de windup correcto y consejos accesibles.
 - Módulo `systems/boss-v94-readability.js` desacoplado de físicas, hitboxes y daño. Candidata sujeta a CI y Pages.
 
-## 09/10/2026 · OHANA V93 · Cuerno, cuatro metamorfosis · ohana-293
+## 09/10/2026 · OHANA V93 · CUERNO · METAMORFOSIS COMPLETA · ohana-293
 
-- Cuatro rituales Canvas propios de Cuerno, sincronizados con las cuatro evoluciones; movimiento reducido y regresión de Dino V90 y Cuerno V92 cubiertos.
-- Cambios en `systems/cuerno-v93-metamorphosis.js` y `systems/evo-cinema.js`. Candidata de publicación sujeta a CI y Pages.
+- Cuatro rituales de transición, sincronizados con la cinemática de evolución: cuerno vivo que abraza su futura cara, nacimiento de cuatro patas, dos alas con plumas y Aurora final con siete arcos y cuernos nacarados.
+- Nuevo módulo determinista `systems/cuerno-v93-metamorphosis.js`, integrado en `systems/evo-cinema.js` y precacheado para jugar sin conexión. Cuerno mantiene silueta propia y movimiento reducido.
+- Se conservan los contratos mecánicos y visuales de Dino V90 y Cuerno V92, sin nuevas hitboxes ni cambios en el motor cooperativo.
+- `index.html` y `sw.js` sincronizados a la caché `ohana-293`. La release requiere Node, Browser E2E, Multiplayer E2E, Visual y `release:check`.
 
 ## 09/10/2026 · OHANA V92 · CUERNO: RESONANCIA PRISMÁTICA Y CONTACTO REAL · ohana-292
 
