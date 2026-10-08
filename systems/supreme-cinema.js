@@ -186,7 +186,7 @@ function storyMotion(id,k,target){
   if(id==="cat") return {x:k>.56?target*.06:Math.sin(k*19)*target*.008*seg(k,.14,.48),y:-Math.sin(seg(k,.36,.61)*Math.PI)*target*.07,scale:1+.055*e(seg(k,.64,.84)),rot:Math.sin(k*13)*.018*(1-seg(k,.7,.9))};
   if(id==="dragon") return {x:-Math.sin(seg(k,.26,.53)*Math.PI)*target*.025,y:-Math.sin(seg(k,.32,.84)*Math.PI)*target*.13,scale:1+.065*e(seg(k,.62,.87)),rot:-.035*Math.sin(seg(k,.3,.78)*Math.PI)};
   if(id==="dino") return {x:0,y:Math.sin(seg(k,.20,.34)*Math.PI)*target*.035+Math.sin(seg(k,.50,.64)*Math.PI)*target*.06,scale:1+.04*e(seg(k,.52,.76)),rot:0};
-  if(id==="frita") return {x:Math.sin(seg(k,.26,.62)*Math.PI)*target*.06,y:-Math.sin(seg(k,.36,.60)*Math.PI)*target*.05,scale:1+.05*e(seg(k,.56,.78)),rot:Math.sin(k*Math.PI*2)*.035};
+  if(id==="frita") return {x:Math.sin(seg(k,.23,.58)*Math.PI)*target*.04,y:-Math.sin(seg(k,.28,.61)*Math.PI)*target*.055,scale:1+.055*e(seg(k,.63,.85)),rot:-.04*Math.sin(seg(k,.2,.55)*Math.PI)+.018*Math.sin(seg(k,.62,.86)*Math.PI)};
   if(id==="pizza") return {x:-Math.sin(seg(k,.40,.62)*Math.PI)*target*.08,y:-Math.sin(seg(k,.42,.64)*Math.PI)*target*.035,scale:1+.05*e(seg(k,.58,.82)),rot:-.035*seg(k,.40,.58)};
   if(id==="yomi") return {x:0,y:e(seg(k,.48,.72))*target*.025,scale:1.08-.08*e(seg(k,.18,.70)),rot:0};
   return {x:lerp(-target*.04,target*.035,e(seg(k,.18,.76))),y:-e(seg(k,.50,.80))*target*.045,scale:1+.05*e(seg(k,.56,.82)),rot:Math.sin(k*Math.PI)*.025};
@@ -196,6 +196,7 @@ function storyPose(id,k){
   if(id==="cat") return k<.58?"idle":k<.78?"attack":"victory";
   if(id==="dino") return (k>.18&&k<.36)||(k>.49&&k<.66)?"attack":k>.70?"victory":"idle";
   if(id==="dragon") return k<.32?"idle":k<.53?"jump":k<.78?"attack":"victory";
+  if(id==="frita") return k<.24?"idle":k<.57?"attack":k<.77?"cast":"victory";
   if(id==="pizza") return k<.42?"idle":k<.70?"attack":"victory";
   if(id==="yomi") return k<.54?"idle":k<.78?"attack":"victory";
   return k<.34?"idle":k<.72?"attack":"victory";
@@ -321,17 +322,36 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       ctx.beginPath();ctx.arc(cx+target*.18,cy-target*.28,3,0,Math.PI*2);ctx.fill();
     }
   }else if(id==="frita"){
-    const pk=seg(k,.06,.60);
-    const px=lerp(cx-target*.86,cx+target*.15,easeInOut(pk));
-    const py=cy-target*.30-Math.sin(pk*Math.PI)*target*.52;
-    potato(ctx,px,py,target*.055,t*4,1-seg(k,.58,.70));
-    const fry=seg(k,.58,.92);
+    // The runaway potato is caught on the fork, crowned, then turns into a crisp nova.
+    const chase=seg(k,.06,.49);
+    const px=lerp(cx-target*.82,cx+target*.19,easeInOut(chase));
+    const py=cy-target*.34-Math.sin(chase*Math.PI)*target*.43;
+    const catchK=seg(k,.42,.63);
+    const caught=catchK>0;
+    const potatoX=caught?lerp(px,cx+target*.22,catchK):px;
+    const potatoY=caught?lerp(py,cy-target*.31,catchK):py;
+    potato(ctx,potatoX,potatoY,target*.055,t*4,1-seg(k,.66,.76));
+    if(caught&&catchK<1) {
+      drawSpark(ctx,cx+target*.2,cy-target*.3,target*(.015+.02*catchK),"#fff6cc");
+      drawRing(ctx,cx+target*.2,cy-target*.3,target*.15,catchK,"#ff5141",2,.28);
+    }
+    const swirl=seg(k,.49,.77);
+    if(swirl>0){
+      for(let i=0;i<5;i++){
+        const a=i*TAU/5+t*.2;
+        const rx=target*(.24+.32*swirl),ry=target*(.12+.24*swirl);
+        const x=cx+Math.cos(a)*rx,y=cy+Math.sin(a)*ry;
+        drawSpark(ctx,x,y,(2+i%2)*swirl,i%2?"#fff0a0":"#f75536");
+      }
+      drawRing(ctx,cx,cy,target*(.22+.4*swirl),swirl,"#ff4e35",2,.2);
+    }
+    const fry=seg(k,.70,.95);
     if(fry>0){
       for(let i=0;i<7;i++){
         const x=cx+(i-3)*target*.13;
-        line(ctx,x,cy-target*.54,x+Math.sin(i)*target*.04,cy+target*.38,"#ffd36a",3,.18+.32*fry);
+        line(ctx,x,cy-target*.54,x+Math.sin(i)*target*.04,cy+target*.38,i%3===0?"#fff3b2":"#ffd36a",2.2,.13+.24*fry);
       }
-      drawRing(ctx,cx,cy,target*.88,fry,color,4,.46);
+      drawRing(ctx,cx,cy,target*.88,fry,color,3,.46);
     }
   }else if(id==="pizza"){
     const ok=seg(k,.08,.62);
