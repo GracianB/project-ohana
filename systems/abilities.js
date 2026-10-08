@@ -243,7 +243,7 @@ export const SUPREME_IDENTITY = Object.freeze({
   dino:    { kind: "quake",   line: "ANTES DEL MIEDO, EL RUGIDO", text: "La tierra se rompe bajo cada paso." },
   frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
   pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
-  yomi:    { kind: "maw",     line: "EL ABISMO TIENE HAMBRE", text: "La grieta atrae, marca y ejecuta a los débiles." },
+  yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
   cuerno:  { kind: "aurora",  line: "CORRE HACIA LA LUZ", text: "Aurora, escudo y una estampida de color." },
 });
 
