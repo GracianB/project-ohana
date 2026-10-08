@@ -416,7 +416,7 @@ function draw(ctx, pose, R) {
     // A slight delayed counterbalance lets the tail follow the running hips.
     // No changes to locomotion, collisions or the character's hitbox.
     const runLag = st === "run" ? Math.sin((pose.phase || 0) - 0.7) * 0.1 * T.tailLag[f] : 0;
-    const base = PI * 0.96 - tailA - wagA * 0.6 + runLag;
+    const base = PI * 0.96 - tailA - wagA * 0.6 * T.shell[f] + runLag;
     tpts = chain(-bw * 0.7, -bh * 0.22, P.tail * T.tailLength[f] * (rolling ? .66 : 1), base,
   (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12 * T.tailWave[f], 8);
     const sides = taperTail(ctx, R, tpts, P.tw * T.tailWidth[f], c.body);
@@ -463,8 +463,8 @@ function draw(ctx, pose, R) {
     leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
     ctx.save(); upper();
     ctx.rotate(shellRot);
-    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15);
-    R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * 1.5 + tw * 4, -bh * 1.3 - tw * 3], [-bw * 1.2 + tw * 3, -bh * 0.9], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
+    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15) * T.tailLag[f];
+    R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * (1.42 + .08 * T.tailLength[f]) + tw * 4, -bh * 1.3 - tw * 3 * T.tailWave[f]], [-bw * 1.2 + tw * 3, -bh * (.9 + .04 * T.tailWidth[f])], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
     tinyArm(ctx, R, bw * 0.3, -bh * 1.0, P.armL, armB, 5, dark, c.claw);
     ctx.restore();
   } else {
@@ -541,7 +541,8 @@ function draw(ctx, pose, R) {
   ctx.save(); upper();
   if (baby) {
     ctx.rotate(shellRot);
-    eggShell(ctx, R, 0, -bh * 0.9, bw * 1.5, bh * 0.85, false, t);
+    ctx.save();ctx.globalAlpha *= T.belly[f];
+    eggShell(ctx, R, 0, -bh * 0.9, bw * 1.5, bh * 0.85, false, t);ctx.restore();
     tinyArm(ctx, R, bw * 0.95, -bh * 1.0, P.armL, armF, 5.5, c.body, c.claw);
   } else {
     tinyArm(ctx, R, bw * 0.7, -bh * 0.64, P.armL, armF, 5 + f * 0.4, c.body, c.claw);
@@ -587,7 +588,7 @@ function draw(ctx, pose, R) {
     ctx.restore();
   }
   // POLVO AL CORRER
-  if (stomp > 0 && !baby) {
+  if (stomp > 0) {
     ctx.save();
     ctx.globalAlpha *= stomp * 0.8 * T.footDust[f];
     R.ellipse(ctx, 16, -2, 3.5, 2.5, "#e4dcc8", { lw: 1.2, ink: "#8a7d6a" });
@@ -673,7 +674,7 @@ function drawHead(ctx, R, pose, o) {
 
   ctx.save();
   R.blob(ctx, skull, null, { line: false, shade: false }); ctx.clip();
-  ctx.fillStyle = c.spot;
+  ctx.globalAlpha *= T.spot[f]; ctx.fillStyle = c.spot;
   ctx.beginPath(); ctx.ellipse(-hw * 0.55, -hh * 0.62, hw * 0.13, hh * 0.1, -0.5, 0, PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-hw * 0.2, -hh * 0.95, hw * 0.14, hh * 0.1, 0, 0, PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(hw * 0.35, -hh * 0.9, hw * 0.09, hh * 0.07, 0.2, 0, PI * 2); ctx.fill();
