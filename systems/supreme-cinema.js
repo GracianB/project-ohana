@@ -278,6 +278,16 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawSpark(ctx,fx,fy,4+8*sneeze,"#ffd36a");
       for(let i=0;i<3;i++) circle(ctx,fx+i*8,fy-i*3,5+i*3,"#ff7b35",.22+.16*sneeze,true);
     }
+    // Dragon earns the Supernova with three wing crescents before the main blast.
+    const ascent=seg(k,.33,.62);
+    if(ascent>0){
+      for(let i=0;i<3;i++){
+        const a=-Math.PI*.72+i*.56;
+        const px=cx+Math.cos(a)*target*(.32+i*.10),py=cy+Math.sin(a)*target*(.35+i*.07);
+        drawSpark(ctx,px,py,(3+i*2)*ascent,i===1?"#fff5bb":"#ffaf63");
+      }
+      drawRing(ctx,cx,cy+target*.12,target*(.22+.44*ascent),ascent,"#ffd690",2,.27);
+    }
     const nova=seg(k,.50,.90);
     if(nova>0){
       drawRays(ctx,cx,cy,target*1.38,"#ff7b35",.18+.34*nova,-t*.25,12);
