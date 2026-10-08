@@ -808,7 +808,7 @@ test("V36 cinematic director wires evolution death boss and ending presentation"
 });
 
 
-test("V37 signature U is cinematic, unique and regression-protected", () => {
+test("V48 signature U uses ten real storyboards and stays regression-protected", () => {
   const game = fs.readFileSync("./game.js", "utf8");
   const abilities = fs.readFileSync("./systems/abilities.js", "utf8");
   const cinema = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
@@ -822,14 +822,27 @@ test("V37 signature U is cinematic, unique and regression-protected", () => {
   assert.match(abilities, /kind: "supremeField"/);
   assert.match(abilities, /kind: "assist"/);
   assert.match(abilities, /CustomEvent\("ohana-supreme"/);
-  assert.match(cinema, /PROJECT OHANA V44 · SUPREME SHORTS/);
-  assert.match(cinema, /drawDummy/);
-  assert.match(cinema, /dataset\.activeId/);
-  assert.match(cinema, /dataset\.state="active"/);
-  assert.match(css, /V44 · SUPREME SHORTS/);
-  assert.match(html, /supreme\.css\?v=ohana-239/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-239/);
+  assert.match(cinema, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
+  assert.match(cinema, /SUPREME_STORYBOARDS/);
+  assert.match(cinema, /pollen-bonk/);
+  assert.match(cinema, /rift-zipper/);
+  assert.match(cinema, /overcharge/);
+  assert.match(cinema, /deadpan-eclipse/);
+  assert.match(cinema, /tiny-sneeze/);
+  assert.match(cinema, /double-stomp/);
+  assert.match(cinema, /potato-catch/);
+  assert.match(cinema, /oven-too-hot/);
+  assert.match(cinema, /void-looks-back/);
+  assert.match(cinema, /tiny-rainbow/);
+  assert.match(cinema, /dataset\.mode="storyboard"/);
+  assert.match(cinema, /dataset\.story=story\.gag/);
+  assert.match(cinema, /drawAssist/);
+  assert.match(css, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
+  assert.doesNotMatch(css, /sc-motif/);
+  assert.match(html, /supreme\.css\?v=ohana-240/);
+  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-240/);
   assert.match(visual, /09-supreme-u-assist/);
+  assert.match(visual, /09b-supreme-yomi-story/);
 });
 
 
