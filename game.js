@@ -28,6 +28,7 @@ import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
 import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
+import { drawEncounterSignals } from "./systems/encounter-signals.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
@@ -2589,6 +2590,7 @@ ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.
 }
 if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
 for (const e of game.enemies) if ((!game.finale || !e.boss) && (e.boss || visibleForRender(e,game.cam,camW(),camH()))) drawEnemy(ctx, e, game.cam, t);
+if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
 for (const pr of game.projectiles) if (visibleForRender(pr,game.cam,camW(),camH())) drawProjectile(ctx, pr, game.cam, t);
