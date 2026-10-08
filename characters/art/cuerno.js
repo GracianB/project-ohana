@@ -1,4 +1,4 @@
-// V74 CANON · lone living horn → round face → four legs → wings → black unicorn.
+// V75 IRIS FINALE · anatomical motion, rooted tails and hinged wings; V74's five-form canon is preserved.
 // Character height is an optical reading aid, never a physics/hitbox change.
 export const CUERNO_VISUAL_H=Object.freeze([118,92,91,86,82]);
 // V66: Cuerno's personality is stage-specific and deterministic, never random FX.
@@ -66,6 +66,52 @@ ctx.restore();
 // V67: J/K/L/U originate at the real horn. Pure pose contract, no extra FX objects.
 const IRIS_COLORS=["#ffacbe","#ffc98f","#ffe8a5","#a6e8b8","#a7e5fb","#b8c4ff","#e0b9f6"];
 const HORN_TIPS=[[0,-65],[4,-91],[24,-100],[25,-120],[33,-139]];
+
+// Deterministic, bounded anatomy: these poses are shared by gameplay and the title portraits.
+// Nothing here creates particles, timers, new sprites or changes collision/physics.
+export function cuernoTailPose(pose,form,t){
+ const f=Math.max(2,Math.min(4,form|0));
+ const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
+ const time=Number.isFinite(Number(t))?Number(t):0;
+ const running=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
+ const amplitude=f===4?6.2:f===3?5.4:4.2;
+ const wave=Math.sin(time*.075+phase*.22)*amplitude*.55+
+   (running?Math.sin(phase)*amplitude*.52:0);
+ const speed=Math.max(0,Math.min(1,Number(pose?.speed)||0));
+ return {swing:Math.max(-amplitude,Math.min(amplitude,wave)),
+   lift:air?7+f:running?1.8+speed*2.3:Math.sin(time*.055)*1.15};
+}
+function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
+ const {swing,lift}=cuernoTailPose(pose,form,t);
+ const length=form===4?35:form===3?27:21;
+ const strands=form===4?6:form===3?5:4;
+ ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+ for(let i=0;i<strands;i++){
+  const endX=rootX-length-swing+(i%2?1.4:0);
+  const endY=rootY+8+i*2.8-lift;
+  ctx.strokeStyle=colors[i%colors.length];
+  ctx.lineWidth=(form===4?4.6:form===3?4.0:3.7)-i*.24;
+  ctx.globalAlpha=.91-i*.045;
+  ctx.beginPath();ctx.moveTo(rootX-i*.65,rootY+i*.64);
+  ctx.bezierCurveTo(rootX-11,rootY-8+i*1.4,
+    rootX-17-swing*.3,rootY+17+i*2-lift*.65,endX,endY);
+  ctx.stroke();
+ }
+ ctx.restore();
+}
+export function cuernoWingPose(pose,form,t){
+ if(form<3)return {open:0,flap:0,hinge:0};
+ const state=pose?.state||"idle",air=!!pose?.air||state==="jump";
+ const cast=state==="cast"||state==="attack",victory=state==="victory";
+ const slot=cuernoMagicPose(pose,form)?.slot;
+ const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
+ const time=Number.isFinite(Number(t))?Number(t):0;
+ const open=air?1:slot===3?1:slot===2?.89:cast?.84:victory?.95:
+   state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
+ const flutter=air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
+ const flap=Math.sin(time*.10+phase*.12)*flutter;
+ return {open,flap,hinge:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
+}
 export function cuernoMagicPose(pose,form){
 if(pose?.state==="dead"||pose?.state==="hurt")return null;
 const forced=Number.isInteger(pose?.cuernoMagicSlot)&&pose.cuernoMagicSlot>=0&&pose.cuernoMagicSlot<=3;
@@ -277,13 +323,15 @@ ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
 for(let i=0;i<3;i++){ctx.strokeStyle=["#f4c5e7","#f6dfa9","#bfdcfb"][i];
  ctx.lineWidth=2.5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-12,-34+i*5);
  ctx.quadraticCurveTo(-25-i*2,-37+i*5,-27-i*3,-24+i*8);ctx.stroke();}
-ctx.save();ctx.translate(0,-31);ctx.scale(1+squish,1-squish);
+// The face and horn squash together around their shared tip, not as separate stickers.
+ctx.save();ctx.translate(4,-91);ctx.scale(1+squish,1-squish);ctx.translate(-4,91);
+ctx.save();ctx.translate(0,-31);
 // One clean round head; the cuteness comes from the ball itself.
 ctx.fillStyle="#ffe7f7";ctx.strokeStyle="#795c91";ctx.lineWidth=2.8;
 ctx.beginPath();ctx.arc(0,0,22,0,TAU);ctx.fill();ctx.stroke();
 ctx.globalAlpha=.40;ctx.fillStyle="#fff9ff";ctx.beginPath();
 ctx.ellipse(-6,-9,11,5,-.35,0,TAU);ctx.fill();
-ctx.restore();
+ctx.restore();ctx.globalAlpha=1;
 // Keep the spiral horn that was alive in F0, now fixed at the top of the orb.
 ctx.fillStyle="#fff0cf";ctx.strokeStyle="#815a91";ctx.lineWidth=2.3;
 ctx.beginPath();ctx.moveTo(-6,-49);ctx.bezierCurveTo(-4,-61,-1,-78,4,-91);
@@ -297,6 +345,7 @@ R.eye(ctx,9,-33,5,pose,{iris:"#84529f",mood});
 R.blush(ctx,-16,-21,3,"#ffc9df");R.blush(ctx,17,-21,3,"#ffc9df");
 R.mouth(ctx,1,-19,4,pose.state==="victory"?"happy":"smile");
 ctx.fillStyle="#fff5c8";ctx.beginPath();ctx.arc(4,-91,3,0,TAU);ctx.fill();
+ctx.restore(); // End the anchored head; speed lines stay in the body's coordinate frame.
 if(run||air){ctx.strokeStyle="#ffd8ee";ctx.globalAlpha=.52;ctx.lineWidth=1.8;
  for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-23-i*7,-14+i*7);
  ctx.lineTo(-30-i*7,-13+i*7);ctx.stroke();}}
@@ -317,16 +366,13 @@ const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
 const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0);
 ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
 const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
-for(let i=0;i<4;i++){
-const sway=Math.sin(t*.105+i*.68)*2.2+(run?beat*4:0);
-ctx.strokeStyle=ribbons[i];ctx.lineWidth=4.2-i*.32;ctx.lineCap="round";
-ctx.beginPath();ctx.moveTo(-29,-39+i);
-ctx.bezierCurveTo(-42,-45+i*2,-48-sway,-24+i*3,-51-sway,-23+i*4);ctx.stroke();
-}
+// All four strands emerge from the croup; no detached tail during the gallop.
+drawRootedTail(ctx,pose,2,t,-29,-40,ribbons);
 function leg(x,clock,far){
 const stride=run?Math.sin(phase+clock):0,reach=stride*(far?6:7.6);
 const tuck=air?(far?8:10):(cuernoSoulBeat(pose,2)==="prance"&&!far?4:0);
-const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48;
+const anticipation=run&&stride<0?Math.max(0,-stride)*1.3:0;
+const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48-anticipation;
 const hoofX=x+reach+(far?-2:2),hoofY=2-tuck;
 R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
 ctx.fillStyle=far?"#ad95c7":"#bb9dcc";ctx.strokeStyle=ink;ctx.lineWidth=1.35;
@@ -405,15 +451,7 @@ const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
 const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0);
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
-for(let i=0;i<5;i++){
-const sw=Math.sin(t*.105+i*.65)*3+(run?gallop*5:0);
-ctx.save();ctx.globalAlpha=.88-i*.10;
-ctx.strokeStyle=["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"][i];
-ctx.lineWidth=3.7-i*.25;ctx.lineCap="round";
-ctx.beginPath();ctx.moveTo(-34,-45+i*.9);
-ctx.bezierCurveTo(-53-sw*.4,-43+i*3,-51-sw,-27+i*3,-61-sw,-30+i*4);
-ctx.stroke();ctx.restore();
-}
+drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
 function limb(x,clock,back){
 const beat=run?Math.sin(phase+clock):0,reach=run?beat*(back?7.5:10):0;
@@ -439,10 +477,11 @@ ctx.bezierCurveTo(-18,-19,-35,-27,-37,-46);ctx.closePath();ctx.fill();ctx.stroke
 ctx.save();ctx.globalAlpha=.52;ctx.fillStyle=shade;ctx.beginPath();
 ctx.ellipse(-12,-32,20,7,-.13,0,TAU);ctx.fill();ctx.restore();
 // V74: wings are born in F3, not first in the final form.
-const spread=flight?1:angry?.88:pose.state==="victory"?.95:.32;
+const wingMotion=cuernoWingPose(pose,3,t),spread=wingMotion.open;
 function stellarWing(far){
- const flutter=(flight?2.8:1.1)*Math.sin(t*.11+(far?.8:0));
- ctx.save();ctx.translate(far?-17:-6,-48);ctx.rotate(-.13-spread*.20);
+ const flutter=wingMotion.flap*(far?.72:1);
+ ctx.save();ctx.translate(far?-17:-6,-48);
+ ctx.rotate(-.13-spread*.20+wingMotion.hinge*(far?.6:1));
  ctx.fillStyle=far?"#c6d9f6":"#d1ecfb";ctx.strokeStyle="#839dd2";
  ctx.globalAlpha=far?.56:.88;ctx.lineWidth=1.8;
  ctx.beginPath();ctx.moveTo(0,0);
@@ -524,26 +563,20 @@ const phase=Number(pose.phase)||0,beat=Math.sin(phase),speed=Math.max(0,Number(p
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 const soul=cuernoSoulBeat(pose,4);
 const magic=cuernoMagicPose(pose,4);
-const unfold=air?1:magic?.slot===3?1:magic?.slot===2?.86:cast?.9:triumph?1:run?.48:soul==="bow"?.19:soul==="stargaze"?.76:.32;
+const wingMotion=cuernoWingPose(pose,4,t),unfold=wingMotion.open;
 const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
 const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
 const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0);
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
-// Six trailing strands rise from the living comet tail of Unicornio Estelar.
-for(let i=0;i<6;i++){
-const sway=Math.sin(t*.068+i*.53)*3+(run?beat*4:0);
-ctx.save();ctx.globalAlpha=.78-i*.045;ctx.strokeStyle=colors[i];
-ctx.lineWidth=4.1-i*.32;ctx.lineCap="round";
-ctx.beginPath();ctx.moveTo(-40,-44+i*.6);
-ctx.bezierCurveTo(-55,-57+i*3,-57-sway,-20+i*3,-77-sway,-31+i*3);
-ctx.stroke();ctx.restore();
-}
+// V75: root the rainbow tail beneath the obsidian croup. Its arc stays inside
+// a small envelope during runs, jumps and cinematic poses, never flying away.
+drawRootedTail(ctx,pose,4,t,-40,-44,colors);
 // Translucent aurora pinions: folded while resting, unfolding for jumps and casting.
 function wing(far){
-const flap=Math.sin(t*.10+(far?1:0))*2.1*(.25+unfold)+(cast?-1.2:0);
+const flap=wingMotion.flap*(far?.72:1)+(cast?-1.2:0);
 ctx.save();ctx.translate(far?-12:0,-52);
-ctx.rotate((far?-.24:.05)-unfold*.24);
+ctx.rotate((far?-.24:.05)-unfold*.24+wingMotion.hinge*(far?.7:1));
 ctx.globalAlpha=far?.45:.68;
 ctx.fillStyle=far?"#373653":"#343650";
 ctx.strokeStyle=far?"#8f82ba":"#b5a6cb";ctx.lineWidth=1.6;
@@ -630,6 +663,11 @@ ctx.beginPath();ctx.ellipse(37,-77,14.5,13,-.12,0,TAU);ctx.fill();ctx.stroke();
 ctx.fillStyle="#3e3648";ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);
 ctx.quadraticCurveTo(48,-57,38,-61);ctx.closePath();ctx.fill();ctx.stroke();
+// A cheekbone and soft muzzle bridge give the black profile an actual face.
+ctx.save();ctx.strokeStyle="#aa8fae";ctx.globalAlpha=.42;ctx.lineWidth=1.3;
+ctx.beginPath();ctx.moveTo(41,-71);ctx.quadraticCurveTo(48,-72,51,-67);ctx.stroke();
+ctx.beginPath();ctx.moveTo(13,-40);ctx.quadraticCurveTo(20,-38,22,-33);ctx.stroke();
+ctx.restore();
 R.blush(ctx,45,-68,2.0,"#bb7d99");
 R.eye(ctx,35,-79,5,pose,{iris:"#dcc3ff",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":triumph?"happy":cast?"angry":"normal"});
 R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
@@ -644,6 +682,8 @@ for(let i=1;i<=5;i++){
 const y=-i*8,w=4.7-i*.55;ctx.beginPath();ctx.moveTo(-w,y+2);
 ctx.quadraticCurveTo(0,y+5,w,y-2);ctx.stroke();
 }
+ctx.strokeStyle="#fffbea";ctx.lineWidth=.9;ctx.globalAlpha=.78;
+ctx.beginPath();ctx.moveTo(-1,-9);ctx.quadraticCurveTo(-1,-23,-1,-42);ctx.stroke();
 ctx.restore();
 // F4 U is carried by the anatomy: the living horn crowns the quiet dream.
 if(magic?.slot===3){
