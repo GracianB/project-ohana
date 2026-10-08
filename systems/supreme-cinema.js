@@ -349,7 +349,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawRing(ctx,cx,cy,target*.88,fry,color,3,.46);
     }
   }else if(id==="pizza"){
-    // A sleepy slice opens the oven, recoils from its own heat, and becomes lava.
     const yawning=seg(k,.08,.34);
     if(yawning>0&&yawning<1){
       for(let i=0;i<2;i++){
@@ -373,7 +372,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
     }
     const eruption=seg(k,.65,.94);
     if(eruption>0){
-      // Six toppings arc with the eruption, staying inside the stage budget.
       for(let i=0;i<6;i++){
         const a=-Math.PI*.85+i*Math.PI*.14;
         const rr=target*(.30+.68*eruption);
