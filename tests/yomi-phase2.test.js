@@ -41,7 +41,7 @@ test("V57 five evolutions change the actual silhouette",()=>{
 
 test("V57 all U stories are readable and Cuerno assists Yomi for the full sequence",()=>{
   assert.match(storyboards,/yomi:.*duration:3\.90/);
-  assert.match(storyboards,/FAROL → CUERNO → SELLO DE LUZ → RESCATE/);
+  assert.match(storyboards,/FAROL → CUERNO → EMBESTIDA → JUICIO/);
   assert.match(cinema,/Math\.max\(2\.65,story\.duration\)/);
   assert.match(cinema,/inK=easeOut\(seg\(k,\.27,\.41\)\)/);
   assert.match(cinema,/outK=1-easeOut\(seg\(k,\.91,1\)\)/);
