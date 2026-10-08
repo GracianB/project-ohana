@@ -1,4 +1,3 @@
-// PROJECT OHANA V48 · SUPREME CINEMA REBORN
 import {
   fullCanvas, reducedMotion, clamp, seg, easeOut, easeInOut, easeBack, lerp,
   rgba, tint, makeDummy, drawDummy, baseHeight, drawTitle, drawRing, drawRays,
@@ -380,8 +379,6 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       drawRing(ctx,cx,cy,target*.94,eruption,color,4,.56);
     }
   }else if(id==="yomi"){
-    // A guardian needs a story, not a giant anonymous eye.
-    // 1: candle awakens; 2: Cuerno crosses the threshold; 3: two lights join; 4: seal rescues.
     const lamp=seg(k,.06,.30),welcome=seg(k,.22,.52),seal=seg(k,.49,.79),rescue=seg(k,.76,.96);
     if(lamp>0){
       const a=Math.sin(Math.PI*Math.min(1,lamp));
@@ -458,7 +455,6 @@ function play(detail={}){
   const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
   const ally=allyDef?actor(allyDef,Math.min(4,Math.max(2,evo)),allyDef.color):null;
   const reduce=reducedMotion();
-  // Give every U time to be understood; Yomi's duet keeps its longer authored runtime.
   const duration=reduce ? .78 : Math.max(2.65,story.duration);
   let t0=0,raf=0,done=false;
   const token=++generation;
