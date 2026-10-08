@@ -107,10 +107,15 @@ if(cv){
     spot.addColorStop(0,"rgba(255,255,255,.05)");spot.addColorStop(1,"rgba(0,0,0,0)");ctx.fillStyle=spot;ctx.fillRect(0,0,W,H);
     raf=requestAnimationFrame(frame);
   }
-  function select(id){if(!SCENES[id]||id===toId)return;fromId=toId;toId=id;mix=0;}
+  function select(id){
+    if(!SCENES[id]||id===toId)return;
+    fromId=toId;toId=id;mix=0;
+    cv.dataset.heroScene=id;
+  }
   addEventListener("ohana-title-hero",e=>select(String(e.detail?.id||"kilo")));
   addEventListener("pointermove",e=>{pointer.tx=e.clientX/innerWidth;pointer.ty=Math.min(.74,e.clientY/innerHeight)},{passive:true});
   addEventListener("resize",resize);
   new MutationObserver(()=>{if(!raf&&!document.body.classList.contains("playing"))frame();}).observe(document.body,{attributes:true,attributeFilter:["class"]});
-  const initial=document.getElementById("char-select")?.dataset.hero||"kilo";fromId=toId=initial;resize();frame();
+  const initial=document.getElementById("char-select")?.dataset.hero||"kilo";
+  fromId=toId=initial;cv.dataset.heroScene=initial;resize();frame();
 }
