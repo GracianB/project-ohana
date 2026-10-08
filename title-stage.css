@@ -229,3 +229,112 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
   body.intro-complete #char-select .title-stack,body.intro-complete #char-select .hero-stage,body.intro-complete #char-select .title-controls{animation:none!important}
   #char-select *{scroll-behavior:auto!important}
 }
+
+
+/* ==========================================================================
+   V45 · LIVING HERO SELECT
+   Native coverflow inspired by centeredSlides / depth / rotateY patterns.
+   ========================================================================== */
+#char-select .hero-stage{
+  perspective:1600px!important;
+  perspective-origin:50% 46%!important;
+}
+#char-select #chars{perspective:1600px!important;transform-style:preserve-3d!important}
+#char-select #chars .chars-grid{transform-style:preserve-3d!important}
+#char-select #chars .char-card{
+  transform-style:preserve-3d!important;
+  backface-visibility:hidden!important;
+  will-change:transform,opacity,filter!important;
+  transition:
+    transform .62s cubic-bezier(.16,1,.3,1),
+    opacity .48s ease,
+    filter .48s ease!important;
+}
+#char-select #chars .char-card::before{
+  content:"";position:absolute;left:50%;top:55%;width:82%;height:72%;z-index:-1;
+  transform:translate(-50%,-50%) scale(.86);border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--tint) 24%,transparent),transparent 66%);
+  opacity:0;filter:blur(16px);transition:opacity .45s ease,transform .55s cubic-bezier(.16,1,.3,1);
+}
+#char-select #chars .char-card.selected{
+  display:flex!important;z-index:10!important;opacity:1!important;
+  width:min(410px,32vw)!important;height:min(400px,48vh)!important;
+  transform:translate3d(-50%,-50%,90px) scale(1.04)!important;
+  filter:saturate(1.08) brightness(1.04)!important;
+}
+#char-select #chars .char-card.selected::before{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+#char-select #chars .char-card.is-prev,#char-select #chars .char-card.is-next{
+  display:flex!important;z-index:6!important;opacity:.58!important;pointer-events:auto!important;
+  width:min(230px,18vw)!important;height:min(290px,36vh)!important;
+  filter:saturate(.72) brightness(.76)!important;
+}
+#char-select #chars .char-card.is-prev{
+  transform:translate3d(calc(-50% - clamp(230px,22vw,350px)),-50%,-120px) rotateY(24deg) scale(.82)!important;
+}
+#char-select #chars .char-card.is-next{
+  transform:translate3d(calc(-50% + clamp(230px,22vw,350px)),-50%,-120px) rotateY(-24deg) scale(.82)!important;
+}
+#char-select #chars .char-card.is-prev2,#char-select #chars .char-card.is-next2{
+  display:flex!important;z-index:2!important;opacity:.20!important;pointer-events:auto!important;
+  width:min(175px,14vw)!important;height:min(235px,30vh)!important;
+  filter:saturate(.46) brightness(.54) blur(.2px)!important;
+}
+#char-select #chars .char-card.is-prev2{
+  transform:translate3d(calc(-50% - clamp(390px,38vw,610px)),-50%,-300px) rotateY(38deg) scale(.68)!important;
+}
+#char-select #chars .char-card.is-next2{
+  transform:translate3d(calc(-50% + clamp(390px,38vw,610px)),-50%,-300px) rotateY(-38deg) scale(.68)!important;
+}
+#char-select #chars .char-card.selected:hover{
+  transform:translate3d(-50%,-50%,105px) scale(1.065)!important;
+}
+#char-select #chars .char-card.is-prev:hover{
+  opacity:.80!important;
+  transform:translate3d(calc(-50% - clamp(230px,22vw,350px)),-50%,-82px) rotateY(18deg) scale(.86)!important;
+}
+#char-select #chars .char-card.is-next:hover{
+  opacity:.80!important;
+  transform:translate3d(calc(-50% + clamp(230px,22vw,350px)),-50%,-82px) rotateY(-18deg) scale(.86)!important;
+}
+#char-select #chars .char-card.is-prev2:hover,#char-select #chars .char-card.is-next2:hover{opacity:.36!important}
+#char-select #chars .portrait canvas{
+  filter:drop-shadow(0 28px 26px rgba(0,0,0,.42)) drop-shadow(0 0 18px color-mix(in srgb,var(--tint) 14%,transparent))!important;
+}
+#char-select .hero-stage::before{
+  top:60%!important;width:min(760px,58vw)!important;height:min(190px,21vh)!important;
+  background:
+    radial-gradient(ellipse,color-mix(in srgb,var(--hero-tint) 30%,transparent),rgba(0,0,0,0) 68%),
+    radial-gradient(ellipse at 50% 80%,rgba(255,255,255,.055),transparent 62%)!important;
+  filter:blur(12px)!important;
+}
+#char-select .hero-stage::after{
+  bottom:7%!important;width:min(920px,70vw)!important;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--hero-tint) 66%,transparent),transparent)!important;
+  box-shadow:0 0 26px color-mix(in srgb,var(--hero-tint) 18%,transparent)!important;
+}
+#char-select .hero-dossier{
+  width:min(520px,74vw)!important;
+  background:linear-gradient(180deg,rgba(4,11,20,.42),rgba(3,8,16,.74))!important;
+  border-color:color-mix(in srgb,var(--hero-tint) 18%,rgba(255,255,255,.08))!important;
+}
+#char-select .roster-arrow{top:46%!important}
+#char-select[data-hero] .title-stack .tagline{color:color-mix(in srgb,var(--hero-tint) 34%,#e9f6ff)!important}
+
+@media(max-width:900px){
+  #char-select #chars .char-card.is-prev2,#char-select #chars .char-card.is-next2{display:none!important;opacity:0!important;pointer-events:none!important}
+  #char-select #chars .char-card.selected{width:min(330px,54vw)!important;height:min(320px,41vh)!important}
+  #char-select #chars .char-card.is-prev,#char-select #chars .char-card.is-next{
+    width:min(120px,19vw)!important;height:min(175px,25vh)!important;opacity:.28!important;
+  }
+  #char-select #chars .char-card.is-prev{transform:translate3d(calc(-50% - 31vw),-50%,-120px) rotateY(22deg) scale(.76)!important}
+  #char-select #chars .char-card.is-next{transform:translate3d(calc(-50% + 31vw),-50%,-120px) rotateY(-22deg) scale(.76)!important}
+}
+@media(max-width:560px){
+  #char-select #chars .char-card.selected{width:235px!important;height:min(245px,36vh)!important;transform:translate3d(-50%,-50%,40px) scale(1)!important}
+  #char-select #chars .char-card.is-prev,#char-select #chars .char-card.is-next{width:78px!important;height:126px!important;opacity:.17!important}
+  #char-select #chars .char-card.is-prev{transform:translate3d(calc(-50% - 39vw),-50%,-130px) rotateY(24deg) scale(.66)!important}
+  #char-select #chars .char-card.is-next{transform:translate3d(calc(-50% + 39vw),-50%,-130px) rotateY(-24deg) scale(.66)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #char-select #chars .char-card{transition-duration:.01ms!important}
+}
