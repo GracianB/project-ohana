@@ -114,7 +114,11 @@ portraitClock.advance(now, () => {
     const entry = ROSTER_BY_ID.get(cv.dataset.id);
     if (!entry) continue;
     const hero = card.classList.contains("selected");
-    if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < SIDE_PREVIEW_INTERVAL_MS) continue;
+    // Atrium shows all ten; its distant characters are stills with rare
+    // refreshes, while immediate neighbors retain their short 120ms cadence.
+    const neighbor = card.classList.contains("is-prev") || card.classList.contains("is-next");
+    const previewInterval = neighbor ? SIDE_PREVIEW_INTERVAL_MS : 550;
+    if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < previewInterval) continue;
     cv._lastPaintAt = now;
     const { def, index: idx } = entry;
     const c = cv.getContext("2d", { alpha: true });
@@ -316,11 +320,12 @@ const prev2 = ids[(i - 2 + ids.length) % ids.length];
 const prev = ids[(i - 1 + ids.length) % ids.length];
 const next = ids[(i + 1) % ids.length];
 const next2 = ids[(i + 2) % ids.length];
+const atriumMode = document.getElementById("char-select")?.classList.contains("atrium-on") || false;
 
 cards.forEach((el) => {
   const selected = el.dataset.id === id;
   // Match keyboard and ARIA visibility to the actual three-card CSS carousel.
-  const visible = [id, prev, next].includes(el.dataset.id);
+  const visible = atriumMode || [id, prev, next].includes(el.dataset.id);
   const wasVisible = el.getAttribute("aria-hidden") !== "true";
   el.classList.toggle("selected", selected);
   el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
