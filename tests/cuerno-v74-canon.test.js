@@ -8,19 +8,20 @@ const draw=fs.readFileSync("characters/draw.js","utf8");
 const title=fs.readFileSync("systems/title.js","utf8");
 const screenshots=fs.readFileSync("tests/browser/visual-regression.mjs","utf8");
 function picture(form,state="idle",phase=1.2){
- const trace={limbs:0,eyes:0,beziers:0,lines:0,arcs:0,save:0,restore:0,colors:[],scales:0};
+ const trace={limbs:0,eyes:0,beziers:0,lines:0,arcs:0,save:0,restore:0,colors:[],scales:0,limbPositions:[],rotations:[]};
  const ctx=new Proxy({},{
   get(o,k){if(k==="save")return()=>trace.save++;
    if(k==="restore")return()=>trace.restore++;
    if(k==="bezierCurveTo")return()=>trace.beziers++;
    if(k==="lineTo")return()=>trace.lines++;
+   if(k==="rotate")return angle=>trace.rotations.push(angle);
    if(k==="arc")return()=>trace.arcs++;
    if(k==="scale")return()=>trace.scales++;
    if(k in o)return o[k];return()=>{};},
   set(o,k,v){o[k]=v;if(k==="fillStyle")trace.colors.push(String(v));return true;}
  });
  const noop=()=>{};
- const R={limb:()=>trace.limbs++,eye:()=>trace.eyes++,mouth:noop,ellipse:noop,
+ const R={limb:(c,...points)=>{trace.limbs++;trace.limbPositions.push(points.slice(0,7));},eye:()=>trace.eyes++,mouth:noop,ellipse:noop,
   blush:noop,sparkle:noop,celShade:noop,halo:noop};
  Cuerno.draw(ctx,{form,state,t:160,phase,speed:.7,air:state==="jump",cast:state==="cast"?.5:0,
   castSlot:3,bounce:.2,flourish:0,flourishN:0,cuernoDreamT:0},R);
@@ -68,8 +69,8 @@ test("V74 poses stay deterministic and readable at each evolution",()=>{
   assert.deepEqual(a,b,"nondeterminism F"+form+"/"+state);
   assert.ok(a.arcs+a.lines+a.beziers>0&&a.eyes>=1,"blank character F"+form+"/"+state);
  }
- assert.notDeepEqual(picture(3,"run",.1),picture(3,"run",2.9),
-  "wings/legs should move with gallop");
+ assert.notDeepEqual(picture(3,"run",.1).limbPositions,picture(3,"run",2.9).limbPositions,
+  "real knee and hoof coordinates must change with gallop");
 });
 test("V74 movement and four abilities have not been replaced with artwork",()=>{
  const c=ROSTER.find(r=>r.id==="cuerno");
