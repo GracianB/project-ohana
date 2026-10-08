@@ -1,6 +1,6 @@
 ## 08/10/2026 · DINO V76 · COMBATE CINEMÁTICO SIN PERDER EL PERSONAJE
 
-**Rama compatible con Cuerno V74:** `feat/dino-v76-cinematic-combat-20261008`. **Cache:** `ohana-273`.
+**Rama compatible con Cuerno V74:** `feat/dino-v76-cinematic-combat-20261008`. **Cache:** `ohana-274`.
 
 Dino conserva las cinco siluetas, colores, personalidad, 100 calibraciones de evolución y su habilidad U original (`impact` / Modo Coloso). Cuerno no se modifica.
 
@@ -11,6 +11,33 @@ Dino conserva las cinco siluetas, colores, personalidad, 100 calibraciones de ev
 - **QA:** las pruebas de navegador incluyen capturas separadas de J, K y L, y el multijugador espera una variación real de posición con foco explícito y ventana limitada. No cambia el juego solo para hacer pasar el test.
 
 **Nota de integración:** se toma como base `main` después de fusionar Cuerno V74, manteniendo íntegra su evolución. No hacer merge sin CI, Browser E2E, Multiplayer, Visual Matrix y Release Gate completados.
+
+
+## 08/10/2026 · V75 · CUERNO IRIS FINAL · ANATOMÍA VIVA
+
+**Caché** `ohana-273` · Continuación sobre V74, no reinicio del personaje. El canon se mantiene: Cuernín es solo cuerno, Destello es cuerno con esfera sin patas, Potro Iris estrena cuatro patas, Estelar despliega alas y F4 es Unicornio Negro obsidiana.
+
+- **F1:** cara esférica y cuerno nacen del mismo pivote elástico; no se anticipan orejas ni pezuñas.
+- **F2:** cuatro patas con anticipación de trote y cola de cuatro cintas sujeta a la grupa. El golpe de aire no separa la cola del cuerpo.
+- **F3:** alas realmente articuladas, con apertura, bisagra y aleteo según carrera, salto, victoria o hechizo; cola anclada.
+- **F4:** pelaje negro obsidiana `#1b1a28`, cuello orgánico en S sin contorno rectangular, cara más definida, cuerno pulido, alas nocturnas reactivas y seis hebras de cola de movimiento limitado.
+- **Animación determinista:** `cuernoTailPose` y `cuernoWingPose` mantienen posiciones acotadas sin temporizadores, asignaciones de sprites ni efectos aleatorios. En daño o derrota, alas y colas quedan inmóviles.
+- **Relato unificado:** textos de las cuatro transformaciones actualizados en `characters/evolution.js` para que coincidan con lo que se ve. El nacimiento de las alas sucede en F3, no al final.
+- **Compatibilidad:** Cuerno mantiene la velocidad y salto natural superiores, sus cinco formas, las cuatro habilidades J/K/L/U (incluida la U de sueño) y sus hitboxes. **Dino no se modifica.**
+- **Regresión nueva:** `tests/cuerno-v75-final-anatomy.test.js` verifica cinco siluetas en ocho estados, balance de Canvas, cola limitada, alas dinámicas, esfera y cuerno unidos, textos y reposo al recibir daño. Se han eliminado expectativas de caché antigua en `tests/hardening.test.js` y `tests/michi-soul.test.js`.
+- **Calidad:** 370 pruebas Node PASS, `node tests/browser/e2e.mjs` PASS, Multiplayer E2E PASS y `node tests/browser/visual-regression.mjs` PASS con 92 capturas en rama V75. La fusión requiere también `release:check` PASS y comprobación final de GitHub Pages.
+- **Publicación:** `index.html` y `sw.js` comparten `ohana-273`; el historial V74/V73 se conserva debajo.
+
+## 08/10/2026 · V75 · CUERNO · VERDADERO NEGRO, ESCALA EN CARRUSEL, CONTRASTE
+
+**Caché:** `ohana-273`. Esta fase se basa en inspección manual de las **capturas Chromium reales** de V74, no solo en lectura de código.
+
+- **Defecto visual grave detectado:** al cambiar de evolución, el renderizador global aplicaba una capa `#ffffff` de hasta **90%** sobre el personaje (durante el destello `evoBurst`). Como resultado, **Unicornio Negro F4 aparecía BLANCO en el carrusel durante la mayor parte de la transición**, pese a tener pelaje negro correcto dentro del código y la partida. Se reduce **solo para Cuerno** a un máximo de **7,5% de nacarado lila**. Las transiciones de los otros nueve héroes mantienen su animación original y Cuerno conserva su aura de evolución.
+- **Escala corregida de verdad en portada:** el selector normalizaba *cada evolución* para llenar su espacio, con lo que F0 se veía casi tan grande como F4. El nuevo contrato `CUERNO_PORTRAIT_GROWTH=[.68,.77,.86,.94,1]` establece crecimiento visual progresivo legible y `CUERNO_PORTRAIT_ASPECT=[.66,.81,1.16,1.52,1.60]` reserva anchura real a las alas y evita recortes en móvil. Juego y hitboxes no cambian.
+- **Anatomía reforzada:** F3 usa alas azul perla con contorno acero y plumas separadas del pelaje claro. En F4, un filo lunar color índigo da lectura al lomo negro contra fondos oscuros; un segundo reflejo sigue el cuello en S y la cabeza tiene borde lavanda. No aparecen rectángulos nuevos ni partículas.
+- **Iluminación propia:** el óvalo de luz del retrato F4 pasa del oro intenso a un resplandor lila suave, que distingue la piel obsidiana.
+- **Pruebas:** nueva regresión de proporciones de título y destello con comprobación de píxeles de screenshot, prueba de tintado máximo y permanencia de pelaje negro durante evolución, cinco formas y J/K/L/U. Se conservan todos los tests V59–V74; Quality, Browser E2E, Multiplayer E2E, Visual regression, Release Gate y Pages obligatorios.
+- **Dino intacto.** La prioridad es asegurar que Cuerno se vea como el personaje solicitado en selección y en juego real.
 
 ## 08/10/2026 · V74 · CUERNO RECONSTRUCCIÓN CANÓNICA
 

@@ -1,0 +1,43 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import {CUERNO_VISUAL_H} from "../characters/art/cuerno.js";
+const draw=fs.readFileSync("characters/draw.js","utf8");
+const art=fs.readFileSync("characters/art/cuerno.js","utf8");
+const title=fs.readFileSync("systems/title.js","utf8");
+const visual=fs.readFileSync("tests/browser/visual-regression.mjs","utf8");
+const between=(s,a,b)=>s.split(a)[1].split(b)[0];
+test("V75 a black F4 must stay black even during its evolution reveal",()=>{
+ const flash=between(draw,"// V75 · A white crossfade","else if (hurtFresh");
+ assert.match(flash,/flashCol = p\.id === "cuerno" \? "#bba8f5" : "#ffffff"/);
+ assert.match(flash,/flashA = intensity \* \(p\.id === "cuerno" \? 0\.075 : 0\.9\)/);
+ assert.ok(Number(flash.match(/cuerno" \? (0\.\d+) : 0\.9/)?.[1])<=.08,"black unicorn flash too bright");
+ const coat=between(art,"function drawAuroraUnicorn(","function draw(ctx, pose, R)");
+ assert.match(coat,/coat="#1b1a28"/);
+ assert.match(coat,/ctx\.strokeStyle="#a7a1d8"/);
+ assert.match(coat,/ctx\.strokeStyle="#b1a5d0"/);
+ assert.match(coat,/strokeStyle="#c1b3d7"/);
+});
+test("V75 title preserves five increasing optical stages and frame-safe wing widths",()=>{
+ assert.deepEqual([...CUERNO_VISUAL_H],[118,92,91,86,82]);
+ assert.match(title,/CUERNO_PORTRAIT_GROWTH = Object\.freeze\(\[\.68,\.77,\.86,\.94,1\.00\]\)/);
+ assert.match(title,/CUERNO_PORTRAIT_ASPECT = Object\.freeze\(\[\.66,\.81,1\.16,1\.52,1\.60\]\)/);
+ assert.match(title,/safeH \* growth \/ Math\.max\(1, baseH \* envelope\)/);
+ assert.match(title,/def\.id==="cuerno"&&evo===4 \? "rgba\(177, 148, 236, 0\.52\)"/);
+ assert.match(visual,/01i-cuerno: portrait progression reversed/);
+ assert.match(visual,/cuernoLastGrowth/);
+ const f3=between(art,"function drawStellarUnicorn(","function drawAuroraUnicorn(");
+ assert.match(f3,/ctx\.fillStyle=far\?"#aebce0":"#b0d4f2"/);
+ assert.match(f3,/ctx\.strokeStyle="#617ba9"/);
+});
+test("V75 fixes presentation without touching gameplay, other heroes or PNG sprites",()=>{
+ assert.match(draw,/if\(p\.id!=="cuerno"\)\{/);
+ assert.match(draw,/if \(getLook\(\) === "paint" && p\.id!=="cuerno"\)/);
+ assert.match(title,/const growth = def\.id==="cuerno"/);
+ assert.match(title,/const visualAspect = def\.id==="cuerno"/);
+ const f4=between(art,"function drawAuroraUnicorn(","function draw(ctx, pose, R)");
+ assert.match(f4,/two unequal S-curves/);
+ assert.match(f4,/wing\(true\)/);
+ assert.match(f4,/wing\(false\)/);
+ assert.doesNotMatch(f4,/Math\.random|setTimeout|new Image|fetch\(/);
+});

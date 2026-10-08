@@ -217,7 +217,8 @@ try {
       const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
       let visible=0;
       if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),
+        growth:Number(cv?.dataset.cuernoGrowth||0),visible};
     });
     assert.equal(rendered.form,form,'01g-pizza: unexpected form '+form);
     assert.ok(rendered.scale>.2&&rendered.visible>10,'01g-pizza: missing slice pixels '+JSON.stringify(rendered));
@@ -256,6 +257,7 @@ try {
   for(let i=0;i<9;i++) await page.locator('#roster-next').click();
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
+  let cuernoLastGrowth=0;
   for(const form of [0,1,2,3,4]){
     await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
     await page.waitForTimeout(220);
@@ -265,10 +267,13 @@ try {
       const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
       let visible=0;
       if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
-      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),growth:Number(cv?.dataset.cuernoGrowth||0),visible};
     });
     assert.equal(state.form,form,'01i-cuerno: wrong form');
     assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
+    assert.ok(state.growth>.6&&state.growth<=1,'01i-cuerno: invalid stage growth '+JSON.stringify(state));
+    if(form>0)assert.ok(state.growth>cuernoLastGrowth,'01i-cuerno: portrait progression reversed');
+    cuernoLastGrowth=state.growth;
     await capture(page,'01i-cuerno-origin-form-'+(form+1));
     if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
     if(form===2) await capture(page,'01l-cuerno-rainbow-foal-complete');
@@ -778,6 +783,8 @@ try {
   await capture(page,'09w-dino-v75-quake-meteors-l');
   assert.deepEqual(dinoV75Errors,[],'09u/09v/09w: Dino V75 causes browser exceptions');
   page.off('pageerror',onDinoV75Error);
+
+
 
 
   // V63 Potro Iris in real gameplay with error monitoring.

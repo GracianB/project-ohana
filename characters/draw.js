@@ -1173,7 +1173,13 @@ if (moving) drawDust(ctx, H, t, speed);
 
 const s = H / 100;
 let flashCol = null, flashA = 0;
-if (burstK > 0.35) { flashCol = "#ffffff"; flashA = ((burstK - 0.35) / 0.65) * 0.9; }
+// V75 · A white crossfade bleached the black unicorn into a white one for most
+// of every title evolution. Let black stay black; retain only pearl-lilac glint.
+if (burstK > 0.35) {
+  const intensity = Math.max(0, (burstK - 0.35) / 0.65);
+  flashCol = p.id === "cuerno" ? "#bba8f5" : "#ffffff";
+  flashA = intensity * (p.id === "cuerno" ? 0.075 : 0.9);
+}
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
 const painted = pickPainted(p, t, moving, air, atk);
 ctx.save();

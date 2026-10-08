@@ -145,10 +145,11 @@ yomi: [
 "El Juez del Umbral abre la puerta a Cuerno: juntos protegen todo OHANA.",
 ],
 cuerno: [
-"El nácar late: aparecen orejas, hocico y dos pezuñas. Destello aprende a sostener su propia luz.",
-"De la luz nace un potro Iris, con patas para galopar por primera vez.",
-"Potro Iris alza el cuello: cuatro pezuñas encuentran el ritmo, la melena dibuja constelaciones y nace Unicornio Estelar.",
-"La luz de Cuernín encontró su cuerpo y su voz. Aurora abre sus alas sin abandonar la tierra: corre por los suyos, y hasta las estrellas lo siguen.",
+// V75: tell the same biological story that the five live Canvas silhouettes show.
+"El cuerno descubre una carita redonda. Destello sonríe y rebota: todavía no tiene patas.",
+"¡Cuatro patas de verdad! Potro Iris aprende a trotar, con su primer cuerpo de unicornio.",
+"En la espalda de Potro Iris nacen dos alas. Unicornio Estelar aprende a abrirlas al saltar y a dibujar constelaciones con su melena.",
+"El último cambio no es crecer sin límite: el pelaje se vuelve negro obsidiana. Nace Unicornio Negro, con cuello elegante, alas nocturnas y un cuerno que recuerda cada forma anterior.",
 ],
 });
 
