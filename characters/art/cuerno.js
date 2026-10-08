@@ -269,28 +269,33 @@ drawCuernoMagic(ctx,pose,R,form,t);
 ctx.restore();
 }
 
+// V79: F2/F3 receive a tapered, anatomical spiral, not a lightning zigzag.
 function horn(ctx, len, color, wobble) {
-  ctx.save();
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  for (let i = 1; i <= 8; i++) {
-    const k = i / 8;
-    const side = i % 2 ? 1 : -1;
-    ctx.lineTo(side * (2.4 + k * 3.2) + wobble, -k * len);
-  }
-  ctx.strokeStyle = "#fff6ea";
-  ctx.lineWidth = 5.2;
-  ctx.stroke();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2.6;
-  ctx.stroke();
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.arc(wobble * 0.3, -len, 3.2 + len * 0.03, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+ const height=Math.max(14,Math.min(54,Number(len)||29));
+ const drift=Number.isFinite(Number(wobble))?Math.max(-1.4,Math.min(1.4,Number(wobble))):0;
+ ctx.save();ctx.translate(drift,0);ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.fillStyle="#fff8ee";ctx.strokeStyle=color;ctx.lineWidth=2.2;
+ ctx.beginPath();ctx.moveTo(-5,0);
+ ctx.bezierCurveTo(-6,-height*.32,-3,-height*.74,0,-height);
+ ctx.bezierCurveTo(4.4,-height*.69,6.3,-height*.32,5,0);
+ ctx.quadraticCurveTo(0,3,-5,0);ctx.closePath();ctx.fill();ctx.stroke();
+ // The nacre bands are clipped inside the horn itself.
+ ctx.save();ctx.beginPath();ctx.moveTo(-5,0);
+ ctx.bezierCurveTo(-6,-height*.32,-3,-height*.74,0,-height);
+ ctx.bezierCurveTo(4.4,-height*.69,6.3,-height*.32,5,0);
+ ctx.closePath();ctx.clip();
+ for(let i=1;i<=5;i++){
+  const k=i/6,y=-height*k,width=5*(1-k*.8);
+  ctx.strokeStyle=i%2?"#dca5eb":"#b6d5fb";ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.moveTo(-width,y+2.8);
+  ctx.quadraticCurveTo(0,y+5,width,y-1.3);ctx.stroke();
+ }
+ ctx.restore();
+ ctx.strokeStyle="#fffcf3";ctx.lineWidth=1;ctx.globalAlpha=.82;
+ ctx.beginPath();ctx.moveTo(-2,-3);
+ ctx.bezierCurveTo(-3,-height*.33,-1,-height*.65,0,-height*.89);ctx.stroke();
+ ctx.fillStyle="#fff4cb";ctx.beginPath();ctx.arc(0,-height,2.2,0,Math.PI*2);ctx.fill();
+ ctx.restore();
 }
 
 // F0 Cuernín: the HORN is alive. No horse body, legs or oversized round head.
@@ -749,7 +754,11 @@ ctx.restore();
 drawCuernoOverlays(ctx,pose,R,4,t,bounce,tilt);
 }
 
+// One media query object, with live .matches; no per-frame matchMedia calls.
+const CUERNO_MOTION_MEDIA=typeof window!=="undefined"&&typeof window.matchMedia==="function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 function draw(ctx, pose, R) {
+  if(CUERNO_MOTION_MEDIA?.matches&&!pose?.reduceMotion)pose={...pose,reduceMotion:true};
   const f = Math.max(0, Math.min(4, pose.form | 0));
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
