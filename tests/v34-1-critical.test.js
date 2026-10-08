@@ -42,7 +42,8 @@ test("V34.1 boss intro falls from above", () => {
 
 test("V34.1 Pizza L is slot 2", () => {
   const s = read("systems/abilities.js");
-  assert.match(s, /oven: \{ name: "Horno total", key: "L"/);
+  const catalog = read("systems/ability-catalog.js");
+  assert.match(catalog, /oven: \{ name: "Horno total", key: "L"/);
   assert.match(s, /game\.lastAbilityId = id/);
   assert.match(s, /game\.lastAbilitySlot = index/);
 });

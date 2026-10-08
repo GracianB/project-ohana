@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
-const abilities=fs.readFileSync("systems/abilities.js","utf8");
+const abilities=fs.readFileSync("systems/abilities.js","utf8")+"\n"+fs.readFileSync("systems/ability-catalog.js","utf8");
 const art=fs.readFileSync("characters/art/yomi.js","utf8");
 const cinema=fs.readFileSync("systems/supreme-cinema.js","utf8");
 const storyboards=fs.readFileSync("systems/supreme-storyboards.js","utf8");
@@ -40,9 +40,9 @@ test("V57 five evolutions change the actual silhouette",()=>{
 });
 
 test("V57 all U stories are readable and Cuerno assists Yomi for the full sequence",()=>{
-  assert.match(storyboards,/yomi:.*duration:3\.90/);
+  assert.match(storyboards,/yomi:.*duration:6\.25/);
   assert.match(storyboards,/FAROL → CUERNO → EMBESTIDA → JUICIO/);
-  assert.match(cinema,/Math\.max\(2\.65,story\.duration\)/);
+  assert.match(cinema,/Math\.max\(4\.8,story\.duration\)/);
   assert.match(cinema,/inK=easeOut\(seg\(k,\.27,\.41\)\)/);
   assert.match(cinema,/outK=1-easeOut\(seg\(k,\.91,1\)\)/);
   assert.match(abilities,/if \(\(flow\.assist \|\| p\.id === "yomi"\) && def\.ally\)/);
@@ -51,5 +51,5 @@ test("V57 all U stories are readable and Cuerno assists Yomi for the full sequen
   assert.match(browser,/09e-yomi-k-visible-suction/);
   assert.match(browser,/09f-yomi-l-visible-jaws/);
   assert.match(browser,/yomiSupreme\.duration >= 3800/);
-  assert.match(e2e,/item\.duration >= 2600 && item\.duration <= 4200/);
+  assert.match(e2e,/item\.duration >= 4800 && item\.duration <= 6500/);
 });

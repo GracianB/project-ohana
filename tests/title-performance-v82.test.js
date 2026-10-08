@@ -19,9 +19,8 @@ test("V82 Atrium truly stops scheduling frames during gameplay/background",()=>{
 
 test("V82 Atrium computes geometry once per painted frame",()=>{
   assert.match(atrium,/const centers = list\.map\(center\)/);
-  assert.match(atrium,/const a = centers\[i\]/);
-  assert.match(atrium,/const b = centers\[\(i \+ 1\) % list\.length\]/);
-  assert.match(atrium,/centers\[list\.indexOf\(awake\)\]/);
+  assert.doesNotMatch(atrium,/lineTo\(b\.x, b\.y\)/, "V86 removes selector wires");
+  assert.doesNotMatch(atrium,/centers\[list\.indexOf\(awake\)\]/);
   assert.match(atrium,/centers\[list\.indexOf\(sel\)\]/);
 });
 
