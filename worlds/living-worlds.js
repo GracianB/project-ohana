@@ -1,6 +1,3 @@
-// PROJECT OHANA V40 · LIVING WORLDS
-// Procedural room identity. No bitmap backgrounds. Every room has a visual
-// grammar tied to its canonical hero affinity and reacts when that hero enters.
 
 import { ROOMS } from "../systems/map.js";
 
