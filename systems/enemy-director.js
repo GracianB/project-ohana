@@ -4,6 +4,7 @@
 // and steering hints consumed by the existing per-species state machines.
 
 import { ROOM_HARD } from "../engine/foes.js";
+import { buildEncounterSpatialIndex } from "./encounter-spatial.js";
 import {
   applyEnemyEcology,
   ecologyBudget,
@@ -143,6 +144,8 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
 
   const hard = ROOM_HARD[roomId] ?? 1;
   const ecology = ecologyForRoom(roomId);
+  // Small groups are cheaper to scan directly; crowded arenas use a spatial index.
+  const spatial = alive.length>12 ? buildEncounterSpatialIndex(alive) : null;
   prepareSpeciesEvolution(alive, roomId, tick, enemyRole);
   const budget = attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
@@ -166,7 +169,8 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
     const dx = centerX(player) - centerX(e);
     const dy = centerY(player) - centerY(e);
     const dist = Math.hypot(dx, dy);
-    const nearby = alive.filter((o) => o !== e && Math.hypot(centerX(o) - centerX(e), centerY(o) - centerY(e)) < 300).length;
+    const nearby = spatial ? spatial.countNear(e,300) :
+      alive.filter((o) => o !== e && Math.hypot(centerX(o)-centerX(e),centerY(o)-centerY(e)) < 300).length;
     const retreat = lowHealthRetreat(e, role);
     const permit = permits.has(e) || enemyIsCommitted(e);
     const flank = !permit && !retreat && dist < 520 && flankBias > 0.4;
@@ -193,9 +197,9 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
     else e.aiIntent = "HOLD";
 
     // Shared awareness: a nearby alerted foe can wake the group, without global hive mind.
-    const allyAlert = alive.some((o) =>
-      o !== e && Number(o.aggro) > 24 &&
-      Math.hypot(centerX(o) - centerX(e), centerY(o) - centerY(e)) < 360
+    const allyAlert = spatial ? spatial.someNear(e,360,o=>Number(o.aggro)>24) : alive.some((o) =>
+      o !== e && Number(o.aggro)>24 &&
+      Math.hypot(centerX(o)-centerX(e),centerY(o)-centerY(e))<360
     );
     if (allyAlert) e.aggro = Math.max(Number(e.aggro) || 0, 42 + hard * 6);
   }

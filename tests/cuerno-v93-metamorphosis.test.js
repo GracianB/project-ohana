@@ -74,7 +74,7 @@ test("V93 production graph precaches ritual; Dino V90 and Cuerno V92 retained",(
  const html=fs.readFileSync("index.html","utf8");
  const evo=fs.readFileSync("systems/evo-cinema.js","utf8");
  const version=sw.match(/const VERSION = "(ohana-[0-9]+)"/)?.[1];
- assert.ok(version && Number(version.slice(6))>=293);
+  assert.ok(version && Number(version.slice(6))>=293);
  assert.ok(html.includes(version));
  assert.match(sw,/systems\/cuerno-v93-metamorphosis\.js\?v=/);
  assert.match(evo,/drawCuernoMetamorphosis/);
