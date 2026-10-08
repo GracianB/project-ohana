@@ -56,6 +56,7 @@ const PRECACHE = [
   "./engine/input.js?v=" + VERSION,
   "./engine/music.js?v=" + VERSION,
   "./engine/particles.js?v=" + VERSION,
+  "./systems/atrium-interact.js?v=atrium-1",
   "./systems/abilities.js?v=" + VERSION,
   "./systems/boss-adaptation.js?v=" + VERSION,
   "./systems/boss-bait-feedback.js?v=" + VERSION,
