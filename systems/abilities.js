@@ -21,9 +21,9 @@ ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9
 breath: { name: "Llamarada", key: "J", cd: 750, color: "#ff6a2a", desc: "Cono de fuego continuo a corta distancia." },
 gust: { name: "Aletazo", key: "K", cd: 1800, color: "#bfefff", desc: "Ráfaga que empuja enemigos y te impulsa arriba." },
 meteor: { name: "Lluvia de meteoros", key: "L", cd: 6500, color: "#ff4a20", desc: "Meteoritos de fuego caen del cielo." },
-bite: { name: "Mordisco", key: "J", cd: 700, color: "#e8ffe0", desc: "Mordisco demoledor y huesos a distancia; evoluciona en abanico." },
-charge: { name: "Embestida", key: "K", cd: 2200, color: "#4cbf56", desc: "Carga blindada: invulnerable mientras dura." },
-quake: { name: "Terremoto", key: "L", cd: 6000, color: "#c8a060", desc: "Onda por el suelo que lanza por los aires." },
+bite: { name: "Mocosaurio", key: "J", cd: 700, color: "#bafa69", desc: "Escupe babitas con ojos que buscan enemigos; conserva un mordisco cercano." },
+charge: { name: "Dino Rodillo", key: "K", cd: 2200, color: "#7de66e", desc: "Se hace bola con púas, rueda protegido y frena al chocar con la pared." },
+quake: { name: "Extinción", key: "L", cd: 6000, color: "#ffc36c", desc: "Terremoto de dos ondas con meteoritos volcánicos dirigidos a enemigos." },
 salt: { name: "Escopetazo de sal", key: "J", cd: 600, color: "#fff3c0", desc: "Abanico de granos de sal a corta distancia." },
 ketchup: { name: "Charco kétchup", key: "K", cd: 2000, color: "#e23b3b", desc: "Charco que ralentiza y daña con el tiempo." },
 fryer: { name: "Géiseres de aceite", key: "L", cd: 6000, color: "#ffd36a", desc: "Columnas de aceite hirviendo brotan en fila." },
@@ -89,7 +89,7 @@ stitcho: { name: "PLASMA ROLL", color: "#67ddff" },
 chispin: { name: "CADENA RELÁMPAGO", color: "#ffe14a" },
 cat:     { name: "OVILLO SOMBRA", color: "#ffb6e4" },
 dragon:  { name: "ALIENTO ASCENDENTE", color: "#ff8a3a" },
-dino:    { name: "MORDISCO EN CARGA", color: "#c8f04a" },
+dino:    { name: "MOCO + RODILLO", color: "#c8f04a" },
 frita:   { name: "SALSA TURBO", color: "#ffd36a" },
 pizza:   { name: "PEPPERONI ELÁSTICO", color: "#ff8a2a" },
 yomi:    { name: "OFUDA SOMBRA", color: "#ff2244" },
@@ -1105,47 +1105,55 @@ g.shake = Math.min(18, (g.shake || 0) + 4);
 },
 
 bite(g, p, evo) {
-const reach = 42 + evo * 9;
-const box = { x: p.facing > 0 ? p.x + p.w - 4 : p.x - reach + 4, y: p.y - 6, w: reach, h: p.h + 12 };
-let any = false;
-for (const e of g.enemies) {
-  if (canHit(e) && aabb(box, e)) {
-    any = hitEnemy(g, e, (34 + evo * 4) * pw(p), { kx: p.facing * 15, ky: -7, stun: 32, color: "#e8ffe0", shake: 8, crit: true }) || any;
-  }
-}
-if (any) { g.shake = Math.min(18, (g.shake || 0) + 4); p.vx -= p.facing * 3; }
-const shots = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
-const speed = 11 + evo * 0.7;
-const mouthX = cx(p) + p.facing * p.w * 0.58;
-const mouthY = p.y + p.h * 0.38;
-for (let i = 0; i < shots; i++) {
-  const angle = (i - (shots - 1) / 2) * 0.16;
-  pushRuntime(g.projectiles, {
-    x: mouthX - 10, y: mouthY - 7,
-    vx: Math.cos(angle) * speed * p.facing, vy: Math.sin(angle) * speed,
-    w: 20 + evo * 1.5, h: 14 + evo,
-    life: 44 + evo * 5, dmg: (6 + evo * 1.5) / shots,
-    color: evo >= 4 ? "#e8fdff" : "#e8ffe0", shape: "bone", owner: "player", trail: true,
-  }, MAX_RUNTIME_PROJECTILES);
-}
-add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
+ const reach = 42 + evo * 9;
+ const box = { x: p.facing > 0 ? p.x + p.w - 4 : p.x - reach + 4, y: p.y - 6, w: reach, h: p.h + 12 };
+ let any = false;
+ for (const e of g.enemies || []) {
+   if (canHit(e) && aabb(box, e)) {
+     any = hitEnemy(g, e, (34 + evo * 4) * pw(p), {
+       kx: p.facing * 15, ky: -7, stun: 32, color: "#e8ffe0", shake: 6, crit: true
+     }) || any;
+   }
+ }
+ if (any) { g.shake = Math.min(14, (g.shake || 0) + 3); p.vx -= p.facing * 3; }
+ const shots = evo >= 4 ? 3 : evo >= 3 ? 2 : 1;
+ const mouthX = cx(p) + (p.facing || 1) * p.w * 0.58;
+ const mouthY = p.y + p.h * 0.38;
+ for (let i = 0; i < shots; i++) {
+   const angle = (i - (shots - 1) / 2) * 0.33;
+   add({
+     kind: "dinoSpit", x: mouthX, y: mouthY + i * 4,
+     vx: Math.cos(angle) * (7.2 + evo * 0.5) * (p.facing || 1),
+     vy: Math.sin(angle) * 5 - 1.2, face: p.facing || 1,
+     radius: 7 + evo * 0.95, evo, life: 78 + evo * 7,
+     dmg: (12 + evo * 2) * pw(p) / Math.sqrt(shots),
+     color: ["#b9f989","#a4ee6d","#9aedd8","#cafa5b","#e6ff9b"][evo],
+     trail: [], delay: i * 3, target: null
+   });
+ }
+ add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
+ boom(g, mouthX, mouthY, "#d4ff9d", 6, { speed: 2, up: 0.5 });
 },
 charge(g, p, evo) {
-S.charge = 32 + evo * 3;
-armor(p, 8);
-g.shake = Math.min(18, (g.shake || 0) + 4);
-boom(g, cx(p), p.y + p.h, "#d8c7a4", 10);
+ S.charge = 44 + evo * 7;
+ armor(p, 12);
+ p._dinoRollStart = Number(g.t) || 0;
+ g.shake = Math.min(12, (g.shake || 0) + 2);
+ boom(g, cx(p), p.y + p.h, "#b6f58c", 8, { star: true });
 },
 quake(g, p, evo) {
-const oy = p.grounded ? p.y + p.h : (groundBelow(g, cx(p), p.y + p.h - 4) ?? p.y + p.h);
-add({
-  kind: "quake", ox: cx(p), oy, life: 90, speed: 9, maxD: 520 + evo * 60, hit: new Set(), dmg: (24 + evo * 3) * pw(p),
-  fronts: [{ x: cx(p), y: oy, dir: 1, on: true }, { x: cx(p), y: oy, dir: -1, on: true }], spikes: [],
-});
-g.shake = Math.min(20, (g.shake || 0) + 10);
-boom(g, cx(p), oy, "#c8a060", 10, { up: 2 });
+ const oy = p.grounded ? p.y + p.h : (groundBelow(g, cx(p), p.y + p.h - 4) ?? p.y + p.h);
+ add({
+   kind: "quake", ox: cx(p), oy, life: 90, speed: 9 + evo * 0.35,
+   maxD: 520 + evo * 60, hit: new Set(), dmg: (24 + evo * 3) * pw(p),
+   fronts: [{ x: cx(p), y: oy, dir: 1, on: true }, { x: cx(p), y: oy, dir: -1, on: true }], spikes: []
+ });
+ add({ kind: "dinoSkyfall", n: 3 + evo, i: 0, next: 12, evo,
+   face: p.facing || 1, origin: cx(p), dmg: (14 + evo * 2) * pw(p),
+   radius: 42 + evo * 5 });
+ g.shake = Math.min(14, (g.shake || 0) + 6);
+ boom(g, cx(p), oy, "#ffc36c", 10, { up: 2 });
 },
-
 salt(g, p, evo) {
 const h = hand(p);
 const n = 5 + (evo >= 2 ? 2 : 0) + (evo >= 4 ? 2 : 0);
