@@ -49,7 +49,7 @@ const PORTRAIT_ENVELOPE = Object.freeze({
   frita:   [1.00,1.04,1.10,1.20,1.34],
   pizza:   [1.00,1.04,1.10,1.22,1.36],
   yomi:    [1.00,1.08,1.16,1.28,1.46],
-  cuerno:  [1.00,1.06,1.14,1.28,1.48],
+  cuerno:  [1.00,1.06,1.14,1.28,1.68],
 });
 
 function portraitFit(def, evo, bw, bh, hero) {

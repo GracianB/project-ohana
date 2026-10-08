@@ -1,3 +1,14 @@
+## 08/10/2026 · V64 CUERNO · MENSAJE 5/10 · UNICORNIO AURORA
+
+**Caché:** `ohana-263`. **Contrato:** 10 personajes / 5 formas; Dino y la intro de Grok intactos.
+
+- Forma final F4 independiente en Canvas. Adulto de cuerpo largo y musculatura equina, cuello elevado, hocico, orejas, cuatro patas articuladas con pezuñas y cuerno de nácar espiral. Eliminados el cuerpo esférico y las constantes antiguas sin uso.
+- Alas translúcidas de aurora, cinco barbas luminosas por ala, plegadas en reposo y abiertas en saltos, hechizos y victoria. Son solo visuales: NO conceden vuelo, no cambian física, daño o colisiones.
+- Siete mechones reactivos de melena, seis cintas de cola, galope de cuatro tiempos, recogida en el aire, constelación sobria y gestos de combate. Sin recursos PNG, temporizadores ni partículas persistentes.
+- Velocidad 9.6, salto 18.6, cuatro saltos, J/K/L/U y pasiva intactos. Ajuste de contorno visual de retrato F4 sin modificar hitbox.
+- Nuevo test Node para anatomía, alas, articulaciones, estados, determinismo, pila Canvas y estadísticas; matriz Chromium con captura exclusiva de Aurora en selector y partida. CI, E2E, multijugador y Release Gate son obligatorios.
+- Optimización exclusiva de sangría de abilities.js para cumplir presupuesto real de JavaScript de 1,5 MB. Caché `ohana-263` sincronizada.
+
 ## 08/10/2026 · V63 CUERNO · MENSAJE 3/10 RECUPERADO · POTRO IRIS
 
 **Caché:** `ohana-262`. **Contrato:** 10 personajes / 5 formas; Dino e intro de Grok intactos.
