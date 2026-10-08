@@ -224,6 +224,100 @@ function drawEcologyRead(ctx, e, t, y, r) {
   ctx.restore();
 }
 
+function drawSpeciesEvolution(ctx, e, t) {
+  const glyph = String(e.aiSpeciesGlyph || "");
+  const mode = String(e.aiSpeciesMode || "");
+  if (!glyph || !mode) return;
+
+  const color = e.aiSpeciesColor || "#d8e8ff";
+  const relation = String(e.aiSpeciesRelation || "NONE");
+  const y = -e.h / 2 - 10;
+  const s = Math.max(4, Math.min(7, e.w * 0.14));
+  const pulse = 0.82 + Math.sin(t * 0.09 + (e.spawnIndex || 0)) * 0.12;
+
+  ctx.save();
+  ctx.globalAlpha = 0.42 + pulse * 0.18;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 1.35;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  if (mode === "HUNTER") {
+    ctx.beginPath();
+    ctx.moveTo(-s - 2, y + 3);
+    ctx.lineTo(0, y - s);
+    ctx.lineTo(s + 2, y + 3);
+    ctx.stroke();
+  } else if (mode === "SENTINEL") {
+    ctx.strokeRect(-s - 1, y - s, s * 2 + 2, s * 2);
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, y, s + 1.5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha *= 0.9;
+  if (glyph === "split") {
+    ctx.beginPath(); ctx.arc(-2.5, y, 1.8, 0, Math.PI * 2); ctx.arc(2.5, y, 1.8, 0, Math.PI * 2); ctx.fill();
+  } else if (glyph === "fang") {
+    ctx.beginPath(); ctx.moveTo(-3, y - 2); ctx.lineTo(0, y + 3); ctx.lineTo(3, y - 2); ctx.stroke();
+  } else if (glyph === "wing") {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.quadraticCurveTo(-5, y - 5, -7, y + 1); ctx.moveTo(0, y); ctx.quadraticCurveTo(5, y - 5, 7, y + 1); ctx.stroke();
+  } else if (glyph === "sting") {
+    ctx.beginPath(); ctx.moveTo(0, y - 4); ctx.lineTo(4, y); ctx.lineTo(0, y + 3); ctx.lineTo(-4, y); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y + 3); ctx.lineTo(0, y + 6); ctx.stroke();
+  } else if (glyph === "dart") {
+    ctx.beginPath(); ctx.moveTo(-5, y + 2); ctx.lineTo(4, y - 2); ctx.lineTo(1, y + 2); ctx.moveTo(4, y - 2); ctx.lineTo(0, y - 5); ctx.stroke();
+  } else if (glyph === "sonar") {
+    for (let i = 1; i <= 2; i++) { ctx.beginPath(); ctx.arc(0, y, i * 3, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+  } else if (glyph === "school") {
+    for (let i = -1; i <= 1; i++) { const x = i * 3.5; ctx.beginPath(); ctx.moveTo(x - 2, y); ctx.lineTo(x + 2, y - 2); ctx.lineTo(x + 2, y + 2); ctx.closePath(); ctx.fill(); }
+  } else if (glyph === "ember") {
+    ctx.beginPath(); ctx.moveTo(0, y + 4); ctx.quadraticCurveTo(-4, y, 0, y - 5); ctx.quadraticCurveTo(5, y, 0, y + 4); ctx.fill();
+  } else if (glyph === "shell") {
+    ctx.beginPath(); ctx.arc(0, y + 2, 5, Math.PI, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-4, y + 2); ctx.lineTo(4, y + 2); ctx.moveTo(0, y - 3); ctx.lineTo(0, y + 2); ctx.stroke();
+  } else if (glyph === "claw") {
+    ctx.beginPath(); ctx.arc(-2, y, 4, -1.4, 0.7); ctx.moveTo(2, y); ctx.arc(2, y, 4, 2.4, 4.6); ctx.stroke();
+  } else if (glyph === "leap") {
+    ctx.beginPath(); ctx.arc(0, y + 4, 5, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, y - 3); ctx.lineTo(0, y + 1); ctx.stroke();
+  } else if (glyph === "forge") {
+    ctx.save(); ctx.translate(0, y); ctx.rotate(Math.PI / 4); ctx.strokeRect(-3, -3, 6, 6); ctx.restore();
+  } else if (glyph === "root") {
+    ctx.beginPath(); ctx.moveTo(0, y - 5); ctx.lineTo(0, y + 2); ctx.lineTo(-4, y + 5); ctx.moveTo(0, y + 2); ctx.lineTo(4, y + 5); ctx.stroke();
+  } else if (glyph === "pulse") {
+    ctx.beginPath(); ctx.arc(0, y - 1, 3.5, 0, Math.PI * 2); ctx.stroke();
+    for (const x of [-3,0,3]) { ctx.beginPath(); ctx.moveTo(x, y + 2); ctx.quadraticCurveTo(x + 1.5, y + 5, x, y + 7); ctx.stroke(); }
+  } else if (glyph === "arc") {
+    ctx.beginPath(); ctx.moveTo(-5, y - 2); ctx.lineTo(-1, y + 1); ctx.lineTo(1, y - 3); ctx.lineTo(5, y + 2); ctx.stroke();
+  } else if (glyph === "relay") {
+    for (const a of [0, Math.PI * 2 / 3, Math.PI * 4 / 3]) { ctx.beginPath(); ctx.arc(Math.cos(a) * 4, y + Math.sin(a) * 4, 1.4, 0, Math.PI * 2); ctx.fill(); }
+  } else if (glyph === "web") {
+    for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(Math.cos(a) * 5, y + Math.sin(a) * 5); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(0, y, 3, 0, Math.PI * 2); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(0, y, 2, 0, Math.PI * 2); ctx.fill();
+  }
+
+  if (relation !== "NONE") {
+    const relationColor = {
+      PACK:"#91f0b4", FLUSH:"#ff9a66", SCREEN:"#ffd36a",
+      TRAP:"#ff8ac8", RELAY:"#7ee7ff", PINCER:"#ff6a5f"
+    }[relation] || color;
+    ctx.globalAlpha = 0.48;
+    ctx.strokeStyle = relationColor;
+    ctx.fillStyle = relationColor;
+    ctx.beginPath();
+    ctx.moveTo(-s - 5, y + 7);
+    ctx.lineTo(s + 5, y + 7);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(-s - 5, y + 7, 1.5, 0, Math.PI * 2); ctx.arc(s + 5, y + 7, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawEncounterRead(ctx, e, t) {
   if (!(Number(e.aggro) > 0) || e.dying > 0) return;
   const role = e.aiRole || "";
@@ -300,6 +394,7 @@ function drawEncounterRead(ctx, e, t) {
   }
 
   drawEcologyRead(ctx, e, t, y, r);
+  drawSpeciesEvolution(ctx, e, t);
   ctx.restore();
 }
 
