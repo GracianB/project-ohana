@@ -275,7 +275,23 @@ try {
     if(form===3) await capture(page,'01k-cuerno-stellar-unicorn-adult');
     if(form===4) await capture(page,'01m-cuerno-aurora-final');
   }
-  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  // V66 Cuerno soul: each authored comic beat is really drawn in the selector.
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=4;});
+  for(const beat of ['curious','shy','prance','stargaze','sneeze','bow']){
+    await page.evaluate(s=>{window.__OHANA_TITLE_CUERNO_BEAT=s;},beat);
+    await page.waitForTimeout(180);
+    const actual=await page.evaluate(()=>{
+      const cv=document.querySelector('#chars-grid .char-card.selected canvas');
+      return {beat:cv?.dataset.cuernoBeat,evo:Number(cv?.dataset.evo)};
+    });
+    assert.equal(actual.beat,beat,'01n-cuerno: showcase beat missing');
+    assert.equal(actual.evo,4,'01n-cuerno: final form absent');
+    await capture(page,'01n-cuerno-soul-'+beat);
+  }
+  await page.evaluate(()=>{
+    window.__OHANA_TITLE_EVO_OVERRIDE=null;
+    window.__OHANA_TITLE_CUERNO_BEAT=null;
+  });
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01i-cuerno: selector did not restore');

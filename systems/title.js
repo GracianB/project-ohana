@@ -132,7 +132,14 @@ function paintPortraits(now = performance.now()) {
       const poseIndex = showcasePhase < 44 ? 0 : showcasePhase < 88 ? 1 : 2;
       let showcasePose = hero ? personality[poseIndex] : "idle";
       let showcaseMove = null;
-      let stitchoBeat = "";
+      let stitchoBeat = "", cuernoBeat = "";
+      if (hero && def.id === "cuerno" && TITLE_E2E) {
+        const choice = window.__OHANA_TITLE_CUERNO_BEAT;
+        if (["curious","shy","prance","stargaze","sneeze","bow"].includes(choice)) {
+          cuernoBeat = choice;
+          showcasePose = "idle";
+        }
+      }
       if (hero && def.id === "stitcho") {
         const forced = TITLE_E2E && Number.isInteger(window.__OHANA_TITLE_STITCHO_PHASE)
           ? Math.max(0, Math.min(119, window.__OHANA_TITLE_STITCHO_PHASE))
@@ -163,7 +170,15 @@ function paintPortraits(now = performance.now()) {
         visualScale: 1,
         _poseOverride: showcasePose,
         _move: showcaseMove,
+        _cuernoBeat: cuernoBeat,
       };
+      if (hero && def.id === "cuerno") {
+        cv.dataset.cuernoBeat = cuernoBeat;
+        if (card) card.dataset.cuernoBeat = cuernoBeat;
+      } else {
+        delete cv.dataset.cuernoBeat;
+        if (card) delete card.dataset.cuernoBeat;
+      }
       if (hero && def.id === "stitcho") {
         cv.dataset.stitchoBeat = stitchoBeat;
         card.dataset.stitchoBeat = stitchoBeat;
