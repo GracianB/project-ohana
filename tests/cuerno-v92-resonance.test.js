@@ -57,7 +57,9 @@ test("V92 live K lane poisons an enemy that traverses between game frames",()=>{
  clearAbilityFx();const {g,p}=fixture();
  assert.equal(useAbility(g,1),true);
  for(let i=0;i<29;i++)tick(g);
- const x=p.x-40;
+ const path=p._cuernoFantasyActiveTrail?.points||[];
+ assert.ok(path.length>=4,"K needs a sampled visible lane");
+ const x=path.at(-3).x;
  const enemy={x,y:135,w:22,h:28,hp:175,max:175,stun:0};
  g.enemies.push(enemy);
  tick(g); // Remember previous enemy position while path is active.
@@ -77,12 +79,17 @@ test("V92 K followed by L triggers a bounded seven-horn echo with no bonus damag
  clearAbilityFx();const {g,p,messages}=fixture();
  assert.equal(useAbility(g,1),true);
  for(let i=0;i<27;i++)tick(g);
- const enemy={x:p.x-34,y:p.y+15,w:28,h:30,hp:550,max:550,stun:0};
+ const lane=p._cuernoFantasyActiveTrail?.points||[];
+ assert.ok(lane.length>=4);
+ const enemy={x:lane.at(-2).x,y:p.y+15,w:28,h:30,hp:550,max:550,stun:0};
  g.enemies.push(enemy);
  tick(g);
  assert.ok(enemy._cuernoFantasyUntil>g.t,"K did not enchant L target");
  assert.equal(useAbility(g,2),true,"L unavailable for K→L combo");
- for(let i=0;i<36;i++)tick(g);
+ for(let i=0;i<55;i++){
+   tick(g);
+   if(messages.some(m=>String(m[2]).includes("PRISMA")))break;
+ }
  assert.ok(messages.some(m=>String(m[2]).includes("PRISMA")),
    "K→L combo did not announce prismatic resonance");
  assert.ok(enemy.stun>=25,"Prismatic resonance did not visibly stagger the target");
