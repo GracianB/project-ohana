@@ -356,6 +356,38 @@ test("every existing OHANA character ability has a server combat profile", async
 });
 
 
+
+test("SME Contest: original-engine team altar verifies two simultaneous players and grants once",async()=>{
+  const {service,advance}=setup();
+  const room=await makeRoom(service);
+  await startMatch(service,room);
+  await finishIntro(service,room,advance);
+  const roomCode=room.host.roomId;
+  const move=async(identity,x,sequence=1,roomId="beach")=>
+    service.move(roomCode,identity,{mode:"engine",positionX:x,positionY:1070,worldRoomId:roomId,
+      health:80,maxHealth:100,sequence,actionId:`sme:move:${identity.playerId}:${sequence}`});
+  await move(room.host.identity,350);
+  // One player cannot solve a two-plate puzzle, even if submitting signals.
+  const alone=await service.signal(roomCode,room.host.identity,{sequence:2,actionId:"sme:alone",signalKind:"duo",payload:{roomId:"beach"}});
+  assert.equal(alone.duoAltars.beach,undefined);
+  await move(room.guest.identity,700);
+  const started=await service.signal(roomCode,room.host.identity,{sequence:3,actionId:"sme:charge",signalKind:"duo",payload:{roomId:"beach"}});
+  assert.equal(started.duoAltars.beach,undefined);
+  advance(1300);
+  const completed=await service.signal(roomCode,room.guest.identity,{sequence:2,actionId:"sme:lit",signalKind:"duo",payload:{roomId:"beach"}});
+  assert.ok(completed.duoAltars.beach);
+  const events=completed.combat.events.filter(e=>e.signalKind==="duo-lit");
+  assert.equal(events.length,1);
+  assert.equal(events[0].payload.heal,15);
+  assert.equal(events[0].senderPlayerId,null,"completion event is delivered to BOTH players");
+  const replay=await service.signal(roomCode,room.guest.identity,{sequence:2,actionId:"sme:lit",signalKind:"duo",payload:{roomId:"beach"}});
+  assert.equal(replay.combat.events.filter(e=>e.signalKind==="duo-lit").length,1);
+  const retry=await service.signal(roomCode,room.host.identity,{sequence:4,actionId:"sme:attempt-again",signalKind:"duo",payload:{roomId:"beach"}});
+  assert.equal(retry.combat.events.filter(e=>e.signalKind==="duo-lit").length,1,"no heal farming through new action IDs");
+  const guestView=await service.poll(roomCode,room.guest.identity);
+  assert.ok(guestView.duoAltars.beach,"achievements persist in both online snapshots");
+});
+
 test("original-engine online mode accepts absolute positions and stops synthetic server combat", async () => {
   const { service, advance } = setup();
   const room = await makeRoom(service);
