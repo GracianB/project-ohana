@@ -25,6 +25,32 @@ const F = [
   { hw: 26, hh: 20, bw: 20, bh: 31, legL: 15, legW: 16, armL: 12, tail: 46, tw: 21 },
 ];
 
+// Dino V75 · 100 curated acting calibrations (20 qualities × 5 evolutions).
+// Each row is used by the procedural art. Neither roster stats nor hitboxes change.
+export const DINO_ACTING_TUNING = Object.freeze({
+ breath: Object.freeze([1.16,1.10,1.03,.98,.92]),
+ headNod: Object.freeze([1.22,1.14,1.04,.91,.85]),
+ jaw: Object.freeze([.84,.91,1.04,1.12,1.18]),
+ tailLag: Object.freeze([.75,.89,1,1.16,1.24]),
+ tailWave: Object.freeze([1.19,1.12,1.06,.96,.88]),
+ tailLength: Object.freeze([1,1.02,1.04,1.05,1.06]),
+ tailWidth: Object.freeze([1,1.02,1.06,1.09,1.12]),
+ tread: Object.freeze([.85,.96,1.04,1.12,1.18]),
+ footDust: Object.freeze([.65,.8,.9,1.05,1.16]),
+ blush: Object.freeze([1.2,1.15,1.02,.88,.82]),
+ eye: Object.freeze([1.08,1.04,1,.94,.9]),
+ shell: Object.freeze([1.18,1.08,1,.94,.85]),
+ spot: Object.freeze([.8,.84,.89,.94,1]),
+ belly: Object.freeze([.97,.98,.99,1,1]),
+ sparkle: Object.freeze([1.18,1.12,1.06,1,1.08]),
+ rollScale: Object.freeze([.83,.82,.81,.78,.77]),
+ rollSpin: Object.freeze([1.08,1.12,1.16,1.2,1.24]),
+ rollTuck: Object.freeze([.58,.56,.54,.51,.5]),
+ rollGlow: Object.freeze([.72,.8,.9,1,1.14]),
+ victory: Object.freeze([1.16,1.12,1.04,.98,.92]),
+});
+const T = DINO_ACTING_TUNING;
+
 // ---------------------------------------------------------------------------
 // FUNCIONES AUXILIARES DE RENDERIZADO
 // ---------------------------------------------------------------------------
@@ -51,9 +77,12 @@ function taperTail(ctx, R, pts, w0, color) {
     Rt.push([pts[i][0] - Math.cos(a) * w, pts[i][1] - Math.sin(a) * w]);
   }
   const e = pts[n], ea = e[2];
-  const outline = L.concat([[e[0] + Math.cos(ea) * w0 * 0.12, e[1] + Math.sin(ea) * w0 * 0.12]], Rt.reverse());
+  // The left normal of a tail pointing backwards is its dorsal edge.
+  // Keep both edges in stable root-to-tip order: decorating the underside
+  // made plates disappear into the body when the tail swung upwards.
+  const outline = L.concat([[e[0] + Math.cos(ea) * w0 * 0.12, e[1] + Math.sin(ea) * w0 * 0.12]], [...Rt].reverse());
   R.blob(ctx, outline, color);
-  return { top: Rt.reverse(), bottom: L };
+  return { top: L, bottom: Rt };
 }
 
 function spikeAt(ctx, R, x, y, a, len, wd, col, lw = 1.8) {
@@ -176,7 +205,7 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 // ---------------------------------------------------------------------------
 
 function draw(ctx, pose, R) {
-  const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
+  const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0, st = pose.state;
   const { hh, bw, bh } = P;
   const final = f === 4, baby = f === 0;
   const dark = R.darken(c.body, 0.22);
@@ -184,18 +213,30 @@ function draw(ctx, pose, R) {
   const flN = pose.flourishN % 3;
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const pound = pose.move === "pound" && (st === "fall" || st === "jump" || st === "idle");
-  const charging = (pose.move === "charge" && (st === "run" || st === "idle")) || (st === "cast" && pose.castSlot === 1);
+  const rolling = pose.move === "dino-roll" && st !== "dead";
+  const charging = !rolling && ((pose.move === "charge" && (st === "run" || st === "idle")) || (st === "cast" && pose.castSlot === 1));
 
-  let bob = pose.breath * 1.2, lean = 0.08, headRot = Math.sin(t * 0.03) * 0.04, hdx = 0, hdy = pose.breath * 0.6;
+  let bob = (pose.breath || 0) * 1.2 * T.breath[f], lean = 0.08,
+      headRot = Math.sin(t * 0.03) * 0.04 * T.headNod[f], hdx = 0,
+      hdy = (pose.breath || 0) * 0.6;
   let legF = 0, legB = 0, lenF = 1, lenB = 1, bendF = 3, bendB = 3;
   let armF = 0.6 + Math.sin(t * 0.05) * 0.1, armB = 0.4 + Math.sin(t * 0.05 + 1) * 0.1;
-  let jaw = 0, eyeMood = "normal", hurtEyes = false, deadEyes = false;
+  let jaw = 0.018 * T.jaw[f], eyeMood = "normal", hurtEyes = false, deadEyes = false;
   let tailA = Math.sin(t * 0.05) * 0.12 + pose.sway * 0.3, tailWag = 0;
   let roarK = 0, chomp = 0, speedLines = 0, shock = 0, stomp = 0, apple = 0, lookUp = 0, rawr = 0;
   let shellRot = 0;
 
   // LÓGICA DE ESTADOS Y ANIMACIÓN
-  if (charging) {
+  if (rolling) {
+    // Motion is separate from the hitbox: tuck all four limbs, gather the
+    // head and tail and rotate the whole dinosaur around its own centre.
+    const ph = Number(pose.phase) || t * .16;
+    legF = 2.0; legB = 1.9; lenF = T.rollTuck[f]; lenB = T.rollTuck[f];
+    bendF = -1.5; bendB = -1.5; armF = 2.55; armB = 2.45;
+    bob = -P.legL * .46; lean = .12; headRot = .42;
+    hdx = -8; hdy = 6; jaw = .16 * T.jaw[f]; eyeMood = "happy";
+    tailA = -1.15 + Math.sin(ph) * .12;
+  } else if (charging) {
     const ph = pose.phase * 1.3, s = Math.sin(ph);
     legF = s * 0.9; legB = -s * 0.9;
     lenF = 1 - Math.max(0, Math.cos(ph)) * 0.35; lenB = 1 - Math.max(0, -Math.cos(ph)) * 0.35;
@@ -212,14 +253,14 @@ function draw(ctx, pose, R) {
     lenF = 1 - Math.max(0, cs) * 0.4; lenB = 1 - Math.max(0, -cs) * 0.4;
     bendF = 3 + Math.max(0, cs) * 5; bendB = 3 + Math.max(0, -cs) * 5;
     const upDown = Math.abs(cs);
-    bob = P.legL * (1 - Math.cos(a)) * 0.95 - upDown * (baby ? 3 : 5);
+    bob = P.legL * (1 - Math.cos(a)) * 0.95 - upDown * (baby ? 3 : 5) * T.tread[f];
     lean = 0.14 + upDown * 0.04;
     headRot = 0.08 - upDown * 0.1; hdy = (1 - upDown) * 2.5;
     armF = 1.0 + Math.sin(ph * 2) * 0.8; armB = 1.0 - Math.sin(ph * 2) * 0.8;
     tailA = -0.15 + (1 - upDown) * 0.2 + pose.sway * 0.3;
     stomp = Math.max(0, 1 - upDown * 4);
     jaw = 0.12 + upDown * 0.1;
-    shellRot = s * 0.14;
+    shellRot = s * 0.14 * T.shell[f];
   } else if (pound) {
     legF = 1.9; lenF = 0.6; bendF = -2; legB = 1.6; lenB = 0.6; bendB = -2;
     armF = 2.4; armB = 2.2;
@@ -287,7 +328,7 @@ function draw(ctx, pose, R) {
     jaw = 0.3; deadEyes = true; tailA = -0.9;
   } else if (st === "victory") {
     const hop = Math.abs(Math.sin(t * 0.12));
-    bob = -hop * 5;
+    bob = -hop * 5 * T.victory[f];
     lean = -0.1; headRot = -0.5 + Math.sin(t * 0.5) * 0.03; jaw = 1.0;
     armF = 2.2 + Math.sin(t * 0.4) * 0.3; armB = 2.0 - Math.sin(t * 0.4) * 0.3;
     legF = 0.3 * hop; legB = -0.3 * hop;
@@ -319,16 +360,26 @@ function draw(ctx, pose, R) {
   const hipY = -legRoot + bob;
 
   ctx.save();
+  if (rolling) {
+    ctx.translate(0,-36);
+    ctx.rotate(((Number(pose.phase) || t * .16) * T.rollSpin[f]) % (PI * 2));
+    ctx.scale(T.rollScale[f],T.rollScale[f]);
+    ctx.translate(0,36);
+  }
   const SC = [1.3, 1.36, 1.32, 1.28, 1.26][f];
   ctx.scale(SC, SC);
+  if (rolling) {
+    ctx.save(); ctx.globalAlpha = 0.14 * T.rollGlow[f]; ctx.fillStyle = "#b9ff8d";
+    ctx.beginPath(); ctx.ellipse(0,-37,41,43,0,0,PI*2); ctx.fill(); ctx.restore();
+  }
 
   const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 
   // AURA DINO FORMA FINAL (EFECTO EXCLUSIVO MEJORADO)
-  if (final) {
+  if (final && st !== "dead") {
     ctx.save();
-    const auraGlow = 0.5 + Math.sin(t * 0.1) * 0.25;
+    const auraGlow = (0.5 + Math.sin(t * 0.1) * 0.25) * T.rollGlow[f];
     ctx.shadowColor = "#ffaa00";
     ctx.shadowBlur = 15 * auraGlow;
     ctx.fillStyle = "rgba(255, 170, 0, " + (0.15 * auraGlow).toFixed(2) + ")";
@@ -362,29 +413,32 @@ function draw(ctx, pose, R) {
   if (!baby) {
     ctx.save(); upper();
     const wagA = tailWag > 0 ? Math.sin(t * 0.75) * 0.9 * tailWag : 0;
-    const base = PI * 0.96 - tailA - wagA * 0.6;
-    tpts = chain(-bw * 0.7, -bh * 0.22, P.tail, base, (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12, 8);
-    
-    if (f === 2 || final) {
-      for (let i = 2; i <= 3; i++) {
-        const p = tpts[i], a = p[2] + PI / 2 + 0.25;
-        if (final) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
-        else plateAt(ctx, R, p[0], p[1], a, 15 - i * 2, 6, i % 2 ? c.plate : c.plate2);
-      }
-    }
-    const sides = taperTail(ctx, R, tpts, P.tw, c.body);
+    // A slight delayed counterbalance lets the tail follow the running hips.
+    // No changes to locomotion, collisions or the character's hitbox.
+    const runLag = st === "run" ? Math.sin((pose.phase || 0) - 0.7) * 0.1 * T.tailLag[f] : 0;
+    const base = PI * 0.96 - tailA - wagA * 0.6 * T.shell[f] + runLag;
+    tpts = chain(-bw * 0.7, -bh * 0.22, P.tail * T.tailLength[f] * (rolling ? .66 : 1), base,
+  (k) => -k * 1.2 * (1 + tailA) - wagA * k * 1.4 + Math.sin(t * 0.07 + k * 2) * 0.12 * T.tailWave[f], 8);
+    const sides = taperTail(ctx, R, tpts, P.tw * T.tailWidth[f], c.body);
     
     ctx.fillStyle = R.alpha(c.spot, 0.9);
     for (let i = 2; i < 7; i += 2) {
       const p = sides.top[i], q = tpts[i];
       ctx.beginPath(); ctx.ellipse(lerp(p[0], q[0], 0.45), lerp(p[1], q[1], 0.45), P.tw * 0.15 * (1 - i / 10), P.tw * 0.1, q[2], 0, PI * 2); ctx.fill();
     }
-    
+
+    // Dorsal plates must be painted AFTER the solid tail, along its outer
+    // silhouette. Previously the skin covered most crystals and spikes.
     if (f === 2 || final) {
+      for (let i = 2; i <= 3; i++) {
+        const p = sides.top[i], a = tpts[i][2] + PI / 2 + 0.12;
+        if (final) crystal(ctx, R, p[0], p[1], a, 11 - i, 4);
+        else plateAt(ctx, R, p[0], p[1], a, 15 - i * 2, 6, i % 2 ? c.plate : c.plate2);
+      }
       for (let i = 6; i <= 7; i++) {
-        const p = sides.top[i], a = tpts[i][2];
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 - 0.5, 9, 2.4, final ? "#e8fdff" : c.claw);
-        spikeAt(ctx, R, p[0], p[1], a - PI / 2 + 0.1, 7, 2.2, final ? "#e8fdff" : c.claw);
+        const p = sides.top[i], a = tpts[i][2] + PI / 2;
+        spikeAt(ctx, R, p[0], p[1], a - 0.35, 9, 2.4, final ? "#e8fdff" : c.claw);
+        spikeAt(ctx, R, p[0], p[1], a + 0.13, 7, 2.2, final ? "#e8fdff" : c.claw);
       }
     }
     
@@ -409,8 +463,8 @@ function draw(ctx, pose, R) {
     leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
     ctx.save(); upper();
     ctx.rotate(shellRot);
-    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15);
-    R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * 1.5 + tw * 4, -bh * 1.3 - tw * 3], [-bw * 1.2 + tw * 3, -bh * 0.9], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
+    const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15) * T.tailLag[f];
+    R.blob(ctx, [[-bw * 0.8, -bh * 0.8], [-bw * (1.42 + .08 * T.tailLength[f]) + tw * 4, -bh * 1.3 - tw * 3 * T.tailWave[f]], [-bw * 1.2 + tw * 3, -bh * (.9 + .04 * T.tailWidth[f])], [-bw * 0.9, -bh * 0.5]], c.body, { lw: 2.4 });
     tinyArm(ctx, R, bw * 0.3, -bh * 1.0, P.armL, armB, 5, dark, c.claw);
     ctx.restore();
   } else {
@@ -438,7 +492,7 @@ function draw(ctx, pose, R) {
     const body = [[-bw * 1.0, -bh * 0.15], [-bw * 0.8, -bh * 0.7], [-bw * 0.15, -bh * 1.02], [bw * 0.65, -bh * 0.92], [bw * 1.02, -bh * 0.45], [bw * 0.85, -bh * 0.02], [0, bw * 0.3]];
     R.blob(ctx, body, c.body);
     const bel = [[bw * 0.2, -bh * 0.85], [bw * 0.75, -bh * 0.76], [bw * 0.95, -bh * 0.4], [bw * 0.72, -bh * 0.02], [bw * 0.1, bw * 0.16], [-bw * 0.15, -bh * 0.4]];
-    R.blob(ctx, bel, c.belly, { lw: 1.6 });
+    ctx.save();ctx.globalAlpha = T.belly[f];R.blob(ctx, bel, c.belly, { lw: 1.6 });ctx.restore();
     
     ctx.save();
     R.blob(ctx, bel, null, { line: false, shade: false }); ctx.clip();
@@ -450,9 +504,11 @@ function draw(ctx, pose, R) {
     ctx.restore();
 
     ctx.fillStyle = c.spot;
+    ctx.save(); ctx.globalAlpha *= T.spot[f];
     ctx.beginPath(); ctx.ellipse(-bw * 0.5, -bh * 0.55, bw * 0.2, bw * 0.13, -0.4, 0, PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(-bw * 0.62, -bh * 0.25, bw * 0.13, bw * 0.09, -0.2, 0, PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(-bw * 0.2, -bh * 0.82, bw * 0.12, bw * 0.08, -0.1, 0, PI * 2); ctx.fill();
+    ctx.restore();
 
     if (f === 3) {
       for (let i = 0; i < 4; i++) {
@@ -485,7 +541,8 @@ function draw(ctx, pose, R) {
   ctx.save(); upper();
   if (baby) {
     ctx.rotate(shellRot);
-    eggShell(ctx, R, 0, -bh * 0.9, bw * 1.5, bh * 0.85, false, t);
+    ctx.save();ctx.globalAlpha *= T.belly[f];
+    eggShell(ctx, R, 0, -bh * 0.9, bw * 1.5, bh * 0.85, false, t);ctx.restore();
     tinyArm(ctx, R, bw * 0.95, -bh * 1.0, P.armL, armF, 5.5, c.body, c.claw);
   } else {
     tinyArm(ctx, R, bw * 0.7, -bh * 0.64, P.armL, armF, 5 + f * 0.4, c.body, c.claw);
@@ -524,10 +581,16 @@ function draw(ctx, pose, R) {
     ctx.restore();
   }
 
+  // Signature wink for victory; visual only, no entities spawned.
+  if (st === "victory") {
+    ctx.save();ctx.globalAlpha = 0.72;
+    R.sparkle(ctx, bw * 0.7, hipY - bh - P.hh * 2.1, 2.7 * T.sparkle[f], c.plate2);
+    ctx.restore();
+  }
   // POLVO AL CORRER
-  if (stomp > 0 && !baby) {
+  if (stomp > 0) {
     ctx.save();
-    ctx.globalAlpha *= stomp * 0.8;
+    ctx.globalAlpha *= stomp * 0.8 * T.footDust[f];
     R.ellipse(ctx, 16, -2, 3.5, 2.5, "#e4dcc8", { lw: 1.2, ink: "#8a7d6a" });
     R.ellipse(ctx, -12, -2, 3, 2.2, "#e4dcc8", { lw: 1.2, ink: "#8a7d6a" });
     ctx.restore();
@@ -611,7 +674,7 @@ function drawHead(ctx, R, pose, o) {
 
   ctx.save();
   R.blob(ctx, skull, null, { line: false, shade: false }); ctx.clip();
-  ctx.fillStyle = c.spot;
+  ctx.globalAlpha *= T.spot[f]; ctx.fillStyle = c.spot;
   ctx.beginPath(); ctx.ellipse(-hw * 0.55, -hh * 0.62, hw * 0.13, hh * 0.1, -0.5, 0, PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(-hw * 0.2, -hh * 0.95, hw * 0.14, hh * 0.1, 0, 0, PI * 2); ctx.fill();
   ctx.beginPath(); ctx.ellipse(hw * 0.35, -hh * 0.9, hw * 0.09, hh * 0.07, 0.2, 0, PI * 2); ctx.fill();
@@ -659,12 +722,12 @@ function drawHead(ctx, R, pose, o) {
     }
     ctx.save();
     ctx.shadowColor = "#bff4ff"; ctx.shadowBlur = 8;
-    R.sparkle(ctx, hw * 0.35, -hh * 1.55, 3 + Math.sin(t * 0.2) * 1.5, "#ffffff");
+    R.sparkle(ctx, hw * 0.35, -hh * 1.55, (3 + Math.sin(t * 0.2) * 1.5) * T.sparkle[f], "#ffffff");
     ctx.restore();
     crack(ctx, [[-hw * 0.9, -hh * 0.35], [-hw * 0.6, -hh * 0.3], [-hw * 0.5, -hh * 0.05], [-hw * 0.25, hh * 0.05]], t, 4);
   }
 
-  const ex = -hw * 0.08, ey = -hh * 0.42, er = hh * (baby ? 0.46 : 0.4);
+  const ex = -hw * 0.08, ey = -hh * 0.42, er = hh * (baby ? 0.46 : 0.4) * T.eye[f];
   if (o.hurtEyes) {
     ctx.strokeStyle = R.INK; ctx.lineWidth = 2.6; ctx.lineCap = "round";
     ctx.beginPath();
@@ -682,12 +745,12 @@ function drawHead(ctx, R, pose, o) {
   }
 
   if ((f >= 3 || o.eyeMood === "angry") && !o.hurtEyes && !o.deadEyes && o.eyeMood !== "happy" && o.eyeMood !== "closed") {
-    ctx.strokeStyle = R.darken(c.body, 0.45); ctx.lineWidth = 3.2; ctx.lineCap = "round";
+    ctx.strokeStyle = R.darken(c.body, 0.45); ctx.lineWidth = 3.2 * T.headNod[f]; ctx.lineCap = "round";
     ctx.beginPath(); ctx.moveTo(ex - er * 0.9, ey - er * 1.2); ctx.lineTo(ex + er * 0.9, ey - er * (o.eyeMood === "angry" ? 0.75 : 1.1)); ctx.stroke();
   }
 
   R.ellipse(ctx, hw * 0.8, -hh * 0.45, 1.8, 1.3, R.INK, { line: false, shade: false, rot: -0.3 });
-  R.blush(ctx, hw * 0.3, -hh * 0.02, hh * 0.18, "#ff6a7a");
+  R.blush(ctx, hw * 0.3, -hh * 0.02, hh * 0.18 * T.blush[f], "#ff6a7a");
   void dark;
 
   const mx = hw * 1.1, my = hh * 0.25;
