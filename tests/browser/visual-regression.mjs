@@ -228,6 +228,30 @@ try {
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01g-pizza: selector did not return to Kilo');
 
+  // V56 Yomi: verify the guardian-lantern is legible across five evolution silhouettes.
+  for(let n=0;n<8;n++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(230);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'yomi','01h-yomi: selector does not reach Yomi');
+  for(let form=0;form<5;form++){
+    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(160);
+    const render=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let pixels=0;
+      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)pixels++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),pixels};
+    });
+    assert.equal(render.form,form,'01h-yomi: unexpected form '+form);
+    assert.ok(render.scale>.2&&render.pixels>10,'01h-yomi: blank or cropped guardian '+JSON.stringify(render));
+    await capture(page,'01h-yomi-guardian-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let n=0;n<8;n++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01h-yomi: selector did not return to Kilo');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
@@ -536,6 +560,21 @@ try {
   await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3600});
   page.off('pageerror',onPizzaError);
   assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime al finalizar');
+
+  // V56 J smoke: verify real casting and a simulation tick, not just string assertions.
+  const jErrors=[];
+  const onJError=err=>jErrors.push(String(err.message||err));
+  page.on('pageerror',onJError);
+  const jState=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('yomi');api.setEvo(3);api.cast(0);api.step(3);
+    return api.state();
+  });
+  assert.equal(jState.lastAbilityId,'ofuda','09d-yomi-j: incorrect talisman ability');
+  assert.equal(jState.lastAbilitySlot,0,'09d-yomi-j: J cast did not activate');
+  assert.deepEqual(jErrors,[],'09d-yomi-j: runtime error after casting J');
+  await capture(page,'09d-yomi-j-guardian-seal');
+  page.off('pageerror',onJError);
 
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));
