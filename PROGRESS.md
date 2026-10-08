@@ -1,3 +1,9 @@
+## 09/10/2026 · OHANA V100 · primer mundo completo · ohana-300
+
+- Los diez protagonistas protagonizan el retrato final con diez coreografías individuales y deterministas: saltos, saludos y golpes festivos distintos, sin aumentar el número de dibujos por fotograma.
+- Respeta movimiento reducido, la identidad del personaje elegido y la secuencia accesible V99. Módulo `systems/v100-family-choreography.js` precacheado.
+- Candidato final sujeto a Node, Browser E2E, multiplayer, regresión visual, Release Gate y Pages; no anunciar como publicado antes de verificar el deploy.
+
 ## 09/10/2026 · OHANA V99 · final sin cartel prematuro · ohana-299
 
 - La carta de resultados y sus acciones dejan de aparecer durante la llegada de los diez héroes; la escena dura 14,5 s salvo movimiento reducido, y el retrato precede al título.
