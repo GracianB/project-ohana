@@ -3,6 +3,7 @@ import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
 import { duckMusic } from "../engine/music.js";
 import { evolutionTiming } from "./evolution-timing.js";
+import { drawCuernoMetamorphosis } from "./cuerno-v93-metamorphosis.js";
 import { EVOLUTION_CINEMA_PROFILES, EVOLUTION_STAGE_COPY, evolutionMessage } from "../characters/evolution.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
@@ -555,6 +556,10 @@ export function playEvolution(detail = {}) {
     if (!finalForm) {
       drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target * 1.08, clamp((charge * 0.20 + revealK * 0.24), 0, 0.28), t, accent);
     }
+    // Cuerno V93: each biological leap earns an authored, bounded backdrop.
+    if (def.id === "cuerno") drawCuernoMetamorphosis(ctx, {
+      evo, t, timing:T, cx, cy, target, fade, reduce
+    });
     drawFinalAscension(t, L);
     const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
     const R = Math.hypot(W, H) * 0.75;
