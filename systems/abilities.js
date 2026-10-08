@@ -399,7 +399,7 @@ function castSupreme(game, p, flow = currentFlow(game, p)) {
       const heavy=e.boss
         ? Math.min(maxHp * .20, dmg * 1.55) + maxHp * .04
         : Math.min(hp * (marked ? .92 : .82), dmg * (marked ? 1.90 : 1.42) + hp * (marked ? .27 : .14));
-      const execute=!e.boss && hp<=maxHp * (marked ? .42 : .24);
+      const execute=!e.boss && hp<=maxHp * (marked ? .42 : .34);
       hitEnemy(game,e,execute?hp+100:heavy,{
         kx:Math.sign(cx(e)-cx(p))*8,ky:-9,stun:64,
         color:"#ffdc9d",crit:true,parts:12
