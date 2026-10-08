@@ -1,29 +1,35 @@
-## 09/10/2026 · OHANA V97 · juego accesible · ohana-297
+## 09/10/2026 · OHANA V97 · narración puntual accesible · ohana-297
 
-- Avisos puntuales de evolución, entrada/fases de la Reina y umbrales de salud, sin saturar lectores de pantalla a 60 Hz.
-- Reducer determinista `systems/a11y-v97.js`, live region discreta y modo de colores forzados nativo en HUD y controles.
-- Candidata sujeta a CI, regresión visual y publicación GitHub Pages.
+- Lector de pantalla: evolución, fase de la Reina y alertas de salud con histéresis; sin 60 anuncios/s.
+- HUD con región ARIA discreta y forced colors nativos. Conserva los controles V96 y los módulos de enemigos/cooperativo V95.
+- Candidata a release sujeta a CI y Pages.
 
 ## 09/10/2026 · OHANA V96 · controles táctiles adaptativos · ohana-296
 
-- Distribución diferenciada para móviles verticales estrechos y horizontales de poca altura; botones reales E/J/K/L/U y movimiento siguen operativos.
-- Estilos aislados `mobile-v96.css`, áreas táctiles reales, indicadores de foco y respeto al movimiento reducido, sin cambiar motor ni entradas.
-- Candidata de publicación pendiente de CI, regresión visual y Pages.
+- Diseño táctil para 320–420 px en vertical y 450 px de altura en apaisado, con separación real entre poderes, movimiento y salto.
+- Mantiene botones E/J/K/L/U, safe areas, foco visible y movimiento reducido sin cambiar bindings ni física.
+- Se preservan los avisos de Reina, el director global y el cooperativo estable de V95. Candidata CI/Visual/Release Gate/Pages.
 
-## 09/10/2026 · OHANA V95 · Cooperativo con señal resistente · ohana-295
+## 09/10/2026 · OHANA V95 · cooperativo estable y avisos precisos · ohana-295
 
-- Predicción visual remota acotada, retirada progresiva cuando falta señal y aviso de retraso sin alterar posiciones autoritativas.
-- Módulo `systems/coop-v95-presence.js` y pruebas de pérdida de paquetes, reconexión y teletransporte. Candidata sujeta a CI y Pages.
+- Los cuatro indicadores de intención de la Reina se suman a la señalización global e índice espacial V94, sin alterar el director ni las hitboxes.
+- Cooperativo con predicción limitada, sin carreras fantasma tras pérdida de paquetes, etiqueta «SEÑAL RETRASADA» y recuperación automática.
+- Se preservan todos los archivos y tests del V94 publicado. Release candidata sujeta a Node, navegador, multijugador, visual y Release Gate.
 
-## 09/10/2026 · OHANA V94 · Reina del Nido legible · ohana-294
+## 09/10/2026 · OHANA V94 · ENEMIGOS LEGIBLES Y ESTABILIDAD GLOBAL · ohana-294
 
-- Cuatro advertencias visuales asociadas a ataques reales con progreso de windup correcto y consejos accesibles.
-- Módulo `systems/boss-v94-readability.js` desacoplado de físicas, hitboxes y daño. Candidata sujeta a CI y Pages.
+- Los diez biomas comparten un **indicador contextual de amenaza**: solo los tres rivales prioritarios muestran señales sobre la cabeza; el aviso de ataque real queda claramente distinguido del mero permiso de ataque.
+- **Rendimiento del director de enemigos**: búsqueda espacial por celdas para grupos grandes (>12), con distancias euclídeas exactas. Combate, daño, hitboxes, IA, agresividad y presupuestos de ataques quedan idénticos.
+- Canvas sin efectos persistentes, sin temporizadores, sin RNG y compatible con movimiento reducido; oculta enemigos fuera de cámara y no interfiere en el jefe ni el final.
+- Pruebas de vecindad, comportamiento, accesibilidad, señales, precaché y contratos de V93 en preparación.
+- `ROADMAP_V100.md` fija los criterios de salida de V95 a V100. Las fases CI + Browser + Multiplayer + Visual + Release Gate son obligatorias antes del merge.
 
-## 09/10/2026 · OHANA V93 · Cuerno, cuatro metamorfosis · ohana-293
+## 09/10/2026 · OHANA V93 · CUERNO · METAMORFOSIS COMPLETA · ohana-293
 
-- Cuatro rituales Canvas propios de Cuerno, sincronizados con las cuatro evoluciones; movimiento reducido y regresión de Dino V90 y Cuerno V92 cubiertos.
-- Cambios en `systems/cuerno-v93-metamorphosis.js` y `systems/evo-cinema.js`. Candidata de publicación sujeta a CI y Pages.
+- Cuatro rituales de transición, sincronizados con la cinemática de evolución: cuerno vivo que abraza su futura cara, nacimiento de cuatro patas, dos alas con plumas y Aurora final con siete arcos y cuernos nacarados.
+- Nuevo módulo determinista `systems/cuerno-v93-metamorphosis.js`, integrado en `systems/evo-cinema.js` y precacheado para jugar sin conexión. Cuerno mantiene silueta propia y movimiento reducido.
+- Se conservan los contratos mecánicos y visuales de Dino V90 y Cuerno V92, sin nuevas hitboxes ni cambios en el motor cooperativo.
+- `index.html` y `sw.js` sincronizados a la caché `ohana-293`. La release requiere Node, Browser E2E, Multiplayer E2E, Visual y `release:check`.
 
 ## 09/10/2026 · OHANA V92 · CUERNO: RESONANCIA PRISMÁTICA Y CONTACTO REAL · ohana-292
 
