@@ -196,7 +196,7 @@ function storyPose(id,k){
   if(id==="cat") return k<.58?"idle":k<.78?"attack":"victory";
   if(id==="dino") return (k>.18&&k<.36)||(k>.49&&k<.66)?"attack":k>.70?"victory":"idle";
   if(id==="dragon") return k<.32?"idle":k<.53?"jump":k<.78?"attack":"victory";
-  if(id==="frita") return k<.24?"idle":k<.57?"attack":k<.77?"cast":"victory";
+  if(id==="frita") return k<.24?"idle":k<.77?"attack":"victory";
   if(id==="pizza") return k<.42?"idle":k<.70?"attack":"victory";
   if(id==="yomi") return k<.54?"idle":k<.78?"attack":"victory";
   return k<.34?"idle":k<.72?"attack":"victory";
