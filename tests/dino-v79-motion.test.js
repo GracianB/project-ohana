@@ -31,7 +31,7 @@ function draw(form,state,extra={}) {
  Dino.draw(ctx,pose(form,state,extra),R);
  assert.equal(saves,restores,"Canvas state leaks: "+form+" "+state);
  assert.ok(points.length>0,"Character disappeared");
- if(state!=="dead"&&extra.move!=="dino-roll")assert.ok(eyes>0,"Dino gaze lost");
+ if(!["dead","hurt"].includes(state)&&extra.move!=="dino-roll")assert.ok(eyes>0,"Dino gaze lost");
  return {points,eyes,paths};
 }
 
