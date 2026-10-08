@@ -9,6 +9,7 @@ import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
 let active = null;
+let generation = 0;
 const PROFILES = Object.freeze({
   kilo:{mode:"bloom"}, stitcho:{mode:"rift"}, chispin:{mode:"storm"}, cat:{mode:"eclipse"},
   dragon:{mode:"nova"}, dino:{mode:"quake"}, frita:{mode:"crisp"}, pizza:{mode:"oven"},
@@ -70,17 +71,19 @@ function play(detail={}){
   const p=actor(def,evo,color);
   const allyDef=ROSTER.find(r=>String(r.name).toLowerCase()===String(detail.assist||"").toLowerCase()||r.id===String(detail.assist||"").toLowerCase());
   const ally=allyDef?actor(allyDef,Math.min(2,evo),allyDef.color):null;
-  const reduce=reducedMotion(), duration=reduce?.72:1.38;
+  const reduce=reducedMotion(), duration=reduce?.78:1.55;
   let t0=0,raf=0,done=false;
+  const token=++generation;
   el.className="show kind-"+(PROFILES[def.id]?.mode||"bloom");
   el.dataset.activeId=def.id;el.dataset.mode="hero-short";
+  el.dataset.generation=String(token);el.dataset.state="active";el.dataset.duration=String(Math.round(duration*1000));
   el.style.setProperty("--supreme",color);
   el.setAttribute("aria-hidden","false");
   el.querySelector(".sc-sr").textContent=(detail.name||"Suprema")+" · "+(detail.line||"");
   duckMusic(true);try{sfx("supreme");}catch(_){}
 
   function stop(){
-    if(done)return;done=true;cancelAnimationFrame(raf);el.classList.remove("show");el.setAttribute("aria-hidden","true");duckMusic(false);active=null;
+    if(done)return;done=true;cancelAnimationFrame(raf);el.classList.remove("show");el.setAttribute("aria-hidden","true");el.dataset.state="idle";duckMusic(false);active=null;
   }
   function frame(now){
     if(done)return;if(!t0)t0=now;const t=(now-t0)/1000,k=clamp(t/duration,0,1);
