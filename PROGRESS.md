@@ -1,3 +1,28 @@
+## 08/10/2026 · V42 Enemy Species Evolution
+
+**Caché:** `ohana-232`.
+
+V42 convierte cada enemigo en una especie con identidad táctica propia y añade evolución determinista por mundo y relaciones locales entre criaturas.
+
+- 18 identificadores runtime cubiertos por perfiles de especie, incluyendo la pareja Abeja/Avispa.
+- Cada especie declara familia, firma, glifo visual, prioridad, rango, sesgo de flanqueo y tres variantes.
+- Las variantes son deterministas por especie + sala + índice de aparición y se expresan como **HUNTER, SENTINEL o CATALYST**.
+- Una misma especie puede mutar al cambiar de mundo sin introducir RNG de simulación.
+- Relaciones emergentes entre vecinos:
+  - **PACK** · especies de la misma familia alternan posición.
+  - **FLUSH** · ARTILLERY + DIVER coordinan presión y flanqueo.
+  - **SCREEN** · BRUISER protege la aproximación de SWARM.
+  - **TRAP** · AMBUSHER + SKIRMISHER forman una pinza de engaño.
+  - **RELAY** · ARTILLERY + SKIRMISHER mantienen distancia y relevo.
+  - **PINCER** · AMBUSHER + BRUISER cierran desde lados opuestos.
+- El director V38 y la ecología V41 siguen siendo canónicos; V42 se superpone sin reemplazarlos.
+- La capa V42 no modifica HP, daño, hitboxes ni usa `Math.random()`.
+- Cada especie tiene un motivo geométrico procedural y las relaciones se leen visualmente sin PNG nuevos.
+- Browser E2E exige familia, firma, variante, modo y al menos una relación activa en Lab.
+- Visual Regression captura `16-enemy-species-evolution`.
+- Contrato de release V42: **10 personajes · 5 formas · 10 salas**.
+- QA final: `node tests/browser/e2e.mjs` · `node tests/browser/visual-regression.mjs` · `npm run release:check`.
+
 ## 08/10/2026 · V41 Enemy Ecology + Living Encounters
 
 **Caché:** `ohana-231`.
