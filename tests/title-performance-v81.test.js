@@ -47,7 +47,11 @@ test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
 });
 
 test("V81 offline cache and live HTML references are identical",()=>{
- assert.match(sw,/const VERSION = "ohana-280"/);
- assert.match(index,/title-stage\.css\?v=ohana-280/);
- assert.doesNotMatch(index,/ohana-279/);
+ const match=sw.match(/const VERSION = "(ohana-\d+)"/);
+ assert.ok(match,"versioned Service Worker required");
+ const version=match[1];
+ assert.match(version,/^ohana-\d+$/);
+ assert.ok(index.includes("title-stage.css?v="+version));
+ assert.ok([...index.matchAll(/ohana-\d+/g)].every(m=>m[0]===version),
+   "HTML and Service Worker reference different revisions");
 });
