@@ -10,10 +10,10 @@ export function evolutionTiming({ reduced = false, finalForm = false } = {}) {
       oldIn: 0.18,
       charge: 1.05,
       flip: 1.72,
-      flash: 2.34,
-      reveal: 2.48,
-      out: 4.55,
-      end: 5.18,
+      flash: 2.78,
+      reveal: 3.10,
+      out: 5.80,
+      end: 6.45,
     };
   }
   return {
