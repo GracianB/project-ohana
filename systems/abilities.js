@@ -2155,20 +2155,25 @@ irisHalo(ctx,f,cam,t){
 const x=f.x-cam.x,y=f.y-cam.y,progress=1-f.life/f.max;
 const radius=f.r*(1-Math.pow(1-progress,2));
 const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"];
-const opacity=Math.min(1,f.life/18)*.8;
+// Legibility budget: a short anticipation, clean crest and a quiet tail.
+const opening=Math.min(1,progress/.10),ending=Math.min(1,f.life/15);
+const opacity=opening*ending*.72;
 ctx.save();ctx.globalCompositeOperation="lighter";
-if(f.evo===4){
+if(f.evo===4&&radius>32){
 const w=viewW(),h=viewH(),grad=ctx.createRadialGradient(x,y,8,x,y,Math.max(radius,10));
 cols.forEach((c,i)=>grad.addColorStop(i/7,c));
 grad.addColorStop(1,"rgba(221,185,247,0)");
-ctx.globalAlpha=.18*opacity;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+ctx.globalAlpha=.11*opacity;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
 }
 ctx.lineCap="round";
 for(let i=0;i<7;i++){
-ctx.strokeStyle=cols[i];ctx.globalAlpha=(.22+.10*(i%3))*opacity;
-ctx.lineWidth=Math.max(5,Math.min(27,radius*.018));
+ctx.strokeStyle=cols[i];ctx.globalAlpha=(.18+.07*(i%3))*opacity;
+ctx.lineWidth=Math.max(2.5,Math.min(12,radius*.012));
 ctx.beginPath();ctx.arc(x,y,Math.max(1,radius-(3-i)*ctx.lineWidth),0,TAU);ctx.stroke();
 }
+// A precise ivory crest makes the growing hit wave readable without screen flash.
+ctx.globalAlpha=.35*opacity;ctx.lineWidth=1.4;ctx.strokeStyle="#fff9e9";
+ctx.beginPath();ctx.arc(x,y,Math.max(1,radius),0,TAU);ctx.stroke();
 ctx.restore();
 },
 supremeField(ctx, f, cam, t, g, p) {
@@ -2211,11 +2216,11 @@ if(f.mode==="kilo"){
   const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"];
   const w=viewW(),h=viewH(),grad=ctx.createLinearGradient(0,0,w,h);
   cols.forEach((c,i)=>grad.addColorStop(i/6,c));
-  ctx.globalAlpha=.11*fade;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+  ctx.globalAlpha=.07*fade;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
   ctx.lineCap="round";
   for(let i=0;i<7;i++){
-    ctx.strokeStyle=cols[i];ctx.globalAlpha=.46*fade;
-    ctx.lineWidth=7;ctx.beginPath();
+    ctx.strokeStyle=cols[i];ctx.globalAlpha=.27*fade;
+    ctx.lineWidth=4.5;ctx.beginPath();
     ctx.arc(x,y+24,R*(.75+i*.14),Math.PI*.02,Math.PI*1.98);ctx.stroke();
   }
   ctx.globalCompositeOperation="source-over";

@@ -5,7 +5,7 @@ import {
   drawSpark, drawStar, FONT_BODY, FONT_DISPLAY
 } from "./evo-cinema.js";
 import { ROSTER } from "../characters/roster.js";
-import { SUPREME_STORYBOARDS } from "./supreme-storyboards.js";
+import { SUPREME_STORYBOARDS, cuernoGrandStage } from "./supreme-storyboards.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
@@ -169,6 +169,14 @@ function backdrop(ctx,W,H,cx,cy,color,story,k){
   }
   ctx.restore();
 
+  if(story.scene==="aurora"){
+    // A moonlit seven-colour curtain behind the actor, never across the face.
+    const sky=ctx.createLinearGradient(0,0,W,H);
+    sky.addColorStop(0,"rgba(120,112,204,.12)");
+    sky.addColorStop(.48,"rgba(149,229,220,.11)");
+    sky.addColorStop(1,"rgba(240,179,224,.10)");
+    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  }
   if(story.scene==="eclipse"||story.scene==="maw"){
     const v=ctx.createRadialGradient(cx,cy,Math.min(W,H)*.12,cx,cy,Math.min(W,H)*.62);
     v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(0,0,0,.62)");
@@ -187,6 +195,8 @@ function storyMotion(id,k,target){
   if(id==="frita") return {x:Math.sin(seg(k,.23,.58)*Math.PI)*target*.04,y:-Math.sin(seg(k,.28,.61)*Math.PI)*target*.055,scale:1+.055*e(seg(k,.63,.85)),rot:-.04*Math.sin(seg(k,.2,.55)*Math.PI)+.018*Math.sin(seg(k,.62,.86)*Math.PI)};
   if(id==="pizza") return {x:-Math.sin(seg(k,.40,.64)*Math.PI)*target*.055,y:-Math.sin(seg(k,.38,.68)*Math.PI)*target*.05,scale:1+.055*e(seg(k,.64,.86)),rot:-.04*Math.sin(seg(k,.38,.62)*Math.PI)};
   if(id==="yomi") return {x:0,y:e(seg(k,.48,.72))*target*.025,scale:1.08-.08*e(seg(k,.18,.70)),rot:0};
+  if(id==="cuerno")return {x:0,y:-Math.sin(Math.PI*seg(k,.17,.90))*target*.055,
+    scale:1+.055*Math.sin(Math.PI*seg(k,.18,.90)),rot:-.018*Math.sin(Math.PI*seg(k,.18,.78))};
   return {x:lerp(-target*.04,target*.035,e(seg(k,.18,.76))),y:-e(seg(k,.50,.80))*target*.045,scale:1+.05*e(seg(k,.56,.82)),rot:Math.sin(k*Math.PI)*.025};
 }
 
@@ -197,6 +207,7 @@ function storyPose(id,k){
   if(id==="frita") return k<.24?"idle":k<.77?"attack":"victory";
   if(id==="pizza") return k<.40?"idle":k<.73?"attack":"victory";
   if(id==="yomi") return k<.54?"idle":k<.78?"attack":"victory";
+  if(id==="cuerno")return k<.22?"idle":k<.76?"cast":"victory";
   return k<.34?"idle":k<.72?"attack":"victory";
 }
 
@@ -430,26 +441,63 @@ function drawStory(ctx,id,k,t,cx,cy,target,color){
       arcRainbow(ctx,cx,cy+target*.31,target*(.30+.50*rescue),.15+.36*a,true);
       drawRays(ctx,cx,cy-target*.07,target*.92,"#ffe3ac",.10+.14*a,t*.07,8);
     }
-  }else{
-    const tiny=seg(k,.06,.38);
-    if(tiny>0) arcRainbow(ctx,cx,cy-target*.02,target*.28,.52*tiny,false);
-    if(k>.34&&k<.52){
-      const sw=seg(k,.34,.52);
-      ctx.save();ctx.globalAlpha=.45*(1-sw);ctx.translate(target*.55*sw,-target*.18*sw);arcRainbow(ctx,cx,cy-target*.02,target*.28,1,false);ctx.restore();
-    }
-    const aur=seg(k,.48,.97);
-    if(aur>0){
-      arcRainbow(ctx,cx,cy+target*.20,target*(.72+.38*aur),.24+.40*aur,true);
-      drawRays(ctx,cx,cy,target*1.08,color,.08+.12*aur,t*.10,8);
-      // Calm luminous sleep symbols drift in place before the final dissolve.
-      ctx.save();ctx.strokeStyle="#e7d7ff";ctx.lineWidth=2;
-      ctx.globalAlpha=.5*Math.sin(aur*Math.PI);
-      for(let i=0;i<5;i++){
-        const xx=cx+target*(i-2)*.23,yy=cy-target*(.16+.26*aur)+(i%2)*target*.08;
-        ctx.beginPath();ctx.moveTo(xx-5,yy-5);ctx.lineTo(xx+5,yy-5);
-        ctx.lineTo(xx-5,yy+5);ctx.lineTo(xx+5,yy+5);ctx.stroke();
+  }else if(id==="cuerno"){
+    // V68 four-beat grand spectacle: whisper, iris, sleeping stars, soft dawn.
+    const beat=cuernoGrandStage(k),q=easeInOut(beat.value);
+    const rainbow=["#ff9fb5","#ffc89b","#ffe9b5","#b3ebc7","#9ee5ee","#b9c6ff","#e6c6f4"];
+    const hornY=cy-target*.45;
+    if(beat.name==="breath"){
+      const breath=.4+.6*q;
+      drawSpark(ctx,cx,hornY,target*(.012+.028*breath),"#fff6da");
+      for(let i=0;i<7;i++){
+        const a=i*TAU/7-t*.08,r=target*(.07+.14*breath);
+        drawSpark(ctx,cx+Math.cos(a)*r,hornY+Math.sin(a)*r*.72,
+          target*.012*breath,rainbow[i]);
+      }
+      drawRing(ctx,cx,hornY,target*.23,q,"#f5d5ef",1.5,.18);
+    }else if(beat.name==="iris"){
+      const radius=target*(.20+.66*q),alpha=.28+.18*Math.sin(q*Math.PI);
+      ctx.save();ctx.lineCap="round";
+      for(let i=0;i<7;i++){
+        ctx.strokeStyle=rainbow[i];ctx.globalAlpha=alpha;
+        ctx.lineWidth=Math.max(2,target*.018);
+        ctx.beginPath();ctx.arc(cx,hornY,Math.max(4,radius-i*target*.035),0,TAU);ctx.stroke();
       }
       ctx.restore();
+      drawRing(ctx,cx,hornY,target*(.36+.54*q),q,"#fff8e4",2,.21);
+    }else if(beat.name==="dream"){
+      const drift=target*(.20+.33*q);
+      const veil=ctx.createRadialGradient(cx,hornY,8,cx,hornY,target*.68);
+      veil.addColorStop(0,"rgba(216,207,255,.16)");
+      veil.addColorStop(1,"rgba(216,207,255,0)");
+      ctx.fillStyle=veil;ctx.fillRect(cx-target*.8,hornY-target*.8,target*1.6,target*1.6);
+      ctx.save();ctx.lineWidth=Math.max(1.4,target*.007);ctx.lineCap="round";
+      for(let i=0;i<5;i++){
+        const x=cx+(i-2)*target*.23,y=cy-target*.17-drift*(.38+(i%2)*.27);
+        ctx.globalAlpha=.32+.36*Math.sin(Math.PI*q);ctx.strokeStyle=rainbow[i+1];
+        ctx.beginPath();ctx.moveTo(x-5,y-6);ctx.lineTo(x+5,y-6);
+        ctx.lineTo(x-5,y+6);ctx.lineTo(x+5,y+6);ctx.stroke();
+        drawSpark(ctx,x+9,y-12,target*.012*(1+q),rainbow[(i+4)%7]);
+      }
+      ctx.restore();
+      drawRing(ctx,cx,cy+target*.08,target*(.45+.45*q),q,"#e9dbff",2,.18);
+    }else{
+      const fade=1-q;
+      ctx.save();ctx.lineCap="round";
+      for(let i=0;i<7;i++){
+        ctx.strokeStyle=rainbow[i];ctx.globalAlpha=.21*fade;
+        ctx.lineWidth=Math.max(2,target*.019);
+        ctx.beginPath();
+        ctx.arc(cx,cy+target*.12,target*(.72+.40*q)-i*target*.029,
+          Math.PI*.04,Math.PI*1.96);ctx.stroke();
+      }
+      ctx.restore();
+      drawRing(ctx,cx,cy+target*.08,target*(.78+.45*q),q,"#fff6d5",2,.21*fade);
+      for(let i=0;i<5;i++){
+        const a=i*TAU/5+t*.10;
+        drawSpark(ctx,cx+Math.cos(a)*target*.51,cy+Math.sin(a)*target*.31,
+          target*.012*fade,rainbow[(i+2)%7]);
+      }
     }
   }
   ctx.restore();
@@ -537,6 +585,13 @@ function play(detail={}){
     p.vx=0;p.vy=0;p.grounded=true;
     p._poseOverride=storyPose(def.id,k);
     p.melee=p._poseOverride==="attack"?Math.max(2,10-Math.floor(k*8)):0;
+    // Only the cinematic dummy receives these visual cues.
+    if(def.id==="cuerno"){
+      const stage=cuernoGrandStage(k);
+      el.dataset.cuernoPhase=stage.name;
+      p._cuernoMagicSlot=k>=.22&&k<.76?3:-1;
+      p._specialAuroraT=k>=.76?Math.round((1-k)*180):0;
+    }else delete el.dataset.cuernoPhase;
 
     let heroAlpha=vis;
     if(def.id==="cat"){

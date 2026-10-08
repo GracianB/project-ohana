@@ -676,6 +676,17 @@ try {
   assert.equal(dreamU.lastAbilityId,'aurora','09l-cuerno: U not activated');
   assert.equal(dreamU.lastAbilitySlot,3,'09l-cuerno: wrong U slot');
   await capture(page,'09l-cuerno-rainbow-sleep-u');
+  // V68: the real U has its own four-stage cinematic, not just a generic overlay.
+  const cuernoCinema=await page.locator('#supreme-cinema').evaluate(el=>({
+    id:el.dataset.activeId,story:el.dataset.story,phase:el.dataset.cuernoPhase,
+    beat:el.dataset.beat,mode:el.dataset.mode
+  }));
+  assert.equal(cuernoCinema.id,'cuerno','09p-cuerno: wrong cinematic hero');
+  assert.equal(cuernoCinema.story,'dream-rainbow','09p-cuerno: wrong U sequence');
+  assert.equal(cuernoCinema.mode,'storyboard','09p-cuerno: wrong cinematic mode');
+  assert.ok(['breath','iris','dream','aurora'].includes(cuernoCinema.phase),'09p-cuerno: four acts absent');
+  assert.match(cuernoCinema.beat,/ALIENTO.*CÍRCULO.*SUEÑO.*AURORA/);
+  await capture(page,'09p-cuerno-u-grand-spectacle');
   assert.deepEqual(dreamErrors,[],'09k/09l: Cuerno L/U runtime exception');
   page.off('pageerror',onDreamError);
 
