@@ -26,3 +26,23 @@ test("V53 solar ascent, halo and narrative are specific to Dragon",()=>{
  assert.match(cinema,/const ascent=seg\(k,\.33,\.62\)/);
  assert.match(evolution,/La corona solar despierta/);
 });
+
+test("V53 Dragon has four expressive idles and cast-specific powers",()=>{
+ assert.match(dragon,/const flN = \(pose\.flourishN \|\| 0\) % 4/);
+ assert.match(dragon,/cuarta microescena: estornuda/);
+ assert.match(dragon,/state==="cast" && p\.castSlot===1/);
+ assert.match(dragon,/state==="cast" && p\.castSlot===2/);
+ assert.match(dragon,/const climb = clamp\(/);
+ const fx=dragon.split("function dragonSoul(")[1].split("function draw(ctx")[0];
+ assert.doesNotMatch(fx,/requestAnimationFrame|setInterval|setTimeout|Math\.random/);
+});
+
+test("V53 U tells a bounded four-beat comedy-to-sunrise story",()=>{
+ const cine=fs.readFileSync("systems/supreme-cinema.js","utf8");
+ const beats=fs.readFileSync("systems/supreme-storyboards.js","utf8");
+ assert.match(cine,/const chase=seg\(k,\.28,\.57\)/);
+ assert.match(cine,/const crown=seg\(k,\.59,\.79\)/);
+ assert.match(cine,/const nova=seg\(k,\.63,\.92\)/);
+ assert.match(cine,/if\(id==="dragon"\) return k<\.32\?"idle":k<\.53\?"jump":k<\.78\?"attack":"victory"/);
+ assert.match(beats,/ESTORNUDO → PERSECUCIÓN → CORONA → SUPERNOVA/);
+});
