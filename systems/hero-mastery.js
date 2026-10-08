@@ -1,7 +1,3 @@
-// PROJECT OHANA V39 · HERO MASTERY
-// Character-specific traversal and world interaction.
-// This module never mutates enemy HP/damage/hitboxes. It may alter player
-// movement and expose player-only traversal surfaces to the collision layer.
 
 const TAU = Math.PI * 2;
 const clamp = (v, min, max) => Math.max(min, Math.min(max, Number(v) || 0));
@@ -58,8 +54,6 @@ export function masteryOf(id="") {
   return HERO_MASTERY[key] || Object.freeze({id:"wanderer",name:"Instinto Ohana",desc:"Movimiento propio."});
 }
 
-// Coordinates use the canonical 2240×1260 room space. These are optional
-// shortcuts and expression surfaces: no room requires a specific hero.
 const CLOUDS = Object.freeze({
   hub:      [[690,720,150],[1160,560,150],[1600,390,150]],
   beach:    [[930,900,180],[1120,720,150]],
@@ -243,7 +237,6 @@ export function updateHeroMastery(game,input={}) {
     p._masteryMove="wallvault";
   }
 
-  // An unconsumed fresh jump reaches here with _jumpHeld=false.
   if(id==="cat" && !p.grounded && input.jumpPressed && !p._jumpHeld && !s.pounceUsed){
     s.pounceUsed=true;
     p._jumpHeld=true;
@@ -487,7 +480,6 @@ export function drawHeroMastery(ctx,game,t=0) {
     ctx.shadowBlur=0;
   }
 
-  // Compact aura when a mastery move is actively expressing the hero.
   if(p._masteryMove){
     const alpha=.18+Math.sin(t*.18)*.06;
     ctx.globalAlpha=alpha;
