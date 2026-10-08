@@ -133,7 +133,7 @@ test("V84 fantasy markers render three bounded stars and disappear on expiry",()
  const fading=context();
  drawCuernoFantasyStatus(fading.ctx,[present],{x:0,y:0},115,true);
  fading.verify();
- assert.equal(fading.events.filter(x=>x[0]==="stroke").length,3);
+ assert.ok(fading.events.filter(x=>x[0]==="stroke").length>=4, "V91 adds enchantment countdown ring");
  const gone=context();
  drawCuernoFantasyStatus(gone.ctx,[present],{x:0,y:0},205,true);
  gone.verify();

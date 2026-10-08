@@ -1,3 +1,11 @@
+## 09/10/2026 · OHANA V91 · CUERNO · MAGIA CON SIGNIFICADO · ohana-291
+
+- K: huellas de cascos nacaradas en el arcoíris, como máximo siete por estela; conservan los 10 segundos y dos rastros simultáneos.
+- Encantamiento: el enemigo ahora muestra un aro de cuenta atrás para distinguir el daño de fantasía del resto del combate. Sin más ticks de daño ni estados nuevos.
+- L: siete cuernos curvos recorren el radio REAL de la onda de impacto, manteniendo los tres arcos iris y una única hitbox.
+- Geometría aislada en `systems/cuerno-v91-illusions.js`, 7 colores, soporte movimiento reducido y límites estrictos de trazos.
+- Pruebas de forma, límites de dibujo, duración del estado y precaché `ohana-291`. Dino V90 no se modifica.
+
 ## 09/10/2026 · V90 · DINO: RODILLO VIVO Y FÓSILES LEGIBLES · ohana-290
 
 - K: nueva bola de ocho placas, ojos y sonrisa, con giro adaptado a movimiento reducido.
