@@ -1340,6 +1340,52 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 };
 
 const UPD = {
+dinoSpit(g,f) {
+ if(f.delay>0){f.delay--;return true;}
+ if(--f.life<=0)return false;
+ if(!f.target||!canHit(f.target))f.target=nearestEnemy(g,f.x,f.y,590+f.evo*55,null,f.face);
+ if(f.target){
+   const dx=cx(f.target)-f.x,dy=cy(f.target)-f.y,d=Math.hypot(dx,dy)||1;
+   const v=7.5+f.evo*.62,k=.11+f.evo*.018;
+   f.vx+=((dx/d)*v-f.vx)*k;f.vy+=((dy/d)*v-f.vy)*k;
+ }else f.vy+=Math.sin(f.age*.1)*.035;
+ const speed=Math.hypot(f.vx,f.vy),limit=10.5+f.evo*.62;
+ if(speed>limit){f.vx*=limit/speed;f.vy*=limit/speed;}
+ f.trail.push({x:f.x,y:f.y});if(f.trail.length>7)f.trail.shift();
+ const nx=f.x+f.vx,ny=f.y+f.vy;
+ if(solidAt(g,nx,ny)){boom(g,f.x,f.y,f.color,5,{size:2.4,speed:1.4});return false;}
+ f.x=nx;f.y=ny;
+ for(const e of g.enemies||[]){
+   if(!canHit(e)||!circleHit(f.x,f.y,f.radius,e))continue;
+   hitEnemy(g,e,f.dmg,{kx:Math.sign(f.vx)*6,ky:-3,stun:18,color:f.color,shake:1,hitstop:1,parts:5});
+   if(f.evo>=3)for(const other of g.enemies||[]){
+     if(other===e||!canHit(other)||Math.hypot(cx(other)-f.x,cy(other)-f.y)>23+f.evo*4)continue;
+     hitEnemy(g,other,f.dmg*.34,{kx:3*f.face,ky:-2,stun:9,color:f.color,shake:0,hitstop:0,parts:3});
+   }
+   boom(g,f.x,f.y,f.color,7,{size:2.8,star:true,speed:1.8});
+   add({kind:"dinoSplat",x:f.x,y:f.y,life:18,max:18,color:f.color,radius:f.radius});
+   return false;
+ }
+ return f.x>-30&&f.x<(g.worldW||1600)+30&&f.y>-120&&f.y<(g.worldH||900)+80;
+},
+dinoSplat(g,f){return --f.life>0;},
+dinoSkyfall(g,f,p){
+ if(f.next-->0)return true;
+ const enemies=(g.enemies||[]).filter(e=>canHit(e)&&inView(g,e))
+   .sort((a,b)=>Math.abs(cx(a)-f.origin)-Math.abs(cx(b)-f.origin));
+ const target=enemies.length?enemies[f.i%enemies.length]:null;
+ const tx=target?cx(target):clamp(f.origin+f.face*(85+f.i*55),32,(g.worldW||1600)-32);
+ const ty=target?cy(target):p.y+p.h;
+ const startY=Math.min((g.cam?.y||0)-70,ty-245);
+ const travel=Math.max(1,(ty-startY)/10.5);
+ const dir=f.i%2===0?1:-1,vx=dir*(1.45+f.evo*.13);
+ add({kind:"meteor",dino:true,x:tx-vx*travel,y:startY,vx,vy:10.5,
+   r:11+f.evo*1.25+(f.i%3)*1.5,dmg:f.dmg,R:f.radius,life:175,rot:f.i*1.31});
+ const duration=Math.min(65,Math.max(22,Math.round(travel)));
+ add({kind:"dinoWarning",x:tx,y:ty,life:duration,max:duration});
+ f.i++;f.next=9+(f.i%3)*3;return f.i<f.n;
+},
+dinoWarning(g,f){return --f.life>0;},
 irisHalo(g,f){
 f.life--;
 const progress=1-f.life/f.max;
@@ -1782,18 +1828,19 @@ let hitNow = false;
 const top = crossTop(g, f.x, y0 + f.r * 0.5, f.y + f.r * 0.5);
 if (top !== null) { f.y = top - f.r * 0.5; hitNow = true; }
 if (!hitNow) for (const e of g.enemies) if (canHit(e) && circleHit(f.x, f.y, f.r, e)) { hitNow = true; break; }
-if (f.age % 2 === 0) { const n = deterministicUnit(f.age * 4.17 + f.x * 0.009 + f.y * 0.007); g.fx.emit(f.x, f.y, { color: n < 0.5 ? "#ff6a2a" : "#ffd36a", count: 2, size: 3, speed: 0.8, life: 14, gravity: -0.02 }); }
+if (f.age % 3 === 0) { const n = deterministicUnit(f.age * 4.17 + f.x * 0.009 + f.y * 0.007);
+ g.fx?.emit?.(f.x,f.y,{color:f.dino?(n<.5?"#a4f6a1":"#ffd881"):(n<.5?"#ff6a2a":"#ffd36a"),count:f.dino?1:2,size:3,speed:.8,life:14,gravity:-.02}); }
 if (hitNow) {
   for (const e of g.enemies) {
     if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.R + Math.max(e.w, e.h) / 2) {
-      hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 8, ky: -6, stun: 24, color: "#ff6a2a" });
+      hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*8,ky:-6,stun:24,color:f.dino?"#b9f890":"#ff6a2a",shake:f.dino?2:3});
     }
   }
-  add({ kind: "blast", x: f.x, y: f.y, R: f.R, life: 16, color: "#ff6a2a" });
-  boom(g, f.x, f.y, "#ff6a2a", 10, { up: 2, speed: 4 });
-  boom(g, f.x, f.y, "#ffe36a", 8, { star: true, up: 2.4 });
-  g.shake = Math.min(20, (g.shake || 0) + 6);
-  return false;
+  add({kind:"blast",x:f.x,y:f.y,R:f.R,life:16,color:f.dino?"#9fea9b":"#ff6a2a"});
+ boom(g,f.x,f.y,f.dino?"#9fea9b":"#ff6a2a",f.dino?7:10,{up:2,speed:3.3});
+ boom(g,f.x,f.y,f.dino?"#ffe5a3":"#ffe36a",f.dino?5:8,{star:true,up:2.4});
+ g.shake=Math.min(20,(g.shake||0)+(f.dino?3:6));
+ return false;
 }
 return f.life > 0 && f.y < (g.worldH || 900) + 60;
 },
