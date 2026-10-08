@@ -650,6 +650,7 @@ try {
     const api=window.__OHANA_E2E;
     api.start('dragon');api.setEvo(4);api.loadRoom('volcano');
     api.resetInput();api.setInvulnerable(600);
+    api.step(12); // Room entrance animation must finish before sampling embers.
     const steps=[];
     for(const [x,y] of [[290,875],[1580,900],[2010,535]]){
       api.setPlayer(x,y);
