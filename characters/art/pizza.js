@@ -1,5 +1,3 @@
-// PIZZA · porción de pizza (diseño original) · v2
-// pose.move "bounce" → squash/stretch al rebotar sobre enemigos.
 const TAU = Math.PI * 2;
 const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const seg = (k, a, b) => ease((k - a) / Math.max(1e-6, b - a));

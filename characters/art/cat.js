@@ -1,5 +1,4 @@
 // Michi. Pies en (0,0), mira a +x. Cada forma es otra silueta.
-// 0 bola · 1 gato · 2 nube · 3 luna · 4 alas
 const INK = "#3a2416";
 const TAU = Math.PI * 2;
 
@@ -394,7 +393,6 @@ function moonSoul(ctx, pose, form, front) {
       ctx.strokeStyle = moon; ctx.lineWidth = 1.8;
       ctx.beginPath(); ctx.moveTo(17, y + 4); ctx.lineTo(23 - k * 6, y - 13); ctx.stroke();
     }
-    // Shadow Step: three diminishing feline silhouettes, never extra sprites.
     if (shadowStep) {
       const k = Math.max(0, Math.min(1, pose.cast || 0));
       ctx.strokeStyle = shadow;
@@ -409,7 +407,7 @@ function moonSoul(ctx, pose, form, front) {
         ctx.stroke();
       }
     }
-    // Three readable claw trails. No fullscreen flash, no detached PNGs.
+    // Three readable claw trails.
     if (state === "attack") {
       const atk = Math.max(0, Math.min(1, pose.atk || 0));
       const sweep = Math.sin(Math.PI * atk);

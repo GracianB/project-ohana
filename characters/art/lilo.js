@@ -1,13 +1,5 @@
-// ============================================================================
 // KILO · niña hawaiana (diseño original) · characters/art/lilo.js
-// ----------------------------------------------------------------------------
-// Formas: 0 Kilo Bebé (pelele, chupete, sonajero, gatea al correr)
-//         1 Kilo (muumuu rojo con flores, ukelele a la espalda)
-//         2 Kilo Ohana (corona de flores, lei, falda de hula)
-//         3 Super Kilo (vestido ceremonial, capa, bastón luminoso)
-//         4 KILO FORMA FINAL (vestido blanco-dorado, alas de mariposa, halo, pelo flotante)
 // pose.move === "float" (o state "glide"): falda en paracaídas, brazos abiertos.
-// ============================================================================
 
 const SKIN = "#c68657";
 const HAIR = "#2b2233";
@@ -28,9 +20,6 @@ const lerp = (a, b, k) => a + (b - a) * k;
 const L2 = (a, b, k) => [lerp(a[0], b[0], k), lerp(a[1], b[1], k)];
 const ease = (k) => k * k * (3 - 2 * k);
 
-// ---------------------------------------------------------------------------
-// helpers de dibujo
-// ---------------------------------------------------------------------------
 /** Extremidad por cinemática inversa: hombro/cadera (s) → objetivo (t). */
 function ik(ctx, R, sx, sy, tx, ty, L, dir, w, col, opt) {
   let dx = tx - sx, dy = ty - sy, d = Math.hypot(dx, dy) || 0.01;
@@ -119,7 +108,6 @@ function staff(ctx, R, x, y, ang, len, t, big) {
   ctx.strokeStyle = "#8a4e22"; ctx.lineWidth = 4; ctx.stroke();
   ctx.strokeStyle = "#ffc53d"; ctx.lineWidth = 4;
   ctx.beginPath(); ctx.moveTo(x1 - dx * 6, y1 - dy * 6); ctx.lineTo(x1, y1); ctx.stroke();
-  // punta: luna/sol luminoso
   const r = (big ? 8 : 5.5) + Math.sin(t * 0.15) * 0.8;
   ctx.save();
   const g = ctx.createRadialGradient(x1 + dx * 5, y1 + dy * 5, 1, x1 + dx * 5, y1 + dy * 5, r * 3);
@@ -147,9 +135,6 @@ function glowOrb(ctx, R, x, y, r, t, col) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// pose → objetivos de manos/pies (espacio del cuerpo)
-// ---------------------------------------------------------------------------
 function solve(pose, d, f) {
   const t = pose.t, st = pose.state, hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const xF = 4, xB = -5;
@@ -269,7 +254,6 @@ function solve(pose, d, f) {
       if (pose.flourish > 0) {
         const fl = pose.flourish, k = Math.min(1, Math.sin(fl * Math.PI) * 1.6), n = pose.flourishN % 3;
         if (n === 0) {
-          // toca el ukelele (bebé: agita el sonajero)
           if (f === 0) {
             r.handF = L2(r.handF, [xF + 7 + Math.sin(t * 0.7) * 3, sy - al * 0.35], k);
           } else if (k > 0.3) {
@@ -279,7 +263,6 @@ function solve(pose, d, f) {
           }
           r.mood = "happy"; r.fx = "notes"; r.fxK = fl; r.headRot = Math.sin(t * 0.15) * 0.08;
         } else if (n === 1) {
-          // baile hula: caderas y brazos ondulando
           const ph = fl * Math.PI * 6;
           r.hipX = Math.sin(ph * 0.5) * 4 * k;
           r.lean = -r.hipX * 0.025;
@@ -288,7 +271,6 @@ function solve(pose, d, f) {
           r.flare = 0.35 * Math.abs(Math.sin(ph * 0.5)); r.mood = "happy"; r.headRot = -r.hipX * 0.03;
           r.footF = [4 + r.hipX * 0.3, 0]; r.footB = [-5 + r.hipX * 0.3, 0];
         } else {
-          // saluda con la mano y guiña
           r.handF = L2(r.handF, [hx + hr * 0.95 + Math.sin(t * 0.4) * 4, sy - 14], k); r.armOver = true;
           r.wink = true; r.mouth = "open"; r.headRot = 0.08; r.paci = false;
         }
@@ -298,13 +280,9 @@ function solve(pose, d, f) {
   return r;
 }
 
-// ---------------------------------------------------------------------------
-// partes
-// ---------------------------------------------------------------------------
 function ponytail(ctx, R, pose, f, hr, r) {
   const t = pose.t;
   if (f === 0) {
-    // mechón rizado en la coronilla
     ctx.save();
     ctx.translate(-hr * 0.05, -hr * 0.92);
     ctx.rotate(Math.sin(t * 0.08) * 0.15 + pose.sway * 0.3);
@@ -318,7 +296,6 @@ function ponytail(ctx, R, pose, f, hr, r) {
   R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
     (k) => turn + Math.sin(t * 0.08 + k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
   if (f === 4) {
-    // mechones flotando
     for (let i = 0; i < 2; i++) {
       R.tail(ctx, -hr * 0.8, -hr * 0.1 + i * hr * 0.3, hr * 0.8, -2.4 - i * 0.3,
         (k) => Math.sin(t * 0.09 + i * 2 + k * 4) * 1.2 + 0.8, hr * 0.16, hr * 0.05, HAIR, { segments: 6 });
@@ -328,21 +305,16 @@ function ponytail(ctx, R, pose, f, hr, r) {
 
 function head(ctx, R, pose, f, hr, r) {
   const t = pose.t;
-  // pelo trasero
   R.ellipse(ctx, -hr * 0.1, -hr * 0.04, hr * 1.04, hr * 1.0, HAIR);
   if (f >= 1) R.blob(ctx, [[-hr * 0.95, -hr * 0.1], [-hr * 1.02, hr * 0.55], [-hr * 0.7, hr * 0.95], [-hr * 0.35, hr * 0.7], [-hr * 0.2, 0]], HAIR, { shade: false });
-  // cara
   R.ellipse(ctx, hr * 0.1, hr * 0.14, hr * 0.86, hr * 0.8, SKIN);
   R.celShade(ctx, hr * 0.1, hr * 0.14, hr * 0.86, hr * 0.8, SKIN, 0.16);
-  // oreja
   R.ellipse(ctx, -hr * 0.32, hr * 0.22, hr * 0.15, hr * 0.2, SKIN, { lw: R.LINE * 0.8 });
-  // flequillo
   R.blob(ctx, [
     [-hr * 1.0, hr * 0.1], [-hr * 0.9, -hr * 0.6], [-hr * 0.25, -hr * 1.02], [hr * 0.5, -hr * 0.88], [hr * 0.92, -hr * 0.42],
     [hr * 1.0, hr * 0.0], [hr * 0.72, -hr * 0.2], [hr * 0.55, hr * 0.02], [hr * 0.36, -hr * 0.26], [hr * 0.12, -hr * 0.02],
     [-hr * 0.08, -hr * 0.3], [-hr * 0.28, hr * 0.02], [-hr * 0.52, -hr * 0.18], [-hr * 0.62, hr * 0.3],
   ], HAIR);
-  // brillo del pelo (anillo de luz)
   ctx.save();
   ctx.strokeStyle = HAIR_HI;
   ctx.lineWidth = hr * 0.09;
@@ -351,7 +323,6 @@ function head(ctx, R, pose, f, hr, r) {
   ctx.beginPath(); ctx.arc(-hr * 0.1, -hr * 0.05, hr * 0.78, -1.5, -1.25); ctx.stroke();
   ctx.restore();
 
-  // cara
   const ex = hr * 0.12, ey = hr * 0.27;
   if (r.mood === "hurt" || r.mood === "dead") {
     ctx.strokeStyle = R.INK; ctx.lineWidth = hr * 0.08; ctx.lineCap = "round";
@@ -373,7 +344,6 @@ function head(ctx, R, pose, f, hr, r) {
   }
   R.blush(ctx, -hr * 0.08, hr * 0.52, hr * 0.14);
   R.blush(ctx, hr * 0.84, hr * 0.5, hr * 0.09);
-  // nariz
   ctx.strokeStyle = R.darken(SKIN, 0.35); ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.arc(hr * 0.5, hr * 0.44, hr * 0.05, -0.5, 1.4); ctx.stroke();
   const mx = hr * 0.44, my = hr * 0.62;
@@ -386,11 +356,9 @@ function head(ctx, R, pose, f, hr, r) {
     R.mouth(ctx, mx, my, hr * 0.3, r.mouth);
   }
 
-  // accesorios de cabeza
   if (f >= 1 && f <= 3) hibiscus(ctx, R, -hr * 0.55, -hr * 0.72, hr * 0.3, HIBIS[f], 0.3 + Math.sin(t * 0.05) * 0.05);
   if (f === 0) hibiscus(ctx, R, -hr * 0.62, -hr * 0.5, hr * 0.2, HIBIS[0], 0.2);
   if (f === 2) {
-    // corona de flores
     const cols = ["#ffffff", "#ffd23f", "#ff6f91", "#ffffff", "#ffb347", "#ff6f91"];
     for (let i = 0; i < 6; i++) {
       const a = -2.75 + i * 0.36;
@@ -398,7 +366,6 @@ function head(ctx, R, pose, f, hr, r) {
     }
   }
   if (f === 3) {
-    // diadema dorada con sol
     ctx.strokeStyle = R.INK; ctx.lineWidth = hr * 0.2; ctx.lineCap = "round";
     ctx.beginPath(); ctx.arc(-hr * 0.08, hr * 0.02, hr * 0.92, -2.6, -0.45); ctx.stroke();
     ctx.strokeStyle = "#ffc53d"; ctx.lineWidth = hr * 0.1; ctx.stroke();
@@ -416,7 +383,6 @@ function dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, flare) {
   ctx.beginPath();
   ctx.moveTo(x0 - wT, sy);
   ctx.quadraticCurveTo(x0 - wT - 2, sy + (hemY - sy) * 0.4, x0 - wH + shift, hemY);
-  // bajo festoneado
   const n = f === 0 ? 3 : 5;
   const w = (wH * 2) / n;
   for (let i = 0; i < n; i++) {
@@ -438,7 +404,6 @@ function torso(ctx, R, pose, f, d, r) {
   if (f === 4) hemY = hipY + d.ll * 0.55 - r.hemLift;
   const shift = -pose.sway * 3 + r.hipX * 0.6;
   if (f === 0) {
-    // pelele: cuerpo redondito
     R.blob(ctx, [[x0 - 9, sy + 1], [x0 + 9, sy + 1], [x0 + 13, sy + d.th * 0.7], [x0 + 9, hemY], [x0 - 9, hemY], [x0 - 13, sy + d.th * 0.7]], col);
     R.ellipse(ctx, x0 + 3, sy + d.th * 0.55, 5, 5, "#ffffff", { lw: 2 });
     hibiscus(ctx, R, x0 + 3, sy + d.th * 0.55, 3.2, "#ff5c8a");
@@ -454,7 +419,6 @@ function torso(ctx, R, pose, f, d, r) {
   ctx.save();
   ctx.clip();
   if (f <= 2) {
-    // flores blancas del muumuu
     const fl = [[-6, 0.25], [4, 0.45], [-2, 0.8], [8, 0.95], [-10, 1.05], [2, 1.25]];
     ctx.fillStyle = f === 2 ? "#fff3f6" : "#ffffff";
     for (const [fx, fy] of fl) {
@@ -472,7 +436,6 @@ function torso(ctx, R, pose, f, d, r) {
     for (const [fx, fy] of fl) { const cx = x0 + fx + shift * fy * 0.5, cy = sy + (hemY - sy) * fy * 0.8; ctx.moveTo(cx + 1, cy); ctx.arc(cx, cy, 1, 0, Math.PI * 2); }
     ctx.fill();
   } else {
-    // vestido ceremonial: bandas doradas con triángulos
     const gold = f === 3 ? "#ffc53d" : "#ffd35a";
     ctx.fillStyle = gold;
     ctx.fillRect(x0 - 30, hemY - 6, 60, 8);
@@ -488,7 +451,6 @@ function torso(ctx, R, pose, f, d, r) {
       ctx.beginPath(); ctx.ellipse(x0 + 6, hemY - 4, 10, 16, 0, 0, Math.PI * 2); ctx.fill();
     }
   }
-  // sombra lateral
   ctx.fillStyle = R.alpha(R.darken(col, 0.5), 0.18);
   ctx.beginPath(); ctx.ellipse(x0 + wH * 0.8, hemY, wH * 0.6, (hemY - sy) * 0.9, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
@@ -496,7 +458,6 @@ function torso(ctx, R, pose, f, d, r) {
   R.paint(ctx, null);
   R.shine(ctx, x0 - wT * 0.4, sy + 5, 2.2, 4, 0.45);
 
-  // falda de hula (forma 2)
   if (f === 2) {
     const wy = hipY - 3, n = 11, L = d.ll * 0.62;
     const fan = 0.22 + r.flare * 0.62;
@@ -510,7 +471,6 @@ function torso(ctx, R, pose, f, d, r) {
     }
     R.blob(ctx, [[x0 - 14, wy - 3], [x0 + 14, wy - 3], [x0 + 14.5, wy + 2], [x0 - 14.5, wy + 2]], "#c98a4a", { lw: 2 });
   }
-  // lei (formas 2+)
   if (f >= 2) {
     const cols = f === 2 ? ["#ff6f91", "#ffd23f", "#ffffff"] : f === 3 ? ["#ffc53d", "#fff0a0", "#ff9a3d"] : ["#ffffff", "#ffe27a", "#ffd0e6"];
     for (let i = 0; i < 7; i++) {
@@ -567,9 +527,6 @@ function cape(ctx, R, pose, d, r) {
   R.blob(ctx, inner, "#b31f30", { line: false });
 }
 
-// ---------------------------------------------------------------------------
-// efectos
-// ---------------------------------------------------------------------------
 function effects(ctx, R, pose, f, d, r, headTop) {
   const t = pose.t, sy = -d.ll - d.th;
   if (r.fx === "notes") {
@@ -607,9 +564,6 @@ function effects(ctx, R, pose, f, d, r, headTop) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// gatear (Kilo Bebé corriendo)
-// ---------------------------------------------------------------------------
 function drawCrawl(ctx, pose, R) {
   const d = DIM[0], p = pose.phase, s = Math.sin(p), c = Math.cos(p);
   const pink = DRESS[0], dk = R.darken(pink, 0.15);
@@ -617,21 +571,17 @@ function drawCrawl(ctx, pose, R) {
   ctx.save();
   ctx.translate(0, bob);
   const r = { mood: "normal", mouth: "smile", paci: true, hairUp: 0.2, wink: false };
-  // brazo y pierna lejanos
   ik(ctx, R, 6, -18, 12 - s * 5, -2 - Math.max(0, -c) * 4, 17, 1, d.aw, R.darken(SKIN, 0.15), { hand: 3.8 });
   const kneeB = [-12 + s * 4, -3 - Math.max(0, c) * 3];
   R.limb(ctx, -10, -14, -12, -9, kneeB[0], kneeB[1], d.lw, dk, { hand: false });
   R.limb(ctx, kneeB[0], kneeB[1], kneeB[0] - 5, kneeB[1] + 1, kneeB[0] - 10, kneeB[1] - 6, d.lw * 0.8, dk, { hand: false });
   R.ellipse(ctx, kneeB[0] - 11, kneeB[1] - 7, 3.2, 4, R.darken(SKIN, 0.15), { lw: 2.2 });
-  // cuerpo
   R.ellipse(ctx, -4, -15, 16, 11, pink);
   R.ellipse(ctx, -3, -11, 9, 5, "#ffffff", { line: false, shade: false });
-  // pierna y brazo cercanos
   const kneeF = [-8 - s * 4, -3 - Math.max(0, -c) * 3];
   R.limb(ctx, -8, -12, -8, -7, kneeF[0], kneeF[1], d.lw, pink, { hand: false });
   R.limb(ctx, kneeF[0], kneeF[1], kneeF[0] - 5, kneeF[1] + 1, kneeF[0] - 10, kneeF[1] - 6, d.lw * 0.8, pink, { hand: false });
   R.ellipse(ctx, kneeF[0] - 11, kneeF[1] - 7, 3.4, 4.2, SKIN, { lw: 2.2 });
-  // cabeza
   ctx.save();
   ctx.translate(16, -34 + c * 0.8);
   ctx.rotate(0.06 + s * 0.04);
@@ -643,9 +593,6 @@ function drawCrawl(ctx, pose, R) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
-// principal
-// ---------------------------------------------------------------------------
 function draw(ctx, pose, R) {
   const f = pose.form, d = DIM[f], t = pose.t, st = pose.state;
   if (f === 0 && st === "run") return drawCrawl(ctx, pose, R);
@@ -669,7 +616,6 @@ function draw(ctx, pose, R) {
   const legCol = f === 0 ? DRESS[0] : SKIN;
   const legL = (d.ll - 4) * 1.06;
 
-  // --- capa trasera: alas, capa, coleta, ukelele, brazo trasero
   ctx.save();
   bodyT();
   if (f === 4 && !dead) wings(ctx, R, pose, sy);
@@ -688,7 +634,6 @@ function draw(ctx, pose, R) {
   if (!r.backOver) backArm();
   ctx.restore();
 
-  // --- piernas (descalzas)
   const leg = (hxp, foot, col, fcol) => {
     const fy = foot[1] - 3.6, fx = foot[0];
     const e = ik(ctx, R, hxp + r.hipX, hipY, fx, fy, legL, -1, d.lw, col, { hand: false });
@@ -697,7 +642,6 @@ function draw(ctx, pose, R) {
   leg(-3, r.footB, f === 0 ? R.darken(DRESS[0], 0.12) : skinB, skinB);
   leg(3, r.footF, legCol, SKIN);
 
-  // --- cuerpo, cabeza, brazo delantero
   ctx.save();
   bodyT();
   torso(ctx, R, pose, f, d, r);

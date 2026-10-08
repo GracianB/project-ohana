@@ -57,7 +57,7 @@ test('V48: las diez U tienen storyboard cinematográfico propio', () => {
   assert.equal(new Set(CHARACTERS.map((id) => SUPREME_STORYBOARDS[id].beat)).size, 10);
   for (const id of CHARACTERS) {
     const story = SUPREME_STORYBOARDS[id];
-    assert.ok(story.duration >= 1.5 && story.duration <= 1.85, id + '/duration');
+    assert.ok(id === 'yomi' ? (story.duration >= 3.8 && story.duration <= 4.2) : (story.duration >= 1.5 && story.duration <= 1.85), id + '/duration');
     assert.match(story.beat, /→/, id + '/beat');
   }
 });

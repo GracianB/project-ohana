@@ -529,16 +529,19 @@ try {
     api.setCombo(0);
     api.cast(3);
   });
-  await page.waitForTimeout(620);
+  await page.waitForTimeout(1600);
   const yomiSupreme = await page.locator('#supreme-cinema').evaluate((el) => ({
-    mode:el.dataset.mode || '',story:el.dataset.story || '',camera:el.dataset.camera || '',active:el.dataset.activeId || ''
+    mode:el.dataset.mode || '',story:el.dataset.story || '',camera:el.dataset.camera || '',active:el.dataset.activeId || '',
+    assist:el.dataset.assist || '',duration:Number(el.dataset.duration || 0)
   }));
   assert.equal(yomiSupreme.active, 'yomi', '09b-supreme: héroe incorrecto');
   assert.equal(yomiSupreme.mode, 'storyboard', '09b-supreme: Yomi no usa storyboard');
   assert.equal(yomiSupreme.story, 'void-looks-back', '09b-supreme: gag de Yomi incorrecto');
   assert.equal(yomiSupreme.camera, 'pull', '09b-supreme: cámara de Yomi incorrecta');
+  assert.equal(yomiSupreme.assist, 'cuerno', '09b-supreme: Cuerno ausente de la escena Yomi');
+  assert.ok(yomiSupreme.duration >= 3800, '09b-supreme: Cuerno no tiene tiempo para actuar');
   await capture(page, '09b-supreme-yomi-story');
-  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 6800 });
 
   // V55 real U smoke test: catch runtime errors while Pizza's oven cinema draws.
   const pizzaCinemaErrors=[];
@@ -575,6 +578,23 @@ try {
   assert.deepEqual(jErrors,[],'09d-yomi-j: runtime error after casting J');
   await capture(page,'09d-yomi-j-guardian-seal');
   page.off('pageerror',onJError);
+
+  // V57 K/L smoke: cast both powers and catch actual browser runtime faults.
+  const yomiPowerErrors=[];
+  const onYomiError=err=>yomiPowerErrors.push(String(err.message||err));
+  page.on('pageerror',onYomiError);
+  const yomiK=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.start('yomi');api.setEvo(4);api.cast(1);api.step(3);return api.state();
+  });
+  assert.equal(yomiK.lastAbilityId,'sleeve','09e-yomi-k: no lanza mangas imán');
+  assert.equal(yomiK.lastAbilitySlot,1,'09e-yomi-k: ranura K equivocada');
+  await capture(page,'09e-yomi-k-visible-suction');
+  const yomiL=await page.evaluate(()=>{const api=window.__OHANA_E2E;api.cast(2);api.step(6);return api.state();});
+  assert.equal(yomiL.lastAbilityId,'maw','09f-yomi-l: no lanza mordida lunar');
+  assert.equal(yomiL.lastAbilitySlot,2,'09f-yomi-l: ranura L equivocada');
+  await capture(page,'09f-yomi-l-visible-jaws');
+  assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
+  page.off('pageerror',onYomiError);
 
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));

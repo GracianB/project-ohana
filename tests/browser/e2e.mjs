@@ -479,7 +479,7 @@ try {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
     assert.equal(item.mode, 'storyboard', 'V48: U sigue usando hero-short · ' + JSON.stringify(item));
     assert.ok(item.story && item.camera && item.beat.includes('→'), 'V48: storyboard incompleto · ' + JSON.stringify(item));
-    assert.ok(item.duration >= 1500 && item.duration <= 1850, 'V48: timing fuera de rango · ' + JSON.stringify(item));
+    assert.ok(item.duration >= 2600 && item.duration <= 4200, 'V57: la U no permite leer la acción · ' + JSON.stringify(item));
   }
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
 

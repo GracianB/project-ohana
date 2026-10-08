@@ -1,5 +1,3 @@
-// FRITA · "Capitán Kétchup" (patata frita, diseño original)
-// Rasgo propio: el cuerpo es una "columna" flexible (spine) que se curva como
 
 const PAL = [
   { fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a" },

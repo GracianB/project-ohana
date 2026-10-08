@@ -1,3 +1,17 @@
+## 08/10/2026 · V57 YOMI REBORN · FASE 2/3 · PROPOSED
+
+**Caché:** `ohana-257`. **Contrato:** 10 personajes · 5 formas · 10 salas. Dino reservado para el último pase. Intro de Grok sin cambios.
+
+- K **Mangas imán**: succión física solo en el abanico frontal de 210 unidades, conexión visible a cada objetivo afectado, fuerza controlada y respeto al combate de jefes.
+- L **Mordida lunar**: zona de impacto frontal 120×108 visible antes de golpear, anticipación y cierre de fauces sincronizados con el daño; brazos y rostro reaccionan al golpe.
+- Yomi adquiere cinco siluetas realmente diferentes: semilla de farol, caminante, guardián alado, caballero nocturno y guardián lunar de doble creciente. No son escalados del mismo cuerpo.
+- U de Yomi reconstruida como **Farol → Cuerno → sello de luz → rescate**, con Cuerno realmente presente desde el primer tercio de la película y en el combate, cinco impactos como máximo y duración de 3,9 segundos.
+- Todas las U normales tienen mínimo 2,65 segundos para legibilidad; `prefers-reduced-motion` conserva el modo reducido de 0,78 s. Cuerno conserva una aparición más temprana y una escala mayor en el cine.
+- QA de navegador activa K/L reales, prueba el diálogo de Cuerno, valida las cinco siluetas, conserva J y revisa el presupuesto máximo de 1,5 MB de JS.
+- Reducción de comentarios no ejecutables para respetar los presupuestos sin recortar habilidades. Caché `ohana-257` coordinada.
+
+**Fase 3:** perfeccionar toda la puesta en escena de U, fidelidad visual, móvil, asistencia y cierre de Yomi.
+
 ## 08/10/2026 · V56 YOMI REBORN · FASE 1/3
 
 **Caché:** `ohana-256`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** último personaje. **Intro de Grok:** no modificada.

@@ -48,8 +48,8 @@ test('V52 Michi attack, victory and cache release guards', () => {
   assert.match(art, /Three readable claw trails/);
   assert.match(art, /Victory reads as a feline leap/);
   assert.match(art, /ctx\.quadraticCurveTo\(38 \+ shift/);
-  assert.match(sw, /const VERSION = "ohana-256"/);
-  assert.match(index, /game\.js\?v=ohana-256/);
-  assert.match(index, /sw\.js\?v=ohana-256/);
+  assert.match(sw, /const VERSION = "ohana-257"/);
+  assert.match(index, /game\.js\?v=ohana-257/);
+  assert.match(index, /sw\.js\?v=ohana-257/);
   assert.doesNotMatch(index, /ohana-241/);
 });
