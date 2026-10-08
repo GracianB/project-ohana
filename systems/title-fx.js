@@ -43,7 +43,8 @@ if (cv) {
 
   function resize(){
     const pixels=(cv.clientWidth||innerWidth)*(cv.clientHeight||innerHeight);
-    const maxDpr=pixels>1400000?1.35:1.55;
+    // The atmospheric backdrop does not need full hero-portrait resolution.
+    const maxDpr=pixels>1400000?1.12:1.25;
     dpr=Math.min(maxDpr,devicePixelRatio||1);
     W=cv.clientWidth||innerWidth;H=cv.clientHeight||innerHeight;
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
@@ -206,16 +207,17 @@ if (cv) {
   }
 
   function frame(now=performance.now()){
-    if(document.body.classList.contains("playing")){raf=0;lastFrame=0;return;}
-    if(!reduce && lastFrame && now-lastFrame<32){
+    if(document.body.classList.contains("playing") || document.visibilityState==="hidden"){raf=0;lastFrame=0;return;}
+    // ~13fps for scenery vs 24fps for the central playable hero.
+    if(!reduce && lastFrame && now-lastFrame<75){
       raf=requestAnimationFrame(frame);
       return;
     }
     lastFrame=now;
     t+=reduce?0:1;
-    pointer.x+=(pointer.tx-pointer.x)*.045;
-    pointer.y+=(pointer.ty-pointer.y)*.045;
-    mix=reduce?1:Math.min(1,mix+.026);
+    pointer.x+=(pointer.tx-pointer.x)*.11;
+    pointer.y+=(pointer.ty-pointer.y)*.11;
+    mix=reduce?1:Math.min(1,mix+.07);
 
     const A=SCENES[fromId]||SCENES.kilo;
     const B=SCENES[toId]||SCENES.kilo;
@@ -256,7 +258,12 @@ if (cv) {
     pointer.tx=e.clientX/innerWidth;
     pointer.ty=Math.min(.72,e.clientY/innerHeight);
   },{passive:true});
-  addEventListener("resize",resize);
+  addEventListener("resize",()=>{resize();lastFrame=0;if(!raf)raf=requestAnimationFrame(frame);});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"&&!raf&&!document.body.classList.contains("playing")){
+      lastFrame=0;raf=requestAnimationFrame(frame);
+    }
+  });
   new MutationObserver(()=>{
     if(!raf&&!document.body.classList.contains("playing")) frame();
   }).observe(document.body,{attributes:true,attributeFilter:["class"]});
