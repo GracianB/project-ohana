@@ -28,3 +28,10 @@ test('V51 eclipse U renders nine independent moon marks', () => {
   assert.match(cinematic, /const lives=seg\(k,\.24,\.69\)/);
   assert.match(cinematic, /i<9;i\+\+/);
 });
+
+test('V51 Shadow Step is a bounded hand-drawn afterimage', () => {
+  assert.match(art, /const shadowStep = state === "cast"/);
+  assert.match(art, /if \(shadowStep\)/);
+  assert.match(art, /const x = -21 - i \* 11 - k \* 9/);
+  assert.match(art, /fl > \.45 \? "happy"/);
+});
