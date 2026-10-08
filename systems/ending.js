@@ -67,8 +67,8 @@ function showEnding(detail={}){
     const d=ROSTER.find(r=>r.id===id)||ROSTER[0];
     return [id,makeDummy(id,id===hero.id?evo:1,d.color)];
   }));
-  const duration=reduce?1.6:7.4;
-  let t0=0,raf=0,done=false,complete=false;
+  const duration=reduce?1.6:9.6;
+  let t0=0,raf=0,done=false,complete=false,lastPaint=0,shownPhase=1;
 
   layer.className="show cinema-running ending-phase-1";
   layer.dataset.ending="v44-true-ending";
@@ -87,6 +87,7 @@ function showEnding(detail={}){
     if(complete)return;complete=true;
     layer.classList.remove("cinema-running","ending-phase-1","ending-phase-2","ending-phase-3");
     layer.classList.add("cinema-complete","ending-phase-4");
+    layer.dataset.finaleBeat="results";
     layer.querySelector(".win-skip").hidden=true;
     duckMusic(false);
   }
@@ -97,6 +98,16 @@ function showEnding(detail={}){
   function frame(now){
     if(done||complete)return;if(!t0)t0=now;
     const t=(now-t0)/1000,k=clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*.78,tf=t*60;
+    // Ten live Canvas characters are a frame budget, not 120 draws/sec.
+    const frameMs=reduce?1000/12:1000/30;
+    if(k<1 && lastPaint && now-lastPaint<frameMs){raf=requestAnimationFrame(frame);return;}
+    lastPaint=now;
+    const phase=k<.28?1:k<.64?2:3;
+    if(phase!==shownPhase){
+      layer.classList.remove("ending-phase-1","ending-phase-2","ending-phase-3");
+      layer.classList.add("ending-phase-"+phase);shownPhase=phase;
+    }
+    if(!reduce)layer.dataset.finaleBeat=k<.28?"queen":k<.64?"reunion":k<.80?"family":"epilogue";
     ctx.clearRect(0,0,W,H);
     const dawn=seg(k,.48,.92);
     const bg=ctx.createLinearGradient(0,0,0,H);
@@ -116,12 +127,12 @@ function showEnding(detail={}){
       ctx.save();ctx.globalAlpha=1-seg(q,.62,1);
       drawTitle(ctx,"LA REINA CAE",cx,H*.15,Math.max(28,Math.min(62,W*.05)),["#fff4c6","#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ff5a72"});
       ctx.restore();
-      layer.classList.add("ending-phase-1");
+      // Phase transitions are committed once per act, not every frame.
     }
 
     // ACT II · family arrives, one by one, around the protagonist.
     if(k>=.28&&k<.70){
-      layer.classList.remove("ending-phase-1");layer.classList.add("ending-phase-2");
+      // Phase transitions are committed once per act, not every frame.
       const group=seg(k,.28,.62),heroH=Math.min(H*.31,W*.17);
       actor(heroActor,cx,ground,heroH*1.08,tf,{pose:"victory"});
       CAST.filter(id=>id!==hero.id).forEach((id,i)=>{
@@ -136,13 +147,13 @@ function showEnding(detail={}){
 
     // ACT III · sunrise family portrait.
     if(k>=.64){
-      layer.classList.remove("ending-phase-2");layer.classList.add("ending-phase-3");
+      // Phase transitions are committed once per act, not every frame.
       const heroH=Math.min(H*.28,W*.15),spread=Math.min(W*.72,heroH*7.8);
       CAST.forEach((id,i)=>{
         const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1)),chosen=id===hero.id;
         actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
       });
-      const titleK=seg(k,.70,.86);
+      const titleK=seg(k,.80,.94);
       if(titleK>0){
         ctx.save();ctx.globalAlpha=titleK;
         drawTitle(ctx,"NADIE SE QUEDA ATRÁS",cx,H*.16,Math.max(30,Math.min(68,W*.052)),["#fff8d8","#ffe08c"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ffe39a",maxWidth:W*.9});
