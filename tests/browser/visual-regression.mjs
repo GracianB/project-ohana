@@ -306,10 +306,37 @@ try {
     assert.equal(actual.form,4,'01o-cuerno: missing Aurora');
     await capture(page,'01o-cuerno-magia-viva-'+['j','k','l','u'][slot]);
   }
+  // V69: verify victory is animated, not silently disabled when flourish is zero.
+  // Compare genuine Canvas pixels with the hurt pose in each of the five forms.
+  for(let form=0;form<5;form++){
+    const samples=[];
+    for(const pose of ['victory','hurt']){
+      await page.evaluate(({f,p})=>{
+        window.__OHANA_TITLE_EVO_OVERRIDE=f;
+        window.__OHANA_TITLE_CUERNO_MAGIC=null;
+        window.__OHANA_TITLE_CUERNO_BEAT=null;
+        window.__OHANA_TITLE_CUERNO_STATE=p;
+      },{f:form,p:pose});
+      await page.waitForTimeout(170);
+      const sample=await page.evaluate(()=>{
+        const cv=document.querySelector('#chars-grid .char-card.selected canvas');
+        const pixels=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data;
+        let hash=2166136261;
+        for(let i=0;i<pixels.length;i+=16)hash=Math.imul(hash^pixels[i],16777619)>>>0;
+        return {state:cv.dataset.cuernoState,form:Number(cv.dataset.evo),hash};
+      });
+      assert.equal(sample.state,pose,'01p-cuerno: wrong QA pose');
+      assert.equal(sample.form,form,'01p-cuerno: wrong evolution');
+      samples.push(sample.hash);
+      if(pose==='victory')await capture(page,'01p-cuerno-victory-form-'+(form+1));
+    }
+    assert.notEqual(samples[0],samples[1],'01p-cuerno: victory identical to injured form '+form);
+  }
   await page.evaluate(()=>{
     window.__OHANA_TITLE_EVO_OVERRIDE=null;
     window.__OHANA_TITLE_CUERNO_BEAT=null;
     window.__OHANA_TITLE_CUERNO_MAGIC=null;
+    window.__OHANA_TITLE_CUERNO_STATE=null;
   });
   for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
   await page.waitForTimeout(250);
