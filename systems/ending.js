@@ -60,15 +60,17 @@ function drawRift(ctx,cx,cy,R,k){
 function showEnding(detail={}){
   if(running)running.stop(true);
   const layer=buildLayer();bindActions(layer);
-  const canvas=layer.querySelector(".win-canvas"),fc=fullCanvas(canvas),ctx=fc.ctx;
-  const hero=heroBy(detail),evo=clamp(Number(detail.evo)||4,0,4),reduce=reducedMotion();
+  // Keep all ten illustrated actors crisp without a high-DPR full-screen GPU tax.
+  const canvas=layer.querySelector(".win-canvas"),reduce=reducedMotion();
+  const fc=fullCanvas(canvas,reduce?1:1.2),ctx=fc.ctx;
+  const hero=heroBy(detail),evo=clamp(Number(detail.evo)||4,0,4);
   const heroActor=makeDummy(hero.id,evo,hero.color);
   const actors=Object.fromEntries(CAST.map(id=>{
     const d=ROSTER.find(r=>r.id===id)||ROSTER[0];
     return [id,makeDummy(id,id===hero.id?evo:1,d.color)];
   }));
   // The whole family reunites before the results card is allowed to appear.
-  const duration=reduce?1.6:10.2;
+  const duration=reduce?1.6:12.0;
   const family=CAST.filter(id=>id!==hero.id);
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
 
@@ -151,7 +153,7 @@ function showEnding(detail={}){
         actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
       });
       // Text appears after the full family portrait, not during the arrival.
-      const titleK=seg(k,.88,.97);
+      const titleK=seg(k,.84,.92);
       if(titleK>0){
         ctx.save();ctx.globalAlpha=titleK;
         drawTitle(ctx,"NADIE SE QUEDA ATRÁS",cx,H*.16,Math.max(30,Math.min(68,W*.052)),["#fff8d8","#ffe08c"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ffe39a",maxWidth:W*.9});
