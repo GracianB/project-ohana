@@ -37,7 +37,7 @@ test("V60 first metamorphosis is drawable, with two new hooves and a face",()=>{
   assert.equal(juvenile.legs,2,"Destello must have precisely two growing limbs");
   assert.equal(juvenile.eyes,2);
   assert.equal(juvenile.mouths,1);
-  assert.equal(render(2).legs,4,"Potro Iris retains its own temporary four-leg stage");
+  assert.equal(render(2).legs,4,"Potro Iris has its own completed four-leg stage");
 });
 test("V60 animations remain deterministic and canvas stack stays balanced",()=>{
   for(const stage of ["idle","run","jump","attack","cast","victory","hurt"])
