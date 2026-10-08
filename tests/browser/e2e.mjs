@@ -140,6 +140,17 @@ async function auditPage(page, label) {
   assert.ok(sw.active, label + ': Service Worker no activo');
   assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
+  // V80 · Verify real live frame counts, not merely source-code contracts.
+  const beforeCarousel=await page.evaluate(()=>({...window.__OHANA_CAROUSEL_PERF}));
+  await page.waitForTimeout(420);
+  const afterCarousel=await page.evaluate(()=>({...window.__OHANA_CAROUSEL_PERF}));
+  const activeFrames=afterCarousel.active-beforeCarousel.active;
+  const neighbourFrames=afterCarousel.neighbours-beforeCarousel.neighbours;
+  assert.ok(activeFrames>=3&&activeFrames<=16,label+': selected Canvas frame budget broken '+activeFrames);
+  assert.ok(neighbourFrames<=activeFrames*1.65+4,
+    label+': neighbours draw more often than active actor '+neighbourFrames+'/'+activeFrames);
+  assert.ok(afterCarousel.skipped>beforeCarousel.skipped,
+    label+': invisible cards should not consume Canvas renders');
   await page.locator('#btn-play').click();
   await page.waitForTimeout(800);
   if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
