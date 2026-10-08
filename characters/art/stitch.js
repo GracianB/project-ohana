@@ -564,10 +564,12 @@ function faceFor(pose, S) {
     else if (pose.castSlot === 2) { face.mood = "angry"; face.mouth = "roar"; face.ant = "up"; face.glow = 1.2; face.waves = pose.cast; }
   }
   if (st === "idle" && pose.flourish > 0) {
-    const n = pose.flourishN % 3;
+    const n = pose.flourishN % 5;
     if (n === 0) { face.mood = "happy"; face.mouth = "tongue"; face.earFlick = Math.sin(pose.t * 0.9) * 0.25; }
     else if (n === 1) { face.mood = "squint"; face.mouth = "tongue"; }
-    else { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
+    else if (n === 2) { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
+    else if (n === 3) { face.mouth = "o"; face.ant = "up"; face.earFlick = Math.sin(pose.flourish * Math.PI * 5) * 0.22; }
+    else { face.mood = "happy"; face.mouth = "laugh"; face.ant = "forward"; face.glow = 0.8; }
   }
   return face;
 }
@@ -621,10 +623,12 @@ function drawBiped(ctx, R, pose, f, S, C) {
     legA = 1.2 - c * 0.25; legB = 0.95 + c * 0.25; legBendA = -7; legBendB = -7;
     lean += 0.12; headRot = -0.12; bob = c * 1.5;
   } else if (st === "idle" && pose.flourish > 0) {
-    const n = pose.flourishN % 3, k = Math.sin(pose.flourish * Math.PI);
+    const n = pose.flourishN % 5, k = Math.sin(pose.flourish * Math.PI);
     if (n === 0) { scratch = Math.min(1, k * 2); lean += 0.12 * scratch; headRot = -0.18 * scratch; armA = 0.6; armB = -0.6; }
     else if (n === 1) { headRot = Math.sin(t * 0.25) * 0.14; armA = 1.6; armB = 1.3; bendA = -6; }
-    else { headRot = -0.12; armA = 0.8 + Math.sin(t * 0.3) * 0.2; armB = -0.4; }
+    else if (n === 2) { headRot = -0.12; armA = 0.8 + Math.sin(t * 0.3) * 0.2; armB = -0.4; }
+    else if (n === 3) { headRot = Math.sin(pose.flourish * Math.PI * 5) * 0.22; armA = 1.2 * k; armB = -1.2 * k; lift = -3 * k; }
+    else { headRot = -0.08; armA = 1.65 * k; armB = -1.8 * k; lift = -5 * k; }
   }
 
   ctx.save();
@@ -746,6 +750,28 @@ function drawBall(ctx, R, pose, f, S, C, chaos = false) {
   if (show > 0.2) alienEye(ctx, R, Math.sin(ea) * r * 0.55, cy - Math.cos(ea) * r * 0.1, 3.4 * show, 4.2, pose, chaos ? "angry" : "normal");
 }
 
+// Visual-only dimensional portal: anchored to the local sprite frame.
+function drawPocketPortal(ctx, pose, form, front) {
+  if (pose.state !== "cast" || pose.castSlot !== 2) return;
+  const progress = Math.max(0, Math.min(1, Number(pose.cast) || 0));
+  const pulse = Math.sin(Math.PI * progress);
+  if (pulse <= 0) return;
+  ctx.save();
+  const radius = (21 + 17 * pulse + form * 2) * (front ? 0.88 : 1);
+  ctx.translate(front ? 30 : -16, -45);
+  ctx.rotate(pose.t * (front ? -0.045 : 0.035));
+  ctx.globalAlpha *= Math.min(0.78, pulse * (front ? 0.48 : 0.62));
+  ctx.strokeStyle = front ? "#f4adff" : "#62f3ff";
+  ctx.lineWidth = front ? 2.2 : 3.5;
+  ctx.beginPath(); ctx.ellipse(0, 0, radius * 0.7, radius, 0.3, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, 0, radius * 0.45, radius * 0.76, -0.3, 0, TAU); ctx.stroke();
+  for (let i = 0; i < 4; i++) {
+    const angle = i * TAU / 4 + pose.t * 0.025;
+    glowDot(ctx, Math.cos(angle) * radius * 0.65, Math.sin(angle) * radius, 3, CYAN, 0.7);
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], st = pose.state;
   const chaos = pose.move === "chaos" || (st === "cast" && pose.castSlot === 2);
@@ -756,10 +782,12 @@ function draw(ctx, pose, R) {
   const ringY = roll ? -24 : gallop ? -34 : S.by - 6;
   ctx.save();
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, false);
+  drawPocketPortal(ctx, pose, f, false);
   if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C, chaos);
   else if (gallop) drawGallop(ctx, R, pr, f, S, C);
   else drawBiped(ctx, R, pr, f, S, C);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, true);
+  drawPocketPortal(ctx, pose, f, true);
   ctx.restore();
 }
 

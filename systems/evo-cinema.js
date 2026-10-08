@@ -380,7 +380,35 @@ function drawEvolutionIdentity(ctx, id, profile, cx, cy, target, k, t, accent) {
   ctx.restore();
 }
 
-export function playEvolution(detail = {}) {
+export // Stitcho-specific cinematic: bounded procedural dimensional echoes, no gameplay state.
+export function drawStitchoEvolutionMotif(ctx, cx, cy, radius, progress, finalForm = false, reduced = false) {
+  if (reduced) return;
+  const k = clamp(progress, 0, 1);
+  const intensity = Math.sin(k * Math.PI);
+  if (intensity <= 0.001) return;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.globalAlpha *= intensity * (finalForm ? 0.72 : 0.45);
+  ctx.globalCompositeOperation = "lighter";
+  const count = finalForm ? 5 : 3;
+  for (let i = 0; i < count; i++) {
+    const a = i * Math.PI * 2 / count + k * (finalForm ? 4.2 : 2.4);
+    const distance = radius * (0.48 + 0.16 * k);
+    const x = Math.cos(a) * distance, y = Math.sin(a) * distance * 0.53;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-a * 0.6);
+    ctx.strokeStyle = i % 2 ? "#d2a5ff" : "#62f3ff";
+    ctx.lineWidth = finalForm ? 3 : 2;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, radius * 0.17, radius * (finalForm ? 0.34 : 0.26), 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
 
@@ -588,6 +616,10 @@ export function playEvolution(detail = {}) {
     const charge = seg(t, T.charge, T.flash);
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
     drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
+    if (def.id === "stitcho" || def.id === "stitch") {
+      drawStitchoEvolutionMotif(ctx, cx, cy, Math.min(W, H) * 0.32,
+        seg(t, T.charge, T.reveal + 0.45), finalForm, reduce);
+    }
     if (!finalForm) {
       drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target * 1.08, clamp((charge * 0.20 + revealK * 0.24), 0, 0.28), t, accent);
     }
