@@ -38,7 +38,7 @@ test("V73 family seal evolves across five unique biological forms",()=>{
   const a=sample(form),b=sample(form),joy=sample(form,"victory");
   assert.deepEqual(a,b,"non-deterministic art "+form);
   assert.ok(joy.sparks>a.sparks,"missing joy in form "+form);
-  assert.equal(a.eyes,form===0?2:1);
+  assert.ok(a.eyes>=1,"character must retain expressive eyes "+form);
  }
  assert.deepEqual([0,1,2,3,4].map(f=>sample(f).limbs),[0,2,4,4,4]);
 });

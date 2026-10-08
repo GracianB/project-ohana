@@ -152,7 +152,7 @@ function drawCuernoFamilySeal(ctx,pose,R,form,t){
  const [x,y]=anchors[form],col=CUERNO_FAMILY_COLORS[form],TAU=Math.PI*2;
  const living=emotion!=="quiet",sway=emotion==="dash"?Math.sin(Number(pose.phase)||0):0;
  const pulse=emotion==="joy"?.42:emotion==="dream"?.34:emotion==="flight"?.2:.1;
- ctx.save();ctx.translate(x,y);ctx.rotate(sway*.06);
+ ctx.save();ctx.translate(x+sway*.6,y);
  ctx.globalAlpha=living?.9:.52;ctx.fillStyle=form===4?"#fffcdf":"#fff9fb";
  ctx.strokeStyle=form===4?"#c3a6d7":"#ad93c9";ctx.lineWidth=1.3;
  ctx.beginPath();ctx.moveTo(0,-6);ctx.quadraticCurveTo(6,-1,0,7);
