@@ -327,7 +327,7 @@ async function auditPage(page, label) {
   assert.ok(audit.buttons.every((b) => b.name.length > 0), label + ': botón sin nombre accesible');
   assert.ok(audit.dialogs.every((d) => d.labelled && d.modal), label + ': diálogo sin etiquetado/modal accesible');
   assert.ok(audit.bars.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), label + ': progressbar fuera de rango');
-  await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
+  await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:false, timeout:10000 });
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 
   const deterministic = await page.evaluate(() => {
