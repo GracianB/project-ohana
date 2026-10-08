@@ -776,6 +776,32 @@ try {
   });
   assert.equal(dinoL.lastAbilityId,'quake','09w-dino: skyfall quake L did not cast');
   await capture(page,'09w-dino-v75-quake-meteors-l');
+
+  // V77 U · Five-act Colossus with real gameplay and film; Cuerno untouched.
+  const dinoUltimate=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('dino');api.setEvo(4);api.cast(3);api.step(3);
+    const el=document.querySelector('#supreme-cinema');
+    return {state:api.state(),film:el?{
+      id:el.dataset.activeId,story:el.dataset.story,camera:el.dataset.camera,
+      mode:el.dataset.mode,phase:el.dataset.dinoPhase,
+      duration:Number(el.dataset.duration||0),active:el.dataset.state
+    }:null};
+  });
+  assert.equal(dinoUltimate.state.lastAbilityId,'impact','09x-dino-u: original U ID lost');
+  assert.equal(dinoUltimate.state.lastAbilitySlot,3,'09x-dino-u: U input not connected');
+  assert.equal(dinoUltimate.film?.id,'dino','09x-dino-u: wrong movie actor');
+  assert.equal(dinoUltimate.film?.story,'heart-of-colossus','09x-dino-u: incorrect five-act story');
+  assert.equal(dinoUltimate.film?.camera,'colossus','09x-dino-u: camera not specialized');
+  assert.equal(dinoUltimate.film?.mode,'storyboard','09x-dino-u: storyboard missing');
+  assert.ok(dinoUltimate.film?.duration>=3100,'09x-dino-u: epic is too short');
+  await capture(page,'09x-dino-v77-u-heartbeat');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.dinoPhase==='comets',null,{timeout:3600});
+  await capture(page,'09y-dino-v77-u-fossil-comets');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.dinoPhase==='heart',null,{timeout:3200});
+  await capture(page,'09z-dino-v77-u-big-heart');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3800});
+
   assert.deepEqual(dinoV75Errors,[],'09u/09v/09w: Dino V75 causes browser exceptions');
   page.off('pageerror',onDinoV75Error);
 
