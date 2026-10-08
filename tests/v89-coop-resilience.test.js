@@ -27,7 +27,7 @@ test("V89 remote target uses previous sample and teleports across distant rooms"
  assert.equal(room.teleport,true);
 });
 test("V89 saves only sanitized, completed embers; no partial AFK charge",()=>{
- assert.equal(sanitizeDragonTrial({lit:[true,false,true],charge:999}).count,2);
+ assert.equal(sanitizeDragonTrial({lit:[true,false,true],charge:999}).count,1);
  assert.equal(sanitizeDragonTrial({lit:[true]}),null);
  const game={roomId:"volcano",visited:{hub:true,volcano:true},player:{id:"dragon",evo:4},dragonTrial:{lit:[true,true,false],charge:29}};
  const restored=unpackSave(packSave(game,{snapshot(){return null}}),"dragon");

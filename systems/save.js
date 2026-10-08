@@ -9,7 +9,9 @@ const SAVE_KEY = "ohana";
 const SAVE_TMP_KEY = "ohana.tmp";
 export function sanitizeDragonTrial(raw){
  if(!raw||!Array.isArray(raw.lit)||raw.lit.length!==3)return null;
+ // Ordered rite: never trust a later ember without the previous ones.
  const lit=raw.lit.map(v=>v===true);
+ for(let i=1;i<lit.length;i++)if(!lit[i-1])lit[i]=false;
  const count=lit.filter(Boolean).length;
  return {lit,count,completed:count===3,charge:0,active:Math.min(2,count)};
 }
