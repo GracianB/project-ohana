@@ -484,8 +484,9 @@ function stellarWing(far){
  const flutter=wingMotion.flap*(far?.72:1);
  ctx.save();ctx.translate(far?-17:-6,-48);
  ctx.rotate(-.13-spread*.20+wingMotion.hinge*(far?.6:1));
- ctx.fillStyle=far?"#c6d9f6":"#d1ecfb";ctx.strokeStyle="#839dd2";
- ctx.globalAlpha=far?.56:.88;ctx.lineWidth=1.8;
+ // F3 plumes must be discernible from the pale foal's white coat.
+ ctx.fillStyle=far?"#aebce0":"#b0d4f2";ctx.strokeStyle="#617ba9";
+ ctx.globalAlpha=far?.68:.93;ctx.lineWidth=2;
  ctx.beginPath();ctx.moveTo(0,0);
  ctx.bezierCurveTo(-19,-10,-31-spread*11,-27,-39,-29-spread*21+flutter);
  ctx.bezierCurveTo(-50,-47-spread*22,-33,-56-spread*20,-21,-46-spread*13);
@@ -617,6 +618,12 @@ ctx.bezierCurveTo(-37,-62,-18,-61,-3,-53);
 ctx.bezierCurveTo(17,-57,30,-45,23,-30);
 ctx.bezierCurveTo(10,-22,-8,-23,-26,-26);
 ctx.bezierCurveTo(-39,-27,-46,-37,-43,-45);ctx.closePath();ctx.fill();ctx.stroke();
+// An indigo rim reads as BLACK fur even when the sky and UI are dark.
+ctx.save();ctx.globalAlpha=.7;ctx.lineWidth=1.7;ctx.strokeStyle="#a7a1d8";
+ctx.beginPath();ctx.moveTo(-39,-46);
+ctx.bezierCurveTo(-30,-58,-16,-59,-4,-52);
+ctx.quadraticCurveTo(9,-55,19,-47);ctx.stroke();
+ctx.restore();
 ctx.fillStyle=shadow;ctx.globalAlpha=.46;ctx.beginPath();
 ctx.ellipse(-11,-31,27,6,-.06,0,TAU);ctx.fill();ctx.globalAlpha=1;
 // An opalescent embroidery on Aurora's flank, never a second drawn character.
@@ -641,8 +648,11 @@ ctx.bezierCurveTo(27,-91,35,-88,35,-79);
 ctx.bezierCurveTo(37,-70,29,-65,26,-56);
 ctx.bezierCurveTo(22,-45,29,-38,26,-31);
 ctx.quadraticCurveTo(13,-25,3,-34);ctx.closePath();ctx.fill();ctx.stroke();
-ctx.save();ctx.strokeStyle="#867d9e";ctx.lineWidth=1.3;ctx.globalAlpha=.62;
+ctx.save();ctx.strokeStyle="#b1a5d0";ctx.lineWidth=1.7;ctx.globalAlpha=.8;
 ctx.beginPath();ctx.moveTo(9,-42);ctx.bezierCurveTo(14,-51,15,-67,22,-76);ctx.stroke();
+// The reflected moon separates the throat and curved chest, no rectangular slab.
+ctx.strokeStyle="#6d668c";ctx.lineWidth=1.1;ctx.globalAlpha=.56;
+ctx.beginPath();ctx.moveTo(24,-57);ctx.bezierCurveTo(19,-47,26,-38,20,-32);ctx.stroke();
 ctx.restore();
 wing(false);
 leg(-20,Math.PI*.03,false);leg(20,Math.PI*1.04,false);
@@ -660,7 +670,7 @@ const x=28+side*8;ctx.fillStyle="#292634";ctx.strokeStyle=ink;ctx.lineWidth=1.9;
 ctx.beginPath();ctx.moveTo(x-4,-81);ctx.quadraticCurveTo(x+side*5,-101,x+side*9,-84);
 ctx.quadraticCurveTo(x+2,-77,x-4,-81);ctx.fill();ctx.stroke();
 }
-ctx.fillStyle="#292735";ctx.strokeStyle=ink;ctx.lineWidth=2.9;
+ctx.fillStyle="#292735";ctx.strokeStyle="#c1b3d7";ctx.lineWidth=2.5;
 ctx.beginPath();ctx.ellipse(37,-77,14.5,13,-.12,0,TAU);ctx.fill();ctx.stroke();
 ctx.fillStyle="#3e3648";ctx.beginPath();ctx.moveTo(39,-75);
 ctx.bezierCurveTo(53,-78,56,-68,53,-62);

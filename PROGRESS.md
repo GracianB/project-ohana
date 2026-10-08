@@ -13,6 +13,17 @@
 - **Calidad:** 370 pruebas Node PASS, `node tests/browser/e2e.mjs` PASS, Multiplayer E2E PASS y `node tests/browser/visual-regression.mjs` PASS con 92 capturas en rama V75. La fusión requiere también `release:check` PASS y comprobación final de GitHub Pages.
 - **Publicación:** `index.html` y `sw.js` comparten `ohana-273`; el historial V74/V73 se conserva debajo.
 
+## 08/10/2026 · V75 · CUERNO · VERDADERO NEGRO, ESCALA EN CARRUSEL, CONTRASTE
+
+**Caché:** `ohana-273`. Esta fase se basa en inspección manual de las **capturas Chromium reales** de V74, no solo en lectura de código.
+
+- **Defecto visual grave detectado:** al cambiar de evolución, el renderizador global aplicaba una capa `#ffffff` de hasta **90%** sobre el personaje (durante el destello `evoBurst`). Como resultado, **Unicornio Negro F4 aparecía BLANCO en el carrusel durante la mayor parte de la transición**, pese a tener pelaje negro correcto dentro del código y la partida. Se reduce **solo para Cuerno** a un máximo de **7,5% de nacarado lila**. Las transiciones de los otros nueve héroes mantienen su animación original y Cuerno conserva su aura de evolución.
+- **Escala corregida de verdad en portada:** el selector normalizaba *cada evolución* para llenar su espacio, con lo que F0 se veía casi tan grande como F4. El nuevo contrato `CUERNO_PORTRAIT_GROWTH=[.68,.77,.86,.94,1]` establece crecimiento visual progresivo legible y `CUERNO_PORTRAIT_ASPECT=[.66,.81,1.16,1.52,1.60]` reserva anchura real a las alas y evita recortes en móvil. Juego y hitboxes no cambian.
+- **Anatomía reforzada:** F3 usa alas azul perla con contorno acero y plumas separadas del pelaje claro. En F4, un filo lunar color índigo da lectura al lomo negro contra fondos oscuros; un segundo reflejo sigue el cuello en S y la cabeza tiene borde lavanda. No aparecen rectángulos nuevos ni partículas.
+- **Iluminación propia:** el óvalo de luz del retrato F4 pasa del oro intenso a un resplandor lila suave, que distingue la piel obsidiana.
+- **Pruebas:** nueva regresión de proporciones de título y destello con comprobación de píxeles de screenshot, prueba de tintado máximo y permanencia de pelaje negro durante evolución, cinco formas y J/K/L/U. Se conservan todos los tests V59–V74; Quality, Browser E2E, Multiplayer E2E, Visual regression, Release Gate y Pages obligatorios.
+- **Dino intacto.** La prioridad es asegurar que Cuerno se vea como el personaje solicitado en selección y en juego real.
+
 ## 08/10/2026 · V74 · CUERNO RECONSTRUCCIÓN CANÓNICA
 
 **Caché** `ohana-272` · Rediseño ordenado por petición expresa; V73 no era la definitiva. El canon visual es obligatorio.
