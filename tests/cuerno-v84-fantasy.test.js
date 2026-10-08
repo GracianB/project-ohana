@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
  CUERNO_FANTASY,CUERNO_IRIS_COLORS,addCuernoRibbonPoint,cuernoRibbonTouches,
+ startCuernoFantasyTrail,updateCuernoFantasyTrail,
  cuernoPrismPhase,drawCuernoFantasyRibbon,drawCuernoPrismCrown,
  drawCuernoFantasyStatus
 } from "../systems/cuerno-fantasy.js";
@@ -149,4 +150,30 @@ test("V84 full release remains Cuerno-only with Dino and canonical evolutions un
  assert.doesNotMatch(html,/ohana-283/);
  const docs=fs.readFileSync("characters/art/dino.js","utf8");
  assert.match(docs,/dinoAirbornePose/);
+});
+
+test("V84 repeated K never reconnects an old magical lane to a new dash",()=>{
+ const {g,p}=fixture();
+ const effects=[];
+ const add=f=>{effects.push(f);return f;};
+ const cx=o=>o.x+o.w/2;
+ const pw=()=>1;
+ const first=startCuernoFantasyTrail(g,p,4,effects,add,pw,cx);
+ for(let frame=0;frame<8;frame++){
+   p.x+=20;first.age=frame+1;
+   updateCuernoFantasyTrail(g,first,p,true,()=>false,cx);
+ }
+ const frozenPoints=first.points.map(point=>({...point}));
+ const oldLife=first.life;
+ const second=startCuernoFantasyTrail(g,p,4,effects,add,pw,cx);
+ assert.notEqual(first,second);
+ p.x+=70;g.t+=10;first.age++;second.age=2;
+ updateCuernoFantasyTrail(g,first,p,true,()=>false,cx);
+ updateCuernoFantasyTrail(g,second,p,true,()=>false,cx);
+ assert.deepEqual(first.points,frozenPoints,"Old K lane follows the second K");
+ assert.equal(first.life,oldLife-1,"Old K lane lifetime was extended by second K");
+ assert.ok(second.points.length>1,"New K did not record its own magic lane");
+ const third=startCuernoFantasyTrail(g,p,4,effects,add,pw,cx);
+ assert.equal(first.dead,true,"Oldest ribbon must retire at max two overlapping casts");
+ assert.ok(third && effects.length===3);
 });
