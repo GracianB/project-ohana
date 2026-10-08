@@ -1,8 +1,3 @@
-// ============================================================================
-// OHANA · Combat FX
-// Impactos visuales deterministas. Presentación pura: no cambia daño, física,
-// hitboxes ni estado de combate.
-// ============================================================================
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const easeOut = (k) => 1 - Math.pow(1 - clamp(k, 0, 1), 3);
 
