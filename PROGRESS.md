@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V93 · CUERNO · METAMORFOSIS COMPLETA · ohana-293
+
+- Cuatro rituales de transición, sincronizados con la cinemática de evolución: cuerno vivo que abraza su futura cara, nacimiento de cuatro patas, dos alas con plumas y Aurora final con siete arcos y cuernos nacarados.
+- Nuevo módulo determinista `systems/cuerno-v93-metamorphosis.js`, integrado en `systems/evo-cinema.js` y precacheado para jugar sin conexión. Cuerno mantiene silueta propia y movimiento reducido.
+- Se conservan los contratos mecánicos y visuales de Dino V90 y Cuerno V92, sin nuevas hitboxes ni cambios en el motor cooperativo.
+- `index.html` y `sw.js` sincronizados a la caché `ohana-293`. La release requiere Node, Browser E2E, Multiplayer E2E, Visual y `release:check`.
+
 ## 09/10/2026 · OHANA V92 · CUERNO: RESONANCIA PRISMÁTICA Y CONTACTO REAL · ohana-292
 
 - **K, contacto físico entre fotogramas:** la estela arcoíris ahora reconoce a enemigos rápidos que cruzan el camino entre actualizaciones. La comprobación usa el segmento de movimiento enemigo contra hasta 32 puntos de la cinta, con un límite de desplazamiento de 180 px para impedir impactos falsos por teletransportes. El daño, duración de 600 frames y máximo dos estelas permanecen intactos.
