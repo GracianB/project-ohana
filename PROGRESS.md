@@ -1,3 +1,13 @@
+## 08/10/2026 · V63 CUERNO · MENSAJE 3/10 RECUPERADO · POTRO IRIS
+
+**Caché:** `ohana-262`. **Contrato:** 10 personajes / 5 formas; Dino e intro de Grok intactos.
+
+- Forma 2 reconstruida desde cero: potro de cuerpo corto, cuello, hocico, orejas y cuatro patas articuladas. No es la bola provisional ni un adulto reducido.
+- Trote de cuatro tiempos, salto recogido y gestos independientes; melena de cinco mechones y cola arcoíris, cuerno nacarado, marca de iris y destellos acotados. Sin timers ni alterar hitboxes.
+- Velocidad 7.4, salto 16.2 y poderes intactos. Formas 0/1/3/4 conservadas.
+- Pruebas Node de anatomía, articulaciones, trote, salto, identidad, stack Canvas y rendimiento; captura F2 y prueba visual Chromium de partida real.
+- Caché, HTML, Service Worker, documentación y hardening sincronizados. Continuación: 5/10 Unicornio Aurora.
+
 ## 08/10/2026 · V62 CUERNO · MENSAJE 4/10 · UNICORNIO ESTELAR
 
 **Caché:** `ohana-261`. **Contrato:** 10 personajes / 5 formas. Dino e intro de Grok intactos.

@@ -40,7 +40,7 @@ test("V62 Unicornio Estelar is a horse-shaped adult, not the inherited ball",()=
   assert.equal(adult.eyes,1,"one visible adult eye in side-on anatomy");
   assert.equal(adult.mouths,1,"real muzzle");
   assert.ok(adult.beziers>=7,"organic torso, grown neck, mane and tail");
-  assert.equal(foal.limbs.length,4,"Potro Iris art untouched, phase 3 still pending");
+  assert.equal(foal.limbs.length,4,"Potro Iris has four articulated juvenile legs");
 });
 test("V62 fast gallop uses four independent leg beats and retains jump pose",()=>{
   const a=frame(3,"run",.2),b=frame(3,"run",2.8),air=frame(3,"jump",1.3);

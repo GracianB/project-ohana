@@ -271,6 +271,7 @@ try {
     assert.ok(state.scale>.2&&state.visible>12,'01i-cuerno: blank or cropped '+JSON.stringify(state));
     await capture(page,'01i-cuerno-origin-form-'+(form+1));
     if(form===1) await capture(page,'01j-cuerno-destello-first-metamorphosis');
+    if(form===2) await capture(page,'01l-cuerno-rainbow-foal-complete');
     if(form===3) await capture(page,'01k-cuerno-stellar-unicorn-adult');
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
@@ -621,6 +622,21 @@ try {
   await capture(page,'09f-yomi-l-visible-jaws');
   assert.deepEqual(yomiPowerErrors,[],'09e/09f: K/L causó un error de ejecución');
   page.off('pageerror',onYomiError);
+
+  // V63 Potro Iris in real gameplay with error monitoring.
+  const foalErrors=[];
+  const onFoalError=err=>foalErrors.push(String(err.message||err));
+  page.on('pageerror',onFoalError);
+  const foalStage=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(2);api.setPlayerVelocity(7,-8);api.step(16);
+    return api.state();
+  });
+  assert.equal(foalStage.evo,2,'09i-cuerno: falta Potro Iris');
+  assert.ok(Number.isFinite(foalStage.player?.x),'09i-cuerno: movimiento inválido');
+  await capture(page,'09i-cuerno-rainbow-foal-real-play');
+  assert.deepEqual(foalErrors,[],'09i-cuerno: error dibujando Potro Iris');
+  page.off('pageerror',onFoalError);
 
   // V62 real adult motion and game transition: no browser exceptions at form 3.
   const stellarErrors=[];

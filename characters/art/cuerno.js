@@ -141,6 +141,98 @@ function drawFirstBody(ctx,pose,R,t){
   ctx.restore();
 }
 
+// F2 Potro Iris: first complete juvenile unicorn, never the old ball or a tiny adult.
+function drawRainbowFoal(ctx,pose,R,t){
+  const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump";
+  const phase=Number(pose.phase)||0,beat=Math.sin(phase);
+  const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
+  const hurt=pose.state==="hurt"||pose.state==="dead";
+  const cast=pose.state==="cast"||pose.state==="attack";
+  const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35);
+  const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
+  ctx.save();ctx.translate(0,spring);
+  ctx.rotate((air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0));
+  // Four flowing tail ribbons retain Destello's original light language.
+  const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
+  for(let i=0;i<4;i++){
+    const sway=Math.sin(t*.105+i*.68)*2.2+(run?beat*4:0);
+    ctx.strokeStyle=ribbons[i];ctx.lineWidth=4.2-i*.32;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(-29,-39+i);
+    ctx.bezierCurveTo(-42,-45+i*2,-48-sway,-24+i*3,-51-sway,-23+i*4);ctx.stroke();
+  }
+  // Each hoof has its own phase, joint and airy tuck.
+  function leg(x,clock,far){
+    const stride=run?Math.sin(phase+clock):0,reach=stride*(far?6:7.6);
+    const tuck=air?(far?8:10):0;
+    const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48;
+    const hoofX=x+reach+(far?-2:2),hoofY=2-tuck;
+    R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
+    ctx.fillStyle=far?"#ad95c7":"#bb9dcc";ctx.strokeStyle=ink;ctx.lineWidth=1.35;
+    ctx.beginPath();ctx.moveTo(hoofX-4.5,hoofY-3);
+    ctx.quadraticCurveTo(hoofX+1.5,hoofY-4.8,hoofX+5,hoofY-2);
+    ctx.lineTo(hoofX+5,hoofY+2);ctx.lineTo(hoofX-4.5,hoofY+2);
+    ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  leg(-23,Math.PI*.55,true);leg(8,Math.PI*1.5,true);
+  // A young foal's short barrel, raised back and developing chest.
+  ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=2.6;
+  ctx.beginPath();ctx.moveTo(-30,-40);
+  ctx.bezierCurveTo(-29,-49,-12,-51,-2,-46);
+  ctx.bezierCurveTo(13,-48,21,-39,17,-30);
+  ctx.bezierCurveTo(10,-22,-8,-22,-21,-26);
+  ctx.quadraticCurveTo(-33,-29,-30,-40);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle=pearl;ctx.globalAlpha=.63;ctx.beginPath();
+  ctx.ellipse(-10,-30,16,5.5,-.13,0,TAU);ctx.fill();ctx.globalAlpha=1;
+  // Iris stripes belong to its coat, unlike the adult's constellation.
+  for(let i=0;i<3;i++){
+    ctx.strokeStyle=["#f1a7d5","#f5d081","#8bceea"][i];ctx.lineWidth=2.1;
+    ctx.beginPath();ctx.moveTo(-24+i*4,-40+i*1.3);
+    ctx.quadraticCurveTo(-19+i*4,-36+i*1.2,-14+i*4,-39+i*1.2);ctx.stroke();
+  }
+  ctx.fillStyle=coat;ctx.strokeStyle=ink;ctx.lineWidth=2.4;
+  ctx.beginPath();ctx.moveTo(3,-33);
+  ctx.bezierCurveTo(5,-43,7,-55,12,-65);
+  ctx.bezierCurveTo(19,-73,25,-65,26,-57);
+  ctx.bezierCurveTo(24,-46,19,-37,15,-31);
+  ctx.quadraticCurveTo(11,-28,3,-33);ctx.closePath();ctx.fill();ctx.stroke();
+  for(let i=0;i<5;i++){
+    const flutter=Math.sin(t*.13+i*.83)*2+(run?beat*2.8:0);
+    ctx.strokeStyle=["#ffc0e0","#ffd98a","#a1e6db","#9dcbff","#d1aeff"][i];
+    ctx.lineWidth=3.3-i*.19;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(9+i*.7,-64+i*4);
+    ctx.bezierCurveTo(0-i*1.5,-68+i*4,-4+flutter-i,-59+i*5,-9+flutter-i,-64+i*5);ctx.stroke();
+  }
+  leg(-16,Math.PI*.04,false);leg(15,Math.PI*1.04,false);
+  // A foal's ears, soft cheek, single side eye and nascent equine muzzle.
+  for(const side of [-1,1]){
+    const x=22+side*6;
+    ctx.fillStyle="#ffecfa";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(x-3,-68);
+    ctx.quadraticCurveTo(x+side*3,-84,x+side*7,-70);
+    ctx.quadraticCurveTo(x+2,-65,x-3,-68);ctx.fill();ctx.stroke();
+  }
+  ctx.fillStyle="#fff5fb";ctx.strokeStyle=ink;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.ellipse(27,-62,11.6,10,-.12,0,TAU);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(31,-61);
+  ctx.bezierCurveTo(40,-63,43,-56,42,-52);
+  ctx.quadraticCurveTo(36,-47,29,-53);ctx.closePath();ctx.fill();ctx.stroke();
+  R.blush(ctx,34,-56,2.3,"#ffc8e6");
+  const mood=hurt?"closed":cast?"angry":pose.state==="victory"?"happy":"normal";
+  R.eye(ctx,26,-64,4.4,pose,{iris:"#8862b9",mood});
+  R.mouth(ctx,36,-51,3.4,pose.state==="victory"?"happy":cast?"grin":"smile");
+  ctx.fillStyle="#8b72a0";ctx.beginPath();ctx.arc(40,-56,1.25,0,TAU);ctx.fill();
+  ctx.save();ctx.translate(24,-71);ctx.rotate((cast?-.12:0)+Math.sin(t*.085)*.018);
+  horn(ctx,29,"#dab3ff",Math.sin(t*.11)*.29);ctx.restore();
+  if(cast||pose.state==="victory"||flourish>.2)
+    R.sparkle(ctx,25,-106,3.1+2.4*Math.max(flourish,.18),"#ffe0a5");
+  if(run&&Number(pose.speed)>.25){
+    ctx.save();ctx.globalAlpha=.65;ctx.strokeStyle="#ffdbb9";ctx.lineWidth=1.4;
+    for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-42-i*8,-14-i*8);ctx.lineTo(-51-i*8,-13-i*8);ctx.stroke();}
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
 // F3 Unicornio Estelar: true adult anatomy, separate four-beat gallop and a living mane.
 // Every appendage attaches to a horse-shaped torso; no old round ball is reused.
 function drawStellarUnicorn(ctx,pose,R,t){
@@ -255,6 +347,7 @@ function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
+  if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }
   if (f === 3) { drawStellarUnicorn(ctx,pose,R,pose.t||0); return; }
   const t = pose.t || 0;
   const final = f === 4;
