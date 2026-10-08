@@ -1,3 +1,16 @@
+## 08/10/2026 · V53 DRAGÓN SOLAR SOUL PASS · PROPOSED
+
+**Caché:** `ohana-253`. **Contrato:** 10 personajes · 5 formas · 10 salas.
+
+- Dragón es el siguiente personaje tras Michi; Dino permanece reservado para el último pase.
+- Cuatro gestos de espera, incluido el estornudo que se convierte en una brasa fugitiva y el gesto de recuperar la compostura.
+- Aleteo reactivo al ascenso y descenso; estelas y espiral de brasas diferentes por forma.
+- Gust K, Roar L, pisadas cálidas y corona solar de Forma 5 tienen lenguaje visual propio sin alterar colisiones o daño.
+- Supernova Celeste: persecución de la chispa, despegue, corona y explosión final; se conserva el identificador `tiny-sneeze`.
+- La matriz visual de Chromium verifica y captura las cinco formas de Dragón además del resto del juego.
+- Actualización coherente de Service Worker, index.html y pruebas a `ohana-253` para no servir arte antiguo.
+- Control de release: `node tests/browser/e2e.mjs`, `node tests/browser/visual-regression.mjs` y `release:check`.
+
 ## 08/10/2026 · V52 MICHI + CACHE HARDENING
 
 **Caché:** `ohana-252`. **Contrato:** 10 personajes · 5 formas por personaje · 10 salas.
