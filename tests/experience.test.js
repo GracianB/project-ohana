@@ -67,10 +67,13 @@ test("evolution cinema has a bounded return-to-game timeline", () => {
   const final = evolutionTiming({ reduced: false, finalForm: true });
   const reduced = evolutionTiming({ reduced: true, finalForm: true });
 
-  assert.ok(normal.end <= 4);
-  assert.ok(final.end <= 4.4);
+  assert.ok(normal.end <= 2.2);
+  assert.ok(final.end >= 5 && final.end <= 5.6);
+  assert.ok(final.out - final.reveal >= 1.8);
   assert.ok(reduced.end <= 1.5);
   assert.ok(normal.flash <= normal.reveal);
   assert.ok(normal.reveal < normal.out);
   assert.ok(normal.out < normal.end);
+  assert.ok(final.reveal < final.out);
+  assert.ok(final.out < final.end);
 });

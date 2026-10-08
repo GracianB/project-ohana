@@ -22,16 +22,16 @@ async function auditPage(page, label) {
       complete: document.body.classList.contains('intro-complete')
     };
   });
-  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V44 family welcome no aparece');
+  assert.ok(titleIntroState.active && titleIntroState.visible, label + ': V45 comic family welcome no aparece');
   await page.waitForTimeout(1350);
   const heldOpening = await page.evaluate(() => ({
     complete:document.body.classList.contains('intro-complete'),
     mode:document.querySelector('#ohana-intro')?.dataset.openingMode || '',
-    cast:Number(document.querySelector('#ohana-intro')?.dataset.v44Cast || 0),
+    cast:Number(document.querySelector('#ohana-intro')?.dataset.v45Cast || 0),
     ready:document.querySelector('#ohana-intro')?.classList.contains('ready') || false
   }));
-  assert.equal(heldOpening.complete, false, label + ': V44 avanza al carrusel sin acción del usuario');
-  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V44 incorrecto');
+  assert.equal(heldOpening.complete, false, label + ': V45 avanza al carrusel sin acción del usuario');
+  assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V45 incorrecto');
   assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
   assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
   const gameSource = await page.evaluate(async () => {
@@ -74,7 +74,7 @@ async function auditPage(page, label) {
     };
   });
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
-  assert.equal(titleLayout.visibleCards.length, 3, label + ': el selector debe mostrar exactamente anterior/seleccionado/siguiente');
+  assert.equal(titleLayout.visibleCards.length, label === 'mobile' ? 3 : 5, label + ': selector V45 con profundidad incorrecta');
   assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
   assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
@@ -327,7 +327,7 @@ async function auditPage(page, label) {
   assert.ok(audit.buttons.every((b) => b.name.length > 0), label + ': botón sin nombre accesible');
   assert.ok(audit.dialogs.every((d) => d.labelled && d.modal), label + ': diálogo sin etiquetado/modal accesible');
   assert.ok(audit.bars.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), label + ': progressbar fuera de rango');
-  await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:true });
+  await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:false, timeout:10000 });
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 
   const deterministic = await page.evaluate(() => {
@@ -560,8 +560,11 @@ try {
   await reducedPage.emulateMedia({ reducedMotion: 'reduce' });
   await reducedPage.reload({ waitUntil:'networkidle' });
   await reducedPage.waitForTimeout(1350);
-  await reducedPage.locator('#ohana-intro .oi-enter').click();
-  await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  const reducedOpening = reducedPage.locator('#ohana-intro .oi-enter');
+  if (await reducedOpening.count()) {
+    await reducedOpening.click();
+    await reducedPage.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
+  }
   await reducedPage.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
   assert.equal(await reducedPage.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches), true, 'desktop: reduced motion no emulado');
   await reducedPage.locator('#btn-play').click();

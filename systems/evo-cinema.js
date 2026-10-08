@@ -405,6 +405,9 @@ export function playEvolution(detail = {}) {
 
   const pOld = makeDummy(def.id, evo - 1, oldColor);
   const pNew = makeDummy(def.id, evo, color);
+  const finalEchoes = finalForm
+    ? [0,1,2,3].map((stage) => makeDummy(def.id, stage, def.forms?.[stage]?.color || def.color || color))
+    : [];
   pOld._poseOverride = "idle";
   const parts = new Particles();
   const { el, fc } = st;
@@ -461,6 +464,97 @@ export function playEvolution(detail = {}) {
     }
   }
 
+
+
+  function evolutionCamera(t, target) {
+    if (reduce) return { dx:0, dy:0, rot:0, zoom:1 };
+    const q = seg(t, T.charge, T.reveal + 0.55);
+    const mode = cinemaProfile.camera || "orbit";
+    if (mode === "spiral") return { dx:Math.sin(t*4.2)*target*.035*q, dy:Math.cos(t*3.4)*target*.018*q, rot:Math.sin(t*3.1)*.045*q, zoom:1 };
+    if (mode === "snap") return { dx:Math.sin(t*8.0)*target*.018*q, dy:0, rot:0, zoom:1+Math.sin(q*Math.PI)*.055 };
+    if (mode === "eclipse") return { dx:0, dy:-Math.sin(q*Math.PI)*target*.055, rot:-.018*q, zoom:1+q*.025 };
+    if (mode === "sweep") return { dx:lerp(-target*.08,target*.04,easeInOut(q)), dy:-target*.018*q, rot:-.028*(1-q), zoom:1 };
+    if (mode === "impact") return { dx:0, dy:lerp(-target*.075,0,easeOut(q)), rot:0, zoom:.96+.04*easeOut(q) };
+    if (mode === "whip") return { dx:Math.sin(q*Math.PI*1.2)*target*.08, dy:0, rot:Math.sin(q*Math.PI)*.035, zoom:1 };
+    if (mode === "roll") return { dx:0, dy:Math.sin(t*2.5)*target*.018, rot:Math.sin(q*Math.PI)*.055, zoom:.98+.03*q };
+    if (mode === "pull") return { dx:0, dy:0, rot:0, zoom:1.08-.08*easeOut(q) };
+    if (mode === "rise") return { dx:0, dy:-easeOut(q)*target*.075, rot:0, zoom:.97+.05*q };
+    return { dx:Math.sin(t*2.1)*target*.028*q, dy:-Math.sin(t*1.5)*target*.018*q, rot:Math.sin(t*1.7)*.018*q, zoom:1 };
+  }
+
+  function drawFinalAscension(t, L) {
+    if (!finalForm || reduce) return;
+    const { W, H, cx, cy, target, footY } = L;
+    const chargeK = easeOut(seg(t, 0.30, T.flash - 0.10));
+    if (chargeK <= 0) return;
+
+    // Vertical cocoon / beam. The character remains the subject; geometry is atmosphere.
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const beam = ctx.createLinearGradient(cx, cy - target * 1.2, cx, footY + target * 0.65);
+    beam.addColorStop(0, rgba(accent, 0));
+    beam.addColorStop(.22, rgba(light, 0.12 * chargeK));
+    beam.addColorStop(.52, "rgba(255,255,255," + (0.08 + 0.20 * chargeK) + ")");
+    beam.addColorStop(.82, rgba(accent, 0.15 * chargeK));
+    beam.addColorStop(1, rgba(accent, 0));
+    ctx.fillStyle = beam;
+    ctx.fillRect(cx - target * .42, cy - target * 1.2, target * .84, target * 2.1);
+
+    for (let i=0;i<4;i++) {
+      const orbit = seg(t, .46 + i*.10, T.flash - .08);
+      if (orbit <= 0) continue;
+      ctx.globalAlpha = .11 + .20 * orbit;
+      ctx.strokeStyle = i % 2 ? light : accent;
+      ctx.lineWidth = Math.max(1.5, target * .012);
+      ctx.beginPath();
+      ctx.ellipse(
+        cx,
+        cy + Math.sin(t * 2.2 + i) * target * .08,
+        target * (.40 + i*.09),
+        target * (.16 + i*.035),
+        t * (.22 + i*.03) + i,
+        0, Math.PI*2
+      );
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // The four previous forms appear as memories, then converge into the fifth.
+    const converge = easeInOut(seg(t, 1.36, T.flash - .12));
+    finalEchoes.forEach((echo, i) => {
+      const appear = easeOut(seg(t, .40 + i*.22, .72 + i*.22));
+      const vanish = 1 - seg(t, T.flash - .28, T.flash - .02);
+      const alpha = appear * vanish;
+      if (alpha <= .01) return;
+      const angle = -Math.PI*.88 + i * (Math.PI*.59);
+      const sx = cx + Math.cos(angle) * target * 1.00;
+      const sy = cy + Math.sin(angle) * target * .48 + target * .30;
+      const x = lerp(sx, cx, converge);
+      const y = lerp(sy, footY, converge);
+      const h = target * (.34 + i*.035) * (1 - converge*.18);
+      echo._poseOverride = i % 2 ? "victory" : "idle";
+      ctx.save();
+      ctx.globalAlpha = alpha * (.58 + .30*(1-converge));
+      drawDummy(ctx, echo, x, y, h / baseHeight(def.id, i), t*60 + i*17);
+      ctx.restore();
+    });
+
+    // A readable silhouette-like whiteout right before the reveal.
+    const whiteK = Math.sin(seg(t, T.flash - .34, T.flash) * Math.PI);
+    if (whiteK > .001) {
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = whiteK * .30;
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, target * .92);
+      g.addColorStop(0, "rgba(255,255,255,.95)");
+      g.addColorStop(.30, rgba(light,.48));
+      g.addColorStop(1, rgba(accent,0));
+      ctx.fillStyle = g;
+      ctx.fillRect(cx-target,cy-target,target*2,target*2);
+      ctx.restore();
+    }
+  }
+
   function frame(now) {
     if (finished) return;
     try {
@@ -492,7 +586,10 @@ export function playEvolution(detail = {}) {
     const charge = seg(t, T.charge, T.flash);
     const revealK = seg(t, T.reveal, T.reveal + 0.5);
     drawBackdrop(ctx, W, H, cx, cy, accent, dark, (0.35 + charge * 0.5 + revealK * 0.4) * fade);
-    drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target, clamp(charge * 0.72 + revealK, 0, 1), t, accent);
+    if (!finalForm) {
+      drawEvolutionIdentity(ctx, def.id, cinemaProfile, cx, cy, target * 1.08, clamp((charge * 0.20 + revealK * 0.24), 0, 0.28), t, accent);
+    }
+    drawFinalAscension(t, L);
     const rayA = (0.18 + charge * 0.18 + revealK * 0.24) * dark;
     const R = Math.hypot(W, H) * 0.75;
     const spin = reduce ? 0 : t * (0.25 + charge * 0.6 + revealK * 0.2);
@@ -561,6 +658,7 @@ export function playEvolution(detail = {}) {
     // ni una silueta geométrica superpuesta.
     const morphK = easeInOut(seg(t, T.charge, T.flash));
     const introK = easeOut(seg(t, T.oldIn, T.oldIn + 0.35));
+    const cam = evolutionCamera(t, target);
     const box = target * 2.2;
     const bob = reduce ? 0 : Math.sin(t * 2.2) * target * 0.010;
     const centerY = footY + bob;
@@ -584,7 +682,10 @@ export function playEvolution(detail = {}) {
         const oldScale = scale * (0.96 + introK * 0.04) * (1 - morphK * 0.035);
         ctx.save();
         ctx.globalAlpha = oldAlpha;
-        drawDummy(ctx, pOld, cx, centerY, oldScale, tf);
+        ctx.translate(cx + cam.dx, centerY + cam.dy);
+        ctx.rotate(cam.rot * .65);
+        ctx.scale(cam.zoom, cam.zoom);
+        drawDummy(ctx, pOld, 0, 0, oldScale, tf);
         ctx.restore();
       }
 
@@ -596,7 +697,10 @@ export function playEvolution(detail = {}) {
         const newScale = scale * (0.76 + 0.24 * grow);
         ctx.save();
         ctx.globalAlpha = newAlpha;
-        drawDummy(ctx, pNew, cx, centerY, newScale, tf);
+        ctx.translate(cx + cam.dx, centerY + cam.dy);
+        ctx.rotate(cam.rot);
+        ctx.scale(cam.zoom, cam.zoom);
+        drawDummy(ctx, pNew, 0, 0, newScale, tf);
         ctx.restore();
       }
 
@@ -615,7 +719,7 @@ export function playEvolution(detail = {}) {
     } else {
       // Revelación: el nuevo diseño orgánico aparece una vez, limpio y legible.
       const pop = reduce ? 1 : easeBack(revealK);
-      const sc = scale * (0.78 + 0.22 * pop);
+      const sc = scale * (finalForm ? (0.72 + 0.34 * pop) : (0.78 + 0.22 * pop));
       pNew._poseOverride = EVOLUTION_REVEAL_POSE[def.id] || "victory";
       pNew.melee = pNew._poseOverride === "attack" ? 10 : 0;
       pNew.grounded = pNew._poseOverride !== "jump";
@@ -624,7 +728,10 @@ export function playEvolution(detail = {}) {
 
       ctx.save();
       ctx.globalAlpha = 0.98;
-      drawDummy(ctx, pNew, cx, centerY, sc, tf);
+      ctx.translate(cx + cam.dx, centerY + cam.dy);
+      ctx.rotate(cam.rot);
+      ctx.scale(cam.zoom, cam.zoom);
+      drawDummy(ctx, pNew, 0, 0, sc, tf);
       ctx.restore();
 
       if (!reduce) {
@@ -685,7 +792,7 @@ export function playEvolution(detail = {}) {
       ctx.save();
       ctx.globalAlpha = clamp(txt * 2, 0, 1) * fade;
       // kicker
-      drawTitle(ctx, "✦ " + story.kicker + " ✦", cx, ty - size * 0.82, Math.max(13, size * 0.3),
+      drawTitle(ctx, finalForm ? "✦ FORMA FIRMA · ASCENSIÓN ✦" : "✦ " + story.kicker + " ✦", cx, ty - size * 0.82, Math.max(13, size * 0.3),
         tint(accent, 0.6), { font: FONT_BODY, weight: 800, spacing: "0.35em", stroke: false, glow: accent });
       // nombre
       ctx.save();
@@ -708,7 +815,7 @@ export function playEvolution(detail = {}) {
         drawTitle(ctx, story.line, cx, y2 + size * 0.27, Math.max(11, size * 0.22), light,
           { font: FONT_BODY, weight: 700, stroke: false, maxWidth: W * 0.86 });
       }
-      drawTitle(ctx, "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.58, Math.max(13, size * 0.28), "#ffffff",
+      drawTitle(ctx, finalForm ? "FORMA 5/5 · IDENTIDAD COMPLETA" : "FORMA " + (evo + 1) + "/5", cx, y2 + size * 0.58, Math.max(13, size * 0.28), "#ffffff",
         { font: FONT_BODY, weight: 800, spacing: "0.3em", stroke: false });
       // pips de forma
       const pipY = y2 + size * 0.92, pipR = Math.max(4, size * 0.07), gap = pipR * 3.2;

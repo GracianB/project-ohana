@@ -41,6 +41,19 @@ let tick = 0;
 let raf = 0;
 const portraitClock = createFixedClock({ stepMs: 1000 / 30, maxSteps: 1 });
 
+const HERO_SHOWCASE = Object.freeze({
+  kilo:    ["idle","victory","idle"],
+  stitcho: ["idle","attack","victory"],
+  chispin: ["idle","attack","victory"],
+  cat:     ["idle","idle","victory"],
+  dragon:  ["idle","jump","victory"],
+  dino:    ["idle","attack","victory"],
+  frita:   ["run","attack","victory"],
+  pizza:   ["jump","idle","victory"],
+  yomi:    ["idle","attack","idle"],
+  cuerno:  ["idle","victory","jump"],
+});
+
 function readSave() { return saveStore.readRaw(); }
 
 function paintPortraits(now = performance.now()) {
@@ -78,6 +91,9 @@ function paintPortraits(now = performance.now()) {
       const showcaseSlot = Math.floor(showcaseT / 120) % 3;
       const casting = hero && showcasePhase >= 72 && showcasePhase < 98;
       const attacking = hero && showcasePhase >= 103 && showcasePhase < 115;
+      const personality = HERO_SHOWCASE[def.id] || HERO_SHOWCASE.kilo;
+      const poseIndex = showcasePhase < 44 ? 0 : showcasePhase < 88 ? 1 : 2;
+      const showcasePose = hero ? personality[poseIndex] : "idle";
       const bob = Math.sin(tick * 0.03 * profile.pace + idx + profile.sway) * (hero ? 4.5 : 2);
       const sway = Math.sin(tick * 0.02 * profile.pace + idx * 1.3) * 0.035 * profile.sway;
       const showcaseSpeed = Math.max(0.6, Math.min(2.8, (form.speed || def.speed || 4) * 0.38));
@@ -96,7 +112,13 @@ function paintPortraits(now = performance.now()) {
         evoBurst: cv._burst || 0,
         evoBurstMax: 90,
         visualScale: 1,
+        _poseOverride: showcasePose,
       };
+      if (showcasePose === "jump") {
+        dummy.grounded = false;
+        dummy.vy = -3;
+      }
+      if (showcasePose === "run") dummy.vx = Math.max(dummy.vx, showcaseSpeed * 1.35);
       if (casting) {
         const abilityId = def.abilities && def.abilities[showcaseSlot];
         dummy._cast = {
@@ -181,7 +203,7 @@ function mark(id) {
 
   cards.forEach((el) => {
     const selected = el.dataset.id === id;
-    const visible = [id, prev, next].includes(el.dataset.id);
+    const visible = [id, prev, next, prev2, next2].includes(el.dataset.id);
     el.classList.toggle("selected", selected);
     el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
     el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
@@ -220,7 +242,13 @@ function mark(id) {
       heroLine.textContent = (HERO_LINES[selectedDef.id] || mastery.desc || "Cinco formas. Tres poderes. Una identidad propia.") + " · " + mastery.name;
       heroLine.setAttribute("data-mastery", mastery.id);
     }
-    document.getElementById("char-select")?.style.setProperty("--hero-tint", selectedDef.color);
+    const menu = document.getElementById("char-select");
+    menu?.style.setProperty("--hero-tint", selectedDef.color);
+    if (menu) {
+      menu.dataset.hero = selectedDef.id;
+      menu.dataset.heroName = selectedDef.name;
+    }
+    dispatchEvent(new CustomEvent("ohana-title-hero", { detail: { id:selectedDef.id, color:selectedDef.color, name:selectedDef.name } }));
   }
   const status = selectionStatus();
   if (status && selectedDef) {
