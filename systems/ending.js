@@ -4,6 +4,7 @@ import {
   rgba, makeDummy, drawDummy, baseHeight, drawTitle, FONT_BODY, FONT_DISPLAY
 } from "./evo-cinema.js";
 import { ROSTER } from "../characters/roster.js";
+import { familyFinaleBeat } from "./v100-family-choreography.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
 
@@ -167,7 +168,11 @@ function showEnding(detail={}){
       const heroH=Math.min(H*.28,W*.15),spread=Math.min(W*.72,heroH*7.8);
       CAST.forEach((id,i)=>{
         const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1)),chosen=id===hero.id;
-        actor(p,x,ground,heroH*(chosen?1.05:.72),tf,{facing:x<cx?1:-1,pose:chosen?"victory":"idle"});
+        const beat=familyFinaleBeat(id,t-duration*.77,{reduced:reduce,chosen});
+        actor(p,x,ground+beat.lift,heroH*(chosen?1.05:.72),tf,{
+          facing:x<cx?1:-1,pose:beat.pose,grounded:beat.grounded,
+          melee:beat.melee,vx:beat.vx
+        });
       });
       // Text appears after the full family portrait, not during the arrival.
       const titleK=seg(k,.89,.97);
