@@ -1,3 +1,16 @@
+## 08/10/2026 · V55 PIZZA MOLTEN SOUL PASS · PROPOSED
+
+**Caché:** `ohana-255`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** reservado para el último pase.
+
+- Pizza: cuarta animación idle con lanzamiento y rescate de pepperoni mediante un hilo de queso, ligada a su silueta real.
+- Rebote elástico: hilos de queso y anillo de impacto localizado; se mantienen físicas, colisiones y controles.
+- Forma final: pulso de horno solo durante el poder L, sin ocultar el personaje.
+- Suprema U HORNO REAL: bostezo → calentamiento del horno → retroceso por exceso de calor → erupción volcánica. Identificador `oven-too-hot` y duración original intactos.
+- Historia evolutiva nueva hasta Pizza Volcánica, con personalidad y responsabilidad propia.
+- Cinco nuevas capturas Chromium y regresiones de personalidad, rebote, cinematografía y caché.
+- `ohana-255` coordinado en index.html, SW, pruebas y PROGRESS. JavaScript de Pizza optimizado antes del release.
+- No se modifica intro/Atrium de Grok ni habilidades o estructuras de Dino.
+
 ## 08/10/2026 · V54 FRITA CRISPY SOUL PASS · PROPOSED
 
 **Caché:** `ohana-254`. **Contrato:** 10 personajes · 5 formas · 10 salas. **Dino:** reservado para el último personaje.

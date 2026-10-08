@@ -204,6 +204,30 @@ try {
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01f-frita: selector no vuelve a Kilo');
 
+  // V55 Pizza: five genuine Canvas portraits at every evolution stage.
+  for(let n=0;n<7;n++) await page.locator('#roster-next').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'pizza','01g-pizza: selector does not reach Pizza');
+  for(let form=0;form<5;form++){
+    await page.evaluate(f=>{window.__OHANA_TITLE_EVO_OVERRIDE=f;},form);
+    await page.waitForTimeout(180);
+    const rendered=await page.evaluate(()=>{
+      const card=document.querySelector('#chars-grid .char-card.selected');
+      const cv=card?.querySelector('canvas'),ctx=cv?.getContext('2d');
+      const bytes=ctx&&cv.width&&cv.height?ctx.getImageData(0,0,cv.width,cv.height).data:null;
+      let visible=0;
+      if(bytes)for(let i=3;i<bytes.length;i+=64)if(bytes[i]>20)visible++;
+      return {form:Number(cv?.dataset.evo??-1),scale:Number(cv?.dataset.fitScale||0),visible};
+    });
+    assert.equal(rendered.form,form,'01g-pizza: unexpected form '+form);
+    assert.ok(rendered.scale>.2&&rendered.visible>10,'01g-pizza: missing slice pixels '+JSON.stringify(rendered));
+    await capture(page,'01g-pizza-molten-form-'+(form+1));
+  }
+  await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
+  for(let n=0;n<7;n++) await page.locator('#roster-prev').click();
+  await page.waitForTimeout(260);
+  assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01g-pizza: selector did not return to Kilo');
+
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
   await page.locator('#roster-next').click();
   await page.waitForTimeout(520);
@@ -491,6 +515,27 @@ try {
   assert.equal(yomiSupreme.camera, 'pull', '09b-supreme: cámara de Yomi incorrecta');
   await capture(page, '09b-supreme-yomi-story');
   await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+
+  // V55 real U smoke test: catch runtime errors while Pizza's oven cinema draws.
+  const pizzaCinemaErrors=[];
+  const onPizzaError=(error)=>pizzaCinemaErrors.push(String(error.message||error));
+  page.on('pageerror',onPizzaError);
+  await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    api.start('pizza');api.setEvo(4);api.setCombo(0);api.cast(3);
+  });
+  await page.waitForTimeout(520);
+  const pizzaU=await page.locator('#supreme-cinema').evaluate(el=>({
+    active:el.dataset.activeId||'',story:el.dataset.story||'',mode:el.dataset.mode||''
+  }));
+  assert.equal(pizzaU.active,'pizza','09c-pizza-u: actor incorrecto');
+  assert.equal(pizzaU.story,'oven-too-hot','09c-pizza-u: storyboard incorrecto');
+  assert.equal(pizzaU.mode,'storyboard','09c-pizza-u: formato incorrecto');
+  assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime en cinema');
+  await capture(page,'09c-supreme-pizza-molten');
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3600});
+  page.off('pageerror',onPizzaError);
+  assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime al finalizar');
 
   await page.evaluate(() => window.__OHANA_E2E.die('hurt'));
   await page.evaluate(() => window.__OHANA_E2E.step(88));

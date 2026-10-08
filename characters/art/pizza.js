@@ -1,15 +1,5 @@
-// ============================================================================
 // PIZZA · porción de pizza (diseño original) · v2
-// ----------------------------------------------------------------------------
-// Porción con la punta hacia abajo: corteza = "pelo", cara en la parte ancha,
-// queso que gotea y se estira con pose.sway / pose.bounce. Carrera waddle.
-//   0 Porcioncita · mini, un pepperoni, ojazos
-//   1 Pizza       · pepperonis + aceitunas
-//   2 Picante     · jalapeños, cuernos-guindilla, llamitas
-//   3 Familiar    · ancha, doble corteza, gorro de chef
-//   4 PIZZA FORMA FINAL   · halo dorado, queso luminoso, pepperonis en órbita
 // pose.move "bounce" → squash/stretch al rebotar sobre enemigos.
-// ============================================================================
 const TAU = Math.PI * 2;
 const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 const seg = (k, a, b) => ease((k - a) / Math.max(1e-6, b - a));
@@ -35,7 +25,6 @@ const FORM = [
   { W: 74, legL: 18, top: -86, crH: 15, rT: 9,  rB: 8,  er: 7.8, arm: 18, fv: 0.34 },
 ];
 
-// Toppings: [kind, u∈[-1,1], v∈[0,1], r]
 const TOPS = [
   [["pep", -0.05, 0.66, 6]],
   [
@@ -58,9 +47,6 @@ const TOPS = [
   ],
 ];
 
-// ---------------------------------------------------------------------------
-// Geometría
-// ---------------------------------------------------------------------------
 function slicePath(ctx, F, tipY) {
   const W = F.W, top = F.top;
   ctx.beginPath();
@@ -76,9 +62,6 @@ function uv(F, tipY, u, v) {
   return [u * (F.W / 2) * (1 - v), y];
 }
 
-// ---------------------------------------------------------------------------
-// Toppings
-// ---------------------------------------------------------------------------
 function topping(ctx, R, kind, x, y, r, t, i) {
   if (kind === "pep") {
     R.ellipse(ctx, x, y, r, r * 0.92, PEP, { lw: 2 });
@@ -140,9 +123,6 @@ function topping(ctx, R, kind, x, y, r, t, i) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Queso: goterones + hilos
-// ---------------------------------------------------------------------------
 function drip(ctx, R, x, y, len, w, lean, color, t, i, fillOnly) {
   const ex = x + lean;
   const ey = y + len;
@@ -162,7 +142,6 @@ function drip(ctx, R, x, y, len, w, lean, color, t, i, fillOnly) {
   ctx.lineJoin = "round";
   ctx.stroke();
   R.shine(ctx, ex - br * 0.35, ey - br * 0.3, br * 0.3, br * 0.18, 0.7);
-  // gota que se desprende
   const life = frac(t * 0.018 + i * 0.37);
   if (life > 0.55 && len > 4) {
     const k = (life - 0.55) / 0.45;
@@ -188,9 +167,6 @@ function cheeseString(ctx, R, x1, y1, x2, y2, sag, color) {
   ctx.stroke();
 }
 
-// ---------------------------------------------------------------------------
-// Corteza, guindillas, llamas, gorro
-// ---------------------------------------------------------------------------
 function crust(ctx, R, F, c, y0, W, t, gold) {
   const h = F.crH;
   const pts = [
@@ -201,7 +177,6 @@ function crust(ctx, R, F, c, y0, W, t, gold) {
   ];
   R.blob(ctx, pts, c.crust, { lw: R.LINE });
 
-  // labio interior (salsa)
   ctx.beginPath();
   ctx.moveTo(-W * 0.42, y0 + 1.5);
   ctx.quadraticCurveTo(0, y0 + 4.2, W * 0.42, y0 + 1.5);
@@ -209,7 +184,6 @@ function crust(ctx, R, F, c, y0, W, t, gold) {
   ctx.lineWidth = 1.6;
   ctx.stroke();
 
-  // tostado
   ctx.save();
   ctx.fillStyle = R.alpha(R.darken(c.crust, 0.32), 0.38);
   for (let i = 0; i < 6; i++) {
@@ -218,7 +192,6 @@ function crust(ctx, R, F, c, y0, W, t, gold) {
     ctx.ellipse(x, y0 - h * 0.4 + Math.cos(i * 2.3) * 2, 2.5, 1.25, 0.25, 0, TAU);
     ctx.fill();
   }
-  // harina
   ctx.fillStyle = R.alpha("#fff8e8", gold ? 0.45 : 0.28);
   for (let i = 0; i < 4; i++) {
     const x = -W * 0.35 + i * W * 0.22;
@@ -286,9 +259,6 @@ function chefHat(ctx, R, x, y, t, sway) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------------
-// Pose → parámetros animados
-// ---------------------------------------------------------------------------
 function params(pose, f) {
   const st = pose.state;
   const t = pose.t;
@@ -371,7 +341,6 @@ function params(pose, f) {
     const k = pose.cast;
     const slot = pose.castSlot;
     if (slot === 0) {
-      // J · Disco pepperoni
       const wind = seg(k, 0, 0.32);
       const thr = seg(k, 0.32, 0.55);
       P.roll = -0.18 * wind + 0.28 * thr;
@@ -383,7 +352,6 @@ function params(pose, f) {
       P.legF = [0.4 * thr, 2];
       P.legB = [-0.4 * thr, -2];
     } else if (slot === 1) {
-      // K · Hilo de queso
       P.roll = 0.1;
       P.armF = null;
       P.armB = { ang: -1.05, bend: -3 };
@@ -394,7 +362,6 @@ function params(pose, f) {
       P.legB = [-0.4, -2];
       P.strings = 0.4 + k * 0.5;
     } else {
-      // L · Horno total
       P.glow = Math.sin(Math.min(1, k * 1.25) * Math.PI * 0.5 + 0.25);
       P.bx = Math.sin(t * 1.8) * 1.4;
       P.armF = { ang: 1.05, bend: 5 };
@@ -454,10 +421,9 @@ function params(pose, f) {
     P.bounceFx = { q };
   }
 
-  // idle flourishes
   if (st === "idle" && pose.flourish > 0) {
     const k = pose.flourish;
-    const n = pose.flourishN % 3;
+    const n = (pose.flourishN || 0) % 4;
     const b = Math.sin(k * Math.PI);
     if (n === 0) {
       P.drool = k < 0.55 ? seg(k, 0.05, 0.5) : 1 - seg(k, 0.6, 0.85);
@@ -473,17 +439,28 @@ function params(pose, f) {
       P.mood = "happy";
       P.mouth = "open";
       P.dripK = -0.65 * b + 1 - b;
-    } else {
+    } else if (n === 2) {
       P.armF = { ang: 2.95, bend: -3, len: 1.12 };
       P.sprinkle = b;
       P.look = -0.65;
       P.mood = "happy";
       P.mouth = "smile";
       P.roll = -0.06 * b;
+    } else {
+      // V55: a pepperoni escapes; Pizza catches it with a stretchy cheese thread.
+      const toss = seg(k, 0.08, 0.34), catchK = seg(k, 0.55, 0.88);
+      P.armF = { ang: 1.05 + toss * 1.70 - catchK * 1.45, bend: 3 };
+      P.armB = { ang: -0.65 - b * 1.1, bend: -3 };
+      P.roll = -0.12 * b + catchK * 0.11;
+      P.lift = -b * 3;
+      P.mood = catchK > .72 ? "happy" : toss > .52 ? "angry" : "normal";
+      P.mouth = catchK > .72 ? "grin" : "o";
+      P.look = -.45 * b;
+      P.gag = k;
+      P.dripK = 1 + .4 * b;
     }
   }
 
-  // aterrizaje: squash
   if (pose.land > 0.05) {
     const L = pose.land;
     P.sx = lerp(P.sx, 1.12, L);
@@ -493,9 +470,6 @@ function params(pose, f) {
   return P;
 }
 
-// ---------------------------------------------------------------------------
-// Cara
-// ---------------------------------------------------------------------------
 function faceDraw(ctx, R, pose, P, F, tipY, f) {
   const [cx, cy] = uv(F, tipY, 0.12, F.fv);
   const er = F.er;
@@ -550,9 +524,6 @@ function faceDraw(ctx, R, pose, P, F, tipY, f) {
   R.mouth(ctx, cx + er * 0.15, cy + er * 1.55, f === 0 ? 8 : 7.5, mm);
 }
 
-// ---------------------------------------------------------------------------
-// Órbita FORMA FINAL
-// ---------------------------------------------------------------------------
 function orbit(ctx, R, F, t, front) {
   for (let i = 0; i < 4; i++) {
     const a = t * 0.065 + (i * TAU) / 4;
@@ -576,9 +547,6 @@ function orbit(ctx, R, F, t, front) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// FX de combate / habilidades
-// ---------------------------------------------------------------------------
 function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
   if (P.sprinkle > 0 && hand) {
     for (let i = 0; i < 14; i++) {
@@ -601,17 +569,18 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
   }
 
   if (P.bounceFx) {
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,255,255,0.8)";
-    ctx.lineWidth = 2.1;
-    ctx.lineCap = "round";
-    const k = Math.abs(P.bounceFx.q) * 3.2;
-    for (const dx of [-12, 0, 12]) {
-      ctx.beginPath();
-      ctx.moveTo(dx * (1 + k * 0.3), 4);
-      ctx.lineTo(dx * (1.55 + k), 9 + k * 2.2);
-      ctx.stroke();
+    // Elastic landing: the cheese stretches down to the actual impact footprint.
+    const k = clamp(Math.abs(P.bounceFx.q) * 3.2, 0, 1);
+    ctx.save();ctx.lineCap = "round";
+    for(let i=-1;i<=1;i++){
+      const x=i*(11+k*4);
+      ctx.globalAlpha=.38+.34*k;
+      ctx.strokeStyle=i===0?"#fff3bc":"#ffb54d";
+      ctx.lineWidth=2.2-k*.4;
+      ctx.beginPath();ctx.moveTo(x,-3);ctx.quadraticCurveTo(x+i*7,7+k*5,x+i*(7+k*4),11+k*6);ctx.stroke();
     }
+    ctx.globalAlpha=.32*k;ctx.strokeStyle="#ffdf87";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.ellipse(0,4,19+k*14,3.5+k*1.5,0,0,TAU);ctx.stroke();
     ctx.restore();
   }
 
@@ -705,7 +674,6 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
     ctx.strokeStyle = c.cheese;
     ctx.lineWidth = 5;
     ctx.stroke();
-    // lazo
     const lr = 9 + Math.sin(t * 0.42) * 1.8;
     ctx.translate(ex + lr * 0.85, ey - 2);
     ctx.rotate(Math.sin(t * 0.32) * 0.45 - 0.28);
@@ -781,9 +749,6 @@ function fx(ctx, R, P, F, tipY, hand, t, c, shX, shY) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Draw principal
-// ---------------------------------------------------------------------------
 function draw(ctx, pose, R) {
   const f = clamp(pose.form | 0, 0, 4);
   const c = PAL[f];
@@ -803,7 +768,6 @@ function draw(ctx, pose, R) {
   ctx.rotate(P.roll);
   if (P.sx !== 1 || P.sy !== 1) ctx.scale(P.sx, P.sy);
 
-  // --- halo FORMA FINAL (detrás) ---
   if (f === 4 && !P.dead) {
     ctx.save();
     ctx.lineWidth = 5;
@@ -820,7 +784,6 @@ function draw(ctx, pose, R) {
     orbit(ctx, R, F, t, false);
   }
 
-  // --- spin (masa) ---
   ctx.save();
   if (P.spin != null) {
     ctx.translate(0, (F.top + tipY) / 2);
@@ -828,7 +791,6 @@ function draw(ctx, pose, R) {
     ctx.translate(0, -(F.top + tipY) / 2);
   }
 
-  // --- extremidades traseras ---
   const shV = 0.46;
   const shY = F.top + shV * (tipY - F.top);
   const shX = (W / 2) * (1 - shV) - 2;
@@ -858,7 +820,6 @@ function draw(ctx, pose, R) {
     drawArm(-shX, shY, P.armB, true);
   }
 
-  // hilos de queso al correr / saltar
   if (P.strings > 0.05) {
     for (let i = 0; i < 3; i++) {
       const [x, y] = uv(F, tipY, -1, 0.22 + i * 0.28);
@@ -873,7 +834,6 @@ function draw(ctx, pose, R) {
     }
   }
 
-  // --- cuerpo: porción ---
   slicePath(ctx, F, tipY);
   const g = ctx.createLinearGradient(-W * 0.3, F.top, W * 0.22, tipY);
   g.addColorStop(0, R.lighten(c.cheese, f === 4 ? 0.62 : 0.35));
@@ -885,7 +845,6 @@ function draw(ctx, pose, R) {
   ctx.save();
   ctx.clip();
 
-  // salsa bajo el queso
   ctx.fillStyle = c.sauce;
   ctx.beginPath();
   ctx.moveTo(-W, F.top - 2);
@@ -897,13 +856,11 @@ function draw(ctx, pose, R) {
   ctx.closePath();
   ctx.fill();
 
-  // borde salsa
   ctx.lineWidth = 3.5;
   ctx.strokeStyle = R.alpha(c.sauce, 0.58);
   slicePath(ctx, F, tipY);
   ctx.stroke();
 
-  // burbujas tostadas
   for (let i = 0; i < 6; i++) {
     const [x, y] = uv(F, tipY, (frac(i * 0.43 + 0.2) - 0.5) * 1.65, 0.16 + frac(i * 0.61) * 0.68);
     ctx.fillStyle = R.alpha(R.darken(c.cheese, 0.28), 0.28);
@@ -912,7 +869,6 @@ function draw(ctx, pose, R) {
     ctx.fill();
   }
 
-  // sombra lateral
   const sg = ctx.createLinearGradient(W * 0.08, 0, W * 0.52, 0);
   sg.addColorStop(0, "rgba(120,40,0,0)");
   sg.addColorStop(1, "rgba(120,40,0,0.24)");
@@ -925,13 +881,11 @@ function draw(ctx, pose, R) {
     ctx.fillRect(-W, F.top - 10, W * 2, -F.top + 10);
   }
 
-  // toppings
   TOPS[f].forEach(([kind, u, v, r], i) => {
     const [x, y] = uv(F, tipY, u, v);
     topping(ctx, R, kind, x, y, r, t, i);
   });
 
-  // glow horno
   if (P.glow > 0) {
     ctx.fillStyle = R.alpha("#ff2a10", 0.48 * P.glow + 0.1 * Math.sin(t * 0.6));
     ctx.fillRect(-W, F.top - 10, W * 2, -F.top + 10);
@@ -942,7 +896,6 @@ function draw(ctx, pose, R) {
   slicePath(ctx, F, tipY);
   R.paint(ctx, null, { lw: R.LINE });
 
-  // --- goterones de queso ---
   const dK = P.dripK;
   const drips =
     f === 3 ? [[-1, 0.1], [-1, 0.48], [1, 0.2], [1, 0.6], [-1, 0.78], [1, 0.78]] :
@@ -963,7 +916,6 @@ function draw(ctx, pose, R) {
   for (const a of dripArgs) drip(ctx, R, ...a, true);
   ctx.restore();
 
-  // --- corteza ---
   const crY = F.top - 1 + pose.bounce * 1.3;
   ctx.save();
   ctx.translate(0, crY);
@@ -992,17 +944,14 @@ function draw(ctx, pose, R) {
   if (f === 3) chefHat(ctx, R, 2, -F.crH * 1.72, t, pose.sway);
   ctx.restore();
 
-  // --- cara ---
   faceDraw(ctx, R, pose, P, F, tipY, f);
 
-  // babilla (flourish)
   if (P.drool > 0) {
     const [mx, my] = uv(F, tipY, 0.12, F.fv);
     const myy = my + F.er * 1.9;
     drip(ctx, R, mx + F.er * 0.2, myy, P.drool * (-myy - 10), 3.5, 1, c.cheese, 0, 0, false);
   }
 
-  // --- extremidades delanteras ---
   let hand = null;
   if (P.wall) {
     drawLeg(4, [1.5, 4], false);
@@ -1016,10 +965,48 @@ function draw(ctx, pose, R) {
 
   if (f === 4 && !P.dead) orbit(ctx, R, F, t, true);
 
-  // --- FX ---
+  if (f === 4 && pose.state === "cast" && pose.castSlot === 2) {
+    const heat = Math.sin(Math.PI * clamp(Number(pose.cast) || 0, 0, 1));
+    ctx.save();ctx.globalAlpha = .26 * heat;
+    ctx.strokeStyle="#fff5a4";ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.ellipse(0,F.top*.62,F.W*.45,F.W*.24,0,0,TAU);ctx.stroke();
+    ctx.restore();
+  }
+
+  if (P.gag > 0) drawPepperoniCatch(ctx, R, F, tipY, P.gag, f);
   fx(ctx, R, P, F, tipY, hand, t, c, shX, shY);
 
   ctx.restore();
+}
+
+function drawPepperoniCatch(ctx, R, F, tipY, progress, form) {
+  const k = clamp(Number(progress) || 0, 0, 1);
+  const throwK = seg(k, .08, .34), catchK = seg(k, .55, .88);
+  const arc = Math.sin(Math.PI * seg(k, .08, .90));
+  const x = F.W * .23 + throwK * 19 - catchK * 23;
+  const y = F.top - 14 - arc * (16 + form * 2) + catchK * 13;
+  const visibility = Math.sin(Math.PI * k);
+  if (visibility < .02) return;
+  ctx.save();
+  ctx.globalAlpha = .94 * visibility;
+  ctx.translate(x, y);
+  ctx.rotate(k * TAU * 1.3);
+  ctx.fillStyle = form === 4 ? "#f45a30" : PEP;
+  ctx.strokeStyle = "#71271d";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.ellipse(0, 0, 5.8, 5.1, 0, 0, TAU);ctx.fill();ctx.stroke();
+  ctx.fillStyle = "#ffa28a";
+  ctx.beginPath();ctx.arc(-1.6, -1.3, 1.25, 0, TAU);ctx.fill();
+  ctx.restore();
+  if (catchK > .02 && catchK < 1) {
+    const tip = uv(F, tipY, .57, .58);
+    ctx.save();ctx.globalAlpha = .60 * visibility;
+    ctx.strokeStyle = form === 4 ? "#fff5b8" : "#ffda70";
+    ctx.lineWidth = 2.4;ctx.lineCap = "round";
+    ctx.beginPath();ctx.moveTo(tip[0], tip[1]);
+    ctx.quadraticCurveTo(x - 11, y + 9, x, y);ctx.stroke();
+    ctx.restore();
+  }
 }
 
 export default { id: "pizza", draw };

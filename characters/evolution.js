@@ -137,10 +137,10 @@ export const EVOLUTION_MESSAGES = Object.freeze({
     "Tres crujidos se hacen uno. Ni el kétchup logra alcanzarla.",
   ],
   pizza: [
-    "El queso empieza a estirarse.",
-    "La masa entra en calor.",
-    "El horno ya no puede contenerla.",
-    "El volcán acaba de salir del horno.",
+    "Porcioncita descubre que hasta un trocito pequeño puede rebotar.",
+    "Aprende a lanzar pepperoni y recuperar lo que ama con queso.",
+    "El picante le da coraje; su fuego nunca quema a los amigos.",
+    "Pizza Volcánica descubre un fuego capaz de proteger a toda la familia.",
   ],
   yomi: [
     "El farol mira hacia el otro lado.",
