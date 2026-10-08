@@ -195,3 +195,29 @@ body.boss-fight #combo-chip { top: 168px; }
 @media(prefers-reduced-motion:reduce){
   .ability-slot[data-supreme="1"],.touch-btn.special-u{animation:none!important}
 }
+
+/* V97: meaningful screen-reader updates, without an offscreen focus trap. */
+.game-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+@media (forced-colors: active) {
+  body.playing #hud .hud-block,
+  body.playing #boss-wrap,
+  body.playing #touch .touch-btn {
+    background: Canvas !important;
+    border: 2px solid CanvasText !important;
+    color: CanvasText !important;
+    box-shadow: none !important;
+  }
+  body.playing #hud .bar {
+    border: 1px solid CanvasText !important;
+  }
+}
