@@ -95,12 +95,16 @@ test("las entradas táctiles capturan el puntero y respetan pulsaciones simultá
   assert.equal(f.jump.captured, 2);
   assert.equal(f.move.classList.contains("held"), true);
   assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.move.getAttribute("aria-pressed"), "true");
+  assert.equal(f.jump.getAttribute("aria-pressed"), "true");
   assert.equal(f.input.keys.d, true);
   assert.equal(f.input.keys[" "], true);
 
   send(f.move, "pointerup", { pointerId: 1 });
   assert.equal(f.move.classList.contains("held"), false);
   assert.equal(f.jump.classList.contains("held"), true);
+  assert.equal(f.move.getAttribute("aria-pressed"), "false");
+  assert.equal(f.jump.getAttribute("aria-pressed"), "true");
   assert.equal(f.input.keys.d, false);
   assert.equal(f.input.keys[" "], true);
 
