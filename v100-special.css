@@ -198,3 +198,40 @@
 @media(prefers-reduced-motion:reduce){
   #char-select[data-selector-mode="family-grid"] #chars .char-card{transition:none!important;}
 }
+
+/* V100 Especial: in the opening, OHANA is a centered family title,
+   never a caption parked in the lower-left corner. */
+#ohana-intro.family-welcome .oi-welcome{
+  left:50%!important;right:auto!important;
+  top:clamp(54px,10vh,126px)!important;bottom:auto!important;
+  width:min(660px,92vw)!important;max-width:none!important;
+  display:grid!important;justify-items:center!important;
+  text-align:center!important;
+  transform:translate(-50%,10px)!important;
+}
+#ohana-intro.family-welcome.ready .oi-welcome{
+  transform:translate(-50%,0)!important;
+}
+#ohana-intro.family-welcome .oi-welcome strong{
+  font-size:clamp(58px,10vw,118px)!important;
+  line-height:.94!important;
+  letter-spacing:.025em!important;
+  text-shadow:0 6px 30px rgba(0,0,0,.58),0 0 38px rgba(255,223,161,.25)!important;
+}
+#ohana-intro.family-welcome .oi-welcome small{
+  font-size:clamp(11px,1.1vw,16px)!important;
+  line-height:1.4!important;color:#fff7de!important;
+  text-shadow:0 3px 12px rgba(0,0,0,.88)!important;
+}
+#ohana-intro.family-welcome .oi-enter{
+  left:50%!important;right:auto!important;bottom:clamp(20px,4vh,52px)!important;
+  transform:translate(-50%,8px)!important;
+  white-space:nowrap!important;
+}
+#ohana-intro.family-welcome.ready .oi-enter{transform:translate(-50%,0)!important;}
+@media(max-width:620px){
+  #ohana-intro.family-welcome .oi-welcome{
+    top:clamp(48px,9vh,84px)!important;
+  }
+  #ohana-intro.family-welcome .oi-welcome strong{font-size:clamp(54px,15vw,80px)!important;}
+}
