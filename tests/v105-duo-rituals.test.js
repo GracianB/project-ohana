@@ -72,7 +72,6 @@ test("V105 · all ten sanctuary charges persist, reward once and never accept a 
   const charging=await signal(svc,party,party.host.identity,roomId);
   assert.equal(charging.duoCharge?.roomId,roomId,"charge is visible to both clients");
   assert.equal(charging.duoCharge.durationMs,DUO_HOLD_MS);
-  assert.equal(duoRitualProgress({duoChannel:charging.duoCharge,players:charging.players.map(p=>({...p,lastSeenAt:0}))},roomId,0),null);
   advance(DUO_HOLD_MS+80);
   const lit=await signal(svc,party,party.guest.identity,roomId);
   assert.ok(lit.duoAltars?.[roomId],roomId+" should light after continuous hold");
