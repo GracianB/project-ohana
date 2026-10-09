@@ -92,7 +92,7 @@ test("V102: reconnect to original online engine preserves both players, room and
   await assert.rejects(svc.poll(host.roomId,guest.identity),{code:"STALE_SESSION"});
   assert.equal((await svc.poll(host.roomId,rejoined.identity)).phase,"playing");
 });
-test("V102: integration has request timeout, recoverable identity and 304 cache",()=>{
+test("V102: integration has request timeout, recoverable identity and 305 cache",()=>{
   const js=fs.readFileSync("systems/v1002-festival.js","utf8");
   const coop=fs.readFileSync("systems/online-coop.js","utf8");
   const sw=fs.readFileSync("sw.js","utf8");
@@ -105,7 +105,7 @@ test("V102: integration has request timeout, recoverable identity and 304 cache"
   assert.match(coop,/NETWORK_TIMEOUT/);
   assert.match(coop,/identity:this\.identity,sequence,actionId:makeActionId/);
   assert.match(sw,/systems\/v102-living-memories\.js\?v=/);
-  assert.match(sw,/const VERSION = "ohana-304"/);
+  assert.match(sw,/const VERSION = "ohana-305"/);
   assert.match(html,/ohana-304/);
   assert.match(js,/ohana-festival-v1002/);
 });
