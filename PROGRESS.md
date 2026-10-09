@@ -1,3 +1,13 @@
+## 09/10/2026 · OHANA V101 · Los diez sellos · ohana-303
+
+- **No se rehacen los coleccionables:** permanecen los mismos 100 recuerdos interactivos, diez por sala, con el mismo almacenamiento `ohana-festival-v1002`. Se conserva el álbum y todo el progreso del jugador.
+- **Primer recuerdo:** texto de descubrimiento más amable y acceso al álbum con B, sin introducir tutoriales largos.
+- **Diez celebraciones originales 10/10:** título, verso, sello, epílogo, brillo y recompensa propia de capítulo. Solo el primer 10/10 de cada sala concede la bonificación (+250 puntos, +25 de vida, +8 XP); la ceremonia se puede revivir desde el álbum sin duplicar recompensas.
+- **Libro de capítulos:** navegación accesible por las diez salas, un capítulo visible por vez, diez objetos por capítulo y sello permanente cuando se completa.
+- **Experiencia original online, dos personas:** el enlace del juego publicado lleva al sitio Netlify ya existente y no a una función sin servidor en GitHub Pages; al crear una sala, ambos comienzan juntos en el Claro, dentro del mismo motor original.
+- **Sin inventar garantías:** la web pública de Netlify muestra un despliegue del 7/10 en la captura facilitada; es necesario implementar y publicar este commit también en Netlify antes de afirmar que el modo online está al día. El E2E simulado no es una prueba de producción.
+- **Estado:** candidata en rama. Requiere Node, Browser, Multiplayer, Visual, Release Gate y Pages en verde, revisión manual de la ceremonia y prueba real de dos dispositivos antes de cerrarse.
+
 ## 09/10/2026 · OHANA V100.2 · Fiesta de los cien · ohana-302
 
 - **100 descubrimientos interactivos diferentes**, diez por cada una de las diez salas, con nombre, localización sobre plataformas reales, silueta Canvas y diez clases de respuesta.
