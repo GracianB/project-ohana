@@ -82,6 +82,7 @@ const shape=(ctx,kind,color)=>{
 class FestivalDirector{
   constructor(){
     this.claimed=new Set(readAlbum().filter(id=>FESTIVAL_CATALOG.some(x=>x.id===id)));
+    this.runCollected=new Set();
     this.items=[];this.lastRoom="";this.tickN=0;this.toastT=0;this.album=null;this.button=null;
     this.focusBefore=null;this.justCollected=null;this.lastEventT=-10000;
   }
@@ -140,18 +141,21 @@ class FestivalDirector{
     this.album.classList.remove("open");this.album.setAttribute("aria-hidden","true");
     if(this.focusBefore?.isConnected)this.focusBefore.focus({preventScroll:true});
   }
-  reset(){this.items=[];this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;this.setCounter();}
+  reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;this.setCounter();}
   onEnterRoom(game){
     if(!game)return;
     this.lastRoom=game.roomId;
-    this.items=festivalPlacements(game.roomId,game.platforms).filter(it=>!this.claimed.has(it.id));
+    this.items=festivalPlacements(game.roomId,game.platforms).filter(it=>!this.runCollected.has(it.id));
     this.setCounter();
   }
   take(item,game){
-    if(this.claimed.has(item.id))return false;
-    this.claimed.add(item.id);storeAlbum(this.claimed);
+    if(this.runCollected.has(item.id))return false;
+    this.runCollected.add(item.id);
+    const fresh=!this.claimed.has(item.id);
+    const oldRoomCount=festivalProgress([...this.claimed]).byRoom[item.room];
+    if(fresh){this.claimed.add(item.id);storeAlbum(this.claimed);}
     game.festivalSfx?.(item.slot===9?"objective":"pickup");
-    if(item.slot===9)game.festivalVibrate?.(34);
+    if(fresh && oldRoomCount===9)game.festivalVibrate?.(34);
     const p=game.player;
     const i=item.slot;
     addScore(game,[22,25,30,26,40,32,70,45,35,100][i]);
@@ -166,12 +170,12 @@ class FestivalDirector{
     this.toastT=170;
     this.justCollected=item;
     this.setCounter();
-    if(i===9){
+    if(fresh && oldRoomCount===9){
       healPlayer(p,12);
       game.fx?.emit?.(p.x+p.w/2,p.y,{color:"#fff1b5",count:game.reduceMotion?5:24,size:4,up:2.2,life:26,star:true});
       game.festivalNotify?.("¡COLECCIÓN DEL MUNDO!",item.roomName+" · has encontrado sus diez recuerdos.");
     }
-    if(this.claimed.size===100){
+    if(fresh && this.claimed.size===100){
       game.festivalNotify?.("¡LA FAMILIA COMPLETA!","100 recuerdos descubiertos. Nadie se queda atrás.");
     }
     if(typeof document!=="undefined"){
