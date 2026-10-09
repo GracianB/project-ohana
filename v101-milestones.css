@@ -1,0 +1,136 @@
+/* OHANA V101 · Ten Chapter Seals. The collectibles stay familiar; endings feel earned. */
+#festival-album .festival-panel {
+  width:min(1110px,100%);
+  background:radial-gradient(ellipse 95% 45% at 50% 0,rgba(176,153,99,.2),transparent 74%),linear-gradient(150deg,#162e40,#071827 60%,#192333);
+}
+#festival-album .festival-world-nav {
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;
+}
+#festival-album .festival-world-nav button{
+  min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border:1px solid rgba(221,235,224,.23);border-radius:12px;padding:9px 6px;
+  background:rgba(6,20,32,.66);color:#d5e7e7;
+  font:700 clamp(9px,.8vw,12px)/1.16 Outfit,system-ui,sans-serif;
+  cursor:pointer;transition:border-color .18s,background .18s,transform .18s;
+}
+#festival-album .festival-world-nav .festival-nav-mark{
+  font:700 23px/1 Fredoka,system-ui,sans-serif;color:var(--festival-accent);text-shadow:0 0 13px color-mix(in srgb,var(--festival-accent) 35%,transparent);
+}
+#festival-album .festival-world-nav small{color:#bdd2dc;font:700 10px Outfit,system-ui,sans-serif}
+#festival-album .festival-world-nav button[aria-pressed="true"]{
+  border:2px solid var(--festival-accent);background:rgba(255,247,211,.1);color:#fff6cf;
+  box-shadow:inset 0 0 20px color-mix(in srgb,var(--festival-accent) 12%,transparent);
+}
+#festival-album .festival-world-nav button:focus-visible,
+#festival-album .festival-replay:focus-visible{
+  outline:3px solid #ffdb85;outline-offset:3px;
+}
+#festival-album .festival-contents{display:block}
+#festival-album .festival-chapter{display:none;max-width:100%;padding:clamp(15px,2vw,28px)}
+#festival-album .festival-chapter.active{display:block}
+#festival-album .festival-chapter h3{font-size:clamp(18px,2vw,25px);margin-bottom:8px}
+#festival-album .festival-chapter>p{font-size:13px;line-height:1.5;margin:0 0 15px}
+#festival-album .festival-chapter ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#festival-album .festival-chapter li{
+  border:1px solid rgba(239,246,230,.1);border-radius:10px;
+  padding:10px 12px;min-height:45px;font-size:12px;
+}
+#festival-album .festival-chapter li.found{border-color:color-mix(in srgb,var(--festival-accent) 38%,transparent)}
+#festival-album .festival-chapter .festival-slot{font-size:11px}
+#festival-album .festival-replay{
+  margin-top:14px;padding:11px 14px;border:1px solid var(--festival-accent);border-radius:11px;
+  background:rgba(255,243,198,.1);color:#fff4d0;font:800 13px Outfit,system-ui,sans-serif;cursor:pointer;
+}
+#festival-album .festival-chapter .festival-chapter-goal{
+  margin:13px 0 0;color:#b8d8df;font-size:12px;
+}
+#festival-album .festival-chapter.completed{background:radial-gradient(ellipse at top,rgba(255,248,210,.08),transparent 65%),rgba(255,244,189,.05)}
+#festival-milestone{
+  --festival-milestone-color:#ffdc98;
+  position:fixed;z-index:94;top:clamp(128px,18vh,205px);left:50%;
+  width:min(550px,calc(100vw - 22px));
+  display:none;transform:translateX(-50%);pointer-events:none;
+  color:#fff9df;
+}
+#festival-milestone.show{display:block;animation:ohana-v101-appear .42s cubic-bezier(.2,.7,.2,1) both}
+#festival-milestone .festival-milestone-card{
+  position:relative;isolation:isolate;overflow:hidden;text-align:center;
+  padding:clamp(18px,3.2vw,35px);border-radius:25px;
+  border:2px solid var(--festival-milestone-color);
+  background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--festival-milestone-color) 29%,transparent),transparent 73%),
+     linear-gradient(160deg,rgba(10,37,54,.96),rgba(5,13,28,.98));
+  box-shadow:0 14px 80px rgba(0,0,0,.65),0 0 30px color-mix(in srgb,var(--festival-milestone-color) 31%,transparent);
+}
+#festival-milestone .festival-milestone-stars{
+  color:var(--festival-milestone-color);font:800 clamp(14px,2.1vw,20px)/1.2 Outfit,system-ui,sans-serif;
+  letter-spacing:.28em;white-space:normal;opacity:.88;
+}
+#festival-milestone .festival-milestone-kicker{
+  margin:12px 0 4px;color:var(--festival-milestone-color);
+  font:900 clamp(9px,1vw,12px)/1.3 Outfit,system-ui,sans-serif;letter-spacing:.22em;
+}
+#festival-milestone .festival-milestone-seal{
+  display:grid;place-items:center;
+  width:clamp(65px,10vh,94px);height:clamp(65px,10vh,94px);margin:9px auto 12px;
+  border:2px solid var(--festival-milestone-color);border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.17),rgba(255,255,255,.02));
+  box-shadow:0 0 0 7px rgba(255,255,255,.055),0 0 38px color-mix(in srgb,var(--festival-milestone-color) 38%,transparent);
+  color:var(--festival-milestone-color);font:700 clamp(32px,5.8vw,51px)/1 Fredoka,system-ui,sans-serif;
+  animation:ohana-v101-seal .65s .12s backwards;
+}
+#festival-milestone h2{
+  margin:4px 0 9px;color:#fff7da;
+  font:800 clamp(23px,3.6vw,38px)/1.08 Fredoka,system-ui,sans-serif;
+}
+#festival-milestone .festival-milestone-verse{
+  margin:0 auto;color:#e9edf3;font:600 clamp(12px,1.3vw,16px)/1.46 Outfit,system-ui,sans-serif;
+}
+#festival-milestone .festival-milestone-world{
+  margin:15px 0 6px;color:var(--festival-milestone-color);
+  font:800 11px/1.4 Outfit,system-ui,sans-serif;letter-spacing:.1em;
+}
+#festival-milestone .festival-milestone-epilogue{
+  margin:0 0 13px;font:500 12px/1.4 Outfit,system-ui,sans-serif;color:#d1e4e9;
+}
+#festival-milestone .festival-milestone-reward{
+  width:fit-content;max-width:100%;margin:0 auto 12px;padding:9px 12px;
+  border:1px solid rgba(255,239,172,.2);border-radius:999px;
+  background:rgba(255,243,183,.1);color:#fff1b6;
+  font:800 10px/1.25 Outfit,system-ui,sans-serif;letter-spacing:.08em;
+}
+#festival-milestone .festival-milestone-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+#festival-milestone .festival-milestone-actions button{
+  pointer-events:auto;cursor:pointer;padding:9px 12px;min-height:38px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.27);
+  border-radius:12px;color:#fff8e6;font:700 11px Outfit,system-ui,sans-serif;
+}
+#festival-milestone .festival-milestone-actions .festival-milestone-album{
+  color:#102335;background:var(--festival-milestone-color);border-color:var(--festival-milestone-color);
+}
+#festival-milestone button:focus-visible{outline:3px solid white;outline-offset:3px}
+@keyframes ohana-v101-appear{from{opacity:0;transform:translate(-50%,15px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes ohana-v101-seal{from{opacity:0;transform:scale(.45) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media(max-width:760px){
+ #festival-album .festival-world-nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+ #festival-album .festival-world-nav button{padding:8px 2px;font-size:8px;letter-spacing:-.02em}
+ #festival-album .festival-world-nav .festival-nav-mark{font-size:19px}
+ #festival-album .festival-world-nav small{font-size:9px}
+ #festival-milestone{top:clamp(94px,15vh,150px)}
+}
+@media(max-width:420px){
+ #festival-album .festival-world-nav{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #festival-album .festival-chapter ol{grid-template-columns:1fr}
+ #festival-milestone{top:12vh}
+ #festival-milestone .festival-milestone-card{padding:17px 12px}
+ #festival-milestone .festival-milestone-epilogue{display:none}
+}
+@media(max-height:640px){
+ #festival-milestone{top:5vh}
+ #festival-milestone .festival-milestone-seal{width:55px;height:55px;margin:5px auto}
+ #festival-milestone .festival-milestone-card{padding:12px}
+ #festival-milestone .festival-milestone-epilogue{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ #festival-milestone.show,#festival-milestone .festival-milestone-seal{animation:none!important}
+ #festival-album .festival-world-nav button{transition:none!important}
+}

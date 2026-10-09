@@ -1,6 +1,7 @@
 // OHANA V100.2 · Cien descubrimientos jugables, diez por cada sala.
 // Motivos y títulos escritos a mano. Motor limitado a la sala actual y 10 sprites.
 import { addPlayerXp, healPlayer, addScore, addCombo } from "./mutations.js";
+import { FestivalMoment, worldMilestone, chapterSeal, V101_COMPLETION_REWARD } from "./v101-milestones.js";
 // Notifications are injected by game.js; module remains importable in Node tests.
 
 export const FESTIVAL_ROOMS = Object.freeze([{"id":"hub","name":"Claro Ohana","color":"#ffe49c","story":"El claro guarda abrazos que brillan.","titles":["El primer abrazo","Ukelele perdido","Polen dormilón","Risa en el césped","La seta cantante","Un guiño de Kilo","La flor testaruda","El picnic secreto","La hoja que baila","La promesa Ohana"]},{"id":"beach","name":"Costa Hoku","color":"#82e4ec","story":"La costa tiene más historias que granos de arena.","titles":["Concha cantante","Castillo torcido","La ola traviesa","Cangrejo tímido","Botella sin mensaje","Barquito de papel","El pez bromista","Palmera de fiesta","Tesoro de Frita","El abrazo del mar"]},{"id":"jungle","name":"Jungla Alta","color":"#a7e884","story":"Entre lianas, alguien se ríe.","titles":["La liana risueña","Rana directora","Mariposa ninja","Un plátano rebelde","La hoja gigante","Rugido de bolsillo","El nido vacío","Musgo saltarín","El escondite Stitcho","Coro de la jungla"]},{"id":"cave","name":"Cueva Azul","color":"#adceff","story":"Las piedras también tienen secretos.","titles":["Eco de gato","Cristal del bostezo","Murciélago poeta","Piedra con ojos","La gota valiente","El túnel musical","La luna en una roca","Huella invisible","Michi encontró luz","El corazón de la cueva"]},{"id":"lab","name":"Alien Lab","color":"#7beaff","story":"Ni los científicos pueden explicar estas tonterías.","titles":["Chispa experimental","Botón prohibido","Robot con hipo","La probeta azul","Satélite miniatura","Calcetín espacial","Rayo de bolsillo","El mensaje alien","Chispín hace ciencia","Experimento amistad"]},{"id":"ridge","name":"Cumbre","color":"#e6d3ff","story":"El viento se llevó unas risas y las dejó aquí.","titles":["Pluma imposible","El viento juguetón","Nube almohada","Pico musical","Huella del gigante","Trueno pequeñito","Aurora tímida","Un salto eterno","Saludo de Cuerno","La cima compartida"]},{"id":"space","name":"Órbita","color":"#b7b3ff","story":"Hasta las estrellas hacen travesuras.","titles":["Estrella de bolsillo","Cometa risueño","Luna de queso","Un planeta bebé","Satélite mareado","Constelación Yomi","Astronauta de papel","Nebulosa de caramelo","Deseo en órbita","La galaxia Ohana"]},{"id":"reef","name":"Arrecife Abismo","color":"#65ebdf","story":"El fondo del mar tiene su propio carnaval.","titles":["Burbuja traviesa","La perla del pez","Pulpo pianista","Coral de colores","Medusa bailarina","Tesoro de Pizza","Caballito curioso","La anémona amable","Marea de confeti","El festival submarino"]},{"id":"volcano","name":"Caldera","color":"#ffc083","story":"Hasta el fuego puede contar un chiste.","titles":["Brasa amigable","Dragón estornuda","Roca de caramelo","Chimenea musical","Lava de mentira","El huevo valiente","Ceniza de colores","Salto de magma","Fogata en familia","La llama del valor"]},{"id":"boss","name":"Nido Final","color":"#ff91b5","story":"La valentía es más fuerte cuando se comparte.","titles":["Valor de bolsillo","Escama caída","Un latido de luz","Risa contra el miedo","Huella de la Reina","Estrella del Nido","El refugio pequeño","Corazón sin miedo","El último eco","Todos juntos"]}]);
@@ -93,7 +94,14 @@ class FestivalDirector{
     document.getElementById("btn-festival-title")?.addEventListener("click",()=>this.open());
     this.album=document.getElementById("festival-album");
     this.album?.querySelector(".festival-close")?.addEventListener("click",()=>this.close());
-    this.album?.addEventListener("click",e=>{if(e.target===this.album)this.close();});
+    this.album?.addEventListener("click",e=>{
+      if(e.target===this.album){this.close();return;}
+      const chapterButton=e.target.closest?.("[data-festival-chapter]");
+      if(chapterButton){this.activateChapter(chapterButton.dataset.festivalChapter);return;}
+      const replay=e.target.closest?.("[data-festival-replay]");
+      if(replay){const chapter=replay.dataset.festivalReplay;this.close();FestivalMoment.show(chapter,{replay:true});}
+    });
+    document.addEventListener("ohana-open-album",event=>this.open(event.detail?.roomId));
     addEventListener("keydown",e=>{
       if(this.isOpen()&&e.key==="Tab"){e.preventDefault();this.album.querySelector(".festival-close")?.focus();return;}
       if(this.isOpen()&&e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();this.close();return;}
@@ -102,6 +110,7 @@ class FestivalDirector{
       if(document.querySelector("#ohana-intro.show,#start-intro.show,#help.open,#map-overlay.open,#pause-overlay.open,#win-cinema.show"))return;
       e.preventDefault();e.stopImmediatePropagation();this.isOpen()?this.close():this.open();
     },true);
+    FestivalMoment.mount();
     this.setCounter();
   }
   isOpen(){return !!this.album?.classList.contains("open");}
@@ -110,25 +119,36 @@ class FestivalDirector{
     const count=festivalProgress([...this.claimed]);
     const chapter=FESTIVAL_ROOMS.find(x=>x.id===this.lastRoom);
     if(this.button){this.button.textContent="✦ Álbum "+n+"/100";this.button.setAttribute("aria-label","Abrir álbum de "+n+" de 100 descubrimientos. Tecla B");}
-    const inRoom=document.getElementById("festival-room-meter");
-    if(inRoom&&chapter)inRoom.textContent="✦ Recuerdos "+count.byRoom[chapter.id]+"/10 · "+chapter.name;
-    const label=document.getElementById("festival-title-count");
+    const inRoom=typeof document!=="undefined"?document.getElementById("festival-room-meter"):null;
+    if(inRoom&&chapter){
+      const n=count.byRoom[chapter.id];
+      inRoom.textContent=n===10?"✦ "+chapterSeal(chapter.id,n)+" Sello conseguido · "+chapter.name:
+        "✦ Recuerdos "+n+"/10 · "+chapter.name;
+    }
+    const label=typeof document!=="undefined"?document.getElementById("festival-title-count"):null;
     if(label)label.textContent=n+" / 100";
   }
-  open(){
+  open(roomId){
     this.mount();
     if(!this.album)return;
     this.focusBefore=document.activeElement;
     const progress=festivalProgress([...this.claimed]);
     const roomHTML=FESTIVAL_ROOMS.map((room,ri)=>{
       const n=progress.byRoom[room.id];
-      return '<section class="festival-chapter '+(n===10?'completed':'')+'" style="--festival-accent:'+room.color+'"><h3><span>'+safeText(room.name)+'</span><small>'+(n===10?'✓ COMPLETO':n+'/10')+'</small></h3><p>'+safeText(room.story)+'</p><ol>'+room.titles.map((title,i)=>{
+      return '<section class="festival-chapter '+(n===10?'completed':'')+'" data-festival-room="'+room.id+'" style="--festival-accent:'+room.color+'"><h3><span>'+safeText(room.name)+'</span><small>'+(n===10?'✦ SELLO '+chapterSeal(room.id,n):n+'/10')+'</small></h3><p>'+safeText(room.story)+'</p><ol>'+room.titles.map((title,i)=>{
         const unlocked=this.claimed.has(room.id+"-"+i);
         return '<li class="'+(unlocked?"found":"locked")+'"><span class="festival-slot">'+fmt(ri*10+i+1)+'</span><span class="festival-item-copy"><b>'+(unlocked?safeText(title):"Por descubrir")+'</b>'+(unlocked?'<em>'+safeText(FESTIVAL_STORIES[room.id][i])+'</em>':'')+'</span><span aria-hidden="true">'+(unlocked?"✦":"◇")+'</span></li>';
-      }).join("")+'</ol></section>';
+      }).join("")+'</ol>'+(n===10?'<button class="festival-replay" type="button" data-festival-replay="'+room.id+'">✦ Revivir la celebración de este mundo</button>':'<p class="festival-chapter-goal">Encuentra los diez recuerdos para descubrir su sello secreto.</p>')+'</section>';
     }).join("");
     const body=this.album.querySelector(".festival-contents");
     if(body)body.innerHTML=roomHTML;
+    const nav=this.album.querySelector(".festival-world-nav");
+    if(nav) nav.innerHTML=FESTIVAL_ROOMS.map(room=>{
+      const n=progress.byRoom[room.id];
+      return '<button type="button" data-festival-chapter="'+room.id+'" style="--festival-accent:'+room.color+'" aria-pressed="false"><span class="festival-nav-mark">'+(n===10?chapterSeal(room.id,n):"✧")+'</span><span>'+safeText(room.name)+'</span><small>'+n+'/10</small></button>';
+    }).join("");
+    this.activateChapter(FESTIVAL_ROOMS.some(room=>room.id===roomId)?roomId:
+      FESTIVAL_ROOMS.some(room=>room.id===this.lastRoom)?this.lastRoom:"hub");
     const total=this.album.querySelector(".festival-count");
     if(total)total.textContent=progress.found+" / 100";
     const bar=this.album.querySelector(".festival-progress i");
@@ -136,12 +156,23 @@ class FestivalDirector{
     this.album.classList.add("open");this.album.setAttribute("aria-hidden","false");
     this.album.querySelector(".festival-close")?.focus({preventScroll:true});
   }
+  activateChapter(roomId){
+    if(!FESTIVAL_ROOMS.some(room=>room.id===roomId))return;
+    for(const section of this.album?.querySelectorAll(".festival-chapter")||[]){
+      const active=section.dataset.festivalRoom===roomId;
+      section.classList.toggle("active",active);
+      section.setAttribute("aria-hidden",active?"false":"true");
+    }
+    for(const button of this.album?.querySelectorAll("[data-festival-chapter]")||[]){
+      button.setAttribute("aria-pressed",String(button.dataset.festivalChapter===roomId));
+    }
+  }
   close(){
     if(!this.album)return;
     this.album.classList.remove("open");this.album.setAttribute("aria-hidden","true");
     if(this.focusBefore?.isConnected)this.focusBefore.focus({preventScroll:true});
   }
-  reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;this.setCounter();}
+  reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;FestivalMoment.close();this.setCounter();}
   onEnterRoom(game){
     if(!game)return;
     this.lastRoom=game.roomId;
@@ -153,9 +184,10 @@ class FestivalDirector{
     this.runCollected.add(item.id);
     const fresh=!this.claimed.has(item.id);
     const oldRoomCount=festivalProgress([...this.claimed]).byRoom[item.room];
+    const milestone=worldMilestone(item.room,oldRoomCount,fresh);
     if(fresh){this.claimed.add(item.id);storeAlbum(this.claimed);}
     game.festivalSfx?.(item.slot===9?"objective":"pickup");
-    if(fresh && oldRoomCount===9)game.festivalVibrate?.(34);
+    if(milestone)game.festivalVibrate?.(45);
     const p=game.player;
     const i=item.slot;
     addScore(game,[22,25,30,26,40,32,70,45,35,100][i]);
@@ -170,23 +202,25 @@ class FestivalDirector{
     this.toastT=170;
     this.justCollected=item;
     this.setCounter();
-    if(fresh && oldRoomCount===9){
-      healPlayer(p,12);
-      game.fx?.emit?.(p.x+p.w/2,p.y,{color:"#fff1b5",count:game.reduceMotion?5:24,size:4,up:2.2,life:26,star:true});
-      game.festivalNotify?.("¡COLECCIÓN DEL MUNDO!",item.roomName+" · has encontrado sus diez recuerdos.");
-    }
-    if(fresh && this.claimed.size===100){
-      game.festivalNotify?.("¡LA FAMILIA COMPLETA!","100 recuerdos descubiertos. Nadie se queda atrás.");
+    if(milestone){
+      healPlayer(p,V101_COMPLETION_REWARD.heal);
+      addScore(game,V101_COMPLETION_REWARD.score);
+      addPlayerXp(p,V101_COMPLETION_REWARD.xp);
+      p.invuln=Math.max(Number(p.invuln)||0,180);
+      game.festivalSfx?.("objective");
+      game.fx?.emit?.(p.x+p.w/2,p.y,{color:item.color,count:game.reduceMotion?4:30,size:5,up:2.2,life:32,star:true});
+      FestivalMoment.show(milestone.id,{all:this.claimed.size===100});
+      // Online mode keeps collectibles local: no global boss pause or forged server reward.
     }
     if(typeof document!=="undefined"){
       const toast=document.getElementById("festival-toast");
       if(toast){
         const icon=toast.querySelector(".festival-toast-icon"),title=toast.querySelector("strong"),desc=toast.querySelector("span:last-child");
         if(icon)icon.textContent=["✦","♥","♧","◆","♫","◌","◇","➶","✶","♛"][i];
-        if(title)title.textContent=item.title;
-        if(desc)desc.textContent=item.description+" · "+this.claimed.size+"/100";
+        if(title)title.textContent=fresh&&this.claimed.size===1?"¡TU PRIMER RECUERDO!":item.title;
+        if(desc)desc.textContent=fresh&&this.claimed.size===1?item.title+" · Abre el álbum con B":item.description+" · "+this.claimed.size+"/100";
         toast.style.setProperty("--festival-accent",item.color);
-        toast.classList.add("show");
+        toast.classList.toggle("show",!milestone);
       }
     }
     return true;
@@ -196,7 +230,7 @@ class FestivalDirector{
     this.tickN=t;
     if(this.lastRoom!==game.roomId)this.onEnterRoom(game);
     if(this.toastT>0&&--this.toastT===0){
-      document.getElementById("festival-toast")?.classList.remove("show");
+      if(typeof document!=="undefined")document.getElementById("festival-toast")?.classList.remove("show");
     }
     // Every fourth tick is enough for collectibles with 42px proximity.
     if(t%4!==0||!this.items.length)return;

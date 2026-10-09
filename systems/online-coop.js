@@ -9,11 +9,12 @@ import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 const ENDPOINT = "/.netlify/functions/game";
 const SEND_INTERVAL_MS = 125;
 const POLL_INTERVAL_MS = 180;
-const START_ROOM = "beach";
-const STAGE_ROOMS = ["beach", "jungle", "volcano", "boss", "boss"];
+const START_ROOM = "hub";
+// Legacy stage values are only a fallback for old sessions; the actual game loads all 10 original rooms.
+const STAGE_ROOMS = ["hub", "jungle", "volcano", "boss", "boss"];
 const ENGINE_INITIAL = {
   0: { x: 420, y: 1070 },
-  1: { x: 1500, y: 1070 },
+  1: { x: 550, y: 1070 },
 };
 
 function finite(value, fallback) {

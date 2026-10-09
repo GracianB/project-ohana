@@ -150,7 +150,19 @@ async function auditPage(page, label) {
   assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'), 'false', label + ': album inaccessible');
   assert.equal(await page.locator('#festival-album .festival-chapter').count(), 10, label + ': ten-world album missing');
   assert.equal(await page.locator('#festival-album li').count(), 100, label + ': a hundred discoveries not rendered');
+  // V101: ten navigable worlds, but only one chapter in view. Nothing is lost.
+  assert.equal(await page.locator('#festival-album [data-festival-chapter]').count(),10,label + ': chapter navigation missing');
+  assert.equal(await page.locator('#festival-album .festival-chapter.active').count(),1,label + ': chapter layout not focused');
+  await page.locator('#festival-album [data-festival-chapter="beach"]').click();
+  assert.equal(await page.locator('#festival-album [data-festival-chapter="beach"]').getAttribute('aria-pressed'),'true',label + ': chapter click ignored');
+  assert.equal(await page.locator('#festival-album [data-festival-room="beach"]').getAttribute('aria-hidden'),'false',label + ': active chapter inaccessible');
+  assert.equal(await page.locator('#festival-album [data-festival-room="hub"]').getAttribute('aria-hidden'),'true',label + ': inactive chapter still read');
   await page.locator('#festival-album .festival-close').click();
+  await page.evaluate(async()=>{const {FestivalMoment}=await import('./systems/v101-milestones.js');FestivalMoment.show('hub',{replay:true});});
+  await page.locator('#festival-milestone.show').waitFor({state:'visible',timeout:1200});
+  assert.match(await page.locator('#festival-milestone .festival-milestone-name').innerText(),/EL CLARO FLORECE/,label + ': unique world celebration not rendered');
+  await page.locator('#festival-milestone .festival-milestone-close').click();
+  assert.equal(await page.locator('#festival-milestone').getAttribute('aria-hidden'),'true',label + ': world celebration does not close');
   assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'), 'true', label + ': album does not close');
   const moduleProbe = await page.evaluate(async () => {
     const paths = [

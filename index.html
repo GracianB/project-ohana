@@ -9,21 +9,22 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-302">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-302">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-302">
-  <link rel="stylesheet" href="hud.css?v=ohana-302">
-  <link rel="stylesheet" href="evo.css?v=ohana-302">
-  <link rel="stylesheet" href="ending.css?v=ohana-302">
-  <link rel="stylesheet" href="intro.css?v=ohana-302">
-  <link rel="stylesheet" href="demo.css?v=ohana-302">
-  <link rel="stylesheet" href="experience.css?v=ohana-302">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-302">
-  <link rel="stylesheet" href="supreme.css?v=ohana-302">
-  <link rel="stylesheet" href="world-map.css?v=ohana-302">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-302">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-302">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-302">
+  <link rel="stylesheet" href="style.css?v=ohana-303">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-303">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-303">
+  <link rel="stylesheet" href="hud.css?v=ohana-303">
+  <link rel="stylesheet" href="evo.css?v=ohana-303">
+  <link rel="stylesheet" href="ending.css?v=ohana-303">
+  <link rel="stylesheet" href="intro.css?v=ohana-303">
+  <link rel="stylesheet" href="demo.css?v=ohana-303">
+  <link rel="stylesheet" href="experience.css?v=ohana-303">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-303">
+  <link rel="stylesheet" href="supreme.css?v=ohana-303">
+  <link rel="stylesheet" href="world-map.css?v=ohana-303">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-303">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-303">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-303">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-303">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -158,7 +159,7 @@
       <header class="title-stack">
         <p class="eyebrow">Mundo 1 · Isla Hoku</p>
         <h1><span class="word project">PROJECT</span><span class="word ohana">OHANA</span></h1>
-        <p class="tagline">Nadie se queda atrás. <span class="festival-edition">EDICIÓN 100.2 · CIEN SORPRESAS</span></p>
+        <p class="tagline">Nadie se queda atrás. <span class="festival-edition">EDICIÓN 101 · LOS DIEZ SELLOS</span></p>
       </header>
       <section class="hero-stage" aria-label="Elige uno de los diez personajes de la familia">
         <div id="chars"><p class="family-grid-caption">ELIGE TU COMPAÑERO · LOS DIEZ ESTÁN AQUÍ</p><div class="chars-grid" id="chars-grid"></div></div>
@@ -180,7 +181,7 @@
           <button id="btn-continue" type="button" class="cta ghost hidden" disabled>Continuar</button>
           <button id="btn-play" type="button" class="cta primary">Jugar solo</button>
           <button id="btn-new" type="button" class="cta ghost">Nueva partida</button>
-          <a id="btn-coop" class="cta ghost" href="./multiplayer.html">2 jugadores online</a>
+          <a id="btn-coop" class="cta ghost" href="https://project-ohana-multiplayer.netlify.app/multiplayer.html" title="El mismo OHANA original, ahora con dos jugadores">2 jugadores · misma aventura</a>
           <button id="btn-festival-title" class="cta ghost" type="button">✦ Álbum <span id="festival-title-count">0 / 100</span></button>
         </div>
       </div>
@@ -192,10 +193,27 @@
     <div class="festival-panel">
       <div class="festival-panel-head"><div><p>ISLA HOKU · COLECCIÓN</p><h2 id="festival-album-title">Los cien recuerdos de OHANA</h2><span>Encuentra diez sorpresas en cada mundo. Cada una guarda una pequeña historia.</span></div><button type="button" class="festival-close" aria-label="Cerrar álbum">✕</button></div>
       <div class="festival-meter"><strong class="festival-count">0 / 100</strong><div class="festival-progress" aria-label="Progreso de colección"><i></i></div></div>
+      <nav class="festival-world-nav" aria-label="Elegir capítulo de recuerdos"></nav>
       <div class="festival-contents"></div>
       <p class="festival-hint">Cada recuerdo brilla en su escenario. Acércate para descubrirlo. Abre este álbum con <kbd>B</kbd>.</p>
     </div>
   </div>
+  <section id="festival-milestone" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true" aria-label="Celebración por completar diez recuerdos">
+    <div class="festival-milestone-card">
+      <div class="festival-milestone-stars" aria-hidden="true">✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧ ✦ ✧</div>
+      <p class="festival-milestone-kicker">MUNDO COMPLETADO · 10 DE 10</p>
+      <div class="festival-milestone-seal" aria-hidden="true">✿</div>
+      <h2 class="festival-milestone-name">EL CLARO FLORECE</h2>
+      <p class="festival-milestone-verse">Diez recuerdos. Diez maneras de comenzar juntos.</p>
+      <p class="festival-milestone-world">Claro Ohana · Sello ✿</p>
+      <p class="festival-milestone-epilogue">La primera luz de la familia ya no se apagará.</p>
+      <p class="festival-milestone-reward">BONUS · +250 PUNTOS · +25 VIDA · +8 XP</p>
+      <div class="festival-milestone-actions">
+        <button class="festival-milestone-album" type="button">Ver capítulo en mi álbum</button>
+        <button class="festival-milestone-close" type="button">Seguir explorando</button>
+      </div>
+    </div>
+  </section>
   <div id="help" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="help-title">
     <div class="panel">
       <h2 id="help-title">Isla Hoku</h2>
@@ -226,20 +244,20 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="game.js?v=ohana-302"></script>
-  <script type="module" src="systems/title.js?v=ohana-302"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-302"></script>
-  <script type="module" src="systems/atrium-interact.js?v=ohana-302"></script>
-  <script type="module" src="systems/ending.js?v=ohana-302"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-302"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-302"></script>
-  <script type="module" src="systems/supreme-cinema.js?v=ohana-302"></script>
-  <script type="module" src="systems/demo.js?v=ohana-302"></script>
-  <script type="module" src="systems/evo-cinema.js?v=ohana-302"></script>
+  <script type="module" src="game.js?v=ohana-303"></script>
+  <script type="module" src="systems/title.js?v=ohana-303"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-303"></script>
+  <script type="module" src="systems/atrium-interact.js?v=ohana-303"></script>
+  <script type="module" src="systems/ending.js?v=ohana-303"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-303"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-303"></script>
+  <script type="module" src="systems/supreme-cinema.js?v=ohana-303"></script>
+  <script type="module" src="systems/demo.js?v=ohana-303"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-303"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-302", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-303", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

@@ -173,7 +173,7 @@ export function createRoomService(store, options = {}) {
           tick: 0,
           createdAt: now(),
           updatedAt: now(),
-          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: "beach", actions: [] }],
+          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: "hub", actions: [] }],
         };
         const write = await store.setJSON(`room:${roomCode}`, room, { onlyIfNew: true });
         if (write.modified) return { ...snapshot(room, room.players[0].id), identity: { playerId: room.players[0].id, token: room.players[0].token, connectionEpoch: 1 } };
@@ -197,14 +197,14 @@ export function createRoomService(store, options = {}) {
           if (state.players.length >= 2) throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
           identity.playerId = crypto.randomUUID();
           identity.token = credential();
-          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, actions: [] });
+          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
         }
         if (state.players.length === 2 && state.players.every((player) => player.connected && player.characterId && player.ready)) {
           resumeCombat(state, now());
           state.phase = "playing";
           for (const entry of state.players) {
-            entry.worldRoomId = entry.worldRoomId || "beach";
-            entry.x = entry.slot === 0 ? 420 : 1500;
+            entry.worldRoomId = entry.worldRoomId || "hub";
+            entry.x = entry.slot === 0 ? 420 : 550;
             entry.y = 1070;
             entry.facing = entry.slot === 0 ? 1 : -1;
             entry.pose = { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 };
@@ -245,7 +245,7 @@ export function createRoomService(store, options = {}) {
         player.lastSeenAt = now();
         if (state.players.length === 2 && state.players.every((entry) => entry.connected && entry.characterId && entry.ready)) {
           state.phase = "playing";
-          for (const entry of state.players) entry.worldRoomId = entry.worldRoomId || "beach";
+          for (const entry of state.players) entry.worldRoomId = entry.worldRoomId || "hub";
           state.combat ||= createCombat(state.players, now());
         }
       });
