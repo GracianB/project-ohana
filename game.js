@@ -24,6 +24,7 @@ import { portals } from "./systems/portals.js";
 import { DeathFx } from "./systems/death-fx.js";
 import { Rain } from "./systems/rain.js";
 import { Surprises } from "./systems/surprises.js";
+import { Festival } from "./systems/v1002-festival.js";
 import { createBossNido, updateBossNido } from "./systems/boss-nido.js";
 import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
@@ -123,6 +124,7 @@ worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y
 shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), experience: new ExperienceDirector(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
 };
 
+Festival.mount();
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 
 function vfxUnit(seed) {
@@ -240,7 +242,8 @@ DOM.help?.classList.contains("open") ||
 DOM.map?.classList.contains("open") ||
 DOM.pause?.classList.contains("open") ||
 DOM.finale?.classList.contains("show") ||
-DOM.evoStage?.classList.contains("show")
+DOM.evoStage?.classList.contains("show") ||
+Festival.isOpen()
 );
 }
 function setMuted(on) {
@@ -287,6 +290,7 @@ pauseLayer.setAttribute("aria-hidden", paused ? "false" : "true");
 }function closeOverlays() {
 DOM.help?.classList.remove("open");
 DOM.map?.classList.remove("open");
+Festival.close();
 setPaused(false);
 }
 function hitStop(frames) {
@@ -312,6 +316,7 @@ if (!canAct()) return;
 if (!portals.tryUse(game.player, game)) evolve("manual");
 }
 function escape() {
+if (Festival.isOpen()) { Festival.close(); return; }
 if (DOM.evoStage?.classList.contains("show") || DOM.finale?.classList.contains("show")) return;
 if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
 if (DOM.help?.classList.contains("open")) { DOM.help.classList.remove("open"); return; }
@@ -577,6 +582,7 @@ beep(r.boss ? "boss" : "door");
 playMusic(themeForRoom(id));
 worldClear();
 Surprises.onEnterRoom(game);
+Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
 save();
@@ -658,6 +664,7 @@ game.clearTicks = 0;
 game.dragonTrial = null;
 game.best = null;
 Surprises.reset();
+Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
 game.running = true; closeOverlays();
 let roomId = "hub";
@@ -2575,6 +2582,7 @@ portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
+Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
 for (const o of game.orbs) {
 if (o.taken || !visibleForRender(o,game.cam,camW(),camH())) continue;
 drawCrystal(o);
@@ -2976,6 +2984,7 @@ game.combatFx?.update();
 if (DeathFx.isPlaying()) DeathFx.update(game);
 Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
 Surprises.update(game, t);
+Festival.update(game, t);
 updateCam();
 onlineCoop.tick(game);
 if ((t & 3) === 0) updateHUD();

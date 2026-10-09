@@ -1,3 +1,12 @@
+## 09/10/2026 · OHANA V100.2 · Fiesta de los cien · ohana-302
+
+- **100 descubrimientos interactivos diferentes**, diez por cada una de las diez salas, con nombre, localización sobre plataformas reales, silueta Canvas y diez clases de respuesta.
+- **Recompensas jugables moderadas**: experiencia, curación, invulnerabilidad breve, combo, puntuación y celebración. Conserva físicas, jefe y red originales.
+- **Álbum 0/100** en portada, durante la partida y con tecla B. Recuerda el progreso en el navegador y muestra diez capítulos con sus objetos aún ocultos.
+- Diseño adaptativo, compatibilidad con movimiento reducido y render limitado a diez objetos en la sala activa.
+- Continúan intactos los diez héroes, el multijugador SME y el final único de la V100 Especial.
+- **Estado: candidata**. Solo publicar con Node, Browser, Multiplayer, Visual, Release Gate y Pages en verde.
+
 ## 09/10/2026 · OHANA V100 ESPECIAL · El Claro de los Diez · ohana-301
 
 - **Nueva selección directa**: diez ilustraciones originales Canvas simultáneas; cuadrícula de 5 × 2 en escritorio y 2 × 5 adaptable con desplazamiento vertical en móvil, sin carrusel ni flechas.

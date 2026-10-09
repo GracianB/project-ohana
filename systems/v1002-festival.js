@@ -195,9 +195,9 @@ class FestivalDirector{
       }
     }
   }
-  draw(ctx,cam,t,game){
+  draw(ctx,cam,t,game,view={}){
     if(!ctx||!this.items.length||game?.finale||game?.won)return;
-    const W=game?.viewW||1280,H=game?.viewH||720;
+    const W=view.w||1280,H=view.h||720;
     for(const item of this.items){
       const x=item.x-(cam?.x||0),y=item.y-(cam?.y||0);
       if(x< -45||x>W+45||y< -45||y>H+45)continue;
