@@ -13,7 +13,7 @@ class CountedStore {
     const current=this.entries.get(key);
     if(options.onlyIfNew&&current||options.onlyIfMatch&&(!current||current.etag!==options.onlyIfMatch))return {modified:false};
     this.writes++;
-    this.entries.set(key,{data:structuredClone(value),etag='"'+this.writes+'"'});
+    this.entries.set(key,{data:structuredClone(value),etag:'"'+this.writes+'"'});
     return {modified:true,etag:'"'+this.writes+'"'};
   }
 }
