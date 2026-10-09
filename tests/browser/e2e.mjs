@@ -243,6 +243,25 @@ async function auditPage(page, label) {
   assert.ok(foundMoment.sceneCount>=1 && foundMoment.living.some(id=>id.startsWith('hub-')),label+': V102 first original-world pickup has no authored animation '+JSON.stringify(foundMoment));
   assert.equal(foundMoment.remainingAfter,foundMoment.remainingBefore-1,label+': collectible not removed');
   assert.equal(foundMoment.toast,true,label+': collection reward not displayed');
+  // V104 modules must load in the browser; Lab/Ridge scene drawing must be
+  // finite and static under reduced-motion without moving the real game.
+  const v104Probe=await page.evaluate(async()=>{
+    const { V104_MOMENTS,V104Memories }=await import('/systems/v104-living-stories.js');
+    const { FESTIVAL_CATALOG }=await import('/systems/v1002-festival.js');
+    const examples=[{id:'lab-0',x:320,y:240},{id:'ridge-9',x:600,y:240}];
+    const ids=[];
+    for(let i=0;i<examples.length;i++){
+      const scene=V104Memories.collect(examples[i],i*20);
+      ids.push(scene?.id||'');
+    }
+    const snap=V104Memories.snapshot(20);
+    V104Memories.clear();
+    return {count:V104_MOMENTS.length,ids,snapshot:snap,valid:V104_MOMENTS.every(m=>FESTIVAL_CATALOG.some(x=>x.id===m.id))};
+  });
+  assert.equal(v104Probe.count,20,label+': V104 memories missing');
+  assert.deepEqual(v104Probe.ids,['lab-0','ridge-9'],label+': V104 events not authored');
+  assert.equal(v104Probe.valid,true,label+': V104 alters original collection');
+  assert.deepEqual(v104Probe.snapshot.active,['ridge-9'],label+': V104 leaked events across worlds');
   if (label === 'desktop') {
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(1350);
