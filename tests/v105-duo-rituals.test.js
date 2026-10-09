@@ -19,7 +19,7 @@ class MemoryStore {
 function setup(){
  let time=1_800_000_000_000,cred=0;
  const svc=createRoomService(new MemoryStore(),{
-  now:()=>time,makeCode:()=>"HOKU25",makeCredential:()=>"token-"+(++cred)
+  now:()=>time,makeCode:()=>"HKU225",makeCredential:()=>"token-"+(++cred)
  });
  return {svc,now:()=>time,advance:(ms)=>{time+=ms;}};
 }
