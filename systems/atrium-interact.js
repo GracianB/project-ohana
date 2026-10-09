@@ -1,7 +1,7 @@
 // The family plays back. Character paint stays in characters/.
 const stage = document.getElementById("char-select");
 const grid = document.getElementById("chars-grid");
-if (stage && grid) {
+if (stage && grid && stage.dataset.selectorMode !== "family-grid") {
   const LINES = {
     kilo: ["¡Polen!", "Te guardo sitio", "Ukulele listo"],
     stitcho: ["¡Pared!", "Plasma on", "Te trepo"],

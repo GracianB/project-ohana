@@ -235,3 +235,32 @@
   }
   #ohana-intro.family-welcome .oi-welcome strong{font-size:clamp(54px,15vw,80px)!important;}
 }
+
+/* V100 Especial: the opening OHANA is the centered headline, not a corner bug. */
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+  left:50%!important;right:auto!important;top:clamp(70px,11vh,130px)!important;bottom:auto!important;
+  translate:-50% 0!important;max-width:min(650px,90vw)!important;width:min(650px,90vw)!important;
+  text-align:center!important;justify-items:center!important;gap:8px!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+  font-size:clamp(70px,8.5vw,122px)!important;line-height:.94!important;
+  letter-spacing:.05em!important;text-shadow:0 6px 36px rgba(0,0,0,.6)!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome small{
+  color:#fff4dc!important;font-size:clamp(11px,1.2vw,15px)!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+  left:50%!important;right:auto!important;bottom:max(36px,6vh)!important;
+  translate:-50% 0!important;white-space:nowrap!important;
+}
+@media(max-width:620px){
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+    top:max(52px,9vh)!important;max-width:94vw!important;width:94vw!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+    font-size:clamp(53px,15vw,85px)!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+    bottom:max(28px,5vh)!important;
+  }
+}
