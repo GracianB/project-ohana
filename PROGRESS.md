@@ -1,3 +1,12 @@
+## 10/10/2026 · OHANA V106 · Cien recuerdos, museo y epílogo familiar · ohana-310
+
+- **Recuerdos 81–100:** Caldera y Nido Final reciben diez viñetas Canvas originales cada uno, con motivos y relatos únicos conectados a sus coleccionables reales.
+- **Museo interactivo:** cada recuerdo descubierto tiene un botón «✦ Ver» en su capítulo. Abre su retrato Canvas sin salir del álbum, sin mover al jugador, sin tráfico nuevo ni alterar guardados. Los recuerdos bloqueados no se pueden abrir. Escape restaura el foco.
+- **Atlas 100/100:** muestra diez sellos de capítulo y permite revivir la celebración de la familia completa. La repetición no concede recompensas.
+- **Móvil y accesibilidad:** retratos estáticos sin bucle animado, navegación por teclado, colores de cada mundo y movimiento reducido.
+- **Compatibilidad:** los mismos 100 coleccionables, misma clave de almacenamiento `ohana-festival-v1002` y mismo progreso. Netlify y Santuarios Dúo V105 intactos.
+- **QA:** test de 100 escenas distintas, galería cerrada a piezas bloqueadas, render Canvas, E2E del álbum y `ohana-310` en SW/HTML; controles Node, Browser, Multiplayer, Visual, Release Gate y Pages. Validación Netlify de dos dispositivos en V111.
+
 ## 09/10/2026 · OHANA V105 · Santuarios Dúo reforzados · ohana-309
 
 - **La V105 de recuerdos 61–80 ya existe en #246:** Órbita y Arrecife mantienen veinte dibujos y microhistorias únicos, objetos originales y el guardado `ohana-festival-v1002`. Esta contribución se construye sobre esa PR para no duplicar código.

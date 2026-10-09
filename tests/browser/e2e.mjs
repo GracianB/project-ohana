@@ -243,6 +243,25 @@ async function auditPage(page, label) {
   assert.ok(foundMoment.sceneCount>=1 && foundMoment.living.some(id=>id.startsWith('hub-')),label+': V102 first original-world pickup has no authored animation '+JSON.stringify(foundMoment));
   assert.equal(foundMoment.remainingAfter,foundMoment.remainingBefore-1,label+': collectible not removed');
   assert.equal(foundMoment.toast,true,label+': collection reward not displayed');
+
+  // V106 museum: only previously earned memories are replayable.
+  await page.locator('#btn-festival').click();
+  const museumEntry=page.locator('#festival-album [data-festival-memory="hub-0"]');
+  assert.equal(await museumEntry.count(),1,label+': earned memory lacks museum entry');
+  assert.equal(await page.locator('#festival-album [data-festival-memory="hub-1"]').count(),0,label+': locked memory can be replayed');
+  await museumEntry.click();
+  assert.equal(await page.locator('#festival-album .festival-memory-preview').evaluate(el=>el.hidden),false,label+': museum preview not open');
+  const portraitPixels=await page.locator('#festival-album .festival-memory-preview canvas').evaluate(el=>{
+    const data=el.getContext('2d').getImageData(0,0,el.width,el.height).data;
+    let drawn=0;for(let i=3;i<data.length;i+=4)if(data[i])drawn++;
+    return drawn;
+  });
+  assert.ok(portraitPixels>100,label+': museum did not paint original Canvas image');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#festival-album .festival-memory-preview').evaluate(el=>el.hidden),true,label+': museum Escape did not return to album');
+  assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'),'false',label+': museum Escape closed entire album');
+  await page.locator('#festival-album .festival-close').click();
+
   // V104 modules must load in the browser; Lab/Ridge scene drawing must be
   // finite and static under reduced-motion without moving the real game.
   const v104Probe=await page.evaluate(async()=>{
