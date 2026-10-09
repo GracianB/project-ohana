@@ -1,5 +1,5 @@
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
-import { progressDuoRitual, duoPlateState } from "../../multiplayer/duo-altars.js";
+import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_RETRIES = 4;
@@ -61,6 +61,7 @@ function snapshot(room, viewerId) {
     combat: room.combat ? structuredClone(room.combat) : null,
     engineMode: !!room.engineMode,
     duoAltars: structuredClone(room.duoAltars || {}),
+    duoCharge: room.duoChannel ? { roomId:room.duoChannel.roomId, startedAt:room.duoChannel.startedAt, durationMs:DUO_HOLD_MS } : null,
     updatedAt: room.updatedAt,
   };
 }
@@ -449,6 +450,8 @@ export function createRoomService(store, options = {}) {
         if (!player) throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
         if (identity.connectionEpoch !== player.connectionEpoch) return;
         player.connected = false;
+        // A disconnected partner breaks the ritual. Resuming cannot reuse a prior hold.
+        state.duoChannel = null;
         if (state.phase === "playing") {
           state.phase = "lobby";
           if (state.combat && state.combat.pausedAt == null) state.combat.pausedAt = now();
