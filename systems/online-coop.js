@@ -2,13 +2,13 @@ import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
 import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
+import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
-const SEND_INTERVAL_MS = 125;
-const POLL_INTERVAL_MS = 180;
+// Adaptive pacing replaces fixed 125ms mutation + 180ms polling bursts.
 const START_ROOM = "hub";
 // Legacy stage values are only a fallback for old sessions; the actual game loads all 10 original rooms.
 const STAGE_ROOMS = ["hub", "jungle", "volcano", "boss", "boss"];
@@ -71,6 +71,10 @@ class OnlineCoop {
     this.sequence = 0;
     this.lastSend = 0;
     this.lastPoll = 0;
+    this.lastSnapshotAt = 0;
+    this.rttMs = 0;
+    this.requestSamples = 0;
+    this.lastSentPose = null;
     this.polling = false;
     this.mutationBusy = false;
     this.pendingMutations = [];
@@ -121,6 +125,10 @@ class OnlineCoop {
     this.sequence = 0;
     this.lastSend = 0;
     this.lastPoll = 0;
+    this.lastSnapshotAt = 0;
+    this.rttMs = 0;
+    this.requestSamples = 0;
+    this.lastSentPose = null;
     this.error = "";
     this.mutationBusy = false;
     this.pendingPosition = null;
@@ -285,7 +293,11 @@ class OnlineCoop {
     if (!this.enabled || this.polling || !this.roomId || !this.identity) return;
     const now = performance.now();
     if (!immediate && now < this.retryAfter) return;
-    if (!immediate && now - this.lastPoll < POLL_INTERVAL_MS) return;
+    const pacing=networkPacing(this.rttMs,this.retryFailures,this.snapshot?.phase==="lobby");
+    if(!immediate && now-this.lastPoll<pacing.pollMs)return;
+    // Mutation responses already contain a full snapshot, so a second poll
+    // immediately after each move merely doubles Netlify Functions + Blob I/O.
+    if(!immediate && now-this.lastSnapshotAt<pacing.pollMs)return;
 
     this.polling = true;
     this.lastPoll = now;
@@ -296,6 +308,7 @@ class OnlineCoop {
         identity: this.identity,
       });
       this.snapshot = snapshot;
+      this.recordNetworkReply(now);
       this.updateRemote(snapshot, game);
       this.sequence = Math.max(
         this.sequence,
@@ -374,6 +387,7 @@ class OnlineCoop {
           return {...item,identity:this.identity,sequence,actionId:makeActionId(this.identity.playerId,sequence)};
         });
       this.resumeFailures=0;
+      this.lastSentPose=null;
       this.clearRetry();
       return true;
     }catch(error){
@@ -382,6 +396,17 @@ class OnlineCoop {
       else this.markRetry(error);
       return false;
     }finally{this.reconnecting=false;}
+  }
+
+  recordNetworkReply(started){
+    const now=performance.now();
+    this.lastSnapshotAt=now;
+    this.rttMs=roundtripEWMA(this.rttMs,now-started);
+    this.requestSamples++;
+    if(typeof document!=="undefined"){
+      document.body.dataset.coopRtt=String(Math.round(this.rttMs));
+      document.body.dataset.coopMoveInterval=String(networkPacing(this.rttMs,this.retryFailures).moveMs);
+    }
   }
 
   markRetry(error){
@@ -424,11 +449,9 @@ class OnlineCoop {
 
   async sendPosition(game, force = false) {
     if (!this.enabled || !game.player || game.player.dead || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
-    const now = performance.now();
-    if (!force && now - this.lastSend < SEND_INTERVAL_MS) return;
-    this.lastSend = now;
-    const sequence = ++this.sequence;
-    this.enqueueMutation({
+    const now=performance.now();
+    const pacing=networkPacing(this.rttMs,this.retryFailures,this.snapshot?.phase==="lobby");
+    const pose={
       action: "move",
       roomId: this.roomId,
       identity: this.identity,
@@ -448,7 +471,12 @@ class OnlineCoop {
       melee: finite(game.player.melee, 0),
       dash: finite(game.player.dash, 0),
       worldRoomId: game.roomId || START_ROOM,
-    });
+    };
+    if(!shouldSendPosition(this.lastSentPose,pose,now-this.lastSend,pacing,force))return;
+    const sequence=++this.sequence;
+    this.lastSentPose=pose;
+    this.lastSend=now;
+    this.enqueueMutation({...pose,sequence,actionId:makeActionId(this.identity.playerId,sequence)});
     void this.drainMutations(game);
   }
 
@@ -459,9 +487,11 @@ class OnlineCoop {
       while (this.enabled && this.roomId && this.identity && this.pendingMutations.length) {
         const body = this.pendingMutations.shift();
         try {
+          const started=performance.now();
           const data = await post(body);
           if (data) {
             this.snapshot = data;
+            this.recordNetworkReply(started);
             this.updateRemote(data, game);
           }
           this.clearRetry();
@@ -737,6 +767,11 @@ class OnlineCoop {
     if(!this.enabled)return;
     drawDuoAltars(ctx,game,this.remote?{...this.remote,worldRoomId:this.remoteWorld}:null,this.snapshot,t,!!game.reduceMotion);
     if (!this.remote || this.remoteWorld !== game.roomId) return;
+    // Character vector artwork is expensive. Cull before invoking the entire
+    // character renderer when the teammate is outside camera by a wide margin.
+    const vx=this.remote.x-(game.cam?.x||0),vy=this.remote.y-(game.cam?.y||0);
+    const vw=Number(game.viewW)||1280,vh=Number(game.viewH)||720;
+    if(vx < -240 || vx > vw+240 || vy < -300 || vy > vh+300)return;
     const definition = ROSTER.find((item) => item.id === this.remote.characterId);
     if (!definition) return;
     const evo = Math.max(0, Math.min(4, Number(this.remote.evolution) || 0));
