@@ -365,8 +365,10 @@ export function createRoomService(store, options = {}) {
       if (!Number.isSafeInteger(seq) || seq < 1) throw new RoomError("INVALID_SEQUENCE", "La señal no es válida.");
       const actionId = String(payload?.actionId || "");
       const signalKind = String(payload?.signalKind || "");
-      if (!actionId || actionId.length > 96 || !signalKind || signalKind.length > 32) {
-        throw new RoomError("INVALID_SIGNAL", "La señal no es válida.");
+      const permittedKinds=new Set(["action","hit","hurt","orb","room","state","duo"]);
+      const payloadBytes=JSON.stringify(payload?.payload??{}).length;
+      if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>1800){
+        throw new RoomError("INVALID_SIGNAL","Señal inválida o demasiado grande.");
       }
       const { room } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
