@@ -334,14 +334,11 @@ const atriumMode = document.getElementById("char-select")?.classList.contains("a
 
 cards.forEach((el) => {
   const selected = el.dataset.id === id;
-  // Match keyboard and ARIA visibility to the actual three-card CSS carousel.
-  const visible = atriumMode || [id, prev, next].includes(el.dataset.id);
+  // V100 Especial: all ten heroes share a single native, accessible grid.
+  const visible = true;
   const wasVisible = el.getAttribute("aria-hidden") !== "true";
   el.classList.toggle("selected", selected);
-  el.classList.toggle("is-prev2", el.dataset.id === prev2 && ids.length > 3);
-  el.classList.toggle("is-prev", el.dataset.id === prev && ids.length > 1);
-  el.classList.toggle("is-next", el.dataset.id === next && ids.length > 2);
-  el.classList.toggle("is-next2", el.dataset.id === next2 && ids.length > 3);
+  el.classList.remove("is-prev2", "is-prev", "is-next", "is-next2");
   if (selected || visible !== wasVisible) {
     const canvas = el.querySelector("canvas");
     if (canvas) { canvas._needsFit = true; canvas._lastPaintAt = 0; }
@@ -401,7 +398,7 @@ if (status && selectedDef) {
   status.textContent =
     "Personaje seleccionado: " + selectedDef.name +
     ". " + (selectedDef.forms?.[0]?.name || "Forma inicial") +
-    ". Usa las flechas para cambiar.";
+    ". Elige cualquier personaje del panel.";
 }
 
 const focused = document.activeElement;
@@ -512,6 +509,7 @@ wrap.querySelectorAll(".char-card").forEach((el) => {
     el.appendChild(rail);
   }
   el.addEventListener("pointerdown", () => mark(def.id));
+  el.addEventListener("focus", () => mark(def.id));
   el.addEventListener("pointerenter", () => { if (selectedId !== def.id) sfx("ui"); });
 });
 portraitCanvases = [...wrap.querySelectorAll(".char-card canvas")];
@@ -533,10 +531,7 @@ if (typeof ResizeObserver !== "undefined") {
 mountLook(wrap);
 applyLook();
 buildDots();
-const prevBtn = document.getElementById("roster-prev");
-const nextBtn = document.getElementById("roster-next");
-if (prevBtn) prevBtn.onclick = () => stepRoster(-1);
-if (nextBtn) nextBtn.onclick = () => stepRoster(1);
+// V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
 const play = document.getElementById("btn-play");
 const neu = document.getElementById("btn-new");
@@ -562,10 +557,10 @@ function refreshContinue() {
 refreshContinue();
 addEventListener("keydown", (e) => {
   if (document.body.classList.contains("playing")) return;
-  if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
     if (!document.body.classList.contains("intro-complete")) return;
     e.preventDefault();
-    stepRoster(e.key === "ArrowLeft" ? -1 : 1);
+    stepRoster(e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1);
     return;
   }
   if (e.key !== "Enter" || e.repeat || document.activeElement?.closest("button, a")) return;

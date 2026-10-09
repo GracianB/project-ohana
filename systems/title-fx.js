@@ -2,7 +2,8 @@
 // One coherent place, ten hero affinities. The selector stays in Hoku while
 // the chosen hero opens a living procedural window to their world.
 const cv = document.getElementById("title-fx");
-if (cv) {
+// Static family-grid backdrop replaces continuous full-screen Canvas rendering.
+if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "family-grid") {
   const ctx = cv.getContext("2d", { alpha:true });
   const RMQ = matchMedia("(prefers-reduced-motion: reduce)");
   let reduce = RMQ.matches;
