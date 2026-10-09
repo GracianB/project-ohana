@@ -1,3 +1,13 @@
+## 09/10/2026 · OHANA V100 ESPECIAL · El Claro de los Diez · ohana-301
+
+- **Nueva selección directa**: diez ilustraciones originales Canvas simultáneas; cuadrícula de 5 × 2 en escritorio y 2 × 5 adaptable con desplazamiento vertical en móvil, sin carrusel ni flechas.
+- **Nuevo escenario de portada**: «OHANA» centrado, jerarquía legible y horizonte Hoku fijo por CSS en lugar de una escena de fondo Canvas de pantalla completa en bucle.
+- **Derrota de la Reina**: sprite original visible, fracturas y explosión determinista de 26 fragmentos; puente de 210 ticks sin reactivar peligros o enemigos.
+- **Cinemática final única**: el epílogo de 14,5 segundos empieza cuando la Reina ya se ha roto, sin repetir la caída ni mostrar el cartel antes de la familia.
+- **Intro tipo cómic**: burbujas limitadas al viewport y separadas si se solapan, protagonistas más proporcionados en móviles y dos nuevos gags.
+- **Protección**: cache/HTML ohana-301, 10 personajes/5 formas, multijugador SME/Dino/Cuerno sin tocar, contratos QA nuevos y adaptados.
+- **Estado: PR candidata**. Publicar solo al pasar Node, Browser E2E, Multiplayer, Visual Matrix, Release Gate y Pages.
+
 ## 09/10/2026 · OHANA V100 · diez héroes, diez celebraciones · ohana-300
 
 - Retrato final con diez coreografías deterministas y personales; no se multiplica el número de dibujos, las hitboxes ni el coste de la simulación.
