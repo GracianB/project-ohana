@@ -36,6 +36,7 @@ import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
+import { canvasDpr,createFramePressureMonitor } from "./systems/frame-pressure.js";
 import { bindInput } from "./engine/input.js";
 import { beginPlatformDrop, dropIgnoresPlatform, advancePlatformDrop } from "./engine/platform-drop.js";
 import { bindDialogs } from "./systems/dialogs.js";
@@ -71,7 +72,9 @@ reverseAirAccel: 0.36,
 groundBrake: 0.68,
 airBrake: 0.94,
 });
-const clock = createFixedClock();
+const clock = createFixedClock({ maxSteps: 3 });
+const framePressure=createFramePressureMonitor();
+let adaptiveLowRes=false;
 const $ = (id) => document.getElementById(id);
 const DOM = {
 help: $("help"),
@@ -224,9 +227,9 @@ function camZoom() { return getLook() === "paint" ? 1 : CAM_ZOOM; }
 function camW() { return viewW / camZoom(); }
 function camH() { return viewH / camZoom(); }
 function fit() {
-viewDpr = reduceMotion ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
 viewW = Math.max(320, innerWidth | 0);
 viewH = Math.max(240, innerHeight | 0);
+viewDpr = canvasDpr(viewW,viewH,window.devicePixelRatio || 1,reduceMotion,adaptiveLowRes);
 const bw = Math.round(viewW * viewDpr);
 const bh = Math.round(viewH * viewDpr);
 if (canvas.width !== bw) canvas.width = bw;
@@ -2828,7 +2831,7 @@ if (DOM.hpBar.style.width !== w) DOM.hpBar.style.width = w;
 }
 setText(DOM.hpText, hp + "/" + p.maxHealth);
 const avatarKey = p.id + ":" + p.evo;
-if (avatarKey !== hudAvatarKey || (t & 31) === 0) {
+if (avatarKey !== hudAvatarKey || (t & 63) === 0) {
 hudAvatarKey = avatarKey;
 drawHudAvatar(p);
 }
@@ -2974,7 +2977,7 @@ if (game.finale) {
   game.combatFx?.update();
   updateCam();
   onlineCoop.tick(game);
-  if ((t & 3) === 0) updateHUD();
+  if (t % 6 === 0) updateHUD();
   return;
 }
 tickWorldSummon();
@@ -2990,7 +2993,7 @@ Surprises.update(game, t);
 Festival.update(game, t);
 updateCam();
 onlineCoop.tick(game);
-if ((t & 3) === 0) updateHUD();
+if (t % 6 === 0) updateHUD();
 if (t % 300 === 0) save();
 }
 function containRuntimeFault(scope, error) {
@@ -3010,6 +3013,10 @@ try { DOM.pause?.classList.add("open"); } catch (_) {}
 let renderedTick = -1;
 function loop(now) {
 if (game.running && !document.hidden) {
+if (!adaptiveLowRes && framePressure.observe(now)) {
+  adaptiveLowRes = true;
+  fit();
+}
 try {
   clock.advance(now, step);
 } catch (error) {

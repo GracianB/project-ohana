@@ -34,7 +34,7 @@ if (stage && grid && stage.dataset.selectorMode !== "family-grid") {
   const pointer = { x: innerWidth * .5, y: innerHeight * .4, on: false };
   let awake = null;
   let gagAt = 0, lastAtriumFrame = 0, pointerPending = false, fxRaf = 0;
-  const ATRIUM_FRAME_INTERVAL_MS = 65; // ~15fps animated lines; heroes have separate budgets.
+  const ATRIUM_FRAME_INTERVAL_MS = 105; // ~9fps ambient FX; controls stay immediate.
 
   const cards = () => [...grid.querySelectorAll(".char-card")];
   const muted = () => document.getElementById("btn-mute")?.getAttribute("aria-pressed") === "true";

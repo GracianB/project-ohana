@@ -89,8 +89,8 @@ test("V106 · museum, atlas, final reward, browser and cache contracts",()=>{
  assert.match(sw,/v106-final-memories\.js\?v=/);
  assert.match(sw,/v106-memory-gallery\.js\?v=/);
  assert.match(sw,/v106-memory-museum\.css\?v=/);
- assert.match(sw,/const VERSION = "ohana-310"/);
- assert.match(index,/ohana-310/);
+ assert.match(sw,/const VERSION = "ohana-311"/);
+ assert.match(index,/ohana-311/);
  assert.match(browser,/portraitPixels/);
  assert.match(festival,/ohana-festival-v1002/);
 });

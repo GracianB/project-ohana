@@ -23,11 +23,11 @@ test("V81 Canvas memory: only three live cards and one DPR for side previews",()
  assert.match(title,/canvas\.width = 1;\s*canvas\.height = 1;/);
  assert.match(title,/const sidePreview = !cv\.closest\("\.char-card"\)\?\.classList\.contains\("selected"\)/);
  assert.match(title,/Math\.min\(sidePreview \? 1 : maxDpr, window\.devicePixelRatio \|\| 1\)/);
- assert.match(title,/SIDE_PREVIEW_INTERVAL_MS = 120/);
+ assert.match(title,/SIDE_PREVIEW_INTERVAL_MS = 190/);
  assert.match(browser,/offscreenBuffers/);
  const atrium=read("systems/atrium-interact.js");
  const atriumCss=read("atrium-interact.css");
- assert.match(atrium,/ATRIUM_FRAME_INTERVAL_MS = 65/);
+ assert.match(atrium,/ATRIUM_FRAME_INTERVAL_MS = 105/);
  assert.match(atrium,/pointerPending = true/);
  assert.match(atrium,/document\.body\.classList\.contains\("playing"\)/);
  assert.match(atriumCss,/#char-select\.atrium-on #chars \.char-card\.selected,[\s\S]*?filter:none!important/);

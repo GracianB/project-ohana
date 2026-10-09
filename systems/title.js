@@ -82,8 +82,8 @@ let raf = 0;
 let portraitCanvases = [];
 // Center character keeps 24fps; side previews refresh only when needed.
 let portraitResizeObserver = null;
-const SIDE_PREVIEW_INTERVAL_MS = 120;
-const portraitClock = createFixedClock({ stepMs: 1000 / 24, maxSteps: 1 });
+const SIDE_PREVIEW_INTERVAL_MS = 190;
+const portraitClock = createFixedClock({ stepMs: 1000 / 20, maxSteps: 1 });
 
 const HERO_SHOWCASE = Object.freeze({
 kilo:    ["idle","victory","idle"],
@@ -117,7 +117,7 @@ portraitClock.advance(now, () => {
     // Atrium shows all ten; its distant characters are stills with rare
     // refreshes, while immediate neighbors retain their short 120ms cadence.
     const neighbor = card.classList.contains("is-prev") || card.classList.contains("is-next");
-    const previewInterval = neighbor ? SIDE_PREVIEW_INTERVAL_MS : 550;
+    const previewInterval = neighbor ? SIDE_PREVIEW_INTERVAL_MS : 900;
     if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < previewInterval) continue;
     cv._lastPaintAt = now;
     const { def, index: idx } = entry;
