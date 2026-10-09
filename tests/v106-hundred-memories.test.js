@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { V106_MOMENTS,V106MemoryDirector,V106_LIFE,v106Moment } from "../systems/v106-final-memories.js";
-import { MEMORY_MUSEUM_ROOMS,canRevisitMemory,paintMemoryPortrait,memoryAtlasData } from "../systems/v106-memory-gallery.js";
+import { MEMORY_MUSEUM_ROOMS,canRevisitMemory,paintMemoryPortrait,memoryAtlasData,authoredMemoryStory } from "../systems/v106-memory-gallery.js";
 import { FESTIVAL_CATALOG,FESTIVAL_ROOMS,FESTIVAL_KEY } from "../systems/v1002-festival.js";
 import { LIVING_MEMORIES } from "../systems/v102-living-memories.js";
 import { V103_LIVING_MOMENTS } from "../systems/v103-living-stories.js";
@@ -49,6 +49,9 @@ test("V106 · museum never exposes undiscovered memories, keeps every collection
  const claimed=new Set(["hub-0","volcano-1","boss-9"]);
  assert.deepEqual(MEMORY_MUSEUM_ROOMS,["hub","beach","jungle","cave","lab","ridge","space","reef","volcano","boss"]);
  assert.equal(canRevisitMemory("hub-0",claimed),true);
+ assert.match(authoredMemoryStory("hub-0"),/abrazo/);
+ assert.match(authoredMemoryStory("boss-9"),/Cien recuerdos/);
+ assert.equal(authoredMemoryStory("unwritten-2"),null);
  assert.equal(canRevisitMemory("boss-9",claimed),true);
  assert.equal(canRevisitMemory("boss-8",claimed),false);
  assert.equal(canRevisitMemory("boss-9-malformed",claimed),false);

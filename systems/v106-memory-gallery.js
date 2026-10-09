@@ -1,11 +1,11 @@
 // OHANA V106 · The Memory Museum
 // A still portrait of each *earned* discovery, never another reward or unlock.
 // Drawing uses isolated temporary directors: the live game events remain intact.
-import { LivingMemoryDirector } from "./v102-living-memories.js";
-import { V103MemoryDirector } from "./v103-living-stories.js";
-import { V104MemoryDirector } from "./v104-living-stories.js";
-import { V105MemoryDirector } from "./v105-living-stories.js";
-import { V106MemoryDirector } from "./v106-final-memories.js";
+import { LivingMemoryDirector,memoryMoment } from "./v102-living-memories.js";
+import { V103MemoryDirector,v103Moment } from "./v103-living-stories.js";
+import { V104MemoryDirector,v104Moment } from "./v104-living-stories.js";
+import { V105MemoryDirector,v105Moment } from "./v105-living-stories.js";
+import { V106MemoryDirector,v106Moment } from "./v106-final-memories.js";
 const ENGINES=Object.freeze({
  hub:LivingMemoryDirector,beach:LivingMemoryDirector,
  jungle:V103MemoryDirector,cave:V103MemoryDirector,
@@ -14,6 +14,9 @@ const ENGINES=Object.freeze({
  volcano:V106MemoryDirector,boss:V106MemoryDirector
 });
 export const MEMORY_MUSEUM_ROOMS=Object.freeze(Object.keys(ENGINES));
+export function authoredMemoryStory(id){
+ return memoryMoment(id)?.story||v103Moment(id)?.story||v104Moment(id)?.story||v105Moment(id)?.story||v106Moment(id)?.story||null;
+}
 export function canRevisitMemory(id,earnedIds){
  if(typeof id!=="string"||!earnedIds||typeof earnedIds.has!=="function"||!earnedIds.has(id))return false;
  const [room,slot,extra]=id.split("-");

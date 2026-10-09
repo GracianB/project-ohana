@@ -55,7 +55,7 @@ class WorldCelebration {
     text(".festival-milestone-verse",all?"Has reunido los cien recuerdos. Diez mundos te recuerdan.":ending.verse);
     text(".festival-milestone-world",ending.name+" · Sello "+ending.seal);
     text(".festival-milestone-epilogue",all?"Nadie se queda atrás. Nunca.":ending.epilogue);
-    text(".festival-milestone-reward",replay?"Este sello ya es tuyo.":all?"La colección completa ya es tuya.":"BONUS · +250 PUNTOS · +25 VIDA · +8 XP");
+    text(".festival-milestone-reward",all?"La colección completa ya es tuya.":replay?"Este sello ya es tuyo.":"BONUS · +250 PUNTOS · +25 VIDA · +8 XP");
     const stars=el.querySelector(".festival-milestone-stars");
     if(stars)stars.textContent="✦  ✧  ✦  ✧  ✦  ✧  ✦  ✧  ✦  ✧";
     el.classList.add("show");
