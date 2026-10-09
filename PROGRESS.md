@@ -1,3 +1,10 @@
+## 09/10/2026 · OHANA V105 · 80 recuerdos vivos · Órbita y Arrecife · ohana-308
+
+- **Veinte nuevas escenas reales:** Órbita (space-0…9) y Arrecife Abismo (reef-0…9) tienen cada uno diez dibujos vectoriales originales y microhistorias relacionadas con sus coleccionables originales, sin nuevos objetos.
+- **Ochenta de cien:** V102/V103/V104/V105 aportan ahora ochenta escenas distintas; el álbum sigue teniendo 100 piezas y se mantiene `ohana-festival-v1002`, guardados, recompensas y sellos 10/10.
+- **Eficiencia y accesibilidad:** dos efectos como máximo, 128 ticks de duración, recorte fuera de cámara, limpieza al cambiar de sala y presentación estática en movimiento reducido. No se alteran física, habilidades, combate, red ni servidor Netlify.
+- **Release:** `ohana-308` en HTML y service worker, nuevo módulo precacheado. Unit, Browser E2E, Multiplayer E2E, Visual y Release Gate obligatorios. Verificación pública real de dos dispositivos y Netlify reservada para V111.
+
 ## 09/10/2026 · OHANA V104 red · consolidación con recuerdos 41–60 · ohana-307
 
 - **Trabajo unificado:** la V104 original de recuerdos para Alien Lab/Cumbre es PR #243. En esta rama se integran mejoras de multijugador sobre esa implementación, sin duplicar ni sustituir dibujos y sin dos colecciones incompatibles.
