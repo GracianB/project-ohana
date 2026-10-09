@@ -3,6 +3,7 @@
 import { addPlayerXp, healPlayer, addScore, addCombo } from "./mutations.js";
 import { FestivalMoment, worldMilestone, chapterSeal, V101_COMPLETION_REWARD } from "./v101-milestones.js";
 import { LivingMemories, memoryMoment } from "./v102-living-memories.js";
+import { V103Memories } from "./v103-living-stories.js";
 // Notifications are injected by game.js; module remains importable in Node tests.
 
 export const FESTIVAL_ROOMS = Object.freeze([{"id":"hub","name":"Claro Ohana","color":"#ffe49c","story":"El claro guarda abrazos que brillan.","titles":["El primer abrazo","Ukelele perdido","Polen dormilón","Risa en el césped","La seta cantante","Un guiño de Kilo","La flor testaruda","El picnic secreto","La hoja que baila","La promesa Ohana"]},{"id":"beach","name":"Costa Hoku","color":"#82e4ec","story":"La costa tiene más historias que granos de arena.","titles":["Concha cantante","Castillo torcido","La ola traviesa","Cangrejo tímido","Botella sin mensaje","Barquito de papel","El pez bromista","Palmera de fiesta","Tesoro de Frita","El abrazo del mar"]},{"id":"jungle","name":"Jungla Alta","color":"#a7e884","story":"Entre lianas, alguien se ríe.","titles":["La liana risueña","Rana directora","Mariposa ninja","Un plátano rebelde","La hoja gigante","Rugido de bolsillo","El nido vacío","Musgo saltarín","El escondite Stitcho","Coro de la jungla"]},{"id":"cave","name":"Cueva Azul","color":"#adceff","story":"Las piedras también tienen secretos.","titles":["Eco de gato","Cristal del bostezo","Murciélago poeta","Piedra con ojos","La gota valiente","El túnel musical","La luna en una roca","Huella invisible","Michi encontró luz","El corazón de la cueva"]},{"id":"lab","name":"Alien Lab","color":"#7beaff","story":"Ni los científicos pueden explicar estas tonterías.","titles":["Chispa experimental","Botón prohibido","Robot con hipo","La probeta azul","Satélite miniatura","Calcetín espacial","Rayo de bolsillo","El mensaje alien","Chispín hace ciencia","Experimento amistad"]},{"id":"ridge","name":"Cumbre","color":"#e6d3ff","story":"El viento se llevó unas risas y las dejó aquí.","titles":["Pluma imposible","El viento juguetón","Nube almohada","Pico musical","Huella del gigante","Trueno pequeñito","Aurora tímida","Un salto eterno","Saludo de Cuerno","La cima compartida"]},{"id":"space","name":"Órbita","color":"#b7b3ff","story":"Hasta las estrellas hacen travesuras.","titles":["Estrella de bolsillo","Cometa risueño","Luna de queso","Un planeta bebé","Satélite mareado","Constelación Yomi","Astronauta de papel","Nebulosa de caramelo","Deseo en órbita","La galaxia Ohana"]},{"id":"reef","name":"Arrecife Abismo","color":"#65ebdf","story":"El fondo del mar tiene su propio carnaval.","titles":["Burbuja traviesa","La perla del pez","Pulpo pianista","Coral de colores","Medusa bailarina","Tesoro de Pizza","Caballito curioso","La anémona amable","Marea de confeti","El festival submarino"]},{"id":"volcano","name":"Caldera","color":"#ffc083","story":"Hasta el fuego puede contar un chiste.","titles":["Brasa amigable","Dragón estornuda","Roca de caramelo","Chimenea musical","Lava de mentira","El huevo valiente","Ceniza de colores","Salto de magma","Fogata en familia","La llama del valor"]},{"id":"boss","name":"Nido Final","color":"#ff91b5","story":"La valentía es más fuerte cuando se comparte.","titles":["Valor de bolsillo","Escama caída","Un latido de luz","Risa contra el miedo","Huella de la Reina","Estrella del Nido","El refugio pequeño","Corazón sin miedo","El último eco","Todos juntos"]}]);
@@ -173,11 +174,12 @@ class FestivalDirector{
     this.album.classList.remove("open");this.album.setAttribute("aria-hidden","true");
     if(this.focusBefore?.isConnected)this.focusBefore.focus({preventScroll:true});
   }
-  reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;FestivalMoment.close();LivingMemories.clear();this.setCounter();}
+  reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;FestivalMoment.close();LivingMemories.clear();V103Memories.clear();this.setCounter();}
   onEnterRoom(game){
     if(!game)return;
     this.lastRoom=game.roomId;
     LivingMemories.onRoom(game.roomId);
+    V103Memories.onRoom(game.roomId);
     this.items=festivalPlacements(game.roomId,game.platforms).filter(it=>!this.runCollected.has(it.id));
     this.setCounter();
   }
@@ -203,7 +205,7 @@ class FestivalDirector{
     game.nums?.add?.(item.x,item.y-30,"✦ "+(this.claimed.size)+"/100",item.color);
     this.toastT=170;
     this.justCollected=item;
-    const memoryScene=LivingMemories.collect(item,this.tickN);
+    const memoryScene=LivingMemories.collect(item,this.tickN)||V103Memories.collect(item,this.tickN);
     this.setCounter();
     if(milestone){
       healPlayer(p,V101_COMPLETION_REWARD.heal);
@@ -261,6 +263,7 @@ class FestivalDirector{
       ctx.restore();
     }
     LivingMemories.draw(ctx,cam,t,{room:game?.roomId||this.lastRoom,reduceMotion:!!game?.reduceMotion,w:W,h:H});
+    V103Memories.draw(ctx,cam,t,{room:game?.roomId||this.lastRoom,reduceMotion:!!game?.reduceMotion,w:W,h:H});
   }
   snapshot(){
     const p=festivalProgress([...this.claimed]);
