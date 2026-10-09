@@ -107,6 +107,7 @@ const PRECACHE = [
   "./systems/coop-v103-pacing.js?v=" + VERSION,
   "./systems/coop-v104-sync.js?v=" + VERSION,
   "./systems/coop-v107-room-follow.js?v=" + VERSION,
+  "./systems/menu-visibility.js?v=" + VERSION,
   "./systems/enemy-director.js?v=" + VERSION,
   "./systems/encounter-spatial.js?v=" + VERSION,
   "./systems/encounter-signals.js?v=" + VERSION,

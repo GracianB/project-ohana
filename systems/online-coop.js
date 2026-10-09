@@ -227,10 +227,31 @@ class OnlineCoop {
       font: "700 11px Outfit, sans-serif",
       letterSpacing: ".08em",
       pointerEvents: "none",
-      backdropFilter: "blur(8px)",
+      backdropFilter: "none",
       boxShadow: "0 8px 28px rgba(0,0,0,.22)",
     });
     document.body.appendChild(badge);
+  }
+
+  // Network status is informational: keep it independent of FPS and physics.
+  // Only mutate DOM text when the observed state actually changes.
+  showNetworkHealth(){
+    if(typeof document==="undefined"||!this.enabled)return;
+    const badge=document.getElementById("online-peer-badge");
+    if(!badge)return;
+    const state=document.body.dataset.onlineState||"connected";
+    let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
+      state==="reconnecting"?"ONLINE · RECONECTANDO":
+      state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
+    if(state==="connected"&&this.requestSamples>0){
+      const ping=Math.max(0,Math.round(this.rttMs));
+      const age=performance.now()-this.remote?.sampleAt;
+      const quality=peerNetworkHealth(this.rttMs,Number.isFinite(age)?Math.max(0,age):0);
+      text+=" · "+ping+" ms";
+      if(quality.quality==="late"||quality.quality==="lost")text+=" · SEÑAL RETRASADA";
+      else if(quality.quality==="slow")text+=" · RED LENTA";
+    }
+    if(badge.textContent!==text)badge.textContent=text;
   }
 
   currentPlayer(snapshot) {
@@ -332,6 +353,7 @@ class OnlineCoop {
           document.body.dataset.onlineState="waiting-peer";
           const badge=document.getElementById("online-peer-badge");
           if(badge)badge.textContent="ONLINE · ESPERANDO COMPAÑERO";
+          this.showNetworkHealth();
         }
         return;
       }
@@ -367,6 +389,7 @@ class OnlineCoop {
       document.body.dataset.onlineError=error?.code||"INVALID_SESSION";
       const badge=document.getElementById("online-peer-badge");
       if(badge)badge.textContent="ONLINE · SESIÓN NO DISPONIBLE";
+      this.showNetworkHealth();
     }
     // No automatic redirect: lets players see the error and retry safely.
   }
@@ -419,6 +442,7 @@ class OnlineCoop {
       document.body.dataset.coopMoveInterval=String(networkPacing(this.rttMs,this.retryFailures).moveMs);
       document.body.dataset.coopNetwork=peerNetworkHealth(this.rttMs).quality;
       document.body.dataset.coopOutOfOrder=String(this.outOfOrderPackets);
+      this.showNetworkHealth();
     }
   }
 
@@ -430,6 +454,7 @@ class OnlineCoop {
       document.body.dataset.onlineState="reconnecting";
       const badge=document.getElementById("online-peer-badge");
       if(badge)badge.textContent="ONLINE · RECONECTANDO";
+      this.showNetworkHealth();
     }
   }
 
@@ -442,6 +467,7 @@ class OnlineCoop {
       document.body.dataset.onlineState=waiting?"waiting-peer":"connected";
       const badge=document.getElementById("online-peer-badge");
       if(badge)badge.textContent=waiting?"ONLINE · ESPERANDO COMPAÑERO":"ONLINE · 2 JUGADORES";
+      this.showNetworkHealth();
     }
   }
 
@@ -547,8 +573,7 @@ class OnlineCoop {
     const events = this.snapshot?.combat?.events || [];
     for (const event of events) {
       if (event.kind !== "online-signal" || event.senderPlayerId === this.identity?.playerId) continue;
-      // A room-change event necessarily names the destination, not our old
-      // local world. Filtering it as an in-room combat action loses teleports.
+      // Room-change signals name a destination by definition.
       if (event.signalKind !== "room" && event.payload?.roomId !== game.roomId) continue;
       if (this.seenSignals.has(event.id)) continue;
       this.seenSignals.add(event.id);
