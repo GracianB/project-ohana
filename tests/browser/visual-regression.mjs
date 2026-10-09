@@ -555,7 +555,7 @@ try {
   }));
   assert.equal(endingState.show, true, '08-ending: final no visible');
   assert.equal(endingState.running, true, '08-ending: resultados sustituyen al cine');
-  assert.equal(endingState.mode, 'v44-true-ending', '08-ending: final V44 no activo');
+  assert.equal(endingState.mode, 'v100-special-single-ending', '08-ending: single V100 Especial cinematic not active');
   await capture(page, '08-ending');
   await page.locator('#win-cinema .win-skip').click();
   await page.waitForTimeout(120);
