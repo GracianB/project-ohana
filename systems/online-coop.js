@@ -456,8 +456,6 @@ class OnlineCoop {
       roomId: this.roomId,
       identity: this.identity,
       mode: "engine",
-      sequence,
-      actionId: "online:" + this.identity.playerId + ":" + sequence,
       positionX: finite(game.player.x, 420),
       positionY: finite(game.player.y, 1070),
       facing: game.player.facing || 1,
