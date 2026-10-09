@@ -125,6 +125,8 @@ shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new 
 };
 
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
+game.festivalSfx = (name) => beep(name);
+game.festivalVibrate = (ms) => buzz(ms);
 Festival.mount();
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 

@@ -90,3 +90,34 @@
 @media(prefers-reduced-motion:reduce){
  #festival-toast,#festival-album .festival-progress i{transition:none!important}
 }
+
+#festival-album .festival-chapter.completed{
+ border-color:var(--festival-accent);background:rgba(255,244,189,.08)
+}
+#festival-album .festival-item-copy{
+ display:grid;gap:3px;min-width:0;flex:1;
+}
+#festival-album .festival-item-copy b{
+ font:700 11px/1.3 Outfit,system-ui,sans-serif;overflow-wrap:anywhere;
+}
+#festival-album .festival-item-copy em{
+ font:400 10px/1.4 Outfit,system-ui,sans-serif;color:#d8e8e7;
+}
+#festival-room-meter{
+ margin-top:7px;color:#ffebae;font:800 10px/1.3 Outfit,system-ui,sans-serif;
+ text-align:center;letter-spacing:.03em;
+}
+body.playing #top-actions{max-width:calc(100vw - 16px)}
+@media(max-width:760px){
+ body.playing #top-actions{
+   top:4px;left:50%;max-width:calc(100vw - 8px);gap:2px;padding:3px;
+ }
+ body.playing #top-actions button{
+   min-width:0;padding:7px 5px;font-size:clamp(6px,1.5vw,9px);
+   letter-spacing:0;white-space:nowrap;
+ }
+ #festival-room-meter{font-size:9px}
+}
+@media(max-width:420px){
+ body.playing #top-actions button#btn-full{display:none}
+}

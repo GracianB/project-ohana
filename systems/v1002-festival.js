@@ -4,6 +4,7 @@ import { addPlayerXp, healPlayer, addScore, addCombo } from "./mutations.js";
 // Notifications are injected by game.js; module remains importable in Node tests.
 
 export const FESTIVAL_ROOMS = Object.freeze([{"id":"hub","name":"Claro Ohana","color":"#ffe49c","story":"El claro guarda abrazos que brillan.","titles":["El primer abrazo","Ukelele perdido","Polen dormilón","Risa en el césped","La seta cantante","Un guiño de Kilo","La flor testaruda","El picnic secreto","La hoja que baila","La promesa Ohana"]},{"id":"beach","name":"Costa Hoku","color":"#82e4ec","story":"La costa tiene más historias que granos de arena.","titles":["Concha cantante","Castillo torcido","La ola traviesa","Cangrejo tímido","Botella sin mensaje","Barquito de papel","El pez bromista","Palmera de fiesta","Tesoro de Frita","El abrazo del mar"]},{"id":"jungle","name":"Jungla Alta","color":"#a7e884","story":"Entre lianas, alguien se ríe.","titles":["La liana risueña","Rana directora","Mariposa ninja","Un plátano rebelde","La hoja gigante","Rugido de bolsillo","El nido vacío","Musgo saltarín","El escondite Stitcho","Coro de la jungla"]},{"id":"cave","name":"Cueva Azul","color":"#adceff","story":"Las piedras también tienen secretos.","titles":["Eco de gato","Cristal del bostezo","Murciélago poeta","Piedra con ojos","La gota valiente","El túnel musical","La luna en una roca","Huella invisible","Michi encontró luz","El corazón de la cueva"]},{"id":"lab","name":"Alien Lab","color":"#7beaff","story":"Ni los científicos pueden explicar estas tonterías.","titles":["Chispa experimental","Botón prohibido","Robot con hipo","La probeta azul","Satélite miniatura","Calcetín espacial","Rayo de bolsillo","El mensaje alien","Chispín hace ciencia","Experimento amistad"]},{"id":"ridge","name":"Cumbre","color":"#e6d3ff","story":"El viento se llevó unas risas y las dejó aquí.","titles":["Pluma imposible","El viento juguetón","Nube almohada","Pico musical","Huella del gigante","Trueno pequeñito","Aurora tímida","Un salto eterno","Saludo de Cuerno","La cima compartida"]},{"id":"space","name":"Órbita","color":"#b7b3ff","story":"Hasta las estrellas hacen travesuras.","titles":["Estrella de bolsillo","Cometa risueño","Luna de queso","Un planeta bebé","Satélite mareado","Constelación Yomi","Astronauta de papel","Nebulosa de caramelo","Deseo en órbita","La galaxia Ohana"]},{"id":"reef","name":"Arrecife Abismo","color":"#65ebdf","story":"El fondo del mar tiene su propio carnaval.","titles":["Burbuja traviesa","La perla del pez","Pulpo pianista","Coral de colores","Medusa bailarina","Tesoro de Pizza","Caballito curioso","La anémona amable","Marea de confeti","El festival submarino"]},{"id":"volcano","name":"Caldera","color":"#ffc083","story":"Hasta el fuego puede contar un chiste.","titles":["Brasa amigable","Dragón estornuda","Roca de caramelo","Chimenea musical","Lava de mentira","El huevo valiente","Ceniza de colores","Salto de magma","Fogata en familia","La llama del valor"]},{"id":"boss","name":"Nido Final","color":"#ff91b5","story":"La valentía es más fuerte cuando se comparte.","titles":["Valor de bolsillo","Escama caída","Un latido de luz","Risa contra el miedo","Huella de la Reina","Estrella del Nido","El refugio pequeño","Corazón sin miedo","El último eco","Todos juntos"]}]);
+export const FESTIVAL_STORIES = Object.freeze({"hub":["En el Claro nadie empieza solo.","Una guitarra diminuta suena entre hojas.","Ese polen quiere cinco minutos más.","Hasta la hierba tiene cosquillas.","No era una seta. Era la vocalista.","Kilo sabe guardar un secreto.","Esta flor nunca se rinde.","Hay sitio para diez en esta manta.","La hoja se apunta al baile.","La familia se cuida de verdad."],"beach":["La concha se cree sirena.","Lo construyó un cangrejo sin planos.","La ola quería darte los buenos días.","Tiene dos pinzas y cero valentía.","El mensaje era una sonrisa.","No sabe nadar, pero presume.","El pez aprendió a contar chistes.","Hoy la palmera se ha peinado.","Frita escondió algo que cruje.","El mar siempre devuelve un abrazo."],"jungle":["La liana quería jugar al escondite.","Esta rana dirige el coro.","Ni los ninjas la vieron venir.","El plátano decidió escapar.","Puede cobijar una familia entera.","Es un rugido tamaño bolsillo.","Alguien salió a explorar antes.","Este musgo tiene muelles.","Stitcho estaba justo detrás.","En la jungla cantan hasta las piedras."],"cave":["El eco respondió con un miau.","Un cristal quiere seguir durmiendo.","Recita poemas colgado del techo.","La roca lleva siglos observando.","Una gota no le teme al abismo.","Las paredes saben percusión.","Un pedacito de luna se quedó.","Michi pasó sin hacer ruido.","En la oscuridad nació un destello.","Hasta una cueva puede ser hogar."],"lab":["El invento funciona, más o menos.","El cartel decía: NO TOCAR.","El robot tiene hipo digital.","No es zumo, por si preguntabas.","Envía sonrisas a otra galaxia.","Misterio sin resolver: un calcetín.","Chispín lo guardaba para después.","Traducido del alien: hola familia.","La ciencia mejora con amigos.","El resultado fue cien por cien cariño."],"ridge":["Una pluma vuela contra el viento.","El aire te hace una reverencia.","Parece una almohada enorme.","La montaña conoce la melodía.","Alguien grandísimo pasó por aquí.","La tormenta hizo un sonido chiquito.","Una aurora se puso colorada.","Hasta el horizonte quiere saltar.","Cuerno dejó esta luz a propósito.","Desde aquí se ve toda la familia."],"space":["La estrella cabe en una mano.","Este cometa ríe al despegar.","Los astronautas pidieron merienda.","El planeta aún lleva pañales.","Da vueltas sin saber por qué.","Yomi recuerda una historia antigua.","Su casco es un dedal.","Huele a azúcar de las estrellas.","Pídelo sin decírselo a nadie.","Ninguna galaxia brilla en soledad."],"reef":["Una burbuja te sigue sonriendo.","Dentro había una canción.","El pulpo toca ocho teclas a la vez.","Cada coral tiene su carácter.","La medusa conoce tres pasos.","Pizza dejó una porción de alegría.","Este caballito lo pregunta todo.","Una anémona vino a saludarte.","El agua parece confeti.","Hay una fiesta incluso bajo el mar."],"volcano":["Una brasa aprendió a saludar.","El estornudo apagó una vela.","Parece lava, pero es dulce.","La montaña toca un tambor.","Esta lava solo quiere cosquillas.","Algo muy pequeño tiene valor.","Las cenizas parecen estrellas.","La roca pide un gran salto.","El fuego calienta el corazón.","El valor crece cuando se comparte."],"boss":["Llevas coraje incluso en miniatura.","La Reina también pierde escamas.","Una luz insiste en volver.","El miedo se hizo pequeñito.","Hasta una sombra deja huella.","El Nido esconde estrellas.","Un lugar seguro junto al peligro.","Tu corazón sabe ser valiente.","Escucha: algo nuevo comienza.","Nadie se queda atrás. Nunca."]});
 export const FESTIVAL_KINDS = Object.freeze(["star","heart","leaf","shield","note","ring","diamond","wing","spark","crown"]);
 export const FESTIVAL_TOTAL = 100;
 export const FESTIVAL_KEY = "ohana-festival-v1002";
@@ -11,7 +12,7 @@ export const FESTIVAL_DESCRIPTIONS = Object.freeze(["Una chispa nueva para tu av
 export const FESTIVAL_CATALOG = Object.freeze(FESTIVAL_ROOMS.flatMap((room) =>
   room.titles.map((title, slot) => Object.freeze({
     id:room.id+"-"+slot, room:room.id, roomName:room.name, slot, title,
-    description:FESTIVAL_DESCRIPTIONS[slot],
+    description:FESTIVAL_STORIES[room.id][slot],
     color:room.color, kind:FESTIVAL_KINDS[slot],
   }))
 ));
@@ -93,6 +94,7 @@ class FestivalDirector{
     this.album?.querySelector(".festival-close")?.addEventListener("click",()=>this.close());
     this.album?.addEventListener("click",e=>{if(e.target===this.album)this.close();});
     addEventListener("keydown",e=>{
+      if(this.isOpen()&&e.key==="Tab"){e.preventDefault();this.album.querySelector(".festival-close")?.focus();return;}
       if(this.isOpen()&&e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();this.close();return;}
       if(e.key?.toLowerCase()!=="b"||e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
       if(document.activeElement?.matches("input,textarea,select,[contenteditable]"))return;
@@ -104,7 +106,11 @@ class FestivalDirector{
   isOpen(){return !!this.album?.classList.contains("open");}
   setCounter(){
     const n=this.claimed.size;
+    const count=festivalProgress([...this.claimed]);
+    const chapter=FESTIVAL_ROOMS.find(x=>x.id===this.lastRoom);
     if(this.button){this.button.textContent="✦ Álbum "+n+"/100";this.button.setAttribute("aria-label","Abrir álbum de "+n+" de 100 descubrimientos. Tecla B");}
+    const inRoom=document.getElementById("festival-room-meter");
+    if(inRoom&&chapter)inRoom.textContent="✦ Recuerdos "+count.byRoom[chapter.id]+"/10 · "+chapter.name;
     const label=document.getElementById("festival-title-count");
     if(label)label.textContent=n+" / 100";
   }
@@ -115,9 +121,9 @@ class FestivalDirector{
     const progress=festivalProgress([...this.claimed]);
     const roomHTML=FESTIVAL_ROOMS.map((room,ri)=>{
       const n=progress.byRoom[room.id];
-      return '<section class="festival-chapter" style="--festival-accent:'+room.color+'"><h3><span>'+safeText(room.name)+'</span><small>'+n+'/10</small></h3><p>'+safeText(room.story)+'</p><ol>'+room.titles.map((title,i)=>{
+      return '<section class="festival-chapter '+(n===10?'completed':'')+'" style="--festival-accent:'+room.color+'"><h3><span>'+safeText(room.name)+'</span><small>'+(n===10?'✓ COMPLETO':n+'/10')+'</small></h3><p>'+safeText(room.story)+'</p><ol>'+room.titles.map((title,i)=>{
         const unlocked=this.claimed.has(room.id+"-"+i);
-        return '<li class="'+(unlocked?"found":"locked")+'"><span class="festival-slot">'+fmt(ri*10+i+1)+'</span><span>'+(unlocked?safeText(title):"Por descubrir")+'</span><span aria-hidden="true">'+(unlocked?"✦":"◇")+'</span></li>';
+        return '<li class="'+(unlocked?"found":"locked")+'"><span class="festival-slot">'+fmt(ri*10+i+1)+'</span><span class="festival-item-copy"><b>'+(unlocked?safeText(title):"Por descubrir")+'</b>'+(unlocked?'<em>'+safeText(FESTIVAL_STORIES[room.id][i])+'</em>':'')+'</span><span aria-hidden="true">'+(unlocked?"✦":"◇")+'</span></li>';
       }).join("")+'</ol></section>';
     }).join("");
     const body=this.album.querySelector(".festival-contents");
@@ -144,6 +150,8 @@ class FestivalDirector{
   take(item,game){
     if(this.claimed.has(item.id))return false;
     this.claimed.add(item.id);storeAlbum(this.claimed);
+    game.festivalSfx?.(item.slot===9?"objective":"pickup");
+    if(item.slot===9)game.festivalVibrate?.(34);
     const p=game.player;
     const i=item.slot;
     addScore(game,[22,25,30,26,40,32,70,45,35,100][i]);
