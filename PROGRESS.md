@@ -1,3 +1,11 @@
+## 09/10/2026 · OHANA V104 · Laboratorio y Cumbre: 60 recuerdos vivos · ohana-306
+
+- **Recuerdos 41–60:** veinte escenas Canvas originales para Alien Lab (lab-0…9) y Cumbre (ridge-0…9). Cada hallazgo muestra su dibujo particular y su microhistoria, sin crear objetos adicionales y sin pausar al jugador.
+- **Libro y guardados intactos:** continúa `ohana-festival-v1002` con los mismos cien elementos y el sello 10/10 de V101. V102 y V103 siguen funcionando en sus salas; ninguna recompensa se puede repetir por esta animación.
+- **Rendimiento:** dos escenas como máximo por mundo, caducidad automática, recorte fuera de cámara, animaciones sin timers y versión estática cuando se solicita reducir movimiento.
+- **No confundir producción:** esta V104 no toca el backend Netlify del modo cooperativo. El ritmo de red de V103 debe desplegarse y medirse por separado antes de afirmar mejoras en servidores reales.
+- **QA:** tests de 20 dibujos únicos, guardados de 100 piezas, limpieza entre salas, movimiento reducido, integración E2E y precaché offline. Publicación condicionada a Node, Browser, Multiplayer, Visual, Release Gate y Pages.
+
 ## 09/10/2026 · OHANA V103 · Misma aventura, menos esperas · ohana-305
 
 - **Prioridad explícita: multijugador lentísimo en Netlify tras el primer despliegue real V102.** Hipótesis fundada en código: peticiones POST cada 125 ms para movimiento más sondeo cada 180 ms por jugador, con lectura/escritura en Netlify Blobs. No es una medición del servidor real.
