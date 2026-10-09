@@ -66,6 +66,13 @@ function snapshot(room, viewerId) {
   };
 }
 
+// Respect legitimate zero values, including the death state and the left edge.
+// Using Number(value)||fallback resurrects players and snaps x=0 back to spawn.
+function finitePayloadNumber(value,fallback,min,max){
+  if(value==null||!Number.isFinite(Number(value)))return fallback;
+  return Math.min(max,Math.max(min,Number(value)));
+}
+
 function validateCharacter(characterId) {
   const allowed = new Set(["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"]);
   if (!allowed.has(characterId)) throw new RoomError("INVALID_CHARACTER", "Elige un personaje de OHANA.");
@@ -283,13 +290,13 @@ export function createRoomService(store, options = {}) {
             state.combat.enemies = [];
             state.combat.boss = null;
           }
-          player.x = Math.max(0, Math.min(ENGINE_WORLD_W, Number(payload?.positionX) || player.x));
-          player.y = Math.max(0, Math.min(ENGINE_WORLD_H, Number(payload?.positionY) || player.y));
+          player.x = finitePayloadNumber(payload?.positionX,player.x,0,ENGINE_WORLD_W);
+          player.y = finitePayloadNumber(payload?.positionY,player.y,0,ENGINE_WORLD_H);
           player.facing = Number(payload?.facing) < 0 ? -1 : 1;
           player.evolution = Math.max(0, Math.min(4, Math.floor(Number(payload?.evolution) || 0)));
           player.experience = Math.max(0, Number(payload?.experience) || 0);
-          player.health = Math.max(0, Number(payload?.health) || player.health || 0);
-          player.maxHealth = Math.max(1, Number(payload?.maxHealth) || player.maxHealth || 1);
+          player.health = finitePayloadNumber(payload?.health,player.health??0,0,100000);
+          player.maxHealth = finitePayloadNumber(payload?.maxHealth,player.maxHealth??1,1,100000);
           player.worldRoomId = String(payload?.worldRoomId || player.worldRoomId || "beach");
           player.pose = {
             vx: Math.max(-40, Math.min(40, Number(payload?.velocityX) || 0)),

@@ -1,3 +1,11 @@
+## 10/10/2026 · OHANA V107 · menos GPU invisible, cooperativo coherente · ohana-312
+
+- Menú: `menuPaintAllowedInDocument()` detiene los dos Canvas ocultos durante bienvenida y cinemática de inicio. Los MutationObserver existentes reanudan dibujo al volver a la cuadrícula, sin quitar ningún personaje ni reducir sus controles.
+- Servidor Netlify: las posiciones 0 y la vida 0 son valores válidos, no datos ausentes. Ahora se aceptan como cero en vez de sustituirlos por el dato anterior. Se acotan NaN/Infinity y valores extremos.
+- Indicador de cooperativo: ping estimado y red retrasada visibles en la partida, con mensajes de reconexión y espera. No añade peticiones de red ni bucles; evita costoso desenfoque en badge.
+- Sin alterar guardados, las cien escenas, efectos de personaje, físicas, autorizaciones del servidor ni protocolo multijugador.
+- Cache coherente `ohana-312`; cobertura unitaria para render oculto y sincronización con vida/posición cero. Browser, Multiplayer, Visual y Release Gate antes del merge.
+
 ## 10/10/2026 · OHANA · recuperación inmediata de fluidez · ohana-311
 
 - **Problema confirmado en código:** bienvenida con bloqueo de 1,1 s; portales con carga de 20–45 fotogramas; tres bucles gráficos simultáneos en la portada; render a DPR hasta 1,25 y UI de partida demasiado frecuente. La molestia real la ha comunicado quien juega; esto aún no equivale a una medición de hardware remoto.

@@ -14,14 +14,14 @@ test("V80: active hero stays at full animation while side previews are throttled
   "new ResizeObserver(",
   "const visible = true",
   "cv._labelEvo !== evo || cv._labelHero !== hero",
-  "document.visibilityState === \"hidden\""
+  "menuPaintAllowedInDocument(document)"
  ])assert.ok(title.includes(s),"missing: "+s);
  assert.ok(!title.includes("const visible = [id, prev, next, prev2, next2]"));
 });
 test("V80: fullscreen background has lower DPR and frame cadence",()=>{
  assert.ok(fx.includes("maxDpr=pixels>1400000?1.12:1.25"));
  assert.ok(fx.includes("now-lastFrame<110"));
- assert.ok(fx.includes("document.visibilityState===\"hidden\""));
+ assert.ok(fx.includes("menuPaintAllowedInDocument(document)"));
  assert.match(css,/#char-select #chars \.portrait canvas\{[^}]*filter:none/);
  assert.match(css,/#char-select #chars \.char-card\.is-prev,#char-select #chars \.char-card\.is-next\{[^}]*filter:none/s);
 });

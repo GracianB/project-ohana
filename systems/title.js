@@ -1,6 +1,7 @@
 import { ROSTER } from "../characters/roster.js";
 import { canonId, saveStore } from "./save.js";
 import { createFixedClock } from "../engine/clock.js";
+import { menuPaintAllowedInDocument } from "./menu-visibility.js";
 import { drawCharacter } from "../characters/draw.js";
 import { CUERNO_VISUAL_H } from "../characters/art/cuerno.js";
 import { getLook, setLook } from "../characters/look.js";
@@ -101,7 +102,7 @@ cuerno:  ["idle","victory","jump"],
 function readSave() { return saveStore.readRaw(); }
 
 function paintPortraits(now = performance.now()) {
-if (document.body.classList.contains("playing") || document.visibilityState === "hidden") {
+if (!menuPaintAllowedInDocument(document)) {
   raf = 0;
   portraitClock.reset();
   return;
@@ -574,14 +575,14 @@ addEventListener("keydown", (e) => {
   } else begin("new");
 });
 const mo = new MutationObserver(() => {
-  if (!document.body.classList.contains("playing") && !raf) paintPortraits();
-  if (!document.body.classList.contains("playing")) refreshContinue();
+  if (menuPaintAllowedInDocument(document) && !raf) paintPortraits();
+  if (menuPaintAllowedInDocument(document)) refreshContinue();
 });
 mo.observe(document.body, { attributes: true, attributeFilter: ["class"] });
 paintPortraits();
 }
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && !raf && !document.body.classList.contains("playing")) {
+  if (menuPaintAllowedInDocument(document) && !raf) {
     portraitClock.reset();
     for (const cv of portraitCanvases) cv._lastPaintAt = 0;
     raf = requestAnimationFrame(paintPortraits);

@@ -1,6 +1,8 @@
 // PROJECT OHANA V47A · HOKU HERO GATE
 // One coherent place, ten hero affinities. The selector stays in Hoku while
 // the chosen hero opens a living procedural window to their world.
+// Avoid running under the cinematic opening or when the game is already active.
+import { menuPaintAllowedInDocument } from "./menu-visibility.js";
 const cv = document.getElementById("title-fx");
 // Static family-grid backdrop replaces continuous full-screen Canvas rendering.
 if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "family-grid") {
@@ -208,7 +210,7 @@ if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "fami
   }
 
   function frame(now=performance.now()){
-    if(document.body.classList.contains("playing") || document.visibilityState==="hidden"){raf=0;lastFrame=0;return;}
+    if(!menuPaintAllowedInDocument(document)){raf=0;lastFrame=0;return;}
     // ~13fps for scenery vs 24fps for the central playable hero.
     if(!reduce && lastFrame && now-lastFrame<110){
       raf=requestAnimationFrame(frame);
@@ -261,12 +263,12 @@ if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "fami
   },{passive:true});
   addEventListener("resize",()=>{resize();lastFrame=0;if(!raf)raf=requestAnimationFrame(frame);});
   document.addEventListener("visibilitychange",()=>{
-    if(document.visibilityState==="visible"&&!raf&&!document.body.classList.contains("playing")){
+    if(menuPaintAllowedInDocument(document)&&!raf){
       lastFrame=0;raf=requestAnimationFrame(frame);
     }
   });
   new MutationObserver(()=>{
-    if(!raf&&!document.body.classList.contains("playing")) frame();
+    if(!raf&&menuPaintAllowedInDocument(document)) frame();
   }).observe(document.body,{attributes:true,attributeFilter:["class"]});
 
   const initial=document.getElementById("char-select")?.dataset.hero||"kilo";

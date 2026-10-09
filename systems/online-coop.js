@@ -4,6 +4,7 @@ import { drawCharacter } from "../characters/draw.js";
 import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
+import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
@@ -82,6 +83,7 @@ class OnlineCoop {
     this.pendingMutations = [];
     this.lastRoomId = "";
     this.lastLocalWorld = "";
+    this.localRoomGraceUntil = 0;
     this.error = "";
     this.seenSignals = new Set();
     this.localStateSent = "";
@@ -145,6 +147,7 @@ class OnlineCoop {
     this.retryAfter = 0;
     this.lastRoomId = "";
     this.lastLocalWorld = "";
+    this.localRoomGraceUntil = 0;
     this.reconnecting=false;
     this.resumeFailures=0;
 
@@ -314,6 +317,7 @@ class OnlineCoop {
         this.outOfOrderPackets++;
         return;
       }
+      const previousPeerRoom=this.remoteWorld;
       this.snapshot = snapshot;
       this.updateRemote(snapshot, game);
       this.sequence = Math.max(
@@ -333,8 +337,9 @@ class OnlineCoop {
       }
 
       const remoteWorld = this.remote?.playerId ? this.remoteWorld : "";
-      if (remoteWorld && remoteWorld !== game.roomId && this.lastRoomId !== remoteWorld) {
+      if (shouldFollowPeerRoom(previousPeerRoom,remoteWorld,game.roomId,now,this.localRoomGraceUntil)) {
         this.lastRoomId = remoteWorld;
+        this.lastLocalWorld=remoteWorld;
         try {
           if (typeof game.loadRoom === "function") game.loadRoom(remoteWorld, "online-peer");
         } catch (_) {}
@@ -542,7 +547,9 @@ class OnlineCoop {
     const events = this.snapshot?.combat?.events || [];
     for (const event of events) {
       if (event.kind !== "online-signal" || event.senderPlayerId === this.identity?.playerId) continue;
-      if (event.payload?.roomId !== game.roomId) continue;
+      // A room-change event necessarily names the destination, not our old
+      // local world. Filtering it as an in-room combat action loses teleports.
+      if (event.signalKind !== "room" && event.payload?.roomId !== game.roomId) continue;
       if (this.seenSignals.has(event.id)) continue;
       this.seenSignals.add(event.id);
       if (this.seenSignals.size > 128) this.seenSignals.delete(this.seenSignals.values().next().value);
@@ -728,6 +735,7 @@ class OnlineCoop {
       const firstWorld = !this.lastLocalWorld;
       this.lastLocalWorld = game.roomId;
       if (!firstWorld) {
+        this.localRoomGraceUntil=performance.now()+1200;
         void this.signal(game, "room", {
           roomId: game.roomId,
           positionX: game.player?.x,
