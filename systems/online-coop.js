@@ -3,6 +3,7 @@ import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
 import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
+import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
@@ -74,6 +75,7 @@ class OnlineCoop {
     this.lastSnapshotAt = 0;
     this.rttMs = 0;
     this.requestSamples = 0;
+    this.outOfOrderPackets = 0;
     this.lastSentPose = null;
     this.polling = false;
     this.mutationBusy = false;
@@ -307,8 +309,12 @@ class OnlineCoop {
         roomId: this.roomId,
         identity: this.identity,
       });
-      this.snapshot = snapshot;
       this.recordNetworkReply(now);
+      if(!shouldUseSnapshot(this.snapshot,snapshot)){
+        this.outOfOrderPackets++;
+        return;
+      }
+      this.snapshot = snapshot;
       this.updateRemote(snapshot, game);
       this.sequence = Math.max(
         this.sequence,
@@ -406,6 +412,8 @@ class OnlineCoop {
     if(typeof document!=="undefined"){
       document.body.dataset.coopRtt=String(Math.round(this.rttMs));
       document.body.dataset.coopMoveInterval=String(networkPacing(this.rttMs,this.retryFailures).moveMs);
+      document.body.dataset.coopNetwork=peerNetworkHealth(this.rttMs).quality;
+      document.body.dataset.coopOutOfOrder=String(this.outOfOrderPackets);
     }
   }
 
@@ -488,9 +496,11 @@ class OnlineCoop {
           const started=performance.now();
           const data = await post(body);
           if (data) {
-            this.snapshot = data;
             this.recordNetworkReply(started);
-            this.updateRemote(data, game);
+            if(shouldUseSnapshot(this.snapshot,data)){
+              this.snapshot = data;
+              this.updateRemote(data, game);
+            }else this.outOfOrderPackets++;
           }
           this.clearRetry();
         } catch (error) {
