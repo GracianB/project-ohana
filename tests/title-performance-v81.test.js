@@ -19,7 +19,7 @@ test("V81 fixes CSS order, NOT just early V80 rules overridden later",()=>{
 });
 
 test("V81 Canvas memory: only three live cards and one DPR for side previews",()=>{
- assert.match(title,/const visible = atriumMode \|\| \[id, prev, next\]/);
+ assert.match(title,/const visible = true/);
  assert.match(title,/canvas\.width = 1;\s*canvas\.height = 1;/);
  assert.match(title,/const sidePreview = !cv\.closest\("\.char-card"\)\?\.classList\.contains\("selected"\)/);
  assert.match(title,/Math\.min\(sidePreview \? 1 : maxDpr, window\.devicePixelRatio \|\| 1\)/);
@@ -32,7 +32,7 @@ test("V81 Canvas memory: only three live cards and one DPR for side previews",()
  assert.match(atrium,/document\.body\.classList\.contains\("playing"\)/);
  assert.match(atriumCss,/#char-select\.atrium-on #chars \.char-card\.selected,[\s\S]*?filter:none!important/);
  assert.match(browser,/assert\.equal\(carouselAudit\.canvasFilter,'none'/);
- assert.match(visual,/titleLayout\.atriumOn \? 10 : 3/);
+ assert.match(visual,/assert\.equal\(titleLayout\.visible\.length, 10/);
 });
 
 test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
@@ -41,7 +41,7 @@ test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
  assert.match(ending,/fullCanvas\(canvas,reduce\?1:1\.2\)/);
  assert.match(ending,/const duration=reduce\?1\.6:14\.5/);
  assert.match(ending,/const titleK=seg\(k,\.89,\.97\)/);
- assert.match(ending,/layer\.dataset\.ending="v44-true-ending"/);
+ assert.match(ending,/layer\.dataset\.ending="v100-special-single-ending"/);
  assert.match(ending,/layer\.dataset\.pacing="v80-delayed-finale"/);
  assert.match(ending,/layer\.querySelector\("\.win-skip"\)\.onclick=\(\)=>revealResults/);
 });

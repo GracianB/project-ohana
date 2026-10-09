@@ -28,13 +28,13 @@ test("V86 power metadata is shared with battle engine and HUD",()=>{
 });
 test("V86 boss finale opens wings, never placeholder concentric circles",()=>{
  const game=fs.readFileSync("game.js","utf8");
- assert.ok(game.includes("drawBossFallScene(ctx, f"));
- assert.ok(game.includes("!game.finale || !e.boss"));
+ assert.ok(game.includes("drawBossFallScene(ctx, game.finale"));
+ assert.ok(game.includes("!e.boss || !fall.queenVisible"));
  const calls=[];
- const ctx=new Proxy({}, {get(o,k){if(k in o)return o[k];if(k==="createLinearGradient")return()=>({addColorStop(){}});return(...a)=>calls.push([k,...a]);},set(o,k,v){o[k]=v;return true;}});
- drawBossFallScene(ctx,{t:200,max:520,x:400,y:260},{x:0,y:0},{w:1280,h:720},false);
+ const ctx=new Proxy({}, {get(o,k){if(k in o)return o[k];if(k==="createLinearGradient"||k==="createRadialGradient")return()=>({addColorStop(){}});return(...a)=>calls.push([k,...a]);},set(o,k,v){o[k]=v;return true;}});
+ drawBossFallScene(ctx,{t:115,max:210,x:400,y:260},{x:0,y:0},{w:1280,h:720},false);
  assert.equal(calls.some(c=>c[0]==="arc"),false);
- assert.ok(calls.some(c=>c[0]==="bezierCurveTo"));
+ assert.ok(calls.some(c=>c[0]==="lineTo"),"Queen must fragment into geometric pieces");
 });
 test("V86 every new module is offline cached",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");

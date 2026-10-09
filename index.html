@@ -9,19 +9,20 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-300">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-300">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-300">
-  <link rel="stylesheet" href="hud.css?v=ohana-300">
-  <link rel="stylesheet" href="evo.css?v=ohana-300">
-  <link rel="stylesheet" href="ending.css?v=ohana-300">
-  <link rel="stylesheet" href="intro.css?v=ohana-300">
-  <link rel="stylesheet" href="demo.css?v=ohana-300">
-  <link rel="stylesheet" href="experience.css?v=ohana-300">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-300">
-  <link rel="stylesheet" href="supreme.css?v=ohana-300">
-  <link rel="stylesheet" href="world-map.css?v=ohana-300">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-300">
+  <link rel="stylesheet" href="style.css?v=ohana-301">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-301">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-301">
+  <link rel="stylesheet" href="hud.css?v=ohana-301">
+  <link rel="stylesheet" href="evo.css?v=ohana-301">
+  <link rel="stylesheet" href="ending.css?v=ohana-301">
+  <link rel="stylesheet" href="intro.css?v=ohana-301">
+  <link rel="stylesheet" href="demo.css?v=ohana-301">
+  <link rel="stylesheet" href="experience.css?v=ohana-301">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-301">
+  <link rel="stylesheet" href="supreme.css?v=ohana-301">
+  <link rel="stylesheet" href="world-map.css?v=ohana-301">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-301">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-301s">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -141,7 +142,7 @@
       </div>
     </div>
   </div>
-  <main id="char-select" aria-label="Menú principal">
+  <main id="char-select" data-selector-mode="family-grid" aria-label="Menú principal">
     <div id="ohana-intro" aria-hidden="true" data-opening-guard="true"></div>
     <nav class="brand-bar" aria-label="Ecosistema GracianB">
       <a class="brand-gb" href="https://gracianb.github.io/GracianB/" target="_blank" rel="noopener">GB</a>
@@ -156,10 +157,8 @@
         <h1><span class="word project">PROJECT</span><span class="word ohana">OHANA</span></h1>
         <p class="tagline">Nadie se queda atrás.</p>
       </header>
-      <section class="hero-stage" aria-label="Selección de personaje">
-        <button type="button" class="roster-arrow prev" id="roster-prev" aria-label="Personaje anterior">‹</button>
-        <div id="chars"><div class="chars-grid" id="chars-grid"></div></div>
-        <button type="button" class="roster-arrow next" id="roster-next" aria-label="Personaje siguiente">›</button>
+      <section class="hero-stage" aria-label="Elige uno de los diez personajes de la familia">
+        <div id="chars"><p class="family-grid-caption">ELIGE TU COMPAÑERO · LOS DIEZ ESTÁN AQUÍ</p><div class="chars-grid" id="chars-grid"></div></div>
         <section class="hero-dossier" aria-live="polite" aria-atomic="true">
           <span class="dossier-kicker">HÉROE</span>
           <strong id="selected-hero-name">Kilo</strong>
@@ -214,20 +213,20 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="game.js?v=ohana-300"></script>
-  <script type="module" src="systems/title.js?v=ohana-300"></script>
-  <script type="module" src="systems/title-fx.js?v=ohana-300"></script>
-  <script type="module" src="systems/atrium-interact.js?v=ohana-300"></script>
-  <script type="module" src="systems/ending.js?v=ohana-300"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-300"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-300"></script>
-  <script type="module" src="systems/supreme-cinema.js?v=ohana-300"></script>
-  <script type="module" src="systems/demo.js?v=ohana-300"></script>
-  <script type="module" src="systems/evo-cinema.js?v=ohana-300"></script>
+  <script type="module" src="game.js?v=ohana-301"></script>
+  <script type="module" src="systems/title.js?v=ohana-301"></script>
+  <script type="module" src="systems/title-fx.js?v=ohana-301"></script>
+  <script type="module" src="systems/atrium-interact.js?v=ohana-301"></script>
+  <script type="module" src="systems/ending.js?v=ohana-301"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-301"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-301"></script>
+  <script type="module" src="systems/supreme-cinema.js?v=ohana-301"></script>
+  <script type="module" src="systems/demo.js?v=ohana-301"></script>
+  <script type="module" src="systems/evo-cinema.js?v=ohana-301"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-300", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-301", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

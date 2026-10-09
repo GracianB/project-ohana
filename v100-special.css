@@ -1,0 +1,266 @@
+/* OHANA V100 ESPECIAL · El Claro de los Diez
+   Static CSS island; the procedural backdrop is retired for better frame pacing.
+   All ten original Canvas character illustrations stay real, keyboard-accessible. */
+#char-select[data-selector-mode="family-grid"]{
+  --ohana-horizon:#244d51;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  background:
+    radial-gradient(ellipse 70% 35% at 51% 54%,rgba(249,192,103,.25),transparent 75%),
+    radial-gradient(ellipse 45% 25% at 86% 77%,rgba(109,173,134,.22),transparent 80%),
+    radial-gradient(ellipse 45% 25% at 16% 76%,rgba(89,156,167,.25),transparent 80%),
+    linear-gradient(180deg,#071827 0%,#173d50 30%,#587a70 54%,#a07b61 69%,#183e3e 70%,#081c2c 100%)!important;
+}
+#char-select[data-selector-mode="family-grid"]::before{
+  background:linear-gradient(180deg,rgba(3,10,20,.28),transparent 30%,rgba(5,14,23,.30) 72%,rgba(2,8,18,.64))!important;
+}
+#char-select[data-selector-mode="family-grid"]::after{box-shadow:inset 0 0 80px rgba(2,8,18,.26)!important;}
+#char-select[data-selector-mode="family-grid"] .title-sky,
+#char-select[data-selector-mode="family-grid"] #title-fx{display:none!important;}
+#char-select[data-selector-mode="family-grid"] .title-shell{
+  width:min(1390px,calc(100vw - 52px))!important;
+  padding:clamp(9px,1.8vh,18px) 0 12px!important;
+  gap:clamp(9px,1.8vh,20px)!important;
+}
+#char-select[data-selector-mode="family-grid"] .title-stack h1 .word.ohana{
+  font-size:clamp(50px,6.4vw,90px)!important;
+  line-height:.9!important;
+  letter-spacing:.025em!important;
+  text-indent:.025em!important;
+  filter:drop-shadow(0 5px 0 rgba(25,49,53,.5)) drop-shadow(0 16px 38px rgba(0,0,0,.4))!important;
+}
+#char-select[data-selector-mode="family-grid"] .title-stack .tagline{
+  margin-top:7px!important;
+  font-size:clamp(12px,1.1vw,16px)!important;
+  color:#fff5d8!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-stage{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(210px,260px)!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:clamp(10px,1.3vw,20px)!important;
+  place-items:stretch!important;
+  perspective:none!important;
+  isolation:isolate!important;
+  height:auto!important;
+  min-height:0!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-stage::before{
+  top:47%!important;left:44%!important;width:100%!important;height:100%!important;
+  background:radial-gradient(ellipse,rgba(250,224,161,.09),transparent 68%)!important;
+  filter:none!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-stage::after{display:none!important;}
+#char-select[data-selector-mode="family-grid"] #chars{
+  position:relative!important;inset:auto!important;grid-column:1!important;grid-row:1!important;
+  width:100%!important;height:auto!important;min-height:0!important;
+  overflow:visible!important;perspective:none!important;transform:none!important;
+}
+#char-select[data-selector-mode="family-grid"] .family-grid-caption{
+  text-align:center;margin:0 0 10px!important;color:#fff1cc;
+  font:800 clamp(9px,.78vw,12px)/1.2 Outfit,system-ui,sans-serif;
+  letter-spacing:.19em;text-transform:uppercase;text-shadow:0 3px 12px #132429;
+}
+#char-select[data-selector-mode="family-grid"] #chars .chars-grid{
+  position:relative!important;inset:auto!important;
+  display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  gap:clamp(7px,1vw,13px)!important;
+  height:auto!important;min-height:0!important;
+  transform:none!important;transform-style:flat!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card,
+#char-select[data-selector-mode="family-grid"] #chars .char-card.selected{
+  display:flex!important;position:relative!important;inset:auto!important;left:auto!important;top:auto!important;
+  flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;
+  width:100%!important;height:clamp(128px,21vh,210px)!important;min-width:0!important;
+  margin:0!important;padding:7px 7px 9px!important;
+  border:1px solid rgba(255,245,218,.20)!important;
+  border-radius:17px!important;
+  background:linear-gradient(160deg,rgba(5,16,29,.54),rgba(6,25,34,.72))!important;
+  box-shadow:0 7px 21px rgba(1,8,14,.17)!important;
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+  filter:none!important;backface-visibility:visible!important;
+  transform:none!important;will-change:auto!important;
+  transition:border-color .14s ease,background .14s ease,box-shadow .14s ease!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card.selected{
+  border:2px solid var(--tint,#ffedaf)!important;
+  background:linear-gradient(165deg,rgba(32,46,56,.88),rgba(7,25,35,.96))!important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.12),0 10px 28px rgba(1,6,13,.30)!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card:hover,
+#char-select[data-selector-mode="family-grid"] #chars .char-card:focus-visible{
+  border-color:var(--tint,#ffe09b)!important;
+  outline:2px solid #fff4ce!important;outline-offset:2px!important;
+  transform:none!important;filter:none!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card::before{
+  z-index:0!important;top:38%!important;height:70%!important;width:86%!important;
+  opacity:.75!important;filter:none!important;transform:translate(-50%,-50%)!important;
+  background:radial-gradient(ellipse,color-mix(in srgb,var(--tint) 20%,transparent),transparent 73%)!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card .portrait{
+  width:100%!important;max-width:100%!important;height:calc(100% - 25px)!important;
+  min-height:0!important;margin:0!important;flex:1 1 auto!important;
+  background:transparent!important;overflow:hidden!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card .portrait canvas{
+  display:block!important;width:100%!important;height:100%!important;
+  filter:none!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card h3{
+  display:block!important;position:relative!important;
+  margin:2px 0 0!important;padding:0!important;
+  font:800 clamp(10px,1vw,15px)/1.05 Outfit,system-ui,sans-serif!important;
+  color:#fff6dc!important;letter-spacing:.02em;text-align:center!important;
+}
+#char-select[data-selector-mode="family-grid"] #chars .char-card .role,
+#char-select[data-selector-mode="family-grid"] #chars .char-card small,
+#char-select[data-selector-mode="family-grid"] #chars .char-card .h-move,
+#char-select[data-selector-mode="family-grid"] #chars .char-card .hint,
+#char-select[data-selector-mode="family-grid"] #chars .char-card .swatch,
+#char-select[data-selector-mode="family-grid"] #chars .form-rail,
+#char-select[data-selector-mode="family-grid"] .roster-arrow,
+#char-select[data-selector-mode="family-grid"] .chars-dots{display:none!important;}
+#char-select[data-selector-mode="family-grid"] .hero-dossier{
+  position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+  transform:none!important;grid-column:2!important;grid-row:1!important;
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:center!important;gap:8px!important;
+  width:100%!important;height:100%!important;padding:clamp(14px,1.8vw,24px)!important;margin:0!important;
+  background:linear-gradient(165deg,rgba(6,26,38,.92),rgba(5,15,30,.90))!important;
+  border:1px solid color-mix(in srgb,var(--hero-tint) 46%,#364b54)!important;
+  border-radius:21px!important;text-align:left!important;
+  box-shadow:0 13px 28px rgba(0,0,0,.19)!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier .dossier-kicker{
+  font-size:10px!important;letter-spacing:.22em!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier strong{
+  font-size:clamp(30px,3vw,43px)!important;text-align:left!important;line-height:1.08!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier>span:not(.dossier-kicker){
+  font-size:12px!important;color:#ffe6b3!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier .dossier-line{
+  font-size:12px!important;line-height:1.45!important;max-width:100%!important;
+  color:#d8eced!important;text-align:left!important;margin:3px 0!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier .dossier-meta{
+  display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin:3px 0!important;
+}
+#char-select[data-selector-mode="family-grid"] .hero-dossier .dossier-meta span{
+  font-size:9px!important;padding:6px 8px!important;color:#edf9ff!important;
+}
+#char-select[data-selector-mode="family-grid"] .title-controls{
+  width:min(1040px,100%)!important;margin:0 auto!important;
+  background:rgba(5,20,32,.89)!important;
+}
+#char-select[data-selector-mode="family-grid"] .brand-bar{
+  background:rgba(5,18,29,.55)!important;
+}
+@media(max-width:1000px){
+  #char-select[data-selector-mode="family-grid"] .title-shell{width:calc(100vw - 28px)!important;}
+  #char-select[data-selector-mode="family-grid"] .hero-stage{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto auto!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #chars{grid-column:1!important;grid-row:1!important;}
+  #char-select[data-selector-mode="family-grid"] .hero-dossier{
+    grid-column:1!important;grid-row:2!important;min-height:92px!important;height:auto!important;
+    padding:13px 18px!important;align-items:center!important;text-align:center!important;
+  }
+  #char-select[data-selector-mode="family-grid"] .hero-dossier .dossier-line{text-align:center!important;}
+  #char-select[data-selector-mode="family-grid"] #chars .char-card,
+  #char-select[data-selector-mode="family-grid"] #chars .char-card.selected{height:clamp(105px,18vh,154px)!important;}
+}
+@media(max-width:620px){
+  #char-select[data-selector-mode="family-grid"]{
+    height:100dvh!important;grid-template-rows:38px auto 18px!important;
+    align-content:start!important;
+  }
+  #char-select[data-selector-mode="family-grid"] .title-shell{height:auto!important;min-height:0!important;padding:12px 0 18px!important;}
+  #char-select[data-selector-mode="family-grid"] .title-stack h1 .word.ohana{font-size:clamp(47px,13vw,70px)!important;}
+  #char-select[data-selector-mode="family-grid"] #chars .chars-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(5,auto)!important;gap:8px!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #chars .char-card,
+  #char-select[data-selector-mode="family-grid"] #chars .char-card.selected{
+    height:142px!important;padding:6px!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #chars .char-card h3{font-size:13px!important;}
+  #char-select[data-selector-mode="family-grid"] .hero-dossier{padding:16px!important;}
+  #char-select[data-selector-mode="family-grid"] .title-controls{grid-template-columns:1fr!important;}
+  #char-select[data-selector-mode="family-grid"] #menu-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  #char-select[data-selector-mode="family-grid"] #chars .char-card{transition:none!important;}
+}
+
+/* V100 Especial: in the opening, OHANA is a centered family title,
+   never a caption parked in the lower-left corner. */
+#ohana-intro.family-welcome .oi-welcome{
+  left:50%!important;right:auto!important;
+  top:clamp(54px,10vh,126px)!important;bottom:auto!important;
+  width:min(660px,92vw)!important;max-width:none!important;
+  display:grid!important;justify-items:center!important;
+  text-align:center!important;
+  transform:translate(-50%,10px)!important;
+}
+#ohana-intro.family-welcome.ready .oi-welcome{
+  transform:translate(-50%,0)!important;
+}
+#ohana-intro.family-welcome .oi-welcome strong{
+  font-size:clamp(58px,10vw,118px)!important;
+  line-height:.94!important;
+  letter-spacing:.025em!important;
+  text-shadow:0 6px 30px rgba(0,0,0,.58),0 0 38px rgba(255,223,161,.25)!important;
+}
+#ohana-intro.family-welcome .oi-welcome small{
+  font-size:clamp(11px,1.1vw,16px)!important;
+  line-height:1.4!important;color:#fff7de!important;
+  text-shadow:0 3px 12px rgba(0,0,0,.88)!important;
+}
+#ohana-intro.family-welcome .oi-enter{
+  left:50%!important;right:auto!important;bottom:clamp(20px,4vh,52px)!important;
+  transform:translate(-50%,8px)!important;
+  white-space:nowrap!important;
+}
+#ohana-intro.family-welcome.ready .oi-enter{transform:translate(-50%,0)!important;}
+@media(max-width:620px){
+  #ohana-intro.family-welcome .oi-welcome{
+    top:clamp(48px,9vh,84px)!important;
+  }
+  #ohana-intro.family-welcome .oi-welcome strong{font-size:clamp(54px,15vw,80px)!important;}
+}
+
+/* V100 Especial: the opening OHANA is the centered headline, not a corner bug. */
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+  left:50%!important;right:auto!important;top:clamp(70px,11vh,130px)!important;bottom:auto!important;
+  translate:-50% 0!important;max-width:min(650px,90vw)!important;width:min(650px,90vw)!important;
+  text-align:center!important;justify-items:center!important;gap:8px!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+  font-size:clamp(70px,8.5vw,122px)!important;line-height:.94!important;
+  letter-spacing:.05em!important;text-shadow:0 6px 36px rgba(0,0,0,.6)!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome small{
+  color:#fff4dc!important;font-size:clamp(11px,1.2vw,15px)!important;
+}
+#char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+  left:50%!important;right:auto!important;bottom:max(36px,6vh)!important;
+  translate:-50% 0!important;white-space:nowrap!important;
+}
+@media(max-width:620px){
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome{
+    top:max(52px,9vh)!important;max-width:94vw!important;width:94vw!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
+    font-size:clamp(53px,15vw,85px)!important;
+  }
+  #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
+    bottom:max(28px,5vh)!important;
+  }
+}

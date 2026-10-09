@@ -76,15 +76,15 @@ async function auditPage(page, label) {
     };
   });
   assert.equal(titleLayout.introComplete, true, label + ': intro no entrega el menú');
-  assert.equal(titleLayout.visibleCards.length, titleLayout.atriumOn ? 10 : 3, label + ': selector debe mantener solo 3 tarjetas renderizadas');
-  assert.ok(Math.abs(titleLayout.selectedCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.12, label + ': héroe seleccionado fuera del eje central');
+  assert.equal(titleLayout.visibleCards.length, 10, label + ': deben aparecer los diez personajes a la vez');
+  assert.ok(titleLayout.selected.left >= -2 && titleLayout.selected.right <= titleLayout.viewport.width + 2, label + ': personaje seleccionado fuera del panel');
   assert.ok(Math.abs(titleLayout.titleCenter - titleLayout.viewport.width / 2) <= titleLayout.viewport.width * 0.08, label + ': título fuera del eje central · ' + JSON.stringify(titleLayout));
   assert.ok(titleLayout.title.top < titleLayout.hero.top + titleLayout.hero.height * 0.35, label + ': título cae dentro del carrusel');
   assert.ok(titleLayout.controls.top > titleLayout.title.bottom, label + ': controles invaden la cabecera');
-  assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
+  if (titleLayout.viewport.width > 620) assert.ok(titleLayout.controls.bottom <= titleLayout.viewport.height + 2, label + ': controles fuera del viewport');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, label + ': dossier invade los controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.viewport.width + 2, label + ': portada desborda horizontalmente');
-  // V81: verify the separate ten-hero Atrium keeps all ten portraits
+  // V100 Especial: all ten portraits are visible whether Atrium exists or not.
   // while using filter-free Canvas and a low-frequency effects layer.
   if (label === 'desktop' && titleLayout.atriumOn) {
     await page.waitForTimeout(600);
@@ -109,8 +109,8 @@ async function auditPage(page, label) {
   }
   // V81: real browser stress test. Cycle every hero and verify GPU backing
   // stores, computed CSS and ARIA stay in sync after fast navigation.
-  if (label === 'desktop' && !titleLayout.atriumOn) {
-    for (let turn=0;turn<10;turn++) await page.locator('#roster-next').click();
+  if (label === 'desktop') {
+    for (let turn=0;turn<10;turn++) await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(200);
     const carouselAudit=await page.evaluate(()=>{
       const all=[...document.querySelectorAll('#chars-grid .char-card')];
@@ -133,17 +133,17 @@ async function auditPage(page, label) {
         selectedPixels:cv?.width*cv?.height||0,
         canvasFilter:cv?getComputedStyle(cv).filter:'',
         cardFilter:selected?getComputedStyle(selected).filter:'',
-        backdropDpr:(()=>{const fx=document.querySelector('#title-fx');return fx?fx.width/Math.max(1,fx.clientWidth):0})()
+        staticBackdrop:(()=>{const fx=document.querySelector('#title-fx');return fx ? fx.getClientRects().length===0 : true})()
       };
     });
     assert.deepEqual(
       [carouselAudit.displayed,carouselAudit.accessible,carouselAudit.offscreenBuffers],
-      [3,3,0],label+': render/ARIA/GPU disagree: '+JSON.stringify(carouselAudit));
+      [10,10,0],label+': 10-hero render/ARIA/GPU mismatch: '+JSON.stringify(carouselAudit));
     assert.equal(carouselAudit.selected,'kilo',label+': carousel does not wrap back to Kilo');
     assert.ok(carouselAudit.selectedPixels>10000,label+': selected portrait lost backing canvas');
     assert.equal(carouselAudit.canvasFilter,'none',label+': legacy CSS reenabled costly Canvas filter');
     assert.equal(carouselAudit.cardFilter,'none',label+': legacy CSS reenabled costly card filter');
-    assert.ok(carouselAudit.backdropDpr<=1.30,label+': backdrop DPR unexpectedly high');
+    assert.equal(carouselAudit.staticBackdrop,true,label+': fondo Canvas sigue consumiendo GPU');
   }
   const moduleProbe = await page.evaluate(async () => {
     const paths = [

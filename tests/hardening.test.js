@@ -757,7 +757,7 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(css, /#char-select #difficulty\{[\s\S]*?grid-area:auto!important/);
   const intro = fs.readFileSync("./systems/intro.js", "utf8");
   assert.match(title, /playTitleIntro\(\)/);
-  assert.match(title, /const visible = atriumMode \|\| \[id, prev, next\]/);
+  assert.match(title, /const visible = true/);
   assert.match(title, /el\.setAttribute\("aria-hidden", String\(!visible\)\)/);
   assert.match(titleFx, /PROJECT OHANA V47A · HOKU HERO GATE/);
   assert.match(titleFx, /heroScene/);

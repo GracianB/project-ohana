@@ -47,7 +47,7 @@ import { CombatFX, combatTier } from "./systems/combat-fx.js";
 import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
-import { drawBossFallScene } from "./systems/boss-fall-scene.js";
+import { drawBossFallScene, bossFallStage } from "./systems/boss-fall-scene.js";
 import { newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
@@ -1228,8 +1228,8 @@ id: game.player?.id || "",
 room: game.roomId
 }}));
 game.finale = {
-t: 520,
-max: 520,
+t: 210,
+max: 210,
 x: e.x + e.w / 2,
 y: e.y + e.h * 0.42,
 lines: [
@@ -1238,21 +1238,21 @@ lines: [
   "Ohana no es el poder. Es no dejar a nadie."
 ]
 };
-game.storyLine = "El nido se abre.";
+game.storyLine = "";
 game.hitstop = 0;
-game.flash = 24;
+game.flash = 5;
 game.flashColor = "#fff6c8";
-game.shake = 26;
+game.shake = 6;
 game.projectiles = [];
 game.bossFx?.clear(); // Kill stale boss circling effects before the victory story.
 game.fx?.emit(game.finale.x, game.finale.y, {
 color: "#ffe66a",
-count: game.reduceMotion ? 16 : 44,
-size: 6,
-up: 3.2,
-speed: 4.6,
-star: true,
-life: 28,
+count: game.reduceMotion ? 5 : 12,
+size: 3,
+up: 1.4,
+speed: 2,
+star: false,
+life: 16,
 });
 game.bolts = [];
 game.slashes = [];
@@ -1262,22 +1262,27 @@ function tickFinale() {
 const f = game.finale;
 if (!f || f.t <= 0) return;
 f.t--;
-if (game.fx && f.t % 5 === 0 && f.t > 80) {
-game.fx.emit(f.x + (vfxRandom(1) - 0.5) * 160, f.y + (vfxRandom(2) - 0.5) * 90, {
-  color: f.t > 240 ? "#ff4060" : "#ffe66a",
-  count: 2,
-  size: 4,
-  up: 2.2,
-  star: true,
-  life: 18,
-});
+// One impact, one fragmentation, then one cinematic. No continuous shower
+// of damage flash or post-combat projectiles pretending the fight continues.
+const stage = bossFallStage(f);
+if (stage.progress < .34 && f.t % 20 === 0) {
+  game.fx?.emit(f.x, f.y, { color: "#ff8799", count: 3, size: 3, up: 1, life: 16 });
 }
-if (f.t === 420) game.storyLine = f.lines[1];
-if (f.t === 260) game.storyLine = f.lines[2];
-if (f.t === 420 || f.t === 260 || f.t === 120) {
-game.flash = 12;
-game.flashColor = f.t === 120 ? "#ffe66a" : "#fff";
+if (f.t === 135) {
+  game.flash = game.reduceMotion ? 3 : 10;
+  game.flashColor = "#fff1ce";
+  game.shake = game.reduceMotion ? 0 : 19;
+  game.fx?.emit(f.x, f.y, {
+    color: "#ff9d74", count: game.reduceMotion ? 10 : 38,
+    size: 5, up: 2.3, speed: 5.3, star: false, life: 34
+  });
+  game.fx?.emit(f.x, f.y, {
+    color: "#a2e6ff", count: game.reduceMotion ? 7 : 25,
+    size: 4, up: 2.0, speed: 4.8, star: true, life: 35
+  });
+  beep("win");
 }
+if (f.t === 55) game.storyLine = "";
 if (f.t === 0 && !game.won) {
 game.won = true;
 const p = game.player;
@@ -1736,14 +1741,9 @@ if (e.stun > 0) {
 
 if (e.boss) {
   if (e.fell) {
-    e.vx = 0; e.vy = 0;
-    e.x += ((game.worldW / 2 - e.w / 2) - e.x) * 0.14;
-    e.y += ((game.worldH / 2 - 80 - e.h / 2) - e.y) * 0.14;
+    // Hold the defeated Queen on screen. The finale owns her fragmentation.
+    e.vx = 0; e.vy = 0; e.telegraph = false;
     e.dying = Math.max(0, (e.dying || 0) - 1);
-    if (t % 3 === 0) {
-      game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 8, size: 5, up: 2.4, star: true });
-      game.flash = 4;
-    }
     continue;
   }
   if (e.invuln > 0) e.invuln--;
@@ -2368,7 +2368,6 @@ if (e.boss && e.hp <= 0) {
     beep("win");
     game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: game.reduceMotion ? 12 : 32, size: 6, up: 2.8, star: true });
     game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff4060", count: game.reduceMotion ? 8 : 20, size: 4, up: 2, speed: 3.5 });
-    showBossMessage("EL NIDO CAE", "La Reina se deshace.");
     beginFinale(e);
     return true;
   }
@@ -2589,7 +2588,17 @@ if (!visibleForRender(g,game.cam,camW(),camH())) continue;
 ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
 }
 if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
-for (const e of game.enemies) if ((!game.finale || !e.boss) && (e.boss || visibleForRender(e,game.cam,camW(),camH()))) drawEnemy(ctx, e, game.cam, t);
+for (const e of game.enemies) {
+  // Keep the Queen's actual authored sprite until it breaks into shards.
+  // Everything else freezes and disappears during the scripted epilogue.
+  const fall = game.finale && e.boss ? bossFallStage(game.finale) : null;
+  if (game.finale && (!e.boss || !fall.queenVisible)) continue;
+  if (!e.boss && !visibleForRender(e, game.cam, camW(), camH())) continue;
+  ctx.save();
+  if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
+  drawEnemy(ctx, e, game.cam, t);
+  ctx.restore();
+}
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
@@ -2624,7 +2633,7 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
 }
 }
 ctx.restore();
-if (game.storyLine && (game.bossIntro || game.finale) && !document.querySelector("#notification-container .game-notification")) {
+if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {
 ctx.save();
 ctx.globalAlpha = 0.92;
 ctx.fillStyle = "rgba(4,8,16,.55)";
@@ -2686,37 +2695,9 @@ ctx.fillStyle = "rgba(4,8,16," + (0.12 + k * 0.62) + ")";
 ctx.fillRect(0, 0, viewW, viewH);
 }
 if (game.finale && game.finale.t > 0) {
-const f = game.finale;
-const k = 1 - f.t / f.max;
-ctx.save();
-drawBossFallScene(ctx, f, game.cam, { w: viewW, h: viewH }, reduceMotion || game.reduceMotion);
-ctx.globalAlpha = 1;
-ctx.textAlign = "center";
-if (k > 0.18) {
-  const a = Math.min(1, (k - 0.18) * 3);
-  ctx.globalAlpha = a;
-  ctx.fillStyle = "#ffe66a";
-  ctx.font = "800 " + Math.round(40 + (1 - a) * 18) + "px Fraunces, serif";
-  ctx.fillText("LA REINA CAE", viewW / 2, viewH * 0.36);
+  drawBossFallScene(ctx, game.finale, game.cam, { w: viewW, h: viewH }, reduceMotion || game.reduceMotion);
 }
-if (k > 0.4) {
-  ctx.globalAlpha = Math.min(1, (k - 0.4) * 3);
-  ctx.fillStyle = "#fff";
-  ctx.font = "600 20px Outfit, sans-serif";
-  ctx.fillText("El nido se queda en silencio", viewW / 2, viewH * 0.36 + 42);
-}
-if (k > 0.62) {
-  ctx.globalAlpha = Math.min(1, (k - 0.62) * 3.2);
-  ctx.fillStyle = "#9ad7ff";
-  ctx.font = "600 16px Outfit, sans-serif";
-  ctx.fillText("Nadie se queda atrás", viewW / 2, viewH * 0.36 + 74);
-}
-ctx.globalAlpha = 0.55;
-ctx.fillStyle = "#c9d7e8";
-ctx.font = "600 12px Outfit, sans-serif";
-ctx.fillText("Esc para seguir", viewW / 2, viewH * 0.36 + 112);
-ctx.restore();
-}
+
 if (game.ult && game.ult.t > 0) {
 game.ult.t--;
 const u = game.ult.t / 42;
@@ -2975,6 +2956,16 @@ return;
 }
 if (!game.won) game.clearTicks = (game.clearTicks || 0) + 1;
 tickFinale();
+if (game.finale) {
+  // Locked, deterministic 3.5-second death beat: no enemy AI, bullets,
+  // hazards or renewed damage while the boss dissolves. Camera/FX still run.
+  game.fx.update();
+  game.combatFx?.update();
+  updateCam();
+  onlineCoop.tick(game);
+  if ((t & 3) === 0) updateHUD();
+  return;
+}
 tickWorldSummon();
 if (!canAct()) return;
 updatePlayer();
@@ -3068,7 +3059,8 @@ if (!onlineCoop.enabled || !game.player) return;
 const state = event.detail?.state;
 if (state === "won" && game.boss && !game.finale && !game.won) {
   game.boss.hp = 0;
-  game.boss.fell = false;
+  game.boss.fell = true;
+  game.boss.dying = Math.max(120, game.boss.dying || 0);
   beginFinale(game.boss);
 } else if (state === "lost" && !game.won) {
   game.player.dead = true;

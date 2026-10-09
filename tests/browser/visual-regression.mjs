@@ -122,8 +122,8 @@ try {
       scrollWidth: document.documentElement.scrollWidth,
     };
   });
-  assert.equal(titleLayout.visible.length, titleLayout.atriumOn ? 10 : 3, '01-character-select: V81 3 tarjetas sin vistas fantasma');
-  assert.ok(Math.abs((titleLayout.selected.left + titleLayout.selected.width / 2) - titleLayout.width / 2) < titleLayout.width * .1, '01-character-select: héroe fuera del centro');
+  assert.equal(titleLayout.visible.length, 10, '01-character-select: faltan héroes en la nueva cuadrícula');
+  assert.ok(titleLayout.selected.left >= -2 && titleLayout.selected.right <= titleLayout.width + 2, '01-character-select: héroe fuera del panel');
   assert.ok(Math.abs((titleLayout.title.left + titleLayout.title.width / 2) - titleLayout.width / 2) < titleLayout.width * .08, '01-character-select: título fuera del centro');
   assert.ok(titleLayout.controls.bottom <= titleLayout.height + 2, '01-character-select: controles fuera del viewport');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, '01-character-select: dossier invade controles');
@@ -150,14 +150,13 @@ try {
   assert.equal(finalFormFit.cardEvo, '4', '01c-final-form-fit: tarjeta no conoce su evolución');
   assert.ok(finalFormFit.envelope >= 1.3, '01c-final-form-fit: Forma 5 sin margen de silueta');
   assert.ok(finalFormFit.scale >= .34, '01c-final-form-fit: escala inválida');
-  assert.equal(finalFormFit.backdrop, 'hoku-gate', '01c-final-form-fit: fondo V47A incorrecto');
-  assert.equal(finalFormFit.scene, 'kilo', '01c-final-form-fit: afinidad inicial incorrecta');
+  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'family-grid', '01c-final-form-fit: cuadrícula no activada');
   await capture(page, '01c-character-select-final-form-fit');
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
   await page.waitForTimeout(120);
 
   // V53 Dragon art audit: each evolutionary silhouette must draw in the selector.
-  for(let n=0;n<4;n++) await page.locator('#roster-next').click();
+  for(let n=0;n<4;n++) await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(280);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'dragon','01e-dragon: selección no llega a Dragón');
   for(let form=0;form<5;form++){
@@ -176,12 +175,12 @@ try {
     await capture(page,'01e-dragon-solar-form-'+(form+1));
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<4;n++) await page.locator('#roster-prev').click();
+  for(let n=0;n<4;n++) await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(280);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01e-dragon: selector no vuelve a Kilo');
 
   // V54 Frita: capture each form without modifying the parallel Atrium intro.
-  for(let n=0;n<6;n++) await page.locator('#roster-next').click();
+  for(let n=0;n<6;n++) await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(240);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'frita','01f-frita: selección no llega a Frita');
   for(let form=0;form<5;form++){
@@ -200,12 +199,12 @@ try {
     await capture(page,'01f-frita-crispy-form-'+(form+1));
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<6;n++) await page.locator('#roster-prev').click();
+  for(let n=0;n<6;n++) await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01f-frita: selector no vuelve a Kilo');
 
   // V55 Pizza: five genuine Canvas portraits at every evolution stage.
-  for(let n=0;n<7;n++) await page.locator('#roster-next').click();
+  for(let n=0;n<7;n++) await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'pizza','01g-pizza: selector does not reach Pizza');
   for(let form=0;form<5;form++){
@@ -225,12 +224,12 @@ try {
     await capture(page,'01g-pizza-molten-form-'+(form+1));
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<7;n++) await page.locator('#roster-prev').click();
+  for(let n=0;n<7;n++) await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01g-pizza: selector did not return to Kilo');
 
   // V56 Yomi: verify the guardian-lantern is legible across five evolution silhouettes.
-  for(let n=0;n<8;n++) await page.locator('#roster-next').click();
+  for(let n=0;n<8;n++) await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(230);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'yomi','01h-yomi: selector does not reach Yomi');
   for(let form=0;form<5;form++){
@@ -249,12 +248,12 @@ try {
     await capture(page,'01h-yomi-guardian-form-'+(form+1));
   }
   await page.evaluate(()=>{window.__OHANA_TITLE_EVO_OVERRIDE=null;});
-  for(let n=0;n<8;n++) await page.locator('#roster-prev').click();
+  for(let n=0;n<8;n++) await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(260);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01h-yomi: selector did not return to Kilo');
 
   // V59 Cuerno: the baby is a living horn, not a four-legged ball.
-  for(let i=0;i<9;i++) await page.locator('#roster-next').click();
+  for(let i=0;i<9;i++) await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'cuerno','01i-cuerno: selector does not reach Cuerno');
   let cuernoLastGrowth=0;
@@ -343,17 +342,17 @@ try {
     window.__OHANA_TITLE_CUERNO_MAGIC=null;
     window.__OHANA_TITLE_CUERNO_STATE=null;
   });
-  for(let i=0;i<9;i++) await page.locator('#roster-prev').click();
+  for(let i=0;i<9;i++) await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(250);
   assert.equal(await page.locator('#char-select').getAttribute('data-hero'),'kilo','01i-cuerno: selector did not restore');
 
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = 60; });
-  await page.locator('#roster-next').click();
+  await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(520);
   const livingSelect = await page.evaluate(() => ({
     hero:document.querySelector('#char-select')?.dataset.hero || '',
     atriumOn:document.querySelector('#char-select')?.classList.contains('atrium-on') || false,
-    scene:document.querySelector('#title-fx')?.dataset.heroScene || '',
+    scene:document.querySelector('#char-select')?.dataset.hero || '',
     stitchoBeat:document.querySelector('#chars-grid .char-card.selected')?.dataset.stitchoBeat || '',
     visible:[...document.querySelectorAll('#chars-grid .char-card')].filter((card) => {
       const s=getComputedStyle(card),r=card.getBoundingClientRect();
@@ -362,12 +361,12 @@ try {
   }));
   assert.equal(livingSelect.hero, 'stitcho', '01b-living-select: selección no avanza a Stitcho');
   assert.equal(livingSelect.scene, 'stitcho', '01b-living-select: fondo no reacciona al héroe');
-  assert.equal(livingSelect.visible.length, livingSelect.atriumOn ? 10 : 5, '01b-living-select: profundidad Atrium/carrusel incorrecta');
+  assert.equal(livingSelect.visible.length, 10, '01b-living-select: cuadrícula debe mostrar los diez héroes');
   assert.equal(livingSelect.stitchoBeat, 'plasma-roll', '01d-stitcho: coreografía de selector incorrecta');
   await capture(page, '01b-character-select-stitcho-world');
   await capture(page, '01d-stitcho-plasma-roll');
   await page.evaluate(() => { window.__OHANA_TITLE_STITCHO_PHASE = null; });
-  await page.locator('#roster-prev').click();
+  await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(420);
 
   await page.locator('#btn-play').click();
@@ -556,7 +555,7 @@ try {
   }));
   assert.equal(endingState.show, true, '08-ending: final no visible');
   assert.equal(endingState.running, true, '08-ending: resultados sustituyen al cine');
-  assert.equal(endingState.mode, 'v44-true-ending', '08-ending: final V44 no activo');
+  assert.equal(endingState.mode, 'v100-special-single-ending', '08-ending: single V100 Especial cinematic not active');
   await capture(page, '08-ending');
   await page.locator('#win-cinema .win-skip').click();
   await page.waitForTimeout(120);
