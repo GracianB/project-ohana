@@ -200,9 +200,13 @@ export function createRoomService(store, options = {}) {
           state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
         }
         if (state.players.length === 2 && state.players.every((player) => player.connected && player.characterId && player.ready)) {
+          // V102: reconnecting must never reset both avatars back to the start.
+          // Spawn only before the very first combat initialization. In engine mode
+          // the original OHANA ten-room world retains its real world positions.
+          const firstStart = !state.combat && !state.engineMode;
           resumeCombat(state, now());
           state.phase = "playing";
-          for (const entry of state.players) {
+          if (firstStart) for (const entry of state.players) {
             entry.worldRoomId = entry.worldRoomId || "hub";
             entry.x = entry.slot === 0 ? 420 : 550;
             entry.y = 1070;
