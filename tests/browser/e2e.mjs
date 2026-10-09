@@ -133,7 +133,7 @@ async function auditPage(page, label) {
         selectedPixels:cv?.width*cv?.height||0,
         canvasFilter:cv?getComputedStyle(cv).filter:'',
         cardFilter:selected?getComputedStyle(selected).filter:'',
-        staticBackdrop:(()=>{const fx=document.querySelector('#title-fx');return fx?getComputedStyle(fx).display==='none':false})()
+        staticBackdrop:(()=>{const fx=document.querySelector('#title-fx');return fx ? fx.getClientRects().length===0 : true})()
       };
     });
     assert.deepEqual(
