@@ -43,7 +43,7 @@ test("V100.2: integración y offline completos",()=>{
  for(const s of ["Festival.mount()","Festival.onEnterRoom(game)","Festival.update(game, t)","Festival.draw(ctx,game.cam,t,game"])assert.ok(g.includes(s),s);
  assert.match(sw,/systems\/v1002-festival\.js\?v=/);
  assert.match(sw,/v100-2\.css\?v=/);
- assert.match(sw,/const VERSION = "ohana-311"/);
+ assert.match(sw,/const VERSION = "ohana-312"/);
  assert.match(html,/id="festival-album"/);
  assert.match(html,/id="btn-festival-title"/);
  assert.match(css,/prefers-reduced-motion/);

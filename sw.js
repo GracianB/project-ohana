@@ -1,4 +1,4 @@
-const VERSION = "ohana-311";
+const VERSION = "ohana-312";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -106,6 +106,8 @@ const PRECACHE = [
   "./systems/v106-memory-gallery.js?v=" + VERSION,
   "./systems/coop-v103-pacing.js?v=" + VERSION,
   "./systems/coop-v104-sync.js?v=" + VERSION,
+  "./systems/coop-v107-room-follow.js?v=" + VERSION,
+  "./systems/menu-visibility.js?v=" + VERSION,
   "./systems/enemy-director.js?v=" + VERSION,
   "./systems/encounter-spatial.js?v=" + VERSION,
   "./systems/encounter-signals.js?v=" + VERSION,

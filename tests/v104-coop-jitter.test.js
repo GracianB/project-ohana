@@ -76,8 +76,8 @@ test("V104 · offline bundle and feature parity ready for automated CI",()=>{
  const html=fs.readFileSync("index.html","utf8");
  const online=fs.readFileSync("systems/online-coop.js","utf8");
  const festival=fs.readFileSync("systems/v1002-festival.js","utf8");
- assert.match(sw,/const VERSION = "ohana-311"/);
- assert.match(html,/ohana-311/);
+ assert.match(sw,/const VERSION = "ohana-312"/);
+ assert.match(html,/ohana-312/);
  assert.match(sw,/systems\/v104-living-stories\.js\?v=/);
  assert.match(sw,/systems\/coop-v104-sync\.js\?v=/);
  assert.match(online,/shouldUseSnapshot\(this\.snapshot,snapshot\)/);
