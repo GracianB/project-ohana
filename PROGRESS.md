@@ -1,3 +1,13 @@
+## 09/10/2026 · OHANA V102 · Los veinte recuerdos vivos · ohana-304
+
+- **Mismos 100 objetos, mismos guardados:** V102 anima los 20 hallazgos de Claro y Costa, no reemplaza ni invalida el álbum de V100.2/V101. Sin objetos extra ni ventanas que congelen la acción.
+- **20 microhistorias visuales propias:** un dibujo Canvas distinto por objeto (abrazo, ukelele, siesta, seta cantante, palmera, castillo, cangrejo, etc.), breve, posicionado sobre el hallazgo real y con su frase única. Máximo tres eventos temporales en memoria, con soporte reduced-motion y descarte al cambiar de sala.
+- **El sello 10/10 sigue siendo la celebración importante** y mantiene su recompensa V101. La secuencia de mundo terminado no se adelanta.
+- **Multijugador del mismo motor original:** al reconectar una sala previamente iniciada el servidor deja de reiniciar a los dos avatares (posiciones, evolución, sala y experiencia); en ausencia temporal del compañero el cliente espera sin expulsar a quien sigue conectado.
+- **Recuperación real de sesión:** POST con timeout de 10 s, reanudación de credenciales al recibir DISCONNECTED, identidad actualizada en sessionStorage, reenvío acotado de señales, movimientos obsoletos descartados y error terminal claro ante STALE_SESSION/INVALID_SESSION. Sin bucles de peticiones agresivos.
+- **QA:** nuevos tests de autoría, animación y reconexión de dos identidades en el servicio real sin red + smoke de navegador Chromium, además de Node, E2E multijugador, matriz visual, Release Gate y Pages.
+- **Recordatorio de producción:** Netlify y GitHub Pages se despliegan por separado. La PR en GitHub no actualiza automáticamente la publicación de Netlify del 7 de octubre; el cooperativo público necesita versión nueva y verificación en dos dispositivos antes de afirmar ese despliegue.
+
 ## 09/10/2026 · OHANA V101 · Los diez sellos · ohana-303
 
 - **No se rehacen los coleccionables:** permanecen los mismos 100 recuerdos interactivos, diez por sala, con el mismo almacenamiento `ohana-festival-v1002`. Se conserva el álbum y todo el progreso del jugador.
