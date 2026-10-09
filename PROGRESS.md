@@ -1,9 +1,18 @@
-## 09/10/2026 · OHANA V105 · 80 recuerdos vivos · Órbita y Arrecife · ohana-308
+## 09/10/2026 · OHANA V105 · Santuarios Dúo reforzados · ohana-309
+
+- **La V105 de recuerdos 61–80 ya existe en #246:** Órbita y Arrecife mantienen veinte dibujos y microhistorias únicos, objetos originales y el guardado `ohana-festival-v1002`. Esta contribución se construye sobre esa PR para no duplicar código.
+- **Diez Santuarios Dúo realmente compartidos:** cada uno tiene su identidad y lema. El servidor comprueba dos personajes vivos, conectados, recientes y cada uno sobre una placa diferente, durante 1200 ms continuos. El resultado se guarda por sala y únicamente emite una recompensa `duo-lit` incluso si llegan señales repetidas.
+- **Carga visible en ambos clientes:** el servidor transmite el estado de carga, y la interfaz muestra el progreso, el objetivo de mantener ambas placas y las pistas de cada santuario. Al completarse quedan dorados.
+- **Interrupción segura:** moverse fuera de la placa, abandonar la sala, caer, desconectarse o reaparecer con una sesión nueva invalida la carga anterior. Nadie consigue un ritual por solo mandar el mensaje de red ni se reanuda la carga después de una desconexión.
+- **QA automatizada:** test de los diez santuarios y todas sus variantes, interrupciones, reconexión, recompensa única, contexto visual y regresión de guardado. Node, Browser E2E, Multiplayer E2E, Visual Matrix y Release Gate deben aprobarse antes de fusión y despliegue Pages.
+- **Sin tareas manuales para el usuario hasta V111:** Netlify queda en V102 hasta que se actualice en la candidata V111; la evolución de código y su lógica de servidor se verifica automáticamente entre tanto. Ningún test simulado prueba rendimiento público real.
+
+## 09/10/2026 · OHANA V105 · 80 recuerdos vivos · Órbita y Arrecife · ohana-309
 
 - **Veinte nuevas escenas reales:** Órbita (space-0…9) y Arrecife Abismo (reef-0…9) tienen cada uno diez dibujos vectoriales originales y microhistorias relacionadas con sus coleccionables originales, sin nuevos objetos.
 - **Ochenta de cien:** V102/V103/V104/V105 aportan ahora ochenta escenas distintas; el álbum sigue teniendo 100 piezas y se mantiene `ohana-festival-v1002`, guardados, recompensas y sellos 10/10.
 - **Eficiencia y accesibilidad:** dos efectos como máximo, 128 ticks de duración, recorte fuera de cámara, limpieza al cambiar de sala y presentación estática en movimiento reducido. No se alteran física, habilidades, combate, red ni servidor Netlify.
-- **Release:** `ohana-308` en HTML y service worker, nuevo módulo precacheado. Unit, Browser E2E, Multiplayer E2E, Visual y Release Gate obligatorios. Verificación pública real de dos dispositivos y Netlify reservada para V111.
+- **Release:** `ohana-309` en HTML y service worker, nuevo módulo precacheado. Unit, Browser E2E, Multiplayer E2E, Visual y Release Gate obligatorios. Verificación pública real de dos dispositivos y Netlify reservada para V111.
 
 ## 09/10/2026 · OHANA V104 red · consolidación con recuerdos 41–60 · ohana-307
 
