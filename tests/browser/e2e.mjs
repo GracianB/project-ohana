@@ -145,6 +145,13 @@ async function auditPage(page, label) {
     assert.equal(carouselAudit.cardFilter,'none',label+': legacy CSS reenabled costly card filter');
     assert.equal(carouselAudit.staticBackdrop,true,label+': fondo Canvas sigue consumiendo GPU');
   }
+  // V100.2: a real visitor can open, read and close all ten album chapters.
+  await page.locator('#btn-festival-title').click();
+  assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'), 'false', label + ': album inaccessible');
+  assert.equal(await page.locator('#festival-album .festival-chapter').count(), 10, label + ': ten-world album missing');
+  assert.equal(await page.locator('#festival-album li').count(), 100, label + ': a hundred discoveries not rendered');
+  await page.locator('#festival-album .festival-close').click();
+  assert.equal(await page.locator('#festival-album').getAttribute('aria-hidden'), 'true', label + ': album does not close');
   const moduleProbe = await page.evaluate(async () => {
     const paths = [
       '/characters/rig.js',
@@ -205,6 +212,22 @@ async function auditPage(page, label) {
   await page.waitForTimeout(800);
   if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
+  // V100.2: a playable collectible must affect the actual world and album.
+  const foundMoment = await page.evaluate(async () => {
+    const { Festival } = await import('/systems/v1002-festival.js');
+    const before = Festival.snapshot();
+    const first = before.items[0];
+    if (!first) throw new Error('festival not initialized on entering Claro');
+    const api = window.__OHANA_E2E;
+    api.setInvulnerable(200);
+    api.setPlayer(first.x-16,first.y-22);
+    api.step(8);
+    const after = Festival.snapshot();
+    return {before:before.found,after:after.found,remainingBefore:before.remaining,remainingAfter:after.remaining,toast:document.getElementById('festival-toast')?.classList.contains('show')};
+  });
+  assert.equal(foundMoment.after,foundMoment.before+1,label+': collectible not picked up '+JSON.stringify(foundMoment));
+  assert.equal(foundMoment.remainingAfter,foundMoment.remainingBefore-1,label+': collectible not removed');
+  assert.equal(foundMoment.toast,true,label+': collection reward not displayed');
   if (label === 'desktop') {
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(1350);
