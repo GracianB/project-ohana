@@ -1,3 +1,13 @@
+## 09/10/2026 · OHANA V104 · Dos héroes, una sola aventura · ohana-306
+
+- **El creador no tendrá que probar cada versión hasta V111.** Cada versión se cierra con suites Node, navegador, multijugador simulado, visual y Release Gate. El único despliegue Netlify y prueba humana solicitados serán en la candidata de lanzamiento V111 (salvo urgencia crítica). Política en `docs/V111-QUALITY-PROTOCOL.md`.
+- **Cooperativo más coherente bajo lag real:** el cliente ignora respuestas atrasadas de poll/move con revisiones anteriores, evitando movimientos hacia atrás cuando se cruzan peticiones. Cuenta respuestas fuera de orden en `document.body.dataset.coopOutOfOrder` y calidad en `coopNetwork`.
+- **Compañero más suave:** la interpolación toma el intervalo real entre paquetes, incluso con 600–1200 ms de latencia, y deja de suponer que todos llegaron en 180 ms. Mantiene límite de predicción, no inventa teletransportes y respeta salas.
+- **Protección contra señales enormes:** el servidor admite solo clases conocidas de señales y un cuerpo acotado, reduciendo riesgo de saturar los blobs por ataques o payloads accidentales. No se altera el contrato legítimo de acciones.
+- **Recuerdos 41–60:** nuevas microhistorias ilustradas en Alien Lab y Cumbre, con escenas breves sin pausar, máximo dos simultáneas, y sin tocar guardado `ohana-festival-v1002`.
+- **Verificación:** nuevos tests Node de 20 escenas, muestras de red lenta, rechazo de paquetes antiguos, clasificación de salud y acciones servidor malformadas. Sigue habiendo pruebas E2E de dos navegadores, matriz visual y Release Gate.
+- **Pendiente posterior:** no afirmar V104 online desplegada en Netlify; usuario no quiere despliegues manuales por versión. Lanzamiento online V111 requiere una publicación y una prueba real final entre dos dispositivos.
+
 ## 09/10/2026 · OHANA V103 · Misma aventura, menos esperas · ohana-305
 
 - **Prioridad explícita: multijugador lentísimo en Netlify tras el primer despliegue real V102.** Hipótesis fundada en código: peticiones POST cada 125 ms para movimiento más sondeo cada 180 ms por jugador, con lectura/escritura en Netlify Blobs. No es una medición del servidor real.
