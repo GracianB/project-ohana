@@ -416,6 +416,20 @@ export function createRoomService(store, options = {}) {
     },
 
     async poll(roomCode, identity) {
+      // Fast path: the original engine uses this endpoint to observe its partner.
+      // Reads should not invoke CAS writes, full JSON comparisons or combat
+      // advancement on every request. Keep the 4s heartbeat and 15s expiry.
+      const current=await read(roomCode);
+      const viewer=playerFrom(current.room,identity);
+      if(!viewer.connected)throw new RoomError("DISCONNECTED","Reconecta la sesión antes de consultar la sala.",409);
+      if(current.room.engineMode) {
+        const time=now();
+        const lastSeen=Number(viewer.lastSeenAt??viewer.lastMoveAt??current.room.updatedAt??0);
+        const stale=current.room.players.some(p=>p.connected&&time-Number(p.lastSeenAt??p.lastMoveAt??current.room.updatedAt??0)>PLAYER_STALE_MS);
+        if(!stale&&time-lastSeen<PLAYER_HEARTBEAT_MS){
+          return snapshot(current.room,viewer.id);
+        }
+      }
       const { room } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de consultar la sala.", 409);
