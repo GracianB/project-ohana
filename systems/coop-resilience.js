@@ -13,7 +13,7 @@ export function remoteMotionSample(previous,x,y,now,roomChanged=false){
  return Object.freeze({
   targetX,targetY,
   previousX:teleport?targetX:px,previousY:teleport?targetY:py,
-  previousSampleAt:teleport?at-180:Math.min(at-16,lastAt),
+  previousSampleAt:teleport?at-180:Math.max(at-1500,Math.min(at-16,lastAt)),
   sampleAt:at,teleport
  });
 }
