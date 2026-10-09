@@ -262,6 +262,30 @@ async function auditPage(page, label) {
   assert.deepEqual(v104Probe.ids,['lab-0','ridge-9'],label+': V104 events not authored');
   assert.equal(v104Probe.valid,true,label+': V104 alters original collection');
   assert.deepEqual(v104Probe.snapshot.active,['ridge-9'],label+': V104 leaked events across worlds');
+  // V105 · authored Orbita/Arrecife sprites also paint actual pixels.
+  const v105Probe=await page.evaluate(async()=>{
+    const {V105_MOMENTS,V105Memories}=await import('/systems/v105-living-stories.js');
+    const {FESTIVAL_CATALOG}=await import('/systems/v1002-festival.js');
+    const layer=document.createElement('canvas');layer.width=160;layer.height=160;
+    const ctx=layer.getContext('2d');
+    const paint=(id,t,reduced)=>{
+      ctx.clearRect(0,0,160,160);
+      V105Memories.collect({id,x:80,y:90},t-20);
+      V105Memories.draw(ctx,{x:0,y:0},t,{room:id.split('-')[0],reduceMotion:reduced,w:160,h:160});
+      const rgba=ctx.getImageData(0,0,160,160).data;
+      let pixels=0;for(let p=3;p<rgba.length;p+=4)if(rgba[p])pixels++;
+      return pixels;
+    };
+    const spacePixels=paint('space-0',20,false);
+    const reefPixels=paint('reef-9',50,true);
+    const recent=V105Memories.snapshot(50).active;
+    V105Memories.clear();
+    return {count:V105_MOMENTS.length,spacePixels,reefPixels,recent,valid:V105_MOMENTS.every(x=>FESTIVAL_CATALOG.some(y=>y.id===x.id))};
+  });
+  assert.equal(v105Probe.count,20,label+': V105 visual catalog incomplete');
+  assert.ok(v105Probe.spacePixels>100 && v105Probe.reefPixels>100,label+': V105 pixels missing '+JSON.stringify(v105Probe));
+  assert.equal(v105Probe.valid,true,label+': V105 must reuse real festival objects');
+  assert.deepEqual(v105Probe.recent,['reef-9'],label+': V105 scene leaked across rooms');
   if (label === 'desktop') {
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(1350);
