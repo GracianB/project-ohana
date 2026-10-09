@@ -1,3 +1,14 @@
+## 09/10/2026 · OHANA V103 · Misma aventura, menos esperas · ohana-305
+
+- **Prioridad explícita: multijugador lentísimo en Netlify tras el primer despliegue real V102.** Hipótesis fundada en código: peticiones POST cada 125 ms para movimiento más sondeo cada 180 ms por jugador, con lectura/escritura en Netlify Blobs. No es una medición del servidor real.
+- **Menos peticiones, controles locales intactos:** red adaptativa a la latencia con envío de posición en torno a 340 ms (hasta 750 ms bajo sobrecarga), sondeo en torno a 650 ms (hasta 1250 ms si el servidor responde despacio). No ralentiza la simulación, el input, saltos ni habilidades locales. Los cambios importantes (sala, vida, evolución) se envían cuando toca; en reposo se evita tráfico salvo heartbeat de 2,6 s.
+- **Las respuestas a movimientos ya traen a tu compañero:** no se duplica un poll durante una respuesta reciente; conserva backoff y colas acotadas. RTT medio se expone solo en `document.body.dataset.coopRtt` y ritmo de envío en `data-coop-move-interval` para inspección de rendimiento.
+- **Servidor Netlify / Blob:** sondeos en motor original sin cambios se contestan en lectura directa, sin clonar/escribir el estado en Blobs, preservando comprobación de credenciales, heartbeat a 4 s y caducidad por 15 s. El motor antiguo conserva su semántica.
+- **Gráficos:** no dibujar el otro personaje cuando se encuentra a más de 240 px fuera de la cámara. Se siguen dibujando los dos Santuarios Dúo.
+- **20 recuerdos más:** Jungla Alta y Cueva Azul, números 21–40, reciben escenas vectoriales originales ligeras al recoger los mismos objetos. Las 100 piezas, el progreso local de V100.2 y los sellos V101 permanecen intactos.
+- **Pruebas:** pacing adaptativo, movimiento y heartbeat, sondeo sin escrituras, 20 autorías únicas, expiración de efectos, caché offline y suites Node/navegador/multijugador/visual/release.
+- **Pendiente real:** actualizar Netlify manualmente una vez fusionada y publicada V103; medir RTT en dos dispositivos, fluidez y número de solicitudes, comparando V102 versus V103. Un CI verde nunca garantiza velocidad en conexión doméstica.
+
 ## 09/10/2026 · OHANA V102 · Los veinte recuerdos vivos · ohana-304
 
 - **Mismos 100 objetos, mismos guardados:** V102 anima los 20 hallazgos de Claro y Costa, no reemplaza ni invalida el álbum de V100.2/V101. Sin objetos extra ni ventanas que congelen la acción.
