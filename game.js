@@ -124,6 +124,7 @@ worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y
 shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), experience: new ExperienceDirector(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
 };
 
+game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 Festival.mount();
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 
