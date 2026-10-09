@@ -76,7 +76,7 @@ test("V101: browser UI, reduced-motion, storage compatibility and original-world
   assert.match(css,/prefers-reduced-motion/);
   assert.match(sw,/v101-milestones\.css\?v=/);
   assert.match(sw,/systems\/v101-milestones\.js\?v=/);
-  assert.match(sw,/const VERSION = "ohana-305"/);
+  assert.match(sw,/const VERSION = "ohana-306"/);
   assert.match(coop,/const START_ROOM = "hub"/);
   assert.match(coop,/1: \{ x: 550, y: 1070 \}/);
   assert.match(server,/worldRoomId: "hub"/);
