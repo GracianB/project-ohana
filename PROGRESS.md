@@ -1,3 +1,11 @@
+## 10/10/2026 · OHANA · recuperación inmediata de fluidez · ohana-311
+
+- **Problema confirmado en código:** bienvenida con bloqueo de 1,1 s; portales con carga de 20–45 fotogramas; tres bucles gráficos simultáneos en la portada; render a DPR hasta 1,25 y UI de partida demasiado frecuente. La molestia real la ha comunicado quien juega; esto aún no equivale a una medición de hardware remoto.
+- **Pantallas:** la bienvenida es accionable desde 160 ms; se dibuja a máximo ~30 fps; la cinemática de nueva partida es ~460 ms (240 ms con movimiento reducido) y puede saltarse. Portales ya cargados requieren 8–10 ticks (5 con movimiento reducido), conservan las partículas, bloqueo por evolución y protección contra reentrada.
+- **Rendimiento real:** los personajes de portada dibujan a 20 fps para el principal y con menor frecuencia los secundarios; atmósfera y partículas se refrescan a ~9 fps sin ralentizar entradas. En partida, menos regeneraciones del HUD, máximo tres pasos de recuperación de física y canvas a DPR adaptativo por resolución o presión de fotogramas sostenida.
+- **Sin sacrificar juego:** poderes, físicas, cien recuerdos, cooperativo y guardados no cambian. Nueva suite de pruebas de latencia estructural, presión de fotogramas, resolución y compatibilidad. Las pruebas de navegador y QA son obligatorias antes de publicar.
+- **Validación real posterior:** comprobar en el equipo del jugador los milisegundos de entrada, las transiciones entre mundos y el FPS sostenido; los tests automáticos no garantizan rendimiento en Firefox/GPU de ese equipo.
+
 ## 10/10/2026 · OHANA V106 · Cien recuerdos, museo y epílogo familiar · ohana-310
 
 - **Recuerdos 81–100:** Caldera y Nido Final reciben diez viñetas Canvas originales cada uno, con motivos y relatos únicos conectados a sus coleccionables reales.

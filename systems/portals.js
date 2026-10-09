@@ -371,14 +371,9 @@ export class Portals {
 
   _beginCharge(portal, type, reduce) {
     if (!portal || !portal.dest) return;
-    const max =
-      type === "blackhole"
-        ? reduce
-          ? 14
-          : 28 + Math.floor(unit(this._simT + portal.x * 0.17 + portal.y * 0.23) * 18) // 28–45
-        : reduce
-          ? 10
-          : 20 + Math.floor(unit(this._simT + portal.x * 0.29 + portal.y * 0.31) * 17); // 20–36
+    // Destinations are already resident. The wind-up must never be mistaken
+    // for a frozen screen; keep feedback, transfer and arrival intact.
+    const max = reduce ? 5 : type === "blackhole" ? 10 : 8;
     this.charge = { portal, type, t: 0, max, snapped: false, freezeLeft: 0 };
     this._visual = { scale: 1, alpha: 1 };
     this._overlay = {
@@ -400,7 +395,7 @@ export class Portals {
     const p = game.player;
     const portal = c.portal;
     c.t++;
-    if (c.t > c.max + 30) {
+    if (c.t > c.max + 8) {
       this._overlay = this._overlay || {
         alpha: 0.75,
         color: c.type === "blackhole" ? "90,40,160" : "255,160,60",

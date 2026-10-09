@@ -71,7 +71,7 @@ export function playTitleIntro() {
   el.dataset.v45Cast = String(CAST.length);
   el.dataset.openingMode = "family-welcome";
 
-  let raf = 0, t0 = 0, last = 0, ready = false, done = false;
+  let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
 
   function layout() {
     const W = fc.W, H = fc.H;
@@ -314,6 +314,11 @@ export function playTitleIntro() {
     if(!t0){t0=now;last=now;}
     last=now;
     const t=(now-t0)/1000;
+    // The entry is actionable after the first meaningful frame, not a
+    // mandatory one-second wait.
+    if(!ready&&t>=0.16){ready=true;el.classList.add("ready");}
+    if(lastPaint && now-lastPaint<33){raf=requestAnimationFrame(frame);return;}
+    lastPaint=now;
     const L=layout();
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     island(t,L);
@@ -322,7 +327,6 @@ export function playTitleIntro() {
     vign.addColorStop(0,"rgba(0,0,0,0)");vign.addColorStop(1,"rgba(0,0,0,.52)");
     ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
     ctx.restore();
-    if(!ready&&t>1.1){ready=true;el.classList.add("ready");}
     raf=requestAnimationFrame(frame);
   }
 
@@ -382,7 +386,7 @@ export function playIntro(kind, name, done, id) {
   const kicker = kind === "resume" ? "CONTINUAR" : "NUEVA PARTIDA";
   const sub = kind === "resume" ? "Se recupera tu forma y tu sala" : "Empiezas como bebé · Rumbo al Claro";
   el.querySelector(".intro-sr").textContent = kicker + ": " + title + ". " + sub;
-  const T = reduce ? { in: 0.12, out: 0.35, end: 0.5 } : { in: 0.28, out: 0.7, end: 0.95 };
+  const T = reduce ? { in: 0.07, out: 0.14, end: 0.24 } : { in: 0.14, out: 0.31, end: 0.46 };
 
   let t0 = 0, last = 0, raf = 0, skip = false, finished = false, burst = false, started = false;
   function startGame() {

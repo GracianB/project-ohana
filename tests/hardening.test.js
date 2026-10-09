@@ -721,12 +721,12 @@ test("V47B selector and cinematics keep rendering cost bounded", () => {
   const evo = fs.readFileSync("./systems/evo-cinema.js", "utf8");
   const supreme = fs.readFileSync("./systems/supreme-cinema.js", "utf8");
   const css = fs.readFileSync("./title-stage.css", "utf8");
-  assert.match(title, /stepMs: 1000 \/ 24/);
+  assert.match(title, /stepMs: 1000 \/ 20/);
   assert.match(title, /portraitCanvases/);
   assert.match(title, /aria-hidden.*=== "true"/);
   assert.match(title, /maxDpr = w \* h > 120000 \? 1\.45 : 1\.65/);
-  assert.match(titleFx, /now-lastFrame<75/);
-  assert.match(title, /SIDE_PREVIEW_INTERVAL_MS = 120/);
+  assert.match(titleFx, /now-lastFrame<110/);
+  assert.match(title, /SIDE_PREVIEW_INTERVAL_MS = 190/);
   assert.match(title, /new ResizeObserver\(/);
   assert.match(titleFx, /length:28/);
   assert.match(titleFx, /R=Math\.min\(W\*\.155,H\*\.225\)/);

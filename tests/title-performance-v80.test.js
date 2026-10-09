@@ -8,7 +8,7 @@ const finalCss=read("ending.css"),sw=read("sw.js"),page=read("index.html");
 
 test("V80: active hero stays at full animation while side previews are throttled",()=>{
  for(const s of [
-  "SIDE_PREVIEW_INTERVAL_MS = 120",
+  "SIDE_PREVIEW_INTERVAL_MS = 190",
   "!hero && !cv._needsFit && now - (cv._lastPaintAt || 0)",
   "if (cv._needsFit === false) return",
   "new ResizeObserver(",
@@ -20,7 +20,7 @@ test("V80: active hero stays at full animation while side previews are throttled
 });
 test("V80: fullscreen background has lower DPR and frame cadence",()=>{
  assert.ok(fx.includes("maxDpr=pixels>1400000?1.12:1.25"));
- assert.ok(fx.includes("now-lastFrame<75"));
+ assert.ok(fx.includes("now-lastFrame<110"));
  assert.ok(fx.includes("document.visibilityState===\"hidden\""));
  assert.match(css,/#char-select #chars \.portrait canvas\{[^}]*filter:none/);
  assert.match(css,/#char-select #chars \.char-card\.is-prev,#char-select #chars \.char-card\.is-next\{[^}]*filter:none/s);

@@ -210,7 +210,7 @@ if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "fami
   function frame(now=performance.now()){
     if(document.body.classList.contains("playing") || document.visibilityState==="hidden"){raf=0;lastFrame=0;return;}
     // ~13fps for scenery vs 24fps for the central playable hero.
-    if(!reduce && lastFrame && now-lastFrame<75){
+    if(!reduce && lastFrame && now-lastFrame<110){
       raf=requestAnimationFrame(frame);
       return;
     }
