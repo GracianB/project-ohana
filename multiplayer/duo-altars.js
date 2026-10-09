@@ -15,11 +15,34 @@ export const DUO_ALTARS=Object.freeze({
  volcano:Object.freeze({name:"Brasas Hermanas",color:"#ffb789",pads:[370,840]}),
  boss:Object.freeze({name:"Valor de Familia",color:"#ffc5e3",pads:[350,820]}),
 });
+// Room personality: instructions intentionally require BOTH players, no specific hero.
+export const DUO_CUES=Object.freeze({
+ hub:"Dos promesas en el mismo claro",
+ beach:"Dos mareas que laten juntas",
+ jungle:"Dos raíces, un mismo árbol",
+ cave:"Dos ecos despiertan el cristal",
+ lab:"Dos circuitos, una sola chispa",
+ ridge:"Dos valientes frente al viento",
+ space:"Dos estrellas comparten órbita",
+ reef:"Dos corazones bajo las olas",
+ volcano:"Dos brasas hacen un hogar",
+ boss:"Dos héroes mantienen la esperanza",
+});
+export function duoRitualProgress(room,now=Date.now()){
+ const charge=room?.duoChannel;
+ if(!charge?.roomId||!DUO_ALTARS[charge.roomId]||room?.duoAltars?.[charge.roomId])return null;
+ const elapsed=Math.max(0,Math.min(DUO_HOLD_MS,Number(now)-Number(charge.startedAt)));
+ if(!duoPlateState(room.players,charge.roomId,now)?.ready)return null;
+ return Object.freeze({
+  roomId:charge.roomId,elapsedMs:elapsed,durationMs:DUO_HOLD_MS,
+  ratio:elapsed/DUO_HOLD_MS,startedAt:charge.startedAt,
+ });
+}
 const finite=(x,f=0)=>Number.isFinite(Number(x))?Number(x):f;
 const same=(player,pad)=>Math.abs(finite(player?.x,-9999)-pad)<=DUO_RADIUS&&Math.abs(finite(player?.y,-9999)-1070)<=150;
 export function duoPlateState(players=[],roomId="beach",now=Date.now(),freshMs=2200){
  const altar=DUO_ALTARS[roomId];if(!altar)return null;
- const live=players.filter(p=>p&&p.connected&&Number(p.health)>0&&p.worldRoomId===roomId&&Number(now)-finite(p.lastSeenAt,-1e9)<=freshMs);
+ const live=players.filter(p=>p&&p.connected&&Number(p.health)>0&&p.worldRoomId===roomId&&Number(now)-finite(p.lastSeenAt,-1e9)>=0&&Number(now)-finite(p.lastSeenAt,-1e9)<=freshMs);
  const a=live.find(p=>same(p,altar.pads[0])),b=live.find(p=>p!==a&&same(p,altar.pads[1]));
  const alternateA=live.find(p=>same(p,altar.pads[1])),alternateB=live.find(p=>p!==alternateA&&same(p,altar.pads[0]));
  return Object.freeze({roomId,ready:!!((a&&b)||(alternateA&&alternateB)),
