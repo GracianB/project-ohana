@@ -32,7 +32,7 @@ test("V98 actual production drawing uses culling on expensive objects, never gam
   "game.projectiles","game.bolts"]){
   assert.ok(game.includes(code),"Missing "+code);
  }
- assert.match(game,/e\.boss \|\| visibleForRender\(e,game\.cam/);
+ assert.match(game,/!e\.boss && !visibleForRender\(e, game\.cam/);
  assert.match(game,/visibleForRender\(pr,game\.cam/);
  assert.match(game,/visibleForRender\(b,game\.cam/);
  const source=fs.readFileSync("systems/render-v98-culling.js","utf8");
