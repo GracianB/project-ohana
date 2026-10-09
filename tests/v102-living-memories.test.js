@@ -61,7 +61,7 @@ test("V102: reconnect to original online engine preserves both players, room and
   const store=new MemoryStore();
   let now=1_800_000_000_000;
   let seq=0;
-  const svc=createRoomService(store,{now:()=>now,makeCode:()=> "MOVERS",makeCredential:()=> "secure-"+(++seq)});
+  const svc=createRoomService(store,{now:()=>now,makeCode:()=> "MOVE22",makeCredential:()=> "secure-"+(++seq)});
   const host=await svc.create();
   const guest=await svc.join(host.roomId);
   await svc.choose(host.roomId,host.identity,"kilo");
