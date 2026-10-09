@@ -1,0 +1,77 @@
+/* OHANA V106 · Memory Museum and Hundred Hearts atlas.
+   Earned images are personal chapters, never another paywall or collectible. */
+#festival-album .festival-memory-open{
+ flex:0 0 auto;min-height:32px;padding:5px 8px;
+ border:1px solid color-mix(in srgb,var(--festival-accent) 55%,transparent);
+ border-radius:9px;background:rgba(255,241,189,.10);color:#fff3c4;
+ font:800 10px/1.2 Outfit,system-ui,sans-serif;cursor:pointer;
+ transition:background .18s ease,transform .18s ease;
+}
+#festival-album .festival-memory-open:hover{background:rgba(255,231,165,.21);transform:translateY(-2px)}
+#festival-album .festival-memory-open:focus-visible,
+#festival-album .festival-grand-atlas button:focus-visible,
+#festival-album .festival-memory-close:focus-visible{outline:3px solid #ffdfa4;outline-offset:3px}
+#festival-album .festival-chapter li.found{
+ border:1px solid color-mix(in srgb,var(--festival-accent) 20%,transparent);
+ padding:7px 8px;gap:9px;min-height:52px;
+}
+#festival-album .festival-memory-preview{
+ position:fixed;inset:0;z-index:115;display:grid;place-items:center;
+ background:rgba(2,9,20,.90);padding:16px;
+}
+#festival-album .festival-memory-preview[hidden]{display:none!important}
+#festival-album .festival-memory-sheet{
+ position:relative;display:flex;flex-direction:column;align-items:center;
+ width:min(470px,100%);max-height:95dvh;overflow:auto;
+ padding:clamp(16px,4vw,31px);text-align:center;
+ border:2px solid color-mix(in srgb,var(--festival-accent) 65%,#fff5db);
+ border-radius:28px;
+ background:radial-gradient(ellipse at 50% 16%,color-mix(in srgb,var(--festival-accent) 21%,transparent),transparent 60%),linear-gradient(155deg,#193542,#101c32 70%,#291b39);
+ box-shadow:0 26px 80px rgba(0,0,0,.58);
+}
+#festival-album .festival-memory-close{
+ align-self:flex-end;min-width:44px;min-height:44px;border-radius:13px;
+ border:1px solid rgba(255,255,255,.35);background:#20394a;color:#fff;font-size:20px;cursor:pointer;
+}
+#festival-album .festival-memory-kicker{
+ margin:0;color:var(--festival-accent);font:800 11px/1.5 Outfit,system-ui,sans-serif;
+ letter-spacing:.20em;
+}
+#festival-album .festival-memory-sheet canvas{
+ display:block;width:min(220px,100%);height:auto;aspect-ratio:1;
+ margin:4px auto 0;filter:drop-shadow(0 12px 22px rgba(0,0,0,.20));
+}
+#festival-album .festival-memory-place{margin:-5px 0 7px;color:var(--festival-accent);font:800 11px/1.4 Outfit,system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+#festival-album .festival-memory-sheet h3{margin:0;color:#fff4d3;font:700 clamp(24px,5vw,33px)/1.15 Fredoka,system-ui,sans-serif}
+#festival-album .festival-memory-story{max-width:34ch;margin:14px 0;color:#e9f5f1;font:600 clamp(15px,2.8vw,18px)/1.55 Outfit,system-ui,sans-serif}
+#festival-album .festival-memory-footer{margin:13px 0 0;color:#bddee0;font:600 11px/1.6 Outfit,system-ui,sans-serif;letter-spacing:.04em}
+#festival-album .festival-grand-atlas{
+ position:relative;padding:20px 17px;margin:0;border-radius:19px;
+ border:1px solid rgba(255,218,153,.55);text-align:center;
+ background:radial-gradient(ellipse at 50% 0%,rgba(255,222,158,.20),transparent 65%),linear-gradient(135deg,rgba(70,44,85,.80),rgba(11,46,59,.88));
+}
+#festival-album .festival-grand-atlas[hidden]{display:none!important}
+#festival-album .festival-grand-atlas strong{display:block;color:#ffe9a7;letter-spacing:.11em;font:800 clamp(16px,3vw,22px)/1.25 Fredoka,system-ui,sans-serif}
+#festival-album .festival-grand-atlas p{margin:9px auto;color:#e1f5ed;font:600 13px/1.5 Outfit,system-ui,sans-serif}
+#festival-album .festival-grand-seals{display:flex;justify-content:center;gap:clamp(4px,1.5vw,13px);flex-wrap:wrap;margin:16px 0}
+#festival-album .festival-grand-seals span{
+ display:grid;place-items:center;width:34px;height:34px;
+ border-radius:50%;border:1px solid rgba(255,233,173,.62);
+ background:rgba(255,235,185,.10);color:#fff2c4;font-size:20px;
+}
+#festival-album .festival-grand-atlas button{
+ border:1px solid #ffe3a3;border-radius:99px;padding:11px 20px;
+ background:#f6d99e;color:#162236;font:800 13px/1.2 Outfit,system-ui,sans-serif;
+ cursor:pointer;
+}
+@media(max-width:620px){
+ #festival-album .festival-memory-sheet{padding:12px 16px 23px}
+ #festival-album .festival-memory-sheet canvas{width:min(190px,100%)}
+ #festival-album .festival-memory-open{min-width:54px}
+ #festival-album .festival-memory-story{margin:8px 0}
+ #festival-album .festival-grand-seals span{width:29px;height:29px}
+}
+@media(prefers-reduced-motion:reduce){
+ #festival-album .festival-memory-open{transition:none!important;transform:none!important}
+ #festival-album .festival-memory-sheet canvas{filter:none!important}
+}

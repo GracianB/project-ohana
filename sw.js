@@ -1,4 +1,4 @@
-const VERSION = "ohana-309";
+const VERSION = "ohana-310";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -26,6 +26,7 @@ const PRECACHE = [
   "./v100-special.css?v=" + VERSION,
   "./v100-2.css?v=" + VERSION,
   "./v101-milestones.css?v=" + VERSION,
+  "./v106-memory-museum.css?v=" + VERSION,
   "./game.js?v=" + VERSION,
   "./characters/art/_template.js?v=" + VERSION,
   "./characters/art/cat.js?v=" + VERSION,
@@ -101,6 +102,8 @@ const PRECACHE = [
   "./systems/v103-living-stories.js?v=" + VERSION,
   "./systems/v104-living-stories.js?v=" + VERSION,
   "./systems/v105-living-stories.js?v=" + VERSION,
+  "./systems/v106-final-memories.js?v=" + VERSION,
+  "./systems/v106-memory-gallery.js?v=" + VERSION,
   "./systems/coop-v103-pacing.js?v=" + VERSION,
   "./systems/coop-v104-sync.js?v=" + VERSION,
   "./systems/enemy-director.js?v=" + VERSION,
