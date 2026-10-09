@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { ROOMS } from "../systems/map.js";
-import { FESTIVAL_ROOMS, FESTIVAL_CATALOG, FESTIVAL_TOTAL, FESTIVAL_KINDS, festivalPlacements, festivalProgress, festivalNear, Festival } from "../systems/v1002-festival.js";
+import { FESTIVAL_ROOMS, FESTIVAL_STORIES, FESTIVAL_CATALOG, FESTIVAL_TOTAL, FESTIVAL_KINDS, festivalPlacements, festivalProgress, festivalNear, Festival } from "../systems/v1002-festival.js";
 
 test("V100.2: 100 motivos únicos en 10 mundos y 10 familias",()=>{
  assert.equal(FESTIVAL_TOTAL,100);
@@ -12,6 +12,8 @@ test("V100.2: 100 motivos únicos en 10 mundos y 10 familias",()=>{
  assert.equal(new Set(FESTIVAL_CATALOG.map(x=>x.id)).size,100);
  assert.equal(new Set(FESTIVAL_CATALOG.map(x=>x.title)).size,100);
  assert.equal(new Set(FESTIVAL_CATALOG.map(x=>x.kind)).size,10);
+ assert.equal(new Set(FESTIVAL_CATALOG.map(x=>x.description)).size,100);
+ assert.equal(Object.values(FESTIVAL_STORIES).flat().length,100);
  for(const r of FESTIVAL_ROOMS){assert.equal(r.titles.length,10);assert.ok(ROOMS[r.id],r.id);}
 });
 test("V100.2: cada hallazgo pertenece a plataforma real y está al alcance",()=>{
