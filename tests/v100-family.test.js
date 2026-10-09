@@ -51,7 +51,7 @@ test("V100 production cinematic, accessible results, cache and release agree",()
  assert.match(ending,/card\.inert=true/);
  assert.match(ending,/card\.inert=false/);
  assert.match(ending,/const duration=reduce\?1\.6:14\.5/);
- assert.match(sw,/const VERSION = "ohana-300"/);
+ assert.match(sw,/const VERSION = "ohana-300s"/);
  assert.ok(html.includes("ohana-300")&&progress.includes("ohana-300"));
  assert.match(sw,/systems\/v100-family-choreography\.js\?v=/);
  assert.match(intro,/PROJECT OHANA/);
