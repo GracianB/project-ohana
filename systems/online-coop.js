@@ -30,20 +30,33 @@ function makeActionId(playerId, sequence) {
 }
 
 async function post(body) {
-  const response = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    cache: "no-store",
-    body: JSON.stringify(body),
-  });
-  const data = await response.json();
-  if (!response.ok || data?.error) {
-    const error = new Error(data?.error?.message || "No se pudo sincronizar la partida online.");
-    error.code = data?.error?.code;
-    error.status = response.status;
+  // A lost connection must not leave the entire engine waiting on one hung POST.
+  const abort = new AbortController();
+  const timeout = setTimeout(()=>abort.abort(), 10000);
+  try{
+    const response = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      cache: "no-store",
+      signal: abort.signal,
+      body: JSON.stringify(body),
+    });
+    const data = await response.json().catch(()=>null);
+    if (!response.ok || !data || data.error) {
+      const error = new Error(data?.error?.message || "No se pudo sincronizar la partida online.");
+      error.code = data?.error?.code || "SERVER_UNAVAILABLE";
+      error.status = response.status;
+      throw error;
+    }
+    return data.data;
+  } catch(error) {
+    if(error.name==="AbortError") {
+      const timeoutError=new Error("La conexión tardó demasiado. Reintentando sin perder tu partida.");
+      timeoutError.code="NETWORK_TIMEOUT";
+      throw timeoutError;
+    }
     throw error;
-  }
-  return data.data;
+  } finally {clearTimeout(timeout);}
 }
 
 class OnlineCoop {
@@ -71,6 +84,8 @@ class OnlineCoop {
     this.retryAfter = 0;
     this.nextDuoAt=0;
     this.duoApplied=new Set();
+    this.reconnecting=false;
+    this.resumeFailures=0;
   }
 
   readSession() {
@@ -120,6 +135,8 @@ class OnlineCoop {
     this.retryAfter = 0;
     this.lastRoomId = "";
     this.lastLocalWorld = "";
+    this.reconnecting=false;
+    this.resumeFailures=0;
 
     document.body.dataset.gameMode = "online";
     document.body.dataset.onlineRoom = this.roomId;
@@ -285,11 +302,14 @@ class OnlineCoop {
         this.currentPlayer(snapshot)?.lastSequence || 0
       );
       this.clearRetry();
-
       if (snapshot.phase === "lobby") {
-        this.enabled = false;
-        this.clearSession();
-        location.href = "./multiplayer.html";
+        // Other player may only be offline. Keep this world and session alive.
+        // Server pauses combat until they return; do not redirect both to lobby.
+        if(typeof document!=="undefined"){
+          document.body.dataset.onlineState="waiting-peer";
+          const badge=document.getElementById("online-peer-badge");
+          if(badge)badge.textContent="ONLINE · ESPERANDO COMPAÑERO";
+        }
         return;
       }
 
@@ -301,10 +321,67 @@ class OnlineCoop {
         } catch (_) {}
       }
     } catch (error) {
+      if(error?.code==="DISCONNECTED") {
+        if(await this.resumeSession())return;
+      }
+      if(error?.code==="INVALID_SESSION"||error?.code==="STALE_SESSION"||error?.code==="ROOM_EXPIRED"){
+        this.failClosed(error);return;
+      }
       this.markRetry(error);
     } finally {
       this.polling = false;
     }
+  }
+
+  failClosed(error){
+    this.error=error?.message||"Sesión caducada";
+    this.enabled=false;
+    this.pendingMutations.length=0;
+    this.clearSession();
+    if(typeof document!=="undefined"){
+      document.body.dataset.onlineState="error";
+      document.body.dataset.onlineError=error?.code||"INVALID_SESSION";
+      const badge=document.getElementById("online-peer-badge");
+      if(badge)badge.textContent="ONLINE · SESIÓN NO DISPONIBLE";
+    }
+    // No automatic redirect: lets players see the error and retry safely.
+  }
+
+  async resumeSession(){
+    if(this.reconnecting||!this.enabled||!this.identity||!this.roomId)return false;
+    this.reconnecting=true;
+    try{
+      const snapshot=await post({action:"join",roomId:this.roomId,identity:this.identity});
+      if(!snapshot?.identity?.token||!snapshot?.identity?.playerId)throw new Error("No se pudo recuperar la identidad.");
+      this.identity=snapshot.identity;
+      this.snapshot=snapshot;
+      this.updateRemote(snapshot);
+      // A reconnect increments connectionEpoch; future requests need new credentials.
+      try{
+        sessionStorage.setItem("ohana-coop-session",JSON.stringify({
+          roomId:this.roomId,identity:this.identity,
+          characterId:this.selectedCharacterId,
+          selectedCharacterId:this.selectedCharacterId,originalEngine:true
+        }));
+      }catch(_){}
+      const latest=this.currentPlayer(snapshot)?.lastSequence||0;
+      this.sequence=Math.max(this.sequence,latest);
+      // Unacknowledged moves are obsolete; non-movement signals can safely be
+      // reissued with fresh monotonic sequence IDs after the resumed connection.
+      this.pendingMutations=this.pendingMutations.filter(item=>item.action!=="move").slice(-16)
+        .map(item=>{
+          const sequence=++this.sequence;
+          return {...item,identity:this.identity,sequence,actionId:makeActionId(this.identity.playerId,sequence)};
+        });
+      this.resumeFailures=0;
+      this.clearRetry();
+      return true;
+    }catch(error){
+      this.resumeFailures++;
+      if(["INVALID_SESSION","STALE_SESSION","ROOM_EXPIRED"].includes(error.code))this.failClosed(error);
+      else this.markRetry(error);
+      return false;
+    }finally{this.reconnecting=false;}
   }
 
   markRetry(error){
@@ -323,9 +400,10 @@ class OnlineCoop {
     this.retryFailures=0;
     this.retryAfter=0;
     if(this.enabled&&typeof document!=="undefined"){
-      document.body.dataset.onlineState="connected";
+      const waiting=this.snapshot?.phase==="lobby";
+      document.body.dataset.onlineState=waiting?"waiting-peer":"connected";
       const badge=document.getElementById("online-peer-badge");
-      if(badge)badge.textContent="ONLINE · 2 JUGADORES";
+      if(badge)badge.textContent=waiting?"ONLINE · ESPERANDO COMPAÑERO":"ONLINE · 2 JUGADORES";
     }
   }
 
@@ -345,7 +423,7 @@ class OnlineCoop {
   }
 
   async sendPosition(game, force = false) {
-    if (!this.enabled || !game.player || game.player.dead || !this.roomId || !this.identity) return;
+    if (!this.enabled || !game.player || game.player.dead || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     const now = performance.now();
     if (!force && now - this.lastSend < SEND_INTERVAL_MS) return;
     this.lastSend = now;
@@ -375,7 +453,7 @@ class OnlineCoop {
   }
 
   async drainMutations(game) {
-    if (this.mutationBusy || performance.now() < this.retryAfter) return;
+    if (this.mutationBusy || this.reconnecting || this.snapshot?.phase==="lobby" || performance.now() < this.retryAfter) return;
     this.mutationBusy = true;
     try {
       while (this.enabled && this.roomId && this.identity && this.pendingMutations.length) {
@@ -388,15 +466,16 @@ class OnlineCoop {
           }
           this.clearRetry();
         } catch (error) {
-          this.markRetry(error);
-          if (error?.code === "STALE_SESSION" || error?.code === "INVALID_SESSION") {
-            this.enabled = false;
-            this.clearSession();
-            this.pendingMutations.length=0;
-            location.href = "./multiplayer.html";
+          if(error?.code==="DISCONNECTED"){
+            if(body.action!=="move")this.pendingMutations.unshift(body);
+            if(await this.resumeSession())continue;
             break;
           }
-          if (body.action !== "move") this.pendingMutations.unshift(body);
+          if(["STALE_SESSION","INVALID_SESSION","ROOM_EXPIRED"].includes(error?.code)){
+            this.failClosed(error);break;
+          }
+          this.markRetry(error);
+          if(body.action!=="move")this.pendingMutations.unshift(body);
           break;
         }
       }
@@ -408,7 +487,7 @@ class OnlineCoop {
   }
 
   async signal(game, signalKind, payload = {}) {
-    if (!this.enabled || !this.roomId || !this.identity) return;
+    if (!this.enabled || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     const sequence = ++this.sequence;
     this.enqueueMutation({
       action: "signal",

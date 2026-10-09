@@ -235,9 +235,12 @@ async function auditPage(page, label) {
     api.setPlayer(first.x-16,first.y-22);
     api.step(8);
     const after = Festival.snapshot();
-    return {before:before.found,after:after.found,remainingBefore:before.remaining,remainingAfter:after.remaining,toast:document.getElementById('festival-toast')?.classList.contains('show')};
+    const { LivingMemories } = await import('/systems/v102-living-memories.js');
+    const living=LivingMemories.snapshot(Festival.tickN);
+    return {before:before.found,after:after.found,remainingBefore:before.remaining,remainingAfter:after.remaining,toast:document.getElementById('festival-toast')?.classList.contains('show'),living:living.active,sceneCount:living.total};
   });
   assert.equal(foundMoment.after,foundMoment.before+1,label+': collectible not picked up '+JSON.stringify(foundMoment));
+  assert.ok(foundMoment.sceneCount>=1 && foundMoment.living.some(id=>id.startsWith('hub-')),label+': V102 first original-world pickup has no authored animation '+JSON.stringify(foundMoment));
   assert.equal(foundMoment.remainingAfter,foundMoment.remainingBefore-1,label+': collectible not removed');
   assert.equal(foundMoment.toast,true,label+': collection reward not displayed');
   if (label === 'desktop') {
