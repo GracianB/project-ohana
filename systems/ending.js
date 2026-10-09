@@ -86,7 +86,7 @@ function showEnding(detail={}){
   card.setAttribute("aria-hidden","true");
   layer.removeAttribute("aria-labelledby");
   layer.setAttribute("aria-label","Cinemática final de OHANA");
-  layer.dataset.ending="v44-true-ending";
+  layer.dataset.ending="v100-special-single-ending";
   layer.dataset.pacing="v80-delayed-finale";
   layer.dataset.duration=String(Math.round(duration*1000));
   layer.dataset.resultsAt=String(Math.round(duration*1000));
@@ -134,7 +134,7 @@ function showEnding(detail={}){
     glow.addColorStop(0,rgba(dawn>.1?"#ffe6a3":"#ff486a",.22+.22*dawn));glow.addColorStop(1,"rgba(0,0,0,0)");
     ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
 
-    // ACT I · Queen fall / rift collapses around selected hero.
+    // ACT I · After the Queen has already exploded, the Nido finally opens.
     if(k<.30){
       const q=seg(k,0,.30),rift=1-seg(k,.19,.30);
       drawRift(ctx,cx,H*.38,Math.min(W,H)*.38,rift);
@@ -142,7 +142,7 @@ function showEnding(detail={}){
       heroActor._poseOverride=q<.45?"attack":"victory";heroActor.melee=q<.45?10:0;
       actor(heroActor,cx,ground,h,tf,{pose:heroActor._poseOverride});
       ctx.save();ctx.globalAlpha=1-seg(q,.62,1);
-      drawTitle(ctx,"LA REINA CAE",cx,H*.15,Math.max(28,Math.min(62,W*.05)),["#fff4c6","#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ff5a72"});
+      drawTitle(ctx,"EL NIDO SE ABRE",cx,H*.15,Math.max(28,Math.min(62,W*.05)),["#fff4c6","#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ff5a72"});
       ctx.restore();
       layer.classList.add("ending-phase-1");
     }

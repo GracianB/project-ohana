@@ -78,7 +78,7 @@ export function playTitleIntro() {
     return {
       W, H,
       floor: H * 0.80,
-      heroH: clamp(Math.min(W, H) * 0.11, 60, 102),
+      heroH: clamp(Math.min(W * .105, H * .13), 34, 102),
     };
   }
 
@@ -132,13 +132,24 @@ export function playTitleIntro() {
   }
 
 
+  let bubbleBoxes = [];
   function comicBubble(text,x,y,k=1,accent="#fff6c8",tail="left") {
     if (k <= 0.02) return;
     ctx.save();
     ctx.globalAlpha=clamp(k,0,1);
-    ctx.font="800 12px Outfit,system-ui,sans-serif";
-    const padX=11,padY=8,w=Math.max(48,ctx.measureText(text).width+padX*2),h=30;
-    const bx=clamp(x-w/2,8,fc.W-w-8),by=clamp(y-h,12,fc.H-h-12),r=11;
+    const fs=clamp(fc.W/38,9,12);
+    ctx.font="800 "+fs+"px Outfit,system-ui,sans-serif";
+    const padX=11,h=clamp(fs*2.5,25,32);
+    const w=Math.min(fc.W-24,Math.max(48,ctx.measureText(text).width+padX*2));
+    const bx=clamp(x-w/2,12,Math.max(12,fc.W-w-12)),r=11;
+    let by=clamp(y-h,12,Math.max(12,fc.H-h-18));
+    // Collision avoidance applies to each comic frame, including phone widths.
+    for(let attempt=0;attempt<5;attempt++){
+      const overlap=bubbleBoxes.some(b=>bx < b.x+b.w+4 && bx+w+4>b.x && by < b.y+b.h+7 && by+h+7>b.y);
+      if(!overlap)break;
+      by=Math.max(12,by-h-12);
+    }
+    bubbleBoxes.push({x:bx,y:by,w,h});
     ctx.fillStyle="rgba(255,252,238,.96)";
     ctx.strokeStyle=accent;ctx.lineWidth=2.2;
     ctx.shadowColor="rgba(0,0,0,.28)";ctx.shadowBlur=12;
@@ -152,7 +163,7 @@ export function playTitleIntro() {
     ctx.fillStyle="rgba(255,252,238,.96)";ctx.strokeStyle=accent;
     ctx.beginPath();ctx.moveTo(tx-6,by+h-1);ctx.lineTo(tx+4,by+h-1);ctx.lineTo(tx+(tail==="right"?12:-12),by+h+11);ctx.closePath();ctx.fill();ctx.stroke();
     ctx.fillStyle="#15202a";ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(text,bx+w/2,by+h/2+1);
+    ctx.fillText(text,bx+w/2,by+h/2+1,w-12);
     ctx.restore();
   }
 
@@ -201,6 +212,7 @@ export function playTitleIntro() {
     const {W,floor,heroH}=L;
     const tf=t*60;
     const loop=t%14;
+    bubbleBoxes = [];
 
     // Kilo: polen flotando y pequeñas celebraciones.
     const pollen=0.55+0.45*Math.sin(t*1.8);
@@ -227,6 +239,8 @@ export function playTitleIntro() {
     // Michi se limita a juzgar a todos.
     const catFace=loop>3.0&&loop<4.2?-1:1;
     actor("cat",W*.70,floor+3,heroH*.80,tf,{facing:catFace,pose:"idle"});
+    const catEye=Math.sin(clamp(seg(loop,3.55,4.25),0,1)*Math.PI);
+    if(catEye>.05) comicBubble("YO NO FUI.",W*.70,floor-heroH*.93,catEye,"#ffb6e4","left");
 
     // Dragón practica. La primera llama del ciclo es ridículamente pequeña.
     const sneeze=Math.sin(clamp(seg(loop,3.05,3.68),0,1)*Math.PI);
@@ -269,6 +283,7 @@ export function playTitleIntro() {
     const rk=Math.sin(clamp(seg(loop,9.15,10.45),0,1)*Math.PI);
     actor("cuerno",W*.92,floor+1,heroH*.76,tf,{facing:-1,pose:rk>.2?"victory":"idle"});
     rainbow(W*.905,floor-heroH*.72,22,rk);
+    if(rk>.35) comicBubble("¡TACHÁN!",W*.87,floor-heroH*1.02,rk,"#efbaff","right");
 
     // Dino cierra el ciclo con un pisotón que hace reaccionar a todos.
     const stomp=Math.sin(clamp(seg(loop,11.05,11.95),0,1)*Math.PI);
