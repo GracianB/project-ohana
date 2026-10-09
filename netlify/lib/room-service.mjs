@@ -197,7 +197,7 @@ export function createRoomService(store, options = {}) {
           if (state.players.length >= 2) throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
           identity.playerId = crypto.randomUUID();
           identity.token = credential();
-          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 550, y: 1070, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
+          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
         }
         if (state.players.length === 2 && state.players.every((player) => player.connected && player.characterId && player.ready)) {
           resumeCombat(state, now());
