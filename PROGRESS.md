@@ -1,4 +1,13 @@
-## 09/10/2026 · OHANA V104 · Laboratorio y Cumbre: 60 recuerdos vivos · ohana-306
+## 09/10/2026 · OHANA V104 red · consolidación con recuerdos 41–60 · ohana-307
+
+- **Trabajo unificado:** la V104 original de recuerdos para Alien Lab/Cumbre es PR #243. En esta rama se integran mejoras de multijugador sobre esa implementación, sin duplicar ni sustituir dibujos y sin dos colecciones incompatibles.
+- **Sin pruebas manuales por versión:** el desarrollo V104–V110 utiliza GitHub CI, E2E de dos contextos, matriz visual y Release Gate; la prueba pública con dos dispositivos y el despliegue final de Netlify se reservan para V111, según `docs/V111-QUALITY-PROTOCOL.md`.
+- **Snapshots seguros:** respuestas atrasadas del sondeo o de movimiento no retroceden el estado ya observado; métricas de RTT, salud de red y paquetes desordenados.
+- **Movimiento remoto con jitter:** extrapolación acotada basada en intervalos de paquetes reales, incluso cuando Netlify responde mucho más despacio de 180 ms.
+- **Señales acotadas:** servidor rechaza tipos desconocidos y cuerpos grandes antes de guardarlos en Netlify Blobs.
+- **Tests:** nueva suite Node contra snapshots atrasados, muestras lentas y señales falsas, sumada a las pruebas V104 de recuerdos, navegador, multijugador, visual y Release Gate. No declarar Netlify actualizado sin publicación posterior.
+
+## 09/10/2026 · OHANA V104 · Laboratorio y Cumbre: 60 recuerdos vivos · ohana-307
 
 - **Recuerdos 41–60:** veinte escenas Canvas originales para Alien Lab (lab-0…9) y Cumbre (ridge-0…9). Cada hallazgo muestra su dibujo particular y su microhistoria, sin crear objetos adicionales y sin pausar al jugador.
 - **Libro y guardados intactos:** continúa `ohana-festival-v1002` con los mismos cien elementos y el sello 10/10 de V101. V102 y V103 siguen funcionando en sus salas; ninguna recompensa se puede repetir por esta animación.
