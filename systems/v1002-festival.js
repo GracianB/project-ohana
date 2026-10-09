@@ -119,13 +119,13 @@ class FestivalDirector{
     const count=festivalProgress([...this.claimed]);
     const chapter=FESTIVAL_ROOMS.find(x=>x.id===this.lastRoom);
     if(this.button){this.button.textContent="✦ Álbum "+n+"/100";this.button.setAttribute("aria-label","Abrir álbum de "+n+" de 100 descubrimientos. Tecla B");}
-    const inRoom=document.getElementById("festival-room-meter");
+    const inRoom=typeof document!=="undefined"?document.getElementById("festival-room-meter"):null;
     if(inRoom&&chapter){
       const n=count.byRoom[chapter.id];
       inRoom.textContent=n===10?"✦ "+chapterSeal(chapter.id,n)+" Sello conseguido · "+chapter.name:
         "✦ Recuerdos "+n+"/10 · "+chapter.name;
     }
-    const label=document.getElementById("festival-title-count");
+    const label=typeof document!=="undefined"?document.getElementById("festival-title-count"):null;
     if(label)label.textContent=n+" / 100";
   }
   open(roomId){
