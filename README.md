@@ -53,6 +53,12 @@ Lo que demuestra no es un motor abierto: simulación fija a 60 Hz, director de c
 
 El contrato de cierre está en [WORLD-1.md](WORLD-1.md). No hay Mundo 2 hasta que ese tag se respete.
 
+## Crecimiento y rendimiento
+
+El desarrollo de OHANA tiene ahora un margen de **12 MB para el código JS de juego** y **2 MB de CSS transferido** (antes 3 MB y 500 KB). Los avisos de revisión aparecen desde 2,4 MB de JS y 400 KB de CSS. Estos presupuestos son controles propios del repositorio, **no son las cuotas de Netlify** ni invitan a descargar más recursos al iniciar el juego.
+
+Permanecen activas las pruebas de primera pintura (< 4 s), simulación, accesibilidad, regresión visual, multijugador y Release Gate. Si el juego crece, priorizar carga por mundos y demanda antes de aumentar el coste inicial para quien juega desde móvil.
+
 ## El bucle
 
 ```mermaid
