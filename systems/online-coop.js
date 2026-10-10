@@ -283,14 +283,25 @@ class OnlineCoop {
     return snapshot?.players?.find((player) => player.isYou) || null;
   }
 
-  setupDirect(game){
+  async setupDirect(game){
     if(this.directAttempted||!this.enabled||!this.remote?.playerId||!this.identity)return;
     this.directAttempted=true;
     this.directRetryAt=performance.now()+rtcReconnectDelay(this.directRetries);
+    const roomId=this.roomId,identity=this.identity,peerId=this.remote.playerId;
+    let iceServers=globalThis.OHANA_RTC_ICE_SERVERS;
+    try {
+      // Authenticated ephemeral TURN config. STUN remains available when unset.
+      const config=await post({action:"rtc-config",roomId,identity});
+      if(Array.isArray(config?.iceServers)&&config.iceServers.length)iceServers=config.iceServers;
+    } catch (_) {
+      // TURN is optional: do not disrupt the multiplayer HTTP fallback.
+    }
+    if(!this.enabled||!this.directAttempted||this.roomId!==roomId||
+       this.identity!==identity||this.remote?.playerId!==peerId)return;
     const me=this.currentPlayer(this.snapshot);
     this.direct=new DirectPeerLink({
       initiator:me?.slot===0,
-      iceServers:globalThis.OHANA_RTC_ICE_SERVERS,
+      iceServers,
       relay:message=>void this.signal(game,"action",message),
       onPose:pose=>this.receiveDirectPose(pose),
       onEvent:event=>this.receiveDirectEvent(game,event),
