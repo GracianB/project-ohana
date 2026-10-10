@@ -114,3 +114,11 @@ test("V118: visual blend follows the same RTC grace as snapshot ownership",()=>{
  assert.doesNotMatch(coop,/now-this\.lastDirectPoseAt<400/);
  assert.match(coop,/const blend=rtcPreferDirectPose\(/);
 });
+
+test("V121: deployment check permits only a known Netlify HTML rewrite",()=>{
+ const checker=fs.readFileSync("tools/check-live-deployment.mjs","utf8");
+ assert.match(checker,/expectedNetlifyHtml/);
+ assert.match(checker,/site\.hostname==="project-ohana-multiplayer\.netlify\.app"/);
+ assert.match(checker,/const match=exact\|\|transformed/);
+ assert.match(checker,/path==="index.html"/);
+});
