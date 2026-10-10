@@ -93,6 +93,21 @@ try {
 
   await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
   await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
+  // V108: both real Chromium instances must exchange SDP through the SAME
+  // fake Netlify room, then open direct SCTP pose + reliable action channels.
+  for (const [label,page] of [["host",hostPage],["guest",guestPage]]) {
+    await page.waitForFunction(()=>document.body.dataset.coopTransport==="direct",null,{timeout:30000});
+    const verified=await page.evaluate(async()=>{
+      const {onlineCoop}=await import("/systems/online-coop.js");
+      return {active:onlineCoop.direct?.active,offer:!!onlineCoop.direct?.pc?.remoteDescription,
+        fast:onlineCoop.direct?.poseChannel?.readyState,reliable:onlineCoop.direct?.eventChannel?.readyState};
+    });
+    assert.equal(verified.active,true,label+": WebRTC fast lane never opened "+JSON.stringify(verified));
+    assert.equal(verified.offer,true,label+": WebRTC missing remote description");
+    assert.equal(verified.fast,"open",label+": pose channel not open");
+    assert.equal(verified.reliable,"open",label+": reliable channel not open");
+  }
+
 
   // Two separate browser contexts can leave the host tab unfocused in CI.
   // Assert real server-side displacement, not a brittle absolute spawn x.
@@ -101,7 +116,18 @@ try {
   const initialHost = initial.players.find((player) => player.playerId === host.identity.playerId);
   assert.ok(initialHost && Number.isFinite(initialHost.x), "host missing valid initial position");
 
+  const peerBefore=await guestPage.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.remote?.targetX??0;
+  });
   await hostPage.keyboard.down("ArrowRight");
+  // If the direct lane is real, guest sees a new pose during the next handful
+  // of frames, without waiting for the Netlify 340ms/650ms HTTP cycle.
+  await guestPage.waitForFunction(async before=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return !!onlineCoop.direct?.active && onlineCoop.remote?.targetX>before+5 &&
+      performance.now()-onlineCoop.lastDirectPoseAt<1200;
+  },peerBefore,{timeout:2500});
   await hostPage.waitForTimeout(1250);
   await hostPage.keyboard.up("ArrowRight");
 

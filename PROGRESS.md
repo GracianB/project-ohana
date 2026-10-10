@@ -1,3 +1,12 @@
+## 10/10/2026 · OHANA V108 · vía WebRTC directa, Netlify solo autoridad y respaldo · ohana-313
+
+- **Cambio arquitectónico real:** las posiciones y animaciones de ataques viajan entre jugadores por WebRTC (canal de poses SCTP no ordenado y sin retransmisiones, máximo 20 Hz; canal independiente y fiable de acciones/salas). Netlify autentica la sala y sigue guardando su estado; su repetido sondeo ya no dicta el ritmo visual cuando funciona el enlace directo.
+- **Negociación segura:** SDP fragmentado en señales `action/rtc` que el servidor existente ya acepta (carga inferior a 1800 bytes), identidad ligada a los dos jugadores autenticados, protocolo antiguo sin migrar. STUN estándar; sin servidor TURN, las redes que bloquean P2P seguirán utilizando Netlify.
+- **Sin engaños:** HUD distingue `DIRECTO WEBRTC` frente a `SERVIDOR (CON RETRASO)`. El ping indicado es el RTT del servidor, no un RTT WebRTC medido. La conexión directa no modifica salud, puntuaciones ni poderes autoritativos. Todos los movimientos se validan, se ignoran paquetes duplicados y se protege el orden de sala.
+- **Fallback:** si el navegador no ofrece WebRTC o los navegadores no pueden negociar ICE, el modo tradicional sigue funcionando, con toda su latencia declarada. Sin bloqueo de la interfaz.
+- **Pruebas:** validación de payload, SDP fragmentado y reordenado, límites de datos, poses a 50 ms, mensajes de acciones y E2E real con dos pestañas Chromium que deben alcanzar estado directo y ver el movimiento de la otra. Node, browser, multiplayer, matriz visual y Release Gate.
+- **Despliegues independientes:** GitHub Pages no publica automáticamente la función de Netlify. No declarar el multijugador en producción solucionado hasta comprobar la URL de Netlify desde dos dispositivos con WebRTC activo.
+
 ## 10/10/2026 · OHANA V107 · menos GPU invisible, cooperativo coherente · ohana-312
 
 - Menú: `menuPaintAllowedInDocument()` detiene los dos Canvas ocultos durante bienvenida y cinemática de inicio. Los MutationObserver existentes reanudan dibujo al volver a la cuadrícula, sin quitar ningún personaje ni reducir sus controles.

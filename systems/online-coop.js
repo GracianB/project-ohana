@@ -5,6 +5,7 @@ import { coopRetryDelay,remoteMotionSample } from "./coop-resilience.js";
 import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pacing.js";
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
+import { DirectPeerLink } from "./coop-v108-direct.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
@@ -94,6 +95,9 @@ class OnlineCoop {
     this.duoApplied=new Set();
     this.reconnecting=false;
     this.resumeFailures=0;
+    this.direct=null;
+    this.directAttempted=false;
+    this.lastDirectPoseAt=0;
   }
 
   readSession() {
@@ -119,6 +123,10 @@ class OnlineCoop {
     const session = this.readSession();
     if (!session || !definition) return false;
 
+    this.direct?.close();
+    this.direct=null;
+    this.directAttempted=false;
+    this.lastDirectPoseAt=0;
     this.enabled = true;
     this.roomId = session.roomId;
     this.identity = session.identity;
@@ -205,6 +213,7 @@ class OnlineCoop {
 
     await this.sendPosition(game, true);
     this.ensurePeerHud();
+    this.setupDirect(game);
     return true;
   }
 
@@ -240,14 +249,17 @@ class OnlineCoop {
     const badge=document.getElementById("online-peer-badge");
     if(!badge)return;
     const state=document.body.dataset.onlineState||"connected";
+    const direct=!!this.direct?.active;
+    document.body.dataset.coopTransport=direct?"direct":"server";
     let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
+    if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
     if(state==="connected"&&this.requestSamples>0){
       const ping=Math.max(0,Math.round(this.rttMs));
       const age=performance.now()-this.remote?.sampleAt;
       const quality=peerNetworkHealth(this.rttMs,Number.isFinite(age)?Math.max(0,age):0);
-      text+=" · "+ping+" ms";
+      text+=" · servidor "+ping+" ms";
       if(quality.quality==="late"||quality.quality==="lost")text+=" · SEÑAL RETRASADA";
       else if(quality.quality==="slow")text+=" · RED LENTA";
     }
@@ -258,6 +270,61 @@ class OnlineCoop {
     return snapshot?.players?.find((player) => player.isYou) || null;
   }
 
+  setupDirect(game){
+    if(this.directAttempted||!this.enabled||!this.remote?.playerId||!this.identity)return;
+    this.directAttempted=true;
+    const me=this.currentPlayer(this.snapshot);
+    this.direct=new DirectPeerLink({
+      initiator:me?.slot===0,
+      relay:message=>void this.signal(game,"action",message),
+      onPose:pose=>this.receiveDirectPose(pose),
+      onEvent:event=>this.receiveDirectEvent(game,event),
+      onState:()=>this.showNetworkHealth()
+    });
+    if(this.direct.available)void this.direct.start();
+    this.showNetworkHealth();
+  }
+
+  receiveDirectPose(pose){
+    if(!this.remote||!this.enabled)return;
+    const now=performance.now();
+    const teleport=this.remoteWorld!==pose.room;
+    const sample=remoteMotionSample(this.remote,pose.x,pose.y,now,teleport);
+    Object.assign(this.remote,sample);
+    if(sample.teleport){this.remote.x=pose.x;this.remote.y=pose.y;}
+    this.remoteWorld=pose.room;
+    this.remote.pose={vx:pose.vx,vy:pose.vy,grounded:pose.grounded,melee:pose.melee,dash:pose.dash};
+    this.remote.facing=pose.facing;
+    this.remote.evolution=pose.evo;
+    this.lastDirectPoseAt=now;
+  }
+
+  receiveDirectEvent(game,event){
+    if(!this.enabled||!this.remote)return;
+    if(event.kind==="room"){
+      const destination=String(event.payload?.roomId||"");
+      if(!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(destination))return;
+      this.remoteWorld=destination;
+      if(game.roomId!==destination){
+        this.lastRoomId=destination;
+        this.lastLocalWorld=destination;
+        this.localRoomGraceUntil=performance.now()+1200;
+        try{game.loadRoom?.(destination,"online-peer");}catch{}
+      }
+    }else if(event.kind==="action"){
+      const action=event.payload?.action;
+      if(!["attack","ability","dash"].includes(action))return;
+      this.remote.actionKind=action;
+      this.remote.abilitySlot=Number.isInteger(event.payload?.slot)?event.payload.slot:null;
+      this.remote.actionUntil=performance.now()+(action==="ability"?420:action==="dash"?280:300);
+      if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
+      else this.remote.dash=18;
+    }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
+      // Server still handles the definitive state; direct feedback is visual only.
+      this.remote.actionKind=event.payload.state;
+    }
+  }
+
   updateRemote(snapshot, game) {
     const you = this.currentPlayer(snapshot);
     const remote = snapshot?.players?.find((player) => !player.isYou && player.connected && player.characterId);
@@ -266,7 +333,8 @@ class OnlineCoop {
       return;
     }
 
-    const worldRoom = remote.worldRoomId || "hub";
+    const freshDirect=!!this.direct?.active&&performance.now()-this.lastDirectPoseAt<400;
+    const worldRoom = (freshDirect?this.remoteWorld:remote.worldRoomId)||"hub";
     const previous = this.remote;
     const legacyCoord = !snapshot.engineMode && Number(remote.y) > 0 && Number(remote.y) <= 720;
     const spawn = ENGINE_INITIAL[remote.slot] || ENGINE_INITIAL[1];
@@ -299,16 +367,18 @@ class OnlineCoop {
         actionUntil: 0,
       };
     } else {
-      const sample=remoteMotionSample(this.remote,targetX,targetY,performance.now(),this.remoteWorld!==worldRoom);
-      Object.assign(this.remote,sample);
-      if(sample.teleport){this.remote.x=targetX;this.remote.y=targetY;}
+      if(!freshDirect){
+        const sample=remoteMotionSample(this.remote,targetX,targetY,performance.now(),this.remoteWorld!==worldRoom);
+        Object.assign(this.remote,sample);
+        if(sample.teleport){this.remote.x=targetX;this.remote.y=targetY;}
+      }
       this.remote.characterId = remote.characterId;
       this.remote.evolution = remote.evolution ?? this.remote.evolution ?? 1;
-      this.remote.facing = remote.facing || this.remote.facing || 1;
+      if(!freshDirect)this.remote.facing = remote.facing || this.remote.facing || 1;
       this.remote.slot = remote.slot;
       this.remote.health = remote.health;
       this.remote.maxHealth = remote.maxHealth;
-      this.remote.pose = structuredClone(remote.pose || this.remote.pose || { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 });
+      if(!freshDirect)this.remote.pose = structuredClone(remote.pose || this.remote.pose || { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 });
     }
 
     this.remoteWorld = worldRoom;
@@ -383,6 +453,7 @@ class OnlineCoop {
     this.error=error?.message||"Sesión caducada";
     this.enabled=false;
     this.pendingMutations.length=0;
+    this.direct?.close();this.direct=null;this.directAttempted=false;
     this.clearSession();
     if(typeof document!=="undefined"){
       document.body.dataset.onlineState="error";
@@ -421,6 +492,7 @@ class OnlineCoop {
           return {...item,identity:this.identity,sequence,actionId:makeActionId(this.identity.playerId,sequence)};
         });
       this.resumeFailures=0;
+      this.direct?.close();this.direct=null;this.directAttempted=false;this.lastDirectPoseAt=0;
       this.lastSentPose=null;
       this.clearRetry();
       return true;
@@ -557,6 +629,10 @@ class OnlineCoop {
 
   async signal(game, signalKind, payload = {}) {
     if (!this.enabled || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
+    // Action/room feedback is shown directly before the authoritative POST.
+    // The RTC handshake itself is carried ONLY over Netlify, never recursively.
+    if(signalKind==="action"&&payload.action!=="rtc")this.direct?.sendEvent("action",payload);
+    else if(signalKind==="room"||signalKind==="state")this.direct?.sendEvent(signalKind,payload);
     const sequence = ++this.sequence;
     this.enqueueMutation({
       action: "signal",
@@ -579,6 +655,10 @@ class OnlineCoop {
       this.seenSignals.add(event.id);
       if (this.seenSignals.size > 128) this.seenSignals.delete(this.seenSignals.values().next().value);
 
+      if(event.signalKind==="action"&&event.payload?.action==="rtc"){
+        if(this.direct)void this.direct.signal(event.payload);
+        continue;
+      }
       if(event.signalKind === "duo-lit"){
         const roomId=String(event.payload?.roomId||"");
         if(roomId===game.roomId&&!this.duoApplied.has(roomId)){
@@ -728,6 +808,8 @@ class OnlineCoop {
 
   tick(game) {
     if (!this.enabled) return;
+    if(!this.directAttempted&&this.remote?.playerId)this.setupDirect(game);
+    this.direct?.sendPose(game);
     void this.poll(game);
 
     const localState = game.player?.dead ? "lost" : game.won ? "won" : "";
@@ -774,8 +856,9 @@ class OnlineCoop {
     if (this.remote) {
       const now = performance.now();
       const correction = remotePresenceCorrection(this.remote, now);
-      this.remote.x += (correction.x - this.remote.x) * correction.blend;
-      this.remote.y += (correction.y - this.remote.y) * correction.blend;
+      const blend=this.direct?.active&&now-this.lastDirectPoseAt<400?Math.max(.4,correction.blend):correction.blend;
+      this.remote.x += (correction.x - this.remote.x) * blend;
+      this.remote.y += (correction.y - this.remote.y) * blend;
       this.remote.signalOpacity = correction.opacity;
       this.remote.signalWeak = correction.stale;
       const pose = this.remote.pose || {};
