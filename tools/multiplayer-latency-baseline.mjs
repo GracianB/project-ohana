@@ -55,32 +55,35 @@ for (let i = 1; i <= 50; i++) {
 // competing storage transactions, NOT a real internet RTT or WebRTC path.
 const burstDurations = [], burstErrors = [];
 const burstStart = performance.now();
-const requests = Array.from({ length: 12 }, (_, index) => {
-  const identity = index % 2 ? joined.identity : created.identity;
-  const sequence = 100 + index;
-  const started = performance.now();
-  return service.move(created.roomId, identity, {
-    mode:"engine", sequence, actionId:identity.playerId+":"+sequence,
-    positionX:600+index*5, positionY:710, health:100, maxHealth:100,
-    worldRoomId:"hub"
-  }).then(result => {
-    burstDurations.push(performance.now()-started);
-    return { accepted:result.accepted, replayed:result.replayed };
-  }).catch(error => {
-    burstDurations.push(performance.now()-started);
-    burstErrors.push(error.code || error.message);
-    return { accepted:false, error:error.code || error.message };
-  });
-});
-const burstResults = await Promise.all(requests);
+let burstAccepted = 0;
+// Two simultaneous requests per round, one from each player. Rounds wait for
+// acknowledgement so a newer sequence never overtakes an older one by design.
+for (let round = 0; round < 6; round++) {
+  const results = await Promise.all([created.identity, joined.identity].map(async identity => {
+    const sequence = 100 + round;
+    const started = performance.now();
+    try {
+      const result = await service.move(created.roomId, identity, {
+        mode:"engine", sequence, actionId:identity.playerId+":"+sequence,
+        positionX:600+round*8, positionY:710, health:100, maxHealth:100,
+        worldRoomId:"hub"
+      });
+      return { accepted:!!result.accepted };
+    } catch (error) {
+      burstErrors.push(error.code || error.message);
+      return { accepted:false };
+    } finally {
+      burstDurations.push(performance.now()-started);
+    }
+  }));
+  burstAccepted += results.filter(result=>result.accepted).length;
+}
 const burst = {
-  requests:requests.length,
+  requests:12, concurrentPlayers:2, rounds:6,
   wallMs:Number((performance.now()-burstStart).toFixed(2)),
   p50ms:Number(percentile(burstDurations,50).toFixed(2)),
   p95ms:Number(percentile(burstDurations,95).toFixed(2)),
-  accepted:burstResults.filter(x=>x.accepted).length,
-  errors:burstErrors,
-  conflicts:store.conflicts
+  accepted:burstAccepted, errors:burstErrors, conflicts:store.conflicts
 };
 const stats = {
   scenario:"sequential synthetic engine movement",
@@ -93,4 +96,4 @@ const stats = {
   note:"Measures local room-service/storage processing ONLY. Concurrent bursts intentionally expose contention and may reject requests. This does not measure WebRTC, browsers, real network RTT, Netlify cold starts or render delay."
 };
 console.log(JSON.stringify(stats,null,2));
-if (failures.length || stats.accepted !== 50) process.exitCode = 1;
+if (failures.length || stats.accepted !== 50 || burst.errors.length || burst.accepted !== 12) process.exitCode = 1;
