@@ -454,6 +454,10 @@ class OnlineCoop {
     if (!this.enabled || this.polling || !this.roomId || !this.identity) return;
     const now = performance.now();
     if (!immediate && now < this.retryAfter) return;
+    // Mutation responses contain snapshots; concurrent polls add Blob reads
+    // and can race with a newer mutation reply on slow HTTP connections.
+    // Keep immediate recovery polls available for phase/session transitions.
+    if (!immediate && (this.mutationBusy || this.pendingMutations.length > 0)) return;
     const pacing=networkPacing(this.rttMs,this.retryFailures,this.snapshot?.phase==="lobby");
     if(!immediate && now-this.lastPoll<pacing.pollMs)return;
     // Mutation responses already contain a full snapshot, so a second poll

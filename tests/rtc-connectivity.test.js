@@ -173,3 +173,22 @@ test("TURN credential lookup has a short deadline without lowering normal game r
  assert.match(source,/setTimeout\(\(\)=>abort\.abort\(\), timeoutMs\)/);
  assert.match(source,/post\(\{action:"rtc-config",roomId,identity\},1800\)/);
 });
+
+test("routine HTTP polling yields to pending/in-flight mutations, but recovery polls remain allowed",async()=>{
+ const coop=new onlineCoop.constructor();
+ coop.enabled=true;coop.roomId="ABCDEF";coop.identity={playerId:"local",token:"secret"};
+ coop.pendingMutations=[{action:"move"}];coop.mutationBusy=false;
+ // Do not issue a network request or mutate lastPoll while a move is pending.
+ const previousFetch=globalThis.fetch;
+ globalThis.fetch=()=>{throw new Error("redundant poll")};
+ try {
+  await coop.poll({},false);
+  assert.equal(coop.polling,false);
+  assert.equal(coop.lastPoll,0);
+  coop.pendingMutations=[];
+  coop.mutationBusy=true;
+  await coop.poll({},false);
+  assert.equal(coop.polling,false);
+  assert.equal(coop.lastPoll,0);
+ }finally{globalThis.fetch=previousFetch;}
+});
