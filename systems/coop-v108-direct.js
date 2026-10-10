@@ -299,7 +299,8 @@ export class DirectPeerLink{
    const pending=this.remoteCandidates.get(message.sid);
    for(const value of message.candidates){
     const candidate=safeIceCandidate(value),key=JSON.stringify(candidate);
-    if(pending.length<MAX_CANDIDATES&&!this.appliedCandidates.has(key)&&!pending.some(c=>JSON.stringify(c)===key))pending.push(candidate);
+    if(pending.length<MAX_CANDIDATES&&(message.sid!==this.sessionId||!this.appliedCandidates.has(key))&&
+      !pending.some(c=>JSON.stringify(c)===key))pending.push(candidate);
    }
    if(message.sid===this.sessionId)await this._applyRemoteCandidates();
    return true;

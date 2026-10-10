@@ -62,10 +62,11 @@ test("candidate arrival before SDP is buffered, deduplicated and applied after r
  assert.deepEqual(link.pc.added,[candidate()]);
  await link.signal(packet());assert.equal(link.pc.added.length,1);
  const old=link.pc;
+ await link.signal(packet("session-0002"));
  await link.signal(splitDirectDescription("offer","session-0002","v=0\r\n")[0]);
  assert.notEqual(link.pc,old);
  assert.equal(await link.signal(packet()),false,"old session cannot add ICE to the replacement");
- assert.equal(link.pc.added.length,0);link.close();
+ assert.deepEqual(link.pc.added,[candidate()],"candidate deduplication belongs to its session, not the old connection");link.close();
 });
 
 test("a single poll containing offer and candidates cannot race asynchronous SDP installation",async()=>{
