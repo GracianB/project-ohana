@@ -6,7 +6,7 @@ import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pa
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
 import { DirectPeerLink } from "./coop-v108-direct.js";
-import { rtcFresh,rtcCanRetry,rtcReconnectDelay } from "./coop-v109-recovery.js";
+import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
@@ -365,8 +365,7 @@ class OnlineCoop {
       return;
     }
 
-    const freshDirect=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt)
-      &&performance.now()-this.lastDirectPoseAt<400;
+    const freshDirect=rtcPreferDirectPose(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
     const worldRoom = (freshDirect?this.remoteWorld:remote.worldRoomId)||"hub";
     const previous = this.remote;
     const legacyCoord = !snapshot.engineMode && Number(remote.y) > 0 && Number(remote.y) <= 720;
