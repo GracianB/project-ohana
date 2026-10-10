@@ -256,7 +256,7 @@ class OnlineCoop {
     const badge=document.getElementById("online-peer-badge");
     if(!badge)return;
     const state=document.body.dataset.onlineState||"connected";
-    const direct=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now());
+    const direct=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
     document.body.dataset.coopTransport=direct?"direct":"server";
     if(direct&&this.direct?.directRttMs>0)document.body.dataset.coopRttDirect=String(Math.round(this.direct.directRttMs));
     else delete document.body.dataset.coopRttDirect;
@@ -302,7 +302,7 @@ class OnlineCoop {
 
   repairDirect(game,now=performance.now()){
     if(!this.enabled||!this.remote?.playerId||!this.direct?.available)return false;
-    const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now);
+    const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt);
     if(!rtcCanRetry({now,at:this.directRetryAt,hidden:typeof document!=="undefined"&&document.hidden,
       lobby:this.snapshot?.phase==="lobby",peer:!!this.remote?.playerId,connected}))return false;
     this.direct?.close();this.direct=null;
@@ -365,7 +365,7 @@ class OnlineCoop {
       return;
     }
 
-    const freshDirect=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now())
+    const freshDirect=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt)
       &&performance.now()-this.lastDirectPoseAt<400;
     const worldRoom = (freshDirect?this.remoteWorld:remote.worldRoomId)||"hub";
     const previous = this.remote;
@@ -851,7 +851,7 @@ class OnlineCoop {
     this.direct?.sendPose(game);
     this.direct?.ping();
     if(typeof document!=="undefined"&&this.direct?.active){
-      const connected=rtcFresh(this.direct.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now());
+      const connected=rtcFresh(this.direct.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
       if(document.body.dataset.coopTransport!==(connected?"direct":"server"))this.showNetworkHealth();
     }
     void this.poll(game);
@@ -900,7 +900,7 @@ class OnlineCoop {
     if (this.remote) {
       const now = performance.now();
       const correction = remotePresenceCorrection(this.remote, now);
-      const blend=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now)
+      const blend=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt)
         &&now-this.lastDirectPoseAt<400?Math.max(.4,correction.blend):correction.blend;
       this.remote.x += (correction.x - this.remote.x) * blend;
       this.remote.y += (correction.y - this.remote.y) * blend;

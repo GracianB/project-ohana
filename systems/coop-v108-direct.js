@@ -121,6 +121,7 @@ export class DirectPeerLink{
    {urls:"stun:stun.l.google.com:19302"}
   ]});
   this.poseChannel=null;this.eventChannel=null;this.receivedSeq=0;this.lastPoseAt=0;
+  this.pendingPing=null;this.lastPongAt=0;this.lastPingSentAt=0;this.directRttMs=0;
   this.ready=false;
   this.pc.ondatachannel=e=>this._attach(e.channel);
   this.pc.onconnectionstatechange=()=>{

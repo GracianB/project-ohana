@@ -9,6 +9,9 @@ test("V109: RTC status reflects real incoming data, not just an OPEN socket",()=
  assert.equal(rtcFresh(true,1000,800,5500),false);
  assert.equal(rtcFresh(true,0,1000,1200),true);
  assert.equal(rtcFresh(true,0,1000,5600),false);
+ assert.equal(rtcFresh(true,1000,800,7000,6900),true,"live P2P pong prevents destructive renegotiation during paused poses");
+ assert.equal(rtcFresh(true,1000,800,11500,6900),false,"a genuinely silent channel still degrades");
+
  assert.equal(rtcFresh(false,2000,1000,2100),false);
 });
 test("V109: bounded reconnect avoids Netlify signaling storms",()=>{
