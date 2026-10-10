@@ -899,8 +899,8 @@ class OnlineCoop {
     if (this.remote) {
       const now = performance.now();
       const correction = remotePresenceCorrection(this.remote, now);
-      const blend=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt)
-        &&now-this.lastDirectPoseAt<400?Math.max(.4,correction.blend):correction.blend;
+      const blend=rtcPreferDirectPose(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt)
+        ?Math.max(.4,correction.blend):correction.blend;
       this.remote.x += (correction.x - this.remote.x) * blend;
       this.remote.y += (correction.y - this.remote.y) * blend;
       this.remote.signalOpacity = correction.opacity;
