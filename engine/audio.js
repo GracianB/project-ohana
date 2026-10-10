@@ -5,8 +5,21 @@
 // ============================================================================
 let ctx = null, master = null, noiseBuf = null, muted = false;
 const lastPlay = new Map(); // anti-spam por efecto
+let audioUnlocked = false;
+if (typeof window !== "undefined") {
+  const unlock = () => {
+    audioUnlocked = true;
+    if (ctx?.state === "suspended") {
+      try { ctx.resume()?.catch(() => {}); } catch (_) {}
+    }
+  };
+  window.addEventListener("pointerdown", unlock, { capture: true });
+  window.addEventListener("keydown", unlock, { capture: true });
+}
+
 
 function ac() {
+  if (!audioUnlocked) return null;
   if (!ctx) {
     const host = typeof window === "undefined" ? null : window;
     const AC = host && (host.AudioContext || host.webkitAudioContext);
