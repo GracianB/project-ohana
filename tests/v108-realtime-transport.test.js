@@ -122,3 +122,23 @@ test("V120: valid TURN credentials reach RTC while malformed servers are rejecte
  const coop=fs.readFileSync("systems/online-coop.js","utf8");
  assert.match(coop,/iceServers:globalThis\.OHANA_RTC_ICE_SERVERS/);
 });
+
+test("V122: ICE failure is observable without exposing TURN credentials",async()=>{
+ const {DirectPeerLink}=await import("../systems/coop-v108-direct.js");
+ let pc,events=[];
+ class RTCStub{
+  constructor(){this.connectionState="new";this.iceConnectionState="new";pc=this;}
+  createDataChannel(label){return {label,readyState:"connecting",close(){}};}
+  close(){}
+ }
+ const link=new DirectPeerLink({RTC:RTCStub,initiator:true});
+ link.onIceStatus=e=>events.push(e);
+ assert.equal(link._makeConnection(),true);
+ pc.iceConnectionState="failed";pc.connectionState="failed";
+ pc.oniceconnectionstatechange();
+ assert.deepEqual(events.at(-1),{ice:"failed",connection:"failed",turnConfigured:false});
+ link.close();
+ const coop=fs.readFileSync("systems/online-coop.js","utf8");
+ assert.match(coop,/ICE FALLIDO/);
+ assert.match(coop,/coopIceState/);
+});
