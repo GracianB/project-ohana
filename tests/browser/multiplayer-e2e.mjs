@@ -17,7 +17,13 @@ class MemoryStore {
 }
 
 const server = await startServer(4174);
-const browser = await chromium.launch({ headless: true });
+// Two distinct browser contexts represent two simultaneously active devices,
+// not background tabs fighting Chromium's animation throttling policies.
+const browser = await chromium.launch({ headless: true, args: [
+  "--disable-background-timer-throttling",
+  "--disable-renderer-backgrounding",
+  "--disable-backgrounding-occluded-windows"
+] });
 const store = new MemoryStore();
 const service = createRoomService(store);
 let host;
@@ -145,6 +151,63 @@ try {
 
   await hostPage.keyboard.press("h");
   await hostPage.waitForTimeout(300);
+
+  // V109: simulate a real direct link loss while Netlify stays connected.
+  // A fresh offer must rebuild BOTH data channels and the guest's answerer.
+  const firstSession=await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    const id=onlineCoop.direct?.sessionId;
+    if(!onlineCoop.direct?.active||!id)throw Error("Cannot exercise RTC recovery without active direct link");
+    onlineCoop.direct.close();
+    onlineCoop.directRetryAt=0;
+    return id;
+  });
+  await hostPage.waitForFunction(async previous=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct?.active && onlineCoop.direct?.sessionId!==previous;
+  },firstSession,{timeout:30000});
+  const recoveredSession=await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct.sessionId;
+  });
+  await guestPage.waitForFunction(async sessionId=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct?.active&&onlineCoop.direct.sessionId===sessionId;
+  },recoveredSession,{timeout:30000});
+  assert.notEqual(recoveredSession,firstSession,"negotiation reused the damaged RTC session");
+  // The HTTP transport badge changes only when a real fresh pose arrives.
+  // Verify the new channels DELIVER data, not merely show readyState=open.
+  // Observe the full state AT THE SAME MOMENT in each browser. Checking
+  // first tab, switching focus, then sampling again creates false failures.
+  const recovered=await Promise.all([hostPage,guestPage].map(async page=>{
+    // Evaluate INSIDE the game's main world. waitForFunction can execute in a
+    // Playwright utility world whose modules/globals do not represent the
+    // actual on-screen game.
+    let proof=null;
+    for(let i=0;i<75;i++){
+      proof=await page.evaluate(async expected=>{
+        const {onlineCoop}=await import("/systems/online-coop.js");
+        const direct=onlineCoop.direct;
+        if(document.body.dataset.coopTransport!=="direct"||!direct?.active||
+          direct.sessionId!==expected||direct.receivedSeq<1||
+          onlineCoop.lastDirectPoseAt<=0||performance.now()-onlineCoop.lastDirectPoseAt>=1500)return null;
+        return {mode:document.body.dataset.coopTransport,active:direct.active,
+          session:direct.sessionId,receivedSeq:direct.receivedSeq,
+          channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]};
+      },recoveredSession);
+      if(proof)break;
+      await page.waitForTimeout(200);
+    }
+    assert.ok(proof,"no live direct packet arrived in recovered browser");
+    return proof;
+  }));
+  for(const state of recovered){
+    assert.equal(state.mode,"direct","a browser never confirmed live RTC after recovery");
+    assert.equal(state.active,true,"connection did not heal");
+    assert.equal(state.session,recoveredSession,"unexpected RTC session after recovery");
+    assert.ok(state.receivedSeq>0,"new negotiated channel delivered no poses");
+    assert.deepEqual(state.channels,["open","open"],"both SCTP channels must recover");
+  }
 
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log("PASS · dos contextos reales entran al motor original de OHANA, sincronizan posición y ejecutan combate online.");

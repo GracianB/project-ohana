@@ -85,8 +85,8 @@ test("V103: complete service worker and release bundles include gameplay changes
  const sw=fs.readFileSync("sw.js","utf8");
  const online=fs.readFileSync("systems/online-coop.js","utf8");
  const festival=fs.readFileSync("systems/v1002-festival.js","utf8");
- assert.match(html,/ohana-313/);
- assert.match(sw,/const VERSION = "ohana-313"/);
+ assert.match(html,/ohana-314/);
+ assert.match(sw,/const VERSION = "ohana-314"/);
  assert.match(sw,/systems\/v103-living-stories\.js\?v=/);
  assert.match(sw,/systems\/coop-v103-pacing\.js\?v=/);
  assert.match(online,/shouldSendPosition\(/);

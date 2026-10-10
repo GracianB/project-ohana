@@ -67,8 +67,8 @@ test("V107: Netlify stores zero HP and x=0 without resurrecting or misplacing pe
 test("V107: offline graph and original save/protocol remain intact",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),page=fs.readFileSync("index.html","utf8");
  const coop=fs.readFileSync("systems/online-coop.js","utf8");
- assert.match(sw,/const VERSION = "ohana-313"/);
- assert.match(page,/ohana-313/);
+ assert.match(sw,/const VERSION = "ohana-314"/);
+ assert.match(page,/ohana-314/);
  assert.match(sw,/systems\/menu-visibility\.js\?v=/);
  assert.match(sw,/systems\/coop-v107-room-follow\.js\?v=/);
  assert.match(coop,/showNetworkHealth\(\)/);
