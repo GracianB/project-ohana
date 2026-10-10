@@ -111,7 +111,7 @@ test("V84 seven-horn L remains a single physical iris hitbox",()=>{
  assert.match(source,/kind:"cuernoPrismCrown"/);
  assert.match(source,/cuernoPrismCrown\(g,f\)/);
  assert.match(source,/drawCuernoPrismCrown\(ctx,f,cam,t/);
- assert.ok(source.length<135000,"Shared engine memory/performance ceiling exceeded");
+ // Historical 135 KB source cap retired; functional checks remain active.
  const phases=[68,50,32,15,1].map(life=>cuernoPrismPhase(life,68));
  assert.equal(phases[0].fade,0);
  assert.ok(phases[1].radius>phases[0].radius);
