@@ -230,18 +230,21 @@ export class DirectPeerLink{
   const now=this.now();
   if(now-this.lastPoseAt<REALTIME_POSE_MS||this.poseChannel.bufferedAmount>12000)return false;
   const p=game.player;
-  this.lastPoseAt=now;
-  this.poseChannel.send(JSON.stringify({
-   t:"pose",seq:++this.nextSeq,room:game.roomId,
+  const frame=JSON.stringify({
+   t:"pose",seq:this.nextSeq+1,room:game.roomId,
    x:p.x,y:p.y,vx:p.vx,vy:p.vy,facing:p.facing,
    evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash
-  }));
-  return true;
+  });
+  try{
+   this.poseChannel.send(frame);
+   this.nextSeq++;this.lastPoseAt=now;
+   return true;
+  }catch{return false;}
  }
  sendEvent(kind,payload={}){
   if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state"].includes(kind))return false;
-  this.eventChannel.send(JSON.stringify({t:"event",kind,payload}));
-  return true;
+  try{this.eventChannel.send(JSON.stringify({t:"event",kind,payload}));return true;}
+  catch{return false;}
  }
  close(){
   this.closed=true;
