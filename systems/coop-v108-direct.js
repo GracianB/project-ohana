@@ -222,8 +222,8 @@ export class DirectPeerLink{
   const id=++this.pingSeq;
   this.pendingPing={id,sent:now};
   this.lastPingSentAt=now;
-  this.eventChannel.send(JSON.stringify({t:"ping",id}));
-  return true;
+  try{this.eventChannel.send(JSON.stringify({t:"ping",id}));return true;}
+  catch{this.pendingPing=null;return false;}
  }
  sendPose(game){
   if(!this.active||!game?.player)return false;
