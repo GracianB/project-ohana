@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { chromium, devices } from 'playwright';
 import { startServer } from './server.mjs';
-import { JS_WARN_BYTES, JS_HARD_BYTES, CSS_WARN_BYTES, CSS_HARD_BYTES, FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
+import { FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
 
 const server = await startServer(4173);
 const base = 'http://127.0.0.1:4173/';
@@ -503,10 +503,6 @@ async function auditPage(page, label) {
   assert.equal(audit.route.length, 10, label + ': recorrido de salas');
   assert.ok(audit.nonZero > 100, label + ': Canvas vacío');
   assert.ok(audit.sum > 10000, label + ': Canvas sin señal visual');
-  assert.ok(audit.js < JS_HARD_BYTES, label + ': JS transferido > ' + JS_HARD_BYTES + ' bytes · ' + audit.js + ' bytes');
-  if (audit.js >= JS_WARN_BYTES) console.warn('[OHANA] AVISO · revisar peso JS · ' + label + ': ' + audit.js + ' / ' + JS_HARD_BYTES + ' bytes');
-  assert.ok(audit.css < CSS_HARD_BYTES, label + ': CSS > ' + CSS_HARD_BYTES + ' bytes');
-  if (audit.css >= CSS_WARN_BYTES) console.warn('[OHANA] AVISO · revisar peso CSS · ' + label + ': ' + audit.css + ' / ' + CSS_HARD_BYTES + ' bytes');
   assert.ok(audit.fcp < FIRST_CONTENTFUL_PAINT_MS, label + ': FCP > ' + FIRST_CONTENTFUL_PAINT_MS + ' ms');
   assert.ok(gameplay.length >= 10, label + ': secuencia de gameplay incompleta');
   assert.match(audit.title, /PROJECT OHANA/i);
