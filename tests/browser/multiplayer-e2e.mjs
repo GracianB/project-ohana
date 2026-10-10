@@ -180,23 +180,26 @@ try {
   // Observe the full state AT THE SAME MOMENT in each browser. Checking
   // first tab, switching focus, then sampling again creates false failures.
   const recovered=await Promise.all([hostPage,guestPage].map(async page=>{
-    const handle=await page.waitForFunction(async expected=>{
-      const {onlineCoop}=await import("/systems/online-coop.js");
-      const direct=onlineCoop.direct;
-      if(document.body.dataset.coopTransport!=="direct"||!direct?.active||
-        direct.sessionId!==expected||direct.receivedSeq<1||
-        onlineCoop.lastDirectPoseAt<=0||performance.now()-onlineCoop.lastDirectPoseAt>=1500)return false;
-      // The polling API returns a truthy handle, not reliably a clone of
-      // the returned object. Capture the actual complete proof atomically.
-      window.__ohanaRtcRecoveryProof={
-        mode:document.body.dataset.coopTransport,active:direct.active,
-        session:direct.sessionId,receivedSeq:direct.receivedSeq,
-        channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]
-      };
-      return true;
-    },recoveredSession,{timeout:15000});
-    await handle.dispose();
-    return page.evaluate(()=>window.__ohanaRtcRecoveryProof);
+    // Evaluate INSIDE the game's main world. waitForFunction can execute in a
+    // Playwright utility world whose modules/globals do not represent the
+    // actual on-screen game.
+    let proof=null;
+    for(let i=0;i<75;i++){
+      proof=await page.evaluate(async expected=>{
+        const {onlineCoop}=await import("/systems/online-coop.js");
+        const direct=onlineCoop.direct;
+        if(document.body.dataset.coopTransport!=="direct"||!direct?.active||
+          direct.sessionId!==expected||direct.receivedSeq<1||
+          onlineCoop.lastDirectPoseAt<=0||performance.now()-onlineCoop.lastDirectPoseAt>=1500)return null;
+        return {mode:document.body.dataset.coopTransport,active:direct.active,
+          session:direct.sessionId,receivedSeq:direct.receivedSeq,
+          channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]};
+      },recoveredSession);
+      if(proof)break;
+      await page.waitForTimeout(200);
+    }
+    assert.ok(proof,"no live direct packet arrived in recovered browser");
+    return proof;
   }));
   for(const state of recovered){
     assert.equal(state.mode,"direct","a browser never confirmed live RTC after recovery");
