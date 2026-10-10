@@ -177,26 +177,28 @@ try {
   assert.notEqual(recoveredSession,firstSession,"negotiation reused the damaged RTC session");
   // The HTTP transport badge changes only when a real fresh pose arrives.
   // Verify the new channels DELIVER data, not merely show readyState=open.
+  // Observe the full state AT THE SAME MOMENT in each browser. Checking
+  // first tab, switching focus, then sampling again creates false failures.
   const recovered=await Promise.all([hostPage,guestPage].map(async page=>{
-    await page.waitForFunction(async()=>{
+    const handle=await page.waitForFunction(async expected=>{
       const {onlineCoop}=await import("/systems/online-coop.js");
-      return document.body.dataset.coopTransport==="direct" &&
-        onlineCoop.direct?.active && onlineCoop.lastDirectPoseAt>0 &&
-        performance.now()-onlineCoop.lastDirectPoseAt<1500;
-    },null,{timeout:12000});
-    // Capture this tab immediately after ITS OWN verified fresh packet.
-    return page.evaluate(async()=>{
-      const {onlineCoop}=await import("/systems/online-coop.js");
-      return {mode:document.body.dataset.coopTransport,active:onlineCoop.direct?.active,
-        channels:[onlineCoop.direct?.poseChannel?.readyState,onlineCoop.direct?.eventChannel?.readyState]};
-    });
+      const direct=onlineCoop.direct;
+      if(document.body.dataset.coopTransport!=="direct"||!direct?.active||
+        direct.sessionId!==expected||direct.receivedSeq<1||
+        onlineCoop.lastDirectPoseAt<=0||performance.now()-onlineCoop.lastDirectPoseAt>=1500)return false;
+      return {mode:document.body.dataset.coopTransport,active:direct.active,
+        session:direct.sessionId,receivedSeq:direct.receivedSeq,
+        channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]};
+    },recoveredSession,{timeout:15000});
+    const proof=await handle.jsonValue();
+    await handle.dispose();
+    return proof;
   }));
-  // Each page already had to prove DIRECT + a fresh incoming packet in the
-  // waitForFunction above. Do not sample badge text a second time, since
-  // inactive/headless tabs may legitimately return to the honest server mode
-  // between those independent observations.
   for(const state of recovered){
+    assert.equal(state.mode,"direct","a browser never confirmed live RTC after recovery");
     assert.equal(state.active,true,"connection did not heal");
+    assert.equal(state.session,recoveredSession,"unexpected RTC session after recovery");
+    assert.ok(state.receivedSeq>0,"new negotiated channel delivered no poses");
     assert.deepEqual(state.channels,["open","open"],"both SCTP channels must recover");
   }
 
