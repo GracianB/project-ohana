@@ -122,3 +122,8 @@ test("V121: deployment check permits only a known Netlify HTML rewrite",()=>{
  assert.match(checker,/const match=exact\|\|transformed/);
  assert.match(checker,/path==="index.html"/);
 });
+
+test("V123: Dragon Trial has no unreachable return after successful ember",()=>{
+ const src=fs.readFileSync("systems/dragon-trial.js","utf8");
+ assert.doesNotMatch(src,/return Object\.freeze\(\{index:i,count:state\.count,complete:state\.completed,ember\}\);\s*return null;/);
+});
