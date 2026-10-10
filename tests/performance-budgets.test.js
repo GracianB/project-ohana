@@ -12,15 +12,15 @@ test("OHANA allows source growth without artificial byte ceilings",()=>{
     assert.equal(cap,Infinity);
 });
 test("Browser E2E retains actual responsiveness and accessibility checks",()=>{
-  assert.doesNotMatch(e2e,/audit\\.(?:js|css)\\s*[<>]=?\\s*(?:JS|CSS)_(?:HARD|WARN)_BYTES/);
-  assert.match(e2e,/audit\\.fcp < FIRST_CONTENTFUL_PAINT_MS/);
+  assert.doesNotMatch(e2e,/audit\.(?:js|css)\s*[<>]=?\s*(?:JS|CSS)_(?:HARD|WARN)_BYTES/);
+  assert.match(e2e,/audit\.fcp < FIRST_CONTENTFUL_PAINT_MS/);
   assert.match(e2e,/perfMs < SIMULATION_STEP_BUDGET_MS/);
   assert.equal(FIRST_CONTENTFUL_PAINT_MS,4000);
   assert.equal(SIMULATION_STEP_BUDGET_MS,1000);
 });
 test("Release gate reports source sizes and protects precache integrity",()=>{
-  assert.match(gate,/runtimeFiles\\.reduce\\(\\(total, file\\) => total \\+ fs\\.statSync\\(file\\)\\.size/);
-  assert.match(gate,/JS fuente \\(informativo, sin techo\\)/);
-  assert.match(gate,/jsPrecache\\.size !== runtimeFiles\\.length/);
+  assert.match(gate,/runtimeFiles\.reduce\(\(total, file\) => total \+ fs\.statSync\(file\)\.size/);
+  assert.match(gate,/JS fuente \(informativo, sin techo\)/);
+  assert.match(gate,/jsPrecache\.size !== runtimeFiles\.length/);
   assert.doesNotMatch(gate,/runtimeJsBytes >= JS_HARD_BYTES/);
 });
