@@ -131,7 +131,7 @@ test("V123: Dragon Trial has no unreachable return after successful ember",()=>{
 test("V124: WebAudio waits for an actual pointer or keyboard gesture",()=>{
  const audio=fs.readFileSync("engine/audio.js","utf8");
  assert.match(audio,/if \(!audioUnlocked\) return null;/);
- assert.match(audio,/addEventListener\("pointerdown", unlock/);
- assert.match(audio,/addEventListener\("keydown", unlock/);
+ assert.match(audio,/addEventListener\("pointerdown", unlockAudioFromGesture/);
+ assert.match(audio,/addEventListener\("keydown", unlockAudioFromGesture/);
  assert.match(audio,/audioUnlocked = true/);
 });
