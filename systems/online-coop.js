@@ -258,12 +258,14 @@ class OnlineCoop {
     const state=document.body.dataset.onlineState||"connected";
     const direct=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
     document.body.dataset.coopTransport=direct?"direct":"server";
+    document.body.dataset.coopRoute=direct?(this.direct?.route||"unknown"):"server";
     if(direct&&this.direct?.directRttMs>0)document.body.dataset.coopRttDirect=String(Math.round(this.direct.directRttMs));
     else delete document.body.dataset.coopRttDirect;
     let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
     if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
+    if(direct&&this.direct?.route==="relay")text=text.replace("DIRECTO WEBRTC","WEBRTC · TURN");
     if(state==="connected"&&!direct&&this.direct?.iceState==="failed")text+=" · ICE FALLIDO"+(this.direct.iceServers.some(x=>String(x.urls).startsWith("turn"))?" · REVISAR TURN":" · TURN NECESARIO");
     if(direct&&this.direct?.directRttMs>0)text+=" · P2P "+Math.round(this.direct.directRttMs)+" ms";
     if(state==="connected"&&this.requestSamples>0){
@@ -271,8 +273,8 @@ class OnlineCoop {
       const age=performance.now()-this.remote?.sampleAt;
       const quality=peerNetworkHealth(this.rttMs,Number.isFinite(age)?Math.max(0,age):0);
       text+=" · servidor "+ping+" ms";
-      if(quality.quality==="late"||quality.quality==="lost")text+=" · SEÑAL RETRASADA";
-      else if(quality.quality==="slow")text+=" · RED LENTA";
+      if(!direct&&(quality.quality==="late"||quality.quality==="lost"))text+=" · SEÑAL RETRASADA";
+      else if(!direct&&quality.quality==="slow")text+=" · RED LENTA";
     }
     if(badge.textContent!==text)badge.textContent=text;
   }
@@ -298,6 +300,7 @@ class OnlineCoop {
       }
     });
     this.direct.onMetrics=()=>this.showNetworkHealth();
+    this.direct.onRoute=()=>this.showNetworkHealth();
     this.direct.onIceStatus=({ice,turnConfigured})=>{
       if(typeof document==="undefined")return;
       document.body.dataset.coopIceState=ice;
@@ -310,6 +313,9 @@ class OnlineCoop {
 
   repairDirect(game,now=performance.now()){
     if(!this.enabled||!this.remote?.playerId||!this.direct?.available)return false;
+    // Only slot 0 initiates offers. The guest preserves its answerer until the
+    // new offer arrives, avoiding simultaneous teardown during slow signaling.
+    if(!this.direct.initiator)return false;
     const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt);
     if(!rtcCanRetry({now,at:this.directRetryAt,hidden:typeof document!=="undefined"&&document.hidden,
       lobby:this.snapshot?.phase==="lobby",peer:!!this.remote?.playerId,connected}))return false;
@@ -369,10 +375,12 @@ class OnlineCoop {
     const you = this.currentPlayer(snapshot);
     const remote = snapshot?.players?.find((player) => !player.isYou && player.connected && player.characterId);
     if (!remote) {
+      if(this.remote)this.resetDirectPeer();
       this.remote = null;
       return;
     }
 
+    if(this.remote&&this.remote.playerId!==remote.playerId)this.resetDirectPeer();
     const freshDirect=rtcPreferDirectPose(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
     const worldRoom = (freshDirect?this.remoteWorld:remote.worldRoomId)||"hub";
     const previous = this.remote;
@@ -423,6 +431,12 @@ class OnlineCoop {
 
     this.remoteWorld = worldRoom;
     if (you && !you.isYou) return;
+  }
+
+  resetDirectPeer(){
+    this.direct?.close();this.direct=null;this.directAttempted=false;
+    this.lastDirectPoseAt=0;this.directConnectedAt=0;this.directRetryAt=0;this.directRetries=0;
+    this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
   }
 
   async poll(game, immediate = false) {
@@ -701,6 +715,7 @@ class OnlineCoop {
       if (this.seenSignals.size > 128) this.seenSignals.delete(this.seenSignals.values().next().value);
 
       if(rtc){
+        if(event.senderPlayerId!==this.remote?.playerId)continue;
         if(this.direct)void this.direct.signal(event.payload);
         continue;
       }
@@ -857,6 +872,7 @@ class OnlineCoop {
     else this.repairDirect(game);
     this.direct?.sendPose(game);
     this.direct?.ping();
+    void this.direct?.sampleRoute();
     if(typeof document!=="undefined"&&this.direct?.active){
       const connected=rtcFresh(this.direct.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
       if(document.body.dataset.coopTransport!==(connected?"direct":"server"))this.showNetworkHealth();

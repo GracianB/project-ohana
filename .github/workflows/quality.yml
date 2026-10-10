@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium and Firefox
+        run: npx playwright install --with-deps chromium firefox
 
       - name: Unit tests
         run: npm test
@@ -41,6 +41,16 @@ jobs:
 
       - name: Multiplayer E2E
         run: npm run test:browser:multiplayer
+
+      - name: Multiplayer with late ICE candidates
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_LATE_ICE: '1'
+
+      - name: Firefox Multiplayer E2E
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_BROWSER: firefox
 
       - name: Visual regression matrix
         run: npm run test:visual
