@@ -36,8 +36,6 @@ export function updateDragonTrial(game){
  state.count=i+1;
  state.completed=state.count===DRAGON_EMBERS.length;
  return Object.freeze({index:i,count:state.count,complete:state.completed,ember});
-
- return null;
 }
 export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
  if(!ctx||game?.roomId!=="volcano")return;
