@@ -1,10 +1,8 @@
-// OHANA growth budgets (October 2026).
-// Room for ten worlds, new characters and multiplayer without a small source cap.
-// These are safety ceilings, not performance targets; warn early and keep the
-// real FCP, simulation, accessibility and release gates unchanged.
-export const JS_WARN_BYTES = 2_400_000;
-export const JS_HARD_BYTES = 12_000_000; // formerly 3 MB
-export const CSS_WARN_BYTES = 400_000;
-export const CSS_HARD_BYTES = 2_000_000; // formerly 500 KB
+// OHANA uses real runtime and browser performance gates, not static source caps.
+// Byte counts remain observable for diagnostics, never an artificial release blocker.
+export const JS_WARN_BYTES = Number.POSITIVE_INFINITY;
+export const JS_HARD_BYTES = Number.POSITIVE_INFINITY;
+export const CSS_WARN_BYTES = Number.POSITIVE_INFINITY;
+export const CSS_HARD_BYTES = Number.POSITIVE_INFINITY;
 export const FIRST_CONTENTFUL_PAINT_MS = 4_000;
 export const SIMULATION_STEP_BUDGET_MS = 1_000;

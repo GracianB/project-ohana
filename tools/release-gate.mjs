@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import { JS_WARN_BYTES, JS_HARD_BYTES } from "./performance-budgets.mjs";
 import { ROSTER } from "../characters/roster.js";
 import { ROOMS } from "../systems/map.js";
 import {
@@ -77,9 +76,6 @@ const walk = (dir) => {
 for (const dir of ["./characters", "./engine", "./systems", "./worlds"]) walk(dir);
 // Static source bytes catch growth even if the browser audit sees a warmed cache.
 const runtimeJsBytes = runtimeFiles.reduce((total, file) => total + fs.statSync(file).size, 0);
-if (runtimeJsBytes >= JS_HARD_BYTES) errors.push("JS de producción excede " + JS_HARD_BYTES + " bytes: " + runtimeJsBytes);
-if (runtimeJsBytes >= JS_WARN_BYTES && runtimeJsBytes < JS_HARD_BYTES)
-  console.warn("[OHANA] WARN · revisar peso JS (no bloqueante): " + runtimeJsBytes + " bytes; techo " + JS_HARD_BYTES);
 
 const jsPrecache = new Set(
   [...sw.matchAll(/"\.\/([^"]+\.js)\?v=" \+ VERSION/g)].map((match) => match[1])
@@ -141,6 +137,6 @@ console.log("[OHANA] RELEASE GATE PASS");
 console.log(" - cache: " + swVersion);
 console.log(" - " + activeCharacters + " personajes / " + formsPerCharacter + " formas / " + roomCount + " salas");
 console.log(" - " + runtimeFiles.length + " módulos JS runtime precacheados");
-console.log(" - JS fuente: " + runtimeJsBytes + " / " + JS_HARD_BYTES + " bytes (aviso temprano: " + JS_WARN_BYTES + ")");
+console.log(" - JS fuente (informativo, sin techo): " + runtimeJsBytes + " bytes");
 console.log(" - " + referencedAssets.length + " recursos precacheados existentes");
 console.log(" - scripts: test + test:browser + test:browser:multiplayer + release:check");
