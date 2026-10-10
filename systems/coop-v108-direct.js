@@ -95,7 +95,7 @@ export class DirectPeerLink{
   this.ready=false;this.closed=false;this.lastPoseAt=0;this.nextSeq=0;this.receivedSeq=0;
   this.sessionId=null;this.assembler=createDirectAssembler();this.negotiating=false;
   this.pingSeq=0;this.pendingPing=null;this.lastPingSentAt=0;this.directRttMs=0;this.lastPongAt=0;this.onMetrics=null;
-  this.priorOffers=new Set();
+  this.priorOffers=new Set();this.iceState="new";this.connectionState="new";this.onIceStatus=null;
  }
  get available(){return typeof this.RTC==="function";}
  get active(){return this.ready&&this.poseChannel?.readyState==="open"&&this.eventChannel?.readyState==="open";}
@@ -150,7 +150,16 @@ export class DirectPeerLink{
   this.pendingPing=null;this.lastPongAt=0;this.lastPingSentAt=0;this.directRttMs=0;
   this.ready=false;
   this.pc.ondatachannel=e=>this._attach(e.channel);
+  const current=this.pc;
+  const reportIce=()=>{
+   if(this.closed||this.pc!==current)return;
+   this.iceState=current.iceConnectionState||"unknown";
+   this.connectionState=current.connectionState||"unknown";
+   this.onIceStatus?.({ice:this.iceState,connection:this.connectionState,turnConfigured:this.iceServers.some(x=>String(x.urls).includes("turn"))});
+  };
+  current.oniceconnectionstatechange=reportIce;
   this.pc.onconnectionstatechange=()=>{
+   reportIce();
    if(["failed","closed","disconnected"].includes(this.pc?.connectionState||"")){
     this.ready=false;this.onState?.(false);
    }
