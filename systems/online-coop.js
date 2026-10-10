@@ -264,6 +264,7 @@ class OnlineCoop {
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
     if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
+    if(state==="connected"&&!direct&&this.direct?.iceState==="failed")text+=" · ICE FALLIDO"+(this.direct.iceServers.some(x=>String(x.urls).startsWith("turn"))?" · REVISAR TURN":" · TURN NECESARIO");
     if(direct&&this.direct?.directRttMs>0)text+=" · P2P "+Math.round(this.direct.directRttMs)+" ms";
     if(state==="connected"&&this.requestSamples>0){
       const ping=Math.max(0,Math.round(this.rttMs));
@@ -297,6 +298,12 @@ class OnlineCoop {
       }
     });
     this.direct.onMetrics=()=>this.showNetworkHealth();
+    this.direct.onIceStatus=({ice,turnConfigured})=>{
+      if(typeof document==="undefined")return;
+      document.body.dataset.coopIceState=ice;
+      document.body.dataset.coopTurnConfigured=String(turnConfigured);
+      this.showNetworkHealth();
+    };
     if(this.direct.available)void this.direct.start();
     this.showNetworkHealth();
   }
