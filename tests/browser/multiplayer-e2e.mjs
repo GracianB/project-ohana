@@ -200,14 +200,20 @@ try {
     onlineCoop.directRetryAt=0;
     return id;
   });
-  await hostPage.waitForFunction(async previous=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return onlineCoop.direct?.active && onlineCoop.direct?.sessionId!==previous;
-  },firstSession,{timeout:30000});
-  const recoveredSession=await hostPage.evaluate(async()=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return onlineCoop.direct.sessionId;
-  });
+  // Firefox may run waitForFunction in a separate Playwright utility world.
+  // Sample the actual game module directly and require a newly negotiated ID.
+  let recoveredSession=null;
+  for(let attempt=0;attempt<150;attempt++){
+    recoveredSession=await hostPage.evaluate(async previous=>{
+      const {onlineCoop}=await import("/systems/online-coop.js");
+      const direct=onlineCoop.direct;
+      return direct?.active&&direct.sessionId&&direct.sessionId!==previous
+        ? direct.sessionId : null;
+    },firstSession);
+    if(recoveredSession)break;
+    await hostPage.waitForTimeout(200);
+  }
+  assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
     const {onlineCoop}=await import("/systems/online-coop.js");
     return onlineCoop.direct?.active&&onlineCoop.direct.sessionId===sessionId;
