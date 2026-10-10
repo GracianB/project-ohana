@@ -350,6 +350,8 @@ test("stopMusic desconecta todo el grafo de delay del tema", async () => {
 
   try {
     globalThis.window = { AudioContext: FakeAudioContext };
+    const { unlockAudioFromGesture } = await import("../engine/audio.js");
+    unlockAudioFromGesture();
     globalThis.setTimeout = (callback) => { pendingTimeouts.push(callback); return 0; };
     playMusic("claro");
     stopMusic();
