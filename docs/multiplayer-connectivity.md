@@ -68,3 +68,32 @@ requiring the candidate signal path to establish and recover the connection.
 This verifies signaling behavior, not a paid TURN provider or an actual restrictive
 network. Field acceptance requires two physical clients, a selected relay route
 when necessary, measured latency and successful recovery after a connection loss.
+
+## Optional automatic TURN/TLS credentials (Netlify)
+
+The game now asks the existing authenticated `game` function for
+`action: "rtc-config"` before creating a WebRTC connection. With no TURN
+environment configured, the response includes no relay and the default
+STUN / HTTPS fallback remains unchanged. Failed requests do not block play.
+
+To enable this route, **first provision and operate a real coturn relay**
+with a valid public TLS certificate and TCP port 443, and configure coturn's
+`use-auth-secret` and `static-auth-secret` settings. In the Netlify site
+environment (server-side only), set:
+
+- `OHANA_TURN_TLS_URL=turns:relay.example.org:443?transport=tcp`
+- `OHANA_TURN_SHARED_SECRET=<same long random coturn REST shared secret>`
+
+The relay host must be reachable over TCP 443 from both clients. The
+temporary TURN user is authenticated via coturn REST HMAC-SHA1 using an
+expiry timestamp; 15-minute credentials are issued only to an authenticated
+room participant. No permanent relay secret is sent to the browser or
+committed to GitHub. A TURN account, dedicated hostname, port allocation,
+TLS configuration, uptime and network acceptance tests are still required.
+A successful code deploy **does not** mean TURN is operational.
+
+An authenticated browser receives short-lived ICE configuration via the
+same Netlify function already used for room polling. A new credential is
+requested on reconnection; ICE negotiations in progress retain their own
+current configuration. Avoid printing the response payload in production
+logs because ephemeral credentials are still sensitive while valid.

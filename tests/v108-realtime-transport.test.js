@@ -120,7 +120,8 @@ test("V120: valid TURN credentials reach RTC while malformed servers are rejecte
  assert.deepEqual(configured.iceServers[2],valid);
  link.close();
  const coop=fs.readFileSync("systems/online-coop.js","utf8");
- assert.match(coop,/iceServers:globalThis\.OHANA_RTC_ICE_SERVERS/);
+ assert.match(coop,/iceServers=globalThis\.OHANA_RTC_ICE_SERVERS/);
+ assert.match(coop,/\n\s+iceServers,/);
 });
 
 test("V122: ICE failure is observable without exposing TURN credentials",async()=>{
