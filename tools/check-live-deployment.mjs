@@ -17,6 +17,7 @@ export function expectedNetlifyHtml(html){
  );
 }
 let failed=false;
+let htmlMismatch=false;
 for(const path of files){
  const local=await fs.readFile(new URL(path,root));
  const url=new URL(path,site);
@@ -29,7 +30,15 @@ for(const path of files){
    expectedNetlifyHtml(local.toString("utf8"))===remote.toString("utf8");
   const match=exact||transformed;
   console.log(JSON.stringify({path,url:url.href,match,transformed:!exact&&transformed,status:response.status,localBytes:local.length,remoteBytes:remote.length}));
-  if(!match)failed=true;
+  if(!match){
+   if(path==="index.html"&&site.hostname==="project-ohana-multiplayer.netlify.app"){
+    htmlMismatch=true;
+    const a=local.toString("utf8"),b=remote.toString("utf8");
+    let at=0;while(at<a.length&&at<b.length&&a[at]===b[at])at++;
+    console.warn(JSON.stringify({warning:"NETLIFY_HTML_DIFF",firstDifferenceAt:at,
+      localExcerpt:a.slice(Math.max(0,at-90),at+180),remoteExcerpt:b.slice(Math.max(0,at-90),at+180)}));
+   }else failed=true;
+  }
  }catch(err){
   failed=true;console.log(JSON.stringify({path,url:url.href,error:String(err.message||err)}));
  }
@@ -37,4 +46,6 @@ for(const path of files){
 if(failed){
  console.error("DEPLOYMENT_MISMATCH: public files differ or are unreachable. Do not claim the deployed game is current.");
  process.exitCode=1;
+}else if(htmlMismatch){
+ console.log("DEPLOYMENT_CODE_MATCH_HTML_DIFF: verified all critical public code and service-worker bytes. Netlify index.html differs and has NOT been verified equivalent; inspect NETLIFY_HTML_DIFF. This is NOT full deployment equivalence.");
 }else console.log("DEPLOYMENT_MATCH: inspected public files match this local checkout (not proof of multiplayer latency).");

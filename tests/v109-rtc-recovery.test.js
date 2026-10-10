@@ -135,3 +135,11 @@ test("V124: WebAudio waits for an actual pointer or keyboard gesture",()=>{
  assert.match(audio,/addEventListener\("keydown", unlockAudioFromGesture/);
  assert.match(audio,/audioUnlocked = true/);
 });
+
+test("V125: deployment checker distinguishes Netlify HTML rewrite from verified runtime code",()=>{
+ const checker=fs.readFileSync("tools/check-live-deployment.mjs","utf8");
+ assert.match(checker,/DEPLOYMENT_CODE_MATCH_HTML_DIFF/);
+ assert.match(checker,/NETLIFY_HTML_DIFF/);
+ assert.match(checker,/else failed=true/);
+ assert.match(checker,/if\(failed\)/);
+});
