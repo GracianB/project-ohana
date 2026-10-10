@@ -165,3 +165,11 @@ test("real room service authenticates and relays late ICE while rejecting malfor
   await assert.rejects(service.signal(host.roomId,host.identity,{...body,sequence:2,actionId:"invalid-ice",payload}),e=>e.code==="INVALID_SIGNAL");
  }
 });
+
+test("TURN credential lookup has a short deadline without lowering normal game request timeout",async()=>{
+ const {readFileSync}=await import("node:fs");
+ const source=readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
+ assert.match(source,/async function post\(body,timeoutMs=10000\)/);
+ assert.match(source,/setTimeout\(\(\)=>abort\.abort\(\), timeoutMs\)/);
+ assert.match(source,/post\(\{action:"rtc-config",roomId,identity\},1800\)/);
+});

@@ -33,10 +33,10 @@ function makeActionId(playerId, sequence) {
   return `online:${playerId}:${sequence}`;
 }
 
-async function post(body) {
+async function post(body,timeoutMs=10000) {
   // A lost connection must not leave the entire engine waiting on one hung POST.
   const abort = new AbortController();
-  const timeout = setTimeout(()=>abort.abort(), 10000);
+  const timeout = setTimeout(()=>abort.abort(), timeoutMs);
   try{
     const response = await fetch(ENDPOINT, {
       method: "POST",
@@ -291,7 +291,7 @@ class OnlineCoop {
     let iceServers=globalThis.OHANA_RTC_ICE_SERVERS;
     try {
       // Authenticated ephemeral TURN config. STUN remains available when unset.
-      const config=await post({action:"rtc-config",roomId,identity});
+      const config=await post({action:"rtc-config",roomId,identity},1800);
       if(Array.isArray(config?.iceServers)&&config.iceServers.length)iceServers=config.iceServers;
     } catch (_) {
       // TURN is optional: do not disrupt the multiplayer HTTP fallback.
