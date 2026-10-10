@@ -325,6 +325,10 @@ class OnlineCoop {
     this.remote.facing=pose.facing;
     this.remote.evolution=pose.evo;
     this.lastDirectPoseAt=now;
+    // A reconnected peer can send poses before its badge is refreshed by
+    // another Netlify HTTP response. Restore DIRECT mode on the first packet.
+    if(typeof document!=="undefined"&&document.body.dataset.coopTransport!=="direct")
+      this.showNetworkHealth();
   }
 
   receiveDirectEvent(game,event){
@@ -846,6 +850,10 @@ class OnlineCoop {
     else this.repairDirect(game);
     this.direct?.sendPose(game);
     this.direct?.ping();
+    if(typeof document!=="undefined"&&this.direct?.active){
+      const connected=rtcFresh(this.direct.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now());
+      if(document.body.dataset.coopTransport!==(connected?"direct":"server"))this.showNetworkHealth();
+    }
     void this.poll(game);
 
     const localState = game.player?.dead ? "lost" : game.won ? "won" : "";

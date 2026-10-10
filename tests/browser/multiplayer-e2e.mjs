@@ -169,6 +169,14 @@ try {
     return onlineCoop.direct?.active&&onlineCoop.direct.sessionId===sessionId;
   },recoveredSession,{timeout:30000});
   assert.notEqual(recoveredSession,firstSession,"negotiation reused the damaged RTC session");
+  // The HTTP transport badge changes only when a real fresh pose arrives.
+  // Verify the new channels DELIVER data, not merely show readyState=open.
+  for(const page of [hostPage,guestPage])await page.waitForFunction(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return document.body.dataset.coopTransport==="direct" &&
+      onlineCoop.direct?.active && onlineCoop.lastDirectPoseAt>0 &&
+      performance.now()-onlineCoop.lastDirectPoseAt<1500;
+  },null,{timeout:10000});
   const recovered=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
     const {onlineCoop}=await import("/systems/online-coop.js");
     return {mode:document.body.dataset.coopTransport,active:onlineCoop.direct?.active,
