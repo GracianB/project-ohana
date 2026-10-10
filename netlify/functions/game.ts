@@ -1,6 +1,7 @@
 import { getStore } from "@netlify/blobs";
 import { createRoomService, RoomError } from "../lib/room-service.mjs";
 import { temporaryTurnConfig } from "../lib/turn-credentials.mjs";
+import { cloudflareTurnConfig } from "../lib/cloudflare-turn.mjs";
 
 const headers = {
   "content-type": "application/json; charset=utf-8",
@@ -36,7 +37,8 @@ export default async function handler(request: Request) {
         // Authenticate against an existing room before minting a relay credential.
         // Do not disclose TURN_SHARED_SECRET, including in error responses.
         await service.poll(body.roomId, body.identity);
-        const config = temporaryTurnConfig({
+        const managed = await cloudflareTurnConfig({keyId:process.env.OHANA_CF_TURN_KEY_ID,apiToken:process.env.OHANA_CF_TURN_API_TOKEN});
+        const config = managed || temporaryTurnConfig({
           url: process.env.OHANA_TURN_TLS_URL,
           secret: process.env.OHANA_TURN_SHARED_SECRET,
           playerId: body.identity?.playerId,

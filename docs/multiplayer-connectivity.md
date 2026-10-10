@@ -97,3 +97,29 @@ same Netlify function already used for room polling. A new credential is
 requested on reconnection; ICE negotiations in progress retain their own
 current configuration. Avoid printing the response payload in production
 logs because ephemeral credentials are still sensitive while valid.
+
+## Cloudflare managed TURN, no private VPS required
+
+Cloudflare Realtime TURN credentials can be issued by Netlify after the room
+session has been authenticated. The server requests short-lived credentials
+from Cloudflare's documented `generate-ice-servers` API, forwarding **only**
+`turns:turn.cloudflare.com:443?transport=tcp` to the browser.
+
+1. In Cloudflare Dashboard, activate Realtime TURN and create a TURN key.
+2. In the Netlify site environment settings add (scope: Functions):
+   - `OHANA_CF_TURN_KEY_ID` (Cloudflare TURN key identifier)
+   - `OHANA_CF_TURN_API_TOKEN` (the private key API token; secret)
+3. Redeploy the Netlify site with its functions. Never paste the token in
+   GitHub, browser console, game room chat or any published script.
+4. Test two browsers: inspect `document.body.dataset.coopTransport` and
+   `document.body.dataset.coopRoute`. A working relay reports `direct`
+   and `relay`. If `server` remains, inspect Firefox `about:webrtc`
+   locally without sharing unredacted network identifiers.
+
+Cloudflare is tried first if configured, with self-hosted coturn as optional
+fallback. If neither is configured or credentials cannot be obtained promptly,
+STUN and HTTP fallback remain available. This feature does not guarantee
+that the user's egress policies allow TURN/TLS, and does not modify the firewall.
+
+Pricing, plan eligibility and payment requirements must be verified in the
+Cloudflare account before enabling paid usage.
