@@ -106,3 +106,11 @@ test("V117: transient 400ms RTC gap must not hand visual authority to stale HTTP
  const coop=fs.readFileSync("systems/online-coop.js","utf8");
  assert.match(coop,/const freshDirect=rtcPreferDirectPose\(/);
 });
+
+test("V118: visual blend follows the same RTC grace as snapshot ownership",()=>{
+ const coop=fs.readFileSync("systems/online-coop.js","utf8");
+ const calls=coop.match(/rtcPreferDirectPose\(/g)||[];
+ assert.ok(calls.length>=2,"snapshot and visual interpolation must share the same freshness policy");
+ assert.doesNotMatch(coop,/now-this\.lastDirectPoseAt<400/);
+ assert.match(coop,/const blend=rtcPreferDirectPose\(/);
+});
