@@ -4,6 +4,29 @@
 // ICE negotiation is relayed through existing authenticated 'action' signals;
 // no external API keys, polling loops, server protocol migrations or timers per frame.
 export const REALTIME_POSE_MS=50;
+export const ICE_GATHER_WAIT_MS=1200;
+const MAX_CANDIDATES=64;
+const validSession=s=>typeof s==="string"&&/^[A-Za-z0-9._:-]{5,80}$/.test(s);
+// Copy only browser ICE fields. Never forward arbitrary objects or credentials.
+export function safeIceCandidate(value){
+ if(!value||typeof value.candidate!=="string"||!value.candidate.startsWith("candidate:")||
+    value.candidate.length>1000||/[\r\n]/.test(value.candidate))return null;
+ const mid=value.sdpMid??null,index=value.sdpMLineIndex??null;
+ if(mid!==null&&(typeof mid!=="string"||mid.length>64))return null;
+ if(index!==null&&(!Number.isInteger(index)||index<0||index>16))return null;
+ if(mid===null&&index===null)return null;
+ const result={candidate:value.candidate,sdpMid:mid,sdpMLineIndex:index};
+ if(value.usernameFragment!=null){
+  if(typeof value.usernameFragment!=="string"||value.usernameFragment.length>256)return null;
+  result.usernameFragment=value.usernameFragment;
+ }
+ return result;
+}
+export function isRtcCandidateSignal(message){
+ return message?.action==="rtc"&&message.kind==="candidates"&&validSession(message.sid)&&
+  Array.isArray(message.candidates)&&message.candidates.length>0&&message.candidates.length<=4&&
+  JSON.stringify(message).length<=1600&&message.candidates.every(c=>safeIceCandidate(c)!==null);
+}
 // TURN is required on networks where direct ICE candidates cannot connect.
 // Accept credentials only from explicit, trusted deployment configuration.
 export function rtcIceServers(extra=[]){
@@ -96,6 +119,11 @@ export class DirectPeerLink{
   this.sessionId=null;this.assembler=createDirectAssembler();this.negotiating=false;
   this.pingSeq=0;this.pendingPing=null;this.lastPingSentAt=0;this.directRttMs=0;this.lastPongAt=0;this.onMetrics=null;
   this.priorOffers=new Set();this.iceState="new";this.connectionState="new";this.onIceStatus=null;
+  this.signalQueue=Promise.resolve();this.queuedSignals=0;
+  this.remoteCandidates=new Map();this.appliedCandidates=new Set();
+  this.localCandidates=[];this.localCandidateKeys=new Set();this.descriptionPublished=false;
+  this.candidateTimer=null;this.cancelIceWait=null;
+  this.route="unknown";this.statsBusy=false;this.lastStatsAt=-Infinity;this.onRoute=null;
  }
  get available(){return typeof this.RTC==="function";}
  get active(){return this.ready&&this.poseChannel?.readyState==="open"&&this.eventChannel?.readyState==="open";}
@@ -108,6 +136,7 @@ export class DirectPeerLink{
   if(channel.label==="poses"){
    this.poseChannel=channel;
    channel.onmessage=e=>{
+    if(this.closed||this.poseChannel!==channel)return;
     if(typeof e.data!=="string"||e.data.length>1000)return;
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
     const pose=safeDirectPose(msg,this.receivedSeq);
@@ -118,10 +147,13 @@ export class DirectPeerLink{
   }else if(channel.label==="events"){
    this.eventChannel=channel;
    channel.onmessage=e=>{
+    if(this.closed||this.eventChannel!==channel)return;
     if(typeof e.data!=="string"||e.data.length>900)return;
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
     if(msg?.t==="ping"&&Number.isSafeInteger(msg.id)&&msg.id>0){
-      if(channel.readyState==="open"&&channel.bufferedAmount<16000)channel.send(JSON.stringify({t:"pong",id:msg.id}));
+      if(channel.readyState==="open"&&channel.bufferedAmount<16000){
+       try{channel.send(JSON.stringify({t:"pong",id:msg.id}));}catch{}
+      }
       return;
     }
     if(msg?.t==="pong"&&this.pendingPing?.id===msg.id){
@@ -144,6 +176,9 @@ export class DirectPeerLink{
  }
  _makeConnection(){
   if(this.closed||!this.available)return false;
+  this.cancelIceWait?.();clearTimeout(this.candidateTimer);this.candidateTimer=null;
+  this.localCandidates=[];this.localCandidateKeys.clear();this.descriptionPublished=false;
+  this.appliedCandidates.clear();this.route="unknown";this.lastStatsAt=-Infinity;
   if(this.pc)try{this.pc.close();}catch{}
   this.pc=new this.RTC({iceServers:this.iceServers});
   this.poseChannel=null;this.eventChannel=null;this.receivedSeq=0;this.lastPoseAt=0;
@@ -151,6 +186,16 @@ export class DirectPeerLink{
   this.ready=false;
   this.pc.ondatachannel=e=>this._attach(e.channel);
   const current=this.pc;
+  current.onicecandidate=event=>{
+   if(this.closed||this.pc!==current)return;
+   const candidate=safeIceCandidate(event.candidate?.toJSON?.()||event.candidate);
+   if(!candidate)return;
+   const key=JSON.stringify(candidate);
+   if(this.localCandidateKeys.has(key)||this.localCandidateKeys.size>=MAX_CANDIDATES)return;
+   this.localCandidateKeys.add(key);this.localCandidates.push(candidate);
+   if(this.descriptionPublished&&this.candidateTimer===null)
+    this.candidateTimer=setTimeout(()=>{this.candidateTimer=null;this._flushLocalCandidates(current);},120);
+  };
   const reportIce=()=>{
    if(this.closed||this.pc!==current)return;
    this.iceState=current.iceConnectionState||"unknown";
@@ -173,21 +218,54 @@ export class DirectPeerLink{
  async _waitForIce(){
   const pc=this.pc;
   if(!pc||pc.iceGatheringState==="complete")return;
-  // ICE candidates must be included in the SDP because Netlify is not a
-  // websocket signaling service. Bound waiting so offline users can play.
+  // Prefer one gathered SDP to many HTTP mutations. Bound the initial wait;
+  // candidates gathered later continue through authenticated batched signals.
   await new Promise(resolve=>{
    let finished=false;
-   const done=()=>{if(finished)return;finished=true;clearTimeout(timeout);pc.removeEventListener?.("icegatheringstatechange",check);resolve();};
+   const done=()=>{if(finished)return;finished=true;clearTimeout(timeout);pc.removeEventListener?.("icegatheringstatechange",check);if(this.cancelIceWait===done)this.cancelIceWait=null;resolve();};
    const check=()=>{if(pc.iceGatheringState==="complete")done();};
-   const timeout=setTimeout(done,2600);
+   const timeout=setTimeout(done,ICE_GATHER_WAIT_MS);
+   this.cancelIceWait=done;
    pc.addEventListener?.("icegatheringstatechange",check);
    check();
   });
  }
  async _publish(kind){
+  const pc=this.pc,sid=this.sessionId;
   await this._waitForIce();
-  if(this.closed||!this.pc?.localDescription)return;
-  for(const fragment of splitDirectDescription(kind,this.sessionId,this.pc.localDescription.sdp))this.relay?.(fragment);
+  if(this.closed||this.pc!==pc||this.sessionId!==sid||!pc?.localDescription)return;
+  const sdp=pc.localDescription.sdp;
+  for(const fragment of splitDirectDescription(kind,sid,sdp))this.relay?.(fragment);
+  // Candidates already present in SDP need no additional Netlify mutation.
+  this.localCandidates=this.localCandidates.filter(c=>!sdp.split(/\r?\n/).includes("a="+c.candidate));
+  this.descriptionPublished=true;
+  this._flushLocalCandidates(pc);
+ }
+ _flushLocalCandidates(pc){
+  if(this.closed||this.pc!==pc||!this.descriptionPublished||!validSession(this.sessionId))return;
+  while(this.localCandidates.length){
+   const candidates=[];
+   while(this.localCandidates.length&&candidates.length<4){
+    const next=this.localCandidates[0];
+    if(JSON.stringify({action:"rtc",kind:"candidates",sid:this.sessionId,candidates:[...candidates,next],roomId:"volcano"}).length>1600)break;
+    candidates.push(this.localCandidates.shift());
+   }
+   if(!candidates.length){this.localCandidates.shift();continue;}
+   this.relay?.({action:"rtc",kind:"candidates",sid:this.sessionId,candidates});
+  }
+ }
+ async _applyRemoteCandidates(){
+  const pc=this.pc,sid=this.sessionId;
+  if(!pc?.remoteDescription||typeof pc.addIceCandidate!=="function")return;
+  const candidates=this.remoteCandidates.get(sid)||[];
+  this.remoteCandidates.delete(sid);
+  for(const candidate of candidates){
+   if(this.closed||this.pc!==pc||this.sessionId!==sid)return;
+   const key=JSON.stringify(candidate);
+   if(this.appliedCandidates.has(key)||this.appliedCandidates.size>=MAX_CANDIDATES)continue;
+   this.appliedCandidates.add(key);
+   try{await pc.addIceCandidate(candidate);}catch{}
+  }
  }
  async start(){
   if(this.closed||!this.available||this.pc)return false;
@@ -201,8 +279,32 @@ export class DirectPeerLink{
    return true;
   }catch{this.close();return false;}
  }
- async signal(message){
+ signal(message){
+  if(this.closed||this.queuedSignals>=64)return Promise.resolve(false);
+  // A poll can contain offer + candidates together. Preserve order across awaits.
+  this.queuedSignals++;
+  const task=this.signalQueue.then(()=>this._signal(message)).catch(()=>false);
+  this.signalQueue=task.finally(()=>{this.queuedSignals--;});
+  return task;
+ }
+ async _signal(message){
   if(this.closed||!this.available||message?.action!=="rtc")return false;
+  if(message.kind==="candidates"){
+   if(!isRtcCandidateSignal(message)||this.priorOffers.has(message.sid)||
+     (this.initiator&&message.sid!==this.sessionId))return false;
+   if(!this.remoteCandidates.has(message.sid)){
+    if(this.remoteCandidates.size>=4)return false;
+    this.remoteCandidates.set(message.sid,[]);
+   }
+   const pending=this.remoteCandidates.get(message.sid);
+   for(const value of message.candidates){
+    const candidate=safeIceCandidate(value),key=JSON.stringify(candidate);
+    if(pending.length<MAX_CANDIDATES&&(message.sid!==this.sessionId||!this.appliedCandidates.has(key))&&
+      !pending.some(c=>JSON.stringify(c)===key))pending.push(candidate);
+   }
+   if(message.sid===this.sessionId)await this._applyRemoteCandidates();
+   return true;
+  }
   const assembled=this.assembler.accept(message);
   if(!assembled)return false;
   if(assembled.kind==="offer"&&this.initiator)return false;
@@ -216,6 +318,7 @@ export class DirectPeerLink{
       // connection. Never call setRemoteDescription(offer) on a live answerer
       // that is still holding the previous answer.
       this.priorOffers.add(this.sessionId);
+      this.remoteCandidates.delete(this.sessionId);
       if(this.priorOffers.size>8)this.priorOffers.delete(this.priorOffers.values().next().value);
       this._makeConnection();
     }
@@ -224,12 +327,15 @@ export class DirectPeerLink{
     if(!this.pc||this.negotiating)return false;
     this.negotiating=true;
     await this.pc.setRemoteDescription({type:"offer",sdp:assembled.sdp});
+    await this._applyRemoteCandidates();
+    if(this.closed)return false;
     const answer=await this.pc.createAnswer();
     await this.pc.setLocalDescription(answer);
     await this._publish("answer");
    }else{
     if(!this.pc||this.pc.remoteDescription)return false;
     await this.pc.setRemoteDescription({type:"answer",sdp:assembled.sdp});
+    await this._applyRemoteCandidates();
    }
    return true;
   }catch{return false;}finally{this.negotiating=false;}
@@ -244,6 +350,23 @@ export class DirectPeerLink{
   this.lastPingSentAt=now;
   try{this.eventChannel.send(JSON.stringify({t:"ping",id}));return true;}
   catch{this.pendingPing=null;return false;}
+ }
+ async sampleRoute(){
+  const pc=this.pc,now=this.now();
+  if(!this.active||this.statsBusy||typeof pc?.getStats!=="function"||now-this.lastStatsAt<5000)return;
+  this.lastStatsAt=now;this.statsBusy=true;
+  try{
+   const stats=await pc.getStats();
+   if(this.closed||this.pc!==pc)return;
+   let pair;
+   for(const value of stats.values())if(value.type==="transport"&&value.selectedCandidatePairId)pair=stats.get(value.selectedCandidatePairId);
+   if(!pair)for(const value of stats.values())if(value.type==="candidate-pair"&&value.state==="succeeded"&&(value.selected||value.nominated)){pair=value;break;}
+   if(!pair)return;
+   const local=stats.get(pair.localCandidateId),remote=stats.get(pair.remoteCandidateId);
+   this.route=local?.candidateType==="relay"||remote?.candidateType==="relay"?"relay":local&&remote?"p2p":"unknown";
+   // Expose route only: no addresses, SDP, ports or TURN credentials in UI.
+   this.onRoute?.(this.route);
+  }catch{}finally{this.statsBusy=false;}
  }
  sendPose(game){
   if(!this.active||!game?.player)return false;
@@ -268,6 +391,8 @@ export class DirectPeerLink{
  }
  close(){
   this.closed=true;
+  this.cancelIceWait?.();clearTimeout(this.candidateTimer);this.candidateTimer=null;
+  this.remoteCandidates.clear();this.localCandidates=[];this.appliedCandidates.clear();
   this.assembler.reset();
   try{this.poseChannel?.close();}catch{}
   try{this.eventChannel?.close();}catch{}

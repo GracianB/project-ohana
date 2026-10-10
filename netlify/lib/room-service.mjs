@@ -1,5 +1,6 @@
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
 import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
+import { isRtcCandidateSignal } from "../../systems/coop-v108-direct.js";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_RETRIES = 4;
@@ -387,7 +388,9 @@ export function createRoomService(store, options = {}) {
         typeof relayPayload?.data==="string"&&relayPayload.data.length>0&&
         relayPayload.data.length<=12000;
       const maxSignalBytes=rtcFragment?12400:1800;
-      if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>maxSignalBytes){
+      const rtcCandidates=signalKind==="action"&&isRtcCandidateSignal(relayPayload);
+      if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>maxSignalBytes||
+        (relayPayload?.action==="rtc"&&!rtcFragment&&!rtcCandidates)){
         throw new RoomError("INVALID_SIGNAL","Señal inválida o demasiado grande.");
       }
       const { room } = await mutate(roomCode, (state) => {

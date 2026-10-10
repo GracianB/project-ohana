@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chromium } from "playwright";
+import { chromium, firefox } from "playwright";
 import { startServer } from "./server.mjs";
 import { createRoomService, RoomError } from "../../netlify/lib/room-service.mjs";
 
@@ -16,23 +16,57 @@ class MemoryStore {
   }
 }
 
-const server = await startServer(4174);
+const server = await startServer(0);
+const origin=`http://127.0.0.1:${server.address().port}`;
+const browserName=process.env.OHANA_TEST_BROWSER||"chromium";
+const lateIce=process.env.OHANA_TEST_LATE_ICE==="1";
+const browserType=browserName==="firefox"?firefox:chromium;
 // Two distinct browser contexts represent two simultaneously active devices,
 // not background tabs fighting Chromium's animation throttling policies.
-const browser = await chromium.launch({ headless: true, args: [
+const browser = await browserType.launch({ headless: true, args: browserName==="chromium"?[
   "--disable-background-timer-throttling",
   "--disable-renderer-backgrounding",
   "--disable-backgrounding-occluded-windows"
-] });
+]:[] });
 const store = new MemoryStore();
 const service = createRoomService(store);
 let host;
 let roomId;
+let candidateSignals=0;
+const candidateSessions=new Set();
+
+async function installLateIce(context){
+  if(!lateIce)return;
+  await context.addInitScript(()=>{
+    const Native=window.RTCPeerConnection;
+    // Real ICE/SCTP, with candidate signaling delayed past the SDP wait. Hide
+    // gathered candidates from SDP so this test cannot pass without trickle ICE.
+    window.RTCPeerConnection=class extends Native {
+      lateReady=false;timers=new Set();
+      get iceGatheringState(){return this.lateReady?super.iceGatheringState:"gathering";}
+      get localDescription(){
+        const d=super.localDescription;
+        return d?new RTCSessionDescription({type:d.type,sdp:d.sdp.replace(/^a=(?:candidate:.*|end-of-candidates)\r?\n/gm,"")}):null;
+      }
+      set onicecandidate(fn){
+        super.onicecandidate=event=>{
+          if(!event.candidate)return;
+          const timer=setTimeout(()=>{this.timers.delete(timer);this.lateReady=true;fn?.(event);},2500);
+          this.timers.add(timer);
+        };
+      }
+      close(){for(const timer of this.timers)clearTimeout(timer);this.timers.clear();super.close();}
+    };
+  });
+}
 
 async function installFakeNetlify(context) {
   await context.route("**/.netlify/functions/game", async (route) => {
     try {
       const body = route.request().postDataJSON();
+      if(body.action==="signal"&&body.payload?.kind==="candidates"){
+        candidateSignals++;candidateSessions.add(body.payload.sid);
+      }
       let data;
       switch (body.action) {
         case "create": data = host = await service.create(); roomId = data.roomId; break;
@@ -56,27 +90,30 @@ const contexts = [];
 try {
   const hostContext = await browser.newContext(); contexts.push(hostContext);
   const guestContext = await browser.newContext(); contexts.push(guestContext);
+  await installLateIce(hostContext);await installLateIce(guestContext);
   await installFakeNetlify(hostContext); await installFakeNetlify(guestContext);
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
   const errors = [];
   for (const page of [hostPage, guestPage]) page.on("pageerror", (error) => errors.push(error.stack || error.message));
 
-  await hostPage.goto("http://127.0.0.1:4174/multiplayer.html");
+  await hostPage.goto(origin+"/multiplayer.html");
+  console.log(`multiplayer ${browserName}: lobby loaded${lateIce?" / late ICE":""}`);
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
   await hostPage.getByRole("button", { name: "Seleccionar a Kilo", exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
-  await guestPage.goto("http://127.0.0.1:4174/multiplayer.html");
+  await guestPage.goto(origin+"/multiplayer.html");
   await guestPage.locator("#room-input").fill(roomId);
   await guestPage.getByRole("button", { name: "Unirse" }).click();
   await guestPage.getByRole("button", { name: "Seleccionar a Michi", exact: true }).click();
   await guestPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
-  await hostPage.waitForURL(/index\.html\?online=1/, { timeout: 7000 });
-  await guestPage.waitForURL(/index\.html\?online=1/, { timeout: 7000 });
+  await hostPage.waitForURL(/index\.html\?online=1/, { waitUntil:"domcontentloaded",timeout:15000 });
+  await guestPage.waitForURL(/index\.html\?online=1/, { waitUntil:"domcontentloaded",timeout:15000 });
+  console.log("multiplayer: both players entered the original engine");
 
   for (const page of [hostPage, guestPage]) {
     const transferredSession = await page.evaluate(() => JSON.parse(sessionStorage.getItem("ohana-coop-session") || "null"));
@@ -113,6 +150,7 @@ try {
     assert.equal(verified.fast,"open",label+": pose channel not open");
     assert.equal(verified.reliable,"open",label+": reliable channel not open");
   }
+  console.log("multiplayer: both real WebRTC channels opened");
 
 
   // Two separate browser contexts can leave the host tab unfocused in CI.
@@ -162,14 +200,20 @@ try {
     onlineCoop.directRetryAt=0;
     return id;
   });
-  await hostPage.waitForFunction(async previous=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return onlineCoop.direct?.active && onlineCoop.direct?.sessionId!==previous;
-  },firstSession,{timeout:30000});
-  const recoveredSession=await hostPage.evaluate(async()=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return onlineCoop.direct.sessionId;
-  });
+  // Firefox may run waitForFunction in a separate Playwright utility world.
+  // Sample the actual game module directly and require a newly negotiated ID.
+  let recoveredSession=null;
+  for(let attempt=0;attempt<150;attempt++){
+    recoveredSession=await hostPage.evaluate(async previous=>{
+      const {onlineCoop}=await import("/systems/online-coop.js");
+      const direct=onlineCoop.direct;
+      return direct?.active&&direct.sessionId&&direct.sessionId!==previous
+        ? direct.sessionId : null;
+    },firstSession);
+    if(recoveredSession)break;
+    await hostPage.waitForTimeout(200);
+  }
+  assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
     const {onlineCoop}=await import("/systems/online-coop.js");
     return onlineCoop.direct?.active&&onlineCoop.direct.sessionId===sessionId;
@@ -209,10 +253,21 @@ try {
     assert.deepEqual(state.channels,["open","open"],"both SCTP channels must recover");
   }
 
+  // ICE can learn the other endpoint as peer-reflexive: an open bidirectional
+  // channel need not wait for BOTH endpoints' delayed candidate batches.
+  if(lateIce){
+    assert.ok(candidateSessions.has(firstSession),"initial connection must use the late candidate signal path");
+    assert.ok(candidateSessions.has(recoveredSession),"recovery must use the late candidate signal path");
+  }
+
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
-  console.log("PASS · dos contextos reales entran al motor original de OHANA, sincronizan posición y ejecutan combate online.");
+  console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
+} catch(error) {
+  console.error("Multiplayer failed:",error);
+  throw error;
 } finally {
   for (const context of contexts) await context.close();
   await browser.close();
+  server.closeAllConnections();
   await new Promise((resolve) => server.close(resolve));
 }
