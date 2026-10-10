@@ -17,7 +17,13 @@ class MemoryStore {
 }
 
 const server = await startServer(4174);
-const browser = await chromium.launch({ headless: true });
+// Two distinct browser contexts represent two simultaneously active devices,
+// not background tabs fighting Chromium's animation throttling policies.
+const browser = await chromium.launch({ headless: true, args: [
+  "--disable-background-timer-throttling",
+  "--disable-renderer-backgrounding",
+  "--disable-backgrounding-occluded-windows"
+] });
 const store = new MemoryStore();
 const service = createRoomService(store);
 let host;
@@ -171,17 +177,20 @@ try {
   assert.notEqual(recoveredSession,firstSession,"negotiation reused the damaged RTC session");
   // The HTTP transport badge changes only when a real fresh pose arrives.
   // Verify the new channels DELIVER data, not merely show readyState=open.
-  for(const page of [hostPage,guestPage])await page.waitForFunction(async()=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return document.body.dataset.coopTransport==="direct" &&
-      onlineCoop.direct?.active && onlineCoop.lastDirectPoseAt>0 &&
-      performance.now()-onlineCoop.lastDirectPoseAt<1500;
-  },null,{timeout:10000});
-  const recovered=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
-    const {onlineCoop}=await import("/systems/online-coop.js");
-    return {mode:document.body.dataset.coopTransport,active:onlineCoop.direct?.active,
-      channels:[onlineCoop.direct?.poseChannel?.readyState,onlineCoop.direct?.eventChannel?.readyState]};
-  })));
+  const recovered=await Promise.all([hostPage,guestPage].map(async page=>{
+    await page.waitForFunction(async()=>{
+      const {onlineCoop}=await import("/systems/online-coop.js");
+      return document.body.dataset.coopTransport==="direct" &&
+        onlineCoop.direct?.active && onlineCoop.lastDirectPoseAt>0 &&
+        performance.now()-onlineCoop.lastDirectPoseAt<1500;
+    },null,{timeout:12000});
+    // Capture this tab immediately after ITS OWN verified fresh packet.
+    return page.evaluate(async()=>{
+      const {onlineCoop}=await import("/systems/online-coop.js");
+      return {mode:document.body.dataset.coopTransport,active:onlineCoop.direct?.active,
+        channels:[onlineCoop.direct?.poseChannel?.readyState,onlineCoop.direct?.eventChannel?.readyState]};
+    });
+  }));
   for(const state of recovered){
     assert.equal(state.mode,"direct","the HUD did not restore true direct mode");
     assert.equal(state.active,true,"connection did not heal");
