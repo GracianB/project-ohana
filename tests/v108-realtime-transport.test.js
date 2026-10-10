@@ -81,3 +81,25 @@ test("V108: full app uses WebRTC with honest degraded Netlify fallback; keeps ev
  assert.match(html,/ohana-315/);
  assert.match(e2e,/coopTransport/);
 });
+
+test("V116: closed RTC channels never crash the game loop or lose pose sequence",()=>{
+ let ms=2000;
+ const link=new DirectPeerLink({initiator:true,RTC:class FakeRTC{},now:()=>ms});
+ const channel=label=>({label,readyState:"open",bufferedAmount:0,throws:true,
+  send(){if(this.throws)throw new Error("channel closed mid-frame");},close(){this.readyState="closed";}});
+ const pose=channel("poses"),events=channel("events");
+ link._attach(pose);link._attach(events);
+ const game={roomId:"hub",player:{x:420,y:970,vx:1,vy:0,facing:1,evo:2,grounded:true}};
+ assert.equal(link.sendPose(game),false);
+ assert.equal(link.nextSeq,0);
+ assert.equal(link.lastPoseAt,0);
+ assert.equal(link.sendEvent("action",{action:"attack"}),false);
+ assert.equal(link.ping(),false);
+ assert.equal(link.pendingPing,null);
+ pose.throws=false;events.throws=false;
+ assert.equal(link.sendPose(game),true);
+ assert.equal(link.nextSeq,1);
+ assert.equal(link.sendEvent("action",{action:"attack"}),true);
+ ms+=1500;
+ assert.equal(link.ping(),true);
+});
