@@ -51,15 +51,46 @@ for (let i = 1; i <= 50; i++) {
   } catch (error) { failures.push(error.code || error.message); }
   samples.push(performance.now()-started);
 }
+// Stress writes from two separate players against one room. This models
+// competing storage transactions, NOT a real internet RTT or WebRTC path.
+const burstDurations = [], burstErrors = [];
+const burstStart = performance.now();
+const requests = Array.from({ length: 12 }, (_, index) => {
+  const identity = index % 2 ? joined.identity : created.identity;
+  const sequence = 100 + index;
+  const started = performance.now();
+  return service.move(created.roomId, identity, {
+    mode:"engine", sequence, actionId:identity.playerId+":"+sequence,
+    positionX:600+index*5, positionY:710, health:100, maxHealth:100,
+    worldRoomId:"hub"
+  }).then(result => {
+    burstDurations.push(performance.now()-started);
+    return { accepted:result.accepted, replayed:result.replayed };
+  }).catch(error => {
+    burstDurations.push(performance.now()-started);
+    burstErrors.push(error.code || error.message);
+    return { accepted:false, error:error.code || error.message };
+  });
+});
+const burstResults = await Promise.all(requests);
+const burst = {
+  requests:requests.length,
+  wallMs:Number((performance.now()-burstStart).toFixed(2)),
+  p50ms:Number(percentile(burstDurations,50).toFixed(2)),
+  p95ms:Number(percentile(burstDurations,95).toFixed(2)),
+  accepted:burstResults.filter(x=>x.accepted).length,
+  errors:burstErrors,
+  conflicts:store.conflicts
+};
 const stats = {
   scenario:"sequential synthetic engine movement",
   requests:samples.length, simulatedStorageLatencyMs:latency,
   p50ms:Number(percentile(samples,50).toFixed(2)),
   p95ms:Number(percentile(samples,95).toFixed(2)),
   maxMs:Number(Math.max(...samples).toFixed(2)),
-  accepted:accepted.filter(Boolean).length, failures,
+  accepted:accepted.filter(Boolean).length, failures, burst,
   storageReads:store.reads, storageWrites:store.writes, conflicts:store.conflicts,
-  note:"Measures local room-service/storage processing ONLY. It does not measure WebRTC, browsers, real network RTT, Netlify cold starts or render delay."
+  note:"Measures local room-service/storage processing ONLY. Concurrent bursts intentionally expose contention and may reject requests. This does not measure WebRTC, browsers, real network RTT, Netlify cold starts or render delay."
 };
 console.log(JSON.stringify(stats,null,2));
 if (failures.length || stats.accepted !== 50) process.exitCode = 1;
