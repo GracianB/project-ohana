@@ -4,8 +4,9 @@
 // ICE negotiation is relayed through existing authenticated 'action' signals;
 // no external API keys, polling loops, server protocol migrations or timers per frame.
 export const REALTIME_POSE_MS=50;
-const MAX_SIGNAL_PARTS=16;
-const PART_LENGTH=640;
+// V110: most SDP exchanges take one authenticated Netlify mutation.
+const MAX_SIGNAL_PARTS=4;
+const PART_LENGTH=12000;
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const finite=v=>typeof v==="number"&&Number.isFinite(v);
 export function safeDirectPose(message,prevSeq=0){
@@ -25,10 +26,24 @@ export function safeDirectPose(message,prevSeq=0){
 }
 export function splitDirectDescription(kind,sid,sdp){
  if(!["offer","answer"].includes(kind)||typeof sid!=="string"||sid.length>80||typeof sdp!=="string"||sdp.length>PART_LENGTH*MAX_SIGNAL_PARTS||!sdp.length)return [];
- const total=Math.ceil(sdp.length/PART_LENGTH);
- return Array.from({length:total},(_,part)=>({
-  action:"rtc",kind,sid,part,total,data:sdp.slice(part*PART_LENGTH,(part+1)*PART_LENGTH)
- }));
+ // Escaped JSON (especially SDP CRLF) can be larger than raw SDP.
+ // Adapt each chunk to the ACTUAL serialized size accepted by Netlify.
+ const chunks=[];
+ for(let offset=0;offset<sdp.length;){
+  let span=Math.min(PART_LENGTH,sdp.length-offset);
+  while(span>0){
+   const data=sdp.slice(offset,offset+span);
+   const encoded=JSON.stringify({action:"rtc",kind,sid,part:0,total:MAX_SIGNAL_PARTS,data,roomId:"volcano"});
+   if(encoded.length<=12350)break;
+   span=Math.floor(span*.9);
+  }
+  if(span<1)return [];
+  chunks.push(sdp.slice(offset,offset+span));
+  offset+=span;
+  if(chunks.length>MAX_SIGNAL_PARTS)return [];
+ }
+ const total=chunks.length;
+ return chunks.map((data,part)=>({action:"rtc",kind,sid,part,total,data}));
 }
 export function createDirectAssembler(){
  const pending=new Map();

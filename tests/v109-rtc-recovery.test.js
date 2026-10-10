@@ -39,8 +39,8 @@ test("V109: negotiation bypasses world filter and new authenticated SDP rebuilds
  assert.match(rtc,/this\.priorOffers\.add\(this\.sessionId\)/);
  assert.match(rtc,/this\.pendingPing=\{id,sent:now\}/);
  assert.match(sw,/coop-v109-recovery\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-314"/);
- assert.match(html,/ohana-314/);
+ assert.match(sw,/const VERSION = "ohana-315"/);
+ assert.match(html,/ohana-315/);
 });
 
 test("V109: guest rebuilds its prior RTCPeerConnection for an authenticated new offer",async()=>{
