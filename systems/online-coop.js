@@ -689,7 +689,7 @@ class OnlineCoop {
           }
           if(handling==="refresh"){
             // The game phase changed. Do not resend an invalid action.
-            this.markRetry(error);
+            this.clearRetry();
             void this.poll(game,true);
             break;
           }
