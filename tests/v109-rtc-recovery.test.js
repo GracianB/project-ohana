@@ -127,3 +127,11 @@ test("V123: Dragon Trial has no unreachable return after successful ember",()=>{
  const src=fs.readFileSync("systems/dragon-trial.js","utf8");
  assert.doesNotMatch(src,/return Object\.freeze\(\{index:i,count:state\.count,complete:state\.completed,ember\}\);\s*return null;/);
 });
+
+test("V124: WebAudio waits for an actual pointer or keyboard gesture",()=>{
+ const audio=fs.readFileSync("engine/audio.js","utf8");
+ assert.match(audio,/if \(!audioUnlocked\) return null;/);
+ assert.match(audio,/addEventListener\("pointerdown", unlockAudioFromGesture/);
+ assert.match(audio,/addEventListener\("keydown", unlockAudioFromGesture/);
+ assert.match(audio,/audioUnlocked = true/);
+});
