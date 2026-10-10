@@ -63,7 +63,7 @@ test("V105 · offline, browser and gameplay integration share a single cache",()
  assert.match(js,/V105Memories\.clear\(\)/);
  assert.match(js,/ohana-festival-v1002/);
  assert.match(sw,/systems\/v105-living-stories\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-312"/);
- assert.match(html,/ohana-312/);
+ assert.match(sw,/const VERSION = "ohana-313"/);
+ assert.match(html,/ohana-313/);
  assert.match(e2e,/v105Probe/);
 });

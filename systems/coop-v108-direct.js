@@ -1,0 +1,202 @@
+// OHANA V108 · WebRTC fast lane.
+// Netlify still authenticates the room and persists canonical progress.
+// Only time-sensitive cosmetic poses and actions take the direct channel.
+// ICE negotiation is relayed through existing authenticated 'action' signals;
+// no external API keys, polling loops, server protocol migrations or timers per frame.
+export const REALTIME_POSE_MS=50;
+const MAX_SIGNAL_PARTS=16;
+const PART_LENGTH=640;
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const finite=v=>typeof v==="number"&&Number.isFinite(v);
+export function safeDirectPose(message,prevSeq=0){
+ if(!message||message.t!=="pose"||!Number.isSafeInteger(message.seq)||message.seq<=prevSeq)return null;
+ if(!finite(message.x)||!finite(message.y)||message.x<0||message.y<0||message.x>2400||message.y>1450)return null;
+ if(typeof message.room!=="string"||!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(message.room))return null;
+ return {
+  seq:message.seq,x:message.x,y:message.y,room:message.room,
+  vx:finite(message.vx)?clamp(message.vx,-45,45):0,
+  vy:finite(message.vy)?clamp(message.vy,-65,65):0,
+  facing:message.facing===-1?-1:1,
+  evo:finite(message.evo)?clamp(Math.floor(message.evo),0,4):0,
+  grounded:message.grounded!==false,
+  melee:finite(message.melee)?clamp(message.melee,0,30):0,
+  dash:finite(message.dash)?clamp(message.dash,0,30):0
+ };
+}
+export function splitDirectDescription(kind,sid,sdp){
+ if(!["offer","answer"].includes(kind)||typeof sid!=="string"||sid.length>80||typeof sdp!=="string"||sdp.length>PART_LENGTH*MAX_SIGNAL_PARTS||!sdp.length)return [];
+ const total=Math.ceil(sdp.length/PART_LENGTH);
+ return Array.from({length:total},(_,part)=>({
+  action:"rtc",kind,sid,part,total,data:sdp.slice(part*PART_LENGTH,(part+1)*PART_LENGTH)
+ }));
+}
+export function createDirectAssembler(){
+ const pending=new Map();
+ return {
+  accept(m){
+   if(!m||!["offer","answer"].includes(m.kind)||typeof m.sid!=="string"||m.sid.length>80||
+      !/^[A-Za-z0-9._:-]{5,80}$/.test(m.sid)||
+      !Number.isInteger(m.part)||!Number.isInteger(m.total)||
+      m.total<1||m.total>MAX_SIGNAL_PARTS||m.part<0||m.part>=m.total||
+      typeof m.data!=="string"||m.data.length>PART_LENGTH)return null;
+   const key=m.kind+":"+m.sid;
+   if(!pending.has(key)){
+    if(pending.size>3)pending.clear();
+    pending.set(key,{parts:Array(m.total).fill(null),total:m.total});
+   }
+   const state=pending.get(key);
+   if(state.total!==m.total){pending.delete(key);return null;}
+   state.parts[m.part]=m.data;
+   if(state.parts.some(p=>p===null))return null;
+   pending.delete(key);
+   const sdp=state.parts.join("");
+   if(!sdp.startsWith("v=0"))return null;
+   return {kind:m.kind,sid:m.sid,sdp};
+  },
+  reset(){pending.clear();}
+ };
+}
+export class DirectPeerLink{
+ constructor({initiator,relay,onPose,onEvent,onState,RTC=globalThis.RTCPeerConnection,now=()=>performance.now()}={}){
+  this.initiator=!!initiator;
+  this.relay=relay;
+  this.onPose=onPose;this.onEvent=onEvent;this.onState=onState;
+  this.RTC=RTC;this.now=now;
+  this.pc=null;this.poseChannel=null;this.eventChannel=null;
+  this.ready=false;this.closed=false;this.lastPoseAt=0;this.nextSeq=0;this.receivedSeq=0;
+  this.sessionId=null;this.assembler=createDirectAssembler();this.negotiating=false;
+ }
+ get available(){return typeof this.RTC==="function";}
+ get active(){return this.ready&&this.poseChannel?.readyState==="open"&&this.eventChannel?.readyState==="open";}
+ _state(){
+  const on=this.poseChannel?.readyState==="open"&&this.eventChannel?.readyState==="open";
+  if(on!==this.ready){this.ready=on;this.onState?.(on);}
+ }
+ _attach(channel){
+  if(!channel)return;
+  if(channel.label==="poses"){
+   this.poseChannel=channel;
+   channel.onmessage=e=>{
+    if(typeof e.data!=="string"||e.data.length>1000)return;
+    let msg;try{msg=JSON.parse(e.data);}catch{return;}
+    const pose=safeDirectPose(msg,this.receivedSeq);
+    if(!pose)return;
+    this.receivedSeq=pose.seq;
+    this.onPose?.(pose);
+   };
+  }else if(channel.label==="events"){
+   this.eventChannel=channel;
+   channel.onmessage=e=>{
+    if(typeof e.data!=="string"||e.data.length>900)return;
+    let msg;try{msg=JSON.parse(e.data);}catch{return;}
+    if(msg?.t==="event"&&["action","room","state"].includes(msg.kind))this.onEvent?.(msg);
+   };
+  }else{try{channel.close();}catch{}return;}
+  channel.onopen=()=>this._state();
+  channel.onclose=()=>this._state();
+  channel.onerror=()=>this._state();
+ }
+ _makeConnection(){
+  if(this.closed||!this.available)return false;
+  if(this.pc)try{this.pc.close();}catch{}
+  this.pc=new this.RTC({iceServers:[
+   {urls:"stun:stun.cloudflare.com:3478"},
+   {urls:"stun:stun.l.google.com:19302"}
+  ]});
+  this.poseChannel=null;this.eventChannel=null;this.receivedSeq=0;this.lastPoseAt=0;
+  this.ready=false;
+  this.pc.ondatachannel=e=>this._attach(e.channel);
+  this.pc.onconnectionstatechange=()=>{
+   if(["failed","closed","disconnected"].includes(this.pc?.connectionState||"")){
+    this.ready=false;this.onState?.(false);
+   }
+  };
+  if(this.initiator){
+   this._attach(this.pc.createDataChannel("poses",{ordered:false,maxRetransmits:0}));
+   this._attach(this.pc.createDataChannel("events",{ordered:true}));
+  }
+  return true;
+ }
+ async _waitForIce(){
+  const pc=this.pc;
+  if(!pc||pc.iceGatheringState==="complete")return;
+  // ICE candidates must be included in the SDP because Netlify is not a
+  // websocket signaling service. Bound waiting so offline users can play.
+  await new Promise(resolve=>{
+   let finished=false;
+   const done=()=>{if(finished)return;finished=true;clearTimeout(timeout);pc.removeEventListener?.("icegatheringstatechange",check);resolve();};
+   const check=()=>{if(pc.iceGatheringState==="complete")done();};
+   const timeout=setTimeout(done,2600);
+   pc.addEventListener?.("icegatheringstatechange",check);
+   check();
+  });
+ }
+ async _publish(kind){
+  await this._waitForIce();
+  if(this.closed||!this.pc?.localDescription)return;
+  for(const fragment of splitDirectDescription(kind,this.sessionId,this.pc.localDescription.sdp))this.relay?.(fragment);
+ }
+ async start(){
+  if(this.closed||!this.available||this.pc)return false;
+  try{
+   if(!this._makeConnection())return false;
+   if(!this.initiator)return true;
+   this.sessionId=(globalThis.crypto?.randomUUID?.()||"rtc-"+String(Math.round(this.now()))).replaceAll("-","");
+   const offer=await this.pc.createOffer();
+   await this.pc.setLocalDescription(offer);
+   await this._publish("offer");
+   return true;
+  }catch{this.close();return false;}
+ }
+ async signal(message){
+  if(this.closed||!this.available||message?.action!=="rtc")return false;
+  const assembled=this.assembler.accept(message);
+  if(!assembled)return false;
+  if(assembled.kind==="offer"&&this.initiator)return false;
+  if(assembled.kind==="answer"&&(!this.initiator||assembled.sid!==this.sessionId))return false;
+  if(assembled.kind==="offer"&&this.sessionId===assembled.sid&&this.pc?.remoteDescription)return false;
+  try{
+   if(assembled.kind==="offer"){
+    this.sessionId=assembled.sid;
+    if(!this.pc||this.pc.connectionState==="failed"||this.pc.connectionState==="closed")this._makeConnection();
+    if(!this.pc||this.negotiating)return false;
+    this.negotiating=true;
+    await this.pc.setRemoteDescription({type:"offer",sdp:assembled.sdp});
+    const answer=await this.pc.createAnswer();
+    await this.pc.setLocalDescription(answer);
+    await this._publish("answer");
+   }else{
+    if(!this.pc||this.pc.remoteDescription)return false;
+    await this.pc.setRemoteDescription({type:"answer",sdp:assembled.sdp});
+   }
+   return true;
+  }catch{return false;}finally{this.negotiating=false;}
+ }
+ sendPose(game){
+  if(!this.active||!game?.player)return false;
+  const now=this.now();
+  if(now-this.lastPoseAt<REALTIME_POSE_MS||this.poseChannel.bufferedAmount>12000)return false;
+  const p=game.player;
+  this.lastPoseAt=now;
+  this.poseChannel.send(JSON.stringify({
+   t:"pose",seq:++this.nextSeq,room:game.roomId,
+   x:p.x,y:p.y,vx:p.vx,vy:p.vy,facing:p.facing,
+   evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash
+  }));
+  return true;
+ }
+ sendEvent(kind,payload={}){
+  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state"].includes(kind))return false;
+  this.eventChannel.send(JSON.stringify({t:"event",kind,payload}));
+  return true;
+ }
+ close(){
+  this.closed=true;
+  this.assembler.reset();
+  try{this.poseChannel?.close();}catch{}
+  try{this.eventChannel?.close();}catch{}
+  try{this.pc?.close();}catch{}
+  this.pc=null;this.poseChannel=null;this.eventChannel=null;
+  if(this.ready){this.ready=false;this.onState?.(false);}
+ }
+}
