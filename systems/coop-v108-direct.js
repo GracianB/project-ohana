@@ -95,6 +95,9 @@ export class DirectPeerLink{
   channel.onopen=()=>this._state();
   channel.onclose=()=>this._state();
   channel.onerror=()=>this._state();
+  // Browsers may deliver negotiated channels already OPEN by the time the
+  // handler attaches. An existing open channel is just as valid.
+  if(channel.readyState==="open")this._state();
  }
  _makeConnection(){
   if(this.closed||!this.available)return false;
