@@ -17,3 +17,15 @@ export function rtcFresh(active,lastPoseAt,connectedAt,now,lastPongAt=0){
 export function rtcCanRetry({now=0,at=0,hidden=false,lobby=false,peer=false,connected=false}={}){
   return peer&&!hidden&&!lobby&&!connected&&Number.isFinite(now)&&now>=at;
 }
+
+/**
+ * Keep direct visual authority across brief packet gaps. An HTTP snapshot may
+ * lag behind RTC, so do not switch back to it on a single 400ms hiccup.
+ * Past this window HTTP is allowed to recover the visual position.
+ */
+export const RTC_POSE_GRACE_MS=1200;
+export function rtcPreferDirectPose(active,lastPoseAt,connectedAt,now,lastPongAt=0){
+  return rtcFresh(active,lastPoseAt,connectedAt,now,lastPongAt)
+    &&Number.isFinite(lastPoseAt)&&lastPoseAt>0
+    &&now-lastPoseAt>=0&&now-lastPoseAt<RTC_POSE_GRACE_MS;
+}
