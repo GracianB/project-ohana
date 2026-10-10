@@ -4,6 +4,20 @@
 // ICE negotiation is relayed through existing authenticated 'action' signals;
 // no external API keys, polling loops, server protocol migrations or timers per frame.
 export const REALTIME_POSE_MS=50;
+// TURN is required on networks where direct ICE candidates cannot connect.
+// Accept credentials only from explicit, trusted deployment configuration.
+export function rtcIceServers(extra=[]){
+ const base=[{urls:"stun:stun.cloudflare.com:3478"},{urls:"stun:stun.l.google.com:19302"}];
+ if(!Array.isArray(extra))return base;
+ for(const item of extra.slice(0,4)){
+  if(!item||typeof item!=="object")continue;
+  const urls=typeof item.urls==="string"?[item.urls]:Array.isArray(item.urls)?item.urls:[];
+  if(!urls.length||urls.length>4||!urls.every(u=>typeof u==="string"&&u.length<250&&/^turns?:/.test(u)))continue;
+  if(typeof item.username!=="string"||!item.username||item.username.length>256||typeof item.credential!=="string"||!item.credential||item.credential.length>512)continue;
+  base.push({urls:urls.length===1?urls[0]:urls,username:item.username,credential:item.credential});
+ }
+ return base;
+}
 // V110: most SDP exchanges take one authenticated Netlify mutation.
 const MAX_SIGNAL_PARTS=4;
 const PART_LENGTH=12000;
@@ -72,11 +86,11 @@ export function createDirectAssembler(){
  };
 }
 export class DirectPeerLink{
- constructor({initiator,relay,onPose,onEvent,onState,RTC=globalThis.RTCPeerConnection,now=()=>performance.now()}={}){
+ constructor({initiator,relay,onPose,onEvent,onState,RTC=globalThis.RTCPeerConnection,now=()=>performance.now(),iceServers=[]}={}){
   this.initiator=!!initiator;
   this.relay=relay;
   this.onPose=onPose;this.onEvent=onEvent;this.onState=onState;
-  this.RTC=RTC;this.now=now;
+  this.RTC=RTC;this.now=now;this.iceServers=rtcIceServers(iceServers);
   this.pc=null;this.poseChannel=null;this.eventChannel=null;
   this.ready=false;this.closed=false;this.lastPoseAt=0;this.nextSeq=0;this.receivedSeq=0;
   this.sessionId=null;this.assembler=createDirectAssembler();this.negotiating=false;
@@ -131,10 +145,7 @@ export class DirectPeerLink{
  _makeConnection(){
   if(this.closed||!this.available)return false;
   if(this.pc)try{this.pc.close();}catch{}
-  this.pc=new this.RTC({iceServers:[
-   {urls:"stun:stun.cloudflare.com:3478"},
-   {urls:"stun:stun.l.google.com:19302"}
-  ]});
+  this.pc=new this.RTC({iceServers:this.iceServers});
   this.poseChannel=null;this.eventChannel=null;this.receivedSeq=0;this.lastPoseAt=0;
   this.pendingPing=null;this.lastPongAt=0;this.lastPingSentAt=0;this.directRttMs=0;
   this.ready=false;
