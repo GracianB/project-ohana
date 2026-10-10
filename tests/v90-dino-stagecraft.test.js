@@ -21,7 +21,8 @@ test("V90 isolated render path and offline cache",()=>{
  const sw=fs.readFileSync("sw.js","utf8"),html=fs.readFileSync("index.html","utf8");
  assert.match(code,/drawDinoRollingShell/);assert.match(code,/drawDinoFossilForecast/);
  assert.match(engine,/DINO_FX\.drawRollShell\(ctx, p, cam, t, game\)/);
- // Historical 135 KB source cap retired; functional checks remain active.const version=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+ // Historical 135 KB source cap retired; functional checks remain active.
+ const version=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
   assert.ok(version && Number(version.slice(6))>=290);
  assert.match(sw,/systems\/dino-stagecraft\.js\?v=/);assert.ok(html.includes(version));
 });
