@@ -186,13 +186,17 @@ try {
       if(document.body.dataset.coopTransport!=="direct"||!direct?.active||
         direct.sessionId!==expected||direct.receivedSeq<1||
         onlineCoop.lastDirectPoseAt<=0||performance.now()-onlineCoop.lastDirectPoseAt>=1500)return false;
-      return {mode:document.body.dataset.coopTransport,active:direct.active,
+      // The polling API returns a truthy handle, not reliably a clone of
+      // the returned object. Capture the actual complete proof atomically.
+      window.__ohanaRtcRecoveryProof={
+        mode:document.body.dataset.coopTransport,active:direct.active,
         session:direct.sessionId,receivedSeq:direct.receivedSeq,
-        channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]};
+        channels:[direct.poseChannel?.readyState,direct.eventChannel?.readyState]
+      };
+      return true;
     },recoveredSession,{timeout:15000});
-    const proof=await handle.jsonValue();
     await handle.dispose();
-    return proof;
+    return page.evaluate(()=>window.__ohanaRtcRecoveryProof);
   }));
   for(const state of recovered){
     assert.equal(state.mode,"direct","a browser never confirmed live RTC after recovery");
