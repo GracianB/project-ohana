@@ -93,3 +93,16 @@ test("V109: P2P latency is measured by round trip of ping/pong, not guessed from
   assert.equal(events.sent.at(-1).t,"pong","incoming ping is answered on the reliable channel");
   link.close();
 });
+
+test("V117: transient 400ms RTC gap must not hand visual authority to stale HTTP",async()=>{
+ const {rtcPreferDirectPose,RTC_POSE_GRACE_MS}=await import("../systems/coop-v109-recovery.js");
+ assert.equal(RTC_POSE_GRACE_MS,1200);
+ assert.equal(rtcPreferDirectPose(true,1000,900,1600,1500),true);
+ assert.equal(rtcPreferDirectPose(true,1000,900,2199,2100),true);
+ assert.equal(rtcPreferDirectPose(true,1000,900,2200,2100),false);
+ assert.equal(rtcPreferDirectPose(false,1000,900,1200,1100),false);
+ assert.equal(rtcPreferDirectPose(true,0,900,1100,1000),false);
+ assert.equal(rtcPreferDirectPose(true,1000,900,950,1000),false);
+ const coop=fs.readFileSync("systems/online-coop.js","utf8");
+ assert.match(coop,/const freshDirect=rtcPreferDirectPose\(/);
+});
