@@ -645,6 +645,16 @@ class OnlineCoop {
     void this.drainMutations(game);
   }
 
+  // 409 is not always a transient network failure. Replaying an already
+  // rejected sequence can block newer signals and make recovery slower.
+  classifyMutationError(error){
+    const code=String(error?.code||"SERVER_UNAVAILABLE");
+    if(typeof document!=="undefined")document.body.dataset.coopLastErrorCode=code.slice(0,48);
+    if(code==="DUPLICATE_ACTION")return "drop";
+    if(code==="NOT_READY"||code==="MATCH_STARTED")return "refresh";
+    return "retry";
+  }
+
   async drainMutations(game) {
     if (this.mutationBusy || this.reconnecting || this.snapshot?.phase==="lobby" || performance.now() < this.retryAfter) return;
     this.mutationBusy = true;
@@ -670,6 +680,18 @@ class OnlineCoop {
           }
           if(["STALE_SESSION","INVALID_SESSION","ROOM_EXPIRED"].includes(error?.code)){
             this.failClosed(error);break;
+          }
+          const handling=this.classifyMutationError(error);
+          if(handling==="drop"){
+            // The server has already advanced beyond this sequence. The
+            // rejected payload must not starve fresh movement and signaling.
+            continue;
+          }
+          if(handling==="refresh"){
+            // The game phase changed. Do not resend an invalid action.
+            this.clearRetry();
+            void this.poll(game,true);
+            break;
           }
           this.markRetry(error);
           if(body.action!=="move")this.pendingMutations.unshift(body);

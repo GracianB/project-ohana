@@ -143,3 +143,14 @@ test("V125: deployment checker distinguishes Netlify HTML rewrite from verified 
  assert.match(checker,/else failed=true/);
  assert.match(checker,/if\(failed\)/);
 });
+
+test("V126: terminal 409 action conflicts do not trigger endless retries",async()=>{
+ const {onlineCoop}=await import("../systems/online-coop.js");
+ assert.equal(onlineCoop.classifyMutationError({code:"DUPLICATE_ACTION",status:409}),"drop");
+ assert.equal(onlineCoop.classifyMutationError({code:"NOT_READY",status:409}),"refresh");
+ assert.equal(onlineCoop.classifyMutationError({code:"STALE_SESSION",status:409}),"retry");
+ assert.equal(onlineCoop.classifyMutationError({code:"ROOM_BUSY",status:409}),"retry");
+ const source=fs.readFileSync("systems/online-coop.js","utf8");
+ assert.match(source,/if\(handling==="drop"\)/);
+ assert.match(source,/if\(handling==="refresh"\)/);
+});
