@@ -6,15 +6,16 @@
 let ctx = null, master = null, noiseBuf = null, muted = false;
 const lastPlay = new Map(); // anti-spam por efecto
 let audioUnlocked = false;
-if (typeof window !== "undefined") {
-  const unlock = () => {
-    audioUnlocked = true;
-    if (ctx?.state === "suspended") {
-      try { ctx.resume()?.catch(() => {}); } catch (_) {}
-    }
-  };
-  window.addEventListener("pointerdown", unlock, { capture: true });
-  window.addEventListener("keydown", unlock, { capture: true });
+// Only invoke from a trusted player gesture, never from startup or a timer.
+export function unlockAudioFromGesture() {
+  audioUnlocked = true;
+  if (ctx?.state === "suspended") {
+    try { ctx.resume()?.catch(() => {}); } catch (_) {}
+  }
+}
+if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+  window.addEventListener("pointerdown", unlockAudioFromGesture, { capture: true });
+  window.addEventListener("keydown", unlockAudioFromGesture, { capture: true });
 }
 
 
