@@ -1,5 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import { createRoomService, RoomError } from "../lib/room-service.mjs";
+import { temporaryTurnConfig } from "../lib/turn-credentials.mjs";
 
 const headers = {
   "content-type": "application/json; charset=utf-8",
@@ -31,6 +32,18 @@ export default async function handler(request: Request) {
       case "attack": data = await service.action(body.roomId, body.identity, body, "attack"); break;
       case "ability": data = await service.action(body.roomId, body.identity, body, "ability"); break;
       case "dodge": data = await service.action(body.roomId, body.identity, body, "dodge"); break;
+      case "rtc-config": {
+        // Authenticate against an existing room before minting a relay credential.
+        // Do not disclose TURN_SHARED_SECRET, including in error responses.
+        await service.poll(body.roomId, body.identity);
+        const config = temporaryTurnConfig({
+          url: process.env.OHANA_TURN_TLS_URL,
+          secret: process.env.OHANA_TURN_SHARED_SECRET,
+          playerId: body.identity?.playerId,
+        });
+        data = config || { iceServers: [], expiresAt: 0 };
+        break;
+      }
       case "poll": data = await service.poll(body.roomId, body.identity); break;
       case "disconnect": data = await service.disconnect(body.roomId, body.identity); break;
       default: return respond({ error: { code: "UNKNOWN_ACTION", message: "Acción desconocida." } }, 400);
