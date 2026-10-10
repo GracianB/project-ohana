@@ -65,6 +65,8 @@ export class DirectPeerLink{
   this.pc=null;this.poseChannel=null;this.eventChannel=null;
   this.ready=false;this.closed=false;this.lastPoseAt=0;this.nextSeq=0;this.receivedSeq=0;
   this.sessionId=null;this.assembler=createDirectAssembler();this.negotiating=false;
+  this.pingSeq=0;this.pendingPing=null;this.lastPingSentAt=0;this.directRttMs=0;this.lastPongAt=0;this.onMetrics=null;
+  this.priorOffers=new Set();
  }
  get available(){return typeof this.RTC==="function";}
  get active(){return this.ready&&this.poseChannel?.readyState==="open"&&this.eventChannel?.readyState==="open";}
@@ -89,6 +91,18 @@ export class DirectPeerLink{
    channel.onmessage=e=>{
     if(typeof e.data!=="string"||e.data.length>900)return;
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
+    if(msg?.t==="ping"&&Number.isSafeInteger(msg.id)&&msg.id>0){
+      if(channel.readyState==="open"&&channel.bufferedAmount<16000)channel.send(JSON.stringify({t:"pong",id:msg.id}));
+      return;
+    }
+    if(msg?.t==="pong"&&this.pendingPing?.id===msg.id){
+      const delta=this.now()-this.pendingPing.sent;
+      if(Number.isFinite(delta)&&delta>=0&&delta<12000){
+        this.directRttMs=this.directRttMs?Math.round(this.directRttMs*.75+delta*.25):Math.round(delta);
+        this.lastPongAt=this.now();this.pendingPing=null;this.onMetrics?.(this.directRttMs);
+      }
+      return;
+    }
     if(msg?.t==="event"&&["action","room","state"].includes(msg.kind))this.onEvent?.(msg);
    };
   }else{try{channel.close();}catch{}return;}
@@ -157,9 +171,18 @@ export class DirectPeerLink{
   if(!assembled)return false;
   if(assembled.kind==="offer"&&this.initiator)return false;
   if(assembled.kind==="answer"&&(!this.initiator||assembled.sid!==this.sessionId))return false;
+  if(assembled.kind==="offer"&&this.priorOffers.has(assembled.sid))return false;
   if(assembled.kind==="offer"&&this.sessionId===assembled.sid&&this.pc?.remoteDescription)return false;
   try{
    if(assembled.kind==="offer"){
+    if(this.sessionId&&this.sessionId!==assembled.sid){
+      // A new authenticated offer replaces a previous failed/reopened peer
+      // connection. Never call setRemoteDescription(offer) on a live answerer
+      // that is still holding the previous answer.
+      this.priorOffers.add(this.sessionId);
+      if(this.priorOffers.size>8)this.priorOffers.delete(this.priorOffers.values().next().value);
+      this._makeConnection();
+    }
     this.sessionId=assembled.sid;
     if(!this.pc||this.pc.connectionState==="failed"||this.pc.connectionState==="closed")this._makeConnection();
     if(!this.pc||this.negotiating)return false;
@@ -174,6 +197,17 @@ export class DirectPeerLink{
    }
    return true;
   }catch{return false;}finally{this.negotiating=false;}
+ }
+ ping(){
+  if(!this.active)return false;
+  const now=this.now();
+  if(now-this.lastPingSentAt<1500||this.eventChannel.bufferedAmount>12000)return false;
+  if(this.pendingPing&&now-this.pendingPing.sent<4500)return false;
+  const id=++this.pingSeq;
+  this.pendingPing={id,sent:now};
+  this.lastPingSentAt=now;
+  this.eventChannel.send(JSON.stringify({t:"ping",id}));
+  return true;
  }
  sendPose(game){
   if(!this.active||!game?.player)return false;
@@ -200,6 +234,7 @@ export class DirectPeerLink{
   try{this.eventChannel?.close();}catch{}
   try{this.pc?.close();}catch{}
   this.pc=null;this.poseChannel=null;this.eventChannel=null;
+  this.pendingPing=null;
   if(this.ready){this.ready=false;this.onState?.(false);}
  }
 }

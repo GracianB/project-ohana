@@ -1,3 +1,12 @@
+## 10/10/2026 · OHANA V109 · enlace directo recuperable y ping WebRTC verdadero · ohana-314
+
+- **Corrección de conexión entre mundos:** SDP/WebRTC pasa por la validación de identidad aunque los personajes estén en salas distintas. Antes se descartaba por un filtro de mundo destinado a ataques.
+- **Recuperación del enlace:** un canal abierto sin recibir posiciones durante 4,5 segundos ya no se anuncia como «directo». Reintentos espaciados 16/27/45 segundos, con negociación nueva y restauración de ambos canales; no se disparan peticiones en pestañas ocultas, lobby o cuando el enlace funciona.
+- **Cambio de oferta en el invitado:** una oferta nueva sustituye la conexión WebRTC vieja (sin rehacer personajes ni guardar estados), ignorando IDs viejos para evitar negociación regresiva.
+- **Latencia real:** ping/pong sobre el canal de eventos SCTP cada 1,5 s, mostrado como «P2P N ms» independiente del RTT de Netlify. Se identifica sin engaños el respaldo «SERVIDOR (CON RETRASO)».
+- **QA:** tests de caducidad, retry, SDP por salas, recuperación de answerer, ping real y simulación en dos Chromium: se corta un canal ya conectado y debe negociarse otro con ambos canales abiertos. No se altera la física, combate, identidad de sala, guardados ni los cien recuerdos.
+- **Publicación:** GitHub Pages y Netlify siguen siendo despliegues distintos. Hasta comprobar Netlify en producción y red pública real no se considera solucionado el problema de sincronización de dos dispositivos.
+
 ## 10/10/2026 · OHANA V108 · vía WebRTC directa, Netlify solo autoridad y respaldo · ohana-313
 
 - **Cambio arquitectónico real:** las posiciones y animaciones de ataques viajan entre jugadores por WebRTC (canal de poses SCTP no ordenado y sin retransmisiones, máximo 20 Hz; canal independiente y fiable de acciones/salas). Netlify autentica la sala y sigue guardando su estado; su repetido sondeo ya no dicta el ritmo visual cuando funciona el enlace directo.

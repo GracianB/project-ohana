@@ -6,6 +6,7 @@ import { networkPacing, shouldSendPosition, roundtripEWMA } from "./coop-v103-pa
 import { shouldUseSnapshot, peerNetworkHealth } from "./coop-v104-sync.js";
 import { shouldFollowPeerRoom } from "./coop-v107-room-follow.js";
 import { DirectPeerLink } from "./coop-v108-direct.js";
+import { rtcFresh,rtcCanRetry,rtcReconnectDelay } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
@@ -98,6 +99,9 @@ class OnlineCoop {
     this.direct=null;
     this.directAttempted=false;
     this.lastDirectPoseAt=0;
+    this.directConnectedAt=0;
+    this.directRetryAt=0;
+    this.directRetries=0;
   }
 
   readSession() {
@@ -127,6 +131,9 @@ class OnlineCoop {
     this.direct=null;
     this.directAttempted=false;
     this.lastDirectPoseAt=0;
+    this.directConnectedAt=0;
+    this.directRetryAt=0;
+    this.directRetries=0;
     this.enabled = true;
     this.roomId = session.roomId;
     this.identity = session.identity;
@@ -249,12 +256,15 @@ class OnlineCoop {
     const badge=document.getElementById("online-peer-badge");
     if(!badge)return;
     const state=document.body.dataset.onlineState||"connected";
-    const direct=!!this.direct?.active;
+    const direct=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now());
     document.body.dataset.coopTransport=direct?"direct":"server";
+    if(direct&&this.direct?.directRttMs>0)document.body.dataset.coopRttDirect=String(Math.round(this.direct.directRttMs));
+    else delete document.body.dataset.coopRttDirect;
     let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
     if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
+    if(direct&&this.direct?.directRttMs>0)text+=" · P2P "+Math.round(this.direct.directRttMs)+" ms";
     if(state==="connected"&&this.requestSamples>0){
       const ping=Math.max(0,Math.round(this.rttMs));
       const age=performance.now()-this.remote?.sampleAt;
@@ -273,16 +283,34 @@ class OnlineCoop {
   setupDirect(game){
     if(this.directAttempted||!this.enabled||!this.remote?.playerId||!this.identity)return;
     this.directAttempted=true;
+    this.directRetryAt=performance.now()+rtcReconnectDelay(this.directRetries);
     const me=this.currentPlayer(this.snapshot);
     this.direct=new DirectPeerLink({
       initiator:me?.slot===0,
       relay:message=>void this.signal(game,"action",message),
       onPose:pose=>this.receiveDirectPose(pose),
       onEvent:event=>this.receiveDirectEvent(game,event),
-      onState:()=>this.showNetworkHealth()
+      onState:connected=>{
+        if(connected)this.directConnectedAt=performance.now();
+        this.showNetworkHealth();
+      }
     });
+    this.direct.onMetrics=()=>this.showNetworkHealth();
     if(this.direct.available)void this.direct.start();
     this.showNetworkHealth();
+  }
+
+  repairDirect(game,now=performance.now()){
+    if(!this.enabled||!this.remote?.playerId||!this.direct?.available)return false;
+    const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now);
+    if(!rtcCanRetry({now,at:this.directRetryAt,hidden:typeof document!=="undefined"&&document.hidden,
+      lobby:this.snapshot?.phase==="lobby",peer:!!this.remote?.playerId,connected}))return false;
+    this.direct?.close();this.direct=null;
+    this.directAttempted=false;
+    this.lastDirectPoseAt=0;this.directConnectedAt=0;
+    this.directRetries++;
+    this.setupDirect(game);
+    return true;
   }
 
   receiveDirectPose(pose){
@@ -333,7 +361,8 @@ class OnlineCoop {
       return;
     }
 
-    const freshDirect=!!this.direct?.active&&performance.now()-this.lastDirectPoseAt<400;
+    const freshDirect=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now())
+      &&performance.now()-this.lastDirectPoseAt<400;
     const worldRoom = (freshDirect?this.remoteWorld:remote.worldRoomId)||"hub";
     const previous = this.remote;
     const legacyCoord = !snapshot.engineMode && Number(remote.y) > 0 && Number(remote.y) <= 720;
@@ -454,6 +483,7 @@ class OnlineCoop {
     this.enabled=false;
     this.pendingMutations.length=0;
     this.direct?.close();this.direct=null;this.directAttempted=false;
+    this.directConnectedAt=0;this.lastDirectPoseAt=0;
     this.clearSession();
     if(typeof document!=="undefined"){
       document.body.dataset.onlineState="error";
@@ -493,6 +523,7 @@ class OnlineCoop {
         });
       this.resumeFailures=0;
       this.direct?.close();this.direct=null;this.directAttempted=false;this.lastDirectPoseAt=0;
+      this.directConnectedAt=0;this.directRetryAt=0;this.directRetries=0;
       this.lastSentPose=null;
       this.clearRetry();
       return true;
@@ -650,12 +681,15 @@ class OnlineCoop {
     for (const event of events) {
       if (event.kind !== "online-signal" || event.senderPlayerId === this.identity?.playerId) continue;
       // Room-change signals name a destination by definition.
-      if (event.signalKind !== "room" && event.payload?.roomId !== game.roomId) continue;
+      // RTC offers/answers can arrive while teammates are in different worlds.
+      // Checking game.roomId first permanently loses their negotiation.
+      const rtc=event.signalKind==="action"&&event.payload?.action==="rtc";
+      if (!rtc && event.signalKind !== "room" && event.payload?.roomId !== game.roomId) continue;
       if (this.seenSignals.has(event.id)) continue;
       this.seenSignals.add(event.id);
       if (this.seenSignals.size > 128) this.seenSignals.delete(this.seenSignals.values().next().value);
 
-      if(event.signalKind==="action"&&event.payload?.action==="rtc"){
+      if(rtc){
         if(this.direct)void this.direct.signal(event.payload);
         continue;
       }
@@ -809,7 +843,9 @@ class OnlineCoop {
   tick(game) {
     if (!this.enabled) return;
     if(!this.directAttempted&&this.remote?.playerId)this.setupDirect(game);
+    else this.repairDirect(game);
     this.direct?.sendPose(game);
+    this.direct?.ping();
     void this.poll(game);
 
     const localState = game.player?.dead ? "lost" : game.won ? "won" : "";
@@ -856,7 +892,8 @@ class OnlineCoop {
     if (this.remote) {
       const now = performance.now();
       const correction = remotePresenceCorrection(this.remote, now);
-      const blend=this.direct?.active&&now-this.lastDirectPoseAt<400?Math.max(.4,correction.blend):correction.blend;
+      const blend=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now)
+        &&now-this.lastDirectPoseAt<400?Math.max(.4,correction.blend):correction.blend;
       this.remote.x += (correction.x - this.remote.x) * blend;
       this.remote.y += (correction.y - this.remote.y) * blend;
       this.remote.signalOpacity = correction.opacity;

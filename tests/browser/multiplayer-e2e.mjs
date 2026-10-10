@@ -146,6 +146,40 @@ try {
   await hostPage.keyboard.press("h");
   await hostPage.waitForTimeout(300);
 
+  // V109: simulate a real direct link loss while Netlify stays connected.
+  // A fresh offer must rebuild BOTH data channels and the guest's answerer.
+  const firstSession=await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    const id=onlineCoop.direct?.sessionId;
+    if(!onlineCoop.direct?.active||!id)throw Error("Cannot exercise RTC recovery without active direct link");
+    onlineCoop.direct.close();
+    onlineCoop.directRetryAt=0;
+    return id;
+  });
+  await hostPage.waitForFunction(async previous=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct?.active && onlineCoop.direct?.sessionId!==previous;
+  },firstSession,{timeout:30000});
+  const recoveredSession=await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct.sessionId;
+  });
+  await guestPage.waitForFunction(async sessionId=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return onlineCoop.direct?.active&&onlineCoop.direct.sessionId===sessionId;
+  },recoveredSession,{timeout:30000});
+  assert.notEqual(recoveredSession,firstSession,"negotiation reused the damaged RTC session");
+  const recovered=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
+    const {onlineCoop}=await import("/systems/online-coop.js");
+    return {mode:document.body.dataset.coopTransport,active:onlineCoop.direct?.active,
+      channels:[onlineCoop.direct?.poseChannel?.readyState,onlineCoop.direct?.eventChannel?.readyState]};
+  })));
+  for(const state of recovered){
+    assert.equal(state.mode,"direct","the HUD did not restore true direct mode");
+    assert.equal(state.active,true,"connection did not heal");
+    assert.deepEqual(state.channels,["open","open"],"both SCTP channels must recover");
+  }
+
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log("PASS · dos contextos reales entran al motor original de OHANA, sincronizan posición y ejecutan combate online.");
 } finally {
