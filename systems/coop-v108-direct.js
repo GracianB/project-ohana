@@ -4,8 +4,9 @@
 // ICE negotiation is relayed through existing authenticated 'action' signals;
 // no external API keys, polling loops, server protocol migrations or timers per frame.
 export const REALTIME_POSE_MS=50;
-const MAX_SIGNAL_PARTS=16;
-const PART_LENGTH=640;
+// V110: most SDP exchanges take one authenticated Netlify mutation.
+const MAX_SIGNAL_PARTS=4;
+const PART_LENGTH=12000;
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const finite=v=>typeof v==="number"&&Number.isFinite(v);
 export function safeDirectPose(message,prevSeq=0){

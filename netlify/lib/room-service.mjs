@@ -374,8 +374,20 @@ export function createRoomService(store, options = {}) {
       const actionId = String(payload?.actionId || "");
       const signalKind = String(payload?.signalKind || "");
       const permittedKinds=new Set(["action","hit","hurt","orb","room","state","duo"]);
-      const payloadBytes=JSON.stringify(payload?.payload??{}).length;
-      if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>1800){
+      const relayPayload=payload?.payload;
+      const payloadBytes=JSON.stringify(relayPayload??{}).length;
+      // V110: allow a larger payload only for structurally valid RTC SDP
+      // fragments. Ordinary game action signals keep their original limit.
+      const rtcFragment=signalKind==="action"&&relayPayload?.action==="rtc"&&
+        ["offer","answer"].includes(relayPayload?.kind)&&
+        typeof relayPayload?.sid==="string"&&/^[A-Za-z0-9._:-]{5,80}$/.test(relayPayload.sid)&&
+        Number.isInteger(relayPayload?.part)&&Number.isInteger(relayPayload?.total)&&
+        relayPayload.total>=1&&relayPayload.total<=4&&
+        relayPayload.part>=0&&relayPayload.part<relayPayload.total&&
+        typeof relayPayload?.data==="string"&&relayPayload.data.length>0&&
+        relayPayload.data.length<=12000;
+      const maxSignalBytes=rtcFragment?12400:1800;
+      if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>maxSignalBytes){
         throw new RoomError("INVALID_SIGNAL","Señal inválida o demasiado grande.");
       }
       const { room } = await mutate(roomCode, (state) => {

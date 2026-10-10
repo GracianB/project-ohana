@@ -1,3 +1,10 @@
+## 10/10/2026 · OHANA V110 · negociación RTC en una sola petición · ohana-315
+
+- SDP WebRTC típico enviado en una sola señal Netlify autenticada, en lugar de varios fragmentos de 640 caracteres. Grandes negociaciones ICE conservan hasta 4 fragmentos.
+- Solo RTC válido puede utilizar hasta 12.400 caracteres por evento; las demás señales siguen limitadas a 1.800. El juego usa la misma autoridad y guarda los mismos datos.
+- Pruebas de SDP de tamaño real, límite del relé y fragmentación más grande, además del E2E Chromium y release:check.
+- Netlify debe desplegarse y verificarse por separado; un CI verde no equivale a una partida pública real, ni resuelve redes que exigen TURN.
+
 ## 10/10/2026 · OHANA V109 · enlace directo recuperable y ping WebRTC verdadero · ohana-314
 
 - **Corrección de conexión entre mundos:** SDP/WebRTC pasa por la validación de identidad aunque los personajes estén en salas distintas. Antes se descartaba por un filtro de mundo destinado a ataques.

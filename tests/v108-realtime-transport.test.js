@@ -17,10 +17,10 @@ test("V108: fast-lane pose accepts bounded human movement but never invalid remo
  assert.equal(safeDirectPose({...frame(2),health:100000},1)?.health,undefined,"network poses cannot write authoritative HP");
 });
 test("V108: Netlify relay carries multi-part negotiated SDP without dropping or accepting tampered frames",()=>{
- const sid="ab1234d5",sdp="v=0\n"+"a=sctp-port:5000\n".repeat(78);
+ const sid="ab1234d5",sdp="v=0\n"+"a=sctp-port:5000\n".repeat(820);
  const parts=splitDirectDescription("offer",sid,sdp);
  assert.ok(parts.length>=2);
- assert.ok(parts.every(p=>p.action==="rtc"&&JSON.stringify({...p,roomId:"hub"}).length<1800));
+ assert.ok(parts.every(p=>p.action==="rtc"&&JSON.stringify({...p,roomId:"hub"}).length<12400));
  const a=createDirectAssembler();
  assert.equal(a.accept(parts.at(-1)),null);
  for(const p of parts.slice(0,-1)){
@@ -28,7 +28,7 @@ test("V108: Netlify relay carries multi-part negotiated SDP without dropping or 
    if(p===parts.at(-2))assert.deepEqual(last,{kind:"offer",sid,sdp});
    else assert.equal(last,null);
  }
- assert.deepEqual(splitDirectDescription("offer",sid,"".padEnd(14000,"x")),[]);
+ assert.deepEqual(splitDirectDescription("offer",sid,"".padEnd(50000,"x")),[]);
  assert.equal(a.accept({...parts[0],part:99}),null);
  assert.equal(a.accept({...parts[0],kind:"control"}),null);
  assert.equal(a.accept({...parts[0],sid:"fake<script>"}),null);
@@ -77,7 +77,7 @@ test("V108: full app uses WebRTC with honest degraded Netlify fallback; keeps ev
  assert.match(coop,/this\.pendingMutations\.sort/);
  assert.match(coop,/ohana-coop-session/);
  assert.match(sw,/systems\/coop-v108-direct\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-314"/);
- assert.match(html,/ohana-314/);
+ assert.match(sw,/const VERSION = "ohana-315"/);
+ assert.match(html,/ohana-315/);
  assert.match(e2e,/coopTransport/);
 });
