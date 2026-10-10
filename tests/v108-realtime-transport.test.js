@@ -103,3 +103,22 @@ test("V116: closed RTC channels never crash the game loop or lose pose sequence"
  ms+=1500;
  assert.equal(link.ping(),true);
 });
+
+test("V120: valid TURN credentials reach RTC while malformed servers are rejected",async()=>{
+ const {rtcIceServers,DirectPeerLink}=await import("../systems/coop-v108-direct.js");
+ const valid={urls:"turns:relay.example.test:5349",username:"temporary-user",credential:"temporary-password"};
+ assert.equal(rtcIceServers([valid,{urls:"https://invalid.test",username:"u",credential:"p"}]).length,3);
+ let configured;
+ class RTCStub{
+  constructor(config){configured=config;this.connectionState="new";}
+  createDataChannel(label){return {label,readyState:"connecting",close(){}};}
+  close(){}
+ }
+ const link=new DirectPeerLink({RTC:RTCStub,initiator:true,iceServers:[valid]});
+ assert.equal(link._makeConnection(),true);
+ assert.equal(configured.iceServers.length,3);
+ assert.deepEqual(configured.iceServers[2],valid);
+ link.close();
+ const coop=fs.readFileSync("systems/online-coop.js","utf8");
+ assert.match(coop,/iceServers:globalThis\.OHANA_RTC_ICE_SERVERS/);
+});
