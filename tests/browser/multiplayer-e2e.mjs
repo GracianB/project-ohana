@@ -33,6 +33,7 @@ const service = createRoomService(store);
 let host;
 let roomId;
 let candidateSignals=0;
+const candidateSessions=new Set();
 
 async function installLateIce(context){
   if(!lateIce)return;
@@ -63,7 +64,9 @@ async function installFakeNetlify(context) {
   await context.route("**/.netlify/functions/game", async (route) => {
     try {
       const body = route.request().postDataJSON();
-      if(body.action==="signal"&&body.payload?.kind==="candidates")candidateSignals++;
+      if(body.action==="signal"&&body.payload?.kind==="candidates"){
+        candidateSignals++;candidateSessions.add(body.payload.sid);
+      }
       let data;
       switch (body.action) {
         case "create": data = host = await service.create(); roomId = data.roomId; break;
@@ -244,7 +247,12 @@ try {
     assert.deepEqual(state.channels,["open","open"],"both SCTP channels must recover");
   }
 
-  if(lateIce)assert.ok(candidateSignals>=4,"initial connection and recovery must really relay late ICE for both peers");
+  // ICE can learn the other endpoint as peer-reflexive: an open bidirectional
+  // channel need not wait for BOTH endpoints' delayed candidate batches.
+  if(lateIce){
+    assert.ok(candidateSessions.has(firstSession),"initial connection must use the late candidate signal path");
+    assert.ok(candidateSessions.has(recoveredSession),"recovery must use the late candidate signal path");
+  }
 
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);

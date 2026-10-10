@@ -218,8 +218,8 @@ export class DirectPeerLink{
  async _waitForIce(){
   const pc=this.pc;
   if(!pc||pc.iceGatheringState==="complete")return;
-  // ICE candidates must be included in the SDP because Netlify is not a
-  // websocket signaling service. Bound waiting so offline users can play.
+  // Prefer one gathered SDP to many HTTP mutations. Bound the initial wait;
+  // candidates gathered later continue through authenticated batched signals.
   await new Promise(resolve=>{
    let finished=false;
    const done=()=>{if(finished)return;finished=true;clearTimeout(timeout);pc.removeEventListener?.("icegatheringstatechange",check);if(this.cancelIceWait===done)this.cancelIceWait=null;resolve();};
