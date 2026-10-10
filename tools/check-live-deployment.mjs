@@ -8,6 +8,14 @@ if(!["https:","http:"].includes(site.protocol))throw Error("Use an HTTP(S) site 
 if(!site.pathname.endsWith("/"))site.pathname+="/";
 const files=["index.html","sw.js","game.js","systems/online-coop.js","systems/coop-v108-direct.js","systems/coop-v109-recovery.js"];
 const sha=data=>crypto.createHash("sha256").update(data).digest("hex");
+// Netlify Pretty URLs rewrites exactly the co-op link in index.html.
+// Permit only that known single-tag transformation on the production host.
+export function expectedNetlifyHtml(html){
+ return html.replace(
+  /<a id="btn-coop" class="cta ghost" href="https:\/\/project-ohana-multiplayer\.netlify\.app\/multiplayer\.html" title="El mismo OHANA original, ahora con dos jugadores">/,
+  "<a class='cta ghost' href='https://project-ohana-multiplayer.netlify.app/multiplayer' id='btn-coop' title='El mismo OHANA original, ahora con dos jugadores'>"
+ );
+}
 let failed=false;
 for(const path of files){
  const local=await fs.readFile(new URL(path,root));
@@ -16,8 +24,11 @@ for(const path of files){
   const response=await fetch(url,{cache:"no-store",signal:AbortSignal.timeout(12000),headers:{"cache-control":"no-cache"}});
   if(!response.ok)throw Error("HTTP "+response.status);
   const remote=Buffer.from(await response.arrayBuffer());
-  const match=sha(local)===sha(remote);
-  console.log(JSON.stringify({path,url:url.href,match,status:response.status,localBytes:local.length,remoteBytes:remote.length}));
+  const exact=sha(local)===sha(remote);
+  const transformed=path==="index.html"&&site.hostname==="project-ohana-multiplayer.netlify.app"&&
+   expectedNetlifyHtml(local.toString("utf8"))===remote.toString("utf8");
+  const match=exact||transformed;
+  console.log(JSON.stringify({path,url:url.href,match,transformed:!exact&&transformed,status:response.status,localBytes:local.length,remoteBytes:remote.length}));
   if(!match)failed=true;
  }catch(err){
   failed=true;console.log(JSON.stringify({path,url:url.href,error:String(err.message||err)}));
