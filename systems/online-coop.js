@@ -287,6 +287,7 @@ class OnlineCoop {
     const me=this.currentPlayer(this.snapshot);
     this.direct=new DirectPeerLink({
       initiator:me?.slot===0,
+      iceServers:globalThis.OHANA_RTC_ICE_SERVERS,
       relay:message=>void this.signal(game,"action",message),
       onPose:pose=>this.receiveDirectPose(pose),
       onEvent:event=>this.receiveDirectEvent(game,event),
