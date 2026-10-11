@@ -134,6 +134,7 @@ const PRECACHE = [
   "./systems/magic.js?v=" + VERSION,
   "./systems/map.js?v=" + VERSION,
   "./systems/traversal-nodes.js?v=" + VERSION,
+  "./systems/traversal-safety.js?v=" + VERSION,
   "./systems/world-graph.js?v=" + VERSION,
   "./systems/mutations.js?v=" + VERSION,
   "./systems/message-manager.js?v=" + VERSION,
