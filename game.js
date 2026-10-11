@@ -59,6 +59,7 @@ import { encounterLabel } from "./systems/boss-encounter-memory.js";
 import { onlineCoop } from "./systems/online-coop.js";
 import { applyCoopChallenge } from "./systems/coop-challenge.js";
 import { supportBelow } from "./systems/platform-geometry.js";
+import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -1484,6 +1485,7 @@ if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
 }
 }
 if (p.wall) p.vy = Math.min(p.vy, 2.2);
+stepChispinCloud(p,{jump,left,right});
 const inputState = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
 p._jumpPrev = !!jump;
 Passives.update(game, inputState);
@@ -2625,6 +2627,7 @@ game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.r
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
 ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
+drawChispinCloud(ctx,game.player,game.cam,t);
 drawCharacter(ctx, game.player, game.cam, t);
 ctx.globalAlpha = 1;
 } else if (game.player.dead) {
