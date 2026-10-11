@@ -335,6 +335,21 @@ try {
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
+  // V303: actual H/J/L casts, native FX and a direct delivery to the other player.
+  if(hostCharacter==='chispin'){
+    await hostPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
+      for(const id of ['chain','blink','storm'])game.player.cds[id]=0;
+      for(const index of [0,1,2])if(!useAbility(game,index))throw Error('Chispin cast failed '+index);
+      updateAbilityFx(game);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    });
+    await guestPage.waitForFunction(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
+      return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
+    },null,{timeout:3000});
+    const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
+    assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
+  }
   // V302: verify actual Stitcho storm echo delivery, while preserving the live peer identity.
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
