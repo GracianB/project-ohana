@@ -71,8 +71,9 @@ when necessary, measured latency and successful recovery after a connection loss
 
 ## Optional automatic TURN/TLS credentials (Netlify)
 
-The game now asks the existing authenticated `game` function for
-`action: "rtc-config"` before creating a WebRTC connection. With no TURN
+The game asks the authenticated `rtc-config` function before creating a WebRTC
+connection. Older clients using `action: "rtc-config"` on `game` share the same
+credential cache and global issuance budget. With no TURN
 environment configured, the response includes no relay and the default
 STUN / HTTPS fallback remains unchanged. Failed requests do not block play.
 
@@ -93,8 +94,8 @@ TLS configuration, uptime and network acceptance tests are still required.
 A successful code deploy **does not** mean TURN is operational.
 
 An authenticated browser receives short-lived ICE configuration via the
-same Netlify function already used for room polling. A new credential is
-requested on reconnection; ICE negotiations in progress retain their own
+dedicated Netlify function. Credentials are reused until one minute before expiry;
+provider errors are cached for 30 seconds. ICE negotiations retain their own
 current configuration. Avoid printing the response payload in production
 logs because ephemeral credentials are still sensitive while valid.
 
@@ -123,3 +124,20 @@ that the user's egress policies allow TURN/TLS, and does not modify the firewall
 
 Pricing, plan eligibility and payment requirements must be verified in the
 Cloudflare account before enabling paid usage.
+
+## Issuance protection and deployment verification
+
+Credential retrieval has its own per-IP platform limit (12 requests/minute), so
+movement and polling are unaffected. A shared store with conditional lease claims
+allows at most 30 new issuance attempts/minute across all players and function
+instances, including legacy clients. The fixed 30 budget slots are reused; the
+limit cannot be bypassed by creating more rooms. Credential caches are scoped to
+the authenticated participant, connection epoch and provider configuration.
+These limits bound credential issuance, not relay bandwidth. Provider traffic
+quotas and billing limits remain necessary when enabling a paid relay.
+
+The browser E2E fixture runs the actual credential HTTP handler with a mocked
+provider and verifies both RTCPeerConnections receive the temporary credentials.
+The guest response is delayed to exercise an offer arriving during TURN lookup.
+This is a credential-integration test, not proof of a live relay. Production
+acceptance still requires a selected `relay` route between physical clients.

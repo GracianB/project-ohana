@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chromium, firefox } from "playwright";
 import { startServer } from "./server.mjs";
 import { createRoomService, RoomError } from "../../netlify/lib/room-service.mjs";
+import { createRtcConfigHandler } from "../../netlify/lib/rtc-config-service.mjs";
 
 class MemoryStore {
   entries = new Map();
@@ -30,6 +31,12 @@ const browser = await browserType.launch({ headless: true, args: browserName==="
 ]:[] });
 const store = new MemoryStore();
 const service = createRoomService(store);
+const rtcStore=new MemoryStore();
+const rtcConfigCalls=[];
+const testIce={urls:"turns:turn.cloudflare.com:443?transport=tcp",username:"browser-test-user",credential:"browser-test-credential"};
+const rtcHandler=createRtcConfigHandler({service,store:rtcStore,
+ env:{OHANA_CF_TURN_KEY_ID:"browser-test-key-id",OHANA_CF_TURN_API_TOKEN:"server-test-token-not-for-browser"},
+ fetchImpl:async()=>({ok:true,json:async()=>({iceServers:[{...testIce,urls:[testIce.urls]}]})})});
 let host;
 let roomId;
 let candidateSignals=0;
@@ -61,6 +68,15 @@ async function installLateIce(context){
 }
 
 async function installFakeNetlify(context) {
+  // Exercise the real authenticated HTTP handler, not an UNKNOWN_ACTION fallback.
+  // This verifies credential delivery to RTC; it does not claim a live TURN relay.
+  await context.route("**/.netlify/functions/rtc-config",async route=>{
+    const body=route.request().postDataJSON();rtcConfigCalls.push(body.identity?.playerId);
+    // Let the host offer arrive before the guest's TURN config finishes.
+    if(body.identity?.playerId!==host?.identity?.playerId)await new Promise(resolve=>setTimeout(resolve,1400));
+    const response=await rtcHandler(new Request(route.request().url(),{method:"POST",body:JSON.stringify(body)}));
+    await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:await response.text()});
+  });
   await context.route("**/.netlify/functions/game", async (route) => {
     try {
       const body = route.request().postDataJSON();
@@ -143,9 +159,11 @@ try {
     const verified=await page.evaluate(async()=>{
       const {onlineCoop}=await import("/systems/online-coop.js");
       return {active:onlineCoop.direct?.active,offer:!!onlineCoop.direct?.pc?.remoteDescription,
+        credentialDelivered:onlineCoop.direct?.pc?.getConfiguration().iceServers.some(s=>s.username==="browser-test-user"&&s.credential==="browser-test-credential"),
         fast:onlineCoop.direct?.poseChannel?.readyState,reliable:onlineCoop.direct?.eventChannel?.readyState};
     });
     assert.equal(verified.active,true,label+": WebRTC fast lane never opened "+JSON.stringify(verified));
+    assert.equal(verified.credentialDelivered,true,label+": authenticated TURN config never reached RTC");
     assert.equal(verified.offer,true,label+": WebRTC missing remote description");
     assert.equal(verified.fast,"open",label+": pose channel not open");
     assert.equal(verified.reliable,"open",label+": reliable channel not open");

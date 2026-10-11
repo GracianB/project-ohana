@@ -38,7 +38,7 @@ async function post(body,timeoutMs=10000) {
   const abort = new AbortController();
   const timeout = setTimeout(()=>abort.abort(), timeoutMs);
   try{
-    const response = await fetch(ENDPOINT, {
+    const response = await fetch(body.action==="rtc-config"?"/.netlify/functions/rtc-config":ENDPOINT, {
       method: "POST",
       headers: { "content-type": "application/json" },
       cache: "no-store",
@@ -97,6 +97,8 @@ class OnlineCoop {
     this.reconnecting=false;
     this.resumeFailures=0;
     this.direct=null;
+    this.directSetupId=0;
+    this.turnConfigStatus="loading";
     this.directAttempted=false;
     this.lastDirectPoseAt=0;
     this.directConnectedAt=0;
@@ -259,15 +261,19 @@ class OnlineCoop {
     const direct=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,performance.now(),this.direct?.lastPongAt);
     document.body.dataset.coopTransport=direct?"direct":"server";
     document.body.dataset.coopRoute=direct?(this.direct?.route||"unknown"):"server";
+    document.body.dataset.coopTurnStatus=this.turnConfigStatus;
     if(direct&&this.direct?.directRttMs>0)document.body.dataset.coopRttDirect=String(Math.round(this.direct.directRttMs));
     else delete document.body.dataset.coopRttDirect;
     let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
     if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
+    if(state==="connected"&&!direct&&this.directAttempted&&(!this.direct||["new","checking"].includes(this.direct.iceState)))
+      text=text.replace("SERVIDOR (CON RETRASO)","CONECTANDO WEBRTC");
     if(direct&&this.direct?.route==="relay")text=text.replace("DIRECTO WEBRTC","WEBRTC · TURN");
     if(state==="connected"&&!direct&&this.direct?.iceState==="failed")text+=" · ICE FALLIDO"+(this.direct.iceServers.some(x=>String(x.urls).startsWith("turn"))?" · REVISAR TURN":" · TURN NECESARIO");
-    if(direct&&this.direct?.directRttMs>0)text+=" · P2P "+Math.round(this.direct.directRttMs)+" ms";
+    if(this.turnConfigStatus==="unavailable"||this.turnConfigStatus==="rate-limited")text=text.replace("TURN NECESARIO","TURN TEMPORALMENTE NO DISPONIBLE");
+    if(direct&&this.direct?.directRttMs>0)text+=" · "+(this.direct.route==="relay"?"TURN ":"P2P ")+Math.round(this.direct.directRttMs)+" ms";
     if(state==="connected"&&this.requestSamples>0){
       const ping=Math.max(0,Math.round(this.rttMs));
       const age=performance.now()-this.remote?.sampleAt;
@@ -286,6 +292,8 @@ class OnlineCoop {
   async setupDirect(game){
     if(this.directAttempted||!this.enabled||!this.remote?.playerId||!this.identity)return;
     this.directAttempted=true;
+    const setupId=++this.directSetupId;
+    this.turnConfigStatus="loading";
     this.directRetryAt=performance.now()+rtcReconnectDelay(this.directRetries);
     const roomId=this.roomId,identity=this.identity,peerId=this.remote.playerId;
     let iceServers=globalThis.OHANA_RTC_ICE_SERVERS;
@@ -293,10 +301,12 @@ class OnlineCoop {
       // Authenticated ephemeral TURN config. STUN remains available when unset.
       const config=await post({action:"rtc-config",roomId,identity},1800);
       if(Array.isArray(config?.iceServers)&&config.iceServers.length)iceServers=config.iceServers;
-    } catch (_) {
+      if(setupId===this.directSetupId)this.turnConfigStatus=config?.status||"unavailable";
+    } catch (error) {
+      if(setupId===this.directSetupId)this.turnConfigStatus=error?.status===429?"rate-limited":"unavailable";
       // TURN is optional: do not disrupt the multiplayer HTTP fallback.
     }
-    if(!this.enabled||!this.directAttempted||this.roomId!==roomId||
+    if(setupId!==this.directSetupId||!this.enabled||!this.directAttempted||this.roomId!==roomId||
        this.identity!==identity||this.remote?.playerId!==peerId)return;
     const me=this.currentPlayer(this.snapshot);
     this.direct=new DirectPeerLink({
@@ -445,6 +455,7 @@ class OnlineCoop {
   }
 
   resetDirectPeer(){
+    this.directSetupId++;
     this.direct?.close();this.direct=null;this.directAttempted=false;
     this.lastDirectPoseAt=0;this.directConnectedAt=0;this.directRetryAt=0;this.directRetries=0;
     this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
@@ -742,6 +753,9 @@ class OnlineCoop {
       // RTC offers/answers can arrive while teammates are in different worlds.
       // Checking game.roomId first permanently loses their negotiation.
       const rtc=event.signalKind==="action"&&event.payload?.action==="rtc";
+      // The peer can publish SDP while our authenticated TURN lookup is pending.
+      // Keep the event unseen so the next tick can process it after setup.
+      if(rtc&&!this.direct)continue;
       if (!rtc && event.signalKind !== "room" && event.payload?.roomId !== game.roomId) continue;
       if (this.seenSignals.has(event.id)) continue;
       this.seenSignals.add(event.id);
