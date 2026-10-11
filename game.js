@@ -2616,7 +2616,7 @@ for (const e of game.enemies) {
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
-for (const pr of game.projectiles) if (visibleForRender(pr,game.cam,camW(),camH())) drawProjectile(ctx, pr, game.cam, t);
+for (const pr of game.projectiles) if ((!onlineCoop.hasFreshCombat(game) || pr.owner === "player") && visibleForRender(pr,game.cam,camW(),camH())) drawProjectile(ctx, pr, game.cam, t);
 for (const b of game.bolts) if (visibleForRender(b,game.cam,camW(),camH())) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
