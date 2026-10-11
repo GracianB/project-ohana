@@ -8,6 +8,7 @@
 import { ROOMS } from "./map.js";
 import { showNotification } from "./notify.js";
 import { traversalProfile, traversalNodeSnapshot } from "./traversal-nodes.js";
+import { boundedArrivalSpawn, boundedTraversalKick } from "./traversal-safety.js";
 
 function overlaps(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -189,18 +190,18 @@ export class Portals {
   }
 
   /** Spawn desplazado para no solapar el portal. */
-  spawnPoint(playerW, playerH) {
+  spawnPoint(playerW, playerH, worldW, worldH) {
     const pad = this.landingPad();
     if (!pad) return null;
     const w = playerW || 24, h = playerH || 32;
     if (pad.type === "blackhole") {
       const mid = pad.x + pad.w / 2;
       const side = mid < 800 ? 1 : -1;
-      return { x: pad.x + (side > 0 ? pad.w + 48 : -w - 48), y: pad.y + pad.h / 2 - h / 2 };
+      return boundedArrivalSpawn({ x: pad.x + (side > 0 ? pad.w + 48 : -w - 48), y: pad.y + pad.h / 2 - h / 2 }, w, h, worldW, worldH);
     }
     const midC = pad.x + pad.w / 2;
     const facing = midC < 800 ? 1 : -1;
-    return { x: pad.x + pad.w / 2 - w / 2 + facing * 24, y: pad.y - h - 12 };
+    return boundedArrivalSpawn({ x: pad.x + pad.w / 2 - w / 2 + facing * 24, y: pad.y - h - 12 }, w, h, worldW, worldH);
   }
 
   /** Impulso sugerido al aterrizar (game.js aplica vx/vy). */
@@ -631,14 +632,14 @@ export class Portals {
     const mid = portal.x + portal.w / 2;
     const fallbackFacing = mid < 800 ? 1 : -1;
     const facing = Math.sign(profile.vx || 0) || fallbackFacing;
-    return {
+    return boundedTraversalKick({
       vx: Number(profile.vx) || fallbackFacing * (type === "blackhole" ? 2.4 : 5.5),
       vy: Number(profile.vy) || (type === "blackhole" ? -3.2 : -7.5),
       facing,
       type: profile.kind === "vortex" ? "blackhole" : "catapult",
       nodeLabel: profile.label,
       color: profile.color,
-    };
+    });
   }
 
   _queue(portal, fromRoomId) {
