@@ -3324,6 +3324,7 @@ state() {
     rain: !!Rain.active,
     umbrella: !!Rain.hasUmbrella,
     starBonus: Surprises.starOrbBonus(),
+    kiloDuet: game._kiloDuet?{age:game._kiloDuet.age,evo:game._kiloDuet.evo}:null,
     lastAbilityId: game.lastAbilityId,
     lastAbilitySlot: game.lastAbilitySlot,
     flow: game._combatFlow ? {
