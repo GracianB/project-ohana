@@ -22,15 +22,15 @@ export function aliasId(id) {
 export const ALL_ROSTER = [
   {
     id: "kilo", name: "Kilo", role: "control", tag: "Ukulele y polen",
-    color: "#e23b3d",
+    color: "#eb554a",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
     passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio. En Kilo Flor Solar, vuela un momento. El polen se recarga en el suelo." },
     evoNames: ["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "Kilo Flor Solar"],
     forms: [
-      { name: "Kilo Bebé", color: "#ff9ab0", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
-      { name: "Kilo", color: "#e23b3d", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 24, h: 34 },
-      { name: "Kilo Ohana", color: "#ff4d78", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 28, h: 42 },
+      { name: "Kilo Bebé", color: "#ffacc2", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },
+      { name: "Kilo", color: "#eb554a", speed: 4.0, jump: 12.2, jumps: 1, hp: 100, w: 24, h: 34 },
+      { name: "Kilo Ohana", color: "#ea637b", speed: 4.5, jump: 13.0, jumps: 2, hp: 125, w: 28, h: 42 },
       { name: "Super Kilo", color: "#ffd36a", speed: 5.1, jump: 13.8, jumps: 2, hp: 155, w: 32, h: 48 },
       { name: "Kilo Flor Solar", color: "#ff6b9a", speed: 6.2, jump: 15.2, jumps: 3, hp: 210, w: 36, h: 52, aura: true, glide: true },
     ],

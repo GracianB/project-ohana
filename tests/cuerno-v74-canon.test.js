@@ -59,7 +59,7 @@ test("V74 five visible sizes rise gradually, without triple growth from generic 
   "form "+i+" grew smaller than its predecessor");
  assert.ok(screenHeights[4]/screenHeights[0]<2,"F4 still too large vs newborn");
  assert.match(draw,/p\.id==="cuerno"\?CUERNO_VISUAL_H\[evo\]/);
- assert.match(draw,/if\(p\.id!=="cuerno"\)\{/);
+ assert.match(draw,/if\(p\.id!=="cuerno"&&p\.id!=="kilo"\)\{/);
  assert.match(title,/def\.id==="cuerno"\?CUERNO_VISUAL_H\[evo\]/);
  assert.match(title,/cuerno:  \[0\.70,0\.98,1\.10,1\.43,1\.77\]/);
 });

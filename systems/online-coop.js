@@ -9,7 +9,8 @@ import { DirectPeerLink } from "./coop-v108-direct.js";
 import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
-import { drawProjectile,drawSlash,drawBolt } from "./abilities.js";
+import {drawKiloDuet} from "./kilo-duet.js";
+import { drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
 import { capturePeerEffects,applyPeerEffects,advancePeerEffects } from "./coop-peer-effects.js";
@@ -1120,6 +1121,10 @@ class OnlineCoop {
     if(!this.enabled)return;
     const peerFx=game.coopPeerEffects;
     if(peerFx){
+      if(this.remote?.characterId==='kilo'){
+        if(peerFx.kiloDuet)drawKiloDuet(ctx,peerFx.kiloDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+        drawKiloAbilityEcho(ctx,peerFx.kiloFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});
+      }
       for(const pr of peerFx.projectiles)drawProjectile(ctx,pr,game.cam,t);
       for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam);
       for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
@@ -1162,6 +1167,7 @@ class OnlineCoop {
       abilitySlot: this.remote.abilitySlot,
       phase: this.remote.phase + t / 10,
       visualScale: 1,
+      _kiloDuetAge:peerFx?.kiloDuet?.age||0,_kiloDuetT:peerFx?.kiloDuet?120-peerFx.kiloDuet.age:0,
       _cloudActive:!!this.remote.cloud,_thrust:this.remote.thrust||0,_thrustFace:this.remote.thrustFacing||1,
     };
     ctx.save();

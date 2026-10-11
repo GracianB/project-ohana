@@ -1,3 +1,4 @@
+import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
 import { CUERNO_V92, rememberCuernoEnemyPositions, drawCuernoPrismEcho } from "./cuerno-v92-resonance.js";
@@ -179,7 +180,7 @@ return true;
 }
 
 const SPECIALS = Object.freeze({
-kilo:    { flight: true,  name: "Vuelo solar", text: "Vuelo libre: WASD controla el aire durante unos segundos." },
+kilo:    { flight: true,  name: "Dúo musical", text: "Kilo abre su anillo y Stitcho rebota a compás. Puedes seguir moviéndote." },
 stitcho: { phase: true,   name: "Costura fantasma", text: "Cruza el peligro con intangibilidad breve." },
 chispin: { boltDash: true,name: "Rayo veloz", text: "Impulso eléctrico horizontal con invulnerabilidad." },
 cat:     { shadow: true,  name: "Paso sombra", text: "Desaparece y reaparece con invulnerabilidad." },
@@ -192,7 +193,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 });
 
 const SUPREME = Object.freeze({
-kilo:    { id: "solar", name: "OHANA SOLAR", key: "U", cd: 9000, color: "#ffd36a", special: "Vuelo solar", ally: "stitcho" },
+kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
 stitcho: { id: "bang", name: "SINGULARIDAD COSIDA", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma", ally: "chispin" },
 chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
 cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
@@ -310,6 +311,15 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 }
 
 function castSupreme(game, p, flow = currentFlow(game, p)) {
+if(p.id==='kilo'){
+ game._supremeFlow=flow;game._assist={heroId:'stitcho',heroName:'Stitcho',t:120};
+ game.ult={t:0,name:SUPREME.kilo.name,color:'#ffd36a',identity:SUPREME_IDENTITY.kilo.kind};
+ startKiloDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ healPlayer(p,p.maxHealth*(.12+(Number(p.evo)||0)*.05));
+ p.invuln=Math.max(p.invuln||0,90);
+ game.nums?.add(cx(p),p.y-36,'OHANA · ¡A COMPÁS!','#ffd36a',true);
+ return;
+}
 activateSpecial(game, p, { launch: false });
 const def = SUPREME[p.id] || SUPREME.kilo;
 const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
@@ -628,6 +638,7 @@ if (pl.e) {
 export function updateAbilityFx(game) {
 const p = game.player;
 if (!p) return;
+updateKiloDuet(game,hitEnemy);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
 if (S.caos > 0) {
@@ -671,6 +682,10 @@ if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
  rememberCuernoEnemyPositions(game.enemies);
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
+game.kiloAbilityFx=p.id==='kilo'?FX.filter(f=>['note','hula','ohana'].includes(f.kind)).slice(0,12).map(f=>({
+ kind:f.kind,x:Number.isFinite(f.x)?f.x:cx(p),y:Number.isFinite(f.y)?f.y:cy(p),
+ life:f.life,r:f.r||1,vx:f.vx||0,vy:f.vy||0,rot:f.rot||0,n:f.n||10,color:f.color||'#ffd36a'
+})):[];
 }
 
 export { drawCuernoGallopRibbons };
@@ -680,6 +695,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 for (const f of FX) {
 const d = DRW[f.kind];
 if (!d) continue;
@@ -843,6 +859,7 @@ if (!Number.isFinite(d)) return false;
 if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
 damageEnemy(e, d);
+g.onAbilityHit?.(e,d);
 e.flash = Math.max(e.flash || 0, 14);
 
 if (e.boss) {
@@ -3599,4 +3616,10 @@ ctx.strokeStyle = "#7ecbff";
 ctx.lineWidth = 2;
 ctx.stroke();
 ctx.restore();
+}
+export function drawKiloAbilityEcho(ctx,effects,cam,t,p){
+ for(const f of effects||[]){
+  if(!['note','hula','ohana'].includes(f.kind))continue;
+  ctx.save();DRW[f.kind](ctx,f,cam,t,{},p);ctx.restore();
+ }
 }

@@ -1,3 +1,4 @@
+import {KILO_VISUAL_H} from "./art/kilo.js";
 import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
@@ -1124,14 +1125,18 @@ if (p.id === "cuerno") {
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
   pose.cuernoDreamT = Math.max(0, Number(p._specialAuroraT) || 0) / 260;
 }
+if(p.id==='kilo'&&p._kiloDuetT>0){
+ pose.kiloDuetAge=p._kiloDuetAge||0;
+ if(!moving&&!air){pose.state='cast';pose.castSlot=pose.kiloDuetAge<30?0:2;}
+}
 const atk = pose.atk;
 const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
 const hurtFresh = (p.invuln || 0) > 18;
 
 // Cuerno V74 is already drawn in five different anatomical sizes. Do NOT
 // multiply their growth again by generic evolution scaling or old sprite size.
-let H = (p.id==="cuerno"?CUERNO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[p.id]||1))*(p.visualScale||1);
-if (getLook() === "paint" && p.id!=="cuerno") H = Math.min(220, Math.max(H, (p.h || 28) * 3));
+let H = (p.id==="cuerno"?CUERNO_VISUAL_H[evo]:p.id==="kilo"?KILO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[p.id]||1))*(p.visualScale||1);
+if (getLook() === "paint" && p.id!=="cuerno"&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
 if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 
@@ -1143,7 +1148,7 @@ let sx = 1 + squash * 0.9 - stretch * 0.35;
 let sy = 1 - squash * 0.75 + stretch * 0.4;
 // El arte de cada forma ya cambia su geometría. Este segundo nivel ajusta
 // la lectura corporal por personaje sin alterar jamás w/h de la hitbox.
-if(p.id!=="cuerno"){
+if(p.id!=="cuerno"&&p.id!=="kilo"){
 sx *= (pose.evolutionScaleX || 1) * (evoVis.bodyX || 1);
 sy *= (pose.evolutionScaleY || 1) * (evoVis.bodyY || 1);
 }
@@ -1179,9 +1184,10 @@ if (burstK > 0.35) {
   const intensity = Math.max(0, (burstK - 0.35) / 0.65);
   flashCol = p.id === "cuerno" ? "#bba8f5" : "#ffffff";
   flashA = intensity * (p.id === "cuerno" ? 0.075 : 0.9);
+  if(p.id==="kilo")flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
-const painted = pickPainted(p, t, moving, air, atk);
+const painted = p.id==="kilo"||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 if (painted) {
