@@ -1,3 +1,4 @@
+import { strategicLedgesFor } from "./room-strategy.js";
 export const ROOM_W = 2240;
 export const ROOM_H = 1260;
 
@@ -159,6 +160,7 @@ const LAYOUT = {
 for (const room of Object.values(ROOMS)) {
   room.signatureCharacter = SIGNATURES[room.id] || "kilo";
   room.plats = LAYOUT[room.id] || room.plats;
+  room.plats = room.plats.concat(strategicLedgesFor(room.id,room.plats,ROOM_W));
   const cast = {
     hub: ["cucaracho", "cucaracho", "phosquito"],
     beach: ["cangrejo", "cangrejo", "gaviota", "gaviota"],
