@@ -385,7 +385,7 @@ export class DirectPeerLink{
   }catch{return false;}
  }
  sendEvent(kind,payload={}){
-  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state"].includes(kind))return false;
+  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state","hit"].includes(kind))return false;
   try{this.eventChannel.send(JSON.stringify({t:"event",kind,payload}));return true;}
   catch{return false;}
  }
