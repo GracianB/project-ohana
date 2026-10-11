@@ -148,7 +148,7 @@ export class DirectPeerLink{
    this.eventChannel=channel;
    channel.onmessage=e=>{
     if(this.closed||this.eventChannel!==channel)return;
-    if(typeof e.data!=="string"||e.data.length>900)return;
+    if(typeof e.data!=="string"||e.data.length>12000)return;
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
     if(msg?.t==="ping"&&Number.isSafeInteger(msg.id)&&msg.id>0){
       if(channel.readyState==="open"&&channel.bufferedAmount<16000){
@@ -164,7 +164,8 @@ export class DirectPeerLink{
       }
       return;
     }
-    if(msg?.t==="event"&&["action","room","state","combat"].includes(msg.kind))this.onEvent?.(msg);
+    if(msg?.t==="event"&&["action","room","state","combat"].includes(msg.kind)&&
+       (msg.kind==="combat"||e.data.length<=900))this.onEvent?.(msg);
    };
   }else{try{channel.close();}catch{}return;}
   channel.onopen=()=>this._state();
@@ -386,8 +387,11 @@ export class DirectPeerLink{
  }
  sendEvent(kind,payload={}){
   if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state","combat"].includes(kind))return false;
-  try{this.eventChannel.send(JSON.stringify({t:"event",kind,payload}));return true;}
-  catch{return false;}
+  try{
+   const encoded=JSON.stringify({t:"event",kind,payload});
+   if(encoded.length>(kind==="combat"?12000:900))return false;
+   this.eventChannel.send(encoded);return true;
+  }catch{return false;}
  }
  close(){
   this.closed=true;
