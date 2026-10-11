@@ -440,7 +440,7 @@ p.y = game.worldH - 240;
 p.x = safeX(220);
 p.y = 70;
 } else if (fromDir === "portal") {
-const spot = portals.spawnPoint(p.w, p.h);
+const spot = portals.spawnPoint(p.w, p.h, game.worldW, game.worldH);
 if (spot) {
   p.x = safeX(spot.x);
   p.y = spot.y;
