@@ -1,3 +1,4 @@
+import {drawChispinDuet} from './chispin-duet.js';
 import {drawStitchoDuet} from "./stitcho-duet.js";
 import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
@@ -11,7 +12,7 @@ import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./co
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import {drawKiloDuet} from "./kilo-duet.js";
-import { drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
+import { drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
 import { capturePeerEffects,applyPeerEffects,advancePeerEffects } from "./coop-peer-effects.js";
@@ -1122,6 +1123,8 @@ class OnlineCoop {
     if(!this.enabled)return;
     const peerFx=game.coopPeerEffects;
     if(peerFx){
+      if(this.remote?.characterId==='chispin')drawChispinAbilityEcho(ctx,peerFx.chispinFx,game.cam,t,this.remote);
+      if(this.remote?.characterId==='chispin'&&peerFx.chispinDuet)drawChispinDuet(ctx,peerFx.chispinDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
       if(this.remote?.characterId==='stitcho'&&peerFx.stitchoDuet)drawStitchoDuet(ctx,peerFx.stitchoDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
       if(this.remote?.characterId==='kilo'){
         if(peerFx.kiloDuet)drawKiloDuet(ctx,peerFx.kiloDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
@@ -1170,6 +1173,7 @@ class OnlineCoop {
       abilitySlot: this.remote.abilitySlot,
       phase: this.remote.phase + t / 10,
       visualScale: 1,
+      _chispinDuetAge:peerFx?.chispinDuet?.age||0,_chispinDuetT:peerFx?.chispinDuet?120-peerFx.chispinDuet.age:0,
       _stitchoDuetAge:peerFx?.stitchoDuet?.age||0,_stitchoDuetT:peerFx?.stitchoDuet?120-peerFx.stitchoDuet.age:0,
       _kiloDuetAge:peerFx?.kiloDuet?.age||0,_kiloDuetT:peerFx?.kiloDuet?120-peerFx.kiloDuet.age:0,
       _cloudActive:!!this.remote.cloud,_thrust:this.remote.thrust||0,_thrustFace:this.remote.thrustFacing||1,

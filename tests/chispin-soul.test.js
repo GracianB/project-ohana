@@ -19,7 +19,7 @@ test('V50 Chispín has four unique idle flourishes and bounded storm layers', ()
 });
 
 test('V50 Chispín U and evolution preserve bespoke electrical identity', () => {
-  assert.match(abilities, /chispin: \{ id: "boltgod", name: "TORMENTA ABSOLUTA"/);
+  assert.match(abilities, /chispin: \{ id: "boltgod", name: "NUEVE COLAS, UN TRUENO"/);
   assert.match(abilities, /const orbit=R\*\(\.61/);
   assert.match(cinema, /if\(id==="chispin"\)/);
   assert.match(cinema, /const crown=seg\(k,\.19,\.56\)/);

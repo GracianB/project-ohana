@@ -1,3 +1,4 @@
+import {readChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {readStitchoDuet} from './stitcho-duet.js';
 import {readKiloDuet} from './kilo-duet.js';
 // V295: the same projectile/slash/lightning renderers, without remote damage.
@@ -21,7 +22,8 @@ function effect(item,type){
  value.owner="peer-visual";return value;
 }
 export function capturePeerEffects(game,frameNo,scope){
- const frame={protocol:2,scope,frameNo,roomId:game.roomId,stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
+ const frame={protocol:2,scope,frameNo,roomId:game.roomId,chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
+  chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],
   kiloFx:(game.kiloAbilityFx||[]).slice(0,12).map(f=>effect(f,"kiloFx")).filter(Boolean),
   projectiles:(game.projectiles||[]).filter(p=>p?.owner==="player").slice(0,12).map(p=>effect(p,"projectiles")).filter(Boolean),
   slashes:(game.slashes||[]).slice(-6).map(s=>effect(s,"slashes")).filter(Boolean),
@@ -40,7 +42,9 @@ export function applyPeerEffects(game,frame){
  if(history?.retired.has(frame.scope)||history?.scope===frame.scope&&frame.frameNo<=history.frameNo)return false;
  const current=game.coopPeerEffects;
  if(current?.scope===frame.scope&&frame.frameNo<=current.frameNo)return false;
- const value={scope:frame.scope,frameNo:frame.frameNo,ticks:0,kiloDuet:readKiloDuet(frame.kiloDuet),stitchoDuet:readStitchoDuet(frame.stitchoDuet)};
+ const value={scope:frame.scope,frameNo:frame.frameNo,ticks:0,chispinDuet:readChispinDuet(frame.chispinDuet),kiloDuet:readKiloDuet(frame.kiloDuet),stitchoDuet:readStitchoDuet(frame.stitchoDuet)};
+ if(frame.chispinDuet!=null&&!value.chispinDuet)return false;
+ value.chispinFx=readChispinEffects(frame.chispinFx||[]);if(!value.chispinFx)return false;
  if(frame.kiloDuet!=null&&!value.kiloDuet)return false;
  if(frame.stitchoDuet!=null&&!value.stitchoDuet)return false;
  if(frame.kiloFx!=null&&(!Array.isArray(frame.kiloFx)||frame.kiloFx.length>12||frame.kiloFx.some(f=>!["note","hula","ohana"].includes(f?.kind))))return false;
@@ -59,6 +63,8 @@ export function applyPeerEffects(game,frame){
 export function advancePeerEffects(game){
  const frame=game.coopPeerEffects;if(!frame)return;
  const move=frame.ticks++<12;
+ for(const f of frame.chispinFx||[]){f.life--;if(f.kind==='storm')f.bolts=f.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);}frame.chispinFx=(frame.chispinFx||[]).filter(f=>f.life>0);
+ if(frame.chispinDuet){frame.chispinDuet.tails=frame.chispinDuet.tails.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);frame.chispinDuet.bolts=frame.chispinDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);if(++frame.chispinDuet.age>=120)frame.chispinDuet=null;}
  if(frame.stitchoDuet){
   frame.stitchoDuet.bolts=frame.stitchoDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);
   if(++frame.stitchoDuet.age>=120)frame.stitchoDuet=null;

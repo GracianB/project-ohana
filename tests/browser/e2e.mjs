@@ -637,9 +637,17 @@ try {
     });
   });
   for(const item of stitchoDuets){assert.equal(item.duet?.evo,item.evo);assert.ok(item.duet.age>=40);assert.equal(item.moved,true);assert.equal(item.overlay,false);}
+  const chispinDuets=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    return [0,1,2,3,4].map(evo=>{
+      api.start('chispin');api.setEvo(evo);api.setPlayer(320,900);api.resetInput();api.cast(3);api.setPlayerVelocity(2,0);
+      const state=api.step(44);return {evo,duet:state.chispinDuet,moved:state.player.x!==320,overlay:!!document.querySelector('#supreme-cinema.show')};
+    });
+  });
+  for(const item of chispinDuets){assert.equal(item.duet?.evo,item.evo);assert.ok(item.duet.age>=40);assert.equal(item.moved,true);assert.equal(item.overlay,false);}
   const supremeStories = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
-    const ids = ['chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+    const ids = ['cat','dragon','dino','frita','pizza','yomi','cuerno'];
     return ids.map((id) => {
       api.start(id);
       api.setEvo(4);
@@ -932,7 +940,7 @@ try {
   const mobilePage = await mobile.newPage({ ...devices['iPhone 13'], isMobile:true, hasTouch:true });
   await auditPage(mobilePage, 'mobile');
   assert.ok(await mobilePage.locator('#touch').isVisible(), 'mobile: controles táctiles');
-  for(const hero of ['kilo','stitcho']){
+  for(const hero of ['kilo','stitcho','chispin']){
     await mobilePage.evaluate(id=>{const api=window.__OHANA_E2E;api.start(id);api.setEvo(0);api.resetInput();},hero);
     assert.equal(await mobilePage.locator('.touch-btn[data-k="u"]').evaluate(el=>el.classList.contains('off')),false,'baby '+hero+' U must be available on touch');
     await mobilePage.locator('.touch-btn[data-k="u"]').tap();
