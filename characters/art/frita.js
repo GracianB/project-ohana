@@ -585,7 +585,7 @@ function drawFritaFootwork(ctx, pose, f, t) {
     // Migas crujientes: una pequeña estela de carrerilla, sin sprites sueltos.
     for (let i = 0; i < 4; i++) {
       const k = frac(t * .07 * running + i * .25);
-      const x = -12 - k * 26, y = -1 - i % 2 * 2 - k * 7;
+      const x = -12 - k * 26, y = -1 - (i % 2) * 2 - k * 7;
       ctx.globalAlpha = .28 * (1 - k) * running;
       ctx.fillStyle = i % 3 === 0 ? ketchup : "#ffd470";
       ctx.beginPath();
