@@ -1,13 +1,14 @@
 // Michi. Pies en (0,0), mira a +x. Cada forma es otra silueta.
+export const MICHI_VISUAL_H=[60,72,84,94,106];
 const INK = "#3a2416";
 const TAU = Math.PI * 2;
 
 const PAL = [
   { fur: "#ffe3b8", dark: "#e7b56a", belly: "#fff8ee", ear: "#ffb7c8", nose: "#ff8aa0", eye: "#3aa0e8", accent: "#7ec8ff" },
-  { fur: "#f29a3a", dark: "#c45e16", belly: "#ffe4c2", ear: "#ff8fa3", nose: "#e23b4a", eye: "#2d6fe0", accent: "#ffd24a" },
+  { fur: "#f6aa51", dark: "#c45e16", belly: "#ffe4c2", ear: "#ff8fa3", nose: "#e23b4a", eye: "#2d6fe0", accent: "#ffd24a" },
   { fur: "#ffd0e8", dark: "#e888c0", belly: "#fff", ear: "#ffb3d9", nose: "#ff5c8a", eye: "#3f8ef0", accent: "#fff4a8" },
-  { fur: "#c9b4ff", dark: "#6a4ec4", belly: "#f4eeff", ear: "#a88cff", nose: "#ff7aa8", eye: "#f0d060", accent: "#ffe27a" },
-  { fur: "#fff6ea", dark: "#e4c07a", belly: "#fff", ear: "#ffd0e0", nose: "#ff5c8a", eye: "#e0489b", accent: "#ffd24a" },
+  { fur: "#c9b4ff", dark: "#7052bb", belly: "#f4eeff", ear: "#a88cff", nose: "#ff7aa8", eye: "#f0d060", accent: "#ffe27a" },
+  { fur: "#fff6ea", dark: "#e4c07a", belly: "#fff", ear: "#ffd0e0", nose: "#ff5c8a", eye: "#e0489b", accent: "#ffb780" },
 ];
 
 function solve(pose) {
@@ -448,6 +449,7 @@ function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, Math.round(Number(safe.form) || 0)));
   const c = PAL[f];
   const r = solve(safe);
+  if(Number.isFinite(safe.michiDuetAge)){r.mood=safe.michiDuetAge<36?'happy':'angry';r.tail=2.1;r.arm=safe.michiDuetAge<36?-1.7:.4;}
   ctx.save();
   moonSoul(ctx, safe, f, false);
   ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
@@ -464,6 +466,7 @@ function draw(ctx, pose, R) {
   else if (f === 2) drawCloud(ctx, R, safe, r, c);
   else if (f === 3) drawMoon(ctx, R, safe, r, c);
   else drawGod(ctx, R, safe, r, c);
+  if(r.st!=='dead'){const by=[-20,-36,-40,-48,-50][f];ctx.fillStyle=c.accent;ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(7,by,3+f*.35,0,TAU);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(5,by-1);ctx.lineTo(9,by+1);ctx.stroke();}
   moonSoul(ctx, safe, f, true);
   ctx.restore();
 }

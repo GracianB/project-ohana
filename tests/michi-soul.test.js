@@ -16,7 +16,7 @@ test('V51 Michi five-form local moon effects and four-flourish identity', () => 
   assert.doesNotMatch(local, /Math\.random|setTimeout|setInterval|requestAnimationFrame/);
 });
 test('V51 Michi eclipse identity preserves ability and cinematic', () => {
-  assert.match(abilities, /ECLIPSE DE NUEVE VIDAS/);
+  assert.match(abilities, /¡ESE OVILLO QUEMA!/);
   assert.match(abilities, /OVILLO SOMBRA/);
   assert.match(cinematic, /if\(id==="cat"\) return/);
   assert.match(evolution, /bg:"#120b27"/);

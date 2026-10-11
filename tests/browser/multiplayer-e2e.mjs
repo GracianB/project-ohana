@@ -121,7 +121,7 @@ try {
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
-  await hostPage.getByRole("button", { name: ({kilo:"Seleccionar a Kilo",stitcho:"Seleccionar a Stitcho",chispin:"Seleccionar a Chispín"})[hostCharacter], exact: true }).click();
+  await hostPage.getByRole("button", { name: ({kilo:"Seleccionar a Kilo",stitcho:"Seleccionar a Stitcho",chispin:"Seleccionar a Chispín",cat:"Seleccionar a Michi"})[hostCharacter], exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await guestPage.goto(origin+"/multiplayer.html");
@@ -323,18 +323,24 @@ try {
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {useAbility}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
-    game.player.cds.solar=0;game.player.cds.bang=0;game.player.cds.boltgod=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    game.player.cds.solar=0;game.player.cds.bang=0;game.player.cds.boltgod=0;game.player.cds.eclipse=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
     if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
   });
   let duetDelivered=false;
   for(let i=0;i<30;i++){
     duetDelivered=await guestPage.evaluate(async expected=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected+'Duet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected==='cat'?'michiDuet':expected+'Duet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
       return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId===expected;
     },hostCharacter);
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
+  // V304: three real Michi casts preserve the same visual effects on the peer.
+  if(hostCharacter==='cat'){
+    await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});
+    await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
+    assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
+  }
   // V303: actual H/J/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
     await hostPage.evaluate(async()=>{

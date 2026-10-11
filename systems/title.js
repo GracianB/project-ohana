@@ -1,3 +1,4 @@
+import {MICHI_VISUAL_H} from "../characters/art/cat.js";
 import {CHISPIN_VISUAL_H} from "../characters/art/chispin.js";
 import {STITCHO_VISUAL_H} from "../characters/art/stitcho.js";
 import {KILO_VISUAL_H} from "../characters/art/kilo.js";
@@ -64,14 +65,14 @@ export const CUERNO_PORTRAIT_GROWTH = Object.freeze([.68,.77,.86,.94,1.00]);
 
 function portraitFit(def, evo, bw, bh, hero) {
 const form = def.forms?.[evo] || {};
-const baseH = def.id==="cuerno"?CUERNO_VISUAL_H[evo]:def.id==="kilo"?KILO_VISUAL_H[evo]:def.id==="chispin"?CHISPIN_VISUAL_H[evo]:def.id==="stitcho"?STITCHO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
+const baseH = def.id==="cuerno"?CUERNO_VISUAL_H[evo]:def.id==="kilo"?KILO_VISUAL_H[evo]:def.id==="cat"?MICHI_VISUAL_H[evo]:def.id==="chispin"?CHISPIN_VISUAL_H[evo]:def.id==="stitcho"?STITCHO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
 const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
 const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
 const visualAspect = def.id==="cuerno" ? CUERNO_PORTRAIT_ASPECT[evo] : Math.max(.72, geometryAspect * envelope);
 const safeW = bw * (hero ? (evo >= 4 ? .72 : .82) : .72);
 const safeH = bh * (hero ? (def.id==="cuerno"?.79:evo>=4?.70:.80) : .72);
 // A coherent progression, not five independent 'fill the frame' portraits.
-const growth = def.id==="cuerno" ? CUERNO_PORTRAIT_GROWTH[evo] : ["kilo","stitcho","chispin"].includes(def.id)?[.72,.79,.86,.93,1][evo]:1;
+const growth = def.id==="cuerno" ? CUERNO_PORTRAIT_GROWTH[evo] : ["kilo","stitcho","chispin","cat"].includes(def.id)?[.72,.79,.86,.93,1][evo]:1;
 const byHeight = safeH * growth / Math.max(1, baseH * envelope);
 const byWidth = safeW / Math.max(1, baseH * visualAspect);
 const scale = Math.max(.34, Math.min(byHeight, byWidth));

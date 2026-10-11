@@ -99,12 +99,13 @@ test('V303: Chispin duet hits nearby targets during visible choreography', () =>
   clearAbilityFx();
 });
 
-test('PR151.14: Cat supreme activa eclipse y amortigua movimiento enemigo', () => {
+test('V304: Michi duet telegraphs local hits and retains protection', () => {
   const enemy = makeEnemy({ vx: 20, vy: -10 });
   const game = cast('cat', [enemy]);
-  assert.ok(enemy._eclipseT >= 90);
-  assert.ok(Math.abs(enemy.vx) <= 3.2);
-  assert.ok(Math.abs(enemy.vy) <= 1.6);
+  assert.equal(enemy.hp,1000);
+  for(let i=0;i<55;i++){game.t++;updateAbilityFx(game);}
+  assert.ok(enemy.hp<1000);assert.ok(enemy.stun>=25);
+  assert.ok(Math.abs(enemy.vx)<=4&&enemy.vy<=-3);
   assert.ok(game.player.invuln >= 55);
   clearAbilityFx();
 });
