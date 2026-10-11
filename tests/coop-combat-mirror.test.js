@@ -42,3 +42,13 @@ test("event channel accepts bounded combat frames without loosening other events
  const source=(await import("node:fs")).readFileSync(new URL("../game.js",import.meta.url),"utf8");
  assert.match(source,/onlineCoop\.hasFreshCombat\(game\)/);
 });
+
+test("instant damage events share one ID across WebRTC and HTTP",async()=>{
+ const fs=await import("node:fs");
+ const client=fs.readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
+ const rtc=fs.readFileSync(new URL("../systems/coop-v108-direct.js",import.meta.url),"utf8");
+ assert.match(client,/this\.direct\?\.sendEvent\("hit",payload\)/);
+ assert.match(client,/if\(id&&this\.seenHitEvents\.has\(id\)\)return/);
+ assert.match(client,/this\.applySyncedHit\(game,event\.payload\)/);
+ assert.match(rtc,/\["action","room","state","hit","combat"\]\.includes\(msg\.kind\)/);
+});
