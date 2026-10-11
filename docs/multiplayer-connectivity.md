@@ -169,3 +169,19 @@ The guest response is delayed; a deterministic regression test forces an offer
 to arrive before TURN setup is complete and checks that it is processed later.
 This is a credential-integration test, not proof of a live relay. Production
 acceptance still requires a selected `relay` route between physical clients.
+
+## Shared combat visuals over direct WebRTC
+
+When a reliable WebRTC channel is active, the host (slot 0) transmits a
+bounded presentation snapshot roughly every 200 ms: up to 24 identified enemies
+and 16 non-player projectiles. The guest (slot 1) reconciles matching enemy
+positions, HP and attack windups and renders the host's projectile appearance
+instead of drawing duplicate local projectile visuals. Packets are room scoped,
+sequence checked and limited to 12 KB; other events retain the 900-byte limit.
+
+A stale / disconnected peer reverts to its normal local enemy presentation
+after 750 ms. The host never accepts guest combat snapshots. This is a visual
+synchronization stage, **not** a shared authoritative enemy simulation:
+individual AI choices, enemy collisions, combat damage and death progression
+are still partly local and may diverge. The final combat unification must
+move those decisions into an authoritative single simulation.
