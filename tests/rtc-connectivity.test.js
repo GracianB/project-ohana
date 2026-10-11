@@ -181,4 +181,5 @@ test("enemy hits travel on the fast channel and the delayed HTTP replay is dedup
  assert.match(source,/this\.applySyncedHit\(game,event\.payload\)/);
  assert.match(source,/if\(id&&this\.seenHitEvents\.has\(id\)\)return/);
  assert.match(rtc,/\["action","room","state","hit"\]\.includes\(kind\)/);
+ assert.match(rtc,/\["action","room","state","hit"\]\.includes\(msg\.kind\)/);
 });
