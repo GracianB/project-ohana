@@ -16,11 +16,12 @@ function hash(n) {
   return s - Math.floor(s);
 }
 
-function onView(x, w) {
-  return x + w > -180 && x < 1460;
+export function platformInView(x, width, viewportWidth = 1280, margin = 120) {
+  return Number.isFinite(x) && Number.isFinite(width) && width > 0 &&
+    x + width > -margin && x < viewportWidth + margin;
 }
 
-export function drawChasms(ctx, platforms, cam, t) {
+export function drawChasms(ctx, platforms, cam, t, viewportWidth = 1280) {
   const grounds = platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
   for (let i = 0; i < grounds.length - 1; i++) {
     const a = grounds[i], b = grounds[i + 1];
@@ -28,7 +29,7 @@ export function drawChasms(ctx, platforms, cam, t) {
     if (gap < 40) continue;
     const x = a.x + a.w - cam.x;
     const y = a.y - cam.y;
-    if (!onView(x, gap)) continue;
+    if (!platformInView(x, gap, viewportWidth)) continue;
 
     const g = ctx.createLinearGradient(0, y, 0, y + 220);
     g.addColorStop(0, "rgba(8,12,22,.18)");
@@ -77,14 +78,15 @@ export function drawChasms(ctx, platforms, cam, t) {
   }
 }
 
-export function drawPlatform(ctx, plat, world, cam, t) {
+export function drawPlatform(ctx, plat, world, cam, t, viewportWidth = 1280) {
   const x = plat.x - cam.x;
   const y = plat.y - cam.y;
   const w = plat.w;
   const h = plat.h;
-  if (!onView(x, w)) return;
+  if (!platformInView(x, w, viewportWidth)) return;
   const id = world.id || "grove";
   const thin = h <= 24;
+  if (![x,y,w,h].every(Number.isFinite) || w <= 0 || h <= 0) return;
 
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.28)";
@@ -113,11 +115,19 @@ export function drawPlatform(ctx, plat, world, cam, t) {
     ctx.restore();
   }
 
+  // The collision surface starts exactly at plat.y, so the line belongs there.
+  // A consistent outline keeps thin and thick platforms readable in every world.
   ctx.fillStyle = world.edge || "#fff";
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = 0.95;
   plate(ctx, x, y - 1, w, thin ? 6 : 9, 6);
   ctx.fill();
   ctx.globalAlpha = 1;
+  ctx.strokeStyle = "rgba(5,12,25,.82)";
+  ctx.lineWidth = thin ? 1.8 : 2.4;
+  ctx.beginPath();
+  ctx.moveTo(x + 2, y + (thin ? 7 : 9));
+  ctx.lineTo(x + w - 2, y + (thin ? 7 : 9));
+  ctx.stroke();
   ctx.fillStyle = "rgba(255,255,255,.3)";
   ctx.fillRect(x + 4, y + 1, Math.max(0, w - 8), 2);
 
@@ -242,8 +252,8 @@ function dress(ctx, world, cam, t) {
   }
   ctx.restore();
 }
-export function drawTerrain(ctx, platforms, world, cam, t) {
-  drawChasms(ctx, platforms, cam, t);
-  for (const plat of platforms) drawPlatform(ctx, plat, world, cam, t);
+export function drawTerrain(ctx, platforms, world, cam, t, viewportWidth = 1280) {
+  drawChasms(ctx, platforms, cam, t, viewportWidth);
+  for (const plat of platforms) drawPlatform(ctx, plat, world, cam, t, viewportWidth);
   dress(ctx, world, cam, t);
 }
