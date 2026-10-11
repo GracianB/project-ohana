@@ -657,8 +657,8 @@ try {
       };
     });
   });
-  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 8, 'V302: las ocho U pendientes conservan storyboard propio');
-  assert.equal(new Set(supremeStories.map((x) => x.camera)).size, 9, 'V301: las nueve U pendientes conservan cámara propia');
+  assert.equal(new Set(supremeStories.map((x) => x.story)).size, supremeStories.length, 'Las U pendientes conservan storyboard propio');
+  assert.equal(new Set(supremeStories.map((x) => x.camera)).size, supremeStories.length, 'Las U pendientes conservan cámara propia');
   for (const item of supremeStories) {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
     assert.equal(item.mode, 'storyboard', 'V48: U sigue usando hero-short · ' + JSON.stringify(item));
