@@ -125,6 +125,27 @@ that the user's egress policies allow TURN/TLS, and does not modify the firewall
 Pricing, plan eligibility and payment requirements must be verified in the
 Cloudflare account before enabling paid usage.
 
+## Metered alternative
+
+Create a TURN credential in Metered ahead of time; new credentials can take up
+to two minutes to propagate. Use its individual credential API key, not the
+account-wide secret. In Netlify Functions environment settings configure:
+
+- `OHANA_METERED_DOMAIN=ohana-multiplayer.metered.live`
+- `OHANA_METERED_TURN_API_KEY=<API key for that one TURN credential>`
+
+When configured, Metered takes precedence over Cloudflare. OHANA fetches its
+credential list server-side with a bounded request and forwards only validated
+Metered TLS/TCP 443 relay URLs. Errors and redirects do not expose the API key.
+It shares the existing authenticated cache, issuance budget and coturn fallback.
+Configuration is refreshed every five minutes; this does not imply dashboard
+credentials themselves expire in five minutes. Rotate or disable the credential
+in Metered to revoke access, then update the Netlify key.
+
+Verify the actual account plan before testing. Newly created accounts may start
+on a free 500 MB trial; the dashboard can require a payment method to switch to
+the advertised free 20 GB plan. Do not activate a paid plan without approval.
+
 ## Issuance protection and deployment verification
 
 Credential retrieval has its own per-IP platform limit (12 requests/minute), so
