@@ -870,7 +870,7 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   assert.doesNotMatch(css, /sc-motif/);
   assert.match(html, /supreme\.css\?v=ohana-\d+/);
   assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-\d+/);
-  assert.match(visual, /09-supreme-u-assist/);
+  assert.match(visual, /09-supreme-kilo-in-world-duet/);
   assert.match(visual, /09b-supreme-yomi-story/);
 });
 

@@ -2987,7 +2987,7 @@ const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
 const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
 if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-const locked = isSupreme && (Number(p.evo) || 0) < 4;
+const locked = isSupreme && p.id!=="kilo" && (Number(p.evo) || 0) < 4;
 btn.classList.toggle("off", locked);
 const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
 if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
