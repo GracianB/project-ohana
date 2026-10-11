@@ -88,6 +88,7 @@ class OnlineCoop {
     this.localRoomGraceUntil = 0;
     this.error = "";
     this.seenSignals = new Set();
+    this.seenHitEvents = new Set();
     this.localStateSent = "";
     this.lastOrbSignals = new Set();
     this.retryFailures = 0;
@@ -156,6 +157,7 @@ class OnlineCoop {
     this.pendingSignals = [];
     this.pendingMutations = [];
     this.seenSignals.clear();
+    this.seenHitEvents.clear();
     this.lastOrbSignals.clear();
     this.duoApplied.clear();
     this.nextDuoAt=0;
@@ -386,6 +388,8 @@ class OnlineCoop {
       this.remote.actionUntil=performance.now()+(action==="ability"?420:action==="dash"?280:300);
       if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
       else this.remote.dash=18;
+    }else if(event.kind==="hit"){
+      this.applySyncedHit(game,event.payload);
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
       // Server still handles the definitive state; direct feedback is visual only.
       this.remote.actionKind=event.payload.state;
@@ -734,6 +738,11 @@ class OnlineCoop {
     if(signalKind==="action"&&payload.action!=="rtc")this.direct?.sendEvent("action",payload);
     else if(signalKind==="room"||signalKind==="state")this.direct?.sendEvent(signalKind,payload);
     const sequence = ++this.sequence;
+    if(signalKind==="hit"){
+      // One identity across the fast DataChannel and slower HTTP snapshot.
+      payload={...payload,syncId:makeActionId(this.identity.playerId,sequence)};
+      this.direct?.sendEvent("hit",payload);
+    }
     this.enqueueMutation({
       action: "signal",
       roomId: this.roomId,
@@ -845,7 +854,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "hit") {
-        this.applyRemoteHit(game, event.payload);
+        this.applySyncedHit(game, event.payload);
       }
 
       if (event.signalKind === "hurt") {
@@ -857,6 +866,17 @@ class OnlineCoop {
         }
       }
     }
+  }
+
+  applySyncedHit(game,payload){
+    const id=typeof payload?.syncId==="string"?payload.syncId:"";
+    // Legacy snapshots without IDs still follow their existing seenSignals.
+    if(id&&this.seenHitEvents.has(id))return;
+    if(id){
+      this.seenHitEvents.add(id);
+      if(this.seenHitEvents.size>192)this.seenHitEvents.delete(this.seenHitEvents.values().next().value);
+    }
+    this.applyRemoteHit(game,payload);
   }
 
   applyRemoteHit(game, payload) {
