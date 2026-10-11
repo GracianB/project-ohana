@@ -110,7 +110,7 @@ if (p._cast && t - p._cast.t < 26) {
   castSlot = p._cast.slot;
 }
 
-const hurt = (p.invuln || 0) > 18 ? clamp(((p.invuln || 0) - 18) / 10, 0, 1) : 0;
+const hurt = !opts.ignoreHurt && (p.invuln || 0) > 18 ? clamp(((p.invuln || 0) - 18) / 10, 0, 1) : 0;
 
 let state = "idle";
 if (p.dead) state = "dead";

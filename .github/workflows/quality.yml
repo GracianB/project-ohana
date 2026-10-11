@@ -42,6 +42,9 @@ jobs:
       - name: Kilo V301 vector and duet audit
         run: node tests/browser/kilo-v301.mjs
 
+      - name: Stitcho V302 vector and storm audit
+        run: node tests/browser/stitcho-v302.mjs
+
       - name: Multiplayer E2E
         run: npm run test:browser:multiplayer
 
@@ -53,6 +56,17 @@ jobs:
       - name: Firefox Multiplayer E2E
         run: npm run test:browser:multiplayer
         env:
+          OHANA_TEST_BROWSER: firefox
+
+      - name: Stitcho Multiplayer E2E
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: stitcho
+
+      - name: Stitcho Firefox Multiplayer E2E
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: stitcho
           OHANA_TEST_BROWSER: firefox
 
       - name: Visual regression matrix

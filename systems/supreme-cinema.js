@@ -540,7 +540,7 @@ if(k>.37&&k<.94){
 }
 
 function play(detail={}){
-if(detail.id==="kilo")return; // V301: Kilo performs U in the actual world.
+if(["kilo","stitcho"].includes(detail.id))return; // V301: Kilo performs U in the actual world.
 if(active) active.stop();
 const el=mount(),cv=el.querySelector("canvas"),fc=fullCanvas(cv),ctx=fc.ctx;
 const def=heroDef(String(detail.id||"kilo"));

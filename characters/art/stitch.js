@@ -12,11 +12,11 @@ const CYAN = "#62f3ff";
 const CLAW = "#f2f7ff";
 
 const PAL = [
-  { body: "#6fa6ff", stripe: "#8b57f2", limb: "#5a92f2" },
-  { body: "#2f6bff", stripe: "#7a3fe0", limb: "#2a5fe6" },
-  { body: "#2648d6", stripe: "#8e3ff0", limb: "#213fc0" },
-  { body: "#2a78f0", stripe: "#7a3fe0", limb: "#246add" },
-  { body: "#5a44d8", stripe: "#f08cff", limb: "#5a44d8" },
+  { body: "#8ac6ff", stripe: "#827aeb", limb: "#6aabe8" },
+  { body: "#367ddd", stripe: "#7a3fe0", limb: "#2a5fe6" },
+  { body: "#244aa3", stripe: "#8e3ff0", limb: "#213fc0" },
+  { body: "#337cbb", stripe: "#7a3fe0", limb: "#246add" },
+  { body: "#5b4cc4", stripe: "#f08cff", limb: "#5a44d8" },
 ];
 
 // Proporciones por forma (y de 0 a ~-100; las antenas pueden sobresalir)
@@ -307,7 +307,7 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   for (let i = 0; i < 2; i++) {
     const [bx, by] = bases[i];
     let tx, ty, bend = Math.sin(t * 0.1 + i * 1.3) * L * 0.12 + pose.sway * L * 0.2;
-    const m = face.ant;
+    const m = pose.stitchoDuetAge>=18&&pose.stitchoDuetAge<30?'spin':face.ant;
     if (m === "spin") {
       const a = t * 0.38 + i * Math.PI;
       tx = bx + Math.cos(a) * L * 0.75; ty = by - L * 0.55 + Math.sin(a) * L * 0.3; bend = L * 0.25;
@@ -393,22 +393,16 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
     glowDot(ctx, exF + eyR * 1.2, ey - eyR * 1.1, 3, "#ff4a7a", 0.6 + 0.4 * Math.sin(t * 0.3));
   }
 
-  // --- corona de luz (FORMA FINAL)
-  if (S.final) {
-    ctx.save();
-    ctx.translate(0, -ry - 6 + Math.sin(t * 0.08) * 1.5);
-    ctx.shadowColor = "#ffe27a"; ctx.shadowBlur = 8;
-    ctx.beginPath();
-    for (let i = 0; i <= 8; i++) {
-      const xx = -12 + i * 3, yy = i % 2 ? 0 : -7 - (i === 4 ? 4 : 0);
-      i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy);
+  // V302: a constellation crest belongs to Nebula's alien silhouette.
+  if(S.final){
+    ctx.save();ctx.translate(0,-ry-9);ctx.strokeStyle='#cbbaff';ctx.lineWidth=1.8;
+    ctx.beginPath();ctx.ellipse(0,0,16,4,-.1,0,TAU);ctx.stroke();
+    for(let i=0;i<5;i++){
+      const a=-Math.PI+i*Math.PI/4;
+      R.ellipse(ctx,Math.cos(a)*15,Math.sin(a)*8,2,2,i%2?CYAN:'#fff2ba',{lw:1});
     }
-    ctx.lineTo(12, 3); ctx.lineTo(-12, 3); ctx.closePath();
-    ctx.fillStyle = "#fff0a0"; ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.lineWidth = 1.6; ctx.strokeStyle = "#c98a1a"; ctx.stroke();
     ctx.restore();
-    for (const tp of tips) R.sparkle(ctx, tp[0] + Math.sin(t * 0.2) * 2, tp[1] - 6, 3 + Math.sin(t * 0.25) * 1.5, "#fff6c0");
+    for(const tp of tips)R.sparkle(ctx,tp[0],tp[1]-5,2.5,'#cbbaff');
   }
 
   // --- efectos de cara

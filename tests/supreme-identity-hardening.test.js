@@ -9,7 +9,7 @@ globalThis.window.addEventListener = globalThis.addEventListener;
 globalThis.window.removeEventListener = globalThis.removeEventListener;
 globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 
-const { useAbility, clearAbilityFx, registerCombatAction, supremeOf, abilityPreMove } = await import('../systems/abilities.js');
+const { useAbility, clearAbilityFx, registerCombatAction, supremeOf, updateAbilityFx, abilityPreMove } = await import('../systems/abilities.js');
 
 function makeEnemy(overrides = {}) {
   return {
@@ -82,6 +82,7 @@ test('PR151.11: Kilo supreme cura y concede invulnerabilidad', () => {
 test('PR151.12: Stitcho supreme aplica control fuerte al enemigo', () => {
   const enemy = makeEnemy({ x: 300, y: 260 });
   const game = cast('stitcho', [enemy]);
+  for(let i=0;i<43;i++){game.t++;updateAbilityFx(game);}
   assert.ok(enemy.stun >= 52);
   assert.notEqual(enemy.vx, 0);
   clearAbilityFx();
