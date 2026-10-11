@@ -2585,7 +2585,7 @@ drawRoomAtmosphere(
 );
 drawLivingWorld(ctx, game, t, camW(), camH());
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
-drawTerrain(ctx, game.platforms, world, game.cam, t);
+drawTerrain(ctx, game.platforms, world, game.cam, t, camW());
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 const r = room();
