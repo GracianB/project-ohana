@@ -127,6 +127,18 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   plate(ctx, x, y - 1, w, thin ? 6 : 9, 6);
   ctx.fill();
   ctx.globalAlpha = 1;
+  // V289 readability pass: a single crisp walkable line and visible
+  // edge markers make thin ledges distinct from background decoration.
+  if (thin) {
+    ctx.save();
+    ctx.fillStyle = world.platOutline || "rgba(255,255,255,.88)";
+    ctx.fillRect(x + 2, y - 2, Math.max(0, w - 4), 2);
+    ctx.fillStyle = world.edge || "#e8fdff";
+    const cap = Math.min(8, Math.max(3, w * .08));
+    ctx.fillRect(x, y - 2, cap, 7);
+    ctx.fillRect(x + w - cap, y - 2, cap, 7);
+    ctx.restore();
+  }
   ctx.fillStyle = "rgba(255,255,255,.3)";
   ctx.fillRect(x + 4, y + 1, Math.max(0, w - 8), 2);
 
