@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,mirroredProjectileHits,sharedEnemyTarget} from '../systems/coop-combat-mirror.js';
 import {capturePeerEffects,applyPeerEffects,advancePeerEffects} from '../systems/coop-peer-effects.js';
 import {DirectPeerLink} from '../systems/coop-v108-direct.js';
+import {onlineCoop} from '../systems/online-coop.js';
 const enemy=()=>({kind:'cucaracho',spawnIndex:0,x:100,y:200,w:24,h:24,vx:2,vy:0,hp:20,max:20});
 const host=()=>({roomId:'hub',coopRoomVisit:1,enemies:[enemy()],projectiles:[]});
 const guest=()=>({roomId:'hub',enemies:[],projectiles:[],createCoopEnemy:s=>({...enemy(),kind:s.kind})});
@@ -53,4 +54,20 @@ test('V298 snapshot datagrams stop at backpressure without queuing reliable acti
  assert.equal(link.sendLatest('combat',{frameNo:1}),true);assert.equal(sent[0].t,'world');
  link.poseChannel.bufferedAmount=12001;assert.equal(link.sendLatest('combat',{}),false);
  assert.equal(link.sendLatest('hit',{}),false);assert.equal(sent.length,1);
+});
+test('V296 duplicate actions and expired target identities cannot replay damage',()=>{
+ const coop=new onlineCoop.constructor(),game=host();coop.remote={characterId:'cuerno'};
+ const action={action:'ability',characterId:'cuerno',roomId:'hub',syncId:'ability:1'};
+ assert.equal(coop.applyPeerAction(game,action),true);assert.equal(coop.applyPeerAction(game,action),false);
+ captureCombatFrame(game,1,'s');const target=game.enemies[0];
+ assert.equal(coop.applyRemoteHit(game,{targetSyncId:target._coopSyncId,targetVisit:0,kind:target.kind,x:target.x,y:target.y,damage:5}),false);
+ assert.equal(target.hp,20);
+});
+test('V299 incompatible combat protocol pauses guest AI and rejects stale sessions',()=>{
+ const coop=new onlineCoop.constructor(),game=guest();coop.enabled=true;coop.currentPlayer=()=>({slot:1});coop.remoteWorld='hub';
+ assert.equal(coop.receiveCombatFrame(game,{protocol:1}),false);assert.equal(coop.peerCombatProtocol,0);
+ assert.equal(coop.advanceGuestCombat(game),true);
+ const h=host();assert.equal(coop.receiveCombatFrame(game,captureCombatFrame(h,1,'old')),true);
+ assert.equal(coop.receiveCombatFrame(game,captureCombatFrame(h,1,'new')),true);
+ assert.equal(coop.receiveCombatFrame(game,captureCombatFrame(h,2,'old')),false);
 });
