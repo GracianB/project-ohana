@@ -13,7 +13,7 @@ const projectile=(p)=>({
 export function captureCombatFrame(game,frameNo){
  return {
   roomId:String(game?.roomId||"").slice(0,24),frameNo:num(frameNo,0,1e9),
-  enemies:(game?.enemies||[]).slice(0,40).map((e,i)=>({
+  enemies:(game?.enemies||[]).slice(0,24).map((e,i)=>({
     index:Number.isInteger(e.spawnIndex)?e.spawnIndex:(e.boss?-2:i),
     kind:String(e.kind||"").slice(0,30),boss:!!e.boss,
     x:num(e.x,-4096,20000),y:num(e.y,-4096,20000),
@@ -23,12 +23,12 @@ export function captureCombatFrame(game,frameNo){
        .map(k=>[k,typeof e[k]==="boolean"?e[k]:num(e[k],-1000,1000)]))
   })),
   bullets:(game?.projectiles||[]).filter(p=>p.owner!=="player"&&p.life>0)
-    .slice(0,28).map(projectile)
+    .slice(0,16).map(projectile)
  };
 }
 export function applyCombatFrame(game,frame){
- if(!frame||frame.roomId!==game?.roomId||!Array.isArray(frame.enemies)||frame.enemies.length>40||
- !Array.isArray(frame.bullets)||frame.bullets.length>28)return false;
+ if(!frame||frame.roomId!==game?.roomId||!Array.isArray(frame.enemies)||frame.enemies.length>24||
+ !Array.isArray(frame.bullets)||frame.bullets.length>16)return false;
  const targets=Array.isArray(game.enemies)?game.enemies:[];
  for(const item of frame.enemies){
   if(!item||typeof item.kind!=="string"||typeof item.x!=="number"||typeof item.y!=="number")continue;
