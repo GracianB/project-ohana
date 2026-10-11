@@ -341,7 +341,7 @@ try {
     await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
     assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
   }
-  // V303: actual H/J/L casts, native FX and a direct delivery to the other player.
+  // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;

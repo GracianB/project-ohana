@@ -1124,7 +1124,7 @@ class OnlineCoop {
     if(!this.enabled)return;
     const peerFx=game.coopPeerEffects;
     if(peerFx){
-      if(this.remote?.characterId==='cat'){drawMichiAbilityEcho(ctx,peerFx.michiFx,game.cam,t,this.remote);if(peerFx.michiDuet)drawMichiDuet(ctx,peerFx.michiDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);}
+      if(this.remote?.characterId==='cat'){drawMichiAbilityEcho(ctx,peerFx.michiFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});if(peerFx.michiDuet)drawMichiDuet(ctx,peerFx.michiDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);}
       if(this.remote?.characterId==='chispin')drawChispinAbilityEcho(ctx,peerFx.chispinFx,game.cam,t,this.remote);
       if(this.remote?.characterId==='chispin'&&peerFx.chispinDuet)drawChispinDuet(ctx,peerFx.chispinDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
       if(this.remote?.characterId==='stitcho'&&peerFx.stitchoDuet)drawStitchoDuet(ctx,peerFx.stitchoDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
