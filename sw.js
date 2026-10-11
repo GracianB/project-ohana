@@ -108,6 +108,7 @@ const PRECACHE = [
   "./systems/coop-v104-sync.js?v=" + VERSION,
   "./systems/coop-v107-room-follow.js?v=" + VERSION,
   "./systems/coop-v108-direct.js?v=" + VERSION,
+  "./systems/coop-combat-mirror.js?v=" + VERSION,
   "./systems/coop-v109-recovery.js?v=" + VERSION,
   "./systems/menu-visibility.js?v=" + VERSION,
   "./systems/enemy-director.js?v=" + VERSION,

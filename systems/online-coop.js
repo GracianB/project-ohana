@@ -9,6 +9,8 @@ import { DirectPeerLink } from "./coop-v108-direct.js";
 import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
+import { drawProjectile } from "./abilities.js";
+import { captureCombatFrame,applyCombatFrame } from "./coop-combat-mirror.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
@@ -88,6 +90,7 @@ class OnlineCoop {
     this.localRoomGraceUntil = 0;
     this.error = "";
     this.seenSignals = new Set();
+    this.seenHitEvents = new Set();
     this.localStateSent = "";
     this.lastOrbSignals = new Set();
     this.retryFailures = 0;
@@ -104,6 +107,8 @@ class OnlineCoop {
     this.directConnectedAt=0;
     this.directRetryAt=0;
     this.directRetries=0;
+    this.lastCombatSentAt=0;this.combatSequence=0;
+    this.lastCombatReceivedAt=0;this.lastCombatFrame=0;
   }
 
   readSession() {
@@ -136,6 +141,9 @@ class OnlineCoop {
     this.directConnectedAt=0;
     this.directRetryAt=0;
     this.directRetries=0;
+    this.lastCombatSentAt=0;this.combatSequence=0;
+    this.lastCombatReceivedAt=0;this.lastCombatFrame=0;
+    game.coopRemoteEnemyBullets=[];
     this.enabled = true;
     this.roomId = session.roomId;
     this.identity = session.identity;
@@ -156,6 +164,7 @@ class OnlineCoop {
     this.pendingSignals = [];
     this.pendingMutations = [];
     this.seenSignals.clear();
+    this.seenHitEvents.clear();
     this.lastOrbSignals.clear();
     this.duoApplied.clear();
     this.nextDuoAt=0;
@@ -386,6 +395,16 @@ class OnlineCoop {
       this.remote.actionUntil=performance.now()+(action==="ability"?420:action==="dash"?280:300);
       if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
       else this.remote.dash=18;
+    }else if(event.kind==="hit"){
+      if(event.payload?.roomId===game.roomId)this.applySyncedHit(game,event.payload);
+    }else if(event.kind==="combat"){
+      if(this.currentPlayer(this.snapshot)?.slot!==1)return;
+      const frame=event.payload;
+      if(!Number.isInteger(frame?.frameNo)||frame.frameNo<=this.lastCombatFrame)return;
+      if(applyCombatFrame(game,frame)){
+        this.lastCombatFrame=frame.frameNo;
+        this.lastCombatReceivedAt=performance.now();
+      }
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
       // Server still handles the definitive state; direct feedback is visual only.
       this.remote.actionKind=event.payload.state;
@@ -734,6 +753,10 @@ class OnlineCoop {
     if(signalKind==="action"&&payload.action!=="rtc")this.direct?.sendEvent("action",payload);
     else if(signalKind==="room"||signalKind==="state")this.direct?.sendEvent(signalKind,payload);
     const sequence = ++this.sequence;
+    if(signalKind==="hit"){
+      payload={...payload,roomId:game.roomId||START_ROOM,syncId:makeActionId(this.identity.playerId,sequence)};
+      this.direct?.sendEvent("hit",payload);
+    }
     this.enqueueMutation({
       action: "signal",
       roomId: this.roomId,
@@ -845,7 +868,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "hit") {
-        this.applyRemoteHit(game, event.payload);
+        this.applySyncedHit(game, event.payload);
       }
 
       if (event.signalKind === "hurt") {
@@ -859,14 +882,24 @@ class OnlineCoop {
     }
   }
 
+  applySyncedHit(game,payload){
+    const id=typeof payload?.syncId==="string"?payload.syncId:"";
+    if(id&&this.seenHitEvents.has(id))return;
+    if(this.applyRemoteHit(game,payload)===false)return;
+    if(id){
+      this.seenHitEvents.add(id);
+      if(this.seenHitEvents.size>192)this.seenHitEvents.delete(this.seenHitEvents.values().next().value);
+    }
+  }
+
   applyRemoteHit(game, payload) {
-    if (!payload || !Array.isArray(game.enemies)) return;
+    if (!payload || !Array.isArray(game.enemies)) return false;
     const targetId = String(payload.targetId || "");
     const kind = String(payload.kind || "");
     const x = finite(payload.x, 0);
     const y = finite(payload.y, 0);
     const damage = Math.max(0, finite(payload.damage, 0));
-    if (!damage) return;
+    if (!damage || damage > 1000) return false;
 
     let target = targetId
       ? game.enemies.find((enemy) => enemy && enemy.id === targetId && !enemy.dying)
@@ -883,7 +916,7 @@ class OnlineCoop {
         .sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
     }
 
-    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return;
+    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
     target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
@@ -903,6 +936,7 @@ class OnlineCoop {
       speed: 2.2,
       life: 12,
     });
+    return true;
   }
 
   applyRemoteHurt(game, amount) {
@@ -913,11 +947,25 @@ class OnlineCoop {
     player.flash = Math.max(player.flash || 0, 8);
   }
 
+  hasFreshCombat(game){
+    return this.enabled&&this.currentPlayer(this.snapshot)?.slot===1&&
+      this.remoteWorld===game.roomId&&this.direct?.active&&
+      performance.now()-this.lastCombatReceivedAt<750;
+  }
+
   tick(game) {
     if (!this.enabled) return;
     if(!this.directAttempted&&this.remote?.playerId)this.setupDirect(game);
     else this.repairDirect(game);
     this.direct?.sendPose(game);
+    // Host's enemy motion and projectiles are visible to the guest at 5 Hz.
+    // Zero extra Netlify requests; dropped frames never block gameplay.
+    const combatNow=performance.now();
+    if(this.direct?.active&&this.currentPlayer(this.snapshot)?.slot===0&&
+       this.remoteWorld===game.roomId&&combatNow-this.lastCombatSentAt>=200){
+      if(this.direct.sendEvent("combat",captureCombatFrame(game,++this.combatSequence)))
+        this.lastCombatSentAt=combatNow;
+    }
     this.direct?.ping();
     void this.direct?.sampleRoute();
     if(typeof document!=="undefined"&&this.direct?.active){
@@ -1004,6 +1052,13 @@ class OnlineCoop {
 
   render(ctx, game, t) {
     if(!this.enabled)return;
+    if(this.hasFreshCombat(game)){
+      for(const pr of game.coopRemoteEnemyBullets||[]){
+        const vx=pr.x-(game.cam?.x||0),vy=pr.y-(game.cam?.y||0);
+        if(vx>-200&&vx<(game.viewW||1280)+200&&vy>-200&&vy<(game.viewH||720)+200)
+          drawProjectile(ctx,pr,game.cam,t);
+      }
+    }
     drawDuoAltars(ctx,game,this.remote?{...this.remote,worldRoomId:this.remoteWorld}:null,this.snapshot,t,!!game.reduceMotion);
     if (!this.remote || this.remoteWorld !== game.roomId) return;
     // Character vector artwork is expensive. Cull before invoking the entire
