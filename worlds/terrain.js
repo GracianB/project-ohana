@@ -251,8 +251,8 @@ function dress(ctx, world, cam, t) {
   }
   ctx.restore();
 }
-export function drawTerrain(ctx, platforms, world, cam, t) {
-  drawChasms(ctx, platforms, cam, t);
-  for (const plat of platforms || []) drawPlatform(ctx, plat, world, cam, t);
+export function drawTerrain(ctx, platforms, world, cam, t, viewportWidth = 1280) {
+  drawChasms(ctx, platforms, cam, t, viewportWidth);
+  for (const plat of platforms || []) drawPlatform(ctx, plat, world, cam, t, viewportWidth);
   dress(ctx, world, cam, t);
 }
