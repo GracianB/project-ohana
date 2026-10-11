@@ -173,3 +173,12 @@ test("TURN credential lookup has a short deadline without lowering normal game r
  assert.match(source,/setTimeout\(\(\)=>abort\.abort\(\), timeoutMs\)/);
  assert.match(source,/post\(\{action:"rtc-config",roomId,identity\},1800\)/);
 });
+
+test("enemy hits travel on the fast channel and the delayed HTTP replay is deduplicated",async()=>{
+ const source=(await import("node:fs")).readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
+ const rtc=(await import("node:fs")).readFileSync(new URL("../systems/coop-v108-direct.js",import.meta.url),"utf8");
+ assert.match(source,/this\.direct\?\.sendEvent\("hit",payload\)/);
+ assert.match(source,/this\.applySyncedHit\(game,event\.payload\)/);
+ assert.match(source,/if\(id&&this\.seenHitEvents\.has\(id\)\)return/);
+ assert.match(rtc,/\["action","room","state","hit"\]\.includes\(kind\)/);
+});
