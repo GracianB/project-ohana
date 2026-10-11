@@ -15,7 +15,7 @@ test("guest matches spawn identity, mirrors attacks and never creates untrusted 
  const f=captureCombatFrame({roomId:"hub",enemies:[{spawnIndex:0,kind:"toro",x:100,y:0,hp:19,telegraph:true}],
  projectiles:[{owner:"enemy",x:40,y:50,w:8,h:8,life:15}]},8);
  assert.equal(applyCombatFrame(game,f),true);
- assert.equal(game.enemies[0].x,60);assert.equal(game.enemies[0].hp,19);
+ assert.equal(game.enemies[0].x,100);assert.equal(game.enemies[0].hp,19);
  assert.equal(game.enemies[0].telegraph,true);assert.equal(game.coopRemoteEnemyBullets.length,1);
  assert.equal(applyCombatFrame(game,{...f,roomId:"boss"}),false);
  assert.equal(game.enemies.length,1);
@@ -29,7 +29,7 @@ test("rejects oversized combat frames and mismatched enemy kinds",()=>{
 });
 test("online client retains direct host-authority and stale fallback boundaries",async()=>{
  const source=(await import("node:fs")).readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
- assert.match(source,/this\.direct\.sendEvent\("combat",captureCombatFrame/);
+ assert.match(source,/this\.direct\.sendLatest\?\.\("combat",frame\)/);
  assert.match(source,/this\.remoteWorld===game\.roomId/);
  assert.match(source,/performance\.now\(\)-this\.lastCombatReceivedAt<750/);
 });
@@ -63,10 +63,10 @@ test("guest predicts host enemy movement, not separate attack decisions",()=>{
  assert.ok(enemy.x>104&&enemy.x<108);
  assert.equal(advanceMirroredEnemies(game,760),false);
 });
-test("game engine defers enemy AI to host only when fresh mirror exists",async()=>{
+test("game engine defers enemy AI to host while awaiting authoritative snapshots",async()=>{
  const fs=await import("node:fs");
  const engine=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8");
  const coop=fs.readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
- assert.match(engine,/if \(onlineCoop\.advanceGuestCombat\(game\)\) return;/);
+ assert.match(engine,/if\s*\(onlineCoop\.advanceGuestCombat\(game\)\)\s*\{/);
  assert.match(coop,/return advanceMirroredEnemies\(game,performance\.now\(\)-this\.lastCombatReceivedAt\)/);
 });

@@ -9,8 +9,10 @@ import { DirectPeerLink } from "./coop-v108-direct.js";
 import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./coop-v109-recovery.js";
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
-import { drawProjectile } from "./abilities.js";
-import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies } from "./coop-combat-mirror.js";
+import { drawProjectile,drawSlash,drawBolt } from "./abilities.js";
+import { drawChispinCloud } from "./chispin-cloud.js";
+import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
+import { capturePeerEffects,applyPeerEffects,advancePeerEffects } from "./coop-peer-effects.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
@@ -109,6 +111,9 @@ class OnlineCoop {
     this.directRetries=0;
     this.lastCombatSentAt=0;this.combatSequence=0;
     this.lastCombatReceivedAt=0;this.lastCombatFrame=0;
+    this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
+    this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
+    this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
   }
 
   readSession() {
@@ -143,6 +148,10 @@ class OnlineCoop {
     this.directRetries=0;
     this.lastCombatSentAt=0;this.combatSequence=0;
     this.lastCombatReceivedAt=0;this.lastCombatFrame=0;
+    this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
+    this.remoteCombatScope="";this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
+    this.seenActionEvents.clear();this.effectSequence=0;this.lastEffectsSentAt=0;
+    resetCombatMirror(game);game.coopPeerEffects=null;this._combatGame=game;
     game.coopRemoteEnemyBullets=[];
     this.enabled = true;
     this.roomId = session.roomId;
@@ -271,12 +280,17 @@ class OnlineCoop {
     document.body.dataset.coopTransport=direct?"direct":"server";
     document.body.dataset.coopRoute=direct?(this.direct?.route||"unknown"):"server";
     document.body.dataset.coopTurnStatus=this.turnConfigStatus;
+    const guest=this.currentPlayer(this.snapshot)?.slot===1;
+    const synced=!guest||this.hasFreshCombat(this._combatGame||{});
+    document.body.dataset.coopCombat=synced?"live":"waiting";
     if(direct&&this.direct?.directRttMs>0)document.body.dataset.coopRttDirect=String(Math.round(this.direct.directRttMs));
     else delete document.body.dataset.coopRttDirect;
     let text=state==="waiting-peer"?"ONLINE · ESPERANDO COMPAÑERO":
       state==="reconnecting"?"ONLINE · RECONECTANDO":
       state==="error"?"ONLINE · SESIÓN NO DISPONIBLE":"ONLINE · 2 JUGADORES";
     if(state==="connected")text+=direct?" · DIRECTO WEBRTC":" · SERVIDOR (CON RETRASO)";
+    if(state==="connected"&&guest&&!synced)text+=" · COMBATE EN PAUSA";
+    if(this.peerCombatProtocol!==null&&this.peerCombatProtocol!==COMBAT_PROTOCOL)text+=" · ACTUALIZA AMBOS JUEGOS";
     if(state==="connected"&&!direct&&this.directAttempted&&(!this.direct||["new","checking"].includes(this.direct.iceState)))
       text=text.replace("SERVIDOR (CON RETRASO)","CONECTANDO WEBRTC");
     if(direct&&this.direct?.route==="relay")text=text.replace("DIRECTO WEBRTC","WEBRTC · TURN");
@@ -325,7 +339,10 @@ class OnlineCoop {
       onPose:pose=>this.receiveDirectPose(pose),
       onEvent:event=>this.receiveDirectEvent(game,event),
       onState:connected=>{
-        if(connected)this.directConnectedAt=performance.now();
+        if(connected){
+          this.directConnectedAt=performance.now();
+          this.direct?.sendEvent("state",{state:"protocol",version:COMBAT_PROTOCOL});
+        }
         this.showNetworkHealth();
       }
     });
@@ -368,6 +385,8 @@ class OnlineCoop {
     this.remote.pose={vx:pose.vx,vy:pose.vy,grounded:pose.grounded,melee:pose.melee,dash:pose.dash};
     this.remote.facing=pose.facing;
     this.remote.evolution=pose.evo;
+    this.remote.w=pose.w;this.remote.h=pose.h;
+    this.remote.cloud=pose.cloud;this.remote.thrust=pose.thrust;this.remote.thrustFacing=pose.thrustFacing;
     this.lastDirectPoseAt=now;
     // A reconnected peer can send poses before its badge is refreshed by
     // another Netlify HTTP response. Restore DIRECT mode on the first packet.
@@ -388,23 +407,15 @@ class OnlineCoop {
         try{game.loadRoom?.(destination,"online-peer");}catch{}
       }
     }else if(event.kind==="action"){
-      const action=event.payload?.action;
-      if(!["attack","ability","dash"].includes(action))return;
-      this.remote.actionKind=action;
-      this.remote.abilitySlot=Number.isInteger(event.payload?.slot)?event.payload.slot:null;
-      this.remote.actionUntil=performance.now()+(action==="ability"?420:action==="dash"?280:300);
-      if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
-      else this.remote.dash=18;
+      this.applyPeerAction(game,event.payload);
     }else if(event.kind==="hit"){
       if(event.payload?.roomId===game.roomId)this.applySyncedHit(game,event.payload);
     }else if(event.kind==="combat"){
-      if(this.currentPlayer(this.snapshot)?.slot!==1)return;
-      const frame=event.payload;
-      if(!Number.isInteger(frame?.frameNo)||frame.frameNo<=this.lastCombatFrame)return;
-      if(applyCombatFrame(game,frame)){
-        this.lastCombatFrame=frame.frameNo;
-        this.lastCombatReceivedAt=performance.now();
-      }
+      this.receiveCombatFrame(game,event.payload);
+    }else if(event.kind==="effects"){
+      if(applyPeerEffects(game,event.payload))this.lastPeerEffectsAt=performance.now();
+    }else if(event.kind==="state"&&event.payload?.state==="protocol"){
+      this.peerCombatProtocol=Number.isInteger(event.payload.version)?event.payload.version:0;
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
       // Server still handles the definitive state; direct feedback is visual only.
       this.remote.actionKind=event.payload.state;
@@ -478,6 +489,9 @@ class OnlineCoop {
     this.direct?.close();this.direct=null;this.directAttempted=false;
     this.lastDirectPoseAt=0;this.directConnectedAt=0;this.directRetryAt=0;this.directRetries=0;
     this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
+    this.lastCombatFrame=0;this.lastCombatReceivedAt=0;this.remoteCombatScope="";
+    this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
+    if(this._combatGame){resetCombatMirror(this._combatGame);this._combatGame.coopPeerEffects=null;}
   }
 
   async poll(game, immediate = false) {
@@ -750,7 +764,10 @@ class OnlineCoop {
     if (!this.enabled || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     // Action/room feedback is shown directly before the authoritative POST.
     // The RTC handshake itself is carried ONLY over Netlify, never recursively.
-    if(signalKind==="action"&&payload.action!=="rtc")this.direct?.sendEvent("action",payload);
+    if(signalKind==="action"&&payload.action!=="rtc"){
+      payload={...payload,roomId:game.roomId||START_ROOM,syncId:makeActionId(this.identity.playerId,this.sequence+1)};
+      this.direct?.sendEvent("action",payload);this.sendPeerEffects(game,true);
+    }
     else if(signalKind==="room"||signalKind==="state")this.direct?.sendEvent(signalKind,payload);
     const sequence = ++this.sequence;
     if(signalKind==="hit"){
@@ -787,6 +804,10 @@ class OnlineCoop {
       if(rtc){
         if(event.senderPlayerId!==this.remote?.playerId)continue;
         if(this.direct)void this.direct.signal(event.payload);
+        continue;
+      }
+      if(event.signalKind==="combat"){
+        if(event.senderSlot===0&&event.senderPlayerId===this.remote?.playerId)this.receiveCombatFrame(game,event.payload);
         continue;
       }
       if(event.signalKind === "duo-lit"){
@@ -855,16 +876,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "action") {
-        const action = event.payload?.action;
-        if (!this.remote) continue;
-        this.remote.actionKind = action;
-        this.remote.abilitySlot = Number.isFinite(Number(event.payload?.slot)) ? Number(event.payload.slot) : null;
-        this.remote.actionUntil = performance.now() + (action === "ability" ? 420 : action === "dash" ? 280 : 300);
-        if (action === "attack" || action === "ability") {
-          this.remote.melee = action === "ability" ? 16 : 10;
-        } else if (action === "dash") {
-          this.remote.dash = 18;
-        }
+        this.applyPeerAction(game,event.payload);
       }
 
       if (event.signalKind === "hit") {
@@ -892,6 +904,51 @@ class OnlineCoop {
     }
   }
 
+  applyPeerAction(game,payload){
+    if(!this.remote||!payload||!['attack','ability','dash'].includes(payload.action))return false;
+    if(payload.roomId&&payload.roomId!==game.roomId)return false;
+    if(payload.characterId&&payload.characterId!==this.remote.characterId)return false;
+    const id=typeof payload.syncId==='string'?payload.syncId.slice(0,96):'';
+    if(id&&this.seenActionEvents.has(id))return false;
+    if(id){this.seenActionEvents.add(id);if(this.seenActionEvents.size>192)this.seenActionEvents.delete(this.seenActionEvents.values().next().value);}
+    const action=payload.action;
+    this.remote.actionKind=action;
+    this.remote.abilitySlot=Number.isInteger(payload.slot)?Math.max(0,Math.min(3,payload.slot)):null;
+    this.remote.actionUntil=performance.now()+(action==='ability'?420:action==='dash'?280:300);
+    if(action==='dash')this.remote.dash=18;else this.remote.melee=action==='ability'?16:10;
+    return true;
+  }
+
+  receiveCombatFrame(game,frame){
+    if(this.currentPlayer(this.snapshot)?.slot!==1)return false;
+    if(frame?.protocol!==COMBAT_PROTOCOL){this.peerCombatProtocol=0;return false;}
+    if(frame.roomId!==game.roomId||!validCombatFrame(frame)||this.retiredCombatScopes.has(frame.scope))return false;
+    if(this.remoteCombatScope===frame.scope&&frame.frameNo<=this.lastCombatFrame)return false;
+    if(applyCombatFrame(game,frame)){
+      if(this.remoteCombatScope&&this.remoteCombatScope!==frame.scope){
+        this.retiredCombatScopes.add(this.remoteCombatScope);
+        if(this.retiredCombatScopes.size>16)this.retiredCombatScopes.delete(this.retiredCombatScopes.values().next().value);
+      }
+      this.remoteCombatScope=frame.scope;this.peerCombatProtocol=COMBAT_PROTOCOL;
+      this.lastCombatFrame=frame.frameNo;this.lastCombatReceivedAt=performance.now();return true;
+    }
+    return false;
+  }
+
+  sendPeerEffects(game,force=false){
+    const now=performance.now();
+    if(!this.direct?.active||this.remoteWorld!==game.roomId||(!force&&now-this.lastEffectsSentAt<200))return false;
+    const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
+    if(this.direct.sendLatest?.('effects',frame)){this.lastEffectsSentAt=now;return true;}
+    return false;
+  }
+
+  enemyTarget(game,enemy){
+    if(!this.enabled||this.currentPlayer(this.snapshot)?.slot!==0||this.remoteWorld!==game.roomId||
+      !this.remote||performance.now()-this.lastDirectPoseAt>=1200)return game.player;
+    return sharedEnemyTarget(enemy,game.player,{...this.remote,w:this.remote.w||32,h:this.remote.h||48,dead:this.remote.health===0});
+  }
+
   applyRemoteHit(game, payload) {
     if (!payload || !Array.isArray(game.enemies)) return false;
     const targetId = String(payload.targetId || "");
@@ -901,7 +958,10 @@ class OnlineCoop {
     const damage = Math.max(0, finite(payload.damage, 0));
     if (!damage || damage > 1000) return false;
 
-    let target = targetId
+    let target = Number.isSafeInteger(payload.targetSyncId)
+      ?game.enemies.find(enemy=>enemy._coopSyncId===payload.targetSyncId&&enemy._coopVisit===payload.targetVisit&&!enemy.dying):null;
+    if(Number.isSafeInteger(payload.targetSyncId)&&!target)return false;
+    if(!target)target = targetId
       ? game.enemies.find((enemy) => enemy && enemy.id === targetId && !enemy.dying)
       : null;
 
@@ -909,12 +969,6 @@ class OnlineCoop {
       .filter((enemy) => enemy && enemy.hp > 0 && !enemy.dying)
       .filter((enemy) => !kind || enemy.kind === kind)
       .sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
-
-    if (!target) {
-      target = game.enemies
-        .filter((enemy) => enemy && enemy.hp > 0 && !enemy.dying)
-        .sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
-    }
 
     if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
@@ -948,13 +1002,13 @@ class OnlineCoop {
   }
 
   advanceGuestCombat(game){
-    if(!this.hasFreshCombat(game))return false;
-    return advanceMirroredEnemies(game,performance.now()-this.lastCombatReceivedAt);
+    if(this.hasFreshCombat(game))return advanceMirroredEnemies(game,performance.now()-this.lastCombatReceivedAt);
+    return this.enabled&&this.currentPlayer(this.snapshot)?.slot===1;
   }
 
   hasFreshCombat(game){
     return this.enabled&&this.currentPlayer(this.snapshot)?.slot===1&&
-      this.remoteWorld===game.roomId&&this.direct?.active&&
+      this.remoteWorld===game.roomId&&game._coopMirror&&
       performance.now()-this.lastCombatReceivedAt<750;
   }
 
@@ -966,11 +1020,18 @@ class OnlineCoop {
     // Host's enemy motion and projectiles are visible to the guest at 5 Hz.
     // Zero extra Netlify requests; dropped frames never block gameplay.
     const combatNow=performance.now();
-    if(this.direct?.active&&this.currentPlayer(this.snapshot)?.slot===0&&
-       this.remoteWorld===game.roomId&&combatNow-this.lastCombatSentAt>=200){
-      if(this.direct.sendEvent("combat",captureCombatFrame(game,++this.combatSequence)))
-        this.lastCombatSentAt=combatNow;
+    if(this.currentPlayer(this.snapshot)?.slot===0&&this.remoteWorld===game.roomId&&
+       combatNow-this.lastCombatSentAt>=(this.direct?.active?200:1000)&&this.snapshot?.phase!=="lobby"){
+      const frame=captureCombatFrame(game,++this.combatSequence,this.combatEpoch);
+      if(this.direct?.active){
+        if(this.direct.sendLatest?.("combat",frame))this.lastCombatSentAt=combatNow;
+      }else{
+        this.lastCombatSentAt=combatNow;void this.signal(game,"combat",frame);
+      }
     }
+    this.sendPeerEffects(game);advancePeerEffects(game);
+    if(performance.now()-(this.lastPeerEffectsAt||0)>750)game.coopPeerEffects=null;
+    if(combatNow-this.lastCombatHealthAt>250){this.lastCombatHealthAt=combatNow;this.showNetworkHealth();}
     this.direct?.ping();
     void this.direct?.sampleRoute();
     if(typeof document!=="undefined"&&this.direct?.active){
@@ -1057,6 +1118,12 @@ class OnlineCoop {
 
   render(ctx, game, t) {
     if(!this.enabled)return;
+    const peerFx=game.coopPeerEffects;
+    if(peerFx){
+      for(const pr of peerFx.projectiles)drawProjectile(ctx,pr,game.cam,t);
+      for(const slash of peerFx.slashes)drawSlash(ctx,slash,game.cam);
+      for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
+    }
     if(this.hasFreshCombat(game)){
       for(const pr of game.coopRemoteEnemyBullets||[]){
         const vx=pr.x-(game.cam?.x||0),vy=pr.y-(game.cam?.y||0);
@@ -1081,8 +1148,8 @@ class OnlineCoop {
       id: definition.id,
       x: this.remote.x,
       y: this.remote.y,
-      w: form.w,
-      h: form.h,
+      w: this.remote.w||form.w,
+      h: this.remote.h||form.h,
       vx: this.remote.signalWeak ? 0 : finite(this.remote.pose?.vx, 0),
       vy: this.remote.signalWeak ? 0 : finite(this.remote.pose?.vy, 0),
       facing: this.remote.facing || 1,
@@ -1095,11 +1162,13 @@ class OnlineCoop {
       abilitySlot: this.remote.abilitySlot,
       phase: this.remote.phase + t / 10,
       visualScale: 1,
+      _cloudActive:!!this.remote.cloud,_thrust:this.remote.thrust||0,_thrustFace:this.remote.thrustFacing||1,
     };
     ctx.save();
     if (this.remote.invuln > 0) ctx.globalAlpha = 0.72;
     if (this.remote.signalWeak) ctx.globalAlpha *= Math.max(.44, Math.min(1, this.remote.signalOpacity || 1));
     drawCharacter(ctx, player, game.cam, t);
+    drawChispinCloud(ctx,player,game.cam,t);
     ctx.globalAlpha = 1;
     const px = player.x + player.w / 2 - game.cam.x;
     const py = player.y + player.h * 0.45 - game.cam.y;

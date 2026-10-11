@@ -1,6 +1,7 @@
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
 import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
 import { isRtcCandidateSignal } from "../../systems/coop-v108-direct.js";
+import { validCombatFrame } from "../../systems/coop-combat-mirror.js";
 
 const ROOM_TTL_MS = 6 * 60 * 60 * 1000;
 const MAX_RETRIES = 4;
@@ -374,7 +375,7 @@ export function createRoomService(store, options = {}) {
       if (!Number.isSafeInteger(seq) || seq < 1) throw new RoomError("INVALID_SEQUENCE", "La señal no es válida.");
       const actionId = String(payload?.actionId || "");
       const signalKind = String(payload?.signalKind || "");
-      const permittedKinds=new Set(["action","hit","hurt","orb","room","state","duo"]);
+      const permittedKinds=new Set(["action","hit","hurt","orb","room","state","duo","combat"]);
       const relayPayload=payload?.payload;
       const payloadBytes=JSON.stringify(relayPayload??{}).length;
       // V110: allow a larger payload only for structurally valid RTC SDP
@@ -387,15 +388,17 @@ export function createRoomService(store, options = {}) {
         relayPayload.part>=0&&relayPayload.part<relayPayload.total&&
         typeof relayPayload?.data==="string"&&relayPayload.data.length>0&&
         relayPayload.data.length<=12000;
-      const maxSignalBytes=rtcFragment?12400:1800;
+      const combat=signalKind==="combat"&&relayPayload?.protocol===2&&validCombatFrame(relayPayload);
+      const maxSignalBytes=rtcFragment?12400:combat?11200:1800;
       const rtcCandidates=signalKind==="action"&&isRtcCandidateSignal(relayPayload);
       if(!actionId||actionId.length>96||!permittedKinds.has(signalKind)||payloadBytes>maxSignalBytes||
-        (relayPayload?.action==="rtc"&&!rtcFragment&&!rtcCandidates)){
+        (relayPayload?.action==="rtc"&&!rtcFragment&&!rtcCandidates)||(signalKind==="combat"&&!combat)){
         throw new RoomError("INVALID_SIGNAL","Señal inválida o demasiado grande.");
       }
       const { room } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de enviar señales.", 409);
+        if(signalKind==="combat"&&player.slot!==0)throw new RoomError("HOST_ONLY","Solo el anfitrión publica enemigos.",403);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) return;
         if (seq <= player.lastSequence || hasAction(player, actionId)) {

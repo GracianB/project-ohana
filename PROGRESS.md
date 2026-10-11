@@ -1,3 +1,19 @@
+## V290–V300 · Mundo cooperativo compartido (ohana-326)
+
+- V290: validación atómica de instantáneas y límites de tamaños/valores.
+- V291: identidades estables de enemigos y secuencias por sesión y visita.
+- V292: reconciliación de aparición, transformación y desaparición de enemigos.
+- V293: predicción limitada a doce ticks; el invitado no ejecuta otra IA tras perder paquetes.
+- V294: proyectiles enemigos compartidos con colisión local y consumo sin daño repetido.
+- V295: proyectiles, tajos y rayos del compañero mediante los renderizadores originales, sin simular daño duplicado.
+- V296: dimensiones reales, embestida de Cuerno, nube de Chispin y deduplicación de acciones.
+- V297: los enemigos ordinarios del anfitrión consideran al compañero vivo más cercano.
+- V298: instantáneas descartables en el canal rápido y respaldo HTTP autenticado a 1 Hz.
+- V299: estado visible de sincronización de combate y aviso de versiones incompatibles.
+- V300: pruebas de ciclo de vida, daño y efectos por canales reales; actualización del precache completo.
+
+Se conservan las plataformas y pozos de V288/V289. La IA del jefe sigue ejecutándose en el anfitrión; sus efectos especializados que no usan proyectiles/tajos/rayos no se replican íntegramente. No se promete sincronización perfecta ni latencia cero. TURN gratuito conserva su cuota existente y no se contrata ningún plan.
+
 ## 10/10/2026 · OHANA V110 · negociación RTC en una sola petición · ohana-315
 
 - SDP WebRTC típico enviado en una sola señal Netlify autenticada, en lugar de varios fragmentos de 640 caracteres. Grandes negociaciones ICE conservan hasta 4 fragmentos.
