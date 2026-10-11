@@ -932,10 +932,12 @@ try {
   const mobilePage = await mobile.newPage({ ...devices['iPhone 13'], isMobile:true, hasTouch:true });
   await auditPage(mobilePage, 'mobile');
   assert.ok(await mobilePage.locator('#touch').isVisible(), 'mobile: controles táctiles');
-  await mobilePage.evaluate(()=>{const api=window.__OHANA_E2E;api.start('kilo');api.setEvo(0);api.resetInput();});
-  assert.equal(await mobilePage.locator('.touch-btn[data-k="u"]').evaluate(el=>el.classList.contains('off')),false,'V301: baby Kilo U must be available on touch');
-  await mobilePage.locator('.touch-btn[data-k="u"]').tap();
-  await mobilePage.waitForFunction(()=>window.__OHANA_E2E.state().lastAbilitySlot===3,null,{timeout:2500});
+  for(const hero of ['kilo','stitcho']){
+    await mobilePage.evaluate(id=>{const api=window.__OHANA_E2E;api.start(id);api.setEvo(0);api.resetInput();},hero);
+    assert.equal(await mobilePage.locator('.touch-btn[data-k="u"]').evaluate(el=>el.classList.contains('off')),false,'baby '+hero+' U must be available on touch');
+    await mobilePage.locator('.touch-btn[data-k="u"]').tap();
+    await mobilePage.waitForFunction(()=>window.__OHANA_E2E.state().lastAbilitySlot===3,null,{timeout:2500});
+  }
   await mobilePage.locator('.touch-btn[data-k="e"]').tap();
   await mobilePage.locator('.touch-btn[data-k="j"]').tap();
   await mobile.close();
