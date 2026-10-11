@@ -72,8 +72,10 @@ async function installFakeNetlify(context) {
   // This verifies credential delivery to RTC; it does not claim a live TURN relay.
   await context.route("**/.netlify/functions/rtc-config",async route=>{
     const body=route.request().postDataJSON();rtcConfigCalls.push(body.identity?.playerId);
-    // Let the host offer arrive before the guest's TURN config finishes.
-    if(body.identity?.playerId!==host?.identity?.playerId)await new Promise(resolve=>setTimeout(resolve,1400));
+    // Add asynchronous response delay while leaving headroom below the 1.8s
+    // production deadline on loaded CI runners. The unit test forces the exact
+    // offer-before-config ordering without depending on wall-clock scheduling.
+    if(body.identity?.playerId!==host?.identity?.playerId)await new Promise(resolve=>setTimeout(resolve,350));
     const response=await rtcHandler(new Request(route.request().url(),{method:"POST",body:JSON.stringify(body)}));
     await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:await response.text()});
   });

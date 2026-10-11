@@ -138,6 +138,7 @@ quotas and billing limits remain necessary when enabling a paid relay.
 
 The browser E2E fixture runs the actual credential HTTP handler with a mocked
 provider and verifies both RTCPeerConnections receive the temporary credentials.
-The guest response is delayed to exercise an offer arriving during TURN lookup.
+The guest response is delayed; a deterministic regression test forces an offer
+to arrive before TURN setup is complete and checks that it is processed later.
 This is a credential-integration test, not proof of a live relay. Production
 acceptance still requires a selected `relay` route between physical clients.
