@@ -52,3 +52,23 @@ export function applyCombatFrame(game,frame){
   ["x","y","w","h","vx","vy","life"].every(k=>typeof p[k]==="number"&&Number.isFinite(p[k]))).map(projectile);
  return true;
 }
+
+/**
+ * Guest-side prediction only. While host frames are fresh, never run a
+ * second enemy brain on the guest: it could select a different target and
+ * telegraph a different attack. Movement uses the host velocity and is
+ * bounded to 12 simulation frames between incoming snapshots.
+ */
+export function advanceMirroredEnemies(game,frameAgeMs){
+ if(!Array.isArray(game?.enemies)||!Number.isFinite(frameAgeMs)||frameAgeMs<0||frameAgeMs>=750)return false;
+ const speed=frameAgeMs<=220?1:frameAgeMs<=440?.6:.2;
+ for(const enemy of game.enemies){
+  if(!enemy||enemy.hp<=0||enemy.dying||enemy.fell)continue;
+  const dx=num(enemy.vx,-40,40)*speed,dy=num(enemy.vy,-40,40)*speed;
+  enemy.x=num(enemy.x+dx,-4096,20000);
+  enemy.y=num(enemy.y+dy,-4096,20000);
+  if(enemy.flash>0)enemy.flash=Math.max(0,enemy.flash-1);
+  if(enemy._hitT>0)enemy._hitT=Math.max(0,enemy._hitT-1);
+ }
+ return true;
+}

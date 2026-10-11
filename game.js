@@ -1722,6 +1722,9 @@ return dmg;
 }
 function updateEnemies() {
 if (!game.player) return;
+// WebRTC host is the single source of enemy decisions during fresh frames.
+// Guest only extrapolates that state instead of independently picking targets.
+if (onlineCoop.advanceGuestCombat(game)) return;
 game.bossFx?.update();
 game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
