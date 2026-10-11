@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {captureCombatFrame,applyCombatFrame} from "../systems/coop-combat-mirror.js";
+import {captureCombatFrame,applyCombatFrame,advanceMirroredEnemies} from "../systems/coop-combat-mirror.js";
 
 test("host sends room-scoped bounded enemy and projectile combat state",()=>{
  const game={roomId:"hub",enemies:[{spawnIndex:0,kind:"toro",x:100,y:200,vx:3,vy:1,hp:15,telegraph:true}],projectiles:[
@@ -51,4 +51,22 @@ test("instant damage events share one ID across WebRTC and HTTP",async()=>{
  assert.match(client,/if\(id&&this\.seenHitEvents\.has\(id\)\)return/);
  assert.match(client,/this\.applySyncedHit\(game,event\.payload\)/);
  assert.match(rtc,/\["action","room","state","hit","combat"\]\.includes\(msg\.kind\)/);
+});
+
+test("guest predicts host enemy movement, not separate attack decisions",()=>{
+ const enemy={kind:"toro",x:100,y:200,vx:4,vy:-2,hp:80,telegraph:true,flash:8};
+ const game={enemies:[enemy]};
+ assert.equal(advanceMirroredEnemies(game,150),true);
+ assert.equal(enemy.x,104);assert.equal(enemy.y,198);
+ assert.equal(enemy.telegraph,true);assert.equal(enemy.flash,7);
+ assert.equal(advanceMirroredEnemies(game,300),true);
+ assert.ok(enemy.x>104&&enemy.x<108);
+ assert.equal(advanceMirroredEnemies(game,760),false);
+});
+test("game engine defers enemy AI to host only when fresh mirror exists",async()=>{
+ const fs=await import("node:fs");
+ const engine=fs.readFileSync(new URL("../game.js",import.meta.url),"utf8");
+ const coop=fs.readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
+ assert.match(engine,/if \(onlineCoop\.advanceGuestCombat\(game\)\) return;/);
+ assert.match(coop,/return advanceMirroredEnemies\(game,performance\.now\(\)-this\.lastCombatReceivedAt\)/);
 });
