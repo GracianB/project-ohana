@@ -3,6 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createRoomService, RoomError } from "../netlify/lib/room-service.mjs";
 import { CAMPAIGN } from "../multiplayer/mission.js";
+import {captureCombatFrame} from "../systems/coop-combat-mirror.js";
 
 class MemoryStore {
   entries = new Map();
@@ -40,6 +41,16 @@ async function makeRoom(service) {
   const guest = await service.join(host.roomId);
   return { host, guest };
 }
+
+test("V298 HTTP combat snapshots require the authenticated host and valid finite state",async()=>{
+ const {service}=setup(),room=await makeRoom(service);await startMatch(service,room);
+ const frame=captureCombatFrame({roomId:"hub",enemies:[],projectiles:[],coopRoomVisit:1},1,"host-session");
+ const message={sequence:1,actionId:"combat:1",signalKind:"combat",payload:frame};
+ const sent=await service.signal(room.host.roomId,room.host.identity,message);
+ assert.ok(sent.combat.events.some(e=>e.signalKind==="combat"&&e.senderSlot===0&&e.payload.frameNo===1));
+ await assert.rejects(service.signal(room.host.roomId,room.guest.identity,{...message,actionId:"guest:combat"}),e=>e.code==="HOST_ONLY");
+ await assert.rejects(service.signal(room.host.roomId,room.host.identity,{...message,sequence:2,actionId:"bad:combat",payload:{...frame,frameNo:NaN}}),e=>e.status===400);
+});
 
 async function startMatch(service, room) {
   await service.choose(room.host.roomId, room.host.identity, "kilo");

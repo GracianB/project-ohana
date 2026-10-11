@@ -288,7 +288,7 @@ try {
     const foe=makeFoe(1700,300,'phosquito',game.roomId,991,{rng:()=>.5});
     foe.spawnIndex=991;foe.hp=foe.max=500;game.enemies.push(foe);
     const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');
-    const frame=captureCombatFrame(game,++onlineCoop.combatFrameNo,onlineCoop.combatEpoch);
+    const frame=captureCombatFrame(game,++onlineCoop.combatSequence,onlineCoop.combatEpoch);
     onlineCoop.direct.sendLatest('combat',frame);return foe._coopSyncId;
   });
   let mirrored=false;
@@ -304,7 +304,7 @@ try {
     const {onlineCoop}=await import('/systems/online-coop.js');const game=onlineCoop._combatGame;
     game.enemies=game.enemies.filter(e=>e._coopSyncId!==id);
     const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');
-    onlineCoop.direct.sendLatest('combat',captureCombatFrame(game,++onlineCoop.combatFrameNo,onlineCoop.combatEpoch));
+    onlineCoop.direct.sendLatest('combat',captureCombatFrame(game,++onlineCoop.combatSequence,onlineCoop.combatEpoch));
     onlineCoop.lastEffectsSentAt=performance.now()+600;
     onlineCoop.direct.sendLatest('effects',{protocol:2,scope:onlineCoop.combatEpoch,frameNo:++onlineCoop.effectSequence,roomId:game.roomId,
       projectiles:[{x:500,y:300,w:12,h:12,vx:0,vy:0,life:100,max:100,shape:'orb',color:'#ff8de1'}],slashes:[],bolts:[]});
