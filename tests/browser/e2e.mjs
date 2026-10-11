@@ -629,9 +629,17 @@ try {
     assert.equal(item.overlay,false,'V301: Kilo opened fullscreen U');
     assert.equal(item.moved,true,'V301: U prevented player movement');
   }
+  const stitchoDuets=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    return [0,1,2,3,4].map(evo=>{
+      api.start('stitcho');api.setEvo(evo);api.setPlayer(320,900);api.resetInput();api.cast(3);api.setPlayerVelocity(2,0);
+      const state=api.step(44);return {evo,duet:state.stitchoDuet,moved:state.player.x!==320,overlay:!!document.querySelector('#supreme-cinema.show')};
+    });
+  });
+  for(const item of stitchoDuets){assert.equal(item.duet?.evo,item.evo);assert.ok(item.duet.age>=40);assert.equal(item.moved,true);assert.equal(item.overlay,false);}
   const supremeStories = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
-    const ids = ['stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+    const ids = ['chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
     return ids.map((id) => {
       api.start(id);
       api.setEvo(4);
@@ -649,7 +657,7 @@ try {
       };
     });
   });
-  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 9, 'V301: las nueve U pendientes conservan storyboard propio');
+  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 8, 'V302: las ocho U pendientes conservan storyboard propio');
   assert.equal(new Set(supremeStories.map((x) => x.camera)).size, 9, 'V301: las nueve U pendientes conservan cámara propia');
   for (const item of supremeStories) {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));

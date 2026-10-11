@@ -20,6 +20,7 @@ class MemoryStore {
 const server = await startServer(0);
 const origin=`http://127.0.0.1:${server.address().port}`;
 const browserName=process.env.OHANA_TEST_BROWSER||"chromium";
+const hostCharacter=process.env.OHANA_TEST_HOST||"kilo";
 const lateIce=process.env.OHANA_TEST_LATE_ICE==="1";
 const browserType=browserName==="firefox"?firefox:chromium;
 // Two distinct browser contexts represent two simultaneously active devices,
@@ -120,7 +121,7 @@ try {
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
-  await hostPage.getByRole("button", { name: "Seleccionar a Kilo", exact: true }).click();
+  await hostPage.getByRole("button", { name: hostCharacter==="stitcho"?"Seleccionar a Stitcho":"Seleccionar a Kilo", exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await guestPage.goto(origin+"/multiplayer.html");
@@ -322,18 +323,33 @@ try {
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {useAbility}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
-    game.player.cds.solar=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    game.player.cds.solar=0;game.player.cds.bang=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
     if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
   });
   let duetDelivered=false;
   for(let i=0;i<30;i++){
-    duetDelivered=await guestPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const s=onlineCoop._combatGame.coopPeerEffects?.kiloDuet;
-      return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId==='kilo';
-    });
+    duetDelivered=await guestPage.evaluate(async expected=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected==='stitcho'?'stitchoDuet':'kiloDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+      return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId===expected;
+    },hostCharacter);
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
+  // V302: verify actual Stitcho storm echo delivery, while preserving the live peer identity.
+  await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+    const g=onlineCoop._combatGame;const effects=capturePeerEffects(g,++onlineCoop.effectSequence,onlineCoop.combatEpoch);
+    effects.stitchoDuet={x:300,y:900,age:45,evo:4,facing:1,bolts:[{x:330,y:850,life:10}]};
+    onlineCoop.lastEffectsSentAt=performance.now()+600;onlineCoop.direct.sendLatest('effects',effects);
+  });
+  let stormDelivered=false;
+  for(let i=0;i<30;i++){
+    stormDelivered=await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
+    });if(stormDelivered)break;await guestPage.waitForTimeout(30);
+  }
+  assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC');
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
 } catch(error) {

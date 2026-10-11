@@ -61,6 +61,7 @@ export function safeDirectPose(message,prevSeq=0){
   dash:finite(message.dash)?clamp(message.dash,0,30):0,
   w:finite(message.w)?clamp(message.w,1,1024):null,h:finite(message.h)?clamp(message.h,1,1024):null,
   cloud:message.cloud===true,thrust:finite(message.thrust)?clamp(message.thrust,0,60):0,
+  move:["roll","chaos","climb"].includes(message.move)?message.move:null,
   thrustFacing:message.thrustFacing===-1?-1:1
  };
 }
@@ -385,7 +386,7 @@ export class DirectPeerLink{
    t:"pose",seq:this.nextSeq+1,room:game.roomId,
    x:p.x,y:p.y,vx:p.vx,vy:p.vy,facing:p.facing,
    evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash,
-   w:p.w,h:p.h,cloud:!!p._cloudActive,thrust:p._thrust||0,thrustFacing:p._thrustFace||p.facing
+   move:p._abilMove||null,w:p.w,h:p.h,cloud:!!p._cloudActive,thrust:p._thrust||0,thrustFacing:p._thrustFace||p.facing
   });
   try{
    this.poseChannel.send(frame);

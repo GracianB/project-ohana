@@ -590,6 +590,13 @@ try {
   assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(),/A COMPÁS/,'V301: HUD must show the actual duet name');
   await page.waitForTimeout(620);
   await capture(page,'09-supreme-kilo-in-world-duet');
+  const stitchoAttempt=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;api.start('stitcho');api.setEvo(4);api.cast(3);
+    return {state:api.step(44),overlay:!!document.querySelector('#supreme-cinema.show')};
+  });
+  assert.ok(stitchoAttempt.state.stitchoDuet?.age>=40,'V302: Stitcho duet did not progress');
+  assert.equal(stitchoAttempt.overlay,false);await capture(page,'09a-stitcho-in-world-storm');
+
 
   await page.evaluate(() => {
     const api=window.__OHANA_E2E;

@@ -1,3 +1,9 @@
+## V302 · Stitcho: Caos bajo la nube (ohana-328)
+
+U de dos segundos dentro del escenario: Chispín llega con la nube de su L, despeina las antenas de Stitcho y combina tres tandas de rayos locales con el caos controlable del protagonista. Sin pantalla completa ni desplazamiento automático. Cinco formas accesibles, potencia por evolución y enfriamiento conservado.
+
+Paletas azul/cobalto/violeta revisadas, crecimiento visual compensado y constelación orbital de Nébula en lugar de corona genérica. Conserva los gestos y costuras del trabajo anterior y las físicas. Dúo cosmético replicado por WebRTC, movimiento roll/chaos del compañero y daño del invitado sincronizado con identidades estables.
+
 ## V301 · Kilo: ¡a compás! (ohana-327)
 
 Primera revisión de diez personajes. U combina el Anillo Ohana de Kilo y los rebotes de Stitcho durante dos segundos dentro del mundo: llamada, despiste, caos y pétalo final. Disponible desde bebé, con potencia por evolución y enfriamiento original. No abre escena completa, no mueve al jugador automáticamente y daña únicamente según la geometría visible.

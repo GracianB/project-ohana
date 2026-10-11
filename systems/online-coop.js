@@ -1,3 +1,4 @@
+import {drawStitchoDuet} from "./stitcho-duet.js";
 import { ROSTER, applyForm } from "../characters/roster.js";
 import { paintFit } from "../characters/look.js";
 import { drawCharacter } from "../characters/draw.js";
@@ -383,7 +384,7 @@ class OnlineCoop {
     Object.assign(this.remote,sample);
     if(sample.teleport){this.remote.x=pose.x;this.remote.y=pose.y;}
     this.remoteWorld=pose.room;
-    this.remote.pose={vx:pose.vx,vy:pose.vy,grounded:pose.grounded,melee:pose.melee,dash:pose.dash};
+    this.remote.pose={move:pose.move,vx:pose.vx,vy:pose.vy,grounded:pose.grounded,melee:pose.melee,dash:pose.dash};
     this.remote.facing=pose.facing;
     this.remote.evolution=pose.evo;
     this.remote.w=pose.w;this.remote.h=pose.h;
@@ -1121,6 +1122,7 @@ class OnlineCoop {
     if(!this.enabled)return;
     const peerFx=game.coopPeerEffects;
     if(peerFx){
+      if(this.remote?.characterId==='stitcho'&&peerFx.stitchoDuet)drawStitchoDuet(ctx,peerFx.stitchoDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
       if(this.remote?.characterId==='kilo'){
         if(peerFx.kiloDuet)drawKiloDuet(ctx,peerFx.kiloDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
         drawKiloAbilityEcho(ctx,peerFx.kiloFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});
@@ -1163,10 +1165,12 @@ class OnlineCoop {
       melee: this.remote.melee,
       dash: this.remote.dash,
       invuln: this.remote.invuln,
+      _abilMove:this.remote.pose?.move||null,
       actionKind: this.remote.actionKind,
       abilitySlot: this.remote.abilitySlot,
       phase: this.remote.phase + t / 10,
       visualScale: 1,
+      _stitchoDuetAge:peerFx?.stitchoDuet?.age||0,_stitchoDuetT:peerFx?.stitchoDuet?120-peerFx.stitchoDuet.age:0,
       _kiloDuetAge:peerFx?.kiloDuet?.age||0,_kiloDuetT:peerFx?.kiloDuet?120-peerFx.kiloDuet.age:0,
       _cloudActive:!!this.remote.cloud,_thrust:this.remote.thrust||0,_thrustFace:this.remote.thrustFacing||1,
     };

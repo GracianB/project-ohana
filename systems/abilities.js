@@ -1,3 +1,4 @@
+import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
@@ -181,7 +182,7 @@ return true;
 
 const SPECIALS = Object.freeze({
 kilo:    { flight: true,  name: "Dúo musical", text: "Kilo abre su anillo y Stitcho rebota a compás. Puedes seguir moviéndote." },
-stitcho: { phase: true,   name: "Costura fantasma", text: "Cruza el peligro con intangibilidad breve." },
+stitcho: { phase: true,   name: "Dúo de tormenta", text: "Caos controlable de Stitcho bajo la nube de Chispín. Sigue moviéndote." },
 chispin: { boltDash: true,name: "Rayo veloz", text: "Impulso eléctrico horizontal con invulnerabilidad." },
 cat:     { shadow: true,  name: "Paso sombra", text: "Desaparece y reaparece con invulnerabilidad." },
 dragon:  { flight: true,  name: "Vuelo celestial", text: "Vuelo libre: WASD controla el aire durante unos segundos." },
@@ -194,7 +195,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 
 const SUPREME = Object.freeze({
 kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
-stitcho: { id: "bang", name: "SINGULARIDAD COSIDA", key: "U", cd: 9000, color: "#8f7bff", special: "Costura fantasma", ally: "chispin" },
+stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 9000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
 chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
 cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
 dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
@@ -311,6 +312,12 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 }
 
 function castSupreme(game, p, flow = currentFlow(game, p)) {
+if(p.id==='stitcho'){
+ game._supremeFlow=flow;game._assist={heroId:'chispin',heroName:'Chispín',t:120};
+ game.ult={t:0,name:SUPREME.stitcho.name,color:'#67ddff',identity:SUPREME_IDENTITY.stitcho.kind};
+ startStitchoDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ p.invuln=Math.max(p.invuln||0,60);return;
+}
 if(p.id==='kilo'){
  game._supremeFlow=flow;game._assist={heroId:'stitcho',heroName:'Stitcho',t:120};
  game.ult={t:0,name:SUPREME.kilo.name,color:'#ffd36a',identity:SUPREME_IDENTITY.kilo.kind};
@@ -639,6 +646,7 @@ export function updateAbilityFx(game) {
 const p = game.player;
 if (!p) return;
 updateKiloDuet(game,hitEnemy);
+updateStitchoDuet(game,hitEnemy);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
 if (S.caos > 0) {
@@ -695,6 +703,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 for (const f of FX) {
 const d = DRW[f.kind];
