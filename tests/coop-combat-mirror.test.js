@@ -33,3 +33,12 @@ test("online client retains direct host-authority and stale fallback boundaries"
  assert.match(source,/this\.remoteWorld===game\.roomId/);
  assert.match(source,/performance\.now\(\)-this\.lastCombatReceivedAt<750/);
 });
+
+test("event channel accepts bounded combat frames without loosening other events",async()=>{
+ const rtc=(await import("node:fs")).readFileSync(new URL("../systems/coop-v108-direct.js",import.meta.url),"utf8");
+ assert.match(rtc,/e\.data\.length>12000/);
+ assert.match(rtc,/msg\.kind==="combat"\|\|e\.data\.length<=900/);
+ assert.match(rtc,/kind==="combat"\?12000:900/);
+ const source=(await import("node:fs")).readFileSync(new URL("../game.js",import.meta.url),"utf8");
+ assert.match(source,/onlineCoop\.hasFreshCombat\(game\)/);
+});
