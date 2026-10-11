@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { RoomError } from "./room-service.mjs";
 import { cloudflareTurnConfig } from "./cloudflare-turn.mjs";
 import { temporaryTurnConfig } from "./turn-credentials.mjs";
+import { meteredTurnConfig } from "./metered-turn.mjs";
 
 const EMPTY={iceServers:[],expiresAt:0};
 const MAX_ISSUES_PER_MINUTE=30;
@@ -26,10 +27,12 @@ export async function getRtcConfig({service,store,body,env={},fetchImpl=fetch,no
  const snapshot=await service.poll(body.roomId,body.identity);
  if(!snapshot.players?.find(p=>p.isYou&&p.connected))throw new RoomError("DISCONNECTED","Reconecta antes de solicitar TURN.",409);
  const managed=!!(env.OHANA_CF_TURN_KEY_ID&&env.OHANA_CF_TURN_API_TOKEN);
+ const metered=!!(env.OHANA_METERED_DOMAIN&&env.OHANA_METERED_TURN_API_KEY);
  const coturn=!!(env.OHANA_TURN_TLS_URL&&env.OHANA_TURN_SHARED_SECRET);
- if(!managed&&!coturn)return {...EMPTY,status:"not-configured"};
+ if(!metered&&!managed&&!coturn)return {...EMPTY,status:"not-configured"};
  const scope=[snapshot.roomId,body.identity.playerId,body.identity.connectionEpoch??0,
-  env.OHANA_CF_TURN_KEY_ID,env.OHANA_CF_TURN_API_TOKEN,env.OHANA_TURN_TLS_URL,env.OHANA_TURN_SHARED_SECRET].join(":");
+  env.OHANA_CF_TURN_KEY_ID,env.OHANA_CF_TURN_API_TOKEN,env.OHANA_TURN_TLS_URL,env.OHANA_TURN_SHARED_SECRET,
+  env.OHANA_METERED_DOMAIN,env.OHANA_METERED_TURN_API_KEY].join(":");
  const key="credential:"+createHash("sha256").update(scope).digest("hex");
  const at=now(),entry=await read(store,key),cached=entry?.data;
  if(cached?.expiresAt>at+CACHE_MARGIN_MS)return {...cached.config,status:"ready"};
@@ -39,9 +42,14 @@ export async function getRtcConfig({service,store,body,env={},fetchImpl=fetch,no
  if(!claim.modified)throw new RoomError("RTC_CONFIG_BUSY","La configuración TURN está en curso.",429);
  try{
   await reserveIssue(store,at);
-  const config=await cloudflareTurnConfig({keyId:env.OHANA_CF_TURN_KEY_ID,apiToken:env.OHANA_CF_TURN_API_TOKEN,fetchImpl})||
+  // Select one managed provider to keep its request within the 1.8s client
+  // deadline; do not chain two slow API lookups during connection setup.
+  const primary=metered?
+   await meteredTurnConfig({domain:env.OHANA_METERED_DOMAIN,apiKey:env.OHANA_METERED_TURN_API_KEY,fetchImpl,now:at}):
+   await cloudflareTurnConfig({keyId:env.OHANA_CF_TURN_KEY_ID,apiToken:env.OHANA_CF_TURN_API_TOKEN,fetchImpl});
+  const config=primary||
    temporaryTurnConfig({url:env.OHANA_TURN_TLS_URL,secret:env.OHANA_TURN_SHARED_SECRET,playerId:body.identity.playerId,now:at});
-  const expiresAt=config?.expiresAt||at+3600000;
+  const expiresAt=config?.refreshAt||config?.expiresAt||at+3600000;
   await store.setJSON(key,config?{config:{...config,expiresAt},expiresAt}:{retryAt:at+30000},{onlyIfMatch:claim.etag});
   return config?{...config,expiresAt,status:"ready"}:{...EMPTY,status:"unavailable"};
  }catch(error){
