@@ -280,6 +280,44 @@ try {
     assert.ok(candidateSessions.has(recoveredSession),"recovery must use the late candidate signal path");
   }
 
+  // V300: real channel deliveries must reconcile dynamic enemies and render native attacks.
+  const mirroredId=await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    const {makeFoe}=await import('/engine/foes.js');
+    const game=onlineCoop._combatGame;
+    const foe=makeFoe(1700,300,'phosquito',game.roomId,991,{rng:()=>.5});
+    foe.spawnIndex=991;foe.hp=foe.max=500;game.enemies.push(foe);
+    const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');
+    const frame=captureCombatFrame(game,++onlineCoop.combatFrameNo,onlineCoop.combatEpoch);
+    onlineCoop.direct.sendLatest('combat',frame);return foe._coopSyncId;
+  });
+  let mirrored=false;
+  for(let i=0;i<50;i++){
+    mirrored=await guestPage.evaluate(async id=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===id&&e.kind==='phosquito');
+    },mirroredId);
+    if(mirrored)break;await guestPage.waitForTimeout(100);
+  }
+  assert.ok(mirrored,'guest never received the dynamically spawned host enemy');
+  await hostPage.evaluate(async id=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');const game=onlineCoop._combatGame;
+    game.enemies=game.enemies.filter(e=>e._coopSyncId!==id);
+    const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');
+    onlineCoop.direct.sendLatest('combat',captureCombatFrame(game,++onlineCoop.combatFrameNo,onlineCoop.combatEpoch));
+    onlineCoop.lastEffectsSentAt=performance.now()+600;
+    onlineCoop.direct.sendLatest('effects',{protocol:2,scope:onlineCoop.combatEpoch,frameNo:++onlineCoop.effectSequence,roomId:game.roomId,
+      projectiles:[{x:500,y:300,w:12,h:12,vx:0,vy:0,life:100,max:100,shape:'orb',color:'#ff8de1'}],slashes:[],bolts:[]});
+  },mirroredId);
+  let reconciled=false;
+  for(let i=0;i<50;i++){
+    reconciled=await guestPage.evaluate(async id=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');const game=onlineCoop._combatGame;
+      return !game.enemies.some(e=>e._coopSyncId===id)&&game.coopPeerEffects?.projectiles.some(p=>p.color==='#ff8de1');
+    },mirroredId);
+    if(reconciled)break;await guestPage.waitForTimeout(50);
+  }
+  assert.ok(reconciled,'enemy removal and actual native peer projectile were not delivered');
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
 } catch(error) {

@@ -58,7 +58,10 @@ export function safeDirectPose(message,prevSeq=0){
   evo:finite(message.evo)?clamp(Math.floor(message.evo),0,4):0,
   grounded:message.grounded!==false,
   melee:finite(message.melee)?clamp(message.melee,0,30):0,
-  dash:finite(message.dash)?clamp(message.dash,0,30):0
+  dash:finite(message.dash)?clamp(message.dash,0,30):0,
+  w:finite(message.w)?clamp(message.w,1,1024):null,h:finite(message.h)?clamp(message.h,1,1024):null,
+  cloud:message.cloud===true,thrust:finite(message.thrust)?clamp(message.thrust,0,60):0,
+  thrustFacing:message.thrustFacing===-1?-1:1
  };
 }
 export function splitDirectDescription(kind,sid,sdp){
@@ -137,8 +140,12 @@ export class DirectPeerLink{
    this.poseChannel=channel;
    channel.onmessage=e=>{
     if(this.closed||this.poseChannel!==channel)return;
-    if(typeof e.data!=="string"||e.data.length>1000)return;
+    if(typeof e.data!=="string"||e.data.length>12000)return;
     let msg;try{msg=JSON.parse(e.data);}catch{return;}
+    if(msg?.t==="world"&&["combat","effects"].includes(msg.kind)){
+     this.onEvent?.({t:"event",kind:msg.kind,payload:msg.payload});return;
+    }
+    if(e.data.length>1000)return;
     const pose=safeDirectPose(msg,this.receivedSeq);
     if(!pose)return;
     this.receivedSeq=pose.seq;
@@ -164,8 +171,8 @@ export class DirectPeerLink{
       }
       return;
     }
-    if(msg?.t==="event"&&["action","room","state","hit","combat"].includes(msg.kind)&&
-       (msg.kind==="combat"||e.data.length<=900))this.onEvent?.(msg);
+    if(msg?.t==="event"&&(["action","room","state","hit","combat"].includes(msg.kind)||msg.kind==="effects")&&
+       (msg.kind==="effects"||(msg.kind==="combat"||e.data.length<=900)))this.onEvent?.(msg);
    };
   }else{try{channel.close();}catch{}return;}
   channel.onopen=()=>this._state();
@@ -377,7 +384,8 @@ export class DirectPeerLink{
   const frame=JSON.stringify({
    t:"pose",seq:this.nextSeq+1,room:game.roomId,
    x:p.x,y:p.y,vx:p.vx,vy:p.vy,facing:p.facing,
-   evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash
+   evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash,
+   w:p.w,h:p.h,cloud:!!p._cloudActive,thrust:p._thrust||0,thrustFacing:p._thrustFace||p.facing
   });
   try{
    this.poseChannel.send(frame);
@@ -386,11 +394,20 @@ export class DirectPeerLink{
   }catch{return false;}
  }
  sendEvent(kind,payload={}){
-  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state","hit","combat"].includes(kind))return false;
+  if(!this.active||this.eventChannel.bufferedAmount>16000||!(["action","room","state","hit","combat"].includes(kind)||kind==="effects"))return false;
   try{
    const encoded=JSON.stringify({t:"event",kind,payload});
-   if(encoded.length>(kind==="combat"?12000:900))return false;
+   if(encoded.length>(kind==="effects"?12000:kind==="combat"?12000:900))return false;
    this.eventChannel.send(encoded);return true;
+  }catch{return false;}
+ }
+ // V298: disposable snapshots do not queue behind reliable actions and pings.
+ sendLatest(kind,payload){
+  if(!this.active||!["combat","effects"].includes(kind)||this.poseChannel.bufferedAmount>12000)return false;
+  try{
+   const encoded=JSON.stringify({t:"world",kind,payload});
+   if(encoded.length>12000)return false;
+   this.poseChannel.send(encoded);return true;
   }catch{return false;}
  }
  close(){

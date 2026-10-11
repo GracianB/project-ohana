@@ -60,6 +60,7 @@ import { onlineCoop } from "./systems/online-coop.js";
 import { applyCoopChallenge } from "./systems/coop-challenge.js";
 import { supportBelow } from "./systems/platform-geometry.js";
 import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
+import { resetCombatMirror,mirroredProjectileHits } from "./systems/coop-combat-mirror.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -128,6 +129,16 @@ rng: Math.random,
 fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
 worldW: ROOM_W, worldH: ROOM_H, running: false, reduceMotion, spawn: { x: 180, y: 500 },
 shake: 0, hitstop: 0, camPunch: 0, combo: 0, comboT: 0, score: 0, combatFx: new CombatFX(), bossFx: new BossFX(), experience: new ExperienceDirector(), roomId: "hub", visited: { hub: true }, fading: 0, flash: 0, kills: 0, won: false, summoned: false, summonDelay: 0, runtimeFaults: 0, lastRuntimeFault: ""
+};
+
+
+const coopEnemyKinds=new Set(['phosquito','mosquito','libelula','abeja','pez','planta','medusa','anguila','rana','cangrejo','gaviota','murcielago','arana','brasita','escoria','ufo','cucaracho']);
+game.createCoopEnemy=(spec)=>{
+ if(spec.boss?spec.kind!=='boss':!coopEnemyKinds.has(spec.kind))return null;
+ const enemy=spec.boss?createBossNido():makeFoe(spec.x,spec.y,spec.kind,game.roomId,spec.index,{baby:!!spec.flags?.baby,rng:()=>.5});
+ if(enemy.kind!==spec.kind)return null;
+ enemy.spawnIndex=spec.index;enemy.roomId=game.roomId;enemy._coopChallengeApplied=true;
+ return enemy;
 };
 
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
@@ -490,6 +501,8 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+game.coopRoomVisit=(game.coopRoomVisit||0)+1;
+resetCombatMirror(game);game.coopPeerEffects=null;
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
 if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
@@ -889,6 +902,7 @@ addPlayerXp(p, 1);
 void onlineCoop.signal(game, "hit", {
 characterId: p.id,
 targetId: e.id,
+targetSyncId:e._coopSyncId,targetVisit:e._coopVisit,
 kind: e.kind,
 x: e.x,
 y: e.y,
@@ -1721,7 +1735,24 @@ function updateEnemies() {
 if (!game.player) return;
 // WebRTC host is the single source of enemy decisions during fresh frames.
 // Guest only extrapolates that state instead of independently picking targets.
-if (onlineCoop.advanceGuestCombat(game)) return;
+if (onlineCoop.advanceGuestCombat(game)) {
+  if(onlineCoop.hasFreshCombat(game)){
+    mirroredProjectileHits(game,damage=>hurtPlayer(damage,"-"+Math.round(damage)));
+    for(const enemy of game.enemies){
+      const p=game.player;
+      if(!p||p.dead||p.invuln>0)break;
+      if(enemy.hp>0&&!enemy.dying&&!enemy.fell&&!(enemy.kind==="planta"&&!enemy.up)&&aabb(p,enemy)){
+        if(!enemy.boss&&p.vy>1.5&&p.y+p.h<enemy.y+Math.min(28,enemy.h*.5)){
+          const damage=8+(Number(p.evo)||0)*2;
+          damageEnemy(enemy,damage);p.vy=-9.4;p.grounded=false;p.invuln=Math.max(p.invuln||0,10);
+          void onlineCoop.signal(game,"hit",{targetSyncId:enemy._coopSyncId,targetVisit:enemy._coopVisit,
+            targetId:enemy.id,kind:enemy.kind,x:enemy.x,y:enemy.y,damage,characterId:p.id});
+        }else if(!enemy.boss||enemy.contactDmg>0)hurtPlayer(enemy.boss?enemy.contactDmg:dmgFor(enemy),"CONTACTO");
+      }
+    }
+  }
+  return;
+}
 game.bossFx?.update();
 game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
@@ -1792,6 +1823,7 @@ if (e.boss) {
   continue;
 }
 
+const aiTarget=onlineCoop.enemyTarget(game,e)||game.player;
 const flyer = e.kind === "phosquito" || e.kind === "mosquito" || e.kind === "gaviota" || e.kind === "murcielago" || e.kind === "libelula" || e.kind === "avispa" || e.kind === "abeja" || e.kind === "brasita" || e.kind === "ufo";
 if (flyer) {
   const band = e.kind === "gaviota" ? 280 : 360;
@@ -1802,14 +1834,14 @@ else if (e.kind === "planta" || e.kind === "medusa" || e.kind === "pez" || e.kin
 else e.vy += 0.5;
 e.x += e.vx; e.y += e.vy;
 {
-const s = sense(e, game.player);
+const s = sense(e, aiTarget);
 const pack = Math.max(0, Number(e.aiPack) || 0);
 const next = think(e, s, pack);
 if (next !== "patrol" && (e.mode || "patrol") === "patrol") e.alertPing = 16;
 e.mode = next;
 e._dx = s.dx;
 e._over = s.over;
-const steering = enemySteering(e, game.player);
+const steering = enemySteering(e, aiTarget);
 e._aiSteer = steering.x;
 e._aiSteerScale = steering.scale;
 if (e.alertPing > 0) e.alertPing--;
@@ -1819,12 +1851,12 @@ if (e.kind === "planta" && e.up) {
   if ((e.plantWind || 0) > 0) {
     e.plantWind--;
     e.telegraph = true;
-    e.aimDx = game.player.x - e.x;
-    e.aimDy = game.player.y - e.y;
+    e.aimDx = aiTarget.x - e.x;
+    e.aimDy = aiTarget.y - e.y;
     if (e.plantWind <= 0) {
       e.telegraph = false;
       e.aimDx = e.aimDy = null;
-      const aim = Math.sign(game.player.x - e.x) || 1;
+      const aim = Math.sign(aiTarget.x - e.x) || 1;
       pushRuntime(game.projectiles, {
         x: e.x + 10, y: e.y + 8,
         vx: aim * 4.2 * 0.7,
@@ -1861,13 +1893,13 @@ if (e.kind === "phosquito") {
     e.diving--;
     e.telegraph = false;
     if (e.diving <= 0) e.diveCd = 70;
-  } else if (e.diveCd <= 0 && game.player && enemyCanCommit(e)) {
+  } else if (e.diveCd <= 0 && aiTarget && enemyCanCommit(e)) {
     e.wind = (e.wind || 0) + 1;
     e.telegraph = true;
     e.vx *= 0.9;
     if (e.wind > 12) {
       e.wind = 0; e.telegraph = false; e.diving = 28;
-      e.vx += Math.sign(game.player.x - e.x) * 1.8;
+      e.vx += Math.sign(aiTarget.x - e.x) * 1.8;
       e.vy = 3.4;
     }
   } else {
@@ -1880,7 +1912,7 @@ if (e.kind === "phosquito") {
 }
 if (e.kind === "cucaracho" && e.evo >= 2) {
   e.telegraph = false;
-  if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.16;
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * 0.16;
   e.vx = Math.max(-3.6, Math.min(3.6, e.vx));
   if (e.grounded && (e.hop || 0) <= 0 && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e) && (t + Math.floor(e.x)) % 70 === 0) {
     e.vy = -6.2;
@@ -1895,10 +1927,10 @@ if (e.kind === "cucaracho" && e.evo < 2) {
     if (e.lunge <= 0) e.vx *= 0.4;
   } else {
     e.lungeCd = (e.lungeCd || 0) - 1;
-    if (e.evo >= 1 && e.lungeCd <= 0 && game.player && e.mode === "strike" && enemyCanCommit(e)) {
+    if (e.evo >= 1 && e.lungeCd <= 0 && aiTarget && e.mode === "strike" && enemyCanCommit(e)) {
       e.lungeCd = 90;
       e.lunge = 18;
-      e.vx = Math.sign(game.player.x - e.x || 1) * 5.2;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 5.2;
       e.vy = -3.5;
       e.flash = 6;
       game.fx.emit(e.x, e.y + e.h, { color: "#c45a18", count: 6, size: 2.5, up: 1.2 });
@@ -1918,20 +1950,20 @@ if (e.kind === "mosquito") {
     e.diving--;
     e.telegraph = false;
     if (e.diving <= 0) { e.spiral = 28; e.diveCd = 48; }
-  } else if (e.diveCd <= 0 && game.player && e.mode === "strike" && enemyCanCommit(e)) {
+  } else if (e.diveCd <= 0 && aiTarget && e.mode === "strike" && enemyCanCommit(e)) {
     e.wind = (e.wind || 0) + 1;
     e.telegraph = true;
     e.vx *= 0.85;
     e.vy *= 0.7;
     if (e.wind > 14) {
       e.wind = 0; e.telegraph = false; e.diving = 22;
-      e.vx = Math.sign(game.player.x - e.x || 1) * 3.4;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 3.4;
       e.vy = 5.5;
     }
   } else {
     e.telegraph = false;
     e.vy += 0.05;
-    if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.12;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.12;
     if (e.y < 480) e.vy += 0.55;
     if (e.y > 740) e.vy = -2.4;
   }
@@ -1946,7 +1978,7 @@ if (e.kind === "libelula") {
     e.telegraph = false;
     if (t % 2 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4aba7a" }, MAX_RUNTIME_GHOSTS);
     if (e.darting <= 0) { e.dart = 55 + (t % 35); e.vx *= 0.35; }
-  } else if (e.wind > 0 || (e.dart <= 0 && game.player && enemyCanCommit(e))) {
+  } else if (e.wind > 0 || (e.dart <= 0 && aiTarget && enemyCanCommit(e))) {
     if (e.dart <= 0 && e.wind <= 0) e.wind = 1;
     e.wind++;
     e.telegraph = true;
@@ -1955,12 +1987,12 @@ if (e.kind === "libelula") {
     e.vy = 0;
     if (e.wind > 10) {
       e.wind = 0; e.telegraph = false; e.darting = 16;
-      const dx = game.player.x - e.x;
-      const dy = game.player.y - e.y;
+      const dx = aiTarget.x - e.x;
+      const dy = aiTarget.y - e.y;
       const len = Math.hypot(dx, dy) || 1;
       e.vx = (dx / len) * 6.2 + (game.rng() - 0.5) * 1.5;
       e.vy = (dy / len) * 4.5;
-      e.baseY += Math.sign(game.player.y - e.baseY) * 36;
+      e.baseY += Math.sign(aiTarget.y - e.baseY) * 36;
       e.baseY = Math.max(220, Math.min(620, e.baseY));
     }
   } else {
@@ -1989,7 +2021,7 @@ if (e.kind === "abeja" || e.kind === "avispa") {
       e.vy *= 0.15;
       e.baseY = Math.max(220, Math.min(620, e.y));
     }
-  } else if (e.cd <= 0 && game.player && enemyCanCommit(e)) {
+  } else if (e.cd <= 0 && aiTarget && enemyCanCommit(e)) {
     e.wind = (e.wind || 0) + 1;
     e.telegraph = true;
     e.vx *= 0.9;
@@ -2000,8 +2032,8 @@ if (e.kind === "abeja" || e.kind === "avispa") {
       e.telegraph = false;
       e.diving = 26;
       e.charging = 26;
-      const dx = game.player.x - e.x;
-      const dy = game.player.y - e.y + 12;
+      const dx = aiTarget.x - e.x;
+      const dy = aiTarget.y - e.y + 12;
       const len = Math.hypot(dx, dy) || 1;
       e.vx = (dx / len) * 6.2;
       e.vy = (dy / len) * 8.4;
@@ -2012,9 +2044,9 @@ if (e.kind === "abeja" || e.kind === "avispa") {
     e.charging = 0;
     e.vy = 0;
     e.y = e.baseY + Math.sin(e.bob) * 16 + Math.sin(e.bob * 2.5) * 5;
-    if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.03;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.03;
     e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
-    e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.18;
+    e.baseY += Math.sign((aiTarget ? aiTarget.y : e.baseY) - e.baseY) * 0.18;
     e.baseY = Math.max(220, Math.min(620, e.baseY));
   }
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
@@ -2028,16 +2060,16 @@ if (e.kind === "pez") {
     e.dashSwim--;
     if (t % 2 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#a0e8ff", count: 2, size: 2.2, up: 0.3, speed: 0.6, life: 14 });
     if (e.dashSwim <= 0) e.vx *= 0.45;
-  } else if (e.dashCd <= 0 && game.player && enemyCanCommit(e)) {
+  } else if (e.dashCd <= 0 && aiTarget && enemyCanCommit(e)) {
     e.dashCd = 90 + (t % 40);
     e.dashSwim = 18;
-    e.vx = Math.sign(game.player.x - e.x || 1) * 4.4;
-    e.baseY += Math.sign(game.player.y - e.baseY) * 28;
+    e.vx = Math.sign(aiTarget.x - e.x || 1) * 4.4;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 28;
   }
   e.y = e.baseY + Math.sin(e.bob) * 26 + Math.sin(e.bob * 2.2) * 8;
-  if (game.player) {
-    e.vx += Math.sign(game.player.x - e.x) * 0.035;
-    e.baseY += Math.sign(game.player.y - e.baseY) * 0.25;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.035;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.25;
   }
   e.vx = Math.max(e.dashSwim > 0 ? -4.6 : -2.4, Math.min(e.dashSwim > 0 ? 4.6 : 2.4, e.vx));
   e.baseY = Math.max(280, Math.min(560, e.baseY));
@@ -2048,20 +2080,20 @@ if (e.kind === "medusa") {
   e.vy = 0;
   e.bob = (e.bob || 0) + 0.04;
   if (e.baseY == null) e.baseY = e.y;
-  e.baseY += Math.sign((game.player ? game.player.y : e.baseY) - e.baseY) * 0.18;
+  e.baseY += Math.sign((aiTarget ? aiTarget.y : e.baseY) - e.baseY) * 0.18;
   e.y = e.baseY + Math.sin(e.bob) * 40;
-  if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.015;
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.015;
   e.vx = Math.max(-1.4, Math.min(1.4, e.vx));
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
   if (t % 8 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h - 4, { color: "#ff9ad8", count: 1, size: 2, up: 0.4, speed: 0.5, life: 14 });
   if (e.pulsezap > 0) {
     e.pulsezap--;
     e.telegraph = e.pulsezap > 8; // pulse ring visible ~0.4s (pulsezap 32→9)
-    if (e.pulsezap === 8 && game.player) {
-      const aim = Math.sign(game.player.x - e.x) || 1;
+    if (e.pulsezap === 8 && aiTarget) {
+      const aim = Math.sign(aiTarget.x - e.x) || 1;
       pushRuntime(game.projectiles, {
         x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
-        vx: aim * 1.6, vy: (game.player.y - e.y) * 0.012,
+        vx: aim * 1.6, vy: (aiTarget.y - e.y) * 0.012,
         w: 12, h: 12, life: 90, dmg: 10, color: "#ff8ad0",
         owner: "enemy", trail: true,
 }, MAX_RUNTIME_PROJECTILES);
@@ -2071,8 +2103,8 @@ if (e.kind === "medusa") {
   } else {
     e.telegraph = false;
     e.zapCd = (e.zapCd || 0) - 1;
-    if (e.zapCd <= 0 && game.player && enemyCanCommit(e)) {
-      const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
+    if (e.zapCd <= 0 && aiTarget && enemyCanCommit(e)) {
+      const dist = Math.hypot(aiTarget.x - e.x, aiTarget.y - e.y);
       if (dist < 280) e.pulsezap = 32; // ~0.4s telegraph before sting
       else e.zapCd = 20;
     }
@@ -2083,9 +2115,9 @@ if (e.kind === "anguila" && !(e.stun > 5)) {
   e.bob = (e.bob || 0) + 0.055;
   if (e.baseY == null) e.baseY = e.y;
   e.y = e.baseY + Math.sin(e.bob) * 22 + Math.sin(e.bob * 1.7) * 8;
-  if (game.player) {
-    e.vx += Math.sign(game.player.x - e.x) * 0.028;
-    e.baseY += Math.sign(game.player.y - e.baseY) * 0.2;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.028;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.2;
   }
   e.vx = Math.max(-2.2, Math.min(2.2, e.vx));
   e.baseY = Math.max(260, Math.min(560, e.baseY));
@@ -2094,12 +2126,12 @@ if (e.kind === "anguila" && !(e.stun > 5)) {
   if (e.pulsezap > 0) {
     e.pulsezap--;
     e.telegraph = e.pulsezap > 12; // ~0.4s telegraph (pulsezap 36→12)
-    if (game.player && e.telegraph) {
-      e.aimDx = game.player.x - e.x;
-      e.aimDy = game.player.y - e.y;
+    if (aiTarget && e.telegraph) {
+      e.aimDx = aiTarget.x - e.x;
+      e.aimDy = aiTarget.y - e.y;
     }
-    if (e.pulsezap === 12 && game.player) {
-      const dx = game.player.x - e.x, dy = game.player.y - e.y;
+    if (e.pulsezap === 12 && aiTarget) {
+      const dx = aiTarget.x - e.x, dy = aiTarget.y - e.y;
       const len = Math.hypot(dx, dy) || 1;
       pushRuntime(game.projectiles, {
         x: e.x + e.w / 2 - 5, y: e.y + e.h / 2,
@@ -2114,8 +2146,8 @@ if (e.kind === "anguila" && !(e.stun > 5)) {
     e.telegraph = false;
     e.aimDx = e.aimDy = null;
     e.zapCd = (e.zapCd || 0) - 1;
-    if (e.zapCd <= 0 && game.player && enemyCanCommit(e)) {
-      const dist = Math.hypot(game.player.x - e.x, game.player.y - e.y);
+    if (e.zapCd <= 0 && aiTarget && enemyCanCommit(e)) {
+      const dist = Math.hypot(aiTarget.x - e.x, aiTarget.y - e.y);
       if (dist < 320) e.pulsezap = 36;
       else e.zapCd = 18;
     }
@@ -2127,11 +2159,11 @@ if (e.kind === "rana" && !(e.stun > 5)) {
     e.telegraph = true;
     e.vx *= 0.35;
     e.sitting = Math.max(e.sitting || 0, 2);
-    if (e.hopWind <= 0 && game.player) {
+    if (e.hopWind <= 0 && aiTarget) {
       e.telegraph = false;
       e.sitting = 0;
       e.hopCd = 52 + (t % 28);
-      e.vx = Math.sign(game.player.x - e.x || 1) * (3.2 + game.rng());
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * (3.2 + game.rng());
       e.vy = -7.2;
       e.flash = 5;
       game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#6ad070", count: 6, size: 2.4, up: 1.1 });
@@ -2142,7 +2174,7 @@ if (e.kind === "rana" && !(e.stun > 5)) {
     e.telegraph = false;
   } else {
     e.hopCd = (e.hopCd || 0) - 1;
-    if (e.hopCd <= 0 && game.player && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e)) {
+    if (e.hopCd <= 0 && aiTarget && (e.mode === "chase" || e.mode === "strike") && enemyCanCommit(e)) {
       e.hopWind = 24; // ~0.4s telegraph
       e.telegraph = true;
     } else if (Math.abs(e.vy) < 0.2 && e.hopCd > 0 && e.hopCd < 40) {
@@ -2153,7 +2185,7 @@ if (e.kind === "rana" && !(e.stun > 5)) {
 }
 if (e.kind === "cangrejo" && !(e.stun > 5)) {
   e.clawCd = (e.clawCd || 0) - 1;
-  const near = game.player && Math.abs(game.player.x - e.x) < 130 && Math.abs(game.player.y - e.y) < 90;
+  const near = aiTarget && Math.abs(aiTarget.x - e.x) < 130 && Math.abs(aiTarget.y - e.y) < 90;
   if (e.clawWind > 0) {
     e.clawWind--;
     e.telegraph = true;
@@ -2170,7 +2202,7 @@ if (e.kind === "cangrejo" && !(e.stun > 5)) {
     e.clawSnap--;
     e.claws = true;
     e.telegraph = false;
-    if (near && game.player) e.vx += Math.sign(game.player.x - e.x || 1) * 0.14;
+    if (near && aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * 0.14;
   } else {
     e.claws = !!near;
     e.telegraph = false;
@@ -2188,14 +2220,14 @@ if (e.kind === "gaviota") {
     e.diving--;
     e.telegraph = false;
     if (e.diving <= 0) { e.diveCd = 70; e.vy = -2.0; e.baseY = Math.max(240, Math.min(520, e.y)); }
-  } else if (e.diveCd <= 0 && game.player && enemyCanCommit(e)) {
+  } else if (e.diveCd <= 0 && aiTarget && enemyCanCommit(e)) {
     e.wind = (e.wind || 0) + 1;
     e.telegraph = true;
     e.vx *= 0.88;
     e.vy *= 0.75;
     if (e.wind > 24) { // ~0.4s telegraph
       e.wind = 0; e.telegraph = false; e.diving = 26;
-      e.vx = Math.sign(game.player.x - e.x || 1) * 2.6;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 2.6;
       e.vy = 4.2;
     }
   } else {
@@ -2203,7 +2235,7 @@ if (e.kind === "gaviota") {
     e.vy += 0.03;
     e.y = e.baseY + Math.sin(e.bob) * 12;
     e.vy = 0;
-    if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.05;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.05;
     if (e.y < 260) e.baseY += 0.4;
     if (e.y > 560) e.baseY -= 0.4;
   }
@@ -2220,20 +2252,20 @@ if (e.kind === "murcielago") {
     e.telegraph = false;
     if (t % 3 === 0) pushRuntime(game.ghosts, { x: e.x, y: e.y, w: e.w, h: e.h, life: 7, color: "#4a3060" }, MAX_RUNTIME_GHOSTS);
     if (e.diving <= 0) { e.diveCd = angry ? 40 : 65; e.vy = -2.4; e.baseY = Math.max(200, Math.min(500, e.y)); }
-  } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && game.player && enemyCanCommit(e)) {
+  } else if ((e.diveCd <= 0 || (angry && e.diveCd < 20)) && aiTarget && enemyCanCommit(e)) {
     e.wind = (e.wind || 0) + 1;
     e.telegraph = true;
     e.vx *= 0.86;
     if (e.wind > 12) {
       e.wind = 0; e.telegraph = false; e.diving = 24;
-      e.vx = Math.sign(game.player.x - e.x || 1) * 3.0;
+      e.vx = Math.sign(aiTarget.x - e.x || 1) * 3.0;
       e.vy = 5.0;
     }
   } else {
     e.telegraph = false;
     e.y = e.baseY + Math.sin(e.bob) * 14;
     e.vy = 0;
-    if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.07;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.07;
     e.vx = Math.max(-3.2, Math.min(3.2, e.vx));
   }
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
@@ -2244,7 +2276,7 @@ if (e.kind === "arana") {
     e.telegraph = true;
     e.vx *= 0.92;
     if (e.vy > 6) e.dropping = false;
-  } else if (e.dropCd <= 0 && game.player && Math.abs(game.player.x - e.x) < 160 && enemyCanCommit(e)) {
+  } else if (e.dropCd <= 0 && aiTarget && Math.abs(aiTarget.x - e.x) < 160 && enemyCanCommit(e)) {
     e.dropCd = 140;
     e.dropping = true;
     e.y = Math.max(80, e.y - 180);
@@ -2253,7 +2285,7 @@ if (e.kind === "arana") {
     game.fx.emit(e.x + e.w / 2, e.y, { color: "#888", count: 4, size: 2, up: 0.3 });
   } else {
     e.telegraph = false;
-    if (game.player) e.vx += Math.sign(game.player.x - e.x) * 0.04;
+    if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x) * 0.04;
     e.vx = Math.max(-2.0, Math.min(2.0, e.vx));
   }
   if (!e.dropping && Math.abs(e.vy) < 0.15) e.dropping = false;
@@ -2263,9 +2295,9 @@ if (e.kind === "brasita") {
   if (e.baseY == null) e.baseY = e.y;
   e.y = e.baseY + Math.sin(e.bob) * 18;
   e.vy = 0;
-  if (game.player) {
-    e.vx += Math.sign(game.player.x - e.x) * 0.04;
-    e.baseY += Math.sign(game.player.y - e.baseY) * 0.22;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.04;
+    e.baseY += Math.sign(aiTarget.y - e.baseY) * 0.22;
   }
   e.vx = Math.max(-1.8, Math.min(1.8, e.vx));
   e.baseY = Math.max(220, Math.min(620, e.baseY));
@@ -2275,7 +2307,7 @@ if (e.kind === "brasita") {
 if (e.kind === "escoria") {
   const hot = e.hp < e.max * 0.45;
   const spd = hot ? 2.4 : 1.1;
-  if (game.player) e.vx += Math.sign(game.player.x - e.x || 1) * (hot ? 0.12 : 0.04);
+  if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * (hot ? 0.12 : 0.04);
   e.vx = Math.max(-spd, Math.min(spd, e.vx));
   e.enraged = hot;
   e.telegraph = false;
@@ -2287,9 +2319,9 @@ if (e.kind === "ufo" && !(e.stun > 5)) {
   if (e.baseY == null) e.baseY = e.y;
   e.y = e.baseY + Math.sin(e.bob) * 14;
   e.vy = 0;
-  if (game.player) {
-    e.vx += Math.sign(game.player.x - e.x) * 0.03;
-    e.baseY += Math.sign(game.player.y - 40 - e.baseY) * 0.15;
+  if (aiTarget) {
+    e.vx += Math.sign(aiTarget.x - e.x) * 0.03;
+    e.baseY += Math.sign(aiTarget.y - 40 - e.baseY) * 0.15;
   }
   e.vx = Math.max(-1.6, Math.min(1.6, e.vx));
   e.baseY = Math.max(180, Math.min(520, e.baseY));
@@ -2297,10 +2329,10 @@ if (e.kind === "ufo" && !(e.stun > 5)) {
   e.shootCd = (e.shootCd || 0) - 1;
   if (e.shootCd <= 30 && enemyCanCommit(e)) e.telegraph = true;
   else e.telegraph = false;
-  if (e.shootCd <= 0 && game.player && enemyCanCommit(e)) {
+  if (e.shootCd <= 0 && aiTarget && enemyCanCommit(e)) {
     e.shootCd = 90;
     e.telegraph = false;
-    const dx = game.player.x - e.x, dy = game.player.y - e.y;
+    const dx = aiTarget.x - e.x, dy = aiTarget.y - e.y;
     const len = Math.hypot(dx, dy) || 1;
     pushRuntime(game.projectiles, {
       x: e.x + e.w / 2 - 6, y: e.y + e.h,
@@ -2311,8 +2343,8 @@ if (e.kind === "ufo" && !(e.stun > 5)) {
     game.fx.emit(e.x + e.w / 2, e.y + e.h, { color: "#7ee7ff", count: 6, size: 2.5, up: 0.8 });
   }
 }
-if (!e.telegraph && game.player) {
-  const steer = enemySteering(e, game.player);
+if (!e.telegraph && aiTarget) {
+  const steer = enemySteering(e, aiTarget);
   if (e.mode === "retreat" || e.mode === "flank") {
     e.vx += steer.x * steer.scale;
   } else if (e.mode === "hold" && !enemyCanCommit(e)) {
@@ -2459,9 +2491,12 @@ if (pr.trail && pr.life % 2 === 0) {
 if (pr.owner === "player") {
   for (const e of game.enemies) {
     if (!pr.pickup && !e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
-      let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
+    let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
       dmg = Math.round(dmg);
-      damageEnemy(e, dmg); registerBossPunish(e); e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
+      damageEnemy(e, dmg); registerBossPunish(e);
+      void onlineCoop.signal(game,"hit",{targetSyncId:e._coopSyncId,targetVisit:e._coopVisit,targetId:e.id,
+        kind:e.kind,x:e.x,y:e.y,damage:dmg,characterId:game.player.id});
+      e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
       e.stun = Math.max(e.stun || 0, e.boss ? 4 : 12);
       e.flash = Math.max(e.flash || 0, 14);
       if (pr.pierce) {
