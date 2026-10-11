@@ -57,6 +57,7 @@ import { baitLabel } from "./systems/boss-bait.js";
 import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
 import { encounterLabel } from "./systems/boss-encounter-memory.js";
 import { onlineCoop } from "./systems/online-coop.js";
+import { applyCoopChallenge } from "./systems/coop-challenge.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -512,6 +513,7 @@ if (f[3]) applyElite(e);
 return e;
 });
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
+for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
 if (isAirFoe(e)) continue;
 let floor = null;
@@ -528,6 +530,7 @@ game.boss = null;
 if (r.boss && !game.won) {
 game.boss = scaleFoe(createBossNido());
 game.enemies.push(game.boss);
+applyCoopChallenge(game.boss,onlineCoop.enabled);
 }
 game.projectiles.length = 0;
 game.bolts.length = 0;
