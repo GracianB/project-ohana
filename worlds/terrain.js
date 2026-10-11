@@ -16,19 +16,27 @@ function hash(n) {
   return s - Math.floor(s);
 }
 
-function onView(x, w) {
-  return x + w > -180 && x < 1460;
+// Camera drawing width is not always 1280 CSS pixels (ultrawide, DPR, zoom).
+// Conservative canvas bounds prevent platforms vanishing on large monitors.
+export function platformInView(x, w, canvasWidth) {
+  if (!Number.isFinite(x) || !Number.isFinite(w) || w <= 0) return false;
+  const width = Number.isFinite(canvasWidth) && canvasWidth > 0 ? canvasWidth : 2560;
+  return x + w > -180 && x < width + 180;
+}
+function drawingWidth(ctx) {
+  return Number(ctx?.canvas?.width) || 2560;
 }
 
 export function drawChasms(ctx, platforms, cam, t) {
-  const grounds = platforms.filter((pl) => pl.h > 40).sort((a, b) => a.x - b.x);
+  const grounds = (platforms || []).filter((pl) => pl && [pl.x,pl.y,pl.w,pl.h].every(Number.isFinite) && pl.w > 0 && pl.h > 40).sort((a, b) => a.x - b.x);
   for (let i = 0; i < grounds.length - 1; i++) {
     const a = grounds[i], b = grounds[i + 1];
     const gap = b.x - (a.x + a.w);
-    if (gap < 40) continue;
+    // A vertical staircase is not a chasm: only compare floors at similar height.
+    if (gap < 40 || Math.abs(a.y - b.y) > 42) continue;
     const x = a.x + a.w - cam.x;
     const y = a.y - cam.y;
-    if (!onView(x, gap)) continue;
+    if (!platformInView(x, gap, drawingWidth(ctx))) continue;
 
     const g = ctx.createLinearGradient(0, y, 0, y + 220);
     g.addColorStop(0, "rgba(8,12,22,.18)");
@@ -78,11 +86,12 @@ export function drawChasms(ctx, platforms, cam, t) {
 }
 
 export function drawPlatform(ctx, plat, world, cam, t) {
+  if (!plat || ![plat.x,plat.y,plat.w,plat.h].every(Number.isFinite) || plat.w <= 0 || plat.h <= 0) return;
   const x = plat.x - cam.x;
   const y = plat.y - cam.y;
   const w = plat.w;
   const h = plat.h;
-  if (!onView(x, w)) return;
+  if (!platformInView(x, w, drawingWidth(ctx))) return;
   const id = world.id || "grove";
   const thin = h <= 24;
 
@@ -244,6 +253,6 @@ function dress(ctx, world, cam, t) {
 }
 export function drawTerrain(ctx, platforms, world, cam, t) {
   drawChasms(ctx, platforms, cam, t);
-  for (const plat of platforms) drawPlatform(ctx, plat, world, cam, t);
+  for (const plat of platforms || []) drawPlatform(ctx, plat, world, cam, t);
   dress(ctx, world, cam, t);
 }
