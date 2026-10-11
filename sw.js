@@ -111,6 +111,7 @@ const PRECACHE = [
   "./systems/coop-combat-mirror.js?v=" + VERSION,
   "./systems/coop-challenge.js?v=" + VERSION,
   "./systems/platform-geometry.js?v=" + VERSION,
+  "./systems/room-strategy.js?v=" + VERSION,
   "./systems/chispin-cloud.js?v=" + VERSION,
   "./systems/coop-v109-recovery.js?v=" + VERSION,
   "./systems/menu-visibility.js?v=" + VERSION,
