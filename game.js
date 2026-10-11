@@ -2624,10 +2624,10 @@ for (const b of game.bolts) if (visibleForRender(b,game.cam,camW(),camH())) draw
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
 game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam);
+if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
 ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
-drawChispinCloud(ctx,game.player,game.cam,t);
 drawCharacter(ctx, game.player, game.cam, t);
 ctx.globalAlpha = 1;
 } else if (game.player.dead) {
