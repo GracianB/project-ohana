@@ -164,7 +164,7 @@ export class DirectPeerLink{
       }
       return;
     }
-    if(msg?.t==="event"&&["action","room","state"].includes(msg.kind))this.onEvent?.(msg);
+    if(msg?.t==="event"&&["action","room","state","hit"].includes(msg.kind))this.onEvent?.(msg);
    };
   }else{try{channel.close();}catch{}return;}
   channel.onopen=()=>this._state();
