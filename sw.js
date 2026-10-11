@@ -158,6 +158,7 @@ const PRECACHE = [
   "./worlds/living-worlds.js?v=" + VERSION,
   "./worlds/painted-hub.js?v=" + VERSION,
   "./worlds/terrain.js?v=" + VERSION,
+  "./worlds/platform-audit.js?v=" + VERSION,
   "./worlds/painted-rooms.js?v=" + VERSION,
   "./assets/sprites/bodies/cuerno-idle.svg?v=" + VERSION,
   "./assets/sprites/bodies/cuerno-run.svg?v=" + VERSION,
