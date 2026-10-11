@@ -10,7 +10,7 @@ import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./co
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import { drawProjectile } from "./abilities.js";
-import { captureCombatFrame,applyCombatFrame } from "./coop-combat-mirror.js";
+import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies } from "./coop-combat-mirror.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
@@ -945,6 +945,11 @@ class OnlineCoop {
     player.health = Math.max(0, player.health - amount);
     player.invuln = 24;
     player.flash = Math.max(player.flash || 0, 8);
+  }
+
+  advanceGuestCombat(game){
+    if(!this.hasFreshCombat(game))return false;
+    return advanceMirroredEnemies(game,performance.now()-this.lastCombatReceivedAt);
   }
 
   hasFreshCombat(game){
