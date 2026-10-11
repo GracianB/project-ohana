@@ -790,6 +790,69 @@ drawCuernoOverlays(ctx,pose,R,4,t,bounce,tilt);
 // One media query object, with live .matches; no per-frame matchMedia calls.
 const CUERNO_MOTION_MEDIA=typeof window!=="undefined"&&typeof window.matchMedia==="function"
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
+/**
+ * Rastros de un unicornio vivo. Las cuatro formas adultas reaccionan a
+ * frenadas, giros y aterrizajes con huellas de luz, sin afectar al terreno.
+ * El cuerno recién nacido no tiene patas. El modo de movimiento reducido
+ * suprime todas las huellas para respetar la preferencia de accesibilidad.
+ */
+export function cuernoFootstepState(pose, form) {
+  const p = pose || {};
+  const f = Math.max(0, Math.min(4, Number.isFinite(Number(form)) ? Math.trunc(Number(form)) : 0));
+  const st = p.state || "idle";
+  if (f < 1 || p.reduceMotion || (st !== "idle" && st !== "run") || p.air) return null;
+  const clamp01 = (n) => Number.isFinite(Number(n)) ? Math.max(0, Math.min(1, Number(n))) : 0;
+  const land = clamp01(p.land);
+  const turn = st === "run" ? clamp01(p.turnPulse) : 0;
+  const brake = st === "run" ? clamp01(p.brake) : 0;
+  const speed = st === "run" ? clamp01(p.speed) : 0;
+  if (land < .035 && turn < .035 && brake < .035 && speed < .5) return null;
+  return Object.freeze({ form: f, land, turn, brake, speed });
+}
+
+function drawCuernoFootsteps(ctx, pose, form) {
+  const m = cuernoFootstepState(pose, form);
+  if (!m) return;
+  const colors = ["#fff0cc","#f2ceec","#d4e9ff","#a6e8d6"];
+  const col = colors[form-1];
+  const alpha = Math.max(m.land, m.turn, m.brake, m.speed * .28);
+  const t = Number.isFinite(Number(pose.t)) ? Number(pose.t) : 0;
+  ctx.save(); ctx.lineCap="round";
+  if (m.land > .035) {
+    // Círculo tenue bajo los cascos, proporcional al peso visual de la forma.
+    ctx.globalAlpha=.38*m.land;
+    ctx.strokeStyle=col;ctx.lineWidth=1.5+form*.2;
+    ctx.beginPath();ctx.ellipse(0,2,12+form*3+(1-m.land)*13,2.5+(1-m.land)*2.4,0,0,Math.PI*2);
+    ctx.stroke();
+  }
+  if (form===1) {
+    // El primer cuerpo todavía flota: un eco de perla, no cascos inventados.
+    ctx.globalAlpha=.28*alpha;ctx.strokeStyle="#f2ceec";ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(0,-6,9+4*alpha,-Math.PI*.65,Math.PI*.15);ctx.stroke();
+  } else {
+    // Casquitos en dos pasos alternos y acotados al personaje.
+    for(let i=0;i<2;i++){
+      const pulse=((t*.047+i*.5)%1+1)%1;
+      const x=-15-i*10-pulse*12, y=1+i*2-pulse*5;
+      ctx.globalAlpha=.32*alpha*(1-pulse*.7);
+      ctx.strokeStyle=col;ctx.lineWidth=1.4;
+      ctx.beginPath();
+      ctx.ellipse(x,y,3.7+form*.25,1.9+form*.15,-.15,0,Math.PI*2);
+      ctx.stroke();
+    }
+  }
+  if (m.turn > .035 || m.brake > .035) {
+    // Gesto de frenada/contrapaso: hoja de luz baja, no partículas globales.
+    const energy=Math.max(m.turn,m.brake);
+    ctx.globalAlpha=.38*energy;ctx.strokeStyle=col;ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(-18,-2);
+    ctx.quadraticCurveTo(-30-7*energy,-13,-42-8*energy,-2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   // When U protects the character, rig invulnerability can shadow "cast"
   // with "hurt". Keep the unicorn's dream visible, never mask real damage.
@@ -797,6 +860,8 @@ function draw(ctx, pose, R) {
     pose={...pose,state:"cast"};
   if(CUERNO_MOTION_MEDIA?.matches&&!pose?.reduceMotion)pose={...pose,reduceMotion:true};
   const f = Math.max(0, Math.min(4, pose.form | 0));
+  // Pequeñas huellas ambientales detrás del cuerpo, con respeto a reduceMotion.
+  drawCuernoFootsteps(ctx, pose, f);
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
   if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }
