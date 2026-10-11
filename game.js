@@ -58,6 +58,7 @@ import { baitFeedbackLabel } from "./systems/boss-bait-feedback.js";
 import { encounterLabel } from "./systems/boss-encounter-memory.js";
 import { onlineCoop } from "./systems/online-coop.js";
 import { applyCoopChallenge } from "./systems/coop-challenge.js";
+import { supportBelow } from "./systems/platform-geometry.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -516,13 +517,7 @@ for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
 if (isAirFoe(e)) continue;
-let floor = null;
-for (const plat of game.platforms) {
-  const mid = e.x + e.w / 2;
-  if (mid > plat.x && mid < plat.x + plat.w) {
-    if (!floor || plat.y > floor.y) floor = plat;
-  }
-}
+const floor = supportBelow(e,game.platforms,280);
 if (floor) e.y = floor.y - e.h;
 }
 game.bossFx?.clear();
