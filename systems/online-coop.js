@@ -90,6 +90,7 @@ class OnlineCoop {
     this.localRoomGraceUntil = 0;
     this.error = "";
     this.seenSignals = new Set();
+    this.seenHitEvents = new Set();
     this.localStateSent = "";
     this.lastOrbSignals = new Set();
     this.retryFailures = 0;
@@ -163,6 +164,7 @@ class OnlineCoop {
     this.pendingSignals = [];
     this.pendingMutations = [];
     this.seenSignals.clear();
+    this.seenHitEvents.clear();
     this.lastOrbSignals.clear();
     this.duoApplied.clear();
     this.nextDuoAt=0;
@@ -393,6 +395,8 @@ class OnlineCoop {
       this.remote.actionUntil=performance.now()+(action==="ability"?420:action==="dash"?280:300);
       if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
       else this.remote.dash=18;
+    }else if(event.kind==="hit"){
+      if(event.payload?.roomId===game.roomId)this.applySyncedHit(game,event.payload);
     }else if(event.kind==="combat"){
       if(this.currentPlayer(this.snapshot)?.slot!==1)return;
       const frame=event.payload;
@@ -749,6 +753,10 @@ class OnlineCoop {
     if(signalKind==="action"&&payload.action!=="rtc")this.direct?.sendEvent("action",payload);
     else if(signalKind==="room"||signalKind==="state")this.direct?.sendEvent(signalKind,payload);
     const sequence = ++this.sequence;
+    if(signalKind==="hit"){
+      payload={...payload,roomId:game.roomId||START_ROOM,syncId:makeActionId(this.identity.playerId,sequence)};
+      this.direct?.sendEvent("hit",payload);
+    }
     this.enqueueMutation({
       action: "signal",
       roomId: this.roomId,
@@ -860,7 +868,7 @@ class OnlineCoop {
       }
 
       if (event.signalKind === "hit") {
-        this.applyRemoteHit(game, event.payload);
+        this.applySyncedHit(game, event.payload);
       }
 
       if (event.signalKind === "hurt") {
@@ -874,14 +882,24 @@ class OnlineCoop {
     }
   }
 
+  applySyncedHit(game,payload){
+    const id=typeof payload?.syncId==="string"?payload.syncId:"";
+    if(id&&this.seenHitEvents.has(id))return;
+    if(this.applyRemoteHit(game,payload)===false)return;
+    if(id){
+      this.seenHitEvents.add(id);
+      if(this.seenHitEvents.size>192)this.seenHitEvents.delete(this.seenHitEvents.values().next().value);
+    }
+  }
+
   applyRemoteHit(game, payload) {
-    if (!payload || !Array.isArray(game.enemies)) return;
+    if (!payload || !Array.isArray(game.enemies)) return false;
     const targetId = String(payload.targetId || "");
     const kind = String(payload.kind || "");
     const x = finite(payload.x, 0);
     const y = finite(payload.y, 0);
     const damage = Math.max(0, finite(payload.damage, 0));
-    if (!damage) return;
+    if (!damage || damage > 1000) return false;
 
     let target = targetId
       ? game.enemies.find((enemy) => enemy && enemy.id === targetId && !enemy.dying)
@@ -898,7 +916,7 @@ class OnlineCoop {
         .sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
     }
 
-    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return;
+    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
     target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
@@ -918,6 +936,7 @@ class OnlineCoop {
       speed: 2.2,
       life: 12,
     });
+    return true;
   }
 
   applyRemoteHurt(game, amount) {
