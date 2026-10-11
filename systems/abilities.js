@@ -316,14 +316,14 @@ if(p.id==='stitcho'){
  game._supremeFlow=flow;game._assist={heroId:'chispin',heroName:'Chispín',t:120};
  game.ult={t:0,name:SUPREME.stitcho.name,color:'#67ddff',identity:SUPREME_IDENTITY.stitcho.kind};
  startStitchoDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
- p.invuln=Math.max(p.invuln||0,60);return;
+ p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
 }
 if(p.id==='kilo'){
  game._supremeFlow=flow;game._assist={heroId:'stitcho',heroName:'Stitcho',t:120};
  game.ult={t:0,name:SUPREME.kilo.name,color:'#ffd36a',identity:SUPREME_IDENTITY.kilo.kind};
  startKiloDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
  healPlayer(p,p.maxHealth*(.12+(Number(p.evo)||0)*.05));
- p.invuln=Math.max(p.invuln||0,90);
+ p.invuln=Math.max(p.invuln||0,90);p._duetProtectionUntil=(Number(game.t)||0)+90;
  game.nums?.add(cx(p),p.y-36,'OHANA · ¡A COMPÁS!','#ffd36a',true);
  return;
 }

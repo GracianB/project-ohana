@@ -1120,7 +1120,8 @@ const footY = p.y + p.h - cam.y;
 const speed = Math.abs(p.vx || 0);
 const moving = !!p.grounded && speed > 0.55;
 const air = !p.grounded;
-const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng }), p), p);
+const duetProtected=["kilo","stitcho"].includes(p.id)&&(p._kiloDuetT>0||p._stitchoDuetT>0)&&Number(p._duetProtectionUntil)>t;
+const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p);
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
@@ -1135,8 +1136,8 @@ if(p.id==='stitcho'&&p._stitchoDuetT>0){
  if(pose.stitchoDuetAge>=30&&pose.stitchoDuetAge<102)pose.move='chaos';
 }
 const atk = pose.atk;
-const hurt = (p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0;
-const hurtFresh = (p.invuln || 0) > 18;
+const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
+const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
 
 // Cuerno V74 is already drawn in five different anatomical sizes. Do NOT
 // multiply their growth again by generic evolution scaling or old sprite size.
