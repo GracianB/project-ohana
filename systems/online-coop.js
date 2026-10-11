@@ -389,7 +389,7 @@ class OnlineCoop {
       if(action==="attack"||action==="ability")this.remote.melee=action==="ability"?16:10;
       else this.remote.dash=18;
     }else if(event.kind==="hit"){
-      this.applySyncedHit(game,event.payload);
+      if(event.payload?.roomId===game.roomId)this.applySyncedHit(game,event.payload);
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
       // Server still handles the definitive state; direct feedback is visual only.
       this.remote.actionKind=event.payload.state;
@@ -740,7 +740,7 @@ class OnlineCoop {
     const sequence = ++this.sequence;
     if(signalKind==="hit"){
       // One identity across the fast DataChannel and slower HTTP snapshot.
-      payload={...payload,syncId:makeActionId(this.identity.playerId,sequence)};
+      payload={...payload,roomId:game.roomId||START_ROOM,syncId:makeActionId(this.identity.playerId,sequence)};
       this.direct?.sendEvent("hit",payload);
     }
     this.enqueueMutation({
@@ -872,21 +872,21 @@ class OnlineCoop {
     const id=typeof payload?.syncId==="string"?payload.syncId:"";
     // Legacy snapshots without IDs still follow their existing seenSignals.
     if(id&&this.seenHitEvents.has(id))return;
+    if(this.applyRemoteHit(game,payload)===false)return;
     if(id){
       this.seenHitEvents.add(id);
       if(this.seenHitEvents.size>192)this.seenHitEvents.delete(this.seenHitEvents.values().next().value);
     }
-    this.applyRemoteHit(game,payload);
   }
 
   applyRemoteHit(game, payload) {
-    if (!payload || !Array.isArray(game.enemies)) return;
+    if (!payload || !Array.isArray(game.enemies)) return false;
     const targetId = String(payload.targetId || "");
     const kind = String(payload.kind || "");
     const x = finite(payload.x, 0);
     const y = finite(payload.y, 0);
     const damage = Math.max(0, finite(payload.damage, 0));
-    if (!damage) return;
+    if (!damage || damage > 1000) return false;
 
     let target = targetId
       ? game.enemies.find((enemy) => enemy && enemy.id === targetId && !enemy.dying)
@@ -903,7 +903,7 @@ class OnlineCoop {
         .sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))[0];
     }
 
-    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return;
+    if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
     target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
@@ -923,6 +923,7 @@ class OnlineCoop {
       speed: 2.2,
       life: 12,
     });
+    return true;
   }
 
   applyRemoteHurt(game, amount) {
