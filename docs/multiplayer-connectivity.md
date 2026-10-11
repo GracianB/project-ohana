@@ -134,6 +134,12 @@ account-wide secret. In Netlify Functions environment settings configure:
 - `OHANA_METERED_DOMAIN=ohana-multiplayer.metered.live`
 - `OHANA_METERED_TURN_API_KEY=<API key for that one TURN credential>`
 
+On a free Netlify plan, use the default variable scopes rather than a Functions-only
+scope. Keep values in the production context and mark the credential API key as
+`Contains secret values` (`is_secret: true`); Netlify excludes post-processing for
+that secret. Builds/functions/runtime remain authorized production scopes. Never
+use a frontend-public variable prefix or put the API key in published JavaScript.
+
 When configured, Metered takes precedence over Cloudflare. OHANA fetches its
 credential list server-side with a bounded request and forwards only validated
 Metered TLS/TCP 443 relay URLs. Errors and redirects do not expose the API key.
