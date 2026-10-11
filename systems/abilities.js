@@ -1,3 +1,4 @@
+import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
@@ -196,7 +197,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 const SUPREME = Object.freeze({
 kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
 stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 9000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
-chispin: { id: "boltgod", name: "TORMENTA ABSOLUTA", key: "U", cd: 9000, color: "#ffe14a", special: "Rayo veloz", ally: "cat" },
+chispin: { id: "boltgod", name: "NUEVE COLAS, UN TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo de nueve colas", ally: "cat" },
 cat:     { id: "eclipse", name: "ECLIPSE DE NUEVE VIDAS", key: "U", cd: 9000, color: "#ffb6e4", special: "Paso sombra", ally: "dragon" },
 dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
 dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
@@ -312,6 +313,12 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 }
 
 function castSupreme(game, p, flow = currentFlow(game, p)) {
+if(p.id==='chispin'){
+ game._supremeFlow=flow;game._assist={heroId:'cat',heroName:'Michi',t:120};
+ game.ult={t:0,name:SUPREME.chispin.name,color:'#fff29a',identity:SUPREME_IDENTITY.chispin.kind};
+ startChispinDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
+}
 if(p.id==='stitcho'){
  game._supremeFlow=flow;game._assist={heroId:'chispin',heroName:'Chispín',t:120};
  game.ult={t:0,name:SUPREME.stitcho.name,color:'#67ddff',identity:SUPREME_IDENTITY.stitcho.kind};
@@ -647,6 +654,7 @@ const p = game.player;
 if (!p) return;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
+updateChispinDuet(game,hitEnemy);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
 if (S.caos > 0) {
@@ -690,6 +698,7 @@ if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
  rememberCuernoEnemyPositions(game.enemies);
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
+game.chispinAbilityFx=p.id==='chispin'?(readChispinEffects(FX.filter(f=>['chain','trail','storm'].includes(f.kind)).slice(0,8))||[]):[];
 game.kiloAbilityFx=p.id==='kilo'?FX.filter(f=>['note','hula','ohana'].includes(f.kind)).slice(0,12).map(f=>({
  kind:f.kind,x:Number.isFinite(f.x)?f.x:cx(p),y:Number.isFinite(f.y)?f.y:cy(p),
  life:f.life,r:f.r||1,vx:f.vx||0,vy:f.vy||0,rot:f.rot||0,n:f.n||10,color:f.color||'#ffd36a'
@@ -703,6 +712,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 for (const f of FX) {
@@ -3632,3 +3642,5 @@ export function drawKiloAbilityEcho(ctx,effects,cam,t,p){
   ctx.save();DRW[f.kind](ctx,f,cam,t,{},p);ctx.restore();
  }
 }
+
+export function drawChispinAbilityEcho(ctx,effects,cam,t,p){for(const f of readChispinEffects(effects||[])||[]){ctx.save();DRW[f.kind](ctx,f,cam,t,{},p);ctx.restore();}}

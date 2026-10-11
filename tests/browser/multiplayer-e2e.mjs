@@ -121,7 +121,7 @@ try {
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
-  await hostPage.getByRole("button", { name: hostCharacter==="stitcho"?"Seleccionar a Stitcho":"Seleccionar a Kilo", exact: true }).click();
+  await hostPage.getByRole("button", { name: ({kilo:"Seleccionar a Kilo",stitcho:"Seleccionar a Stitcho",chispin:"Seleccionar a Chispín"})[hostCharacter], exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await guestPage.goto(origin+"/multiplayer.html");
@@ -323,13 +323,13 @@ try {
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {useAbility}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
-    game.player.cds.solar=0;game.player.cds.bang=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    game.player.cds.solar=0;game.player.cds.bang=0;game.player.cds.boltgod=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
     if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
   });
   let duetDelivered=false;
   for(let i=0;i<30;i++){
     duetDelivered=await guestPage.evaluate(async expected=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected==='stitcho'?'stitchoDuet':'kiloDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected+'Duet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
       return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId===expected;
     },hostCharacter);
     if(duetDelivered)break;await guestPage.waitForTimeout(50);

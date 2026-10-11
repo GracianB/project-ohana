@@ -6,8 +6,8 @@ const BOLT = "#fff6a0";
 const PAL = [
   { body: "#fff06a", belly: "#fffdf2", gill: "#c07bff", glow: "#ecd6ff", inner: "#b066ff" },
   { body: "#ffd83a", belly: "#fffaf0", gill: "#b05cff", glow: "#e6ccff", inner: "#a04cf0" },
-  { body: "#ffa024", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
-  { body: "#ffe45a", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
+  { body: "#ffc13e", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
+  { body: "#ffdc62", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
   { body: "#fff4d2", belly: "#ffffff", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
 ];
 
@@ -590,6 +590,7 @@ function stormSoul(ctx, pose, f, o, front) {
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], t = pose.t, st = pose.state;
   const o = opts(pose, f, S);
+  if(Number.isFinite(pose.chispinDuetAge)){o.skyBolt=pose.chispinDuetAge>=36&&pose.chispinDuetAge<104?1:0;o.sparks=pose.chispinDuetAge>=18?.65:.2;}
   const cy = S.by - 4;
   stormSoul(ctx, pose, f, o, false);
 
@@ -600,8 +601,8 @@ function draw(ctx, pose, R) {
   if (S.final) {
     ctx.save();
     ctx.translate(0, cy - 14);
-    for (let i = 0; i < 8; i++) {
-      const a0 = i * (TAU / 8) + t * 0.02, a1 = a0 + TAU / 8;
+    for (let i = 0; i < 5; i++) {
+      const a0 = i * (TAU / 5) + t * 0.012, a1 = a0 + TAU / 9;
       bolt(ctx, Math.cos(a0) * 50, Math.sin(a0) * 50, Math.cos(a1) * 50, Math.sin(a1) * 50, i + Math.floor(t / 5), "#8fd4ff", 1.6, i % 2 === 0);
     }
     ctx.restore();

@@ -88,11 +88,14 @@ test('PR151.12: Stitcho supreme aplica control fuerte al enemigo', () => {
   clearAbilityFx();
 });
 
-test('V37: Chispin supreme encadena hasta ocho objetivos', () => {
+test('V303: Chispin duet hits nearby targets during visible choreography', () => {
   const enemies = Array.from({ length: 10 }, (_, i) => makeEnemy({ x: 180 + i * 70 }));
   const game = cast('chispin', enemies);
+  assert.equal(enemies.filter(e=>e.hp<1000).length,0);
+  for(let i=0;i<121;i++){game.t++;updateAbilityFx(game);}
   const damaged = enemies.filter((e) => e.hp < 1000);
-  assert.equal(damaged.length, 8);
+  assert.ok(damaged.length>=3&&damaged.length<=5);
+  assert.ok(enemies.slice(5).every(e=>e.hp===1000));
   clearAbilityFx();
 });
 

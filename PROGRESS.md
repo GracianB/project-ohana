@@ -1,3 +1,7 @@
+## V303 · Chispín: Nueve colas, un trueno (ohana-329)
+
+Cinco formas vectoriales con crecimiento explícito, contraste ámbar/violeta y aurora abierta. U de 120 ticks dentro del escenario: Michi salta a por una chispa y sus nueve colas liberan wisps dirigidos bajo tres pulsos de tormenta. Conserva movimiento, física, colisiones y cooldown; daño limitado a enemigos cercanos y cancelación al morir o cambiar de sala. H/J/L replican sus efectos nativos mediante datos visuales limitados, sin generar daño remoto. Chromium/Firefox, táctil y cinco evoluciones incluidos en las puertas de CI.
+
 ## V302 · Stitcho: Caos bajo la nube (ohana-328)
 
 U de dos segundos dentro del escenario: Chispín llega con la nube de su L, despeina las antenas de Stitcho y combina tres tandas de rayos locales con el caos controlable del protagonista. Sin pantalla completa ni desplazamiento automático. Cinco formas accesibles, potencia por evolución y enfriamiento conservado.
