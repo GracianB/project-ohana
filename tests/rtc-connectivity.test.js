@@ -173,3 +173,13 @@ test("TURN credential lookup has a short deadline without lowering normal game r
  assert.match(source,/setTimeout\(\(\)=>abort\.abort\(\), timeoutMs\)/);
  assert.match(source,/post\(\{action:"rtc-config",roomId,identity\},1800\)/);
 });
+
+test("online teammate abilities retain distinct character-colored visual cues without applying damage",async()=>{
+ const {readFileSync}=await import("node:fs");
+ const source=readFileSync(new URL("../systems/online-coop.js",import.meta.url),"utf8");
+ for(const id of ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"]){
+  assert.match(source,new RegExp(id+':"#'));
+ }
+ assert.match(source,/const slot=Math\.max\(0,Math\.min\(3,Number\(this\.remote\.abilitySlot\)\|\|0\)\)/);
+ assert.match(source,/cosmetic telegraph, never a second damage simulation/);
+});

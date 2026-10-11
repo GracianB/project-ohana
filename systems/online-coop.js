@@ -1046,10 +1046,24 @@ class OnlineCoop {
     if (this.remote.actionKind === "ability") {
       ctx.save();
       ctx.globalAlpha = Math.max(0, (this.remote.actionUntil - performance.now()) / 420);
-      ctx.strokeStyle = "#ffd36a";
-      ctx.lineWidth = 3;
+      // Teammate's attack must carry character identity. This is a
+      // cosmetic telegraph, never a second damage simulation.
+      const hues={kilo:"#83dcff",stitcho:"#b8a5ff",chispin:"#fff187",
+        cat:"#ffbe9d",dragon:"#ff926c",dino:"#7ee8a7",
+        frita:"#ffcc73",pizza:"#ffa3b5",yomi:"#cbb2ff",cuerno:"#ff8de1"};
+      const tone=hues[definition.id]||"#ffd36a";
+      const slot=Math.max(0,Math.min(3,Number(this.remote.abilitySlot)||0));
+      const originX=px+player.facing*(20+slot*7);
+      const pulse=18+((t*4) % (15+slot*4));
+      ctx.strokeStyle=tone;
+      ctx.lineWidth=3+slot*.45;
       ctx.beginPath();
-      ctx.arc(px + player.facing * 26, py - 12, 18 + ((t * 4) % 18), -1.05, 1.05);
+      ctx.arc(originX,py-12,pulse,-1.05,1.05);
+      ctx.stroke();
+      // Concentric pulse makes distant abilities legible on both displays.
+      ctx.globalAlpha*=.55;
+      ctx.beginPath();
+      ctx.arc(originX,py-12,pulse+11+slot*2,-1.25,1.25);
       ctx.stroke();
       ctx.restore();
     }
