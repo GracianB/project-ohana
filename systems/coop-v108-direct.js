@@ -164,7 +164,7 @@ export class DirectPeerLink{
       }
       return;
     }
-    if(msg?.t==="event"&&["action","room","state","combat"].includes(msg.kind)&&
+    if(msg?.t==="event"&&["action","room","state","hit","combat"].includes(msg.kind)&&
        (msg.kind==="combat"||e.data.length<=900))this.onEvent?.(msg);
    };
   }else{try{channel.close();}catch{}return;}
@@ -386,7 +386,7 @@ export class DirectPeerLink{
   }catch{return false;}
  }
  sendEvent(kind,payload={}){
-  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state","combat"].includes(kind))return false;
+  if(!this.active||this.eventChannel.bufferedAmount>16000||!["action","room","state","hit","combat"].includes(kind))return false;
   try{
    const encoded=JSON.stringify({t:"event",kind,payload});
    if(encoded.length>(kind==="combat"?12000:900))return false;
