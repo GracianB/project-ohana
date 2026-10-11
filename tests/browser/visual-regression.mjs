@@ -579,55 +579,17 @@ try {
   await page.evaluate(() => window.__OHANA_E2E.start('kilo'));
   await page.evaluate(() => window.__OHANA_E2E.setEvo(4));
   await page.evaluate(() => window.__OHANA_E2E.setCombo(10));
-  const previousSupremeGeneration = await page.evaluate(() => Number(document.querySelector('#supreme-cinema')?.dataset.generation || 0));
-  const supremeAttempt = await page.evaluate(() => {
-    const state = window.__OHANA_E2E.cast(3);
-    const el = document.querySelector('#supreme-cinema');
-    return {
-      state,
-      cinema: el ? {
-        generation:Number(el.dataset.generation || 0),
-        state:el.dataset.state || '',
-        hidden:el.getAttribute('aria-hidden'),
-        show:el.classList.contains('show'),
-        duration:Number(el.dataset.duration || 0),
-        mode:el.dataset.mode || '',
-        story:el.dataset.story || '',
-        camera:el.dataset.camera || '',
-        beat:el.dataset.beat || '',
-        assist:el.dataset.assist || ''
-      } : null
-    };
+  const supremeAttempt=await page.evaluate(()=>{
+    const state=window.__OHANA_E2E.cast(3);
+    return {state,overlay:!!document.querySelector('#supreme-cinema.show')};
   });
-  const supremeState = supremeAttempt.state;
-  assert.equal(supremeState.lastAbilitySlot, 3, '09-supreme: U no se lanza como slot 3 · ' + JSON.stringify(supremeAttempt));
-  assert.equal(supremeState.assist, 'stitcho', '09-supreme: OHANA ASSIST no invoca a Stitcho para Kilo · ' + JSON.stringify(supremeAttempt));
-  assert.ok(supremeAttempt.cinema?.generation > previousSupremeGeneration, '09-supreme: la cinemática U no incrementa generación · ' + JSON.stringify(supremeAttempt));
-  assert.equal(supremeAttempt.cinema?.state, 'active', '09-supreme: U no entra en active de forma síncrona · ' + JSON.stringify(supremeAttempt));
-  // La activación ya se valida de forma síncrona arriba. No esperamos aquí:
-  // un runner CI cargado puede reanudar Playwright después de que expire el
-  // temporizador real de la cinemática y convertir una prueba visual en una
-  // carrera de reloj de pared.
-  const supremeCinemaState = await page.locator('#supreme-cinema').evaluate((el) => ({
-    show: el.classList.contains('show'),
-    state: el.dataset.state,
-    hidden: el.getAttribute('aria-hidden'),
-    duration: Number(el.dataset.duration || 0),
-    mode:el.dataset.mode || '',
-    story:el.dataset.story || '',
-    camera:el.dataset.camera || '',
-    beat:el.dataset.beat || '',
-    assist:el.dataset.assist || ''
-  }));
-  assert.equal(supremeCinemaState.duration >= 1500, true, '09-supreme: duración cinematográfica insuficiente');
-  assert.equal(supremeCinemaState.mode, 'storyboard', '09-supreme: no usa gramática V48');
-  assert.equal(supremeCinemaState.story, 'pollen-bonk', '09-supreme: storyboard de Kilo incorrecto');
-  assert.equal(supremeCinemaState.camera, 'rise', '09-supreme: cámara de Kilo incorrecta');
-  assert.equal(supremeCinemaState.assist, 'stitcho', '09-supreme: assist no entra en el mini-film');
-  assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(), /OHANA SOLAR/, '09-supreme: HUD no muestra el nombre de U');
+  assert.equal(supremeAttempt.state.lastAbilitySlot,3,'V301: U must launch in slot 3');
+  assert.equal(supremeAttempt.state.assist,'stitcho','V301: Stitcho must join Kilo');
+  assert.equal(supremeAttempt.state.kiloDuet?.age,0,'V301: in-world duet must start synchronously');
+  assert.equal(supremeAttempt.overlay,false,'V301: Kilo U must not open fullscreen cinema');
+  assert.match(await page.locator('.ability-slot[data-supreme="1"] .name').textContent(),/A COMPÁS/,'V301: HUD must show the actual duet name');
   await page.waitForTimeout(620);
-  await capture(page, '09-supreme-u-assist');
-  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle', null, { timeout: 3600 });
+  await capture(page,'09-supreme-kilo-in-world-duet');
 
   await page.evaluate(() => {
     const api=window.__OHANA_E2E;

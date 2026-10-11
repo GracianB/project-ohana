@@ -13,7 +13,7 @@ const DIM = [
   { hr: 23, th: 29, ll: 26, al: 27, lw: 7.5, aw: 6 },
   { hr: 22, th: 30, ll: 28, al: 28, lw: 7.5, aw: 6 },
 ];
-const DRESS = ["#ff9ab0", "#e23b3d", "#ff4d78", "#d42a3a", "#fff7ea"];
+const DRESS = ["#ffacc2", "#eb554a", "#ea637b", "#c73d4a", "#fff1d9"];
 const HIBIS = ["#ff5c8a", "#ff6f91", "#ffd23f", "#ff4d6d", "#ff6b9a"];
 
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -277,6 +277,13 @@ function solve(pose, d, f) {
       }
     }
   }
+  if(Number.isFinite(pose.kiloDuetAge)){
+    const beat=pose.kiloDuetAge;
+    r.paci=false;r.uke='play';r.armOver=true;
+    r.handB=[xF+al*.9,sy+1];r.handF=[xF+1,sy+al*.62+Math.sin(beat*.65)*2.5];
+    r.headRot=beat<18?.12:beat<30?-.18:Math.sin(beat*.18)*.06;
+    r.mood=beat<30?'happy':'closed';r.mouth=beat<30?'open':'smile';
+  }
   return r;
 }
 
@@ -295,6 +302,9 @@ function ponytail(ctx, R, pose, f, hr, r) {
   const len = hr * (f === 4 ? 1.9 : 1.55);
   R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
     (k) => turn + Math.sin(t * 0.08 + k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
+  if(f===2){
+    for(let i=0;i<4;i++)R.ellipse(ctx,-hr*1.08+Math.sin(t*.06+i*.5)*2,-hr*.5+i*hr*.3,hr*.15,hr*.22,HAIR,{lw:1.7});
+  }
   if (f === 4) {
     for (let i = 0; i < 2; i++) {
       R.tail(ctx, -hr * 0.8, -hr * 0.1 + i * hr * 0.3, hr * 0.8, -2.4 - i * 0.3,
@@ -375,7 +385,14 @@ function head(ctx, R, pose, f, hr, r) {
     ctx.strokeStyle = R.INK; ctx.lineWidth = hr * 0.18; ctx.lineCap = "round";
     ctx.beginPath(); ctx.arc(-hr * 0.08, hr * 0.02, hr * 0.92, -2.5, -0.55); ctx.stroke();
     ctx.strokeStyle = "#ffe27a"; ctx.lineWidth = hr * 0.09; ctx.stroke();
-    hibiscus(ctx, R, -hr * 0.6, -hr * 0.7, hr * 0.3, "#ffffff", 0.3);
+    const opening=pose.state==='cast'||pose.state==='attack'?1:.7;
+    for(let i=0;i<7;i++){
+      const a=-Math.PI+i*Math.PI/6;
+      const x=Math.cos(a)*hr*.92,y=Math.sin(a)*hr*.92-hr*.2;
+      ctx.save();ctx.translate(x,y);ctx.rotate(a-Math.PI/2);
+      R.ellipse(ctx,0,-hr*.14,hr*.12,hr*.3*opening,i%2?'#ff8da7':'#fff2ba',{lw:1.8});ctx.restore();
+    }
+    hibiscus(ctx, R, -hr * 0.6, -hr * 0.7, hr * 0.22, "#ffffff", 0.3);
   }
 }
 
@@ -645,12 +662,19 @@ function draw(ctx, pose, R) {
   ctx.save();
   bodyT();
   torso(ctx, R, pose, f, d, r);
+  if(f>=1){
+    const count=f===1?3:f===2?5:7;
+    for(let i=0;i<count;i++){
+      const x=(i-(count-1)/2)*3.5,y=sy+6+Math.abs(i-(count-1)/2)*.8;
+      R.ellipse(ctx,x,y,2.2,3.2,f<3?'#76cbb4':'#ffe09a',{lw:1.2});
+    }
+  }
   const frontArm = () => {
     const e = ik(ctx, R, 4, sy + 3, r.handF[0], r.handF[1], al, 1, d.aw, SKIN, { hand: d.aw * 0.75 });
     R.ellipse(ctx, 4, sy + 3.5, 5, 4.5, DRESS[f], { lw: 2.4 });
     if (f === 0) {
       const ang = Math.atan2(e[0] - 4, -(e[1] - sy - 3)) * 0.4 + (r.fx === "notes" ? Math.sin(t * 0.8) * 0.5 : 0) + (st === "attack" ? pose.atk * 1.5 - 0.5 : 0);
-      rattle(ctx, R, e[0], e[1], ang, t);
+      uke(ctx, R, e[0], e[1], ang, 7, false);
     } else if (r.uke === "hand") {
       const a = Math.atan2(e[1] - sy - 3, e[0] - 4), us = 13 + f;
       uke(ctx, R, e[0] + Math.cos(a) * us * 1.55, e[1] + Math.sin(a) * us * 1.55, a + Math.PI, us, f === 4);

@@ -141,6 +141,11 @@ game.createCoopEnemy=(spec)=>{
  return enemy;
 };
 
+game.onAbilityHit=(enemy,damage)=>{
+ if(game.player?.id==='kilo'&&onlineCoop.enabled&&onlineCoop.currentPlayer(onlineCoop.snapshot)?.slot===1)
+  void onlineCoop.signal(game,'hit',{targetSyncId:enemy._coopSyncId,targetVisit:enemy._coopVisit,
+   targetId:enemy.id,kind:enemy.kind,x:enemy.x,y:enemy.y,damage,characterId:'kilo'});
+};
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
 game.festivalVibrate = (ms) => buzz(ms);
@@ -502,7 +507,7 @@ return false;
 const first = !game.visited[id];
 game.roomId = id;
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
-resetCombatMirror(game);game.coopPeerEffects=null;
+resetCombatMirror(game);game.coopPeerEffects=null;game._kiloDuet=null;game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
 if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
@@ -2791,12 +2796,12 @@ if (viewW >= 820) drawMinimap();
 function castPower(index) {
 const p = game.player;
 if (!p) return;
-const need = [0, 1, 2, 4][index] ?? 4;
+const need = p.id==="kilo"&&index===3?0:[0, 1, 2, 4][index] ?? 4;
 if ((Number(p.evo) || 0) < need) {
 game.nums.add(p.x, p.y - 12, "FORMA " + (need + 1), "#fff6c8");
 return;
 }
-useAbility(game, index);
+if(!useAbility(game, index))return;
 void onlineCoop.signal(game, "action", {
 action: "ability",
 slot: index,
@@ -2808,7 +2813,7 @@ const bar = DOM.abilityBar;
 if (!bar || !game.player) return;
 const evo = Number(game.player.evo) || 0;
 const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
-slots.push({ id: "supreme", need: 4, supreme: true });
+slots.push({ id: "supreme", need: game.player.id==="kilo"?0:4, supreme: true });
 bar.innerHTML = slots.map((slot) => {
 const d = slot.supreme
   ? supremeOf(game.player.id)
@@ -2982,7 +2987,7 @@ const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
 const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
 if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-const locked = isSupreme && (Number(p.evo) || 0) < 4;
+const locked = isSupreme && p.id!=="kilo" && (Number(p.evo) || 0) < 4;
 btn.classList.toggle("off", locked);
 const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
 if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
@@ -3319,6 +3324,7 @@ state() {
     rain: !!Rain.active,
     umbrella: !!Rain.hasUmbrella,
     starBonus: Surprises.starOrbBonus(),
+    kiloDuet: game._kiloDuet?{age:game._kiloDuet.age,evo:game._kiloDuet.evo}:null,
     lastAbilityId: game.lastAbilityId,
     lastAbilitySlot: game.lastAbilitySlot,
     flow: game._combatFlow ? {

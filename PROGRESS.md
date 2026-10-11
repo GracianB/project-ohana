@@ -1,3 +1,13 @@
+## V301 · Kilo: ¡a compás! (ohana-327)
+
+Primera revisión de diez personajes. U combina el Anillo Ohana de Kilo y los rebotes de Stitcho durante dos segundos dentro del mundo: llamada, despiste, caos y pétalo final. Disponible desde bebé, con potencia por evolución y enfriamiento original. No abre escena completa, no mueve al jugador automáticamente y daña únicamente según la geometría visible.
+
+Cinco formas vectoriales con crecimiento compensado, paleta coral/crema, collar tropical, trenza Ohana, corona solar que abre al atacar y ukelele pequeño del bebé. Conserva físicas y colisiones. La revelación de evolución usa un destello suave que mantiene el diseño visible.
+
+J/K/L y U se replican visualmente por el canal rápido. Los impactos de habilidades de Kilo del invitado llegan al anfitrión con identidades estables; las réplicas son cosméticas. Las acciones en enfriamiento no envían animaciones falsas.
+
+Pruebas de fases, límites, daño, muerte, enfriamiento y cinco formas; vista real Canvas y entrega del dúo por WebRTC. Los otros nueve personajes conservan sus U hasta su revisión propia.
+
 ## V290–V300 · Mundo cooperativo compartido (ohana-326)
 
 - V290: validación atómica de instantáneas y límites de tamaños/valores.

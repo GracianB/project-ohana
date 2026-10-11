@@ -318,6 +318,22 @@ try {
     if(reconciled)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(reconciled,'enemy removal and actual native peer projectile were not delivered');
+  // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
+  await hostPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    const {useAbility}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
+    game.player.cds.solar=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
+  });
+  let duetDelivered=false;
+  for(let i=0;i<30;i++){
+    duetDelivered=await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');const s=onlineCoop._combatGame.coopPeerEffects?.kiloDuet;
+      return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId==='kilo';
+    });
+    if(duetDelivered)break;await guestPage.waitForTimeout(50);
+  }
+  assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
 } catch(error) {

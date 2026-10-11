@@ -613,9 +613,25 @@ try {
     assert.ok(Math.abs(supremeDrift[id].player?.vx || 0) < 0.05, 'V47B: ' + id + ' sale corriendo al pulsar U');
   }
 
+  await page.waitForFunction(() => document.querySelector('#supreme-cinema')?.dataset.state === 'idle',null,{timeout:8500});
+  const kiloDuets=await page.evaluate(()=>{
+    const api=window.__OHANA_E2E;
+    return [0,1,2,3,4].map(evo=>{
+      api.start('kilo');api.setEvo(evo);api.setPlayer(320,900);api.resetInput();
+      api.cast(3);api.setPlayerVelocity(2,0);const state=api.step(36);
+      return {evo,duet:state.kiloDuet,moved:state.player.x!==320,
+        overlay:!!document.querySelector('#supreme-cinema.show')};
+    });
+  });
+  for(const item of kiloDuets){
+    assert.equal(item.duet?.evo,item.evo,'V301: wrong duet evolution');
+    assert.ok(item.duet?.age>=30,'V301: real game did not advance in-world duet');
+    assert.equal(item.overlay,false,'V301: Kilo opened fullscreen U');
+    assert.equal(item.moved,true,'V301: U prevented player movement');
+  }
   const supremeStories = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
-    const ids = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+    const ids = ['stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
     return ids.map((id) => {
       api.start(id);
       api.setEvo(4);
@@ -633,8 +649,8 @@ try {
       };
     });
   });
-  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 10, 'V48: las U comparten storyboard');
-  assert.equal(new Set(supremeStories.map((x) => x.camera)).size, 10, 'V48: las U comparten cámara');
+  assert.equal(new Set(supremeStories.map((x) => x.story)).size, 9, 'V301: las nueve U pendientes conservan storyboard propio');
+  assert.equal(new Set(supremeStories.map((x) => x.camera)).size, 9, 'V301: las nueve U pendientes conservan cámara propia');
   for (const item of supremeStories) {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
     assert.equal(item.mode, 'storyboard', 'V48: U sigue usando hero-short · ' + JSON.stringify(item));
@@ -908,6 +924,10 @@ try {
   const mobilePage = await mobile.newPage({ ...devices['iPhone 13'], isMobile:true, hasTouch:true });
   await auditPage(mobilePage, 'mobile');
   assert.ok(await mobilePage.locator('#touch').isVisible(), 'mobile: controles táctiles');
+  await mobilePage.evaluate(()=>{const api=window.__OHANA_E2E;api.start('kilo');api.setEvo(0);api.resetInput();});
+  assert.equal(await mobilePage.locator('.touch-btn[data-k="u"]').evaluate(el=>el.classList.contains('off')),false,'V301: baby Kilo U must be available on touch');
+  await mobilePage.locator('.touch-btn[data-k="u"]').tap();
+  await mobilePage.waitForFunction(()=>window.__OHANA_E2E.state().lastAbilitySlot===3,null,{timeout:2500});
   await mobilePage.locator('.touch-btn[data-k="e"]').tap();
   await mobilePage.locator('.touch-btn[data-k="j"]').tap();
   await mobile.close();
