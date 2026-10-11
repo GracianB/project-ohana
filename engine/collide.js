@@ -6,6 +6,10 @@ export function aabb(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
+function validPlatform(p) {
+  return p && [p.x,p.y,p.w,p.h].every(Number.isFinite) && p.w > 0 && p.h > 0;
+}
+
 function overlapX(body, plat, inset) {
   const m = inset || 0;
   return body.x + body.w > plat.x + m && body.x < plat.x + plat.w - m;
@@ -13,7 +17,7 @@ function overlapX(body, plat, inset) {
 
 export function hitsSolid(body, platforms, previous) {
   for (const plat of platforms || []) {
-    if (plat.h <= 24) continue;
+    if (!validPlatform(plat) || plat.h <= 24) continue;
     if (aabb(body, plat)) return plat;
     if (previous) {
       const start = { x: previous.x, y: previous.y, w: body.w, h: body.h };
@@ -46,15 +50,19 @@ export function resolveBody(body, platforms, opts) {
   let hitX = 0;
   let hitY = 0;
   for (const plat of platforms || []) {
+    if (!validPlatform(plat)) continue;
     const thin = plat.h <= 24;
     if (thin && o.solidsOnly) continue;
     if (thin) {
       if (o.drop || (o.dropThroughY != null && plat.y <= o.dropThroughY)) continue;
       if ((body.vy || 0) < 0) continue;
-      const wasAbove = prevY + body.h <= plat.y + 6;
-      if (!wasAbove && body.y + body.h > plat.y + 10) continue;
+      // A one-way ledge can only catch a player whose PREVIOUS feet
+      // were above the surface. Never snap a player climbing from below.
+      const previousFeet = prevY + body.h;
+      const currentFeet = body.y + body.h;
+      if (previousFeet > plat.y + 2 || currentFeet < plat.y - 1) continue;
       if (!overlapX(body, plat, 1)) continue;
-      if (body.y + body.h >= plat.y - 1) {
+      if (currentFeet >= plat.y - 1) {
         body.y = plat.y - body.h;
         body.vy = Math.min(0, body.vy || 0);
         grounded = true;
