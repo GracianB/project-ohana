@@ -51,10 +51,14 @@ export function resolveBody(body, platforms, opts) {
     if (thin) {
       if (o.drop || (o.dropThroughY != null && plat.y <= o.dropThroughY)) continue;
       if ((body.vy || 0) < 0) continue;
-      const wasAbove = prevY + body.h <= plat.y + 6;
-      if (!wasAbove && body.y + body.h > plat.y + 10) continue;
+      // One-way platforms may only catch a downward crossing from above.
+      // Do not snap a character onto a ledge while they are already beneath it.
+      const previousFeet = prevY + body.h;
+      const currentFeet = body.y + body.h;
+      const wasAbove = previousFeet <= plat.y + 5 && prevY < plat.y;
+      if (!wasAbove || currentFeet < plat.y - 1) continue;
       if (!overlapX(body, plat, 1)) continue;
-      if (body.y + body.h >= plat.y - 1) {
+      if (currentFeet >= plat.y - 1) {
         body.y = plat.y - body.h;
         body.vy = Math.min(0, body.vy || 0);
         grounded = true;
