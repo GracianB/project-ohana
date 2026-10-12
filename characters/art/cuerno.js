@@ -63,6 +63,25 @@ R.sparkle(ctx,x-4,born-24,3.5*k,"#d1f5e6");
 ctx.restore();
 }
 
+/**
+ * V321 · L rainbow and U greeting are physically different rituals.
+ * Pure cast progress, five form-safe silhouettes, no authority or physics.
+ */
+export function cuernoRitualBody(pose={},form=0) {
+ const p=pose||{},slot=p.castSlot;
+ if(p.state!=="cast"||![2,3].includes(slot))return null;
+ const safe=n=>typeof n==="number"&&Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
+ const ease=n=>n<=0?0:n>=1?1:n*n*(3-2*n);
+ const k=safe(p.cast),prepare=ease((k-.05)/.29),strike=ease((k-.34)/.22),rest=ease((k-.76)/.24);
+ const load=prepare*(1-strike),release=strike*(1-rest),greet=slot===3?release:0;
+ const f=Number.isFinite(Number(form))?Math.max(0,Math.min(4,Math.trunc(Number(form)))):0;
+ return Object.freeze({form:f,slot,load,release,recovery:rest,greet,
+   tilt:slot===2?-.15*load+.13*release:.17*greet-.07*load,
+   lift:slot===2?1.5*load-3.5*release:-2*greet,
+   wing:slot===2?.4*load+.57*release:.24*load+.78*greet,
+   hoof:slot===2?2.3*load+.5*release:3.5*greet});
+}
+
 // V67: J/K/L/U originate at the real horn. Pure pose contract, no extra FX objects.
 const IRIS_COLORS=["#ffacbe","#ffc98f","#ffe8a5","#a6e8b8","#a7e5fb","#b8c4ff","#e0b9f6"];
 const HORN_TIPS=[[0,-65],[4,-91],[24,-100],[25,-120],[33,-139]];
@@ -108,7 +127,8 @@ export function cuernoWingPose(pose,form,t){
  const slot=cuernoMagicPose(pose,form)?.slot;
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
  const time=Number.isFinite(Number(t))?Number(t):0;
- const open=air?1:slot===3?1:slot===2?.89:cast?.84:victory?.95:
+ const ritual=cuernoRitualBody(pose,form);
+  const open=air?1:ritual?Math.min(1,.27+ritual.wing):cast?.84:victory?.95:
    state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
  const flutter=pose?.reduceMotion?0:air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
  const flap=pose?.reduceMotion?0:Math.sin(time*.10+phase*.12)*flutter;
@@ -124,9 +144,11 @@ export function cuernoLegPose(pose,form,t,clock=0,far=false){
  const step=Math.sin(phase+clock),tempo=.75+speed*.35;
  const range=(f===2?(far?6:7.6):f===3?(far?7.8:10):far?8.7:11.5)*tempo;
  const moving=run&&!pose?.reduceMotion;
- return {reach:moving?step*range:0,tuck:air?(far?8:11)+(f-2)*1.2:0,
-  kneeLift:moving?Math.max(0,-step)*(f===2?1.3:2.2):0,
-  hoofLift:moving?Math.max(0,step)*((f-2)*1.25+2):0};
+ const ritual=cuernoRitualBody(pose,f);
+  const additional=ritual?.hoof||0;
+  return {reach:(moving?step*range:0)+(far?-.8:1.3)*(ritual?.load||0),tuck:air?(far?8:11)+(f-2)*1.2:0,
+  kneeLift:(moving?Math.max(0,-step)*(f===2?1.3:2.2):0)+additional*.62,
+  hoofLift:(moving?Math.max(0,step)*((f-2)*1.25+2):0)+(far?.15:.9)*additional};
 }
 export function cuernoManePose(pose,form,t,index){
  const f=Math.max(2,Math.min(4,form|0)),i=Math.max(0,Math.min(6,index|0));
@@ -860,13 +882,17 @@ function draw(ctx, pose, R) {
     pose={...pose,state:"cast"};
   if(CUERNO_MOTION_MEDIA?.matches&&!pose?.reduceMotion)pose={...pose,reduceMotion:true};
   const f = Math.max(0, Math.min(4, pose.form | 0));
-  // Pequeñas huellas ambientales detrás del cuerpo, con respeto a reduceMotion.
+  // Ambient effects remain behind the actor; only the body moves.
   drawCuernoFootsteps(ctx, pose, f);
-  if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
-  if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
-  if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }
-  if (f === 3) { drawStellarUnicorn(ctx,pose,R,pose.t||0); return; }
-  drawAuroraUnicorn(ctx,pose,R,pose.t||0);
+  const ritual=cuernoRitualBody(pose,f);
+  ctx.save();
+  if(ritual){ctx.translate(0,ritual.lift);ctx.rotate(ritual.tilt);}
+  if(f===0)drawLivingHorn(ctx,pose,R,pose.t||0);
+  else if(f===1)drawFirstBody(ctx,pose,R,pose.t||0);
+  else if(f===2)drawRainbowFoal(ctx,pose,R,pose.t||0);
+  else if(f===3)drawStellarUnicorn(ctx,pose,R,pose.t||0);
+  else drawAuroraUnicorn(ctx,pose,R,pose.t||0);
+  ctx.restore();
 }
 
 export default { id: "cuerno", draw };
