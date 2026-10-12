@@ -2,7 +2,7 @@ import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
 import {STITCHO_VISUAL_H} from "./art/stitcho.js";
 import {KILO_VISUAL_H} from "./art/kilo.js";
-import { computePose, enhancePose, motionProfile, R } from "./rig.js";
+import { computePose, enhancePose, motionProfile, isDuetProtected, R } from "./rig.js";
 import { ART } from "./art/index.js";
 import { drawKineticSignature } from "./kinetic-stagecraft.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
@@ -1125,7 +1125,7 @@ const footY = p.y + p.h - cam.y;
 const speed = Math.abs(p.vx || 0);
 const moving = !!p.grounded && speed > 0.55;
 const air = !p.grounded;
-const duetProtected=["kilo","stitcho","chispin","cat"].includes(p.id)&&(p._kiloDuetT>0||p._stitchoDuetT>0||p._chispinDuetT>0||p._michiDuetT>0)&&Number(p._duetProtectionUntil)>t;
+const duetProtected=isDuetProtected(p,t);
 const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p);
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";

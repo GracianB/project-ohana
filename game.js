@@ -1,3 +1,4 @@
+import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
@@ -144,11 +145,7 @@ game.createCoopEnemy=(spec)=>{
  return enemy;
 };
 
-game.onAbilityHit=(enemy,damage)=>{
- if(['kilo','stitcho','chispin','cat'].includes(game.player?.id)&&onlineCoop.enabled&&onlineCoop.currentPlayer(onlineCoop.snapshot)?.slot===1)
-  void onlineCoop.signal(game,'hit',{targetSyncId:enemy._coopSyncId,targetVisit:enemy._coopVisit,
-   targetId:enemy.id,kind:enemy.kind,x:enemy.x,y:enemy.y,damage,characterId:game.player.id});
-};
+game.onAbilityHit=(enemy,damage)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage);
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
 game.festivalVibrate = (ms) => buzz(ms);

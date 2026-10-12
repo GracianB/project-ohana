@@ -1,3 +1,7 @@
+## Multijugador · impactos de los diez héroes y protección visual U (ohana-338)
+
+Se elimina la limitación de cuatro héroes en los impactos de habilidades del invitado. Solo el invitado y objetivos con identidad estable/visita válida pueden enviar impactos; el anfitrión conserva autoridad y deduplicación. La protección visual contempla también familyDuet y parejas alternativas, conserva señales explícitas de daño real y respeta protección larga de Yomi sin alterar invulnerabilidad. Nuevas pruebas Chromium/Firefox con los seis restantes como anfitrión e invitado; lanzamiento U real, aparición de NPC, daño aplicado una vez y recuperación de conexión. No modifica los impactos legacy de las U ni la PR #312 de GPT.com. Publicación pendiente de créditos Netlify.
+
 ## Michi · segunda pasada de personalidad (ohana-337)
 
 Huellas de patas en sus formas terrestres, destellos en Nube rosa, medias lunas en Michi Luna, aterrizajes suaves y curvas de ovillo en giro/frenada. Cinco formas revisadas en Canvas nativo. Efectos locales deterministas, suprimidos con movimiento reducido y durante aire/daño/muerte/cast/U; sin mutar físicas ni causar daño. Conserva U V304 y avances GPT.com hasta V313. Integra después de Chispín en una entrega separada; Netlify sigue pendiente de créditos gratuitos.
