@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import {ROSTER} from "../../characters/roster.js";
 import { chromium, firefox } from "playwright";
 import { startServer } from "./server.mjs";
 import { createRoomService, RoomError } from "../../netlify/lib/room-service.mjs";
@@ -21,6 +22,8 @@ const server = await startServer(0);
 const origin=`http://127.0.0.1:${server.address().port}`;
 const browserName=process.env.OHANA_TEST_BROWSER||"chromium";
 const hostCharacter=process.env.OHANA_TEST_HOST||"kilo";
+const guestCharacter=process.env.OHANA_TEST_GUEST||"cat";
+const selection=id=>{const hero=ROSTER.find(r=>r.id===id);if(!hero)throw Error("Unknown test hero "+id);return "Seleccionar a "+hero.name;};
 const lateIce=process.env.OHANA_TEST_LATE_ICE==="1";
 const browserType=browserName==="firefox"?firefox:chromium;
 // Two distinct browser contexts represent two simultaneously active devices,
@@ -121,13 +124,13 @@ try {
   await hostPage.getByRole("button", { name: "Crear sala" }).click();
   await hostPage.locator("#room-code").waitFor();
   roomId = await hostPage.locator("#room-code").innerText();
-  await hostPage.getByRole("button", { name: ({kilo:"Seleccionar a Kilo",stitcho:"Seleccionar a Stitcho",chispin:"Seleccionar a Chispín",cat:"Seleccionar a Michi"})[hostCharacter], exact: true }).click();
+  await hostPage.getByRole("button", { name: selection(hostCharacter), exact: true }).click();
   await hostPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await guestPage.goto(origin+"/multiplayer.html");
   await guestPage.locator("#room-input").fill(roomId);
   await guestPage.getByRole("button", { name: "Unirse" }).click();
-  await guestPage.getByRole("button", { name: "Seleccionar a Michi", exact: true }).click();
+  await guestPage.getByRole("button", { name: selection(guestCharacter), exact: true }).click();
   await guestPage.getByRole("button", { name: "Confirmar personaje" }).click();
 
   await hostPage.waitForURL(/index\.html\?online=1/, { waitUntil:"domcontentloaded",timeout:15000 });
@@ -322,21 +325,21 @@ try {
   // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
-    const {useAbility}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
-    game.player.cds.solar=0;game.player.cds.bang=0;game.player.cds.boltgod=0;game.player.cds.eclipse=0;useAbility(game,3);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+    const {useAbility,supremeOf}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
+    game.player.cds[supremeOf(game.player.id).id]=0;if(!useAbility(game,3))throw Error("Actual U cast failed");onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
     if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
   });
   let duetDelivered=false;
   for(let i=0;i<30;i++){
     duetDelivered=await guestPage.evaluate(async expected=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected==='cat'?'michiDuet':expected+'Duet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
-      return !!s&&s.age>=0&&s.age<120&&onlineCoop.remote?.characterId===expected;
+      const {onlineCoop}=await import('/systems/online-coop.js');const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+      return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
     },hostCharacter);
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
-  // V304: a real guest hit goes through the combat hook and reaches the host once.
-  if(hostCharacter==='cat'){
+  // Every selected guest reports a real engine impact to the host exactly once.
+  {
     const id=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {makeFoe}=await import('/engine/foes.js');const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');const g=onlineCoop._combatGame,e=makeFoe(1700,300,'phosquito',g.roomId,992,{rng:()=>.5});e.spawnIndex=992;e.hp=e.max=500;e.stun=300;g.enemies.push(e);onlineCoop.direct.sendLatest('combat',captureCombatFrame(g,++onlineCoop.combatSequence,onlineCoop.combatEpoch));return e._coopSyncId;});
     await guestPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===id);},id,{timeout:3000});
     await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0}))throw Error('Guest impact failed');},id);
@@ -344,6 +347,9 @@ try {
     await hostPage.waitForTimeout(250);
     assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
   }
+  // Verify a real guest U travelling back to the host too.
+  await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,supremeOf}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;g.player.cds[supremeOf(g.player.id).id]=0;if(!useAbility(g,3))throw Error('Guest U failed');onlineCoop.sendPeerEffects(g,true);});
+  await hostPage.waitForFunction(async expected=>{const {onlineCoop}=await import('/systems/online-coop.js');const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];return !!s&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;},guestCharacter,{timeout:3000});
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});

@@ -39,6 +39,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: Ten hero U protection audit
+        run: node tests/browser/all-hero-u-protection.mjs
+
       - name: Michi personality and movement audit
         run: node tests/browser/michi-personality.mjs
 
@@ -134,3 +137,25 @@ jobs:
           name: ohana-visual-results
           path: test-results/
           if-no-files-found: ignore
+
+  six-hero-coop:
+    name: Six hero guest impacts and U echoes (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install selected browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Six real heroes as host and guest
+        run: node tests/browser/six-hero-multiplayer.mjs
+        env:
+          OHANA_TEST_BROWSER: ${{ matrix.browser }}

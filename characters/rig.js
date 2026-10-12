@@ -58,6 +58,10 @@ return NEUTRAL;
 *   anticipation, impact, secondary
 * }
 */
+export function isDuetProtected(p,t){
+ if(!p||p.dead||(p.hurtFlash||0)>0||!Number.isFinite(t)||!Number.isFinite(p._duetProtectionUntil)||p._duetProtectionUntil<=t)return false;
+ return ['_kiloDuetT','_stitchoDuetT','_chispinDuetT','_michiDuetT','_familyDuetT'].some(k=>Number.isFinite(p[k])&&p[k]>0&&p[k]<=120);
+}
 export function computePose(p, t, opts = {}) {
 const prof = profileOf(p);
 const rng = typeof opts.rng === "function" ? opts.rng : (typeof p.rng === "function" ? p.rng : Math.random);

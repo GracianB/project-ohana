@@ -492,7 +492,7 @@ if(FAMILY_DUETS[p.id]){
  startFamilyDuet(game,power*pw(p)*uExpPower(p),(game.enemies||[]).filter(canHit),chosen);
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
- p._duetProtectionUntil=(Number(game.t)||0)+60;
+ p._duetProtectionUntil=(Number(game.t)||0)+Math.min(120,p.invuln);
 }
 }
 
