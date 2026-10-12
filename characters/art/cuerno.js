@@ -63,6 +63,25 @@ R.sparkle(ctx,x-4,born-24,3.5*k,"#d1f5e6");
 ctx.restore();
 }
 
+/**
+ * V321 · L rainbow and U greeting are physically different rituals.
+ * Pure cast progress, five form-safe silhouettes, no authority or physics.
+ */
+export function cuernoRitualBody(pose={},form=0) {
+ const p=pose||{},slot=p.castSlot;
+ if(p.state!=="cast"||![2,3].includes(slot))return null;
+ const safe=n=>typeof n==="number"&&Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
+ const ease=n=>n<=0?0:n>=1?1:n*n*(3-2*n);
+ const k=safe(p.cast),prepare=ease((k-.05)/.29),strike=ease((k-.34)/.22),rest=ease((k-.76)/.24);
+ const load=prepare*(1-strike),release=strike*(1-rest),greet=slot===3?release:0;
+ const f=Number.isFinite(Number(form))?Math.max(0,Math.min(4,Math.trunc(Number(form)))):0;
+ return Object.freeze({form:f,slot,load,release,recovery:rest,greet,
+   tilt:slot===2?-.15*load+.13*release:.17*greet-.07*load,
+   lift:slot===2?1.5*load-3.5*release:-2*greet,
+   wing:slot===2?.4*load+.57*release:.24*load+.78*greet,
+   hoof:slot===2?2.3*load+.5*release:3.5*greet});
+}
+
 // V67: J/K/L/U originate at the real horn. Pure pose contract, no extra FX objects.
 const IRIS_COLORS=["#ffacbe","#ffc98f","#ffe8a5","#a6e8b8","#a7e5fb","#b8c4ff","#e0b9f6"];
 const HORN_TIPS=[[0,-65],[4,-91],[24,-100],[25,-120],[33,-139]];
@@ -108,7 +127,8 @@ export function cuernoWingPose(pose,form,t){
  const slot=cuernoMagicPose(pose,form)?.slot;
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
  const time=Number.isFinite(Number(t))?Number(t):0;
- const open=air?1:slot===3?1:slot===2?.89:cast?.84:victory?.95:
+ const ritual=cuernoRitualBody(pose,form);
+  const open=air?1:ritual?Math.min(1,.27+ritual.wing):cast?.84:victory?.95:
    state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
  const flutter=pose?.reduceMotion?0:air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
  const flap=pose?.reduceMotion?0:Math.sin(time*.10+phase*.12)*flutter;
@@ -124,9 +144,11 @@ export function cuernoLegPose(pose,form,t,clock=0,far=false){
  const step=Math.sin(phase+clock),tempo=.75+speed*.35;
  const range=(f===2?(far?6:7.6):f===3?(far?7.8:10):far?8.7:11.5)*tempo;
  const moving=run&&!pose?.reduceMotion;
- return {reach:moving?step*range:0,tuck:air?(far?8:11)+(f-2)*1.2:0,
-  kneeLift:moving?Math.max(0,-step)*(f===2?1.3:2.2):0,
-  hoofLift:moving?Math.max(0,step)*((f-2)*1.25+2):0};
+ const ritual=cuernoRitualBody(pose,f);
+  const additional=ritual?.hoof||0;
+  return {reach:(moving?step*range:0)+(far?-.8:1.3)*(ritual?.load||0),tuck:air?(far?8:11)+(f-2)*1.2:0,
+  kneeLift:(moving?Math.max(0,-step)*(f===2?1.3:2.2):0)+additional*.62,
+  hoofLift:(moving?Math.max(0,step)*((f-2)*1.25+2):0)+(far?.15:.9)*additional};
 }
 export function cuernoManePose(pose,form,t,index){
  const f=Math.max(2,Math.min(4,form|0)),i=Math.max(0,Math.min(6,index|0));
@@ -331,8 +353,9 @@ function drawLivingHorn(ctx,pose,R,t){
   const TAU=Math.PI*2;
   const moving=pose.state==="run",air=!!pose.air;
   const k=moving?Math.sin(pose.phase||t*.15):Math.sin(t*.06);
-  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0);
-  const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3);
+  const ritual=cuernoRitualBody(pose,0);
+  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0)+(ritual?.tilt||0);
+  const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3)+(ritual?.lift||0);
   ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
   const aura=.5+.5*Math.sin(t*.085);
   ctx.globalAlpha=.19+.09*aura;ctx.fillStyle="#ffe3f5";
@@ -375,8 +398,9 @@ drawCuernoOverlays(ctx,pose,R,0,t,bounce,tilt);
 function drawFirstBody(ctx,pose,R,t){
 const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase);
-const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.35);
-const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0);
+const ritual=cuernoRitualBody(pose,1);
+const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.35)+(ritual?.lift||0);
+const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0)+(ritual?.tilt||0);
 const squish=run?.035*Math.abs(beat):0,hurt=pose.state==="hurt"||pose.state==="dead";
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
 // Three tiny strands of rainbow hair, not a pony's neck or torso.
@@ -421,9 +445,10 @@ const phase=Number(pose.phase)||0,beat=Math.sin(phase);
 const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0)));
 const hurt=pose.state==="hurt"||pose.state==="dead";
 const cast=pose.state==="cast"||pose.state==="attack";
-const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35);
+const ritual=cuernoRitualBody(pose,2);
+const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35)+(ritual?.lift||0);
 const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
-const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0);
+const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0)+(ritual?.tilt||0);
 ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
 const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
 // All four strands emerge from the croup; no detached tail during the gallop.
@@ -505,12 +530,13 @@ function drawStellarUnicorn(ctx,pose,R,t){
 const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,speed=Math.max(0,Math.min(1.4,Number(pose.speed)||0));
 const gallop=run?Math.sin(phase):0,flight=air?1:0;
-const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1);
+const ritual=cuernoRitualBody(pose,3);
+const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1)+(ritual?.lift||0);
 const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe49e";
 const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
 const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
-const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0);
+const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0)+(ritual?.tilt||0);
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
@@ -629,8 +655,9 @@ const magic=cuernoMagicPose(pose,4);
 const wingMotion=cuernoWingPose(pose,4,t),unfold=wingMotion.open;
 const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
 const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
-const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8);
-const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0);
+const ritual=cuernoRitualBody(pose,4);
+const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0);
+const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0)+(ritual?.tilt||0);
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 // V75: root the rainbow tail beneath the obsidian croup. Its arc stays inside
 // a small envelope during runs, jumps and cinematic poses, never flying away.
@@ -860,7 +887,7 @@ function draw(ctx, pose, R) {
     pose={...pose,state:"cast"};
   if(CUERNO_MOTION_MEDIA?.matches&&!pose?.reduceMotion)pose={...pose,reduceMotion:true};
   const f = Math.max(0, Math.min(4, pose.form | 0));
-  // Pequeñas huellas ambientales detrás del cuerpo, con respeto a reduceMotion.
+  // Keep the original five evolution dispatches for legacy contracts.
   drawCuernoFootsteps(ctx, pose, f);
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
