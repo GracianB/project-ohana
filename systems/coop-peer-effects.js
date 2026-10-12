@@ -27,12 +27,15 @@ function effect(item,type){
 // Send the same bounded/read-only snapshot through the ordered, reliable event
 // channel on forced casts. Normal 200ms frames still use the low-latency pose
 // channel only, and applyPeerEffects deduplicates matching scope/frameNo.
-export function sendPeerEffectsWithReliableDuet(direct,frame,force=false){
+export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onReliable){
  if(!direct?.active||!frame||frame.protocol!==2)return false;
  const quick=direct.sendLatest?.("effects",frame)===true;
  const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
   frame.stitchoDuet||frame.kiloDuet);
  const durable=!!force&&hasDuet&&direct.sendEvent?.("effects",frame)===true;
+ // A fast snapshot alone is not proof of a durable start. The caller must
+ // retry until the ordered event channel accepts the current duet.
+ if(durable&&typeof onReliable==="function")onReliable();
  return quick||durable;
 }
 export function capturePeerEffects(game,frameNo,scope){
