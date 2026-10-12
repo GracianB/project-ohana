@@ -994,7 +994,7 @@ else flashCanvas = c;
 return c;
 }
 
-function poseFingerprint(pose) {
+export function poseFingerprint(pose) {
 const q = (v, s) => Math.round((Number(v) || 0) * s);
 return [
 pose.state || "", pose.move || "", pose.form | 0, pose.cuernoBeat || "",
