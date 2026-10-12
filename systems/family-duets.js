@@ -5,11 +5,11 @@
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
- dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",color:"#d9ee7a",kind:"geyser"},
- frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",color:"#ffd36a",kind:"oven"},
- pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",color:"#ff9d82",kind:"maw"},
- yomi:{ally:"cuerno",borrowedL:"rainbow",name:"Yomi y Cuerno",line:"¡Luz entre sombras!",color:"#e2b8ff",kind:"rainbow"},
- cuerno:{ally:"kilo",borrowedL:"ohana",name:"Cuerno y Kilo",line:"¡Toda la familia!",color:"#ffe9a8",kind:"ohana"}
+ dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",cue:"FRITA · FREIDORA",color:"#d9ee7a",kind:"geyser"},
+ frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",cue:"PIZZA · HORNO",color:"#ffd36a",kind:"oven"},
+ pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · FAUCES",color:"#ff9d82",kind:"maw"},
+ yomi:{ally:"cuerno",borrowedL:"rainbow",name:"Yomi y Cuerno",line:"¡Luz entre sombras!",cue:"CUERNO · ARCOÍRIS",color:"#e2b8ff",kind:"rainbow"},
+ cuerno:{ally:"kilo",borrowedL:"ohana",name:"Cuerno y Kilo",line:"¡Toda la familia!",cue:"KILO · CORO OHANA",color:"#ffe9a8",kind:"ohana"}
 };
 export const FAMILY_DUETS=Object.freeze(Object.fromEntries(Object.entries(names).map(([id,data])=>[id,Object.freeze({hero:id,...data})])));
 export const FAMILY_DUET_LENGTH=120;
@@ -23,15 +23,15 @@ export function readFamilyDuet(s){
  !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
  return {hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
 }
-export function familyDuetPose(s){
+export function familyDuetPose(s,reduce=false){
  const data=FAMILY_DUETS[s?.hero];if(!data)return null;
  const age=clamp(s.age,0,119),evo=clamp(s.evo,0,4),face=s.facing===-1?-1:1;
  const arrival=Math.min(1,age/18);
  const exit=age>=106?Math.max(0,1-(age-106)/14):1;
  const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
- const allyX=s.x-face*(146-75*arrival)+face*Math.sin(age*.09)*7;
- const allyY=s.y-24-(data.kind==="rainbow"?34:12)-Math.sin(age*.075)*8;
+ const allyX=s.x-face*(146-75*arrival)+(reduce?0:face*Math.sin(age*.09)*7);
+ const allyY=s.y-24-(data.kind==="rainbow"?34:12)-(reduce?0:Math.sin(age*.075)*8);
  return {beat,phase,allyX,allyY,alpha:exit,kind:data.kind,
    radius:56+evo*8,focusX:s.x+face*(56+phase*65),focusY:s.y-26};
 }
@@ -105,26 +105,34 @@ function spark(ctx,x,y,r,color){
 }
 export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readFamilyDuet(value);if(!s)return false;
- const def=FAMILY_DUETS[s.hero],pose=familyDuetPose(s);
+ const def=FAMILY_DUETS[s.hero],pose=familyDuetPose(s,reduce);
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];
- ctx.save();ctx.globalAlpha*=pose.alpha;
+ ctx.save();const baseAlpha=ctx.globalAlpha;ctx.globalAlpha*=pose.alpha;
  if(friend&&form&&typeof drawActor==="function"){
   const arrival=Math.min(1,s.age/18);
   drawActor(ctx,{...friend,...form,id:def.ally,evo:s.evo,
-   x:pose.allyX-form.w/2,y:pose.allyY-form.h,facing:s.facing,
-   vx:pose.beat==="arrival"?s.facing*4:0,vy:pose.beat==="arrival"?-2:0,
+   x:pose.allyX-form.w/2,y:pose.allyY-form.h,
+   // The friend runs toward the hero, turns to lend L, then waves goodbye.
+   facing:pose.beat==="arrival"?-s.facing:s.facing,
+   vx:pose.beat==="arrival"?s.facing*4:pose.beat==="farewell"?-s.facing*1.7:0,
+   vy:pose.beat==="arrival"?-2:pose.beat==="borrowed-L"&&s.age%24<8?-1:0,
    grounded:pose.beat!=="arrival",
-   visualScale:.62+arrival*.11,_duetActor:true},cam,t);
+   _poseOverride:pose.beat==="arrival"?"run":pose.beat==="borrowed-L"?"attack":pose.beat==="farewell"?"victory":"idle",
+   melee:pose.beat==="borrowed-L"?6:0,
+   visualScale:.62+arrival*.11+s.evo*.018,_duetActor:true},cam,t);
  }
  if(s.age>=18&&s.age<106){
   // Hand-off: an illuminated link connects the player's presence to their friend.
   ctx.strokeStyle=def.color;ctx.lineWidth=2;ctx.globalAlpha*=.5;
   ctx.beginPath();ctx.moveTo(x,y-42);ctx.quadraticCurveTo((x+pose.allyX-cam.x)/2,y-120,pose.allyX-cam.x,pose.allyY-cam.y-30);ctx.stroke();
-  ctx.globalAlpha=pose.alpha;
+  ctx.globalAlpha=baseAlpha*pose.alpha;
  }
  if(pose.beat==="exchange"){
-  ctx.fillStyle="#fff8df";ctx.font="700 13px sans-serif";ctx.textAlign="center";
-  ctx.fillText(def.line,x,y-130);
+  const p=(s.age-18)/18;
+  ctx.fillStyle=def.color;ctx.font="800 14px sans-serif";ctx.textAlign="center";
+  ctx.fillText(def.cue,x,y-145-(reduce?0:Math.sin(p*Math.PI)*5));
+  ctx.fillStyle="#fff8df";ctx.font="700 12px sans-serif";
+  ctx.fillText(def.line,x,y-126);
  }
  // Three actual L beats at 42,66,90 with forecast then impact.
  for(let j=0;j<3;j++){
