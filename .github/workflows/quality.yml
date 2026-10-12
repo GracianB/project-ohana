@@ -45,6 +45,20 @@ jobs:
       - name: Stitcho V302 vector and storm audit
         run: node tests/browser/stitcho-v302.mjs
 
+      - name: Michi V304 vector and duet audit
+        run: node tests/browser/michi-v304.mjs
+
+      - name: Michi Multiplayer E2E
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: cat
+
+      - name: Michi Firefox Multiplayer E2E
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: cat
+          OHANA_TEST_BROWSER: firefox
+
       - name: Chispin V303 vector and duet audit
         run: node tests/browser/chispin-v303.mjs
 

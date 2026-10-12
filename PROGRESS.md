@@ -1,6 +1,10 @@
+## V304 · Michi: ¡Ese ovillo quema! (ohana-330)
+
+Cinco formas con crecimiento vectorial explícito, contraste revisado y cascabel meteoro. U de 120 ticks con Dragón: nueve colas orbitales atrapan tres meteoros con avisos de aterrizaje. Movimiento, cooldown y colisiones conservados; daño local tras preparación visible, cancelación por muerte/cambio de sala. J/K/L replican ovillo, ronroneo y wisps nativos mediante datos limitados sin daño ni curación remotos. CI incluye cinco formas, tacto y Michi anfitrión Chromium/Firefox.
+
 ## V303 · Chispín: Nueve colas, un trueno (ohana-329)
 
-Cinco formas vectoriales con crecimiento explícito, contraste ámbar/violeta y aurora abierta. U de 120 ticks dentro del escenario: Michi salta a por una chispa y sus nueve colas liberan wisps dirigidos bajo tres pulsos de tormenta. Conserva movimiento, física, colisiones y cooldown; daño limitado a enemigos cercanos y cancelación al morir o cambiar de sala. H/J/L replican sus efectos nativos mediante datos visuales limitados, sin generar daño remoto. Chromium/Firefox, táctil y cinco evoluciones incluidos en las puertas de CI.
+Cinco formas vectoriales con crecimiento explícito, contraste ámbar/violeta y aurora abierta. U de 120 ticks dentro del escenario: Michi salta a por una chispa y sus nueve colas liberan wisps dirigidos bajo tres pulsos de tormenta. Conserva movimiento, física, colisiones y cooldown; daño limitado a enemigos cercanos y cancelación al morir o cambiar de sala. J/K/L replican sus efectos nativos mediante datos visuales limitados, sin generar daño remoto. Chromium/Firefox, táctil y cinco evoluciones incluidos en las puertas de CI.
 
 ## V302 · Stitcho: Caos bajo la nube (ohana-328)
 
