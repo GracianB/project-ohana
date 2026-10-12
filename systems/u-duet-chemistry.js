@@ -2,7 +2,7 @@
 // An overlay of BOTH characters, not another generic effect or new damage
 // source. Peer snapshots contain only a bounded rank (1..3), never XP.
 import {ROSTER} from "../characters/roster.js";
-import {chooseUPartner,uPartnerInfo} from "./u-partners.js";
+import {DEFAULT_U_PARTNERS,chooseUPartner,uPartnerInfo} from "./u-partners.js";
 
 const TAU=Math.PI*2;
 const origin=Object.freeze({
@@ -109,7 +109,7 @@ function symbol(ctx,shape,x,y,size,color){
 // Adds a small, evolving joint seal at the handoff and the L beats.
 // Each of the 90 pairings has distinct hue, rhythm and spatial signature.
 export function drawDuetChemistry(ctx,s,cam,t=0,reduced=false){
- const c=duetChemistry(s?.hero,s?.ally||undefined,s?.bondRank||1);
+ const c=duetChemistry(s?.hero,s?.ally||DEFAULT_U_PARTNERS[s?.hero],s?.bondRank||1);
  if(!c||!ctx||!Number.isFinite(s.x)||!Number.isFinite(s.y))return false;
  if(!cam||!Number.isFinite(cam.x)||!Number.isFinite(cam.y))return false;
  const age=s.age||0,face=s.facing===-1?-1:1;
