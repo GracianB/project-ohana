@@ -23,6 +23,18 @@ function effect(item,type){
  for(const k of ["spin","trail"])value[k]=item[k]===true;
  value.owner="peer-visual";return value;
 }
+// V322: a duet START is a meaningful event, not a disposable pose.
+// Send the same bounded/read-only snapshot through the ordered, reliable event
+// channel on forced casts. Normal 200ms frames still use the low-latency pose
+// channel only, and applyPeerEffects deduplicates matching scope/frameNo.
+export function sendPeerEffectsWithReliableDuet(direct,frame,force=false){
+ if(!direct?.active||!frame||frame.protocol!==2)return false;
+ const quick=direct.sendLatest?.("effects",frame)===true;
+ const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
+  frame.stitchoDuet||frame.kiloDuet);
+ const durable=!!force&&hasDuet&&direct.sendEvent?.("effects",frame)===true;
+ return quick||durable;
+}
 export function capturePeerEffects(game,frameNo,scope){
  const frame={protocol:2,scope,frameNo,roomId:game.roomId,familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
   chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],
