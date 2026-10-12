@@ -348,8 +348,43 @@ try {
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
   // Verify a real guest U travelling back to the host too.
-  await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,supremeOf}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;g.player.cds[supremeOf(g.player.id).id]=0;if(!useAbility(g,3))throw Error('Guest U failed');onlineCoop.sendPeerEffects(g,true);});
-  await hostPage.waitForFunction(async expected=>{const {onlineCoop}=await import('/systems/online-coop.js');const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];return !!s&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;},guestCharacter,{timeout:3000});
+  const guestInitialSend=await guestPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,supremeOf}=await import('/systems/abilities.js');
+    const g=onlineCoop._combatGame;g.player.cds[supremeOf(g.player.id).id]=0;
+    if(!useAbility(g,3))throw Error('Guest U failed');
+    return {sent:onlineCoop.sendPeerEffects(g,true),duet:g._familyDuet?.hero||null,
+      room:g.roomId,remoteWorld:onlineCoop.remoteWorld,active:onlineCoop.direct?.active,
+      ally:g._familyDuet?.ally||null,duetAge:g._familyDuet?.age??null};
+  });
+  // Capture exact state on failure; timing limits remain strict.
+  try{
+    await hostPage.waitForFunction(async expected=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';
+      const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+      return !!s&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
+    },guestCharacter,{timeout:3000});
+  }catch(error){
+    const inspect=async page=>page.evaluate(async()=>{
+      const {onlineCoop:o}=await import('/systems/online-coop.js'),g=o._combatGame,fx=g.coopPeerEffects;
+      return {room:g.roomId,remoteWorld:o.remoteWorld,remoteId:o.remote?.characterId||null,
+        directActive:o.direct?.active,poseChannel:o.direct?.poseChannel?.readyState,
+        eventChannel:o.direct?.eventChannel?.readyState,
+        poseBuffered:o.direct?.poseChannel?.bufferedAmount,
+        eventBuffered:o.direct?.eventChannel?.bufferedAmount,
+        lastFxAgeMs:Math.round(performance.now()-(o.lastPeerEffectsAt||0)),
+        fxScope:fx?.scope||null,fxFrame:fx?.frameNo||null,fxHero:fx?.familyDuet?.hero||null,
+        fxAge:fx?.familyDuet?.age??null,localDuet:g._familyDuet?.hero||null,
+        localDuetAge:g._familyDuet?.age??null,sentSeq:o.effectSequence,
+        reliableAccepted:o._reliableDuetSource===g._familyDuet,
+        reliableLink:o._reliableDuetLink===o.direct};
+    });
+    const details=await Promise.allSettled([inspect(hostPage),inspect(guestPage)]);
+    console.error('OHANA U GUEST TO HOST DIAGNOSTICS',JSON.stringify({
+      guestInitialSend,host:details[0].status==='fulfilled'?details[0].value:String(details[0].reason),
+      guest:details[1].status==='fulfilled'?details[1].value:String(details[1].reason)}));
+    throw error;
+  }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});
