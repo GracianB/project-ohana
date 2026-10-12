@@ -425,6 +425,9 @@ const DINO_HICCUP_MOTION_MEDIA = typeof window !== "undefined" && typeof window.
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 
 export function dinoHiccupState(pose = {}) {
+  // Original optional steam-FX API: reduced motion MUST return null.
+  // Its accessible body-only replacement is dinoHiccupSilhouette below.
+  if (pose.reduceMotion || DINO_HICCUP_MOTION_MEDIA?.matches) return null;
   if (pose.state !== "idle" || pose.move === "pound" || pose.move === "charge") return null;
   const k = Number(pose.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
@@ -433,16 +436,26 @@ export function dinoHiccupState(pose = {}) {
   const prepare = ease(seg(k, .05, .36));
   const sneeze = Math.sin(Math.PI * seg(k, .38, .66));
   const settle = ease(seg(k, .68, .94));
-  // Reduced motion keeps three *static bodily expressions* (inhale / hipo /
-  // relief), but removes drifting steam rings and temporal oscillation.
-  const reduced = pose.reduceMotion === true || !!DINO_HICCUP_MOTION_MEDIA?.matches;
-  if (reduced) return Object.freeze({
+  return Object.freeze({ prepare, sneeze: clamp(sneeze, 0, 1),
+    settle, phase: k });
+}
+
+/**
+ * A11y-safe counterpart to dinoHiccupState: three still *body* poses, no
+ * animated steam, no new timers, no override of the existing optional FX API.
+ */
+export function dinoHiccupSilhouette(pose = {}) {
+  if (!(pose.reduceMotion === true || DINO_HICCUP_MOTION_MEDIA?.matches)) return null;
+  if (pose.state !== "idle" || pose.move === "pound" || pose.move === "charge") return null;
+  const k = Number(pose.flourish);
+  if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
+  const n = Number.isFinite(Number(pose.flourishN)) ? Math.trunc(Number(pose.flourishN)) : 0;
+  if (((n % 4) + 4) % 4 !== 3) return null;
+  return Object.freeze({
     prepare: k < .38 ? 1 : 0,
     sneeze: k >= .38 && k < .68 ? 1 : 0,
     settle: k >= .68 ? 1 : 0, phase: k, reduced: true
   });
-  return Object.freeze({ prepare, sneeze: clamp(sneeze, 0, 1),
-    settle, phase: k, reduced: false });
 }
 
 function drawDinoHiccup(ctx, R, f, x, y, h) {
@@ -476,7 +489,7 @@ function draw(ctx, pose, R) {
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = (Number(pose.flourishN) || 0) % 4;
-  const hiccup = dinoHiccupState(pose);
+  const hiccup = dinoHiccupState(pose) || dinoHiccupSilhouette(pose);
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const pound = pose.move === "pound" && (st === "fall" || st === "jump" || st === "idle");
   const rolling = pose.move === "dino-roll" && st !== "dead";
