@@ -1,5 +1,5 @@
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
-import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower} from "./u-partners.js";
+import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
@@ -172,7 +172,8 @@ game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
 if (S.pull && id !== "cheese") S.pull = null;
 const flow = registerCombatAction(game, key, id);
 const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
-gainUExp(p,index);
+const bondGain=gainUExp(p,index);
+if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
 if (index === 3) castSupreme(game, p, flow);
 else fn(game, p, evo);
