@@ -507,3 +507,17 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
   .u-partner-panel select{flex:1 1 165px;min-width:0}
   #u-partner-technique{flex:1 0 100%;text-align:center}
 }
+
+/* V314 · Bonded U preview: actual ally artwork, not a colored placeholder. */
+#u-partner-portrait{
+  display:block;width:84px;height:56px;flex:0 0 84px;
+  border-radius:10px;border:1px solid rgba(255,231,167,.38);
+  background:radial-gradient(ellipse at 50% 90%,rgba(255,232,168,.18),transparent 75%);
+  object-fit:contain;
+}
+#u-partner-technique{flex:1 1 230px;line-height:1.35}
+@media(max-width:640px){
+ #u-partner-portrait{width:64px;height:49px;flex-basis:64px}
+ .u-partner-panel label{flex:1 1 100%;text-align:center}
+ #u-partner-technique{font-size:.72rem}
+}
