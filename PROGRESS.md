@@ -1,3 +1,7 @@
+## Integración Stitcho + aportaciones V313 (ohana-335)
+
+Preserva PR #302, #305–#308 y Stitcho #304. Los conflictos de versiones se resuelven con una caché nueva que incluye todas las dependencias de main. Revalidación completa antes de publicar.
+
 ## Stitcho · segunda pasada de personalidad (ohana-332)
 
 Costuras de carrera, aterrizajes de garras, giros segmentados y frenadas con tres trazos, adaptados a sus cinco formas y su acento Nébula. Efectos locales sin mutaciones de física ni daño; suprimidos por movimiento reducido, aire, daño, muerte y poderes de roll/chaos/climb. Conserva U V302 y las aportaciones GPT.com. La segunda pasada sigue por Chispín y Michi; después continúa Dragón V305 y se revisa/reutiliza PR #302 para V306–V310.
@@ -1479,3 +1483,30 @@ El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cac
 ## Polish Pass 2026-10-06
 
 Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-209.
+
+
+## OHANA V305 · Dragón y Dino, U cooperativa
+
+- Dragón puede seguir volando libremente al pulsar U. Dino aparece en la misma sala y presta su L real `quake` en tres golpes con anticipación, daño acotado y salida propia.
+- Cinco evoluciones de Dino, 150 escenas Canvas para los seis dúos U, multijugador visual sin autoridad de daño y cancelación segura por sala o muerte.
+- Los storyboards originales se conservan en la galería de pruebas; las U no detienen el juego.
+- Cache: `ohana-332`.
+
+
+## OHANA V312 · Diez personalidades cinéticas
+
+- Diez firmas de movimiento y combate auténticas: pétalos de Kilo, costuras de Stitcho, rayos de Chispín, ovillos de Michi, brasas de Dragón, fósiles de Dino, sal de Frita, queso de Pizza, ofuda de Yomi y prisma de Cuerno.
+- Señales ligadas a aterrizajes, giros, frenadas, ataques, salto/vuelo y carrera sin modificar daños, físicas, hitboxes ni protocolo cooperativo.
+- Integradas en el jugador local y en el dibujo del compañero remoto. Accesibilidad: se congela la oscilación temporal y se limitan ornamentos cuando hay movimiento reducido.
+- Verificación de 300 escenas vectoriales (10 héroes × 5 formas × 6 acciones), suite Node de inmovilidad, regresión visual y auditoría multijugador.
+- Versión offline: `ohana-333`.
+
+
+## OHANA V313 · Elección libre de pareja y U EXP
+
+- Diez personajes pueden elegir cualquiera de los otros nueve compañeros: 90 combinaciones verificadas, cada una usando la L real de la pareja seleccionada.
+- Las cuatro U originales conservan su coreografía para la pareja histórica. Al elegir otra, usan el mismo dúo jugable con prestada L, tres golpes y arte específico que las otras seis.
+- Experiencia de afinidad U EXP: tres niveles, progresión con J/K/L/U, mejora de potencia del ataque prestado, guardado en save v2 sin perder partidas anteriores.
+- Selector accesible en el menú para cada héroe, conserva su preferencia en el mismo dispositivo, con información del ataque L elegido y HUD durante la partida.
+- Validación: 90 parejas × cinco evoluciones = 450 estados multijugador, autoridad separada, daño a objetivos delimitados y ningún impacto doble; pruebas Chromium y Firefox completas.
+- Caché: `ohana-334`.

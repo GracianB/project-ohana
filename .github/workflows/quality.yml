@@ -54,6 +54,15 @@ jobs:
       - name: Michi V304 vector and duet audit
         run: node tests/browser/michi-v304.mjs
 
+      - name: V313 · Real U partner selector and ten custom casts
+        run: node tests/browser/u-partners-v313.mjs
+
+      - name: Ten kinetic personalities (300 real Canvas scenes)
+        run: node tests/browser/kinetic-v312.mjs
+
+      - name: Six Family U duet screenshots (150 scenes)
+        run: node tests/browser/family-duets-v306-v310.mjs
+
       - name: Michi Multiplayer E2E
         run: npm run test:browser:multiplayer
         env:

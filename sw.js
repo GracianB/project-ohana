@@ -1,4 +1,4 @@
-const VERSION = "ohana-332";
+const VERSION = "ohana-335";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -44,6 +44,7 @@ const PRECACHE = [
   "./characters/art/stitcho.js?v=" + VERSION,
   "./characters/art/yomi.js?v=" + VERSION,
   "./characters/draw.js?v=" + VERSION,
+  "./characters/kinetic-stagecraft.js?v=" + VERSION,
   "./characters/evolution.js?v=" + VERSION,
   "./characters/costume.js?v=" + VERSION,
   "./characters/definitive.js?v=" + VERSION,
@@ -66,6 +67,8 @@ const PRECACHE = [
   "./engine/particles.js?v=" + VERSION,
   "./systems/atrium-interact.js?v=" + VERSION,
   "./systems/abilities.js?v=" + VERSION,
+  "./systems/family-duets.js?v=" + VERSION,
+  "./systems/u-partners.js?v=" + VERSION,
   "./systems/ability-catalog.js?v=" + VERSION,
   "./systems/boss-fall-scene.js?v=" + VERSION,
   "./systems/dragon-trial.js?v=" + VERSION,

@@ -4,6 +4,7 @@ import {STITCHO_VISUAL_H} from "./art/stitcho.js";
 import {KILO_VISUAL_H} from "./art/kilo.js";
 import { computePose, enhancePose, motionProfile, R } from "./rig.js";
 import { ART } from "./art/index.js";
+import { drawKineticSignature } from "./kinetic-stagecraft.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
 import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
@@ -812,7 +813,7 @@ for (let i = 0; i < 3; i++) {
 ctx.restore();
 }
 
-function drawCharacterMotionFX(ctx, p, H, pose, t) {
+function drawCharacterMotionFX(ctx, p, H, pose, t, reduceMotion=false) {
 const color = accentFor(p);
 const prof = motionProfile(p);
 drawSignatureFX(ctx, p, H, pose, t);
@@ -825,6 +826,8 @@ drawMasteryMotionFX(ctx, p, H, t);
 drawLandingImpact(ctx, H, color, pose);
 drawAttackFX(ctx, H, color, pose);
 drawEvolutionCombatFX(ctx, p, H, pose, t);
+// Independent, low-cost character acting layered atop the original art.
+drawKineticSignature(ctx,p,H,pose,t,reduceMotion);
 drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
 if (pose.state === "jump" && pose.stretch > 0.12) {
 ctx.save();
@@ -1114,7 +1117,7 @@ ctx.drawImage(tintCanvas, x, y, w, h);
 ctx.restore();
 }
 
-export function drawCharacter(ctx, p, cam, t) {
+export function drawCharacter(ctx, p, cam, t, options={}) {
 const evo = Math.max(0, Math.min(4, Math.round(Number(p.evo) || 0)));
 const facing = p.facing || 1;
 const footX = p.x + p.w / 2 - cam.x;
@@ -1217,7 +1220,7 @@ ctx.restore();
 
 drawFlavor(ctx, p.id, H, t, evo, true);
 drawEvolutionSignatureFX(ctx, p, H, pose, t);
-drawCharacterMotionFX(ctx, p, H, pose, t);
+drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
 if (burstK > 0) {
 drawBurst(ctx, H, color, burstK);
 p.evoBurst--;
