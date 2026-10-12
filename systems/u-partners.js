@@ -110,8 +110,9 @@ export function uBondProgress(p,ally=p?.uPartner){
  const xp=bondXP(p,ally),rank=uExpRank(xp),next=rank<3?U_EXP_THRESHOLDS[rank]:MAX_U_EXP;
  const prev=U_EXP_THRESHOLDS[rank-1];
  return Object.freeze({xp,rank,next,remaining:Math.max(0,next-xp),
-  percent:rank===3?Math.min(100,Math.round(xp/MAX_U_EXP*100)):
-   Math.min(100,Math.round((xp-prev)/(next-prev)*100)),
+  // The HUD bar is explicitly labelled 0..200 total XP. Its fill must
+  // stay monotonic when a player reaches a new rank.
+  percent:Math.min(100,Math.round(xp/MAX_U_EXP*100)),
   name:["","Encuentro","Sintonía","Leyenda"][rank]});
 }
 export function uExpPower(p){
