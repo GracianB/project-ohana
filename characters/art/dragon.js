@@ -704,6 +704,71 @@ if (h > 8) {
 }
 
 
+
+/**
+ * El dragón desplaza el aire con el cuerpo: transición de ala al aterrizar,
+ * contraviento al girar y un rastro tenue de brasas al correr.
+ * Estado estrictamente visual; no modifica el vuelo ni el aliento.
+ */
+export function dragonMomentum(pose) {
+  const p = pose || {};
+  const state = p.state || "idle";
+  if (state === "dead" || state === "hurt" || p.move === "fly") return null;
+  const unit = (value) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(1, Number(value))) : 0;
+  const landing = unit(p.land);
+  const run = state === "run" ? unit(p.speed) : 0;
+  const turn = state === "run" ? unit(p.turnPulse) : 0;
+  const brake = state === "run" ? unit(p.brake) : 0;
+  return landing > .03 || run > .35 || turn > .03 || brake > .03
+    ? { landing, run, turn, brake }
+    : null;
+}
+
+function dragonGroundAirflow(ctx, pose, f, t, color) {
+  const m = dragonMomentum(pose);
+  if (!m) return;
+  ctx.save();
+  ctx.lineCap = "round";
+  if (m.run > .35) {
+    for (let i = 0; i < 3; i++) {
+      const life = ((t * .06 * m.run + i / 3) % 1 + 1) % 1;
+      const x = -13 - 24 * life - i * 4;
+      const y = -3 - 5 * i - 5 * life;
+      ctx.globalAlpha = .24 * (1 - life);
+      ctx.fillStyle = i === 1 ? "#ff893c" : color;
+      ctx.beginPath();ctx.ellipse(x,y,1.5 + (1-life),2.3,.3,0,Math.PI*2);ctx.fill();
+    }
+  }
+  if(m.landing > .03){
+    // Dos ondas de aire comprimido al plegar las alas.
+    ctx.globalAlpha = .38 * m.landing;
+    ctx.strokeStyle = f === 4 ? "#fff7c4" : color;
+    ctx.lineWidth = 1.7;
+    for (const side of [-1,1]) {
+      ctx.beginPath(); ctx.moveTo(side * 8, -2);
+      ctx.quadraticCurveTo(side * (18 + 6 * (1-m.landing)), -12, side * (28 + 13 * (1-m.landing)), -2);
+      ctx.stroke();
+    }
+  }
+  if(m.turn > .03){
+    ctx.globalAlpha = .44 * m.turn;
+    ctx.strokeStyle = "#ff9862"; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(-12, -25);
+    ctx.quadraticCurveTo(-30 - 5 * m.turn,-37,-42 - 12 * m.turn,-19);
+    ctx.stroke();
+  }
+  if(m.brake > .03){
+    ctx.globalAlpha = .43 * m.brake;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 3; i++) {
+      const y = -6 - i * 7;
+      ctx.beginPath();ctx.moveTo(-16-i*4,y);
+      ctx.lineTo(-26-i*6-m.brake*7,y+3+i);ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 /** Solar soul is local to Dragon's canvas. No persistent particles or timers. */
 function dragonSoul(ctx, pose, front) {
 const p = pose || {};
@@ -717,6 +782,8 @@ const color = f === 4 ? "#fff4a3" : f >= 2 ? "#ffc368" : "#ffe4a2";
 ctx.save();
 ctx.lineCap = "round";
 if (!front) {
+  // Polvo de brasas y contraviento siempre quedan detrás del cuerpo.
+  dragonGroundAirflow(ctx, p, f, t, color);
   if (flight) {
     const n = f >= 3 ? 5 : 3;
     for (let i = 0; i < n; i++) {
