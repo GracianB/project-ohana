@@ -17,7 +17,7 @@ import {drawKiloDuet} from "./kilo-duet.js";
 import { drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
-import { capturePeerEffects,applyPeerEffects,advancePeerEffects } from "./coop-peer-effects.js";
+import { capturePeerEffects,applyPeerEffects,advancePeerEffects,sendPeerEffectsWithReliableDuet } from "./coop-peer-effects.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
@@ -944,7 +944,7 @@ class OnlineCoop {
     const now=performance.now();
     if(!this.direct?.active||this.remoteWorld!==game.roomId||(!force&&now-this.lastEffectsSentAt<200))return false;
     const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
-    if(this.direct.sendLatest?.('effects',frame)){this.lastEffectsSentAt=now;return true;}
+    if(sendPeerEffectsWithReliableDuet(this.direct,frame,force)){this.lastEffectsSentAt=now;return true;}
     return false;
   }
 
