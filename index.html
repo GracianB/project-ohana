@@ -97,7 +97,8 @@
       </div>
       <div class="evo-display">
         <div id="hud-evo" class="evo-text">Forma 1/5</div>
-      <div id="u-exp-hud" class="evo-text" aria-live="off"></div>
+        <div id="u-exp-hud" class="evo-text" aria-live="off"></div>
+        <div class="u-exp-track" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="0" aria-label="Experiencia de afinidad de pareja"><i id="u-exp-fill"></i></div>
         <div class="form-pips" id="form-pips" role="img" aria-label="Progreso de evolución">
           <b class="on active"></b><b></b><b></b><b></b><b></b>
         </div>
@@ -176,6 +177,7 @@
       <div class="title-controls">
         <div class="u-partner-panel" role="group" aria-label="Configurar U cooperativa">
           <label for="u-partner-select">U EXP · Elige pareja</label>
+          <canvas id="u-partner-portrait" width="166" height="100" role="img" aria-label="Retrato del compañero elegido"></canvas>
           <select id="u-partner-select" aria-label="Compañero de la habilidad U"></select>
           <span id="u-partner-technique" role="status" aria-live="polite">La U toma prestada la L de tu pareja.</span>
         </div>

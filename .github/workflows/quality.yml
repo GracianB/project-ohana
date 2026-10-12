@@ -57,6 +57,9 @@ jobs:
       - name: V313 · Real U partner selector and ten custom casts
         run: node tests/browser/u-partners-v313.mjs
 
+      - name: V314 · Pair-specific bond EXP, artwork and three resonance ranks
+        run: node tests/browser/u-bonds-v314.mjs
+
       - name: Ten kinetic personalities (300 real Canvas scenes)
         run: node tests/browser/kinetic-v312.mjs
 
