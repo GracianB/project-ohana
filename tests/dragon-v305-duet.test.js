@@ -11,7 +11,7 @@ function game(evo=4){
   health:100,maxHealth:125,vx:2,vy:-1,facing:1,grounded:false,jumps:1,
   cds:{},cdDur:{},invuln:0,dead:false};
  return {player:p,roomId:"volcano",t:0,worldW:1600,worldH:900,
-  cam:{x:0,y:0},enemies:[],projectiles:[],slashes:[],bolts:[],ghosts:[],score:0,
+  cam:{x:0,y:0},platforms:[],enemies:[],projectiles:[],slashes:[],bolts:[],ghosts:[],score:0,
   fx:{emit(){}},nums:{add(){}}};
 }
 test("V305: Dragon borrows Dino's actual L quake, not its own L meteor",()=>{
