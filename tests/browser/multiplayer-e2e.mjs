@@ -322,6 +322,7 @@ try {
     if(reconciled)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(reconciled,'enemy removal and actual native peer projectile were not delivered');
+  if(guestCharacter==='dino')await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const previous=onlineCoop.applyRemoteHit;onlineCoop._proofRestoreRemoteHit=previous;onlineCoop.applyRemoteHit=function(g,p){const accepted=previous.call(this,g,p);if(accepted&&p.characterId==='dino'&&p.dinoImpact){const e=g.enemies.find(e=>e._coopSyncId===p.targetSyncId);g._dinoImpactProof={received:p.dinoImpact,stun:e?.stun,vx:e?.vx,vy:e?.vy};}return accepted;};});
   // Isolate the guest-impact target before any persistent U fields are launched.
   {
     const id=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {makeFoe}=await import('/engine/foes.js');const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');const g=onlineCoop._combatGame,e=makeFoe(1700,300,'phosquito',g.roomId,992,{rng:()=>.5});e.spawnIndex=992;e.hp=e.max=500;e.stun=300;g.enemies.push(e);onlineCoop.direct.sendLatest('combat',captureCombatFrame(g,++onlineCoop.combatSequence,onlineCoop.combatEpoch));return e._coopSyncId;});
@@ -337,7 +338,7 @@ try {
       if(Date.now()<enemyDeadline)await guestPage.waitForTimeout(50);
     }while(Date.now()<enemyDeadline);
     assert.ok(enemyMirrored,'authoritative enemy not mirrored on guest within 3000ms');
-    await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0}))throw Error('Guest impact failed');},id);
+    await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0,...(g.player.id==='dino'?{stun:62,kx:15,ky:-12}:{})}))throw Error('Guest impact failed');},id);
     const impactDeadline=Date.now()+3000;let hitAcknowledged=false;
     do{
       hitAcknowledged=await hostPage.evaluate(async enemyId=>{
@@ -365,6 +366,10 @@ try {
     }
     await hostPage.waitForTimeout(250);
     assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
+  }
+  if(guestCharacter==='dino'){
+    const proof=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const p=onlineCoop._combatGame._dinoImpactProof;onlineCoop.applyRemoteHit=onlineCoop._proofRestoreRemoteHit;delete onlineCoop._proofRestoreRemoteHit;return p;});
+    assert.deepEqual(proof.received,{stun:62,kx:15,ky:-12});assert.ok(proof.stun>=62);assert.equal(proof.vx,15);assert.equal(proof.vy,-12);
   }
   // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
   await hostPage.evaluate(async()=>{
