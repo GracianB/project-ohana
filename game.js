@@ -2,7 +2,9 @@ import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
-import {optionsForUPartner,chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice} from "./systems/u-partners.js";
+import {optionsForUPartner,chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice,
+ readStoredUBonds,persistUBonds,combineUBonds,bondXP,switchUPartner,uBondProgress} from "./systems/u-partners.js";
+import {duetChemistry} from "./systems/u-duet-chemistry.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
@@ -685,7 +687,8 @@ game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
-game.player.uExp=0;
+game.player.uBonds=readStoredUBonds(localStorage,def.id);
+game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
@@ -701,7 +704,13 @@ try {
   if (u) {
     game.player.evo = u.evo;
     game.player.xp = u.xp;
-    game.player.uExp = u.uExp || 0;
+    // V313 saves contained one U EXP value. Migrate it to the equipped
+    // partner only, rather than gifting it to all nine companions.
+    const legacy=(u.uExp>0&&!Object.keys(u.uBonds||{}).length)?
+      {[game.player.uPartner]:u.uExp}:null;
+    game.player.uBonds=combineUBonds(def.id,game.player.uBonds,u.uBonds,legacy);
+    game.player.uExp=bondXP(game.player);
+    persistUBonds(localStorage,def.id,game.player.uBonds);
     game.visited = { hub: true };
     for (const key of Object.keys(u.visited)) if (ROOMS[key]) game.visited[key] = true;
     game.score = u.score;
@@ -2827,7 +2836,8 @@ if (!d) return "";
 const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
-const detail = slot.supreme ? (d.name + " · U EXP con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
+const bond=slot.supreme?uBondProgress(game.player):null;
+const detail = slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
@@ -2898,10 +2908,18 @@ setText(DOM.hudWorld, room().name);
 const seen = Object.keys(game.visited || {}).length;
 setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
 setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
-const ally=uPartnerInfo(p.id,p.uPartner),uLevel=uExpRank(p.uExp);
+const ally=uPartnerInfo(p.id,p.uPartner),bond=uBondProgress(p);
 setText(document.getElementById("u-exp-hud"),
- "U EXP " + uLevel + "/3 · " + (ally?.name||"Familia") +
- " ("+(ally?.lName||"L")+") · "+Math.floor(p.uExp||0)+"/200");
+ "U EXP " + bond.rank + "/3 · " + (ally?.name||"Familia") +
+ " · L: "+(ally?.lName||"L")+" · "+bond.xp+"/200"+
+ (bond.rank<3?" · faltan "+bond.remaining:" · Leyenda"));
+const bondFill=document.getElementById("u-exp-fill");
+if(bondFill){
+ const width=bond.percent+"%";
+ if(bondFill.style.width!==width)bondFill.style.width=width;
+ bondFill.parentElement?.setAttribute("aria-valuenow",String(bond.xp));
+}
+
 
 if (p.evo >= 4) {
 const sup = supremeOf(p.id);
@@ -3093,16 +3111,36 @@ requestAnimationFrame(loop);
 function setupSelect() {
 const partnerSelect=document.getElementById("u-partner-select");
 const technique=document.getElementById("u-partner-technique");
+const preview=document.getElementById("u-partner-portrait");
 function renderUPartnerChoices(hero){
  if(!partnerSelect||!hero)return;
  const options=optionsForUPartner(hero);
  if(!options.length)return;
  const selected=loadUPartnerChoice(localStorage,hero);
- partnerSelect.innerHTML=options.map(o=>'<option value="'+o.id+'">'+o.name+' · L: '+o.lName+'</option>').join("");
+ const bonds=readStoredUBonds(localStorage,hero);
+ partnerSelect.innerHTML=options.map(o=>'<option value="'+o.id+'">'+o.name+
+ ' · L: '+o.lName+' · EXP '+(bonds[o.id]||0)+'/200</option>').join("");
  partnerSelect.value=selected;
  partnerSelect.dataset.hero=hero;
- if(technique)technique.textContent="U en combate · "+(uPartnerInfo(hero,selected)?.lName||"L")+
-  " · selecciona otro héroe para cambiar el dúo";
+ const info=uPartnerInfo(hero,selected),progress=uBondProgress({id:hero,uPartner:selected,uBonds:bonds});
+const chemistry=duetChemistry(hero,selected,progress.rank);
+if(technique)technique.textContent="U en combate · "+(chemistry?.name||"U cooperativa")+
+ " · Nivel "+progress.rank+"/3 · "+progress.name+
+ " · EXP "+progress.xp+"/200"+(progress.rank<3?" · faltan "+progress.remaining:" · rango máximo");
+if(preview&&info){
+ const ctx=preview.getContext("2d");ctx.clearRect(0,0,preview.width,preview.height);
+ const def=ROSTER.find(r=>r.id===selected),form=def?.forms?.[1]||def?.forms?.[0];
+ if(form){
+  ctx.save();
+  const w=form.w||28,h=form.h||32;
+  drawCharacter(ctx,{...def,...form,id:selected,evo:1,x:preview.width*.5-w*.5,
+   y:preview.height*.78-h,w,h,facing:1,vx:0,vy:0,grounded:true,
+   melee:0,visualScale:1.10}, {x:0,y:0},0,{reduceMotion:true});
+  ctx.restore();
+ }
+ preview.setAttribute("aria-label","Compañero "+info.name+" presta "+info.lName+
+  ", afinidad "+progress.rank+" de 3");
+}
 }
 renderUPartnerChoices("kilo");
 addEventListener("ohana-select",e=>renderUPartnerChoices(e.detail?.id));
@@ -3111,7 +3149,7 @@ partnerSelect?.addEventListener("change",()=>{
  if(!storeUPartnerChoice(localStorage,hero,ally))return;
  renderUPartnerChoices(hero);
  if(game.running&&game.player?.id===hero){
-  game.player.uPartner=ally;
+  switchUPartner(game.player,ally);
   renderAbilityBar();
   updateHUD();
  }
@@ -3364,7 +3402,8 @@ state() {
     familyDuet:game._familyDuet?{hero:game._familyDuet.hero,ally:game._familyDuet.ally||null,age:game._familyDuet.age,evo:game._familyDuet.evo}:null,
     uPartner:p?.uPartner||null,
     uExp:p?.uExp||0,
-    uExpRank:uExpRank(p?.uExp),
+    uExpRank:uBondProgress(p).rank,
+    uBonds:p?{...p.uBonds}:null,
     michiDuet:game._michiDuet?{age:game._michiDuet.age,evo:game._michiDuet.evo}:null,
     chispinDuet:game._chispinDuet?{age:game._chispinDuet.age,evo:game._chispinDuet.evo}:null,
     stitchoDuet:game._stitchoDuet?{age:game._stitchoDuet.age,evo:game._stitchoDuet.evo}:null,

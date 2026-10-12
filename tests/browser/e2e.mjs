@@ -491,7 +491,11 @@ async function auditPage(page, label) {
     const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0;
     const buttons = [...document.querySelectorAll('button')].map((b) => ({ name: b.getAttribute('aria-label') || b.textContent.trim() || b.getAttribute('title') || '', disabled: b.disabled }));
     const dialogs = [...document.querySelectorAll('[role="dialog"]')].map((d) => ({ labelled: !!d.getAttribute('aria-label') || !!d.getAttribute('aria-labelledby'), modal: d.getAttribute('aria-modal') === 'true' }));
-    const bars = [...document.querySelectorAll('[role="progressbar"]')].map((b) => Number(b.getAttribute('aria-valuenow')));
+    const bars = [...document.querySelectorAll('[role="progressbar"]')].map((b) => ({
+      value:Number(b.getAttribute("aria-valuenow")),
+      min:Number(b.getAttribute("aria-valuemin")||0),
+      max:Number(b.getAttribute("aria-valuemax")||100)
+    }));
     return { chars:ROSTER.length, forms:ROSTER.reduce((n,p)=>n+p.forms.length,0), powers:ROSTER.reduce((n,p)=>n+p.forms.length*p.abilities.length,0), abilityDefs:Object.keys(ABILITY_DEFS).length, rooms:Object.keys(ROOMS).length, route, nonZero, sum, js, css, fcp, title:document.title, buttons, dialogs, bars, canvasLabel:canvas?.getAttribute('aria-label') || '' };
   });
 
@@ -509,13 +513,17 @@ async function auditPage(page, label) {
   assert.ok(audit.canvasLabel.length > 0, label + ': Canvas sin aria-label');
   assert.ok(audit.buttons.every((b) => b.name.length > 0), label + ': botón sin nombre accesible');
   assert.ok(audit.dialogs.every((d) => d.labelled && d.modal), label + ': diálogo sin etiquetado/modal accesible');
-  assert.ok(audit.bars.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), label + ': progressbar fuera de rango');
+  assert.ok(audit.bars.every(({value,min,max})=>[value,min,max].every(Number.isFinite)&&
+    max>min&&value>=min&&value<=max),label+': progressbar fuera de rango');
   await page.screenshot({ path:'test-results/ohana-' + label + '.png', fullPage:false, timeout:10000 });
   if (errors.length) throw new Error(label + ': ' + errors.join('\n'));
 
   const deterministic = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
     const run = () => {
+      // Deterministic GAMEPLAY should not depend on an accumulated profile
+      // from a prior seeded replay. Bond persistence is tested separately.
+      localStorage.removeItem("ohana-u-bonds-v2");
       api.setSeed(123456789);
       api.start('kilo');
       api.setXp(55);

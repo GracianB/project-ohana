@@ -1518,3 +1518,14 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Selector accesible en el menú para cada héroe, conserva su preferencia en el mismo dispositivo, con información del ataque L elegido y HUD durante la partida.
 - Validación: 90 parejas × cinco evoluciones = 450 estados multijugador, autoridad separada, daño a objetivos delimitados y ningún impacto doble; pruebas Chromium y Firefox completas.
 - Caché: `ohana-334`.
+
+
+## OHANA V314 · Química de pareja y EXP de vínculo individual
+
+- Las 90 parejas (diez protagonistas × nueve compañeros) tienen XP guardada independientemente, con tres rangos y retrato Canvas del aliado seleccionado; cambiar compañero no regala progreso.
+- Compatibilidad real con V313: restaura el progreso numérico anterior a la pareja seleccionada y combina los nuevos progresos sin pérdidas. Persiste por héroe y pareja en almacenamiento local, además de los saves v2.
+- Diez estilos visuales del héroe que ejecuta U se combinan con las diez L prestadas. Doble firma de color, cinco formas evolutivas, tres rangos y ritmos distintos; las cuatro U artesanales anteriores permanecen intactas.
+- Bonificaciones de sinergia limitadas y aplicadas solamente en impacto real a partir del rango dos; no se crea un ataque duplicado ni se envía autoridad de daño por red.
+- Los impactos prestados con éxito ganan experiencia; los compañeros que curan (Kilo) obtienen EXP por sus tres intervenciones de apoyo.
+- QA: 1.350 estados Canvas (90 parejas × cinco evoluciones × tres rangos), seguridad de snapshots en multijugador, test E2E de retrato, partidas y progreso persistente, validación completa del pipeline.
+- Versión sin conexión: `ohana-335`.
