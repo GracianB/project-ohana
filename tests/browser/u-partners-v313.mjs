@@ -39,7 +39,7 @@ try{
    if(after.uExp<=0||after.uExpRank<1)throw Error("Missing bond experience "+hero);
    const hud=document.getElementById("u-exp-hud")?.textContent||"";
    if(!hud.includes("U EXP")||!hud.includes("200"))throw Error("HUD missing U EXP "+hero);
-   api.step(47);
+   api.step(80);
    const stepped=api.state();
    if(stepped.familyDuet?.ally!==chosen[hero]||stepped.familyDuet?.age<42)
     throw Error("Three-beat choreography absent "+hero);
