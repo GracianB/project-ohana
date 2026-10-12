@@ -815,6 +815,23 @@ function drawSoulSeams(ctx, pose, f, front = false) {
   ctx.restore();
 }
 
+
+const STITCHO_MOTION_MEDIA=typeof window!=='undefined'&&typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+export function stitchoFootwork(pose={}){
+ if(pose.reduceMotion||STITCHO_MOTION_MEDIA?.matches||pose.air||['roll','chaos','climb'].includes(pose.move)||!['idle','run'].includes(pose.state||'idle'))return null;
+ const unit=v=>Number.isFinite(Number(v))?Math.max(0,Math.min(1,Number(v))):0;
+ const landing=unit(pose.land),turn=pose.state==='run'?unit(pose.turnPulse):0,brake=pose.state==='run'?unit(pose.brake):0,running=pose.state==='run'?unit(pose.speed):0;
+ return landing>.02||turn>.02||brake>.02||running>.3?{landing,turn,brake,running}:null;
+}
+function drawStitchoFootwork(ctx,pose,f,t){
+ const m=stitchoFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';const col=f===4?'#bfa5ff':'#8ae9ff';ctx.strokeStyle=col;ctx.lineWidth=f===0?1.5:1.8;
+ if(m.running>.3)for(let i=0;i<3;i++){const k=((t*.065+i/3)%1+1)%1,x=-15-k*25,y=-3-k*5;ctx.globalAlpha=.4*(1-k)*m.running;ctx.beginPath();ctx.moveTo(x-2,y-2);ctx.lineTo(x+2,y+1);ctx.lineTo(x+5,y-2);ctx.stroke();}
+ if(m.landing>.02){ctx.globalAlpha=m.landing*.65;const spread=12+(1-m.landing)*18;for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*6,-1);ctx.lineTo(side*spread,-3);ctx.lineTo(side*(spread+4),-7);ctx.stroke();}for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-6+i*6,-2);ctx.lineTo(-9+i*6,-7-(1-m.landing)*4);ctx.stroke();}}
+ if(m.turn>.02){ctx.globalAlpha=m.turn*.6;for(let i=0;i<3;i++){const a=1.7+i*.4;ctx.beginPath();ctx.arc(-4,-11,15+f,a,a+.23);ctx.stroke();}}
+ if(m.brake>.02){ctx.globalAlpha=m.brake*.55;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-13-i*5,-1);ctx.lineTo(-23-i*5,-3-i*2);ctx.stroke();}}
+ ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], st = pose.state;
   const chaos = pose.move === "chaos" || (st === "cast" && pose.castSlot === 2);
@@ -824,6 +841,7 @@ function draw(ctx, pose, R) {
   if (pose.move === "climb" && st !== "dead" && st !== "hurt") pr.state = "wall";
   const ringY = roll ? -24 : gallop ? -34 : S.by - 6;
   ctx.save();
+  drawStitchoFootwork(ctx,pr,f,pose.t||0);
   drawSoulSeams(ctx, pr, f, false);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, false);
   if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C, chaos);
