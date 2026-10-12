@@ -27,15 +27,40 @@ function sigil(ctx,x,y,k,col){
 const YOMI_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 
+/**
+ * Yomi's own J/K/L/U body has a readable wind-up and recovery.
+ * All poses are pure and derive from the rig cast fraction, never from time.
+ */
+export function yomiCastActing(pose={}) {
+ const p=pose||{},slot=p.castSlot;
+ if(p.state!=="cast" || !Number.isInteger(slot)||slot<0||slot>3)return null;
+ const k=typeof p.cast==="number"&&Number.isFinite(p.cast)?clamp(p.cast,0,1):0;
+ const ease=n=>n<=0?0:n>=1?1:n*n*(3-2*n);
+ const seg=(a,b)=>ease((k-a)/(b-a));
+ const charge=seg(.04,.32),contact=seg(.32,.53),settle=seg(.76,1);
+ const load=charge*(1-contact),release=contact*(1-settle);
+ return Object.freeze({
+  slot,load,release,settle,
+  rise:slot===3?-4.3*release:slot===2?2*load-2.4*release:-1.5*load,
+  tilt:slot===2?-.16*load+.2*release:slot===3?.18*release:slot===0?-.13*load+.2*release:.12*release,
+  front:slot===2?-.5*load+.44*release:slot===3?.64*release:.24*release,
+  back:slot===2?.22*load-.28*release:slot===3?-.52*release:-.18*load,
+  maw:slot===2?.1*load+.88*release:0,
+  aurora:slot===3?release:0,
+ });
+}
+
 export function yomiRitualState(pose) {
   const p = pose || {};
+  // Cosmetic floating rituals stay OFF for reduced motion; only the
+  // directional body cast postures remain, as expected by shared QA.
   if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return null;
   if ((p.state || "idle") !== "idle") return null;
   const k = Number(p.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
   const n = Number.isFinite(Number(p.flourishN)) ? Math.trunc(Number(p.flourishN)) : 0;
-  return { scene: ((n % 4) + 4) % 4, phase: k,
-    alpha: clamp(Math.min(k * 7, (1 - k) * 7), 0, 1) };
+  return Object.freeze({scene:((n%4)+4)%4,phase:k,
+    alpha:clamp(Math.min(k*7,(1-k)*7),0,1)});
 }
 
 function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
@@ -82,7 +107,7 @@ function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
 function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
   const state = yomiRitualState(p);
   if (!state) return;
-  const { scene, phase: k, alpha } = state;
+  const { scene, phase: k, alpha, reduced } = state;
   const sunlight = f === 4 ? "#fff3c3" : glow;
   ctx.save();
   ctx.globalAlpha = alpha * .78;
@@ -90,7 +115,7 @@ function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
     // Escuchar: el farol oye tres campanadas suaves.
     line(ctx, sunlight, 1.6);
     for (let i = 0; i < 3; i++) {
-      const spread = (k * 1.3 + i / 3) % 1;
+      const spread = reduced?(i+1)*.19:(k * 1.3 + i / 3) % 1;
       ctx.globalAlpha = alpha * .48 * (1 - spread);
       ctx.beginPath();
       ctx.arc(0, faceY - 12, 13 + spread * 28, -Math.PI * .85, -Math.PI * .15);
@@ -99,7 +124,7 @@ function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
   } else if (scene === 1) {
     // Mensajes del umbral: tres sellos vuelan alrededor sin afectar a enemigos.
     for (let i = 0; i < 3; i++) {
-      const a = t * .045 + i * TAU / 3;
+      const a = (reduced?0:t * .045) + i * TAU / 3;
       const x = Math.cos(a) * (w + 21);
       const y = faceY - 1 + Math.sin(a) * 19;
       ctx.save(); ctx.translate(x, y); ctx.scale(.56, .56);
@@ -109,7 +134,7 @@ function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
   } else if (scene === 2) {
     // Vals de llamitas: cinco luces en espiral, siempre dentro del personaje.
     for (let i = 0; i < 5; i++) {
-      const a = t * .065 + i * TAU / 5;
+      const a = (reduced?0:t * .065) + i * TAU / 5;
       const x = Math.cos(a) * (w + 7 + 4 * Math.sin(k * Math.PI));
       const y = faceY + Math.sin(a) * 20;
       ellipse(ctx, x, y, 2.1 + .8 * Math.sin(k * Math.PI), 3.1, i % 2 ? sunlight : "#fff8df");
@@ -137,14 +162,15 @@ function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
   const cast=st==="cast"?(p.castSlot|0):-1,atk=clamp(Number(p.atk)||0,0,1);
-  const pulse=.5+.5*Math.sin(t*.095),run=st==="run",flight=st==="jump"||st==="fall"||st==="glide";
-  const angry=st==="attack"||cast===2, hurt=st==="hurt"||st==="dead";
-  const open=angry?(st==="attack"?atk:.85):st==="victory"?.3:.05;
-  const swing=Math.sin(t*(run?.26:.08))*(run?5:2.4)+(Number(p.sway)||0)*3;
-  const hover=st==="dead"?1:Math.sin(t*.067)*2.1-(flight?3:0);
+  const acting=yomiCastActing(p),reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
+  const pulse=reduced?.5:.5+.5*Math.sin(t*.095),run=st==="run",flight=st==="jump"||st==="fall"||st==="glide";
+  const angry=st==="attack"||cast===2,hurt=st==="hurt"||st==="dead";
+  const open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
+  const swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
+  const hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
   const w=20+f*2.9,h=55+f*4.2;
   const shoulder=-h*.68,faceY=-h*.72;
-  ctx.save();ctx.translate(0,hover);ctx.rotate(run?-.085*Math.sin(t*.32):flight?-.045:0);
+  ctx.save();ctx.translate(0,hover);ctx.rotate((run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)+(acting?.tilt||0));
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
@@ -215,9 +241,9 @@ function draw(ctx,pose,R){
   for(const side of [-1,1]){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
-    const leading=side===1,windup=cast===2 && leading ? .44*Math.sin(Math.PI*clamp(Number(p.cast)||0,0,1)) : 0;
-    ctx.rotate(side*((cast===1?.22:run?.22:.12)+Math.sin(t*.075+side)*.07)-windup);
-    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0);
+    const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
+    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup);
+    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0);
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
@@ -289,7 +315,7 @@ function draw(ctx,pose,R){
     }
   }
   // Expressive OHANA face, never permanent horror teeth.
-  const mood=hurt?"closed":angry?"angry":st==="victory"?"happy":"normal";
+  const mood=hurt?"closed":angry?"angry":st==="victory"||cast===3?"happy":"normal";
   const eyeSize=f===0?6.5:6+f*.15;
   R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
   R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
@@ -301,7 +327,7 @@ function draw(ctx,pose,R){
   ctx.ellipse(1,faceY+13,angry?6+open*8:4.8,angry?4+open*7:2.4,0,0,TAU);ctx.fill();
   // The L bite grows from Yomi's expression, not an unrelated monster sprite.
   if(cast===2){
-    const k=clamp(Number(p.cast)||0,0,1),snap=Math.max(0,1-Math.abs(k-.5)/.22);
+    const snap=acting?.release||0;
     ctx.save();ctx.globalAlpha=.48+.24*snap;line(ctx,glow,2);
     for(const side of [-1,1]){
       ctx.beginPath();ctx.moveTo(1,faceY+13+side*5);
@@ -349,6 +375,14 @@ function draw(ctx,pose,R){
       ctx.beginPath();ctx.arc(0,-25,12+16*k+i*9,-Math.PI*.88,Math.PI*.22);ctx.stroke();
     }
     ctx.fillStyle="#fff6d7";ctx.beginPath();ctx.arc(0,-25,3.5+2*ring,0,TAU);ctx.fill();
+    ctx.restore();
+  }
+  if(cast===3){
+    // U · the lantern opens to greet Cuerno's borrowed rainbow.
+    // For any other chosen companion it remains an invitation, not a hit.
+    const k=acting?.aurora||0;
+    ctx.save();ctx.globalAlpha=.55*k;line(ctx,glow,2.4);
+    ctx.beginPath();ctx.arc(0,-25,10+18*k,-Math.PI*.89,Math.PI*.17);ctx.stroke();
     ctx.restore();
   }
   if(st==="victory"||((p.flourishN||0)%4===3&&p.flourish>0)){
