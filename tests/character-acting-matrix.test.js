@@ -37,7 +37,7 @@ function makeContext(label){
   const stats={depth:0,highest:0,paths:0,paint:0,geometry:0};
   const available=new Set([
     "arc","arcTo","beginPath","bezierCurveTo","clip","closePath","ellipse","fill","fillRect",
-    "getLineDash","isPointInPath","isPointInStroke","lineTo","measureText","moveTo",
+    "getLineDash","setLineDash","isPointInPath","isPointInStroke","lineTo","measureText","moveTo",
     "quadraticCurveTo","restore","rotate","roundRect","save","scale","stroke",
     "strokeRect","translate","createLinearGradient","createRadialGradient",
   ]);
@@ -58,6 +58,11 @@ function makeContext(label){
       if(method==="createLinearGradient"||method==="createRadialGradient")return {addColorStop(offset){assert.ok(Number.isFinite(offset)&&offset>=0&&offset<=1,label+": invalid gradient offset");}};
       if(method==="measureText")return {width:0};
       if(method==="getLineDash")return [];
+      if(method==="setLineDash") {
+        assert.ok(Array.isArray(args[0]),label+": dash must be array");
+        for(const n of args[0])assert.ok(Number.isFinite(n)&&n>=0,label+": invalid dash length");
+        return;
+      }
       if(method==="isPointInPath"||method==="isPointInStroke")return false;
       return undefined;
     };
