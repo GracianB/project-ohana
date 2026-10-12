@@ -10,7 +10,7 @@ function createGame(id,evo=4) {
  const def=ROSTER.find(p=>p.id===id);
  const p={...def,...def.forms[evo],id,evo,x:100,y:200,w:24,h:34,health:100,maxHealth:120,
   vx:3,vy:-2,facing:1,grounded:true,jumps:2,invuln:0,dead:false,cds:{},cdDur:{}};
- return {player:p,roomId:"hub",worldW:1600,worldH:900,cam:{x:0,y:0},enemies:[],
+ return {player:p,roomId:"hub",worldW:1600,worldH:900,cam:{x:0,y:0},enemies:[],platforms:[],
   projectiles:[],slashes:[],bolts:[],ghosts:[],t:0,reduceMotion:true,
   fx:{emit(){}},nums:{add(){}},score:0};
 }
