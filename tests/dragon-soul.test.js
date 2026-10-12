@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { dragonBodyActing } from "../characters/art/dragon.js";
 const dragon=fs.readFileSync("characters/art/dragon.js","utf8");
 const abilities=fs.readFileSync("systems/abilities.js","utf8");
 test("V53 dragon art uses bounded local five-form solar animation",()=>{
@@ -32,7 +33,7 @@ test("V53 Dragon has four expressive idles and cast-specific powers",()=>{
  assert.match(dragon,/cuarta microescena: estornuda/);
  assert.match(dragon,/state==="cast" && p\.castSlot===1/);
  assert.match(dragon,/state==="cast" && p\.castSlot===2/);
- assert.match(dragon,/const climb = clamp\(/);
+ assert.equal(dragonBodyActing({state:"glide",vy:-.65}).climb,.65);
  const fx=dragon.split("function dragonSoul(")[1].split("function draw(ctx")[0];
  assert.doesNotMatch(fx,/requestAnimationFrame|setInterval|setTimeout|Math\.random/);
 });
