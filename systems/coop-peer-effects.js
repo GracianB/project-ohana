@@ -38,6 +38,20 @@ export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onRelia
  if(durable&&typeof onReliable==="function")onReliable();
  return quick||durable;
 }
+// V322 · one bounded, damage-free U start descriptor piggybacked on the
+// existing authenticated ability signal. Never relay live missiles, foes,
+// hitboxes or repeated 5 Hz snapshots through the Netlify room store.
+export function captureFamilyDuetRelay(game,frameNo,scope){
+ const duet=readFamilyDuet(game?._familyDuet);
+ if(!duet||!Number.isSafeInteger(frameNo)||frameNo<1||
+   typeof scope!=="string"||!/^[a-zA-Z0-9_.:-]{1,96}$/.test(scope)||
+   typeof game?.roomId!=="string")return null;
+ const packet={protocol:2,scope,frameNo,roomId:game.roomId,
+  familyDuet:duet,michiDuet:null,chispinDuet:null,stitchoDuet:null,
+  kiloDuet:null,michiFx:[],chispinFx:[],kiloFx:[],
+  projectiles:[],slashes:[],bolts:[]};
+ return JSON.stringify(packet).length<=1100?packet:null;
+}
 export function capturePeerEffects(game,frameNo,scope){
  const frame={protocol:2,scope,frameNo,roomId:game.roomId,familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
   chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],
