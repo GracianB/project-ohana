@@ -12,8 +12,8 @@ export function readDinoEffects(list){
  for(const k of ['r','R','radius','pulseRadius'])if(v[k]!==undefined&&(v[k]<0||v[k]>1000))return null;
  v.evo=Math.max(0,Math.min(4,Math.floor(Number(v.evo)||0)));v.color=/^#[0-9a-f]{6}$/i.test(f.color)?f.color:'#c8f04a';v.dino=f.kind==='meteor';
  if(f.kind==='dinoSpit'){v.trail=(Array.isArray(f.trail)?f.trail:[]).slice(-6).map(b=>({x:b.x,y:b.y}));if(v.trail.some(b=>![b.x,b.y].every(valid)))return null;}
- if(f.kind==='quake'){if(!Array.isArray(f.fronts)||f.fronts.length>2||!Array.isArray(f.spikes)||f.spikes.length>64)return null;
- v.fronts=f.fronts.map(b=>({x:b.x,y:b.y,dir:b.dir,on:b.on===true}));if(v.fronts.some(b=>![b.x,b.y].every(valid)||![-1,1].includes(b.dir)))return null;
+ if(f.kind==='quake'){if(!Number.isFinite(f.speed)||f.speed<=0||f.speed>30||!Number.isFinite(f.maxD)||f.maxD<0||f.maxD>1000)return null;if(!Array.isArray(f.fronts)||f.fronts.length>2||!Array.isArray(f.spikes)||f.spikes.length>64)return null;
+ v.fronts=f.fronts.map(b=>({x:b.x,y:b.y,dir:b.dir,on:b.on===true}));if(v.fronts.some(b=>![b.x,b.y].every(valid)||![-1,1].includes(b.dir)||Math.abs(b.x-f.ox)>f.maxD+f.speed))return null;
  v.spikes=f.spikes.slice(-24).map(b=>({x:b.x,y:b.y,h:b.h,lean:b.lean,life:b.life}));if(v.spikes.some(b=>![b.x,b.y,b.h,b.lean,b.life].every(valid)||b.h<0||b.h>300||b.life<0||b.life>26))return null;
  }out.push(v);
  }return out;
