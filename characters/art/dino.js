@@ -89,6 +89,35 @@ export function dinoSecondaryMotion(pose={}) {
   });
 }
 
+/**
+ * V317 · Dino's L is a *weighted* terrestrial stomp, not another generic
+ * expanding ring. Pure, bounded, immutable timing shared by all five forms.
+ * No damage, ground position, cooldown or physics is inferred from this.
+ */
+export function dinoQuakeActing(pose={}) {
+  if (pose.state!=="cast" || pose.castSlot!==2) return null;
+  const safe=n=>typeof n==="number"&&Number.isFinite(n)?clamp(n,0,1):0;
+  const k=safe(pose.cast),f=clamp(Math.round(safe(pose.form/4)*4),0,4);
+  const mass=[.78,.91,1,1.16,1.26][f];
+  const brace=ease(seg(k,.04,.36));
+  const impact=ease(seg(k,.36,.56));
+  const settle=ease(seg(k,.62,.90));
+  const load=brace*(1-impact),slam=impact*(1-settle),recovery=settle;
+  return Object.freeze({
+    form:f,load,slam,recovery,mass,
+    hip:-9.5*load*mass+5.2*slam*mass+1.4*recovery,
+    jaw:.12*load+.48*slam,
+    head:-.3*load+.39*slam,
+    // Separate opposite leg angles make the tail and hips stop together.
+    legF:-.3*load+.67*slam-.08*recovery,
+    legB:.24*load-.44*slam+.06*recovery,
+    footBrace:.17*load,
+    tail:.5*load-.82*slam+.16*recovery,
+    // The body receives the recoil; the original hit area is untouched.
+    recoil:Math.max(0,slam*(1-recovery)),
+  });
+}
+
 // V83 · A continuous airborne silhouette. The rig supplies vertical velocity
 // normalized to [-1,1]; at the apex both jump and fall share the same pose.
 // These are DRAWING angles only: velocities, collisions and jump stats stay put.
@@ -497,29 +526,41 @@ function draw(ctx, pose, R) {
   } else if (st === "cast") {
     const k = pose.cast, slot = pose.castSlot;
     if (slot === 0) {
-      const e = ease(seg(k, 0, 0.2)) * (1 - seg(k, 0.85, 1));
-      jaw = 1.0 * e; headRot = -0.18 * e; hdx = 3 * e; lean = 0.15 * e + 0.05;
-      armF = lerp(0.6, -0.5, e); armB = lerp(0.4, -0.7, e);
-      legF = 0.35 * e; legB = -0.35 * e;
-      roarK = e; eyeMood = "angry";
-      tailA = 0.3 * e + Math.sin(t * 0.8) * 0.08 * e;
-      hdy = Math.sin(t * 1.3) * 0.8 * e;
+      // J · gather pressure in the cheeks, then force the globule forward.
+      // The eye and shoulder lead the spit; the tongue remains visible.
+      const inhale=ease(seg(k,0,.24)),spit=ease(seg(k,.24,.40));
+      const release=1-ease(seg(k,.82,1));
+      const load=inhale*(1-spit),action=spit*release;
+      jaw=(.18*load+1.0*action)*T.jaw[f];
+      headRot=-.29*load+.12*action;
+      hdx=-2.4*load+5*action;hdy=-1.4*load+.9*action;
+      lean=.05-.16*load+.23*action;
+      armF=.65+1.0*load-.95*action;armB=.4+.8*load-.75*action;
+      legF=-.2*load+.38*action;legB=.22*load-.35*action;
+      lenF=1-.11*load;lenB=1-.09*load;
+      roarK=action;eyeMood=action>.2?"angry":"normal";
+      tailA=-.43*load+.31*action;
     } else if (slot === 2) {
       // L · Extinción: brace the hips, rear up, then pound the earth.
       // Unlike K, there is no airborne somersault or phantom body translation.
-      const brace=ease(seg(k,0,.37));
-      const slam=ease(seg(k,.37,.57));
-      const recover=1-ease(seg(k,.71,1));
-      bob=-9*brace*(1-slam)+7*slam*recover;
-      lean=-.12*brace+.27*slam*recover;
-      headRot=-.24*brace+.31*slam*recover;
-      hdx=-2*brace+4*slam*recover;hdy=-2*brace+4*slam*recover;
-      legF=-.27*brace+.63*slam*recover;legB=.19*brace-.42*slam*recover;
-      lenF=1-.16*brace+.10*slam*recover;lenB=1-.12*brace+.06*slam*recover;
-      armF=1.5*brace-.65*slam*recover;armB=1.35*brace-.55*slam*recover;
-      jaw=.21*brace+.48*slam*recover;eyeMood="angry";
-      shock=slam*(1-ease(seg(k,.73,1)));
-      tailA=.42*brace-.68*slam*recover;
+      const quake=dinoQuakeActing({...pose,state:"cast"});
+      bob=quake.hip;
+      lean=-.16*quake.load+.29*quake.slam;
+      headRot=quake.head;
+      hdx=-2.8*quake.load+4.2*quake.slam;
+      hdy=-2.4*quake.load+3.5*quake.slam;
+      legF=quake.legF;legB=quake.legB;
+      lenF=1-quake.footBrace+.07*quake.slam;
+      lenB=1-quake.footBrace+.06*quake.slam;
+      bendF=3+3*quake.load-1.5*quake.slam;
+      bendB=3+2.3*quake.load-1.2*quake.slam;
+      armF=1.6*quake.load-.7*quake.slam;
+      armB=1.4*quake.load-.6*quake.slam;
+      jaw=quake.jaw;eyeMood=quake.recovery>.7?"normal":"angry";
+      shock=quake.recoil;
+      tailA=quake.tail;
+      // Forward skull and feet fall on the same beat, different from K's
+      // somersault and U's celebratory colossus posture.
     } else if (slot === 3) {
       // U · Corazón de Coloso: awake, open the chest, roar, then settle.
       // This is a new character pose; the five-act film remains separate.
