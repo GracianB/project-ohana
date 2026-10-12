@@ -49,6 +49,37 @@ export const HERO_MASTERY = Object.freeze({
   }),
 });
 
+// One authored reaction to the first real mastery feat per room. Unlike attack
+// messages, these are earned by traversal and must never spam a moving player.
+export const HERO_MASTERY_MOMENTS = Object.freeze({
+  kilo:Object.freeze({text:"¡El viento canta!",color:"#ff9ad8"}),
+  stitcho:Object.freeze({text:"¡Conozco el atajo!",color:"#7edfff"}),
+  chispin:Object.freeze({text:"¡Nubes con chispa!",color:"#ffe14a"}),
+  cat:Object.freeze({text:"¡Ni me has visto!",color:"#ffb6e4"}),
+  dragon:Object.freeze({text:"¡Otra batida!",color:"#fff0d0"}),
+  dino:Object.freeze({text:"¡La tierra despierta!",color:"#c8f04a"}),
+  frita:Object.freeze({text:"¡Carril crujiente!",color:"#ffd36a"}),
+  pizza:Object.freeze({text:"¡Rebote de horno!",color:"#ffb43a"}),
+  yomi:Object.freeze({text:"¿Me ves ahora?",color:"#ff5b78"}),
+  cuerno:Object.freeze({text:"¡Camino de aurora!",color:"#fff6c8"}),
+});
+
+// Returns true only when a real movement event has earned its one-time line.
+// State is per-player/per-room and bounded (two primitive values), even on
+// long-running cooperative sessions. The existing numbers layer renders it.
+export function signalHeroMasteryMoment(game,id){
+  const p=game?.player;
+  if(!p||p.dead||heroId(p)!==id)return false;
+  const cue=HERO_MASTERY_MOMENTS[id];
+  if(!cue)return false;
+  const s=ensureState(p),room=String(game.roomId||"hub");
+  if(s.momentRoom!==room){s.momentRoom=room;s.momentShown=false;}
+  if(s.momentShown)return false;
+  s.momentShown=true;
+  game.nums?.add?.(cx(p),p.y-18,cue.text,cue.color,true);
+  return true;
+}
+
 export function masteryOf(id="") {
   const key = id === "michi" ? "cat" : String(id||"");
   return HERO_MASTERY[key] || Object.freeze({id:"wanderer",name:"Instinto Ohana",desc:"Movimiento propio."});
@@ -128,6 +159,7 @@ function ensureState(p) {
     p._mastery = {
       hero:heroId(p), room:"", wingUsed:0, pounceUsed:false,
       railTicks:0, bridge:null, broken:{}, bloomT:0, cloudLand:0, padCd:0,
+      momentRoom:"",momentShown:false,
     };
   }
   return p._mastery;
@@ -145,6 +177,7 @@ export function onMasteryRoom(game) {
   if(!p) return;
   const s=ensureState(p);
   s.room=String(game.roomId||"hub");
+  s.momentRoom=s.room;s.momentShown=false;
   s.wingUsed=0;
   s.pounceUsed=false;
   s.railTicks=0;
@@ -228,6 +261,7 @@ export function updateHeroMastery(game,input={}) {
       if(p._butterfly!=null) p._butterfly=Math.min(70+evo*10,(p._butterfly||0)+2+evo);
       s.bloomT=12;
       p._masteryMove="bloomdraft";
+      signalHeroMasteryMoment(game,"kilo");
       if((Number(input.t)||0)%7===0) game.fx?.emit?.(bloom.x,bloom.y,{color:"#ff9ad8",count:2,size:2.6,up:1.4,speed:1.1,life:16,star:true});
     }
   }
@@ -235,6 +269,7 @@ export function updateHeroMastery(game,input={}) {
   if(id==="stitcho" && p._pmove==="climb" && input.jump){
     p.vy=Math.min(p.vy,-(3.5+evo*0.48));
     p._masteryMove="wallvault";
+    signalHeroMasteryMoment(game,"stitcho");
   }
 
   if(id==="cat" && !p.grounded && input.jumpPressed && !p._jumpHeld && !s.pounceUsed){
@@ -244,6 +279,7 @@ export function updateHeroMastery(game,input={}) {
     p.vy=-(4.8+evo*0.45);
     p.invuln=Math.max(p.invuln||0,6+evo);
     p._masteryMove="moonpounce";
+    signalHeroMasteryMoment(game,"cat");
     game.fx?.emit?.(cx(p),cy(p),{color:"#ffb6e4",count:8+evo,size:2.8,up:1.1,speed:2.6,life:15,star:true});
   }
 
@@ -256,6 +292,7 @@ export function updateHeroMastery(game,input={}) {
       p.vx+=(p.facing||1)*(0.8+evo*0.18);
       p._gliding=true;
       p._masteryMove="wingbeat";
+      signalHeroMasteryMoment(game,"dragon");
       game.fx?.emit?.(cx(p)-(p.facing||1)*8,cy(p),{color:evo>=4?"#ffd84a":"#fff0d0",count:10+evo*2,size:3,up:0.7,speed:2.8,life:16,star:evo>=3});
     }
   }
@@ -269,12 +306,14 @@ export function updateHeroMastery(game,input={}) {
       p.vx=dir*Math.max(Math.abs(p.vx),10.5+evo*0.85);
       p._slideT=Math.max(p._slideT,10+Math.min(10,evo*2));
       p._masteryMove="greaserail";
+      signalHeroMasteryMoment(game,"frita");
       if((Number(input.t)||0)%3===0) game.fx?.emit?.(cx(p)-dir*p.w*0.45,feet,{color:"#ffd36a",count:2,size:2.4,up:0.6,speed:1.6,life:12});
     }else s.railTicks=Math.max(0,s.railTicks-2);
   }
 
   if(id==="yomi" && p._specter>0){
     p._masteryMove="hollowphase";
+    signalHeroMasteryMoment(game,"yomi");
     if(evo>=2) p.vx+=(p.facing||1)*0.08*evo;
   }
 
@@ -312,9 +351,10 @@ export function onDinoPoundImpact(game) {
     p.coyote=0;
     p.jumps=0;
     p._masteryMove="seismicbreak";
+    const firstMastery=signalHeroMasteryMoment(game,"dino");
     game.shake=Math.min(24,(game.shake||0)+9+evo*2);
     game.fx?.emit?.(hit.x,hit.y,{color:"#c8f04a",count:14+evo*2,size:4,up:2.2,speed:4.2,life:20,star:true});
-    game.nums?.add?.(hit.x,hit.y-18,"¡RUPTURA!","#dfff7a",true);
+    if(!firstMastery) game.nums?.add?.(hit.x,hit.y-18,"¡RUPTURA!","#dfff7a",true);
   }
   return hit;
 }
@@ -330,6 +370,7 @@ export function afterMoveHeroMastery(game,input={}) {
     const cloud=supportAt(game,p,"cloudstep");
     if(cloud && p.grounded){
       p._masteryMove="cloudstep";
+      signalHeroMasteryMoment(game,"chispin");
       if((Number(input.t)||0)%8===0) game.fx?.emit?.(cx(p),cloud.y,{color:"#ffe14a",count:2,size:2.2,up:0.6,speed:1.0,life:12});
     }
   }
@@ -343,8 +384,9 @@ export function afterMoveHeroMastery(game,input={}) {
       p.jumps=Math.max(0,(p.jumps||0)-1);
       p.vy=-(p.jumpPower*(1.12+evo*0.045));
       p._masteryMove="ovenbounce";
+      const firstMastery=signalHeroMasteryMoment(game,"pizza");
       game.fx?.emit?.(cx(p),pad.y,{color:"#ffb43a",count:10+evo*2,size:3,up:1.4,speed:3.0,life:16,star:true});
-      game.nums?.add?.(cx(p),pad.y-14,"¡HORNO!","#ffe27a");
+      if(!firstMastery) game.nums?.add?.(cx(p),pad.y-14,"¡HORNO!","#ffe27a");
     }
   }
 
@@ -360,6 +402,7 @@ export function afterMoveHeroMastery(game,input={}) {
       dir,
     };
     p._masteryMove="aurorabridge";
+    signalHeroMasteryMoment(game,"cuerno");
     game.fx?.emit?.(cx(p),p.y+p.h,{color:"#fff6c4",count:10+evo*2,size:3,up:1.2,speed:2.6,life:16,star:true});
   }
 }
