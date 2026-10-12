@@ -69,6 +69,9 @@ jobs:
       - name: V314 · Pair-specific bond EXP, artwork and three resonance ranks
         run: node tests/browser/u-bonds-v314.mjs
 
+      - name: V315 · Ten companion acting styles and 1,350 true duets
+        run: node tests/browser/u-duet-direction-v315.mjs
+
       - name: Ten kinetic personalities (300 real Canvas scenes)
         run: node tests/browser/kinetic-v312.mjs
 
