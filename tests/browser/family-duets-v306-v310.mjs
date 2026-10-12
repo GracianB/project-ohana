@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import {chromium} from "playwright";
 import {startServer} from "./server.mjs";
 
-// V311: actual Canvas/vector art for 5 heroes x 5 forms x 5 timeline chapters.
+// V305–V311: actual Canvas art for 6 heroes x 5 forms x 5 chapters.
 // Distinct screenshots permit visual inspection without stopping combat or
 // displaying a fullscreen U. No fake sprites and no visual-only stub of L.
 const STAGES=[
@@ -16,11 +16,11 @@ const STAGES=[
 const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch({headless:true});
- const page=await browser.newPage({viewport:{width:1500,height:1300}});
+ const page=await browser.newPage({viewport:{width:1500,height:1570}});
  const errors=[];page.on("pageerror",error=>errors.push(error.message));
  await page.route("**/family-duets-preview",route=>route.fulfill({contentType:"text/html",body:"<html><body></body></html>"}));
  await page.goto(`http://127.0.0.1:${server.address().port}/family-duets-preview`);
- await page.setContent('<canvas id="audit" width="1500" height="1300"></canvas><style>body{margin:0;background:#14232b}</style>');
+ await page.setContent('<canvas id="audit" width="1500" height="1570"></canvas><style>body{margin:0;background:#14232b}</style>');
  const all=[];
  await fs.mkdir("test-results/family-duets",{recursive:true});
  for(const stage of STAGES){
@@ -30,12 +30,12 @@ try{
    const {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet,readFamilyDuet,familyDuetChoreography}
      =await import("/systems/family-duets.js");
    localStorage.setItem("ohana-look-v2","vector");
-   const heroes=["dino","frita","pizza","yomi","cuerno"];
+   const heroes=["dragon","dino","frita","pizza","yomi","cuerno"];
    const canvas=document.querySelector("#audit"),ctx=canvas.getContext("2d");
    ctx.clearRect(0,0,canvas.width,canvas.height);
    ctx.fillStyle="#14232b";ctx.fillRect(0,0,canvas.width,canvas.height);
    ctx.textAlign="center";ctx.font="800 22px sans-serif";ctx.fillStyle="#fff5df";
-   ctx.fillText("OHANA V311 · "+stage.name+" · cinco familias y cinco evoluciones",750,35);
+   ctx.fillText("OHANA V311 · "+stage.name+" · seis familias y cinco evoluciones",750,35);
    const samples=[];
    for(const [row,id] of heroes.entries()){
     const def=ROSTER.find(r=>r.id===id);
@@ -71,17 +71,17 @@ try{
    }
    return samples;
   },{stage});
-  assert.equal(result.length,25);
+  assert.equal(result.length,30);
   assert.ok(result.every(s=>s.visible>300),"Every hero and evolution must render real vector pixels");
   assert.ok(result.every(s=>s.ally!==s.id),"Every cameo must be the actual friend");
   all.push(...result);
   await page.screenshot({path:`test-results/family-duets/scene-${stage.name}.png`});
  }
- assert.equal(all.length,125);
- assert.equal(new Set(all.map(x=>x.id+"/"+x.evo+"/"+x.stage)).size,125);
+ assert.equal(all.length,150);
+ assert.equal(new Set(all.map(x=>x.id+"/"+x.evo+"/"+x.stage)).size,150);
  assert.deepEqual(errors,[]);
  await fs.writeFile("test-results/family-duets/audit.json",JSON.stringify({frames:all.length,scenes:all},null,2));
- console.log("PASS · OHANA V311: 125 real Canvas scenes across five heroes, five evolutions, five U chapters.");
+ console.log("PASS · OHANA V305–V311: 150 real Canvas scenes across six heroes, five evolutions, five U chapters.");
 }finally{
  await browser?.close();
  server.closeAllConnections();
