@@ -20,6 +20,10 @@ export const KINETIC_STAGES=Object.freeze(["landing","turn","brake","attack","ai
 export function kineticSignature(p,pose,reduced=false){
  const identity=KINETIC_IDENTITIES[p?.id];
  if(!identity||!pose||p?.dead)return null;
+ // Do not turn malformed remote/QA state into a huge Canvas animation.
+ // Values produced by the normal rig are all normalized well below this bound.
+ if(["impact","atk","land","turnPulse","brake","speed","vy"].some(key=>
+  pose[key]!=null&&(!Number.isFinite(pose[key])||Math.abs(pose[key])>8)))return null;
  const form=clamp(Math.trunc(Number(p.evo)||0),0,4);
  const impact=clamp(Number(pose.impact)||0,0,1.2);
  const atk=clamp(Number(pose.atk)||0,0,1);
