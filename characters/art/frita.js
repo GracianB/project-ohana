@@ -399,6 +399,28 @@ DIP[f] = { d, x: tp.x + Math.sin(tp.a) * F.w * 0.4 };
 return DIP[f];
 }
 
+/**
+ * V318: readable preparation, useful action and physical follow-through.
+ * The stage is derived from the existing cast tick, not the wall clock.
+ * This describes art exclusively. It never sets attack reach or hit damage.
+ */
+export function fritaCookingActing(pose={}) {
+  if(pose.state!=="cast" || ![0,1,2,3].includes(pose.castSlot))return null;
+  const unit=n=>typeof n==="number"&&Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
+  const k=unit(pose.cast),prepare=seg(k,.02,.26),
+    action=seg(k,.26,.47),rest=seg(k,.74,1);
+  const load=prepare*(1-action),serve=action*(1-rest);
+  return Object.freeze({
+    slot:pose.castSlot,k,load,serve,recovery:rest,
+    // More readable than a perpetual sine wave: hands squeeze only
+    // while ketchup is being released, independent from render time.
+    squeeze:pose.castSlot===1?serve:0,
+    crouch:pose.castSlot===2?3.2*load:pose.castSlot===3?1.8*load:1.5*load,
+    jump:pose.castSlot===2?-12*serve:pose.castSlot===3?-3.5*serve:0,
+    offer:pose.castSlot===3?serve:0,
+  });
+}
+
 function params(pose, f, F) {
 const st = pose.state, t = pose.t;
 const P = {
@@ -462,28 +484,58 @@ if (st === "run" && pose.move !== "slide") {
   }
 } else if (st === "cast") {
   const k = pose.cast, slot = pose.castSlot;
+  const act=fritaCookingActing({...pose,state:"cast"});
   if (slot === 0) {
-    P.bend = -0.25; P.a0 = -0.05;
-    P.armF = { ang: 2.75 + Math.sin(t * 1.3) * 0.2, bend: 3 };
-    P.armB = { ang: -0.6, bend: -3 };
-    P.item = "salt"; P.fx = { kind: "salt", k };
-    P.mood = "happy"; P.mouth = "open";
+    // J · salt leaves the shaker only after she has braced her legs.
+    P.lift=act.crouch;
+    P.a0=-.19*act.load+.17*act.serve;
+    P.bend=-.38*act.load+.32*act.serve;
+    P.wig=-.13*act.load+.19*act.serve;
+    P.legF=[-.3*act.load+.35*act.serve,3.4];
+    P.legB=[.27*act.load-.31*act.serve,-3];
+    P.armF={ang:1.5+1.22*act.serve-.22*act.load,bend:3};
+    P.armB={ang:-.6-.8*act.load+.2*act.serve,bend:-3};
+    P.item="salt";P.fx={kind:"salt",k:act.serve};
+    P.mood="happy";P.mouth=act.serve>.2?"open":"o";
   } else if (slot === 1) {
-    const sq = 0.5 + Math.sin(t * 0.8) * 0.5;
-    P.a0 = 0.12; P.bend = 0.3 + sq * 0.1;
-    P.armF = { ang: 1.35, bend: 4, len: 0.95 }; P.armB = { ang: 1.2, bend: 5, len: 0.9 };
-    P.item = "ketchup"; P.squeeze = sq; P.fx = { kind: "ketchup", k };
-    P.mood = "angry"; P.mouth = "grin";
-    P.legF = [0.35, 3]; P.legB = [-0.35, -3];
+    // K · deliberate bottle squeeze, not a clock-driven perpetual spray.
+    P.lift=act.crouch;
+    P.a0=-.19*act.load+.16*act.serve;
+    P.bend=-.27*act.load+.31*act.serve;
+    P.wig=-.15*act.load+.26*act.serve;
+    P.legF=[-.45*act.load+.39*act.serve,4];
+    P.legB=[.29*act.load-.35*act.serve,-4];
+    P.armF={ang:.65*act.load+1.38*act.serve,bend:4,len:.95};
+    P.armB={ang:1.6*act.load+1.2*act.serve,bend:5,len:.9};
+    P.item="ketchup";P.squeeze=act.squeeze;
+    P.fx={kind:"ketchup",k:act.serve};
+    P.mood=act.serve>.3?"angry":"normal";P.mouth=act.serve>.3?"grin":"o";
+  } else if (slot === 2) {
+    // L · fryer: bend like a spring, open up, then land on both shoes.
+    P.lift=act.crouch+act.jump;
+    P.a0=-.22*act.load+.20*act.serve;
+    P.bend=-.68*act.load+.37*act.serve;
+    P.wig=-.24*act.load+.42*act.serve;
+    P.legF=[-.4*act.load+1.08*act.serve,5];
+    P.legB=[.31*act.load+.54*act.serve,5];
+    P.armF={ang:.5*act.load+2.6*act.serve,bend:4};
+    P.armB={ang:-.6*act.load-2.6*act.serve,bend:-4};
+    P.fx={kind:"oil",k:act.serve};P.mood="happy";P.mouth="open";
+    P.capeFlow=4+8*act.serve;P.capeWind=.6;P.capeUp=act.serve;
   } else {
-    const j = Math.sin(Math.min(1, k * 1.4) * Math.PI);
-    P.lift = -16 * j;
-    P.bend = -0.7 * j + Math.sin(t * 0.5) * 0.15; P.wig = 0.4 * j;
-    P.legF = [1.1 * j, 5]; P.legB = [0.5 * j, 5];
-    P.armF = { ang: 2.6, bend: 4 }; P.armB = { ang: -2.6, bend: -4 };
-    P.fx = { kind: "oil", k };
-    P.mood = "happy"; P.mouth = "open";
-    P.capeFlow = 4; P.capeWind = 0.6; P.capeUp = 1;
+    // U · offer a fresh fry to the visitor (usually Pizza), rather than
+    // replaying L's fryer jump. No phantom food entity or extra healing.
+    P.lift=act.crouch+act.jump;
+    P.a0=.2*act.offer-.15*act.load;
+    P.bend=.37*act.offer-.28*act.load;
+    P.wig=.12*act.offer;
+    P.legF=[-.24*act.load+.42*act.offer,4];
+    P.legB=[.28*act.load-.34*act.offer,-3];
+    P.armF={ang:.5*act.load+2.8*act.offer,bend:3};
+    P.armB={ang:-.5-1.0*act.offer,bend:-3};
+    P.item=withFork?"forkUp":null;
+    P.mood="happy";P.mouth=act.offer>.15?"grin":"o";
+    P.capeFlow=7+13*act.offer;P.capeWind=.5;P.capeUp=act.offer;
   }
 } else if (st === "hurt") {
   P.a0 = -0.3; P.bend = -0.9 - pose.hurt * 0.2; P.wig = -0.3; P.bx = -3;
