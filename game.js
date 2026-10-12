@@ -3124,7 +3124,7 @@ function renderUPartnerChoices(hero){
  partnerSelect.dataset.hero=hero;
  const info=uPartnerInfo(hero,selected),progress=uBondProgress({id:hero,uPartner:selected,uBonds:bonds});
 const chemistry=duetChemistry(hero,selected,progress.rank);
-if(technique)technique.textContent=(chemistry?.name||"U cooperativa")+
+if(technique)technique.textContent="U en combate · "+(chemistry?.name||"U cooperativa")+
  " · Nivel "+progress.rank+"/3 · "+progress.name+
  " · EXP "+progress.xp+"/200"+(progress.rank<3?" · faltan "+progress.remaining:" · rango máximo");
 if(preview&&info){
