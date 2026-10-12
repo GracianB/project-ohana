@@ -257,6 +257,25 @@ for (const lx of [-6, 1, 8]) {
 ctx.restore();
 }
 
+/**
+ * V319: elastic oven acting is purely visual and uses the existing
+ * bounded cast phase. It cannot alter hits, camera, physics or U choice.
+ */
+export function pizzaOvenActing(pose={}) {
+  if(pose.state!=="cast"||![2,3].includes(pose.castSlot))return null;
+  const unit=n=>typeof n==="number"&&Number.isFinite(n)?clamp(n,0,1):0;
+  const k=unit(pose.cast);
+  const prep=seg(k,.04,.31),hit=seg(k,.31,.52),rest=seg(k,.76,1);
+  const load=prep*(1-hit),burst=hit*(1-rest);
+  return Object.freeze({
+    slot:pose.castSlot,k,load,burst,recovery:rest,
+    squash:1+.16*load-.11*burst,stretch:1-.14*load+.18*burst,
+    tilt:-.2*load+.27*burst,
+    cheese:pose.castSlot===2?.15*load+.8*burst:.2*load+.95*burst,
+    offer:pose.castSlot===3?burst:0
+  });
+}
+
 function params(pose, f) {
 const st = pose.state;
 const t = pose.t;
@@ -359,17 +378,33 @@ if (st === "run") {
     P.legF = [0.4, 2];
     P.legB = [-0.4, -2];
     P.strings = 0.4 + k * 0.5;
+  } else if (slot === 2) {
+    // L · oven bracing: squash the dough, open the crust, rebound.
+    const a=pizzaOvenActing({...pose,state:"cast"});
+    P.sx=a.squash;P.sy=a.stretch;P.roll=a.tilt;
+    P.bx=-3*a.load+5*a.burst;P.lift=2.4*a.load-3.5*a.burst;
+    P.armF={ang:.25+.85*a.load+1.5*a.burst,bend:5};
+    P.armB={ang:-.25-.85*a.load-1.5*a.burst,bend:-5};
+    P.legF=[-.44*a.load+.45*a.burst,2+2*a.load];
+    P.legB=[.37*a.load-.42*a.burst,-2-2*a.load];
+    P.glow=.17*a.load+.88*a.burst;
+    P.fx=a.burst>.025?{kind:"oven",k:a.burst}:null;
+    P.mood=a.burst>.2?"angry":"normal";
+    P.mouth=a.burst>.2?"roar":"o";
+    P.dripK=1+.7*a.burst;P.strings=a.cheese;
   } else {
-    P.glow = Math.sin(Math.min(1, k * 1.25) * Math.PI * 0.5 + 0.25);
-    P.bx = Math.sin(t * 1.8) * 1.4;
-    P.armF = { ang: 1.05, bend: 5 };
-    P.armB = { ang: -1.05, bend: -5 };
-    P.legF = [0.35, 2];
-    P.legB = [-0.35, -2];
-    P.fx = { kind: "oven", k };
-    P.mood = "angry";
-    P.mouth = "roar";
-    P.dripK = 1.7;
+    // U · offer a warm slice to the chosen ally, normally Yomi.
+    // This cannot introduce a second oven hit.
+    const a=pizzaOvenActing({...pose,state:"cast"});
+    P.sx=a.squash;P.sy=a.stretch;P.roll=a.tilt;
+    P.bx=1.6*a.offer;P.lift=1.2*a.load-2*a.offer;
+    P.armF={ang:.5+2.2*a.offer,bend:3,len:1+.19*a.offer};
+    P.armB={ang:-.5-1.5*a.offer,bend:-4};
+    P.legF=[-.25*a.load+.35*a.offer,3];
+    P.legB=[.23*a.load-.3*a.offer,-3];
+    P.glow=.12+.25*a.offer;P.strings=a.cheese;
+    P.mood="happy";P.mouth=a.offer>.2?"grin":"smile";
+    P.dripK=1+.45*a.offer;P.fx=null;
   }
 } else if (st === "hurt") {
   P.roll = -0.34;
