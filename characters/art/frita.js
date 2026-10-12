@@ -726,7 +726,7 @@ const faceQ = at(sp, F.fs);
 drawFritaFootwork(ctx, pose, f, t);
 
 if (f === 4) goldFlames(ctx, R, sp, w + 6, t, P.lying ? 0.45 : 1);
-if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, false);
+if (P.fx && P.fx.kind === "oil" && P.fx.k > .02) drawOil(ctx, R, sp, P.fx.k, t, false);
 if (P.cup > 0) {
   ketchupCup(ctx, R, dipInfo(f, F).x, 0, P.cup);
 }
@@ -875,7 +875,7 @@ if (handF) {
 
 if (P.gag > 0) drawSaltCatch(ctx, tip, P.gag, f);
 if (P.fx) drawFx(ctx, R, P, sp, handF, t, f, w);
-if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, true);
+if (P.fx && P.fx.kind === "oil" && P.fx.k > .02) drawOil(ctx, R, sp, P.fx.k, t, true);
 if (P.lying === "slide") speedLines(ctx, R, sp, t, w, f);
 if (pose.state === "dead") dizzy(ctx, R, tip.x - 4, tip.y - w * 0.9, t);
 
@@ -1026,13 +1026,14 @@ if (fx.kind === "whack") {
   for (const dy of [-6, 0, 6]) { ctx.beginPath(); ctx.moveTo(hand[0] - 4, y + dy); ctx.lineTo(hand[0] + 18, y + dy * 0.5); ctx.stroke(); }
   R.sparkle(ctx, x + 4, y, 6 + fx.k * 5, "#fff6c0");
   ctx.restore();
-} else if (fx.kind === "salt" && hand) {
+} else if (fx.kind === "salt" && hand && fx.k > .02) {
   ctx.save();
+  const parentAlpha=ctx.globalAlpha;
   for (let i = 0; i < 14; i++) {
     const life = frac(t * 0.05 + i * 0.071);
     const x = hand[0] + 4 + (frac(i * 0.37) - 0.3) * 18 + life * 10;
     const y = hand[1] + 6 + life * 50;
-    ctx.globalAlpha = 1 - life;
+    ctx.globalAlpha = parentAlpha * (1 - life) * Math.min(1,fx.k*2);
     ctx.fillStyle = "#ffffff";
     ctx.save(); ctx.translate(x, y); ctx.rotate(i + t * 0.2);
     ctx.fillRect(-1.3, -1.3, 2.6, 2.6);
@@ -1040,10 +1041,11 @@ if (fx.kind === "whack") {
     ctx.restore();
   }
   ctx.restore();
-} else if (fx.kind === "ketchup" && hand) {
+} else if (fx.kind === "ketchup" && hand && fx.k > .02) {
   const x0 = hand[0] + 4 + Math.cos(0.35) * 13, y0 = hand[1] + Math.sin(0.35) * 13;
   const len = 30 + fx.k * 20;
   ctx.save();
+  ctx.globalAlpha *= Math.min(1,fx.k*2);
   ctx.beginPath();
   ctx.moveTo(x0, y0);
   ctx.quadraticCurveTo(x0 + len * 0.6, y0 + 2, x0 + len, y0 + 16 + Math.sin(t * 0.5) * 2);
