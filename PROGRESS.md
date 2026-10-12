@@ -1475,3 +1475,11 @@ El criterio está en `WORLD-1.md`. Gameplay congelado salvo bug demostrable. Cac
 ## Polish Pass 2026-10-06
 
 Arte orgánico como fuente única del héroe, cinemática de evolución limpia, fondos procedurales por defecto, carrusel contenido, controles visibles y robustos, atajo QA Ctrl+Z, rutas de salto suavizadas y atmósfera procedural específica para las 10 salas. Cache: ohana-209.
+
+
+## OHANA V305 · Dragón y Dino, U cooperativa
+
+- Dragón puede seguir volando libremente al pulsar U. Dino aparece en la misma sala y presta su L real `quake` en tres golpes con anticipación, daño acotado y salida propia.
+- Cinco evoluciones de Dino, 150 escenas Canvas para los seis dúos U, multijugador visual sin autoridad de daño y cancelación segura por sala o muerte.
+- Los storyboards originales se conservan en la galería de pruebas; las U no detienen el juego.
+- Cache: `ohana-332`.
