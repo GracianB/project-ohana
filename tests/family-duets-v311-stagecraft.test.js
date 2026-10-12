@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {ROSTER} from "../characters/roster.js";
+import {guestPerformance,GUEST_ACTING} from "../systems/u-duet-direction-v315.js";
 import {FAMILY_DUETS,FAMILY_DUET_BEATS,FAMILY_DUET_LENGTH,
  familyDuetChoreography,familyDuetPose,readFamilyDuet,drawFamilyDuet} from "../systems/family-duets.js";
 
@@ -68,7 +69,13 @@ for(const hero of HEROES){
     assert.equal(a.evo,evo);
     assert.equal(a.w,form.w);
     assert.equal(a.h,form.h);
-    assert.equal(a._poseOverride,entry.pose);
+    // V315: the five canonical duets still share chapter timestamps, but
+    // each *guest* has an authored pose rather than the old generic run.
+    const authored=guestPerformance(state,FAMILY_DUETS[hero].ally);
+    assert.equal(a._poseOverride,authored.pose);
+    assert.equal(authored.style,GUEST_ACTING[FAMILY_DUETS[hero].ally].style);
+    if(entry.stage==="arrival")assert.ok(["run","jump","glide","idle"].includes(a._poseOverride));
+    else assert.equal(a._poseOverride,entry.pose);
     assert.equal(a._duetActor,true);
     assert.ok(a.visualScale>=.62);
     assert.equal(calls.filter(c=>c[0]==="save").length,calls.filter(c=>c[0]==="restore").length);
