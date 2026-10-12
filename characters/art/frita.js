@@ -138,11 +138,15 @@ smoothPath(ctx, pts);
 R.paint(ctx, null, { lw: R.LINE });
 }
 
+// A shoulder/elbow/wrist chain painted on the same path as the original limb.
 function thinLimb(ctx, R, x1, y1, x3, y3, bend, c, hand) {
 const mx = (x1 + x3) / 2, my = (y1 + y3) / 2;
 const dx = x3 - x1, dy = y3 - y1, d = Math.hypot(dx, dy) || 1;
 const x2 = mx - (dy / d) * bend, y2 = my + (dx / d) * bend;
 R.limb(ctx, x1, y1, x2, y2, x3, y3, 3.4, c.limb, { lw: 1.4, hand: false });
+// Both sockets lie on the actual arm curve. No free-floating decal joints.
+R.ellipse(ctx, x1, y1, 3.6, 3.4, c.limb, { lw: 1.2 });
+R.ellipse(ctx, x2, y2, 3.1, 3.1, c.limb, { lw: 1.2 });
 if (hand) glove(ctx, R, x3, y3, hand === true ? 4.2 : hand);
 return [x3, y3];
 }
@@ -168,6 +172,8 @@ ctx.restore();
 function leg(ctx, R, x, y, len, ang, bend, c) {
 const ex = x + Math.sin(ang) * len, ey = y + Math.cos(ang) * len;
 thinLimb(ctx, R, x, y, ex, ey, bend, c, false);
+// Hip and bent knee remain attached when a leg springs into a jump.
+R.ellipse(ctx,x,y,4.5,4,c.limb,{lw:1.2});
 shoe(ctx, R, ex, ey, c, ang * 0.35);
 return [ex, ey];
 }
@@ -421,6 +427,34 @@ export function fritaCookingActing(pose={}) {
   });
 }
 
+
+/**
+ * V324: anatomical follow-through, not another cosmetic debris emitter.
+ * Independent of frame time: the existing rig provides acceleration, turn,
+ * landing and speed. The body plants its shoes before the upper fry settles.
+ */
+export function fritaBodyFollowThrough(pose={},form=0) {
+ const cap=n=>typeof n==="number"&&Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
+ const state=pose.state||"idle",run=state==="run"&&pose.move!=="slide";
+ const brake=run?cap(pose.brake):0,turn=run?cap(pose.turnPulse):0;
+ const land=!["hurt","dead"].includes(state)?cap(pose.land):0;
+ const speed=run?cap(pose.speed):0;
+ const phase=Number.isFinite(pose.phase)?pose.phase:0;
+ const stride=run?Math.sin(phase)*speed:0;
+ const weight=[.68,.86,1,1.2,1.32][Math.max(0,Math.min(4,form|0))];
+ const hold=state==="hurt"||state==="dead"||pose.move==="slide"||state==="cast";
+ const settle=hold?0:land*weight,lag=hold?0:(turn*.7+brake*.9)*weight;
+ return Object.freeze({
+  brace:hold?0:(.37*brake+.25*turn+.18*land)*weight,
+  bend:hold?0:(-.39*brake-.23*turn+.31*land)*weight,
+  lean:hold?0:(.12*speed-.22*turn+.2*brake)*weight,
+  rearKnee:hold?0:(-.16*stride+.38*settle+.19*lag),
+  frontKnee:hold?0:(.19*stride+.53*settle+.24*lag),
+  capeLag:hold?0:Math.min(15,(6*turn+8*brake+3*land)*weight),
+  settle,lag,stride
+ });
+}
+
 function params(pose, f, F) {
 const st = pose.state, t = pose.t;
 const P = {
@@ -602,6 +636,15 @@ if (st === "idle" && pose.flourish > 0) {
     P.item = withFork && catchK > 0.45 ? "forkUp" : null;
     P.gag = k;
   }
+}
+// V324: move the fry itself. Salt particles and footsteps remain secondary.
+const follow=fritaBodyFollowThrough(pose,f);
+if(!P.lying&&!P.wall&&["run","idle","jump","fall","glide"].includes(st)){
+ P.a0+=follow.lean;P.bend+=follow.bend;P.wig+=follow.brace;
+ P.lift+=follow.settle*1.5;
+ P.legF=[P.legF[0]+follow.frontKnee*.26,P.legF[1]+follow.frontKnee];
+ P.legB=[P.legB[0]-follow.rearKnee*.26,P.legB[1]+follow.rearKnee];
+ P.capeFlow+=follow.capeLag;
 }
 return P;
 }
@@ -873,6 +916,19 @@ if (handF) {
   glove(ctx, R, hx, hy, 4.2);
 }
 
+// The U literally offers a little fry from the front glove. It cannot hit.
+if(pose.state==="cast"&&pose.castSlot===3&&handF){
+ const share=fritaCookingActing(pose);
+ if(share&&share.offer>.02){
+  const hx=handF[0]+7,hy=handF[1]-5;
+  ctx.save();ctx.globalAlpha*=Math.min(1,share.offer*1.3);
+  ctx.translate(hx,hy-6*share.offer);ctx.rotate(-.28*share.offer);
+  R.ellipse(ctx,0,0,4.2+2*share.offer,9+2*share.offer,"#ffdf73",{lw:1.7});
+  ctx.strokeStyle="#b87b27";ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(-1,-5);ctx.quadraticCurveTo(2,0,1,5);ctx.stroke();
+  ctx.restore();
+ }
+}
 if (P.gag > 0) drawSaltCatch(ctx, tip, P.gag, f);
 if (P.fx) drawFx(ctx, R, P, sp, handF, t, f, w);
 if (P.fx && P.fx.kind === "oil" && P.fx.k > .02) drawOil(ctx, R, sp, P.fx.k, t, true);
