@@ -1,4 +1,5 @@
 // Save v2. Ids viejos se canonizan para no romper partidas.
+import {sanitizeUBonds} from "./u-partners.js";
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
 export function canonId(id) {
@@ -39,6 +40,7 @@ export function packSave(game, MagicMod) {
     id: p ? canonId(p.id) : "",
     xp: p ? p.xp : 0,
     uExp: p ? Math.max(0,Math.min(200,Math.floor(finiteNumber(p.uExp)))) : 0,
+    uBonds: p ? sanitizeUBonds(canonId(p.id),p.uBonds) : {},
     hp: p ? p.health : null,
     nineUsed: !!(p && p._nineUsed),
     dragonTrial: sanitizeDragonTrial(game.dragonTrial),
@@ -101,6 +103,7 @@ export function unpackSave(raw, defId) {
     evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),
     xp: Math.max(0, finiteNumber(raw.xp)),
     uExp: Math.max(0, Math.min(200,Math.floor(finiteNumber(raw.uExp)))),
+    uBonds: sanitizeUBonds(id,raw.uBonds),
     hp: raw.hp == null ? null : Math.max(0, finiteNumber(raw.hp)),
     nineUsed: !!raw.nineUsed,
     dragonTrial: sanitizeDragonTrial(raw.dragonTrial),
