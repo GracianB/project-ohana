@@ -50,6 +50,34 @@ export function yomiCastActing(pose={}) {
  });
 }
 
+
+/**
+ * V326: a living lantern compresses and braces with its OWN paper ribs.
+ * The sealed sleeve movement is purely visual. It cannot change collisions,
+ * execution, boss immunity, peer damage or borrowed L.
+ */
+export function yomiLanternBody(pose={},form=0) {
+ const safe=n=>typeof n==="number"&&Number.isFinite(n)?clamp(n,0,1):0;
+ const state=pose.state||"idle",running=state==="run",airborne=["jump","fall","glide"].includes(state);
+ const turn=running?safe(pose.turnPulse):0,brake=running?safe(pose.brake):0;
+ const land=state==="dead"||state==="hurt"?0:safe(pose.land);
+ const weight=[.72,.86,1,1.18,1.32][clamp(form|0,0,4)];
+ const cast=yomiCastActing(pose);
+ const settle=land*weight,brace=(turn*.55+brake*.75)*weight;
+ const alive=state!=="hurt"&&state!=="dead";
+ const heart=cast?.slot===3?cast.release:cast?.slot===1?cast.release*.5:0;
+ return Object.freeze({
+  width:alive?1+settle*.07+brace*.035+(cast?.slot===2?.06*cast.load:0):1,
+  height:alive?1-settle*.075+brace*.03-(cast?.slot===3?.06*cast.load:0):1,
+  tilt:alive?(running?-.1*brake+.12*turn:.02*(airborne?1:0)):0,
+  sleeveBrace:alive?brace*.35+settle*.18:0,
+  shoulder:alive?cast?.slot===2?-.18*cast.load+.21*cast.release:
+   cast?.slot===3?.24*cast.release:cast?.slot===0?-.14*cast.load+.16*cast.release:0:0,
+  flameLift:heart*4+settle*1.5,
+  heart,settle,brace
+ });
+}
+
 export function yomiRitualState(pose) {
   const p = pose || {};
   // Cosmetic floating rituals stay OFF for reduced motion; only the
@@ -162,7 +190,7 @@ function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
   const cast=st==="cast"?(p.castSlot|0):-1,atk=clamp(Number(p.atk)||0,0,1);
-  const acting=yomiCastActing(p),reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
+  const acting=yomiCastActing(p),body=yomiLanternBody(p,f),reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
   const pulse=reduced?.5:.5+.5*Math.sin(t*.095),run=st==="run",flight=st==="jump"||st==="fall"||st==="glide";
   const angry=st==="attack"||cast===2,hurt=st==="hurt"||st==="dead";
   const open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
@@ -170,7 +198,9 @@ function draw(ctx,pose,R){
   const hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
   const w=20+f*2.9,h=55+f*4.2;
   const shoulder=-h*.68,faceY=-h*.72;
-  ctx.save();ctx.translate(0,hover);ctx.rotate((run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)+(acting?.tilt||0));
+  ctx.save();ctx.translate(0,hover);
+  ctx.rotate((run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)+(acting?.tilt||0)+body.tilt);
+  ctx.scale(body.width,body.height);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
@@ -242,14 +272,26 @@ function draw(ctx,pose,R){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
-    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup);
+    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))
+      +windup+body.shoulder+side*body.sleeveBrace);
     const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0);
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
     ctx.quadraticCurveTo(13,sleeveLen*.48,7,0);ctx.closePath();ctx.fill();
     line(ctx,trim,2);ctx.stroke();
-    line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
+    // An articulated arm runs INSIDE the draped sleeve. The cuff and palm
+    // stay connected to its shoulder even when L opens Yomi's jaws.
+    const elbowX=(leading?-1:1)*(3+body.sleeveBrace*7),elbowY=sleeveLen*.51;
+    ctx.strokeStyle=paper;ctx.lineWidth=4;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(0,0);
+    ctx.quadraticCurveTo(elbowX*.4,elbowY*.5,elbowX,elbowY);
+    ctx.quadraticCurveTo(elbowX*1.35,sleeveLen*.78,0,sleeveLen-3);ctx.stroke();
+    ellipse(ctx,0,0,6.5,5.2,trim);
+    ellipse(ctx,elbowX,elbowY,4.2,4.4,paper);
+    ellipse(ctx,0,sleeveLen-1,6.7,4.8,glow);
+    line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);
+    ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
     ctx.restore();
   }
   // Lantern-shaped body: hand-painted gold rim, paper ribs and inner flame.
@@ -355,10 +397,11 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
   // Warm lantern heart stays visible on every stage.
-  ellipse(ctx,0,-25,7+f*.5,9+f*.3,glow);
+  ellipse(ctx,0,-25-body.flameLift,7+f*.5+body.heart*.9,9+f*.3+body.heart*2,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
-  ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
-  ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();
+  ctx.moveTo(0,-34-body.flameLift);
+  ctx.quadraticCurveTo(-7,-23-body.flameLift,0,-18-body.flameLift);
+  ctx.quadraticCurveTo(9,-24-body.flameLift,0,-34-body.flameLift);ctx.fill();
   // J throws a horizontal paper seal; the hand no longer points skyward.
   if(cast===0) {
     const k=clamp(Number(p.cast)||0,0,1);
