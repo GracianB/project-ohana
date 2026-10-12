@@ -358,12 +358,23 @@ try {
   });
   // Capture exact state on failure; timing limits remain strict.
   try{
-    await hostPage.waitForFunction(async expected=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');
-      const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';
-      const s=onlineCoop._combatGame.coopPeerEffects?.[key];
-      return !!s&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
-    },guestCharacter,{timeout:3000});
+    // E2E must sample the real game state, not launch overlapping async
+    // import promises on requestAnimationFrame (which can be throttled in CI).
+    // This is the same explicit polling used for host -> guest, with the
+    // original 3-second delivery deadline preserved.
+    const deadline=Date.now()+3000;
+    let guestDuetDelivered=false;
+    do {
+      guestDuetDelivered=await hostPage.evaluate(async expected=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';
+        const s=onlineCoop._combatGame.coopPeerEffects?.[key];
+        return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
+      },guestCharacter);
+      if(guestDuetDelivered)break;
+      if(Date.now()<deadline)await hostPage.waitForTimeout(50);
+    }while(Date.now()<deadline);
+    if(!guestDuetDelivered)throw new Error('Guest U echo not observed on host within 3000ms');
   }catch(error){
     const inspect=async page=>page.evaluate(async()=>{
       const {onlineCoop:o}=await import('/systems/online-coop.js'),g=o._combatGame,fx=g.coopPeerEffects;
