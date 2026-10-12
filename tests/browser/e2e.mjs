@@ -662,10 +662,10 @@ try {
       api.resetInput();
       api.cast(3);
       const world=api.state();
-      const inWorld=!['dragon'].includes(id) ? !!world.familyDuet && world.familyDuet.hero===id && document.querySelector('#supreme-cinema.show')?.dataset.activeId!==id : null;
+      const inWorld=!!world.familyDuet && world.familyDuet.hero===id && document.querySelector('#supreme-cinema.show')?.dataset.activeId!==id;
       // Exercise the archived full-screen storyboards independently. Actual U
       // now plays without an overlay, but their authored art remains audited.
-      if(id!=='dragon')dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id,evo:4,hero:id,name:'U · galería',assist:({dino:'frita',frita:'pizza',pizza:'yomi',yomi:'cuerno',cuerno:'kilo'})[id],dreamTargets:0}}));
+      dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id,evo:4,hero:id,name:'U · galería',assist:({dragon:'dino',dino:'frita',frita:'pizza',pizza:'yomi',yomi:'cuerno',cuerno:'kilo'})[id],dreamTargets:0}}));
       const el = document.querySelector('#supreme-cinema');
       return {
         id,inWorld,
@@ -678,8 +678,8 @@ try {
       };
     });
   });
-  for(const item of supremeStories.filter(item=>item.id!=='dragon'))assert.equal(item.inWorld,true,'V306-V310: U de '+item.id+' no aparece en el mundo');
-  assert.equal(new Set(supremeStories.map((x) => x.story)).size, supremeStories.length, 'La galería de U mantiene cinco storyboards independientes');
+  for(const item of supremeStories)assert.equal(item.inWorld,true,'V305-V310: U de '+item.id+' no aparece en el mundo');
+  assert.equal(new Set(supremeStories.map((x) => x.story)).size, supremeStories.length, 'La galería mantiene seis storyboards U independientes');
   assert.equal(new Set(supremeStories.map((x) => x.camera)).size, supremeStories.length, 'Las U pendientes conservan cámara propia');
   for (const item of supremeStories) {
     assert.equal(item.active, item.id, 'V48: storyboard asignado a héroe incorrecto · ' + JSON.stringify(item));
