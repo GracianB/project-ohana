@@ -587,11 +587,29 @@ function stormSoul(ctx, pose, f, o, front) {
   ctx.restore();
 }
 
+
+const CHISPIN_MOTION_MEDIA=typeof window!=='undefined'&&typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+export function chispinFootwork(pose={}){
+ if(pose.reduceMotion||CHISPIN_MOTION_MEDIA?.matches||pose.air||Number.isFinite(pose.chispinDuetAge)||!['idle','run'].includes(pose.state||'idle'))return null;
+ const unit=v=>Number.isFinite(Number(v))?Math.max(0,Math.min(1,Number(v))):0;
+ const landing=unit(pose.land),turn=pose.state==='run'?unit(pose.turnPulse):0,brake=pose.state==='run'?unit(pose.brake):0,running=pose.state==='run'?unit(pose.speed):0;
+ return landing>.02||turn>.02||brake>.02||running>.3?{landing,turn,brake,running}:null;
+}
+function drawChispinFootwork(ctx,pose,f,t){
+ const m=chispinFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';const col=f===4?'#ff9ce7':'#cc9cff';
+ if(m.running>.3)for(let i=0;i<2;i++){const k=((t*.075+i*.5)%1+1)%1,x=-16-k*26;ctx.globalAlpha=.48*(1-k)*m.running;ctx.strokeStyle=i?col:'#fff3a0';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x,-2-k*3);ctx.lineTo(x-4,-6-k*3);ctx.lineTo(x+1,-6-k*3);ctx.lineTo(x-3,-11-k*3);ctx.stroke();}
+ if(m.landing>.02){ctx.globalAlpha=m.landing*.55;ctx.fillStyle=f>=3?'#beb0ed':'#d8d8ee';for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse((i-1)*(8+(1-m.landing)*15),-1-i%2,8,2.7,0,0,Math.PI*2);ctx.fill();}ctx.strokeStyle=col;ctx.lineWidth=1.5;for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*11,-3);ctx.lineTo(side*16,-7-(1-m.landing)*9);ctx.stroke();}}
+ if(m.turn>.02){ctx.globalAlpha=m.turn*.6;ctx.strokeStyle='#fff3a0';ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(-7,-6);ctx.lineTo(-17,-10);ctx.lineTo(-13,-15);ctx.lineTo(-23,-19);ctx.stroke();}
+ if(m.brake>.02){ctx.globalAlpha=m.brake*.4;ctx.strokeStyle=col;ctx.lineWidth=2;for(let i=0;i<2;i++){ctx.beginPath();ctx.ellipse(-17-i*9,-3-i*3,7,2,-.2,Math.PI*.2,Math.PI*1.7);ctx.stroke();}}
+ ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], t = pose.t, st = pose.state;
   const o = opts(pose, f, S);
   if(Number.isFinite(pose.chispinDuetAge)){o.skyBolt=pose.chispinDuetAge>=36&&pose.chispinDuetAge<104?1:0;o.sparks=pose.chispinDuetAge>=18?.65:.2;}
   const cy = S.by - 4;
+  drawChispinFootwork(ctx,pose,f,t);
   stormSoul(ctx, pose, f, o, false);
 
   if (S.clouds) for (let i = 0; i < 3; i++) {

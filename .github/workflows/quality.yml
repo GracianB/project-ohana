@@ -39,6 +39,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: Chispin personality and movement audit
+        run: node tests/browser/chispin-personality.mjs
+
       - name: Stitcho personality and movement audit
         run: node tests/browser/stitcho-personality.mjs
 
