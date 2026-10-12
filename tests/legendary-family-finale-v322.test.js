@@ -115,3 +115,15 @@ test("V322 · reject invalid peer props, including fake rank-3, without animatio
     }
   }
 });
+
+import {poseFingerprint} from "../characters/draw.js";
+test("V322 · cached Canvas frame is invalidated by brake/turn and reduced motion",()=>{
+ const base={state:"run",form:3,phase:2,speed:.8,vy:0,turnPulse:0,brake:0,
+  anticipation:0,land:0,reduceMotion:false,castSlot:-1,look:{x:1,y:0}};
+ const same={...base};assert.equal(poseFingerprint(base),poseFingerprint(same));
+ for(const changed of [
+  {brake:.75},{turnPulse:.83},{anticipation:.5},{reduceMotion:true}
+ ]){
+  assert.notEqual(poseFingerprint(base),poseFingerprint({...base,...changed}));
+ }
+});
