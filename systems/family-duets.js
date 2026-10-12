@@ -18,7 +18,7 @@ export const FAMILY_DUETS=Object.freeze(Object.fromEntries(Object.entries(names)
 // Classic six duets retain their original art. The others gain the same
 // in-world system only when the player selects an alternative companion.
 const L_VISUALS=Object.freeze({
- chaos:"chaos",storm:"storm",ninetails:"tails",meteor:"meteor",
+ caos:"chaos",storm:"storm",ninetails:"tails",meteor:"meteor",
  quake:"quake",fryer:"geyser",oven:"oven",maw:"maw",rainbow:"rainbow",ohana:"ohana"
 });
 export function familyDuetDefinition(s){
