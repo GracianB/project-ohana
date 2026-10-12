@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import Dino, {dinoGroundBrace,dinoHiccupState,dinoSecondaryMotion} from "../characters/art/dino.js";
+import Dino, {dinoGroundBrace,dinoHiccupState,dinoHiccupSilhouette,dinoSecondaryMotion} from "../characters/art/dino.js";
 import {R} from "../characters/rig.js";
 import {ROSTER} from "../characters/roster.js";
 import {FAMILY_DUETS,FAMILY_DUET_LENGTH,FAMILY_DUET_BEATS,
@@ -13,7 +13,7 @@ class PathMock {
 globalThis.Path2D ||= PathMock;
 
 const pose=(form,state,props={})=>({
-  form,state,t:140,phase:1.9,speed:0,vy:0,air:false,land:0,
+  form,state,t:140,phase:1.9,speed:0,vy:0,air:false,land:0,blink:0,
   atk:0,cast:0,castSlot:-1,look:{x:1,y:0},breath:.3,
   bounce:.12,sway:.2,turnPulse:0,brake:0,impact:0,
   flourish:0,flourishN:0,move:null,reduceMotion:false,...props
@@ -117,16 +117,18 @@ test("Dino V317: reduced-motion hiccup tells a story with fixed postures, no ste
     const early=pose(form,"idle",{flourish:.22,flourishN:3,reduceMotion:true});
     const hipo=pose(form,"idle",{flourish:.52,flourishN:3,reduceMotion:true});
     const relief=pose(form,"idle",{flourish:.85,flourishN:3,reduceMotion:true});
-    const steps=[early,hipo,relief].map(dinoHiccupState);
+    const steps=[early,hipo,relief].map(dinoHiccupSilhouette);
+    for(const p of [early,hipo,relief])assert.equal(dinoHiccupState(p),null,
+      "Original cosmetic FX contract must be suppressed in reduced motion");
     assert.deepEqual(steps.map(v=>[v.prepare,v.sneeze,v.settle]),[[1,0,0],[0,1,0],[0,0,1]]);
     assert.ok(steps.every(v=>v.reduced && Object.isFrozen(v)));
     const visual=[early,hipo,relief].map(x=>draw(x).moves);
     assert.equal(new Set(visual.map(x=>JSON.stringify(x))).size,3);
     for(const state of [early,hipo,relief])
-      assert.deepEqual(dinoHiccupState({...state,t:987654}),dinoHiccupState(state));
+      assert.deepEqual(dinoHiccupSilhouette({...state,t:987654}),dinoHiccupSilhouette(state));
   }
-  assert.equal(dinoHiccupState({state:"cast",flourish:.52,flourishN:3,reduceMotion:true}),null);
-  assert.equal(dinoHiccupState({state:"hurt",flourish:.52,flourishN:3,reduceMotion:true}),null);
+  assert.equal(dinoHiccupSilhouette({state:"cast",flourish:.52,flourishN:3,reduceMotion:true}),null);
+  assert.equal(dinoHiccupSilhouette({state:"hurt",flourish:.52,flourishN:3,reduceMotion:true}),null);
 });
 
 test("Dino V317: no new toes in hurt/dead/rolling; reject NaN and hostile values",()=>{
