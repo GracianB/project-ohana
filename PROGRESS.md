@@ -1,3 +1,7 @@
+## Stitcho · segunda pasada de personalidad (ohana-332)
+
+Costuras de carrera, aterrizajes de garras, giros segmentados y frenadas con tres trazos, adaptados a sus cinco formas y su acento Nébula. Efectos locales sin mutaciones de física ni daño; suprimidos por movimiento reducido, aire, daño, muerte y poderes de roll/chaos/climb. Conserva U V302 y las aportaciones GPT.com. La segunda pasada sigue por Chispín y Michi; después continúa Dragón V305 y se revisa/reutiliza PR #302 para V306–V310.
+
 ## Kilo · segunda pasada de personalidad (ohana-331)
 
 Nueva prioridad del usuario: completar una segunda pasada de personalidad/movimiento para Kilo, Stitcho, Chispín y Michi, una entrega por personaje, antes de continuar Dragón V305–Cuerno V310. Conserva las aportaciones GPT.com #293–#300 ya publicadas con Michi. Kilo añade pétalos de carrera, aterrizajes musicales, curvas al girar y respuesta suave al frenar; efectos locales y deterministas, sin daño ni cambios de física, suprimidos con movimiento reducido.
