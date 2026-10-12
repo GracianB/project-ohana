@@ -117,7 +117,7 @@ export function updateFamilyDuet(game,hit,heal){
    const identity=duetHitOptions(chemistry,s.facing,def.kind==="rainbow"?48:32);
    const knock=s.facing*(def.kind==="quake"?7:4);
    if(typeof hit==="function"&&hit(game,e,damage,{
-    color:def.color,stun:identity.stun,kx:identity.kx||(knock),ky:-5,hitstop:0,shake:1
+    color:def.color,stun:identity.stun,kx:chemistry.perk==="titan"?identity.kx:knock,ky:-5,hitstop:0,shake:1
    }))applied++;
   }
   if(def.kind==="ohana"&&typeof heal==="function")heal(p,(Number(p.maxHealth)||100)*(.035+s.evo*.006));
