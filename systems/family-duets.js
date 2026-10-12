@@ -1,10 +1,11 @@
-// OHANA · V306–V310: five interactive U duets, each borrows the next hero's L.
-// V305 Dragón belongs to the separate Codex track and is intentionally absent.
+// OHANA · V305–V311: six real U duets with the next hero's L.
+// Dragón calls Dino's fossil quake, retaining his original free-flight supreme.
 // Visuals never damage anything. Only updateFamilyDuet mutates combat state.
 // The cooperative wire format is deliberately small and contains NO hit sets.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
+ dragon:{ally:"dino",borrowedL:"quake",name:"Dragón y Dino",line:"¡El cielo tiembla!",cue:"DINO · TERREMOTO",color:"#ffac63",kind:"quake"},
  dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",cue:"FRITA · FREIDORA",color:"#d9ee7a",kind:"geyser"},
  frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",cue:"PIZZA · HORNO",color:"#ffd36a",kind:"oven"},
  pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · FAUCES",color:"#ff9d82",kind:"maw"},
@@ -31,7 +32,7 @@ export function familyDuetPose(s,reduce=false){
  const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
  const allyX=s.x-face*(146-75*arrival)+(reduce?0:face*Math.sin(age*.09)*7);
- const allyY=s.y-24-(data.kind==="rainbow"?34:12)-(reduce?0:Math.sin(age*.075)*8);
+ const allyY=s.y-24-(data.kind==="quake"?48:data.kind==="rainbow"?34:12)-(reduce?0:Math.sin(age*.075)*8);
  return {beat,phase,allyX,allyY,alpha:exit,kind:data.kind,
    radius:56+evo*8,focusX:s.x+face*(56+phase*65),focusY:s.y-26};
 }
@@ -52,6 +53,7 @@ export function familyDuetStrike(s,beat,e){
  const p=center(e),f=s.facing,dx=p.x-s.x,dy=p.y-s.y;
  const b=clamp(beat,0,2),evo=s.evo;
  switch(def.kind){
+  case "quake":{const epicenter=s.x+f*(52+b*54);return Math.abs(p.x-epicenter)<=66+evo*7&&Math.abs(p.y-(s.y-24))<=65+evo*3;}
   case "geyser":{const x=s.x+f*(34+b*54);return Math.abs(p.x-x)<=31+evo*3&&p.y>s.y-163&&p.y<s.y+27;}
   case "oven":{const forward=dx*f;return forward>=-24&&forward<=210+evo*15&&Math.abs(dy+18)<54+b*19;}
   case "maw":{const x=s.x+f*(58+b*21);return Math.abs(p.x-x)<=65+evo*5&&Math.abs(dy+38)<=60;}
@@ -76,12 +78,13 @@ export function updateFamilyDuet(game,hit,heal){
   let applied=0;
   for(const e of def.kind==='ohana'?[]:(game.enemies||[])){
    if(!e||e.hp<=0||e.dying||e.fell||s.legacyTargets?.has(e)||!familyDuetStrike(s,beat,e))continue;
-   const knock=s.facing*4;
+   const knock=s.facing*(def.kind==="quake"?7:4);
    if(typeof hit==="function"&&hit(game,e,damage,{
     color:def.color,stun:def.kind==="rainbow"?48:32,kx:knock,ky:-5,hitstop:0,shake:1
    }))applied++;
   }
   if(def.kind==="ohana"&&typeof heal==="function")heal(p,(Number(p.maxHealth)||100)*(.035+s.evo*.006));
+  if(def.kind==="quake")p._specialFlightT=Math.max(p._specialFlightT||0,180);
   if(def.kind==="rainbow")p.invuln=Math.max(p.invuln||0,16);
   if(def.kind==="geyser")p._specialTitanT=Math.max(p._specialTitanT||0,30);
   if(def.kind==="maw")p._specialGhostT=Math.max(p._specialGhostT||0,24);
@@ -132,6 +135,22 @@ function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
  ctx.save();ctx.globalAlpha*=energy;
  const count=reduce?2:2+evo;
  switch(def.kind){
+  case "quake":{ // Dino arrives with fossil dust and Dragón's warm embers
+   ctx.strokeStyle="#e5b487";ctx.lineWidth=2+evo*.35;
+   ctx.beginPath();ctx.moveTo(ax-s.facing*14,ay+13);
+   for(let i=0;i<count+2;i++){
+    const xx=ax-s.facing*(16+i*11),yy=ay+12+(i%2?5:-3);
+    ctx.lineTo(xx,yy);spark(ctx,xx,yy-6,2.2+i*.35,i%2?"#ffdca0":"#ec7541");
+   }
+   ctx.stroke();
+   if(s.age>=22&&s.age<=105){
+    for(let i=0;i<Math.min(6,count+1);i++){
+     const offset=30+i*17,fireY=y-32-i*6-(reduce?0:Math.sin(t*.08+i)*3);
+     spark(ctx,x+s.facing*offset,fireY,3.2+i*.25,i%2?"#ff974a":"#fff2b6");
+    }
+   }
+   break;
+  }
   case "geyser": // Frita lands running, a little spray of crispy salt
    for(let i=0;i<count;i++){
     const d=14+i*9,yy=reduce?0:Math.sin(s.age*.18+i)*4;
@@ -221,6 +240,24 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
   const xx=x+s.facing*(40+j*54),yy=y-26;
   ctx.save();ctx.globalAlpha*=intensity;
   switch(def.kind){
+   case "quake":{
+    // Dino lends his L earthquake, not another Dragon meteor.
+    const radius=windup?(18+progress*52):(69+s.evo*6)*(1+progress*.35);
+    const floor=yy+24;
+    ring(ctx,xx,floor,radius,windup?"#ffe7b5":"#ffba77",.82,.24);
+    ctx.strokeStyle=windup?"#ffd8a9":"#f8b66d";ctx.lineWidth=2.5+s.evo*.35;
+    ctx.beginPath();
+    ctx.moveTo(xx-radius,floor+4);ctx.lineTo(xx-radius*.58,floor-9);
+    ctx.lineTo(xx-radius*.2,floor+5);ctx.lineTo(xx+radius*.17,floor-17);
+    ctx.lineTo(xx+radius*.5,floor+2);ctx.lineTo(xx+radius,floor-8);ctx.stroke();
+    const shards=reduce?3:5+s.evo;
+    for(let k=0;k<shards;k++){
+     const a=k*TAU/shards,r=radius*.78;
+     spark(ctx,xx+Math.cos(a)*r,floor+Math.sin(a)*r*.21-
+      (windup?0:Math.sin(progress*Math.PI)*(8+k%3*3)),2.7+k%3,"#fff1c2");
+    }
+    break;
+   }
    case "geyser":{
     const height=windup?8:145*(1-progress*.55);
     ctx.fillStyle="#ffbd51";ctx.beginPath();ctx.moveTo(xx-25,y);
