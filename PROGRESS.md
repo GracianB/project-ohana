@@ -1,3 +1,11 @@
+## OHANA V322 · Postintegración de seis héroes y Leyenda (ohana-339)
+
+- Integradas #317, #314, #321, #320, #322, #323 y #324: seis personajes vectoriales y host/invitado para los diez. No afirmar Netlify publicado hasta tener cuota y validar dos dispositivos.
+- Rangos de afinidad: el tercer rango da una acción escénica distinta a las seis parejas canónicas dentro del mundo, sin alterar los golpes L en ticks 42/66/90, las otras 84 parejas ni sus EXP.
+- Rendimiento/a11y: caché Canvas incluye giro, frenada, anticipación y movimiento reducido. Invalida la antigua caché de 338 para servir las poses mejoradas.
+- Regresión obligatoria en PR: Node, Browser, 1.350 escenas U, Chromium/Firefox host/invitado, Visual, release:check; en main GitHub CI + Pages posterior.
+- Pendiente coordinado #318: el impacto legacy de lanzamiento de U sigue siendo inmediato y amplio para algunos héroes; no se ha convertido a daño local telegrafiado ni se presenta como resuelto.
+
 ## Multijugador · impactos de los diez héroes y protección visual U (ohana-338)
 
 Se elimina la limitación de cuatro héroes en los impactos de habilidades del invitado. Solo el invitado y objetivos con identidad estable/visita válida pueden enviar impactos; el anfitrión conserva autoridad y deduplicación. La protección visual contempla también familyDuet y parejas alternativas, conserva señales explícitas de daño real y respeta protección larga de Yomi sin alterar invulnerabilidad. Nuevas pruebas Chromium/Firefox con los seis restantes como anfitrión e invitado; lanzamiento U real, aparición de NPC, daño aplicado una vez y recuperación de conexión. No modifica los impactos legacy de las U ni la PR #312 de GPT.com. Publicación pendiente de créditos Netlify.
