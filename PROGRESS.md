@@ -1483,3 +1483,12 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Cinco evoluciones de Dino, 150 escenas Canvas para los seis dúos U, multijugador visual sin autoridad de daño y cancelación segura por sala o muerte.
 - Los storyboards originales se conservan en la galería de pruebas; las U no detienen el juego.
 - Cache: `ohana-332`.
+
+
+## OHANA V312 · Diez personalidades cinéticas
+
+- Diez firmas de movimiento y combate auténticas: pétalos de Kilo, costuras de Stitcho, rayos de Chispín, ovillos de Michi, brasas de Dragón, fósiles de Dino, sal de Frita, queso de Pizza, ofuda de Yomi y prisma de Cuerno.
+- Señales ligadas a aterrizajes, giros, frenadas, ataques, salto/vuelo y carrera sin modificar daños, físicas, hitboxes ni protocolo cooperativo.
+- Integradas en el jugador local y en el dibujo del compañero remoto. Accesibilidad: se congela la oscilación temporal y se limitan ornamentos cuando hay movimiento reducido.
+- Verificación de 300 escenas vectoriales (10 héroes × 5 formas × 6 acciones), suite Node de inmovilidad, regresión visual y auditoría multijugador.
+- Versión offline: `ohana-333`.
