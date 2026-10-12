@@ -370,7 +370,11 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
  * Cuarto gesto de Dino: hipo volcánico. El cuerpo se sorprende y expulsa
  * dos nubecitas inofensivas; no son proyectiles ni ataques.
  */
+const DINO_HICCUP_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
 export function dinoHiccupState(pose = {}) {
+  if (pose.reduceMotion || DINO_HICCUP_MOTION_MEDIA?.matches) return null;
   if (pose.state !== "idle" || pose.move === "pound" || pose.move === "charge") return null;
   const k = Number(pose.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;

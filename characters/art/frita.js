@@ -556,8 +556,12 @@ return P;
 
 
 /** Cinemática local de Frita: el crujido se ve en el suelo, nunca daña. */
+const FRITA_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
 export function fritaFootwork(pose) {
   const p = pose || {};
+  if (p.reduceMotion || FRITA_MOTION_MEDIA?.matches) return null;
   const state = p.state || "idle";
   if (state === "dead" || state === "hurt" || p.move === "slide") return null;
   const clamp01 = (value) => {

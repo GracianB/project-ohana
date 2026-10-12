@@ -752,8 +752,12 @@ if (e.kind === "slap" && hand) {
  * El impulso de Pizza se comunica en masa de queso, no en partículas genéricas.
  * Solo devuelve datos visuales: jamás cambia velocidades, rebotes ni colisiones.
  */
+const PIZZA_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
 export function pizzaMomentum(pose) {
   const p = pose || {};
+  if (p.reduceMotion || PIZZA_MOTION_MEDIA?.matches) return null;
   const state = p.state || "idle";
   if (state === "dead" || state === "hurt" || p.move === "bounce") return null;
   const norm = (value) => {

@@ -24,8 +24,12 @@ function sigil(ctx,x,y,k,col){
  * Cuatro microescenas de Yomi. Deterministas, acotadas al personaje y sin
  * temporizadores: no alteran la simulación ni producen ataques invisibles.
  */
+const YOMI_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
 export function yomiRitualState(pose) {
   const p = pose || {};
+  if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return null;
   if ((p.state || "idle") !== "idle") return null;
   const k = Number(p.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
@@ -35,6 +39,7 @@ export function yomiRitualState(pose) {
 }
 
 function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
+  if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return;
   const state = p.state || "idle";
   const flying = state === "jump" || state === "fall" || state === "glide";
   const running = state === "run";
