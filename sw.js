@@ -66,6 +66,7 @@ const PRECACHE = [
   "./engine/particles.js?v=" + VERSION,
   "./systems/atrium-interact.js?v=" + VERSION,
   "./systems/abilities.js?v=" + VERSION,
+  "./systems/family-duets.js?v=" + VERSION,
   "./systems/ability-catalog.js?v=" + VERSION,
   "./systems/boss-fall-scene.js?v=" + VERSION,
   "./systems/dragon-trial.js?v=" + VERSION,

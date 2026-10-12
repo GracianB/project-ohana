@@ -604,6 +604,9 @@ try {
     api.setEvo(4);
     api.setCombo(0);
     api.cast(3);
+    if(api.state().familyDuet?.hero!=='yomi'||document.querySelector('#supreme-cinema.show')?.dataset.activeId==='yomi')throw Error('V309: Yomi U not in world');
+    // Legacy film remains a separately previewable storyboard, not blocking U.
+    dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id:'yomi',evo:4,name:'Juicio del umbral',assist:'cuerno',dreamTargets:0}}));
   });
   await page.waitForTimeout(1600);
   const yomiSupreme = await page.locator('#supreme-cinema').evaluate((el) => ({
@@ -626,6 +629,8 @@ try {
   await page.evaluate(()=>{
     const api=window.__OHANA_E2E;
     api.start('pizza');api.setEvo(4);api.setCombo(0);api.cast(3);
+    if(api.state().familyDuet?.hero!=='pizza'||document.querySelector('#supreme-cinema.show')?.dataset.activeId==='pizza')throw Error('V308: Pizza U not in world');
+    dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id:'pizza',evo:4,name:'Horno real',assist:'yomi',dreamTargets:0}}));
   });
   await page.waitForTimeout(520);
   const pizzaU=await page.locator('#supreme-cinema').evaluate(el=>({
@@ -688,8 +693,12 @@ try {
   });
   assert.equal(dreamU.lastAbilityId,'aurora','09l-cuerno: U not activated');
   assert.equal(dreamU.lastAbilitySlot,3,'09l-cuerno: wrong U slot');
+  assert.equal(dreamU.familyDuet?.hero,'cuerno','V310: Cuerno U should invite Kilo in the world');
+  assert.equal(await page.locator('#supreme-cinema.show').count(),0,'V310: Cuerno U may not block gameplay');
   await capture(page,'09l-cuerno-rainbow-sleep-u');
-  // V68: the real U has its own four-stage cinematic, not just a generic overlay.
+  // Keep the original four-act film renderer under visual QA as an optional preview.
+  await page.evaluate(()=>dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id:'cuerno',evo:4,name:'Sueño arcoíris',assist:'kilo',dreamTargets:0}})));
+  // V68: archived Cuerno film still has its own four-stage art.
   const cuernoCinema=await page.locator('#supreme-cinema').evaluate(el=>({
     id:el.dataset.activeId,story:el.dataset.story,phase:el.dataset.cuernoPhase,
     beat:el.dataset.beat,mode:el.dataset.mode,
@@ -903,6 +912,8 @@ try {
   const dinoUltimate=await page.evaluate(()=>{
     const api=window.__OHANA_E2E;
     api.start('dino');api.setEvo(4);api.cast(3);api.step(3);
+    if(api.state().familyDuet?.hero!=='dino'||document.querySelector('#supreme-cinema.show')?.dataset.activeId==='dino')throw Error('V306: Dino U not in world');
+    dispatchEvent(new CustomEvent('ohana-supreme',{detail:{id:'dino',evo:4,name:'Corazón de coloso',assist:'frita',dreamTargets:0}}));
     const el=document.querySelector('#supreme-cinema');
     return {state:api.state(),film:el?{
       id:el.dataset.activeId,story:el.dataset.story,camera:el.dataset.camera,

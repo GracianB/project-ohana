@@ -1,3 +1,4 @@
+import {drawFamilyDuet} from './family-duets.js';
 import {drawMichiDuet} from './michi-duet.js';
 import {drawChispinDuet} from './chispin-duet.js';
 import {drawStitchoDuet} from "./stitcho-duet.js";
@@ -1124,6 +1125,7 @@ class OnlineCoop {
     if(!this.enabled)return;
     const peerFx=game.coopPeerEffects;
     if(peerFx){
+      if(peerFx.familyDuet&&this.remote?.characterId===peerFx.familyDuet.hero)drawFamilyDuet(ctx,peerFx.familyDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
       if(this.remote?.characterId==='cat'){drawMichiAbilityEcho(ctx,peerFx.michiFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});if(peerFx.michiDuet)drawMichiDuet(ctx,peerFx.michiDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);}
       if(this.remote?.characterId==='chispin')drawChispinAbilityEcho(ctx,peerFx.chispinFx,game.cam,t,this.remote);
       if(this.remote?.characterId==='chispin'&&peerFx.chispinDuet)drawChispinDuet(ctx,peerFx.chispinDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
@@ -1175,7 +1177,8 @@ class OnlineCoop {
       abilitySlot: this.remote.abilitySlot,
       phase: this.remote.phase + t / 10,
       visualScale: 1,
-      _michiDuetAge:peerFx?.michiDuet?.age||0,_michiDuetT:peerFx?.michiDuet?120-peerFx.michiDuet.age:0,
+      _familyDuetAge:peerFx?.familyDuet?.age||0,_familyDuetT:peerFx?.familyDuet?120-peerFx.familyDuet.age:0,
+       _michiDuetAge:peerFx?.michiDuet?.age||0,_michiDuetT:peerFx?.michiDuet?120-peerFx.michiDuet.age:0,
       _chispinDuetAge:peerFx?.chispinDuet?.age||0,_chispinDuetT:peerFx?.chispinDuet?120-peerFx.chispinDuet.age:0,
       _stitchoDuetAge:peerFx?.stitchoDuet?.age||0,_stitchoDuetT:peerFx?.stitchoDuet?120-peerFx.stitchoDuet.age:0,
       _kiloDuetAge:peerFx?.kiloDuet?.age||0,_kiloDuetT:peerFx?.kiloDuet?120-peerFx.kiloDuet.age:0,

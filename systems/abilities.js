@@ -1,3 +1,4 @@
+import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
@@ -341,6 +342,9 @@ if(p.id==='kilo'){
  game.nums?.add(cx(p),p.y-36,'OHANA · ¡A COMPÁS!','#ffd36a',true);
  return;
 }
+// Keep every legacy Supreme contract (Yomi execution, Cuerno's gradual dream,
+// Dino's colossus and Frita's speed). Family L beats are additive only for newly
+// arriving foes, not for enemies already targeted by the original U.
 activateSpecial(game, p, { launch: false });
 const def = SUPREME[p.id] || SUPREME.kilo;
 const identity = SUPREME_IDENTITY[p.id] || SUPREME_IDENTITY.kilo;
@@ -349,7 +353,7 @@ const power = Math.max(1, Number(flow?.multiplier) || 1);
 const dmg = (70 + evo * 14) * pw(p) * power;
 const enemies = (game.enemies || []).filter(canHit);
 const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
-emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
+if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
 if (p.id === "kilo") {
 for (const e of enemies) hitEnemy(game, e, dmg * 0.72, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 28, color: def.color, crit: true });
@@ -450,7 +454,9 @@ hit: new Set(),
 });
 add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
 
-if ((flow.assist || p.id === "yomi") && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+if ((flow.assist || p.id === "yomi") && def.ally) {
+ if(!FAMILY_DUETS[p.id])summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+}
 
 game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: (flow.assist || p.id === "yomi") ? def.ally : "" };
 game.flashColor = def.color;
@@ -462,6 +468,12 @@ game.shake = Math.min(dinoColossus ? 16 : 26, (game.shake || 0) + (gentleAurora 
 game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
+if(FAMILY_DUETS[p.id]){
+ startFamilyDuet(game,power*pw(p),(game.enemies||[]).filter(canHit));
+ game.ult.t=0;
+ p.invuln=Math.max(p.invuln||0,60);
+ p._duetProtectionUntil=(Number(game.t)||0)+60;
+}
 }
 
 const FIXED_DT_MS = 1000 / 60;
@@ -663,6 +675,7 @@ updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateChispinDuet(game,hitEnemy);
 updateMichiDuet(game,hitEnemy);
+updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
 if (S.caos > 0) {
@@ -721,6 +734,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
