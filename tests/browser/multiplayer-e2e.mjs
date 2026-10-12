@@ -325,9 +325,44 @@ try {
   // Isolate the guest-impact target before any persistent U fields are launched.
   {
     const id=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {makeFoe}=await import('/engine/foes.js');const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');const g=onlineCoop._combatGame,e=makeFoe(1700,300,'phosquito',g.roomId,992,{rng:()=>.5});e.spawnIndex=992;e.hp=e.max=500;e.stun=300;g.enemies.push(e);onlineCoop.direct.sendLatest('combat',captureCombatFrame(g,++onlineCoop.combatSequence,onlineCoop.combatEpoch));return e._coopSyncId;});
-    await guestPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===id);},id,{timeout:3000});
+    // Avoid overlapping async-import rAF callbacks in background CI pages.
+    // The time limit is still 3000 ms and only the host-authoritative enemy counts.
+    const enemyDeadline=Date.now()+3000;let enemyMirrored=false;
+    do{
+      enemyMirrored=await guestPage.evaluate(async enemyId=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===enemyId);
+      },id);
+      if(enemyMirrored)break;
+      if(Date.now()<enemyDeadline)await guestPage.waitForTimeout(50);
+    }while(Date.now()<enemyDeadline);
+    assert.ok(enemyMirrored,'authoritative enemy not mirrored on guest within 3000ms');
     await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0}))throw Error('Guest impact failed');},id);
-    await hostPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.find(e=>e._coopSyncId===id)?.hp===488;},id,{timeout:3000});
+    const impactDeadline=Date.now()+3000;let hitAcknowledged=false;
+    do{
+      hitAcknowledged=await hostPage.evaluate(async enemyId=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        return onlineCoop._combatGame.enemies.find(e=>e._coopSyncId===enemyId)?.hp===488;
+      },id);
+      if(hitAcknowledged)break;
+      if(Date.now()<impactDeadline)await hostPage.waitForTimeout(50);
+    }while(Date.now()<impactDeadline);
+    if(!hitAcknowledged){
+      const check=async page=>page.evaluate(async enemyId=>{
+        const {onlineCoop:o}=await import('/systems/online-coop.js'),g=o._combatGame;
+        const foe=g.enemies.find(e=>e._coopSyncId===enemyId);
+        return {room:g.roomId,remoteWorld:o.remoteWorld,remoteId:o.remote?.characterId||null,
+          foeHp:foe?.hp??null,foeVisit:foe?._coopVisit??null,
+          directActive:o.direct?.active,eventChannel:o.direct?.eventChannel?.readyState,
+          eventBuffered:o.direct?.eventChannel?.bufferedAmount,
+          seenHits:o.seenHitEvents?.size??null,eventsReceived:o.lastDirectPoseAt||0};
+      },id);
+      const states=await Promise.allSettled([check(hostPage),check(guestPage)]);
+      console.error('OHANA GUEST HIT DIAGNOSTICS',JSON.stringify({
+        host:states[0].status==='fulfilled'?states[0].value:String(states[0].reason),
+        guest:states[1].status==='fulfilled'?states[1].value:String(states[1].reason)}));
+      throw new Error('guest 12-point hit not observed once on host within 3000ms');
+    }
     await hostPage.waitForTimeout(250);
     assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
   }
