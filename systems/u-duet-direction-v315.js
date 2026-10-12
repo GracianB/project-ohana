@@ -24,7 +24,7 @@ export function borrowedLFootprint(kind,s,beat=0){
   !Number.isInteger(beat)||beat<0||beat>2)return null;
  const f=s.facing,e=s.evo,b=beat;
  const circle=(x,y,r)=>Object.freeze({shape:"circle",x,y,r});
- const rect=(x,y,rx,ry,strict=false)=>Object.freeze({shape:"rect",x,y,rx,ry,strict});
+ const rect=(x,y,rx,ry,strictY=false)=>Object.freeze({shape:"rect",x,y,rx,ry,strictY});
  switch(kind){
   case "chaos":return circle(s.x,s.y-26,140+e*12);
   case "storm":return rect(s.x+f*(45+b*43),s.y-45,52+e*6,120);
@@ -53,8 +53,7 @@ export function borrowedLContains(area,entity){
  switch(area.shape){
   case "circle":return Math.hypot(dx,dy)<=area.r;
   case "annulus":{const distance=Math.hypot(dx,dy);return distance<=area.r&&distance>=area.inner;}
-  case "rect":return area.strict?Math.abs(dx)<area.rx&&Math.abs(dy)<area.ry:
-    Math.abs(dx)<=area.rx&&Math.abs(dy)<=area.ry;
+  case "rect":return Math.abs(dx)<=area.rx&&(area.strictY?Math.abs(dy)<area.ry:Math.abs(dy)<=area.ry);
   default:return false;
  }
 }
