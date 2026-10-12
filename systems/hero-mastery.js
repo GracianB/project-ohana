@@ -351,10 +351,10 @@ export function onDinoPoundImpact(game) {
     p.coyote=0;
     p.jumps=0;
     p._masteryMove="seismicbreak";
-    signalHeroMasteryMoment(game,"dino");
+    const firstMastery=signalHeroMasteryMoment(game,"dino");
     game.shake=Math.min(24,(game.shake||0)+9+evo*2);
     game.fx?.emit?.(hit.x,hit.y,{color:"#c8f04a",count:14+evo*2,size:4,up:2.2,speed:4.2,life:20,star:true});
-    game.nums?.add?.(hit.x,hit.y-18,"¡RUPTURA!","#dfff7a",true);
+    if(!firstMastery) game.nums?.add?.(hit.x,hit.y-18,"¡RUPTURA!","#dfff7a",true);
   }
   return hit;
 }
@@ -384,9 +384,9 @@ export function afterMoveHeroMastery(game,input={}) {
       p.jumps=Math.max(0,(p.jumps||0)-1);
       p.vy=-(p.jumpPower*(1.12+evo*0.045));
       p._masteryMove="ovenbounce";
-      signalHeroMasteryMoment(game,"pizza");
+      const firstMastery=signalHeroMasteryMoment(game,"pizza");
       game.fx?.emit?.(cx(p),pad.y,{color:"#ffb43a",count:10+evo*2,size:3,up:1.4,speed:3.0,life:16,star:true});
-      game.nums?.add?.(cx(p),pad.y-14,"¡HORNO!","#ffe27a");
+      if(!firstMastery) game.nums?.add?.(cx(p),pad.y-14,"¡HORNO!","#ffe27a");
     }
   }
 
