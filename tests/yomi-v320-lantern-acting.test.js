@@ -59,17 +59,13 @@ test("V320 Yomi L maw and U lantern greeting have distinct pure acting",()=>{
  assert.equal(yomiCastActing({state:"hurt",castSlot:2,cast:.5}),null);
  assert.equal(yomiCastActing({state:"cast",castSlot:99,cast:.5}),null);
 });
-test("V320 reduced motion retains static ritual stages, not disappearing character",()=>{
+test("V320 reduced motion suppresses cosmetic orbit but cast body remains staged",()=>{
  for(let scene=0;scene<4;scene++){
   const p=pose(4,"idle",{flourishN:scene,flourish:.5,reduceMotion:true});
-  const x=yomiRitualState(p);
-  assert.ok(Object.isFrozen(x));
-  assert.equal(x.reduced,true);
-  assert.equal(x.scene,scene);
-  assert.equal(x.phase,.5);
-  assert.equal(x.alpha,1);
-  assert.equal(yomiRitualState({...p,state:"hurt"}),null);
-  assert.deepEqual(x,yomiRitualState({...p,t:30000}));
+  assert.equal(yomiRitualState(p),null);
+  const a=yomiCastActing({...p,state:"cast",castSlot:2,cast:.57});
+  assert.ok(a.maw>.85,"real bite posture must remain");
+  assert.deepEqual(a,yomiCastActing({...p,state:"cast",castSlot:2,cast:.57,t:30000}));
  }
 });
 test("V320 real Canvas: five silhouettes, J/K/L/U and reduced ritual are finite",()=>{
