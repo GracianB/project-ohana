@@ -3,7 +3,8 @@
 // Visuals never damage anything. Only updateFamilyDuet mutates combat state.
 // The cooperative wire format is deliberately small and contains NO hit sets.
 import {ROSTER} from "../characters/roster.js";
-import {DEFAULT_U_PARTNERS,chooseUPartner,U_L_NAMES} from "./u-partners.js";
+import {DEFAULT_U_PARTNERS,chooseUPartner,U_L_NAMES,bondXP,uExpRank,gainUBondHit,persistUBonds} from "./u-partners.js";
+import {duetChemistry,duetHitOptions,applyDuetChemistry,drawDuetChemistry} from "./u-duet-chemistry.js";
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
@@ -46,8 +47,9 @@ const center=e=>({x:e.x+(e.w||0)/2,y:e.y+(e.h||0)/2});
 export function readFamilyDuet(s){
  if(!s||typeof s!=="object"||!familyDuetDefinition(s)||!validNumber(s.x)||!validNumber(s.y)||
  !Number.isInteger(s.age)||s.age<0||s.age>=FAMILY_DUET_LENGTH||
- !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
- return {...(s.ally===undefined?{}:{ally:s.ally}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
+ !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||
+ (s.bondRank!==undefined&&(!Number.isInteger(s.bondRank)||s.bondRank<1||s.bondRank>3)))return null;
+ return {...(s.ally===undefined?{}:{ally:s.ally}),...(s.bondRank===undefined?{}:{bondRank:s.bondRank}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
 }
 export function familyDuetPose(s,reduce=false){
  const data=familyDuetDefinition(s);if(!data)return null;
@@ -66,7 +68,9 @@ export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
  const ally=selectedAlly===undefined?DEFAULT_U_PARTNERS[p?.id]:selectedAlly;
  const def=familyDuetDefinition({hero:p?.id,ally});
  if(!p||p.dead||!def)return false;
- game._familyDuet={hero:p.id,...(def.ally===DEFAULT_U_PARTNERS[p.id]?{}:{ally:def.ally}),room:String(game.roomId||"hub"),
+ const bondRank=uExpRank(bondXP(p,def.ally));
+ game._familyDuet={hero:p.id,...(def.ally===DEFAULT_U_PARTNERS[p.id]?{}:{ally:def.ally}),
+   ...(bondRank>1?{bondRank}:{}),room:String(game.roomId||"hub"),
    x:center(p).x,y:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),
    facing:p.facing===-1?-1:1,power:clamp(power,1,2),
    // Entities already handled by the legacy U cannot be damaged twice by L.
@@ -107,14 +111,25 @@ export function updateFamilyDuet(game,hit,heal){
  if(beat>=0){
   const damage=(70+s.evo*14)*s.power*(def.kind==="ohana"?.19:def.kind==="maw"?.27:.23);
   let applied=0;
+  const chemistry=duetChemistry(s.hero,def.ally,s.bondRank||1);
   for(const e of def.kind==='ohana'?[]:(game.enemies||[])){
    if(!e||e.hp<=0||e.dying||e.fell||s.legacyTargets?.has(e)||!familyDuetStrike(s,beat,e))continue;
+   const identity=duetHitOptions(chemistry,s.facing,def.kind==="rainbow"?48:32);
    const knock=s.facing*(def.kind==="quake"?7:4);
    if(typeof hit==="function"&&hit(game,e,damage,{
-    color:def.color,stun:def.kind==="rainbow"?48:32,kx:knock,ky:-5,hitstop:0,shake:1
+    color:def.color,stun:identity.stun,kx:identity.kx||(knock),ky:-5,hitstop:0,shake:1
    }))applied++;
   }
   if(def.kind==="ohana"&&typeof heal==="function")heal(p,(Number(p.maxHealth)||100)*(.035+s.evo*.006));
+  applyDuetChemistry(p,chemistry,applied,heal);
+  // Bond experience belongs only to the active hero/ally pair. Each actual
+  // successful L beat (or Kilo's helpful chorus) is rewarded once.
+  if(applied>0||def.kind==="ohana"){
+   const gained=gainUBondHit(p,2+Math.min(3,applied));
+   if(gained){
+    try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}
+   }
+  }
   if(def.kind==="chaos")p.invuln=Math.max(p.invuln||0,18);
   if(def.kind==="storm")p._specialSpeedT=Math.max(p._specialSpeedT||0,18);
   if(def.kind==="tails")p._specialShadowT=Math.max(p._specialShadowT||0,18);
@@ -156,7 +171,7 @@ export function familyDuetChoreography(value,reduce=false){
  const beat=nearest.index;
  const delta=beat<0?null:s.age-FAMILY_DUET_BEATS[beat];
  return Object.freeze({
-  hero:s.hero,ally:familyDuetDefinition(s).ally,borrowedL:familyDuetDefinition(s).borrowedL,
+  hero:s.hero,ally:familyDuetDefinition(s).ally,borrowedL:familyDuetDefinition(s).borrowedL,bondRank:s.bondRank||1,
   stage:pose.beat,form:s.evo,allyX:pose.allyX,allyY:pose.allyY,opacity:pose.alpha,
   keyframe:beat,telegraph:delta!==null&&delta<0,
   impact:delta===0,progress:delta===null?0:delta<0?(delta+17)/17:Math.min(1,delta/18),
@@ -393,5 +408,6 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
   for(let k=0;k<3;k++)spark(ctx,pose.allyX-cam.x+(k-1)*16,pose.allyY-cam.y-25-k*11,4+k,def.color);
  }
  drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce);
+ drawDuetChemistry(ctx,s,cam,t,reduce);
  ctx.restore();return true;
 }
