@@ -2,6 +2,7 @@ import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
+import {optionsForUPartner,chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice} from "./systems/u-partners.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
@@ -682,7 +683,10 @@ game.hitstop = 0;
 game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
-game.player = makePlayer(def); game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+game.player = makePlayer(def);
+game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
+game.player.uExp=0;
+game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
 game.best = null;
@@ -697,6 +701,7 @@ try {
   if (u) {
     game.player.evo = u.evo;
     game.player.xp = u.xp;
+    game.player.uExp = u.uExp || 0;
     game.visited = { hub: true };
     for (const key of Object.keys(u.visited)) if (ROOMS[key]) game.visited[key] = true;
     game.score = u.score;
@@ -2821,14 +2826,16 @@ const d = slot.supreme
 if (!d) return "";
 const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
-const detail = slot.supreme ? (d.name + " · " + (d.special || "Suprema")) : d.name;
+const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
+const detail = slot.supreme ? (d.name + " · U EXP con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
 slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
 }));
 touchPowers = Array.from(document.querySelectorAll(".touch-btn.pw"));
-abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",");
+abilityBarKey = game.player.id + ":" + evo + ":" + (game.player.abilities || []).join(",")
+ + ":" + game.player.uPartner;
 }
 function drawHudAvatar(p) {
 const av = DOM.hudAvatar;
@@ -2856,7 +2863,7 @@ c.restore();
 
 function updateHUD() {
 const p = game.player; if (!p) return;
-const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",");
+const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",") + ":" + p.uPartner;
 if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
 setText(DOM.hudName, p.name);
 const mk = markAt(p.id, p.evo);
@@ -2891,6 +2898,11 @@ setText(DOM.hudWorld, room().name);
 const seen = Object.keys(game.visited || {}).length;
 setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
 setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
+const ally=uPartnerInfo(p.id,p.uPartner),uLevel=uExpRank(p.uExp);
+setText(document.getElementById("u-exp-hud"),
+ "U EXP " + uLevel + "/3 · " + (ally?.name||"Familia") +
+ " ("+(ally?.lName||"L")+") · "+Math.floor(p.uExp||0)+"/200");
+
 if (p.evo >= 4) {
 const sup = supremeOf(p.id);
 const sp = specialOf(p.id);
@@ -3079,6 +3091,31 @@ if ((game.renderDirty || renderedTick !== t) && !paused) {
 requestAnimationFrame(loop);
 }
 function setupSelect() {
+const partnerSelect=document.getElementById("u-partner-select");
+const technique=document.getElementById("u-partner-technique");
+function renderUPartnerChoices(hero){
+ if(!partnerSelect||!hero)return;
+ const options=optionsForUPartner(hero);
+ if(!options.length)return;
+ const selected=loadUPartnerChoice(localStorage,hero);
+ partnerSelect.innerHTML=options.map(o=>'<option value="'+o.id+'">'+o.name+' · L: '+o.lName+'</option>').join("");
+ partnerSelect.value=selected;
+ partnerSelect.dataset.hero=hero;
+ if(technique)technique.textContent="U en combate · "+(uPartnerInfo(hero,selected)?.lName||"L")+
+  " · selecciona otro héroe para cambiar el dúo";
+}
+renderUPartnerChoices("kilo");
+addEventListener("ohana-select",e=>renderUPartnerChoices(e.detail?.id));
+partnerSelect?.addEventListener("change",()=>{
+ const hero=partnerSelect.dataset.hero,ally=partnerSelect.value;
+ if(!storeUPartnerChoice(localStorage,hero,ally))return;
+ renderUPartnerChoices(hero);
+ if(game.running&&game.player?.id===hero){
+  game.player.uPartner=ally;
+  renderAbilityBar();
+  updateHUD();
+ }
+});
 const wrap = document.getElementById("chars");
 if (!wrap) return;
 const grid = document.getElementById("chars-grid") || wrap;
@@ -3324,7 +3361,10 @@ state() {
     rain: !!Rain.active,
     umbrella: !!Rain.hasUmbrella,
     starBonus: Surprises.starOrbBonus(),
-    familyDuet:game._familyDuet?{hero:game._familyDuet.hero,age:game._familyDuet.age,evo:game._familyDuet.evo}:null,
+    familyDuet:game._familyDuet?{hero:game._familyDuet.hero,ally:game._familyDuet.ally||null,age:game._familyDuet.age,evo:game._familyDuet.evo}:null,
+    uPartner:p?.uPartner||null,
+    uExp:p?.uExp||0,
+    uExpRank:uExpRank(p?.uExp),
     michiDuet:game._michiDuet?{age:game._michiDuet.age,evo:game._michiDuet.evo}:null,
     chispinDuet:game._chispinDuet?{age:game._chispinDuet.age,evo:game._chispinDuet.evo}:null,
     stitchoDuet:game._stitchoDuet?{age:game._stitchoDuet.age,evo:game._stitchoDuet.evo}:null,
