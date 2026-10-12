@@ -55,3 +55,20 @@ test("V322 · failed RTC routes are handled without fake delivery",()=>{
  assert.equal(sendPeerEffectsWithReliableDuet(transport(false,true),f,true),true);
  assert.equal(sendPeerEffectsWithReliableDuet(transport(true,true),{protocol:1},true),false);
 });
+
+
+test("V322 · only successful durable sends acknowledge the U; quick successes still require retry",()=>{
+ const f=capture("dino");
+ let acknowledged=0;
+ const quickOnly=transport(true,false);
+ assert.equal(sendPeerEffectsWithReliableDuet(quickOnly,f,true,()=>acknowledged++),true);
+ assert.equal(acknowledged,0,"the unreliable lane must not mark U delivered");
+ assert.deepEqual(quickOnly.sent.map(x=>x.mode),["fast","reliable"]);
+ const retry=transport(false,true);
+ assert.equal(sendPeerEffectsWithReliableDuet(retry,f,true,()=>acknowledged++),true);
+ assert.equal(acknowledged,1,"first ordered acknowledgment occurs once");
+ const noExtra=transport();
+ assert.equal(sendPeerEffectsWithReliableDuet(noExtra,f,false,()=>acknowledged++),true);
+ assert.equal(acknowledged,1,"periodic fast snapshots never generate another ordered event");
+ assert.deepEqual(noExtra.sent.map(x=>x.mode),["fast"]);
+});
