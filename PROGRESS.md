@@ -1,3 +1,11 @@
+## Michi · segunda pasada de personalidad (ohana-337)
+
+Huellas de patas en sus formas terrestres, destellos en Nube rosa, medias lunas en Michi Luna, aterrizajes suaves y curvas de ovillo en giro/frenada. Cinco formas revisadas en Canvas nativo. Efectos locales deterministas, suprimidos con movimiento reducido y durante aire/daño/muerte/cast/U; sin mutar físicas ni causar daño. Conserva U V304 y avances GPT.com hasta V313. Integra después de Chispín en una entrega separada; Netlify sigue pendiente de créditos gratuitos.
+
+## Chispín · segunda pasada de personalidad (ohana-336)
+
+Dos chispas de carrera, nubecitas amortiguadoras al aterrizar, zigzag de giro y remolinos de frenada en cinco formas, con acento rosa de Tormenta. Efectos locales deterministas, suprimidos por movimiento reducido, aire, daño, muerte, cast y U activa. No altera físicas, daño ni U V303; conserva avances GPT.com hasta V313. Sigue Michi en una entrega separada. Netlify pendiente por créditos agotados: preparar y validar GitHub, sin reintentar ni contratar planes.
+
 ## Integración Stitcho + aportaciones V313 (ohana-335)
 
 Preserva PR #302, #305–#308 y Stitcho #304. Los conflictos de versiones se resuelven con una caché nueva que incluye todas las dependencias de main. Revalidación completa antes de publicar.
@@ -1530,4 +1538,4 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Multijugador: sólo se envían datos de postura existentes y rango acotado, no se replican daños; accesibilidad con movimiento reducido determinista, sin oscilaciones de cámara y menos marcas.
 - Auditoría Node de 2.700 hitboxes (1+ millones de comprobaciones espaciales frente a las reglas anteriores), 2.700 ilustraciones de invitado, muerte/cambio de sala y cinco formas. Chromium: 1.350 escenas reales Canvas y diez galerías por compañero.
 - Se mantienen la U personalizada y la U artesanal histórica de Kilo, Stitcho, Chispín y Michi.
-- Versión offline: `ohana-336`.
+- Versión offline: `ohana-338`.
