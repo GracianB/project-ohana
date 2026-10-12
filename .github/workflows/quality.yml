@@ -39,6 +39,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: Kilo personality and movement audit
+        run: node tests/browser/kilo-personality.mjs
+
       - name: Kilo V301 vector and duet audit
         run: node tests/browser/kilo-v301.mjs
 

@@ -610,10 +610,29 @@ function drawCrawl(ctx, pose, R) {
   ctx.restore();
 }
 
+
+// Cosmetic follow-through only: no player or combat state is written.
+const KILO_MOTION_MEDIA=typeof window!=='undefined'&&typeof window.matchMedia==='function'?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+export function kiloFootwork(pose={}){
+ if(pose.reduceMotion||KILO_MOTION_MEDIA?.matches||pose.air||!['idle','run'].includes(pose.state||'idle'))return null;
+ const unit=v=>Number.isFinite(Number(v))?Math.max(0,Math.min(1,Number(v))):0;
+ const landing=unit(pose.land),turn=pose.state==='run'?unit(pose.turnPulse):0,brake=pose.state==='run'?unit(pose.brake):0,running=pose.state==='run'?unit(pose.speed):0;
+ return landing>.02||turn>.02||brake>.02||running>.3?{landing,turn,brake,running}:null;
+}
+function drawKiloFootwork(ctx,pose,f,t){
+ const m=kiloFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';const petal=f>=3?'#ffe3a8':'#ffb4b7';
+ if(m.running>.3)for(let i=0;i<3;i++){const k=((t*.055+i/3)%1+1)%1;ctx.globalAlpha=.42*(1-k)*m.running;ctx.fillStyle=i===1?'#fff3d4':petal;ctx.beginPath();ctx.ellipse(-15-k*22,-2-k*(5+f),2.4,1.2,.4,0,Math.PI*2);ctx.fill();}
+ if(m.landing>.02){ctx.globalAlpha=m.landing*.6;ctx.strokeStyle=petal;ctx.lineWidth=1.8;ctx.beginPath();ctx.ellipse(0,-1,12+(1-m.landing)*20,3,0,0,Math.PI*2);ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle=petal;ctx.beginPath();ctx.ellipse(-9+i*9,-3-(1-m.landing)*12,2,1.2,-.5+i*.5,0,Math.PI*2);ctx.fill();}}
+ if(m.turn>.02){ctx.globalAlpha=m.turn*.6;ctx.strokeStyle='#fff1cc';ctx.lineWidth=1.7;ctx.beginPath();ctx.arc(-7,-12,14+f,Math.PI*.55,Math.PI*1.3);ctx.stroke();}
+ if(m.brake>.02){ctx.globalAlpha=m.brake*.55;ctx.strokeStyle=petal;ctx.lineWidth=1.4;for(let i=0;i<2;i++){ctx.beginPath();ctx.moveTo(-17-i*5,-3-i*4);ctx.quadraticCurveTo(-25-i*5,-9-i*4,-32-i*5,-5-i*4);ctx.stroke();}}
+ ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = pose.form, d = DIM[f], t = pose.t, st = pose.state;
   if (f === 0 && st === "run") return drawCrawl(ctx, pose, R);
   const dead = st === "dead";
+  drawKiloFootwork(ctx,pose,f,pose.t||0);
   const r = dead ? solve({ ...pose, state: "idle", flourish: 0 }, d, f) : solve(pose, d, f);
   const hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const hx = 1 + r.hipX * 0.3, hy = sy - d.hr * 0.9;
