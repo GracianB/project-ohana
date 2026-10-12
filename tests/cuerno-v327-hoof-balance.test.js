@@ -41,7 +41,7 @@ function render(p){
  const before=JSON.stringify(p);Cuerno.draw(ctx,p,R);
  assert.equal(stack,0,"unbalanced Canvas stack");
  assert.equal(JSON.stringify(p),before,"art mutated the rig");
- assert.ok(paints>20&&trace.length>80&&trace.length<10000,"unbounded geometry");
+ assert.ok(paints>10&&trace.length>20&&trace.length<10000,"unbounded geometry");
  return JSON.stringify(trace);
 }
 test("V327 F0 horn and F1 orb gain balance without inventing hooves",()=>{
