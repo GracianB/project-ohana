@@ -276,6 +276,33 @@ export function pizzaOvenActing(pose={}) {
   });
 }
 
+
+/**
+ * V325: mozzarella follows changes in momentum inside the real slice body.
+ * Visual-only; does not alter bounce physics, hitboxes or U authority.
+ */
+export function pizzaDoughFollowThrough(pose={}, form=0) {
+ const cap=n=>typeof n==="number"&&Number.isFinite(n)?clamp(n,0,1):0;
+ const state=pose.state||"idle",run=state==="run";
+ const turn=run?cap(pose.turnPulse):0,brake=run?cap(pose.brake):0;
+ const land=["hurt","dead","cast"].includes(state)?0:cap(pose.land);
+ const speed=run?cap(pose.speed):0;
+ const heavy=[.72,.87,.97,1.27,1.38][clamp(form|0,0,4)];
+ const blocked=["hurt","dead","cast","attack"].includes(state)||pose.move==="bounce";
+ const drag=blocked?0:(.9*turn+brake)*heavy;
+ const stomp=blocked?0:land*heavy;
+ return Object.freeze({
+  widen:1+stomp*.095+drag*.052,
+  tall:1-stomp*.082+drag*.032,
+  tilt:blocked?0:(.13*speed-.21*turn+.2*brake)*heavy,
+  crustLag:blocked?0:drag*.14,
+  cheese:blocked?0:clamp(drag*.64+stomp*.48,0,1),
+  frontKnee:blocked?0:stomp*2.8+drag*.85,
+  backKnee:blocked?0:stomp*2.1+drag*.65,
+  drag,stomp
+ });
+}
+
 function params(pose, f) {
 const st = pose.state;
 const t = pose.t;
@@ -495,11 +522,22 @@ if (st === "idle" && pose.flourish > 0) {
 }
 
 if (pose.land > 0.05) {
-  const L = pose.land;
+  const L = clamp(Number(pose.land)||0,0,1);
   P.sx = lerp(P.sx, 1.12, L);
   P.sy = lerp(P.sy, 0.88, L);
 }
-
+// Unlike extra speed particles, these forces deform Pizza's actual torso,
+// crust and articulated legs. Casts keep their own authored L/U animations.
+const dough=pizzaDoughFollowThrough(pose,f);
+if(["idle","run","jump","fall","glide"].includes(st)&&pose.move!=="bounce"){
+ P.sx*=dough.widen;P.sy*=dough.tall;P.roll+=dough.tilt;
+ P.legF=[P.legF[0]+dough.drag*.07,P.legF[1]+dough.frontKnee];
+ P.legB=[P.legB[0]-dough.drag*.07,P.legB[1]-dough.backKnee];
+ if(P.armF)P.armF={...P.armF,ang:P.armF.ang+dough.crustLag};
+ if(P.armB)P.armB={...P.armB,ang:P.armB.ang-dough.crustLag};
+ P.strings=Math.max(P.strings,dough.cheese);
+ P.dripK+=dough.drag*.18;
+}
 return P;
 }
 
@@ -920,7 +958,16 @@ const armW = f === 0 ? 4.6 : 5.2;
 const drawArm = (sx, sy, A, back) => {
   if (!A) return null;
   const len = F.arm * (A.len || 1);
-  return R.swingLimb(ctx, sx, sy, len, A.ang, A.bend, armW, back ? R.darken(armC, 0.15) : armC, { lw: 2.2 });
+  const fur=back?R.darken(armC,.15):armC;
+  const ex=sx+Math.sin(A.ang)*len,ey=sy+Math.cos(A.ang)*len;
+  const mx=(sx+ex)*.5-Math.cos(A.ang)*A.bend;
+  const my=(sy+ey)*.5+Math.sin(A.ang)*A.bend;
+  R.limb(ctx,sx,sy,mx,my,ex,ey,armW,fur,{lw:2.2,hand:false});
+  // Both humerus and elbow belong to the same dough mass, not floating lines.
+  R.ellipse(ctx,sx,sy,armW*.68,armW*.68,fur,{lw:1.4});
+  R.ellipse(ctx,mx,my,armW*.6,armW*.6,fur,{lw:1.4});
+  R.ellipse(ctx,ex,ey,armW*.82,armW*.7,back?fur:c.cheese,{lw:1.5});
+  return [ex,ey];
 };
 const legC = R.darken(c.dough, 0.08);
 const drawLeg = (x, L, back) => {
@@ -928,7 +975,10 @@ const drawLeg = (x, L, back) => {
   const ey = tipY + Math.cos(L[0]) * F.legL;
   const mx = x + Math.sin(L[0]) * F.legL * 0.5 + Math.cos(L[0]) * L[1];
   const my = tipY + Math.cos(L[0]) * F.legL * 0.5;
-  R.limb(ctx, x, tipY - 4, mx, my, ex, ey, 5, back ? R.darken(legC, 0.15) : legC, { lw: 2.2, hand: false });
+  const limb=back?R.darken(legC,.15):legC;
+  R.limb(ctx, x, tipY - 4, mx, my, ex, ey, 5, limb, { lw: 2.2, hand: false });
+  R.ellipse(ctx,x,tipY-4,4.3,4.3,limb,{lw:1.4});
+  R.ellipse(ctx,mx,my,3.8,3.8,limb,{lw:1.4});
   R.ellipse(ctx, ex + 2.2, ey - 1.8, 5, 3.3, back ? R.darken(c.shoe, 0.2) : c.shoe, { lw: 2 });
 };
 
@@ -1081,6 +1131,23 @@ if (P.wall) {
   hand = drawArm(shX, shY, P.armF, false);
 }
 
+// U is an actual hand-off, not another copy of L's oven. The small
+// slice stays fixed to Pizza's articulated hand and has zero game authority.
+if(pose.state==="cast"&&pose.castSlot===3&&hand){
+ const offer=pizzaOvenActing(pose);
+ if(offer&&offer.offer>.03){
+  const x=hand[0]+8,y=hand[1]-5-4*offer.offer;
+  ctx.save();ctx.globalAlpha*=Math.min(1,offer.offer*1.4);
+  ctx.translate(x,y);ctx.rotate(-.22*offer.offer);
+  ctx.fillStyle=c.cheese;ctx.strokeStyle=R.INK;ctx.lineWidth=1.7;
+  ctx.beginPath();ctx.moveTo(-7,-8);ctx.lineTo(7,-8);ctx.lineTo(0,10);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.strokeStyle=c.crust;ctx.lineWidth=4;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(-7,-8);ctx.lineTo(7,-8);ctx.stroke();
+  ctx.fillStyle=PEP;ctx.beginPath();ctx.arc(0,-2,2.3,0,TAU);ctx.fill();
+  ctx.restore();
+ }
+}
 ctx.restore(); // spin
 
 if (f === 4 && !P.dead) orbit(ctx, R, F, t, true);
