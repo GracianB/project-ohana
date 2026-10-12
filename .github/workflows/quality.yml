@@ -51,6 +51,9 @@ jobs:
       - name: Michi V304 vector and duet audit
         run: node tests/browser/michi-v304.mjs
 
+      - name: Five Family U duet screenshots (25 scenes)
+        run: node tests/browser/family-duets-v306-v310.mjs
+
       - name: Michi Multiplayer E2E
         run: npm run test:browser:multiplayer
         env:

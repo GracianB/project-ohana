@@ -507,7 +507,7 @@ return false;
 const first = !game.visited[id];
 game.roomId = id;
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
-resetCombatMirror(game);game.coopPeerEffects=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
+resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
 if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
@@ -3324,6 +3324,7 @@ state() {
     rain: !!Rain.active,
     umbrella: !!Rain.hasUmbrella,
     starBonus: Surprises.starOrbBonus(),
+    familyDuet:game._familyDuet?{hero:game._familyDuet.hero,age:game._familyDuet.age,evo:game._familyDuet.evo}:null,
     michiDuet:game._michiDuet?{age:game._michiDuet.age,evo:game._michiDuet.evo}:null,
     chispinDuet:game._chispinDuet?{age:game._chispinDuet.age,evo:game._chispinDuet.evo}:null,
     stitchoDuet:game._stitchoDuet?{age:game._stitchoDuet.age,evo:game._stitchoDuet.evo}:null,
