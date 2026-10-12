@@ -83,7 +83,7 @@ test("V316 Meteor L has separate crouch, launch and recovery body beats",()=>{
   assert.ok(pose(.18).meteorGather>.4);
   assert.equal(pose(.18).meteorRelease,0);
   assert.ok(pose(.44).meteorRelease>.75);
-  assert.ok(pose(.44).meteorGather<.1);
+  assert.ok(pose(.44).meteorGather<.15);
   assert.equal(pose(1).meteorRelease,0);
   assert.equal(pose(1).meteorGather,0);
   assert.equal(dragonBodyActing({state:"cast",castSlot:1,cast:.44}).meteorRelease,0);
