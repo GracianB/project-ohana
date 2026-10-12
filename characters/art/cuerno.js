@@ -801,7 +801,7 @@ export function cuernoFootstepState(pose, form) {
   const p = pose || {};
   const f = Math.max(0, Math.min(4, Number.isFinite(Number(form)) ? Math.trunc(Number(form)) : 0));
   const st = p.state || "idle";
-  if (f < 1 || p.reduceMotion || (st !== "idle" && st !== "run") || p.air) return null;
+  if (f < 1 || p.reduceMotion || CUERNO_MOTION_MEDIA?.matches || (st !== "idle" && st !== "run") || p.air) return null;
   const clamp01 = (n) => Number.isFinite(Number(n)) ? Math.max(0, Math.min(1, Number(n))) : 0;
   const land = clamp01(p.land);
   const turn = st === "run" ? clamp01(p.turnPulse) : 0;
