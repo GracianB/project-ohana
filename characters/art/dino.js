@@ -365,6 +365,41 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 // DIBUJO PRINCIPAL DE DINO
 // ---------------------------------------------------------------------------
 
+
+/**
+ * Cuarto gesto de Dino: hipo volcánico. El cuerpo se sorprende y expulsa
+ * dos nubecitas inofensivas; no son proyectiles ni ataques.
+ */
+export function dinoHiccupState(pose = {}) {
+  if (pose.state !== "idle" || pose.move === "pound" || pose.move === "charge") return null;
+  const k = Number(pose.flourish);
+  if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
+  const n = Number.isFinite(Number(pose.flourishN)) ? Math.trunc(Number(pose.flourishN)) : 0;
+  if (((n % 4) + 4) % 4 !== 3) return null;
+  const prepare = ease(seg(k, .05, .36));
+  const sneeze = Math.sin(Math.PI * seg(k, .38, .66));
+  const settle = ease(seg(k, .68, .94));
+  return Object.freeze({ prepare, sneeze: clamp(sneeze, 0, 1),
+    settle, phase: k });
+}
+
+function drawDinoHiccup(ctx, R, f, x, y, h) {
+  if (!h || h.sneeze <= .03) return;
+  ctx.save();
+  ctx.globalAlpha = .55 * h.sneeze;
+  ctx.strokeStyle = f === 4 ? "#eeffe3" : "#dce8d0";
+  ctx.lineWidth = f >= 3 ? 2.1 : 1.6;
+  for (let i = 0; i < 2; i++) {
+    const r = 3.5 + i * 3.5 + h.sneeze * 5;
+    const xx = x + 8 + i * 12 + h.sneeze * 7;
+    const yy = y - i * 7 - 5 * h.sneeze;
+    ctx.beginPath(); ctx.ellipse(xx, yy, r, r * .56, -.14, 0, PI * 2); ctx.stroke();
+  }
+  R.sparkle(ctx, x + 27 + h.sneeze * 8, y - 17, 2 + h.sneeze * 2.4,
+    f === 4 ? "#fff3a1" : "#ffe1ac");
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0;
   // U temporarily grants invulnerability. The shared rig classifies long
@@ -377,7 +412,8 @@ function draw(ctx, pose, R) {
   const motion = dinoSecondaryMotion(pose);
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
-  const flN = pose.flourishN % 3;
+  const flN = (Number(pose.flourishN) || 0) % 4;
+  const hiccup = dinoHiccupState(pose);
   const flE = fl > 0 ? Math.sin(fl * PI) : 0;
   const pound = pose.move === "pound" && (st === "fall" || st === "jump" || st === "idle");
   const rolling = pose.move === "dino-roll" && st !== "dead";
@@ -549,10 +585,22 @@ function draw(ctx, pose, R) {
       jaw = 0.6 * Math.sin(r2 * PI); rawr = Math.sin(r2 * PI);
       headRot = -0.2 * flE; armF = lerp(armF, 1.9, flE); armB = lerp(armB, 1.7, flE);
       eyeMood = rawr > 0.3 ? "closed" : "normal";
-    } else {
+    } else if (flN === 2) {
       tailWag = flE; eyeMood = "happy"; jaw = 0.25 * flE;
       bob += Math.abs(Math.sin(t * 0.6)) * -1.5 * flE;
       headRot = Math.sin(t * 0.3) * 0.08 * flE;
+    } else if (hiccup) {
+      // Cuarto gesto: se hincha, le da hipo y se sorprende de su propio aliento.
+      const puff = hiccup.sneeze, ready = hiccup.prepare * (1 - hiccup.settle);
+      bob -= 2.4 * ready;
+      lean = -.08 * ready + .15 * puff;
+      headRot = -.18 * ready + .27 * puff;
+      hdy -= 1.9 * ready;
+      jaw = .12 * ready + .58 * puff;
+      armF = .5 + 1.4 * puff; armB = .4 + 1.2 * puff;
+      legF = -.1 * ready + .24 * puff; legB = .1 * ready - .17 * puff;
+      tailA = .22 * ready - .34 * puff;
+      eyeMood = puff > .35 ? "closed" : hiccup.settle > .1 ? "happy" : "normal";
     }
   }
 
@@ -803,6 +851,12 @@ function draw(ctx, pose, R) {
       R.ellipse(ctx, dx, -3 - shock * 6 - (i % 2) * 4, 3 + shock * 3, 2.5 + shock * 2, "#d8cfb8", { lw: 1.2, ink: "#7a6d5a" });
     }
     ctx.restore();
+  }
+
+  if (hiccup && st === "idle") {
+    const puffX = headX + P.hw * 1.25;
+    const puffY = hipY + headY + P.hh * .25;
+    drawDinoHiccup(ctx, R, f, puffX, puffY, hiccup);
   }
 
   // Signature wink for victory; visual only, no entities spawned.
