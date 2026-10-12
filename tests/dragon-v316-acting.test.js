@@ -110,6 +110,8 @@ test("V316 live body geometry changes for landing, turning, braking, climb and m
     assert.notEqual(render(form,{state:"run",speed:.8,brake:1}),running,"brake must act F"+form);
     assert.notEqual(render(form,{state:"glide",vy:-.9,air:true}),render(form,{state:"glide",vy:.9,air:true}),"wing pitch F"+form);
     assert.notEqual(render(form,{state:"cast",castSlot:2,cast:.18}),render(form,{state:"cast",castSlot:2,cast:.44}),"meteor wind-up F"+form);
+    assert.notEqual(render(form,{state:"cast",castSlot:3,cast:.44}),render(form,{state:"cast",castSlot:2,cast:.44}),"U cannot reuse L meteor posture F"+form);
+    assert.notEqual(render(form,{state:"hurt",castSlot:3,cast:.44}),render(form,{state:"hurt",castSlot:3,cast:0}),"invulnerable U must visibly act F"+form);
     for(const scene of [
       {state:"jump",vy:-1},{state:"fall",vy:1},{state:"attack",atk:.4},
       {state:"cast",castSlot:0,cast:.4},{state:"cast",castSlot:1,cast:.4},
