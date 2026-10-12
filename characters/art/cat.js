@@ -11,6 +11,95 @@ const PAL = [
   { fur: "#fff6ea", dark: "#e4c07a", belly: "#fff", ear: "#ffd0e0", nose: "#ff5c8a", eye: "#e0489b", accent: "#ffb780" },
 ];
 
+
+const unit = n => typeof n === "number" && Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+const smooth = x => { const k = unit(x); return k*k*(3-2*k); };
+
+/**
+ * V323: the four casts now have separate readable BODY performances.
+ * Pure, finite and independent of wall-clock time or multiplayer authority.
+ * No visual frame is allowed to manufacture a hit.
+ */
+export function michiCastActing(pose = {}) {
+  if (pose.state !== "cast" || !Number.isInteger(pose.castSlot) ||
+      pose.castSlot < 0 || pose.castSlot > 3) return null;
+  const slot = pose.castSlot, k = unit(pose.cast);
+  const windup = smooth((k-.04)/.26), contact = smooth((k-.32)/.21);
+  const recovery = smooth((k-.77)/.23);
+  const load = windup*(1-contact), release = contact*(1-recovery);
+  return Object.freeze({
+    slot, load, release, recovery,
+    // Yarn throws forward; purr curls in; nine tails fan; U greets Dragon.
+    shoulder: slot===0 ? -1.4*load+1.2*release :
+      slot===1 ? .65*load-.34*release :
+      slot===2 ? -1.8*load+1.35*release : -.7*load+1.1*release,
+    paw: slot===0 ? 10*release : slot===1 ? -5*load :
+      slot===2 ? -8*load+11*release : -7*load+8*release,
+    tailRoot: slot===2 ? .55*load+1.1*release :
+      slot===3 ? -.38*load+.85*release : .2*load,
+    tilt: slot===0 ? -.12*load+.22*release :
+      slot===1 ? -.07*load+.04*release :
+      slot===2 ? -.23*load+.16*release : .16*release-.09*load,
+    crouch: slot===1 ? 4.2*load+2.5*release :
+      slot===2 ? 5.1*load : slot===3 ? 3.2*load : 2.8*load,
+    ears: slot===1 ? -.18*release : slot===2 ? -.24*load+.28*release :
+      slot===3 ? .25*release : -.18*load,
+    // Purring breath has a torso contribution even with reduced motion.
+    purr: slot===1 ? .7*load+release : 0,
+    greet: slot===3 ? release : 0
+  });
+}
+
+/** Finite, form-independent locomotion contract; never mutates pose. */
+export function michiBodyMechanics(pose = {}) {
+  const state = pose.state || "idle";
+  const phase = Number.isFinite(pose.phase) ? pose.phase : 0;
+  const stride = state==="run" ? Math.sin(phase) * unit(pose.speed) : 0;
+  const land=unit(pose.land), turn=unit(pose.turnPulse), brake=unit(pose.brake);
+  const action=michiCastActing(pose);
+  const reduced=!!pose.reduceMotion;
+  return Object.freeze({
+    stride, land, turn, brake,
+    lift: state==="run" ? -2.2*Math.abs(stride) :
+      state==="jump" ? -3.5 : state==="fall" ? 1.4 :
+      state==="idle" ? -1.2*land : 0,
+    tilt: state==="run" ? -.1*stride+.12*brake-.15*turn :
+      state==="jump" ? -.13 : state==="fall" ? .09 :
+      (action?.tilt||0),
+    forePaw: state==="run" ? stride*.6 : state==="jump" ? -.8 :
+      state==="fall" ? .65 : 0,
+    hindPaw: state==="run" ? -stride*.75 : state==="jump" ? .85 :
+      state==="fall" ? -.3 : 0,
+    ear: state==="hurt" ? -.26 : state==="dead" ? -.4 :
+      (action?.ears||0)+(state==="run" ? -.1*stride : 0),
+    tailCounter: state==="run" ? -.3*stride : (action?.tailRoot||0),
+    squash: state==="dead" ? 0 : .16*land+.07*brake+(action?.crouch||0)/25,
+    breath: state==="idle" ? (reduced?0:.026*Math.sin((Number.isFinite(pose.t)?pose.t:0)*.07)) :
+      (action?.purr||0)*.07,
+  });
+}
+
+// A genuine two-segment limb: anchored shoulder/hip -> elbow/knee -> paw.
+// Joint circles are painted with the same body fur, avoiding detached sticks.
+function jointedPaw(ctx, R, x, y, length, angle, bend, width, fur, paw="#ffc5d9") {
+  const a=Number.isFinite(angle)?Math.max(-3,Math.min(3,angle)):0;
+  const kneeX=x+Math.sin(a)*length*.45+bend;
+  const kneeY=y+Math.cos(a)*length*.46;
+  const footX=x+Math.sin(a)*length+ Math.sign(bend)*Math.min(2,Math.abs(bend)*.2);
+  const footY=y+Math.cos(a)*length;
+  ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+  for(const [ink,w] of [[INK,width+3],[fur,width]]) {
+    ctx.strokeStyle=ink;ctx.lineWidth=w;ctx.beginPath();
+    ctx.moveTo(x,y);ctx.quadraticCurveTo(kneeX,kneeY,kneeX,kneeY);
+    ctx.quadraticCurveTo(kneeX+(footX-kneeX)*.3,kneeY+(footY-kneeY)*.65,footX,footY);
+    ctx.stroke();
+  }
+  R.ellipse(ctx,x,y,width*.59,width*.59,fur,{lw:1.35});
+  R.ellipse(ctx,kneeX,kneeY,width*.48,width*.48,fur,{lw:1.25});
+  R.ellipse(ctx,footX,footY,width*.76,width*.55,paw,{lw:1.4});
+  ctx.restore();
+}
+
 function solve(pose) {
   const st = pose.state || "idle";
   const slot = st === "cast" ? (pose.castSlot | 0) : -1;
@@ -20,11 +109,14 @@ function solve(pose) {
   const atk = st === "attack" ? (pose.atk || 0) : 0;
   const cast = st === "cast" ? (pose.cast || 0) : 0;
   const fl = pose.flourish || 0;
+  const action = michiCastActing(pose);
+  const mechanics = michiBodyMechanics(pose);
   let arm = 0.35;
   if (st === "attack") arm = -2.05 + Math.sin(Math.min(1, atk) * Math.PI) * 3.15;
-  else if (slot === 0) arm = 1.15 + cast * 0.25;
-  else if (slot === 1) arm = 0.45;
-  else if (slot === 2) arm = -2.15;
+  else if (slot === 0) arm = .35 + action.shoulder;
+  else if (slot === 1) arm = -.35 + action.shoulder;
+  else if (slot === 2) arm = -.55 + action.shoulder;
+  else if (slot === 3) arm = -.5 + action.shoulder;
   else if (st === "run") arm = 0.25 + run * 0.85;
   else if (st === "jump") arm = -2.15;
   else if (st === "fall" || st === "glide") arm = 0.55;
@@ -38,9 +130,9 @@ function solve(pose) {
   else if (st === "attack" || slot === 2) mood = "angry";
   else if (st === "idle" && fl > 0 && (pose.flourishN % 4) === 3) mood = fl > .45 ? "happy" : "normal";
   return {
-    st, slot, t, run, atk, cast, fl, arm, leg, mood,
+    st, slot, t, run, atk, cast, fl, arm, leg, mood, action, mechanics,
     bob: st === "run" ? -Math.abs(run) * 3.4 : st === "jump" ? -5 : st === "idle" ? Math.sin(t * 0.07) * 1.7 : 0,
-    tail: slot === 2 ? 2.1 : st === "run" ? 1.25 : st === "attack" ? 1.45 : 0.75,
+    tail: slot === 2 ? 1.5+action.tailRoot*.7 : st === "run" ? 1.25 : st === "attack" ? 1.45 : 0.75,
   };
 }
 
@@ -117,15 +209,15 @@ function tail(ctx, R, x, y, len, ang, amp, t, i, color) {
 }
 
 function legs(ctx, R, r, hx, fur, dark, len) {
-  const L = len || 20;
-  R.swingLimb(ctx, hx - 9, -L - 2, L, r.leg, r.st === "jump" ? -5 : 0, 7.2, dark);
-  R.swingLimb(ctx, hx + 8, -L - 2, L, r.st === "jump" ? -2.05 : -r.leg, r.st === "jump" ? -4 : 0, 7.2, fur);
+  const L = len || 20, m = r.mechanics;
+  jointedPaw(ctx,R,hx-9,-L-2,L,r.leg+m.hindPaw*.38,-3-3*m.stride,6.5,dark,dark);
+  jointedPaw(ctx,R,hx+8,-L-2,L,-r.leg+m.forePaw*.35,3+2*m.stride,6.7,fur);
 }
 
 function arm(ctx, R, r, x, y, fur, len) {
   const L = len || 18;
   const bend = r.st === "attack" ? 6 : r.slot === 0 ? 4 : 1;
-  R.swingLimb(ctx, x, y, L, r.arm, bend, 6.4, fur, { handColor: "#ffb0c4" });
+  jointedPaw(ctx,R,x,y,L,r.arm,bend+(r.action?.paw||0)*.34,6.4,fur);
   if (r.st === "attack" && r.atk > 0.25 && r.atk < 0.75) {
     ctx.save();
     ctx.translate(x + 22, y - 6);
@@ -145,15 +237,18 @@ function arm(ctx, R, r, x, y, fur, len) {
 function drawBaby(ctx, R, pose, r, c) {
   tail(ctx, R, -6, -20, 16, -2.5, r.tail * 0.7, r.t, 0, c.dark);
   if (r.st !== "dead") {
-    R.swingLimb(ctx, -8, -8, 8, 0.2 + r.leg * 0.4, 0, 6, c.fur);
-    R.swingLimb(ctx, 9, -8, 8, -0.15 - r.leg * 0.4, 0, 6, c.fur);
+    jointedPaw(ctx,R,-8,-8,8,.2+r.leg*.4,-1.2,5.3,c.dark);
+    jointedPaw(ctx,R,9,-8,8,-.15-r.leg*.4,1.2,5.3,c.fur);
   }
   R.ellipse(ctx, 2, -38, 32, 30, c.fur);
   R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
   R.shine(ctx, -8, -50, 8, 4, 0.4);
+  jointedPaw(ctx,R,-21,-36,13,-.4+r.arm*.25,-2.5,5.6,c.dark);
+  jointedPaw(ctx,R,23,-35,13,.2+r.arm*.24,2.6,5.6,c.fur);
   const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
-  ear(ctx, -14, -58, 18, -0.35 + flop, c.fur, c.ear);
-  ear(ctx, 16, -58, 20, 0.28 - flop, c.fur, c.ear);
+  const earResponse = r.mechanics.ear;
+  ear(ctx, -14, -58, 18, -0.35 + flop + earResponse, c.fur, c.ear);
+  ear(ctx, 16, -58, 20, 0.28 - flop - earResponse, c.fur, c.ear);
   face(ctx, R, pose, r, 4, -40, 26, c);
   R.ellipse(ctx, 14, -24, 5.2, 5.2, c.accent, { shade: false, lw: 1.6 });
   ctx.beginPath();
@@ -166,6 +261,7 @@ function drawBaby(ctx, R, pose, r, c) {
 function drawCat(ctx, R, pose, r, c) {
   tail(ctx, R, -16, -28, 40, -2.15, r.tail, r.t, 0.4, c.fur);
   legs(ctx, R, r, 0, c.fur, c.dark, 20);
+  jointedPaw(ctx,R,-14,-40,19,-.25-r.arm*.3,-2.5,5.8,c.dark);
   R.ellipse(ctx, 2, -34, 24, 16, c.fur);
   R.ellipse(ctx, 8, -30, 11, 9, c.belly, { line: false });
   ctx.strokeStyle = c.dark;
@@ -181,8 +277,8 @@ function drawCat(ctx, R, pose, r, c) {
   ctx.save();
   ctx.translate(12, -62 + (r.st === "attack" ? -2 : 0));
   if (r.st === "run") ctx.rotate(r.run * 0.06);
-  ear(ctx, -14, -6, 24, -0.25, c.fur, c.ear);
-  ear(ctx, 12, -6, 26, 0.2, c.fur, c.ear);
+  ear(ctx, -14, -6, 24, -0.25+r.mechanics.ear, c.fur, c.ear);
+  ear(ctx, 12, -6, 26, 0.2-r.mechanics.ear, c.fur, c.ear);
   R.ellipse(ctx, 0, 8, 22, 20, c.fur);
   R.shine(ctx, -6, -2, 7, 3.5, 0.38);
   ctx.beginPath();
@@ -209,11 +305,14 @@ function drawCloud(ctx, R, pose, r, c) {
   tail(ctx, R, -20, -36, 28, -1.7, r.tail * 0.6, r.t, 1, "#fff");
   const puffs = [[-26, -30, 16], [-4, -26, 20], [20, -32, 15], [-10, -44, 13], [14, -46, 12], [4, -18, 14]];
   for (const p of puffs) R.ellipse(ctx, p[0], p[1], p[2], p[2] * 0.82, "#fff", { lw: 2.1 });
+  // Even the cloud has two attached paws, partly hidden by the cloud mass.
+  jointedPaw(ctx,R,-24,-28,13,-.35+r.arm*.24,-2,5.8,c.dark);
+  jointedPaw(ctx,R,25,-28,13,.35+r.arm*.24,2,5.8,c.fur);
   R.ellipse(ctx, 2, -34, 16, 11, c.fur, { line: false });
   ctx.save();
   ctx.translate(6, -64);
-  ear(ctx, -12, -2, 16, -0.2, "#fff", c.ear);
-  ear(ctx, 12, -2, 16, 0.18, "#fff", c.ear);
+  ear(ctx, -12, -2, 16, -0.2+r.mechanics.ear, "#fff", c.ear);
+  ear(ctx, 12, -2, 16, 0.18-r.mechanics.ear, "#fff", c.ear);
   R.ellipse(ctx, -18, 6, 9, 8, "#fff", { lw: 2 });
   R.ellipse(ctx, 18, 8, 8, 7, "#fff", { lw: 2 });
   R.ellipse(ctx, 0, 8, 20, 18, c.fur);
@@ -240,13 +339,14 @@ function drawMoon(ctx, R, pose, r, c) {
   tail(ctx, R, -8, -34, 36, -2.35, r.tail, r.t, 0, c.fur);
   tail(ctx, R, -4, -26, 30, -1.35, r.tail, r.t, 1.4, c.accent);
   legs(ctx, R, r, 2, c.fur, c.dark, 22);
+  jointedPaw(ctx,R,-10,-51,17,-.4-r.arm*.2,-3,5.3,c.dark);
   R.ellipse(ctx, 2, -40, 13, 24, c.fur);
   R.ellipse(ctx, 5, -34, 6, 12, c.belly, { line: false });
   arm(ctx, R, r, 10, -48, c.fur, 16);
   ctx.save();
   ctx.translate(4, -74);
-  ear(ctx, -10, 0, 32, -0.12, c.fur, c.ear);
-  ear(ctx, 12, 0, 34, 0.1, c.fur, c.ear);
+  ear(ctx, -10, 0, 32, -0.12+r.mechanics.ear, c.fur, c.ear);
+  ear(ctx, 12, 0, 34, 0.1-r.mechanics.ear, c.fur, c.ear);
   ctx.beginPath();
   ctx.arc(-2, -28, 9, 0.4, 5.4);
   ctx.strokeStyle = c.accent;
@@ -284,14 +384,16 @@ function feather(ctx, side, rot, len, color) {
 
 function drawGod(ctx, R, pose, r, c) {
   const flap = Math.sin(r.t * 0.18) * 0.22 + (r.slot === 2 ? 0.15 : 0);
+  // Shoulder/scapula sockets keep both feather fans rooted to the same torso.
+  R.ellipse(ctx,-5,-35,12,10,c.dark,{lw:2});
   feather(ctx, -1, -1.05 + flap, 48, "#fff");
   feather(ctx, -1, -0.45 + flap, 58, "#fff8e4");
   feather(ctx, -1, 0.12 + flap, 42, "#ffe7a8");
   feather(ctx, 1, -0.95 - flap, 44, "#fff4d4");
   feather(ctx, 1, -0.28 - flap, 54, "#fff");
-  const n = r.slot === 2 ? 7 : 3;
+  const n = r.slot === 2 ? 9 : 5;
   for (let i = 0; i < n; i++) {
-    const spread = r.slot === 2 ? -2.6 + i * 0.38 : -2.2 + i * 0.45;
+    const spread = r.slot === 2 ? -2.8 + i * .37 : -2.35 + i * .42;
     const col = i % 2 ? c.accent : c.fur;
     tail(ctx, R, -12, -28, 30 + (i % 3) * 6, spread, r.tail, r.t, i, col);
   }
@@ -311,13 +413,14 @@ function drawGod(ctx, R, pose, r, c) {
     ctx.restore();
   }
   legs(ctx, R, r, 2, c.fur, c.dark, 18);
+  jointedPaw(ctx,R,-12,-38,18,-.35-r.arm*.2,-2.5,5.8,c.dark);
   R.ellipse(ctx, 2, -32, 20, 16, c.fur);
   R.ellipse(ctx, 7, -28, 8, 8, c.accent);
   arm(ctx, R, r, 14, -36, c.fur, 17);
   ctx.save();
   ctx.translate(8, -62);
-  ear(ctx, -12, -4, 22, -0.2, c.fur, c.ear);
-  ear(ctx, 12, -4, 24, 0.16, c.fur, c.ear);
+  ear(ctx, -12, -4, 22, -0.2+r.mechanics.ear, c.fur, c.ear);
+  ear(ctx, 12, -4, 24, 0.16-r.mechanics.ear, c.fur, c.ear);
   R.ellipse(ctx, 0, 8, 22, 20, c.fur);
   R.shine(ctx, -6, 0, 7, 3.2, 0.42);
   face(ctx, R, pose, r, 1, 6, 18, c);
@@ -466,18 +569,32 @@ function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, Math.round(Number(safe.form) || 0)));
   const c = PAL[f];
   const r = solve(safe);
-  if(Number.isFinite(safe.michiDuetAge)){r.mood=safe.michiDuetAge<36?'happy':'angry';r.tail=2.1;r.arm=safe.michiDuetAge<36?-1.7:.4;}
+  if(Number.isFinite(safe.michiDuetAge)){
+    const beat=Math.max(0,Math.min(120,safe.michiDuetAge));
+    r.mood=beat<36?'happy':'angry';r.tail=2.1;
+    // The physical greeting becomes a nine-tail catching stance, without
+    // duplicating the authoritative meteor sequence in michi-duet.js.
+    r.arm=beat<18?-.7:beat<36?-1.7:beat<104?.8:.15;
+    r.mechanics={...r.mechanics,tilt:beat<36?-.12:beat<104?.1:0,
+      ear:beat<36?.21:-.17};
+  }
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
   moonSoul(ctx, safe, f, false);
-  ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
+  ctx.translate(0, r.bob + (safe.bounce || 0) * 2 + r.mechanics.lift);
+  if(r.st!=="hurt"&&r.st!=="dead")ctx.rotate(r.mechanics.tilt);
   if (r.st === "dead") {
     ctx.rotate(1.05);
     ctx.translate(8, -10);
   } else if (r.st === "hurt") ctx.rotate(-0.18);
   else if (r.st === "jump") ctx.scale(0.94, 1.08);
   else if (r.st === "fall") ctx.scale(1.05, 0.92);
-  else if (r.slot === 1) ctx.scale(1.08, 0.9);
+  else if (r.action) {
+    const a=r.action,compress=r.mechanics.squash;
+    ctx.scale(1+compress*.32+(a.slot===1?a.purr*.12:0),
+      1-compress*.30+(a.slot===2?a.release*.07:0));
+    if(a.slot===3)ctx.translate(a.greet*3,-a.greet*2);
+  }
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
   if (f === 0) drawBaby(ctx, R, safe, r, c);
   else if (f === 1) drawCat(ctx, R, safe, r, c);
