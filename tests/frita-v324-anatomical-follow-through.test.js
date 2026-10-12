@@ -9,7 +9,7 @@ class PathMock{moveTo(){}lineTo(){}bezierCurveTo(){}quadraticCurveTo(){}arc(){}e
 globalThis.Path2D ||= PathMock;
 const pose=(form,state="idle",extra={})=>({form,state,t:155,phase:1.1,speed:.9,
  land:0,turnPulse:0,brake:0,air:false,vy:0,sway:0,bounce:0,breath:.2,
- look:{x:1,y:0},hurt:0,atk:0,cast:0,castSlot:-1,
+ look:{x:1,y:0},hurt:0,blink:0,atk:0,cast:0,castSlot:-1,
  flourish:0,flourishN:0,evoT:0,...extra});
 function render(p){
  const props={globalAlpha:1,globalCompositeOperation:"source-over",fillStyle:"#fff",
