@@ -4,7 +4,7 @@
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
- dragon:{ally:"dino",borrowedL:"quake",name:"Dragón y Dino",line:"¡Meteoritos con patas!",color:"#ffb86b",kind:"meteor"},
+ dragon:{ally:"dino",borrowedL:"quake",name:"Dragón y Dino",line:"¡Tiembla el cielo!",color:"#ffb86b",kind:"quake"},
  dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",color:"#d9ee7a",kind:"geyser"},
  frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",color:"#ffd36a",kind:"oven"},
  pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",color:"#ff9d82",kind:"maw"},
@@ -31,7 +31,7 @@ export function familyDuetPose(s){
  const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
  const allyX=s.x-face*(146-75*arrival)+face*Math.sin(age*.09)*7;
- const allyY=s.y-24-(data.kind==="meteor"?74:data.kind==="rainbow"?34:12)-Math.sin(age*.075)*8;
+ const allyY=s.y-24-(data.kind==="quake"?72:data.kind==="rainbow"?34:12)-Math.sin(age*.075)*8;
  return {beat,phase,allyX,allyY,alpha:exit,kind:data.kind,
    radius:56+evo*8,focusX:s.x+face*(56+phase*65),focusY:s.y-26};
 }
@@ -50,7 +50,7 @@ export function familyDuetStrike(s,beat,e){
  const p=center(e),f=s.facing,dx=p.x-s.x,dy=p.y-s.y;
  const b=clamp(beat,0,2),evo=s.evo;
  switch(def.kind){
-  case "meteor":{const x=s.x+f*(52+b*54),y=s.y-26;return Math.hypot(p.x-x,p.y-y)<=65+evo*6;}
+  case "quake":{const x=s.x+f*(52+b*54);return Math.abs(p.x-x)<=68+evo*6&&Math.abs(p.y-(s.y-24))<=62;}
   case "geyser":{const x=s.x+f*(34+b*54);return Math.abs(p.x-x)<=31+evo*3&&p.y>s.y-163&&p.y<s.y+27;}
   case "oven":{const forward=dx*f;return forward>=-24&&forward<=210+evo*15&&Math.abs(dy+18)<54+b*19;}
   case "maw":{const x=s.x+f*(58+b*21);return Math.abs(p.x-x)<=65+evo*5&&Math.abs(dy+38)<=60;}
@@ -75,7 +75,7 @@ export function updateFamilyDuet(game,hit,heal){
   let applied=0;
   for(const e of game.enemies||[]){
    if(!e||e.hp<=0||e.dying||e.fell||!familyDuetStrike(s,beat,e))continue;
-   const knock=s.facing*(def.kind==="meteor"?6:4);
+   const knock=s.facing*(def.kind==="quake"?6:4);
    if(typeof hit==="function"&&hit(game,e,damage,{
     color:def.color,stun:def.kind==="rainbow"?48:32,kx:knock,ky:-5,hitstop:0,shake:1
    }))applied++;
@@ -134,11 +134,15 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
   const xx=x+s.facing*(40+j*54),yy=y-26;
   ctx.save();ctx.globalAlpha*=intensity;
   switch(def.kind){
-   case "meteor":{
-    const sky=yy-160*(windup?1-progress:0);
-    ring(ctx,xx,yy+25,45+s.evo*3,def.color,.75,.28);
-    ctx.fillStyle="#ff7f4b";ctx.beginPath();ctx.arc(xx,windup?sky:yy-6,11+s.evo*2,0,TAU);ctx.fill();
-    for(let k=0;k<3;k++)spark(ctx,xx+(k-1)*12,sky-16-k*6,4,"#ffe7b8");
+   case "quake":{
+    // Dino lends his L: a fossil stomp, not Dragón's own meteor move.
+    const shock=windup?12:Math.max(12,72*(1-progress*.4));
+    ring(ctx,xx,yy+22,shock,def.color,.82,.24);
+    ctx.strokeStyle="#f1da9e";ctx.lineWidth=3;ctx.beginPath();
+    ctx.moveTo(xx-shock,yy+20);ctx.lineTo(xx-shock*.48,yy+8);
+    ctx.lineTo(xx-shock*.16,yy+23);ctx.lineTo(xx+shock*.32,yy+4);
+    ctx.lineTo(xx+shock,yy+20);ctx.stroke();
+    for(let k=0;k<5;k++)spark(ctx,xx+(k-2)*14,yy+12-Math.max(0,1-progress)*k*3,3.8,"#fff3c8");
     break;}
    case "geyser":{
     const height=windup?8:145*(1-progress*.55);
