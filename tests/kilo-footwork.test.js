@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {kiloFootwork} from '../characters/art/lilo.js';
+test('Kilo petals follow run, landing, braking and turn without mutating the pose',()=>{const p=Object.freeze({state:'run',speed:1,land:.8,turnPulse:.7,brake:.6});assert.deepEqual(kiloFootwork(p),{landing:.8,turn:.7,brake:.6,running:1});});
+test('Kilo optional footwork disappears for reduced motion, airborne movement and combat',()=>{for(const p of [{state:'run',speed:1,reduceMotion:true},{state:'run',speed:1,air:true},{state:'hurt',land:1},{state:'cast',land:1},{state:'dead',land:1}])assert.equal(kiloFootwork(p),null);});
+test('Kilo footwork rejects unbounded numeric inputs and is quiet at rest',()=>{assert.equal(kiloFootwork({state:'idle',land:NaN}),null);assert.equal(kiloFootwork({state:'run',speed:Infinity}),null);assert.equal(kiloFootwork({state:'idle'}),null);assert.equal(kiloFootwork({state:'run',speed:10}).running,1);});

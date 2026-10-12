@@ -1,3 +1,7 @@
+## Kilo · segunda pasada de personalidad (ohana-331)
+
+Nueva prioridad del usuario: completar una segunda pasada de personalidad/movimiento para Kilo, Stitcho, Chispín y Michi, una entrega por personaje, antes de continuar Dragón V305–Cuerno V310. Conserva las aportaciones GPT.com #293–#300 ya publicadas con Michi. Kilo añade pétalos de carrera, aterrizajes musicales, curvas al girar y respuesta suave al frenar; efectos locales y deterministas, sin daño ni cambios de física, suprimidos con movimiento reducido.
+
 ## V304 · Michi: ¡Ese ovillo quema! (ohana-330)
 
 Cinco formas con crecimiento vectorial explícito, contraste revisado y cascabel meteoro. U de 120 ticks con Dragón: nueve colas orbitales atrapan tres meteoros con avisos de aterrizaje. Movimiento, cooldown y colisiones conservados; daño local tras preparación visible, cancelación por muerte/cambio de sala. J/K/L replican ovillo, ronroneo y wisps nativos mediante datos limitados sin daño ni curación remotos. CI incluye cinco formas, tacto y Michi anfitrión Chromium/Firefox.

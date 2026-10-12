@@ -77,8 +77,8 @@ test("V108: full app uses WebRTC with honest degraded Netlify fallback; keeps ev
  assert.match(coop,/this\.pendingMutations\.sort/);
  assert.match(coop,/ohana-coop-session/);
  assert.match(sw,/systems\/coop-v108-direct\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-330"/);
- assert.match(html,/ohana-330/);
+ assert.match(sw,/const VERSION = "ohana-331"/);
+ assert.match(html,/ohana-331/);
  assert.match(e2e,/coopTransport/);
 });
 
