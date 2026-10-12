@@ -369,12 +369,13 @@ try {
   const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+    if(!onlineCoop.direct?.active)return false;
     const g=onlineCoop._combatGame;const effects=capturePeerEffects(g,++onlineCoop.effectSequence,onlineCoop.combatEpoch);
     effects.stitchoDuet={x:300,y:900,age:45,evo:4,facing:1,bolts:[{x:330,y:850,life:10}]};
-    onlineCoop.lastEffectsSentAt=performance.now()+600;onlineCoop.direct.sendLatest('effects',effects);
+    onlineCoop.lastEffectsSentAt=performance.now()+600;return onlineCoop.direct.sendLatest('effects',effects);
   });
   let stormDelivered=false;
-  for(let i=0;i<30;i++){
+  for(let i=0;i<120;i++){
     await sendStorm();
     stormDelivered=await guestPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
