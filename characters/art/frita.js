@@ -554,6 +554,87 @@ if (st === "idle" && pose.flourish > 0) {
 return P;
 }
 
+
+/** Cinemática local de Frita: el crujido se ve en el suelo, nunca daña. */
+export function fritaFootwork(pose) {
+  const p = pose || {};
+  const state = p.state || "idle";
+  if (state === "dead" || state === "hurt" || p.move === "slide") return null;
+  const clamp01 = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
+  };
+  const landing = clamp01(p.land);
+  const turn = state === "run" ? clamp01(p.turnPulse) : 0;
+  const brake = state === "run" ? clamp01(p.brake) : 0;
+  const running = state === "run" ? clamp01(p.speed) : 0;
+  return landing > .02 || turn > .02 || brake > .02 || running > .3
+    ? { landing, turn, brake, running }
+    : null;
+}
+
+function drawFritaFootwork(ctx, pose, f, t) {
+  const motion = fritaFootwork(pose);
+  if (!motion) return;
+  const { landing, turn, brake, running } = motion;
+  const salt = f === 4 ? "#fff9cc" : "#fff5dd";
+  const ketchup = f >= 2 ? "#d8231c" : "#e83b2d";
+  ctx.save();
+  ctx.lineCap = "round";
+  if (running > .3) {
+    // Migas crujientes: una pequeña estela de carrerilla, sin sprites sueltos.
+    for (let i = 0; i < 4; i++) {
+      const k = frac(t * .07 * running + i * .25);
+      const x = -12 - k * 26, y = -1 - (i % 2) * 2 - k * 7;
+      ctx.globalAlpha = .28 * (1 - k) * running;
+      ctx.fillStyle = i % 3 === 0 ? ketchup : "#ffd470";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 1.3 + (1 - k) * .8, 1.1, .45, 0, TAU);
+      ctx.fill();
+    }
+  }
+  if (landing > .02) {
+    // Crujido al tocar suelo: anillo lateral y chispas, nunca pantalla completa.
+    ctx.globalAlpha = .52 * landing;
+    ctx.strokeStyle = f === 4 ? "#ffe27a" : "#e8a020";
+    ctx.lineWidth = 1.7;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 15 + (1 - landing) * 19, 3.5 + (1 - landing) * 2.2, 0, 0, TAU);
+    ctx.stroke();
+    for (let i = -2; i <= 2; i++) {
+      const side = i < 0 ? -1 : 1;
+      const rise = (1 - landing) * (8 + (i + 2) % 3 * 3);
+      const x = side * (12 + Math.abs(i) * 7 + rise);
+      const y = -2 - rise;
+      ctx.globalAlpha = .6 * landing;
+      ctx.fillStyle = i % 2 ? "#ffd470" : salt;
+      ctx.beginPath(); ctx.arc(x, y, 1.4 + landing * .6, 0, TAU); ctx.fill();
+    }
+  }
+  if (turn > .02) {
+    // Un giro brusco deja un trazo de kétchup detrás de los zapatos.
+    ctx.globalAlpha = .57 * turn;
+    ctx.strokeStyle = ketchup;
+    ctx.lineWidth = 2 + turn;
+    ctx.beginPath();
+    ctx.moveTo(-7, -4);
+    ctx.quadraticCurveTo(-19 - 9 * turn, -21 - 8 * turn, -38 - 10 * turn, -12);
+    ctx.stroke();
+    ctx.strokeStyle = salt; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-14, -6); ctx.lineTo(-24 - 6 * turn, -12 - 8 * turn); ctx.stroke();
+  }
+  if (brake > .02) {
+    // Sal de frenada: tres puntos distinguen a Frita de los demás héroes.
+    for (let i = 0; i < 3; i++) {
+      const x = -11 - i * 8 - brake * 9, y = -4 - i * 4 - brake * 4;
+      ctx.globalAlpha = .45 * brake * (1 - i * .18);
+      ctx.fillStyle = salt;
+      ctx.beginPath(); ctx.arc(x, y, 1.6 - i * .15, 0, TAU); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
 const f = pose.form, c = PAL[f], F = FORM[f], t = pose.t;
 const P = params(pose, f, F);
@@ -584,6 +665,9 @@ if (P.lying === "slide") {
 }
 const tip = sp[sp.length - 1];
 const faceQ = at(sp, F.fs);
+
+// El polvo de sal y el crujido quedan detrás de las piernas y la silueta.
+drawFritaFootwork(ctx, pose, f, t);
 
 if (f === 4) goldFlames(ctx, R, sp, w + 6, t, P.lying ? 0.45 : 1);
 if (P.fx && P.fx.kind === "oil") drawOil(ctx, R, sp, P.fx.k, t, false);
