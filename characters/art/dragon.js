@@ -214,14 +214,19 @@ export function dragonBodyActing(pose = {}) {
 }
 
 function drawBase(ctx, pose, R) {
-const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
+const f = pose.form, c = PAL[f], P = F[f], t = pose.t;
+// While U grants invulnerability, the rig may report "hurt". For Dragon's
+// *own* U cast only, keep the ceremonial pose; actual damage still wins when
+// there is no live U cast. No mutation of pose or the rig.
+const st = pose.state === "hurt" && pose.castSlot === 3 && Number(pose.cast) > 0
+  ? "cast" : pose.state;
 const r = P.r, bw = P.bw, bh = P.bh;
 const final = f === 4;
 const dark = R.darken(c.body, 0.2);
 const fl = pose.flourish > 0 ? pose.flourish : 0;
 const flN = (pose.flourishN || 0) % 4;
 const flE = fl > 0 ? Math.sin(fl * PI) : 0;
-const acting = dragonBodyActing(pose);
+const acting = dragonBodyActing(st === pose.state ? pose : {...pose,state:st});
 const flying = acting.flight || pose.move === "float";
 
 let bob = pose.breath * 1.1, lean = 0.04, headRot = Math.sin(t * 0.025) * 0.04, hdx = 0, hdy = 0;
@@ -287,7 +292,7 @@ if (st === "run") {
     gust = fw * (1 - rc);
     armF = 1.2; armB = 0.8; eyeMood = "angry"; jaw = 0.3 * fw;
     legF = 0.3 * fw; legB = -0.4 * fw;
-  } else {
+  } else if (slot === 2) {
     // L meteor: a visible crouch and wing fold before lifting both wings,
     // raising the snout to call the strike, then a tail-driven recoil.
     // Meteor targeting, travel and authoritative damage remain in abilities.
@@ -309,6 +314,23 @@ if (st === "run") {
     wOpen = Math.max(.25, Math.min(1, wOpen));
     eyeMood = gather > .3 || release > .3 ? "angry" : "normal";
     tailWave = -1.3 * gather + 2.1 * release;
+  } else if (slot === 3) {
+    // U · Solar greeting: bow toward Dino, unfurl both wings, then return
+    // to a flight-ready neutral. This is distinct from the meteor L posture.
+    const bow = ease(seg(k, 0, .24)) * (1 - ease(seg(k, .27, .48)));
+    const greeting = ease(seg(k, .27, .49)) * (1 - ease(seg(k, .76, 1)));
+    bob = 3.5 * bow - 1.8 * greeting;
+    lean = .25 * bow - .16 * greeting;
+    headRot = .32 * bow - .52 * greeting;
+    hdx = 3 * bow - 2 * greeting;
+    jaw = .15 * bow + .52 * greeting;
+    armF = .35 + 2.1 * greeting; armB = -.15 + 1.8 * greeting;
+    legF = -.35 * bow + .1 * greeting; legB = .24 * bow - .1 * greeting;
+    wRot = -1.12 * bow + .22 * greeting;
+    wRotFar = -1.05 * bow + .4 * greeting;
+    wOpen = Math.max(.25, .3 + .7 * greeting);
+    tailWave = -.72 * bow + .86 * greeting;
+    eyeMood = greeting > .2 ? "happy" : "normal";
   }
 } else if (st === "hurt") {
   lean = -0.28; headRot = -0.35; hdx = -2;
