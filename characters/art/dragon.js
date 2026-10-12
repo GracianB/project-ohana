@@ -710,8 +710,12 @@ if (h > 8) {
  * contraviento al girar y un rastro tenue de brasas al correr.
  * Estado estrictamente visual; no modifica el vuelo ni el aliento.
  */
+const DRAGON_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
+  ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
 export function dragonMomentum(pose) {
   const p = pose || {};
+  if (p.reduceMotion || DRAGON_MOTION_MEDIA?.matches) return null;
   const state = p.state || "idle";
   if (state === "dead" || state === "hurt" || p.move === "fly") return null;
   const unit = (value) => Number.isFinite(Number(value)) ? Math.max(0, Math.min(1, Number(value))) : 0;
