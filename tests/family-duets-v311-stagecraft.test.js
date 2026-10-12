@@ -4,7 +4,7 @@ import {ROSTER} from "../characters/roster.js";
 import {FAMILY_DUETS,FAMILY_DUET_BEATS,FAMILY_DUET_LENGTH,
  familyDuetChoreography,familyDuetPose,readFamilyDuet,drawFamilyDuet} from "../systems/family-duets.js";
 
-const HEROES=["dino","frita","pizza","yomi","cuerno"];
+const HEROES=["dragon","dino","frita","pizza","yomi","cuerno"];
 const STAGES=[
  {age:8,stage:"arrival",pose:"run"},
  {age:27,stage:"exchange",pose:"idle"},
@@ -29,7 +29,7 @@ function mockCanvas(){
   })
  };
 }
-test("V311: five authentic borrowed L labels, no Dragon V305 ownership",()=>{
+test("V305–V311: six authentic borrowed L labels and distinct actors",()=>{
  assert.deepEqual(Object.keys(FAMILY_DUETS).sort(),HEROES.slice().sort());
  for(const id of HEROES){
   const duet=FAMILY_DUETS[id],ally=ROSTER.find(r=>r.id===duet.ally);
@@ -110,7 +110,7 @@ for(const hero of HEROES){
  });
  test(hero+": malformed peer frames never draw borrowed L or invoke actor",()=>{
   const frame=view(hero,4,37),rejected=[
-   {...frame,hero:"dragon"}, {...frame,age:120},{...frame,evo:5},
+   {...frame,hero:"unknown"}, {...frame,age:120},{...frame,evo:5},
    {...frame,x:Infinity},{...frame,age:NaN},{...frame,facing:0},
    {...frame,x:-999999},null
   ];

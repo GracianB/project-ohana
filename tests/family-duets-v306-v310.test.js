@@ -5,20 +5,20 @@ import {FAMILY_DUETS,FAMILY_DUET_BEATS,FAMILY_DUET_LENGTH,startFamilyDuet,
 import {ROSTER} from "../characters/roster.js";
 import {capturePeerEffects,applyPeerEffects,advancePeerEffects} from "../systems/coop-peer-effects.js";
 
-const HEROES=["dino","frita","pizza","yomi","cuerno"];
+const HEROES=["dragon","dino","frita","pizza","yomi","cuerno"];
 function createGame(id,evo=4) {
  const def=ROSTER.find(p=>p.id===id);
  const p={...def,...def.forms[evo],id,evo,x:100,y:200,w:24,h:34,health:100,maxHealth:120,
   vx:3,vy:-2,facing:1,grounded:true,jumps:2,invuln:0,dead:false,cds:{},cdDur:{}};
- return {player:p,roomId:"hub",worldW:1600,worldH:900,cam:{x:0,y:0},enemies:[],
+ return {player:p,roomId:"hub",worldW:1600,worldH:900,cam:{x:0,y:0},enemies:[],platforms:[],
   projectiles:[],slashes:[],bolts:[],ghosts:[],t:0,reduceMotion:true,
   fx:{emit(){}},nums:{add(){}},score:0};
 }
 
-test("V306–V310: exactly five distinct canon L loans, leaving Dragón V305 to Codex",()=>{
+test("V305–V310: all six distinct canon L loans, including Dragón and Dino",()=>{
  assert.deepEqual(Object.keys(FAMILY_DUETS).sort(),HEROES.slice().sort());
- assert.deepEqual(HEROES.map(id=>FAMILY_DUETS[id].borrowedL),["fryer","oven","maw","rainbow","ohana"]);
- assert.deepEqual(HEROES.map(id=>FAMILY_DUETS[id].ally),["frita","pizza","yomi","cuerno","kilo"]);
+ assert.deepEqual(HEROES.map(id=>FAMILY_DUETS[id].borrowedL),["quake","fryer","oven","maw","rainbow","ohana"]);
+ assert.deepEqual(HEROES.map(id=>FAMILY_DUETS[id].ally),["dino","frita","pizza","yomi","cuerno","kilo"]);
  for(const id of HEROES){
   const def=FAMILY_DUETS[id],friend=ROSTER.find(r=>r.id===def.ally);
   assert.ok(friend);
@@ -80,7 +80,7 @@ for(const id of HEROES){
   assert.equal(readFamilyDuet({...view,x:Infinity}),null);
   assert.equal(readFamilyDuet({...view,age:120}),null);
   assert.equal(readFamilyDuet({...view,evo:5}),null);
-  assert.equal(readFamilyDuet({...view,hero:"dragon"}),null);
+  assert.equal(readFamilyDuet({...view,hero:"unknown"}),null);
   assert.equal(readFamilyDuet({...view,facing:0}),null);
  });
  test(id+": network peers see the ally without receiving authority to damage",()=>{
