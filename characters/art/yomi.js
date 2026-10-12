@@ -52,15 +52,15 @@ export function yomiCastActing(pose={}) {
 
 export function yomiRitualState(pose) {
   const p = pose || {};
+  // Cosmetic floating rituals stay OFF for reduced motion; only the
+  // directional body cast postures remain, as expected by shared QA.
+  if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return null;
   if ((p.state || "idle") !== "idle") return null;
   const k = Number(p.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
   const n = Number.isFinite(Number(p.flourishN)) ? Math.trunc(Number(p.flourishN)) : 0;
-  const reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
-  return Object.freeze({scene:((n % 4)+4)%4,
-    phase:reduced?(k<.33?.2:k<.67?.5:.8):k,
-    alpha:reduced?1:clamp(Math.min(k*7,(1-k)*7),0,1),
-    reduced});
+  return Object.freeze({scene:((n%4)+4)%4,phase:k,
+    alpha:clamp(Math.min(k*7,(1-k)*7),0,1)});
 }
 
 function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
