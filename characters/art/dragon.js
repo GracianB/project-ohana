@@ -188,6 +188,31 @@ R.ellipse(ctx, x, y, r, r * 0.9, "#ece6f0", { lw: 1.4, ink: "#8a7f96" });
 ctx.restore();
 }
 
+/**
+ * V316: body acting uses the rig's existing signals, never changes physics.
+ * No new timers, state, camera offsets, hitboxes or network behavior.
+ * Reduced motion keeps readable poses without adding time-based motion.
+ */
+export function dragonBodyActing(pose = {}) {
+  const state = pose.state || "idle";
+  const unit = value => typeof value === "number" && Number.isFinite(value) ? clamp(value, 0, 1) : 0;
+  const value = typeof pose.vy === "number" && Number.isFinite(pose.vy) ? clamp(pose.vy, -1, 1) : 0;
+  const grounded = state === "idle" || state === "run";
+  const flight = state === "glide" || (pose.move === "fly" && !["hurt", "dead", "cast", "attack"].includes(state));
+  const meteor = state === "cast" && pose.castSlot === 2;
+  const k = meteor ? unit(pose.cast) : 0;
+  return {
+    landing: grounded ? unit(pose.land) : 0,
+    turn: state === "run" ? unit(pose.turnPulse) : 0,
+    brake: state === "run" ? unit(pose.brake) : 0,
+    flight,
+    climb: flight ? -value : 0,
+    meteorGather: meteor ? ease(seg(k, 0, .28)) * (1 - ease(seg(k, .30, .48))) : 0,
+    meteorRelease: meteor ? ease(seg(k, .30, .48)) * (1 - ease(seg(k, .77, 1))) : 0,
+    reduced: !!pose.reduceMotion || !!DRAGON_MOTION_MEDIA?.matches,
+  };
+}
+
 function drawBase(ctx, pose, R) {
 const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
 const r = P.r, bw = P.bw, bh = P.bh;
@@ -196,7 +221,8 @@ const dark = R.darken(c.body, 0.2);
 const fl = pose.flourish > 0 ? pose.flourish : 0;
 const flN = (pose.flourishN || 0) % 4;
 const flE = fl > 0 ? Math.sin(fl * PI) : 0;
-const flying = st === "glide" || pose.move === "fly" || pose.move === "float";
+const acting = dragonBodyActing(pose);
+const flying = acting.flight || pose.move === "float";
 
 let bob = pose.breath * 1.1, lean = 0.04, headRot = Math.sin(t * 0.025) * 0.04, hdx = 0, hdy = 0;
 let legF = 0, legB = 0, lenF = 1, lenB = 1;
@@ -262,15 +288,27 @@ if (st === "run") {
     armF = 1.2; armB = 0.8; eyeMood = "angry"; jaw = 0.3 * fw;
     legF = 0.3 * fw; legB = -0.4 * fw;
   } else {
-    const up = ease(seg(k, 0, 0.35)), rc = seg(k, 0.85, 1);
-    const e = up * (1 - rc);
-    lean = -0.32 * e; headRot = -0.75 * e; hdx = -2 * e;
-    jaw = 0.85 * e; roar = e;
-    armF = lerp(0.35, 2.5, e); armB = lerp(-0.15, 2.1, e);
-    wRot = lerp(-0.1, 0.1, e) + Math.sin(t * 0.4) * 0.12 * e; wOpen = lerp(0.6, 1, e);
-    legF = 0.25 * e; legB = -0.2 * e;
-    eyeMood = e > 0.3 ? "angry" : "normal";
-    tailWave = 1.5 * e + Math.sin(t * 0.3) * 0.3;
+    // L meteor: a visible crouch and wing fold before lifting both wings,
+    // raising the snout to call the strike, then a tail-driven recoil.
+    // Meteor targeting, travel and authoritative damage remain in abilities.
+    const gather = acting.meteorGather, release = acting.meteorRelease;
+    const recover = ease(seg(k, .77, 1));
+    bob = 4.2 * gather - 2.8 * release;
+    lean = -.22 * gather + .16 * release;
+    headRot = -.24 * gather - .83 * release;
+    hdx = -3 * gather + 2.5 * release;
+    jaw = .18 * gather + .9 * release;
+    roar = release;
+    armF = .7 + 1.9 * release; armB = -.3 + 2.5 * release;
+    legF = -.34 * gather + .35 * release;
+    legB = .45 * gather - .3 * release;
+    lenF = 1 - .19 * gather; lenB = 1 - .19 * gather;
+    wRot = -.95 * gather + .32 * release;
+    wRotFar = -.8 * gather + .47 * release;
+    wOpen = .23 * gather + (1 - recover) * release + .6 * recover;
+    wOpen = Math.max(.25, Math.min(1, wOpen));
+    eyeMood = gather > .3 || release > .3 ? "angry" : "normal";
+    tailWave = -1.3 * gather + 2.1 * release;
   }
 } else if (st === "hurt") {
   lean = -0.28; headRot = -0.35; hdx = -2;
@@ -294,14 +332,56 @@ if (st === "run") {
   breathUp = 1; eyeMood = "happy";
   tailWave = 1.4 + Math.sin(t * 0.2) * 0.5;
 } else if (flying) {
-  const climb = clamp(-(Number(pose.vy) || 0), -1, 1);
-  lean = 0.34 - climb * .09; headRot = -0.1 - climb * .06;
-  legF = -0.55; legB = -0.85;
-  armF = 0.9; armB = 0.6;
-  if (st === "glide" && !final) { wRot = -0.7 + Math.sin(t * 0.05) * 0.03 - climb * .13; wRotFar = -0.35 - climb * .1; }
-  else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4 - climb * .12; }
+  const climb = acting.climb;
+  lean = .25 - climb * .17; headRot = -.12 - climb * .16;
+  bob = climb * -.8;
+  legF = -.45 - Math.max(0, -climb) * .36;
+  legB = -.8 + Math.max(0, climb) * .24;
+  armF = .9 - climb * .34; armB = .6 + climb * .22;
+  const beat = acting.reduced ? 0 : Math.sin(t * (final ? .28 : .18));
+  if (st === "glide" && !final) {
+    wRot = -.66 + beat * .035 - climb * .18;
+    wRotFar = -.36 - climb * .12;
+  } else {
+    wRot = -.38 + beat * .48 - climb * .2;
+    wRotFar = -.16 + beat * .35 + climb * .08;
+  }
   wOpen = 1; eyeMood = "happy";
-  tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
+  tailWave = -.3 - climb * .46 + (acting.reduced ? 0 : Math.sin(t * .07) * .18);
+}
+
+// Ground contact drives the *body*, not only the old dust and wind trails.
+if (acting.landing > .02) {
+  const k = acting.landing;
+  bob += (f === 0 ? 6.5 : 4.5) * k;
+  lean -= .16 * k; headRot -= .15 * k;
+  lenF = Math.max(.62, lenF - .27 * k);
+  lenB = Math.max(.62, lenB - .22 * k);
+  legF -= .24 * k; legB += .18 * k;
+  armF += .34 * k;
+  wRot = lerp(wRot, -1.05, .8 * k);
+  wRotFar = lerp(wRotFar ?? wRot + .3, -1.18, .8 * k);
+  wOpen = lerp(wOpen, .2, k);
+  tailWave -= .95 * k;
+}
+if (acting.turn > .02) {
+  const k = acting.turn;
+  lean -= .33 * k; headRot += .29 * k;
+  armF += .62 * k; armB -= .45 * k;
+  wRot += .48 * k; wRotFar = (wRotFar ?? wRot + .3) - .46 * k;
+  wOpen = Math.max(wOpen, .72);
+  tailWave -= 1.65 * k;
+}
+if (acting.brake > .02) {
+  const k = acting.brake;
+  bob += 2.8 * k; lean -= .24 * k; headRot += .13 * k;
+  legF -= .65 * k; legB += .52 * k;
+  lenF = Math.max(.65, lenF - .17 * k);
+  armF += .5 * k;
+  wRot = lerp(wRot, .12, k);
+  wRotFar = lerp(wRotFar ?? wRot + .3, -.34, k);
+  wOpen = Math.max(wOpen, .86 * k);
+  tailWave += 1.5 * k;
 }
 
 if (fl > 0) {
