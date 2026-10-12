@@ -1,3 +1,4 @@
+import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
 import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
@@ -177,6 +178,7 @@ if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
 if (index === 3) castSupreme(game, p, flow);
 else fn(game, p, evo);
+if(p.id==='dino')game.dinoAbilityFx=captureDinoNativeFx(p);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
 if (flow.label && index < 3) {
@@ -489,7 +491,7 @@ game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
 if(FAMILY_DUETS[p.id]){
- startFamilyDuet(game,power*pw(p)*uExpPower(p),(game.enemies||[]).filter(canHit),chosen);
+ startFamilyDuet(game,power*pw(p)*uExpPower(p),p.id==='dino'?[]:(game.enemies||[]).filter(canHit),chosen);
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
  p._duetProtectionUntil=(Number(game.t)||0)+Math.min(120,p.invuln);
@@ -500,6 +502,10 @@ const FIXED_DT_MS = 1000 / 60;
 const MAX_FX = 96;
 const MAX_ABILITY_PROJECTILES = 96;
 
+function captureDinoNativeFx(p){
+const dinoNative=FX.filter(f=>['dinoColossus','dinoFossil','dinoFossilMark','dinoFossilBlast','dinoSpit','dinoSplat','dinoWarning','quake'].includes(f.kind)||f.kind==='meteor'&&f.dino);
+return p.id==='dino'&&!p.dead?(readDinoEffects([...dinoNative.filter(f=>['dinoColossus','quake'].includes(f.kind)).slice(0,2),...dinoNative.filter(f=>!['dinoColossus','quake'].includes(f.kind)).slice(-14)])||[]):[];
+}
 function abilityNow(game) {
 const tick = Number(game?.t);
 return Number.isFinite(tick) ? tick * FIXED_DT_MS : 0;
@@ -739,6 +745,7 @@ if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
  rememberCuernoEnemyPositions(game.enemies);
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
+game.dinoAbilityFx=captureDinoNativeFx(p);
 game.michiAbilityFx=p.id==='cat'?(readMichiEffects(FX.filter(f=>['yarn','purr','wisp'].includes(f.kind)).slice(-12))||[]):[];
 game.chispinAbilityFx=p.id==='chispin'?(readChispinEffects(FX.filter(f=>['chain','trail','storm'].includes(f.kind)).slice(0,8))||[]):[];
 game.kiloAbilityFx=p.id==='kilo'?FX.filter(f=>['note','hula','ohana'].includes(f.kind)).slice(0,12).map(f=>({
@@ -3690,3 +3697,5 @@ export function drawKiloAbilityEcho(ctx,effects,cam,t,p){
 export function drawChispinAbilityEcho(ctx,effects,cam,t,p){for(const f of readChispinEffects(effects||[])||[]){ctx.save();DRW[f.kind](ctx,f,cam,t,{},p);ctx.restore();}}
 
 export function drawMichiAbilityEcho(ctx,effects,cam,t,p){for(const f of readMichiEffects(effects||[])||[]){ctx.save();DRW[f.kind](ctx,f,cam,t,{},p);ctx.restore();}}
+
+export function drawDinoAbilityEcho(ctx,effects,cam,t,p,reduceMotion=false){for(const f of readDinoEffects(effects||[])||[]){ctx.save();DRW[f.kind](ctx,f,cam,t,{reduceMotion},p);ctx.restore();}}

@@ -61,7 +61,7 @@ export function safeDirectPose(message,prevSeq=0){
   dash:finite(message.dash)?clamp(message.dash,0,30):0,
   w:finite(message.w)?clamp(message.w,1,1024):null,h:finite(message.h)?clamp(message.h,1,1024):null,
   cloud:message.cloud===true,thrust:finite(message.thrust)?clamp(message.thrust,0,60):0,
-  move:["roll","chaos","climb"].includes(message.move)?message.move:null,
+  move:["roll","chaos","climb","dino-roll"].includes(message.move)?message.move:null,
   thrustFacing:message.thrustFacing===-1?-1:1
  };
 }

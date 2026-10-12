@@ -59,7 +59,9 @@ return NEUTRAL;
 * }
 */
 export function isDuetProtected(p,t){
- if(!p||p.dead||(p.hurtFlash||0)>0||!Number.isFinite(t)||!Number.isFinite(p._duetProtectionUntil)||p._duetProtectionUntil<=t)return false;
+ if(!p||p.dead||(p.hurtFlash||0)>0||!Number.isFinite(t))return false;
+ if(p.id==='dino'&&Number.isFinite(p._specialArmorT)&&p._specialArmorT>0&&p._specialArmorT<=260&&p.invuln>0&&p.invuln<=2)return true;
+ if(!Number.isFinite(p._duetProtectionUntil)||p._duetProtectionUntil<=t)return false;
  return ['_kiloDuetT','_stitchoDuetT','_chispinDuetT','_michiDuetT','_familyDuetT'].some(k=>Number.isFinite(p[k])&&p[k]>0&&p[k]<=120);
 }
 export function computePose(p, t, opts = {}) {

@@ -431,6 +431,14 @@ try {
       guest:details[1].status==='fulfilled'?details[1].value:String(details[1].reason)}));
     throw error;
   }
+  if(hostCharacter==='dino'){
+    await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js'),{useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['bite','charge','quake'])g.player.cds[id]=0;for(const slot of [0,1,2])if(!useAbility(g,slot))throw Error('Dino native cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});
+    await Promise.all([
+      guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const fx=onlineCoop._combatGame.coopPeerEffects?.dinoFx||[];return ['dinoColossus','dinoSpit','quake'].every(kind=>fx.some(f=>f.kind===kind));},null,{timeout:3000}),
+      guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop.remote?.pose?.move==='dino-roll';},null,{timeout:3000})
+    ]);
+    assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.dinoFx.every(f=>f.dmg===undefined&&f.initialDamage===undefined&&f.target===undefined&&f.hit===undefined);}),true,'Dino effects must remain cosmetic');
+  }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});

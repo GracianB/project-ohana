@@ -39,6 +39,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: Dino complete review audit
+        run: node tests/browser/dino-complete-review.mjs
+
       - name: Ten hero U protection audit
         run: node tests/browser/all-hero-u-protection.mjs
 

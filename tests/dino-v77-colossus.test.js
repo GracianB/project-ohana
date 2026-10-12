@@ -44,10 +44,10 @@ test("Dino V77 has exactly five expressive story acts with deterministic boundar
  assert.equal(supremeOf("cuerno").id,"aurora");
 });
 
-test("Dino V77 U starts a bounded 260-frame titan, immediate hit and independent FX",()=>{
+test("Dino V77 U starts a bounded titan with a telegraphed local stomp and independent FX",()=>{
  const h=battle(),p=h.g.player,e=h.g.enemies[0];
  h.fns.castUltimate(h.g,p,[e],110,"#d3f59c");
- assert.ok(e.hp<2000,"Original instant titan hit must remain");
+ assert.equal(e.hp,2000,"No damage before the stomp warning");
  assert.ok(p._specialT>=260&&p._specialTitanT>=260&&p._specialArmorT>=260);
  assert.ok(p.invuln>=72);
  const fields=h.active.filter(f=>f.kind==="dinoColossus");
@@ -69,12 +69,12 @@ test("Dino V77 U starts a bounded 260-frame titan, immediate hit and independent
  assert.equal(h.g._dinoUltimate.remaining,0);
 });
 
-test("Dino V77 reduced-motion halves fossil count and keeps impacts finite",()=>{
+test("Dino V77 reduced-motion preserves fossil count and keeps impacts finite",()=>{
  const h=battle();h.g.reduceMotion=true;
  h.fns.castUltimate(h.g,h.g.player,h.g.enemies,110,"#d3f59c");
  const field=h.active.find(f=>f.kind==="dinoColossus");
  for(let i=0;i<260;i++)h.fns.update.dinoColossus(h.g,field,h.g.player);
- assert.equal(h.active.filter(f=>f.kind==="dinoFossil").length,3);
+ assert.equal(h.active.filter(f=>f.kind==="dinoFossil").length,8);
  assert.ok(h.g.shake<=18);
  const rock=h.active.find(f=>f.kind==="dinoFossil");
  const target=h.g.enemies[0],before=target.hp;

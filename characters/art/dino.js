@@ -1,3 +1,4 @@
+export const DINO_VISUAL_H=[64,78,90,108,124];
 // ============================================================================
 // DINO · Dinosaurio verde cabezón tipo T-rex (Versión Ultra Pulida)
 // 0 Dino Bebé | 1 Dino | 2 Dino Pico | 3 Dino Rex | 4 DINO FORMA FINAL

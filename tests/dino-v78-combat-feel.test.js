@@ -73,7 +73,7 @@ test("Dino V78 L and U target moving enemies without creating unlimited rocks",(
  const h=setupDino(),target={x:300,y:210,w:24,h:30,hp:2000,vx:7,vy:0};
  const g={enemies:[target],platforms:[{x:200,y:270,w:330,h:30}],
    cam:{x:0,y:0},worldW:950,reduceMotion:false};
- const p={x:100,y:215,w:32,h:48,evo:4,facing:1};
+ const p={id:"dino",x:100,y:215,w:32,h:48,evo:4,facing:1};
  const f={n:7,i:0,next:0,evo:4,face:1,origin:116,dmg:40,radius:65};
  for(let i=0;i<125 && f.i<7;i++)h.fx.update.dinoSkyfall(g,f,p);
  const marks=h.spawned.filter(e=>e.kind==="dinoWarning");

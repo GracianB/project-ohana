@@ -1,3 +1,7 @@
+## Dino · revisión completa: Coloso anunciado y combate compartido (ohana-340)
+
+Reutiliza anatomía, apoyo de garras e hipo de GPT V317. Cinco tamaños visuales explícitos, sin doble escalado ni cambios de colisión. U conserva 260 ticks de Coloso/armadura y fósiles, con primer impacto local tras 18 ticks de aviso, círculos visibles ajustados al daño y participación real de la L prestada. Potencia inicial repartida entre pisada y préstamo; sin golpe global al lanzar. Movimiento reducido conserva la misma cantidad/cadencia de fósiles y simplifica los adornos. J/L/U se replican con renderizadores nativos y datos limitados sin daño; K transmite dino-roll. Corregida la apariencia de daño de la armadura mínima de Dino. No modifica arte ni U de Frita, Pizza, Yomi o Cuerno, que el usuario continúa con GPT. Publicación pendiente de créditos Netlify.
+
 ## OHANA V322 · Postintegración de seis héroes y Leyenda (ohana-339)
 
 - Integradas #317, #314, #321, #320, #322, #323 y #324: seis personajes vectoriales y host/invitado para los diez. No afirmar Netlify publicado hasta tener cuota y validar dos dispositivos.

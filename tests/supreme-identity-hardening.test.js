@@ -119,14 +119,16 @@ test('PR151.15: Dragon supreme escala el impacto y la sacudida', () => {
   clearAbilityFx();
 });
 
-test('Dino V77: supreme conserva impacto, protege al Coloso y respeta vibración acotada', () => {
+test('Dino local: supreme announces its stomp, protects Colossus and preserves bounded shake', () => {
   const enemy = makeEnemy();
   const game = cast('dino', [enemy]);
-  assert.ok(enemy.hp < 1000);
+  assert.equal(enemy.hp,1000);
   assert.ok(game.shake >= 9 && game.shake <= 18);
-  assert.ok(Math.abs(enemy.vx) >= 14);
+
   assert.ok(game.player._specialTitanT >= 260);
   assert.ok(game.player._specialArmorT >= 260);
+  for(let i=0;i<18;i++){game.t++;updateAbilityFx(game);}
+  assert.ok(enemy.hp<1000);assert.ok(Math.abs(enemy.vx)>=14);
   clearAbilityFx();
 });
 
