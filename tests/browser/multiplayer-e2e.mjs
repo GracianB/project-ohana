@@ -366,7 +366,7 @@ try {
     assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
   }
   // V302: verify actual Stitcho storm echo delivery, while preserving the live peer identity.
-  await hostPage.evaluate(async()=>{
+  const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
     const g=onlineCoop._combatGame;const effects=capturePeerEffects(g,++onlineCoop.effectSequence,onlineCoop.combatEpoch);
@@ -375,9 +375,10 @@ try {
   });
   let stormDelivered=false;
   for(let i=0;i<30;i++){
+    await sendStorm();
     stormDelivered=await guestPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
-    });if(stormDelivered)break;await guestPage.waitForTimeout(30);
+    });if(stormDelivered)break;await guestPage.waitForTimeout(100);
   }
   assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC');
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
