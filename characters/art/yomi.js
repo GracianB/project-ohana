@@ -19,6 +19,115 @@ function sigil(ctx,x,y,k,col){
   line(ctx,col,1.2);ctx.beginPath();ctx.moveTo(-3,-4);ctx.lineTo(1,-5);ctx.lineTo(-1,1);ctx.lineTo(3,1);ctx.lineTo(0,6);ctx.stroke();
   ctx.restore();
 }
+
+/**
+ * Cuatro microescenas de Yomi. Deterministas, acotadas al personaje y sin
+ * temporizadores: no alteran la simulación ni producen ataques invisibles.
+ */
+export function yomiRitualState(pose) {
+  const p = pose || {};
+  if ((p.state || "idle") !== "idle") return null;
+  const k = Number(p.flourish);
+  if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
+  const n = Number.isFinite(Number(p.flourishN)) ? Math.trunc(Number(p.flourishN)) : 0;
+  return { scene: ((n % 4) + 4) % 4, phase: k,
+    alpha: clamp(Math.min(k * 7, (1 - k) * 7), 0, 1) };
+}
+
+function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
+  const state = p.state || "idle";
+  const flying = state === "jump" || state === "fall" || state === "glide";
+  const running = state === "run";
+  const land = clamp(Number(p.land) || 0, 0, 1);
+  if (!flying && !running && state !== "hurt" && land <= 0) return;
+  ctx.save();
+  if (running || flying) {
+    // El farol deja motas de papel y fuego: no son proyectiles.
+    for (let i = 0; i < 4; i++) {
+      const phase = ((t * (running ? .061 : .038) + i * .25) % 1 + 1) % 1;
+      const x = (running ? -24 - phase * 30 : (i - 1.5) * 11) - w * .2;
+      const y = running ? -12 - i * 10 - phase * 8 : -12 + phase * 27;
+      ctx.globalAlpha = .36 * (1 - phase);
+      ctx.fillStyle = i % 2 ? glow : "#fff5db";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 2 + (f >= 3 ? .6 : 0), 3 - phase, .25, 0, TAU);
+      ctx.fill();
+    }
+  }
+  if (land > .04 && state !== "dead") {
+    ctx.globalAlpha = land * .42;
+    line(ctx, glow, 1.5);
+    ctx.beginPath(); ctx.ellipse(0, 1, 12 + (1 - land) * 19, 3 + (1 - land) * 2, 0, 0, TAU);
+    ctx.stroke();
+  }
+  if (state === "hurt") {
+    ctx.globalAlpha = .35;
+    line(ctx, shadow, 2);
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * (w + 5), -h * .7);
+      ctx.lineTo(side * (w + 10), -h * .58);
+      ctx.lineTo(side * (w + 4), -h * .49);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
+  const state = yomiRitualState(p);
+  if (!state) return;
+  const { scene, phase: k, alpha } = state;
+  const sunlight = f === 4 ? "#fff3c3" : glow;
+  ctx.save();
+  ctx.globalAlpha = alpha * .78;
+  if (scene === 0) {
+    // Escuchar: el farol oye tres campanadas suaves.
+    line(ctx, sunlight, 1.6);
+    for (let i = 0; i < 3; i++) {
+      const spread = (k * 1.3 + i / 3) % 1;
+      ctx.globalAlpha = alpha * .48 * (1 - spread);
+      ctx.beginPath();
+      ctx.arc(0, faceY - 12, 13 + spread * 28, -Math.PI * .85, -Math.PI * .15);
+      ctx.stroke();
+    }
+  } else if (scene === 1) {
+    // Mensajes del umbral: tres sellos vuelan alrededor sin afectar a enemigos.
+    for (let i = 0; i < 3; i++) {
+      const a = t * .045 + i * TAU / 3;
+      const x = Math.cos(a) * (w + 21);
+      const y = faceY - 1 + Math.sin(a) * 19;
+      ctx.save(); ctx.translate(x, y); ctx.scale(.56, .56);
+      sigil(ctx, 0, 0, k, trim);
+      ctx.restore();
+    }
+  } else if (scene === 2) {
+    // Vals de llamitas: cinco luces en espiral, siempre dentro del personaje.
+    for (let i = 0; i < 5; i++) {
+      const a = t * .065 + i * TAU / 5;
+      const x = Math.cos(a) * (w + 7 + 4 * Math.sin(k * Math.PI));
+      const y = faceY + Math.sin(a) * 20;
+      ellipse(ctx, x, y, 2.1 + .8 * Math.sin(k * Math.PI), 3.1, i % 2 ? sunlight : "#fff8df");
+    }
+  } else {
+    // Constelación: Yomi enciende una media luna que conecta cinco estrellas.
+    const points = [];
+    for (let i = 0; i < 5; i++) {
+      const a = -.9 * Math.PI + i * Math.PI / 4;
+      points.push([Math.cos(a) * (w + 23), faceY - 13 + Math.sin(a) * 29]);
+    }
+    line(ctx, trim, 1.3);
+    ctx.beginPath(); ctx.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
+    ctx.stroke();
+    for (const [x, y] of points) {
+      ellipse(ctx, x, y, 2.6, 2.6, sunlight);
+      ellipse(ctx, x - .7, y - .8, .8, .8, "#ffffff");
+    }
+  }
+  ctx.restore();
+}
+
 function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
@@ -31,6 +140,7 @@ function draw(ctx,pose,R){
   const w=20+f*2.9,h=55+f*4.2;
   const shoulder=-h*.68,faceY=-h*.72;
   ctx.save();ctx.translate(0,hover);ctx.rotate(run?-.085*Math.sin(t*.32):flight?-.045:0);
+  yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
   ctx.quadraticCurveTo(-29-swing,-9,-22-swing,-1);
@@ -240,6 +350,7 @@ function draw(ctx,pose,R){
     const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
     ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
   }
+  drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
   ctx.restore();
 }
 export default {id:"yomi",draw};
