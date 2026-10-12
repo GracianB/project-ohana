@@ -307,21 +307,26 @@ function crack(ctx, pts, t, seed) {
   ctx.restore();
 }
 
-function foot(ctx, R, x, y, w, col, claw) {
-  R.ellipse(ctx, x + w * 0.25, y + w * 0.08, w * 0.85, w * 0.48, col);
+function foot(ctx, R, x, y, w, col, claw, brace = 0) {
+  // V317: Dino plants his toes rather than emitting a fake impact circle.
+  // Three claws spread laterally with his existing weight and quake contact.
+  const plant = clamp(brace, 0, 1);
+  R.ellipse(ctx, x + w * (0.25 - plant * .08), y + w * 0.08,
+    w * (0.85 + plant * .13), w * (0.48 + plant * .07), col);
   ctx.fillStyle = claw; ctx.strokeStyle = R.INK; ctx.lineWidth = 1.3;
   for (let i = 0; i < 3; i++) {
-    const cx = x + w * (0.55 + i * 0.25), cy = y + w * (0.42 - i * 0.07);
+    const cx = x + w * (0.55 + i * 0.25 + (i - 1) * plant * .14);
+    const cy = y + w * (0.42 - i * 0.07 + Math.abs(i - 1) * plant * .09);
     ctx.beginPath();
     ctx.ellipse(cx, cy, w * 0.13, w * 0.1, 0, 0, PI * 2);
     ctx.fill(); ctx.stroke();
   }
 }
 
-function leg(ctx, R, x, y, len, ang, w, col, claw, bend) {
+function leg(ctx, R, x, y, len, ang, w, col, claw, bend, brace = 0) {
   const e = R.swingLimb(ctx, x, y, len, ang, bend, w * 0.78, col, { hand: false });
   R.ellipse(ctx, x + Math.sin(ang) * len * 0.15, y + Math.cos(ang) * len * 0.1, w * 0.68, w * 0.82, col, { rot: ang * 0.6 });
-  foot(ctx, R, e[0], e[1], w * 0.85, col, claw);
+  foot(ctx, R, e[0], e[1], w * 0.85, col, claw, brace);
 }
 
 function tinyArm(ctx, R, x, y, len, ang, w, col, claw) {
@@ -365,6 +370,52 @@ function eggShell(ctx, R, cx, cy, rx, ry, top, t) {
 // DIBUJO PRINCIPAL DE DINO
 // ---------------------------------------------------------------------------
 
+/**
+ * V317 · Dino's feet have their own readable weight transfer.
+ * Front and rear toes brace at different beats of H/J/K/L/U, turning and
+ * landing. Pure Canvas articulation, never a second earthquake hitbox.
+ */
+export function dinoGroundBrace(pose = {}) {
+  const p = pose || {}, unit = (v) => typeof v === "number" && Number.isFinite(v) ? clamp(v, 0, 1) : 0;
+  const form = typeof p.form === "number" && Number.isFinite(p.form) ? Math.round(clamp(p.form, 0, 4)) : 0;
+  const weight = [0.63, 0.79, 0.89, 1, 1.08][form];
+  const state = p.state || "idle";
+  if (state === "dead" || state === "hurt" || state === "wall" ||
+      p.move === "dino-roll" || p.move === "pound") return Object.freeze({front:0,rear:0});
+  const landing = state === "idle" || state === "run" ? unit(p.land) : 0;
+  const brake = state === "run" ? unit(p.brake) : 0;
+  const turn = state === "run" ? unit(p.turnPulse) : 0;
+  let front = landing * .7 + brake * .76 + turn * .16;
+  let rear = landing * .62 + brake * .22 + turn * .64;
+  if (state === "attack") {
+    const a=unit(p.atk), windup=ease(seg(a,0,.32)), contact=ease(seg(a,.32,.52)),
+      recovery=1-ease(seg(a,.64,1));
+    front += (.24 * windup + .46 * contact) * recovery;
+    rear += (.34 * windup + .19 * contact) * recovery;
+  } else if (state === "cast") {
+    const k=unit(p.cast),charge=ease(seg(k,0,.35)),impact=ease(seg(k,.35,.58)),
+      release=1-ease(seg(k,.75,1));
+    if (p.castSlot === 0) { // J: spit recoil braces the rear foot
+      front += .14*charge*release;
+      rear += (.33*charge+.27*impact)*release;
+    } else if (p.castSlot === 1) { // K: compact charge, release the toes
+      front += .2*charge*release;
+      rear += .14*impact*release;
+    } else if (p.castSlot === 2) { // L: fossil quake travels through both feet
+      front += (.36*charge+.52*impact)*release;
+      rear += (.48*charge+.27*impact)*release;
+    } else if (p.castSlot === 3) { // U: Colossus holds a rooted stance, not L's snap
+      front += .50*charge*release;
+      rear += .50*charge*release;
+    }
+  } else if (state === "victory") {
+    front += .18;
+    rear += .1;
+  }
+  return Object.freeze({front:clamp(front*weight,0,1),rear:clamp(rear*weight,0,1)});
+}
+
+
 
 /**
  * Cuarto gesto de Dino: hipo volcánico. El cuerpo se sorprende y expulsa
@@ -374,7 +425,6 @@ const DINO_HICCUP_MOTION_MEDIA = typeof window !== "undefined" && typeof window.
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 
 export function dinoHiccupState(pose = {}) {
-  if (pose.reduceMotion || DINO_HICCUP_MOTION_MEDIA?.matches) return null;
   if (pose.state !== "idle" || pose.move === "pound" || pose.move === "charge") return null;
   const k = Number(pose.flourish);
   if (!Number.isFinite(k) || k <= 0 || k >= 1) return null;
@@ -383,12 +433,20 @@ export function dinoHiccupState(pose = {}) {
   const prepare = ease(seg(k, .05, .36));
   const sneeze = Math.sin(Math.PI * seg(k, .38, .66));
   const settle = ease(seg(k, .68, .94));
+  // Reduced motion keeps three *static bodily expressions* (inhale / hipo /
+  // relief), but removes drifting steam rings and temporal oscillation.
+  const reduced = pose.reduceMotion === true || !!DINO_HICCUP_MOTION_MEDIA?.matches;
+  if (reduced) return Object.freeze({
+    prepare: k < .38 ? 1 : 0,
+    sneeze: k >= .38 && k < .68 ? 1 : 0,
+    settle: k >= .68 ? 1 : 0, phase: k, reduced: true
+  });
   return Object.freeze({ prepare, sneeze: clamp(sneeze, 0, 1),
-    settle, phase: k });
+    settle, phase: k, reduced: false });
 }
 
 function drawDinoHiccup(ctx, R, f, x, y, h) {
-  if (!h || h.sneeze <= .03) return;
+  if (!h || h.reduced || h.sneeze <= .03) return;
   ctx.save();
   ctx.globalAlpha = .55 * h.sneeze;
   ctx.strokeStyle = f === 4 ? "#eeffe3" : "#dce8d0";
@@ -414,6 +472,7 @@ function draw(ctx, pose, R) {
   const { hh, bw, bh } = P;
   const final = f === 4, baby = f === 0;
   const motion = dinoSecondaryMotion(pose);
+  const brace = dinoGroundBrace({...pose,state:st});
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = (Number(pose.flourishN) || 0) % 4;
@@ -726,8 +785,8 @@ function draw(ctx, pose, R) {
   // DINO BEBÉ: CÁSCARA Y PIERNAS
   if (baby) {
     const lb = [-6, hipY], lf = [6, hipY];
-    leg(ctx, R, lb[0], lb[1], P.legL * lenB, legB, P.legW, dark, c.claw, bendB);
-    leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
+    leg(ctx, R, lb[0], lb[1], P.legL * lenB, legB, P.legW, dark, c.claw, bendB, brace.rear);
+    leg(ctx, R, lf[0], lf[1], P.legL * lenF, legF, P.legW, c.body, c.claw, bendF, brace.front);
     ctx.save(); upper();
     ctx.rotate(shellRot);
     const tw = Math.sin(t * (tailWag > 0 ? 0.8 : 0.08)) * (tailWag > 0 ? 0.6 : 0.15) * T.tailLag[f] + motion.tailTip*.52;
@@ -749,7 +808,7 @@ function draw(ctx, pose, R) {
     ctx.restore();
 
     // PIERNA TRASERA Y BRAZO TRASERO
-    leg(ctx, R, -5, hipY, P.legL * lenB, legB, P.legW, dark, c.claw, bendB);
+    leg(ctx, R, -5, hipY, P.legL * lenB, legB, P.legW, dark, c.claw, bendB, brace.rear);
     ctx.save(); upper();
     tinyArm(ctx, R, bw * 0.45, -bh * 0.66, P.armL, armB, 4.5 + f * 0.4, dark, c.claw);
     ctx.restore();
@@ -797,7 +856,7 @@ function draw(ctx, pose, R) {
     ctx.restore();
 
     // PIERNA DELANTERA: merge the upper leg into the waist.
-    leg(ctx, R, 6, hipY, P.legL * lenF, legF, P.legW, c.body, c.claw, bendF);
+    leg(ctx, R, 6, hipY, P.legL * lenF, legF, P.legW, c.body, c.claw, bendF, brace.front);
     softenDinoJoint(ctx,6,hipY,P.legW*.48,P.legW*.47,c.body,
       R.lighten(c.body,.27));
   }
