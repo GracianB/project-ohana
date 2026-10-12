@@ -1521,3 +1521,13 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Los impactos prestados con éxito ganan experiencia; los compañeros que curan (Kilo) obtienen EXP por sus tres intervenciones de apoyo.
 - QA: 1.350 estados Canvas (90 parejas × cinco evoluciones × tres rangos), seguridad de snapshots en multijugador, test E2E de retrato, partidas y progreso persistente, validación completa del pipeline.
 - Versión sin conexión: `ohana-335`.
+
+
+## OHANA V315 · Diez entradas de compañero y avisos fieles a la L
+
+- Cada uno de los diez compañeros tiene una entrada, gesto de ataque, dirección y despedida propios: vuelo de Dragón, carrera de Dino, salto eléctrico de Chispín, portal de Yomi, etc. Se combinan con el héroe titular, cinco evoluciones y tres rangos de afinidad sin congelar los controles.
+- Avisos en Canvas coincidentes con las zonas de daño reales de las diez habilidades L prestadas (círculo, rectángulo o arco), tres golpes y ventanas exactas. Se comparte el mismo descriptor de impacto para la advertencia y el combate.
+- Multijugador: sólo se envían datos de postura existentes y rango acotado, no se replican daños; accesibilidad con movimiento reducido determinista, sin oscilaciones de cámara y menos marcas.
+- Auditoría Node de 2.700 hitboxes (1+ millones de comprobaciones espaciales frente a las reglas anteriores), 2.700 ilustraciones de invitado, muerte/cambio de sala y cinco formas. Chromium: 1.350 escenas reales Canvas y diez galerías por compañero.
+- Se mantienen la U personalizada y la U artesanal histórica de Kilo, Stitcho, Chispín y Michi.
+- Versión offline: `ohana-336`.
