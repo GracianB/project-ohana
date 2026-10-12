@@ -119,6 +119,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
     this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
+    this._reliableDuetSource=null;this._reliableDuetLink=null;
   }
 
   readSession() {
@@ -156,6 +157,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
     this.seenActionEvents.clear();this.effectSequence=0;this.lastEffectsSentAt=0;
+    this._reliableDuetSource=null;this._reliableDuetLink=null;
     resetCombatMirror(game);game.coopPeerEffects=null;this._combatGame=game;
     game.coopRemoteEnemyBullets=[];
     this.enabled = true;
@@ -943,9 +945,17 @@ class OnlineCoop {
   sendPeerEffects(game,force=false){
     const now=performance.now();
     if(!this.direct?.active||this.remoteWorld!==game.roomId||(!force&&now-this.lastEffectsSentAt<200))return false;
+    const duet=game._familyDuet||game._michiDuet||game._chispinDuet||game._stitchoDuet||game._kiloDuet;
+    // A U cast can precede remote-room synchronization or reliable channel
+    // readiness. Keep attempting its first durable snapshot at normal 5 Hz
+    // until accepted; a freshly negotiated link must receive it again.
+    const pending=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
     const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
-    if(sendPeerEffectsWithReliableDuet(this.direct,frame,force)){this.lastEffectsSentAt=now;return true;}
-    return false;
+    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pending,()=>{
+      if(duet){this._reliableDuetSource=duet;this._reliableDuetLink=this.direct;}
+    });
+    if(sent)this.lastEffectsSentAt=now;
+    return sent;
   }
 
   enemyTarget(game,enemy){
