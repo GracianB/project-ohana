@@ -105,7 +105,7 @@ test("V102: integration has request timeout, recoverable identity and 305 cache"
   assert.match(coop,/NETWORK_TIMEOUT/);
   assert.match(coop,/identity:this\.identity,sequence,actionId:makeActionId/);
   assert.match(sw,/systems\/v102-living-memories\.js\?v=/);
-  assert.match(sw,/const VERSION = "ohana-338"/);
-  assert.match(html,/ohana-338/);
+  assert.match(sw,/const VERSION = "ohana-\d+"/);
+  assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\d+)"/)?.[1]),"HTML and service-worker cache must match");
   assert.match(js,/ohana-festival-v1002/);
 });
