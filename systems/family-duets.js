@@ -5,6 +5,7 @@
 import {ROSTER} from "../characters/roster.js";
 import {DEFAULT_U_PARTNERS,chooseUPartner,U_L_NAMES,bondXP,uExpRank,gainUBondHit,persistUBonds} from "./u-partners.js";
 import {duetChemistry,duetHitOptions,applyDuetChemistry,drawDuetChemistry} from "./u-duet-chemistry.js";
+import {borrowedLFootprint,borrowedLContains,guestPerformance,drawBorrowedLWarnings} from "./u-duet-direction-v315.js";
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
@@ -58,9 +59,10 @@ export function familyDuetPose(s,reduce=false){
  const exit=age>=106?Math.max(0,1-(age-106)/14):1;
  const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
- const allyX=s.x-face*(146-75*arrival)+(reduce?0:face*Math.sin(age*.09)*7);
- const allyY=s.y-24-(data.kind==="quake"?48:data.kind==="rainbow"?34:12)-(reduce?0:Math.sin(age*.075)*8);
- return {beat,phase,allyX,allyY,alpha:exit,kind:data.kind,
+ const guest=guestPerformance({...s,age,evo,facing:face},data.ally,reduce);
+ const allyX=guest?.x??s.x-face*(146-75*arrival);
+ const allyY=guest?.y??s.y-40;
+ return {beat,phase,allyX,allyY,guest,alpha:exit,kind:data.kind,
    radius:56+evo*8,focusX:s.x+face*(56+phase*65),focusY:s.y-26};
 }
 export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
@@ -78,24 +80,11 @@ export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
  game._assist={heroId:def.ally,heroName:def.ally,t:p.id==="yomi"?240:FAMILY_DUET_LENGTH};
  return true;
 }
+// The exact footprint is shared with the on-screen pre-hit telegraph.
 export function familyDuetStrike(s,beat,e){
  const def=familyDuetDefinition(s);
  if(!def||!e)return false;
- const p=center(e),f=s.facing,dx=p.x-s.x,dy=p.y-s.y;
- const b=clamp(beat,0,2),evo=s.evo;
- switch(def.kind){
-  case "chaos":return Math.hypot(dx,dy+26)<=140+evo*12;
-  case "storm":return Math.abs(dx-f*(45+b*43))<=52+evo*6&&Math.abs(dy+45)<=120;
-  case "tails":return Math.hypot(dx,dy+25)<=105+evo*13;
-  case "meteor":return Math.hypot(dx-f*(55+b*46),dy+22)<=60+evo*5;
-  case "quake":{const epicenter=s.x+f*(52+b*54);return Math.abs(p.x-epicenter)<=66+evo*7&&Math.abs(p.y-(s.y-24))<=65+evo*3;}
-  case "geyser":{const x=s.x+f*(34+b*54);return Math.abs(p.x-x)<=31+evo*3&&p.y>s.y-163&&p.y<s.y+27;}
-  case "oven":{const forward=dx*f;return forward>=-24&&forward<=210+evo*15&&Math.abs(dy+18)<54+b*19;}
-  case "maw":{const x=s.x+f*(58+b*21);return Math.abs(p.x-x)<=65+evo*5&&Math.abs(dy+38)<=60;}
-  case "rainbow":{const r=70+b*40+evo*8;return Math.hypot(dx,dy+24)<=r&&Math.hypot(dx,dy+24)>=Math.max(0,r-85);}
-  case "ohana":return Math.hypot(dx,dy+30)<=155+evo*15;
-  default:return false;
- }
+ return borrowedLContains(borrowedLFootprint(def.kind,s,beat),e);
 }
 export function updateFamilyDuet(game,hit,heal){
  const s=game?._familyDuet,p=game?.player;
@@ -283,17 +272,15 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];
  ctx.save();const baseAlpha=ctx.globalAlpha;ctx.globalAlpha*=pose.alpha;
  if(friend&&form&&typeof drawActor==="function"){
-  const arrival=Math.min(1,s.age/18);
+  const actor=pose.guest;
   drawActor(ctx,{...friend,...form,id:def.ally,evo:s.evo,
    x:pose.allyX-form.w/2,y:pose.allyY-form.h,
-   // The friend runs toward the hero, turns to lend L, then waves goodbye.
-   facing:pose.beat==="arrival"?-s.facing:s.facing,
-   vx:pose.beat==="arrival"?s.facing*4:pose.beat==="farewell"?-s.facing*1.7:0,
-   vy:pose.beat==="arrival"?-2:pose.beat==="borrowed-L"&&s.age%24<8?-1:0,
-   grounded:pose.beat!=="arrival",
-   _poseOverride:pose.beat==="arrival"?"run":pose.beat==="borrowed-L"?"attack":pose.beat==="farewell"?"victory":"idle",
-   melee:pose.beat==="borrowed-L"?6:0,
-   visualScale:.62+arrival*.11+s.evo*.018,_duetActor:true},cam,t);
+   // Ten genuinely different entrances and L gestures, not one generic hop.
+   facing:actor?.facing??s.facing,
+   vx:actor?.vx??0,vy:actor?.vy??0,grounded:actor?.grounded??true,
+   _poseOverride:actor?.pose??"idle",
+   melee:actor?.impact?6:0,
+   visualScale:actor?.visualScale??.72,_duetActor:true},cam,t);
  }
  if(s.age>=18&&s.age<106){
   // Hand-off: an illuminated link connects the player's presence to their friend.
@@ -408,6 +395,7 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
   for(let k=0;k<3;k++)spark(ctx,pose.allyX-cam.x+(k-1)*16,pose.allyY-cam.y-25-k*11,4+k,def.color);
  }
  drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce);
+ drawBorrowedLWarnings(ctx,def.kind,s,cam,t,reduce);
  drawDuetChemistry(ctx,s,cam,t,reduce);
  ctx.restore();return true;
 }
