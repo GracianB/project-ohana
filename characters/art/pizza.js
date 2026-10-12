@@ -747,6 +747,87 @@ if (e.kind === "slap" && hand) {
 }
 }
 
+
+/**
+ * El impulso de Pizza se comunica en masa de queso, no en partículas genéricas.
+ * Solo devuelve datos visuales: jamás cambia velocidades, rebotes ni colisiones.
+ */
+export function pizzaMomentum(pose) {
+  const p = pose || {};
+  const state = p.state || "idle";
+  if (state === "dead" || state === "hurt" || p.move === "bounce") return null;
+  const norm = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? clamp(n, 0, 1) : 0;
+  };
+  const land = norm(p.land);
+  const run = state === "run" ? norm(p.speed) : 0;
+  const turn = state === "run" ? norm(p.turnPulse) : 0;
+  const brake = state === "run" ? norm(p.brake) : 0;
+  return (land > .03 || run > .35 || turn > .03 || brake > .03)
+    ? { land, run, turn, brake } : null;
+}
+
+function drawPizzaMomentum(ctx, pose, form, F, t, c) {
+  const m = pizzaMomentum(pose);
+  if (!m) return;
+  const cheese = form === 4 ? "#fff5b8" : c.cheese;
+  ctx.save();
+  ctx.lineCap = "round";
+  if (m.run > .35) {
+    // Una carrera deja trocitos de ingrediente y estira un hilo de queso.
+    for (let i = 0; i < 3; i++) {
+      const life = frac(t * .065 * m.run + i / 3);
+      const x = -F.W * .25 - 17 - life * 24;
+      const y = -8 - i * 5 - life * 9;
+      ctx.globalAlpha = .36 * (1 - life) * m.run;
+      ctx.fillStyle = i === 1 ? "#4c9d56" : "#d33c2b";
+      ctx.beginPath();
+      ctx.ellipse(x, y, 2.2 * (1 - life * .4), 1.8, .4, 0, TAU);
+      ctx.fill();
+    }
+  }
+  if (m.land > .03) {
+    ctx.globalAlpha = .45 * m.land;
+    ctx.strokeStyle = cheese;
+    ctx.lineWidth = 2.3;
+    ctx.beginPath();
+    ctx.ellipse(0, 1.5, 16 + (1 - m.land) * 24, 3 + (1 - m.land) * 2, 0, 0, TAU);
+    ctx.stroke();
+    // Dos tiras de mozzarella vuelven a la corteza tras aterrizar.
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(side * 12, -2);
+      ctx.quadraticCurveTo(side * (18 + 6 * (1 - m.land)), 8, side * (19 + 12 * (1 - m.land)), 3);
+      ctx.stroke();
+    }
+  }
+  if (m.turn > .03) {
+    // El queso llega tarde a la curva: una estela elástica corta y legible.
+    ctx.globalAlpha = .58 * m.turn;
+    ctx.lineWidth = 3.5;
+    ctx.strokeStyle = cheese;
+    ctx.beginPath(); ctx.moveTo(-F.W * .29, -30);
+    ctx.bezierCurveTo(-F.W * .48, -25, -F.W * .66 - 11 * m.turn, -4, -F.W * .6 - 20 * m.turn, -10);
+    ctx.stroke();
+    ctx.lineWidth = 1.2; ctx.strokeStyle = "#ffffff";
+    ctx.beginPath(); ctx.moveTo(-F.W * .35, -28); ctx.lineTo(-F.W * .5, -18); ctx.stroke();
+  }
+  if (m.brake > .03) {
+    // Frenada estilo acordeón con pequeños pliegues de queso fundido.
+    ctx.globalAlpha = .48 * m.brake;
+    ctx.strokeStyle = cheese;
+    ctx.lineWidth = 1.7;
+    for (let i = 0; i < 3; i++) {
+      const x = -F.W * .2 - 10 - i * 8;
+      ctx.beginPath(); ctx.moveTo(x, -2);
+      ctx.quadraticCurveTo(x - 4 * m.brake, -10 - 3 * m.brake, x - 7 * m.brake, -2 - i * 2);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
 function draw(ctx, pose, R) {
 const f = clamp(pose.form | 0, 0, 4);
 const c = PAL[f];
@@ -765,6 +846,8 @@ if (P.dead) {
 ctx.translate(P.bx, P.lift);
 ctx.rotate(P.roll);
 if (P.sx !== 1 || P.sy !== 1) ctx.scale(P.sx, P.sy);
+// La inercia se dibuja detrás de la masa, sin tocar su física.
+drawPizzaMomentum(ctx, pose, f, F, t, c);
 
 if (f === 4 && !P.dead) {
   ctx.save();
