@@ -103,6 +103,77 @@ function spark(ctx,x,y,r,color){
  ctx.lineTo(x-r*.4,y+r*.4);ctx.lineTo(x-r,y);ctx.lineTo(x-r*.4,y-r*.4);
  ctx.closePath();ctx.fill();
 }
+// V311: every friend has a distinct movement signature. These cues are
+// decorative only, scale with the five evolutions and never mutate a hitbox.
+export function familyDuetChoreography(value,reduce=false){
+ const s=readFamilyDuet(value);if(!s)return null;
+ const pose=familyDuetPose(s,reduce);
+ const beat=FAMILY_DUET_BEATS.findIndex(b=>s.age>=b-17&&s.age<=b+18);
+ const delta=beat<0?null:s.age-FAMILY_DUET_BEATS[beat];
+ return Object.freeze({
+  hero:s.hero,ally:FAMILY_DUETS[s.hero].ally,borrowedL:FAMILY_DUETS[s.hero].borrowedL,
+  stage:pose.beat,form:s.evo,allyX:pose.allyX,allyY:pose.allyY,opacity:pose.alpha,
+  keyframe:beat,telegraph:delta!==null&&delta<0,
+  impact:delta===0,progress:delta===null?0:delta<0?(delta+17)/17:Math.min(1,delta/18),
+  accentCount:reduce?2:2+s.evo
+ });
+}
+function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
+ const def=FAMILY_DUETS[s.hero],evo=s.evo,x=s.x-cam.x,y=s.y-cam.y;
+ const ax=pose.allyX-cam.x,ay=pose.allyY-cam.y;
+ const energy=Math.min(1,s.age/12)*pose.alpha;
+ ctx.save();ctx.globalAlpha*=energy;
+ const count=reduce?2:2+evo;
+ switch(def.kind){
+  case "geyser": // Frita lands running, a little spray of crispy salt
+   for(let i=0;i<count;i++){
+    const d=14+i*9,yy=reduce?0:Math.sin(s.age*.18+i)*4;
+    spark(ctx,ax-s.facing*d,ay+8-i*4+yy,2.2+i*.3,i%2?"#fff5cb":"#ffb44a");
+   }break;
+  case "oven": // Pizza follows a trail of melting cheese with bright pepperoni
+   ctx.strokeStyle="#ffdd8e";ctx.lineWidth=2.6;ctx.beginPath();
+   ctx.moveTo(ax-s.facing*35,ay+13);
+   ctx.quadraticCurveTo(ax-s.facing*53,ay-18,ax-s.facing*71,ay+7);
+   ctx.stroke();
+   for(let i=0;i<count;i++){ctx.fillStyle=i%2?"#df6950":"#ffdf8c";ctx.beginPath();
+    ctx.arc(ax-s.facing*(20+i*12),ay-5+(reduce?0:Math.cos(s.age*.13+i)*3),3.6,0,TAU);ctx.fill();}
+   break;
+  case "maw": // Yomi arrives through folds of shadow, with floating ofuda
+   for(let i=0;i<count;i++){
+    ctx.save();ctx.translate(ax-s.facing*(15+i*12),ay-7-i*6);
+    ctx.rotate((reduce?0:Math.sin(s.age*.07+i)*.12)*s.facing);
+    ctx.fillStyle="#f5dbc3";ctx.fillRect(-3.8,-9,7.6,15);
+    ctx.strokeStyle="#be6570";ctx.lineWidth=1.2;ctx.beginPath();
+    ctx.moveTo(-2,-5);ctx.lineTo(2,-2);ctx.lineTo(-2,1);ctx.stroke();ctx.restore();
+   }break;
+  case "rainbow": // Cuerno sweeps seven gentle ribbon strokes, never flashing
+   for(let i=0;i<7;i++){
+    const hues=["#ffaabb","#ffe8a2","#beffa7","#9ce8fa","#c3b6ff","#f6b9ee","#fff6bd"];
+    ctx.strokeStyle=hues[i];ctx.lineWidth=2;ctx.beginPath();
+    const off=10+i*4;
+    ctx.moveTo(ax-s.facing*off,ay+i*2-20);
+    ctx.quadraticCurveTo(ax-s.facing*(35+i*3),ay-50,ax-s.facing*(65+i*2),ay-20+i*4);
+    ctx.stroke();
+   }break;
+  case "ohana": // Kilo appears with a small musical constellation
+   for(let i=0;i<count;i++){
+    const phase=i*TAU/count+(reduce?0:t*.025);
+    const rx=25+evo*4,ry=18+evo*2;
+    const xx=ax+Math.cos(phase)*rx,yy=ay-15+Math.sin(phase)*ry;
+    spark(ctx,xx,yy,2.5+i*.5,i%2?"#ff9bbf":"#fff9d2");
+    if(i<2){ctx.lineWidth=1.7;ctx.strokeStyle="#fff0aa";ctx.beginPath();
+      ctx.moveTo(xx+2,yy);ctx.lineTo(xx+2,yy-11);ctx.lineTo(xx+9,yy-13);ctx.stroke();}
+   }break;
+ }
+ // All five heroes participate in a clearly bounded L handoff.
+ if(s.age>=28&&s.age<105){
+   const p=(s.age-28)/77;
+   const targetX=x+s.facing*(36+p*56);
+   ctx.globalAlpha*=reduce?.4:.75;
+   ring(ctx,targetX,y-25,13+evo*3,def.color,.8,.6);
+ }
+ ctx.restore();
+}
 export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readFamilyDuet(value);if(!s)return false;
  const def=FAMILY_DUETS[s.hero],pose=familyDuetPose(s,reduce);
@@ -182,5 +253,6 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  if(pose.beat==="farewell"){
   for(let k=0;k<3;k++)spark(ctx,pose.allyX-cam.x+(k-1)*16,pose.allyY-cam.y-25-k*11,4+k,def.color);
  }
+ drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce);
  ctx.restore();return true;
 }
