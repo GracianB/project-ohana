@@ -1,4 +1,5 @@
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
+import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
@@ -171,6 +172,7 @@ game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
 if (S.pull && id !== "cheese") S.pull = null;
 const flow = registerCombatAction(game, key, id);
 const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
+gainUExp(p,index);
 
 if (index === 3) castSupreme(game, p, flow);
 else fn(game, p, evo);
@@ -315,28 +317,45 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 }
 
 function castSupreme(game, p, flow = currentFlow(game, p)) {
+const chosen=chooseUPartner(p.id,p.uPartner);
+const personalPower=Math.max(1,Number(flow?.multiplier)||1)*pw(p)*uExpPower(p);
+// Original four cinematic duets remain untouched when their canonical
+// companion is selected. A different choice runs the same playable L-loan
+// choreography as the six other heroes, without freezing player controls.
+if(["cat","chispin","stitcho","kilo"].includes(p.id)&&chosen!==DEFAULT_U_PARTNERS[p.id]){
+ game._supremeFlow=flow;
+ game.ult={t:0,name:SUPREME[p.id].name,color:SUPREME[p.id].color,
+   identity:SUPREME_IDENTITY[p.id].kind};
+ game._specialName=specialOf(p.id).name;
+ game._assist={heroId:chosen,heroName:chosen,t:120};
+ startFamilyDuet(game,personalPower,[],chosen);
+ p.invuln=Math.max(p.invuln||0,60);
+ p._duetProtectionUntil=(Number(game.t)||0)+60;
+ game.nums?.add(cx(p),p.y-36,"U EXP · "+chosen.toUpperCase(),"#fff4c8",true);
+ return;
+}
 if(p.id==='cat'){
  game._supremeFlow=flow;game._assist={heroId:'dragon',heroName:'Dragón',t:120};
  game.ult={t:0,name:SUPREME.cat.name,color:'#ffb6e4',identity:SUPREME_IDENTITY.cat.kind};
- startMichiDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ startMichiDuet(game,personalPower);
  p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
 }
 if(p.id==='chispin'){
  game._supremeFlow=flow;game._assist={heroId:'cat',heroName:'Michi',t:120};
  game.ult={t:0,name:SUPREME.chispin.name,color:'#fff29a',identity:SUPREME_IDENTITY.chispin.kind};
- startChispinDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ startChispinDuet(game,personalPower);
  p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
 }
 if(p.id==='stitcho'){
  game._supremeFlow=flow;game._assist={heroId:'chispin',heroName:'Chispín',t:120};
  game.ult={t:0,name:SUPREME.stitcho.name,color:'#67ddff',identity:SUPREME_IDENTITY.stitcho.kind};
- startStitchoDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ startStitchoDuet(game,personalPower);
  p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
 }
 if(p.id==='kilo'){
  game._supremeFlow=flow;game._assist={heroId:'stitcho',heroName:'Stitcho',t:120};
  game.ult={t:0,name:SUPREME.kilo.name,color:'#ffd36a',identity:SUPREME_IDENTITY.kilo.kind};
- startKiloDuet(game,Math.max(1,Number(flow?.multiplier)||1)*pw(p));
+ startKiloDuet(game,personalPower);
  healPlayer(p,p.maxHealth*(.12+(Number(p.evo)||0)*.05));
  p.invuln=Math.max(p.invuln||0,90);p._duetProtectionUntil=(Number(game.t)||0)+90;
  game.nums?.add(cx(p),p.y-36,'OHANA · ¡A COMPÁS!','#ffd36a',true);
@@ -469,7 +488,7 @@ game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
 if(FAMILY_DUETS[p.id]){
- startFamilyDuet(game,power*pw(p),(game.enemies||[]).filter(canHit));
+ startFamilyDuet(game,power*pw(p)*uExpPower(p),(game.enemies||[]).filter(canHit),chosen);
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
  p._duetProtectionUntil=(Number(game.t)||0)+60;
