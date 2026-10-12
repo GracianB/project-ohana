@@ -1492,3 +1492,13 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Integradas en el jugador local y en el dibujo del compañero remoto. Accesibilidad: se congela la oscilación temporal y se limitan ornamentos cuando hay movimiento reducido.
 - Verificación de 300 escenas vectoriales (10 héroes × 5 formas × 6 acciones), suite Node de inmovilidad, regresión visual y auditoría multijugador.
 - Versión offline: `ohana-333`.
+
+
+## OHANA V313 · Elección libre de pareja y U EXP
+
+- Diez personajes pueden elegir cualquiera de los otros nueve compañeros: 90 combinaciones verificadas, cada una usando la L real de la pareja seleccionada.
+- Las cuatro U originales conservan su coreografía para la pareja histórica. Al elegir otra, usan el mismo dúo jugable con prestada L, tres golpes y arte específico que las otras seis.
+- Experiencia de afinidad U EXP: tres niveles, progresión con J/K/L/U, mejora de potencia del ataque prestado, guardado en save v2 sin perder partidas anteriores.
+- Selector accesible en el menú para cada héroe, conserva su preferencia en el mismo dispositivo, con información del ataque L elegido y HUD durante la partida.
+- Validación: 90 parejas × cinco evoluciones = 450 estados multijugador, autoridad separada, daño a objetivos delimitados y ningún impacto doble; pruebas Chromium y Firefox completas.
+- Caché: `ohana-334`.
