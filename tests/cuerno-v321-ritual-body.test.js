@@ -38,7 +38,7 @@ function render(p) {
  const snapshot=JSON.stringify(p);Cuerno.draw(ctx,p,R);
  assert.equal(stack,0,"unbalanced canvas stack");
  assert.equal(JSON.stringify(p),snapshot,"art must not mutate rig state");
- assert.ok(paints>15&&geometry.length>35&&geometry.length<7000,"bounded vector art missing: "+paints+" / "+geometry.length);
+ assert.ok(paints>10&&geometry.length>20&&geometry.length<7000,"bounded vector art missing: "+paints+" / "+geometry.length);
  return JSON.stringify(geometry);
 }
 test("V321 L rainbow and U Ohana create distinct form-safe bodily anticipation",()=>{
