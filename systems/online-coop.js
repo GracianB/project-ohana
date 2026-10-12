@@ -1187,7 +1187,7 @@ class OnlineCoop {
     ctx.save();
     if (this.remote.invuln > 0) ctx.globalAlpha = 0.72;
     if (this.remote.signalWeak) ctx.globalAlpha *= Math.max(.44, Math.min(1, this.remote.signalOpacity || 1));
-    drawCharacter(ctx, player, game.cam, t);
+    drawCharacter(ctx, player, game.cam, t, {reduceMotion:game.reduceMotion});
     drawChispinCloud(ctx,player,game.cam,t);
     ctx.globalAlpha = 1;
     const px = player.x + player.w / 2 - game.cam.x;

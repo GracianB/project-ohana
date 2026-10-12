@@ -2668,11 +2668,11 @@ if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
 ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
-drawCharacter(ctx, game.player, game.cam, t);
+drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
 } else if (game.player.dead) {
 ctx.globalAlpha = 0.45;
-drawCharacter(ctx, game.player, game.cam, t);
+drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
 } else if (game.player.invuln % 4 !== 1) {
 const pv = typeof portals.playerVisual === "function" ? portals.playerVisual() : null;
@@ -2684,10 +2684,10 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   ctx.scale(pv.scale, pv.scale);
   ctx.translate(-px, -py);
   ctx.globalAlpha = Math.max(0, pv.alpha);
-  drawCharacter(ctx, game.player, game.cam, t);
+  drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
   ctx.restore();
 } else {
-  drawCharacter(ctx, game.player, game.cam, t);
+  drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 }
 }
 ctx.restore();
