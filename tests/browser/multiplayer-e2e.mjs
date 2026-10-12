@@ -322,6 +322,15 @@ try {
     if(reconciled)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(reconciled,'enemy removal and actual native peer projectile were not delivered');
+  // Isolate the guest-impact target before any persistent U fields are launched.
+  {
+    const id=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {makeFoe}=await import('/engine/foes.js');const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');const g=onlineCoop._combatGame,e=makeFoe(1700,300,'phosquito',g.roomId,992,{rng:()=>.5});e.spawnIndex=992;e.hp=e.max=500;e.stun=300;g.enemies.push(e);onlineCoop.direct.sendLatest('combat',captureCombatFrame(g,++onlineCoop.combatSequence,onlineCoop.combatEpoch));return e._coopSyncId;});
+    await guestPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===id);},id,{timeout:3000});
+    await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0}))throw Error('Guest impact failed');},id);
+    await hostPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.find(e=>e._coopSyncId===id)?.hp===488;},id,{timeout:3000});
+    await hostPage.waitForTimeout(250);
+    assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
+  }
   // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
@@ -338,15 +347,6 @@ try {
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
-  // Every selected guest reports a real engine impact to the host exactly once.
-  {
-    const id=await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {makeFoe}=await import('/engine/foes.js');const {captureCombatFrame}=await import('/systems/coop-combat-mirror.js');const g=onlineCoop._combatGame,e=makeFoe(1700,300,'phosquito',g.roomId,992,{rng:()=>.5});e.spawnIndex=992;e.hp=e.max=500;e.stun=300;g.enemies.push(e);onlineCoop.direct.sendLatest('combat',captureCombatFrame(g,++onlineCoop.combatSequence,onlineCoop.combatEpoch));return e._coopSyncId;});
-    await guestPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.some(e=>e._coopSyncId===id);},id,{timeout:3000});
-    await guestPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const {hitEnemy}=await import('/systems/abilities.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id);if(!hitEnemy(g,e,12,{hitstop:0,shake:0}))throw Error('Guest impact failed');},id);
-    await hostPage.waitForFunction(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.enemies.find(e=>e._coopSyncId===id)?.hp===488;},id,{timeout:3000});
-    await hostPage.waitForTimeout(250);
-    assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
-  }
   // Verify a real guest U travelling back to the host too.
   await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,supremeOf}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;g.player.cds[supremeOf(g.player.id).id]=0;if(!useAbility(g,3))throw Error('Guest U failed');onlineCoop.sendPeerEffects(g,true);});
   await hostPage.waitForFunction(async expected=>{const {onlineCoop}=await import('/systems/online-coop.js');const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];return !!s&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;},guestCharacter,{timeout:3000});
