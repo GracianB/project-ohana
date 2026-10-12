@@ -13,8 +13,10 @@ globalThis.Path2D ||= PathMock;
 function pose(form,state="idle",additional={}) {
   return {form,state,t:120,phase:1.64,speed:0,vy:0,
     air:false,land:0,sway:.1,bounce:.1,breath:.35,look:{x:1,y:0},
-    atk:0,cast:0,castSlot:-1,flourish:0,flourishN:0,
-    impact:0,turnPulse:0,brake:0,...additional};
+    atk:0,cast:0,castSlot:-1,hurt:0,blink:0,nineLives:0,
+    flourish:0,flourishN:0,evoT:0,squash:0,stretch:0,
+    bodyTilt:0,headTilt:0,armSwing:0,legSwing:0,anticipation:0,
+    impact:0,turnPulse:0,brake:0,secondary:0,...additional};
 }
 function scene(form,state,additional={}){
   const p=pose(form,state,additional),snapshot=JSON.stringify(p);
