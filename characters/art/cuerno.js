@@ -137,6 +137,14 @@ export function cuernoWingPose(pose,form,t){
  return {open,flap,hinge:pose?.reduceMotion?0:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
 }
 
+// Native Canvas joints avoid depending on rig helpers absent from portrait mocks.
+function drawHoofJoint(ctx,x,y,r,color) {
+ ctx.save();
+ ctx.fillStyle=color;ctx.strokeStyle="#4d435f";ctx.lineWidth=1.2;
+ ctx.beginPath();ctx.ellipse(x,y,r,r,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.restore();
+}
+
 /**
  * V327 · Five-form balance contract. F0 remains a living horn; F1 remains
  * an orb; only F2–F4 have actual four-legged hoof mechanics.
@@ -498,8 +506,8 @@ const tuck=gait.tuck+(cuernoSoulBeat(pose,2)==="prance"&&!far&&!air?4:0);
 const kneeX=x+reach*.43+(far?-2:2),kneeY=-14+tuck*.48-kneeLift;
 const hoofX=x+reach+(far?-2:2),hoofY=2-tuck-hoofLift;
 R.limb(ctx,x,-26,kneeX,kneeY,hoofX,hoofY,far?4.4:5.1,far?"#dac6ec":"#f8e4f9",{hand:false});
-R.ellipse(ctx,x,-26,far?3.6:4.2,far?3.6:4.2,far?"#dac6ec":"#f8e4f9",{lw:1.35});
-R.ellipse(ctx,kneeX,kneeY,far?3.5:4.1,far?3.5:4.1,far?"#dac6ec":"#f8e4f9",{lw:1.35});
+drawHoofJoint(ctx,x,-26,far?3.6:4.2,far?"#dac6ec":"#f8e4f9");
+drawHoofJoint(ctx,kneeX,kneeY,far?3.5:4.1,far?"#dac6ec":"#f8e4f9");
 ctx.fillStyle=far?"#ad95c7":"#bb9dcc";ctx.strokeStyle=ink;ctx.lineWidth=1.35;
 ctx.beginPath();ctx.moveTo(hoofX-4.5,hoofY-3);
 ctx.quadraticCurveTo(hoofX+1.5,hoofY-4.8,hoofX+5,hoofY-2);
@@ -586,8 +594,8 @@ const bend=4+kneeLift*2;
 const kneeX=x+reach*.42+(back?-3:4),kneeY=-18+tuck*.45-kneeLift*.3;
 const hoofX=x+reach+(back?-3:3),hoofY=5-tuck-hoofLift;
 R.limb(ctx,x,-32,kneeX,kneeY,hoofX,hoofY,back?5.6:6.2,back?"#b6cee9":"#d2e4fc",{hand:false});
-R.ellipse(ctx,x,-32,back?4.6:5.1,back?4.6:5.1,back?"#b6cee9":"#d2e4fc",{lw:1.4});
-R.ellipse(ctx,kneeX,kneeY,back?4:4.6,back?4:4.6,back?"#b6cee9":"#d2e4fc",{lw:1.4});
+drawHoofJoint(ctx,x,-32,back?4.6:5.1,back?"#b6cee9":"#d2e4fc");
+drawHoofJoint(ctx,kneeX,kneeY,back?4:4.6,back?"#b6cee9":"#d2e4fc");
 ctx.fillStyle=back?"#8c9ac0":"#9eb1d2";ctx.strokeStyle=ink;ctx.lineWidth=1.7;
 ctx.beginPath();ctx.moveTo(hoofX-5.5,hoofY-3);
 ctx.quadraticCurveTo(hoofX+1,hoofY-6-bend*.05,hoofX+6,hoofY-2);
@@ -731,8 +739,8 @@ const {reach,tuck,kneeLift,hoofLift}=cuernoLegPose(pose,4,t,clock,far);
 const kneeX=x+reach*.48+(far?-4:4),kneeY=-17+tuck*.5-kneeLift*.3;
 const hoofX=x+reach+(far?-5:4),hoofY=6-tuck-hoofLift;
 R.limb(ctx,x,-33,kneeX,kneeY,hoofX,hoofY,far?5.8:6.5,far?"#363247":"#272431",{hand:false});
-R.ellipse(ctx,x,-33,far?4.8:5.4,far?4.8:5.4,far?"#363247":"#272431",{lw:1.5});
-R.ellipse(ctx,kneeX,kneeY,far?4.2:4.8,far?4.2:4.8,far?"#363247":"#272431",{lw:1.5});
+drawHoofJoint(ctx,x,-33,far?4.8:5.4,far?"#363247":"#272431");
+drawHoofJoint(ctx,kneeX,kneeY,far?4.2:4.8,far?"#363247":"#272431");
 ctx.fillStyle=far?"#57516b":"#66576d";ctx.strokeStyle=ink;ctx.lineWidth=1.6;
 ctx.beginPath();ctx.moveTo(hoofX-5.8,hoofY-3);
 ctx.quadraticCurveTo(hoofX+.5,hoofY-6,hoofX+6,hoofY-2);
