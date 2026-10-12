@@ -483,3 +483,27 @@ body.intro-complete #char-select .title-controls{animation:v36-controls-arrive .
 /* V99 · The old horizontal bridge across the sky is not a character connection.
    The radial hero stage retains depth without drawing a hairline across worlds. */
 #char-select .hero-stage::after { display: none !important; }
+
+/* V313 · Player chooses the real U companion, not a preselected cameo.
+   Compact on desktop and phone, never overlapping the Play control. */
+.u-partner-panel{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  gap:.35rem .65rem;width:min(100%,820px);margin:.5rem auto .8rem;
+  padding:.48rem .9rem;border:1px solid rgba(255,229,176,.38);
+  border-radius:14px;background:rgba(20,40,49,.78);color:#fff3dc;
+  box-sizing:border-box;backdrop-filter:blur(8px);
+}
+.u-partner-panel label{font-weight:800;font-size:.82rem;letter-spacing:.025em}
+.u-partner-panel select{
+  max-width:100%;min-width:180px;min-height:36px;
+  color:#143035;background:#f7eee1;border:1px solid #ecd9b0;
+  border-radius:10px;padding:.36rem .6rem;font:700 .82rem system-ui;
+}
+.u-partner-panel select:focus-visible{outline:3px solid #fff2a8;outline-offset:2px}
+#u-partner-technique{font-size:.76rem;opacity:.92}
+#u-exp-hud{font-size:.76rem;letter-spacing:.015em;line-height:1.3}
+@media(max-width:640px){
+  .u-partner-panel{padding:.4rem .55rem;margin:.35rem auto .5rem;gap:.3rem}
+  .u-partner-panel select{flex:1 1 165px;min-width:0}
+  #u-partner-technique{flex:1 0 100%;text-align:center}
+}
