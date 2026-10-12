@@ -1,3 +1,4 @@
+import {startFamilyDuet,updateFamilyDuet,drawFamilyDuet,FAMILY_DUETS} from './family-duets.js';
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
@@ -349,7 +350,7 @@ const power = Math.max(1, Number(flow?.multiplier) || 1);
 const dmg = (70 + evo * 14) * pw(p) * power;
 const enemies = (game.enemies || []).filter(canHit);
 const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
-emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
+if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
 if (p.id === "kilo") {
 for (const e of enemies) hitEnemy(game, e, dmg * 0.72, { kx: Math.sign(cx(e) - cx(p)) * 5, ky: -8, stun: 28, color: def.color, crit: true });
@@ -450,9 +451,14 @@ hit: new Set(),
 });
 add({ kind: "supreme", x: cx(p), y: cy(p), life: 72, max: 72, color: def.color, name: def.name, identity: identity.kind });
 
-if ((flow.assist || p.id === "yomi") && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
+if (!FAMILY_DUETS[p.id] && (flow.assist || p.id === "yomi") && def.ally) summonAssist(game, p, def.ally, dmg * 0.34, def.color);
 
-game.ult = { t: 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: (flow.assist || p.id === "yomi") ? def.ally : "" };
+game.ult = { t: FAMILY_DUETS[p.id] ? 0 : 96, color: def.color, name: def.name, identity: identity.kind, flow: flow.label || "", assist: FAMILY_DUETS[p.id] ? def.ally : (flow.assist || p.id === "yomi") ? def.ally : "" };
+if(FAMILY_DUETS[p.id]){
+ startFamilyDuet(game,power*pw(p));
+ p.invuln=Math.max(p.invuln||0,60);
+ p._duetProtectionUntil=(Number(game.t)||0)+60;
+}
 game.flashColor = def.color;
 // Aurora F4 feels majestic rather than stroboscopic; other U effects are untouched.
 const gentleAurora=p.id==="cuerno"&&evo===4;
@@ -663,6 +669,7 @@ updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateChispinDuet(game,hitEnemy);
 updateMichiDuet(game,hitEnemy);
+updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
 if (S.caos > 0) {
@@ -721,6 +728,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
