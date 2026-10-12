@@ -2,6 +2,8 @@
 // Dragón calls Dino's fossil quake, retaining his original free-flight supreme.
 // Visuals never damage anything. Only updateFamilyDuet mutates combat state.
 // The cooperative wire format is deliberately small and contains NO hit sets.
+import {ROSTER} from "../characters/roster.js";
+import {DEFAULT_U_PARTNERS,chooseUPartner,U_L_NAMES} from "./u-partners.js";
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
@@ -13,19 +15,42 @@ const names={
  cuerno:{ally:"kilo",borrowedL:"ohana",name:"Cuerno y Kilo",line:"¡Toda la familia!",cue:"KILO · CORO OHANA",color:"#ffe9a8",kind:"ohana"}
 };
 export const FAMILY_DUETS=Object.freeze(Object.fromEntries(Object.entries(names).map(([id,data])=>[id,Object.freeze({hero:id,...data})])));
+// Classic six duets retain their original art. The others gain the same
+// in-world system only when the player selects an alternative companion.
+const L_VISUALS=Object.freeze({
+ chaos:"chaos",storm:"storm",ninetails:"tails",meteor:"meteor",
+ quake:"quake",fryer:"geyser",oven:"oven",maw:"maw",rainbow:"rainbow",ohana:"ohana"
+});
+export function familyDuetDefinition(s){
+ const hero=s?.hero;
+ const chosen=s?.ally===undefined?DEFAULT_U_PARTNERS[hero]:s.ally;
+ const ally=chooseUPartner(hero,chosen);
+ if(!ally||ally!==chosen)return null;
+ if(FAMILY_DUETS[hero]&&FAMILY_DUETS[hero].ally===ally)return FAMILY_DUETS[hero];
+ const friend=ROSTER.find(r=>r.id===ally);
+ const ability=friend?.abilities?.[2];
+ const kind=L_VISUALS[ability];
+ if(!kind)return null;
+ const actor=ROSTER.find(r=>r.id===hero);
+ return Object.freeze({hero,ally,borrowedL:ability,kind,
+  name:actor.name+" y "+friend.name,
+  cue:friend.name.toUpperCase()+" · "+(U_L_NAMES[ability]||ability).toUpperCase(),
+  line:"¡"+friend.name+", préstame tu L!",
+  color:friend.color||"#fff6cf"});
+}
 export const FAMILY_DUET_LENGTH=120;
 export const FAMILY_DUET_BEATS=Object.freeze([42,66,90]);
 const validNumber=n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<=20000;
 const center=e=>({x:e.x+(e.w||0)/2,y:e.y+(e.h||0)/2});
 
 export function readFamilyDuet(s){
- if(!s||typeof s!=="object"||!Object.hasOwn(FAMILY_DUETS,s.hero)||!validNumber(s.x)||!validNumber(s.y)||
+ if(!s||typeof s!=="object"||!familyDuetDefinition(s)||!validNumber(s.x)||!validNumber(s.y)||
  !Number.isInteger(s.age)||s.age<0||s.age>=FAMILY_DUET_LENGTH||
  !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
- return {hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
+ return {...(s.ally===undefined?{}:{ally:s.ally}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
 }
 export function familyDuetPose(s,reduce=false){
- const data=FAMILY_DUETS[s?.hero];if(!data)return null;
+ const data=familyDuetDefinition(s);if(!data)return null;
  const age=clamp(s.age,0,119),evo=clamp(s.evo,0,4),face=s.facing===-1?-1:1;
  const arrival=Math.min(1,age/18);
  const exit=age>=106?Math.max(0,1-(age-106)/14):1;
@@ -36,10 +61,12 @@ export function familyDuetPose(s,reduce=false){
  return {beat,phase,allyX,allyY,alpha:exit,kind:data.kind,
    radius:56+evo*8,focusX:s.x+face*(56+phase*65),focusY:s.y-26};
 }
-export function startFamilyDuet(game,power=1,legacyTargets=[]){
- const p=game?.player,def=FAMILY_DUETS[p?.id];
+export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
+ const p=game?.player;
+ const ally=selectedAlly===undefined?DEFAULT_U_PARTNERS[p?.id]:selectedAlly;
+ const def=familyDuetDefinition({hero:p?.id,ally});
  if(!p||p.dead||!def)return false;
- game._familyDuet={hero:p.id,room:String(game.roomId||"hub"),
+ game._familyDuet={hero:p.id,...(def.ally===DEFAULT_U_PARTNERS[p.id]?{}:{ally:def.ally}),room:String(game.roomId||"hub"),
    x:center(p).x,y:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),
    facing:p.facing===-1?-1:1,power:clamp(power,1,2),
    // Entities already handled by the legacy U cannot be damaged twice by L.
@@ -48,11 +75,15 @@ export function startFamilyDuet(game,power=1,legacyTargets=[]){
  return true;
 }
 export function familyDuetStrike(s,beat,e){
- const def=FAMILY_DUETS[s.hero];
+ const def=familyDuetDefinition(s);
  if(!def||!e)return false;
  const p=center(e),f=s.facing,dx=p.x-s.x,dy=p.y-s.y;
  const b=clamp(beat,0,2),evo=s.evo;
  switch(def.kind){
+  case "chaos":return Math.hypot(dx,dy+26)<=140+evo*12;
+  case "storm":return Math.abs(dx-f*(45+b*43))<=52+evo*6&&Math.abs(dy+45)<=120;
+  case "tails":return Math.hypot(dx,dy+25)<=105+evo*13;
+  case "meteor":return Math.hypot(dx-f*(55+b*46),dy+22)<=60+evo*5;
   case "quake":{const epicenter=s.x+f*(52+b*54);return Math.abs(p.x-epicenter)<=66+evo*7&&Math.abs(p.y-(s.y-24))<=65+evo*3;}
   case "geyser":{const x=s.x+f*(34+b*54);return Math.abs(p.x-x)<=31+evo*3&&p.y>s.y-163&&p.y<s.y+27;}
   case "oven":{const forward=dx*f;return forward>=-24&&forward<=210+evo*15&&Math.abs(dy+18)<54+b*19;}
@@ -65,7 +96,7 @@ export function familyDuetStrike(s,beat,e){
 export function updateFamilyDuet(game,hit,heal){
  const s=game?._familyDuet,p=game?.player;
  if(!s){if(p)p._familyDuetT=0;return;}
- const def=FAMILY_DUETS[s.hero];
+ const def=familyDuetDefinition(s);
  if(!p||p.dead||!def||p.id!==s.hero||String(game.roomId||"hub")!==s.room||s.age>=FAMILY_DUET_LENGTH){
   game._familyDuet=null;if(p)p._familyDuetT=0;
   if(game._assist?.heroId===def?.ally)game._assist.t=0;
@@ -84,6 +115,10 @@ export function updateFamilyDuet(game,hit,heal){
    }))applied++;
   }
   if(def.kind==="ohana"&&typeof heal==="function")heal(p,(Number(p.maxHealth)||100)*(.035+s.evo*.006));
+  if(def.kind==="chaos")p.invuln=Math.max(p.invuln||0,18);
+  if(def.kind==="storm")p._specialSpeedT=Math.max(p._specialSpeedT||0,18);
+  if(def.kind==="tails")p._specialShadowT=Math.max(p._specialShadowT||0,18);
+  if(def.kind==="meteor")p._specialFlightT=Math.max(p._specialFlightT||0,18);
   if(def.kind==="quake")p._specialFlightT=Math.max(p._specialFlightT||0,180);
   if(def.kind==="rainbow")p.invuln=Math.max(p.invuln||0,16);
   if(def.kind==="geyser")p._specialTitanT=Math.max(p._specialTitanT||0,30);
@@ -121,7 +156,7 @@ export function familyDuetChoreography(value,reduce=false){
  const beat=nearest.index;
  const delta=beat<0?null:s.age-FAMILY_DUET_BEATS[beat];
  return Object.freeze({
-  hero:s.hero,ally:FAMILY_DUETS[s.hero].ally,borrowedL:FAMILY_DUETS[s.hero].borrowedL,
+  hero:s.hero,ally:familyDuetDefinition(s).ally,borrowedL:familyDuetDefinition(s).borrowedL,
   stage:pose.beat,form:s.evo,allyX:pose.allyX,allyY:pose.allyY,opacity:pose.alpha,
   keyframe:beat,telegraph:delta!==null&&delta<0,
   impact:delta===0,progress:delta===null?0:delta<0?(delta+17)/17:Math.min(1,delta/18),
@@ -129,12 +164,39 @@ export function familyDuetChoreography(value,reduce=false){
  });
 }
 function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
- const def=FAMILY_DUETS[s.hero],evo=s.evo,x=s.x-cam.x,y=s.y-cam.y;
+ const def=familyDuetDefinition(s),evo=s.evo,x=s.x-cam.x,y=s.y-cam.y;
  const ax=pose.allyX-cam.x,ay=pose.allyY-cam.y;
  const energy=Math.min(1,s.age/12)*pose.alpha;
  ctx.save();ctx.globalAlpha*=energy;
  const count=reduce?2:2+evo;
  switch(def.kind){
+  case "chaos": // Dimension stitch through the friend's entrance
+   for(let i=0;i<count;i++){
+    const bx=ax-s.facing*(20+i*13),by=ay-18-(i%2)*13;
+    ctx.strokeStyle=i%2?"#a2b4ff":"#e4a9fc";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bx-7,by-8);ctx.lineTo(bx+6,by+5);
+    ctx.lineTo(bx-5,by+11);ctx.stroke();
+   }break;
+  case "storm": // Lightning branches along the arrival path
+   for(let i=0;i<count;i++){
+    const bx=ax-s.facing*(18+i*15),by=ay-16-i*7;
+    ctx.strokeStyle=i%2?"#ffffff":"#f6e574";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bx,by-11);ctx.lineTo(bx+8,by+1);
+    ctx.lineTo(bx+2,by);ctx.lineTo(bx+12,by+16);ctx.stroke();
+   }break;
+  case "tails": // Nine wisps, bounded by reduced-motion
+   for(let i=0;i<(reduce?3:9);i++){
+    const a=i*TAU/(reduce?3:9)+(reduce?0:t*.02);
+    spark(ctx,ax+Math.cos(a)*(25+evo*4),ay-30+Math.sin(a)*(18+evo*3),
+     2.5+i%3,i%2?"#ffb4de":"#f8dcff");
+   }break;
+  case "meteor":
+   for(let i=0;i<count;i++){
+    const bx=ax+s.facing*(16+i*9),by=ay-20-i*9;
+    spark(ctx,bx,by,3+i*.4,i%2?"#ffe4a0":"#ff926e");
+    ctx.strokeStyle="#ffb374";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bx-s.facing*9,by-18);ctx.lineTo(bx,by);ctx.stroke();
+   }break;
   case "quake":{ // Dino arrives with fossil dust and Dragón's warm embers
    ctx.strokeStyle="#e5b487";ctx.lineWidth=2+evo*.35;
    ctx.beginPath();ctx.moveTo(ax-s.facing*14,ay+13);
@@ -202,7 +264,7 @@ function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
 }
 export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readFamilyDuet(value);if(!s)return false;
- const def=FAMILY_DUETS[s.hero],pose=familyDuetPose(s,reduce);
+ const def=familyDuetDefinition(s),pose=familyDuetPose(s,reduce);
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];
  ctx.save();const baseAlpha=ctx.globalAlpha;ctx.globalAlpha*=pose.alpha;
  if(friend&&form&&typeof drawActor==="function"){
@@ -240,6 +302,39 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
   const xx=x+s.facing*(40+j*54),yy=y-26;
   ctx.save();ctx.globalAlpha*=intensity;
   switch(def.kind){
+   case "chaos":{
+    const r=windup?30+progress*52:100+progress*35;
+    ring(ctx,xx,yy,r,"#b39dff",.85,.5);
+    for(let k=0;k<(reduce?3:6);k++){
+     const a=k*TAU/(reduce?3:6);
+     spark(ctx,xx+Math.cos(a)*r,yy+Math.sin(a)*r*.45,4,"#eacfff");
+    }
+    break;
+   }
+   case "storm":{
+    for(let k=0;k<(reduce?2:4);k++){
+     const bx=xx+(k-1)*22;
+     ctx.strokeStyle=k%2?"#fff0ad":"#b2efff";ctx.lineWidth=3;
+     ctx.beginPath();ctx.moveTo(bx,yy-115);ctx.lineTo(bx+17,yy-52);
+     ctx.lineTo(bx+1,yy-47);ctx.lineTo(bx+22,yy+23);ctx.stroke();
+    }break;
+   }
+   case "tails":{
+    const rad=windup?55:90+s.evo*10;
+    for(let k=0;k<(reduce?3:9);k++){
+     const a=k*TAU/(reduce?3:9)+(reduce?0:t*.015);
+     ring(ctx,xx+Math.cos(a)*rad,yy+Math.sin(a)*rad*.55,9, k%2?"#ffb8e2":"#d8b0ff",.5,.7);
+    }break;
+   }
+   case "meteor":{
+    const fall=windup?55+progress*15:70*(1-progress);
+    for(let k=0;k<(reduce?2:4);k++){
+     const mx=xx+(k-1)*19,my=yy-fall-30;
+     spark(ctx,mx,my,10-k*.8,k%2?"#ffb678":"#ffe5a3");
+     ctx.strokeStyle="#ffae75";ctx.lineWidth=2.5;ctx.beginPath();
+     ctx.moveTo(mx-16,my-26);ctx.lineTo(mx,my);ctx.stroke();
+    }break;
+   }
    case "quake":{
     // Dino lends his L earthquake, not another Dragon meteor.
     const radius=windup?(18+progress*52):(69+s.evo*6)*(1+progress*.35);
