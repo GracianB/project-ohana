@@ -32,7 +32,7 @@ function makeContext(label){
   const state={
     globalAlpha:1,globalCompositeOperation:"source-over",fillStyle:"#fff",strokeStyle:"#fff",
     lineWidth:1,lineCap:"butt",lineJoin:"miter",font:"10px sans-serif",
-    textAlign:"start",textBaseline:"alphabetic",shadowColor:"#000",shadowBlur:0,filter:"none",
+    textAlign:"start",textBaseline:"alphabetic",shadowColor:"#000",shadowBlur:0,filter:"none",lineDashOffset:0,
   };
   const stats={depth:0,highest:0,paths:0,paint:0,geometry:0};
   const available=new Set([
