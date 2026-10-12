@@ -1,4 +1,8 @@
 import test from "node:test";
+import {ROSTER} from "../characters/roster.js";
+import {FAMILY_DUETS,FAMILY_DUET_LENGTH,FAMILY_DUET_BEATS,
+  familyDuetDefinition,familyDuetChoreography,familyDuetStrike} from "../systems/family-duets.js";
+import {optionsForUPartner} from "../systems/u-partners.js";
 import assert from "node:assert/strict";
 import dragon, {dragonBodyLanguage,dragonMomentum} from "../characters/art/dragon.js";
 import {R} from "../characters/rig.js";
@@ -145,4 +149,42 @@ test("V316: no state mutation, no new damage, finite posture values, accessibili
   assert.deepEqual(dragonMomentum({state:"idle",land:.7}),{
     landing:.7,run:0,turn:0,brake:0
   },"V305 landing API must remain compatible");
+});
+
+test("V316: Dragon keeps Dino's quake U and all nine selectable guests",()=>{
+  const ownL=ROSTER.find(r=>r.id==="dragon").abilities[2];
+  const borrowed=ROSTER.find(r=>r.id==="dino").abilities[2];
+  assert.equal(ownL,"meteor");
+  assert.equal(borrowed,"quake");
+  assert.equal(FAMILY_DUETS.dragon.ally,"dino");
+  assert.equal(FAMILY_DUETS.dragon.borrowedL,"quake");
+  assert.equal(FAMILY_DUET_LENGTH,120);
+  assert.deepEqual(FAMILY_DUET_BEATS,[42,66,90]);
+  const choices=optionsForUPartner("dragon");
+  assert.equal(choices.length,9);
+  for(const choice of choices)for(let form=0;form<5;form++){
+    const def=familyDuetDefinition({hero:"dragon",ally:choice.id});
+    assert.equal(def.ally,choice.id);
+    assert.equal(def.borrowedL,choice.borrowedL);
+    for(const rank of [1,2,3])for(const age of [2,26,42,66,90,112]){
+      const p={hero:"dragon",ally:choice.id,x:212,y:315,age,evo:form,
+        facing:1,bondRank:rank};
+      const before=JSON.stringify(p);
+      const stage=familyDuetChoreography(p,true);
+      assert.ok(stage);
+      assert.equal(stage.ally,choice.id);
+      assert.equal(stage.borrowedL,choice.borrowedL);
+      assert.equal(stage.bondRank,rank);
+      assert.ok(Number.isFinite(stage.allyX));
+      assert.ok(Number.isFinite(stage.allyY));
+      assert.equal(JSON.stringify(p),before,"art metadata is read-only");
+    }
+  }
+  for(const form of [0,1,2,3,4]){
+    const u={hero:"dragon",x:212,y:315,age:42,evo:form,facing:1};
+    const on={x:212+52-10,y:315-24-10,w:20,h:20,hp:99};
+    const far={x:1000,y:315,w:20,h:20,hp:99};
+    assert.equal(familyDuetStrike(u,0,on),true,"Dino's real quake footprint");
+    assert.equal(familyDuetStrike(u,0,far),false);
+  }
 });
