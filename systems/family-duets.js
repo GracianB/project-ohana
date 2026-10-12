@@ -167,6 +167,93 @@ export function familyDuetChoreography(value,reduce=false){
   accentCount:reduce?2:2+s.evo
  });
 }
+// V322 · Six canonical LEGENDARY meetings, not six extra sources of damage.
+// Rank 1/2 and every alternate partner keep their established acting and L.
+const LEGEND_GAGS=Object.freeze({
+ dragon:Object.freeze({ally:"dino",kind:"egg",guestPose:"victory"}),
+ dino:Object.freeze({ally:"frita",kind:"sprout",guestPose:"jump"}),
+ frita:Object.freeze({ally:"pizza",kind:"snack",guestPose:"jump"}),
+ pizza:Object.freeze({ally:"yomi",kind:"slice",guestPose:"attack"}),
+ yomi:Object.freeze({ally:"cuerno",kind:"lantern",guestPose:"glide"}),
+ cuerno:Object.freeze({ally:"kilo",kind:"flowers",guestPose:"victory"})
+});
+export function legendaryDuetMoment(value,reduce=false){
+ const s=readFamilyDuet(value);
+ const def=s&&LEGEND_GAGS[s.hero];
+ if(!s||s.bondRank!==3||!def||def.ally!==(s.ally||DEFAULT_U_PARTNERS[s.hero])||s.age<18)return null;
+ const guest=familyDuetPose(s,reduce);
+ const stage=s.age<36?"gag":s.age<102?"borrowed-L":"farewell";
+ const start=stage==="gag"?18:stage==="borrowed-L"?36:102;
+ const length=stage==="gag"?18:stage==="borrowed-L"?66:18;
+ const progress=clamp((s.age-start)/length,0,1);
+ const x=(s.x+guest.allyX)*.5,y=Math.min(s.y-23,guest.allyY-10);
+ return Object.freeze({hero:s.hero,ally:def.ally,kind:def.kind,stage,progress,
+  x,y,face:s.facing,form:s.evo,guestPose:stage==="gag"?def.guestPose:null,
+  // Static, stage-driven poses are kept when reduced motion is requested.
+  still:!!reduce});
+}
+function drawLegendaryDuetMoment(ctx,s,cam,reduce){
+ const d=legendaryDuetMoment(s,reduce);
+ if(!d)return false;
+ const x=d.x-cam.x,y=d.y-cam.y,k=d.progress,face=d.face,scale=.82+d.form*.07;
+ ctx.save();ctx.translate(x,y);ctx.scale(face*scale,scale);
+ ctx.globalAlpha*=d.stage==="farewell"?Math.max(.16,1-k):.82;
+ ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";
+ const oval=(a,b,rx,ry,color)=>{
+  ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(a,b,rx,ry,0,0,TAU);ctx.fill();
+  ctx.strokeStyle="#674c47";ctx.lineWidth=1.5;ctx.stroke();
+ };
+ const line=(color,points)=>{
+  ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.beginPath();
+  points.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.stroke();
+ };
+ const lift=d.still?0:Math.sin(Math.PI*k)*4;
+ if(d.kind==="egg"){
+  // Dino mistakes a small, harmless meteor for an egg.
+  oval(0,-9-lift,12,16,"#ffebbc");
+  line("#d48d52",[[-6,-3-lift],[-2,-7-lift],[1,-3-lift],[5,-7-lift]]);
+  line("#ef9555",[[-14,-22-lift],[-18,-27-lift],[-23,-30-lift]]);
+ }else if(d.kind==="sprout"){
+  // The quake grows a potato; Frita catches rather than damages it.
+  oval(0,-6-lift,13,9,"#e3b572");
+  ctx.strokeStyle="#71b65c";ctx.lineWidth=3;ctx.beginPath();
+  ctx.moveTo(0,-13-lift);ctx.quadraticCurveTo(-7,-24-lift,-12,-19-lift);
+  ctx.moveTo(0,-13-lift);ctx.quadraticCurveTo(5,-28-lift,12,-24-lift);ctx.stroke();
+ }else if(d.kind==="snack"){
+  // Frita offers one crisp potato to Pizza's oven.
+  ctx.fillStyle="#ffe08f";ctx.fillRect(-7,-20-lift,10,22);
+  line("#d88d38",[[-7,-20-lift],[-7,3-lift],[4,3-lift]]);
+  line("#fbe2a4",[[4,-13-lift],[13,-16-lift],[19,-12-lift]]);
+ }else if(d.kind==="slice"){
+  // Pizza offers a slice; Yomi's small mouth tastes it.
+  ctx.fillStyle="#ffcc70";ctx.beginPath();
+  ctx.moveTo(-21,-13-lift);ctx.lineTo(2,-19-lift);ctx.lineTo(-8,5-lift);ctx.closePath();ctx.fill();
+  line("#b46b4a",[[-21,-13-lift],[2,-19-lift]]);
+  oval(-9,-9-lift,2.7,2.7,"#cf6657");
+  ctx.strokeStyle="#d6b0ce";ctx.lineWidth=3;ctx.beginPath();
+  ctx.ellipse(17,-9,7,11,0,-Math.PI*.5,Math.PI*.5);ctx.stroke();
+ }else if(d.kind==="lantern"){
+  // Aurora unfolds from Yomi's lantern, caught by Cuerno's floating horn.
+  ctx.fillStyle="#f6dbb4";ctx.fillRect(-13,-17-lift,14,18);
+  line("#63475e",[[-13,-17-lift],[-6,-23-lift],[1,-17-lift]]);
+  ctx.strokeStyle="#9be8d8";ctx.lineWidth=3;ctx.beginPath();
+  ctx.moveTo(1,-7-lift);ctx.quadraticCurveTo(15,-29-lift,24,-17-lift);ctx.stroke();
+ }else if(d.kind==="flowers"){
+  // Kilo neatly orders Cuerno's rainbow into three small, fixed flowers.
+  const shades=["#ef9cbb","#edd77d","#a6daec"];
+  for(let i=0;i<3;i++){
+   const xx=-16+i*16,yy=-8-(i%2)*7-lift;
+   for(let j=0;j<4;j++){
+    const angle=j*TAU/4;
+    ctx.fillStyle=shades[i];ctx.beginPath();
+    ctx.ellipse(xx+Math.cos(angle)*4,yy+Math.sin(angle)*4,3.7,3,angle,0,TAU);ctx.fill();
+   }
+   oval(xx,yy,2.5,2.5,"#fff2c7");
+  }
+  line("#a7d5bf",[[-16,0],[-7,7],[0,0],[8,7],[16,0]]);
+ }
+ ctx.restore();return true;
+}
 function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
  const def=familyDuetDefinition(s),evo=s.evo,x=s.x-cam.x,y=s.y-cam.y;
  const ax=pose.allyX-cam.x,ay=pose.allyY-cam.y;
@@ -269,6 +356,7 @@ function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
 export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readFamilyDuet(value);if(!s)return false;
  const def=familyDuetDefinition(s),pose=familyDuetPose(s,reduce);
+ const legendary=legendaryDuetMoment(s,reduce);
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];
  ctx.save();const baseAlpha=ctx.globalAlpha;ctx.globalAlpha*=pose.alpha;
  if(friend&&form&&typeof drawActor==="function"){
@@ -278,7 +366,7 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
    // Ten genuinely different entrances and L gestures, not one generic hop.
    facing:actor?.facing??s.facing,
    vx:actor?.vx??0,vy:actor?.vy??0,grounded:actor?.grounded??true,
-   _poseOverride:actor?.pose??"idle",
+   _poseOverride:legendary?.guestPose||actor?.pose||"idle",
    melee:actor?.impact?6:0,
    visualScale:actor?.visualScale??.72,_duetActor:true},cam,t);
  }
@@ -397,5 +485,7 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce);
  drawBorrowedLWarnings(ctx,def.kind,s,cam,t,reduce);
  drawDuetChemistry(ctx,s,cam,t,reduce);
+ // Draw the gag last, between hero and guest, never at an enemy target.
+ drawLegendaryDuetMoment(ctx,s,cam,reduce);
  ctx.restore();return true;
 }
