@@ -23,6 +23,35 @@ function effect(item,type){
  for(const k of ["spin","trail"])value[k]=item[k]===true;
  value.owner="peer-visual";return value;
 }
+// V322: a duet START is a meaningful event, not a disposable pose.
+// Send the same bounded/read-only snapshot through the ordered, reliable event
+// channel on forced casts. Normal 200ms frames still use the low-latency pose
+// channel only, and applyPeerEffects deduplicates matching scope/frameNo.
+export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onReliable){
+ if(!direct?.active||!frame||frame.protocol!==2)return false;
+ const quick=direct.sendLatest?.("effects",frame)===true;
+ const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
+  frame.stitchoDuet||frame.kiloDuet);
+ const durable=!!force&&hasDuet&&direct.sendEvent?.("effects",frame)===true;
+ // A fast snapshot alone is not proof of a durable start. The caller must
+ // retry until the ordered event channel accepts the current duet.
+ if(durable&&typeof onReliable==="function")onReliable();
+ return quick||durable;
+}
+// V322 · one bounded, damage-free U start descriptor piggybacked on the
+// existing authenticated ability signal. Never relay live missiles, foes,
+// hitboxes or repeated 5 Hz snapshots through the Netlify room store.
+export function captureFamilyDuetRelay(game,frameNo,scope){
+ const duet=readFamilyDuet(game?._familyDuet);
+ if(!duet||!Number.isSafeInteger(frameNo)||frameNo<1||
+   typeof scope!=="string"||!/^[a-zA-Z0-9_.:-]{1,96}$/.test(scope)||
+   typeof game?.roomId!=="string")return null;
+ const packet={protocol:2,scope,frameNo,roomId:game.roomId,
+  familyDuet:duet,michiDuet:null,chispinDuet:null,stitchoDuet:null,
+  kiloDuet:null,michiFx:[],chispinFx:[],kiloFx:[],
+  projectiles:[],slashes:[],bolts:[]};
+ return JSON.stringify(packet).length<=1100?packet:null;
+}
 export function capturePeerEffects(game,frameNo,scope){
  const frame={protocol:2,scope,frameNo,roomId:game.roomId,familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
   chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],

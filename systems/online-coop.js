@@ -17,7 +17,7 @@ import {drawKiloDuet} from "./kilo-duet.js";
 import { drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
-import { capturePeerEffects,applyPeerEffects,advancePeerEffects } from "./coop-peer-effects.js";
+import { capturePeerEffects,applyPeerEffects,advancePeerEffects,sendPeerEffectsWithReliableDuet,captureFamilyDuetRelay } from "./coop-peer-effects.js";
 import { DUO_ALTARS,duoPlateState } from "../multiplayer/duo-altars.js";
 
 const ENDPOINT = "/.netlify/functions/game";
@@ -119,6 +119,8 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
     this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
+    this._reliableDuetSource=null;this._reliableDuetLink=null;
+    this._relayDuetSource=null;this._relayDuetHoldUntil=0;
   }
 
   readSession() {
@@ -156,6 +158,8 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
     this.seenActionEvents.clear();this.effectSequence=0;this.lastEffectsSentAt=0;
+    this._reliableDuetSource=null;this._reliableDuetLink=null;
+    this._relayDuetSource=null;this._relayDuetHoldUntil=0;
     resetCombatMirror(game);game.coopPeerEffects=null;this._combatGame=game;
     game.coopRemoteEnemyBullets=[];
     this.enabled = true;
@@ -770,6 +774,13 @@ class OnlineCoop {
     // Action/room feedback is shown directly before the authoritative POST.
     // The RTC handshake itself is carried ONLY over Netlify, never recursively.
     if(signalKind==="action"&&payload.action!=="rtc"){
+      // Reuse this very same authenticated mutation as the reliable fallback
+      // when a real U starts. Zero extra HTTP requests for ordinary casts.
+      const duet=payload.action==="ability"&&payload.slot===3?game._familyDuet:null;
+      if(duet){
+        const start=captureFamilyDuetRelay(game,++this.effectSequence,this.combatEpoch);
+        if(start){payload={...payload,duetStart:start};this._relayDuetSource=duet;}
+      }
       payload={...payload,roomId:game.roomId||START_ROOM,syncId:makeActionId(this.identity.playerId,this.sequence+1)};
       this.direct?.sendEvent("action",payload);this.sendPeerEffects(game,true);
     }
@@ -921,6 +932,16 @@ class OnlineCoop {
     this.remote.abilitySlot=Number.isInteger(payload.slot)?Math.max(0,Math.min(3,payload.slot)):null;
     this.remote.actionUntil=performance.now()+(action==='ability'?420:action==='dash'?280:300);
     if(action==='dash')this.remote.dash=18;else this.remote.melee=action==='ability'?16:10;
+    // Authenticated U echo: pure visual snapshot from the existing ability
+    // event, validated exactly as direct snapshots. No remote damage.
+    if(action==="ability"&&payload.slot===3&&payload.duetStart&&
+       payload.characterId===this.remote.characterId&&
+       payload.duetStart.familyDuet?.hero===this.remote.characterId&&
+       payload.duetStart.familyDuet?.age<120&&
+       applyPeerEffects(game,payload.duetStart)){
+      this.lastPeerEffectsAt=performance.now();
+      this._relayDuetHoldUntil=this.lastPeerEffectsAt+2100;
+    }
     return true;
   }
 
@@ -942,10 +963,30 @@ class OnlineCoop {
 
   sendPeerEffects(game,force=false){
     const now=performance.now();
-    if(!this.direct?.active||this.remoteWorld!==game.roomId||(!force&&now-this.lastEffectsSentAt<200))return false;
+    const duet=game._familyDuet||game._michiDuet||game._chispinDuet||game._stitchoDuet||game._kiloDuet;
+    if(!this.direct?.active||this.remoteWorld!==game.roomId){
+      // The test harness and reconnecting clients can cast U without
+      // going through the physical keyboard handler. Relay only once per
+      // family-duet instance, not on every heartbeat.
+      if(game._familyDuet&&this.enabled&&this.remoteWorld===game.roomId&&
+         this._relayDuetSource!==game._familyDuet&&
+         Number(game._familyDuet.age)<100&&this.snapshot?.phase!=="lobby"){
+        this._relayDuetSource=game._familyDuet;
+        void this.signal(game,"action",{action:"ability",slot:3,characterId:game.player?.id});
+      }
+      return false;
+    }
+    if(!force&&now-this.lastEffectsSentAt<200)return false;
+    // A U cast can precede remote-room synchronization or reliable channel
+    // readiness. Keep attempting its first durable snapshot at normal 5 Hz
+    // until accepted; a freshly negotiated link must receive it again.
+    const pending=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
     const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
-    if(this.direct.sendLatest?.('effects',frame)){this.lastEffectsSentAt=now;return true;}
-    return false;
+    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pending,()=>{
+      if(duet){this._reliableDuetSource=duet;this._reliableDuetLink=this.direct;}
+    });
+    if(sent)this.lastEffectsSentAt=now;
+    return sent;
   }
 
   enemyTarget(game,enemy){
@@ -1035,7 +1076,11 @@ class OnlineCoop {
       }
     }
     this.sendPeerEffects(game);advancePeerEffects(game);
-    if(performance.now()-(this.lastPeerEffectsAt||0)>750)game.coopPeerEffects=null;
+    // A one-shot authenticated U relay keeps the guest visible for the
+    // actual 120-tick duet while RTC reconnects; ordinary FX still expire.
+    if(performance.now()-(this.lastPeerEffectsAt||0)>750&&
+       !(this._relayDuetHoldUntil>performance.now()&&game.coopPeerEffects?.familyDuet))
+      game.coopPeerEffects=null;
     if(combatNow-this.lastCombatHealthAt>250){this.lastCombatHealthAt=combatNow;this.showNetworkHealth();}
     this.direct?.ping();
     void this.direct?.sampleRoute();

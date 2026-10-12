@@ -50,8 +50,8 @@ test("V104: gameplay, E2E, offline precache and cache versions stay in sync",()=
  assert.match(game,/V104Memories\.onRoom\(game\.roomId\)/);
  assert.match(game,/V104Memories\.clear\(\)/);
  assert.match(sw,/v104-living-stories\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-338"/);
- assert.match(html,/ohana-338/);
+ assert.match(sw,/const VERSION = "ohana-\d+"/);
+ assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\d+)"/)?.[1]),"HTML and service-worker cache must match");
  assert.match(e2e,/V104_MOMENTS/);
  assert.match(game,/ohana-festival-v1002/);
 });

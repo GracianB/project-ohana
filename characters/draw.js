@@ -994,7 +994,7 @@ else flashCanvas = c;
 return c;
 }
 
-function poseFingerprint(pose) {
+export function poseFingerprint(pose) {
 const q = (v, s) => Math.round((Number(v) || 0) * s);
 return [
 pose.state || "", pose.move || "", pose.form | 0, pose.cuernoBeat || "",
@@ -1005,6 +1005,8 @@ q(pose.hurt, 8), q(pose.blink, 4), q(pose.sway, 8), q(pose.bounce, 8),
 q(pose.breath, 6), q(pose.flourish, 8), pose.flourishN | 0, q(pose.evoT, 12),
 pose.nineLives > 0 ? 1 : 0, q(pose.look && pose.look.y, 6),
 q(pose.squash, 8), q(pose.stretch, 8), q(pose.bodyTilt, 8),
+q(pose.turnPulse, 8),q(pose.brake, 8),q(pose.anticipation, 8),
+pose.reduceMotion ? 1 : 0,
 ].join("|");
 }
 
@@ -1126,7 +1128,9 @@ const speed = Math.abs(p.vx || 0);
 const moving = !!p.grounded && speed > 0.55;
 const air = !p.grounded;
 const duetProtected=isDuetProtected(p,t);
-const pose = applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p);
+// Propagate accessibility preference to the *local* render pose only.
+const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
+  reduceMotion: options.reduceMotion===true};
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;

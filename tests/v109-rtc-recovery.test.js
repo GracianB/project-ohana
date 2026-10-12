@@ -39,8 +39,8 @@ test("V109: negotiation bypasses world filter and new authenticated SDP rebuilds
  assert.match(rtc,/this\.priorOffers\.add\(this\.sessionId\)/);
  assert.match(rtc,/this\.pendingPing=\{id,sent:now\}/);
  assert.match(sw,/coop-v109-recovery\.js\?v=/);
- assert.match(sw,/const VERSION = "ohana-338"/);
- assert.match(html,/ohana-338/);
+ assert.match(sw,/const VERSION = "ohana-\d+"/);
+ assert.ok(html.includes(sw.match(/const VERSION = "(ohana-\d+)"/)?.[1]),"HTML and service-worker cache must match");
 });
 
 test("V109: guest rebuilds its prior RTCPeerConnection for an authenticated new offer",async()=>{
