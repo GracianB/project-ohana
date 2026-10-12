@@ -330,6 +330,23 @@ if (fl > 0) {
   }
 }
 
+// V316: secondary anatomy follows the existing rig, never the combat hitbox.
+const acting = dragonBodyLanguage(pose);
+if (acting) {
+  bob += acting.bob;
+  lean += acting.lean;
+  headRot += acting.head;
+  legF += acting.legF;
+  legB += acting.legB;
+  armF += acting.armF;
+  armB += acting.armB;
+  const farAngle = wRotFar === null ? wRot + 0.3 : wRotFar;
+  wRot += acting.wing;
+  wRotFar = farAngle + acting.wingFar;
+  wOpen = clamp(wOpen + acting.spread, 0.18, 1);
+  tailWave += acting.tail;
+}
+
 const hipY = -(P.legL + P.legW * 0.55) + bob;
 
 ctx.save();
@@ -704,6 +721,147 @@ if (h > 8) {
 }
 
 
+
+/**
+ * V316 · Dragon's body language. This is deliberately pure: the same frame and
+ * rig pose always have the same anatomy, including during peer replays.
+ * Each value is an angle/offset within the existing vector drawing. No
+ * collision, attack, timer, cached pose or network state is touched.
+ */
+export function dragonBodyLanguage(pose) {
+  const p = pose || {};
+  const state = p.state || "idle";
+  if (state === "dead" || state === "hurt" || state === "wall") return null;
+  const unit = (v) => typeof v === "number" && Number.isFinite(v) ? clamp(v, 0, 1) : 0;
+  const signed = (v) => typeof v === "number" && Number.isFinite(v) ? clamp(v, -1, 1) : 0;
+  const form = typeof p.form === "number" && Number.isFinite(p.form) ? Math.round(clamp(p.form, 0, 4)) : 0;
+  const baby = form === 0, ancient = form >= 3;
+  const reduced = p.reduceMotion === true || !!DRAGON_MOTION_MEDIA?.matches;
+  const calm = reduced ? 0.75 : 1;
+  const out = { bob: 0, lean: 0, head: 0, legF: 0, legB: 0,
+    armF: 0, armB: 0, wing: 0, wingFar: 0, spread: 0, tail: 0 };
+  let active = false;
+  // Landing compresses the abdomen and folds both wings against the ground;
+  // babies stumble, while elders keep their balance.
+  const land = (state === "idle" || state === "run") ? unit(p.land) : 0;
+  if (land > .03) {
+    active = true;
+    const fold = land * calm;
+    out.bob += (baby ? 4.4 : ancient ? 2.1 : 3.1) * fold;
+    out.lean -= .17 * fold;
+    out.head += .16 * fold;
+    out.legF += .28 * fold;
+    out.legB -= .22 * fold;
+    out.wing -= .62 * fold;
+    out.wingFar -= .39 * fold;
+    out.spread -= .33 * fold;
+    out.tail -= .57 * fold;
+  }
+  if (state === "run") {
+    const speed = unit(p.speed);
+    const brake = unit(p.brake), turn = unit(p.turnPulse);
+    if (speed > .08 || brake > .03 || turn > .03) {
+      active = true;
+      const weight = baby ? 1.25 : ancient ? .8 : 1;
+      out.bob += (baby ? 1.3 : .45) * speed;
+      out.lean += (.08 * speed - .25 * brake + .31 * turn) * weight * calm;
+      out.head += (-.11 * brake + .2 * turn) * calm;
+      out.legF += (.4 * brake - .3 * turn) * calm;
+      out.legB -= (.24 * brake + .21 * turn) * calm;
+      out.armF += (.27 * turn - .22 * brake) * calm;
+      out.wing -= (.24 * speed + .66 * brake) * calm;
+      out.wingFar += (.35 * turn - .36 * brake) * calm;
+      out.spread += .26 * turn - .22 * brake;
+      out.tail -= (.44 * brake + .62 * turn) * calm;
+    }
+  } else if (state === "jump") {
+    active = true;
+    const climb = Math.max(0, -signed(p.vy));
+    out.bob -= (baby ? 1.6 : 2.6) * climb;
+    out.lean -= (.11 + .11 * climb) * calm;
+    out.head -= .15 * calm;
+    out.legF += .32; out.legB -= .17;
+    out.armF += .28; out.armB += .16;
+    out.wing += (baby ? .4 : .7) * calm;
+    out.wingFar += (baby ? .12 : .43) * calm;
+    out.spread += .20;
+    out.tail += .4 + .35 * climb;
+  } else if (state === "fall") {
+    active = true;
+    const drop = Math.max(0, signed(p.vy));
+    out.lean += (.11 + .14 * drop) * calm;
+    out.head += .2 * calm;
+    out.legF -= .21; out.legB += .3;
+    out.armF += .18;
+    out.wing -= (baby ? .12 : .36) * calm;
+    out.wingFar -= .3 * calm;
+    out.spread += .18;
+    out.tail -= .55 * drop;
+  } else if (state === "glide" || p.move === "fly") {
+    active = true;
+    const climb = -signed(p.vy);
+    out.lean += (.06 - .14 * climb) * calm;
+    out.head -= (.12 + .08 * climb) * calm;
+    out.legF -= .25; out.legB -= .18;
+    out.armF -= .18; out.armB -= .12;
+    // Baby wings beat steeply; the mature dragon glides on broad membranes.
+    out.wing += (baby ? .21 : ancient ? -.18 : -.06) * calm;
+    out.wingFar += (baby ? -.15 : ancient ? -.4 : -.26) * calm;
+    out.spread += ancient ? .02 : .12;
+    out.tail += .22 * climb;
+  } else if (state === "attack") {
+    active = true;
+    const a = unit(p.atk), charge = ease(seg(a, 0, .32)),
+      snap = ease(seg(a, .32, .54)), release = 1-ease(seg(a,.65,1));
+    out.lean += (-.2 * charge + .25 * snap) * release * calm;
+    out.head -= .14 * charge * release;
+    out.armF += .22 * snap * release;
+    out.legF += .27 * snap * release;
+    out.wing -= .42 * charge * release;
+    out.wingFar += .28 * snap * release;
+    out.tail += (.58 * snap - .4 * charge) * release;
+  } else if (state === "cast") {
+    active = true;
+    const k = unit(p.cast), charge = ease(seg(k,0,.28)),
+      strike = ease(seg(k,.28,.52)), release = 1-ease(seg(k,.79,1));
+    if (p.castSlot === 0) { // J: throat fills, then the body recoils on breath
+      out.bob -= 1.5 * charge * release;
+      out.lean += (-.21*charge+.25*strike)*release;
+      out.head += (-.22*charge+.14*strike)*release;
+      out.wing -= .34*charge*release;
+      out.wingFar -= .22*charge*release;
+      out.tail -= .38*charge*release;
+    } else if (p.castSlot === 1) { // K: the two wings cut the air in sequence
+      out.lean += (-.23*charge+.21*strike)*release;
+      out.armF += .3*strike*release;
+      out.wing += (.52*strike-.28*charge)*release;
+      out.wingFar += (.33*strike-.16*charge)*release;
+      out.spread += .16*strike;
+      out.tail += .42*strike*release;
+    } else { // L: brace legs and spread the wings for the meteor roar
+      out.bob += 1.1*charge*release;
+      out.lean -= .22*charge*release;
+      out.head -= .28*strike*release;
+      out.legF += .32*charge*release;
+      out.legB -= .28*charge*release;
+      out.wing += .25*strike*release;
+      out.wingFar += .4*strike*release;
+      out.spread += .15*strike;
+      out.tail += .62*strike*release;
+    }
+  } else if (state === "victory") {
+    active = true;
+    out.lean -= ancient ? .10 : .05;
+    out.head -= .12;
+    out.armF += .18;out.armB += .11;
+    out.wing += baby ? .12 : .35;
+    out.wingFar += baby ? -.12 : .25;
+    out.tail += ancient ? .38 : .2;
+  }
+  if (!active) return null;
+  for (const key of Object.keys(out)) out[key] = clamp(out[key], -2, 2);
+  return Object.freeze(out);
+}
 
 /**
  * El dragón desplaza el aire con el cuerpo: transición de ala al aterrizar,
