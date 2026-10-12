@@ -108,7 +108,14 @@ function spark(ctx,x,y,r,color){
 export function familyDuetChoreography(value,reduce=false){
  const s=readFamilyDuet(value);if(!s)return null;
  const pose=familyDuetPose(s,reduce);
- const beat=FAMILY_DUET_BEATS.findIndex(b=>s.age>=b-17&&s.age<=b+18);
+ // Telegraph windows overlap for two frames. The nearest keyframe owns
+ // the on-screen cue so an earlier impact never masks the coming L beat.
+ const nearest=FAMILY_DUET_BEATS.reduce((best,b,i)=>{
+  const distance=Math.abs(s.age-b);
+  return s.age>=b-17&&s.age<=b+18&&distance<best.distance
+   ?{index:i,distance}:best;
+ },{index:-1,distance:Infinity});
+ const beat=nearest.index;
  const delta=beat<0?null:s.age-FAMILY_DUET_BEATS[beat];
  return Object.freeze({
   hero:s.hero,ally:FAMILY_DUETS[s.hero].ally,borrowedL:FAMILY_DUETS[s.hero].borrowedL,
