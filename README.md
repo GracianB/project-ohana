@@ -386,3 +386,12 @@ El CI guarda métricas headless Chromium para escritorio y móvil emulado en un 
 La portada y el juego ya no ejecutan módulos completos de cinemáticas raras antes de entrar. El kit común `systems/cinema-kit.js` conserva la calidad Canvas de la bienvenida y la carga bajo demanda mantiene las escenas originales de evolución, victoria y supremas. El selector activo es `family-grid`; dos módulos históricos inactivos ya no figuran como entradas de la página.
 
 Los recursos continúan íntegros en el precache del Service Worker para que el juego funcione offline. Esto reduce el trabajo de importación, compilación y ejecución inicial, pero no equivale a reducir los bytes descargados por la instalación offline. El CI comprueba el arranque en Chromium y el disparo de las tres cinemáticas originales. Solo despliegue en GitHub Pages, sin Netlify ni TURN de pago.
+
+
+### V368 · Actualizaciones offline incrementales
+
+OHANA instala todos los recursos necesarios para funcionar sin conexión. La instalación inicial precarga el juego por lotes de seis peticiones, con prioridad para la portada, el motor y sus estilos, en vez de intentar descargarlo todo a la vez.
+
+Desde V368 se conserva un manifiesto de huellas Git de cada archivo en la caché. Al publicar una nueva versión, el Service Worker puede reutilizar sin descarga los recursos exactamente iguales y descargar únicamente los que cambien. La primera migración desde V367 necesita reconstruir la caché porque no había metadatos comparables. Una instalación interrumpida no reemplaza una versión anterior válida.
+
+**Al desarrollar V369 y siguientes:** actualizar referencias `ohana-NNN` y ejecutar `node tools/update-offline-revisions.mjs` después de editar recursos y antes de la batería `npm run release:check`. El Release Gate rechaza cualquier manifiesto incorrecto. Se conserva el catálogo offline completo, el control de errores 503 para recursos no disponibles y el aislamiento de endpoints externos.
