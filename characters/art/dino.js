@@ -475,6 +475,39 @@ function drawDinoHiccup(ctx, R, f, x, y, h) {
   ctx.restore();
 }
 
+// Living dinosaur, not a disconnected bobbing sticker. Thorax, neck bridge,
+// hip, jaw and tail share a single anchored stage performance in every form.
+export function dinoWelcomeAnatomy(pose={},form=0){
+ const idle=Object.freeze({active:false,thoraxX:1,thoraxY:1,bob:0,
+  lean:0,head:0,neckX:0,neckY:0,jaw:0,armFront:0,armBack:0,
+  tail:0,legFront:0,legBack:0});
+ const w=pose.dinoWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle"||
+    ['dino-roll','charge','pound'].includes(pose.move))return idle;
+ const u=n=>Number.isFinite(n)?clamp(n,0,1):0;
+ const formIndex=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
+ const breath=(u(w.breath)-.5)*2;
+ const melody=u(w.melody),dragon=u(w.dragon),chase=u(w.chase);
+ const rib=[.065,.055,.048,.044,.040][formIndex];
+ const baby=formIndex===0;
+ return Object.freeze({
+  active:true,
+  thoraxX:1+rib*breath,
+  thoraxY:1-rib*.55*breath,
+  bob:-breath*(baby?.80:1.30)+melody*(-1.6)+dragon*1.9+chase*(-.90),
+  lean:breath*.015-melody*.052+dragon*.10+chase*.060,
+  head:breath*.035-melody*.13+dragon*.33+chase*.14,
+  neckX:breath*(baby?.5:.8)+melody*1.9-dragon*2.8+chase*2.8,
+  neckY:breath*(baby?.4:.7)+dragon*(-2.0)+chase*(-.7),
+  jaw:melody*.19+dragon*.49+chase*.26,
+  armFront:melody*.24+dragon*.83+chase*.33,
+  armBack:melody*.17+dragon*.51+chase*.14,
+  tail:breath*.15+melody*.23-dragon*.34+chase*.22,
+  legFront:dragon*.10+chase*.09,
+  legBack:-dragon*.09-chase*.07
+ });
+}
+
 function draw(ctx, pose, R) {
   const f = clamp(Math.round(Number(pose.form) || 0),0,4), c = PAL[f], P = F[f], t = Number(pose.t) || 0;
   // U temporarily grants invulnerability. The shared rig classifies long
@@ -720,6 +753,21 @@ function draw(ctx, pose, R) {
     // Keep this specific face soft; an idle baby dinosaur does not need a
     // Colossus roar or the fake heavy-hitter silhouette from combat U.
   }
+  // Relative movement is applied before headX/headY and the original
+  // dinoNeckBridgePoints. Neck/head/torso therefore remain joined; the
+  // grounded legs are drawn in a separate coordinate space.
+  const stageLife=dinoWelcomeAnatomy(pose,f);
+  if(stageLife.active){
+    bob+=stageLife.bob;lean+=stageLife.lean;
+    headRot+=stageLife.head;
+    hdx+=stageLife.neckX;hdy+=stageLife.neckY;
+    jaw=clamp(jaw+stageLife.jaw,0,1.45);
+    armF+=stageLife.armFront;armB+=stageLife.armBack;
+    legF+=stageLife.legFront;legB+=stageLife.legBack;
+    tailA=clamp(tailA+stageLife.tail,-1.04,.84);
+    if((welcome?.dragon||0)>.48)eyeMood="closed";
+    else if((welcome?.melody||0)>.4)eyeMood="happy";
+  }
   const legRoot = P.legL + P.legW * 0.5;
   const hipY = -legRoot + bob + (rolling || st === "dead" ? 0 : motion.hipDrop);
 
@@ -742,6 +790,7 @@ function draw(ctx, pose, R) {
     ctx.translate(0, hipY);
     ctx.rotate(lean);
     if (!rolling && motion.squash > 0) ctx.scale(1+motion.squash*.028,1-motion.squash*.028);
+    if(stageLife.active)ctx.scale(stageLife.thoraxX,stageLife.thoraxY);
   };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
 

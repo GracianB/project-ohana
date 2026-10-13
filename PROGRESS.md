@@ -1,3 +1,13 @@
+## OHANA V355 · Dino con cuello, pecho y peso conectados todo el ciclo (ohana-355)
+
+- Segunda intervención de la ronda profunda por personaje. Dino deja de limitar su actuación visible al gag final de pisotón. Sin reescribir los cinco beats originales, ahora responde a la melodía de Kilo (0.5–1.3 s), al estornudo de Dragón (3.3–4.1 s) y a la persecución de Frita/Pizza (5.4–6.3 s). Vuelve a su pisotón original hacia los 11–13 s.
+- `dinoWelcomeAnatomy` calcula por evolución respiración y contracción de pecho y reacción de cadera/cuello/cabeza/brazos/cola. Se usa el rig original `characters/art/dino.js` y el cuello se dibuja con `dinoNeckBridgePoints(P,headX,headY)` **después** de calcular la cabeza: evita abrir una costura entre cuello y cuerpo. El escalado de la mitad superior se ancla a la cadera y no multiplica ni desplaza los pies apoyados.
+- F0 huevo-cáscara mantiene su vientre redondo y patas cortas; F4 Coloso se mueve con mayor peso y dilatación torácica menor. El rodar, el hipo, los fósiles, la U y la física no se modifican. En los estados de combate, daño o vuelo la señal extra está inactiva.
+- Modo reducido estable, reloj puro reproducible, datos de reacción en E2E, fingerprint para no congelar fotogramas, cinco formas comprobadas, pruebas Node de geometría/continuidad y tres capturas adicionales; caché `ohana-355`.
+- PR apilada sobre V354 hasta que su CI y su fusión finalicen. No pasar a `main` antes de Node, navegador, cooperativo Chromium/Firefox, regresión visual y Release Gate verdes. Sin despliegue Netlify.
+
+---
+
 ## OHANA V354 · Dragón vivo durante catorce segundos y auditoría de los diez (ohana-354)
 
 - Primera edición de la segunda ronda **personaje por personaje**. Se ha estudiado el código del reparto entero en `AUDITORIA_PERSONAJES_V354.md`; quedan objetivos precisos V355–V363 para Dino, Frita, Pizza, Yomi, Cuerno, Kilo, Stitcho, Chispín y Michi.
