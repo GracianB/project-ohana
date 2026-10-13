@@ -14,6 +14,7 @@ import {
 import { ROSTER } from "../characters/roster.js";
 import { canonId } from "./save.js";
 import { sfx } from "../engine/audio.js";
+import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -63,14 +64,55 @@ export function playTitleIntro() {
   const fc = fullCanvas(el.querySelector("canvas"));
   const ctx = fc.ctx;
   const reduce = reducedMotion();
-  const CAST = ["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
+  const CAST = WELCOME_CAST_ORDER;
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     return [id, makeDummy(id, 0, def.color)];
   }));
   el.dataset.v45Cast = String(CAST.length);
   el.dataset.openingMode = "family-welcome";
+  el.dataset.openingFit = "measured-silhouettes";
 
+  // The real active Canvas renderer supplies optical bounds once per opening.
+  // New wings, horns and artwork cannot silently unbalance the ten-character cast.
+  function measureCastArtwork() {
+    const cv = document.createElement("canvas");
+    cv.width = 320; cv.height = 320;
+    const probe = cv.getContext("2d", { willReadFrequently: true });
+    const result = {};
+    if (!probe) return result;
+    for (const id of CAST) {
+      try {
+        probe.setTransform(1, 0, 0, 1, 0, 0);
+        probe.clearRect(0, 0, 320, 320);
+        const def = ROSTER.find(r => r.id === id);
+        const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
+        subject._poseOverride = "idle";
+        subject.grounded = true;
+        probe.save();
+        probe.translate(160, 260);
+        drawDummy(probe, subject, 0, 0, 1, 24);
+        probe.restore();
+        const data = probe.getImageData(0, 0, 320, 320).data;
+        let x0 = 320, x1 = -1, y0 = 320, y1 = -1;
+        for (let y = 0; y < 320; y++) for (let x = 0; x < 320; x++) {
+          if (data[(y * 320 + x) * 4 + 3] < 110) continue;
+          x0 = Math.min(x0, x); x1 = Math.max(x1, x);
+          y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+        }
+        if (x1 >= x0 && y1 >= y0) {
+          result[id] = {width:x1-x0+1,height:y1-y0+1,
+            centerOffsetX:(x0+x1)/2-160};
+        }
+      } catch (_) {
+        // When pixel readback is blocked, deterministic fallback bounds
+        // still allow the welcome to render without a blank scene.
+      }
+    }
+    return result;
+  }
+  const opticalBounds = measureCastArtwork();
+  el.dataset.openingMeasured = String(Object.keys(opticalBounds).length);
   let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
 
   function layout() {
@@ -78,7 +120,9 @@ export function playTitleIntro() {
     return {
       W, H,
       floor: H * 0.80,
-      heroH: clamp(Math.min(W * .105, H * .13), 34, 102),
+      heroH: W < 760
+        ? clamp(Math.min(W * .16, H * .10), 30, 76)
+        : clamp(Math.min(W * .105, H * .145), 44, 112),
     };
   }
 
@@ -91,12 +135,25 @@ export function playTitleIntro() {
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
     p._poseOverride = opts.pose || "idle";
-    const scale = h / Math.max(1, baseHeight(id, 0)) * (id === "cuerno" ? .48 : 1);
+    const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
+    const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
-    ctx.translate(x, footY);
+    ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
     if (opts.rotate) ctx.rotate(opts.rotate);
-    drawDummy(ctx, p, 0, 0, scale, tf);
+    drawDummy(ctx, p, 0, 0, fit.scale, tf);
+    ctx.restore();
+    // Labels travel with the character during comic beats.
+    const def = ROSTER.find(r => r.id === id);
+    ctx.save();
+    ctx.globalAlpha = opts.alpha === undefined ? .82 : clamp(opts.alpha,0,1)*.82;
+    ctx.fillStyle = "#fff2d3";
+    ctx.shadowColor = "rgba(0,0,0,.72)";
+    ctx.shadowBlur = 5;
+    ctx.font = "700 " + (fc.W < 760 ? 9 : 11) + "px Outfit,system-ui,sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(def?.name || id, x, footY + 12, slotWidth * .86);
     ctx.restore();
   }
 
