@@ -1,3 +1,13 @@
+## OHANA V369 · Primera actualización incremental comprobada (ohana-369)
+
+- Comparación de datos reales desde la edición V368 publicada: 200 recursos con SHA de Git y tamaño verificable, 199 mantienen contenido idéntico. Solo `index.html` cambia de `ohana-368` a `ohana-369`.
+- Modelo exacto sobre los bytes del repositorio: **6.433.149 bytes (6,14 MiB)** reutilizables, 17.817 bytes de la nueva portada y 99,5% de recursos iguales. Estos son bytes de origen sin comprimir, no métricas de red sobre conexión real.
+- `tools/offline-baseline-v368.json` retiene el inventario anterior para pruebas reproducibles; `tools/offline-upgrade-report.mjs` valida la huella actual de cada archivo, calcula el diferencial y emite `test-results/performance/v369-offline-upgrade.json`.
+- La nueva versión del Service Worker almacena únicamente en CacheStorage local `/.ohana-install-stats.json` (reutilizados, descargados y total). Sin analítica, identificadores ni servicios nuevos.
+- Pruebas Node instalan un V368 simulado con los 199 archivos reales conservados, prueban una sola petición de nueva portada, comparan bytes de `game.js`, validan el contador de instalación y confirman que una petición fallida no sustituye la versión anterior.
+- Nuevo test Chromium con Service Worker y CacheStorage auténticos: instancia un entorno V368 con contenidos reales, comprueba solicitudes HTTP de actualización, verifica manifestación de `199 reutilizados + 1 descargado` y que el juego se abre offline después de activar V369.
+- Se preserva la limitación de seis conexiones, las 200 entradas offline, todas las cinemáticas, diez héroes, matriz cooperativa completa y GitHub Pages sin servicios de pago.
+
 ## OHANA V368 · Precaché incremental y seis descargas simultáneas (ohana-368)
 
 - La instalación PWA conserva el catálogo completo de 200 recursos estáticos y módulos del juego, más la ruta `./`, incluyendo las cinemáticas diferidas de V367, personajes, CSS y sprites para jugar sin conexión.
