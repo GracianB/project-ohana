@@ -47,7 +47,7 @@ test("V357 Pizza notices Kilo, Chispín and Dino independently of its own chase"
 test("V357 deformation shares one transform with original cheese, crust, real arms and shoes",()=>{
  const art=readFileSync(new URL("../characters/art/pizza.js",import.meta.url),"utf8");
  for(const name of ["function slicePath(","function cheeseString(","function crust(",
-  "function draw(","function params(","function drawLeg","function drawArm"])
+  "function draw(","function params(","const drawLeg =","const drawArm ="])
   assert.ok(art.includes(name),"canonical Pizza anatomy "+name);
  assert.match(art,/const life=pizzaWelcomeAnatomy\(pose,f\)/);
  assert.match(art,/ctx\.scale\(P\.sx, P\.sy\)/);
