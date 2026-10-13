@@ -48,12 +48,20 @@ try {
  await page.evaluate(()=>navigator.serviceWorker.register("./sw.js?v=ohana-369",{scope:"./"}));
  // CacheStorage creation may precede the last cache.put on slower runners.
  // Observe the actual completed metadata, not merely the new cache name.
+ let ready=false;
  try {
-   await page.waitForFunction(async()=>{
-     if(!navigator.serviceWorker.controller)return false;
-     const c=await caches.open("ohana-static-ohana-369");
-     return !!(await c.match("./.ohana-install-stats.json"));
-   },undefined,{timeout:45000});
+   await page.waitForFunction(()=>!!navigator.serviceWorker.controller,undefined,{timeout:45000});
+   // Do not pass an async predicate to waitForFunction: the polling runtime
+   // may treat the returned Promise as a truthy value before it settles.
+   for(let attempt=0;attempt<200;attempt++){
+     ready=await page.evaluate(async()=>{
+       const c=await caches.open("ohana-static-ohana-369");
+       return !!(await c.match("./.ohana-install-stats.json"));
+     });
+     if(ready)break;
+     await page.waitForTimeout(150);
+   }
+   if(!ready)throw new Error("Installation stats missing after 30s");
  } catch(error) {
    const diagnostic=await page.evaluate(async()=>{
      const names=await caches.keys();
