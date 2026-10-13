@@ -11,23 +11,43 @@ export const MICHI_WELCOME_BEATS=Object.freeze({
  flick:Object.freeze([4.40,4.54,4.76,4.89]),
  purr:Object.freeze([4.86,5.02,5.25,5.43])
 });
+// V363 · Michi judges the other nine even outside her own theatrical slot.
+// Body-only cat reactions: never yarn casts, damage, U or duplicate tails.
+export const MICHI_FAMILY_REACTIONS=Object.freeze({
+ melody:Object.freeze([.62,.82,1.12,1.40]),
+ spark:Object.freeze([1.73,1.92,2.25,2.55]),
+ chase:Object.freeze([5.64,5.83,6.13,6.42]),
+ yomi:Object.freeze([8.06,8.25,8.62,8.93]),
+ dino:Object.freeze([11.83,12.03,12.39,12.72])
+});
 export function michiWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
+ const breath=(1+Math.sin(t*TAU*5/14))*.5;
  if(reducedMotion)return Object.freeze({phase:"idle",inspect:0,sideeye:0,groom:0,flick:0,purr:0,
-  ear:0,tail:0,wing:0,halo:.1,reduced:true});
+  breath:.5,melody:0,spark:0,chase:0,yomi:0,dino:0,ear:0,tail:0,wing:0,halo:.1,reduced:true});
  const inspect=pulse(t,...MICHI_WELCOME_BEATS.inspect);
  const sideeye=pulse(t,...MICHI_WELCOME_BEATS.sideeye);
  const groom=pulse(t,...MICHI_WELCOME_BEATS.groom);
  const flick=pulse(t,...MICHI_WELCOME_BEATS.flick);
  const purr=pulse(t,...MICHI_WELCOME_BEATS.purr);
+ const melody=pulse(t,...MICHI_FAMILY_REACTIONS.melody);
+ const spark=pulse(t,...MICHI_FAMILY_REACTIONS.spark);
+ const chase=pulse(t,...MICHI_FAMILY_REACTIONS.chase);
+ const yomi=pulse(t,...MICHI_FAMILY_REACTIONS.yomi);
+ const dino=pulse(t,...MICHI_FAMILY_REACTIONS.dino);
  const phase=purr>.22?"purr":flick>.22?"flick":groom>.22?"groom":
    sideeye>.22?"sideeye":inspect>.22?"inspect":"idle";
  return Object.freeze({phase,inspect,sideeye,groom,flick,purr,
-  ear:clip(.3*inspect+.58*sideeye+.12*groom+.92*flick+.32*purr),
-  tail:clip(.1*inspect+.28*sideeye+.36*groom+.98*flick+.44*purr),
-  wing:clip(.08*inspect+.16*sideeye+.28*groom+.45*flick+.74*purr),
-  halo:clip(.1+.12*inspect+.09*sideeye+.16*groom+.27*flick+.43*purr),
+  breath,melody,spark,chase,yomi,dino,
+  ear:clip(.3*inspect+.58*sideeye+.12*groom+.92*flick+.32*purr
+    +melody*.16+spark*.30+chase*.26+yomi*.17+dino*.28),
+  tail:clip(.1*inspect+.28*sideeye+.36*groom+.98*flick+.44*purr
+    +melody*.12+spark*.27+chase*.43+yomi*.22+dino*.34),
+  wing:clip(.08*inspect+.16*sideeye+.28*groom+.45*flick+.74*purr
+    +melody*.09+spark*.14+yomi*.16+dino*.27),
+  halo:clip(.1+.12*inspect+.09*sideeye+.16*groom+.27*flick+.43*purr
+    +melody*.04+spark*.07+chase*.06+yomi*.10+dino*.09),
   reduced:false});
 }
 export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
