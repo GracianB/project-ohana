@@ -200,6 +200,23 @@ async function auditPage(page, label) {
     ['idle','sniff','prank','charge','hiccup','cloud'].includes(chispinFilm.livePhase),
     label+': Chispin original spring rig is disconnected from actual welcome');
   assert.equal(chispinFilm.motion,'full',label+': Chispin unexpectedly reduced-motion');
+  // V353 Michi judges everyone with authentic kitten/cloud/moon/guardian poses.
+  const michiFilm=await page.evaluate(async()=>{
+    const {michiWelcomeBeat}=await import('/systems/intro-michi-stage.js?e2e=v353');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[.1,3.32,3.78,4.2,4.65,5.14].map(t=>michiWelcomeBeat(t).phase),
+      livePhase:el?.dataset.michiWelcomePhase||'',
+      motion:el?.dataset.michiWelcomeMotion||'',
+      stageAlive:!!el?.querySelector('canvas')
+    };
+  });
+  assert.deepEqual(michiFilm.phases,['idle','inspect','sideeye','groom','flick','purr'],
+    label+': Michi must inspect, judge, groom, flick and purr');
+  assert.ok(michiFilm.stageAlive&&
+    ['idle','inspect','sideeye','groom','flick','purr'].includes(michiFilm.livePhase),
+    label+': Michi original cat rig disconnected from welcome Canvas');
+  assert.equal(michiFilm.motion,'full',label+': Michi unexpectedly reduced-motion');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
