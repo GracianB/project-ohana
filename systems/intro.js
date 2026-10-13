@@ -23,6 +23,7 @@ import { yomiWelcomeBeat, drawYomiWelcomeFX } from "./intro-yomi-stage.js";
 import { cuernoWelcomeBeat, drawCuernoWelcomeFX } from "./intro-cuerno-stage.js";
 import { kiloWelcomeBeat, drawKiloWelcomeFX } from "./intro-kilo-stage.js";
 import { stitchoWelcomeBeat, drawStitchoWelcomeFX } from "./intro-stitcho-stage.js";
+import { chispinWelcomeBeat, drawChispinWelcomeFX } from "./intro-chispin-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -81,7 +82,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -103,7 +104,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -172,6 +173,7 @@ export function playTitleIntro() {
     p._introCuerno = id === "cuerno" ? (opts.cuernoWelcome || null) : null;
     p._introKilo = id === "kilo" ? (opts.kiloWelcome || null) : null;
     p._introStitcho = id === "stitcho" ? (opts.stitchoWelcome || null) : null;
+    p._introChispin = id === "chispin" ? (opts.chispinWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -356,9 +358,28 @@ export function playTitleIntro() {
       el.dataset.stitchoWelcomePhase=stitchoBeat.phase;
       el.dataset.stitchoWelcomeMotion=reduce?"reduced":"full";
     }
-    actor("chispin",cxp,chispin.foot+1,heroH*.92,tf,{
-      facing:-1,pose:duel>.08?"attack":zap>.08?"victory":"idle",melee:duel>.08?8:0
+    // V352 Chispin reacts THROUGH its living spring-tail and gill rig,
+    // complementing Stitcho's independent comedy rather than attacking.
+    const chispinBeat=chispinWelcomeBeat(loop,reduce);
+    const chispinHeight=heroH*.96;
+    drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"back");
+    actor("chispin",cxp,chispin.foot+1,chispinHeight,tf,{
+      facing:-1,pose:"idle",chispinWelcome:chispinBeat
     });
+    drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"front");
+    if(isE2E){
+      el.dataset.chispinWelcomePhase=chispinBeat.phase;
+      el.dataset.chispinWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(chispinBeat.sniff>.48){
+      comicBubble("¿CHISPA?",cxp,chispin.foot-heroH*1.04,chispinBeat.sniff,"#fff2bf","left");
+    }else if(chispinBeat.prank>.48){
+      comicBubble("¡JA, JA!",cxp,chispin.foot-heroH*1.03,chispinBeat.prank,"#f3c0ff","left");
+    }else if(chispinBeat.charge>.48){
+      comicBubble("¡ESTORNUDO!",cxp,chispin.foot-heroH*1.08,chispinBeat.charge,"#ffe6b3","left");
+    }else if(chispinBeat.cloud>.48){
+      comicBubble("¿MI NUBE?",cxp,chispin.foot-heroH*1.06,chispinBeat.cloud,"#e8d8ff","left");
+    }
     if(stitchoBeat.scout>.48){
       comicBubble("¿LISTO?",sx,stitcho.foot-heroH*1.08,stitchoBeat.scout,"#a5f2ff","right");
     }else if(stitchoBeat.taunt>.48){
@@ -372,7 +393,8 @@ export function playTitleIntro() {
     }else if(stitchoBeat.swagger>.48){
       comicBubble("¡CALCULADO!",sx,stitcho.foot-heroH*1.09,stitchoBeat.swagger,"#d7bafa","right");
     }
-    if(zap>.18)comicBubble("UPS.",cxp,chispin.foot-heroH*.88,zap,"#7ee7ff","left");
+    if(chispinBeat.hiccup>.39)
+      comicBubble("UPS.",cxp,chispin.foot-heroH*.95,chispinBeat.hiccup,"#7ee7ff","left");
 
     // Michi se limita a juzgar a todos.
     const catFace=loop>3.0&&loop<4.2?-1:1;

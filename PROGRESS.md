@@ -1,3 +1,16 @@
+## OHANA V352 · Chispín interpreta una tormenta pequeña con cinco gestos reales (ohana-352)
+
+- Novena intervención artística individual de la bienvenida de diez personajes. Chispín deja de repetir la pose `attack/victory` del duelo genérico: olfatea una chispa, hace una travesura a Stitcho, acumula electricidad en las branquias y el muelle, tiene un hipo cómico durante el accidente luminoso y crea una nubecilla amable. Cinco beats deterministas en 14 segundos: `sniff/prank/charge/hiccup/cloud`, con diálogos propios y respuesta «UPS.» en el hipo.
+- `systems/intro-chispin-stage.js`: director temporal independiente y efectos decorativos acotados a su espacio, sin añadir ataques reales, daño ni cambio al rayo escénico compartido.
+- Arte verdadero: `characters/art/chispin.js` reexporta `pikachu.js`. `chispinWelcomeRig` conecta las cinco expresiones a cabeza, ojos, boca, orejas, branquias, brazos, patas y cola de muelle; F0 tiene proporciones compactas, F2 conserva su cresta, F3 su cuerpo ancho y nubes, F4 la corona y aro tormentoso. Los efectos de combate `mouthSpark/skyBolt/whip` no se disparan por la intro.
+- `characters/draw.js` pasa la señal de actuación solo al doble de la intro, en el Canvas verdadero y con una clave de caché diferente en cada gesto; el personaje real del juego y su repertorio J/K/L/U se conservan.
+- Modo de movimiento reducido: pose estática sin FX frontales. Seis nuevos tests Node: dramaturgia temporal, accesibilidad, 5 formas, geometría, caché y protección del rig; Browser E2E desktop/mobile y cinco capturas visuales.
+- Validación CI de cooperativo: tras dos cierres transitorios WebRTC registrados en el runner de Chromium (Dino y Yomi, no relacionados con el código escénico), `tests/browser/six-hero-multiplayer.mjs` reintenta **una única sesión completa** solo si `rtc-retry-policy.mjs` confirma pérdida real del canal y fallo de eco de U. Se mantienen 3 s, todas las comprobaciones de daño/eco y un segundo error bloquea CI; cinco pruebas Node controlan expresamente la política contra falsos positivos.
+- Caché `ohana-352` en `index.html` y `sw.js` más precaché del nuevo módulo. Barrera de fusión: Node, Browser E2E, multijugador Chromium y Firefox, regresión visual y Release Gate, sin despliegue Netlify.
+- Siguiente personaje: Michi V353, para finalizar la ronda individual de diez.
+
+---
+
 ## OHANA V351 · Stitcho interpreta cinco actos con anatomía original (ohana-351)
 
 - Octava intervención artística individual en la intro de diez héroes. Stitcho tiene cinco escenas deterministas: antenas curiosas (scout), provocación gestual (taunt), encogerse antes del relámpago (curl), reacción de sorpresa al accidente con Chispín (shock), y recuperación arrogante (swagger). Cada escena se dirige mediante una señal pura dentro del bucle de 14 s; los diálogos son «¿LISTO?», «¡TE PILLO!», «¡PLAN B!», «¿EN SERIO?» y «¡CALCULADO!». Se mantiene el gag compartido con Chispín y su «UPS.».

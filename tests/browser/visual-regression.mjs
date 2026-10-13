@@ -209,6 +209,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V352 five fixed-time films of Chispin beside the undisturbed Stitcho.
+  for(const [at,phase,label] of [
+    [.42,'sniff','00zm-chispin-curiosity'],
+    [.90,'prank','00zn-chispin-prank'],
+    [1.72,'charge','00zo-chispin-mini-storm'],
+    [2.35,'hiccup','00zp-chispin-hiccup'],
+    [2.97,'cloud','00zq-chispin-cloud-smile']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.chispinWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});

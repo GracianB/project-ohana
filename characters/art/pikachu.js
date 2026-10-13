@@ -308,6 +308,37 @@ function figure(ctx, R, pose, f, S, C, o) {
   return tip;
 }
 
+// V352 · Stage-only Chispin acting is connected to the original spring-tail,
+// gill, ear, mouth, two-arm and two-foot anatomy. Never borrowed by gameplay.
+export function chispinWelcomeRig(pose={},form=0){
+ const w=pose.chispinWelcome;
+ const idle={active:false,head:0,headDX:0,ear:0,gill:0,charge:0,coil:0,
+  tail:0,tailAmp:0,armA:0,armB:0,leg:0,lift:0,bodyRot:0,eyes:"normal",mouth:"smile"};
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return idle;
+ const n=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
+ const sniff=n(w.sniff),prank=n(w.prank),charge=n(w.charge),
+  hiccup=n(w.hiccup),cloud=n(w.cloud);
+ const child=form===0?.64:form===3?.83:1;
+ return {
+  active:sniff+prank+charge+hiccup+cloud>.003,
+  head:-.18*sniff+.17*prank-.21*charge+.36*hiccup-.13*cloud,
+  headDX:child*(-1.6*sniff+2.8*prank-2.4*charge+3.2*hiccup),
+  ear:-.1*sniff+.22*prank-.32*charge+.48*hiccup-.1*cloud,
+  gill:.14*sniff+.43*prank+.76*charge+.9*hiccup+.37*cloud,
+  charge:.12*sniff+.18*prank+.43*charge+.28*hiccup+.31*cloud,
+  coil:.17*sniff+.36*prank+.82*charge-.21*hiccup+.25*cloud,
+  tail:.08*sniff+.31*prank+.73*charge-.34*hiccup+.33*cloud,
+  tailAmp:.12*sniff+.25*prank-.26*charge+.40*hiccup+.16*cloud,
+  armA:child*(.31*sniff-.6*prank+1.08*charge+.83*hiccup+.69*cloud),
+  armB:child*(-.28*sniff+.62*prank-1.13*charge-.76*hiccup-.55*cloud),
+  leg:child*(.1*sniff+.23*prank+.42*charge-.27*hiccup+.14*cloud),
+  lift:child*(-1.6*prank-2.2*hiccup-1.1*cloud),
+  bodyRot:.04*sniff-.08*prank-.11*charge+.21*hiccup-.05*cloud,
+  eyes:hiccup>.26?"squeeze":cloud>.26?"happy":charge>.26?"squeeze":prank>.26?"happy":"normal",
+  mouth:hiccup>.25?"o":cloud>.25?"smile":charge>.25?"flat":prank>.25?"grin":"smile"
+ };
+}
+
 function opts(pose, f, S) {
   const t = pose.t, st = pose.state;
   const o = {
@@ -419,6 +450,25 @@ function opts(pose, f, S) {
       o.armB = -2.0 - Math.sin(t * .42) * .3;
       o.rot = Math.sin(t * .42) * .12 * k;
     }
+  }
+  const welcome=chispinWelcomeRig(pose,f);
+  if(welcome.active){
+    o.headRot+=welcome.head;
+    o.headDX+=welcome.headDX;
+    o.earA+=welcome.ear;
+    o.gillFlare+=welcome.gill;
+    o.charge+=welcome.charge;
+    o.tailAxis+=welcome.coil;
+    o.tailLen=Math.min(1.6,Math.max(.65,o.tailLen+welcome.tail*.24));
+    o.tailAmp=Math.min(1.55,Math.max(.5,o.tailAmp+welcome.tailAmp));
+    o.armA+=welcome.armA;o.armB+=welcome.armB;
+    o.legBend+=welcome.leg*2;
+    o.footX+=welcome.leg*2;
+    o.lift+=welcome.lift;
+    o.rot+=welcome.bodyRot;
+    o.eyes=welcome.eyes;o.mouth=welcome.mouth;
+    // Charges are cheek/gill light on the body, not an attack or projectile.
+    o.mouthSpark=0;o.skyBolt=0;o.whip=0;
   }
   return o;
 }
