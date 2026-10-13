@@ -387,6 +387,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V362: four late scenes show Chispin using REAL body and spring tail,
+  // not fake lightning or a frozen tiny drawing.
+  for(const [at,reaction,label] of [
+    [3.72,'dragon','00zq1-chispin-hears-dragon'],
+    [5.75,'chase','00zq2-chispin-enjoys-chase'],
+    [8.50,'yomi','00zq3-chispin-meets-yomi'],
+    [12.20,'dino','00zq4-chispin-surprised-by-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.chispinFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V353: five real cat expressive silhouettes in the same ten-hero stage.
   for(const [at,phase,label] of [
     [3.32,'inspect','00zr-michi-inspects'],
