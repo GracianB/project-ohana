@@ -13,6 +13,26 @@ if(state==="cast"&&form>=3&&pose?.castSlot===3)return "stargaze";
 if(state!=="idle"||!(Number(pose?.flourish)>.06&&Number(pose?.flourish)<.94))return "";
 return form===4?(Number(pose.flourishN)%2?"bow":"sneeze"):SOUL_BEATS[form];
 }
+// V349 · Pure pose applied to the ORIGINAL five evolution silhouettes.
+// Newborn Cuernin has no hooves or wings; Destello is still an orb.
+export function cuernoWelcomeAnatomy(pose={},form=0){
+ const f=Math.max(0,Math.min(4,Number(form)|0)),b=pose?.cuernoWelcome;
+ const u=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
+ if(!b||pose?.state==="dead"||pose?.state==="hurt")return Object.freeze({
+  tilt:0,lift:0,hoof:0,mane:0,wing:0,tail:0,glow:0});
+ const wonder=u(b.wonder),tiptoe=u(b.tiptoe),aurora=u(b.aurora);
+ const surprise=u(b.surprise),bow=u(b.bow);
+ const clamp=(v,a,c)=>Math.max(a,Math.min(c,v));
+ return Object.freeze({
+  tilt:clamp(-wonder*.11-tiptoe*.04-aurora*.18+surprise*.19+bow*.20,-.4,.4),
+  lift:clamp(-wonder*.8-tiptoe*(f<2?2:1.5)-aurora*2.9+surprise*2.2+bow*1.8,-5,4),
+  hoof:f>=2?clamp(tiptoe*4+surprise*2.4-bow*1.1,0,6):0,
+  mane:f>=2?clamp((Number.isFinite(b.mane)?b.mane:0)*4.4,-5,5):0,
+  wing:f>=3?u(b.wing):0,
+  tail:f>=2?clamp((Number.isFinite(b.tail)?b.tail:0)*4.4,-5,5):0,
+  glow:u(b.glow)
+ });
+}
 // Small pantomimes belong to the character, not world particles or physics.
 function drawCuernoSoul(ctx,pose,R,form,t){
 const beat=cuernoSoulBeat(pose,form);if(!beat)return;
@@ -98,8 +118,9 @@ export function cuernoTailPose(pose,form,t){
  const wave=pose?.reduceMotion?0:Math.sin(time*.075+phase*.22)*amplitude*.55+
    (running?Math.sin(phase)*amplitude*.52:0);
  const speed=Math.max(0,Math.min(1,Number(pose?.speed)||0));
- return {swing:Math.max(-amplitude,Math.min(amplitude,wave)),
-   lift:air?7+f:running?1.8+speed*2.3:pose?.reduceMotion?0:Math.sin(time*.055)*1.15};
+ const intro=cuernoWelcomeAnatomy(pose,f);
+ return {swing:Math.max(-amplitude,Math.min(amplitude,wave+intro.tail)),
+   lift:(air?7+f:running?1.8+speed*2.3:pose?.reduceMotion?0:Math.sin(time*.055)*1.15)+intro.hoof*.25};
 }
 function drawRootedTail(ctx,pose,form,t,rootX,rootY,colors){
  const {swing,lift}=cuernoTailPose(pose,form,t);
@@ -128,11 +149,13 @@ export function cuernoWingPose(pose,form,t){
  const phase=Number.isFinite(Number(pose?.phase))?Number(pose.phase):0;
  const time=Number.isFinite(Number(t))?Number(t):0;
  const ritual=cuernoRitualBody(pose,form);
-  const open=air?1:ritual?Math.min(1,.27+ritual.wing):cast?.84:victory?.95:
-   state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23;
+  const intro=cuernoWelcomeAnatomy(pose,form);
+ const open=Math.min(1,(air?1:ritual?Math.min(1,.27+ritual.wing):cast?.84:victory?.95:
+   state==="run"?.52:cuernoSoulBeat(pose,form)==="stargaze"?.74:form===4?.29:.23)+intro.wing*.56);
  const flutter=pose?.reduceMotion?0:air?4.8:cast||victory?2.9:state==="run"?2.3:1.1;
  const flap=pose?.reduceMotion?0:Math.sin(time*.10+phase*.12)*flutter;
- return {open,flap,hinge:pose?.reduceMotion?0:Math.sin(time*.065+phase*.2)*(air?.055:.022)};
+ return {open,flap:flap+intro.wing*2.1,
+   hinge:(pose?.reduceMotion?0:Math.sin(time*.065+phase*.2)*(air?.055:.022))+intro.wing*.036};
 }
 // V78 pure Canvas motion contract for three equine forms.
 export function cuernoLegPose(pose,form,t,clock=0,far=false){
@@ -145,10 +168,11 @@ export function cuernoLegPose(pose,form,t,clock=0,far=false){
  const range=(f===2?(far?6:7.6):f===3?(far?7.8:10):far?8.7:11.5)*tempo;
  const moving=run&&!pose?.reduceMotion;
  const ritual=cuernoRitualBody(pose,f);
-  const additional=ritual?.hoof||0;
-  return {reach:(moving?step*range:0)+(far?-.8:1.3)*(ritual?.load||0),tuck:air?(far?8:11)+(f-2)*1.2:0,
-  kneeLift:(moving?Math.max(0,-step)*(f===2?1.3:2.2):0)+additional*.62,
-  hoofLift:(moving?Math.max(0,step)*((f-2)*1.25+2):0)+(far?.15:.9)*additional};
+  const additional=ritual?.hoof||0,intro=cuernoWelcomeAnatomy(pose,f);
+  return {reach:(moving?step*range:0)+(far?-.8:1.3)*(ritual?.load||0)+intro.hoof*(far?-.37:.75),
+    tuck:air?(far?8:11)+(f-2)*1.2:0,
+    kneeLift:(moving?Math.max(0,-step)*(f===2?1.3:2.2):0)+additional*.62+intro.hoof*.35,
+    hoofLift:(moving?Math.max(0,step)*((f-2)*1.25+2):0)+(far?.15:.9)*additional+intro.hoof*(far?.16:.48)};
 }
 export function cuernoManePose(pose,form,t,index){
  const f=Math.max(2,Math.min(4,form|0)),i=Math.max(0,Math.min(6,index|0));
@@ -159,7 +183,7 @@ export function cuernoManePose(pose,form,t,index){
  const run=pose?.state==="run",air=!!pose?.air||pose?.state==="jump";
  const breeze=Math.sin(time*(f===2?.13:.09)+i*(f===2?.83:f===3?.74:.57))*(f===2?1.8:3);
  const wind=run?Math.sin(phase)*speed*(f===2?2.6:f===3?3.2:4):0;
- return Math.max(-9,Math.min(9,breeze+wind+(air?(f===2?1.2:2.8):0)));
+ return Math.max(-9,Math.min(9,breeze+wind+(air?(f===2?1.2:2.8):0)+cuernoWelcomeAnatomy(pose,f).mane));
 }
 export function cuernoMagicPose(pose,form){
 if(pose?.state==="dead"||pose?.state==="hurt")return null;
@@ -354,8 +378,9 @@ function drawLivingHorn(ctx,pose,R,t){
   const moving=pose.state==="run",air=!!pose.air;
   const k=moving?Math.sin(pose.phase||t*.15):Math.sin(t*.06);
   const ritual=cuernoRitualBody(pose,0);
-  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0)+(ritual?.tilt||0);
-  const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3)+(ritual?.lift||0);
+  const intro=cuernoWelcomeAnatomy(pose,0);
+  const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0)+(ritual?.tilt||0)+intro.tilt;
+  const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3)+(ritual?.lift||0)+intro.lift;
   ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
   const aura=.5+.5*Math.sin(t*.085);
   ctx.globalAlpha=.19+.09*aura;ctx.fillStyle="#ffe3f5";
@@ -399,8 +424,9 @@ function drawFirstBody(ctx,pose,R,t){
 const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||pose.state==="fall";
 const phase=Number(pose.phase)||0,beat=Math.sin(phase);
 const ritual=cuernoRitualBody(pose,1);
-const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.35)+(ritual?.lift||0);
-const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0)+(ritual?.tilt||0);
+const intro=cuernoWelcomeAnatomy(pose,1);
+const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.35)+(ritual?.lift||0)+intro.lift;
+const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0)+(ritual?.tilt||0)+intro.tilt;
 const squish=run?.035*Math.abs(beat):0,hurt=pose.state==="hurt"||pose.state==="dead";
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
 // Three tiny strands of rainbow hair, not a pony's neck or torso.
@@ -446,9 +472,10 @@ const flourish=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.flourish)||0))
 const hurt=pose.state==="hurt"||pose.state==="dead";
 const cast=pose.state==="cast"||pose.state==="attack";
 const ritual=cuernoRitualBody(pose,2);
-const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35)+(ritual?.lift||0);
+const intro=cuernoWelcomeAnatomy(pose,2);
+const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math.sin(t*.082)*1.35)+(ritual?.lift||0)+intro.lift;
 const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
-const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0)+(ritual?.tilt||0);
+const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
 const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
 // All four strands emerge from the croup; no detached tail during the gallop.
@@ -531,12 +558,13 @@ const TAU=Math.PI*2,run=pose.state==="run",air=!!pose.air||pose.state==="jump"||
 const phase=Number(pose.phase)||0,speed=Math.max(0,Math.min(1.4,Number(pose.speed)||0));
 const gallop=run?Math.sin(phase):0,flight=air?1:0;
 const ritual=cuernoRitualBody(pose,3);
-const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1)+(ritual?.lift||0);
+const intro=cuernoWelcomeAnatomy(pose,3);
+const bounce=(Number(pose.bounce)||0)+(run?-2.7*Math.abs(Math.sin(phase*2)):Math.sin(t*.07)*1.1)+(ritual?.lift||0)+intro.lift;
 const rear=-24,front=13,coat="#e7f4ff",ink="#475075",shade="#b6d2f3",gold="#ffe49e";
 const flare=Math.max(0,Math.min(1,Number(pose.flourish)||0));
 const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
-const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0)+(ritual?.tilt||0);
+const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
@@ -656,8 +684,9 @@ const wingMotion=cuernoWingPose(pose,4,t),unfold=wingMotion.open;
 const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
 const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
 const ritual=cuernoRitualBody(pose,4);
-const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0);
-const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0)+(ritual?.tilt||0);
+const intro=cuernoWelcomeAnatomy(pose,4);
+const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0)+intro.lift;
+const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
 // V75: root the rainbow tail beneath the obsidian croup. Its arc stays inside
 // a small envelope during runs, jumps and cinematic poses, never flying away.

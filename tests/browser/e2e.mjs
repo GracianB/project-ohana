@@ -133,6 +133,23 @@ async function auditPage(page, label) {
   assert.ok(yomiFilm.stageAlive&&
     ['idle','listen','gather','reveal','startle','bow'].includes(yomiFilm.livePhase),
     label+': Yomi acting director disconnected from intro Canvas');
+  // V349: Cuerno evolves from living horn (no imaginary legs) to four-hoof
+  // foal and winged guardian. Intro phase read from real rendered stage.
+  const cuernoFilm=await page.evaluate(async()=>{
+    const {cuernoWelcomeBeat}=await import('/systems/intro-cuerno-stage.js?e2e=v349');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[.5,9.44,9.81,10.13,10.46,10.84].map(t=>cuernoWelcomeBeat(t).phase),
+      livePhase:el?.dataset.cuernoWelcomePhase||'',
+      stageAlive:!!el?.querySelector('canvas')
+    };
+  });
+  assert.deepEqual(cuernoFilm.phases,
+    ['idle','wonder','tiptoe','aurora','surprise','bow'],
+    label+': Cuerno needs five unique character beats');
+  assert.ok(cuernoFilm.stageAlive&&
+    ['idle','wonder','tiptoe','aurora','surprise','bow'].includes(cuernoFilm.livePhase),
+    label+': Cuerno scene must render in the real welcome Canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };

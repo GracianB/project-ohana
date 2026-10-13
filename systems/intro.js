@@ -20,6 +20,7 @@ import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
 import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
 import { pizzaWelcomeBeat, drawPizzaWelcomeFX } from "./intro-pizza-stage.js";
 import { yomiWelcomeBeat, drawYomiWelcomeFX } from "./intro-yomi-stage.js";
+import { cuernoWelcomeBeat, drawCuernoWelcomeFX } from "./intro-cuerno-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -78,7 +79,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -100,7 +101,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -166,6 +167,7 @@ export function playTitleIntro() {
     p._introFrita = id === "frita" ? (opts.fritaWelcome || null) : null;
     p._introPizza = id === "pizza" ? (opts.pizzaWelcome || null) : null;
     p._introYomi = id === "yomi" ? (opts.yomiWelcome || null) : null;
+    p._introCuerno = id === "cuerno" ? (opts.cuernoWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -462,11 +464,33 @@ export function playTitleIntro() {
         yomiBeat.bow,"#ffe7b5","left");
     }
 
-    // Cuerno dibuja una aurora minúscula y satisfecha.
-    const rk=Math.sin(clamp(seg(loop,9.15,10.45),0,1)*Math.PI);
-    actor("cuerno",cuerno.x,cuerno.foot+1,heroH*.98,tf,{facing:-1,pose:rk>.2?"victory":"idle"});
-    rainbow(cuerno.x-W*.015,cuerno.foot-heroH*.72,22,rk);
-    if(rk>.35) comicBubble("¡TACHÁN!",cuerno.x-W*.025,cuerno.foot-heroH*1.02,rk,"#efbaff","right");
+    // V349 · Cuerno is a LIVING HORN at F0, not a tiny generic unicorn.
+    // Subsequent forms keep their canonical orb/foal/wings. Stage magic
+    // echoes the horn without triggering the actual dream U.
+    const cuernoBeat=cuernoWelcomeBeat(loop,reduce);
+    const cuernoHeight=heroH*1.06;
+    drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"back");
+    actor("cuerno",cuerno.x,cuerno.foot+1,cuernoHeight,tf,{
+      facing:-1,alpha:1,pose:"idle",cuernoWelcome:cuernoBeat
+    });
+    drawCuernoWelcomeFX(ctx,cuerno.x,cuerno.foot+1,cuernoHeight,t,cuernoBeat,"front");
+    if(isE2E){
+      el.dataset.cuernoWelcomePhase=cuernoBeat.phase;
+      el.dataset.cuernoWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(cuernoBeat.wonder>.44){
+      comicBubble("¿ESO BRILLA?",cuerno.x,cuerno.foot-heroH*1.03,
+        cuernoBeat.wonder,"#edd8ff","right");
+    }else if(cuernoBeat.aurora>.44){
+      comicBubble("¡MIRA MI LUZ!",cuerno.x,cuerno.foot-heroH*1.06,
+        cuernoBeat.aurora,"#e2d9ff","right");
+    }else if(cuernoBeat.surprise>.44){
+      comicBubble("¡UY!",cuerno.x,cuerno.foot-heroH*1.05,
+        cuernoBeat.surprise,"#f5d9ff","right");
+    }else if(cuernoBeat.bow>.44){
+      comicBubble("PARA TI.",cuerno.x,cuerno.foot-heroH*1.04,
+        cuernoBeat.bow,"#d8eeff","right");
+    }
 
     // V345 · Dino deserves his own living scene: curiosity, grounded
     // anticipation, gentle two-foot stomp, surprise and contagious delight.
