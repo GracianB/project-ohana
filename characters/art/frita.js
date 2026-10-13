@@ -603,6 +603,37 @@ if (st === "idle" && pose.flourish > 0) {
     P.gag = k;
   }
 }
+// V346 · Only the welcome version directs the EXISTING bendable fry spine,
+// connected arms, two planted shoes and ketchup cape. Combat art remains
+// exactly as before when pose.fritaWelcome is absent.
+const welcome=pose.fritaWelcome;
+if(welcome&&st!=="dead"&&st!=="hurt"){
+  const unit=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
+  const ready=unit(welcome.ready),dash=unit(welcome.dash);
+  const reach=unit(welcome.reach),wobble=unit(welcome.wobble);
+  const triumph=unit(welcome.triumph),cape=unit(welcome.cape);
+  P.a0+=ready*(-.16)+dash*.18+reach*.20+wobble*(-.27)+triumph*(-.15);
+  P.bend+=ready*(-.28)+dash*.19+reach*.24+wobble*(-.55)+triumph*(-.25);
+  P.wig+=dash*.22+wobble*.24+triumph*.12;
+  P.bx+=dash*1.8+reach*2.5-wobble*2.8;
+  P.lift+=ready*1.4+dash*(-1.1)+reach*(-.7)+wobble*2.4+triumph*(-1.8);
+  P.legF=[P.legF[0]+ready*.18+dash*.36+wobble*(-.31)+triumph*.22,
+    P.legF[1]+dash*1.6+wobble*1.3];
+  P.legB=[P.legB[0]-ready*.15-dash*.32+wobble*.38-triumph*.19,
+    P.legB[1]-dash*1.5+wobble*1.1];
+  P.armF={...P.armF,ang:P.armF.ang+ready*.62+reach*1.30+wobble*1.10+triumph*1.65,
+    bend:(P.armF.bend||0)+wobble*.7};
+  P.armB={...P.armB,ang:P.armB.ang-ready*.29-reach*.72+wobble*(-.60)+triumph*.65};
+  P.faceRot+=ready*(-.09)+reach*(-.18)+wobble*.33+triumph*(-.14);
+  P.capeFlow+=cape*11+dash*5+triumph*8;
+  P.capeWind=Math.max(P.capeWind,cape*.85+triumph*.45);
+  P.capeUp=Math.max(P.capeUp||0,reach*.16+triumph*.25);
+  // Distinct moods and physically hand-held props, never separate stickers.
+  if(ready>.20){P.mood="happy";P.mouth="grin";P.item="salt";}
+  if(reach>.20){P.mood="angry";P.mouth="open";P.item="ketchup";P.squeeze=reach;}
+  if(wobble>.20){P.mood="hurt";P.mouth="o";P.item=null;}
+  if(triumph>.20){P.mood="happy";P.mouth="grin";P.item=withFork?"forkUp":"salt";}
+}
 return P;
 }
 
