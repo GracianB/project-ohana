@@ -2463,6 +2463,15 @@ ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,R*1.35,0,TAU);ctx.fill();
 ctx.globalAlpha=.68*fade;
 ctx.strokeStyle=f.color;ctx.lineWidth=2.2;
 ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();
+// Pizza's long-lived oven pulses reach 430 world units. A stable outer
+// contour makes later hits readable after the 12-frame launch warning fades.
+if(f.mode==="pizza"){
+ ctx.globalAlpha=.26*fade;
+ ctx.strokeStyle="#ffbf74";ctx.lineWidth=1.5;
+ ctx.setLineDash([12,16]);ctx.beginPath();
+ ctx.arc(x,y,SUPREME_LAUNCH_RADII.pizza,0,TAU);ctx.stroke();
+ ctx.setLineDash([]);
+}
 
 if(f.mode==="kilo"){
   for(let i=0;i<8;i++){const a=i*TAU/8+t*.018;const rr=R*.78;ctx.save();ctx.translate(x+Math.cos(a)*rr,y+Math.sin(a)*rr);ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,0,5,14,0,0,TAU);ctx.stroke();ctx.restore();}
