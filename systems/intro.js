@@ -513,6 +513,8 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.fritaWelcomePhase=fritaBeat.phase;
       el.dataset.fritaWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.fritaFamilyReaction=fritaBeat.spirit>.2?"spirit":
+        fritaBeat.fire>.2?"fire":fritaBeat.music>.2?"music":"rest";
     }
     if(fritaBeat.ready>.45){
       comicBubble("¡A COCINAR!",fritaX+heroH*.07,fritaY-heroH*1.0,
