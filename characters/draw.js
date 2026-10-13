@@ -1007,6 +1007,11 @@ pose.nineLives > 0 ? 1 : 0, q(pose.look && pose.look.y, 6),
 q(pose.squash, 8), q(pose.stretch, 8), q(pose.bodyTilt, 8),
 q(pose.turnPulse, 8),q(pose.brake, 8),q(pose.anticipation, 8),
 pose.reduceMotion ? 1 : 0,
+// Stage-only Dragon expressiveness must invalidate the presentCanvas cache.
+pose.dragonWelcome?.phase || "",q(pose.dragonWelcome?.inhale,12),
+q(pose.dragonWelcome?.sneeze,12),q(pose.dragonWelcome?.recoil,12),
+q(pose.dragonWelcome?.proud,12),q(pose.dragonWelcome?.wing,8),
+q(pose.dragonWelcome?.tail,8),
 ].join("|");
 }
 
@@ -1131,6 +1136,7 @@ const duetProtected=isDuetProtected(p,t);
 // Propagate accessibility preference to the *local* render pose only.
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true};
+if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
@@ -1204,7 +1210,7 @@ if (burstK > 0.35) {
   if(p.id==="kilo")flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; }
-const painted = ["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+const painted = p._introForceCanvas||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 if (painted) {
