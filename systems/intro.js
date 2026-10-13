@@ -15,6 +15,7 @@ import { ROSTER } from "../characters/roster.js";
 import { canonId } from "./save.js";
 import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
+import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -64,10 +65,17 @@ export function playTitleIntro() {
   const fc = fullCanvas(el.querySelector("canvas"));
   const ctx = fc.ctx;
   const reduce = reducedMotion();
+  const isE2E = new URLSearchParams(location.search).has("e2e");
+  let frozenSceneTime = null;
+  if(isE2E)window.__OHANA_WELCOME_SET_FRAME = at => {
+    frozenSceneTime = Number.isFinite(at) ? Math.max(0,at) : null;
+  };
   const CAST = WELCOME_CAST_ORDER;
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
-    return [id, makeDummy(id, 0, def.color)];
+    const player = makeDummy(id, 0, def.color);
+    if(id==="dragon")player._introForceCanvas=true;
+    return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
   el.dataset.openingMode = "family-welcome";
@@ -88,6 +96,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
+        if(id==="dragon")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -115,7 +124,7 @@ export function playTitleIntro() {
   el.dataset.openingMeasured = String(Object.keys(opticalBounds).length);
   // Browser acceptance can audit every cast member without probing a screenshot
   // or relying on animation timing. Production never exports this debug data.
-  if (new URLSearchParams(location.search).has("e2e")) {
+  if (isE2E) {
     const welcomeL = layout();
     window.__OHANA_WELCOME_CAST_AUDIT = CAST.map(id => {
       const slot = welcomeCastSpot(id,welcomeL.W,welcomeL.floor,welcomeL.heroH);
@@ -147,6 +156,8 @@ export function playTitleIntro() {
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
     p._poseOverride = opts.pose || "idle";
+    // Stage-only gesture data. Never touches save state, combat or physics.
+    p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -313,14 +324,30 @@ export function playTitleIntro() {
     const catEye=Math.sin(clamp(seg(loop,3.55,4.25),0,1)*Math.PI);
     if(catEye>.05) comicBubble("YO NO FUI.",cat.x,cat.foot-heroH*.93,catEye,"#ffb6e4","left");
 
-    // Dragón practica. La primera llama del ciclo es ridículamente pequeña.
-    const sneeze=Math.sin(clamp(seg(loop,3.05,3.68),0,1)*Math.PI);
-    actor("dragon",dragon.x,dragon.foot+1,heroH*1.03,tf,{facing:1,pose:sneeze>.05?"attack":"idle",melee:sneeze>.05?8:0});
-    if(sneeze>0){
-      ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="rgba(255,126,58,"+sneeze+")";ctx.shadowColor="#ff7e3a";ctx.shadowBlur=18;
-      ctx.beginPath();ctx.moveTo(dragon.x+W*.024,dragon.foot-heroH*.47);ctx.quadraticCurveTo(dragon.x+W*.044,dragon.foot-heroH*.69,dragon.x+W*.052,dragon.foot-heroH*.48);ctx.quadraticCurveTo(dragon.x+W*.035,dragon.foot-heroH*.39,dragon.x+W*.024,dragon.foot-heroH*.47);ctx.fill();ctx.restore();
-      comicBubble("ACHÍS.",dragon.x+W*.024,dragon.foot-heroH*.88,sneeze,"#ff8a45","left");
-      comicBubble("...",cat.x,cat.foot-heroH*.72,sneeze,"#ffb6e4","right");
+    // V344 · Dragón's entire 14-second story is independently directed:
+    // quiet living silhouette → proud inhale → tiny sneeze → recoil → grin.
+    // Never hijack global abilities, movement or the other nine actors.
+    const dragonBeat=dragonWelcomeBeat(loop,reduce);
+    const dragonHeight=heroH*1.10;
+    drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"back");
+    actor("dragon",dragon.x,dragon.foot+1,dragonHeight,tf,{
+      facing:1,pose:"idle",dragonWelcome:dragonBeat
+    });
+    drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"front");
+    if(isE2E){
+      el.dataset.dragonWelcomePhase=dragonBeat.phase;
+      el.dataset.dragonWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(dragonBeat.sneeze>.20){
+      comicBubble("¡ACHÍS!",dragon.x+heroH*.18,dragon.foot-heroH*.98,
+        dragonBeat.sneeze,"#ff8a45","left");
+    }else if(dragonBeat.proud>.36){
+      comicBubble("¡LO TENÍA!",dragon.x,dragon.foot-heroH*1.06,
+        dragonBeat.proud,"#ffc46b","left");
+    }
+    if(dragonBeat.recoil>.30){
+      comicBubble("...",cat.x,cat.foot-heroH*.72,
+        dragonBeat.recoil*.85,"#ffb6e4","right");
     }
 
     // Frita y Pizza cruzan la escena persiguiendo una patata.
@@ -396,7 +423,7 @@ export function playTitleIntro() {
     const L=layout();
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     island(t,L);
-    scene(reduce?0.7:t,L);
+    scene(reduce?0.7:(frozenSceneTime ?? t),L);
     const vign=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
     vign.addColorStop(0,"rgba(0,0,0,0)");vign.addColorStop(1,"rgba(0,0,0,.52)");
     ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
@@ -413,6 +440,7 @@ export function playTitleIntro() {
     removeEventListener("resize",onResize);
     removeEventListener("keydown",enter,true);
     el.removeEventListener("pointerdown",enter);
+    if(isE2E)delete window.__OHANA_WELCOME_SET_FRAME;
     finishClasses();
     el.remove();
   }

@@ -97,6 +97,19 @@ try {
   assert.equal(openingState.complete, false, '00-opening-family: avanza sola al carrusel');
   assert.equal(openingState.mode, 'family-welcome', '00-opening-family: modo visual incorrecto');
   await capture(page, '00-opening-family');
+  // V344 directed frames prove that Dragon's personality is visible within
+  // the full ten-hero composition, not merely described in source comments.
+  for(const [at,phase,label] of [
+    [2.76,'inhale','00b-dragon-inhale'],
+    [3.52,'sneeze','00c-dragon-fire-sneeze'],
+    [4.40,'proud','00d-dragon-proud-recovery']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>document.querySelector('#ohana-intro')?.dataset.dragonWelcomePhase===expected,
+      phase,{timeout:1600});
+    await capture(page,label);
+  }
+  await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
   await page.waitForSelector('#btn-play', { state:'visible', timeout:2500 });
