@@ -136,6 +136,19 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V355 Dino retains original neck bridge and planted feet while noticing
+  // the family's early moments; these frames occur outside its main stomp.
+  for(const [at,reaction,label] of [
+    [.90,'melody','00dd-dino-hears-kilo'],
+    [3.64,'dragon','00de-dino-reacts-to-dragon'],
+    [5.83,'chase','00df-dino-watches-chase']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.dinoFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V346 Frita's real choreographed body, props and cape in the full cast.
   for(const [at,phase,label] of [
     [4.55,'ready','00i-frita-chef-ready'],
