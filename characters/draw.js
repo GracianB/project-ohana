@@ -1033,6 +1033,8 @@ pose.pizzaWelcome?.phase || "",q(pose.pizzaWelcome?.sniff,12),
 q(pose.pizzaWelcome?.spring,12),q(pose.pizzaWelcome?.stretch,12),
 q(pose.pizzaWelcome?.catch,12),q(pose.pizzaWelcome?.flourish,12),
 q(pose.pizzaWelcome?.cheese,8),q(pose.pizzaWelcome?.crust,8),
+q(pose.pizzaWelcome?.breath,12),q(pose.pizzaWelcome?.melody,12),
+q(pose.pizzaWelcome?.spark,12),q(pose.pizzaWelcome?.dino,12),
 // V348: Yomi lantern stage does not reuse an old static presentCanvas pose.
 pose.yomiWelcome?.phase || "",q(pose.yomiWelcome?.listen,12),
 q(pose.yomiWelcome?.gather,12),q(pose.yomiWelcome?.reveal,12),
