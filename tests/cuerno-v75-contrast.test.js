@@ -23,7 +23,8 @@ test("V75 title preserves five increasing optical stages and frame-safe wing wid
  assert.match(title,/CUERNO_PORTRAIT_GROWTH = Object\.freeze\(\[\.68,\.77,\.86,\.94,1\.00\]\)/);
  assert.match(title,/CUERNO_PORTRAIT_ASPECT = Object\.freeze\(\[\.66,\.81,1\.16,1\.52,1\.60\]\)/);
  assert.match(title,/safeH \* growth \/ Math\.max\(1, baseH \* envelope\)/);
- assert.match(title,/def\.id==="cuerno"&&evo===4 \? "rgba\(177, 148, 236, 0\.52\)"/);
+ assert.match(title,/def\.id==="cuerno"&&evo===4 \? "legend" : "hero"/);
+  assert.match(title,/aura==="legend" \? "rgba\(177, 148, 236, 0\.52\)"/);
  assert.match(visual,/01i-cuerno: portrait progression reversed/);
  assert.match(visual,/cuernoLastGrowth/);
  const f3=between(art,"function drawStellarUnicorn(","function drawAuroraUnicorn(");
