@@ -17,12 +17,14 @@ export const DRAGON_WELCOME_BEATS=Object.freeze({
 /** Every state is analytic, repeatable and bounded. No timers or randomness. */
 export function dragonWelcomeBeat(seconds, reduceMotion=false){
   const raw=Number.isFinite(seconds)?seconds:0;
-  const time=((raw%14)+14)%14;
+  // A shared 14-second time base keeps idle breathing and the acted beats
+  // seamless and exactly repeatable at each new welcome loop.
+  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
   const inhale=pulse(time,...DRAGON_WELCOME_BEATS.inhale);
   const sneeze=pulse(time,...DRAGON_WELCOME_BEATS.sneeze);
   const recoil=pulse(time,...DRAGON_WELCOME_BEATS.recoil);
   const proud=pulse(time,...DRAGON_WELCOME_BEATS.proud);
-  const breath=(1+Math.sin(raw*2.1))*.5;
+  const breath=(1+Math.sin(time*TAU*5/14))*.5;
   const phase=sneeze>.17?"sneeze":recoil>.25?"recoil":inhale>.17?"inhale":proud>.25?"proud":"idle";
   if(reduceMotion)return Object.freeze({
     phase:"idle",inhale:0,sneeze:0,recoil:0,proud:.22,
@@ -30,8 +32,8 @@ export function dragonWelcomeBeat(seconds, reduceMotion=false){
   });
   return Object.freeze({
     phase,inhale,sneeze,recoil,proud,breath,
-    wing:clamp(.22+.15*Math.sin(raw*2.8)+inhale*.42+sneeze*.42+proud*.28),
-    tail:clamp(.34*Math.sin(raw*1.8)+recoil*.66-proud*.25,-1,1),
+    wing:clamp(.22+.15*Math.sin(time*TAU*6/14)+inhale*.42+sneeze*.42+proud*.28),
+    tail:clamp(.34*Math.sin(time*TAU*4/14)+recoil*.66-proud*.25,-1,1),
     glow:clamp(.10+sneeze*.9+proud*.36),
     reduced:false
   });
