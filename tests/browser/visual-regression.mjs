@@ -137,6 +137,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V347 Pizza's own acting frames in the same family portrait as Frita.
+  for(const [at,phase,label] of [
+    [4.58,'sniff','00n-pizza-cheese-sniff'],
+    [5.18,'spring','00o-pizza-elastic-spring'],
+    [5.80,'stretch','00p-pizza-mozzarella'],
+    [6.30,'catch','00q-pizza-pepperoni-catch'],
+    [6.78,'flourish','00r-pizza-proud-finish']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.pizzaWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});

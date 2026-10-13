@@ -500,6 +500,40 @@ if (pose.land > 0.05) {
   P.sy = lerp(P.sy, 0.88, L);
 }
 
+// V347: only an intro dummy directs Pizza's original elastic crust,
+// cheese, connected arms and planted shoes. Outside the intro the original
+// attack/oven/pepperoni form logic remains untouched.
+const welcome=pose.pizzaWelcome;
+if(welcome && st!=="dead" && st!=="hurt"){
+ const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+ const sniff=unit(welcome.sniff),spring=unit(welcome.spring),
+   stretch=unit(welcome.stretch),caught=unit(welcome.catch),
+   flourish=unit(welcome.flourish);
+ const baseArmF=P.armF||{ang:.5,bend:3},baseArmB=P.armB||{ang:-.5,bend:-3};
+ // Soft dough contracts under weight, then recovers; mozzarella follows.
+ P.sx=clamp(P.sx+sniff*.06+spring*.17-stretch*.11+caught*.11+flourish*.04,.64,1.45);
+ P.sy=clamp(P.sy-sniff*.05-spring*.15+stretch*.19-caught*.08+flourish*.04,.66,1.48);
+ P.roll+=sniff*(-.09)+spring*.16-stretch*(-.23)+caught*.20+flourish*.13;
+ P.bx+=spring*2.6-stretch*1.7+caught*3.4;
+ P.lift+=sniff*.4+spring*2.1+stretch*(-1.7)+caught*1.0-flourish*2.2;
+ P.legF=[P.legF[0]-spring*.27+caught*.33+flourish*.28,
+   P.legF[1]+spring*1.2+caught*.7];
+ P.legB=[P.legB[0]+spring*.24-caught*.31-flourish*.26,
+   P.legB[1]-spring*1.0+caught*.5];
+ P.armF={...baseArmF,ang:baseArmF.ang+sniff*.35+spring*.43+
+   stretch*1.46-caught*.88+flourish*1.21,bend:(baseArmF.bend||0)+stretch*1.5};
+ P.armB={...baseArmB,ang:baseArmB.ang-sniff*.23-spring*.39-
+   stretch*.83+caught*.58+flourish*.91};
+ P.dripK+=spring*.33+stretch*.74+caught*.48;
+ P.strings=Math.max(P.strings,unit(welcome.cheese),stretch*.94);
+ P.glow=Math.max(P.glow,.07+stretch*.18+flourish*.25);
+ P.look+=sniff*(-.23)+stretch*.17-caught*.4;
+ if(sniff>.20){P.mood="normal";P.mouth="o";}
+ if(spring>.20){P.mood="happy";P.mouth="open";}
+ if(stretch>.20){P.mood="angry";P.mouth="open";}
+ if(caught>.20){P.mood="happy";P.mouth="o";}
+ if(flourish>.20){P.mood="happy";P.mouth="grin";}
+}
 return P;
 }
 
