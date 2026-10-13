@@ -113,6 +113,18 @@ export function playTitleIntro() {
   }
   const opticalBounds = measureCastArtwork();
   el.dataset.openingMeasured = String(Object.keys(opticalBounds).length);
+  // Browser acceptance can audit every cast member without probing a screenshot
+  // or relying on animation timing. Production never exports this debug data.
+  if (new URLSearchParams(location.search).has("e2e")) {
+    const welcomeL = layout();
+    window.__OHANA_WELCOME_CAST_AUDIT = CAST.map(id => {
+      const slot = welcomeCastSpot(id,welcomeL.W,welcomeL.floor,welcomeL.heroH);
+      const fit = welcomeActorFit(opticalBounds[id],welcomeL.heroH,slot.slotWidth);
+      return {id,x:slot.x,foot:slot.foot,row:slot.row,slotWidth:slot.slotWidth,
+        measured:!!opticalBounds[id],paintedHeight:fit.paintedHeight,
+        paintedWidth:fit.paintedWidth,targetHeight:welcomeL.heroH};
+    });
+  }
   let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
 
   function layout() {
