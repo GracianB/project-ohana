@@ -1,4 +1,4 @@
-const VERSION = "ohana-339";
+const VERSION = "ohana-340";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -77,6 +77,7 @@ const PRECACHE = [
   "./systems/coop-resilience.js?v=" + VERSION,
   "./systems/coop-v95-presence.js?v=" + VERSION,
   "./systems/dino-combat.js?v=" + VERSION,
+  "./systems/dino-coop-effects.js?v=" + VERSION,
   "./systems/dino-stagecraft.js?v=" + VERSION,
   "./systems/cuerno-fantasy.js?v=" + VERSION,
   "./systems/cuerno-v92-resonance.js?v=" + VERSION,

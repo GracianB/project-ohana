@@ -21,12 +21,7 @@ export function createDinoEffects(ops) {
  };
  return {
    castUltimate(g,p,enemies,dmg,color) {
-     // Keep the original immediate Colossus hit and boss handling. New
-     // aftershocks follow, rather than multiplying one-frame screen damage.
-     for(const e of enemies) hitEnemy(g,e,dmg*1.06,{
-       kx:Math.sign(cx(e)-cx(p))*15,ky:-12,stun:62,
-       color,crit:true,shake:2,parts:8
-     });
+     // The initial stomp is announced for 18 ticks and uses the same local circle as its art.
      const span=260;
      p._specialT=Math.max(Number(p._specialT)||0,span);
      p._specialTitanT=Math.max(Number(p._specialTitanT)||0,span);
@@ -34,7 +29,7 @@ export function createDinoEffects(ops) {
      p.invuln=Math.max(Number(p.invuln)||0,72);
      g._dinoUltimate={beats:5,version:77,remaining:span};
      add({kind:"dinoColossus",x:cx(p),y:cy(p),life:span,max:span,
-       nextPulse:28,nextFossil:34,beat:0,stones:0,
+       nextPulse:28,nextFossil:34,beat:0,stones:0,warmup:18,initialDamage:dmg*.37,pulseGlow:0,pulseRadius:172+cap(Number(p.evo)||0,0,4)*32,
        dmg:dmg*.17,color:color||"#c8f04a",evo:cap(Number(p.evo)||0,0,4)});
      g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO!","#eaffb5",true);
      g.shake=Math.min(18,(g.shake||0)+9);
@@ -42,12 +37,21 @@ export function createDinoEffects(ops) {
    },
    update: {
  dinoColossus(g,f,p){
+   if(p?.dead||p?.id!=="dino"){if(g._dinoUltimate)g._dinoUltimate.remaining=0;return false;}
    if(--f.life<=0){if(g._dinoUltimate)g._dinoUltimate.remaining=0;return false;}
    f.x=cx(p);f.y=cy(p);
    const elapsed=f.max-f.life;
-   const maxStones=g.reduceMotion?3:Math.min(8,4+f.evo);
+   f.pulseGlow=Math.max(0,(f.pulseGlow||0)-1);
+   if(f.warmup>0&&--f.warmup===0){
+     const radius=172+f.evo*32;
+     for(const e of visibleTargets(g))if(Math.hypot(cx(e)-f.x,cy(e)-f.y)<=radius+Math.max(e.w,e.h)*.5)hitEnemy(g,e,f.initialDamage,{kx:Math.sign(cx(e)-f.x)*15,ky:-12,stun:62,color:f.color,crit:true,shake:2,parts:8});
+     f.pulseGlow=12;
+   }
+   const maxStones=Math.min(8,4+f.evo);
    if(--f.nextPulse<=0){
      f.nextPulse=34;
+     f.pulseRadius=245+f.evo*46;
+     f.pulseGlow=12;
      f.beat++;
      const range=245+f.evo*46;
      for(const e of visibleTargets(g)){
@@ -71,12 +75,13 @@ export function createDinoEffects(ops) {
      const frames=cap(Math.round(time),18,48);
      add({kind:"dinoFossilMark",x:dest.x,y:dest.y,life:frames,max:frames});
      f.stones++;
-     f.nextFossil=g.reduceMotion?45:25;
+     f.nextFossil=25;
    }
    if(g._dinoUltimate)g._dinoUltimate.remaining=f.life;
    return true;
  },
  dinoFossil(g,f) {
+   if(g.player?.dead)return false;
    if(--f.life<=0)return false;
    f.rot+=.08;f.age++;
    f.x+=f.vx;f.y+=f.vy;
@@ -193,13 +198,18 @@ dinoColossus(ctx,f,cam,t,g,p){
     ctx.globalAlpha=(1-a)*fade*.38;
     ctx.beginPath();ctx.ellipse(x,y+18,rr,rr*.32,0,0,TAU);ctx.stroke();
   }
-  const scale=1+.12*Math.sin(t*.085);
-  ctx.globalAlpha=(.09+.05*Math.sin(t*.11))*fade;
+  const scale=g?.reduceMotion?1:1+.12*Math.sin(t*.085);
+  ctx.globalAlpha=(g?.reduceMotion ? .09 : .09+.05*Math.sin(t*.11))*fade;
   ctx.fillStyle="#ddffad";ctx.beginPath();
   ctx.ellipse(x,y,38*scale,51*scale,0,0,TAU);ctx.fill();
   ctx.restore();
+  // Exact damaging circles, shown during preparation and before every aftershock.
+  ctx.save();const warning=f.warmup>0,r=warning?172+f.evo*32:f.nextPulse<=12?245+f.evo*46:f.pulseRadius||245+f.evo*46;
+  ctx.globalAlpha=fade*(warning?.55:f.nextPulse<=12?.36:f.pulseGlow>0?.5:.10);
+  ctx.strokeStyle=warning?'#ffe6a2':'#cbff9a';ctx.lineWidth=warning?2:3;
+  if(warning)ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();ctx.setLineDash([]);ctx.restore();
 },
-dinoFossil(ctx,f,cam,t){
+dinoFossil(ctx,f,cam,t,g){
   const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
   ctx.save();
   const sp=Math.hypot(f.vx,f.vy)||1,ex=x-f.vx/sp*46,ey=y-f.vy/sp*46;
@@ -208,7 +218,7 @@ dinoFossil(ctx,f,cam,t){
   grad.addColorStop(1,"rgba(245,255,165,.92)");
   ctx.strokeStyle=grad;ctx.lineWidth=f.r*1.25;ctx.lineCap="round";
   ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(x,y);ctx.stroke();
-  ctx.translate(x,y);ctx.rotate(f.rot);
+  ctx.translate(x,y);ctx.rotate(g?.reduceMotion?0:f.rot);
   ctx.fillStyle="#556645";ctx.strokeStyle="#d9ff9c";ctx.lineWidth=2;
   ctx.beginPath();
   for(let i=0;i<7;i++){const a=i*TAU/7,r=f.r*(.86+(i%3)*.08);

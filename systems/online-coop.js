@@ -14,7 +14,7 @@ import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./co
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import {drawKiloDuet} from "./kilo-duet.js";
-import { drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
+import { drawDinoAbilityEcho,drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
 import { capturePeerEffects,applyPeerEffects,advancePeerEffects,sendPeerEffectsWithReliableDuet,captureFamilyDuetRelay } from "./coop-peer-effects.js";
@@ -1021,7 +1021,15 @@ class OnlineCoop {
     target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
     target.invuln = Math.max(target.invuln || 0, 8);
-    target.stun = Math.max(target.stun || 0, 8);
+    const previousStun=Number(target.stun)||0;
+    target.stun = Math.max(previousStun, 8);
+    // Dino guest impacts retain their local control, with host/boss bounds.
+    const dinoImpact=this.remote?.characterId==='dino'&&payload.characterId==='dino'?payload.dinoImpact:null;
+    if(dinoImpact&&typeof dinoImpact==='object'){
+      if(Number.isFinite(dinoImpact.stun))target.stun=Math.max(previousStun,target.boss?Math.min(6,Math.max(0,dinoImpact.stun)):clamp(dinoImpact.stun,0,62));
+      if(Number.isFinite(dinoImpact.kx))target.vx=target.boss?(target.vx||0)+clamp(dinoImpact.kx,-8,8)*.08:clamp(dinoImpact.kx,-16,16);
+      if(Number.isFinite(dinoImpact.ky))target.vy=Math.min(target.vy||0,target.boss?Math.max(-1.6,dinoImpact.ky):clamp(dinoImpact.ky,-16,0));
+    }
     target._hitT = 10;
     target._hitMax = 10;
     if (game.player && !game.player.dead) {
@@ -1171,6 +1179,7 @@ class OnlineCoop {
     const peerFx=game.coopPeerEffects;
     if(peerFx){
       if(peerFx.familyDuet&&this.remote?.characterId===peerFx.familyDuet.hero)drawFamilyDuet(ctx,peerFx.familyDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+      if(this.remote?.characterId==='dino')drawDinoAbilityEcho(ctx,peerFx.dinoFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34},!!game.reduceMotion);
       if(this.remote?.characterId==='cat'){drawMichiAbilityEcho(ctx,peerFx.michiFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});if(peerFx.michiDuet)drawMichiDuet(ctx,peerFx.michiDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);}
       if(this.remote?.characterId==='chispin')drawChispinAbilityEcho(ctx,peerFx.chispinFx,game.cam,t,this.remote);
       if(this.remote?.characterId==='chispin'&&peerFx.chispinDuet)drawChispinDuet(ctx,peerFx.chispinDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);

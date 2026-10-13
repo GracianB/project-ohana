@@ -145,7 +145,7 @@ game.createCoopEnemy=(spec)=>{
  return enemy;
 };
 
-game.onAbilityHit=(enemy,damage)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage);
+game.onAbilityHit=(enemy,damage,options)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage,options);
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
 game.festivalVibrate = (ms) => buzz(ms);
@@ -507,7 +507,7 @@ return false;
 const first = !game.visited[id];
 game.roomId = id;
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
-resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
+resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.dinoAbilityFx=[];game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
 if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();

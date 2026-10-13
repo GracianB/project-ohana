@@ -1,3 +1,4 @@
+import {readDinoEffects,advanceDinoEffects} from './dino-coop-effects.js';
 import {readMichiDuet,readMichiEffects} from './michi-duet.js';
 import {readFamilyDuet,FAMILY_DUET_LENGTH} from './family-duets.js';
 import {readChispinDuet,readChispinEffects} from './chispin-duet.js';
@@ -47,6 +48,7 @@ export function captureFamilyDuetRelay(game,frameNo,scope){
    typeof scope!=="string"||!/^[a-zA-Z0-9_.:-]{1,96}$/.test(scope)||
    typeof game?.roomId!=="string")return null;
  const packet={protocol:2,scope,frameNo,roomId:game.roomId,
+  dinoFx:duet.hero==='dino'?(readDinoEffects(game.dinoAbilityFx||[])||[]).filter(f=>f.kind==='dinoColossus').slice(0,1):[],
   familyDuet:duet,michiDuet:null,chispinDuet:null,stitchoDuet:null,
   kiloDuet:null,michiFx:[],chispinFx:[],kiloFx:[],
   projectiles:[],slashes:[],bolts:[]};
@@ -54,13 +56,14 @@ export function captureFamilyDuetRelay(game,frameNo,scope){
 }
 export function capturePeerEffects(game,frameNo,scope){
  const frame={protocol:2,scope,frameNo,roomId:game.roomId,familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
+  dinoFx:readDinoEffects(game.dinoAbilityFx||[])||[],
   chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],
   kiloFx:(game.kiloAbilityFx||[]).slice(0,12).map(f=>effect(f,"kiloFx")).filter(Boolean),
   projectiles:(game.projectiles||[]).filter(p=>p?.owner==="player").slice(0,12).map(p=>effect(p,"projectiles")).filter(Boolean),
   slashes:(game.slashes||[]).slice(-6).map(s=>effect(s,"slashes")).filter(Boolean),
   bolts:(game.bolts||[]).slice(-6).map(b=>effect(b,"bolts")).filter(Boolean)};
  while(JSON.stringify(frame).length>8500){
-  const list=frame.michiFx.length?frame.michiFx:frame.projectiles.length?frame.projectiles:frame.slashes.length?frame.slashes:frame.bolts;
+  const list=frame.dinoFx.length?frame.dinoFx:frame.michiFx.length?frame.michiFx:frame.projectiles.length?frame.projectiles:frame.slashes.length?frame.slashes:frame.bolts;
   if(!list.length)break;list.pop();
  }
  return frame;
@@ -74,6 +77,7 @@ export function applyPeerEffects(game,frame){
  const current=game.coopPeerEffects;
  if(current?.scope===frame.scope&&frame.frameNo<=current.frameNo)return false;
  const value={scope:frame.scope,frameNo:frame.frameNo,ticks:0,familyDuet:readFamilyDuet(frame.familyDuet),michiDuet:readMichiDuet(frame.michiDuet),michiFx:readMichiEffects(frame.michiFx||[]),chispinDuet:readChispinDuet(frame.chispinDuet),kiloDuet:readKiloDuet(frame.kiloDuet),stitchoDuet:readStitchoDuet(frame.stitchoDuet)};
+ value.dinoFx=readDinoEffects(frame.dinoFx||[]);if(!value.dinoFx)return false;
  if(!value.michiFx||frame.michiDuet!=null&&!value.michiDuet)return false;
  if(frame.familyDuet!=null&&!value.familyDuet)return false;
  if(frame.chispinDuet!=null&&!value.chispinDuet)return false;
@@ -96,6 +100,7 @@ export function applyPeerEffects(game,frame){
 export function advancePeerEffects(game){
  const frame=game.coopPeerEffects;if(!frame)return;
  const move=frame.ticks++<12;
+ frame.dinoFx=advanceDinoEffects(frame.dinoFx,move);
  if(frame.familyDuet&&++frame.familyDuet.age>=FAMILY_DUET_LENGTH)frame.familyDuet=null;
  if(frame.michiDuet){frame.michiDuet.stars=frame.michiDuet.stars.map(b=>({...b,age:b.age+1})).filter(b=>b.age<=30);if(++frame.michiDuet.age>=120)frame.michiDuet=null;}
  for(const f of frame.michiFx||[]){f.life--;if(move&&f.kind!=='purr'){f.x+=f.vx;f.y+=f.vy;}}frame.michiFx=(frame.michiFx||[]).filter(f=>f.life>0);
