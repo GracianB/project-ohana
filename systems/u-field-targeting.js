@@ -18,3 +18,23 @@ export function selectFritaFieldTargets(enemies, x, y) {
     .slice(0, FRITA_FIELD_MAX_TARGETS)
     .map(({enemy}) => enemy);
 }
+
+ 
+// V325: an authored, stationary warning ring precedes each of these initial U
+// hits. Only the host's normal hitEnemy path applies damage at the impact tick.
+export const SUPREME_LAUNCH_WINDUP = 12;
+export const SUPREME_LAUNCH_RADII = Object.freeze({ dragon: 320, pizza: 430 });
+
+export function selectSupremeLaunchTargets(enemies, hero, x, y) {
+  const radius = SUPREME_LAUNCH_RADII[hero];
+  if (!Number.isFinite(radius) || !Number.isFinite(x) || !Number.isFinite(y) || !Array.isArray(enemies)) return [];
+  const r2 = radius * radius;
+  return enemies.filter(enemy => {
+    if (!enemy || ![enemy.x, enemy.y, enemy.w, enemy.h].every(Number.isFinite) ||
+        enemy.w < 0 || enemy.h < 0) return false;
+    const closestX = Math.max(enemy.x, Math.min(x, enemy.x + enemy.w));
+    const closestY = Math.max(enemy.y, Math.min(y, enemy.y + enemy.h));
+    const dx = closestX - x, dy = closestY - y;
+    return dx * dx + dy * dy <= r2;
+  });
+}
