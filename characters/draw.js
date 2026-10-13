@@ -1079,6 +1079,9 @@ pose.michiWelcome?.phase || "",q(pose.michiWelcome?.inspect,12),
 q(pose.michiWelcome?.sideeye,12),q(pose.michiWelcome?.groom,12),
 q(pose.michiWelcome?.flick,12),q(pose.michiWelcome?.purr,12),
 q(pose.michiWelcome?.tail,8),q(pose.michiWelcome?.wing,8),
+q(pose.michiWelcome?.breath,12),q(pose.michiWelcome?.melody,12),
+q(pose.michiWelcome?.spark,12),q(pose.michiWelcome?.chase,12),
+q(pose.michiWelcome?.yomi,12),q(pose.michiWelcome?.dino,12),
 ].join("|");
 }
 
