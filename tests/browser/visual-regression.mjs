@@ -181,6 +181,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V350: Kilo's connected hands, ukulele, real five-form face and petals.
+  for(const [at,phase,label] of [
+    [.33,'listen','00zc-kilo-listens'],
+    [.71,'strum','00zd-kilo-ukulele'],
+    [1.09,'bloom','00ze-kilo-music-bloom'],
+    [1.47,'surprise','00zf-kilo-pollen-sneeze'],
+    [1.87,'finale','00zg-kilo-family-finale']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.kiloWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});

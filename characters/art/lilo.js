@@ -135,6 +135,26 @@ function glowOrb(ctx, R, x, y, r, t, col) {
   }
 }
 
+// V350 · Pure directions for the ACTUAL five-form Kilo rig.
+// Baby Kilo's pacifier/held ukulele stays intact. Later forms keep the
+// original long hair, clothing, staff and angel wings.
+export function kiloWelcomeRig(pose={},form=0){
+ const b=pose?.kiloWelcome,u=n=>Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
+ if(!b||b.reduced||pose?.state==="dead"||pose?.state==="hurt")
+  return Object.freeze({listen:0,strum:0,bloom:0,surprise:0,finale:0,
+   tilt:0,lift:0,head:0,hair:0,wing:0});
+ const listen=u(b.listen),strum=u(b.strum),bloom=u(b.bloom),
+   surprise=u(b.surprise),finale=u(b.finale);
+ const limit=(n,a,c)=>Math.max(a,Math.min(c,n));
+ return Object.freeze({
+  listen,strum,bloom,surprise,finale,
+  tilt:limit(-listen*.09+strum*.11-bloom*.13+surprise*.21-finale*.14,-.4,.4),
+  lift:limit(-strum*1.4-bloom*3+surprise*2.0-finale*1.8,-5,4),
+  head:limit(-listen*.17+strum*.10-bloom*.16+surprise*.23-finale*.12,-.4,.4),
+  hair:limit(strum*.24+bloom*.57+surprise*.19+finale*.43,0,1),
+  wing:Math.max(0,Math.min(1,(Number(form)|0)>=4?(Number.isFinite(b.wing)?b.wing:0):0))
+ });
+}
 function solve(pose, d, f) {
   const t = pose.t, st = pose.state, hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const xF = 4, xB = -5;
@@ -283,6 +303,40 @@ function solve(pose, d, f) {
     r.handB=[xF+al*.9,sy+1];r.handF=[xF+1,sy+al*.62+Math.sin(beat*.65)*2.5];
     r.headRot=beat<18?.12:beat<30?-.18:Math.sin(beat*.18)*.06;
     r.mood=beat<30?'happy':'closed';r.mouth=beat<30?'open':'smile';
+  }
+  // Scene-only body acting, applied to connected IK bones, not stickers.
+  // Never changes Kilo's J/K/L/U, duets or real state outside the welcome.
+  const welcome=kiloWelcomeRig(pose,f);
+  const {listen,strum,bloom,surprise,finale}=welcome;
+  if(listen+strum+bloom+surprise+finale>.01){
+    r.lean+=welcome.tilt;
+    r.oy+=welcome.lift;
+    r.headRot+=welcome.head;
+    r.hairUp+=welcome.hair;
+    r.flare+=bloom*.31+finale*.25;
+    r.hemLift+=bloom*2.2+finale*1.4;
+    r.handF[0]+=listen*3.2+strum*4.3+bloom*al*.48+surprise*al*.71+finale*al*.78;
+    r.handF[1]-=listen*2.8+strum*3.5+bloom*al*.55+surprise*al*.58+finale*al*.76;
+    r.handB[0]-=listen*2.3+strum*3.1+bloom*al*.52+surprise*al*.65+finale*al*.71;
+    r.handB[1]-=strum*3.0+bloom*al*.56+surprise*al*.64+finale*al*.78;
+    r.footF=[r.footF[0]+strum*2.1+bloom*1.8+surprise*2.4,r.footF[1]-strum*.5-bloom*1.6];
+    r.footB=[r.footB[0]-strum*2.1-bloom*1.3-surprise*2.1,r.footB[1]-strum*.5-bloom*1.1];
+    if(strum>.15){
+      r.mood="happy";r.mouth="open";r.fx="notes";r.fxK=strum;
+      // Ukelele remains held in the original hands. Form 3 keeps its
+      // signature staff, rather than mysteriously acquiring a second prop.
+      if(f>=1&&f!==3){
+        r.uke="play";r.armOver=true;
+        r.handB=[xF+al*.78,sy+.5];
+        r.handF=[xF+1,sy+al*.60+strum*2.3];
+      }
+    }
+    if(listen>.20){r.mood="normal";r.mouth="o";}
+    if(bloom>.20){r.mood="happy";r.mouth="open";r.fx="flowers";r.fxK=bloom;r.armOver=true;}
+    if(surprise>.20){r.mood="closed";r.mouth="o";r.wink=true;r.fx=null;}
+    if(finale>.20){r.mood="happy";r.mouth="open";r.fx="flowers";r.fxK=finale*.70;r.armOver=true;}
+    if(f===0&&(surprise>.20||bloom>.2))r.paci=false;
+    if(f===3&&bloom>.2)r.staffUp=true;
   }
   return r;
 }
@@ -499,7 +553,9 @@ function torso(ctx, R, pose, f, d, r) {
 
 function wings(ctx, R, pose, sy) {
   const t = pose.t;
-  const flap = 0.55 + 0.45 * Math.abs(Math.sin(t * 0.12));
+  // The final guardian's original shoulder-rooted wings open in time with
+  // the music. Forms 0–3 never gain wings just for the intro.
+  const flap = Math.min(1.25, 0.55 + 0.45 * Math.abs(Math.sin(t * 0.12)) + kiloWelcomeRig(pose,4).wing * .34);
   const up = [[0, 0], [-10, -18], [-30, -36], [-44, -30], [-42, -12], [-24, 2]];
   const lo = [[0, 2], [-22, 6], [-34, 20], [-26, 32], [-10, 22]];
   for (const side of [1, -1]) {

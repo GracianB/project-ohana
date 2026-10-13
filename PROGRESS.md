@@ -1,3 +1,16 @@
+## OHANA V350 · Kilo protagoniza la música de bienvenida (ohana-350)
+
+- Séptima revisión artística individual después de Dragón, Dino, Frita, Pizza, Yomi y Cuerno. Antes Kilo recibía solo polen flotando y cambiaba aleatoriamente entre `idle` y `victory` por un seno continuo. Ahora interpreta una **historia propia de cinco beats**, en el mismo ciclo determinista de 14 segundos: escucha `listen`, toca ukelele `strum`, florece `bloom`, se sorprende y estornuda por el polen `surprise`, remata alegre `finale`.
+- `systems/intro-kilo-stage.js`: director temporal puro, resplandor cálido de jardín local, notas cercanas al instrumento original, cinco pétalos pequeños que no invaden los otros nueve slots, gesto de sorpresa y estrella final. Diálogos «¿LO OYES?», «¡MÚSICA!», «¡FLORECEMOS!», «¡ACHÍS DE POLEN!» y «¡OTRA!».
+- **Código del verdadero dibujo**: `characters/art/kilo.js` es un mero reexport de `lilo.js`; por tanto las modificaciones de anatomía están en `characters/art/lilo.js`. `kiloWelcomeRig` dirige cabeza, pelo, falda, cadera, manos y rodillas a través de la cinemática inversa original `ik`, y mantiene el ukelele sujetado a las manos. Conserva el chupete y el pequeño cuerpo de F0, el cuerpo de las evoluciones F1/F2, el bastón y la capa en F3 y las alas originalmente nacidas del cuerpo de F4; no inventa alas en el resto.
+- El último guardián alado abre sus alas en sincronía con la música, sin alterar el código de las habilidades o el multijugador. `characters/draw.js` fuerza Canvas solo en el doble de intro y propaga `pose.kiloWelcome` al rig real, con fingerprint diferenciado por fase.
+- Accesibilidad: modo de movimiento reducido anula partículas y gestos rápidos en el director y mantiene el dibujo de Kilo accesible y reconocible. No hay daños, impactos, hitboxes, poderes ni físicas nuevos.
+- Seis nuevas pruebas Node verifican los cinco beats, bucle 14 s, geometría Canvas finita, modo reducido, las cinco evoluciones, reglas de alas, cache y conservación de la cinemática inversa original. Browser E2E escritorio/móvil prueba director real. La matriz visual añade cinco nuevas capturas, manteniendo las de seis personajes anteriores.
+- Caché `ohana-350` sincronizada en HTML/Service Worker y módulo escénico nuevo precacheado. Barrera antes de fusión: Node, Browser E2E, cooperativo Chromium y Firefox, visual y Release Gate verdes. Sin despliegue Netlify.
+- Siguientes personajes por separado: Stitcho, Chispín y Michi, cada uno con intervención artística individual en la misma intro.
+
+---
+
 ## OHANA V349 · Cuerno individual: cuerno vivo, orbita y aurora del unicornio (ohana-349)
 
 - Sexta intervención individual en la bienvenida después de Dragón V344, Dino V345, Frita V346, Pizza V347 y Yomi V348. Se respeta **la verdadera evolución**: F0 es un cuerno vivo con ojos, sin cuerpo ni cascos; F1 añade cara flotante, sin inventar caballo; F2–F4 obtienen cuatro patas articuladas y crines, F3–F4 alas nacidas de los hombros.

@@ -21,6 +21,7 @@ import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
 import { pizzaWelcomeBeat, drawPizzaWelcomeFX } from "./intro-pizza-stage.js";
 import { yomiWelcomeBeat, drawYomiWelcomeFX } from "./intro-yomi-stage.js";
 import { cuernoWelcomeBeat, drawCuernoWelcomeFX } from "./intro-cuerno-stage.js";
+import { kiloWelcomeBeat, drawKiloWelcomeFX } from "./intro-kilo-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -79,7 +80,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -101,7 +102,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -168,6 +169,7 @@ export function playTitleIntro() {
     p._introPizza = id === "pizza" ? (opts.pizzaWelcome || null) : null;
     p._introYomi = id === "yomi" ? (opts.yomiWelcome || null) : null;
     p._introCuerno = id === "cuerno" ? (opts.cuernoWelcome || null) : null;
+    p._introKilo = id === "kilo" ? (opts.kiloWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -306,12 +308,35 @@ export function playTitleIntro() {
     const loop=t%14;
     bubbleBoxes = [];
 
-    // Kilo: polen flotando y pequeñas celebraciones.
-    const pollen=0.55+0.45*Math.sin(t*1.8);
-    actor("kilo",kilo.x,kilo.foot,heroH*1.02,tf,{facing:1,pose:pollen>.82?"victory":"idle"});
-    const px=kilo.x+W*.024,py=kilo.foot-heroH*.86-Math.sin(t*2.4)*9;
-    ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="#ffe66a";ctx.shadowColor="#ffe66a";ctx.shadowBlur=22;
-    ctx.beginPath();ctx.arc(px,py,4+pollen*3,0,Math.PI*2);ctx.fill();ctx.restore();
+    // V350: Kilo plays an actual connected five-form body/ukulele rig.
+    // Pollination, laughter and surprise are its own fully timed story.
+    const kiloBeat=kiloWelcomeBeat(loop,reduce);
+    const kiloHeight=heroH*1.08;
+    drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"back");
+    actor("kilo",kilo.x,kilo.foot,kiloHeight,tf,{
+      facing:1,pose:"idle",kiloWelcome:kiloBeat
+    });
+    drawKiloWelcomeFX(ctx,kilo.x,kilo.foot,kiloHeight,t,kiloBeat,"front");
+    if(isE2E){
+      el.dataset.kiloWelcomePhase=kiloBeat.phase;
+      el.dataset.kiloWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(kiloBeat.listen>.45){
+      comicBubble("¿LO OYES?",kilo.x,kilo.foot-heroH*1.04,
+        kiloBeat.listen,"#e4f6be","right");
+    }else if(kiloBeat.strum>.45){
+      comicBubble("¡MÚSICA!",kilo.x,kilo.foot-heroH*1.05,
+        kiloBeat.strum,"#ffecaa","right");
+    }else if(kiloBeat.bloom>.46){
+      comicBubble("¡FLORECEMOS!",kilo.x,kilo.foot-heroH*1.08,
+        kiloBeat.bloom,"#b8edc9","right");
+    }else if(kiloBeat.surprise>.46){
+      comicBubble("¡ACHÍS DE POLEN!",kilo.x,kilo.foot-heroH*1.07,
+        kiloBeat.surprise,"#f6d0cc","right");
+    }else if(kiloBeat.finale>.46){
+      comicBubble("¡OTRA!",kilo.x,kilo.foot-heroH*1.06,
+        kiloBeat.finale,"#ffe6ac","right");
+    }
 
     // Stitcho + Chispín: primero juegan a pelearse; luego llega el accidente.
     const duel=Math.sin(clamp(seg(loop,.35,1.25),0,1)*Math.PI);
