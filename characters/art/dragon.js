@@ -188,6 +188,39 @@ R.ellipse(ctx, x, y, r, r * 0.9, "#ece6f0", { lw: 1.4, ink: "#8a7f96" });
 ctx.restore();
 }
 
+// Real connected chest/neck/shoulder movement for all five Dragon forms.
+// Animated ONLY on the introduction dummy, never gameplay or combat.
+// Scaling is anchored at the hip; feet remain planted outside upper().
+export function dragonWelcomeAnatomy(pose={},form=0){
+ const neutral=Object.freeze({active:false,bodyX:1,bodyY:1,bob:0,head:0,
+  neck:0,lean:0,armFront:0,armBack:0,wingFront:0,wingBack:0,tail:0,jaw:0});
+ const w=pose.dragonWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return neutral;
+ const safe=v=>Number.isFinite(v)?clamp(v,0,1):0;
+ const f=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
+ const breath=(safe(w.breath)-.5)*2;
+ const chase=safe(w.chase),ghost=safe(w.ghost),dino=safe(w.dino);
+ // A baby breathes from the round abdomen; the grown dragon expands from
+ // its sternum. Wings counterbalance, rather than becoming detached props.
+ const diaphragm=[.064,.055,.050,.042,.038][f];
+ const shoulder=[.026,.032,.038,.046,.050][f];
+ return Object.freeze({
+  active:true,
+  bodyX:1+breath*diaphragm,
+  bodyY:1-breath*diaphragm*.64,
+  bob:-breath*(f===0?1.15:1.55)-chase*.65+ghost*1.0+dino*2.2,
+  head:breath*.035-chase*.15+ghost*.18+dino*.24,
+  neck:breath*.65+chase*1.5-ghost*2.0+dino*1.0,
+  lean:breath*.025+chase*.055-ghost*.11+dino*.09,
+  armFront:breath*.07+chase*.14+ghost*.35+dino*.38,
+  armBack:-breath*.055+chase*.11+ghost*.19-dino*.12,
+  wingFront:breath*shoulder+chase*.08-ghost*.17+dino*.25,
+  wingBack:-breath*shoulder+chase*.05+ghost*.20+dino*.18,
+  tail:breath*.22+chase*.40-ghost*.27+dino*.44,
+  jaw:chase*.25+ghost*.35+dino*.28
+ });
+}
+
 function drawBase(ctx, pose, R) {
 const f = pose.form, c = PAL[f], P = F[f], t = pose.t, st = pose.state;
 const r = P.r, bw = P.bw, bh = P.bh;
@@ -379,12 +412,26 @@ if(welcome && st!=="dead" && st!=="hurt"){
   smoke=smoke && sneeze<.08;
 }
 
+// Continuous acting between the named beats: diaphragm changes upper
+// geometry every frame; reaction to siblings moves REAL head, rooted shoulder
+// joints, membrane wings, arms and tail, with no combat animation state.
+const life=dragonWelcomeAnatomy(pose,f);
+if(life.active){
+ bob+=life.bob; lean+=life.lean; headRot+=life.head;
+ hdx+=life.neck; armF+=life.armFront;armB+=life.armBack;
+ const far=wRotFar===null?wRot+.3:wRotFar;
+ wRot+=life.wingFront;wRotFar=far+life.wingBack;
+ tailWave+=life.tail;jaw=clamp(jaw+life.jaw,0,1);
+ if((welcome?.ghost||0)>.54)eyeMood="closed";
+ else if((welcome?.chase||0)>.6)eyeMood="happy";
+ else if((welcome?.dino||0)>.55)eyeMood="normal";
+}
 const hipY = -(P.legL + P.legW * 0.55) + bob;
 
 ctx.save();
 if (st === "dead") { ctx.translate(40, -bw - 3); ctx.rotate(-PI / 2); }
 
-const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); };
+const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); if(life.active)ctx.scale(life.bodyX,life.bodyY); };
 const neckX = bw * 0.28 + hdx, neckY = -bh - r * 0.5 + hdy;
 const shX = bw * 0.38, shY = -bh * 0.74;
 const wingX = f === 0 ? -bw * 0.75 : -bw * 0.55, wingY = f === 0 ? -bh * 0.55 : -bh * 0.8;
