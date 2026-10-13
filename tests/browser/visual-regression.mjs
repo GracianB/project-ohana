@@ -299,6 +299,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V361: four fixed instants verify original attached alien body after
+  // Stitcho's prank (egg shell, antenna roots, shoulder/axilla, claw and tail).
+  for(const [at,reaction,label] of [
+    [3.70,'dragon','00zl1-stitcho-hears-dragon'],
+    [5.72,'chase','00zl2-stitcho-laughs-at-chase'],
+    [8.45,'yomi','00zl3-stitcho-meets-yomi'],
+    [12.20,'dino','00zl4-stitcho-ducks-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.stitchoFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V352 five fixed-time films of Chispin beside the undisturbed Stitcho.
   for(const [at,phase,label] of [
     [.42,'sniff','00zm-chispin-curiosity'],
