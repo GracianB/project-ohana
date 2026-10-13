@@ -1022,6 +1022,11 @@ pose.fritaWelcome?.phase || "",q(pose.fritaWelcome?.ready,12),
 q(pose.fritaWelcome?.dash,12),q(pose.fritaWelcome?.reach,12),
 q(pose.fritaWelcome?.wobble,12),q(pose.fritaWelcome?.triumph,12),
 q(pose.fritaWelcome?.cape,8),
+// V347: Pizza crust/dough/cheese movement changes the real Canvas cache.
+pose.pizzaWelcome?.phase || "",q(pose.pizzaWelcome?.sniff,12),
+q(pose.pizzaWelcome?.spring,12),q(pose.pizzaWelcome?.stretch,12),
+q(pose.pizzaWelcome?.catch,12),q(pose.pizzaWelcome?.flourish,12),
+q(pose.pizzaWelcome?.cheese,8),q(pose.pizzaWelcome?.crust,8),
 ].join("|");
 }
 
@@ -1149,6 +1154,7 @@ const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,i
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
 if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;
+if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._introPizza;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
