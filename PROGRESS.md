@@ -1,3 +1,13 @@
+## OHANA V364 · GitHub Pages, caché rápida y funcionamiento sin créditos (ohana-364)
+
+- Versión de sw.js e index.html sincronizada; precache completo de módulos preservado para juego sin conexión.
+- Segunda visita con caché caliente: los módulos estáticos salen de la caché actual sin repetir decenas de peticiones de red; faltas offline devuelven 503 de texto, no HTML como JS.
+- Portada: botón cooperativo deshabilitado claramente mientras no haya servidor de salas/señalización WebRTC ni TURN de pago. Juego individual permanece disponible en GitHub Pages. No se despliega ni invoca Netlify desde la portada.
+- Menú Canvas: el gradiente de cada retrato se crea al cambiar aura/tamaño en vez de en cada dibujo, y se reutiliza el contexto 2D.
+- Game loop: en menús/pausa/pestaña oculta no se despierta 60 veces por segundo; durante gameplay mantiene requestAnimationFrame y el reloj determinista original.
+- Seis pruebas nuevas en tests/v364-static-performance.test.js de SW real, red en caché caliente, errores offline, backend externo, enlace desactivado y preservación de simulación.
+- La intervención evita tocar habilidades, físicas, daño, colisiones, guardado y WebRTC; publicación condicionada a Node, Browser, Visual, cooperativo Chromium/Firefox y Release Gate.
+
 ## OHANA V363 · Michi, diez personajes y cierre de segunda ronda (ohana-363)
 
 - Décima intervención profunda individual de diez: Michi ocupa el último slot, pero ya no permanece casi quieto el resto de un ciclo de 14 segundos. Conserva los cinco beats originales de actuar como director (inspect, sideeye, groom, flick, purr) y cinco encuentros con la familia: Kilo (.62–1.4 s), Chispín (1.73–2.55 s), persecución Frita/Pizza (5.64–6.42 s), farol de Yomi (8.06–8.93 s) y pisotón Dino (11.83–12.72 s).

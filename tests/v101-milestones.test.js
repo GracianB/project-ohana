@@ -68,7 +68,8 @@ test("V101: browser UI, reduced-motion, storage compatibility and original-world
   const server=fs.readFileSync("netlify/lib/room-service.mjs","utf8");
   assert.match(html,/id="festival-milestone"/);
   assert.match(html,/class="festival-world-nav"/);
-  assert.match(html,/project-ohana-multiplayer\.netlify\.app\/multiplayer\.html/);
+  assert.match(html,/id="btn-coop"[^>]*disabled/);
+   assert.doesNotMatch(html,/project-ohana-multiplayer\.netlify\.app/);
   assert.match(js,/data-festival-replay/);
   assert.match(js,/worldMilestone\(item\.room,oldRoomCount,fresh\)/);
   assert.match(js,/FestivalMoment\.show\(milestone\.id/);

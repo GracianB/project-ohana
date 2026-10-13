@@ -126,7 +126,7 @@ portraitClock.advance(now, () => {
     if (!hero && !cv._needsFit && now - (cv._lastPaintAt || 0) < previewInterval) continue;
     cv._lastPaintAt = now;
     const { def, index: idx } = entry;
-    const c = cv.getContext("2d", { alpha: true });
+    const c = cv._context || (cv._context = cv.getContext("2d", { alpha: true }));
     fitCanvas(cv);
     const dpr = cv._dpr || 1;
     const bw = cv.width / dpr, bh = cv.height / dpr;
@@ -260,10 +260,19 @@ portraitClock.advance(now, () => {
     c.save();
     c.translate(bw / 2, footY);
     c.scale(1, 0.22);
-    const glow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
-    glow.addColorStop(0, hero ? (def.id==="cuerno"&&evo===4 ? "rgba(177, 148, 236, 0.52)" : "rgba(255, 214, 120, 0.72)") : "rgba(0,0,0,0.35)");
-    glow.addColorStop(1, "rgba(0,0,0,0)");
-    c.fillStyle = glow;
+    // Canvas gradients are expensive objects; keep them until size/aura changes.
+    // Preserve the same pixel colors for every hero and evolution.
+    const aura = hero ? (def.id==="cuerno"&&evo===4 ? "legend" : "hero") : "side";
+    const glowKey = cv.width + ":" + cv.height + ":" + aura;
+    if (cv._glowKey !== glowKey) {
+      const glow = c.createRadialGradient(0, 0, 8, 0, 0, Math.max(36, bw * 0.42));
+      glow.addColorStop(0, aura==="legend" ? "rgba(177, 148, 236, 0.52)"
+        : aura==="hero" ? "rgba(255, 214, 120, 0.72)" : "rgba(0,0,0,0.35)");
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      cv._glow = glow;
+      cv._glowKey = glowKey;
+    }
+    c.fillStyle = cv._glow;
     c.beginPath();
     c.arc(0, 0, Math.max(36, bw * 0.42), 0, Math.PI * 2);
     c.fill();
@@ -305,7 +314,7 @@ const maxDpr = w * h > 120000 ? 1.45 : 1.65;
 const sidePreview = !cv.closest(".char-card")?.classList.contains("selected");
 const dpr = Math.min(sidePreview ? 1 : maxDpr, window.devicePixelRatio || 1);
 const W = Math.round(w * dpr), H = Math.round(h * dpr);
-if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv._glowKey = null; }
 cv._dpr = dpr;
 cv._needsFit = false;
 }

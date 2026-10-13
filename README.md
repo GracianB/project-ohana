@@ -361,3 +361,12 @@ El RNG de simulación no es consumido por el render ni por VFX de presentación.
 ## Deterministic Gameplay Core · Phase 33
 
 Las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación. La convocatoria del Nido utiliza 132 ticks de simulación en lugar de `setTimeout`, por lo que la espera se pausa con la partida y no depende del reloj de pared.
+
+ 
+## V364 · Rendimiento y alojamiento gratuito (GitHub Pages)
+
+OHANA individual se sirve únicamente desde GitHub Pages. El modo cooperativo público queda **en pausa** mientras no exista un servicio de salas y señalización WebRTC; GitHub Pages es alojamiento estático y no ejecuta las funciones de Netlify ni proporciona TURN. Se conserva el motor cooperativo y sus pruebas para recuperarlo cuando haya infraestructura disponible, sin consumir créditos de Netlify ni contratar TURN.
+
+Rendimiento: el Service Worker reutiliza los módulos JS ya precacheados, evitando descargarlos de nuevo en cada visita con caché caliente. Los recursos que faltan durante una desconexión devuelven un error de recurso, nunca HTML fingiendo ser JavaScript. El menú reutiliza contextos y gradientes Canvas mientras sus dimensiones y aura no cambien. El bucle de juego baja la frecuencia de sus comprobaciones durante menús, pausa y pestañas ocultas, manteniendo la simulación de tiempo fijo y la frecuencia normal mientras se juega. Se preservan las pruebas de navegador, dibujos, evoluciones, guardado y juego individual.
+
+**Alcance medible:** menos peticiones redundantes tras la primera instalación del Service Worker y menos asignaciones de gradientes por fotograma; no se afirma una ganancia de FPS sin una medición de dispositivo representativo. La primera visita todavía descarga los módulos y el cooperativo necesita infraestructura externa para funcionar entre dispositivos.
