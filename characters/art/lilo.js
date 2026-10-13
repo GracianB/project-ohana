@@ -160,7 +160,7 @@ export function kiloWelcomeRig(pose={},form=0){
   tilt:limit(-listen*.09+strum*.11-bloom*.13+surprise*.21-finale*.14
     +breath*.018-dragon*.14+chase*.075+yomi*(-.085)+dino*.12,-.4,.4),
   lift:limit(-strum*1.4-bloom*3+surprise*2.0-finale*1.8
-    -breath*.60+dragon*1.75-chase*.55-yomi*.9+dino*1.55,-5,4),
+    -breath*.60+dragon*1.75-chase*1.45-yomi*.9+dino*1.55,-5,4),
   head:limit(-listen*.17+strum*.10-bloom*.16+surprise*.23-finale*.12
     +breath*.035+dragon*.22-chase*.13+yomi*.16+dino*.21,-.4,.4),
   hair:limit(strum*.24+bloom*.57+surprise*.19+finale*.43
