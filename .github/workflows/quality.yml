@@ -45,6 +45,9 @@ jobs:
       - name: V367 startup · lazy cinema and original scene routes
         run: node tests/browser/v367-startup.mjs
 
+      - name: V369 actual Chromium cache upgrade · 199 reused and 1 transferred
+        run: node tests/browser/v369-cache-migration.mjs
+
       - name: Ten hero U protection audit
         run: node tests/browser/all-hero-u-protection.mjs
 
