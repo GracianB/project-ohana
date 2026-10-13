@@ -95,6 +95,13 @@ test("V364 static distribution and UI do not point players to exhausted Netlify"
   assert.ok(precachedScripts.length > 100, "preserve full offline module graph");
 });
 
+test("V364 game renderer keeps full-speed play but idles while stopped/paused", () => {
+  const game = fs.readFileSync("game.js", "utf8");
+  assert.match(game, /if \(game\.running && !paused && !document\.hidden\) requestAnimationFrame\(loop\)/);
+  assert.match(game, /else setTimeout\(\(\) => requestAnimationFrame\(loop\), 120\)/);
+  assert.match(game, /clock\.advance\(now, step\)/, "simulation must preserve its fixed clock");
+});
+
 test("V364 portrait aura is reused, but resize invalidates the cached gradient", () => {
   assert.match(title, /cv\._context \|\| \(cv\._context = cv\.getContext/);
   assert.match(title, /if \(cv\._glowKey !== glowKey\)/);
