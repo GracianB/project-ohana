@@ -19,6 +19,7 @@ import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js"
 import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
 import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
 import { pizzaWelcomeBeat, drawPizzaWelcomeFX } from "./intro-pizza-stage.js";
+import { yomiWelcomeBeat, drawYomiWelcomeFX } from "./intro-yomi-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -77,7 +78,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -99,7 +100,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -164,6 +165,7 @@ export function playTitleIntro() {
     p._introDino = id === "dino" ? (opts.dinoWelcome || null) : null;
     p._introFrita = id === "frita" ? (opts.fritaWelcome || null) : null;
     p._introPizza = id === "pizza" ? (opts.pizzaWelcome || null) : null;
+    p._introYomi = id === "yomi" ? (opts.yomiWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -432,17 +434,33 @@ export function playTitleIntro() {
         fritaBeat.triumph,"#ffdc94","right");
     }
 
-    // Yomi is always present in the ten-hero family portrait. The shadow
-    // entrance is a performance, never an eight-second missing character.
-    const yomiIn=easeOut(seg(loop,7.35,8.15))*(1-seg(loop,9.05,9.55));
-    if(yomiIn>0){
-      ctx.save();ctx.globalAlpha=.60*yomiIn;ctx.fillStyle="#02040a";
-      ctx.beginPath();ctx.ellipse(yomi.x,yomi.foot+6,34*yomiIn,9,0,0,Math.PI*2);ctx.fill();ctx.restore();
-    }
-    actor("yomi",yomi.x,yomi.foot,heroH*.95,tf,{
-      facing:-1,alpha:.78+.22*yomiIn,pose:yomiIn>.4?"victory":"idle"
+    // V348: Yomi remains fully readable THROUGH the entire 14-second loop.
+    // The shadow is a local theatrical curtain, never eight seconds of absence.
+    const yomiBeat=yomiWelcomeBeat(loop,reduce);
+    const yomiHeight=heroH*1.03;
+    drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"back");
+    actor("yomi",yomi.x,yomi.foot,yomiHeight,tf,{
+      facing:-1,alpha:1,pose:"idle",yomiWelcome:yomiBeat
     });
-    if(loop>7.95&&loop<8.85) comicBubble("BU.",yomi.x,yomi.foot-heroH*.88,Math.sin(seg(loop,7.95,8.85)*Math.PI),"#ff5b78","right");
+    drawYomiWelcomeFX(ctx,yomi.x,yomi.foot,yomiHeight,t,yomiBeat,"front");
+    if(isE2E){
+      el.dataset.yomiWelcomePhase=yomiBeat.phase;
+      el.dataset.yomiWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.yomiWelcomeAlwaysVisible="true";
+    }
+    if(yomiBeat.listen>.43){
+      comicBubble("¿QUIÉN ANDA AHÍ?",yomi.x-yomiHeight*.18,yomi.foot-heroH*1.05,
+        yomiBeat.listen,"#ffe3b1","left");
+    }else if(yomiBeat.reveal>.43){
+      comicBubble("¡BU!",yomi.x-yomiHeight*.13,yomi.foot-heroH*1.03,
+        yomiBeat.reveal,"#ffd2d8","left");
+    }else if(yomiBeat.startle>.43){
+      comicBubble("¡AY, ME ASUSTÉ!",yomi.x-yomiHeight*.13,yomi.foot-heroH*1.05,
+        yomiBeat.startle,"#f5d0da","left");
+    }else if(yomiBeat.bow>.43){
+      comicBubble("ERA BROMA.",yomi.x-yomiHeight*.1,yomi.foot-heroH*1.05,
+        yomiBeat.bow,"#ffe7b5","left");
+    }
 
     // Cuerno dibuja una aurora minúscula y satisfecha.
     const rk=Math.sin(clamp(seg(loop,9.15,10.45),0,1)*Math.PI);

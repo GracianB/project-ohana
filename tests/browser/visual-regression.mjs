@@ -151,6 +151,21 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V348: Yomi's lantern performance, verified within the FULL family,
+  // must never erase the hero while the shadow curtain is on.
+  for(const [at,phase,label] of [
+    [7.49,'listen','00s-yomi-listening'],
+    [7.85,'gather','00t-yomi-shadow-gather'],
+    [8.23,'reveal','00u-yomi-lantern-reveal'],
+    [8.62,'startle','00v-yomi-startled'],
+    [9.05,'bow','00w-yomi-bashful-bow']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.yomiWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});

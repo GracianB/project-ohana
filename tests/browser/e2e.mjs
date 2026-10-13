@@ -114,6 +114,25 @@ async function auditPage(page, label) {
   assert.ok(pizzaFilm.stageAlive&&
     ['idle','sniff','spring','stretch','catch','flourish'].includes(pizzaFilm.livePhase),
     label+': Pizza director must remain rendered within the live welcome canvas');
+  // V348: Yomi must never disappear from the stage while delivering
+  // five distinct lantern moments inside the original Canvas renderer.
+  const yomiFilm=await page.evaluate(async()=>{
+    const {yomiWelcomeBeat}=await import('/systems/intro-yomi-stage.js?e2e=v348');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[.7,7.49,7.85,8.23,8.62,9.05].map(t=>yomiWelcomeBeat(t).phase),
+      livePhase:el?.dataset.yomiWelcomePhase||'',
+      alwaysVisible:el?.dataset.yomiWelcomeAlwaysVisible,
+      stageAlive:!!el?.querySelector('canvas')
+    };
+  });
+  assert.deepEqual(yomiFilm.phases,
+    ['idle','listen','gather','reveal','startle','bow'],
+    label+': Yomi must act with five distinct lantern beats');
+  assert.equal(yomiFilm.alwaysVisible,'true',label+': Yomi unexpectedly invisible on stage');
+  assert.ok(yomiFilm.stageAlive&&
+    ['idle','listen','gather','reveal','startle','bow'].includes(yomiFilm.livePhase),
+    label+': Yomi acting director disconnected from intro Canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
