@@ -1017,6 +1017,11 @@ pose.dinoWelcome?.phase || "",q(pose.dinoWelcome?.curious,12),
 q(pose.dinoWelcome?.brace,12),q(pose.dinoWelcome?.stomp,12),
 q(pose.dinoWelcome?.startled,12),q(pose.dinoWelcome?.delighted,12),
 q(pose.dinoWelcome?.tail,8),
+// V346: Frita motion cues drive the existing fry spine, cape and connected limbs.
+pose.fritaWelcome?.phase || "",q(pose.fritaWelcome?.ready,12),
+q(pose.fritaWelcome?.dash,12),q(pose.fritaWelcome?.reach,12),
+q(pose.fritaWelcome?.wobble,12),q(pose.fritaWelcome?.triumph,12),
+q(pose.fritaWelcome?.cape,8),
 ].join("|");
 }
 
@@ -1143,6 +1148,7 @@ const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,i
   reduceMotion: options.reduceMotion===true};
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
+if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
