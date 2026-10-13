@@ -228,6 +228,23 @@ async function auditPage(page, label) {
   assert.ok(cuernoFilm.stageAlive&&
     ['idle','wonder','tiptoe','aurora','surprise','bow'].includes(cuernoFilm.livePhase),
     label+': Cuerno scene must render in the real welcome Canvas');
+  // V359: a sentient horn NEVER grows limbs; adults keep four original hooves.
+  const cuernoFamily=await page.evaluate(async()=>{
+    const {cuernoWelcomeBeat}=await import('/systems/intro-cuerno-stage.js?e2e=v359');
+    const times=[1.15,3.8,8.50],keys=['melody','dragon','yomi'];
+    const frames=times.map(t=>cuernoWelcomeBeat(t));
+    const el=document.querySelector('#ohana-intro');
+    return {strength:frames.map((b,i)=>b[keys[i]]),
+      quiet:frames.every(b=>b.phase==='idle'),
+      still:cuernoWelcomeBeat(3.8,true).dragon,
+      visible:!!el?.querySelector('canvas'),
+      family:el?.dataset.cuernoFamilyReaction||''};
+  });
+  assert.ok(cuernoFamily.visible&&cuernoFamily.quiet);
+  assert.ok(cuernoFamily.strength.every(x=>x>.65),
+    label+': Cuerno needs the connected anatomy during the quiet scenes');
+  assert.equal(cuernoFamily.still,0);
+  assert.ok(['rest','melody','dragon','yomi'].includes(cuernoFamily.family));
   // V350: Kilo acts with the real hand-held ukulele, not a pollen-only sprite.
   const kiloFilm=await page.evaluate(async()=>{
     const {kiloWelcomeBeat}=await import('/systems/intro-kilo-stage.js?e2e=v350');
