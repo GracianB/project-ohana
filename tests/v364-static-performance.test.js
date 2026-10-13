@@ -20,7 +20,7 @@ function harness({ offline = false } = {}) {
     headers: { "Content-Type": "text/html" }
   }));
   const cache = {
-    match: async (request) => storage.get(absolute(request)),
+    match: async (request) => storage.get(absolute(request))?.clone(),
     put: async (request, response) => { storage.set(absolute(request), response); },
     addAll: async () => {}
   };
