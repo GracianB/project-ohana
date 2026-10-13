@@ -431,7 +431,7 @@ export function fritaWelcomeAnatomy(pose={},form=0){
  if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")
   return neutral;
  const unit=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):0;
- const f=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
  const breath=(unit(w.breath)-.5)*2;
  const music=unit(w.music),fire=unit(w.fire),spirit=unit(w.spirit);
  const flexibility=[.25,.20,.18,.16,.14][f];
