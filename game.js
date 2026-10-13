@@ -2606,6 +2606,9 @@ if (!game.player) return;
 ctx.setTransform(viewDpr, 0, 0, viewDpr, 0, 0);
 ctx.imageSmoothingEnabled = true;
 const world = WORLDS[game.worldIndex] || WORLDS[0];
+// One consistent camera viewport per draw. The gameplay camera and collision
+// logic are unchanged; bounds no longer get recomputed per enemy/projectile.
+const viewportW=camW(),viewportH=camH();
 const shake = reduceMotion ? 0 : game.shake;
 const z = camZoom() * (game.experience?.zoomPulse(game) || 1);
 const centerX = viewW / 2;
@@ -2618,20 +2621,19 @@ ctx.translate(centerX + shakeX, centerY + shakeY);
 ctx.scale(z, z);
 ctx.translate(-centerX, -centerY);
 if (paintedHubOn(game.roomId)) {
-drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, camW(), camH());
-drawLivingWorld(ctx, game, t, camW(), camH());
+drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
+drawLivingWorld(ctx, game, t, viewportW,viewportH);
 } else {
-renderWorld(ctx, world, game.cam, t, camW(), camH());
+renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
 drawRoomAtmosphere(
   ctx,
   game.roomId,
   game.cam,
   t,
-  camW(),
-  camH(),
+  viewportW,viewportH,
   game.player?.id
 );
-drawLivingWorld(ctx, game, t, camW(), camH());
+drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
@@ -2644,15 +2646,15 @@ Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
 Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
 for (const o of game.orbs) {
-if (o.taken || !visibleForRender(o,game.cam,camW(),camH())) continue;
+if (o.taken || !visibleForRender(o,game.cam,viewportW,viewportH)) continue;
 drawCrystal(o);
 }
 for (const h of game.hearts) {
-if (h.taken || !visibleForRender(h,game.cam,camW(),camH())) continue;
+if (h.taken || !visibleForRender(h,game.cam,viewportW,viewportH)) continue;
 ctx.fillStyle = "#f45"; ctx.beginPath(); ctx.arc(h.x - game.cam.x, h.y - game.cam.y, 8, 0, Math.PI * 2); ctx.fill();
 }
 for (const g of game.ghosts) {
-if (!visibleForRender(g,game.cam,camW(),camH())) continue;
+if (!visibleForRender(g,game.cam,viewportW,viewportH)) continue;
 ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
 }
 if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
@@ -2661,7 +2663,7 @@ for (const e of game.enemies) {
   // Everything else freezes and disappears during the scripted epilogue.
   const fall = game.finale && e.boss ? bossFallStage(game.finale) : null;
   if (game.finale && (!e.boss || !fall.queenVisible)) continue;
-  if (!e.boss && !visibleForRender(e, game.cam, camW(), camH())) continue;
+  if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t);
@@ -2670,8 +2672,11 @@ for (const e of game.enemies) {
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
-for (const pr of game.projectiles) if ((!onlineCoop.hasFreshCombat(game) || pr.owner === "player") && visibleForRender(pr,game.cam,camW(),camH())) drawProjectile(ctx, pr, game.cam, t);
-for (const b of game.bolts) if (visibleForRender(b,game.cam,camW(),camH())) drawBolt(ctx, b, game.cam, t);
+// Network freshness is stable for this paint; asking it for each bolt also
+// touches performance.now() repeatedly, without changing synchronization.
+const peerCombatFresh=onlineCoop.hasFreshCombat(game);
+for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) drawProjectile(ctx, pr, game.cam, t);
+for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
 game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam);

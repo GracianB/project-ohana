@@ -35,8 +35,16 @@ export class CombatFX {
   }
 
   update() {
-    for (const item of this.items) item.life--;
-    this.items = this.items.filter((item) => item.life > 0);
+    // Each impact ages exactly once, including the frame when it expires.
+    // In-place stable compaction avoids allocating a fresh effect array at 60Hz.
+    const items=this.items;
+    let write=0;
+    for(let i=0;i<items.length;i++){
+      const item=items[i];
+      item.life--;
+      if(item.life>0)items[write++]=item;
+    }
+    items.length=write;
   }
 
   render(ctx, cam) {
