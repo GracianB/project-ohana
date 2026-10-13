@@ -553,7 +553,9 @@ function torso(ctx, R, pose, f, d, r) {
 
 function wings(ctx, R, pose, sy) {
   const t = pose.t;
-  const flap = 0.55 + 0.45 * Math.abs(Math.sin(t * 0.12));
+  // The final guardian's original shoulder-rooted wings open in time with
+  // the music. Forms 0–3 never gain wings just for the intro.
+  const flap = Math.min(1.25, 0.55 + 0.45 * Math.abs(Math.sin(t * 0.12)) + kiloWelcomeRig(pose,4).wing * .34);
   const up = [[0, 0], [-10, -18], [-30, -36], [-44, -30], [-42, -12], [-24, 2]];
   const lo = [[0, 2], [-22, 6], [-34, 20], [-26, 32], [-10, 22]];
   for (const side of [1, -1]) {
