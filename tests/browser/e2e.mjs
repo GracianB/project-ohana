@@ -99,6 +99,21 @@ async function auditPage(page, label) {
   assert.ok(fritaFilm.stageAlive&&
     ['idle','ready','dash','reach','wobble','triumph'].includes(fritaFilm.livePhase),
     label+': Frita performance must render inside the actual welcome canvas');
+  // V347: verify independent Pizza acting alongside Frita's existing chase.
+  const pizzaFilm=await page.evaluate(async()=>{
+    const {pizzaWelcomeBeat}=await import('/systems/intro-pizza-stage.js?e2e=v347');
+    return {
+      phases:[.7,4.58,5.18,5.8,6.3,6.78].map(t=>pizzaWelcomeBeat(t).phase),
+      livePhase:document.querySelector('#ohana-intro')?.dataset.pizzaWelcomePhase||'',
+      stageAlive:!!document.querySelector('#ohana-intro canvas')
+    };
+  });
+  assert.deepEqual(pizzaFilm.phases,
+    ['idle','sniff','spring','stretch','catch','flourish'],
+    label+': Pizza stage director must show five distinct moments');
+  assert.ok(pizzaFilm.stageAlive&&
+    ['idle','sniff','spring','stretch','catch','flourish'].includes(pizzaFilm.livePhase),
+    label+': Pizza director must remain rendered within the live welcome canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
