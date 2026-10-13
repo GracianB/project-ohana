@@ -1,3 +1,13 @@
+## OHANA V323 · Primer arreglo local de U de Frita (ohana-340)
+
+- Recuperación de emergencia V323 fusionada: `systems/abilities.js` y `PROGRESS.md` restaurados desde V322 íntegramente; pruebas contra archivos truncados en PR #332. Se retiró el parche incompleto que no podía aplicarse con seguridad.
+- PR #333: los pulsos repetidos del campo U de Frita ahora solo seleccionan hasta cinco enemigos cercanos dentro de un radio de 126 unidades de mundo, con selección estable y sin mutar la lista de enemigos. El anillo Canvas usa la misma constante de alcance y no se dibuja más pequeño que la zona afectada.
+- Permanecen intactos el golpe original de lanzamiento, la velocidad/curación de Frita, las habilidades U de los otros nueve personajes, la física y el intercambio de daño host/invitado.
+- Nuevas pruebas Node de selección determinista, distancia y radio visible; suite obligatoria: `node tests/browser/e2e.mjs`, `node tests/browser/visual-regression.mjs`, pruebas cooperativas Chromium/Firefox y `release:check`. No declarar aprobadas hasta que finalice CI.
+- Esta es una mejora parcial del issue #318, no el rediseño completo de autoridad/telegraph de las U. No se ha publicado Netlify ni verificado una partida entre dos dispositivos.
+
+---
+
 ## OHANA V322 · Postintegración de seis héroes y Leyenda (ohana-339)
 
 - Integradas #317, #314, #321, #320, #322, #323 y #324: seis personajes vectoriales y host/invitado para los diez. No afirmar Netlify publicado hasta tener cuota y validar dos dispositivos.
