@@ -491,6 +491,8 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.pizzaWelcomePhase=pizzaBeat.phase;
       el.dataset.pizzaWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.pizzaFamilyReaction=pizzaBeat.yomi>.2?"yomi":
+        pizzaBeat.dragon>.2?"dragon":pizzaBeat.melody>.2?"melody":"rest";
     }
     if(pizzaBeat.sniff>.45){
       comicBubble("¿HUELO QUESO?",pizzaX-heroH*.09,pizzaY-heroH*.98,
