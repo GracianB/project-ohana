@@ -313,29 +313,53 @@ function figure(ctx, R, pose, f, S, C, o) {
 export function chispinWelcomeRig(pose={},form=0){
  const w=pose.chispinWelcome;
  const idle={active:false,head:0,headDX:0,ear:0,gill:0,charge:0,coil:0,
-  tail:0,tailAmp:0,armA:0,armB:0,leg:0,lift:0,bodyRot:0,eyes:"normal",mouth:"smile"};
+  tail:0,tailAmp:0,armA:0,armB:0,leg:0,lift:0,bodyRot:0,eyes:"normal",mouth:"smile",
+  torsoX:1,torsoY:1,tailIdle:0};
  if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return idle;
  const n=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
  const sniff=n(w.sniff),prank=n(w.prank),charge=n(w.charge),
   hiccup=n(w.hiccup),cloud=n(w.cloud);
- const child=form===0?.64:form===3?.83:1;
+ const dragon=n(w.dragon),chase=n(w.chase),yomi=n(w.yomi),dino=n(w.dino);
+ const breath=(n(w.breath)-.5)*2;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const rib=[.065,.052,.046,.037,.032][f];
+ const child=f===0?.64:f===3?.83:1;
  return {
-  active:sniff+prank+charge+hiccup+cloud>.003,
-  head:-.18*sniff+.17*prank-.21*charge+.36*hiccup-.13*cloud,
-  headDX:child*(-1.6*sniff+2.8*prank-2.4*charge+3.2*hiccup),
-  ear:-.1*sniff+.22*prank-.32*charge+.48*hiccup-.1*cloud,
-  gill:.14*sniff+.43*prank+.76*charge+.9*hiccup+.37*cloud,
-  charge:.12*sniff+.18*prank+.43*charge+.28*hiccup+.31*cloud,
-  coil:.17*sniff+.36*prank+.82*charge-.21*hiccup+.25*cloud,
-  tail:.08*sniff+.31*prank+.73*charge-.34*hiccup+.33*cloud,
-  tailAmp:.12*sniff+.25*prank-.26*charge+.40*hiccup+.16*cloud,
-  armA:child*(.31*sniff-.6*prank+1.08*charge+.83*hiccup+.69*cloud),
-  armB:child*(-.28*sniff+.62*prank-1.13*charge-.76*hiccup-.55*cloud),
-  leg:child*(.1*sniff+.23*prank+.42*charge-.27*hiccup+.14*cloud),
-  lift:child*(-1.6*prank-2.2*hiccup-1.1*cloud),
-  bodyRot:.04*sniff-.08*prank-.11*charge+.21*hiccup-.05*cloud,
-  eyes:hiccup>.26?"squeeze":cloud>.26?"happy":charge>.26?"squeeze":prank>.26?"happy":"normal",
-  mouth:hiccup>.25?"o":cloud>.25?"smile":charge>.25?"flat":prank>.25?"grin":"smile"
+  active:true,
+  // Body and original attached spring tail share a real foot-rooted canvas.
+  // Small baby form inflates more than F4, without inventing F4 features in F0.
+  torsoX:Math.max(.91,Math.min(1.09,1+breath*rib-dragon*.020+chase*.018+yomi*.014)),
+  torsoY:Math.max(.93,Math.min(1.08,1-breath*rib*.62+dragon*.017-chase*.014)),
+  head:-.18*sniff+.17*prank-.21*charge+.36*hiccup-.13*cloud
+    +breath*.035+dragon*.19-chase*.16+yomi*.18-dino*.22,
+  headDX:child*(-1.6*sniff+2.8*prank-2.4*charge+3.2*hiccup
+    +dragon*1.1+chase*1.6+yomi*(-.8)+dino*1.4),
+  ear:-.1*sniff+.22*prank-.32*charge+.48*hiccup-.1*cloud
+    +breath*.04+dragon*.19+chase*.24+yomi*.13+dino*.27,
+  gill:.14*sniff+.43*prank+.76*charge+.9*hiccup+.37*cloud
+    +breath*.10+dragon*.31+chase*.17+yomi*.21+dino*.34,
+  charge:.12*sniff+.18*prank+.43*charge+.28*hiccup+.31*cloud
+    +dragon*.06+yomi*.04,
+  coil:.17*sniff+.36*prank+.82*charge-.21*hiccup+.25*cloud
+    +breath*.12+dragon*.24+chase*.30+yomi*.18+dino*.24,
+  tail:.08*sniff+.31*prank+.73*charge-.34*hiccup+.33*cloud
+    +breath*.14+dragon*.19+chase*.27+yomi*.16+dino*.28,
+  tailAmp:.12*sniff+.25*prank-.26*charge+.40*hiccup+.16*cloud
+    +dragon*.19-chase*.09+yomi*.15+dino*.20,
+  armA:child*(.31*sniff-.6*prank+1.08*charge+.83*hiccup+.69*cloud
+    +dragon*.75+chase*.58+yomi*.48+dino*.82),
+  armB:child*(-.28*sniff+.62*prank-1.13*charge-.76*hiccup-.55*cloud
+    -dragon*.65-chase*.51+yomi*.36-dino*.68),
+  leg:child*(.1*sniff+.23*prank+.42*charge-.27*hiccup+.14*cloud
+    +dragon*.12+chase*.20+dino*.16),
+  lift:child*(-1.6*prank-2.2*hiccup-1.1*cloud
+    -breath*.67+dragon*1.3-chase*.85-yomi*.74+dino*1.5),
+  bodyRot:.04*sniff-.08*prank-.11*charge+.21*hiccup-.05*cloud
+    +breath*.016+dragon*.1-chase*.095+yomi*.07-dino*.12,
+  eyes:hiccup>.26?"squeeze":cloud>.26?"happy":charge>.26?"squeeze":prank>.26?"happy":
+    dragon>.3?"squeeze":chase>.3?"happy":yomi>.3?"normal":dino>.3?"squeeze":"normal",
+  mouth:hiccup>.25?"o":cloud>.25?"smile":charge>.25?"flat":prank>.25?"grin":
+    dragon>.3?"o":chase>.3?"grin":yomi>.3?"smile":dino>.3?"o":"smile"
  };
 }
 
@@ -684,6 +708,10 @@ function draw(ctx, pose, R) {
     if (o.rot) { ctx.translate(0, cy); ctx.rotate(o.rot); ctx.translate(0, -cy); }
     if (o.spinX !== 1) { const sx = Math.sign(o.spinX || 1) * Math.max(0.2, Math.abs(o.spinX)); ctx.scale(sx, 1); }
     if (o.stretchY !== 1) ctx.scale(1, o.stretchY);
+    // One connected native silhouette including ears, gills, spring tail,
+    // shoulder roots, paws and planted feet, not a floating outer effect.
+    const life=chispinWelcomeRig(pose,f);
+    if(life.active)ctx.scale(life.torsoX,life.torsoY);
     const tip = figure(ctx, R, pose, f, S, C, o);
     ctx.restore();
     return tip;
