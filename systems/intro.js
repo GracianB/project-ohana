@@ -575,6 +575,8 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.cuernoWelcomePhase=cuernoBeat.phase;
       el.dataset.cuernoWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.cuernoFamilyReaction=cuernoBeat.yomi>.2?"yomi":
+        cuernoBeat.dragon>.2?"dragon":cuernoBeat.melody>.2?"melody":"rest";
     }
     if(cuernoBeat.wonder>.44){
       comicBubble("¿ESO BRILLA?",cuerno.x,cuerno.foot-heroH*1.03,

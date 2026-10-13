@@ -14,6 +14,13 @@ export const CUERNO_WELCOME_BEATS=Object.freeze({
   surprise:Object.freeze([10.28,10.40,10.53,10.65]),
   bow:Object.freeze([10.61,10.74,10.93,11.08])
 });
+// V359: all five real anatomies stay alive while the rest of the family acts.
+ // A horn and an orb never grow fabricated horse legs or wings in these cues.
+export const CUERNO_FAMILY_REACTIONS=Object.freeze({
+  melody:Object.freeze([.73,.91,1.22,1.47]),
+  dragon:Object.freeze([3.34,3.54,3.87,4.13]),
+  yomi:Object.freeze([8.04,8.24,8.58,8.90])
+});
 export function cuernoWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -23,15 +30,18 @@ export function cuernoWelcomeBeat(seconds,reducedMotion=false){
  const surprise=pulse(t,...CUERNO_WELCOME_BEATS.surprise);
  const bow=pulse(t,...CUERNO_WELCOME_BEATS.bow);
  const breath=(1+Math.sin(t*TAU*4/14))*.5;
+ const melody=pulse(t,...CUERNO_FAMILY_REACTIONS.melody);
+ const dragon=pulse(t,...CUERNO_FAMILY_REACTIONS.dragon);
+ const yomi=pulse(t,...CUERNO_FAMILY_REACTIONS.yomi);
  if(reducedMotion)return Object.freeze({phase:"idle",wonder:0,tiptoe:0,
-   aurora:0,surprise:0,bow:.2,breath:.5,mane:0,wing:0,tail:0,glow:.12,reduced:true});
+   aurora:0,surprise:0,bow:.2,breath:.5,melody:0,dragon:0,yomi:0,mane:0,wing:0,tail:0,glow:.12,reduced:true});
  const phase=aurora>.2?"aurora":surprise>.2?"surprise":tiptoe>.2?"tiptoe":
    wonder>.2?"wonder":bow>.2?"bow":"idle";
- return Object.freeze({phase,wonder,tiptoe,aurora,surprise,bow,breath,
-  mane:clamp(.19*Math.sin(t*TAU*5/14)+aurora*.48+surprise*.21-bow*.18,-1,1),
-  wing:clamp(tiptoe*.16+aurora*.78+surprise*.27+bow*.18),
-  tail:clamp(.20*Math.sin(t*TAU*3/14)+aurora*.51+surprise*.27-bow*.16,-1,1),
-  glow:clamp(.12+wonder*.10+aurora*.74+bow*.17),reduced:false});
+ return Object.freeze({phase,wonder,tiptoe,aurora,surprise,bow,breath,melody,dragon,yomi,
+  mane:clamp(.19*Math.sin(t*TAU*5/14)+aurora*.48+surprise*.21-bow*.18+melody*.12-dragon*.24+yomi*.19,-1,1),
+  wing:clamp(tiptoe*.16+aurora*.78+surprise*.27+bow*.18+dragon*.22+yomi*.13),
+  tail:clamp(.20*Math.sin(t*TAU*3/14)+aurora*.51+surprise*.27-bow*.16+melody*.11+dragon*.33-yomi*.21,-1,1),
+  glow:clamp(.12+wonder*.10+aurora*.74+bow*.17+melody*.06+dragon*.11+yomi*.17),reduced:false});
 }
 export function drawCuernoWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
  if(!ctx||!beat||![x,foot,height,seconds].every(Number.isFinite)||height<=0)return;
