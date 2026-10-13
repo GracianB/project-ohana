@@ -58,7 +58,8 @@ test("V359 form dispatch preserves the real horn, orb, four-hoof foal and two wi
    "if (f === 2) { drawRainbowFoal(","if (f === 3) { drawStellarUnicorn("])
   assert.ok(s.includes(line),"cannot substitute form with old generic sprite "+line);
  assert.equal((s.match(/if\(intro\.active\)ctx\.scale\(intro\.bodyX,intro\.bodyY\)/g)||[]).length,5);
- assert.doesNotMatch(s,/function drawCuernoOverlays[^]*?if\(intro\.active\)/);
+ const overlayOnly=s.slice(s.indexOf("function drawCuernoOverlays("),s.indexOf("function drawLivingHorn("));
+ assert.ok(!overlayOnly.includes("if(intro.active)"),"form-only anatomy cannot leak into overlays");
  assert.match(s,/The F0 baby is only a sentient horn/);
  assert.match(s,/F1 · Destello: a SINGLE spherical face/);
  assert.match(s,/F2 · First foal body, precisely FOUR articulated legs/);
