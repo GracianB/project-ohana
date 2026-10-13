@@ -15,22 +15,45 @@ const PAL = [
 // welcome duplicate. Body proportions and each canonical form stay intact.
 export function michiWelcomeRig(pose={},form=0){
  const w=pose.michiWelcome;
- const idle={active:false,arm:0,leg:0,tail:0,bob:0,head:0,ear:0,wing:0,mood:"normal"};
+ const idle={active:false,arm:0,leg:0,tail:0,bob:0,head:0,ear:0,wing:0,mood:"normal",
+   torsoX:1,torsoY:1,haunch:0,paw:0,look:0};
  if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return idle;
  const n=x=>Number.isFinite(x)?Math.min(1,Math.max(0,x)):0;
  const inspect=n(w.inspect),sideeye=n(w.sideeye),groom=n(w.groom),
   flick=n(w.flick),purr=n(w.purr);
- const baby=form===0?.65:form===2?.74:1;
+ const melody=n(w.melody),spark=n(w.spark),chase=n(w.chase),
+  yomi=n(w.yomi),dino=n(w.dino);
+ const breath=(n(w.breath)-.5)*2;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const baby=f===0?.65:f===2?.74:1;
+ // F0 has a soft oval belly. F2 is a cloud (no invented cat boots).
+ // F3 retains its moon silhouette. F4 has the ONLY feathered wings.
+ const expansion=[.072,.059,.042,.037,.034][f];
  return {
-  active:inspect+sideeye+groom+flick+purr>.003,
-  arm:baby*(.16*inspect-.23*sideeye-1.35*groom+.75*flick+.48*purr),
-  leg:baby*(.10*inspect-.15*sideeye+.22*groom+.32*flick+.11*purr),
-  tail:.13*inspect+.25*sideeye+.29*groom+.94*flick+.55*purr,
-  bob:-1.2*inspect+.6*sideeye-.55*groom-2.7*flick-1.4*purr,
-  head:-.14*inspect+.19*sideeye+.24*groom-.31*flick-.13*purr,
-  ear:.12*inspect-.22*sideeye+.08*groom+.4*flick-.15*purr,
-  wing:form===4?.14*inspect+.19*sideeye+.25*groom+.44*flick+.84*purr:0,
-  mood:sideeye>.3?"angry":groom>.26?"closed":flick>.25?"angry":purr>.24?"happy":"normal"
+  active:true,
+  torsoX:Math.max(.90,Math.min(1.10,1+breath*expansion+melody*.015
+     -spark*.025+chase*.019+yomi*.012)),
+  torsoY:Math.max(.92,Math.min(1.08,1-breath*expansion*.61
+     -melody*.01+spark*.026-chase*.016)),
+  arm:baby*(.16*inspect-.23*sideeye-1.35*groom+.75*flick+.48*purr
+     +melody*.25+spark*.72+chase*.61+yomi*.42+dino*.83),
+  leg:baby*(.10*inspect-.15*sideeye+.22*groom+.32*flick+.11*purr
+     +spark*.13+chase*.20+dino*.17),
+  tail:.13*inspect+.25*sideeye+.29*groom+.94*flick+.55*purr
+     +breath*.13+melody*.15+spark*.43+chase*.57+yomi*.19+dino*.38,
+  bob:-1.2*inspect+.6*sideeye-.55*groom-2.7*flick-1.4*purr
+     -breath*.83-melody*.45+spark*1.2-chase*.78-yomi*.62+dino*1.4,
+  head:-.14*inspect+.19*sideeye+.24*groom-.31*flick-.13*purr
+     +breath*.025-melody*.10+spark*.22-chase*.15+yomi*.14+dino*.27,
+  ear:.12*inspect-.22*sideeye+.08*groom+.4*flick-.15*purr
+     +breath*.04+melody*.12+spark*.27-chase*.22+yomi*.17+dino*.28,
+  haunch:breath*.31+spark*.43+chase*.46+dino*.54,
+  paw:groom*.61+melody*.15+spark*.46+chase*.38+yomi*.27+dino*.5,
+  look:melody*.13-spark*.24+chase*.19+yomi*.16-dino*.26,
+  wing:f===4?.14*inspect+.19*sideeye+.25*groom+.44*flick+.84*purr
+      +melody*.08+spark*.17+yomi*.18+dino*.32:0,
+  mood:sideeye>.3?"angry":groom>.26?"closed":flick>.25?"angry":purr>.24?"happy":
+    spark>.36?"angry":chase>.36?"happy":yomi>.36?"happy":dino>.36?"closed":"normal"
  };
 }
 
@@ -141,14 +164,15 @@ function tail(ctx, R, x, y, len, ang, amp, t, i, color) {
 
 function legs(ctx, R, r, hx, fur, dark, len) {
   const L = len || 20;
-  R.swingLimb(ctx, hx - 9, -L - 2, L, r.leg, r.st === "jump" ? -5 : 0, 7.2, dark);
-  R.swingLimb(ctx, hx + 8, -L - 2, L, r.st === "jump" ? -2.05 : -r.leg, r.st === "jump" ? -4 : 0, 7.2, fur);
+  // Two original hip roots stay connected while the haunch breathes.
+  R.swingLimb(ctx, hx - 9, -L - 2, L, r.leg+(r.michiHaunch||0)*.12, r.st === "jump" ? -5 : 0, 7.2, dark);
+  R.swingLimb(ctx, hx + 8, -L - 2, L, r.st === "jump" ? -2.05 : -r.leg-(r.michiHaunch||0)*.12, r.st === "jump" ? -4 : 0, 7.2, fur);
 }
 
 function arm(ctx, R, r, x, y, fur, len) {
   const L = len || 18;
   const bend = r.st === "attack" ? 6 : r.slot === 0 ? 4 : 1;
-  R.swingLimb(ctx, x, y, L, r.arm, bend, 6.4, fur, { handColor: "#ffb0c4" });
+  R.swingLimb(ctx, x, y, L, r.arm-(r.michiPaw||0)*.20, bend, 6.4, fur, { handColor: "#ffb0c4" });
   if (r.st === "attack" && r.atk > 0.25 && r.atk < 0.75) {
     ctx.save();
     ctx.translate(x + 22, y - 6);
@@ -171,8 +195,15 @@ function drawBaby(ctx, R, pose, r, c) {
     R.swingLimb(ctx, -8, -8, 8, 0.2 + r.leg * 0.4, 0, 6, c.fur);
     R.swingLimb(ctx, 9, -8, 8, -0.15 - r.leg * 0.4, 0, 6, c.fur);
   }
+  // The baby had back legs but no visible forepaws to groom with. Both
+  // tiny arms now begin at its REAL shoulder line, partly hidden by the
+  // oval belly so there is no floating wrist or detached axilla.
+  R.swingLimb(ctx, -17, -34, 7, -0.28-(r.michiPaw||0)*.14,
+    0, 5.2, c.dark, {handColor:"#ffd5da"});
   R.ellipse(ctx, 2, -38, 32, 30, c.fur);
   R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
+  R.swingLimb(ctx, 19, -33, 9, r.arm-(r.michiPaw||0)*.42,
+    0, 5.5, c.fur, {handColor:"#ffb0c4"});
   R.shine(ctx, -8, -50, 8, 4, 0.4);
   const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
   ear(ctx, -14, -58, 18, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
@@ -498,13 +529,17 @@ function draw(ctx, pose, R) {
   if(welcome.active){
     r.arm+=welcome.arm;r.leg+=welcome.leg;
     r.tail+=welcome.tail;r.bob+=welcome.bob;
-    r.michiHead=welcome.head;r.michiEar=welcome.ear;
+    r.michiHead=welcome.head+welcome.look;r.michiEar=welcome.ear;
     r.michiWing=welcome.wing;r.mood=welcome.mood;
+    r.michiHaunch=welcome.haunch;r.michiPaw=welcome.paw;r.michiLook=welcome.look;
   }
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
   moonSoul(ctx, safe, f, false);
   ctx.translate(0, r.bob + (safe.bounce || 0) * 2);
+  // One connected original cat silhouette per form: tail, feet, shoulder
+  // roots, ears and (F4 only) feathered wings expand together from the paws.
+  if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
   if (r.st === "dead") {
     ctx.rotate(1.05);
     ctx.translate(8, -10);

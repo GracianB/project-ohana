@@ -109,6 +109,21 @@ try {
       phase,{timeout:1600});
     await capture(page,label);
   }
+  // V363: five genuine family reactions during the silent time after her
+  // own five theatrical beats; inspect real ears, grooming paw and tail.
+  for(const [at,reaction,label] of [
+    [1.0,'melody','00zx1-michi-hears-kilo'],
+    [2.08,'spark','00zx2-michi-judges-spark'],
+    [6.0,'chase','00zx3-michi-watches-chase'],
+    [8.45,'yomi','00zx4-michi-greets-yomi'],
+    [12.2,'dino','00zx5-michi-ducks-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.michiFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V354: every after-beat paints the SAME connected Dragon, not idle artwork
   // with new overlays. Watch the torso, wing roots, head, claws and tail.
   for(const [at,reaction,label] of [
@@ -461,6 +476,66 @@ try {
   });
   screenshots.push('00zq5-chispin-five-real-evolutions-breathing');
   await page.locator('#chispin-form-audit').evaluate(el=>el.remove());
+  // V363: pixel-level FIVE-FORM inspection. The family opening uses baby
+  // Michi; without these captures F2 cloud paws or detached F4 feather roots
+  // could pass every intro screenshot. Real drawDummy -> drawCharacter ->
+  // original cat.js, with actual F0..F4 evolution definitions.
+  const michiFormAudit=await page.evaluate(async()=>{
+    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
+    const {michiWelcomeBeat}=await import('/systems/intro-michi-stage.js?visual=v362');
+    const canvas=document.createElement('canvas');
+    canvas.id='michi-form-audit';
+    canvas.width=1450;canvas.height=580;
+    canvas.style.cssText='position:fixed;left:12px;top:12px;width:min(96vw,1450px);height:auto;z-index:99999;pointer-events:none';
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const samples=[];
+    for(const [row,at] of [[0,.875],[1,2.625]]){
+      for(let f=0;f<5;f++){
+        const x=145+f*290,y=235+row*290;
+        const p=makeDummy('cat',f);
+        p._introForceCanvas=true;
+        p._introMichi=michiWelcomeBeat(at);
+        p._poseOverride='idle';p.grounded=true;p.facing=1;
+        ctx.save();drawDummy(ctx,p,x,y,1.28,24);ctx.restore();
+        const startX=f*290,rowY=row*290;
+        const data=ctx.getImageData(startX,rowY,290,290).data;
+        let pixels=0,hash=2166136261>>>0;
+        for(let i=0;i<data.length;i+=4){
+          if(data[i+3]<80)continue;
+          pixels++;
+          hash=Math.imul(hash^data[i],16777619)>>>0;
+          hash=Math.imul(hash^data[i+1],16777619)>>>0;
+          hash=Math.imul(hash^data[i+2],16777619)>>>0;
+        }
+        samples.push({form:f,row,pixels,hash});
+        ctx.fillStyle='#edebff';ctx.font='bold 16px sans-serif';
+        ctx.fillText(['Michito','Michi','Nube rosa','Michi Luna','Michi Eclipse'][f],
+          x-73,rowY+22);
+      }
+    }
+    // Fill the background behind the 10 ORIGINAL rendered bodies only
+    // after measuring pixel alpha, keeping a clear printable audit.
+    ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#102638';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation='source-over';
+    document.body.appendChild(canvas);
+    return samples;
+  });
+  assert.equal(michiFormAudit.length,10,'five actual forms x two breathing poses');
+  assert.ok(michiFormAudit.every(a=>a.pixels>120),
+    'all original Michi forms must visibly paint at both instants: '+
+    JSON.stringify(michiFormAudit));
+  for(let f=0;f<5;f++){
+    const a=michiFormAudit.find(x=>x.form===f&&x.row===0);
+    const b=michiFormAudit.find(x=>x.form===f&&x.row===1);
+    assert.notEqual(a.hash,b.hash,
+      'Michi form '+f+' must really breathe on the Canvas, not just change metadata');
+  }
+  await page.locator('#michi-form-audit').screenshot({
+    path:resultsDir+'/00zx6-michi-five-real-evolutions-breathing.png'
+  });
+  screenshots.push('00zx6-michi-five-real-evolutions-breathing');
+  await page.locator('#michi-form-audit').evaluate(el=>el.remove());
   // V353: five real cat expressive silhouettes in the same ten-hero stage.
   for(const [at,phase,label] of [
     [3.32,'inspect','00zr-michi-inspects'],

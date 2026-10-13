@@ -1,3 +1,15 @@
+## OHANA V363 · Michi, diez personajes y cierre de segunda ronda (ohana-363)
+
+- Décima intervención profunda individual de diez: Michi ocupa el último slot, pero ya no permanece casi quieto el resto de un ciclo de 14 segundos. Conserva los cinco beats originales de actuar como director (inspect, sideeye, groom, flick, purr) y cinco encuentros con la familia: Kilo (.62–1.4 s), Chispín (1.73–2.55 s), persecución Frita/Pizza (5.64–6.42 s), farol de Yomi (8.06–8.93 s) y pisotón Dino (11.83–12.72 s).
+- `characters/art/cat.js` sigue siendo la única anatomía: cuerpo redondo F0, gato real F1, nube flotante F2, figura lunar F3 y Eclipse F4 con alas emplumadas únicas. Nunca se generan patas de gato debajo de la nube ni alas en F0–F3.
+- `michiWelcomeRig`: respiración real de vientre F0 vs torso F4, escala del cuerpo de la cadera al apoyo, cuello, mirada y orejas, cola unida, apoyos y mano del acicalado. Cada pose mantiene extremidades originales; se añaden apenas cinco señales analíticas de interacciones, no sprites nuevos ni poderes.
+- El movimiento de cuerpo utiliza el mismo Canvas del personaje y sus transformaciones originales. El sello de dibujo incorpora respiración y los cinco encuentros para evitar fotogramas congelados. Se conserva todo combate, daño, hilo/yarn, U, red y U cooperativa.
+- `prefers-reduced-motion` inmóvil y estados no-idle intactos. Seis pruebas Node de anatomía F0–F4, cinco encuentros, cadera/patas/alas, modo reducido, continuidad de reloj y preservación del reparto.
+- Browser E2E escritorio/móvil, cinco capturas de Michi durante otros actos y lámina de diez imágenes de F0–F4 con dos fases respiratorias. Actualizadas versión HTML/SW `ohana-363` y documentación.
+- V363 depende de V362 Chispín: no fusionar la rama hasta que Node, Browser, Visual, Release Gate y los dos cooperativos estén verdes, y Chispín se integre primero. No desplegar Netlify.
+
+---
+
 ## OHANA V362 · Chispín, branquias, orejas y cola de muelle auténticas (ohana-362)
 
 - Novena intervención de la segunda ronda individual, tras la V361 Stitcho ya publicada. Mantiene las cinco actuaciones de los primeros 3.30 segundos y ahora interpreta corporalmente el resto del ciclo de 14 s.
