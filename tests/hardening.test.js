@@ -730,7 +730,9 @@ test("V47B selector and cinematics keep rendering cost bounded", () => {
   assert.match(title, /new ResizeObserver\(/);
   assert.match(titleFx, /length:28/);
   assert.match(titleFx, /R=Math\.min\(W\*\.155,H\*\.225\)/);
-  assert.match(evo, /pixels > 1800000 \? 1\.45/);
+  const cinemaKit = fs.readFileSync("./systems/cinema-kit.js", "utf8");
+  assert.match(cinemaKit, /pixels > 1800000 \? 1\.45/);
+  assert.match(evo, /from "\.\/cinema-kit\.js"/);
   assert.match(supreme, /p\.vx=0;p\.vy=0;p\.grounded=true/);
   assert.match(css, /V47B · SELECTOR PERFORMANCE \+ TIGHTER SPOTLIGHT/);
   assert.match(css, /roster-arrow,[\s\S]*?backdrop-filter:none!important/);
@@ -877,7 +879,8 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   assert.match(css, /PROJECT OHANA V48 · SUPREME CINEMA REBORN/);
   assert.doesNotMatch(css, /sc-motif/);
   assert.match(html, /supreme\.css\?v=ohana-\d+/);
-  assert.match(html, /systems\/supreme-cinema\.js\?v=ohana-\d+/);
+  assert.match(html, /systems\/cinema-loader\.js\?v=ohana-\d+/);
+  assert.match(fs.readFileSync("./systems/cinema-loader.js","utf8"),/installLazyCinema\("ohana-supreme","\.\/supreme-cinema\.js"/);
   assert.match(visual, /09-supreme-kilo-in-world-duet/);
   assert.match(visual, /09b-supreme-yomi-story/);
 });
