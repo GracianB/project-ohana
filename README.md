@@ -395,3 +395,12 @@ OHANA instala todos los recursos necesarios para funcionar sin conexión. La ins
 Desde V368 se conserva un manifiesto de huellas Git de cada archivo en la caché. Al publicar una nueva versión, el Service Worker puede reutilizar sin descarga los recursos exactamente iguales y descargar únicamente los que cambien. La primera migración desde V367 necesita reconstruir la caché porque no había metadatos comparables. Una instalación interrumpida no reemplaza una versión anterior válida.
 
 **Al desarrollar V369 y siguientes:** actualizar referencias `ohana-NNN` y ejecutar `node tools/update-offline-revisions.mjs` después de editar recursos y antes de la batería `npm run release:check`. El Release Gate rechaza cualquier manifiesto incorrecto. Se conserva el catálogo offline completo, el control de errores 503 para recursos no disponibles y el aislamiento de endpoints externos.
+
+
+### V369 · Una actualización incremental medida
+
+La primera actualización basada en el manifiesto de V368 muestra **199 de 200 recursos estáticos sin cambios**, equivalentes a **6.433.149 bytes (6,14 MiB) de archivos originales potencialmente reutilizables**. Solo `index.html` necesita actualizarse (17.817 bytes de origen). Estas cifras comparan contenido del repositorio, sin atribuirlas a consumo real de transferencia HTTP comprimida.
+
+El Service Worker guarda estadísticas de instalación exclusivamente en CacheStorage (`./.ohana-install-stats.json`, dentro del caché `ohana-static-ohana-369`) y no envía datos personales ni analítica. La auditoría `node tools/offline-upgrade-report.mjs` genera `test-results/performance/v369-offline-upgrade.json`. Chromium prueba la migración y que sigue habiendo juego offline tras ella.
+
+Las próximas revisiones deben conservar la tabla de huellas regenerándola con `node tools/update-offline-revisions.mjs` y validarla con Release Gate. Solo GitHub Pages, sin Netlify/TURN de pago.

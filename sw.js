@@ -1,4 +1,4 @@
-const VERSION = "ohana-368";
+const VERSION = "ohana-369";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -208,7 +208,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "index.html": "24ac5eb9883345d41640bdb5cdc18aee31831f35",
+  "index.html": "aeb79b34517ea27b3bb0f067450a989462377c43",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -410,6 +410,7 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
+const INSTALL_STATS = "./.ohana-install-stats.json";
 const MAX_INSTALL_FETCHES = 6;
 const PRIORITY_ASSETS = new Set([
   "./index.html","./game.js","./style.css","./title-stage.css",
@@ -475,6 +476,12 @@ async function installOfflineRelease() {
   await cache.put(REVISION_METADATA,new Response(JSON.stringify(PRECACHE_REVISIONS),{
     headers:{"Content-Type":"application/json; charset=utf-8"}
   }));
+  // Local-only diagnostics for actual device updates. Never log URLs, keys,
+  // player data or user identifiers and never send telemetry to a server.
+  await cache.put(INSTALL_STATS,new Response(JSON.stringify({
+    version:VERSION,reused,downloaded,total:work.length,
+    incremental:previous.length>0
+  }),{headers:{"Content-Type":"application/json; charset=utf-8"}}));
   return {reused,downloaded};
 }
 
