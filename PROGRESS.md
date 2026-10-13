@@ -1,3 +1,13 @@
+## OHANA V368 · Precaché incremental y seis descargas simultáneas (ohana-368)
+
+- La instalación PWA conserva el catálogo completo de 200 recursos estáticos y módulos del juego, más la ruta `./`, incluyendo las cinemáticas diferidas de V367, personajes, CSS y sprites para jugar sin conexión.
+- El instalador deja de lanzar ~200 peticiones simultáneas mediante `cache.addAll`. Ahora prioriza el arranque visible y utiliza como máximo 6 descargas simultáneas, sin competir agresivamente con la primera pantalla.
+- Se descarga `index.html` solo una vez y se reutiliza la misma respuesta para `./`. La diferencia es pequeña pero real desde la primera instalación.
+- Nueva tabla de huellas Git SHA-1 de contenido, verificada recurso a recurso por Release Gate contra los bytes del repositorio. Las próximas versiones podrán copiar desde la caché anterior los assets con huella idéntica y no tendrán que descargarlos de nuevo. V368, que migra desde V367 sin metadatos, tiene que descargar los recursos la primera vez.
+- Una versión nueva solo toma el control después de preparar todos sus recursos y escribir correctamente el manifiesto, conservando la versión anterior si la instalación falla o se interrumpe. La activación elimina entonces cachés antiguas.
+- `tools/update-offline-revisions.mjs` permite regenerar determinísticamente las huellas al actualizar archivos y versión. Test Node simula primera instalación, descargas concurrentes, instalación con fallo, reutilización verificada y continuidad offline.
+- Sin servicios de pago: GitHub Pages, sin volver a llamar a Netlify o TURN desde el juego público.
+
 ## OHANA V367 · Arranque ligero y cinemáticas por demanda (ohana-367)
 
 - El arranque pasa de diez entradas JavaScript a seis: se mantienen motor, portada, escenas de mundo, director visual y tutorial, y se añade un despachador de cinemáticas.
