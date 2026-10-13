@@ -485,7 +485,7 @@ function draw(ctx, pose, R) {
   const { hh, bw, bh } = P;
   const final = f === 4, baby = f === 0;
   const motion = dinoSecondaryMotion(pose);
-  const brace = dinoGroundBrace({...pose,state:st});
+  let brace = dinoGroundBrace({...pose,state:st});
   const dark = R.darken(c.body, 0.22);
   const fl = pose.flourish > 0 ? pose.flourish : 0;
   const flN = (Number(pose.flourishN) || 0) % 4;
@@ -688,6 +688,37 @@ function draw(ctx, pose, R) {
     hdx += motion.headOffset;
     hdy += motion.hipDrop * .54 + motion.cheekBounce;
     jaw = clamp(jaw + motion.cheekBounce*.16,0,1.45);
+  }
+  // The intro directs the same connected bones and joints the game already
+  // uses. Even the heavy stomp remains optical: no damage or world physics.
+  const welcome=pose.dinoWelcome;
+  if(welcome && st!=="dead" && st!=="hurt" && !rolling){
+    const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+    const signed=v=>Number.isFinite(v)?clamp(v,-1,1):0;
+    const curious=unit(welcome.curious),prepare=unit(welcome.brace);
+    const impact=unit(welcome.stomp),surprise=unit(welcome.startled);
+    const delight=unit(welcome.delighted);
+    // A little dinosaur who discovers his own strength has readable weight:
+    // inquisitive snout, two planted feet, compression, recoil, shy delight.
+    bob+=curious*(-1.6)+prepare*(2.7)+impact*(3.7)+surprise*(-3.3)+delight*(-1.4);
+    lean+=curious*.075+prepare*(-.17)+impact*.19+surprise*(-.19)+delight*(-.08);
+    headRot+=curious*(-.17)+prepare*.10+impact*.24+surprise*(-.30)+delight*(-.23);
+    hdx+=curious*2.7+impact*1.9+surprise*(-2.6)+delight*1.3;
+    hdy+=prepare*1.4+impact*2.3+surprise*(-2.2);
+    armF+=curious*.42+prepare*.61+impact*(-.15)+surprise*1.20+delight*1.07;
+    armB+=curious*.21+prepare*.31+surprise*.79+delight*.81;
+    legF+=prepare*.28+impact*.45+surprise*(-.19)+delight*.12;
+    legB+=prepare*.22+impact*.35+surprise*(-.13);
+    lenF=clamp(lenF-prepare*.045-impact*.075,.65,1.2);
+    lenB=clamp(lenB-prepare*.04-impact*.06,.65,1.2);
+    tailA=clamp(tailA+signed(welcome.tail)*.19+prepare*.22-impact*.24+surprise*(-.15)+delight*.28,-1.04,.84);
+    tailWag+=curious*.12+delight*.32;
+    jaw=clamp(jaw+curious*.17+impact*.20+surprise*.62+delight*.47,0,1.45);
+    eyeMood=surprise>.26?"closed":delight>.22?"happy":"normal";
+    brace={front:clamp(Math.max(brace.front,prepare*.48,impact*.98),0,1),
+      rear:clamp(Math.max(brace.rear,prepare*.41,impact*.84),0,1)};
+    // Keep this specific face soft; an idle baby dinosaur does not need a
+    // Colossus roar or the fake heavy-hitter silhouette from combat U.
   }
   const legRoot = P.legL + P.legW * 0.5;
   const hipY = -legRoot + bob + (rolling || st === "dead" ? 0 : motion.hipDrop);
