@@ -14,6 +14,14 @@ export const DRAGON_WELCOME_BEATS=Object.freeze({
   proud:Object.freeze([4.08,4.27,4.60,4.88])
 });
 
+// Second half of Dragon's film: it notices its family instead of going inert
+// for the ten seconds after the sneeze. These never change the legacy phase.
+export const DRAGON_FAMILY_REACTIONS=Object.freeze({
+  chase:Object.freeze([5.23,5.47,5.91,6.18]),
+  ghost:Object.freeze([8.09,8.30,8.62,8.94]),
+  dino:Object.freeze([11.75,11.97,12.35,12.70])
+});
+
 /** Every state is analytic, repeatable and bounded. No timers or randomness. */
 export function dragonWelcomeBeat(seconds, reduceMotion=false){
   const raw=Number.isFinite(seconds)?seconds:0;
@@ -25,16 +33,19 @@ export function dragonWelcomeBeat(seconds, reduceMotion=false){
   const recoil=pulse(time,...DRAGON_WELCOME_BEATS.recoil);
   const proud=pulse(time,...DRAGON_WELCOME_BEATS.proud);
   const breath=(1+Math.sin(time*TAU*5/14))*.5;
+  const chase=pulse(time,...DRAGON_FAMILY_REACTIONS.chase);
+  const ghost=pulse(time,...DRAGON_FAMILY_REACTIONS.ghost);
+  const dino=pulse(time,...DRAGON_FAMILY_REACTIONS.dino);
   const phase=sneeze>.17?"sneeze":recoil>.25?"recoil":inhale>.17?"inhale":proud>.25?"proud":"idle";
   if(reduceMotion)return Object.freeze({
     phase:"idle",inhale:0,sneeze:0,recoil:0,proud:.22,
-    breath:.5,wing:0,tail:0,glow:.12,reduced:true
+    breath:.5,chase:0,ghost:0,dino:0,wing:0,tail:0,glow:.12,reduced:true
   });
   return Object.freeze({
-    phase,inhale,sneeze,recoil,proud,breath,
-    wing:clamp(.22+.15*Math.sin(time*TAU*6/14)+inhale*.42+sneeze*.42+proud*.28),
-    tail:clamp(.34*Math.sin(time*TAU*4/14)+recoil*.66-proud*.25,-1,1),
-    glow:clamp(.10+sneeze*.9+proud*.36),
+    phase,inhale,sneeze,recoil,proud,breath,chase,ghost,dino,
+    wing:clamp(.22+.15*Math.sin(time*TAU*6/14)+inhale*.42+sneeze*.42+proud*.28+ghost*.10+dino*.17),
+    tail:clamp(.34*Math.sin(time*TAU*4/14)+recoil*.66-proud*.25+chase*.25-dino*.35,-1,1),
+    glow:clamp(.10+sneeze*.9+proud*.36+ghost*.15+dino*.12),
     reduced:false
   });
 }

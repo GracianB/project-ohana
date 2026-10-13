@@ -1,3 +1,15 @@
+## OHANA V354 · Dragón vivo durante catorce segundos y auditoría de los diez (ohana-354)
+
+- Primera edición de la segunda ronda **personaje por personaje**. Se ha estudiado el código del reparto entero en `AUDITORIA_PERSONAJES_V354.md`; quedan objetivos precisos V355–V363 para Dino, Frita, Pizza, Yomi, Cuerno, Kilo, Stitcho, Chispín y Michi.
+- Hallazgo: los beats principales duran unos 2–3 segundos, dentro de un loop de 14. La primera ronda consiguió escenas individuales; la segunda exige continuidad entre actuaciones, articulación original y reacción colectiva.
+- Dragón: `dragonWelcomeAnatomy` modifica en el Canvas original la expansión de pecho, peso, cuello, cabeza, mandíbula, brazos, dos alas ancladas y cola. F0 respira más por el vientre y F4 más por los hombros. No altera las cinco formas.
+- Tres momentos nuevos **sin tocar las cuatro fases iniciales**: observa la persecución Frita/Pizza, se asusta del farol de Yomi y reacciona al pisotón de Dino. La respiración continúa durante el reposo, incluso cuando no hay diálogo.
+- Funciones deterministas sin azar, ciclo de 14 s exacto, modo reducido estático, estado de combate intacto, sin daños/colisiones/U online.
+- Seis nuevas pruebas Node específicas del cuerpo, diez actores auditados en matriz independiente, navegador, tres nuevos fotogramas visuales. `index.html` y `sw.js` alineados a `ohana-354`.
+- No fusionar sin Node, E2E, visual, cooperativo Firefox/Chromium, Release Gate y publicación Pages correcta; no desplegar Netlify.
+
+---
+
 ## OHANA V353 · Michi: el gato que juzga a toda la familia con cinco actos (ohana-353)
 
 - Décima intervención artística individual de la portada, cerrando la ronda de los diez personajes originales. Michi interpreta una historia propia dentro de los 14 segundos de escena: examina la travesura eléctrica, mira de reojo, se acicala una pata, mueve la cola como advertencia y acaba ronroneando con cariño. Diálogos «¿QUÉ HACÉIS?», «YO NO FUI.», «ME ACICALO.», «NI ME MIRES.» y «PERO SOIS MÍOS.»

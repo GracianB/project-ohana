@@ -69,6 +69,22 @@ async function auditPage(page, label) {
   assert.ok(dragonFilm.hasStageHook&&dragonFilm.stageAlive,
     label+': Dragon animated frame is not rendered in the actual intro Canvas');
   assert.ok(['idle','inhale','sneeze','recoil','proud'].includes(dragonFilm.livePhase));
+  // V354: a living Dragon keeps acting after the introductory sneeze.
+  const dragonFamily=await page.evaluate(async()=>{
+    const {dragonWelcomeBeat}=await import('/systems/intro-dragon-stage.js?e2e=v354');
+    const beats=[5.7,8.49,12.20].map(t=>dragonWelcomeBeat(t));
+    return {names:['chase','ghost','dino'],strength:beats.map((b,i)=>b[['chase','ghost','dino'][i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      reduced:dragonWelcomeBeat(8.49,true).ghost,
+      live:document.querySelector('#ohana-intro')?.dataset.dragonFamilyReaction,
+      original:document.querySelector('#ohana-intro')?.dataset.dragonWelcomeMotion};
+  });
+  assert.ok(dragonFamily.quiet, label+': family reactions must not overwrite the sneeze director');
+  assert.ok(dragonFamily.strength.every(v=>v>.65),
+    label+': Dragon must react separately to chase, ghost and Dino');
+  assert.equal(dragonFamily.reduced,0);
+  assert.ok(['rest','chase','ghost','dino'].includes(dragonFamily.live));
+  assert.equal(dragonFamily.original,'full');
   // Dino's authored stage performance is independent of Dragon V344.
   const dinoFilm=await page.evaluate(async()=>{
     const {dinoWelcomeBeat}=await import('/systems/intro-dino-stage.js?e2e=v345');

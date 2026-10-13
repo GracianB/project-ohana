@@ -109,6 +109,19 @@ try {
       phase,{timeout:1600});
     await capture(page,label);
   }
+  // V354: every after-beat paints the SAME connected Dragon, not idle artwork
+  // with new overlays. Watch the torso, wing roots, head, claws and tail.
+  for(const [at,reaction,label] of [
+    [5.70,'chase','00da-dragon-watches-frita'],
+    [8.49,'ghost','00db-dragon-looks-at-yomi'],
+    [12.20,'dino','00dc-dragon-reacts-to-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.dragonFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V345: three separate fixed-time art captures demonstrate that Dino's
   // body/feet are acting on the actual intro Canvas alongside Dragon V344.
   for(const [at,phase,label] of [
