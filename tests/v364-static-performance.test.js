@@ -6,6 +6,7 @@ import vm from "node:vm";
 const sw = fs.readFileSync("sw.js", "utf8");
 const home = fs.readFileSync("index.html", "utf8");
 const title = fs.readFileSync("systems/title.js", "utf8");
+const currentVersion = sw.match(/const VERSION = "(ohana-\\d+)"/)?.[1];
 
 function harness({ offline = false } = {}) {
   const handlers = {};
@@ -58,7 +59,7 @@ function harness({ offline = false } = {}) {
 
 test("V364 JS cache-first: pinned and bare ES imports do not refetch after installation", async () => {
   const h = harness();
-  for (const path of ["game.js?v=ohana-364", "game.js", "game.js?v=ohana-230"]) {
+  for (const path of ["game.js?v="+currentVersion, "game.js", "game.js?v=ohana-230"]) {
     const result = await h.dispatch(path);
     assert.equal(result.status, 200);
     assert.match(await result.text(), /cached = 1/);
@@ -68,7 +69,7 @@ test("V364 JS cache-first: pinned and bare ES imports do not refetch after insta
 
 test("V364 offline: unknown JavaScript must NOT be mistaken for HTML", async () => {
   const h = harness({ offline: true });
-  const missing = await h.dispatch("systems/not-cached.js?v=ohana-364");
+  const missing = await h.dispatch("systems/not-cached.js?v="+currentVersion);
   assert.equal(missing.status, 503);
   assert.match(missing.headers.get("content-type"), /text\/plain/);
   assert.doesNotMatch(await missing.text(), /<html|<title/i);
@@ -86,8 +87,8 @@ test("V364 leaves dynamic backends untouched and never caches external origins",
 });
 
 test("V364 static distribution and UI do not point players to exhausted Netlify", () => {
-  assert.match(sw, /const VERSION = "ohana-364"/);
-  assert.ok([...home.matchAll(/ohana-\d+/g)].every(x => x[0] === "ohana-364"));
+  assert.ok(currentVersion && Number(currentVersion.slice(6)) >= 364);
+  assert.ok([...home.matchAll(/ohana-\d+/g)].every(x => x[0] === currentVersion));
   assert.match(home, /id="btn-coop"[^>]+disabled/);
   assert.doesNotMatch(home, /netlify\.app/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
