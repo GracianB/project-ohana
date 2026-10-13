@@ -195,8 +195,15 @@ function drawBaby(ctx, R, pose, r, c) {
     R.swingLimb(ctx, -8, -8, 8, 0.2 + r.leg * 0.4, 0, 6, c.fur);
     R.swingLimb(ctx, 9, -8, 8, -0.15 - r.leg * 0.4, 0, 6, c.fur);
   }
+  // The baby had back legs but no visible forepaws to groom with. Both
+  // tiny arms now begin at its REAL shoulder line, partly hidden by the
+  // oval belly so there is no floating wrist or detached axilla.
+  R.swingLimb(ctx, -17, -34, 7, -0.28-(r.michiPaw||0)*.14,
+    0, 5.2, c.dark, {handColor:"#ffd5da"});
   R.ellipse(ctx, 2, -38, 32, 30, c.fur);
   R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
+  R.swingLimb(ctx, 19, -33, 9, r.arm-(r.michiPaw||0)*.42,
+    0, 5.5, c.fur, {handColor:"#ffb0c4"});
   R.shine(ctx, -8, -50, 8, 4, 0.4);
   const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
   ear(ctx, -14, -58, 18, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
