@@ -8,7 +8,7 @@ const pose=(t,f=0)=>({state:"idle",form:f,cuernoWelcome:cuernoWelcomeBeat(t)});
 
 test("V359 five Cuerno anatomies breathe without replacing a horn by a horse",()=>{
  for(let f=0;f<5;f++){
-  const frames=[0,.5,1.08,2.6,3.7,7.25,8.43,9.8,12.0,13.9]
+  const frames=[0,.5,1.15,2.6,3.8,7.25,8.50,9.8,12.0,13.9]
    .map(t=>cuernoWelcomeAnatomy(pose(t,f),f));
   assert.ok(frames.every(a=>a.active),"connected native rig "+f);
   assert.ok(new Set(frames.map(a=>a.bodyX.toFixed(4))).size>=4,"not frozen");
@@ -32,7 +32,7 @@ test("V359 five Cuerno anatomies breathe without replacing a horn by a horse",()
 });
 
 test("V359 musical horn, dragon sneeze and Yomi lantern encounters are physically distinct",()=>{
- const scenes=[["melody",1.08],["dragon",3.7],["yomi",8.43]];
+ const scenes=[["melody",1.15],["dragon",3.8],["yomi",8.50]];
  assert.equal(Object.keys(CUERNO_FAMILY_REACTIONS).length,3);
  for(const [key,t] of scenes){
   const b=cuernoWelcomeBeat(t);
@@ -68,24 +68,24 @@ test("V359 form dispatch preserves the real horn, orb, four-hoof foal and two wi
 });
 
 test("V359 genuine accessibility and combat isolation: no new magic, wings or legs",()=>{
- for(const t of [0,.5,1.08,3.7,8.43,10.2,Infinity,NaN]){
+ for(const t of [0,.5,1.15,3.8,8.50,10.2,Infinity,NaN]){
   const b=cuernoWelcomeBeat(t,true),a=cuernoWelcomeAnatomy({state:"idle",cuernoWelcome:b},4);
   assert.equal(b.melody,0);assert.equal(b.dragon,0);assert.equal(b.yomi,0);
   assert.equal(a.active,false);assert.equal(a.bodyX,1);assert.equal(a.bodyY,1);
  }
  for(const state of ["dead","hurt","attack","cast","run","jump","glide","victory"]){
-  const a=cuernoWelcomeAnatomy({state,cuernoWelcome:cuernoWelcomeBeat(3.7)},4);
+  const a=cuernoWelcomeAnatomy({state,cuernoWelcome:cuernoWelcomeBeat(3.8)},4);
   assert.equal(a.active,false);
   assert.equal(a.hoof,0);assert.equal(a.wing,0);
  }
  assert.equal(cuernoWelcomeAnatomy({state:"idle"},0).active,false);
- assert.equal(cuernoWelcomeAnatomy({state:"idle",reduceMotion:true,cuernoWelcome:cuernoWelcomeBeat(1.08)},0).active,false);
+ assert.equal(cuernoWelcomeAnatomy({state:"idle",reduceMotion:true,cuernoWelcome:cuernoWelcomeBeat(1.15)},0).active,false);
 });
 
 test("V359 every family scene and slow native respiration invalidates pose cache",()=>{
  const key=t=>poseFingerprint(pose(t,4));
  assert.notEqual(key(.5),key(2.3));
- for(const [now,old] of [[1.08,.2],[3.7,3.1],[8.43,7.6]])
+ for(const [now,old] of [[1.15,.2],[3.8,3.1],[8.50,7.6]])
   assert.notEqual(key(now),key(old));
  assert.deepEqual(cuernoWelcomeBeat(0),cuernoWelcomeBeat(14));
  assert.deepEqual(cuernoWelcomeAnatomy(pose(0),0),cuernoWelcomeAnatomy(pose(14),0));
