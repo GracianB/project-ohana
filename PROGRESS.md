@@ -1,3 +1,15 @@
+## OHANA V356 · Frita: chef vivo, columna flexible y útiles unidos (ohana-356)
+
+- Tercera intervención de la ronda profunda individual, después de Dragón V354 y Dino V355. Cinco actos originales de Frita conservados, pero la patata ya no queda sin actuación fuera del chase de 4 a 7 segundos.
+- Nueva complicidad temporal con Kilo (música, 0.6–1.3 s), susto ante Dragón (fuego 3.35–4.08 s) y ternura al ver a Yomi (8.02–8.88 s). Reacciones físicas, no habilidades nuevas.
+- `fritaWelcomeAnatomy` modifica la `spine()` original por evolución, añadiendo inclinación, flexión, base de cadera, brazo delantero/trasero, dos zapatos, mirada y capa con amplitudes distintas en F0–F4.
+- Los elementos de cocina siguen saliendo de `handF` calculada por el brazo unido al cuerpo: salero en manos infantiles, tenedor en formas maduras y botella en la persecución original. Nada de props flotando o inventar trajes/evoluciones.
+- La animación solo se activa en el dummy de intro al estar `idle`, no en U, colisiones, combate, física, red ni guardado. Movimiento reducido inmóvil. Reloj analítico de 14 s.
+- Seis pruebas Node nuevas de continuidad, anclajes, expresiones, evoluciones, accesibilidad, actor de intro y cache; pruebas E2E escritorio/móvil y tres capturas dirigidas adicionales. Versión `ohana-356` sincronizada en HTML y precaché.
+- PR apilada sobre V355 hasta que V354 y V355 superen CI y se fusionen. Bloqueo: Node, Browser E2E, regresión visual, cooperativo Chromium/Firefox, Release Gate y publicación Pages; sin Netlify.
+
+---
+
 ## OHANA V355 · Dino con cuello, pecho y peso conectados todo el ciclo (ohana-355)
 
 - Segunda intervención de la ronda profunda por personaje. Dino deja de limitar su actuación visible al gag final de pisotón. Sin reescribir los cinco beats originales, ahora responde a la melodía de Kilo (0.5–1.3 s), al estornudo de Dragón (3.3–4.1 s) y a la persecución de Frita/Pizza (5.4–6.3 s). Vuelve a su pisotón original hacia los 11–13 s.

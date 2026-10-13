@@ -163,6 +163,19 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V356: real fry spine, shoulders, hands and grounded shoes keep acting
+  // in the ten-member canvas between Frita's original food chase frames.
+  for(const [at,reaction,label] of [
+    [.89,'music','00dg-frita-hears-ukulele'],
+    [3.67,'fire','00dh-frita-reacts-to-dragon'],
+    [8.43,'spirit','00di-frita-meets-yomi']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.fritaFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V347 Pizza's own acting frames in the same family portrait as Frita.
   for(const [at,phase,label] of [
     [4.58,'sniff','00n-pizza-cheese-sniff'],

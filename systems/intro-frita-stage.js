@@ -13,6 +13,13 @@ export const FRITA_WELCOME_BEATS=Object.freeze({
  wobble:Object.freeze([6.00,6.14,6.31,6.51]),
  triumph:Object.freeze([6.46,6.63,6.86,7.06])
 });
+// Supporting comic moments during the long break after the potato chase.
+// Each is tied to a real family member, not a global particle barrage.
+export const FRITA_FAMILY_REACTIONS=Object.freeze({
+  music:Object.freeze([.56,.76,1.05,1.34]),
+  fire:Object.freeze([3.35,3.51,3.82,4.08]),
+  spirit:Object.freeze([8.02,8.20,8.56,8.88])
+});
 export function fritaWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -22,14 +29,17 @@ export function fritaWelcomeBeat(seconds,reducedMotion=false){
  const wobble=pulse(time,...FRITA_WELCOME_BEATS.wobble);
  const triumph=pulse(time,...FRITA_WELCOME_BEATS.triumph);
  const breath=(1+Math.sin(time*TAU*5/14))*.5;
+ const music=pulse(time,...FRITA_FAMILY_REACTIONS.music);
+ const fire=pulse(time,...FRITA_FAMILY_REACTIONS.fire);
+ const spirit=pulse(time,...FRITA_FAMILY_REACTIONS.spirit);
  if(reducedMotion)return Object.freeze({phase:"idle",ready:0,dash:0,reach:0,wobble:0,
-   triumph:.20,breath:.5,cape:0,glow:.10,reduced:true});
+   triumph:.20,breath:.5,music:0,fire:0,spirit:0,cape:0,glow:.10,reduced:true});
  const phase=reach>.2?"reach":wobble>.22?"wobble":ready>.2?"ready":
    dash>.20?"dash":triumph>.2?"triumph":"idle";
  return Object.freeze({
-   phase,ready,dash,reach,wobble,triumph,breath,
-   cape:clamp(.12+.19*Math.sin(time*TAU*5/14)+dash*.48+reach*.24+wobble*.40+triumph*.30),
-   glow:clamp(.10+ready*.15+reach*.26+triumph*.38),reduced:false
+   phase,ready,dash,reach,wobble,triumph,breath,music,fire,spirit,
+   cape:clamp(.12+.19*Math.sin(time*TAU*5/14)+dash*.48+reach*.24+wobble*.40+triumph*.30+fire*.25+spirit*.18),
+   glow:clamp(.10+ready*.15+reach*.26+triumph*.38+music*.09+spirit*.16),reduced:false
  });
 }
 export function drawFritaWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){

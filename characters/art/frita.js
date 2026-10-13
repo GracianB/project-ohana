@@ -421,6 +421,36 @@ export function fritaCookingActing(pose={}) {
   });
 }
 
+// Stage-only chef acting acts through Frita's original flexible fry spine,
+// real shoulder/hand joints, rooted shoes and hand-held utensils. Each of the
+// five forms retains its own width, cape, props and accessories.
+export function fritaWelcomeAnatomy(pose={},form=0){
+ const neutral=Object.freeze({active:false,spine:0,tilt:0,sway:0,hipX:0,lift:0,
+  leftLeg:0,rightLeg:0,armFront:0,armBack:0,face:0,cape:0});
+ const w=pose.fritaWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")
+  return neutral;
+ const unit=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):0;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const breath=(unit(w.breath)-.5)*2;
+ const music=unit(w.music),fire=unit(w.fire),spirit=unit(w.spirit);
+ const flexibility=[.25,.20,.18,.16,.14][f];
+ return Object.freeze({
+  active:true,
+  spine:breath*flexibility+music*(-.16)+fire*.34+spirit*(-.18),
+  tilt:breath*.025+music*(-.10)+fire*.18+spirit*(-.14),
+  sway:breath*.08+music*.17+fire*(-.33)+spirit*.28,
+  hipX:music*.45-fire*1.25+spirit*.70,
+  lift:breath*.45+music*(-.65)+fire*1.20+spirit*(-.75),
+  leftLeg:music*.08+fire*.25+spirit*.10,
+  rightLeg:music*(-.08)-fire*.22-spirit*.08,
+  armFront:music*.56+fire*1.15+spirit*.74,
+  armBack:music*(-.40)+fire*.71+spirit*(-.58),
+  face:music*(-.13)+fire*.30+spirit*(-.18),
+  cape:unit(w.cape)*.32+music*.1+fire*.58+spirit*.26
+ });
+}
+
 function params(pose, f, F) {
 const st = pose.state, t = pose.t;
 const P = {
@@ -633,6 +663,25 @@ if(welcome&&st!=="dead"&&st!=="hurt"){
   if(reach>.20){P.mood="angry";P.mouth="open";P.item="ketchup";P.squeeze=reach;}
   if(wobble>.20){P.mood="hurt";P.mouth="o";P.item=null;}
   if(triumph>.20){P.mood="happy";P.mouth="grin";P.item=withFork?"forkUp":"salt";}
+} 
+// The supporting vignettes do not fabricate ingredients or disconnected
+// hands. Later draw() recomputes shoulder and fingertips from the same spine.
+const life=fritaWelcomeAnatomy(pose,f);
+if(life.active){
+ P.bend+=life.spine;P.a0+=life.tilt;P.wig+=life.sway;
+ P.bx+=life.hipX;P.lift+=life.lift;
+ P.legF=[P.legF[0]+life.leftLeg,P.legF[1]];
+ P.legB=[P.legB[0]+life.rightLeg,P.legB[1]];
+ P.armF={...P.armF,ang:P.armF.ang+life.armFront};
+ P.armB={...P.armB,ang:P.armB.ang+life.armBack};
+ P.faceRot+=life.face;P.capeFlow+=life.cape*7;
+ P.capeWind=Math.max(P.capeWind,life.cape*.55);
+ const fire=Number(pose.fritaWelcome?.fire)||0,
+   music=Number(pose.fritaWelcome?.music)||0,
+   spirit=Number(pose.fritaWelcome?.spirit)||0;
+ if(fire>.44){P.mood="hurt";P.mouth="o";P.item=null;}
+ else if(music>.44){P.mood="happy";P.mouth="grin";P.item=f>=2?"forkUp":"salt";}
+ else if(spirit>.44){P.mood="happy";P.mouth="smile";P.item=null;}
 }
 return P;
 }

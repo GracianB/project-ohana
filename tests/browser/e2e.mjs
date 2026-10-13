@@ -129,6 +129,22 @@ async function auditPage(page, label) {
   assert.ok(fritaFilm.stageAlive&&
     ['idle','ready','dash','reach','wobble','triumph'].includes(fritaFilm.livePhase),
     label+': Frita performance must render inside the actual welcome canvas');
+  // V356: actual fry anatomy reacts while idle, without free-floating salt.
+  const fritaFamily=await page.evaluate(async()=>{
+    const {fritaWelcomeBeat}=await import('/systems/intro-frita-stage.js?e2e=v356');
+    const times=[.89,3.67,8.43],keys=['music','fire','spirit'];
+    const beats=times.map(t=>fritaWelcomeBeat(t));
+    const el=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      still:fritaWelcomeBeat(.89,true).music,
+      connected:!!el?.querySelector('canvas'),
+      current:el?.dataset.fritaFamilyReaction||''};
+  });
+  assert.ok(fritaFamily.quiet&&fritaFamily.connected);
+  assert.ok(fritaFamily.strength.every(x=>x>.65),label+': Frita family scenes are lost');
+  assert.equal(fritaFamily.still,0);
+  assert.ok(['rest','music','fire','spirit'].includes(fritaFamily.current));
   // V347: verify independent Pizza acting alongside Frita's existing chase.
   const pizzaFilm=await page.evaluate(async()=>{
     const {pizzaWelcomeBeat}=await import('/systems/intro-pizza-stage.js?e2e=v347');
