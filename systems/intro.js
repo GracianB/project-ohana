@@ -18,6 +18,7 @@ import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-ca
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
 import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
 import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
+import { pizzaWelcomeBeat, drawPizzaWelcomeFX } from "./intro-pizza-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -76,7 +77,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -98,7 +99,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -162,6 +163,7 @@ export function playTitleIntro() {
     p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
     p._introDino = id === "dino" ? (opts.dinoWelcome || null) : null;
     p._introFrita = id === "frita" ? (opts.fritaWelcome || null) : null;
+    p._introPizza = id === "pizza" ? (opts.pizzaWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -361,6 +363,10 @@ export function playTitleIntro() {
     const fritaHeight=heroH*1.06;
     let fritaX=frita.x,fritaY=frita.foot+3;
     let fritaPose="idle",fritaVelocity=0,fritaFacing=-1;
+    const pizzaBeat=pizzaWelcomeBeat(loop,reduce);
+    const pizzaHeight=heroH*1.02;
+    let pizzaX=pizza.x,pizzaY=pizza.foot+2,pizzaPose="idle";
+    let pizzaFacing=-1,pizzaVelocity=0,pizzaGrounded=true;
     if(chase>0&&chase<1){
       const x=lerp(W*.08,W*.92,easeInOut(chase));
       const y=floor-12-Math.abs(Math.sin(chase*Math.PI*6))*20;
@@ -369,15 +375,39 @@ export function playTitleIntro() {
       fritaX=x-48;fritaY=frita.foot+3;
       fritaPose=fritaBeat.phase==="wobble"?"idle":"run";
       fritaVelocity=6;fritaFacing=1;
-      actor("pizza",x-105,pizza.foot-Math.abs(Math.sin(chase*Math.PI*5))*20,
-        heroH*.90,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
+      pizzaX=x-105;
+      pizzaY=pizza.foot-Math.abs(Math.sin(chase*Math.PI*5))*20;
+      pizzaPose="jump";pizzaFacing=1;pizzaVelocity=5;pizzaGrounded=false;
       if(chase>.12&&chase<.78){
         comicBubble("¡MÍA!",x-52,floor-heroH*.78,Math.sin(chase*Math.PI),"#fff1b3","right");
         if(chase>.34)comicBubble("¡NI HABLAR!",x-110,floor-heroH*.95,
           Math.sin(chase*Math.PI),"#ffd84a","left");
       }
-    }else{
-      actor("pizza",pizza.x,pizza.foot+2,heroH*.90,tf,{facing:-1,pose:"idle"});
+    }
+    // Pizza keeps the shared chase and now has a complete independent
+    // elastic-performance director, using the canonical dough/crust rig.
+    drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"back");
+    actor("pizza",pizzaX,pizzaY,pizzaHeight,tf,{
+      facing:pizzaFacing,vx:pizzaVelocity,grounded:pizzaGrounded,
+      vy:pizzaGrounded?0:-2,pose:pizzaPose,pizzaWelcome:pizzaBeat
+    });
+    drawPizzaWelcomeFX(ctx,pizzaX,pizzaY,pizzaHeight,t,pizzaBeat,"front");
+    if(isE2E){
+      el.dataset.pizzaWelcomePhase=pizzaBeat.phase;
+      el.dataset.pizzaWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(pizzaBeat.sniff>.45){
+      comicBubble("¿HUELO QUESO?",pizzaX-heroH*.09,pizzaY-heroH*.98,
+        pizzaBeat.sniff,"#ffe0ab","left");
+    }else if(pizzaBeat.stretch>.45){
+      comicBubble("¡ES MÍO!",pizzaX-heroH*.07,pizzaY-heroH*1.0,
+        pizzaBeat.stretch,"#ffe4a2","left");
+    }else if(pizzaBeat.catch>.45){
+      comicBubble("¡PILLADO!",pizzaX-heroH*.05,pizzaY-heroH*.98,
+        pizzaBeat.catch,"#ffc48e","left");
+    }else if(pizzaBeat.flourish>.45){
+      comicBubble("¡SOY DELICIOSO!",pizzaX-heroH*.09,pizzaY-heroH*1.0,
+        pizzaBeat.flourish,"#ffda9e","left");
     }
     drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"back");
     actor("frita",fritaX,fritaY,fritaHeight,tf,{
