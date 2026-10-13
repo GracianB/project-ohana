@@ -4,6 +4,8 @@ import fs from "node:fs";
 import vm from "node:vm";
 
 const sw=fs.readFileSync("sw.js","utf8");
+const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+const previous="ohana-"+(Number(current?.slice(6)||0)-1);
 const root="https://example.com/project-ohana/";
 function setup({offline=false,failPath="",reuse=false}={}){
   const handlers={}, databases=new Map();
@@ -62,10 +64,10 @@ function setup({offline=false,failPath="",reuse=false}={}){
     await work;
   };
   const seed=async (path,content)=>{
-    const key="ohana-static-ohana-367",cache=storage(key);
+    const key="ohana-static-"+previous,cache=storage(key);
     const oldMap=reuse?{[path]:revisions[path]}:{[path]:"different-binary-digest"};
     await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(oldMap)));
-    await cache.put("./"+path+"?v=ohana-367",new Response(content));
+    await cache.put("./"+path+"?v="+previous,new Response(content));
   };
   return {install,activate,seed,storage,caches,precache,revisions,requests,
     calls:()=>attempts,parallel:()=>maxParallel,skips:()=>skip,claims:()=>claims};
@@ -85,10 +87,10 @@ test("V368 cold install uses no more than six simultaneous downloads and no dupl
  assert.equal(h.calls(),h.precache.length-1);
  assert.ok(h.parallel()<=6 && h.parallel()>=2);
  assert.equal(h.requests.filter(x=>new URL(x).pathname.endsWith("/")).length,0);
- const cache=h.storage("ohana-static-ohana-368");
+ const cache=h.storage("ohana-static-"+current);
  assert.match(await (await cache.match("./")).text(),/index\.html/);
  assert.match(await (await cache.match("./index.html")).text(),/index\.html/);
- for(const asset of ["./game.js?v=ohana-368","./systems/cinema-kit.js?v=ohana-368","./assets/sprites/forms/kilo-0.png?v=ohana-368"]){
+ for(const asset of ["./game.js?v="+current,"./systems/cinema-kit.js?v="+current,"./assets/sprites/forms/kilo-0.png?v="+current]){
    assert.equal((await cache.match(asset))?.status,200,asset+" must survive offline");
  }
  assert.equal((await (await cache.match("./.ohana-revisions.json")).json())["game.js"],h.revisions["game.js"]);
@@ -101,12 +103,12 @@ test("V368 future release reuses identical verified blobs, never changed binarie
  await h.install();
  assert.equal(h.requests.some(x=>new URL(x).pathname.endsWith("/game.js")),false);
  assert.equal(h.calls(),h.precache.length-2);
- const cache=h.storage("ohana-static-ohana-368");
- assert.match(await (await cache.match("./game.js?v=ohana-368")).text(),/previouslyVerified/);
- assert.equal((await cache.match("./title-stage.css?v=ohana-368"))?.status,200);
- assert.ok((await h.caches.keys()).includes("ohana-static-ohana-367"),"old cache remains until activation");
+ const cache=h.storage("ohana-static-"+current);
+ assert.match(await (await cache.match("./game.js?v="+current)).text(),/previouslyVerified/);
+ assert.equal((await cache.match("./title-stage.css?v="+current))?.status,200);
+ assert.ok((await h.caches.keys()).includes("ohana-static-"+previous),"old cache remains until activation");
  await h.activate();
- assert.deepEqual(await h.caches.keys(),["ohana-static-ohana-368"]);
+ assert.deepEqual(await h.caches.keys(),["ohana-static-"+current]);
  assert.equal(h.claims(),1);
 });
 
@@ -115,7 +117,7 @@ test("V368 changed SHA never reuses stale assets and incomplete install never ta
  await h.seed("game.js","export const unsafeStaleCode=true;");
  await h.install();
  assert.equal(h.requests.some(x=>x.includes("/game.js")),true);
- assert.doesNotMatch(await (await h.storage("ohana-static-ohana-368").match("./game.js?v=ohana-368")).text(),/unsafeStaleCode/);
+ assert.doesNotMatch(await (await h.storage("ohana-static-"+current).match("./game.js?v="+current)).text(),/unsafeStaleCode/);
  const bad=setup({failPath:"/game.js"});
  await assert.rejects(bad.install(),/network unavailable/);
  assert.equal(bad.skips(),0,"failed offline install must not replace an active release");
