@@ -53,6 +53,22 @@ async function auditPage(page, label) {
     label+': visual character size remains disproportionate '+JSON.stringify(castAudit.cast));
   if(label==='desktop')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,1);
   if(label==='mobile')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,2);
+  // V344 real browser: the Dragon micro-film must be a deterministic,
+  // independently importable performance, not a frozen painted baby sprite.
+  const dragonFilm=await page.evaluate(async()=>{
+    const {dragonWelcomeBeat}=await import('/systems/intro-dragon-stage.js?e2e=v344');
+    return {
+      phases:[0.5,2.76,3.52,3.86,4.4].map(t=>dragonWelcomeBeat(t).phase),
+      hasStageHook:typeof window.__OHANA_WELCOME_SET_FRAME==='function',
+      livePhase:document.querySelector('#ohana-intro')?.dataset.dragonWelcomePhase||'',
+      stageAlive:!!document.querySelector('#ohana-intro canvas')
+    };
+  });
+  assert.deepEqual(dragonFilm.phases,['idle','inhale','sneeze','recoil','proud'],
+    label+': Dragon acting director missing phases');
+  assert.ok(dragonFilm.hasStageHook&&dragonFilm.stageAlive,
+    label+': Dragon animated frame is not rendered in the actual intro Canvas');
+  assert.ok(['idle','inhale','sneeze','recoil','proud'].includes(dragonFilm.livePhase));
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
