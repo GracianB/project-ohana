@@ -6,6 +6,7 @@ import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
+import { FRITA_FIELD_RADIUS, selectFritaFieldTargets } from "./u-field-targeting.js";
 import { CUERNO_V92, rememberCuernoEnemyPositions, drawCuernoPrismEcho } from "./cuerno-v92-resonance.js";
 import { CUERNO_FANTASY, startCuernoFantasyTrail,
  updateCuernoFantasyTrail, tickCuernoFantasyStatus,
@@ -1471,7 +1472,7 @@ if (f.pulse % pulseEvery === 0) {
     const tx = target ? cx(target) : f.x + (p.facing||1) * 180;
     add({kind:"meteor",x:tx-(p.facing||1)*120,y:(g.cam.y||0)-50,vx:(p.facing||1)*2.8,vy:11.5,r:15,dmg:f.dmg*1.35,R:72,life:150,rot:0});
   } else if (mode === "frita") {
-    const targets = g.enemies.filter(canHit).slice(0,5);
+    const targets = selectFritaFieldTargets(g.enemies.filter(canHit),f.x,f.y);
     for (const e of targets) {
       hitEnemy(g,e,f.dmg*0.8,{kx:Math.sign(cx(e)-f.x)*3,ky:-8,stun:20,color:f.color,hitstop:1});
       e._friedT=Math.max(e._friedT||0,80);
@@ -2394,7 +2395,7 @@ const x=f.x-cam.x,y=f.y-cam.y;
 const u=1-f.life/f.max;
 const fade=Math.min(1,f.life/18,Math.max(.15,u*4));
 const pulse=.72+.28*Math.sin(t*.12);
-const R=110+Math.sin(t*.07)*12;
+const R=f.mode==="frita" ? FRITA_FIELD_RADIUS+4+Math.sin(t*.07)*4 : 110+Math.sin(t*.07)*12;
 ctx.save();
 ctx.globalCompositeOperation="lighter";
 ctx.globalAlpha=.16*fade;
