@@ -223,6 +223,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V353: five real cat expressive silhouettes in the same ten-hero stage.
+  for(const [at,phase,label] of [
+    [3.32,'inspect','00zr-michi-inspects'],
+    [3.78,'sideeye','00zs-michi-judges'],
+    [4.20,'groom','00zt-michi-grooms'],
+    [4.65,'flick','00zu-michi-tail-warning'],
+    [5.14,'purr','00zv-michi-purrs']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.michiWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
