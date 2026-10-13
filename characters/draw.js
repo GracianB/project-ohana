@@ -1048,6 +1048,11 @@ pose.stitchoWelcome?.phase || "",q(pose.stitchoWelcome?.scout,12),
 q(pose.stitchoWelcome?.taunt,12),q(pose.stitchoWelcome?.curl,12),
 q(pose.stitchoWelcome?.shock,12),q(pose.stitchoWelcome?.swagger,12),
 q(pose.stitchoWelcome?.antenna,8),q(pose.stitchoWelcome?.tail,8),
+// V352 live Chispin animation must never be frozen by presentCanvas caching.
+pose.chispinWelcome?.phase || "",q(pose.chispinWelcome?.sniff,12),
+q(pose.chispinWelcome?.prank,12),q(pose.chispinWelcome?.charge,12),
+q(pose.chispinWelcome?.hiccup,12),q(pose.chispinWelcome?.cloud,12),
+q(pose.chispinWelcome?.coil,8),q(pose.chispinWelcome?.gills,8),
 ].join("|");
 }
 
@@ -1180,6 +1185,7 @@ if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYom
 if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._introCuerno;
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
+if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
