@@ -1,3 +1,4 @@
+import { cachedGradient } from "../systems/canvas-gradient-cache.js";
 
 import { ROOMS } from "../systems/map.js";
 
@@ -234,8 +235,11 @@ export function drawLivingWorld(ctx,game,t=0,viewW=1280,viewH=720){
     ctx.save();
     ctx.globalCompositeOperation="lighter";
     ctx.globalAlpha=.045+.025*Math.sin(t*.04);
-    const g=ctx.createRadialGradient(viewW*.5,viewH*.48,20,viewW*.5,viewH*.48,Math.max(viewW,viewH)*.65);
-    g.addColorStop(0,art.accent);g.addColorStop(1,"rgba(0,0,0,0)");
+    const g=cachedGradient(ctx,"living-affinity:"+roomId+":"+viewW+":"+viewH+":"+art.accent,()=>{
+      const value=ctx.createRadialGradient(viewW*.5,viewH*.48,20,viewW*.5,viewH*.48,Math.max(viewW,viewH)*.65);
+      value.addColorStop(0,art.accent);value.addColorStop(1,"rgba(0,0,0,0)");
+      return value;
+    });
     ctx.fillStyle=g;ctx.fillRect(0,0,viewW,viewH);ctx.restore();
   }
 }
