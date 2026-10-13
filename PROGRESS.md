@@ -1,3 +1,14 @@
+## OHANA V357 · Pizza: masa elástica conectada, corteza y queso durante todo el ciclo (ohana-357)
+
+- Cuarta intervención individual profunda tras Dragón, Dino y Frita. Pizza conserva las cinco escenas de persecución, horno y mozzarella y añade tres reacciones adicionales, sin quedar inmóvil el resto de los 14 s: música de Kilo (0.72–1.44 s), estornudo de Dragón (3.39–4.11 s) y aparición de Yomi (8.12–8.90 s).
+- `pizzaWelcomeAnatomy` trabaja el verdadero rig Canvas `characters/art/pizza.js`: respiración del cuerpo triangular por evolución, compresión y recuperación de la masa, brazo y pierna conectados, base de cadera, mirada, goterones y corteza solidaria. F0 tiene masa más flexible, F4 es más firme y conserva su halo dorado.
+- Los ingredientes `TOPS[f]`, el queso fundido y sus hilos siguen anclados a coordenadas `uv(F,tipY,...)` de la misma masa. La corteza recibe el pequeño cabeceo local **antes** del render y sigue el torso deformado; no se inventan ingredientes ni objetos externos.
+- No altera hitboxes, U, J/K/L, evolución, física, multiplayer, guardado o la escena original de Frita. Las señales nuevas solo se admiten en la pose `idle` del doble artístico. Movimiento reducido realmente quieto.
+- Director de reloj puro con 14 s exactos y tres reacciones aisladas. Seis tests Node de las cinco formas, bounds, articulaciones, queso/crust, accesibilidad, caché y otras nueve familias; Browser E2E móvil/escritorio y tres capturas dirigidas. HTML y service worker comparten `ohana-357`.
+- PR apilada sobre V356 hasta que la integración precedente llegue a `main`. Exigir Node, Browser E2E, visual, Chromium/Firefox cooperativo, Release Gate y Pages antes de fusionar. Sin Netlify.
+
+---
+
 ## OHANA V356 · Frita: chef vivo, columna flexible y útiles unidos (ohana-356)
 
 - Tercera intervención de la ronda profunda individual, después de Dragón V354 y Dino V355. Cinco actos originales de Frita conservados, pero la patata ya no queda sin actuación fuera del chase de 4 a 7 segundos.
