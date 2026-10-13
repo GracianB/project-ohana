@@ -166,6 +166,21 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V349: the newborn is really a sentient horn, while F2–F4 retain
+  // connected quadruped anatomy. Capture all Cuerno beats in the full cast.
+  for(const [at,phase,label] of [
+    [9.44,'wonder','00x-cuerno-living-horn-wonder'],
+    [9.81,'tiptoe','00y-cuerno-first-prance'],
+    [10.13,'aurora','00z-cuerno-seven-color-horn'],
+    [10.46,'surprise','00za-cuerno-surprised'],
+    [10.84,'bow','00zb-cuerno-bow']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.cuernoWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
