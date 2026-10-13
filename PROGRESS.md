@@ -1,3 +1,14 @@
+## OHANA V365 · Rendimiento de Canvas en partida (ohana-365)
+
+- Renderizado world: sky, gradación cromática, viñeta de profundidad y sombra del HUD reutilizan CanvasGradient cuando el contexto, dimensiones, sala y paleta son idénticos. Brillos y movimiento de horizonte siguen siendo dinámicos.
+- Atmósfera: viñeta de cada sala y halo solar tienen caché de recurso 2D; mapa de afinidad de 10 salas se comparte en vez de reconstruir objetos en cada fotograma.
+- Living World: aura vinculada al personaje se reutiliza sin detener el pulso de luminosidad.
+- Caché de gradientes aislada por Canvas con WeakMap, límite de 32 elementos por contexto y expulsión del más antiguo para no acumular memoria.
+- Motor game.js: calcula viewport y frescura de combate cooperativo una vez por render en lugar de repetir en todos los enemigos y proyectiles, sin tocar daño ni simulación.
+- CombatFX: elimina el filtrado que generaba arrays cada tick; compacción estable in situ con vidas y límite de 40 impactos intactos.
+- Tests Node v365: identidad de recursos, aislamiento entre Canvas, invalidación tras resize, límite de caché, dibujo del mundo original en fotogramas consecutivos y continuidad de efectos.
+- No se ha reactivado Netlify ni TURN. Se conserva el bloqueo del cooperativo público (sin servidor de salas) y se publica únicamente por GitHub Pages si CI integral aprueba.
+
 ## OHANA V364 · GitHub Pages, caché rápida y funcionamiento sin créditos (ohana-364)
 
 - Versión de sw.js e index.html sincronizada; precache completo de módulos preservado para juego sin conexión.
