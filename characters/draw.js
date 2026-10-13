@@ -1012,6 +1012,11 @@ pose.dragonWelcome?.phase || "",q(pose.dragonWelcome?.inhale,12),
 q(pose.dragonWelcome?.sneeze,12),q(pose.dragonWelcome?.recoil,12),
 q(pose.dragonWelcome?.proud,12),q(pose.dragonWelcome?.wing,8),
 q(pose.dragonWelcome?.tail,8),
+// V345: Dino theatrical poses must not reuse the prior presentCanvas frame.
+pose.dinoWelcome?.phase || "",q(pose.dinoWelcome?.curious,12),
+q(pose.dinoWelcome?.brace,12),q(pose.dinoWelcome?.stomp,12),
+q(pose.dinoWelcome?.startled,12),q(pose.dinoWelcome?.delighted,12),
+q(pose.dinoWelcome?.tail,8),
 ].join("|");
 }
 
@@ -1137,6 +1142,7 @@ const duetProtected=isDuetProtected(p,t);
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true};
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
+if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
