@@ -362,6 +362,9 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.stitchoWelcomePhase=stitchoBeat.phase;
       el.dataset.stitchoWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.stitchoFamilyReaction=stitchoBeat.dino>.2?"dino":
+        stitchoBeat.yomi>.2?"yomi":stitchoBeat.chase>.2?"chase":
+        stitchoBeat.dragon>.2?"dragon":"rest";
     }
     // V352 Chispin reacts THROUGH its living spring-tail and gill rig,
     // complementing Stitcho's independent comedy rather than attacking.

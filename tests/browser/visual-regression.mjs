@@ -299,6 +299,80 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V361: four fixed instants verify original attached alien body after
+  // Stitcho's prank (egg shell, antenna roots, shoulder/axilla, claw and tail).
+  for(const [at,reaction,label] of [
+    [3.70,'dragon','00zl1-stitcho-hears-dragon'],
+    [5.72,'chase','00zl2-stitcho-laughs-at-chase'],
+    [8.45,'yomi','00zl3-stitcho-meets-yomi'],
+    [12.20,'dino','00zl4-stitcho-ducks-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.stitchoFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
+  // V361: pixel-level FIVE-FORM inspection. The family opening uses baby
+  // Stitcho; without these captures a disconnected F3 visor or F4 ring
+  // could pass every intro screenshot. Real drawDummy -> drawCharacter ->
+  // original stitch.js, with actual F0..F4 evolution definitions.
+  const stitchoFormAudit=await page.evaluate(async()=>{
+    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
+    const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?visual=v361');
+    const canvas=document.createElement('canvas');
+    canvas.id='stitcho-form-audit';
+    canvas.width=1450;canvas.height=580;
+    canvas.style.cssText='position:fixed;left:12px;top:12px;width:min(96vw,1450px);height:auto;z-index:99999;pointer-events:none';
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const samples=[];
+    for(const [row,at] of [[0,.875],[1,2.625]]){
+      for(let f=0;f<5;f++){
+        const x=145+f*290,y=235+row*290;
+        const p=makeDummy('stitcho',f);
+        p._introForceCanvas=true;
+        p._introStitcho=stitchoWelcomeBeat(at);
+        p._poseOverride='idle';p.grounded=true;p.facing=1;
+        ctx.save();drawDummy(ctx,p,x,y,1.28,24);ctx.restore();
+        const startX=f*290,rowY=row*290;
+        const data=ctx.getImageData(startX,rowY,290,290).data;
+        let pixels=0,hash=2166136261>>>0;
+        for(let i=0;i<data.length;i+=4){
+          if(data[i+3]<80)continue;
+          pixels++;
+          hash=Math.imul(hash^data[i],16777619)>>>0;
+          hash=Math.imul(hash^data[i+1],16777619)>>>0;
+          hash=Math.imul(hash^data[i+2],16777619)>>>0;
+        }
+        samples.push({form:f,row,pixels,hash});
+        ctx.fillStyle='#edebff';ctx.font='bold 16px sans-serif';
+        ctx.fillText(['Mini Stitcho','Stitcho','Bravo','Experimento Ñam','Nébula'][f],
+          x-73,rowY+22);
+      }
+    }
+    // Fill the background behind the 10 ORIGINAL rendered bodies only
+    // after measuring pixel alpha, keeping a clear printable audit.
+    ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#102638';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation='source-over';
+    document.body.appendChild(canvas);
+    return samples;
+  });
+  assert.equal(stitchoFormAudit.length,10,'five actual forms x two breathing poses');
+  assert.ok(stitchoFormAudit.every(a=>a.pixels>120),
+    'all original Stitcho forms must visibly paint at both instants: '+
+    JSON.stringify(stitchoFormAudit));
+  for(let f=0;f<5;f++){
+    const a=stitchoFormAudit.find(x=>x.form===f&&x.row===0);
+    const b=stitchoFormAudit.find(x=>x.form===f&&x.row===1);
+    assert.notEqual(a.hash,b.hash,
+      'Stitcho form '+f+' must really breathe on the Canvas, not just change metadata');
+  }
+  await page.locator('#stitcho-form-audit').screenshot({
+    path:resultsDir+'/00zl5-stitcho-five-real-evolutions-breathing.png'
+  });
+  screenshots.push('00zl5-stitcho-five-real-evolutions-breathing');
+  await page.locator('#stitcho-form-audit').evaluate(el=>el.remove());
   // V352 five fixed-time films of Chispin beside the undisturbed Stitcho.
   for(const [at,phase,label] of [
     [.42,'sniff','00zm-chispin-curiosity'],

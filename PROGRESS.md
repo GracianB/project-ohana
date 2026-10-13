@@ -1,3 +1,15 @@
+## OHANA V361 · Stitcho: huevo vivo, antenas y garras durante 14 segundos (ohana-361)
+
+- Octava revisión individual profunda de los diez miembros. Stitcho conserva los cinco beats originales (observa, provoca, se enrolla, se asusta y presume) de los primeros 3.13 s; su anatomía continúa interpretando el resto del ciclo de 14 s.
+- Nuevas respuestas de cuerpo y mirada: estornudo de Dragón (3.42–4.13 s), carrera de Frita/Pizza (5.35–6.2 s), farol de Yomi (8.05–8.96 s) y pisotón de Dino (11.81–12.72 s). Sin plasma, cast, daño ni ninguna habilidad cooperativa nueva.
+- **Cinco formas auténticas, no sprites genéricos.** F0 es un huevo azul con patas y manitas cortas y antenas; F1 es el alien con garras; F2 integra púas y carrera cuadrúpeda; F3 tiene visor, armadura y propulsor real; F4 conserva estrellas, corona y dos anillos orbitales por detrás y delante. No se crean miembros ni efectos de otras evoluciones.
+- En el arte original `characters/art/stitch.js`, `stitchoWelcomeRig` calcula respiración distinta por forma, apoyada en la cadera verdadera mediante `upper()`; cabeza, orejas, dos antenas con bases y brazos se desplazan en ese mismo Canvas conectado. Las piernas conservan su apoyo separado del pecho. `faceFor` cambia ojos, boca, antenas y orejas según cada gag.
+- Movimiento reducido inmóvil. Estados de run, salto, daño, wall, roll, caos, victoria y J/K/L/U mantienen comportamiento canónico; el arte de intro solo actúa en `idle`.
+- Seis suites Node específicas, Browser E2E móvil/escritorio, cuatro capturas de la familia completa, fingerprint actualizado y `ohana-361` en HTML y service worker. No cambia hitbox, física, multiplayer, daño, U, guardado ni red.
+- V361 está desarrollada en rama sobre V360 y permanece no fusionada hasta confirmar CI Node, E2E, Visual, cooperativo Chromium/Firefox, Release Gate y Pages. No desplegar Netlify.
+
+---
+
 ## OHANA V360 · Kilo completa el ciclo musical con manos, ukelele y cuerpo conectados (ohana-360)
 
 - Séptima intervención anatómica individual de la segunda ronda de 10 héroes. Kilo ya protagonizaba cinco beats (escuchar, tocar, florecer, sorprenderse, finalizar) en los primeros 2.16 segundos. Ahora continúa vivo **los catorce segundos**: escucha el estornudo de Dragón (3.35–4.10 s), anima la persecución de Frita/Pizza (5.23–6.18 s), reacciona al farol de Yomi (8.03–8.94 s) y responde al pisotón de Dino (11.78–12.69 s).
