@@ -110,9 +110,11 @@ test('V304: Michi duet telegraphs local hits and retains protection', () => {
   clearAbilityFx();
 });
 
-test('PR151.15: Dragon supreme escala el impacto y la sacudida', () => {
+test('V325: Dragon supreme warns before the scaled knockback hit', () => {
   const enemy = makeEnemy();
   const game = cast('dragon', [enemy]);
+  assert.equal(enemy.hp,1000,'telegraph must precede damage');
+  for(let i=0;i<12;i++){game.t++;updateAbilityFx(game);}
   assert.ok(enemy.hp < 1000);
   assert.ok(game.shake >= 16);
   assert.ok(Math.abs(enemy.vx) >= 16);
@@ -137,10 +139,12 @@ test('PR151.17: Frita supreme activa Fritura y devuelve vida', () => {
   clearAbilityFx();
 });
 
-test('PR151.18: Pizza supreme activa Horno real y recompensa por objetivos', () => {
+test('V325: Pizza supreme launches Horno after a visible warning and rewards actual hits', () => {
   const enemies = [makeEnemy(), makeEnemy({ x: 250 }), makeEnemy({ x: 320 })];
   const game = cast('pizza', enemies);
   assert.ok(game.player._ovenKingT >= 120);
+  assert.equal(game.score, 0,'no credit before impact');
+  for(let i=0;i<12;i++){game.t++;updateAbilityFx(game);}
   assert.equal(game.score, 84);
   clearAbilityFx();
 });

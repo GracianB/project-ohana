@@ -108,9 +108,13 @@ test("V305: real Dragon U remains flight capable and suppresses blocking film",(
   assert.equal(g._familyDuet.evo,evo);
   assert.ok(p._specialFlightT>=210);
   assert.deepEqual([p.x,p.y,p.vx,p.vy],old);
-  assert.ok(target.hp<10000,"original Dragon supreme still deals damage");
+  assert.equal(target.hp,10000,"V325 warning must prevent an invisible cast-frame hit");
+  for(let i=0;i<11;i++){g.t++;updateAbilityFx(g);}
+  assert.equal(target.hp,10000,"warning must remain safe until tick 12");
+  g.t++;updateAbilityFx(g);
+  assert.ok(target.hp<10000,"the original Dragon supreme strength must land after warning");
   const after=target.hp;
-  for(let i=0;i<92;i++){g.t++;updateAbilityFx(g);}
+  for(let i=0;i<80;i++){g.t++;updateAbilityFx(g);}
   assert.equal(target.hp,after,"existing target cannot take duplicate borrowed L damage");
   assert.equal(useAbility(g,3),false,"cooldown still gates U");
  }

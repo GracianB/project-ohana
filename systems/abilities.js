@@ -6,7 +6,8 @@ import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
-import { FRITA_FIELD_RADIUS, selectFritaFieldTargets } from "./u-field-targeting.js";
+import { FRITA_FIELD_RADIUS, selectFritaFieldTargets, SUPREME_LAUNCH_WINDUP,
+ SUPREME_LAUNCH_RADII, selectSupremeLaunchTargets } from "./u-field-targeting.js";
 import { CUERNO_V92, rememberCuernoEnemyPositions, drawCuernoPrismEcho } from "./cuerno-v92-resonance.js";
 import { CUERNO_FANTASY, startCuernoFantasyTrail,
  updateCuernoFantasyTrail, tickCuernoFantasyStatus,
@@ -376,7 +377,9 @@ const enemies = (game.enemies || []).filter(canHit);
 // V324: only Frita's launch strike is constrained to the visible fryer aura.
 // The same hit set is excluded from later borrowed-L beats; distant enemies
 // remain eligible when they physically enter a telegraphed beat.
-const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),cy(p)) : enemies;
+const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),cy(p)) :
+  (p.id === "dragon" || p.id === "pizza") ? [] : enemies;
+let launchWarning = null;
 const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
 if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
@@ -410,7 +413,11 @@ for (const e of enemies) {
 p.invuln = Math.max(p.invuln || 0, 80);
 p._shadowCloneT = 150;
 } else if (p.id === "dragon") {
-for (const e of enemies) hitEnemy(game, e, dmg * 1.08, { kx: Math.sign(cx(e)-cx(p)) * 16, ky: -12, stun: 44, color: def.color, crit: true });
+// Stage the first impact after a visible, fixed-radius warning instead of
+// damaging every enemy on the map on the cast frame.
+launchWarning = add({kind:"supremeLaunch",mode:"dragon",x:cx(p),y:cy(p),
+  radius:SUPREME_LAUNCH_RADII.dragon,life:SUPREME_LAUNCH_WINDUP,
+  max:SUPREME_LAUNCH_WINDUP,dmg,actor:p,room:String(game.roomId||"hub"),color:def.color});
 game.shake = Math.min(28, (game.shake || 0) + 16);
 p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
 } else if (p.id === "dino") {
@@ -421,9 +428,10 @@ healPlayer(p, p.maxHealth * 0.18);
 p._fryGodT = 180;
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 260);
 } else if (p.id === "pizza") {
-for (const e of enemies) hitEnemy(game, e, dmg * 0.86, { kx: Math.sign(cx(e)-cx(p)) * 10, ky: -13, stun: 52, color: def.color, crit: true });
+launchWarning = add({kind:"supremeLaunch",mode:"pizza",x:cx(p),y:cy(p),
+  radius:SUPREME_LAUNCH_RADII.pizza,life:SUPREME_LAUNCH_WINDUP,
+  max:SUPREME_LAUNCH_WINDUP,dmg,actor:p,room:String(game.roomId||"hub"),color:def.color});
 p._ovenKingT = 180;
-addScore(game, enemies.length * 8);
 p._specialBounceT = Math.max(p._specialBounceT || 0, 260);
 } else if (p.id === "yomi") {
 // U · Juicio del Umbral: Cuerno's aurora charge hits every living foe.
@@ -495,6 +503,7 @@ game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
 if(FAMILY_DUETS[p.id]){
  startFamilyDuet(game,power*pw(p)*uExpPower(p),launchTargets,chosen);
+ if(launchWarning)launchWarning.duet=game._familyDuet;
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
  p._duetProtectionUntil=(Number(game.t)||0)+Math.min(120,p.invuln);
@@ -1390,6 +1399,26 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
 const UPD = {
 ...DINO_FX.update,
+// The drawn circle is authoritative, not an invisible global U attack.
+supremeLaunch(g,f,p){
+ if(g.player!==f.actor||p.dead||String(g.roomId||"hub")!==f.room)return false;
+ if(--f.life>0)return true;
+ const targets=selectSupremeLaunchTargets((g.enemies||[]).filter(canHit),f.mode,f.x,f.y);
+ let applied=0;
+ for(const e of targets){
+  const factor=f.mode==="dragon"?1.08:.86;
+  const impact=f.mode==="dragon"
+   ?{kx:Math.sign(cx(e)-f.x)*16,ky:-12,stun:44,color:f.color,crit:true}
+   :{kx:Math.sign(cx(e)-f.x)*10,ky:-13,stun:52,color:f.color,crit:true};
+  if(hitEnemy(g,e,f.dmg*factor,impact)){
+   applied++;
+   if(f.duet&&g._familyDuet===f.duet)f.duet.legacyTargets.add(e);
+  }
+ }
+ if(f.mode==="pizza"&&applied)addScore(g,applied*8);
+ boom(g,f.x,f.y,f.color,g.reduceMotion?5:11,{up:1.5,star:true});
+ return false;
+},
 cuernoFantasyTrail(g,f,p){
  return updateCuernoFantasyTrail(g,f,p,S.gallop>0,canHit,cx,cy);
 },
@@ -2358,6 +2387,29 @@ ctx.restore();
 
 const DRW = {
 ...DINO_FX.draw,
+// Stationary, finite pre-impact ring. The visual radius is exactly the
+// collision radius used by selectSupremeLaunchTargets at the final frame.
+supremeLaunch(ctx,f,cam,t,g){
+ const x=f.x-cam.x,y=f.y-cam.y;
+ const progress=1-f.life/f.max;
+ const alpha=g?.reduceMotion ? 0.48 : 0.55;
+ ctx.save();
+ ctx.globalCompositeOperation="lighter";
+ ctx.strokeStyle=f.color;
+ ctx.globalAlpha=alpha;
+ ctx.lineWidth=3;
+ ctx.beginPath();ctx.arc(x,y,f.radius,0,TAU);ctx.stroke();
+ ctx.globalAlpha=alpha*.65;ctx.lineWidth=2;
+ ctx.beginPath();ctx.arc(x,y,f.radius*(.62+.38*progress),0,TAU);ctx.stroke();
+ ctx.fillStyle=f.color;ctx.globalAlpha=.08;
+ ctx.beginPath();ctx.arc(x,y,f.radius,0,TAU);ctx.fill();
+ ctx.globalCompositeOperation="source-over";
+ ctx.globalAlpha=.92;
+ ctx.fillStyle="#fff8da";
+ ctx.textAlign="center";ctx.font="800 14px Outfit,system-ui,sans-serif";
+ ctx.fillText(f.mode==="dragon"?"SUPERNOVA · IMPACTO":"HORNO · IMPACTO",x,y-f.radius-12);
+ ctx.restore();
+},
 cuernoFantasyTrail(ctx,f,cam,t,g){
  drawCuernoFantasyRibbon(ctx,f,cam,t,!!g?.reduceMotion);
 },
@@ -2411,6 +2463,15 @@ ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,R*1.35,0,TAU);ctx.fill();
 ctx.globalAlpha=.68*fade;
 ctx.strokeStyle=f.color;ctx.lineWidth=2.2;
 ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();
+// Pizza's long-lived oven pulses reach 430 world units. A stable outer
+// contour makes later hits readable after the 12-frame launch warning fades.
+if(f.mode==="pizza"){
+ ctx.globalAlpha=.26*fade;
+ ctx.strokeStyle="#ffbf74";ctx.lineWidth=1.5;
+ ctx.setLineDash([12,16]);ctx.beginPath();
+ ctx.arc(x,y,SUPREME_LAUNCH_RADII.pizza,0,TAU);ctx.stroke();
+ ctx.setLineDash([]);
+}
 
 if(f.mode==="kilo"){
   for(let i=0;i<8;i++){const a=i*TAU/8+t*.018;const rr=R*.78;ctx.save();ctx.translate(x+Math.cos(a)*rr,y+Math.sin(a)*rr);ctx.rotate(a);ctx.beginPath();ctx.ellipse(0,0,5,14,0,0,TAU);ctx.stroke();ctx.restore();}
