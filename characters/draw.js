@@ -1027,6 +1027,11 @@ pose.pizzaWelcome?.phase || "",q(pose.pizzaWelcome?.sniff,12),
 q(pose.pizzaWelcome?.spring,12),q(pose.pizzaWelcome?.stretch,12),
 q(pose.pizzaWelcome?.catch,12),q(pose.pizzaWelcome?.flourish,12),
 q(pose.pizzaWelcome?.cheese,8),q(pose.pizzaWelcome?.crust,8),
+// V348: Yomi lantern stage does not reuse an old static presentCanvas pose.
+pose.yomiWelcome?.phase || "",q(pose.yomiWelcome?.listen,12),
+q(pose.yomiWelcome?.gather,12),q(pose.yomiWelcome?.reveal,12),
+q(pose.yomiWelcome?.startle,12),q(pose.yomiWelcome?.bow,12),
+q(pose.yomiWelcome?.ribbon,8),q(pose.yomiWelcome?.halo,8),
 ].join("|");
 }
 
@@ -1155,6 +1160,7 @@ if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._in
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
 if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;
 if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._introPizza;
+if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
