@@ -166,6 +166,23 @@ async function auditPage(page, label) {
   assert.ok(kiloFilm.stageAlive&&
     ['idle','listen','strum','bloom','surprise','finale'].includes(kiloFilm.livePhase),
     label+': Kilo living rig not shown on the actual intro Canvas');
+  // V351: five independently acted Stitcho frames in the ten-hero Canvas.
+  const stitchoFilm=await page.evaluate(async()=>{
+    const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?e2e=v351');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[0,.42,.86,1.27,1.97,2.68].map(t=>stitchoWelcomeBeat(t).phase),
+      livePhase:el?.dataset.stitchoWelcomePhase||'',
+      stageAlive:!!el?.querySelector('canvas'),
+      motion:el?.dataset.stitchoWelcomeMotion||''
+    };
+  });
+  assert.deepEqual(stitchoFilm.phases,['idle','scout','taunt','curl','shock','swagger'],
+    label+': Stitcho must perform five connected anatomical acts, not default attack');
+  assert.ok(stitchoFilm.stageAlive&&
+    ['idle','scout','taunt','curl','shock','swagger'].includes(stitchoFilm.livePhase),
+    label+': Stitcho's original Canvas figure is disconnected from the intro');
+  assert.equal(stitchoFilm.motion,'full',label+': unexpected reduced-motion Stitcho stage');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
