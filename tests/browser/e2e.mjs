@@ -84,6 +84,21 @@ async function auditPage(page, label) {
   assert.ok(dinoFilm.stageAlive&&
     ['idle','curious','brace','stomp','startled','delighted'].includes(dinoFilm.livePhase),
     label+': Dino animation must stay visible on the live welcome canvas');
+  // V346: Frita is individually animated during the existing potato chase.
+  const fritaFilm=await page.evaluate(async()=>{
+    const {fritaWelcomeBeat}=await import('/systems/intro-frita-stage.js?e2e=v346');
+    return {
+      phases:[.7,4.55,5.16,5.77,6.23,6.75].map(t=>fritaWelcomeBeat(t).phase),
+      livePhase:document.querySelector('#ohana-intro')?.dataset.fritaWelcomePhase||'',
+      stageAlive:!!document.querySelector('#ohana-intro canvas')
+    };
+  });
+  assert.deepEqual(fritaFilm.phases,
+    ['idle','ready','dash','reach','wobble','triumph'],
+    label+': Frita stage director must expose five clearly separate moments');
+  assert.ok(fritaFilm.stageAlive&&
+    ['idle','ready','dash','reach','wobble','triumph'].includes(fritaFilm.livePhase),
+    label+': Frita performance must render inside the actual welcome canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
