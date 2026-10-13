@@ -12,24 +12,40 @@ export const STITCHO_WELCOME_BEATS=Object.freeze({
  shock:Object.freeze([1.69,1.84,2.10,2.30]),
  swagger:Object.freeze([2.32,2.52,2.86,3.13])
 });
+// V361 · After his alien prank, Stitcho listens to the rest of the family.
+// Every response is body-only, never a plasma hit, claw attack or chaos cast.
+export const STITCHO_FAMILY_REACTIONS=Object.freeze({
+ dragon:Object.freeze([3.42,3.57,3.86,4.13]),
+ chase:Object.freeze([5.35,5.54,5.91,6.20]),
+ yomi:Object.freeze([8.05,8.26,8.62,8.96]),
+ dino:Object.freeze([11.81,12.02,12.39,12.72])
+});
 export function stitchoWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
+ const breath=(1+Math.sin(t*TAU*4/14))*.5;
  if(reducedMotion)return Object.freeze({
   phase:"idle",scout:0,taunt:0,curl:0,shock:0,swagger:0,
-  antenna:0,tail:0,glow:.16,reduced:true
+  breath:.5,dragon:0,chase:0,yomi:0,dino:0,antenna:0,tail:0,glow:.16,reduced:true
  });
  const scout=pulse(t,...STITCHO_WELCOME_BEATS.scout);
  const taunt=pulse(t,...STITCHO_WELCOME_BEATS.taunt);
  const curl=pulse(t,...STITCHO_WELCOME_BEATS.curl);
  const shock=pulse(t,...STITCHO_WELCOME_BEATS.shock);
  const swagger=pulse(t,...STITCHO_WELCOME_BEATS.swagger);
+ const dragon=pulse(t,...STITCHO_FAMILY_REACTIONS.dragon);
+ const chase=pulse(t,...STITCHO_FAMILY_REACTIONS.chase);
+ const yomi=pulse(t,...STITCHO_FAMILY_REACTIONS.yomi);
+ const dino=pulse(t,...STITCHO_FAMILY_REACTIONS.dino);
  const phase=shock>.22?"shock":swagger>.22?"swagger":curl>.22?"curl":
    taunt>.22?"taunt":scout>.22?"scout":"idle";
- return Object.freeze({phase,scout,taunt,curl,shock,swagger,
-  antenna:clamp(.32*scout+.65*taunt+.24*curl+.92*shock+.48*swagger),
-  tail:clamp(.2*scout+.54*taunt+.2*curl+.85*shock+.74*swagger),
-  glow:clamp(.16+.18*scout+.28*taunt+.12*curl+.42*shock+.37*swagger),
+ return Object.freeze({phase,scout,taunt,curl,shock,swagger,breath,dragon,chase,yomi,dino,
+  antenna:clamp(.32*scout+.65*taunt+.24*curl+.92*shock+.48*swagger
+    +dragon*.18+chase*.28+yomi*.15+dino*.22),
+  tail:clamp(.2*scout+.54*taunt+.2*curl+.85*shock+.74*swagger
+    +dragon*.18+chase*.31+yomi*.16+dino*.28),
+  glow:clamp(.16+.18*scout+.28*taunt+.12*curl+.42*shock+.37*swagger
+    +dragon*.07+chase*.04+yomi*.10+dino*.08),
   reduced:false});
 }
 export function drawStitchoWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
