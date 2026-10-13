@@ -23,7 +23,7 @@ const tick=(g,n)=>{for(let i=0;i<n;i++){g.t++;updateAbilityFx(g);}};
 
 test('V325 local launch geometry respects AABB edges and cannot mutate targets',()=>{
   assert.deepEqual(SUPREME_LAUNCH_RADII,{dragon:320,pizza:430});
-  assert.equal(SUPREME_LAUNCH_WINDUP,12);
+  assert.equal(SUPREME_LAUNCH_WINDUP,24);
   for(const hero of ['dragon','pizza']){
     const radius=SUPREME_LAUNCH_RADII[hero];
     const inside=enemyAt(radius+12,0,'rim');

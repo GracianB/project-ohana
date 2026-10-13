@@ -115,7 +115,7 @@ test('V325: Dragon supreme warns before the scaled knockback hit', () => {
   const enemy = makeEnemy();
   const game = cast('dragon', [enemy]);
   assert.equal(enemy.hp,1000,'telegraph must precede damage');
-  for(let i=0;i<12;i++){game.t++;updateAbilityFx(game);}
+  for(let i=0;i<24;i++){game.t++;updateAbilityFx(game);}
   assert.ok(enemy.hp < 1000);
   assert.ok(game.shake >= 16);
   assert.ok(Math.abs(enemy.vx) >= 16);

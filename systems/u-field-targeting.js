@@ -22,7 +22,8 @@ export function selectFritaFieldTargets(enemies, x, y) {
  
 // V325: an authored, stationary warning ring precedes each of these initial U
 // hits. Only the host's normal hitEnemy path applies damage at the impact tick.
-export const SUPREME_LAUNCH_WINDUP = 12;
+// V371: solo lo usa el U de Dragón (Pizza usa OHANA_U_WINDUP): 24 frames = 0,4 s.
+export const SUPREME_LAUNCH_WINDUP = 24;
 export const SUPREME_LAUNCH_RADII = Object.freeze({ dragon: 320, pizza: 430 });
 
 export function selectSupremeLaunchTargets(enemies, hero, x, y) {

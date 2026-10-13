@@ -2,7 +2,11 @@ import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './fa
 import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
+import {updateChispinPizzaPlay,drawChispinPizzaPlay} from './chispin-pizza-play.js';
+import {updateDinoDragonPlay,drawDinoDragonPlay,dinoDragonCast} from './dino-dragon-play.js';
+import {updateMichiYomiPlay,drawMichiYomiPlay,michiYomiImpact} from './michi-yomi-play.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
+import {momentCast,updateMoments,drawMoments} from './stitcho-cuerno-play.js';
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
@@ -353,7 +357,7 @@ if(p.id==='chispin'){
 if(p.id==='stitcho'){
  game._supremeFlow=flow;game._assist={heroId:'chispin',heroName:'Chispín',t:120};
  game.ult={t:0,name:SUPREME.stitcho.name,color:'#67ddff',identity:SUPREME_IDENTITY.stitcho.kind};
- startStitchoDuet(game,personalPower);
+ startStitchoDuet(game,personalPower);momentCast(game,p,3);
  p.invuln=Math.max(p.invuln||0,60);p._duetProtectionUntil=(Number(game.t)||0)+60;return;
 }
 if(p.id==='kilo'){
@@ -444,6 +448,7 @@ p._specialGhostT=Math.max(p._specialGhostT||0,260);
 p.invuln=Math.max(p.invuln||0,120);
 } else if (p.id === "cuerno") {
 // V370: 0.4 s rainbow wind-up; sleepers are chosen at cast time.
+momentCast(game,p,3);
 add({kind:"uCharge",mode:"cuerno",x:cx(p),y:cy(p),life:OHANA_U_WINDUP,max:OHANA_U_WINDUP,
   targets:dreamTargets,actor:p,room:String(game.roomId||"hub"),color:def.color,evo:Math.max(0,Math.min(4,Number(p.evo)||0))});
 p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
@@ -728,7 +733,11 @@ const p = game.player;
 if (!p) return;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
+updateMoments(game);
 updateChispinDuet(game,hitEnemy);
+updateChispinPizzaPlay(game);
+updateDinoDragonPlay(game);
+updateMichiYomiPlay(game);
 updateMichiDuet(game,hitEnemy);
 updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
@@ -792,7 +801,11 @@ const cam = game.cam;
 if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+drawChispinPizzaPlay(ctx,game,t);
+drawDinoDragonPlay(ctx,game,t);
+drawMichiYomiPlay(ctx,game,t);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+drawMoments(ctx,game,t);
 if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 for (const f of FX) {
 const d = DRW[f.kind];
@@ -1104,16 +1117,19 @@ boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
 
 plasma(g, p, evo) {
 add({ kind: "burst", n: evo >= 3 ? 4 : 3, i: 0, gap: 5, next: 0 });
+momentCast(g, p, 0, evo); g.shake = Math.min(18, (g.shake || 0) + 2);
 },
 rollo(g, p, evo) {
-S.roll = 40 + evo * 4;
+S.roll = 44 + evo * 5;
 armor(p, 6);
+momentCast(g, p, 1, evo);
 boom(g, cx(p), p.y + p.h, "#5ad1ff", 10);
 },
 caos(g, p, evo) {
 S.caos = 120 + evo * 10;
 S.cvx = p.facing * (10 + evo * 0.6);
 p.vy = -9;
+momentCast(g, p, 2, evo);
 armor(p, 6);
 g.shake = Math.min(18, (g.shake || 0) + 6);
 boom(g, cx(p), cy(p), "#8f7bff", 10, { star: true });
@@ -1136,7 +1152,7 @@ for (let i = 0; i < maxN; i++) {
   dmg *= 0.85;
 }
 if (pts.length === 1) pts.push({ x: h.x + p.facing * 150, y: h.y + (deterministicUnit((g.t || 0) * 0.91 + h.x * 0.07 + h.y * 0.013) - 0.5) * 20 });
-add({ kind: "chain", pts, life: 18 });
+add({ kind: "chain", pts, life: 30, max: 30 });
 boom(g, h.x, h.y, "#ffe14a", 8, { star: true });
 },
 blink(g, p, evo) {
@@ -1199,6 +1215,7 @@ boom(g, cx(p), cy(p), "#b78bff", 18, { star: true, up: 3 });
 
 breath(g, p, evo) {
 add({ kind: "breath", life: 30 + evo * 4, max: 30 + evo * 4, len: 110 + evo * 22, dmg: 6 * pw(p) });
+dinoDragonCast(g, p, "breath", evo);
 },
 gust(g, p, evo) {
 p.vy = evo >= 4 ? -11.5 : -9.5;
@@ -1217,10 +1234,12 @@ for (const pr of g.projectiles) {
   if (dx > -40 && dx < 240 && Math.abs(pr.y - cy(p)) < 120) { pr.life = 0; boom(g, pr.x, pr.y, "#fff", 4); }
 }
 add({ kind: "gust", x: cx(p), y: cy(p), f, life: 24 });
+dinoDragonCast(g, p, "gust", evo);
 for (let i = 0; i < 3; i++) g.fx.emit(cx(p), p.y + p.h, { color: "#dff6ff", count: 4, size: 2.4, angle: Math.PI / 2, spread: 1.4, speed: 3 });
 },
 meteor(g, p, evo) {
 add({ kind: "shower", n: 6 + evo, i: 0, next: 0, f: p.facing, dmg: (26 + evo * 3) * pw(p), r: 64 + evo * 6 });
+dinoDragonCast(g, p, "meteor", evo);
 g.shake = Math.min(18, (g.shake || 0) + 4);
 },
 
@@ -1252,12 +1271,14 @@ bite(g, p, evo) {
    });
  }
  add({ kind: "jaws", life: 14, size: 26 + evo * 6, reach });
+ dinoDragonCast(g, p, "bite", evo);
  boom(g, mouthX, mouthY, "#d4ff9d", 6, { speed: 2, up: 0.5 });
 },
 charge(g, p, evo) {
  S.charge = 44 + evo * 7;
  armor(p, 12);
  p._dinoRollStart = Number(g.t) || 0;
+ dinoDragonCast(g, p, "charge", evo);
  g.shake = Math.min(12, (g.shake || 0) + 2);
  boom(g, cx(p), p.y + p.h, "#b6f58c", 8, { star: true });
 },
@@ -1271,6 +1292,7 @@ quake(g, p, evo) {
  add({ kind: "dinoSkyfall", n: 3 + evo, i: 0, next: 12, evo,
    face: p.facing || 1, origin: cx(p), dmg: (14 + evo * 2) * pw(p),
    radius: 42 + evo * 5 });
+ dinoDragonCast(g, p, "quake", evo);
  g.shake = Math.min(14, (g.shake || 0) + 6);
  boom(g, cx(p), oy, "#ffc36c", 10, { up: 2 });
 },
@@ -1381,6 +1403,7 @@ for (const e of enemies) {
   const dir=Math.sign(cx(e)-cx(p)) || 1;
   const dmg=(21 + evo * 5) * pw(p) * (e.boss ? .75 : 1);
   hitEnemy(g,e,dmg,{kx:dir*4,ky:-3,stun:18,color:"#ffd99c",parts:6,hitstop:0});
+  michiYomiImpact(cx(e),cy(e),"¡DONG!","#ffd99c");
   e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+240);
 }
 add({ kind:"sleeve", life:28,max:28, evo, face:p.facing||1, targets:enemies.length });
@@ -1403,10 +1426,11 @@ w:30+evo*2,h:10,life:38,dmg:(19+evo*3)*pw(p),
 color:"#ffeab5",shape:"auroraLance",owner:"player",trail:true,pierce:3
 },MAX_RUNTIME_PROJECTILES);
 p._thrust=5;p._thrustFace=face;
+momentCast(g,p,0,evo);
 boom(g,cx(p)+face*16,y,["#ffe6ac","#f3c9eb","#d6ceff","#b7e9f4","#fff1ad"][evo],5,{star:true});
 },
 gallop(g,p,evo){
-S.gallop=17+evo*2;S.gallopFace=p.facing||1;
+S.gallop=19+evo*2;S.gallopFace=p.facing||1;momentCast(g,p,1,evo);
 p.vy=Math.min(p.vy||0,-3.4);
 armor(p,18);p._thrust=6;p._thrustFace=S.gallopFace;
 startCuernoFantasyTrail(g,p,evo,FX,add,pw,cx);
@@ -1419,7 +1443,7 @@ add({kind:"irisHalo",x:cx(p),y:cy(p),r:radius,life:58,max:58,
 evo,color:"#fff6c8",hit:new Set(),dmg:(25+evo*6)*pw(p)});
 add({kind:"cuernoPrismCrown",x:cx(p),y:cy(p),evo,
  life:CUERNO_FANTASY.crownFrames,max:CUERNO_FANTASY.crownFrames});
-p._auroraHaloT=58;
+p._auroraHaloT=58;momentCast(g,p,2,evo);
 boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{star:true});
 },
 
@@ -1505,6 +1529,7 @@ uCharge(g,f,p){
   const foes=(g.enemies||[]).filter(canHit);
   resolveYomiJudgement(g,p,foes,f.dmg);
   for(const e of foes)add({kind:"uHitMark",mode:"yomi",e,x:cx(e),y:cy(e),evo:f.evo||0,life:60,max:60});
+  for(const e of foes)michiYomiImpact(cx(e),cy(e),"¡JUICIO!","#ffcb91",{life:84,big:2});
  }else{
   const sleepers=(f.targets||[]).filter(e=>e&&!e.dying&&!e.dead);
   resolveCuernoDream(g,p,sleepers);
@@ -1876,6 +1901,7 @@ for (const e of g.enemies) {
   if (set.has(e) || !canHit(e) || !circleHit(f.x, f.y, f.r + 2, e)) continue;
   set.add(e);
   hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx || 1) * 7, ky: -3, stun: 18, color: "#ff8ad4" });
+  michiYomiImpact(cx(e), cy(e), "¡OVILLO!", "#ff8ad4");
 }
 return f.life > 0;
 },
@@ -1889,6 +1915,7 @@ for (const e of g.enemies) {
   f.hit.add(e);
   const st = e.boss ? 40 + f.evo * 8 : f.stun;
   hitEnemy(g, e, f.dmg, { stun: st, color: "#ffb6e4", shake: 0, xp: 1, parts: 6 });
+  michiYomiImpact(cx(e), cy(e), "¡RONRONEO!", "#ffb6e4");
   if (!e.boss) { e.vx = 0; e.telegraph = false; }
   e._sleepUntil = (g.t || 0) + st;
   f.slept.push(e);
@@ -1939,6 +1966,7 @@ if (f.delay <= 0) {
   for (const e of g.enemies) {
     if (canHit(e) && circleHit(f.x, f.y, 10, e)) {
       hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 5, ky: -3, stun: 18, color: f.color });
+      if (f.tail) michiYomiImpact(f.x, f.y, "¡COLA!", f.color);
       boom(g, f.x, f.y, f.color, 8, { star: true });
       return false;
     }
@@ -2179,6 +2207,7 @@ if (!f.stuck) {
       f.vx = 0;
       f.vy = 0;
       hitEnemy(g, e, f.dmg * 0.45, { kx: direction * 2, ky: -1, stun: 10, color: "#f2e6c8" });
+      michiYomiImpact(cx(e), cy(e), "¡SELLO!", "#ffe1a7");
       e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+160);
       break;
     }
@@ -2201,6 +2230,7 @@ if (f.stuck && --f.stuck <= 0) {
     }
   }
   boom(g, f.x, f.y, "#ff4466", 12, { star: true });
+  michiYomiImpact(f.x, f.y, "¡ESTALLA!", "#ff4466");
   return false;
 }
 return f.stuck > 0 || f.life > 0;
@@ -2224,6 +2254,7 @@ if (f.life === strikeFrame) {
       const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
       hitEnemy(g, e, f.dmg * (marked ? 1.9 : 1), { kx: f.face * 8, ky: -3, stun: marked ? 40 : 20, color: "#e9768e", crit:marked });
       if(marked) { e._yomiMarkUntil=0; g.nums?.add(cx(e),e.y-24,"JUICIO","#ffd99c",true); }
+      michiYomiImpact(cx(e), cy(e), marked ? "" : "¡ÑAC!", "#e9768e");
     }
   }
 }
@@ -2949,12 +2980,22 @@ for (let i = 0; i < f.n; i++) {
 }
 },
 chain(ctx, f, cam) {
-const k = f.life / 18;
+// V371 Chispín J: 0,5 s legible — rayo grueso con borde naranja, núcleo blanco y ¡ZAP! en cada blanco.
+const k = f.life / (f.max || 18);
 ctx.globalAlpha = Math.max(0.2, k);
 for (let i = 0; i < f.pts.length - 1; i++) {
   const a = f.pts[i], b = f.pts[i + 1];
-  zig(ctx, a.x - cam.x, a.y - cam.y, b.x - cam.x, b.y - cam.y, 22, 8, "#ffe14a", 3.2 * k + 1);
-  glow(ctx, b.x - cam.x, b.y - cam.y, 26, "#fff6a0", 0.6 * k);
+  const ax = a.x - cam.x, ay = a.y - cam.y, bx = b.x - cam.x, by = b.y - cam.y;
+  zig(ctx, ax, ay, bx, by, 22, 8, "#ff9a1a", 6 * k + 2);
+  zig(ctx, ax, ay, bx, by, 22, 8, "#ffe14a", 3.4 * k + 1);
+  zig(ctx, ax, ay, bx, by, 22, 8, "#ffffff", 1.2);
+  ctx.strokeStyle = "#fff6a0"; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.arc(bx, by, 10 + (1 - k) * 22, 0, TAU); ctx.stroke();
+  if (k > 0.45) {
+    ctx.font = "900 13px system-ui,sans-serif"; ctx.textAlign = "center";
+    ctx.lineWidth = 3; ctx.strokeStyle = "#5a3a00"; ctx.strokeText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
+    ctx.fillStyle = "#fff36a"; ctx.fillText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
+  }
 }
 },
 trail(ctx, f, cam, t) {
@@ -2995,7 +3036,7 @@ ctx.beginPath();
 ctx.moveTo(hx, hy);
 ctx.quadraticCurveTo((hx + x) / 2, Math.max(hy, y) + 18, x, y);
 ctx.stroke();
-glow(ctx, x, y, f.r * 2, "#ff8ad4", 0.4);
+ctx.globalAlpha = 0.3; ctx.fillStyle = "#ff8ad4"; ctx.beginPath(); ctx.arc(x, y, f.r * 1.8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
 ctx.translate(x, y);
 ctx.rotate(f.rot);
 ctx.fillStyle = "#ff8ad4";
@@ -3109,14 +3150,20 @@ const x = f.x - cam.x, y = f.y - cam.y;
 const len = 60;
 const d = Math.hypot(f.vx, f.vy) || 1;
 const gx = x - (f.vx / d) * len, gy = y - (f.vy / d) * len;
-const gr = ctx.createLinearGradient(gx, gy, x, y);
-gr.addColorStop(0, f.dino ? "rgba(130,240,130,0)" : "rgba(255,80,20,0)");
-gr.addColorStop(1, f.dino ? "rgba(190,255,130,.95)" : "rgba(255,200,80,.95)");
-ctx.strokeStyle = gr;
+// V371: estela plana en 3 tramos (sin gradiente por frame).
 ctx.lineCap = "round";
-ctx.lineWidth = f.r * 1.6;
-ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(x, y); ctx.stroke();
-glow(ctx, x, y, f.r * 3, f.dino ? "#b9f890" : "#ff8a2a", 0.7);
+for (let i = 0; i < 3; i++) {
+  const a0 = i / 3, a1 = (i + 1) / 3;
+  ctx.globalAlpha = 0.25 + i * 0.3;
+  ctx.strokeStyle = f.dino ? (i < 2 ? "#9fea9b" : "#d8ff9a") : (i < 2 ? "#ff6a2a" : "#ffd36a");
+  ctx.lineWidth = f.r * (0.9 + i * 0.35);
+  ctx.beginPath(); ctx.moveTo(gx + (x - gx) * a0, gy + (y - gy) * a0); ctx.lineTo(gx + (x - gx) * a1, gy + (y - gy) * a1); ctx.stroke();
+}
+ctx.globalAlpha = 1;
+ctx.fillStyle = f.dino ? "#b9f890" : "#ff8a2a";
+ctx.globalAlpha = 0.22; ctx.beginPath(); ctx.arc(x, y, f.r * 2.6, 0, TAU); ctx.fill();
+ctx.globalAlpha = 0.4; ctx.beginPath(); ctx.arc(x, y, f.r * 1.7, 0, TAU); ctx.fill();
+ctx.globalAlpha = 1;
 ctx.translate(x, y);
 ctx.rotate(f.rot);
 ctx.fillStyle = f.dino ? "#4e6540" : "#5a2a1a";
@@ -3260,7 +3307,11 @@ for (let i = 0; i < 5; i++) {
 },
 disc(ctx, f, cam) {
 const x = f.x - cam.x, y = f.y - cam.y;
-glow(ctx, x, y, f.r * 1.8, "#ff7a4a", 0.35);
+// V371 Pizza J: estela de queso elástico detrás del pepperoni.
+ctx.strokeStyle = "rgba(255,216,74,.75)"; ctx.lineWidth = f.r * 0.7; ctx.lineCap = "round";
+ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x - f.vx * 2.2, y - f.vy * 2.2 + 6, x - f.vx * 4, y - f.vy * 4); ctx.stroke();
+ctx.globalAlpha = 0.35; ctx.fillStyle = "#ff7a4a";
+ctx.beginPath(); ctx.arc(x, y, f.r * 1.5, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
 ctx.translate(x, y);
 ctx.rotate(f.rot);
 ctx.fillStyle = "#8e1f12";
@@ -3308,12 +3359,19 @@ const k = Math.max(0, Math.min(1, life / maxLife));
 const rawR = Number.isFinite(f.r) ? f.r : 0;
 const R = Number.isFinite(f.R) ? Math.max(0, f.R) : 0;
 const radius = Math.max(1, rawR || R * Math.min(1, (Number.isFinite(f.age) ? f.age : 0) / 18));
-const gr = ctx.createRadialGradient(x, y, radius * 0.2, x, y, radius);
-gr.addColorStop(0, "rgba(255,200,90,0)");
-gr.addColorStop(0.75, "rgba(255,140,40," + 0.25 * k + ")");
-gr.addColorStop(1, "rgba(255,90,20," + 0.5 * k + ")");
-ctx.fillStyle = gr;
+// V371 Pizza L: sin gradiente por frame — aro de calor plano + lenguas de horno.
+ctx.fillStyle = "rgba(255,120,30," + 0.16 * k + ")";
 ctx.beginPath(); ctx.arc(x, y, radius, 0, TAU); ctx.fill();
+ctx.strokeStyle = "rgba(255,80,20," + 0.55 * k + ")"; ctx.lineWidth = 10;
+ctx.beginPath(); ctx.arc(x, y, radius - 5, 0, TAU); ctx.stroke();
+ctx.fillStyle = "rgba(255,190,70," + 0.7 * k + ")";
+for (let i = 0; i < 10; i++) {
+  const a = (i / 10) * TAU + t * 0.05, fl = 10 + Math.sin(t * 0.5 + i) * 6;
+  const fx = x + Math.cos(a) * radius, fy = y + Math.sin(a) * radius;
+  ctx.beginPath(); ctx.moveTo(fx - Math.sin(a) * 6, fy + Math.cos(a) * 6);
+  ctx.lineTo(fx + Math.cos(a) * fl, fy + Math.sin(a) * fl);
+  ctx.lineTo(fx + Math.sin(a) * 6, fy - Math.cos(a) * 6); ctx.fill();
+}
 ctx.globalAlpha = k;
 ctx.strokeStyle = "#ffcf6a";
 ctx.lineWidth = 4;

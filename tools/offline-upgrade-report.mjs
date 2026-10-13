@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {createHash} from "node:crypto";
 
-const old=JSON.parse(fs.readFileSync("tools/offline-baseline-v369.json","utf8"));
+const old=JSON.parse(fs.readFileSync("tools/offline-baseline-v370.json","utf8"));
 const sw=fs.readFileSync("sw.js","utf8");
 const currentVersion=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
 const start=sw.indexOf("const PRECACHE_REVISIONS = {");

@@ -70,8 +70,8 @@ function setup({offline=false,failPath="",reuse=false}={}){
     await cache.put("./"+path+"?v="+previous,new Response(content));
   };
   const seedFullPreviousRelease=async()=>{
-    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v369.json","utf8"));
-    if(baseline.version!==previous)throw new Error("V370 must upgrade from actual V369");
+    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v370.json","utf8"));
+    if(baseline.version!==previous)throw new Error("V371 must upgrade from actual V370");
     const cache=storage("ohana-static-"+previous);
     const manifest=Object.fromEntries(Object.entries(baseline.resources).map(([name,item])=>[name,item.sha]));
     await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(manifest)));
@@ -89,8 +89,8 @@ function setup({offline=false,failPath="",reuse=false}={}){
 
 test("V368 full offline manifest preserves 200 resources and exact Git blob hashes",()=>{
  const h=setup();
- assert.equal(h.precache.length,203,"root plus the 202 canonical assets");
- assert.equal(Object.keys(h.revisions).length,202);
+ assert.equal(h.precache.length,208,"root plus the 207 canonical assets");
+ assert.equal(Object.keys(h.revisions).length,207);
  assert.equal(h.revisions["index.html"].length,40);
  assert.equal(h.revisions["systems/cinema-loader.js"].length,40);
 });
@@ -138,38 +138,38 @@ test("V368 changed SHA never reuses stale assets and incomplete install never ta
 });
 
 
-test("V370 actual V369→V370 migration: 182 preserved files cost zero network requests",async()=>{
+test("V371 actual V370→V371 migration: 196 preserved files cost zero network requests",async()=>{
  const h=setup();
  await h.seedFullPreviousRelease();
  const first=h.requests.length;
  await h.install();
  const network=h.requests.slice(first).map(x=>new URL(x).pathname);
- assert.equal(h.precache.length,203);
- assert.equal(network.length,20,"only the 20 changed or new V370 files need a fetch");
+ assert.equal(h.precache.length,208);
+ assert.equal(network.length,11,"only the 11 changed or new V371 files need a fetch");
  assert.ok(network.some(x=>x.endsWith("/index.html")),network.join(","));
  assert.ok(h.parallel()<=6);
  const fresh=h.storage("ohana-static-"+current);
- const previously=fs.readFileSync("game.js");
- const fromCache=Buffer.from(await (await fresh.match("./game.js?v="+current)).arrayBuffer());
- assert.deepEqual(fromCache,previously,"unchanged real game.js bytes must survive migration");
+ const previously=fs.readFileSync("systems/cinema-loader.js");
+ const fromCache=Buffer.from(await (await fresh.match("./systems/cinema-loader.js?v="+current)).arrayBuffer());
+ assert.deepEqual(fromCache,previously,"unchanged real systems/cinema-loader.js bytes must survive migration");
  assert.ok(await fresh.match("./index.html"));
  assert.ok(await fresh.match("./"));
  const privateStats=await (await fresh.match("./.ohana-install-stats.json")).json();
- assert.equal(privateStats.reused,182);
- assert.equal(privateStats.downloaded,20);
- assert.equal(privateStats.total,202);
+ assert.equal(privateStats.reused,196);
+ assert.equal(privateStats.downloaded,11);
+ assert.equal(privateStats.total,207);
  assert.equal(privateStats.incremental,true);
  assert.equal(h.skips(),1);
  await h.activate();
  assert.deepEqual(await h.caches.keys(),["ohana-static-"+current]);
 });
 
-test("V370 failed incremental index fetch leaves V369 intact and unactivated",async()=>{
+test("V371 failed incremental index fetch leaves V370 intact and unactivated",async()=>{
  const h=setup({failPath:"/index.html"});
  await h.seedFullPreviousRelease();
  await assert.rejects(h.install(),/network unavailable/);
  assert.equal(h.skips(),0);
  assert.ok((await h.caches.keys()).includes("ohana-static-"+previous));
- const old=await h.storage("ohana-static-"+previous).match("./game.js?v="+previous);
+ const old=await h.storage("ohana-static-"+previous).match("./systems/cinema-loader.js?v="+previous);
  assert.equal(old.status,200);
 });

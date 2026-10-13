@@ -109,8 +109,8 @@ test("V305: real Dragon U remains flight capable and suppresses blocking film",(
   assert.ok(p._specialFlightT>=210);
   assert.deepEqual([p.x,p.y,p.vx,p.vy],old);
   assert.equal(target.hp,10000,"V325 warning must prevent an invisible cast-frame hit");
-  for(let i=0;i<11;i++){g.t++;updateAbilityFx(g);}
-  assert.equal(target.hp,10000,"warning must remain safe until tick 12");
+  for(let i=0;i<23;i++){g.t++;updateAbilityFx(g);}
+  assert.equal(target.hp,10000,"warning must remain safe until tick 24");
   g.t++;updateAbilityFx(g);
   assert.ok(target.hp<10000,"the original Dragon supreme strength must land after warning");
   const after=target.hp;

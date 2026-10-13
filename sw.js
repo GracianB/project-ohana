@@ -1,4 +1,4 @@
-const VERSION = "ohana-370";
+const VERSION = "ohana-371";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./",
@@ -127,6 +127,11 @@ const PRECACHE = [
   "./systems/stitcho-duet.js?v=" + VERSION,
   "./systems/chispin-duet.js?v=" + VERSION,
   "./systems/michi-duet.js?v=" + VERSION,
+  "./systems/stitcho-cuerno-play.js?v=" + VERSION,
+  "./systems/michi-yomi-play.js?v=" + VERSION,
+  "./systems/kilo-frita-interactions.js?v=" + VERSION,
+  "./systems/dino-dragon-play.js?v=" + VERSION,
+  "./systems/chispin-pizza-play.js?v=" + VERSION,
   "./systems/coop-challenge.js?v=" + VERSION,
   "./systems/platform-geometry.js?v=" + VERSION,
   "./systems/room-strategy.js?v=" + VERSION,
@@ -210,7 +215,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "index.html": "8018d235deb76e00855e7816d10fd74f2a3c47ed",
+  "index.html": "fc8b875fd5efb7f21c9958192211dd6ca010ab94",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -235,13 +240,13 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "b77f012ef84349d738e3609f47bd86f119a5734a",
+  "game.js": "df1ecda81717eb1e71f1c1ac5d7e54c56b65eed9",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "ec4057f83660a7cf6ef034b573aeda36b662ee07",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "968b33617177db4cb151429d7106cce041ca9119",
-  "characters/art/dragon.js": "6747dc57a241ed77786614695836e2a077dfc7ae",
+  "characters/art/dragon.js": "56486023cd78180d64bb474f77098710441abedd",
   "characters/art/frita.js": "1e761e90bf01e73150a5302a39311f9be3570434",
   "characters/art/index.js": "a0abb447c08eae66af9475ba9459a67f3dd15f45",
   "characters/art/kilo.js": "6cb085e45287bb7d32a8d19606506437c8d23ce6",
@@ -274,8 +279,8 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "3daffcf661284cb26aa6d82e34cc1bfc8529416e",
   "engine/particles.js": "c51fc9989a5facbd1be415bead79faf6f351bf96",
   "systems/atrium-interact.js": "7f1a80852ac4723bbb9e7f09c6530b9c1bd035f5",
-  "systems/abilities.js": "6726abbd31a8f81b6d11873358cfb9697e4a84b2",
-  "systems/u-field-targeting.js": "0de16075f51a665ea4d788f18813cf1920382712",
+  "systems/abilities.js": "3052c096db2af0a9f6d2b0c3112280dee0a464a6",
+  "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "9940e44e7f51076f12211287aa7cfbf5db4c74c0",
   "systems/u-partners.js": "998c1a778d27856d6e7d2529add4ea519b42dc81",
   "systems/u-duet-chemistry.js": "3989b02fad26154a7a4db9699ee65e6fff939269",
@@ -334,7 +339,12 @@ const PRECACHE_REVISIONS = {
   "systems/kilo-duet.js": "24dcc811ff45c6c63b3fddea2c0e77e7aaa9a917",
   "systems/stitcho-duet.js": "fd1746106e6ea61f2bcf20520bdb17d01bf87804",
   "systems/chispin-duet.js": "cc5e2ff1f3ffe6bdef46532b3960d055bca9506b",
-  "systems/michi-duet.js": "972bf0a653c40438323c554a4b34c9db2439f55c",
+  "systems/michi-duet.js": "92c558eb9becf98e1ece424d27279fc137e113a7",
+  "systems/stitcho-cuerno-play.js": "099203e8e4f51da33a9351aca361e6c7a025ea4c",
+  "systems/michi-yomi-play.js": "427410db046d5c910185218f0aae91b1c13dc88e",
+  "systems/kilo-frita-interactions.js": "3b262a53f5e5e6746b7078908feda85f76340251",
+  "systems/dino-dragon-play.js": "a5dd95368e878fafe2689aaea1624605a874a326",
+  "systems/chispin-pizza-play.js": "7fe3dae4b281498fadaaaa8e6b59ffe7bcb7db59",
   "systems/coop-challenge.js": "b3f47ac8cec7092f81f7a9db2d632d3b29fb1bf5",
   "systems/platform-geometry.js": "2c94566f8d7e28f38e610ffcea7285432f858149",
   "systems/room-strategy.js": "892f1a531cf19931eba9e12345b805d5540cfb4d",

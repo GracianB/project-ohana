@@ -435,7 +435,10 @@ const wingX = f === 0 ? -bw * 0.75 : -bw * 0.55, wingY = f === 0 ? -bh * 0.55 : 
 if (f === 0) { wRot -= 0.45; if (wRotFar !== null) wRotFar -= 0.45; }
 
 if (st !== "dead") { ctx.save(); upper();
-wing(ctx, R, wingX + 7, wingY - 3, P.wing * 0.9, wRotFar !== null ? wRotFar : wRot + 0.3, wOpen, c, final, t, true);
+// V371: en Dragón Celestial el ala lejana se pliega hacia atrás para que sus varillas
+// no asomen detrás de la cabeza (reposo y ataque); el vuelo conserva su envergadura.
+const farTuck = final && !flying ? -0.42 : 0, farLen = final && !flying ? 0.8 : 0.9;
+wing(ctx, R, wingX + 7 + (farTuck ? -3 : 0), wingY - 3, P.wing * farLen, (wRotFar !== null ? wRotFar : wRot + 0.3) + farTuck, wOpen, c, final, t, true);
 ctx.restore(); }
 
 ctx.save(); upper();

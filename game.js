@@ -66,6 +66,7 @@ import { applyCoopChallenge } from "./systems/coop-challenge.js";
 import { supportBelow } from "./systems/platform-geometry.js";
 import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
 import { resetCombatMirror,mirroredProjectileHits } from "./systems/coop-combat-mirror.js";
+import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFritaInteractions } from "./systems/kilo-frita-interactions.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -136,6 +137,7 @@ let reduceMotion = RMQ.matches;
 try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches; game.reduceMotion = reduceMotion; }); } catch (_) {}
 
 const game = {
+  get paused() { return paused; },
 player: null, enemies: [], projectiles: [], bolts: [], slashes: [], platforms: [], orbs: [], hearts: [], ghosts: [],
 rng: Math.random,
 fx: new ParticleSystem(), nums: new Floaters(), worldIndex: 0, cam: { x: 0, y: 0 },
@@ -1571,6 +1573,7 @@ if(dragonEmber){
  }
 }
 Magic.update(game);
+updateKiloFritaInteractions(game);
 if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
 if (!p.grounded && p.coyote > 0) p.coyote--;
 if (p._specialFlightT > 0) {
@@ -2714,6 +2717,7 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 }
 }
+if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCharacter, ROSTER);
 ctx.restore();
 if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {
 ctx.save();
@@ -3281,6 +3285,7 @@ event.stopImmediatePropagation();
 cheatEvolve();
 }, true);
 
+installKiloFritaInteractions(game, { target: window, canAct });
 input = bindInput({
 target: window, canvas, buttons: document.querySelectorAll(".touch-btn"), canAct,
 isRunning: () => game.running,

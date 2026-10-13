@@ -1,3 +1,11 @@
+## OHANA V371 · Interacciones G y capas visuales J/K/L/U de los 10 personajes (ohana-371)
+
+- Kilo y Kétchup, Stitcho y Cuerno, Chispín y Pizza, Michi y Yomi, Dragón y Dino: 3 interacciones propias por pareja y nuevas capas visuales en J/K/L/U, en los módulos `systems/kilo-frita-interactions.js`, `systems/stitcho-cuerno-play.js`, `systems/chispin-pizza-play.js`, `systems/michi-yomi-play.js` y `systems/dino-dragon-play.js`.
+- Michi: U con 9 colas realistas en abanico desde la cadera, festones de pelo, punta oscura y látigo en S, sin gradientes.
+- Dragón: carga del U ampliada a 0,4 s (24 frames), con carga, estallido y daño sincronizados; se cancela al morir o cambiar de sala.
+- Tecla G de emote por personaje, ignorada mientras se escribe en campos de texto o chat y en pausa.
+- Los 5 módulos nuevos entran en el precache offline; nueva línea base `tools/offline-baseline-v370.json`: 196/207 recursos reutilizados, 11 descargados.
+
 ## OHANA V370 · Arte y U mejorados de los 10 personajes (ohana-370)
 
 - Arte revisado de las 5 formas y poses de Kilo, Stitcho, Chispín, Michi, Frita, Pizza, Yomi, Cuerno, Dragón y Dino, sin gradientes por frame.

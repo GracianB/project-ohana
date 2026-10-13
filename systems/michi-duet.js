@@ -1,4 +1,5 @@
 // V304: nine orbiting tails catch three telegraphed meteors from Dragon.
+import {michiYomiImpact} from './michi-yomi-play.js';
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),finite=n=>Number.isFinite(n)&&Math.abs(n)<=20000;
 export function readMichiDuet(s){
  if(!s||![s.x,s.y].every(finite)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||!Array.isArray(s.stars)||s.stars.length>3||s.stars.some(b=>!b||![b.x,b.y].every(finite)||!Number.isInteger(b.age)||b.age<0||b.age>30))return null;
@@ -12,13 +13,50 @@ export function updateMichiDuet(g,hit){
  s.x=p.x+p.w/2;s.y=p.y+p.h;const pose=michiDuetPose(s),damage=(70+s.evo*14)*s.power;
  const targets=(g.enemies||[]).filter(e=>e&&e.hp>0&&!e.dying&&!e.fell);
  if([36,60,84].includes(s.age)){const nearby=targets.filter(e=>Math.hypot(e.x+e.w/2-s.x,e.y+e.h/2-(s.y-25))<=220+20*s.evo).sort((a,b)=>Math.abs(a.x-s.x)-Math.abs(b.x-s.x));const e=nearby[0];s.stars.push({x:e?e.x+e.w/2:s.x+s.facing*70,y:e?e.y+e.h/2:s.y-20,age:0});}
- for(const b of s.stars){if(b.age===18)for(const e of targets)if(Math.hypot(e.x+e.w/2-b.x,e.y+e.h/2-b.y)<=pose.meteorRadius+Math.min(e.w,e.h)/2)hit(g,e,damage*.2,{color:'#ffb379',stun:30,kx:s.facing*4,ky:-4,hitstop:4,shake:2});b.age++;}s.stars=s.stars.filter(b=>b.age<=30);
- if(s.age>=48&&s.age<104)for(const e of targets)if(!s.tailsHit.has(e)&&Math.hypot(e.x+e.w/2-s.x,(e.y+e.h/2-(s.y-25))/.55)<=pose.radius+Math.min(e.w,e.h)/2&&hit(g,e,damage*.45,{color:'#d7b0ff',stun:36,kx:s.facing*5,ky:-4,hitstop:3,shake:1}))s.tailsHit.add(e);
+ for(const b of s.stars){if(b.age===18)for(const e of targets)if(Math.hypot(e.x+e.w/2-b.x,e.y+e.h/2-b.y)<=pose.meteorRadius+Math.min(e.w,e.h)/2){hit(g,e,damage*.2,{color:'#ffb379',stun:30,kx:s.facing*4,ky:-4,hitstop:4,shake:2});michiYomiImpact(e.x+e.w/2,e.y+e.h/2,'¡ATRAPADO!','#ffb379',{life:72,big:1.8});}b.age++;}s.stars=s.stars.filter(b=>b.age<=30);
+ if(s.age>=48&&s.age<104)for(const e of targets)if(!s.tailsHit.has(e)&&Math.hypot(e.x+e.w/2-s.x,(e.y+e.h/2-(s.y-25))/.55)<=pose.radius+Math.min(e.w,e.h)/2&&hit(g,e,damage*.45,{color:'#d7b0ff',stun:36,kx:s.facing*5,ky:-4,hitstop:3,shake:1})){s.tailsHit.add(e);michiYomiImpact(e.x+e.w/2,e.y+e.h/2,'¡NUEVE VIDAS!','#d7b0ff',{life:72,big:1.8});}
  p._michiDuetAge=s.age;p._michiDuetT=120-s.age;if(g._assist?.heroId==='dragon')g._assist.t=120-s.age;s.age++;
 }
 const MICHI_U_FORM=[{name:'Michito',w:7,tip:8,glow:'#ffd6ee'},{name:'Michi',w:8,tip:9,glow:'#ffc4e6'},{name:'Nube rosa',w:9,tip:10,glow:'#ffe0f2'},{name:'Michi Luna',w:10,tip:11,glow:'#e6d6ff'},{name:'Michi Eclipse',w:12,tip:13,glow:'#7a4ae0'}];
 const MICHI_U_COLORS=['#ff9cdb','#c9a2ff','#ffd36b'];
 function uText(ctx,txt,x,y,size,fill,a=1){ctx.save();ctx.globalAlpha*=a;ctx.font=`900 ${size}px sans-serif`;ctx.textAlign='center';ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle='#4a2f8a';ctx.strokeText(txt,x,y);ctx.fillStyle=fill;ctx.fillText(txt,x,y);ctx.restore();}
+// V371 · Colas de gato realistas: 12 segmentos afilados, latigazo con desfase de fase, capas de color planas (sin gradientes ni brillo blanco).
+const MICHI_TAIL_PAL=[
+ {w:16,line:'#8a5a2a',fur:'#ffe3b8',top:'#fff1dc',shade:'#f0c88a',tip:'#c98f45'},
+ {w:17,line:'#8f3a70',fur:'#ffc4e6',top:'#ffdff0',shade:'#eea2cf',tip:'#c0609c'},
+ {w:18,line:'#9a4a82',fur:'#ffd0e8',top:'#ffe6f3',shade:'#f0a6d0',tip:'#c96aa4'},
+ {w:20,line:'#3e2a7a',fur:'#c9b4ff',top:'#e0d4ff',shade:'#a690ea',tip:'#5a3fa0'},
+ {w:22,line:'#2e1a5e',fur:'#ffb3dc',top:'#ffcfe8',shade:'#e488bd',tip:'#7a4ae0'},
+];
+function mixHex(h,k){const n=parseInt(h.slice(1),16),f=c=>Math.round(k>0?c+(255-c)*k:c*(1+k));return'#'+[n>>16,(n>>8)&255,n&255].map(c=>f(c).toString(16).padStart(2,'0')).join('');}
+// Cola esponjosa: tubo de círculos solapados (punta redonda), festones de pelo y 3 capas planas.
+function drawMichiTail(ctx,x,y,a,len,P,age,i,face,reduce,hairs){
+ const N=22,pts=[];let px=x,py=y;
+ for(let j=0;j<=N;j++){const u=j/N,w=P.w*(1-.5*u)*(u>.9?1-(u-.9)*2.2:1)*(j<2?.8+.1*j:1);
+  pts.push({x:px,y:py,u,r:w/2});
+  const lash=reduce?0:Math.sin(age*.09-u*2.1+i*.8)*.42*u+Math.sin(age*.05-u*1.2+i)*.12;
+  const ang=a+lash-face*.35*u*u;px+=Math.cos(ang)*len/N;py+=Math.sin(ang)*len/N;}
+ const fur=mixHex(P.fur,(i%3-1)*.06);
+ const layer=(col,rf,off,from=0,lobes=false)=>{ctx.fillStyle=col;ctx.beginPath();
+  for(let j=0;j<=N;j++){const q=pts[j];if(q.u<from)continue;const n=pts[Math.min(N,j+1)],o=pts[Math.max(0,j-1)],dx=n.x-o.x,dy=n.y-o.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
+   const cx=q.x+nx*q.r*off,cy=q.y+ny*q.r*off,R=Math.max(1,q.r*rf);ctx.moveTo(cx+R,cy);ctx.arc(cx,cy,R,0,Math.PI*2);
+   if(lobes&&j%3===0&&j>1){const lr=q.r*.34*rf;for(const sd of [-1,1]){const lx=q.x+nx*sd*q.r*.82,ly=q.y+ny*sd*q.r*.82-(lr*.2);ctx.moveTo(lx+lr,ly);ctx.arc(lx,ly,lr,0,Math.PI*2);}}}
+  ctx.fill();};
+ const outline=2.4;ctx.save();
+ ctx.fillStyle=P.line;ctx.beginPath();
+ for(let j=0;j<=N;j++){const q=pts[j],n=pts[Math.min(N,j+1)],o=pts[Math.max(0,j-1)],dx=n.x-o.x,dy=n.y-o.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,R=q.r+outline;ctx.moveTo(q.x+R,q.y);ctx.arc(q.x,q.y,R,0,Math.PI*2);
+  if(j%3===0&&j>1){const lr=q.r*.34+outline;for(const sd of [-1,1]){const lx=q.x+nx*sd*q.r*.82,ly=q.y+ny*sd*q.r*.82-q.r*.08;ctx.moveTo(lx+lr,ly);ctx.arc(lx,ly,lr,0,Math.PI*2);}}}
+ ctx.fill();
+ layer(P.shade,1,0,0,true);
+ layer(fur,.82,-.12,0,false);
+ layer(P.top,.42,-.42,.08,false);
+ layer(P.tip,1,0,.76,true);
+ layer(mixHex(P.tip,.18),.55,-.3,.8,false);
+ if(hairs&&!reduce){for(let k=0;k<2;k++){const ph=((age+i*7+k*13)%30)/30,src=pts[N-2-k*5];
+  ctx.globalAlpha*=1-ph;ctx.strokeStyle=k?P.shade:fur;ctx.lineWidth=1.3;ctx.lineCap='round';const hx=src.x+Math.sin(ph*5+i)*6,hy=src.y-ph*18+ph*ph*30;
+  ctx.beginPath();ctx.moveTo(hx,hy);ctx.quadraticCurveTo(hx+3,hy+2,hx+1,hy+6);ctx.stroke();ctx.globalAlpha/=Math.max(.001,1-ph);}}
+ ctx.restore();
+}
 export function drawMichiDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readMichiDuet(value);if(!s)return;const pose=michiDuetPose(s),F=MICHI_U_FORM[s.evo],x=s.x-cam.x,y=s.y-25-cam.y,age=s.age;ctx.save();ctx.globalAlpha*=age>108?(120-age)/12:1;ctx.lineCap='round';
  const def=roster.find(r=>r.id==='dragon'),form=def?.forms?.[s.evo];if(def&&form)drawActor(ctx,{...def,...form,id:'dragon',evo:s.evo,x:pose.dragonX-form.w/2,y:pose.dragonY-form.h,facing:s.facing,vx:0,vy:0,grounded:false,visualScale:.56,_duetActor:true},cam,t);
@@ -31,12 +69,8 @@ export function drawMichiDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  if(s.evo===4&&age>=20&&age<108){const k=Math.min(1,(age-20)/12);ctx.save();ctx.globalAlpha*=.55*k;ctx.fillStyle='#ffb3dc';ctx.beginPath();ctx.arc(x,y,40*k+4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4a2f8a';ctx.beginPath();ctx.arc(x+5,y-3,36*k,0,Math.PI*2);ctx.fill();ctx.restore();}
  // 2) Nueve colas gruesas 24-104.
  if(age>=24&&age<104){const grow=Math.min(1,(age-24)/12),fade=age>96?(104-age)/8:1,r=pose.radius*(.25+.75*grow);ctx.save();ctx.globalAlpha*=fade;
-  for(let i=0;i<9;i++){const a=i*Math.PI*2/9+(reduce?0:age*.035)*s.facing,wav=reduce?0:Math.sin(age*.15+i)*.18,tx=x+Math.cos(a)*r,ty=y+Math.sin(a)*r*.55,cx=x+Math.cos(a-.55+wav)*r*.65,cy=y+Math.sin(a-.55+wav)*r*.6,col=MICHI_U_COLORS[i%3];
-   ctx.strokeStyle='#4a2f8a';ctx.lineWidth=F.w+4;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(cx,cy,tx,ty);ctx.stroke();
-   ctx.strokeStyle=col;ctx.lineWidth=F.w;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(cx,cy,tx,ty);ctx.stroke();
-   ctx.strokeStyle='#fff6fb';ctx.lineWidth=Math.max(2,F.w*.3);ctx.beginPath();ctx.moveTo(x+(cx-x)*.3,y+(cy-y)*.3);ctx.quadraticCurveTo(cx,cy,x+(tx-x)*.85,y+(ty-y)*.85);ctx.stroke();
-   ctx.fillStyle='#fff6fb';ctx.strokeStyle='#4a2f8a';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(tx,ty,F.tip,F.tip*.62,a,0,Math.PI*2);ctx.fill();ctx.stroke();}
-  ctx.fillStyle=F.glow;ctx.strokeStyle='#4a2f8a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,9+s.evo,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
+  const TP=MICHI_TAIL_PAL[s.evo],hx=x-s.facing*(20+s.evo*7),hy=y+2,mid=-Math.PI/2-s.facing*.58;for(let i=0;i<9;i++){const spread=(i-4)/4,a=mid+spread*(.78+.1*grow)+(reduce?0:Math.sin(age*.04+i)*.05);drawMichiTail(ctx,hx,hy,a,r*.92,TP,age,(i*4)%9,s.facing,reduce,age>=36&&age<96);}
+  ctx.restore();}
  // Meteoros: marcador en el suelo 18 frames antes, caída y aro de impacto al atraparlo.
  for(const b of s.stars){const bx=b.x-cam.x,by=b.y-cam.y,mr=pose.meteorRadius;if(b.age<=18){const k=b.age/18,my=by-200*(1-k),pulse=reduce?0:Math.sin(b.age*.6)*3;
    ctx.save();ctx.strokeStyle='#ff6a4a';ctx.lineWidth=3;ctx.setLineDash([7,5]);ctx.beginPath();ctx.ellipse(bx,by,mr+pulse,(mr+pulse)*.32,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(bx-10,by);ctx.lineTo(bx+10,by);ctx.moveTo(bx,by-6);ctx.lineTo(bx,by+6);ctx.stroke();
