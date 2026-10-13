@@ -8,13 +8,14 @@ const kit=fs.readFileSync("systems/cinema-kit.js","utf8");
 const evo=fs.readFileSync("systems/evo-cinema.js","utf8");
 const loader=fs.readFileSync("systems/cinema-loader.js","utf8");
 const sw=fs.readFileSync("sw.js","utf8");
+const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
 
 test("V367: only active menu/game scripts execute during first paint",()=>{
  const scripts=[...html.matchAll(/<script type="module" src="([^"]+)"/g)].map(m=>m[1]);
  assert.equal(scripts.length,6);
- assert.equal(scripts[0],"systems/cinema-loader.js?v=ohana-367");
+ assert.equal(scripts[0],"systems/cinema-loader.js?v="+current);
  for(const rare of ["evo-cinema.js","supreme-cinema.js","ending.js","title-fx.js","atrium-interact.js"]){
-   assert.ok(!scripts.some(s=>s.endsWith(rare+"?v=ohana-367")),rare+" eagerly loads");
+   assert.ok(!scripts.some(s=>s.endsWith(rare+"?v="+current)),rare+" eagerly loads");
  }
  assert.match(html,/data-selector-mode="family-grid"/);
  assert.match(intro,/from "\.\/cinema-kit\.js"/);
@@ -38,9 +39,9 @@ test("V367: exact original authored cinema handlers are loaded only on event",()
  assert.doesNotMatch(loader,/fetch\(|sendBeacon|\.netlify\/functions|setInterval/);
 });
 test("V367: all new runtime modules survive offline service-worker activation",()=>{
- assert.match(sw,/const VERSION = "ohana-367"/);
+ assert.ok(current&&Number(current.slice(6))>=367);
  for(const path of ["systems/cinema-kit.js","systems/cinema-loader.js","systems/evo-cinema.js","systems/supreme-cinema.js","systems/ending.js"]){
    assert.ok(sw.includes('"./'+path+'?v=" + VERSION'),path+" must be precached");
  }
- assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]==="ohana-367"));
+ assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]===current));
 });
