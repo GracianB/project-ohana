@@ -12,23 +12,40 @@ export const CHISPIN_WELCOME_BEATS=Object.freeze({
  hiccup:Object.freeze([2.07,2.22,2.44,2.62]),
  cloud:Object.freeze([2.60,2.80,3.09,3.30])
 });
+// V362 · Chispin participates beyond its opening joke; none of these cues
+// summons a battle cloud, charged projectile, network hit or ability.
+export const CHISPIN_FAMILY_REACTIONS=Object.freeze({
+ dragon:Object.freeze([3.43,3.58,3.87,4.15]),
+ chase:Object.freeze([5.32,5.53,5.96,6.22]),
+ yomi:Object.freeze([8.08,8.28,8.66,8.96]),
+ dino:Object.freeze([11.80,12.00,12.42,12.74])
+});
 export function chispinWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
+ const breath=(1+Math.sin(t*TAU*4/14))*.5;
  if(reducedMotion)return Object.freeze({phase:"idle",sniff:0,prank:0,charge:0,hiccup:0,cloud:0,
-  ear:0,coil:0,gills:0,halo:.12,reduced:true});
+  breath:.5,dragon:0,chase:0,yomi:0,dino:0,ear:0,coil:0,gills:0,halo:.12,reduced:true});
  const sniff=pulse(t,...CHISPIN_WELCOME_BEATS.sniff);
  const prank=pulse(t,...CHISPIN_WELCOME_BEATS.prank);
  const charge=pulse(t,...CHISPIN_WELCOME_BEATS.charge);
  const hiccup=pulse(t,...CHISPIN_WELCOME_BEATS.hiccup);
  const cloud=pulse(t,...CHISPIN_WELCOME_BEATS.cloud);
+ const dragon=pulse(t,...CHISPIN_FAMILY_REACTIONS.dragon);
+ const chase=pulse(t,...CHISPIN_FAMILY_REACTIONS.chase);
+ const yomi=pulse(t,...CHISPIN_FAMILY_REACTIONS.yomi);
+ const dino=pulse(t,...CHISPIN_FAMILY_REACTIONS.dino);
  const phase=cloud>.22?"cloud":hiccup>.22?"hiccup":charge>.22?"charge":
   prank>.22?"prank":sniff>.22?"sniff":"idle";
- return Object.freeze({phase,sniff,prank,charge,hiccup,cloud,
-  ear:clamp(.22*sniff+.46*prank+.64*charge+.89*hiccup+.36*cloud),
-  coil:clamp(.22*sniff+.55*prank+.88*charge+.43*hiccup+.27*cloud),
-  gills:clamp(.21*sniff+.48*prank+.78*charge+.9*hiccup+.46*cloud),
-  halo:clamp(.12+.10*sniff+.17*prank+.53*charge+.18*hiccup+.5*cloud),
+ return Object.freeze({phase,sniff,prank,charge,hiccup,cloud,breath,dragon,chase,yomi,dino,
+  ear:clamp(.22*sniff+.46*prank+.64*charge+.89*hiccup+.36*cloud
+    +dragon*.15+chase*.25+yomi*.13+dino*.28),
+  coil:clamp(.22*sniff+.55*prank+.88*charge+.43*hiccup+.27*cloud
+    +dragon*.30+chase*.38+yomi*.20+dino*.35),
+  gills:clamp(.21*sniff+.48*prank+.78*charge+.9*hiccup+.46*cloud
+    +dragon*.20+chase*.24+yomi*.15+dino*.29),
+  halo:clamp(.12+.10*sniff+.17*prank+.53*charge+.18*hiccup+.5*cloud
+    +dragon*.08+chase*.06+yomi*.09+dino*.06),
   reduced:false});
 }
 export function drawChispinWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
