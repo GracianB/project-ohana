@@ -100,6 +100,20 @@ async function auditPage(page, label) {
   assert.ok(dinoFilm.stageAlive&&
     ['idle','curious','brace','stomp','startled','delighted'].includes(dinoFilm.livePhase),
     label+': Dino animation must stay visible on the live welcome canvas');
+  // V355 Dino's body breathes and interacts between its original stomp scenes.
+  const dinoFamily=await page.evaluate(async()=>{
+    const {dinoWelcomeBeat}=await import('/systems/intro-dino-stage.js?e2e=v355');
+    const times=[.90,3.64,5.83], keys=['melody','dragon','chase'];
+    const beats=times.map(t=>dinoWelcomeBeat(t));
+    const el=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),still:dinoWelcomeBeat(.9,true).melody,
+      stage:!!el?.querySelector('canvas'),reaction:el?.dataset.dinoFamilyReaction};
+  });
+  assert.ok(dinoFamily.stage&&dinoFamily.quiet);
+  assert.ok(dinoFamily.strength.every(x=>x>.6),label+': Dino family interactions not directed');
+  assert.equal(dinoFamily.still,0);
+  assert.ok(['melody','dragon','chase','rest'].includes(dinoFamily.reaction));
   // V346: Frita is individually animated during the existing potato chase.
   const fritaFilm=await page.evaluate(async()=>{
     const {fritaWelcomeBeat}=await import('/systems/intro-frita-stage.js?e2e=v346');
