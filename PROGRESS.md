@@ -1,3 +1,14 @@
+## OHANA V353 · Michi: el gato que juzga a toda la familia con cinco actos (ohana-353)
+
+- Décima intervención artística individual de la portada, cerrando la ronda de los diez personajes originales. Michi interpreta una historia propia dentro de los 14 segundos de escena: examina la travesura eléctrica, mira de reojo, se acicala una pata, mueve la cola como advertencia y acaba ronroneando con cariño. Diálogos «¿QUÉ HACÉIS?», «YO NO FUI.», «ME ACICALO.», «NI ME MIRES.» y «PERO SOIS MÍOS.»
+- Director `systems/intro-michi-stage.js`, cinco beats `inspect/sideeye/groom/flick/purr` deterministas, iluminación rosa-lunar suave y efectos frontales limitados a su slot. No se activan las U, J/K/L ni hitboxes.
+- Arte real `characters/art/cat.js`: bebé F0 con orejas y patas cortas, gato F1, nube F2, gato lunar F3 y guardián alado F4, sin reemplazar el lienzo por un dibujo ficticio. `michiWelcomeRig` dirige ojos, cara, orejas, cola, pata, rotación de cabeza, cuerpo y plumas originales de F4. Las alas no aparecen en F0–F3, y las colas adicionales del combate supremo no se invocan en la bienvenida.
+- `systems/intro.js` integra su actuación junto a Dragon y Chispín sin romper sus escenas. `characters/draw.js` conserva Canvas original con una fingerprint diferente en cada acto y pasa la señal solo al doble escénico.
+- Accesibilidad `prefers-reduced-motion`: ausencia de movimientos rápidos y de efectos delanteros. Seis tests Node cubren guion 14 s, cinco formas, accesibilidad, FX, caché y preservación del reparto. Browser E2E de escritorio/móvil más cinco fotogramas en regresión visual.
+- Caché `ohana-353` en HTML + SW y precaché del director. Solo fusionar después de CI Node, Browser E2E, cooperativo Chromium y Firefox, visual y Release Gate verdes. No desplegar Netlify.
+
+---
+
 ## OHANA V352 · Chispín interpreta una tormenta pequeña con cinco gestos reales (ohana-352)
 
 - Novena intervención artística individual de la bienvenida de diez personajes. Chispín deja de repetir la pose `attack/victory` del duelo genérico: olfatea una chispa, hace una travesura a Stitcho, acumula electricidad en las branquias y el muelle, tiene un hipo cómico durante el accidente luminoso y crea una nubecilla amable. Cinco beats deterministas en 14 segundos: `sniff/prank/charge/hiccup/cloud`, con diálogos propios y respuesta «UPS.» en el hipo.
