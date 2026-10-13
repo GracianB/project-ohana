@@ -522,7 +522,7 @@ function draw(ctx, pose, R) {
   if(welcome.active){
     r.arm+=welcome.arm;r.leg+=welcome.leg;
     r.tail+=welcome.tail;r.bob+=welcome.bob;
-    r.michiHead=welcome.head;r.michiEar=welcome.ear;
+    r.michiHead=welcome.head+welcome.look;r.michiEar=welcome.ear;
     r.michiWing=welcome.wing;r.mood=welcome.mood;
     r.michiHaunch=welcome.haunch;r.michiPaw=welcome.paw;r.michiLook=welcome.look;
   }
