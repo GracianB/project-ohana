@@ -1,3 +1,15 @@
+## OHANA V362 · Chispín, branquias, orejas y cola de muelle auténticas (ohana-362)
+
+- Novena intervención de la segunda ronda individual, tras la V361 Stitcho ya publicada. Mantiene las cinco actuaciones de los primeros 3.30 segundos y ahora interpreta corporalmente el resto del ciclo de 14 s.
+- Cuatro encuentros nuevos con la familia: estornudo de Dragón (3.43–4.15), persecución de Frita/Pizza (5.32–6.22), farol de Yomi (8.08–8.96) y pisotón de Dino (11.80–12.74). Son reacciones expresivas de cuerpo, no poderes, relámpagos que hagan daño ni proyectiles nuevos.
+- El rig original de `characters/art/pikachu.js` se anima de manera unificada y sin sustituir el sprite: expansión física del tórax más visible en F0 que F4, rotación de cabeza, orejas en la misma raíz craneal, branquias, axilas, brazos, pies y cola de muelle con punta de batería auténtica. Las cinco formas mantienen rasgos y proporciones propios; la cresta, nubes de F3 y corona/aurora de F4 no aparecen en formas incorrectas.
+- `chispinWelcomeRig` devuelve controles acotados y finitos durante los catorce segundos. `opts` dibuja el cuerpo con esos datos y su escala está alrededor de la base de apoyos del Canvas, por lo que cola, orejas, brazos y patas comparten geometría. Sin cambiar colisiones ni hitboxes.
+- El modo reducido permanece inmóvil; las habilidades J/K/L/U, cooperación, física, red, guardado y otras nueve actuaciones quedan fuera de estos nuevos datos de intro.
+- Seis nuevas suites Node de respiración, eventos aislados, partes conectadas, 5 formas, accesibilidad y cache. E2E escritorio/móvil, cuatro capturas nuevas del elenco y auditoría real de píxeles de F0–F4 en dos tiempos de respiración. HTML y SW alineados a `ohana-362`.
+- No fusionar sin Node, Browser, Visual, cooperativo Chromium/Firefox, Release Gate y Pages verdes. Sin Netlify.
+
+---
+
 ## OHANA V361 · Stitcho: huevo vivo, antenas y garras durante 14 segundos (ohana-361)
 
 - Octava revisión individual profunda de los diez miembros. Stitcho conserva los cinco beats originales (observa, provoca, se enrolla, se asusta y presume) de los primeros 3.13 s; su anatomía continúa interpretando el resto del ciclo de 14 s.
