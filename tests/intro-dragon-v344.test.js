@@ -68,8 +68,12 @@ test('V344 · front and back stage FX have isolated Canvas state and visible geo
  const before=calls.length;
  drawDragonWelcomeFX(ctx,200,400,112,3.5,dragonWelcomeBeat(3.5,true),'front');
  const staticChunk=calls.slice(before);
- assert.ok(!staticChunk.some(c=>c[0]==='gradient'),'reduced motion must not draw fireball');
- assert.ok(staticChunk.length<=2,'reduced motion should not emit fast moving embers');
+ assert.ok(!staticChunk.some(c=>c[0]==='gradient'||c[0]==='arc'||c[0]==='ellipse'),
+   'reduced motion may show one static sparkle, never fireball or moving embers');
+ const beforeAgain=calls.length;
+ drawDragonWelcomeFX(ctx,200,400,112,8.5,dragonWelcomeBeat(8.5,true),'front');
+ assert.deepEqual(calls.slice(beforeAgain),staticChunk,
+   'reduced motion must render an identical static finish at any time');
 });
 
 test('V344 · render cache notices independently directed head, wing and tail',()=>{
