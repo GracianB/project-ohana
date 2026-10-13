@@ -1,3 +1,16 @@
+## OHANA V349 · Cuerno individual: cuerno vivo, orbita y aurora del unicornio (ohana-349)
+
+- Sexta intervención individual en la bienvenida después de Dragón V344, Dino V345, Frita V346, Pizza V347 y Yomi V348. Se respeta **la verdadera evolución**: F0 es un cuerno vivo con ojos, sin cuerpo ni cascos; F1 añade cara flotante, sin inventar caballo; F2–F4 obtienen cuatro patas articuladas y crines, F3–F4 alas nacidas de los hombros.
+- Director independiente `systems/intro-cuerno-stage.js`: cinco beats de 14 segundos, `wonder/tiptoe/aurora/surprise/bow`, con respiración suave, curiosidad, amago de paso, un arco de siete colores pequeño originado en el cuerno, sorpresa y reverencia final.
+- `characters/art/cuerno.js` recibe únicamente la señal temporal `pose.cuernoWelcome` del doble de la intro. `cuernoWelcomeAnatomy` modula el cuerno y la cara flotante de las dos formas recién nacidas, y participa en huesos de cuatro cascos, movimiento retrasado de melena y cola en F2–F4, y plumas articuladas de alas en F3–F4. Se mantienen las raíces de extremidades, las uniones escapulares y las cinco formas; los ritos J/K/L/U y el sueño no se tocan.
+- No hay llamaradas ni auroras de daño global: halo pastel moderado, 7 trazos pegados al cuerno y partículas locales sin colisión. Diálogos: «¿ESO BRILLA?», «¡MIRA MI LUZ!», «¡UY!» y «PARA TI.».
+- El render `characters/draw.js` pasa `pose.cuernoWelcome` exclusivamente al dummy de la intro y actualiza `poseFingerprint`; se fuerza el Canvas original del personaje, sin dibujarlo como otro unicornio independiente ni sustituir siluetas.
+- Modo reduced motion: Cuerno conserva el dibujo quieto, sin siete bandas animadas o sacudidas. Director temporal determinista y reproducible, no timers ni azar.
+- Pruebas V349: seis comprobaciones Node de las fases, límites y período, Canvas acotado, accesibilidad, **restricciones por evolución** (sin cascos ni crines prematuros), conservación de las cinco formas y cuatro ritos, render cache. Browser E2E escritorio/móvil y cinco capturas visuales reales añadidas a las 22 capturas individuales anteriores.
+- `ohana-349` en HTML/Service Worker y nuevo módulo precacheado offline. No integrar hasta Node, Browser E2E, visual, cooperativo Firefox/Chromium y Release Gate en verde. Sin Netlify ni garantías de Pages actualizado.
+
+---
+
 ## OHANA V348 · Yomi, el farol fantasma que nunca desaparece de la intro (ohana-348)
 
 - Quinta revisión artística individual después de Dragón V344, Dino V345, Frita V346 y Pizza V347. La intro mantiene los diez personajes **visibles durante los 14 segundos completos**; Yomi deja de esconder su silueta tras un estado de entrada. Su presencia misteriosa se actúa, no se simula retirándolo.
