@@ -1,3 +1,17 @@
+## OHANA V325 · Dragón y Pizza: aviso real antes del impacto inicial U (ohana-342)
+
+- Eliminado el daño global instantáneo del **lanzamiento inicial** de Dragón y Pizza. Ahora muestran un anillo fijo de advertencia durante 12 frames y únicamente al cerrarse aplican daño mediante el `hitEnemy` habitual.
+- El área autorizada de la explosión inicial se calcula con intersección círculo/AABB y radio visual real: 320 unidades para Dragón, 430 para Pizza. Las zonas y la misma duración se comparten en `systems/u-field-targeting.js`; los enemigos fuera del círculo no reciben daño.
+- La comprobación de alcance se realiza **en el instante del impacto**, por lo que enemigos que entran o salen de la zona durante el aviso se comportan de forma consistente. Cambiar de sala o morir cancela el impacto pendiente.
+- El dúo U de cada héroe arranca en el lanzamiento, pero `legacyTargets` se rellena exclusivamente con enemigos realmente dañados al finalizar el aviso. Se conservan las L prestadas a los ticks 42/66/90, las cinco evoluciones y las nueve elecciones de compañero.
+- Conservados fuerza y retroceso del daño original de Dragón, vuelo, sacudida y meteoros posteriores. Pizza conserva la fórmula de daño, Horno Real, rebotes y puntos por enemigos golpeados, sin recompensar enemigos distantes no alcanzados.
+- El campo posterior de Pizza continúa atacando hasta 430 unidades: se dibuja un contorno externo constante con ese mismo radio. La advertencia de lanzamiento sigue dibujándose aunque se active movimiento reducido, sin flashes estroboscópicos.
+- Pruebas V325: 90 lanzamientos reales (2 héroes × 5 formas × 9 compañeros), 12 cuadros sin daño previo, colisión de borde, objetivos móviles, cancelación por cambio de sala/muerte y deduplicación de compañero; también se revisaron las aserciones anteriores de fuerza de Dragón y recompensa de Pizza.
+- Pruebas de calidad obligatorias: Node, Browser E2E, escenas visuales, seis héroes como anfitrión/invitado en Chromium y Firefox y Release Gate. No anunciar aprobados ni fusionar hasta terminar CI. Sin publicación Netlify.
+- El issue #318 **continúa abierto**: quedan por revisar especialmente Dino (Coloso y fósiles), Yomi (juicio/ejecuciones), Cuerno (sueño) y autoridad de lanzamiento en la red.
+
+---
+
 ## OHANA V324 · U de Frita: lanzamiento local y protección contra dobles golpes (ohana-341)
 
 - El golpe inicial de Frita pasa a respetar el mismo círculo de 126 unidades del aura U que sus pulsos periódicos; ahora no alcanza enemigos lejanos ni los elige por orden de aparición.
