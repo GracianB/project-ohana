@@ -437,6 +437,8 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.dragonWelcomePhase=dragonBeat.phase;
       el.dataset.dragonWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.dragonFamilyReaction=dragonBeat.dino>.2?"dino":
+        dragonBeat.ghost>.2?"ghost":dragonBeat.chase>.2?"chase":"rest";
     }
     if(dragonBeat.sneeze>.20){
       comicBubble("¡ACHÍS!",dragon.x+heroH*.18,dragon.foot-heroH*.98,
