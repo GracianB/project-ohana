@@ -183,6 +183,23 @@ async function auditPage(page, label) {
     ['idle','scout','taunt','curl','shock','swagger'].includes(stitchoFilm.livePhase),
     label+": Stitcho's original Canvas figure is disconnected from the intro");
   assert.equal(stitchoFilm.motion,'full',label+': unexpected reduced-motion Stitcho stage');
+  // V352: Chispin's five independent gestures use its original live body.
+  const chispinFilm=await page.evaluate(async()=>{
+    const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?e2e=v352');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[.01,.42,.90,1.72,2.35,2.97].map(t=>chispinWelcomeBeat(t).phase),
+      livePhase:el?.dataset.chispinWelcomePhase||'',
+      motion:el?.dataset.chispinWelcomeMotion||'',
+      stageAlive:!!el?.querySelector('canvas')
+    };
+  });
+  assert.deepEqual(chispinFilm.phases,['idle','sniff','prank','charge','hiccup','cloud'],
+    label+': Chispin needs five living forms and mini-storm gestures');
+  assert.ok(chispinFilm.stageAlive&&
+    ['idle','sniff','prank','charge','hiccup','cloud'].includes(chispinFilm.livePhase),
+    label+': Chispin original spring rig is disconnected from actual welcome');
+  assert.equal(chispinFilm.motion,'full',label+': Chispin unexpectedly reduced-motion');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
