@@ -46,10 +46,24 @@ try {
  const seedRequests=network.length;
  network.length=0;
  await page.evaluate(()=>navigator.serviceWorker.register("./sw.js?v=ohana-369",{scope:"./"}));
- await page.waitForFunction(async()=>{
-   const keys=await caches.keys();
-   return keys.includes("ohana-static-ohana-369") && !!navigator.serviceWorker.controller;
- },undefined,{timeout:45000});
+ // CacheStorage creation may precede the last cache.put on slower runners.
+ // Observe the actual completed metadata, not merely the new cache name.
+ try {
+   await page.waitForFunction(async()=>{
+     if(!navigator.serviceWorker.controller)return false;
+     const c=await caches.open("ohana-static-ohana-369");
+     return !!(await c.match("./.ohana-install-stats.json"));
+   },undefined,{timeout:45000});
+ } catch(error) {
+   const diagnostic=await page.evaluate(async()=>{
+     const names=await caches.keys();
+     const c=await caches.open("ohana-static-ohana-369");
+     return {names,controlled:!!navigator.serviceWorker.controller,
+       assets:(await c.keys()).map(x=>new URL(x.url).pathname).slice(-12)};
+   });
+   throw new Error("V369 SW install metadata not completed: "+JSON.stringify(diagnostic)+
+     "; requests="+network.slice(-15).join(",")+"; "+error.message);
+ }
  const migration=await page.evaluate(async()=>{
    const c=await caches.open("ohana-static-ohana-369");
    const stats=await (await c.match("./.ohana-install-stats.json")).json();
