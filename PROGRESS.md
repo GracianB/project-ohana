@@ -1,3 +1,13 @@
+## OHANA V357 · Pizza: masa viva, corteza y queso unidos durante catorce segundos (ohana-357)
+
+- Cuarta revisión individual de la segunda ronda. Mantiene intactos los cinco actos originales de su persecución con Frita y los diez personajes de la intro; también mira el ukelele de Kilo (0.59–1.39 s), el chispazo cercano de Chispín (2.12–2.91 s) y el pisotón de Dino (11.83–12.64 s).
+- `pizzaWelcomeAnatomy` se integra en el **dibujo original** `characters/art/pizza.js`, no como capa gráfica superpuesta. Deforma masa y corteza bajo un único `ctx.scale(P.sx,P.sy)`, compartido por toppings, queso anclado, hombros, brazos, zapatos y cara, con elasticidad distinta por evolución F0–F4.
+- Coreografía temporal pura con microrespiración perceptible fuera del chase; orienta rostro, desplazamiento y extremidades sin activar ataque/horno, habilidades, daño, suelo o red. El modo de movimiento reducido neutraliza el rig de intro.
+- Seis nuevas pruebas Node de anatomía de cinco formas, continuidad, anclajes reales, modo reducido y fingerprint. Browser E2E desktop/mobile y tres capturas nuevas, además de todas las anteriores. Versión `ohana-357` cacheada.
+- PR apilada sobre V356, pendiente cierre en orden de V354–V356 y pruebas Node, visual, cooperativo Chromium/Firefox y Release Gate. Netlify no se despliega.
+
+---
+
 ## OHANA V356 · Frita: chef vivo, columna flexible y útiles unidos (ohana-356)
 
 - Tercera intervención de la ronda profunda individual, después de Dragón V354 y Dino V355. Cinco actos originales de Frita conservados, pero la patata ya no queda sin actuación fuera del chase de 4 a 7 segundos.
