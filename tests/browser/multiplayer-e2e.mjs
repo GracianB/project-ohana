@@ -457,7 +457,11 @@ try {
     assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
   }
   console.log("multiplayer: character-specific J/K/L effects verified");
-  // V302: verify actual Stitcho storm echo delivery, while preserving the live peer identity.
+  // Stitcho's storm is verified by the dedicated Stitcho Chromium/Firefox
+  // scenarios. Injecting synthetic Stitcho effects into every other hero's
+  // six-hero WebRTC run was redundant and could stall overloaded CI browsers.
+  // Keep the original 12-second delivery budget, not 120 unbounded RPC calls.
+  if(hostCharacter==='stitcho'){
   const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
@@ -467,13 +471,15 @@ try {
     onlineCoop.lastEffectsSentAt=performance.now()+600;return onlineCoop.direct.sendLatest('effects',effects);
   });
   let stormDelivered=false;
-  for(let i=0;i<120;i++){
+  const stormDeadline=Date.now()+12000;
+  while(Date.now()<stormDeadline){
     await sendStorm();
     stormDelivered=await guestPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
     });if(stormDelivered)break;await guestPage.waitForTimeout(100);
   }
   assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC');
+  }
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
 } catch(error) {
