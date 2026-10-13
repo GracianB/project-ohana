@@ -634,14 +634,19 @@ try {
   });
   await page.waitForTimeout(520);
   const pizzaU=await page.locator('#supreme-cinema').evaluate(el=>({
-    active:el.dataset.activeId||'',story:el.dataset.story||'',mode:el.dataset.mode||''
+    active:el.dataset.activeId||'',story:el.dataset.story||'',mode:el.dataset.mode||'',
+    duration:Number(el.dataset.duration||0)
   }));
   assert.equal(pizzaU.active,'pizza','09c-pizza-u: actor incorrecto');
   assert.equal(pizzaU.story,'oven-too-hot','09c-pizza-u: storyboard incorrecto');
   assert.equal(pizzaU.mode,'storyboard','09c-pizza-u: formato incorrecto');
+  assert.ok(pizzaU.duration>=4800&&pizzaU.duration<=6400,'09c-pizza-u: duración real fuera del storyboard');
   assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime en cinema');
   await capture(page,'09c-supreme-pizza-molten');
-  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:3600});
+  // A real Pizza storyboard lasts 4.8–6.4 s. The former 3.6 s timeout was
+  // shorter than the authored scene and failed based on runner load.
+  await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',
+    null,{timeout:Math.max(8000,pizzaU.duration+2500)});
   page.off('pageerror',onPizzaError);
   assert.deepEqual(pizzaCinemaErrors,[],'09c-pizza-u: error runtime al finalizar');
 
