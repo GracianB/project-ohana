@@ -1,3 +1,15 @@
+## OHANA V360 · Kilo completa el ciclo musical con manos, ukelele y cuerpo conectados (ohana-360)
+
+- Séptima intervención anatómica individual de la segunda ronda de 10 héroes. Kilo ya protagonizaba cinco beats (escuchar, tocar, florecer, sorprenderse, finalizar) en los primeros 2.16 segundos. Ahora continúa vivo **los catorce segundos**: escucha el estornudo de Dragón (3.35–4.10 s), anima la persecución de Frita/Pizza (5.23–6.18 s), reacciona al farol de Yomi (8.03–8.94 s) y responde al pisotón de Dino (11.78–12.69 s).
+- Las cuatro escenas extra no invocan ataque ni U: la cadera del dibujo original sigue conectada al pecho que respira, y las manos articuladas `ik()` siguen unidas a los hombros y al ukelele real. El pelo, la falda, los apoyos, la expresión y las alas de F4 se mueven con amplitudes distintas según evolución.
+- **Cinco formas intactas:** F0 tiene respiración redonda, chupete y pequeño instrumento, con gateo propio al correr; F1/F2 cantan con su ukelele real; F3 conserva bastón, vestido y capa, sin introducir un instrumento extra durante escenas nuevas; F4 conserva el ukelele y las alas ancladas a los hombros, que reaccionan a la familia.
+- Implementado en `characters/art/lilo.js` (fuente de verdad de `characters/art/kilo.js`), `systems/intro-kilo-stage.js`, `systems/intro.js` y el fingerprint del Canvas de `characters/draw.js`. No sprites de pegatina ni FX que suplanten anatomía.
+- Siete nuevas suites Node: reloj puro, cuatro reacciones separadas, expansión torácica en F0–F4, IK/uke/staff/alas, accesibilidad, pintura caché, preservación de los otros nueve. Browser E2E y cuatro nuevos fotogramas dirigidos dentro de la composición completa, además de todos los fotogramas anteriores.
+- `prefers-reduced-motion` impide estas animaciones; estados de juego, combate, J/K/L/U, físicas, hitboxes, multijugador, evolución y guardado siguen intactos. HTML y service worker sincronizados a `ohana-360`.
+- No fusionar sin Node, Browser, Visual, Chromium/Firefox Coop, Release Gate y Pages verdes. No desplegar Netlify.
+
+---
+
 ## OHANA V359 · Cuerno y las cinco anatomías verdaderas, vivas durante 14 segundos (ohana-359)
 
 - Sexta revisión individual de la segunda ronda, apilada sobre Yomi V358. Tres reacciones nuevas mientras la atención está en el resto de la familia: escucha a Kilo (0.73–1.47 s), se sobresalta con el estornudo de Dragón (3.34–4.13 s) y observa el farol de Yomi (8.04–8.90 s).
