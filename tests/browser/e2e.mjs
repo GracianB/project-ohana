@@ -80,7 +80,7 @@ async function auditPage(page, label) {
   });
   assert.deepEqual(dinoFilm.phases,
     ['idle','curious','brace','stomp','startled','delighted'],
-    label+': Dino's acting phases are not connected to the actual intro');
+    label+": Dino acting phases are not connected to the actual intro");
   assert.ok(dinoFilm.stageAlive&&
     ['idle','curious','brace','stomp','startled','delighted'].includes(dinoFilm.livePhase),
     label+': Dino animation must stay visible on the live welcome canvas');
