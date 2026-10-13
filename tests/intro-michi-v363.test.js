@@ -56,6 +56,8 @@ test("V363 cat paws, hip, ears, whiskers, tails and F4 feathers remain rooted in
  assert.match(src,/if\(welcome\.active\)ctx\.scale\(welcome\.torsoX,welcome\.torsoY\)/);
  assert.match(src,/r\.michiHaunch=welcome\.haunch/);
  assert.match(src,/r\.michiPaw=welcome\.paw/);
+ assert.match(src,/R\.swingLimb\(ctx, -17, -34, 7,/);
+ assert.match(src,/R\.swingLimb\(ctx, 19, -33, 9,/);
  assert.match(src,/R\.swingLimb\(ctx, hx - 9, -L - 2/);
  assert.match(src,/R\.swingLimb\(ctx, x, y, L, r\.arm-/);
  assert.match(src,/const flap = Math\.sin\(r\.t \* 0\.18\)/);
