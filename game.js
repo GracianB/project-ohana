@@ -3103,7 +3103,11 @@ if ((game.renderDirty || renderedTick !== t) && !paused) {
   }
 }
 } else clock.reset();
-requestAnimationFrame(loop);
+// The title has its own paced Canvas loop. When the game is stopped, paused or
+// hidden, polling game logic at 60fps only burns battery (and schedules GC).
+// Wake at ~8Hz until play resumes; active gameplay still uses native rAF.
+if (game.running && !paused && !document.hidden) requestAnimationFrame(loop);
+else setTimeout(() => requestAnimationFrame(loop), 120);
 }
 function setupSelect() {
 const partnerSelect=document.getElementById("u-partner-select");
