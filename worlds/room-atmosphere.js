@@ -1,8 +1,10 @@
 const TAU=Math.PI*2;
+import { cachedGradient } from "../systems/canvas-gradient-cache.js";
 import { drawOdysseySectors } from "./odyssey-sectors.js";
 function u(n){const x=Math.sin(n*91.17+17.31)*43758.5453;return x-Math.floor(x);}
 function w(v,s){const m=v%s;return m<0?m+s:m;}
-function vig(ctx,W,H,a){const g=ctx.createRadialGradient(W*.5,H*.44,H*.18,W*.5,H*.48,Math.max(W,H)*.78);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,"+a+")");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function vig(ctx,W,H,a){const g=cachedGradient(ctx,"room-vig:"+W+":"+H+":"+a,()=>{const v=ctx.createRadialGradient(W*.5,H*.44,H*.18,W*.5,H*.48,Math.max(W,H)*.78);v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(0,0,0,"+a+")");return v;});ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+const ROOM_SIGNATURE = Object.freeze({hub:"kilo",beach:"stitcho",jungle:"chispin",cave:"cat",lab:"dragon",ridge:"dino",space:"frita",reef:"pizza",volcano:"yomi",boss:"cuerno"});
 const CHARACTER_THEMES = {
  kilo:    { c1:"#ffd36a", c2:"#ff7b52", motif:"sun" },
  stitcho: { c1:"#7ee7ff", c2:"#8c7bff", motif:"stitches" },
@@ -22,10 +24,7 @@ export function drawRoomAtmosphere(ctx,id,cam,t,W,H,characterId){
  if(id==="hub") hub(ctx,cam,t,W,H); else if(id==="beach") beach(ctx,cam,t,W,H); else if(id==="jungle") jungle(ctx,cam,t,W,H);
  else if(id==="cave") cave(ctx,cam,t,W,H); else if(id==="lab") lab(ctx,cam,t,W,H); else if(id==="ridge") ridge(ctx,cam,t,W,H);
  else if(id==="space") space(ctx,cam,t,W,H); else if(id==="reef") reef(ctx,cam,t,W,H); else if(id==="volcano") volcano(ctx,cam,t,W,H); else if(id==="boss") boss(ctx,cam,t,W,H);
- const roomSignature = {
-   hub:"kilo", beach:"stitcho", jungle:"chispin", cave:"cat", lab:"dragon",
-   ridge:"dino", space:"frita", reef:"pizza", volcano:"yomi", boss:"cuerno"
- }[id] || "kilo";
+ const roomSignature = ROOM_SIGNATURE[id] || "kilo";
  drawCharacterOdyssey(ctx, id, characterId || roomSignature, roomSignature, cam, t, W, H);
  ctx.restore();
 }
@@ -63,8 +62,11 @@ function drawCharacterOdyssey(ctx,roomId,characterId,signatureId,cam,t,W,H){
 
  if(theme.motif==="sun"){
    const sx=W*.78,sy=H*.16;
-   const rg=ctx.createRadialGradient(sx,sy,8,sx,sy,260);
-   rg.addColorStop(0,theme.c1+"cc");rg.addColorStop(.2,theme.c1+"55");rg.addColorStop(1,"transparent");
+   const rg=cachedGradient(ctx,"character-sun:"+W+":"+H+":"+theme.c1,()=>{
+     const v=ctx.createRadialGradient(sx,sy,8,sx,sy,260);
+     v.addColorStop(0,theme.c1+"cc");v.addColorStop(.2,theme.c1+"55");v.addColorStop(1,"transparent");
+     return v;
+   });
    ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
    for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2+t*.001;beam(ctx,sx,sy,sx+Math.cos(a)*360,sy+Math.sin(a)*260,theme.c1,.035,18);}
  } else if(theme.motif==="stitches"){
