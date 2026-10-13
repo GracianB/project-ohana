@@ -190,6 +190,19 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V357: verify foot-rooted elastic dough, attached crust and cheese
+  // while Pizza notices family members outside its original chase.
+  for(const [at,reaction,label] of [
+    [1.12,'melody','00dj-pizza-hears-kilo'],
+    [3.70,'dragon','00dk-pizza-ducks-flame'],
+    [8.50,'yomi','00dl-pizza-sees-lantern']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.pizzaFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V348: Yomi's lantern performance, verified within the FULL family,
   // must never erase the hero while the shadow curtain is on.
   for(const [at,phase,label] of [
