@@ -778,7 +778,12 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(intro, /¿EN SERIO\?/);
   assert.match(intro, /¡NI HABLAR!/);
   assert.match(intro, /¡DINO!/);
-  assert.match(intro, /const CAST = \["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"\]/);
+  assert.match(intro, /const CAST = WELCOME_CAST_ORDER/);
+  const welcome = fs.readFileSync("./systems/intro-cast-fit.js", "utf8");
+  assert.match(welcome, /WELCOME_CAST_ORDER = Object\.freeze/);
+  for(const id of ["dino","dragon","kilo","stitcho","chispin","cat","frita","pizza","yomi","cuerno"])
+    assert.ok(welcome.includes('"'+id+'"'),"intro lineup missing "+id);
+  assert.match(intro, /const opticalBounds = measureCastArtwork\(\)/);
   assert.match(intro, /openingMode = "family-welcome"/);
   assert.match(intro, /ENTRAR EN HOKU/);
   assert.doesNotMatch(intro, /EL NIDO HA DESPERTADO/);

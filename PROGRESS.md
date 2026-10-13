@@ -1,3 +1,15 @@
+## OHANA · Ajuste visual de bienvenida (ohana-343)
+
+- La pantalla inicial mostraba tamaños incoherentes: Kilo, Stitcho, Chispín y Michi se dibujaban casi dos veces más grandes porque el guion utilizaba `baseHeight` de la cinemática antigua (34 px), pero el artista actual utiliza alturas base propias de entre 60–64 px; Cuerno arrastraba además un parche `*.48` que no medía su cuerpo real.
+- `systems/intro.js` ahora pinta cada héroe una sola vez fuera de pantalla y obtiene su silueta real de los píxeles visibles (`alpha >= 110`), incluyendo alas, cuernos, patas y contornos. Las escalas del reparto se calculan por altura y anchura disponible a través del helper puro `systems/intro-cast-fit.js`, sin tocar arte, evolución, hitboxes, juego ni habilidades.
+- Los diez héroes quedan distribuidos en diez posiciones individuales en escritorio; en móviles usan dos filas de cinco. Los rótulos con nombres siguen a cada figura incluso durante sus pequeñas acciones humorísticas.
+- Yomi permanece visible todo el ciclo. La aparición fantasmal se conserva como actuación y deja de ocultarlo durante ocho segundos. Dragón/Dino/Frita/Pizza/Cuerno recuperan presencia comparable a los personajes vectoriales ampliados, sin sacrificar la anatomía original.
+- La calibración funciona con nuevas versiones de Canvas y tiene valores de reserva cuando el navegador impide leer píxeles. El cálculo se efectúa una vez por apertura, no en cada fotograma.
+- Nuevas pruebas Node de reparto 10/10, tamaños, distribución responsive, fallbacks, conservación del guion y antitruncamiento; E2E inspecciona medidas y posiciones reales de los diez en los navegadores. Mantener `ohana-343` sincronizado en `sw.js`, `index.html` y precaché.
+- Validación obligatoria antes de fusionar: Node, Browser E2E, escenas visuales, Chromium/Firefox multijugador y Release Gate. No se ha desplegado Netlify; corrección de intro independiente de la V326 de combate Dino.
+
+---
+
 ## OHANA V325 · Dragón y Pizza: aviso real antes del impacto inicial U (ohana-342)
 
 - Eliminado el daño global instantáneo del **lanzamiento inicial** de Dragón y Pizza. Ahora muestran un anillo fijo de advertencia durante 12 frames y únicamente al cerrarse aplican daño mediante el `hitEnemy` habitual.
