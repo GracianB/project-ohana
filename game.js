@@ -40,7 +40,8 @@ import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
 import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
-import { canvasDpr,createFramePressureMonitor } from "./systems/frame-pressure.js";
+import { canvasDpr,createFramePressureMonitor,initialCanvasPressure,createResolutionRecovery } from "./systems/frame-pressure.js";
+import { createRenderProfiler } from "./systems/render-profiler.js";
 import { bindInput } from "./engine/input.js";
 import { beginPlatformDrop, dropIgnoresPlatform, advancePlatformDrop } from "./engine/platform-drop.js";
 import { bindDialogs } from "./systems/dialogs.js";
@@ -82,7 +83,14 @@ airBrake: 0.94,
 });
 const clock = createFixedClock({ maxSteps: 3 });
 const framePressure=createFramePressureMonitor();
-let adaptiveLowRes=false;
+const resolutionRecovery=createResolutionRecovery();
+const renderProfiler=createRenderProfiler();
+let adaptiveLowRes=initialCanvasPressure({
+ width:window.innerWidth,height:window.innerHeight,
+ touch:(navigator.maxTouchPoints||0)>0 || window.matchMedia("(pointer: coarse)").matches,
+ memoryGB:navigator.deviceMemory,cores:navigator.hardwareConcurrency
+});
+if(adaptiveLowRes)resolutionRecovery.reducedAt(performance.now());
 const $ = (id) => document.getElementById(id);
 const DOM = {
 help: $("help"),
@@ -3089,10 +3097,18 @@ try { DOM.pause?.classList.add("open"); } catch (_) {}
 let renderedTick = -1;
 function loop(now) {
 if (game.running && !document.hidden) {
-if (!adaptiveLowRes && framePressure.observe(now)) {
-  adaptiveLowRes = true;
-  fit();
-}
+// Only change drawing resolution, never simulation, hitboxes or input.
+if(!paused){
+  if (!adaptiveLowRes && framePressure.observe(now)) {
+    adaptiveLowRes = true;
+    resolutionRecovery.reducedAt(now);
+    fit();
+  } else if(adaptiveLowRes && resolutionRecovery.observe(now)){
+    adaptiveLowRes = false;
+    framePressure.reset();
+    fit();
+  }
+} else resolutionRecovery.pause();
 try {
   clock.advance(now, step);
 } catch (error) {
@@ -3100,7 +3116,9 @@ try {
 }
 if ((game.renderDirty || renderedTick !== t) && !paused) {
   try {
+    const paintStarted=performance.now();
     render();
+    renderProfiler.sample(now,performance.now()-paintStarted);
     renderedTick = t;
     game.renderDirty = false;
   } catch (error) {
@@ -3317,6 +3335,26 @@ start(def);
 
 const e2eParams = new URLSearchParams(location.search);
 const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+// Local developer diagnostic: ?perf=1. No analytics, cookies, requests,
+// gameplay callbacks, user identifiers, or timers in ordinary sessions.
+if (e2eEnabled || e2eParams.get("perf") === "1") {
+  window.__OHANA_PERF=Object.freeze({
+    snapshot:()=>renderProfiler.snapshot({dpr:viewDpr,mode:adaptiveLowRes?"economy":"quality"}),
+    reset:()=>renderProfiler.reset()
+  });
+  if(e2eParams.get("perf")==="1"){
+    const panel=document.createElement("output");
+    panel.id="ohana-perf-metrics";
+    panel.setAttribute("aria-label","Diagnóstico local del renderizado OHANA");
+    panel.style.cssText="position:fixed;right:8px;bottom:8px;z-index:10000;background:rgba(5,13,25,.91);color:#d9ffe6;border:1px solid #78bfac;border-radius:8px;padding:7px 10px;font:12px/1.45 monospace;pointer-events:none";
+    panel.textContent="OHANA · esperando fotogramas";
+    document.body.appendChild(panel);
+    setInterval(()=>{
+      const a=window.__OHANA_PERF.snapshot();
+      panel.textContent="OHANA "+a.mode+" · "+a.dpr.toFixed(2)+"x · "+a.fps+" FPS · render p95 "+a.renderP95Ms+" ms · frame p95 "+a.frameP95Ms+" ms";
+    },1200);
+  }
+}
 
 if (e2eEnabled) {
 const dismissE2EOverlays = () => {

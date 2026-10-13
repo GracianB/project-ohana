@@ -39,6 +39,9 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: V366 performance · live desktop and mobile Chromium
+        run: node tests/browser/v366-performance.mjs
+
       - name: Ten hero U protection audit
         run: node tests/browser/all-hero-u-protection.mjs
 

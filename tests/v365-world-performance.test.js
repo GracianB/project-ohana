@@ -97,7 +97,8 @@ test("V365: the active render culls with one shared viewport and retains gamepla
   assert.match(worlds,/cachedGradient\(ctx,"sky:/);
   assert.match(atmosphere,/cachedGradient\(ctx,"room-vig:/);
   assert.match(living,/cachedGradient\(ctx,"living-affinity:/);
-  assert.match(sw,/const VERSION = "ohana-365"/);
+  const version=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+  assert.ok(version&&Number(version.slice(6))>=365);
   assert.match(sw,/systems\/canvas-gradient-cache\.js\?v=/);
-  assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]==="ohana-365"));
+  assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]===version));
 });

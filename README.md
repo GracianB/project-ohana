@@ -370,3 +370,12 @@ OHANA individual se sirve únicamente desde GitHub Pages. El modo cooperativo p�
 Rendimiento: el Service Worker reutiliza los módulos JS ya precacheados, evitando descargarlos de nuevo en cada visita con caché caliente. Los recursos que faltan durante una desconexión devuelven un error de recurso, nunca HTML fingiendo ser JavaScript. El menú reutiliza contextos y gradientes Canvas mientras sus dimensiones y aura no cambien. El bucle de juego baja la frecuencia de sus comprobaciones durante menús, pausa y pestañas ocultas, manteniendo la simulación de tiempo fijo y la frecuencia normal mientras se juega. Se preservan las pruebas de navegador, dibujos, evoluciones, guardado y juego individual.
 
 **Alcance medible:** menos peticiones redundantes tras la primera instalación del Service Worker y menos asignaciones de gradientes por fotograma; no se afirma una ganancia de FPS sin una medición de dispositivo representativo. La primera visita todavía descarga los módulos y el cooperativo necesita infraestructura externa para funcionar entre dispositivos.
+
+
+## OHANA V366 · Rendimiento móvil y diagnóstico local
+
+Para revisar el rendimiento en cualquier dispositivo, abre la URL habitual con `?perf=1` al final, por ejemplo `https://gracianb.github.io/project-ohana/?perf=1`. Aparece un medidor local de FPS, percentil 95 de fotogramas, percentil 95 de dibujo y resolución Canvas. No se registran datos personales ni se envían estadísticas a servidores.
+
+En dispositivos táctiles con hardware realmente limitado (hasta 2 GB RAM o dos núcleos) se reduce la resolución inicial del Canvas, nunca la frecuencia de la simulación. Si el juego registra sobrecarga baja la resolución, y cuando recupera estabilidad durante suficiente tiempo intenta restablecer la nitidez. Pausas y pestañas ocultas no cuentan como tiempo fluido. Los dispositivos modernos mantienen su calidad inicial.
+
+El CI guarda métricas headless Chromium para escritorio y móvil emulado en un JSON descargable desde el artefacto visual. Son datos reproducibles del entorno GitHub Actions, no una promesa de FPS para teléfonos físicos. Juego individual en GitHub Pages; cooperativo público en pausa sin Netlify/TURN.
