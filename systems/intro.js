@@ -378,6 +378,9 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.chispinWelcomePhase=chispinBeat.phase;
       el.dataset.chispinWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.chispinFamilyReaction=chispinBeat.dino>.2?"dino":
+        chispinBeat.yomi>.2?"yomi":chispinBeat.chase>.2?"chase":
+        chispinBeat.dragon>.2?"dragon":"rest";
     }
     if(chispinBeat.sniff>.48){
       comicBubble("¿CHISPA?",cxp,chispin.foot-heroH*1.04,chispinBeat.sniff,"#fff2bf","left");
