@@ -1004,6 +1004,10 @@ try {
     });
   });
   for(const item of michiDuets){assert.equal(item.duet?.evo,item.evo);assert.ok(item.duet.age>=40);assert.equal(item.moved,true);assert.equal(item.overlay,false);}
+  // V367: the gallery deliberately steps through six full-film storyboards
+  // in a single synchronous evaluate. Preload *only for this gallery audit*;
+  // ordinary first paint still defers the heavyweight supreme cinema.
+  await page.evaluate(async()=>{await import('/systems/supreme-cinema.js');});
   const supremeStories = await page.evaluate(() => {
     const api = window.__OHANA_E2E;
     const ids = ['dragon','dino','frita','pizza','yomi','cuerno'];

@@ -80,7 +80,8 @@ test("V366: production captures real render time but not user events or network 
  assert.match(game,/if\(e2eParams\.get\("perf"\)==="1"\)/);
  assert.match(game,/window\.__OHANA_PERF=Object\.freeze/);
  assert.doesNotMatch(profiler,/\bfetch\(|sendBeacon|localStorage|indexedDB|XMLHttpRequest|WebSocket/);
- assert.match(sw,/const VERSION = "ohana-366"/);
+ const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+ assert.ok(current&&Number(current.slice(6))>=366);
  assert.match(sw,/systems\/render-profiler\.js\?v=/);
- assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]==="ohana-366"));
+ assert.ok([...html.matchAll(/ohana-\d+/g)].every(x=>x[0]===current));
 });

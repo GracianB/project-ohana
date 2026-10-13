@@ -4,6 +4,7 @@ import fs from "node:fs";
 const read=p=>fs.readFileSync(p,"utf8");
 const title=read("systems/title.js"),css=read("title-stage.css");
 const ending=read("systems/ending.js"),cinema=read("systems/evo-cinema.js");
+const cinemaKit=read("systems/cinema-kit.js");
 const browser=read("tests/browser/e2e.mjs"),visual=read("tests/browser/visual-regression.mjs");
 const sw=read("sw.js"),index=read("index.html");
 
@@ -36,8 +37,9 @@ test("V81 Canvas memory: only three live cards and one DPR for side previews",()
 });
 
 test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
- assert.match(cinema,/export function fullCanvas\(cv, dprCap = Infinity\)/);
- assert.match(cinema,/Math\.min\(maxDpr, dprCap, window\.devicePixelRatio \|\| 1\)/);
+ assert.match(cinemaKit,/export function fullCanvas\(cv, dprCap = Infinity\)/);
+ assert.match(cinemaKit,/Math\.min\(maxDpr, dprCap, window\.devicePixelRatio \|\| 1\)/);
+ assert.match(cinema,/from "\.\/cinema-kit\.js"/);
  assert.match(ending,/fullCanvas\(canvas,reduce\?1:1\.2\)/);
  assert.match(ending,/const duration=reduce\?1\.6:14\.5/);
  assert.match(ending,/const titleK=seg\(k,\.89,\.97\)/);

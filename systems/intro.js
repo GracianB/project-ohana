@@ -10,7 +10,7 @@ import {
   Particles, fullCanvas, loadFonts, reducedMotion, seg, clamp, lerp, easeOut, easeBack, easeInOut,
   drawRays, drawBackdrop, drawRing, drawTitle, rgba, tint, makeDummy, drawDummy, baseHeight,
   FONT_BODY, FONT_DISPLAY,
-} from "./evo-cinema.js";
+} from "./cinema-kit.js";
 import { ROSTER } from "../characters/roster.js";
 import { canonId } from "./save.js";
 import { sfx } from "../engine/audio.js";
