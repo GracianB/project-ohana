@@ -1,3 +1,13 @@
+## OHANA V366 · Calidad adaptable, recuperación y medición real (ohana-366)
+
+- Perfiles de inicio: los móviles con indicios explícitos de hardware muy limitado (2 GB RAM o menos, o dos núcleos o menos) arrancan con Canvas DPR 1; pantallas pequeñas modernas conservan nitidez normal.
+- Presión sostenida: se mantiene el degradado gráfico anterior, sin afectar a físicas, entrada de teclado/táctil, sonido o sincronización.
+- Recuperación: tras un mínimo de 12 segundos y 240 fotogramas fluidos, la resolución gráfica puede restaurarse automáticamente; pausa, cambio de pestaña y tirones interrumpen la recuperación.
+- Observabilidad local optativa: añadir `?perf=1` a la URL muestra FPS y tiempo de render p95, ventana de 120 fotogramas y DPR; no envía ningún dato fuera del navegador ni activa timers de diagnóstico en visitas ordinarias.
+- Pruebas Node para perfiles, aislamiento de CPU móvil y escritorio, ventana de recuperación, percentiles y límite de memoria.
+- Nueva batería Chromium real escritorio + móvil emulado: captura FPS, p95 frame/render, DPR, y registra `test-results/performance/v366-chromium.json` como artefacto de GitHub Actions. Son medidas de CI, no sustituyen una prueba en móvil físico.
+- GitHub Pages sigue siendo el único despliegue. Netlify y TURN de pago permanecen sin uso, y el cooperativo público sin servicio de salas continúa en pausa.
+
 ## OHANA V365 · Rendimiento de Canvas en partida (ohana-365)
 
 - Renderizado world: sky, gradación cromática, viñeta de profundidad y sombra del HUD reutilizan CanvasGradient cuando el contexto, dimensiones, sala y paleta son idénticos. Brillos y movimiento de horizonte siguen siendo dinámicos.
