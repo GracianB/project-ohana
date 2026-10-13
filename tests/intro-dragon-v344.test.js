@@ -58,7 +58,11 @@ test('V344 · front and back stage FX have isolated Canvas state and visible geo
    assert.equal(chunk[0][0],'save');
    assert.equal(chunk.at(-1)[0],'restore');
    assert.ok(chunk.some(v=>v[0]==='stroke'||v[0]==='fill'));
-   assert.ok(chunk.some(v=>['arc','ellipse','gradient'].includes(v[0])));
+   if(layer==='back'||dragonWelcomeBeat(time).inhale>.08||
+      dragonWelcomeBeat(time).sneeze>.01||dragonWelcomeBeat(time).recoil>.06)
+     assert.ok(chunk.some(v=>['arc','ellipse','gradient'].includes(v[0])));
+   else assert.ok(chunk.some(v=>v[0]==='lineTo'),
+     'the proud sparkle is deliberately a crisp line, not a circle');
    assert.ok(chunk.flat().filter(v=>typeof v==='number').every(Number.isFinite));
  }
  const before=calls.length;
