@@ -82,7 +82,7 @@ const assetNames=[...new Set(precacheEntries.filter(name=>name!==".").map(name=>
 for(const path of assetNames) {
   if(!fs.existsSync("./"+path))continue;
   const data=fs.readFileSync("./"+path);
-  const actual=createHash("sha1").update("blob "+data.length+"\\0").update(data).digest("hex");
+  const actual=createHash("sha1").update("blob "+data.length).update(Buffer.from([0])).update(data).digest("hex");
   if(revisions[path]!==actual)errors.push("V368: recurso cambió sin regenerar manifiesto: "+path);
 }
 for(const path of Object.keys(revisions)){
