@@ -1,3 +1,13 @@
+## OHANA V324 · U de Frita: lanzamiento local y protección contra dobles golpes (ohana-341)
+
+- El golpe inicial de Frita pasa a respetar el mismo círculo de 126 unidades del aura U que sus pulsos periódicos; ahora no alcanza enemigos lejanos ni los elige por orden de aparición.
+- Los cinco objetivos más cercanos, como máximo, pueden recibir el daño original del lanzamiento. Curación, velocidad Centella, fórmula de daño y enfriamiento permanecen intactos.
+- El conjunto `legacyTargets` enviado al dúo contiene únicamente objetivos alcanzados realmente por el lanzamiento de Frita. Los enemigos no tocados conservan el derecho a recibir golpes L en los momentos visibles 42/66/90 cuando entren en sus áreas. Dino, Yomi, Dragón, Pizza y Cuerno conservan sus rutas originales.
+- Pruebas de juego reales: 5 evoluciones × 9 parejas, radio de frontera, límite de cinco, exclusión de blancos lejanos, curación y marcador de no-doble-golpe. No se declara validado hasta CI de Node, Browser, multiplayer, visual y `release:check`.
+- Sigue abierto #318: autoridad, telegrafiado de impactos iniciales de otros héroes y pruebas entre dispositivos reales. Sin publicación Netlify.
+
+---
+
 ## OHANA V323 · Primer arreglo local de U de Frita (ohana-340)
 
 - Recuperación de emergencia V323 fusionada: `systems/abilities.js` y `PROGRESS.md` restaurados desde V322 íntegramente; pruebas contra archivos truncados en PR #332. Se retiró el parche incompleto que no podía aplicarse con seguridad.
