@@ -165,16 +165,31 @@ function draw(ctx,pose,R){
   const acting=yomiCastActing(p),reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
   const pulse=reduced?.5:.5+.5*Math.sin(t*.095),run=st==="run",flight=st==="jump"||st==="fall"||st==="glide";
   const angry=st==="attack"||cast===2,hurt=st==="hurt"||st==="dead";
-  const open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
-  const swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
-  const hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
+  let open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
+  let swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
+  let hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
   const w=20+f*2.9,h=55+f*4.2;
-  const shoulder=-h*.68,faceY=-h*.72;
-  ctx.save();ctx.translate(0,hover);ctx.rotate((run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)+(acting?.tilt||0));
+  // V348 · Yomi stays physically connected during the title performance.
+  // No substitute silhouette or combat casts: head, lantern ribs, sleeves,
+  // trailing ribbon and hearth all belong to this ORIGINAL five-form art.
+  const welcome=p.yomiWelcome&&st!=="dead"&&st!=="hurt"?p.yomiWelcome:null;
+  const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+  const listen=unit(welcome?.listen),gather=unit(welcome?.gather),
+    reveal=unit(welcome?.reveal),startle=unit(welcome?.startle),
+    bow=unit(welcome?.bow);
+  const ribbon=Number.isFinite(welcome?.ribbon)?clamp(welcome.ribbon,-1,1):0;
+  hover+=gather*(-3.8)+reveal*(-5)+startle*3.0+bow*2.4;
+  swing+=ribbon*7+gather*2.4-reveal*2.9+startle*3.8-bow*1.3;
+  open=clamp(open+listen*.15+reveal*.48+startle*.53+bow*.08,0,1);
+  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1;
+  const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
+  ctx.save();ctx.translate(0,hover);ctx.rotate(
+    (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
+    +(acting?.tilt||0)+stageTilt);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
-  ctx.quadraticCurveTo(-29-swing,-9,-22-swing,-1);
+  ctx.quadraticCurveTo(-29-swing-gather*3,-9,-22-swing,-1);
   ctx.quadraticCurveTo(-14-swing,7,-8,2);ctx.quadraticCurveTo(-6,-11,-11,-18);ctx.fill();
   ctx.globalAlpha=1;
   if(f===4){
@@ -242,8 +257,10 @@ function draw(ctx,pose,R){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
-    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup);
-    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0);
+    const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46):
+      (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38);
+    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
+    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
     ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
@@ -315,7 +332,8 @@ function draw(ctx,pose,R){
     }
   }
   // Expressive OHANA face, never permanent horror teeth.
-  const mood=hurt?"closed":angry?"angry":st==="victory"||cast===3?"happy":"normal";
+  const mood=hurt?"closed":angry?"angry":startle>.23?"closed":
+    reveal>.25||bow>.20?"happy":st==="victory"||cast===3?"happy":"normal";
   const eyeSize=f===0?6.5:6+f*.15;
   R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
   R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
@@ -324,7 +342,7 @@ function draw(ctx,pose,R){
     ellipse(ctx,w*.49,faceY+9,3.5,2.1,"#ef9fa0");
   }
   ctx.fillStyle=angry?"#592943":"#94536b";ctx.beginPath();
-  ctx.ellipse(1,faceY+13,angry?6+open*8:4.8,angry?4+open*7:2.4,0,0,TAU);ctx.fill();
+  ctx.ellipse(1,faceY+13,angry?6+open*8:4.8+open*2.8,angry?4+open*7:2.4+open*3.9,0,0,TAU);ctx.fill();
   // The L bite grows from Yomi's expression, not an unrelated monster sprite.
   if(cast===2){
     const snap=acting?.release||0;
@@ -355,7 +373,7 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
   // Warm lantern heart stays visible on every stage.
-  ellipse(ctx,0,-25,7+f*.5,9+f*.3,glow);
+  ellipse(ctx,0,-25,7+f*.5+reveal*2.2,9+f*.3+reveal*2.7,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
   ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
   ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();
