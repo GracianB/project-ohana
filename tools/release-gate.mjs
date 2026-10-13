@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { createHash } from "node:crypto";
 import { ROSTER } from "../characters/roster.js";
 import { ROOMS } from "../systems/map.js";
 import {
@@ -64,6 +65,31 @@ const precacheEntries = [...precacheBlock.matchAll(/"\.\/([^"]+)(?:\?v=" \+ VERS
   .filter(Boolean);
 const duplicateEntries = precacheEntries.filter((value, i, all) => all.indexOf(value) !== i);
 if (duplicateEntries.length) errors.push("PRECACHE contiene duplicados: " + [...new Set(duplicateEntries)].join(", "));
+
+
+// V368: content-addressed reuse is safe only if the manifest matches actual
+// committed file bytes. Fail the release before caching a stale module.
+const revisionOpen=sw.indexOf("const PRECACHE_REVISIONS = {");
+const revisionClose=sw.indexOf("\n};",revisionOpen);
+let revisions={};
+if(revisionOpen<0||revisionClose<0)errors.push("V368: manifest de huellas ausente");
+else{
+  try {
+    revisions=JSON.parse(sw.slice(sw.indexOf("{",revisionOpen),revisionClose+2));
+  } catch(error){errors.push("V368: manifest de huellas no parseable: "+error.message);}
+}
+const assetNames=[...new Set(precacheEntries.filter(name=>name!==".").map(name=>name.split(/[?#]/,1)[0]))];
+for(const path of assetNames) {
+  if(!fs.existsSync("./"+path))continue;
+  const data=fs.readFileSync("./"+path);
+  const actual=createHash("sha1").update("blob "+data.length+"\\0").update(data).digest("hex");
+  if(revisions[path]!==actual)errors.push("V368: recurso cambió sin regenerar manifiesto: "+path);
+}
+for(const path of Object.keys(revisions)){
+  if(!assetNames.includes(path))errors.push("V368: huella huérfana: "+path);
+}
+if(!sw.includes('const MAX_INSTALL_FETCHES = 6'))errors.push("V368: instalar recursos en seis conexiones");
+if(sw.includes("cache.addAll(PRECACHE)"))errors.push("V368: precache masivo sin control de concurrencia");
 
 const runtimeFiles = ["./game.js"];
 const walk = (dir) => {
