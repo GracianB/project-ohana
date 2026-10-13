@@ -1,3 +1,13 @@
+## OHANA V367 · Arranque ligero y cinemáticas por demanda (ohana-367)
+
+- El arranque pasa de diez entradas JavaScript a seis: se mantienen motor, portada, escenas de mundo, director visual y tutorial, y se añade un despachador de cinemáticas.
+- La bienvenida deja de ejecutar todo el módulo de evolución: funciones Canvas compartidas trasladadas a `systems/cinema-kit.js`, reutilizadas y reexportadas por `systems/evo-cinema.js` para preservar API pública y cinematografía completa.
+- Victoria, evolución y supremas se cargan únicamente cuando llegan sus eventos `ohana-win`, `ohana-evolve` y `ohana-supreme`. Los eventos iniciales se conservan durante la importación y se invoca el render original, sin sustituirlo por una versión abreviada.
+- Se dejan de cargar `title-fx.js` y `atrium-interact.js` en el selector `family-grid`, donde sus propias protecciones ya impedían ejecutarlos.
+- El Service Worker sigue precargando absolutamente todos los módulos originales y nuevos para primera instalación y partida offline. El cambio reduce código ejecutado en primera página, no promete reducir el total de bytes descargados por el precache de instalación.
+- Tests Node verifican seis scripts iniciales, reexportaciones, compatibilidad de caché y rutas de eventos. Nuevo test Chromium verifica que los módulos raros no se importan en arranque y que cada evento abre su propia escena original.
+- Se conserva la matriz completa cooperativa Chromium/Firefox, regresión visual y Release Gate. GitHub Pages es la única publicación; no se reactivan Netlify ni TURN.
+
 ## OHANA V366 · Calidad adaptable, recuperación y medición real (ohana-366)
 
 - Perfiles de inicio: los móviles con indicios explícitos de hardware muy limitado (2 GB RAM o menos, o dos núcleos o menos) arrancan con Canvas DPR 1; pantallas pequeñas modernas conservan nitidez normal.
