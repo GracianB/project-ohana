@@ -434,7 +434,7 @@ try {
         }
         samples.push({form:f,row,pixels,hash});
         ctx.fillStyle='#edebff';ctx.font='bold 16px sans-serif';
-        ctx.fillText(['Mini Chispín','Chispín','Voltio','Nimbo','Aurora'][f],
+        ctx.fillText(['Chispín Bebé','Chispín','Voltín','Trueno Gordo','Chispín Tormenta'][f],
           x-73,rowY+22);
       }
     }
