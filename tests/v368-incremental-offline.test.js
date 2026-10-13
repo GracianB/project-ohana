@@ -69,7 +69,21 @@ function setup({offline=false,failPath="",reuse=false}={}){
     await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(oldMap)));
     await cache.put("./"+path+"?v="+previous,new Response(content));
   };
-  return {install,activate,seed,storage,caches,precache,revisions,requests,
+  const seedFullPreviousRelease=async()=>{
+    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v368.json","utf8"));
+    if(baseline.version!==previous)throw new Error("V369 must upgrade from actual V368");
+    const cache=storage("ohana-static-"+previous);
+    const manifest=Object.fromEntries(Object.entries(baseline.resources).map(([name,item])=>[name,item.sha]));
+    await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(manifest)));
+    for(const [name,item] of Object.entries(baseline.resources)){
+      // Only source-identical files exist locally in V369. The changed V368
+      // index is deliberately not reused and must come from the network.
+      if(revisions[name]!==item.sha)continue;
+      const bytes=fs.readFileSync(name);
+      await cache.put("./"+name+"?v="+previous,new Response(bytes));
+    }
+  };
+  return {install,activate,seed,seedFullPreviousRelease,storage,caches,precache,revisions,requests,
     calls:()=>attempts,parallel:()=>maxParallel,skips:()=>skip,claims:()=>claims};
 }
 
@@ -121,4 +135,41 @@ test("V368 changed SHA never reuses stale assets and incomplete install never ta
  const bad=setup({failPath:"/game.js"});
  await assert.rejects(bad.install(),/network unavailable/);
  assert.equal(bad.skips(),0,"failed offline install must not replace an active release");
+});
+
+
+test("V369 actual V368→V369 migration: 199 preserved files cost zero network requests",async()=>{
+ const h=setup();
+ await h.seedFullPreviousRelease();
+ const first=h.requests.length;
+ await h.install();
+ const network=h.requests.slice(first).map(x=>new URL(x).pathname);
+ assert.equal(h.precache.length,201);
+ assert.equal(network.length,1,"only the updated index.html needs a fetch");
+ assert.ok(network[0].endsWith("/index.html"),network.join(","));
+ assert.equal(h.parallel(),1,"only one changed resource needs a connection");
+ const fresh=h.storage("ohana-static-"+current);
+ const previously=fs.readFileSync("game.js");
+ const fromCache=Buffer.from(await (await fresh.match("./game.js?v="+current)).arrayBuffer());
+ assert.deepEqual(fromCache,previously,"unchanged real game.js bytes must survive migration");
+ assert.ok(await fresh.match("./index.html"));
+ assert.ok(await fresh.match("./"));
+ const privateStats=await (await fresh.match("./.ohana-install-stats.json")).json();
+ assert.equal(privateStats.reused,199);
+ assert.equal(privateStats.downloaded,1);
+ assert.equal(privateStats.total,200);
+ assert.equal(privateStats.incremental,true);
+ assert.equal(h.skips(),1);
+ await h.activate();
+ assert.deepEqual(await h.caches.keys(),["ohana-static-"+current]);
+});
+
+test("V369 failed incremental index fetch leaves V368 intact and unactivated",async()=>{
+ const h=setup({failPath:"/index.html"});
+ await h.seedFullPreviousRelease();
+ await assert.rejects(h.install(),/network unavailable/);
+ assert.equal(h.skips(),0);
+ assert.ok((await h.caches.keys()).includes("ohana-static-"+previous));
+ const old=await h.storage("ohana-static-"+previous).match("./game.js?v="+previous);
+ assert.equal(old.status,200);
 });
