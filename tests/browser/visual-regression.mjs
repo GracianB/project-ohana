@@ -190,6 +190,18 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V357: silhouette, cheese and shoes deform together in three quiet scenes.
+  for(const [at,reaction,label] of [
+    [.95,'melody','00dj-pizza-hears-kilo'],
+    [2.48,'spark','00dk-pizza-avoids-spark'],
+    [12.19,'dino','00dl-pizza-sees-dino-stomp']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.pizzaFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V348: Yomi's lantern performance, verified within the FULL family,
   // must never erase the hero while the shadow curtain is on.
   for(const [at,phase,label] of [

@@ -14,6 +14,12 @@ export const PIZZA_WELCOME_BEATS=Object.freeze({
   catch:Object.freeze([6.05,6.22,6.36,6.52]),
   flourish:Object.freeze([6.48,6.68,6.88,7.08])
 });
+// Even the slice participates in the family outside its famous food chase.
+export const PIZZA_FAMILY_REACTIONS=Object.freeze({
+ melody:Object.freeze([.59,.79,1.10,1.39]),
+ spark:Object.freeze([2.12,2.31,2.60,2.91]),
+ dino:Object.freeze([11.83,12.02,12.32,12.64])
+});
 export function pizzaWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -23,17 +29,20 @@ export function pizzaWelcomeBeat(seconds,reducedMotion=false){
  const caught=pulse(time,...PIZZA_WELCOME_BEATS.catch);
  const flourish=pulse(time,...PIZZA_WELCOME_BEATS.flourish);
  const breath=(1+Math.sin(time*TAU*4/14))*.5;
+ const melody=pulse(time,...PIZZA_FAMILY_REACTIONS.melody);
+ const spark=pulse(time,...PIZZA_FAMILY_REACTIONS.spark);
+ const dino=pulse(time,...PIZZA_FAMILY_REACTIONS.dino);
  if(reducedMotion)return Object.freeze({
   phase:'idle',sniff:0,spring:0,stretch:0,catch:0,flourish:.2,
-  breath:.5,cheese:0,crust:0,glow:.11,reduced:true
+  breath:.5,melody:0,spark:0,dino:0,cheese:0,crust:0,glow:.11,reduced:true
  });
  const phase=stretch>.22?'stretch':caught>.22?'catch':spring>.22?'spring':
    sniff>.22?'sniff':flourish>.22?'flourish':'idle';
  return Object.freeze({
-  phase,sniff,spring,stretch,catch:caught,flourish,breath,
-  cheese:clamp(.14+stretch*.76+spring*.3+caught*.27),
-  crust:clamp(.22*Math.sin(time*TAU*5/14)+sniff*.28-spring*.26+caught*.35,-1,1),
-  glow:clamp(.11+spring*.14+stretch*.18+flourish*.33),reduced:false
+  phase,sniff,spring,stretch,catch:caught,flourish,breath,melody,spark,dino,
+  cheese:clamp(.14+stretch*.76+spring*.3+caught*.27+melody*.14+spark*.13),
+  crust:clamp(.22*Math.sin(time*TAU*5/14)+sniff*.28-spring*.26+caught*.35+melody*.13-spark*.18+dino*.21,-1,1),
+  glow:clamp(.11+spring*.14+stretch*.18+flourish*.33+melody*.10+dino*.16),reduced:false
  });
 }
 
