@@ -329,14 +329,17 @@ export function playTitleIntro() {
       actor("pizza",pizza.x,pizza.foot+2,heroH*.90,tf,{facing:-1,pose:"idle"});
     }
 
-    // Yomi aparece y desaparece de una sombra imposible.
+    // Yomi is always present in the ten-hero family portrait. The shadow
+    // entrance is a performance, never an eight-second missing character.
     const yomiIn=easeOut(seg(loop,7.35,8.15))*(1-seg(loop,9.05,9.55));
     if(yomiIn>0){
       ctx.save();ctx.globalAlpha=.60*yomiIn;ctx.fillStyle="#02040a";
       ctx.beginPath();ctx.ellipse(yomi.x,yomi.foot+6,34*yomiIn,9,0,0,Math.PI*2);ctx.fill();ctx.restore();
-      actor("yomi",yomi.x,yomi.foot,heroH*.95,tf,{facing:-1,alpha:yomiIn,pose:"idle"});
-      if(loop>7.95&&loop<8.85) comicBubble("BU.",yomi.x,yomi.foot-heroH*.88,Math.sin(seg(loop,7.95,8.85)*Math.PI),"#ff5b78","right");
     }
+    actor("yomi",yomi.x,yomi.foot,heroH*.95,tf,{
+      facing:-1,alpha:.78+.22*yomiIn,pose:yomiIn>.4?"victory":"idle"
+    });
+    if(loop>7.95&&loop<8.85) comicBubble("BU.",yomi.x,yomi.foot-heroH*.88,Math.sin(seg(loop,7.95,8.85)*Math.PI),"#ff5b78","right");
 
     // Cuerno dibuja una aurora minúscula y satisfecha.
     const rk=Math.sin(clamp(seg(loop,9.15,10.45),0,1)*Math.PI);
