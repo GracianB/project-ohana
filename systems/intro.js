@@ -24,6 +24,7 @@ import { cuernoWelcomeBeat, drawCuernoWelcomeFX } from "./intro-cuerno-stage.js"
 import { kiloWelcomeBeat, drawKiloWelcomeFX } from "./intro-kilo-stage.js";
 import { stitchoWelcomeBeat, drawStitchoWelcomeFX } from "./intro-stitcho-stage.js";
 import { chispinWelcomeBeat, drawChispinWelcomeFX } from "./intro-chispin-stage.js";
+import { michiWelcomeBeat, drawMichiWelcomeFX } from "./intro-michi-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -82,7 +83,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -104,7 +105,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita"||id==="pizza"||id==="yomi"||id==="cuerno"||id==="kilo"||id==="stitcho"||id==="chispin"||id==="cat")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -174,6 +175,7 @@ export function playTitleIntro() {
     p._introKilo = id === "kilo" ? (opts.kiloWelcome || null) : null;
     p._introStitcho = id === "stitcho" ? (opts.stitchoWelcome || null) : null;
     p._introChispin = id === "chispin" ? (opts.chispinWelcome || null) : null;
+    p._introMichi = id === "cat" ? (opts.michiWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -396,11 +398,31 @@ export function playTitleIntro() {
     if(chispinBeat.hiccup>.39)
       comicBubble("UPS.",cxp,chispin.foot-heroH*.95,chispinBeat.hiccup,"#7ee7ff","left");
 
-    // Michi se limita a juzgar a todos.
+    // V353: Michi watches the family's mayhem and judges everyone with
+    // five connected acts in her real kitten/cloud/moon/guardian anatomy.
     const catFace=loop>3.0&&loop<4.2?-1:1;
-    actor("cat",cat.x,cat.foot+3,heroH*.92,tf,{facing:catFace,pose:"idle"});
-    const catEye=Math.sin(clamp(seg(loop,3.55,4.25),0,1)*Math.PI);
-    if(catEye>.05) comicBubble("YO NO FUI.",cat.x,cat.foot-heroH*.93,catEye,"#ffb6e4","left");
+    const michiBeat=michiWelcomeBeat(loop,reduce);
+    const michiHeight=heroH*.96;
+    drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"back");
+    actor("cat",cat.x,cat.foot+3,michiHeight,tf,{
+      facing:catFace,pose:"idle",michiWelcome:michiBeat
+    });
+    drawMichiWelcomeFX(ctx,cat.x,cat.foot+3,michiHeight,t,michiBeat,"front");
+    if(isE2E){
+      el.dataset.michiWelcomePhase=michiBeat.phase;
+      el.dataset.michiWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(michiBeat.inspect>.48){
+      comicBubble("¿QUÉ HACÉIS?",cat.x,cat.foot-heroH*1.08,michiBeat.inspect,"#ffe2ed","left");
+    }else if(michiBeat.sideeye>.48){
+      comicBubble("YO NO FUI.",cat.x,cat.foot-heroH*1.06,michiBeat.sideeye,"#ffb6e4","left");
+    }else if(michiBeat.groom>.48){
+      comicBubble("ME ACICALO.",cat.x,cat.foot-heroH*1.09,michiBeat.groom,"#ffe1f3","left");
+    }else if(michiBeat.flick>.48){
+      comicBubble("NI ME MIRES.",cat.x,cat.foot-heroH*1.08,michiBeat.flick,"#e6c6ff","left");
+    }else if(michiBeat.purr>.48){
+      comicBubble("PERO SOIS MÍOS.",cat.x,cat.foot-heroH*1.08,michiBeat.purr,"#ffe9b3","left");
+    }
 
     // V344 · Dragón's entire 14-second story is independently directed:
     // quiet living silhouette → proud inhale → tiny sneeze → recoil → grin.
