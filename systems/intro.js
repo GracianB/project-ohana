@@ -545,6 +545,8 @@ export function playTitleIntro() {
       el.dataset.yomiWelcomePhase=yomiBeat.phase;
       el.dataset.yomiWelcomeMotion=reduce?"reduced":"full";
       el.dataset.yomiWelcomeAlwaysVisible="true";
+      el.dataset.yomiFamilyReaction=yomiBeat.dino>.2?"dino":
+        yomiBeat.spark>.2?"spark":yomiBeat.melody>.2?"melody":"rest";
     }
     if(yomiBeat.listen>.43){
       comicBubble("¿QUIÉN ANDA AHÍ?",yomi.x-yomiHeight*.18,yomi.foot-heroH*1.05,

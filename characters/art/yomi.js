@@ -158,6 +158,35 @@ function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
   ctx.restore();
 }
 
+// V358 · The body beneath the artwork is a paper lantern, NOT a floating
+// humanoid. Deform its existing ribs, hanging sleeves, paper tail and flame
+// continuously while idle; retain the seed/ward/knight/moon silhouettes.
+export function yomiWelcomeAnatomy(pose={},form=0){
+ const still=Object.freeze({active:false,expandX:1,expandY:1,rise:0,tilt:0,
+  ribbon:0,sleeveFront:0,sleeveBack:0,face:0,flame:0,open:0});
+ const w=pose.yomiWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return still;
+ const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+ const f=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
+ const breath=(unit(w.breath)-.5)*2;
+ const melody=unit(w.melody),spark=unit(w.spark),dino=unit(w.dino);
+ const rib=[.074,.064,.055,.047,.044][f];
+ // F0 is a round living seed, F4 a heavier lunar guardian.
+ return Object.freeze({
+  active:true,
+  expandX:1+breath*rib+melody*.018-spark*.036+dino*.033,
+  expandY:1-breath*rib*.59-melody*.022+spark*.047-dino*.031,
+  rise:-breath*(f===0?1.3:1.9)+melody*(-.9)+spark*1.8+dino*(-2.5),
+  tilt:breath*.016-melody*.09+spark*.17-dino*.12,
+  ribbon:breath*.45+melody*.80-spark*1.12+dino*.84,
+  sleeveFront:melody*.44+spark*1.06+dino*.80,
+  sleeveBack:-melody*.32+spark*.62-dino*.47,
+  face:melody*(-1.3)+spark*1.6+dino*(-2.0),
+  flame:breath*.12+melody*.20+spark*.37+dino*.31,
+  open:melody*.08+spark*.32+dino*.21
+ });
+}
+
 function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
   const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
@@ -181,11 +210,16 @@ function draw(ctx,pose,R){
   hover+=gather*(-3.8)+reveal*(-5)+startle*3.0+bow*2.4;
   swing+=ribbon*7+gather*2.4-reveal*2.9+startle*3.8-bow*1.3;
   open=clamp(open+listen*.15+reveal*.48+startle*.53+bow*.08,0,1);
-  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1;
+  const life=yomiWelcomeAnatomy(p,f);
+  // Original five silhouette types remain recognizable. The lantern's rib
+  // geometry, its attached sleeves and the mouth all share the same origin.
+  hover+=life.rise;swing+=life.ribbon;open=clamp(open+life.open,0,1);
+  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
   const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
   ctx.save();ctx.translate(0,hover);ctx.rotate(
     (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
-    +(acting?.tilt||0)+stageTilt);
+    +(acting?.tilt||0)+stageTilt+life.tilt);
+  if(life.active)ctx.scale(life.expandX,life.expandY);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
@@ -257,8 +291,8 @@ function draw(ctx,pose,R){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
     // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
-    const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46):
-      (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38);
+    const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
+      (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
     ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
     const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
@@ -332,8 +366,8 @@ function draw(ctx,pose,R){
     }
   }
   // Expressive OHANA face, never permanent horror teeth.
-  const mood=hurt?"closed":angry?"angry":startle>.23?"closed":
-    reveal>.25||bow>.20?"happy":st==="victory"||cast===3?"happy":"normal";
+  const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
+    reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
   const eyeSize=f===0?6.5:6+f*.15;
   R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
   R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
@@ -373,7 +407,7 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
   }
   // Warm lantern heart stays visible on every stage.
-  ellipse(ctx,0,-25,7+f*.5+reveal*2.2,9+f*.3+reveal*2.7,glow);
+  ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
   ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
   ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
   ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();

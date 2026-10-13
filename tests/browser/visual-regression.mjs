@@ -217,6 +217,19 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V358: the original lantern ribs, connected sleeve roots, face and
+  // paper ribbon acknowledge three family members away from its ghost prank.
+  for(const [at,reaction,label] of [
+    [1.02,'melody','00dm-yomi-hears-ukulele'],
+    [2.16,'spark','00dn-yomi-startled-by-spark'],
+    [12.20,'dino','00do-yomi-stomp-reaction']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.yomiFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V349: the newborn is really a sentient horn, while F2–F4 retain
   // connected quadruped anatomy. Capture all Cuerno beats in the full cast.
   for(const [at,phase,label] of [

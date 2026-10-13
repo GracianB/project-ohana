@@ -1,3 +1,14 @@
+## OHANA V358 · Yomi respira con sus costillas de farol y mangas reales (ohana-358)
+
+- Quinta revisión anatómica individual de la segunda ronda. Yomi mantiene su intro de cinco actos con teatro de sombras, pero deja de ser un farol casi inmóvil mientras actúan los demás: respiración de papel y reacciones a la música de Kilo (.65–1.42 s), la chispa de Chispín (1.78–2.52 s) y el pisotón de Dino (11.72–12.59 s).
+- `yomiWelcomeAnatomy` actúa sobre el dibujo original `characters/art/yomi.js`: proporción horizontal/vertical de costillas del farol, levitación, balanceo de cinta, giro del cuerpo, mangas articuladas en sus raíces, rostro y llama interior. Los cinco cuerpos se conservan distintos: F0 semilla, F1 caminante, F2 guardián alado, F3 caballero y F4 luna creciente doble.
+- La geometría continúa unida en el mismo Canvas; la luz de escenario sigue limitada a su posición, sin recortar la silueta ni esconder a Yomi. Ningún hechizo, daño, U, hitbox ni teletransporte nuevo.
+- Movimiento reducido estático y estados no-idle intactos, incluido J/K/L/U. Tres reacciones puras y deterministas dentro del ciclo de 14 s sin timers, red ni azar.
+- Seis pruebas Node: 5 formas, respiración continua, bounds, mangas y corazón del farol, condiciones reducidas, caché, ciclo 14 s, integridad de todo el reparto. Browser E2E escritorio/móvil y tres capturas nuevas. HTML y service worker `ohana-358`.
+- PR apilada sobre Pizza V357, luego cambiar base a `main` sin duplicaciones. No fusionar sin Node, navegador, visual, multijugador Chromium/Firefox, Release Gate y Pages. No desplegar Netlify.
+
+---
+
 ## OHANA V357 · Pizza: masa viva, corteza y queso unidos durante catorce segundos (ohana-357)
 
 - Cuarta revisión individual de la segunda ronda. Mantiene intactos los cinco actos originales de su persecución con Frita y los diez personajes de la intro; también mira el ukelele de Kilo (0.59–1.39 s), el chispazo cercano de Chispín (2.12–2.91 s) y el pisotón de Dino (11.83–12.64 s).
