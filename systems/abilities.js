@@ -373,6 +373,10 @@ const evo = clamp(Number(p.evo) || 0, 0, 4);
 const power = Math.max(1, Number(flow?.multiplier) || 1);
 const dmg = (70 + evo * 14) * pw(p) * power;
 const enemies = (game.enemies || []).filter(canHit);
+// V324: only Frita's launch strike is constrained to the visible fryer aura.
+// The same hit set is excluded from later borrowed-L beats; distant enemies
+// remain eligible when they physically enter a telegraphed beat.
+const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),cy(p)) : enemies;
 const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
 if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
@@ -412,7 +416,7 @@ p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
 } else if (p.id === "dino") {
 DINO_FX.castUltimate(game,p,enemies,dmg,def.color);
 } else if (p.id === "frita") {
-for (const e of enemies) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
+for (const e of launchTargets) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
 healPlayer(p, p.maxHealth * 0.18);
 p._fryGodT = 180;
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 260);
@@ -490,7 +494,7 @@ game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
 if(FAMILY_DUETS[p.id]){
- startFamilyDuet(game,power*pw(p)*uExpPower(p),(game.enemies||[]).filter(canHit),chosen);
+ startFamilyDuet(game,power*pw(p)*uExpPower(p),launchTargets,chosen);
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
  p._duetProtectionUntil=(Number(game.t)||0)+Math.min(120,p.invuln);
