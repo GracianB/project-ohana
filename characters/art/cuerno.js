@@ -18,18 +18,27 @@ return form===4?(Number(pose.flourishN)%2?"bow":"sneeze"):SOUL_BEATS[form];
 export function cuernoWelcomeAnatomy(pose={},form=0){
  const f=Math.max(0,Math.min(4,Number(form)|0)),b=pose?.cuernoWelcome;
  const u=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
- if(!b||pose?.state==="dead"||pose?.state==="hurt")return Object.freeze({
-  tilt:0,lift:0,hoof:0,mane:0,wing:0,tail:0,glow:0});
+ if(!b||b.reduced||pose.reduceMotion||pose?.state==="dead"||pose?.state==="hurt"||(pose?.state&&pose.state!=="idle"))return Object.freeze({
+  active:false,bodyX:1,bodyY:1,tilt:0,lift:0,hoof:0,mane:0,wing:0,tail:0,glow:0});
  const wonder=u(b.wonder),tiptoe=u(b.tiptoe),aurora=u(b.aurora);
  const surprise=u(b.surprise),bow=u(b.bow);
+ const melody=u(b.melody),dragon=u(b.dragon),yomi=u(b.yomi);
+ const breath=(u(b.breath)-.5)*2;
+ const rib=[.065,.057,.040,.033,.028][f];
  const clamp=(v,a,c)=>Math.max(a,Math.min(c,v));
  return Object.freeze({
-  tilt:clamp(-wonder*.11-tiptoe*.04-aurora*.18+surprise*.19+bow*.20,-.4,.4),
-  lift:clamp(-wonder*.8-tiptoe*(f<2?2:1.5)-aurora*2.9+surprise*2.2+bow*1.8,-5,4),
-  hoof:f>=2?clamp(tiptoe*4+surprise*2.4-bow*1.1,0,6):0,
-  mane:f>=2?clamp((Number.isFinite(b.mane)?b.mane:0)*4.4,-5,5):0,
+  active:true,
+  // F0 is genuinely a tapered horn; F1 a floating orb; F2+ are four-legged.
+  // Scale the ORIGINAL drawing around its local origin, with no fake hooves.
+  bodyX:clamp(1+breath*rib+melody*.017-dragon*.025+yomi*.023,.91,1.09),
+  bodyY:clamp(1-breath*rib*.58-melody*.014+dragon*.031-yomi*.018,.93,1.08),
+  tilt:clamp(-wonder*.11-tiptoe*.04-aurora*.18+surprise*.19+bow*.20
+     -melody*.055+dragon*.12-yomi*.09+breath*.012,-.4,.4),
+  lift:clamp(-wonder*.8-tiptoe*(f<2?2:1.5)-aurora*2.9+surprise*2.2+bow*1.8-breath*.6-melody*.5+dragon*1.3-yomi*.85,-5,4),
+  hoof:f>=2?clamp(tiptoe*4+surprise*2.4-bow*1.1+dragon*.7+yomi*.3,0,6):0,
+  mane:f>=2?clamp((Number.isFinite(b.mane)?b.mane:0)*4.4+melody*.5-dragon*.7+yomi*.7,-5,5):0,
   wing:f>=3?u(b.wing):0,
-  tail:f>=2?clamp((Number.isFinite(b.tail)?b.tail:0)*4.4,-5,5):0,
+  tail:f>=2?clamp((Number.isFinite(b.tail)?b.tail:0)*4.4+melody*.4+dragon*.8-yomi*.5,-5,5):0,
   glow:u(b.glow)
  });
 }
@@ -309,6 +318,7 @@ function drawCuernoFamilySeal(ctx,pose,R,form,t){
 
 function drawCuernoOverlays(ctx,pose,R,form,t,lift,tilt){
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 drawCuernoFamilySeal(ctx,pose,R,form,t);
 drawCuernoSoul(ctx,pose,R,form,t);
 drawCuernoMagic(ctx,pose,R,form,t);
@@ -382,6 +392,7 @@ function drawLivingHorn(ctx,pose,R,t){
   const tilt=(moving?-.13:0)+k*.10+(air?-.09:0)+(cuernoSoulBeat(pose,0)==="curious"?.07*Math.sin(t*.14):0)+(ritual?.tilt||0)+intro.tilt;
   const bounce=(pose.bounce||0)+(moving?Math.abs(k)*-2:Math.sin(t*.07)*1.3)+(ritual?.lift||0)+intro.lift;
   ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
   const aura=.5+.5*Math.sin(t*.085);
   ctx.globalAlpha=.19+.09*aura;ctx.fillStyle="#ffe3f5";
   ctx.beginPath();ctx.ellipse(0,-35,17,31,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
@@ -429,6 +440,7 @@ const lift=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(beat):Math.sin(t*.07)*1.3
 const tilt=(air?-.11:0)+(run?-.085*beat:0)+(cuernoSoulBeat(pose,1)==="shy"?.06:0)+(ritual?.tilt||0)+intro.tilt;
 const squish=run?.035*Math.abs(beat):0,hurt=pose.state==="hurt"||pose.state==="dead";
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 // Three tiny strands of rainbow hair, not a pony's neck or torso.
 for(let i=0;i<3;i++){ctx.strokeStyle=["#f4c5e7","#f6dfa9","#bfdcfb"][i];
  ctx.lineWidth=2.5;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(-12,-34+i*5);
@@ -477,6 +489,7 @@ const spring=(Number(pose.bounce)||0)+(run?-2.3*Math.abs(Math.sin(phase*2)):Math
 const ink="#645478",coat="#f9efff",pearl="#e7d9ff";
 const tilt=(air?-.10:0)+(run?-.045*beat:0)+(cast?-.055:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,spring);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 const ribbons=["#faadd9","#fbd27e","#91d7ff","#d2b2ff"];
 // All four strands emerge from the croup; no detached tail during the gallop.
 drawRootedTail(ctx,pose,2,t,-29,-40,ribbons);
@@ -566,6 +579,7 @@ const flourish=Math.sin(Math.PI*flare);
 const angry=pose.state==="attack"||pose.state==="cast";
 const tilt=(air?-.075:0)+(run?-.025*gallop:0)+(cuernoSoulBeat(pose,3)==="stargaze"?-.04:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 drawRootedTail(ctx,pose,3,t,-34,-45,["#b8ddff","#d6b4f4","#ffb9d4","#ffe6a1","#b3f0e7"]);
 // Hooves and knees follow four distinct gallop timings. Rear legs paint behind the torso.
 function limb(x,clock,back){
@@ -688,6 +702,7 @@ const intro=cuernoWelcomeAnatomy(pose,4);
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0)+intro.lift;
 const tilt=(air?-.065:0)+(run?-.026*beat:0)+(cast?-.04:0)+(soul==="bow"?.08*Math.sin(Math.PI*(Number(pose.flourish)||.6)):soul==="sneeze"?-.06:0)+(ritual?.tilt||0)+intro.tilt;
 ctx.save();ctx.translate(0,bounce);ctx.rotate(tilt);
+if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 // V75: root the rainbow tail beneath the obsidian croup. Its arc stays inside
 // a small envelope during runs, jumps and cinematic poses, never flying away.
 drawRootedTail(ctx,pose,4,t,-40,-44,colors);
