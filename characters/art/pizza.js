@@ -276,6 +276,37 @@ export function pizzaOvenActing(pose={}) {
   });
 }
 
+// Stage-only elastic acting modifies the ORIGINAL slice, toppings, connected
+// arms, real shoes and cheese strings in one coherent local coordinate space.
+export function pizzaWelcomeAnatomy(pose={},form=0){
+ const neutral=Object.freeze({active:false,x:1,y:1,roll:0,hip:0,lift:0,
+  armFront:0,armBack:0,legFront:0,legBack:0,look:0,cheese:0});
+ const w=pose.pizzaWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return neutral;
+ const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+ const f=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
+ const breath=(unit(w.breath)-.5)*2;
+ const melody=unit(w.melody),spark=unit(w.spark),dino=unit(w.dino);
+ // Dough flexes generously as a tiny slice and moves more deliberately
+ // once heavy with toppings and magical final-form accessories.
+ const elasticity=[.047,.040,.036,.030,.027][f];
+ const pressure=melody*.018+spark*.047-dino*.052;
+ return Object.freeze({
+  active:true,
+  x:1+breath*elasticity+pressure,
+  y:1-breath*elasticity*.67-pressure*.62,
+  roll:breath*.025+melody*.075-spark*.14+dino*.11,
+  hip:melody*.55-spark*1.30+dino*.85,
+  lift:breath*.35-melody*.60+spark*1.80+dino*1.50,
+  armFront:melody*.35+spark*.76+dino*.94,
+  armBack:-melody*.28-spark*.48+dino*.57,
+  legFront:melody*.12+spark*.35+dino*.33,
+  legBack:-melody*.09-spark*.31-dino*.29,
+  look:-melody*.16+spark*.28+dino*.35,
+  cheese:clamp(melody*.10+spark*.23+dino*.27,0,1)
+ });
+}
+
 function params(pose, f) {
 const st = pose.state;
 const t = pose.t;
@@ -533,6 +564,25 @@ if(welcome && st!=="dead" && st!=="hurt"){
  if(stretch>.20){P.mood="angry";P.mouth="open";}
  if(caught>.20){P.mood="happy";P.mouth="o";}
  if(flourish>.20){P.mood="happy";P.mouth="grin";}
+}
+const life=pizzaWelcomeAnatomy(pose,f);
+if(life.active){
+ // Whole-slice geometry stays continuous: cheese/drips and real limb roots
+ // are composed through the SAME transform, never separate screen sprites.
+ P.sx=clamp(P.sx*life.x,.72,1.35);
+ P.sy=clamp(P.sy*life.y,.72,1.35);
+ P.roll+=life.roll;P.bx+=life.hip;P.lift+=life.lift;
+ P.legF=[P.legF[0]+life.legFront,P.legF[1]];
+ P.legB=[P.legB[0]+life.legBack,P.legB[1]];
+ P.armF={...P.armF,ang:P.armF.ang+life.armFront};
+ P.armB={...P.armB,ang:P.armB.ang+life.armBack};
+ P.look+=life.look;
+ P.strings=Math.max(P.strings,life.cheese);
+ P.dripK+=life.cheese*.24;
+ const w=pose.pizzaWelcome;
+ if((w.spark||0)>.44){P.mood="hurt";P.mouth="o";}
+ else if((w.dino||0)>.44){P.mood="happy";P.mouth="open";}
+ else if((w.melody||0)>.44){P.mood="happy";P.mouth="smile";}
 }
 return P;
 }
