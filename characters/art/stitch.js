@@ -548,24 +548,44 @@ function rings(ctx, R, cx, cy, t, front) {
 export function stitchoWelcomeRig(pose={},form=0){
  const w=pose.stitchoWelcome;
  const inert={active:false,lean:0,head:0,armA:0,armB:0,legA:0,legB:0,
-  bendA:0,bendB:0,lift:0,tail:0,antenna:0};
- if(!w||w.reduced||pose.reduceMotion||!['idle','victory'].includes(pose.state||'idle'))
+  bendA:0,bendB:0,lift:0,tail:0,antenna:0,torsoX:1,torsoY:1,
+  ear:0,look:0,cheer:0};
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||'idle')!=='idle')
   return inert;
  const n=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
  const scout=n(w.scout),taunt=n(w.taunt),curl=n(w.curl),
   shock=n(w.shock),swagger=n(w.swagger);
- const baby=form===0?.56:1;
+ const dragon=n(w.dragon),chase=n(w.chase),yomi=n(w.yomi),dino=n(w.dino);
+ const breath=(n(w.breath)-.5)*2;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const rib=[.063,.051,.048,.039,.033][f];
+ const baby=f===0?.56:1;
  return {
-  active:scout+taunt+curl+shock+swagger>.005,
-  lean:baby*(-.10*scout+.17*taunt-.27*curl-.22*shock+.10*swagger),
-  head:-.16*scout+.19*taunt+.27*curl-.38*shock-.13*swagger,
-  armA:baby*(.30*scout+1.20*taunt-.74*curl+1.66*shock+.96*swagger),
-  armB:baby*(-.47*scout-1.05*taunt+1.18*curl-1.37*shock-.67*swagger),
-  legA:baby*(.12*scout+.18*taunt-.18*curl+.42*shock+.21*swagger),
-  legB:baby*(-.10*scout-.15*taunt+.13*curl-.32*shock-.16*swagger),
-  bendA:baby*(-2*curl-4*shock),bendB:baby*(3*curl+3*shock),
-  lift:baby*(-2.8*taunt-2.3*swagger),
-  tail:n(w.tail),antenna:n(w.antenna)
+  active:true,
+  // F0 is a living egg with attached very short paws, not a scaled biped.
+  // F3 tech visor/jetpack and F4 orbital rings retain native geometry.
+  torsoX:Math.max(.91,Math.min(1.09,1+breath*rib-dragon*.020+chase*.022+yomi*.014)),
+  torsoY:Math.max(.93,Math.min(1.08,1-breath*rib*.65+dragon*.015-chase*.014)),
+  lean:baby*(-.10*scout+.17*taunt-.27*curl-.22*shock+.10*swagger
+    +breath*.026+dragon*.14-chase*.105+yomi*.10-dino*.16),
+  head:-.16*scout+.19*taunt+.27*curl-.38*shock-.13*swagger
+    +breath*.033+dragon*.22-chase*.16+yomi*.20-dino*.25,
+  armA:baby*(.30*scout+1.20*taunt-.74*curl+1.66*shock+.96*swagger
+    +dragon*.83+chase*.64+yomi*.47+dino*.91),
+  armB:baby*(-.47*scout-1.05*taunt+1.18*curl-1.37*shock-.67*swagger
+    -dragon*.65-chase*.47+yomi*.39-dino*.78),
+  legA:baby*(.12*scout+.18*taunt-.18*curl+.42*shock+.21*swagger
+    +dragon*.12+chase*.17+dino*.19),
+  legB:baby*(-.10*scout-.15*taunt+.13*curl-.32*shock-.16*swagger
+    -dragon*.11-chase*.15-dino*.14),
+  bendA:baby*(-2*curl-4*shock+dragon*.65-chase*.35),
+  bendB:baby*(3*curl+3*shock-dragon*.56+chase*.30),
+  lift:baby*(-2.8*taunt-2.3*swagger-breath*.65+dragon*1.2
+    -chase*.90-yomi*.65+dino*1.45),
+  tail:n(w.tail),antenna:n(w.antenna),
+  ear:breath*.04+dragon*.20+chase*(-.23)+yomi*.18+dino*.30,
+  look:dragon*.20-chase*.13+yomi*.14+dino*.15,
+  cheer:chase
  };
 }
 
@@ -599,6 +619,13 @@ function faceFor(pose, S) {
     else if(w.curl>.18){face.mood="squint";face.mouth="o";face.ant="tuck";face.earFlick=-.12*w.curl;}
     else if(w.taunt>.18){face.mood="happy";face.mouth="tongue";face.ant="forward";face.earFlick=.18*w.taunt;face.glow=.82;}
     else if(w.scout>.18){face.mood="squint";face.mouth="smirk";face.ant="up";face.lookUp=true;face.earFlick=.1*w.scout;}
+    else if(w.dragon>.18){face.mood="squint";face.mouth="o";face.ant="back";face.earFlick=.18*w.dragon;}
+    else if(w.chase>.18){face.mood="happy";face.mouth="grin";face.ant="forward";face.earFlick=-.17*w.chase;}
+    else if(w.yomi>.18){face.mood="normal";face.mouth="o";face.ant="up";face.earFlick=.14*w.yomi;face.lookUp=true;}
+    else if(w.dino>.18){face.mood="squint";face.mouth="o";face.ant="tuck";face.earFlick=.25*w.dino;}
+    // Tiny independent breathing of the authentic antenna roots, not FX.
+    const living=stitchoWelcomeRig(pose,Number(pose.form)||0);
+    face.earFlick+=living.ear;
   }
   return face;
 }
@@ -668,7 +695,7 @@ function drawBiped(ctx, R, pose, f, S, C) {
     legA+=welcome.legA;legB+=welcome.legB;
     bendA+=welcome.bendA;bendB+=welcome.bendB;
     lift+=welcome.lift;
-    headDX+=welcome.lean*3;
+    headDX+=welcome.lean*3+welcome.look*2.1;
   }
 
   ctx.save();
@@ -676,7 +703,13 @@ function drawBiped(ctx, R, pose, f, S, C) {
   ctx.translate(0, lift);
 
   const hy = hipY + bob;
-  const upper = (fn) => { ctx.save(); ctx.translate(0, hy); ctx.rotate(lean); ctx.translate(0, -hipY); fn(); ctx.restore(); };
+  // Keep original hip as transform root: the upper anatomy breathes together
+  // (egg shell / chest / arms / ears / antennae / visor), shoes stay grounded.
+  const upper = (fn) => {
+    ctx.save();ctx.translate(0,hy);ctx.rotate(lean);
+    if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
+    ctx.translate(0,-hipY);fn();ctx.restore();
+  };
   const legX = S.egg ? 8 : S.brx * 0.45;
   const shF = S.egg ? [S.hx + S.hrx * 0.5, S.hy + S.hry * 0.62] : [S.bx + S.brx * 0.25, S.by - S.bry * 0.2];
   const shB = S.egg ? [S.hx - S.hrx * 0.55, S.hy + S.hry * 0.5] : [S.bx - S.brx * 0.3, S.by - S.bry * 0.3];
