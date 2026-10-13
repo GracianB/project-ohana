@@ -109,6 +109,21 @@ try {
       phase,{timeout:1600});
     await capture(page,label);
   }
+  // V363: five genuine family reactions during the silent time after her
+  // own five theatrical beats; inspect real ears, grooming paw and tail.
+  for(const [at,reaction,label] of [
+    [1.0,'melody','00zx1-michi-hears-kilo'],
+    [2.08,'spark','00zx2-michi-judges-spark'],
+    [6.0,'chase','00zx3-michi-watches-chase'],
+    [8.45,'yomi','00zx4-michi-greets-yomi'],
+    [12.2,'dino','00zx5-michi-ducks-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.michiFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V354: every after-beat paints the SAME connected Dragon, not idle artwork
   // with new overlays. Watch the torso, wing roots, head, claws and tail.
   for(const [at,reaction,label] of [
