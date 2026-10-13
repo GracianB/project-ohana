@@ -150,6 +150,22 @@ async function auditPage(page, label) {
   assert.ok(cuernoFilm.stageAlive&&
     ['idle','wonder','tiptoe','aurora','surprise','bow'].includes(cuernoFilm.livePhase),
     label+': Cuerno scene must render in the real welcome Canvas');
+  // V350: Kilo acts with the real hand-held ukulele, not a pollen-only sprite.
+  const kiloFilm=await page.evaluate(async()=>{
+    const {kiloWelcomeBeat}=await import('/systems/intro-kilo-stage.js?e2e=v350');
+    const el=document.querySelector('#ohana-intro');
+    return {
+      phases:[.03,.33,.71,1.09,1.47,1.87].map(t=>kiloWelcomeBeat(t).phase),
+      livePhase:el?.dataset.kiloWelcomePhase||'',
+      stageAlive:!!el?.querySelector('canvas')
+    };
+  });
+  assert.deepEqual(kiloFilm.phases,
+    ['idle','listen','strum','bloom','surprise','finale'],
+    label+': Kilo must play five distinct musical and flower scenes');
+  assert.ok(kiloFilm.stageAlive&&
+    ['idle','listen','strum','bloom','surprise','finale'].includes(kiloFilm.livePhase),
+    label+': Kilo living rig not shown on the actual intro Canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
