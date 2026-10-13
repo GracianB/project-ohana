@@ -276,6 +276,37 @@ export function pizzaOvenActing(pose={}) {
   });
 }
 
+// V357 · All stage additions are measured in original dough-body coordinates.
+// Elastic deformation is anchored at the foot origin by draw(): shoulders,
+// cheese strands and crust stay in the SAME scaled Canvas space as the shoes.
+export function pizzaWelcomeAnatomy(pose={},form=0){
+ const neutral=Object.freeze({active:false,sx:1,sy:1,roll:0,hip:0,lift:0,
+  armFront:0,armBack:0,legFront:0,legBack:0,crust:0,cheese:0,drip:0,look:0});
+ const w=pose.pizzaWelcome;
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return neutral;
+ const unit=x=>Number.isFinite(x)?Math.max(0,Math.min(1,x)):0;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const breath=(unit(w.breath)-.5)*2;
+ const melody=unit(w.melody),dragon=unit(w.dragon),yomi=unit(w.yomi);
+ const elastic=[.070,.063,.054,.044,.040][f];
+ return Object.freeze({
+   active:true,
+   sx:1+breath*elastic+melody*.025-dragon*.052+yomi*.034,
+   sy:1-breath*elastic*.75-melody*.024+dragon*.064-yomi*.031,
+   roll:breath*.016+melody*(-.076)+dragon*.154+yomi*(-.11),
+   hip:melody*.58-dragon*1.16+yomi*.42,
+   lift:breath*(-.45)+melody*(-.50)+dragon*1.40+yomi*(-.73),
+   armFront:melody*.48+dragon*.95+yomi*.57,
+   armBack:melody*(-.39)+dragon*.73+yomi*(-.42),
+   legFront:melody*.10+dragon*.18+yomi*.09,
+   legBack:-melody*.10-dragon*.16-yomi*.08,
+   crust:breath*.12+melody*.19-dragon*.33+yomi*.20,
+   cheese:unit(w.cheese)+melody*.07+dragon*.24+yomi*.12,
+   drip:melody*.12+dragon*.30+yomi*.18,
+   look:melody*.12-dragon*.36+yomi*.27
+ });
+}
+
 function params(pose, f) {
 const st = pose.state;
 const t = pose.t;
@@ -533,6 +564,26 @@ if(welcome && st!=="dead" && st!=="hurt"){
  if(stretch>.20){P.mood="angry";P.mouth="open";}
  if(caught>.20){P.mood="happy";P.mouth="o";}
  if(flourish>.20){P.mood="happy";P.mouth="grin";}
+}
+// The quiet gags move real crust, attached melted cheese, shoulders, hips,
+// hands and legs. No cast state, new collision or particles.
+const life=pizzaWelcomeAnatomy(pose,f);
+if(life.active){
+ P.sx=clamp(P.sx*life.sx,.70,1.30);
+ P.sy=clamp(P.sy*life.sy,.72,1.29);
+ P.roll+=life.roll;P.bx+=life.hip;P.lift+=life.lift;
+ P.armF={...P.armF,ang:P.armF.ang+life.armFront};
+ P.armB={...P.armB,ang:P.armB.ang+life.armBack};
+ P.legF=[P.legF[0]+life.legFront,P.legF[1]];
+ P.legB=[P.legB[0]+life.legBack,P.legB[1]];
+ P.strings=Math.max(P.strings,Math.min(1,life.cheese*.30));
+ P.dripK=Math.max(.68,Math.min(1.48,P.dripK+life.drip*.18));
+ P.crustNod=life.crust;
+ P.look+=life.look;
+ const wb=pose.pizzaWelcome;
+ if((wb?.dragon||0)>.46){P.mood="normal";P.mouth="o";}
+ else if((wb?.melody||0)>.46){P.mood="happy";P.mouth="smile";}
+ else if((wb?.yomi||0)>.46){P.mood="happy";P.mouth="grin";}
 }
 return P;
 }
@@ -1073,7 +1124,7 @@ ctx.restore();
 const crY = F.top - 1 + pose.bounce * 1.3;
 ctx.save();
 ctx.translate(0, crY);
-ctx.rotate(pose.sway * 0.045);
+ctx.rotate(pose.sway * 0.045 + (P.crustNod||0)*.16);
 if (f === 3) {
   crust(ctx, R, F, c, -F.crH * 0.92, W * 0.94, t, false);
   crust(ctx, R, F, c, 0, W, t, false);
