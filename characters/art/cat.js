@@ -11,6 +11,29 @@ const PAL = [
   { fur: "#fff6ea", dark: "#e4c07a", belly: "#fff", ear: "#ffd0e0", nose: "#ff5c8a", eye: "#e0489b", accent: "#ffb780" },
 ];
 
+// V353 · Five-act facial/ear/tail/paw direction, exclusively for the
+// welcome duplicate. Body proportions and each canonical form stay intact.
+export function michiWelcomeRig(pose={},form=0){
+ const w=pose.michiWelcome;
+ const idle={active:false,arm:0,leg:0,tail:0,bob:0,head:0,ear:0,wing:0,mood:"normal"};
+ if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return idle;
+ const n=x=>Number.isFinite(x)?Math.min(1,Math.max(0,x)):0;
+ const inspect=n(w.inspect),sideeye=n(w.sideeye),groom=n(w.groom),
+  flick=n(w.flick),purr=n(w.purr);
+ const baby=form===0?.65:form===2?.74:1;
+ return {
+  active:inspect+sideeye+groom+flick+purr>.003,
+  arm:baby*(.16*inspect-.23*sideeye-1.35*groom+.75*flick+.48*purr),
+  leg:baby*(.10*inspect-.15*sideeye+.22*groom+.32*flick+.11*purr),
+  tail:.13*inspect+.25*sideeye+.29*groom+.94*flick+.55*purr,
+  bob:-1.2*inspect+.6*sideeye-.55*groom-2.7*flick-1.4*purr,
+  head:-.14*inspect+.19*sideeye+.24*groom-.31*flick-.13*purr,
+  ear:.12*inspect-.22*sideeye+.08*groom+.4*flick-.15*purr,
+  wing:form===4?.14*inspect+.19*sideeye+.25*groom+.44*flick+.84*purr:0,
+  mood:sideeye>.3?"angry":groom>.26?"closed":flick>.25?"angry":purr>.24?"happy":"normal"
+ };
+}
+
 function solve(pose) {
   const st = pose.state || "idle";
   const slot = st === "cast" ? (pose.castSlot | 0) : -1;
@@ -152,8 +175,8 @@ function drawBaby(ctx, R, pose, r, c) {
   R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
   R.shine(ctx, -8, -50, 8, 4, 0.4);
   const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
-  ear(ctx, -14, -58, 18, -0.35 + flop, c.fur, c.ear);
-  ear(ctx, 16, -58, 20, 0.28 - flop, c.fur, c.ear);
+  ear(ctx, -14, -58, 18, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
+  ear(ctx, 16, -58, 20, 0.28 - flop - (r.michiEar || 0), c.fur, c.ear);
   face(ctx, R, pose, r, 4, -40, 26, c);
   R.ellipse(ctx, 14, -24, 5.2, 5.2, c.accent, { shade: false, lw: 1.6 });
   ctx.beginPath();
@@ -180,9 +203,10 @@ function drawCat(ctx, R, pose, r, c) {
   arm(ctx, R, r, 14, -36, c.fur, 18);
   ctx.save();
   ctx.translate(12, -62 + (r.st === "attack" ? -2 : 0));
+  ctx.rotate(r.michiHead || 0);
   if (r.st === "run") ctx.rotate(r.run * 0.06);
-  ear(ctx, -14, -6, 24, -0.25, c.fur, c.ear);
-  ear(ctx, 12, -6, 26, 0.2, c.fur, c.ear);
+  ear(ctx, -14, -6, 24, -0.25 + (r.michiEar || 0), c.fur, c.ear);
+  ear(ctx, 12, -6, 26, 0.2 - (r.michiEar || 0), c.fur, c.ear);
   R.ellipse(ctx, 0, 8, 22, 20, c.fur);
   R.shine(ctx, -6, -2, 7, 3.5, 0.38);
   ctx.beginPath();
@@ -212,8 +236,9 @@ function drawCloud(ctx, R, pose, r, c) {
   R.ellipse(ctx, 2, -34, 16, 11, c.fur, { line: false });
   ctx.save();
   ctx.translate(6, -64);
-  ear(ctx, -12, -2, 16, -0.2, "#fff", c.ear);
-  ear(ctx, 12, -2, 16, 0.18, "#fff", c.ear);
+  ctx.rotate(r.michiHead || 0);
+  ear(ctx, -12, -2, 16, -0.2 + (r.michiEar || 0), "#fff", c.ear);
+  ear(ctx, 12, -2, 16, 0.18 - (r.michiEar || 0), "#fff", c.ear);
   R.ellipse(ctx, -18, 6, 9, 8, "#fff", { lw: 2 });
   R.ellipse(ctx, 18, 8, 8, 7, "#fff", { lw: 2 });
   R.ellipse(ctx, 0, 8, 20, 18, c.fur);
@@ -245,8 +270,9 @@ function drawMoon(ctx, R, pose, r, c) {
   arm(ctx, R, r, 10, -48, c.fur, 16);
   ctx.save();
   ctx.translate(4, -74);
-  ear(ctx, -10, 0, 32, -0.12, c.fur, c.ear);
-  ear(ctx, 12, 0, 34, 0.1, c.fur, c.ear);
+  ctx.rotate(r.michiHead || 0);
+  ear(ctx, -10, 0, 32, -0.12 + (r.michiEar || 0), c.fur, c.ear);
+  ear(ctx, 12, 0, 34, 0.1 - (r.michiEar || 0), c.fur, c.ear);
   ctx.beginPath();
   ctx.arc(-2, -28, 9, 0.4, 5.4);
   ctx.strokeStyle = c.accent;
@@ -283,7 +309,7 @@ function feather(ctx, side, rot, len, color) {
 }
 
 function drawGod(ctx, R, pose, r, c) {
-  const flap = Math.sin(r.t * 0.18) * 0.22 + (r.slot === 2 ? 0.15 : 0);
+  const flap = Math.sin(r.t * 0.18) * 0.22 + (r.slot === 2 ? 0.15 : 0) + (r.michiWing || 0)*.24;
   feather(ctx, -1, -1.05 + flap, 48, "#fff");
   feather(ctx, -1, -0.45 + flap, 58, "#fff8e4");
   feather(ctx, -1, 0.12 + flap, 42, "#ffe7a8");
@@ -316,8 +342,9 @@ function drawGod(ctx, R, pose, r, c) {
   arm(ctx, R, r, 14, -36, c.fur, 17);
   ctx.save();
   ctx.translate(8, -62);
-  ear(ctx, -12, -4, 22, -0.2, c.fur, c.ear);
-  ear(ctx, 12, -4, 24, 0.16, c.fur, c.ear);
+  ctx.rotate(r.michiHead || 0);
+  ear(ctx, -12, -4, 22, -0.2 + (r.michiEar || 0), c.fur, c.ear);
+  ear(ctx, 12, -4, 24, 0.16 - (r.michiEar || 0), c.fur, c.ear);
   R.ellipse(ctx, 0, 8, 22, 20, c.fur);
   R.shine(ctx, -6, 0, 7, 3.2, 0.42);
   face(ctx, R, pose, r, 1, 6, 18, c);
@@ -467,6 +494,13 @@ function draw(ctx, pose, R) {
   const c = PAL[f];
   const r = solve(safe);
   if(Number.isFinite(safe.michiDuetAge)){r.mood=safe.michiDuetAge<36?'happy':'angry';r.tail=2.1;r.arm=safe.michiDuetAge<36?-1.7:.4;}
+  const welcome=michiWelcomeRig(safe,f);
+  if(welcome.active){
+    r.arm+=welcome.arm;r.leg+=welcome.leg;
+    r.tail+=welcome.tail;r.bob+=welcome.bob;
+    r.michiHead=welcome.head;r.michiEar=welcome.ear;
+    r.michiWing=welcome.wing;r.mood=welcome.mood;
+  }
   ctx.save();
   drawMichiFootwork(ctx,safe,f,safe.t||0);
   moonSoul(ctx, safe, f, false);
