@@ -193,6 +193,24 @@ async function auditPage(page, label) {
   assert.ok(yomiFilm.stageAlive&&
     ['idle','listen','gather','reveal','startle','bow'].includes(yomiFilm.livePhase),
     label+': Yomi acting director disconnected from intro Canvas');
+  // V358: the real paper-lantern body also acts while other stars play.
+  const yomiFamily=await page.evaluate(async()=>{
+    const {yomiWelcomeBeat}=await import('/systems/intro-yomi-stage.js?e2e=v358');
+    const times=[1.02,2.16,12.20],keys=['melody','spark','dino'];
+    const beats=times.map(t=>yomiWelcomeBeat(t));
+    const el=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      reduced:yomiWelcomeBeat(2.16,true).spark,
+      stage:!!el?.querySelector('canvas'),
+      reaction:el?.dataset.yomiFamilyReaction||'',
+      visible:el?.dataset.yomiWelcomeAlwaysVisible};
+  });
+  assert.ok(yomiFamily.quiet&&yomiFamily.stage);
+  assert.ok(yomiFamily.strength.every(x=>x>.62),label+': Yomi lacks living lantern reactions');
+  assert.equal(yomiFamily.reduced,0);
+  assert.equal(yomiFamily.visible,'true');
+  assert.ok(['rest','melody','spark','dino'].includes(yomiFamily.reaction));
   // V349: Cuerno evolves from living horn (no imaginary legs) to four-hoof
   // foal and winged guardian. Intro phase read from real rendered stage.
   const cuernoFilm=await page.evaluate(async()=>{
