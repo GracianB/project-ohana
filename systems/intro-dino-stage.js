@@ -13,6 +13,13 @@ export const DINO_WELCOME_BEATS=Object.freeze({
   startled:Object.freeze([11.95,12.13,12.25,12.47]),
   delighted:Object.freeze([12.42,12.63,13.05,13.32])
 });
+// Three understated scenes tie Dino to the rest of Hoku even BEFORE its
+// famous final stomp. Every signal is cosmetic; none affects the Colossus U.
+export const DINO_FAMILY_REACTIONS=Object.freeze({
+  melody:Object.freeze([.52,.74,1.02,1.31]),
+  dragon:Object.freeze([3.36,3.50,3.78,4.08]),
+  chase:Object.freeze([5.42,5.68,5.98,6.30])
+});
 export function dinoWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -22,14 +29,17 @@ export function dinoWelcomeBeat(seconds,reducedMotion=false){
  const startled=pulse(time,...DINO_WELCOME_BEATS.startled);
  const delighted=pulse(time,...DINO_WELCOME_BEATS.delighted);
  const breath=(1+Math.sin(time*TAU*4/14))*.5;
+ const melody=pulse(time,...DINO_FAMILY_REACTIONS.melody);
+ const dragon=pulse(time,...DINO_FAMILY_REACTIONS.dragon);
+ const chase=pulse(time,...DINO_FAMILY_REACTIONS.chase);
  if(reducedMotion)return Object.freeze({phase:"idle",curious:0,brace:0,
-   stomp:0,startled:0,delighted:.20,breath:.5,tail:0,glow:.08,reduced:true});
+   stomp:0,startled:0,delighted:.20,breath:.5,melody:0,dragon:0,chase:0,tail:0,glow:.08,reduced:true});
  const phase=stomp>.18?"stomp":startled>.22?"startled":brace>.20?"brace":
    curious>.2?"curious":delighted>.2?"delighted":"idle";
  return Object.freeze({
-   phase,curious,brace,stomp,startled,delighted,breath,
-   tail:clamp(.22*Math.sin(time*TAU*5/14)+curious*.18-stomp*.35+delighted*.25,-1,1),
-   glow:clamp(.08+stomp*.36+delighted*.18),reduced:false
+   phase,curious,brace,stomp,startled,delighted,breath,melody,dragon,chase,
+   tail:clamp(.22*Math.sin(time*TAU*5/14)+curious*.18-stomp*.35+delighted*.25+melody*.14-dragon*.25+chase*.24,-1,1),
+   glow:clamp(.08+stomp*.36+delighted*.18+melody*.10+dragon*.10),reduced:false
  });
 }
 export function drawDinoWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
