@@ -1038,6 +1038,11 @@ q(pose.cuernoWelcome?.tiptoe,12),q(pose.cuernoWelcome?.aurora,12),
 q(pose.cuernoWelcome?.surprise,12),q(pose.cuernoWelcome?.bow,12),
 q(pose.cuernoWelcome?.mane,8),q(pose.cuernoWelcome?.wing,8),
 q(pose.cuernoWelcome?.tail,8),
+// V350 Kilo: unique real pose cache for each note, hand, flower and smile.
+pose.kiloWelcome?.phase || "",q(pose.kiloWelcome?.listen,12),
+q(pose.kiloWelcome?.strum,12),q(pose.kiloWelcome?.bloom,12),
+q(pose.kiloWelcome?.surprise,12),q(pose.kiloWelcome?.finale,12),
+q(pose.kiloWelcome?.wing,8),q(pose.kiloWelcome?.petals,8),
 ].join("|");
 }
 
@@ -1168,6 +1173,7 @@ if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._intro
 if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._introPizza;
 if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
 if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._introCuerno;
+if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
