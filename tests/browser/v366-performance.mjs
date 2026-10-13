@@ -22,7 +22,7 @@ try {
     page.on("pageerror",err=>errors.push(String(err.message)));
     try {
       await page.goto(base,{waitUntil:"domcontentloaded"});
-      await page.waitForFunction(()=>!!window.__OHANA_E2E?.start&&!!window.__OHANA_PERF?.snapshot,{timeout:15000});
+      await page.waitForFunction(()=>!!window.__OHANA_E2E?.start&&!!window.__OHANA_PERF?.snapshot,undefined,{timeout:15000});
       await page.evaluate(()=>{
         window.__OHANA_E2E.start("kilo");
         window.__OHANA_PERF.reset();
