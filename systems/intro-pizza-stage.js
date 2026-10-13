@@ -14,6 +14,14 @@ export const PIZZA_WELCOME_BEATS=Object.freeze({
   catch:Object.freeze([6.05,6.22,6.36,6.52]),
   flourish:Object.freeze([6.48,6.68,6.88,7.08])
 });
+// V357 · When the spotlight belongs to someone else, Pizza still has a pulse:
+ // listens to Kilo, ducks Dragon's sneeze and notices Yomi's lantern.
+ // The signals never create fire damage, extra toppings or weapon casts.
+export const PIZZA_FAMILY_REACTIONS=Object.freeze({
+  melody:Object.freeze([.72,.88,1.19,1.44]),
+  dragon:Object.freeze([3.39,3.54,3.85,4.11]),
+  yomi:Object.freeze([8.12,8.30,8.59,8.90])
+});
 export function pizzaWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -23,17 +31,20 @@ export function pizzaWelcomeBeat(seconds,reducedMotion=false){
  const caught=pulse(time,...PIZZA_WELCOME_BEATS.catch);
  const flourish=pulse(time,...PIZZA_WELCOME_BEATS.flourish);
  const breath=(1+Math.sin(time*TAU*4/14))*.5;
+ const melody=pulse(time,...PIZZA_FAMILY_REACTIONS.melody);
+ const dragon=pulse(time,...PIZZA_FAMILY_REACTIONS.dragon);
+ const yomi=pulse(time,...PIZZA_FAMILY_REACTIONS.yomi);
  if(reducedMotion)return Object.freeze({
   phase:'idle',sniff:0,spring:0,stretch:0,catch:0,flourish:.2,
-  breath:.5,cheese:0,crust:0,glow:.11,reduced:true
+  breath:.5,melody:0,dragon:0,yomi:0,cheese:0,crust:0,glow:.11,reduced:true
  });
  const phase=stretch>.22?'stretch':caught>.22?'catch':spring>.22?'spring':
    sniff>.22?'sniff':flourish>.22?'flourish':'idle';
  return Object.freeze({
-  phase,sniff,spring,stretch,catch:caught,flourish,breath,
-  cheese:clamp(.14+stretch*.76+spring*.3+caught*.27),
-  crust:clamp(.22*Math.sin(time*TAU*5/14)+sniff*.28-spring*.26+caught*.35,-1,1),
-  glow:clamp(.11+spring*.14+stretch*.18+flourish*.33),reduced:false
+  phase,sniff,spring,stretch,catch:caught,flourish,breath,melody,dragon,yomi,
+  cheese:clamp(.14+stretch*.76+spring*.3+caught*.27+melody*.10+dragon*.16+yomi*.13),
+  crust:clamp(.22*Math.sin(time*TAU*5/14)+sniff*.28-spring*.26+caught*.35+melody*.12-dragon*.27+yomi*.16,-1,1),
+  glow:clamp(.11+spring*.14+stretch*.18+flourish*.33+melody*.06+dragon*.09+yomi*.10),reduced:false
  });
 }
 
