@@ -123,6 +123,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V346 Frita's real choreographed body, props and cape in the full cast.
+  for(const [at,phase,label] of [
+    [4.55,'ready','00i-frita-chef-ready'],
+    [5.16,'dash','00j-frita-cape-dash'],
+    [5.77,'reach','00k-frita-ketchup-reach'],
+    [6.23,'wobble','00l-frita-crunch-wobble'],
+    [6.75,'triumph','00m-frita-chef-triumph']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.fritaWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});
