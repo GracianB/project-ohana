@@ -2392,7 +2392,7 @@ const DRW = {
 supremeLaunch(ctx,f,cam,t,g){
  const x=f.x-cam.x,y=f.y-cam.y;
  const progress=1-f.life/f.max;
- const alpha=g?.reduceMotion?.48:.55;
+ const alpha=g?.reduceMotion ? 0.48 : 0.55;
  ctx.save();
  ctx.globalCompositeOperation="lighter";
  ctx.strokeStyle=f.color;
