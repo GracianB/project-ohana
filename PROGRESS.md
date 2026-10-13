@@ -1,3 +1,17 @@
+## OHANA V347 · Pizza protagonista individual de la intro (ohana-347)
+
+- Cuarta revisión individual, después de Dragón V344, Dino V345 y Frita V346. La persecución de la patata continúa, pero Pizza tiene ahora su propia progresión cómica: olfatea queso, se impulsa como masa elástica, estira mozzarella, atrapa un pepperoni y termina celebrando orgulloso.
+- `systems/intro-pizza-stage.js` implementa las cinco fases `sniff/spring/stretch/catch/flourish` dentro de un ciclo determinista de 14 segundos. Iluminación cálida, ondas pequeñas al saltar, hebras de queso y un solo pepperoni escénico: todos decorativos, sin colisiones ni daño.
+- El arte original en `characters/art/pizza.js` participa físicamente: masa comprimible y recuperable, inclinación de la corteza, gravedad del queso, ojos/boca expresivos, brazos conectados y zapatos reaccionando a cada fase. Se respeta `pizzaOvenActing`, las cinco evoluciones y las mecánicas J/K/L/U.
+- `characters/draw.js` inyecta únicamente `pose.pizzaWelcome` en el personaje temporal de la bienvenida y diferencia cada fase en el fingerprint Canvas, evitando fotogramas congelados. Fuera de la intro, el personaje no recibe el nuevo parámetro ni cambia su comportamiento.
+- La composición conserva intacta la persecución con Frita, incluyendo sus propias escenas y diálogos, mientras Pizza presenta «¿HUELO QUESO?», «¡ES MÍO!», «¡PILLADO!» y «¡SOY DELICIOSO!».
+- Movimiento reducido: escenario estático y sin gotas, hebras ni movimientos rápidos; el director sigue sin usar timers o aleatoriedad.
+- Pruebas V347 Node: ciclo de 14 s, tiempos y fases acotadas, efectos Canvas finitos, accesibilidad, actualización del render y preservación de los cinco diseños y el horno. Browser E2E de escritorio/móvil comprueba el director real de Pizza; cinco capturas visuales dirigidas se añaden a las de los tres héroes anteriores.
+- Caché `ohana-347` sincronizada en index.html y sw.js, con módulo de Pizza precacheado offline. CI Node, E2E, multijugador Chromium/Firefox, visual y Release Gate obligatorios. Sin despliegue de Netlify.
+- Siguiente personaje individual: Yomi, con énfasis en presencia fantasmal, expresividad y continuidad durante toda la intro.
+
+---
+
 ## OHANA V346 · Frita protagoniza la intro con cuerpo flexible y comicidad propia (ohana-346)
 
 - Tercera revisión individual de la portada, después de Dragón V344 y Dino V345. Se conserva su persecución compartida con Pizza, pero Frita ya no es un icono de carrera: preparación de chef, esprint con capa, intento de alcanzar la patata, pequeño tropiezo y orgullo final.
