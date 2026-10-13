@@ -195,6 +195,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V351: real antenna, paws, ears, mouth and tail across Stitcho's alien gag.
+  for(const [at,phase,label] of [
+    [.42,'scout','00zh-stitcho-antenna-scout'],
+    [.86,'taunt','00zi-stitcho-teasing'],
+    [1.27,'curl','00zj-stitcho-defense-curl'],
+    [1.97,'shock','00zk-stitcho-shocked'],
+    [2.68,'swagger','00zl-stitcho-recovery']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.stitchoWelcomePhase===expected,
+      phase,{timeout:1800});
+    await capture(page,label);
+  }
   await page.evaluate(()=>window.__OHANA_WELCOME_SET_FRAME(null));
   await page.locator('#ohana-intro .oi-enter').click();
   await page.locator('#ohana-intro').waitFor({ state:'detached', timeout:2500 }).catch(() => {});

@@ -1043,6 +1043,11 @@ pose.kiloWelcome?.phase || "",q(pose.kiloWelcome?.listen,12),
 q(pose.kiloWelcome?.strum,12),q(pose.kiloWelcome?.bloom,12),
 q(pose.kiloWelcome?.surprise,12),q(pose.kiloWelcome?.finale,12),
 q(pose.kiloWelcome?.wing,8),q(pose.kiloWelcome?.petals,8),
+// V351 Stitcho: native antenna, face, paws and tail need distinct live frames.
+pose.stitchoWelcome?.phase || "",q(pose.stitchoWelcome?.scout,12),
+q(pose.stitchoWelcome?.taunt,12),q(pose.stitchoWelcome?.curl,12),
+q(pose.stitchoWelcome?.shock,12),q(pose.stitchoWelcome?.swagger,12),
+q(pose.stitchoWelcome?.antenna,8),q(pose.stitchoWelcome?.tail,8),
 ].join("|");
 }
 
@@ -1174,6 +1179,7 @@ if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._intro
 if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
 if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._introCuerno;
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
+if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;

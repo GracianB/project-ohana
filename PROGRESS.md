@@ -1,3 +1,15 @@
+## OHANA V351 · Stitcho interpreta cinco actos con anatomía original (ohana-351)
+
+- Octava intervención artística individual en la intro de diez héroes. Stitcho tiene cinco escenas deterministas: antenas curiosas (scout), provocación gestual (taunt), encogerse antes del relámpago (curl), reacción de sorpresa al accidente con Chispín (shock), y recuperación arrogante (swagger). Cada escena se dirige mediante una señal pura dentro del bucle de 14 s; los diálogos son «¿LISTO?», «¡TE PILLO!», «¡PLAN B!», «¿EN SERIO?» y «¡CALCULADO!». Se mantiene el gag compartido con Chispín y su «UPS.».
+- `systems/intro-stitcho-stage.js` separa el director de gestos de los efectos visuales locales: luz cian/violeta y trazos pequeños en su slot, sin disparos, hitboxes ni daño. Sin temporizadores ni azar.
+- El verdadero arte se encuentra en `characters/art/stitch.js`; `stitcho.js` es un reexport. `stitchoWelcomeRig` interviene en rotación de cabeza, inclinación del tronco, pequeñas patas y brazos conectados, expresión de ojos/boca, antenas, orejas y cola. F0 sigue siendo un huevo con extremidades cortas; F2 conserva púas; F3 su visor, mochila y hombreras; F4 sus anillos cósmicos. No se convierten unas formas en otras durante la intro.
+- `characters/draw.js` pasa la actuación exclusivamente al Canvas original del doble de bienvenida y separa las poses en su caché; ningún estado, arma, evolución, combate o multijugador es alterado.
+- Movimiento reducido: Stitcho se queda en pose quieta y sin trazos de primer plano. Pruebas Node comprueban fases, loop 14 s, cinco formas, coordenadas FX, caché y preservación de activos; E2E escritorio/móvil valida la intro y regresión visual captura cinco fotogramas nuevos.
+- Caché sincronizada `ohana-351` en index.html/Service Worker con el nuevo director precacheado. Antes de fusionar exigir Node, navegador, cooperativo Chromium/Firefox, visual, Release Gate y despliegue Pages correcto. Netlify no se despliega.
+- Próximos personajes individuales: Chispín (V352), Michi (V353).
+
+---
+
 ## OHANA V350 · Kilo protagoniza la música de bienvenida (ohana-350)
 
 - Séptima revisión artística individual después de Dragón, Dino, Frita, Pizza, Yomi y Cuerno. Antes Kilo recibía solo polen flotando y cambiaba aleatoriamente entre `idle` y `victory` por un seno continuo. Ahora interpreta una **historia propia de cinco beats**, en el mismo ciclo determinista de 14 segundos: escucha `listen`, toca ukelele `strum`, florece `bloom`, se sorprende y estornuda por el polen `surprise`, remata alegre `finale`.

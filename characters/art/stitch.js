@@ -330,7 +330,8 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   }
 
   // --- oreja trasera
-  const earWig = Math.sin(t * 0.05) * 0.08 + pose.sway * 0.12 + (face.earFlick || 0);
+  const earWig = Math.sin(t * 0.05) * 0.08 + pose.sway * 0.12 + (face.earFlick || 0) +
+    (pose.stitchoWelcome?.reduced ? 0 : (pose.stitchoWelcome?.antenna||0)*.13);
   earFin(ctx, R, -rx * 0.45, -ry * 0.62, S.ear * 0.85, -0.25 + earWig, C.body, true);
 
   // --- cabeza
@@ -542,6 +543,32 @@ function rings(ctx, R, cx, cy, t, front) {
 // ---------------------------------------------------------------------------
 // modos de dibujo
 // ---------------------------------------------------------------------------
+// The welcome drives Stitcho's CANONICAL antenna/head/limb rig. F0 stays
+// an egg: scaled tiny paws, no imaginary armor, jetpack or orbital rings.
+export function stitchoWelcomeRig(pose={},form=0){
+ const w=pose.stitchoWelcome;
+ const inert={active:false,lean:0,head:0,armA:0,armB:0,legA:0,legB:0,
+  bendA:0,bendB:0,lift:0,tail:0,antenna:0};
+ if(!w||w.reduced||pose.reduceMotion||!['idle','victory'].includes(pose.state||'idle'))
+  return inert;
+ const n=v=>Number.isFinite(v)?Math.max(0,Math.min(1,v)):0;
+ const scout=n(w.scout),taunt=n(w.taunt),curl=n(w.curl),
+  shock=n(w.shock),swagger=n(w.swagger);
+ const baby=form===0?.56:1;
+ return {
+  active:scout+taunt+curl+shock+swagger>.005,
+  lean:baby*(-.10*scout+.17*taunt-.27*curl-.22*shock+.10*swagger),
+  head:-.16*scout+.19*taunt+.27*curl-.38*shock-.13*swagger,
+  armA:baby*(.30*scout+1.20*taunt-.74*curl+1.66*shock+.96*swagger),
+  armB:baby*(-.47*scout-1.05*taunt+1.18*curl-1.37*shock-.67*swagger),
+  legA:baby*(.12*scout+.18*taunt-.18*curl+.42*shock+.21*swagger),
+  legB:baby*(-.10*scout-.15*taunt+.13*curl-.32*shock-.16*swagger),
+  bendA:baby*(-2*curl-4*shock),bendB:baby*(3*curl+3*shock),
+  lift:baby*(-2.8*taunt-2.3*swagger),
+  tail:n(w.tail),antenna:n(w.antenna)
+ };
+}
+
 function faceFor(pose, S) {
   const st = pose.state;
   const face = { mood: S.spikes ? "angry" : "normal", mouth: "smirk", ant: "idle", glow: null, plasma: 0, waves: 0, crackle: false, lookUp: false, earFlick: 0 };
@@ -564,12 +591,22 @@ function faceFor(pose, S) {
     else if (n === 2) { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
     else { face.mouth = "smirk"; face.ant = "forward"; face.crackle = true; face.glow = 1.15; }
   }
+  // Stage expressions live in this face, not on a decorative overlay.
+  const w=pose.stitchoWelcome;
+  if(w&&!w.reduced&&st==='idle'){
+    if(w.shock>.18){face.mood="squint";face.mouth="o";face.ant="limp";face.earFlick=-.26*w.shock;face.glow=1.05;}
+    else if(w.swagger>.18){face.mood="happy";face.mouth="grin";face.ant="up";face.earFlick=.20*w.swagger;face.glow=.95;}
+    else if(w.curl>.18){face.mood="squint";face.mouth="o";face.ant="tuck";face.earFlick=-.12*w.curl;}
+    else if(w.taunt>.18){face.mood="happy";face.mouth="tongue";face.ant="forward";face.earFlick=.18*w.taunt;face.glow=.82;}
+    else if(w.scout>.18){face.mood="squint";face.mouth="smirk";face.ant="up";face.lookUp=true;face.earFlick=.1*w.scout;}
+  }
   return face;
 }
 
 function drawBiped(ctx, R, pose, f, S, C) {
   const st = pose.state, t = pose.t;
   const face = faceFor(pose, S);
+  const welcome=stitchoWelcomeRig(pose,f);
   const hipY = -S.legL - 2;
   let legA = 0, legB = 0, legBendA = 3, legBendB = 3;
   let armA = 0.35, armB = -0.25, bendA = 4, bendB = -3;
@@ -621,6 +658,17 @@ function drawBiped(ctx, R, pose, f, S, C) {
     else if (n === 1) { headRot = Math.sin(t * 0.25) * 0.14; armA = 1.6; armB = 1.3; bendA = -6; }
     else if (n === 2) { headRot = -0.12; armA = 0.8 + Math.sin(t * 0.3) * 0.2; armB = -0.4; }
     else { lean += 0.09 * k; headRot = -0.08; armA = 1.9 - k * 0.35; armB = -1.55 + k * 0.22; bendA = -4; bendB = 4; }
+  }
+
+  // The five beats articulate connected arms, short egg paws, planted
+  // feet, torso and head. Inactive in real gameplay and damaged states.
+  if(welcome.active){
+    lean+=welcome.lean;headRot+=welcome.head;
+    armA+=welcome.armA;armB+=welcome.armB;
+    legA+=welcome.legA;legB+=welcome.legB;
+    bendA+=welcome.bendA;bendB+=welcome.bendB;
+    lift+=welcome.lift;
+    headDX+=welcome.lean*3;
   }
 
   ctx.save();
@@ -838,8 +886,11 @@ function draw(ctx, pose, R) {
   const roll = pose.move === "roll" || (st === "cast" && pose.castSlot === 1) || chaos;
   const gallop = f >= 2 && st === "run" && !roll;
   const pr = { ...pose };
+  if(pose.stitchoWelcome&&!pose.stitchoWelcome.reduced&&st==="idle"){
+    pr.sway=(Number(pr.sway)||0)+stitchoWelcomeRig(pr,f).tail*.54;
+  }
   if (pose.move === "climb" && st !== "dead" && st !== "hurt") pr.state = "wall";
-  const ringY = roll ? -24 : gallop ? -34 : S.by - 6;
+  const ringY = (roll ? -24 : gallop ? -34 : S.by - 6) - (f===4?(pr.stitchoWelcome?.swagger||0)*2:0);
   ctx.save();
   drawStitchoFootwork(ctx,pr,f,pose.t||0);
   drawSoulSeams(ctx, pr, f, false);
