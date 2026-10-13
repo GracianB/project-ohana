@@ -1032,6 +1032,12 @@ pose.yomiWelcome?.phase || "",q(pose.yomiWelcome?.listen,12),
 q(pose.yomiWelcome?.gather,12),q(pose.yomiWelcome?.reveal,12),
 q(pose.yomiWelcome?.startle,12),q(pose.yomiWelcome?.bow,12),
 q(pose.yomiWelcome?.ribbon,8),q(pose.yomiWelcome?.halo,8),
+// V349 Cuerno: scene-only horn, hooves, mane and wings update independently.
+pose.cuernoWelcome?.phase || "",q(pose.cuernoWelcome?.wonder,12),
+q(pose.cuernoWelcome?.tiptoe,12),q(pose.cuernoWelcome?.aurora,12),
+q(pose.cuernoWelcome?.surprise,12),q(pose.cuernoWelcome?.bow,12),
+q(pose.cuernoWelcome?.mane,8),q(pose.cuernoWelcome?.wing,8),
+q(pose.cuernoWelcome?.tail,8),
 ].join("|");
 }
 
@@ -1161,6 +1167,7 @@ if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDin
 if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;
 if(p.id==="pizza"&&p._introForceCanvas&&p._introPizza)pose.pizzaWelcome=p._introPizza;
 if(p.id==="yomi"&&p._introForceCanvas&&p._introYomi)pose.yomiWelcome=p._introYomi;
+if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._introCuerno;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
