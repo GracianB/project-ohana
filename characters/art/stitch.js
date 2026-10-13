@@ -331,7 +331,7 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
 
   // --- oreja trasera
   const earWig = Math.sin(t * 0.05) * 0.08 + pose.sway * 0.12 + (face.earFlick || 0) +
-    (pose.stitchoWelcome?.reduced ? 0 : (pose.stitchoWelcome?.antenna||0)*.13);
+    (pose.stitchoWelcome?.reduced||pose.reduceMotion ? 0 : (pose.stitchoWelcome?.antenna||0)*.13);
   earFin(ctx, R, -rx * 0.45, -ry * 0.62, S.ear * 0.85, -0.25 + earWig, C.body, true);
 
   // --- cabeza
@@ -613,7 +613,7 @@ function faceFor(pose, S) {
   }
   // Stage expressions live in this face, not on a decorative overlay.
   const w=pose.stitchoWelcome;
-  if(w&&!w.reduced&&st==='idle'){
+  if(w&&!w.reduced&&!pose.reduceMotion&&st==='idle'){
     if(w.shock>.18){face.mood="squint";face.mouth="o";face.ant="limp";face.earFlick=-.26*w.shock;face.glow=1.05;}
     else if(w.swagger>.18){face.mood="happy";face.mouth="grin";face.ant="up";face.earFlick=.20*w.swagger;face.glow=.95;}
     else if(w.curl>.18){face.mood="squint";face.mouth="o";face.ant="tuck";face.earFlick=-.12*w.curl;}
