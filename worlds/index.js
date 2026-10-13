@@ -5,6 +5,8 @@
 //   WORLDS[]  ·  renderWorld(ctx, world, cam, t, W, H)
 // Each world adds `edge` (platform glow accent) used by the platform draw.
 
+import { cachedGradient } from "../systems/canvas-gradient-cache.js";
+
 export const WORLDS = [
   { id: "beach",   name: "Isla Hoku", ground: "#c9964e", groundTop: "#6bb86a", edge: "#8fe0a6", sky: ["#1b6fd6", "#57b8ef", "#ffe7bd"] },
   { id: "jungle",  name: "Jungla",    ground: "#245522", groundTop: "#63c85a", edge: "#a6f07a", sky: ["#07160a", "#123a18", "#2f6a2e"] },
@@ -28,9 +30,7 @@ function wrap(v, span) {
 }
 function onScreen(x, pad, W) { return x > -pad && x < W + pad; }
 
-function cinematicGrade(ctx, world, W, H, t) {
-  const id = world?.id || "beach";
-  const profiles = {
+const GRADE_PROFILES = {
     beach:   ["rgba(255,225,165,.10)", "rgba(0,42,72,.18)"],
     jungle:  ["rgba(180,255,145,.08)", "rgba(0,25,12,.28)"],
     volcano: ["rgba(255,95,35,.12)", "rgba(35,0,0,.34)"],
@@ -39,12 +39,18 @@ function cinematicGrade(ctx, world, W, H, t) {
     aquatic: ["rgba(80,230,255,.08)", "rgba(0,18,45,.30)"],
     grove:   ["rgba(220,245,180,.08)", "rgba(10,35,15,.18)"],
     boss:    ["rgba(255,105,120,.10)", "rgba(18,3,18,.40)"]
-  };
-  const [top, bottom] = profiles[id] || profiles.beach;
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, top);
-  g.addColorStop(.48, "rgba(0,0,0,0)");
-  g.addColorStop(1, bottom);
+};
+
+function cinematicGrade(ctx, world, W, H, t) {
+  const id = world?.id || "beach";
+  const [top, bottom] = GRADE_PROFILES[id] || GRADE_PROFILES.beach;
+  const g = cachedGradient(ctx,"grade:"+id+":"+H,()=>{
+    const value=ctx.createLinearGradient(0,0,0,H);
+    value.addColorStop(0,top);
+    value.addColorStop(.48,"rgba(0,0,0,0)");
+    value.addColorStop(1,bottom);
+    return value;
+  });
   ctx.fillStyle = g;
   ctx.fillRect(0,0,W,H);
 
@@ -56,20 +62,26 @@ function cinematicGrade(ctx, world, W, H, t) {
   ctx.fillStyle = hg;
   ctx.fillRect(0,horizon-90,W,210);
 
-  const vg = ctx.createRadialGradient(W*.5,H*.48,H*.18,W*.5,H*.5,Math.max(W,H)*.78);
-  vg.addColorStop(0,"rgba(0,0,0,0)");
-  vg.addColorStop(.68,"rgba(0,0,0,.025)");
-  vg.addColorStop(1,"rgba(0,0,0,.22)");
+  const vg = cachedGradient(ctx,"grade-vignette:"+W+":"+H,()=>{
+    const value=ctx.createRadialGradient(W*.5,H*.48,H*.18,W*.5,H*.5,Math.max(W,H)*.78);
+    value.addColorStop(0,"rgba(0,0,0,0)");
+    value.addColorStop(.68,"rgba(0,0,0,.025)");
+    value.addColorStop(1,"rgba(0,0,0,.22)");
+    return value;
+  });
   ctx.fillStyle = vg;
   ctx.fillRect(0,0,W,H);
 }
 
 export function renderWorld(ctx, world, cam, t, W, H) {
   const sky = world.sky || ["#0a0a12", "#161630"];
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  if (sky.length >= 3) {
-    g.addColorStop(0, sky[0]); g.addColorStop(0.55, sky[1]); g.addColorStop(1, sky[2]);
-  } else { g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); }
+  const g = cachedGradient(ctx,"sky:"+world.id+":"+H+":"+sky.join(","),()=>{
+    const value=ctx.createLinearGradient(0,0,0,H);
+    if(sky.length>=3){
+      value.addColorStop(0,sky[0]);value.addColorStop(.55,sky[1]);value.addColorStop(1,sky[2]);
+    } else {value.addColorStop(0,sky[0]);value.addColorStop(1,sky[1]);}
+    return value;
+  });
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
@@ -87,8 +99,11 @@ export function renderWorld(ctx, world, cam, t, W, H) {
   drawWorldLandmarks(ctx, world, cam, t, W, H);
 
   // subtle global top vignette to seat the HUD
-  const tv = ctx.createLinearGradient(0, 0, 0, 160);
-  tv.addColorStop(0, "rgba(0,0,0,.22)"); tv.addColorStop(1, "rgba(0,0,0,0)");
+  const tv = cachedGradient(ctx,"hud-top-grade",()=>{
+    const value=ctx.createLinearGradient(0,0,0,160);
+    value.addColorStop(0,"rgba(0,0,0,.22)");value.addColorStop(1,"rgba(0,0,0,0)");
+    return value;
+  });
   ctx.fillStyle = tv; ctx.fillRect(0, 0, W, 160);
 }
 
