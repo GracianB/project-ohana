@@ -296,6 +296,22 @@ async function auditPage(page, label) {
     ['idle','scout','taunt','curl','shock','swagger'].includes(stitchoFilm.livePhase),
     label+": Stitcho's original Canvas figure is disconnected from the intro");
   assert.equal(stitchoFilm.motion,'full',label+': unexpected reduced-motion Stitcho stage');
+  // V361: alien egg, real shoulder roots and antennae react for fourteen seconds.
+  const stitchoFamily=await page.evaluate(async()=>{
+    const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?e2e=v361');
+    const at=[3.70,5.72,8.45,12.2],keys=['dragon','chase','yomi','dino'];
+    const beats=at.map(t=>stitchoWelcomeBeat(t)),root=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),quiet:beats.every(b=>b.phase==='idle'),
+      still:stitchoWelcomeBeat(3.7,true).dragon,
+      canvas:!!root?.querySelector('canvas'),
+      reaction:root?.dataset.stitchoFamilyReaction||'',
+      motion:root?.dataset.stitchoWelcomeMotion||''};
+  });
+  assert.ok(stitchoFamily.canvas&&stitchoFamily.quiet);
+  assert.ok(stitchoFamily.strength.every(x=>x>.72),label+': Stitcho disappears after the prank');
+  assert.equal(stitchoFamily.still,0);
+  assert.ok(['rest','dragon','chase','yomi','dino'].includes(stitchoFamily.reaction));
+  assert.equal(stitchoFamily.motion,'full');
   // V352: Chispin's five independent gestures use its original live body.
   const chispinFilm=await page.evaluate(async()=>{
     const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?e2e=v352');
