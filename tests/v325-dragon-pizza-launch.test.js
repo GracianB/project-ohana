@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {clearAbilityFx,useAbility,updateAbilityFx} from '../systems/abilities.js';
+import {clearAbilityFx,useAbility,updateAbilityFx,OHANA_U_WINDUP} from '../systems/abilities.js';
 import {optionsForUPartner,DEFAULT_U_PARTNERS} from '../systems/u-partners.js';
 import {SUPREME_LAUNCH_RADII,SUPREME_LAUNCH_WINDUP,
   selectSupremeLaunchTargets} from '../systems/u-field-targeting.js';
@@ -59,8 +59,9 @@ test('V325 90 real U casts: Dragon and Pizza warn first, then locally hit all fi
       assert.ok(g.player.cds[hero==='dragon'?'nova':'ovenking']>0,'preserve U cooldown');
       if(hero==='dragon')assert.ok(g.player._specialFlightT>=260);
       else assert.ok(g.player._ovenKingT>=180);
-      tick(g,SUPREME_LAUNCH_WINDUP-1);
-      assert.equal(close.hp,1000,'warning must last for eleven full frames');
+      const W=hero==='pizza'?OHANA_U_WINDUP:SUPREME_LAUNCH_WINDUP;
+      tick(g,W-1);
+      assert.equal(close.hp,1000,'warning must last the full wind-up');
       assert.equal(g.score,0,'no score before visible impact');
       tick(g,1);
       assert.ok(close.hp<1000,'nearby enemy must take original-strength U hit');
@@ -83,16 +84,17 @@ test('V325 launch hits targets at warning expiry, not at cast; cancels on room c
     const enemy=enemyAt(950,277,'moving');
     const g=makeGame(hero,4,undefined,[enemy]);
     assert.equal(useAbility(g,3),true);
+    const W=hero==='pizza'?OHANA_U_WINDUP:SUPREME_LAUNCH_WINDUP;
     tick(g,5);assert.equal(enemy.hp,1000);
     enemy.x=150;enemy.y=265;
-    tick(g,7);assert.ok(enemy.hp<1000,'enemy entering warned area is hittable');
+    tick(g,W-5);assert.ok(enemy.hp<1000,'enemy entering warned area is hittable');
     clearAbilityFx();
     const leave=enemyAt(150,277,'leave'),room=makeGame(hero,2,undefined,[leave]);
-    useAbility(room,3);tick(room,5);room.roomId='forest';tick(room,12);
+    useAbility(room,3);tick(room,5);room.roomId='forest';tick(room,W-4);
     assert.equal(leave.hp,1000,'warning must not damage a different room');
     clearAbilityFx();
     const foe=enemyAt(150,277,'dead'),dead=makeGame(hero,2,undefined,[foe]);
-    useAbility(dead,3);tick(dead,5);dead.player.dead=true;tick(dead,12);
+    useAbility(dead,3);tick(dead,5);dead.player.dead=true;tick(dead,W-4);
     assert.equal(foe.hp,1000,'a dead actor cannot complete the U launch');
   }
   clearAbilityFx();

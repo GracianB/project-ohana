@@ -21,11 +21,11 @@ const PAL = [
 
 // Proporciones por forma (y de 0 a ~-100; las antenas pueden sobresalir)
 const P = [
-  { egg: true, hx: 1, hy: -38, hrx: 29, hry: 34, bx: 0, by: -24, brx: 0, bry: 0, legL: 5, legW: 8, armL: 9, armW: 6, hand: 5, antL: 15, ear: 6, eye: 9.2 },
-  { hx: 4, hy: -58, hrx: 25, hry: 21, bx: -2, by: -31, brx: 15, bry: 17, legL: 13, legW: 8.5, armL: 16, armW: 6.5, hand: 5.4, antL: 27, ear: 9, eye: 9.4 },
-  { hx: 13, hy: -52, hrx: 25, hry: 20, bx: -2, by: -30, brx: 19, bry: 17, lean: 0.32, legL: 12, legW: 10.5, armL: 20, armW: 8.5, hand: 7.5, antL: 29, ear: 10, eye: 9, spikes: true, bigClaw: true },
-  { hx: 5, hy: -62, hrx: 25, hry: 21, bx: -2, by: -34, brx: 18, bry: 19, legL: 14, legW: 9.5, armL: 18, armW: 7.5, hand: 6, antL: 29, ear: 10, eye: 9.4, tech: true },
-  { hx: 5, hy: -66, hrx: 25, hry: 21, bx: -2, by: -36, brx: 18, bry: 20, legL: 15, legW: 9.5, armL: 19, armW: 7.5, hand: 6, antL: 31, ear: 10, eye: 9.4, final: true },
+  { egg: true, hx: 1, hy: -38, hrx: 30, hry: 33, bx: 0, by: -24, brx: 0, bry: 0, legL: 5, legW: 8.5, armL: 8, armW: 6, hand: 4.6, antL: 13, ear: 9.5, eye: 12.2 },
+  { hx: 4, hy: -58, hrx: 25, hry: 21, bx: -2, by: -31, brx: 15, bry: 17, legL: 13, legW: 8.5, armL: 16, armW: 6.5, hand: 5.4, antL: 26, ear: 11, eye: 10.4 },
+  { hx: 13, hy: -52, hrx: 25, hry: 20, bx: -2, by: -30, brx: 19, bry: 17, lean: 0.32, legL: 12, legW: 10.5, armL: 20, armW: 8.5, hand: 7.5, antL: 29, ear: 12.5, eye: 9.2, spikes: true, bigClaw: true },
+  { hx: 5, hy: -64, hrx: 26, hry: 21, bx: -2, by: -35, brx: 19, bry: 20, legL: 15, legW: 10, armL: 19, armW: 8, hand: 6.4, antL: 30, ear: 12.5, eye: 9.4, tech: true, extraArms: true },
+  { hx: 5, hy: -72, hrx: 27, hry: 22, bx: -2, by: -39, brx: 19, bry: 22, legL: 17, legW: 10, armL: 21, armW: 8, hand: 6.6, antL: 35, ear: 14, eye: 9.8, final: true, extraArms: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -369,12 +369,25 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   const exF = rx * 0.5, exB = -rx * 0.1, ey = -ry * 0.14;
   // ojos de alien almendrados y rasgados, sin aro (no parecen gafas)
   alienEye(ctx, R, exB - 1, ey - 0.5, eyR * 0.72, eyR * 1.05, pose, mood, "#5a2fb8", face.lookUp, -0.45);
-  alienEye(ctx, R, exF + 1, ey, eyR * 0.84, eyR * 1.15, pose, mood, "#5a2fb8", face.lookUp, 0.45);
+  alienEye(ctx, R, exF + 1, ey, eyR * 0.84, eyR * 1.15, pose, mood, S.final ? CYAN : "#5a2fb8", face.lookUp, 0.45);
+  const openEye = mood !== "x" && mood !== "happy" && mood !== "squint" && mood !== "closed" && pose.blink <= 0.75;
+  if (S.egg && openEye) {
+    // brillo doble extra (bebé)
+    ctx.fillStyle = "#fff";
+    for (const [ex, k] of [[exB - 1, 0.72], [exF + 1, 0.84]]) { ctx.beginPath(); ctx.arc(ex + eyR * k * 0.35, ey - eyR * 0.55, eyR * 0.16, 0, TAU); ctx.fill(); }
+  }
+  if (S.final && openEye && mood !== "angry") {
+    // ceja corta cósmica: mirada intensa
+    ctx.beginPath(); ctx.moveTo(exF - eyR * 0.7, ey - eyR * 1.35); ctx.lineTo(exF + eyR * 0.8, ey - eyR * 1.05);
+    ctx.moveTo(exB - eyR * 0.6, ey - eyR * 1.2); ctx.lineTo(exB + eyR * 0.4, ey - eyR * 1.3);
+    ctx.lineWidth = 2.6; ctx.strokeStyle = R.INK; ctx.lineCap = "round"; ctx.stroke();
+  }
   // fosas nasales mínimas
   ctx.fillStyle = R.INK;
   ctx.beginPath(); ctx.arc(rx * 0.93, ry * 0.12, 1, 0, TAU); ctx.arc(rx * 0.8, ry * 0.16, 0.9, 0, TAU); ctx.fill();
-  alienMouth(ctx, R, rx * 0.42, ry * 0.56, rx * (S.egg ? 0.7 : 0.92), face.mouth, S.egg ? 1 : 2);
-  if (face.blush !== false) R.blush(ctx, rx * 0.05, ry * 0.42, rx * 0.14, "#b784ff");
+  alienMouth(ctx, R, rx * 0.42, ry * 0.56, rx * (S.egg ? 0.5 : 0.92), face.mouth, S.egg ? 1 : 2);
+  if (face.blush !== false) R.blush(ctx, rx * 0.05, ry * 0.42, rx * (S.egg ? 0.2 : 0.14), S.egg ? "#ff9ad5" : "#b784ff");
+  if (S.egg && face.blush !== false) R.blush(ctx, rx * 0.86, ry * 0.36, rx * 0.12, "#ff9ad5");
 
   // --- visor (Experimento Ñam)
   if (S.tech) {
@@ -596,7 +609,7 @@ function faceFor(pose, S) {
   else if (st === "jump") { face.mouth = "grin"; }
   else if (st === "fall" || st === "glide") { face.mouth = "o"; }
   else if (st === "attack") { face.mood = "angry"; face.mouth = pose.atk > 0.2 ? "roar" : "grin"; face.ant = "back"; }
-  else if (st === "hurt") { face.mood = "closed"; face.mouth = "wavy"; face.ant = "forward"; face.earFlick = -0.4; }
+  else if (st === "hurt") { face.mood = "squint"; face.mouth = "wavy"; face.ant = "limp"; face.earFlick = -0.75; }
   else if (st === "dead") { face.mood = "x"; face.mouth = "tongue"; face.ant = "limp"; face.glow = 0; face.blush = false; }
   else if (st === "victory") { face.mood = "happy"; face.mouth = "laugh"; face.crackle = true; face.glow = 1; }
   else if (st === "wall") { face.mouth = "grin"; face.lookUp = true; face.ant = "back"; }
@@ -667,7 +680,7 @@ function drawBiped(ctx, R, pose, f, S, C) {
     if (pose.castSlot === 0) { armA = 1.3; armB = 1.0; lean += 0.1; headRot = 0.05; legA = 0.35; legB = -0.3; }
     else { armA = 1.45 + Math.sin(t * 0.6) * 0.1; armB = -1.85; kA = 1.25; kB = 1.35; headRot = -0.22; legA = 0.4; legB = -0.4; lift = 0; }
   } else if (st === "hurt") {
-    armA = 0.9; armB = -1.9; lean -= 0.25; headRot = -0.3; headDX = -3; legA = 0.4; legB = -0.2;
+    armA = 1.25; armB = -2.1; lean -= 0.42; headRot = -0.42; headDX = -5; headDY = 1.5; legA = 0.55; legB = -0.35; legBendA = -4;
   } else if (st === "victory") {
     const hop = Math.abs(Math.sin(t * 0.17));
     lift = -hop * 16;
@@ -701,6 +714,12 @@ function drawBiped(ctx, R, pose, f, S, C) {
   ctx.save();
   if (st === "dead") { ctx.translate(-S.hy * 0.55, -(S.hrx - S.hx) - 1); ctx.rotate(-Math.PI / 2 + 0.06); legA = 0.6; legB = -0.2; armA = 1.7; armB = -1.3; headRot = 0.1; bob = 0; }
   ctx.translate(0, lift);
+  // squash/stretch leve: estira al saltar/caer, aplasta al aterrizar
+  if (st !== "dead") {
+    const land = Math.max(0, Math.min(1, Number(pose.land) || 0));
+    const sy = (st === "jump" ? 1.06 : st === "fall" ? 1.03 : 1) - land * 0.08;
+    if (sy !== 1) ctx.scale(1 + (1 - sy) * 0.7, sy);
+  }
 
   const hy = hipY + bob;
   // Keep original hip as transform root: the upper anatomy breathes together
@@ -739,6 +758,8 @@ function drawBiped(ctx, R, pose, f, S, C) {
     if (S.tech) jetpack(ctx, R, S.bx - S.brx - 3, S.by - S.bry * 0.25, t, pose.air || st === "victory" ? 1 : 0.35);
     if (!(trail && trail.which === "B")) arm(ctx, R, shB[0], shB[1], S.armL * kB, armB, bendB, S.armW, back, hs * 0.95, S.bigClaw);
     if (S.tech) shoulderPlate(ctx, R, shB[0], shB[1] - 1, 6.5, true);
+    // brazos extra: el trasero sale hacia atrás del torso para no quedar tapado
+    if (S.extraArms) arm(ctx, R, shB[0] - S.brx * 0.45, shB[1] + S.bry * 0.6, S.armL * 0.88, armB * 0.5 - 0.95, bendB, S.armW * 0.9, R.darken(limbCol, 0.3), hs * 0.9, true);
     if (!S.egg) drawBody(ctx, R, f, S, C, S.bx, S.by, S.brx, S.bry, t, false);
   });
   if (scratch <= 0) leg(ctx, R, legX * (S.egg ? 1 : 0.5), hy, S.legL, legA, legBendA, S.legW, limbCol);
@@ -747,6 +768,8 @@ function drawBiped(ctx, R, pose, f, S, C) {
     drawHead(ctx, R, pose, f, S, C, S.hx + headDX, S.hy + headDY, headRot - lean * 0.6, face);
     if (trail && trail.which === "B") { drawTrail(shB, S.armL * kB); arm(ctx, R, shB[0], shB[1], S.armL * kB, armB, bendB, S.armW, back, hs * 0.95, S.bigClaw); }
     if (trail && trail.which === "A") drawTrail(shF, S.armL * kA);
+    // brazo extra del lado de cámara: delante del cuerpo y desplazado hacia fuera
+    if (S.extraArms) arm(ctx, R, shF[0] + S.brx * 0.35, shF[1] + S.bry * 0.7, S.armL * 0.88, (st === "attack" ? -0.35 : armA * 0.5 + 0.95), (st === "attack" ? -4 : bendA), S.armW * 0.9, R.lighten(limbCol, 0.08), hs * 0.9, true);
     arm(ctx, R, shF[0], shF[1], S.armL * kA, armA, bendA, S.armW, limbCol, hs, S.bigClaw);
     if (S.tech) shoulderPlate(ctx, R, shF[0], shF[1] - 1, 7, false);
   });
@@ -765,11 +788,14 @@ function drawGallop(ctx, R, pose, f, S, C) {
   const bx = -2, by = -31 + bob, rx = 22 + s * 2.5, ry = 12.5;
 
   leg(ctx, R, hipB[0] - 3, hipB[1], legL, -s * 0.9 - 0.25, 4, w, back);
+  // brazos extra al galope: par central con fase cruzada (no desaparecen)
+  if (S.extraArms) arm(ctx, R, bx + 1, by + 6, legL - 6, -s * 0.8 + 0.5, -3, w * 0.8, R.darken(limbCol, 0.3), S.hand * 0.75, true);
   arm(ctx, R, hipF[0] - 3, hipF[1], legL - 1, s * 0.95 + 0.25, -4, w * 0.9, back, S.hand * 0.8, S.bigClaw);
   tailPart(ctx, R, bx - rx * 0.95, by - 2, Math.PI * 1.15, 11, 5.5, C.body, t, pose, 1);
   if (S.tech) jetpack(ctx, R, bx - rx * 0.3, by - ry - 6, t, 1);
   drawBody(ctx, R, f, S, C, bx, by, rx, ry, t, true);
   leg(ctx, R, hipB[0], hipB[1], legL, -s * 0.9, 4, w, limbCol);
+  if (S.extraArms) arm(ctx, R, bx + 4, by + 7, legL - 6, s * 0.8 + 0.3, -3, w * 0.8, R.lighten(limbCol, 0.08), S.hand * 0.78, true);
   drawHead(ctx, R, pose, f, S, C, bx + rx + 8, by - 14, 0.12, face);
   arm(ctx, R, hipF[0], hipF[1], legL - 1, s * 0.95, -4, w, limbCol, S.hand * 0.85, S.bigClaw);
   if (S.tech) shoulderPlate(ctx, R, hipF[0], hipF[1] - 2, 7, false);
@@ -928,10 +954,11 @@ function draw(ctx, pose, R) {
   drawStitchoFootwork(ctx,pr,f,pose.t||0);
   drawSoulSeams(ctx, pr, f, false);
   if (f === 4) rings(ctx, R, 0, ringY, pose.t, false);
+  // los anillos van siempre detrás del cuerpo (misma capa en todas las poses)
+  if (f === 4) rings(ctx, R, 0, ringY, pose.t, true);
   if (roll && st !== "dead" && st !== "hurt") drawBall(ctx, R, pr, f, S, C, chaos);
   else if (gallop) drawGallop(ctx, R, pr, f, S, C);
   else drawBiped(ctx, R, pr, f, S, C);
-  if (f === 4) rings(ctx, R, 0, ringY, pose.t, true);
   drawSoulSeams(ctx, pr, f, true);
   ctx.restore();
 }

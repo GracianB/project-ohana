@@ -7,13 +7,13 @@ const HAIR_HI = "#6a5a8c";
 const IRIS = "#7a4520";
 
 const DIM = [
-  { hr: 31, th: 17, ll: 12, al: 16, lw: 8.5, aw: 7 },
+  { hr: 33, th: 16, ll: 12, al: 16, lw: 8.5, aw: 7 },
   { hr: 25, th: 25, ll: 20, al: 24, lw: 7.5, aw: 6 },
   { hr: 24, th: 27, ll: 24, al: 26, lw: 7.5, aw: 6 },
   { hr: 23, th: 29, ll: 26, al: 27, lw: 7.5, aw: 6 },
   { hr: 22, th: 30, ll: 28, al: 28, lw: 7.5, aw: 6 },
 ];
-const DRESS = ["#ffacc2", "#eb554a", "#ea637b", "#c73d4a", "#fff1d9"];
+const DRESS = ["#ffacc2", "#eb554a", "#ea637b", "#c73d4a", "#ffe9a8"];
 const HIBIS = ["#ff5c8a", "#ff6f91", "#ffd23f", "#ff4d6d", "#ff6b9a"];
 
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -63,7 +63,7 @@ function note(ctx, R, x, y, s, col, a) {
 
 /** Ukelele: (x,y) = centro de la caja; el mástil apunta en `ang`. */
 function uke(ctx, R, x, y, ang, s, gold) {
-  const body = gold ? "#ffd35a" : "#e3a15c", neck = gold ? "#f0b43a" : "#7a4726";
+  const body = gold ? "#f08a2c" : "#e3a15c", neck = gold ? "#8a4e22" : "#7a4726";
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(ang);
@@ -77,9 +77,9 @@ function uke(ctx, R, x, y, ang, s, gold) {
   ctx.fillStyle = R.darken(body, 0.45);
   ctx.fillRect(-s * 0.46, -s * 0.2, s * 0.08, s * 0.4);
   ctx.strokeStyle = "rgba(255,255,255,0.75)";
-  ctx.lineWidth = 0.6;
+  ctx.lineWidth = Math.max(0.6, s * 0.05);
   ctx.beginPath();
-  for (let i = -1; i <= 1; i += 2) { ctx.moveTo(-s * 0.42, i * s * 0.05); ctx.lineTo(s * 1.5, i * s * 0.04); }
+  for (let i = -1.5; i <= 1.5; i += 1) { ctx.moveTo(-s * 0.42, i * s * 0.045); ctx.lineTo(s * 1.5, i * s * 0.035); }
   ctx.stroke();
   R.shine(ctx, -s * 0.3, -s * 0.22, s * 0.16, s * 0.08, 0.5);
   ctx.restore();
@@ -110,11 +110,10 @@ function staff(ctx, R, x, y, ang, len, t, big) {
   ctx.beginPath(); ctx.moveTo(x1 - dx * 6, y1 - dy * 6); ctx.lineTo(x1, y1); ctx.stroke();
   const r = (big ? 8 : 5.5) + Math.sin(t * 0.15) * 0.8;
   ctx.save();
-  const g = ctx.createRadialGradient(x1 + dx * 5, y1 + dy * 5, 1, x1 + dx * 5, y1 + dy * 5, r * 3);
-  g.addColorStop(0, "rgba(255,245,190,0.9)");
-  g.addColorStop(1, "rgba(255,200,90,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x1 + dx * 5, y1 + dy * 5, r * 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,210,110,0.22)";
+  ctx.beginPath(); ctx.arc(x1 + dx * 5, y1 + dy * 5, r * 2.6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,245,190,0.4)";
+  ctx.beginPath(); ctx.arc(x1 + dx * 5, y1 + dy * 5, r * 1.6, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   R.star(ctx, x1 + dx * 5, y1 + dy * 5, r, "#fff0a0", { points: 4, inner: 0.5, rot: t * 0.03, lw: 2 });
   R.sparkle(ctx, x1 + dx * 5 + 6, y1 + dy * 5 - 6, 3 + Math.sin(t * 0.2) * 1.5, "#ffffff");
@@ -122,12 +121,12 @@ function staff(ctx, R, x, y, ang, len, t, big) {
 
 function glowOrb(ctx, R, x, y, r, t, col) {
   ctx.save();
-  const g = ctx.createRadialGradient(x, y, 1, x, y, r * 2.4);
-  g.addColorStop(0, "rgba(255,255,255,0.95)");
-  g.addColorStop(0.35, R.alpha(col, 0.7));
-  g.addColorStop(1, R.alpha(col, 0));
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, r * 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = R.alpha(col, 0.2);
+  ctx.beginPath(); ctx.arc(x, y, r * 2.3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = R.alpha(col, 0.55);
+  ctx.beginPath(); ctx.arc(x, y, r * 1.3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.beginPath(); ctx.arc(x, y, r * 0.6, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   for (let i = 0; i < 4; i++) {
     const a = t * 0.08 + (i * Math.PI) / 2;
@@ -137,7 +136,7 @@ function glowOrb(ctx, R, x, y, r, t, col) {
 
 // V350 · Pure directions for the ACTUAL five-form Kilo rig.
 // Baby Kilo's pacifier/held ukulele stays intact. Later forms keep the
-// original long hair, clothing, staff and angel wings.
+// original long hair, clothing, staff and the Flor Solar sun halo.
 export function kiloWelcomeRig(pose={},form=0){
  const b=pose?.kiloWelcome,u=n=>Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
  if(!b||b.reduced||pose?.reduceMotion||(pose?.state&&pose.state!=="idle"))
@@ -184,6 +183,8 @@ function solve(pose, d, f) {
     footF: [4, 0], footB: [-5, 0], handF: restF.slice(), handB: restB.slice(),
     flare: 0, hemLift: 0, hairUp: 0, uke: f >= 1 ? "back" : null, armOver: false,
     fx: null, fxK: 0, smear: 0, smearA: 0, paci: f === 0, staffUp: false, backOver: false,
+    // Secondary motion (follow-through): hair and skirt lag behind the body.
+    hairLag: Math.sin(t * 0.05 - 0.9) * 0.08, skirt: Math.sin(t * 0.05 - 1.3) * 0.25,
   };
   const br = pose.breath;
   r.handF[1] += br * 0.8; r.handB[1] += br * 0.8; r.handF[0] += br * 0.4;
@@ -210,24 +211,37 @@ function solve(pose, d, f) {
       r.handB = [xB + s * al * 0.55 - 2, sy + al * 0.72];
       r.lean = 0.12; r.flare = 0.25 + 0.2 * Math.abs(s); r.headRot = 0.05 + c * 0.03;
       r.hairUp = -0.1 + Math.abs(c) * 0.3;
+      // Contact squash: the body dips as each foot plants, arms swing from the
+      // shoulder with a slight elbow lag, hair/skirt trail half a beat behind.
+      r.oy += Math.max(0, 1 - Math.abs(c) * 3) * 1.2;
+      r.handF[1] -= Math.max(0, -s) * 3; r.handB[1] -= Math.max(0, s) * 3;
+      r.hairLag = Math.sin(p - 1.4) * 0.35 + 0.15; r.skirt = Math.sin(p * 2 - 1.2) * 0.7 - 0.4;
       break;
     }
     case "jump":
-      r.footF = [7, -d.ll * 0.5]; r.footB = [-6, -d.ll * 0.18];
-      r.handF = [hx + hr * 0.9, sy - 10]; r.handB = [xB - al * 0.7, sy - 4]; r.armOver = true;
-      r.lean = -0.06; r.hairUp = -0.6; r.flare = -0.1; r.mouth = "open"; r.headRot = -0.08;
+    case "fall": {
+      // Continuous rise -> apex -> fall blend driven by vertical speed, so the
+      // apex reads as a hang instead of a one-frame snap between two poses.
+      const k = ease(Math.max(0, Math.min(1, ((pose.vy || 0) + 0.45) / 0.9)));
+      const J = { fF: [7, -d.ll * 0.5], fB: [-6, -d.ll * 0.18], hF: [hx + hr * 0.9, sy - 10], hB: [xB - al * 0.7, sy - 4] };
+      const F = { fF: [5, 1], fB: [-4, -3], hF: [xF + al * 0.9, sy - 3], hB: [xB - al * 0.9, sy - 1] };
+      r.footF = L2(J.fF, F.fF, k); r.footB = L2(J.fB, F.fB, k);
+      r.handF = L2(J.hF, F.hF, k); r.handB = L2(J.hB, F.hB, k); r.armOver = true;
+      const apex = 1 - Math.abs(k * 2 - 1);
+      r.handF[1] -= apex * 3; r.handB[1] -= apex * 3;
+      r.lean = lerp(-0.06, 0, k); r.hairUp = lerp(-0.6, 1, k) + apex * 0.25; r.flare = lerp(-0.1, 0.7, k) + apex * 0.3;
+      r.hemLift = 3 * k; r.mouth = k < 0.5 ? "open" : "o"; r.headRot = lerp(-0.08, 0.06, k);
+      r.hairLag = lerp(-0.35, 0.3, k); r.skirt = lerp(0.2, -0.6, k);
       break;
-    case "fall":
-      r.footF = [5, 1]; r.footB = [-4, -3];
-      r.handF = [xF + al * 0.9, sy - 3]; r.handB = [xB - al * 0.9, sy - 1]; r.armOver = true;
-      r.hairUp = 1; r.flare = 0.7; r.hemLift = 3; r.mouth = "o"; r.headRot = 0.06;
-      break;
+    }
     case "attack": {
       const a = pose.atk, sh = [xF, sy + 3];
-      r.footF = [9, 0]; r.footB = [-8, 0]; r.mood = "angry"; r.mouth = "open"; r.paci = false;
+      r.footF = [9, 0]; r.footB = [-8, 0]; r.mood = "angry"; r.mouth = "grin"; r.paci = false;
       if (a < 0.3) {
         const k = ease(a / 0.3);
         r.handF = L2(restF, [xB - 6, sy - 10], k); r.lean = -0.14 * k; r.headRot = -0.06 * k;
+        // Anticipation: crouch and wind up, hair and skirt pulled forward.
+        r.oy += 2 * k; r.footB = [-8 - 2 * k, 0]; r.hairLag = 0.4 * k; r.skirt = 0.5 * k;
         if (f >= 1 && k > 0.55) r.uke = "hand";
         r.armOver = false;
       } else {
@@ -235,7 +249,13 @@ function solve(pose, d, f) {
         const back = a < 0.55 ? 0 : (a - 0.55) / 0.45;
         const ang = lerp(-2.7, 1.3, k) - back * 0.35;
         r.handF = [sh[0] + Math.sin(ang) * al, sh[1] + Math.cos(ang) * al];
-        r.lean = lerp(-0.14, 0.2, k) * (1 - back * 0.7); r.headRot = 0.08 * k;
+        // Recovery: settle the swing back toward rest instead of freezing.
+        const rec = a < 0.6 ? 0 : ease(Math.min(1, (a - 0.6) / 0.32));
+        r.handF = L2(r.handF, [restF[0] + 3, restF[1] - 2], rec);
+        r.lean = lerp(-0.14, 0.2, k) * (1 - back * 0.7) * (1 - rec * 0.6); r.headRot = 0.08 * k * (1 - rec);
+        r.oy += a < 0.5 ? (1 - Math.abs(a - 0.4) / 0.1 > 0 ? 1.5 * (1 - Math.abs(a - 0.4) / 0.1) : 0) : 0;
+        r.hairLag = lerp(0.4, -0.45, k) * (1 - rec) ; r.skirt = lerp(0.5, -0.9, k) * (1 - rec);
+        r.footF = [9 + 2 * k * (1 - rec), 0];
         r.armOver = true;
         if (f >= 1) r.uke = "hand";
         if (a < 0.8) { r.smear = 1 - Math.max(0, (a - 0.45) / 0.35); r.smearA = ang; }
@@ -315,6 +335,11 @@ function solve(pose, d, f) {
       }
     }
   }
+  // Landing follow-through: hair and skirt keep travelling down for a beat.
+  if (!pose.air && pose.land > 0.02 && (st === "idle" || st === "run")) {
+    r.hairUp -= pose.land * 0.7; r.hairLag += pose.land * 0.45; r.skirt -= pose.land * 0.8;
+    r.flare += pose.land * 0.5; r.oy += pose.land * 1.5;
+  }
   if(Number.isFinite(pose.kiloDuetAge)){
     const beat=pose.kiloDuetAge;
     r.paci=false;r.uke='play';r.armOver=true;
@@ -391,16 +416,16 @@ function ponytail(ctx, R, pose, f, hr, r) {
   if (f === 0) {
     ctx.save();
     ctx.translate(-hr * 0.05, -hr * 0.92);
-    ctx.rotate(Math.sin(t * 0.08) * 0.15 + pose.sway * 0.3);
+    ctx.rotate(Math.sin(t * 0.08) * 0.15 + pose.sway * 0.3 + (r.hairLag || 0) * 0.6);
     R.tail(ctx, 0, 0, hr * 0.55, -1.7, (k) => 4.5 + pose.bounce, 5, 2.5, HAIR, { segments: 7 });
     ctx.restore();
     return;
   }
-  const turn = -2.1 + r.hairUp * 1.4 - pose.sway * 0.9 + pose.bounce * 0.6;
+  const turn = -2.1 + r.hairUp * 1.4 - pose.sway * 0.9 + pose.bounce * 0.6 + (r.hairLag || 0);
   const bx = -hr * 0.5, by = -hr * 0.82;
   const len = hr * (f === 4 ? 1.9 : 1.55);
   R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
-    (k) => turn + Math.sin(t * 0.08 + k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
+    (k) => turn + (r.hairLag || 0) * k * 0.8 + Math.sin(t * 0.08 - k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
   if(f===2){
     for(let i=0;i<4;i++)R.ellipse(ctx,-hr*1.08+Math.sin(t*.06+i*.5)*2,-hr*.5+i*hr*.3,hr*.15,hr*.22,HAIR,{lw:1.7});
   }
@@ -448,8 +473,9 @@ function head(ctx, R, pose, f, hr, r) {
     ctx.stroke();
   } else {
     const mood = r.mood === "normal" ? undefined : r.mood;
-    R.eye(ctx, ex, ey, hr * 0.29, pose, { iris: IRIS, mood: r.wink ? "happy" : mood, lash: true });
-    R.eye(ctx, hr * 0.66, ey - hr * 0.02, hr * 0.24, pose, { iris: IRIS, mood });
+    const eb = f === 0 ? 1.22 : 1;
+    R.eye(ctx, ex, ey, hr * 0.29 * eb, pose, { iris: IRIS, mood: r.wink ? "happy" : mood, lash: true });
+    R.eye(ctx, hr * 0.66, ey - hr * 0.02, hr * 0.24 * eb, pose, { iris: IRIS, mood });
   }
   R.blush(ctx, -hr * 0.08, hr * 0.52, hr * 0.14);
   R.blush(ctx, hr * 0.84, hr * 0.5, hr * 0.09);
@@ -518,22 +544,20 @@ function torso(ctx, R, pose, f, d, r) {
   let wH = (f === 0 ? 14 : 13 + f * 0.8) + r.flare * 7;
   let hemY = hipY + d.ll * (f === 0 ? 0.35 : f >= 3 ? 0.45 : 0.32) - r.hemLift;
   if (f === 4) hemY = hipY + d.ll * 0.55 - r.hemLift;
-  const shift = -pose.sway * 3 + r.hipX * 0.6;
+  const shift = -pose.sway * 3 + r.hipX * 0.6 + (r.skirt || 0) * 3;
   if (f === 0) {
     R.blob(ctx, [[x0 - 9, sy + 1], [x0 + 9, sy + 1], [x0 + 13, sy + d.th * 0.7], [x0 + 9, hemY], [x0 - 9, hemY], [x0 - 13, sy + d.th * 0.7]], col);
     R.ellipse(ctx, x0 + 3, sy + d.th * 0.55, 5, 5, "#ffffff", { lw: 2 });
     hibiscus(ctx, R, x0 + 3, sy + d.th * 0.55, 3.2, "#ff5c8a");
     return;
   }
-  const g = ctx.createLinearGradient(x0 - wH, sy, x0 + wH, hemY);
-  g.addColorStop(0, R.lighten(col, 0.22));
-  g.addColorStop(0.6, col);
-  g.addColorStop(1, R.darken(col, 0.2));
   dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, r.flare);
-  ctx.fillStyle = g;
+  ctx.fillStyle = col;
   ctx.fill();
   ctx.save();
   ctx.clip();
+  ctx.fillStyle = R.alpha(R.lighten(col, 0.3), 0.55);
+  ctx.beginPath(); ctx.ellipse(x0 - wH * 0.55, sy + (hemY - sy) * 0.35, wH * 0.45, (hemY - sy) * 0.6, 0, 0, Math.PI * 2); ctx.fill();
   if (f <= 2) {
     const fl = [[-6, 0.25], [4, 0.45], [-2, 0.8], [8, 0.95], [-10, 1.05], [2, 1.25]];
     ctx.fillStyle = f === 2 ? "#fff3f6" : "#ffffff";
@@ -579,7 +603,7 @@ function torso(ctx, R, pose, f, d, r) {
     const fan = 0.22 + r.flare * 0.62;
     for (let i = 0; i < n; i++) {
       const k = i / (n - 1), x = x0 - 13 + k * 26;
-      const ang = (k - 0.5) * 2 * fan - pose.sway * 0.28 + Math.sin(t * 0.13 + i * 0.8) * 0.06 + r.hipX * 0.03 + pose.bounce * (k - 0.5) * 0.3;
+      const ang = (k - 0.5) * 2 * fan - pose.sway * 0.28 + Math.sin(t * 0.13 + i * 0.8) * 0.06 + r.hipX * 0.03 + pose.bounce * (k - 0.5) * 0.3 + (r.skirt || 0) * (0.18 + 0.1 * Math.sin(i * 1.7));
       const ex = x + Math.sin(ang) * L, ey = wy + Math.cos(ang) * L * (1 - r.flare * 0.12);
       const px = Math.cos(ang) * 2, py = -Math.sin(ang) * 2;
       R.poly(ctx, [[x - 2.2, wy], [x + 2.2, wy], [ex + px * 0.3, ey + py * 0.3], [ex - px * 0.3, ey - py * 0.3]],
@@ -596,36 +620,29 @@ function torso(ctx, R, pose, f, d, r) {
   }
 }
 
+// Kilo Flor Solar: corona-girasol plana detrás del cuerpo (sin gradientes,
+// colores planos). Los pétalos laten con la música y se abren en la intro.
+const SUN_PETAL = ["#ffd23f", "#ff9a3d"];
 function wings(ctx, R, pose, sy) {
   const t = pose.t;
-  // The final guardian's original shoulder-rooted wings open in time with
-  // the music. Forms 0–3 never gain wings just for the intro.
-  const flap = Math.min(1.25, 0.55 + 0.45 * Math.abs(Math.sin(t * 0.12)) + kiloWelcomeRig(pose,4).wing * .34);
-  const up = [[0, 0], [-10, -18], [-30, -36], [-44, -30], [-42, -12], [-24, 2]];
-  const lo = [[0, 2], [-22, 6], [-34, 20], [-26, 32], [-10, 22]];
-  for (const side of [1, -1]) {
-    ctx.save();
-    ctx.translate(-4, sy + 8);
-    ctx.scale(side === 1 ? flap : -flap * 0.72, 1);
-    for (const pts of [lo, up]) {
-      ctx.beginPath();
-      pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-      ctx.closePath();
-      const g = ctx.createLinearGradient(0, 0, -40, -20);
-      g.addColorStop(0, "rgba(255,248,210,0.9)");
-      g.addColorStop(0.5, "rgba(255,160,215,0.72)");
-      g.addColorStop(1, "rgba(255,200,245,0.6)");
-      ctx.fillStyle = g;
-      ctx.lineJoin = "round";
-      ctx.fill();
-      ctx.lineWidth = 2.4; ctx.strokeStyle = "#fff2c4"; ctx.stroke();
+  const flap = Math.min(1.25, 0.85 + 0.15 * Math.abs(Math.sin(t * 0.12)) + kiloWelcomeRig(pose, 4).wing * 0.3);
+  const cx = -1, cy = sy - 21, n = 12, rot = t * 0.01; // centrado tras la cabeza: la enmarca como un sol
+  ctx.save();
+  ctx.fillStyle = "rgba(255,226,122,0.18)";
+  ctx.beginPath(); ctx.arc(cx, cy, 40 * flap, 0, Math.PI * 2); ctx.fill();
+  for (let ring = 0; ring < 2; ring++) {
+    for (let i = 0; i < n; i++) {
+      const a = rot + (i + ring * 0.5) * (Math.PI * 2 / n);
+      const L = (ring ? 27 : 35) * flap;
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
+      R.ellipse(ctx, 0, -L * 0.62, 6.5 - ring, L * 0.42, SUN_PETAL[ring], { lw: 2.2, shade: false });
+      ctx.restore();
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-36, -28); ctx.moveTo(0, 0); ctx.lineTo(-40, -14); ctx.moveTo(0, 2); ctx.lineTo(-28, 22); ctx.stroke();
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    ctx.beginPath(); ctx.arc(-34, -24, 2.6, 0, Math.PI * 2); ctx.arc(-24, 18, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
   }
+  R.ellipse(ctx, cx, cy, 17, 17, "#8a4e22", { lw: 2.4, shade: false });
+  ctx.fillStyle = "#5a3014";
+  for (let i = 0; i < 10; i++) { const a = i * 2.4, rr = 3 + (i % 3) * 4; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 1.4, 0, Math.PI * 2); ctx.fill(); }
+  ctx.restore();
 }
 
 function cape(ctx, R, pose, d, r) {
@@ -766,7 +783,7 @@ function draw(ctx, pose, R) {
   if (f === 3) cape(ctx, R, pose, d, r);
   if (r.fx === "summon" && f >= 1) glowOrb(ctx, R, 0, sy - d.hr * 2 - 6, 12, t, "#fff0c0");
   ctx.save(); headT(); ponytail(ctx, R, pose, f, d.hr, r); ctx.restore();
-  if (r.uke === "back") uke(ctx, R, -15, sy + d.th * 0.58, -Math.PI / 2 - 0.95 + pose.sway * 0.1, 12 + f, f === 4);
+  if (r.uke === "back") uke(ctx, R, -21, sy + d.th * 0.7, -Math.PI / 2 - 0.55 + pose.sway * 0.1, 13 + f, f === 4);
   if (f === 3) {
     const hb = r.staffUp ? [r.handB[0], r.handB[1]] : r.handB;
     staff(ctx, R, hb[0], hb[1], r.staffUp ? -0.15 : -0.12 - pose.sway * 0.1, 56, t, r.staffUp);

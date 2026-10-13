@@ -9,7 +9,8 @@ globalThis.window.addEventListener = globalThis.addEventListener;
 globalThis.window.removeEventListener = globalThis.removeEventListener;
 globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 
-const { useAbility, clearAbilityFx, registerCombatAction, supremeOf, updateAbilityFx, abilityPreMove } = await import('../systems/abilities.js');
+const { useAbility, clearAbilityFx, registerCombatAction, supremeOf, updateAbilityFx, abilityPreMove, OHANA_U_WINDUP } = await import('../systems/abilities.js');
+const windup=(game)=>{for(let i=0;i<OHANA_U_WINDUP;i++){game.t++;updateAbilityFx(game);}};
 
 function makeEnemy(overrides = {}) {
   return {
@@ -144,7 +145,7 @@ test('V325: Pizza supreme launches Horno after a visible warning and rewards act
   const game = cast('pizza', enemies);
   assert.ok(game.player._ovenKingT >= 120);
   assert.equal(game.score, 0,'no credit before impact');
-  for(let i=0;i<12;i++){game.t++;updateAbilityFx(game);}
+  windup(game);
   assert.equal(game.score, 84);
   clearAbilityFx();
 });
@@ -153,6 +154,8 @@ test('PR151.19: Yomi supreme ejecuta objetivos por debajo del 34%', () => {
   const finisher = makeEnemy({ hp: 30, maxHp: 100 });
   const survivor = makeEnemy({ x: 260, hp: 500, maxHp: 1000 });
   const game = cast('yomi', [finisher, survivor]);
+  assert.equal(finisher.hp, 30, 'V370: visible gate wind-up before judgement');
+  windup(game);
   assert.equal(finisher.hp, 0);
   assert.ok(survivor.hp > 0);
   clearAbilityFx();
@@ -160,6 +163,7 @@ test('PR151.19: Yomi supreme ejecuta objetivos por debajo del 34%', () => {
 
 test('PR151.20: Cuerno supreme cura y concede experiencia', () => {
   const game = cast('cuerno');
+  windup(game);
   assert.ok(game.player.health > 40);
   assert.ok(game.player.xp > 0);
   clearAbilityFx();

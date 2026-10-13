@@ -1,5 +1,6 @@
 // Project OHANA · Dino-specific combat animation, isolated from the shared engine.
 import { drawDinoFossilForecast, drawDinoRollingShell } from "./dino-stagecraft.js";
+import { noteDinoQuake, tickDinoQuake, drawDinoQuake } from "./dino-quake-u.js";
 // Injecting helpers keeps the original cast/update contracts and JS budget intact.
 export function createDinoEffects(ops) {
  const { nearestEnemy, canHit, cx, cy, solidAt, circleHit, hitEnemy, boom,
@@ -36,7 +37,7 @@ export function createDinoEffects(ops) {
      add({kind:"dinoColossus",x:cx(p),y:cy(p),life:span,max:span,
        nextPulse:28,nextFossil:34,beat:0,stones:0,
        dmg:dmg*.17,color:color||"#c8f04a",evo:cap(Number(p.evo)||0,0,4)});
-     g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO!","#eaffb5",true);
+     g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO! ¡TERREMOTO!","#eaffb5",true);
      g.shake=Math.min(18,(g.shake||0)+9);
      boom(g,cx(p),p.y+p.h,"#eaffb5",9,{up:1.6,star:true});
    },
@@ -44,18 +45,20 @@ export function createDinoEffects(ops) {
  dinoColossus(g,f,p){
    if(--f.life<=0){if(g._dinoUltimate)g._dinoUltimate.remaining=0;return false;}
    f.x=cx(p);f.y=cy(p);
-   const elapsed=f.max-f.life;
+   const elapsed=f.max-f.life;tickDinoQuake(f);
    const maxStones=g.reduceMotion?3:Math.min(8,4+f.evo);
    if(--f.nextPulse<=0){
      f.nextPulse=34;
      f.beat++;
-     const range=245+f.evo*46;
+     const range=245+f.evo*46,hit=[];
      for(const e of visibleTargets(g)){
        if(Math.hypot(cx(e)-f.x,cy(e)-f.y)>range+Math.max(e.w,e.h)*.5)continue;
+       hit.push(e);
        hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*5,ky:-6,stun:21,
          color:"#bbff97",hitstop:0,shake:0,parts:3});
      }
      if(!g.reduceMotion)g.shake=Math.min(10,(g.shake||0)+2);
+     noteDinoQuake(g,f,f.x,p.y+p.h,hit);
      boom(g,f.x,p.y+p.h,"#c6fa87",g.reduceMotion?2:5,{speed:1.6,up:.6});
    }
    if(elapsed>=37&&f.stones<maxStones&&--f.nextFossil<=0){
@@ -197,17 +200,14 @@ dinoColossus(ctx,f,cam,t,g,p){
   ctx.globalAlpha=(.09+.05*Math.sin(t*.11))*fade;
   ctx.fillStyle="#ddffad";ctx.beginPath();
   ctx.ellipse(x,y,38*scale,51*scale,0,0,TAU);ctx.fill();
-  ctx.restore();
+  ctx.restore();drawDinoQuake(ctx,f,cam,t,p);
 },
 dinoFossil(ctx,f,cam,t){
   const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
   ctx.save();
   const sp=Math.hypot(f.vx,f.vy)||1,ex=x-f.vx/sp*46,ey=y-f.vy/sp*46;
-  const grad=ctx.createLinearGradient(ex,ey,x,y);
-  grad.addColorStop(0,"rgba(130,250,135,0)");
-  grad.addColorStop(1,"rgba(245,255,165,.92)");
-  ctx.strokeStyle=grad;ctx.lineWidth=f.r*1.25;ctx.lineCap="round";
-  ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(x,y);ctx.stroke();
+  ctx.lineCap="round";ctx.globalAlpha=.4;ctx.strokeStyle="#f5ffa5";ctx.lineWidth=f.r*1.25;
+  ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(x,y);ctx.stroke();ctx.globalAlpha=1;
   ctx.translate(x,y);ctx.rotate(f.rot);
   ctx.fillStyle="#556645";ctx.strokeStyle="#d9ff9c";ctx.lineWidth=2;
   ctx.beginPath();

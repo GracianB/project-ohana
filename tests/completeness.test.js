@@ -10,7 +10,7 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 globalThis.CustomEvent ||= class CustomEvent { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } };
 const { ROSTER, applyForm, tickEvoTween } = await import('../characters/roster.js');
 const { ROOMS } = await import('../systems/map.js');
-const { ABILITY_DEFS, useAbility, updateAbilityFx, abilityPreMove, clearAbilityFx, hitEnemy } = await import('../systems/abilities.js');
+const { OHANA_U_WINDUP, ABILITY_DEFS, useAbility, updateAbilityFx, abilityPreMove, clearAbilityFx, hitEnemy } = await import('../systems/abilities.js');
 const { createBossNido, updateBossNido } = await import('../systems/boss-nido.js');
 const { BOSS_COMBAT_PROFILES, chooseBossPattern, patternLabel, recoveryFrames } = await import('../systems/boss-combat.js');
 const { createBossBehavior, observeBossBehavior, reactiveAttackPreference, behaviorSnapshot, behaviorLabel } = await import('../systems/boss-behavior.js');
@@ -1047,10 +1047,11 @@ test('V58: U de Yomi y Cuerno golpea a toda la sala sin ejecutar jefes sanos', (
   const g=contractGame({player:{...b.player,id:'yomi',abilities:['ofuda','sleeve','maw'],evo:4},enemies:[b.enemies[0],behind,boss]});
   g.enemies[1]._yomiMarkUntil=200;
   assert.equal(useAbility(g,3),true);
+  for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}
   assert.ok(g.enemies.every(e=>e.hp<e.max),'U debe alcanzar los tres enemigos');
   assert.ok(boss.hp>0,'jefe sano no debe morir automáticamente');
   assert.equal(g._assist?.heroId,'cuerno','Cuerno debe intervenir realmente');
-  assert.equal(g._assist?.t,240,'Cuerno permanece en combate');
+  assert.ok(g._assist?.t>=240-OHANA_U_WINDUP,'Cuerno permanece en combate');
   assert.ok(500-behind.hp>500-g.enemies[0].hp,'la marca potencia Juicio');
   clearAbilityFx();
 });

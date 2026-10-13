@@ -1,12 +1,18 @@
 
 const PAL = [
-{ fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a" },
+{ fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a", thick: 3.8, shoeS: 1.15 },
 { fry: "#f7c04a", edge: "#d98c22", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a" },
-{ fry: "#f6bd45", edge: "#d6851e", cape: "#d42020", limb: "#4a2a26", shoe: "#2b2b3a" },
+{ fry: "#f6bd45", edge: "#d6851e", cape: "#d42020", limb: "#4a2a26", shoe: "#e8322a", thick: 3.6 },
 { fry: "#ffd35e", edge: "#cf7a18", cape: "#d42020", limb: "#4a2a26", shoe: "#e8322a" },
-{ fry: "#ffd23a", edge: "#e89a10", cape: "#e82020", limb: "#6a3a16", shoe: "#ffe27a" },
+{ fry: "#ffd23a", edge: "#e89a10", cape: "#e82020", limb: "#6a3a16", shoe: "#ffe27a", thick: 3.8, shoeS: 1.1 },
 ];
 const KETCHUP = "#d8231c";
+// Contorno único: miembros/accesorios usan fracciones fijas de R.LINE para que
+// la silueta lea igual en las 5 formas.
+const OL_LIMB = 0.6, OL_PROP = 0.7;
+
+/** Altura visual por forma (la usa draw.js, igual que CUERNO/KILO/MICHI…). */
+export const FRITA_VISUAL_H = Object.freeze([68, 70, 80, 90, 102]);
 
 const TAU = Math.PI * 2;
 const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
@@ -142,12 +148,12 @@ function thinLimb(ctx, R, x1, y1, x3, y3, bend, c, hand) {
 const mx = (x1 + x3) / 2, my = (y1 + y3) / 2;
 const dx = x3 - x1, dy = y3 - y1, d = Math.hypot(dx, dy) || 1;
 const x2 = mx - (dy / d) * bend, y2 = my + (dx / d) * bend;
-R.limb(ctx, x1, y1, x2, y2, x3, y3, 3.4, c.limb, { lw: 1.4, hand: false });
+R.limb(ctx, x1, y1, x2, y2, x3, y3, c.thick || 3.4, c.limb, { lw: R.LINE * OL_LIMB, hand: false });
 if (hand) glove(ctx, R, x3, y3, hand === true ? 4.2 : hand);
 return [x3, y3];
 }
 function glove(ctx, R, x, y, r) {
-R.ellipse(ctx, x, y, r, r * 0.95, "#ffffff", { lw: 2 });
+R.ellipse(ctx, x, y, r, r * 0.95, "#ffffff", { lw: R.LINE * OL_PROP });
 ctx.beginPath();
 ctx.moveTo(x - r * 0.2, y - r * 0.4);
 ctx.lineTo(x - r * 0.2, y + r * 0.1);
@@ -159,7 +165,9 @@ function shoe(ctx, R, x, y, c, rot = 0) {
 ctx.save();
 ctx.translate(x, y);
 ctx.rotate(rot);
-R.ellipse(ctx, 2.2, -1.8, 5.4, 3.4, c.shoe, { lw: 2 });
+const ss = c.shoeS || 1;
+ctx.scale(ss, ss);
+R.ellipse(ctx, 2.2, -1.8, 5.4, 3.4, c.shoe, { lw: R.LINE * OL_PROP / ss });
 ctx.fillStyle = "#ffffff";
 ctx.fillRect(-2.6, 0.2, 9.4, 1.2);
 R.shine(ctx, 0.5, -3.2, 1.8, 0.9, 0.7);
@@ -314,13 +322,14 @@ for (const [k, i] of drips) {
   const y = pts[3][1] + (pts[5][1] - pts[3][1]) * k + 2;
   const dl = 3 + 3 * frac(i * 0.61) + Math.sin(t * 0.08 + i * 2) * 1.5;
   R.blob(ctx, [[x - 2.4, y - 2], [x + 2.4, y - 2], [x + 2, y + dl], [x, y + dl + 2.5], [x - 2, y + dl]], KETCHUP, { lw: 1.6, shade: false });
+  R.shine(ctx, x - 0.8, y + dl * 0.6, 0.7, 1.4, 0.75);
 }
 R.ellipse(ctx, neck.x + Math.cos(neck.a) * w * 0.1, neck.y + Math.sin(neck.a) * w * 0.1, 3, 3, o.gold ? "#ffe27a" : "#ffd24a", { lw: 1.6 });
 }
 
 function face(ctx, R, pose, w, f, mood, mouthM, t) {
-const er = f === 0 ? 7.6 : f === 3 ? 5.4 : 5.2;
-const e1 = [-w * 0.1, 0], e2 = [w * 0.3, -0.3];
+const er = [8, 6.2, 5.6, 5.4, 5.4][f];
+const e1 = f === 0 ? [-w * 0.2, 0.5] : [-w * 0.1, 0], e2 = f === 0 ? [w * 0.32, 0] : [w * 0.3, -0.3];
 const iris = f === 4 ? "#c07a10" : "#5a3418";
 if (f === 2) {
   const tailW = Math.sin(t * 0.3) * 2 + pose.sway * 3;
@@ -364,24 +373,34 @@ if (f === 3 && mood !== "hurt") {
   const m = mood === "hurt" ? "closed" : mood;
   R.eye(ctx, e1[0], e1[1], er, pose, { iris, mood: m, lash: f === 0 });
   R.eye(ctx, e2[0], e2[1], er * 0.86, pose, { iris, mood: m });
+  if (mood === "angry") {
+    // ceño de ataque (todas las formas con ojos normales)
+    ctx.beginPath();
+    ctx.moveTo(e1[0] - er * 0.9, e1[1] - er * 1.25); ctx.lineTo(e1[0] + er * 0.7, e1[1] - er * 0.85);
+    ctx.moveTo(e2[0] + er * 0.8, e2[1] - er * 1.2); ctx.lineTo(e2[0] - er * 0.5, e2[1] - er * 0.85);
+    ctx.lineWidth = 2; ctx.strokeStyle = R.INK; ctx.lineCap = "round"; ctx.stroke();
+  }
   if (mood === "hurt") {
+    // gota de sudor de aceite
+    R.blob(ctx, [[e2[0] + er * 1.2, e2[1] - er * 1.5], [e2[0] + er * 1.7, e2[1] - er * 0.4], [e2[0] + er * 0.8, e2[1] - er * 0.4]], "#bfe8ff", { lw: 1.4, shade: false });
     ctx.beginPath();
     ctx.moveTo(e1[0] - er, e1[1] - er * 1.4); ctx.lineTo(e1[0] + er * 0.7, e1[1] - er);
     ctx.moveTo(e2[0] + er, e2[1] - er * 1.4); ctx.lineTo(e2[0] - er * 0.5, e2[1] - er);
     ctx.lineWidth = 1.8; ctx.strokeStyle = R.INK; ctx.stroke();
   }
 }
-R.blush(ctx, -w * 0.3, er * 1.35, er * 0.55);
-R.blush(ctx, w * 0.48, er * 1.3, er * 0.45);
-R.mouth(ctx, w * 0.12, er * 1.55, f === 0 ? 7 : 6.5, mouthM);
+const bb = f === 0 ? 1.35 : 1;
+R.blush(ctx, -w * 0.32, er * 1.3, er * 0.55 * bb);
+R.blush(ctx, w * 0.5, er * 1.25, er * 0.45 * bb);
+R.mouth(ctx, w * 0.06, er * (f === 0 ? 1.35 : 1.55), f === 0 ? 5.5 : 6.5, mouthM);
 }
 
 const FORM = [
-{ w: 30, L: 50, legL: 10, fs: 0.62 },
-{ w: 20, L: 72, legL: 20, fs: 0.74 },
-{ w: 21, L: 70, legL: 20, fs: 0.74 },
-{ w: 19, L: 62, legL: 18, fs: 0.74 },
-{ w: 23, L: 70, legL: 20, fs: 0.74 },
+{ w: 34, L: 46, legL: 9, fs: 0.68 },
+{ w: 19, L: 70, legL: 18, fs: 0.75 },
+{ w: 24, L: 72, legL: 20, fs: 0.74 },
+{ w: 20, L: 64, legL: 18, fs: 0.74 },
+{ w: 26, L: 76, legL: 22, fs: 0.74 },
 ];
 
 const DIP = [];
@@ -470,8 +489,9 @@ if (st === "run" && pose.move !== "slide") {
   P.lift = -Math.abs(Math.cos(ph)) * 4.5;
   P.legF = [s * 1.0, 3 + Math.max(0, s) * 4];
   P.legB = [-s * 1.0, 3 + Math.max(0, -s) * 4];
-  P.armF = { ang: -s * 1.1, bend: 4 };
-  P.armB = { ang: s * 1.1, bend: -4 };
+  // El brazo delantero no cruza la silueta al ir hacia atrás: se queda al costado.
+  P.armF = { ang: Math.max(-0.3, -s * 1.1), bend: 4 + Math.max(0, s) * 2 };
+  P.armB = { ang: Math.min(0.5, s * 1.1), bend: -4 };
   P.mouth = "open";
   P.capeFlow = 20 + pose.speed * 12;
   P.capeWind = 0.8;
@@ -507,7 +527,9 @@ if (st === "run" && pose.move !== "slide") {
     P.bx = 6 * hit - 6 * rec;
     P.legF = [-0.2 * ant + 0.9 * hit - 0.6 * rec, 5];
     P.legB = [-0.1 * ant - 0.75 * hit + 0.55 * rec, -2];
-    P.armF = { ang: 0.6 - 1.0 * ant + 2.05 * hit - 0.9 * rec, bend: 2 * (1 - hit) + 1, len: 1 + 0.3 * hit };
+    // Preparación baja (detrás de la cadera) y estocada horizontal: el brazo
+    // con tenedor nunca sube por delante de la cara.
+    P.armF = { ang: 0.3 - 0.7 * ant + 1.75 * hit - 0.8 * rec, bend: 2 * (1 - hit) + 1, len: 1 + 0.3 * hit };
     P.armB = { ang: -1.2 - 1.3 * hit + 1.2 * rec, bend: -5 };
     P.item = "fork";
     if (hit > 0.3 && rec < 0.9) P.fx = { kind: "thrust", k: hit * (1 - rec) };
@@ -793,7 +815,9 @@ if (P.lying === "slide") {
   legBase = at(sp, 0);
 } else if (f === 0) {
   coneTilt = pose.state === "run" ? Math.sin(pose.phase * 2) * 0.08 + 0.06 : P.a0 * 0.3 + pose.sway * 0.05;
-  sp = spine(P.bx, hipY - 29, P.a0 * 0.6 + coneTilt, F.L, P.bend, P.wig);
+  // Bebé: la frita dentro del cono se dobla la mitad, así la cara grande
+  // sigue de frente y legible al correr y atacar.
+  sp = spine(P.bx, hipY - 29, P.a0 * 0.45 + coneTilt, F.L, P.bend * 0.5, P.wig * 0.5);
   legBase = { x: P.bx, y: hipY, a: coneTilt };
 } else {
   sp = spine(P.bx, hipY, P.a0, F.L, P.bend, P.wig);
@@ -817,10 +841,11 @@ if (hasCape) {
   });
 }
 
-const shQ = at(sp, f === 0 ? 0.3 : 0.52);
-const sideW = multi ? w * 1.2 : w * 0.5;
+// Bebé: hombros en los lados del cono para que los brazos no tapen la cara.
+const shQ = at(sp, f === 0 ? 0.04 : 0.52);
+const sideW = f === 0 && !P.lying ? 17 : multi ? w * 1.2 : w * 0.5;
 const shF = off(shQ, sideW - 1), shB = off(shQ, -sideW + 2);
-const armLen = [14, 20, 21, 22, 23][f];
+const armLen = [12, 19, 21, 21, 24][f];
 
 const drawArm = (sh, A, front) => {
   if (!A) return null;
@@ -909,6 +934,17 @@ ctx.rotate(fr);
 face(ctx, R, pose, w, f, P.mood, P.mouth, t);
 ctx.restore();
 
+if (f === 1 && !P.lying) {
+  // Rasgo de Frita: punta mojada en kétchup con brillo.
+  ctx.save();
+  const kt = along(tip, w * 0.02);
+  ctx.translate(kt[0], kt[1]);
+  ctx.rotate(tip.a);
+  R.blob(ctx, [[-w * 0.7, 5], [-w * 0.62, -3], [0, -8], [w * 0.62, -3], [w * 0.7, 5], [w * 0.3, 9], [w * 0.12, 15], [-w * 0.08, 9], [-w * 0.4, 8]], "#e61e14", { lw: R.LINE, shade: false });
+  R.shine(ctx, -w * 0.22, -2.5, 3.2, 1.5, 0.9);
+  R.ellipse(ctx, w * 0.12, 13, 1.2, 1.2, "#ff8a7a", { line: false, shade: false });
+  ctx.restore();
+}
 if (f === 4) {
   const ct = along(tip, w * 0.08);
   crown(ctx, R, ct[0], ct[1], tip.a, t);
@@ -1094,9 +1130,12 @@ if (fx.kind === "whack") {
   ctx.globalAlpha = fx.k;
   R.star(ctx, x + 10, y, 8 + fx.k * 4, "#fff6a8", { points: 6, inner: 0.5, lw: 2 });
   ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
+  // Estela por encima/detrás de la punta para no tapar la cara.
   for (let i = 0; i < 3; i++) {
-    ctx.beginPath(); ctx.moveTo(x - 6, y + 4 + i * 6); ctx.lineTo(x - 18 - i * 3, y + 8 + i * 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 4 - i * 2, y - 6 - i * 4); ctx.lineTo(x - 16 - i * 4, y - 10 - i * 5); ctx.stroke();
   }
+  R.ellipse(ctx, x + 18, y + 6, 2.6, 2.2, KETCHUP, { lw: 1.4, shade: false });
+  R.ellipse(ctx, x + 14, y - 8, 1.8, 1.6, KETCHUP, { lw: 1.2, shade: false });
   ctx.restore();
 } else if (fx.kind === "thrust" && hand) {
   ctx.save();

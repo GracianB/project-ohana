@@ -1,3 +1,9 @@
+## OHANA V370 · Arte y U mejorados de los 10 personajes (ohana-370)
+
+- Arte revisado de las 5 formas y poses de Kilo, Stitcho, Chispín, Michi, Frita, Pizza, Yomi, Cuerno, Dragón y Dino, sin gradientes por frame.
+- U con carga, impacto y rótulos legibles: Supernova Celeste (Dragón), Corazón de Coloso (Dino), Horno real (Pizza), Juicio del Umbral (Yomi) y nube de sueño con Zzz (Cuerno).
+- Nuevos módulos `systems/dragon-supreme.js` y `systems/dino-quake-u.js` en el precache offline; nueva línea base `tools/offline-baseline-v369.json`: 182/202 recursos reutilizados, 20 descargados.
+
 ## OHANA V369 · Primera actualización incremental comprobada (ohana-369)
 
 - Comparación de datos reales desde la edición V368 publicada: 200 recursos con SHA de Git y tamaño verificable, 199 mantienen contenido idéntico. Solo `index.html` cambia de `ohana-368` a `ohana-369`.

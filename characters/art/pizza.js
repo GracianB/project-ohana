@@ -16,7 +16,7 @@ const PEP = "#c8322a";
 const PEP_GOD = "#e84838";
 
 const FORM = [
-{ W: 60, legL: 13, top: -80, crH: 14, rT: 13, rB: 16, er: 9.5, arm: 13, fv: 0.33 },
+{ W: 60, legL: 13, top: -80, crH: 14, rT: 11, rB: 7, er: 10.4, arm: 13, fv: 0.33 },
 { W: 66, legL: 17, top: -84, crH: 14, rT: 8,  rB: 7,  er: 7.4, arm: 16, fv: 0.34 },
 { W: 68, legL: 18, top: -84, crH: 14, rT: 8,  rB: 7,  er: 7.4, arm: 17, fv: 0.34 },
 { W: 96, legL: 16, top: -72, crH: 13, rT: 9,  rB: 9,  er: 8.6, arm: 18, fv: 0.30 },
@@ -1039,11 +1039,7 @@ if (P.strings > 0.05) {
 }
 
 slicePath(ctx, F, tipY);
-const g = ctx.createLinearGradient(-W * 0.3, F.top, W * 0.22, tipY);
-g.addColorStop(0, R.lighten(c.cheese, f === 4 ? 0.62 : 0.35));
-g.addColorStop(0.5, c.cheese);
-g.addColorStop(1, R.darken(c.cheese, 0.14));
-ctx.fillStyle = g;
+ctx.fillStyle = c.cheese; // V370: flat cheese + highlight band, no per-frame gradient
 ctx.fill();
 
 ctx.save();
@@ -1073,11 +1069,10 @@ for (let i = 0; i < 6; i++) {
   ctx.fill();
 }
 
-const sg = ctx.createLinearGradient(W * 0.08, 0, W * 0.52, 0);
-sg.addColorStop(0, "rgba(120,40,0,0)");
-sg.addColorStop(1, "rgba(120,40,0,0.24)");
-ctx.fillStyle = sg;
-ctx.fillRect(-W, F.top - 10, W * 2, -F.top + 10);
+ctx.fillStyle = R.alpha(R.lighten(c.cheese, f === 4 ? 0.62 : 0.35), 0.55);
+ctx.beginPath(); ctx.ellipse(-W * 0.14, F.top + 16, W * 0.16, -F.top * 0.28, -0.25, 0, TAU); ctx.fill();
+ctx.fillStyle = "rgba(120,40,0,0.16)";
+ctx.fillRect(W * 0.22, F.top - 10, W, -F.top + 10);
 
 R.shine(ctx, -W * 0.28, F.top + 14, 5.5, 2.5, 0.62);
 if (f === 4) {

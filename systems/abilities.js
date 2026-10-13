@@ -6,6 +6,7 @@ import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
+import { createDragonSupremeEffects } from "./dragon-supreme.js";
 import { FRITA_FIELD_RADIUS, selectFritaFieldTargets, SUPREME_LAUNCH_WINDUP,
  SUPREME_LAUNCH_RADII, selectSupremeLaunchTargets } from "./u-field-targeting.js";
 import { CUERNO_V92, rememberCuernoEnemyPositions, drawCuernoPrismEcho } from "./cuerno-v92-resonance.js";
@@ -418,6 +419,7 @@ p._shadowCloneT = 150;
 launchWarning = add({kind:"supremeLaunch",mode:"dragon",x:cx(p),y:cy(p),
   radius:SUPREME_LAUNCH_RADII.dragon,life:SUPREME_LAUNCH_WINDUP,
   max:SUPREME_LAUNCH_WINDUP,dmg,actor:p,room:String(game.roomId||"hub"),color:def.color});
+DRAGON_U_FX.cast(game,p,SUPREME_LAUNCH_RADII.dragon,SUPREME_LAUNCH_WINDUP,evo);
 game.shake = Math.min(28, (game.shake || 0) + 16);
 p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
 } else if (p.id === "dino") {
@@ -427,47 +429,25 @@ for (const e of launchTargets) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(
 healPlayer(p, p.maxHealth * 0.18);
 p._fryGodT = 180;
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 260);
+startFritaKetchupU(game, p, evo, dmg);
 } else if (p.id === "pizza") {
 launchWarning = add({kind:"supremeLaunch",mode:"pizza",x:cx(p),y:cy(p),
-  radius:SUPREME_LAUNCH_RADII.pizza,life:SUPREME_LAUNCH_WINDUP,
-  max:SUPREME_LAUNCH_WINDUP,dmg,actor:p,room:String(game.roomId||"hub"),color:def.color});
+  radius:SUPREME_LAUNCH_RADII.pizza,life:OHANA_U_WINDUP,
+  max:OHANA_U_WINDUP,dmg,actor:p,room:String(game.roomId||"hub"),color:def.color});
 p._ovenKingT = 180;
 p._specialBounceT = Math.max(p._specialBounceT || 0, 260);
 } else if (p.id === "yomi") {
-// U · Juicio del Umbral: Cuerno's aurora charge hits every living foe.
-// Bosses receive a capped percentage; ordinary marked foes are executed only if weakened.
-for (const e of enemies) {
-  const hp=Math.max(0,Number(e.hp ?? e.health ?? 0));
-  const maxHp=Math.max(hp,Number(e.maxHp ?? e.maxHealth ?? e.max ?? hp));
-  const marked=(Number(e._yomiMarkUntil)||0)>(Number(game.t)||0);
-  const heavy=e.boss
-    ? Math.min(maxHp * .20, dmg * 1.55) + maxHp * .04
-    : Math.min(hp * (marked ? .92 : .82), dmg * (marked ? 1.90 : 1.42) + hp * (marked ? .27 : .14));
-  const execute=!e.boss && hp<=maxHp * (marked ? .42 : .34);
-  hitEnemy(game,e,execute?hp+100:heavy,{
-    kx:Math.sign(cx(e)-cx(p))*8,ky:-9,stun:64,
-    color:"#ffdc9d",crit:true,parts:12
-  });
-  e._yomiMarkUntil=0;
-  e._abyssMarkT=Math.max(e._abyssMarkT||0,180);
-}
+// V370: 0.4 s visible gate wind-up, then the original judgement resolves.
+add({kind:"uCharge",mode:"yomi",x:cx(p),y:cy(p),life:OHANA_U_WINDUP,max:OHANA_U_WINDUP,
+  dmg,evo:Number(p.evo)||0,actor:p,room:String(game.roomId||"hub"),color:def.color});
 p._specialGhostT=Math.max(p._specialGhostT||0,260);
 p.invuln=Math.max(p.invuln||0,120);
-game.nums?.add(cx(p),p.y-58,"CUERNO · JUICIO DEL UMBRAL","#ffe6b5",true);
- } else if (p.id === "cuerno") {
-// Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
-const sleepers=dreamTargets;
-for(const e of sleepers){
-e.stun=Math.max(e.stun||0,156);
-e._auroraSleepT=156;
-e.vx=0;
-}
-game._auroraDreamTargets=sleepers.length;
-healPlayer(p,p.maxHealth*.16);
-addPlayerXp(p,24+sleepers.length*4);
+} else if (p.id === "cuerno") {
+// V370: 0.4 s rainbow wind-up; sleepers are chosen at cast time.
+add({kind:"uCharge",mode:"cuerno",x:cx(p),y:cy(p),life:OHANA_U_WINDUP,max:OHANA_U_WINDUP,
+  targets:dreamTargets,actor:p,room:String(game.roomId||"hub"),color:def.color,evo:Math.max(0,Math.min(4,Number(p.evo)||0))});
 p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
 p._specialArmorT=Math.max(p._specialArmorT||0,220);
-game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
 }
 
 if (p.id !== "dino") add({
@@ -479,6 +459,7 @@ x: cx(p),
 y: cy(p),
 life: p.id === "yomi" ? 170 : 150,
 max: p.id === "yomi" ? 170 : 150,
+pin: p.id === "frita",
 pulse: 0,
 dmg: dmg * 0.18,
 color: def.color,
@@ -543,6 +524,46 @@ S.p._armorT = 0;
 S.p = p;
 S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 FX.length = 0;
+}
+
+// V370 · U wind-up for Pizza/Yomi/Cuerno: 24 frames ≈ 0.4 s at 60 fps.
+export const OHANA_U_WINDUP = 24;
+function resolveYomiJudgement(game,p,enemies,dmg){
+// U · Juicio del Umbral: Cuerno's aurora charge hits every living foe.
+// Bosses receive a capped percentage; ordinary marked foes are executed only if weakened.
+for (const e of enemies) {
+  const hp=Math.max(0,Number(e.hp ?? e.health ?? 0));
+  const maxHp=Math.max(hp,Number(e.maxHp ?? e.maxHealth ?? e.max ?? hp));
+  const marked=(Number(e._yomiMarkUntil)||0)>(Number(game.t)||0);
+  const heavy=e.boss
+    ? Math.min(maxHp * .20, dmg * 1.55) + maxHp * .04
+    : Math.min(hp * (marked ? .92 : .82), dmg * (marked ? 1.90 : 1.42) + hp * (marked ? .27 : .14));
+  const execute=!e.boss && hp<=maxHp * (marked ? .42 : .34);
+  hitEnemy(game,e,execute?hp+100:heavy,{
+    kx:Math.sign(cx(e)-cx(p))*8,ky:-9,stun:64,
+    color:"#ffdc9d",crit:true,parts:12,hitstop:3
+  });
+  e._yomiMarkUntil=0;
+  e._abyssMarkT=Math.max(e._abyssMarkT||0,180);
+}
+p._specialGhostT=Math.max(p._specialGhostT||0,260);
+p.invuln=Math.max(p.invuln||0,120);
+game.nums?.add(cx(p),p.y-58,"YOMI · JUICIO DEL UMBRAL","#ffe6b5",true);
+}
+function resolveCuernoDream(game,p,dreamTargets){
+// Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
+const sleepers=dreamTargets;
+for(const e of sleepers){
+e.stun=Math.max(e.stun||0,156);
+e._auroraSleepT=156;
+e.vx=0;
+}
+game._auroraDreamTargets=sleepers.length;
+healPlayer(p,p.maxHealth*.16);
+addPlayerXp(p,24+sleepers.length*4);
+p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
+p._specialArmorT=Math.max(p._specialArmorT||0,220);
+game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
 }
 
 export function clearAbilityFx() {
@@ -987,7 +1008,15 @@ function hand(p) { return { x: cx(p) + p.facing * (p.w * 0.45), y: p.y + p.h * 0
 function add(f) {
 if (!f || typeof f.kind !== "string") return null;
 FX.push(f);
-if (FX.length > MAX_FX) FX.splice(0, FX.length - MAX_FX);
+if (FX.length > MAX_FX) {
+ // Pinned FX (Frita's U) are never evicted by spam of other effects; only
+ // the oldest unpinned ones are dropped, so the cap still holds.
+ let drop = FX.length - MAX_FX;
+ for (let i = 0; i < FX.length && drop > 0;) {
+  if (FX[i].pin) { i++; continue; }
+  FX.splice(i, 1); drop--;
+ }
+}
 return f;
 }
 
@@ -1397,9 +1426,100 @@ boom(g,cx(p),cy(p),["#ffbbdf","#e8c2fa","#c9bbff","#aedff5","#fff4be"][evo],5,{s
 };
 
 const DINO_FX = createDinoEffects({nearestEnemy,canHit,cx,cy,solidAt,circleHit,hitEnemy,boom,add,clamp,inView,groundBelow});
+const DRAGON_U_FX = createDragonSupremeEffects({cx,cy,canHit,add,clamp});
+// ── Frita U · KÉTCHUP BOMBA ──────────────────────────────────────────────
+// Time-based on the fixed 60 Hz simulation clock (FIXED_DT_MS): windup and
+// burst are expressed in ms and converted once, so they never depend on the
+// render frame rate. The FX is pinned so other effects never evict it.
+export const FRITA_U_WINDUP_MS = 400;
+export const FRITA_U_BURST_MS = 1200;
+const FRITA_U_WINDUP = Math.round(FRITA_U_WINDUP_MS / FIXED_DT_MS);
+const FRITA_U_BURST = Math.round(FRITA_U_BURST_MS / FIXED_DT_MS);
+const FRITA_U_RADIUS = 168;
+const FRITA_U_MAX_STUCK = 8;
+// Splat silhouette: fixed lobes, computed once (no per-frame allocation).
+const FRITA_SPLAT_LOBES = Object.freeze([1,.62,.92,.55,1.08,.7,.86,.5,1.02,.66,.95,.58]);
+const FRITA_SPLAT_DROPS = Object.freeze([[.15,1.25,9],[.95,1.32,7],[1.7,1.2,8],[2.5,1.38,6],[3.3,1.22,9],[4.1,1.3,7],[4.9,1.36,8],[5.7,1.24,6]]);
+function startFritaKetchupU(g, p, evo, dmg) {
+ for (let i = FX.length - 1; i >= 0; i--) if (FX[i].kind === "fritaKetchupU") FX.splice(i, 1);
+ add({ kind: "fritaKetchupU", pin: true, age: 0, x: cx(p), y: cy(p), face: p.facing || 1,
+  evo, dmg: dmg * 0.42, windup: FRITA_U_WINDUP, burst: FRITA_U_BURST,
+  life: FRITA_U_WINDUP + FRITA_U_BURST, max: FRITA_U_WINDUP + FRITA_U_BURST,
+  stuck: [], room: String(g.roomId || "hub") });
+ g.nums?.add?.(cx(p), p.y - 44, "¡AGITANDO…!", "#ff6b5a", false);
+}
+function fritaSplatPath(ctx, x, y, r, rot) {
+ const n = FRITA_SPLAT_LOBES.length;
+ ctx.beginPath();
+ for (let i = 0; i <= n; i++) {
+  const a = rot + i / n * TAU, k = FRITA_SPLAT_LOBES[i % n];
+  const am = rot + (i - .5) / n * TAU, km = (k + FRITA_SPLAT_LOBES[(i + n - 1) % n]) * .5 * 1.08;
+  const px = x + Math.cos(a) * r * k, py = y + Math.sin(a) * r * k * .78;
+  if (i === 0) ctx.moveTo(px, py);
+  else ctx.quadraticCurveTo(x + Math.cos(am) * r * km, y + Math.sin(am) * r * km * .78, px, py);
+ }
+ ctx.closePath();
+}
+
+
 const UPD = {
+fritaKetchupU(g, f, p) {
+ if (p.dead || String(g.roomId || "hub") !== f.room) return false;
+ f.life--;
+ const age = f.max - f.life;
+ if (age <= f.windup) { f.x = cx(p); f.y = cy(p); f.face = p.facing || f.face; }
+ if (age === f.windup) {
+  // SPLAT: one readable impact for every foe inside the puddle.
+  for (const e of g.enemies || []) {
+   if (!canHit(e)) continue;
+   const dx = cx(e) - f.x, dy = cy(e) - f.y, d = Math.hypot(dx, dy);
+   if (d > FRITA_U_RADIUS) continue;
+   hitEnemy(g, e, f.dmg, { kx: Math.sign(dx || f.face) * 9, ky: -7, stun: 30, color: "#e23b3b", crit: true, hitstop: 3 });
+   e.flash = Math.max(e.flash || 0, 10);
+   if (f.stuck.length < FRITA_U_MAX_STUCK) { f.stuck.push(e); e._ketchupT = f.burst; }
+  }
+  boom(g, f.x, f.y, "#e23b3b", 16, { up: 2.2, speed: 4.4 });
+  boom(g, f.x, f.y, "#fff3c0", 6, { up: 1.6 });
+  g.shake = Math.min(20, (g.shake || 0) + 9);
+  g.flashColor = "#e23b3b"; g.flash = Math.max(g.flash || 0, 8);
+  g.nums?.add?.(f.x, f.y - 70, "¡KÉTCHUP BOMBA!", "#ff4b3a", true);
+ } else if (age > f.windup) {
+  const k = age - f.windup;
+  for (const e of f.stuck) {
+   if (!canHit(e)) continue;
+   // Sticky ketchup: strong slow while the splat lasts.
+   e.vx = (e.vx || 0) * 0.6;
+   if (k % 24 === 0) hitEnemy(g, e, f.dmg * 0.22, { kx: 0, ky: -2, stun: 10, color: "#e23b3b", hitstop: 0 });
+  }
+ }
+ if (f.life <= 0) { for (const e of f.stuck) e._ketchupT = 0; return false; }
+ return true;
+},
 ...DINO_FX.update,
+...DRAGON_U_FX.update,
 // The drawn circle is authoritative, not an invisible global U attack.
+uCharge(g,f,p){
+ if(g.player!==f.actor||p.dead||String(g.roomId||"hub")!==f.room)return false;
+ if(--f.life>0)return true;
+ if(f.mode==="yomi"){
+  const foes=(g.enemies||[]).filter(canHit);
+  resolveYomiJudgement(g,p,foes,f.dmg);
+  for(const e of foes)add({kind:"uHitMark",mode:"yomi",e,x:cx(e),y:cy(e),evo:f.evo||0,life:60,max:60});
+ }else{
+  const sleepers=(f.targets||[]).filter(e=>e&&!e.dying&&!e.dead);
+  resolveCuernoDream(g,p,sleepers);
+  for(const e of sleepers)add({kind:"uHitMark",mode:"cuerno",e,x:cx(e),y:cy(e),life:72,max:72});
+  // Solo visual: nube de sueño (1,5 s) y Zzz por bicho mientras dure el sueño (156 ticks).
+  add({kind:"cuernoDreamCloud",x:f.x,y:f.y,actor:p,evo:Number(f.evo)||0,life:90,max:90});
+  if(sleepers.length)add({kind:"cuernoSleepZ",list:sleepers.slice(0,12),evo:Number(f.evo)||0,life:156,max:156,pin:true});
+ }
+ boom(g,f.x,f.y,f.color,g.reduceMotion?5:11,{up:1.5,star:true});
+ g.shake=Math.min(26,(g.shake||0)+(f.mode==="yomi"?10:3));
+ return false;
+},
+uHitMark(g,f){if(f.e&&!f.e.dead){f.x=cx(f.e);f.y=cy(f.e);}return --f.life>0;},
+cuernoDreamCloud(g,f){if(f.actor&&!f.actor.dead){f.x=cx(f.actor);f.y=cy(f.actor);}return --f.life>0;},
+cuernoSleepZ(g,f){f.list=f.list.filter(e=>e&&!e.dead&&!e.dying&&e.hp>0);return --f.life>0&&f.list.length>0;},
 supremeLaunch(g,f,p){
  if(g.player!==f.actor||p.dead||String(g.roomId||"hub")!==f.room)return false;
  if(--f.life>0)return true;
@@ -1412,6 +1532,7 @@ supremeLaunch(g,f,p){
    :{kx:Math.sign(cx(e)-f.x)*10,ky:-13,stun:52,color:f.color,crit:true};
   if(hitEnemy(g,e,f.dmg*factor,impact)){
    applied++;
+   if(f.mode==="pizza")add({kind:"uHitMark",mode:"pizza",e,x:cx(e),y:cy(e),life:60,max:60});
    if(f.duet&&g._familyDuet===f.duet)f.duet.legacyTargets.add(e);
   }
  }
@@ -2386,9 +2507,137 @@ ctx.restore();
 }
 
 const DRW = {
+fritaKetchupU(ctx, f, cam, t) {
+ const age = f.max - f.life, x = f.x - cam.x, y = f.y - cam.y;
+ ctx.save();
+ ctx.lineJoin = "round"; ctx.lineCap = "round";
+ if (age < f.windup) {
+  // Anticipación: bote gigante alzado que tiembla + telegrafía del área.
+  const q = age / f.windup, sh = Math.sin(age * 1.9) * (2 + q * 5);
+  ctx.globalAlpha = .35 + q * .45;
+  ctx.strokeStyle = "#ff5a48"; ctx.lineWidth = 3; ctx.setLineDash([10, 9]);
+  ctx.beginPath(); ctx.ellipse(x, y + 18, FRITA_U_RADIUS * (.35 + .65 * q), FRITA_U_RADIUS * (.35 + .65 * q) * .78, 0, 0, TAU); ctx.stroke();
+  ctx.setLineDash([]);
+  const bx = x + sh, by = y - 70 - q * 10;
+  ctx.globalAlpha = 1;
+  ctx.translate(bx, by); ctx.rotate(Math.PI + sh * .04);
+  ctx.fillStyle = "#d8261f"; ctx.strokeStyle = "#3a0d0a"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-13, -20, 26, 36, 8) : ctx.rect(-13, -20, 26, 36); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fff3c0"; ctx.fillRect(-9, -6, 18, 9);
+  ctx.fillStyle = "#f4f4f4"; ctx.beginPath(); ctx.moveTo(-7, 16); ctx.lineTo(7, 16); ctx.lineTo(2, 27); ctx.lineTo(-2, 27); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  return;
+ }
+ const k = age - f.windup, u = k / f.burst;
+ const grow = Math.min(1, k / 8), fade = Math.min(1, f.life / 20);
+ const r = FRITA_U_RADIUS * (.55 + .45 * grow);
+ // Charco/splat de kétchup con lóbulos y gotas.
+ ctx.globalAlpha = .62 * fade;
+ ctx.fillStyle = "#c81e1a"; ctx.strokeStyle = "#4a0f0b"; ctx.lineWidth = 4;
+ fritaSplatPath(ctx, x, y + 18, r, .3); ctx.fill(); ctx.stroke();
+ ctx.globalAlpha = .55 * fade; ctx.fillStyle = "#ff6a52";
+ fritaSplatPath(ctx, x - r * .12, y + 6, r * .42, 1.1); ctx.fill();
+ ctx.globalAlpha = .9 * fade; ctx.fillStyle = "#e23b3b";
+ for (const [a, d, s] of FRITA_SPLAT_DROPS) {
+  const dd = r * d * (k < 8 ? .6 + .4 * grow : 1);
+  const px = x + Math.cos(a) * dd, py = y + 18 + Math.sin(a) * dd * .78 + (k < 8 ? 0 : Math.min(10, (k - 8) * .3));
+  ctx.beginPath(); ctx.arc(px, py, s, 0, TAU); ctx.fill(); ctx.stroke();
+ }
+ // Onda de impacto los primeros 0,25 s.
+ if (k < 15) {
+  ctx.globalAlpha = (1 - k / 15) * .9; ctx.strokeStyle = "#fff3c0"; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.ellipse(x, y + 18, r * (1 + k / 15 * .35), r * .78 * (1 + k / 15 * .35), 0, 0, TAU); ctx.stroke();
+ }
+ // Kétchup pegado en cada enemigo alcanzado.
+ ctx.globalAlpha = .9 * fade; ctx.fillStyle = "#d8261f"; ctx.strokeStyle = "#4a0f0b"; ctx.lineWidth = 2;
+ for (const e of f.stuck) {
+  if (!e || e.dead || e.dying) continue;
+  const ex = cx(e) - cam.x, ey = e.y - cam.y + 6;
+  fritaSplatPath(ctx, ex, ey, 9 + Math.min(e.w || 24, 40) * .22, u * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(ex + 4, ey + 9 + (k % 30) * .4, 2.5, 0, TAU); ctx.fill();
+ }
+ ctx.restore();
+},
 ...DINO_FX.draw,
+...DRAGON_U_FX.draw,
 // Stationary, finite pre-impact ring. The visual radius is exactly the
 // collision radius used by selectSupremeLaunchTargets at the final frame.
+// V370: wind-up shapes. Flat strokes only (no gradients), finite and cheap.
+uCharge(ctx,f,cam,t,g){
+ const x=f.x-cam.x,y=f.y-cam.y,k=1-f.life/f.max;
+ ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+ if(f.mode==="yomi"){
+  // A torii-like threshold gate rises and opens around Yomi.
+  const sc=1+(Number(f.evo)||0)*.12,h=(40+90*k)*sc,w=(70+50*k)*sc;
+  ctx.globalAlpha=.35+.5*k;ctx.strokeStyle="#ffcb91";ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(x-w/2,y+30);ctx.lineTo(x-w/2,y+30-h);ctx.moveTo(x+w/2,y+30);ctx.lineTo(x+w/2,y+30-h);
+  ctx.moveTo(x-w/2-14,y+30-h);ctx.quadraticCurveTo(x,y+18-h,x+w/2+14,y+30-h);
+  ctx.moveTo(x-w/2,y+42-h);ctx.lineTo(x+w/2,y+42-h);ctx.stroke();
+  ctx.fillStyle="#2a1020";ctx.globalAlpha=.28*k;ctx.fillRect(x-w/2+4,y+44-h,w-8,h-14);
+  for(let i=0;i<6;i++){const a=i*TAU/6+t*.05,r=110*(1-k)+20;
+   ctx.globalAlpha=.7*k;ctx.fillStyle="#fff1d6";ctx.save();ctx.translate(x+Math.cos(a)*r,y+Math.sin(a)*r*.6);ctx.rotate(a);
+   ctx.fillRect(-4,-7,8,14);ctx.restore();}
+ }else{
+  // Seven rainbow arcs gather into Cuerno's horn (escala por forma).
+  const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"],ev=Number(f.evo)||0,sc=.75+ev*.12;
+  for(let i=0;i<4+ev;i++){const a=i*TAU/(4+ev)+t*.07,d=(120*sc)*(1-k)+14;ctx.globalAlpha=.4+.5*k;ctx.fillStyle=cols[i%7];ctx.beginPath();ctx.arc(x+Math.cos(a)*d,y-30+Math.sin(a)*d*.6,2.5+ev*.4,0,TAU);ctx.fill();}
+  for(let i=0;i<7;i++){const r=(150-i*12)*sc*(1-k*.75);
+   ctx.globalAlpha=.25+.55*k;ctx.strokeStyle=cols[i];ctx.lineWidth=4;
+   ctx.beginPath();ctx.arc(x,y,Math.max(4,r),Math.PI*1.05,Math.PI*1.95);ctx.stroke();}
+  ctx.globalAlpha=k;ctx.fillStyle="#fff6c8";ctx.beginPath();ctx.arc(x,y-30,(4+8*k)*sc,0,TAU);ctx.fill();
+  ctx.strokeStyle="#7b5aa6";ctx.lineWidth=2;ctx.stroke();
+ }
+ ctx.globalAlpha=.9;ctx.fillStyle="#fff8da";ctx.textAlign="center";ctx.font="800 14px Outfit,system-ui,sans-serif";
+ ctx.fillText(f.mode==="yomi"?"UMBRAL · SE ABRE":"ARCOÍRIS · CARGANDO",x,y-150);
+ ctx.restore();
+},
+// V370: per-enemy impact marks so U hits are readable on each foe.
+uHitMark(ctx,f,cam,t){
+ const x=f.x-cam.x,y=f.y-cam.y,k=1-f.life/f.max,a=Math.min(1,f.life/14);
+ ctx.save();ctx.globalAlpha=a;ctx.lineCap="round";
+ if(f.mode==="pizza"){
+  // Pizza slice burst: 6 wedges flying out + cheese ring.
+  ctx.strokeStyle="#ffd66a";ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,12+30*k,0,TAU);ctx.stroke();
+  for(let i=0;i<6;i++){const ang=i*TAU/6+k,r=10+34*k;ctx.save();ctx.translate(x+Math.cos(ang)*r,y+Math.sin(ang)*r);ctx.rotate(ang+Math.PI/2);
+   ctx.fillStyle="#ffcc48";ctx.beginPath();ctx.moveTo(0,6);ctx.lineTo(-6,-6);ctx.lineTo(6,-6);ctx.closePath();ctx.fill();
+   ctx.fillStyle="#c8322a";ctx.beginPath();ctx.arc(0,-2,1.8,0,TAU);ctx.fill();ctx.restore();}
+ }else if(f.mode==="yomi"){
+  // Ofuda seal slaps onto the foe, then a crack.
+  ctx.save();ctx.translate(x,y-4);ctx.rotate(-.2);ctx.fillStyle="#fff1d6";ctx.fillRect(-7,-14,14,28);
+  ctx.strokeStyle="#c4503a";ctx.lineWidth=2;ctx.strokeRect(-7,-14,14,28);
+  ctx.beginPath();ctx.moveTo(-3,-8);ctx.lineTo(3,-2);ctx.lineTo(-3,4);ctx.lineTo(3,10);ctx.stroke();ctx.restore();
+  const sc=1+(Number(f.evo)||0)*.15;
+  ctx.strokeStyle="#ffcb91";ctx.lineWidth=3+sc;ctx.beginPath();ctx.arc(x,y,(16+30*k)*sc,0,TAU);ctx.stroke();
+  ctx.strokeStyle="#c4503a";ctx.lineWidth=2;for(let i=0;i<4;i++){const an=i*TAU/4+.4,r0=(12+10*k)*sc,r1=(22+26*k)*sc;
+   ctx.beginPath();ctx.moveTo(x+Math.cos(an)*r0,y+Math.sin(an)*r0);ctx.lineTo(x+Math.cos(an)*r1,y+Math.sin(an)*r1);ctx.stroke();}
+  if(k<.6){ctx.fillStyle="#fff1d6";ctx.font="800 13px Outfit,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("¡SELLADO!",x,y-30*sc-16*k);}
+ }else{
+  // Dream: little rainbow arc + "z" stars above the sleeper.
+  const cols=["#ff8cab","#ffe9a3","#a5e5fa"];
+  for(let i=0;i<3;i++){ctx.strokeStyle=cols[i];ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y-14,18-i*4,Math.PI*1.1,Math.PI*1.9);ctx.stroke();}
+  ctx.fillStyle="#e4d8ff";ctx.font="800 12px Outfit,system-ui,sans-serif";ctx.textAlign="center";
+  ctx.fillText("z",x+10,y-30-14*k);ctx.fillText("Z",x+18,y-42-18*k);
+ }
+ ctx.restore();
+},
+// Nube de sueño de Cuerno: puffs planos + estrellitas, sin gradientes.
+cuernoDreamCloud(ctx,f,cam,t){
+ const x=f.x-cam.x,y=f.y-cam.y-70,k=1-f.life/f.max,ev=Number(f.evo)||0,sc=.8+ev*.15;
+ const a=Math.min(1,k*6,f.life/18);ctx.save();ctx.globalAlpha=a*.85;ctx.lineWidth=2.5;ctx.strokeStyle="#7b5aa6";ctx.fillStyle=ev===4?"#d9ccff":"#f1e8ff";
+ const puffs=[[-34,4,18],[-14,-8,24],[12,-6,22],[34,5,17],[0,8,20]];
+ for(const [dx,dy,r] of puffs){ctx.beginPath();ctx.arc(x+dx*sc,y+dy*sc+Math.sin(t*.05+dx)*2,r*sc,0,TAU);ctx.fill();ctx.stroke();}
+ for(const [dx,dy,r] of puffs){ctx.beginPath();ctx.arc(x+dx*sc,y+dy*sc+Math.sin(t*.05+dx)*2,r*sc-1.5,0,TAU);ctx.fill();}
+ const cols=["#ff8cab","#ffe9a3","#a5e5fa","#e5b9f4"];
+ for(let i=0;i<3+ev;i++){const u=((t*.012+i/(3+ev))%1),sx=x+(i%2?1:-1)*(10+i*9)*sc,sy=y+18*sc+u*50;ctx.globalAlpha=a*(1-u);ctx.fillStyle=cols[i%4];ctx.beginPath();ctx.arc(sx,sy,2.2+ev*.3,0,TAU);ctx.fill();}
+ ctx.restore();
+},
+cuernoSleepZ(ctx,f,cam,t){
+ const a=Math.min(1,f.life/20),ev=Number(f.evo)||0;ctx.save();ctx.textAlign="center";ctx.lineJoin="round";ctx.lineWidth=3.5;ctx.strokeStyle="#3a2050";
+ for(const e of f.list){const x=cx(e)-cam.x+8,y=e.y-cam.y-6;
+  for(let i=0;i<3;i++){const ph=((t*.018+i/3)%1),zx=x+ph*16+Math.sin(ph*6)*3,zy=y-ph*30;ctx.globalAlpha=a*Math.sin(ph*Math.PI);
+   ctx.font="900 "+((12+ev*1.5+ph*8)|0)+"px Outfit,system-ui,sans-serif";ctx.fillStyle=i===1?"#fff6c8":"#e4d8ff";ctx.strokeText("Z",zx,zy);ctx.fillText("Z",zx,zy);}}
+ ctx.restore();
+},
 supremeLaunch(ctx,f,cam,t,g){
  const x=f.x-cam.x,y=f.y-cam.y;
  const progress=1-f.life/f.max;
@@ -2403,11 +2652,24 @@ supremeLaunch(ctx,f,cam,t,g){
  ctx.beginPath();ctx.arc(x,y,f.radius*(.62+.38*progress),0,TAU);ctx.stroke();
  ctx.fillStyle=f.color;ctx.globalAlpha=.08;
  ctx.beginPath();ctx.arc(x,y,f.radius,0,TAU);ctx.fill();
+ if(f.mode==="pizza"){
+  // V370: the oven ring is cut into 8 glowing slices that close as it heats.
+  ctx.globalAlpha=alpha*(.4+.6*progress);ctx.lineWidth=2.5;
+  for(let i=0;i<8;i++){const a=i*TAU/8+progress*.6;
+   ctx.beginPath();ctx.moveTo(x+Math.cos(a)*f.radius*(1-progress)*.9,y+Math.sin(a)*f.radius*(1-progress)*.9);
+   ctx.lineTo(x+Math.cos(a)*f.radius,y+Math.sin(a)*f.radius);ctx.stroke();}
+  // V370 Pizza: oven mouth heats up above her head + readable call-out.
+  ctx.globalAlpha=Math.min(1,.35+progress);ctx.fillStyle="#3a1608";ctx.strokeStyle="#ff8a2a";ctx.lineWidth=4;
+  ctx.beginPath();ctx.arc(x,y-46,14+18*progress,Math.PI,0);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle=progress>.6?"#ffe27a":"#ff8a2a";ctx.beginPath();ctx.ellipse(x,y-48,(10+14*progress),4+5*progress,0,0,TAU);ctx.fill();
+  ctx.globalAlpha=1;ctx.font="900 18px Outfit,system-ui,sans-serif";ctx.textAlign="center";ctx.lineWidth=5;ctx.strokeStyle="#3a1608";ctx.fillStyle="#ffd66a";
+  ctx.strokeText("¡ABRID EL HORNO!",x,y-84);ctx.fillText("¡ABRID EL HORNO!",x,y-84);
+ }
  ctx.globalCompositeOperation="source-over";
  ctx.globalAlpha=.92;
  ctx.fillStyle="#fff8da";
  ctx.textAlign="center";ctx.font="800 14px Outfit,system-ui,sans-serif";
- ctx.fillText(f.mode==="dragon"?"SUPERNOVA · IMPACTO":"HORNO · IMPACTO",x,y-f.radius-12);
+ ctx.fillText(f.mode==="dragon"?"SUPERNOVA · IMPACTO":"HORNO · SE CALIENTA",x,y-f.radius-12);
  ctx.restore();
 },
 cuernoFantasyTrail(ctx,f,cam,t,g){
@@ -2455,11 +2717,17 @@ const R=f.mode==="frita" ? FRITA_FIELD_RADIUS+4+Math.sin(t*.07)*4 : 110+Math.sin
 ctx.save();
 ctx.globalCompositeOperation="lighter";
 ctx.globalAlpha=.16*fade;
+if(f.mode==="frita"){
+ // Frita: flat oil pool instead of a per-frame radial gradient.
+ ctx.fillStyle="#ffd36a";ctx.globalAlpha=.08*fade;
+ ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();
+}else{
 const grd=ctx.createRadialGradient(x,y,8,x,y,R*1.35);
 grd.addColorStop(0,f.color);
 grd.addColorStop(.48,"rgba(255,255,255,.08)");
 grd.addColorStop(1,"rgba(0,0,0,0)");
 ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,R*1.35,0,TAU);ctx.fill();
+}
 ctx.globalAlpha=.68*fade;
 ctx.strokeStyle=f.color;ctx.lineWidth=2.2;
 ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();
@@ -2488,6 +2756,10 @@ if(f.mode==="kilo"){
 }else if(f.mode==="frita"){
   ctx.globalAlpha=.55*fade;for(let i=-4;i<=4;i++){const xx=x+i*22;ctx.beginPath();ctx.moveTo(xx,y+34);ctx.quadraticCurveTo(xx+8*Math.sin(t*.1+i),y-34,xx,y-72);ctx.stroke();}
 }else if(f.mode==="pizza"){
+  // V370 Pizza: thick cheese wave + rising pepperoni so the 2.5 s oven reads.
+  ctx.globalAlpha=.5*fade;ctx.fillStyle="#ffcc48";ctx.beginPath();ctx.ellipse(x,y+38,R*pulse*.9,10,0,0,TAU);ctx.fill();
+  ctx.globalAlpha=.85*fade;ctx.strokeStyle="#ff8a2a";ctx.lineWidth=5;ctx.beginPath();ctx.arc(x,y,R*pulse,0,TAU);ctx.stroke();ctx.lineWidth=2.2;ctx.strokeStyle=f.color;
+  for(let i=0;i<8;i++){const ph=(t*.018+i*.37)%1,px=x+Math.cos(i*2.4)*R*.8,py=y+40-ph*120;ctx.globalAlpha=(1-ph)*.9*fade;ctx.fillStyle="#c8322a";ctx.beginPath();ctx.arc(px,py,5,0,TAU);ctx.fill();}
   ctx.globalAlpha=.65*fade;ctx.beginPath();ctx.moveTo(x,y-R*.75);ctx.lineTo(x+R*.7,y+R*.48);ctx.lineTo(x-R*.7,y+R*.48);ctx.closePath();ctx.stroke();for(let i=0;i<5;i++){const a=i*TAU/5+t*.015;ctx.beginPath();ctx.arc(x+Math.cos(a)*R*.42,y+Math.sin(a)*R*.34,6,0,TAU);ctx.stroke();}
 }else if(f.mode==="yomi"){
   ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();

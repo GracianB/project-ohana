@@ -220,6 +220,10 @@ function draw(ctx,pose,R){
     (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
     +(acting?.tilt||0)+stageTilt+life.tilt);
   if(life.active)ctx.scale(life.expandX,life.expandY);
+  // V371 · locomotion readability: run bob, jump stretch, fall squash.
+  const jumpS=st==="jump",fallS=st==="fall",runPh=Number.isFinite(p.phase)?p.phase:t*.26;
+  if(run&&!reduced)ctx.translate(0,-Math.abs(Math.sin(runPh))*3.2);
+  if(jumpS)ctx.scale(.9,1.1);else if(fallS)ctx.scale(1.06,.95);
   yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
   // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
   ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
@@ -285,7 +289,10 @@ function draw(ctx,pose,R){
     ctx.beginPath();ctx.moveTo(-w*.78,-17);ctx.quadraticCurveTo(0,-7,w*.78,-17);ctx.stroke();ctx.restore();
   }
   // Actual foot silhouette: Yomi hovers but retains a clear readable ground anchor.
-  ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);
+  if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
+  else{const ls=run&&!reduced?Math.sin(runPh)*5:0,ly=jumpS?-5:fallS?3:0;
+   ellipse(ctx,-7-ls,ly-(run?Math.max(0,Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);
+   ellipse(ctx,8+ls,(jumpS?-3:ly)-(run?Math.max(0,-Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);}
   // Two animated open sleeves. K's suction visibly pulls them forward.
   for(const side of [-1,1]){
     ctx.save();ctx.translate(side*(w*.77),shoulder+6);
@@ -293,7 +300,7 @@ function draw(ctx,pose,R){
     const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
     const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
       (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
-    ctx.rotate(side*((cast===1?.22:run?.22:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
+    ctx.rotate(side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
     const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
     ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
     ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
@@ -368,7 +375,7 @@ function draw(ctx,pose,R){
   // Expressive OHANA face, never permanent horror teeth.
   const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
     reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
-  const eyeSize=f===0?6.5:6+f*.15;
+  const eyeSize=f===0?7.3:6+f*.15; // V370: Farol baby reads cuter
   R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
   R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
   if(!angry){

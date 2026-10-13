@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { useAbility,updateAbilityFx,clearAbilityFx,abilityPreMove,
+import { OHANA_U_WINDUP,useAbility,updateAbilityFx,clearAbilityFx,abilityPreMove,
   ABILITY_DEFS,supremeOf } from "../systems/abilities.js";
 import { ROSTER } from "../characters/roster.js";
 
@@ -63,6 +63,7 @@ test("V65 U puts every on-screen normal enemy to sleep, dissolves them gradually
  const distant=enemy(2000);
  const g=game(4,[normal,other,boss,distant]);
  assert.equal(useAbility(g,3),true);
+ advance(g,OHANA_U_WINDUP);
  assert.equal(normal.hp,120,"U must not kill before the sleep phase");
  assert.ok(normal.stun>=150&&other.stun>=150,"normal enemies not asleep");
  assert.ok(normal._auroraSleepT>0&&other._auroraSleepT>0);

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import {useAbility,updateAbilityFx,clearAbilityFx,drawAuroraDreamTargets} from "../systems/abilities.js";
+import {useAbility,updateAbilityFx,clearAbilityFx,drawAuroraDreamTargets,OHANA_U_WINDUP} from "../systems/abilities.js";
 import {ROSTER} from "../characters/roster.js";
 const abilities=fs.readFileSync("systems/abilities.js","utf8");
 const cinema=fs.readFileSync("systems/supreme-cinema.js","utf8");
@@ -22,6 +22,7 @@ test("V71 U remembers only initial onscreen ordinary enemies",()=>{
  const seen=enemy(170),boss=enemy(270,{boss:true,hp:5000,maxHp:5000});
  const beyond=enemy(2200),g=world([seen,boss,beyond]);
  assert.equal(useAbility(g,3),true);
+ step(g,OHANA_U_WINDUP);
  assert.equal(g._auroraDreamTargets,1);
  assert.equal(boss._auroraSleepT,undefined);
  assert.equal(beyond._auroraSleepT,undefined);

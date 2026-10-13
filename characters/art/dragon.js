@@ -14,7 +14,7 @@ const PAL = [
 ];
 
 const F = [
-{ r: 30, bw: 14, bh: 22, legL: 9, legW: 10, armL: 9, wing: 22, tail: 20, horn: 3, sn: 0.5 },
+{ r: 31, bw: 14, bh: 20, legL: 8, legW: 10, armL: 8, wing: 20, tail: 18, horn: 3, sn: 0.4 },
 { r: 25, bw: 14, bh: 29, legL: 14, legW: 10, armL: 13, wing: 36, tail: 30, horn: 9, sn: 0.62 },
 { r: 22, bw: 13, bh: 33, legL: 18, legW: 10, armL: 15, wing: 58, tail: 38, horn: 11, sn: 0.68 },
 { r: 22, bw: 16, bh: 35, legL: 18, legW: 12, armL: 16, wing: 62, tail: 42, horn: 19, sn: 0.68 },
@@ -103,18 +103,15 @@ const scal = (a, b) => {
 for (let i = 1; i < 3; i++) scal(tips[i - 1], tips[i]);
 scal(tips[2], P);
 ctx.closePath();
-const g = ctx.createRadialGradient(W[0], W[1], L * 0.05, W[0], W[1], L * 0.65);
-if (final) {
-  g.addColorStop(0, "#ff5a1a");
-  g.addColorStop(0.55, "#ffa02a");
-  g.addColorStop(1, "#ffe86a");
-} else {
-  const m = far ? R.darken(c.mem, 0.22) : c.mem;
-  g.addColorStop(0, R.darken(m, 0.1));
-  g.addColorStop(1, R.lighten(m, 0.18));
-}
-ctx.fillStyle = g;
+// Flat membrane + inner glow lobe (no per-frame gradient)
+const m0 = final ? "#ff8a2a" : (far ? R.darken(c.mem, 0.22) : c.mem);
+ctx.fillStyle = m0;
 ctx.fill();
+ctx.save();
+ctx.clip();
+ctx.fillStyle = final ? "rgba(255,232,106,.55)" : "rgba(255,255,255,.16)";
+ctx.beginPath(); ctx.ellipse(W[0], W[1], L * 0.42, L * 0.3, rot || 0, 0, PI * 2); ctx.fill();
+ctx.restore();
 ctx.lineWidth = R.LINE;
 ctx.strokeStyle = final ? "#8a2a10" : R.INK;
 ctx.lineJoin = "round";
@@ -684,7 +681,7 @@ if (f === 3) {
   R.shine(ctx, r * 0.2, -r * 0.68, 1, 1.4, 0.9);
 }
 
-const ex = r * 0.3, ey = -r * 0.12, er = r * (f === 0 ? 0.34 : 0.3);
+const ex = r * 0.3, ey = -r * 0.12, er = r * (f === 0 ? 0.38 : 0.3);
 if (final) {
   ctx.save();
   ctx.shadowColor = "#fff080"; ctx.shadowBlur = 10;
@@ -724,7 +721,15 @@ if (f >= 1) {
 }
 
 if (final) {
-  R.halo(ctx, -r * 0.05, -r * 1.25, r * 0.85, t, "#ffe27a");
+  // Dragón Celestial: constelación de 3 estrellas planas en lugar del halo GOD.
+  { const tw = Math.sin(t * 0.12) * 0.15, pts = [[-r * 0.55, -r * 1.22], [0, -r * 1.42], [r * 0.5, -r * 1.2]];
+    ctx.save(); ctx.strokeStyle = "rgba(255,226,122,.55)"; ctx.lineWidth = 1.2;
+    ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+    pts.forEach(([x, y], i) => { const s = (i === 1 ? 4.2 : 3) * (1 + (i === 1 ? tw : -tw));
+      ctx.fillStyle = i === 1 ? "#fff6c8" : "#ffe27a"; ctx.strokeStyle = "#8a3a10"; ctx.lineWidth = 1;
+      ctx.beginPath(); for (let k = 0; k < 8; k++) { const a = k * PI / 4 - PI / 2, rr = k % 2 ? s * 0.42 : s;
+        ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fill(); ctx.stroke(); });
+    ctx.restore(); }
   for (let i = 0; i < 5; i++) {
     const a = -PI * 0.82 + i * PI * 0.16;
     const fx = Math.cos(a) * r * 0.78, fy = Math.sin(a) * r * 0.72 - 2;

@@ -8,15 +8,15 @@ const PAL = [
   { body: "#ffd83a", belly: "#fffaf0", gill: "#b05cff", glow: "#e6ccff", inner: "#a04cf0" },
   { body: "#ffc13e", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
   { body: "#ffdc62", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
-  { body: "#fff4d2", belly: "#ffffff", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
+  { body: "#6fdcff", belly: "#effcff", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
 ];
 
 const P = [
-  { hr: 27, hx: 2, hy: -41, brx: 17, bry: 14, bx: 0, by: -17, legW: 8, armL: 7, armW: 6, gillL: 9, gillW: 3, ear: 7, eye: 8.4, tail: 17, coil: 4, turns: 2.5 },
-  { hr: 24, hx: 3, hy: -60, brx: 19, bry: 20, bx: -1, by: -27, legW: 9, armL: 11, armW: 6.5, gillL: 13, gillW: 3.4, ear: 8.5, eye: 8.2, tail: 27, coil: 6, turns: 2.5 },
-  { hr: 21, hx: 4, hy: -74, brx: 14, bry: 24, bx: 0, by: -37, legW: 8, armL: 15, armW: 6, gillL: 15, gillW: 3.4, ear: 7.5, eye: 7.6, tail: 33, coil: 5, turns: 3, crest: true },
+  { hr: 29, hx: 2, hy: -40, brx: 16, bry: 13, bx: 0, by: -16, legW: 8, armL: 6, armW: 6, gillL: 7, gillW: 3, ear: 6, eye: 9.8, tail: 15, coil: 3.5, turns: 2 },
+  { hr: 24, hx: 3, hy: -60, brx: 19, bry: 20, bx: -1, by: -27, legW: 9, armL: 11, armW: 6.5, gillL: 13, gillW: 3.4, ear: 8.5, eye: 8.6, tail: 25, coil: 6, turns: 2.5 },
+  { hr: 21, hx: 4, hy: -74, brx: 14, bry: 24, bx: 0, by: -37, legW: 8, armL: 15, armW: 6, gillL: 15, gillW: 3.4, ear: 9.5, eye: 7.6, tail: 33, coil: 5, turns: 3, crest: true },
   { hr: 24, hx: 7, hy: -60, brx: 30, bry: 27, bx: -2, by: -29, legW: 10, armL: 10, armW: 7, gillL: 21, gillW: 4.4, ear: 8.5, eye: 8, tail: 30, coil: 6, turns: 2.5, fat: true, clouds: true },
-  { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 8.5, eye: 8, tail: 34, coil: 5.5, turns: 3, final: true },
+  { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 10.5, eye: 8, tail: 38, coil: 5.5, turns: 3, final: true },
 ];
 
 function pEll(x, y, rx, ry, rot = 0) {
@@ -24,13 +24,8 @@ function pEll(x, y, rx, ry, rot = 0) {
   p.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU);
   return p;
 }
-function godFill(ctx, x, y, r) {
-  const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.45, r * 0.05, x, y, r * 1.2);
-  g.addColorStop(0, "#ffffff"); g.addColorStop(0.5, "#fff1c4"); g.addColorStop(1, "#f2c65a");
-  return g;
-}
 function skin(ctx, R, path, f, x, y, r, col, extra) {
-  ctx.fillStyle = f === 4 ? godFill(ctx, x, y, r) : R.volume(ctx, x, y, r, col);
+  ctx.fillStyle = R.volume(ctx, x, y, r, col);
   ctx.fill(path);
   if (extra) { ctx.save(); ctx.clip(path); extra(); ctx.restore(); }
   ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.lineJoin = "round"; ctx.stroke(path);
@@ -68,9 +63,9 @@ function cloud(ctx, R, x, y, s, col, dark) {
   p.moveTo(x + s * 0.95, y - s * 0.25);
   p.arc(x, y - s * 0.25, s * 0.95, 0, TAU);
   ctx.lineWidth = 4; ctx.strokeStyle = R.INK; ctx.stroke(p);
-  const g = ctx.createLinearGradient(x, y - s, x, y + s);
-  g.addColorStop(0, dark ? "#8f97c8" : "#ffffff"); g.addColorStop(1, dark ? "#4c5288" : "#c9d8ea");
-  ctx.fillStyle = g; ctx.fill(p);
+  ctx.fillStyle = dark ? "#6c73ad" : "#eef4fb"; ctx.fill(p);
+  ctx.fillStyle = dark ? "rgba(190,198,240,0.55)" : "#ffffff";
+  ctx.beginPath(); ctx.arc(x - s * 0.25, y - s * 0.55, s * 0.35, 0, TAU); ctx.fill();
 }
 
 /** Branquia plumosa: tallo curvo + flecos. */
@@ -123,7 +118,7 @@ function springTail(ctx, R, x, y, axis, len, amp, turns, col, f, t, glow) {
   }
   ctx.lineCap = "round";
   const w = f === 3 ? 6 : 5.2;
-  const base = f === 4 ? "#f4d27a" : R.darken(col, 0.05);
+  const base = R.darken(col, 0.05);
   for (let j = 0; j < N; j++) {
     ctx.beginPath(); ctx.moveTo(pts[j][0], pts[j][1]); ctx.lineTo(pts[j + 1][0], pts[j + 1][1]);
     ctx.strokeStyle = R.INK; ctx.lineWidth = w + 2.8; ctx.stroke();
@@ -135,15 +130,13 @@ function springTail(ctx, R, x, y, axis, len, amp, turns, col, f, t, glow) {
   ctx.save();
   ctx.translate(ex, ey); ctx.rotate(axis);
   if (glow > 0.05) {
-    const g = ctx.createRadialGradient(6, 0, 0, 6, 0, 14 + glow * 6);
-    g.addColorStop(0, "rgba(160,255,245," + (0.8 * glow) + ")"); g.addColorStop(1, "rgba(160,255,245,0)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(6, 0, 14 + glow * 6, 0, TAU); ctx.fill();
+    ctx.fillStyle = "rgba(160,255,245," + (0.35 * Math.min(1, glow)) + ")";
+    ctx.beginPath(); ctx.arc(6, 0, 10 + glow * 5, 0, TAU); ctx.fill();
   }
   ctx.beginPath(); ctx.roundRect(0, -5, 12, 10, 3.5);
-  const bg = ctx.createLinearGradient(0, -5, 0, 5);
-  const bc = f === 4 ? "#6cc4ff" : TQ;
-  bg.addColorStop(0, R.lighten(bc, 0.45)); bg.addColorStop(1, R.darken(bc, 0.2));
-  R.paint(ctx, bg, { lw: 2.4 });
+  const bc = f === 4 ? "#ff5ad8" : TQ;
+  R.paint(ctx, bc, { lw: 2.4 });
+  ctx.fillStyle = R.lighten(bc, 0.4); ctx.fillRect(1.5, -4, 9, 3);
   ctx.fillStyle = "#ffffff"; ctx.fillRect(3.5, -4.2, 2, 8.4);
   ctx.beginPath(); ctx.roundRect(12, -2.5, 3.5, 5, 1.2); R.paint(ctx, "#e8f4ff", { lw: 1.8 });
   ctx.restore();
@@ -255,7 +248,7 @@ function figure(ctx, R, pose, f, S, C, o) {
       ctx.beginPath(); ctx.moveTo(ex - 4, ey - 3); ctx.lineTo(ex + 2, ey); ctx.lineTo(ex - 4, ey + 3); ctx.stroke();
     }
   } else {
-    const iris = f === 4 ? "#d0409a" : "#d27a12";
+    const iris = f === 4 ? "#2a5fd0" : "#d27a12";
     R.eye(ctx, -hr * 0.02, ey + 1, S.eye * 0.82, pose, { iris, mood: o.eyes, lash: true });
     R.eye(ctx, hr * 0.7, ey + 1.5, S.eye * 0.9, pose, { iris, mood: o.eyes, lash: true });
   }
@@ -294,9 +287,8 @@ function figure(ctx, R, pose, f, S, C, o) {
   }
   if (o.mouthSpark > 0) {
     const k = o.mouthSpark, mx = hr * 0.75 + 6 + Math.max(0, k - 0.5) * 60, my = hr * 0.35;
-    const g = ctx.createRadialGradient(mx, my, 0, mx, my, 8 + k * 6);
-    g.addColorStop(0, "#ffffff"); g.addColorStop(0.4, BOLT); g.addColorStop(1, "rgba(255,240,120,0)");
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mx, my, 8 + k * 6, 0, TAU); ctx.fill();
+    ctx.fillStyle = "rgba(255,246,160,0.45)"; ctx.beginPath(); ctx.arc(mx, my, 8 + k * 6, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(mx, my, 3 + k * 2, 0, TAU); ctx.fill();
     sparkBurst(ctx, mx, my, 12 + k * 6, t, 5, BOLT);
   }
   ctx.restore();
@@ -399,7 +391,7 @@ function opts(pose, f, S) {
     o.tailAxis = -2.95; o.tailLen = 1.3; o.tailAmp = 0.7; o.earA = -0.4; o.gillFlare = -0.5; o.mouth = "open";
   } else if (st === "fall" || st === "glide") {
     o.footY = -2; o.footX = 3; o.legBend = -2; o.armA = 1.95; o.armB = -2.6;
-    o.tailAxis = -1.9; o.tailLen = 0.7; o.tailAmp = 1.3; o.earA = 0.25; o.gillFlare = 0.6; o.mouth = "o";
+    o.tailAxis = -2.7; o.tailLen = 0.95; o.tailAmp = 1.3; o.earA = 0.25; o.gillFlare = 0.6; o.mouth = "o";
   } else if (st === "attack") {
     const k = pose.atk;
     o.eyes = "angry"; o.mouth = "grin"; o.charge = 0.7;

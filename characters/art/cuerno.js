@@ -410,9 +410,16 @@ if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
   // The F0 baby is only a sentient horn. No collar, orb, hooves or body.
   ctx.fillStyle="#fff2d5";ctx.beginPath();ctx.arc(0,-65,3.2,0,TAU);ctx.fill();
   const mood=pose.state==="hurt"||pose.state==="dead"?"closed":pose.state==="attack"?"happy":"normal";
-  R.eye(ctx,-5,-24,3.5,pose,{iris:"#623d85",mood});
-  R.eye(ctx,6,-24,3.5,pose,{iris:"#623d85",mood});
-  R.mouth(ctx,.5,-16,3.4,pose.state==="attack"?"happy":"smile");
+  // V370 baby read: bigger eyes, rosy cheeks and a two-leaf "Semilla" sprout.
+  R.eye(ctx,-5,-24,4.3,pose,{iris:"#623d85",mood});
+  R.eye(ctx,6,-24,4.3,pose,{iris:"#623d85",mood});
+  R.blush(ctx,-9,-17,2.4,"#ffb8d8");R.blush(ctx,10,-17,2.4,"#ffb8d8");
+  R.mouth(ctx,.5,-15,3.2,pose.state==="attack"?"happy":"smile");
+  {const sw=Math.sin(t*.09)*.18+(moving?-.25:0);
+   ctx.save();ctx.translate(1,-67);ctx.rotate(sw);ctx.strokeStyle="#4f7a4a";ctx.lineWidth=1.4;
+   ctx.beginPath();ctx.moveTo(0,1);ctx.lineTo(0,-5);ctx.stroke();ctx.fillStyle="#9be39a";
+   for(const s of [-1,1]){ctx.beginPath();ctx.ellipse(s*3.4,-6,3.6,1.9,s*-.5,0,TAU);ctx.fill();ctx.stroke();}
+   ctx.restore();}
   // The newborn hops by magic. When it runs, its own tip pulls it forward.
   if(moving||air){
     ctx.strokeStyle="#ffe3a3";ctx.lineWidth=1.8;ctx.globalAlpha=.65;
@@ -932,6 +939,21 @@ function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, pose.form | 0));
   // Keep the original five evolution dispatches for legacy contracts.
   drawCuernoFootsteps(ctx, pose, f);
+  ctx.save();cuernoActionLean(ctx,pose,f);
+  drawCuernoForm(ctx,pose,R,f);
+  ctx.restore();
+}
+// Lectura de acción (pivote en los cascos): embestida de cuerno al atacar,
+// retroceso al recibir golpe y saltito de victoria. Solo transformaciones.
+function cuernoActionLean(ctx,pose,f){
+  if(pose.reduceMotion)return;
+  const st=pose.state,k=1-f*.12;
+  if(st==="attack"){const a=Math.max(0,Math.min(1,Number(pose.atk)||0)),thrust=Math.sin(Math.min(1,a/.55)*Math.PI);
+    ctx.translate((a<.2?-2*a/.2:thrust*6)*k,0);ctx.rotate((a<.2?-.06:.1*thrust)*k);}
+  else if(st==="hurt"){ctx.translate(-5*k,0);ctx.rotate(-.16*k);ctx.scale(1.04,.95);}
+  else if(st==="victory"){const hop=Math.abs(Math.sin((Number(pose.t)||0)*.15));ctx.translate(0,-hop*6*k);ctx.scale(1-hop*.03,1+hop*.04);}
+}
+function drawCuernoForm(ctx,pose,R,f){
   if (f === 0) { drawLivingHorn(ctx,pose,R,pose.t||0); return; }
   if (f === 1) { drawFirstBody(ctx,pose,R,pose.t||0); return; }
   if (f === 2) { drawRainbowFoal(ctx,pose,R,pose.t||0); return; }

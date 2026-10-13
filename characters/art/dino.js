@@ -277,11 +277,8 @@ function crystal(ctx, R, x, y, a, len, wd) {
     [x + ux * len * 0.7 - nx * wd, y + uy * len * 0.7 - ny * wd],
     [x - nx * wd * 0.7, y - ny * wd * 0.7],
   ];
-  const g = ctx.createLinearGradient(x, y, x + ux * len, y + uy * len);
-  g.addColorStop(0, "#5fd0f0");
-  g.addColorStop(0.6, "#bff4ff");
-  g.addColorStop(1, "#ffffff");
-  R.poly(ctx, pts, g, { lw: 2, ink: "#1d3c5c" });
+  R.poly(ctx, pts, "#8fe2f8", { lw: 2, ink: "#1d3c5c" });
+  R.poly(ctx, [pts[1], pts[2], [x + ux * len * 0.55, y + uy * len * 0.55]], "#e4faff", { lw: 0 });
   ctx.strokeStyle = "rgba(255,255,255,0.9)";
   ctx.lineWidth = 1.4;
   ctx.beginPath();
@@ -1075,7 +1072,12 @@ function drawHead(ctx, R, pose, o) {
   }
 
   if (final) {
-    R.halo(ctx, -hw * 0.1, -hh * 1.35, hw * 0.7, t, "#fff27a");
+    // Dino Coloso: volcanic crown of lava spikes (no angel halo)
+    for (let i = -2; i <= 2; i++) {
+      const bx = -hw * 0.1 + i * hw * 0.26, by = -hh * 0.95 - (2 - Math.abs(i)) * 1.5;
+      const ht = hh * (0.55 + (2 - Math.abs(i)) * 0.14) + Math.sin(t * 0.08 + i) * 1.2;
+      R.poly(ctx, [[bx - hw * 0.11, by], [bx, by - ht], [bx + hw * 0.11, by]], i === 0 ? "#ffd84a" : "#ff6a2a", { lw: 1.8 });
+    }
   }
 
   const hx = -hw * 0.55, hy = hh * 0.22;

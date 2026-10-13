@@ -5,10 +5,10 @@ const TAU = Math.PI * 2;
 
 const PAL = [
   { fur: "#ffe3b8", dark: "#e7b56a", belly: "#fff8ee", ear: "#ffb7c8", nose: "#ff8aa0", eye: "#3aa0e8", accent: "#7ec8ff" },
-  { fur: "#f6aa51", dark: "#c45e16", belly: "#ffe4c2", ear: "#ff8fa3", nose: "#e23b4a", eye: "#2d6fe0", accent: "#ffd24a" },
+  { fur: "#ffc4e6", dark: "#d978b4", belly: "#fff2fa", ear: "#ff8fbf", nose: "#ff5c8a", eye: "#2d6fe0", accent: "#ffd24a" },
   { fur: "#ffd0e8", dark: "#e888c0", belly: "#fff", ear: "#ffb3d9", nose: "#ff5c8a", eye: "#3f8ef0", accent: "#fff4a8" },
   { fur: "#c9b4ff", dark: "#7052bb", belly: "#f4eeff", ear: "#a88cff", nose: "#ff7aa8", eye: "#f0d060", accent: "#ffe27a" },
-  { fur: "#fff6ea", dark: "#e4c07a", belly: "#fff", ear: "#ffd0e0", nose: "#ff5c8a", eye: "#e0489b", accent: "#ffb780" },
+  { fur: "#ffb3dc", dark: "#b8508f", belly: "#fff0f8", ear: "#ff7ac0", nose: "#ff3f7f", eye: "#7a4ae0", accent: "#4a2f8a" },
 ];
 
 // V353 · Five-act facial/ear/tail/paw direction, exclusively for the
@@ -200,15 +200,15 @@ function drawBaby(ctx, R, pose, r, c) {
   // oval belly so there is no floating wrist or detached axilla.
   R.swingLimb(ctx, -17, -34, 7, -0.28-(r.michiPaw||0)*.14,
     0, 5.2, c.dark, {handColor:"#ffd5da"});
-  R.ellipse(ctx, 2, -38, 32, 30, c.fur);
+  R.ellipse(ctx, 2, -37, 31, 31, c.fur);
   R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
   R.swingLimb(ctx, 19, -33, 9, r.arm-(r.michiPaw||0)*.42,
     0, 5.5, c.fur, {handColor:"#ffb0c4"});
   R.shine(ctx, -8, -50, 8, 4, 0.4);
   const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
-  ear(ctx, -14, -58, 18, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
-  ear(ctx, 16, -58, 20, 0.28 - flop - (r.michiEar || 0), c.fur, c.ear);
-  face(ctx, R, pose, r, 4, -40, 26, c);
+  ear(ctx, -15, -59, 14, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
+  ear(ctx, 16, -59, 15, 0.28 - flop - (r.michiEar || 0), c.fur, c.ear);
+  face(ctx, R, pose, r, 4, -39, 30, c);
   R.ellipse(ctx, 14, -24, 5.2, 5.2, c.accent, { shade: false, lw: 1.6 });
   ctx.beginPath();
   ctx.arc(14, -24, 7.2, 0, TAU);
@@ -218,7 +218,7 @@ function drawBaby(ctx, R, pose, r, c) {
 }
 
 function drawCat(ctx, R, pose, r, c) {
-  tail(ctx, R, -16, -28, 40, -2.15, r.tail, r.t, 0.4, c.fur);
+  tail(ctx, R, -18, -20, 36, -2.85 + (r.st === "jump" ? 0.35 : 0), r.tail * 0.8, r.t, 0.4, c.dark);
   legs(ctx, R, r, 0, c.fur, c.dark, 20);
   R.ellipse(ctx, 2, -34, 24, 16, c.fur);
   R.ellipse(ctx, 8, -30, 11, 9, c.belly, { line: false });
@@ -293,11 +293,11 @@ function drawMoon(ctx, R, pose, r, c) {
   ctx.lineWidth = 2.4;
   ctx.fill();
   ctx.stroke();
-  tail(ctx, R, -8, -34, 36, -2.35, r.tail, r.t, 0, c.fur);
-  tail(ctx, R, -4, -26, 30, -1.35, r.tail, r.t, 1.4, c.accent);
+  tail(ctx, R, -10, -22, 34, -2.8, r.tail * 0.8, r.t, 0, c.dark);
+  tail(ctx, R, -8, -18, 28, -3.05, r.tail * 0.7, r.t, 1.4, c.accent);
   legs(ctx, R, r, 2, c.fur, c.dark, 22);
-  R.ellipse(ctx, 2, -40, 13, 24, c.fur);
-  R.ellipse(ctx, 5, -34, 6, 12, c.belly, { line: false });
+  R.ellipse(ctx, 2, -40, 16, 24, c.fur);
+  R.ellipse(ctx, 5, -34, 8, 13, c.belly, { line: false });
   arm(ctx, R, r, 10, -48, c.fur, 16);
   ctx.save();
   ctx.translate(4, -74);
@@ -339,18 +339,23 @@ function feather(ctx, side, rot, len, color) {
   ctx.restore();
 }
 
+// Michi Eclipse (forma 5). Nombre interno fijado por tests.
 function drawGod(ctx, R, pose, r, c) {
   const flap = Math.sin(r.t * 0.18) * 0.22 + (r.slot === 2 ? 0.15 : 0) + (r.michiWing || 0)*.24;
-  feather(ctx, -1, -1.05 + flap, 48, "#fff");
-  feather(ctx, -1, -0.45 + flap, 58, "#fff8e4");
-  feather(ctx, -1, 0.12 + flap, 42, "#ffe7a8");
-  feather(ctx, 1, -0.95 - flap, 44, "#fff4d4");
-  feather(ctx, 1, -0.28 - flap, 54, "#fff");
+  // Eclipse disc behind the head: violet moon with pink rim (flat fills).
+  ctx.beginPath(); ctx.arc(8, -70, 34, 0, TAU); ctx.fillStyle = "#ff8fcf"; ctx.fill();
+  ctx.beginPath(); ctx.arc(11, -72, 30, 0, TAU); ctx.fillStyle = c.accent; ctx.fill();
+  ctx.lineWidth = 2.2; ctx.strokeStyle = INK; ctx.stroke();
+  feather(ctx, -1, -1.05 + flap, 48, "#ffd6ee");
+  feather(ctx, -1, -0.45 + flap, 58, "#fff0f8");
+  feather(ctx, -1, 0.12 + flap, 42, "#c9b4ff");
+  feather(ctx, 1, -0.95 - flap, 44, "#fff0f8");
+  feather(ctx, 1, -0.28 - flap, 54, "#ffd6ee");
   const n = r.slot === 2 ? 7 : 3;
   for (let i = 0; i < n; i++) {
     const spread = r.slot === 2 ? -2.6 + i * 0.38 : -2.2 + i * 0.45;
     const col = i % 2 ? c.accent : c.fur;
-    tail(ctx, R, -12, -28, 30 + (i % 3) * 6, spread, r.tail, r.t, i, col);
+    tail(ctx, R, -14, -22, 28 + (i % 3) * 5, spread - 0.45, r.tail * 0.8, r.t, i, col);
   }
   if (r.slot === 2) {
     ctx.save();
@@ -385,14 +390,14 @@ function drawGod(ctx, R, pose, r, c) {
     ctx.lineTo(i * 8 + (i === 0 ? 0 : i * 2), -26 - (i === 0 ? 8 : 0));
     ctx.lineTo(i * 8 + 8, -10);
     ctx.closePath();
-    ctx.fillStyle = c.accent;
+    ctx.fillStyle = "#ffd76a";
     ctx.strokeStyle = INK;
     ctx.lineWidth = 1.6;
     ctx.fill();
     ctx.stroke();
   }
   ctx.restore();
-  R.halo(ctx, 8, -98, 20, r.t, "#ffd76a");
+  
 }
 
 

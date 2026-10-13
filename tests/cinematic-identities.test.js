@@ -11,7 +11,8 @@ globalThis.window.dispatchEvent = globalThis.dispatchEvent;
 
 const { EVOLUTION_CINEMA_PROFILES } = await import('../characters/evolution.js');
 const { evolutionTiming } = await import('../systems/evolution-timing.js');
-const { SUPREME_IDENTITY, supremeOf, useAbility, clearAbilityFx } = await import('../systems/abilities.js');
+const { SUPREME_IDENTITY, supremeOf, useAbility, clearAbilityFx, updateAbilityFx, OHANA_U_WINDUP } = await import('../systems/abilities.js');
+const windup=(g)=>{for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}};
 const { SUPREME_STORYBOARDS } = await import('../systems/supreme-storyboards.js');
 
 const CHARACTERS = ['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
@@ -95,6 +96,7 @@ test('PR151.9: Yomi conserva el contrato de ejecución al 34% de vida', () => {
   const player = { id:'yomi',abilities:['a','b','c'],x:100,y:260,w:28,h:34,facing:1,evo:4,health:100,maxHealth:125,cds:{},cdDur:{},dead:false,xp:0 };
   const game = {player,enemies:[enemy],projectiles:[],ghosts:[],platforms:[],worldW:1600,worldH:900,cam:{x:0,y:0},t:0,reduceMotion:true,shake:0,flash:0,score:0,nums:{add(){}},fx:{emit(){}}};
   useAbility(game,3);
+  windup(game);
   assert.equal(enemy.hp,0);
   clearAbilityFx();
 });
@@ -107,6 +109,7 @@ test('PR151.10: los contratos de estado de Kilo/Frita/Cuerno se aplican en la su
     const game={player,enemies:[enemy],projectiles:[],ghosts:[],platforms:[],worldW:1600,worldH:900,cam:{x:0,y:0},t:0,reduceMotion:true,shake:0,flash:0,score:0,nums:{add(){}},fx:{emit(){}}};
     const xp0=player.xp;
     useAbility(game,3);
+    if(id==='cuerno')windup(game);
     if(flag==='invuln') assert.ok(player.invuln>=75);
     if(flag==='_fryGodT') assert.ok(player._fryGodT>=120);
     if(flag==='xp') assert.ok(player.xp>xp0);

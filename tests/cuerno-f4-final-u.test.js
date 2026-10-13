@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {ROSTER} from "../characters/roster.js";
-import {useAbility,updateAbilityFx,clearAbilityFx,cuernoAuroraDomePose,drawCuernoAuroraDome} from "../systems/abilities.js";
+import {OHANA_U_WINDUP,useAbility,updateAbilityFx,clearAbilityFx,cuernoAuroraDomePose,drawCuernoAuroraDome} from "../systems/abilities.js";
 const ability=fs.readFileSync("systems/abilities.js","utf8");
 const art=fs.readFileSync("characters/art/cuerno.js","utf8");
 const movie=fs.readFileSync("systems/supreme-cinema.js","utf8");
@@ -63,6 +63,7 @@ test("V72 gameplay U snapshots F4 and protects boss, no physical stat mutation",
  assert.equal(useAbility(g,3),true);
  assert.equal(p.speed,9.6);assert.equal(p.jumpPower,18.6);
  assert.ok(g.flash<=5);assert.ok(g.shake<=3);
+ for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}
  assert.ok(normal._auroraSleepT>0);
  assert.equal(boss._auroraSleepT,undefined);
  for(let i=0;i<150;i++){g.t++;updateAbilityFx(g);}
