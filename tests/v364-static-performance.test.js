@@ -6,7 +6,7 @@ import vm from "node:vm";
 const sw = fs.readFileSync("sw.js", "utf8");
 const home = fs.readFileSync("index.html", "utf8");
 const title = fs.readFileSync("systems/title.js", "utf8");
-const currentVersion = sw.match(/const VERSION = "(ohana-\\d+)"/)?.[1];
+const currentVersion = sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
 
 function harness({ offline = false } = {}) {
   const handlers = {};
