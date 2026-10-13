@@ -35,6 +35,24 @@ async function auditPage(page, label) {
   assert.equal(heldOpening.mode, 'family-welcome', label + ': modo de apertura V45 incorrecto');
   assert.equal(heldOpening.cast, 10, label + ': bienvenida no contiene los 10 héroes');
   assert.equal(heldOpening.ready, true, label + ': CTA de entrada no se activa');
+  // Real-browser opening audit: silhouettes must use measured art, all ten
+  // must remain on-screen, and compact viewports use two readable rows.
+  const castAudit=await page.evaluate(()=>({
+    fit:document.querySelector('#ohana-intro')?.dataset.openingFit,
+    measured:Number(document.querySelector('#ohana-intro')?.dataset.openingMeasured||0),
+    cast:window.__OHANA_WELCOME_CAST_AUDIT||[]
+  }));
+  assert.equal(castAudit.fit,'measured-silhouettes',label+': portada still uses obsolete generic hero scale');
+  assert.equal(castAudit.cast.length,10,label+': opening cast audit missing heroes');
+  assert.equal(new Set(castAudit.cast.map(hero=>hero.id)).size,10);
+  assert.ok(castAudit.measured>=8,label+': visual calibration could not inspect most characters');
+  assert.ok(castAudit.cast.every(hero=>hero.x>0&&hero.x<hero.slotWidth*(label==='desktop'?10:5)+2),
+    label+': character off the welcome stage');
+  assert.ok(castAudit.cast.every(hero=>Number.isFinite(hero.paintedHeight)&&
+    hero.paintedHeight>=hero.targetHeight*.33&&hero.paintedHeight<=hero.targetHeight*1.02),
+    label+': visual character size remains disproportionate '+JSON.stringify(castAudit.cast));
+  if(label==='desktop')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,1);
+  if(label==='mobile')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,2);
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };
