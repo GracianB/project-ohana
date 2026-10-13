@@ -347,6 +347,38 @@ if (acting) {
   tailWave += acting.tail;
 }
 
+// Intro-only performance: the same connected head/arms/wings/tail are directed
+// as a living character, rather than replacing the baby with a new drawing.
+// Values are stage optics only: no combat state, hitboxes, U or timers change.
+const welcome=pose.dragonWelcome;
+if(welcome && st!=="dead" && st!=="hurt"){
+  const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+  const signed=v=>Number.isFinite(v)?clamp(v,-1,1):0;
+  const inhale=unit(welcome.inhale),sneeze=unit(welcome.sneeze);
+  const recoil=unit(welcome.recoil),proud=unit(welcome.proud);
+  const wingLife=unit(welcome.wing),tailLife=signed(welcome.tail);
+  // Weight gathers in the belly first, then shoulders release into the sneeze.
+  bob+=inhale*1.6-sneeze*3.1+recoil*2.0-proud*1.3;
+  lean+=inhale*(-.10)+sneeze*.18-recoil*.13-proud*.09;
+  headRot+=inhale*(-.27)+sneeze*.32-recoil*(-.18)-proud*.31;
+  hdx+=inhale*(-2.8)+sneeze*5.0+proud*1.7;
+  hdy+=inhale*1.3-sneeze*2.2;
+  armF+=inhale*.38+sneeze*1.10+recoil*(-.22)+proud*1.02;
+  armB+=inhale*.18+sneeze*.70+proud*.75;
+  legF+=recoil*.17-proud*.15;
+  legB-=recoil*.22;
+  const far=wRotFar===null?wRot+.3:wRotFar;
+  wRot+=wingLife*(-.38)+inhale*(-.35)+sneeze*.22+proud*.21;
+  wRotFar=far-wingLife*.24-inhale*.24+sneeze*.19+proud*.29;
+  wOpen=clamp(wOpen+.13+wingLife*.19+inhale*.13+proud*.09,.18,1);
+  tailWave+=tailLife*.95+recoil*.55-proud*.27;
+  jaw=clamp(jaw+inhale*.12+sneeze*.66+recoil*.18+proud*.40,0,1);
+  if(sneeze>.35)eyeMood="closed";
+  else if(proud>.24)eyeMood="happy";
+  else if(inhale>.4)eyeMood="normal";
+  smoke=smoke && sneeze<.08;
+}
+
 const hipY = -(P.legL + P.legW * 0.55) + bob;
 
 ctx.save();
