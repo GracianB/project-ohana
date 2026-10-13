@@ -1,3 +1,17 @@
+## OHANA V344 · Dragón protagonista de la intro, acabado individual (ohana-344)
+
+- Intervención exclusiva sobre **Dragón**, usando como punto de partida la intro ópticamente equilibrada V343. Nada se ha rediseñado arbitrariamente en el resto de personajes.
+- Coreografía original de 14 segundos en `systems/intro-dragon-stage.js`: reposo con respiración, carga de aire, estornudo de fuego pequeño pero legible, sobresalto, reacción de Michi y recuperación orgullosa. Gags «¡ACHÍS!» y «¡LO TENÍA!» aparecen en sus respectivos momentos, no simultáneamente.
+- La actuación es determinista y está dirigida por tiempo, sin temporizadores adicionales, RNG, destellos estroboscópicos ni acciones de combate. Con movimiento reducido se mantiene la presencia pero se eliminan los efectos bruscos.
+- Se dirige el arte **existente** de `characters/art/dragon.js`: cabeza y mandíbula, peso en el abdomen, desplazamiento de hombros, patas, alas articuladas y cola responden de manera específica a cada fase. Nunca se cambia la anatomía canónica, las hitboxes, las evoluciones ni la U.
+- `characters/draw.js` propaga exclusivamente el parámetro de actuación de intro al rig, garantiza que Dragón use su Canvas canónico durante la bienvenida (sin reemplazos de arte pintado) e incorpora las fases al fingerprint del render, evitando congelaciones por caché.
+- El escenario usa iluminación cálida contenida, marcas de respiración, pequeños anillos de humo y una llama de corto alcance anclada a su hocico, sin tapar a Kilo. La altura escénica crece suavemente dentro del encuadre responsivo V343.
+- Pruebas V344: coreografía completa, las cinco fases temporales y repetición de 14 segundos, accesibilidad, geometría y estados Canvas, actualización del fingerprint, preservación del módulo original. El Browser E2E valida el director real en escritorio y móvil y la regresión visual captura tres planos dirigidos de Dragón (inhalar, estornudar y remate).
+- Versión de caché `ohana-344` sincronizada y nuevo módulo precacheado offline. CI obligatoria: Node, Browser E2E, visual completa, cooperativo Firefox/Chromium y Release Gate. No fusionar hasta finalizar en verde.
+- Las mejoras de Dino, Frita, Pizza, Yomi, Cuerno y Michi siguen pendientes de integrarse por separado, con revisión anatómica mensaje a mensaje. **No se ha desplegado en Netlify.**
+
+---
+
 ## OHANA · Ajuste visual de bienvenida (ohana-343)
 
 - La pantalla inicial mostraba tamaños incoherentes: Kilo, Stitcho, Chispín y Michi se dibujaban casi dos veces más grandes porque el guion utilizaba `baseHeight` de la cinemática antigua (34 px), pero el artista actual utiliza alturas base propias de entre 60–64 px; Cuerno arrastraba además un parche `*.48` que no medía su cuerpo real.
