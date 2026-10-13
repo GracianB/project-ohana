@@ -318,7 +318,6 @@ function drawCuernoFamilySeal(ctx,pose,R,form,t){
 
 function drawCuernoOverlays(ctx,pose,R,form,t,lift,tilt){
 ctx.save();ctx.translate(0,lift);ctx.rotate(tilt);
-if(intro.active)ctx.scale(intro.bodyX,intro.bodyY);
 drawCuernoFamilySeal(ctx,pose,R,form,t);
 drawCuernoSoul(ctx,pose,R,form,t);
 drawCuernoMagic(ctx,pose,R,form,t);
