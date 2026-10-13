@@ -13,6 +13,13 @@ export const YOMI_WELCOME_BEATS=Object.freeze({
  startle:Object.freeze([8.42,8.55,8.69,8.82]),
  bow:Object.freeze([8.78,8.94,9.17,9.38])
 });
+// V358 · The lantern guardian responds with its own body even while other
+// heroes are on stage. Never a new spell, invisible bite or screen-wide flash.
+export const YOMI_FAMILY_REACTIONS=Object.freeze({
+  melody:Object.freeze([.65,.83,1.11,1.42]),
+  spark:Object.freeze([1.78,1.96,2.23,2.52]),
+  dino:Object.freeze([11.72,11.93,12.28,12.59])
+});
 export function yomiWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const time=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -22,13 +29,16 @@ export function yomiWelcomeBeat(seconds,reducedMotion=false){
  const startle=pulse(time,...YOMI_WELCOME_BEATS.startle);
  const bow=pulse(time,...YOMI_WELCOME_BEATS.bow);
  const breath=(1+Math.sin(time*TAU*4/14))*.5;
+ const melody=pulse(time,...YOMI_FAMILY_REACTIONS.melody);
+ const spark=pulse(time,...YOMI_FAMILY_REACTIONS.spark);
+ const dino=pulse(time,...YOMI_FAMILY_REACTIONS.dino);
  if(reducedMotion)return Object.freeze({phase:'idle',listen:0,gather:0,
-  reveal:0,startle:0,bow:.20,breath:.5,ribbon:0,halo:.12,reduced:true});
+  reveal:0,startle:0,bow:.20,breath:.5,melody:0,spark:0,dino:0,ribbon:0,halo:.12,reduced:true});
  const phase=reveal>.2?'reveal':startle>.2?'startle':gather>.2?'gather':
   listen>.2?'listen':bow>.2?'bow':'idle';
- return Object.freeze({phase,listen,gather,reveal,startle,bow,breath,
-  ribbon:clamp(.18*Math.sin(time*TAU*5/14)+gather*.40-reveal*.30+startle*.44-bow*.18,-1,1),
-  halo:clamp(.12+gather*.22+reveal*.75+startle*.27+bow*.2),reduced:false});
+ return Object.freeze({phase,listen,gather,reveal,startle,bow,breath,melody,spark,dino,
+  ribbon:clamp(.18*Math.sin(time*TAU*5/14)+gather*.40-reveal*.30+startle*.44-bow*.18+melody*.16-spark*.22+dino*.18,-1,1),
+  halo:clamp(.12+gather*.22+reveal*.75+startle*.27+bow*.2+melody*.09+spark*.13+dino*.12),reduced:false});
 }
 export function drawYomiWelcomeFX(ctx,x,foot,height,seconds,beat,layer='back'){
  if(!ctx||!beat||![x,foot,height,seconds].every(Number.isFinite)||height<=0)return;
