@@ -160,6 +160,21 @@ async function auditPage(page, label) {
   assert.ok(pizzaFilm.stageAlive&&
     ['idle','sniff','spring','stretch','catch','flourish'].includes(pizzaFilm.livePhase),
     label+': Pizza director must remain rendered within the live welcome canvas');
+  // V357: pizza dough and crust keep acting in the gaps between chase beats.
+  const pizzaFamily=await page.evaluate(async()=>{
+    const {pizzaWelcomeBeat}=await import('/systems/intro-pizza-stage.js?e2e=v357');
+    const times=[1.12,3.70,8.50],keys=['melody','dragon','yomi'];
+    const beats=times.map(t=>pizzaWelcomeBeat(t));
+    const el=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      still:pizzaWelcomeBeat(3.70,true).dragon,
+      stage:!!el?.querySelector('canvas'),current:el?.dataset.pizzaFamilyReaction||''};
+  });
+  assert.ok(pizzaFamily.quiet&&pizzaFamily.stage);
+  assert.ok(pizzaFamily.strength.every(x=>x>.65),label+': Pizza lacks connected quiet scenes');
+  assert.equal(pizzaFamily.still,0);
+  assert.ok(['rest','melody','dragon','yomi'].includes(pizzaFamily.current));
   // V348: Yomi must never disappear from the stage while delivering
   // five distinct lantern moments inside the original Canvas renderer.
   const yomiFilm=await page.evaluate(async()=>{
