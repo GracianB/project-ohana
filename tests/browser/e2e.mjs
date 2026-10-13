@@ -69,6 +69,22 @@ async function auditPage(page, label) {
   assert.ok(dragonFilm.hasStageHook&&dragonFilm.stageAlive,
     label+': Dragon animated frame is not rendered in the actual intro Canvas');
   assert.ok(['idle','inhale','sneeze','recoil','proud'].includes(dragonFilm.livePhase));
+  // V363: Michi's five real bodies stay alive even when the cat is not
+  // directing her own scene. Real paws, tail roots and F4 feather shoulders.
+  const michiFamily=await page.evaluate(async()=>{
+    const {michiWelcomeBeat}=await import('/systems/intro-michi-stage.js?e2e=v363');
+    const times=[1.0,2.08,6.0,8.45,12.2],keys=['melody','spark','chase','yomi','dino'];
+    const beats=times.map(t=>michiWelcomeBeat(t)),el=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      reduced:michiWelcomeBeat(6,true).chase,
+      canvas:!!el?.querySelector('canvas'),
+      reaction:el?.dataset.michiFamilyReaction||''};
+  });
+  assert.ok(michiFamily.canvas&&michiFamily.quiet);
+  assert.ok(michiFamily.strength.every(x=>x>.60),label+': Michi remains frozen after her own five beats');
+  assert.equal(michiFamily.reduced,0);
+  assert.ok(['rest','melody','spark','chase','yomi','dino'].includes(michiFamily.reaction));
   // V354: a living Dragon keeps acting after the introductory sneeze.
   const dragonFamily=await page.evaluate(async()=>{
     const {dragonWelcomeBeat}=await import('/systems/intro-dragon-stage.js?e2e=v354');
