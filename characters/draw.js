@@ -1053,6 +1053,11 @@ pose.chispinWelcome?.phase || "",q(pose.chispinWelcome?.sniff,12),
 q(pose.chispinWelcome?.prank,12),q(pose.chispinWelcome?.charge,12),
 q(pose.chispinWelcome?.hiccup,12),q(pose.chispinWelcome?.cloud,12),
 q(pose.chispinWelcome?.coil,8),q(pose.chispinWelcome?.gills,8),
+// V353 Michi cat: real form-specific ears/eyes/tail/wings invalidate canvas.
+pose.michiWelcome?.phase || "",q(pose.michiWelcome?.inspect,12),
+q(pose.michiWelcome?.sideeye,12),q(pose.michiWelcome?.groom,12),
+q(pose.michiWelcome?.flick,12),q(pose.michiWelcome?.purr,12),
+q(pose.michiWelcome?.tail,8),q(pose.michiWelcome?.wing,8),
 ].join("|");
 }
 
@@ -1186,6 +1191,7 @@ if(p.id==="cuerno"&&p._introForceCanvas&&p._introCuerno)pose.cuernoWelcome=p._in
 if(p.id==="kilo"&&p._introForceCanvas&&p._introKilo)pose.kiloWelcome=p._introKilo;
 if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p._introStitcho;
 if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
+if(p.id==="cat"&&p._introForceCanvas&&p._introMichi)pose.michiWelcome=p._introMichi;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
