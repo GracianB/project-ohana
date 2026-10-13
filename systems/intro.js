@@ -597,6 +597,8 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.dinoWelcomePhase=dinoBeat.phase;
       el.dataset.dinoWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.dinoFamilyReaction=dinoBeat.chase>.2?"chase":
+        dinoBeat.dragon>.2?"dragon":dinoBeat.melody>.2?"melody":"rest";
     }
     if(dinoBeat.stomp>.26){
       comicBubble("¡PUM!",dino.x+heroH*.12,dino.foot-heroH*1.0,
