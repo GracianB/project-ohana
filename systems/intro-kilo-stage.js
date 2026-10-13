@@ -13,6 +13,14 @@ export const KILO_WELCOME_BEATS=Object.freeze({
  surprise:Object.freeze([1.25,1.38,1.54,1.66]),
  finale:Object.freeze([1.62,1.77,1.98,2.16])
 });
+// V360 · Four family callbacks spread Kilo's own musical personality across
+// the complete film, not just the opening 2.16 seconds. No actual J/K/L/U.
+export const KILO_FAMILY_REACTIONS=Object.freeze({
+ dragon:Object.freeze([3.35,3.52,3.83,4.10]),
+ chase:Object.freeze([5.23,5.47,5.94,6.18]),
+ yomi:Object.freeze([8.03,8.23,8.67,8.94]),
+ dino:Object.freeze([11.78,12.01,12.40,12.69])
+});
 export function kiloWelcomeBeat(seconds,reducedMotion=false){
  const raw=Number.isFinite(seconds)?seconds:0;
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
@@ -22,17 +30,21 @@ export function kiloWelcomeBeat(seconds,reducedMotion=false){
  const surprise=pulse(t,...KILO_WELCOME_BEATS.surprise);
  const finale=pulse(t,...KILO_WELCOME_BEATS.finale);
  const breath=(1+Math.sin(t*TAU*4/14))*.5;
+ const dragon=pulse(t,...KILO_FAMILY_REACTIONS.dragon);
+ const chase=pulse(t,...KILO_FAMILY_REACTIONS.chase);
+ const yomi=pulse(t,...KILO_FAMILY_REACTIONS.yomi);
+ const dino=pulse(t,...KILO_FAMILY_REACTIONS.dino);
  if(reducedMotion)return Object.freeze({
   phase:"idle",listen:0,strum:0,bloom:0,surprise:0,finale:.2,
-  breath:.5,petals:0,wing:0,glow:.12,reduced:true
+  breath:.5,dragon:0,chase:0,yomi:0,dino:0,petals:0,wing:0,glow:.12,reduced:true
  });
  const phase=bloom>.22?"bloom":surprise>.22?"surprise":strum>.22?"strum":
    listen>.22?"listen":finale>.22?"finale":"idle";
  return Object.freeze({
-  phase,listen,strum,bloom,surprise,finale,breath,
-  petals:clamp(strum*.30+bloom*.90+surprise*.33+finale*.25),
-  wing:clamp(strum*.16+bloom*.50+finale*.78),
-  glow:clamp(.12+listen*.08+strum*.23+bloom*.62+finale*.33),reduced:false
+  phase,listen,strum,bloom,surprise,finale,breath,dragon,chase,yomi,dino,
+  petals:clamp(strum*.30+bloom*.90+surprise*.33+finale*.25+chase*.07+yomi*.09),
+  wing:clamp(strum*.16+bloom*.50+finale*.78+dragon*.14+dino*.22),
+  glow:clamp(.12+listen*.08+strum*.23+bloom*.62+finale*.33+dragon*.11+yomi*.17+dino*.09),reduced:false
  });
 }
 export function drawKiloWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
