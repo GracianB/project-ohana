@@ -42,6 +42,9 @@ jobs:
       - name: V366 performance · live desktop and mobile Chromium
         run: node tests/browser/v366-performance.mjs
 
+      - name: V367 startup · lazy cinema and original scene routes
+        run: node tests/browser/v367-startup.mjs
+
       - name: Ten hero U protection audit
         run: node tests/browser/all-hero-u-protection.mjs
 
