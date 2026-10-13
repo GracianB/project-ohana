@@ -245,6 +245,18 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V359: inspect each Cuerno form and the living horn's actual reactions.
+  for(const [at,reaction,label] of [
+    [1.15,'melody','00dp-cuerno-listens-to-kilo'],
+    [3.80,'dragon','00dq-cuerno-ducks-sneeze'],
+    [8.50,'yomi','00dr-cuerno-watches-lantern']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.cuernoFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V350: Kilo's connected hands, ukulele, real five-form face and petals.
   for(const [at,phase,label] of [
     [.33,'listen','00zc-kilo-listens'],
