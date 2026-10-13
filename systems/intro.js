@@ -267,46 +267,48 @@ export function playTitleIntro() {
 
   function scene(t,L) {
     const {W,floor,heroH}=L;
+    const spots = Object.fromEntries(CAST.map(id => [id, welcomeCastSpot(id,W,floor,heroH)]));
+    const {dino,dragon,kilo,stitcho,chispin,cat,frita,pizza,yomi,cuerno}=spots;
     const tf=t*60;
     const loop=t%14;
     bubbleBoxes = [];
 
     // Kilo: polen flotando y pequeñas celebraciones.
     const pollen=0.55+0.45*Math.sin(t*1.8);
-    actor("kilo",W*.34,floor,heroH*1.02,tf,{facing:1,pose:pollen>.82?"victory":"idle"});
-    const px=W*.405,py=floor-heroH*.86-Math.sin(t*2.4)*9;
+    actor("kilo",kilo.x,kilo.foot,heroH*1.02,tf,{facing:1,pose:pollen>.82?"victory":"idle"});
+    const px=kilo.x+W*.024,py=kilo.foot-heroH*.86-Math.sin(t*2.4)*9;
     ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="#ffe66a";ctx.shadowColor="#ffe66a";ctx.shadowBlur=22;
     ctx.beginPath();ctx.arc(px,py,4+pollen*3,0,Math.PI*2);ctx.fill();ctx.restore();
 
     // Stitcho + Chispín: primero juegan a pelearse; luego llega el accidente.
     const duel=Math.sin(clamp(seg(loop,.35,1.25),0,1)*Math.PI);
     const zap=Math.sin(clamp(seg(loop,1.72,2.28),0,1)*Math.PI);
-    const sx=W*(.50-.012*duel),cxp=W*(.60+.012*duel);
-    actor("stitcho",sx,floor+2,heroH,tf,{facing:1,pose:duel>.08||zap>.08?"attack":"idle",melee:duel>.08||zap>.08?10:0,rotate:-zap*.08});
-    actor("chispin",cxp,floor+1,heroH*.92,tf,{facing:-1,pose:duel>.08?"attack":zap>.08?"victory":"idle",melee:duel>.08?8:0});
+    const sx=stitcho.x-W*.007*duel,cxp=chispin.x+W*.007*duel;
+    actor("stitcho",sx,stitcho.foot+2,heroH,tf,{facing:1,pose:duel>.08||zap>.08?"attack":"idle",melee:duel>.08||zap>.08?10:0,rotate:-zap*.08});
+    actor("chispin",cxp,chispin.foot+1,heroH*.92,tf,{facing:-1,pose:duel>.08?"attack":zap>.08?"victory":"idle",melee:duel>.08?8:0});
     if(duel>.35){
-      comicBubble(loop<.82?"¡TOMA!":"¡FALLASTE!",W*.555,floor-heroH*1.02,duel,"#8f7bff",loop<.82?"left":"right");
+      comicBubble(loop<.82?"¡TOMA!":"¡FALLASTE!",(sx+cxp)/2,stitcho.foot-heroH*1.02,duel,"#8f7bff",loop<.82?"left":"right");
     }
-    bolt(cxp-W*.015,floor-heroH*.50,sx+W*.02,floor-heroH*.49,zap);
+    bolt(cxp-W*.012,chispin.foot-heroH*.50,sx+W*.014,stitcho.foot-heroH*.49,zap);
     if(zap>.18){
-      comicBubble("¿EN SERIO?",sx,floor-heroH*.92,zap,"#ffe14a","right");
-      comicBubble("UPS.",cxp,floor-heroH*.88,zap,"#7ee7ff","left");
+      comicBubble("¿EN SERIO?",sx,stitcho.foot-heroH*.92,zap,"#ffe14a","right");
+      comicBubble("UPS.",cxp,chispin.foot-heroH*.88,zap,"#7ee7ff","left");
     }
 
     // Michi se limita a juzgar a todos.
     const catFace=loop>3.0&&loop<4.2?-1:1;
-    actor("cat",W*.70,floor+3,heroH*.80,tf,{facing:catFace,pose:"idle"});
+    actor("cat",cat.x,cat.foot+3,heroH*.92,tf,{facing:catFace,pose:"idle"});
     const catEye=Math.sin(clamp(seg(loop,3.55,4.25),0,1)*Math.PI);
-    if(catEye>.05) comicBubble("YO NO FUI.",W*.70,floor-heroH*.93,catEye,"#ffb6e4","left");
+    if(catEye>.05) comicBubble("YO NO FUI.",cat.x,cat.foot-heroH*.93,catEye,"#ffb6e4","left");
 
     // Dragón practica. La primera llama del ciclo es ridículamente pequeña.
     const sneeze=Math.sin(clamp(seg(loop,3.05,3.68),0,1)*Math.PI);
-    actor("dragon",W*.18,floor+1,heroH*.97,tf,{facing:1,pose:sneeze>.05?"attack":"idle",melee:sneeze>.05?8:0});
+    actor("dragon",dragon.x,dragon.foot+1,heroH*1.03,tf,{facing:1,pose:sneeze>.05?"attack":"idle",melee:sneeze>.05?8:0});
     if(sneeze>0){
       ctx.save();ctx.globalCompositeOperation="lighter";ctx.fillStyle="rgba(255,126,58,"+sneeze+")";ctx.shadowColor="#ff7e3a";ctx.shadowBlur=18;
-      ctx.beginPath();ctx.moveTo(W*.215,floor-heroH*.47);ctx.quadraticCurveTo(W*.233,floor-heroH*.69,W*.247,floor-heroH*.48);ctx.quadraticCurveTo(W*.231,floor-heroH*.39,W*.215,floor-heroH*.47);ctx.fill();ctx.restore();
-      comicBubble("ACHÍS.",W*.205,floor-heroH*.88,sneeze,"#ff8a45","left");
-      comicBubble("...",W*.70,floor-heroH*.72,sneeze,"#ffb6e4","right");
+      ctx.beginPath();ctx.moveTo(dragon.x+W*.024,dragon.foot-heroH*.47);ctx.quadraticCurveTo(dragon.x+W*.044,dragon.foot-heroH*.69,dragon.x+W*.052,dragon.foot-heroH*.48);ctx.quadraticCurveTo(dragon.x+W*.035,dragon.foot-heroH*.39,dragon.x+W*.024,dragon.foot-heroH*.47);ctx.fill();ctx.restore();
+      comicBubble("ACHÍS.",dragon.x+W*.024,dragon.foot-heroH*.88,sneeze,"#ff8a45","left");
+      comicBubble("...",cat.x,cat.foot-heroH*.72,sneeze,"#ffb6e4","right");
     }
 
     // Frita y Pizza cruzan la escena persiguiendo una patata.
@@ -316,41 +318,41 @@ export function playTitleIntro() {
       const y=floor-12-Math.abs(Math.sin(chase*Math.PI*6))*20;
       ctx.fillStyle="#e9bd55";ctx.strokeStyle="#704b21";ctx.lineWidth=2;
       ctx.beginPath();ctx.ellipse(x,y,10,7,chase*9,0,Math.PI*2);ctx.fill();ctx.stroke();
-      actor("frita",x-48,floor+3,heroH*.80,tf,{facing:1,vx:6,pose:"run"});
-      actor("pizza",x-105,floor-Math.abs(Math.sin(chase*Math.PI*5))*20,heroH*.84,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
+      actor("frita",x-48,frita.foot+3,heroH*.90,tf,{facing:1,vx:6,pose:"run"});
+      actor("pizza",x-105,pizza.foot-Math.abs(Math.sin(chase*Math.PI*5))*20,heroH*.90,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
       if(chase>.12&&chase<.78){
         comicBubble("¡MÍA!",x-52,floor-heroH*.78,Math.sin(chase*Math.PI),"#fff1b3","right");
         if(chase>.34) comicBubble("¡NI HABLAR!",x-110,floor-heroH*.95,Math.sin(chase*Math.PI),"#ffd84a","left");
       }
     } else {
-      actor("frita",W*.77,floor+3,heroH*.76,tf,{facing:-1,pose:"idle"});
-      actor("pizza",W*.83,floor+2,heroH*.78,tf,{facing:-1,pose:"idle"});
+      actor("frita",frita.x,frita.foot+3,heroH*.90,tf,{facing:-1,pose:"idle"});
+      actor("pizza",pizza.x,pizza.foot+2,heroH*.90,tf,{facing:-1,pose:"idle"});
     }
 
     // Yomi aparece y desaparece de una sombra imposible.
     const yomiIn=easeOut(seg(loop,7.35,8.15))*(1-seg(loop,9.05,9.55));
     if(yomiIn>0){
       ctx.save();ctx.globalAlpha=.60*yomiIn;ctx.fillStyle="#02040a";
-      ctx.beginPath();ctx.ellipse(W*.90,floor+6,34*yomiIn,9,0,0,Math.PI*2);ctx.fill();ctx.restore();
-      actor("yomi",W*.90,floor,heroH*.93,tf,{facing:-1,alpha:yomiIn,pose:"idle"});
-      if(loop>7.95&&loop<8.85) comicBubble("BU.",W*.88,floor-heroH*.88,Math.sin(seg(loop,7.95,8.85)*Math.PI),"#ff5b78","right");
+      ctx.beginPath();ctx.ellipse(yomi.x,yomi.foot+6,34*yomiIn,9,0,0,Math.PI*2);ctx.fill();ctx.restore();
+      actor("yomi",yomi.x,yomi.foot,heroH*.95,tf,{facing:-1,alpha:yomiIn,pose:"idle"});
+      if(loop>7.95&&loop<8.85) comicBubble("BU.",yomi.x,yomi.foot-heroH*.88,Math.sin(seg(loop,7.95,8.85)*Math.PI),"#ff5b78","right");
     }
 
     // Cuerno dibuja una aurora minúscula y satisfecha.
     const rk=Math.sin(clamp(seg(loop,9.15,10.45),0,1)*Math.PI);
-    actor("cuerno",W*.92,floor+1,heroH*.76,tf,{facing:-1,pose:rk>.2?"victory":"idle"});
-    rainbow(W*.905,floor-heroH*.72,22,rk);
-    if(rk>.35) comicBubble("¡TACHÁN!",W*.87,floor-heroH*1.02,rk,"#efbaff","right");
+    actor("cuerno",cuerno.x,cuerno.foot+1,heroH*.98,tf,{facing:-1,pose:rk>.2?"victory":"idle"});
+    rainbow(cuerno.x-W*.015,cuerno.foot-heroH*.72,22,rk);
+    if(rk>.35) comicBubble("¡TACHÁN!",cuerno.x-W*.025,cuerno.foot-heroH*1.02,rk,"#efbaff","right");
 
     // Dino cierra el ciclo con un pisotón que hace reaccionar a todos.
     const stomp=Math.sin(clamp(seg(loop,11.05,11.95),0,1)*Math.PI);
-    actor("dino",W*.075,floor+2,heroH,tf,{facing:1,pose:stomp>.18?"victory":"idle"});
+    actor("dino",dino.x,dino.foot+2,heroH*1.04,tf,{facing:1,pose:stomp>.18?"victory":"idle"});
     if(stomp>.05){
       ctx.save();ctx.globalAlpha=.22*stomp;ctx.strokeStyle="#b8d57b";ctx.lineWidth=2;
-      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(W*.075,floor+4);ctx.lineTo(W*(.11+i*.018),floor+10+i*4);ctx.stroke();}
+      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(dino.x,dino.foot+4);ctx.lineTo(dino.x+W*(.032+i*.018),dino.foot+10+i*4);ctx.stroke();}
       ctx.restore();
-      comicBubble("¡DINO!",W*.14,floor-heroH*.92,stomp,"#b8ef6b","right");
-      comicBubble("¿QUÉ?",W*.075,floor-heroH*1.12,stomp,"#fff6c8","left");
+      comicBubble("¡DINO!",dino.x+W*.05,dino.foot-heroH*.92,stomp,"#b8ef6b","right");
+      comicBubble("¿QUÉ?",dino.x,dino.foot-heroH*1.12,stomp,"#fff6c8","left");
     }
 
     // Pequeños puntos de luz para que el claro respire sin parecer una intro de logo.
