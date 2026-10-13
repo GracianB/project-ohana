@@ -69,6 +69,21 @@ async function auditPage(page, label) {
   assert.ok(dragonFilm.hasStageHook&&dragonFilm.stageAlive,
     label+': Dragon animated frame is not rendered in the actual intro Canvas');
   assert.ok(['idle','inhale','sneeze','recoil','proud'].includes(dragonFilm.livePhase));
+  // Dino's authored stage performance is independent of Dragon V344.
+  const dinoFilm=await page.evaluate(async()=>{
+    const {dinoWelcomeBeat}=await import('/systems/intro-dino-stage.js?e2e=v345');
+    return {
+      phases:[.7,10.8,11.4,11.8,12.19,12.79].map(t=>dinoWelcomeBeat(t).phase),
+      livePhase:document.querySelector('#ohana-intro')?.dataset.dinoWelcomePhase||'',
+      stageAlive:!!document.querySelector('#ohana-intro canvas')
+    };
+  });
+  assert.deepEqual(dinoFilm.phases,
+    ['idle','curious','brace','stomp','startled','delighted'],
+    label+": Dino acting phases are not connected to the actual intro");
+  assert.ok(dinoFilm.stageAlive&&
+    ['idle','curious','brace','stomp','startled','delighted'].includes(dinoFilm.livePhase),
+    label+': Dino animation must stay visible on the live welcome canvas');
   const gameSource = await page.evaluate(async () => {
     const response = await fetch('/game.js?v=ohana-230', { cache:'no-store' });
     return { ok: response.ok, status: response.status, source: await response.text() };

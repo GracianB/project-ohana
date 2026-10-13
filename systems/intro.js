@@ -16,6 +16,7 @@ import { canonId } from "./save.js";
 import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
+import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -74,7 +75,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -96,7 +97,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -158,6 +159,7 @@ export function playTitleIntro() {
     p._poseOverride = opts.pose || "idle";
     // Stage-only gesture data. Never touches save state, combat or physics.
     p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
+    p._introDino = id === "dino" ? (opts.dinoWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -386,17 +388,30 @@ export function playTitleIntro() {
     rainbow(cuerno.x-W*.015,cuerno.foot-heroH*.72,22,rk);
     if(rk>.35) comicBubble("¡TACHÁN!",cuerno.x-W*.025,cuerno.foot-heroH*1.02,rk,"#efbaff","right");
 
-    // Dino cierra el ciclo con un pisotón que hace reaccionar a todos.
-    const stomp=Math.sin(clamp(seg(loop,11.05,11.95),0,1)*Math.PI);
-    actor("dino",dino.x,dino.foot+2,heroH*1.04,tf,{facing:1,pose:stomp>.18?"victory":"idle"});
-    if(stomp>.05){
-      ctx.save();ctx.globalAlpha=.22*stomp;ctx.strokeStyle="#b8d57b";ctx.lineWidth=2;
-      for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(dino.x,dino.foot+4);ctx.lineTo(dino.x+W*(.032+i*.018),dino.foot+10+i*4);ctx.stroke();}
-      ctx.restore();
-      comicBubble("¡DINO!",dino.x+W*.05,dino.foot-heroH*.92,stomp,"#b8ef6b","right");
-      comicBubble("¿QUÉ?",dino.x,dino.foot-heroH*1.12,stomp,"#fff6c8","left");
+    // V345 · Dino deserves his own living scene: curiosity, grounded
+    // anticipation, gentle two-foot stomp, surprise and contagious delight.
+    // Only Dino receives this stage direction. Dragón V344 is unchanged.
+    const dinoBeat=dinoWelcomeBeat(loop,reduce);
+    const dinoHeight=heroH*1.08;
+    drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"back");
+    actor("dino",dino.x,dino.foot+2,dinoHeight,tf,{
+      facing:1,pose:"idle",dinoWelcome:dinoBeat
+    });
+    drawDinoWelcomeFX(ctx,dino.x,dino.foot+2,dinoHeight,t,dinoBeat,"front");
+    if(isE2E){
+      el.dataset.dinoWelcomePhase=dinoBeat.phase;
+      el.dataset.dinoWelcomeMotion=reduce?"reduced":"full";
     }
-
+    if(dinoBeat.stomp>.26){
+      comicBubble("¡PUM!",dino.x+heroH*.12,dino.foot-heroH*1.0,
+        dinoBeat.stomp,"#b8ef6b","right");
+    }else if(dinoBeat.startled>.32){
+      comicBubble("¿HE SIDO YO?",dino.x+heroH*.12,dino.foot-heroH*1.04,
+        dinoBeat.startled,"#fff6c8","right");
+    }else if(dinoBeat.delighted>.32){
+      comicBubble("¡SOY ENORME!",dino.x+heroH*.12,dino.foot-heroH*1.06,
+        dinoBeat.delighted,"#ccf8a2","right");
+    }
     // Pequeños puntos de luz para que el claro respire sin parecer una intro de logo.
     ctx.save();ctx.globalCompositeOperation="lighter";
     for(let i=0;i<22;i++){

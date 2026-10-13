@@ -777,7 +777,10 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
   assert.match(intro, /comicBubble/);
   assert.match(intro, /¿EN SERIO\?/);
   assert.match(intro, /¡NI HABLAR!/);
-  assert.match(intro, /¡DINO!/);
+  assert.match(intro, /¡PUM!/);
+  assert.match(intro, /¿HE SIDO YO\?/);
+  assert.match(intro, /¡SOY ENORME!/);
+  assert.match(intro, /dinoWelcomeBeat\(loop,reduce\)/);
   assert.match(intro, /const CAST = WELCOME_CAST_ORDER/);
   const welcome = fs.readFileSync("./systems/intro-cast-fit.js", "utf8");
   assert.match(welcome, /WELCOME_CAST_ORDER = Object\.freeze/);

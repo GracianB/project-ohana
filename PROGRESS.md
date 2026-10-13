@@ -1,3 +1,16 @@
+## OHANA V345 · Dino protagonista de la intro, dirección artística individual (ohana-345)
+
+- Segundo personaje trabajado individualmente después de Dragón V344. Escena de 14 segundos con peso, expresividad y cinco actuaciones diferenciadas: curiosidad, preparación con las patas plantadas, pisotón teatral, reacción sorprendida y orgullo final.
+- `systems/intro-dino-stage.js` dirige las fases `curious/brace/stomp/startled/delighted` de forma matemática, sin temporizadores, azar o dependencias de física/red. Pequeñas partículas y ondulaciones elípticas **solo decorativas** nacen bajo sus propios pies, sin crear golpes de área reales. Se mantiene el reparto V343 con diez personajes.
+- `characters/art/dino.js` conserva el mismo dinosaurio vectorial y las cinco evoluciones. Para la bienvenida únicamente, dirige el peso del cuerpo, mandíbula y ojos, cuello y cabeza, bracitos, patas apoyadas, cola y dedos anclados al suelo con sus funciones anatómicas actuales. Los sistemas de Coloso, fósiles, hipo, rodar y ataques no cambian.
+- `characters/draw.js` inyecta exclusivamente `pose.dinoWelcome` cuando el dummy de la intro lo solicita, amplía el fingerprint de la caché para que cada gesto se dibuje y utiliza el Canvas original en vez de una sustitución pintada.
+- Texto y ritmo del gag: «¡PUM!», después «¿HE SIDO YO?», y recuperación «¡SOY ENORME!». Mantiene los elementos del Dragón V344 sin alteraciones.
+- Accesibilidad: el modo de movimiento reducido elimina los temblores/partículas y deja una presencia estática. Las fases recorren un loop de 14 segundos sin corte de posición. No hay cambios a multijugador, daño, hitboxes ni terreno.
+- Pruebas nuevas Node: fases, límites numéricos, modo reducido, geometría Canvas real, caché, las cinco evoluciones y conservación de API de Dino. E2E navegador de escritorio/móvil comprueba el director en la intro. La suite visual captura cuatro momentos, manteniendo las tres capturas de Dragón.
+- Versión de caché `ohana-345` en HTML, Service Worker y precaché del módulo nuevo; no dar por integrado hasta Node, E2E, pruebas visuales, cooperativo Chromium/Firefox y Release Gate completos. Sin despliegue Netlify.
+
+---
+
 ## OHANA V344 · Dragón protagonista de la intro, acabado individual (ohana-344)
 
 - Intervención exclusiva sobre **Dragón**, usando como punto de partida la intro ópticamente equilibrada V343. Nada se ha rediseñado arbitrariamente en el resto de personajes.
