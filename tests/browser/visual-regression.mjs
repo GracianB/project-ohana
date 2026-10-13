@@ -314,11 +314,11 @@ try {
     await capture(page,label);
   }
   // V361: pixel-level FIVE-FORM inspection. The family opening uses baby
-  // Stitcho; without these captures a disconnected F3 visor or F4 ring
+  // Stitcho; without these captures disconnected F3 clouds or the F4 aurora crown
   // could pass every intro screenshot. Real drawDummy -> drawCharacter ->
-  // original stitch.js, with actual F0..F4 evolution definitions.
+  // original pikachu.js, with actual F0..F4 evolution definitions.
   const stitchoFormAudit=await page.evaluate(async()=>{
-    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
+    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v362');
     const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?visual=v361');
     const canvas=document.createElement('canvas');
     canvas.id='stitcho-form-audit';
@@ -387,6 +387,80 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V362: four late scenes show Chispin using REAL body and spring tail,
+  // not fake lightning or a frozen tiny drawing.
+  for(const [at,reaction,label] of [
+    [3.72,'dragon','00zq1-chispin-hears-dragon'],
+    [5.75,'chase','00zq2-chispin-enjoys-chase'],
+    [8.50,'yomi','00zq3-chispin-meets-yomi'],
+    [12.20,'dino','00zq4-chispin-surprised-by-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.chispinFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
+  // V362: pixel-level FIVE-FORM inspection. The family opening uses baby
+  // Chispin; without these captures a disconnected F3 visor or F4 ring
+  // could pass every intro screenshot. Real drawDummy -> drawCharacter ->
+  // original stitch.js, with actual F0..F4 evolution definitions.
+  const chispinFormAudit=await page.evaluate(async()=>{
+    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
+    const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?visual=v362');
+    const canvas=document.createElement('canvas');
+    canvas.id='chispin-form-audit';
+    canvas.width=1450;canvas.height=580;
+    canvas.style.cssText='position:fixed;left:12px;top:12px;width:min(96vw,1450px);height:auto;z-index:99999;pointer-events:none';
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const samples=[];
+    for(const [row,at] of [[0,.875],[1,2.625]]){
+      for(let f=0;f<5;f++){
+        const x=145+f*290,y=235+row*290;
+        const p=makeDummy('chispin',f);
+        p._introForceCanvas=true;
+        p._introChispin=chispinWelcomeBeat(at);
+        p._poseOverride='idle';p.grounded=true;p.facing=1;
+        ctx.save();drawDummy(ctx,p,x,y,1.28,24);ctx.restore();
+        const startX=f*290,rowY=row*290;
+        const data=ctx.getImageData(startX,rowY,290,290).data;
+        let pixels=0,hash=2166136261>>>0;
+        for(let i=0;i<data.length;i+=4){
+          if(data[i+3]<80)continue;
+          pixels++;
+          hash=Math.imul(hash^data[i],16777619)>>>0;
+          hash=Math.imul(hash^data[i+1],16777619)>>>0;
+          hash=Math.imul(hash^data[i+2],16777619)>>>0;
+        }
+        samples.push({form:f,row,pixels,hash});
+        ctx.fillStyle='#edebff';ctx.font='bold 16px sans-serif';
+        ctx.fillText(['Chispín Bebé','Chispín','Voltín','Trueno Gordo','Chispín Tormenta'][f],
+          x-73,rowY+22);
+      }
+    }
+    // Fill the background behind the 10 ORIGINAL rendered bodies only
+    // after measuring pixel alpha, keeping a clear printable audit.
+    ctx.globalCompositeOperation='destination-over';ctx.fillStyle='#102638';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation='source-over';
+    document.body.appendChild(canvas);
+    return samples;
+  });
+  assert.equal(chispinFormAudit.length,10,'five actual forms x two breathing poses');
+  assert.ok(chispinFormAudit.every(a=>a.pixels>120),
+    'all original Chispin forms must visibly paint at both instants: '+
+    JSON.stringify(chispinFormAudit));
+  for(let f=0;f<5;f++){
+    const a=chispinFormAudit.find(x=>x.form===f&&x.row===0);
+    const b=chispinFormAudit.find(x=>x.form===f&&x.row===1);
+    assert.notEqual(a.hash,b.hash,
+      'Chispin form '+f+' must really breathe on the Canvas, not just change metadata');
+  }
+  await page.locator('#chispin-form-audit').screenshot({
+    path:resultsDir+'/00zq5-chispin-five-real-evolutions-breathing.png'
+  });
+  screenshots.push('00zq5-chispin-five-real-evolutions-breathing');
+  await page.locator('#chispin-form-audit').evaluate(el=>el.remove());
   // V353: five real cat expressive silhouettes in the same ten-hero stage.
   for(const [at,phase,label] of [
     [3.32,'inspect','00zr-michi-inspects'],

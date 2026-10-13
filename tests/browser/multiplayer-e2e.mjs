@@ -211,6 +211,7 @@ try {
     ", current=" + (hostState?.x ?? "absent"));
   assert.ok(hostState.x <= 2240 && hostState.x >= 0, "host escaped world bounds");
 
+  console.log("multiplayer: authoritative movement and direct poses verified");
   await hostPage.keyboard.press("h");
   await hostPage.waitForTimeout(300);
 
@@ -284,6 +285,7 @@ try {
     assert.ok(candidateSessions.has(recoveredSession),"recovery must use the late candidate signal path");
   }
 
+  console.log("multiplayer: recovery negotiated and fresh channels delivered live poses");
   // V300: real channel deliveries must reconcile dynamic enemies and render native attacks.
   const mirroredId=await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
@@ -366,6 +368,7 @@ try {
     await hostPage.waitForTimeout(250);
     assert.equal(await hostPage.evaluate(async id=>{const {onlineCoop}=await import('/systems/online-coop.js');const g=onlineCoop._combatGame,e=g.enemies.find(e=>e._coopSyncId===id),hp=e?.hp;g.enemies=g.enemies.filter(e=>e._coopSyncId!==id);return hp;},id),488,'guest damage must be applied once on the host');
   }
+  console.log("multiplayer: enemy replication and authoritative guest impact verified");
   // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
   await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
@@ -431,6 +434,7 @@ try {
       guest:details[1].status==='fulfilled'?details[1].value:String(details[1].reason)}));
     throw error;
   }
+  console.log("multiplayer: bidirectional U echoes verified");
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});
@@ -452,6 +456,7 @@ try {
     const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
     assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
   }
+  console.log("multiplayer: character-specific J/K/L effects verified");
   // V302: verify actual Stitcho storm echo delivery, while preserving the live peer identity.
   const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');

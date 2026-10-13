@@ -329,6 +329,22 @@ async function auditPage(page, label) {
     ['idle','sniff','prank','charge','hiccup','cloud'].includes(chispinFilm.livePhase),
     label+': Chispin original spring rig is disconnected from actual welcome');
   assert.equal(chispinFilm.motion,'full',label+': Chispin unexpectedly reduced-motion');
+  // V362: the original ear/gill and spring-tail rig remains alive in idle slots.
+  const chispinFamily=await page.evaluate(async()=>{
+    const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?e2e=v362');
+    const at=[3.72,5.75,8.5,12.2],keys=['dragon','chase','yomi','dino'];
+    const beats=at.map(t=>chispinWelcomeBeat(t)),root=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      reduced:chispinWelcomeBeat(3.72,true).dragon,
+      painted:!!root?.querySelector('canvas'),
+      reaction:root?.dataset.chispinFamilyReaction||''};
+  });
+  assert.ok(chispinFamily.painted&&chispinFamily.quiet);
+  assert.ok(chispinFamily.strength.every(v=>v>.72),
+    label+': original Chispin spring tail does not react during other acts');
+  assert.equal(chispinFamily.reduced,0);
+  assert.ok(['rest','dragon','chase','yomi','dino'].includes(chispinFamily.reaction));
   // V353 Michi judges everyone with authentic kitten/cloud/moon/guardian poses.
   const michiFilm=await page.evaluate(async()=>{
     const {michiWelcomeBeat}=await import('/systems/intro-michi-stage.js?e2e=v353');
