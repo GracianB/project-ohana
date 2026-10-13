@@ -314,11 +314,11 @@ try {
     await capture(page,label);
   }
   // V361: pixel-level FIVE-FORM inspection. The family opening uses baby
-  // Stitcho; without these captures a disconnected F3 visor or F4 ring
+  // Stitcho; without these captures disconnected F3 clouds or the F4 aurora crown
   // could pass every intro screenshot. Real drawDummy -> drawCharacter ->
-  // original stitch.js, with actual F0..F4 evolution definitions.
+  // original pikachu.js, with actual F0..F4 evolution definitions.
   const stitchoFormAudit=await page.evaluate(async()=>{
-    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
+    const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v362');
     const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?visual=v361');
     const canvas=document.createElement('canvas');
     canvas.id='stitcho-form-audit';
@@ -407,7 +407,7 @@ try {
   // original stitch.js, with actual F0..F4 evolution definitions.
   const chispinFormAudit=await page.evaluate(async()=>{
     const {makeDummy,drawDummy}=await import('/systems/evo-cinema.js?visual=v361');
-    const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?visual=v361');
+    const {chispinWelcomeBeat}=await import('/systems/intro-chispin-stage.js?visual=v362');
     const canvas=document.createElement('canvas');
     canvas.id='chispin-form-audit';
     canvas.width=1450;canvas.height=580;
