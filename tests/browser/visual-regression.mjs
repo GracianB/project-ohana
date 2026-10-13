@@ -271,6 +271,20 @@ try {
       phase,{timeout:1800});
     await capture(page,label);
   }
+  // V360: Kilo is not frozen for eleven seconds after the original song.
+  // These frames expose the actual IK arms, hip, head, hair, dress and uke.
+  for(const [at,reaction,label] of [
+    [3.67,'dragon','00zg1-kilo-hears-dragon'],
+    [5.72,'chase','00zg2-kilo-cheers-chase'],
+    [8.45,'yomi','00zg3-kilo-meets-lantern'],
+    [12.20,'dino','00zg4-kilo-reacts-to-dino']
+  ]){
+    await page.evaluate(t=>window.__OHANA_WELCOME_SET_FRAME(t),at);
+    await page.waitForFunction(expected=>
+      document.querySelector('#ohana-intro')?.dataset.kiloFamilyReaction===expected,
+      reaction,{timeout:1800});
+    await capture(page,label);
+  }
   // V351: real antenna, paws, ears, mouth and tail across Stitcho's alien gag.
   for(const [at,phase,label] of [
     [.42,'scout','00zh-stitcho-antenna-scout'],
