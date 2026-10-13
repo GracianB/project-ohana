@@ -420,6 +420,9 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.michiWelcomePhase=michiBeat.phase;
       el.dataset.michiWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.michiFamilyReaction=michiBeat.dino>.2?"dino":
+        michiBeat.yomi>.2?"yomi":michiBeat.chase>.2?"chase":
+        michiBeat.spark>.2?"spark":michiBeat.melody>.2?"melody":"rest";
     }
     if(michiBeat.inspect>.48){
       comicBubble("¿QUÉ HACÉIS?",cat.x,cat.foot-heroH*1.08,michiBeat.inspect,"#ffe2ed","left");
