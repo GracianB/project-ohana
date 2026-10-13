@@ -379,3 +379,10 @@ Para revisar el rendimiento en cualquier dispositivo, abre la URL habitual con `
 En dispositivos táctiles con hardware realmente limitado (hasta 2 GB RAM o dos núcleos) se reduce la resolución inicial del Canvas, nunca la frecuencia de la simulación. Si el juego registra sobrecarga baja la resolución, y cuando recupera estabilidad durante suficiente tiempo intenta restablecer la nitidez. Pausas y pestañas ocultas no cuentan como tiempo fluido. Los dispositivos modernos mantienen su calidad inicial.
 
 El CI guarda métricas headless Chromium para escritorio y móvil emulado en un JSON descargable desde el artefacto visual. Son datos reproducibles del entorno GitHub Actions, no una promesa de FPS para teléfonos físicos. Juego individual en GitHub Pages; cooperativo público en pausa sin Netlify/TURN.
+
+
+### V367 · Arranque por fases
+
+La portada y el juego ya no ejecutan módulos completos de cinemáticas raras antes de entrar. El kit común `systems/cinema-kit.js` conserva la calidad Canvas de la bienvenida y la carga bajo demanda mantiene las escenas originales de evolución, victoria y supremas. El selector activo es `family-grid`; dos módulos históricos inactivos ya no figuran como entradas de la página.
+
+Los recursos continúan íntegros en el precache del Service Worker para que el juego funcione offline. Esto reduce el trabajo de importación, compilación y ejecución inicial, pero no equivale a reducir los bytes descargados por la instalación offline. El CI comprueba el arranque en Chromium y el disparo de las tres cinemáticas originales. Solo despliegue en GitHub Pages, sin Netlify ni TURN de pago.
