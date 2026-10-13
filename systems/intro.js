@@ -326,6 +326,9 @@ export function playTitleIntro() {
     if(isE2E){
       el.dataset.kiloWelcomePhase=kiloBeat.phase;
       el.dataset.kiloWelcomeMotion=reduce?"reduced":"full";
+      el.dataset.kiloFamilyReaction=kiloBeat.dino>.2?"dino":
+        kiloBeat.yomi>.2?"yomi":kiloBeat.chase>.2?"chase":
+        kiloBeat.dragon>.2?"dragon":"rest";
     }
     if(kiloBeat.listen>.45){
       comicBubble("¿LO OYES?",kilo.x,kilo.foot-heroH*1.04,

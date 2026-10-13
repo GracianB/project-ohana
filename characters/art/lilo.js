@@ -140,19 +140,37 @@ function glowOrb(ctx, R, x, y, r, t, col) {
 // original long hair, clothing, staff and angel wings.
 export function kiloWelcomeRig(pose={},form=0){
  const b=pose?.kiloWelcome,u=n=>Number.isFinite(n)?Math.max(0,Math.min(1,n)):0;
- if(!b||b.reduced||pose?.state==="dead"||pose?.state==="hurt")
-  return Object.freeze({listen:0,strum:0,bloom:0,surprise:0,finale:0,
-   tilt:0,lift:0,head:0,hair:0,wing:0});
+ if(!b||b.reduced||pose?.reduceMotion||(pose?.state&&pose.state!=="idle"))
+  return Object.freeze({active:false,listen:0,strum:0,bloom:0,surprise:0,finale:0,
+   dragon:0,chase:0,yomi:0,dino:0,tilt:0,lift:0,head:0,hair:0,wing:0,
+   ribX:1,ribY:1,hem:0,armFront:0,armBack:0,headLook:0});
  const listen=u(b.listen),strum=u(b.strum),bloom=u(b.bloom),
    surprise=u(b.surprise),finale=u(b.finale);
+ const dragon=u(b.dragon),chase=u(b.chase),yomi=u(b.yomi),dino=u(b.dino);
+ const breath=(u(b.breath)-.5)*2;
+ const f=Number.isFinite(form)?Math.max(0,Math.min(4,Math.round(form))):0;
+ const chest=[.052,.044,.040,.031,.033][f];
  const limit=(n,a,c)=>Math.max(a,Math.min(c,n));
  return Object.freeze({
-  listen,strum,bloom,surprise,finale,
-  tilt:limit(-listen*.09+strum*.11-bloom*.13+surprise*.21-finale*.14,-.4,.4),
-  lift:limit(-strum*1.4-bloom*3+surprise*2.0-finale*1.8,-5,4),
-  head:limit(-listen*.17+strum*.10-bloom*.16+surprise*.23-finale*.12,-.4,.4),
-  hair:limit(strum*.24+bloom*.57+surprise*.19+finale*.43,0,1),
-  wing:Math.max(0,Math.min(1,(Number(form)|0)>=4?(Number.isFinite(b.wing)?b.wing:0):0))
+  active:true,listen,strum,bloom,surprise,finale,dragon,chase,yomi,dino,
+  // Baby swells in the belly. Flower guardian's chest and wing roots move
+  // less, but the same IK shoulders and anchored dress remain connected.
+  ribX:limit(1+breath*chest+.014*chase-.020*dragon+.016*yomi,.91,1.09),
+  ribY:limit(1-breath*chest*.58-.012*chase+.017*dragon-.010*yomi,.93,1.07),
+  tilt:limit(-listen*.09+strum*.11-bloom*.13+surprise*.21-finale*.14
+    +breath*.018-dragon*.14+chase*.075+yomi*(-.085)+dino*.12,-.4,.4),
+  lift:limit(-strum*1.4-bloom*3+surprise*2.0-finale*1.8
+    -breath*.60+dragon*1.75-chase*1.45-yomi*.9+dino*1.55,-5,4),
+  head:limit(-listen*.17+strum*.10-bloom*.16+surprise*.23-finale*.12
+    +breath*.035+dragon*.22-chase*.13+yomi*.16+dino*.21,-.4,.4),
+  hair:limit(strum*.24+bloom*.57+surprise*.19+finale*.43
+    +Math.abs(breath)*.11+dragon*.20+chase*.24+yomi*.12+dino*.26,0,1),
+  hem:breath*.34+dragon*.55+chase*1.6+yomi*.6+dino*1.2,
+  armFront:breath*.55+dragon*3.0+chase*2.1+yomi*1.65+dino*3.3,
+  armBack:-breath*.35-dragon*2.6-chase*1.4+yomi*.9-dino*2.4,
+  headLook:chase*.08+dragon*(-.14)+yomi*.08+dino*.12,
+  wing:f===4?Math.max(0,Math.min(1,(Number.isFinite(b.wing)?b.wing:0)
+    +dragon*.11+dino*.13)):0
  });
 }
 function solve(pose, d, f) {
@@ -337,6 +355,33 @@ function solve(pose, d, f) {
     if(finale>.20){r.mood="happy";r.mouth="open";r.fx="flowers";r.fxK=finale*.70;r.armOver=true;}
     if(f===0&&(surprise>.20||bloom>.2))r.paci=false;
     if(f===3&&bloom>.2)r.staffUp=true;
+  }
+  // Secondary acting continues BETWEEN the five musical beats. All hands
+  // are IK endpoints in the original hip-rooted space: no floating prop.
+  if(welcome.active){
+    const reaction=welcome.dragon+welcome.chase+welcome.yomi+welcome.dino;
+    const bodyPulse=(welcome.ribX-1);
+    r.lean+=bodyPulse*.65 + welcome.headLook;
+    r.oy+=welcome.lift * .48;
+    r.headRot+=welcome.head*.62;
+    r.hairUp+=welcome.hair*.40;
+    r.hemLift+=welcome.hem;
+    r.flare+=Math.max(0,bodyPulse)*.9+welcome.chase*.22;
+    r.handF=[r.handF[0]+welcome.armFront,r.handF[1]-welcome.armFront*.66];
+    r.handB=[r.handB[0]+welcome.armBack,r.handB[1]-welcome.armBack*.56];
+    r.footF=[r.footF[0]+welcome.chase*.7+welcome.dino*.45,r.footF[1]];
+    r.footB=[r.footB[0]-welcome.chase*.5-welcome.dino*.40,r.footB[1]];
+    if(welcome.dragon>.45){r.mood="closed";r.mouth="o";r.wink=true;}
+    else if(welcome.chase>.45){r.mood="happy";r.mouth="open";}
+    else if(welcome.yomi>.45){r.mood="happy";r.mouth="smile";}
+    else if(welcome.dino>.45){r.mood="normal";r.mouth="o";}
+    // Kilo's F3 wears and uses its OWN staff; it never sprouts an
+    // extra ukulele. F0 already holds its miniature instrument.
+    if(reaction>.35 && f!==3 && f>=1 && welcome.chase>.30){
+      r.uke="play";r.armOver=true;
+      r.handB=[xF+al*.78,sy+.5];
+      r.handF=[xF+1,sy+al*.60+welcome.chase*1.8];
+    }
   }
   return r;
 }
@@ -702,7 +747,14 @@ function draw(ctx, pose, R) {
   if (dead) { ctx.translate(46 + f * 2, -d.hr * 1.12); ctx.rotate(-Math.PI / 2); }
   ctx.translate(r.ox, r.oy);
   if (r.spin !== 1) ctx.scale(r.spin, 1);
-  const bodyT = () => { ctx.translate(r.hipX, hipY); ctx.rotate(r.lean); ctx.translate(0, -hipY); };
+  // The chest breathes around the REAL hip joint. Both IK shoulders,
+  // hair, dress and the ukulele share this transform; shoes do not scale.
+  const life=kiloWelcomeRig(pose,f);
+  const bodyT = () => {
+    ctx.translate(r.hipX, hipY);ctx.rotate(r.lean);
+    if(life.active)ctx.scale(life.ribX,life.ribY);
+    ctx.translate(0,-hipY);
+  };
   const headT = () => { ctx.translate(hx, sy); ctx.rotate(r.headRot); ctx.translate(0, hy - sy); };
   const skinB = R.darken(SKIN, 0.16);
   const legCol = f === 0 ? DRESS[0] : SKIN;

@@ -261,6 +261,24 @@ async function auditPage(page, label) {
   assert.ok(kiloFilm.stageAlive&&
     ['idle','listen','strum','bloom','surprise','finale'].includes(kiloFilm.livePhase),
     label+': Kilo living rig not shown on the actual intro Canvas');
+  // V360: Kilo's actual IK hands, five outfits and breathing belly respond
+  // to family activity throughout the entire film, without a combat cast.
+  const kiloFamily=await page.evaluate(async()=>{
+    const {kiloWelcomeBeat}=await import('/systems/intro-kilo-stage.js?e2e=v360');
+    const times=[3.67,5.72,8.45,12.2],keys=['dragon','chase','yomi','dino'];
+    const beats=times.map(t=>kiloWelcomeBeat(t));
+    const root=document.querySelector('#ohana-intro');
+    return {strength:beats.map((b,i)=>b[keys[i]]),
+      quiet:beats.every(b=>b.phase==='idle'),
+      still:kiloWelcomeBeat(8.45,true).yomi,
+      canvas:!!root?.querySelector('canvas'),family:root?.dataset.kiloFamilyReaction||'',
+      motion:root?.dataset.kiloWelcomeMotion||''};
+  });
+  assert.ok(kiloFamily.quiet&&kiloFamily.canvas,label+': original Kilo stage missing');
+  assert.ok(kiloFamily.strength.every(x=>x>.75),label+': Kilo stops interacting after musical intro');
+  assert.equal(kiloFamily.still,0);
+  assert.ok(['rest','dragon','chase','yomi','dino'].includes(kiloFamily.family));
+  assert.equal(kiloFamily.motion,'full');
   // V351: five independently acted Stitcho frames in the ten-hero Canvas.
   const stitchoFilm=await page.evaluate(async()=>{
     const {stitchoWelcomeBeat}=await import('/systems/intro-stitcho-stage.js?e2e=v351');
