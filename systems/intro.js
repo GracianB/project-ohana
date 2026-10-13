@@ -17,6 +17,7 @@ import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
 import { dinoWelcomeBeat, drawDinoWelcomeFX } from "./intro-dino-stage.js";
+import { fritaWelcomeBeat, drawFritaWelcomeFX } from "./intro-frita-stage.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -75,7 +76,7 @@ export function playTitleIntro() {
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
     const player = makeDummy(id, 0, def.color);
-    if(id==="dragon"||id==="dino")player._introForceCanvas=true;
+    if(id==="dragon"||id==="dino"||id==="frita")player._introForceCanvas=true;
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
@@ -97,7 +98,7 @@ export function playTitleIntro() {
         const def = ROSTER.find(r => r.id === id);
         const subject = makeDummy(id, 0, def?.forms?.[0]?.color || def?.color);
         subject._poseOverride = "idle";
-        if(id==="dragon"||id==="dino")subject._introForceCanvas=true;
+        if(id==="dragon"||id==="dino"||id==="frita")subject._introForceCanvas=true;
         subject.grounded = true;
         probe.save();
         probe.translate(160, 260);
@@ -160,6 +161,7 @@ export function playTitleIntro() {
     // Stage-only gesture data. Never touches save state, combat or physics.
     p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
     p._introDino = id === "dino" ? (opts.dinoWelcome || null) : null;
+    p._introFrita = id === "frita" ? (opts.fritaWelcome || null) : null;
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
@@ -352,22 +354,52 @@ export function playTitleIntro() {
         dragonBeat.recoil*.85,"#ffb6e4","right");
     }
 
-    // Frita y Pizza cruzan la escena persiguiendo una patata.
+    // V346 · Frita stars in the chase, not merely a running icon. Pizza's
+    // running/jumping choreography remains intact for the next art pass.
     const chase=seg(loop,4.25,7.15);
+    const fritaBeat=fritaWelcomeBeat(loop,reduce);
+    const fritaHeight=heroH*1.06;
+    let fritaX=frita.x,fritaY=frita.foot+3;
+    let fritaPose="idle",fritaVelocity=0,fritaFacing=-1;
     if(chase>0&&chase<1){
       const x=lerp(W*.08,W*.92,easeInOut(chase));
       const y=floor-12-Math.abs(Math.sin(chase*Math.PI*6))*20;
       ctx.fillStyle="#e9bd55";ctx.strokeStyle="#704b21";ctx.lineWidth=2;
       ctx.beginPath();ctx.ellipse(x,y,10,7,chase*9,0,Math.PI*2);ctx.fill();ctx.stroke();
-      actor("frita",x-48,frita.foot+3,heroH*.90,tf,{facing:1,vx:6,pose:"run"});
-      actor("pizza",x-105,pizza.foot-Math.abs(Math.sin(chase*Math.PI*5))*20,heroH*.90,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
+      fritaX=x-48;fritaY=frita.foot+3;
+      fritaPose=fritaBeat.phase==="wobble"?"idle":"run";
+      fritaVelocity=6;fritaFacing=1;
+      actor("pizza",x-105,pizza.foot-Math.abs(Math.sin(chase*Math.PI*5))*20,
+        heroH*.90,tf,{facing:1,grounded:false,vy:-2,pose:"jump"});
       if(chase>.12&&chase<.78){
         comicBubble("¡MÍA!",x-52,floor-heroH*.78,Math.sin(chase*Math.PI),"#fff1b3","right");
-        if(chase>.34) comicBubble("¡NI HABLAR!",x-110,floor-heroH*.95,Math.sin(chase*Math.PI),"#ffd84a","left");
+        if(chase>.34)comicBubble("¡NI HABLAR!",x-110,floor-heroH*.95,
+          Math.sin(chase*Math.PI),"#ffd84a","left");
       }
-    } else {
-      actor("frita",frita.x,frita.foot+3,heroH*.90,tf,{facing:-1,pose:"idle"});
+    }else{
       actor("pizza",pizza.x,pizza.foot+2,heroH*.90,tf,{facing:-1,pose:"idle"});
+    }
+    drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"back");
+    actor("frita",fritaX,fritaY,fritaHeight,tf,{
+      facing:fritaFacing,vx:fritaVelocity,pose:fritaPose,fritaWelcome:fritaBeat
+    });
+    drawFritaWelcomeFX(ctx,fritaX,fritaY,fritaHeight,t,fritaBeat,"front");
+    if(isE2E){
+      el.dataset.fritaWelcomePhase=fritaBeat.phase;
+      el.dataset.fritaWelcomeMotion=reduce?"reduced":"full";
+    }
+    if(fritaBeat.ready>.45){
+      comicBubble("¡A COCINAR!",fritaX+heroH*.07,fritaY-heroH*1.0,
+        fritaBeat.ready,"#ffdd86","right");
+    }else if(fritaBeat.reach>.47){
+      comicBubble("¡CASI!",fritaX+heroH*.08,fritaY-heroH*1.0,
+        fritaBeat.reach,"#ffedb1","right");
+    }else if(fritaBeat.wobble>.48){
+      comicBubble("¡AY, LA SAL!",fritaX+heroH*.06,fritaY-heroH*1.02,
+        fritaBeat.wobble,"#fff3b5","right");
+    }else if(fritaBeat.triumph>.45){
+      comicBubble("¡BON APPÉTIT!",fritaX+heroH*.06,fritaY-heroH*1.0,
+        fritaBeat.triumph,"#ffdc94","right");
     }
 
     // Yomi is always present in the ten-hero family portrait. The shadow

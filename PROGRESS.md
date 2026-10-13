@@ -1,3 +1,16 @@
+## OHANA V346 · Frita protagoniza la intro con cuerpo flexible y comicidad propia (ohana-346)
+
+- Tercera revisión individual de la portada, después de Dragón V344 y Dino V345. Se conserva su persecución compartida con Pizza, pero Frita ya no es un icono de carrera: preparación de chef, esprint con capa, intento de alcanzar la patata, pequeño tropiezo y orgullo final.
+- `systems/intro-frita-stage.js` contiene un director determinista de 14 segundos, con cinco fases diferenciadas: `ready`, `dash`, `reach`, `wobble` y `triumph`. Los reflejos ámbar, líneas cinéticas, gotas de kétchup y miguitas se anclan a la silueta del personaje, no son ataques ni colisiones.
+- La anatomía y las expresiones se modifican en el verdadero `characters/art/frita.js`: tronco-patata flexionado con continuidad, brazos y piernas conectados, pies, cara, capa de kétchup, salero y botella sostenidos. Las cinco formas y las habilidades J/K/L/U conservan sus rutas originales; solo las copias de la intro reciben `pose.fritaWelcome`.
+- La puesta en escena ahora ofrece «¡A COCINAR!», «¡CASI!», «¡AY, LA SAL!» y «¡BON APPÉTIT!», sin quitar el gag compartido «¡MÍA!» / «¡NI HABLAR!» a Pizza. La escala se calibra ópticamente con la misma función V343 y queda en su espacio limitado.
+- Accesibilidad: el modo de movimiento reducido elimina las partículas y gestos rápidos. El ciclo usa matemáticas de fase, sin temporizadores ni aleatoriedad, y no modifica daño, física, invulnerabilidad, hitboxes ni multijugador.
+- Pruebas V346: director, loop 14 s, modo reducido, geometría finita Canvas, anticongelación del render, cinco formas y preservación de Frita Cooking. El Browser E2E valida el director en escritorio/móvil y la regresión visual añade cinco fotogramas de Frita conservando los de Dragón y Dino.
+- El módulo de la intro se incluye en el precaché offline. `ohana-346` se sincroniza en HTML y Service Worker; CI Node, Browser E2E, visual, cooperativo Firefox/Chromium y Release Gate obligatorios antes de fusionar. Sin Netlify.
+- Pendiente siguiente personaje: Pizza, con su propio trabajo de anatomía y puesta en escena, en mensaje posterior.
+
+---
+
 ## OHANA V345 · Dino protagonista de la intro, dirección artística individual (ohana-345)
 
 - Segundo personaje trabajado individualmente después de Dragón V344. Escena de 14 segundos con peso, expresividad y cinco actuaciones diferenciadas: curiosidad, preparación con las patas plantadas, pisotón teatral, reacción sorprendida y orgullo final.
