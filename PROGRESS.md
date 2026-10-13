@@ -1,3 +1,14 @@
+## OHANA V359 · Cuerno y las cinco anatomías verdaderas, vivas durante 14 segundos (ohana-359)
+
+- Sexta revisión individual de la segunda ronda, apilada sobre Yomi V358. Tres reacciones nuevas mientras la atención está en el resto de la familia: escucha a Kilo (0.73–1.47 s), se sobresalta con el estornudo de Dragón (3.34–4.13 s) y observa el farol de Yomi (8.04–8.90 s).
+- **Cuerno no es un caballo pequeño en todas las evoluciones.** F0 continúa siendo un cuerno animado sin extremidades; F1 una cara esférica flotante, también sin patas; F2 un potro con cuatro patas articuladas y sin alas; F3/F4 tienen cuatro cascos, columna, crin, raíz de cola y alas de verdad. No existe código que cree cascos o alas en las dos formas más pequeñas.
+- En `characters/art/cuerno.js`, el antiguo `cuernoWelcomeAnatomy` controla ahora la respiración y la dilatación de su cuerpo original en las cinco funciones de render independientes. Las deformaciones se anclan en el mismo origen que cada figura y no crean hitboxes ni miembros nuevos.
+- El director `systems/intro-cuerno-stage.js` mantiene intactas sus cinco escenas y las especializaciones de música, susto y fantasía. Las reacciones nuevas solo se aplican al doble artístico `idle`; J/K/L/U, sueño, U cooperativa y guardado no se alteran.
+- Modo reducido inmóvil; todos los valores geométricos acotados y finitos, ciclo puro de 14 s. Seis tests Node (silueta por evolución, 3 reacciones, anatomía real, estados no-idle, fingerprint, otras nueve familias); E2E móvil/escritorio, tres fotogramas nuevos y caché `ohana-359`.
+- No fusionar hasta quality Node, Browser, visual, coop Chromium/Firefox, Release Gate, Pages y V358 fusionada. No usar Netlify.
+
+---
+
 ## OHANA V358 · Yomi respira con sus costillas de farol y mangas reales (ohana-358)
 
 - Quinta revisión anatómica individual de la segunda ronda. Yomi mantiene su intro de cinco actos con teatro de sombras, pero deja de ser un farol casi inmóvil mientras actúan los demás: respiración de papel y reacciones a la música de Kilo (.65–1.42 s), la chispa de Chispín (1.78–2.52 s) y el pisotón de Dino (11.72–12.59 s).
