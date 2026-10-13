@@ -65,6 +65,11 @@ export function playTitleIntro() {
   const fc = fullCanvas(el.querySelector("canvas"));
   const ctx = fc.ctx;
   const reduce = reducedMotion();
+  const isE2E = new URLSearchParams(location.search).has("e2e");
+  let frozenSceneTime = null;
+  if(isE2E)window.__OHANA_WELCOME_SET_FRAME = at => {
+    frozenSceneTime = Number.isFinite(at) ? Math.max(0,at) : null;
+  };
   const CAST = WELCOME_CAST_ORDER;
   const actors = Object.fromEntries(CAST.map((id) => {
     const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
@@ -119,7 +124,7 @@ export function playTitleIntro() {
   el.dataset.openingMeasured = String(Object.keys(opticalBounds).length);
   // Browser acceptance can audit every cast member without probing a screenshot
   // or relying on animation timing. Production never exports this debug data.
-  if (new URLSearchParams(location.search).has("e2e")) {
+  if (isE2E) {
     const welcomeL = layout();
     window.__OHANA_WELCOME_CAST_AUDIT = CAST.map(id => {
       const slot = welcomeCastSpot(id,welcomeL.W,welcomeL.floor,welcomeL.heroH);
@@ -329,7 +334,7 @@ export function playTitleIntro() {
       facing:1,pose:"idle",dragonWelcome:dragonBeat
     });
     drawDragonWelcomeFX(ctx,dragon.x,dragon.foot+1,dragonHeight,t,dragonBeat,"front");
-    if(new URLSearchParams(location.search).has("e2e")){
+    if(isE2E){
       el.dataset.dragonWelcomePhase=dragonBeat.phase;
       el.dataset.dragonWelcomeMotion=reduce?"reduced":"full";
     }
@@ -418,7 +423,7 @@ export function playTitleIntro() {
     const L=layout();
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     island(t,L);
-    scene(reduce?0.7:t,L);
+    scene(reduce?0.7:(frozenSceneTime ?? t),L);
     const vign=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
     vign.addColorStop(0,"rgba(0,0,0,0)");vign.addColorStop(1,"rgba(0,0,0,.52)");
     ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
@@ -435,6 +440,7 @@ export function playTitleIntro() {
     removeEventListener("resize",onResize);
     removeEventListener("keydown",enter,true);
     el.removeEventListener("pointerdown",enter);
+    if(isE2E)delete window.__OHANA_WELCOME_SET_FRAME;
     finishClasses();
     el.remove();
   }
