@@ -1,3 +1,17 @@
+## OHANA V348 · Yomi, el farol fantasma que nunca desaparece de la intro (ohana-348)
+
+- Quinta revisión artística individual después de Dragón V344, Dino V345, Frita V346 y Pizza V347. La intro mantiene los diez personajes **visibles durante los 14 segundos completos**; Yomi deja de esconder su silueta tras un estado de entrada. Su presencia misteriosa se actúa, no se simula retirándolo.
+- Nuevo director `systems/intro-yomi-stage.js` con cinco beats originales: escucha curiosa (`listen`), sombras que se juntan (`gather`), revelación del farol (`reveal`), Yomi se asusta de su propio truco (`startle`) y reverencia tímida (`bow`). Todos deterministas, sin RNG, sin relojes ni efectos de daño.
+- `characters/art/yomi.js` conserva intactas las cinco arquitecturas de silueta y el repertorio de cuatro rituales J/K/L/U. Los gestos de intro modifican exclusivamente el mismo cuerpo farol original: inclinación, altura, mangas unidas a hombros, movimiento retrasado de cinta/capa, expresión de ojos y boca y llama interior, sin monstruos superpuestos.
+- Efectos gráficos locales: luz de papel cálida y rosa pálido, sombra baja que **no tapa el cuerpo**, motas de papel, una media luna, gesto de sobresalto y estrella de despedida. Diálogos «¿QUIÉN ANDA AHÍ?», «¡BU!», «¡AY, ME ASUSTÉ!» y «ERA BROMA.».
+- Se elimina el truco antiguo `yomiIn` basado en variar la opacidad del héroe; en la intro se dibuja siempre con `alpha:1`, en Canvas canónico forzado sólo en el actor temporal. `characters/draw.js` propaga `pose.yomiWelcome` para ese actor y versiona las fases dentro de `poseFingerprint`.
+- Con movimiento reducido, permanece en postura estable sin sombra móvil ni motas; la intro conserva su diseño inclusivo. No se tocan ataques, muerte, jefe, ejecuciones, colaboración, hitboxes, físicas ni red.
+- Pruebas V348: cinco fases sobre bucle exacto de 14 s, parámetros acotados, Canvas finito con save/restore, movimiento reducido, 5 formas, J/K/L/U y continuidad visual. Browser E2E valida escritorio/móvil y la suite visual añade 5 fotogramas de Yomi conservando los de los cuatro anteriores.
+- Caché `ohana-348` sincronizada en HTML/Service Worker, módulo incorporado al precaché offline. Barrera de fusión: Node, Browser E2E, matriz visual completa, cooperativo Firefox+Chromium y Release Gate. Ningún despliegue de Netlify.
+- Siguiente trabajo individual: Cuerno, mejorando la expresión del unicornio y su aurora sin sustituir sus cinco formas o su sueño.
+
+---
+
 ## OHANA V347 · Pizza protagonista individual de la intro (ohana-347)
 
 - Cuarta revisión individual, después de Dragón V344, Dino V345 y Frita V346. La persecución de la patata continúa, pero Pizza tiene ahora su propia progresión cómica: olfatea queso, se impulsa como masa elástica, estira mozzarella, atrapa un pepperoni y termina celebrando orgulloso.
