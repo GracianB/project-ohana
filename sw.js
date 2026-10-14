@@ -278,7 +278,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/cat.js": "ec4057f83660a7cf6ef034b573aeda36b662ee07",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
-  "characters/art/dino.js": "336570d5660aaea7cf8453670f798be2aeb907dc",
+  "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
   "characters/art/dragon.js": "56486023cd78180d64bb474f77098710441abedd",
   "characters/art/frita.js": "1e761e90bf01e73150a5302a39311f9be3570434",
   "characters/art/index.js": "5c738ee0f3205254935f678bc6d586345ed98479",
