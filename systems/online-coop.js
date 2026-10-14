@@ -14,6 +14,7 @@ import { rtcFresh,rtcCanRetry,rtcReconnectDelay,rtcPreferDirectPose } from "./co
 import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import {drawKiloDuet} from "./kilo-duet.js";
+import {drawDinoPeerEffects} from "./dino-coop-effects.js";
 import { drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
@@ -1171,6 +1172,7 @@ class OnlineCoop {
     const peerFx=game.coopPeerEffects;
     if(peerFx){
       if(peerFx.familyDuet&&this.remote?.characterId===peerFx.familyDuet.hero)drawFamilyDuet(ctx,peerFx.familyDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+      if(this.remote?.characterId==="dino")drawDinoPeerEffects(ctx,peerFx.dinoFx,game.cam,t,!!game.reduceMotion);
       if(this.remote?.characterId==='cat'){drawMichiAbilityEcho(ctx,peerFx.michiFx,game.cam,t,{...this.remote,w:this.remote.w||24,h:this.remote.h||34});if(peerFx.michiDuet)drawMichiDuet(ctx,peerFx.michiDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);}
       if(this.remote?.characterId==='chispin')drawChispinAbilityEcho(ctx,peerFx.chispinFx,game.cam,t,this.remote);
       if(this.remote?.characterId==='chispin'&&peerFx.chispinDuet)drawChispinDuet(ctx,peerFx.chispinDuet,game.cam,t,drawCharacter,ROSTER,!!game.reduceMotion);

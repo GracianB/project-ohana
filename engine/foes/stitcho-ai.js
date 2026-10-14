@@ -146,7 +146,13 @@ export function updateStitchoWebs(game) {
   if (p && p._webSlowT > 0) { p._webSlowT--; p.vx *= STITCHO_AI.webSlow; }
 }
 export { drawStitchoWebs } from "./stitcho-foes.js";
-export function clearStitchoWebs(game) { if (game) game._stitchoWebs = []; }
+export function clearStitchoWebs(game) {
+  if (!game) return;
+  game._stitchoWebs = [];
+  // The web timer is attached to the player, not the room's hazard array.
+  // Clearing only the array leaves the player slowed in the next room.
+  if (game.player) game.player._webSlowT = 0;
+}
 
 /**
  * Enganche de game.js updateEnemies() (mismo patrón que updateKiloFoeAI):

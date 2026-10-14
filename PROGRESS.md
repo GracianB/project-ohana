@@ -1,8 +1,24 @@
-## V376 · Cuerno: prrrf, auroras y evoluciones coherentes (ohana-376)
+## V379 · Cuerno: prrrf, auroras y evoluciones coherentes (ohana-379)
 
 K tiene preparación tímida, cola levantada, nube arcoíris desde la grupa, sonido sintetizado breve y estela curva de 3 segundos. J y melee nacen visualmente del cuerno. Las evoluciones usan el potrito lila actual, con transición gradual y cuatro relatos. U añade una aurora legible, respeta el compañero elegido y evita duplicarlo con el dúo común. Se conservan daños, cooldowns y hitboxes; pausa y muerte detienen el kit. Efectos acotados y movimiento reducido. Vista interactiva en previews/cuerno-finale.html.
 
 Validación específica: 20 combinaciones de ataque/forma, 12 escenas de evolución, K real en cinco formas, U, limpieza al cambiar de sala, móvil y movimiento reducido.
+
+
+## V378 · Dino anatomía conectada y efectos cooperativos auténticos (ohana-378)
+
+- Las cinco formas tienen articulaciones dibujadas sobre la curva real de las piernas: rodilla centrada en Bézier, tobillo conectado a la pata y codos articulados. Los dedos conservan su apoyo original y las hitboxes no cambian.
+- Respiración corporal diferenciada: costillas, cuello, vientre y cabeza se expanden/retraen suavemente sobre el rig existente, sin mover los pies; movimiento reducido la inmoviliza. Ningún cálculo requiere nuevas texturas ni gradientes por fotograma.
+- Los compañeros Dino ven los avisos del Coloso y de los fósiles, piedras que caen, ondas de impacto y proyectiles verdes. Red P2P: solo siete tipos visuales permitidos, tamaño y coordenadas acotados, sin daño, objetivos, actores ni hitsets; protección de versión/sala, secuencia y reinicio de snapshots al atravesar portales. No cambia la autoridad del combate ni genera peticiones a Netlify.
+- Tests: geometría de articulaciones y respiración × cinco formas, H/J/K/L/U, escenas de movimiento; validación de datos visuales, repetición, cambios de sala y Canvas reducido. Publicación condicionada a Node + Browser Chromium/Firefox, cooperativo, visual, offline y Release Gate.
+
+## V377 · Dino: Coloso local y telegrafiado (ohana-377)
+
+El golpe inicial de Dino conserva su potencia original y el Coloso de 260 ticks, pero deja de atacar instantáneamente a enemigos remotos. Durante 18 ticks aparece un círculo de 172+32×evolución unidades y únicamente los enemigos que intersectan ese círculo al resolver el aviso reciben el impacto. Los blancos alcanzados se incorporan al conjunto de prevención de dobles impactos del dúo U; el resto continúa disponible para las habilidades L prestadas. Muerte, cambio de sala y cambio de actor anulan el impacto preparado. Se mantienen las ondas sísmicas, el número y cadencia de fósiles, la armadura, el enfriamiento y la autoridad de daño original. Pruebas de círculo real, temporización, salida/entrada tardía, limpieza de estado y movimiento reducido. Publicación condicionada a CI, Browser/Firefox, cooperativo y Release Gate.
+
+## V376 · Stitcho: telarañas y ralentización aisladas por sala (ohana-376)
+
+Hotfix sobre la V375. Una transición de portal aceptada limpia las telarañas de la sala anterior y el temporizador de ralentización del jugador, sin cambiar la velocidad normal ni borrar trampas cuando el portal está bloqueado o no existe. Pruebas Node: colisión real, transición sin persistencia del debuff, ausencia de trampas y orden de aceptación. Se regenera el manifiesto de huellas Git y se actualiza la versión offline para impedir que el Service Worker reutilice módulos antiguos. Publicación sujeta a CI, matriz de navegadores, multijugador y Release Gate.
 
 ## V375 · Selector integrado con Cuerno y proporciones (ohana-375)
 

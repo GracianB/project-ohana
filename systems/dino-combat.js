@@ -22,30 +22,44 @@ export function createDinoEffects(ops) {
  };
  return {
    castUltimate(g,p,enemies,dmg,color) {
-     // Keep the original immediate Colossus hit and boss handling. New
-     // aftershocks follow, rather than multiplying one-frame screen damage.
-     for(const e of enemies) hitEnemy(g,e,dmg*1.06,{
-       kx:Math.sign(cx(e)-cx(p))*15,ky:-12,stun:62,
-       color,crit:true,shake:2,parts:8
-     });
-     const span=260;
+     // V377: the original powerful Colossus impact is now local and announced.
+     // Keep its damage, armor, 260-tick duration and fossil cadence unchanged.
+     const span=260, evo=cap(Number(p.evo)||0,0,4);
      p._specialT=Math.max(Number(p._specialT)||0,span);
      p._specialTitanT=Math.max(Number(p._specialTitanT)||0,span);
      p._specialArmorT=Math.max(Number(p._specialArmorT)||0,span);
      p.invuln=Math.max(Number(p.invuln)||0,72);
      g._dinoUltimate={beats:5,version:77,remaining:span};
-     add({kind:"dinoColossus",x:cx(p),y:cy(p),life:span,max:span,
+     const field=add({kind:"dinoColossus",x:cx(p),y:cy(p),life:span,max:span,
        nextPulse:28,nextFossil:34,beat:0,stones:0,
-       dmg:dmg*.17,color:color||"#c8f04a",evo:cap(Number(p.evo)||0,0,4)});
-     g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO! ¡TERREMOTO!","#eaffb5",true);
+       warmup:18,launchRadius:172+evo*32,launchDamage:dmg*1.06,
+       room:String(g.roomId||"hub"),actor:p,
+       dmg:dmg*.17,color:color||"#c8f04a",evo});
+     g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO!","#eaffb5",true);
      g.shake=Math.min(18,(g.shake||0)+9);
      boom(g,cx(p),p.y+p.h,"#eaffb5",9,{up:1.6,star:true});
+     return field;
    },
    update: {
  dinoColossus(g,f,p){
+   // A failed cast, death or room transition cannot fire a delayed hit.
+   if(!p||p.dead||p!==f.actor||String(g.roomId||"hub")!==f.room){
+     if(g._dinoUltimate)g._dinoUltimate.remaining=0;
+     return false;
+   }
    if(--f.life<=0){if(g._dinoUltimate)g._dinoUltimate.remaining=0;return false;}
    f.x=cx(p);f.y=cy(p);
    const elapsed=f.max-f.life;tickDinoQuake(f);
+   if(f.warmup>0&&--f.warmup===0){
+     // Same circleHit geometry as the warning ring, sampled on the hit frame.
+     for(const e of visibleTargets(g)){
+       if(!circleHit(f.x,f.y,f.launchRadius,e))continue;
+       if(hitEnemy(g,e,f.launchDamage,{
+         kx:Math.sign(cx(e)-f.x)*15,ky:-12,stun:62,
+         color:f.color,crit:true,shake:2,parts:8
+       })) f.duet?.legacyTargets?.add(e);
+     }
+   }
    const maxStones=g.reduceMotion?3:Math.min(8,4+f.evo);
    if(--f.nextPulse<=0){
      f.nextPulse=34;
@@ -196,11 +210,20 @@ dinoColossus(ctx,f,cam,t,g,p){
     ctx.globalAlpha=(1-a)*fade*.38;
     ctx.beginPath();ctx.ellipse(x,y+18,rr,rr*.32,0,0,TAU);ctx.stroke();
   }
-  const scale=1+.12*Math.sin(t*.085);
-  ctx.globalAlpha=(.09+.05*Math.sin(t*.11))*fade;
+  const scale=g?.reduceMotion?1:1+.12*Math.sin(t*.085);
+  ctx.globalAlpha=(g?.reduceMotion ? .09 : .09+.05*Math.sin(t*.11))*fade;
   ctx.fillStyle="#ddffad";ctx.beginPath();
   ctx.ellipse(x,y,38*scale,51*scale,0,0,TAU);ctx.fill();
   ctx.restore();drawDinoQuake(ctx,f,cam,t,p);
+  // The perimeter has exactly the radius used by the impact calculation.
+  if(f.warmup>0){
+    ctx.save();
+    ctx.globalAlpha=fade*(.45+.35*(1-f.warmup/18));
+    ctx.strokeStyle="#ffe6a2";ctx.lineWidth=3;
+    ctx.setLineDash([6,5]);ctx.beginPath();
+    ctx.arc(x,y,f.launchRadius,0,TAU);ctx.stroke();
+    ctx.setLineDash([]);ctx.restore();
+  }
 },
 dinoFossil(ctx,f,cam,t){
   const x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
