@@ -13,4 +13,4 @@ drawCuernoV373(ctx,x-25,350,{form:i+1,t:20,scale:i===0?5:i===1?3.7:3.1});
 ctx.textAlign='left';ctx.fillStyle='#ebdcf5';ctx.font='600 26px system-ui';ctx.fillText('La familia · misma escala que en el juego',32,482);
 ROSTER.forEach((r,i)=>{const f=r.forms[0],x=60+i*120,y=650;ctx.fillStyle='#272d3f';ctx.beginPath();ctx.ellipse(x,y+4,42,8,0,0,Math.PI*2);ctx.fill();const p={id:r.id,evo:0,color:f.color,w:f.w,h:f.h,x:x-f.w/2,y:y-f.h,vx:0,vy:0,grounded:true,facing:1,melee:0,invuln:0,speed:f.speed};drawCharacter(ctx,p,{x:0,y:0},40);ctx.fillStyle=r.id==='cuerno'?'#ecc4ff':'#d4ccdc';ctx.font='600 17px system-ui';ctx.textAlign='center';ctx.fillText(r.name,x,697);});
 window.previewReady=true;
-</script></html>
+</script><footer style="max-width:1200px;margin:0 auto;padding:0 32px 32px"><a href="cuerno-design.html">Comparar las cinco formas y probar sus expresiones →</a></footer></html>
