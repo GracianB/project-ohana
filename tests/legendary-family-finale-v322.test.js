@@ -85,7 +85,7 @@ test("V322 · ranks 1-2 stay unchanged; all other 9 partners remain selectable",
       const s=frame(hero,27,2,rank);
       assert.equal(legendaryDuetMoment(s),null);
       const {actor}=stage(s);
-      assert.equal(actor._poseOverride,"idle");
+      assert.ok(["run","glide"].includes(actor._poseOverride));
     }
     for(const ally of choices.map(o=>o.id)){
       const input=frame(hero,27,2,3,ally);

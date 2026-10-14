@@ -23,11 +23,10 @@ try{
   const results=[];
   for(const hero of ten){
    dispatchEvent(new CustomEvent("ohana-select",{detail:{id:hero}}));
-   if(selector.options.length!==9)throw Error("Not nine options for "+hero);
-   selector.value=chosen[hero];
-   selector.dispatchEvent(new Event("change",{bubbles:true}));
+   if(!selector.hidden||!selector.disabled)throw Error("Manual choice must be hidden");
+   api.selectUPartner(hero,chosen[hero]);
    const label=document.getElementById("u-partner-technique")?.textContent||"";
-   if(!label.includes("U en combate"))throw Error("Missing live technique "+hero);
+   if(!label.includes("compañero sorpresa"))throw Error("Missing live technique "+hero);
    api.start(hero);api.setEvo(4);
    const initial=api.state();
    if(initial.uPartner!==chosen[hero])throw Error("Selection not loaded "+hero+": "+initial.uPartner);
@@ -50,7 +49,7 @@ try{
  assert.equal(checks.length,10);
  assert.equal(new Set(checks.map(x=>x.partner)).size>=5,true);
  assert.deepEqual(errors,[],"uncaught browser runtime errors");
- console.log("PASS · OHANA V313: 10 real UI selections, real U casting and borrowed-L in-world state.");
+ console.log("PASS · OHANA V313: 10 pinned-pair browser audits, real U casting and borrowed-L in-world state.");
 }finally{
  await browser?.close();
  server.closeAllConnections();

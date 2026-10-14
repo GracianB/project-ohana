@@ -9,23 +9,23 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-381">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-381">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-381">
-  <link rel="stylesheet" href="hud.css?v=ohana-381">
-  <link rel="stylesheet" href="evo.css?v=ohana-381">
-  <link rel="stylesheet" href="ending.css?v=ohana-381">
-  <link rel="stylesheet" href="intro.css?v=ohana-381">
-  <link rel="stylesheet" href="demo.css?v=ohana-381">
-  <link rel="stylesheet" href="experience.css?v=ohana-381">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-381">
-  <link rel="stylesheet" href="supreme.css?v=ohana-381">
-  <link rel="stylesheet" href="world-map.css?v=ohana-381">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-381">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-381">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-381">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-381">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-381">
+  <link rel="stylesheet" href="style.css?v=ohana-382">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-382">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-382">
+  <link rel="stylesheet" href="hud.css?v=ohana-382">
+  <link rel="stylesheet" href="evo.css?v=ohana-382">
+  <link rel="stylesheet" href="ending.css?v=ohana-382">
+  <link rel="stylesheet" href="intro.css?v=ohana-382">
+  <link rel="stylesheet" href="demo.css?v=ohana-382">
+  <link rel="stylesheet" href="experience.css?v=ohana-382">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-382">
+  <link rel="stylesheet" href="supreme.css?v=ohana-382">
+  <link rel="stylesheet" href="world-map.css?v=ohana-382">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-382">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-382">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-382">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-382">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-382">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -176,11 +176,11 @@
         </section>
       </section>
       <div class="title-controls">
-        <div class="u-partner-panel" role="group" aria-label="Configurar U cooperativa">
-          <label for="u-partner-select">U EXP · Elige pareja</label>
-          <canvas id="u-partner-portrait" width="166" height="100" role="img" aria-label="Retrato del compañero elegido"></canvas>
-          <select id="u-partner-select" aria-label="Compañero de la habilidad U"></select>
-          <span id="u-partner-technique" role="status" aria-live="polite">La U toma prestada la L de tu pareja.</span>
+        <div class="u-partner-panel" role="group" aria-label="Invocación sorpresa">
+          <label for="u-partner-select">U · Compañero sorpresa</label>
+          <canvas id="u-partner-portrait" width="166" height="100" role="img" aria-label="Compañero sorpresa"></canvas>
+          <select hidden disabled id="u-partner-select" aria-label="Compañero de la habilidad U"></select>
+          <span id="u-partner-technique" role="status" aria-live="polite">Una «?» revela quién viene a ayudarte.</span>
         </div>
         <div id="difficulty" role="group" aria-label="Dificultad">
           <button type="button" data-diff="easy">Fácil</button>
@@ -254,16 +254,16 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-381"></script>
-  <script type="module" src="game.js?v=ohana-381"></script>
-  <script type="module" src="systems/title.js?v=ohana-381"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-381"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-381"></script>
-  <script type="module" src="systems/demo.js?v=ohana-381"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-382"></script>
+  <script type="module" src="game.js?v=ohana-382"></script>
+  <script type="module" src="systems/title.js?v=ohana-382"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-382"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-382"></script>
+  <script type="module" src="systems/demo.js?v=ohana-382"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-381", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-382", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

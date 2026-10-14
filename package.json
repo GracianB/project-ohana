@@ -12,7 +12,8 @@
     "test:browser:multiplayer": "node tests/browser/multiplayer-e2e.mjs",
     "diagnose:multiplayer": "node tools/multiplayer-latency-baseline.mjs 30",
     "diagnose:deploy": "node tools/check-live-deployment.mjs",
-    "test:browser:michi-ending": "node tests/browser/michi-ending.mjs"
+    "test:browser:michi-ending": "node tests/browser/michi-ending.mjs",
+    "test:browser:u-companions": "node tests/browser/u-companions-v382.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

@@ -57,11 +57,18 @@ export function borrowedLContains(area,entity){
   default:return false;
  }
 }
+export function readGuestOrigin(s){
+ if(s?.originX===undefined&&s?.originY===undefined)return {};
+ if(!finite(s?.originX)||!finite(s?.originY))return null;
+ return {originX:s.originX,originY:s.originY};
+}
 export function guestPerformance(s,ally,reduced=false){
  const identity=GUEST_ACTING[ally];
  if(!identity||!s||!finite(s.x)||!finite(s.y)||
   !Number.isInteger(s.age)||s.age<0||s.age>=120||
   ![-1,1].includes(s.facing))return null;
+ const origin=readGuestOrigin(s);if(origin===null)return null;
+ const originX=origin.originX??s.x,originY=origin.originY??s.y;
  const age=s.age,f=s.facing,e=clamp(s.evo,0,4),
   rank=Number.isInteger(s.bondRank)&&s.bondRank<=3&&s.bondRank>=1?s.bondRank:1;
  const arrive=clamp(age/18,0,1),out=clamp((age-105)/15,0,1);
@@ -75,14 +82,18 @@ export function guestPerformance(s,ally,reduced=false){
  const pairSeed=(s.hero||"").split("").reduce((n,ch)=>n+ch.charCodeAt(0),0)%7;
  const offset=(pairSeed-3)*1.5;
  const rest=74+offset;
- let lateral=146-(146-rest)*arrive+out*65;
+ const smooth=k=>k*k*(3-2*k);
+ const advance=clamp((age-36)/66,0,1);
+ let travel=age<18?-180+(180-rest)*smooth(arrive):age<36?-rest+(rest-28)*smooth((age-18)/18):-28+230*advance*identity.travel;
+ if(age>=106)travel+=out*100;
+ let lateral=-travel;
  let altitude=identity.height,drift=0,gesture="idle",pose="idle",vx=0,vy=0;
  switch(ally){
   case "kilo":
    altitude+=reduced?0:Math.sin(age*.17)*7;
    drift=2.5*impulse;gesture="hover";pose=attack?"attack":"idle";break;
   case "stitcho":
-   lateral+=reduced?0:Math.sin(age*.28)*4;
+   altitude+=reduced?0:Math.sin(age*.28)*4;
    drift=12*impulse;gesture="dash";pose=attack?"attack":"run";vx=age<18?5:0;break;
   case "chispin":
    altitude+=reduced?0:Math.abs(Math.sin(age*.23))*13;
@@ -97,7 +108,7 @@ export function guestPerformance(s,ally,reduced=false){
    altitude+=reduced?0:Math.sin(age*.38)*2;
    drift=8*impulse;gesture="stomp";pose=attack?"attack":"run";vx=age<18?3:0;break;
   case "frita":
-   lateral+=reduced?0:Math.sin(age*.20)*6;
+   altitude+=reduced?0:Math.sin(age*.20)*3;
    drift=12*impulse;gesture="slide";pose=attack?"attack":"run";vx=age<18?6:0;break;
   case "pizza":
    altitude+=reduced?0:Math.abs(Math.sin(age*.16))*19;
@@ -110,14 +121,15 @@ export function guestPerformance(s,ally,reduced=false){
    drift=7*impulse;gesture="float";pose=attack?"attack":"glide";break;
  }
  const exchange=age>=18&&age<36,leaving=age>=106;
- const facing=leaving?-f:age<18?f:f;
- if(exchange)pose="idle";
- if(leaving){pose="victory";vx=-f*2;}
+ const facing=f;
+ if(exchange){pose=age<30?(identity.height>=40?"glide":"run"):"idle";vx=age<30?f*3:0;}
+ if(leaving){pose=identity.height>=40?"glide":"run";vx=f*7;}
+ else if(!attack&&age>=36)vx=f*230*identity.travel/66;
  // Bigger forms are recognizable without obscuring the parent character.
  const size=.59+arrive*.13+e*.017+(rank-1)*.012;
  return Object.freeze({
   ally,style:identity.style,gesture,phase:leaving?"farewell":age<18?"arrival":exchange?"exchange":attack?"impact":"borrowed-L",
-  x:s.x-f*(lateral-drift),y:s.y-altitude-(rank-1)*2,
+  x:originX-f*(lateral-drift),y:originY-altitude-(rank-1)*2,
   facing,pose,vx,vy,grounded:identity.height<20,
   visualScale:size,rank,impact:attack,arrival:arrive,exit:out
  });
@@ -149,4 +161,23 @@ export function drawBorrowedLWarnings(ctx,kind,s,cam,t=0,reduced=false){
   ctx.restore();drawn=true;
  }
  return drawn;
+}
+
+export function surpriseGuestDrawer(drawActor,s,cam,reduced=false){
+ if(!s.surprise||typeof drawActor!=='function')return drawActor;
+ return (...args)=>{
+  const ctx=args[0],actor=args[1],age=s.age;
+  const x=actor.x+actor.w/2-cam.x,y=actor.y+actor.h-48-cam.y;
+  const alpha=clamp((age-18)/8,0,1);
+  if(age<18){
+   ctx.save();ctx.translate(x,y);if(!reduced)ctx.rotate(Math.sin(age*.5)*.06);
+   ctx.fillStyle='#ffe6a2';ctx.strokeStyle='#805735';ctx.lineWidth=2.5;ctx.beginPath();
+   if(typeof ctx.roundRect==='function')ctx.roundRect(-23,-23,46,46,12);else ctx.rect(-23,-23,46,46);
+   ctx.fill();ctx.stroke();ctx.fillStyle='#76543f';ctx.textAlign='center';ctx.font='700 34px Fredoka, sans-serif';ctx.fillText('?',0,12);ctx.restore();
+  }else if(age<28){
+   ctx.save();ctx.globalAlpha*=1-(age-18)/10;ctx.strokeStyle='#ffeaa4';ctx.lineWidth=2;
+   for(let i=0;i<6;i++){const a=i*TAU/6,r=25+(age-18)*2;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.lineTo(x+Math.cos(a)*(r+8),y+Math.sin(a)*(r+8));ctx.stroke();}ctx.restore();
+  }
+  if(alpha>0){ctx.save();ctx.globalAlpha*=alpha;drawActor(...args);ctx.restore();}
+ };
 }

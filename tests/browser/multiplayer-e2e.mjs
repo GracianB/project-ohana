@@ -370,18 +370,20 @@ try {
   }
   console.log("multiplayer: enemy replication and authoritative guest impact verified");
   // V301: the teammate receives Kilo's real in-world U, without a fullscreen overlay.
-  await hostPage.evaluate(async()=>{
+  const hostU=await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {useAbility,supremeOf}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
     game.player.cds[supremeOf(game.player.id).id]=0;if(!useAbility(game,3))throw Error("Actual U cast failed");onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
-    if(document.querySelector('#supreme-cinema.show'))throw Error('Kilo U opened fullscreen cinema');
+    if(document.querySelector('#supreme-cinema.show'))throw Error('U opened fullscreen cinema');
+    const key=game._familyDuet?'familyDuet':game.player.id==='cat'?'michiDuet':game.player.id+'Duet';const state=game['_'+key];
+    return {hero:game.player.id,key,partner:game.player.uPartner,originX:state?.originX};
   });
   let duetDelivered=false;
   for(let i=0;i<30;i++){
     duetDelivered=await guestPage.evaluate(async expected=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';const s=onlineCoop._combatGame.coopPeerEffects?.[key];
-      return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
-    },hostCharacter);
+      const {onlineCoop}=await import('/systems/online-coop.js');const key=expected.key;const s=onlineCoop._combatGame.coopPeerEffects?.[key];const {familyDuetDefinition}=await import('/systems/family-duets.js');const {DEFAULT_U_PARTNERS}=await import('/systems/u-partners.js');const ally=key==='familyDuet'?familyDuetDefinition(s)?.ally:DEFAULT_U_PARTNERS[expected.hero];
+      return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected.hero)&&ally===expected.partner&&s.surprise===true&&s.originX===expected.originX&&onlineCoop.remote?.characterId===expected.hero;
+    },hostU);
     if(duetDelivered)break;await guestPage.waitForTimeout(50);
   }
   assert.ok(duetDelivered,'Kilo duet never arrived over the live WebRTC channel');
@@ -390,7 +392,8 @@ try {
     const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,supremeOf}=await import('/systems/abilities.js');
     const g=onlineCoop._combatGame;g.player.cds[supremeOf(g.player.id).id]=0;
     if(!useAbility(g,3))throw Error('Guest U failed');
-    return {sent:onlineCoop.sendPeerEffects(g,true),duet:g._familyDuet?.hero||null,
+    const key=g._familyDuet?'familyDuet':g.player.id==='cat'?'michiDuet':g.player.id+'Duet';
+    return {hero:g.player.id,key,partner:g.player.uPartner,originX:g['_'+key]?.originX,sent:onlineCoop.sendPeerEffects(g,true),duet:g._familyDuet?.hero||null,
       room:g.roomId,remoteWorld:onlineCoop.remoteWorld,active:onlineCoop.direct?.active,
       ally:g._familyDuet?.ally||null,duetAge:g._familyDuet?.age??null};
   });
@@ -405,10 +408,10 @@ try {
     do {
       guestDuetDelivered=await hostPage.evaluate(async expected=>{
         const {onlineCoop}=await import('/systems/online-coop.js');
-        const key=['kilo','stitcho','chispin','cat'].includes(expected)?(expected==='cat'?'michiDuet':expected+'Duet'):'familyDuet';
-        const s=onlineCoop._combatGame.coopPeerEffects?.[key];
-        return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected)&&onlineCoop.remote?.characterId===expected;
-      },guestCharacter);
+        const key=expected.key;
+        const s=onlineCoop._combatGame.coopPeerEffects?.[key];const {familyDuetDefinition}=await import('/systems/family-duets.js');const {DEFAULT_U_PARTNERS}=await import('/systems/u-partners.js');const ally=key==='familyDuet'?familyDuetDefinition(s)?.ally:DEFAULT_U_PARTNERS[expected.hero];
+        return !!s&&s.age>=0&&s.age<120&&(key!=='familyDuet'||s.hero===expected.hero)&&ally===expected.partner&&s.surprise===true&&s.originX===expected.originX&&onlineCoop.remote?.characterId===expected.hero;
+      },guestInitialSend);
       if(guestDuetDelivered)break;
       if(Date.now()<deadline)await hostPage.waitForTimeout(50);
     }while(Date.now()<deadline);
