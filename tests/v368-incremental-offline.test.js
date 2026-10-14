@@ -5,10 +5,10 @@ import vm from "node:vm";
 
 const sw=fs.readFileSync("sw.js","utf8");
 const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
-const previous="ohana-"+(Number(current?.slice(6)||0)-1);
 // V373: expected delta derived from the real committed V372 baseline vs. the
 // current content-addressed table, so the assertions stay exact.
 const BASELINE=JSON.parse(fs.readFileSync("tools/offline-baseline-v372.json","utf8"));
+const previous=BASELINE.version;
 const REVS=JSON.parse(sw.slice(sw.indexOf("{",sw.indexOf("const PRECACHE_REVISIONS = {")),sw.indexOf("\n};",sw.indexOf("const PRECACHE_REVISIONS = {"))+2));
 const TOTAL=Object.keys(REVS).length;
 const REUSED=Object.keys(REVS).filter(k=>BASELINE.resources[k]?.sha===REVS[k]).length;

@@ -31,9 +31,9 @@ test("V75 title preserves five increasing optical stages and frame-safe wing wid
  assert.match(f3,/ctx\.fillStyle=far\?"#aebce0":"#b0d4f2"/);
  assert.match(f3,/ctx\.strokeStyle="#617ba9"/);
 });
-test("V75 fixes presentation without touching gameplay, other heroes or PNG sprites",()=>{
- assert.match(draw,/if\(p\.id!=="cuerno"&&p\.id!=="kilo"&&p\.id!=="stitcho"&&p\.id!=="chispin"&&p\.id!=="cat"\)\{/);
- assert.match(draw,/if \(getLook\(\) === "paint" && !\["cuerno","kilo","stitcho","chispin","cat"\]\.includes\(p\.id\)&&!p\._duetActor\)/);
+test("V75 preserves Cuerno's independent anatomy alongside calibrated Canvas heroes",()=>{
+ assert.match(draw,/if\(!calibrated&&p\.id!=="cuerno"&&p\.id!=="kilo"&&p\.id!=="stitcho"&&p\.id!=="chispin"&&p\.id!=="cat"\)\{/);
+ assert.match(draw,/if \(getLook\(\) === "paint" && !calibrated && !\["cuerno","kilo","stitcho","chispin","cat"\]\.includes\(p\.id\)&&!p\._duetActor\)/);
  assert.match(title,/const growth = def\.id==="cuerno"/);
  assert.match(title,/const visualAspect = def\.id==="cuerno"/);
  const f4=between(art,"function drawAuroraUnicorn(","function draw(ctx, pose, R)");

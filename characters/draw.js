@@ -7,6 +7,7 @@ import { ART } from "./art/index.js";
 import { drawKineticSignature } from "./kinetic-stagecraft.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
 import { FRITA_VISUAL_H } from "./art/frita.js";
+import { CALIBRATED_VISUAL_H } from "./visual-size.js";
 import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
@@ -1240,7 +1241,9 @@ const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
 // Cuerno V74 is already drawn in five different anatomical sizes. Do NOT
 // multiply their growth again by generic evolution scaling or old sprite size.
 let H = (p.id==="cuerno"?CUERNO_VISUAL_H[evo]:p.id==="kilo"?KILO_VISUAL_H[evo]:p.id==="cat"?MICHI_VISUAL_H[evo]:p.id==="chispin"?CHISPIN_VISUAL_H[evo]:p.id==="stitcho"?STITCHO_VISUAL_H[evo]:p.id==="frita"?FRITA_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[p.id]||1))*(p.visualScale||1);
-if (getLook() === "paint" && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
+const calibrated = CALIBRATED_VISUAL_H[p.id];
+if (calibrated) H = calibrated[evo] * (p.visualScale || 1);
+if (getLook() === "paint" && !calibrated && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
 if (p.id === "frita" && !p._duetActor) H = FRITA_VISUAL_H[evo] * (p.visualScale || 1); // Frita: altura propia también en look "paint"
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
 if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
@@ -1253,7 +1256,7 @@ let sx = 1 + squash * 0.9 - stretch * 0.35;
 let sy = 1 - squash * 0.75 + stretch * 0.4;
 // El arte de cada forma ya cambia su geometría. Este segundo nivel ajusta
 // la lectura corporal por personaje sin alterar jamás w/h de la hitbox.
-if(p.id!=="cuerno"&&p.id!=="kilo"&&p.id!=="stitcho"&&p.id!=="chispin"&&p.id!=="cat"){
+if(!calibrated&&p.id!=="cuerno"&&p.id!=="kilo"&&p.id!=="stitcho"&&p.id!=="chispin"&&p.id!=="cat"){
 sx *= (pose.evolutionScaleX || 1) * (evoVis.bodyX || 1);
 sy *= (pose.evolutionScaleY || 1) * (evoVis.bodyY || 1);
 }
@@ -1293,7 +1296,7 @@ if (burstK > 0.35) {
   if(p.id==="kilo")flashA=Math.min(.12,flashA);
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; }
-const painted = p._introForceCanvas||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 if (painted) {
