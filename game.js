@@ -1,5 +1,6 @@
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
+import { mountSelectScreen } from "./systems/select-screen.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
@@ -66,6 +67,14 @@ import { applyCoopChallenge } from "./systems/coop-challenge.js";
 import { supportBelow } from "./systems/platform-geometry.js";
 import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
 import { resetCombatMirror,mirroredProjectileHits } from "./systems/coop-combat-mirror.js";
+import { cachedGradient } from "./systems/canvas-gradient-cache.js";
+import { updateKiloFoeAI } from "./engine/foes/kilo-ai.js";
+import { updateStitchoFoeAI, updateStitchoWebs } from "./engine/foes/stitcho-ai.js";
+import { drawStitchoWebs } from "./engine/foes/stitcho-foes.js";
+import { updateMichiFoeAI } from "./engine/foes/michi-ai.js";
+import { updateChispinFoeAI, chispinFoeBlocks } from "./engine/foes/chispin-ai.js";
+import { updateDinoFoeAI, updateDinoHazards, onDinoFoeDeath, resetDinoFoeAI, dinoPuddles, dinoSparks } from "./engine/foes/dino-ai.js";
+import { drawDinoHazards, drawDinoAbductFx } from "./engine/foes/dino-foes.js";
 import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFritaInteractions } from "./systems/kilo-frita-interactions.js";
 
 const canvas = document.getElementById("game");
@@ -516,6 +525,7 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+resetDinoFoeAI();
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
 resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
@@ -872,6 +882,10 @@ let d = dmg;
 const push = kb == null ? 1 : kb;
 const crit = d >= 32 || push >= 1.5;
 if (e.boss) d = Math.ceil(d * 0.55);
+if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.y + e.h * 0.35)) {
+  d = Math.max(1, Math.round(d * 0.35));
+  game.fx.emit(e.x + e.w / 2, e.y + e.h / 3, { color: "#9fe8ff", count: 5, size: 2, up: 0.8, life: 10 });
+}
 damageEnemy(e, d);
 registerBossPunish(e);
 const face = p.facing || 1;
@@ -1348,6 +1362,7 @@ dispatchEvent(new CustomEvent("ohana-win", { detail: {
   score: game.score,
   kills: game.kills,
   id: p ? p.id : "kilo",
+  uPartner: p?.uPartner || null,
   evo: p ? p.evo : 4,
   hero: p ? p.name : "Ohana",
   form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
@@ -1914,7 +1929,9 @@ if (e.kind === "planta") {
   if (e.hide > 110) { e.hide = 0; e.up = !e.up; }
 }
 if (e.invuln > 0) e.invuln--;
-if (e.kind === "phosquito") {
+const kiloAI = updateKiloFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e) });
+const stitchoAI = updateStitchoFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e) });
+if (!kiloAI && e.kind === "phosquito") {
   e.diveCd = (e.diveCd || 0) - 1;
   if (e.diving) {
     e.diving--;
@@ -1948,7 +1965,7 @@ if (e.kind === "cucaracho" && e.evo >= 2) {
   }
   if (e.hop > 0) e.hop--;
 }
-if (e.kind === "cucaracho" && e.evo < 2) {
+if (!kiloAI && e.kind === "cucaracho" && e.evo < 2) {
   if (e.lunge > 0) {
     e.lunge--;
     if (e.lunge <= 0) e.vx *= 0.4;
@@ -1964,7 +1981,7 @@ if (e.kind === "cucaracho" && e.evo < 2) {
     }
   }
 }
-if (e.kind === "mosquito") {
+if (!kiloAI && e.kind === "mosquito") {
   e.diveCd = (e.diveCd || 0) - 1;
   if (e.spiral > 0) {
     e.spiral--;
@@ -1996,7 +2013,7 @@ if (e.kind === "mosquito") {
   }
   e.vx = Math.max(-5.0, Math.min(5.0, e.vx));
 }
-if (e.kind === "libelula") {
+if (!stitchoAI && e.kind === "libelula") {
   e.bob = (e.bob || 0) + 0.07;
   e.dart = (e.dart || 0) - 1;
   if (e.baseY == null) e.baseY = e.y;
@@ -2032,7 +2049,7 @@ if (e.kind === "libelula") {
   }
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
 }
-if (e.kind === "abeja" || e.kind === "avispa") {
+if (!kiloAI && !stitchoAI && (e.kind === "abeja" || e.kind === "avispa")) {
   e.bob = (e.bob || 0) + 0.07;
   if (e.baseY == null) e.baseY = e.y;
   e.cd = (e.cd || 0) - 1;
@@ -2239,6 +2256,7 @@ if (e.kind === "cangrejo" && !(e.stun > 5)) {
   }
   e.vx = Math.max(-2.6, Math.min(2.6, e.vx));
 }
+updateChispinFoeAI(e, game, t, aiTarget);
 if (e.kind === "gaviota") {
   e.diveCd = (e.diveCd || 0) - 1;
   if (e.baseY == null) e.baseY = e.y;
@@ -2269,7 +2287,7 @@ if (e.kind === "gaviota") {
   e.vx = Math.max(-3.4, Math.min(3.4, e.vx));
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
 }
-if (e.kind === "murcielago") {
+if (!stitchoAI && e.kind === "murcielago") {
   e.diveCd = (e.diveCd || 0) - 1;
   if (e.baseY == null) e.baseY = e.y;
   e.bob = (e.bob || 0) + 0.09;
@@ -2297,7 +2315,7 @@ if (e.kind === "murcielago") {
   }
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
 }
-if (e.kind === "arana") {
+if (!stitchoAI && e.kind === "arana") {
   e.dropCd = (e.dropCd || 0) - 1;
   if (e.dropping) {
     e.telegraph = true;
@@ -2317,7 +2335,9 @@ if (e.kind === "arana") {
   }
   if (!e.dropping && Math.abs(e.vy) < 0.15) e.dropping = false;
 }
-if (e.kind === "brasita") {
+const dinoHandled = !game.paused && e.hp > 0 && !e.dying && updateDinoFoeAI(e, game, 1, { t, target: aiTarget, canCommit: enemyCanCommit(e), contactDmg: dmgFor(e) });
+if (dinoHandled) { /* V372 Dino AI */ }
+else if (e.kind === "brasita") {
   e.bob = (e.bob || 0) + 0.08;
   if (e.baseY == null) e.baseY = e.y;
   e.y = e.baseY + Math.sin(e.bob) * 18;
@@ -2331,7 +2351,7 @@ if (e.kind === "brasita") {
   if (e.x < 30 || e.x > game.worldW - 30 - e.w) { e.vx *= -1; e.x = Math.max(30, Math.min(game.worldW - 30 - e.w, e.x)); }
   if (t % 3 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff8a30", count: 2, size: 2.4, up: 0.8, speed: 0.9, life: 16 });
 }
-if (e.kind === "escoria") {
+else if (e.kind === "escoria") {
   const hot = e.hp < e.max * 0.45;
   const spd = hot ? 2.4 : 1.1;
   if (aiTarget) e.vx += Math.sign(aiTarget.x - e.x || 1) * (hot ? 0.12 : 0.04);
@@ -2341,7 +2361,7 @@ if (e.kind === "escoria") {
   e.color = hot ? "#ff4020" : "#c04010";
   if (hot && t % 4 === 0) game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ff6020", count: 2, size: 2.2, up: 0.6, life: 12 });
 }
-if (e.kind === "ufo" && !(e.stun > 5)) {
+else if (e.kind === "ufo" && !(e.stun > 5)) {
   e.bob = (e.bob || 0) + 0.04;
   if (e.baseY == null) e.baseY = e.y;
   e.y = e.baseY + Math.sin(e.bob) * 14;
@@ -2380,6 +2400,7 @@ if (!e.telegraph && aiTarget) {
   }
 }
 
+updateMichiFoeAI(e, game, t, aiTarget);
 solidifyFoe(e);
 const p = game.player;
 const solid = !(e.kind === "planta" && !e.up);
@@ -2428,7 +2449,10 @@ if (p && !p.dead && !e.dying && solid && aabb(p, e)) {
   }
 }
 }
+updateStitchoWebs(game);
+updateDinoHazards(game, (n) => hurtPlayer(n, "-" + n));
 game.enemies = game.enemies.filter((e) => {
+if (e.hp <= 0) onDinoFoeDeath(e);
 if (e.boss && e.hp <= 0) {
   if (!e.fell) {
     e.fell = true;
@@ -2656,6 +2680,7 @@ Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
 Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
+drawStitchoWebs(ctx, game, game.cam);
 for (const o of game.orbs) {
 if (o.taken || !visibleForRender(o,game.cam,viewportW,viewportH)) continue;
 drawCrystal(o);
@@ -2678,6 +2703,11 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t);
+  ctx.restore();
+}
+if (!game.finale) {
+  ctx.save(); ctx.translate(-game.cam.x, -game.cam.y);
+  drawDinoHazards(ctx, dinoPuddles, dinoSparks, t); drawDinoAbductFx(ctx, game.player, t);
   ctx.restore();
 }
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
@@ -2733,9 +2763,13 @@ ctx.restore();
 if (!DeathFx.isPlaying()) {
 const hpRatio = game.player.health / Math.max(1, game.player.maxHealth);
 if (hpRatio <= 0.65) {
-  const low = 1 - Math.max(0, hpRatio);
-  const vg = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
-  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
+  // V372: 8 niveles de peligro cacheados por tamaño; nunca un gradiente nuevo por fotograma.
+  const low = Math.round((1 - Math.max(0, hpRatio)) * 8) / 8;
+  const vg = cachedGradient(ctx, "lowhp:" + viewW + "x" + viewH + ":" + low, () => {
+    const g = ctx.createRadialGradient(viewW / 2, viewH / 2, viewH * 0.3, viewW / 2, viewH / 2, viewW * 0.72);
+    g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(" + Math.round(80 * low) + ",0,0," + (0.32 + low * 0.28) + ")");
+    return g;
+  });
   ctx.fillStyle = vg; ctx.fillRect(0, 0, viewW, viewH);
 }
 }
@@ -3192,6 +3226,7 @@ const hit = markAt(c.id, 0).name;
 return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>';
 }).join("");
 grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => dispatchEvent(new CustomEvent("ohana-select", { detail: { id: el.dataset.id } }))));
+try { mountSelectScreen({ grid, roster: ROSTER }); } catch (err) { console.error("[ohana] select screen", err); }
 addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
@@ -3392,6 +3427,11 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+foeBoxes() {
+  return { worldW: game.worldW, worldH: game.worldH,
+    enemies: game.enemies.filter((e) => !e.boss).map((e) => ({ kind: e.kind, x: e.x, y: e.y, w: e.w, h: e.h, hp: e.hp })),
+    platforms: (game.platforms || []).filter((q) => q && q.h > 24).map((q) => ({ x: q.x, y: q.y, w: q.w, h: q.h })) };
+},
 setSeed(seed = 1) {
   let state = (Number(seed) >>> 0) || 1;
   game.rng = () => {

@@ -25,6 +25,8 @@ import { kiloWelcomeBeat, drawKiloWelcomeFX } from "./intro-kilo-stage.js";
 import { stitchoWelcomeBeat, drawStitchoWelcomeFX } from "./intro-stitcho-stage.js";
 import { chispinWelcomeBeat, drawChispinWelcomeFX } from "./intro-chispin-stage.js";
 import { michiWelcomeBeat, drawMichiWelcomeFX } from "./intro-michi-stage.js";
+import { planWelcomeFantasy, activeFantasy, drawWelcomeFantasy, fantasyCamera } from "./intro-fantasy.js";
+import { cachedGradient } from "./canvas-gradient-cache.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -76,6 +78,14 @@ export function playTitleIntro() {
   const reduce = reducedMotion();
   const isE2E = new URLSearchParams(location.search).has("e2e");
   let frozenSceneTime = null;
+  // V372: cada ejecución elige sus maravillas; el ritmo (huecos fijos) no cambia.
+  // Las pruebas fijan la semilla con ?welcomeSeed=N (por defecto 1 en e2e).
+  const seedParam = Number(new URLSearchParams(location.search).get("welcomeSeed"));
+  const fantasySeed = Number.isFinite(seedParam) && seedParam > 0 ? seedParam
+    : isE2E ? 1 : ((globalThis.crypto?.getRandomValues?.(new Uint32Array(1))[0]) || Math.floor(Math.random() * 4294967295) || 1);
+  const fantasy = planWelcomeFantasy(fantasySeed);
+  el.dataset.welcomeSeed = String(fantasy.seed);
+  el.dataset.welcomeFantasy = fantasy.beats.map(b => b.kind).join(",");
   if(isE2E)window.__OHANA_WELCOME_SET_FRAME = at => {
     frozenSceneTime = Number.isFinite(at) ? Math.max(0,at) : null;
   };
@@ -185,15 +195,19 @@ export function playTitleIntro() {
     drawDummy(ctx, p, 0, 0, fit.scale, tf);
     ctx.restore();
     // Labels travel with the character during comic beats.
+    if (opts.noLabel) return;
     const def = ROSTER.find(r => r.id === id);
     ctx.save();
     ctx.globalAlpha = opts.alpha === undefined ? .82 : clamp(opts.alpha,0,1)*.82;
-    ctx.fillStyle = "#fff2d3";
-    ctx.shadowColor = "rgba(0,0,0,.72)";
-    ctx.shadowBlur = 5;
+    // V372: contorno en vez de shadowBlur (10 desenfoques por fotograma en móvil).
     ctx.font = "700 " + (fc.W < 760 ? 9 : 11) + "px Outfit,system-ui,sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(0,0,0,.62)";
+    ctx.strokeText(def?.name || id, x, footY + 12, slotWidth * .86);
+    ctx.fillStyle = "#fff2d3";
     ctx.fillText(def?.name || id, x, footY + 12, slotWidth * .86);
     ctx.restore();
   }
@@ -250,13 +264,14 @@ export function playTitleIntro() {
     bubbleBoxes.push({x:bx,y:by,w,h});
     ctx.fillStyle="rgba(255,252,238,.96)";
     ctx.strokeStyle=accent;ctx.lineWidth=2.2;
-    ctx.shadowColor="rgba(0,0,0,.28)";ctx.shadowBlur=12;
+    // V372: sombra plana desplazada, sin desenfoque por fotograma.
+    ctx.save();ctx.globalAlpha*=.22;ctx.fillStyle="#000";
+    ctx.fillRect(bx+3,by+4,w,h);ctx.restore();
     ctx.beginPath();
     ctx.moveTo(bx+r,by);ctx.lineTo(bx+w-r,by);ctx.quadraticCurveTo(bx+w,by,bx+w,by+r);
     ctx.lineTo(bx+w,by+h-r);ctx.quadraticCurveTo(bx+w,by+h,bx+w-r,by+h);
     ctx.lineTo(bx+r,by+h);ctx.quadraticCurveTo(bx,by+h,bx,by+h-r);
     ctx.lineTo(bx,by+r);ctx.quadraticCurveTo(bx,by,bx+r,by);ctx.closePath();ctx.fill();ctx.stroke();
-    ctx.shadowBlur=0;
     const tx=tail==="right"?bx+w*.72:bx+w*.28;
     ctx.fillStyle="rgba(255,252,238,.96)";ctx.strokeStyle=accent;
     ctx.beginPath();ctx.moveTo(tx-6,by+h-1);ctx.lineTo(tx+4,by+h-1);ctx.lineTo(tx+(tail==="right"?12:-12),by+h+11);ctx.closePath();ctx.fill();ctx.stroke();
@@ -265,45 +280,61 @@ export function playTitleIntro() {
     ctx.restore();
   }
 
-  function island(t,L) {
-    const {W,H,floor}=L;
+  // V372: cielo, sol, colinas y hierba son estáticos: se pintan UNA vez por
+  // tamaño en un lienzo aparte y cada fotograma solo copia ese bitmap.
+  let backdrop=null,backdropKey="";
+  function paintBackdrop(c,W,H,floor){
     const horizon=H*.70;
-    const sky=ctx.createLinearGradient(0,0,0,H);
+    const sky=c.createLinearGradient(0,0,0,H);
     sky.addColorStop(0,"#15364a");
     sky.addColorStop(.46,"#285d6a");
     sky.addColorStop(.72,"#cf9d65");
     sky.addColorStop(1,"#07131b");
-    ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
-
+    c.fillStyle=sky;c.fillRect(0,0,W,H);
     const sunX=W*.76, sunY=H*.23, sr=Math.min(W,H)*.075;
-    const sg=ctx.createRadialGradient(sunX,sunY,0,sunX,sunY,sr*3.8);
+    const sg=c.createRadialGradient(sunX,sunY,0,sunX,sunY,sr*3.8);
     sg.addColorStop(0,"rgba(255,237,174,.74)");
     sg.addColorStop(.28,"rgba(255,208,126,.22)");
     sg.addColorStop(1,"rgba(255,195,110,0)");
-    ctx.fillStyle=sg;ctx.fillRect(0,0,W,H);
-
-    ctx.fillStyle="#091e25";
-    ctx.beginPath();
-    ctx.moveTo(0,floor+10);ctx.lineTo(0,horizon+20);
-    ctx.quadraticCurveTo(W*.12,horizon-24,W*.25,horizon+14);
-    ctx.quadraticCurveTo(W*.39,horizon+38,W*.52,horizon-4);
-    ctx.quadraticCurveTo(W*.67,horizon-34,W*.82,horizon+10);
-    ctx.quadraticCurveTo(W*.92,horizon+26,W,horizon-2);
-    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
-
+    c.fillStyle=sg;c.fillRect(0,0,W,H);
+    c.fillStyle="#091e25";
+    c.beginPath();
+    c.moveTo(0,floor+10);c.lineTo(0,horizon+20);
+    c.quadraticCurveTo(W*.12,horizon-24,W*.25,horizon+14);
+    c.quadraticCurveTo(W*.39,horizon+38,W*.52,horizon-4);
+    c.quadraticCurveTo(W*.67,horizon-34,W*.82,horizon+10);
+    c.quadraticCurveTo(W*.92,horizon+26,W,horizon-2);
+    c.lineTo(W,H);c.lineTo(0,H);c.closePath();c.fill();
+    const grass=c.createLinearGradient(0,floor-20,0,H);
+    grass.addColorStop(0,"rgba(35,82,60,.82)");
+    grass.addColorStop(1,"rgba(7,20,19,.98)");
+    c.fillStyle=grass;c.fillRect(0,floor-8,W,H-floor+8);
+  }
+  function island(t,L) {
+    const {W,H,floor}=L;
+    const dpr=fc.dpr||1,key=W+"x"+H+"@"+dpr;
+    if(key!==backdropKey){
+      backdropKey=key;
+      backdrop=typeof document!=="undefined"?document.createElement("canvas"):null;
+      const bctx=backdrop?.getContext("2d");
+      if(bctx){
+        backdrop.width=Math.max(1,Math.round(W*dpr));backdrop.height=Math.max(1,Math.round(H*dpr));
+        bctx.scale(dpr,dpr);paintBackdrop(bctx,W,H,floor);
+      }else backdrop=null;
+    }
+    if(backdrop)ctx.drawImage(backdrop,0,0,W,H);
+    else paintBackdrop(ctx,W,H,floor);
+    const horizon=H*.70;
     ctx.globalAlpha=.17;
     ctx.strokeStyle="#9be7ee";ctx.lineWidth=1.6;
+    ctx.beginPath();
     for(let i=0;i<6;i++){
       const yy=horizon+18+i*18;
       const off=((t*(12+i*2))%(W+180))-90;
-      ctx.beginPath();ctx.moveTo(off,yy);ctx.lineTo(off+110,yy);ctx.stroke();
+      ctx.moveTo(off,yy);ctx.lineTo(off+110,yy);
     }
+    ctx.stroke();
     ctx.globalAlpha=1;
-
-    const grass=ctx.createLinearGradient(0,floor-20,0,H);
-    grass.addColorStop(0,"rgba(35,82,60,.82)");
-    grass.addColorStop(1,"rgba(7,20,19,.98)");
-    ctx.fillStyle=grass;ctx.fillRect(0,floor-8,W,H-floor+8);
   }
 
   function scene(t,L) {
@@ -313,6 +344,20 @@ export function playTitleIntro() {
     const tf=t*60;
     const loop=t%14;
     bubbleBoxes = [];
+    // V372 · maravilla del hueco actual. Con reduced-motion se muestra una
+    // sola, quieta y completa, sin movimiento de cámara.
+    const wonder=reduce?{beat:fantasy.beats[0],k:.5}:activeFantasy(fantasy,loop);
+    if(isE2E){
+      el.dataset.welcomeFantasyActive=wonder?wonder.beat.kind:"none";
+      el.dataset.welcomeFantasyReactor=wonder?wonder.beat.reactor:"none";
+    }
+    const cam=fantasyCamera(wonder,reduce);
+    ctx.save();
+    if(cam){
+      ctx.translate(W/2+cam.dx,L.H/2+cam.dy);ctx.rotate(cam.rotate);ctx.scale(cam.zoom,cam.zoom);ctx.translate(-W/2,-L.H/2);
+    }
+    if(wonder&&wonder.beat.kind!=="cameraThief")drawWelcomeFantasy(ctx,W,L.H,wonder,spots,{reduce,
+      actorAt:(id,x,foot,h,alpha)=>actor(id,x,foot,h,tf,{alpha,noLabel:true,pose:"idle"})});
 
     // V350: Kilo plays an actual connected five-form body/ukulele rig.
     // Pollination, laughter and surprise are its own fully timed story.
@@ -641,6 +686,13 @@ export function playTitleIntro() {
       ctx.beginPath();ctx.arc(x,y,1.5+(i%4)*.45,0,Math.PI*2);ctx.fill();
     }
     ctx.restore();
+    ctx.restore();
+    if(wonder){
+      if(wonder.beat.kind==="cameraThief")drawWelcomeFantasy(ctx,W,L.H,wonder,spots,{reduce});
+      const who=spots[wonder.beat.reactor];
+      const say=reduce?1:Math.sin(clamp((wonder.k-.12)/.76,0,1)*Math.PI);
+      if(who&&say>.3)comicBubble(wonder.beat.line,who.x,who.foot-heroH*1.32,say,"#fff3b0","left");
+    }
   }
 
   function frame(now){
@@ -652,13 +704,18 @@ export function playTitleIntro() {
     // mandatory one-second wait.
     if(!ready&&t>=0.16){ready=true;el.classList.add("ready");}
     if(lastPaint && now-lastPaint<33){raf=requestAnimationFrame(frame);return;}
+    // V372: si la partida ya empezó (inicio directo, coop, e2e) o la pestaña
+    // está oculta, la bienvenida invisible no debe seguir pintando 10 rigs.
+    if(document.hidden||document.body.classList.contains("playing")){raf=requestAnimationFrame(frame);return;}
     lastPaint=now;
     const L=layout();
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     island(t,L);
     scene(reduce?0.7:(frozenSceneTime ?? t),L);
-    const vign=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
-    vign.addColorStop(0,"rgba(0,0,0,0)");vign.addColorStop(1,"rgba(0,0,0,.52)");
+    const vign=cachedGradient(ctx,"welcome-vignette:"+L.W+"x"+L.H,()=>{
+      const g=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
+      g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.52)");return g;
+    });
     ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
     ctx.restore();
     raf=requestAnimationFrame(frame);

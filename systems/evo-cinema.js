@@ -9,6 +9,18 @@ import { EVOLUTION_CINEMA_PROFILES, EVOLUTION_STAGE_COPY, evolutionMessage } fro
 import {
   FONT_DISPLAY, FONT_BODY, clamp, lerp, seg, easeOut, easeInOut, easeBack, reducedMotion, rgba, tint, loadFonts, fullCanvas, Particles, drawStar, drawSpark, drawRays, drawBackdrop, drawRing, drawTitle, baseHeight, makeDummy, drawDummy
 } from "./cinema-kit.js";
+import * as EvoCine_kilo from "./evo-cine/kilo.js";
+import * as EvoCine_frita from "./evo-cine/frita.js";
+import * as EvoCine_stitcho from "./evo-cine/stitcho.js";
+import * as EvoCine_cuerno from "./evo-cine/cuerno.js";
+import * as EvoCine_chispin from "./evo-cine/chispin.js";
+import * as EvoCine_pizza from "./evo-cine/pizza.js";
+import * as EvoCine_michi from "./evo-cine/michi.js";
+import * as EvoCine_yomi from "./evo-cine/yomi.js";
+import * as EvoCine_dino from "./evo-cine/dino.js";
+import * as EvoCine_dragon from "./evo-cine/dragon.js";
+const EVO_CINE_BY_ID = Object.freeze({ kilo: EvoCine_kilo, lilo: EvoCine_kilo, frita: EvoCine_frita, stitcho: EvoCine_stitcho, stitch: EvoCine_stitcho, cuerno: EvoCine_cuerno, chispin: EvoCine_chispin, pikachu: EvoCine_chispin, pizza: EvoCine_pizza, cat: EvoCine_michi, michi: EvoCine_michi, yomi: EvoCine_yomi, dino: EvoCine_dino, dragon: EvoCine_dragon });
+
 export { FONT_DISPLAY, FONT_BODY, clamp, lerp, seg, easeOut, easeInOut, easeBack, reducedMotion, rgba, tint, loadFonts, fullCanvas, Particles, drawStar, drawSpark, drawRays, drawBackdrop, drawRing, drawTitle, baseHeight, makeDummy, drawDummy } from "./cinema-kit.js";
 
 let stage = null;
@@ -80,6 +92,10 @@ function drawEvolutionIdentity(ctx, id, profile, cx, cy, target, k, t, accent) {
 export function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
+  const cineMod = EVO_CINE_BY_ID[detail.id || "kilo"];
+  if (!detail._classic && cineMod && typeof cineMod.drawEvoCine === "function" && !reducedMotion()) {
+    if (playCharacterCine(st, detail, cineMod)) return;
+  }
 
   const id = detail.id || "kilo";
   const evo = clamp(Number(detail.evo) || 1, 1, 4);
@@ -552,4 +568,70 @@ export function playEvolution(detail = {}) {
 if (!window.__ohanaEvoCinema) {
   window.__ohanaEvoCinema = true;
   addEventListener("ohana-evolve", (e) => playEvolution((e && e.detail) || {}));
+}
+
+// V372: cinemática propia de cada personaje (4 s). La ruta clásica queda como
+// respaldo (error de render) y para movimiento reducido.
+function playCharacterCine(st, detail, mod) {
+  const id = detail.id || "kilo";
+  const evo = clamp(Number(detail.evo) || 1, 1, 4);
+  const def = ROSTER.find((r) => r.id === id) || ROSTER[0];
+  const from = evo, to = evo + 1;            // formas 1..5 (evo 0..4 → +1)
+  const dur = Number(mod.EVO_CINE_DURATION) || 4;
+  const { el, fc } = st;
+  const ctx = fc.ctx;
+  const toName = String(detail.toName || detail.name || def.forms?.[evo]?.name || "Nueva forma");
+  st.sr.textContent = "Evolución completada: " + toName + ". Nueva forma " + to + " de 5.";
+  el.classList.add("show");
+  el.classList.toggle("finale", evo >= 4);
+  el.querySelector(".form-ladder")?.remove();
+  sfx("evoCharge"); duckMusic(true);
+  let t0 = performance.now(), raf = 0, finished = false, skipAt = -1, failSafe = 0, fanfare = false;
+  function frame(now) {
+    if (finished) return;
+    let t = (now - t0) / 1000;
+    if (skipAt >= 0) t = dur;
+    try {
+      ctx.save();
+      ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
+      ctx.clearRect(0, 0, fc.W, fc.H);
+      mod.drawEvoCine(ctx, fc.W, fc.H, Math.min(t, dur), from, to);
+      ctx.restore();
+    } catch (err) {
+      try { ctx.restore(); } catch (_) {}
+      console.error("[ohana] per-character evo cine failed, classic fallback", { id, evo, err });
+      finish(true); running = null; playClassic(); return;
+    }
+    if (!fanfare && t > dur * 0.6) { fanfare = true; sfx("evoFlash"); }
+    if (t >= dur) { finish(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function onSkip(e) {
+    if ((performance.now() - t0) < 800) return;
+    if (e && e.type === "keydown") { e.preventDefault(); e.stopPropagation(); }
+    skipAt = 1;
+  }
+  function finish(silent) {
+    if (finished) return;
+    finished = true;
+    clearTimeout(failSafe); cancelAnimationFrame(raf);
+    removeEventListener("keydown", onSkip, true);
+    el.removeEventListener("pointerdown", onSkip);
+    ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
+    ctx.clearRect(0, 0, fc.W, fc.H);
+    el.classList.remove("show", "finale");
+    duckMusic(false);
+    running = null;
+    if (!silent) {
+      document.querySelectorAll(".game-notification.evo").forEach((n) => n.click());
+      try { window.dispatchEvent(new CustomEvent("ohana-evolve-done", { detail: { id: def.id, evo } })); } catch (_) {}
+    }
+  }
+  function playClassic() { playEvolution({ ...detail, _classic: true }); }
+  addEventListener("keydown", onSkip, true);
+  el.addEventListener("pointerdown", onSkip);
+  running = { stop: finish };
+  failSafe = setTimeout(() => finish(), (dur + 2) * 1000);
+  raf = requestAnimationFrame(frame);
+  return true;
 }

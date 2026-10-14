@@ -7,6 +7,9 @@ import { ROSTER } from "../characters/roster.js";
 import { familyFinaleBeat } from "./v100-family-choreography.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
+import { chooseUPartner } from "./u-partners.js";
+import { endingSignature, duoBeat, drawSignature } from "./ending-duo.js";
+import { cachedGradient } from "./canvas-gradient-cache.js";
 
 let running=null;
 const CAST=["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
@@ -72,7 +75,14 @@ function showEnding(detail={}){
   }));
   // The whole family reunites before the results card is allowed to appear.
   const duration=reduce?1.6:14.5; // V99: family portrait earns the full reveal before results
-  const family=CAST.filter(id=>id!==hero.id);
+  // V372: el compañero U elegido comparte protagonismo con el héroe.
+  const partnerId=chooseUPartner(hero.id,detail.uPartner)||CAST.find(id=>id!==hero.id);
+  const partnerDef=ROSTER.find(r=>r.id===partnerId)||ROSTER[0];
+  const partnerActor=actors[partnerId];
+  const heroSig=endingSignature(hero.id),partnerSig=endingSignature(partnerId);
+  const family=CAST.filter(id=>id!==hero.id&&id!==partnerId);
+  // Retrato final: héroe y compañero juntos en el centro, la familia a los lados.
+  const portrait=[...family.slice(0,4),hero.id,partnerId,...family.slice(4)];
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
   // Keep the family framed on orientation / window changes, without raising DPR.
   const onResize=()=>{if(!done&&!complete){fc.resize();lastPaint=0;}};
@@ -88,6 +98,9 @@ function showEnding(detail={}){
   layer.setAttribute("aria-label","Cinemática final de OHANA");
   layer.dataset.ending="v100-special-single-ending";
   layer.dataset.pacing="v80-delayed-finale";
+  layer.dataset.endingHero=hero.id;
+  layer.dataset.endingPartner=partnerId;
+  layer.dataset.endingMotif=heroSig.motif+"+"+partnerSig.motif;
   layer.dataset.duration=String(Math.round(duration*1000));
   layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
@@ -127,22 +140,46 @@ function showEnding(detail={}){
     const t=(now-t0)/1000,k=clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*.78,tf=t*60;
     ctx.clearRect(0,0,W,H);
     const dawn=seg(k,.48,.92);
-    const bg=ctx.createLinearGradient(0,0,0,H);
-    bg.addColorStop(0,dawn>.1?"#264b63":"#050915");bg.addColorStop(.56,dawn>.1?"#bf8f69":"#180817");bg.addColorStop(1,"#061016");
+    // V372: gradientes cacheados por tamaño (y 12 pasos de amanecer), nunca por fotograma.
+    const day=dawn>.1,step=Math.round(dawn*12);
+    const bg=cachedGradient(ctx,"end-bg:"+W+"x"+H+":"+day,()=>{
+      const g=ctx.createLinearGradient(0,0,0,H);
+      g.addColorStop(0,day?"#264b63":"#050915");g.addColorStop(.56,day?"#bf8f69":"#180817");g.addColorStop(1,"#061016");return g;
+    });
     ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-    const glow=ctx.createRadialGradient(cx,H*.32,0,cx,H*.32,Math.min(W,H)*.52);
-    glow.addColorStop(0,rgba(dawn>.1?"#ffe6a3":"#ff486a",.22+.22*dawn));glow.addColorStop(1,"rgba(0,0,0,0)");
+    const glow=cachedGradient(ctx,"end-glow:"+W+"x"+H+":"+step,()=>{
+      const g=ctx.createRadialGradient(cx,H*.32,0,cx,H*.32,Math.min(W,H)*.52);
+      g.addColorStop(0,rgba(step>1?"#ffe6a3":"#ff486a",.22+.22*step/12));g.addColorStop(1,"rgba(0,0,0,0)");return g;
+    });
     ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
 
     // ACT I · After the Queen has already exploded, the Nido finally opens.
     if(k<.30){
       const q=seg(k,0,.30),rift=1-seg(k,.19,.30);
       drawRift(ctx,cx,H*.38,Math.min(W,H)*.38,rift);
-      const h=Math.min(H*.44,W*.28);
-      heroActor._poseOverride=q<.45?"attack":"victory";heroActor.melee=q<.45?10:0;
-      actor(heroActor,cx,ground,h,tf,{pose:heroActor._poseOverride});
-      ctx.save();ctx.globalAlpha=1-seg(q,.62,1);
-      drawTitle(ctx,"EL NIDO SE ABRE",cx,H*.15,Math.max(28,Math.min(62,W*.05)),["#fff4c6","#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:"#ff5a72"});
+      const h=Math.min(H*.40,W*.25),d=duoBeat(t,reduce),gap=Math.min(W*.16,h*.75);
+      const hx=cx-gap*.5*d.partnerIn,px=lerp(W+h,cx+gap*.5,easeOut(d.partnerIn));
+      const R=h*.62,spin=t*.9;
+      // 1) Golpe de firma del héroe hacia la grieta. 2) Entra su compañero U.
+      // 3) Remate del compañero. 4) Combo del dúo, con los dos motivos a la vez.
+      drawSignature(ctx,hero.id,hx,ground-h*.55,R,d.heroMove*(1-d.combo*.4),1,spin);
+      if(d.partnerIn>0)drawSignature(ctx,partnerId,px,ground-h*.5,R*.9,d.partnerMove*(1-d.combo*.4),-1,spin);
+      if(d.combo>0){
+        drawSignature(ctx,hero.id,cx,H*.38,Math.min(W,H)*.22,d.combo,1,spin);
+        drawSignature(ctx,partnerId,cx,H*.38,Math.min(W,H)*.16,d.combo,-1,-spin);
+      }
+      heroActor._poseOverride=d.heroMove<1&&!reduce?"attack":"victory";heroActor.melee=heroActor._poseOverride==="attack"?10:0;
+      actor(heroActor,hx,ground,h,tf,{pose:heroActor._poseOverride,facing:1});
+      if(d.partnerIn>0){
+        const running=d.partnerIn<1;
+        partnerActor.melee=!running&&d.partnerMove<1?10:0;
+        actor(partnerActor,px,ground,h*.86,tf,{facing:-1,vx:running?-6:0,
+          pose:running?"run":d.partnerMove<1?"attack":"victory",alpha:clamp(d.partnerIn*3,0,1)});
+      }
+      ctx.save();ctx.globalAlpha=1-seg(q,.84,1);
+      const duoName=(hero.name||hero.id).toUpperCase()+" & "+(partnerDef.name||partnerId).toUpperCase();
+      drawTitle(ctx,d.combo>.15?duoName:"EL NIDO SE ABRE",cx,H*.15,Math.max(26,Math.min(58,W*.048)),["#fff4c6",d.combo>.15?heroSig.color:"#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:d.combo>.15?heroSig.color:"#ff5a72",maxWidth:W*.92});
+      if(d.combo>.3)drawTitle(ctx,heroSig.line,cx,H*.15+Math.max(26,Math.min(58,W*.048))*.95,Math.max(12,Math.min(20,W*.016)),heroSig.accent,{font:FONT_BODY,weight:800,stroke:false,maxWidth:W*.9});
       ctx.restore();
       layer.classList.add("ending-phase-1");
     }
@@ -151,9 +188,10 @@ function showEnding(detail={}){
     if(k>=.27&&k<.80){
       layer.classList.remove("ending-phase-1");layer.classList.add("ending-phase-2");
       const group=seg(k,.27,.72),heroH=Math.min(H*.31,W*.17);
-      actor(heroActor,cx,ground,heroH*1.08,tf,{pose:"victory"});
+      actor(heroActor,cx-heroH*.3,ground,heroH*1.08,tf,{pose:"victory"});
+      actor(partnerActor,cx+heroH*.38,ground,heroH*.92,tf,{pose:"victory",facing:-1});
       family.forEach((id,i)=>{
-        const p=actors[id],side=i%2?-1:1,row=Math.floor(i/2),x=cx+side*(heroH*.78+row*heroH*.42);
+        const p=actors[id],side=i%2?-1:1,row=Math.floor(i/2),x=cx+side*(heroH*1.05+row*heroH*.42);
         const enter=easeOut(seg(group,i*.055,.30+i*.055));
         const y=ground+18*(1-enter);
         actor(p,x,y,heroH*(.68+(i%3)*.05),tf,{facing:x<cx?1:-1,pose:i===2&&enter>.7?"run":"idle",alpha:enter});
@@ -166,10 +204,15 @@ function showEnding(detail={}){
     if(k>=.77){
       layer.classList.remove("ending-phase-2");layer.classList.add("ending-phase-3");
       const heroH=Math.min(H*.28,W*.15),spread=Math.min(W*.72,heroH*7.8);
-      CAST.forEach((id,i)=>{
-        const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1)),chosen=id===hero.id;
+      const heroX=cx-spread/2+spread*(4/(CAST.length-1)),partnerX=cx-spread/2+spread*(5/(CAST.length-1));
+      // Arco de los dos motivos uniendo al dúo protagonista (8 s, en bucle suave).
+      const loopK=reduce?.6:((t-duration*.77)/2.2)%1;
+      drawSignature(ctx,hero.id,heroX,ground-heroH*1.25,heroH*.55,.35+loopK*.5,1,t*.8);
+      drawSignature(ctx,partnerId,partnerX+heroH*.12,ground-heroH*1.1,heroH*.45,.35+((loopK+.5)%1)*.5,-1,-t*.8);
+      portrait.forEach((id,i)=>{
+        const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1))+(id===partnerId?heroH*.12:0),chosen=id===hero.id||id===partnerId;
         const beat=familyFinaleBeat(id,t-duration*.77,{reduced:reduce,chosen});
-        actor(p,x,ground+beat.lift,heroH*(chosen?1.05:.72),tf,{
+        actor(p,x,ground+beat.lift,heroH*(id===hero.id?1.05:chosen?.9:.72),tf,{
           facing:x<cx?1:-1,pose:beat.pose,grounded:beat.grounded,
           melee:beat.melee,vx:beat.vx
         });

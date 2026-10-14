@@ -6,6 +6,13 @@ import vm from "node:vm";
 const sw=fs.readFileSync("sw.js","utf8");
 const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
 const previous="ohana-"+(Number(current?.slice(6)||0)-1);
+// V372: expected delta derived from the real committed V371 baseline vs. the
+// current content-addressed table, so the assertions stay exact.
+const BASELINE=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
+const REVS=JSON.parse(sw.slice(sw.indexOf("{",sw.indexOf("const PRECACHE_REVISIONS = {")),sw.indexOf("\n};",sw.indexOf("const PRECACHE_REVISIONS = {"))+2));
+const TOTAL=Object.keys(REVS).length;
+const REUSED=Object.keys(REVS).filter(k=>BASELINE.resources[k]?.sha===REVS[k]).length;
+const DOWNLOADED=TOTAL-REUSED;
 const root="https://example.com/project-ohana/";
 function setup({offline=false,failPath="",reuse=false}={}){
   const handlers={}, databases=new Map();
@@ -70,8 +77,8 @@ function setup({offline=false,failPath="",reuse=false}={}){
     await cache.put("./"+path+"?v="+previous,new Response(content));
   };
   const seedFullPreviousRelease=async()=>{
-    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v370.json","utf8"));
-    if(baseline.version!==previous)throw new Error("V371 must upgrade from actual V370");
+    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
+    if(baseline.version!==previous)throw new Error("V372 must upgrade from actual V371");
     const cache=storage("ohana-static-"+previous);
     const manifest=Object.fromEntries(Object.entries(baseline.resources).map(([name,item])=>[name,item.sha]));
     await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(manifest)));
@@ -89,8 +96,9 @@ function setup({offline=false,failPath="",reuse=false}={}){
 
 test("V368 full offline manifest preserves 200 resources and exact Git blob hashes",()=>{
  const h=setup();
- assert.equal(h.precache.length,208,"root plus the 207 canonical assets");
- assert.equal(Object.keys(h.revisions).length,207);
+ assert.equal(h.precache.length,TOTAL+1,"root plus the "+TOTAL+" canonical assets");
+ assert.equal(Object.keys(h.revisions).length,TOTAL);
+ assert.ok(TOTAL>=209,"V372 keeps every V371 asset and adds intro-fantasy + ending-duo");
  assert.equal(h.revisions["index.html"].length,40);
  assert.equal(h.revisions["systems/cinema-loader.js"].length,40);
 });
@@ -138,14 +146,17 @@ test("V368 changed SHA never reuses stale assets and incomplete install never ta
 });
 
 
-test("V371 actual V370→V371 migration: 196 preserved files cost zero network requests",async()=>{
+test("V372 actual V371→V372 migration: preserved files cost zero network requests",async()=>{
  const h=setup();
  await h.seedFullPreviousRelease();
  const first=h.requests.length;
  await h.install();
  const network=h.requests.slice(first).map(x=>new URL(x).pathname);
- assert.equal(h.precache.length,208);
- assert.equal(network.length,11,"only the 11 changed or new V371 files need a fetch");
+ assert.equal(h.precache.length,TOTAL+1);
+ assert.ok(REUSED>=190,"V372 must reuse at least 190 V371 assets, got "+REUSED);
+ assert.equal(network.length,DOWNLOADED,"only the "+DOWNLOADED+" changed or new V372 files need a fetch");
+ for(const must of ["/systems/intro-fantasy.js","/systems/ending-duo.js","/systems/intro.js","/systems/ending.js"])
+   assert.ok(network.some(x=>x.endsWith(must)),must+" must be fetched: "+network.join(","));
  assert.ok(network.some(x=>x.endsWith("/index.html")),network.join(","));
  assert.ok(h.parallel()<=6);
  const fresh=h.storage("ohana-static-"+current);
@@ -155,16 +166,16 @@ test("V371 actual V370→V371 migration: 196 preserved files cost zero network r
  assert.ok(await fresh.match("./index.html"));
  assert.ok(await fresh.match("./"));
  const privateStats=await (await fresh.match("./.ohana-install-stats.json")).json();
- assert.equal(privateStats.reused,196);
- assert.equal(privateStats.downloaded,11);
- assert.equal(privateStats.total,207);
+ assert.equal(privateStats.reused,REUSED);
+ assert.equal(privateStats.downloaded,DOWNLOADED);
+ assert.equal(privateStats.total,TOTAL);
  assert.equal(privateStats.incremental,true);
  assert.equal(h.skips(),1);
  await h.activate();
  assert.deepEqual(await h.caches.keys(),["ohana-static-"+current]);
 });
 
-test("V371 failed incremental index fetch leaves V370 intact and unactivated",async()=>{
+test("V372 failed incremental index fetch leaves V371 intact and unactivated",async()=>{
  const h=setup({failPath:"/index.html"});
  await h.seedFullPreviousRelease();
  await assert.rejects(h.install(),/network unavailable/);

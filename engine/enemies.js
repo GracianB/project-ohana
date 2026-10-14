@@ -1,6 +1,11 @@
 import { drawBossQueen } from "./boss-art.js";
 import { drawQueenV94Warning } from "../systems/boss-v94-readability.js";
 import { drawFoeRig } from "./foe-rig.js";
+import { drawKiloFoe } from "./foes/kilo-foes.js";
+import { drawStitchoFoe } from "./foes/stitcho-foes.js";
+import { drawMichiFoe } from "./foes/michi-foes.js";
+import { drawChispinFoe } from "./foes/chispin-foes.js";
+import { drawDinoFoe, isDinoFoe } from "./foes/dino-foes.js";
 
 const KIND_TINT = {
   pez: "#3aa8d8",
@@ -62,6 +67,11 @@ export function drawEnemy(ctx, e, cam, t) {
   if (e.elite) drawEliteAura(ctx, e, t);
 
   if (e.kind === "boss") drawBoss(ctx, e, t);
+  else if (drawKiloFoe(ctx, e, t)) { /* V372 Kilo */ }
+  else if (drawStitchoFoe(ctx, e, t)) { /* V372 Stitcho */ }
+  else if (drawMichiFoe(ctx, e, t)) { /* V372 Michi */ }
+  else if (drawChispinFoe(ctx, e, t)) { /* V372 Chispín */ }
+  else if (isDinoFoe(e)) drawDinoFoe(ctx, e, t);
   else if (drawFoeRig(ctx, e, t)) { /* crawler / flyer / brute */ }
   else if (e.kind === "phosquito") drawPhosquito(ctx, e, t);
   else if (e.kind === "mosquito") drawMosquito(ctx, e, t);
@@ -76,9 +86,6 @@ export function drawEnemy(ctx, e, cam, t) {
   else if (e.kind === "gaviota") drawGaviota(ctx, e, t);
   else if (e.kind === "murcielago") drawMurcielago(ctx, e, t);
   else if (e.kind === "arana") drawArana(ctx, e, t);
-  else if (e.kind === "brasita") drawBrasita(ctx, e, t);
-  else if (e.kind === "escoria") drawEscoria(ctx, e, t);
-  else if (e.kind === "ufo") drawUfo(ctx, e, t);
   else drawCucaracho(ctx, e, t);
 
   if (!e.boss) {
@@ -576,10 +583,7 @@ function drawTelegraph(ctx, e, t) {
   } else if (k === "ufo") {
     // Rayo hacia abajo + anillo de suelo
     const beamH = 34 + Math.sin(t * 0.5) * 4;
-    const g = ctx.createLinearGradient(0, 6, 0, beamH);
-    g.addColorStop(0, "rgba(126,231,255,.55)");
-    g.addColorStop(1, "rgba(126,231,255,.05)");
-    ctx.fillStyle = g;
+    ctx.fillStyle = "rgba(126,231,255,.28)";
     ctx.beginPath();
     ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(16, beamH); ctx.lineTo(-16, beamH);
     ctx.closePath(); ctx.fill();
@@ -1389,103 +1393,6 @@ function drawArana(ctx, e, t) {
   ctx.arc(7, 1, 1.1, 0, Math.PI * 2); ctx.arc(10, 1.5, 1, 0, Math.PI * 2);
   ctx.fill();
   ctx.lineCap = "butt";
-}
-
-function drawBrasita(ctx, e, t) {
-  const pulse = 1 + Math.sin(t / 4 + (e.bob || 0)) * 0.12;
-  ctx.scale(pulse * 1.2, pulse * 1.2);
-  // outer glow
-  const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 16);
-  g.addColorStop(0, "rgba(255,240,180,.9)");
-  g.addColorStop(0.35, "rgba(255,140,40,.75)");
-  g.addColorStop(0.7, "rgba(255,60,20,.35)");
-  g.addColorStop(1, "rgba(255,40,0,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill();
-  // core
-  ctx.fillStyle = "#ffe8a0";
-  ctx.beginPath(); ctx.arc(0, -1, 5, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#111";
-  ctx.beginPath(); ctx.arc(-2, -1, 1.1, 0, Math.PI * 2); ctx.arc(2, -1, 1.1, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#ff6a20";
-  ctx.beginPath(); ctx.arc(0, 1, 7, 0, Math.PI * 2); ctx.fill();
-  // flicker tips
-  ctx.fillStyle = "rgba(255,200,80,.7)";
-  for (let i = 0; i < 4; i++) {
-    const a = t / 5 + i * 1.5;
-    ctx.beginPath(); ctx.arc(Math.cos(a) * 8, Math.sin(a) * 8, 2, 0, Math.PI * 2); ctx.fill();
-  }
-}
-
-function drawEscoria(ctx, e, t) {
-  const hot = e.hp < e.max * 0.45;
-  const dir = e.vx >= 0 ? 1 : -1;
-  const crawl = Math.sin(t / 5 + e.x * 0.08) * 2;
-  ctx.scale(dir * 1.25, 1.25);
-  if (hot) {
-    ctx.fillStyle = "rgba(255,80,20,.25)";
-    ctx.beginPath(); ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI * 2); ctx.fill();
-  }
-  // legs
-  ctx.strokeStyle = hot ? "#ff6020" : "#6a2010"; ctx.lineWidth = 2.2; ctx.lineCap = "round";
-  ctx.beginPath();
-  ctx.moveTo(-8, 4); ctx.lineTo(-12, 10 + crawl);
-  ctx.moveTo(0, 5); ctx.lineTo(0, 11 - crawl);
-  ctx.moveTo(8, 4); ctx.lineTo(12, 10 + crawl);
-  ctx.stroke();
-  // shell
-  const g = ctx.createRadialGradient(2, -2, 1, 0, 2, 14);
-  g.addColorStop(0, hot ? "#ff9040" : "#e06030");
-  g.addColorStop(0.5, hot ? "#ff4020" : "#c04010");
-  g.addColorStop(1, "#4a1008");
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(0, 1, 13, 8, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#3a1008";
-  ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(5, -2); ctx.lineTo(-5, -2); ctx.fill();
-  // cracks / lava veins
-  ctx.strokeStyle = hot ? "rgba(255,220,80,.8)" : "rgba(255,120,40,.45)"; ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(-6, 0); ctx.lineTo(-2, -3); ctx.lineTo(4, 1); ctx.lineTo(8, -2);
-  ctx.stroke();
-  // eyes
-  ctx.fillStyle = hot ? "#ffe060" : "#ff8040";
-  ctx.beginPath(); ctx.arc(6, -1, 2, 0, Math.PI * 2); ctx.arc(10, 1, 1.6, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#111";
-  ctx.beginPath(); ctx.arc(6.4, -1, 0.8, 0, Math.PI * 2); ctx.arc(10.3, 1, 0.7, 0, Math.PI * 2); ctx.fill();
-  ctx.lineCap = "butt";
-}
-
-function drawUfo(ctx, e, t) {
-  const bob = Math.sin(t / 8 + (e.bob || 0)) * 1.5;
-  ctx.translate(0, bob);
-  // beam when telegraph (reforzado; el anillo global también lo marca)
-  if (e.telegraph) {
-    ctx.fillStyle = "rgba(126,231,255,.32)";
-    ctx.beginPath();
-    ctx.moveTo(-8, 6); ctx.lineTo(8, 6); ctx.lineTo(18, 34); ctx.lineTo(-18, 34); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,180,.7)"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.ellipse(0, 34, 14, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
-  }
-  // saucer body
-  const g = ctx.createLinearGradient(0, -8, 0, 8);
-  g.addColorStop(0, "#c8f0ff");
-  g.addColorStop(0.45, "#7ee7ff");
-  g.addColorStop(1, "#2a6a90");
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(0, 2, 18, 6, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "rgba(20,60,90,.6)"; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.ellipse(0, 2, 18, 6, 0, 0, Math.PI * 2); ctx.stroke();
-  // dome
-  ctx.fillStyle = "rgba(180,240,255,.85)";
-  ctx.beginPath(); ctx.ellipse(0, -2, 8, 7, 0, Math.PI, 0); ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,.45)";
-  ctx.beginPath(); ctx.ellipse(-2, -4, 3, 2.5, 0, 0, Math.PI * 2); ctx.fill();
-  // lights
-  for (let i = -2; i <= 2; i++) {
-    const tw = 0.4 + 0.4 * Math.sin(t / 4 + i);
-    ctx.fillStyle = `rgba(255,${180 + i * 10},80,${tw})`;
-    ctx.beginPath(); ctx.arc(i * 6, 4, 1.8, 0, Math.PI * 2); ctx.fill();
-  }
 }
 
 function drawBoss(ctx, e, t) {

@@ -1,3 +1,17 @@
+## OHANA V372 · Rendimiento medido, bienvenida fantástica y final del dúo (ohana-372)
+
+- Rendimiento (Chromium headless, perfil iPhone 13, U + J/K/L + G de los 10 personajes en forma 4, mediana de 2 pasadas): V370 13 FPS · V371 12 FPS · V372 38 FPS; CPU de requestAnimationFrame por fotograma 23,1 → 24,1 → 8,1 ms. La causa era la bienvenida invisible, que seguía pintando 10 rigs (~38 ms/fotograma) debajo de la partida cuando el juego arrancaba sin pulsar ENTRAR; ahora deja de pintar con `body.playing` o la pestaña oculta.
+- Sin gradientes por fotograma: fondo de la bienvenida (cielo, sol, colinas, hierba) pintado una vez por tamaño en un lienzo aparte, viñeta cacheada; gradientes del final cacheados; viñeta de vida baja con 8 niveles cacheados. Etiquetas y bocadillos sin `shadowBlur`.
+- Bienvenida (`systems/intro-fantasy.js`): 3 huecos de tiempo fijos por bucle; cada ejecución elige 3 maravillas distintas de 7 (lluvia de estrellas, portal, ballena voladora, Stitcho roba la cámara, farolillos, puente arcoíris, luna globo) y quién reacciona. El ritmo nunca depende del azar; `?welcomeSeed=N` la fija; con reduced-motion se muestra una sola maravilla quieta y sin movimiento de cámara. Sigue siendo saltable con ENTRAR / Enter / Espacio / Esc.
+- Final (`systems/ending-duo.js`): el héroe y su compañero U (el elegido, `uPartner`) protagonizan el acto I con golpes de firma propios de cada personaje (10 motivos distintos), nombre del dúo y frase propia; comparten el centro del retrato final.
+- Los 2 módulos nuevos entran en el precache; nueva línea base `tools/offline-baseline-v371.json` desde b58cf3a. Los tests de migración calculan el delta exacto contra esa base.
+
+- Enemigos (arte): 18 bichos redibujados por los especialistas en `engine/foes/{kilo,stitcho,michi,chispin,dino}-foes.js` (el cucaracho vuelve a ser una cucaracha de verdad; la avispa se distingue de la abeja con `variant`). Poses de reposo, aviso, ataque, golpe y muerte, variantes por dureza y sin gradientes por fotograma.
+- Enemigos (IA): `engine/foes/*-ai.js` enganchados en `game.js` (Kilo, Stitcho con telarañas, Michi, Chispín con la guardia del cangrejo ×0,35 en cuerpo a cuerpo, Dino con charcos, chispas y abducción del ovni que suelta al jugador si hay techo).
+- Cinemáticas de evolución propias de los 10 personajes (`systems/evo-cine/*.js`, 4 s); la cinemática clásica queda para movimiento reducido y como respaldo ante errores.
+- Selector: `systems/select-screen.js` añade barras de estadísticas y animaciones a las tarjetas; las barras flotan sobre la tarjeta seleccionada para no encoger el retrato.
+- G en pausa: Chispín, Michi/Yomi y Dino/Dragón ya no encolan la G pulsada durante la pausa.
+
 ## OHANA V371 · Interacciones G y capas visuales J/K/L/U de los 10 personajes (ohana-371)
 
 - Kilo y Kétchup, Stitcho y Cuerno, Chispín y Pizza, Michi y Yomi, Dragón y Dino: 3 interacciones propias por pareja y nuevas capas visuales en J/K/L/U, en los módulos `systems/kilo-frita-interactions.js`, `systems/stitcho-cuerno-play.js`, `systems/chispin-pizza-play.js`, `systems/michi-yomi-play.js` y `systems/dino-dragon-play.js`.

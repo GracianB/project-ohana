@@ -4,6 +4,7 @@ const TAU = Math.PI * 2;
 const IDS = new Set(["cat", "yomi"]);
 const MAX_IMPACTS = 16;
 let emoteQueued = false;
+let gameRef = null; // se fija en updateMichiYomiPlay; el keydown lo usa para ignorar G en pausa
 const st = { emote: 0, land: 0, idle: 0, still: 0, lastX: null, lastY: null, fallV: 0, wasAir: false, landX: 0, landY: 0 };
 const impacts = [];
 
@@ -17,6 +18,7 @@ if (typeof addEventListener === "function") {
     if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
     if (String(e.key || "").toLowerCase() !== "g") return;
     if (e.target?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+    if (gameRef?.paused) return;
     emoteQueued = true;
   });
 }
@@ -35,6 +37,7 @@ export function michiYomiImpact(x, y, text, color, opts) {
 
 export function updateMichiYomiPlay(game) {
   for (let i = impacts.length - 1; i >= 0; i--) if (--impacts[i].life <= 0) impacts.splice(i, 1);
+  if (game) gameRef = game;
   const p = game?.player;
   if (!p || !IDS.has(p.id) || p.dead) { emoteQueued = false; st.emote = st.land = st.idle = 0; return; }
   if (game.paused) { emoteQueued = false; return; }

@@ -20,11 +20,13 @@ export const DINO_DRAGON_ATTACK_FX = Object.freeze({
 });
 const LIFE = { breath: 42, gust: 36, meteor: 60, bite: 32, charge: 50, quake: 60 };
 
+let gameRef = null;
 if (typeof addEventListener === "function") {
   addEventListener("keydown", (e) => {
     if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
     if (String(e.key || "").toLowerCase() !== "g") return;
     if (e.target?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+    if (gameRef?.paused || globalThis.game?.paused) return;
     emoteQueued = true;
   });
 }
@@ -66,6 +68,7 @@ export function dinoDragonCast(g, p, kind, evo = 0) {
 }
 
 export function updateDinoDragonPlay(game) {
+  if (game) gameRef = game;
   const p = game?.player;
   for (let i = FX.length - 1; i >= 0; i--) {
     const f = FX[i];

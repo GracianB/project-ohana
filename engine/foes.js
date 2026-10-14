@@ -68,7 +68,7 @@ export function makeFoe(x, y, kind, roomId, i, opts = {}) {
     const spawnY = Math.max(400, Math.min(520, (y || 460) + (i % 2) * 28));
     return {
       x, y: spawnY, w: 42, h: 48,
-      vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "abeja", color: "#f0c020",
+      vx: (i % 2 ? 1 : -1) * 1.4, vy: 0, hp, max: hp, kind: "abeja", variant: kind, color: "#f0c020",
       boss: false, shoot: 0, telegraph: false, wind: 0, diving: 0, charging: 0, cd: 40 + i * 18,
       bob: rng() * 6.28, baseY: spawnY,
     };

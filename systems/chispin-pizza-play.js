@@ -4,6 +4,7 @@
 const TAU = Math.PI * 2;
 const IDS = new Set(["chispin", "pizza"]);
 let emoteQueued = false;
+let lastGame = null;
 const st = { emote: 0, land: 0, idle: 0, still: 0, lastX: null, lastY: null, fallV: 0, wasAir: false, landX: 0, landY: 0, seed: 0 };
 
 export const CHISPIN_PIZZA_PLAY = Object.freeze({
@@ -16,6 +17,7 @@ if (typeof addEventListener === "function") {
     if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
     if (String(e.key || "").toLowerCase() !== "g") return;
     if (e.target?.closest?.("input, textarea, select, [contenteditable='true']")) return;
+    if (lastGame?.paused || globalThis.game?.paused) return;
     emoteQueued = true;
   });
 }
@@ -27,6 +29,7 @@ export function resetChispinPizzaPlay() {
 }
 
 export function updateChispinPizzaPlay(game) {
+  lastGame = game || lastGame;
   const p = game?.player;
   if (game?.paused) { emoteQueued = false; return; }
   if (!p || !IDS.has(p.id) || p.dead) { emoteQueued = false; st.emote = st.land = st.idle = 0; return; }

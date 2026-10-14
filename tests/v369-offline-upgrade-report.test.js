@@ -6,23 +6,32 @@ import {execFileSync} from "node:child_process";
 test("V369 verified historical upgrade computes accurate SHA diff and source-byte savings",()=>{
  const stdout=execFileSync(process.execPath,["tools/offline-upgrade-report.mjs"],{encoding:"utf8"});
  const report=JSON.parse(fs.readFileSync("test-results/performance/v369-offline-upgrade.json","utf8"));
- assert.match(stdout,/OHANA ohana-370 → ohana-371: 196\/207 assets unchanged/);
- assert.equal(report.sourceVersion,"ohana-370");
- assert.equal(report.targetVersion,"ohana-371");
- assert.equal(report.total,207);
- assert.equal(report.reused,196);
- assert.equal(report.downloaded,11);
- assert.equal(report.reusePct,94.69);
+ const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
+ const sw=fs.readFileSync("sw.js","utf8");
+ const st=sw.indexOf("const PRECACHE_REVISIONS = {");
+ const revs=JSON.parse(sw.slice(sw.indexOf("{",st),sw.indexOf("\n};",st)+2));
+ const total=Object.keys(revs).length;
+ const reused=Object.keys(revs).filter(k=>baseline.resources[k]?.sha===revs[k]).length;
+ assert.match(stdout,new RegExp("OHANA ohana-371 → ohana-372: "+reused+"\\/"+total+" assets unchanged"));
+ assert.equal(report.sourceVersion,"ohana-371");
+ assert.equal(report.targetVersion,"ohana-372");
+ assert.equal(report.total,total);
+ assert.equal(report.reused,reused);
+ assert.equal(report.downloaded,total-reused);
+ assert.ok(reused>=190,"V372 must reuse at least 190 V371 assets");
+ assert.equal(report.reusePct,Number((100*reused/total).toFixed(2)));
  assert.ok(report.changed.some(v=>v.path==="index.html"));
- assert.deepEqual(report.changed.filter(v=>v.kind==="new").map(v=>v.path).sort(),["systems/chispin-pizza-play.js","systems/dino-dragon-play.js","systems/kilo-frita-interactions.js","systems/michi-yomi-play.js","systems/stitcho-cuerno-play.js"]);
+ const added=report.changed.filter(v=>v.kind==="new").map(v=>v.path);
+ for(const must of ["systems/ending-duo.js","systems/intro-fantasy.js"])assert.ok(added.includes(must),must);
+ assert.deepEqual(added.sort(),Object.keys(revs).filter(k=>!baseline.resources[k]).sort());
  assert.deepEqual(report.removed,[]);
  assert.ok(report.avoidedSourceBytes>5_000_000);
  assert.equal(report.avoidedSourceBytes+report.changedSourceBytes,report.currentFullSourceBytes);
- const manifest=JSON.parse(fs.readFileSync("tools/offline-baseline-v370.json","utf8"));
+ const manifest=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
  assert.equal(report.priorFullSourceBytes,Object.values(manifest.resources).reduce((sum,item)=>sum+item.bytes,0));
 });
 
-test("V369 upgrade never sends analytics and still preserves all 207 offline assets",()=>{
+test("V369 upgrade never sends analytics and still preserves every offline asset",()=>{
  const sw=fs.readFileSync("sw.js","utf8");
  assert.match(sw,/const INSTALL_STATS = "\.\/\.ohana-install-stats\.json"/);
  assert.match(sw,/const MAX_INSTALL_FETCHES = 6/);
@@ -31,5 +40,7 @@ test("V369 upgrade never sends analytics and still preserves all 207 offline ass
  assert.match(sw,/reused,downloaded,total:work\.length/);
  assert.doesNotMatch(sw,/sendBeacon\(|navigator\.analytics|google-analytics|\.netlify\/functions\/metrics/);
  const entries=sw.slice(sw.indexOf("const PRECACHE = ["),sw.indexOf("];",sw.indexOf("const PRECACHE = [")));
- assert.equal([...entries.matchAll(/"\.\//g)].length,208);
+ const revs=JSON.parse(sw.slice(sw.indexOf("{",sw.indexOf("const PRECACHE_REVISIONS = {")),sw.indexOf("\n};",sw.indexOf("const PRECACHE_REVISIONS = {"))+2));
+ assert.equal([...entries.matchAll(/"\.\//g)].length,Object.keys(revs).length+1);
+ assert.ok(Object.keys(revs).length>=209);
 });
