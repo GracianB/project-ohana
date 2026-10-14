@@ -7,6 +7,7 @@
 // Contrato igual que characters/art/cuerno.js: draw(ctx, pose, R) con origen en los
 // cascos (y=0, arriba negativo), mirando a la derecha; draw.js ya escala por H/100.
 // Sin gradientes, determinista (azar con hash sembrado).
+import { drawRainbowPuff } from "../cuerno-stagecraft.js";
 const TAU = Math.PI * 2;
 export const CUERNO_V373_ANIMS = Object.freeze(["idle", "walk", "jump", "attack", "death", "trail"]);
 export const CUERNO_V373_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Potro Iris", "Unicornio Estelar", "Unicornio Negro"]);
@@ -30,7 +31,7 @@ export function cuernoExpression(pose = {}) {
   const state = pose.state || "idle", disabled = state === "dead" || state === "hurt";
   const reduced = pose.reduceMotion === true || pose.cuernoWelcome?.reduced === true;
   const t = Number.isFinite(pose.t) ? pose.t : 0;
-  const beat = disabled ? "" : pose.cuernoBeat || "";
+  const beat = disabled ? "" : pose.cuernoK?.phase==="warn" ? "shy" : state==="trail" ? "prance" : pose.cuernoBeat || (pose.cuernoDreamT>0?"stargaze":"");
   const welcome = disabled ? null : pose.cuernoWelcome;
   const blink = Number.isFinite(pose.blink) ? clamp(pose.blink, 0, 1) : 0;
   // A brief blink every few seconds; rig blink remains authoritative.
@@ -109,13 +110,10 @@ function wing(ctx, P, x, y, span, flap, far, lw) {
 }
 
 // Pedorreta arcoíris cómica y cute: nubecitas de colores + destellos tras la grupa.
-function rainbowPuff(ctx, x, y, u, t) {
-  for (let i = 0; i < 5; i++) {
-    const k = ((t * .06 + i / 5) % 1), px = x - k * 12 * u, py = y + Math.sin(k * 6 + i) * 2 * u, r = (2.8 + k * 4.2) * u;
-    ctx.globalAlpha = 1 - k * .7; ell(ctx, px, py, r, r * .85, 0, IRIS[i % 7], "#ffffff", .8 * u);
-  }
-  ctx.globalAlpha = 1;
-  for (let i = 0; i < 3; i++) star(ctx, x - (4 + i * 5) * u, y - (4 - i * 2.5) * u + Math.sin(t * .3 + i) * u, (1.3 + hash(i, 7)) * u, "#fff6c8");
+function rainbowPuff(ctx, x, y, u, t, form, reduced) {
+  ctx.save();ctx.translate(x,y);ctx.scale(u,u);
+  for(let i=0;i<(reduced?1:2);i++)drawRainbowPuff(ctx,0,0,reduced?.35:((t*.025+i*.42)%1),{form,reduced});
+  ctx.restore();
 }
 /** 0..1: alineación de la constelación de victoria. Ciclo 240 ticks: rampa 20, fija 60 (~1 s), rampa 20. */
 export function cuernoV373StarAlign(t) {
@@ -138,6 +136,8 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const bob = face.reduced ? 0 : run ? -Math.abs(Math.sin(ph)) * 2.5 * u : air ? -3 * u : Math.sin(t * .06) * .6 * u;
   const lunge = att ? Math.sin(clamp(atk, 0, 1) * Math.PI) * 6 * u : 0;
   ctx.translate(lunge, bob);
+  const charge=pose.cuernoK?.phase==="warn"?clamp(pose.cuernoK.progress,0,1):0;
+  if(charge&&!face.reduced)ctx.scale(1+charge*.045,1-charge*.04);
   if (att) ctx.rotate(.08 * Math.sin(clamp(atk, 0, 1) * Math.PI));
   const tuck = air ? .9 : 0;
   // --- capa trasera: cola, ala lejana, patas lejanas
@@ -149,7 +149,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
       (-5 + (face.reduced ? 0 : Math.sin(t * .055 + i * .35) * 1.6)) * u, P.mane[i], P.ink, lw * .65);
   }
   ctx.restore();
-  const flap = dead ? -.4 : face.reduced ? 0 : air ? Math.sin(t * .5) : Math.sin(t * .12) * .25;
+  const flap = dead ? -.4 : face.reduced ? 0 : pose.cuernoDreamT>0 ? .55+Math.sin(t*.08)*.12 : air ? Math.sin(t * .5) : Math.sin(t * .12) * .25;
   if (P.wings) wing(ctx, P, -bodyRx * .1, bodyY - bodyRy * .7, 26 * P.wings * u, flap + .15, true, lw);
   const sw = (k) => run ? Math.sin(ph + k) * .9 : air ? (k ? -1 : 1) * tuck * .6 : dead ? (k ? 1.4 : -1.4) : 0;
   leg(ctx, P, -bodyRx * .55, bodyY + bodyRy * .3, legL * (dead ? .42 : 1), sw(Math.PI), 4.4 * u * P.leg, true, lw);
@@ -162,7 +162,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   if (f === 0) ell(ctx, -bodyRx * .45, bodyY, 1.6 * u, 1.1 * u, .4, "#9be39a", P.ink, lw * .5);
   else if (f === 1) star(ctx, -bodyRx * .45, bodyY, 2.4 * u, "#ffc28e");
   else if (f === 2) for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(-bodyRx * .45, bodyY + 2 * u, (3.2 - i * .9) * u, Math.PI, TAU); ctx.strokeStyle = IRIS[i * 2]; ctx.lineWidth = .9 * u; ctx.stroke(); }
-  if (trail) rainbowPuff(ctx, -bodyRx * 1.05, bodyY - bodyRy * .1, u, t);
+  if (trail) rainbowPuff(ctx, -bodyRx * 1.05, bodyY - bodyRy * .1, u, t, f+1, face.reduced);
   if (P.stars) for (let i = 0; i < 5; i++) star(ctx, -bodyRx * .6 + hash(i, f) * bodyRx * 1.2, bodyY - bodyRy * .5 + hash(i, f + 3) * bodyRy, 1.3 * u, P.night ? "#fff1ad" : "#aeb9fb");
   // --- patas cercanas
   leg(ctx, P, -bodyRx * .45, bodyY + bodyRy * .45, legL * (dead ? .42 : 1), sw(0), 4.8 * u * P.leg, false, lw);
@@ -282,5 +282,13 @@ export function cuernoTrailOrigin(x, y, { form = 1, facing = 1, scale = 1 } = {}
   const f = clamp((form | 0) - 1, 0, 4), P = F[f], u = CUERNO_V373_HEIGHT[f] / 60;
   const legL = 22 * P.leg * u * (f === 0 ? .75 : 1), ry = 10 * P.body * u;
   return { x: x - (facing < 0 ? -1 : 1) * 17 * P.body * u * 1.05 * scale, y: y + (-(legL + ry * .55) - ry * .1) * scale };
+}
+/** Optical tip of the actual spiral horn, using the same authored anatomy. */
+export function cuernoHornOrigin(x,y,{form=1,facing=1,scale=1}={}) {
+  const f=clamp((form|0)-1,0,4),P=F[f],u=CUERNO_V373_HEIGHT[f]/60;
+  const legL=22*P.leg*u*(f===0?.75:1),rx=17*P.body*u,ry=10*P.body*u,bodyY=-(legL+ry*.55);
+  const head=9*P.head*u,hx=rx*.75+head*.55,hy=bodyY-ry*.4-head*(f===0?.9:1.3);
+  const hl=11*P.horn*u*(f===0?.6:1);
+  return {x:x+(facing<0?-1:1)*(hx+head*.15+Math.cos(-1.05)*hl)*scale,y:y+(hy-head*.78+Math.sin(-1.05)*hl)*scale};
 }
 export default { id: "cuerno", draw };

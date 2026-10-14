@@ -3,6 +3,8 @@
 // Dúo: se lanza desde la U de Cuerno con startCuernoDuo(game) (no escucha la tecla U para no duplicar la U).
 // Solo visual: no hace daño, no cambia HP ni velocidad del jugador, sin red, sin gradientes, sin azar por frame.
 import { emitCuernoFx } from "./cuerno-fx.js";
+import {chooseUPartner} from "./u-partners.js";
+import {drawCuernoDream} from "../characters/cuerno-stagecraft.js";
 const TAU = Math.PI * 2;
 export const CUERNO_PLAY_KEYS = Object.freeze({ nuzzle: "1", dream: "2", neigh: "3" });
 export const CUERNO_DUO_PARTNER = "kilo"; // = DEFAULT_U_PARTNERS.cuerno en u-partners.js
@@ -30,7 +32,7 @@ const cx = (p) => p.x + p.w / 2;
 export function startCuernoDuo(game) {
   const p = game?.player;
   if (!p || p.id !== "cuerno" || p.dead || st.duoCd > 0 || st.duo) return false;
-  st.duo = { phase: "wind", age: 0, face: p.facing === -1 ? -1 : 1, form: formOf(p), trail: [] };
+  st.duo = { phase: "wind", age: 0, face: p.facing === -1 ? -1 : 1, form: formOf(p), partner:chooseUPartner(p.id,p.uPartner), trail: [] };
   st.duoCd = 180;
   game.nums?.add?.(cx(p), p.y - 36, "¡ARCOÍRIS EN TÁNDEM!", "#ffe45a", true);
   return true;
@@ -137,6 +139,7 @@ export function drawCuernoPlay(ctx, game, t, drawActor, roster) {
   const d = st.duo;
   if (d) {
     if (d.phase === "wind") {
+      drawCuernoDream(ctx,x,feet-30,70+d.form*7,d.age/CUERNO_PLAY_DUR.duoWind*.5,{form:d.form,reduced:!!game.reduceMotion});
       // Telegraph: anillo arcoíris que se cierra + flecha de dirección + compañero llegando.
       const k = d.age / CUERNO_PLAY_DUR.duoWind;
       for (let i = 0; i < 6; i++) { ctx.strokeStyle = RAINBOW[i]; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, feet - 14, (70 - 40 * k) + i * 4, (24 - 12 * k) + i * 1.5, 0, 0, TAU); ctx.stroke(); }
@@ -150,11 +153,12 @@ export function drawCuernoPlay(ctx, game, t, drawActor, roster) {
       ctx.globalAlpha = 1;
     }
     // Compañero (Kilo) galopando/corriendo al lado, un poco detrás.
-    const def = roster?.find?.((r) => r.id === CUERNO_DUO_PARTNER), form = def?.forms?.[0];
-    if (drawActor && def && form) {
+    const partner=d.partner||CUERNO_DUO_PARTNER;
+    const def = roster?.find?.((r) => r.id === partner), form = def?.forms?.[Math.min(4,p.evo||0)]||def?.forms?.[0];
+    if (drawActor && def && form && !game._familyDuet) {
       const lag = d.phase === "wind" ? 60 - 30 * (d.age / CUERNO_PLAY_DUR.duoWind) : 26;
       const bob = d.phase === "run" ? -Math.abs(Math.sin(t * 0.35)) * 6 : 0;
-      try { drawActor(ctx, { ...def, ...form, id: CUERNO_DUO_PARTNER, evo: 0, x: p.x - d.face * lag + (p.w - form.w) / 2, y: p.y + p.h - form.h + bob, facing: d.face, vx: d.phase === "run" ? d.face * 6 : 0, vy: 0, grounded: true, visualScale: 0.9, _duetActor: true }, cam, t); } catch { /* el dúo sigue sin compañero */ }
+      try { drawActor(ctx, { ...def, ...form, id: partner, evo:Math.min(4,p.evo||0), x: p.x - d.face * lag + (p.w - form.w) / 2, y: p.y + p.h - form.h + bob, facing: d.face, vx: d.phase === "run" ? d.face * 6 : 0, vy: 0, grounded: true, visualScale: 0.9, _duetActor: true }, cam, t); } catch { /* el dúo sigue sin compañero */ }
     }
     if (d.phase === "run" && d.age < 40) label(ctx, "¡A GALOPE!", x, top - 34, "#ffe45a", 15);
   }

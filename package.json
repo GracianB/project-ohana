@@ -6,6 +6,7 @@
     "test": "node --test tests/*.js",
     "test:browser": "node tests/browser/e2e.mjs",
     "test:browser:characters": "node tests/browser/character-size.mjs",
+    "test:browser:cuerno": "node tests/browser/cuerno-finale.mjs",
     "test:visual": "node tests/browser/visual-regression.mjs",
     "release:check": "node tools/release-gate.mjs",
     "test:browser:multiplayer": "node tests/browser/multiplayer-e2e.mjs",

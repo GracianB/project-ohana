@@ -3,7 +3,8 @@
 // Fases: sueño (0–1,5 s: estrellas de sueño, notas dibujadas, cuerno cargando) ·
 // estampida (1,5–2,6 s: onda de cascos y cuerno, flash de luz, flores brotando) ·
 // presentación (2,6–4,0 s: nueva forma, nombre, pétalos). Sin gradientes, determinista.
-import cuernoArt from "../../characters/art/cuerno.js";
+import cuernoArt, { CUERNO_V373_HEIGHT } from "../../characters/art/cuerno-v373.js";
+import { drawCuernoDream, drawRainbowPuff } from "../../characters/cuerno-stagecraft.js";
 import { R } from "../../characters/rig.js";
 import { flatCtx, hash01 } from "./stitcho.js";
 
@@ -20,7 +21,7 @@ export function evoCinePhase(t) { return t < 1.5 ? "sueno" : t < 2.6 ? "estampid
 
 function pose(form, t, extra = {}) {
   return { form, state: "idle", t: t * 60, phase: t * 9, breath: Math.sin(t * 3) * .5, blink: 0, look: { x: .2, y: 0 }, sway: 0, bounce: 0,
-    atk: 0, flourish: 0, flourishN: 0, cast: 0, castSlot: 0, speed: 0, air: false, reduceMotion: true, ...extra };
+    atk: 0, flourish: 0, flourishN: 0, cast: 0, castSlot: 0, speed: 0, air: false, reduceMotion: false, ...extra };
 }
 function drawCuerno(ctx, form, x, y, s, t, extra) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
@@ -46,7 +47,7 @@ function flower(ctx, x, y, r, k, i) {
 export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
   t = clamp(Number(t) || 0, 0, EVO_CINE_DURATION);
   const from = clamp((fromForm | 0) - 1, 0, 4), to = clamp((toForm | 0) - 1, 0, 4);
-  const cx = w / 2, foot = h * .8, s = h / 210, U = h;
+  const cx = w / 2, foot = h * .78, s = h * .4 / CUERNO_V373_HEIGHT[to], U = h;
   const kD = seg(t, 0, 1.5), kS = seg(t, 1.5, 2.6), kP = seg(t, 2.6, 4.0), phase = evoCinePhase(t);
   ctx.save();
   ctx.fillStyle = NIGHT; ctx.fillRect(0, 0, w, h);
@@ -59,16 +60,19 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
   ctx.globalAlpha = 1;
   // suelo
   ctx.fillStyle = "#2a2048"; ctx.fillRect(0, foot, w, h - foot);
+  drawCuernoDream(ctx,cx,foot-h*.17,h*.31,Math.min(.8,t/5),{form:to+1});
   if (phase === "sueno") {
-    drawCuerno(ctx, from, cx, foot, s, t, { state: kD > .5 ? "cast" : "idle", castSlot: 2, cast: kD });
+    drawCuerno(ctx, from, cx, foot, s, t, { state: kD > .5 ? "cast" : "idle", castSlot: 2, cast: kD,cuernoBeat:"curious" });
     // notas que suben y estrellas de sueño que convergen en el cuerno
     for (let i = 0; i < 8; i++) { const u = (hash01(i, 4) + t * .4) % 1; ctx.globalAlpha = Math.sin(u * Math.PI); note(ctx, cx + (hash01(i, 5) - .5) * w * .7, foot - u * h * .6, 1 + hash01(i, 6), IRIS[i % 7]); }
     for (let i = 0; i < 10; i++) { const a = hash01(i, 7) * TAU + t, r = U * .5 * (1 - kD) + U * .05; ctx.globalAlpha = kD; star(ctx, cx + Math.cos(a) * r, foot - U * .45 + Math.sin(a) * r * .5, 3, "#fff6c8"); }
     ctx.globalAlpha = 1;
   } else if (phase === "estampida") {
     // forma vieja → nueva con destello; onda expansiva de cascos y flores brotando
-    const morph = kS > .45;
-    drawCuerno(ctx, morph ? to : from, cx, foot, s * (1 + Math.sin(kS * Math.PI) * .08), t, { state: "run", speed: 1, phase: t * 14 });
+    const morph = seg(kS,.32,.65);
+    if(morph<1){ctx.save();ctx.globalAlpha=1-morph;drawCuerno(ctx,from,cx,foot,s,t,{state:"run",speed:1});ctx.restore();}
+    if(morph>0){ctx.save();ctx.globalAlpha=morph;drawCuerno(ctx,to,cx,foot,s*(1+Math.sin(kS*Math.PI)*.04),t,{state:"run",speed:1});ctx.restore();}
+    drawRainbowPuff(ctx,cx-h*.09,foot-h*.07,Math.min(.95,.1+kS*.85),{form:to+1});
     for (let i = 0; i < 3; i++) {
       const k = clamp(kS * 1.4 - i * .2); if (k <= 0) continue;
       ctx.globalAlpha = 1 - k; ctx.strokeStyle = IRIS[i * 2]; ctx.lineWidth = U * .02 * (1 - k) + 2;
@@ -80,7 +84,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
     ctx.strokeStyle = "#fff1ad"; ctx.lineWidth = 3;
     for (let i = 0; i < 6; i++) { if (kS < i / 6) continue; const x = cx + (i - 2.5) * U * .14; ctx.beginPath(); ctx.arc(x, foot + 10, U * .025, Math.PI * .15, Math.PI * .85, true); ctx.stroke(); }
     const flash = Math.max(0, 1 - Math.abs(t - 2.05) / .2);
-    if (flash > 0) { ctx.globalAlpha = flash * .85; ctx.fillStyle = "#fff8e6"; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
+    if (flash > 0) { ctx.globalAlpha = flash * (to===4?.1:.2); ctx.fillStyle = "#f2dcff"; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
   } else {
     const hop = Math.abs(Math.sin(kP * Math.PI * 2)) * (1 - kP) * U * .06;
     for (let i = 0; i < 12; i++) flower(ctx, cx + (hash01(i, 9) - .5) * w * .9, foot + 6 + hash01(i, 10) * (h - foot - 10), U * .03, 1, i);
@@ -91,7 +95,8 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
     const ty = h * .14 + (1 - a) * 20, name = FORM_NAMES[to];
     ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.strokeText(name, cx, ty); ctx.fillStyle = "#fff6c8"; ctx.fillText(name, cx, ty);
     ctx.font = `700 ${Math.round(h * .035)}px Outfit, system-ui, sans-serif`; ctx.fillStyle = "#e4d8ff";
-    ctx.fillText("Forma " + fromForm + " → " + toForm + " · los sueños también vuelan", cx, ty + h * .06);
+    const stories=["Un brote aprende a brillar","La crin descubre el arcoíris","Alas para abrazar las nubes","La noche también sueña en colores"];
+    ctx.fillText(stories[Math.max(0,to-1)], cx, ty + h * .06);
     ctx.globalAlpha = 1;
   }
   ctx.restore();

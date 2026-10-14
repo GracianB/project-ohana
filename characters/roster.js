@@ -156,7 +156,7 @@ export const ALL_ROSTER = [
     ],
   },
   {
-    id: "cuerno", name: "Cuerno", role: "luz", tag: "Cuerno viviente → Unicornio negro alado",
+    id: "cuerno", name: "Cuerno", role: "luz", tag: "Potrito lila → Unicornio negro alado",
     color: "#f2c1ff",
     speed: 6.0, jumpPower: 14.6, maxJumps: 2, health: 86, w: 22, h: 26,
     abilities: ["gleam", "gallop", "rainbow"],

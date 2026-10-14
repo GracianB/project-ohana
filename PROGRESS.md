@@ -1,3 +1,10 @@
+## V379 · Cuerno: prrrf, auroras y evoluciones coherentes (ohana-379)
+
+K tiene preparación tímida, cola levantada, nube arcoíris desde la grupa, sonido sintetizado breve y estela curva de 3 segundos. J y melee nacen visualmente del cuerno. Las evoluciones usan el potrito lila actual, con transición gradual y cuatro relatos. U añade una aurora legible, respeta el compañero elegido y evita duplicarlo con el dúo común. Se conservan daños, cooldowns y hitboxes; pausa y muerte detienen el kit. Efectos acotados y movimiento reducido. Vista interactiva en previews/cuerno-finale.html.
+
+Validación específica: 20 combinaciones de ataque/forma, 12 escenas de evolución, K real en cinco formas, U, limpieza al cambiar de sala, móvil y movimiento reducido.
+
+
 ## V378 · Dino anatomía conectada y efectos cooperativos auténticos (ohana-378)
 
 - Las cinco formas tienen articulaciones dibujadas sobre la curva real de las piernas: rodilla centrada en Bézier, tobillo conectado a la pata y codos articulados. Los dedos conservan su apoyo original y las hitboxes no cambian.

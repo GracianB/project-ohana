@@ -10,6 +10,8 @@
 import * as CuernoFx from "./cuerno-fx.js";            // Chispín (opcional)
 import * as CuernoEvo from "./cuerno-evo-v373.js";       // Dino (opcional; no importa este módulo)
 import * as CuernoArt from "../characters/art/cuerno-v373.js"; // Stitcho (opcional)
+import { CUERNO_VISUAL_H } from "../characters/art/cuerno.js";
+import {sfx} from "../engine/audio.js";
 
 export const CUERNO_ID = "cuerno";
 const COLORS = Object.freeze(["#ff8fb8", "#ffc46b", "#fff27a", "#8dffb0", "#7ee7ff", "#a99bff", "#f2c1ff"]);
@@ -18,7 +20,7 @@ const FORM_TINT = Object.freeze(["#ffe0f4", "#f2c1ff", "#c9b6ff", "#9ad7ff", "#2
 // Definición del kit (frames a 60 Hz). warn = frames de aviso antes de golpear.
 export const CUERNO_KIT = Object.freeze({
   J: Object.freeze({ id: "lanza", name: "Lanza astral", warn: 10, active: 14, cd: 29 }),
-  K: Object.freeze({ id: "cornada", name: "Cornada", warn: 16, active: 16, cd: 96 }),
+  K: Object.freeze({ id: "cornada", name: "Prrrf arcoíris", warn: 16, active: 16, cd: 96 }),
   L: Object.freeze({ id: "estampida", name: "Estampida arcoíris", warn: 30, active: 40, cd: 336 }),
   F: Object.freeze({ id: "sueno", name: "Sueño", warn: 26, active: 20, cd: 420 }),
   M: Object.freeze({ id: "puya", name: "Puya", warn: 5, active: 8, cd: 18 }),
@@ -129,6 +131,8 @@ export function castCuerno(key, p, game, def = {}) {
 // Avanza un frame. opts.hit(game, e, dmg, o) = hitEnemy de abilities.js.
 export function updateCuerno(game, p, opts = {}) {
   if (!p?._cuernoKit) return;
+  if(game?.paused)return;
+  if(p.dead){resetCuerno(p);return;}
   const S = p._cuernoKit;
   for (const k in S.cd) if (S.cd[k] > 0) S.cd[k]--;
   const hit = opts.hit || ((g, e, d) => { e.hp -= d; return true; });
@@ -145,6 +149,7 @@ export function updateCuerno(game, p, opts = {}) {
     }
     // Fase activa
     if (a.key === "K") {
+      if(a.t===1){game.nums?.add?.(cxOf(p)-a.face*p.w,p.y-28,"¡PRRRF!", "#f7c5ef",true);sfx("rainbowPuff");}
       p.vx = a.face * (9 + a.form); a.x = cxOf(p) + a.face * (p.w || 0) * 0.4; a.y = cyOf(p);
       if (a.t % TRAIL_EVERY === 1) spawnTrail(game, p, S, a);   // solo tras el aviso
     }
@@ -188,7 +193,7 @@ function spawnTrail(game, p, S, a) {
   seg.w = 18 + a.form * 2; seg.h = 12 + a.form * 2;
   // Punto de salida detrás de la cadera (arte de Stitcho) o desplazamiento fijo.
   const orig = typeof CuernoArt.cuernoTrailOrigin === "function"
-    ? CuernoArt.cuernoTrailOrigin(cxOf(p), p.y + (p.h || 0), { form: a.form, facing: a.face, scale: 1 })
+    ? CuernoArt.cuernoTrailOrigin(cxOf(p), p.y + (p.h || 0), { form: a.form, facing: a.face, scale: CUERNO_VISUAL_H[a.form-1]/100*(p.visualScale||1) })
     : { x: cxOf(p) - a.face * ((p.w || 0) / 2 + seg.w / 2), y: cyOf(p) };
   seg.x = orig.x - seg.w / 2;
   seg.y = p.y + (p.h || 0) - seg.h;          // la banda dañina queda a ras de suelo
@@ -196,7 +201,7 @@ function spawnTrail(game, p, S, a) {
   // Gancho de efectos: API inyectada (game.cuernoFxApi) o cuerno-fx.js de Chispín.
   const api = game.cuernoFxApi || CuernoFx;
   if (game.cuernoFx && typeof api.emitCuernoTrail === "function") {
-    const payload = { x: orig.x, y: orig.y, form: seg.form, life: CUERNO_TRAIL_LIFE };
+    const payload = { x: orig.x, y: orig.y, form: seg.form, life: CUERNO_TRAIL_LIFE,face:a.face,reduced:!!game.reduceMotion };
     const stars = cuernoEvoMods(seg.form).trailStars;   // el kit no crea estrellas
     if (stars !== null) payload.stars = stars;
     api.emitCuernoTrail(game.cuernoFx, payload);
@@ -224,7 +229,9 @@ function drawTrail(ctx, S, cam) {
     if (!seg.on) continue;
     ctx.globalAlpha = Math.min(1, seg.life / 40) * 0.85;
     const bh = seg.h / 6;
-    for (let i = 0; i < 6; i++) { ctx.fillStyle = CUERNO_TRAIL_BANDS[i]; ctx.fillRect(seg.x, seg.y + i * bh, seg.w + 1, bh + 0.5); }
+    ctx.lineCap="round";ctx.lineWidth=bh+1;
+    for (let i = 0; i < 6; i++) {ctx.strokeStyle=CUERNO_TRAIL_BANDS[i];ctx.beginPath();
+      const y=seg.y+i*bh;ctx.moveTo(seg.x,y);ctx.quadraticCurveTo(seg.x+seg.w*.5,y-Math.sin(seg.x*.035)*2,seg.x+seg.w+1,y);ctx.stroke();}
   }
   ctx.restore();
 }
@@ -249,6 +256,7 @@ export function drawCuerno(ctx, p, cam = { x: 0, y: 0 }, t = 0) {
     ctx.fillStyle = col;
     ctx.globalAlpha = warn ? 0.18 + 0.35 * k : 0.45 * k + 0.15;
     if (z.kind === "circle") {
+      ctx.globalAlpha=warn?.08+.12*k:.035;
       ctx.beginPath(); ctx.arc(z.x, z.y, warn ? z.r * k : z.r, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2); ctx.stroke();
       if (a.key === "L") for (let i = 0; i < 7; i++) {          // arcos iris planos
@@ -265,8 +273,20 @@ export function drawCuerno(ctx, p, cam = { x: 0, y: 0 }, t = 0) {
     } else {
       const w = warn ? z.w * k : z.w;
       const x = a.face > 0 ? z.x : z.x + z.w - w;
+      if(!warn&&(a.key==="J"||a.key==="M")){
+        ctx.globalAlpha=.9;ctx.setLineDash([]);ctx.lineCap="round";
+        const origin=CuernoArt.cuernoHornOrigin(cxOf(p),p.y+p.h,{form:a.form,facing:a.face,scale:CUERNO_VISUAL_H[a.form-1]/100*(p.visualScale||1)});
+        for(const lance of a.lances||[{sl:0}]){
+          const tip=a.x+a.face*w,ty=a.y+lance.sl*w;
+          ctx.strokeStyle="#c8b3f3";ctx.lineWidth=a.key==="M"?5:8;ctx.beginPath();ctx.moveTo(origin.x,origin.y);ctx.quadraticCurveTo(a.x+a.face*w*.4,a.y,tip,ty);ctx.stroke();
+          ctx.strokeStyle="#fff6d3";ctx.lineWidth=2;ctx.stroke();
+          ctx.fillStyle="#fff1ad";ctx.beginPath();ctx.moveTo(tip+a.face*9,ty);ctx.lineTo(tip-a.face*4,ty-6);ctx.lineTo(tip-a.face*4,ty+6);ctx.closePath();ctx.fill();
+        }
+        ctx.restore();continue;
+      }
+      ctx.globalAlpha=warn?.05+.1*k:.04;
       ctx.fillRect(x, z.y, w, z.h);
-      ctx.globalAlpha = 0.9; ctx.strokeRect(z.x, z.y, z.w, z.h);
+      ctx.globalAlpha = warn?.6:.18; ctx.strokeRect(z.x, z.y, z.w, z.h);
       if (a.lances) for (const l of a.lances) {     // lanzas extra en abanico
         if (!l.sl) continue;
         ctx.beginPath(); ctx.moveTo(a.x, a.y);
