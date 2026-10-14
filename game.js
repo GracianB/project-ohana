@@ -2747,24 +2747,24 @@ game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.r
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
-if (game.player.id === "cuerno" && game.player.dead && cuernoDeathT(game.player) < CUERNO_DEATH_DURATION) {
+if (game.player.id === "cuerno" && game.player.dead) {
   const cp = game.player;
-  try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+  if (cuernoDeathT(cp) < CUERNO_DEATH_DURATION) try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
 } else {
 ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
 drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
 }
 } else if (game.player.dead) {
-if (game.player.id === "cuerno" && cuernoDeathT(game.player) < CUERNO_DEATH_DURATION) {
+if (game.player.id === "cuerno") {
   const cp = game.player;
-  try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+  if (cuernoDeathT(cp) < CUERNO_DEATH_DURATION) try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
 } else {
 ctx.globalAlpha = 0.45;
 drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
 }
-} else if (game.player.invuln % 4 !== 1) {
+} else if (game.player.invuln % 4 !== 1 && !(game.won && game.player.id === "cuerno" && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION)) {
 const pv = typeof portals.playerVisual === "function" ? portals.playerVisual() : null;
 if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   const px = game.player.x + game.player.w / 2 - game.cam.x;
@@ -2784,7 +2784,7 @@ if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCha
 if (!game.player.dead) drawCuernoPlay(ctx, game, t, drawCharacter, ROSTER);
 if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION) {
   const cp = game.player;
-  try { drawCuernoVictory(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y - 8 - game.cam.y, (t - game._cuernoWonT) / 60, (Number(cp.evo) || 0) + 1); } catch (_) {}
+  try { drawCuernoVictory(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, (t - game._cuernoWonT) / 60, (Number(cp.evo) || 0) + 1); } catch (_) {}
 }
 ctx.restore();
 if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {

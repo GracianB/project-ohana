@@ -22,7 +22,7 @@ export function emitCuernoTrail(fx, seg = {}) {
 export const CUERNO_ARC_LIFE = 60;
 export function cuernoDoubleJump(fx, p) {
   if (!fx || !p) return;
-  fx.arc = { x: p.x + (p.w || 0) / 2, y: p.y + (p.h || 0), life: CUERNO_ARC_LIFE, form: p.form || p.evo || 1 };
+  fx.arc = { x: p.x + (p.w || 0) / 2, y: p.y + (p.h || 0), life: CUERNO_ARC_LIFE, form: Math.max(1, Math.min(5, Number(p.form) || (Number(p.evo) || 0) + 1)) };
   emitCuernoFx(fx, "star", fx.arc.x, fx.arc.y, { form: fx.arc.form, count: 3 });
 }
 function push(fx, p) {
@@ -50,7 +50,7 @@ export function emitCuernoFx(fx, type, x, y, opts = {}) {
 export function updateCuernoFx(fx, p, t, paused = false) {
   if (paused) return;
   if (p && Math.abs(p.vx || 0) > 1.5 && t % 2 === 0) {
-    const form = p.form || p.evo || 1;
+    const form = Math.max(1, Math.min(5, Number(p.form) || (Number(p.evo) || 0) + 1));
     emitCuernoFx(fx, "trail", p.x + (p.w || 0) / 2 - (p.vx > 0 ? 8 : -8), p.y + (p.h || 0) * 0.55, { form, dir: Math.sign(p.vx) });
     if (form >= 3 && t % 12 === 0) emitCuernoFx(fx, "star", p.x + (p.w || 0) / 2, p.y, { form, count: 1, speed: 0.6 });
   }

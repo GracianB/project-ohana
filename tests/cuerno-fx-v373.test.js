@@ -34,3 +34,11 @@ test("rastro K: tope 40, confeti al acabar, sin gradientes", () => {
   for (let t = 0; t < 181; t++) updateCuernoFx(fx, null, t);
   assert.equal(fx.trail.length, 0); assert.ok(fx.list.some((q) => q.type === "spark"));
 });
+
+test("runtime evo 0..4 maps to FX forms 1..5 without falling one form behind", () => {
+ for (let evo=0;evo<5;evo++) {
+  const fx=createCuernoFx(),p={x:0,y:0,w:20,h:20,vx:3,evo};
+  cuernoDoubleJump(fx,p);assert.equal(fx.arc.form,evo+1);
+  updateCuernoFx(fx,p,0);assert.ok(fx.list.every(q=>q.form===evo+1));
+ }
+});
