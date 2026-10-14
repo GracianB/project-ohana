@@ -122,14 +122,20 @@ test('V325: Dragon supreme warns before the scaled knockback hit', () => {
   clearAbilityFx();
 });
 
-test('Dino V77: supreme conserva impacto, protege al Coloso y respeta vibración acotada', () => {
+test('Dino V377: Coloso conserva potencia y armadura tras aviso local de 18 ticks', () => {
   const enemy = makeEnemy();
-  const game = cast('dino', [enemy]);
-  assert.ok(enemy.hp < 1000);
+  const farEnemy = makeEnemy({x:1400,y:260});
+  const game = cast('dino', [enemy,farEnemy]);
+  assert.equal(enemy.hp,1000,'no hit before telegraph');
   assert.ok(game.shake >= 9 && game.shake <= 18);
-  assert.ok(Math.abs(enemy.vx) >= 14);
   assert.ok(game.player._specialTitanT >= 260);
   assert.ok(game.player._specialArmorT >= 260);
+  for(let i=0;i<17;i++){game.t++;updateAbilityFx(game);}
+  assert.equal(enemy.hp,1000,'17 frames must not deal damage');
+  game.t++;updateAbilityFx(game);
+  assert.ok(enemy.hp < 1000);
+  assert.equal(farEnemy.hp,1000,'the remote enemy is outside the announced circle');
+  assert.ok(Math.abs(enemy.vx) >= 14);
   clearAbilityFx();
 });
 
