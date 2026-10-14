@@ -5,8 +5,14 @@ export function dinoImpactPhase(life,max){
  return Object.freeze({k,radius:20+k*20,opacity:.3+.6*k});
 }
 export function drawDinoFossilForecast(ctx,f,cam,t,reduce=false){
- const q=dinoImpactPhase(f.life,f.max),x=f.x-(cam?.x||0),y=f.y-(cam?.y||0),R=q.radius;
+ const q=dinoImpactPhase(f.life,f.max),x=f.x-(cam?.x||0),y=f.y-(cam?.y||0);
+ // A true circle for the actual damage radius. The old flattened ground
+ // ellipse is retained only as decoration inside the collision boundary.
+ const R=Number.isFinite(f.r)&&f.r>0?Math.min(1000,f.r):q.radius;
  ctx.save();ctx.translate(x,y);ctx.globalAlpha=q.opacity;
+ ctx.strokeStyle="#ffdc91";ctx.lineWidth=2.8;
+ ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(0,0,R,0,TAU);ctx.stroke();
+ ctx.setLineDash([]);
  ctx.strokeStyle="#eaffad";ctx.lineWidth=2.8;
  ctx.beginPath();ctx.ellipse(0,0,R,R*.26,0,0,TAU);ctx.stroke();
  for(let i=0;i<4;i++){
