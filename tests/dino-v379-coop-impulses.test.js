@@ -45,5 +45,5 @@ test("V379: host only accepts real Dino peer and clamps values after enemy ident
  assert.match(abilities,/g\.onAbilityHit\?\.\(e,d,o\)/);
  assert.match(coop,/payload\.characterId==="dino"&&this\.remote\?\.characterId==="dino"/);
  assert.match(coop,/applyDinoImpact\(target,dinoImpact\)/);
- assert.match(coop,/target\._coopSyncId===payload\.targetSyncId/);
+ assert.match(coop,/enemy\._coopSyncId===payload\.targetSyncId/);
 });
