@@ -5,7 +5,7 @@
 import {ROSTER} from "../characters/roster.js";
 import {DEFAULT_U_PARTNERS,chooseUPartner,U_L_NAMES,bondXP,uExpRank,gainUBondHit,persistUBonds} from "./u-partners.js";
 import {duetChemistry,duetHitOptions,applyDuetChemistry,drawDuetChemistry} from "./u-duet-chemistry.js";
-import {borrowedLFootprint,borrowedLContains,guestPerformance,drawBorrowedLWarnings} from "./u-duet-direction-v315.js";
+import {borrowedLFootprint,borrowedLContains,guestPerformance,readGuestOrigin,surpriseGuestDrawer,drawBorrowedLWarnings} from "./u-duet-direction-v315.js";
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 const TAU=Math.PI*2;
 const names={
@@ -46,11 +46,11 @@ const validNumber=n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<=20000
 const center=e=>({x:e.x+(e.w||0)/2,y:e.y+(e.h||0)/2});
 
 export function readFamilyDuet(s){
- if(!s||typeof s!=="object"||!familyDuetDefinition(s)||!validNumber(s.x)||!validNumber(s.y)||
+ if(!s||typeof s!=="object"||readGuestOrigin(s)===null||!familyDuetDefinition(s)||!validNumber(s.x)||!validNumber(s.y)||
  !Number.isInteger(s.age)||s.age<0||s.age>=FAMILY_DUET_LENGTH||
  !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||
  (s.bondRank!==undefined&&(!Number.isInteger(s.bondRank)||s.bondRank<1||s.bondRank>3)))return null;
- return {...(s.ally===undefined?{}:{ally:s.ally}),...(s.bondRank===undefined?{}:{bondRank:s.bondRank}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
+ return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),...(s.ally===undefined?{}:{ally:s.ally}),...(s.bondRank===undefined?{}:{bondRank:s.bondRank}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
 }
 export function familyDuetPose(s,reduce=false){
  const data=familyDuetDefinition(s);if(!data)return null;
@@ -73,7 +73,7 @@ export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
  const bondRank=uExpRank(bondXP(p,def.ally));
  game._familyDuet={hero:p.id,...(def.ally===DEFAULT_U_PARTNERS[p.id]?{}:{ally:def.ally}),
    ...(bondRank>1?{bondRank}:{}),room:String(game.roomId||"hub"),
-   x:center(p).x,y:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),
+   ...(p.uSurprise?{surprise:true}:{}),x:center(p).x,y:p.y+p.h,originX:center(p).x,originY:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),
    facing:p.facing===-1?-1:1,power:clamp(power,1,2),
    // Entities already handled by the legacy U cannot be damaged twice by L.
    legacyTargets:new Set(Array.isArray(legacyTargets)?legacyTargets.slice(0,256):[])};
@@ -354,7 +354,7 @@ function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
  ctx.restore();
 }
 export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
- const s=readFamilyDuet(value);if(!s)return false;
+ const s=readFamilyDuet(value);if(!s)return false;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);
  const def=familyDuetDefinition(s),pose=familyDuetPose(s,reduce);
  const legendary=legendaryDuetMoment(s,reduce);
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];

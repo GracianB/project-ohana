@@ -1,13 +1,14 @@
+import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V303: a playable storm, with Michi chasing nine electrical tail wisps.
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),valid=n=>Number.isFinite(n)&&Math.abs(n)<=20000;
 export function readChispinDuet(s){
- if(!s||![s.x,s.y].every(valid)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
+ if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(valid)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
  const tails=s.tails||[],bolts=s.bolts||[];
  if(!Array.isArray(tails)||tails.length>9||tails.some(b=>!b||![b.x,b.y].every(valid)||!Number.isInteger(b.idx)||b.idx<0||b.idx>8||!Number.isFinite(b.life)||b.life<0||b.life>48)||!Array.isArray(bolts)||bolts.length>3||bolts.some(b=>!b||![b.x,b.y].every(valid)||!Number.isFinite(b.life)||b.life<0||b.life>22))return null;
- return {x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,tails:tails.map(b=>({x:b.x,y:b.y,idx:b.idx,life:b.life})),bolts:bolts.map(b=>({x:b.x,y:b.y,life:b.life}))};
+ return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,tails:tails.map(b=>({x:b.x,y:b.y,idx:b.idx,life:b.life})),bolts:bolts.map(b=>({x:b.x,y:b.y,life:b.life}))};
 }
-export function chispinDuetPose(s){const jump=s.age>=18&&s.age<36?Math.sin((s.age-18)/18*Math.PI)*48:0;return {cloudX:s.x,cloudY:s.y-145,catX:s.x-s.facing*(76+Math.min(1,s.age/18)*10),catY:s.y-jump,range:220+20*s.evo,beat:s.age<18?'arrival':s.age<36?'chase':s.age<104?'conduction':'farewell'};}
-export function startChispinDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='chispin')return false;g._chispinDuet={x:p.x+p.w/2,y:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),tails:[],bolts:[]};return true;}
+export function chispinDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:Math.min(119,s.age),hero:'chispin'},'cat',reduce);const jump=s.age>=18&&s.age<36?Math.sin((s.age-18)/18*Math.PI)*48:0;return {guest,cloudX:s.x,cloudY:s.y-145,catX:guest.x,catY:guest.y-jump,range:220+20*s.evo,beat:s.age<18?'arrival':s.age<36?'chase':s.age<104?'conduction':'farewell'};}
+export function startChispinDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='chispin')return false;g._chispinDuet={...(p.uSurprise?{surprise:true}:{}),x:p.x+p.w/2,y:p.y+p.h,originX:p.x+p.w/2,originY:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),tails:[],bolts:[]};return true;}
 export function updateChispinDuet(g,hit){
  const s=g._chispinDuet,p=g.player;if(!s){if(p)p._chispinDuetT=0;return;}
  if(!p||p.dead||p.id!=='chispin'||s.age>=120){g._chispinDuet=null;if(p)p._chispinDuetT=0;if(g._assist?.heroId==='cat')g._assist.t=0;return;}
@@ -26,7 +27,7 @@ export function updateChispinDuet(g,hit){
  p._chispinDuetAge=s.age;p._chispinDuetT=120-s.age;if(g._assist?.heroId==='cat')g._assist.t=120-s.age;s.age++;
 }
 export function drawChispinDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
- const s=readChispinDuet(value);if(!s)return;const pose=chispinDuetPose(s),x=s.x-cam.x,y=s.y-cam.y,cx=pose.cloudX-cam.x,cy=pose.cloudY-cam.y;
+ const s=readChispinDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=chispinDuetPose(s,reduce),x=s.x-cam.x,y=s.y-cam.y,cx=pose.cloudX-cam.x,cy=pose.cloudY-cam.y;
  ctx.save();ctx.globalAlpha*=s.age>108?(120-s.age)/12:1;
  // V370 U readability: 0.6 s visible charge, cloud grows, each thunder lingers ~0.4 s.
  const grow=Math.min(1,.55+s.age/40),flashOn=s.bolts.some(b=>b.life>16);
@@ -37,7 +38,7 @@ export function drawChispinDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  ctx.beginPath();for(const [dx,dy,r] of [[-26,0,20],[0,-10,27],[26,0,20],[-48,6,13],[48,6,13]]){const R=r*grow;ctx.moveTo(cx+dx*grow+R,cy+dy);ctx.arc(cx+dx*grow,cy+dy,R,0,Math.PI*2);}ctx.fill();ctx.stroke();
  if(flashOn){ctx.fillStyle='#fff29a';ctx.beginPath();ctx.ellipse(cx,cy+16,40*grow,6,0,0,Math.PI*2);ctx.fill();}
  const def=roster.find(r=>r.id==='cat'),form=def?.forms?.[s.evo];
- if(def&&form)drawActor(ctx,{...def,...form,id:'cat',evo:s.evo,x:pose.catX-form.w/2,y:pose.catY-form.h,facing:s.facing,vx:s.age<36?s.facing*2:0,vy:0,grounded:true,visualScale:.58,_duetActor:true},cam,t);
+ if(def&&form)drawActor(ctx,{...def,...form,id:'cat',evo:s.evo,x:pose.catX-form.w/2,y:pose.catY-form.h,facing:pose.guest.facing,vx:pose.guest.vx,vy:pose.guest.vy,grounded:pose.guest.grounded,_poseOverride:pose.guest.pose,visualScale:.72,_duetActor:true},cam,t);
  // Nine curved conductors grow from the helper, then release homing wisps.
  if(s.age>=24&&s.age<104)for(let i=0;i<9;i++){const a=-1.25+i*.31,rx=pose.catX-cam.x,ry=pose.catY-cam.y-22,len=26+6*s.evo;ctx.strokeStyle=['#d7b0ff','#ff9ce8','#fff29a'][i%3];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(rx,ry);ctx.quadraticCurveTo(rx-s.facing*18,ry-35,rx+Math.cos(a)*len*s.facing,ry+Math.sin(a)*len);ctx.stroke();}
  for(const b of s.tails){const bx=b.x-cam.x,by=b.y-cam.y;ctx.fillStyle=['#d7b0ff','#ff9ce8','#fff29a'][b.idx%3];ctx.beginPath();ctx.ellipse(bx,by,7,4,reduce?0:t*.08+b.idx,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();}

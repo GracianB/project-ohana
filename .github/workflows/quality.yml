@@ -75,7 +75,7 @@ jobs:
       - name: Michi V304 vector and duet audit
         run: node tests/browser/michi-v304.mjs
 
-      - name: V313 · Real U partner selector and ten custom casts
+      - name: U · Ten deterministic partner cast audits
         run: node tests/browser/u-partners-v313.mjs
 
       - name: V314 · Pair-specific bond EXP, artwork and three resonance ranks
@@ -150,6 +150,9 @@ jobs:
 
       - name: Michi redesign and living finale
         run: npm run test:browser:michi-ending
+
+      - name: Surprise U companions in action
+        run: npm run test:browser:u-companions
 
       - name: Release gate
         run: npm run release:check

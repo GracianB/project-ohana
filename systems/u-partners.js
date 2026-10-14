@@ -26,6 +26,12 @@ export function chooseUPartner(hero,requested){
  if(typeof requested==="string"&&requested!==hero&&byId.has(requested))return requested;
  return DEFAULT_U_PARTNERS[hero];
 }
+export function rollUPartner(hero,random=Math.random,previous=null){
+ const choices=optionsForUPartner(hero).filter(p=>p.id!==previous);
+ if(!choices.length)return chooseUPartner(hero);
+ const sample=Number(random());const unit=Number.isFinite(sample)?Math.max(0,Math.min(.999999,sample)):0;
+ return choices[Math.floor(unit*choices.length)].id;
+}
 export function uPartnerInfo(hero,requested){
  const ally=chooseUPartner(hero,requested);
  return ally?optionsForUPartner(hero).find(p=>p.id===ally)||null:null;

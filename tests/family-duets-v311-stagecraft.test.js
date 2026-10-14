@@ -75,6 +75,7 @@ for(const hero of HEROES){
     assert.equal(a._poseOverride,authored.pose);
     assert.equal(authored.style,GUEST_ACTING[FAMILY_DUETS[hero].ally].style);
     if(entry.stage==="arrival")assert.ok(["run","jump","glide","idle"].includes(a._poseOverride));
+    else if(entry.stage==="exchange"||entry.stage==="farewell")assert.ok(["run","glide"].includes(a._poseOverride));
     else assert.equal(a._poseOverride,entry.pose);
     assert.equal(a._duetActor,true);
     assert.ok(a.visualScale>=.62);

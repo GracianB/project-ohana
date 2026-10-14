@@ -90,11 +90,11 @@ test("V315 · Ten guests have independent enter/attack/farewell poses, all ranks
    assert.ok(a&&b);
    assert.equal(a.style,GUEST_ACTING[buddy.id].style);
    assert.equal(a.rank,rank);
-   assert.equal(a.pose,age>=106?"victory":age===42||age===66||age===90?"attack":a.pose);
+   assert.equal(a.pose,age>=106?(GUEST_ACTING[buddy.id].height>=40?"glide":"run"):age===42||age===66||age===90?"attack":a.pose);
    assert.ok(Number.isFinite(a.x)&&Number.isFinite(a.y));
-   assert.ok(a.x<=s.x&&a.x>s.x-260);
+   assert.ok(a.x<s.x+380&&a.x>s.x-260);
    assert.ok(a.visualScale>=.59&&a.visualScale<.85);
-   assert.equal(a.facing,age>=106?-1:1,"friend approaches facing the correct direction");
+   assert.equal(a.facing,1,"friend approaches facing the correct direction");
    if(age===42)poses.add(buddy.id+":"+a.gesture);
    assert.equal(b.gesture,a.gesture);
    assert.equal(guestPerformance(s,buddy.id,true).x,b.x);

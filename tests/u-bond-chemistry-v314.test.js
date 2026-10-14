@@ -193,6 +193,6 @@ test("V314: real menu, HUD, 3 ranked strengths, and save wiring are not decorati
  assert.match(gameSource,/readStoredUBonds\(localStorage,def\.id\)/);
  assert.match(gameSource,/switchUPartner\(game\.player,ally\)/);
  assert.match(gameSource,/const legacy=\(u\.uExp>0/);
- assert.match(gameSource,/drawCharacter\(ctx,\{\.\.\.def,\.\.\.form,id:selected/);
+ assert.match(gameSource,/Compañero sorpresa: se revela al activar U/);
  assert.match(abilities,/persistUBonds\(globalThis\.localStorage,p\.id,p\.uBonds\)/);
 });

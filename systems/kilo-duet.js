@@ -1,3 +1,4 @@
+import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V301: an in-world Ohana ring + Stitcho chaos attack. Rendering never damages.
 export const KILO_DUET_TICKS=120;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -10,14 +11,14 @@ export function kiloDuetPose(state){
  else if(age<90){
   const k=(age-30)/60;dx=face*Math.sin(k*Math.PI*6)*radius;
   dy=-Math.abs(Math.sin(k*Math.PI*3))*64;beat='chaos';
- }else{dx=face*36;beat='petal';}
- return {x:state.x+dx,y:state.y+dy,beat,radius,
+ }else{dx=face*(36+(age-90)/30*220);beat='petal';}
+ return {x:(state.originX??state.x)+dx,y:(state.originY??state.y)+dy,beat,radius,
   ring:age<30?0:Math.min(radius,(age-30)/24*radius),
   finale:age>=90?Math.min(1,(age-90)/12):0};
 }
 export function startKiloDuet(game,power=1){
  const p=game.player;if(!p||p.dead||p.id!=='kilo')return false;
- game._kiloDuet={x:p.x+p.w/2,y:p.y+p.h,facing:p.facing===-1?-1:1,
+ game._kiloDuet={...(p.uSurprise?{surprise:true}:{}),x:p.x+p.w/2,y:p.y+p.h,originX:p.x+p.w/2,originY:p.y+p.h,facing:p.facing===-1?-1:1,
   evo:clamp(Math.floor(Number(p.evo)||0),0,4),age:0,power:clamp(Number(power)||1,1,2),
   wave:new Set(),roll:new Set(),final:new Set(),previous:null};
  return true;
@@ -52,10 +53,10 @@ export function updateKiloDuet(game,hit){
  s.previous=ally;p._kiloDuetAge=s.age;p._kiloDuetT=120-s.age;s.age++;
 }
 export function readKiloDuet(value){
- if(!value||![value.x,value.y,value.age,value.evo,value.facing].every(Number.isFinite)||
+ if(!value||readGuestOrigin(value)===null||![value.x,value.y,value.age,value.evo,value.facing].every(Number.isFinite)||
   Math.abs(value.x)>20000||Math.abs(value.y)>20000||!Number.isInteger(value.age)||value.age<0||value.age>=120||
   !Number.isInteger(value.evo)||value.evo<0||value.evo>4||![-1,1].includes(value.facing))return null;
- return {x:value.x,y:value.y,age:value.age,evo:value.evo,facing:value.facing};
+ return {...(value.surprise===true?{surprise:true}:{}),...readGuestOrigin(value),x:value.x,y:value.y,age:value.age,evo:value.evo,facing:value.facing};
 }
 // V370: readable three-act U. 0-30 charge (Kilo strums, notes converge),
 // 30-90 hula ring + Stitcho chaos, 90-120 big bloom burst. Flat fills only.
@@ -72,7 +73,7 @@ function kiloNote(ctx,x,y,sz,col){
  ctx.beginPath();ctx.moveTo(x+sz*.48,y-sz*.1);ctx.lineTo(x+sz*.48,y-sz*1.5);ctx.lineTo(x+sz*1.05,y-sz*1.1);ctx.stroke();
 }
 export function drawKiloDuet(ctx,state,cam,t,drawActor,roster,reduce=false){
- const s=readKiloDuet(state);if(!s)return;
+ const s=readKiloDuet(state);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);
  const pose=kiloDuetPose(s),x=s.x-cam.x,y=s.y-26-cam.y,age=s.age,evo=s.evo;
  const spin=reduce?0:t*.006,solar=evo===4;
  ctx.save();

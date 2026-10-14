@@ -16,15 +16,15 @@ try{
   if(!selector||!portrait||!document.querySelector("#u-exp-fill"))throw Error("Missing real duet UI");
   const pick=(hero,ally)=>{
    dispatchEvent(new CustomEvent("ohana-select",{detail:{id:hero}}));
-   selector.value=ally;selector.dispatchEvent(new Event("change",{bubbles:true}));
-   if(selector.value!==ally)throw Error("Menu selection did not stick");
+   api.selectUPartner(hero,ally);
+   if(!selector.hidden)throw Error("Manual choice should not be visible");
   };
   pick("kilo","cat");
   const image=portrait.getContext("2d").getImageData(0,0,portrait.width,portrait.height).data;
   let realPixels=0;
   for(let i=3;i<image.length;i+=4)if(image[i]>24)realPixels++;
   if(realPixels<100)throw Error("Partner portrait lacks real character drawing: "+realPixels);
-  if(!portrait.getAttribute("aria-label").includes("Michi"))throw Error("Wrong accessible artwork");
+  if(!portrait.getAttribute("aria-label").includes("sorpresa"))throw Error("Wrong accessible artwork");
   api.start("kilo");api.setEvo(4);
   let old=api.state();if(old.uExp!==0||old.uPartner!=="cat")throw Error("Initial cat bond not zero");
   // Each real U grants 12 affinity; re-entering the same character resets only
@@ -62,7 +62,7 @@ try{
  assert.equal(result.rank,3);
  assert.ok(result.portraitPixels>100);
  assert.deepEqual(errors,[]);
- console.log("PASS · V314: real partner portrait, per-pair persistence, rank 3 and independent playable casts.");
+ console.log("PASS · V314: mystery portrait, per-pair persistence, rank 3 and independent playable casts.");
 }finally{
  await browser?.close();
  server.closeAllConnections();

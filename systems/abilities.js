@@ -1,6 +1,6 @@
 import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
-import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
+import {DEFAULT_U_PARTNERS,chooseUPartner,rollUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
 import {startChispinDuet,updateChispinDuet,drawChispinDuet,readChispinEffects} from './chispin-duet.js';
 import {updateChispinPizzaPlay,drawChispinPizzaPlay} from './chispin-pizza-play.js';
@@ -186,6 +186,7 @@ game.hitstop = Math.min(5, Math.max(game.hitstop || 0, 5));
 if (S.pull && id !== "cheese") S.pull = null;
 const flow = registerCombatAction(game, key, id);
 const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
+if(index===3&&p.uSurprise){p.uPartner=rollUPartner(p.id,game.uRandom||Math.random,p._uLastPartner);p._uLastPartner=p.uPartner;}
 const bondGain=gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
@@ -347,7 +348,7 @@ if(["cat","chispin","stitcho","kilo"].includes(p.id)&&chosen!==DEFAULT_U_PARTNER
  startFamilyDuet(game,personalPower,[],chosen);
  p.invuln=Math.max(p.invuln||0,60);
  p._duetProtectionUntil=(Number(game.t)||0)+60;
- game.nums?.add(cx(p),p.y-36,"U EXP · "+chosen.toUpperCase(),"#fff4c8",true);
+ game.nums?.add(cx(p),p.y-36,p.uSurprise?"¡OHANA SORPRESA!":"U EXP · "+chosen.toUpperCase(),"#fff4c8",true);
  return;
 }
 if(p.id==='cat'){

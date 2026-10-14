@@ -4,9 +4,8 @@ import { mountSelectScreen } from "./systems/select-screen.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
-import {optionsForUPartner,chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice,
+import {chooseUPartner,uPartnerInfo,uExpRank,loadUPartnerChoice,storeUPartnerChoice,
  readStoredUBonds,persistUBonds,combineUBonds,bondXP,switchUPartner,uBondProgress} from "./systems/u-partners.js";
-import {duetChemistry} from "./systems/u-duet-chemistry.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { drawTerrain } from "./worlds/terrain.js";
 import { drawRoomAtmosphere } from "./worlds/room-atmosphere.js";
@@ -713,6 +712,8 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
+// Browser audits can pin a pair; normal play always invokes a surprise.
+game.player.uSurprise=!e2eEnabled;
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
 game.player.uBonds=readStoredUBonds(localStorage,def.id);
 game.player.uExp=bondXP(game.player);
@@ -2929,7 +2930,7 @@ const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
@@ -3002,6 +3003,7 @@ setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, s
 setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
 const ally=uPartnerInfo(p.id,p.uPartner),bond=uBondProgress(p);
 setText(document.getElementById("u-exp-hud"),
+ p.uSurprise&&![game._familyDuet,game._michiDuet,game._chispinDuet,game._stitchoDuet,game._kiloDuet].some(s=>s&&s.age>=18&&s.age<120)?"U · ? · Compañero sorpresa":
  "U EXP " + bond.rank + "/3 · " + (ally?.name||"Familia") +
  " · L: "+(ally?.lName||"L")+" · "+bond.xp+"/200"+
  (bond.rank<3?" · faltan "+bond.remaining:" · Leyenda"));
@@ -3227,47 +3229,12 @@ const partnerSelect=document.getElementById("u-partner-select");
 const technique=document.getElementById("u-partner-technique");
 const preview=document.getElementById("u-partner-portrait");
 function renderUPartnerChoices(hero){
- if(!partnerSelect||!hero)return;
- const options=optionsForUPartner(hero);
- if(!options.length)return;
- const selected=loadUPartnerChoice(localStorage,hero);
- const bonds=readStoredUBonds(localStorage,hero);
- partnerSelect.innerHTML=options.map(o=>'<option value="'+o.id+'">'+o.name+
- ' · L: '+o.lName+' · EXP '+(bonds[o.id]||0)+'/200</option>').join("");
- partnerSelect.value=selected;
- partnerSelect.dataset.hero=hero;
- const info=uPartnerInfo(hero,selected),progress=uBondProgress({id:hero,uPartner:selected,uBonds:bonds});
-const chemistry=duetChemistry(hero,selected,progress.rank);
-if(technique)technique.textContent="U en combate · "+(chemistry?.name||"U cooperativa")+
- " · Nivel "+progress.rank+"/3 · "+progress.name+
- " · EXP "+progress.xp+"/200"+(progress.rank<3?" · faltan "+progress.remaining:" · rango máximo");
-if(preview&&info){
- const ctx=preview.getContext("2d");ctx.clearRect(0,0,preview.width,preview.height);
- const def=ROSTER.find(r=>r.id===selected),form=def?.forms?.[1]||def?.forms?.[0];
- if(form){
-  ctx.save();
-  const w=form.w||28,h=form.h||32;
-  drawCharacter(ctx,{...def,...form,id:selected,evo:1,x:preview.width*.5-w*.5,
-   y:preview.height*.78-h,w,h,facing:1,vx:0,vy:0,grounded:true,
-   melee:0,visualScale:1.10}, {x:0,y:0},0,{reduceMotion:true});
-  ctx.restore();
- }
- preview.setAttribute("aria-label","Compañero "+info.name+" presta "+info.lName+
-  ", afinidad "+progress.rank+" de 3");
-}
+ if(partnerSelect){partnerSelect.hidden=true;partnerSelect.disabled=true;partnerSelect.style.display="none";partnerSelect.setAttribute("aria-hidden","true");}
+ if(technique)technique.textContent="Pulsa U: un compañero sorpresa entra en acción y presta su poder.";
+ if(preview){const ctx=preview.getContext('2d');ctx.clearRect(0,0,preview.width,preview.height);ctx.fillStyle='#ffe69d';ctx.font='700 62px Fredoka, sans-serif';ctx.textAlign='center';ctx.fillText('?',preview.width/2,74);preview.setAttribute('aria-label','Compañero sorpresa: se revela al activar U');}
 }
 renderUPartnerChoices("kilo");
 addEventListener("ohana-select",e=>renderUPartnerChoices(e.detail?.id));
-partnerSelect?.addEventListener("change",()=>{
- const hero=partnerSelect.dataset.hero,ally=partnerSelect.value;
- if(!storeUPartnerChoice(localStorage,hero,ally))return;
- renderUPartnerChoices(hero);
- if(game.running&&game.player?.id===hero){
-  switchUPartner(game.player,ally);
-  renderAbilityBar();
-  updateHUD();
- }
-});
 const wrap = document.getElementById("chars");
 if (!wrap) return;
 const grid = document.getElementById("chars-grid") || wrap;
@@ -3484,6 +3451,8 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+ setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
+ selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
   return { worldW: game.worldW, worldH: game.worldH,
     enemies: game.enemies.filter((e) => !e.boss).map((e) => ({ kind: e.kind, x: e.x, y: e.y, w: e.w, h: e.h, hp: e.hp })),

@@ -1,12 +1,13 @@
+import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V304: nine orbiting tails catch three telegraphed meteors from Dragon.
 import {michiYomiImpact} from './michi-yomi-play.js';
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),finite=n=>Number.isFinite(n)&&Math.abs(n)<=20000;
 export function readMichiDuet(s){
- if(!s||![s.x,s.y].every(finite)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||!Array.isArray(s.stars)||s.stars.length>3||s.stars.some(b=>!b||![b.x,b.y].every(finite)||!Number.isInteger(b.age)||b.age<0||b.age>30))return null;
- return {x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,stars:s.stars.map(b=>({x:b.x,y:b.y,age:b.age}))};
+ if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(finite)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||!Array.isArray(s.stars)||s.stars.length>3||s.stars.some(b=>!b||![b.x,b.y].every(finite)||!Number.isInteger(b.age)||b.age<0||b.age>30))return null;
+ return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,stars:s.stars.map(b=>({x:b.x,y:b.y,age:b.age}))};
 }
-export function michiDuetPose(s){return {radius:84+s.evo*10,meteorRadius:42+s.evo*3,dragonX:s.x-s.facing*95,dragonY:s.y-110,beat:s.age<18?'arrival':s.age<36?'yarn':s.age<104?'catch':'farewell'};}
-export function startMichiDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='cat')return false;g._michiDuet={x:p.x+p.w/2,y:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),stars:[],tailsHit:new Set()};return true;}
+export function michiDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:Math.min(119,s.age),hero:'cat'},'dragon',reduce);return {guest,radius:84+s.evo*10,meteorRadius:42+s.evo*3,dragonX:guest.x,dragonY:guest.y,beat:s.age<18?'arrival':s.age<36?'yarn':s.age<104?'catch':'farewell'};}
+export function startMichiDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='cat')return false;g._michiDuet={...(p.uSurprise?{surprise:true}:{}),x:p.x+p.w/2,y:p.y+p.h,originX:p.x+p.w/2,originY:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),stars:[],tailsHit:new Set()};return true;}
 export function updateMichiDuet(g,hit){
  const s=g._michiDuet,p=g.player;if(!s){if(p)p._michiDuetT=0;return;}
  if(!p||p.dead||p.id!=='cat'||s.age>=120){g._michiDuet=null;if(p)p._michiDuetT=0;if(g._assist?.heroId==='dragon')g._assist.t=0;return;}
@@ -58,8 +59,8 @@ function drawMichiTail(ctx,x,y,a,len,P,age,i,face,reduce,hairs){
  ctx.restore();
 }
 export function drawMichiDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
- const s=readMichiDuet(value);if(!s)return;const pose=michiDuetPose(s),F=MICHI_U_FORM[s.evo],x=s.x-cam.x,y=s.y-25-cam.y,age=s.age;ctx.save();ctx.globalAlpha*=age>108?(120-age)/12:1;ctx.lineCap='round';
- const def=roster.find(r=>r.id==='dragon'),form=def?.forms?.[s.evo];if(def&&form)drawActor(ctx,{...def,...form,id:'dragon',evo:s.evo,x:pose.dragonX-form.w/2,y:pose.dragonY-form.h,facing:s.facing,vx:0,vy:0,grounded:false,visualScale:.56,_duetActor:true},cam,t);
+ const s=readMichiDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=michiDuetPose(s,reduce),F=MICHI_U_FORM[s.evo],x=s.x-cam.x,y=s.y-25-cam.y,age=s.age;ctx.save();ctx.globalAlpha*=age>108?(120-age)/12:1;ctx.lineCap='round';
+ const def=roster.find(r=>r.id==='dragon'),form=def?.forms?.[s.evo];if(def&&form)drawActor(ctx,{...def,...form,id:'dragon',evo:s.evo,x:pose.dragonX-form.w/2,y:pose.dragonY-form.h,facing:pose.guest.facing,vx:pose.guest.vx,vy:pose.guest.vy,grounded:false,_poseOverride:pose.guest.pose,visualScale:.70,_duetActor:true},cam,t);
  // 1) Anticipación 0-24: aro que se cierra hacia Michi + chispas convergentes + texto.
  if(age<28){const k=Math.min(1,age/24),R=pose.radius*1.6*(1-k)+18;ctx.save();ctx.globalAlpha*=age<24?.35+.65*k:(28-age)/4;ctx.strokeStyle=MICHI_U_COLORS[0];ctx.lineWidth=4+4*k;ctx.beginPath();ctx.ellipse(x,y,R,R*.6,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=MICHI_U_COLORS[2];ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.beginPath();ctx.ellipse(x,y,R+10,(R+10)*.6,reduce?0:age*.05,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
   for(let i=0;i<9;i++){const a=i*Math.PI*2/9,d=R*1.05;ctx.fillStyle=MICHI_U_COLORS[i%3];ctx.beginPath();ctx.arc(x+Math.cos(a)*d,y+Math.sin(a)*d*.6,3+2*k,0,Math.PI*2);ctx.fill();}
