@@ -1,3 +1,13 @@
+## V375 · Selector integrado con Cuerno y proporciones (ohana-375)
+
+La cuadrícula conserva los diez héroes y las alturas calibradas de V374. Flechas por filas según las columnas reales, foco sincronizado, Inicio/Fin y controles externos que mantienen sus teclas. Marca visible de selección; en móvil, ficha y controles siguen a las cinco filas sin superponerse. Ambos módulos visuales entran en el precache con sus huellas actualizadas.
+
+## V374 · Cuerno adorable y proporciones del elenco (ohana-374)
+
+Cuerno parte del canvas lila aprobado: ojos violetas con parpadeo, orejas redondeadas, hocico suave, crin continua lavanda, plumas perladas y una forma nocturna más cálida. Expresiones de curiosidad, timidez y victoria conectadas al rig; movimiento reducido conserva una pose quieta. Vista interactiva en previews/cuerno-design.html.
+
+Dino, Dragon, Yomi y Pizza usan alturas ópticas medidas por forma. Se elimina su segunda escala genérica de evolución: primera forma legible junto al resto y crecimiento progresivo hasta la última, compartido entre juego y selector. No se cambian hitboxes, movimiento ni habilidades. Nueva versión de caché para conservar la instalación activa durante la actualización.
+
 ## V373 · Cuerno integrado (ohana-373)
 
 Cinco formas, cornada con aviso y estela, lanza astral, estampida, doble salto desde forma 3, emotes, dúo Kilo, curación de evolución, intro/muerte/victoria. Se conserva el circuito común de cooldown, flow y vínculo U. El sueño de U congela IA y movimiento sin omitir contacto, daño ni eliminación. Pools y ataques se limpian al cambiar de sala. Migración offline verificada contra los bytes del commit V372 c01fcc3.

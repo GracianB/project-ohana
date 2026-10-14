@@ -1,0 +1,16 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cuerno · Unicornio lila</title><style>body{margin:0;background:#111826;color:#f8eefb;font:16px system-ui}main{max-width:1200px;margin:auto;padding:32px}h1{margin:0;font-size:36px}p{color:#c6b7d2}canvas{width:100%;height:auto;border:1px solid #67567d;border-radius:24px;background:#182031}a{color:#ebc3ff}</style><main><h1>Cuerno · Unicornio lila</h1><p>El dibujo del juego: bebé, poni y familia. Crin lila, cuello curvo, orejas y sonrisa.</p><canvas width="1200" height="760" id="preview" aria-label="Cuerno bebé y poni junto a los diez personajes"></canvas><p><a href="../gallery.html?id=cuerno">Ver todas las evoluciones y poses →</a> · <a href="../index.html">Volver al juego →</a></p></main><script type="module">
+import {drawCuernoV373} from '../characters/art/cuerno-v373.js';
+import {drawCharacter} from '../characters/draw.js';
+import {ROSTER} from '../characters/roster.js';
+const c=document.querySelector('canvas'),ctx=c.getContext('2d');
+ctx.fillStyle='#182031';ctx.fillRect(0,0,1200,760);
+for(const [i,name] of ['Cuernín · Semilla','Destello · Naciente','Potro Iris'].entries()){
+const x=200+i*400;ctx.fillStyle='#242b40';ctx.beginPath();ctx.roundRect(i*400+20,24,360,400,24);ctx.fill();
+ctx.fillStyle='#e9c4ff';ctx.font='600 23px system-ui';ctx.textAlign='center';ctx.fillText(name,x,66);
+ctx.fillStyle='#373046';ctx.beginPath();ctx.ellipse(x,360,115,13,0,0,Math.PI*2);ctx.fill();
+drawCuernoV373(ctx,x-25,350,{form:i+1,t:20,scale:i===0?5:i===1?3.7:3.1});
+}
+ctx.textAlign='left';ctx.fillStyle='#ebdcf5';ctx.font='600 26px system-ui';ctx.fillText('La familia · misma escala que en el juego',32,482);
+ROSTER.forEach((r,i)=>{const f=r.forms[0],x=60+i*120,y=650;ctx.fillStyle='#272d3f';ctx.beginPath();ctx.ellipse(x,y+4,42,8,0,0,Math.PI*2);ctx.fill();const p={id:r.id,evo:0,color:f.color,w:f.w,h:f.h,x:x-f.w/2,y:y-f.h,vx:0,vy:0,grounded:true,facing:1,melee:0,invuln:0,speed:f.speed};drawCharacter(ctx,p,{x:0,y:0},40);ctx.fillStyle=r.id==='cuerno'?'#ecc4ff':'#d4ccdc';ctx.font='600 17px system-ui';ctx.textAlign='center';ctx.fillText(r.name,x,697);});
+window.previewReady=true;
+</script><footer style="max-width:1200px;margin:0 auto;padding:0 32px 32px"><a href="cuerno-design.html">Comparar las cinco formas y probar sus expresiones →</a></footer></html>

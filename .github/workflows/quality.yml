@@ -142,6 +142,9 @@ jobs:
       - name: Visual regression matrix
         run: npm run test:visual
 
+      - name: Character Canvas proportions and Cuerno design
+        run: npm run test:browser:characters
+
       - name: Release gate
         run: npm run release:check
 
