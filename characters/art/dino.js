@@ -326,9 +326,9 @@ export function dinoJointAnatomy(len=12,angle=0,bend=3,width=12,brace=0) {
 
 // Bounded tidal breathing through neck, ribs and belly. Does not move feet,
 // mutate hitboxes or rely on per-frame allocations of gradients.
-export function dinoBreathMechanics(pose={}) {
+export function dinoBreathMechanics(pose={},state=pose.state) {
   const form=clamp(Math.round(Number.isFinite(pose.form)?pose.form:0),0,4);
-  const active=pose.state==="idle"||pose.state==="victory"||pose.state==="cast";
+  const active=state==="idle"||state==="victory"||state==="cast";
   const input=Number.isFinite(pose.breath)?clamp(pose.breath,-1,1):0;
   const tide=pose.reduceMotion?0:input*(active?1:.26);
   const profile=[1.45,1.26,1.12,.95,.86][form];
@@ -826,7 +826,7 @@ function draw(ctx, pose, R) {
     return;
   }
 
-  const breath=dinoBreathMechanics(pose);
+  const breath=dinoBreathMechanics(pose,st);
   const upper = () => {
     ctx.translate(0, hipY);
     ctx.rotate(lean);
