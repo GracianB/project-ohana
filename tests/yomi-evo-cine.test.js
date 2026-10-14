@@ -1,3 +1,4 @@
+import {ROSTER} from '../characters/roster.js';
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -13,7 +14,7 @@ test("yomi evo-cine: dibuja todas las fases y formas sin gradientes ni GOD", () 
     assert.ok(!calls.text.some((s) => /god/i.test(s)));
   }
   const { c, calls } = mock(); drawEvoCine(c, 960, 540, 3.6, 4, 5);
-  assert.ok(calls.text.some((s) => s.includes("Yomi Umbral")));
+  assert.ok(calls.text.some((s) => s.includes(ROSTER.find(r=>r.id==='yomi').forms[4].name)));
 });
 test("yomi evo-cine: sin gradientes ni Math.random en el código", () => {
   const src = readFileSync(new URL("../systems/evo-cine/yomi.js", import.meta.url), "utf8");
