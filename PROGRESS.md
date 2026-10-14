@@ -1,6 +1,6 @@
 ## V381 · Michi y final animado (ohana-381)
 
-El reencuentro permanece animado después de la cinemática; los controles se integran debajo de la familia, sin panel central ni título duplicado. Resize permanece activo hasta cerrar. Michi recibe cinco siluetas suaves, ojos expresivos, patas cortas con dedos y colas elevadas detrás de la cadera; nube flotante y alas solo en Eclipse. Michi, Chispín, Pizza y Yomi usan el arte real en sus evoluciones, conservando sus efectos narrativos. Pruebas de poses, 48 escenas de evolución, animación final, móvil y cierre.
+El reencuentro permanece animado después de la cinemática; los controles se integran debajo de la familia, sin panel central ni título duplicado. Resize permanece activo hasta cerrar. Michi recibe cinco siluetas suaves, ojos expresivos, patas cortas con dedos y colas elevadas detrás de la cadera; nube flotante y alas solo en Eclipse. Michi, Chispín, Pizza y Yomi usan el arte real en sus evoluciones, conservando sus efectos narrativos. La tercera forma se distingue como nube blanca flotante y silueta amplia. Música original con motivos reconocibles, frases de 16 compases con respuestas y pausas, timbres suaves, percusión equilibrada y variación de capas. Pruebas de poses, 48 escenas de evolución, animación final, móvil y cierre.
 
 ## V380 · Dino: avisos precisos, accesibilidad justa y cooperativo fiel (ohana-380)
 
