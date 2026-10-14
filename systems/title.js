@@ -15,6 +15,7 @@ import { playMusic } from "../engine/music.js";
 import { motionProfile } from "../characters/rig.js";
 import { difficulty } from "../characters/signature.js";
 import { masteryOf } from "./hero-mastery.js";
+import { rosterIndex } from "./roster-navigation.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -422,11 +423,17 @@ if (focused?.classList.contains("char-card") && focused.getAttribute("aria-hidde
 syncDots();
 }
 
-function stepRoster(dir) {
-const ids = [...document.querySelectorAll("#chars-grid .char-card")].map((el) => el.dataset.id);
+function stepRoster(key) {
+const cards = [...document.querySelectorAll("#chars-grid .char-card")];
+const ids = cards.map((el) => el.dataset.id);
 if (!ids.length) return;
 const i = Math.max(0, ids.indexOf(selectedId));
-mark(ids[(i + dir + ids.length) % ids.length]);
+const grid = document.getElementById("chars-grid");
+const columns = getComputedStyle(grid).gridTemplateColumns.split(/\s+/).length;
+const next = rosterIndex(i, key, ids.length, columns);
+mark(ids[next]);
+cards[next].focus({ preventScroll: true });
+cards[next].scrollIntoView({ block: "nearest", inline: "nearest" });
 sfx("ui");
 }
 
@@ -571,10 +578,15 @@ function refreshContinue() {
 refreshContinue();
 addEventListener("keydown", (e) => {
   if (document.body.classList.contains("playing")) return;
-  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)) {
     if (!document.body.classList.contains("intro-complete")) return;
+    if (document.querySelector("#start-intro.show, [data-dialog].open, [data-dialog].show")) return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const target = e.target;
+    if (target?.closest("input, select, textarea, [contenteditable], [role='slider']")) return;
+    if (target?.closest("button, a") && !target.closest("#chars-grid")) return;
     e.preventDefault();
-    stepRoster(e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1);
+    stepRoster(e.key);
     return;
   }
   if (e.key !== "Enter" || e.repeat || document.activeElement?.closest("button, a")) return;

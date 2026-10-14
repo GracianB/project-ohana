@@ -89,6 +89,12 @@
   background:linear-gradient(165deg,rgba(32,46,56,.88),rgba(7,25,35,.96))!important;
   box-shadow:0 0 0 2px rgba(255,255,255,.12),0 10px 28px rgba(1,6,13,.30)!important;
 }
+#char-select[data-selector-mode="family-grid"] #chars .char-card.selected::after{
+  content:"✓"!important;position:absolute!important;top:6px!important;right:6px!important;
+  bottom:auto!important;left:auto!important;width:22px!important;height:22px!important;
+  display:grid!important;place-items:center;background:#fff4ce!important;color:#10242b!important;
+  border-radius:50%;font:900 14px system-ui!important;transform:none!important;
+}
 #char-select[data-selector-mode="family-grid"] #chars .char-card:hover,
 #char-select[data-selector-mode="family-grid"] #chars .char-card:focus-visible{
   border-color:var(--tint,#ffe09b)!important;
@@ -198,6 +204,15 @@
 @media(prefers-reduced-motion:reduce){
   #char-select[data-selector-mode="family-grid"] #chars .char-card{transition:none!important;}
 }
+
+/* Keep the roster in document flow on phones: the dossier follows all five rows. */
+@media(max-width:620px){
+  #char-select[data-selector-mode="family-grid"] .title-shell{display:flex!important;flex-direction:column!important;gap:16px!important;}
+  #char-select[data-selector-mode="family-grid"] .hero-stage{flex:none!important;grid-template-rows:max-content max-content!important;}
+  #char-select[data-selector-mode="family-grid"] #chars{min-height:max-content!important;}
+  #char-select[data-selector-mode="family-grid"] .title-controls{flex:none!important;}
+}
+#char-select[data-selector-mode="family-grid"] #chars .ss-stats{display:none!important;}
 
 /* V100 Especial: in the opening, OHANA is a centered family title,
    never a caption parked in the lower-left corner. */
