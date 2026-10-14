@@ -247,7 +247,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "6895b7e2caf621c2c54a8c96afe18ecbe7118fb0",
+  "index.html": "f4761952f5cb4404f6956ee1d5224a3e98ecedb1",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
