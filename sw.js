@@ -352,7 +352,7 @@ const PRECACHE_REVISIONS = {
   "systems/cuerno-kit.js": "500bde237d997dbbbc71469f2a2f539c90f2d9bf",
   "systems/cuerno-play-v373.js": "0d6408ddad5376140c2bc10a1ff4d0f54c64ce3b",
   "systems/cuerno-evo-v373.js": "27e336a70c2cbc022d918596ec356c0fc7e44bf5",
-  "characters/art/cuerno-v373.js": "ef78ed7da2f8b221b2b027dee4bf09a4ceb8c6dc",
+  "characters/art/cuerno-v373.js": "b8275adb63feff8d61dc4d65ab6110bc11afd1fa",
   "systems/cuerno-v92-resonance.js": "20f145a444f37b11a55d3437486a4dcedae3d14c",
   "systems/cuerno-v93-metamorphosis.js": "e57d82a29cb96e5f194cfa95c6074ac503426851",
   "systems/cuerno-v91-illusions.js": "6d54567cb5c51c224e84ab1651d284ef505981de",

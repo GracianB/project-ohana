@@ -16,8 +16,8 @@ const IRIS = ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa", "#aeb9fb", 
 export const CUERNO_V373_HEIGHT = Object.freeze([47, 63, 77, 95, 117]);
 const F = [
   // coat, dark (contorno de color), mane colors, head/body proportions, legs, horn, wings
-  { coat: "#fff3fa", shade: "#f2d3e8", ink: "#6b4a7a", mane: [IRIS[0], IRIS[6]], head: 1.45, body: .8, leg: .55, horn: .5, wings: 0, tail: .6, sprout: true },
-  { coat: "#fde9ff", shade: "#e9c6f2", ink: "#634477", mane: [IRIS[0], IRIS[2], IRIS[6]], head: 1.15, body: .9, leg: .8, horn: .85, wings: 0, tail: .8 },
+  { coat: "#fff3fa", shade: "#f2d3e8", ink: "#6b4a7a", mane: ["#b786dd", "#e4c4ff", "#a77ad3"], head: 1.45, body: .8, leg: .55, horn: .5, wings: 0, tail: .6, sprout: true },
+  { coat: "#fde9ff", shade: "#e9c6f2", ink: "#634477", mane: ["#c29bea", "#f0d9ff", "#ad83da"], head: 1.15, body: .9, leg: .8, horn: .85, wings: 0, tail: .8 },
   { coat: "#f6f0ff", shade: "#d9cdf5", ink: "#4f3e78", mane: IRIS, head: 1, body: 1, leg: 1, horn: 1.15, wings: 0, tail: 1.1 },
   { coat: "#eef8ff", shade: "#c9dcf2", ink: "#344a74", mane: IRIS, head: .95, body: 1.05, leg: 1.08, horn: 1.3, wings: 1, tail: 1.2, stars: true },
   { coat: "#24203c", shade: "#15122a", ink: "#0a0816", mane: ["#a5e5fa", "#aeb9fb", "#e5b9f4", "#fff1ad"], head: .92, body: 1.1, leg: 1.12, horn: 1.45, wings: 1.35, tail: 1.35, stars: true, night: true },
@@ -45,6 +45,8 @@ function star(ctx, x, y, r, col) {
   ctx.closePath(); ctx.fillStyle = col; ctx.fill();
 }
 function leg(ctx, P, hx, hy, len, swing, w, far, lw) {
+  const stance = far ? -2.4 * (len / 22) : 0;
+  hx += stance;
   const kx = hx + Math.sin(swing) * len * .45, ky = hy + Math.cos(swing) * len * .5;
   const fx = kx + Math.sin(swing * .6) * len * .25, fy = hy + len * .98 - Math.max(0, Math.sin(swing)) * len * .15;
   ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -127,7 +129,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R) {
   // --- cuello + cabeza
   const neckX = bodyRx * .75, neckY = bodyY - bodyRy * .4;
   const headR = 9 * P.head * u, hx = neckX + headR * .55 + (att ? 3 * u : 0), hy = neckY - headR * (f === 0 ? .9 : 1.3) + (att ? 3 * u : 0);
-  ctx.beginPath(); ctx.moveTo(neckX - 5 * u, neckY + 3 * u); ctx.lineTo(hx - headR * .4, hy); ctx.lineTo(hx + headR * .2, hy + headR * .3); ctx.lineTo(neckX + 5 * u, neckY + 2 * u); ctx.closePath();
+  ctx.beginPath(); ctx.moveTo(neckX - 5 * u, neckY + 3 * u); ctx.quadraticCurveTo(neckX - 6 * u, hy + headR * .3, hx - headR * .4, hy); ctx.quadraticCurveTo(hx + headR * .1, hy - headR * .12, hx + headR * .2, hy + headR * .3); ctx.quadraticCurveTo(neckX + 7 * u, neckY - 2 * u, neckX + 5 * u, neckY + 2 * u); ctx.closePath();
   ctx.fillStyle = P.coat; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = P.ink; ctx.stroke();
   // crin arcoíris en mechones sobre el cuello
   for (let i = 0; i < P.mane.length; i++) {
@@ -143,6 +145,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R) {
   // oreja
   ctx.beginPath(); ctx.moveTo(hx - headR * .3, hy - headR * .6); ctx.lineTo(hx - headR * .55, hy - headR * 1.25); ctx.lineTo(hx + headR * .05, hy - headR * .75); ctx.closePath();
   ctx.fillStyle = P.coat; ctx.fill(); ctx.lineWidth = lw * .9; ctx.strokeStyle = P.ink; ctx.stroke();
+  ell(ctx, hx - headR * .25, hy - headR * .85, headR * .12, headR * .23, -.35, P.night ? "#aa89d0" : "#d6a5ec", null, 0);
   // flequillo arcoíris sobre la frente
   for (let i = 0; i < Math.min(3, P.mane.length); i++) ell(ctx, hx - headR * (.15 - i * .18), hy - headR * .62, headR * .2, headR * .34, .5 + i * .2, P.mane[i], P.ink, lw * .6);
   // ojo grande con brillo (cerrado al recibir golpe; X al morir)
@@ -156,6 +159,12 @@ function drawForm(ctx, f, anim, t, atk = 0, R) {
     if (P.night) { ctx.strokeStyle = "#fff1ad"; ctx.lineWidth = lw * .8; ctx.beginPath(); ctx.moveTo(ex - er * 1.2, ey - er * 1.5); ctx.lineTo(ex + er * 1.1, ey - er * 1.1); ctx.stroke(); }
   }
   if (f < 3) { ctx.fillStyle = "#ffb8d8"; ctx.globalAlpha *= .7; ctx.beginPath(); ctx.ellipse(hx + headR * .1, hy + headR * .45, headR * .2, headR * .12, 0, 0, TAU); ctx.fill(); ctx.globalAlpha /= .7; }
+  // Small upturned smile remains readable beneath the muzzle.
+  if (!dead && !hit) {
+    ctx.strokeStyle = P.ink; ctx.lineWidth = lw * .65; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(hx + headR * .5, hy + headR * .53);
+    ctx.quadraticCurveTo(hx + headR * .78, hy + headR * .7, hx + headR, hy + headR * .48); ctx.stroke();
+  }
   // cuerno en espiral (embiste al atacar)
   const hl = 11 * P.horn * u * (f === 0 ? .6 : 1), ha = -1.05 + (att ? .45 * Math.sin(clamp(atk, 0, 1) * Math.PI) : 0);
   const bx = hx + headR * .15, by = hy - headR * .78, tx = bx + Math.cos(ha) * hl, ty = by + Math.sin(ha) * hl, nx = -Math.sin(ha) * 2.4 * u * P.horn, ny = Math.cos(ha) * 2.4 * u * P.horn;
