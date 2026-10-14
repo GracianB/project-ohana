@@ -29,8 +29,12 @@ export function drawDinoQuake(ctx,f,cam,t,p){
   ctx.strokeText("¡TERREMOTO!",x,y-96);ctx.fillText("¡TERREMOTO!",x,y-96);
  }
  const pk=elapsed<DINO_QUAKE_CHARGE?elapsed/DINO_QUAKE_CHARGE:1-cap(f.nextPulse/34,0,1);
- ctx.setLineDash([12,8]);ctx.globalAlpha=(.25+.4*pk)*fade;ctx.strokeStyle="#ffcf6a";ctx.lineWidth=2.5;
- ctx.beginPath();ctx.ellipse(x,gy,range,range*.2,0,0,TAU);ctx.stroke();ctx.setLineDash([]);
+ // The pulse checks Euclidean distance from (f.x,f.y); its tell must
+ // use that same centre and radius, not only an oblate ground ellipse.
+ ctx.setLineDash([12,8]);ctx.globalAlpha=(.35+.38*pk)*fade;ctx.strokeStyle="#ffcf6a";ctx.lineWidth=2.5;
+ ctx.beginPath();ctx.arc(x,y,range,0,TAU);ctx.stroke();ctx.setLineDash([]);
+ ctx.globalAlpha=(.16+.2*pk)*fade;
+ ctx.beginPath();ctx.ellipse(x,gy,range,range*.2,0,0,TAU);ctx.stroke();
  ctx.globalAlpha=.14*pk*fade;ctx.fillStyle="#c6fa87";
  ctx.beginPath();ctx.ellipse(x,gy,range*pk,range*.2*pk,0,0,TAU);ctx.fill();
  for(const w of f.waves||[]){const k=w.t/30;if(k>=1)continue;const wx=w.x-ox,wy=w.y-oy;
