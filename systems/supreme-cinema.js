@@ -7,6 +7,7 @@ drawSpark, drawStar, FONT_BODY, FONT_DISPLAY
 import { ROSTER } from "../characters/roster.js";
 import { SUPREME_STORYBOARDS } from "./supreme-storyboards.js";
 import { cuernoGrandStage } from "./supreme-storyboards.js";
+import {drawCuernoDream} from "../characters/cuerno-stagecraft.js";
 import { dinoColossusStage, drawDinoColossusFilm } from "./dino-ultimate-film.js";
 import { duckMusic } from "../engine/music.js";
 import { sfx } from "../engine/audio.js";
@@ -439,6 +440,7 @@ if(id==="kilo"){
   }
 }else if(id==="cuerno"){
   // V68 four-beat grand spectacle: whisper, iris, sleeping stars, soft dawn.
+  drawCuernoDream(ctx,cx,cy+target*.08,target*.62,k,{form:5,reduced:reduceMotion});
   const beat=cuernoGrandStage(k),q=easeInOut(beat.value);
   const rainbow=["#ff9fb5","#ffc89b","#ffe9b5","#b3ebc7","#9ee5ee","#b9c6ff","#e6c6f4"];
   const hornY=cy-target*.45;

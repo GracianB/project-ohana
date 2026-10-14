@@ -1,5 +1,6 @@
 // V373 · Efectos de Cuerno: estela arcoíris, estrellas, notas ♪ y destellos.
 // Pool propio con tope fijo, sin gradientes ni Math.random. Formas 1..5 escalan intensidad.
+import { drawRainbowPuff } from "../characters/cuerno-stagecraft.js";
 export const CUERNO_FX_MAX = 160;
 const RAINBOW = ["#ff6b8a", "#ffb04a", "#ffe45a", "#6ee07a", "#5ac8ff", "#a88cff"];
 const h01 = (i) => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
@@ -14,6 +15,7 @@ export function emitCuernoTrail(fx, seg = {}) {
   const s = { x: seg.x || 0, y: seg.y || 0, w: seg.w ?? 14 + form * 2, life, max: life, form, born: fx.seed, stars: seg.stars ?? form >= 2 };
   if (fx.trail.length >= CUERNO_TRAIL_MAX) fx.trail.shift();
   fx.trail.push(s);
+  if(!seg.reduced)emitCuernoFx(fx,"puff",s.x,s.y,{form,count:1,dir:seg.face||1,size:4+form});
   if (fx.seed % 2 === 0) emitCuernoFx(fx, "spark", s.x, s.y - 6, { form, count: 2, speed: 0.8, size: 2.4 });
   else fx.seed++;
   return s;
@@ -38,10 +40,10 @@ export function emitCuernoFx(fx, type, x, y, opts = {}) {
     const a = r * Math.PI * 2, sp = (opts.speed ?? 1.2) * (0.5 + r2);
     push(fx, {
       type, x, y, form,
-      vx: type === "trail" ? -(opts.dir || 1) * 0.3 : Math.cos(a) * sp,
-      vy: type === "note" ? -0.8 - r2 * 0.5 : type === "trail" ? 0 : Math.sin(a) * sp - 0.4,
+      vx: type === "puff" ? -(opts.dir||1)*(1+r2) : type === "trail" ? -(opts.dir || 1) * 0.3 : Math.cos(a) * sp,
+      vy: type === "puff" ? -.5-r2*.5 : type === "note" ? -0.8 - r2 * 0.5 : type === "trail" ? 0 : Math.sin(a) * sp - 0.4,
       life: type === "trail" ? 26 : type === "note" ? 60 : 36, max: 0,
-      color: RAINBOW[(fx.seed + i) % RAINBOW.length], size: (opts.size ?? 3) * (1 + (form - 1) * 0.12),
+      color: RAINBOW[(fx.seed + i) % RAINBOW.length], size: (opts.size ?? 3) * (1 + (form - 1) * 0.12),dir:opts.dir||1,
     });
     fx.list[fx.list.length - 1].max = fx.list[fx.list.length - 1].life;
   }
@@ -104,7 +106,8 @@ export function drawCuernoFx(ctx, fx) {
     if (q.type === "trail") {
       const band = q.size * 0.9;
       for (let b = 0; b < (q.form >= 2 ? 6 : 3); b++) { ctx.fillStyle = RAINBOW[b * (q.form >= 2 ? 1 : 2)]; ctx.fillRect(q.x - q.size * 2, q.y + (b - 2.5) * band, q.size * 4 * k, band); }
-    } else if (q.type === "star") star(ctx, q.x, q.y, q.size * 1.6 * (0.6 + k * 0.4));
+    } else if(q.type==="puff")drawRainbowPuff(ctx,q.x,q.y,1-k,{form:q.form,facing:q.dir});
+    else if (q.type === "star") star(ctx, q.x, q.y, q.size * 1.6 * (0.6 + k * 0.4));
     else if (q.type === "note") note(ctx, q.x, q.y, q.size);
     else { ctx.fillRect(q.x - q.size / 2, q.y - q.size / 2, q.size * k + 1, q.size * k + 1); }
   }

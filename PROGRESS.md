@@ -1,9 +1,16 @@
-## V379 · Dino: avisos precisos, accesibilidad justa y cooperativo fiel (ohana-379)
+## V380 · Dino: avisos precisos, accesibilidad justa y cooperativo fiel (ohana-380)
 
 - Movimiento reducido cambia únicamente el aspecto: las cinco evoluciones generan exactamente el mismo número de fósiles (hasta ocho), con la misma cadencia y daños. Se atenúan sacudidas y partículas.
 - Los marcadores de fósiles muestran el radio de explosión real, sobreviven a caídas de más de 48 fotogramas y se retiran al impactar su proyectil asociado. Las ondas del Coloso dibujan su área circular de daño sin eliminar el anillo decorativo de suelo. El invitado cooperativo recibe esas mismas circunferencias exactas en un paquete visual inerte.
 - Los golpes de Dino transportan impulso horizontal, vertical y aturdimiento numéricos y limitados, conservando un solo árbitro de daño en el anfitrión y un máximo de 6 fotogramas de aturdimiento en jefes. Los demás héroes no reciben cambios de física.
 - Se añaden pruebas Node para paridad normal/reducido, marcador prolongado, radios Canvas, serialización de impulsos, valores inválidos, límites de jefes, bloqueo de suplantación de héroe y autoría del daño. Requiere navegador, cooperativo, visual, migración offline y Release Gate verdes antes de fusión. No usar Netlify.
+
+## V379 · Cuerno: prrrf, auroras y evoluciones coherentes (ohana-379)
+
+K tiene preparación tímida, cola levantada, nube arcoíris desde la grupa, sonido sintetizado breve y estela curva de 3 segundos. J y melee nacen visualmente del cuerno. Las evoluciones usan el potrito lila actual, con transición gradual y cuatro relatos. U añade una aurora legible, respeta el compañero elegido y evita duplicarlo con el dúo común. Se conservan daños, cooldowns y hitboxes; pausa y muerte detienen el kit. Efectos acotados y movimiento reducido. Vista interactiva en previews/cuerno-finale.html.
+
+Validación específica: 20 combinaciones de ataque/forma, 12 escenas de evolución, K real en cinco formas, U, limpieza al cambiar de sala, móvil y movimiento reducido.
+
 
 ## V378 · Dino anatomía conectada y efectos cooperativos auténticos (ohana-378)
 

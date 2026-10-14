@@ -115,6 +115,7 @@ const BANK = {
   jump: () => { tone(300, 520, 0.12, 0.07, "square"); tone(600, 900, 0.08, 0.02, "sine"); },
   land: () => noise(0.08, 0.08, 0, { type: "lowpass", f0: 600 }),
   dash: () => { noise(0.18, 0.1, 0, { f0: 800, f1: 3000, q: 0.7 }); tone(220, 520, 0.1, 0.03, "sawtooth"); },
+  rainbowPuff: () => {tone(180,68,.18,.035,"triangle",0,{vibrato:22});tone(100,45,.09,.022,"sawtooth",.035);tone(820,1200,.09,.018,"sine",.14);},
   // combate
   slash: () => noise(0.12, 0.12, 0, { f0: 3000, f1: 900, q: 1.2 }),
   hit: () => { tone(200, 70, 0.14, 0.1, "square"); noise(0.08, 0.1, 0, { type: "lowpass", f0: 1500 }); },

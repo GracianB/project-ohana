@@ -1,0 +1,43 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cuerno · Sueños, alas y un pequeño prrrf</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#171525;color:#fbf0ff;font:15px/1.5 system-ui}main{max-width:1180px;margin:auto;padding:30px 24px}h1{font-size:clamp(28px,4vw,44px);line-height:1.1;letter-spacing:-.04em;margin:8px 0 14px}h2{font-size:20px;margin:0 0 6px}p{color:#c5b7d4;margin:4px 0 18px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.2em;color:#d6b2ef}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}select,button{font:inherit;color:#f6e8ff;background:#302640;border:1px solid #826995;border-radius:10px;padding:9px 13px;cursor:pointer}label{font-size:13px}section{padding:20px;margin-top:22px;border:1px solid #50415f;border-radius:24px;background:#211d31}canvas{width:100%;height:auto;border-radius:16px;display:block;background:#191c32}input[type=range]{flex:1;min-width:140px;accent-color:#dca8ee}a{color:#e1b7f6}footer{margin:24px 0;font-size:13px}:focus-visible{outline:3px solid #f3d0ff;outline-offset:3px}@media(max-width:600px){main{padding:20px 12px}section{padding:14px}}</style>
+<main><span class="eyebrow">Cuerno · El capítulo completo</span><h1>Sueños, alas y un pequeño prrrf.</h1><p>Un potrito adorable con un sentido del humor muy particular. Su magia nace del cuerno… y a veces sale por detrás.</p>
+<section><h2>Una nube de travesuras.</h2><p>El kit real del juego: preparación, impulso y estela. Las nubes, las lanzas y el actor se dibujan con los mismos módulos de Ohana.</p>
+<div class="controls"><label for="form">Forma</label><select id="form"></select><label for="attack">Poder</label><select id="attack"><option value="K">K · Prrrf arcoíris</option><option value="J">J · Lanza astral</option><option value="L">L · Estampida arcoíris</option><option value="U">U · Sueño de auroras</option></select><button id="replay">Repetir</button><button id="pause" aria-pressed="false">Pausar</button><label><input type="checkbox" id="sound"> Sonido</label></div>
+<canvas id="battle" width="1080" height="360" role="img" aria-label="Cuerno muestra sus ataques y su pedorreta arcoíris"></canvas></section>
+<section><h2>Crecer también es soñar.</h2><p>Cuatro transformaciones: el mismo potrito lila, una crin que descubre colores, alas perladas y una última noche llena de estrellas.</p>
+<div class="controls"><label for="evolution">Evolución</label><select id="evolution"><option value="1">Semilla → Destello</option><option value="2">Destello → Potro Iris</option><option value="3">Potro Iris → Estelar</option><option value="4">Estelar → Unicornio Negro</option></select><label for="time">Momento</label><input id="time" type="range" min="0" max="4" step="0.02" value="3.3"><output id="seconds">3,3 s</output></div>
+<canvas id="cinema" width="1080" height="470" role="img" aria-label="Cinemática de evolución del nuevo Cuerno"></canvas></section>
+<footer><a href="../index.html">Volver a Ohana →</a> · <a href="cuerno-design.html">Las cinco formas →</a></footer></main>
+<script type="module">
+import {ROSTER} from '../characters/roster.js';import {drawCharacter} from '../characters/draw.js';
+import {castCuerno,updateCuerno,drawCuerno,resetCuerno} from '../systems/cuerno-kit.js';
+import {createCuernoFx,updateCuernoFx,drawCuernoFx} from '../systems/cuerno-fx.js';
+import {startCuernoDuo,updateCuernoPlay,drawCuernoPlay,resetCuernoPlay} from '../systems/cuerno-play-v373.js';
+import {drawEvoCine} from '../systems/evo-cine/cuerno.js';
+import {drawCuernoDream} from '../characters/cuerno-stagecraft.js';import {setMuted} from '../engine/audio.js';
+const def=ROSTER.find(r=>r.id==='cuerno'),form=document.getElementById('form'),attack=document.getElementById('attack'),pause=document.getElementById('pause'),sound=document.getElementById('sound');
+def.evoNames.forEach((name,i)=>form.add(new Option(name,String(i))));form.value='2';
+const c=document.getElementById('battle'),ctx=c.getContext('2d'),cinema=document.getElementById('cinema'),cc=cinema.getContext('2d'),time=document.getElementById('time'),evolution=document.getElementById('evolution');
+const motion=matchMedia('(prefers-reduced-motion: reduce)');let game,tick=0,last=0,paused=motion.matches,message='',messageAge=0;
+function reset(){resetCuernoPlay();const evo=Number(form.value),f=def.forms[evo];tick=0;message='';messageAge=0;
+const p={...f,id:'cuerno',evo,color:f.color,x:260,y:280-f.h,w:f.w,h:f.h,health:f.hp,maxHealth:f.hp,facing:1,grounded:true,vx:0,vy:0,melee:0,invuln:0,uPartner:'cat',_introForceCanvas:true};
+game={player:p,cam:{x:0,y:0},enemies:[{x:510,y:248,w:28,h:32,hp:999},{x:730,y:248,w:28,h:32,hp:999}],cuernoFx:createCuernoFx(),reduceMotion:motion.matches,nums:{add(x,y,label){message=label;messageAge=60}}};
+setMuted(!sound.checked);if(attack.value==='U')startCuernoDuo(game);else castCuerno(attack.value,p,game);
+}
+function step(){const p=game.player;tick++;if(attack.value!=='U'){updateCuerno(game,p);p.x+=p.vx||0;if(!p._cuernoKit?.acts.length)p.vx*=.82;}else updateCuernoPlay(game,tick);
+updateCuernoFx(game.cuernoFx,p,tick);game.cam.x=Math.max(0,p.x-460);messageAge=Math.max(0,messageAge-1);if(tick>=240)reset();}
+function paint(){ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#1c2138';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#343149';ctx.fillRect(0,282,c.width,78);
+const cam=game.cam,p=game.player;ctx.save();ctx.translate(-cam.x,0);drawCuernoFx(ctx,game.cuernoFx);ctx.restore();drawCuerno(ctx,p,cam,tick);
+if(attack.value==='U')drawCuernoDream(ctx,p.x+p.w/2-cam.x,240,150,Math.min(.99,tick/160),{form:p.evo+1,reduced:motion.matches});
+for(const e of game.enemies){ctx.fillStyle=e.hp<999?'#e7b5d8':'#8190b9';ctx.beginPath();ctx.roundRect(e.x-cam.x,e.y,e.w,e.h,12);ctx.fill();ctx.fillStyle='#fff5ff';for(const x of [8,20]){ctx.beginPath();ctx.arc(e.x-cam.x+x,e.y+10,3,0,Math.PI*2);ctx.fill();}}
+drawCharacter(ctx,p,cam,tick,{reduceMotion:motion.matches});if(attack.value==='U')drawCuernoPlay(ctx,game,tick,drawCharacter,ROSTER);
+if(messageAge){ctx.font='900 22px system-ui';ctx.textAlign='center';ctx.fillStyle='#ffe1f4';ctx.fillText(message,p.x+p.w/2-cam.x,100);}
+ctx.font='600 13px system-ui';ctx.textAlign='left';ctx.fillStyle='#baadc9';ctx.fillText(attack.value==='K'?'Preparación → ¡PRRRF! → impulso → estela':attack.value==='U'?'Susurro → aurora → abrazo → despedida':'Aviso → golpe → destellos',26,332);
+}
+function paintCinema(){drawEvoCine(cc,cinema.width,cinema.height,Number(time.value),Number(evolution.value),Number(evolution.value)+1);document.getElementById('seconds').value=Number(time.value).toFixed(1).replace('.',',')+' s';}
+form.onchange=attack.onchange=()=>{reset();paint()};document.getElementById('replay').onclick=()=>{reset();paint()};sound.onchange=()=>setMuted(!sound.checked);pause.onclick=()=>{paused=!paused;pause.setAttribute('aria-pressed',String(paused));pause.textContent=paused?'Animar':'Pausar'};
+motion.addEventListener('change',()=>{paused=motion.matches;reset();paint()});time.oninput=evolution.onchange=paintCinema;
+reset();paint();paintCinema();window.cuernoFinalePreview={setFrame(n){paused=true;reset();for(let i=0;i<n;i++)step();paint()},setCinema(t,from){time.value=String(t);evolution.value=String(from);paintCinema()}};window.previewReady=true;
+function frame(now){if(!document.hidden&&now-last>=1000/30){if(!paused){step();step();}paint();last=now}requestAnimationFrame(frame)}requestAnimationFrame(frame);
+</script></html>

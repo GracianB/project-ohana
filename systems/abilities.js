@@ -10,6 +10,7 @@ import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet
 import {momentCast,updateMoments,drawMoments} from './stitcho-cuerno-play.js';
 import { castCuerno, updateCuerno, drawCuerno } from './cuerno-kit.js';
 import { startCuernoDuo } from './cuerno-play-v373.js';
+import {drawCuernoDream} from "../characters/cuerno-stagecraft.js";
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
@@ -2778,7 +2779,10 @@ const R=f.mode==="frita" ? FRITA_FIELD_RADIUS+4+Math.sin(t*.07)*4 : 110+Math.sin
 ctx.save();
 ctx.globalCompositeOperation="lighter";
 ctx.globalAlpha=.16*fade;
-if(f.mode==="frita"){
+if(f.mode==="cuerno"){
+ ctx.fillStyle="#dcc8f0";ctx.globalAlpha=.06*fade;
+ ctx.beginPath();ctx.arc(x,y,R*.9,0,TAU);ctx.fill();
+}else if(f.mode==="frita"){
  // Frita: flat oil pool instead of a per-frame radial gradient.
  ctx.fillStyle="#ffd36a";ctx.globalAlpha=.08*fade;
  ctx.beginPath();ctx.arc(x,y,R,0,TAU);ctx.fill();
@@ -2826,17 +2830,9 @@ if(f.mode==="kilo"){
   ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
  }else if(f.mode==="cuerno"){
   drawCuernoAuroraDome(ctx,f,cam,t,g);
-  const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#aeb9fb","#e5b9f4"];
-  const w=viewW(),h=viewH(),grad=ctx.createLinearGradient(0,0,w,h);
-  cols.forEach((c,i)=>grad.addColorStop(i/6,c));
-  ctx.globalAlpha=.07*fade;ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-  ctx.lineCap="round";
-  for(let i=0;i<7;i++){
-    ctx.strokeStyle=cols[i];ctx.globalAlpha=.27*fade;
-    ctx.lineWidth=4.5;ctx.beginPath();
-    ctx.arc(x,y+24,R*(.75+i*.14),Math.PI*.02,Math.PI*1.98);ctx.stroke();
-  }
   ctx.globalCompositeOperation="source-over";
+  ctx.globalAlpha=1;
+  drawCuernoDream(ctx,x,y+16,R*1.4,u,{form:(f.evo||0)+1,reduced:!!g.reduceMotion});
   drawAuroraDreamTargets(ctx,f,cam,t,g);
 }
 ctx.restore();
