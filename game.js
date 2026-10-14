@@ -536,7 +536,7 @@ clearStitchoWebs(game);
 resetDinoFoeAI();
 try { resetCuernoEvoV373(); resetCuernoPlay(); resetCuerno(game.player); game.cuernoFx = createCuernoFx(); } catch (_) {}
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
-resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
+resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game.dinoAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
 if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();

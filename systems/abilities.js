@@ -1,3 +1,4 @@
+import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
 import {DEFAULT_U_PARTNERS,chooseUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
 import {startMichiDuet,updateMichiDuet,drawMichiDuet,readMichiEffects} from './michi-duet.js';
@@ -195,6 +196,7 @@ if (flow.label && index < 3) {
 game.nums?.add(cx(p), p.y - 22, flow.label, def.color || p.color || "#fff6c8");
 }
 trimAbilityProjectiles(game);
+game.dinoAbilityFx=captureDinoNativeFx(p);
 return true;
 }
 
@@ -508,6 +510,20 @@ const FIXED_DT_MS = 1000 / 60;
 const MAX_FX = 96;
 const MAX_ABILITY_PROJECTILES = 96;
 
+// Curate the native Dino fields for visual relay. Always retain the Colossus
+// warning; limit the remaining particles to 11 and never leak gameplay fields.
+function captureDinoNativeFx(p){
+ if(p?.id!=="dino"||p.dead)return [];
+ const types=new Set(["dinoColossus","dinoFossil","dinoFossilMark","dinoFossilBlast",
+   "dinoSpit","dinoSplat","dinoWarning"]);
+ const visual=FX.filter(f=>types.has(f.kind)&&f.life>0);
+ const colossus=visual.find(f=>f.kind==="dinoColossus");
+ const selected=colossus
+   ? [colossus,...visual.filter(f=>f!==colossus).slice(-11)]
+   : visual.slice(-12);
+ return readDinoEffects(selected)||[];
+}
+
 function abilityNow(game) {
 const tick = Number(game?.t);
 return Number.isFinite(tick) ? tick * FIXED_DT_MS : 0;
@@ -793,6 +809,7 @@ if(p.id==="cuerno"&&FX.some(f=>f.kind==="cuernoFantasyTrail"))
  rememberCuernoEnemyPositions(game.enemies);
 tickCuernoFantasyStatus(game,p,canHit,damageEnemy);
 trimAbilityProjectiles(game);
+game.dinoAbilityFx=captureDinoNativeFx(p);
 game.michiAbilityFx=p.id==='cat'?(readMichiEffects(FX.filter(f=>['yarn','purr','wisp'].includes(f.kind)).slice(-12))||[]):[];
 game.chispinAbilityFx=p.id==='chispin'?(readChispinEffects(FX.filter(f=>['chain','trail','storm'].includes(f.kind)).slice(0,8))||[]):[];
 game.kiloAbilityFx=p.id==='kilo'?FX.filter(f=>['note','hula','ohana'].includes(f.kind)).slice(0,12).map(f=>({
