@@ -998,7 +998,7 @@ if (!Number.isFinite(d)) return false;
 if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
 damageEnemy(e, d);
-g.onAbilityHit?.(e,d);
+g.onAbilityHit?.(e,d,o);
 e.flash = Math.max(e.flash || 0, 14);
 
 if (e.boss) {
