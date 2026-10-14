@@ -1,4 +1,4 @@
-const VERSION = "ohana-375";
+const VERSION = "ohana-376";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/roster-navigation.js?v=" + VERSION,
@@ -247,7 +247,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "6895b7e2caf621c2c54a8c96afe18ecbe7118fb0",
+  "index.html": "f4761952f5cb4404f6956ee1d5224a3e98ecedb1",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -272,7 +272,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "63135183aedc05a2892ad92cf71d1f3ee9a75496",
+  "game.js": "92cf38b8dbe7e7973b3a198caca13b808e379ea7",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "ec4057f83660a7cf6ef034b573aeda36b662ee07",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
@@ -311,7 +311,7 @@ const PRECACHE_REVISIONS = {
   "engine/foes/chispin-foes.js": "045868012e1aa87285a55c0d8b9f35d448c23435",
   "engine/foes/dino-foes.js": "0f85f45b4e1ca99e1c0d2fed3999f049071a3a61",
   "engine/foes/kilo-ai.js": "32526908f9fedfd94b79520d316a84e06187bfa6",
-  "engine/foes/stitcho-ai.js": "1425fc207a69772abcd79fb4c99fe137f379cc18",
+  "engine/foes/stitcho-ai.js": "57812496cc2dbb6cd291ea58c46f0c3f5c1980bc",
   "engine/foes/michi-ai.js": "001fbec5c231dadfc96e61b4e1323a9060e78897",
   "engine/foes/chispin-ai.js": "5c08de57edc87d775d97186e1890037bc87ebb7e",
   "engine/foes/dino-ai.js": "91f166d92f871cc8c4d67fdecb10e8c4c4017617",
