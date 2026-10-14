@@ -80,6 +80,9 @@ import { updateCuernoPlay, drawCuernoPlay, queueCuernoPlay, resetCuernoPlay, CUE
 import { cuernoFormMods, cuernoEvolveBurst, updateCuernoBursts, drawCuernoBursts, resetCuernoEvoV373, drawCuernoIntro, drawCuernoDeath, drawCuernoVictory, CUERNO_INTRO_DURATION, CUERNO_DEATH_DURATION, CUERNO_VICTORY_DURATION } from "./systems/cuerno-evo-v373.js";
 import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFritaInteractions } from "./systems/kilo-frita-interactions.js";
 
+const e2eParams = new URLSearchParams(location.search);
+const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
 let input;
@@ -3397,8 +3400,7 @@ start(def);
 }
 }
 
-const e2eParams = new URLSearchParams(location.search);
-const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+
 // Local developer diagnostic: ?perf=1. No analytics, cookies, requests,
 // gameplay callbacks, user identifiers, or timers in ordinary sessions.
 if (e2eEnabled || e2eParams.get("perf") === "1") {
