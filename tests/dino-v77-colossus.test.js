@@ -44,21 +44,25 @@ test("Dino V77 has exactly five expressive story acts with deterministic boundar
  assert.equal(supremeOf("cuerno").id,"aurora");
 });
 
-test("Dino V77 U starts a bounded 260-frame titan, immediate hit and independent FX",()=>{
+test("Dino V377 U keeps a 260-frame titan and announces the original impact",()=>{
  const h=battle(),p=h.g.player,e=h.g.enemies[0];
  h.fns.castUltimate(h.g,p,[e],110,"#d3f59c");
- assert.ok(e.hp<2000,"Original instant titan hit must remain");
+ assert.equal(e.hp,2000,"No invisible global damage on the cast frame");
  assert.ok(p._specialT>=260&&p._specialTitanT>=260&&p._specialArmorT>=260);
  assert.ok(p.invuln>=72);
  const fields=h.active.filter(f=>f.kind==="dinoColossus");
  assert.equal(fields.length,1,"No duplicate supreme fields");
  assert.equal(fields[0].max,260);
+ assert.equal(fields[0].warmup,18);
+ assert.equal(fields[0].launchRadius,300);
  assert.ok(h.g.shake<=18,"No dangerous screen shaking");
  let updates=0;
  for(let t=0;t<260;t++){
    const f=fields[0];if(f.life<=0)break;
    h.fns.update.dinoColossus(h.g,f,p);
    updates++;
+   if(t===16)assert.equal(e.hp,2000,"Preparation must not deal damage");
+   if(t===17)assert.ok(e.hp<2000,"Colossus hits after 18 warning ticks");
  }
  const rocks=h.active.filter(f=>f.kind==="dinoFossil");
  const marks=h.active.filter(f=>f.kind==="dinoFossilMark");

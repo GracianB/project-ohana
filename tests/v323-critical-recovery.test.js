@@ -51,7 +51,8 @@ test('original six hero U contracts remain until issue #318 is fixed with equiva
   assert.match(supreme, /kind:"supremeLaunch",mode:"pizza"/);
   assert.match(abilitiesSource, /supremeLaunch\(g,f,p\)\{/);
   assert.match(abilitiesSource, /supremeLaunch\(ctx,f,cam,t,g\)\{/);
-  assert.match(supreme, /startFamilyDuet\(game,power\*pw\(p\)\*uExpPower\(p\),launchTargets,chosen\)/);
+  assert.match(supreme, /startFamilyDuet\(game,power\*pw\(p\)\*uExpPower\(p\),p\.id==="dino"\?\[\]:launchTargets,chosen\)/);
+  assert.match(supreme, /if\(dinoLaunch\)dinoLaunch\.duet=game\._familyDuet/);
 });
 
 test('OHANA progress history is not a placeholder or one-line replacement', () => {

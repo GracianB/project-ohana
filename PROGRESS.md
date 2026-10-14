@@ -1,3 +1,7 @@
+## V377 · Dino: Coloso local y telegrafiado (ohana-377)
+
+El golpe inicial de Dino conserva su potencia original y el Coloso de 260 ticks, pero deja de atacar instantáneamente a enemigos remotos. Durante 18 ticks aparece un círculo de 172+32×evolución unidades y únicamente los enemigos que intersectan ese círculo al resolver el aviso reciben el impacto. Los blancos alcanzados se incorporan al conjunto de prevención de dobles impactos del dúo U; el resto continúa disponible para las habilidades L prestadas. Muerte, cambio de sala y cambio de actor anulan el impacto preparado. Se mantienen las ondas sísmicas, el número y cadencia de fósiles, la armadura, el enfriamiento y la autoridad de daño original. Pruebas de círculo real, temporización, salida/entrada tardía, limpieza de estado y movimiento reducido. Publicación condicionada a CI, Browser/Firefox, cooperativo y Release Gate.
+
 ## V376 · Stitcho: telarañas y ralentización aisladas por sala (ohana-376)
 
 Hotfix sobre la V375. Una transición de portal aceptada limpia las telarañas de la sala anterior y el temporizador de ralentización del jugador, sin cambiar la velocidad normal ni borrar trampas cuando el portal está bloqueado o no existe. Pruebas Node: colisión real, transición sin persistencia del debuff, ausencia de trampas y orden de aceptación. Se regenera el manifiesto de huellas Git y se actualiza la versión offline para impedir que el Service Worker reutilice módulos antiguos. Publicación sujeta a CI, matriz de navegadores, multijugador y Release Gate.

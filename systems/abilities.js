@@ -390,6 +390,7 @@ const enemies = (game.enemies || []).filter(canHit);
 const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),cy(p)) :
   (p.id === "dragon" || p.id === "pizza") ? [] : enemies;
 let launchWarning = null;
+let dinoLaunch = null;
 const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
 if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
@@ -432,7 +433,7 @@ DRAGON_U_FX.cast(game,p,SUPREME_LAUNCH_RADII.dragon,SUPREME_LAUNCH_WINDUP,evo);
 game.shake = Math.min(28, (game.shake || 0) + 16);
 p._specialFlightT = Math.max(p._specialFlightT || 0, 260);
 } else if (p.id === "dino") {
-DINO_FX.castUltimate(game,p,enemies,dmg,def.color);
+dinoLaunch = DINO_FX.castUltimate(game,p,enemies,dmg,def.color);
 } else if (p.id === "frita") {
 for (const e of launchTargets) hitEnemy(game, e, dmg * 0.66, { kx: Math.sign(cx(e)-cx(p)) * 4, ky: -10, stun: 38, color: def.color, crit: true });
 healPlayer(p, p.maxHealth * 0.18);
@@ -494,7 +495,8 @@ game.hitstop = Math.min(8, Math.max(game.hitstop || 0, 6));
 game._specialName = specialOf(p.id).name;
 game._supremeFlow = flow;
 if(FAMILY_DUETS[p.id]){
- startFamilyDuet(game,power*pw(p)*uExpPower(p),launchTargets,chosen);
+ startFamilyDuet(game,power*pw(p)*uExpPower(p),p.id==="dino"?[]:launchTargets,chosen);
+ if(dinoLaunch)dinoLaunch.duet=game._familyDuet;
  if(launchWarning)launchWarning.duet=game._familyDuet;
  game.ult.t=0;
  p.invuln=Math.max(p.invuln||0,60);
