@@ -1,3 +1,7 @@
+## V376 · Stitcho: telarañas y ralentización aisladas por sala (ohana-376)
+
+Hotfix sobre la V375. Una transición de portal aceptada limpia las telarañas de la sala anterior y el temporizador de ralentización del jugador, sin cambiar la velocidad normal ni borrar trampas cuando el portal está bloqueado o no existe. Pruebas Node: colisión real, transición sin persistencia del debuff, ausencia de trampas y orden de aceptación. Se regenera el manifiesto de huellas Git y se actualiza la versión offline para impedir que el Service Worker reutilice módulos antiguos. Publicación sujeta a CI, matriz de navegadores, multijugador y Release Gate.
+
 ## V375 · Selector integrado con Cuerno y proporciones (ohana-375)
 
 La cuadrícula conserva los diez héroes y las alturas calibradas de V374. Flechas por filas según las columnas reales, foco sincronizado, Inicio/Fin y controles externos que mantienen sus teclas. Marca visible de selección; en móvil, ficha y controles siguen a las cinco filas sin superponerse. Ambos módulos visuales entran en el precache con sus huellas actualizadas.
