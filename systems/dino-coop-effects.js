@@ -12,8 +12,9 @@ export function readDinoEffects(list){
   const out=[];
   for(const f of list){
     if(!f||!KINDS.has(f.kind)||!finite(f.x)||!finite(f.y)||
-      !finite(f.life,280)||f.life<=0||!finite(f.max,280)||f.max<=0)return null;
-    const v={kind:f.kind,x:f.x,y:f.y,life:f.life,max:f.max,color:C(f.color)};
+      !finite(f.life,280)||f.life<=0||
+      !finite(f.max??f.life,280)||(f.max??f.life)<=0)return null;
+    const v={kind:f.kind,x:f.x,y:f.y,life:f.life,max:f.max??f.life,color:C(f.color)};
     for(const key of SCALARS){
       if(f[key]===undefined)continue;
       if(!finite(f[key]))return null;
