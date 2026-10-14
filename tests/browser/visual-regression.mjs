@@ -1368,6 +1368,11 @@ try {
 
 
   // V77 U · Five-act Colossus with real gameplay and film; Cuerno untouched.
+  // Advance real RAF callbacks on a controlled clock: full-page screenshots
+  // can stall rendering long enough to skip a short act on slower machines.
+  const dinoFilmTime = new Date();
+  await page.clock.install({time:dinoFilmTime});
+  await page.clock.pauseAt(new Date(dinoFilmTime.getTime()+1000));
   const dinoUltimate=await page.evaluate(()=>{
     const api=window.__OHANA_E2E;
     api.start('dino');api.setEvo(4);api.cast(3);api.step(3);
@@ -1390,11 +1395,14 @@ try {
   // Real U is validated from gameplay; full-page screenshots can take longer
   // than a film's fleeting beat. Check the persistent *observed* act history,
   // then render each actual film function at a deterministic frame.
+  await page.clock.runFor(Math.round(dinoUltimate.film.duration*.12));
   await capture(page,'09x-dino-v77-u-runtime');
+  await page.clock.runFor(dinoUltimate.film.duration+500);
   await page.waitForFunction(()=>document.querySelector('#supreme-cinema')?.dataset.state==='idle',null,{timeout:6000});
   const seenDinoActs=await page.locator('#supreme-cinema').evaluate(el=>(el.dataset.dinoPhasesSeen||'').split('|'));
   assert.deepEqual(seenDinoActs,['heartbeat','awaken','rupture','comets','heart'],
     '09x-dino-u: film must have actually visited five ordered acts');
+  await page.clock.resume();
 
   for (const scene of [
     {stage:.12,name:'09x-dino-v77-u-heartbeat'},
