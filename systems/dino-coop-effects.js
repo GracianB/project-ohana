@@ -65,6 +65,11 @@ export function drawDinoPeerEffects(ctx,list,cam={},t=0,reduceMotion=false){
         ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
         ctx.setLineDash([]);
       }
+      // The same Euclidean radius and centre used by host quake damage.
+      const quakeRadius=245+f.evo*46;
+      ctx.globalAlpha=.42;ctx.strokeStyle="#ffcf6a";ctx.lineWidth=2.5;
+      ctx.setLineDash([12,8]);ctx.beginPath();
+      ctx.arc(x,y,quakeRadius,0,TAU);ctx.stroke();ctx.setLineDash([]);
       if(!reduceMotion){
         const pulse=clamp(1-(f.nextPulse||0)/34,0,1);
         ctx.globalAlpha=.28*(1-pulse);ctx.strokeStyle="#c8f04a";ctx.lineWidth=2;
@@ -73,8 +78,10 @@ export function drawDinoPeerEffects(ctx,list,cam={},t=0,reduceMotion=false){
       }
     }else if(f.kind==="dinoFossilMark"||f.kind==="dinoWarning"){
       const k=clamp(f.life/Math.max(1,f.max),0,1);
+      const radius=clamp(f.r||28+f.evo*4,1,1000);
       ctx.globalAlpha=.35+.5*(1-k);ctx.strokeStyle="#ffe5a5";ctx.lineWidth=2;
-      ctx.beginPath();ctx.ellipse(x,y,28+f.evo*4,6+f.evo,0,0,TAU);ctx.stroke();
+      ctx.setLineDash([7,5]);ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.ellipse(x,y,radius,radius*.26,0,0,TAU);ctx.stroke();
       ctx.beginPath();ctx.moveTo(x-7,y);ctx.lineTo(x+7,y);
       ctx.moveTo(x,y-7);ctx.lineTo(x,y+7);ctx.stroke();
     }else if(f.kind==="dinoFossil"){
