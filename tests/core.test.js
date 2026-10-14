@@ -345,6 +345,7 @@ test("stopMusic desconecta todo el grafo de delay del tema", async () => {
     }
     createGain() { return makeNode("gain", { gain: param() }); }
     createDelay() { return makeNode("delay", { delayTime: param() }); }
+    createBiquadFilter() { return makeNode("filter", { frequency: param(), Q: param() }); }
     createBuffer(_channels, length) { return { getChannelData: () => new Float32Array(length) }; }
   }
 
@@ -357,7 +358,7 @@ test("stopMusic desconecta todo el grafo de delay del tema", async () => {
     stopMusic();
     for (const callback of pendingTimeouts) callback();
     const themeNodes = nodes.slice(2);
-    assert.equal(themeNodes.length, 4);
+    assert.equal(themeNodes.length, 5);
     assert.ok(themeNodes.every((node) => node.disconnected));
   } finally {
     if (originalWindow === undefined) delete globalThis.window;

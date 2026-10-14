@@ -6,7 +6,7 @@ test("V99 finale results wait for the complete family reveal",()=>{
  const js=fs.readFileSync("systems/ending.js","utf8");
  const css=fs.readFileSync("ending.css","utf8");
  assert.match(js,/const duration=reduce\?1\.6:14\.5/);
- assert.match(js,/if\(k>=1\)\{revealResults\(\);return;\}/);
+ assert.match(js,/if\(k>=1\)revealResults\(\);/);
  assert.match(js,/const titleK=seg\(k,\.89,\.97\)/);
  assert.match(css,/#win-cinema\.cinema-running \.win-card\{visibility:hidden;pointer-events:none/);
  assert.match(css,/#win-cinema\.cinema-complete \.win-card\{visibility:visible;pointer-events:auto/);

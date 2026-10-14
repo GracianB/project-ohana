@@ -1,7 +1,9 @@
+import {ROSTER} from '../../characters/roster.js';
+import {drawEvolutionActor} from './real-actor.js';
 // Cinemática de evolución de Yomi: tinta y sombras, mariposas lunares y abanico. Sin gradientes, determinista.
 // Fases: carga (0-1.6s), transformación (1.6-2.9s), presentación (2.9-4s).
 export const EVO_CINE_DURATION = 4.0;
-const FORM_NAMES = ["Yomi", "Yomi Manga", "Yomi Grieta", "Yomi Devoralunas", "Yomi Umbral"];
+const FORM_NAMES = ROSTER.find(r=>r.id==='yomi').forms.map(f=>f.name);
 const formName = (f) => FORM_NAMES[Math.max(0, Math.min(4, (f | 0) - 1))];
 // Paleta de characters/art/yomi.js: [piel, túnica, farol, sombra].
 const PAL = [["#f8e5b9", "#d78b69", "#f8b567", "#52364b"], ["#f1d5a5", "#c67d69", "#ffb35c", "#604066"], ["#f3cba5", "#ad6481", "#ed9f6b", "#6f467d"], ["#edd0bf", "#a74668", "#ff7580", "#7d3b71"], ["#fff0d4", "#8d3d67", "#ffd279", "#b9588f"]];
@@ -30,41 +32,7 @@ function fan(ctx, x, y, R, open, col, line) {
   if (open > 0.5) { ctx.fillStyle = "#fff4c8"; ctx.globalAlpha = (open - 0.5) * 2; ctx.beginPath(); ctx.arc(0, -R * 0.68, R * 0.16, 0, TAU); ctx.fill(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(R * 0.06, -R * 0.7, R * 0.14, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
   ctx.restore();
 }
-function yomi(ctx, x, y, s, form, t) {
-  const f = Math.max(0, Math.min(4, form - 1)), [skin, robe, lantern, shade] = PAL[f];
-  const blink = (t % 2.7) < 0.1;
-  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.lineWidth = 2; ctx.strokeStyle = L; ctx.lineJoin = "round";
-  const o = (fn, c) => { ctx.fillStyle = c; ctx.beginPath(); fn(); ctx.fill(); ctx.stroke(); };
-  // túnica acampanada + mangas
-  o(() => { ctx.moveTo(-10, -30); ctx.quadraticCurveTo(-20, -8, -18, 0); ctx.lineTo(18, 0); ctx.quadraticCurveTo(20, -8, 10, -30); ctx.closePath(); }, robe);
-  ctx.fillStyle = shade; ctx.fillRect(-18, -4, 36, 4);
-  for (const d of [-1, 1]) o(() => { ctx.ellipse(d * 14, -18, 6, 9, d * 0.4, 0, TAU); }, robe);
-  // obi + ofuda colgando
-  o(() => { ctx.rect(-11, -20, 22, 5); }, shade);
-  o(() => { ctx.rect(4, -16, 5, 9); }, "#fff5d8");
-  // farolillo en la mano
-  ctx.strokeStyle = L; ctx.beginPath(); ctx.moveTo(-17, -12); ctx.lineTo(-17, -6); ctx.stroke();
-  o(() => { ctx.ellipse(-17, -1, 5, 6, 0, 0, TAU); }, lantern);
-  ctx.fillStyle = "#fff4c8"; ctx.beginPath(); ctx.ellipse(-17, -1, 2, 3.5, 0, 0, TAU); ctx.fill();
-  // cabeza: pelo oscuro con flequillo recto
-  o(() => { ctx.ellipse(0, -44, 18, 17, 0, 0, TAU); }, shade);
-  o(() => { ctx.ellipse(0, -41, 14, 13, 0, 0, TAU); }, skin);
-  ctx.fillStyle = shade; ctx.beginPath(); ctx.moveTo(-15, -46); ctx.quadraticCurveTo(0, -64, 15, -46); ctx.lineTo(15, -44); for (let i = 4; i >= -4; i--) ctx.lineTo(i * 3.4, -46 + (i % 2 ? 3 : 0)); ctx.closePath(); ctx.fill();
-  for (const d of [-1, 1]) o(() => { ctx.ellipse(d * 17, -36, 4, 12, d * 0.15, 0, TAU); }, shade);
-  // ojos
-  for (const d of [-1, 1]) {
-    if (blink) { ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(d * 5.5 - 3, -39); ctx.quadraticCurveTo(d * 5.5, -37, d * 5.5 + 3, -39); ctx.stroke(); ctx.lineWidth = 2; continue; }
-    ctx.fillStyle = L; ctx.beginPath(); ctx.ellipse(d * 5.5, -39, 2.8, 3.8, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = f >= 3 ? "#ff4466" : "#c9a0ff"; ctx.beginPath(); ctx.ellipse(d * 5.5, -38.2, 1.8, 2, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(d * 5.5 - 1, -40.2, 1, 0, TAU); ctx.fill();
-  }
-  ctx.fillStyle = "rgba(255,120,150,.45)"; for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(d * 9.5, -34.5, 2.6, 1.5, 0, 0, TAU); ctx.fill(); }
-  ctx.lineWidth = 1.3; ctx.beginPath(); ctx.arc(0, -34, 1.8, 0.2, Math.PI - 0.2); ctx.stroke();
-  // luna creciente en el pelo (forma 2+) y cuernitos de sombra (4+)
-  if (f >= 1) { ctx.fillStyle = "#fff4c8"; ctx.beginPath(); ctx.arc(9, -56, 4, 0, TAU); ctx.fill(); ctx.fillStyle = shade; ctx.beginPath(); ctx.arc(10.8, -57, 3.4, 0, TAU); ctx.fill(); }
-  if (f >= 3) for (const d of [-1, 1]) o(() => { ctx.moveTo(d * 8, -58); ctx.quadraticCurveTo(d * 12, -68, d * 15, -66); ctx.quadraticCurveTo(d * 12, -61, d * 12, -56); ctx.closePath(); }, shade);
-  ctx.restore();
-}
+function yomi(ctx,x,y,s,form,t){drawEvolutionActor(ctx,'yomi',x,y,s,form,t);}
 
 export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
   const K = h / 300, cx = w / 2, cy = h * 0.68, to = Math.max(1, Math.min(5, toForm | 0)), fi = to - 1;

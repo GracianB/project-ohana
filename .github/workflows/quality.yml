@@ -148,6 +148,9 @@ jobs:
       - name: Cuerno finale attacks and evolutions
         run: npm run test:browser:cuerno
 
+      - name: Michi redesign and living finale
+        run: npm run test:browser:michi-ending
+
       - name: Release gate
         run: npm run release:check
 

@@ -136,40 +136,27 @@ function rng(seed) {
   let s = seed >>> 0 || 1;
   return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
 }
-function buildMelody(th) {
-  const m = th.melody;
-  const R = rng(m.seed);
-  const scale = SCALES[th.scale];
-  const bars = th.chords.length * 2; // frase + variación
-  const out = [];
-  let deg = 7; // índice en escala extendida (tónica +1 octava)
-  const ext = [];
-  for (let o = -1; o < 3; o++) for (const s of scale) ext.push(s + o * 12);
-  const nearest = (semi) => { let bi = 0; for (let i = 0; i < ext.length; i++) if (Math.abs(ext[i] - semi) < Math.abs(ext[bi] - semi)) bi = i; return bi; };
-  for (let b = 0; b < bars; b++) {
-    const [cr, cq] = th.chords[b % th.chords.length];
-    const tones = CHORD[cq].map((x) => x + cr);
-    const variation = b >= th.chords.length;
-    for (let s = 0; s < 16; s++) {
-      if (m.rhythm[s] !== "x" || (variation && s === 14 && R() < 0.5)) { out.push(null); continue; }
-      const strong = s % 4 === 0;
-      if (strong) {
-        // salta a la nota del acorde más cercana
-        const target = tones[Math.floor(R() * tones.length)] + 12;
-        const cand = [nearest(target), nearest(target + 12), nearest(target - 12)];
-        cand.sort((a, c) => Math.abs(a - deg) - Math.abs(c - deg));
-        deg = cand[0];
-      } else {
-        deg += R() < 0.5 ? 1 : -1;
-        if (R() < 0.2) deg += R() < 0.5 ? 2 : -2;
-      }
-      deg = Math.max(4, Math.min(ext.length - 4, deg));
-      // la última nota de la frase vuelve a la tónica
-      if (b === bars - 1 && s >= 12) deg = nearest(12);
-      out.push(ext[deg]);
-    }
+const MOTIFS={title:[0,2,4,2,1,0,4,2],claro:[0,2,4,2,1,0,4,2],victoria:[0,2,4,5,4,2,1,0],costa:[0,1,2,4,2,1,4,2],jungla:[0,2,3,4,2,3,1,0],jefe:[0,1,0,4,3,1,4,0],jefe3:[0,1,3,4,3,1,4,0]};
+function buildMelody(th){
+ const name=Object.keys(THEMES).find(k=>THEMES[k]===th),motif=MOTIFS[name]||[0,2,1,4,3,2,1,0],scale=SCALES[th.scale],out=[];
+ for(let bar=0;bar<th.chords.length*4;bar++){
+  const [root,quality]=th.chords[bar%th.chords.length],tones=CHORD[quality].map(n=>n+root);
+  let phraseNote=0;
+  for(let step=0;step<16;step++){
+   if(th.melody.rhythm[step]!=='x'||(bar%4===3&&step>12)){out.push(null);continue;}
+   const degree=motif[(phraseNote+++(bar%4)*2)%motif.length],answer=bar%8>=4;
+   let note=scale[degree]+(answer&&degree<2?12:0);
+   if(step%4===0){const choices=tones.flatMap(n=>[n-12,n,n+12]).filter(n=>n>=0&&n<=16);note=choices.reduce((a,b)=>Math.abs(b-note)<Math.abs(a-note)?b:a,choices[0]);}
+   if(bar%4===3&&step>=12)note=0;
+   out.push(note);
   }
-  return out;
+ }
+ return out;
+}
+export function musicPhrase(name){return THEMES[name]?buildMelody(THEMES[name]):[];}
+export function musicArrangement(bar,boss=false){
+ const section=Math.floor((((bar%16)+16)%16)/4);
+ return {melody:[.86,1,1,.82][section],bass:[.65,.85,1,.7][section],arp:[.55,.8,1,.45][section],drums:boss?[.85,1,1,.8][section]:[.45,.7,.8,.4][section]};
 }
 
 // ---------------------------------------------------------------------------
@@ -192,14 +179,14 @@ function voice(g, dest, t, freq, dur, vol, kind) {
     case "pluck": add("triangle", freq, 1); add("sine", freq * 2, 0.35); rel = Math.min(dur, 0.35); break;
     case "uke": add("triangle", freq, 1); add("square", freq, 0.08); rel = 0.22; break;
     case "marimba": add("sine", freq, 1); add("sine", freq * 4, 0.25); rel = 0.28; break;
-    case "bell": add("sine", freq, 1); add("sine", freq * 2.76, 0.3); add("sine", freq * 5.4, 0.1); rel = Math.max(0.6, dur); break;
+    case "bell": add("sine", freq, 1); add("sine", freq * 2.76, 0.12); add("sine", freq * 5.4, 0.04); rel = Math.max(0.6, dur); break;
     case "flute": { atk = 0.04; const o = add("sine", freq, 1); add("triangle", freq, 0.3);
-      const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 5.5; lg.gain.value = freq * 0.012;
+      const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = 5.5; lg.gain.value = freq * 0.004;
       l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + dur + 0.1); break; }
-    case "lead": atk = 0.01; add("square", freq, 0.55); add("sawtooth", freq, 0.35, 7); break;
-    case "synth": add("sawtooth", freq, 0.5); add("square", freq / 2, 0.3); rel = Math.min(dur, 0.18); break;
+    case "lead": atk = 0.01; add("triangle", freq, 0.8); add("sawtooth", freq, 0.16, 3); break;
+    case "synth": add("triangle", freq, 0.7); add("sine", freq / 2, 0.3); rel = Math.min(dur, 0.18); break;
     case "bass": add("triangle", freq, 1); add("square", freq, 0.15); rel = Math.min(dur, 0.4); break;
-    case "pad": atk = 0.35; add("sawtooth", freq, 0.35, -8); add("sawtooth", freq, 0.35, 8); add("triangle", freq / 2, 0.4); break;
+    case "pad": atk = 0.35; add("triangle", freq, 0.3, -4); add("sine", freq, 0.3, 4); add("triangle", freq / 2, 0.4); break;
     default: add("sine", freq, 1);
   }
   env.gain.setValueAtTime(0.0001, t);
@@ -254,8 +241,9 @@ function startTheme(name) {
   // un poco de "sala" con un delay suave
   const dl = ctx.createDelay(0.5), fb = ctx.createGain(), wet = ctx.createGain();
   dl.delayTime.value = (60 / th.bpm) * 0.75; fb.gain.value = 0.25; wet.gain.value = 0.18;
-  bus.connect(master); bus.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(master);
-  const st = { name, th, melody: buildMelody(th), bus, nodes: [bus, dl, fb, wet], step: 0, next: ctx.currentTime + 0.1, g };
+  const tone=ctx.createBiquadFilter();tone.type='lowpass';tone.frequency.value=name.startsWith('jefe')?6200:4200;tone.Q.value=.5;
+  bus.connect(tone);tone.connect(master);tone.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(master);
+  const st = { name, th, melody: buildMelody(th), bus, nodes: [bus, tone, dl, fb, wet], step: 0, next: ctx.currentTime + 0.1, g };
   st.timer = setInterval(() => schedule(st), TICK_MS);
   current = st;
 }
@@ -276,38 +264,39 @@ function stopTheme(st, fade = 1) {
   }, fade * 1000 + 300);
 }
 
-function schedule(st) {
+function schedule(st,horizon) {
   const { ctx } = st.g;
   const th = st.th;
   const sixteenth = 60 / th.bpm / 4;
-  while (st.next < ctx.currentTime + LOOKAHEAD) {
+  while (st.next < (horizon??ctx.currentTime + LOOKAHEAD)) {
     const s = st.step % 16;
     const bar = Math.floor(st.step / 16);
     const [cr, cq] = th.chords[bar % th.chords.length];
     const chord = CHORD[cq].map((x) => x + cr);
+    const mix=musicArrangement(bar,st.name.startsWith("jefe"));
     let t = st.next;
     if (th.swing && s % 2 === 1) t += sixteenth * th.swing;
     const barLen = sixteenth * 16;
     // pad: un acorde por compás
     if (th.pad && s === 0) for (const n of chord) voice(st.g, st.bus, t, hz(th.root + n), barLen, 0.05 * th.pad, "pad");
     // bajo
-    if (th.bass && th.bass[s] === "x") voice(st.g, st.bus, t, hz(th.root - 12 + (s % 8 === 6 ? chord[2] : chord[0])), sixteenth * 2, 0.16, "bass");
+    if (th.bass && th.bass[s] === "x") voice(st.g, st.bus, t, hz(th.root - 12 + (s % 8 === 6 ? chord[2] : chord[0])), sixteenth * 2, 0.13 * mix.bass, "bass");
     // arpegio
     if (th.arp && th.arp[s] === "x") {
       const n = chord[(st.step) % chord.length] + 12 + (Math.floor(s / 4) % 2 ? 12 : 0);
-      voice(st.g, st.bus, t, hz(th.root + n), sixteenth * 1.5, 0.05, th.arpInst || "pluck");
+      voice(st.g, st.bus, t, hz(th.root + n), sixteenth * 1.5, 0.045 * mix.arp, th.arpInst || "pluck");
     }
     // melodía
     const mn = st.melody[st.step % st.melody.length];
     if (mn != null) {
       let len = 1; while (len < 6 && st.melody[(st.step + len) % st.melody.length] == null) len++;
-      voice(st.g, st.bus, t, hz(th.root + th.melody.oct + mn), sixteenth * len * 0.95, 0.075, th.melody.inst);
+      voice(st.g, st.bus, t, hz(th.root + th.melody.oct + mn), sixteenth * len * 0.95, 0.082 * mix.melody, th.melody.inst);
     }
     // percusión
     if (th.drums) {
-      if (th.drums.k && th.drums.k[s] === "x") drum(st.g, st.bus, t, "k", 0.5);
-      if (th.drums.s && th.drums.s[s] === "x") drum(st.g, st.bus, t, "s", 0.3);
-      if (th.drums.h && th.drums.h[s] !== ".") drum(st.g, st.bus, t, th.drums.h[s] === "o" ? "o" : "h", 0.25);
+      if (th.drums.k && th.drums.k[s] === "x") drum(st.g, st.bus, t, "k", 0.38 * mix.drums);
+      if (th.drums.s && th.drums.s[s] === "x") drum(st.g, st.bus, t, "s", 0.22 * mix.drums);
+      if (th.drums.h && th.drums.h[s] !== ".") drum(st.g, st.bus, t, th.drums.h[s] === "o" ? "o" : "h", 0.15 * mix.drums);
     }
     st.step++;
     st.next += sixteenth;
@@ -346,4 +335,16 @@ function unlock() {
 if (typeof addEventListener === "function") {
   addEventListener("pointerdown", unlock, { capture: true });
   addEventListener("keydown", unlock, { capture: true });
+}
+
+/** Short, deterministic audition through the same score and voices as the game. */
+export async function renderMusicPreview(name='title',seconds=12){
+ if(!THEMES[name])throw new Error('Unknown music theme');
+ seconds=Math.max(2,Math.min(30,Number(seconds)||12));
+ const ctx=new OfflineAudioContext(2,Math.ceil(seconds*44100),44100),bus=ctx.createGain();
+ bus.gain.value=MUSIC_VOL;const tone=ctx.createBiquadFilter();tone.type='lowpass';tone.frequency.value=name.startsWith('jefe')?6200:4200;tone.Q.value=.5;bus.connect(tone);tone.connect(ctx.destination);
+ const noiseBuf=ctx.createBuffer(1,44100,44100),noise=noiseBuf.getChannelData(0),random=rng(42);
+ for(let i=0;i<noise.length;i++)noise[i]=random()*2-1;
+ const th=THEMES[name];schedule({name,th,melody:buildMelody(th),bus,step:0,next:.1,g:{ctx,noiseBuf}},seconds-.5);
+ return ctx.startRendering();
 }

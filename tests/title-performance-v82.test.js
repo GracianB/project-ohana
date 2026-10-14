@@ -32,7 +32,7 @@ test("V82 portrait metadata only changes when the form or pose changes",()=>{
 });
 
 test("V82 finale handles resizes, removes handlers and survives two victories",()=>{
-  assert.match(ending,/const onResize=\(\)=>\{if\(!done&&!complete\)\{fc\.resize\(\);lastPaint=0;\}\}/);
+  assert.match(ending,/const onResize=\(\)=>\{if\(!done\)\{fc\.resize\(\);lastPaint=0;\}\}/);
   assert.match(ending,/addEventListener\("resize",onResize/);
   assert.match(ending,/removeEventListener\("resize",onResize\)/);
   assert.match(ending,/layer\.onkeydown=\(e\)=>/);
