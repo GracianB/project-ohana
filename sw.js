@@ -333,7 +333,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "3daffcf661284cb26aa6d82e34cc1bfc8529416e",
   "engine/particles.js": "c51fc9989a5facbd1be415bead79faf6f351bf96",
   "systems/atrium-interact.js": "7f1a80852ac4723bbb9e7f09c6530b9c1bd035f5",
-  "systems/abilities.js": "91bf08d02b7b77c5b9ca2c701f7be7e4fd04c9d4",
+  "systems/abilities.js": "7583f9220af67f61541be833fdd1b03275b6ff30",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "9940e44e7f51076f12211287aa7cfbf5db4c74c0",
   "systems/u-partners.js": "998c1a778d27856d6e7d2529add4ea519b42dc81",
