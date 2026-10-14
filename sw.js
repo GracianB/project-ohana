@@ -1,4 +1,4 @@
-const VERSION = "ohana-376";
+const VERSION = "ohana-377";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/roster-navigation.js?v=" + VERSION,
@@ -247,7 +247,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "f4761952f5cb4404f6956ee1d5224a3e98ecedb1",
+  "index.html": "9946117a027ed21e77e93c7655062aa416ad916c",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -332,7 +332,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "3daffcf661284cb26aa6d82e34cc1bfc8529416e",
   "engine/particles.js": "c51fc9989a5facbd1be415bead79faf6f351bf96",
   "systems/atrium-interact.js": "7f1a80852ac4723bbb9e7f09c6530b9c1bd035f5",
-  "systems/abilities.js": "6794510a1b17d873a6a2e76a9be5fadf46e255b0",
+  "systems/abilities.js": "62765318fd7676f8bc68c7e79fead7cbfcdf6cbd",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "9940e44e7f51076f12211287aa7cfbf5db4c74c0",
   "systems/u-partners.js": "998c1a778d27856d6e7d2529add4ea519b42dc81",
@@ -347,7 +347,7 @@ const PRECACHE_REVISIONS = {
   "systems/render-profiler.js": "3e74625b9200a9baa40d84190ca7f358719133db",
   "systems/coop-resilience.js": "9a0c97f656a8c0bbaca4b95ba6cec99e6896e5eb",
   "systems/coop-v95-presence.js": "3c71b45510b2cdd7b5f3635217fe3cf8bf8e41a1",
-  "systems/dino-combat.js": "104a3229fca5dcbb489b7e78498fe022e7cf6f54",
+  "systems/dino-combat.js": "5a71afcde78fb99a3badeb8d2e457c99d197d69f",
   "systems/dragon-supreme.js": "76608fc09e28f9ae26e24f91e25de0b6a0c0275e",
   "systems/dino-quake-u.js": "df748ce45ecc04a8d5a485c2f3deb71263a46553",
   "systems/dino-stagecraft.js": "8f9a62ce07cc0bda24707132fcd66cb791953db0",
