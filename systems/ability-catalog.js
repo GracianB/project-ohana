@@ -28,6 +28,6 @@ ofuda: { name: "Sello guardián", key: "J", cd: 560, color: "#f2e6c8", desc: "J:
 sleeve: { name: "Campanada del Umbral", key: "K", cd: 2900, color: "#ffd99c", desc: "K: campanada que alcanza y marca a todos los enemigos vivos. L consume las marcas para rematar." },
 maw: { name: "Mordida lunar", key: "L", cd: 5800, color: "#e9768e", desc: "L: mordida frontal con anticipación. Los enemigos marcados reciben daño extra." },
 gleam: { name: "Lanza astral", key: "J", cd: 480, color: "#ffe9a8", desc: "J: cuerno de nácar con estela iris. Atraviesa hasta tres enemigos." },
-gallop: { name: "Galope encantado", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: deja un camino arcoíris 10 s que encanta y desgasta a los enemigos que lo pisan." },
+gallop: { name: "Prrrf arcoíris", key: "K", cd: 1600, color: "#f2c1ff", desc: "K: toma impulso, suelta una nube arcoíris y galopa. Su estela dura 3 s y daña a los enemigos que la pisan." },
 rainbow: { name: "Corona de los Siete Cuernos", key: "L", cd: 5600, color: "#fff6c8", desc: "L: siete cuernos curvos siguen el borde de la onda real, con tres arcos iris de nácar." },
 };

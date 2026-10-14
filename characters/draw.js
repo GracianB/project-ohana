@@ -1001,6 +1001,7 @@ const q = (v, s) => Math.round((Number(v) || 0) * s);
 return [
 pose.state || "", pose.move || "", pose.form | 0, pose.cuernoBeat || "",
   pose.cuernoMagicSlot ?? -1, q(pose.cuernoDreamT, 2),
+pose.cuernoK?.phase||"",q(pose.cuernoK?.progress,20),
 q(pose.phase, 6), q(pose.speed, 8), q(pose.vy, 8), pose.air ? 1 : 0,
 q(pose.land, 8), q(pose.atk, 10), q(pose.cast, 10), pose.castSlot | 0,
 q(pose.hurt, 8), q(pose.blink, 4), q(pose.sway, 8), q(pose.bounce, 8),
@@ -1222,7 +1223,11 @@ if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
   pose.cuernoDreamT = Math.max(0, Number(p._specialAuroraT) || 0) / 260;
-  if (!p.dead && p._cuernoKit?.acts?.some((a) => a.key === "K" && a.phase === "active")) pose.state = "trail";
+  const rainbowK=p._cuernoKit?.acts?.find(a=>a.key==="K");
+  if(!p.dead&&rainbowK){
+    pose.cuernoK={phase:rainbowK.phase,progress:rainbowK.t/(rainbowK.phase==="warn"?rainbowK.warn:rainbowK.active)};
+    if(rainbowK.phase==="active")pose.state="trail";
+  }
 }
 if(p.id==='kilo'&&p._kiloDuetT>0){
  pose.kiloDuetAge=p._kiloDuetAge||0;

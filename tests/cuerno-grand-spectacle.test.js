@@ -62,7 +62,7 @@ test("V68 preserves iris geometry and cannot alter the boss-safe dream",()=>{
  assert.match(magic,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>!e\.boss&&inView\(game,e\)\) : \[\]/);
  assert.match(magic,/const opening=Math\.min\(1,progress\/\.10\),ending=Math\.min\(1,f\.life\/15\)/);
  assert.match(magic,/ctx\.globalAlpha=\.11\*opacity/);
- assert.match(magic,/ctx\.globalAlpha=\.07\*fade/);
+ assert.match(magic,/drawCuernoDream\(ctx,x,y\+16,R\*1\.4,u/);
  // Historical 135 KB source cap retired; functional checks remain active.
  assert.deepEqual(ROSTER.find(h=>h.id==="cuerno").abilities,["gleam","gallop","rainbow"]);
  const body=art.split("export function cuernoMagicPose(")[1].split("function horn(")[0];

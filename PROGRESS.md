@@ -1,3 +1,9 @@
+## V376 · Cuerno: prrrf, auroras y evoluciones coherentes (ohana-376)
+
+K tiene preparación tímida, cola levantada, nube arcoíris desde la grupa, sonido sintetizado breve y estela curva de 3 segundos. J y melee nacen visualmente del cuerno. Las evoluciones usan el potrito lila actual, con transición gradual y cuatro relatos. U añade una aurora legible, respeta el compañero elegido y evita duplicarlo con el dúo común. Se conservan daños, cooldowns y hitboxes; pausa y muerte detienen el kit. Efectos acotados y movimiento reducido. Vista interactiva en previews/cuerno-finale.html.
+
+Validación específica: 20 combinaciones de ataque/forma, 12 escenas de evolución, K real en cinco formas, U, limpieza al cambiar de sala, móvil y movimiento reducido.
+
 ## V375 · Selector integrado con Cuerno y proporciones (ohana-375)
 
 La cuadrícula conserva los diez héroes y las alturas calibradas de V374. Flechas por filas según las columnas reales, foco sincronizado, Inicio/Fin y controles externos que mantienen sus teclas. Marca visible de selección; en móvil, ficha y controles siguen a las cinco filas sin superponerse. Ambos módulos visuales entran en el precache con sus huellas actualizadas.

@@ -126,7 +126,7 @@ test("V84 seven-horn L remains a single physical iris hitbox",()=>{
  }
  const display=context();
  drawAbilityFx(display.ctx,g,g.t);display.verify();
- assert.match(ABILITY_DEFS.gallop.desc,/10 s/);
+ assert.match(ABILITY_DEFS.gallop.desc,/3 s/);
  assert.match(ABILITY_DEFS.rainbow.desc,/siete cuernos/);
  clearAbilityFx();
 });

@@ -1,6 +1,8 @@
 // Shared intro and cinema drawing primitives. V367: no evolution event listeners.
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
+import {CUERNO_V373_HEIGHT} from "../characters/art/cuerno-v373.js";
+import {CUERNO_VISUAL_H} from "../characters/art/cuerno.js";
 
 const VISUAL_H = [34, 56, 76, 98, 124];
 const CHAR_K = { kilo: 1.0, lilo: 1.0, stitcho: 0.95, stitch: 0.95, chispin: 0.92, pikachu: 0.92, cat: 0.92, dragon: 1.0, frita: 1.04, dino: 1.0, pizza: 0.98, yomi: 0.96 };
@@ -261,6 +263,7 @@ export function drawTitle(ctx, text, x, y, size, colors, opts = {}) {
 
 /** Altura visual (px) de un personaje/forma con visualScale = 1. */
 export function baseHeight(id, evo) {
+  if(id==="cuerno"){const form=clamp(evo|0,0,4);return CUERNO_V373_HEIGHT[form]*CUERNO_VISUAL_H[form]/100;}
   return VISUAL_H[clamp(evo | 0, 0, 4)] * (CHAR_K[id] || 1);
 }
 

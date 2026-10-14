@@ -145,6 +145,9 @@ jobs:
       - name: Character Canvas proportions and Cuerno design
         run: npm run test:browser:characters
 
+      - name: Cuerno finale attacks and evolutions
+        run: npm run test:browser:cuerno
+
       - name: Release gate
         run: npm run release:check
 
