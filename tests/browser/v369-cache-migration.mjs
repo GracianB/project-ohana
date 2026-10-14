@@ -50,7 +50,7 @@ try {
  },{baseline,same});
  const seedRequests=network.length;
  network.length=0;
- await page.evaluate(()=>navigator.serviceWorker.register("./sw.js?v=ohana-374",{scope:"./"}));
+ await page.evaluate(()=>navigator.serviceWorker.register("./sw.js?v=ohana-375",{scope:"./"}));
  // CacheStorage creation may precede the last cache.put on slower runners.
  // Observe the actual completed metadata, not merely the new cache name.
  let ready=false;
@@ -60,7 +60,7 @@ try {
    // may treat the returned Promise as a truthy value before it settles.
    for(let attempt=0;attempt<200;attempt++){
      ready=await page.evaluate(async()=>{
-       const c=await caches.open("ohana-static-ohana-374");
+       const c=await caches.open("ohana-static-ohana-375");
        return !!(await c.match("./.ohana-install-stats.json"));
      });
      if(ready)break;
@@ -70,7 +70,7 @@ try {
  } catch(error) {
    const diagnostic=await page.evaluate(async()=>{
      const names=await caches.keys();
-     const c=await caches.open("ohana-static-ohana-374");
+     const c=await caches.open("ohana-static-ohana-375");
      return {names,controlled:!!navigator.serviceWorker.controller,
        assets:(await c.keys()).map(x=>new URL(x.url).pathname).slice(-12)};
    });
@@ -78,9 +78,9 @@ try {
      "; requests="+network.slice(-15).join(",")+"; "+error.message);
  }
  const migration=await page.evaluate(async()=>{
-   const c=await caches.open("ohana-static-ohana-374");
+   const c=await caches.open("ohana-static-ohana-375");
    const stats=await (await c.match("./.ohana-install-stats.json")).json();
-   const game=await c.match("./game.js?v=ohana-374");
+   const game=await c.match("./game.js?v=ohana-375");
    const root=await c.match("./");
    return {
      stats,
@@ -108,7 +108,7 @@ try {
  await page.waitForFunction(()=>!!window.__OHANA_E2E?.start,undefined,{timeout:15000});
  await page.evaluate(()=>window.__OHANA_E2E.start("kilo"));
  await page.waitForFunction(()=>document.body.classList.contains("playing"),undefined,{timeout:10000});
- console.log("OHANA V372→V374 Chromium upgrade: "+seedRequests+" fixture downloads, "+
+ console.log("OHANA V372→V375 Chromium upgrade: "+seedRequests+" fixture downloads, "+
    migration.stats.reused+" cached, "+migration.stats.downloaded+" network, offline play OK.");
  await context.close();
 } finally {

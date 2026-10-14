@@ -1,3 +1,7 @@
+## V375 · Selector integrado con Cuerno y proporciones (ohana-375)
+
+La cuadrícula conserva los diez héroes y las alturas calibradas de V374. Flechas por filas según las columnas reales, foco sincronizado, Inicio/Fin y controles externos que mantienen sus teclas. Marca visible de selección; en móvil, ficha y controles siguen a las cinco filas sin superponerse. Ambos módulos visuales entran en el precache con sus huellas actualizadas.
+
 ## V374 · Cuerno adorable y proporciones del elenco (ohana-374)
 
 Cuerno parte del canvas lila aprobado: ojos violetas con parpadeo, orejas redondeadas, hocico suave, crin continua lavanda, plumas perladas y una forma nocturna más cálida. Expresiones de curiosidad, timidez y victoria conectadas al rig; movimiento reducido conserva una pose quieta. Vista interactiva en previews/cuerno-design.html.

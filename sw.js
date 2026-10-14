@@ -1,6 +1,7 @@
-const VERSION = "ohana-374";
+const VERSION = "ohana-375";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/roster-navigation.js?v=" + VERSION,
   "./characters/visual-size.js?v=" + VERSION,
   "./",
   "./index.html",
@@ -244,8 +245,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "f3862ceff8a81dbd429c44f8eb6763cd65c9f446",
+  "index.html": "6895b7e2caf621c2c54a8c96afe18ecbe7118fb0",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -266,7 +268,7 @@ const PRECACHE_REVISIONS = {
   "supreme.css": "8cdec07251d4a7f268ec50fb3f96a199c32287f5",
   "world-map.css": "9700cb42230a70d3d551f1d327d0bfe19026086d",
   "mobile-v96.css": "d9ab3041736bf7af70c3af1118e0cead577a580c",
-  "v100-special.css": "6b0523cbc9a7b079dd33723077a97faaa1189f6b",
+  "v100-special.css": "0e9d0b30a4955be103011c8818f0302b29d22c30",
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
@@ -455,7 +457,7 @@ const PRECACHE_REVISIONS = {
   "systems/save.js": "a3090509e6b51bf0b033c6d8e898fed8fbce4045",
   "systems/surprises.js": "85e1a21e2018fb6ad6479a108784878323ebc4bd",
   "systems/title-fx.js": "ad9ad317a97072b7ad747a1738fb1ed1dd1f72f2",
-  "systems/title.js": "2b8fb31d4464610db29be36f29771f8785c5a500",
+  "systems/title.js": "fc5e6ab1bcc30900e044c68a798c08a87084faab",
   "systems/experience.js": "6b20279a96a9e62ac62edc27baaeab76024b54b5",
   "systems/online-coop.js": "af0fd46f7873e148af6ecb2996b30973e754a3ea",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
