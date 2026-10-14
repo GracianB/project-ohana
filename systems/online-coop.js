@@ -15,6 +15,7 @@ import { remotePresenceCorrection } from "./coop-v95-presence.js";
 import { drawDuoAltars } from "./duo-altar-art.js";
 import {drawKiloDuet} from "./kilo-duet.js";
 import {drawDinoPeerEffects} from "./dino-coop-effects.js";
+import {applyDinoImpact,readDinoImpact} from "./coop-ability-hits.js";
 import { drawMichiAbilityEcho,drawChispinAbilityEcho,drawKiloAbilityEcho,drawProjectile,drawSlash,drawBolt } from "./abilities.js";
 import { drawChispinCloud } from "./chispin-cloud.js";
 import { captureCombatFrame,applyCombatFrame,advanceMirroredEnemies,validCombatFrame,COMBAT_PROTOCOL,resetCombatMirror,sharedEnemyTarget } from "./coop-combat-mirror.js";
@@ -1022,7 +1023,12 @@ class OnlineCoop {
     target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
     target.invuln = Math.max(target.invuln || 0, 8);
-    target.stun = Math.max(target.stun || 0, 8);
+    // Dino's authorized impulse is bounded and boss-limited at the host.
+    // No metadata means the historical generic hit response for other heroes.
+    const dinoImpact=payload.characterId==="dino"&&this.remote?.characterId==="dino"
+      ?readDinoImpact(payload.dinoImpact):null;
+    if(!dinoImpact)target.stun=Math.max(target.stun||0,8);
+    else applyDinoImpact(target,dinoImpact);
     target._hitT = 10;
     target._hitMax = 10;
     if (game.player && !game.player.dead) {
