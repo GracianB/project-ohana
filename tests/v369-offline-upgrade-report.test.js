@@ -12,9 +12,9 @@ test("V369 verified historical upgrade computes accurate SHA diff and source-byt
  const revs=JSON.parse(sw.slice(sw.indexOf("{",st),sw.indexOf("\n};",st)+2));
  const total=Object.keys(revs).length;
  const reused=Object.keys(revs).filter(k=>baseline.resources[k]?.sha===revs[k]).length;
- assert.match(stdout,new RegExp("OHANA ohana-372 → ohana-373: "+reused+"\\/"+total+" assets unchanged"));
+ assert.match(stdout,new RegExp("OHANA ohana-372 → ohana-374: "+reused+"\\/"+total+" assets unchanged"));
  assert.equal(report.sourceVersion,"ohana-372");
- assert.equal(report.targetVersion,"ohana-373");
+ assert.equal(report.targetVersion,"ohana-374");
  assert.equal(report.total,total);
  assert.equal(report.reused,reused);
  assert.equal(report.downloaded,total-reused);

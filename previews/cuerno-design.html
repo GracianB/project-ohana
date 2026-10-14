@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cuerno · Un pequeño universo lila</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#141321;color:#fbf3ff;font:16px/1.5 system-ui}
+main{max-width:1440px;margin:auto;padding:36px 28px}header{max-width:720px;margin-bottom:24px}
+.eyebrow{color:#c9afe9;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+h1{font-size:clamp(28px,4vw,48px);line-height:1.1;margin:8px 0 16px;letter-spacing:-.04em}p{color:#c5b9d3}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px}label{font-size:13px;color:#d7c6e7}
+select,button{font:inherit;color:#f9edff;background:#2a243b;border:1px solid #766186;border-radius:12px;padding:10px 14px;cursor:pointer}
+:focus-visible{outline:3px solid #f2ccff;outline-offset:4px}button[aria-pressed=true]{background:#655080}
+.evolutions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+article{min-width:0;border:1px solid #494057;border-radius:24px;background:#211e30;overflow:hidden;padding:18px 10px 12px;text-align:center}
+article span{font-size:10px;font-weight:800;color:#bba5cf;letter-spacing:.15em}h2{font-size:16px;margin:5px 0;color:#eee0fb}
+canvas{display:block;width:100%;height:auto}article p{font-size:12px;margin:0 4px 8px}
+.family{margin-top:22px;padding:22px;border:1px solid #494057;border-radius:24px;background:#1b192a}.family h2{font-size:18px}.family p{margin-top:0;font-size:13px}
+.notes{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px;font-size:13px}.notes strong{color:#eed7ff}.notes p{margin:4px 0}
+a{color:#e6c4ff}footer{margin-top:28px;font-size:13px}
+@media(max-width:800px){.evolutions{grid-template-columns:repeat(2,minmax(0,1fr))}.evolutions article:last-child{grid-column:1/-1;width:100%;max-width:340px;justify-self:center}.notes{grid-template-columns:1fr}main{padding:24px 16px}.family{padding:14px}}
+</style>
+<main><header><span class="eyebrow">Cuerno · Diseño del personaje</span><h1>Un pequeño universo lila.</h1><p>De potrito soñador a guardián de las estrellas. Cinco formas, la misma mirada dulce y una crin lavanda que crece con él.</p></header>
+<div class="controls"><label for="pose">Ver a Cuerno</label><select id="pose"><option value="idle">Respirando</option><option value="walk">Trotando</option><option value="jump">Saltando</option><option value="victory">Celebrando</option><option value="curious">Curioso</option><option value="shy">Tímido</option><option value="blink">Parpadeando</option><option value="attack">Embistiendo</option><option value="trail">Estela arcoíris</option><option value="hurt">Herido</option><option value="death">Tras la derrota</option></select><button id="pause" type="button" aria-pressed="false">Pausar</button><button id="mirror" type="button" aria-pressed="false">Girar</button></div>
+<section class="evolutions" aria-label="Las cinco evoluciones de Cuerno"></section>
+<section class="family"><h2>Pequeño, pero parte de una gran familia.</h2><p>Su tamaño real junto a los demás héroes, en la primera forma.</p><canvas id="family" width="1320" height="180" role="img" aria-label="Los diez héroes a escala de juego"></canvas></section>
+<div class="notes"><div><strong>Una mirada que responde</strong><p>Ojos violetas, pestaña suave, mejillas rosadas y sonrisa. Curiosidad, timidez y alegría tienen su propia expresión.</p></div><div><strong>Lavanda en cada evolución</strong><p>El arcoíris aparece entre los mechones. La forma nocturna conserva las orejas suaves y la misma ternura.</p></div><div><strong>Magia ligera</strong><p>Cuernito de semilla, plumas perladas y estrellas de mantequilla. Respeta la preferencia de movimiento reducido.</p></div></div>
+<footer><a href="cuerno-reference.html">Canvas de referencia →</a> · <a href="../gallery.html?id=cuerno">Todas las poses del juego →</a> · <a href="../index.html">Volver a Ohana →</a></footer></main>
+<script type="module">
+import {drawCuernoV373,CUERNO_V373_NAMES} from '../characters/art/cuerno-v373.js';
+import {drawCharacter} from '../characters/draw.js';import {ROSTER} from '../characters/roster.js';
+const scales=[4,3,2.5,1.85,1.5],descriptions=['Un brote, una sonrisa y mucha curiosidad.','Un poni dulce que empieza a brillar.','Su crin descubre los colores del cielo.','Alas de perla para abrazar las nubes.','Un guardián nocturno de corazón tierno.'];
+const section=document.querySelector('.evolutions');
+CUERNO_V373_NAMES.forEach((name,i)=>{const card=document.createElement('article');card.innerHTML=`<span>FORMA ${i+1} / 5</span><h2>${name}</h2><canvas width="300" height="310" role="img" aria-label="${name}"></canvas><p>${descriptions[i]}</p>`;section.appendChild(card)});
+const canvases=[...section.querySelectorAll('canvas')],pose=document.getElementById('pose'),pause=document.getElementById('pause'),mirror=document.getElementById('mirror');
+const motion=matchMedia('(prefers-reduced-motion: reduce)');let paused=motion.matches,facing=1,t=30,last=0;
+function paint(){canvases.forEach((canvas,i)=>{const ctx=canvas.getContext('2d');ctx.clearRect(0,0,300,310);ctx.fillStyle=i===4?'#30293f':'#332c43';ctx.beginPath();ctx.ellipse(150,266,100,10,0,0,Math.PI*2);ctx.fill();const value=pose.value;drawCuernoV373(ctx,135,256,{form:i+1,t,scale:scales[i],facing,anim:['curious','shy','blink'].includes(value)?'idle':value,cuernoBeat:['curious','shy'].includes(value)?value:'',blink:value==='blink'?1:0,reduceMotion:motion.matches});});}
+function buttonState(){pause.setAttribute('aria-pressed',String(paused));pause.textContent=paused?'Animar':'Pausar'}
+pause.onclick=()=>{paused=!paused;buttonState()};mirror.onclick=()=>{facing*=-1;mirror.setAttribute('aria-pressed',String(facing<0));paint()};pose.onchange=paint;motion.addEventListener('change',()=>{paused=motion.matches;buttonState();paint()});buttonState();
+const family=document.getElementById('family'),ctx=family.getContext('2d');ROSTER.forEach((r,i)=>{const f=r.forms[0],x=66+i*132,y=115;ctx.fillStyle='#322b40';ctx.beginPath();ctx.ellipse(x,y+5,38,6,0,0,Math.PI*2);ctx.fill();const p={id:r.id,evo:0,color:f.color,w:f.w,h:f.h,x:x-f.w/2,y:y-f.h,vx:0,vy:0,grounded:true,facing:1,melee:0,invuln:0,speed:f.speed};drawCharacter(ctx,p,{x:0,y:0},40);ctx.fillStyle=r.id==='cuerno'?'#edcaff':'#c8bdd6';ctx.font='600 17px system-ui';ctx.textAlign='center';ctx.fillText(r.name,x,155)});
+function frame(now){if(!document.hidden&&now-last>=50){if(!paused)t+=Math.min(3,(now-last)*.06);paint();last=now}requestAnimationFrame(frame)}paint();window.previewReady=true;window.cuernoPreview={setFrame(value){paused=true;t=value;buttonState();paint()}};requestAnimationFrame(frame);
+</script></html>
