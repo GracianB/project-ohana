@@ -73,12 +73,12 @@ test("Dino V377 U keeps a 260-frame titan and announces the original impact",()=
  assert.equal(h.g._dinoUltimate.remaining,0);
 });
 
-test("Dino V77 reduced-motion halves fossil count and keeps impacts finite",()=>{
+test("Dino V379 reduced-motion preserves full fossil gameplay and keeps impacts finite",()=>{
  const h=battle();h.g.reduceMotion=true;
  h.fns.castUltimate(h.g,h.g.player,h.g.enemies,110,"#d3f59c");
  const field=h.active.find(f=>f.kind==="dinoColossus");
  for(let i=0;i<260;i++)h.fns.update.dinoColossus(h.g,field,h.g.player);
- assert.equal(h.active.filter(f=>f.kind==="dinoFossil").length,3);
+ assert.equal(h.active.filter(f=>f.kind==="dinoFossil").length,8);
  assert.ok(h.g.shake<=18);
  const rock=h.active.find(f=>f.kind==="dinoFossil");
  const target=h.g.enemies[0],before=target.hp;

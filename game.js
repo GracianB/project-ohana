@@ -169,7 +169,7 @@ game.createCoopEnemy=(spec)=>{
 };
 
 game.cuernoFx=createCuernoFx();
-game.onAbilityHit=(enemy,damage)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage);
+game.onAbilityHit=(enemy,damage,options)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage,options);
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
 game.festivalVibrate = (ms) => buzz(ms);

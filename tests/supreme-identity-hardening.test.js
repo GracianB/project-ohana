@@ -127,7 +127,7 @@ test('Dino V377: Coloso conserva potencia y armadura tras aviso local de 18 tick
   const farEnemy = makeEnemy({x:1400,y:260});
   const game = cast('dino', [enemy,farEnemy]);
   assert.equal(enemy.hp,1000,'no hit before telegraph');
-  assert.ok(game.shake >= 9 && game.shake <= 18);
+  assert.ok(game.shake>=0&&game.shake<=3,'reduced motion must suppress U start shake');
   assert.ok(game.player._specialTitanT >= 260);
   assert.ok(game.player._specialArmorT >= 260);
   for(let i=0;i<17;i++){game.t++;updateAbilityFx(game);}
