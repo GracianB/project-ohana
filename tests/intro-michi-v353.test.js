@@ -100,13 +100,11 @@ test("V353 authentic cat.js drawing, baby-to-guardian anatomy and eight existing
  const art=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
  const intro=readFileSync(new URL("../systems/intro.js",import.meta.url),"utf8");
  const draw=readFileSync(new URL("../characters/draw.js",import.meta.url),"utf8");
- for(const part of ["function solve(","function ear(","function face(","function tail(",
-  "function drawBaby(","function drawCat(","function drawCloud(","function drawMoon(",
-  "function drawGod(","function feather(","function moonSoul("])
-  assert.ok(art.includes(part),"cat anatomy missing "+part);
+ for(const part of ["function solve(","function drawMichiPortrait(","function moonSoul("])
+    assert.ok(art.includes(part),"cat anatomy missing "+part);
  assert.match(art,/const welcome=michiWelcomeRig\(safe,f\)/);
- assert.match(art,/const flap = .*r\.michiWing/);
- assert.match(art,/const n = r\.slot === 2 \? 7 : 3/);
+ assert.match(art,/if\(f===4\)/);
+ assert.match(art,/const count=f===4\?3:f===3\?2:1/);
  assert.match(intro,/michiWelcomeBeat\(loop,reduce\)/);
  assert.match(intro,/michiWelcome:michiBeat/);
  assert.match(draw,/pose\.michiWelcome=p\._introMichi/);

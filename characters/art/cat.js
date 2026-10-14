@@ -90,317 +90,6 @@ function solve(pose) {
   };
 }
 
-function ear(ctx, x, y, h, lean, fur, inner) {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(lean || 0);
-  ctx.beginPath();
-  ctx.moveTo(-8, 3);
-  ctx.lineTo(0, -h);
-  ctx.lineTo(11, 4);
-  ctx.closePath();
-  ctx.fillStyle = fur;
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = "round";
-  ctx.fill();
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-3.2, 1);
-  ctx.lineTo(1, -h * 0.58);
-  ctx.lineTo(6, 2);
-  ctx.fillStyle = inner;
-  ctx.fill();
-  ctx.restore();
-}
-
-function face(ctx, R, pose, r, x, y, s, c) {
-  const er = Math.max(4.2, s * 0.36);
-  R.eye(ctx, x - s * 0.38, y, er, pose, { iris: c.eye, mood: r.mood, lash: true });
-  R.eye(ctx, x + s * 0.4, y + 0.4, er * 0.94, pose, { iris: c.eye, mood: r.mood, lash: true });
-  ctx.beginPath();
-  ctx.moveTo(x, y + s * 0.26);
-  ctx.lineTo(x - 3.4, y + s * 0.26 + 3.4);
-  ctx.lineTo(x + 3.4, y + s * 0.26 + 3.4);
-  ctx.closePath();
-  ctx.fillStyle = c.nose;
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = 1.4;
-  ctx.fill();
-  ctx.stroke();
-  const mouth = r.st === "attack" || r.slot === 2 ? "fang" : r.mood === "happy" ? "smile" : r.st === "hurt" ? "flat" : "smile";
-  R.mouth(ctx, x + 0.4, y + s * 0.52, Math.max(7, s * 0.46), mouth);
-  ctx.save();
-  ctx.strokeStyle = "rgba(255,255,255,0.9)";
-  ctx.lineWidth = 1.35;
-  ctx.lineCap = "round";
-  const w = Math.sin(r.t * 0.22) * 1.4;
-  for (const side of [-1, 1]) {
-    ctx.beginPath();
-    ctx.moveTo(x + side * s * 0.22, y + s * 0.34);
-    ctx.quadraticCurveTo(x + side * s * 0.6, y + s * 0.24 + w, x + side * s * 1.05, y + s * 0.16);
-    ctx.moveTo(x + side * s * 0.22, y + s * 0.48);
-    ctx.quadraticCurveTo(x + side * s * 0.62, y + s * 0.52, x + side * s * 1.08, y + s * 0.5 + w);
-    ctx.stroke();
-  }
-  ctx.restore();
-  R.blush(ctx, x - s * 0.64, y + s * 0.32, s * 0.18, "#ff8aa8");
-  R.blush(ctx, x + s * 0.68, y + s * 0.34, s * 0.16, "#ff8aa8");
-}
-
-function tail(ctx, R, x, y, len, ang, amp, t, i, color) {
-  const end = R.tail(ctx, x, y, len, ang, (u) => Math.sin(t * 0.16 + i + u * 4) * amp * (1.15 - u), len > 30 ? 10 : 8, 3.1, color, { segments: 10, lw: 2.1, ink: INK });
-  if (end) {
-    ctx.beginPath();
-    ctx.arc(end[0], end[1], 3.4, 0, TAU);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.lineWidth = 1.6;
-    ctx.strokeStyle = INK;
-    ctx.stroke();
-  }
-  return end;
-}
-
-function legs(ctx, R, r, hx, fur, dark, len) {
-  const L = len || 20;
-  // Two original hip roots stay connected while the haunch breathes.
-  R.swingLimb(ctx, hx - 9, -L - 2, L, r.leg+(r.michiHaunch||0)*.12, r.st === "jump" ? -5 : 0, 7.2, dark);
-  R.swingLimb(ctx, hx + 8, -L - 2, L, r.st === "jump" ? -2.05 : -r.leg-(r.michiHaunch||0)*.12, r.st === "jump" ? -4 : 0, 7.2, fur);
-}
-
-function arm(ctx, R, r, x, y, fur, len) {
-  const L = len || 18;
-  const bend = r.st === "attack" ? 6 : r.slot === 0 ? 4 : 1;
-  R.swingLimb(ctx, x, y, L, r.arm-(r.michiPaw||0)*.20, bend, 6.4, fur, { handColor: "#ffb0c4" });
-  if (r.st === "attack" && r.atk > 0.25 && r.atk < 0.75) {
-    ctx.save();
-    ctx.translate(x + 22, y - 6);
-    ctx.strokeStyle = "rgba(255,255,255,0.9)";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * 5, -8);
-      ctx.lineTo(8 + i * 6, 6);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-}
-
-function drawBaby(ctx, R, pose, r, c) {
-  tail(ctx, R, -6, -20, 16, -2.5, r.tail * 0.7, r.t, 0, c.dark);
-  if (r.st !== "dead") {
-    R.swingLimb(ctx, -8, -8, 8, 0.2 + r.leg * 0.4, 0, 6, c.fur);
-    R.swingLimb(ctx, 9, -8, 8, -0.15 - r.leg * 0.4, 0, 6, c.fur);
-  }
-  // The baby had back legs but no visible forepaws to groom with. Both
-  // tiny arms now begin at its REAL shoulder line, partly hidden by the
-  // oval belly so there is no floating wrist or detached axilla.
-  R.swingLimb(ctx, -17, -34, 7, -0.28-(r.michiPaw||0)*.14,
-    0, 5.2, c.dark, {handColor:"#ffd5da"});
-  R.ellipse(ctx, 2, -37, 31, 31, c.fur);
-  R.ellipse(ctx, 8, -30, 14, 12, c.belly, { line: false });
-  R.swingLimb(ctx, 19, -33, 9, r.arm-(r.michiPaw||0)*.42,
-    0, 5.5, c.fur, {handColor:"#ffb0c4"});
-  R.shine(ctx, -8, -50, 8, 4, 0.4);
-  const flop = r.st === "hurt" ? 0.35 : r.mood === "angry" ? -0.15 : 0.05;
-  ear(ctx, -15, -59, 14, -0.35 + flop + (r.michiEar || 0), c.fur, c.ear);
-  ear(ctx, 16, -59, 15, 0.28 - flop - (r.michiEar || 0), c.fur, c.ear);
-  face(ctx, R, pose, r, 4, -39, 30, c);
-  R.ellipse(ctx, 14, -24, 5.2, 5.2, c.accent, { shade: false, lw: 1.6 });
-  ctx.beginPath();
-  ctx.arc(14, -24, 7.2, 0, TAU);
-  ctx.strokeStyle = "#fff";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-function drawCat(ctx, R, pose, r, c) {
-  tail(ctx, R, -18, -20, 36, -2.85 + (r.st === "jump" ? 0.35 : 0), r.tail * 0.8, r.t, 0.4, c.dark);
-  legs(ctx, R, r, 0, c.fur, c.dark, 20);
-  R.ellipse(ctx, 2, -34, 24, 16, c.fur);
-  R.ellipse(ctx, 8, -30, 11, 9, c.belly, { line: false });
-  ctx.strokeStyle = c.dark;
-  ctx.lineWidth = 2.3;
-  ctx.lineCap = "round";
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(-10, -40 + i * 6);
-    ctx.quadraticCurveTo(2, -36 + i * 6, 12, -40 + i * 6);
-    ctx.stroke();
-  }
-  arm(ctx, R, r, 14, -36, c.fur, 18);
-  ctx.save();
-  ctx.translate(12, -62 + (r.st === "attack" ? -2 : 0));
-  ctx.rotate(r.michiHead || 0);
-  if (r.st === "run") ctx.rotate(r.run * 0.06);
-  ear(ctx, -14, -6, 24, -0.25 + (r.michiEar || 0), c.fur, c.ear);
-  ear(ctx, 12, -6, 26, 0.2 - (r.michiEar || 0), c.fur, c.ear);
-  R.ellipse(ctx, 0, 8, 22, 20, c.fur);
-  R.shine(ctx, -6, -2, 7, 3.5, 0.38);
-  ctx.beginPath();
-  ctx.moveTo(-8, -8);
-  ctx.quadraticCurveTo(0, -16, 8, -8);
-  ctx.strokeStyle = c.dark;
-  ctx.lineWidth = 2.2;
-  ctx.stroke();
-  face(ctx, R, pose, r, 1, 6, 18, c);
-  ctx.beginPath();
-  ctx.moveTo(-8, 22);
-  ctx.quadraticCurveTo(0, 28, 10, 22);
-  ctx.strokeStyle = c.accent;
-  ctx.lineWidth = 3.4;
-  ctx.stroke();
-  R.ellipse(ctx, 1, 26, 3.3, 3.3, "#ffd24a", { lw: 1.5 });
-  ctx.restore();
-}
-
-function drawCloud(ctx, R, pose, r, c) {
-  const bob = Math.sin(r.t * 0.09) * 3;
-  ctx.save();
-  ctx.translate(0, bob);
-  tail(ctx, R, -20, -36, 28, -1.7, r.tail * 0.6, r.t, 1, "#fff");
-  const puffs = [[-26, -30, 16], [-4, -26, 20], [20, -32, 15], [-10, -44, 13], [14, -46, 12], [4, -18, 14]];
-  for (const p of puffs) R.ellipse(ctx, p[0], p[1], p[2], p[2] * 0.82, "#fff", { lw: 2.1 });
-  R.ellipse(ctx, 2, -34, 16, 11, c.fur, { line: false });
-  ctx.save();
-  ctx.translate(6, -64);
-  ctx.rotate(r.michiHead || 0);
-  ear(ctx, -12, -2, 16, -0.2 + (r.michiEar || 0), "#fff", c.ear);
-  ear(ctx, 12, -2, 16, 0.18 - (r.michiEar || 0), "#fff", c.ear);
-  R.ellipse(ctx, -18, 6, 9, 8, "#fff", { lw: 2 });
-  R.ellipse(ctx, 18, 8, 8, 7, "#fff", { lw: 2 });
-  R.ellipse(ctx, 0, 8, 20, 18, c.fur);
-  R.shine(ctx, -6, 0, 6, 3, 0.45);
-  face(ctx, R, pose, r, 0, 6, 16, c);
-  R.star(ctx, -16, -14, 6, c.accent);
-  ctx.restore();
-  ctx.restore();
-}
-
-function drawMoon(ctx, R, pose, r, c) {
-  const sway = Math.sin(r.t * 0.1) * 6;
-  ctx.beginPath();
-  ctx.moveTo(-2, -86);
-  ctx.quadraticCurveTo(-42 + sway, -46, -32 + sway * 0.4, -2);
-  ctx.lineTo(8, -8);
-  ctx.quadraticCurveTo(-8, -50, 2, -86);
-  ctx.closePath();
-  ctx.fillStyle = "#3d2a86";
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = 2.4;
-  ctx.fill();
-  ctx.stroke();
-  tail(ctx, R, -10, -22, 34, -2.8, r.tail * 0.8, r.t, 0, c.dark);
-  tail(ctx, R, -8, -18, 28, -3.05, r.tail * 0.7, r.t, 1.4, c.accent);
-  legs(ctx, R, r, 2, c.fur, c.dark, 22);
-  R.ellipse(ctx, 2, -40, 16, 24, c.fur);
-  R.ellipse(ctx, 5, -34, 8, 13, c.belly, { line: false });
-  arm(ctx, R, r, 10, -48, c.fur, 16);
-  ctx.save();
-  ctx.translate(4, -74);
-  ctx.rotate(r.michiHead || 0);
-  ear(ctx, -10, 0, 32, -0.12 + (r.michiEar || 0), c.fur, c.ear);
-  ear(ctx, 12, 0, 34, 0.1 - (r.michiEar || 0), c.fur, c.ear);
-  ctx.beginPath();
-  ctx.arc(-2, -28, 9, 0.4, 5.4);
-  ctx.strokeStyle = c.accent;
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  R.ellipse(ctx, 0, 6, 17, 18, c.fur);
-  R.shine(ctx, -5, -2, 5, 2.6, 0.35);
-  face(ctx, R, pose, r, 1, 4, 15, c);
-  ctx.restore();
-}
-
-function feather(ctx, side, rot, len, color) {
-  ctx.save();
-  ctx.translate(-2, -34);
-  ctx.scale(side, 1);
-  ctx.rotate(rot);
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.quadraticCurveTo(len * 0.45, -18, len, -4);
-  ctx.quadraticCurveTo(len * 0.5, 10, 0, 5);
-  ctx.closePath();
-  ctx.fillStyle = color;
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = 2;
-  ctx.fill();
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(4, 0);
-  ctx.lineTo(len * 0.72, -2);
-  ctx.strokeStyle = "#e6c56a";
-  ctx.lineWidth = 1.3;
-  ctx.stroke();
-  ctx.restore();
-}
-
-// Michi Eclipse (forma 5). Nombre interno fijado por tests.
-function drawGod(ctx, R, pose, r, c) {
-  const flap = Math.sin(r.t * 0.18) * 0.22 + (r.slot === 2 ? 0.15 : 0) + (r.michiWing || 0)*.24;
-  // Eclipse disc behind the head: violet moon with pink rim (flat fills).
-  ctx.beginPath(); ctx.arc(8, -70, 34, 0, TAU); ctx.fillStyle = "#ff8fcf"; ctx.fill();
-  ctx.beginPath(); ctx.arc(11, -72, 30, 0, TAU); ctx.fillStyle = c.accent; ctx.fill();
-  ctx.lineWidth = 2.2; ctx.strokeStyle = INK; ctx.stroke();
-  feather(ctx, -1, -1.05 + flap, 48, "#ffd6ee");
-  feather(ctx, -1, -0.45 + flap, 58, "#fff0f8");
-  feather(ctx, -1, 0.12 + flap, 42, "#c9b4ff");
-  feather(ctx, 1, -0.95 - flap, 44, "#fff0f8");
-  feather(ctx, 1, -0.28 - flap, 54, "#ffd6ee");
-  const n = r.slot === 2 ? 7 : 3;
-  for (let i = 0; i < n; i++) {
-    const spread = r.slot === 2 ? -2.6 + i * 0.38 : -2.2 + i * 0.45;
-    const col = i % 2 ? c.accent : c.fur;
-    tail(ctx, R, -14, -22, 28 + (i % 3) * 5, spread - 0.45, r.tail * 0.8, r.t, i, col);
-  }
-  if (r.slot === 2) {
-    ctx.save();
-    ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.45;
-    for (let i = 0; i < 5; i++) {
-      const a = -2.4 + i * 0.45 + Math.sin(r.t * 0.2 + i) * 0.15;
-      ctx.strokeStyle = i % 2 ? "#fff" : c.accent;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-12, -28);
-      ctx.quadraticCurveTo(-30 - i * 4, -50 + i * 8, -12 + Math.cos(a) * 48, -28 + Math.sin(a) * 36);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-  legs(ctx, R, r, 2, c.fur, c.dark, 18);
-  R.ellipse(ctx, 2, -32, 20, 16, c.fur);
-  R.ellipse(ctx, 7, -28, 8, 8, c.accent);
-  arm(ctx, R, r, 14, -36, c.fur, 17);
-  ctx.save();
-  ctx.translate(8, -62);
-  ctx.rotate(r.michiHead || 0);
-  ear(ctx, -12, -4, 22, -0.2 + (r.michiEar || 0), c.fur, c.ear);
-  ear(ctx, 12, -4, 24, 0.16 - (r.michiEar || 0), c.fur, c.ear);
-  R.ellipse(ctx, 0, 8, 22, 20, c.fur);
-  R.shine(ctx, -6, 0, 7, 3.2, 0.42);
-  face(ctx, R, pose, r, 1, 6, 18, c);
-  for (let i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * 8, -12);
-    ctx.lineTo(i * 8 + (i === 0 ? 0 : i * 2), -26 - (i === 0 ? 8 : 0));
-    ctx.lineTo(i * 8 + 8, -10);
-    ctx.closePath();
-    ctx.fillStyle = "#ffd76a";
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 1.6;
-    ctx.fill();
-    ctx.stroke();
-  }
-  ctx.restore();
-  
-}
-
-
 // V51 · Michi Moon Soul Pass. Local Canvas-only animation, no timers or global particles.
 function moonSoul(ctx, pose, form, front) {
   const t = Number.isFinite(pose.t) ? pose.t : 0;
@@ -523,6 +212,38 @@ function drawMichiFootwork(ctx,pose,f,t){
  ctx.restore();
 }
 
+
+// Shared silhouette: raised plumes behind the hips; two short, separate feet.
+function drawMichiPortrait(ctx,R,pose,r,c,f){
+ const H=[72,88,94,108,116][f],headY=-H+33,bodyY=-30-f*2;
+ const oval=(x,y,rx,ry,col,line=true)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=col;ctx.fill();if(line){ctx.strokeStyle=INK;ctx.lineWidth=2;ctx.stroke();}};
+ const stroke=(col,w)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();};
+ const sway=pose.reduceMotion?0:Math.sin(r.t*.065)*2+r.tail;
+ const count=f===4?3:f===3?2:1;
+ for(let i=0;i<count;i++){
+  const tipX=-36-i*15,tipY=bodyY-19-i*14+sway;
+  ctx.beginPath();ctx.moveTo(-15,bodyY+2);ctx.bezierCurveTo(-42,bodyY+1,-57-i*8,tipY-13,tipX,tipY);stroke(INK,12-i);
+  ctx.beginPath();ctx.moveTo(-15,bodyY+2);ctx.bezierCurveTo(-42,bodyY+1,-57-i*8,tipY-13,tipX,tipY);stroke(c.dark,8-i);
+  oval(tipX,tipY,5-i*.5,6,c.belly);
+ }
+ if(f===4){for(const side of [-1,1]){ctx.save();ctx.translate(side*14,bodyY-13);ctx.scale(side,1);ctx.rotate(pose.reduceMotion?0:Math.sin(r.t*.08)*.08);ctx.beginPath();ctx.moveTo(0,3);ctx.bezierCurveTo(19,-7,28,-40,39,-35);ctx.quadraticCurveTo(44,-21,33,-12);ctx.quadraticCurveTo(28,-4,19,-4);ctx.quadraticCurveTo(12,7,0,3);ctx.fillStyle=c.belly;ctx.fill();stroke(INK,2);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(5+i*7,-2-i*4);ctx.quadraticCurveTo(23,-11-i*6,31+i*3,-24-i*3);stroke('#cbb2ea',1.3);}ctx.restore();}}
+ oval(0,headY+22,10,Math.max(9,(bodyY-headY)/2),c.fur);
+ const step=r.st==='run'?r.run*4:0;
+ if(f!==2)for(const side of [-1,1]){const x=side*10;ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(INK,11);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(side<0?c.dark:c.fur,7);oval(x+side*step,-4,8,5,c.belly);for(const toe of [-2,2]){ctx.beginPath();ctx.moveTo(x+side*step+toe,-5);ctx.lineTo(x+side*step+toe,-2);stroke(c.dark,.8);}}
+ oval(0,bodyY,19,22,c.fur);oval(3,bodyY+3,11,14,c.belly,false);
+ if(f===2)for(const [x,y,z] of [[-18,bodyY,9],[18,bodyY,8],[-10,bodyY+12,8],[10,bodyY+12,8]])oval(x,y,z,z*.8,'#fff6fb');
+ ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(INK,10);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(c.dark,6);
+ const reach=r.st==='attack'?Math.sin(Math.PI*r.atk)*16:r.slot>=0?10:(r.michiPaw||0)*12+Math.sin(r.arm)*3;
+ ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(INK,10);ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(c.fur,6);oval(19+reach,bodyY+4-reach,5,5,c.belly);
+ ctx.save();ctx.translate(2,headY);if(r.mood==='angry'){ctx.rotate(-.06);}ctx.rotate(r.michiHead||0);
+ for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*9,-14);ctx.quadraticCurveTo(side*23,-33,side*23,-19);ctx.lineTo(side*25,-1);ctx.closePath();ctx.fillStyle=c.fur;ctx.fill();stroke(INK,2);ctx.beginPath();ctx.moveTo(side*14,-13);ctx.lineTo(side*20,-24);ctx.lineTo(side*21,-8);ctx.fillStyle=c.ear;ctx.fill();}
+ oval(0,0,25,23,c.fur);oval(-11,10,9,7,c.belly,false);oval(11,10,9,7,c.belly,false);
+ for(const side of [-1,1]){oval(side*10,-1,7.2,9,'#fff8ff');oval(side*10+1,-.3,5.1,7,c.eye,false);oval(side*10+1,1,2.7,5,'#392745',false);oval(side*10-1,-3,2,2,'#fff',false);oval(side*10+3,3,1,1,'#fff',false);if(r.mood==='closed'||r.mood==='happy'||(!pose.reduceMotion&&r.t%170<5)){ctx.beginPath();ctx.moveTo(side*10-7,0);ctx.quadraticCurveTo(side*10,5,side*10+7,0);stroke(c.fur,12);stroke(INK,1.6);}oval(side*18,10,4,2.2,c.ear,false);for(const dy of [8,12]){ctx.beginPath();ctx.moveTo(side*18,dy);ctx.lineTo(side*29,dy-2);stroke(c.dark,1);}}
+ ctx.beginPath();ctx.moveTo(-3,8);ctx.quadraticCurveTo(0,5,3,8);ctx.lineTo(0,11);ctx.closePath();ctx.fillStyle=c.nose;ctx.fill();ctx.beginPath();ctx.moveTo(0,11);ctx.lineTo(0,14);ctx.quadraticCurveTo(-4,18,-6,14);ctx.moveTo(0,14);ctx.quadraticCurveTo(4,18,6,14);stroke(INK,1.3);
+ for(const x of [-5,0,5]){ctx.beginPath();ctx.moveTo(x,-20);ctx.lineTo(x*.8,-14);stroke(c.dark,2);}
+ if(f>=3){ctx.beginPath();ctx.arc(0,-29,6,.5,5.8);stroke('#ffe5a1',2.5);}ctx.restore();
+ ctx.beginPath();ctx.moveTo(-12,bodyY-14);ctx.quadraticCurveTo(0,bodyY-8,12,bodyY-14);stroke(f===4?'#6c458f':c.ear,4);oval(0,bodyY-8,4,5,'#ffe3a0');
+}
 function draw(ctx, pose, R) {
   const src = pose || {};
   const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
@@ -553,12 +274,7 @@ function draw(ctx, pose, R) {
   else if (r.st === "fall") ctx.scale(1.05, 0.92);
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
-  if (f === 0) drawBaby(ctx, R, safe, r, c);
-  else if (f === 1) drawCat(ctx, R, safe, r, c);
-  else if (f === 2) drawCloud(ctx, R, safe, r, c);
-  else if (f === 3) drawMoon(ctx, R, safe, r, c);
-  else drawGod(ctx, R, safe, r, c);
-  if(r.st!=='dead'){const by=[-20,-36,-40,-48,-50][f];ctx.fillStyle=c.accent;ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(7,by,3+f*.35,0,TAU);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(5,by-1);ctx.lineTo(9,by+1);ctx.stroke();}
+  drawMichiPortrait(ctx,R,safe,r,c,f);
   moonSoul(ctx, safe, f, true);
   ctx.restore();
 }

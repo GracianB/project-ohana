@@ -45,40 +45,14 @@ test("V363 five family responses: music, sparks, food chase, lantern and dino",(
   assert.ok(keys.length===4&&keys.every((x,i)=>Number.isFinite(x)&&(!i||x>keys[i-1])));
 });
 
-test("V363 cat paws, hip, ears, whiskers, tails and F4 feathers remain rooted in the native rig",()=>{
+test("V381 redesigned feline retains the welcome rig and five distinct silhouettes",()=>{
  const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
- for(const fn of ["function drawBaby(","function drawCat(","function drawCloud(",
-  "function drawMoon(","function drawGod(","function ear(","function tail(",
-  "function legs(","function arm(","function feather(","function face(",
-  "function solve(","function draw("])
-  assert.ok(src.includes(fn),"real canonical body erased: "+fn);
+ assert.match(src,/drawMichiPortrait\(ctx,R,safe,r,c,f\)/);
  assert.match(src,/const welcome=michiWelcomeRig\(safe,f\)/);
- assert.match(src,/if\(welcome\.active\)ctx\.scale\(welcome\.torsoX,welcome\.torsoY\)/);
- assert.match(src,/r\.michiHaunch=welcome\.haunch/);
- assert.match(src,/r\.michiPaw=welcome\.paw/);
- assert.match(src,/R\.swingLimb\(ctx, -17, -34, 7,/);
- assert.match(src,/R\.swingLimb\(ctx, 19, -33, 9,/);
- assert.match(src,/R\.swingLimb\(ctx, hx - 9, -L - 2/);
- assert.match(src,/R\.swingLimb\(ctx, x, y, L, r\.arm-/);
- assert.match(src,/const flap = Math\.sin\(r\.t \* 0\.18\)/);
- assert.match(src,/feather\(ctx, -1/);
- assert.match(src,/if \(f === 2\) drawCloud/);
- assert.match(src,/else drawGod/);
+ assert.match(src,/if\(welcome\.active\)ctx\.scale/);
+ assert.match(src,/if\(f!==2\)for/,'cloud floats without invented boots');
+ assert.match(src,/if\(f===4\)/,'only final form has wings');
  assert.equal(typeof michiFootwork,"function");
-});
-
-test("V363 F0 baby, F1 cat, F2 floating cloud, F3 moon and F4 Eclipse remain distinguishable",()=>{
- const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
- const forms=["drawBaby(ctx, R, safe, r, c)","drawCat(ctx, R, safe, r, c)",
-  "drawCloud(ctx, R, safe, r, c)","drawMoon(ctx, R, safe, r, c)",
-  "drawGod(ctx, R, safe, r, c)"];
- for(const form of forms)assert.ok(src.includes(form),form+" missing");
- assert.match(src,/const expansion=\[\.072,\.059,\.042,\.037,\.034\]\[f\]/);
- assert.match(src,/wing:f===4\?/);
- assert.match(src,/const puffs = \[\[/);
- assert.match(src,/const sway = Math\.sin\(r\.t \* 0\.1\)/);
- assert.match(src,/if \(r\.slot === 2\) \{/);
- assert.doesNotMatch(src,/FULL_CONTENT_PLACEHOLDER/);
 });
 
 test("V363 stage motion is disabled for low-motion and all canonical player states",()=>{

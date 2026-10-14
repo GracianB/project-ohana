@@ -26,7 +26,7 @@ function buildLayer(){
   layer.setAttribute("aria-labelledby","win-title");
   layer.innerHTML=
     '<canvas class="win-canvas" aria-hidden="true"></canvas>'+
-    '<button type="button" class="win-skip">SALTAR A RESULTADOS ↗</button>'+
+    '<button type="button" class="win-skip">VER EL REENCUENTRO ↗</button>'+
     '<div class="win-card">'+
       '<p class="win-kicker">Mundo 1 completado · Isla Hoku</p>'+
       '<p class="win-act">LA FAMILIA VUELVE A CASA</p>'+
@@ -85,7 +85,7 @@ function showEnding(detail={}){
   const portrait=[...family.slice(0,4),hero.id,partnerId,...family.slice(4)];
   let t0=0,raf=0,done=false,complete=false,lastPaint=0;
   // Keep the family framed on orientation / window changes, without raising DPR.
-  const onResize=()=>{if(!done&&!complete){fc.resize();lastPaint=0;}};
+  const onResize=()=>{if(!done){fc.resize();lastPaint=0;}};
   addEventListener("resize",onResize,{passive:true});
 
   layer.className="show cinema-running ending-phase-1";
@@ -116,13 +116,12 @@ function showEnding(detail={}){
   }
   function revealResults(){
     if(complete)return;complete=true;
-    removeEventListener("resize",onResize);
     layer.classList.remove("cinema-running","ending-phase-1","ending-phase-2","ending-phase-3");
     layer.classList.add("cinema-complete","ending-phase-4");
     card.inert=false;
     card.setAttribute("aria-hidden","false");
     layer.removeAttribute("aria-label");
-    layer.setAttribute("aria-labelledby","win-title");
+    layer.setAttribute("aria-label","Nadie se queda atrás. Mundo 1 completado. La familia vuelve a casa.");
     layer.querySelector(".win-skip").hidden=true;
     layer.querySelector("#win-continue")?.focus({preventScroll:true});
     duckMusic(false);
@@ -133,11 +132,11 @@ function showEnding(detail={}){
     if(!silent)revealResults();
   }
   function frame(now){
-    if(done||complete)return;if(!t0)t0=now;
+    if(done)return;if(!t0)t0=now;
     // Ten Canvas actors are expensive. Elapsed time, not frame count, drives the story.
-    if(!reduce && lastPaint && now-lastPaint<41){raf=requestAnimationFrame(frame);return;}
+    if(lastPaint && now-lastPaint<(reduce?120:41)){raf=requestAnimationFrame(frame);return;}
     lastPaint=now;
-    const t=(now-t0)/1000,k=clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*.78,tf=t*60;
+    const t=(now-t0)/1000,k=complete?1:clamp(t/duration,0,1),W=fc.W,H=fc.H,cx=W/2,ground=H*(W<600?.66:.70),tf=reduce?60:t*60;
     ctx.clearRect(0,0,W,H);
     const dawn=seg(k,.48,.92);
     // V372: gradientes cacheados por tamaño (y 12 pasos de amanecer), nunca por fotograma.
@@ -226,10 +225,10 @@ function showEnding(detail={}){
         ctx.restore();
       }
     }
-    if(k>=1){revealResults();return;}
+    if(k>=1)revealResults();
     raf=requestAnimationFrame(frame);
   }
-  layer.querySelector(".win-skip").onclick=()=>revealResults();
+  layer.querySelector(".win-skip").onclick=()=>{t0=performance.now()-duration*1000;revealResults();};
   // The same dialog node is reused on every victory: replace the handler
   // rather than leaking one-shot listeners if the scene ended by mouse click.
   layer.onkeydown=(e)=>{

@@ -1,6 +1,7 @@
-const VERSION = "ohana-380";
+const VERSION = "ohana-381";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/evo-cine/real-actor.js?v=" + VERSION,
   "./characters/cuerno-stagecraft.js?v=" + VERSION,
   "./systems/roster-navigation.js?v=" + VERSION,
   "./characters/visual-size.js?v=" + VERSION,
@@ -247,10 +248,11 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/evo-cine/real-actor.js": "5adcb1dfc4015eb7bedc41c5303cc7961a4c6fda",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "921a1bce1fcdf663e9474e304a4efeefa2c6f008",
+  "index.html": "855b10c013629762fd2deb50a6fa1dcc72e84aba",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -263,7 +265,7 @@ const PRECACHE_REVISIONS = {
   "atrium-interact.css": "d7da49b1a7d2c0d5ac3bef25d5ba8fd79e86ea5b",
   "hud.css": "34e283fa5b432c415636fb22c45ca2d10b4763ee",
   "evo.css": "e0c4685187247fbe8986811927fe6e94286c7710",
-  "ending.css": "3d43eed4ba5f60790717709d5c6a5020848b1201",
+  "ending.css": "82ec666c39ff1163eacbaa38f8710364e2d64a7b",
   "intro.css": "8575b9f7cd7c649af9fdab68c9a36ce3f427225f",
   "demo.css": "44b745dbace004886fc317f8c9ea0a654cd37de2",
   "experience.css": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
@@ -277,7 +279,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "8b106d98c41a2e597cf271b2405c1f81abc8aa93",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "ec4057f83660a7cf6ef034b573aeda36b662ee07",
+  "characters/art/cat.js": "390a11ea8dacfeae8cb511de84fbe731ca3c54b4",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
@@ -323,10 +325,10 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/frita.js": "32bd6b2de6ca880b5b25d882ad83da53701d8861",
   "systems/evo-cine/stitcho.js": "623798860993ee413880d267598010172b55f36d",
   "systems/evo-cine/cuerno.js": "890edcfdb2877ca4736abc3e046a72fd2bca4575",
-  "systems/evo-cine/chispin.js": "d37ab03abdc9fa3b5735fb4936dc150f3d86661e",
-  "systems/evo-cine/pizza.js": "e6df1efcc0c35eddcc6d3940d47a8952c38fb594",
-  "systems/evo-cine/michi.js": "fc9532488bde774e7dc980270c96f214edf746d5",
-  "systems/evo-cine/yomi.js": "bd042db346b4a019bcd4dd3e12b777987b0b9de5",
+  "systems/evo-cine/chispin.js": "950ba67afb4711967291b222e8f016fedf829acc",
+  "systems/evo-cine/pizza.js": "ff81084feff4b0f62e8d19b3bd5dbf7f0fdb18e7",
+  "systems/evo-cine/michi.js": "e7d05336670c0efebd6cedb90abeeb0a581c4a8d",
+  "systems/evo-cine/yomi.js": "1d7c30124e64a3fe061a45199d01b2e2529bb8f2",
   "systems/evo-cine/dino.js": "fc356b5e946345dbf856173fdf293b4cb0e9b654",
   "systems/evo-cine/dragon.js": "4cfec65095a07be5942c45bc47bf119725c61b35",
   "engine/foes.js": "250d28a48300ca924fb7da7edf12674a5798bd6c",
@@ -381,7 +383,7 @@ const PRECACHE_REVISIONS = {
   "systems/death-fx.js": "b373412bd245f196d6d484007814301d773fc145",
   "systems/demo.js": "59f2808ccaabe0e279398918df36724f481b1d0f",
   "systems/dialogs.js": "f71fe7e537278185e260369284dc8391566e9848",
-  "systems/ending.js": "7af910f68d951544ef347a15b1f1df7008a48f0a",
+  "systems/ending.js": "f21c9645e90e484f926e1a24728e0be460051ba9",
   "systems/ending-duo.js": "1a0dbbe4c814935ef6ebed4f0a254ded3f70b5af",
   "systems/v100-family-choreography.js": "5f8ebb3851d3131394e6e198d32645ef1b2bf3c7",
   "systems/v1002-festival.js": "15ffcc231d6ebd47d2790d87bfd512b30d5f214f",

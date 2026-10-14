@@ -45,7 +45,7 @@ test("V81 finale extends reunion and caps ONLY its full-screen canvas",()=>{
  assert.match(ending,/const titleK=seg\(k,\.89,\.97\)/);
  assert.match(ending,/layer\.dataset\.ending="v100-special-single-ending"/);
  assert.match(ending,/layer\.dataset\.pacing="v80-delayed-finale"/);
- assert.match(ending,/layer\.querySelector\("\.win-skip"\)\.onclick=\(\)=>revealResults/);
+ assert.match(ending,/layer\.querySelector\("\.win-skip"\)\.onclick=\(\)=>\{t0=performance\.now\(\)-duration\*1000;revealResults/);
 });
 
 test("V81 offline cache and live HTML references are identical",()=>{
