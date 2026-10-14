@@ -12,16 +12,6 @@ const st = { act: null, t: 0, cd: 0, duoCd: 0, duo: null, queued: null, seed: 0,
 export const CUERNO_SKY = Object.freeze({ dur: 180, cd: 600, range: 240 });
 let gameRef = null;
 
-if (typeof addEventListener === "function") {
-  addEventListener("keydown", (e) => {
-    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
-    if (e.target?.closest?.("input, textarea, select, [contenteditable='true']")) return;
-    if (gameRef?.paused || gameRef?.player?.id !== "cuerno") return;
-    const k = String(e.key || "").toLowerCase();
-    const hit = Object.entries(CUERNO_PLAY_KEYS).find(([, v]) => v === k);
-    if (hit) st.queued = hit[0];
-  });
-}
 export function queueCuernoPlay(kind) { if (CUERNO_PLAY_KEYS[kind]) st.queued = kind; }
 export function resetCuernoPlay() { Object.assign(st, { act: null, t: 0, cd: 0, duoCd: 0, duo: null, queued: null, sky: null, skyCd: 0 }); }
 export function readCuernoPlay() { return { act: st.act, t: st.t, duo: st.duo ? { phase: st.duo.phase, age: st.duo.age } : null, sky: st.sky ? { t: st.sky.t } : null, skyCd: st.skyCd }; }
@@ -59,7 +49,7 @@ export function updateCuernoPlay(game, t = 0) {
     const q = st.queued; st.queued = null;
     if (!st.cd && !st.act) {
       st.act = q; st.t = CUERNO_PLAY_DUR[q]; st.cd = 30;
-      if (q === "neigh" && p.grounded) p.vy = Math.min(p.vy || 0, -4);
+      // Emotes remain visual: never change movement or collision.
       const label = { nuzzle: "¡Mimos!", dream: "zzz…", neigh: "¡Hiiiiiii!" }[q];
       game.nums?.add?.(cx(p), p.y - 30, label, "#ffd6f0", true);
     }

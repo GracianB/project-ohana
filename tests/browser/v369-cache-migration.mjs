@@ -92,7 +92,7 @@ try {
  const upgradeRequests=[...network];
  const changedRequests=upgradeRequests.filter(name=>name!=="/sw.js");
  const expectedChanged=Object.keys(current).filter(name=>!same.includes(name)).map(name=>"/"+name).sort();
- for(const must of ["/index.html","/systems/intro.js","/systems/intro-fantasy.js","/systems/ending.js","/systems/ending-duo.js"])
+ for(const must of ["/index.html","/game.js","/characters/art/cuerno-v373.js","/systems/cuerno-kit.js","/systems/cuerno-play-v373.js","/systems/cuerno-evo-v373.js","/systems/cuerno-fx.js"])
    assert.ok(expectedChanged.includes(must),"V373 must refresh "+must);
  assert.deepEqual([...new Set(changedRequests)].sort(),expectedChanged,"only the "+expectedChanged.length+" changed or new V373 files should transfer during upgrade");
  assert.equal(migration.stats.reused,same.length);

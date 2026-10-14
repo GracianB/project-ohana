@@ -1,3 +1,9 @@
+## V373 · Cuerno integrado (ohana-373)
+
+Cinco formas, cornada con aviso y estela, lanza astral, estampida, doble salto desde forma 3, emotes, dúo Kilo, curación de evolución, intro/muerte/victoria. Se conserva el circuito común de cooldown, flow y vínculo U. El sueño de U congela IA y movimiento sin omitir contacto, daño ni eliminación. Pools y ataques se limpian al cambiar de sala. Migración offline verificada contra los bytes del commit V372 c01fcc3.
+
+F sigue siendo golpe (alias de H); sueño se activa con U, sin añadir una tecla incompatible. Publicación condicionada a Node, Browser, Visual, Release Gate y cooperativo.
+
 ## OHANA V372 · Rendimiento medido, bienvenida fantástica y final del dúo (ohana-372)
 
 - Rendimiento (Chromium headless, perfil iPhone 13, U + J/K/L + G de los 10 personajes en forma 4, mediana de 2 pasadas): V370 13 FPS · V371 12 FPS · V372 38 FPS; CPU de requestAnimationFrame por fotograma 23,1 → 24,1 → 8,1 ms. La causa era la bienvenida invisible, que seguía pintando 10 rigs (~38 ms/fotograma) debajo de la partida cuando el juego arrancaba sin pulsar ENTRAR; ahora deja de pintar con `body.playing` o la pestaña oculta.

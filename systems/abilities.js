@@ -153,18 +153,9 @@ p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
-// V373: kit propio de Cuerno. Orden real de ranuras: 0=J, 1=K, 2=L (p.abilities); 3=U (suprema).
-// La U conserva su suprema; F es la tecla de golpe (melee "M" en game.js).
-// Se activa cuando el juego crea game.cuernoFx (runtime real); sin él se usa el kit heredado.
-if (p.id === "cuerno" && index < 3 && game.cuernoFx) {
-  const cuernoKey = ["J", "K", "L"][index];
-  if (castCuerno(cuernoKey, p, game)) {
-    const cdDur = baseCd / (1 + clamp(Number(p.evo) || 0, 0, 4) * 0.12);
-    p.cds[id] = now + cdDur; p.cdDur[id] = cdDur;
-    game.lastAbilityId = id; game.lastAbilitySlot = index;
-    return true;
-  }
-}
+// Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
+const cuernoKey = p.id === "cuerno" && index < 3 && game.cuernoFx ? ["J", "K", "L"][index] : null;
+if (cuernoKey && !castCuerno(cuernoKey, p, game)) return false;
 
 const key = FLOW_KEYS[index + 1];
 const preFlow = currentFlow(game, p);
@@ -197,7 +188,7 @@ const bondGain=gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
 if (index === 3) castSupreme(game, p, flow);
-else fn(game, p, evo);
+else if (!cuernoKey) fn(game, p, evo);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
 if (flow.label && index < 3) {
@@ -576,6 +567,7 @@ const sleepers=dreamTargets;
 for(const e of sleepers){
 e.stun=Math.max(e.stun||0,156);
 e._auroraSleepT=156;
+e.sleep=Math.max(e.sleep||0,156);
 e.vx=0;
 }
 game._auroraDreamTargets=sleepers.length;
@@ -1639,6 +1631,7 @@ if (mode === "stitcho") {
 } else if (mode === "cuerno") {
   for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
     e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
+    e.sleep=Math.max(e.sleep||0,f.life+2);
     e.stun=Math.max(e.stun||0,3);
     e.vx=0;
   }
