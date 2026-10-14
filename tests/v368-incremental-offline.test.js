@@ -6,9 +6,9 @@ import vm from "node:vm";
 const sw=fs.readFileSync("sw.js","utf8");
 const current=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
 const previous="ohana-"+(Number(current?.slice(6)||0)-1);
-// V372: expected delta derived from the real committed V371 baseline vs. the
+// V373: expected delta derived from the real committed V372 baseline vs. the
 // current content-addressed table, so the assertions stay exact.
-const BASELINE=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
+const BASELINE=JSON.parse(fs.readFileSync("tools/offline-baseline-v372.json","utf8"));
 const REVS=JSON.parse(sw.slice(sw.indexOf("{",sw.indexOf("const PRECACHE_REVISIONS = {")),sw.indexOf("\n};",sw.indexOf("const PRECACHE_REVISIONS = {"))+2));
 const TOTAL=Object.keys(REVS).length;
 const REUSED=Object.keys(REVS).filter(k=>BASELINE.resources[k]?.sha===REVS[k]).length;
@@ -77,8 +77,8 @@ function setup({offline=false,failPath="",reuse=false}={}){
     await cache.put("./"+path+"?v="+previous,new Response(content));
   };
   const seedFullPreviousRelease=async()=>{
-    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v371.json","utf8"));
-    if(baseline.version!==previous)throw new Error("V372 must upgrade from actual V371");
+    const baseline=JSON.parse(fs.readFileSync("tools/offline-baseline-v372.json","utf8"));
+    if(baseline.version!==previous)throw new Error("V373 must upgrade from actual V372");
     const cache=storage("ohana-static-"+previous);
     const manifest=Object.fromEntries(Object.entries(baseline.resources).map(([name,item])=>[name,item.sha]));
     await cache.put("./.ohana-revisions.json",new Response(JSON.stringify(manifest)));
@@ -98,7 +98,7 @@ test("V368 full offline manifest preserves 200 resources and exact Git blob hash
  const h=setup();
  assert.equal(h.precache.length,TOTAL+1,"root plus the "+TOTAL+" canonical assets");
  assert.equal(Object.keys(h.revisions).length,TOTAL);
- assert.ok(TOTAL>=209,"V372 keeps every V371 asset and adds intro-fantasy + ending-duo");
+ assert.ok(TOTAL>=235,"V373 keeps every V372 asset and adds the 5 Cuerno modules");
  assert.equal(h.revisions["index.html"].length,40);
  assert.equal(h.revisions["systems/cinema-loader.js"].length,40);
 });
@@ -146,16 +146,16 @@ test("V368 changed SHA never reuses stale assets and incomplete install never ta
 });
 
 
-test("V372 actual V371→V372 migration: preserved files cost zero network requests",async()=>{
+test("V373 actual V372→V373 migration: preserved files cost zero network requests",async()=>{
  const h=setup();
  await h.seedFullPreviousRelease();
  const first=h.requests.length;
  await h.install();
  const network=h.requests.slice(first).map(x=>new URL(x).pathname);
  assert.equal(h.precache.length,TOTAL+1);
- assert.ok(REUSED>=190,"V372 must reuse at least 190 V371 assets, got "+REUSED);
- assert.equal(network.length,DOWNLOADED,"only the "+DOWNLOADED+" changed or new V372 files need a fetch");
- for(const must of ["/systems/intro-fantasy.js","/systems/ending-duo.js","/systems/intro.js","/systems/ending.js"])
+ assert.ok(REUSED>=190,"V373 must reuse at least 190 V372 assets, got "+REUSED);
+ assert.equal(network.length,DOWNLOADED,"only the "+DOWNLOADED+" changed or new V373 files need a fetch");
+ for(const must of ["/systems/cuerno-fx.js","/systems/cuerno-kit.js","/systems/cuerno-play-v373.js","/systems/cuerno-evo-v373.js","/characters/art/cuerno-v373.js","/game.js","/systems/abilities.js"])
    assert.ok(network.some(x=>x.endsWith(must)),must+" must be fetched: "+network.join(","));
  assert.ok(network.some(x=>x.endsWith("/index.html")),network.join(","));
  assert.ok(h.parallel()<=6);
@@ -175,7 +175,7 @@ test("V372 actual V371→V372 migration: preserved files cost zero network reque
  assert.deepEqual(await h.caches.keys(),["ohana-static-"+current]);
 });
 
-test("V372 failed incremental index fetch leaves V371 intact and unactivated",async()=>{
+test("V373 failed incremental index fetch leaves V372 intact and unactivated",async()=>{
  const h=setup({failPath:"/index.html"});
  await h.seedFullPreviousRelease();
  await assert.rejects(h.install(),/network unavailable/);

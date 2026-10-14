@@ -1,0 +1,927 @@
+{
+  "version": "ohana-372",
+  "commit": "c01fcc3893848e37e8a994321a865bb26f69ed6f",
+  "resourceCount": 230,
+  "resources": {
+    "index.html": {
+      "sha": "cbb882811803ad28aa0a8d2b80b46d10ef5195ae",
+      "bytes": 17817
+    },
+    "multiplayer.html": {
+      "sha": "8d58e873acb79c46e341587e581ac8924a73de89",
+      "bytes": 6825
+    },
+    "multiplayer.css": {
+      "sha": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
+      "bytes": 11657
+    },
+    "multiplayer.js": {
+      "sha": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
+      "bytes": 54258
+    },
+    "multiplayer/mission.js": {
+      "sha": "e94f85833c4c66f3ac8e2e51d1162d7e6db1cdd1",
+      "bytes": 2660
+    },
+    "multiplayer/duo-altars.js": {
+      "sha": "29aafd8ca96cd1320d75cbd2b7be6bd107a569b0",
+      "bytes": 3849
+    },
+    "manifest.json": {
+      "sha": "3e910803d5c4ea7d158370d0b5becb462c23d77b",
+      "bytes": 595
+    },
+    "favicon.svg": {
+      "sha": "0abf301dd591cf61ff22025c55d3308d6a61c8d7",
+      "bytes": 8050
+    },
+    "style.css": {
+      "sha": "88c2a07e405acbd6888f7a809cc0621d2ecad514",
+      "bytes": 93480
+    },
+    "title-stage.css": {
+      "sha": "41ea8c5624ffc4472576032d9fbccc1285066df4",
+      "bytes": 35252
+    },
+    "atrium-interact.css": {
+      "sha": "d7da49b1a7d2c0d5ac3bef25d5ba8fd79e86ea5b",
+      "bytes": 6441
+    },
+    "hud.css": {
+      "sha": "34e283fa5b432c415636fb22c45ca2d10b4763ee",
+      "bytes": 7815
+    },
+    "evo.css": {
+      "sha": "e0c4685187247fbe8986811927fe6e94286c7710",
+      "bytes": 2445
+    },
+    "ending.css": {
+      "sha": "3d43eed4ba5f60790717709d5c6a5020848b1201",
+      "bytes": 13796
+    },
+    "intro.css": {
+      "sha": "8575b9f7cd7c649af9fdab68c9a36ce3f427225f",
+      "bytes": 4055
+    },
+    "demo.css": {
+      "sha": "44b745dbace004886fc317f8c9ea0a654cd37de2",
+      "bytes": 410
+    },
+    "experience.css": {
+      "sha": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
+      "bytes": 3089
+    },
+    "cinematic-ui.css": {
+      "sha": "4f413944a0ba3c63d43c078c3565f223df736c38",
+      "bytes": 5444
+    },
+    "supreme.css": {
+      "sha": "8cdec07251d4a7f268ec50fb3f96a199c32287f5",
+      "bytes": 808
+    },
+    "world-map.css": {
+      "sha": "9700cb42230a70d3d551f1d327d0bfe19026086d",
+      "bytes": 4334
+    },
+    "mobile-v96.css": {
+      "sha": "d9ab3041736bf7af70c3af1118e0cead577a580c",
+      "bytes": 3516
+    },
+    "v100-special.css": {
+      "sha": "6b0523cbc9a7b079dd33723077a97faaa1189f6b",
+      "bytes": 14301
+    },
+    "v100-2.css": {
+      "sha": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
+      "bytes": 6720
+    },
+    "v101-milestones.css": {
+      "sha": "580faa55039560a48a88844578ac30bbab5087c3",
+      "bytes": 7716
+    },
+    "v106-memory-museum.css": {
+      "sha": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
+      "bytes": 4639
+    },
+    "game.js": {
+      "sha": "3b5565522a801ccc867f26d6e96c48c2bd9dbbe3",
+      "bytes": 135777
+    },
+    "characters/art/_template.js": {
+      "sha": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
+      "bytes": 4640
+    },
+    "characters/art/cat.js": {
+      "sha": "ec4057f83660a7cf6ef034b573aeda36b662ee07",
+      "bytes": 24082
+    },
+    "characters/art/chispin.js": {
+      "sha": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
+      "bytes": 87
+    },
+    "characters/art/cuerno.js": {
+      "sha": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
+      "bytes": 50210
+    },
+    "characters/art/dino.js": {
+      "sha": "968b33617177db4cb151429d7106cce041ca9119",
+      "bytes": 56743
+    },
+    "characters/art/dragon.js": {
+      "sha": "56486023cd78180d64bb474f77098710441abedd",
+      "bytes": 47763
+    },
+    "characters/art/frita.js": {
+      "sha": "1e761e90bf01e73150a5302a39311f9be3570434",
+      "bytes": 49053
+    },
+    "characters/art/index.js": {
+      "sha": "a0abb447c08eae66af9475ba9459a67f3dd15f45",
+      "bytes": 1115
+    },
+    "characters/art/kilo.js": {
+      "sha": "6cb085e45287bb7d32a8d19606506437c8d23ce6",
+      "bytes": 98
+    },
+    "characters/art/lilo.js": {
+      "sha": "2545ace985c84888d2ca1e0b504fe5a3b35bdf4a",
+      "bytes": 43101
+    },
+    "characters/art/pikachu.js": {
+      "sha": "cf6e2559c82b26c6b99c55607d044cae922a68bd",
+      "bytes": 36636
+    },
+    "characters/art/pizza.js": {
+      "sha": "4ea37610815133b9db63fedefb9535ebc3e598af",
+      "bytes": 40526
+    },
+    "characters/art/stitch.js": {
+      "sha": "0fdd609ddb8cf44a7bd918fe6ac4e744d3e16824",
+      "bytes": 50164
+    },
+    "characters/art/stitcho.js": {
+      "sha": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
+      "bytes": 102
+    },
+    "characters/art/yomi.js": {
+      "sha": "afe3a1db9b73eaa46d40517b8161ce28626d72ba",
+      "bytes": 21445
+    },
+    "characters/draw.js": {
+      "sha": "23769dcb39224e0328a90f259c9eccb89434bef7",
+      "bytes": 52972
+    },
+    "characters/kinetic-stagecraft.js": {
+      "sha": "892f6728bf8fc00c28f5798da41514d62b12e3a8",
+      "bytes": 8493
+    },
+    "characters/evolution.js": {
+      "sha": "79ae360268f3131e3ea4cf1bb5e99fdaaba4bfc9",
+      "bytes": 39421
+    },
+    "characters/costume.js": {
+      "sha": "ac0a620099244df844bee9cddac6c68149a0a960",
+      "bytes": 5011
+    },
+    "characters/definitive.js": {
+      "sha": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
+      "bytes": 20393
+    },
+    "characters/look.js": {
+      "sha": "39154d7e158f0105c35bad3db455aa2ba85fd340",
+      "bytes": 919
+    },
+    "characters/rig.js": {
+      "sha": "709eef2e67c4fe6e0e8d09b6057e5cf3c80cfdfe",
+      "bytes": 21456
+    },
+    "characters/roster.js": {
+      "sha": "a96bb2f89b1d2d0db17ee28b9b1a1d8994fe9e7c",
+      "bytes": 12819
+    },
+    "characters/signature.js": {
+      "sha": "835675968554270015edda645cca8e340978ce70",
+      "bytes": 2779
+    },
+    "characters/sprites.js": {
+      "sha": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
+      "bytes": 5600
+    },
+    "engine/audio.js": {
+      "sha": "588b963027794f8f03e69df4802f3432a7c916eb",
+      "bytes": 12154
+    },
+    "engine/boss-art.js": {
+      "sha": "96c97aec57c49f96f699391c79026212eb78ec8e",
+      "bytes": 16761
+    },
+    "engine/clock.js": {
+      "sha": "106823291b4a2ee05eaab098704322207ef26e2e",
+      "bytes": 699
+    },
+    "engine/collide.js": {
+      "sha": "b8ddb9a49ba45fa1f792f3818e3045f9d5bc946d",
+      "bytes": 4867
+    },
+    "engine/enemies.js": {
+      "sha": "f405d4659a64bb66d5d10489d23509815d8fa1d4",
+      "bytes": 57475
+    },
+    "engine/foe-brain.js": {
+      "sha": "92da318a15a4b8de745f706584844550eebc714d",
+      "bytes": 3168
+    },
+    "engine/foe-rig.js": {
+      "sha": "4bd9f8a0d8125fa72c700226e7c38664ad65d8a9",
+      "bytes": 7113
+    },
+    "engine/foes/kilo-foes.js": {
+      "sha": "6f63d4cccead3d2d608330e36ee52e4de09df8a9",
+      "bytes": 15817
+    },
+    "engine/foes/stitcho-foes.js": {
+      "sha": "101632806b45d8f9a33b576b4aeee456c52d040b",
+      "bytes": 13869
+    },
+    "engine/foes/michi-foes.js": {
+      "sha": "aa8d9c02a6331eb2981fde98d1ac6eb48a88bb82",
+      "bytes": 22696
+    },
+    "engine/foes/chispin-foes.js": {
+      "sha": "045868012e1aa87285a55c0d8b9f35d448c23435",
+      "bytes": 13245
+    },
+    "engine/foes/dino-foes.js": {
+      "sha": "0f85f45b4e1ca99e1c0d2fed3999f049071a3a61",
+      "bytes": 12967
+    },
+    "engine/foes/kilo-ai.js": {
+      "sha": "32526908f9fedfd94b79520d316a84e06187bfa6",
+      "bytes": 9131
+    },
+    "engine/foes/stitcho-ai.js": {
+      "sha": "1425fc207a69772abcd79fb4c99fe137f379cc18",
+      "bytes": 8361
+    },
+    "engine/foes/michi-ai.js": {
+      "sha": "001fbec5c231dadfc96e61b4e1323a9060e78897",
+      "bytes": 4957
+    },
+    "engine/foes/chispin-ai.js": {
+      "sha": "5c08de57edc87d775d97186e1890037bc87ebb7e",
+      "bytes": 3043
+    },
+    "engine/foes/dino-ai.js": {
+      "sha": "91f166d92f871cc8c4d67fdecb10e8c4c4017617",
+      "bytes": 7588
+    },
+    "systems/select-screen.js": {
+      "sha": "ac5a0608f352eb59dafed831f9ebb2cb9a880e19",
+      "bytes": 11464
+    },
+    "systems/evo-cine/kilo.js": {
+      "sha": "7c8850102962935334d53f4cd8a21fd9e59dbf4e",
+      "bytes": 10797
+    },
+    "systems/evo-cine/frita.js": {
+      "sha": "32bd6b2de6ca880b5b25d882ad83da53701d8861",
+      "bytes": 9355
+    },
+    "systems/evo-cine/stitcho.js": {
+      "sha": "623798860993ee413880d267598010172b55f36d",
+      "bytes": 9791
+    },
+    "systems/evo-cine/cuerno.js": {
+      "sha": "2bc88217849df7c50155fac0210b0717114378ba",
+      "bytes": 7340
+    },
+    "systems/evo-cine/chispin.js": {
+      "sha": "d37ab03abdc9fa3b5735fb4936dc150f3d86661e",
+      "bytes": 3889
+    },
+    "systems/evo-cine/pizza.js": {
+      "sha": "e6df1efcc0c35eddcc6d3940d47a8952c38fb594",
+      "bytes": 4252
+    },
+    "systems/evo-cine/michi.js": {
+      "sha": "fc9532488bde774e7dc980270c96f214edf746d5",
+      "bytes": 11144
+    },
+    "systems/evo-cine/yomi.js": {
+      "sha": "bd042db346b4a019bcd4dd3e12b777987b0b9de5",
+      "bytes": 9910
+    },
+    "systems/evo-cine/dino.js": {
+      "sha": "fc356b5e946345dbf856173fdf293b4cb0e9b654",
+      "bytes": 7418
+    },
+    "systems/evo-cine/dragon.js": {
+      "sha": "4cfec65095a07be5942c45bc47bf119725c61b35",
+      "bytes": 7394
+    },
+    "engine/foes.js": {
+      "sha": "250d28a48300ca924fb7da7edf12674a5798bd6c",
+      "bytes": 7609
+    },
+    "engine/input.js": {
+      "sha": "73be22d662f0ba410952e7eabc8913e841acb21f",
+      "bytes": 7073
+    },
+    "engine/platform-drop.js": {
+      "sha": "ec1f2a91aa47bfeba0b387d560bf736a1217bd84",
+      "bytes": 2153
+    },
+    "engine/music.js": {
+      "sha": "3daffcf661284cb26aa6d82e34cc1bfc8529416e",
+      "bytes": 16207
+    },
+    "engine/particles.js": {
+      "sha": "c51fc9989a5facbd1be415bead79faf6f351bf96",
+      "bytes": 3147
+    },
+    "systems/atrium-interact.js": {
+      "sha": "7f1a80852ac4723bbb9e7f09c6530b9c1bd035f5",
+      "bytes": 10787
+    },
+    "systems/abilities.js": {
+      "sha": "3052c096db2af0a9f6d2b0c3112280dee0a464a6",
+      "bytes": 160100
+    },
+    "systems/u-field-targeting.js": {
+      "sha": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
+      "bytes": 2016
+    },
+    "systems/family-duets.js": {
+      "sha": "9940e44e7f51076f12211287aa7cfbf5db4c74c0",
+      "bytes": 24460
+    },
+    "systems/u-partners.js": {
+      "sha": "998c1a778d27856d6e7d2529add4ea519b42dc81",
+      "bytes": 5843
+    },
+    "systems/u-duet-chemistry.js": {
+      "sha": "3989b02fad26154a7a4db9699ee65e6fff939269",
+      "bytes": 7074
+    },
+    "systems/u-duet-direction-v315.js": {
+      "sha": "75ff69ddad6e7f9c0e929d03f5394d80cd945b05",
+      "bytes": 7326
+    },
+    "systems/ability-catalog.js": {
+      "sha": "780a0f1bd5c3479f9f5df52018a1067ff00b40ba",
+      "bytes": 4173
+    },
+    "systems/boss-fall-scene.js": {
+      "sha": "fd1eb014e509495a167dbcffc49261351df950e8",
+      "bytes": 2969
+    },
+    "systems/dragon-trial.js": {
+      "sha": "d8da8839b6ec952cd7efd4b9795469773205c6dd",
+      "bytes": 4588
+    },
+    "systems/canvas-gradient-cache.js": {
+      "sha": "a33dd6799c3dff42fc484c16a4aff51b6ec31072",
+      "bytes": 655
+    },
+    "systems/cinema-kit.js": {
+      "sha": "50b48206502d1c6c1e8388aa5e948d3b07eb7b15",
+      "bytes": 10140
+    },
+    "systems/cinema-loader.js": {
+      "sha": "a7fd7e8e8ae0da9716e87cd9e5f5ff5a443022ca",
+      "bytes": 1482
+    },
+    "systems/render-profiler.js": {
+      "sha": "3e74625b9200a9baa40d84190ca7f358719133db",
+      "bytes": 1679
+    },
+    "systems/coop-resilience.js": {
+      "sha": "9a0c97f656a8c0bbaca4b95ba6cec99e6896e5eb",
+      "bytes": 861
+    },
+    "systems/coop-v95-presence.js": {
+      "sha": "3c71b45510b2cdd7b5f3635217fe3cf8bf8e41a1",
+      "bytes": 2058
+    },
+    "systems/dino-combat.js": {
+      "sha": "104a3229fca5dcbb489b7e78498fe022e7cf6f54",
+      "bytes": 12412
+    },
+    "systems/dragon-supreme.js": {
+      "sha": "76608fc09e28f9ae26e24f91e25de0b6a0c0275e",
+      "bytes": 4579
+    },
+    "systems/dino-quake-u.js": {
+      "sha": "df748ce45ecc04a8d5a485c2f3deb71263a46553",
+      "bytes": 2900
+    },
+    "systems/dino-stagecraft.js": {
+      "sha": "8f9a62ce07cc0bda24707132fcd66cb791953db0",
+      "bytes": 2192
+    },
+    "systems/cuerno-fantasy.js": {
+      "sha": "c61206d82c35b6d6d54d9406c58743e14c45adf9",
+      "bytes": 9663
+    },
+    "systems/cuerno-v92-resonance.js": {
+      "sha": "20f145a444f37b11a55d3437486a4dcedae3d14c",
+      "bytes": 3957
+    },
+    "systems/cuerno-v93-metamorphosis.js": {
+      "sha": "e57d82a29cb96e5f194cfa95c6074ac503426851",
+      "bytes": 5874
+    },
+    "systems/cuerno-v91-illusions.js": {
+      "sha": "6d54567cb5c51c224e84ab1651d284ef505981de",
+      "bytes": 3118
+    },
+    "systems/dino-ultimate-film.js": {
+      "sha": "1fc8e80f257b444cb45d6ac99a5037e89eaa8114",
+      "bytes": 6051
+    },
+    "systems/boss-adaptation.js": {
+      "sha": "55f52a286af58399dbbd4ccf0c45f1ac9728c3c4",
+      "bytes": 4260
+    },
+    "systems/boss-bait-feedback.js": {
+      "sha": "7886698c7886569888d0d5732b931202a86ed070",
+      "bytes": 2996
+    },
+    "systems/boss-bait.js": {
+      "sha": "6ca3bde204828a69256528f541234a81f3eb7f23",
+      "bytes": 2678
+    },
+    "systems/boss-behavior.js": {
+      "sha": "bc3727e8c83a4f372a4ecc888a4ad0ae627b0bf8",
+      "bytes": 3731
+    },
+    "systems/boss-combat.js": {
+      "sha": "1a8fc9c40db8010349fa7041cac6eb074bf98fba",
+      "bytes": 4409
+    },
+    "systems/boss-counterplay.js": {
+      "sha": "ed979670ce894feffa098a1fee1d722addfa19a4",
+      "bytes": 4150
+    },
+    "systems/boss-v94-readability.js": {
+      "sha": "e315c3601c1ec7f5213d8235a05c4d003ec409b8",
+      "bytes": 3047
+    },
+    "systems/boss-encounter-memory.js": {
+      "sha": "061fec279fb2d7ed6ecdd0488607c6753f35f6ef",
+      "bytes": 3010
+    },
+    "systems/boss-fx.js": {
+      "sha": "82f960bd5ef9806e95735a22cf7429353cfb361b",
+      "bytes": 17062
+    },
+    "systems/boss-hud.js": {
+      "sha": "e90159158c27a3ba5db5ff685d6fd139077dca7e",
+      "bytes": 758
+    },
+    "systems/boss-nido.js": {
+      "sha": "4595361af406ef1afd1f891140dfa16f59e0f946",
+      "bytes": 23379
+    },
+    "systems/combat-fx.js": {
+      "sha": "e70331cc3edd9b07e4e6f5ce1959fd1f221d7fae",
+      "bytes": 3623
+    },
+    "systems/combat-feedback.js": {
+      "sha": "535bdb2e5f923d10e554a7f8f605cf8f0f2f984d",
+      "bytes": 448
+    },
+    "systems/death-fx.js": {
+      "sha": "b373412bd245f196d6d484007814301d773fc145",
+      "bytes": 36629
+    },
+    "systems/demo.js": {
+      "sha": "59f2808ccaabe0e279398918df36724f481b1d0f",
+      "bytes": 3383
+    },
+    "systems/dialogs.js": {
+      "sha": "f71fe7e537278185e260369284dc8391566e9848",
+      "bytes": 2553
+    },
+    "systems/ending.js": {
+      "sha": "7af910f68d951544ef347a15b1f1df7008a48f0a",
+      "bytes": 13620
+    },
+    "systems/ending-duo.js": {
+      "sha": "1a0dbbe4c814935ef6ebed4f0a254ded3f70b5af",
+      "bytes": 7742
+    },
+    "systems/v100-family-choreography.js": {
+      "sha": "5f8ebb3851d3131394e6e198d32645ef1b2bf3c7",
+      "bytes": 1679
+    },
+    "systems/v1002-festival.js": {
+      "sha": "15ffcc231d6ebd47d2790d87bfd512b30d5f214f",
+      "bytes": 27158
+    },
+    "systems/v101-milestones.js": {
+      "sha": "cb40a244bfe688023d3558fb470b83d4ec67c2dd",
+      "bytes": 5421
+    },
+    "systems/v102-living-memories.js": {
+      "sha": "dede717c97d83b272de230ca3db2a9dcdbbf6f6b",
+      "bytes": 8345
+    },
+    "systems/v103-living-stories.js": {
+      "sha": "5f69faff9d7728c91d1984bd53299ec712342c61",
+      "bytes": 7172
+    },
+    "systems/v104-living-stories.js": {
+      "sha": "864b8884079503890ea3c75121a5c760accc6aa2",
+      "bytes": 7415
+    },
+    "systems/v105-living-stories.js": {
+      "sha": "f0c4c1a537bb6347c372cbdfdadf1e9be197ed6f",
+      "bytes": 7489
+    },
+    "systems/v106-final-memories.js": {
+      "sha": "b42d9c79cbda7ef39e2c6828194925a9837b2db0",
+      "bytes": 7219
+    },
+    "systems/v106-memory-gallery.js": {
+      "sha": "247c6b7dfab681adb289c5c7fb48251fe54271b9",
+      "bytes": 2208
+    },
+    "systems/coop-v103-pacing.js": {
+      "sha": "d11337685492515876b1b45a17a6c84131269c24",
+      "bytes": 2120
+    },
+    "systems/coop-v104-sync.js": {
+      "sha": "5d17e2eb197aff95f07887bf089a6f7aab5a4f14",
+      "bytes": 1113
+    },
+    "systems/coop-v107-room-follow.js": {
+      "sha": "9c8f21bb62748f6c6bef97e6fc0df63abce5d9be",
+      "bytes": 657
+    },
+    "systems/coop-v108-direct.js": {
+      "sha": "48acc28b903e8809f7ce0e03e7cf73cb91f4d437",
+      "bytes": 20673
+    },
+    "systems/coop-combat-mirror.js": {
+      "sha": "78475ea8de4b4332e2e36c9973695f6d49606e8b",
+      "bytes": 8912
+    },
+    "systems/coop-peer-effects.js": {
+      "sha": "0d834d83b7f024350fec08a4d2c9a6a5dd345808",
+      "bytes": 8174
+    },
+    "systems/coop-ability-hits.js": {
+      "sha": "d28f9c3ae12da9baeed2acd162f3aeccffc3eb67",
+      "bytes": 812
+    },
+    "systems/kilo-duet.js": {
+      "sha": "24dcc811ff45c6c63b3fddea2c0e77e7aaa9a917",
+      "bytes": 7600
+    },
+    "systems/stitcho-duet.js": {
+      "sha": "fd1746106e6ea61f2bcf20520bdb17d01bf87804",
+      "bytes": 6230
+    },
+    "systems/chispin-duet.js": {
+      "sha": "cc5e2ff1f3ffe6bdef46532b3960d055bca9506b",
+      "bytes": 7821
+    },
+    "systems/michi-duet.js": {
+      "sha": "92c558eb9becf98e1ece424d27279fc137e113a7",
+      "bytes": 11256
+    },
+    "systems/stitcho-cuerno-play.js": {
+      "sha": "099203e8e4f51da33a9351aca361e6c7a025ea4c",
+      "bytes": 10730
+    },
+    "systems/michi-yomi-play.js": {
+      "sha": "4b7470b951e79575c39650c14c22a11c1381d64f",
+      "bytes": 9306
+    },
+    "systems/kilo-frita-interactions.js": {
+      "sha": "3b262a53f5e5e6746b7078908feda85f76340251",
+      "bytes": 18700
+    },
+    "systems/dino-dragon-play.js": {
+      "sha": "29b30ceeb06363499c6bd6111e266aa6b46f6f7b",
+      "bytes": 19282
+    },
+    "systems/chispin-pizza-play.js": {
+      "sha": "14f2ad3335d851eaaa4d1f65572c1a22f13136a7",
+      "bytes": 7781
+    },
+    "systems/coop-challenge.js": {
+      "sha": "b3f47ac8cec7092f81f7a9db2d632d3b29fb1bf5",
+      "bytes": 614
+    },
+    "systems/platform-geometry.js": {
+      "sha": "2c94566f8d7e28f38e610ffcea7285432f858149",
+      "bytes": 996
+    },
+    "systems/room-strategy.js": {
+      "sha": "892f1a531cf19931eba9e12345b805d5540cfb4d",
+      "bytes": 903
+    },
+    "systems/chispin-cloud.js": {
+      "sha": "ab120d3b913e6902983161d7df1dbbdf108d174b",
+      "bytes": 1773
+    },
+    "systems/coop-v109-recovery.js": {
+      "sha": "d9fa781d392838208a35d478cea0986fb3b21fce",
+      "bytes": 1594
+    },
+    "systems/menu-visibility.js": {
+      "sha": "4a779b567eaf1c0a4d8fa9c4c056c10816410382",
+      "bytes": 766
+    },
+    "systems/enemy-director.js": {
+      "sha": "748bbd96bbc90832272557356ec3210f4aceee9d",
+      "bytes": 10243
+    },
+    "systems/encounter-spatial.js": {
+      "sha": "4f50b64880f8182f0db121dd353067eba2276668",
+      "bytes": 1395
+    },
+    "systems/encounter-signals.js": {
+      "sha": "70b550e019561332fa598584938c888edf40106b",
+      "bytes": 2175
+    },
+    "systems/enemy-ecology.js": {
+      "sha": "b50f47be30c5ddb5e86de25986ed737529367d0d",
+      "bytes": 6307
+    },
+    "systems/enemy-species.js": {
+      "sha": "54fb76ba1b7125a2c6177588cc5cd5f5e0ac9190",
+      "bytes": 11638
+    },
+    "systems/world-cinema.js": {
+      "sha": "61000e8b753af29a327d145663faf109aec7cb69",
+      "bytes": 367
+    },
+    "systems/cinematic-director.js": {
+      "sha": "b238f8829d833dae6756b22ea4067a808c1992d3",
+      "bytes": 711
+    },
+    "systems/supreme-cinema.js": {
+      "sha": "dd2c98aad254ec9fe8ed03c87b2dd4048215a5b8",
+      "bytes": 30603
+    },
+    "systems/supreme-storyboards.js": {
+      "sha": "9ebe3ba6f15a2cd2e23d2c0e307b8b8ddf0acb26",
+      "bytes": 1887
+    },
+    "systems/evo-cinema.js": {
+      "sha": "50b82f71bd2366e27676d9dee4b89ce64f55e597",
+      "bytes": 28661
+    },
+    "systems/floaters.js": {
+      "sha": "d634cecc50465e4f0661aa6a6eac187fedb201fc",
+      "bytes": 1333
+    },
+    "systems/hud.js": {
+      "sha": "5a168383aeb7896cb86991f4812040b80f548eee",
+      "bytes": 1578
+    },
+    "systems/a11y-v97.js": {
+      "sha": "a636eae0e6b45bd8896d931d2e459e8049d4623f",
+      "bytes": 1933
+    },
+    "systems/render-v98-culling.js": {
+      "sha": "64725ac71706a84351b645c44b6615d8cebaf030",
+      "bytes": 977
+    },
+    "systems/frame-pressure.js": {
+      "sha": "0386d6604ecfaa482a482eb9216962bf7413c720",
+      "bytes": 2683
+    },
+    "systems/hero-mastery.js": {
+      "sha": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
+      "bytes": 18009
+    },
+    "systems/hazards.js": {
+      "sha": "2b5761f15ca57e4a22c2368142de78d64ab277ba",
+      "bytes": 3859
+    },
+    "systems/intro.js": {
+      "sha": "1744690684877637d3ecfb27cbbad88cda180440",
+      "bytes": 41489
+    },
+    "systems/intro-cast-fit.js": {
+      "sha": "9c97bb2367f339ad775fc18b671fb68937a9574e",
+      "bytes": 1662
+    },
+    "systems/intro-dragon-stage.js": {
+      "sha": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
+      "bytes": 5907
+    },
+    "systems/intro-dino-stage.js": {
+      "sha": "e866d1dce44c4f50164e944ff3791d616699f060",
+      "bytes": 5718
+    },
+    "systems/intro-frita-stage.js": {
+      "sha": "246eac271ef254625ffdf81a19d6846cf98b30a3",
+      "bytes": 5008
+    },
+    "systems/intro-pizza-stage.js": {
+      "sha": "a5a4a1852ecacdd8f0b50ba4bf6a0d92a834cce6",
+      "bytes": 5512
+    },
+    "systems/intro-yomi-stage.js": {
+      "sha": "8cf0e3e2c81593d28ac2a4642999a9d2137b3717",
+      "bytes": 5325
+    },
+    "systems/intro-cuerno-stage.js": {
+      "sha": "0c77a0a1423c5d43352f03505583c6ac918a3c5f",
+      "bytes": 5125
+    },
+    "systems/intro-kilo-stage.js": {
+      "sha": "89c4d649e598e2c7ad5ec51daecf0b8904fc374b",
+      "bytes": 4902
+    },
+    "systems/intro-stitcho-stage.js": {
+      "sha": "55d59da936c32ecc447078b83b18323c257c36b4",
+      "bytes": 4675
+    },
+    "systems/intro-chispin-stage.js": {
+      "sha": "32f0aef73a213c183d0f162c6262f6c42dec169b",
+      "bytes": 4860
+    },
+    "systems/intro-michi-stage.js": {
+      "sha": "a89f2ad4ada0c4fb89af14324d08ad7377d5a579",
+      "bytes": 4774
+    },
+    "systems/intro-fantasy.js": {
+      "sha": "4af41b9fc17ba8736ab2b8306167f270de242b80",
+      "bytes": 12275
+    },
+    "systems/magic.js": {
+      "sha": "4f737b1eda71e63ffd62ed28a88fcf54993945c8",
+      "bytes": 38917
+    },
+    "systems/map.js": {
+      "sha": "29dcac55f3db21eb77c1f258a50b09d759d428a8",
+      "bytes": 15019
+    },
+    "systems/traversal-nodes.js": {
+      "sha": "8e25357893f8354e637bed008c6e74a770ef9bb7",
+      "bytes": 1787
+    },
+    "systems/traversal-safety.js": {
+      "sha": "22dd9d72a4a9e2f3d4bc79e5a90c61a3eb03f812",
+      "bytes": 986
+    },
+    "systems/world-graph.js": {
+      "sha": "b3fd20dd7d5325133e8b5b818a2fdb8ae231cb10",
+      "bytes": 6738
+    },
+    "systems/mutations.js": {
+      "sha": "58fa2d31dd265dbf045314363b49b4ad0e1b71bb",
+      "bytes": 2952
+    },
+    "systems/message-manager.js": {
+      "sha": "bbae3a1611d1d31810c9f76bf16cc71e79379f8a",
+      "bytes": 7159
+    },
+    "systems/notify.js": {
+      "sha": "d6ab13a1955952106587e945a0291ca29c21663d",
+      "bytes": 1883
+    },
+    "systems/evolution-timing.js": {
+      "sha": "31195d306f284aecd436e85d89a4650845b2bb1f",
+      "bytes": 663
+    },
+    "systems/objectives.js": {
+      "sha": "74e96109895e8bb32ab852f3b0019f57bfa6a5ca",
+      "bytes": 3684
+    },
+    "systems/passives.js": {
+      "sha": "4b392b85b9379b6ecb9ff4a17b5ac2c8c3a97626",
+      "bytes": 20639
+    },
+    "systems/portals.js": {
+      "sha": "3a0fa97d105647de3551bc81bc7c0e1e8431a8ee",
+      "bytes": 33100
+    },
+    "systems/rain.js": {
+      "sha": "02c82578fd89f44120a607b21138c6ca62fe2be2",
+      "bytes": 7643
+    },
+    "systems/runtime.js": {
+      "sha": "805100524fc731356e6a90b53b69eb59573548f5",
+      "bytes": 1268
+    },
+    "systems/save.js": {
+      "sha": "a3090509e6b51bf0b033c6d8e898fed8fbce4045",
+      "bytes": 5108
+    },
+    "systems/surprises.js": {
+      "sha": "85e1a21e2018fb6ad6479a108784878323ebc4bd",
+      "bytes": 18510
+    },
+    "systems/title-fx.js": {
+      "sha": "ad9ad317a97072b7ad747a1738fb1ed1dd1f72f2",
+      "bytes": 13068
+    },
+    "systems/title.js": {
+      "sha": "a26f41dbd9039881946986aaa167866a9146c7c0",
+      "bytes": 27498
+    },
+    "systems/experience.js": {
+      "sha": "6b20279a96a9e62ac62edc27baaeab76024b54b5",
+      "bytes": 17424
+    },
+    "systems/online-coop.js": {
+      "sha": "ffeac83f8d9e87daa93da3fa5ea593c1945d60f3",
+      "bytes": 58414
+    },
+    "systems/duo-altar-art.js": {
+      "sha": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
+      "bytes": 2795
+    },
+    "systems/xp.js": {
+      "sha": "df3fba7395dfacd5fe3dc37826c6cb10c244856a",
+      "bytes": 163
+    },
+    "worlds/index.js": {
+      "sha": "27332abeebee80c8eddc5aaffcce3a22603bbbcd",
+      "bytes": 59061
+    },
+    "worlds/odyssey-sectors.js": {
+      "sha": "5292d72c89432f2b0b2e35570d29c2d79cd7061d",
+      "bytes": 6284
+    },
+    "worlds/room-atmosphere.js": {
+      "sha": "99be70792882ff5b396e792bb50922b0bafe86fd",
+      "bytes": 11207
+    },
+    "worlds/living-worlds.js": {
+      "sha": "79435db96328f216b138de6031b76449d4b2f511",
+      "bytes": 9424
+    },
+    "worlds/painted-hub.js": {
+      "sha": "c845ee06119088951a6b30cae2cd5696535c774a",
+      "bytes": 100
+    },
+    "worlds/terrain.js": {
+      "sha": "942f80bad7eee6133ff7faddede5ffa0d8155df7",
+      "bytes": 9211
+    },
+    "worlds/painted-rooms.js": {
+      "sha": "a93d5d0c8c5cc76845f6dac4196f36d10b56895f",
+      "bytes": 288
+    },
+    "assets/sprites/bodies/cuerno-idle.svg": {
+      "sha": "ca6854839be73b1d927e0ec4ca85905840531db3",
+      "bytes": 1310
+    },
+    "assets/sprites/bodies/cuerno-run.svg": {
+      "sha": "ade90a6428f1821aa832e089861034c16131ce3a",
+      "bytes": 1405
+    },
+    "assets/sprites/bodies/cuerno-jump.svg": {
+      "sha": "7f3307b5ea02d6ede8d1c37e27e32275e7b5080a",
+      "bytes": 1530
+    },
+    "assets/sprites/bodies/cuerno-atk.svg": {
+      "sha": "20ac9419be1e3a9c8293670a310810cfd04b1ab6",
+      "bytes": 1558
+    },
+    "assets/sprites/forms/kilo-0.png": {
+      "sha": "cb3cbc49a2a3704a7eae33cd3725caf3f4a67b18",
+      "bytes": 220737
+    },
+    "assets/sprites/forms/kilo-4.png": {
+      "sha": "cdda4c84ea921d89a175e451b38f552b4ddf9f14",
+      "bytes": 613380
+    },
+    "assets/sprites/forms/pizza-0.png": {
+      "sha": "71f4560b9cf590d2d899e020dcff20df1da5482e",
+      "bytes": 221643
+    },
+    "assets/sprites/forms/pizza-4.png": {
+      "sha": "88a1acdec38521e3335f74316cfb60ec7f713dda",
+      "bytes": 532026
+    },
+    "assets/sprites/forms/cat-0.png": {
+      "sha": "e86ac2c2eb47ee20310cf25a504fb0a19109bace",
+      "bytes": 284517
+    },
+    "assets/sprites/forms/cat-4.png": {
+      "sha": "798687a48289d5282fc1fcc1e2482f910de89f33",
+      "bytes": 459826
+    },
+    "assets/sprites/forms/yomi-0.png": {
+      "sha": "4638db96f86599be2e710c15d253974958fe291e",
+      "bytes": 170213
+    },
+    "assets/sprites/forms/yomi-4.png": {
+      "sha": "ca3291ea61481948429594c2902b6db8cdbe229d",
+      "bytes": 423648
+    },
+    "assets/sprites/boss-queen.png": {
+      "sha": "df621d3e67969bc84df44cf2ab04173184ce29e3",
+      "bytes": 1206298
+    }
+  }
+}

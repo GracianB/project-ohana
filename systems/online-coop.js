@@ -1261,18 +1261,20 @@ class OnlineCoop {
       ctx.stroke();
       ctx.restore();
     }
+    // V373: la constelación de Cuerno sube ~30 px sobre el cuerno; aparta nombre y vida.
+    const cuernoLabelLift = (player.id || definition?.id) === "cuerno" ? 34 : 0;
     ctx.font = "700 11px Outfit, sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "#e5fbff";
     ctx.strokeStyle = "rgba(4,8,16,.84)";
     ctx.lineWidth = 3;
-    ctx.strokeText("J2 · " + (definition.name || "Jugador"), player.x + player.w / 2 - game.cam.x, player.y - 10 - game.cam.y);
-    ctx.fillText("J" + ((this.remote.slot ?? 1) + 1) + " · " + (definition.name || "Jugador") + (this.remote.signalWeak ? " · SEÑAL RETRASADA" : ""), player.x + player.w / 2 - game.cam.x, player.y - 10 - game.cam.y);
+    ctx.strokeText("J2 · " + (definition.name || "Jugador"), player.x + player.w / 2 - game.cam.x, player.y - 10 - cuernoLabelLift - game.cam.y);
+    ctx.fillText("J" + ((this.remote.slot ?? 1) + 1) + " · " + (definition.name || "Jugador") + (this.remote.signalWeak ? " · SEÑAL RETRASADA" : ""), player.x + player.w / 2 - game.cam.x, player.y - 10 - cuernoLabelLift - game.cam.y);
     const hp = Math.max(0, finite(this.remote.health, this.remote.maxHealth || 1));
     const maxHp = Math.max(1, finite(this.remote.maxHealth, 1));
     const barW = 58;
     const barX = player.x + player.w / 2 - barW / 2 - game.cam.x;
-    const barY = player.y - 23 - game.cam.y;
+    const barY = player.y - 23 - cuernoLabelLift - game.cam.y;
     ctx.fillStyle = "rgba(3,8,16,.78)";
     ctx.fillRect(barX, barY, barW, 5);
     ctx.fillStyle = hp / maxHp > .45 ? "#7ee7a7" : "#ff8b8b";

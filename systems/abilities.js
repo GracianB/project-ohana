@@ -7,6 +7,8 @@ import {updateDinoDragonPlay,drawDinoDragonPlay,dinoDragonCast} from './dino-dra
 import {updateMichiYomiPlay,drawMichiYomiPlay,michiYomiImpact} from './michi-yomi-play.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
 import {momentCast,updateMoments,drawMoments} from './stitcho-cuerno-play.js';
+import { castCuerno, updateCuerno, drawCuerno } from './cuerno-kit.js';
+import { startCuernoDuo } from './cuerno-play-v373.js';
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
@@ -151,6 +153,18 @@ p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
+// V373: kit propio de Cuerno. Orden real de ranuras: 0=J, 1=K, 2=L (p.abilities); 3=U (suprema).
+// La U conserva su suprema; F es la tecla de golpe (melee "M" en game.js).
+// Se activa cuando el juego crea game.cuernoFx (runtime real); sin él se usa el kit heredado.
+if (p.id === "cuerno" && index < 3 && game.cuernoFx) {
+  const cuernoKey = ["J", "K", "L"][index];
+  if (castCuerno(cuernoKey, p, game)) {
+    const cdDur = baseCd / (1 + clamp(Number(p.evo) || 0, 0, 4) * 0.12);
+    p.cds[id] = now + cdDur; p.cdDur[id] = cdDur;
+    game.lastAbilityId = id; game.lastAbilitySlot = index;
+    return true;
+  }
+}
 
 const key = FLOW_KEYS[index + 1];
 const preFlow = currentFlow(game, p);
@@ -449,6 +463,7 @@ p.invuln=Math.max(p.invuln||0,120);
 } else if (p.id === "cuerno") {
 // V370: 0.4 s rainbow wind-up; sleepers are chosen at cast time.
 momentCast(game,p,3);
+startCuernoDuo(game);
 add({kind:"uCharge",mode:"cuerno",x:cx(p),y:cy(p),life:OHANA_U_WINDUP,max:OHANA_U_WINDUP,
   targets:dreamTargets,actor:p,room:String(game.roomId||"hub"),color:def.color,evo:Math.max(0,Math.min(4,Number(p.evo)||0))});
 p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
@@ -734,6 +749,7 @@ if (!p) return;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateMoments(game);
+if (p.id === "cuerno") updateCuerno(game, p, { hit: hitEnemy });
 updateChispinDuet(game,hitEnemy);
 updateChispinPizzaPlay(game);
 updateDinoDragonPlay(game);
@@ -807,6 +823,7 @@ drawMichiYomiPlay(ctx,game,t);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawMoments(ctx,game,t);
 if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if (p.id === "cuerno") drawCuerno(ctx, p, cam, t);
 for (const f of FX) {
 const d = DRW[f.kind];
 if (!d) continue;

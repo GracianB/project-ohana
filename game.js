@@ -75,6 +75,10 @@ import { updateMichiFoeAI } from "./engine/foes/michi-ai.js";
 import { updateChispinFoeAI, chispinFoeBlocks } from "./engine/foes/chispin-ai.js";
 import { updateDinoFoeAI, updateDinoHazards, onDinoFoeDeath, resetDinoFoeAI, dinoPuddles, dinoSparks } from "./engine/foes/dino-ai.js";
 import { drawDinoHazards, drawDinoAbductFx } from "./engine/foes/dino-foes.js";
+import { createCuernoFx, updateCuernoFx, drawCuernoFx, cuernoDoubleJump } from "./systems/cuerno-fx.js";
+import { castCuerno } from "./systems/cuerno-kit.js";
+import { updateCuernoPlay, drawCuernoPlay, queueCuernoPlay, resetCuernoPlay, CUERNO_PLAY_KEYS } from "./systems/cuerno-play-v373.js";
+import { cuernoFormMods, cuernoEvolveBurst, updateCuernoBursts, drawCuernoBursts, resetCuernoEvoV373, drawCuernoIntro, drawCuernoDeath, drawCuernoVictory, CUERNO_INTRO_DURATION, CUERNO_DEATH_DURATION, CUERNO_VICTORY_DURATION } from "./systems/cuerno-evo-v373.js";
 import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFritaInteractions } from "./systems/kilo-frita-interactions.js";
 
 const canvas = document.getElementById("game");
@@ -164,6 +168,7 @@ game.createCoopEnemy=(spec)=>{
  return enemy;
 };
 
+game.cuernoFx=createCuernoFx();
 game.onAbilityHit=(enemy,damage)=>forwardCoopAbilityHit(game,onlineCoop,enemy,damage);
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
@@ -526,6 +531,7 @@ return false;
 const first = !game.visited[id];
 game.roomId = id;
 resetDinoFoeAI();
+try { resetCuernoEvoV373(); resetCuernoPlay(); } catch (_) {}
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
 resetCombatMirror(game);game.coopPeerEffects=null;game._familyDuet=null;game._michiDuet=null;game.michiAbilityFx=[];game._chispinDuet=null;game._stitchoDuet=null;game._kiloDuet=null;game.chispinAbilityFx=[];game.kiloAbilityFx=[];
 // Keep the ritual when briefly leaving Caldera, never restart a completed reward.
@@ -670,6 +676,7 @@ return p;
 }
 function start(def) {
 game.loadRoom = loadRoom;
+game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
 game.lastAbilitySlot = null;
 if (!def) return;
@@ -775,6 +782,7 @@ return;
 }
 p.evo += 1;
 applyForm(p);
+if (p.id === "cuerno") { try { cuernoEvolveBurst(game, p); } catch (_) {} }
 paintFit(p);
 if (p.evo === 4) Surprises.onBecomeGod(game);
 const toGod = p.evo >= 4;
@@ -953,6 +961,7 @@ game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: p.color || "#fff6c8", count:
 game.nums.add(e.x, e.y - 16, "x" + game.combo, "#fff6c8");
 }
 }
+function cuernoDeathT(p) { return Number.isFinite(p?._cuernoDeadAt) ? Math.max(0, (t - p._cuernoDeadAt) / 60) : Infinity; }
 function hornPoke(p, evo, def) {
 const face = p.facing || 1;
 p._thrust = 6;
@@ -1074,6 +1083,7 @@ characterId: p.id,
 });
 
 if (p.id === "cuerno") {
+if (castCuerno("M", p, game, def)) return;
 hornPoke(p, evo, def);
 return;
 }
@@ -1126,7 +1136,7 @@ if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on
 if (p.health <= 0 && Passives.onLethal(game)) return;
 if (p.health <= 0) {
 p.health = 0;
-p.dead = true;
+p.dead = true; p._cuernoDeadAt = t;
 dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "hurt", id: p.id, hero: p.name } }));
 showErrorMessage("DERROTA", "R vuelve al claro");
 if (!DeathFx.isPlaying()) DeathFx.start(p, () => respawn(), { reason: "hurt" });
@@ -1182,7 +1192,7 @@ return false;
 }
 function dieVoid(p) {
 if (!p || p.dead) return;
-p.dead = true; p.health = 0; game.shake = 16; beep("hurt");
+p.dead = true; p._cuernoDeadAt = t; p.health = 0; game.shake = 16; beep("hurt");
 dispatchEvent(new CustomEvent("ohana-death", { detail: { reason: "void", id: p.id, hero: p.name } }));
 const hurt = document.getElementById("fx-hurt");
 if (hurt) { hurt.classList.add("on"); setTimeout(() => hurt.classList.remove("on"), 280); }
@@ -1351,6 +1361,7 @@ if (f.t === 135) {
 if (f.t === 55) game.storyLine = "";
 if (f.t === 0 && !game.won) {
 game.won = true;
+game._cuernoWonT = t;
 const p = game.player;
 const ticks = game.clearTicks || 0;
 const rank = clearRank(ticks);
@@ -1509,7 +1520,9 @@ for (const plat of game.platforms) {
 }
 const canJump = p.jumps < p.maxJumps || p.coyote > 0 || p.wall;
 if (p.buffer > 0 && canJump) {
+const cuernoAirJump = !(p.coyote > 0 || p.wall);
 p.vy = -p.jumpPower; p.jumps = p.coyote > 0 || p.wall ? 1 : p.jumps + 1;
+if (p.id === "cuerno" && cuernoAirJump && p.jumps === 2 && cuernoFormMods((Number(p.evo) || 0) + 1)?.unlock?.rainbowJump) cuernoDoubleJump(game.cuernoFx, p);
 if (p.wall) p.vx = 8 * p.wall;
 p.grounded = false; p.coyote = 0; p.buffer = 0; p._jumpHeld = true; beep("jump");
 game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: p.color || "#fff", count: 10, size: 2.6, up: 1.4, speed: 2.2, life: 14 });
@@ -1589,6 +1602,8 @@ if(dragonEmber){
 }
 Magic.update(game);
 updateKiloFritaInteractions(game);
+updateCuernoPlay(game, t);
+updateCuernoBursts(game);
 if (p.grounded && Math.abs(p.vx) > 2 && t % 6 === 0) game.fx.emit(p.x + p.w / 2, p.y + p.h, { color: "#ccc", count: 2, size: 2 });
 if (!p.grounded && p.coyote > 0) p.coyote--;
 if (p._specialFlightT > 0) {
@@ -1826,6 +1841,13 @@ if (e.stun > 0) {
     if (e.hopWind) e.hopWind = 0;
     if (e.clawWind) e.clawWind = 0;
   }
+}
+// V373: sueño de Cuerno. Solo se saltan IA y movimiento; invuln, daño y muerte siguen.
+if (!e.boss && e.sleep > 0) {
+  e.sleep--;
+  e.vx = 0; e.telegraph = false;
+  if (e.invuln > 0) e.invuln--;
+  continue;
 }
 
 if (e.boss) {
@@ -2708,6 +2730,7 @@ for (const e of game.enemies) {
 if (!game.finale) {
   ctx.save(); ctx.translate(-game.cam.x, -game.cam.y);
   drawDinoHazards(ctx, dinoPuddles, dinoSparks, t); drawDinoAbductFx(ctx, game.player, t);
+  drawCuernoFx(ctx, game.cuernoFx); drawCuernoBursts(ctx);
   ctx.restore();
 }
 if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
@@ -2724,13 +2747,23 @@ game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.r
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
+if (game.player.id === "cuerno" && game.player.dead && cuernoDeathT(game.player) < CUERNO_DEATH_DURATION) {
+  const cp = game.player;
+  try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+} else {
 ctx.globalAlpha = typeof DeathFx.playerAlpha === "function" ? DeathFx.playerAlpha() : 0.45;
 drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
+}
 } else if (game.player.dead) {
+if (game.player.id === "cuerno" && cuernoDeathT(game.player) < CUERNO_DEATH_DURATION) {
+  const cp = game.player;
+  try { drawCuernoDeath(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y + cp.h - game.cam.y, cuernoDeathT(cp), (Number(cp.evo) || 0) + 1); } catch (_) {}
+} else {
 ctx.globalAlpha = 0.45;
 drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
+}
 } else if (game.player.invuln % 4 !== 1) {
 const pv = typeof portals.playerVisual === "function" ? portals.playerVisual() : null;
 if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
@@ -2748,6 +2781,11 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
 }
 }
 if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCharacter, ROSTER);
+if (!game.player.dead) drawCuernoPlay(ctx, game, t, drawCharacter, ROSTER);
+if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION) {
+  const cp = game.player;
+  try { drawCuernoVictory(ctx, cp.x + cp.w / 2 - game.cam.x, cp.y - 8 - game.cam.y, (t - game._cuernoWonT) / 60, (Number(cp.evo) || 0) + 1); } catch (_) {}
+}
 ctx.restore();
 if (game.storyLine && game.bossIntro && !game.finale && !document.querySelector("#notification-container .game-notification")) {
 ctx.save();
@@ -2853,6 +2891,9 @@ if (game.flashColor && !game._portalFlash) {
 }
 }
 game.experience?.render(ctx, game, viewW, viewH, t);
+if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
+  try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
+}
 if (viewW >= 820) drawMinimap();
 }
 function castPower(index) {
@@ -3113,7 +3154,10 @@ if (DeathFx.isPlaying()) DeathFx.update(game);
 Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
 Surprises.update(game, t);
 Festival.update(game, t);
+if (game._cuernoIntroT != null && ++game._cuernoIntroT > CUERNO_INTRO_DURATION * 60) game._cuernoIntroT = null;
+updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null, t, paused);
 updateCam();
+game.coopRemote = onlineCoop.remote;
 onlineCoop.tick(game);
 if (t % 6 === 0) updateHUD();
 if (t % 300 === 0) save();
@@ -3227,6 +3271,11 @@ return '<button class="char-card" type="button" data-id="' + c.id + '" aria-labe
 }).join("");
 grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => dispatchEvent(new CustomEvent("ohana-select", { detail: { id: el.dataset.id } }))));
 try { mountSelectScreen({ grid, roster: ROSTER }); } catch (err) { console.error("[ohana] select screen", err); }
+addEventListener("keydown", (e) => {
+if (!game.running || paused || overlayOpen() || e.repeat || game.player?.id !== "cuerno") return;
+const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e.key);
+if (kind) queueCuernoPlay(kind);
+});
 addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
