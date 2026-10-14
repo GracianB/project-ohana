@@ -1,3 +1,10 @@
+## V379 · Dino: avisos precisos, accesibilidad justa y cooperativo fiel (ohana-379)
+
+- Movimiento reducido cambia únicamente el aspecto: las cinco evoluciones generan exactamente el mismo número de fósiles (hasta ocho), con la misma cadencia y daños. Se atenúan sacudidas y partículas.
+- Los marcadores de fósiles muestran el radio de explosión real, sobreviven a caídas de más de 48 fotogramas y se retiran al impactar su proyectil asociado. Las ondas del Coloso dibujan su área circular de daño sin eliminar el anillo decorativo de suelo. El invitado cooperativo recibe esas mismas circunferencias exactas en un paquete visual inerte.
+- Los golpes de Dino transportan impulso horizontal, vertical y aturdimiento numéricos y limitados, conservando un solo árbitro de daño en el anfitrión y un máximo de 6 fotogramas de aturdimiento en jefes. Los demás héroes no reciben cambios de física.
+- Se añaden pruebas Node para paridad normal/reducido, marcador prolongado, radios Canvas, serialización de impulsos, valores inválidos, límites de jefes, bloqueo de suplantación de héroe y autoría del daño. Requiere navegador, cooperativo, visual, migración offline y Release Gate verdes antes de fusión. No usar Netlify.
+
 ## V378 · Dino anatomía conectada y efectos cooperativos auténticos (ohana-378)
 
 - Las cinco formas tienen articulaciones dibujadas sobre la curva real de las piernas: rodilla centrada en Bézier, tobillo conectado a la pata y codos articulados. Los dedos conservan su apoyo original y las hitboxes no cambian.
