@@ -36,7 +36,7 @@ export function createDinoEffects(ops) {
        room:String(g.roomId||"hub"),actor:p,
        dmg:dmg*.17,color:color||"#c8f04a",evo});
      g.nums?.add?.(cx(p),p.y-50,"¡DESPIERTA, COLOSO!","#eaffb5",true);
-     g.shake=Math.min(18,(g.shake||0)+9);
+     g.shake=Math.min(g.reduceMotion?3:18,(g.shake||0)+(g.reduceMotion?1:9));
      boom(g,cx(p),p.y+p.h,"#eaffb5",9,{up:1.6,star:true});
      return field;
    },
@@ -60,7 +60,8 @@ export function createDinoEffects(ops) {
        })) f.duet?.legacyTargets?.add(e);
      }
    }
-   const maxStones=g.reduceMotion?3:Math.min(8,4+f.evo);
+   // Accessibility changes only paint, never target count or impact cadence.
+   const maxStones=Math.min(8,4+f.evo);
    if(--f.nextPulse<=0){
      f.nextPulse=34;
      f.beat++;
@@ -81,14 +82,17 @@ export function createDinoEffects(ops) {
      const spawnY=Math.min((g.cam?.y||0)-48,dest.y-225);
      const vx=dir*(1.8+f.evo*.18);
      const time=Math.max(16,(dest.y-spawnY)/11);
-     add({kind:"dinoFossil",x:dest.x-vx*time,y:spawnY,
+     const stoneRadius=10+f.evo*1.2,blastRadius=48+f.evo*6;
+     const fossil=add({kind:"dinoFossil",x:dest.x-vx*time,y:spawnY,
        vx,vy:11,landX:dest.x,landY:dest.y,
-       r:10+f.evo*1.2,dmg:f.dmg*1.22,R:48+f.evo*6,
+       r:stoneRadius,dmg:f.dmg*1.22,R:blastRadius,
        life:120,age:0,rot:f.stones*.93});
-     const frames=cap(Math.round(time),18,48);
-     add({kind:"dinoFossilMark",x:dest.x,y:dest.y,life:frames,max:frames});
+     // Stay signposted until collision, including long drops from high cameras.
+     const frames=cap(Math.ceil((dest.y-3-stoneRadius-spawnY)/11)+1,1,120);
+     add({kind:"dinoFossilMark",x:dest.x,y:dest.y,
+       r:blastRadius,life:frames,max:frames,fossil});
      f.stones++;
-     f.nextFossil=g.reduceMotion?45:25;
+     f.nextFossil=25;
    }
    if(g._dinoUltimate)g._dinoUltimate.remaining=f.life;
    return true;
@@ -112,7 +116,11 @@ export function createDinoEffects(ops) {
    g.shake=Math.min(13,(g.shake||0)+(g.reduceMotion?1:3));
    return false;
  },
- dinoFossilMark(g,f){return --f.life>0;},
+ dinoFossilMark(g,f){
+   if(f.fossil){const active=f.fossil.life>0&&!f.fossil.dead;
+     f.life=Math.max(1,f.life-1);return active;}
+   return --f.life>0;
+ },
  dinoFossilBlast(g,f){return --f.life>0;},
 
 dinoSpit(g,f) {
