@@ -1221,6 +1221,7 @@ if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;
   pose.cuernoDreamT = Math.max(0, Number(p._specialAuroraT) || 0) / 260;
+  if (!p.dead && p._cuernoKit?.acts?.some((a) => a.key === "K" && a.phase === "active")) pose.state = "trail";
 }
 if(p.id==='kilo'&&p._kiloDuetT>0){
  pose.kiloDuetAge=p._kiloDuetAge||0;

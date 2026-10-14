@@ -48,6 +48,9 @@ jobs:
       - name: V369 actual Chromium cache upgrade · 199 reused and 1 transferred
         run: node tests/browser/v369-cache-migration.mjs
 
+      - name: Cuerno V373 real runtime integration
+        run: node tests/browser/cuerno-v373.mjs
+
       - name: Ten hero U protection audit
         run: node tests/browser/all-hero-u-protection.mjs
 

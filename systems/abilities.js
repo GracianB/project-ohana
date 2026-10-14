@@ -7,6 +7,8 @@ import {updateDinoDragonPlay,drawDinoDragonPlay,dinoDragonCast} from './dino-dra
 import {updateMichiYomiPlay,drawMichiYomiPlay,michiYomiImpact} from './michi-yomi-play.js';
 import {startStitchoDuet,updateStitchoDuet,drawStitchoDuet} from './stitcho-duet.js';
 import {momentCast,updateMoments,drawMoments} from './stitcho-cuerno-play.js';
+import { castCuerno, updateCuerno, drawCuerno } from './cuerno-kit.js';
+import { startCuernoDuo } from './cuerno-play-v373.js';
 import {startKiloDuet,updateKiloDuet,drawKiloDuet} from './kilo-duet.js';
 import { vfxSprite } from "../characters/sprites.js";
 import { createDinoEffects } from "./dino-combat.js";
@@ -151,6 +153,9 @@ p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
+// Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
+const cuernoKey = p.id === "cuerno" && index < 3 && game.cuernoFx ? ["J", "K", "L"][index] : null;
+if (cuernoKey && !castCuerno(cuernoKey, p, game)) return false;
 
 const key = FLOW_KEYS[index + 1];
 const preFlow = currentFlow(game, p);
@@ -183,7 +188,7 @@ const bondGain=gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
 if (index === 3) castSupreme(game, p, flow);
-else fn(game, p, evo);
+else if (!cuernoKey) fn(game, p, evo);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
 if (flow.label && index < 3) {
@@ -449,6 +454,7 @@ p.invuln=Math.max(p.invuln||0,120);
 } else if (p.id === "cuerno") {
 // V370: 0.4 s rainbow wind-up; sleepers are chosen at cast time.
 momentCast(game,p,3);
+startCuernoDuo(game);
 add({kind:"uCharge",mode:"cuerno",x:cx(p),y:cy(p),life:OHANA_U_WINDUP,max:OHANA_U_WINDUP,
   targets:dreamTargets,actor:p,room:String(game.roomId||"hub"),color:def.color,evo:Math.max(0,Math.min(4,Number(p.evo)||0))});
 p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
@@ -561,6 +567,7 @@ const sleepers=dreamTargets;
 for(const e of sleepers){
 e.stun=Math.max(e.stun||0,156);
 e._auroraSleepT=156;
+e.sleep=Math.max(e.sleep||0,156);
 e.vx=0;
 }
 game._auroraDreamTargets=sleepers.length;
@@ -734,6 +741,7 @@ if (!p) return;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateMoments(game);
+if (p.id === "cuerno") updateCuerno(game, p, { hit: hitEnemy });
 updateChispinDuet(game,hitEnemy);
 updateChispinPizzaPlay(game);
 updateDinoDragonPlay(game);
@@ -807,6 +815,7 @@ drawMichiYomiPlay(ctx,game,t);
 if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawMoments(ctx,game,t);
 if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if (p.id === "cuerno") drawCuerno(ctx, p, cam, t);
 for (const f of FX) {
 const d = DRW[f.kind];
 if (!d) continue;
@@ -1622,6 +1631,7 @@ if (mode === "stitcho") {
 } else if (mode === "cuerno") {
   for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
     e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
+    e.sleep=Math.max(e.sleep||0,f.life+2);
     e.stun=Math.max(e.stun||0,3);
     e.vx=0;
   }

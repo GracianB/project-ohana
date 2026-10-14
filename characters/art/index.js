@@ -12,7 +12,7 @@ import dino from "./dino.js";
 import frita from "./frita.js";
 import pizza from "./pizza.js";
 import yomi from "./yomi.js";
-import cuerno from "./cuerno.js";
+import cuerno from "./cuerno-v373.js";
 
 const ART = Object.freeze({
   kilo,
