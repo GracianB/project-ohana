@@ -238,11 +238,33 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
  ctx.save();ctx.translate(2,headY);if(r.mood==='angry'){ctx.rotate(-.06);}ctx.rotate(r.michiHead||0);
  for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*9,-14);ctx.quadraticCurveTo(side*23,-33,side*23,-19);ctx.lineTo(side*25,-1);ctx.closePath();ctx.fillStyle=c.fur;ctx.fill();stroke(INK,2);ctx.beginPath();ctx.moveTo(side*14,-13);ctx.lineTo(side*20,-24);ctx.lineTo(side*21,-8);ctx.fillStyle=c.ear;ctx.fill();}
  oval(0,0,25,23,c.fur);oval(-11,10,9,7,c.belly,false);oval(11,10,9,7,c.belly,false);
- for(const side of [-1,1]){oval(side*10,-1,7.2,9,'#fff8ff');oval(side*10+1,-.3,5.1,7,c.eye,false);oval(side*10+1,1,2.7,5,'#392745',false);oval(side*10-1,-3,2,2,'#fff',false);oval(side*10+3,3,1,1,'#fff',false);if(r.mood==='closed'||r.mood==='happy'||(!pose.reduceMotion&&r.t%170<5)){ctx.beginPath();ctx.moveTo(side*10-7,0);ctx.quadraticCurveTo(side*10,5,side*10+7,0);stroke(c.fur,12);stroke(INK,1.6);}oval(side*18,10,4,2.2,c.ear,false);for(const dy of [8,12]){ctx.beginPath();ctx.moveTo(side*18,dy);ctx.lineTo(side*29,dy-2);stroke(c.dark,1);}}
+
+ for(const side of [-1,1]){
+  const ex=side*10,ey=-2;
+  const closed=r.mood==='closed'||r.mood==='happy'||(!pose.reduceMotion&&r.t%170<5);
+  ctx.save();ctx.translate(ex,ey);
+  if(closed){
+   ctx.beginPath();ctx.moveTo(-6,2);ctx.quadraticCurveTo(0,r.mood==='happy'?-5:6,6,2);stroke('#49304e',1.8);
+  }else{
+   // Soft almond whites and a single upper lid, without spectacle-like rings.
+   ctx.beginPath();ctx.moveTo(-7,1);ctx.bezierCurveTo(-7,-10,6,-11,7,0);ctx.bezierCurveTo(7,10,-6,10,-7,1);ctx.fillStyle='#fff8ff';ctx.fill();
+   const gaze=Math.max(-1.2,Math.min(1.2,(pose.look?.x||0)*.8));
+   oval(gaze,.4,5.2,7.3,c.eye,false);oval(gaze,3,4.2,3.2,f>=3?'#d4a9ee':'#a5d8f6',false);
+   oval(gaze,-.2,2.7,5.5,'#38223f',false);
+   oval(gaze-1.8,-3.3,2.1,2.3,'#fff',false);oval(gaze+2,3.8,.9,.9,'#fff',false);
+   ctx.beginPath();ctx.moveTo(-7,0);ctx.bezierCurveTo(-7,-10,6,-11,7,0);stroke('#49304e',1.7);
+   ctx.beginPath();ctx.moveTo(side*6,-4);ctx.lineTo(side*8,-6);stroke('#49304e',1.2);
+   if(r.mood==='angry'){ctx.beginPath();ctx.moveTo(-6,-10-side*1.8);ctx.lineTo(6,-10+side*1.8);stroke(c.dark,1.8);}
+  }
+  ctx.restore();
+  oval(side*18,10,4,2.2,c.ear,false);
+  for(const dy of [8,12]){ctx.beginPath();ctx.moveTo(side*18,dy);ctx.lineTo(side*29,dy-2);stroke(c.dark,1);}
+ }
+
  ctx.beginPath();ctx.moveTo(-3,8);ctx.quadraticCurveTo(0,5,3,8);ctx.lineTo(0,11);ctx.closePath();ctx.fillStyle=c.nose;ctx.fill();ctx.beginPath();ctx.moveTo(0,11);ctx.lineTo(0,14);ctx.quadraticCurveTo(-4,18,-6,14);ctx.moveTo(0,14);ctx.quadraticCurveTo(4,18,6,14);stroke(INK,1.3);
  for(const x of [-5,0,5]){ctx.beginPath();ctx.moveTo(x,-20);ctx.lineTo(x*.8,-14);stroke(c.dark,2);}
  if(f>=3){ctx.beginPath();ctx.arc(0,-29,6,.5,5.8);stroke('#ffe5a1',2.5);}ctx.restore();
- ctx.beginPath();ctx.moveTo(-12,bodyY-14);ctx.quadraticCurveTo(0,bodyY-8,12,bodyY-14);stroke(f===4?'#6c458f':c.ear,4);oval(0,bodyY-8,4,5,'#ffe3a0');
+ if(f>0){const collarY=Math.max(bodyY-14,headY+25);ctx.beginPath();ctx.moveTo(-12,collarY);ctx.quadraticCurveTo(0,collarY+3,12,collarY);stroke(f===4?'#6c458f':c.ear,4);oval(0,collarY+5,3.3,4,'#ffe3a0');}
 }
 function draw(ctx, pose, R) {
   const src = pose || {};
