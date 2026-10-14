@@ -1,3 +1,10 @@
+## V378 · Dino anatomía conectada y efectos cooperativos auténticos (ohana-378)
+
+- Las cinco formas tienen articulaciones dibujadas sobre la curva real de las piernas: rodilla centrada en Bézier, tobillo conectado a la pata y codos articulados. Los dedos conservan su apoyo original y las hitboxes no cambian.
+- Respiración corporal diferenciada: costillas, cuello, vientre y cabeza se expanden/retraen suavemente sobre el rig existente, sin mover los pies; movimiento reducido la inmoviliza. Ningún cálculo requiere nuevas texturas ni gradientes por fotograma.
+- Los compañeros Dino ven los avisos del Coloso y de los fósiles, piedras que caen, ondas de impacto y proyectiles verdes. Red P2P: solo siete tipos visuales permitidos, tamaño y coordenadas acotados, sin daño, objetivos, actores ni hitsets; protección de versión/sala, secuencia y reinicio de snapshots al atravesar portales. No cambia la autoridad del combate ni genera peticiones a Netlify.
+- Tests: geometría de articulaciones y respiración × cinco formas, H/J/K/L/U, escenas de movimiento; validación de datos visuales, repetición, cambios de sala y Canvas reducido. Publicación condicionada a Node + Browser Chromium/Firefox, cooperativo, visual, offline y Release Gate.
+
 ## V377 · Dino: Coloso local y telegrafiado (ohana-377)
 
 El golpe inicial de Dino conserva su potencia original y el Coloso de 260 ticks, pero deja de atacar instantáneamente a enemigos remotos. Durante 18 ticks aparece un círculo de 172+32×evolución unidades y únicamente los enemigos que intersectan ese círculo al resolver el aviso reciben el impacto. Los blancos alcanzados se incorporan al conjunto de prevención de dobles impactos del dúo U; el resto continúa disponible para las habilidades L prestadas. Muerte, cambio de sala y cambio de actor anulan el impacto preparado. Se mantienen las ondas sísmicas, el número y cadencia de fósiles, la armadura, el enfriamiento y la autoridad de daño original. Pruebas de círculo real, temporización, salida/entrada tardía, limpieza de estado y movimiento reducido. Publicación condicionada a CI, Browser/Firefox, cooperativo y Release Gate.
