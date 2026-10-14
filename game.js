@@ -69,7 +69,7 @@ import { stepChispinCloud,drawChispinCloud } from "./systems/chispin-cloud.js";
 import { resetCombatMirror,mirroredProjectileHits } from "./systems/coop-combat-mirror.js";
 import { cachedGradient } from "./systems/canvas-gradient-cache.js";
 import { updateKiloFoeAI } from "./engine/foes/kilo-ai.js";
-import { updateStitchoFoeAI, updateStitchoWebs } from "./engine/foes/stitcho-ai.js";
+import { updateStitchoFoeAI, updateStitchoWebs, clearStitchoWebs } from "./engine/foes/stitcho-ai.js";
 import { drawStitchoWebs } from "./engine/foes/stitcho-foes.js";
 import { updateMichiFoeAI } from "./engine/foes/michi-ai.js";
 import { updateChispinFoeAI, chispinFoeBlocks } from "./engine/foes/chispin-ai.js";
@@ -530,6 +530,9 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+// Hazards and movement debuffs from the previous room must not cross portals.
+// Blocked portals return above, so their traps and effects are untouched.
+clearStitchoWebs(game);
 resetDinoFoeAI();
 try { resetCuernoEvoV373(); resetCuernoPlay(); resetCuerno(game.player); game.cuernoFx = createCuernoFx(); } catch (_) {}
 game.coopRoomVisit=(game.coopRoomVisit||0)+1;
