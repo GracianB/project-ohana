@@ -304,6 +304,40 @@ function crack(ctx, pts, t, seed) {
   ctx.restore();
 }
 
+
+// V378 · Pure connected-joint geometry. The knee lies ON the curved leg,
+// not on the Bézier control point, which could put a floating knee in midair.
+export function dinoJointAnatomy(len=12,angle=0,bend=3,width=12,brace=0) {
+  const bounded=(v,lo,hi,fb)=>Number.isFinite(v)?clamp(v,lo,hi):fb;
+  const L=bounded(len,0,90,12),a=bounded(angle,-3.2,3.2,0);
+  const B=bounded(bend,-20,20,3),W=bounded(width,1,30,12);
+  const planted=bounded(brace,0,1,0);
+  const dx=Math.sin(a)*L,dy=Math.cos(a)*L;
+  // Quadratic Bézier at t=.5: (origin + 2*control + ankle)/4.
+  const kneeX=dx*.5+Math.cos(a)*B*.5;
+  const kneeY=dy*.5;
+  return Object.freeze({
+    kneeX,kneeY,ankleX:dx,ankleY:dy,
+    kneeRadius:W*(.43+planted*.035),
+    ankleRadius:W*(.24+planted*.05),
+    toePlant:planted,
+  });
+}
+
+// Bounded tidal breathing through neck, ribs and belly. Does not move feet,
+// mutate hitboxes or rely on per-frame allocations of gradients.
+export function dinoBreathMechanics(pose={}) {
+  const form=clamp(Math.round(Number.isFinite(pose.form)?pose.form:0),0,4);
+  const active=pose.state==="idle"||pose.state==="victory"||pose.state==="cast";
+  const input=Number.isFinite(pose.breath)?clamp(pose.breath,-1,1):0;
+  const tide=pose.reduceMotion?0:input*(active?1:.26);
+  const profile=[1.45,1.26,1.12,.95,.86][form];
+  const rib=clamp(tide*.045*profile,-.066,.066);
+  const lift=clamp(tide*.027*profile,-.04,.04);
+  return Object.freeze({rib,lift,belly:clamp(tide*1.8*profile,-2.8,2.8),
+    throat:clamp(tide*.45*profile,-.7,.7)});
+}
+
 function foot(ctx, R, x, y, w, col, claw, brace = 0) {
   // V317: Dino plants his toes rather than emitting a fake impact circle.
   // Three claws spread laterally with his existing weight and quake contact.
@@ -321,13 +355,22 @@ function foot(ctx, R, x, y, w, col, claw, brace = 0) {
 }
 
 function leg(ctx, R, x, y, len, ang, w, col, claw, bend, brace = 0) {
+  const joint=dinoJointAnatomy(len,ang,bend,w,brace);
   const e = R.swingLimb(ctx, x, y, len, ang, bend, w * 0.78, col, { hand: false });
+  // Thigh overlaps the pelvis; the kneecap seals both halves of the curved limb.
   R.ellipse(ctx, x + Math.sin(ang) * len * 0.15, y + Math.cos(ang) * len * 0.1, w * 0.68, w * 0.82, col, { rot: ang * 0.6 });
+  R.ellipse(ctx,x+joint.kneeX,y+joint.kneeY,joint.kneeRadius,joint.kneeRadius*.91,
+    col,{rot:ang*.4,lw:1.35});
+  // A small ankle joint belongs to the leg, before the three planted toes.
+  R.ellipse(ctx,e[0],e[1],joint.ankleRadius,joint.ankleRadius*.9,col,{lw:1.15});
   foot(ctx, R, e[0], e[1], w * 0.85, col, claw, brace);
 }
 
 function tinyArm(ctx, R, x, y, len, ang, w, col, claw) {
   const e = R.swingLimb(ctx, x, y, len, ang, 1.5, w, col, { hand: w * 0.7 });
+  // Tiny Rex elbows are real continuous joints rather than detached claws.
+  const elbow=dinoJointAnatomy(len,ang,1.5,w,0);
+  R.ellipse(ctx,x+elbow.kneeX,y+elbow.kneeY,w*.50,w*.46,col,{lw:1.1});
   ctx.fillStyle = claw; ctx.strokeStyle = R.INK; ctx.lineWidth = 1.1;
   for (let i = -1; i <= 1; i += 2) {
     const aa = ang + 0.3 + i * 0.5;
@@ -783,10 +826,12 @@ function draw(ctx, pose, R) {
     return;
   }
 
+  const breath=dinoBreathMechanics(pose);
   const upper = () => {
     ctx.translate(0, hipY);
     ctx.rotate(lean);
     if (!rolling && motion.squash > 0) ctx.scale(1+motion.squash*.028,1-motion.squash*.028);
+    ctx.scale(1+breath.rib,1-breath.lift);
     if(stageLife.active)ctx.scale(stageLife.thoraxX,stageLife.thoraxY);
   };
   const headX = (baby ? bw * 0.25 : bw * 0.62) + hdx, headY = (baby ? -bh * 0.95 - hh * 0.62 : -bh - hh * 0.42) + hdy;
@@ -911,7 +956,9 @@ function draw(ctx, pose, R) {
     R.blob(ctx,junction,c.body,{line:false,shade:false});
     const body = [[-bw * 1.0, -bh * 0.15], [-bw * 0.8, -bh * 0.7], [-bw * 0.15, -bh * 1.02], [bw * 0.65, -bh * 0.92], [bw * 1.02, -bh * 0.45], [bw * 0.85, -bh * 0.02], [0, bw * 0.3]];
     R.blob(ctx, body, c.body);
-    const bel = [[bw * 0.2, -bh * 0.85], [bw * 0.75, -bh * 0.76], [bw * 0.95, -bh * 0.4], [bw * 0.72, -bh * 0.02], [bw * 0.1, bw * 0.16], [-bw * 0.15, -bh * 0.4]];
+    const bel = [[bw * 0.2, -bh * 0.85], [bw * 0.75, -bh * 0.76],
+      [bw * 0.95+breath.belly, -bh * 0.4], [bw * 0.72+breath.belly*.75, -bh * 0.02],
+      [bw * 0.1, bw * 0.16], [-bw * 0.15, -bh * 0.4]];
     ctx.save();ctx.globalAlpha = T.belly[f];R.blob(ctx, bel, c.belly, { lw: 1.6 });ctx.restore();
     
     ctx.save();
@@ -954,7 +1001,7 @@ function draw(ctx, pose, R) {
   // CABEZA
   ctx.save(); upper();
   if (baby) ctx.rotate(shellRot * 0.6);
-  ctx.translate(headX, headY + pose.bounce * 1.5);
+  ctx.translate(headX, headY + pose.bounce * 1.5 - breath.throat);
   ctx.rotate(headRot);
   drawHead(ctx, R, pose, { f, c, P, t, final, baby, jaw, eyeMood, hurtEyes, deadEyes, roarK, chomp, rawr, lookUp, eyeLook:motion.eyeLook });
   ctx.restore();
