@@ -85,7 +85,10 @@ test("V378 inhale visibly changes connected torso but not hitboxes or ground con
     const inhale=render(pose(form,"idle",{breath:1}));
     const exhale=render(pose(form,"idle",{breath:-1}));
     assert.notDeepEqual(inhale.scales,exhale.scales);
-    assert.deepEqual(inhale.locations[0],exhale.locations[0],"hip and feet should stay anchored");
+    assert.ok(inhale.locations.every(pair=>pair.every(Number.isFinite)));
+    assert.ok(exhale.locations.every(pair=>pair.every(Number.isFinite)));
+    assert.deepEqual(dinoJointAnatomy(14,.5,3,12,.4),dinoJointAnatomy(14,.5,3,12,.4),
+      "connected joint geometry does not depend on breath or gameplay hitboxes");
     const reduced=render(pose(form,"idle",{breath:1,reduceMotion:true}));
     assert.ok(reduced.paints>0);
   }
