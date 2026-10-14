@@ -12,6 +12,8 @@ const sw=fs.readFileSync("sw.js","utf8");
 const start=sw.indexOf("const PRECACHE_REVISIONS = {");
 const end=sw.indexOf("\n};",start);
 const current=JSON.parse(sw.slice(sw.indexOf("{",start),end+2));
+const currentVersion=sw.match(/const VERSION = "(ohana-\d+)"/)?.[1];
+assert.ok(currentVersion,"current Service Worker version is present");
 const same=Object.entries(baseline.resources).filter(([name,r])=>current[name]===r.sha).map(([name])=>name);
 const currentTotal=Object.keys(current).length;
 // V373 work (intros, final and the concurrent foe modules) changes a bounded set:
@@ -50,7 +52,7 @@ try {
  },{baseline,same});
  const seedRequests=network.length;
  network.length=0;
- await page.evaluate(()=>navigator.serviceWorker.register("./sw.js?v=ohana-375",{scope:"./"}));
+ await page.evaluate(version=>navigator.serviceWorker.register("./sw.js?v="+version,{scope:"./"}),currentVersion);
  // CacheStorage creation may precede the last cache.put on slower runners.
  // Observe the actual completed metadata, not merely the new cache name.
  let ready=false;
@@ -59,28 +61,28 @@ try {
    // Do not pass an async predicate to waitForFunction: the polling runtime
    // may treat the returned Promise as a truthy value before it settles.
    for(let attempt=0;attempt<200;attempt++){
-     ready=await page.evaluate(async()=>{
-       const c=await caches.open("ohana-static-ohana-375");
+     ready=await page.evaluate(async(version)=>{
+       const c=await caches.open("ohana-static-"+version);
        return !!(await c.match("./.ohana-install-stats.json"));
-     });
+     },currentVersion);
      if(ready)break;
      await page.waitForTimeout(150);
    }
    if(!ready)throw new Error("Installation stats missing after 30s");
  } catch(error) {
-   const diagnostic=await page.evaluate(async()=>{
+   const diagnostic=await page.evaluate(async(version)=>{
      const names=await caches.keys();
-     const c=await caches.open("ohana-static-ohana-375");
+     const c=await caches.open("ohana-static-"+version);
      return {names,controlled:!!navigator.serviceWorker.controller,
        assets:(await c.keys()).map(x=>new URL(x.url).pathname).slice(-12)};
-   });
+   },currentVersion);
    throw new Error("V373 SW install metadata not completed: "+JSON.stringify(diagnostic)+
      "; requests="+network.slice(-15).join(",")+"; "+error.message);
  }
- const migration=await page.evaluate(async()=>{
-   const c=await caches.open("ohana-static-ohana-375");
+ const migration=await page.evaluate(async(version)=>{
+   const c=await caches.open("ohana-static-"+version);
    const stats=await (await c.match("./.ohana-install-stats.json")).json();
-   const game=await c.match("./game.js?v=ohana-375");
+   const game=await c.match("./game.js?v="+version);
    const root=await c.match("./");
    return {
      stats,
@@ -88,7 +90,7 @@ try {
      rootOk:root?.status===200,
      oldCachePresent:(await caches.keys()).includes("ohana-static-ohana-372")
    };
- });
+ },currentVersion);
  const upgradeRequests=[...network];
  const changedRequests=upgradeRequests.filter(name=>name!=="/sw.js");
  const expectedChanged=Object.keys(current).filter(name=>!same.includes(name)).map(name=>"/"+name).sort();
@@ -108,7 +110,7 @@ try {
  await page.waitForFunction(()=>!!window.__OHANA_E2E?.start,undefined,{timeout:15000});
  await page.evaluate(()=>window.__OHANA_E2E.start("kilo"));
  await page.waitForFunction(()=>document.body.classList.contains("playing"),undefined,{timeout:10000});
- console.log("OHANA V372→V375 Chromium upgrade: "+seedRequests+" fixture downloads, "+
+ console.log("OHANA V372→"+currentVersion+" Chromium upgrade: "+seedRequests+" fixture downloads, "+
    migration.stats.reused+" cached, "+migration.stats.downloaded+" network, offline play OK.");
  await context.close();
 } finally {
