@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: V400 pause, audio and motion preferences
+        run: node tests/browser/v400-experience.mjs
+
       - name: Browser E2E
         run: npm run test:browser
 

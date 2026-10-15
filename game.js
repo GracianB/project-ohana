@@ -18,7 +18,7 @@ import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeO
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
-import { playMusic, themeForRoom, duckMusic, currentMusic } from "./engine/music.js";
+import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
@@ -148,8 +148,11 @@ let t = 0;
 let muted = false;
 let paused = false;
 const RMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
-let reduceMotion = RMQ.matches;
-try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches; game.reduceMotion = reduceMotion; }); } catch (_) {}
+let gentleMotion = false;
+try { gentleMotion = localStorage.getItem("ohana-gentle-motion") === "1"; } catch (_) {}
+let reduceMotion = RMQ.matches || gentleMotion;
+document.body.classList.toggle("gentle-motion", gentleMotion);
+try { RMQ.addEventListener("change", (e) => { reduceMotion = e.matches || gentleMotion; game.reduceMotion = reduceMotion; }); } catch (_) {}
 
 const game = {
   get paused() { return paused; },
@@ -325,6 +328,12 @@ clock.reset();
 } catch (_) {}
 
 if (paused) {
+const p = game.player;
+setText(document.getElementById("pause-hero"), p?.name || "Familia Ohana");
+setText(document.getElementById("pause-objective"), room().hint || room().goal || "Explora la isla y reúne a la familia.");
+setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
+setText(document.getElementById("pause-journey"), Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
+setText(document.getElementById("pause-score"), String(game.score || 0));
 try {
   save();
 } catch (_) {}
@@ -2750,7 +2759,7 @@ for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
-game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam);
+game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
@@ -3278,6 +3287,28 @@ const pause = document.getElementById("pause-overlay");
 if (pause) pause.addEventListener("click", (e) => { if (e.target.id === "pause-overlay") setPaused(false); });
 const resume = document.getElementById("btn-resume");
 const quit = document.getElementById("btn-quit");
+const musicSlider = document.getElementById("pause-music");
+const musicValue = document.getElementById("pause-music-value");
+if (musicSlider) {
+  musicSlider.value = String(Math.round(musicVolume() * 100));
+  setText(musicValue, musicSlider.value + "%");
+  musicSlider.addEventListener("input", () => {
+    setMusicVolume(Number(musicSlider.value) / 100);
+    setText(musicValue, musicSlider.value + "%");
+  });
+}
+const gentleToggle = document.getElementById("pause-gentle");
+if (gentleToggle) {
+  gentleToggle.checked = gentleMotion;
+  gentleToggle.addEventListener("change", () => {
+    gentleMotion = gentleToggle.checked;
+    document.body.classList.toggle("gentle-motion", gentleMotion);
+    reduceMotion = RMQ.matches || gentleMotion;
+    game.reduceMotion = reduceMotion;
+    try { localStorage.setItem("ohana-gentle-motion", gentleMotion ? "1" : "0"); } catch (_) {}
+    fit();
+  });
+}
 if (resume) resume.onclick = () => setPaused(false);
 if (quit) quit.onclick = returnToMenu;
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));

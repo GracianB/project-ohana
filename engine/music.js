@@ -12,6 +12,23 @@ import { audioGraph } from "./audio.js";
 const LOOKAHEAD = 0.15;   // s que se programan por adelantado
 const TICK_MS = 30;
 const MUSIC_VOL = 0.26;
+let musicLevel = 1;
+try {
+  const saved = globalThis.localStorage?.getItem("ohana-music-volume");
+  if (saved !== null && saved !== undefined && Number.isFinite(Number(saved))) musicLevel = Math.max(0, Math.min(1, Number(saved)));
+} catch (_) {}
+export function musicVolume() { return musicLevel; }
+export function setMusicVolume(value) {
+  if (!Number.isFinite(Number(value))) return musicLevel;
+  musicLevel = Math.max(0, Math.min(1, Number(value)));
+  try { globalThis.localStorage?.setItem("ohana-music-volume", String(musicLevel)); } catch (_) {}
+  if (current) {
+    const { ctx } = current.g;
+    current.bus.gain.cancelScheduledValues(ctx.currentTime);
+    current.bus.gain.setTargetAtTime(MUSIC_VOL * duck * musicLevel, ctx.currentTime, 0.08);
+  }
+  return musicLevel;
+}
 
 // ---------------------------------------------------------------------------
 // Temas. Notas en semitonos relativos a la tónica (root, en MIDI).
@@ -237,7 +254,8 @@ function startTheme(name) {
   const { ctx, master } = g;
   const bus = ctx.createGain();
   bus.gain.setValueAtTime(0.0001, ctx.currentTime);
-  bus.gain.exponentialRampToValueAtTime(MUSIC_VOL * duck, ctx.currentTime + 1.2);
+  if (musicLevel === 0) bus.gain.setValueAtTime(0, ctx.currentTime);
+  else bus.gain.exponentialRampToValueAtTime(MUSIC_VOL * duck * musicLevel, ctx.currentTime + 1.2);
   // un poco de "sala" con un delay suave
   const dl = ctx.createDelay(0.5), fb = ctx.createGain(), wet = ctx.createGain();
   dl.delayTime.value = (60 / th.bpm) * 0.75; fb.gain.value = 0.25; wet.gain.value = 0.18;
@@ -322,7 +340,7 @@ export function duckMusic(on) {
   const { ctx } = current.g;
   try {
     current.bus.gain.cancelScheduledValues(ctx.currentTime);
-    current.bus.gain.setTargetAtTime(MUSIC_VOL * duck, ctx.currentTime, 0.25);
+    current.bus.gain.setTargetAtTime(MUSIC_VOL * duck * musicLevel, ctx.currentTime, 0.25);
   } catch (_) {}
 }
 

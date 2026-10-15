@@ -235,3 +235,35 @@ body.boss-fight #combo-chip { top: 168px; }
  transition:width .2s ease-out;
 }
 @media(prefers-reduced-motion:reduce){.u-exp-track i{transition:none}}
+/* V400 · A useful, calm pause with room to breathe on small screens. */
+#pause-overlay .panel.slim {width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 36px);overflow:auto;padding:clamp(22px,4vw,36px);text-align:left;background:radial-gradient(ellipse at 100% 0,rgba(113,91,179,.25),transparent 65%),#101c2a;border:1px solid #a8d8e533;border-radius:28px;box-shadow:0 24px 90px #0008;}
+.pause-kicker {color:#a6deea;font-size:10px;letter-spacing:.18em;font-weight:800;margin:0 0 10px;}
+#pause-title {font:600 clamp(25px,5vw,34px) Fredoka,sans-serif;margin:0;color:#fff2c2;}
+.pause-hero {color:#c4b6f8;font-weight:700;margin:9px 0 22px;}
+.pause-mission {padding:18px;border-radius:16px;background:#a4e2d30c;border:1px solid #a4e2d325;}
+.pause-mission span {font-size:10px;letter-spacing:.13em;font-weight:800;color:#9ce2cb;}
+.pause-mission p {margin:8px 0 0;line-height:1.55;color:#eef7fa;}
+.pause-stats {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0;}
+.pause-stats div {border-left:2px solid #cbb1f34d;padding-left:12px;}
+.pause-stats dt {font-size:12px;color:#a8bdcc;}
+.pause-stats dd {margin:5px 0 0;font:600 23px Fredoka,sans-serif;color:#fff2c2;}
+.pause-controls {display:flex;flex-wrap:wrap;gap:12px 20px;font-size:12px;color:#afc6d5;margin-bottom:24px;}
+#pause-overlay .cta {min-height:48px;}
+#pause-overlay #btn-resume {width:100%;margin:0 0 10px;}
+#pause-overlay #btn-quit {width:100%;margin:0;}
+#help .panel {max-height:calc(100dvh - 36px);overflow:auto;}
+#help ul {list-style:none;padding:0;display:grid;gap:10px;}
+#help li {padding:12px 16px;background:#ffffff07;border:1px solid #ffffff12;border-radius:12px;line-height:1.5;}
+#help .help-controls {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:18px 0;}
+.help-controls div {padding:10px 12px;border-radius:10px;background:#a6deea0c;color:#dcebf5;font-size:13px;}
+.help-controls kbd {display:inline-block;margin-right:6px;color:#fff2c2;}
+@media(max-width:480px){#help .help-controls{grid-template-columns:1fr;} .pause-stats{gap:6px;} .pause-stats dd{font-size:20px;} .pause-controls{gap:10px;}}
+.pause-settings {border:1px solid #a6deea25;border-radius:16px;padding:14px 16px;margin:0 0 22px;color:#dcebf5;}
+.pause-settings legend {padding:0 8px;font-size:12px;font-weight:700;color:#a6deea;}
+.pause-settings label {display:flex;align-items:center;gap:10px;font-size:13px;}
+.pause-settings output {margin-left:auto;color:#fff2c2;font-variant-numeric:tabular-nums;}
+#pause-music {width:100%;min-height:32px;accent-color:#f3cf83;}
+.pause-settings .pause-gentle {display:grid;grid-template-columns:20px 1fr;gap:3px 10px;margin-top:6px;}
+.pause-gentle input {grid-row:span 2;width:18px;height:18px;accent-color:#aeecd5;}
+.pause-gentle small {grid-column:2;color:#9db6c8;font-size:11px;}
+body.gentle-motion .ability-slot,body.gentle-motion .touch-btn,body.gentle-motion #combo-value {animation:none!important;transition:none!important;}
