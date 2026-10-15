@@ -1,3 +1,12 @@
+# OHANA V400 (ohana-400) · Claridad en combate y comodidad al jugar
+
+- Pausa rediseñada con personaje actual, siguiente paso de la sala, forma, exploración y puntos. Controles de combate a la vista; desplazamiento en pantallas pequeñas.
+- Música ajustable sin perder los efectos de sonido, con nivel guardado y transiciones suaves. El silencio general y la atenuación de las cinemáticas siguen funcionando.
+- Movimiento suave guardado, compatible con la preferencia del sistema: menos sacudidas, daño flotante estable y cinemáticas con movimiento reducido.
+- Los golpes numéricos cercanos dentro de seis ticks se agrupan sin prolongar su vida; las etiquetas evitan solaparse. Curaciones, KO y recompensas mantienen su identidad. Presupuesto de 96 intacto.
+- Ayuda organizada por acciones y explicación de la U sorpresa. Se conservan los diez personajes, sus cinco formas, el nuevo Michi, la música y el final animado de V381/V382.
+- Validación: pruebas de agrupación/vida/separación/volumen y auditoría Chromium del juego real en escritorio, móvil y horizontal, persistencia y reanudación.
+
 ## V382 · Compañeros U en acción (ohana-382)
 
 Cada U invoca a uno de los otros nueve héroes al azar, evitando repetir al anterior. Una caja con «?» oculta su identidad durante la entrada y se abre para revelar al compañero; la elección manual desaparece del menú. La EXP pertenece a la pareja que realmente aparece. Los diez compañeros recorren el combate: entrada, saludo breve, tres intervenciones y salida hacia delante. La trayectoria nace del punto de invocación y no se arrastra con el jugador. Se conservan sus diez estilos, cinco formas, nueve parejas y tres rangos. Los cuatro dúos clásicos incorporan el mismo origen independiente y poses reales de carrera, salto o vuelo. Los impactos conservan daños y autoridad; los avisos de L siguen sus geometrías compartidas. El origen viaja como dos números finitos acotados, sin actores ni funciones ni hitsets, y las tramas antiguas siguen siendo compatibles.

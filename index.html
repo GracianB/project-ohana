@@ -9,23 +9,23 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;600;700;800&display=swap">
-  <link rel="stylesheet" href="style.css?v=ohana-382">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-382">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-382">
-  <link rel="stylesheet" href="hud.css?v=ohana-382">
-  <link rel="stylesheet" href="evo.css?v=ohana-382">
-  <link rel="stylesheet" href="ending.css?v=ohana-382">
-  <link rel="stylesheet" href="intro.css?v=ohana-382">
-  <link rel="stylesheet" href="demo.css?v=ohana-382">
-  <link rel="stylesheet" href="experience.css?v=ohana-382">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-382">
-  <link rel="stylesheet" href="supreme.css?v=ohana-382">
-  <link rel="stylesheet" href="world-map.css?v=ohana-382">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-382">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-382">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-382">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-382">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-382">
+  <link rel="stylesheet" href="style.css?v=ohana-400">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-400">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-400">
+  <link rel="stylesheet" href="hud.css?v=ohana-400">
+  <link rel="stylesheet" href="evo.css?v=ohana-400">
+  <link rel="stylesheet" href="ending.css?v=ohana-400">
+  <link rel="stylesheet" href="intro.css?v=ohana-400">
+  <link rel="stylesheet" href="demo.css?v=ohana-400">
+  <link rel="stylesheet" href="experience.css?v=ohana-400">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-400">
+  <link rel="stylesheet" href="supreme.css?v=ohana-400">
+  <link rel="stylesheet" href="world-map.css?v=ohana-400">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-400">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-400">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-400">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-400">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-400">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -233,7 +233,7 @@
         <li>Diez salas conectadas por rutas, caídas, catapultas y vórtices. Jungla pide forma 3; Caldera y Nido, forma 4.</li>
         <li>Derrota a la Reina del Nido.</li>
       </ul>
-      <p><kbd>WASD</kbd> mover · espacio saltar · <kbd>Shift</kbd> dash · <kbd>H</kbd> golpe · <kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>U</kbd> suprema · <kbd>E</kbd> interactuar · <kbd>R</kbd> Claro · <kbd>M</kbd> mapa · <kbd>Esc</kbd> pausa</p>
+      <div class="help-controls"><div><kbd>WASD / ← →</kbd> Mover</div><div><kbd>Espacio / ↑</kbd> Saltar</div><div><kbd>Shift</kbd> Dash</div><div><kbd>H</kbd> Golpe</div><div><kbd>J K L</kbd> Poderes al evolucionar</div><div><kbd>U</kbd> Compañero sorpresa</div><div><kbd>E</kbd> Usar catapulta</div><div><kbd>M</kbd> Mapa · <kbd>B</kbd> Álbum</div><div><kbd>R</kbd> Volver al Claro</div><div><kbd>Esc</kbd> Pausa</div></div><p>La U revela con una «?» a uno de los otros nueve compañeros. Cada invitado entra en escena con su propio recorrido.</p>
       <button type="button" id="btn-close-help" class="cta ghost">Cerrar ayuda</button>
     </div>
   </div>
@@ -246,7 +246,13 @@
   </div>
   <div id="pause-overlay" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="pause-title">
     <div class="panel slim">
-      <h2 id="pause-title">Pausa</h2>
+      <p class="pause-kicker">OHANA · UN RESPIRO EN EL CAMINO</p>
+      <h2 id="pause-title">La aventura te espera</h2>
+      <p id="pause-hero" class="pause-hero"></p>
+      <section class="pause-mission" aria-label="Tu siguiente paso"><span>SIGUIENTE PASO</span><p id="pause-objective"></p></section>
+      <dl class="pause-stats"><div><dt>Forma</dt><dd id="pause-form">1 / 5</dd></div><div><dt>Exploración</dt><dd id="pause-journey">1 / 10</dd></div><div><dt>Puntos</dt><dd id="pause-score">0</dd></div></dl>
+      <div class="pause-controls"><span><kbd>H</kbd> Golpe</span><span><kbd>J K L</kbd> Poderes</span><span><kbd>U</kbd> Sorpresa Ohana</span><span><kbd>M</kbd> Mapa</span></div>
+      <fieldset class="pause-settings"><legend>A tu ritmo</legend><label for="pause-music">Música <output id="pause-music-value" for="pause-music">100%</output></label><input id="pause-music" type="range" min="0" max="100" step="5" value="100"><label class="pause-gentle" for="pause-gentle"><input id="pause-gentle" type="checkbox">Movimiento suave <small>Menos sacudidas y números estables</small></label></fieldset>
       <button type="button" id="btn-resume" class="cta primary">Seguir</button>
       <button type="button" id="btn-quit" class="cta ghost">Menú</button>
     </div>
@@ -254,16 +260,16 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-382"></script>
-  <script type="module" src="game.js?v=ohana-382"></script>
-  <script type="module" src="systems/title.js?v=ohana-382"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-382"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-382"></script>
-  <script type="module" src="systems/demo.js?v=ohana-382"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-400"></script>
+  <script type="module" src="game.js?v=ohana-400"></script>
+  <script type="module" src="systems/title.js?v=ohana-400"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-400"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-400"></script>
+  <script type="module" src="systems/demo.js?v=ohana-400"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-382", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-400", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

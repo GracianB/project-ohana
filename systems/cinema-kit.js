@@ -22,6 +22,7 @@ export const easeBack = (k) => {
 };
 
 export function reducedMotion() {
+  try { if (globalThis.localStorage?.getItem("ohana-gentle-motion") === "1") return true; } catch (_) {}
   try { return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); } catch (_) { return false; }
 }
 
