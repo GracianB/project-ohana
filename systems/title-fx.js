@@ -5,7 +5,7 @@
 import { menuPaintAllowedInDocument } from "./menu-visibility.js";
 const cv = document.getElementById("title-fx");
 // Static family-grid backdrop replaces continuous full-screen Canvas rendering.
-if (cv && document.getElementById("char-select")?.dataset.selectorMode !== "family-grid") {
+if (cv && !["family-grid", "family-camp"].includes(document.getElementById("char-select")?.dataset.selectorMode)) {
   const ctx = cv.getContext("2d", { alpha:true });
   const RMQ = matchMedia("(prefers-reduced-motion: reduce)");
   let reduce = RMQ.matches;

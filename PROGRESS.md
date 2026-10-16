@@ -1,3 +1,7 @@
+## V410 · Campamento de la familia (ohana-410)
+
+Diez mejoras: isla Canvas compartida; diez actores reales; luciérnaga navegable; selección por proximidad; selección directa accesible; cámara adaptable; presentación voluntaria de doce segundos con tres frases legibles; álbum de cinco formas; estadísticas y poderes del roster real; misterio U separado del héroe elegido y diseño móvil sin desbordamiento. El entrenamiento y los nuevos niveles quedan para sus rondas previstas. Los renderizadores ambientales antiguos no arrancan en modo campamento.
+
 # OHANA V400 (ohana-400) · Claridad en combate y comodidad al jugar
 
 - Pausa rediseñada con personaje actual, siguiente paso de la sala, forma, exploración y puntos. Controles de combate a la vista; desplazamiento en pantallas pequeñas.

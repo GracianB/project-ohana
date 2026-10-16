@@ -570,7 +570,8 @@ try {
       selected: box('#chars-grid .char-card.selected'),
       title: box('.title-stack'),
       controls: box('.title-controls'),
-      dossier: box('.hero-dossier'),
+      dossier: box('.camp-dossier'),
+      camp: box('#family-camp'),
       width: innerWidth,
       height: innerHeight,
       scrollWidth: document.documentElement.scrollWidth,
@@ -578,8 +579,8 @@ try {
   });
   assert.equal(titleLayout.visible.length, 10, '01-character-select: faltan héroes en la nueva cuadrícula');
   assert.ok(titleLayout.selected.left >= -2 && titleLayout.selected.right <= titleLayout.width + 2, '01-character-select: héroe fuera del panel');
-  assert.ok(Math.abs((titleLayout.title.left + titleLayout.title.width / 2) - titleLayout.width / 2) < titleLayout.width * .08, '01-character-select: título fuera del centro');
-  assert.ok(titleLayout.controls.bottom <= titleLayout.height + 2, '01-character-select: controles fuera del viewport');
+  assert.ok(titleLayout.title.left >= -2 && titleLayout.title.right <= titleLayout.width + 2, '01-character-select: cabecera fuera del viewport');
+  assert.ok(titleLayout.controls.top >= titleLayout.camp.bottom, '01-character-select: controles invaden el campamento');
   assert.ok(titleLayout.dossier.bottom <= titleLayout.controls.top + 12, '01-character-select: dossier invade controles');
   assert.ok(titleLayout.scrollWidth <= titleLayout.width + 2, '01-character-select: overflow horizontal');
   await capture(page, '01-character-select-1680x900');
@@ -604,7 +605,7 @@ try {
   assert.equal(finalFormFit.cardEvo, '4', '01c-final-form-fit: tarjeta no conoce su evolución');
   assert.ok(finalFormFit.envelope >= 1.3, '01c-final-form-fit: Forma 5 sin margen de silueta');
   assert.ok(finalFormFit.scale >= .34, '01c-final-form-fit: escala inválida');
-  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'family-grid', '01c-final-form-fit: cuadrícula no activada');
+  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'family-camp', '01c-final-form-fit: campamento no activado');
   await capture(page, '01c-character-select-final-form-fit');
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
   await page.waitForTimeout(120);
