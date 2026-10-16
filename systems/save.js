@@ -1,5 +1,6 @@
 // Save v2. Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
+import {sanitizeCheckpoints} from "./adventure-state.js";
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
 export function canonId(id) {
@@ -30,7 +31,8 @@ export function packSave(game, MagicMod) {
     magic = api && api.snapshot ? api.snapshot() : null;
   } catch (e) { magic = null; }
   return {
-    v: 2,
+    v: 3,
+    checkpoints: sanitizeCheckpoints(game.checkpoints),
     roomId: game.roomId,
     visited: game.visited || { hub: true },
     score: game.score || 0,
@@ -90,12 +92,13 @@ export function rememberBest(current, next) {
 /** Devuelve campos listos o null si el save no es de este personaje. */
 export function unpackSave(raw, defId) {
   if (!raw || typeof raw !== "object") return null;
-  if (raw.v != null && raw.v !== 2) return null;
+  if (raw.v != null && raw.v !== 2 && raw.v !== 3) return null;
   const id = canonId(raw.id);
   if (defId && id !== canonId(defId)) return null;
   const vis = raw.visited && typeof raw.visited === "object" && !Array.isArray(raw.visited) ? raw.visited : { hub: true };
   return {
     roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
+    checkpoints: raw.v === 3 ? sanitizeCheckpoints(raw.checkpoints) : {},
     visited: vis,
     score: Math.max(0, finiteNumber(raw.score)),
     kills: Math.max(0, finiteNumber(raw.kills)),
@@ -135,7 +138,7 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
     },
     read(id) { return unpackSave(this.readRaw(), id); },
     write(game, magic) {
-      if (!game?.player || game.player.dead) return false;
+      if (!game?.player || game.player.dead || game.practice) return false;
       const raw = JSON.stringify(packSave(game, magic));
       try {
         const store = getStorage();

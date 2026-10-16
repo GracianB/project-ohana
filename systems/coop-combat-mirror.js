@@ -1,4 +1,5 @@
 // V290–V294: atomic host snapshots, stable identities and bounded prediction.
+import {starSnapshot,validStarSnapshot,applyStarSnapshot} from "./stellar-power.js";
 export const COMBAT_PROTOCOL=2;
 export const COMBAT_LIMITS=Object.freeze({enemies:24,bullets:16,bytes:11200,predictionTicks:12,staleMs:750});
 const captures=new WeakMap();
@@ -37,6 +38,8 @@ export function captureCombatFrame(game,frameNo,scope="local"){
   if(!state.bullets.has(p))state.bullets.set(p,++state.nextBullet);
   return projectile(p,state.bullets.get(p));
  })};
+ if(game.stars?.length)frame.star=starSnapshot(game,game.coopRemote);
+ if(game.checkpoints?.[game.roomId])frame.checkpoint=game.checkpoints[game.roomId];
  while(JSON.stringify(frame).length>11200){
   if(frame.bullets.length)frame.bullets.pop();
   else if(frame.enemies.length){frame.enemies.pop();frame.full=false;}
@@ -45,6 +48,8 @@ export function captureCombatFrame(game,frameNo,scope="local"){
  return frame;
 }
 export function validCombatFrame(frame){
+ if(frame?.star!==undefined&&!validStarSnapshot(frame.star))return false;
+ if(frame?.checkpoint!==undefined&&(typeof frame.checkpoint!=="string"||!/^[a-z0-9_-]{1,30}$/.test(frame.checkpoint)))return false;
  if(!frame||!Array.isArray(frame.enemies)||frame.enemies.length>24||!Array.isArray(frame.bullets)||frame.bullets.length>16)return false;
  try{if(JSON.stringify(frame).length>11200)return false;}catch{return false;}
  const modern=frame.protocol===2;
@@ -111,6 +116,8 @@ export function applyCombatFrame(game,frame){
   game._coopMirror={scope:frame.scope,visit:frame.visit,frameNo:frame.frameNo,predicted:0,consumed};
  }
  game.coopRemoteEnemyBullets=frame.bullets.filter(p=>!game._coopMirror?.consumed.has(p.id)).map(p=>projectile(p,p.id));
+ if(frame.star)applyStarSnapshot(game,frame.star);
+ if(frame.checkpoint&&(game.checkpointPoints||[]).some(p=>p.id===frame.checkpoint)){game.checkpoints||={};game.checkpoints[game.roomId]=frame.checkpoint;}
  return true;
 }
 export function advanceMirroredEnemies(game,frameAgeMs){

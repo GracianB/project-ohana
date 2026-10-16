@@ -34,6 +34,9 @@ import { isAirFoe, applyElite, makeFoe } from "./engine/foes.js";
 import { sense, think } from "./engine/foe-brain.js";
 import { directEnemyEncounter, enemyCanCommit, enemySteering, enemyDirectorSnapshot } from "./systems/enemy-director.js";
 import { drawEncounterSignals } from "./systems/encounter-signals.js";
+import {roomDimensions,roomCheckpoints,checkpointAt,reachedCheckpoint,drawCheckpoints,TRAINING_ROOM} from "./systems/adventure-state.js";
+import {adventureProfile} from "./characters/adventure-profiles.js";
+import {createStars,updateStellar,drawStars,drawStellarActor} from "./systems/stellar-power.js";
 import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
@@ -215,6 +218,7 @@ p.maxHealth = boundedFinite(p.maxHealth, 100, 1, 100000);
 p.health = boundedFinite(p.health, p.dead ? 0 : p.maxHealth, 0, p.maxHealth);
 p.xp = boundedFinite(p.xp, 0, 0, MAX_RUNTIME_SAFE);
 p.evo = Math.floor(boundedFinite(p.evo, 0, 0, 4));
+p.starLeft = Math.floor(boundedFinite(p.starLeft, 0, 0, 600));
 p.invuln = Math.floor(boundedFinite(p.invuln, 0, 0, 600));
 p.coyote = Math.floor(boundedFinite(p.coyote, 0, 0, 60));
 p.buffer = Math.floor(boundedFinite(p.buffer, 0, 0, 60));
@@ -412,7 +416,7 @@ el.classList.add("show");
 function room() { return game.roomDef || ROOMS[game.roomId] || ROOMS.hub; }
 let saveWarning = false;
 function save() {
-if (!game.player || game.player.dead) return;
+if (!game.player || game.player.dead || game.practice) return;
 const saved = saveStore.write(game, Magic);
 if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
 saveWarning = !saved;
@@ -420,6 +424,7 @@ return saved;
 }
 function returnToMenu() {
 save();
+document.body.classList.remove("practicing");
 game.running = false;
 input?.reset();
 clock.reset();
@@ -531,7 +536,7 @@ p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
 if (fromDir !== "down") snapToFloor(p);
 }
 function loadRoom(id, fromDir) {
-const r = ROOMS[id];
+const r = game.practice ? TRAINING_ROOM : ROOMS[id];
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -558,8 +563,12 @@ game.visited[id] = true;
 game.worldIndex = r.world;
 const paint = getLook() === "paint";
 const S = paint ? PAINT_WORLD : 1;
-game.worldW = ROOM_W * S;
-game.worldH = ROOM_H * S;
+const dimensions=roomDimensions(r,S);
+game.worldW = dimensions.width;
+game.worldH = dimensions.height;
+game.checkpointPoints=roomCheckpoints(r,S);
+game.stars=createStars(r,S);
+if(game.player)game.player.starLeft=0;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -645,11 +654,11 @@ beep(r.boss ? "boss" : "door");
 playMusic(themeForRoom(id));
 worldClear();
 Surprises.onEnterRoom(game);
-Festival.onEnterRoom(game);
+if(!game.practice)Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
 save();
-dispatchEvent(new CustomEvent("ohana-room", { detail: {
+if(!game.practice)dispatchEvent(new CustomEvent("ohana-room", { detail: {
 id,
 name: r.name,
 visited: game.visited,
@@ -688,16 +697,20 @@ applyForm(p, { silent: true });
 paintFit(p);
 return p;
 }
-function start(def) {
+function start(def, options = {}) {
+if(options.practice&&onlineCoop.enabled)return;
+game.practice=!!options.practice;
+document.body.classList.toggle("practicing",game.practice);
+game.checkpoints={};
 game.loadRoom = loadRoom;
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
 game.lastAbilitySlot = null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
-const onlineMode = !!onlineSession?.originalEngine;
-const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
-try { localStorage.removeItem("ohana-resume"); } catch (e) {}
+const onlineMode = !game.practice && !!onlineSession?.originalEngine;
+const resume = !game.practice && !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
+if(!game.practice)try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 input?.reset();
 clock.reset();
 t = 0;
@@ -724,6 +737,7 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
+if(game.practice){game.player.evo=Math.max(0,Math.min(4,Number(options.evo)||0));game.player.xp=XP_NEED[game.player.evo]||0;applyForm(game.player,{silent:true});paintFit(game.player);game._cuernoIntroT=null;}
 // Browser audits can pin a pair; normal play always invokes a surprise.
 game.player.uSurprise=!e2eEnabled;
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
@@ -764,6 +778,7 @@ try {
     game.best = u.best || null;
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
+    game.checkpoints = u.checkpoints || {};
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
   }
 } catch (e) {}
@@ -772,6 +787,8 @@ document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
 if (!loadRoom(roomId)) loadRoom("hub");
+if(resume){const point=checkpointAt(game.checkpointPoints,game.checkpoints[game.roomId]);if(point){game.player.x=point.x;game.player.y=point.y-game.player.h;}}
+if(game.practice){document.getElementById('practice-hero').value=def.id;document.getElementById('practice-form').value=String(game.player.evo);game.fading=0;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 if (onlineMode) {
 void onlineCoop.start(game, def).catch((error) => {
@@ -785,6 +802,7 @@ updateHUD();
 canvas.focus({ preventScroll: true });
 }
 function evolve(reason) {
+if(game.practice)return;
 const p = game.player; if (!p || p.dead) return;
 p.evo = Number(p.evo) || 0;
 const fromEvo = p.evo;
@@ -847,6 +865,7 @@ showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
 
 function respawn() {
 const p = game.player; if (!p) return;
+const savedRoom=game.roomId,point=checkpointAt(game.checkpointPoints||[],game.checkpoints?.[game.roomId]);
 if (DeathFx.isPlaying()) DeathFx.cancel();
 p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
 p._combatChain = [];
@@ -854,7 +873,8 @@ game._combatFlow = null;
 game._assist = null;
 game._supremeFlow = null;
 Magic.reset(game);
-loadRoom("hub");
+loadRoom(point?savedRoom:"hub");
+if(point){p.x=point.x;p.y=point.y-p.h;game.cam.x=Math.max(0,Math.min(game.worldW-viewW,p.x-viewW/2));}
 }
 function dash() {
 const p = game.player;
@@ -880,7 +900,7 @@ void onlineCoop.signal(game, "action", { action: "dash", characterId: p.id });
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
 function damageEnemy(e, amount) { if (e.dying > 0) return true; return safeDamageEnemy(e, amount); }
 function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
-function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
+function damagePlayer(p, amount) { return p?.starLeft>0||game.practice?false:safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
 function addScore(amount) { return safeAddScore(game, amount); }
 function addKill() { return safeAddKill(game); }
@@ -1121,7 +1141,7 @@ return e;
 }
 function hurtPlayer(amount, label) {
 const p = game.player;
-if (!p || p.dead || p.invuln > 0) return;
+if (!p || p.dead || p.invuln > 0 || p.starLeft > 0 || game.practice) return;
 const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard" ? 1.4 : 1;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
@@ -1509,16 +1529,16 @@ if (oppose) {
   p.facing = face;
 }
 } else if (axisX !== 0) {
-const target = axisX * Math.abs(p.speed);
+const target = axisX * Math.abs(p.speed) * (p.starLeft>0?1.15:1);
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
 const accel = p.grounded
   ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
   : (reversing ? CONTROL_FEEL.reverseAirAccel : CONTROL_FEEL.airAccel);
-p.vx += (target - p.vx) * accel;
+p.vx += (target - p.vx) * Math.min(1,accel*adventureProfile(p.id).accel);
 if (Math.abs(target - p.vx) < 0.06) p.vx = target;
 p.facing = axisX;
 } else {
-p.vx *= p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake;
+p.vx *= Math.min(.98,(p.grounded ? CONTROL_FEEL.groundBrake : CONTROL_FEEL.airBrake)*adventureProfile(p.id).brake);
 if (Math.abs(p.vx) < 0.04) p.vx = 0;
 }
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
@@ -1704,7 +1724,7 @@ const nxt = p.forms && p.forms[p.evo + 1];
 setPrompt("E · evolucionar" + (nxt ? " · " + nxt.name : ""), true);
 }
 else setPrompt("", false);
-while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+while (!game.practice && p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 tickRam(p);
 }
 function tickRam(p) {
@@ -1830,7 +1850,7 @@ game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
 for (const e of game.enemies) {
-const molts = e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
+const molts = e.kind === "cucaracho" && !e.baby && !e.starDefeated && (e.evo || 0) < 2;
 const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
 if (!e.boss && e.hp <= 0 && posed && !molts) {
   if (e.dying == null) {
@@ -2513,7 +2533,7 @@ if (e.boss && e.hp <= 0) {
 }
 if (e.hp > 0) return true;
 if (e.deathHold && e.dying > 0) return true;
-if (e.kind === "cucaracho" && !e.baby && e.evo < 2) {
+if (e.kind === "cucaracho" && !e.baby && !e.starDefeated && e.evo < 2) {
   e.evo += 1;
   e.hp = Math.round(e.max * 0.9);
   e.max = Math.max(e.max, e.hp);
@@ -2693,7 +2713,7 @@ ctx.save();
 ctx.translate(centerX + shakeX, centerY + shakeY);
 ctx.scale(z, z);
 ctx.translate(-centerX, -centerY);
-if (paintedHubOn(game.roomId)) {
+if (!game.practice && paintedHubOn(game.roomId)) {
 drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 } else {
@@ -2713,11 +2733,13 @@ drawTerrain(ctx, game.platforms, world, game.cam, t);
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
-portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
+portals.draw(ctx, game.cam, t, { skipCatapult: !game.practice && paintedHubOn(game.roomId) });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
-Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
+if(!game.practice)Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
+drawStars(ctx,game.stars,game.cam,t,game.reduceMotion);
+drawCheckpoints(ctx,game.checkpointPoints||[],game.checkpoints?.[game.roomId],game.cam);
 drawStitchoWebs(ctx, game, game.cam);
 for (const o of game.orbs) {
 if (o.taken || !visibleForRender(o,game.cam,viewportW,viewportH)) continue;
@@ -2796,6 +2818,7 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 }
 }
+drawStellarActor(ctx,game.player,game.cam,t,game.reduceMotion);
 if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCharacter, ROSTER);
 if (!game.player.dead) drawCuernoPlay(ctx, game, t, drawCharacter, ROSTER);
 if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION) {
@@ -3167,6 +3190,9 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updatePlayer();
+const peer=onlineCoop.enabled&&onlineCoop.remoteWorld===game.roomId?onlineCoop.remote:null;
+const starAuthority=!onlineCoop.enabled||onlineCoop.currentPlayer(onlineCoop.snapshot)?.slot===0;
+updateStellar(game,{authority:starAuthority,remote:peer,onStart:()=>beep("pickup")});
 updateCuernoPlay(game, t);
 updateCuernoBursts(game);
 updateEnemies();
@@ -3176,7 +3202,16 @@ game.combatFx?.update();
 if (DeathFx.isPlaying()) DeathFx.update(game);
 Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
 Surprises.update(game, t);
-Festival.update(game, t);
+if(!game.practice)Festival.update(game, t);
+
+const starRemaining=game.player.starLeft||0;
+if(!starRemaining||starRemaining>(game._lastStarLeft||0)+30)game._starWarned=false;
+if(starRemaining>0&&starRemaining<=180&&!game._starWarned){beep("objective");game._starWarned=true;}
+game._lastStarLeft=starRemaining;
+if(starRemaining>0&&currentMusic()!=="estrella"){beep("star_in");playMusic("estrella");}
+else if(!starRemaining&&currentMusic()==="estrella"){beep("star_out");playMusic(game.boss?game.boss.phase>=3?"jefe3":"jefe":themeForRoom(game.roomId));}
+const checkpoint=starAuthority?(reachedCheckpoint(game.checkpointPoints||[],game.player)||reachedCheckpoint(game.checkpointPoints||[],peer?{...peer,grounded:peer.pose?.grounded??peer.grounded}:null)):null;
+if(checkpoint&&game.checkpoints?.[game.roomId]!==checkpoint.id){game.checkpoints[game.roomId]=checkpoint.id;save();showObjectiveMessage("PUNTO DE CONTROL",checkpoint.label);}
 updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null, t, paused);
 updateCam();
 game.coopRemote = onlineCoop.remote;
@@ -3264,6 +3299,13 @@ const kind = Object.keys(CUERNO_PLAY_KEYS).find((k) => CUERNO_PLAY_KEYS[k] === e
 if (kind) queueCuernoPlay(kind);
 });
 addEventListener("ohana-start", (e) => start(ROSTER.find((r) => r.id === e.detail?.id)));
+addEventListener("ohana-practice",e=>start(ROSTER.find(r=>r.id===e.detail?.id),{practice:true,evo:e.detail?.evo}));
+const practiceTools=document.createElement('div');practiceTools.id='practice-toolbar';practiceTools.setAttribute('role','group');practiceTools.setAttribute('aria-label','Islote de pruebas sin progreso');
+practiceTools.innerHTML='<strong>PRUEBAS · SIN GUARDADO</strong><label>Héroe <select id="practice-hero">'+ROSTER.map(r=>'<option value="'+r.id+'">'+r.name+'</option>').join('')+'</select></label><label>Forma <select id="practice-form">'+[0,1,2,3,4].map(n=>'<option value="'+n+'">'+(n+1)+'</option>').join('')+'</select></label><button type="button" id="practice-reset">Reiniciar</button><button type="button" id="practice-exit">Volver al campamento</button>';
+document.body.appendChild(practiceTools);
+function practiceRestart(){const hero=document.getElementById('practice-hero').value,evo=Number(document.getElementById('practice-form').value);start(ROSTER.find(r=>r.id===hero),{practice:true,evo});}
+document.getElementById('practice-hero').onchange=practiceRestart;document.getElementById('practice-form').onchange=practiceRestart;document.getElementById('practice-reset').onclick=practiceRestart;document.getElementById('practice-exit').onclick=returnToMenu;
+
 addEventListener("keydown", (e) => {
 if (game.running || overlayOpen() || e.repeat) return;
 if (/^[0-9]$/.test(e.key)) {
@@ -3522,6 +3564,12 @@ state() {
   const boss = game.boss || game.enemies.find((e) => e.boss);
   return {
     running: !!game.running,
+    practice: !!game.practice,
+    worldSize: {width:game.worldW,height:game.worldH},
+    starLeft: p?.starLeft || 0,
+    peerStarLeft: game.coopRemote?.starLeft || 0,
+    stars: (game.stars||[]).map(s=>({...s})),
+    checkpoints: {...game.checkpoints},
     roomId: game.roomId,
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
@@ -3655,6 +3703,7 @@ setPlayerVelocity(vx = 0, vy = 0) {
   game.player.vy = Number.isFinite(Number(vy)) ? Number(vy) : 0;
   return this.state();
 },
+takeHit(amount=10){hurtPlayer(amount);return this.state();},
 exhaustPlayerJumps() {
   if (!game.player) return this.state();
   game.player.jumps = Math.max(0, Number(game.player.maxJumps) || 0);

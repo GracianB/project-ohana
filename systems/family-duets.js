@@ -113,7 +113,7 @@ export function updateFamilyDuet(game,hit,heal){
   applyDuetChemistry(p,chemistry,applied,heal);
   // Bond experience belongs only to the active hero/ally pair. Each actual
   // successful L beat (or Kilo's helpful chorus) is rewarded once.
-  if(applied>0||def.kind==="ohana"){
+  if(!game.practice&&(applied>0||def.kind==="ohana")){
    const gained=gainUBondHit(p,2+Math.min(3,applied));
    if(gained){
     try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}

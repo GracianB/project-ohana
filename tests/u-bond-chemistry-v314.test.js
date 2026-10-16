@@ -103,7 +103,7 @@ test("V314: saved v2 files retain per-partner progression, and legacy scalar XP 
  g.player.uBonds={[one]:101,cat:39};
  g.player.uExp=101;
  const raw=packSave(g),restored=unpackSave(raw,"dragon");
- assert.equal(raw.v,2);
+ assert.equal(raw.v,3);
  assert.equal(restored.uBonds[one],101);
  assert.equal(restored.uBonds.cat,39);
  assert.equal(restored.uExp,101);

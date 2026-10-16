@@ -416,7 +416,7 @@ test('phase 38: combo también queda dentro del firewall global', () => {
 test('phase 39: start() no hereda estado transitorio de una sesión anterior', () => {
   const game = fs.readFileSync('./game.js', 'utf8');
 
-  const start = game.indexOf('function start(def)');
+  const start = game.indexOf('function start(def,');
   const evolve = game.indexOf('function evolve(', start);
 
   assert.ok(start > 0);

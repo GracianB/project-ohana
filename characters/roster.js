@@ -5,6 +5,7 @@
 // w/h son la hitbox. No se han tocado.
 // ============================================================================
 
+import { adventureRoster } from "./adventure-profiles.js";
 const ACTIVE = ["kilo", "stitcho", "chispin", "cat", "dragon", "dino", "frita", "pizza", "yomi", "cuerno"];
 
 const ALIAS = {
@@ -172,11 +173,11 @@ export const ALL_ROSTER = [
   },
 ];
 
-export const ROSTER = ACTIVE.map((id) => ALL_ROSTER.find((r) => r.id === id)).filter(Boolean);
+export const ROSTER = ACTIVE.map((id) => ALL_ROSTER.find((r) => r.id === id)).filter(Boolean).map(adventureRoster);
 
 export function findRoster(id) {
   const key = aliasId(id);
-  return ALL_ROSTER.find((r) => r.id === key) || null;
+  return ROSTER.find((r) => r.id === key) || null;
 }
 
 function clearEvoTween(p) {
