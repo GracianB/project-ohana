@@ -557,6 +557,11 @@ buildDots();
 // V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
 mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new")});
+const replay = document.createElement("button");
+replay.id = "btn-replay-welcome"; replay.type = "button"; replay.className = "cta ghost";
+replay.textContent = "Ver la bienvenida";
+replay.onclick = () => playTitleIntro({replay:true});
+document.getElementById("menu-row")?.appendChild(replay);
 const play = document.getElementById("btn-play");
 const neu = document.getElementById("btn-new");
 if (play) play.onclick = () => begin("new");

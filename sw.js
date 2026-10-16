@@ -1,6 +1,7 @@
-const VERSION = "ohana-410";
+const VERSION = "ohana-420";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/welcome-story.js?v=" + VERSION,
   "./family-camp.css?v=" + VERSION,
   "./systems/family-camp.js?v=" + VERSION,
   "./systems/family-camp-model.js?v=" + VERSION,
@@ -251,6 +252,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/welcome-story.js": "4f26e793194cf16fd68ee39d4cd3e1b477e8a49e",
   "family-camp.css": "f34276374f677baa65f6fb42d69104a57c8952ba",
   "systems/family-camp.js": "2e83444c2925f76bfa84d0442e77fd89073caf55",
   "systems/family-camp-model.js": "e8e91d57eaa24b539c27e89307966d4cc55cac49",
@@ -258,7 +260,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "0115c10f8a98399435483f612f667c005f7543da",
+  "index.html": "ed02f50e568c92d11fb55b7f07462a180c7a4ce4",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -272,7 +274,7 @@ const PRECACHE_REVISIONS = {
   "hud.css": "de49c113688894eb2685223a22835b913cd83eaa",
   "evo.css": "e0c4685187247fbe8986811927fe6e94286c7710",
   "ending.css": "82ec666c39ff1163eacbaa38f8710364e2d64a7b",
-  "intro.css": "8575b9f7cd7c649af9fdab68c9a36ce3f427225f",
+  "intro.css": "4d66fe8ecb60e7284393804c59899b83cc5c90f8",
   "demo.css": "44b745dbace004886fc317f8c9ea0a654cd37de2",
   "experience.css": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
   "cinematic-ui.css": "4f413944a0ba3c63d43c078c3565f223df736c38",
@@ -283,7 +285,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "37d4e9e150b0ed3efef116d014aa9b1872fac479",
+  "game.js": "cb72d209bb3a8ea3f7c438615227fd4f574c4408",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
@@ -439,7 +441,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "2b5761f15ca57e4a22c2368142de78d64ab277ba",
-  "systems/intro.js": "1744690684877637d3ecfb27cbbad88cda180440",
+  "systems/intro.js": "710c106b8d16398ada92acc4ff3052953a1cfb79",
   "systems/intro-cast-fit.js": "9c97bb2367f339ad775fc18b671fb68937a9574e",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
   "systems/intro-dino-stage.js": "e866d1dce44c4f50164e944ff3791d616699f060",
@@ -469,7 +471,7 @@ const PRECACHE_REVISIONS = {
   "systems/save.js": "a3090509e6b51bf0b033c6d8e898fed8fbce4045",
   "systems/surprises.js": "85e1a21e2018fb6ad6479a108784878323ebc4bd",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
-  "systems/title.js": "5c3b20d2bea6c110b1a065e84fc2d8a99d65378d",
+  "systems/title.js": "f8e838da03c482ac55301fa3be7e3a8c459c3fd2",
   "systems/experience.js": "6b20279a96a9e62ac62edc27baaeab76024b54b5",
   "systems/online-coop.js": "e79efbf176194634359fb3bb26d0542559e72fbc",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",

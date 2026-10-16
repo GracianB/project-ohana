@@ -790,7 +790,7 @@ test("V36 title is one canonical cinematic composition with real opening", () =>
     assert.ok(welcome.includes('"'+id+'"'),"intro lineup missing "+id);
   assert.match(intro, /const opticalBounds = measureCastArtwork\(\)/);
   assert.match(intro, /openingMode = "family-welcome"/);
-  assert.match(intro, /ENTRAR EN HOKU/);
+  assert.match(intro, /EXPLORAR EL CAMPAMENTO/);
   assert.doesNotMatch(intro, /EL NIDO HA DESPERTADO/);
   assert.doesNotMatch(intro, /DIEZ HÉROES · CINCO FORMAS · DIEZ SALAS/);
   assert.equal((css.match(/OHANA ROSTER V2/g) || []).length, 0);

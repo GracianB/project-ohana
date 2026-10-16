@@ -3358,6 +3358,7 @@ if (
 
 // A running victory film owns Escape: skip to its results instead of
 // opening the pause/menu handler underneath the cinematic overlay.
+if (!game.running && document.getElementById("ohana-intro")?.classList.contains("show")) return;
 const endingOverlay = document.getElementById("win-cinema");
 if (endingOverlay?.classList.contains("cinema-running")) {
   event.preventDefault();

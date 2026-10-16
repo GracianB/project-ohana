@@ -58,3 +58,16 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
   #ohana-intro .oi-welcome{left:16px;right:16px;bottom:88px;max-width:none}
   #ohana-intro .oi-enter{left:16px;right:auto;bottom:24px}
 }
+/* V420 · readable dialogue sits below the cast; the scene remains visible. */
+#ohana-intro .oi-story-dialogue {position:absolute;z-index:7;left:50%;bottom:95px;transform:translateX(-50%);width:min(620px,calc(100vw - 40px));padding:12px 18px;border-radius:16px;background:#102632e8;border:1px solid #b7ded32b;pointer-events:none;}
+#ohana-intro .oi-story-dialogue[hidden] {display:none!important;}
+.oi-story-chapter {display:block;color:#99c7c6;font:700 9px Outfit,sans-serif;letter-spacing:.1em;margin-bottom:7px;}
+.oi-story-speaker {display:block;color:#f7da9f;font:600 16px Fredoka,sans-serif;}
+.oi-story-line {margin:5px 0 0;color:#f2f2e4;font:500 16px/1.45 Outfit,sans-serif;min-height:24px;}
+#ohana-intro .oi-story-controls {position:absolute;z-index:8;bottom:30px;left:24px;display:flex;gap:8px;}
+#ohana-intro .oi-story-controls button {min-height:42px;padding:9px 13px;border:1px solid #add7d34d;border-radius:10px;color:#def0e6;background:#12313c;font:700 11px Outfit,sans-serif;cursor:pointer;}
+#ohana-intro .oi-story-controls button[aria-pressed=true] {background:#d9c99e;color:#163240;}
+#ohana-intro .oi-story-controls button:focus-visible,#ohana-intro .oi-enter:focus-visible {outline:3px solid #ffe4a9;outline-offset:4px;}
+#ohana-intro .oi-enter {right:24px!important;left:auto!important;transform:none!important;bottom:30px!important;min-height:42px!important;}
+@media(max-width:700px){#ohana-intro .oi-story-dialogue{bottom:140px;padding:12px 14px;width:calc(100vw - 28px);}.oi-story-line{font-size:15px;}.oi-story-chapter{font-size:8px;}#ohana-intro .oi-story-controls{left:14px;bottom:85px;right:14px;justify-content:center;}#ohana-intro .oi-enter{left:14px!important;right:14px!important;bottom:24px!important;width:calc(100% - 28px)!important;}.oi-story-speaker{font-size:15px;}}
+@media(max-height:500px) and (min-width:701px){#ohana-intro .oi-story-dialogue{bottom:72px;max-width:460px;padding:8px 12px;}.oi-story-line{font-size:13px;}#ohana-intro .oi-story-controls,#ohana-intro .oi-enter{bottom:16px!important;}}
