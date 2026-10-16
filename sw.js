@@ -253,7 +253,7 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/welcome-story.js": "4f26e793194cf16fd68ee39d4cd3e1b477e8a49e",
-  "family-camp.css": "f34276374f677baa65f6fb42d69104a57c8952ba",
+  "family-camp.css": "5e107cb7d8c96964f4e1c65dc6e62767634bfebf",
   "systems/family-camp.js": "2e83444c2925f76bfa84d0442e77fd89073caf55",
   "systems/family-camp-model.js": "e8e91d57eaa24b539c27e89307966d4cc55cac49",
   "systems/evo-cine/real-actor.js": "5adcb1dfc4015eb7bedc41c5303cc7961a4c6fda",
