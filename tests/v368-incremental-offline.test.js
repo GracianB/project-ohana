@@ -153,13 +153,20 @@ test("V373 actual V372→V373 migration: preserved files cost zero network reque
  await h.install();
  const network=h.requests.slice(first).map(x=>new URL(x).pathname);
  assert.equal(h.precache.length,TOTAL+1);
- assert.ok(REUSED>=190,"V373 must reuse at least 190 V372 assets, got "+REUSED);
  assert.equal(network.length,DOWNLOADED,"only the "+DOWNLOADED+" changed or new V373 files need a fetch");
  for(const must of ["/systems/cuerno-fx.js","/systems/cuerno-kit.js","/systems/cuerno-play-v373.js","/systems/cuerno-evo-v373.js","/characters/art/cuerno-v373.js","/game.js","/systems/abilities.js"])
    assert.ok(network.some(x=>x.endsWith(must)),must+" must be fetched: "+network.join(","));
  assert.ok(network.some(x=>x.endsWith("/index.html")),network.join(","));
  assert.ok(h.parallel()<=6);
  const fresh=h.storage("ohana-static-"+current);
+ // Later releases legitimately edit more of V372. Verify every unchanged
+ // resource, rather than imposing V373's historical count on new content.
+ for(const name of Object.keys(REVS).filter(k=>BASELINE.resources[k]?.sha===REVS[k])){
+   assert.ok(!network.some(url=>url.endsWith("/"+name)),name+" must be reused without a request");
+   const response=await fresh.match("./"+name,{ignoreSearch:true});
+   assert.ok(response,name+" must remain cached");
+   assert.deepEqual(Buffer.from(await response.arrayBuffer()),fs.readFileSync(name),name+" cached bytes must survive migration");
+ }
  const previously=fs.readFileSync("systems/cinema-loader.js");
  const fromCache=Buffer.from(await (await fresh.match("./systems/cinema-loader.js?v="+current)).arrayBuffer());
  assert.deepEqual(fromCache,previously,"unchanged real systems/cinema-loader.js bytes must survive migration");

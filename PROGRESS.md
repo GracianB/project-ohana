@@ -1,3 +1,7 @@
+## V420 · Bienvenida dirigida y conversaciones legibles (ohana-420)
+
+Once escenas: diez protagonistas y una coda con enemigos reales en un islote apartado. Cada héroe prepara su broma, la ejecuta con su rig original y recibe una respuesta de otro familiar. Las actuaciones se ralentizan para acompañar el guion y la cámara enfoca suavemente; los bocadillos fugaces se reservan al modo de inspección de fotogramas. Una sola frase principal, cuatro a seis segundos según longitud, tres intervenciones por escena y 1,2 segundos de descanso. Pausa real, anterior, siguiente, Escape, controles de teclado, movimiento suave y repetición desde el menú. El campamento se conserva como destino; no se altera la campaña ni su guardado.
+
 ## V410 · Campamento de la familia (ohana-410)
 
 Diez mejoras: isla Canvas compartida; diez actores reales; luciérnaga navegable; selección por proximidad; selección directa accesible; cámara adaptable; presentación voluntaria de doce segundos con tres frases legibles; álbum de cinco formas; estadísticas y poderes del roster real; misterio U separado del héroe elegido y diseño móvil sin desbordamiento. El entrenamiento y los nuevos niveles quedan para sus rondas previstas. Los renderizadores ambientales antiguos no arrancan en modo campamento.

@@ -27,6 +27,10 @@ import { chispinWelcomeBeat, drawChispinWelcomeFX } from "./intro-chispin-stage.
 import { michiWelcomeBeat, drawMichiWelcomeFX } from "./intro-michi-stage.js";
 import { planWelcomeFantasy, activeFantasy, drawWelcomeFantasy, fantasyCamera } from "./intro-fantasy.js";
 import { cachedGradient } from "./canvas-gradient-cache.js";
+import { welcomeStoryAt, nextWelcomeLine, WELCOME_STORIES } from "./welcome-story.js";
+import { makeFoe } from "../engine/foes.js";
+import { drawEnemy } from "../engine/enemies.js";
+import { duckMusic } from "../engine/music.js";
 
 const CYAN = "#7ee7ff", GOLD = "#ffe66a", PINK = "#ff6aa8";
 
@@ -47,8 +51,12 @@ function iris(ctx, W, H, cx, cy, k) {
 // ---------------------------------------------------------------------------
 // Intro de portada
 // ---------------------------------------------------------------------------
-export function playTitleIntro() {
-  const el = document.getElementById("ohana-intro");
+export function playTitleIntro(options = {}) {
+  let el = document.getElementById("ohana-intro");
+  if (!el && options.replay) {
+    el = document.createElement("div"); el.id = "ohana-intro";
+    document.getElementById("char-select")?.prepend(el);
+  }
   const finishClasses = () => {
     document.body.classList.remove("intro-playing", "intro-pending");
     document.body.classList.add("intro-complete");
@@ -65,12 +73,15 @@ export function playTitleIntro() {
   el.innerHTML =
     '<canvas aria-hidden="true"></canvas>' +
     '<div class="oi-welcome" aria-hidden="true"><span>PROJECT OHANA · ISLA HOKU</span><strong>OHANA</strong><small>La familia ya está aquí. Y tiene ganas de jugar.</small></div>' +
-    '<button class="oi-enter" type="button">ENTRAR EN HOKU ↗</button>';
+    '<div class="oi-story-dialogue" aria-live="polite" aria-atomic="true"><span class="oi-story-chapter"></span><strong class="oi-story-speaker"></strong><p class="oi-story-line"></p></div>' +
+    '<div class="oi-story-controls"><button type="button" class="oi-previous" aria-label="Frase anterior">←</button><button type="button" class="oi-pause" aria-pressed="false">Pausar</button><button type="button" class="oi-next">Siguiente frase →</button></div>' +
+    '<button class="oi-enter" type="button">EXPLORAR EL CAMPAMENTO ↗</button>';
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
   el.setAttribute("aria-label", "Escena de bienvenida de Isla Hoku");
   el.setAttribute("aria-hidden", "false");
   el.classList.add("show", "family-welcome");
+  document.body.classList.remove("intro-complete");
   document.body.classList.add("intro-playing");
 
   const fc = fullCanvas(el.querySelector("canvas"));
@@ -154,12 +165,25 @@ export function playTitleIntro() {
     });
   }
   let raf = 0, t0 = 0, last = 0, lastPaint = 0, ready = false, done = false;
+  let storyTime = 0, storyPaused = false, activeDirection = null;
+  const storySpeaker = el.querySelector(".oi-story-speaker");
+  const storyLine = el.querySelector(".oi-story-line");
+  const storyChapter = el.querySelector(".oi-story-chapter");
+  const pauseButton = el.querySelector(".oi-pause");
+  const stageEnemies = ["cangrejo","avispa","cangrejo"].map((kind,i)=>{
+    const enemy=makeFoe(0,0,kind,"beach",i);
+    enemy.x=-enemy.w/2;enemy.y=-enemy.h-(kind==="avispa"?12:0);
+    return enemy;
+  });
+  pauseButton.onclick = () => { storyPaused = !storyPaused; duckMusic(storyPaused); pauseButton.textContent = storyPaused ? "Continuar" : "Pausar"; pauseButton.setAttribute("aria-pressed",String(storyPaused)); };
+  el.querySelector(".oi-next").onclick = () => { storyTime = nextWelcomeLine(storyTime); };
+  el.querySelector(".oi-previous").onclick = () => { storyTime = nextWelcomeLine(storyTime,-1); };
 
   function layout() {
     const W = fc.W, H = fc.H;
     return {
       W, H,
-      floor: H * 0.80,
+      floor: H * (frozenSceneTime === null ? (W < 760 ? .67 : .75) : .80),
       heroH: W < 760
         ? clamp(Math.min(W * .16, H * .10), 30, 76)
         : clamp(Math.min(W * .105, H * .145), 44, 112),
@@ -175,6 +199,7 @@ export function playTitleIntro() {
     p.vy = Number(opts.vy || 0);
     p.melee = Number(opts.melee || 0);
     p._poseOverride = opts.pose || "idle";
+    if (activeDirection?.lineIndex === 2 && id === activeDirection.partner) p._poseOverride = "victory";
     // Stage-only gesture data. Never touches save state, combat or physics.
     p._introDragon = id === "dragon" ? (opts.dragonWelcome || null) : null;
     p._introDino = id === "dino" ? (opts.dinoWelcome || null) : null;
@@ -189,6 +214,7 @@ export function playTitleIntro() {
     const slotWidth = fc.W / (fc.W < 760 ? 5 : 10);
     const fit = welcomeActorFit(opticalBounds[id], h, slotWidth);
     ctx.save();
+    if (activeDirection?.hero && id !== activeDirection.hero && id !== activeDirection.partner) ctx.globalAlpha *= .82;
     ctx.translate(x - fit.centerOffsetX * fit.scale, footY);
     if (opts.alpha !== undefined) ctx.globalAlpha *= clamp(opts.alpha, 0, 1);
     if (opts.rotate) ctx.rotate(opts.rotate);
@@ -246,6 +272,7 @@ export function playTitleIntro() {
 
   let bubbleBoxes = [];
   function comicBubble(text,x,y,k=1,accent="#fff6c8",tail="left") {
+    if (activeDirection) return;
     if (k <= 0.02) return;
     ctx.save();
     ctx.globalAlpha=clamp(k,0,1);
@@ -337,21 +364,24 @@ export function playTitleIntro() {
     ctx.globalAlpha=1;
   }
 
-  function scene(t,L) {
+  function scene(t,L,direction=null) {
+    activeDirection = direction;
     const {W,floor,heroH}=L;
     const spots = Object.fromEntries(CAST.map(id => [id, welcomeCastSpot(id,W,floor,heroH)]));
     const {dino,dragon,kilo,stitcho,chispin,cat,frita,pizza,yomi,cuerno}=spots;
     const tf=t*60;
-    const loop=t%14;
+    const loop=direction ? direction.sceneTime : t%14;
     bubbleBoxes = [];
     // V372 · maravilla del hueco actual. Con reduced-motion se muestra una
     // sola, quieta y completa, sin movimiento de cámara.
-    const wonder=reduce?{beat:fantasy.beats[0],k:.5}:activeFantasy(fantasy,loop);
+    const wonder=direction?null:reduce?{beat:fantasy.beats[0],k:.5}:activeFantasy(fantasy,loop);
     if(isE2E){
       el.dataset.welcomeFantasyActive=wonder?wonder.beat.kind:"none";
       el.dataset.welcomeFantasyReactor=wonder?wonder.beat.reactor:"none";
     }
-    const cam=fantasyCamera(wonder,reduce);
+    const focus=direction?.hero?spots[direction.hero]:null;
+    const focusWeight=direction?Math.sin(Math.PI*clamp(direction.local/direction.duration,0,1)):0;
+    const cam=focus&&!reduce?{dx:clamp((W/2-focus.x)*.12,-W*.05,W*.05)*focusWeight,dy:-L.H*.015*focusWeight,rotate:0,zoom:1+.08*focusWeight}:fantasyCamera(wonder,reduce);
     ctx.save();
     if(cam){
       ctx.translate(W/2+cam.dx,L.H/2+cam.dy);ctx.rotate(cam.rotate);ctx.scale(cam.zoom,cam.zoom);ctx.translate(-W/2,-L.H/2);
@@ -698,6 +728,8 @@ export function playTitleIntro() {
   function frame(now){
     if(done) return;
     if(!t0){t0=now;last=now;}
+    const elapsed = Math.min(.1, Math.max(0,(now-last)/1000));
+    if (!storyPaused && !document.hidden && !document.body.classList.contains("playing")) storyTime += elapsed;
     last=now;
     const t=(now-t0)/1000;
     // The entry is actionable after the first meaningful frame, not a
@@ -709,9 +741,29 @@ export function playTitleIntro() {
     if(document.hidden||document.body.classList.contains("playing")){raf=requestAnimationFrame(frame);return;}
     lastPaint=now;
     const L=layout();
+    const direction = frozenSceneTime === null ? welcomeStoryAt(storyTime) : null;
+    const line = direction?.line;
+    const speaker = line ? (ROSTER.find(r=>r.id===line.speaker)?.name || (line.speaker==="avispa"?"Avispa":"Cangrejo")) : "La familia";
+    const text = direction ? (line?.text || (direction.complete ? "La aventura te espera. Nadie se queda atrás." : "Un pequeño respiro. Y otra travesura.")) : "";
+    if(storyLine.textContent!==text){storyLine.textContent=text;storySpeaker.textContent=speaker;}
+    if(direction){
+      const chapter=(direction.index+1)+" / "+WELCOME_STORIES.length+" · "+direction.title;
+      if(storyChapter.textContent!==chapter)storyChapter.textContent=chapter;
+      const hero=direction.hero||"enemies",lineIndex=String(direction.lineIndex);
+      if(el.dataset.storyHero!==hero)el.dataset.storyHero=hero;
+      if(el.dataset.storyLine!==lineIndex)el.dataset.storyLine=lineIndex;
+      if(isE2E)el.dataset.storyTime=storyTime.toFixed(2);
+    }
+    el.querySelector(".oi-story-dialogue").hidden=!direction;
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
-    island(t,L);
-    scene(reduce?0.7:(frozenSceneTime ?? t),L);
+    island(direction?storyTime:t,L);
+    // Their own tiny island: real enemy renderers, no AI, collision or campaign state.
+    if(direction){
+      const ex=L.W*.81,ey=L.H*.36,r=Math.min(125,Math.max(60,L.W*.11));
+      ctx.fillStyle="#d3c09b";ctx.beginPath();ctx.ellipse(ex,ey,r,r*.29,0,0,Math.PI*2);ctx.fill();
+      for(let i=0;i<stageEnemies.length;i++){ctx.save();ctx.translate(ex+(i-1)*r*.54,ey-24);ctx.scale(.9,.9);drawEnemy(ctx,stageEnemies[i],{x:0,y:0},reduce?0:storyTime*60);ctx.restore();}
+    }
+    scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);
     const vign=cachedGradient(ctx,"welcome-vignette:"+L.W+"x"+L.H,()=>{
       const g=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
       g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.52)");return g;
@@ -722,24 +774,37 @@ export function playTitleIntro() {
   }
 
   function enter(e){
-    if(done||!ready) return;
-    if(e?.type==="keydown"&&!["Enter"," ","Escape"].includes(e.key)) return;
+    if(done||(!ready&&e?.key!=="Escape")) return;
+    if(e?.type==="keydown"&&!["Enter","Escape"].includes(e.key)) return;
+    if(e?.type==="keydown"&&e.key!=="Escape"&&e.target?.closest?.(".oi-story-controls")) return;
     if(e?.type==="keydown"){e.preventDefault();e.stopPropagation();}
     done=true;
+    duckMusic(false);
     cancelAnimationFrame(raf);
     removeEventListener("resize",onResize);
     removeEventListener("keydown",enter,true);
+    removeEventListener("keydown",storyKeys,true);
     el.removeEventListener("pointerdown",enter);
     if(isE2E)delete window.__OHANA_WELCOME_SET_FRAME;
     finishClasses();
     el.remove();
+    document.querySelector("#chars-grid .char-card.selected")?.focus({preventScroll:true});
+  }
+
+  function storyKeys(e){
+    if(e.key==="Tab"){
+      const buttons=[...el.querySelectorAll("button")].filter(b=>!b.hidden);const i=buttons.indexOf(document.activeElement);
+      e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();return;
+    }
+    if(e.key===" "&&!e.target?.closest?.("button")){e.preventDefault();e.stopImmediatePropagation();pauseButton.click();}
   }
 
   function onResize(){fc.resize();}
   addEventListener("resize",onResize);
   addEventListener("keydown",enter,true);
-  el.addEventListener("pointerdown",enter);
+  addEventListener("keydown",storyKeys,true);
   el.querySelector(".oi-enter")?.addEventListener("click",enter);
+  el.querySelector(".oi-enter")?.focus({preventScroll:true});
   loadFonts();
   raf=requestAnimationFrame(frame);
 }

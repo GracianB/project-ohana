@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: V420 readable welcome · pause, dialogue and replay
+        run: node tests/browser/v420-welcome-story.mjs
+
       - name: V410 family camp · ten heroes and fifty real forms
         run: node tests/browser/v410-family-camp.mjs
 
