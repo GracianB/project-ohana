@@ -36,6 +36,13 @@ export function setMusicVolume(value) {
 // drums: 16 pasos por compás: k = bombo, s = caja, h = charles, o = abierto.
 // ---------------------------------------------------------------------------
 const THEMES = {
+  estrella: {
+    bpm:156,root:65,scale:"major",swing:0,
+    chords:[[0,"maj"],[5,"maj"],[9,"min"],[7,"sus"]],
+    pad:.12,bass:"x...x...x.x.x...",arp:"x.x.x.x.x.x.x.x.",arpInst:"pluck",
+    melody:{rhythm:"x.x.xx..x.x.x.x.",inst:"bell",oct:12,seed:430},
+    drums:{k:"x.......x.......",s:"....x.......x...",h:"..x...x...x...x."}
+  },
   title: {
     bpm: 84, root: 60, scale: "major", swing: 0,
     chords: [[0, "maj"], [9, "min"], [5, "maj"], [7, "sus"]],

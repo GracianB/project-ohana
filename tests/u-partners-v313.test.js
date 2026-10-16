@@ -132,7 +132,7 @@ test("V313: bond EXP levels up, survives save v2, and is capped",()=>{
  assert.equal(gainUExp({...p,dead:true},3),0);
  g.player.uExp=137;
  const saved=packSave(g),decoded=unpackSave(saved,"cat");
- assert.equal(saved.v,2);assert.equal(decoded.uExp,137);
+ assert.equal(saved.v,3);assert.equal(decoded.uExp,137);
  assert.equal(unpackSave({...saved,uExp:1e8},"cat").uExp,200);
  assert.equal(unpackSave({...saved,uExp:"bad"},"cat").uExp,0);
  assert.equal(unpackSave({...saved,uExp:undefined},"cat").uExp,0);

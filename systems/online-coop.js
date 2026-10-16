@@ -1,4 +1,5 @@
 import {drawFamilyDuet} from './family-duets.js';
+import {drawStellarActor} from './stellar-power.js';
 import {drawMichiDuet} from './michi-duet.js';
 import {drawChispinDuet} from './chispin-duet.js';
 import {drawStitchoDuet} from "./stitcho-duet.js";
@@ -1048,7 +1049,7 @@ class OnlineCoop {
 
   applyRemoteHurt(game, amount) {
     const player = game.player;
-    if (!player || player.dead || player.invuln > 0) return;
+    if (!player || player.dead || player.invuln > 0 || player.starLeft > 0) return;
     player.health = Math.max(0, player.health - amount);
     player.invuln = 24;
     player.flash = Math.max(player.flash || 0, 8);
@@ -1225,6 +1226,7 @@ class OnlineCoop {
       melee: this.remote.melee,
       dash: this.remote.dash,
       invuln: this.remote.invuln,
+      starLeft: this.remote.starLeft || 0,
       _abilMove:this.remote.pose?.move||null,
       actionKind: this.remote.actionKind,
       abilitySlot: this.remote.abilitySlot,
@@ -1241,6 +1243,7 @@ class OnlineCoop {
     if (this.remote.invuln > 0) ctx.globalAlpha = 0.72;
     if (this.remote.signalWeak) ctx.globalAlpha *= Math.max(.44, Math.min(1, this.remote.signalOpacity || 1));
     drawCharacter(ctx, player, game.cam, t, {reduceMotion:game.reduceMotion});
+    drawStellarActor(ctx, player, game.cam, t, game.reduceMotion);
     drawChispinCloud(ctx,player,game.cam,t);
     ctx.globalAlpha = 1;
     const px = player.x + player.w / 2 - game.cam.x;

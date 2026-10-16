@@ -286,6 +286,29 @@ try {
   }
 
   console.log("multiplayer: recovery negotiated and fresh channels delivered live poses");
+  // V430: the host awards a real pickup to either actor; both clients receive
+  // the taken state and the matching timer over the existing combat channel.
+  const starOriginal=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{const {onlineCoop:o}=await import('/systems/online-coop.js');const g=o._combatGame;return {x:g.player.x,y:g.player.y,stars:g.stars.map(s=>({...s}))};})));
+  for(const collector of ['host','guest']){
+    const star=await hostPage.evaluate(async collector=>{
+      const {onlineCoop:o}=await import('/systems/online-coop.js');const g=o._combatGame,target=collector==='host'?g.player:o.remote;
+      if(collector==='guest')g.player.x=target.x-220;
+      g.player.starLeft=0;if(o.remote)o.remote.starLeft=0;
+      const value={x:target.x+target.w/2,y:target.y+target.h/2,taken:false};g.stars=[value];return value;
+    },collector);
+    await guestPage.evaluate(async star=>{const {onlineCoop:o}=await import('/systems/online-coop.js');const g=o._combatGame;g.stars=[{...star,taken:false}];g.player.starLeft=0;if(o.remote)o.remote.starLeft=0;},star);
+    let proof=false;
+    for(let attempt=0;attempt<60;attempt++){
+      proof=await guestPage.evaluate(async collector=>{const {onlineCoop:o}=await import('/systems/online-coop.js');const g=o._combatGame;return !!g.stars[0]?.taken&&(collector==='host'?(o.remote?.starLeft||0):(g.player.starLeft||0))>0;},collector);
+      if(proof)break;await guestPage.waitForTimeout(100);
+    }
+    assert.equal(proof,true,collector+': authoritative star pickup or timer did not reach the other client');
+  }
+  await Promise.all([hostPage,guestPage].map((page,i)=>page.evaluate(async original=>{
+    const {onlineCoop:o}=await import('/systems/online-coop.js');const g=o._combatGame;g.player.x=original.x;g.player.y=original.y;g.player.starLeft=0;if(o.remote)o.remote.starLeft=0;g.stars=original.stars.map(s=>({...s,taken:true}));
+  },starOriginal[i])));
+  console.log('multiplayer: host and guest star pickups are host-owned, mirrored and bounded');
+
   // V300: real channel deliveries must reconcile dynamic enemies and render native attacks.
   const mirroredId=await hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');

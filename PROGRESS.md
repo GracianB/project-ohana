@@ -1,3 +1,7 @@
+## V430 · Islote, estrella y base de aventura (ohana-430)
+
+Entrenamiento con los diez héroes y cinco formas, enemigos reales, reinicio y salida al campamento sin guardar partida, colección ni EXP de vínculos. Perfiles de velocidad, salto, resistencia, aceleración y frenada conservando las hitboxes. Estrella de 600 ticks: +15 % de velocidad, protección, contacto contra enemigos normales y golpe básico acotado cada segundo en jefes; diez acentos visuales, cuenta final y música original. Dimensiones por definición de zona y puntos de control con reaparición local; guardado v3 compatible con v2. El anfitrión decide recogidas, contactos y puntos de control; los snapshots opcionales transmiten estado acotado a su compañero. El islote de tres estaciones es el piloto; las zonas largas se construirán en las siguientes rondas.
+
 ## V420 · Bienvenida dirigida y conversaciones legibles (ohana-420)
 
 Once escenas: diez protagonistas y una coda con enemigos reales en un islote apartado. Cada héroe prepara su broma, la ejecuta con su rig original y recibe una respuesta de otro familiar. Las actuaciones se ralentizan para acompañar el guion y la cámara enfoca suavemente; los bocadillos fugaces se reservan al modo de inspección de fotogramas. Una sola frase principal, cuatro a seis segundos según longitud, tres intervenciones por escena y 1,2 segundos de descanso. Pausa real, anterior, siguiente, Escape, controles de teclado, movimiento suave y repetición desde el menú. El campamento se conserva como destino; no se altera la campaña ni su guardado.

@@ -187,7 +187,7 @@ if (S.pull && id !== "cheese") S.pull = null;
 const flow = registerCombatAction(game, key, id);
 const signatureLink = index < 3 ? applySignatureLink(game, p, flow, key) : null;
 if(index===3&&p.uSurprise){p.uPartner=rollUPartner(p.id,game.uRandom||Math.random,p._uLastPartner);p._uLastPartner=p.uPartner;}
-const bondGain=gainUExp(p,index);
+const bondGain=game.practice?0:gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
 if (index === 3) castSupreme(game, p, flow);
@@ -291,6 +291,7 @@ game._specialPulse = { id: p.id, t: 36, color: SUPREME[p.id]?.color || p.color |
 }
 
 function emitSupremeEvent(game, p, def, identity, flow, dreamCount = 0) {
+if(game.practice)return;
 if (typeof dispatchEvent !== "function" || typeof CustomEvent !== "function") return;
 const ally = (flow.assist || p.id === "yomi") ? (SUPREME[p.id]?.ally || "") : "";
 try {

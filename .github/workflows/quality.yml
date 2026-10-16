@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: V430 training isolation, star power and checkpoints
+        run: node tests/browser/v430-adventure.mjs
+
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
 

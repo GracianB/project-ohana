@@ -267,3 +267,14 @@ body.boss-fight #combo-chip { top: 168px; }
 .pause-gentle input {grid-row:span 2;width:18px;height:18px;accent-color:#aeecd5;}
 .pause-gentle small {grid-column:2;color:#9db6c8;font-size:11px;}
 body.gentle-motion .ability-slot,body.gentle-motion .touch-btn,body.gentle-motion #combo-value {animation:none!important;transition:none!important;}
+#practice-toolbar {display:none;}
+body.practicing #practice-toolbar {display:flex;position:fixed;z-index:55;top:70px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);padding:10px 14px;gap:10px;flex-wrap:wrap;align-items:center;border:1px solid #b7e4dc55;border-radius:15px;background:#112b37ed;color:#dce9da;font:600 11px Outfit,sans-serif;}
+#practice-toolbar strong {color:#e9d8ab;font-size:9px;letter-spacing:.08em;}
+#practice-toolbar label {display:flex;align-items:center;gap:5px;}
+#practice-toolbar select,#practice-toolbar button {min-height:34px;border:1px solid #b5d7d43b;background:#25414c;border-radius:8px;color:#fff1d0;padding:5px 9px;font:600 11px Outfit,sans-serif;}
+@media(max-width:700px){body.practicing #practice-toolbar{top:100px;width:calc(100vw - 24px);justify-content:center;gap:5px;}#practice-toolbar strong{width:100%;text-align:center;}#practice-toolbar button{font-size:10px;}}
+body.practicing #hud .hud-block.world,body.practicing #btn-map,body.practicing #btn-festival {display:none!important;}
+@media(max-width:700px){body.practicing #hud .hud-block.player{display:none!important;}body.practicing #practice-toolbar{top:65px;}#practice-toolbar select,#practice-toolbar button{min-height:44px;}}
+
+/* Keep the game viewport aligned with input and camera coordinates. */
+body.playing #game {max-height:none;}
