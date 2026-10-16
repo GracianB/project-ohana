@@ -275,3 +275,6 @@ body.practicing #practice-toolbar {display:flex;position:fixed;z-index:55;top:70
 @media(max-width:700px){body.practicing #practice-toolbar{top:100px;width:calc(100vw - 24px);justify-content:center;gap:5px;}#practice-toolbar strong{width:100%;text-align:center;}#practice-toolbar button{font-size:10px;}}
 body.practicing #hud .hud-block.world,body.practicing #btn-map,body.practicing #btn-festival {display:none!important;}
 @media(max-width:700px){body.practicing #hud .hud-block.player{display:none!important;}body.practicing #practice-toolbar{top:65px;}#practice-toolbar select,#practice-toolbar button{min-height:44px;}}
+
+/* Keep the game viewport aligned with input and camera coordinates. */
+body.playing #game {max-height:none;}

@@ -277,7 +277,7 @@ const PRECACHE_REVISIONS = {
   "style.css": "88c2a07e405acbd6888f7a809cc0621d2ecad514",
   "title-stage.css": "41ea8c5624ffc4472576032d9fbccc1285066df4",
   "atrium-interact.css": "d7da49b1a7d2c0d5ac3bef25d5ba8fd79e86ea5b",
-  "hud.css": "49e8d0ada2c49296893fc29242e5201801d19dff",
+  "hud.css": "88c412da08269725aa72d3edcd52011f26bf4287",
   "evo.css": "e0c4685187247fbe8986811927fe6e94286c7710",
   "ending.css": "82ec666c39ff1163eacbaa38f8710364e2d64a7b",
   "intro.css": "4d66fe8ecb60e7284393804c59899b83cc5c90f8",
