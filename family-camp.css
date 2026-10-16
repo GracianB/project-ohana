@@ -86,3 +86,4 @@ body.playing #char-select.camp-on {display:none!important;}
 #char-select.camp-on #chars #chars-grid .char-card h3 {display:block!important;opacity:1!important;visibility:visible!important;height:auto!important;max-height:none!important;font:600 12px/16px Fredoka,sans-serif!important;color:#e4e6d9!important;}
 #char-select.camp-on #chars #chars-grid .char-card .portrait {overflow:hidden!important;flex:0 0 64px!important;}
 @media(max-width:1000px){#char-select.camp-on #chars #chars-grid .char-card .portrait {flex-basis:48px!important;}}
+#char-select.camp-on #chars #chars-grid .char-card,#char-select.camp-on #chars #chars-grid .char-card:is(.selected,:hover,:focus-visible) {position:relative!important;inset:auto!important;transform:none!important;translate:none!important;rotate:none!important;scale:none!important;z-index:auto!important;transition:background .15s ease!important;}
