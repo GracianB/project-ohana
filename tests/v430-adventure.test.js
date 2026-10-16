@@ -10,10 +10,10 @@ test('V430 star lasts 600 active ticks, is host-owned and never executes bosses'
  assert.equal(Object.keys(STAR_STYLES).length,10);assert.equal(new Set(Object.values(STAR_STYLES).map(s=>s[1])).size,10);
 });
 test('V430 star and checkpoint snapshots are bounded, shared and reject stale frames',()=>{
- const p=player(),remote={...player(),starLeft:421},host={player:p,coopRemote:remote,roomId:'hub',coopRoomVisit:1,t:0,stars:[{x:10,y:14,taken:true}],enemies:[],projectiles:[],checkpoints:{hub:'combate'}};p.starLeft=222;
- const frame=captureCombatFrame(host,1,'audit');assert.equal(validCombatFrame(frame),true);assert.deepEqual(frame.star,{host:222,guest:421,mask:1});assert.equal(validCombatFrame({...frame,star:{...frame.star,guest:Infinity}}),false);
+ const p=player(),remote={...player(),starLeft:421},host={player:p,coopRemote:remote,roomId:'hub',coopRoomVisit:1,t:0,stars:[{x:10,y:14,taken:true}],enemies:[{x:20,y:10,w:20,h:28,hp:0,max:100,kind:'cucaracho',starDefeated:true}],projectiles:[],checkpoints:{hub:'combate'}};p.starLeft=222;
+ const frame=captureCombatFrame(host,1,'audit');assert.equal(validCombatFrame(frame),true);assert.equal(frame.enemies[0].flags.starDefeated,true);assert.deepEqual(frame.star,{host:222,guest:421,mask:1});assert.equal(validCombatFrame({...frame,star:{...frame.star,guest:Infinity}}),false);
  const guest={player:player(),coopRemote:player(),roomId:'hub',enemies:[],projectiles:[],stars:[{x:10,y:14,taken:false}],checkpoints:{},checkpointPoints:[{id:'combate'}]};
- assert.equal(applyCombatFrame(guest,frame),true);assert.equal(guest.player.starLeft,421);assert.equal(guest.coopRemote.starLeft,222);assert.equal(guest.stars[0].taken,true);assert.equal(guest.checkpoints.hub,'combate');assert.equal(applyCombatFrame(guest,frame),false);
+ assert.equal(applyCombatFrame(guest,frame),true);assert.equal(guest.enemies[0].starDefeated,true);assert.equal(guest.player.starLeft,421);assert.equal(guest.coopRemote.starLeft,222);assert.equal(guest.stars[0].taken,true);assert.equal(guest.checkpoints.hub,'combate');assert.equal(applyCombatFrame(guest,frame),false);
  assert.equal(applyStarSnapshot(guest,{host:-1,guest:600,mask:1}),false);
 });
 test('V430 dimensions, three training checkpoints and save v2 migration remain safe',()=>{

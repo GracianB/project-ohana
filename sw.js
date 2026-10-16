@@ -412,7 +412,7 @@ const PRECACHE_REVISIONS = {
   "systems/coop-v104-sync.js": "5d17e2eb197aff95f07887bf089a6f7aab5a4f14",
   "systems/coop-v107-room-follow.js": "9c8f21bb62748f6c6bef97e6fc0df63abce5d9be",
   "systems/coop-v108-direct.js": "48acc28b903e8809f7ce0e03e7cf73cb91f4d437",
-  "systems/coop-combat-mirror.js": "7190de1ac8184f4fba7bb5fe7e4886dd201ec021",
+  "systems/coop-combat-mirror.js": "b57b445141e763cef1e898508fc857d4f19ef1c4",
   "systems/coop-peer-effects.js": "a1c64be2fcca40fa9aac435213dbc1065823d4a3",
   "systems/coop-ability-hits.js": "8e8559d5539b7e8a4ece3fca5b96ec920c41dfad",
   "systems/kilo-duet.js": "03de1337958491caab8e9aad404e889632d7617b",

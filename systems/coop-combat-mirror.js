@@ -9,7 +9,7 @@ const coordinate=x=>Number.isFinite(x)&&x>=-4096&&x<=20000;
 const word=x=>typeof x==="string"&&/^[a-zA-Z0-9_-]{1,30}$/.test(x);
 const color=x=>typeof x==="string"&&/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(x)?x:"#ffd36a";
 const numbers=["wind","hopWind","clawWind","phase","flash","stun","dying","attackT","charge","invuln","contactDmg","evo","_hitT","_hitMax","alertPing","poseT","teleT","teleMax","teleRange","aimDx","aimDy"];
-const bools=["telegraph","fell","elite","baby","up","airborne","diving","charging","darting","lunging"];
+const bools=["starDefeated","telegraph","fell","elite","baby","up","airborne","diving","charging","darting","lunging"];
 const strings=["mode","teleKind","aiRole","aiIntent","aiFormation"];
 const flags=[...numbers,...bools,...strings];
 function stateFor(game){
