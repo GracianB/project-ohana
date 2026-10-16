@@ -1,6 +1,9 @@
-const VERSION = "ohana-400";
+const VERSION = "ohana-410";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./family-camp.css?v=" + VERSION,
+  "./systems/family-camp.js?v=" + VERSION,
+  "./systems/family-camp-model.js?v=" + VERSION,
   "./systems/evo-cine/real-actor.js?v=" + VERSION,
   "./characters/cuerno-stagecraft.js?v=" + VERSION,
   "./systems/roster-navigation.js?v=" + VERSION,
@@ -248,11 +251,14 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "family-camp.css": "f34276374f677baa65f6fb42d69104a57c8952ba",
+  "systems/family-camp.js": "2e83444c2925f76bfa84d0442e77fd89073caf55",
+  "systems/family-camp-model.js": "e8e91d57eaa24b539c27e89307966d4cc55cac49",
   "systems/evo-cine/real-actor.js": "5adcb1dfc4015eb7bedc41c5303cc7961a4c6fda",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "f916968f53da8875e75e4119edb8899449682092",
+  "index.html": "0115c10f8a98399435483f612f667c005f7543da",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -336,7 +342,7 @@ const PRECACHE_REVISIONS = {
   "engine/platform-drop.js": "ec1f2a91aa47bfeba0b387d560bf736a1217bd84",
   "engine/music.js": "ab6b251739c5fbd5957936ec02789c28da7f5502",
   "engine/particles.js": "c51fc9989a5facbd1be415bead79faf6f351bf96",
-  "systems/atrium-interact.js": "7f1a80852ac4723bbb9e7f09c6530b9c1bd035f5",
+  "systems/atrium-interact.js": "d30ef90c40018bc35c64194811c3df9e08aae911",
   "systems/abilities.js": "0ac0436cdd90debf11e1870b8c1f8e00e873c5d3",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "0c45397c6ae1afbd16992190c76563a62b3acb49",
@@ -462,8 +468,8 @@ const PRECACHE_REVISIONS = {
   "systems/runtime.js": "805100524fc731356e6a90b53b69eb59573548f5",
   "systems/save.js": "a3090509e6b51bf0b033c6d8e898fed8fbce4045",
   "systems/surprises.js": "85e1a21e2018fb6ad6479a108784878323ebc4bd",
-  "systems/title-fx.js": "ad9ad317a97072b7ad747a1738fb1ed1dd1f72f2",
-  "systems/title.js": "fc5e6ab1bcc30900e044c68a798c08a87084faab",
+  "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
+  "systems/title.js": "5c3b20d2bea6c110b1a065e84fc2d8a99d65378d",
   "systems/experience.js": "6b20279a96a9e62ac62edc27baaeab76024b54b5",
   "systems/online-coop.js": "e79efbf176194634359fb3bb26d0542559e72fbc",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",

@@ -36,6 +36,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: V410 family camp · ten heroes and fifty real forms
+        run: node tests/browser/v410-family-camp.mjs
+
       - name: V400 pause, audio and motion preferences
         run: node tests/browser/v400-experience.mjs
 

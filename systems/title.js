@@ -17,6 +17,7 @@ import { difficulty } from "../characters/signature.js";
 import { masteryOf } from "./hero-mastery.js";
 import { rosterIndex } from "./roster-navigation.js";
 import { CALIBRATED_VISUAL_H, CALIBRATED_HEIGHT } from "../characters/visual-size.js";
+import { mountFamilyCamp } from "./family-camp.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
 let titleJingle = false;
@@ -555,6 +556,7 @@ applyLook();
 buildDots();
 // V100 Especial: native grid selection, no carousel arrow controls.
 mark(selectedId);
+mountFamilyCamp({select:id=>dispatchEvent(new CustomEvent("ohana-select",{detail:{id}})),onBegin:()=>begin("new")});
 const play = document.getElementById("btn-play");
 const neu = document.getElementById("btn-new");
 if (play) play.onclick = () => begin("new");
