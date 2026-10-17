@@ -92,3 +92,14 @@ test('runtime boundary sanitizes corrupt entities without changing valid state',
   sanitizeRuntimeState(game);
   assert.equal(JSON.stringify(game),snapshot);
 });
+
+
+test('starting a new game clears both committed and staged checkpoints', () => {
+  const storage=memory(), store=createSaveStore(storage);
+  store.write(checkpoint(10));
+  storage.setItem('ohana.tmp',JSON.stringify({v:2,id:'kilo',xp:55,revision:2}));
+  assert.equal(store.clear(),true);
+  assert.equal(store.readRaw(),null);
+  assert.equal(storage.data.size,0);
+  assert.equal(createSaveStore(()=>{throw Error('blocked');}).clear(),false);
+});

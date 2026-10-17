@@ -12,7 +12,7 @@ import {
   FONT_BODY, FONT_DISPLAY,
 } from "./cinema-kit.js";
 import { ROSTER } from "../characters/roster.js";
-import { canonId } from "./save.js";
+import { canonId, saveStore } from "./save.js";
 import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
@@ -829,7 +829,7 @@ export function playIntro(kind, name, done, id) {
   let evo = 0;
   if (kind === "resume") {
     try {
-      const sv = JSON.parse(localStorage.getItem("ohana") || "null");
+      const sv = saveStore.readRaw();
       if (sv && canonId(sv.id) === def.id) evo = clamp(Number(sv.evo) || 0, 0, 4);
     } catch (_) {}
   }

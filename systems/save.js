@@ -144,6 +144,14 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
       }
     },
     read(id) { return unpackSave(this.readRaw(), id); },
+    clear() {
+      try {
+        const store = getStorage();
+        store.removeItem(SAVE_TMP_KEY);
+        store.removeItem(SAVE_KEY);
+        return true;
+      } catch (_) { return false; }
+    },
     write(game, magic) {
       if (!game?.player || game.player.dead) return false;
       try {
