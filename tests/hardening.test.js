@@ -38,7 +38,7 @@ test('V46 input conserva teclas mantenidas y evita movimiento fantasma', () => {
   assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
-  assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* 18/);
+  assert.match(fs.readFileSync("./engine/camera.js", "utf8"), /Math\.sign\(player\.vx \|\| 0\) \* 18/);
 });
 
 

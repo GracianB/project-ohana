@@ -41,3 +41,20 @@ export function boundedFinite(value, fallback, min, max) {
   if (!Number.isFinite(n)) return fallback;
   return Math.max(min, Math.min(max, n));
 }
+
+// Keep collection identity and insertion order; decrement each lifetime once.
+// Used for transient entities whose update has already run this simulation tick.
+export function compactLiveList(list, {tickLife = false, max = Infinity} = {}) {
+  let write = 0;
+  for (let i = 0; i < list.length; i++) {
+    const item = list[i];
+    if (!item) continue;
+    if (tickLife) item.life--;
+    if (Number.isFinite(item.life) && item.life > 0) list[write++] = item;
+  }
+  const cap = Math.max(0, Math.floor(max));
+  const start = Math.max(0, write - cap);
+  if (start > 0) list.copyWithin(0, start, write);
+  list.length = write - start;
+  return list;
+}

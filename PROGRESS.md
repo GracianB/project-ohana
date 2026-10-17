@@ -2004,3 +2004,7 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 ## Foundation · ohana-421
 
 Diagonal face-time collision checks, revisioned checkpoint recovery, extracted runtime state validation, and full quality workflow required before Pages deployment.
+
+## Performance and control feel - ohana-422
+
+Symmetric camera anticipation, cleared pause action buffers, stable transient collections, offscreen particle culling and change-only experience UI. Multiplayer services remain deferred.

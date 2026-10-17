@@ -1,3 +1,4 @@
+import { compactLiveList } from "./runtime.js";
 const TAU = Math.PI * 2;
 
 const clamp = (v, a = 0, b = 1) =>
@@ -311,20 +312,16 @@ export class ExperienceDirector {
       this.lastBossPhase = 0;
     }
 
-    for (const item of this.impulses) item.life--;
-    this.impulses = this.impulses.filter((item) => item.life > 0);
+    compactLiveList(this.impulses, { tickLife: true });
 
     if (typeof document !== "undefined") {
-      document.body.dataset.experience =
-        experienceRank(combo, this.state.crit);
-
-      document.body.dataset.experienceMotion =
-        reduced ? "reduced" : "full";
-
-      document.body.classList.toggle(
-        "experience-intense",
-        combo >= 4 || !!boss
-      );
+      const rank = experienceRank(combo, this.state.crit);
+      const motion = reduced ? "reduced" : "full";
+      if (document.body.dataset.experience !== rank) document.body.dataset.experience = rank;
+      if (document.body.dataset.experienceMotion !== motion) document.body.dataset.experienceMotion = motion;
+      const intense = combo >= 4 || !!boss;
+      if (document.body.classList.contains("experience-intense") !== intense)
+        document.body.classList.toggle("experience-intense", intense);
     }
 
     this.updateUI(game);
@@ -344,24 +341,25 @@ export class ExperienceDirector {
       !!boss ||
       this.state.evoT > 0;
 
-    this.ui.classList.toggle("show", visible);
-    this.ui.setAttribute("aria-hidden", visible ? "false" : "true");
+    if (this.ui.classList.contains("show") !== visible) this.ui.classList.toggle("show", visible);
+    const hidden = visible ? "false" : "true";
+    if (this.ui.getAttribute("aria-hidden") !== hidden) this.ui.setAttribute("aria-hidden", hidden);
+    if (!visible) return;
 
     const rank = experienceRank(combo, this.state.crit);
 
     if (this.uiTitle) {
-      this.uiTitle.textContent = boss
-        ? "FASE " + (Number(boss.phase) || 1)
-        : rank;
+      const title = boss ? "FASE " + (Number(boss.phase) || 1) : rank;
+      if (this.uiTitle.textContent !== title) this.uiTitle.textContent = title;
     }
 
     if (this.uiNote) {
-      this.uiNote.textContent =
-        boss
+      const note = boss
           ? "REINA DEL NIDO"
           : combo >= 2
             ? "COMBO ×" + combo
             : "READY";
+      if (this.uiNote.textContent !== note) this.uiNote.textContent = note;
     }
 
     if (this.uiBar) {
@@ -375,7 +373,8 @@ export class ExperienceDirector {
         )
       );
 
-      this.uiBar.style.width = value + "%";
+      const width = Math.round(value) + "%";
+      if (this.uiBar.style.width !== width) this.uiBar.style.width = width;
     }
   }
 

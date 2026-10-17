@@ -1,3 +1,4 @@
+import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
@@ -39,7 +40,7 @@ import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
-import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
+import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
 import { canvasDpr,createFramePressureMonitor,initialCanvasPressure,createResolutionRecovery } from "./systems/frame-pressure.js";
 import { createRenderProfiler } from "./systems/render-profiler.js";
@@ -235,6 +236,7 @@ function setPaused(on) {
 if (game.finale && game.finale.t > 0) return;
 
 paused = !!on && game.running;
+clearBufferedActions(game.player);
 
 const pauseLayer = DOM.pause || document.getElementById("pause-overlay");
 
@@ -2526,18 +2528,17 @@ if (pr.owner === "player") {
   pr.life = 0;
 }
 }
-game.projectiles = game.projectiles.filter((pr) => pr.life > 0);
-game.bolts = game.bolts.filter((b) => --b.life > 0).slice(-MAX_RUNTIME_BOLTS);
-game.slashes = (game.slashes || []).filter((s) => --s.life > 0);
-if (game.slashes.length > 6) game.slashes.splice(0, game.slashes.length - 6);
-game.ghosts = game.ghosts.filter((g) => --g.life > 0);
+compactLiveList(game.projectiles);
+compactLiveList(game.bolts, { tickLife: true, max: MAX_RUNTIME_BOLTS });
+compactLiveList(game.slashes, { tickLife: true, max: MAX_RUNTIME_SLASHES });
+compactLiveList(game.ghosts, { tickLife: true });
 }
 function updateCam() {
 const p = game.player; if (!p) return;
 const vw = camW(), vh = camH();
 let lerp = 0.24;
-const look = p._dashGo > 0 ? 48 : Math.sign(p.vx || 0) * 18;
-let tx = p.x + p.w / 2 + (p.facing || 1) * look - vw / 2;
+const look = horizontalLook(p);
+let tx = p.x + p.w / 2 + look - vw / 2;
 let ty = p.y + p.h / 2 - vh / 2;
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
@@ -2683,7 +2684,7 @@ for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
-game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
+game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
@@ -3446,6 +3447,10 @@ state() {
   const boss = game.boss || game.enemies.find((e) => e.boss);
   return {
     running: !!game.running,
+    paused,
+    runtimeFaults: game.runtimeFaults || 0,
+    camera: { x: game.cam.x, y: game.cam.y },
+    bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,

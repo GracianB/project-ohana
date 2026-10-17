@@ -46,6 +46,9 @@ jobs:
       - name: V400 pause, audio and motion preferences
         run: node tests/browser/v400-experience.mjs
 
+      - name: Local gameplay, offline fonts and responsive controls
+        run: npm run test:browser:local
+
       - name: Browser E2E
         run: npm run test:browser
 
