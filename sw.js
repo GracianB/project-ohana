@@ -264,7 +264,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/evo-cine/presentation.js": "88e6239074420115cdacaba803365b46edcbebcd",
   "worlds/scenic-backdrops.js": "8fe1635a665889b030b4b7db34b8376fc08e0b09",
-  "play-interface.css": "881d6782438860df87c7be063828bd68ba46d00d",
+  "play-interface.css": "2c111fda7d648352542e6f9e3beb1c41965176a0",
   "fonts.css": "45263fe112608bd327a1c37cc6dd34a61103a055",
   "assets/fonts/fredoka-latin.woff2": "8d290e33894ad1c8d3a525017642e13107c237aa",
   "assets/fonts/fredoka-latin-ext.woff2": "e16cd42416e0fabe1062233bc6d282758f3842a4",

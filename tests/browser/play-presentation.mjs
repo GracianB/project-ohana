@@ -14,6 +14,8 @@ try {
    await page.setViewportSize({width,height});await page.waitForTimeout(120);
    const cards=await page.locator('#hud .hud-block').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,right:r.right,height:r.height};}));
    assert.ok(cards.every(r=>r.x>=0&&r.right<=width+1&&r.height<140),name+': HUD '+JSON.stringify(cards));
+   const tracks=await page.locator('.ability-slot .cd').evaluateAll(nodes=>nodes.map(n=>({track:n.getBoundingClientRect().height,fill:n.firstElementChild.getBoundingClientRect().height})));
+   assert.ok(tracks.every(r=>r.track===0?r.fill===0:r.track<=4&&r.fill<=r.track+1),name+': cooldown tracks must not expand into blocks '+JSON.stringify(tracks));
    await page.screenshot({path:`test-results/presentation/${name}-play.png`});
    await page.locator('#btn-map').click();
    await page.locator('#map-overlay.open').waitFor();

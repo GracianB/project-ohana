@@ -38,7 +38,7 @@ body.playing #ability-bar{bottom:14px;gap:6px;padding:0;border:0;background:none
 body.playing .ability-slot{min-width:106px;max-width:142px;padding:9px 11px;background:#102b34eb;border:1px solid #b7d7bb2e;border-radius:10px;box-shadow:none;animation:none;transform:none;}
 body.playing .ability-slot[data-supreme="1"]{min-width:124px;border-color:#e6c98d55;background:#253a32f2;}
 body.playing .ability-slot .key{font-size:10px;color:#d0d9b6;}.ability-slot .name{font:500 11px Outfit,sans-serif;}
-body.playing .ability-slot .cd{height:3px;background:#c9d6c015;margin-top:6px;}.ability-slot .cd i{background:#a9d7b2;box-shadow:none;}
+body.playing .ability-slot .cd{display:block;width:100%;height:3px;background:#c9d6c015;margin-top:6px;}.ability-slot .cd i{background:#a9d7b2;box-shadow:none;}
 body.playing #combo-chip{border-radius:50px;background:#193e3add;border:1px solid #bad3a455;box-shadow:none;font-family:Fredoka,sans-serif;}
 body.playing #touch .col.move,body.playing #touch .col.act{background:#102b3466;border:1px solid #bdd8bd22;border-radius:20px;box-shadow:none;backdrop-filter:none;}
 body.playing #touch .touch-btn{background:#15353dd9;border:1px solid #bdd8bd38;border-radius:15px;color:#e5e9d1;box-shadow:0 3px 0 #071f27aa;backdrop-filter:none;transition:transform .08s,background .08s;}
