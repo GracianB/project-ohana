@@ -41,22 +41,24 @@ export function familyDuetDefinition(s){
   color:friend.color||"#fff6cf"});
 }
 export const FAMILY_DUET_LENGTH=120;
+export const SURPRISE_DUET_LENGTH=360;
+const duetLength=s=>s?.surprise===true?SURPRISE_DUET_LENGTH:FAMILY_DUET_LENGTH;
 export const FAMILY_DUET_BEATS=Object.freeze([42,66,90]);
 const validNumber=n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<=20000;
 const center=e=>({x:e.x+(e.w||0)/2,y:e.y+(e.h||0)/2});
 
 export function readFamilyDuet(s){
  if(!s||typeof s!=="object"||readGuestOrigin(s)===null||!familyDuetDefinition(s)||!validNumber(s.x)||!validNumber(s.y)||
- !Number.isInteger(s.age)||s.age<0||s.age>=FAMILY_DUET_LENGTH||
+ !Number.isInteger(s.age)||s.age<0||s.age>=duetLength(s)||
  !Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||
  (s.bondRank!==undefined&&(!Number.isInteger(s.bondRank)||s.bondRank<1||s.bondRank>3)))return null;
  return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),...(s.ally===undefined?{}:{ally:s.ally}),...(s.bondRank===undefined?{}:{bondRank:s.bondRank}),hero:s.hero,x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing};
 }
 export function familyDuetPose(s,reduce=false){
  const data=familyDuetDefinition(s);if(!data)return null;
- const age=clamp(s.age,0,119),evo=clamp(s.evo,0,4),face=s.facing===-1?-1:1;
+ const age=clamp(s.age,0,duetLength(s)-1),evo=clamp(s.evo,0,4),face=s.facing===-1?-1:1;
  const arrival=Math.min(1,age/18);
- const exit=age>=106?Math.max(0,1-(age-106)/14):1;
+ const exit=Math.min(1,(duetLength(s)-age)/14);
  const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
  const guest=guestPerformance({...s,age,evo,facing:face},data.ally,reduce);
@@ -90,7 +92,7 @@ export function updateFamilyDuet(game,hit,heal){
  const s=game?._familyDuet,p=game?.player;
  if(!s){if(p)p._familyDuetT=0;return;}
  const def=familyDuetDefinition(s);
- if(!p||p.dead||!def||p.id!==s.hero||String(game.roomId||"hub")!==s.room||s.age>=FAMILY_DUET_LENGTH){
+ if(!p||p.dead||!def||p.id!==s.hero||String(game.roomId||"hub")!==s.room||s.age>=duetLength(s)){
   game._familyDuet=null;if(p)p._familyDuetT=0;
   if(game._assist?.heroId===def?.ally)game._assist.t=0;
   return;
@@ -129,7 +131,7 @@ export function updateFamilyDuet(game,hit,heal){
   if(def.kind==="maw")p._specialGhostT=Math.max(p._specialGhostT||0,24);
   if(applied>0)game.fx?.emit?.(s.x+s.facing*54,s.y-30,{color:def.color,count:Math.min(6,applied+2),size:3,up:1,speed:2,life:13});
  }
- p._familyDuetAge=s.age;p._familyDuetT=FAMILY_DUET_LENGTH-s.age;
+ p._familyDuetAge=s.age;p._familyDuetT=duetLength(s)-s.age;
  if(game._assist?.heroId===def.ally)game._assist.t=(s.hero==="yomi"?240:FAMILY_DUET_LENGTH)-s.age;
  s.age++;
 }

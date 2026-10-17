@@ -1,3 +1,15 @@
+## V426 · Chispa, cinco transformaciones y nube compañera (ohana-426)
+
+Nuevo renderer de Chispa: bebé, mascota bípeda, Feral cuadrúpedo, Cúmulo pesado y guardián Tempestad. Cambian la anatomía, la marcha y el carácter de cada forma. Antenas, cola viva, ojos y gestos propios sustituyen al ajolote eléctrico anterior. La evolución cuenta una travesura con una chispa fugitiva y el nacimiento de una nube compañera. J conecta blancos con descargas limpias, K deja semillas de luz y L incorpora una nube expresiva con preparación y descarga sobre la posición previamente señalada. El aviso no hace daño y las réplicas visuales validan sus coordenadas.
+
+## V425 · Evoluciones escenificadas y profundidad visual (ohana-425)
+
+Cuarenta evoluciones con el mismo actor Canvas que la partida, tres actos, escala adaptable al ancho y alto, nombres reales, mensaje propio y cinco pasos visibles. Botón explícito para continuar, teclas deliberadas y restauración de foco; modo suave sin salto ni cámara temblorosa. Diez fondos con planos de paisaje y paralaje, paletas de profundidad y motivos de cada bioma; se retiran las superposiciones del personaje que invadían el escenario. Enemigos con estado anclado a su posición física, barras acotadas solo cuando aportan información, marca de élite y reducción de destellos. Las colisiones y los tiempos de daño se conservan.
+
+## V424 · Bocadillos, siluetas y sorpresa prolongada (ohana-424)
+
+La frase activa vuelve a ser un bocadillo anclado a su hablante y limitado al viewport. Vida y experiencia muestran sus cifras; la ficha indica la forma y el progreso sin duplicar salud. Auditoría de las 50 siluetas en ambos modos visuales, escala óptica uniforme sin cambiar colisiones y anatomía progresiva de Chispin con continuidad de color. Las U sorpresa duran seis segundos: tres golpes L originales, vuelta cómica por la pantalla, reverencia y despedida visual sin daño adicional. Pruebas de límites, duración, móviles y dibujo de todas las formas.
+
 ## V420 · Bienvenida dirigida y conversaciones legibles (ohana-420)
 
 Once escenas: diez protagonistas y una coda con enemigos reales en un islote apartado. Cada héroe prepara su broma, la ejecuta con su rig original y recibe una respuesta de otro familiar. Las actuaciones se ralentizan para acompañar el guion y la cámara enfoca suavemente; los bocadillos fugaces se reservan al modo de inspección de fotogramas. Una sola frase principal, cuatro a seis segundos según longitud, tres intervenciones por escena y 1,2 segundos de descanso. Pausa real, anterior, siguiente, Escape, controles de teclado, movimiento suave y repetición desde el menú. El campamento se conserva como destino; no se altera la campaña ni su guardado.
@@ -2000,3 +2012,15 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Auditoría Node de 2.700 hitboxes (1+ millones de comprobaciones espaciales frente a las reglas anteriores), 2.700 ilustraciones de invitado, muerte/cambio de sala y cinco formas. Chromium: 1.350 escenas reales Canvas y diez galerías por compañero.
 - Se mantienen la U personalizada y la U artesanal histórica de Kilo, Stitcho, Chispín y Michi.
 - Versión offline: `ohana-338`.
+
+## Foundation · ohana-421
+
+Diagonal face-time collision checks, revisioned checkpoint recovery, extracted runtime state validation, and full quality workflow required before Pages deployment.
+
+## Performance and control feel - ohana-422
+
+Symmetric camera anticipation, cleared pause action buffers, stable transient collections, offscreen particle culling and change-only experience UI. Multiplayer services remain deferred.
+
+## Play presentation - ohana-423
+
+Illustrated interactive atlas with room details and real outgoing paths. Reworked compact player HUD, touch controls, instructions and contextual messages. Restrained impact effects and motion.

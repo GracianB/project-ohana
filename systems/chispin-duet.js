@@ -59,6 +59,6 @@ export function readChispinEffects(list){
  const v={kind:f.kind,life:f.life};
  if(f.kind==='chain'){if(!Array.isArray(f.pts)||f.pts.length<2||f.pts.length>6||f.pts.some(b=>!b||![b.x,b.y].every(valid)))return null;v.pts=f.pts.map(b=>({x:b.x,y:b.y}));}
  if(f.kind==='trail'){if(![f.x1,f.y1,f.x2,f.y2].every(valid))return null;for(const k of ['x1','y1','x2','y2'])v[k]=f[k];}
- if(f.kind==='storm'){if(![f.x,f.y].every(valid)||!Array.isArray(f.bolts)||f.bolts.length>3||f.bolts.some(b=>!b||![b.x,b.y1,b.y2].every(valid)||!Number.isFinite(b.life)||b.life<=0||b.life>10))return null;v.x=f.x;v.y=f.y;v.next=clamp(Number(f.next)||0,0,20);v.bolts=f.bolts.map(b=>({x:b.x,y1:b.y1,y2:b.y2,life:b.life}));}out.push(v);
+ if(f.kind==='storm'){if(![f.x,f.y].every(valid)||!Array.isArray(f.bolts)||f.bolts.length>3||f.bolts.some(b=>!b||![b.x,b.y1,b.y2].every(valid)||!Number.isFinite(b.life)||b.life<=0||b.life>10))return null;v.x=f.x;v.y=f.y;v.next=clamp(Number(f.next)||0,0,20);v.bolts=f.bolts.map(b=>({x:b.x,y1:b.y1,y2:b.y2,life:b.life}));}if(f.kind==='storm'&&f.forecast!==undefined){const p=f.forecast;if(!p||![p.x,p.y1,p.y2].every(valid))return null;v.forecast={x:p.x,y1:p.y1,y2:p.y2};}out.push(v);
  }return out;
 }

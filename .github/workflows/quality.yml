@@ -1,6 +1,7 @@
 name: quality
 
 on:
+  workflow_call:
   pull_request:
     # Stacked character PRs also need Browser/Visual/Release gates.
     branches: [main, 'feat/**', 'fix/**']
@@ -28,7 +29,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Install Chromium and Firefox
         run: npx playwright install --with-deps chromium firefox
@@ -44,6 +45,15 @@ jobs:
 
       - name: V400 pause, audio and motion preferences
         run: node tests/browser/v400-experience.mjs
+
+      - name: Local gameplay, offline fonts and responsive controls
+        run: npm run test:browser:local
+
+      - name: Illustrated atlas, readable guide and compact play interface
+        run: npm run test:browser:presentation
+
+      - name: Story bubbles, character sizes and surprise encore
+        run: npm run test:browser:polish && npm run test:browser:characters && npm run test:browser:direction && npm run test:browser:chispa
 
       - name: Browser E2E
         run: npm run test:browser
@@ -188,7 +198,7 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Install selected browser
         run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: Six real heroes as host and guest

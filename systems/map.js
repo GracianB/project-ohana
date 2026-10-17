@@ -23,7 +23,7 @@ export const ROOMS = {
   hub: {
     id: "hub", name: "Claro Ohana", short: "Claro", world: 6,
     doors: { right: "beach", left: "cave", up: "ridge", down: null },
-    hint: "Piso bajo. ESTE costa · OESTE cueva · centro ARRIBA cumbre. Catapulta ESTE → Costa.",
+    hint: "La costa te espera al este. Explora la cueva al oeste o sube hacia la cumbre.",
     plats: [[0, 810, 1600, 90], [80, 680, 160, 18], [300, 620, 150, 18], ...stairs(760)],
     foes: [[620, 200, "cucaracho"], [980, 200, "cucaracho"], [1180, 200, "phosquito"]],
     orbs: [[400, 500], [900, 200]],
@@ -33,7 +33,7 @@ export const ROOMS = {
     id: "beach", name: "Costa Hoku", short: "Costa", world: 0,
     doors: { left: "hub", right: "jungle", up: null, down: "reef" },
     pit: true,
-    hint: "Pozo central BAJA al Arrecife (agua). Forma 3 abre ESTE a la jungla. Catapulta OESTE → Claro.",
+    hint: "El descenso central lleva al arrecife. Al este, la jungla se abre en la forma 3.",
     plats: [
       [0, 810, 600, 90],
       [880, 810, 720, 90],
@@ -53,7 +53,7 @@ export const ROOMS = {
     doors: { left: "beach", right: null, up: null, down: "volcano" },
     needEvo: 2,
     pit: true,
-    hint: "Fila media, ESTE. Hueco central ABAJO = Caldera (forma 4). BH → Caldera.",
+    hint: "Explora las copas. El descenso central lleva a la caldera a partir de la forma 4.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [180, 680, 150, 18], ...stairs(200)],
     foes: [[360, 440, "libelula"], [820, 480, "mosquito"], [1280, 460, "abeja"], [640, 200, "rana", true]],
     orbs: [[520, 420], [800, 180]],
@@ -62,7 +62,7 @@ export const ROOMS = {
   cave: {
     id: "cave", name: "Cueva Azul", short: "Cueva", world: 8,
     doors: { right: "hub", left: "lab", up: null, down: null },
-    hint: "OESTE lab (forma 2). ESTE claro.",
+    hint: "El laboratorio está al oeste: necesitas la forma 2. Al este vuelves al Claro.",
     plats: [[0, 810, 1600, 90], [180, 660, 160, 18], [480, 520, 150, 18], [880, 620, 180, 18], [1180, 470, 150, 18]],
     foes: [[360, 200, "planta"], [720, 280, "murcielago"], [1100, 240, "murcielago"], [480, 200, "arana", true], [1240, 200, "arana"], [1040, 200, "phosquito"]],
     orbs: [[500, 420], [1200, 400]]
@@ -71,7 +71,7 @@ export const ROOMS = {
     id: "lab", name: "Alien Lab", short: "Lab", world: 4,
     doors: { right: "cave", left: null, up: null, down: null },
     needEvo: 1,
-    hint: "Solo salida ESTE. Si llueve, el paraguas está en el suelo.",
+    hint: "Busca el paraguas si empieza a llover. La salida del este vuelve a la cueva.",
     plats: [[0, 810, 1600, 90], [180, 660, 180, 18], [480, 520, 180, 18], [860, 380, 180, 18], [1220, 540, 180, 18]],
     foes: [[400, 200, "planta"], [820, 200, "phosquito"], [1240, 200, "cucaracho"], [640, 200, "cucaracho"], [1000, 280, "arana"], [280, 280, "murcielago"]],
     orbs: [[520, 440], [900, 300]]
@@ -80,7 +80,7 @@ export const ROOMS = {
     id: "ridge", name: "Cumbre", short: "Cumbre", world: 9,
     doors: { down: "hub", right: "space", left: null, up: null },
     pit: true,
-    hint: "Hueco central ABAJO = Claro. ESTE = órbita.",
+    hint: "Al este puedes alcanzar la órbita. El descenso central te devuelve al Claro.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [200, 660, 160, 18], [500, 520, 150, 18], [1040, 620, 160, 18]],
     foes: [[480, 200, "phosquito"], [860, 200, "cucaracho"], [1200, 200, "cucaracho"], [320, 280, "murcielago"], [1040, 240, "murcielago"], [700, 200, "arana"]],
     orbs: [[720, 420], [1100, 280]]
@@ -90,7 +90,7 @@ export const ROOMS = {
     doors: { left: "ridge", down: "hub", right: null, up: null },
     needEvo: 1,
     pit: true,
-    hint: "Pozo central ABAJO = Claro. BH secreto → Arrecife abajo.",
+    hint: "Un vórtice esconde una ruta al arrecife. El descenso central vuelve al Claro.",
     plats: [[0, 810, 680, 90], [920, 810, 680, 90], [220, 640, 150, 18], [560, 480, 150, 18], [1100, 360, 160, 18]],
     foes: [[420, 280, "ufo", true], [980, 220, "ufo"], [640, 200, "phosquito"], [1280, 300, "brasita"]],
     orbs: [[640, 390], [1120, 260]],
@@ -99,7 +99,7 @@ export const ROOMS = {
   reef: {
     id: "reef", name: "Arrecife Abismo", short: "Arrecife", world: 5,
     doors: { left: null, right: null, up: "beach", down: null },
-    hint: "Arriba = Costa. Peces y medusas (sueltan orbes). BH puede seguir a Órbita como atajo.",
+    hint: "La catapulta te devuelve a la costa. Explora el agua para encontrar cristales y un atajo a la órbita.",
     plats: [[0, 810, 1600, 90], [200, 660, 190, 18], [560, 520, 190, 18], [920, 640, 190, 18], [1220, 480, 190, 18], [740, 360, 180, 18]],
     foes: [[420, 300, "medusa"], [1040, 260, "medusa"], [280, 400, "pez"], [620, 360, "pez"], [900, 440, "pez"], [1100, 400, "pez"], [560, 340, "anguila", true], [1280, 380, "anguila"]],
     orbs: [[300, 560], [640, 440], [1000, 560], [1300, 400], [820, 280]],
@@ -123,7 +123,7 @@ export const ROOMS = {
     id: "boss", name: "Nido Final", short: "Nido", world: 7,
     doors: { left: "volcano", right: null, up: null, down: null },
     needEvo: 3,
-    hint: "El monstruo está aquí. Prepárate. OESTE huye.",
+    hint: "La Reina te espera. Esquiva sus ataques y golpea durante sus descansos.",
     plats: [[0, 810, 1600, 90], [180, 620, 180, 18], [700, 500, 200, 18], [1180, 620, 180, 18]],
     foes: [],
     orbs: [[800, 420]],

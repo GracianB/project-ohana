@@ -1,3 +1,4 @@
+import {drawEvolutionPresentation} from "./evo-cine/presentation.js";
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
 import { sfx } from "../engine/audio.js";
@@ -35,7 +36,7 @@ function ensureStage() {
   el.setAttribute("aria-modal", "true");
   el.setAttribute("aria-labelledby", "evo-description");
   el.setAttribute("aria-live", "assertive");
-  el.innerHTML = '<canvas aria-hidden="true"></canvas><p class="evo-sr" id="evo-description"></p>';
+  el.innerHTML = '<canvas aria-hidden="true"></canvas><p class="evo-sr" id="evo-description"></p><button type="button" class="evo-skip">Continuar · Esc</button>';
   if (!el.isConnected) document.body.appendChild(el);
   const fc = fullCanvas(el.querySelector("canvas"));
   stage = { el, fc, sr: el.querySelector(".evo-sr") };
@@ -93,7 +94,7 @@ export function playEvolution(detail = {}) {
   const st = ensureStage();
   if (running) running.stop(true);
   const cineMod = EVO_CINE_BY_ID[detail.id || "kilo"];
-  if (!detail._classic && cineMod && typeof cineMod.drawEvoCine === "function" && !reducedMotion()) {
+  if (!detail._classic && cineMod && typeof cineMod.drawEvoCine === "function" ) {
     if (playCharacterCine(st, detail, cineMod)) return;
   }
 
@@ -534,8 +535,8 @@ export function playEvolution(detail = {}) {
 
   function onSkip(e) {
     const t = (performance.now() - t0) / 1000;
-    if (t < 0.8) return;
-    if (e && e.type === "keydown") { e.preventDefault(); e.stopPropagation(); }
+    if (t < 0.8 && e?.type!=="click") return;
+    if (e && e.type === "keydown") { if (!["Escape","Enter"," "].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
     if (skipAt < 0) skipAt = t;
   }
 
@@ -545,7 +546,7 @@ export function playEvolution(detail = {}) {
     if (failSafe) clearTimeout(failSafe);
     cancelAnimationFrame(raf);
     removeEventListener("keydown", onSkip, true);
-    el.removeEventListener("pointerdown", onSkip);
+    el.querySelector(".evo-skip").removeEventListener("click", onSkip);
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
     el.classList.remove("show", "finale");
@@ -558,7 +559,7 @@ export function playEvolution(detail = {}) {
   }
 
   addEventListener("keydown", onSkip, true);
-  el.addEventListener("pointerdown", onSkip);
+  el.querySelector(".evo-skip").addEventListener("click", onSkip);
   running = { stop: finish };
   loadFonts();
   failSafe = setTimeout(() => finish(true), Math.max(3500, (T.end + 1.5) * 1000));
@@ -595,7 +596,7 @@ function playCharacterCine(st, detail, mod) {
       ctx.save();
       ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
       ctx.clearRect(0, 0, fc.W, fc.H);
-      mod.drawEvoCine(ctx, fc.W, fc.H, Math.min(t, dur), from, to);
+      drawEvolutionPresentation(ctx, fc.W, fc.H, id, evo, Math.min(t, dur), reducedMotion());
       ctx.restore();
     } catch (err) {
       try { ctx.restore(); } catch (_) {}
@@ -607,8 +608,8 @@ function playCharacterCine(st, detail, mod) {
     raf = requestAnimationFrame(frame);
   }
   function onSkip(e) {
-    if ((performance.now() - t0) < 800) return;
-    if (e && e.type === "keydown") { e.preventDefault(); e.stopPropagation(); }
+    if ((performance.now() - t0) < 800 && e?.type!=="click") return;
+    if (e && e.type === "keydown") { if (!["Escape","Enter"," "].includes(e.key)) return; e.preventDefault(); e.stopPropagation(); }
     skipAt = 1;
   }
   function finish(silent) {
@@ -616,7 +617,7 @@ function playCharacterCine(st, detail, mod) {
     finished = true;
     clearTimeout(failSafe); cancelAnimationFrame(raf);
     removeEventListener("keydown", onSkip, true);
-    el.removeEventListener("pointerdown", onSkip);
+    el.querySelector(".evo-skip").removeEventListener("click", onSkip);
     ctx.setTransform(fc.dpr, 0, 0, fc.dpr, 0, 0);
     ctx.clearRect(0, 0, fc.W, fc.H);
     el.classList.remove("show", "finale");
@@ -629,7 +630,7 @@ function playCharacterCine(st, detail, mod) {
   }
   function playClassic() { playEvolution({ ...detail, _classic: true }); }
   addEventListener("keydown", onSkip, true);
-  el.addEventListener("pointerdown", onSkip);
+  el.querySelector(".evo-skip").addEventListener("click", onSkip);
   running = { stop: finish };
   failSafe = setTimeout(() => finish(), (dur + 2) * 1000);
   raf = requestAnimationFrame(frame);

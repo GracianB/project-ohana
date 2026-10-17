@@ -38,7 +38,7 @@ test('V46 input conserva teclas mantenidas y evita movimiento fantasma', () => {
   assert.match(sw, /\.\/engine\/input\.js\?v=" \+ VERSION/);
   assert.match(sw, /const isScript = url\.pathname\.endsWith\("\.js"\)/);
   assert.ok(index.includes("?v=" + version), 'index.html debe usar la misma versión de caché');
-  assert.match(game, /Math\.sign\(p\.vx \|\| 0\) \* 18/);
+  assert.match(fs.readFileSync("./engine/camera.js", "utf8"), /Math\.sign\(player\.vx \|\| 0\) \* 18/);
 });
 
 
@@ -250,13 +250,13 @@ test('phase 29: runtime integrity guard protege estado crítico y colecciones', 
   const runtime = fs.readFileSync('./systems/runtime.js', 'utf8');
   assert.match(runtime, /export const MAX_RUNTIME_SAFE = Number\.MAX_SAFE_INTEGER/);
   assert.match(runtime, /export function boundedFinite\(value, fallback, min, max\)/);
-  assert.match(game, /function sanitizeRuntimeState\(\)/);
-  assert.match(game, /sanitizeRuntimeState\(\);/);
-  assert.match(game, /game\.score = boundedFinite\(game\.score, 0, 0, MAX_RUNTIME_SAFE\)/);
-  assert.match(game, /p\.health = boundedFinite\(p\.health/);
-  assert.match(game, /e\.hp = boundedFinite\(e\.hp/);
-  assert.match(game, /pr\.dmg = boundedFinite\(pr\.dmg/);
-  assert.match(game, /if \(typeof game\.rng !== "function"\) game\.rng = Math\.random/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /export function sanitizeRuntimeState\(game\)/);
+  assert.match(game, /sanitizeRuntimeState\(game\);/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /game\.score = boundedFinite\(game\.score, 0, 0, MAX_RUNTIME_SAFE\)/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /p\.health = boundedFinite\(p\.health/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /e\.hp = boundedFinite\(e\.hp/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /pr\.dmg = boundedFinite\(pr\.dmg/);
+  assert.match(fs.readFileSync("./systems/runtime-state.js", "utf8"), /if \(typeof game\.rng !== "function"\) game\.rng = Math\.random/);
   assert.equal((game.match(/game\.score\s*=\s*\(Number\(game\.score\)/g) || []).length, 0);
 });
 
@@ -590,7 +590,7 @@ test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', 
   assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
   assert.match(source, /setItem\(SAVE_KEY, raw\)/);
   assert.match(source, /raw\.v != null && raw\.v !== 2/);
-  assert.match(source, /return parse\(store\.getItem\(SAVE_TMP_KEY\)\)/);
+  assert.match(source, /revision\(temporary\) > revision\(primary\)/);
 });
 
 
@@ -682,7 +682,7 @@ test('phase 53: los fallos inyectados siguen en modo fail-closed y recuperable',
   assert.match(game, /injectFault\(kind = "nan"\)/);
   assert.match(game, /game\.score = NaN/);
   assert.ok(game.includes("pushRuntime(game.projectiles"), "fault injection debe respetar pushRuntime");
-  assert.match(game, /sanitizeRuntimeState\(\)/);
+  assert.match(game, /sanitizeRuntimeState\(game\)/);
   assert.match(game, /containRuntimeFault\("simulation", error\)/);
 });
 

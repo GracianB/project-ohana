@@ -12,7 +12,7 @@ import {
   FONT_BODY, FONT_DISPLAY,
 } from "./cinema-kit.js";
 import { ROSTER } from "../characters/roster.js";
-import { canonId } from "./save.js";
+import { canonId, saveStore } from "./save.js";
 import { sfx } from "../engine/audio.js";
 import { WELCOME_CAST_ORDER, welcomeCastSpot, welcomeActorFit } from "./intro-cast-fit.js";
 import { dragonWelcomeBeat, drawDragonWelcomeFX } from "./intro-dragon-stage.js";
@@ -272,7 +272,8 @@ export function playTitleIntro(options = {}) {
 
   let bubbleBoxes = [];
   function comicBubble(text,x,y,k=1,accent="#fff6c8",tail="left") {
-    if (activeDirection) return;
+    // The active speaker has a DOM speech bubble; avoid unrelated timed quips.
+    if (activeDirection?.line) return;
     if (k <= 0.02) return;
     ctx.save();
     ctx.globalAlpha=clamp(k,0,1);
@@ -755,6 +756,12 @@ export function playTitleIntro(options = {}) {
       if(isE2E)el.dataset.storyTime=storyTime.toFixed(2);
     }
     el.querySelector(".oi-story-dialogue").hidden=!direction;
+    const dialogue=el.querySelector(".oi-story-dialogue");
+    const spot=line&&CAST.includes(line.speaker)?welcomeCastSpot(line.speaker,L.W,L.floor,L.heroH):null;
+    const bubbleWidth=Math.min(300,L.W-28),bubbleHeight=dialogue.offsetHeight||140;
+    const bx=clamp(spot?.x??L.W*.78,bubbleWidth/2+14,L.W-bubbleWidth/2-14);
+    const by=clamp((spot?.foot??L.H*.48)-L.heroH*1.08,bubbleHeight+18,L.H-170);
+    dialogue.style.left=bx+"px";dialogue.style.top=by+"px";
     ctx.save();ctx.clearRect(0,0,L.W,L.H);
     island(direction?storyTime:t,L);
     // Their own tiny island: real enemy renderers, no AI, collision or campaign state.
@@ -829,7 +836,7 @@ export function playIntro(kind, name, done, id) {
   let evo = 0;
   if (kind === "resume") {
     try {
-      const sv = JSON.parse(localStorage.getItem("ohana") || "null");
+      const sv = saveStore.readRaw();
       if (sv && canonId(sv.id) === def.id) evo = clamp(Number(sv.evo) || 0, 0, 4);
     } catch (_) {}
   }

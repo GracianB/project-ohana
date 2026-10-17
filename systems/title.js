@@ -476,7 +476,7 @@ const def = ROSTER.find((r) => r.id === selectedId);
 const name = def ? def.name : "Ohana";
 if (kind === "new") {
   try {
-    localStorage.removeItem("ohana");
+    saveStore.clear();
     localStorage.removeItem("ohana-resume");
   } catch (e) {}
 }

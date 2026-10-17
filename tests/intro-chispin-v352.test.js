@@ -36,7 +36,7 @@ test("V352 reduced motion disables body animation and forward effects without al
 });
 
 test("V352 all five real Chispin anatomies retain distinct connected gestures",()=>{
- assert.deepEqual(CHISPIN_VISUAL_H,[62,72,82,90,102]);
+ assert.deepEqual(CHISPIN_VISUAL_H,[55,70,85,102,120]);
  assert.equal(typeof chispinFootwork,"function");
  assert.equal(WELCOME_CAST_ORDER.filter(id=>id==="chispin").length,1);
  for(let form=0;form<5;form++){
@@ -105,7 +105,7 @@ test("V352 no substituted drawing, no gameplay rewrite and seven earlier persona
   "function opts(","function stormSoul(","function paw(","function footOval(",
   "function drawChispinFootwork(","function cloud(","function bolt("])
   assert.ok(art.includes(component),"do not remove original "+component);
- assert.match(wrapper,/export \{default\} from "\.\/pikachu\.js"/);
+ assert.match(wrapper,/export \{default\} from "\.\/chispa\.js"/);
  assert.match(art,/const welcome=chispinWelcomeRig\(pose,f\)/);
  assert.match(art,/o\.mouthSpark=0;o\.skyBolt=0;o\.whip=0/);
  assert.match(intro,/chispinWelcomeBeat\(loop,reduce\)/);

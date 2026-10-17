@@ -7,7 +7,7 @@ import { ART } from "./art/index.js";
 import { drawKineticSignature } from "./kinetic-stagecraft.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
 import { FRITA_VISUAL_H } from "./art/frita.js";
-import { CALIBRATED_VISUAL_H } from "./visual-size.js";
+import { CALIBRATED_VISUAL_H, OPTICAL_SCALE } from "./visual-size.js";
 import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
@@ -827,10 +827,10 @@ drawLocomotionFX(ctx, H, color, pose, t);
 drawMasteryMotionFX(ctx, p, H, t);
 drawLandingImpact(ctx, H, color, pose);
 drawAttackFX(ctx, H, color, pose);
-drawEvolutionCombatFX(ctx, p, H, pose, t);
+if(p.id!=="chispin")drawEvolutionCombatFX(ctx, p, H, pose, t);
 // Independent, low-cost character acting layered atop the original art.
 drawKineticSignature(ctx,p,H,pose,t,reduceMotion);
-drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
+if(p.id!=="chispin")drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
 if (pose.state === "jump" && pose.stretch > 0.12) {
 ctx.save();
 ctx.globalAlpha = 0.22 + pose.stretch * 0.18;
@@ -1250,6 +1250,7 @@ const calibrated = CALIBRATED_VISUAL_H[p.id];
 if (calibrated) H = calibrated[evo] * (p.visualScale || 1);
 if (getLook() === "paint" && !calibrated && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
 if (p.id === "frita" && !p._duetActor) H = FRITA_VISUAL_H[evo] * (p.visualScale || 1); // Frita: altura propia también en look "paint"
+H *= OPTICAL_SCALE[p.id]?.[evo] || 1;
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
 if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 
@@ -1286,8 +1287,8 @@ drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
 ctx.scale(facing, 1);
 ctx.translate(recoilX + lunge, -formLift);
 
-if (evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
-drawFlavor(ctx, p.id, H, t, evo, false);
+if (p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
+if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);
 if (moving) drawDust(ctx, H, t, speed);
 
 const s = H / 100;
@@ -1319,8 +1320,8 @@ catch (err) {
 }
 ctx.restore();
 
-drawFlavor(ctx, p.id, H, t, evo, true);
-drawEvolutionSignatureFX(ctx, p, H, pose, t);
+if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
+if(p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
 if (burstK > 0) {
 drawBurst(ctx, H, color, burstK);

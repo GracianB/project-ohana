@@ -1,3 +1,4 @@
+import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
 import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
 import {DEFAULT_U_PARTNERS,chooseUPartner,rollUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
@@ -175,7 +176,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2) {
+if (index === 2 && p.id !== "chispin") {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -1210,7 +1211,7 @@ boom(g, x0 + p.w / 2, y0 + p.h / 2, "#fff3a0", 10, { star: true });
 boom(g, cx(p), cy(p), "#ffe14a", 10, { star: true });
 },
 storm(g, p, evo) {
-add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, next: 12, bolts: [], dmg: (20 + evo * 2) * pw(p), vx: 0 });
+add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, bolts: [], dmg: (20 + evo * 2) * pw(p), vx: 0 });
 boom(g, cx(p), p.y - 60, "#9cf", 10);
 },
 
@@ -1895,11 +1896,18 @@ f.x += f.vx;
 f.y += (ty - f.y) * 0.05;
 for (const b of f.bolts) b.life--;
 f.bolts = f.bolts.filter((b) => b.life > 0);
-if (--f.next <= 0 && f.life > 8) {
+f.next--;
+if(f.next===7&&f.life>15){
+ const bx=f.x+(gameRand(g)-.5)*30;
+ const ground=groundBelow(g,bx,f.y+20);
+ f.forecast={x:bx,y1:f.y+16,y2:ground===null?f.y+400:ground};
+}
+if (f.next <= 0 && f.life > 8) {
   f.next = 20;
-  const bx = f.x + (gameRand(g) - 0.5) * 30;
-  let by = groundBelow(g, bx, f.y + 20);
-  if (by === null) by = f.y + 400;
+  const bx = f.forecast?.x ?? f.x;
+  let by = f.forecast?.y2 ?? groundBelow(g,bx,f.y+20);
+  if(by===null)by=f.y+400;
+  delete f.forecast;
   let struck = false;
   for (const en of g.enemies) {
     if (!canHit(en)) continue;
@@ -3006,53 +3014,10 @@ for (let i = 0; i < f.n; i++) {
   ctx.beginPath(); ctx.arc(px - 3, py - 4, 1.4, 0, TAU); ctx.arc(px + 3, py - 4, 1.4, 0, TAU); ctx.fill();
 }
 },
-chain(ctx, f, cam) {
-// V371 Chispín J: 0,5 s legible — rayo grueso con borde naranja, núcleo blanco y ¡ZAP! en cada blanco.
-const k = f.life / (f.max || 18);
-ctx.globalAlpha = Math.max(0.2, k);
-for (let i = 0; i < f.pts.length - 1; i++) {
-  const a = f.pts[i], b = f.pts[i + 1];
-  const ax = a.x - cam.x, ay = a.y - cam.y, bx = b.x - cam.x, by = b.y - cam.y;
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ff9a1a", 6 * k + 2);
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ffe14a", 3.4 * k + 1);
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ffffff", 1.2);
-  ctx.strokeStyle = "#fff6a0"; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.arc(bx, by, 10 + (1 - k) * 22, 0, TAU); ctx.stroke();
-  if (k > 0.45) {
-    ctx.font = "900 13px system-ui,sans-serif"; ctx.textAlign = "center";
-    ctx.lineWidth = 3; ctx.strokeStyle = "#5a3a00"; ctx.strokeText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
-    ctx.fillStyle = "#fff36a"; ctx.fillText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
-  }
-}
-},
-trail(ctx, f, cam, t) {
-const k = f.life / 42;
-ctx.globalAlpha = k;
-zig(ctx, f.x1 - cam.x, f.y1 - cam.y, f.x2 - cam.x, f.y2 - cam.y, 16, 10, "#ffe14a", 2.4);
-zig(ctx, f.x1 - cam.x, f.y1 - cam.y + 8, f.x2 - cam.x, f.y2 - cam.y + 8, 12, 8, "#7ecbff", 1.4);
-},
-storm(ctx, f, cam, t) {
-const x = f.x - cam.x, y = f.y - cam.y;
-const fade = Math.min(1, f.life / 15);
-ctx.globalAlpha = fade;
-ctx.strokeStyle = "rgba(160,200,255,.55)";
-ctx.lineWidth = 1.5;
-for (let i = 0; i < 8; i++) {
-  const rx = x - 34 + ((i * 37 + t * 3) % 68), ry = y + 18 + ((t * 9 + i * 23) % 70);
-  ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 2, ry + 8); ctx.stroke();
-}
-for (const b of f.bolts) {
-  ctx.globalAlpha = fade * (b.life / 10);
-  zig(ctx, b.x - cam.x, b.y1 - cam.y, b.x - cam.x, b.y2 - cam.y, 26, 9, "#ffe14a", 3.5);
-}
-ctx.globalAlpha = fade;
-drawCloud(ctx, x, y, 1, t);
-if (f.next < 5) { glow(ctx, x, y + 8, 40, "#fff6a0", 0.5); }
-ctx.fillStyle = "#ffe14a";
-ctx.beginPath();
-ctx.moveTo(x - 4, y - 2); ctx.lineTo(x + 5, y - 2); ctx.lineTo(x, y + 6); ctx.lineTo(x + 6, y + 6); ctx.lineTo(x - 4, y + 18); ctx.lineTo(x - 1, y + 9); ctx.lineTo(x - 6, y + 9);
-ctx.closePath(); ctx.fill();
-},
+chain(ctx,f,cam,t,g){drawChispaChain(ctx,f,cam,t,!!g?.reduceMotion);},
+trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},
+storm(ctx,f,cam,t,g){drawChispaStorm(ctx,f,cam,t,!!g?.reduceMotion);},
+
 yarn(ctx, f, cam, t, g, p) {
 const h = hand(p);
 const x = f.x - cam.x, y = f.y - cam.y;

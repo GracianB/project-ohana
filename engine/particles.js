@@ -83,7 +83,7 @@ export class ParticleSystem {
     list.length = w;
   }
 
-  render(ctx, cam) {
+  render(ctx, cam, viewport = null) {
     const list = this.items;
     ctx.save();
     const baseAlpha = ctx.globalAlpha;
@@ -93,9 +93,11 @@ export class ParticleSystem {
         const a = p.life / p.max;
         const sx = p.x - cam.x;
         const sy = p.y - cam.y;
+        const s = p.size * (0.6 + a * 0.5);
+        if (viewport && (sx + s < -8 || sy + s < -8 ||
+          sx - s > viewport.width + 8 || sy - s > viewport.height + 8)) continue;
         ctx.globalAlpha = baseAlpha * a;
         ctx.fillStyle = p.color;
-        const s = p.size * (0.6 + a * 0.5);
         if (p.star) {
           ctx.fillRect(sx - s, sy - 0.6, s * 2, 1.2);
           ctx.fillRect(sx - 0.6, sy - s, 1.2, s * 2);
