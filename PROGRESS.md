@@ -1,3 +1,7 @@
+## V430 · Cuerno: anatomía suave y alas de constelación (ohana-430)
+
+Refinado del renderer compartido de las cinco formas: patas de silueta continua con articulación y cascos en lugar de tubos, alas con hombro y siete plumas afiladas, coberteras y nervaduras. Crines adultas más largas, cola de aurora barrida, mirada con reflejo inferior, cuerno con faceta nacarada y joya de pecho desde Potro Iris. Estelar y Negro llevan diadema; Negro conserva el pelaje oscuro y gana constelaciones en ala y lomo. El galope sigue la fase real del rig; el movimiento reducido congela también las patas. Se conservan origen del cuerno, estela, tamaños, cuatro patas, colisiones y kit de combate. La misma anatomía aparece en selección, partida, bienvenida y evolución.
+
 ## V429 · Chispa: santuario, actuación y progresión (ohana-429)
 
 Vida 82/102/128/156/200 y velocidad 4,8/5,4/6,1/6,6/7,6. J progresa de 2 a 5 blancos y deja marcas durante 150 ticks; L prioriza y consume la marca con +20% de daño. K progresa de 145 a 240 px con evasión breve. Un santuario activo por jugador. Los cinco cuerpos respiran, flotan o corren con preparación y recuperación de golpes; modo suave estable y cuatro patas de Kirin conservadas.
