@@ -29,7 +29,7 @@ import {drawCuernoV373,CUERNO_V373_NAMES} from '../characters/art/cuerno-v373.js
 import {drawCharacter} from '../characters/draw.js';import {ROSTER} from '../characters/roster.js';
 import {preloadChispaAtlas} from '../characters/art/chispa-sprite.js';
 await preloadChispaAtlas();
-const scales=[4,3,2.5,1.85,1.5],descriptions=['Un brote, una sonrisa y mucha curiosidad.','Un poni de ojos de cristal y pequeños cascos lila.','Crin de aurora y una joya que guarda el cielo.','Siete plumas por ala, nácar y una diadema estelar.','Pelaje de medianoche, alas de constelación y mirada de luna.'];
+const scales=[4,3,2.5,1.85,1.5],descriptions=['Un brote, una sonrisa y mucha curiosidad.','Un poni de ojos de cristal y pequeños cascos lila.','Un kirín de jade, seis cintas de aurora y corona de prismas.','Siete plumas por ala, nácar y una diadema estelar.','Pelaje de medianoche, alas de constelación y mirada de luna.'];
 const section=document.querySelector('.evolutions');
 CUERNO_V373_NAMES.forEach((name,i)=>{const card=document.createElement('article');card.innerHTML=`<span>FORMA ${i+1} / 5</span><h2>${name}</h2><canvas width="300" height="310" role="img" aria-label="${name}"></canvas><p>${descriptions[i]}</p>`;section.appendChild(card)});
 const canvases=[...section.querySelectorAll('canvas')],pose=document.getElementById('pose'),pause=document.getElementById('pause'),mirror=document.getElementById('mirror');

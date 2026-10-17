@@ -1,3 +1,7 @@
+## V431 · Cuerno orgánico y Kirín Aurora (ohana-431)
+
+Se elimina la construcción por piezas visibles: las cuatro patas se dibujan antes del torso, ocultando los extremos planos; el cuello, pecho, lomo y vientre comparten una sola silueta Bézier. Corvejones curvados en reposo y cañas afinadas. La tercera forma se reconstruye como Kirín Aurora: pelaje de jade, seis cintas fluidas nacidas de la nuca, dos serpentinas y corona de tres prismas. Es una transformación de silueta, no otro poni del mismo color. Se mantienen cuatro patas y los orígenes de ataques. Actualizados nombres en roster/cinemática/previsualización. Modo suave determinista, sin gradientes ni partículas nuevas.
+
 ## V430 · Cuerno: anatomía suave y alas de constelación (ohana-430)
 
 Refinado del renderer compartido de las cinco formas: patas de silueta continua con articulación y cascos en lugar de tubos, alas con hombro y siete plumas afiladas, coberteras y nervaduras. Crines adultas más largas, cola de aurora barrida, mirada con reflejo inferior, cuerno con faceta nacarada y joya de pecho desde Potro Iris. Estelar y Negro llevan diadema; Negro conserva el pelaje oscuro y gana constelaciones en ala y lomo. El galope sigue la fase real del rig; el movimiento reducido congela también las patas. Se conservan origen del cuerno, estela, tamaños, cuatro patas, colisiones y kit de combate. La misma anatomía aparece en selección, partida, bienvenida y evolución.

@@ -1,7 +1,7 @@
 // V373 · Cuerno renovado: 5 formas cuadrúpedas que crecen con claridad.
 //   1 Cuernín · Semilla   → potrito chibi, cabeza enorme, cuernito con brote.
 //   2 Destello · Naciente → poni, cuerno corto en espiral, crin corta pastel.
-//   3 Potro Iris          → unicornio, crin y cola arcoíris largas.
+//   3 Kirín Aurora          → unicornio, crin y cola arcoíris largas.
 //   4 Unicornio Estelar   → unicornio alado (alas de pluma), estrellas en la crin.
 //   5 Unicornio Negro     → corcel celeste oscuro, alas grandes, crin de estrellas, media luna.
 // Contrato igual que characters/art/cuerno.js: draw(ctx, pose, R) con origen en los
@@ -10,7 +10,7 @@
 import { drawRainbowPuff } from "../cuerno-stagecraft.js";
 const TAU = Math.PI * 2;
 export const CUERNO_V373_ANIMS = Object.freeze(["idle", "walk", "jump", "attack", "death", "trail"]);
-export const CUERNO_V373_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Potro Iris", "Unicornio Estelar", "Unicornio Negro"]);
+export const CUERNO_V373_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Kirín Aurora", "Unicornio Estelar", "Unicornio Negro"]);
 const IRIS = ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa", "#aeb9fb", "#e5b9f4"];
 // Altura de la silueta en unidades de arte (draw.js: px = H/100 · unidades, con
 // H = CUERNO_VISUAL_H = [118, 92, 91, 86, 82]) → en pantalla ≈ 55, 58, 70, 82, 96 px.
@@ -19,7 +19,7 @@ const F = [
   // coat, dark (contorno de color), mane colors, head/body proportions, legs, horn, wings
   { coat: "#fff3fa", shade: "#f2d3e8", ink: "#6b4a7a", mane: ["#b786dd", "#e4c4ff", "#a77ad3"], head: 1.45, body: .8, leg: .55, horn: .5, wings: 0, tail: .6, sprout: true },
   { coat: "#fde9ff", shade: "#e9c6f2", ink: "#634477", mane: ["#c29bea", "#f0d9ff", "#ad83da"], head: 1.15, body: .9, leg: .8, horn: .85, wings: 0, tail: .8 },
-  { coat: "#f6f0ff", shade: "#dfd2f4", ink: "#655080", mane: ["#b786dd", "#e5b9f4", "#ffb8cf", "#ffe9a3", "#a5e5fa"], head: 1.06, body: 1, leg: 1, horn: 1.15, wings: 0, tail: 1.1 },
+  { coat: "#e5fff6", shade: "#b1ded8", ink: "#49657b", mane: ["#a688ed", "#8ee4e7", "#ffc2e3", "#efdca1", "#b6a5f2"], head: 1.06, body: 1, leg: 1, horn: 1.15, wings: 0, tail: 1.1 },
   { coat: "#f4f5ff", shade: "#d6d8f2", ink: "#52658b", mane: ["#bba8ed", "#e5b9f4", "#ffb8cf", "#ffe9a3", "#a5e5fa"], head: 1.02, body: 1.05, leg: 1.08, horn: 1.3, wings: 1, tail: 1.2, stars: true },
   { coat: "#29283f", shade: "#1b2033", ink: "#15182a", mane: ["#a390df", "#d2b5ed", "#9acfe8", "#eee2ba"], head: .99, body: 1.1, leg: 1.12, horn: 1.45, wings: 1.35, tail: 1.35, stars: true, night: true },
 ];
@@ -83,9 +83,10 @@ function star(ctx, x, y, r, col) {
 function leg(ctx, P, hx, hy, len, swing, w, far, lw) {
   const stance = far ? -2.4 * (len / 22) : 0;
   hx += stance;
-  const kx=hx+Math.sin(swing)*len*.45,ky=hy+Math.cos(swing)*len*.5;
-  const fx=kx+Math.sin(swing*.6)*len*.25,fy=hy+len*.98-Math.max(0,Math.sin(swing))*len*.15;
-  const thigh=w*.57,cannon=w*.33;
+  const hind=hx<0;
+  const kx=hx+(hind?-.16:.075)*len+Math.sin(swing)*len*.38,ky=hy+Math.cos(swing)*len*.52;
+  const fx=hx+(hind?.055:-.035)*len+Math.sin(swing*.6)*len*.42,fy=hy+len*.98-Math.max(0,Math.sin(swing))*len*.15;
+  const thigh=w*(hind?.88:.62),cannon=w*.27;
   ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
   ctx.fillStyle=far?P.shade:P.coat;ctx.strokeStyle=P.ink;ctx.lineWidth=lw*.78;
   ctx.beginPath();ctx.moveTo(hx-thigh,hy);
@@ -130,6 +131,30 @@ function wing(ctx,P,x,y,span,flap,far,lw){
   ctx.restore();
 }
 
+function auroraMantle(ctx,x,y,bodyY,u,t,reduced,hurt){
+ ctx.save();ctx.translate(x,y);ctx.lineJoin='round';
+ const wave=reduced||hurt?0:Math.sin(t*.055)*2*u;
+ const colors=['#ae91e8','#79d9df','#d8b1f0','#f1acd6','#92dfce','#b7a0f0'];
+ for(let i=5;i>=0;i--){
+  const sx=-i*1.1*u,sy=i*.9*u,tx=-(25+i*4.5)*u,ty=(-18+i*6)*u+wave*(i%2?1:-1);
+  ctx.beginPath();ctx.moveTo(sx,sy);
+  ctx.bezierCurveTo(-12*u,(-8-i*1.3)*u,tx+12*u,ty-15*u,tx,ty);
+  ctx.bezierCurveTo(tx-5*u,ty+6*u,tx+8*u,ty+10*u,tx+6*u,ty+17*u);
+  ctx.bezierCurveTo(tx+9*u,ty+8*u,tx+2*u,ty+3*u,tx+4*u,ty-u);
+  ctx.bezierCurveTo(tx+13*u,ty-10*u,-8*u,sy+4*u,sx,sy);ctx.closePath();
+  ctx.fillStyle=colors[i];ctx.fill();ctx.strokeStyle='#59618d';ctx.lineWidth=.75*u;ctx.stroke();
+  ctx.strokeStyle='#f7fffb';ctx.lineWidth=.55*u;ctx.beginPath();ctx.moveTo(sx-4*u,sy-u);ctx.quadraticCurveTo(-25*u,ty-8*u,tx+u,ty);ctx.stroke();
+ }
+ for(let i=0;i<2;i++){
+  const endY=Math.min(34*u,bodyY-y+30*u),endX=-(39+i*7)*u;
+  ctx.beginPath();ctx.moveTo(-8*u,8*u);
+  ctx.bezierCurveTo(-52*u,-6*u,-48*u,endY+6*u,endX,endY);
+  ctx.bezierCurveTo(-43*u,endY+2*u,-48*u,-2*u,-5*u,5*u);ctx.closePath();
+  ctx.fillStyle=i?'#a2e3e1':'#e1b8ec';ctx.fill();ctx.strokeStyle='#69638d';ctx.lineWidth=.65*u;ctx.stroke();
+ }
+ ctx.restore();
+}
+
 // Pedorreta arcoíris cómica y cute: nubecitas de colores + destellos tras la grupa.
 function rainbowPuff(ctx, x, y, u, t, form, reduced) {
   ctx.save();ctx.translate(x,y);ctx.scale(u,u);
@@ -150,6 +175,8 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const ph = face.reduced?0:run&&Number.isFinite(pose.phase)?pose.phase:t * (trail ? .45 : run ? .32 : .05);
   const legL = 22 * P.leg * u * (f === 0 ? .75 : 1), bodyRx = 17 * P.body * u, bodyRy = 10 * P.body * u;
   const bodyY = -(legL + bodyRy * .55);
+  const neckX = bodyRx * .75, neckY = bodyY - bodyRy * .4;
+  const headR = 9 * P.head * u, hx = neckX + headR * .55 + (att ? 3 * u : 0), hy = neckY - headR * (f === 0 ? .9 : 1.3) + (att ? 3 * u : 0);
   ctx.save();
   // muerte: se tumba de lado (patas flojas), sin salirse de su sitio
   if (dead) { ctx.translate(0, Math.min(legL * .42, -(bodyY + bodyRy) - lw * 1.5) - 4.5 * u); ctx.globalAlpha *= .85; }
@@ -161,6 +188,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   if(charge&&!face.reduced)ctx.scale(1+charge*.045,1-charge*.04);
   if (att) ctx.rotate(.08 * Math.sin(clamp(atk, 0, 1) * Math.PI));
   const tuck = air ? .9 : 0;
+  if(f===2&&!dead)auroraMantle(ctx,neckX-3*u,hy+headR*.4,bodyY,u,t,face.reduced,hit);
   // --- capa trasera: cola, ala lejana, patas lejanas
   const tailX = -bodyRx * .95, tailY = bodyY - bodyRy * .3;
   ctx.save();ctx.translate(tailX, tailY);ctx.rotate(trail ? 1.35 : run ? .65 : f>=3?.42:f===2?.12:-.25);
@@ -175,8 +203,16 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const sw = (k) => run ? Math.sin(ph + k) * .9 : air ? (k ? -1 : 1) * tuck * .6 : dead ? (k ? 1.4 : -1.4) : 0;
   leg(ctx, P, -bodyRx * .55, bodyY + bodyRy * .3, legL * (dead ? .42 : 1), sw(Math.PI), 4.4 * u * P.leg, true, lw);
   leg(ctx, P, bodyRx * .55, bodyY + bodyRy * .3, legL * (dead ? .42 : 1), sw(0), 4.4 * u * P.leg, true, lw);
-  // --- cuerpo
-  ell(ctx, 0, bodyY, bodyRx, bodyRy, 0, P.coat, P.ink, lw);
+  // Near legs are also BEHIND the barrel: their flat root caps never show.
+  leg(ctx,P,-bodyRx*.45,bodyY+bodyRy*.4,legL*(dead?.42:1),sw(0),4.8*u*P.leg,false,lw);
+  leg(ctx,P,bodyRx*.65,bodyY+bodyRy*.4,legL*(dead?.42:1),sw(Math.PI),4.8*u*P.leg,false,lw);
+  // One continuous back, arched neck, breast and belly. No neck rectangle.
+  ctx.beginPath();ctx.moveTo(-bodyRx,bodyY);
+  ctx.bezierCurveTo(-bodyRx*1.12,bodyY-bodyRy*1.08,bodyRx*.12,bodyY-bodyRy*1.22,neckX-5*u,neckY);
+  ctx.bezierCurveTo(neckX-6*u,hy+headR*.15,hx-headR*.47,hy-headR*.28,hx+headR*.15,hy+headR*.18);
+  ctx.bezierCurveTo(hx+headR*.58,hy+headR*.92,neckX+9*u,neckY+bodyRy*.45,bodyRx*.83,bodyY+bodyRy*.60);
+  ctx.bezierCurveTo(bodyRx*.26,bodyY+bodyRy*1.07,-bodyRx*.91,bodyY+bodyRy*1.10,-bodyRx,bodyY);
+  ctx.closePath();ctx.fillStyle=P.coat;ctx.fill();ctx.strokeStyle=P.ink;ctx.lineWidth=lw;ctx.stroke();
   ell(ctx, -bodyRx * .2, bodyY + bodyRy * .35, bodyRx * .7, bodyRy * .4, 0, P.shade, null, 0);
   // A soft breast and flank plane keep the barrel dimensional at game scale.
   ctx.save();ctx.globalAlpha*=P.night?.42:.62;
@@ -196,14 +232,6 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
     pts.forEach(([a,b],i)=>i?ctx.lineTo(a*bodyRx,bodyY+b*bodyRy):ctx.moveTo(a*bodyRx,bodyY+b*bodyRy));ctx.stroke();
     pts.forEach(([a,b],i)=>star(ctx,a*bodyRx,bodyY+b*bodyRy,(i===1?1.6:1.1)*u,i===1?'#f2e4b9':'#afcfeb'));
   }
-  // --- patas cercanas
-  leg(ctx, P, -bodyRx * .45, bodyY + bodyRy * .45, legL * (dead ? .42 : 1), sw(0), 4.8 * u * P.leg, false, lw);
-  leg(ctx, P, bodyRx * .65, bodyY + bodyRy * .45, legL * (dead ? .42 : 1), sw(Math.PI), 4.8 * u * P.leg, false, lw);
-  // --- cuello + cabeza
-  const neckX = bodyRx * .75, neckY = bodyY - bodyRy * .4;
-  const headR = 9 * P.head * u, hx = neckX + headR * .55 + (att ? 3 * u : 0), hy = neckY - headR * (f === 0 ? .9 : 1.3) + (att ? 3 * u : 0);
-  ctx.beginPath(); ctx.moveTo(neckX - 5 * u, neckY + 3 * u); ctx.quadraticCurveTo(neckX - 6 * u, hy + headR * .3, hx - headR * .4, hy); ctx.quadraticCurveTo(hx + headR * .1, hy - headR * .12, hx + headR * .2, hy + headR * .3); ctx.quadraticCurveTo(neckX + 7 * u, neckY - 2 * u, neckX + 5 * u, neckY + 2 * u); ctx.closePath();
-  ctx.fillStyle = P.coat; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = P.ink; ctx.stroke();
   // crin arcoíris en mechones sobre el cuello
   for (let i = P.mane.length - 1; i >= 0; i--) {
     const k = i / Math.max(1, P.mane.length - 1);
@@ -270,8 +298,8 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const hl = 11 * P.horn * u * (f === 0 ? .6 : 1), ha = -1.05 + (att ? .45 * Math.sin(clamp(atk, 0, 1) * Math.PI) : 0);
   const bx = hx + headR * .15, by = hy - headR * .78, tx = bx + Math.cos(ha) * hl, ty = by + Math.sin(ha) * hl, nx = -Math.sin(ha) * 2.4 * u * P.horn, ny = Math.cos(ha) * 2.4 * u * P.horn;
   ctx.beginPath(); ctx.moveTo(bx - nx, by - ny); ctx.lineTo(tx, ty); ctx.lineTo(bx + nx, by + ny); ctx.closePath();
-  ctx.fillStyle = P.night ? "#fff1ad" : "#ffe9a3"; ctx.fill(); ctx.lineWidth = lw * .8; ctx.strokeStyle = P.ink; ctx.stroke();
-  ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.lineTo(bx+nx*.72,by+ny*.72);ctx.closePath();ctx.fillStyle=P.night?'#c9c1ed':'#fff9de';ctx.fill();
+  ctx.fillStyle = f===2?"#b0e4e4":P.night ? "#fff1ad" : "#ffe9a3"; ctx.fill(); ctx.lineWidth = lw * .8; ctx.strokeStyle = P.ink; ctx.stroke();
+  ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(tx,ty);ctx.lineTo(bx+nx*.72,by+ny*.72);ctx.closePath();ctx.fillStyle=f===2?'#f0e1ff':P.night?'#c9c1ed':'#fff9de';ctx.fill();
   ctx.strokeStyle = P.night ? "#e5b9f4" : "#ff8cab"; ctx.lineWidth = lw * .6;
   for (let i = 1; i < 4; i++) { const k = i / 4; ctx.beginPath(); ctx.moveTo(bx - nx * (1 - k) + (tx - bx) * k, by - ny * (1 - k) + (ty - by) * k); ctx.lineTo(bx + nx * (1 - k) + (tx - bx) * (k + .08), by + ny * (1 - k) + (ty - by) * (k + .08)); ctx.stroke(); }
   if (att && atk > .25 && atk < .75) { ctx.strokeStyle = "#fff6c8"; ctx.lineWidth = lw; for (let i = 0; i < 3; i++) { const a = ha + (i - 1) * .4; ctx.beginPath(); ctx.moveTo(tx + Math.cos(a) * 3 * u, ty + Math.sin(a) * 3 * u); ctx.lineTo(tx + Math.cos(a) * 8 * u, ty + Math.sin(a) * 8 * u); ctx.stroke(); } }
@@ -279,6 +307,15 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
     ctx.strokeStyle=P.night?'#c3b1e2':'#bcb4dd';ctx.lineWidth=lw*.55;
     ctx.beginPath();ctx.moveTo(hx-headR*.47,hy-headR*.43);ctx.quadraticCurveTo(hx,hy-headR*.69,hx+headR*.53,hy-headR*.42);ctx.stroke();
     star(ctx,hx+headR*.13,hy-headR*.54,u*(f===4?1.65:1.25),P.night?'#c3eeee':'#fff8e5');
+  }
+  if(f===2){
+    const cy=by-hl*.32;
+    ctx.save();ctx.translate(bx,cy);ctx.rotate(-.23);
+    ctx.strokeStyle='#a68de0';ctx.lineWidth=lw*.7;ctx.beginPath();ctx.ellipse(0,0,hl*.52,hl*.18,0,0,TAU);ctx.stroke();
+    for(let i=0;i<3;i++){
+      const px=(i-1)*hl*.42,py=-hl*(.19+(i===1?.25:0));
+      ctx.beginPath();ctx.moveTo(px,py-hl*.18);ctx.lineTo(px+hl*.1,py);ctx.lineTo(px,py+hl*.13);ctx.lineTo(px-hl*.1,py);ctx.closePath();ctx.fillStyle=['#9be9ed','#f5d3ed','#c2adff'][i];ctx.fill();ctx.strokeStyle=P.ink;ctx.lineWidth=lw*.5;ctx.stroke();
+    }ctx.restore();
   }
   // brote de semilla (forma 1)
   if (P.sprout) { ctx.strokeStyle = "#4f7a4a"; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx, ty - 3 * u); ctx.stroke(); for (const s of [-1, 1]) ell(ctx, tx + s * 2.2 * u, ty - 3.6 * u, 2.4 * u, 1.2 * u, s * -.5, "#9be39a", "#4f7a4a", 1); }
