@@ -1,3 +1,4 @@
+import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
 import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
 import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
@@ -117,7 +118,8 @@ S.charge = Math.max(S.charge || 0, 72);
 armor(p, 10);
 } else if (p.id === "frita") {
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
-p.invuln = Math.max(p.invuln || 0, 12);
+p.invuln = Math.max(p.invuln || 0, 12+evo*2);
+p._chispaEvadeUntil=(Number(g.t)||0)+12+evo*2;
 } else if (p.id === "pizza") {
 p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
 armor(p, 10);
@@ -1171,15 +1173,16 @@ chain(g, p, evo) {
 const h = hand(p);
 const pts = [{ x: h.x, y: h.y }];
 const hit = new Set();
-const maxN = evo >= 3 ? 5 : 4;
+const tuning=chispaKit(evo);
+const maxN = tuning.targets;
 let from = { x: h.x, y: h.y };
-let dmg = (22 + evo * 2) * pw(p);
+let dmg = tuning.chain * pw(p);
 for (let i = 0; i < maxN; i++) {
-  const e = nearestEnemy(g, from.x, from.y, i === 0 ? 300 + evo * 20 : 210 + evo * 15, hit, i === 0 ? p.facing : 0);
+  const e = nearestEnemy(g, from.x, from.y, i === 0 ? tuning.reach : 210 + evo * 15, hit, i === 0 ? p.facing : 0);
   if (!e) break;
   hit.add(e);
   pts.push({ x: cx(e), y: cy(e) });
-  hitEnemy(g, e, dmg, { kx: Math.sign(cx(e) - from.x) * 4, ky: -2, stun: 22, color: "#ffe14a" });
+  if(hitEnemy(g, e, dmg, { kx: Math.sign(cx(e) - from.x) * 4, ky: -2, stun: 22, color: "#d6f5ff" }))e._chispaMarkUntil=(Number(g.t)||0)+150;
   from = { x: cx(e), y: cy(e) };
   dmg *= 0.85;
 }
@@ -1190,7 +1193,7 @@ boom(g, h.x, h.y, "#ffe14a", 8, { star: true });
 blink(g, p, evo) {
 const W = g.worldW || 1600;
 const x0 = p.x, y0 = p.y;
-const dist = 150 + evo * 18;
+const dist = chispaKit(evo).dash;
 let nx = clamp(p.x + p.facing * dist, 30, W - p.w - 30);
 const direction = Math.sign(nx - x0);
 const steps = Math.ceil(Math.abs(nx - x0) / 8);
@@ -1211,7 +1214,10 @@ boom(g, x0 + p.w / 2, y0 + p.h / 2, "#fff3a0", 10, { star: true });
 boom(g, cx(p), cy(p), "#ffe14a", 10, { star: true });
 },
 storm(g, p, evo) {
-add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, bolts: [], dmg: (20 + evo * 2) * pw(p), vx: 0 });
+// One sanctuary at a time: recasting replaces the previous field.
+for(let i=FX.length-1;i>=0;i--)if(FX[i].kind==='storm')FX.splice(i,1);
+const tuning=chispaKit(evo);
+add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
 boom(g, cx(p), p.y - 60, "#9cf", 10);
 },
 
@@ -1888,7 +1894,7 @@ return f.life > 0;
 },
 storm(g, f, p) {
 f.life--;
-const e = nearestEnemy(g, f.x, f.y + 140, 700, null, 0);
+const e = chispaStormTarget(g.enemies,f.x,f.y+140,Number(g.t)||0);
 const tx = e ? cx(e) : cx(p) + p.facing * 120;
 const ty = Math.max((g.cam.y || 0) + 50, (e ? e.y : p.y) - 150);
 f.vx = f.vx * 0.9 + clamp(tx - f.x, -60, 60) * 0.012;
@@ -1898,12 +1904,12 @@ for (const b of f.bolts) b.life--;
 f.bolts = f.bolts.filter((b) => b.life > 0);
 f.next--;
 if(f.next===7&&f.life>15){
- const bx=f.x+(gameRand(g)-.5)*30;
+ const bx=e&&chispaMarked(e,Number(g.t)||0)?cx(e):f.x+(gameRand(g)-.5)*30;
  const ground=groundBelow(g,bx,f.y+20);
  f.forecast={x:bx,y1:f.y+16,y2:ground===null?f.y+400:ground};
 }
 if (f.next <= 0 && f.life > 8) {
-  f.next = 20;
+  f.next = f.interval||20;
   const bx = f.forecast?.x ?? f.x;
   let by = f.forecast?.y2 ?? groundBelow(g,bx,f.y+20);
   if(by===null)by=f.y+400;
@@ -1912,7 +1918,9 @@ if (f.next <= 0 && f.life > 8) {
   for (const en of g.enemies) {
     if (!canHit(en)) continue;
     if (Math.abs(cx(en) - bx) < 28 + en.w / 2 && en.y + en.h > f.y && en.y < by) {
-      hitEnemy(g, en, f.dmg, { ky: -3, stun: 26, color: "#9cf" });
+      const marked=chispaMarked(en,Number(g.t)||0);
+      hitEnemy(g, en, f.dmg*(marked?1.2:1), { ky: -3, stun: marked?34:26, color: "#b9efff" });
+      if(marked)en._chispaMarkUntil=0;
       struck = true;
     }
   }

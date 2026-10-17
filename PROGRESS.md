@@ -1,3 +1,9 @@
+## V429 · Chispa: santuario, actuación y progresión (ohana-429)
+
+Vida 82/102/128/156/200 y velocidad 4,8/5,4/6,1/6,6/7,6. J progresa de 2 a 5 blancos y deja marcas durante 150 ticks; L prioriza y consume la marca con +20% de daño. K progresa de 145 a 240 px con evasión breve. Un santuario activo por jugador. Los cinco cuerpos respiran, flotan o corren con preparación y recuperación de golpes; modo suave estable y cuatro patas de Kirin conservadas.
+
+Entrada espiritual en bienvenida e intro personal, sellos de trueno y conductores en el final, nuevo timbre sonoro de L. Chispa como compañero tiene ritual y tres golpes con aviso; la sorpresa canónica de Stitcho dura 360 ticks con encore y despedida, sin daño posterior al tramo de combate. Las réplicas siguen siendo visuales. Validación: 1215 tests Node, 345 escenas del compañero, intro y final reales, 100 tamaños, 200 poses y juego offline escritorio/móvil. Sin despliegue ni reactivación del multijugador.
+
 ## V428 · Chispa: de adorable a deidad del trueno (ohana-428)
 
 Cinco anatomías blancas y doradas: semilla espiritual, familiar bípedo, kirin de cuatro patas, asceta levitante de cuatro brazos y deidad serpentina con colmillos. Cuarenta poses transparentes integradas en partida, retrato y evolución. Los rayos son angulosos blancos con borde cian; la L invoca un sello conductor en lugar de una nube sonriente. Colisiones y estadísticas conservadas.

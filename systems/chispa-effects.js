@@ -1,3 +1,4 @@
+import {drawThunderSeal,thunderBolt} from './chispa-stagecraft.js';
 const TAU=Math.PI*2;
 const unit=x=>Math.max(0,Math.min(1,Number(x)||0));
 function oval(ctx,x,y,rx,ry,c){ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fill();}
@@ -57,6 +58,9 @@ export function drawChispaStorm(ctx,f,cam,t,reduced=false){
   }
   const arrival=unit((f.maxLife?(f.maxLife-f.life):30)/16),s=.55+arrival*.35;
   drawChispaCloud(ctx,x,y,s,charge,t,reduced);
+  const tier=Math.max(0,Math.min(4,((f.maxLife||220)-180)/20));
+  drawThunderSeal(ctx,x,y,48+tier*7,t,reduced,charge);
+  if(f.forecast&&!reduced){ctx.save();ctx.globalAlpha*=.28;thunderBolt(ctx,x,y,f.forecast.x-cam.x,f.forecast.y1-cam.y,.45,t,false);ctx.restore();}
   if(f.life<24){ctx.save();ctx.globalAlpha*=1-f.life/24;oval(ctx,x+36,y-25,5,3,'#f2edc7');oval(ctx,x+45,y-34,3,2,'#f2edc7');ctx.restore();}
  }finally{ctx.restore();}
 }
@@ -64,7 +68,7 @@ export function drawChispaChain(ctx,f,cam,t=0,reduced=false){
  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha*=unit(f.life/(f.max||30));
  for(let i=1;i<f.pts.length;i++){
   const a=f.pts[i-1],b=f.pts[i];lightning(ctx,a.x-cam.x,a.y-cam.y,b.x-cam.x,b.y-cam.y,3,t,reduced);
-  oval(ctx,b.x-cam.x,b.y-cam.y,4,4,'#fff8dc');
+  drawThunderSeal(ctx,b.x-cam.x,b.y-cam.y,11,t,reduced,0);
  }ctx.restore();
 }
 export function drawChispaTrail(ctx,f,cam,t=0,reduced=false){
@@ -72,6 +76,9 @@ export function drawChispaTrail(ctx,f,cam,t=0,reduced=false){
  const dx=f.x2-f.x1,dy=f.y2-f.y1;
  for(let i=0;i<5;i++){
   const u=(i+.5)/5,x=f.x1+dx*u-cam.x,y=f.y1+dy*u-cam.y;
-  ctx.fillStyle=i%2?'#f5df9f':'#b5ddcb';ctx.beginPath();ctx.ellipse(x,y,6+4*k,3,Math.atan2(dy,dx),0,TAU);ctx.fill();
- }ctx.strokeStyle='#fff2c6';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(f.x1-cam.x,f.y1-cam.y);ctx.lineTo(f.x2-cam.x,f.y2-cam.y);ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.atan2(dy,dx));ctx.strokeStyle=i%2?'#e4ce87':'#d2f6ff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-9,-4);ctx.lineTo(-2,1);ctx.lineTo(2,-2);ctx.lineTo(10,4);ctx.stroke();ctx.restore();
+ }
+ thunderBolt(ctx,f.x1-cam.x,f.y1-cam.y,f.x2-cam.x,f.y2-cam.y,.35,t,reduced);
+ ctx.restore();
 }

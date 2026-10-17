@@ -11,6 +11,7 @@ export function chispaSpriteFrame(pose={}){
  else if(['jump','fall','glide','wall','hurt'].includes(state))col=5;
  else if(state==='attack')col=6;
  else if(state==='cast'||(!pose.reduceMotion&&number(pose.chispinWelcome?.charge)>.5))col=7;
+ else if(!pose.reduceMotion&&number(pose.chispinWelcome?.hiccup)>.4)col=5;
  return row*8+col;
 }
 export function preloadChispaAtlas(){
@@ -22,13 +23,35 @@ export function preloadChispaAtlas(){
  });return loading;
 }
 export function chispaAtlasStatus(){return {ready,width:atlas?.naturalWidth||0,height:atlas?.naturalHeight||0};}
-export function chispaSpriteCacheKey(pose){return `${ready?'thunder-v4':'fallback'}:${chispaSpriteFrame(pose)}`;}
+export function chispaSpriteMotion(pose={}){
+ const t=number(pose.t),phase=number(pose.phase),form=Math.max(0,Math.min(4,pose.form|0)),state=pose.state||'idle';
+ if(pose.reduceMotion||state==='dead')return {x:0,y:0,rotation:0,sx:1,sy:1};
+ const float=[0,3,4].includes(form),idle=state==='idle'||state==='victory';
+ let x=0,y=idle&&float?Math.sin(t*.065)*(form===4?3:2):0,rotation=0,sx=1,sy=1;
+ if(state==='run'){rotation=Math.sin(phase)*.025;y=-Math.abs(Math.sin(phase*2))*1.5;}
+ if(idle){const breath=Math.sin(t*.055)*.012;sx=1+breath;sy=1-breath*.6;}
+ if(state==='attack'||state==='cast'){
+  const k=Math.max(0,Math.min(1,number(state==='attack'?pose.atk:pose.cast,.5))),anticipation=Math.sin(Math.min(1,k/.25)*Math.PI*.5),strike=Math.sin(Math.max(0,Math.min(1,(k-.25)/.75))*Math.PI);
+  x=k<.25?-anticipation*3:strike*(form===2?9:5);rotation=k<.25?-.045:strike*.055;
+  sy=1+(k<.25?-.025:.025*strike);sx=1+(k<.25?.025:-.015*strike);
+ }
+ if(pose.chispinWelcome&&idle){const w=pose.chispinWelcome;y-=number(w.charge)*4+number(w.hiccup)*3;rotation+=number(w.prank)*.06-number(w.sniff)*.045;}
+ if(['jump','fall','glide'].includes(state))rotation=state==='jump'?-.06:state==='fall'?.045:Math.sin(t*.06)*.025;
+ if(state==='victory'){rotation=Math.sin(t*.05)*.035;y-=Math.max(0,Math.sin(t*.05))*2;}
+ if(state==='hurt')rotation=-.13;
+ return {x,y,rotation,sx,sy};
+}
+export function chispaSpriteCacheKey(pose){
+ const motion=pose.reduceMotion?0:Math.floor(number(pose.t)/4);
+ return `${ready?'thunder-v5':'fallback'}:${chispaSpriteFrame(pose)}:${motion}`;
+}
 export function drawChispaSprite(ctx,pose){
  if(!ready)return false;
  const frame=chispaSpriteFrame(pose),isKirin=Math.floor(frame/8)===2;
  const m=isKirin?KIRIN_METRICS[frame%8]:METRICS[frame],base=isKirin?KIRIN_METRICS[0]:METRICS[Math.floor(frame/8)*8];
  const scale=100/(base[7]-base[5]),center=(m[4]+m[6])/2;
- ctx.save();
+ const motion=chispaSpriteMotion(pose);
+ ctx.save();ctx.translate(motion.x,motion.y);ctx.rotate(motion.rotation);ctx.scale(motion.sx,motion.sy);
  if(pose.state==='dead'){ctx.translate(0,-18);ctx.rotate(-Math.PI*.45);ctx.scale(.9,.9);}
  ctx.drawImage(isKirin?kirin:atlas,m[0],m[1],m[2],m[3],-center*scale,-m[7]*scale,m[2]*scale,m[3]*scale);
  ctx.restore();return true;

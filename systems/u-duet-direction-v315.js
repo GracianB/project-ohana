@@ -96,8 +96,8 @@ export function guestPerformance(s,ally,reduced=false){
    altitude+=reduced?0:Math.sin(age*.28)*4;
    drift=12*impulse;gesture="dash";pose=attack?"attack":"run";vx=age<18?5:0;break;
   case "chispin":
-   altitude+=reduced?0:Math.abs(Math.sin(age*.23))*13;
-   drift=8*impulse;gesture="spring";pose=attack?"attack":"jump";vy=-1;break;
+   altitude+=(e>=3?23:0)+(reduced?0:Math.sin(age*.12)*(e>=3?7:4));
+   drift=8*impulse;gesture="spring";pose=attack?'attack':age>=26&&age<102?'cast':e>=3?'glide':'run';vy=e>=3?-1:0;vx=age<18?5:0;break;
   case "cat":
    altitude+=reduced?0:Math.abs(Math.sin(age*.19))*16;
    drift=16*impulse;gesture="pounce";pose=attack?"attack":"run";vx=age<18?4:0;break;
@@ -126,7 +126,7 @@ export function guestPerformance(s,ally,reduced=false){
  if(leaving){pose=identity.height>=40?"glide":"run";vx=f*7;}
  else if(!attack&&age>=36)vx=f*230*identity.travel/66;
  // Bigger forms are recognizable without obscuring the parent character.
- const size=.59+arrive*.13+e*.017+(rank-1)*.012;
+ const size=(.59+arrive*.13+e*.017+(rank-1)*.012)*(ally==='chispin'?1.16:1);
  if(s.surprise===true&&age>=102){
   // The combat beats finish at frame 90. This encore is visual acting only.
   const k=clamp((age-102)/198,0,1),farewell=clamp((age-300)/60,0,1);
@@ -206,10 +206,15 @@ export function surpriseGuestDrawer(drawActor,s,cam,reduced=false){
     const px=reduced?startX:startX+(edge-startX)*smooth;
     const py=reduced?startY:startY+(floor-startY)*smooth;
     const guest={...actor,x:cam.x+px-actor.w/2,y:cam.y+py-actor.h};
+    if(actor.id==='chispin'){
+     ctx.save();ctx.strokeStyle='#e6cf88';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(px,py+3,34,8,0,0,TAU);ctx.stroke();
+     if(!reduced&&age<300)for(let i=0;i<3;i++){const dx=(i-1)*24,dy=-42-Math.sin(age*.05+i)*8;ctx.strokeStyle=i%2?'#ffffff':'#b8efff';ctx.beginPath();ctx.moveTo(px+dx,py+dy-15);ctx.lineTo(px+dx-5,py+dy);ctx.lineTo(px+dx+3,py+dy-2);ctx.lineTo(px+dx-2,py+dy+11);ctx.stroke();}
+     ctx.restore();
+    }
     drawActor(ctx,guest,...args.slice(2));
     ctx.fillStyle='#fff2ce';ctx.strokeStyle='#173c40';ctx.lineWidth=4;
     ctx.font='600 13px Fredoka, sans-serif';ctx.textAlign='center';
-    const text=age>=300?'¡Hasta la próxima!':age<200?'¡Yo también juego!':'¿Has visto mi L?';
+    const text=actor.id==='chispin'?(age>=300?'Namasté. ¡No toques el rayo!':age<200?'He desenchufado el cielo.':'Tranquilo. Era mi calentamiento.'):(age>=300?'¡Hasta la próxima!':age<200?'¡Yo también juego!':'¿Has visto mi L?');
     ctx.strokeText(text,px,py-92);ctx.fillText(text,px,py-92);
    }else drawActor(...args);
    ctx.restore();

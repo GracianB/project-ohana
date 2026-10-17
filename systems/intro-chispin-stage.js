@@ -55,10 +55,10 @@ export function drawChispinWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"
  if(layer==="back"){
   const g=ctx.createRadialGradient(x,foot-h*.58,0,x,foot-h*.58,h*.51);
   g.addColorStop(0,"rgba(255,231,150,"+(.07+.12*beat.halo)+")");
-  g.addColorStop(.53,"rgba(207,154,255,"+(.04+.12*beat.halo)+")");
-  g.addColorStop(1,"rgba(207,154,255,0)");
+  g.addColorStop(.53,"rgba(155,225,255,"+(.04+.12*beat.halo)+")");
+  g.addColorStop(1,"rgba(155,225,255,0)");
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,foot-h*.58,h*.51,0,TAU);ctx.fill();
-  ctx.strokeStyle="#eed6ff";ctx.globalAlpha=.25;ctx.lineWidth=1.2;
+  ctx.strokeStyle="#d5f5ff";ctx.globalAlpha=.25;ctx.lineWidth=1.2;
   ctx.beginPath();ctx.ellipse(x,foot+2,h*.25,h*.046,0,0,TAU);ctx.stroke();
  }else if(layer==="front"&&!beat.reduced){
   if(beat.sniff>.03){
@@ -68,7 +68,7 @@ export function drawChispinWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"
    }
   }
   if(beat.prank>.03){
-   ctx.globalAlpha=.57*beat.prank;ctx.strokeStyle="#d8a4ff";ctx.lineWidth=1.7;
+   ctx.globalAlpha=.57*beat.prank;ctx.strokeStyle="#bceeff";ctx.lineWidth=1.7;
    for(let i=0;i<3;i++){
     const px=x-h*(.13+i*.032),py=foot-h*(.43+i*.06);
     ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-h*.04,py-h*.015);ctx.stroke();
@@ -90,7 +90,7 @@ export function drawChispinWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"
    }
   }
   if(beat.cloud>.03){
-   const k=beat.cloud;ctx.globalAlpha=.64*k;ctx.lineWidth=1.5;ctx.strokeStyle="#f9eaff";
+   const k=beat.cloud;ctx.globalAlpha=.64*k;ctx.lineWidth=1.5;ctx.strokeStyle="#fffefa";
    // Five small cloud curls live above Chispin, never obscure Stitcho or another slot.
    for(let i=0;i<3;i++){
     const px=x+h*(-.12+i*.11),py=foot-h*(.96+Math.sin(i*1.7)*.03);

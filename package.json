@@ -6,6 +6,7 @@
     "test": "node --test tests/*.js",
     "test:browser": "node tests/browser/e2e.mjs",
     "test:browser:approved-chispa": "node tests/browser/approved-chispa.mjs",
+    "test:browser:chispa-sanctuary": "node tests/browser/chispa-sanctuary.mjs",
     "test:browser:chispa": "node tests/browser/chispa-redesign.mjs",
     "test:browser:direction": "node tests/browser/visual-direction.mjs",
     "test:browser:polish": "node tests/browser/character-polish.mjs",

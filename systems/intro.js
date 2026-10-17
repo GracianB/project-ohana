@@ -1,3 +1,4 @@
+import {drawChispaCeremony} from './chispa-stagecraft.js';
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
 // ----------------------------------------------------------------------------
@@ -447,6 +448,7 @@ export function playTitleIntro(options = {}) {
     const chispinBeat=chispinWelcomeBeat(loop,reduce);
     const chispinHeight=heroH*.96;
     drawChispinWelcomeFX(ctx,cxp,chispin.foot+1,chispinHeight,t,chispinBeat,"back");
+    drawChispaCeremony(ctx,cxp,chispin.foot+1,chispinHeight,t,reduce,"intro");
     actor("chispin",cxp,chispin.foot+1,chispinHeight,tf,{
       facing:-1,pose:"idle",chispinWelcome:chispinBeat
     });
@@ -463,9 +465,9 @@ export function playTitleIntro(options = {}) {
     }else if(chispinBeat.prank>.48){
       comicBubble("¡JA, JA!",cxp,chispin.foot-heroH*1.03,chispinBeat.prank,"#f3c0ff","left");
     }else if(chispinBeat.charge>.48){
-      comicBubble("¡ESTORNUDO!",cxp,chispin.foot-heroH*1.08,chispinBeat.charge,"#ffe6b3","left");
+      comicBubble("OM… ¡TRUENO!",cxp,chispin.foot-heroH*1.08,chispinBeat.charge,"#ffe6b3","left");
     }else if(chispinBeat.cloud>.48){
-      comicBubble("¿MI NUBE?",cxp,chispin.foot-heroH*1.06,chispinBeat.cloud,"#e8d8ff","left");
+      comicBubble("CALMA. MÁS O MENOS.",cxp,chispin.foot-heroH*1.06,chispinBeat.cloud,"#e8d8ff","left");
     }
     if(stitchoBeat.scout>.48){
       comicBubble("¿LISTO?",sx,stitcho.foot-heroH*1.08,stitchoBeat.scout,"#a5f2ff","right");
@@ -914,6 +916,10 @@ export function playIntro(kind, name, done, id) {
     p._evoT = seg(t, T.in, T.out);
     ctx.save();
     ctx.globalAlpha = seg(t, 0.1, 0.25) * fade;
+    if(def.id==='chispin'){
+      p._poseOverride=t<T.in?'jump':t<T.out-.25?'cast':'victory';
+      drawChispaCeremony(ctx,cx,footY+yOff,target,t,reduce,'intro');
+    }
     drawDummy(ctx, p, cx, footY + yOff, scale * (1 + 0.1 * outK), t * 60);
     ctx.restore();
     parts.update(dt);

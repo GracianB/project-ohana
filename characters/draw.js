@@ -1205,7 +1205,7 @@ const footY = p.y + p.h - cam.y;
 const speed = Math.abs(p.vx || 0);
 const moving = !!p.grounded && speed > 0.55;
 const air = !p.grounded;
-const duetProtected=isDuetProtected(p,t);
+const duetProtected=isDuetProtected(p,t)||(p.id==='chispin'&&Number(p._chispaEvadeUntil)>t);
 // Propagate accessibility preference to the *local* render pose only.
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true};

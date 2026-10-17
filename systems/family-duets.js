@@ -1,3 +1,4 @@
+import {drawChispaAssist} from './chispa-stagecraft.js';
 // OHANA · V305–V311: six real U duets with the next hero's L.
 // Dragón calls Dino's fossil quake, retaining his original free-flight supreme.
 // Visuals never damage anything. Only updateFamilyDuet mutates combat state.
@@ -359,6 +360,7 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readFamilyDuet(value);if(!s)return false;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);
  const def=familyDuetDefinition(s),pose=familyDuetPose(s,reduce);
  const legendary=legendaryDuetMoment(s,reduce);
+ if(def.ally==='chispin')drawChispaAssist(ctx,s,cam,t,reduce);
  const x=s.x-cam.x,y=s.y-cam.y,friend=roster.find(r=>r.id===def.ally),form=friend?.forms?.[s.evo];
  ctx.save();const baseAlpha=ctx.globalAlpha;ctx.globalAlpha*=pose.alpha;
  if(friend&&form&&typeof drawActor==="function"){
@@ -404,6 +406,7 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
     break;
    }
    case "storm":{
+    if(def.ally==='chispin')break;
     for(let k=0;k<(reduce?2:4);k++){
      const bx=xx+(k-1)*22;
      ctx.strokeStyle=k%2?"#fff0ad":"#b2efff";ctx.lineWidth=3;

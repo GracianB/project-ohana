@@ -31,6 +31,12 @@ const KIND_TINT = {
 
 export function drawEnemy(ctx, e, cam, t, {reduceMotion=false}={}) {
   if (e.boss && e.fell) return;
+  const simulationT=t;
+  if(e.hp>0&&Number.isFinite(e._chispaMarkUntil)&&e._chispaMarkUntil>simulationT){
+    ctx.save();ctx.translate(e.x+e.w/2-cam.x,e.y-cam.y-29);
+    ctx.fillStyle='#102e35';ctx.beginPath();ctx.arc(0,0,9,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#d6f5ff';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(3,-7);ctx.lineTo(-4,1);ctx.lineTo(3,-1);ctx.lineTo(-2,7);ctx.stroke();ctx.restore();
+  }
   if (reduceMotion) t=0;
 
   const x = e.x - cam.x;

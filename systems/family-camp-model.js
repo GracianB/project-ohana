@@ -1,7 +1,7 @@
 export const CAMP_HEROES = Object.freeze({
  kilo:{x:235,y:310,role:'Melodía y flotación',route:'Corrientes de polen y mecanismos musicales',prop:'music',lines:['La aventura empieza con una nota.','¿Quién ha convertido mi ukelele en una tostadora?','Vale. Ensayamos una vez más.']},
  stitcho:{x:460,y:230,role:'Acrobacias y agarre',route:'Paredes, trepa y recorridos verticales',prop:'kite',lines:['He encontrado un atajo. Está arriba.','¡Era una cometa! ¡ERA UNA COMETA!','Aterrizaje perfecto. Casi.']},
- chispin:{x:670,y:310,role:'Velocidad y electricidad',route:'Nubes eléctricas y circuitos de impulso',prop:'spark',lines:['Solo iba a cargar una lucecita.','Creo que he encendido toda la isla.','¿Alguien tiene un cable más largo?']},
+ chispin:{x:670,y:310,role:'Velocidad y electricidad',route:'Nubes eléctricas y circuitos de impulso',prop:'spark',lines:['Respira. Escucha. Hasta el rayo tiene su calma.','Ups. He meditado tan fuerte que he encendido la isla.','Puedo partir el cielo. Pero primero, un abrazo.']},
  cat:{x:925,y:230,role:'Precisión y salto lunar',route:'Saltos felinos y secretos a contraluz',prop:'moon',lines:['Esa mariposa sabe algo.','¡La tenía! Bueno, casi la tenía.','Estoy vigilando. No estoy durmiendo.']},
  dragon:{x:1120,y:310,role:'Potencia y planeo',route:'Corrientes de aire y vuelos encadenados',prop:'fire',lines:['Voy a tostar una nube.','¡Eso era el sombrero de Dino!','Ahora tiene ventilación. De nada.']},
  dino:{x:270,y:485,role:'Peso e impacto',route:'Grietas, pisotones y rebotes colosales',prop:'rock',lines:['Puedo saltar sin hacer ruido.','¿Ese terremoto ha sido mío?','Lo repito, pero de puntillas.']},
