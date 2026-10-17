@@ -2008,3 +2008,7 @@ Diagonal face-time collision checks, revisioned checkpoint recovery, extracted r
 ## Performance and control feel - ohana-422
 
 Symmetric camera anticipation, cleared pause action buffers, stable transient collections, offscreen particle culling and change-only experience UI. Multiplayer services remain deferred.
+
+## Play presentation - ohana-423
+
+Illustrated interactive atlas with room details and real outgoing paths. Reworked compact player HUD, touch controls, instructions and contextual messages. Restrained impact effects and motion.

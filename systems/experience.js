@@ -397,11 +397,9 @@ export class ExperienceDirector {
     const W = Math.max(320, Number(width) || ctx.canvas?.width || 1280);
     const H = Math.max(240, Number(height) || ctx.canvas?.height || 720);
 
-    const impact = this.state.impact;
-    const shock = this.state.shock;
+    // Impact and landing cues are drawn at their world-space origins by CombatFX.
     const dash = this.state.dash;
     const hurt = this.state.hurt;
-    const land = this.state.land;
     const evo = this.state.evo;
     const boss = this.state.boss;
     const dir = this.state.dir || 1;
@@ -409,7 +407,7 @@ export class ExperienceDirector {
     ctx.save();
 
 
-    if (!reduced && dash > 0.035) {
+    if (!reduced && dash > 0.12) {
       const a = clamp(dash * 0.55);
 
       ctx.globalAlpha = a;
@@ -417,7 +415,7 @@ export class ExperienceDirector {
       ctx.strokeStyle = this.state.color || "#7ee7ff";
       ctx.lineWidth = 1.5;
 
-      const count = 15;
+      const count = 6;
 
       for (let i = 0; i < count; i++) {
         const y =
@@ -441,84 +439,10 @@ export class ExperienceDirector {
     }
 
 
-    if (impact > 0.035 || shock > 0.035) {
-      const ix =
-        W * 0.5 +
-        dir * Math.min(170, W * 0.14);
-
-      const iy = H * 0.48;
-
-      const power =
-        clamp(Math.max(impact, shock));
-
-      const radius =
-        16 + easeOut(1 - power) * 72;
-
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = power * 0.42;
-      ctx.strokeStyle = this.state.color || "#fff";
-      ctx.lineWidth = 2 + power * 3;
-
-      ctx.beginPath();
-      ctx.arc(ix, iy, radius, 0, TAU);
-      ctx.stroke();
-
-      ctx.globalAlpha = power * 0.28;
-
-      for (let i = 0; i < 10; i++) {
-        const angle =
-          (TAU * i) / 10 +
-          time * 0.025;
-
-        const inner = radius * 0.65;
-        const outer =
-          radius * (1.25 + (i & 1) * 0.45);
-
-        ctx.beginPath();
-        ctx.moveTo(
-          ix + Math.cos(angle) * inner,
-          iy + Math.sin(angle) * inner
-        );
-        ctx.lineTo(
-          ix + Math.cos(angle) * outer,
-          iy + Math.sin(angle) * outer
-        );
-        ctx.stroke();
-      }
-
-      if (this.state.crit && !reduced && impact > 0.12) {
-        ctx.globalAlpha = Math.min(0.95, impact);
-        ctx.fillStyle = "#fff0a4";
-        ctx.font = "900 15px Outfit, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("CRÍTICO", ix, iy - radius - 18);
-      }
-    }
 
 
-    if (land > 0.035) {
-      const k = 1 - land;
-      const r =
-        24 + (1 - k) * Math.min(110, W * 0.12);
 
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = land * 0.42;
-      ctx.strokeStyle = this.state.color || "#fff";
-      ctx.lineWidth = 2 + land * 2;
 
-      ctx.beginPath();
-      ctx.ellipse(
-        W * 0.5,
-        H * 0.74,
-        r,
-        Math.max(8, r * 0.16),
-        0,
-        0,
-        TAU
-      );
-      ctx.stroke();
-    }
 
 
     if (evo > 0.03) {

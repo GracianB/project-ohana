@@ -8,25 +8,26 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=ohana-422">
-  <link rel="stylesheet" href="style.css?v=ohana-422">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-422">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-422">
-  <link rel="stylesheet" href="hud.css?v=ohana-422">
-  <link rel="stylesheet" href="evo.css?v=ohana-422">
-  <link rel="stylesheet" href="ending.css?v=ohana-422">
-  <link rel="stylesheet" href="intro.css?v=ohana-422">
-  <link rel="stylesheet" href="demo.css?v=ohana-422">
-  <link rel="stylesheet" href="experience.css?v=ohana-422">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-422">
-  <link rel="stylesheet" href="supreme.css?v=ohana-422">
-  <link rel="stylesheet" href="world-map.css?v=ohana-422">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-422">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-422">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-422">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-422">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-422">
-  <link rel="stylesheet" href="family-camp.css?v=ohana-422">
+  <link rel="stylesheet" href="fonts.css?v=ohana-423">
+  <link rel="stylesheet" href="style.css?v=ohana-423">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-423">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-423">
+  <link rel="stylesheet" href="hud.css?v=ohana-423">
+  <link rel="stylesheet" href="evo.css?v=ohana-423">
+  <link rel="stylesheet" href="ending.css?v=ohana-423">
+  <link rel="stylesheet" href="intro.css?v=ohana-423">
+  <link rel="stylesheet" href="demo.css?v=ohana-423">
+  <link rel="stylesheet" href="experience.css?v=ohana-423">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-423">
+  <link rel="stylesheet" href="supreme.css?v=ohana-423">
+  <link rel="stylesheet" href="world-map.css?v=ohana-423">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-423">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-423">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-423">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-423">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-423">
+  <link rel="stylesheet" href="family-camp.css?v=ohana-423">
+  <link rel="stylesheet" href="play-interface.css?v=ohana-423">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -227,20 +228,20 @@
   </section>
   <div id="help" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="help-title">
     <div class="panel">
-      <h2 id="help-title">Isla Hoku</h2>
-      <ul>
-        <li>Empiezas bebé y evolucionas automáticamente al reunir XP, hasta su forma final: cinco formas.</li>
-        <li><kbd>E</kbd> usa catapultas. Los vórtices se activan al entrar en su campo.</li>
-        <li>Diez salas conectadas por rutas, caídas, catapultas y vórtices. Jungla pide forma 3; Caldera y Nido, forma 4.</li>
-        <li>Derrota a la Reina del Nido.</li>
-      </ul>
-      <div class="help-controls"><div><kbd>WASD / ← →</kbd> Mover</div><div><kbd>Espacio / ↑</kbd> Saltar</div><div><kbd>Shift</kbd> Dash</div><div><kbd>H</kbd> Golpe</div><div><kbd>J K L</kbd> Poderes al evolucionar</div><div><kbd>U</kbd> Compañero sorpresa</div><div><kbd>E</kbd> Usar catapulta</div><div><kbd>M</kbd> Mapa · <kbd>B</kbd> Álbum</div><div><kbd>R</kbd> Volver al Claro</div><div><kbd>Esc</kbd> Pausa</div></div><p>La U revela con una «?» a uno de los otros nueve compañeros. Cada invitado entra en escena con su propio recorrido.</p>
+      <p class="map-eyebrow">GUÍA DE LA FAMILIA</p>
+      <h2 id="help-title">Tu aventura empieza aquí</h2>
+      <p class="help-lead">Explora Isla Hoku, haz crecer a tu héroe y reúne fuerzas para enfrentarte a la Reina del Nido.</p>
+      <ol class="help-steps"><li><em>01</em><strong>Explora</strong><p>Salta entre plataformas y busca caminos nuevos. El mapa te muestra cómo conectar cada lugar.</p></li><li><em>02</em><strong>Evoluciona</strong><p>Reúne cristales y derrota enemigos para ganar XP. Tu héroe cambia de forma automáticamente.</p></li><li><em>03</em><strong>Haz equipo</strong><p>Usa tus poderes y llama a un compañero con U. Cada invitado tiene su propia entrada en escena.</p></li></ol>
+      <div class="help-controls"><div><kbd>A D / ← →</kbd> Mover</div><div><kbd>W / Espacio / ↑</kbd> Saltar</div><div><kbd>S / ↓</kbd> Bajar de una plataforma</div><div><kbd>Shift</kbd> Dash · esquivar</div><div><kbd>H / F</kbd> Golpe cercano</div><div><kbd>J K L</kbd> Poderes del héroe</div><div><kbd>U</kbd> Compañero sorpresa</div><div><kbd>E</kbd> Usar catapulta</div><div><kbd>M</kbd> Mapa · <kbd>B</kbd> Álbum</div><div><kbd>Esc</kbd> Pausa</div></div>
+      <p class="help-footnote">En móvil, usa los botones de pantalla. Jungla se abre en la forma 3; Caldera y Nido, en la forma 4. <kbd>R</kbd> te devuelve al Claro. Los vórtices se activan al entrar en su campo.</p>
       <button type="button" id="btn-close-help" class="cta ghost">Cerrar ayuda</button>
     </div>
   </div>
   <div id="map-overlay" data-dialog="open" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="map-title">
     <div class="panel">
-      <h2 id="map-title">Archipiélago</h2>
+      <p class="map-eyebrow">ISLA HOKU · DIEZ LUGARES, UNA AVENTURA</p>
+      <h2 id="map-title">Sigue tu propio camino</h2>
+      <p class="map-intro">Selecciona un lugar para descubrir sus conexiones.</p>
       <div id="map-grid"></div>
       <button type="button" id="btn-close-map" class="cta ghost">Cerrar mapa</button>
     </div>
@@ -261,16 +262,16 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-422"></script>
-  <script type="module" src="game.js?v=ohana-422"></script>
-  <script type="module" src="systems/title.js?v=ohana-422"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-422"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-422"></script>
-  <script type="module" src="systems/demo.js?v=ohana-422"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-423"></script>
+  <script type="module" src="game.js?v=ohana-423"></script>
+  <script type="module" src="systems/title.js?v=ohana-423"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-423"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-423"></script>
+  <script type="module" src="systems/demo.js?v=ohana-423"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-422", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-423", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

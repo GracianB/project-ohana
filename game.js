@@ -22,7 +22,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
-import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
+import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { visibleForRender } from "./systems/render-v98-culling.js";
 import { Floaters } from "./systems/floaters.js";
@@ -598,6 +598,21 @@ return;
 DOM.help?.classList.remove("open");
 setPaused(false);
 grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+grid.onclick = event => {
+  const node=event.target.closest('.wm-node');
+  if(!node||!grid.contains(node))return;
+  for(const other of grid.querySelectorAll('.wm-node')){
+    other.classList.toggle('selected',other===node);
+    other.setAttribute('aria-pressed',String(other===node));
+  }
+  grid.querySelector('.wm-detail').innerHTML=worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+};
+requestAnimationFrame(()=>{
+ const node=grid.querySelector('.wm-node.here');
+ node?.focus({preventScroll:true});
+ const scroll=grid.querySelector('.wm-scroll');
+ if(scroll&&node)scroll.scrollLeft=node.offsetLeft-scroll.clientWidth/2;
+});
 overlay.classList.add("open");
 }
 function makePlayer(def) {
@@ -2629,7 +2644,8 @@ drawRoomAtmosphere(
   game.cam,
   t,
   viewportW,viewportH,
-  game.player?.id
+  game.player?.id,
+  game.reduceMotion || reduceMotion
 );
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
@@ -2684,7 +2700,7 @@ for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
-game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
+game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam, game.reduceMotion || reduceMotion); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);

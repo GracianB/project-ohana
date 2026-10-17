@@ -49,6 +49,9 @@ jobs:
       - name: Local gameplay, offline fonts and responsive controls
         run: npm run test:browser:local
 
+      - name: Illustrated atlas, readable guide and compact play interface
+        run: npm run test:browser:presentation
+
       - name: Browser E2E
         run: npm run test:browser
 

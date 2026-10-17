@@ -47,75 +47,50 @@ export class CombatFX {
     items.length=write;
   }
 
-  render(ctx, cam) {
+  render(ctx, cam, reduceMotion = false) {
     if (!ctx) return;
     ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    for (const item of this.items) {
-      const u = 1 - item.life / item.max;
-      const e = easeOut(u);
-      const fade = 1 - u;
-      const x = item.x - cam.x;
-      const y = item.y - cam.y;
-      const span = 18 + item.tier * 11;
-      const alpha = fade * (0.64 + item.tier * 0.08);
-
-      ctx.globalCompositeOperation = "lighter";
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = item.color;
-      ctx.lineWidth = 2.8 + item.tier * 0.9;
-
-      ctx.beginPath();
-      ctx.arc(x, y, span * (0.25 + e * 0.9), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      const sweep = -0.9 + item.dir * 0.2;
-      ctx.arc(x - item.dir * span * 0.15, y, span * (0.55 + e * 0.7), sweep, sweep + 1.7);
-      ctx.stroke();
-
-      const rays = 4 + item.tier * 2;
-      for (let i = 0; i < rays; i++) {
-        const a = (Math.PI * 2 * i) / rays + item.seed * 0.17;
-        const inner = span * (0.25 + e * 0.22);
-        const outer = span * (0.72 + e * (0.65 + item.tier * 0.10));
-        ctx.beginPath();
-        ctx.moveTo(x + Math.cos(a) * inner, y + Math.sin(a) * inner);
-        ctx.lineTo(x + Math.cos(a) * outer, y + Math.sin(a) * outer);
-        ctx.stroke();
-      }
-
-      if (item.tier >= 2) {
-        ctx.globalAlpha = alpha * 0.72;
-        const dir = item.dir;
-        for (let i = 0; i < 2 + item.tier; i++) {
-          const yy = y + (i - (item.tier + 1) / 2) * 5;
-          const len = (18 + item.tier * 9) * e;
+    try {
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (const item of this.items) {
+        const progress = 1 - item.life / item.max;
+        const ease = easeOut(progress);
+        const x = item.x - cam.x, y = item.y - cam.y;
+        const span = 14 + item.tier * 6;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.globalAlpha = Math.max(0, (1 - progress) * .86);
+        ctx.strokeStyle = item.color;
+        ctx.fillStyle = item.color;
+        ctx.lineWidth = 2 + item.tier * .45;
+        if (reduceMotion) {
+          // A steady impact mark: no orbiting shards, scale pulses or flashes.
           ctx.beginPath();
-          ctx.moveTo(x + dir * 3, yy);
-          ctx.lineTo(x + dir * (len + 6), yy - (i - 1) * 1.5);
-          ctx.stroke();
+          ctx.moveTo(x-span*.5,y);ctx.lineTo(x,y-span*.5);
+          ctx.lineTo(x+span*.5,y);ctx.lineTo(x,y+span*.5);ctx.closePath();ctx.stroke();
+          continue;
+        }
+        // One directional brush stroke follows the strike, rather than a
+        // full circle covering the target. The second stroke is its afterimage.
+        const start = item.dir > 0 ? -1.1 : Math.PI-1.1;
+        ctx.beginPath();ctx.arc(x,y,span*(.5+ease*.8),start,start+1.5);ctx.stroke();
+        ctx.globalAlpha *= .45;ctx.lineWidth = 1.2;
+        ctx.beginPath();ctx.arc(x-item.dir*4,y+3,span*(.8+ease*.7),start+.15,start+1);ctx.stroke();
+        ctx.globalAlpha = Math.max(0,(1-progress)*.75);
+        const rays = 3 + Math.min(3,item.tier);
+        for(let i=0;i<rays;i++){
+          const angle = i*Math.PI*2/rays+item.seed*.17;
+          const distance = span*(.35+ease*1.2);
+          const sx=x+Math.cos(angle)*distance,sy=y+Math.sin(angle)*distance;
+          const radius=(item.tier>=3?3:2)*(1-progress);
+          ctx.beginPath();ctx.moveTo(sx-radius,sy);ctx.lineTo(sx,sy-radius*1.8);
+          ctx.lineTo(sx+radius,sy);ctx.lineTo(sx,sy+radius*1.8);ctx.closePath();ctx.fill();
+        }
+        if(progress<.22){
+          ctx.globalAlpha=(1-progress/.22)*.7;
+          ctx.fillStyle="#fff5d0";ctx.beginPath();ctx.arc(x,y,3+item.tier*.5,0,Math.PI*2);ctx.fill();
         }
       }
-
-      ctx.globalAlpha = alpha * 0.9;
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(x, y, Math.max(2.2, 4.6 - e * 2.4), 0, Math.PI * 2);
-      ctx.fill();
-
-      if (item.label && item.tier >= 2 && u < 0.78) {
-        ctx.globalAlpha = Math.min(0.96, (0.78 - u) * 1.8);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "800 " + (11 + item.tier * 2) + "px Outfit,sans-serif";
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "rgba(4,8,16,.88)";
-        ctx.strokeText(item.label, x, y - 20 - e * 10);
-        ctx.fillStyle = item.color;
-        ctx.fillText(item.label, x, y - 20 - e * 10);
-      }
-    }
-    ctx.restore();
+    } finally {ctx.restore();}
   }
 }
