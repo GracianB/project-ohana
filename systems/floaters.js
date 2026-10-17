@@ -31,9 +31,12 @@ export class Floaters {
     return true;
   }
   update() {
-    this.items = this.items.filter((f) => {
-      f.y -= f.crit ? 1.6 : 1.2; f.life--; return f.life > 0;
-    });
+    let write = 0;
+    for (const f of this.items) {
+      f.y -= f.crit ? 1.6 : 1.2;
+      if (--f.life > 0) this.items[write++] = f;
+    }
+    this.items.length = write;
   }
   render(ctx, cam, reduceMotion = false) {
     ctx.save();

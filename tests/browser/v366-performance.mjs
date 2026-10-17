@@ -23,6 +23,10 @@ try {
     try {
       await page.goto(base,{waitUntil:"domcontentloaded"});
       await page.waitForFunction(()=>!!window.__OHANA_E2E?.start&&!!window.__OHANA_PERF?.snapshot,undefined,{timeout:15000});
+      // Measure gameplay after the welcome has actually released its canvas.
+      // Starting the harness alone leaves the opening animation active.
+      await page.locator('#ohana-intro .oi-enter').click();
+      await page.locator('#ohana-intro').waitFor({state:'detached'});
       await page.evaluate(()=>{
         window.__OHANA_E2E.start("kilo");
         window.__OHANA_PERF.reset();

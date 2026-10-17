@@ -1,3 +1,5 @@
+import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
+import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { mountSelectScreen } from "./systems/select-screen.js";
@@ -20,7 +22,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
-import { renderWorldGraphHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
+import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { visibleForRender } from "./systems/render-v98-culling.js";
 import { Floaters } from "./systems/floaters.js";
@@ -38,7 +40,7 @@ import { resolveBody, hitsSolid } from "./engine/collide.js";
 import { XP_NEED } from "./systems/xp.js";
 import { saveStore } from "./systems/save.js";
 import { finiteOr as safeFiniteOr, damageEnemy as safeDamageEnemy, healPlayer as safeHealPlayer, damagePlayer as safeDamagePlayer, addPlayerXp as safeAddPlayerXp, addScore as safeAddScore, addKill as safeAddKill, addCombo as safeAddCombo } from "./systems/mutations.js";
-import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
+import { MAX_RUNTIME_ENEMIES, MAX_RUNTIME_PROJECTILES, MAX_RUNTIME_GHOSTS, MAX_RUNTIME_ORBS, MAX_RUNTIME_BOLTS, MAX_RUNTIME_SLASHES, MAX_RUNTIME_SAFE, pushRuntime, compactRuntimeList, compactLiveList, boundedFinite as runtimeBoundedFinite } from "./systems/runtime.js";
 import { createFixedClock } from "./engine/clock.js";
 import { canvasDpr,createFramePressureMonitor,initialCanvasPressure,createResolutionRecovery } from "./systems/frame-pressure.js";
 import { createRenderProfiler } from "./systems/render-profiler.js";
@@ -191,83 +193,6 @@ return vfxUnit(game.t * 31.73 + Number(salt) * 17.11);
 }
 function boundedFinite(value, fallback, min, max) { return runtimeBoundedFinite(value, fallback, min, max); }
 
-function sanitizeRuntimeState() {
-game.t = boundedFinite(game.t, 0, 0, MAX_RUNTIME_SAFE);
-game.score = boundedFinite(game.score, 0, 0, MAX_RUNTIME_SAFE);
-game.kills = Math.floor(boundedFinite(game.kills, 0, 0, MAX_RUNTIME_SAFE));
-game.combo = Math.floor(boundedFinite(game.combo, 0, 0, 999));
-game.comboT = Math.floor(boundedFinite(game.comboT, 0, 0, 600));
-game.shake = boundedFinite(game.shake, 0, 0, 32);
-game.hitstop = Math.floor(boundedFinite(game.hitstop, 0, 0, 8));
-game.flash = Math.floor(boundedFinite(game.flash, 0, 0, 120));
-game.fading = Math.floor(boundedFinite(game.fading, 0, 0, 120));
-if (typeof game.rng !== "function") game.rng = Math.random;
-
-const p = game.player;
-if (p) {
-p.x = boundedFinite(p.x, game.spawn?.x ?? 180, -2048, game.worldW + 2048);
-p.y = boundedFinite(p.y, game.spawn?.y ?? 500, -2048, game.worldH + 2048);
-p.w = boundedFinite(p.w, 32, 1, 256);
-p.h = boundedFinite(p.h, 32, 1, 256);
-p.vx = boundedFinite(p.vx, 0, -40, 40);
-p.vy = boundedFinite(p.vy, 0, -40, 40);
-p.maxHealth = boundedFinite(p.maxHealth, 100, 1, 100000);
-p.health = boundedFinite(p.health, p.dead ? 0 : p.maxHealth, 0, p.maxHealth);
-p.xp = boundedFinite(p.xp, 0, 0, MAX_RUNTIME_SAFE);
-p.evo = Math.floor(boundedFinite(p.evo, 0, 0, 4));
-p.invuln = Math.floor(boundedFinite(p.invuln, 0, 0, 600));
-p.coyote = Math.floor(boundedFinite(p.coyote, 0, 0, 60));
-p.buffer = Math.floor(boundedFinite(p.buffer, 0, 0, 60));
-p.dash = Math.floor(boundedFinite(p.dash, 0, 0, 120));
-p.melee = Math.floor(boundedFinite(p.melee, 0, 0, 120));
-}
-
-compactRuntimeList(game.enemies, MAX_RUNTIME_ENEMIES);
-for (const e of game.enemies) {
-e.x = boundedFinite(e.x, 0, -2048, game.worldW + 2048);
-e.y = boundedFinite(e.y, 0, -2048, game.worldH + 2048);
-e.w = boundedFinite(e.w, 32, 1, 512);
-e.h = boundedFinite(e.h, 32, 1, 512);
-e.vx = boundedFinite(e.vx, 0, -40, 40);
-e.vy = boundedFinite(e.vy, 0, -40, 40);
-e.max = boundedFinite(e.max, 1, 1, 100000);
-e.hp = boundedFinite(e.hp, 0, 0, e.max);
-e.invuln = Math.floor(boundedFinite(e.invuln, 0, 0, 600));
-e.stun = Math.floor(boundedFinite(e.stun, 0, 0, 120));
-e.dying = Math.floor(boundedFinite(e.dying, 0, 0, 240));
-}
-
-compactRuntimeList(game.projectiles, MAX_RUNTIME_PROJECTILES);
-for (const pr of game.projectiles) {
-pr.x = boundedFinite(pr.x, 0, -4096, game.worldW + 4096);
-pr.y = boundedFinite(pr.y, 0, -4096, game.worldH + 4096);
-pr.w = boundedFinite(pr.w, 8, 1, 256);
-pr.h = boundedFinite(pr.h, 8, 1, 256);
-pr.vx = boundedFinite(pr.vx, 0, -60, 60);
-pr.vy = boundedFinite(pr.vy, 0, -60, 60);
-pr.life = Math.floor(boundedFinite(pr.life, 0, 0, 600));
-pr.dmg = boundedFinite(pr.dmg, 0, 0, 100000);
-}
-
-compactRuntimeList(game.ghosts, MAX_RUNTIME_GHOSTS);
-for (const g of game.ghosts) {
-g.x = boundedFinite(g.x, 0, -4096, game.worldW + 4096);
-g.y = boundedFinite(g.y, 0, -4096, game.worldH + 4096);
-g.w = boundedFinite(g.w, 32, 1, 256);
-g.h = boundedFinite(g.h, 32, 1, 256);
-g.life = Math.floor(boundedFinite(g.life, 0, 0, 120));
-}
-
-compactRuntimeList(game.orbs, MAX_RUNTIME_ORBS);
-for (const o of game.orbs) {
-o.x = boundedFinite(o.x, 0, -4096, game.worldW + 4096);
-o.y = boundedFinite(o.y, 0, -4096, game.worldH + 4096);
-o.r = boundedFinite(o.r, 9, 1, 128);
-}
-
-game.cam.x = boundedFinite(game.cam?.x, 0, -4096, game.worldW + 4096);
-game.cam.y = boundedFinite(game.cam?.y, 0, -4096, game.worldH + 4096);
-}
 
 let viewW = 1280, viewH = 720, viewDpr = 1;
 const CAM_ZOOM = 1.02;
@@ -311,6 +236,7 @@ function setPaused(on) {
 if (game.finale && game.finale.t > 0) return;
 
 paused = !!on && game.running;
+clearBufferedActions(game.player);
 
 const pauseLayer = DOM.pause || document.getElementById("pause-overlay");
 
@@ -672,6 +598,21 @@ return;
 DOM.help?.classList.remove("open");
 setPaused(false);
 grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+grid.onclick = event => {
+  const node=event.target.closest('.wm-node');
+  if(!node||!grid.contains(node))return;
+  for(const other of grid.querySelectorAll('.wm-node')){
+    other.classList.toggle('selected',other===node);
+    other.setAttribute('aria-pressed',String(other===node));
+  }
+  grid.querySelector('.wm-detail').innerHTML=worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+};
+requestAnimationFrame(()=>{
+ const node=grid.querySelector('.wm-node.here');
+ node?.focus({preventScroll:true});
+ const scroll=grid.querySelector('.wm-scroll');
+ if(scroll&&node)scroll.scrollLeft=node.offsetLeft-scroll.clientWidth/2;
+});
 overlay.classList.add("open");
 }
 function makePlayer(def) {
@@ -2602,18 +2543,17 @@ if (pr.owner === "player") {
   pr.life = 0;
 }
 }
-game.projectiles = game.projectiles.filter((pr) => pr.life > 0);
-game.bolts = game.bolts.filter((b) => --b.life > 0).slice(-MAX_RUNTIME_BOLTS);
-game.slashes = (game.slashes || []).filter((s) => --s.life > 0);
-if (game.slashes.length > 6) game.slashes.splice(0, game.slashes.length - 6);
-game.ghosts = game.ghosts.filter((g) => --g.life > 0);
+compactLiveList(game.projectiles);
+compactLiveList(game.bolts, { tickLife: true, max: MAX_RUNTIME_BOLTS });
+compactLiveList(game.slashes, { tickLife: true, max: MAX_RUNTIME_SLASHES });
+compactLiveList(game.ghosts, { tickLife: true });
 }
 function updateCam() {
 const p = game.player; if (!p) return;
 const vw = camW(), vh = camH();
 let lerp = 0.24;
-const look = p._dashGo > 0 ? 48 : Math.sign(p.vx || 0) * 18;
-let tx = p.x + p.w / 2 + (p.facing || 1) * look - vw / 2;
+const look = horizontalLook(p);
+let tx = p.x + p.w / 2 + look - vw / 2;
 let ty = p.y + p.h / 2 - vh / 2;
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
@@ -2704,7 +2644,8 @@ drawRoomAtmosphere(
   game.cam,
   t,
   viewportW,viewportH,
-  game.player?.id
+  game.player?.id,
+  game.reduceMotion || reduceMotion
 );
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
@@ -2740,7 +2681,7 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  drawEnemy(ctx, e, game.cam, t);
+  drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
   ctx.restore();
 }
 if (!game.finale) {
@@ -2759,7 +2700,7 @@ for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
 onlineCoop.render(ctx, game, t);
-game.fx.render(ctx, game.cam); game.combatFx?.render(ctx, game.cam); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
+game.fx.render(ctx, game.cam, { width: viewportW, height: viewportH }); game.combatFx?.render(ctx, game.cam, game.reduceMotion || reduceMotion); game.nums.render(ctx, game.cam, game.reduceMotion || reduceMotion);
 if (!game.player.dead && !DeathFx.isPlaying()) drawChispinCloud(ctx,game.player,game.cam,t);
 if (DeathFx.isPlaying()) {
 DeathFx.draw(ctx, game.cam, t);
@@ -2989,7 +2930,7 @@ const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
 let orbsLeft = 0;
 for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
 const hp = Math.max(0, Math.ceil(p.health));
-setText(DOM.hudMeta, "HP " + hp + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 4 ? "/" + need : ""));
+setText(DOM.hudMeta, "Forma " + (p.evo + 1) + "/5 · " + (p.evo < 4 ? p.xp + "/" + need + " de experiencia" : "Evolución completa"));
 const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
 if (DOM.hpBar) {
 const w = hpPct + "%";
@@ -3144,7 +3085,7 @@ if (game._cuernoIntroT != null) {
   if (++game._cuernoIntroT > CUERNO_INTRO_DURATION * 60) game._cuernoIntroT = null;
   return;
 }
-sanitizeRuntimeState();
+sanitizeRuntimeState(game);
 game.experience?.update(game);
 if (game.hitstop > 0) {
 game.hitstop--;
@@ -3522,6 +3463,10 @@ state() {
   const boss = game.boss || game.enemies.find((e) => e.boss);
   return {
     running: !!game.running,
+    paused,
+    runtimeFaults: game.runtimeFaults || 0,
+    camera: { x: game.cam.x, y: game.cam.y },
+    bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,

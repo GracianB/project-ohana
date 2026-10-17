@@ -36,3 +36,8 @@ body.playing #evo-stage:not(.show){display:none!important;pointer-events:none!im
   #evo-stage::before,#evo-stage::after{transition:none!important}
   #evo-stage .evo-skip{transition:none!important}
 }
+
+/* A clear stage, with an explicit action instead of accidental tap-to-skip. */
+#evo-stage::before,#evo-stage::after{display:none!important;}
+#evo-stage .evo-skip{background:#173c40;color:#fff1cf;border:1px solid #b5d1b755;border-radius:12px;min-height:44px;padding:12px 20px;letter-spacing:0;text-transform:none;font:600 13px Outfit,sans-serif;backdrop-filter:none;}
+#evo-stage .evo-skip:focus-visible{outline:3px solid #e8d290;outline-offset:4px;}

@@ -18,7 +18,7 @@ canvas{display:block;width:100%;height:auto}article p{font-size:12px;margin:0 4p
 a{color:#e6c4ff}footer{margin-top:28px;font-size:13px}
 @media(max-width:800px){.evolutions{grid-template-columns:repeat(2,minmax(0,1fr))}.evolutions article:last-child{grid-column:1/-1;width:100%;max-width:340px;justify-self:center}.notes{grid-template-columns:1fr}main{padding:24px 16px}.family{padding:14px}}
 </style>
-<main><header><span class="eyebrow">Cuerno · Diseño del personaje</span><h1>Un pequeño universo lila.</h1><p>De potrito soñador a guardián de las estrellas. Cinco formas, la misma mirada dulce y una crin lavanda que crece con él.</p></header>
+<main><header><span class="eyebrow">Cuerno · Diseño del personaje</span><h1>Un pequeño universo lila.</h1><p>De un brote curioso a un guardián de la noche. Patas articuladas, crines de aurora y alas de plumas que descubren su propia constelación.</p></header>
 <div class="controls"><label for="pose">Ver a Cuerno</label><select id="pose"><option value="idle">Respirando</option><option value="walk">Trotando</option><option value="jump">Saltando</option><option value="victory">Celebrando</option><option value="curious">Curioso</option><option value="shy">Tímido</option><option value="blink">Parpadeando</option><option value="attack">Embistiendo</option><option value="trail">Estela arcoíris</option><option value="hurt">Herido</option><option value="death">Tras la derrota</option></select><button id="pause" type="button" aria-pressed="false">Pausar</button><button id="mirror" type="button" aria-pressed="false">Girar</button></div>
 <section class="evolutions" aria-label="Las cinco evoluciones de Cuerno"></section>
 <section class="family"><h2>Pequeño, pero parte de una gran familia.</h2><p>Su tamaño real junto a los demás héroes, en la primera forma.</p><canvas id="family" width="1320" height="180" role="img" aria-label="Los diez héroes a escala de juego"></canvas></section>
@@ -27,7 +27,9 @@ a{color:#e6c4ff}footer{margin-top:28px;font-size:13px}
 <script type="module">
 import {drawCuernoV373,CUERNO_V373_NAMES} from '../characters/art/cuerno-v373.js';
 import {drawCharacter} from '../characters/draw.js';import {ROSTER} from '../characters/roster.js';
-const scales=[4,3,2.5,1.85,1.5],descriptions=['Un brote, una sonrisa y mucha curiosidad.','Un poni dulce que empieza a brillar.','Su crin descubre los colores del cielo.','Alas de perla para abrazar las nubes.','Un guardián nocturno de corazón tierno.'];
+import {preloadChispaAtlas} from '../characters/art/chispa-sprite.js';
+await preloadChispaAtlas();
+const scales=[4,3,2.5,1.85,1.5],descriptions=['Un brote, una sonrisa y mucha curiosidad.','Un poni de ojos de cristal y pequeños cascos lila.','Un kirín de jade, seis cintas de aurora y corona de prismas.','Siete plumas por ala, nácar y una diadema estelar.','Pelaje de medianoche, alas de constelación y mirada de luna.'];
 const section=document.querySelector('.evolutions');
 CUERNO_V373_NAMES.forEach((name,i)=>{const card=document.createElement('article');card.innerHTML=`<span>FORMA ${i+1} / 5</span><h2>${name}</h2><canvas width="300" height="310" role="img" aria-label="${name}"></canvas><p>${descriptions[i]}</p>`;section.appendChild(card)});
 const canvases=[...section.querySelectorAll('canvas')],pose=document.getElementById('pose'),pause=document.getElementById('pause'),mirror=document.getElementById('mirror');

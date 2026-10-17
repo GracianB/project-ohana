@@ -26,61 +26,21 @@ function wrap(v, size) {
 }
 
 export function drawOdysseySectors(ctx, roomId, cam, t, W, H, playerId) {
-  const horizon = H * 0.58;
-  const worldWidth = 2240;
-  const sectorWidth = worldWidth / CHARACTER_SECTORS.length;
-
+  const index = CHARACTER_SECTORS.findIndex(theme => theme.id === playerId);
+  if (index < 0) return;
+  const theme = CHARACTER_SECTORS[index];
+  // A quiet emblem in the distance. Navigation belongs in the atlas, not
+  // in permanent labels and arch outlines across the playable platforms.
+  const x = wrap(index * 224 + 110 - cam.x * .12, W + 160) - 80;
   ctx.save();
-  for (let i = 0; i < CHARACTER_SECTORS.length; i++) {
-    const theme = CHARACTER_SECTORS[i];
-    const wx = i * sectorWidth + sectorWidth * 0.5;
-    const px = wx - cam.x * 0.72;
-    if (px < -280 || px > W + 280) continue;
-
-    const active = playerId === theme.id;
-    const top = horizon - 260 - (i % 3) * 28;
-    const bottom = horizon + 48;
-    const accent = active ? 0.24 : 0.055 + 0.018 * Math.sin(t * 0.015 + i);
-
-    ctx.globalAlpha = accent;
-    ctx.strokeStyle = theme.c1;
-    ctx.lineWidth = active ? 5 : 3;
-    ctx.beginPath();
-    ctx.moveTo(px - sectorWidth * 0.42, bottom);
-    ctx.quadraticCurveTo(px - sectorWidth * 0.30, top + 55, px, top);
-    ctx.quadraticCurveTo(px + sectorWidth * 0.30, top + 55, px + sectorWidth * 0.42, bottom);
-    ctx.stroke();
-
-    ctx.globalAlpha = active ? 0.10 : 0.04;
-    const rg = ctx.createRadialGradient(px, top + 90, 8, px, top + 90, 190);
-    rg.addColorStop(0, theme.c1 + "aa");
-    rg.addColorStop(0.5, theme.c2 + "28");
-    rg.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = rg;
-    ctx.fillRect(px - 210, top - 110, 420, 360);
-
-    ctx.globalAlpha = active ? 0.30 : 0.10;
-    drawMotif(ctx, theme.motif, px, top + 88, t, i, theme);
-
-    ctx.fillStyle = theme.c1;
-    ctx.globalAlpha = active ? 0.78 : 0.18;
-    ctx.font = active ? "800 11px Outfit,system-ui,sans-serif" : "700 9px Outfit,system-ui,sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(theme.name, px, horizon + 84);
-  }
-
-  ctx.globalAlpha = 0.10;
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, horizon);
-  ctx.lineTo(W, horizon);
-  ctx.stroke();
+  ctx.globalAlpha = .08;
+  drawMotif(ctx, theme.motif, x, H * .19, t * .35, index, theme);
   ctx.restore();
 }
 
 function drawMotif(ctx, motif, x, y, t, i, theme) {
   ctx.save();
+  const baseAlpha = ctx.globalAlpha;
   if (motif === "sun") {
     ctx.strokeStyle = theme.c1;
     ctx.lineWidth = 2;
@@ -127,7 +87,7 @@ function drawMotif(ctx, motif, x, y, t, i, theme) {
   } else {
     const cols = [theme.c1, theme.c2, "#ff7aa2", "#8fb8ff", "#ffe66a", "#8fe28e"];
     for (let k = 0; k < cols.length; k++) {
-      ctx.strokeStyle = cols[k]; ctx.lineWidth = 4; ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = cols[k]; ctx.lineWidth = 4; ctx.globalAlpha = baseAlpha * 0.55;
       ctx.beginPath(); ctx.arc(x, y + 28, 28 + k * 8, Math.PI, TAU); ctx.stroke();
     }
   }

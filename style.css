@@ -2044,9 +2044,6 @@ body.boss-fight::after {
     width: 64px;
     height: 64px;
   }
-  #game {
-    max-height: 62dvh;
-  }
 }
 
 /* Touch devices */

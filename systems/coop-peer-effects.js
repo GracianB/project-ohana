@@ -107,7 +107,7 @@ export function advancePeerEffects(game){
  if(frame.chispinDuet){frame.chispinDuet.tails=frame.chispinDuet.tails.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);frame.chispinDuet.bolts=frame.chispinDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);if(++frame.chispinDuet.age>=120)frame.chispinDuet=null;}
  if(frame.stitchoDuet){
   frame.stitchoDuet.bolts=frame.stitchoDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);
-  if(++frame.stitchoDuet.age>=120)frame.stitchoDuet=null;
+  if(++frame.stitchoDuet.age>=(frame.stitchoDuet.surprise?360:120))frame.stitchoDuet=null;
  }
  if(frame.kiloDuet&&++frame.kiloDuet.age>=120)frame.kiloDuet=null;
  for(const type of ["projectiles","slashes","bolts","kiloFx"]){

@@ -1,3 +1,4 @@
+import {drawChispaCeremony} from './chispa-stagecraft.js';
 // PROJECT OHANA V44 · TRUE ENDING
 import {
   fullCanvas, reducedMotion, clamp, seg, easeOut, easeInOut, lerp,
@@ -112,6 +113,7 @@ function showEnding(detail={}){
   function actor(p,x,footY,h,tf,opts={}){
     p.facing=opts.facing||1;p.grounded=opts.grounded!==false;p.vx=opts.vx||0;p.vy=opts.vy||0;p.melee=opts.melee||0;p._poseOverride=opts.pose||"idle";
     ctx.save();if(opts.alpha!==undefined)ctx.globalAlpha*=opts.alpha;
+    if(p.id==='chispin')drawChispaCeremony(ctx,x,footY,h,tf/60,reduce,'ending');
     drawDummy(ctx,p,x,footY,h/baseHeight(p.id,p.evo||0),tf);ctx.restore();
   }
   function revealResults(){
@@ -156,9 +158,9 @@ function showEnding(detail={}){
     if(k<.30){
       const q=seg(k,0,.30),rift=1-seg(k,.19,.30);
       drawRift(ctx,cx,H*.38,Math.min(W,H)*.38,rift);
-      const h=Math.min(H*.40,W*.25),d=duoBeat(t,reduce),gap=Math.min(W*.16,h*.75);
+      const h=Math.min(H*.40,W*.25),d=duoBeat(t,reduce),gap=Math.min(W*.32,h*1.35);
       const hx=cx-gap*.5*d.partnerIn,px=lerp(W+h,cx+gap*.5,easeOut(d.partnerIn));
-      const R=h*.62,spin=t*.9;
+      const R=h*.62,spin=reduce?0:t*.9;
       // 1) Golpe de firma del héroe hacia la grieta. 2) Entra su compañero U.
       // 3) Remate del compañero. 4) Combo del dúo, con los dos motivos a la vez.
       drawSignature(ctx,hero.id,hx,ground-h*.55,R,d.heroMove*(1-d.combo*.4),1,spin);
@@ -206,8 +208,8 @@ function showEnding(detail={}){
       const heroX=cx-spread/2+spread*(4/(CAST.length-1)),partnerX=cx-spread/2+spread*(5/(CAST.length-1));
       // Arco de los dos motivos uniendo al dúo protagonista (8 s, en bucle suave).
       const loopK=reduce?.6:((t-duration*.77)/2.2)%1;
-      drawSignature(ctx,hero.id,heroX,ground-heroH*1.25,heroH*.55,.35+loopK*.5,1,t*.8);
-      drawSignature(ctx,partnerId,partnerX+heroH*.12,ground-heroH*1.1,heroH*.45,.35+((loopK+.5)%1)*.5,-1,-t*.8);
+      drawSignature(ctx,hero.id,heroX,ground-heroH*1.25,heroH*.55,.35+loopK*.5,1,reduce?0:t*.8);
+      drawSignature(ctx,partnerId,partnerX+heroH*.12,ground-heroH*1.1,heroH*.45,.35+((loopK+.5)%1)*.5,-1,reduce?0:-t*.8);
       portrait.forEach((id,i)=>{
         const p=actors[id],x=cx-spread/2+spread*(i/(CAST.length-1))+(id===partnerId?heroH*.12:0),chosen=id===hero.id||id===partnerId;
         const beat=familyFinaleBeat(id,t-duration*.77,{reduced:reduce,chosen});

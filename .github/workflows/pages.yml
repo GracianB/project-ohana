@@ -13,24 +13,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Run unit tests
-        run: node --test tests/*.js
+  quality:
+    uses: ./.github/workflows/quality.yml
 
   deploy:
-    needs: test
+    needs: quality
     timeout-minutes: 15
     permissions:
       contents: read

@@ -30,7 +30,7 @@ function petals(ctx,game,t,art,boost,viewW,viewH){
   const [a,b]=visibleWorldX(game.cam,viewW);
   ctx.save();
   ctx.globalCompositeOperation="lighter";
-  for(let i=0;i<28;i++){
+  for(let i=0;i<12;i++){
     const wx=a+unit(i*7.7+11)*(b-a);
     const base=unit(i*13.1+3)*viewH*.82+80;
     const y=base+Math.sin(t*.018+i)*18-game.cam.y;
@@ -47,7 +47,7 @@ function petals(ctx,game,t,art,boost,viewW,viewH){
 function speedCoast(ctx,game,t,art,boost,viewW,viewH){
   ctx.save();
   ctx.globalCompositeOperation="lighter";
-  for(let i=0;i<10;i++){
+  for(let i=0;i<5;i++){
     const y=viewH*(.18+i*.065)+Math.sin(t*.025+i)*9;
     const phase=((t*2.2+i*91)%(viewW+260))-130;
     const len=90+(i%3)*55;
@@ -223,11 +223,12 @@ const DRAW=Object.freeze({
 
 export function drawLivingWorld(ctx,game,t=0,viewW=1280,viewH=720){
   if(!ctx||!game)return;
+  if(game.reduceMotion)t=0;
   const roomId=String(game.roomId||"hub");
   const art=ROOM_ART[roomId]||ROOM_ART.hub;
   const p=game.player;
   const affinity=!!p && String(p.id)===art.hero;
-  const boost=affinity?1.65:1;
+  const boost=affinity?1.15:.7;
   const fn=DRAW[roomId]||DRAW.hub;
   fn(ctx,game,t,art,boost,viewW,viewH);
 

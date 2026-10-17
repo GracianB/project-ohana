@@ -45,7 +45,7 @@ test("V63 foal has independent trot, tucked jump and expressive movement",()=>{
 });
 test("V63 innate power and performance contracts remain intact",()=>{
   const c=ROSTER.find(hero=>hero.id==="cuerno");
-  assert.equal(c.forms[2].name,"Potro Iris");
+  assert.equal(c.forms[2].name,"Kirín Aurora");
   assert.equal(c.forms[2].speed,7.4);assert.equal(c.forms[2].jump,16.2);
   assert.equal(c.forms[3].speed,8.4);assert.equal(c.forms[3].jump,17.4);
   assert.deepEqual(c.abilities,["gleam","gallop","rainbow"]);

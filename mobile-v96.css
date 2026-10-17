@@ -112,3 +112,56 @@
 @media (prefers-reduced-motion: reduce) {
   body.playing #touch button {transition: none !important;}
 }
+
+/* Compact play HUD: fixed desktop card widths must never widen a phone. */
+@media (max-width: 640px), (max-height: 450px) and (pointer: coarse) {
+  body.playing #hud {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    top: max(54px, calc(env(safe-area-inset-top) + 44px));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    gap: 6px;
+    padding: 0;
+  }
+  body.playing #hud .hud-block {
+    min-width: 0;
+    max-width: none;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(7, 16, 29, .92);
+    backdrop-filter: none;
+    box-shadow: 0 3px 12px rgba(0,0,0,.22);
+  }
+  body.playing #hud .hud-ident { gap: 6px; margin-bottom: 4px; }
+  body.playing #hud .hud-ident > div { min-width: 0; }
+  body.playing #hud .hud-avatar { width: 28px; height: 28px; flex-basis: 28px; border-radius: 8px; }
+  body.playing #hud .hud-name,
+  body.playing #hud #hud-world { font-size: 14px; line-height: 1.2; }
+  body.playing #hud .hud-trait { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body.playing #hud .hud-kicker,
+  body.playing #hud .hud-meta,
+  body.playing #hud #u-exp-hud,
+  body.playing #hud .u-exp-track,
+  body.playing #hud .form-pips,
+  body.playing #hud #hud-combo { display: none; }
+  body.playing #hud .bar-row { margin-top: 4px; gap: 4px; }
+  body.playing #hud .bar { height: 8px; }
+  body.playing #hud .bar-lab { width: 16px; font-size: 8px; }
+  body.playing #hud .world-name,
+  body.playing #hud .journey,
+  body.playing #hud .evo-text,
+  body.playing #hud #festival-room-meter { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  body.playing #hud .journey,
+  body.playing #hud .evo-text,
+  body.playing #hud #festival-room-meter { font-size: 9px; line-height: 1.3; }
+  body.playing #hud .evo-display { margin-top: 4px; }
+  body.playing #top-actions { max-width: calc(100vw - 16px); gap: 4px; }
+  body.playing #top-actions button { padding: 7px 8px; font-size: 8px; letter-spacing: .02em; }
+  body.playing #notification-container { top: 156px; width: calc(100vw - 24px); max-width: 360px; }
+  body.playing #notification-container .game-notification { padding: 8px 10px; backdrop-filter: none; }
+  body.playing #boss-wrap { top: 150px; left: 12px; right: 12px; width: auto; transform: none; }
+}
+@media (hover: none) and (pointer: coarse) {
+  body.playing #controls-hint { display: none; }
+}

@@ -13,3 +13,6 @@ export const CALIBRATED_VISUAL_H = Object.freeze(Object.fromEntries(
     Object.freeze(heights.map((height, form) => 100 * CALIBRATED_HEIGHT[form] / height)),
   ])
 ));
+
+// Optical normalization of the remaining Canvas silhouettes; hitboxes stay physical.
+export const OPTICAL_SCALE = Object.freeze({"kilo": [0.8594, 0.8537, 0.8854, 0.9189, 0.8451], "stitcho": [0.8594, 0.7955, 0.9444, 0.8793, 0.8571], "chispin": [1, 1, 1, 1, 1], "cat": [1.2222, 1.0769, 1.0625, 0.9027, 0.8889], "frita": [0.8088, 0.9211, 1.0, 1.1724, 0.916], "cuerno": [1.0185, 1.129, 1.0241, 1.0408, 1.0256]});

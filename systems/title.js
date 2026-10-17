@@ -30,11 +30,11 @@ if (!document.body.classList.contains("playing")) setTimeout(() => { if (!docume
 addEventListener("pointerdown", jingle, { capture: true });
 addEventListener("keydown", jingle, { capture: true });
 
-const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispín Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
+const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispa Bebé", pikachu: "Chispa Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
 const HERO_LINES = {
 kilo: "Corrientes de polen, flotación y vuelo solar en las formas altas.",
 stitcho: "Paredes, agarre, trepa y vaults para dominar rutas verticales.",
-chispin: "Cloudstep: puede correr sobre nubes eléctricas y convertir altura en velocidad.",
+chispin: "J marca blancos; L los busca y consume su marca. K atraviesa el espacio con una estela eléctrica.",
 cat: "Moon Pounce, nueve vidas y movilidad felina para corregir saltos imposibles.",
 dragon: "Batidas extra, planeo y vuelo: el aire es una ruta, no una caída.",
 dino: "Pisotón sísmico, ruptura de grietas y rebote colosal tras el impacto.",
@@ -476,7 +476,7 @@ const def = ROSTER.find((r) => r.id === selectedId);
 const name = def ? def.name : "Ohana";
 if (kind === "new") {
   try {
-    localStorage.removeItem("ohana");
+    saveStore.clear();
     localStorage.removeItem("ohana-resume");
   } catch (e) {}
 }

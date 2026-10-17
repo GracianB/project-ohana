@@ -265,7 +265,7 @@ test("combat FX escala por combo y mantiene un límite seguro de partículas", (
     lineCap: "round", lineJoin: "round",
     textAlign: "center", textBaseline: "middle",
     font: "12px sans-serif",
-    save() {}, restore() {}, beginPath() {}, arc() {}, moveTo() {}, lineTo() {},
+    save() {}, restore() {}, beginPath() {}, closePath() {}, arc() {}, moveTo() {}, lineTo() {},
     stroke() {}, fill() {}, strokeText() {}, fillText() {},
   };
   assert.doesNotThrow(() => fx.render(ctx, { x: 0, y: 0 }));

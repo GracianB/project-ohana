@@ -1,3 +1,5 @@
+import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
+import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
 import {readDinoEffects} from './dino-coop-effects.js';
 import {FAMILY_DUETS,startFamilyDuet,updateFamilyDuet,drawFamilyDuet} from './family-duets.js';
 import {DEFAULT_U_PARTNERS,chooseUPartner,rollUPartner,gainUExp,uExpPower,persistUBonds} from "./u-partners.js";
@@ -116,7 +118,8 @@ S.charge = Math.max(S.charge || 0, 72);
 armor(p, 10);
 } else if (p.id === "frita") {
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
-p.invuln = Math.max(p.invuln || 0, 12);
+p.invuln = Math.max(p.invuln || 0, 12+evo*2);
+p._chispaEvadeUntil=(Number(g.t)||0)+12+evo*2;
 } else if (p.id === "pizza") {
 p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
 armor(p, 10);
@@ -175,7 +178,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2) {
+if (index === 2 && p.id !== "chispin") {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -218,7 +221,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 const SUPREME = Object.freeze({
 kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
 stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 9000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
-chispin: { id: "boltgod", name: "NUEVE COLAS, UN TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo de nueve colas", ally: "cat" },
+chispin: { id: "boltgod", name: "JUICIO DEL TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo del trueno", ally: "cat" },
 cat:     { id: "eclipse", name: "¡ESE OVILLO QUEMA!", key: "U", cd: 9000, color: "#ffb6e4", special: "Dúo de meteoros", ally: "dragon" },
 dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
 dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
@@ -1170,15 +1173,16 @@ chain(g, p, evo) {
 const h = hand(p);
 const pts = [{ x: h.x, y: h.y }];
 const hit = new Set();
-const maxN = evo >= 3 ? 5 : 4;
+const tuning=chispaKit(evo);
+const maxN = tuning.targets;
 let from = { x: h.x, y: h.y };
-let dmg = (22 + evo * 2) * pw(p);
+let dmg = tuning.chain * pw(p);
 for (let i = 0; i < maxN; i++) {
-  const e = nearestEnemy(g, from.x, from.y, i === 0 ? 300 + evo * 20 : 210 + evo * 15, hit, i === 0 ? p.facing : 0);
+  const e = nearestEnemy(g, from.x, from.y, i === 0 ? tuning.reach : 210 + evo * 15, hit, i === 0 ? p.facing : 0);
   if (!e) break;
   hit.add(e);
   pts.push({ x: cx(e), y: cy(e) });
-  hitEnemy(g, e, dmg, { kx: Math.sign(cx(e) - from.x) * 4, ky: -2, stun: 22, color: "#ffe14a" });
+  if(hitEnemy(g, e, dmg, { kx: Math.sign(cx(e) - from.x) * 4, ky: -2, stun: 22, color: "#d6f5ff" }))e._chispaMarkUntil=(Number(g.t)||0)+150;
   from = { x: cx(e), y: cy(e) };
   dmg *= 0.85;
 }
@@ -1189,7 +1193,7 @@ boom(g, h.x, h.y, "#ffe14a", 8, { star: true });
 blink(g, p, evo) {
 const W = g.worldW || 1600;
 const x0 = p.x, y0 = p.y;
-const dist = 150 + evo * 18;
+const dist = chispaKit(evo).dash;
 let nx = clamp(p.x + p.facing * dist, 30, W - p.w - 30);
 const direction = Math.sign(nx - x0);
 const steps = Math.ceil(Math.abs(nx - x0) / 8);
@@ -1210,7 +1214,10 @@ boom(g, x0 + p.w / 2, y0 + p.h / 2, "#fff3a0", 10, { star: true });
 boom(g, cx(p), cy(p), "#ffe14a", 10, { star: true });
 },
 storm(g, p, evo) {
-add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, next: 12, bolts: [], dmg: (20 + evo * 2) * pw(p), vx: 0 });
+// One sanctuary at a time: recasting replaces the previous field.
+for(let i=FX.length-1;i>=0;i--)if(FX[i].kind==='storm')FX.splice(i,1);
+const tuning=chispaKit(evo);
+add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
 boom(g, cx(p), p.y - 60, "#9cf", 10);
 },
 
@@ -1887,7 +1894,7 @@ return f.life > 0;
 },
 storm(g, f, p) {
 f.life--;
-const e = nearestEnemy(g, f.x, f.y + 140, 700, null, 0);
+const e = chispaStormTarget(g.enemies,f.x,f.y+140,Number(g.t)||0);
 const tx = e ? cx(e) : cx(p) + p.facing * 120;
 const ty = Math.max((g.cam.y || 0) + 50, (e ? e.y : p.y) - 150);
 f.vx = f.vx * 0.9 + clamp(tx - f.x, -60, 60) * 0.012;
@@ -1895,16 +1902,25 @@ f.x += f.vx;
 f.y += (ty - f.y) * 0.05;
 for (const b of f.bolts) b.life--;
 f.bolts = f.bolts.filter((b) => b.life > 0);
-if (--f.next <= 0 && f.life > 8) {
-  f.next = 20;
-  const bx = f.x + (gameRand(g) - 0.5) * 30;
-  let by = groundBelow(g, bx, f.y + 20);
-  if (by === null) by = f.y + 400;
+f.next--;
+if(f.next===7&&f.life>15){
+ const bx=e&&chispaMarked(e,Number(g.t)||0)?cx(e):f.x+(gameRand(g)-.5)*30;
+ const ground=groundBelow(g,bx,f.y+20);
+ f.forecast={x:bx,y1:f.y+16,y2:ground===null?f.y+400:ground};
+}
+if (f.next <= 0 && f.life > 8) {
+  f.next = f.interval||20;
+  const bx = f.forecast?.x ?? f.x;
+  let by = f.forecast?.y2 ?? groundBelow(g,bx,f.y+20);
+  if(by===null)by=f.y+400;
+  delete f.forecast;
   let struck = false;
   for (const en of g.enemies) {
     if (!canHit(en)) continue;
     if (Math.abs(cx(en) - bx) < 28 + en.w / 2 && en.y + en.h > f.y && en.y < by) {
-      hitEnemy(g, en, f.dmg, { ky: -3, stun: 26, color: "#9cf" });
+      const marked=chispaMarked(en,Number(g.t)||0);
+      hitEnemy(g, en, f.dmg*(marked?1.2:1), { ky: -3, stun: marked?34:26, color: "#b9efff" });
+      if(marked)en._chispaMarkUntil=0;
       struck = true;
     }
   }
@@ -3006,53 +3022,10 @@ for (let i = 0; i < f.n; i++) {
   ctx.beginPath(); ctx.arc(px - 3, py - 4, 1.4, 0, TAU); ctx.arc(px + 3, py - 4, 1.4, 0, TAU); ctx.fill();
 }
 },
-chain(ctx, f, cam) {
-// V371 Chispín J: 0,5 s legible — rayo grueso con borde naranja, núcleo blanco y ¡ZAP! en cada blanco.
-const k = f.life / (f.max || 18);
-ctx.globalAlpha = Math.max(0.2, k);
-for (let i = 0; i < f.pts.length - 1; i++) {
-  const a = f.pts[i], b = f.pts[i + 1];
-  const ax = a.x - cam.x, ay = a.y - cam.y, bx = b.x - cam.x, by = b.y - cam.y;
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ff9a1a", 6 * k + 2);
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ffe14a", 3.4 * k + 1);
-  zig(ctx, ax, ay, bx, by, 22, 8, "#ffffff", 1.2);
-  ctx.strokeStyle = "#fff6a0"; ctx.lineWidth = 2.5;
-  ctx.beginPath(); ctx.arc(bx, by, 10 + (1 - k) * 22, 0, TAU); ctx.stroke();
-  if (k > 0.45) {
-    ctx.font = "900 13px system-ui,sans-serif"; ctx.textAlign = "center";
-    ctx.lineWidth = 3; ctx.strokeStyle = "#5a3a00"; ctx.strokeText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
-    ctx.fillStyle = "#fff36a"; ctx.fillText("¡ZAP!", bx, by - 18 - (1 - k) * 10);
-  }
-}
-},
-trail(ctx, f, cam, t) {
-const k = f.life / 42;
-ctx.globalAlpha = k;
-zig(ctx, f.x1 - cam.x, f.y1 - cam.y, f.x2 - cam.x, f.y2 - cam.y, 16, 10, "#ffe14a", 2.4);
-zig(ctx, f.x1 - cam.x, f.y1 - cam.y + 8, f.x2 - cam.x, f.y2 - cam.y + 8, 12, 8, "#7ecbff", 1.4);
-},
-storm(ctx, f, cam, t) {
-const x = f.x - cam.x, y = f.y - cam.y;
-const fade = Math.min(1, f.life / 15);
-ctx.globalAlpha = fade;
-ctx.strokeStyle = "rgba(160,200,255,.55)";
-ctx.lineWidth = 1.5;
-for (let i = 0; i < 8; i++) {
-  const rx = x - 34 + ((i * 37 + t * 3) % 68), ry = y + 18 + ((t * 9 + i * 23) % 70);
-  ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 2, ry + 8); ctx.stroke();
-}
-for (const b of f.bolts) {
-  ctx.globalAlpha = fade * (b.life / 10);
-  zig(ctx, b.x - cam.x, b.y1 - cam.y, b.x - cam.x, b.y2 - cam.y, 26, 9, "#ffe14a", 3.5);
-}
-ctx.globalAlpha = fade;
-drawCloud(ctx, x, y, 1, t);
-if (f.next < 5) { glow(ctx, x, y + 8, 40, "#fff6a0", 0.5); }
-ctx.fillStyle = "#ffe14a";
-ctx.beginPath();
-ctx.moveTo(x - 4, y - 2); ctx.lineTo(x + 5, y - 2); ctx.lineTo(x, y + 6); ctx.lineTo(x + 6, y + 6); ctx.lineTo(x - 4, y + 18); ctx.lineTo(x - 1, y + 9); ctx.lineTo(x - 6, y + 9);
-ctx.closePath(); ctx.fill();
-},
+chain(ctx,f,cam,t,g){drawChispaChain(ctx,f,cam,t,!!g?.reduceMotion);},
+trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},
+storm(ctx,f,cam,t,g){drawChispaStorm(ctx,f,cam,t,!!g?.reduceMotion);},
+
 yarn(ctx, f, cam, t, g, p) {
 const h = hand(p);
 const x = f.x - cam.x, y = f.y - cam.y;

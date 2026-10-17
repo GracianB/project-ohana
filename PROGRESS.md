@@ -1,3 +1,33 @@
+## V431 · Cuerno orgánico y Kirín Aurora (ohana-431)
+
+Se elimina la construcción por piezas visibles: las cuatro patas se dibujan antes del torso, ocultando los extremos planos; el cuello, pecho, lomo y vientre comparten una sola silueta Bézier. Corvejones curvados en reposo y cañas afinadas. La tercera forma se reconstruye como Kirín Aurora: pelaje de jade, seis cintas fluidas nacidas de la nuca, dos serpentinas y corona de tres prismas. Es una transformación de silueta, no otro poni del mismo color. Se mantienen cuatro patas y los orígenes de ataques. Actualizados nombres en roster/cinemática/previsualización. Modo suave determinista, sin gradientes ni partículas nuevas.
+
+## V430 · Cuerno: anatomía suave y alas de constelación (ohana-430)
+
+Refinado del renderer compartido de las cinco formas: patas de silueta continua con articulación y cascos en lugar de tubos, alas con hombro y siete plumas afiladas, coberteras y nervaduras. Crines adultas más largas, cola de aurora barrida, mirada con reflejo inferior, cuerno con faceta nacarada y joya de pecho desde Potro Iris. Estelar y Negro llevan diadema; Negro conserva el pelaje oscuro y gana constelaciones en ala y lomo. El galope sigue la fase real del rig; el movimiento reducido congela también las patas. Se conservan origen del cuerno, estela, tamaños, cuatro patas, colisiones y kit de combate. La misma anatomía aparece en selección, partida, bienvenida y evolución.
+
+## V429 · Chispa: santuario, actuación y progresión (ohana-429)
+
+Vida 82/102/128/156/200 y velocidad 4,8/5,4/6,1/6,6/7,6. J progresa de 2 a 5 blancos y deja marcas durante 150 ticks; L prioriza y consume la marca con +20% de daño. K progresa de 145 a 240 px con evasión breve. Un santuario activo por jugador. Los cinco cuerpos respiran, flotan o corren con preparación y recuperación de golpes; modo suave estable y cuatro patas de Kirin conservadas.
+
+Entrada espiritual en bienvenida e intro personal, sellos de trueno y conductores en el final, nuevo timbre sonoro de L. Chispa como compañero tiene ritual y tres golpes con aviso; la sorpresa canónica de Stitcho dura 360 ticks con encore y despedida, sin daño posterior al tramo de combate. Las réplicas siguen siendo visuales. Validación: 1215 tests Node, 345 escenas del compañero, intro y final reales, 100 tamaños, 200 poses y juego offline escritorio/móvil. Sin despliegue ni reactivación del multijugador.
+
+## V428 · Chispa: de adorable a deidad del trueno (ohana-428)
+
+Cinco anatomías blancas y doradas: semilla espiritual, familiar bípedo, kirin de cuatro patas, asceta levitante de cuatro brazos y deidad serpentina con colmillos. Cuarenta poses transparentes integradas en partida, retrato y evolución. Los rayos son angulosos blancos con borde cian; la L invoca un sello conductor en lugar de una nube sonriente. Colisiones y estadísticas conservadas.
+
+## V426 · Chispa, cinco transformaciones y nube compañera (ohana-426)
+
+Nuevo renderer de Chispa: bebé, mascota bípeda, Feral cuadrúpedo, Cúmulo pesado y guardián Tempestad. Cambian la anatomía, la marcha y el carácter de cada forma. Antenas, cola viva, ojos y gestos propios sustituyen al ajolote eléctrico anterior. La evolución cuenta una travesura con una chispa fugitiva y el nacimiento de una nube compañera. J conecta blancos con descargas limpias, K deja semillas de luz y L incorpora una nube expresiva con preparación y descarga sobre la posición previamente señalada. El aviso no hace daño y las réplicas visuales validan sus coordenadas.
+
+## V425 · Evoluciones escenificadas y profundidad visual (ohana-425)
+
+Cuarenta evoluciones con el mismo actor Canvas que la partida, tres actos, escala adaptable al ancho y alto, nombres reales, mensaje propio y cinco pasos visibles. Botón explícito para continuar, teclas deliberadas y restauración de foco; modo suave sin salto ni cámara temblorosa. Diez fondos con planos de paisaje y paralaje, paletas de profundidad y motivos de cada bioma; se retiran las superposiciones del personaje que invadían el escenario. Enemigos con estado anclado a su posición física, barras acotadas solo cuando aportan información, marca de élite y reducción de destellos. Las colisiones y los tiempos de daño se conservan.
+
+## V424 · Bocadillos, siluetas y sorpresa prolongada (ohana-424)
+
+La frase activa vuelve a ser un bocadillo anclado a su hablante y limitado al viewport. Vida y experiencia muestran sus cifras; la ficha indica la forma y el progreso sin duplicar salud. Auditoría de las 50 siluetas en ambos modos visuales, escala óptica uniforme sin cambiar colisiones y anatomía progresiva de Chispin con continuidad de color. Las U sorpresa duran seis segundos: tres golpes L originales, vuelta cómica por la pantalla, reverencia y despedida visual sin daño adicional. Pruebas de límites, duración, móviles y dibujo de todas las formas.
+
 ## V420 · Bienvenida dirigida y conversaciones legibles (ohana-420)
 
 Once escenas: diez protagonistas y una coda con enemigos reales en un islote apartado. Cada héroe prepara su broma, la ejecuta con su rig original y recibe una respuesta de otro familiar. Las actuaciones se ralentizan para acompañar el guion y la cámara enfoca suavemente; los bocadillos fugaces se reservan al modo de inspección de fotogramas. Una sola frase principal, cuatro a seis segundos según longitud, tres intervenciones por escena y 1,2 segundos de descanso. Pausa real, anterior, siguiente, Escape, controles de teclado, movimiento suave y repetición desde el menú. El campamento se conserva como destino; no se altera la campaña ni su guardado.
@@ -2000,3 +2030,19 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Auditoría Node de 2.700 hitboxes (1+ millones de comprobaciones espaciales frente a las reglas anteriores), 2.700 ilustraciones de invitado, muerte/cambio de sala y cinco formas. Chromium: 1.350 escenas reales Canvas y diez galerías por compañero.
 - Se mantienen la U personalizada y la U artesanal histórica de Kilo, Stitcho, Chispín y Michi.
 - Versión offline: `ohana-338`.
+
+## Foundation · ohana-421
+
+Diagonal face-time collision checks, revisioned checkpoint recovery, extracted runtime state validation, and full quality workflow required before Pages deployment.
+
+## Performance and control feel - ohana-422
+
+Symmetric camera anticipation, cleared pause action buffers, stable transient collections, offscreen particle culling and change-only experience UI. Multiplayer services remain deferred.
+
+## Play presentation - ohana-423
+
+Illustrated interactive atlas with room details and real outgoing paths. Reworked compact player HUD, touch controls, instructions and contextual messages. Restrained impact effects and motion.
+
+
+## v428 — Chispa: espiritualidad eléctrica
+Cinco anatomías blancas y doradas desde adorable a deidad temible, 40 poses en atlas transparente. La L invoca un sello conductor y descargas blancas/cian. Mantiene hitboxes y estadísticas. Validado: 1210 pruebas Node, 100 tamaños renderizados, 200 poses de Chispa, cuatro cinemáticas y juego offline en escritorio y móvil.

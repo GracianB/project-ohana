@@ -1,3 +1,4 @@
+import {drawThunderSeal,thunderBolt} from './chispa-stagecraft.js';
 // OHANA V372 · Final con protagonista + compañero U reconocibles.
 // Cada héroe tiene un "golpe final" propio (motivo vectorial plano) y una frase;
 // el compañero U elegido entra corriendo y remata con SU motivo. Sin gradientes,
@@ -6,7 +7,7 @@ const TAU = Math.PI * 2;
 export const ENDING_SIGNATURES = Object.freeze({
   kilo: Object.freeze({ motif: "notes", color: "#ffd36a", accent: "#ff7aa8", line: "¡OHANA SIGNIFICA FAMILIA!" }),
   stitcho: Object.freeze({ motif: "chaos", color: "#7ec8ff", accent: "#b78bff", line: "¡CAOS… PERO DEL BUENO!" }),
-  chispin: Object.freeze({ motif: "bolts", color: "#ffe85a", accent: "#7ee7ff", line: "¡CHISPA FINAL!" }),
+  chispin: Object.freeze({ motif: "bolts", color: "#ffe85a", accent: "#7ee7ff", line: "EL CIELO RUGE. MI FAMILIA DESCANSA." }),
   cat: Object.freeze({ motif: "moon", color: "#ffb6e4", accent: "#fff1b8", line: "NUEVE VIDAS, UNA FAMILIA." }),
   dragon: Object.freeze({ motif: "flame", color: "#ff8a45", accent: "#ffe08a", line: "¡RUGIDO DE AMANECER!" }),
   dino: Object.freeze({ motif: "quake", color: "#a6f08c", accent: "#ffe6a3", line: "¡PUM! ¡GANAMOS!" }),
@@ -61,16 +62,14 @@ export function drawSignature(ctx, id, x, y, R, k, dir = 1, spin = 0) {
       ctx.fillStyle = sig.accent;
       for (let i = 0; i < 5; i++) { const a = spin * 4 + i * TAU / 5; star(ctx, x + Math.cos(a) * R * (0.6 + k * 0.5), y + Math.sin(a) * R * 0.5, 5); }
       break;
-    case "bolts":
-      ctx.strokeStyle = sig.color; ctx.lineWidth = 3;
-      for (let b = 0; b < 4; b++) {
-        const a = -Math.PI / 2 + (b - 1.5) * 0.5;
-        ctx.beginPath(); ctx.moveTo(x, y);
-        for (let i = 1; i <= 5; i++) { const r = R * (i / 5) * (0.5 + k); ctx.lineTo(x + Math.cos(a) * r + (i % 2 ? 7 : -7), y + Math.sin(a) * r); }
-        ctx.stroke();
+    case "bolts": {
+      drawThunderSeal(ctx,x,y-R*.35,R*.6,spin*60,false,k);
+      for(let i=0;i<3;i++){
+        const tx=x+dir*R*(.35+i*.32),ty=y+R*(.15+i*.12);
+        thunderBolt(ctx,x,y-R*.35,tx,ty,.5+i*.15,spin*50,false);
       }
-      ctx.fillStyle = sig.accent; ctx.beginPath(); ctx.arc(x, y, 6 + 4 * k, 0, TAU); ctx.fill();
       break;
+    }
     case "moon": {
       const my = y - R * (0.5 + k * 0.4), r = R * 0.34;
       ctx.fillStyle = sig.accent; ctx.beginPath(); ctx.arc(x, my, r, 0, TAU); ctx.fill();

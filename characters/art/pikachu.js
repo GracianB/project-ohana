@@ -8,14 +8,14 @@ const PAL = [
   { body: "#ffd83a", belly: "#fffaf0", gill: "#b05cff", glow: "#e6ccff", inner: "#a04cf0" },
   { body: "#ffc13e", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
   { body: "#ffdc62", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
-  { body: "#6fdcff", belly: "#effcff", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
+  { body: "#ffe17b", belly: "#fffbed", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
 ];
 
 const P = [
   { hr: 29, hx: 2, hy: -40, brx: 16, bry: 13, bx: 0, by: -16, legW: 8, armL: 6, armW: 6, gillL: 7, gillW: 3, ear: 6, eye: 9.8, tail: 15, coil: 3.5, turns: 2 },
   { hr: 24, hx: 3, hy: -60, brx: 19, bry: 20, bx: -1, by: -27, legW: 9, armL: 11, armW: 6.5, gillL: 13, gillW: 3.4, ear: 8.5, eye: 8.6, tail: 25, coil: 6, turns: 2.5 },
   { hr: 21, hx: 4, hy: -74, brx: 14, bry: 24, bx: 0, by: -37, legW: 8, armL: 15, armW: 6, gillL: 15, gillW: 3.4, ear: 9.5, eye: 7.6, tail: 33, coil: 5, turns: 3, crest: true },
-  { hr: 24, hx: 7, hy: -60, brx: 30, bry: 27, bx: -2, by: -29, legW: 10, armL: 10, armW: 7, gillL: 21, gillW: 4.4, ear: 8.5, eye: 8, tail: 30, coil: 6, turns: 2.5, fat: true, clouds: true },
+  { hr: 22, hx: 5, hy: -83, brx: 20, bry: 27, bx: -1, by: -40, legW: 10, armL: 10, armW: 7, gillL: 21, gillW: 4.4, ear: 8.5, eye: 8, tail: 30, coil: 6, turns: 2.5, clouds: true },
   { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 10.5, eye: 8, tail: 38, coil: 5.5, turns: 3, final: true },
 ];
 
@@ -446,7 +446,9 @@ function opts(pose, f, S) {
       o.rot = Math.sin(t * 1.3) * 0.16 * k; o.headRot = Math.sin(t * 1.3 + 1) * 0.25 * k;
       o.eyes = "squeeze"; o.mouth = "flat"; o.sparks = k; o.charge = 0.4 + k * 0.6; o.gillFlare = Math.sin(t * 1.3) * k; o.earA = Math.sin(t * 1.3) * 0.4 * k;
     } else if (n === 1) { // persigue su cola
-      o.spinX = Math.cos(t * 0.28); o.lift = -Math.abs(Math.sin(t * 0.28)) * 5;
+      // Tail chasing is a readable lean, never an edge-on paper silhouette.
+      o.spinX = 1-k*.1; o.rot=Math.sin(t*.28)*k*.08;
+      o.lift = -Math.abs(Math.sin(t * 0.28)) * 3*k;
       o.tailAxis = -1.2; o.tailLen = 0.8; o.headRot = -0.25; o.mouth = "open"; o.armA = 1.3;
     } else if (n === 2) { // infla los mofletes
       o.puff = Math.min(1, k * 1.8); o.eyes = k > 0.6 ? "squeeze" : "normal"; o.headDY -= k * 2;
@@ -698,7 +700,7 @@ function draw(ctx, pose, R) {
     ctx.translate(dx, o.lift);
     if (st === "dead") { ctx.translate(-S.hy * 0.6, -Math.max(S.hr - S.hx, S.brx - S.bx) - 3); ctx.rotate(-Math.PI / 2 + 0.06); }
     if (o.rot) { ctx.translate(0, cy); ctx.rotate(o.rot); ctx.translate(0, -cy); }
-    if (o.spinX !== 1) { const sx = Math.sign(o.spinX || 1) * Math.max(0.2, Math.abs(o.spinX)); ctx.scale(sx, 1); }
+    if (o.spinX !== 1) ctx.scale(chispinSilhouetteScale(o.spinX), 1);
     if (o.stretchY !== 1) ctx.scale(1, o.stretchY);
     // One connected native silhouette including ears, gills, spring tail,
     // shoulder roots, paws and planted feet, not a floating outer effect.
@@ -761,3 +763,8 @@ function draw(ctx, pose, R) {
 }
 
 export default { id: "chispin", draw };
+
+export function chispinSilhouetteScale(value=1){
+  if(!Number.isFinite(value))return 1;
+  return Math.sign(value||1)*Math.max(.68,Math.min(1.15,Math.abs(value)));
+}
