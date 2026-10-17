@@ -1093,7 +1093,7 @@ const U = 280;
 const ps = 1.5;
 const W = Math.round(U * ps);
 const faBucket = Math.round((flashA || 0) * 20);
-const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket;
+const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket + "#" + (art.cacheKey?.(pose)||"");
 if (key === presentLastKey && presentCanvas && presentCanvas.width === W) {
 ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
 return;

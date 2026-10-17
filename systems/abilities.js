@@ -219,7 +219,7 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 const SUPREME = Object.freeze({
 kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
 stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 9000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
-chispin: { id: "boltgod", name: "NUEVE COLAS, UN TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo de nueve colas", ally: "cat" },
+chispin: { id: "boltgod", name: "JUICIO DEL TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo del trueno", ally: "cat" },
 cat:     { id: "eclipse", name: "¡ESE OVILLO QUEMA!", key: "U", cd: 9000, color: "#ffb6e4", special: "Dúo de meteoros", ally: "dragon" },
 dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
 dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },

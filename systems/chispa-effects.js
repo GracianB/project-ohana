@@ -3,13 +3,17 @@ const unit=x=>Math.max(0,Math.min(1,Number(x)||0));
 function oval(ctx,x,y,rx,ry,c){ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fill();}
 export function drawChispaCloud(ctx,x,y,scale=1,charge=0,t=0,reduced=false){
  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
- const puff=reduced?0:Math.sin(t*.07)*1.5;
- ctx.strokeStyle='#35364e';ctx.lineWidth=3;ctx.fillStyle='#b8bbd8';
- ctx.beginPath();ctx.moveTo(-44,14);ctx.bezierCurveTo(-70,10,-58,-18,-36,-14);ctx.bezierCurveTo(-37,-43,-3,-47,8,-26);ctx.bezierCurveTo(26,-48,53,-30,46,-12);ctx.bezierCurveTo(70,-11,65,18,44,20);ctx.lineTo(-44,20);ctx.closePath();ctx.fill();ctx.stroke();
- oval(ctx,-30,-8+puff,19,12,'#dce3ed');oval(ctx,-7,-21,20,13,'#edf1f5');oval(ctx,28,-10,19,12,'#dce3ed');
- oval(ctx,-14,2,3,4,'#35364e');oval(ctx,16,2,3,4,'#35364e');
- if(charge>.65)oval(ctx,2,10,5,6,'#35364e');else{ctx.strokeStyle='#35364e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(2,5,5,0,Math.PI);ctx.stroke();}
- for(let i=0;i<3;i++){const x=-25+i*25,y=26+(reduced?0:Math.sin(t*.1+i)*2);oval(ctx,x,y,3,5,charge>.65?'#fff2ae':'#a7d2ca');}
+ // A suspended thunder seal: hard metallic conductors, no flame or cloud silhouette.
+ ctx.strokeStyle='#e5cf86';ctx.lineWidth=3;
+ ctx.beginPath();ctx.ellipse(0,0,43,16,0,0,TAU);ctx.stroke();
+ ctx.beginPath();ctx.ellipse(0,0,24,32,0,0,TAU);ctx.stroke();
+ ctx.strokeStyle='#adf0ff';ctx.lineWidth=2;
+ const turn=reduced?0:t*.025;
+ for(let i=0;i<4;i++){
+  const a=i*TAU/4+turn,x=Math.cos(a)*42,y=Math.sin(a)*16;
+  ctx.fillStyle='#fffefa';ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x+4,y);ctx.lineTo(x,y+7);ctx.lineTo(x-4,y);ctx.closePath();ctx.fill();ctx.stroke();
+ }
+ ctx.beginPath();ctx.moveTo(5,-25);ctx.lineTo(-9,2);ctx.lineTo(5,-1);ctx.lineTo(-5,26);ctx.lineTo(13,-6);ctx.lineTo(0,-3);ctx.stroke();
  ctx.restore();
 }
 function lightning(ctx,x1,y1,x2,y2,width,t,reduced){
@@ -17,7 +21,7 @@ function lightning(ctx,x1,y1,x2,y2,width,t,reduced){
  const points=[[x1,y1]];
  for(let i=1;i<n;i++){const k=i/n,off=(reduced?Math.sin(i*2.4):Math.sin(i*2.4+Math.floor(t/3)*1.3))*Math.min(16,len*.07)*Math.sin(k*Math.PI);points.push([x1+dx*k-dy/len*off,y1+dy*k+dx/len*off]);}
  points.push([x2,y2]);
- for(const [c,w] of [['#60798b',width+4],['#f1ce77',width+1],['#fff8dc',Math.max(1,width*.35)]]){
+ for(const [c,w] of [['#8bdff5',width+4],['#e2cc86',width+1],['#ffffff',Math.max(1,width*.35)]]){
   ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
  }
 }

@@ -2,7 +2,7 @@ import chispa from '../../characters/art/chispa.js';
 import {R} from '../../characters/rig.js';
 import {drawChispaCloud} from '../chispa-effects.js';
 const unit=v=>Math.max(0,Math.min(1,v)),TAU=Math.PI*2;
-const STORIES=['Una lucecita. Una nueva amistad.','Su cola aprende a guardar un pequeño trueno.','La nube ya sabe seguir sus travesuras.','Toda una tempestad. La misma cara de inocente.'];
+const STORIES=['La curiosidad despierta el primer trueno.','El rayo toma una forma que nadie esperaba.','Cuatro manos. Un silencio capaz de partir el cielo.','La tormenta ya no le obedece. La tormenta es él.'];
 function actor(ctx,form,x,foot,size,t,state,reduced,flourish=0){
  ctx.save();ctx.translate(x,foot);ctx.scale(size/100,size/100);
  chispa.draw(ctx,{form,state,t:reduced?40:t*60,phase:t*7,look:{x:.5,y:0},reduceMotion:reduced,castSlot:2,flourish,flourishN:0},R);ctx.restore();
@@ -36,7 +36,7 @@ export function drawChispaEvolution(ctx,w,h,s,reduced=false){
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#b6d7cc';ctx.font='600 11px Outfit,sans-serif';ctx.fillText('UNA CHISPA LO CAMBIA TODO',s.cx,h*.13);
   ctx.fillStyle='#fff0c9';ctx.font=`600 ${Math.min(38,w*.072)}px Fredoka,sans-serif`;ctx.fillText(k>.5?s.title:s.previous,s.cx,h*.21,w-32);
   ctx.font='500 12px Outfit,sans-serif';ctx.fillStyle='#e5cc92';ctx.fillText(`Forma ${s.form} → ${s.form+1} de 5`,s.cx,h*.28);
-  ctx.fillStyle='#e0e9da';words(ctx,t>=2.3?STORIES[s.form-1]:'¿Y si solo le doy un toquecito…?',s.cx,h*.79,Math.min(490,w-42),Math.min(16,w*.04));
+  ctx.fillStyle='#e0e9da';words(ctx,t>=2.3?STORIES[s.form-1]:'Respira. Escucha el trueno.',s.cx,h*.79,Math.min(490,w-42),Math.min(16,w*.04));
   const gap=Math.min(36,w*.075);
   for(let i=0;i<5;i++){ctx.fillStyle=i<=s.form?'#e8cd87':'#4b6370';ctx.beginPath();ctx.arc(s.cx+(i-2)*gap,h*.71,i===s.form?5:3,0,TAU);ctx.fill();}
  }finally{ctx.restore();}

@@ -8,7 +8,7 @@ rollo: { name: "Bola rodante", key: "K", cd: 1900, color: "#2f6bff", desc: "Rued
 caos: { name: "Modo caos", key: "L", cd: 5600, color: "#8f7bff", desc: "Rebota por toda la sala arrollándolo todo." },
 chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Rayo que salta entre hasta 4 enemigos." },
 blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Teletransporte corto que deja una estela eléctrica." },
-storm: { name: "Travesura de tormenta", key: "L", cd: 6000, color: "#9cf", desc: "Invoca una nube compañera que señala y descarga rayos sobre los enemigos." },
+storm: { name: "Sello del trueno", key: "L", cd: 6000, color: "#9cf", desc: "Suspende un sello conductor que señala el impacto y descarga rayos ramificados." },
 yarn: { name: "Ovillo bumerán", key: "J", cd: 600, color: "#ff8ad4", desc: "Ovillo que va y vuelve atravesando enemigos." },
 purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Onda grande que duerme a lo que alcanza y te cura." },
 ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 colas brillantes que serpentean y persiguen." },

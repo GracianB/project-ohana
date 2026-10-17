@@ -56,13 +56,13 @@ export const ALL_ROSTER = [
     speed: 4.8, jumpPower: 12.2, maxJumps: 2, health: 78, w: 22, h: 22,
     abilities: ["chain", "blink", "storm"],
     passive: { id: "spark", name: "Chispa veloz", desc: "Tras correr un segundo va más rápido y deja chispas que dañan." },
-    evoNames: ["Chispa Bebé", "Chispa", "Chispa Feral", "Chispa Cúmulo", "Chispa Tempestad"],
+    evoNames: ["Chispa Bebé", "Chispa", "Chispa Kirin", "Chispa Asceta", "Chispa Raijin"],
     forms: [
       { name: "Chispa Bebé", color: "#fff06a", speed: 4.8, jump: 12.2, jumps: 2, hp: 78, w: 22, h: 22 },
       { name: "Chispa", color: "#ffd83a", speed: 5.3, jump: 12.9, jumps: 2, hp: 95, w: 26, h: 28 },
-      { name: "Chispa Feral", color: "#ffa024", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 28, h: 36 },
-      { name: "Chispa Cúmulo", color: "#ffe45a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 38 },
-      { name: "Chispa Tempestad", color: "#ffe5a2", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 40, h: 48, aura: true },
+      { name: "Chispa Kirin", color: "#ffa024", speed: 5.9, jump: 13.6, jumps: 3, hp: 115, w: 28, h: 36 },
+      { name: "Chispa Asceta", color: "#ffe45a", speed: 6.5, jump: 14.4, jumps: 3, hp: 140, w: 40, h: 38 },
+      { name: "Chispa Raijin", color: "#ffe5a2", speed: 7.6, jump: 15.8, jumps: 4, hp: 190, w: 40, h: 48, aura: true },
     ],
   },
   {

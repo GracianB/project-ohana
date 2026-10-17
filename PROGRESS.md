@@ -1,3 +1,7 @@
+## V428 · Chispa: de adorable a deidad del trueno (ohana-428)
+
+Cinco anatomías blancas y doradas: semilla espiritual, familiar bípedo, kirin de cuatro patas, asceta levitante de cuatro brazos y deidad serpentina con colmillos. Cuarenta poses transparentes integradas en partida, retrato y evolución. Los rayos son angulosos blancos con borde cian; la L invoca un sello conductor en lugar de una nube sonriente. Colisiones y estadísticas conservadas.
+
 ## V426 · Chispa, cinco transformaciones y nube compañera (ohana-426)
 
 Nuevo renderer de Chispa: bebé, mascota bípeda, Feral cuadrúpedo, Cúmulo pesado y guardián Tempestad. Cambian la anatomía, la marcha y el carácter de cada forma. Antenas, cola viva, ojos y gestos propios sustituyen al ajolote eléctrico anterior. La evolución cuenta una travesura con una chispa fugitiva y el nacimiento de una nube compañera. J conecta blancos con descargas limpias, K deja semillas de luz y L incorpora una nube expresiva con preparación y descarga sobre la posición previamente señalada. El aviso no hace daño y las réplicas visuales validan sus coordenadas.
@@ -2024,3 +2028,7 @@ Symmetric camera anticipation, cleared pause action buffers, stable transient co
 ## Play presentation - ohana-423
 
 Illustrated interactive atlas with room details and real outgoing paths. Reworked compact player HUD, touch controls, instructions and contextual messages. Restrained impact effects and motion.
+
+
+## v428 — Chispa: espiritualidad eléctrica
+Cinco anatomías blancas y doradas desde adorable a deidad temible, 40 poses en atlas transparente. La L invoca un sello conductor y descargas blancas/cian. Mantiene hitboxes y estadísticas. Validado: 1210 pruebas Node, 100 tamaños renderizados, 200 poses de Chispa, cuatro cinemáticas y juego offline en escritorio y móvil.

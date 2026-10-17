@@ -10,6 +10,7 @@ try {
  await page.waitForFunction(()=>window.previewReady);await page.evaluate(()=>window.cuernoPreview.setFrame(40));
  const audit=await page.evaluate(async()=>{
   const {drawCharacter}=await import('/characters/draw.js'),{ROSTER}=await import('/characters/roster.js'),{setLook}=await import('/characters/look.js');
+  await (await import('/characters/art/chispa-sprite.js')).preloadChispaAtlas();
   const result=[];const canvas=document.createElement('canvas');canvas.width=canvas.height=700;const ctx=canvas.getContext('2d');
   for(const look of ['vector','paint']){setLook(look);
    for(const id of ROSTER.map(r=>r.id))for(let evo=0;evo<5;evo++) {

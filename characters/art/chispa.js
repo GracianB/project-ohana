@@ -1,11 +1,12 @@
-// Electric dormouse: petal antennae, asymmetric forelock and a living comet tail.
+import {drawChispaSprite,chispaSpriteCacheKey} from './chispa-sprite.js';
+// Five distinct thunder evolutions; vector art is only a loading fallback.
 // Each form fits the same art envelope; roster.js retains the physical collider.
 export const CHISPA_FORMS=Object.freeze([
- {body:'#ffe3a0',shade:'#e9b85d',head:26,headY:-52,bodyX:20,bodyY:19,ear:14,collar:0},
- {body:'#ffd577',shade:'#e4a54d',head:25,headY:-54,bodyX:19,bodyY:23,ear:15,collar:0},
- {body:'#ffcd66',shade:'#dc9746',head:24,headY:-56,bodyX:18,bodyY:25,ear:15,collar:1},
- {body:'#ffc965',shade:'#db9652',head:25,headY:-55,bodyX:22,bodyY:25,ear:16,collar:2},
- {body:'#ffe5a2',shade:'#e5b55b',head:25,headY:-56,bodyX:21,bodyY:26,ear:16,collar:3}
+ {body:'#fffefa',shade:'#e9b85d',head:26,headY:-52,bodyX:20,bodyY:19,ear:14,collar:0},
+ {body:'#fffefa',shade:'#e4a54d',head:25,headY:-54,bodyX:19,bodyY:23,ear:15,collar:0},
+ {body:'#fffefa',shade:'#dc9746',head:24,headY:-56,bodyX:18,bodyY:25,ear:15,collar:1},
+ {body:'#fffefa',shade:'#db9652',head:25,headY:-55,bodyX:22,bodyY:25,ear:16,collar:2},
+ {body:'#fffefa',shade:'#e5b55b',head:25,headY:-56,bodyX:21,bodyY:26,ear:16,collar:3}
 ]);
 const INK='#303345',CREAM='#fff6db',TAU=Math.PI*2;
 const finite=(v,f=0)=>Number.isFinite(v)?v:f;
@@ -39,7 +40,7 @@ export function chispaActing(pose={}){
   charge:state==='cast'&&pose.castSlot===2||finite(welcome?.charge)>.2};
 }
 function feral(ctx,pose,a){
- const c='#efb75e',dark='#cc9148',step=a.step;
+ const c='#fffefa',dark='#cc9148',step=a.step;
  // A low, spring-loaded quadruped: the body, gait and face all change.
  ctx.strokeStyle=INK;ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-23,-27);ctx.bezierCurveTo(-66,-18,-60,-58,-37,-46);ctx.stroke();
  ctx.strokeStyle='#91bdb5';ctx.lineWidth=3;ctx.stroke();oval(ctx,-38,-47,8,12,'#b6ddd1',true,-.7);
@@ -99,6 +100,7 @@ function tempest(ctx,pose,a){
  oval(ctx,0,-13,4,5,gold);ctx.restore();
 }
 function draw(ctx,pose){
+ if(drawChispaSprite(ctx,pose))return;
  const f=Math.max(0,Math.min(4,pose.form|0)),s=CHISPA_FORMS[f],a=chispaActing(pose),t=a.t;
  ctx.save();
  try{
@@ -146,4 +148,4 @@ function draw(ctx,pose){
   if(a.gag>.25){const x=23+a.gag*4,y=-68-a.gag*8;line(ctx,[[x-3,y],[x,y-4],[x+2,y],[x,y+4],[x-3,y]],'#c2d8bc',1.5);}
  }finally{ctx.restore();}
 }
-export default {id:'chispin',draw};
+export default {id:'chispin',draw,cacheKey:chispaSpriteCacheKey};

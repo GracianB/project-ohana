@@ -10,12 +10,13 @@ try{
  await fs.mkdir('test-results/chispa',{recursive:true});
  const result=await page.evaluate(async()=>{
   const {drawCharacter}=await import('/characters/draw.js'),{ROSTER}=await import('/characters/roster.js');
+  await (await import('/characters/art/chispa-sprite.js')).preloadChispaAtlas();
   const {drawChispaStorm,drawChispaChain,drawChispaTrail}=await import('/systems/chispa-effects.js');
   const {drawEvolutionPresentation}=await import('/systems/evo-cine/presentation.js');
   const def=ROSTER.find(r=>r.id==='chispin');let frames=0;
   const sheet=document.createElement('canvas');sheet.id='forms';sheet.width=1250;sheet.height=650;const ctx=sheet.getContext('2d');
   ctx.fillStyle='#17333f';ctx.fillRect(0,0,1250,650);ctx.fillStyle='#fff0cb';ctx.font='600 24px Fredoka';ctx.fillText('CHISPA · CINCO TRANSFORMACIONES',30,38);
-  const labels=['Una pequeña carga','Mascota traviesa','Feral · carrera a cuatro patas','Cúmulo · peso y abrazo','Tempestad · guardián'];
+  const labels=['Semilla espiritual','Familiar eléctrico','Kirin · cuatro patas','Asceta · cuatro brazos','Raijin · deidad del trueno'];
   for(let evo=0;evo<5;evo++){
    const f=def.forms[evo],x=125+evo*250;
    const p={...f,id:def.id,evo,x:x-f.w/2,y:250-f.h,grounded:true,facing:1,vx:0,vy:0,melee:0,invuln:0,visualScale:1.35,_poseOverride:'idle'};
