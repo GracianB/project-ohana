@@ -1,3 +1,7 @@
+## V432 · Serafín Aurora y Cuerno Eclipse (ohana-432)
+
+Rediseñadas exclusivamente las formas 4 y 5 de Cuerno. La cuarta despliega seis velas de aurora unidas a hombros de loto; la quinta abre alas de media luna con nervaduras de constelación, corona creciente y un cuerno más largo. Ambas incorporan una melena envolvente y colas más largas. Las formas 1–3 y las estadísticas de combate permanecen iguales. Nombres sincronizados en selección, evolución y galería.
+
 ## V431 · Cuerno orgánico y Kirín Aurora (ohana-431)
 
 Se elimina la construcción por piezas visibles: las cuatro patas se dibujan antes del torso, ocultando los extremos planos; el cuello, pecho, lomo y vientre comparten una sola silueta Bézier. Corvejones curvados en reposo y cañas afinadas. La tercera forma se reconstruye como Kirín Aurora: pelaje de jade, seis cintas fluidas nacidas de la nuca, dos serpentinas y corona de tres prismas. Es una transformación de silueta, no otro poni del mismo color. Se mantienen cuatro patas y los orígenes de ataques. Actualizados nombres en roster/cinemática/previsualización. Modo suave determinista, sin gradientes ni partículas nuevas.

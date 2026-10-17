@@ -10,7 +10,7 @@ import { flatCtx, hash01 } from "./stitcho.js";
 
 export const EVO_CINE_DURATION = 4.0;
 export const EVO_CINE_UNITS = "seconds";
-export const FORM_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Kirín Aurora", "Unicornio Estelar", "Unicornio Negro"]);
+export const FORM_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Kirín Aurora", "Serafín Aurora", "Cuerno Eclipse"]);
 export const EVO_CINE_PHASES = Object.freeze({ dream: [0, 1.5], stampede: [1.5, 2.6], present: [2.6, 4.0] });
 const TAU = Math.PI * 2, NIGHT = "#1a1430", INK = "#3a2050";
 const IRIS = ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa", "#aeb9fb", "#e5b9f4"];
