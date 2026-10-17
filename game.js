@@ -2681,7 +2681,7 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  drawEnemy(ctx, e, game.cam, t);
+  drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
   ctx.restore();
 }
 if (!game.finale) {

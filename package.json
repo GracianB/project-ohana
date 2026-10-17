@@ -5,6 +5,7 @@
   "scripts": {
     "test": "node --test tests/*.js",
     "test:browser": "node tests/browser/e2e.mjs",
+    "test:browser:direction": "node tests/browser/visual-direction.mjs",
     "test:browser:polish": "node tests/browser/character-polish.mjs",
     "test:browser:presentation": "node tests/browser/play-presentation.mjs",
     "test:browser:local": "node tests/browser/local-experience.mjs",

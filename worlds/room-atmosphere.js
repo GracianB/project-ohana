@@ -21,12 +21,12 @@ const CHARACTER_THEMES = {
 export function drawRoomAtmosphere(ctx,id,cam,t,W,H,characterId,reduceMotion=false){
  if(reduceMotion)t=0;
  ctx.save();ctx.globalCompositeOperation="source-over";
- drawOdysseySectors(ctx,id,cam,t,W,H,characterId);
+
  if(id==="hub") hub(ctx,cam,t,W,H); else if(id==="beach") beach(ctx,cam,t,W,H); else if(id==="jungle") jungle(ctx,cam,t,W,H);
  else if(id==="cave") cave(ctx,cam,t,W,H); else if(id==="lab") lab(ctx,cam,t,W,H); else if(id==="ridge") ridge(ctx,cam,t,W,H);
  else if(id==="space") space(ctx,cam,t,W,H); else if(id==="reef") reef(ctx,cam,t,W,H); else if(id==="volcano") volcano(ctx,cam,t,W,H); else if(id==="boss") boss(ctx,cam,t,W,H);
  const roomSignature = ROOM_SIGNATURE[id] || "kilo";
- drawCharacterOdyssey(ctx, id, characterId || roomSignature, roomSignature, cam, t, W, H);
+
  ctx.restore();
 }
 function hub(ctx,cam,t,W,H){ctx.globalAlpha=.10;ctx.strokeStyle="#ffe9ae";ctx.lineWidth=1.4;for(let i=0;i<4;i++){let x=w(i*320-cam.x*.18+t*.05,W+260)-130;ctx.beginPath();ctx.arc(x,H*.23+(i%3)*22,18+(i%4)*5,0,TAU);ctx.stroke();}vig(ctx,W,H,.12);}

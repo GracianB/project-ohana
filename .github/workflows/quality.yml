@@ -53,7 +53,7 @@ jobs:
         run: npm run test:browser:presentation
 
       - name: Story bubbles, character sizes and surprise encore
-        run: npm run test:browser:polish && npm run test:browser:characters
+        run: npm run test:browser:polish && npm run test:browser:characters && npm run test:browser:direction
 
       - name: Browser E2E
         run: npm run test:browser

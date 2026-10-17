@@ -1,3 +1,4 @@
+import {drawScenicBackdrop} from "./scenic-backdrops.js";
 // Ohana — world rendering · MAX visual pass (Fase 3+)
 // 2026-10-03: wrap() fix, un solo pase de causticos, burbujas con techo, no shadowBlur.
 // API intact: WORLDS, renderWorld, drawGrove, drawAquatic. Boca del pozo 620–860 intacta.
@@ -85,18 +86,7 @@ export function renderWorld(ctx, world, cam, t, W, H) {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
-  if (world.id === "beach") drawBeach(ctx, cam, t, W, H);
-  else if (world.id === "jungle") drawJungle(ctx, cam, t, W, H);
-  else if (world.id === "volcano") drawVolcano(ctx, cam, t, W, H);
-  else if (world.id === "space") drawSpace(ctx, cam, t, W, H);
-  else if (world.id === "lab") drawLab(ctx, cam, t, W, H);
-  else if (world.id === "aquatic") drawAquatic(ctx, cam, t, W, H);
-  else if (world.id === "grove") drawGrove(ctx, cam, t, W, H);
-  else if (world.id === "boss") drawBossWorld(ctx, cam, t, W, H);
-  else if (world.id === "cave") drawCaveBase(ctx, cam, t, W, H);
-  else if (world.id === "ridge") drawRidgeBase(ctx, cam, t, W, H);
-
-  drawWorldLandmarks(ctx, world, cam, t, W, H);
+  drawScenicBackdrop(ctx,world.id,cam,t,W,H);
 
   // subtle global top vignette to seat the HUD
   const tv = cachedGradient(ctx,"hud-top-grade",()=>{

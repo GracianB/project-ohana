@@ -29,8 +29,9 @@ const KIND_TINT = {
   boss: "#f55",
 };
 
-export function drawEnemy(ctx, e, cam, t) {
+export function drawEnemy(ctx, e, cam, t, {reduceMotion=false}={}) {
   if (e.boss && e.fell) return;
+  if (reduceMotion) t=0;
 
   const x = e.x - cam.x;
   const y = e.y - cam.y;
@@ -38,7 +39,7 @@ export function drawEnemy(ctx, e, cam, t) {
   ctx.translate(x + e.w / 2, y + e.h / 2);
   const hitMax = Math.max(1, e._hitMax || 10);
   const hitK = Math.max(0, Math.min(1, (e._hitT || 0) / hitMax));
-  if (hitK > 0.001) {
+  if (hitK > 0.001 && !reduceMotion) {
     const dir = e._hitDir || (e.vx >= 0 ? 1 : -1);
     const recoil = hitK * (e.boss ? 1.2 : 2.8);
     ctx.translate(-dir * recoil, 0);
@@ -49,22 +50,22 @@ export function drawEnemy(ctx, e, cam, t) {
     );
   }
   // Hit feedback: flash blanco fuerte, luego rojo
-  if (e.flash > 12) ctx.filter = "brightness(2.2)";
+  if (e.flash > 12) ctx.filter = reduceMotion ? "brightness(1.1)" : "brightness(1.4)";
   else if (e.invuln > 0 && !e.boss && (e.invuln % 8) < 4) ctx.filter = "brightness(1.45)";
   if (e.alertPing > 0 && !e.boss) {
     ctx.fillStyle = "#ffe66a";
     ctx.font = "800 16px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("!", 0, -e.h / 2 - 10);
+    ctx.fillText("!", 0, -e.h / 2 - 25);
   }
-  const bob = e.boss ? 0 : Math.sin(t / 7 + e.x * 0.02) * 1.4;
+  const bob = e.boss || reduceMotion ? 0 : Math.sin(t / 7 + e.x * 0.02) * 1.4;
   ctx.translate(0, bob);
   ctx.fillStyle = "rgba(0,0,0,.34)";
   ctx.beginPath(); ctx.ellipse(0, e.h / 2 + 4 - bob, e.w * 0.48, 5, 0, 0, Math.PI * 2); ctx.fill();
 
-  if (!e.boss) drawEncounterRead(ctx, e, t);
+  if (!e.boss && !e.telegraph && (e.elite || e.alertPing>0)) drawEncounterRead(ctx, e, t);
   if (e.telegraph) drawTelegraph(ctx, e, t);
-  if (e.elite) drawEliteAura(ctx, e, t);
+  if (e.elite && !e.telegraph) drawEliteAura(ctx, e, t);
 
   if (e.kind === "boss") drawBoss(ctx, e, t);
   else if (drawKiloFoe(ctx, e, t)) { /* V372 Kilo */ }
@@ -90,13 +91,6 @@ export function drawEnemy(ctx, e, cam, t) {
 
   if (!e.boss) {
     drawDamageWear(ctx, e, t);
-    ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, e.w * 0.55, e.h * 0.62, 0, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
   }
   ctx.filter = "none";
   // Overlay de golpe: blanco → rojo corto
@@ -134,8 +128,11 @@ export function drawEnemy(ctx, e, cam, t) {
     ctx.stroke();
     ctx.restore();
   }
-  drawHpBar(ctx, e);
   ctx.restore();
+  // Status stays anchored to the physical actor while its artwork recoils.
+  if(enemyStatus(e).visible){
+    ctx.save();ctx.translate(x+e.w/2,y+e.h/2);drawHpBar(ctx,e);ctx.restore();
+  }
 }
 
 
@@ -641,23 +638,30 @@ function drawEliteAura(ctx, e, t) {
   ctx.fill();
 }
 
+export function enemyStatus(e={}) {
+ const max=Number.isFinite(e.max)&&e.max>0?e.max:1;
+ const hp=Number.isFinite(e.hp)?Math.max(0,Math.min(max,e.hp)):max;
+ return {ratio:hp/max,hp,max,visible:!e.boss&&hp>0&&(hp<max||!!e.elite||!!e.telegraph||e.alertPing>0)};
+}
 function drawHpBar(ctx, e) {
-  const bw = e.w;
+  const state=enemyStatus(e);
+  const bw = Math.max(30,Math.min(64,e.w+12));
   const bh = 5;
   const bx = -bw / 2;
-  const by = -e.h / 2 - 12;
-  const ratio = Math.max(0, e.hp / e.max);
-  const tint = e.boss ? "#f55" : (e.elite ? "#ffd24a" : (KIND_TINT[e.kind] || "#5f5"));
-  ctx.fillStyle = "rgba(0,0,0,.65)";
-  roundRect(ctx, bx - 1, by - 1, bw + 2, bh + 2, 3);
+  const by = -e.h / 2 - 14;
+  const ratio = state.ratio;
+  const tint = e.elite ? "#e7c381" : ratio<.28 ? "#e89b85" : "#a4d3b4";
+  ctx.fillStyle = "#102e35";
+  roundRect(ctx, bx - 2, by - 2, bw + 4, bh + 4, 4);
   ctx.fill();
   if (ratio > 0) {
     ctx.fillStyle = tint;
     roundRect(ctx, bx, by, bw * ratio, bh, 2);
     ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,.28)";
-    roundRect(ctx, bx, by, bw * ratio, bh * 0.4, 2);
-    ctx.fill();
+    ctx.fillStyle = "#f8f0d6";ctx.fillRect(bx+bw*ratio-1,by,1,bh);
+  }
+  if(e.elite){
+    ctx.fillStyle="#f3d49a";ctx.beginPath();ctx.moveTo(bx-9,by+2.5);ctx.lineTo(bx-5,by-1.5);ctx.lineTo(bx-1,by+2.5);ctx.lineTo(bx-5,by+6.5);ctx.closePath();ctx.fill();
   }
 }
 

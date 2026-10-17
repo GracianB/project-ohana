@@ -446,7 +446,9 @@ function opts(pose, f, S) {
       o.rot = Math.sin(t * 1.3) * 0.16 * k; o.headRot = Math.sin(t * 1.3 + 1) * 0.25 * k;
       o.eyes = "squeeze"; o.mouth = "flat"; o.sparks = k; o.charge = 0.4 + k * 0.6; o.gillFlare = Math.sin(t * 1.3) * k; o.earA = Math.sin(t * 1.3) * 0.4 * k;
     } else if (n === 1) { // persigue su cola
-      o.spinX = Math.cos(t * 0.28); o.lift = -Math.abs(Math.sin(t * 0.28)) * 5;
+      // Tail chasing is a readable lean, never an edge-on paper silhouette.
+      o.spinX = 1-k*.1; o.rot=Math.sin(t*.28)*k*.08;
+      o.lift = -Math.abs(Math.sin(t * 0.28)) * 3*k;
       o.tailAxis = -1.2; o.tailLen = 0.8; o.headRot = -0.25; o.mouth = "open"; o.armA = 1.3;
     } else if (n === 2) { // infla los mofletes
       o.puff = Math.min(1, k * 1.8); o.eyes = k > 0.6 ? "squeeze" : "normal"; o.headDY -= k * 2;
@@ -698,7 +700,7 @@ function draw(ctx, pose, R) {
     ctx.translate(dx, o.lift);
     if (st === "dead") { ctx.translate(-S.hy * 0.6, -Math.max(S.hr - S.hx, S.brx - S.bx) - 3); ctx.rotate(-Math.PI / 2 + 0.06); }
     if (o.rot) { ctx.translate(0, cy); ctx.rotate(o.rot); ctx.translate(0, -cy); }
-    if (o.spinX !== 1) { const sx = Math.sign(o.spinX || 1) * Math.max(0.2, Math.abs(o.spinX)); ctx.scale(sx, 1); }
+    if (o.spinX !== 1) ctx.scale(chispinSilhouetteScale(o.spinX), 1);
     if (o.stretchY !== 1) ctx.scale(1, o.stretchY);
     // One connected native silhouette including ears, gills, spring tail,
     // shoulder roots, paws and planted feet, not a floating outer effect.
@@ -761,3 +763,8 @@ function draw(ctx, pose, R) {
 }
 
 export default { id: "chispin", draw };
+
+export function chispinSilhouetteScale(value=1){
+  if(!Number.isFinite(value))return 1;
+  return Math.sign(value||1)*Math.max(.68,Math.min(1.15,Math.abs(value)));
+}

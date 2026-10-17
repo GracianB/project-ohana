@@ -32,13 +32,14 @@ test("V365: cached gradients are bounded and oldest entries really evict", () =>
 });
 
 function fakeCanvas(){
-  const counters={linear:0,radial:0,paint:0};
+  const counters={linear:0,radial:0,paint:0,curves:[]};
   const gradient=()=>({addColorStop(){}});
   const ctx=new Proxy({}, {
     get(obj,key){
       if(key==="createLinearGradient")return ()=>{counters.linear++;return gradient();};
       if(key==="createRadialGradient")return ()=>{counters.radial++;return gradient();};
       if(key==="fillRect")return ()=>{counters.paint++;};
+      if(key==="quadraticCurveTo")return (...coords)=>counters.curves.push(coords);
       if(key==="measureText")return ()=>({width:60});
       if(key==="canvas")return {width:1280,height:720};
       if(key==="getTransform")return ()=>({a:1,b:0,c:0,d:1,e:0,f:0});
@@ -58,9 +59,11 @@ test("V365: original world render produces fewer Canvas gradients on repeated fr
   const cam={x:0,y:0};
   renderWorld(ctx,world,cam,10,1280,720);
   const first=counters.linear+counters.radial, firstPaints=counters.paint;
+  const firstCurves=JSON.stringify(counters.curves);counters.curves=[];
   renderWorld(ctx,world,cam,11,1280,720);
   const second=counters.linear+counters.radial-first;
-  assert.ok(first>0 && second>0,"dynamic ocean lighting must keep moving");
+  assert.ok(first>0,"sky needs its initial lighting");
+  assert.notEqual(JSON.stringify(counters.curves),firstCurves,"ocean waves must keep moving without rebuilding gradients");
   assert.ok(second<first,"cached geometry must avoid costly repeated gradients");
   assert.ok(counters.paint>firstPaints,"cache must never skip actual scene painting");
 });

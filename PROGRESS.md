@@ -1,3 +1,7 @@
+## V425 · Evoluciones escenificadas y profundidad visual (ohana-425)
+
+Cuarenta evoluciones con el mismo actor Canvas que la partida, tres actos, escala adaptable al ancho y alto, nombres reales, mensaje propio y cinco pasos visibles. Botón explícito para continuar, teclas deliberadas y restauración de foco; modo suave sin salto ni cámara temblorosa. Diez fondos con planos de paisaje y paralaje, paletas de profundidad y motivos de cada bioma; se retiran las superposiciones del personaje que invadían el escenario. Enemigos con estado anclado a su posición física, barras acotadas solo cuando aportan información, marca de élite y reducción de destellos. Las colisiones y los tiempos de daño se conservan.
+
 ## V424 · Bocadillos, siluetas y sorpresa prolongada (ohana-424)
 
 La frase activa vuelve a ser un bocadillo anclado a su hablante y limitado al viewport. Vida y experiencia muestran sus cifras; la ficha indica la forma y el progreso sin duplicar salud. Auditoría de las 50 siluetas en ambos modos visuales, escala óptica uniforme sin cambiar colisiones y anatomía progresiva de Chispin con continuidad de color. Las U sorpresa duran seis segundos: tres golpes L originales, vuelta cómica por la pantalla, reverencia y despedida visual sin daño adicional. Pruebas de límites, duración, móviles y dibujo de todas las formas.
