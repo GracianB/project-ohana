@@ -82,7 +82,7 @@ test("V74 movement and four abilities have not been replaced with artwork",()=>{
    assert.ok(c.forms[i].jump>other.forms[i].jump);
   }
  }
- assert.equal(c.forms[4].name,"Unicornio Negro");
+ assert.equal(c.forms[4].name,"Cuerno Eclipse");
  assert.equal(c.forms[4].color,"#252132");
  assert.match(screenshots,/01i-cuerno-origin-form-/);
  assert.match(screenshots,/09l-cuerno-rainbow-sleep-u/);
