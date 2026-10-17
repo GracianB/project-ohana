@@ -1,4 +1,4 @@
-const VERSION = "ohana-420";
+const VERSION = "ohana-421";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/welcome-story.js?v=" + VERSION,
@@ -217,6 +217,7 @@ const PRECACHE = [
   "./systems/passives.js?v=" + VERSION,
   "./systems/portals.js?v=" + VERSION,
   "./systems/rain.js?v=" + VERSION,
+  "./systems/runtime-state.js?v=" + VERSION,
   "./systems/runtime.js?v=" + VERSION,
   "./systems/save.js?v=" + VERSION,
   "./systems/surprises.js?v=" + VERSION,
@@ -260,7 +261,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "3f43688c000f17ef710204163b7f67b7b7e37f1f",
-  "index.html": "ed02f50e568c92d11fb55b7f07462a180c7a4ce4",
+  "index.html": "91e8895f38270c9f972b18bb4960563f9604efac",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -285,7 +286,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "cb72d209bb3a8ea3f7c438615227fd4f574c4408",
+  "game.js": "4221301c41b8670273a1e98025d67e9bd1269c02",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "f0b5134dc95a00e583bc309dcaeb462c7ee78f56",
@@ -314,7 +315,7 @@ const PRECACHE_REVISIONS = {
   "engine/audio.js": "3b416984cb358292923a4118f38b3041d8ad5c60",
   "engine/boss-art.js": "96c97aec57c49f96f699391c79026212eb78ec8e",
   "engine/clock.js": "106823291b4a2ee05eaab098704322207ef26e2e",
-  "engine/collide.js": "b8ddb9a49ba45fa1f792f3818e3045f9d5bc946d",
+  "engine/collide.js": "297d1ffc91157d6126fc6f95624b909010f2e3d9",
   "engine/enemies.js": "f405d4659a64bb66d5d10489d23509815d8fa1d4",
   "engine/foe-brain.js": "92da318a15a4b8de745f706584844550eebc714d",
   "engine/foe-rig.js": "4bd9f8a0d8125fa72c700226e7c38664ad65d8a9",
@@ -467,8 +468,9 @@ const PRECACHE_REVISIONS = {
   "systems/passives.js": "4b392b85b9379b6ecb9ff4a17b5ac2c8c3a97626",
   "systems/portals.js": "3a0fa97d105647de3551bc81bc7c0e1e8431a8ee",
   "systems/rain.js": "02c82578fd89f44120a607b21138c6ca62fe2be2",
+  "systems/runtime-state.js": "7848eaa377179a12c6aa7af522aebbf80f173ebf",
   "systems/runtime.js": "805100524fc731356e6a90b53b69eb59573548f5",
-  "systems/save.js": "a3090509e6b51bf0b033c6d8e898fed8fbce4045",
+  "systems/save.js": "54e96eda009d6612ad89613b1e6a29482c2eb608",
   "systems/surprises.js": "85e1a21e2018fb6ad6479a108784878323ebc4bd",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "f8e838da03c482ac55301fa3be7e3a8c459c3fd2",

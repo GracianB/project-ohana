@@ -119,7 +119,15 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
 
   function parse(value) {
     if (typeof value !== "string" || !value) return null;
-    try { return JSON.parse(value); } catch (_) { return null; }
+    try {
+      const raw = JSON.parse(value);
+      return raw && typeof raw === "object" && !Array.isArray(raw) &&
+        (raw.v == null || raw.v === 2) && typeof raw.id === "string" && raw.id ? raw : null;
+    } catch (_) { return null; }
+  }
+
+  function revision(raw) {
+    return Number.isSafeInteger(raw?.revision) && raw.revision >= 0 ? raw.revision : 0;
   }
 
   return {
@@ -127,8 +135,10 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
       try {
         const store = getStorage();
         const primary = parse(store.getItem(SAVE_KEY));
-        if (primary) return primary;
-        return parse(store.getItem(SAVE_TMP_KEY));
+        const temporary = parse(store.getItem(SAVE_TMP_KEY));
+        // Legacy saves have revision zero. A failed commit leaves the newer
+        // staging checkpoint intact; stale staging must never replace primary.
+        return revision(temporary) > revision(primary) ? temporary : primary || temporary;
       } catch (_) {
         return null;
       }
@@ -136,9 +146,12 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
     read(id) { return unpackSave(this.readRaw(), id); },
     write(game, magic) {
       if (!game?.player || game.player.dead) return false;
-      const raw = JSON.stringify(packSave(game, magic));
       try {
         const store = getStorage();
+        const latest = this.readRaw();
+        const nextRevision = revision(latest) + 1;
+        if (!Number.isSafeInteger(nextRevision)) return false;
+        const raw = JSON.stringify({ ...packSave(game, magic), revision: nextRevision });
         store.setItem(SAVE_TMP_KEY, raw);
         store.setItem(SAVE_KEY, raw);
         try { store.removeItem?.(SAVE_TMP_KEY); } catch (_) {}

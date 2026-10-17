@@ -2000,3 +2000,7 @@ Arte orgánico como fuente única del héroe, cinemática de evolución limpia, 
 - Auditoría Node de 2.700 hitboxes (1+ millones de comprobaciones espaciales frente a las reglas anteriores), 2.700 ilustraciones de invitado, muerte/cambio de sala y cinco formas. Chromium: 1.350 escenas reales Canvas y diez galerías por compañero.
 - Se mantienen la U personalizada y la U artesanal histórica de Kilo, Stitcho, Chispín y Michi.
 - Versión offline: `ohana-338`.
+
+## Foundation · ohana-421
+
+Diagonal face-time collision checks, revisioned checkpoint recovery, extracted runtime state validation, and full quality workflow required before Pages deployment.

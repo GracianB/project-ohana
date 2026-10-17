@@ -70,41 +70,32 @@ export function resolveBody(body, platforms, opts) {
       }
       continue;
     }
-    const crossedLeft = prevX + body.w <= plat.x + 1 && body.x + body.w > plat.x;
-    const crossedRight = prevX >= plat.x + plat.w - 1 && body.x < plat.x + plat.w;
-    const sweptTop = Math.min(prevY, body.y);
-    const sweptBottom = Math.max(prevY + body.h, body.y + body.h);
-    const yBand = body.y + body.h > plat.y + 6 && body.y < plat.y + plat.h - 6;
-    const crossedVertically = sweptBottom > plat.y + 6 && sweptTop < plat.y + plat.h - 6;
-    if ((yBand || crossedVertically) && (overlapX(body, plat, 0) || crossedLeft || crossedRight)) {
-      const fromLeft = prevX + body.w <= plat.x + 1;
-      const fromRight = prevX >= plat.x + plat.w - 1;
-      if (fromLeft) {
-        body.x = plat.x - body.w;
-        if ((body.vx || 0) > 0) body.vx = 0;
-        hitX = -1;
-      } else if (fromRight) {
-        body.x = plat.x + plat.w;
-        if ((body.vx || 0) < 0) body.vx = 0;
-        hitX = 1;
-      }
+    // Test overlap at the instant a face is crossed. Combining independent
+    // swept X/Y ranges invents collisions on diagonal near misses.
+    const dx = body.x - prevX;
+    const dy = body.y - prevY;
+    const crossing = (distance, delta) => delta === 0 ? null : distance / delta;
+    const inStep = time => time !== null && time >= 0 && time <= 1;
+    const leftTime = crossing(plat.x - body.w - prevX, dx);
+    const rightTime = crossing(plat.x + plat.w - prevX, dx);
+    const sideTime = dx > 0 ? leftTime : rightTime;
+    const sideY = prevY + dy * sideTime;
+    const sideHit = inStep(sideTime) && sideY + body.h > plat.y + 6 && sideY < plat.y + plat.h - 6;
+    const topTime = crossing(plat.y - body.h - prevY, dy);
+    const bottomTime = crossing(plat.y + plat.h - prevY, dy);
+    const verticalTime = dy >= 0 ? topTime : bottomTime;
+    const verticalX = prevX + dx * verticalTime;
+    const verticalHit = inStep(verticalTime) && verticalX + body.w > plat.x + 2 && verticalX < plat.x + plat.w - 2;
+    if (sideHit && (!verticalHit || sideTime < verticalTime)) {
+      body.x = dx > 0 ? plat.x - body.w : plat.x + plat.w;
+      if (dx * (body.vx || 0) > 0) body.vx = 0;
+      hitX = dx > 0 ? -1 : 1;
     }
-    const sweptLeft = Math.min(prevX, body.x);
-    const sweptRight = Math.max(prevX + body.w, body.x + body.w);
-    const sweptX = sweptRight > plat.x + 2 && sweptLeft < plat.x + plat.w - 2;
-    const crossedTop = (body.vy || 0) >= 0 && prevY + body.h <= plat.y + 4 && body.y + body.h >= plat.y;
-    if (crossedTop && sweptX) {
-      body.y = plat.y - body.h;
-      body.vy = Math.min(0, body.vy || 0);
-      grounded = true;
-      hitY = 1;
-      continue;
-    }
-    const crossedBottom = (body.vy || 0) < 0 && prevY >= plat.y + plat.h - 4 && body.y <= plat.y + plat.h;
-    if (crossedBottom && sweptX) {
-      body.y = plat.y + plat.h;
+    if (verticalHit && (!sideHit || verticalTime <= sideTime)) {
+      body.y = dy >= 0 ? plat.y - body.h : plat.y + plat.h;
       body.vy = 0;
-      hitY = -1;
+      grounded = dy >= 0;
+      hitY = dy >= 0 ? 1 : -1;
       continue;
     }
     if (!overlapX(body, plat, 2)) continue;
