@@ -1,2 +1,2 @@
-export const CHISPIN_VISUAL_H=[62,72,82,90,102];
-export {default} from "./pikachu.js";
+export const CHISPIN_VISUAL_H=[55,70,85,102,120];
+export {default} from "./chispa.js";

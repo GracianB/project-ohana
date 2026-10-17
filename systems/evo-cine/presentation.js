@@ -3,6 +3,7 @@ import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
 import {EVOLUTION_CINEMA_PROFILES,evolutionMessage} from '../../characters/evolution.js';
 import {cachedGradient} from '../canvas-gradient-cache.js';
+import {drawChispaEvolution} from './chispa-presentation.js';
 
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};
@@ -59,6 +60,7 @@ function textLines(ctx,text,x,y,width,lineHeight){
 
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
  const s=evolutionPresentation(id,evo,width,height,time,reduced),def=ROSTER.find(r=>r.id===s.id);
+ if(s.id==='chispin')return drawChispaEvolution(ctx,width,height,s,reduced);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
  ctx.save();
  try{

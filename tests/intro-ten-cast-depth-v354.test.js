@@ -85,7 +85,7 @@ test("V354 audit: five canonical evolutionary forms are represented without runt
 });
 
 test("V354 audit: source-of-truth reexports cannot silently hide a different drawing",()=>{
- const pairs=[["kilo","lilo.js"],["stitcho","stitch.js"],["chispin","pikachu.js"]];
+ const pairs=[["kilo","lilo.js"],["stitcho","stitch.js"],["chispin","chispa.js"]];
  for(const [id,file] of pairs){
   const shim=read("characters/art/"+id+".js");
   assert.ok(shim.includes('from "./'+file+'"'),id+" must use the original body, not duplicate artwork");

@@ -1,3 +1,7 @@
+## V426 · Chispa, cinco transformaciones y nube compañera (ohana-426)
+
+Nuevo renderer de Chispa: bebé, mascota bípeda, Feral cuadrúpedo, Cúmulo pesado y guardián Tempestad. Cambian la anatomía, la marcha y el carácter de cada forma. Antenas, cola viva, ojos y gestos propios sustituyen al ajolote eléctrico anterior. La evolución cuenta una travesura con una chispa fugitiva y el nacimiento de una nube compañera. J conecta blancos con descargas limpias, K deja semillas de luz y L incorpora una nube expresiva con preparación y descarga sobre la posición previamente señalada. El aviso no hace daño y las réplicas visuales validan sus coordenadas.
+
 ## V425 · Evoluciones escenificadas y profundidad visual (ohana-425)
 
 Cuarenta evoluciones con el mismo actor Canvas que la partida, tres actos, escala adaptable al ancho y alto, nombres reales, mensaje propio y cinco pasos visibles. Botón explícito para continuar, teclas deliberadas y restauración de foco; modo suave sin salto ni cámara temblorosa. Diez fondos con planos de paisaje y paralaje, paletas de profundidad y motivos de cada bioma; se retiran las superposiciones del personaje que invadían el escenario. Enemigos con estado anclado a su posición física, barras acotadas solo cuando aportan información, marca de élite y reducción de destellos. Las colisiones y los tiempos de daño se conservan.
