@@ -7,7 +7,7 @@ import { ART } from "./art/index.js";
 import { drawKineticSignature } from "./kinetic-stagecraft.js";
 import { CUERNO_VISUAL_H } from "./art/cuerno.js";
 import { FRITA_VISUAL_H } from "./art/frita.js";
-import { CALIBRATED_VISUAL_H } from "./visual-size.js";
+import { CALIBRATED_VISUAL_H, OPTICAL_SCALE } from "./visual-size.js";
 import { paintedBody, paintedForm } from "./sprites.js";
 import { drawCostume } from "./costume.js";
 import { drawDefinitive } from "./definitive.js";
@@ -1250,6 +1250,7 @@ const calibrated = CALIBRATED_VISUAL_H[p.id];
 if (calibrated) H = calibrated[evo] * (p.visualScale || 1);
 if (getLook() === "paint" && !calibrated && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
 if (p.id === "frita" && !p._duetActor) H = FRITA_VISUAL_H[evo] * (p.visualScale || 1); // Frita: altura propia también en look "paint"
+H *= OPTICAL_SCALE[p.id]?.[evo] || 1;
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;
 if (burstK > 0) H *= 1 + Math.sin((1 - burstK) * Math.PI * 3) * 0.08 * burstK;
 

@@ -1,3 +1,7 @@
+## V424 · Bocadillos, siluetas y sorpresa prolongada (ohana-424)
+
+La frase activa vuelve a ser un bocadillo anclado a su hablante y limitado al viewport. Vida y experiencia muestran sus cifras; la ficha indica la forma y el progreso sin duplicar salud. Auditoría de las 50 siluetas en ambos modos visuales, escala óptica uniforme sin cambiar colisiones y anatomía progresiva de Chispin con continuidad de color. Las U sorpresa duran seis segundos: tres golpes L originales, vuelta cómica por la pantalla, reverencia y despedida visual sin daño adicional. Pruebas de límites, duración, móviles y dibujo de todas las formas.
+
 ## V420 · Bienvenida dirigida y conversaciones legibles (ohana-420)
 
 Once escenas: diez protagonistas y una coda con enemigos reales en un islote apartado. Cada héroe prepara su broma, la ejecuta con su rig original y recibe una respuesta de otro familiar. Las actuaciones se ralentizan para acompañar el guion y la cámara enfoca suavemente; los bocadillos fugaces se reservan al modo de inspección de fotogramas. Una sola frase principal, cuatro a seis segundos según longitud, tres intervenciones por escena y 1,2 segundos de descanso. Pausa real, anterior, siguiente, Escape, controles de teclado, movimiento suave y repetición desde el menú. El campamento se conserva como destino; no se altera la campaña ni su guardado.

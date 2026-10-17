@@ -12,7 +12,14 @@ body.playing #hud .bar-row{margin-top:5px;gap:7px;}.bar-lab{color:#a9c8b9;}
 body.playing #hud .bar{height:7px;background:#ffffff12;border:0;border-radius:20px;overflow:hidden;box-shadow:none;}
 body.playing #hud .bar.hp .bar-fill{background:linear-gradient(90deg,#83cba5,#c8e8ad);box-shadow:none;}
 body.playing #hud .bar.xp .bar-fill{background:#e6bf78;box-shadow:none;}
-body.playing #hud .bar-text{display:none;}body.playing #hud .hud-meta{font:400 10px Outfit,sans-serif;color:#b8cbbb;margin:7px 0 0;}
+body.playing #hud .bar-text{display:block;position:absolute;right:7px;top:50%;transform:translateY(-50%);color:#fff9e7;font:600 10px/1 Outfit,sans-serif;text-shadow:0 1px 2px #102e35,0 0 3px #102e35;}
+body.playing #hud .bar{position:relative;height:16px;border:1px solid #c9e5cc30;background:#071f29;}
+body.playing #hud .bar-lab{width:25px;flex:0 0 25px;font:600 9px Outfit,sans-serif;letter-spacing:0;color:#d4e7d0;}
+body.playing #hud .bar.hp .bar-fill{background:linear-gradient(90deg,#318b76,#84cf9c);}
+body.playing #hud .bar.xp .bar-fill{background:linear-gradient(90deg,#927132,#dcb96a);}
+body.playing #hud .hud-meta{font:400 10px Outfit,sans-serif;color:#b8cbbb;margin:7px 0 0;}
+body.playing #hud .hud-block.player.hurt .bar.hp{border-color:#f69b82;}
+body.playing #hud .hud-block.player.hurt .bar.hp .bar-fill{background:#be6857;}
 body.playing #hud .world-header .hud-kicker{display:none;}body.playing #hud #hud-world{font:600 17px Fredoka,sans-serif;color:#f9efd3;}
 body.playing #hud .journey{font:500 10px Outfit,sans-serif;color:#a8cabb;letter-spacing:.04em;margin-top:4px;}
 body.playing #hud .evo-display{margin-top:7px;}body.playing #hud .evo-text{font:500 10px Outfit,sans-serif;color:#d8dcbb;letter-spacing:0;}

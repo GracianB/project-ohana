@@ -71,3 +71,10 @@ body.intro-complete #start-intro,body.intro-complete #ohana-intro,body.playing #
 #ohana-intro .oi-enter {right:24px!important;left:auto!important;transform:none!important;bottom:30px!important;min-height:42px!important;}
 @media(max-width:700px){#ohana-intro .oi-story-dialogue{bottom:140px;padding:12px 14px;width:calc(100vw - 28px);}.oi-story-line{font-size:15px;}.oi-story-chapter{font-size:8px;}#ohana-intro .oi-story-controls{left:14px;bottom:85px;right:14px;justify-content:center;}#ohana-intro .oi-enter{left:14px!important;right:14px!important;bottom:24px!important;width:calc(100% - 28px)!important;}.oi-story-speaker{font-size:15px;}}
 @media(max-height:500px) and (min-width:701px){#ohana-intro .oi-story-dialogue{bottom:72px;max-width:460px;padding:8px 12px;}.oi-story-line{font-size:13px;}#ohana-intro .oi-story-controls,#ohana-intro .oi-enter{bottom:16px!important;}}
+
+/* The current line belongs to its speaker, with a visible comic tail. */
+#ohana-intro.family-welcome .oi-story-dialogue{bottom:auto!important;width:min(300px,calc(100vw - 28px));transform:translate(-50%,-100%);padding:13px 16px;background:#fff6df;border:2px solid #d9b96e;border-radius:18px;box-shadow:0 5px 0 #06273244;}
+#ohana-intro .oi-story-dialogue::after{content:"";position:absolute;bottom:-10px;left:calc(50% - 9px);width:16px;height:16px;background:#fff6df;border-right:2px solid #d9b96e;border-bottom:2px solid #d9b96e;transform:rotate(45deg);}
+#ohana-intro .oi-story-chapter{color:#657b6c;font-size:9px;margin-bottom:4px;}
+#ohana-intro .oi-story-speaker{color:#24514b;font-size:17px;}
+#ohana-intro .oi-story-line{color:#263f40;font-size:15px;line-height:1.4;margin:5px 0 0;}

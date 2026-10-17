@@ -2930,7 +2930,7 @@ const need = p.evo >= 4 ? p.xp : XP_NEED[p.evo + 1];
 let orbsLeft = 0;
 for (let i = 0; i < game.orbs.length; i++) if (!game.orbs[i].taken) orbsLeft++;
 const hp = Math.max(0, Math.ceil(p.health));
-setText(DOM.hudMeta, "HP " + hp + "/" + p.maxHealth + " · XP " + p.xp + (p.evo < 4 ? "/" + need : ""));
+setText(DOM.hudMeta, "Forma " + (p.evo + 1) + "/5 · " + (p.evo < 4 ? p.xp + "/" + need + " de experiencia" : "Evolución completa"));
 const hpPct = Math.max(0, Math.min(100, (p.health / Math.max(1, p.maxHealth)) * 100));
 if (DOM.hpBar) {
 const w = hpPct + "%";

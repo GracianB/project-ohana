@@ -65,7 +65,7 @@ export function readGuestOrigin(s){
 export function guestPerformance(s,ally,reduced=false){
  const identity=GUEST_ACTING[ally];
  if(!identity||!s||!finite(s.x)||!finite(s.y)||
-  !Number.isInteger(s.age)||s.age<0||s.age>=120||
+  !Number.isInteger(s.age)||s.age<0||s.age>=(s.surprise===true?360:120)||
   ![-1,1].includes(s.facing))return null;
  const origin=readGuestOrigin(s);if(origin===null)return null;
  const originX=origin.originX??s.x,originY=origin.originY??s.y;
@@ -127,6 +127,17 @@ export function guestPerformance(s,ally,reduced=false){
  else if(!attack&&age>=36)vx=f*230*identity.travel/66;
  // Bigger forms are recognizable without obscuring the parent character.
  const size=.59+arrive*.13+e*.017+(rank-1)*.012;
+ if(s.surprise===true&&age>=102){
+  // The combat beats finish at frame 90. This encore is visual acting only.
+  const k=clamp((age-102)/198,0,1),farewell=clamp((age-300)/60,0,1);
+  const play=reduced?0:Math.sin(k*TAU);
+  return Object.freeze({ally,style:identity.style,gesture:farewell?'wave':identity.gesture,
+   phase:farewell?'farewell':'encore',x:originX+f*(180+play*110+farewell*300),
+   y:originY-identity.height-(reduced?0:Math.abs(Math.sin(k*TAU*2))*36),
+   facing:farewell?f:-f,pose:farewell?'victory':k<.45?'jump':'victory',
+   vx:0,vy:0,grounded:identity.height<20,visualScale:size,rank,impact:false,
+   arrival:1,exit:farewell});
+ }
  return Object.freeze({
   ally,style:identity.style,gesture,phase:leaving?"farewell":age<18?"arrival":exchange?"exchange":attack?"impact":"borrowed-L",
   x:originX-f*(lateral-drift),y:originY-altitude-(rank-1)*2,
@@ -178,6 +189,30 @@ export function surpriseGuestDrawer(drawActor,s,cam,reduced=false){
    ctx.save();ctx.globalAlpha*=1-(age-18)/10;ctx.strokeStyle='#ffeaa4';ctx.lineWidth=2;
    for(let i=0;i<6;i++){const a=i*TAU/6,r=25+(age-18)*2;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.lineTo(x+Math.cos(a)*(r+8),y+Math.sin(a)*(r+8));ctx.stroke();}ctx.restore();
   }
-  if(alpha>0){ctx.save();ctx.globalAlpha*=alpha;drawActor(...args);ctx.restore();}
+  if(alpha>0){
+   ctx.save();ctx.globalAlpha*=alpha;
+   if(age>=102){
+    // Stay in view as the camera follows the player. Reserve the HUD and floor.
+    const transform=ctx.getTransform?.(),scale=transform?.a||1;
+    const width=(ctx.canvas?.width||1280)/Math.abs(scale),height=(ctx.canvas?.height||720)/Math.abs(scale);
+    const startX=clamp(actor.x+actor.w/2-cam.x,48,Math.max(48,width-48));
+    const startY=clamp(actor.y+actor.h-cam.y,160,Math.max(160,height-100));
+    const k=clamp((age-102)/198,0,1),blend=clamp((age-102)/30,0,1);
+    const smooth=blend*blend*(3-2*blend);
+    // A playful lap of the viewport: arrive, bounce off an edge, take a bow.
+    // Screen acting never supplies combat coordinates or a second hitbox.
+    const edge=width/2+Math.sin(k*TAU)*Math.max(0,width/2-65);
+    const floor=height*.68-(reduced?0:Math.abs(Math.sin(k*TAU*2))*height*.16);
+    const px=reduced?startX:startX+(edge-startX)*smooth;
+    const py=reduced?startY:startY+(floor-startY)*smooth;
+    const guest={...actor,x:cam.x+px-actor.w/2,y:cam.y+py-actor.h};
+    drawActor(ctx,guest,...args.slice(2));
+    ctx.fillStyle='#fff2ce';ctx.strokeStyle='#173c40';ctx.lineWidth=4;
+    ctx.font='600 13px Fredoka, sans-serif';ctx.textAlign='center';
+    const text=age>=300?'¡Hasta la próxima!':age<200?'¡Yo también juego!':'¿Has visto mi L?';
+    ctx.strokeText(text,px,py-92);ctx.fillText(text,px,py-92);
+   }else drawActor(...args);
+   ctx.restore();
+  }
  };
 }

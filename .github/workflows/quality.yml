@@ -52,6 +52,9 @@ jobs:
       - name: Illustrated atlas, readable guide and compact play interface
         run: npm run test:browser:presentation
 
+      - name: Story bubbles, character sizes and surprise encore
+        run: npm run test:browser:polish && npm run test:browser:characters
+
       - name: Browser E2E
         run: npm run test:browser
 
