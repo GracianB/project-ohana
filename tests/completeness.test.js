@@ -465,7 +465,8 @@ test('Kilo segundo ataque: hula tiene ciclo de impacto real y puede dañar dentr
   clearAbilityFx();
   useAbility(g, 1);
   const before = g.enemies[0].hp;
-  for (let i = 0; i < 12; i++) {
+  // The first impact lands with the first completed hula step (24 ticks).
+  for (let i = 0; i < 24; i++) {
     g.t++;
     updateAbilityFx(g);
   }

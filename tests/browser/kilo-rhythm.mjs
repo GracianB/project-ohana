@@ -14,12 +14,12 @@ try {
   const ctx=document.querySelector('canvas').getContext('2d');
   ctx.fillStyle='#14232b';ctx.fillRect(0,0,1400,1060);
   ctx.fillStyle='#fff1d9';ctx.font='700 30px sans-serif';ctx.fillText('KILO · A COMPÁS',40,48);
-  ctx.font='17px sans-serif';ctx.fillText('H / J: acierta y carga pétalos     K: giro potenciado     L: floración y curación',40,80);
+  ctx.font='17px sans-serif';ctx.fillText('H / J: acierta y carga pétalos     K: baile potenciado     L: floración y curación',40,80);
   for(let row=0;row<4;row++)for(let f=0;f<5;f++){
    const x=145+f*275,y=290+row*240;
    const pose={form:f,t:140,phase:1.6,state:row===0?'attack':'cast',speed:0,land:0,turnPulse:0,brake:0,look:{x:1,y:0},air:false,flourish:0,flourishN:0,atk:.48,cast:.38,blink:0,bodyTilt:0,headTilt:0,move:null,vy:0,castSlot:row-1,hurt:0,nineLives:0,sway:.12,bounce:.1,breath:.4,evoT:0,squash:0,stretch:0,armSwing:0,legSwing:0,anticipation:0,impact:0,secondary:0};
    ctx.save();ctx.translate(x,y);ctx.scale(1.3,1.3);art.draw(ctx,pose,R);ctx.restore();
-   ctx.fillStyle='#fff1d9';ctx.font='600 14px sans-serif';ctx.textAlign='center';ctx.fillText(['H · Golpe','J · Rasgueo','K · Giro','L · Floración'][row]+' / '+['Bebé','Kilo','Ohana','Super','Flor Solar'][f],x,y+24);
+   ctx.fillStyle='#fff1d9';ctx.font='600 14px sans-serif';ctx.textAlign='center';ctx.fillText(['H · Golpe','J · Rasgueo','K · Baile','L · Floración'][row]+' / '+['Bebé','Kilo','Ohana','Super','Flor Solar'][f],x,y+24);
   }
  });
  assert.deepEqual(errors,[]);

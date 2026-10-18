@@ -1054,6 +1054,7 @@ q(pose.cuernoWelcome?.tail,8),q(pose.cuernoWelcome?.breath,12),
 q(pose.cuernoWelcome?.melody,12),q(pose.cuernoWelcome?.dragon,12),
 q(pose.cuernoWelcome?.yomi,12),
 // V350 Kilo: unique real pose cache for each note, hand, flower and smile.
+pose.kiloPerformance?.kind || "",q(pose.kiloPerformance?.time,30),
 pose.kiloWelcome?.phase || "",q(pose.kiloWelcome?.listen,12),
 q(pose.kiloWelcome?.strum,12),q(pose.kiloWelcome?.bloom,12),
 q(pose.kiloWelcome?.surprise,12),q(pose.kiloWelcome?.finale,12),
@@ -1228,6 +1229,14 @@ if (p.id === "cuerno") {
     pose.cuernoK={phase:rainbowK.phase,progress:rainbowK.t/(rainbowK.phase==="warn"?rainbowK.warn:rainbowK.active)};
     if(rainbowK.phase==="active")pose.state="trail";
   }
+}
+if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
+ const age=t-(p._cast?.t??-9999),entry=t-(p._kiloEntranceAt??-9999);
+ if(p._kiloPerformance)pose.kiloPerformance=p._kiloPerformance;
+ else if(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96)
+   pose.kiloPerformance={kind:'dance',time:age/60};
+ else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
+   pose.kiloPerformance={kind:'entrance',time:entry/60};
 }
 if(p.id==='kilo'&&p._kiloDuetT>0){
  pose.kiloDuetAge=p._kiloDuetAge||0;

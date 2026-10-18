@@ -4,6 +4,7 @@
 // personaje reutiliza drawCharacter (characters/draw.js) con un muñeco.
 // Sin gradientes por frame: el halo es un único radial cacheado por contexto.
 import { drawCharacter } from "../../characters/draw.js";
+import { KILO_VISUAL_H } from "../../characters/art/kilo.js";
 import { ROSTER } from "../../characters/roster.js";
 
 export const EVO_CINE_DURATION = 4.0; // s
@@ -83,7 +84,8 @@ function kiloActor(evo, pose) {
 /** Dibuja a Kilo (forma evo) con los pies en (fx, fy) y altura aproximada H px. */
 function drawKilo(ctx, evo, fx, fy, H, t, pose, draw) {
   const p = kiloActor(evo, pose);
-  const s = H / (p.h * 1.9);
+  const s = H / KILO_VISUAL_H[evo];
+  p._kiloPerformance={kind:"evolution",time:t};
   ctx.save(); ctx.translate(fx, fy); ctx.scale(s, s);
   p.x = -p.w / 2; p.y = -p.h;
   try { draw(flatCtx(ctx), p, { x: 0, y: 0 }, t * 60, { reduceMotion: false }); } catch { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.w, p.h); }
@@ -97,7 +99,9 @@ function drawKilo(ctx, evo, fx, fy, H, t, pose, draw) {
  */
 export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
   if (!ctx || !(w > 0) || !(h > 0)) return "none";
-  const draw = opts.drawActor || drawCharacter;
+  const reduced=opts.reduceMotion===true || globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+  const actorDraw = opts.drawActor || drawCharacter;
+  const draw=(ctx,p,cam,frame,options)=>actorDraw(ctx,p,cam,reduced?0:frame,{...options,reduceMotion:reduced});
   const from = formIndex(fromForm), to = toForm == null ? Math.min(4, from + 1) : formIndex(toForm);
   t = clamp(Number(t) || 0, 0, EVO_CINE_DURATION);
   const phase = evoCinePhase(t);
@@ -113,13 +117,13 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
   const close = phase === "presentacion" ? 1 - easeOut(kR) : easeOut(kC);
   for (let i = 0; i < 4; i++) {
     const left = i < 2, top = i % 2 === 0, L = Math.min(w, h) * (.3 + .04 * i);
-    const sway = Math.sin(t * 2 + i) * .06;
+    const sway = reduced?0:Math.sin(t * 2 + i) * .06;
     const bx = left ? -L * .25 + close * L * .25 : w + L * .25 - close * L * .25, by = top ? h * .05 : h * .95;
     const rot = (left ? 0 : Math.PI) + (top ? 1 : -1) * (left ? .5 : -.5) + sway;
     leaf(ctx, bx, by, L, rot, i % 2 ? COL.leaf : COL.leaf2, COL.vein);
   }
   // cuerdas de ukelele (vibran en la carga)
-  const strings = phase === "carga" ? 1 : phase === "transformacion" ? 1 - kT : 0;
+  const strings = reduced?0:phase === "carga" ? .35 : phase === "transformacion" ? (1-kT)*.35 : 0;
   if (strings > 0) {
     ctx.globalAlpha = strings * .8; ctx.strokeStyle = COL.gold; ctx.lineWidth = 2;
     for (let s = 0; s < 4; s++) {
@@ -138,24 +142,24 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
       const a = i * TAU / 8 + t, r = H * (1.1 - kC * .75);
       note(ctx, cx + Math.cos(a) * r, foot - H * .45 + Math.sin(a) * r * .6, H * .06, [COL.gold, COL.pink, COL.teal][i % 3]);
     }
-    drawKilo(ctx, from, cx + Math.sin(t * 9) * kC * 3, foot, H * .8, t, "idle", draw);
-    ctx.fillStyle = COL.skirt;
-    for (let i = -5; i <= 5; i++) ctx.fillRect(cx + i * H * .025 + Math.sin(t * 8 + i) * 3, foot - H * .12, 3, H * .1);
+    drawKilo(ctx, from, cx, foot, H * .9, t, "idle", draw);
     text(ctx, "♪ ALOHA… ♪", cx, h * .14, Math.min(w, h) * .055 * (0.6 + kC * .4), COL.gold);
   } else if (phase === "transformacion") {
     // parpadeo forma vieja/nueva que acelera + guirnalda que gira y crece
-    const rate = 4 + kT * 18, showNew = Math.sin(t * rate * Math.PI) > (1 - kT * 2);
-    const sc = 1 + Math.sin(kT * Math.PI) * .15;
-    drawKilo(ctx, showNew ? to : from, cx, foot, H * (showNew ? 1 : .8) * sc, t, showNew ? "victory" : "idle", draw);
+    const reveal=easeOut(kT),sc=reduced?1:1+Math.sin(kT*Math.PI)*.035;
+    ctx.globalAlpha=1-reveal;
+    drawKilo(ctx,from,cx,foot,H*.9*sc,t,"idle",draw);
+    ctx.globalAlpha=reveal;
+    drawKilo(ctx,to,cx,foot,H*sc,t,"victory",draw);
+    ctx.globalAlpha=1;
     const R = H * (.35 + kT * .45);
     for (let i = 0; i < 12; i++) { const a = i * TAU / 12 + t * 3; flower(ctx, cx + Math.cos(a) * R, foot - H * .45 + Math.sin(a) * R * .45, H * .05, i % 2 ? COL.pink : COL.gold, a); }
-    if (kT > .85) { ctx.globalAlpha = (kT - .85) / .15; ctx.fillStyle = COL.white; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
+    // A continuous hand-to-hand phrase replaces flashing between bodies.
   } else {
     // presentación: nueva forma con rebote, guirnalda puesta, pétalos y título
-    const k = easeBack(clamp(kR / .35, 0, 1));
-    if (kR < .12) { ctx.globalAlpha = 1 - kR / .12; ctx.fillStyle = COL.white; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
-    drawKilo(ctx, to, cx, foot, H * (.7 + .3 * k), t, "victory", draw);
-    for (let i = 0; i < 9; i++) flower(ctx, cx - H * .16 + i * H * .04, foot - H * .58 + Math.abs(i - 4) * H * .012, H * .028, i % 2 ? COL.pink : COL.gold, i);
+    const k = reduced?1:easeOut(clamp(kR/.35,0,1));
+    drawKilo(ctx, to, cx, foot, H * (.97 + .03 * k), t, "victory", draw);
+    // The real rig already wears its lei; keep the face clear at every size.
     for (let i = 0; i < 16; i++) {
       const fall = ((t * 60 * (.6 + (i % 5) * .1) + i * 37) % (h * 1.1));
       flower(ctx, (i * 97) % w, fall - h * .05, 5 + (i % 3) * 2, [COL.pink, COL.gold, COL.teal][i % 3], t + i);
@@ -163,7 +167,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
     for (let i = 0; i < 5; i++) note(ctx, cx + Math.cos(i * 1.3 + t) * H * .7, foot - H * (.7 + ((t * .5 + i * .2) % 1) * .5), H * .05, [COL.gold, COL.teal, COL.pink][i % 3]);
     const name = KILO_FORM_NAMES[to];
     ctx.globalAlpha = clamp(kR * 4, 0, 1);
-    text(ctx, "OHANA", cx, h * .1, Math.min(w, h) * .04, COL.teal);
+    text(ctx, ["ALOHA","ENCUENTRA SU RITMO","BAILA CON SU FAMILIA","GUARDIANA DEL COMPÁS","LA ISLA FLORECE"][to], cx, h * .1, Math.min(w, h) * .035, COL.teal);
     text(ctx, "¡" + name.toUpperCase() + "!", cx, h * .18, Math.min(w, h) * .08 * (.8 + .2 * k), COL.gold);
     text(ctx, "Forma " + (to + 1) + " de 5", cx, h * .9, Math.min(w, h) * .035, COL.white);
     ctx.globalAlpha = 1;

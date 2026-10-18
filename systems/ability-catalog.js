@@ -1,7 +1,7 @@
 // OHANA V86. Power metadata shared by HUD and combat. No graphics or physics.
 export const ABILITY_DEFS = {
 ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "Notas que rebotan tres veces. Cada lanzamiento que acierta carga un pétalo (máximo 3; duran 4 s)." },
-hula: { name: "Giro hula", key: "K", cd: 2100, color: "#ff5ad5", desc: "Refleja proyectiles y te hace flotar. Consume pétalos para ampliar el giro y su daño." },
+hula: { name: "Baile aloha", key: "K", cd: 2100, color: "#ff5ad5", desc: "Cuatro pasos hula: reflejan proyectiles y pulsan daño. Consume pétalos para ampliar alcance y potencia; reflejar al empezar recupera un pétalo." },
 ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Floración que cura y alcanza una zona cercana. Consume pétalos para aumentar alcance, daño y curación." },
 plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
 rollo: { name: "Bola rodante", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos." },

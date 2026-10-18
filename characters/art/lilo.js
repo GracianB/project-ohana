@@ -1,6 +1,32 @@
 // KILO · niña hawaiana (diseño original) · characters/art/lilo.js
 // pose.move === "float" (o state "glide"): falda en paracaídas, brazos abiertos.
 
+// Connected hula choreography shared by combat, welcome and celebrations.
+export function kiloHulaPose(seconds=0, form=0, reduced=false) {
+ const t=Number.isFinite(seconds)?seconds:0, f=Math.max(0,Math.min(4,Number(form)||0));
+ const phase=t*Math.PI*2/1.6, sway=reduced?0:Math.sin(phase), wave=reduced?0:Math.sin(phase*2);
+ const weight=.65+f*.09;
+ return {hip:sway*5*weight,lean:-sway*.09,head:sway*.07,
+  front:[18+sway*10,8+wave*6],back:[-18+sway*10,8-wave*6],
+  step:reduced?0:Math.max(0,Math.sin(phase))*3,
+  heel:reduced?0:Math.max(0,-Math.sin(phase))*3,
+  dip:reduced?0:(1-Math.cos(phase*2))*1.4,skirt:sway*.65};
+}
+function applyHula(r,pose,d,f,seconds,blend=1) {
+ const b=kiloHulaPose(seconds,f,pose.reduceMotion), sy=-d.ll-d.th;
+ const mix=(a,v)=>a+(v-a)*blend;
+ r.spin=1;r.hipX=mix(r.hipX,b.hip);r.lean=mix(r.lean,b.lean);
+ r.oy+=b.dip*blend;r.headRot=mix(r.headRot,b.head);
+ r.handF=L2(r.handF,[4+b.front[0],sy+b.front[1]],blend);
+ r.handB=L2(r.handB,[-5+b.back[0],sy+b.back[1]],blend);
+ if(!pose.air&&!(pose.speed>.55)){
+  r.footF=L2(r.footF,[6+b.hip*.4,-b.step],blend);
+  r.footB=L2(r.footB,[-6+b.hip*.4,-b.heel],blend);
+ }
+ r.skirt+=b.skirt*blend;r.hairLag-=b.skirt*.5*blend;
+ r.flare+=.25*blend;r.armOver=true;r.backOver=true;
+ r.mood='happy';r.mouth='smile';r.paci=false;r.uke=f>0?'back':null;r.fx=null;
+}
 const SKIN = "#c68657";
 const HAIR = "#2b2233";
 const HAIR_HI = "#6a5a8c";
@@ -267,12 +293,12 @@ function solve(pose, d, f) {
       const c = pose.cast, slot = pose.castSlot;
       r.paci = false; r.fxK = c;
       if (slot === 1) {
-        r.spin = pose.reduceMotion ? 1 : Math.cos(c * Math.PI * 4);
-        if (Math.abs(r.spin) < 0.55) r.spin = r.spin < 0 ? -0.55 : 0.55;
+        r.spin = 1;
+        // Hula keeps the face and silhouette visible throughout the phrase.
         const w = Math.sin(c * Math.PI * 2) * 3;
         r.handF = [xF + al * 0.9, sy - 2 + w]; r.handB = [xB - al * 0.9, sy - 6 - w];
         r.footF = [2, 0]; r.footB = [-3, -3];
-        r.flare = 1.3; r.hemLift = 3; r.mood = "happy"; r.mouth = "open"; r.fx = "spin"; r.hairUp = 0.5;
+        applyHula(r,pose,d,f,c*1.6);
       } else if (slot === 2) {
         r.handF = [hx + hr * 0.8, sy - 16]; r.handB = [hx - hr * 0.8, sy - 16]; r.armOver = true; r.backOver = true;
         r.headRot = -0.14; r.mood = "closed"; r.mouth = "o"; r.fx = "summon"; r.hairUp = 0.7; r.staffUp = true;
@@ -300,7 +326,7 @@ function solve(pose, d, f) {
       r.footF = [14, -9]; r.footB = [8, -2]; r.hairUp = 0.8; r.mouth = "flat";
       break;
     case "victory": {
-      const j = Math.abs(Math.sin(t * 0.09));
+      const j = pose.reduceMotion ? 0 : Math.abs(Math.sin(t * 0.09));
       r.oy = -j * 12;
       r.handF = [hx + hr * 0.95, sy - 12]; r.handB = [hx - hr * 0.95, sy - 12]; r.armOver = true; r.backOver = true;
       r.footF = [6, -j * 9]; r.footB = [-6, -j * 5];
@@ -407,6 +433,25 @@ function solve(pose, d, f) {
       r.handB=[xF+al*.78,sy+.5];
       r.handF=[xF+1,sy+al*.60+welcome.chase*1.8];
     }
+  }
+  // Aloha: dance, offer both hands, then hand to heart and a small bow.
+  if(st==='victory'){
+    const seconds=(t/60)%4.8;
+    applyHula(r,pose,d,f,seconds);
+    if(seconds>3.2){
+      const bow=pose.reduceMotion?0:Math.sin((seconds-3.2)/1.6*Math.PI);
+      r.handF=[4,sy+8];r.handB=[-5-al*.7,sy-2];
+      r.lean=bow*.16;r.headRot=bow*.14;r.mood='closed';
+    }
+  }
+  if(pose.kiloPerformance){
+    const b=pose.kiloPerformance;
+    const blend=b.kind==='entrance'?Math.min(1,b.time*4,Math.max(0,(1.6-b.time)*4)):1;
+    applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind==='entrance'&&b.time<.45){r.handF=[hx+hr*.7,sy-10];r.headRot=-.08;r.wink=true;}
+  } else if(pose.kiloWelcome&&!pose.kiloWelcome.reduced){
+    const b=pose.kiloWelcome,blend=Math.min(1,b.strum*.5+b.bloom*.7+b.finale);
+    if(blend>.01)applyHula(r,pose,d,f,t/60,blend);
   }
   return r;
 }

@@ -2057,3 +2057,10 @@ Cinco anatomías blancas y doradas desde adorable a deidad temible, 40 poses en 
 H y J cargan un pétalo por ataque acertado; máximo tres, caducidad de cuatro segundos. K consume la carga para ampliar radio y daño; L para aumentar curación, radio y daño. L ahora usa distancia del mundo (240–455 px), independiente de pantalla. Indicador de tres pétalos; limpieza por muerte, sala y personaje. Gestos corporales de ataque, rasgueo y floración en las cinco formas; giro simplificado con movimiento reducido. U conserva el dúo existente.
 
 Esta entrega inicia el cierre por personaje. Chispa original y la reserva del jefe del mundo 2 siguen en el trabajo previo sin integrar. La ampliación de salas, secretos e interactividad sigue pendiente; no se presenta como completada por esta entrega.
+
+
+## Kilo · Baile aloha · ohana-435
+
+K sustituye el giro por 96 ticks de hula: cuatro pulsos a los ticks 24/48/72/96, reflejo continuo y un pétalo por defensa durante los primeros 12 ticks. Su círculo visible coincide con el radio real. La coreografía comparte pasos, transferencia de peso y manos articuladas entre las cinco formas, entrada jugable, intro y celebración. Entrada sin bloquear controles; victoria con mano al corazón y reverencia.
+
+Las cuatro evoluciones usan el actor real con altura propia, baile y fundido continuo entre formas, sin parpadeo ni fogonazo de pantalla. Los títulos distinguen ritmo, familia, guardiana y floración. Conserva el dúo U y el sistema de pétalos H/J→K/L.

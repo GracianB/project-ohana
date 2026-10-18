@@ -1130,10 +1130,10 @@ S.hover = 60;
 if (p.vy > 0) p.vy = -2;
 add({
   kind: "hula",
-  life: 60,
+  life: 96,
   age: 0,
   r: 46 + evo * 6 + petals * 8,
-  dmg: (9 + petals * 2) * pw(p),
+  dmg: (16 + petals * 3.5) * pw(p),
   heal: evo >= 3 ? 3 : 0,
   hit: new Set(),
   pulse: 0,
@@ -1761,7 +1761,7 @@ return f.life>0;
 hula(g, f, p) {
 f.life--;
 f.pulse = (Number(f.pulse) || 0) + 1;
-const rad = f.r + Math.sin(f.pulse * 0.22) * 5;
+const rad = f.r;
 
 for (const pr of g.projectiles) {
   if (!pr || pr.life <= 0 || pr.owner === "player" || pr._hulaReflectUntil > (g.t || 0)) continue;
@@ -1780,12 +1780,13 @@ for (const pr of g.projectiles) {
   }
   pr.owner = "player";
   pr.reflected = true;
+  if(f.pulse<=12&&earnKiloPetal(g,f))g.nums?.add(cx(p),p.y-40,"¡DEFENSA A COMPÁS!","#fff1b0");
   pr._hulaReflectUntil = (g.t || 0) + 8;
   if (pr.hit && typeof pr.hit.clear === "function") pr.hit.clear();
   boom(g, px, py, "#ff5ad5", 5, { star: true, up: 0.4, speed: 2.5 });
 }
 
-if (f.pulse % 8 === 0) {
+if (f.pulse % 24 === 0) {
   f.hit.clear();
   for (const e of g.enemies) {
     if (!canHit(e) || f.hit.has(e)) continue;
@@ -1796,7 +1797,8 @@ if (f.pulse % 8 === 0) {
       ky: -5,
       stun: 20,
       color: "#ff5ad5",
-      shake: 2,
+      shake: 0,
+      hitstop: 0,
       xp: 1,
     });
     if (f.heal && p.health < p.maxHealth) {
@@ -2907,21 +2909,23 @@ const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const k = Math.min(1, f.life / 10);
 ctx.globalAlpha = 0.25 * k;
 ctx.fillStyle = "#ff5ad5";
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r * 0.8, 0, 0, TAU); ctx.fill();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.fill();
 ctx.globalAlpha = 0.9 * k;
 ctx.strokeStyle = "#ffb3ee";
 ctx.lineWidth = 2;
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r * 0.8, 0, 0, TAU); ctx.stroke();
-const n = 10;
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.stroke();
+// Four stationary hibiscus accents mark the four dance beats.
+const n = 4;
+const beat = Math.floor((96-f.life)/24)%4;
 for (let i = 0; i < n; i++) {
-  const a = (i / n) * TAU + t * 0.35;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r * 0.8;
+  const a = (i / n) * TAU - Math.PI/2;
+  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
   ctx.save();
   ctx.translate(px, py);
   ctx.rotate(a + Math.PI / 2);
-  ctx.fillStyle = i % 2 ? "#7de87a" : "#ff5ad5";
+  ctx.fillStyle = i===beat ? "#fff3a0" : "#ff8db8";
   ctx.beginPath();
-  ctx.ellipse(0, 0, 4, 10, 0, 0, TAU);
+  for(let petal=0;petal<5;petal++){const a=petal*TAU/5;ctx.ellipse(Math.cos(a)*5,Math.sin(a)*5,4,3,a,0,TAU);}
   ctx.fill();
   if (i % 2 === 0) { ctx.fillStyle = "#fff36a"; ctx.beginPath(); ctx.arc(0, 0, 2, 0, TAU); ctx.fill(); }
   ctx.restore();

@@ -169,7 +169,7 @@ function showEnding(detail={}){
         drawSignature(ctx,hero.id,cx,H*.38,Math.min(W,H)*.22,d.combo,1,spin);
         drawSignature(ctx,partnerId,cx,H*.38,Math.min(W,H)*.16,d.combo,-1,-spin);
       }
-      heroActor._poseOverride=d.heroMove<1&&!reduce?"attack":"victory";heroActor.melee=heroActor._poseOverride==="attack"?10:0;
+      heroActor._poseOverride=hero.id==="kilo"?"victory":d.heroMove<1&&!reduce?"attack":"victory";heroActor.melee=heroActor._poseOverride==="attack"?10:0;
       actor(heroActor,hx,ground,h,tf,{pose:heroActor._poseOverride,facing:1});
       if(d.partnerIn>0){
         const running=d.partnerIn<1;
@@ -179,7 +179,7 @@ function showEnding(detail={}){
       }
       ctx.save();ctx.globalAlpha=1-seg(q,.84,1);
       const duoName=(hero.name||hero.id).toUpperCase()+" & "+(partnerDef.name||partnerId).toUpperCase();
-      drawTitle(ctx,d.combo>.15?duoName:"EL NIDO SE ABRE",cx,H*.15,Math.max(26,Math.min(58,W*.048)),["#fff4c6",d.combo>.15?heroSig.color:"#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:d.combo>.15?heroSig.color:"#ff5a72",maxWidth:W*.92});
+      drawTitle(ctx,d.combo>.15?duoName:hero.id==="kilo"?"UN ÚLTIMO BAILE, OHANA":"EL NIDO SE ABRE",cx,H*.15,Math.max(26,Math.min(58,W*.048)),["#fff4c6",d.combo>.15?heroSig.color:"#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:d.combo>.15?heroSig.color:"#ff5a72",maxWidth:W*.92});
       if(d.combo>.3)drawTitle(ctx,heroSig.line,cx,H*.15+Math.max(26,Math.min(58,W*.048))*.95,Math.max(12,Math.min(20,W*.016)),heroSig.accent,{font:FONT_BODY,weight:800,stroke:false,maxWidth:W*.9});
       ctx.restore();
       layer.classList.add("ending-phase-1");
