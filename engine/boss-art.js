@@ -300,6 +300,7 @@ export function drawBossQueen(ctx, e, t) {
   if (tele === "swoop") { wingOpen = 1; flapAmp = 0.1; lean = -0.15 * prog; st.narrow = 0.5; }
   if (mode === "swoop") { lean = 0.5; wingOpen = 0.7; flapAmp = 0.2; st.talonReach = 8; }
   if (tele === "spit" || mode === "spit") { st.beak = mode === "spit" ? 0.8 + Math.sin(t * 0.8) * 0.2 : prog; st.headY = 4; lean = 0.08; }
+  if (mode === 'recovery') { st.headY=7;st.headRot=-.11;st.beak=.35;st.narrow=.18;wingOpen=.3;flapAmp=.1;lean=-.04; }
   if (roaring) { st.beak = 1; st.brow = 5; st.ruffle = 1 + Math.sin(t * 0.8); wingOpen = Math.max(wingOpen, 0.5); flapAmp = 1; st.headRot = Math.sin(t * 0.9) * 0.06; }
   if (e.dying) { st.beak = 0.6; st.narrow = 0; st.lookY = -0.6; }
 
@@ -356,6 +357,11 @@ export function drawBossQueen(ctx, e, t) {
   body(ctx, c, t, st);
   head(ctx, c, t, st);
 
+  if(e.vulnerable&&e.counterBreak>0&&!e.dying){
+    ctx.save();ctx.strokeStyle='#fff0b7';ctx.fillStyle='#f6d58c';ctx.lineWidth=1.5;
+    for(let i=0;i<3;i++){const x=(i-1)*30,y=-118+(i===1?-10:0);ctx.beginPath();ctx.moveTo(x,y-7);ctx.lineTo(x+3,y-2);ctx.lineTo(x+8,y);ctx.lineTo(x+3,y+2);ctx.lineTo(x,y+7);ctx.lineTo(x-3,y+2);ctx.lineTo(x-8,y);ctx.lineTo(x-3,y-2);ctx.closePath();ctx.fill();ctx.stroke();}
+    ctx.restore();
+  }
   // Halo de corona: en fase final la gema se convierte en foco de amenaza.
   if (phase >= 2 && !e.dying) {
     ctx.save();

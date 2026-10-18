@@ -5,7 +5,8 @@ export function formatBossStatus(boss = {}, phaseName = "") {
   ));
 
   const title = "REINA DEL NIDO · FASE " + phase;
-  const visible = phaseName ? title + " · " + phaseName : title;
+  const feather = Number.isInteger(boss._feathersReturned) ? " · H PLUMAS " + (boss._feathersReturned%3) + "/3" : "";
+  const visible = (phaseName ? title + " · " + phaseName : title) + feather;
 
   const states = [];
   if (boss.vulnerable) states.push("vulnerable");

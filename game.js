@@ -1,3 +1,5 @@
+import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-arena.js';
+import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
 import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
 import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
 import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
@@ -20,7 +22,7 @@ import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { earnKiloPetal } from "./systems/kilo-rhythm.js";
 import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attacks.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -471,6 +473,7 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
 // Hazards and movement debuffs from the previous room must not cross portals.
@@ -2664,6 +2667,8 @@ drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
+drawIslandSprings(ctx,game,game.cam,t);
+drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
@@ -3122,9 +3127,11 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updatePlayer();
+updateIslandSprings(game);
 updateCuernoPlay(game, t);
 updateCuernoBursts(game);
 updateEnemies();
+updateNestArena(game,{hurt:hurtPlayer,hit:hitArenaEnemy});
 updateProjectiles();
 game.fx.update();
 game.combatFx?.update();
@@ -3542,6 +3549,8 @@ state() {
       formation: game.enemyDirector.formation || "",
     } : null,
     adventure: adventureSnapshot(game),
+    nestArena: nestArenaSnapshot(game),
+    springs: islandSpringsSnapshot(game),
     enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
     boss: boss ? {
       x: boss.x,

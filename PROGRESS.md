@@ -2097,3 +2097,16 @@ Stitcho estrena «Bola saltarina 626»: se guía con izquierda/derecha, rebota e
 - Verificación: contratos de combate, carreras, reintentos, recompensas únicas, élites y animaciones; navegador en las nueve salas y diez héroes. Caché offline actualizada con los nuevos módulos.
 
 Validación final de ohana-437: 1241/1241 pruebas unitarias; puerta de publicación correcta; navegador en nueve retos, diez héroes y 160 fotogramas de evolución; experiencia local con 50 formas en escritorio/móvil y modo offline; mapa y ayuda a 1280/390/320 px.
+
+
+## ohana-438 · El santuario de la Reina
+
+- Las fases 2 y 3 del Nido incluyen lluvias de dos y tres plumas, con columnas fijas anunciadas y huecos seguros. Las plumas dejan rescoldos que pueden esquivarse saltando.
+- H o un disparo devuelve las plumas contra la Reina. Cada devolución causa daño y tres impactos abren una ventana de 78 ticks, cancelando la rutina de ataque. El HUD muestra la cuenta y el jefe adopta una pose de recuperación.
+- Arena con un santuario de raíces, relieve de búho y faroles de huevo. La Reina usa la plataforma sólida real como suelo: se corrige el desnivel que la hundía bajo el escenario.
+- Flores de salto en las rutas de las nueve salas normales. Impulsan al aterrizar y recuperan los saltos; pasar andando no las activa. Incluyen enfriamiento y efectos compatibles con movimiento reducido.
+- Las plumas se cancelan al cambiar de fase, salir, morir o terminar el encuentro. La entrada y la primera fase no generan peligros nuevos.
+
+Revisión móvil: barra de la Reina bajo las tarjetas de vida/XP, contador de plumas legible y avisos separados. Se evita duplicar el anuncio de fase sobre la barra. Verificación de devolución con H real, fases 2/3, flores, escritorio, 390/320 px y movimiento reducido; sin fallos de ejecución.
+
+Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación correcta; navegador con H real, fases 2/3, flores, diez héroes y 160 fotogramas de evolución. HUD del jefe y avisos comprobados sin solapar vida/XP a 390/320 px.

@@ -446,6 +446,7 @@ export class BossFX {
   }
 
   renderBanner(ctx, b, W, H) {
+    if(W<640)return; // Mobile already shows the phase in its compact boss bar.
     const p = bossPhaseProfile(b.phase);
     const u = 1 - b.life / b.max;
     const inK = clamp(u * 5, 0, 1);

@@ -125,7 +125,8 @@ export function updateBossNido(e, game, helpers) {
   e.adaptationLabel = adaptationLabel(e.adaptation, e.hp / Math.max(1, e.max));
   e.baitLabel = baitLabel(e.bait);
   e.counterplay = observeBossThreat(e.counterplay, e, p, p.health);
-  const floorY = ROOM_H - CONFIG.FLOOR_OFFSET - e.h;
+  const arenaFloor=(game.platforms||[]).filter(pl=>pl.h>40&&cx>=pl.x&&cx<=pl.x+pl.w).sort((a,b)=>a.y-b.y)[0];
+  const floorY = (arenaFloor?.y ?? ROOM_H - CONFIG.FLOOR_OFFSET) - e.h;
 
   if (e.introT > 0) {
     handleIntro(e, game, helpers, cx, floorY);
@@ -156,6 +157,16 @@ export function updateBossNido(e, game, helpers) {
   }
 
   applyBoundsAndClamp(e, ROOM_W, ROOM_H, floorY);
+}
+
+export function exposeNestQueen(e,game,frames=72){
+  if(!e||e.hp<=0||e.dying||e.introT>0)return false;
+  resetAttackState(e);
+  e.mode='recovery';e.recoveryT=Math.max(30,Math.min(100,frames));
+  e.recoveryMax=e.recoveryT;e.vulnerable=true;e.counterBreak=e.recoveryT;
+  e.shockT=0;e.slam=0;e.slamHang=0;
+  game?.bossFx?.counterplay?.(e.x+e.w/2,e.y+e.h/2,e.phase,{break:true,reward:0});
+  return true;
 }
 
 function emitParticles(game, x, y, opts, reduceMotion) {

@@ -1,6 +1,9 @@
-const VERSION = "ohana-437";
+const VERSION = "ohana-438";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/nest-arena.js?v=" + VERSION,
+  "./systems/island-springs.js?v=" + VERSION,
+  "./worlds/nest-sanctuary.js?v=" + VERSION,
   "./characters/power-performance.js?v=" + VERSION,
   "./systems/room-adventures.js?v=" + VERSION,
   "./systems/enemy-champions.js?v=" + VERSION,
@@ -277,6 +280,9 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
+  "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
+  "worlds/nest-sanctuary.js": "52360cb2eb2d50e4020f8453dbe6a67546465f3d",
   "characters/power-performance.js": "f9fa8881f0fab333ff883a8134a51c9bd41d49b2",
   "systems/room-adventures.js": "64dc29e6d7f64a7522a0c7aa88d4de5cc7008e8a",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
@@ -293,8 +299,8 @@ const PRECACHE_REVISIONS = {
   "systems/chispa-stagecraft.js": "5703e13ad0c86fe26bbb9a52dfb5ba979f15bbdf",
   "systems/evo-cine/chispa-presentation.js": "3781241661873684d648d8063aa3e4a94dd251b1",
   "systems/evo-cine/presentation.js": "b193b3b00b5a4d441194dbfc89e7ac74e209adb8",
-  "worlds/scenic-backdrops.js": "8fe1635a665889b030b4b7db34b8376fc08e0b09",
-  "play-interface.css": "2c111fda7d648352542e6f9e3beb1c41965176a0",
+  "worlds/scenic-backdrops.js": "4307884354e7fbde864afcd817b0f4734ca11f56",
+  "play-interface.css": "d48ca40bab0fd38598c794ec61b17c18a2f4ef6a",
   "fonts.css": "45263fe112608bd327a1c37cc6dd34a61103a055",
   "assets/fonts/fredoka-latin.woff2": "8d290e33894ad1c8d3a525017642e13107c237aa",
   "assets/fonts/fredoka-latin-ext.woff2": "e16cd42416e0fabe1062233bc6d282758f3842a4",
@@ -309,7 +315,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "614ad3e3f265ddbbd07eac69be15ac60116cc3ab",
+  "index.html": "79ba11b817cb2891758333e91bd21c5545b8cd55",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -334,7 +340,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "4f9f968cb6bb0468d9c9f4da478299d862696fb2",
+  "game.js": "a6d31d2b1085f580dee90fda3b371b0e4f516f47",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
@@ -361,7 +367,7 @@ const PRECACHE_REVISIONS = {
   "characters/signature.js": "220bc15f0d3cb8af1773fcbc2b1e0d939762cd63",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "cc470dcbf8957ee36cfbe9d525e15b083f9a5ff7",
-  "engine/boss-art.js": "5e501c37fc0531aae837367e9584e002c89cda7b",
+  "engine/boss-art.js": "c3e1c244e70cd95197aaffc173683961b373b899",
   "engine/clock.js": "106823291b4a2ee05eaab098704322207ef26e2e",
   "engine/collide.js": "297d1ffc91157d6126fc6f95624b909010f2e3d9",
   "engine/enemies.js": "5a5b8058f63d8f7baf9894817875119135940e96",
@@ -432,9 +438,9 @@ const PRECACHE_REVISIONS = {
   "systems/boss-counterplay.js": "ed979670ce894feffa098a1fee1d722addfa19a4",
   "systems/boss-v94-readability.js": "e315c3601c1ec7f5213d8235a05c4d003ec409b8",
   "systems/boss-encounter-memory.js": "061fec279fb2d7ed6ecdd0488607c6753f35f6ef",
-  "systems/boss-fx.js": "82f960bd5ef9806e95735a22cf7429353cfb361b",
-  "systems/boss-hud.js": "e90159158c27a3ba5db5ff685d6fd139077dca7e",
-  "systems/boss-nido.js": "4595361af406ef1afd1f891140dfa16f59e0f946",
+  "systems/boss-fx.js": "df6837ad45ca89066f92e7e702dfd92cc26a4537",
+  "systems/boss-hud.js": "5490d412f1e702a42b552dfbee34f3d8f13c7a5b",
+  "systems/boss-nido.js": "1dafcf212a6300af5daa0436ec9e731397b87687",
   "systems/combat-fx.js": "d175e7fc28efc392a9dce71e12547adcca313771",
   "systems/combat-feedback.js": "535bdb2e5f923d10e554a7f8f605cf8f0f2f984d",
   "systems/death-fx.js": "b373412bd245f196d6d484007814301d773fc145",
