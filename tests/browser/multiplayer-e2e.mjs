@@ -470,8 +470,36 @@ try {
     },{field,kinds});
   };
   const awaitPeerFxWitness=async(label)=>{
-    await guestPage.waitForFunction(()=>window.__OHANA_PEER_FX_WITNESS?.seen,
-      null,{timeout:3000});
+    try{
+      await guestPage.waitForFunction(()=>window.__OHANA_PEER_FX_WITNESS?.seen,
+        null,{timeout:3000});
+    }catch(error){
+      const diagnostics=await Promise.allSettled([
+        hostPage.evaluate(async()=>{
+          const {onlineCoop:o}=await import('/systems/online-coop.js');
+          const g=o._combatGame;
+          return {epoch:o.combatEpoch,seq:o.effectSequence,room:g?.roomId,
+            fxMichi:(g?.michiAbilityFx||[]).map(f=>({kind:f.kind,life:f.life})),
+            fxChispin:(g?.chispinAbilityFx||[]).map(f=>({kind:f.kind,life:f.life})),
+            remoteWorld:o.remoteWorld,direct:o.direct?.active,
+            fastBuffer:o.direct?.poseChannel?.bufferedAmount,
+            eventBuffer:o.direct?.eventChannel?.bufferedAmount};
+        }),
+        guestPage.evaluate(async()=>{
+          const {onlineCoop:o}=await import('/systems/online-coop.js');
+          const a=window.__OHANA_PEER_FX_WITNESS,g=o._combatGame;
+          return {audit:a?{seen:a.seen,clean:a.clean,arrivals:a.arrivals,
+            wireComplete:a.wireComplete,rxFrame:a.rxFrame,txFrame:a.txFrame}:null,
+            scope:g?.coopPeerEffects?.scope,frameNo:g?.coopPeerEffects?.frameNo,
+            michiFx:g?.coopPeerEffects?.michiFx?.map(f=>({kind:f.kind,life:f.life})),
+            chispinFx:g?.coopPeerEffects?.chispinFx?.map(f=>({kind:f.kind,life:f.life})),
+            sinceFxMs:performance.now()-(o.lastPeerEffectsAt||0),
+            direct:o.direct?.active};
+        })
+      ]);
+      throw new Error(label+': real WebRTC receipt failed: '+JSON.stringify(diagnostics)+
+        ' original='+error.message);
+    }
     const result=await guestPage.evaluate(()=>{
       const a=window.__OHANA_PEER_FX_WITNESS;
       const r={seen:a.seen,clean:a.clean,arrivals:a.arrivals,
