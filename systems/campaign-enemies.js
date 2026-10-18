@@ -1,4 +1,12 @@
 export const CAMPAIGN_ROLES=Object.freeze(['pursuer','shield','shooter','jumper','flyer','burrower','gunner','captain']);
+// World-space aimed volleys retain the full enemy windup and never home in
+// after firing. Gunners produce a dodgeable fan; shooters lead moving heroes.
+export function campaignVolley(role,foe,hero,elite=false){
+ const lead=Math.max(-90,Math.min(90,(hero.vx||0)*15));
+ const dx=hero.x+hero.w/2+lead-(foe.x+foe.w/2),dy=hero.y+hero.h/2-(foe.y+foe.h/2);
+ const aim=Math.atan2(dy,dx),angles=role==='gunner'?[-.22,0,.22]:elite?[-.09,.09]:[0],speed=role==='gunner'?5:5.8;
+ return angles.map(offset=>({vx:Math.cos(aim+offset)*speed,vy:Math.sin(aim+offset)*speed}));
+}
 const cx=e=>e.x+e.w/2,cy=e=>e.y+e.h/2;
 export function campaignRole(room,index){return CAMPAIGN_ROLES[(index+['beach','jungle','cave','lab','ridge','space','reef','volcano'].indexOf(room)*3+24)%8];}
 export function updateCampaignEnemy(e,g,hurt){
@@ -11,13 +19,17 @@ export function updateCampaignEnemy(e,g,hurt){
  else if(a.wind>0){
   a.wind--;e.telegraph=true;e.vx*=.7;
   if(!a.wind){e.telegraph=false;a.active=24;a.cd=role==='captain'?130:85;
-   if(role==='shooter')shoot(a.aim*5,-.3);
-   if(role==='gunner'){shoot(a.aim*3,-5);shoot(a.aim*4.5,-2.5);}
+   if(role==='shooter'||role==='gunner')
+    for(const bolt of campaignVolley(role,e,p,!!e.elite))shoot(bolt.vx,bolt.vy,e.elite?15:12);
    if(role==='jumper'){e.vy=-10;e.vx=a.aim*6;e.grounded=false;}
    if(role==='flyer'){e.vx=a.aim*8;e.vy=Math.max(-5,Math.min(6,a.dy*.045));}
    if(role==='burrower'){e.vx=a.aim*10;e.vy=-5;}
    if(role==='pursuer'||role==='shield')e.vx=a.aim*(role==='shield'?6:8);
-   if(role==='captain')for(const ally of g.enemies)if(ally!==e&&!ally.boss&&Math.hypot(cx(ally)-cx(e),cy(ally)-cy(e))<400)ally.aggro=100;
+   if(role==='captain'){
+    for(const ally of g.enemies)if(ally!==e&&!ally.boss&&Math.hypot(cx(ally)-cx(e),cy(ally)-cy(e))<450)
+     ally.aggro=Math.max(ally.aggro||0,100);
+    g.fx?.emit?.(cx(e),cy(e),{color:'#ffd598',count:8,size:3,life:22});
+   }
   }
  }else if(a.active>0){a.active--;if(role==='captain'||role==='shooter'||role==='gunner')e.vx*=.8;}
  else{
@@ -25,7 +37,7 @@ export function updateCampaignEnemy(e,g,hurt){
   const range=['shooter','gunner','captain'].includes(role)?300:role==='flyer'?230:role==='jumper'?170:90;
   e.vx=dist<650?dir*(Math.abs(dx)>range?2.2:Math.abs(dx)<range*.6?-1:0):0;
   if(role==='shield')e.vx*=.6;
-  if(visible&&dist<650&&Math.abs(dy)<280&&e.aiAttackPermit!==false&&a.cd<=0){a.wind=role==='gunner'?52:role==='burrower'?46:36;a.aim=dir;a.dy=dy;e.telegraph=true;g.fx?.emit?.(cx(e),e.y,{color:'#fff1b5',count:3,size:2,life:12});}
+  if(visible&&dist<690&&Math.abs(dy)<320&&e.aiAttackPermit!==false&&a.cd<=0){a.wind=role==='gunner'?54:role==='burrower'?46:role==='shooter'?42:36;a.aim=dir;a.dy=dy;e.telegraph=true;g.fx?.emit?.(cx(e),e.y,{color:'#fff1b5',count:3,size:2,life:12});}
  }
  e._shieldFacing=role==='shield'&&!a.active&&!a.wind?dir:0;
  const flying=role==='flyer',oldFeet=e.y+e.h;
