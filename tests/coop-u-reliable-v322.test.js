@@ -163,3 +163,34 @@ test("V449 · real Michi J/K/L FX survive a dropped quick WebRTC frame without t
  sendPeerEffectsWithReliableDuet(partial,{...frame,michiFx:frame.michiFx.slice(0,2)},true);
  assert.deepEqual(partial.sent.map(e=>e.mode),["fast"]);
 });
+
+test("V450 · later fast snapshots never erase a still-live real cosmetic trio",()=>{
+ for(const variant of ["michi","chispin"]){
+  const initial={
+   roomId:"hub",projectiles:[],slashes:[],bolts:[],
+   ...(variant==="michi"?{michiAbilityFx:[
+    {kind:"yarn",life:30,x:10,y:20,vx:0,vy:0},
+    {kind:"purr",life:30,R:80},
+    {kind:"wisp",life:30,x:20,y:30,vx:1,vy:-1}]}:{
+    chispinAbilityFx:[
+      {kind:"chain",life:30,pts:[{x:1,y:2},{x:3,y:4}]},
+      {kind:"trail",life:30,x1:1,y1:2,x2:3,y2:4},
+      {kind:"storm",life:30,x:20,y:30,bolts:[]}]
+   })
+  };
+  const rx={roomId:"hub",enemies:[{hp:500}],coopPeerEffects:null};
+  assert.equal(applyPeerEffects(rx,capturePeerEffects(initial,1,"valid-v450")),true);
+  const field=variant==="michi"?"michiFx":"chispinFx";
+  assert.equal(rx.coopPeerEffects[field].length,3);
+  const later=capturePeerEffects({roomId:"hub",projectiles:[],slashes:[],bolts:[]},2,"valid-v450");
+  assert.equal(applyPeerEffects(rx,later),true);
+  assert.equal(rx.coopPeerEffects[field].length,3,"reliable burst survives one quick empty snapshot");
+  for(let i=0;i<30;i++)advancePeerEffects(rx);
+  assert.equal(rx.coopPeerEffects[field].length,0,"FX expire instead of becoming permanent");
+  assert.equal(applyPeerEffects(rx,{...later,frameNo:3}),true);
+  assert.equal(rx.coopPeerEffects[field].length,0,"expired FX never resurrect");
+  assert.equal(rx.enemies[0].hp,500,"cosmetics never damage the peer");
+  assert.equal(applyPeerEffects(rx,{...later,scope:"new-room-epoch",frameNo:1}),true);
+  assert.equal(rx.coopPeerEffects[field].length,0,"new session cannot inherit old FX");
+ }
+});

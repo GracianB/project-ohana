@@ -1,3 +1,7 @@
+## ohana-450 · Ráfagas cosméticas no desaparecen con un frame más reciente
+
+Los paquetes completos J/K/L de Michi y Chispín pueden llegar correctamente por WebRTC fiable y aun así ser reemplazados por la actualización latest siguiente antes del render. Ahora el receptor conserva sólo los componentes validados, del mismo scope y con vida residual positiva, durante los frames ordinarios siguientes. Las FX caducan naturalmente; no reviven, no contienen daño ni sobreviven a un cambio de sala o sesión. Tests Node simulan un frame completo seguido por un frame vacío, expiración y scopes nuevos.
+
 ## ohana-449 · Michi y Chispín: FX J/K/L fiables sin tráfico periódico adicional
 
 Las ráfagas cosméticas de tres habilidades pueden ser sustituidas en el canal latest antes de la recepción, también con Michi. Se añade la segunda firma real yarn/purr/wisp al envío fiable de eventos únicamente cuando se envía un combo completo forzado. El canal normal a 5 Hz continúa ligero. Nueva prueba Node pierde el canal rápido, valida la llegada por el fiable, rechaza daño remoto y verifica que los combos parciales no activan el canal fiable; el navegador confirma las tres FX en el motor de origen y luego en el invitado.

@@ -75,6 +75,24 @@ export function capturePeerEffects(game,frameNo,scope){
  }
  return frame;
 }
+// One real authored three-key burst has to remain visible as a moment, not
+// disappear whenever a newer lightweight pose frame omits an older particle.
+// Only already validated, damage-free cosmetic objects can survive, in the
+// SAME authenticated scope, with their real decremented life; never revive an
+// expired element or carry effects across scene/session resets.
+function retainComboFx(previous,next,kinds,limit){
+ if(!Array.isArray(next)||!Array.isArray(previous)||
+    !kinds.every(kind=>previous.some(e=>e.kind===kind&&e.life>0)))return next;
+ const out=next.slice(0,limit),seen=new Set(out.map(e=>e.kind));
+ for(const kind of kinds){
+  if(seen.has(kind))continue;
+  const older=previous.find(e=>e.kind===kind&&e.life>0);
+  if(!older)continue;
+  if(out.length===limit)out.pop();
+  out.push(older);seen.add(kind);
+ }
+ return out;
+}
 export function applyPeerEffects(game,frame){
  if(!frame||frame.protocol!==2||frame.roomId!==game.roomId||typeof frame.scope!=="string"||
   !/^[a-zA-Z0-9_.:-]{1,96}$/.test(frame.scope)||!Number.isSafeInteger(frame.frameNo)||frame.frameNo<1||frame.frameNo>1e9)return false;
@@ -102,6 +120,10 @@ export function applyPeerEffects(game,frame){
  if(history&&history.scope!==frame.scope)retired.add(history.scope);
  while(retired.size>16)retired.delete(retired.values().next().value);
  histories.set(game,{scope:frame.scope,frameNo:frame.frameNo,retired});
+ if(current?.scope===frame.scope){
+  value.michiFx=retainComboFx(current.michiFx,value.michiFx,["yarn","purr","wisp"],12);
+  value.chispinFx=retainComboFx(current.chispinFx,value.chispinFx,["chain","trail","storm"],8);
+ }
  game.coopPeerEffects=value;return true;
 }
 export function advancePeerEffects(game){
