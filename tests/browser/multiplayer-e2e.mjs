@@ -440,16 +440,35 @@ try {
   console.log("multiplayer: bidirectional U echoes verified");
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
-    await hostPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const g=onlineCoop._combatGame;for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;for(const index of [0,1,2])if(!useAbility(g,index))throw Error('Michi cast failed');updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);});
+    await hostPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
+      const {applyForm}=await import('/characters/roster.js');
+      const g=onlineCoop._combatGame;
+      // These real J/K/L multiplayer visuals require form 3 (index 2).
+      // Earlier V304 predated progression gates and tried locked abilities
+      // with Michito. Keep gameplay gating, evolve only this test fixture.
+      g.player.evo=Math.max(2,g.player.evo|0);applyForm(g.player,{silent:true});
+      for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;
+      for(const index of [0,1,2])if(!useAbility(g,index))
+        throw Error('Michi cast failed slot '+index+' evo '+g.player.evo);
+      updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);
+    });
     await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
     assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
     await hostPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');const game=onlineCoop._combatGame;
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
+      const {applyForm}=await import('/characters/roster.js');
+      const game=onlineCoop._combatGame;
+      // Storm is the form-3 L slot; do not silently bypass the gate.
+      game.player.evo=Math.max(2,game.player.evo|0);
+      applyForm(game.player,{silent:true});
       for(const id of ['chain','blink','storm'])game.player.cds[id]=0;
-      for(const index of [0,1,2])if(!useAbility(game,index))throw Error('Chispin cast failed '+index);
+      for(const index of [0,1,2])if(!useAbility(game,index))throw Error('Chispin cast failed slot '+index+' evo '+game.player.evo);
       updateAbilityFx(game);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
     });
     await guestPage.waitForFunction(async()=>{
