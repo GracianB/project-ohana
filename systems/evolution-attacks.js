@@ -50,10 +50,22 @@ export function summonDanceFleet(g){
  s.drones=s.drones.filter(d=>!d.dance);
  for(let i=0;i<n;i++)s.drones.push({id:'stitcho',x:c.x+(i-(n-1)/2)*38,y:c.y-85,age:0,life:150+12*tier(p),index:i,count:n,dance:true,next:18+i*5});
 }
+// The ally has an actual formation target, not a fixed screen offset. Pure
+// geometry so the behavior can be tested without a DOM, renderer or RNG.
+export function companionGoal(ally,hero,target=null,tick=0,reduced=false){
+ const face=Math.sign(hero.facing||1)||1,c=center(hero);
+ if(!target)return {
+  x:c.x-face*(78+(reduced?0:Math.sin(tick*.045)*14)),
+  y:hero.y+hero.h-(reduced?0:Math.abs(Math.sin(tick*.09))*8),
+  engaged:false
+ };
+ const q=center(target),dir=Math.sign(q.x-ally.x)||face;
+ return {x:q.x-dir*52,y:target.y+target.h-10,engaged:true};
+}
 export function startBattleCompanion(g,id,power=1){
  if(!THEMES[id]||!g.player)return false;
  const s=state(g),p=g.player,c=center(p);
- s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:360,power,next:35,face:p.facing||1,attack:0};
+ s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:360,power,next:35,face:p.facing||1,attack:0,air:false,motion:'idle',vx:0,vy:0};
  g._assist={heroId:id,heroName:id,t:360};
  return true;
 }
@@ -113,9 +125,20 @@ export function updateEvolutionAttacks(g,hit,heal){
  const a=s.guest;
  if(a){
   a.age++;a.life--;a.attack=Math.max(0,a.attack-1);
-  const target=targets(g,c.x,c.y,950)[0],q=target?center(target):c;
-  const tx=q.x-(p.facing||1)*70,ty=target?target.y+target.h:p.y+p.h;
-  a.x+=clamp(tx-a.x,-7,7);a.y+=(ty-a.y)*.13;a.face=q.x>=a.x?1:-1;
+  // Prefer the threat harassing the player, then the nearest enemy.
+  const nearby=targets(g,c.x,c.y,950);
+  const target=nearby.find(e=>(e.elite||e.aiAttackPermit)&&Math.hypot(center(e).x-c.x,center(e).y-c.y)<520)||nearby[0];
+  const q=target?center(target):c,goal=companionGoal(a,p,target,a.age,!!g.reduceMotion);
+  const ox=a.x,oy=a.y,dx=goal.x-a.x,dy=goal.y-a.y;
+  const speed=goal.engaged?Math.abs(dx)>230?13:9:10;
+  a.x+=clamp(dx,-speed,speed);
+  a.y+=clamp(dy,-10,10);
+  a.vx=a.x-ox;a.vy=a.y-oy;
+  a.air=Math.abs(a.vy)>2||Math.abs(a.y-(p.y+p.h))>28;
+  a.motion=Math.abs(a.vx)>1?'run':goal.engaged?'ready':'idle';
+  if(Math.abs(a.vx)>0.5)a.face=Math.sign(a.vx);
+  else if(target)a.face=q.x>=a.x?1:-1;
+  else a.face=p.facing||1;
   if(--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<240){
    a.next=36;a.attack=14;
    const damage=(15+e*5)*a.power,sy=a.y-28;
@@ -193,6 +216,18 @@ export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
  for(const d of s.drones)drawDrone(ctx,d,cam,t,!!g.reduceMotion);
  for(const b of s.beams){ctx.globalAlpha=b.life/10;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x-cam.x,b.y-cam.y);ctx.lineTo(b.tx-cam.x,b.ty-cam.y);ctx.stroke();glyph(ctx,b.id,b.tx-cam.x,b.ty-cam.y,10,t);}
  ctx.globalAlpha=1;const a=s.guest;
- if(a){const def=roster.find(r=>r.id===a.id),e=tier(g.player),f=def?.forms[e];if(f){ctx.globalAlpha=Math.min(1,a.age/16,a.life/18);drawActor(ctx,{...def,...f,id:a.id,evo:e,x:a.x-f.w/2,y:a.y-f.h,facing:a.face,vx:a.attack?0:a.face*4,vy:0,grounded:true,_poseOverride:a.attack?'attack':'run',_duetActor:true,_introForceCanvas:true,visualScale:.85},cam,t,{reduceMotion:!!g.reduceMotion});}}
+ if(a){const def=roster.find(r=>r.id===a.id),e=tier(g.player),f=def?.forms[e];if(f){
+  const x=a.x-cam.x,y=a.y-cam.y;
+  const alpha=Math.min(1,a.age/16,a.life/18);
+  // Shadow / pulse / visible partner movement make proximity and attack readable.
+  ctx.globalAlpha=alpha*.38;ctx.fillStyle='#102d39';ctx.beginPath();ctx.ellipse(x,y,Math.max(12,f.w*.3),6,0,0,TAU);ctx.fill();
+  ctx.globalAlpha=alpha;
+  if(a.attack){ctx.strokeStyle=THEMES[a.id][0];ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y-f.h*.5,Math.max(26,f.w*.6)+(14-a.attack)*1.4,0,TAU);ctx.stroke();}
+  const bob=g.reduceMotion?0:a.motion==='run'?Math.sin(a.age*.42)*5:Math.sin(a.age*.10)*2;
+  drawActor(ctx,{...def,...f,id:a.id,evo:e,x:a.x-f.w/2,y:a.y-f.h-bob,facing:a.face,
+   vx:a.vx||0,vy:a.vy||0,grounded:!a.air,
+   _poseOverride:a.attack?'attack':a.motion==='run'?'run':'idle',
+   _duetActor:true,_introForceCanvas:true,visualScale:.88},cam,t,{reduceMotion:!!g.reduceMotion});
+ }}
  ctx.restore();
 }
