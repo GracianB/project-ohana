@@ -15,7 +15,7 @@ export function updateIslandSprings(g){
  const s=springs(g);if(!s)return;
  for(const pad of s.pads){pad.cd=Math.max(0,pad.cd-1);pad.flash=Math.max(0,pad.flash-1);}
  if(p.dead){s.wasAir=false;return;}
- if(s.wasAir&&p.grounded){
+ if(s.wasAir&&p.grounded&&!p._dropWasHeld){
   for(const pad of s.pads){
    if(pad.cd||Math.abs(p.x+p.w/2-pad.x)>28+p.w*.3||Math.abs(p.y+p.h-pad.y)>8)continue;
    p.vy=-Math.max(15,Number(p.jumpPower)||12);p.grounded=false;p.jumps=0;p._jumpHeld=false;

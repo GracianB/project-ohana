@@ -13,3 +13,11 @@ test('cooldown, position, death and boss exclusions prevent accidental boosts',(
  g.player.x=185;g.player.dead=true;g.islandSprings.wasAir=true;updateIslandSprings(g);assert.equal(g.player.vy,0);
  g.roomId='boss';updateIslandSprings(g);assert.equal(g.islandSprings,null);
 });
+
+
+test('holding DOWN deliberately lands on a spring without bouncing back up',()=>{
+ const g=game();updateIslandSprings(g);g.player.grounded=false;updateIslandSprings(g);
+ g.player._dropWasHeld=true;g.player.grounded=true;updateIslandSprings(g);
+ assert.equal(g.player.vy,0);assert.equal(g.player.grounded,true);assert.equal(islandSpringsSnapshot(g).used,0);
+ g.player._dropWasHeld=false;updateIslandSprings(g);assert.equal(g.player.vy,0,'releasing DOWN while standing is not another landing');
+});

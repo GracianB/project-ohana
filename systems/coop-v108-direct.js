@@ -1,3 +1,4 @@
+import {worldBounds} from "./world-bounds.js";
 // OHANA V108 · WebRTC fast lane.
 // Netlify still authenticates the room and persists canonical progress.
 // Only time-sensitive cosmetic poses and actions take the direct channel.
@@ -48,7 +49,8 @@ const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const finite=v=>typeof v==="number"&&Number.isFinite(v);
 export function safeDirectPose(message,prevSeq=0){
  if(!message||message.t!=="pose"||!Number.isSafeInteger(message.seq)||message.seq<=prevSeq)return null;
- if(!finite(message.x)||!finite(message.y)||message.x<0||message.y<0||message.x>2400||message.y>1450)return null;
+ const bounds=worldBounds(message.room);
+ if(!bounds||!finite(message.x)||!finite(message.y)||message.x<0||message.y<0||message.x>bounds.width||message.y>bounds.height)return null;
  if(typeof message.room!=="string"||!/^(hub|beach|jungle|cave|lab|ridge|space|reef|volcano|boss)$/.test(message.room))return null;
  return {
   seq:message.seq,x:message.x,y:message.y,room:message.room,

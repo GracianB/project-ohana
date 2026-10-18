@@ -1,3 +1,15 @@
+## ohana-440 · Escenario y movimiento de Michi
+
+Retirado el rectángulo translúcido del efecto de entrada que aparecía en la captura. Corregidos los solapes entre plataformas del trazado base, desvíos y puente de regreso. Los salientes naturales sustituyen las barras verdes; se añaden relieves, vegetación y cascadas en coordenadas del mundo. El minimapa muestra el entorno cercano y queda por encima de los controles, con el suelo largo recortado por sectores descubiertos. Las flores de salto respetan bajar con ↓: ya no devuelven al jugador automáticamente a la repisa superior.
+
+Michi: articulación independiente de patas, apoyo alterno al correr, recogida al saltar, compresión al aterrizar, cabeza/cola/orejas y amasado durante los 72 fotogramas de ronroneo. La I conserva una pose distinta a K. Se mantienen las cinco siluetas canónicas y las escenas de bienvenida.
+
+Cooperativo: terreno, WebRTC y HTTP comparten los límites por sala; las posiciones a 6880 unidades ya no se rechazan ni se recortan a 2240. La conexión WebRTC completa sigue pendiente de validar en este entorno. Las tres brasas del rito del Dragón se anclan ahora a repisas reales de la Caldera ampliada; la secuencia física 1→2→3 pasa en Chromium.
+
+Validación V440: 1265/1265 pruebas unitarias; auditoría general de navegador PASS; Michi (cinco formas × ocho poses), carrera/ronroneo reales, bajada con ↓ y rito del Dragón 1→2→3 PASS. Auditoría candidata de diez salas, atlas y escritorio/móvil PASS. Release gate PASS. Se añaden las auditorías de Michi y recorrido a CI.
+
+Pendientes para la V1 oficial: duración real de 60–90 minutos, balance completo, cierre de cinemáticas/jefe y conexión WebRTC completa entre dos jugadores (la validación de posiciones HTTP/directas sí pasa).
+
 ## ohana-439 · Candidata V1 en desarrollo
 
 Salas de 7200 unidades, sectores, pozos alineados, puntos de control y guardado v3 compatible con v2. Minimapa local y atlas de islas; cinco islas de selección por parejas. I y P propios, P por daño efectivo, ocho roles de combate en los sectores nuevos. Se conserva el final del Mundo 1.

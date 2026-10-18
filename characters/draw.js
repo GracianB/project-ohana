@@ -1268,6 +1268,12 @@ if(p.id==='stitcho'&&(Number(p._stitchoDanceT)||0)>0){
  pose.stitchoDanceAge=Number(p._stitchoDanceAge)||0;
 }
 applyPowerPerformance(pose,p,t);
+if(p.id==='cat'&&!p.dead&&pose.state!=='hurt'&&!Number.isFinite(pose.michiDuetAge)){
+ const age=t-(p._cast?.t??-9999);
+ if(p._cast?.slot===1&&age>=0&&age<72&&!moving&&!air){pose.state='cast';pose.castSlot=1;pose.cast=age/72;}
+ const powerAge=t-(p._powerPerformance?.start??-9999);
+ if(powerAge>=0&&powerAge<(p._powerPerformance?.index===5?120:32))pose.michiPowerIndex=p._powerPerformance.index;
+}
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;

@@ -1153,8 +1153,8 @@ try {
     api.resetInput();api.setInvulnerable(600);
     api.step(12); // Room entrance animation must finish before sampling embers.
     const steps=[];
-    for(const [x,y] of [[290,875],[1580,900],[2010,535]]){
-      api.setPlayer(x,y);
+    for(const ember of api.state().dragonTrialEmbers){
+      api.setPlayer(ember.x-32,ember.y-12);
       steps.push(api.step(37).dragonTrial?.count||0);
     }
     return {steps,trial:api.state().dragonTrial};

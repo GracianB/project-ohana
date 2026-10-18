@@ -532,17 +532,7 @@ export class ExperienceDirector {
       ctx.fillRect(0, 0, W, H);
     }
 
-    // El texto pertenece a MessageManager.
-    if (this.state.roomT > 0.03 && !reduced) {
-      const k = clamp(this.state.roomT / 72);
-      ctx.save();
-      ctx.globalAlpha = 0.16 * easeOut(1 - k);
-      ctx.strokeStyle = this.state.color || "#7ee7ff";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(W * 0.27, H * 0.18, W * 0.46, H * 0.42);
-      ctx.restore();
-    }
-
+    // Room announcements belong to MessageManager; keep the playfield unobstructed.
 
     for (const item of this.impulses) {
       const u = 1 - item.life / item.max;

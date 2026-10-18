@@ -1,3 +1,4 @@
+import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -68,7 +69,7 @@ import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
 import { drawBossFallScene, bossFallStage } from "./systems/boss-fall-scene.js";
-import { newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
+import { dragonEmbersForRoom,newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
@@ -2688,6 +2689,7 @@ drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
+drawIslandLandmarks(ctx,game,game.cam,t);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3518,6 +3520,7 @@ state() {
     paused,
     runtimeFaults: game.runtimeFaults || 0,
     camera: { x: game.cam.x, y: game.cam.y },
+    platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
     worldW:game.worldW,worldH:game.worldH,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
@@ -3566,6 +3569,7 @@ state() {
     assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
     hazardEscape: p?._hazardEscapeKey || "",
     mastery: masterySnapshot(game),
+    dragonTrialEmbers:game.roomId==="volcano"?dragonEmbersForRoom(game.roomDef):[],
     dragonTrial: game.roomId==="volcano" ? dragonTrialSnapshot(game.dragonTrial) : null,
     masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
     worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),

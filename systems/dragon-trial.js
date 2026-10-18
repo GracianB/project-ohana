@@ -8,6 +8,18 @@ export const DRAGON_EMBERS=Object.freeze([
 ]);
 // V88: channel each ember in sequence; the ritual must be played, not grazed.
 export const DRAGON_CHANNEL_FRAMES=30;
+const emberLayouts=new WeakMap();
+export function dragonEmbersForRoom(room){
+ if(!room?.plats?.length)return DRAGON_EMBERS;
+ if(emberLayouts.has(room))return emberLayouts.get(room);
+ const ledges=room.plats.filter(p=>p[3]<=24&&p[2]>=160),used=new Set();
+ if(ledges.length<3)return DRAGON_EMBERS;
+ const result=DRAGON_EMBERS.map((ember,i)=>{
+  const target=(room.width||3360)*[.12,.5,.82][i],height=[960,800,600][i];
+  const best=ledges.filter(p=>!used.has(p)).sort((a,b)=>Math.abs(a[0]+a[2]/2-target)+Math.abs(a[1]-height)*.4-Math.abs(b[0]+b[2]/2-target)-Math.abs(b[1]-height)*.4)[0];
+  used.add(best);return Object.freeze({...ember,x:best[0]+best[2]/2,y:best[1]-42});
+ });emberLayouts.set(room,result);return result;
+}
 const TAU=Math.PI*2;
 const finite=n=>Number.isFinite(Number(n))?Number(n):0;
 export function newDragonTrial(){
@@ -23,7 +35,7 @@ export function updateDragonTrial(game){
  const p=game.player;
  const cx=finite(p.x)+finite(p.w)*.5,cy=finite(p.y)+finite(p.h)*.55;
  if(state.completed)return null;
- const i=state.count,ember=DRAGON_EMBERS[i];
+ const i=state.count,ember=dragonEmbersForRoom(game.roomDef)[i];
  if(!ember)return null;
  const distance=Math.hypot(cx-ember.x,cy-ember.y);
  // Walking away releases the flame: no remote holding, timers or passive AFK win.
@@ -57,8 +69,9 @@ export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
  ctx.moveTo(cx-6,cy+32);ctx.lineTo(cx,cy-62);ctx.lineTo(cx+6,cy+32);
  ctx.stroke();
  ctx.globalAlpha=1;
- for(let i=0;i<DRAGON_EMBERS.length;i++){
-  const s=DRAGON_EMBERS[i],x=s.x-ox,y=s.y-oy;
+ const embers=dragonEmbersForRoom(game.roomDef);
+ for(let i=0;i<embers.length;i++){
+  const s=embers[i],x=s.x-ox,y=s.y-oy;
   if(x< -110||x>2600||y< -180||y>1550)continue;
   const lit=!!state.lit[i],pulse=reduce?0.5:.5+.5*Math.sin(t*.07+i*2);
   const isNext=!lit&&i===(state.count||0),progress=isNext?Math.min(1,(state.charge||0)/DRAGON_CHANNEL_FRAMES):0;

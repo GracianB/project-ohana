@@ -1,3 +1,4 @@
+import {drawNaturalLedge} from "./natural-ledges.js";
 
 function plate(ctx, x, y, w, h, r) {
   const rad = Math.max(0, Math.min(r, h / 2, w / 2));
@@ -94,6 +95,7 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   if (!platformInView(x, w, drawingWidth(ctx))) return;
   const id = world.id || "grove";
   const thin = h <= 24;
+  if(thin&&drawNaturalLedge(ctx,plat,world,cam,t))return;
 
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.28)";

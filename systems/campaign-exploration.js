@@ -1,3 +1,4 @@
+import {tidyPlatforms} from "./platform-layout.js";
 export function enterCampaignExploration(g){
  const r=g.roomDef;if(!r||r.boss){g.campaignExploration=null;return;}
  const branches=[1,3].filter(i=>i<r.sectors.length).map((n,i)=>{
@@ -6,6 +7,7 @@ export function enterCampaignExploration(g){
   const platform={x:x+80,y:974,w:170,h:22,_campaignLift:true};g.platforms.push(platform);
   return {id:`${r.id}-secret-${i}`,x:x+390,y:540,platform,baseY:974,phase:i*Math.PI,found:false};
  });
+ g.platforms=tidyPlatforms(g.platforms);
  g.campaignExploration={branches,shortcut:false};
 }
 export function updateCampaignExploration(g){
@@ -25,6 +27,7 @@ export function updateCampaignExploration(g){
  if(!state.shortcut&&g.secrets?.[r.id]?.includes(key)){
   state.shortcut=true;for(let x=3500;x<r.width-250;x+=340)g.platforms.push({x,y:654,w:300,h:22,_campaignReturn:true});
   for(let y=1054;y>=654;y-=80)g.platforms.push({x:r.width-400,y,w:240,h:22,_campaignReturn:true});
+  g.platforms=tidyPlatforms(g.platforms);
   g.nums?.add?.(p.x,p.y-40,'ATAJO DEL REGRESO ABIERTO','#a9ffe6',true);g.save?.();
  }
 }

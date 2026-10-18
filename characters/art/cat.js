@@ -1,3 +1,4 @@
+import {michiMotion} from "../michi-motion.js";
 // Michi. Pies en (0,0), mira a +x. Cada forma es otra silueta.
 export const MICHI_VISUAL_H=[60,72,84,94,106];
 const INK = "#3a2416";
@@ -218,7 +219,8 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
  const H=[72,88,94,108,116][f],headY=-H+33,bodyY=-30-f*2;
  const oval=(x,y,rx,ry,col,line=true)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=col;ctx.fill();if(line){ctx.strokeStyle=INK;ctx.lineWidth=2;ctx.stroke();}};
  const stroke=(col,w)=>{ctx.strokeStyle=col;ctx.lineWidth=w;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();};
- const sway=pose.reduceMotion?0:Math.sin(r.t*.065)*2+r.tail;
+ const motion=r.motion;
+ const sway=pose.reduceMotion?0:Math.sin(r.t*.065)*2+r.tail+(motion?.tail||0)*18;
  const count=f===4?3:f===3?2:1;
  for(let i=0;i<count;i++){
   const tipX=-36-i*15,tipY=bodyY-19-i*14+sway;
@@ -226,20 +228,20 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
   ctx.beginPath();ctx.moveTo(-15,bodyY+2);ctx.bezierCurveTo(-42,bodyY+1,-57-i*8,tipY-13,tipX,tipY);stroke(c.dark,8-i);
   oval(tipX,tipY,5-i*.5,6,c.belly);
  }
- if(f===4){for(const side of [-1,1]){ctx.save();ctx.translate(side*14,bodyY-13);ctx.scale(side,1);ctx.rotate(pose.reduceMotion?0:Math.sin(r.t*.08)*.08);ctx.beginPath();ctx.moveTo(0,3);ctx.bezierCurveTo(19,-7,28,-40,39,-35);ctx.quadraticCurveTo(44,-21,33,-12);ctx.quadraticCurveTo(28,-4,19,-4);ctx.quadraticCurveTo(12,7,0,3);ctx.fillStyle=c.belly;ctx.fill();stroke(INK,2);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(5+i*7,-2-i*4);ctx.quadraticCurveTo(23,-11-i*6,31+i*3,-24-i*3);stroke('#cbb2ea',1.3);}ctx.restore();}}
+ if(f===4){for(const side of [-1,1]){ctx.save();ctx.translate(side*14,bodyY-13);ctx.scale(side,1);ctx.rotate(pose.reduceMotion?0:(motion?.wing||0));ctx.beginPath();ctx.moveTo(0,3);ctx.bezierCurveTo(19,-7,28,-40,39,-35);ctx.quadraticCurveTo(44,-21,33,-12);ctx.quadraticCurveTo(28,-4,19,-4);ctx.quadraticCurveTo(12,7,0,3);ctx.fillStyle=c.belly;ctx.fill();stroke(INK,2);for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(5+i*7,-2-i*4);ctx.quadraticCurveTo(23,-11-i*6,31+i*3,-24-i*3);stroke('#cbb2ea',1.3);}ctx.restore();}}
  oval(0,headY+22,10,Math.max(9,(bodyY-headY)/2),c.fur);
- const step=r.st==='run'?r.run*4:0;
- if(f!==2)for(const side of [-1,1]){const x=side*10;ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(INK,11);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(side<0?c.dark:c.fur,7);oval(x+side*step,-4,8,5,c.belly);for(const toe of [-2,2]){ctx.beginPath();ctx.moveTo(x+side*step+toe,-5);ctx.lineTo(x+side*step+toe,-2);stroke(c.dark,.8);}}
+ const step=!motion&&r.st==='run'?r.run*4:0;
+ if(f!==2)for(const side of [-1,1]){const x=side*10,dx=motion?(side<0?motion.backX:motion.frontX):side*step,dy=motion?(side<0?motion.backY:motion.frontY):0;ctx.save();ctx.translate(dx,dy);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(INK,11);ctx.beginPath();ctx.moveTo(x,bodyY+12);ctx.lineTo(x+side*step,-7);stroke(side<0?c.dark:c.fur,7);oval(x+side*step,-4,8,5,c.belly);for(const toe of [-2,2]){ctx.beginPath();ctx.moveTo(x+side*step+toe,-5);ctx.lineTo(x+side*step+toe,-2);stroke(c.dark,.8);}ctx.restore();}
  if(f===2){
   ctx.beginPath();ctx.moveTo(-27,bodyY+2);ctx.bezierCurveTo(-43,bodyY-1,-37,bodyY-19,-23,bodyY-17);ctx.bezierCurveTo(-24,bodyY-33,-3,bodyY-35,2,bodyY-22);ctx.bezierCurveTo(15,bodyY-35,34,bodyY-23,28,bodyY-12);ctx.bezierCurveTo(46,bodyY-11,43,bodyY+9,29,bodyY+10);ctx.bezierCurveTo(24,bodyY+24,6,bodyY+24,0,bodyY+17);ctx.bezierCurveTo(-10,bodyY+28,-31,bodyY+17,-27,bodyY+2);ctx.closePath();ctx.fillStyle=c.belly;ctx.fill();stroke('#929dbc',1.7);
   oval(2,bodyY+5,18,10,'#e4effa',false);
   ctx.save();ctx.globalAlpha=.45;ctx.beginPath();ctx.ellipse(0,-2,24,3,0,0,TAU);stroke(c.accent,1.5);ctx.restore();
  }else{oval(0,bodyY,19,22,c.fur);oval(3,bodyY+3,11,14,c.belly,false);}
- ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(INK,10);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(c.dark,6);
- const reach=r.st==='attack'?Math.sin(Math.PI*r.atk)*16:r.slot>=0?10:(r.michiPaw||0)*12+Math.sin(r.arm)*3;
+ ctx.save();ctx.translate(-15,bodyY-12);ctx.rotate(motion?.rearPaw||0);ctx.translate(15,-bodyY+12);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(INK,10);ctx.beginPath();ctx.moveTo(-15,bodyY-12);ctx.quadraticCurveTo(-24,bodyY-3,-18,bodyY+5);stroke(c.dark,6);ctx.restore();
+ const reach=motion?motion.frontPaw*10+(r.michiPaw||0)*12+Math.sin(r.arm)*3:r.st==='attack'?Math.sin(Math.PI*r.atk)*16:r.slot>=0?10:(r.michiPaw||0)*12+Math.sin(r.arm)*3;
  ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(INK,10);ctx.beginPath();ctx.moveTo(15,bodyY-12);ctx.quadraticCurveTo(23+reach,bodyY-6-reach,19+reach,bodyY+4-reach);stroke(c.fur,6);oval(19+reach,bodyY+4-reach,5,5,c.belly);
- ctx.save();ctx.translate(2,headY);if(r.mood==='angry'){ctx.rotate(-.06);}ctx.rotate(r.michiHead||0);
- for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*9,-14);ctx.quadraticCurveTo(side*23,-33,side*23,-19);ctx.lineTo(side*25,-1);ctx.closePath();ctx.fillStyle=c.fur;ctx.fill();stroke(INK,2);ctx.beginPath();ctx.moveTo(side*14,-13);ctx.lineTo(side*20,-24);ctx.lineTo(side*21,-8);ctx.fillStyle=c.ear;ctx.fill();}
+ ctx.save();ctx.translate(2,headY);if(r.mood==='angry'){ctx.rotate(-.06);}ctx.rotate((r.michiHead||0)+(motion?.head||0));
+ for(const side of [-1,1]){ctx.save();ctx.translate(side*17,-12);ctx.rotate(side*(r.michiEar||motion?.ear||0));ctx.translate(-side*17,12);ctx.beginPath();ctx.moveTo(side*9,-14);ctx.quadraticCurveTo(side*23,-33,side*23,-19);ctx.lineTo(side*25,-1);ctx.closePath();ctx.fillStyle=c.fur;ctx.fill();stroke(INK,2);ctx.beginPath();ctx.moveTo(side*14,-13);ctx.lineTo(side*20,-24);ctx.lineTo(side*21,-8);ctx.fillStyle=c.ear;ctx.fill();ctx.restore();}
  oval(0,0,25,23,c.fur);oval(-11,10,9,7,c.belly,false);oval(11,10,9,7,c.belly,false);
 
  for(const side of [-1,1]){
@@ -275,6 +277,7 @@ function draw(ctx, pose, R) {
   const f = Math.max(0, Math.min(4, Math.round(Number(safe.form) || 0)));
   const c = f===2?{...PAL[f],fur:'#f8f6ff',dark:'#a9badf',belly:'#ffffff',ear:'#d0c6f0',eye:'#549fd3',accent:'#a8e5f6'}:PAL[f];
   const r = solve(safe);
+  if(!safe.michiWelcome&&!Number.isFinite(safe.michiDuetAge)){r.motion=michiMotion(safe,f);if(r.motion.mood)r.mood=r.motion.mood;}
   if(Number.isFinite(safe.michiDuetAge)){r.mood=safe.michiDuetAge<36?'happy':'angry';r.tail=2.1;r.arm=safe.michiDuetAge<36?-1.7:.4;}
   const welcome=michiWelcomeRig(safe,f);
   if(welcome.active){
@@ -291,6 +294,7 @@ function draw(ctx, pose, R) {
   // One connected original cat silhouette per form: tail, feet, shoulder
   // roots, ears and (F4 only) feathered wings expand together from the paws.
   if(welcome.active)ctx.scale(welcome.torsoX,welcome.torsoY);
+  if(r.motion){ctx.translate(0,r.motion.lift+r.motion.crouch);ctx.rotate(r.motion.lean);ctx.scale(r.motion.sx,r.motion.sy);}
   if (r.st === "dead") {
     ctx.rotate(1.05);
     ctx.translate(8, -10);
