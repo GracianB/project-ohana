@@ -75,7 +75,7 @@ export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
  ctx.restore();
  ctx.save();ctx.textBaseline='middle';ctx.fillStyle='#b4d8d6';ctx.textAlign='left';
  ctx.font=small?'9px sans-serif':'10px sans-serif';
- ctx.fillText(Math.round(v.progress*100)+'% EXPLORADO',x+12,y+h-11);
+ ctx.fillText(Math.round(v.progress*100)+'% RUTA',x+12,y+h-11);
  ctx.textAlign='right';
  ctx.fillText(v.remaining==null?'FIN DE RUTA':'CONTROL '+v.remaining+' u',x+w-12,y+h-11);
  ctx.restore();
