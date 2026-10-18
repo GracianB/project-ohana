@@ -61,7 +61,13 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
  $('camp-line').textContent=data.lines[0];host.dataset.hero=selected;host.dataset.form=String(form);
  }
- function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;if(!walk)target={x:CAMP_HEROES[id].x,y:CAMP_HEROES[id].y+40};update();}
+ function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;if(!walk){
+  // Direct card/pointer selections must also relocate the firefly. Otherwise
+  // the next arrow key starts from a stale character across the archipelago.
+  cursor={x:CAMP_HEROES[id].x,y:CAMP_HEROES[id].y+40};
+  target={...cursor};
+  walkSelectionLatched=false;
+ }update();}
  const selectHero=(id,walk=false)=>{choose(id,walk);select(id);};
  addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected)choose(e.detail.id);});
  host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
