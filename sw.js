@@ -294,7 +294,7 @@ const PRECACHE_REVISIONS = {
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "d1226270ba90c20f77e1e73fe471d25b322d0300",
   "systems/hero-combos.js": "29d27d8d455fc23038ee0cba91aa805e59d68f49",
-  "systems/campaign-enemies.js": "11784db771685a9dc1ca9a0744f00822a3bd8616",
+  "systems/campaign-enemies.js": "e3caa0f963ef2d3ca21d1ba1452a0d4f16a7a3fe",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
   "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",

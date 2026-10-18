@@ -19,6 +19,7 @@ export function updateCampaignEnemy(e,g,hurt){
  if(!e.campaignRole)return false;
  const p=g.player,role=e.campaignRole;if(!p||p.dead)return true;
  const dx=cx(p)-cx(e),dy=cy(p)-cy(e),dir=Math.sign(dx)||1,dist=Math.hypot(dx,dy),a=e._campaign||={age:0,wind:0,cd:40,active:0,aim:1};a.age++;
+ e._shieldImpact=Math.max(0,(e._shieldImpact||0)-1);
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
  const shoot=(vx,vy,damage=12)=>{if(g.projectiles.length<160)g.projectiles.push({x:cx(e),y:cy(e),vx,vy,w:12,h:12,life:140,dmg:damage,owner:'enemy',color:e.elite?'#ffb882':'#ef9db1'});};
  if(e.sleep>0||e.stun>5){e.sleep=Math.max(0,(e.sleep||0)-1);a.wind=0;a.active=0;a.volley=null;e.telegraph=false;e.vx=0;}
