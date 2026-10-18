@@ -267,9 +267,9 @@ function solve(pose, d, f) {
       const c = pose.cast, slot = pose.castSlot;
       r.paci = false; r.fxK = c;
       if (slot === 1) {
-        r.spin = Math.cos(c * Math.PI * 4);
-        if (Math.abs(r.spin) < 0.18) r.spin = r.spin < 0 ? -0.18 : 0.18;
-        const w = Math.sin(t * 0.3) * 3;
+        r.spin = pose.reduceMotion ? 1 : Math.cos(c * Math.PI * 4);
+        if (Math.abs(r.spin) < 0.55) r.spin = r.spin < 0 ? -0.55 : 0.55;
+        const w = Math.sin(c * Math.PI * 2) * 3;
         r.handF = [xF + al * 0.9, sy - 2 + w]; r.handB = [xB - al * 0.9, sy - 6 - w];
         r.footF = [2, 0]; r.footB = [-3, -3];
         r.flare = 1.3; r.hemLift = 3; r.mood = "happy"; r.mouth = "open"; r.fx = "spin"; r.hairUp = 0.5;
@@ -752,6 +752,27 @@ function draw(ctx, pose, R) {
   const dead = st === "dead";
   drawKiloFootwork(ctx,pose,f,pose.t||0);
   const r = dead ? solve({ ...pose, state: "idle", flourish: 0 }, d, f) : solve(pose, d, f);
+  // Cast-driven follow-through: independent of wall clock and continuous at rest.
+  if (!dead && (st === 'cast' || st === 'attack')) {
+    const progress = Math.max(0, Math.min(1, Number(st === 'attack' ? pose.atk : pose.cast) || 0));
+    const beat = Math.sin(progress * Math.PI), strike = Math.sin(progress * Math.PI * 2);
+    const strength = pose.reduceMotion ? .3 : 1;
+    r.lean += strike * .12 * strength;
+    r.oy += (progress < .35 ? beat * 2 : -beat * 2) * strength;
+    r.headRot -= strike * .08 * strength;
+    r.hairLag += strike * .3 * strength;
+    r.skirt += beat * .35 * strength;
+    r.footF[0] += beat * (st === 'attack' ? 4 : 2);
+    r.footB[1] -= beat * 2 * strength;
+    if (st === 'cast' && pose.castSlot === 0) {
+      r.handF[1] += strike * 5 * strength;
+      r.headRot = -.08 + beat * .16;
+    }
+    if (st === 'cast' && pose.castSlot === 2) {
+      r.handF[1] += (1 - beat) * 10; r.handB[1] += (1 - beat) * 10;
+      r.flare += beat * .5; r.hairUp += beat * .25;
+    }
+  }
   const hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const hx = 1 + r.hipX * 0.3, hy = sy - d.hr * 0.9;
   if (dead) {

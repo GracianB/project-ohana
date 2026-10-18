@@ -1,6 +1,7 @@
-const VERSION = "ohana-432";
+const VERSION = "ohana-434";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/kilo-rhythm.js?v=" + VERSION,
   "./characters/art/chispa-sprite.js?v=" + VERSION,
   "./assets/sprites/chispa-white-gold-v3.png",
   "./assets/sprites/chispa-kirin-four-legs-v4.png",
@@ -270,6 +271,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
   "assets/sprites/chispa-white-gold-v3.png": "3a4c55023a4abb57e8c6cc3e2fd2ca4f1887d4e8",
   "assets/sprites/chispa-kirin-four-legs-v4.png": "c443533822513aa8e3d44ca3b5d718dbd751bb95",
@@ -295,7 +297,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "971d556aa41b67b35619afb6e06dbcc64a3a4379",
+  "index.html": "abef15ad92e3ac8ab8b73af5ab57dc20edb1b57e",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -320,7 +322,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "bb199aadb1c471a3ac639441744db5d0c7bc5840",
+  "game.js": "7b39c49bd3f989744cc38732d2f46be4efaadb9e",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "50fa3ad0e7ed69381f672e0950d1aabe47e47eb9",
@@ -330,7 +332,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/frita.js": "1e761e90bf01e73150a5302a39311f9be3570434",
   "characters/art/index.js": "5c738ee0f3205254935f678bc6d586345ed98479",
   "characters/art/kilo.js": "6cb085e45287bb7d32a8d19606506437c8d23ce6",
-  "characters/art/lilo.js": "2545ace985c84888d2ca1e0b504fe5a3b35bdf4a",
+  "characters/art/lilo.js": "1f626dbdd7744dd7badf5cc1ff83e572068fdce7",
   "characters/art/pikachu.js": "2de615332e375bd8c71b54e719be9fbcd75bcd08",
   "characters/art/pizza.js": "4ea37610815133b9db63fedefb9535ebc3e598af",
   "characters/art/stitch.js": "0fdd609ddb8cf44a7bd918fe6ac4e744d3e16824",
@@ -343,7 +345,7 @@ const PRECACHE_REVISIONS = {
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "39154d7e158f0105c35bad3db455aa2ba85fd340",
   "characters/rig.js": "709eef2e67c4fe6e0e8d09b6057e5cf3c80cfdfe",
-  "characters/roster.js": "727144771263caeea9a6ca55a6f689c489af6372",
+  "characters/roster.js": "b8500da86ac63741df011112a98bcd0200bc2cb8",
   "characters/signature.js": "835675968554270015edda645cca8e340978ce70",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "cc470dcbf8957ee36cfbe9d525e15b083f9a5ff7",
@@ -380,13 +382,13 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "ab6b251739c5fbd5957936ec02789c28da7f5502",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "d30ef90c40018bc35c64194811c3df9e08aae911",
-  "systems/abilities.js": "4c1180b808c3b3ed578e328bd1cbb8d05be7b374",
+  "systems/abilities.js": "7d46abddbf2f3d0687b7855ad93899d09d336205",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "ea27e0828881a84b2037e7bfef175a62b42b6abe",
   "systems/u-partners.js": "1f4fd2c60d134c4b62fd24a0836be585e0627beb",
   "systems/u-duet-chemistry.js": "3989b02fad26154a7a4db9699ee65e6fff939269",
   "systems/u-duet-direction-v315.js": "eb629f03e37e44e409b8c2c5c5d76a09052f16a7",
-  "systems/ability-catalog.js": "485106754efc85fe742bbce86b0a1abe49ddc2c2",
+  "systems/ability-catalog.js": "88145a929e57c2f38f2ed7002917f25de27f6ce3",
   "systems/boss-fall-scene.js": "fd1eb014e509495a167dbcffc49261351df950e8",
   "systems/dragon-trial.js": "d8da8839b6ec952cd7efd4b9795469773205c6dd",
   "systems/canvas-gradient-cache.js": "a33dd6799c3dff42fc484c16a4aff51b6ec31072",

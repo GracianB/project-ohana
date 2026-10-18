@@ -21,7 +21,7 @@ export function aliasId(id) {
 
 export const ALL_ROSTER = [
   {
-    id: "kilo", name: "Kilo", role: "control", tag: "Ukulele y polen",
+    id: "kilo", name: "Kilo", role: "control", tag: "Ukelele · pétalos · A compás",
     color: "#eb554a",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],

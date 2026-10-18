@@ -2050,3 +2050,10 @@ Illustrated interactive atlas with room details and real outgoing paths. Reworke
 
 ## v428 — Chispa: espiritualidad eléctrica
 Cinco anatomías blancas y doradas desde adorable a deidad temible, 40 poses en atlas transparente. La L invoca un sello conductor y descargas blancas/cian. Mantiene hitboxes y estadísticas. Validado: 1210 pruebas Node, 100 tamaños renderizados, 200 poses de Chispa, cuatro cinemáticas y juego offline en escritorio y móvil.
+
+
+## Personajes 1/10 · Kilo «A compás» · ohana-434
+
+H y J cargan un pétalo por ataque acertado; máximo tres, caducidad de cuatro segundos. K consume la carga para ampliar radio y daño; L para aumentar curación, radio y daño. L ahora usa distancia del mundo (240–455 px), independiente de pantalla. Indicador de tres pétalos; limpieza por muerte, sala y personaje. Gestos corporales de ataque, rasgueo y floración en las cinco formas; giro simplificado con movimiento reducido. U conserva el dúo existente.
+
+Esta entrega inicia el cierre por personaje. Chispa original y la reserva del jefe del mundo 2 siguen en el trabajo previo sin integrar. La ampliación de salas, secretos e interactividad sigue pendiente; no se presenta como completada por esta entrega.

@@ -16,6 +16,7 @@ import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
+import { earnKiloPetal } from "./systems/kilo-rhythm.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -894,6 +895,7 @@ crit ? "#ffe66a" : (p.color || "#fff"),
 );
 
 punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+earnKiloPetal(game, p._swing);
 const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
 if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
 game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });

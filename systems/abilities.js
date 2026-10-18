@@ -1,3 +1,4 @@
+import {earnKiloPetal,spendKiloPetals,drawKiloRhythm} from './kilo-rhythm.js';
 import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
 import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
 import {readDinoEffects} from './dino-coop-effects.js';
@@ -553,6 +554,7 @@ const S = { p: null, hover: 0, roll: 0, caos: 0, cvx: 0, charge: 0, pull: null, 
 function syncState(p) {
 if (S.p === p) return;
 if (S.p) {
+S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
 }
@@ -606,6 +608,7 @@ export function clearAbilityFx() {
 FX.length = 0;
 S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 if (S.p) {
+S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
 S.p._combatChain = [];
@@ -831,6 +834,7 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+drawKiloRhythm(ctx,game);
 if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
@@ -1114,20 +1118,22 @@ const CASTERS = {
 ukulele(g, p, evo) {
 const h = hand(p);
 const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
+const rhythmAttack = {};
 for (let i = 0; i < n; i++) {
-  add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
+  add({ kind: "note", rhythmAttack, x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
 }
 boom(g, h.x, h.y, "#ffb347", 8, { star: true });
 },
 hula(g, p, evo) {
+const petals = spendKiloPetals(g);
 S.hover = 60;
 if (p.vy > 0) p.vy = -2;
 add({
   kind: "hula",
   life: 60,
   age: 0,
-  r: 46 + evo * 6,
-  dmg: 9 * pw(p),
+  r: 46 + evo * 6 + petals * 8,
+  dmg: (9 + petals * 2) * pw(p),
   heal: evo >= 3 ? 3 : 0,
   hit: new Set(),
   pulse: 0,
@@ -1137,11 +1143,12 @@ boom(g, cx(p), cy(p), "#ff5ad5", 12, { star: true });
 },
 ohana(g, p, evo) {
 const god = evo >= 4;
-const heal = 20 + evo * 8;
+const petals = spendKiloPetals(g);
+const heal = 20 + evo * 8 + petals * 3;
 healPlayer(p, heal);
 g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6", true);
-const R = Math.hypot(viewW(), viewH());
-add({ kind: "ohana", x: cx(p), y: cy(p), r: 0, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4) * pw(p), lifesteal: god ? 5 : 0 });
+const R = 240 + evo * 35 + petals * 25;
+add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: god ? 5 : 0 });
 g.flash = Math.max(g.flash || 0, god ? 10 : 6);
 g.flashColor = "#ffe9a0";
 g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
@@ -1833,7 +1840,7 @@ note(g, f) {
   for (const e of g.enemies) {
     if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
       f.hit.add(e);
-      hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 });
+      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) earnKiloPetal(g, f.rhythmAttack);
     }
   }
  return f.life > 0;
@@ -1844,7 +1851,7 @@ f.life--;
 f.x = cx(p); f.y = cy(p);
 f.r = Math.min(f.max, f.r + f.max / 30);
 for (const e of g.enemies) {
-  if (f.hit.has(e) || !canHit(e) || !inView(g, e)) continue;
+  if (f.hit.has(e) || !canHit(e)) continue;
   if (Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.r) {
     f.hit.add(e);
     hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
