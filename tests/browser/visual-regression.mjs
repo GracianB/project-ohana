@@ -896,8 +896,12 @@ try {
     // the test presses Space during doorHold, when the game deliberately ignores
     // actions, then incorrectly reports that the Dragon's mastery is broken.
     api.step(12);
-    api.setPlayer(520, 920);
-    api.setPlayerVelocity(0, 2);
+    // Fly safely above all ledges. The older y=920 staging position landed
+    // during Playwright's focus/keyDown round-trip, replenishing normal jumps.
+    // That made Space perform an ordinary jump, never Dragon's extra wingbeat.
+    // The 300+ pixel fall buffer keeps the physical E2E airborne until sampled.
+    api.setPlayer(520, 420);
+    api.setPlayerVelocity(0, 1);
     api.exhaustPlayerJumps();
     api.resetInput();
   });
