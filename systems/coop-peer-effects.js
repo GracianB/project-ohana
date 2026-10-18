@@ -116,10 +116,11 @@ export function applyPeerEffects(game,frame){
   const mReady=triple(m,["yarn","purr","wisp"]);
   const cReady=triple(c,["chain","trail","storm"]);
   if(!mReady&&!cReady)return false;
-  const beforeM=current.michiFx?.length||0,beforeC=current.chispinFx?.length||0;
-  const nextM=mReady?retainComboFx(m,current.michiFx,["yarn","purr","wisp"],12):current.michiFx;
-  const nextC=cReady?retainComboFx(c,current.chispinFx,["chain","trail","storm"],8):current.chispinFx;
-  if(nextM.length===beforeM&&nextC.length===beforeC)return false;
+  const needsM=mReady&&!triple(current.michiFx||[],["yarn","purr","wisp"]);
+  const needsC=cReady&&!triple(current.chispinFx||[],["chain","trail","storm"]);
+  if(!needsM&&!needsC)return false;
+  const nextM=needsM?retainComboFx(m,current.michiFx,["yarn","purr","wisp"],12):current.michiFx;
+  const nextC=needsC?retainComboFx(c,current.chispinFx,["chain","trail","storm"],8):current.chispinFx;
   current.michiFx=nextM;current.chispinFx=nextC;
   const seen=history?.lateCombos||new Set();seen.add(frame.frameNo);
   while(seen.size>12)seen.delete(seen.values().next().value);
