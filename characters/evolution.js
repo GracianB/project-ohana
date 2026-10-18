@@ -106,7 +106,7 @@ chispin: [
 "Descubre que su cola de muelle puede atrapar un rayo.",
 "Cada salto deja una firma de luz violeta.",
 "Aprende a dirigir nubes y relámpagos sin perder su sonrisa.",
-"La nube reconoce a su compañero: Chispa ya sabe cuidar de una tempestad.",
+"La nube reconoce a su compañero: Chispín ya sabe cuidar de una tempestad.",
 ],
 cat: [
 "Michi descubre que hasta su sombra quiere jugar.",

@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { chromium, devices } from 'playwright';
 import { startServer } from './server.mjs';
+import { DRAGON_EMBERS } from '../../systems/dragon-trial.js';
 import { FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
 
-const server = await startServer(4173);
-const base = 'http://127.0.0.1:4173/';
+const server = await startServer(0);
+const base = 'http://127.0.0.1:'+server.address().port+'/';
 
 async function auditPage(page, label) {
   const errors = [];
@@ -592,7 +593,9 @@ async function auditPage(page, label) {
   await page.locator('#btn-festival').click();
   const museumEntry=page.locator('#festival-album [data-festival-memory="hub-0"]');
   assert.equal(await museumEntry.count(),1,label+': earned memory lacks museum entry');
-  assert.equal(await page.locator('#festival-album [data-festival-memory="hub-1"]').count(),0,label+': locked memory can be replayed');
+  const lockedId=await page.evaluate(async()=>{const {Festival,FESTIVAL_CATALOG}=await import('/systems/v1002-festival.js');return FESTIVAL_CATALOG.find(m=>!Festival.claimed.has(m.id))?.id;});
+  assert.ok(lockedId,label+': expected an undiscovered memory');
+  assert.equal(await page.locator('#festival-album [data-festival-memory="'+lockedId+'"]').count(),0,label+': locked memory can be replayed');
   await museumEntry.click();
   assert.equal(await page.locator('#festival-album .festival-memory-preview').evaluate(el=>el.hidden),false,label+': museum preview not open');
   const portraitPixels=await page.locator('#festival-album .festival-memory-preview canvas').evaluate(el=>{
@@ -1050,7 +1053,7 @@ try {
     const api = window.__OHANA_E2E;
     api.start('dragon');
     api.setEvo(4);
-    api.setPlayer(520, 920);
+    api.setPlayer(520, 120);
     api.setPlayerVelocity(0, 2);
     api.exhaustPlayerJumps();
     api.resetInput();
@@ -1114,7 +1117,7 @@ try {
     api.start('kilo');
     api.loadRoom('beach');
     api.resetInput();
-    api.setPlayer(1085, 1060);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.4);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 36 && state.roomId === 'beach'; i++) state = api.step(1);
@@ -1137,26 +1140,41 @@ try {
     'desktop: V85 hero did not settle on the upper ledge');
   await page.locator('#game').focus();
   await page.keyboard.down('ArrowDown');
-  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(40));
+  const platformDropTrace = await page.evaluate(()=>{
+    const api=window.__OHANA_E2E,samples=[];let state;
+    for(let frame=1;frame<=40;frame++){
+      state=api.step(1);
+      if(frame<=8||frame%4===0){
+        const p=state.player;
+        samples.push({frame,y:p.y,vy:p.vy,grounded:p.grounded,held:p.dropHeld,platform:p.dropPlatform&&p.dropPlatform.y});
+      }
+    }
+    return {state,samples};
+  });
+  const platformDropAfter=platformDropTrace.state;
   await page.keyboard.up('ArrowDown');
+  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,samples:platformDropTrace.samples,after:platformDropAfter.player,input:platformDropAfter.input}));
   assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
     'desktop: V85 DOWN did not traverse the ledge / snapback detected');
   assert.equal(platformDropAfter.player.grounded, true,
     'desktop: V85 lower solid floor did not catch the descending hero');
 
   // V87 · Dragon sanctuary is playable without locking co-op doors.
-  const dragonSanctuary=await page.evaluate(()=>{
+  const dragonSanctuary=await page.evaluate((embers)=>{
     const api=window.__OHANA_E2E;
     api.start('dragon');api.setEvo(4);api.loadRoom('volcano');
     api.resetInput();api.setInvulnerable(600);
-    api.step(12); // Room entrance animation must finish before sampling embers.
-    const steps=[];
-    for(const [x,y] of [[290,875],[1580,900],[2010,535]]){
-      api.setPlayer(x,y);
-      steps.push(api.step(37).dragonTrial?.count||0);
+    api.step(12); // Clear entry animation before channeling.
+    const steps=[],positions=[];
+    for(const ember of embers){
+      // Every focus now has real terrain beneath it and requires 30 held ticks.
+      api.setPlayer(ember.x,ember.y-37);
+      const state=api.step(37);
+      steps.push(state.dragonTrial?.count||0);
+      positions.push({ember:ember.title,position:state.player,charge:state.dragonTrial?.charge||0});
     }
-    return {steps,trial:api.state().dragonTrial};
-  });
+    return {steps,positions,trial:api.state().dragonTrial};
+  },DRAGON_EMBERS);
   assert.deepEqual(dragonSanctuary.steps,[1,2,3],
     'V87: dragon embers not collected in real engine · '+JSON.stringify(dragonSanctuary));
   assert.equal(dragonSanctuary.trial?.completed,true,
@@ -1169,7 +1187,7 @@ try {
     api.setEvo(4);
     api.loadRoom('volcano');
     api.resetInput();
-    api.setPlayer(1120, 1120);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.5);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 24 && state.hp > 0; i++) state = api.step(1);
@@ -1185,7 +1203,7 @@ try {
     api.setEvo(4);
     api.loadRoom('volcano');
     api.resetInput();
-    api.setPlayer(1120, 1120);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.5);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 48 && state.hp > 0 && !state.hazardEscape; i++) state = api.step(1);

@@ -1,3 +1,63 @@
+## ohana-451 · Sincronización WebRTC fuera de orden (J/K/L)
+
+Solucionada la carrera entre la instantánea ligera (frameNo más nuevo) y el evento fiable de ráfaga completa que llega después. Se permite fusionar únicamente la terna visual validada de Michi o Chispín si pertenece al mismo scope, la distancia es de 8 frames o menos y aún no se aceptó esa secuencia. No retrocede frameNo, combate, HP ni objetivos; rechaza paquetes caducados, repetidos o de ámbitos retirados. Node incluye pruebas de llegada inversa, ausencia de daño, expiración y anti-replay. La prueba de navegador continúa verificando los FX reales en ambos jugadores.
+
+## ohana-450 · Ráfagas cosméticas no desaparecen con un frame más reciente
+
+Los paquetes completos J/K/L de Michi y Chispín pueden llegar correctamente por WebRTC fiable y aun así ser reemplazados por la actualización latest siguiente antes del render. Ahora el receptor conserva sólo los componentes validados, del mismo scope y con vida residual positiva, durante los frames ordinarios siguientes. Las FX caducan naturalmente; no reviven, no contienen daño ni sobreviven a un cambio de sala o sesión. Tests Node simulan un frame completo seguido por un frame vacío, expiración y scopes nuevos.
+
+## ohana-449 · Michi y Chispín: FX J/K/L fiables sin tráfico periódico adicional
+
+Las ráfagas cosméticas de tres habilidades pueden ser sustituidas en el canal latest antes de la recepción, también con Michi. Se añade la segunda firma real yarn/purr/wisp al envío fiable de eventos únicamente cuando se envía un combo completo forzado. El canal normal a 5 Hz continúa ligero. Nueva prueba Node pierde el canal rápido, valida la llegada por el fiable, rechaza daño remoto y verifica que los combos parciales no activan el canal fiable; el navegador confirma las tres FX en el motor de origen y luego en el invitado.
+
+## ohana-448 · Chispín J/K/L coherente en WebRTC
+
+El test real de Chispín puede perder la única ráfaga simultánea si el canal latest sobrescribe el paquete antes de entregarlo. Al forzar un lanzamiento completo J/K/L, las tres FX validadas y cosméticas se envían también una vez por el canal fiable de eventos WebRTC; no se añade tráfico HTTP ni se duplican las actualizaciones periódicas. Test Node verifica la entrega fiable cuando falla la vía rápida, ausencia de daño remoto, y coste normal de FX parciales. El test navegador comprueba la presencia real de los tres efectos en origen y en el cliente remoto.
+
+## ohana-447 · Ritual del Dragón en plataformas verdaderamente alcanzables
+
+El E2E llegó más lejos al superar V85 y detectó que dos de tres brasas de Caldera ya no podían mantenerse encendidas: el terreno ampliado las dejaba flotando lejos del suelo. Se distribuyen por tres sectores a 2.000/3.440/5.390 unidades, sobre el suelo real, una terraza y un altar ascendente de dos peldaños. El test de navegador conserva la canalización de 30 fotogramas para cada brasa, toma las coordenadas oficiales y verifica [1,2,3]. Unidad valida el apoyo físico y el reparto por sectores. No fusionar hasta pasar CI y E2E completo.
+
+## ohana-446 · Descenso voluntario sin rebote accidental
+
+El paso intencional con ABAJO a través de plataformas finas tiene prioridad sobre las flores de salto y los mecanismos automáticos de bioma. El rebote sigue operativo en aterrizajes normales y no se dispara tarde al soltar la tecla. Tests de regresión de ambos sistemas; E2E V85 debe verificar que se alcanza el suelo inferior en escritorio y móvil. No fusionar la PR hasta validar quality y focused gameplay.
+
+## ohana-445 · Auditoría E2E del descenso real
+
+Se añade instrumentación limitada a E2E para diferenciar tecla DOWN recibida, plataforma de descenso seleccionada y posible recuperación indebida a la misma altura. El objetivo es reparar la colisión de plataformas sin relajar los tests. Es una fase de diagnóstico, no una versión oficial.
+
+## ohana-444 · Evolución accesible sin animación residual
+
+La auditoría completa de las 100 siluetas de personajes pasó. Corregida la escena de evolución en modo movimiento reducido: el encuadre final y la intensidad de los emblemas permanecen estáticos entre fotogramas. No altera la animación normal ni el combate. Sigue en PR de desarrollo.
+
+## ohana-443 · Chispín original calibrado por medición Canvas
+
+La medición de las cinco siluetas del Chispín redondo original produjo 50/72/99/117/129 px frente a los objetivos 55/70/85/102/120. Se calibra exclusivamente OPTICAL_SCALE por forma para conservar silueta, expresividad y hitboxes en vector y pintado; se retira el registro diagnóstico temporal. Continúan las pruebas CI de navegador antes de publicar.
+
+## ohana-442 · Defensa táctica y avisos honestos
+
+Los escuderos bloquean por delante (30 % del daño de H) pero quedan expuestos por la espalda. Tiradores y artilleros fijan la trayectoria en la preparación: la línea visible coincide con el disparo posterior; mover el héroe no cambia el vector a escondidas. U, secretos, campamento y mecanismos de V441 se mantienen. Requiere pasar quality y verificación de jugabilidad.
+
+## ohana-441 · Mundo con mecanismos, U reactiva y desafíos tácticos
+
+Corrección de navegación de luciérnaga por pulsación en el campamento y guardado persistente de secretos. Dos mecanismos por bioma con acciones distintas, castigos anunciados con nuevas combinaciones de especies, enemigos de retos con roles tácticos y ecos de pareja U que reaccionan a J/K/L/I/P con límite de frecuencia. No fusionar ni publicar hasta superar las validaciones de navegador, cooperativo y V1.
+
+## ohana-440 · Pulido jugable y atlas del Mundo 1 (PR #384, borrador)
+
+Diseño de sectores con menos plataformas repetidas, cartografía local del terreno, atlas ilustrado de diez biomas, acompañantes U animados que persiguen y se posicionan, patrones de disparo propios para artilleros y tiradores. Versión de desarrollo sin desplegar. La revisión de cooperativo, balance y sesiones completas sigue pendiente.
+
+## ohana-439 · Candidata V1 en desarrollo
+
+Salas de 7200 unidades, sectores, pozos alineados, puntos de control y guardado v3 compatible con v2. Minimapa local y atlas de islas; cinco islas de selección por parejas. I y P propios, P por daño efectivo, ocho roles de combate en los sectores nuevos. Se conserva el final del Mundo 1.
+
+Validación: 1256 pruebas unitarias pasaron antes del último ajuste de persistencia de encuentros; pruebas dirigidas de puntos de control y director de enemigos: 14/14. Auditoría de combate en Chromium: diez héroes, U desde bebé, I/P y 160 fotogramas de evolución, sin errores. Auditoría candidata: cinco islas, escritorio/móvil, atlas, checkpoint y caída real Beach→Reef, sin errores. Release gate: PASS.
+
+Pendiente: repetir batería completa tras los últimos ajustes; recorrido completo de 60–90 minutos, balance por héroe y revisión final de cinemáticas/jefe. El E2E general se detuvo en la prueba de batida de Dragón al usar una posición antigua que ahora coincide con una plataforma: se trasladó el punto de prueba a espacio libre, pendiente de repetir. Cooperativo Chromium: timeout abriendo el canal WebRTC; Firefox no está instalado en este entorno. No se ha validado el cooperativo completo. No etiquetar como V1 oficial hasta cerrar estos criterios.
+
+## OHANA · Kilo, Stitcho y Chispín recuperado
+
+Kilo cambia el giro por baile hula y ahora enlaza notas, pétalos, reflejos y curación. Stitcho separa sus habilidades: K es la bola 626 dirigida y rebotadora; L es un baile alienígena repetible de cuatro pulsos que cura, daña y aturde mientras permite moverse. Se animan su entrada, el baile y la evolución. El resto del reparto conserva entradas y gestos finales propios. Chispín vuelve a su diseño original redondo, con branquias y cola de muelle; «Trueno Gordo» recupera su cuarta forma. La criatura de trueno blanca y dorada queda separada como arte reservado para el jefe del Mundo 2.
+
 ## V432 · Serafín Aurora y Cuerno Eclipse (ohana-432)
 
 Rediseñadas exclusivamente las formas 4 y 5 de Cuerno. La cuarta despliega seis velas de aurora unidas a hombros de loto; la quinta abre alas de media luna con nervaduras de constelación, corona creciente y un cuerno más largo. Ambas incorporan una melena envolvente y colas más largas. Las formas 1–3 y las estadísticas de combate permanecen iguales. Nombres sincronizados en selección, evolución y galería.
@@ -2050,3 +2110,59 @@ Illustrated interactive atlas with room details and real outgoing paths. Reworke
 
 ## v428 — Chispa: espiritualidad eléctrica
 Cinco anatomías blancas y doradas desde adorable a deidad temible, 40 poses en atlas transparente. La L invoca un sello conductor y descargas blancas/cian. Mantiene hitboxes y estadísticas. Validado: 1210 pruebas Node, 100 tamaños renderizados, 200 poses de Chispa, cuatro cinemáticas y juego offline en escritorio y móvil.
+
+
+## Personajes 1/10 · Kilo «A compás» · ohana-434
+
+H y J cargan un pétalo por ataque acertado; máximo tres, caducidad de cuatro segundos. K consume la carga para ampliar radio y daño; L para aumentar curación, radio y daño. L ahora usa distancia del mundo (240–455 px), independiente de pantalla. Indicador de tres pétalos; limpieza por muerte, sala y personaje. Gestos corporales de ataque, rasgueo y floración en las cinco formas; giro simplificado con movimiento reducido. U conserva el dúo existente.
+
+Esta entrega inicia el cierre por personaje. Chispa original y la reserva del jefe del mundo 2 siguen en el trabajo previo sin integrar. La ampliación de salas, secretos e interactividad sigue pendiente; no se presenta como completada por esta entrega.
+
+
+## Kilo · Baile aloha · ohana-435
+
+K sustituye el giro por 96 ticks de hula: cuatro pulsos a los ticks 24/48/72/96, reflejo continuo y un pétalo por defensa durante los primeros 12 ticks. Su círculo visible coincide con el radio real. La coreografía comparte pasos, transferencia de peso y manos articuladas entre las cinco formas, entrada jugable, intro y celebración. Entrada sin bloquear controles; victoria con mano al corazón y reverencia.
+
+Las cuatro evoluciones usan el actor real con altura propia, baile y fundido continuo entre formas, sin parpadeo ni fogonazo de pantalla. Los títulos distinguen ritmo, familia, guardiana y floración. Conserva el dúo U y el sistema de pétalos H/J→K/L.
+
+
+## Personajes 2–10 · Stitcho y la familia
+
+Stitcho estrena «Bola saltarina 626»: se guía con izquierda/derecha, rebota en paredes y plataformas con impulso y armadura, y las formas avanzadas admiten más rebotes. El rig gira más deprisa durante la bola y dibuja cada rebote; su evolución pasa de una forma a otra con fundido continuo, manteniendo la cápsula y el lenguaje alienígena. Los nueve personajes que faltaban reciben una breve entrada jugable con gestos propios de su kit; el retrato final mantiene las firmas de ataque, carrera y salto de cada héroe en movimiento. Chispín sigue reservado para el jefe del Mundo 2.
+
+
+## ohana-436 · Ayudas de combate y nuevos poderes
+
+- U se desbloquea desde bebé: compañero invencible durante seis segundos, persigue enemigos y ataca en coordenadas del mundo. Rayos encadenados, láseres, ondas, proyectiles y bumeranes según compañero. Sustituye las antiguas U de estados y coreografías.
+- Stitcho L convoca naves según evolución y cura al acertar; Chispín L despliega varias descargas señaladas.
+- Cada héroe desbloquea I en forma 4 y P en forma 5, con daño real, enfriamiento y controles táctiles. K y L siguen desbloqueándose en formas 2 y 3.
+- Salas de 3360 × 1260: un 50 % más de recorrido horizontal, recompensas elevadas y un guardián élite adicional por sala normal.
+- Costa con montañas, cascadas y palmeras en la intro; islote enemigo con acantilado; evolución muestra el nuevo poder; jefe con plumaje y anticipación direccional.
+- Se mantiene Chispín redondo y Trueno Gordo. El diseño Kirin sigue reservado para M2.
+- Verificación: pruebas específicas de combate y salas, navegador con diez héroes y 160 fotogramas de evolución; comprobación móvil a 320/390 px. La batería histórica completa aún tiene contratos incompatibles con el rediseño de U/Chispín; esta entrega permanece en PR borrador.
+
+
+## ohana-437 · Retos de isla y personalidad de combate
+
+- Nueve retos opcionales activados con E, separados de los portales: cuatro carreras de anillos y cinco emboscadas de dos oleadas, con aviso antes de aparecer, guardián élite y premio único por personaje/partida. Fallar o morir permite reintentar.
+- Los élites preparan un contragolpe al bajar de media vida. La dirección queda fijada durante un aviso de 48 ticks; un golpe que los interrumpa cancela el ataque. Se respetan los límites de proyectiles y no se modifica al jefe.
+- I/P tienen anticipación, lanzamiento y recuperación propios para los diez héroes. La animación es visual y respeta movimiento reducido, daño y muerte. Las evoluciones muestran motivos del poder nuevo.
+- Yomi P invoca espíritus; Dragón P crea erupciones; Frita P abre freidoras; Cuerno P descarga constelaciones. Se distinguen los proyectiles, campos y momentos de impacto por personaje.
+- Corrección de ohana-436: U conserva los efectos personales y su ayuda activa. Las coreografías anteriores ya no dibujan un segundo acompañante sobre el que combate. Se recupera la combinación de marca J y rayos L de Chispín.
+- Cuerno U ataca con aurora, incluye al jefe sin ejecutarlo y cura al acertar. Se elimina el sueño de esta habilidad; el sueño sigue siendo la característica del ronroneo de Michi. Se adaptan las comprobaciones históricas a las reglas solicitadas.
+- Verificación: contratos de combate, carreras, reintentos, recompensas únicas, élites y animaciones; navegador en las nueve salas y diez héroes. Caché offline actualizada con los nuevos módulos.
+
+Validación final de ohana-437: 1241/1241 pruebas unitarias; puerta de publicación correcta; navegador en nueve retos, diez héroes y 160 fotogramas de evolución; experiencia local con 50 formas en escritorio/móvil y modo offline; mapa y ayuda a 1280/390/320 px.
+
+
+## ohana-438 · El santuario de la Reina
+
+- Las fases 2 y 3 del Nido incluyen lluvias de dos y tres plumas, con columnas fijas anunciadas y huecos seguros. Las plumas dejan rescoldos que pueden esquivarse saltando.
+- H o un disparo devuelve las plumas contra la Reina. Cada devolución causa daño y tres impactos abren una ventana de 78 ticks, cancelando la rutina de ataque. El HUD muestra la cuenta y el jefe adopta una pose de recuperación.
+- Arena con un santuario de raíces, relieve de búho y faroles de huevo. La Reina usa la plataforma sólida real como suelo: se corrige el desnivel que la hundía bajo el escenario.
+- Flores de salto en las rutas de las nueve salas normales. Impulsan al aterrizar y recuperan los saltos; pasar andando no las activa. Incluyen enfriamiento y efectos compatibles con movimiento reducido.
+- Las plumas se cancelan al cambiar de fase, salir, morir o terminar el encuentro. La entrada y la primera fase no generan peligros nuevos.
+
+Revisión móvil: barra de la Reina bajo las tarjetas de vida/XP, contador de plumas legible y avisos separados. Se evita duplicar el anuncio de fase sobre la barra. Verificación de devolución con H real, fases 2/3, flores, escritorio, 390/320 px y movimiento reducido; sin fallos de ejecución.
+
+Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación correcta; navegador con H real, fases 2/3, flores, diez héroes y 160 fotogramas de evolución. HUD del jefe y avisos comprobados sin solapar vida/XP a 390/320 px.

@@ -30,7 +30,7 @@ if (!document.body.classList.contains("playing")) setTimeout(() => { if (!docume
 addEventListener("pointerdown", jingle, { capture: true });
 addEventListener("keydown", jingle, { capture: true });
 
-const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispa Bebé", pikachu: "Chispa Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
+const ROLES = { kilo: "Kilo Bebé", lilo: "Kilo Bebé", stitcho: "Mini Stitcho", stitch: "Mini Stitcho", dragon: "Dragoncito", chispin: "Chispín Bebé", pikachu: "Chispín Bebé", cat: "Michito", frita: "Palito", dino: "Dino Bebé", pizza: "Porcioncita", yomi: "Farol", cuerno: "Cuernín" };
 const HERO_LINES = {
 kilo: "Corrientes de polen, flotación y vuelo solar en las formas altas.",
 stitcho: "Paredes, agarre, trepa y vaults para dominar rutas verticales.",

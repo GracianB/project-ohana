@@ -1,3 +1,4 @@
+import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
 import {STITCHO_VISUAL_H} from "./art/stitcho.js";
@@ -1054,6 +1055,7 @@ q(pose.cuernoWelcome?.tail,8),q(pose.cuernoWelcome?.breath,12),
 q(pose.cuernoWelcome?.melody,12),q(pose.cuernoWelcome?.dragon,12),
 q(pose.cuernoWelcome?.yomi,12),
 // V350 Kilo: unique real pose cache for each note, hand, flower and smile.
+pose.kiloPerformance?.kind || "",q(pose.kiloPerformance?.time,30),
 pose.kiloWelcome?.phase || "",q(pose.kiloWelcome?.listen,12),
 q(pose.kiloWelcome?.strum,12),q(pose.kiloWelcome?.bloom,12),
 q(pose.kiloWelcome?.surprise,12),q(pose.kiloWelcome?.finale,12),
@@ -1061,6 +1063,8 @@ q(pose.kiloWelcome?.wing,8),q(pose.kiloWelcome?.petals,8),
 q(pose.kiloWelcome?.breath,12),q(pose.kiloWelcome?.dragon,12),
 q(pose.kiloWelcome?.chase,12),q(pose.kiloWelcome?.yomi,12),
 q(pose.kiloWelcome?.dino,12),
+q(pose.stitchoRollBounces,1),
+q(pose.stitchoDanceAge,1),pose.stitchoDanceT>0?1:0,
 // V351 Stitcho: native antenna, face, paws and tail need distinct live frames.
 pose.stitchoWelcome?.phase || "",q(pose.stitchoWelcome?.scout,12),
 q(pose.stitchoWelcome?.taunt,12),q(pose.stitchoWelcome?.curl,12),
@@ -1229,6 +1233,24 @@ if (p.id === "cuerno") {
     if(rainbowK.phase==="active")pose.state="trail";
   }
 }
+if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
+ const age=t-(p._cast?.t??-9999),entry=t-(p._kiloEntranceAt??-9999);
+ if(p._kiloPerformance)pose.kiloPerformance=p._kiloPerformance;
+ else if(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96)
+   pose.kiloPerformance={kind:'dance',time:age/60};
+ else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
+   pose.kiloPerformance={kind:'entrance',time:entry/60};
+}
+if(p.id!=='kilo'&&!p.dead&&!pose.reduceMotion&&pose.state==='idle'&&!moving&&!air){
+ const entry=t-(Number.isFinite(Number(p._ohanaEntranceAt))?Number(p._ohanaEntranceAt):-9999);
+ if(entry>=0&&entry<90){
+  const castSlots={stitcho:1,chispin:0,cat:1,dragon:1,dino:0,frita:0,pizza:1,yomi:2,cuerno:1};
+  const signatures={stitcho:'victory',chispin:'jump',cat:'run',dragon:'glide',dino:'victory',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory'};
+  if(entry<20){pose.state='cast';pose.castSlot=castSlots[p.id]??0;pose.cast=Math.max(.08,entry/20);}
+  else if(entry<62){pose.state=signatures[p.id]||'victory';pose.cast=1;pose.atk=Math.max(pose.atk||0,(62-entry)/42);if(['jump','glide'].includes(pose.state))pose.air=true;}
+  else pose.state='victory';
+ }
+}
 if(p.id==='kilo'&&p._kiloDuetT>0){
  pose.kiloDuetAge=p._kiloDuetAge||0;
  if(!moving&&!air){pose.state='cast';pose.castSlot=pose.kiloDuetAge<30?0:2;}
@@ -1239,6 +1261,13 @@ if(p.id==='stitcho'&&p._stitchoDuetT>0){
  pose.stitchoDuetAge=p._stitchoDuetAge||0;
  if(pose.stitchoDuetAge>=30&&pose.stitchoDuetAge<102)pose.move='chaos';
 }
+if(p.id==='stitcho')pose.stitchoRollBounces=Math.max(0,Number(p._stitchoRollBounces)||0);
+if(p.id==='stitcho'&&(Number(p._stitchoDanceT)||0)>0){
+ pose.state='dance';pose.move='stitcho-dance';
+ pose.stitchoDanceT=Number(p._stitchoDanceT)||0;
+ pose.stitchoDanceAge=Number(p._stitchoDanceAge)||0;
+}
+applyPowerPerformance(pose,p,t);
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
@@ -1285,7 +1314,7 @@ ctx.save();
 ctx.translate(footX, footY);
 drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
 ctx.scale(facing, 1);
-ctx.translate(recoilX + lunge, -formLift);
+ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
 if (p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
 if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);

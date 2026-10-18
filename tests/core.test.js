@@ -206,11 +206,11 @@ test("Dino escupe Mocosaurio y Stitcho diferencia Caos de Rollo", async () => {
   assert.equal(baby.player.facing, 1);
   assert.equal(god.player.facing, -1);
 
-  const player = { id: "stitcho", abilities: ["plasma", "rollo", "caos"], evo: 0, facing: 1, x: 100, y: 100, w: 24, h: 24, speed: 4.4 };
+  const player = { id: "stitcho", abilities: ["plasma", "rollo", "caos"], evo: 2, facing: 1, x: 100, y: 100, w: 24, h: 24, speed: 4.4 };
   const chaosGame = { player, enemies: [], ghosts: [], projectiles: [], fx: { emit() {} }, t: 1 };
   useAbility(chaosGame, 2);
   updateAbilityFx(chaosGame);
-  assert.equal(player._abilMove, "chaos");
+  assert.equal(player._abilMove, "stitcho-dance");
 });
 
 test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {
@@ -291,7 +291,7 @@ test("save canoniza ids viejos y no mezcla personajes", () => {
     player: { evo: 2, id: "kilo", xp: 80, health: 40, _nineUsed: true }
   };
   const raw = packSave(game, { snapshot: () => ({ fx: { shell: 2 } }) });
-  assert.equal(raw.v, 2);
+  assert.equal(raw.v, 3);
   assert.equal(raw.nineUsed, true);
   assert.equal(raw.magic.fx.shell, 2);
   const ok = unpackSave({ ...raw, id: "lilo" }, "kilo");
@@ -409,6 +409,6 @@ test("claro de Mundo 1 guarda el mejor tiempo sin romper v2", () => {
   assert.equal(best.ticks, 20000);
   const game = { roomId: "boss", visited: { hub: true }, score: 40, kills: 8, won: true, clearTicks: 20000, best, player: { evo: 4, id: "kilo", xp: 420, health: 20 } };
   const raw = packSave(game);
-  assert.equal(raw.v, 2);
+  assert.equal(raw.v, 3);
   assert.equal(unpackSave(raw, "kilo").best.ticks, 20000);
 });

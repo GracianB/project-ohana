@@ -1,9 +1,10 @@
+import {ABILITY_DEFS} from '../ability-catalog.js';
+import {extraAbility,drawPowerEmblem} from '../evolution-attacks.js';
 import {drawCharacter} from '../../characters/draw.js';
 import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
 import {EVOLUTION_CINEMA_PROFILES,evolutionMessage} from '../../characters/evolution.js';
 import {cachedGradient} from '../canvas-gradient-cache.js';
-import {drawChispaEvolution} from './chispa-presentation.js';
 
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};
@@ -48,7 +49,8 @@ function actor(ctx,def,form,cx,foot,height,alpha,pose,t,reduced){
  const p={...f,id:def.id,evo:form,w:f.w,h:f.h,x:cx-f.w/2,y:foot-f.h,
   color:f.color,grounded:pose!=='jump'&&pose!=='glide',facing:1,vx:0,vy:0,
   melee:pose==='attack'?6:0,invuln:0,visualScale:scale,_poseOverride:pose,
-  _introForceCanvas:true,reduceMotion:reduced};
+  _introForceCanvas:true,reduceMotion:reduced,
+  _powerPerformance:t>=2.2?{index:form===4?5:4,start:132}:null};
  ctx.save();ctx.globalAlpha*=alpha;drawCharacter(ctx,p,{x:0,y:0},reduced?40:t*60,{reduceMotion:reduced});ctx.restore();
 }
 
@@ -59,8 +61,7 @@ function textLines(ctx,text,x,y,width,lineHeight){
 }
 
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
- const s=evolutionPresentation(id,evo,width,height,time,reduced),def=ROSTER.find(r=>r.id===s.id);
- if(s.id==='chispin')return drawChispaEvolution(ctx,width,height,s,reduced);
+ const s=evolutionPresentation(id,evo,width,height,reduced?3.5:time,reduced),def=ROSTER.find(r=>r.id===s.id);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
  ctx.save();
  try{
@@ -73,6 +74,9 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
    for(let i=0;i<=8;i++){const x=width*i/8,y=height*(.58+layer*.09)+Math.sin(i*1.3+layer)*height*.035;ctx.lineTo(x,y);}
    ctx.lineTo(width,height);ctx.closePath();ctx.fill();
   }
+  // Light opens behind the changing silhouette, never over its face.
+  ctx.save();ctx.translate(s.cx,s.foot-s.target*.45);ctx.globalAlpha=.08+s.reveal*.12;ctx.fillStyle=s.accent;
+  for(let i=0;i<12;i++){const a=i*TAU/12+(reduced?0:s.t*.08);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*width,Math.sin(a)*height);ctx.lineTo(Math.cos(a+.07)*width,Math.sin(a+.07)*height);ctx.fill();}ctx.restore();
   ctx.globalAlpha=.12+s.reveal*.13;
   motif(ctx,s.id,s.cx,s.foot-s.target*.5,s.target*.77,reduced?0:s.t,s.accent,reduced);
   ctx.globalAlpha=1;
@@ -80,6 +84,15 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
   const oldHeight=s.target*CALIBRATED_HEIGHT[s.form-1]/CALIBRATED_HEIGHT[s.form];
   actor(ctx,def,s.form-1,s.cx,s.foot-s.lift,oldHeight,s.oldAlpha,s.pose,s.t,reduced);
   actor(ctx,def,s.form,s.cx,s.foot-s.lift,s.target,s.newAlpha,s.pose,s.t,reduced);
+  if(s.t>2.2&&s.reveal>.8){
+   const age=s.t-2.2,reach=Math.min(width*.32,s.target*.85),strength=Math.sin(Math.PI*Math.min(1,age/1.8));
+   ctx.save();ctx.globalAlpha=.7*strength;
+   for(let side=-1;side<=1;side+=2)for(let i=0;i<3+s.form;i++){
+    const phase=(age*.65+i*.16)%1,px=s.cx+side*(s.target*.3+phase*reach),py=s.foot-s.target*.4-Math.sin(phase*Math.PI)*s.target*.15;
+    if(reduced)drawPowerEmblem(ctx,s.id,s.cx+side*(s.target*.6+i*9),s.foot-s.target*.4,5,0);
+    else drawPowerEmblem(ctx,s.id,px,py,6+s.form,age*60+i*5);
+   }ctx.restore();
+  }
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#b5d3bd';
   ctx.font='600 11px Outfit, sans-serif';ctx.fillText(s.form===4?'LA FAMILIA CRECE · FORMA FINAL':'LA FAMILIA CRECE',s.cx,height*.15);
   ctx.fillStyle='#fff1d0';ctx.font=`600 ${Math.min(38,width*.072)}px Fredoka, sans-serif`;
@@ -92,6 +105,12 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
   for(let i=0;i<5;i++){ctx.fillStyle=i<=s.form?s.accent:'#264b4d';ctx.beginPath();ctx.arc(start+i*gap,height*.7,i===s.form?6:4,0,TAU);ctx.fill();}
   ctx.font=`500 ${Math.min(16,width*.04)}px Outfit, sans-serif`;ctx.fillStyle='#dce5cd';
   textLines(ctx,s.reveal>.5?s.message:'Una nueva fuerza está despertando…',s.cx,height*.77,Math.min(520,width-48),23);
+  const unlock=s.form<3?ABILITY_DEFS[def.abilities[s.form]]:extraAbility(s.id,s.form+1);
+  if(unlock&&s.reveal>.5){
+   ctx.globalAlpha=s.reveal;ctx.fillStyle='#071e2c';const cw=Math.min(430,width-32),cy=height*.89;
+   ctx.fillRect(s.cx-cw/2,cy-20,cw,40);ctx.strokeStyle=s.accent;ctx.lineWidth=1;ctx.strokeRect(s.cx-cw/2,cy-20,cw,40);
+   ctx.fillStyle=s.accent;ctx.font='700 '+Math.min(15,width*.034)+'px Outfit, sans-serif';ctx.fillText('NUEVO PODER · '+unlock.key+' · '+unlock.name,s.cx,cy);
+  }
  }finally{ctx.restore();}
  return s;
 }

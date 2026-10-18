@@ -1,4 +1,4 @@
-// Save v2. Ids viejos se canonizan para no romper partidas.
+// Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
@@ -6,6 +6,9 @@ export function canonId(id) {
   return ID_LEGACY[id] || id || "";
 }
 
+function cleanProgress(raw,arrays=false){
+ const result={};for(const id of ['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss']){const v=raw?.[id];if(arrays&&Array.isArray(v))result[id]=[...new Set(v.filter(x=>typeof x==='string'&&x.startsWith(id+'-')&&x.length<80))].slice(0,64);else if(!arrays&&typeof v==='string'&&v.startsWith(id+'-')&&v.length<80)result[id]=v;}return result;
+}
 const SAVE_KEY = "ohana";
 const SAVE_TMP_KEY = "ohana.tmp";
 export function sanitizeDragonTrial(raw){
@@ -30,7 +33,11 @@ export function packSave(game, MagicMod) {
     magic = api && api.snapshot ? api.snapshot() : null;
   } catch (e) { magic = null; }
   return {
-    v: 2,
+    v: 3,
+    checkpoints: cleanProgress(game.checkpoints),
+    clearedEncounters: cleanProgress(game.clearedEncounters,true),
+    explored: cleanProgress(game.explored,true),
+    secrets: cleanProgress(game.secrets,true),
     roomId: game.roomId,
     visited: game.visited || { hub: true },
     score: game.score || 0,
@@ -90,11 +97,15 @@ export function rememberBest(current, next) {
 /** Devuelve campos listos o null si el save no es de este personaje. */
 export function unpackSave(raw, defId) {
   if (!raw || typeof raw !== "object") return null;
-  if (raw.v != null && raw.v !== 2) return null;
+  if (raw.v != null && ![2,3].includes(raw.v)) return null;
   const id = canonId(raw.id);
   if (defId && id !== canonId(defId)) return null;
   const vis = raw.visited && typeof raw.visited === "object" && !Array.isArray(raw.visited) ? raw.visited : { hub: true };
   return {
+    checkpoints: cleanProgress(raw.checkpoints),
+    clearedEncounters: cleanProgress(raw.clearedEncounters,true),
+    explored: cleanProgress(raw.explored,true),
+    secrets: cleanProgress(raw.secrets,true),
     roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
     visited: vis,
     score: Math.max(0, finiteNumber(raw.score)),
@@ -122,7 +133,7 @@ export function createSaveStore(storage = () => globalThis.localStorage) {
     try {
       const raw = JSON.parse(value);
       return raw && typeof raw === "object" && !Array.isArray(raw) &&
-        (raw.v == null || raw.v === 2) && typeof raw.id === "string" && raw.id ? raw : null;
+        (raw.v == null || [2,3].includes(raw.v)) && typeof raw.id === "string" && raw.id ? raw : null;
     } catch (_) { return null; }
   }
 

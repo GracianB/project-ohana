@@ -92,3 +92,11 @@ body.playing #notification-container{top:166px;}
 #help::before,#help::after,#map-overlay::before,#map-overlay::after{content:none;}
 #help .panel .help-footnote kbd{min-width:0;padding:2px 5px;color:#244d43;background:#e1e6cd;border-color:#c1ccad;}
 @media(max-width:640px){body.playing #controls-hint{display:none;}body.playing #top-actions{top:138px;}body.playing #notification-container{top:184px;}}
+
+/* Keep the queen's phase and feather counter below the mobile player cards. */
+@media(max-width:640px){
+ body.playing.boss-fight #boss-wrap{top:184px!important;left:10px!important;right:10px!important;width:auto!important;max-width:none!important;transform:none!important;}
+ body.playing.boss-fight #boss-wrap .boss-label{font-size:8px!important;line-height:1.35!important;letter-spacing:.12em!important;}
+ body.playing.boss-fight #experience-ribbon{display:none;}
+ body.playing.boss-fight #notification-container{top:244px!important;}
+}

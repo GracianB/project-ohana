@@ -1,3 +1,4 @@
+import {drawNestSanctuary} from './nest-sanctuary.js';
 // Distant scenery only. Solid platforms and hazards are drawn by terrain.js.
 const TAU=Math.PI*2;
 const wrap=(v,n)=>((v%n)+n)%n;
@@ -60,6 +61,7 @@ export function drawScenicBackdrop(ctx,id,cam,t,width,height){
    ellipse(ctx,lx,ly-65,27,5,'#d18b6566');
    for(let i=0;i<3;i++)ellipse(ctx,lx+i*15,ly-90-i*23,20+i*9,12+i*3,'#bc96891a');
   }else if(id==='boss'){
+   drawNestSanctuary(ctx,cam,t,width,height);
    ellipse(ctx,lx,ly-35,70,90,'#432d4155');
    ctx.strokeStyle='#9c6b6b33';ctx.lineWidth=3;
    for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(lx,ly-65+i*23,52-i*3,10,0,0,TAU);ctx.stroke();}

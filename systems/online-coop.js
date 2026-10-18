@@ -931,7 +931,7 @@ class OnlineCoop {
     if(id){this.seenActionEvents.add(id);if(this.seenActionEvents.size>192)this.seenActionEvents.delete(this.seenActionEvents.values().next().value);}
     const action=payload.action;
     this.remote.actionKind=action;
-    this.remote.abilitySlot=Number.isInteger(payload.slot)?Math.max(0,Math.min(3,payload.slot)):null;
+    this.remote.abilitySlot=Number.isInteger(payload.slot)?Math.max(0,Math.min(5,payload.slot)):null;
     this.remote.actionUntil=performance.now()+(action==='ability'?420:action==='dash'?280:300);
     if(action==='dash')this.remote.dash=18;else this.remote.melee=action==='ability'?16:10;
     // Authenticated U echo: pure visual snapshot from the existing ability
@@ -1254,7 +1254,7 @@ class OnlineCoop {
         cat:"#ffbe9d",dragon:"#ff926c",dino:"#7ee8a7",
         frita:"#ffcc73",pizza:"#ffa3b5",yomi:"#cbb2ff",cuerno:"#ff8de1"};
       const tone=hues[definition.id]||"#ffd36a";
-      const slot=Math.max(0,Math.min(3,Number(this.remote.abilitySlot)||0));
+      const slot=Math.max(0,Math.min(5,Number(this.remote.abilitySlot)||0));
       const originX=px+player.facing*(20+slot*7);
       const pulse=18+((t*4) % (15+slot*4));
       ctx.strokeStyle=tone;

@@ -125,7 +125,7 @@ Diez personajes originales. La <kbd>H</kbd> es siempre un golpe cercano y no cam
 | **Pizza** | Porción | Caer sobre un bicho lo aplasta y te rebota | PIZZA forma final |
 | **Michi** | Zarpazo | Aguanta un golpe mortal por sala | MICHI forma final |
 | **Cuerno** | Puya | Al caer, el cuerno brilla y te da un saltito | CUERNO forma final |
-| **Chispín** | Chispa | Tras correr un segundo va más rápido y deja chispas | CHISPÍN forma final |
+| **Chispín** | Chispín Tormenta | Tras correr un segundo va más rápido y deja chispas | CHISPÍN forma final |
 | **Stitcho** | Zarpa | Se agarra a las paredes y trepa | STITCHO forma final |
 | **Dragón** | Garra | Mantén el salto para planear. En forma final, vuela | DRAGÓN forma final |
 | **Dino** | Mordisco | Abajo en el aire: picado con onda | DINO forma final |

@@ -59,7 +59,7 @@ test("V68 J/K/L/U acquire three story beats without changing casts",()=>{
 test("V68 preserves iris geometry and cannot alter the boss-safe dream",()=>{
  assert.match(magic,/kind:"irisHalo"/);
  assert.match(magic,/Math\.hypot\(viewW\(\),viewH\(\)\)\*1\.12/);
- assert.match(magic,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>!e\.boss&&inView\(game,e\)\) : \[\]/);
+ assert.match(magic,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>inView\(game,e\)\) : \[\]/);
  assert.match(magic,/const opening=Math\.min\(1,progress\/\.10\),ending=Math\.min\(1,f\.life\/15\)/);
  assert.match(magic,/ctx\.globalAlpha=\.11\*opacity/);
  assert.match(magic,/drawCuernoDream\(ctx,x,y\+16,R\*1\.4,u/);

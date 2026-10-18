@@ -1,3 +1,7 @@
+import {rhythmPress} from "./hero-combos.js";
+import {chargeFinisher,consumeFinisher,finisherCharge} from "./finisher.js";
+import {POWER_LEVELS,powerAbility,castEvolutionAttack,summonDanceFleet,startBattleCompanion,updateEvolutionAttacks,drawEvolutionAttacks} from './evolution-attacks.js';
+import {earnKiloPetal,spendKiloPetals,drawKiloRhythm} from './kilo-rhythm.js';
 import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
 import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
 import {readDinoEffects} from './dino-coop-effects.js';
@@ -35,7 +39,7 @@ import { ABILITY_DEFS } from "./ability-catalog.js";
 export { ABILITY_DEFS };
 
 
-const FLOW_KEYS = ["H", "J", "K", "L", "U"];
+const FLOW_KEYS = ["H", "J", "K", "L", "U", "I", "P"];
 const FLOW_WINDOW = 180;
 
 export function registerCombatAction(game, key, id = "") {
@@ -118,8 +122,7 @@ S.charge = Math.max(S.charge || 0, 72);
 armor(p, 10);
 } else if (p.id === "frita") {
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
-p.invuln = Math.max(p.invuln || 0, 12+evo*2);
-p._chispaEvadeUntil=(Number(g.t)||0)+12+evo*2;
+p.invuln = Math.max(p.invuln || 0, 12+(Number(p.evo)||0)*2);
 } else if (p.id === "pizza") {
 p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
 armor(p, 10);
@@ -144,18 +147,20 @@ return link;
 
 export function useAbility(game, index) {
 const p = game?.player;
-if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return false;
+if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
+if(index===5&&rhythmPress(game))return true;
 const supreme = index === 3 ? SUPREME[p.id] : null;
-const id = supreme ? supreme.id : p.abilities && p.abilities[index];
-const def = supreme || ABILITY_DEFS[id];
+const def = powerAbility(p,index,ABILITY_DEFS,supreme);
+const id = index>3 ? def?.id : supreme ? supreme.id : p.abilities && p.abilities[index];
 if (!def) return false;
 const fn = CASTERS[id];
-if (index !== 3 && typeof fn !== "function") return false;
+if (index < 3 && typeof fn !== "function") return false;
 const baseCd = Number(def.cd);
 if (!Number.isFinite(baseCd) || baseCd <= 0) return false;
 const now = abilityNow(game);
 p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
+if(index===5&&finisherCharge(p)<100)return false;
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
 // Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
@@ -169,8 +174,10 @@ const chainCd = index < 3
 ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035)
 : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
 const dur = baseCd / (1 + evo * 0.12) * chainCd;
-p.cds[id] = now + dur;
+if(index===5)consumeFinisher(p);
+p.cds[id] = index===5 ? now : now + dur;
 p.cdDur[id] = dur;
+p._chargeAction=(p._chargeAction||0)+1;
 game.lastAbilityId = id;
 game.lastAbilitySlot = index;
 syncState(p);
@@ -178,7 +185,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2 && p.id !== "chispin") {
+if (index === 2 && p.id !== "chispin" && !(p.id === "stitcho" && id === "caos")) {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -193,7 +200,8 @@ if(index===3&&p.uSurprise){p.uPartner=rollUPartner(p.id,game.uRandom||Math.rando
 const bondGain=gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
-if (index === 3) castSupreme(game, p, flow);
+if (index > 3) castEvolutionAttack(game,index);
+else if (index === 3) castSupreme(game, p, flow);
 else if (!cuernoKey) fn(game, p, evo);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
@@ -228,11 +236,11 @@ dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: 
 frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
 pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
 yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
-cuerno:  { id: "aurora", name: "SUEÑO ARCOÍRIS", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
+cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
-return SUPREME[id] || SUPREME.kilo;
+return {...(SUPREME[id] || SUPREME.kilo),special:"Compañero invencible · 6 s",desc:"Disponible desde bebé. Tu compañero busca enemigos y ataca durante seis segundos."};
 }
 
 export function specialOf(id) {
@@ -316,6 +324,7 @@ dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
 }
 
 function summonAssist(game, p, allyId, damage, color) {
+if(game._evolutionAttacks?.guest)return;
 const ally = ROSTER.find((item) => item.id === allyId);
 if (!ally) return;
 add({
@@ -339,6 +348,12 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 function castSupreme(game, p, flow = currentFlow(game, p)) {
 const chosen=chooseUPartner(p.id,p.uPartner);
 const personalPower=Math.max(1,Number(flow?.multiplier)||1)*pw(p)*uExpPower(p);
+// The guest now fights in world coordinates for its entire visit.
+if(startBattleCompanion(game,chosen,personalPower)){
+ game._supremeFlow=flow;game._specialName=SUPREME[p.id]?.name;
+ game.ult={t:0,name:SUPREME[p.id]?.name,color:SUPREME[p.id]?.color,flow:flow.label||'',assist:chosen};
+ game.nums?.add(cx(p),p.y-36,'¡'+(ROSTER.find(r=>r.id===chosen)?.name||chosen)+' AL RESCATE!',SUPREME[p.id]?.color,true);
+}
 // Original four cinematic duets remain untouched when their canonical
 // companion is selected. A different choice runs the same playable L-loan
 // choreography as the six other heroes, without freezing player controls.
@@ -398,7 +413,7 @@ const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),c
   (p.id === "dragon" || p.id === "pizza") ? [] : enemies;
 let launchWarning = null;
 let dinoLaunch = null;
-const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
+const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>inView(game,e)) : [];
 if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
 if (p.id === "kilo") {
@@ -548,16 +563,19 @@ return value - Math.floor(value);
 }
 
 const FX = [];
-const S = { p: null, hover: 0, roll: 0, caos: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
+const S = { p: null, hover: 0, roll: 0, rollBounces: 0, rollLock: 0, stitchoDance: 0, stitchoDanceAge: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
 
 function syncState(p) {
 if (S.p === p) return;
 if (S.p) {
+S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0; S.p._stitchoRollBounces = 0;
 }
 S.p = p;
-S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
 FX.length = 0;
 }
 
@@ -585,27 +603,25 @@ p._specialGhostT=Math.max(p._specialGhostT||0,260);
 p.invuln=Math.max(p.invuln||0,120);
 game.nums?.add(cx(p),p.y-58,"YOMI · JUICIO DEL UMBRAL","#ffe6b5",true);
 }
-function resolveCuernoDream(game,p,dreamTargets){
-// Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
-const sleepers=dreamTargets;
-for(const e of sleepers){
-e.stun=Math.max(e.stun||0,156);
-e._auroraSleepT=156;
-e.sleep=Math.max(e.sleep||0,156);
-e.vx=0;
-}
-game._auroraDreamTargets=sleepers.length;
-healPlayer(p,p.maxHealth*.16);
-addPlayerXp(p,24+sleepers.length*4);
-p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
-p._specialArmorT=Math.max(p._specialArmorT||0,220);
-game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
+function resolveCuernoDream(game,p,targets){
+ let hits=0;
+ for(const e of targets)if(canHit(e)&&Math.hypot(cx(e)-cx(p),cy(e)-cy(p))<600)
+  if(hitEnemy(game,e,(28+(p.evo||0)*12)*pw(p),{kx:Math.sign(cx(e)-cx(p))*5,ky:-4,color:'#d7c3ff',parts:6,hitstop:0}))hits++;
+ game._auroraDreamTargets=0;
+ if(hits)healPlayer(p,p.maxHealth*.16);
+ addPlayerXp(p,24+hits*4);
+ p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
+ p._specialArmorT=Math.max(p._specialArmorT||0,220);
+ game.nums?.add(cx(p),p.y-58,'CORO DE AURORA · '+hits,'#e4d8ff',true);
 }
 
 export function clearAbilityFx() {
 FX.length = 0;
-S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+if (S.p) S.p._stitchoRollBounces = 0;
 if (S.p) {
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
+S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
 S.p._combatChain = [];
@@ -667,8 +683,39 @@ p.vy = Math.min(p.vy, -0.42);
 }
 if (S.roll > 0) {
 S.roll--;
-p.vx = p.facing * Math.max(9, p.speed * 2.1);
-armor(p, 2);
+const steer = input?.right ? 1 : input?.left ? -1 : 0;
+if (S.rollLock > 0) S.rollLock--;
+else if (steer) p.facing = steer;
+const face = p.facing || 1, worldW = game.worldW || 1600;
+const probe = { x: face > 0 ? p.x + p.w - 3 : p.x - 9,
+  y: p.y + p.h * 0.2, w: 12, h: p.h * 0.6 };
+const edge = face < 0 ? p.x <= 8 : p.x + p.w >= worldW - 8;
+const wall = edge || (game.platforms || []).some(pl => aabb(probe, pl));
+const maxBounces = 1 + Math.min(2, Math.floor((Number(p.evo) || 0) / 2));
+if (wall && S.rollBounces < maxBounces) {
+  S.rollBounces++;
+  S.rollLock = 10;
+  p._stitchoRollBounces = S.rollBounces;
+  p.facing = -face;
+  p.vx = -face * Math.max(10, p.speed * 2.3);
+  p.vy = Math.min(Number(p.vy) || 0, -3.2);
+  armor(p, 8);
+  const bx = face > 0 ? p.x + p.w : p.x;
+  game.fx?.emit?.(bx, p.y + p.h * .55, { color: S.rollBounces % 2 ? "#72f2ff" : "#d3a6ff",
+    count: game.reduceMotion ? 3 : 9, size: 3, speed: 2.6, life: 16, star: true });
+  game.nums?.add?.(bx, p.y - 8, S.rollBounces === maxBounces ? "¡REBOTE FINAL!" : "¡REBOTE!", "#aaf5ff", false);
+  game.shake = Math.min(12, (game.shake || 0) + 2);
+} else if (wall) {
+  S.roll = 0;
+  p._stitchoRollBounces = S.rollBounces;
+  p.vx = -face * 2.5;
+  p.vy = Math.min(Number(p.vy) || 0, -2.2);
+} else {
+  p.vx = face * Math.max(9, p.speed * (steer ? 2.35 : 2.1));
+  p._stitchoRollBounces = S.rollBounces;
+  armor(p, 2);
+}
+if (S.roll <= 0) p._stitchoRollBounces = 0;
 }
 if (S.charge > 0) {
 S.charge--;
@@ -710,22 +757,17 @@ if (p.grounded) p.vy = Math.min(p.vy || 0, -0.4);
 armor(p, 2);
 }
 }
-if (S.caos > 0) {
-S.caos--;
-const W = game.worldW || 1600;
-if (p.x < 34) S.cvx = Math.abs(S.cvx);
-if (p.x > W - p.w - 34) S.cvx = -Math.abs(S.cvx);
-if (input && input.left && S.cvx > 0 && S.caos % 10 === 0) S.cvx *= -1;
-if (input && input.right && S.cvx < 0 && S.caos % 10 === 0) S.cvx *= -1;
-p.vx = S.cvx;
-p.facing = Math.sign(S.cvx) || 1;
-if (p.grounded) {
-  p.vy = -10.5;
-  game.shake = Math.min(14, (game.shake || 0) + 4);
-  game.fx.emit(cx(p), p.y + p.h, { color: "#8f7bff", count: 8, size: 3, up: 1.4, speed: 3 });
-}
-if (p.y < 40 && p.vy < 0) p.vy = Math.abs(p.vy) * 0.8;
-armor(p, 2);
+if (S.stitchoDance > 0) {
+  S.stitchoDance--;
+  S.stitchoDanceAge++;
+  p._stitchoDanceT = S.stitchoDance;
+  p._stitchoDanceAge = S.stitchoDanceAge;
+  p._abilMove = "stitcho-dance";
+  armor(p, 1);
+  if (S.stitchoDanceAge % 24 === 0 && p.grounded && !game.reduceMotion) p.vy = Math.min(Number(p.vy) || 0, -2.2);
+} else {
+  p._stitchoDanceT = 0;
+  p._stitchoDanceAge = 0;
 }
 if (S.pull) {
 const pl = S.pull;
@@ -774,9 +816,20 @@ updateMichiDuet(game,hitEnemy);
 updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
-if (S.caos > 0) {
-bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
-if ((game.t & 1) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" }, MAX_RUNTIME_GHOSTS);
+updateEvolutionAttacks(game,hitEnemy,healPlayer);
+if (S.stitchoDance > 0 && S.stitchoDanceAge > 0 && S.stitchoDanceAge % 24 === 0) {
+const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+const heal = 3 + evo * 2, radius = 82 + evo * 12;
+let danceHits=0;
+for (const e of game.enemies || []) {
+  if (!canHit(e) || Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > radius + Math.max(e.w, e.h) * .35) continue;
+  const face = Math.sign(cx(e) - cx(p)) || p.facing || 1;
+  if(hitEnemy(game, e, (8 + evo * 2) * pw(p), { kx: face * 3.5, ky: -2.5, color: "#b7a1ff", parts: 5, shake: 1, hitstop: 0 }))danceHits++;
+}
+if(danceHits)healPlayer(p,heal);
+game.fx?.emit?.(cx(p), cy(p), { color: S.stitchoDanceAge % 48 ? "#8eeeff" : "#d6a8ff",
+  count: game.reduceMotion ? 3 : 8, size: 3, speed: 1.9, life: 16, star: true });
+game.nums?.add?.(cx(p), p.y - 44, danceHits ? "¡BAILE 626! +" + heal : "¡FLOTA 626!", "#c7b8ff", false);
 }
 if (S.charge > 0) {
 const dino = p.id === "dino";
@@ -799,7 +852,7 @@ for (const e of game.enemies) {
 }
 if ((game.t % 4) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#b6ebee" }, MAX_RUNTIME_GHOSTS);
 }
-p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+p._abilMove = S.stitchoDance > 0 ? "stitcho-dance" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
 const updateCount = FX.length;
 for (let i = 0; i < updateCount; i++) {
 const f = FX[i];
@@ -831,15 +884,17 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
-if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
-if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
-if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+const activeGuest=!!game._evolutionAttacks?.guest;
+drawKiloRhythm(ctx,game);
+if(game._familyDuet&&!activeGuest)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._michiDuet&&!activeGuest)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._chispinDuet&&!activeGuest)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawChispinPizzaPlay(ctx,game,t);
 drawDinoDragonPlay(ctx,game,t);
 drawMichiYomiPlay(ctx,game,t);
-if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._stitchoDuet&&!activeGuest)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawMoments(ctx,game,t);
-if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._kiloDuet&&!activeGuest)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if (p.id === "cuerno") drawCuerno(ctx, p, cam, t);
 for (const f of FX) {
 const d = DRW[f.kind];
@@ -848,7 +903,8 @@ ctx.save();
 d(ctx, f, cam, t, game, p);
 ctx.restore();
 }
-if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
+if (S.roll > 0) drawBallAura(ctx, p, cam, t, "#2f6bff");
+if (S.stitchoDance > 0) drawStitchoDanceAura(ctx, p, cam, game.reduceMotion);
 if (S.charge > 0) {
 if (p.id === "dino") {
  drawBallAura(ctx, p, cam, t, "#a8f377");
@@ -858,6 +914,7 @@ if (p.id === "dino") {
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 if (p.id==="cuerno")drawCuernoFantasyStatus(ctx,game.enemies,cam,game.t||t,!!game.reduceMotion);
 drawCastSignature(ctx, p, cam, t);
+drawEvolutionAttacks(ctx,game,cam,t,drawCharacter,ROSTER);
 }
 
 function drawCastSignature(ctx, p, cam, t) {
@@ -1001,9 +1058,12 @@ export function hitEnemy(g, e, dmg, o = {}) {
 if (!canHit(e)) return false;
 let d = Number(dmg);
 if (!Number.isFinite(d)) return false;
+if(e._shieldFacing&&g.player&&Math.sign(cx(g.player)-cx(e))===e._shieldFacing)d*=.3;
 if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
+const before=e.hp;
 damageEnemy(e, d);
+if(!o.noCharge)chargeFinisher(g,Math.max(0,before-e.hp));
 g.onAbilityHit?.(e,d,o);
 e.flash = Math.max(e.flash || 0, 14);
 
@@ -1114,20 +1174,22 @@ const CASTERS = {
 ukulele(g, p, evo) {
 const h = hand(p);
 const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
+const rhythmAttack = {};
 for (let i = 0; i < n; i++) {
-  add({ kind: "note", x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
+  add({ kind: "note", rhythmAttack, x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
 }
 boom(g, h.x, h.y, "#ffb347", 8, { star: true });
 },
 hula(g, p, evo) {
+const petals = spendKiloPetals(g);
 S.hover = 60;
 if (p.vy > 0) p.vy = -2;
 add({
   kind: "hula",
-  life: 60,
+  life: 96,
   age: 0,
-  r: 46 + evo * 6,
-  dmg: 9 * pw(p),
+  r: 46 + evo * 6 + petals * 8,
+  dmg: (16 + petals * 3.5) * pw(p),
   heal: evo >= 3 ? 3 : 0,
   hit: new Set(),
   pulse: 0,
@@ -1137,11 +1199,12 @@ boom(g, cx(p), cy(p), "#ff5ad5", 12, { star: true });
 },
 ohana(g, p, evo) {
 const god = evo >= 4;
-const heal = 20 + evo * 8;
+const petals = spendKiloPetals(g);
+const heal = 20 + evo * 8 + petals * 3;
 healPlayer(p, heal);
 g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6", true);
-const R = Math.hypot(viewW(), viewH());
-add({ kind: "ohana", x: cx(p), y: cy(p), r: 0, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4) * pw(p), lifesteal: god ? 5 : 0 });
+const R = 240 + evo * 35 + petals * 25;
+add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: god ? 5 : 0 });
 g.flash = Math.max(g.flash || 0, god ? 10 : 6);
 g.flashColor = "#ffe9a0";
 g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
@@ -1154,19 +1217,27 @@ add({ kind: "burst", n: evo >= 3 ? 4 : 3, i: 0, gap: 5, next: 0 });
 momentCast(g, p, 0, evo); g.shake = Math.min(18, (g.shake || 0) + 2);
 },
 rollo(g, p, evo) {
-S.roll = 44 + evo * 5;
+S.roll = 54 + evo * 6;
+S.rollBounces = 0;
+S.rollLock = 0;
+p._stitchoRollBounces = 0;
 armor(p, 6);
 momentCast(g, p, 1, evo);
-boom(g, cx(p), p.y + p.h, "#5ad1ff", 10);
+boom(g, cx(p), p.y + p.h, "#5ad1ff", 12);
 },
 caos(g, p, evo) {
-S.caos = 120 + evo * 10;
-S.cvx = p.facing * (10 + evo * 0.6);
-p.vy = -9;
+summonDanceFleet(g);
+S.stitchoDance = 108 + evo * 6;
+S.stitchoDanceAge = 0;
+p._stitchoDanceT = S.stitchoDance;
+p._stitchoDanceAge = 0;
+S.roll = 0;
+S.rollBounces = 0;
+p._stitchoRollBounces = 0;
+armor(p, 8);
 momentCast(g, p, 2, evo);
-armor(p, 6);
-g.shake = Math.min(18, (g.shake || 0) + 6);
-boom(g, cx(p), cy(p), "#8f7bff", 10, { star: true });
+g.shake = Math.min(10, (g.shake || 0) + 2);
+boom(g, cx(p), cy(p), "#8f7bff", 12, { star: true, up: 1.4 });
 },
 
 chain(g, p, evo) {
@@ -1217,7 +1288,7 @@ storm(g, p, evo) {
 // One sanctuary at a time: recasting replaces the previous field.
 for(let i=FX.length-1;i>=0;i--)if(FX[i].kind==='storm')FX.splice(i,1);
 const tuning=chispaKit(evo);
-add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
+add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, count:1+evo, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
 boom(g, cx(p), p.y - 60, "#9cf", 10);
 },
 
@@ -1572,9 +1643,7 @@ uCharge(g,f,p){
   const sleepers=(f.targets||[]).filter(e=>e&&!e.dying&&!e.dead);
   resolveCuernoDream(g,p,sleepers);
   for(const e of sleepers)add({kind:"uHitMark",mode:"cuerno",e,x:cx(e),y:cy(e),life:72,max:72});
-  // Solo visual: nube de sueño (1,5 s) y Zzz por bicho mientras dure el sueño (156 ticks).
-  add({kind:"cuernoDreamCloud",x:f.x,y:f.y,actor:p,evo:Number(f.evo)||0,life:90,max:90});
-  if(sleepers.length)add({kind:"cuernoSleepZ",list:sleepers.slice(0,12),evo:Number(f.evo)||0,life:156,max:156,pin:true});
+
  }
  boom(g,f.x,f.y,f.color,g.reduceMotion?5:11,{up:1.5,star:true});
  g.shake=Math.min(26,(g.shake||0)+(f.mode==="yomi"?10:3));
@@ -1658,12 +1727,8 @@ if (mode === "stitcho") {
     }
   }
 } else if (mode === "cuerno") {
-  for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
-    e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
-    e.sleep=Math.max(e.sleep||0,f.life+2);
-    e.stun=Math.max(e.stun||0,3);
-    e.vx=0;
-  }
+  // Aurora is an attacking field; no sleep or movement suppression.
+
 }
 
 if (f.pulse % pulseEvery === 0) {
@@ -1707,16 +1772,12 @@ if (f.pulse % pulseEvery === 0) {
       hitEnemy(g,e,execute?hp+9999:f.dmg*0.9,{kx:0,ky:-3,stun:44,color:f.color,crit:execute,hitstop:1});
     }
   } else if (mode === "cuerno") {
-    healPlayer(p,Math.max(2,p.maxHealth*.013));
-    p.invuln=Math.max(p.invuln||0,10);
-    for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
-      const cap=Math.max(1,Number(e.maxHp??e.maxHealth??e.max??e.hp)||1);
-      hitEnemy(g,e,Math.max(cap*.28,f.dmg*.2),{
-        kx:0,ky:0,stun:70,color:"#d7c3ff",parts:2,hitstop:0,shake:0
-      });
-      e.stun=Math.max(e.stun||0,50);
-      e._auroraSleepT=Math.max(e._auroraSleepT||0,50);
+    let hits=0;
+    for(const e of g.enemies||[])if(canHit(e)&&Math.hypot(cx(e)-f.x,cy(e)-f.y)<320+(p.evo||0)*55){
+      if(hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*3,ky:-2,color:'#d7c3ff',parts:3,hitstop:0,shake:0}))hits++;
     }
+    if(hits)healPlayer(p,Math.max(2,p.maxHealth*.013));
+
   }
   boom(g,f.x,f.y,f.color,mode==="dragon"?8:5,{star:true,up:1.2,speed:2.4});
 }
@@ -1754,7 +1815,7 @@ return f.life>0;
 hula(g, f, p) {
 f.life--;
 f.pulse = (Number(f.pulse) || 0) + 1;
-const rad = f.r + Math.sin(f.pulse * 0.22) * 5;
+const rad = f.r;
 
 for (const pr of g.projectiles) {
   if (!pr || pr.life <= 0 || pr.owner === "player" || pr._hulaReflectUntil > (g.t || 0)) continue;
@@ -1773,12 +1834,13 @@ for (const pr of g.projectiles) {
   }
   pr.owner = "player";
   pr.reflected = true;
+  if(f.pulse<=12&&earnKiloPetal(g,f))g.nums?.add(cx(p),p.y-40,"¡DEFENSA A COMPÁS!","#fff1b0");
   pr._hulaReflectUntil = (g.t || 0) + 8;
   if (pr.hit && typeof pr.hit.clear === "function") pr.hit.clear();
   boom(g, px, py, "#ff5ad5", 5, { star: true, up: 0.4, speed: 2.5 });
 }
 
-if (f.pulse % 8 === 0) {
+if (f.pulse % 24 === 0) {
   f.hit.clear();
   for (const e of g.enemies) {
     if (!canHit(e) || f.hit.has(e)) continue;
@@ -1789,7 +1851,8 @@ if (f.pulse % 8 === 0) {
       ky: -5,
       stun: 20,
       color: "#ff5ad5",
-      shake: 2,
+      shake: 0,
+      hitstop: 0,
       xp: 1,
     });
     if (f.heal && p.health < p.maxHealth) {
@@ -1833,7 +1896,7 @@ note(g, f) {
   for (const e of g.enemies) {
     if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
       f.hit.add(e);
-      hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 });
+      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) earnKiloPetal(g, f.rhythmAttack);
     }
   }
  return f.life > 0;
@@ -1844,7 +1907,7 @@ f.life--;
 f.x = cx(p); f.y = cy(p);
 f.r = Math.min(f.max, f.r + f.max / 30);
 for (const e of g.enemies) {
-  if (f.hit.has(e) || !canHit(e) || !inView(g, e)) continue;
+  if (f.hit.has(e) || !canHit(e)) continue;
   if (Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.r) {
     f.hit.add(e);
     hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
@@ -1904,29 +1967,28 @@ for (const b of f.bolts) b.life--;
 f.bolts = f.bolts.filter((b) => b.life > 0);
 f.next--;
 if(f.next===7&&f.life>15){
- const bx=e&&chispaMarked(e,Number(g.t)||0)?cx(e):f.x+(gameRand(g)-.5)*30;
- const ground=groundBelow(g,bx,f.y+20);
- f.forecast={x:bx,y1:f.y+16,y2:ground===null?f.y+400:ground};
+ const list=(g.enemies||[]).filter(en=>canHit(en)&&Math.hypot(cx(en)-f.x,cy(en)-f.y)<800).sort((a,b)=>Math.abs(cx(a)-f.x)-Math.abs(cx(b)-f.x));
+ f.forecasts=Array.from({length:f.count||1},(_,i)=>{
+  const target=list[i],bx=target?cx(target):f.x+(i-((f.count||1)-1)/2)*76;
+  const ground=groundBelow(g,bx,f.y+20),y1=target?Math.min(f.y+16,target.y-90):f.y+16;
+  return {x:bx,y1,y2:Math.max(ground??f.y+400,target?target.y+target.h+12:y1+120)};
+ });
+ f.forecast=f.forecasts[0];
 }
 if (f.next <= 0 && f.life > 8) {
-  f.next = f.interval||20;
-  const bx = f.forecast?.x ?? f.x;
-  let by = f.forecast?.y2 ?? groundBelow(g,bx,f.y+20);
-  if(by===null)by=f.y+400;
-  delete f.forecast;
-  let struck = false;
-  for (const en of g.enemies) {
-    if (!canHit(en)) continue;
-    if (Math.abs(cx(en) - bx) < 28 + en.w / 2 && en.y + en.h > f.y && en.y < by) {
-      const marked=chispaMarked(en,Number(g.t)||0);
-      hitEnemy(g, en, f.dmg*(marked?1.2:1), { ky: -3, stun: marked?34:26, color: "#b9efff" });
-      if(marked)en._chispaMarkUntil=0;
-      struck = true;
-    }
+ f.next=f.interval||20;
+ const forecasts=f.forecasts||[f.forecast||{x:f.x,y1:f.y+16,y2:f.y+400}],hit=new Set();
+ for(const b of forecasts){
+  for(const en of g.enemies||[]){
+   if(!canHit(en)||hit.has(en)||Math.abs(cx(en)-b.x)>28+en.w/2||en.y+en.h<b.y1||en.y>b.y2)continue;
+   hit.add(en);const marked=chispaMarked(en,Number(g.t)||0);
+   hitEnemy(g,en,f.dmg*(marked?1.2:1),{ky:-3,color:'#fff18b',hitstop:0});if(marked)en._chispaMarkUntil=0;
   }
-  f.bolts.push({ x: bx, y1: f.y + 16, y2: by, life: 10 });
-  g.fx.emit(bx, by, { color: "#fff6a0", count: 8, size: 3, up: 1.6, speed: 3, star: true });
-  g.shake = Math.min(16, (g.shake || 0) + (struck ? 5 : 2));
+  f.bolts.push({...b,life:10});
+  g.fx?.emit?.(b.x,b.y2,{color:'#fff6a0',count:5,size:3,up:1.6,speed:3,star:true});
+ }
+ delete f.forecast;delete f.forecasts;
+ g.shake=Math.min(10,(g.shake||0)+(hit.size?3:1));
 }
 return f.life > 0;
 },
@@ -2373,6 +2435,34 @@ for (let i=0;i<6;i++) {
   ctx.lineTo(xx+p.facing*6,yy-2);
   ctx.stroke();
 }
+}
+ctx.restore();
+}
+
+function drawStitchoDanceAura(ctx, p, cam, reduced = false) {
+const x = cx(p) - cam.x, y = cy(p) - cam.y, age = Number(p._stitchoDanceAge) || 0;
+const phase = reduced ? 0 : age * 0.085;
+const radius = 30 + Math.max(p.w, p.h) * 0.65;
+ctx.save();
+ctx.globalCompositeOperation = "lighter";
+ctx.lineCap = "round";
+for (let i = 0; i < 3; i++) {
+  const a = phase + i * TAU / 3, r = radius + Math.sin(phase + i * 1.7) * 4;
+  ctx.globalAlpha = reduced ? 0.42 : 0.52;
+  ctx.strokeStyle = i === 1 ? "#d7b2ff" : "#85edff";
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.ellipse(x + Math.cos(a) * 5, y + Math.sin(a) * 3, r, r * 0.38, a * 0.2, 0, Math.PI * 1.45);
+  ctx.stroke();
+}
+ctx.globalAlpha = 0.8;
+for (let i = 0; i < 4; i++) {
+  const a = phase * (i % 2 ? -1 : 1) + i * TAU / 4;
+  const px = x + Math.cos(a) * (radius + 9), py = y - 5 + Math.sin(a) * radius * 0.48;
+  ctx.strokeStyle = i % 2 ? "#f4c8ff" : "#bcf7ff";
+  ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(px - 2, py - 4); ctx.lineTo(px + 2, py); ctx.lineTo(px - 1, py + 3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + 4, py - 6); ctx.lineTo(px + 4, py + 3); ctx.stroke();
 }
 ctx.restore();
 }
@@ -2900,21 +2990,23 @@ const x = cx(p) - cam.x, y = cy(p) - cam.y;
 const k = Math.min(1, f.life / 10);
 ctx.globalAlpha = 0.25 * k;
 ctx.fillStyle = "#ff5ad5";
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r * 0.8, 0, 0, TAU); ctx.fill();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.fill();
 ctx.globalAlpha = 0.9 * k;
 ctx.strokeStyle = "#ffb3ee";
 ctx.lineWidth = 2;
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r * 0.8, 0, 0, TAU); ctx.stroke();
-const n = 10;
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.stroke();
+// Four stationary hibiscus accents mark the four dance beats.
+const n = 4;
+const beat = Math.floor((96-f.life)/24)%4;
 for (let i = 0; i < n; i++) {
-  const a = (i / n) * TAU + t * 0.35;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r * 0.8;
+  const a = (i / n) * TAU - Math.PI/2;
+  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
   ctx.save();
   ctx.translate(px, py);
   ctx.rotate(a + Math.PI / 2);
-  ctx.fillStyle = i % 2 ? "#7de87a" : "#ff5ad5";
+  ctx.fillStyle = i===beat ? "#fff3a0" : "#ff8db8";
   ctx.beginPath();
-  ctx.ellipse(0, 0, 4, 10, 0, 0, TAU);
+  for(let petal=0;petal<5;petal++){const a=petal*TAU/5;ctx.ellipse(Math.cos(a)*5,Math.sin(a)*5,4,3,a,0,TAU);}
   ctx.fill();
   if (i % 2 === 0) { ctx.fillStyle = "#fff36a"; ctx.beginPath(); ctx.arc(0, 0, 2, 0, TAU); ctx.fill(); }
   ctx.restore();

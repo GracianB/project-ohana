@@ -19,3 +19,9 @@ test("boss HUD: no produce texto de ataque gigante", () => {
   const status = formatBossStatus({ phase: 3, hp: 10, max: 100 }, "APOCALIPSIS");
   assert.ok(status.visible.length < 60);
 });
+
+test('boss HUD explains the three-feather opening without hiding phase or health',()=>{
+ const status=formatBossStatus({phase:2,hp:400,max:1600,_feathersReturned:5},'ASCENSO');
+ assert.match(status.visible,/H PLUMAS 2\/3/);assert.match(status.accessible,/Salud 25%/);
+ assert.ok(status.visible.length<70);
+});

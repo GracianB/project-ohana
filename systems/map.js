@@ -1,5 +1,6 @@
+import { installCampaign } from "./campaign-layout.js";
 import { strategicLedgesFor } from "./room-strategy.js";
-export const ROOM_W = 2240;
+export const ROOM_W = 3360;
 export const ROOM_H = 1260;
 
 function stairs(x) {
@@ -185,6 +186,27 @@ for (const room of Object.values(ROOMS)) {
   }
 }
 
+// Widen routes without increasing vertical jumps. Pit mouths, portals and
+// rewards use the same transform so their interactions stay aligned.
+for(const room of Object.values(ROOMS)){
+ room.plats=room.plats.map(([x,y,w,h])=>[x*1.5,y,w*1.5,h]);
+ room.foes=room.foes.map(([x,y,...rest])=>[x*1.5,y,...rest]);
+ room.orbs=room.orbs.map(([x,y])=>[x*1.5,y]);
+ for(const portal of room.portals||[])portal.x*=1.5;
+ if(!room.boss){
+  const ledges=room.plats.filter(p=>p[3]<40&&p[1]>300&&p[1]<1000).sort((a,b)=>a[0]-b[0]);
+  for(const i of [1,Math.floor(ledges.length/2),ledges.length-1]){
+   const ledge=ledges[i];if(!ledge)continue;
+   const x=ledge[0]+ledge[2]/2,y=ledge[1]-45;
+   if(!room.orbs.some(o=>Math.hypot(o[0]-x,o[1]-y)<80))room.orbs.push([x,y]);
+  }
+  const perch=ledges.at(-2),kind=room.foes.at(-1)?.[2];
+  if(perch&&kind)room.foes.push([perch[0]+perch[2]/2,perch[1]-80,kind,true]);
+ }
+}
+
+installCampaign(ROOMS);
+
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -234,8 +256,8 @@ export function drawSigns(ctx, room, cam, t, evo) {
     for (let i = 0; i < w; i += 20) ctx.fillRect(x - cam.x + i, y - cam.y, 8, h);
   }
   // Pit indicator (single): dark elliptical hole + swirl + label at bottom-centre gap.
-  function pit(label, deadly) {
-    const x = ROOM_W / 2 - cam.x, y = ROOM_H - 84 - cam.y;
+  function pit(label, deadly, hazard) {
+    const x = hazard.x+hazard.w/2-cam.x, y = hazard.y-cam.y;
     const c = deadly ? "255,120,140" : "126,231,255";
     const rim = deadly ? "40,8,14" : "6,28,40";
     ctx.save();
@@ -318,19 +340,9 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.restore();
   }
 
-  if (room.doors.right) sign(ROOM_W - 56, 500, "→", room.doors.right, "right"); else wall(ROOM_W - 16, 80, 20, 700);
+  if (room.doors.right) sign((room.width || ROOM_W) - 56, 500, "→", room.doors.right, "right"); else wall((room.width || ROOM_W) - 16, 80, 20, 700);
   if (room.doors.left) sign(40, 356, "←", room.doors.left, "left"); else wall(-4, 80, 20, 700);
-  if (room.doors.up) sign(800, 22, "↑", room.doors.up, "center");
+  if (room.doors.up) sign(room.upExit.x+room.upExit.w/2, 22, "↑", room.doors.up, "center");
 
-  if (room.doors.down) {
-    if (room.pit) {
-      const dest = ROOMS[room.doors.down];
-      pit((dest && (dest.short || dest.name)) || "ABAJO", false);
-    } else {
-      sign(800, ROOM_H - 56, "↓", room.doors.down, "center");
-    }
-  } else if (room.pit) {
-    if (room.id === "beach") pit("↓ ARRECIFE", false);
-    else pit("POZO MORTAL", true);
-  }
+  for(const h of room.hazards||[])pit(h.label,h.type==="death",h);
 }

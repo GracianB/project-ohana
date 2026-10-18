@@ -1,6 +1,6 @@
 import {CAMP_HEROES} from './family-camp-model.js';
 const DATA=[
- ['kilo','Una canción para empezar','pizza','¡Mi queso está bailando!',[.12,2.1]],
+ ['kilo','Aloha: la isla sigue sus pasos','pizza','¡Mi queso está bailando!',[.12,2.1]],
  ['stitcho','El atajo imposible','chispin','La próxima cometa la sujeto yo.',[.18,3.1]],
  ['chispin','Una lucecita nada más','stitcho','¡Me has cargado hasta las orejas!',[.19,3.3]],
  ['cat','La gran cazadora','yomi','Esa mariposa es mi servilleta.',[3.1,5.4]],

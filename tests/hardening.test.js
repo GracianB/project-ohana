@@ -161,7 +161,7 @@ test('phase 20: bait feedback no puede tocar daño, hitbox ni superar su límite
 test('habilidades: Kilo hula tiene updater y Pizza no conserva un bloqueo de movimiento indefinido', () => {
   const abilities = fs.readFileSync('./systems/abilities.js', 'utf8');
   assert.match(abilities, /hula\(g, f, p\)/);
-  assert.match(abilities, /f\.pulse % 8 === 0/);
+  assert.match(abilities, /f\.pulse % 24 === 0/);
   assert.match(abilities, /S\.pull = \{ e, t: 16, maxT: 16 \}/);
   assert.match(abilities, /id !== "cheese"/);
   assert.match(abilities, /const steer = input\?\.right === input\?\.left/);
@@ -589,7 +589,7 @@ test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', 
   assert.match(source, /SAVE_TMP_KEY\s*=\s*"ohana\.tmp"/);
   assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
   assert.match(source, /setItem\(SAVE_KEY, raw\)/);
-  assert.match(source, /raw\.v != null && raw\.v !== 2/);
+  assert.match(source, /raw\.v != null && !\[2,3\]\.includes\(raw\.v\)/);
   assert.match(source, /revision\(temporary\) > revision\(primary\)/);
 });
 
@@ -857,10 +857,10 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   const html = fs.readFileSync("./index.html", "utf8");
   const sw = fs.readFileSync("./sw.js", "utf8");
   const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
-  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3 \}/);
+  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3, i:4, p:5 \}/);
   assert.match(game, /registerCombatAction\(game, "H"/);
-  assert.match(game, /Math\.min\(3, Math\.floor/);
-  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U"\]/);
+  assert.match(game, /Math\.min\(5, Math\.floor/);
+  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U", "I", "P"\]/);
   assert.match(abilities, /kind: "supremeField"/);
   assert.match(abilities, /kind: "assist"/);
   assert.match(abilities, /CustomEvent\("ohana-supreme"/);
@@ -906,7 +906,7 @@ test("V38 enemy intelligence is deterministic, bounded and visually auditable", 
   assert.match(brain, /intent === "FLANK"/);
   assert.match(enemies, /drawEncounterRead/);
   assert.match(enemies, /drawDamageWear/);
-  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t\)/);
+  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t, /);
   assert.match(game, /enemyCanCommit\(e\)/);
   assert.match(game, /enemyDirectorSnapshot/);
   assert.match(visual, /03b-enemy-intelligence/);
@@ -1000,8 +1000,8 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(game, /drawHazards\(/);
   assert.match(game, /drawLivingWorld\(/);
 
-  assert.match(hazards, /magma-pit/);
-  assert.match(hazards, /heroEscape:"dragon"/);
+  assert.match(fs.readFileSync("./systems/campaign-layout.js","utf8"), /magma-pit/);
+  assert.match(fs.readFileSync("./systems/campaign-layout.js","utf8"), /heroEscape:'dragon'/);
   assert.match(map, /\[0,1134,1080,126\]/);
   assert.match(map, /\[1240,1134,1000,126\]/);
 

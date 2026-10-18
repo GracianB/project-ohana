@@ -64,10 +64,10 @@ test("V72 gameplay U snapshots F4 and protects boss, no physical stat mutation",
  assert.equal(p.speed,9.6);assert.equal(p.jumpPower,18.6);
  assert.ok(g.flash<=5);assert.ok(g.shake<=3);
  for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}
- assert.ok(normal._auroraSleepT>0);
+ assert.equal(normal._auroraSleepT,undefined);assert.ok(normal.hp<160);
  assert.equal(boss._auroraSleepT,undefined);
  for(let i=0;i<150;i++){g.t++;updateAbilityFx(g);}
- assert.equal(normal.hp,0);assert.equal(boss.hp,3000);
+ assert.equal(normal.hp,0);assert.ok(boss.hp>0&&boss.hp<3000);
  clearAbilityFx();
 });
 test("V72 final U lives in body, movie, browser and respects old tests",()=>{

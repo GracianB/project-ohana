@@ -134,19 +134,18 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
     helix(ctx, cx, foot - R0 * .6, t, kC, R0);
     glitchSlices(ctx, w, h, t, kC * .6, 4);
   } else if (phase === "transformacion") {
-    // tartamudeo: alterna forma vieja / nueva por franjas desplazadas
-    const step = Math.floor(t * 20), showNew = hash01(step, 21) < kT;
-    const bands = 7, bh = h / bands;
-    for (let i = 0; i < bands; i++) {
-      ctx.save(); ctx.beginPath(); ctx.rect(0, i * bh, w, bh + 1); ctx.clip();
-      ctx.translate((hash01(i, step) - .5) * 40 * (1 - kT * .5), 0);
-      drawStitcho(ctx, (showNew ? hash01(i, step + 1) < .8 : hash01(i, step + 1) < .2) ? to : from, cx, foot, s * (1 + kT * .1), t);
-      ctx.restore();
-    }
+    // La cápsula revela la forma nueva de una pieza: fundido limpio y
+    // continuo, con un pequeño impulso vertical que conserva el golpe alien.
+    const reveal = easeOut(kT), lift = Math.sin(kT * Math.PI) * h * .025;
+    const scale = s * (1 + Math.sin(kT * Math.PI) * .08);
+    ctx.save(); ctx.globalAlpha = 1 - reveal;
+    drawStitcho(ctx, from, cx, foot + lift, scale, t, { state: "cast", castSlot: 0, cast: 1 - kT });
+    ctx.restore();
+    ctx.save(); ctx.globalAlpha = reveal;
+    drawStitcho(ctx, to, cx, foot - lift, scale, t, { state: "cast", castSlot: 0, cast: kT });
+    ctx.restore();
     pod(ctx, cx, foot - R0 * .55, R0, kT, t);
-    glitchSlices(ctx, w, h, t, 1 - kT * .3, 9);
-    const flash = Math.max(0, 1 - Math.abs(t - 2.05) / .22);
-    if (flash > 0) { ctx.globalAlpha = flash * .9; ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
+    glitchSlices(ctx, w, h, t, (1 - kT) * .14, 2);
   } else {
     // presentación: rebote de orejas arriba + nombre
     const hop = Math.abs(Math.sin(kP * Math.PI * 2)) * (1 - kP) * R0 * .18;

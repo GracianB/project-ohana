@@ -115,7 +115,7 @@ test("V305: real Dragon U remains flight capable and suppresses blocking film",(
   assert.ok(target.hp<10000,"the original Dragon supreme strength must land after warning");
   const after=target.hp;
   for(let i=0;i<80;i++){g.t++;updateAbilityFx(g);}
-  assert.equal(target.hp,after,"existing target cannot take duplicate borrowed L damage");
+  assert.ok(target.hp<after,"the invulnerable companion continues attacking during its visit");
   assert.equal(useAbility(g,3),false,"cooldown still gates U");
  }
  clearAbilityFx();

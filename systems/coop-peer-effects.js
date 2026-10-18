@@ -33,7 +33,15 @@ export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onRelia
  const quick=direct.sendLatest?.("effects",frame)===true;
  const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
   frame.stitchoDuet||frame.kiloDuet);
- const durable=!!force&&hasDuet&&direct.sendEvent?.("effects",frame)===true;
+ // A complete J/K/L visual trio is one short authored action. The
+ // replaceable latest lane can otherwise overwrite its only full snapshot.
+ // Explicit bursts get ONE existing reliable WebRTC effects event; ordinary
+ // periodic frames stay on the inexpensive latest lane. No server relay.
+ const kindsOf=list=>Array.isArray(list)?new Set(list.map(f=>f?.kind)):new Set();
+ const spark=kindsOf(frame.chispinFx),cat=kindsOf(frame.michiFx);
+ const hasChispinCombo=spark.has("chain")&&spark.has("trail")&&spark.has("storm");
+ const hasMichiCombo=cat.has("yarn")&&cat.has("purr")&&cat.has("wisp");
+ const durable=!!force&&(hasDuet||hasChispinCombo||hasMichiCombo)&&direct.sendEvent?.("effects",frame)===true;
  // A fast snapshot alone is not proof of a durable start. The caller must
  // retry until the ordered event channel accepts the current duet.
  if(durable&&typeof onReliable==="function")onReliable();
@@ -67,14 +75,58 @@ export function capturePeerEffects(game,frameNo,scope){
  }
  return frame;
 }
+// One real authored three-key burst has to remain visible as a moment, not
+// disappear whenever a newer lightweight pose frame omits an older particle.
+// Only already validated, damage-free cosmetic objects can survive, in the
+// SAME authenticated scope, with their real decremented life; never revive an
+// expired element or carry effects across scene/session resets.
+function retainComboFx(previous,next,kinds,limit){
+ if(!Array.isArray(next)||!Array.isArray(previous)||
+    !kinds.every(kind=>previous.some(e=>e.kind===kind&&e.life>0)))return next;
+ const out=next.slice(0,limit),seen=new Set(out.map(e=>e.kind));
+ for(const kind of kinds){
+  if(seen.has(kind))continue;
+  const older=previous.find(e=>e.kind===kind&&e.life>0);
+  if(!older)continue;
+  if(out.length===limit)out.pop();
+  out.push(older);seen.add(kind);
+ }
+ return out;
+}
 export function applyPeerEffects(game,frame){
  if(!frame||frame.protocol!==2||frame.roomId!==game.roomId||typeof frame.scope!=="string"||
   !/^[a-zA-Z0-9_.:-]{1,96}$/.test(frame.scope)||!Number.isSafeInteger(frame.frameNo)||frame.frameNo<1||frame.frameNo>1e9)return false;
  try{if(JSON.stringify(frame).length>8500)return false;}catch{return false;}
  const history=histories.get(game);
- if(history?.retired.has(frame.scope)||history?.scope===frame.scope&&frame.frameNo<=history.frameNo)return false;
+ if(history?.retired.has(frame.scope))return false;
  const current=game.coopPeerEffects;
- if(current?.scope===frame.scope&&frame.frameNo<=current.frameNo)return false;
+ const stale=history?.scope===frame.scope&&frame.frameNo<=history.frameNo||
+  current?.scope===frame.scope&&frame.frameNo<=current.frameNo;
+ if(stale){
+  // Reliable cosmetic combo events can arrive AFTER newer disposable frames.
+  // They cannot roll back frameNo, combat, room, HP, or non-cosmetic fields.
+  // Accept only an unseen, fully validated trio in the current scope and
+  // within eight 5 Hz snapshots of the live state.
+  if(current?.scope!==frame.scope||frame.frameNo>=current.frameNo||
+     current.frameNo-frame.frameNo>8||history?.lateCombos?.has(frame.frameNo))return false;
+  const m=readMichiEffects(frame.michiFx||[]);
+  const c=readChispinEffects(frame.chispinFx||[]);
+  if(!m||!c)return false;
+  const triple=(list,kinds)=>kinds.every(k=>list.some(e=>e.kind===k&&e.life>0));
+  const mReady=triple(m,["yarn","purr","wisp"]);
+  const cReady=triple(c,["chain","trail","storm"]);
+  if(!mReady&&!cReady)return false;
+  const needsM=mReady&&!triple(current.michiFx||[],["yarn","purr","wisp"]);
+  const needsC=cReady&&!triple(current.chispinFx||[],["chain","trail","storm"]);
+  if(!needsM&&!needsC)return false;
+  const nextM=needsM?retainComboFx(m,current.michiFx,["yarn","purr","wisp"],12):current.michiFx;
+  const nextC=needsC?retainComboFx(c,current.chispinFx,["chain","trail","storm"],8):current.chispinFx;
+  current.michiFx=nextM;current.chispinFx=nextC;
+  const seen=history?.lateCombos||new Set();seen.add(frame.frameNo);
+  while(seen.size>12)seen.delete(seen.values().next().value);
+  if(history)history.lateCombos=seen;
+  return true;
+ }
  const value={scope:frame.scope,frameNo:frame.frameNo,ticks:0,familyDuet:readFamilyDuet(frame.familyDuet),michiDuet:readMichiDuet(frame.michiDuet),michiFx:readMichiEffects(frame.michiFx||[]),chispinDuet:readChispinDuet(frame.chispinDuet),kiloDuet:readKiloDuet(frame.kiloDuet),stitchoDuet:readStitchoDuet(frame.stitchoDuet)};
  value.dinoFx=readDinoEffects(frame.dinoFx||[]);if(!value.dinoFx)return false;
  if(!value.michiFx||frame.michiDuet!=null&&!value.michiDuet)return false;
@@ -93,7 +145,12 @@ export function applyPeerEffects(game,frame){
  const retired=history?.retired||new Set();
  if(history&&history.scope!==frame.scope)retired.add(history.scope);
  while(retired.size>16)retired.delete(retired.values().next().value);
- histories.set(game,{scope:frame.scope,frameNo:frame.frameNo,retired});
+ histories.set(game,{scope:frame.scope,frameNo:frame.frameNo,retired,
+  lateCombos:history?.scope===frame.scope?history.lateCombos||new Set():new Set()});
+ if(current?.scope===frame.scope){
+  value.michiFx=retainComboFx(current.michiFx,value.michiFx,["yarn","purr","wisp"],12);
+  value.chispinFx=retainComboFx(current.chispinFx,value.chispinFx,["chain","trail","storm"],8);
+ }
  game.coopPeerEffects=value;return true;
 }
 export function advancePeerEffects(game){

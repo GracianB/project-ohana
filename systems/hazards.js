@@ -1,3 +1,4 @@
+import { ROOMS } from "./map.js";
 
 export const HAZARD_TYPES = Object.freeze({
   TRANSFER: "transfer",
@@ -5,28 +6,12 @@ export const HAZARD_TYPES = Object.freeze({
   RESCUE: "rescue",
 });
 
-export const ROOM_HAZARDS = Object.freeze({
-  beach: Object.freeze([
-    Object.freeze({ id:"reef-drop", type:"transfer", x:900, y:1040, w:440, h:260, dest:"reef", label:"ARRECIFE", color:"#6ee8ff" }),
-  ]),
-  jungle: Object.freeze([
-    Object.freeze({ id:"caldera-drop", type:"transfer", x:900, y:1040, w:440, h:260, dest:"volcano", label:"CALDERA", color:"#ff9a52" }),
-  ]),
-  ridge: Object.freeze([
-    Object.freeze({ id:"hub-drop-ridge", type:"transfer", x:900, y:1040, w:440, h:260, dest:"hub", label:"CLARO", color:"#d9f6ff" }),
-  ]),
-  space: Object.freeze([
-    Object.freeze({ id:"hub-drop-space", type:"transfer", x:900, y:1040, w:440, h:260, dest:"hub", label:"CAÍDA ORBITAL", color:"#bf9cff" }),
-  ]),
-  volcano: Object.freeze([
-    Object.freeze({ id:"magma-pit", type:"death", x:1080, y:1098, w:160, h:202, label:"MAGMA", color:"#ff5c36", heroEscape:"dragon" }),
-  ]),
-});
+export const ROOM_HAZARDS=Object.freeze(Object.fromEntries(Object.values(ROOMS).map(r=>[r.id,r.hazards])));
 
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,Number(v)||0));
 
 export function hazardsForRoom(roomId="") {
-  return ROOM_HAZARDS[String(roomId)] || Object.freeze([]);
+  return ROOMS[String(roomId)]?.hazards || ROOM_HAZARDS[String(roomId)] || Object.freeze([]);
 }
 
 export function hazardAt(roomId, player) {

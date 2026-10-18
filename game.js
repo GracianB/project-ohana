@@ -1,3 +1,12 @@
+import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
+import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
+import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
+import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
+import {drawLocalMap} from "./systems/local-map.js";
+import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-arena.js';
+import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
+import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
+import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
 import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
@@ -16,7 +25,9 @@ import { drawPaintedHub, paintedHubOn } from "./worlds/painted-hub.js";
 import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
-import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
+import { earnKiloPetal } from "./systems/kilo-rhythm.js";
+import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attacks.js";
+import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
@@ -299,7 +310,7 @@ return "C";
 function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!portals.tryUse(game.player, game)) evolve("manual");
+if (!portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -344,6 +355,7 @@ if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar e
 saveWarning = !saved;
 return saved;
 }
+game.save=save;
 function returnToMenu() {
 save();
 game.running = false;
@@ -467,6 +479,9 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+game.islandSprings=null;game.nestArena=null;
+game._evolutionAttacks = null;
+game._assist = null;
 // Hazards and movement debuffs from the previous room must not cross portals.
 // Blocked portals return above, so their traps and effects are untouched.
 clearStitchoWebs(game);
@@ -479,25 +494,29 @@ if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
+game._defeatedThisVisit=new Set();
 game.finale = null;
 game.visited[id] = true;
 game.worldIndex = r.world;
 const paint = getLook() === "paint";
 const S = paint ? PAINT_WORLD : 1;
-game.worldW = ROOM_W * S;
-game.worldH = ROOM_H * S;
+game.worldW = (r.width || ROOM_W) * S;
+game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+enterCampaignExploration(game);
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
-e.spawnIndex = i;
+e.spawnIndex = i;e._campaignOriginal=true;
+if(f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
 if (f[3]) applyElite(e);
 return e;
 });
+game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-foe-${e.spawnIndex}`));
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -571,6 +590,7 @@ beep(r.boss ? "boss" : "door");
 playMusic(themeForRoom(id));
 worldClear();
 Surprises.onEnterRoom(game);
+enterAdventure(game);
 Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
@@ -665,6 +685,8 @@ game.combatFx?.clear();
 game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
+if(def.id==='kilo')game.player._kiloEntranceAt=t;
+else game.player._ohanaEntranceAt=t;
 // Browser audits can pin a pair; normal play always invokes a surprise.
 game.player.uSurprise=!e2eEnabled;
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
@@ -673,6 +695,7 @@ game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
+game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};
 game.best = null;
 Surprises.reset();
 Festival.reset();
@@ -703,6 +726,7 @@ try {
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
+    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
@@ -713,6 +737,7 @@ document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
 if (!loadRoom(roomId)) loadRoom("hub");
+if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 if (onlineMode) {
 void onlineCoop.start(game, def).catch((error) => {
@@ -795,7 +820,11 @@ game._combatFlow = null;
 game._assist = null;
 game._supremeFlow = null;
 Magic.reset(game);
-loadRoom("hub");
+const r=ROOMS[game.roomId]||ROOMS.hub;
+const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
+loadRoom(r.id);
+if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
+game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
 function dash() {
 const p = game.player;
@@ -819,7 +848,7 @@ game.experience?.dash(p);
 void onlineCoop.signal(game, "action", { action: "dash", characterId: p.id });
 }
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
-function damageEnemy(e, amount) { if (e.dying > 0) return true; return safeDamageEnemy(e, amount); }
+function damageEnemy(e, amount) { if (e.dying > 0) return true; const before=e.hp;const ok=safeDamageEnemy(e, amount);if(ok)chargeFinisher(game,Math.max(0,before-e.hp));return ok; }
 function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
 function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
@@ -845,7 +874,13 @@ function markHit(p, e, dmg, kb) {
 const evo = Number(p.evo) || 0;
 let d = dmg;
 const push = kb == null ? 1 : kb;
-const crit = d >= 32 || push >= 1.5;
+const shieldBlock=shieldBlocksHit(e,p);
+const crit = !shieldBlock && (d >= 32 || push >= 1.5);
+if (shieldBlock){
+ d=Math.max(1,Math.ceil(d*.3));
+ e._shieldImpact=18;
+ game.nums?.add?.(e.x,e.y-26,'¡BLOQUEADO!','#bcf3ff',false);
+}
 if (e.boss) d = Math.ceil(d * 0.55);
 if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.y + e.h * 0.35)) {
   d = Math.max(1, Math.round(d * 0.35));
@@ -854,11 +889,11 @@ if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.
 damageEnemy(e, d);
 registerBossPunish(e);
 const face = p.facing || 1;
-e.vx = face * (e.boss ? 3 : 8) * push;
-e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
-e.stun = Math.max(e.stun || 0, 10);
+e.vx = shieldBlock ? 0 : face * (e.boss ? 3 : 8) * push;
+e.vy = shieldBlock ? e.vy : Math.min(e.vy || 0, -2.2 * Math.abs(push));
+e.stun = Math.max(e.stun || 0, shieldBlock ? 3 : 10);
 e.flash = crit ? 18 : 14;
-e.invuln = Math.max(e.invuln || 0, 8);
+e.invuln = Math.max(e.invuln || 0, shieldBlock ? 4 : 8);
 e._hitT = crit ? 16 : 12;
 e._hitMax = e._hitT;
 e._hitDir = face;
@@ -894,6 +929,7 @@ crit ? "#ffe66a" : (p.color || "#fff"),
 );
 
 punch(e.x, e.y, crit ? "#ffe66a" : p.color);
+earnKiloPetal(game, p._swing);
 const flow = registerCombatAction(game, "H", markAt(p.id, evo)?.name || "H");
 if (flow.label && flow.distinct >= 2) game._combatFlow = { ...game._combatFlow, label: flow.label };
 game.experience?.hit(p, e, { damage: d, crit, boss: !!e.boss });
@@ -1012,6 +1048,7 @@ function attack() {
 const p = game.player;
 if (!p || p.dead) return;
 if (p.melee > 0) { p.meleeBuf = 8; return; }
+p._chargeAction=(p._chargeAction||0)+1;
 
 if (!p.facing) p.facing = 1;
 
@@ -1174,7 +1211,7 @@ if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
   dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
     type: hazard.type, id: hazard.id, room: game.roomId, dest: hazard.dest, hero: p.id
   }}));
-  loadRoom(hazard.dest, "down");
+  if(!loadRoom(hazard.dest, "down"))respawn();
   return;
 }
 
@@ -1367,7 +1404,8 @@ if (!game.won && game.running) loadRoom("boss", "right");
 }
 function nearUpDoor(p) {
 const cx = p.x + p.w / 2;
-return cx > 700 && cx < 1060;
+const exit=game.roomDef?.upExit;
+return !!exit && cx>exit.x && cx<exit.x+exit.w;
 }
 function tryDoors() {
 const p = game.player; const r = room();
@@ -1635,6 +1673,7 @@ if (ok) {
 }
 const r = room();
 if (portals.prompt) setPrompt(portals.prompt, true);
+else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
@@ -1767,7 +1806,9 @@ if (onlineCoop.advanceGuestCombat(game)) {
   return;
 }
 game.bossFx?.update();
-game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
+game.viewW=camW();game.viewH=camH();
+game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
+updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
 for (const e of game.enemies) {
@@ -1836,6 +1877,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
 const cuernoSleeping = !e.boss && e.sleep > 0;
 if (cuernoSleeping) {
@@ -2496,6 +2538,7 @@ if (e.kind === "cucaracho") {
     color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
   });
 }
+if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-foe-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
@@ -2554,7 +2597,7 @@ const vw = camW(), vh = camH();
 let lerp = 0.24;
 const look = horizontalLook(p);
 let tx = p.x + p.w / 2 + look - vw / 2;
-let ty = p.y + p.h / 2 - vh / 2;
+let ty = p.y + p.h / 2 - vh / 2 + Math.max(-100,Math.min(160,(p.vy||0)*12));
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
 if (fin) {
@@ -2591,7 +2634,7 @@ game.nums.update();
 }
 
 function drawMinimap() {
-drawWorldMinimap(ctx, game.roomId, game.visited, game.player?.evo || 0, viewW, viewH);
+drawLocalMap(ctx,game,viewW,viewH);
 }
 function drawCrystal(o) {
 const x = o.x - game.cam.x;
@@ -2649,15 +2692,20 @@ drawRoomAtmosphere(
 );
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
+drawCheckpoints(ctx,game,game.cam,t);
+drawCampaignExploration(ctx,game,game.cam,t);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
+drawIslandSprings(ctx,game,game.cam,t);
+drawNestArena(ctx,game,game.cam,t);
 const r = room();
 drawSigns(ctx, r, game.cam, t, game.player.evo);
 portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
+drawAdventure(ctx,game,game.cam,t);
 Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
 drawStitchoWebs(ctx, game, game.cam);
 for (const o of game.orbs) {
@@ -2682,6 +2730,7 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
+  drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
 if (!game.finale) {
@@ -2690,7 +2739,7 @@ if (!game.finale) {
   drawCuernoFx(ctx, game.cuernoFx); drawCuernoBursts(ctx);
   ctx.restore();
 }
-if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
+if (!game.finale){drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
@@ -2851,12 +2900,12 @@ game.experience?.render(ctx, game, viewW, viewH, t);
 if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
-if (viewW >= 820) drawMinimap();
+drawMinimap();
 }
 function castPower(index) {
 const p = game.player;
 if (!p) return;
-const need = ["kilo","stitcho","chispin","cat"].includes(p.id)&&index===3?0:[0, 1, 2, 4][index] ?? 4;
+const need = POWER_LEVELS[index] ?? 4;
 if ((Number(p.evo) || 0) < need) {
 game.nums.add(p.x, p.y - 12, "FORMA " + (need + 1), "#fff6c8");
 return;
@@ -2873,18 +2922,19 @@ const bar = DOM.abilityBar;
 if (!bar || !game.player) return;
 const evo = Number(game.player.evo) || 0;
 const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
-slots.push({ id: "supreme", need: ["kilo","stitcho","chispin","cat"].includes(game.player.id)?0:4, supreme: true });
+slots.push(...[4,5].map(index=>({id:extraAbility(game.player.id,index).id,need:POWER_LEVELS[index],index})));
+slots.push({ id: "supreme", need: 0, supreme: true, index:3 });
 bar.innerHTML = slots.map((slot) => {
 const d = slot.supreme
   ? supremeOf(game.player.id)
-  : ABILITY_DEFS[slot.id];
+  : slot.index>3?extraAbility(game.player.id,slot.index):ABILITY_DEFS[slot.id];
 if (!d) return "";
 const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
-return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name + (d.desc ? " · " + d.desc : "");
+return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
 slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -3044,36 +3094,37 @@ const item = abilitySlots[i];
 const isSupreme = item.slot.dataset.supreme === "1";
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : item.slot.dataset.id;
-const def = isSupreme ? sup : ABILITY_DEFS[id];
+const slotIndex=Number(item.slot.dataset.index);
+const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def || !item.fill) continue;
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
 const w = pct + "%";
 if (item.fill.style.width !== w) item.fill.style.width = w;
-const sec = left > 80 ? (left / 1000).toFixed(1) : "";
+const sec = slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
 if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
-item.slot.classList.toggle("cooling", left > 80);
+item.slot.classList.toggle("cooling", slotIndex===5?finisherCharge(p)<100:left>80);
 }
-const PWIDX = { j: 0, k: 1, l: 2, u: 3 };
+const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for (let i = 0; i < touchPowers.length; i++) {
 const btn = touchPowers[i];
 const slotIndex = PWIDX[btn.dataset.k];
 const isSupreme = slotIndex === 3;
 const sup = isSupreme ? supremeOf(p.id) : null;
-const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
-const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
+const id = isSupreme ? sup.id : slotIndex>3?extraAbility(p.id,slotIndex).id:(p.abilities || [])[slotIndex];
+const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-const locked = isSupreme && !["kilo","stitcho","chispin","cat"].includes(p.id) && (Number(p.evo) || 0) < 4;
+const locked = (Number(p.evo)||0)<POWER_LEVELS[slotIndex];
 btn.classList.toggle("off", locked);
-const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
+const title = locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) + " · " + def.name : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
 if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
-const label = (locked ? "Forma 5" : def.name) + " · " + btn.dataset.k.toUpperCase();
+const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " · " + btn.dataset.k.toUpperCase();
 if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-btn.classList.toggle("cooling", left > 80);
+const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+btn.classList.toggle("cooling", slotIndex===5 ? finisherCharge(p)<100 : left > 80);
 btn.style.setProperty("--cd", pct + "%");
 }
 }
@@ -3107,16 +3158,21 @@ if (game.finale) {
 }
 tickWorldSummon();
 if (!canAct()) return;
+updateCampaignExploration(game);
 updatePlayer();
+updateCampaignProgress(game);
+updateIslandSprings(game);
 updateCuernoPlay(game, t);
 updateCuernoBursts(game);
 updateEnemies();
+updateNestArena(game,{hurt:hurtPlayer,hit:hitArenaEnemy});
 updateProjectiles();
 game.fx.update();
 game.combatFx?.update();
 if (DeathFx.isPlaying()) DeathFx.update(game);
 Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
 Surprises.update(game, t);
+updateAdventure(game);
 Festival.update(game, t);
 updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null, t, paused);
 updateCam();
@@ -3338,7 +3394,7 @@ abilityBar?.addEventListener("click", (ev) => {
 const slot = ev.target.closest(".ability-slot");
 if (!slot || !game.running || paused || overlayOpen()) return;
 ev.preventDefault();
-const idx = slot.dataset.supreme ? 3 : (game.player && game.player.abilities || []).indexOf(slot.dataset.id);
+const idx = Number(slot.dataset.index);
 if (idx >= 0) castPower(idx);
 });
 }
@@ -3426,6 +3482,8 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
+checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3468,6 +3526,7 @@ state() {
     camera: { x: game.cam.x, y: game.cam.y },
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
+    worldW:game.worldW,worldH:game.worldH,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
     hp: p ? p.health : 0,
@@ -3475,6 +3534,7 @@ state() {
     player: p ? {
       x: p.x, y: p.y, vx: p.vx, vy: p.vy,
       grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
+      dropHeld:!!p._dropWasHeld,dropPlatform:p._dropPlatform?{...p._dropPlatform}:null,
     } : null,
     input: {
       left: !!(input?.keys?.a || input?.keys?.arrowleft),
@@ -3526,6 +3586,9 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    adventure: adventureSnapshot(game),
+    nestArena: nestArenaSnapshot(game),
+    springs: islandSpringsSnapshot(game),
     enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
     boss: boss ? {
       x: boss.x,
@@ -3556,7 +3619,7 @@ loadRoom(id) {
   return this.state();
 },
 cast(index) {
-  useAbility(game, Math.max(0, Math.min(3, Math.floor(Number(index) || 0))));
+  useAbility(game, Math.max(0, Math.min(5, Math.floor(Number(index) || 0))));
   return this.state();
 },
 setCombo(value) {

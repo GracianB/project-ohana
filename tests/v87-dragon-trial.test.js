@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {DRAGON_EMBERS,newDragonTrial,updateDragonTrial,dragonTrialSnapshot,drawDragonTrial} from "../systems/dragon-trial.js";
+import {ROOMS} from '../systems/map.js';
+import {ROSTER} from '../characters/roster.js';
 
 test("V87 Dragon sanctuary asks for three reachable heights, no network-gated door",()=>{
  assert.equal(DRAGON_EMBERS.length,3);
@@ -57,4 +59,23 @@ test("V87 U cinema shows actual gameplay without spawning secondary simulation",
  assert.ok(version && Number(version.slice(6))>=287);
  assert.match(sw,/systems\/dragon-trial\.js\?v=/);
  assert.ok(html.includes(version));
+});
+
+test("V447: all Dragon embers have reachable real platforms across expanded Caldera",()=>{
+ const room=ROOMS.volcano,dragon=ROSTER.find(r=>r.id==='dragon').forms[4];
+ assert.equal(room.sectors.length,5);
+ const occupiedSectors=new Set();
+ for(const e of DRAGON_EMBERS){
+  assert.ok(e.x>1600&&e.x<room.width-100, "ember is inside expanded adventure terrain");
+  const sector=room.sectors.find(s=>e.x>=s.x&&e.x<s.x+s.w);
+  assert.ok(sector,"every ritual node maps to a real world sector");
+  occupiedSectors.add(sector.id);
+  const feet=e.y+dragon.h*(1-.55);
+  assert.ok(room.plats.some(p=>p[3]<=24&&e.x>=p[0]+20&&e.x<=p[0]+p[2]-20&&Math.abs(p[1]-feet)<=3)
+   ||room.plats.some(p=>p[3]>40&&e.x>=p[0]+20&&e.x<=p[0]+p[2]-20&&Math.abs(p[1]-feet)<=3),
+   e.title+" must be supported by true game collision");
+ }
+ assert.equal(occupiedSectors.size,3,"ritual spans three distinct sectors");
+ const above=room.plats.some(p=>p[0]<=5390&&p[0]+p[2]>=5390&&p[1]===734);
+ assert.equal(above,true,"final ember has a reachable authored altar");
 });

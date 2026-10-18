@@ -612,6 +612,7 @@ function faceFor(pose, S) {
   else if (st === "hurt") { face.mood = "squint"; face.mouth = "wavy"; face.ant = "limp"; face.earFlick = -0.75; }
   else if (st === "dead") { face.mood = "x"; face.mouth = "tongue"; face.ant = "limp"; face.glow = 0; face.blush = false; }
   else if (st === "victory") { face.mood = "happy"; face.mouth = "laugh"; face.crackle = true; face.glow = 1; }
+  else if (st === "dance") { face.mood = "happy"; face.mouth = pose.reduceMotion || Math.floor((pose.stitchoDanceAge || 0) / 24) % 2 ? "grin" : "tongue"; face.ant = "spin"; face.glow = 1.1; face.crackle = true; }
   else if (st === "wall") { face.mouth = "grin"; face.lookUp = true; face.ant = "back"; }
   else if (st === "cast") {
     if (pose.castSlot === 0) { face.mood = "angry"; face.mouth = "roar"; face.ant = "forward"; face.glow = 1.4; face.plasma = pose.cast; }
@@ -654,7 +655,17 @@ function drawBiped(ctx, R, pose, f, S, C) {
   let headDX = 0, headDY = 0, trail = null, scratch = 0, kA = 1, kB = 1;
   const limbCol = C.limb, back = R.darken(limbCol, 0.22);
 
-  if (st === "run") {
+  if (st === "dance" || pose.stitchoDanceT > 0) {
+    const age = pose.reduceMotion ? 0 : Number(pose.stitchoDanceAge) || 0;
+    const groove = Math.sin(age * 0.27), counter = Math.cos(age * 0.27);
+    legA = 0.35 + groove * 0.48; legB = -0.35 - groove * 0.42;
+    legBendA = -3 - Math.max(0, groove) * 8; legBendB = -3 - Math.max(0, -groove) * 8;
+    armA = 1.15 + counter * 0.78; armB = -1.15 - counter * 0.78;
+    bendA = -4 - Math.max(0, counter) * 5; bendB = 4 + Math.max(0, -counter) * 5;
+    bob = -Math.abs(groove) * 4; lean += groove * 0.18; headRot = -groove * 0.2;
+    if (!pose.reduceMotion && age % 24 < 5) lift = -4;
+    face.mood = "happy"; face.mouth = Math.floor(age / 24) % 2 ? "grin" : "tongue"; face.ant = "spin"; face.glow = 1.1;
+  } else if (st === "run") {
     const sw = Math.sin(pose.phase);
     legA = sw * 0.95; legB = -sw * 0.95; legBendA = 5; legBendB = 5;
     armA = -sw * 1.0 + 0.3; armB = sw * 1.0 + 0.1;
@@ -804,7 +815,9 @@ function drawGallop(ctx, R, pose, f, S, C) {
 function drawBall(ctx, R, pose, f, S, C, chaos = false) {
   const t = pose.t, r = S.egg ? 22 : 20 + f * 1.2;
   const moving = pose.state === "run" || pose.speed > 0.1;
-  const rot = t * (moving ? 0.35 : 0.5);
+  const inRoll = pose.move === "roll";
+  const bounceCount = Math.max(0, Number(pose.stitchoRollBounces) || 0);
+  const rot = pose.reduceMotion ? 0 : t * (inRoll ? 0.82 : moving ? 0.35 : 0.5) + bounceCount * 0.5;
   const cy = -r - (pose.state === "cast" ? Math.abs(Math.sin(pose.cast * Math.PI)) * 6 : 0);
   // estela
   ctx.save();
@@ -844,6 +857,17 @@ function drawBall(ctx, R, pose, f, S, C, chaos = false) {
     }
     ctx.restore();
   }
+  if (inRoll && bounceCount > 0) {
+    ctx.save();
+    ctx.globalAlpha = pose.reduceMotion ? 0.5 : 0.7;
+    ctx.strokeStyle = bounceCount % 2 ? CYAN : "#d6a8ff";
+    ctx.lineWidth = 1.8;
+    for (let i = 0; i < Math.min(3, bounceCount); i++) {
+      const a = -Math.PI * 0.8 + i * 0.34;
+      ctx.beginPath(); ctx.arc(0, cy, r + 7 + i * 4, a, a + 0.32); ctx.stroke();
+    }
+    ctx.restore();
+  }
   // ojo asomando
   const ea = rot % TAU, show = Math.cos(ea);
   if (show > 0.2) alienEye(ctx, R, Math.sin(ea) * r * 0.55, cy - Math.cos(ea) * r * 0.1, 3.4 * show, 4.2, pose, chaos ? "angry" : "normal");
@@ -855,9 +879,10 @@ function drawSoulSeams(ctx, pose, f, front = false) {
   const wall = pose.state === "wall" || move === "climb";
   const roll = move === "roll";
   const chaos = move === "chaos";
+  const dance = move === "stitcho-dance" || pose.state === "dance";
   const victory = pose.state === "victory";
   const peek = pose.state === "idle" && pose.flourish > 0 && (pose.flourishN % 4) === 3;
-  if (!wall && !roll && !chaos && !victory && !peek) return;
+  if (!wall && !roll && !chaos && !dance && !victory && !peek) return;
 
   const t = Number(pose.t) || 0;
   const col = f >= 4 ? "#f2b3ff" : "#67ddff";
@@ -867,13 +892,13 @@ function drawSoulSeams(ctx, pose, f, front = false) {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  if (!front && (wall || roll || chaos)) {
+  if (!front && (wall || roll || chaos || dance)) {
     ctx.strokeStyle = col;
-    ctx.lineWidth = chaos ? 3.2 : 2.1;
-    ctx.globalAlpha = chaos ? .72 : .48;
+    ctx.lineWidth = chaos || dance ? 3.2 : 2.1;
+    ctx.globalAlpha = chaos || dance ? .72 : .48;
     const baseX = wall ? -30 : -22;
     const baseY = wall ? -50 : -30;
-    for (let i=0;i<(chaos?7:5);i++) {
+    for (let i=0;i<(chaos || dance?7:5);i++) {
       const y = baseY + i * (wall ? 13 : 9);
       const x = baseX - i * (wall ? 1.5 : 6);
       ctx.beginPath();
@@ -881,6 +906,17 @@ function drawSoulSeams(ctx, pose, f, front = false) {
       ctx.lineTo(x-2,y+2);
       ctx.lineTo(x+5,y-2);
       ctx.stroke();
+    }
+  }
+
+  if (front && dance) {
+    const pulse = pose.reduceMotion ? .55 : .35 + .35 * Math.sin(t * .26);
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = hot; ctx.lineWidth = 2.2;
+    for (let i = 0; i < 3; i++) {
+      const a = pose.reduceMotion ? i * TAU / 3 : t * .08 + i * TAU / 3;
+      const x = Math.cos(a) * 28, y = -45 + Math.sin(a) * 12;
+      ctx.beginPath(); ctx.moveTo(x - 4, y - 3); ctx.lineTo(x, y + 2); ctx.lineTo(x + 4, y - 2); ctx.stroke();
     }
   }
 
@@ -941,10 +977,12 @@ function drawStitchoFootwork(ctx,pose,f,t){
 
 function draw(ctx, pose, R) {
   const f = pose.form, S = P[f], C = PAL[f], st = pose.state;
-  const chaos = pose.move === "chaos" || (st === "cast" && pose.castSlot === 2);
-  const roll = pose.move === "roll" || (st === "cast" && pose.castSlot === 1) || chaos;
+  const dance = pose.move === "stitcho-dance" || pose.stitchoDanceT > 0;
+  const chaos = !dance && (pose.move === "chaos" || (st === "cast" && pose.castSlot === 2));
+  const roll = !dance && (pose.move === "roll" || (st === "cast" && pose.castSlot === 1) || chaos);
   const gallop = f >= 2 && st === "run" && !roll;
   const pr = { ...pose };
+  if (dance) pr.state = "dance";
   if(pose.stitchoWelcome&&!pose.stitchoWelcome.reduced&&st==="idle"){
     pr.sway=(Number(pr.sway)||0)+stitchoWelcomeRig(pr,f).tail*.54;
   }

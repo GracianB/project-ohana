@@ -9,7 +9,7 @@ test("V288: every game room has two optional tactical platforms",()=>{
  for(const [id,room] of Object.entries(ROOMS)){
   assert.equal(STRATEGIC_LEDGES[id].length,2,id);
   for(const plat of STRATEGIC_LEDGES[id]){
-   assert.ok(room.plats.some(p=>p.every((n,i)=>n===plat[i])),id);
+   assert.ok(room.plats.some(p=>p.every((n,i)=>n===plat[i]*([0,2].includes(i)?1.5:1))),id);
    assert.ok(plat[0]>=0&&plat[0]+plat[2]<=ROOM_W,id);
    assert.ok(plat[3]<=24&&plat[2]>=160,id);
   }
