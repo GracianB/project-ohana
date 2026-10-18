@@ -1,0 +1,37 @@
+name: Peer FX E2E audit
+
+on:
+  push:
+    branches:
+      - fix/v452-reliable-duet-burst-retry
+
+permissions:
+  contents: read
+
+concurrency:
+  group: peer-fx-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-peer-cosmetics:
+    name: J/K/L WebRTC ${{ matrix.hero }} on Chromium
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        hero: [cat, chispin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Real multiplayer WebRTC J/K/L
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: ${{ matrix.hero }}
+          OHANA_TEST_BROWSER: chromium
