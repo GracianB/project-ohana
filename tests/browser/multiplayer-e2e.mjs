@@ -438,8 +438,51 @@ try {
     throw error;
   }
   console.log("multiplayer: bidirectional U echoes verified");
+  // Short real attack FX last only 30/42 simulation ticks. Observe each
+  // authenticated WebRTC event at ARRIVAL, before asynchronous browser test
+  // RPCs can outlive the animation. We still require actual receiver-side
+  // deserialization and every field to be cosmetic, not just a packet on wire.
+  const armPeerFxWitness=async(field,kinds)=>{
+    await guestPage.evaluate(async({field,kinds})=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      window.__OHANA_PEER_FX_WITNESS?.restore?.();
+      const original=onlineCoop.receiveDirectEvent;
+      const audit={seen:false,clean:false,arrivals:0,wireComplete:0,rxFrame:null,txFrame:null,field};
+      onlineCoop.receiveDirectEvent=function(game,event){
+        const isFx=event?.kind==='effects';
+        const payload=event?.payload?.[field]||[];
+        const fullOnWire=isFx&&kinds.every(k=>payload.some(e=>e?.kind===k));
+        if(isFx){audit.arrivals++;if(fullOnWire)audit.wireComplete++;}
+        const result=original.call(this,game,event);
+        if(fullOnWire){
+          const received=game.coopPeerEffects?.[field]||[];
+          if(kinds.every(k=>received.some(e=>e.kind===k))){
+            audit.seen=true; audit.rxFrame=game.coopPeerEffects.frameNo;
+            audit.txFrame=event.payload.frameNo;
+            audit.clean=received.every(e=>e.dmg===undefined&&e.target===undefined&&
+              e.hit===undefined&&e.hitA===undefined&&e.hitB===undefined);
+          }
+        }
+        return result;
+      };
+      audit.restore=()=>{onlineCoop.receiveDirectEvent=original;};
+      window.__OHANA_PEER_FX_WITNESS=audit;
+    },{field,kinds});
+  };
+  const awaitPeerFxWitness=async(label)=>{
+    await guestPage.waitForFunction(()=>window.__OHANA_PEER_FX_WITNESS?.seen,
+      null,{timeout:3000});
+    const result=await guestPage.evaluate(()=>{
+      const a=window.__OHANA_PEER_FX_WITNESS;
+      const r={seen:a.seen,clean:a.clean,arrivals:a.arrivals,
+        wireComplete:a.wireComplete,rxFrame:a.rxFrame,txFrame:a.txFrame};
+      a.restore();delete window.__OHANA_PEER_FX_WITNESS;return r;
+    });
+    assert.equal(result.clean,true,label+': remote FX must be purely cosmetic');
+  };
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
+    await armPeerFxWitness('michiFx',['yarn','purr','wisp']);
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -460,11 +503,11 @@ try {
       onlineCoop.lastEffectsSentAt=0;
       if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
     });
-    await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
-    assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
+    await awaitPeerFxWitness('Michi J/K/L');
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
+    await armPeerFxWitness('chispinFx',['chain','trail','storm']);
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -487,11 +530,7 @@ try {
     // A bounded reliable event mirrors the full explicit cast, so CI packet
     // coalescing cannot erase the one-time combo snapshot.
     try{
-      await guestPage.waitForFunction(async()=>{
-        const {onlineCoop}=await import('/systems/online-coop.js');
-        const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
-        return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
-      },null,{timeout:3000});
+      await awaitPeerFxWitness('Chispín J/K/L');
     }catch(error){
       const diagnostics=await Promise.allSettled([
         hostPage.evaluate(async()=>{
@@ -513,14 +552,16 @@ try {
           return {room:onlineCoop._combatGame.roomId,scope:f?.scope,frameNo:f?.frameNo,
             kinds:f?.chispinFx?.map(x=>({kind:x.kind,life:x.life})),
             lastReceivedMs:performance.now()-(onlineCoop.lastPeerEffectsAt||0),
+            witness:(()=>{const w=window.__OHANA_PEER_FX_WITNESS;return w?{
+              seen:w.seen,arrivals:w.arrivals,wireComplete:w.wireComplete,
+              rxFrame:w.rxFrame,txFrame:w.txFrame}:null})(),
             remoteWorld:onlineCoop.remoteWorld,direct:onlineCoop.direct?.active};
         })
       ]);
       throw new Error('Chispin WebRTC trio missing despite source cast: '+JSON.stringify(diagnostics)+
         ' original='+error.message);
     }
-    const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
-    assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
+    // Verified at delivery time by the witness, before the transient FX expire.
   }
   console.log("multiplayer: character-specific J/K/L effects verified");
   // Stitcho's storm is verified by the dedicated Stitcho Chromium/Firefox
