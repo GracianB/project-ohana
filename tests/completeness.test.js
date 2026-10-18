@@ -665,7 +665,7 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
     g.enemies[0].x = 120;
     useAbility(g, 1);
-    advanceAbility(g, 54);
+    advanceAbility(g, 82);
     assert.equal(g.player._abilMove, null, 'Rollo debe terminar y liberar el movimiento');
     assert.ok(g.enemies[0].hp < 500, 'Rollo debe dañar por contacto');
     clearAbilityFx();
@@ -673,7 +673,7 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
   {
     const g = contractGame({ player: { ...contractGame().player, id: 'stitcho', abilities: ['plasma', 'rollo', 'caos'] } });
     useAbility(g, 2);
-    assert.ok(g.player.vy < 0 && g.player._armorT > 0, 'Caos debe impulsar y blindar al iniciar');
+    assert.ok(g.player._stitchoDanceT > 0 && g._evolutionAttacks.drones.length > 0, 'L debe bailar e invocar naves ofensivas');
     advanceAbility(g, 140);
     assert.equal(g.player._abilMove, null, 'Caos debe tener fin de estado');
     clearAbilityFx();

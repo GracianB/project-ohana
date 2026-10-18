@@ -17,28 +17,14 @@ function world(enemies=[]){
  shake:0,flash:0,score:0,reduceMotion:true};
 }
 function step(g,n){for(let i=0;i<n;i++){g.t++;updateAbilityFx(g);}}
-test("V71 U remembers only initial onscreen ordinary enemies",()=>{
- clearAbilityFx();
- const seen=enemy(170),boss=enemy(270,{boss:true,hp:5000,maxHp:5000});
- const beyond=enemy(2200),g=world([seen,boss,beyond]);
- assert.equal(useAbility(g,3),true);
- step(g,OHANA_U_WINDUP);
- assert.equal(g._auroraDreamTargets,1);
- assert.equal(boss._auroraSleepT,undefined);
- assert.equal(beyond._auroraSleepT,undefined);
- const newcomer=enemy(230,{hp:140,maxHp:140});g.enemies.push(newcomer);
- step(g,26);
- assert.ok(seen.hp<190&&seen.hp>0);
- assert.equal(newcomer.hp,140,"late arrival hit by old dream");
- assert.equal(newcomer.stun,0);
- step(g,124);
- assert.equal(seen.hp,0);
- assert.equal(boss.hp,5000);
- assert.equal(boss.stun,0);
- assert.equal(beyond.hp,190);
- assert.equal(newcomer.hp,140);
- clearAbilityFx();
+test("Aurora attacks locally and its companion can engage new arrivals without sleep",()=>{
+ clearAbilityFx();const seen=enemy(170,{hp:1000,maxHp:1000}),boss=enemy(270,{boss:true,hp:5000,maxHp:5000}),beyond=enemy(2200),g=world([seen,boss,beyond]);
+ assert.equal(useAbility(g,3),true);step(g,OHANA_U_WINDUP);assert.ok(seen.hp<1000);assert.equal(g._auroraDreamTargets,0);
+ const newcomer=enemy(230,{hp:1000,maxHp:1000});g.enemies.push(newcomer);step(g,100);
+ for(const e of [seen,boss,newcomer,beyond]){assert.equal(e.sleep,undefined);assert.equal(e._auroraSleepT,undefined);}
+ assert.ok(newcomer.hp<1000);assert.ok(boss.hp>0&&boss.hp<5000);assert.equal(beyond.hp,190);clearAbilityFx();
 });
+
 test("V71 original sleepers remain targeted after camera scrolls",()=>{
  clearAbilityFx();
  const chosen=enemy(210),g=world([chosen]);
@@ -72,7 +58,8 @@ test("V71 Canvas creates a bespoke individual rainbow dream, never for bosses",(
 test("V71 reduced motion and true sleeper count are connected to film",()=>{
  assert.match(abilities,/const fade=Math\.min\(1,f\.life\/16,\(f\.max-f\.life\)\/12\),reduced=!!g\.reduceMotion/);
  assert.match(abilities,/dreamTargets: p\.id === "cuerno" \? dreamTargets : null/);
- assert.match(abilities,/for\(const e of f\.dreamTargets\|\|\[\]\) if\(canHit\(e\)&&!e\.boss\)/);
+ assert.match(abilities,/function resolveCuernoDream/);
+ assert.doesNotMatch(abilities.split("function resolveCuernoDream")[1].split("export function clearAbilityFx")[0],/e\.sleep\s*=|_auroraSleepT/);
  assert.match(cinema,/el\.dataset\.dreamTargets=def\.id==="cuerno"/);
  assert.match(cinema,/drawStory\(ctx,def\.id,k,t,cx,cy,target,color,detail\.dreamTargets,reduce\)/);
  assert.match(visual,/09q-cuerno: U cinema missing real sleeper count/);

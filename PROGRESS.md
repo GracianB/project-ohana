@@ -2084,3 +2084,16 @@ Stitcho estrena «Bola saltarina 626»: se guía con izquierda/derecha, rebota e
 - Costa con montañas, cascadas y palmeras en la intro; islote enemigo con acantilado; evolución muestra el nuevo poder; jefe con plumaje y anticipación direccional.
 - Se mantiene Chispín redondo y Trueno Gordo. El diseño Kirin sigue reservado para M2.
 - Verificación: pruebas específicas de combate y salas, navegador con diez héroes y 160 fotogramas de evolución; comprobación móvil a 320/390 px. La batería histórica completa aún tiene contratos incompatibles con el rediseño de U/Chispín; esta entrega permanece en PR borrador.
+
+
+## ohana-437 · Retos de isla y personalidad de combate
+
+- Nueve retos opcionales activados con E, separados de los portales: cuatro carreras de anillos y cinco emboscadas de dos oleadas, con aviso antes de aparecer, guardián élite y premio único por personaje/partida. Fallar o morir permite reintentar.
+- Los élites preparan un contragolpe al bajar de media vida. La dirección queda fijada durante un aviso de 48 ticks; un golpe que los interrumpa cancela el ataque. Se respetan los límites de proyectiles y no se modifica al jefe.
+- I/P tienen anticipación, lanzamiento y recuperación propios para los diez héroes. La animación es visual y respeta movimiento reducido, daño y muerte. Las evoluciones muestran motivos del poder nuevo.
+- Yomi P invoca espíritus; Dragón P crea erupciones; Frita P abre freidoras; Cuerno P descarga constelaciones. Se distinguen los proyectiles, campos y momentos de impacto por personaje.
+- Corrección de ohana-436: U conserva los efectos personales y su ayuda activa. Las coreografías anteriores ya no dibujan un segundo acompañante sobre el que combate. Se recupera la combinación de marca J y rayos L de Chispín.
+- Cuerno U ataca con aurora, incluye al jefe sin ejecutarlo y cura al acertar. Se elimina el sueño de esta habilidad; el sueño sigue siendo la característica del ronroneo de Michi. Se adaptan las comprobaciones históricas a las reglas solicitadas.
+- Verificación: contratos de combate, carreras, reintentos, recompensas únicas, élites y animaciones; navegador en las nueve salas y diez héroes. Caché offline actualizada con los nuevos módulos.
+
+Validación final de ohana-437: 1241/1241 pruebas unitarias; puerta de publicación correcta; navegador en nueve retos, diez héroes y 160 fotogramas de evolución; experiencia local con 50 formas en escritorio/móvil y modo offline; mapa y ayuda a 1280/390/320 px.

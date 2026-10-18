@@ -13,7 +13,7 @@ test('petals reward distinct successful attacks, cap at three and expire safely'
  earnKiloPetal(g,{});g.player.dead=true;assert.equal(kiloPetals(g),0);
 });
 test('K spends petals once, expands real geometry and cooldown cannot consume new petals',()=>{
- for(let evo=0;evo<5;evo++){
+ for(let evo=1;evo<5;evo++){
   clearAbilityFx(); const g=game(evo);for(let i=0;i<3;i++)earnKiloPetal(g,{});
   assert.equal(useAbility(g,1),true);assert.equal(kiloPetals(g),0);updateAbilityFx(g);
   assert.equal(g.kiloAbilityFx.find(f=>f.kind==='hula').r,70+evo*6);

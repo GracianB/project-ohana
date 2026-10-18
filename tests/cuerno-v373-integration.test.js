@@ -40,7 +40,7 @@ test('V373 U sleeps only initial ordinary targets after windup with real runtime
  clearAbilityFx();resetCuernoPlay();const g=world(),e=foe(180),boss=foe(240,{boss:true});g.enemies=[e,boss];
  assert.equal(useAbility(g,3),true);assert.equal(e.sleep,undefined);
  for(let i=0;i<OHANA_U_WINDUP;i++){g.t++;updateAbilityFx(g);}
- assert.ok(e.sleep>0);assert.equal(boss.sleep,undefined);
+ assert.equal(e.sleep,undefined);assert.equal(boss.sleep,undefined);assert.ok(e.hp<e.maxHp);
  clearAbilityFx();resetCuernoPlay();
 });
 test('V373 visual emotes never move the player',()=>{

@@ -109,6 +109,6 @@ test('V325 visible warning circle, impact selector and immutable special contrac
   assert.match(source,/if\(f\.duet&&g\._familyDuet===f\.duet\)f\.duet\.legacyTargets\.add\(e\)/);
   assert.match(source,/DINO_FX\.castUltimate\(game,p,enemies,dmg,def\.color\)/);
   assert.match(source,/const execute=!e\.boss/);
-  assert.match(source,/_auroraSleepT/);
+  assert.match(source,/_specialAuroraT/);
   assert.match(source,/selectFritaFieldTargets\(enemies,cx\(p\),cy\(p\)\)/);
 });

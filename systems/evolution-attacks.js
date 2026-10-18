@@ -9,18 +9,29 @@ const THEMES={
  stitcho:['#83eaff','ship','Costura de plasma','Flota 626','cross','fleet'],
  chispin:['#fff07b','bolt','Muelle relámpago','Cielo de tormenta','chain','thunder'],
  cat:['#f9b5ed','moon','Zarpazo lunar','Constelación felina','pounce','orbit'],
- dragon:['#ff9961','flame','Cometa de fuego','Alas del volcán','comet','garden'],
+ dragon:['#ff9961','flame','Cometa de fuego','Alas del volcán','comet','eruption'],
  dino:['#c3ef91','fossil','Pisotón fósil','Estampida ancestral','quake','stampede'],
- frita:['#ffe6a1','salt','Abanico crujiente','Festival de freidoras','fan','garden'],
+ frita:['#ffe6a1','salt','Abanico crujiente','Festival de freidoras','fan','fryer'],
  pizza:['#ffc774','slice','Porción boomerang','Rueda de porciones','return','orbit'],
- yomi:['#d5bcff','seal','Corte del umbral','Desfile de espíritus','cross','fleet'],
- cuerno:['#d7f9fa','prism','Lanza de aurora','Lluvia de constelaciones','lance','thunder']
+ yomi:['#d5bcff','seal','Corte del umbral','Desfile de espíritus','cross','spirits'],
+ cuerno:['#d7f9fa','prism','Lanza de aurora','Lluvia de constelaciones','lance','constellation']
+};
+const DESCRIPTIONS={
+ fan:'Abanico que busca enemigos y abre espacio a media distancia.',garden:'Flores que anuncian y repiten sus impactos alrededor de los enemigos.',
+ cross:'Ráfaga abierta con un disparo central para acertar de frente.',fleet:'Cinco naves persiguen blancos y disparan láseres durante varios segundos.',
+ chain:'Proyectiles eléctricos que buscan y atraviesan varios enemigos.',thunder:'Seis descargas escalonadas anuncian dónde golpearán.',
+ pounce:'Tres garras lunares barren la zona frente a Michi.',orbit:'Una rueda de proyectiles gira alrededor del héroe antes de salir disparada.',
+ comet:'Cometas que buscan un blanco y explotan al impactar.',eruption:'Seis focos de fuego brotan en oleadas bajo los enemigos.',
+ quake:'Cuatro impactos fósiles sacuden posiciones enemigas tras un aviso.',stampede:'Estampida de proyectiles fósiles que atraviesa varios blancos.',
+ return:'Porciones que salen en abanico y regresan hacia Pizza.',fryer:'Seis freidoras marcan el terreno y lanzan géiseres repetidos.',
+ spirits:'Cinco espíritus sonrientes persiguen y atacan enemigos.',lance:'Abanico de lanzas de aurora que perfora hasta cuatro enemigos.',
+ constellation:'Seis estrellas señalan el terreno antes de descargar aurora.'
 };
 export const POWER_LEVELS=Object.freeze([0,1,2,0,3,4]);
 export function extraAbility(id,index){
  const d=THEMES[id];if(!d||![4,5].includes(index))return null;
  return {id:`${id}_${index===4?'ascend':'finale'}`,key:index===4?'I':'P',name:d[index===4?2:3],color:d[0],cd:index===4?3600:7200,
-  desc:index===4?'Ataque propio de la cuarta forma. Mejora en la forma final.':'Ataque final: despliega todo el poder de esta evolución.'};
+  desc:DESCRIPTIONS[d[index===4?4:5]]};
 }
 export function powerAbility(p,index,defs,supreme){return index===3?supreme:index>3?extraAbility(p.id,index):defs[p.abilities?.[index]];}
 function state(g){
@@ -49,13 +60,13 @@ export function castEvolutionAttack(g,index){
  const p=g.player,d=THEMES[p.id],s=state(g),e=tier(p),c=center(p),face=p.facing||1;
  const mode=d[index===4?4:5],damage=((index===4?22:30)+(e-3)*7)*(Number(p._flowPower)||1);
  const n=index===4?5+(e-3)*2:9;
- if(['fleet'].includes(mode)){
+ if(['fleet','spirits'].includes(mode)){
   for(let i=0;i<5;i++)s.drones.push({id:p.id,x:c.x+(i-2)*40,y:c.y-100,age:0,life:220,index:i,count:5,next:12+i*5});
- }else if(['garden','quake','thunder'].includes(mode)){
+ }else if(['garden','quake','thunder','eruption','fryer','constellation'].includes(mode)){
   const enemies=targets(g,c.x,c.y,900),count=mode==='quake'?4:6;
   for(let i=0;i<count;i++){
    const target=enemies[i%Math.max(1,enemies.length)],at=target?center(target):{x:c.x+face*(65+i*85),y:c.y};
-   s.fields.push({id:p.id,x:at.x,y:at.y,age:-i*8,life:mode==='garden'?170:48,r:mode==='quake'?85:65,damage,mode,next:24});
+   s.fields.push({id:p.id,x:at.x,y:at.y,age:-i*8,life:['garden','eruption','fryer'].includes(mode)?170:48,r:mode==='quake'?85:65,damage,mode,next:24});
   }
  }else if(mode==='pounce'){
   const end=clamp(c.x+face*(180+e*15),20,(g.worldW||3000)-20);
@@ -66,7 +77,8 @@ export function castEvolutionAttack(g,index){
    shot(s,p,p.id,c.x,c.y,Math.cos(a)*face*(mode==='lance'?15:9),Math.sin(a)*9,damage,mode);
   }
  }
- p._cast={slot:index===4?0:2,t:g.t,id:extraAbility(p.id,index).id,form:e};
+ p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e};
+ p._powerPerformance={index,start:g.t};
  g.nums?.add?.(c.x,p.y-36,extraAbility(p.id,index).name,d[0],true);
 }
 function beam(s,id,x,y,to){s.beams.push({id,x,y,tx:to.x,ty:to.y,life:10});}
@@ -88,7 +100,8 @@ export function updateEvolutionAttacks(g,hit,heal){
   f.age++;if(f.age<0)continue;f.life--;
   if(f.age===f.next){
    for(const target of targets(g,f.x,f.y,f.r))hit(g,target,f.damage,{color:THEMES[f.id][0],kx:Math.sign(center(target).x-f.x)*4,ky:-3,hitstop:0});
-   if(f.mode==='garden')f.next+=30;
+   f.strikeAt=f.age;
+   if(['garden','eruption','fryer'].includes(f.mode))f.next+=30;
    g.fx?.emit?.(f.x,f.y,{color:THEMES[f.id][0],count:6,size:3,speed:2,life:16});
   }
  }
@@ -139,22 +152,60 @@ export function updateEvolutionAttacks(g,hit,heal){
 function glyph(ctx,id,x,y,r,t){
  const [color,shape]=THEMES[id];ctx.save();ctx.translate(x,y);ctx.rotate(t*.04);ctx.fillStyle=color;ctx.strokeStyle='#263446';ctx.lineWidth=1.5;ctx.beginPath();
  if(shape==='bolt'){ctx.moveTo(1,-r);ctx.lineTo(-r,2);ctx.lineTo(0,1);ctx.lineTo(-1,r);ctx.lineTo(r,-2);ctx.lineTo(1,-1);}
- else if(shape==='slice'){ctx.moveTo(0,-r);ctx.lineTo(r,r);ctx.lineTo(-r,r);}
+ else if(shape==='slice'){ctx.moveTo(0,-r);ctx.lineTo(r,r);ctx.quadraticCurveTo(0,r*1.3,-r,r);}
  else if(shape==='moon'){ctx.arc(0,0,r,.5,5.8);ctx.quadraticCurveTo(-r*.4,0,r*Math.cos(.5),r*Math.sin(.5));}
  else if(shape==='seal'){ctx.rect(-r*.5,-r,r,r*2);}
+ else if(shape==='petal'){ctx.ellipse(0,0,r*.5,r,0,0,TAU);}
+ else if(shape==='flame'){ctx.moveTo(0,-r);ctx.bezierCurveTo(r*.2,-r*.2,r*1.3,r*.2,r*.5,r*.8);ctx.bezierCurveTo(-r*.9,r*1.4,-r,-r*.2,-r*.35,-r*.3);ctx.quadraticCurveTo(-r*.2,r*.3,0,-r);}
+ else if(shape==='fossil'){ctx.ellipse(0,-r*.2,r,r*.75,0,0,TAU);ctx.moveTo(-r*.4,r*.2);ctx.lineTo(-r*.4,r);ctx.lineTo(r*.4,r);ctx.lineTo(r*.4,r*.2);}
+ else if(shape==='salt'){ctx.rect(-r*.45,-r*.65,r*.9,r*1.3);}
+ else if(shape==='prism'){ctx.moveTo(0,-r);ctx.lineTo(r*.65,0);ctx.lineTo(0,r);ctx.lineTo(-r*.65,0);}
+ else if(shape==='ship'){ctx.moveTo(r,0);ctx.lineTo(-r,-r*.65);ctx.lineTo(-r*.45,0);ctx.lineTo(-r,r*.65);}
  else{for(let i=0;i<5;i++){const a=i*TAU/5;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);ctx.lineTo(Math.cos(a+.6)*r*.4,Math.sin(a+.6)*r*.4);}}
  ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+}
+export function drawPowerEmblem(ctx,id,x,y,r,t=0){if(THEMES[id])glyph(ctx,id,x,y,r,t);}
+function drawField(ctx,f,cam,t,reduced){
+ const x=f.x-cam.x,y=f.y-cam.y,color=THEMES[f.id][0];
+ const since=f.strikeAt==null?Infinity:f.age-f.strikeAt,impact=since<14?1-since/14:0;
+ ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;
+ ctx.globalAlpha=.25+impact*.6;ctx.lineWidth=impact?3:1.5;
+ ctx.setLineDash(impact?[]:[6,5]);ctx.beginPath();ctx.arc(x,y,f.r,0,TAU);ctx.stroke();ctx.setLineDash([]);
+ if(f.mode==='pounce'){
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-f.r*.65,y-28+i*18);ctx.quadraticCurveTo(x,y-45+i*18,x+f.r*.65,y-12+i*18);ctx.stroke();}
+ }else if(['thunder','constellation'].includes(f.mode)){
+  for(let i=0;i<4;i++)glyph(ctx,f.id,x+Math.cos(i*TAU/4)*f.r*.7,y+Math.sin(i*TAU/4)*f.r*.7,7,reduced?0:t);
+  if(impact){ctx.globalAlpha=impact;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,y-f.r-130);ctx.lineTo(x-12,y-70);ctx.lineTo(x+10,y-75);ctx.lineTo(x,y);ctx.stroke();}
+ }else if(['eruption','fryer'].includes(f.mode)){
+  if(impact){ctx.globalAlpha=impact;for(let i=-2;i<=2;i++)glyph(ctx,f.id,x+i*13,y-Math.sin((i+3)*.5)*90*impact,10+impact*9,reduced?0:t);}
+  else{ctx.beginPath();ctx.ellipse(x,y,22,7,0,0,TAU);ctx.stroke();}
+ }else if(f.mode==='garden'){
+  for(let i=0;i<5;i++){const a=i*TAU/5;ctx.globalAlpha=.55+impact*.4;glyph(ctx,f.id,x+Math.cos(a)*f.r*.65,y+Math.sin(a)*f.r*.65,8+impact*7,reduced?0:t);}
+ }else{
+  ctx.beginPath();ctx.ellipse(x,y,f.r*(1-impact*.5),f.r*.3,0,0,TAU);ctx.stroke();
+  for(let i=0;i<3;i++)glyph(ctx,f.id,x+(i-1)*f.r*.5,y-impact*30,8+impact*8,reduced?0:t);
+ }
+ ctx.restore();
+}
+function drawDrone(ctx,d,cam,t,reduced){
+ const x=d.x-cam.x,y=d.y-cam.y;
+ ctx.save();ctx.strokeStyle='#273652';ctx.lineWidth=2;
+ if(d.id==='yomi'){
+  ctx.fillStyle='#ede0c9';ctx.beginPath();ctx.moveTo(x-13,y+12);ctx.quadraticCurveTo(x-20,y-22,x,y-22);ctx.quadraticCurveTo(x+20,y-22,x+13,y+12);ctx.lineTo(x+6,y+7);ctx.lineTo(x,y+14);ctx.lineTo(x-7,y+7);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle='#3d345d';for(const side of [-1,1]){ctx.beginPath();ctx.ellipse(x+side*5,y-6,2.5,4,0,0,TAU);ctx.fill();}
+  ctx.strokeStyle='#c592ba';ctx.beginPath();ctx.arc(x,y+2,4,0,Math.PI);ctx.stroke();
+ }else{
+  ctx.fillStyle=THEMES[d.id][0];ctx.beginPath();ctx.ellipse(x,y,20,7,0,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#d5faff';ctx.beginPath();ctx.ellipse(x,y-5,10,8,0,Math.PI,TAU);ctx.fill();ctx.stroke();
+  for(let i=0;i<3;i++){ctx.fillStyle=i===(reduced?1:Math.floor(t/6)%3)?'#fff6ae':'#6267b6';ctx.beginPath();ctx.arc(x-10+i*10,y+1,2,0,TAU);ctx.fill();}
+ }ctx.restore();
 }
 export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
  const s=g._evolutionAttacks;if(!s||s.owner!==g.player||s.room!==g.roomId)return;
  ctx.save();
- for(const f of s.fields){if(f.age<0)continue;const x=f.x-cam.x,y=f.y-cam.y,warn=f.age<f.next;
-  ctx.globalAlpha=warn?.32:.7;ctx.strokeStyle=THEMES[f.id][0];ctx.lineWidth=warn?2:4;ctx.setLineDash(warn?[6,5]:[]);ctx.beginPath();ctx.ellipse(x,y,f.r,Math.max(12,f.r*.35),0,0,TAU);ctx.stroke();ctx.setLineDash([]);
-  for(let i=0;i<5;i++){const a=i*TAU/5;glyph(ctx,f.id,x+Math.cos(a)*f.r*.7,y+Math.sin(a)*f.r*.25,8,g.reduceMotion?0:t);}
- }
+ for(const f of s.fields)if(f.age>=0)drawField(ctx,f,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;
  for(const b of s.shots)glyph(ctx,b.id,b.x-cam.x,b.y-cam.y,b.r+3,g.reduceMotion?0:t);
- for(const d of s.drones){const x=d.x-cam.x,y=d.y-cam.y;ctx.fillStyle=THEMES[d.id][0];ctx.strokeStyle='#273652';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,20,7,0,0,TAU);ctx.fill();ctx.stroke();ctx.fillStyle='#d5faff';ctx.beginPath();ctx.ellipse(x,y-5,10,8,0,Math.PI,TAU);ctx.fill();ctx.stroke();for(let i=0;i<3;i++){ctx.fillStyle=i===Math.floor(t/6)%3?'#fff6ae':'#6267b6';ctx.beginPath();ctx.arc(x-10+i*10,y+1,2,0,TAU);ctx.fill();}}
+ for(const d of s.drones)drawDrone(ctx,d,cam,t,!!g.reduceMotion);
  for(const b of s.beams){ctx.globalAlpha=b.life/10;ctx.strokeStyle=THEMES[b.id][0];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(b.x-cam.x,b.y-cam.y);ctx.lineTo(b.tx-cam.x,b.ty-cam.y);ctx.stroke();glyph(ctx,b.id,b.tx-cam.x,b.ty-cam.y,10,t);}
  ctx.globalAlpha=1;const a=s.guest;
  if(a){const def=roster.find(r=>r.id===a.id),e=tier(g.player),f=def?.forms[e];if(f){ctx.globalAlpha=Math.min(1,a.age/16,a.life/18);drawActor(ctx,{...def,...f,id:a.id,evo:e,x:a.x-f.w/2,y:a.y-f.h,facing:a.face,vx:a.attack?0:a.face*4,vy:0,grounded:true,_poseOverride:a.attack?'attack':'run',_duetActor:true,_introForceCanvas:true,visualScale:.85},cam,t,{reduceMotion:!!g.reduceMotion});}}

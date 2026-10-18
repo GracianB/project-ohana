@@ -318,6 +318,7 @@ dispatchEvent(new CustomEvent("ohana-supreme", { detail: {
 }
 
 function summonAssist(game, p, allyId, damage, color) {
+if(game._evolutionAttacks?.guest)return;
 const ally = ROSTER.find((item) => item.id === allyId);
 if (!ally) return;
 add({
@@ -346,7 +347,6 @@ if(startBattleCompanion(game,chosen,personalPower)){
  game._supremeFlow=flow;game._specialName=SUPREME[p.id]?.name;
  game.ult={t:0,name:SUPREME[p.id]?.name,color:SUPREME[p.id]?.color,flow:flow.label||'',assist:chosen};
  game.nums?.add(cx(p),p.y-36,'¡'+(ROSTER.find(r=>r.id===chosen)?.name||chosen)+' AL RESCATE!',SUPREME[p.id]?.color,true);
- return;
 }
 // Original four cinematic duets remain untouched when their canonical
 // companion is selected. A different choice runs the same playable L-loan
@@ -407,7 +407,7 @@ const launchTargets = p.id === "frita" ? selectFritaFieldTargets(enemies,cx(p),c
   (p.id === "dragon" || p.id === "pizza") ? [] : enemies;
 let launchWarning = null;
 let dinoLaunch = null;
-const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>!e.boss&&inView(game,e)) : [];
+const dreamTargets = p.id === "cuerno" ? enemies.filter(e=>inView(game,e)) : [];
 if(!FAMILY_DUETS[p.id])emitSupremeEvent(game, p, def, identity, flow, dreamTargets.length);
 
 if (p.id === "kilo") {
@@ -597,21 +597,16 @@ p._specialGhostT=Math.max(p._specialGhostT||0,260);
 p.invuln=Math.max(p.invuln||0,120);
 game.nums?.add(cx(p),p.y-58,"YOMI · JUICIO DEL UMBRAL","#ffe6b5",true);
 }
-function resolveCuernoDream(game,p,dreamTargets){
-// Dreams are gradual. The boss is immune, and distant off-screen mobs are excluded.
-const sleepers=dreamTargets;
-for(const e of sleepers){
-e.stun=Math.max(e.stun||0,156);
-e._auroraSleepT=156;
-e.sleep=Math.max(e.sleep||0,156);
-e.vx=0;
-}
-game._auroraDreamTargets=sleepers.length;
-healPlayer(p,p.maxHealth*.16);
-addPlayerXp(p,24+sleepers.length*4);
-p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
-p._specialArmorT=Math.max(p._specialArmorT||0,220);
-game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",true);
+function resolveCuernoDream(game,p,targets){
+ let hits=0;
+ for(const e of targets)if(canHit(e)&&Math.hypot(cx(e)-cx(p),cy(e)-cy(p))<600)
+  if(hitEnemy(game,e,(28+(p.evo||0)*12)*pw(p),{kx:Math.sign(cx(e)-cx(p))*5,ky:-4,color:'#d7c3ff',parts:6,hitstop:0}))hits++;
+ game._auroraDreamTargets=0;
+ if(hits)healPlayer(p,p.maxHealth*.16);
+ addPlayerXp(p,24+hits*4);
+ p._specialAuroraT=Math.max(p._specialAuroraT||0,260);
+ p._specialArmorT=Math.max(p._specialArmorT||0,220);
+ game.nums?.add(cx(p),p.y-58,'CORO DE AURORA · '+hits,'#e4d8ff',true);
 }
 
 export function clearAbilityFx() {
@@ -883,16 +878,17 @@ const p = game.player;
 if (!p) return;
 if (p.dead) { if (FX.length) clearAbilityFx(); return; }
 const cam = game.cam;
+const activeGuest=!!game._evolutionAttacks?.guest;
 drawKiloRhythm(ctx,game);
-if(game._familyDuet)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
-if(game._michiDuet)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
-if(game._chispinDuet)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._familyDuet&&!activeGuest)drawFamilyDuet(ctx,game._familyDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._michiDuet&&!activeGuest)drawMichiDuet(ctx,game._michiDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._chispinDuet&&!activeGuest)drawChispinDuet(ctx,game._chispinDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawChispinPizzaPlay(ctx,game,t);
 drawDinoDragonPlay(ctx,game,t);
 drawMichiYomiPlay(ctx,game,t);
-if(game._stitchoDuet)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._stitchoDuet&&!activeGuest)drawStitchoDuet(ctx,game._stitchoDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 drawMoments(ctx,game,t);
-if(game._kiloDuet)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
+if(game._kiloDuet&&!activeGuest)drawKiloDuet(ctx,game._kiloDuet,cam,t,drawCharacter,ROSTER,!!game.reduceMotion);
 if (p.id === "cuerno") drawCuerno(ctx, p, cam, t);
 for (const f of FX) {
 const d = DRW[f.kind];
@@ -1638,9 +1634,7 @@ uCharge(g,f,p){
   const sleepers=(f.targets||[]).filter(e=>e&&!e.dying&&!e.dead);
   resolveCuernoDream(g,p,sleepers);
   for(const e of sleepers)add({kind:"uHitMark",mode:"cuerno",e,x:cx(e),y:cy(e),life:72,max:72});
-  // Solo visual: nube de sueño (1,5 s) y Zzz por bicho mientras dure el sueño (156 ticks).
-  add({kind:"cuernoDreamCloud",x:f.x,y:f.y,actor:p,evo:Number(f.evo)||0,life:90,max:90});
-  if(sleepers.length)add({kind:"cuernoSleepZ",list:sleepers.slice(0,12),evo:Number(f.evo)||0,life:156,max:156,pin:true});
+
  }
  boom(g,f.x,f.y,f.color,g.reduceMotion?5:11,{up:1.5,star:true});
  g.shake=Math.min(26,(g.shake||0)+(f.mode==="yomi"?10:3));
@@ -1724,12 +1718,8 @@ if (mode === "stitcho") {
     }
   }
 } else if (mode === "cuerno") {
-  for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
-    e._auroraSleepT=Math.max(e._auroraSleepT||0,f.life+2);
-    e.sleep=Math.max(e.sleep||0,f.life+2);
-    e.stun=Math.max(e.stun||0,3);
-    e.vx=0;
-  }
+  // Aurora is an attacking field; no sleep or movement suppression.
+
 }
 
 if (f.pulse % pulseEvery === 0) {
@@ -1773,16 +1763,12 @@ if (f.pulse % pulseEvery === 0) {
       hitEnemy(g,e,execute?hp+9999:f.dmg*0.9,{kx:0,ky:-3,stun:44,color:f.color,crit:execute,hitstop:1});
     }
   } else if (mode === "cuerno") {
-    healPlayer(p,Math.max(2,p.maxHealth*.013));
-    p.invuln=Math.max(p.invuln||0,10);
-    for(const e of f.dreamTargets||[]) if(canHit(e)&&!e.boss){
-      const cap=Math.max(1,Number(e.maxHp??e.maxHealth??e.max??e.hp)||1);
-      hitEnemy(g,e,Math.max(cap*.28,f.dmg*.2),{
-        kx:0,ky:0,stun:70,color:"#d7c3ff",parts:2,hitstop:0,shake:0
-      });
-      e.stun=Math.max(e.stun||0,50);
-      e._auroraSleepT=Math.max(e._auroraSleepT||0,50);
+    let hits=0;
+    for(const e of g.enemies||[])if(canHit(e)&&Math.hypot(cx(e)-f.x,cy(e)-f.y)<320+(p.evo||0)*55){
+      if(hitEnemy(g,e,f.dmg,{kx:Math.sign(cx(e)-f.x)*3,ky:-2,color:'#d7c3ff',parts:3,hitstop:0,shake:0}))hits++;
     }
+    if(hits)healPlayer(p,Math.max(2,p.maxHealth*.013));
+
   }
   boom(g,f.x,f.y,f.color,mode==="dragon"?8:5,{star:true,up:1.2,speed:2.4});
 }
@@ -1986,7 +1972,8 @@ if (f.next <= 0 && f.life > 8) {
  for(const b of forecasts){
   for(const en of g.enemies||[]){
    if(!canHit(en)||hit.has(en)||Math.abs(cx(en)-b.x)>28+en.w/2||en.y+en.h<b.y1||en.y>b.y2)continue;
-   hit.add(en);hitEnemy(g,en,f.dmg,{ky:-3,color:'#fff18b',hitstop:0});
+   hit.add(en);const marked=chispaMarked(en,Number(g.t)||0);
+   hitEnemy(g,en,f.dmg*(marked?1.2:1),{ky:-3,color:'#fff18b',hitstop:0});if(marked)en._chispaMarkUntil=0;
   }
   f.bolts.push({...b,life:10});
   g.fx?.emit?.(b.x,b.y2,{color:'#fff6a0',count:5,size:3,up:1.6,speed:3,star:true});

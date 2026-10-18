@@ -16,7 +16,7 @@ test('hula has opposite weight transfers, grounded steps, finite five-form poses
  }
 });
 test('dance strikes on four beats only, reflects immediately and rewards one opening parry',()=>{
- for(let evo=0;evo<5;evo++){
+ for(let evo=1;evo<5;evo++){
   clearAbilityFx();const g=game(evo),near={x:110,y:200,w:24,h:24,hp:1000},far={x:900,y:200,w:24,h:24,hp:1000};
   g.enemies=[near,far];for(let i=0;i<3;i++)earnKiloPetal(g,{});
   g.projectiles=Array.from({length:3},()=>({x:110,y:210,w:6,h:6,vx:-4,vy:0,life:100,owner:'enemy'}));

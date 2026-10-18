@@ -206,11 +206,11 @@ test("Dino escupe Mocosaurio y Stitcho diferencia Caos de Rollo", async () => {
   assert.equal(baby.player.facing, 1);
   assert.equal(god.player.facing, -1);
 
-  const player = { id: "stitcho", abilities: ["plasma", "rollo", "caos"], evo: 0, facing: 1, x: 100, y: 100, w: 24, h: 24, speed: 4.4 };
+  const player = { id: "stitcho", abilities: ["plasma", "rollo", "caos"], evo: 2, facing: 1, x: 100, y: 100, w: 24, h: 24, speed: 4.4 };
   const chaosGame = { player, enemies: [], ghosts: [], projectiles: [], fx: { emit() {} }, t: 1 };
   useAbility(chaosGame, 2);
   updateAbilityFx(chaosGame);
-  assert.equal(player._abilMove, "chaos");
+  assert.equal(player._abilMove, "stitcho-dance");
 });
 
 test("colisión: pisa, no atraviesa el bloque y el disparo muere", () => {

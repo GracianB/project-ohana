@@ -6,6 +6,7 @@ const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1280,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
+ page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1');
  await page.waitForFunction(()=>window.__OHANA_E2E);
  await fs.mkdir('test-results/evolution-combat',{recursive:true});
@@ -18,7 +19,7 @@ try{
   assert.equal(await page.locator('#ability-bar button').count(),6);
   assert.equal(await page.locator('#ability-bar [data-index="4"]').getAttribute('aria-label'),'Forma 4 · I');
   await page.evaluate(()=>window.__OHANA_E2E.setEvo(3));await page.keyboard.press('i');
-  assert.equal((await page.evaluate(()=>window.__OHANA_E2E.state())).lastAbilitySlot,4,hero+' I');
+  const current=await page.evaluate(()=>window.__OHANA_E2E.state());if(current.lastAbilitySlot!==4){console.log(JSON.stringify({errors,state:current},null,2));await page.screenshot({path:'test-results/evolution-combat/failure.png'});}assert.equal(current.lastAbilitySlot,4,hero+' I');
   await page.evaluate(()=>window.__OHANA_E2E.setEvo(4));await page.keyboard.press('p');
   assert.equal((await page.evaluate(()=>window.__OHANA_E2E.state())).lastAbilitySlot,5,hero+' P');
   await page.evaluate(()=>window.__OHANA_E2E.step(60));

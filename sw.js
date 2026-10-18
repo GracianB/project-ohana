@@ -1,6 +1,9 @@
-const VERSION = "ohana-436";
+const VERSION = "ohana-437";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./characters/power-performance.js?v=" + VERSION,
+  "./systems/room-adventures.js?v=" + VERSION,
+  "./systems/enemy-champions.js?v=" + VERSION,
   "./characters/art/chispin-boss.js?v=" + VERSION,
   "./systems/evolution-attacks.js?v=" + VERSION,
   "./systems/ohana-panorama.js?v=" + VERSION,
@@ -274,8 +277,11 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "characters/power-performance.js": "f9fa8881f0fab333ff883a8134a51c9bd41d49b2",
+  "systems/room-adventures.js": "64dc29e6d7f64a7522a0c7aa88d4de5cc7008e8a",
+  "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
-  "systems/evolution-attacks.js": "34f7bde5a930b101522a878c2c3bf54fcffa140b",
+  "systems/evolution-attacks.js": "7ed369b38aa6f40a6bb1096e07ce9cee18a7fbe1",
   "systems/ohana-panorama.js": "656a7be154959ea303db6d089548897c2c5d919d",
   "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
@@ -286,7 +292,7 @@ const PRECACHE_REVISIONS = {
   "systems/chispa-kit.js": "019c4395fa807c81f9c6afabbe6c4219f18bcb62",
   "systems/chispa-stagecraft.js": "5703e13ad0c86fe26bbb9a52dfb5ba979f15bbdf",
   "systems/evo-cine/chispa-presentation.js": "3781241661873684d648d8063aa3e4a94dd251b1",
-  "systems/evo-cine/presentation.js": "26c4351d2b0889e2af151627450308a86e47f2e1",
+  "systems/evo-cine/presentation.js": "b193b3b00b5a4d441194dbfc89e7ac74e209adb8",
   "worlds/scenic-backdrops.js": "8fe1635a665889b030b4b7db34b8376fc08e0b09",
   "play-interface.css": "2c111fda7d648352542e6f9e3beb1c41965176a0",
   "fonts.css": "45263fe112608bd327a1c37cc6dd34a61103a055",
@@ -303,7 +309,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "560cb2cf5e86155fd240c9b6ac9ed9569f7ffad4",
+  "index.html": "614ad3e3f265ddbbd07eac69be15ac60116cc3ab",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -328,7 +334,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "e8d30bfad78c00c3664b4d2c8492624a14baf305",
+  "game.js": "4f9f968cb6bb0468d9c9f4da478299d862696fb2",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
@@ -344,7 +350,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "4a49bc0ad8621f8413a566e97b415d5590f8ac72",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "afe3a1db9b73eaa46d40517b8161ce28626d72ba",
-  "characters/draw.js": "dfc729578c6c8c67c20362f42bb80cf5ca55bd3a",
+  "characters/draw.js": "fbbcae2430db79c2f01a155a981188ec38210614",
   "characters/kinetic-stagecraft.js": "892f6728bf8fc00c28f5798da41514d62b12e3a8",
   "characters/evolution.js": "4c693aa7c93354fb18f5673e9b774a42d8b4b6e0",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
@@ -388,7 +394,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "ab6b251739c5fbd5957936ec02789c28da7f5502",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "57445da48d7e8cd90a2998874b884e12ff6b3a8d",
-  "systems/abilities.js": "db72cf8cb5811329ff76d7665442ea807999b18e",
+  "systems/abilities.js": "af18eaf3107d5998680d5e6101936b0da8a2b0d9",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "ea27e0828881a84b2037e7bfef175a62b42b6abe",
   "systems/u-partners.js": "1f4fd2c60d134c4b62fd24a0836be585e0627beb",

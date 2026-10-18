@@ -1,5 +1,5 @@
 import {ABILITY_DEFS} from '../ability-catalog.js';
-import {extraAbility} from '../evolution-attacks.js';
+import {extraAbility,drawPowerEmblem} from '../evolution-attacks.js';
 import {drawCharacter} from '../../characters/draw.js';
 import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
@@ -49,7 +49,8 @@ function actor(ctx,def,form,cx,foot,height,alpha,pose,t,reduced){
  const p={...f,id:def.id,evo:form,w:f.w,h:f.h,x:cx-f.w/2,y:foot-f.h,
   color:f.color,grounded:pose!=='jump'&&pose!=='glide',facing:1,vx:0,vy:0,
   melee:pose==='attack'?6:0,invuln:0,visualScale:scale,_poseOverride:pose,
-  _introForceCanvas:true,reduceMotion:reduced};
+  _introForceCanvas:true,reduceMotion:reduced,
+  _powerPerformance:t>=2.2?{index:form===4?5:4,start:132}:null};
  ctx.save();ctx.globalAlpha*=alpha;drawCharacter(ctx,p,{x:0,y:0},reduced?40:t*60,{reduceMotion:reduced});ctx.restore();
 }
 
@@ -83,6 +84,15 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
   const oldHeight=s.target*CALIBRATED_HEIGHT[s.form-1]/CALIBRATED_HEIGHT[s.form];
   actor(ctx,def,s.form-1,s.cx,s.foot-s.lift,oldHeight,s.oldAlpha,s.pose,s.t,reduced);
   actor(ctx,def,s.form,s.cx,s.foot-s.lift,s.target,s.newAlpha,s.pose,s.t,reduced);
+  if(s.t>2.2&&s.reveal>.8){
+   const age=s.t-2.2,reach=Math.min(width*.32,s.target*.85),strength=Math.sin(Math.PI*Math.min(1,age/1.8));
+   ctx.save();ctx.globalAlpha=.7*strength;
+   for(let side=-1;side<=1;side+=2)for(let i=0;i<3+s.form;i++){
+    const phase=(age*.65+i*.16)%1,px=s.cx+side*(s.target*.3+phase*reach),py=s.foot-s.target*.4-Math.sin(phase*Math.PI)*s.target*.15;
+    if(reduced)drawPowerEmblem(ctx,s.id,s.cx+side*(s.target*.6+i*9),s.foot-s.target*.4,5,0);
+    else drawPowerEmblem(ctx,s.id,px,py,6+s.form,age*60+i*5);
+   }ctx.restore();
+  }
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#b5d3bd';
   ctx.font='600 11px Outfit, sans-serif';ctx.fillText(s.form===4?'LA FAMILIA CRECE · FORMA FINAL':'LA FAMILIA CRECE',s.cx,height*.15);
   ctx.fillStyle='#fff1d0';ctx.font=`600 ${Math.min(38,width*.072)}px Fredoka, sans-serif`;

@@ -1,3 +1,4 @@
+import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
 import {STITCHO_VISUAL_H} from "./art/stitcho.js";
@@ -1266,6 +1267,7 @@ if(p.id==='stitcho'&&(Number(p._stitchoDanceT)||0)>0){
  pose.stitchoDanceT=Number(p._stitchoDanceT)||0;
  pose.stitchoDanceAge=Number(p._stitchoDanceAge)||0;
 }
+applyPowerPerformance(pose,p,t);
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
@@ -1312,7 +1314,7 @@ ctx.save();
 ctx.translate(footX, footY);
 drawShadow(ctx, 0, 2 + (air ? 3 : 0), H * 0.3 * airK * sx, H * 0.06 * airK);
 ctx.scale(facing, 1);
-ctx.translate(recoilX + lunge, -formLift);
+ctx.translate(recoilX + lunge, -formLift-(pose.powerLift||0)*H);
 
 if (p.id!=="chispin" && evo >= 3 && !air) drawGroundRing(ctx, H, color, t);
 if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, false);

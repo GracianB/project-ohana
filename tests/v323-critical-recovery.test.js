@@ -44,7 +44,7 @@ test('original six hero U contracts remain until issue #318 is fixed with equiva
   }
   assert.match(supreme, /DINO_FX\.castUltimate\(game,p,enemies,dmg,def\.color\)/);
   assert.match(supreme, /const execute=!e\.boss/);
-  assert.match(supreme, /_auroraSleepT/);
+  assert.match(supreme, /_specialAuroraT/);
   assert.match(supreme, /const launchTargets = p\.id === "frita" \? selectFritaFieldTargets\(enemies,cx\(p\),cy\(p\)\) :/);
   assert.match(supreme, /\(p\.id === "dragon" \|\| p\.id === "pizza"\) \? \[\] : enemies/);
   assert.match(supreme, /kind:"supremeLaunch",mode:"dragon"/);

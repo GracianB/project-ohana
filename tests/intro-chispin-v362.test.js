@@ -71,7 +71,7 @@ test("V362 F3 cloud conductor and F4 aurora crown never appear on baby body",()=
  assert.match(art,/const cy = S\.by - 4/);
  assert.match(art,/export default \{ id: "chispin", draw \}/);
  const wrapper=readFileSync(new URL("../characters/art/chispin.js",import.meta.url),"utf8");
- assert.match(wrapper,/from "\.\/chispa\.js"/);
+ assert.match(wrapper,/from "\.\/pikachu\.js"/);
  assert.ok(art.length>25000,"do not replace with new generic miniature sprite");
 });
 

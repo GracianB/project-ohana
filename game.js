@@ -1,3 +1,5 @@
+import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
+import {enterAdventure,adventurePrompt,interactAdventure,updateAdventure,drawAdventure,adventureSnapshot} from './systems/room-adventures.js';
 import { horizontalLook, clearBufferedActions } from "./engine/camera.js";
 import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
@@ -301,7 +303,7 @@ return "C";
 function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!portals.tryUse(game.player, game)) evolve("manual");
+if (!portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -575,6 +577,7 @@ beep(r.boss ? "boss" : "door");
 playMusic(themeForRoom(id));
 worldClear();
 Surprises.onEnterRoom(game);
+enterAdventure(game);
 Festival.onEnterRoom(game);
 Passives.onRoom(game);
 Magic.onRoom(game, id);
@@ -1642,6 +1645,7 @@ if (ok) {
 }
 const r = room();
 if (portals.prompt) setPrompt(portals.prompt, true);
+else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
@@ -1775,6 +1779,7 @@ if (onlineCoop.advanceGuestCombat(game)) {
 }
 game.bossFx?.update();
 game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
+updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
 for (const e of game.enemies) {
@@ -2665,6 +2670,7 @@ portals.draw(ctx, game.cam, t, { skipCatapult: paintedHubOn(game.roomId) });
 Rain.draw(ctx, game.cam);
 Rain.drawPlayerHint(ctx, game.cam, game.player);
 Surprises.draw(ctx, game.cam, t, game);
+drawAdventure(ctx,game,game.cam,t);
 Festival.draw(ctx,game.cam,t,game,{w:viewW,h:viewH});
 drawStitchoWebs(ctx, game, game.cam);
 for (const o of game.orbs) {
@@ -2697,7 +2703,7 @@ if (!game.finale) {
   drawCuernoFx(ctx, game.cuernoFx); drawCuernoBursts(ctx);
   ctx.restore();
 }
-if (!game.finale) drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);
+if (!game.finale){drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
@@ -2891,7 +2897,7 @@ const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name;
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name + (d.desc ? " · " + d.desc : "");
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
@@ -3125,6 +3131,7 @@ game.combatFx?.update();
 if (DeathFx.isPlaying()) DeathFx.update(game);
 Rain.update(game, { onTickDamage: (n) => hurtPlayer(n, "lluvia") });
 Surprises.update(game, t);
+updateAdventure(game);
 Festival.update(game, t);
 updateCuernoFx(game.cuernoFx, game.player?.id === "cuerno" ? game.player : null, t, paused);
 updateCam();
@@ -3534,6 +3541,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    adventure: adventureSnapshot(game),
     enemyAI: enemyDirectorSnapshot(game.enemies).slice(0, 12),
     boss: boss ? {
       x: boss.x,

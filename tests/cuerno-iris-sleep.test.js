@@ -46,44 +46,31 @@ test("V65 circular L grows across five forms; F4 covers a distant on-screen enem
  for(let evo=0;evo<5;evo++){
    clearAbilityFx();
    const e=enemy(1050),g=game(evo,[e]);
+   if(evo<2){assert.equal(useAbility(g,2),false);continue;}
    assert.equal(useAbility(g,2),true);
    assert.equal(g.projectiles.length,0,"L must not be seven straight projectiles");
    advance(g);
    assert.equal(e.hp<120,evo===4,"wrong radius at form "+evo);
  }
  clearAbilityFx();
- const e=enemy(180),g=game(0,[e]);useAbility(g,2);advance(g);
+ const e=enemy(180),g=game(2,[e]);useAbility(g,2);advance(g);
  assert.ok(e.hp<120,"young Cuernin's nearby enemies must be hit");
  clearAbilityFx();
 });
-test("V65 U puts every on-screen normal enemy to sleep, dissolves them gradually, never touches boss",()=>{
- clearAbilityFx();
- const normal=enemy(180),other=enemy(710,{hp:220,maxHp:220});
- const boss=enemy(430,{boss:true,hp:5000,maxHp:5000});
- const distant=enemy(2000);
- const g=game(4,[normal,other,boss,distant]);
- assert.equal(useAbility(g,3),true);
- advance(g,OHANA_U_WINDUP);
- assert.equal(normal.hp,120,"U must not kill before the sleep phase");
- assert.ok(normal.stun>=150&&other.stun>=150,"normal enemies not asleep");
- assert.ok(normal._auroraSleepT>0&&other._auroraSleepT>0);
- assert.equal(boss.stun,0,"boss must resist sleep");
- assert.equal(boss._auroraSleepT,undefined);
- advance(g,28);
- assert.ok(normal.hp<120&&normal.hp>0,"first rainbow pulse must hurt, not kill immediately");
- advance(g,122);
- assert.equal(normal.hp,0,"normal enemy survived all waves");
- assert.equal(other.hp,0,"second enemy survived all waves");
- assert.equal(boss.hp,5000,"boss was damaged by forbidden dream");
- assert.equal(boss.stun,0,"boss was stunned by forbidden dream");
- assert.equal(distant.hp,120,"offscreen enemies must not be wiped");
- clearAbilityFx();
+test("Aurora U warns then attacks, heals on hits and never puts enemies to sleep",()=>{
+ clearAbilityFx();const normal=enemy(180,{hp:1000,maxHp:1000}),other=enemy(620,{hp:1000,maxHp:1000});
+ const boss=enemy(430,{boss:true,hp:5000,maxHp:5000}),distant=enemy(2000),g=game(4,[normal,other,boss,distant]);
+ assert.equal(useAbility(g,3),true);advance(g,OHANA_U_WINDUP-1);assert.equal(normal.hp,1000);
+ advance(g,1);assert.ok(normal.hp<1000);assert.equal(normal.sleep,undefined);assert.equal(normal._auroraSleepT,undefined);
+ advance(g,130);assert.ok(g.player.health>70);assert.ok(other.hp<1000);assert.ok(boss.hp>0&&boss.hp<5000);
+ assert.equal(boss.sleep,undefined);assert.equal(distant.hp,120);clearAbilityFx();
 });
+
 test("V65 screen coverage is genuinely drawn, cinematic narrative and budgets remain bounded",()=>{
  assert.match(source,/kind:"irisHalo"/);
  assert.match(source,/Math\.hypot\(viewW\(\),viewH\(\)\)\*1\.12/);
  assert.match(source,/ctx\.createRadialGradient\(x,y,8,x,y,Math\.max\(radius,10\)\)/);
- assert.match(source,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>!e\.boss&&inView\(game,e\)\) : \[\]/);
+ assert.match(source,/dreamTargets = p\.id === "cuerno" \? enemies\.filter\(e=>inView\(game,e\)\) : \[\]/);
  assert.match(cinema,/dream|Dream|sleep|Sleep/);
  assert.match(captures,/09k-cuerno-iris-fullscreen-l/);
  assert.match(captures,/09l-cuerno-rainbow-sleep-u/);
