@@ -194,3 +194,38 @@ test("V450 · later fast snapshots never erase a still-live real cosmetic trio",
   assert.equal(rx.coopPeerEffects[field].length,0,"new session cannot inherit old FX");
  }
 });
+
+test("V451 · delayed reliable Michi and Chispin trios survive newer WebRTC fast frames",()=>{
+ const kinds=[["michiFx",[
+  {kind:"yarn",life:35,x:100,y:100,vx:2,vy:0},
+  {kind:"purr",life:35,R:100},
+  {kind:"wisp",life:35,x:150,y:150,vx:1,vy:1}],
+  ["yarn","purr","wisp"]],["chispinFx",[
+  {kind:"chain",life:35,pts:[{x:10,y:20},{x:30,y:40}]},
+  {kind:"trail",life:35,x1:1,y1:2,x2:3,y2:4},
+  {kind:"storm",life:35,x:100,y:100,bolts:[]}],
+  ["chain","trail","storm"]]];
+ for(const [key,fx,names] of kinds){
+  const base={roomId:"hub",projectiles:[],slashes:[],bolts:[]};
+  const sender={...base,[key==="michiFx"?"michiAbilityFx":"chispinAbilityFx"]:fx};
+  const delayed=capturePeerEffects(sender,10,"epoch-451");
+  const receiver={roomId:"hub",enemies:[{hp:99}],coopPeerEffects:null};
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,11,"epoch-451")),true);
+  assert.equal(receiver.coopPeerEffects[key].length,0);
+  assert.equal(applyPeerEffects(receiver,delayed),true,"old reliable combo should merge");
+  assert.equal(receiver.coopPeerEffects.frameNo,11,"newer state must never roll back");
+  assert.deepEqual(new Set(receiver.coopPeerEffects[key].map(x=>x.kind)),new Set(names));
+  assert.ok(receiver.coopPeerEffects[key].every(e=>e.dmg===undefined&&e.target===undefined));
+  assert.equal(receiver.enemies[0].hp,99,"no remote cosmetic damage");
+  assert.equal(applyPeerEffects(receiver,delayed),false,"same packet may not replay");
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,12,"epoch-451")),true);
+  assert.equal(receiver.coopPeerEffects[key].length,3,"new quick frame must not erase trio");
+  for(let n=0;n<35;n++)advancePeerEffects(receiver);
+  assert.equal(receiver.coopPeerEffects[key].length,0,"late restored FX must expire normally");
+  assert.equal(applyPeerEffects(receiver,delayed),false,"expired packet may not resurrect visuals");
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,20,"epoch-451")),true);
+  assert.equal(applyPeerEffects(receiver,{...delayed,frameNo:9}),false,"out-of-window packet rejected");
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,1,"other-epoch")),true);
+  assert.equal(applyPeerEffects(receiver,delayed),false,"retired scope cannot inject FX");
+ }
+});

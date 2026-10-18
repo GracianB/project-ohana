@@ -1,3 +1,7 @@
+## ohana-451 · Sincronización WebRTC fuera de orden (J/K/L)
+
+Solucionada la carrera entre la instantánea ligera (frameNo más nuevo) y el evento fiable de ráfaga completa que llega después. Se permite fusionar únicamente la terna visual validada de Michi o Chispín si pertenece al mismo scope, la distancia es de 8 frames o menos y aún no se aceptó esa secuencia. No retrocede frameNo, combate, HP ni objetivos; rechaza paquetes caducados, repetidos o de ámbitos retirados. Node incluye pruebas de llegada inversa, ausencia de daño, expiración y anti-replay. La prueba de navegador continúa verificando los FX reales en ambos jugadores.
+
 ## ohana-450 · Ráfagas cosméticas no desaparecen con un frame más reciente
 
 Los paquetes completos J/K/L de Michi y Chispín pueden llegar correctamente por WebRTC fiable y aun así ser reemplazados por la actualización latest siguiente antes del render. Ahora el receptor conserva sólo los componentes validados, del mismo scope y con vida residual positiva, durante los frames ordinarios siguientes. Las FX caducan naturalmente; no reviven, no contienen daño ni sobreviven a un cambio de sala o sesión. Tests Node simulan un frame completo seguido por un frame vacío, expiración y scopes nuevos.
