@@ -28,6 +28,10 @@ function effect(item,type){
 // Send the same bounded/read-only snapshot through the ordered, reliable event
 // channel on forced casts. Normal 200ms frames still use the low-latency pose
 // channel only, and applyPeerEffects deduplicates matching scope/frameNo.
+// Failed one-shot J/K/L bursts stay queued on their own WebRTC link for a
+// bounded retry. A full trio can otherwise vanish when the reliable channel
+// is briefly backpressured but the disposable channel accepts its snapshot.
+const queuedReliableFx=new WeakMap();
 export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onReliable){
  if(!direct?.active||!frame||frame.protocol!==2)return false;
  const quick=direct.sendLatest?.("effects",frame)===true;
@@ -41,9 +45,31 @@ export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onRelia
  const spark=kindsOf(frame.chispinFx),cat=kindsOf(frame.michiFx);
  const hasChispinCombo=spark.has("chain")&&spark.has("trail")&&spark.has("storm");
  const hasMichiCombo=cat.has("yarn")&&cat.has("purr")&&cat.has("wisp");
- const durable=!!force&&(hasDuet||hasChispinCombo||hasMichiCombo)&&direct.sendEvent?.("effects",frame)===true;
- // A fast snapshot alone is not proof of a durable start. The caller must
- // retry until the ordered event channel accepts the current duet.
+ const combo=hasChispinCombo||hasMichiCombo;
+ const wantsReliable=!!force&&(hasDuet||combo);
+ let durable=wantsReliable&&direct.sendEvent?.("effects",frame)===true;
+ // Only complete, authenticated-session cosmetic trios are queued, not
+ // general gameplay events or the high-frequency 5 Hz FX snapshots.
+ if(wantsReliable&&combo){
+  if(durable)queuedReliableFx.delete(direct);
+  else queuedReliableFx.set(direct,{frame});
+ }
+ let queued=queuedReliableFx.get(direct);
+ if(queued&&(queued.frame.scope!==frame.scope||
+    queued.frame.roomId!==frame.roomId||
+    frame.frameNo<queued.frame.frameNo||
+    frame.frameNo-queued.frame.frameNo>8)){
+  queuedReliableFx.delete(direct);queued=null;
+ }
+ // Retry the original VALIDATED one-shot payload on a later heartbeat if
+ // sending it reliably was rejected due to channel backpressure.
+ // Do not send the same payload a second time in the initial failed tick.
+ if(!durable&&!wantsReliable&&queued){
+  if(direct.sendEvent?.("effects",queued.frame)===true){
+   durable=true;queuedReliableFx.delete(direct);
+  }
+ }
+ // This callback also acknowledges the once-per-U reliable start.
  if(durable&&typeof onReliable==="function")onReliable();
  return quick||durable;
 }

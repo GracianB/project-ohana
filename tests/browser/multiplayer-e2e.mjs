@@ -486,10 +486,39 @@ try {
     // The receiver must actually deserialize all three real cosmetic effects.
     // A bounded reliable event mirrors the full explicit cast, so CI packet
     // coalescing cannot erase the one-time combo snapshot.
-    await guestPage.waitForFunction(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
-      return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
-    },null,{timeout:3000});
+    try{
+      await guestPage.waitForFunction(async()=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
+        return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
+      },null,{timeout:3000});
+    }catch(error){
+      const diagnostics=await Promise.allSettled([
+        hostPage.evaluate(async()=>{
+          const {onlineCoop}=await import('/systems/online-coop.js');
+          const g=onlineCoop._combatGame;
+          const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+          const frame=capturePeerEffects(g,onlineCoop.effectSequence+1,onlineCoop.combatEpoch);
+          return {room:g.roomId,epoch:onlineCoop.combatEpoch,seq:onlineCoop.effectSequence,
+            fx:(g.chispinAbilityFx||[]).map(f=>({kind:f.kind,life:f.life})),
+            snapshotKinds:(frame.chispinFx||[]).map(f=>f.kind),
+            snapshotBytes:JSON.stringify(frame).length,
+            remoteWorld:onlineCoop.remoteWorld,
+            direct:onlineCoop.direct?.active,
+            queued:onlineCoop.direct?.eventChannel?.bufferedAmount};
+        }),
+        guestPage.evaluate(async()=>{
+          const {onlineCoop}=await import('/systems/online-coop.js');
+          const f=onlineCoop._combatGame.coopPeerEffects;
+          return {room:onlineCoop._combatGame.roomId,scope:f?.scope,frameNo:f?.frameNo,
+            kinds:f?.chispinFx?.map(x=>({kind:x.kind,life:x.life})),
+            lastReceivedMs:performance.now()-(onlineCoop.lastPeerEffectsAt||0),
+            remoteWorld:onlineCoop.remoteWorld,direct:onlineCoop.direct?.active};
+        })
+      ]);
+      throw new Error('Chispin WebRTC trio missing despite source cast: '+JSON.stringify(diagnostics)+
+        ' original='+error.message);
+    }
     const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
     assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
   }
