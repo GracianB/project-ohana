@@ -1139,10 +1139,20 @@ try {
     'desktop: V85 hero did not settle on the upper ledge');
   await page.locator('#game').focus();
   await page.keyboard.down('ArrowDown');
-  const platformDropFirst = await page.evaluate(() => window.__OHANA_E2E.step(1));
-  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(39));
+  const platformDropTrace = await page.evaluate(()=>{
+    const api=window.__OHANA_E2E,samples=[];let state;
+    for(let frame=1;frame<=40;frame++){
+      state=api.step(1);
+      if(frame<=8||frame%4===0){
+        const p=state.player;
+        samples.push({frame,y:p.y,vy:p.vy,grounded:p.grounded,held:p.dropHeld,platform:p.dropPlatform&&p.dropPlatform.y});
+      }
+    }
+    return {state,samples};
+  });
+  const platformDropAfter=platformDropTrace.state;
   await page.keyboard.up('ArrowDown');
-  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,first:platformDropFirst.player,after:platformDropAfter.player,input:platformDropAfter.input}));
+  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,samples:platformDropTrace.samples,after:platformDropAfter.player,input:platformDropAfter.input}));
   assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
     'desktop: V85 DOWN did not traverse the ledge / snapback detected');
   assert.equal(platformDropAfter.player.grounded, true,
