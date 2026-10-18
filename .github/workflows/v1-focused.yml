@@ -1,0 +1,38 @@
+name: OHANA V1 focused gameplay
+on:
+  push:
+    branches:
+      - feat/v440-layout-map-ally-combat
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v1-focused-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gameplay-critical:
+    name: Input, falls, combat, boss and room smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: All Node gameplay regressions
+        run: node --test tests/v1-campaign.test.js tests/v440-world-polish.test.js tests/v441-campaign-energy.test.js tests/v442-combat-readability.test.js
+      - name: Real keyboard, physical falls and E2E controls
+        run: node tests/browser/e2e.mjs
+      - name: World 1 candidate
+        run: node tests/browser/v1-candidate.mjs
+      - name: Nine room adventures
+        run: node tests/browser/room-adventures.mjs
+      - name: Nest arena
+        run: node tests/browser/nest-arena.mjs
