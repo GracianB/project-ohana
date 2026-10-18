@@ -1,4 +1,4 @@
-const VERSION = "ohana-446";
+const VERSION = "ohana-447";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -289,7 +289,7 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/campaign-exploration.js": "b419c86b60815ae7f827075fbc9d51553c76de47",
-  "systems/campaign-layout.js": "b83612426ae2976b0cb39b952293a9078a013d01",
+  "systems/campaign-layout.js": "6b2d7b236206bcc14b38bec84bbf147b375743c2",
   "systems/local-map.js": "e1f5eb0ece990c3550a0caa7eb6d54bbc430c6e1",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "d1226270ba90c20f77e1e73fe471d25b322d0300",
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "9c294b7a305941ff995bf75b1104962015ecf4b0",
+  "index.html": "277976d327af2f1670716b3c049018f40ff6067d",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -424,7 +424,7 @@ const PRECACHE_REVISIONS = {
   "systems/u-duet-direction-v315.js": "eb629f03e37e44e409b8c2c5c5d76a09052f16a7",
   "systems/ability-catalog.js": "e8d856d7b24945c94dd2a8bec2b47969e078a040",
   "systems/boss-fall-scene.js": "fd1eb014e509495a167dbcffc49261351df950e8",
-  "systems/dragon-trial.js": "d8da8839b6ec952cd7efd4b9795469773205c6dd",
+  "systems/dragon-trial.js": "ccc17d3b51e1977017509763f499af214f3684fe",
   "systems/canvas-gradient-cache.js": "a33dd6799c3dff42fc484c16a4aff51b6ec31072",
   "systems/cinema-kit.js": "ebeaf62b588fd3504f33bbb2e4117f5fe287c843",
   "systems/cinema-loader.js": "a7fd7e8e8ae0da9716e87cd9e5f5ff5a443022ca",

@@ -46,6 +46,11 @@ export function installCampaign(rooms){
     }
    }
   }
+  if(r.id==='volcano'){
+   // The final ember ascends two 80-unit steps from the authored secret route.
+   // The other two embers use actual ground and the third sector's ledge.
+   r.plats.push([5030,814,240,22],[5270,734,240,22]);
+  }
   r.hazards=groundGaps(r.plats,r.width).map((gap,i)=>({id:({beach:"reef-drop",jungle:"caldera-drop",ridge:"hub-drop-ridge",space:"hub-drop-space",volcano:"magma-pit"}[r.id]||`${r.id}-fall`)+ (i?`-${i}`:""),x:gap.x,y:gap.y-36,w:gap.w,h:r.height-gap.y+200,type:r.doors.down?'transfer':'death',dest:r.doors.down||null,label:r.doors.down?rooms[r.doors.down]?.short||r.doors.down:r.id==='volcano'?'MAGMA MORTAL':'ABISMO MORTAL',color:r.doors.down?'#7eeaff':'#ff765f',...(r.id==='volcano'?{heroEscape:'dragon'}:{})}));
   // Large drop mouths have visible stepping stones; missing one still takes the labelled route.
   if(!r.boss)for(const h of r.hazards)if(h.w>140)for(let x=h.x+45;x<h.x+h.w-40;x+=105)r.plats.push([x,h.y-25,90,22]);
