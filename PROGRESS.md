@@ -1,3 +1,7 @@
+## ohana-444 · Evolución accesible sin animación residual
+
+La auditoría completa de las 100 siluetas de personajes pasó. Corregida la escena de evolución en modo movimiento reducido: el encuadre final y la intensidad de los emblemas permanecen estáticos entre fotogramas. No altera la animación normal ni el combate. Sigue en PR de desarrollo.
+
 ## ohana-443 · Chispín original calibrado por medición Canvas
 
 La medición de las cinco siluetas del Chispín redondo original produjo 50/72/99/117/129 px frente a los objetivos 55/70/85/102/120. Se calibra exclusivamente OPTICAL_SCALE por forma para conservar silueta, expresividad y hitboxes en vector y pintado; se retira el registro diagnóstico temporal. Continúan las pruebas CI de navegador antes de publicar.

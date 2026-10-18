@@ -1,4 +1,4 @@
-const VERSION = "ohana-443";
+const VERSION = "ohana-444";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -314,7 +314,7 @@ const PRECACHE_REVISIONS = {
   "systems/chispa-kit.js": "019c4395fa807c81f9c6afabbe6c4219f18bcb62",
   "systems/chispa-stagecraft.js": "5703e13ad0c86fe26bbb9a52dfb5ba979f15bbdf",
   "systems/evo-cine/chispa-presentation.js": "3781241661873684d648d8063aa3e4a94dd251b1",
-  "systems/evo-cine/presentation.js": "b193b3b00b5a4d441194dbfc89e7ac74e209adb8",
+  "systems/evo-cine/presentation.js": "a010c3c58715094823fdb0cddf9547c7fb01e6ea",
   "worlds/scenic-backdrops.js": "4307884354e7fbde864afcd817b0f4734ca11f56",
   "play-interface.css": "d48ca40bab0fd38598c794ec61b17c18a2f4ef6a",
   "fonts.css": "45263fe112608bd327a1c37cc6dd34a61103a055",
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "cf128d3860d5f6f33dffad13af95381613a43093",
+  "index.html": "87f51bbd7b5d1f1c4e09da20bd6abd18eb5d3c0e",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
