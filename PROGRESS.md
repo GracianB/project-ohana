@@ -1,3 +1,7 @@
+## ohana-442 · Defensa táctica y avisos honestos
+
+Los escuderos bloquean por delante (30 % del daño de H) pero quedan expuestos por la espalda. Tiradores y artilleros fijan la trayectoria en la preparación: la línea visible coincide con el disparo posterior; mover el héroe no cambia el vector a escondidas. U, secretos, campamento y mecanismos de V441 se mantienen. Requiere pasar quality y verificación de jugabilidad.
+
 ## ohana-441 · Mundo con mecanismos, U reactiva y desafíos tácticos
 
 Corrección de navegación de luciérnaga por pulsación en el campamento y guardado persistente de secretos. Dos mecanismos por bioma con acciones distintas, castigos anunciados con nuevas combinaciones de especies, enemigos de retos con roles tácticos y ecos de pareja U que reaccionan a J/K/L/I/P con límite de frecuencia. No fusionar ni publicar hasta superar las validaciones de navegador, cooperativo y V1.

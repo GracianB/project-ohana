@@ -1,4 +1,4 @@
-const VERSION = "ohana-441";
+const VERSION = "ohana-442";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -294,7 +294,7 @@ const PRECACHE_REVISIONS = {
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "d1226270ba90c20f77e1e73fe471d25b322d0300",
   "systems/hero-combos.js": "29d27d8d455fc23038ee0cba91aa805e59d68f49",
-  "systems/campaign-enemies.js": "08580d4c42528787d00b8385f35c23a90537a5e3",
+  "systems/campaign-enemies.js": "11784db771685a9dc1ca9a0744f00822a3bd8616",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
   "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "9effcfebebf13638cf5364919024b33ec541a848",
+  "index.html": "48a071355a29f945cbcb6e10283c8c698a9bb929",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -356,7 +356,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "5c71d437e9972b32ab285b1a6fba0ea2d05de491",
+  "game.js": "29b6b27dce8dc26f9a27e471138d90f020a72047",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "94f88e26fc0ce982547bfd2e8d292299ed17c0c2",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",

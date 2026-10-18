@@ -1,5 +1,5 @@
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
-import {campaignRole,updateCampaignEnemy,drawCampaignEnemy} from "./systems/campaign-enemies.js";
+import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
 import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
 import {drawLocalMap} from "./systems/local-map.js";
@@ -874,7 +874,13 @@ function markHit(p, e, dmg, kb) {
 const evo = Number(p.evo) || 0;
 let d = dmg;
 const push = kb == null ? 1 : kb;
-const crit = d >= 32 || push >= 1.5;
+const shieldBlock=shieldBlocksHit(e,p);
+const crit = !shieldBlock && (d >= 32 || push >= 1.5);
+if (shieldBlock){
+ d=Math.max(1,Math.ceil(d*.3));
+ e._shieldImpact=18;
+ game.nums?.add?.(e.x,e.y-26,'¡BLOQUEADO!','#bcf3ff',false);
+}
 if (e.boss) d = Math.ceil(d * 0.55);
 if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.y + e.h * 0.35)) {
   d = Math.max(1, Math.round(d * 0.35));
@@ -883,11 +889,11 @@ if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.
 damageEnemy(e, d);
 registerBossPunish(e);
 const face = p.facing || 1;
-e.vx = face * (e.boss ? 3 : 8) * push;
-e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
-e.stun = Math.max(e.stun || 0, 10);
+e.vx = shieldBlock ? 0 : face * (e.boss ? 3 : 8) * push;
+e.vy = shieldBlock ? e.vy : Math.min(e.vy || 0, -2.2 * Math.abs(push));
+e.stun = Math.max(e.stun || 0, shieldBlock ? 3 : 10);
 e.flash = crit ? 18 : 14;
-e.invuln = Math.max(e.invuln || 0, 8);
+e.invuln = Math.max(e.invuln || 0, shieldBlock ? 4 : 8);
 e._hitT = crit ? 16 : 12;
 e._hitMax = e._hitT;
 e._hitDir = face;
