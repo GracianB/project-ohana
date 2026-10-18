@@ -515,6 +515,9 @@ try {
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
       const {applyForm}=await import('/characters/roster.js');
+      // All module imports MUST complete before casting short-lived FX.
+      // Awaiting the next import after the cast can allow 30+ game ticks.
+      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
       const g=onlineCoop._combatGame;
       // These real J/K/L multiplayer visuals require form 3 (index 2).
       // Earlier V304 predated progression gates and tried locked abilities
@@ -524,7 +527,6 @@ try {
       for(const index of [0,1,2])if(!useAbility(g,index))
         throw Error('Michi cast failed slot '+index+' evo '+g.player.evo);
       updateAbilityFx(g);
-      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
       const sample=capturePeerEffects(g,onlineCoop.effectSequence+1,onlineCoop.combatEpoch);
       if(!['yarn','purr','wisp'].every(kind=>sample.michiFx.some(f=>f.kind===kind)))
         throw Error('Michi source J/K/L FX incomplete '+JSON.stringify(sample.michiFx));
@@ -540,6 +542,9 @@ try {
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
       const {applyForm}=await import('/characters/roster.js');
+      // Preload snapshot code. Never yield to browser animation frames
+      // between a real J/K/L cast and its one-shot 30-frame FX capture.
+      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
       const game=onlineCoop._combatGame;
       // Storm is the form-3 L slot; do not silently bypass the gate.
       game.player.evo=Math.max(2,game.player.evo|0);
@@ -547,7 +552,6 @@ try {
       for(const id of ['chain','blink','storm'])game.player.cds[id]=0;
       for(const index of [0,1,2])if(!useAbility(game,index))throw Error('Chispin cast failed slot '+index+' evo '+game.player.evo);
       updateAbilityFx(game);
-      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
       const sample=capturePeerEffects(game,onlineCoop.effectSequence+1,onlineCoop.combatEpoch);
       if(!['chain','trail','storm'].every(kind=>sample.chispinFx.some(f=>f.kind===kind)))
         throw Error('Chispin source J/K/L FX incomplete '+JSON.stringify(sample.chispinFx));
