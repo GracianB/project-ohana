@@ -424,7 +424,7 @@ const PRECACHE_REVISIONS = {
   "systems/u-duet-direction-v315.js": "eb629f03e37e44e409b8c2c5c5d76a09052f16a7",
   "systems/ability-catalog.js": "e8d856d7b24945c94dd2a8bec2b47969e078a040",
   "systems/boss-fall-scene.js": "fd1eb014e509495a167dbcffc49261351df950e8",
-  "systems/dragon-trial.js": "ccc17d3b51e1977017509763f499af214f3684fe",
+  "systems/dragon-trial.js": "22043531c342632b1e953a424dcfdc397575c4bd",
   "systems/canvas-gradient-cache.js": "a33dd6799c3dff42fc484c16a4aff51b6ec31072",
   "systems/cinema-kit.js": "ebeaf62b588fd3504f33bbb2e4117f5fe287c843",
   "systems/cinema-loader.js": "a7fd7e8e8ae0da9716e87cd9e5f5ff5a443022ca",

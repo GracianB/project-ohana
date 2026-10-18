@@ -4,7 +4,7 @@
 export const DRAGON_EMBERS=Object.freeze([
  // Anchored to real Caldera footholds across its five extended sectors.
  // Y is the channel focal height for Dragón Celestial (ground contact + .55*h).
- Object.freeze({x:1800,y:1113,title:"ALIENTO",color:"#ffbe7e"}),
+ Object.freeze({x:2000,y:1113,title:"ALIENTO",color:"#ffbe7e"}),
  Object.freeze({x:3440,y:953,title:"BATIDA",color:"#ff8a65"}),
  Object.freeze({x:5390,y:713,title:"ASCENSO",color:"#ffe29b"}),
 ]);

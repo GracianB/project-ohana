@@ -1,6 +1,6 @@
 ## ohana-447 · Ritual del Dragón en plataformas verdaderamente alcanzables
 
-El E2E llegó más lejos al superar V85 y detectó que dos de tres brasas de Caldera ya no podían mantenerse encendidas: el terreno ampliado las dejaba flotando lejos del suelo. Se distribuyen por tres sectores a 1.800/3.440/5.390 unidades, sobre el suelo real, una terraza y un altar ascendente de dos peldaños. El test de navegador conserva la canalización de 30 fotogramas para cada brasa, toma las coordenadas oficiales y verifica [1,2,3]. Unidad valida el apoyo físico y el reparto por sectores. No fusionar hasta pasar CI y E2E completo.
+El E2E llegó más lejos al superar V85 y detectó que dos de tres brasas de Caldera ya no podían mantenerse encendidas: el terreno ampliado las dejaba flotando lejos del suelo. Se distribuyen por tres sectores a 2.000/3.440/5.390 unidades, sobre el suelo real, una terraza y un altar ascendente de dos peldaños. El test de navegador conserva la canalización de 30 fotogramas para cada brasa, toma las coordenadas oficiales y verifica [1,2,3]. Unidad valida el apoyo físico y el reparto por sectores. No fusionar hasta pasar CI y E2E completo.
 
 ## ohana-446 · Descenso voluntario sin rebote accidental
 
