@@ -1,4 +1,4 @@
-const VERSION = "ohana-442";
+const VERSION = "ohana-443";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -330,8 +330,8 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/real-actor.js": "5adcb1dfc4015eb7bedc41c5303cc7961a4c6fda",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
-  "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "48a071355a29f945cbcb6e10283c8c698a9bb929",
+  "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
+  "index.html": "cf128d3860d5f6f33dffad13af95381613a43093",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",

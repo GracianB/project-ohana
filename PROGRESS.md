@@ -1,3 +1,7 @@
+## ohana-443 · Chispín original calibrado por medición Canvas
+
+La medición de las cinco siluetas del Chispín redondo original produjo 50/72/99/117/129 px frente a los objetivos 55/70/85/102/120. Se calibra exclusivamente OPTICAL_SCALE por forma para conservar silueta, expresividad y hitboxes en vector y pintado; se retira el registro diagnóstico temporal. Continúan las pruebas CI de navegador antes de publicar.
+
 ## ohana-442 · Defensa táctica y avisos honestos
 
 Los escuderos bloquean por delante (30 % del daño de H) pero quedan expuestos por la espalda. Tiradores y artilleros fijan la trayectoria en la preparación: la línea visible coincide con el disparo posterior; mover el héroe no cambia el vector a escondidas. U, secretos, campamento y mecanismos de V441 se mantienen. Requiere pasar quality y verificación de jugabilidad.

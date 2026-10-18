@@ -24,7 +24,6 @@ try {
   }setLook('vector');return result;
  });
 
- console.log('CHISPIN_METRICS',JSON.stringify(audit.filter(r=>r.id==='chispin').map(r=>({look:r.look,form:r.evo,height:r.height}))));
  for(const row of audit){assert.deepEqual(row.before,row.after,'hitbox changed');const target=[55,70,85,102,120][row.evo];assert.ok(Math.abs(row.height-target)<15,`${row.id} F${row.evo} ${row.look}: ${row.height}px`)}
  for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++)assert.ok(audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo).height>audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1).height);
  await fs.mkdir('test-results/visual',{recursive:true});await page.screenshot({path:'test-results/visual/cuerno-design.png',fullPage:true});
