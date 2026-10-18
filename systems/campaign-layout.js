@@ -25,14 +25,24 @@ export function installCampaign(rooms){
    const floors=r.plats.filter(p=>p[3]>40),end=Math.max(...floors.map(p=>p[0]+p[2]));
    // Keep the original district, then author new terraces rather than stretching it.
    if(end<r.width)r.plats.push([end,1134,r.width-end,126]);
+   // Authored platform vocabulary per sector. Continuous ladders used to carpet
+   // every room with 30 nearly identical ledges and obscure the actual ground.
+   // These local routes deliberately leave a wide fight/rest lane below them.
+   const shapes={
+    explore:[[140,1054,230],[510,974,280],[930,1054,240]],
+    combat:[[250,1034,300],[820,1034,280]],
+    platform:[[120,1054,230],[430,974,230],[740,894,230],[1040,974,220]],
+    secret:[[190,1054,240],[530,974,240],[850,894,260]],
+    rest:[[350,1054,290]]
+   };
    for(let i=0;i<r.sectors.length;i++){
     const s=r.sectors[i],x=s.x+160;
-    // Baby-accessible ascent: 80px rises, broad shared landing areas.
-    for(let j=0;j<4;j++)r.plats.push([x+j*115,1054-j*80,250,22]);
-    r.plats.push([x+560,814,320,22],[x+870,894,260,22]);
+    for(const [dx,y,w] of shapes[s.role]||shapes.explore)
+     r.plats.push([s.x+dx,y,w,22]);
     if(i>1){const cast=CASTS[r.id]||['cucaracho','phosquito','rana','planta'];
-     r.foes.push([x+230,1030,cast[(i-2)%cast.length]],[x+650,760,cast[(i-1)%cast.length]],[x+1000,1040,cast[i%cast.length],i===3]);
-     r.orbs.push([x+310,910],[x+680,750],[x+1000,830]);
+     // Three mixed threats rather than a wall of identical enemies.
+     r.foes.push([x+230,1030,cast[(i-2)%cast.length]],[x+650,840,cast[(i-1)%cast.length]],[x+1000,1040,cast[i%cast.length],i===3]);
+     r.orbs.push([x+310,910],[x+680,780],[x+1000,830]);
     }
    }
   }
