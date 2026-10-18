@@ -1,3 +1,7 @@
+## ohana-448 · Chispín J/K/L coherente en WebRTC
+
+El test real de Chispín puede perder la única ráfaga simultánea si el canal latest sobrescribe el paquete antes de entregarlo. Al forzar un lanzamiento completo J/K/L, las tres FX validadas y cosméticas se envían también una vez por el canal fiable de eventos WebRTC; no se añade tráfico HTTP ni se duplican las actualizaciones periódicas. Test Node verifica la entrega fiable cuando falla la vía rápida, ausencia de daño remoto, y coste normal de FX parciales. El test navegador comprueba la presencia real de los tres efectos en origen y en el cliente remoto.
+
 ## ohana-447 · Ritual del Dragón en plataformas verdaderamente alcanzables
 
 El E2E llegó más lejos al superar V85 y detectó que dos de tres brasas de Caldera ya no podían mantenerse encendidas: el terreno ampliado las dejaba flotando lejos del suelo. Se distribuyen por tres sectores a 2.000/3.440/5.390 unidades, sobre el suelo real, una terraza y un altar ascendente de dos peldaños. El test de navegador conserva la canalización de 30 fotogramas para cada brasa, toma las coordenadas oficiales y verifica [1,2,3]. Unidad valida el apoyo físico y el reparto por sectores. No fusionar hasta pasar CI y E2E completo.

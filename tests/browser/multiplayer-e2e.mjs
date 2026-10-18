@@ -469,8 +469,17 @@ try {
       applyForm(game.player,{silent:true});
       for(const id of ['chain','blink','storm'])game.player.cds[id]=0;
       for(const index of [0,1,2])if(!useAbility(game,index))throw Error('Chispin cast failed slot '+index+' evo '+game.player.evo);
-      updateAbilityFx(game);onlineCoop.lastEffectsSentAt=0;onlineCoop.sendPeerEffects(game,true);
+      updateAbilityFx(game);
+      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+      const sample=capturePeerEffects(game,onlineCoop.effectSequence+1,onlineCoop.combatEpoch);
+      if(!['chain','trail','storm'].every(kind=>sample.chispinFx.some(f=>f.kind===kind)))
+        throw Error('Chispin source J/K/L FX incomplete '+JSON.stringify(sample.chispinFx));
+      onlineCoop.lastEffectsSentAt=0;
+      if(!onlineCoop.sendPeerEffects(game,true))throw Error('Chispin native WebRTC FX delivery rejected');
     });
+    // The receiver must actually deserialize all three real cosmetic effects.
+    // A bounded reliable event mirrors the full explicit cast, so CI packet
+    // coalescing cannot erase the one-time combo snapshot.
     await guestPage.waitForFunction(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
       return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));

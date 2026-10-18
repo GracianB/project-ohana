@@ -115,3 +115,27 @@ test("V322 · family U fallback from authenticated action checks exact peer iden
   assert.equal(host.coopPeerEffects,null,"no U echo without matching slot");
  }finally{Object.assign(peer,old);}
 });
+
+test("V448 · native Chispin J/K/L visual trio survives loss of latest WebRTC frame",()=>{
+ const g={roomId:"hub",chispinAbilityFx:[
+  {kind:"chain",life:28,pts:[{x:4,y:5},{x:7,y:8}],dmg:999},
+  {kind:"trail",life:40,x1:10,y1:11,x2:20,y2:21,hit:{target:"untrusted"}},
+  {kind:"storm",life:210,x:30,y:40,next:12,bolts:[],dmg:999}],
+  projectiles:[],slashes:[],bolts:[]};
+ const frame=capturePeerEffects(g,1,"combo-v448");
+ assert.deepEqual(frame.chispinFx.map(e=>e.kind),["chain","trail","storm"]);
+ const link=transport(false,true);
+ assert.equal(sendPeerEffectsWithReliableDuet(link,frame,true),true);
+ assert.deepEqual(link.sent.map(x=>x.mode),["fast","reliable"]);
+ const client={roomId:"hub",coopPeerEffects:null,enemies:[{hp:180}]};
+ assert.equal(applyPeerEffects(client,link.sent[1].payload),true);
+ assert.deepEqual(client.coopPeerEffects.chispinFx.map(e=>e.kind),["chain","trail","storm"]);
+ assert.equal(client.enemies[0].hp,180);
+ assert.ok(client.coopPeerEffects.chispinFx.every(e=>e.dmg===undefined&&e.hit===undefined));
+ const periodic=transport();
+ assert.equal(sendPeerEffectsWithReliableDuet(periodic,frame,false),true);
+ assert.deepEqual(periodic.sent.map(x=>x.mode),["fast"],"5 Hz frames remain cheap");
+ const partial=transport();
+ assert.equal(sendPeerEffectsWithReliableDuet(partial,{...frame,chispinFx:frame.chispinFx.slice(0,2)},true),true);
+ assert.deepEqual(partial.sent.map(x=>x.mode),["fast"],"ordinary casts do not spam reliable channel");
+});

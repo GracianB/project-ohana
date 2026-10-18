@@ -1,4 +1,4 @@
-const VERSION = "ohana-447";
+const VERSION = "ohana-448";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "277976d327af2f1670716b3c049018f40ff6067d",
+  "index.html": "8dfd35b51f7a2892e4ca227df074a4bf0135482a",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -478,7 +478,7 @@ const PRECACHE_REVISIONS = {
   "systems/coop-v107-room-follow.js": "9c8f21bb62748f6c6bef97e6fc0df63abce5d9be",
   "systems/coop-v108-direct.js": "48acc28b903e8809f7ce0e03e7cf73cb91f4d437",
   "systems/coop-combat-mirror.js": "78475ea8de4b4332e2e36c9973695f6d49606e8b",
-  "systems/coop-peer-effects.js": "9e555b7de7134f507952bb96666a9a5304f1ec7a",
+  "systems/coop-peer-effects.js": "eadc225dca0cc82626638eeed9e07b75b6e766f6",
   "systems/coop-ability-hits.js": "8e8559d5539b7e8a4ece3fca5b96ec920c41dfad",
   "systems/kilo-duet.js": "03de1337958491caab8e9aad404e889632d7617b",
   "systems/stitcho-duet.js": "9e9b67555844a6191251b890c0416d11db143853",

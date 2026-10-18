@@ -33,7 +33,14 @@ export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onRelia
  const quick=direct.sendLatest?.("effects",frame)===true;
  const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
   frame.stitchoDuet||frame.kiloDuet);
- const durable=!!force&&hasDuet&&direct.sendEvent?.("effects",frame)===true;
+ // An explicitly cast complete Chispin J/K/L combo is one short cinematic
+ // action, not three independent disposable pose frames. Otherwise the
+ // unordered "latest" channel can replace the complete frame before arrival.
+ // Use the existing validated effects event, once per explicit forced burst.
+ // Periodic FX frames still use only the lightweight latest channel.
+ const kinds=Array.isArray(frame.chispinFx)?new Set(frame.chispinFx.map(f=>f?.kind)):new Set();
+ const hasChispinCombo=kinds.has("chain")&&kinds.has("trail")&&kinds.has("storm");
+ const durable=!!force&&(hasDuet||hasChispinCombo)&&direct.sendEvent?.("effects",frame)===true;
  // A fast snapshot alone is not proof of a durable start. The caller must
  // retry until the ordered event channel accepts the current duet.
  if(durable&&typeof onReliable==="function")onReliable();
