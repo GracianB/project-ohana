@@ -891,6 +891,11 @@ try {
     const api = window.__OHANA_E2E;
     api.start('dragon');
     api.setEvo(4);
+    // Entering a room intentionally locks controls for eight simulation ticks.
+    // Finish that real entrance before injecting the keyboard press. Otherwise
+    // the test presses Space during doorHold, when the game deliberately ignores
+    // actions, then incorrectly reports that the Dragon's mastery is broken.
+    api.step(12);
     api.setPlayer(520, 920);
     api.setPlayerVelocity(0, 2);
     api.exhaustPlayerJumps();
@@ -899,7 +904,7 @@ try {
   await page.locator('#game').focus();
   await page.keyboard.down('Space');
   const wingState = await page.evaluate(() => window.__OHANA_E2E.step(1));
-  assert.ok(wingState.mastery?.wingUsed >= 1, '12-wingbeat: Dragón no activa la batida extra');
+  assert.ok(wingState.mastery?.wingUsed >= 1, '12-wingbeat: Dragón no activa la batida extra · '+JSON.stringify({player:wingState.player,input:wingState.input,mastery:wingState.mastery}));
   assert.equal(wingState.mastery?.move, 'wingbeat', '12-wingbeat: señal visual de batida ausente');
   await page.waitForTimeout(40);
   await capture(page, '12-hero-mastery-wingbeat');
