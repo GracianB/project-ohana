@@ -18,8 +18,13 @@ try {
    const before=api.state();api.step(65);const after=api.state();
    return {before,after};
   },form);
-  assert.equal(result.before.cuerno.acts.length,3,'three actual runtime attacks form '+form);
-  assert.ok(result.after.cuerno.trails>0,'K creates runtime trail form '+form);
+  // V439 campaign progression gates J/K/L at forms 0/1/2. The older
+  // V373 smoke test expected all three on a baby, bypassing real unlocks.
+  const unlocked=[1,2,3,3,3][form];
+  assert.equal(result.before.cuerno.acts.length,unlocked,
+    'only real unlocked J/K/L attacks may execute in form '+form);
+  if(form>=1)assert.ok(result.after.cuerno.trails>0,'unlocked K creates a runtime trail form '+form);
+  else assert.equal(result.after.cuerno.trails,0,'baby cannot use locked K trail');
   assert.equal(result.after.running,true);
   await page.screenshot({path:'test-results/visual/cuerno-v373-form-'+(form+1)+'.png'});
  }
