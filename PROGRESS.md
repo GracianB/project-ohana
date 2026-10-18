@@ -1,3 +1,7 @@
+## ohana-446 · Descenso voluntario sin rebote accidental
+
+El paso intencional con ABAJO a través de plataformas finas tiene prioridad sobre las flores de salto y los mecanismos automáticos de bioma. El rebote sigue operativo en aterrizajes normales y no se dispara tarde al soltar la tecla. Tests de regresión de ambos sistemas; E2E V85 debe verificar que se alcanza el suelo inferior en escritorio y móvil. No fusionar la PR hasta validar quality y focused gameplay.
+
 ## ohana-445 · Auditoría E2E del descenso real
 
 Se añade instrumentación limitada a E2E para diferenciar tecla DOWN recibida, plataforma de descenso seleccionada y posible recuperación indebida a la misma altura. El objetivo es reparar la colisión de plataformas sin relajar los tests. Es una fase de diagnóstico, no una versión oficial.

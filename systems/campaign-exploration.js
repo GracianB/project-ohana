@@ -53,7 +53,8 @@ export function updateCampaignExploration(g){
  for(const m of state.mechanisms||[]){
   m.cd=Math.max(0,m.cd-1);m.flash=Math.max(0,m.flash-1);
   const mid=p.x+p.w/2,feet=p.y+p.h;
-  if(p.grounded&&Math.abs(mid-m.x)<45&&Math.abs(feet-m.y)<12&&m.cd===0)
+  // Voluntary DOWN traversal wins over automatic biome launch pads.
+  if(!p._dropWasHeld&&!p._dropPlatform&&p.grounded&&Math.abs(mid-m.x)<45&&Math.abs(feet-m.y)<12&&m.cd===0)
    triggerBiomeMechanism(g,m);
  }
  for(const b of state.branches){

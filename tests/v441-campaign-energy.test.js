@@ -78,3 +78,17 @@ test('V441 optional battle rooms feature at least three different foe species',(
  assert.equal(battles.length,5);
  for(const def of battles)assert.ok(new Set(def.foes).size>=3,def.name);
 });
+
+test('V446 DOWN takes precedence over automatic biome mechanisms on safe floor',()=>{
+ const g=playground('jungle');enterCampaignExploration(g);
+ const m=g.campaignExploration.mechanisms[0],p=g.player;
+ p.x=m.x-p.w/2;p.y=m.y-p.h;p.grounded=true;p.vy=0;
+ p._dropWasHeld=true;
+ updateCampaignExploration(g);
+ assert.equal(m.used,0);
+ assert.equal(p.vy,0);
+ p._dropWasHeld=false;p._dropPlatform={x:m.x-80,y:m.y-100,w:160,h:22};
+ updateCampaignExploration(g);assert.equal(m.used,0);
+ p._dropPlatform=null;updateCampaignExploration(g);
+ assert.equal(m.used,1,'automatic mechanism remains usable outside intentional drops');
+});

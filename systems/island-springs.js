@@ -15,6 +15,13 @@ export function updateIslandSprings(g){
  const s=springs(g);if(!s)return;
  for(const pad of s.pads){pad.cd=Math.max(0,pad.cd-1);pad.flash=Math.max(0,pad.flash-1);}
  if(p.dead){s.wasAir=false;return;}
+ // DOWN explicitly asks to descend one-way ledges. A lower spring flower
+ // must not involuntarily launch the player back toward the ledge above.
+ // Read the input state used by the actual collision resolver, not a new keymap.
+ if(p._dropWasHeld||p._dropPlatform){
+  s.wasAir=!p.grounded;
+  return;
+ }
  if(s.wasAir&&p.grounded){
   for(const pad of s.pads){
    if(pad.cd||Math.abs(p.x+p.w/2-pad.x)>28+p.w*.3||Math.abs(p.y+p.h-pad.y)>8)continue;

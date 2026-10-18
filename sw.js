@@ -1,4 +1,4 @@
-const VERSION = "ohana-445";
+const VERSION = "ohana-446";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -288,7 +288,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/campaign-exploration.js": "2ea93e757a63e0d15fd54dee9cdea299bb09963f",
+  "systems/campaign-exploration.js": "b419c86b60815ae7f827075fbc9d51553c76de47",
   "systems/campaign-layout.js": "b83612426ae2976b0cb39b952293a9078a013d01",
   "systems/local-map.js": "e1f5eb0ece990c3550a0caa7eb6d54bbc430c6e1",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
@@ -297,7 +297,7 @@ const PRECACHE_REVISIONS = {
   "systems/campaign-enemies.js": "e3caa0f963ef2d3ca21d1ba1452a0d4f16a7a3fe",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
-  "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
+  "systems/island-springs.js": "e15178e90c170bac541ca99d4854d77806547719",
   "worlds/nest-sanctuary.js": "52360cb2eb2d50e4020f8453dbe6a67546465f3d",
   "characters/power-performance.js": "f9fa8881f0fab333ff883a8134a51c9bd41d49b2",
   "systems/room-adventures.js": "d6d6ecc71fa637cea44185badadc53cf51358cd8",
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "1535c8077938f640e3a5df435aaacc09b97d93b8",
+  "index.html": "9c294b7a305941ff995bf75b1104962015ecf4b0",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
