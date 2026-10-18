@@ -3534,6 +3534,7 @@ state() {
     player: p ? {
       x: p.x, y: p.y, vx: p.vx, vy: p.vy,
       grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
+      dropHeld:!!p._dropWasHeld,dropPlatform:p._dropPlatform?{...p._dropPlatform}:null,
     } : null,
     input: {
       left: !!(input?.keys?.a || input?.keys?.arrowleft),

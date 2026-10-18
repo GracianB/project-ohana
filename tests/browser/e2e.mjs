@@ -1139,9 +1139,10 @@ try {
     'desktop: V85 hero did not settle on the upper ledge');
   await page.locator('#game').focus();
   await page.keyboard.down('ArrowDown');
-  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(40));
+  const platformDropFirst = await page.evaluate(() => window.__OHANA_E2E.step(1));
+  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(39));
   await page.keyboard.up('ArrowDown');
-  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,after:platformDropAfter.player,input:platformDropAfter.input}));
+  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,first:platformDropFirst.player,after:platformDropAfter.player,input:platformDropAfter.input}));
   assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
     'desktop: V85 DOWN did not traverse the ledge / snapback detected');
   assert.equal(platformDropAfter.player.grounded, true,

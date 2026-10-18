@@ -1,3 +1,7 @@
+## ohana-445 · Auditoría E2E del descenso real
+
+Se añade instrumentación limitada a E2E para diferenciar tecla DOWN recibida, plataforma de descenso seleccionada y posible recuperación indebida a la misma altura. El objetivo es reparar la colisión de plataformas sin relajar los tests. Es una fase de diagnóstico, no una versión oficial.
+
 ## ohana-444 · Evolución accesible sin animación residual
 
 La auditoría completa de las 100 siluetas de personajes pasó. Corregida la escena de evolución en modo movimiento reducido: el encuadre final y la intensidad de los emblemas permanecen estáticos entre fotogramas. No altera la animación normal ni el combate. Sigue en PR de desarrollo.
