@@ -4,7 +4,7 @@ ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "N
 hula: { name: "Baile aloha", key: "K", cd: 2100, color: "#ff5ad5", desc: "Cuatro pasos hula: reflejan proyectiles y pulsan daño. Consume pétalos para ampliar alcance y potencia; reflejar al empezar recupera un pétalo." },
 ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Floración que cura y alcanza una zona cercana. Consume pétalos para aumentar alcance, daño y curación." },
 plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
-rollo: { name: "Bola rodante", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos." },
+rollo: { name: "Bola saltarina 626", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos. Guíala con ←/→ y rebota contra paredes y plataformas; las formas avanzadas permiten más rebotes." },
 caos: { name: "Modo caos", key: "L", cd: 5600, color: "#8f7bff", desc: "Rebota por toda la sala arrollándolo todo." },
 chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Marca enemigos durante 2,5 s. Evoluciona de 2 a 5 blancos; L consume la marca con +20% de daño." },
 blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Paso de relámpago: cruza de 145 a 240 px, deja una estela dañina y concede evasión breve." },

@@ -549,7 +549,7 @@ return value - Math.floor(value);
 }
 
 const FX = [];
-const S = { p: null, hover: 0, roll: 0, caos: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
+const S = { p: null, hover: 0, roll: 0, rollBounces: 0, rollLock: 0, caos: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
 
 function syncState(p) {
 if (S.p === p) return;
@@ -559,7 +559,7 @@ S.p._abilMove = null;
 S.p._armorT = 0;
 }
 S.p = p;
-S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 FX.length = 0;
 }
 
@@ -606,7 +606,8 @@ game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",tru
 
 export function clearAbilityFx() {
 FX.length = 0;
-S.hover = 0; S.roll = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+if (S.p) S.p._stitchoRollBounces = 0;
 if (S.p) {
 S.p._kiloRhythm = null;
 S.p._abilMove = null;
@@ -670,8 +671,39 @@ p.vy = Math.min(p.vy, -0.42);
 }
 if (S.roll > 0) {
 S.roll--;
-p.vx = p.facing * Math.max(9, p.speed * 2.1);
-armor(p, 2);
+const steer = input?.right ? 1 : input?.left ? -1 : 0;
+if (S.rollLock > 0) S.rollLock--;
+else if (steer) p.facing = steer;
+const face = p.facing || 1, worldW = game.worldW || 1600;
+const probe = { x: face > 0 ? p.x + p.w - 3 : p.x - 9,
+  y: p.y + p.h * 0.2, w: 12, h: p.h * 0.6 };
+const edge = face < 0 ? p.x <= 8 : p.x + p.w >= worldW - 8;
+const wall = edge || (game.platforms || []).some(pl => aabb(probe, pl));
+const maxBounces = 1 + Math.min(2, Math.floor((Number(p.evo) || 0) / 2));
+if (wall && S.rollBounces < maxBounces) {
+  S.rollBounces++;
+  S.rollLock = 10;
+  p._stitchoRollBounces = S.rollBounces;
+  p.facing = -face;
+  p.vx = -face * Math.max(10, p.speed * 2.3);
+  p.vy = Math.min(Number(p.vy) || 0, -3.2);
+  armor(p, 8);
+  const bx = face > 0 ? p.x + p.w : p.x;
+  game.fx?.emit?.(bx, p.y + p.h * .55, { color: S.rollBounces % 2 ? "#72f2ff" : "#d3a6ff",
+    count: game.reduceMotion ? 3 : 9, size: 3, speed: 2.6, life: 16, star: true });
+  game.nums?.add?.(bx, p.y - 8, S.rollBounces === maxBounces ? "¡REBOTE FINAL!" : "¡REBOTE!", "#aaf5ff", false);
+  game.shake = Math.min(12, (game.shake || 0) + 2);
+} else if (wall) {
+  S.roll = 0;
+  p._stitchoRollBounces = S.rollBounces;
+  p.vx = -face * 2.5;
+  p.vy = Math.min(Number(p.vy) || 0, -2.2);
+} else {
+  p.vx = face * Math.max(9, p.speed * (steer ? 2.35 : 2.1));
+  p._stitchoRollBounces = S.rollBounces;
+  armor(p, 2);
+}
+if (S.roll <= 0) p._stitchoRollBounces = 0;
 }
 if (S.charge > 0) {
 S.charge--;
@@ -1161,10 +1193,13 @@ add({ kind: "burst", n: evo >= 3 ? 4 : 3, i: 0, gap: 5, next: 0 });
 momentCast(g, p, 0, evo); g.shake = Math.min(18, (g.shake || 0) + 2);
 },
 rollo(g, p, evo) {
-S.roll = 44 + evo * 5;
+S.roll = 54 + evo * 6;
+S.rollBounces = 0;
+S.rollLock = 0;
+p._stitchoRollBounces = 0;
 armor(p, 6);
 momentCast(g, p, 1, evo);
-boom(g, cx(p), p.y + p.h, "#5ad1ff", 10);
+boom(g, cx(p), p.y + p.h, "#5ad1ff", 12);
 },
 caos(g, p, evo) {
 S.caos = 120 + evo * 10;

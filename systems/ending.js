@@ -112,6 +112,7 @@ function showEnding(detail={}){
 
   function actor(p,x,footY,h,tf,opts={}){
     p.facing=opts.facing||1;p.grounded=opts.grounded!==false;p.vx=opts.vx||0;p.vy=opts.vy||0;p.melee=opts.melee||0;p._poseOverride=opts.pose||"idle";
+    if(p.id==='kilo'&&!reduce)p._kiloPerformance={kind:"dance",time:tf/60};
     ctx.save();if(opts.alpha!==undefined)ctx.globalAlpha*=opts.alpha;
     if(p.id==='chispin')drawChispaCeremony(ctx,x,footY,h,tf/60,reduce,'ending');
     drawDummy(ctx,p,x,footY,h/baseHeight(p.id,p.evo||0),tf);ctx.restore();

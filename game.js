@@ -667,6 +667,7 @@ game.experience?.reset();
 game.experience?.mount();
 game.player = makePlayer(def);
 if(def.id==='kilo')game.player._kiloEntranceAt=t;
+else game.player._ohanaEntranceAt=t;
 // Browser audits can pin a pair; normal play always invokes a surprise.
 game.player.uSurprise=!e2eEnabled;
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);

@@ -2064,3 +2064,8 @@ Esta entrega inicia el cierre por personaje. Chispa original y la reserva del je
 K sustituye el giro por 96 ticks de hula: cuatro pulsos a los ticks 24/48/72/96, reflejo continuo y un pétalo por defensa durante los primeros 12 ticks. Su círculo visible coincide con el radio real. La coreografía comparte pasos, transferencia de peso y manos articuladas entre las cinco formas, entrada jugable, intro y celebración. Entrada sin bloquear controles; victoria con mano al corazón y reverencia.
 
 Las cuatro evoluciones usan el actor real con altura propia, baile y fundido continuo entre formas, sin parpadeo ni fogonazo de pantalla. Los títulos distinguen ritmo, familia, guardiana y floración. Conserva el dúo U y el sistema de pétalos H/J→K/L.
+
+
+## Personajes 2–10 · Stitcho y la familia
+
+Stitcho estrena «Bola saltarina 626»: se guía con izquierda/derecha, rebota en paredes y plataformas con impulso y armadura, y las formas avanzadas admiten más rebotes. El rig gira más deprisa durante la bola y dibuja cada rebote; su evolución pasa de una forma a otra con fundido continuo, manteniendo la cápsula y el lenguaje alienígena. Los nueve personajes que faltaban reciben una breve entrada jugable con gestos propios de su kit; el retrato final mantiene las firmas de ataque, carrera y salto de cada héroe en movimiento. Chispín sigue reservado para el jefe del Mundo 2.

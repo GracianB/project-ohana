@@ -804,7 +804,9 @@ function drawGallop(ctx, R, pose, f, S, C) {
 function drawBall(ctx, R, pose, f, S, C, chaos = false) {
   const t = pose.t, r = S.egg ? 22 : 20 + f * 1.2;
   const moving = pose.state === "run" || pose.speed > 0.1;
-  const rot = t * (moving ? 0.35 : 0.5);
+  const inRoll = pose.move === "roll";
+  const bounceCount = Math.max(0, Number(pose.stitchoRollBounces) || 0);
+  const rot = pose.reduceMotion ? 0 : t * (inRoll ? 0.82 : moving ? 0.35 : 0.5) + bounceCount * 0.5;
   const cy = -r - (pose.state === "cast" ? Math.abs(Math.sin(pose.cast * Math.PI)) * 6 : 0);
   // estela
   ctx.save();
@@ -841,6 +843,17 @@ function drawBall(ctx, R, pose, f, S, C, chaos = false) {
       const a = t * 0.34 + i * (TAU / 4);
       const x = Math.cos(a) * (r + 6), y = cy + Math.sin(a) * (r + 6);
       zap(ctx, x, y, a + Math.PI / 2, 8 + (i % 2) * 3, i % 2 ? CYAN : "#d6a8ff", 2.2);
+    }
+    ctx.restore();
+  }
+  if (inRoll && bounceCount > 0) {
+    ctx.save();
+    ctx.globalAlpha = pose.reduceMotion ? 0.5 : 0.7;
+    ctx.strokeStyle = bounceCount % 2 ? CYAN : "#d6a8ff";
+    ctx.lineWidth = 1.8;
+    for (let i = 0; i < Math.min(3, bounceCount); i++) {
+      const a = -Math.PI * 0.8 + i * 0.34;
+      ctx.beginPath(); ctx.arc(0, cy, r + 7 + i * 4, a, a + 0.32); ctx.stroke();
     }
     ctx.restore();
   }

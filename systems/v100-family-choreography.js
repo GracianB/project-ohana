@@ -16,19 +16,20 @@ const REST=Object.freeze({pose:"idle",lift:0,grounded:true,melee:0,vx:0});
 const CHOSEN=Object.freeze({pose:"victory",lift:0,grounded:true,melee:0,vx:0});
 export function familyFinaleBeat(id,time,{reduced=false,chosen=false}={}){
  if(reduced)return chosen?CHOSEN:REST;
- if(chosen)return CHOSEN;
  const beat=FAMILY_ROSTER_V100[id];if(!beat)return REST;
  const t=Math.max(0,Math.min(360,Number.isFinite(time)?time:0));
  const wave=Math.sin(t*beat.tempo+beat.offset);
- const active=wave>.38;
+ const active=wave>(chosen ? 0.12 : 0.38);
  const jump=beat.pose==="jump";
  const attack=beat.pose==="attack";
  const running=beat.pose==="run";
  return {
-  pose:active?beat.pose:"idle",
-  lift:jump&&active?-Math.max(0,wave)*beat.amp:Math.sin(t*beat.tempo*.6+beat.offset)*beat.amp*.27,
+  // The lead pair keep their own signature move alive during the portrait;
+  // the rest of the family use the same move as a staggered entrance.
+  pose:active?beat.pose:chosen?"victory":"idle",
+  lift:jump&&active?-Math.max(0,wave)*beat.amp*(chosen?1.55:1):Math.sin(t*beat.tempo*.6+beat.offset)*beat.amp*.27,
   grounded:!(jump&&active),
-  melee:attack&&active?9:0,
-  vx:running&&active?1.8:0,
+  melee:attack&&active?(chosen?11:9):0,
+  vx:running&&active?(chosen?2.4:1.8):0,
  };
 }

@@ -1062,6 +1062,7 @@ q(pose.kiloWelcome?.wing,8),q(pose.kiloWelcome?.petals,8),
 q(pose.kiloWelcome?.breath,12),q(pose.kiloWelcome?.dragon,12),
 q(pose.kiloWelcome?.chase,12),q(pose.kiloWelcome?.yomi,12),
 q(pose.kiloWelcome?.dino,12),
+q(pose.stitchoRollBounces,1),
 // V351 Stitcho: native antenna, face, paws and tail need distinct live frames.
 pose.stitchoWelcome?.phase || "",q(pose.stitchoWelcome?.scout,12),
 q(pose.stitchoWelcome?.taunt,12),q(pose.stitchoWelcome?.curl,12),
@@ -1238,6 +1239,16 @@ if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
  else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
    pose.kiloPerformance={kind:'entrance',time:entry/60};
 }
+if(p.id!=='kilo'&&!p.dead&&!pose.reduceMotion&&pose.state==='idle'&&!moving&&!air){
+ const entry=t-(Number.isFinite(Number(p._ohanaEntranceAt))?Number(p._ohanaEntranceAt):-9999);
+ if(entry>=0&&entry<90){
+  const castSlots={stitcho:1,chispin:0,cat:1,dragon:1,dino:0,frita:0,pizza:1,yomi:2,cuerno:1};
+  const signatures={stitcho:'victory',chispin:'jump',cat:'run',dragon:'glide',dino:'victory',frita:'jump',pizza:'jump',yomi:'attack',cuerno:'victory'};
+  if(entry<20){pose.state='cast';pose.castSlot=castSlots[p.id]??0;pose.cast=Math.max(.08,entry/20);}
+  else if(entry<62){pose.state=signatures[p.id]||'victory';pose.cast=1;pose.atk=Math.max(pose.atk||0,(62-entry)/42);if(['jump','glide'].includes(pose.state))pose.air=true;}
+  else pose.state='victory';
+ }
+}
 if(p.id==='kilo'&&p._kiloDuetT>0){
  pose.kiloDuetAge=p._kiloDuetAge||0;
  if(!moving&&!air){pose.state='cast';pose.castSlot=pose.kiloDuetAge<30?0:2;}
@@ -1248,6 +1259,7 @@ if(p.id==='stitcho'&&p._stitchoDuetT>0){
  pose.stitchoDuetAge=p._stitchoDuetAge||0;
  if(pose.stitchoDuetAge>=30&&pose.stitchoDuetAge<102)pose.move='chaos';
 }
+if(p.id==='stitcho')pose.stitchoRollBounces=Math.max(0,Number(p._stitchoRollBounces)||0);
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
