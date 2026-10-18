@@ -1,4 +1,4 @@
-const POWERS = { j: 0, k: 1, l: 2, u: 3 };
+const POWERS = { j: 0, k: 1, l: 2, u: 3, i: 4, p: 5 };
 const MOVEMENT = new Set(["a", "d", "s", "w", " ", "arrowleft", "arrowright", "arrowup", "arrowdown"]);
 const ACTIONS = { h: "attack", f: "attack", shift: "dash", e: "interact", r: "respawn" };
 const LEFT_KEYS = new Set(["a", "arrowleft"]);

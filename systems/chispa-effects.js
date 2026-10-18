@@ -32,8 +32,8 @@ export function drawChispaStorm(ctx,f,cam,t,reduced=false){
   ctx.lineCap='round';ctx.lineJoin='round';
   const x=f.x-cam.x,y=f.y-cam.y,fade=Math.min(1,f.life/20),charge=unit((20-f.next)/20);
   ctx.globalAlpha*=fade;
-  if(f.forecast){
-   const p=f.forecast,px=p.x-cam.x,py=p.y2-cam.y;
+  for(const p of f.forecasts || (f.forecast?[f.forecast]:[])){
+   const px=p.x-cam.x,py=p.y2-cam.y;
    ctx.save();ctx.globalAlpha*=.28+charge*.25;ctx.strokeStyle='#f4d992';ctx.lineWidth=2;ctx.setLineDash([4,7]);
    ctx.beginPath();ctx.moveTo(px,p.y1-cam.y);ctx.lineTo(px,py);ctx.stroke();ctx.setLineDash([]);
    ctx.beginPath();ctx.ellipse(px,py,25,5,0,0,TAU);ctx.stroke();ctx.restore();

@@ -1,5 +1,5 @@
 import { strategicLedgesFor } from "./room-strategy.js";
-export const ROOM_W = 2240;
+export const ROOM_W = 3360;
 export const ROOM_H = 1260;
 
 function stairs(x) {
@@ -183,6 +183,25 @@ for (const room of Object.values(ROOMS)) {
     portal.x = portal.type === "catapult" ? floor[0] + 160 : floor[0] + Math.max(80, floor[2] - 280);
     portal.y = floor[1] - portal.h;
   }
+}
+
+// Widen routes without increasing vertical jumps. Pit mouths, portals and
+// rewards use the same transform so their interactions stay aligned.
+for(const room of Object.values(ROOMS)){
+ room.plats=room.plats.map(([x,y,w,h])=>[x*1.5,y,w*1.5,h]);
+ room.foes=room.foes.map(([x,y,...rest])=>[x*1.5,y,...rest]);
+ room.orbs=room.orbs.map(([x,y])=>[x*1.5,y]);
+ for(const portal of room.portals||[])portal.x*=1.5;
+ if(!room.boss){
+  const ledges=room.plats.filter(p=>p[3]<40&&p[1]>300&&p[1]<1000).sort((a,b)=>a[0]-b[0]);
+  for(const i of [1,Math.floor(ledges.length/2),ledges.length-1]){
+   const ledge=ledges[i];if(!ledge)continue;
+   const x=ledge[0]+ledge[2]/2,y=ledge[1]-45;
+   if(!room.orbs.some(o=>Math.hypot(o[0]-x,o[1]-y)<80))room.orbs.push([x,y]);
+  }
+  const perch=ledges.at(-2),kind=room.foes.at(-1)?.[2];
+  if(perch&&kind)room.foes.push([perch[0]+perch[2]/2,perch[1]-80,kind,true]);
+ }
 }
 
 function rrect(ctx, x, y, w, h, r) {

@@ -2073,3 +2073,14 @@ Las cuatro evoluciones usan el actor real con altura propia, baile y fundido con
 ## Personajes 2–10 · Stitcho y la familia
 
 Stitcho estrena «Bola saltarina 626»: se guía con izquierda/derecha, rebota en paredes y plataformas con impulso y armadura, y las formas avanzadas admiten más rebotes. El rig gira más deprisa durante la bola y dibuja cada rebote; su evolución pasa de una forma a otra con fundido continuo, manteniendo la cápsula y el lenguaje alienígena. Los nueve personajes que faltaban reciben una breve entrada jugable con gestos propios de su kit; el retrato final mantiene las firmas de ataque, carrera y salto de cada héroe en movimiento. Chispín sigue reservado para el jefe del Mundo 2.
+
+
+## ohana-436 · Ayudas de combate y nuevos poderes
+
+- U se desbloquea desde bebé: compañero invencible durante seis segundos, persigue enemigos y ataca en coordenadas del mundo. Rayos encadenados, láseres, ondas, proyectiles y bumeranes según compañero. Sustituye las antiguas U de estados y coreografías.
+- Stitcho L convoca naves según evolución y cura al acertar; Chispín L despliega varias descargas señaladas.
+- Cada héroe desbloquea I en forma 4 y P en forma 5, con daño real, enfriamiento y controles táctiles. K y L siguen desbloqueándose en formas 2 y 3.
+- Salas de 3360 × 1260: un 50 % más de recorrido horizontal, recompensas elevadas y un guardián élite adicional por sala normal.
+- Costa con montañas, cascadas y palmeras en la intro; islote enemigo con acantilado; evolución muestra el nuevo poder; jefe con plumaje y anticipación direccional.
+- Se mantiene Chispín redondo y Trueno Gordo. El diseño Kirin sigue reservado para M2.
+- Verificación: pruebas específicas de combate y salas, navegador con diez héroes y 160 fotogramas de evolución; comprobación móvil a 320/390 px. La batería histórica completa aún tiene contratos incompatibles con el rediseño de U/Chispín; esta entrega permanece en PR borrador.

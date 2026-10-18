@@ -1,3 +1,4 @@
+import {drawOhanaCoast,drawEnemyIslet} from './ohana-panorama.js';
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
@@ -338,6 +339,7 @@ export function playTitleIntro(options = {}) {
     grass.addColorStop(0,"rgba(35,82,60,.82)");
     grass.addColorStop(1,"rgba(7,20,19,.98)");
     c.fillStyle=grass;c.fillRect(0,floor-8,W,H-floor+8);
+    drawOhanaCoast(c,W,H,floor);
   }
   function island(t,L) {
     const {W,H,floor}=L;
@@ -769,7 +771,7 @@ export function playTitleIntro(options = {}) {
     // Their own tiny island: real enemy renderers, no AI, collision or campaign state.
     if(direction){
       const ex=L.W*.81,ey=L.H*.36,r=Math.min(125,Math.max(60,L.W*.11));
-      ctx.fillStyle="#d3c09b";ctx.beginPath();ctx.ellipse(ex,ey,r,r*.29,0,0,Math.PI*2);ctx.fill();
+      drawEnemyIslet(ctx,ex,ey,r,storyTime,reduce);
       for(let i=0;i<stageEnemies.length;i++){ctx.save();ctx.translate(ex+(i-1)*r*.54,ey-24);ctx.scale(.9,.9);drawEnemy(ctx,stageEnemies[i],{x:0,y:0},reduce?0:storyTime*60);ctx.restore();}
     }
     scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);

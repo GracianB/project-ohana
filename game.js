@@ -17,6 +17,7 @@ import { drawPaintedRoom } from "./worlds/painted-rooms.js";
 import { getLook, paintFit, PAINT_WORLD } from "./characters/look.js";
 import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { earnKiloPetal } from "./systems/kilo-rhythm.js";
+import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attacks.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
@@ -468,6 +469,8 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+game._evolutionAttacks = null;
+game._assist = null;
 // Hazards and movement debuffs from the previous room must not cross portals.
 // Blocked portals return above, so their traps and effects are untouched.
 clearStitchoWebs(game);
@@ -2860,7 +2863,7 @@ if (viewW >= 820) drawMinimap();
 function castPower(index) {
 const p = game.player;
 if (!p) return;
-const need = ["kilo","stitcho","chispin","cat"].includes(p.id)&&index===3?0:[0, 1, 2, 4][index] ?? 4;
+const need = POWER_LEVELS[index] ?? 4;
 if ((Number(p.evo) || 0) < need) {
 game.nums.add(p.x, p.y - 12, "FORMA " + (need + 1), "#fff6c8");
 return;
@@ -2877,18 +2880,19 @@ const bar = DOM.abilityBar;
 if (!bar || !game.player) return;
 const evo = Number(game.player.evo) || 0;
 const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
-slots.push({ id: "supreme", need: ["kilo","stitcho","chispin","cat"].includes(game.player.id)?0:4, supreme: true });
+slots.push(...[4,5].map(index=>({id:extraAbility(game.player.id,index).id,need:POWER_LEVELS[index],index})));
+slots.push({ id: "supreme", need: 0, supreme: true, index:3 });
 bar.innerHTML = slots.map((slot) => {
 const d = slot.supreme
   ? supremeOf(game.player.id)
-  : ABILITY_DEFS[slot.id];
+  : slot.index>3?extraAbility(game.player.id,slot.index):ABILITY_DEFS[slot.id];
 if (!d) return "";
 const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · L: " + (ally?.lName||"")) : d.name;
-return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name;
+return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
 slot, fill: slot.querySelector("i"), sec: slot.querySelector(".cd-sec")
@@ -3048,7 +3052,7 @@ const item = abilitySlots[i];
 const isSupreme = item.slot.dataset.supreme === "1";
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : item.slot.dataset.id;
-const def = isSupreme ? sup : ABILITY_DEFS[id];
+const def = powerAbility(p,Number(item.slot.dataset.index),ABILITY_DEFS,sup);
 if (!def || !item.fill) continue;
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
@@ -3059,20 +3063,20 @@ const sec = left > 80 ? (left / 1000).toFixed(1) : "";
 if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
 item.slot.classList.toggle("cooling", left > 80);
 }
-const PWIDX = { j: 0, k: 1, l: 2, u: 3 };
+const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for (let i = 0; i < touchPowers.length; i++) {
 const btn = touchPowers[i];
 const slotIndex = PWIDX[btn.dataset.k];
 const isSupreme = slotIndex === 3;
 const sup = isSupreme ? supremeOf(p.id) : null;
-const id = isSupreme ? sup.id : (p.abilities || [])[slotIndex];
-const def = isSupreme ? sup : (id && ABILITY_DEFS[id]);
+const id = isSupreme ? sup.id : slotIndex>3?extraAbility(p.id,slotIndex).id:(p.abilities || [])[slotIndex];
+const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-const locked = isSupreme && !["kilo","stitcho","chispin","cat"].includes(p.id) && (Number(p.evo) || 0) < 4;
+const locked = (Number(p.evo)||0)<POWER_LEVELS[slotIndex];
 btn.classList.toggle("off", locked);
-const title = locked ? "Forma 5 · Suprema U" : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
+const title = locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) + " · " + def.name : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
 if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
-const label = (locked ? "Forma 5" : def.name) + " · " + btn.dataset.k.toUpperCase();
+const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " · " + btn.dataset.k.toUpperCase();
 if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
@@ -3342,7 +3346,7 @@ abilityBar?.addEventListener("click", (ev) => {
 const slot = ev.target.closest(".ability-slot");
 if (!slot || !game.running || paused || overlayOpen()) return;
 ev.preventDefault();
-const idx = slot.dataset.supreme ? 3 : (game.player && game.player.abilities || []).indexOf(slot.dataset.id);
+const idx = Number(slot.dataset.index);
 if (idx >= 0) castPower(idx);
 });
 }
@@ -3560,7 +3564,7 @@ loadRoom(id) {
   return this.state();
 },
 cast(index) {
-  useAbility(game, Math.max(0, Math.min(3, Math.floor(Number(index) || 0))));
+  useAbility(game, Math.max(0, Math.min(5, Math.floor(Number(index) || 0))));
   return this.state();
 },
 setCombo(value) {

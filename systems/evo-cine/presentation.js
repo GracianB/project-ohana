@@ -1,3 +1,5 @@
+import {ABILITY_DEFS} from '../ability-catalog.js';
+import {extraAbility} from '../evolution-attacks.js';
 import {drawCharacter} from '../../characters/draw.js';
 import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
@@ -71,6 +73,9 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
    for(let i=0;i<=8;i++){const x=width*i/8,y=height*(.58+layer*.09)+Math.sin(i*1.3+layer)*height*.035;ctx.lineTo(x,y);}
    ctx.lineTo(width,height);ctx.closePath();ctx.fill();
   }
+  // Light opens behind the changing silhouette, never over its face.
+  ctx.save();ctx.translate(s.cx,s.foot-s.target*.45);ctx.globalAlpha=.08+s.reveal*.12;ctx.fillStyle=s.accent;
+  for(let i=0;i<12;i++){const a=i*TAU/12+(reduced?0:s.t*.08);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*width,Math.sin(a)*height);ctx.lineTo(Math.cos(a+.07)*width,Math.sin(a+.07)*height);ctx.fill();}ctx.restore();
   ctx.globalAlpha=.12+s.reveal*.13;
   motif(ctx,s.id,s.cx,s.foot-s.target*.5,s.target*.77,reduced?0:s.t,s.accent,reduced);
   ctx.globalAlpha=1;
@@ -90,6 +95,12 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
   for(let i=0;i<5;i++){ctx.fillStyle=i<=s.form?s.accent:'#264b4d';ctx.beginPath();ctx.arc(start+i*gap,height*.7,i===s.form?6:4,0,TAU);ctx.fill();}
   ctx.font=`500 ${Math.min(16,width*.04)}px Outfit, sans-serif`;ctx.fillStyle='#dce5cd';
   textLines(ctx,s.reveal>.5?s.message:'Una nueva fuerza está despertando…',s.cx,height*.77,Math.min(520,width-48),23);
+  const unlock=s.form<3?ABILITY_DEFS[def.abilities[s.form]]:extraAbility(s.id,s.form+1);
+  if(unlock&&s.reveal>.5){
+   ctx.globalAlpha=s.reveal;ctx.fillStyle='#071e2c';const cw=Math.min(430,width-32),cy=height*.89;
+   ctx.fillRect(s.cx-cw/2,cy-20,cw,40);ctx.strokeStyle=s.accent;ctx.lineWidth=1;ctx.strokeRect(s.cx-cw/2,cy-20,cw,40);
+   ctx.fillStyle=s.accent;ctx.font='700 '+Math.min(15,width*.034)+'px Outfit, sans-serif';ctx.fillText('NUEVO PODER · '+unlock.key+' · '+unlock.name,s.cx,cy);
+  }
  }finally{ctx.restore();}
  return s;
 }

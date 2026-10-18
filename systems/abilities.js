@@ -1,3 +1,4 @@
+import {POWER_LEVELS,powerAbility,castEvolutionAttack,summonDanceFleet,startBattleCompanion,updateEvolutionAttacks,drawEvolutionAttacks} from './evolution-attacks.js';
 import {earnKiloPetal,spendKiloPetals,drawKiloRhythm} from './kilo-rhythm.js';
 import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
 import {drawChispaStorm,drawChispaChain,drawChispaTrail} from "./chispa-effects.js";
@@ -36,7 +37,7 @@ import { ABILITY_DEFS } from "./ability-catalog.js";
 export { ABILITY_DEFS };
 
 
-const FLOW_KEYS = ["H", "J", "K", "L", "U"];
+const FLOW_KEYS = ["H", "J", "K", "L", "U", "I", "P"];
 const FLOW_WINDOW = 180;
 
 export function registerCombatAction(game, key, id = "") {
@@ -119,8 +120,7 @@ S.charge = Math.max(S.charge || 0, 72);
 armor(p, 10);
 } else if (p.id === "frita") {
 p._specialSpeedT = Math.max(p._specialSpeedT || 0, 96);
-p.invuln = Math.max(p.invuln || 0, 12+evo*2);
-p._chispaEvadeUntil=(Number(g.t)||0)+12+evo*2;
+p.invuln = Math.max(p.invuln || 0, 12+(Number(p.evo)||0)*2);
 } else if (p.id === "pizza") {
 p._specialBounceT = Math.max(p._specialBounceT || 0, 100);
 armor(p, 10);
@@ -145,13 +145,13 @@ return link;
 
 export function useAbility(game, index) {
 const p = game?.player;
-if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 3) return false;
+if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
 const supreme = index === 3 ? SUPREME[p.id] : null;
-const id = supreme ? supreme.id : p.abilities && p.abilities[index];
-const def = supreme || ABILITY_DEFS[id];
+const def = powerAbility(p,index,ABILITY_DEFS,supreme);
+const id = index>3 ? def?.id : supreme ? supreme.id : p.abilities && p.abilities[index];
 if (!def) return false;
 const fn = CASTERS[id];
-if (index !== 3 && typeof fn !== "function") return false;
+if (index < 3 && typeof fn !== "function") return false;
 const baseCd = Number(def.cd);
 if (!Number.isFinite(baseCd) || baseCd <= 0) return false;
 const now = abilityNow(game);
@@ -194,7 +194,8 @@ if(index===3&&p.uSurprise){p.uPartner=rollUPartner(p.id,game.uRandom||Math.rando
 const bondGain=gainUExp(p,index);
 if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 
-if (index === 3) castSupreme(game, p, flow);
+if (index > 3) castEvolutionAttack(game,index);
+else if (index === 3) castSupreme(game, p, flow);
 else if (!cuernoKey) fn(game, p, evo);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
@@ -229,11 +230,11 @@ dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: 
 frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
 pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
 yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
-cuerno:  { id: "aurora", name: "SUEÑO ARCOÍRIS", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
+cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
-return SUPREME[id] || SUPREME.kilo;
+return {...(SUPREME[id] || SUPREME.kilo),special:"Compañero invencible · 6 s",desc:"Disponible desde bebé. Tu compañero busca enemigos y ataca durante seis segundos."};
 }
 
 export function specialOf(id) {
@@ -340,6 +341,13 @@ game.nums?.add(cx(p), p.y - 36, "OHANA ASSIST · " + ally.name, ally.color || "#
 function castSupreme(game, p, flow = currentFlow(game, p)) {
 const chosen=chooseUPartner(p.id,p.uPartner);
 const personalPower=Math.max(1,Number(flow?.multiplier)||1)*pw(p)*uExpPower(p);
+// The guest now fights in world coordinates for its entire visit.
+if(startBattleCompanion(game,chosen,personalPower)){
+ game._supremeFlow=flow;game._specialName=SUPREME[p.id]?.name;
+ game.ult={t:0,name:SUPREME[p.id]?.name,color:SUPREME[p.id]?.color,flow:flow.label||'',assist:chosen};
+ game.nums?.add(cx(p),p.y-36,'¡'+(ROSTER.find(r=>r.id===chosen)?.name||chosen)+' AL RESCATE!',SUPREME[p.id]?.color,true);
+ return;
+}
 // Original four cinematic duets remain untouched when their canonical
 // companion is selected. A different choice runs the same playable L-loan
 // choreography as the six other heroes, without freezing player controls.
@@ -807,18 +815,20 @@ updateMichiDuet(game,hitEnemy);
 updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
+updateEvolutionAttacks(game,hitEnemy,healPlayer);
 if (S.stitchoDance > 0 && S.stitchoDanceAge > 0 && S.stitchoDanceAge % 24 === 0) {
 const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
 const heal = 3 + evo * 2, radius = 82 + evo * 12;
-healPlayer(p, heal);
+let danceHits=0;
 for (const e of game.enemies || []) {
   if (!canHit(e) || Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > radius + Math.max(e.w, e.h) * .35) continue;
   const face = Math.sign(cx(e) - cx(p)) || p.facing || 1;
-  hitEnemy(game, e, (8 + evo * 2) * pw(p), { kx: face * 3.5, ky: -2.5, stun: 14, color: "#b7a1ff", parts: 5, shake: 1, hitstop: 0 });
+  if(hitEnemy(game, e, (8 + evo * 2) * pw(p), { kx: face * 3.5, ky: -2.5, color: "#b7a1ff", parts: 5, shake: 1, hitstop: 0 }))danceHits++;
 }
+if(danceHits)healPlayer(p,heal);
 game.fx?.emit?.(cx(p), cy(p), { color: S.stitchoDanceAge % 48 ? "#8eeeff" : "#d6a8ff",
   count: game.reduceMotion ? 3 : 8, size: 3, speed: 1.9, life: 16, star: true });
-game.nums?.add?.(cx(p), p.y - 44, "¡BAILE 626!  +" + heal, "#c7b8ff", false);
+game.nums?.add?.(cx(p), p.y - 44, danceHits ? "¡BAILE 626! +" + heal : "¡FLOTA 626!", "#c7b8ff", false);
 }
 if (S.charge > 0) {
 const dino = p.id === "dino";
@@ -902,6 +912,7 @@ if (p.id === "dino") {
 if (S.gallop > 0 && p.id==="cuerno")drawCuernoGallopRibbons(ctx,p,cam,t,S.gallop);
 if (p.id==="cuerno")drawCuernoFantasyStatus(ctx,game.enemies,cam,game.t||t,!!game.reduceMotion);
 drawCastSignature(ctx, p, cam, t);
+drawEvolutionAttacks(ctx,game,cam,t,drawCharacter,ROSTER);
 }
 
 function drawCastSignature(ctx, p, cam, t) {
@@ -1210,6 +1221,7 @@ momentCast(g, p, 1, evo);
 boom(g, cx(p), p.y + p.h, "#5ad1ff", 12);
 },
 caos(g, p, evo) {
+summonDanceFleet(g);
 S.stitchoDance = 108 + evo * 6;
 S.stitchoDanceAge = 0;
 p._stitchoDanceT = S.stitchoDance;
@@ -1271,7 +1283,7 @@ storm(g, p, evo) {
 // One sanctuary at a time: recasting replaces the previous field.
 for(let i=FX.length-1;i>=0;i--)if(FX[i].kind==='storm')FX.splice(i,1);
 const tuning=chispaKit(evo);
-add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
+add({ kind: "storm", x: cx(p), y: p.y - 140, life: 180 + evo * 20, maxLife:180 + evo * 20, next: 12, interval:tuning.interval, count:1+evo, bolts: [], dmg: tuning.storm * pw(p), vx: 0 });
 boom(g, cx(p), p.y - 60, "#9cf", 10);
 },
 
@@ -1960,29 +1972,27 @@ for (const b of f.bolts) b.life--;
 f.bolts = f.bolts.filter((b) => b.life > 0);
 f.next--;
 if(f.next===7&&f.life>15){
- const bx=e&&chispaMarked(e,Number(g.t)||0)?cx(e):f.x+(gameRand(g)-.5)*30;
- const ground=groundBelow(g,bx,f.y+20);
- f.forecast={x:bx,y1:f.y+16,y2:ground===null?f.y+400:ground};
+ const list=(g.enemies||[]).filter(en=>canHit(en)&&Math.hypot(cx(en)-f.x,cy(en)-f.y)<800).sort((a,b)=>Math.abs(cx(a)-f.x)-Math.abs(cx(b)-f.x));
+ f.forecasts=Array.from({length:f.count||1},(_,i)=>{
+  const target=list[i],bx=target?cx(target):f.x+(i-((f.count||1)-1)/2)*76;
+  const ground=groundBelow(g,bx,f.y+20),y1=target?Math.min(f.y+16,target.y-90):f.y+16;
+  return {x:bx,y1,y2:Math.max(ground??f.y+400,target?target.y+target.h+12:y1+120)};
+ });
+ f.forecast=f.forecasts[0];
 }
 if (f.next <= 0 && f.life > 8) {
-  f.next = f.interval||20;
-  const bx = f.forecast?.x ?? f.x;
-  let by = f.forecast?.y2 ?? groundBelow(g,bx,f.y+20);
-  if(by===null)by=f.y+400;
-  delete f.forecast;
-  let struck = false;
-  for (const en of g.enemies) {
-    if (!canHit(en)) continue;
-    if (Math.abs(cx(en) - bx) < 28 + en.w / 2 && en.y + en.h > f.y && en.y < by) {
-      const marked=chispaMarked(en,Number(g.t)||0);
-      hitEnemy(g, en, f.dmg*(marked?1.2:1), { ky: -3, stun: marked?34:26, color: "#b9efff" });
-      if(marked)en._chispaMarkUntil=0;
-      struck = true;
-    }
+ f.next=f.interval||20;
+ const forecasts=f.forecasts||[f.forecast||{x:f.x,y1:f.y+16,y2:f.y+400}],hit=new Set();
+ for(const b of forecasts){
+  for(const en of g.enemies||[]){
+   if(!canHit(en)||hit.has(en)||Math.abs(cx(en)-b.x)>28+en.w/2||en.y+en.h<b.y1||en.y>b.y2)continue;
+   hit.add(en);hitEnemy(g,en,f.dmg,{ky:-3,color:'#fff18b',hitstop:0});
   }
-  f.bolts.push({ x: bx, y1: f.y + 16, y2: by, life: 10 });
-  g.fx.emit(bx, by, { color: "#fff6a0", count: 8, size: 3, up: 1.6, speed: 3, star: true });
-  g.shake = Math.min(16, (g.shake || 0) + (struck ? 5 : 2));
+  f.bolts.push({...b,life:10});
+  g.fx?.emit?.(b.x,b.y2,{color:'#fff6a0',count:5,size:3,up:1.6,speed:3,star:true});
+ }
+ delete f.forecast;delete f.forecasts;
+ g.shake=Math.min(10,(g.shake||0)+(hit.size?3:1));
 }
 return f.life > 0;
 },

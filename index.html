@@ -8,26 +8,26 @@
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="fonts.css?v=ohana-435">
-  <link rel="stylesheet" href="style.css?v=ohana-435">
-  <link rel="stylesheet" href="title-stage.css?v=ohana-435">
-  <link rel="stylesheet" href="atrium-interact.css?v=ohana-435">
-  <link rel="stylesheet" href="hud.css?v=ohana-435">
-  <link rel="stylesheet" href="evo.css?v=ohana-435">
-  <link rel="stylesheet" href="ending.css?v=ohana-435">
-  <link rel="stylesheet" href="intro.css?v=ohana-435">
-  <link rel="stylesheet" href="demo.css?v=ohana-435">
-  <link rel="stylesheet" href="experience.css?v=ohana-435">
-  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-435">
-  <link rel="stylesheet" href="supreme.css?v=ohana-435">
-  <link rel="stylesheet" href="world-map.css?v=ohana-435">
-  <link rel="stylesheet" href="mobile-v96.css?v=ohana-435">
-  <link rel="stylesheet" href="v100-special.css?v=ohana-435">
-  <link rel="stylesheet" href="v100-2.css?v=ohana-435">
-  <link rel="stylesheet" href="v101-milestones.css?v=ohana-435">
-  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-435">
-  <link rel="stylesheet" href="family-camp.css?v=ohana-435">
-  <link rel="stylesheet" href="play-interface.css?v=ohana-435">
+  <link rel="stylesheet" href="fonts.css?v=ohana-436">
+  <link rel="stylesheet" href="style.css?v=ohana-436">
+  <link rel="stylesheet" href="title-stage.css?v=ohana-436">
+  <link rel="stylesheet" href="atrium-interact.css?v=ohana-436">
+  <link rel="stylesheet" href="hud.css?v=ohana-436">
+  <link rel="stylesheet" href="evo.css?v=ohana-436">
+  <link rel="stylesheet" href="ending.css?v=ohana-436">
+  <link rel="stylesheet" href="intro.css?v=ohana-436">
+  <link rel="stylesheet" href="demo.css?v=ohana-436">
+  <link rel="stylesheet" href="experience.css?v=ohana-436">
+  <link rel="stylesheet" href="cinematic-ui.css?v=ohana-436">
+  <link rel="stylesheet" href="supreme.css?v=ohana-436">
+  <link rel="stylesheet" href="world-map.css?v=ohana-436">
+  <link rel="stylesheet" href="mobile-v96.css?v=ohana-436">
+  <link rel="stylesheet" href="v100-special.css?v=ohana-436">
+  <link rel="stylesheet" href="v100-2.css?v=ohana-436">
+  <link rel="stylesheet" href="v101-milestones.css?v=ohana-436">
+  <link rel="stylesheet" href="v106-memory-museum.css?v=ohana-436">
+  <link rel="stylesheet" href="family-camp.css?v=ohana-436">
+  <link rel="stylesheet" href="play-interface.css?v=ohana-436">
   <title>PROJECT OHANA — Isla Hoku · Gracián Baena</title>
   <meta name="description" content="Project Ohana. Diez personajes, cinco formas, diez salas, un nido. Juega en el navegador.">
   <meta name="author" content="Gracián Baena">
@@ -129,7 +129,7 @@
     <span><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd> poderes · <kbd>U</kbd> suprema</span>
   </div>
   <div id="ability-bar" role="group" aria-label="Habilidades"></div>
-  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="Área de juego. WASD o flechas para moverse; W, flecha arriba o espacio para saltar. Puedes mantener dirección mientras saltas. H ataca, J K L usan poderes, U activa la suprema y E interactúa."></canvas>
+  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="Área de juego. WASD o flechas para moverse; W, flecha arriba o espacio para saltar. Puedes mantener dirección mientras saltas. H ataca, J K L I P usan poderes, U activa la suprema y E interactúa."></canvas>
   <div id="touch" role="group" aria-label="Controles táctiles">
     <div class="col move">
       <button class="touch-btn" data-k="a" aria-label="Izquierda">◀</button>
@@ -142,6 +142,8 @@
         <button class="touch-btn pw" data-k="j" aria-label="Poder J">J</button>
         <button class="touch-btn pw" data-k="k" aria-label="Poder K">K</button>
         <button class="touch-btn pw" data-k="l" aria-label="Poder L">L</button>
+        <button class="touch-btn pw" data-k="i" aria-label="Poder I">I</button>
+        <button class="touch-btn pw" data-k="p" aria-label="Poder P">P</button>
         <button class="touch-btn pw special-u" data-k="u" aria-label="Suprema U" title="Suprema U">U</button>
       </div>
       <div class="act-row main">
@@ -232,7 +234,7 @@
       <h2 id="help-title">Tu aventura empieza aquí</h2>
       <p class="help-lead">Explora Isla Hoku, haz crecer a tu héroe y reúne fuerzas para enfrentarte a la Reina del Nido.</p>
       <ol class="help-steps"><li><em>01</em><strong>Explora</strong><p>Salta entre plataformas y busca caminos nuevos. El mapa te muestra cómo conectar cada lugar.</p></li><li><em>02</em><strong>Evoluciona</strong><p>Reúne cristales y derrota enemigos para ganar XP. Tu héroe cambia de forma automáticamente.</p></li><li><em>03</em><strong>Haz equipo</strong><p>Usa tus poderes y llama a un compañero con U. Cada invitado tiene su propia entrada en escena.</p></li></ol>
-      <div class="help-controls"><div><kbd>A D / ← →</kbd> Mover</div><div><kbd>W / Espacio / ↑</kbd> Saltar</div><div><kbd>S / ↓</kbd> Bajar de una plataforma</div><div><kbd>Shift</kbd> Dash · esquivar</div><div><kbd>H / F</kbd> Golpe cercano</div><div><kbd>J K L</kbd> Poderes del héroe</div><div><kbd>U</kbd> Compañero sorpresa</div><div><kbd>E</kbd> Usar catapulta</div><div><kbd>M</kbd> Mapa · <kbd>B</kbd> Álbum</div><div><kbd>Esc</kbd> Pausa</div></div>
+      <div class="help-controls"><div><kbd>A D / ← →</kbd> Mover</div><div><kbd>W / Espacio / ↑</kbd> Saltar</div><div><kbd>S / ↓</kbd> Bajar de una plataforma</div><div><kbd>Shift</kbd> Dash · esquivar</div><div><kbd>H / F</kbd> Golpe cercano</div><div><kbd>J K L I P</kbd> Poderes del héroe</div><div><kbd>U</kbd> Compañero sorpresa</div><div><kbd>E</kbd> Usar catapulta</div><div><kbd>M</kbd> Mapa · <kbd>B</kbd> Álbum</div><div><kbd>Esc</kbd> Pausa</div></div>
       <p class="help-footnote">En móvil, usa los botones de pantalla. Jungla se abre en la forma 3; Caldera y Nido, en la forma 4. <kbd>R</kbd> te devuelve al Claro. Los vórtices se activan al entrar en su campo.</p>
       <button type="button" id="btn-close-help" class="cta ghost">Cerrar ayuda</button>
     </div>
@@ -253,7 +255,7 @@
       <p id="pause-hero" class="pause-hero"></p>
       <section class="pause-mission" aria-label="Tu siguiente paso"><span>SIGUIENTE PASO</span><p id="pause-objective"></p></section>
       <dl class="pause-stats"><div><dt>Forma</dt><dd id="pause-form">1 / 5</dd></div><div><dt>Exploración</dt><dd id="pause-journey">1 / 10</dd></div><div><dt>Puntos</dt><dd id="pause-score">0</dd></div></dl>
-      <div class="pause-controls"><span><kbd>H</kbd> Golpe</span><span><kbd>J K L</kbd> Poderes</span><span><kbd>U</kbd> Sorpresa Ohana</span><span><kbd>M</kbd> Mapa</span></div>
+      <div class="pause-controls"><span><kbd>H</kbd> Golpe</span><span><kbd>J K L I P</kbd> Poderes</span><span><kbd>U</kbd> Sorpresa Ohana</span><span><kbd>M</kbd> Mapa</span></div>
       <fieldset class="pause-settings"><legend>A tu ritmo</legend><label for="pause-music">Música <output id="pause-music-value" for="pause-music">100%</output></label><input id="pause-music" type="range" min="0" max="100" step="5" value="100"><label class="pause-gentle" for="pause-gentle"><input id="pause-gentle" type="checkbox">Movimiento suave <small>Menos sacudidas y números estables</small></label></fieldset>
       <button type="button" id="btn-resume" class="cta primary">Seguir</button>
       <button type="button" id="btn-quit" class="cta ghost">Menú</button>
@@ -262,16 +264,16 @@
   <div id="win-cinema" data-dialog="show" role="dialog" aria-modal="true" aria-labelledby="win-title" aria-hidden="true"></div>
   <div id="evo-stage" data-dialog="show" role="dialog" aria-modal="true" aria-label="Evolución del personaje" aria-hidden="true"></div>
   <div id="notification-container" role="status" aria-live="polite"></div>
-  <script type="module" src="systems/cinema-loader.js?v=ohana-435"></script>
-  <script type="module" src="game.js?v=ohana-435"></script>
-  <script type="module" src="systems/title.js?v=ohana-435"></script>
-  <script type="module" src="systems/world-cinema.js?v=ohana-435"></script>
-  <script type="module" src="systems/cinematic-director.js?v=ohana-435"></script>
-  <script type="module" src="systems/demo.js?v=ohana-435"></script>
+  <script type="module" src="systems/cinema-loader.js?v=ohana-436"></script>
+  <script type="module" src="game.js?v=ohana-436"></script>
+  <script type="module" src="systems/title.js?v=ohana-436"></script>
+  <script type="module" src="systems/world-cinema.js?v=ohana-436"></script>
+  <script type="module" src="systems/cinematic-director.js?v=ohana-436"></script>
+  <script type="module" src="systems/demo.js?v=ohana-436"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./sw.js?v=ohana-435", { scope: "./" }).catch(function (error) {
+        navigator.serviceWorker.register("./sw.js?v=ohana-436", { scope: "./" }).catch(function (error) {
           console.error("OHANA service worker:", error);
         });
       });

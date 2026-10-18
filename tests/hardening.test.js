@@ -857,10 +857,10 @@ test("V48 signature U uses ten real storyboards and stays regression-protected",
   const html = fs.readFileSync("./index.html", "utf8");
   const sw = fs.readFileSync("./sw.js", "utf8");
   const visual = fs.readFileSync("./tests/browser/visual-regression.mjs", "utf8");
-  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3 \}/);
+  assert.match(game, /PWIDX = \{ j: 0, k: 1, l: 2, u: 3, i:4, p:5 \}/);
   assert.match(game, /registerCombatAction\(game, "H"/);
-  assert.match(game, /Math\.min\(3, Math\.floor/);
-  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U"\]/);
+  assert.match(game, /Math\.min\(5, Math\.floor/);
+  assert.match(abilities, /FLOW_KEYS = \["H", "J", "K", "L", "U", "I", "P"\]/);
   assert.match(abilities, /kind: "supremeField"/);
   assert.match(abilities, /kind: "assist"/);
   assert.match(abilities, /CustomEvent\("ohana-supreme"/);
