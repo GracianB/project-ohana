@@ -452,7 +452,13 @@ try {
       for(const id of ['yarn','purr','ninetails'])g.player.cds[id]=0;
       for(const index of [0,1,2])if(!useAbility(g,index))
         throw Error('Michi cast failed slot '+index+' evo '+g.player.evo);
-      updateAbilityFx(g);onlineCoop.sendPeerEffects(g,true);
+      updateAbilityFx(g);
+      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+      const sample=capturePeerEffects(g,onlineCoop.effectSequence+1,onlineCoop.combatEpoch);
+      if(!['yarn','purr','wisp'].every(kind=>sample.michiFx.some(f=>f.kind===kind)))
+        throw Error('Michi source J/K/L FX incomplete '+JSON.stringify(sample.michiFx));
+      onlineCoop.lastEffectsSentAt=0;
+      if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
     });
     await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
     assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);

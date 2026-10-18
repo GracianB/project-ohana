@@ -1,3 +1,7 @@
+## ohana-449 · Michi y Chispín: FX J/K/L fiables sin tráfico periódico adicional
+
+Las ráfagas cosméticas de tres habilidades pueden ser sustituidas en el canal latest antes de la recepción, también con Michi. Se añade la segunda firma real yarn/purr/wisp al envío fiable de eventos únicamente cuando se envía un combo completo forzado. El canal normal a 5 Hz continúa ligero. Nueva prueba Node pierde el canal rápido, valida la llegada por el fiable, rechaza daño remoto y verifica que los combos parciales no activan el canal fiable; el navegador confirma las tres FX en el motor de origen y luego en el invitado.
+
 ## ohana-448 · Chispín J/K/L coherente en WebRTC
 
 El test real de Chispín puede perder la única ráfaga simultánea si el canal latest sobrescribe el paquete antes de entregarlo. Al forzar un lanzamiento completo J/K/L, las tres FX validadas y cosméticas se envían también una vez por el canal fiable de eventos WebRTC; no se añade tráfico HTTP ni se duplican las actualizaciones periódicas. Test Node verifica la entrega fiable cuando falla la vía rápida, ausencia de daño remoto, y coste normal de FX parciales. El test navegador comprueba la presencia real de los tres efectos en origen y en el cliente remoto.

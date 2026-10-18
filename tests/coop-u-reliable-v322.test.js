@@ -139,3 +139,27 @@ test("V448 · native Chispin J/K/L visual trio survives loss of latest WebRTC fr
  assert.equal(sendPeerEffectsWithReliableDuet(partial,{...frame,chispinFx:frame.chispinFx.slice(0,2)},true),true);
  assert.deepEqual(partial.sent.map(x=>x.mode),["fast"],"ordinary casts do not spam reliable channel");
 });
+
+test("V449 · real Michi J/K/L FX survive a dropped quick WebRTC frame without transferring damage",()=>{
+ const g={roomId:"hub",michiAbilityFx:[
+  {kind:"yarn",life:60,x:100,y:110,vx:12,vy:0,dmg:75},
+  {kind:"purr",life:45,R:112,dmg:250},
+  {kind:"wisp",life:80,x:155,y:160,vx:-1,vy:2,target:{hp:25}}],
+  projectiles:[],slashes:[],bolts:[]};
+ const frame=capturePeerEffects(g,11,"cat-v449");
+ assert.deepEqual(frame.michiFx.map(f=>f.kind),["yarn","purr","wisp"]);
+ const wire=transport(false,true);
+ assert.equal(sendPeerEffectsWithReliableDuet(wire,frame,true),true);
+ assert.deepEqual(wire.sent.map(e=>e.mode),["fast","reliable"]);
+ const client={roomId:"hub",coopPeerEffects:null,enemies:[{hp:220}]};
+ assert.equal(applyPeerEffects(client,wire.sent[1].payload),true);
+ assert.deepEqual(client.coopPeerEffects.michiFx.map(f=>f.kind),["yarn","purr","wisp"]);
+ assert.equal(client.enemies[0].hp,220);
+ assert.ok(client.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined));
+ const ordinary=transport();
+ sendPeerEffectsWithReliableDuet(ordinary,frame,false);
+ assert.deepEqual(ordinary.sent.map(e=>e.mode),["fast"]);
+ const partial=transport();
+ sendPeerEffectsWithReliableDuet(partial,{...frame,michiFx:frame.michiFx.slice(0,2)},true);
+ assert.deepEqual(partial.sent.map(e=>e.mode),["fast"]);
+});
