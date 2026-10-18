@@ -4,6 +4,7 @@ import {ROOMS} from '../systems/map.js';
 import {localMapView} from '../systems/local-map.js';
 import {companionGoal} from '../systems/evolution-attacks.js';
 import {campaignVolley} from '../systems/campaign-enemies.js';
+import {directEnemyEncounter} from '../systems/enemy-director.js';
 
 test('V440 campaign sectors vary their platforms and preserve ground routes',()=>{
  const r=ROOMS.beach;
@@ -47,4 +48,10 @@ test('V440 shooter and gunner use different deterministic telegraphed volleys',(
  assert.ok(aimed[0].vx>0);
  assert.ok(fan[0].vy<fan[1].vy&&fan[1].vy<fan[2].vy);
  for(const bolt of [...aimed,...fan])assert.ok(Number.isFinite(bolt.vx)&&Number.isFinite(bolt.vy));
+});
+test('V440 late zones coordinate three telegraphed threats without overwhelming the hub',()=>{
+ const foes=Array.from({length:4},(_,i)=>({kind:'cucaracho',spawnIndex:i,x:160+i*90,y:920,w:35,h:35,hp:40,max:40,aggro:60}));
+ const player={x:330,y:920,w:40,h:48};
+ assert.equal(directEnemyEncounter(foes,player,'hub',200).budget,1);
+ assert.equal(directEnemyEncounter(foes,player,'lab',200).budget,3);
 });
