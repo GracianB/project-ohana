@@ -48,7 +48,7 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
  menu.querySelector('.hero-stage').before(host);
 const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('#camp-route').after(powers);
  let selected=menu.dataset.hero||'kilo',form=0,film=null,last=0,time=0,raf=0,view={scale:1,x:0};
- let cursor={x:CAMP_HEROES[selected].x,y:CAMP_HEROES[selected].y+40},target={...cursor};const keys=new Set();
+ let cursor={x:CAMP_HEROES[selected].x,y:CAMP_HEROES[selected].y+40},target={...cursor};const keys=new Set();let walkSelectionLatched=false;
  const canvas=host.querySelector('#camp-canvas'),ctx=canvas.getContext('2d');const portrait=host.querySelector('#camp-portrait'),pc=portrait.getContext('2d');
  const scenery=doc.createElement('canvas');scenery.width=1400;scenery.height=660;island(scenery.getContext('2d'),0,true);
  const idleActors=new Map();
@@ -70,15 +70,19 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  $('camp-start').onclick=()=>onBegin();
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});
- canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();keys.add(e.key.toLowerCase());}});
- canvas.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(!keys.size)target={...cursor};});canvas.addEventListener('blur',()=>keys.clear());
+ canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();if(!keys.size)walkSelectionLatched=false;keys.add(e.key.toLowerCase());}});
+ canvas.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(!keys.size)target={...cursor};});canvas.addEventListener('blur',()=>{keys.clear();walkSelectionLatched=false;target={...cursor};});
  function paint(now){raf=0;if(!menuPaintAllowedInDocument(doc)){last=0;return;}if(last&&now-last<50){raf=requestAnimationFrame(paint);return;}
  const dt=last?Math.min(.08,(now-last)/1000):0;last=now;time+=dt;const reduce=reducedMotion(),width=canvas.clientWidth,height=canvas.clientHeight,dpr=Math.min(devicePixelRatio||1,1.5);
  if(canvas.width!==Math.round(width*dpr)||canvas.height!==Math.round(height*dpr)){canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);}
  const desired=campViewport(width,height,selected);view.scale=desired.scale;view.x=reduce?desired.x:view.x+(desired.x-view.x)*Math.min(1,dt*5);
- if(keys.size){const dx=(keys.has('arrowright')||keys.has('d')?1:0)-(keys.has('arrowleft')||keys.has('a')?1:0),dy=(keys.has('arrowdown')||keys.has('s')?1:0)-(keys.has('arrowup')||keys.has('w')?1:0);target={x:Math.max(140,Math.min(1230,cursor.x+dx*200)),y:Math.max(190,Math.min(540,cursor.y+dy*200))};}
+ if(keys.size&&!walkSelectionLatched){const dx=(keys.has('arrowright')||keys.has('d')?1:0)-(keys.has('arrowleft')||keys.has('a')?1:0),dy=(keys.has('arrowdown')||keys.has('s')?1:0)-(keys.has('arrowup')||keys.has('w')?1:0);target={x:Math.max(140,Math.min(1230,cursor.x+dx*200)),y:Math.max(190,Math.min(540,cursor.y+dy*200))};}
  const distance=Math.hypot(target.x-cursor.x,target.y-cursor.y),step=Math.min(distance,dt*250);if(distance){cursor.x+=(target.x-cursor.x)/distance*step;cursor.y+=(target.y-cursor.y)/distance*step;}
- const near=campNearest(cursor.x,cursor.y-35,72);if(near&&near!==selected&&(keys.size>0||distance<20))selectHero(near,true);
+ const near=campNearest(cursor.x,cursor.y-35,72);
+ if(near&&near!==selected&&!walkSelectionLatched&&(keys.size>0||distance<20)){
+  selectHero(near,true);
+  if(keys.size){walkSelectionLatched=true;target={...cursor};}
+ }
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
  for(const def of ROSTER){const p=CAMP_HEROES[def.id],hot=def.id===selected,beat=film?.id===def.id?campPresentation(def.id,time-film.start):null;
  ellipse(ctx,p.x,p.y+4,hot?50:35,12,hot?'#fff5c066':'#425f5029');

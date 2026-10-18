@@ -14,14 +14,14 @@ export function updateCampaignExploration(g){
  for(const b of state.branches){
   const pl=b.platform,old=pl.y;pl.y=b.baseY-Math.max(0,Math.sin(t*.012+b.phase))*220;
   if(p.grounded&&p.x+p.w>pl.x&&p.x<pl.x+pl.w&&Math.abs(p.y+p.h-old)<3)p.y+=pl.y-old;
-  g.secrets||={};const found=g.secrets[r.id]||=[];b.found=found.includes(b.id);
+  g.secrets||={};const found=(g.secrets[r.id]||=[]);b.found=found.includes(b.id);
   if(!b.found&&Math.hypot(p.x+p.w/2-b.x,p.y+p.h/2-b.y)<55){
    found.push(b.id);b.found=true;g.score=(g.score||0)+450;p.xp=(p.xp||0)+18;g.nums?.add?.(b.x,b.y-30,'SECRETO · +450','#fff1a6',true);g.save?.();
   }
  }
  // Reaching the far side opens a permanent high return route for this run/save.
  const key=`${r.id}-shortcut`;
- if(p.x>r.width-240&&!state.shortcut){const found=g.secrets[r.id]||=[];if(!found.includes(key))found.push(key);}
+ if(p.x>r.width-240&&!state.shortcut){g.secrets||={};const found=(g.secrets[r.id]||=[]);if(!found.includes(key))found.push(key);}
  if(!state.shortcut&&g.secrets?.[r.id]?.includes(key)){
   state.shortcut=true;for(let x=3500;x<r.width-250;x+=340)g.platforms.push({x,y:654,w:300,h:22,_campaignReturn:true});
   for(let y=1054;y>=654;y-=80)g.platforms.push({x:r.width-400,y,w:240,h:22,_campaignReturn:true});
