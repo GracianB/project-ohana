@@ -1,4 +1,4 @@
-const VERSION = "ohana-440";
+const VERSION = "ohana-441";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -288,7 +288,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/campaign-exploration.js": "125594ff1a104ad86e475f3df5de9d129e11672f",
+  "systems/campaign-exploration.js": "1c0c1988b25161a2668d84befba97cf7327e7aa8",
   "systems/campaign-layout.js": "b83612426ae2976b0cb39b952293a9078a013d01",
   "systems/local-map.js": "e1f5eb0ece990c3550a0caa7eb6d54bbc430c6e1",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
@@ -300,10 +300,10 @@ const PRECACHE_REVISIONS = {
   "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
   "worlds/nest-sanctuary.js": "52360cb2eb2d50e4020f8453dbe6a67546465f3d",
   "characters/power-performance.js": "f9fa8881f0fab333ff883a8134a51c9bd41d49b2",
-  "systems/room-adventures.js": "64dc29e6d7f64a7522a0c7aa88d4de5cc7008e8a",
+  "systems/room-adventures.js": "fc7002cddda5d234b73550615c16e2f43619b930",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
-  "systems/evolution-attacks.js": "6d6251a7bd52b9355db55ad41aa5367b291f11d0",
+  "systems/evolution-attacks.js": "d0e44941112c3ee631759458f02a1ad08ccfd242",
   "systems/ohana-panorama.js": "656a7be154959ea303db6d089548897c2c5d919d",
   "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
@@ -325,13 +325,13 @@ const PRECACHE_REVISIONS = {
   "engine/camera.js": "60f73d8a4b8a66d8e0f6a4548c8bbf30f48a980c",
   "systems/welcome-story.js": "019b53b2931588c7b5ee0c5f4fd5307081372e33",
   "family-camp.css": "5e107cb7d8c96964f4e1c65dc6e62767634bfebf",
-  "systems/family-camp.js": "e41996809e4f859a0978d1824870e4e2abda5d1a",
+  "systems/family-camp.js": "2f719f3078239b5388ac3842b453e9ccf7f63420",
   "systems/family-camp-model.js": "79da23cb6cd3210a4f5d7d55e792147dfc63c4bf",
   "systems/evo-cine/real-actor.js": "5adcb1dfc4015eb7bedc41c5303cc7961a4c6fda",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "baa3ffbdf763feb0f7200d760e70fc57eede260a",
+  "index.html": "9effcfebebf13638cf5364919024b33ec541a848",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",

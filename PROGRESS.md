@@ -1,3 +1,7 @@
+## ohana-441 · Mundo con mecanismos, U reactiva y desafíos tácticos
+
+Corrección de navegación de luciérnaga por pulsación en el campamento y guardado persistente de secretos. Dos mecanismos por bioma con acciones distintas, castigos anunciados con nuevas combinaciones de especies, enemigos de retos con roles tácticos y ecos de pareja U que reaccionan a J/K/L/I/P con límite de frecuencia. No fusionar ni publicar hasta superar las validaciones de navegador, cooperativo y V1.
+
 ## ohana-440 · Pulido jugable y atlas del Mundo 1 (PR #384, borrador)
 
 Diseño de sectores con menos plataformas repetidas, cartografía local del terreno, atlas ilustrado de diez biomas, acompañantes U animados que persiguen y se posicionan, patrones de disparo propios para artilleros y tiradores. Versión de desarrollo sin desplegar. La revisión de cooperativo, balance y sesiones completas sigue pendiente.

@@ -62,10 +62,22 @@ export function companionGoal(ally,hero,target=null,tick=0,reduced=false){
  const q=center(target),dir=Math.sign(q.x-ally.x)||face;
  return {x:q.x-dir*52,y:target.y+target.h-10,engaged:true};
 }
+export const DUET_ECHOES=Object.freeze({
+ 'kilo+stitcho':{mode:'garden',label:'DÚO A COMPÁS',heal:3,radius:95},
+ 'frita+pizza':{mode:'fryer',label:'FIESTA DEL HORNO',heal:0,radius:115},
+ 'dino+dragon':{mode:'quake',label:'GIGANTES EN MARCHA',heal:0,radius:118},
+ 'cat+cuerno':{mode:'constellation',label:'JARDÍN LUNAR',heal:3,radius:108},
+ 'chispin+yomi':{mode:'thunder',label:'PORTAL DE TRUENO',heal:0,radius:105}
+});
+export function duetEcho(hero,ally){
+ const key=[hero,ally].sort().join('+');
+ return DUET_ECHOES[key]||{mode:'burst',label:'ENLACE OHANA',heal:0,radius:82};
+}
 export function startBattleCompanion(g,id,power=1){
  if(!THEMES[id]||!g.player)return false;
  const s=state(g),p=g.player,c=center(p);
- s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:360,power,next:35,face:p.facing||1,attack:0,air:false,motion:'idle',vx:0,vy:0};
+ s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:360,power,next:35,face:p.facing||1,attack:0,air:false,motion:'idle',vx:0,vy:0,
+  lastCast:p._cast?.t??null,supportCd:0,echoes:0};
  g._assist={heroId:id,heroName:id,t:360};
  return true;
 }
@@ -125,6 +137,7 @@ export function updateEvolutionAttacks(g,hit,heal){
  const a=s.guest;
  if(a){
   a.age++;a.life--;a.attack=Math.max(0,a.attack-1);
+  a.supportCd=Math.max(0,(a.supportCd||0)-1);
   // Prefer the threat harassing the player, then the nearest enemy.
   const nearby=targets(g,c.x,c.y,950);
   const target=nearby.find(e=>(e.elite||e.aiAttackPermit)&&Math.hypot(center(e).x-c.x,center(e).y-c.y)<520)||nearby[0];
@@ -139,6 +152,22 @@ export function updateEvolutionAttacks(g,hit,heal){
   if(Math.abs(a.vx)>0.5)a.face=Math.sign(a.vx);
   else if(target)a.face=q.x>=a.x?1:-1;
   else a.face=p.facing||1;
+  // U now listens to the hero: an actual J/K/L/I/P cast signals a short
+  // paired follow-up, once per cast and at most once per second.
+  const cast=p._cast;
+  if(cast&&cast.slot!==3&&cast.t!==a.lastCast){
+   a.lastCast=cast.t;
+   if(a.supportCd===0&&target&&Math.hypot(q.x-a.x,q.y-a.y)<400){
+    const echo=duetEcho(p.id,a.id);
+    const dmg=(7+e*2)*Math.min(1.35,Number(a.power)||1);
+    s.fields.push({id:a.id,x:q.x,y:q.y,age:0,life:28,
+      r:echo.radius,damage:dmg,mode:echo.mode,next:11,noCharge:true});
+    beam(s,a.id,c.x,c.y,{x:a.x,y:a.y-25});
+    a.supportCd=66;a.attack=14;a.echoes++;
+    if(echo.heal)heal(p,echo.heal);
+    g.nums?.add?.(a.x,a.y-42,echo.label,THEMES[a.id][0],false);
+   }
+  }
   if(--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<240){
    a.next=36;a.attack=14;
    const damage=(15+e*5)*a.power,sy=a.y-28;
