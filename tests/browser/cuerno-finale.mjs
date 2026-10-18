@@ -24,9 +24,15 @@ try {
  await page.emulateMedia({reducedMotion:'no-preference'});
  for(let evo=0;evo<5;evo++){
   const result=await page.evaluate(evo=>{const api=window.__OHANA_E2E;api.start('cuerno');api.setEvo(evo);api.setInvulnerable();api.cast(1);api.step(8);const warn=api.state();api.step(24);const active=api.state();return {warn,active}},evo);
-  assert.equal(result.warn.cuerno.trails,0);assert.ok(result.active.cuerno.trails>0);assert.ok(result.active.running);
+  assert.equal(result.warn.cuerno.trails,0,'K never paints its damaging trail during the warning');
+  if(evo===0){
+   assert.equal(result.active.cuerno.trails,0,'Cuerno bebé must not bypass the form-2 K unlock');
+  }else{
+   assert.ok(result.active.cuerno.trails>0,'real K trail must activate for unlocked form '+(evo+1));
+  }
+  assert.ok(result.active.running);
  }
  const u=await page.evaluate(async()=>{const api=window.__OHANA_E2E;api.start('cuerno');api.setEvo(4);api.cast(3);api.step(35);const play=await import('/systems/cuerno-play-v373.js');const active=api.state();api.loadRoom('jungle');return {active,reset:play.readCuernoPlay()}});
  assert.equal(u.active.familyDuet.hero,'cuerno');assert.equal(u.reset.duo,null);
- assert.deepEqual(errors,[]);console.log('PASS Cuerno finale: 20 attack/form scenes, 12 evolution scenes, real K windup/trail in five forms, U and room reset, mobile/reduced-motion');
+ assert.deepEqual(errors,[]);console.log('PASS Cuerno finale: 20 attack/form scenes, 12 evolution scenes, K locked as baby and real windup/trail in forms 2–5, U and room reset, mobile/reduced-motion');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
