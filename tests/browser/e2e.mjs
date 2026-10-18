@@ -1141,6 +1141,7 @@ try {
   await page.keyboard.down('ArrowDown');
   const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(40));
   await page.keyboard.up('ArrowDown');
+  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,after:platformDropAfter.player,input:platformDropAfter.input}));
   assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
     'desktop: V85 DOWN did not traverse the ledge / snapback detected');
   assert.equal(platformDropAfter.player.grounded, true,
