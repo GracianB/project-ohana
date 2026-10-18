@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {capturePeerEffects,applyPeerEffects,sendPeerEffectsWithReliableDuet,captureFamilyDuetRelay}
+import {capturePeerEffects,applyPeerEffects,advancePeerEffects,sendPeerEffectsWithReliableDuet,captureFamilyDuetRelay}
  from "../systems/coop-peer-effects.js";
 
 const heroes=["dragon","dino","frita","pizza","yomi","cuerno"];
