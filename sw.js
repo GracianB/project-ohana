@@ -1,4 +1,4 @@
-const VERSION = "ohana-439";
+const VERSION = "ohana-440";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -289,12 +289,12 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/campaign-exploration.js": "125594ff1a104ad86e475f3df5de9d129e11672f",
-  "systems/campaign-layout.js": "f89b83a897155b747d8cd44b78a8710052dd822b",
-  "systems/local-map.js": "d6ec3e57a6918369ddc12858c9ed92daff7dd19a",
+  "systems/campaign-layout.js": "b83612426ae2976b0cb39b952293a9078a013d01",
+  "systems/local-map.js": "e1f5eb0ece990c3550a0caa7eb6d54bbc430c6e1",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
   "systems/family-islands.js": "d1226270ba90c20f77e1e73fe471d25b322d0300",
   "systems/hero-combos.js": "29d27d8d455fc23038ee0cba91aa805e59d68f49",
-  "systems/campaign-enemies.js": "3969158c3fbc32a2de3252b9c94ab5da2fb44660",
+  "systems/campaign-enemies.js": "08580d4c42528787d00b8385f35c23a90537a5e3",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
   "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
@@ -303,7 +303,7 @@ const PRECACHE_REVISIONS = {
   "systems/room-adventures.js": "64dc29e6d7f64a7522a0c7aa88d4de5cc7008e8a",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
-  "systems/evolution-attacks.js": "f5753f8320d74d372cf69a2980dfbbd549d92b91",
+  "systems/evolution-attacks.js": "6d6251a7bd52b9355db55ad41aa5367b291f11d0",
   "systems/ohana-panorama.js": "656a7be154959ea303db6d089548897c2c5d919d",
   "systems/kilo-rhythm.js": "25bef17f62855a17721340f1cdb23a9aef943c4a",
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
@@ -331,7 +331,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "f6ead31be5e3720feb3e7705cc6b8ff7224e5511",
-  "index.html": "738a0e5255769ae802719e3209687dac50655236",
+  "index.html": "baa3ffbdf763feb0f7200d760e70fc57eede260a",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -529,7 +529,7 @@ const PRECACHE_REVISIONS = {
   "systems/map.js": "cf944a71e5d3fa396e0a4dae337ee23eb5973130",
   "systems/traversal-nodes.js": "8e25357893f8354e637bed008c6e74a770ef9bb7",
   "systems/traversal-safety.js": "22dd9d72a4a9e2f3d4bc79e5a90c61a3eb03f812",
-  "systems/world-graph.js": "d0ecea73384ce4369fb9f7606e896550b8688a89",
+  "systems/world-graph.js": "0274f74bcfefc52c608000d82dd12045237b2bf8",
   "systems/mutations.js": "58fa2d31dd265dbf045314363b49b4ad0e1b71bb",
   "systems/message-manager.js": "bbae3a1611d1d31810c9f76bf16cc71e79379f8a",
   "systems/notify.js": "d6ab13a1955952106587e945a0291ca29c21663d",
