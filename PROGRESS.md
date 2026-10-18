@@ -1,3 +1,7 @@
+## ohana-440 · Pulido jugable y atlas del Mundo 1 (PR #384, borrador)
+
+Diseño de sectores con menos plataformas repetidas, cartografía local del terreno, atlas ilustrado de diez biomas, acompañantes U animados que persiguen y se posicionan, patrones de disparo propios para artilleros y tiradores. Versión de desarrollo sin desplegar. La revisión de cooperativo, balance y sesiones completas sigue pendiente.
+
 ## ohana-439 · Candidata V1 en desarrollo
 
 Salas de 7200 unidades, sectores, pozos alineados, puntos de control y guardado v3 compatible con v2. Minimapa local y atlas de islas; cinco islas de selección por parejas. I y P propios, P por daño efectivo, ocho roles de combate en los sectores nuevos. Se conserva el final del Mundo 1.
