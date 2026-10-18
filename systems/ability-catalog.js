@@ -5,7 +5,7 @@ hula: { name: "Baile aloha", key: "K", cd: 2100, color: "#ff5ad5", desc: "Cuatro
 ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Floración que cura y alcanza una zona cercana. Consume pétalos para aumentar alcance, daño y curación." },
 plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
 rollo: { name: "Bola saltarina 626", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos. Guíala con ←/→ y rebota contra paredes y plataformas; las formas avanzadas permiten más rebotes." },
-caos: { name: "Modo caos", key: "L", cd: 5600, color: "#8f7bff", desc: "Rebota por toda la sala arrollándolo todo." },
+caos: { name: "Baile extraterrestre 626", key: "L", cd: 5600, color: "#8f7bff", desc: "Una tarantela alienígena de cuatro pulsos. Cada paso cura, daña y aturde a los enemigos cercanos; puedes seguir moviéndote." },
 chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Marca enemigos durante 2,5 s. Evoluciona de 2 a 5 blancos; L consume la marca con +20% de daño." },
 blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Paso de relámpago: cruza de 145 a 240 px, deja una estela dañina y concede evasión breve." },
 storm: { name: "Sello del trueno", key: "L", cd: 6000, color: "#9cf", desc: "Santuario eléctrico: prioriza enemigos marcados, anuncia cada impacto y consume la marca. Un sello activo." },

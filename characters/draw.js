@@ -1063,6 +1063,7 @@ q(pose.kiloWelcome?.breath,12),q(pose.kiloWelcome?.dragon,12),
 q(pose.kiloWelcome?.chase,12),q(pose.kiloWelcome?.yomi,12),
 q(pose.kiloWelcome?.dino,12),
 q(pose.stitchoRollBounces,1),
+q(pose.stitchoDanceAge,1),pose.stitchoDanceT>0?1:0,
 // V351 Stitcho: native antenna, face, paws and tail need distinct live frames.
 pose.stitchoWelcome?.phase || "",q(pose.stitchoWelcome?.scout,12),
 q(pose.stitchoWelcome?.taunt,12),q(pose.stitchoWelcome?.curl,12),
@@ -1260,6 +1261,11 @@ if(p.id==='stitcho'&&p._stitchoDuetT>0){
  if(pose.stitchoDuetAge>=30&&pose.stitchoDuetAge<102)pose.move='chaos';
 }
 if(p.id==='stitcho')pose.stitchoRollBounces=Math.max(0,Number(p._stitchoRollBounces)||0);
+if(p.id==='stitcho'&&(Number(p._stitchoDanceT)||0)>0){
+ pose.state='dance';pose.move='stitcho-dance';
+ pose.stitchoDanceT=Number(p._stitchoDanceT)||0;
+ pose.stitchoDanceAge=Number(p._stitchoDanceAge)||0;
+}
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;

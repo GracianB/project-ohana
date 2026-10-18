@@ -5,7 +5,7 @@ if (stage && grid && !["family-grid", "family-camp"].includes(stage.dataset.sele
   const LINES = {
     kilo: ["¡Polen!", "Te guardo sitio", "Ukulele listo"],
     stitcho: ["¡Pared!", "Plasma on", "Te trepo"],
-    chispin: ["¡Chispa!", "Cadena lista", "Bzz"],
+    chispin: ["¡Chispín!", "Cadena lista", "Bzz"],
     cat: ["Miau", "Nueve vidas", "Sombra"],
     dragon: ["¡Fuego suave!", "Ala", "Meteoro"],
     dino: ["¡Pisotón!", "Grrr", "Te cubro"],

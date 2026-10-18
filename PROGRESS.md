@@ -1,3 +1,7 @@
+## OHANA · Kilo, Stitcho y Chispín recuperado
+
+Kilo cambia el giro por baile hula y ahora enlaza notas, pétalos, reflejos y curación. Stitcho separa sus habilidades: K es la bola 626 dirigida y rebotadora; L es un baile alienígena repetible de cuatro pulsos que cura, daña y aturde mientras permite moverse. Se animan su entrada, el baile y la evolución. El resto del reparto conserva entradas y gestos finales propios. Chispín vuelve a su diseño original redondo, con branquias y cola de muelle; «Trueno Gordo» recupera su cuarta forma. La criatura de trueno blanca y dorada queda separada como arte reservado para el jefe del Mundo 2.
+
 ## V432 · Serafín Aurora y Cuerno Eclipse (ohana-432)
 
 Rediseñadas exclusivamente las formas 4 y 5 de Cuerno. La cuarta despliega seis velas de aurora unidas a hombros de loto; la quinta abre alas de media luna con nervaduras de constelación, corona creciente y un cuerno más largo. Ambas incorporan una melena envolvente y colas más largas. Las formas 1–3 y las estadísticas de combate permanecen iguales. Nombres sincronizados en selección, evolución y galería.

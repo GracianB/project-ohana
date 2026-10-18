@@ -28,7 +28,7 @@ export function signature(id) {
 const HITS = {
   kilo:    { name: "Nota",     kind: "note",  color: "#ff9ab0" },
   stitcho: { name: "Zarpa",    kind: "claws", color: "#7eb6ff" },
-  chispin: { name: "Chispa",   kind: "spark", color: "#ffe14a" },
+  chispin: { name: "Chispín", kind: "spark", color: "#ffe14a" },
   cat:     { name: "Zarpazo",  kind: "paw",   color: "#ffb6e4" },
   dragon:  { name: "Garra",    kind: "flame", color: "#ff6a2a" },
   dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },

@@ -179,7 +179,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2 && p.id !== "chispin") {
+if (index === 2 && p.id !== "chispin" && !(p.id === "stitcho" && id === "caos")) {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -549,7 +549,7 @@ return value - Math.floor(value);
 }
 
 const FX = [];
-const S = { p: null, hover: 0, roll: 0, rollBounces: 0, rollLock: 0, caos: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
+const S = { p: null, hover: 0, roll: 0, rollBounces: 0, rollLock: 0, stitchoDance: 0, stitchoDanceAge: 0, cvx: 0, charge: 0, pull: null, gallop: 0, gallopFace: 1 };
 
 function syncState(p) {
 if (S.p === p) return;
@@ -557,9 +557,11 @@ if (S.p) {
 S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0; S.p._stitchoRollBounces = 0;
 }
 S.p = p;
-S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
 FX.length = 0;
 }
 
@@ -606,9 +608,10 @@ game.nums?.add(cx(p),p.y-58,"SUEÑO ARCOÍRIS · "+sleepers.length,"#e4d8ff",tru
 
 export function clearAbilityFx() {
 FX.length = 0;
-S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.caos = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
+S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 if (S.p) S.p._stitchoRollBounces = 0;
 if (S.p) {
+S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
 S.p._kiloRhythm = null;
 S.p._abilMove = null;
 S.p._armorT = 0;
@@ -745,22 +748,17 @@ if (p.grounded) p.vy = Math.min(p.vy || 0, -0.4);
 armor(p, 2);
 }
 }
-if (S.caos > 0) {
-S.caos--;
-const W = game.worldW || 1600;
-if (p.x < 34) S.cvx = Math.abs(S.cvx);
-if (p.x > W - p.w - 34) S.cvx = -Math.abs(S.cvx);
-if (input && input.left && S.cvx > 0 && S.caos % 10 === 0) S.cvx *= -1;
-if (input && input.right && S.cvx < 0 && S.caos % 10 === 0) S.cvx *= -1;
-p.vx = S.cvx;
-p.facing = Math.sign(S.cvx) || 1;
-if (p.grounded) {
-  p.vy = -10.5;
-  game.shake = Math.min(14, (game.shake || 0) + 4);
-  game.fx.emit(cx(p), p.y + p.h, { color: "#8f7bff", count: 8, size: 3, up: 1.4, speed: 3 });
-}
-if (p.y < 40 && p.vy < 0) p.vy = Math.abs(p.vy) * 0.8;
-armor(p, 2);
+if (S.stitchoDance > 0) {
+  S.stitchoDance--;
+  S.stitchoDanceAge++;
+  p._stitchoDanceT = S.stitchoDance;
+  p._stitchoDanceAge = S.stitchoDanceAge;
+  p._abilMove = "stitcho-dance";
+  armor(p, 1);
+  if (S.stitchoDanceAge % 24 === 0 && p.grounded && !game.reduceMotion) p.vy = Math.min(Number(p.vy) || 0, -2.2);
+} else {
+  p._stitchoDanceT = 0;
+  p._stitchoDanceAge = 0;
 }
 if (S.pull) {
 const pl = S.pull;
@@ -809,9 +807,18 @@ updateMichiDuet(game,hitEnemy);
 updateFamilyDuet(game,hitEnemy,healPlayer);
 syncState(p);
 if (S.roll > 0) bodyHits(game, p, 18, { kx: 10, ky: -6, stun: 24, color: "#5ad1ff", cd: 20 });
-if (S.caos > 0) {
-bodyHits(game, p, 16, { kx: 8, ky: -7, stun: 26, color: "#b8a8ff", cd: 14 });
-if ((game.t & 1) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#8f7bff" }, MAX_RUNTIME_GHOSTS);
+if (S.stitchoDance > 0 && S.stitchoDanceAge > 0 && S.stitchoDanceAge % 24 === 0) {
+const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
+const heal = 3 + evo * 2, radius = 82 + evo * 12;
+healPlayer(p, heal);
+for (const e of game.enemies || []) {
+  if (!canHit(e) || Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > radius + Math.max(e.w, e.h) * .35) continue;
+  const face = Math.sign(cx(e) - cx(p)) || p.facing || 1;
+  hitEnemy(game, e, (8 + evo * 2) * pw(p), { kx: face * 3.5, ky: -2.5, stun: 14, color: "#b7a1ff", parts: 5, shake: 1, hitstop: 0 });
+}
+game.fx?.emit?.(cx(p), cy(p), { color: S.stitchoDanceAge % 48 ? "#8eeeff" : "#d6a8ff",
+  count: game.reduceMotion ? 3 : 8, size: 3, speed: 1.9, life: 16, star: true });
+game.nums?.add?.(cx(p), p.y - 44, "¡BAILE 626!  +" + heal, "#c7b8ff", false);
 }
 if (S.charge > 0) {
 const dino = p.id === "dino";
@@ -834,7 +841,7 @@ for (const e of game.enemies) {
 }
 if ((game.t % 4) === 0) pushRuntime(game.ghosts, { x: p.x, y: p.y, w: p.w, h: p.h, life: 8, color: "#b6ebee" }, MAX_RUNTIME_GHOSTS);
 }
-p._abilMove = S.caos > 0 ? "chaos" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
+p._abilMove = S.stitchoDance > 0 ? "stitcho-dance" : S.gallop > 0 ? "gallop" : S.roll > 0 ? "roll" : S.charge > 0 ? (p.id === "dino" ? "dino-roll" : "charge") : S.hover > 0 ? "float" : S.pull ? "swing" : null;
 const updateCount = FX.length;
 for (let i = 0; i < updateCount; i++) {
 const f = FX[i];
@@ -884,7 +891,8 @@ ctx.save();
 d(ctx, f, cam, t, game, p);
 ctx.restore();
 }
-if (S.roll > 0 || S.caos > 0) drawBallAura(ctx, p, cam, t, S.caos > 0 ? "#8f7bff" : "#2f6bff");
+if (S.roll > 0) drawBallAura(ctx, p, cam, t, "#2f6bff");
+if (S.stitchoDance > 0) drawStitchoDanceAura(ctx, p, cam, game.reduceMotion);
 if (S.charge > 0) {
 if (p.id === "dino") {
  drawBallAura(ctx, p, cam, t, "#a8f377");
@@ -1202,13 +1210,17 @@ momentCast(g, p, 1, evo);
 boom(g, cx(p), p.y + p.h, "#5ad1ff", 12);
 },
 caos(g, p, evo) {
-S.caos = 120 + evo * 10;
-S.cvx = p.facing * (10 + evo * 0.6);
-p.vy = -9;
+S.stitchoDance = 108 + evo * 6;
+S.stitchoDanceAge = 0;
+p._stitchoDanceT = S.stitchoDance;
+p._stitchoDanceAge = 0;
+S.roll = 0;
+S.rollBounces = 0;
+p._stitchoRollBounces = 0;
+armor(p, 8);
 momentCast(g, p, 2, evo);
-armor(p, 6);
-g.shake = Math.min(18, (g.shake || 0) + 6);
-boom(g, cx(p), cy(p), "#8f7bff", 10, { star: true });
+g.shake = Math.min(10, (g.shake || 0) + 2);
+boom(g, cx(p), cy(p), "#8f7bff", 12, { star: true, up: 1.4 });
 },
 
 chain(g, p, evo) {
@@ -2417,6 +2429,34 @@ for (let i=0;i<6;i++) {
   ctx.lineTo(xx+p.facing*6,yy-2);
   ctx.stroke();
 }
+}
+ctx.restore();
+}
+
+function drawStitchoDanceAura(ctx, p, cam, reduced = false) {
+const x = cx(p) - cam.x, y = cy(p) - cam.y, age = Number(p._stitchoDanceAge) || 0;
+const phase = reduced ? 0 : age * 0.085;
+const radius = 30 + Math.max(p.w, p.h) * 0.65;
+ctx.save();
+ctx.globalCompositeOperation = "lighter";
+ctx.lineCap = "round";
+for (let i = 0; i < 3; i++) {
+  const a = phase + i * TAU / 3, r = radius + Math.sin(phase + i * 1.7) * 4;
+  ctx.globalAlpha = reduced ? 0.42 : 0.52;
+  ctx.strokeStyle = i === 1 ? "#d7b2ff" : "#85edff";
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  ctx.ellipse(x + Math.cos(a) * 5, y + Math.sin(a) * 3, r, r * 0.38, a * 0.2, 0, Math.PI * 1.45);
+  ctx.stroke();
+}
+ctx.globalAlpha = 0.8;
+for (let i = 0; i < 4; i++) {
+  const a = phase * (i % 2 ? -1 : 1) + i * TAU / 4;
+  const px = x + Math.cos(a) * (radius + 9), py = y - 5 + Math.sin(a) * radius * 0.48;
+  ctx.strokeStyle = i % 2 ? "#f4c8ff" : "#bcf7ff";
+  ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(px - 2, py - 4); ctx.lineTo(px + 2, py); ctx.lineTo(px - 1, py + 3); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + 4, py - 6); ctx.lineTo(px + 4, py + 3); ctx.stroke();
 }
 ctx.restore();
 }
