@@ -75,7 +75,7 @@ export function enemyRole(kind = "") {
 }
 
 export function enemyIsCommitted(e = {}) {
-  if (e.telegraph) return true;
+  if (e.telegraph || e._campaign?.active>0) return true;
   return ACTIVE_FLAGS.some((key) => Number(e[key]) > 0);
 }
 
@@ -128,7 +128,7 @@ function flankDirection(e, player) {
   return natural;
 }
 
-export function directEnemyEncounter(enemies = [], player = null, roomId = "hub", tick = 0) {
+export function directEnemyEncounter(enemies = [], player = null, roomId = "hub", tick = 0, viewport = null) {
   const alive = (Array.isArray(enemies) ? enemies : []).filter((e) =>
     e && !e.boss && !e.dying && Number(e.hp) > 0
   );
@@ -147,16 +147,17 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
   // Small groups are cheaper to scan directly; crowded arenas use a spatial index.
   const spatial = alive.length>12 ? buildEncounterSpatialIndex(alive) : null;
   prepareSpeciesEvolution(alive, roomId, tick, enemyRole);
-  const budget = attackBudget(alive.length, hard, roomId);
+  const budget = viewport&&alive.some(e=>e.elite&&Math.abs(centerX(e)-centerX(player))<500) ? 4 : attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
     scoreCandidate(b, player, hard, tick, roomId) - scoreCandidate(a, player, hard, tick, roomId)
   );
 
   const committed = sorted.filter(enemyIsCommitted);
-  const permits = new Set(committed.slice(0, budget));
+  const canSee=e=>!viewport||(e.x+e.w>viewport.x&&e.x<viewport.x+viewport.w&&e.y+e.h>viewport.y&&e.y<viewport.y+viewport.h);
+  const permits = new Set(committed.filter(canSee).slice(0, budget));
   for (const e of sorted) {
     if (permits.size >= budget) break;
-    if (!permits.has(e)) permits.add(e);
+    if (!permits.has(e)&&canSee(e)) permits.add(e);
   }
 
   for (const e of alive) {

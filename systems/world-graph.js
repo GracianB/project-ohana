@@ -1,3 +1,4 @@
+import {ROOMS} from "./map.js";
 // PROJECT OHANA V40 · WORLD GRAPH 2.0
 // One canonical spatial graph for doors, drops, catapults and vortices.
 
@@ -14,29 +15,18 @@ export const WORLD_NODES = Object.freeze({
   boss:    Object.freeze({id:"boss",name:"Nido Final",short:"NIDO",x:93,y:77,hero:"dino",needEvo:3}),
 });
 
-export const WORLD_EDGES = Object.freeze([
-  // Main route / physical doors
-  Object.freeze({a:"lab",b:"cave",type:"door",route:"main"}),
-  Object.freeze({a:"cave",b:"hub",type:"door",route:"main"}),
-  Object.freeze({a:"hub",b:"beach",type:"door",route:"main"}),
-  Object.freeze({a:"beach",b:"jungle",type:"door",route:"main",needEvo:2}),
-  Object.freeze({a:"jungle",b:"volcano",type:"drop",route:"main",needEvo:3,directed:true}),
-  Object.freeze({a:"volcano",b:"boss",type:"door",route:"climax",needEvo:3}),
-  Object.freeze({a:"hub",b:"ridge",type:"door",route:"upper"}),
-  Object.freeze({a:"ridge",b:"space",type:"door",route:"upper",needEvo:1}),
-  Object.freeze({a:"beach",b:"reef",type:"drop",route:"lower",directed:true}),
-  Object.freeze({a:"ridge",b:"hub",type:"drop",route:"return",directed:true}),
-  Object.freeze({a:"space",b:"hub",type:"drop",route:"return",directed:true}),
-
-  // Traversal network
-  Object.freeze({a:"hub",b:"beach",type:"catapult",route:"shortcut",directed:true}),
-  Object.freeze({a:"beach",b:"hub",type:"catapult",route:"shortcut",directed:true}),
-  Object.freeze({a:"reef",b:"beach",type:"catapult",route:"shortcut",directed:true}),
-  Object.freeze({a:"jungle",b:"volcano",type:"vortex",route:"shortcut",directed:true,needEvo:3}),
-  Object.freeze({a:"volcano",b:"jungle",type:"vortex",route:"shortcut",directed:true}),
-  Object.freeze({a:"space",b:"reef",type:"vortex",route:"secret",directed:true}),
-  Object.freeze({a:"reef",b:"space",type:"vortex",route:"secret",directed:true,needEvo:1}),
-]);
+export const WORLD_EDGES=Object.freeze(buildEdges());
+function buildEdges(){
+ const result=[],seen=new Set();
+ for(const r of Object.values(ROOMS)){
+  for(const [dir,dest] of Object.entries(r.doors)){
+   if(!dest)continue;const type=dir==='down'?'drop':'door',directed=type==='drop';
+   const key=type+':'+(directed?r.id+'>'+dest:[r.id,dest].sort().join(':'));if(seen.has(key))continue;seen.add(key);
+   result.push(Object.freeze({a:r.id,b:dest,type,route:dest==='boss'?'climax':dir==='up'?'upper':'main',needEvo:Math.max(r.needEvo||0,ROOMS[dest].needEvo||0),...(directed?{directed:true}:{})}));
+  }
+  for(const p of r.portals||[])result.push(Object.freeze({a:r.id,b:p.dest,type:p.type==='blackhole'?'vortex':'catapult',route:p.type==='blackhole'?'secret':'shortcut',directed:true,needEvo:ROOMS[p.dest].needEvo||0}));
+ }return result;
+}
 
 export const EDGE_STYLE = Object.freeze({
   door:      Object.freeze({label:"PUERTA",glyph:"—",color:"#7ee7ff"}),
@@ -99,6 +89,7 @@ export function worldMapDetailHTML(id,current,visited={},evo=0){
   return '<div><span class="wm-detail-kicker">'+(node.id===current?'Estás aquí':locked?'Forma '+(node.needEvo+1)+' para entrar':visited[node.id]?'Lugar descubierto':'Por descubrir')+'</span><h3>'+esc(node.name)+'</h3><p>'+esc(ROOM_NOTES[node.id])+'</p></div><ul aria-label="Caminos desde '+esc(node.name)+'">'+exits+'</ul>';
 }
 
+function atlasIslands(state){return state.nodes.map((n,i)=>{const x=n.x*10,y=n.y*5.6,col=ROOMS[n.id].color||'#b4ceac';let d='';for(let j=0;j<=16;j++){const a=j/16*Math.PI*2,k=1+Math.sin(j*2.1+i)*.13;d+=(j?'L':'M')+(x+Math.cos(a)*(n.id==='hub'?72:60)*k)+' '+(y+Math.sin(a)*43*k);}return '<g opacity="'+(n.visited?1:.46)+'"><path d="'+d+'Z" fill="'+col+'" stroke="#ead7ab" stroke-width="5"/><path d="M'+(x-32)+' '+(y-10)+'q30-28 60 0" fill="none" stroke="#365e5c33" stroke-width="3"/></g>';}).join('');}
 export function renderWorldGraphHTML(current,visited={},evo=0){
   const state=worldGraphSnapshot(current,visited,evo);
   const lines=state.edges.map((e,index)=>{
@@ -110,7 +101,7 @@ export function renderWorldGraphHTML(current,visited={},evo=0){
     return '<path class="wm-edge wm-'+e.type+(e.locked?' locked':'')+'" d="'+d+'"'+(e.directed?' marker-end="url(#wm-arrow)"':'')+'/>';
   }).join('');
   const nodes=state.nodes.map(n=>'<button type="button" class="wm-node '+(n.current?'here selected ':'')+(n.visited?'seen ':'')+(n.locked?'lock':'')+'" data-room="'+n.id+'" data-hero="'+n.hero+'" style="--x:'+n.x+'%;--y:'+n.y+'%" aria-pressed="'+n.current+'"'+(n.current?' aria-current="location"':'')+' aria-label="'+esc(n.name)+(n.current?', estás aquí':n.locked?', requiere forma '+(n.needEvo+1):n.visited?', descubierto':', por descubrir')+'"><span class="wm-marker"><svg viewBox="0 0 40 40" aria-hidden="true">'+MARKS[n.id]+'</svg></span><b>'+esc(n.short)+'</b><small>'+(n.current?'ESTÁS AQUÍ':n.locked?'FORMA '+(n.needEvo+1):n.visited?'EXPLORADO':'POR DESCUBRIR')+'</small></button>').join('');
-  return '<div class="world-map-v40"><div class="wm-summary"><span>CUADERNO DE VIAJE</span><strong>'+state.nodes.filter(n=>n.visited).length+' <small>/ 10 lugares</small></strong></div><div class="wm-scroll" tabindex="0" aria-label="Mapa de Isla Hoku. Puedes desplazarte para explorar sus rutas."><div class="wm-board"><svg class="wm-chart" viewBox="0 0 1000 560" aria-hidden="true"><defs><marker id="wm-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 8 5 0 10" fill="none" stroke="currentColor" stroke-width="2"/></marker></defs><path class="wm-shore" d="M35 235Q60 175 185 200L315 185Q375 215 448 201Q535 220 608 210Q735 180 864 209Q910 250 883 302L866 367Q953 380 978 425L930 487Q845 505 795 467L737 461Q642 510 601 458Q554 410 620 363L662 306Q570 334 470 300Q350 335 259 303Q119 326 35 286Z"/><path class="wm-highland" d="M274 86Q293 26 380 40Q448 9 583 40Q640 74 606 126Q520 161 454 122Q376 171 305 139Z"/><path class="wm-contour" d="M50 250Q180 211 300 236T600 251T871 242M75 275Q200 244 316 267T620 284M300 98Q440 66 587 85M654 411Q750 444 912 426"/><g class="wm-routes">'+lines+'</g><text x="480" y="390" class="wm-sea-label">MAR DE HOKU</text><path class="wm-waves" d="M220 395q8-8 16 0t16 0m-12 14q8-8 16 0t16 0M465 460q8-8 16 0t16 0"/></svg>'+nodes+'<span class="wm-north" aria-hidden="true">N<br>↑</span></div></div><div class="wm-legend"><span><i class="door"></i>Camino</span><span><i class="drop"></i>Descenso</span><span><i class="catapult"></i>Catapulta</span><span><i class="vortex"></i>Vórtice</span></div><section class="wm-detail" aria-live="polite">'+worldMapDetailHTML(current,current,visited,evo)+'</section></div>';
+  return '<div class="world-map-v40"><div class="wm-summary"><span>CUADERNO DE VIAJE</span><strong>'+state.nodes.filter(n=>n.visited).length+' <small>/ 10 lugares</small></strong></div><div class="wm-scroll" tabindex="0" aria-label="Mapa de Isla Hoku. Puedes desplazarte para explorar sus rutas."><div class="wm-board"><svg class="wm-chart" viewBox="0 0 1000 560" aria-hidden="true"><defs><marker id="wm-arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 8 5 0 10" fill="none" stroke="currentColor" stroke-width="2"/></marker></defs>'+atlasIslands(state)+'<g class="wm-routes">'+lines+'</g><text x="480" y="390" class="wm-sea-label">MAR DE HOKU</text><path class="wm-waves" d="M220 395q8-8 16 0t16 0m-12 14q8-8 16 0t16 0M465 460q8-8 16 0t16 0"/></svg>'+nodes+'<span class="wm-north" aria-hidden="true">N<br>↑</span></div></div><div class="wm-legend"><span><i class="door"></i>Camino</span><span><i class="drop"></i>Descenso</span><span><i class="catapult"></i>Catapulta</span><span><i class="vortex"></i>Vórtice</span></div><section class="wm-detail" aria-live="polite">'+worldMapDetailHTML(current,current,visited,evo)+'</section></div>';
 }
 
 

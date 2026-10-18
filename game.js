@@ -1,3 +1,8 @@
+import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
+import {campaignRole,updateCampaignEnemy,drawCampaignEnemy} from "./systems/campaign-enemies.js";
+import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
+import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
+import {drawLocalMap} from "./systems/local-map.js";
 import {updateNestArena,drawNestArena,nestArenaSnapshot} from './systems/nest-arena.js';
 import {updateIslandSprings,drawIslandSprings,islandSpringsSnapshot} from './systems/island-springs.js';
 import {updateChampions,drawChampionSignals} from './systems/enemy-champions.js';
@@ -350,6 +355,7 @@ if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar e
 saveWarning = !saved;
 return saved;
 }
+game.save=save;
 function returnToMenu() {
 save();
 game.running = false;
@@ -488,25 +494,29 @@ if(id === "volcano" && !game.dragonTrial) game.dragonTrial=newDragonTrial();
 dismissNotifications();
 game.renderDirty = true;
 game.roomDef = r;
+game._defeatedThisVisit=new Set();
 game.finale = null;
 game.visited[id] = true;
 game.worldIndex = r.world;
 const paint = getLook() === "paint";
 const S = paint ? PAINT_WORLD : 1;
-game.worldW = ROOM_W * S;
-game.worldH = ROOM_H * S;
+game.worldW = (r.width || ROOM_W) * S;
+game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
+enterCampaignExploration(game);
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
-e.spawnIndex = i;
+e.spawnIndex = i;e._campaignOriginal=true;
+if(f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
 if (f[3]) applyElite(e);
 return e;
 });
+game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-foe-${e.spawnIndex}`));
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -685,6 +695,7 @@ game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
+game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};
 game.best = null;
 Surprises.reset();
 Festival.reset();
@@ -715,6 +726,7 @@ try {
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
+    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
@@ -725,6 +737,7 @@ document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
 if (!loadRoom(roomId)) loadRoom("hub");
+if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 if (onlineMode) {
 void onlineCoop.start(game, def).catch((error) => {
@@ -807,7 +820,11 @@ game._combatFlow = null;
 game._assist = null;
 game._supremeFlow = null;
 Magic.reset(game);
-loadRoom("hub");
+const r=ROOMS[game.roomId]||ROOMS.hub;
+const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
+loadRoom(r.id);
+if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
+game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
 function dash() {
 const p = game.player;
@@ -831,7 +848,7 @@ game.experience?.dash(p);
 void onlineCoop.signal(game, "action", { action: "dash", characterId: p.id });
 }
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
-function damageEnemy(e, amount) { if (e.dying > 0) return true; return safeDamageEnemy(e, amount); }
+function damageEnemy(e, amount) { if (e.dying > 0) return true; const before=e.hp;const ok=safeDamageEnemy(e, amount);if(ok)chargeFinisher(game,Math.max(0,before-e.hp));return ok; }
 function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
 function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
@@ -1025,6 +1042,7 @@ function attack() {
 const p = game.player;
 if (!p || p.dead) return;
 if (p.melee > 0) { p.meleeBuf = 8; return; }
+p._chargeAction=(p._chargeAction||0)+1;
 
 if (!p.facing) p.facing = 1;
 
@@ -1187,7 +1205,7 @@ if (hazard.type === HAZARD_TYPES.TRANSFER && hazard.dest) {
   dispatchEvent(new CustomEvent("ohana-hazard", { detail: {
     type: hazard.type, id: hazard.id, room: game.roomId, dest: hazard.dest, hero: p.id
   }}));
-  loadRoom(hazard.dest, "down");
+  if(!loadRoom(hazard.dest, "down"))respawn();
   return;
 }
 
@@ -1380,7 +1398,8 @@ if (!game.won && game.running) loadRoom("boss", "right");
 }
 function nearUpDoor(p) {
 const cx = p.x + p.w / 2;
-return cx > 700 && cx < 1060;
+const exit=game.roomDef?.upExit;
+return !!exit && cx>exit.x && cx<exit.x+exit.w;
 }
 function tryDoors() {
 const p = game.player; const r = room();
@@ -1781,7 +1800,8 @@ if (onlineCoop.advanceGuestCombat(game)) {
   return;
 }
 game.bossFx?.update();
-game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t);
+game.viewW=camW();game.viewH=camH();
+game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
 updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
@@ -1851,6 +1871,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
 const cuernoSleeping = !e.boss && e.sleep > 0;
 if (cuernoSleeping) {
@@ -2511,6 +2532,7 @@ if (e.kind === "cucaracho") {
     color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
   });
 }
+if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-foe-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
@@ -2569,7 +2591,7 @@ const vw = camW(), vh = camH();
 let lerp = 0.24;
 const look = horizontalLook(p);
 let tx = p.x + p.w / 2 + look - vw / 2;
-let ty = p.y + p.h / 2 - vh / 2;
+let ty = p.y + p.h / 2 - vh / 2 + Math.max(-100,Math.min(160,(p.vy||0)*12));
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
 if (fin) {
@@ -2606,7 +2628,7 @@ game.nums.update();
 }
 
 function drawMinimap() {
-drawWorldMinimap(ctx, game.roomId, game.visited, game.player?.evo || 0, viewW, viewH);
+drawLocalMap(ctx,game,viewW,viewH);
 }
 function drawCrystal(o) {
 const x = o.x - game.cam.x;
@@ -2664,6 +2686,8 @@ drawRoomAtmosphere(
 );
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
+drawCheckpoints(ctx,game,game.cam,t);
+drawCampaignExploration(ctx,game,game.cam,t);
 drawTerrain(ctx, game.platforms, world, game.cam, t);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
@@ -2700,6 +2724,7 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
+  drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
 if (!game.finale) {
@@ -2869,7 +2894,7 @@ game.experience?.render(ctx, game, viewW, viewH, t);
 if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
-if (viewW >= 820) drawMinimap();
+drawMinimap();
 }
 function castPower(index) {
 const p = game.player;
@@ -3063,16 +3088,17 @@ const item = abilitySlots[i];
 const isSupreme = item.slot.dataset.supreme === "1";
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : item.slot.dataset.id;
-const def = powerAbility(p,Number(item.slot.dataset.index),ABILITY_DEFS,sup);
+const slotIndex=Number(item.slot.dataset.index);
+const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def || !item.fill) continue;
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
 const w = pct + "%";
 if (item.fill.style.width !== w) item.fill.style.width = w;
-const sec = left > 80 ? (left / 1000).toFixed(1) : "";
+const sec = slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
 if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
-item.slot.classList.toggle("cooling", left > 80);
+item.slot.classList.toggle("cooling", slotIndex===5?finisherCharge(p)<100:left>80);
 }
 const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for (let i = 0; i < touchPowers.length; i++) {
@@ -3091,8 +3117,8 @@ const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " Â
 if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-btn.classList.toggle("cooling", left > 80);
+const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+btn.classList.toggle("cooling", slotIndex===5 ? finisherCharge(p)<100 : left > 80);
 btn.style.setProperty("--cd", pct + "%");
 }
 }
@@ -3126,7 +3152,9 @@ if (game.finale) {
 }
 tickWorldSummon();
 if (!canAct()) return;
+updateCampaignExploration(game);
 updatePlayer();
+updateCampaignProgress(game);
 updateIslandSprings(game);
 updateCuernoPlay(game, t);
 updateCuernoBursts(game);
@@ -3448,6 +3476,8 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
+checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3490,6 +3520,7 @@ state() {
     camera: { x: game.cam.x, y: game.cam.y },
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
+    worldW:game.worldW,worldH:game.worldH,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
     hp: p ? p.health : 0,

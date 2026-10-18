@@ -4,8 +4,8 @@ import { chromium, devices } from 'playwright';
 import { startServer } from './server.mjs';
 import { FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
 
-const server = await startServer(4173);
-const base = 'http://127.0.0.1:4173/';
+const server = await startServer(0);
+const base = 'http://127.0.0.1:'+server.address().port+'/';
 
 async function auditPage(page, label) {
   const errors = [];
@@ -592,7 +592,9 @@ async function auditPage(page, label) {
   await page.locator('#btn-festival').click();
   const museumEntry=page.locator('#festival-album [data-festival-memory="hub-0"]');
   assert.equal(await museumEntry.count(),1,label+': earned memory lacks museum entry');
-  assert.equal(await page.locator('#festival-album [data-festival-memory="hub-1"]').count(),0,label+': locked memory can be replayed');
+  const lockedId=await page.evaluate(async()=>{const {Festival,FESTIVAL_CATALOG}=await import('/systems/v1002-festival.js');return FESTIVAL_CATALOG.find(m=>!Festival.claimed.has(m.id))?.id;});
+  assert.ok(lockedId,label+': expected an undiscovered memory');
+  assert.equal(await page.locator('#festival-album [data-festival-memory="'+lockedId+'"]').count(),0,label+': locked memory can be replayed');
   await museumEntry.click();
   assert.equal(await page.locator('#festival-album .festival-memory-preview').evaluate(el=>el.hidden),false,label+': museum preview not open');
   const portraitPixels=await page.locator('#festival-album .festival-memory-preview canvas').evaluate(el=>{
@@ -1050,7 +1052,7 @@ try {
     const api = window.__OHANA_E2E;
     api.start('dragon');
     api.setEvo(4);
-    api.setPlayer(520, 920);
+    api.setPlayer(520, 120);
     api.setPlayerVelocity(0, 2);
     api.exhaustPlayerJumps();
     api.resetInput();
@@ -1114,7 +1116,7 @@ try {
     api.start('kilo');
     api.loadRoom('beach');
     api.resetInput();
-    api.setPlayer(1085, 1060);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.4);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 36 && state.roomId === 'beach'; i++) state = api.step(1);
@@ -1169,7 +1171,7 @@ try {
     api.setEvo(4);
     api.loadRoom('volcano');
     api.resetInput();
-    api.setPlayer(1120, 1120);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.5);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 24 && state.hp > 0; i++) state = api.step(1);
@@ -1185,7 +1187,7 @@ try {
     api.setEvo(4);
     api.loadRoom('volcano');
     api.resetInput();
-    api.setPlayer(1120, 1120);
+    {const h=api.checkpointData().hazards[0];api.setPlayer(h.x+h.w/2,h.y+h.h*.5);}
     api.setPlayerVelocity(0, 8);
     let state = api.state();
     for (let i = 0; i < 48 && state.hp > 0 && !state.hazardEscape; i++) state = api.step(1);

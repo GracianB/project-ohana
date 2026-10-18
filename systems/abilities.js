@@ -1,3 +1,5 @@
+import {rhythmPress} from "./hero-combos.js";
+import {chargeFinisher,consumeFinisher,finisherCharge} from "./finisher.js";
 import {POWER_LEVELS,powerAbility,castEvolutionAttack,summonDanceFleet,startBattleCompanion,updateEvolutionAttacks,drawEvolutionAttacks} from './evolution-attacks.js';
 import {earnKiloPetal,spendKiloPetals,drawKiloRhythm} from './kilo-rhythm.js';
 import {chispaKit,chispaMarked,chispaStormTarget} from './chispa-kit.js';
@@ -146,6 +148,7 @@ return link;
 export function useAbility(game, index) {
 const p = game?.player;
 if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
+if(index===5&&rhythmPress(game))return true;
 const supreme = index === 3 ? SUPREME[p.id] : null;
 const def = powerAbility(p,index,ABILITY_DEFS,supreme);
 const id = index>3 ? def?.id : supreme ? supreme.id : p.abilities && p.abilities[index];
@@ -157,6 +160,7 @@ if (!Number.isFinite(baseCd) || baseCd <= 0) return false;
 const now = abilityNow(game);
 p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
+if(index===5&&finisherCharge(p)<100)return false;
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
 // Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
@@ -170,8 +174,10 @@ const chainCd = index < 3
 ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035)
 : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
 const dur = baseCd / (1 + evo * 0.12) * chainCd;
-p.cds[id] = now + dur;
+if(index===5)consumeFinisher(p);
+p.cds[id] = index===5 ? now : now + dur;
 p.cdDur[id] = dur;
+p._chargeAction=(p._chargeAction||0)+1;
 game.lastAbilityId = id;
 game.lastAbilitySlot = index;
 syncState(p);
@@ -1052,9 +1058,12 @@ export function hitEnemy(g, e, dmg, o = {}) {
 if (!canHit(e)) return false;
 let d = Number(dmg);
 if (!Number.isFinite(d)) return false;
+if(e._shieldFacing&&g.player&&Math.sign(cx(g.player)-cx(e))===e._shieldFacing)d*=.3;
 if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
+const before=e.hp;
 damageEnemy(e, d);
+if(!o.noCharge)chargeFinisher(g,Math.max(0,before-e.hp));
 g.onAbilityHit?.(e,d,o);
 e.flash = Math.max(e.flash || 0, 14);
 

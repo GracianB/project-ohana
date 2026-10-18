@@ -1,3 +1,11 @@
+## ohana-439 · Candidata V1 en desarrollo
+
+Salas de 7200 unidades, sectores, pozos alineados, puntos de control y guardado v3 compatible con v2. Minimapa local y atlas de islas; cinco islas de selección por parejas. I y P propios, P por daño efectivo, ocho roles de combate en los sectores nuevos. Se conserva el final del Mundo 1.
+
+Validación: 1256 pruebas unitarias pasaron antes del último ajuste de persistencia de encuentros; pruebas dirigidas de puntos de control y director de enemigos: 14/14. Auditoría de combate en Chromium: diez héroes, U desde bebé, I/P y 160 fotogramas de evolución, sin errores. Auditoría candidata: cinco islas, escritorio/móvil, atlas, checkpoint y caída real Beach→Reef, sin errores. Release gate: PASS.
+
+Pendiente: repetir batería completa tras los últimos ajustes; recorrido completo de 60–90 minutos, balance por héroe y revisión final de cinemáticas/jefe. El E2E general se detuvo en la prueba de batida de Dragón al usar una posición antigua que ahora coincide con una plataforma: se trasladó el punto de prueba a espacio libre, pendiente de repetir. Cooperativo Chromium: timeout abriendo el canal WebRTC; Firefox no está instalado en este entorno. No se ha validado el cooperativo completo. No etiquetar como V1 oficial hasta cerrar estos criterios.
+
 ## OHANA · Kilo, Stitcho y Chispín recuperado
 
 Kilo cambia el giro por baile hula y ahora enlaza notas, pétalos, reflejos y curación. Stitcho separa sus habilidades: K es la bola 626 dirigida y rebotadora; L es un baile alienígena repetible de cuatro pulsos que cura, daña y aturde mientras permite moverse. Se animan su entrada, el baile y la evolución. El resto del reparto conserva entradas y gestos finales propios. Chispín vuelve a su diseño original redondo, con branquias y cola de muelle; «Trueno Gordo» recupera su cuarta forma. La criatura de trueno blanca y dorada queda separada como arte reservado para el jefe del Mundo 2.

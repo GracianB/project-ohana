@@ -1,3 +1,4 @@
+import {HERO_POWERS,beginHeroPower,updateHeroPowers,drawHeroPowers} from "./hero-combos.js";
 // World-space attacks. Rendering never applies damage; guests are not enemies.
 const TAU=Math.PI*2;
 const center=e=>({x:e.x+e.w/2,y:e.y+e.h/2});
@@ -30,8 +31,8 @@ const DESCRIPTIONS={
 export const POWER_LEVELS=Object.freeze([0,1,2,0,3,4]);
 export function extraAbility(id,index){
  const d=THEMES[id];if(!d||![4,5].includes(index))return null;
- return {id:`${id}_${index===4?'ascend':'finale'}`,key:index===4?'I':'P',name:d[index===4?2:3],color:d[0],cd:index===4?3600:7200,
-  desc:DESCRIPTIONS[d[index===4?4:5]]};
+ return {id:`${id}_${index===4?'ascend':'finale'}`,key:index===4?'I':'P',name:HERO_POWERS[id][index===4?0:1],color:d[0],cd:index===4?3600:7200,
+  desc:HERO_POWERS[id][index===4?2:3]};
 }
 export function powerAbility(p,index,defs,supreme){return index===3?supreme:index>3?extraAbility(p.id,index):defs[p.abilities?.[index]];}
 function state(g){
@@ -58,32 +59,15 @@ export function startBattleCompanion(g,id,power=1){
 }
 export function castEvolutionAttack(g,index){
  const p=g.player,d=THEMES[p.id],s=state(g),e=tier(p),c=center(p),face=p.facing||1;
- const mode=d[index===4?4:5],damage=((index===4?22:30)+(e-3)*7)*(Number(p._flowPower)||1);
- const n=index===4?5+(e-3)*2:9;
- if(['fleet','spirits'].includes(mode)){
-  for(let i=0;i<5;i++)s.drones.push({id:p.id,x:c.x+(i-2)*40,y:c.y-100,age:0,life:220,index:i,count:5,next:12+i*5});
- }else if(['garden','quake','thunder','eruption','fryer','constellation'].includes(mode)){
-  const enemies=targets(g,c.x,c.y,900),count=mode==='quake'?4:6;
-  for(let i=0;i<count;i++){
-   const target=enemies[i%Math.max(1,enemies.length)],at=target?center(target):{x:c.x+face*(65+i*85),y:c.y};
-   s.fields.push({id:p.id,x:at.x,y:at.y,age:-i*8,life:['garden','eruption','fryer'].includes(mode)?170:48,r:mode==='quake'?85:65,damage,mode,next:24});
-  }
- }else if(mode==='pounce'){
-  const end=clamp(c.x+face*(180+e*15),20,(g.worldW||3000)-20);
-  s.fields.push({id:p.id,x:(c.x+end)/2,y:c.y,age:0,life:32,r:Math.abs(end-c.x)/2+30,damage:damage*1.5,mode:'pounce',next:10});
- }else{
-  for(let i=0;i<n;i++){
-   const a=mode==='orbit'?i*TAU/n:mode==='cross'?(i-(n-1)/2)*.22:(i-(n-1)/2)*.13;
-   shot(s,p,p.id,c.x,c.y,Math.cos(a)*face*(mode==='lance'?15:9),Math.sin(a)*9,damage,mode);
-  }
- }
+ beginHeroPower(g,index,s);
  p._cast={slot:index,t:g.t,id:extraAbility(p.id,index).id,form:e};
  p._powerPerformance={index,start:g.t};
  g.nums?.add?.(c.x,p.y-36,extraAbility(p.id,index).name,d[0],true);
 }
 function beam(s,id,x,y,to){s.beams.push({id,x,y,tx:to.x,ty:to.y,life:10});}
 export function updateEvolutionAttacks(g,hit,heal){
- const p=g.player;if(!p)return;const s=state(g);if(p.dead){s.shots=[];s.fields=[];s.drones=[];s.beams=[];s.guest=null;g._assist=null;return;}
+ const p=g.player;if(!p)return;const s=state(g);if(p.dead){s.shots=[];s.fields=[];s.drones=[];s.beams=[];s.guest=null;s.moves=[];s.oil=[];p._finisherActive=false;g._assist=null;return;}
+ updateHeroPowers(g,s,hit,id=>THEMES[id][0]);
  s.age++;s.beams=s.beams.filter(b=>--b.life>0);
  const e=tier(p),c=center(p);
  for(const d of s.drones){
@@ -91,7 +75,7 @@ export function updateEvolutionAttacks(g,hit,heal){
   const goal=target?center(target):c,tx=goal.x+(d.index-(d.count-1)/2)*44,ty=goal.y-90;
   d.x+=(tx-d.x)*.08;d.y+=(ty-d.y)*.08;
   if(--d.next<=0&&target){d.next=36;const t=center(target);beam(s,d.id,d.x,d.y,t);
-   const landed=hit(g,target,(9+e*3)*(Number(p._flowPower)||1),{color:THEMES[d.id][0],parts:4,hitstop:0});
+   const landed=hit(g,target,(9+e*3)*(Number(p._flowPower)||1),{color:THEMES[d.id][0],parts:4,hitstop:0,noCharge:!!d.noCharge});
    if(d.dance&&landed&&s.lastDanceHeal!==Math.floor(s.age/24)){heal(p,2+e);s.lastDanceHeal=Math.floor(s.age/24);}
   }
  }
@@ -99,7 +83,7 @@ export function updateEvolutionAttacks(g,hit,heal){
  for(const f of s.fields){
   f.age++;if(f.age<0)continue;f.life--;
   if(f.age===f.next){
-   for(const target of targets(g,f.x,f.y,f.r))hit(g,target,f.damage,{color:THEMES[f.id][0],kx:Math.sign(center(target).x-f.x)*4,ky:-3,hitstop:0});
+   for(const target of targets(g,f.x,f.y,f.r))hit(g,target,f.damage,{color:THEMES[f.id][0],kx:Math.sign(center(target).x-f.x)*4,ky:-3,hitstop:0,noCharge:!!f.noCharge});
    f.strikeAt=f.age;
    if(['garden','eruption','fryer'].includes(f.mode))f.next+=30;
    g.fx?.emit?.(f.x,f.y,{color:THEMES[f.id][0],count:6,size:3,speed:2,life:16});
@@ -120,7 +104,7 @@ export function updateEvolutionAttacks(g,hit,heal){
   for(const t of targets(g,b.x,b.y,90)){
    if(b.hit.has(t))continue;const q=center(t),dx=b.x-ox,dy=b.y-oy,u=clamp(((q.x-ox)*dx+(q.y-oy)*dy)/(dx*dx+dy*dy||1),0,1);
    if(Math.hypot(q.x-ox-u*dx,q.y-oy-u*dy)>b.r+Math.max(t.w,t.h)*.5)continue;
-   b.hit.add(t);hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0});
+   b.hit.add(t);hit(g,t,b.damage,{color:THEMES[b.id][0],parts:5,hitstop:0,noCharge:!!b.noCharge});
    if(b.kind==='comet')s.fields.push({id:b.id,x:b.x,y:b.y,age:0,life:25,r:80,damage:b.damage*.6,mode:'burst',next:1});
    if(!['lance','chain','return','stampede'].includes(b.kind)||b.hit.size>=4){b.life=0;break;}
   }
@@ -201,6 +185,7 @@ function drawDrone(ctx,d,cam,t,reduced){
 }
 export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
  const s=g._evolutionAttacks;if(!s||s.owner!==g.player||s.room!==g.roomId)return;
+ drawHeroPowers(ctx,g,cam);
  ctx.save();
  for(const f of s.fields)if(f.age>=0)drawField(ctx,f,cam,t,!!g.reduceMotion);
  ctx.globalAlpha=1;

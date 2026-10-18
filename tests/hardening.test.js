@@ -589,7 +589,7 @@ test('phase 44: guardado transaccional, versionado y fallback quedan cerrados', 
   assert.match(source, /SAVE_TMP_KEY\s*=\s*"ohana\.tmp"/);
   assert.match(source, /setItem\(SAVE_TMP_KEY, raw\)/);
   assert.match(source, /setItem\(SAVE_KEY, raw\)/);
-  assert.match(source, /raw\.v != null && raw\.v !== 2/);
+  assert.match(source, /raw\.v != null && !\[2,3\]\.includes\(raw\.v\)/);
   assert.match(source, /revision\(temporary\) > revision\(primary\)/);
 });
 
@@ -906,7 +906,7 @@ test("V38 enemy intelligence is deterministic, bounded and visually auditable", 
   assert.match(brain, /intent === "FLANK"/);
   assert.match(enemies, /drawEncounterRead/);
   assert.match(enemies, /drawDamageWear/);
-  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t\)/);
+  assert.match(game, /directEnemyEncounter\(game\.enemies, game\.player, game\.roomId, t, /);
   assert.match(game, /enemyCanCommit\(e\)/);
   assert.match(game, /enemyDirectorSnapshot/);
   assert.match(visual, /03b-enemy-intelligence/);
@@ -1000,8 +1000,8 @@ test("V40 Living Worlds + Traversal Graph makes pits real, worlds procedural and
   assert.match(game, /drawHazards\(/);
   assert.match(game, /drawLivingWorld\(/);
 
-  assert.match(hazards, /magma-pit/);
-  assert.match(hazards, /heroEscape:"dragon"/);
+  assert.match(fs.readFileSync("./systems/campaign-layout.js","utf8"), /magma-pit/);
+  assert.match(fs.readFileSync("./systems/campaign-layout.js","utf8"), /heroEscape:'dragon'/);
   assert.match(map, /\[0,1134,1080,126\]/);
   assert.match(map, /\[1240,1134,1000,126\]/);
 

@@ -20,15 +20,16 @@ test("V40: Caldera contiene un pozo mortal real",()=>{
   const h=ROOM_HAZARDS.volcano?.[0];
   assert.equal(h.type,HAZARD_TYPES.DEATH);
   assert.equal(h.id,"magma-pit");
-  const player=p(1120,1160,7);
+  const player=p(h.x+h.w/2,h.y+h.h*.6,7);
   assert.equal(hazardContainsX("volcano",player)?.id,"magma-pit");
   assert.equal(hazardAt("volcano",player)?.id,"magma-pit");
   assert.equal(hazardTrigger("volcano",player)?.type,HAZARD_TYPES.DEATH);
 });
 
 test("V40: una caída Beach→Reef se activa por profundidad y no por coordenada mágica",()=>{
-  const high=p(1080,1040,8);
-  const deep=p(1080,1110,8);
+  const h=ROOM_HAZARDS.beach[0];
+  const high=p(h.x+h.w/2,h.y-30,8);
+  const deep=p(h.x+h.w/2,h.y+h.h*.5,8);
   assert.equal(hazardContainsX("beach",high)?.id,"reef-drop");
   assert.equal(hazardTrigger("beach",high),null);
   assert.equal(hazardTrigger("beach",deep)?.dest,"reef");

@@ -1,3 +1,4 @@
+import { installCampaign } from "./campaign-layout.js";
 import { strategicLedgesFor } from "./room-strategy.js";
 export const ROOM_W = 3360;
 export const ROOM_H = 1260;
@@ -204,6 +205,8 @@ for(const room of Object.values(ROOMS)){
  }
 }
 
+installCampaign(ROOMS);
+
 function rrect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -253,8 +256,8 @@ export function drawSigns(ctx, room, cam, t, evo) {
     for (let i = 0; i < w; i += 20) ctx.fillRect(x - cam.x + i, y - cam.y, 8, h);
   }
   // Pit indicator (single): dark elliptical hole + swirl + label at bottom-centre gap.
-  function pit(label, deadly) {
-    const x = ROOM_W / 2 - cam.x, y = ROOM_H - 84 - cam.y;
+  function pit(label, deadly, hazard) {
+    const x = hazard.x+hazard.w/2-cam.x, y = hazard.y-cam.y;
     const c = deadly ? "255,120,140" : "126,231,255";
     const rim = deadly ? "40,8,14" : "6,28,40";
     ctx.save();
@@ -337,19 +340,9 @@ export function drawSigns(ctx, room, cam, t, evo) {
     ctx.restore();
   }
 
-  if (room.doors.right) sign(ROOM_W - 56, 500, "→", room.doors.right, "right"); else wall(ROOM_W - 16, 80, 20, 700);
+  if (room.doors.right) sign((room.width || ROOM_W) - 56, 500, "→", room.doors.right, "right"); else wall((room.width || ROOM_W) - 16, 80, 20, 700);
   if (room.doors.left) sign(40, 356, "←", room.doors.left, "left"); else wall(-4, 80, 20, 700);
-  if (room.doors.up) sign(800, 22, "↑", room.doors.up, "center");
+  if (room.doors.up) sign(room.upExit.x+room.upExit.w/2, 22, "↑", room.doors.up, "center");
 
-  if (room.doors.down) {
-    if (room.pit) {
-      const dest = ROOMS[room.doors.down];
-      pit((dest && (dest.short || dest.name)) || "ABAJO", false);
-    } else {
-      sign(800, ROOM_H - 56, "↓", room.doors.down, "center");
-    }
-  } else if (room.pit) {
-    if (room.id === "beach") pit("↓ ARRECIFE", false);
-    else pit("POZO MORTAL", true);
-  }
+  for(const h of room.hazards||[])pit(h.label,h.type==="death",h);
 }

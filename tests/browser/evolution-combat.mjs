@@ -20,7 +20,7 @@ try{
   assert.equal(await page.locator('#ability-bar [data-index="4"]').getAttribute('aria-label'),'Forma 4 · I');
   await page.evaluate(()=>window.__OHANA_E2E.setEvo(3));await page.keyboard.press('i');
   const current=await page.evaluate(()=>window.__OHANA_E2E.state());if(current.lastAbilitySlot!==4){console.log(JSON.stringify({errors,state:current},null,2));await page.screenshot({path:'test-results/evolution-combat/failure.png'});}assert.equal(current.lastAbilitySlot,4,hero+' I');
-  await page.evaluate(()=>window.__OHANA_E2E.setEvo(4));await page.keyboard.press('p');
+  await page.evaluate(()=>{window.__OHANA_E2E.setEvo(4);window.__OHANA_E2E.setFinisher(100);});await page.keyboard.press('p');
   assert.equal((await page.evaluate(()=>window.__OHANA_E2E.state())).lastAbilitySlot,5,hero+' P');
   await page.evaluate(()=>window.__OHANA_E2E.step(60));
  }

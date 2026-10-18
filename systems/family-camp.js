@@ -1,3 +1,4 @@
+import {drawFamilyIslands,pairedScene} from "./family-islands.js";
 import {ROSTER} from '../characters/roster.js';
 import {drawCharacter} from '../characters/draw.js';
 import {CAMP_HEROES,campNearest,campViewport,campPresentation} from './family-camp-model.js';
@@ -22,25 +23,8 @@ export function campActor(def,evo=1,pose='idle',height=92){
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
 function line(c,x,y,x2,y2,color,width=3){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.stroke();}
 function label(c,text,x,y,size=15,color='#fff5cb'){c.font=`600 ${size}px Outfit,sans-serif`;c.textAlign='center';c.fillStyle=color;c.fillText(text,x,y);}
-function island(c,t,reduce){
- c.fillStyle='#244e67';c.fillRect(0,0,1400,660);
- for(let i=0;i<12;i++){const y=35+i*53;line(c,0,y,1400,y,'#80d2dc13',2);}
- ellipse(c,700,366,665,267,'#143e4a');ellipse(c,700,350,660,259,'#e3c897');ellipse(c,700,334,639,239,'#f3ddb1');
- ellipse(c,710,327,575,208,'#9dbe8a');ellipse(c,710,336,545,186,'#b4c78c');
- // A path links ten little stages; the family shares one place.
- c.strokeStyle='#efd8ae';c.lineWidth=55;c.lineCap='round';c.beginPath();c.moveTo(235,325);c.bezierCurveTo(430,165,840,180,1120,325);c.bezierCurveTo(1290,590,280,620,235,325);c.stroke();
- ellipse(c,923,267,137,70,'#74b8bb');ellipse(c,923,257,120,55,'#95d1cf');
- for(const x of [115,1260]){line(c,x,300,x+18,125,'#816047',15);for(let j=0;j<5;j++){c.strokeStyle=j%2?'#4d8c79':'#659e7e';c.lineWidth=16;c.beginPath();c.moveTo(x+18,130);c.quadraticCurveTo(x-115+j*47,65,x-100+j*49,160);c.stroke();}}
- for(const [x,y,col] of [[370,215,'#b4809b'],[1060,455,'#d6ad78']]){c.fillStyle=col;c.beginPath();c.moveTo(x-52,y);c.lineTo(x,y-64);c.lineTo(x+52,y);c.closePath();c.fill();c.fillStyle='#405d60';c.fillRect(x-10,y-30,20,30);}
- // Picnic, stepping stones, wind chimes, a little campfire.
- c.fillStyle='#e6a694';c.fillRect(530,445,95,42);for(let i=0;i<4;i++)line(c,535+i*23,445,535+i*23,487,'#f3d8b5',5);
- for(let i=0;i<4;i++)ellipse(c,845+i*45,307,17,8,'#d6d5ba');
- line(c,201,269,250,269,'#987451',4);for(let i=0;i<4;i++){line(c,205+i*13,269,205+i*13,287+i%2*8,'#fff0c5',2);}
- ellipse(c,1085,343,26,10,'#8e7d65');for(let i=0;i<3;i++)ellipse(c,1074+i*10,332-(reduce?0:Math.sin(t*3+i)*3),7,14,'#ffc780');
- // Enemy silhouettes stay on their own distant island.
- ellipse(c,1300,52,75,30,'#c2b49a');for(let i=0;i<3;i++){ellipse(c,1260+i*35,40,12,9,'#7f5474');ellipse(c,1256+i*35,37,2,2,'#fff6dc');ellipse(c,1264+i*35,37,2,2,'#fff6dc');}label(c,'¿QUÉ TRAMAN?',1300,17,11,'#c3e2e6');
- for(let i=0;i<18;i++){const x=150+(i*137)%1110,y=190+(i*59)%360;ellipse(c,x,y,3,3,i%2?'#fff5c7':'#e7a6b4');}
-}
+function island(c,t,reduce){drawFamilyIslands(c);}
+
 function prop(c,id,x,y,t,active,reduce){
  const type=CAMP_HEROES[id].prop,phase=reduce?0:t;
  c.save();c.translate(x,y);
@@ -60,7 +44,7 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
  const menu=doc.getElementById('char-select');if(!menu||doc.getElementById('family-camp'))return;
  menu.classList.add('camp-on');menu.dataset.selectorMode='family-camp';
  const host=doc.createElement('section');host.id='family-camp';host.setAttribute('aria-label','Campamento de la familia');
- host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Isla viva. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><div class="camp-forms" role="group" aria-label="Explorar las cinco formas">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}">${n+1}</button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
+ host.innerHTML=`<div class="camp-scene"><div class="camp-scene-heading"><span>ANTES DE SALVAR EL MUNDO…</span><strong>Un ratito con la familia.</strong></div><canvas id="camp-canvas" tabindex="0" role="img" aria-label="Cinco islas de la familia. Flechas o WASD mueven la luciérnaga; acércate a un personaje o elígelo en los botones inferiores."></canvas><p class="camp-instructions">Mueve la luciérnaga · toca un personaje · descubre sus travesuras</p><div class="camp-mystery" aria-label="La U revela un compañero sorpresa"><span aria-hidden="true">?</span><p>Una ayuda inesperada.<small>Tu compañero se revela al pulsar U.</small></p></div></div><aside class="camp-dossier"><p class="camp-eyebrow">TU COMPAÑERO DE AVENTURA</p><h2 id="camp-name"></h2><p id="camp-role"></p><div class="camp-album-art"><canvas id="camp-portrait" width="300" height="240" role="img"></canvas><span id="camp-form-name"></span></div><div class="camp-forms" role="group" aria-label="Explorar las cinco formas">${[0,1,2,3,4].map(n=>`<button type="button" data-camp-form="${n}" aria-label="Ver forma ${n+1}">${n+1}</button>`).join('')}</div><p id="camp-route"></p><dl id="camp-stats"></dl><div class="camp-talk" aria-live="polite"><p id="camp-line"></p></div><div class="camp-film-controls"><button type="button" id="camp-film">Ver su travesura</button><button type="button" id="camp-film-stop" hidden>Terminar escena</button></div><button type="button" id="camp-start">¡Vámonos de aventura! ↗</button></aside>`;
  menu.querySelector('.hero-stage').before(host);
 const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('#camp-route').after(powers);
  let selected=menu.dataset.hero||'kilo',form=0,film=null,last=0,time=0,raf=0,view={scale:1,x:0};
@@ -98,10 +82,11 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
  for(const def of ROSTER){const p=CAMP_HEROES[def.id],hot=def.id===selected,beat=film?.id===def.id?campPresentation(def.id,time-film.start):null;
  ellipse(ctx,p.x,p.y+4,hot?50:35,12,hot?'#fff5c066':'#425f5029');
- const pose=beat?.pose||'idle';let x=p.x,y=p.y;
+ const pair=film?pairedScene(def.id,selected,time-film.start):null;
+ const pose=pair?.pose||beat?.pose||'idle';let x=p.x+(reduce?0:pair?.dx||0),y=p.y+(reduce?0:pair?.dy||0);
  if(beat&&!reduce){const phase=(time-film.start)%4;if(pose==='run')x+=Math.sin(phase*Math.PI/2)*30;if(pose==='jump')y-=Math.sin(phase*Math.PI/4)*35;}
  prop(ctx,def.id,x,y,time,!!beat,reduce);
- if(hot){ctx.save();ctx.translate(x,y);drawCharacter(ctx,campActor(def,1,pose,94),{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});ctx.restore();}
+ if(hot||pair){ctx.save();ctx.translate(x,y);drawCharacter(ctx,campActor(def,1,pose,94),{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});ctx.restore();}
  else {
   let cached=idleActors.get(def.id);
   if(!cached){const image=doc.createElement('canvas');image.width=220;image.height=190;cached={image,at:-Infinity,reduce};idleActors.set(def.id,cached);}
