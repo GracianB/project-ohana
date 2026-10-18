@@ -11,7 +11,7 @@ export const ADVENTURES=Object.freeze({
  cave:{name:'El eco despierta',kind:'battle',foes:['murcielago','arana','cucaracho'],color:'#c1afff'},
  lab:{name:'Alarma del experimento',kind:'battle',foes:['ufo','phosquito','arana'],color:'#81eeec'},
  ridge:{name:'Los anillos del viento',kind:'race',color:'#e1e9ff'},
- space:{name:'Patrulla de estrellas',kind:'battle',foes:['ufo','phosquito'],color:'#ceadff'},
+ space:{name:'Patrulla de estrellas',kind:'battle',foes:['ufo','phosquito','medusa'],color:'#ceadff'},
  reef:{name:'El collar de coral',kind:'race',color:'#ffa8d8'},
  volcano:{name:'El corazón de la caldera',kind:'battle',foes:['escoria','brasita','planta'],color:'#ffc184'}
 });

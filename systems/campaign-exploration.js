@@ -40,7 +40,7 @@ export function enterCampaignExploration(g){
   return {id:`${r.id}-secret-${i}`,x:x+390,y:540,platform,baseY:974,phase:i*Math.PI,found:false};
  });
  const def=mechanismForBiome(r.id);
- const mechanisms=def?[1,3].filter(n=>n<r.sectors.length).map((n,i)=>{
+ const mechanisms=def?(r.sectors.length===3?[0,1]:[1,3]).filter(n=>n<r.sectors.length).map((n,i)=>{
   const sector=r.sectors[n],x=sector.x+Math.min(sector.w-140,sector.w*.58);
   const floor=(g.platforms||[]).filter(pl=>pl.h>40&&x>=pl.x+30&&x<=pl.x+pl.w-30).sort((a,b)=>b.y-a.y)[0];
   return floor?{...def,id:r.id+'-mechanism-'+i,x,y:floor.y,cd:0,flash:0,used:0}:null;

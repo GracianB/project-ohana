@@ -288,7 +288,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
-  "systems/campaign-exploration.js": "1c0c1988b25161a2668d84befba97cf7327e7aa8",
+  "systems/campaign-exploration.js": "2ea93e757a63e0d15fd54dee9cdea299bb09963f",
   "systems/campaign-layout.js": "b83612426ae2976b0cb39b952293a9078a013d01",
   "systems/local-map.js": "e1f5eb0ece990c3550a0caa7eb6d54bbc430c6e1",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
@@ -300,7 +300,7 @@ const PRECACHE_REVISIONS = {
   "systems/island-springs.js": "80acba46fdea707fa56764195cdae5cb9912cb74",
   "worlds/nest-sanctuary.js": "52360cb2eb2d50e4020f8453dbe6a67546465f3d",
   "characters/power-performance.js": "f9fa8881f0fab333ff883a8134a51c9bd41d49b2",
-  "systems/room-adventures.js": "fc7002cddda5d234b73550615c16e2f43619b930",
+  "systems/room-adventures.js": "d6d6ecc71fa637cea44185badadc53cf51358cd8",
   "systems/enemy-champions.js": "f72880201ac8b48c66707484e7e7f683f75f1c75",
   "characters/art/chispin-boss.js": "bbc51f322d783e84dbb9a5409262f73ace4dec7d",
   "systems/evolution-attacks.js": "d0e44941112c3ee631759458f02a1ad08ccfd242",
