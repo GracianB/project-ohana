@@ -495,7 +495,7 @@ const PRECACHE_REVISIONS = {
   "systems/chispin-cloud.js": "ab120d3b913e6902983161d7df1dbbdf108d174b",
   "systems/coop-v109-recovery.js": "d9fa781d392838208a35d478cea0986fb3b21fce",
   "systems/menu-visibility.js": "4a779b567eaf1c0a4d8fa9c4c056c10816410382",
-  "systems/enemy-director.js": "9b605c3412572da699c0755fd21f9ec5684fba63",
+  "systems/enemy-director.js": "2557a629fb3e5daa9fdd878ec38a27f9afae5320",
   "systems/encounter-spatial.js": "4f50b64880f8182f0db121dd353067eba2276668",
   "systems/encounter-signals.js": "70b550e019561332fa598584938c888edf40106b",
   "systems/enemy-ecology.js": "b50f47be30c5ddb5e86de25986ed737529367d0d",
