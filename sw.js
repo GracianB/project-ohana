@@ -585,7 +585,7 @@ const PRECACHE_REVISIONS = {
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "939c79afc5a9a0b19f4dddb43987ce8a01d77c19",
   "systems/experience.js": "fdae32ccbf59e4f838cee4f5fe0ca0f5f66d16ca",
-  "systems/online-coop.js": "dab3852a0a87f21ad4890ee84ae7a109f86d420d",
+  "systems/online-coop.js": "6ca9aa0ae2eb26e17fddb8ae616adc68224dd394",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
   "systems/xp.js": "df3fba7395dfacd5fe3dc37826c6cb10c244856a",
   "worlds/index.js": "5e6b0b03d15a30822948aa372a0f8eaf577a4ebf",
