@@ -17,3 +17,7 @@ test('H invulnerability expires on both campaign enemies and the miniboss, allow
  const common={x:100,y:1080,w:30,h:30,hp:100,vx:0,vy:0,campaignRole:'pursuer',invuln:8};for(let i=0;i<8;i++)updateCampaignEnemy(common,g,()=>{});assert.equal(common.invuln,0);
 });
 test('Kilo selection has four authored acts, shared Stitcho reactions and finite choreography',()=>{const kinds=[];for(const t of [1,5,8,11]){const k=pairedScene('kilo','kilo',t),s=pairedScene('stitcho','kilo',t);kinds.push(k.performance.kind);assert.ok(Number.isFinite(k.dx+s.dy));}assert.deepEqual(kinds,['entrance','dance','relic','family']);});
+import {shouldSkipCoopWelcome} from '../systems/coop-welcome.js';
+test('Live lobby sessions bypass automatic title welcome; solo, invalid sessions and voluntary replay keep it',()=>{
+ const s=JSON.stringify({originalEngine:true,characterId:'kilo'});assert.equal(shouldSkipCoopWelcome('?online=1',s),true);assert.equal(shouldSkipCoopWelcome('?online=1',s,true),false);assert.equal(shouldSkipCoopWelcome('',s),false);assert.equal(shouldSkipCoopWelcome('?online=1','{bad'),false);assert.equal(shouldSkipCoopWelcome('?online=1','{}'),false);assert.equal(shouldSkipCoopWelcome('?online=1',null),false);
+});

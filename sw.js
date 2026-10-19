@@ -1,6 +1,7 @@
 const VERSION = "ohana-452";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/coop-welcome.js?v=" + VERSION,
   "./systems/grove-guardian.js?v=" + VERSION,
   "./systems/kilo-combo.js?v=" + VERSION,
   "./systems/player-movement.js?v=" + VERSION,
@@ -304,6 +305,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/coop-welcome.js": "32636a5edb0d6145f9eb4b569ef6654f42a32c45",
   "systems/grove-guardian.js": "ede2bb8cdbd43d9d7241ecf713f05404a2c376e0",
   "systems/kilo-combo.js": "354061e47cc27866baab641c2b02343c4b2b5aeb",
   "systems/player-movement.js": "f5893c679e1d79c18ecb7f498cad0a790c2d2e20",
@@ -544,7 +546,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "c7e540b2c7b725405064887b53c46f01baf7759a",
-  "systems/intro.js": "12182df25dd72f3bc3ebec55d892a252671d5f74",
+  "systems/intro.js": "e3e2b4ba3ce55ca0b54a0839ef43e380fe7bdc5b",
   "systems/intro-cast-fit.js": "9c97bb2367f339ad775fc18b671fb68937a9574e",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
   "systems/intro-dino-stage.js": "e866d1dce44c4f50164e944ff3791d616699f060",
