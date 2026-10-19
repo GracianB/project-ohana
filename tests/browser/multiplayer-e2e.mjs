@@ -241,7 +241,14 @@ try {
     if(recoveredSession)break;
     await hostPage.waitForTimeout(200);
   }
-  if(!recoveredSession)console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,host:await hostPage.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,paused:document.getElementById("pause")?.className,body:document.body.className,hp:o._combatGame?.player?.health,dead:o._combatGame?.player?.dead,state:o.snapshot?.phase,initiator:o.direct?.initiator,active:o.direct?.active,attempted:o.directAttempted,available:o.direct?.available,peer:!!o.remote?.playerId,at:o.directRetryAt,now:performance.now()};})}));
+  if(!recoveredSession){
+    const clients=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
+      const {onlineCoop:o}=await import("/systems/online-coop.js");
+      return {hidden:document.hidden,body:document.body.className,hp:o._combatGame?.player?.health,dead:o._combatGame?.player?.dead,state:o.snapshot?.phase,enabled:o.enabled,error:o.error,polling:o.polling,lastTick:o.lastGameTick,lastPoll:o.lastPoll,lastSnapshot:o.lastSnapshotAt,retryAfter:o.retryAfter,attempted:o.directAttempted,peer:!!o.remote?.playerId,now:performance.now()};
+    })));
+    const stored=[...store.entries.values()].map(e=>({phase:e.data.phase,players:e.data.players?.map(p=>({slot:p.slot,connected:p.connected,lastSeenAt:p.lastSeenAt}))}));
+    console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,clients,stored,serverNow:Date.now()}));
+  }
   assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
     const {onlineCoop}=await import("/systems/online-coop.js");

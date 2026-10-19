@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { chromium, devices } from 'playwright';
 import { startServer } from './server.mjs';
-import { DRAGON_EMBERS } from '../../systems/dragon-trial.js';
 import { FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
 
 const server = await startServer(0);
@@ -1161,21 +1160,21 @@ try {
     'desktop: V85 lower solid floor did not catch the descending hero');
 
   // V87 · Dragon sanctuary is playable without locking co-op doors.
-  const dragonSanctuary=await page.evaluate((embers)=>{
+  const dragonSanctuary=await page.evaluate(()=>{
     const api=window.__OHANA_E2E;
     api.start('dragon');api.setEvo(4);api.loadRoom('volcano');
     api.resetInput();api.setInvulnerable(600);
     api.step(12); // Clear entry animation before channeling.
     const steps=[],positions=[];
-    for(const ember of embers){
-      // Every focus now has real terrain beneath it and requires 30 held ticks.
-      api.setPlayer(ember.x,ember.y-37);
+    for(const ember of api.state().dragonTrialEmbers){
+      // Resolve the same terrain-anchored foci used by the live room.
+      api.setPlayer(ember.x-32,ember.y-12);
       const state=api.step(37);
       steps.push(state.dragonTrial?.count||0);
       positions.push({ember:ember.title,position:state.player,charge:state.dragonTrial?.charge||0});
     }
     return {steps,positions,trial:api.state().dragonTrial};
-  },DRAGON_EMBERS);
+  });
   assert.deepEqual(dragonSanctuary.steps,[1,2,3],
     'V87: dragon embers not collected in real engine · '+JSON.stringify(dragonSanctuary));
   assert.equal(dragonSanctuary.trial?.completed,true,
