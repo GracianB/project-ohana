@@ -34,3 +34,13 @@
 .stitcho-atlas .wm-node:hover .wm-marker{background:#bbebff;color:#193a63;}
 .stitcho-atlas .wm-north{color:#c7efff;}
 .stitcho-atlas .wm-node:focus-visible{outline-color:#a7eaff;}
+
+/* V454 · Chispín private four-island route; warm voltage over the existing
+   petrol palette. Markers keep focus and contrast in both UI themes. */
+.chispin-atlas .wm-scroll,.chispin-atlas .wm-board{background:#143d70;}
+.chispin-atlas .wm-marker{background:#2e527a;color:#fff0bd;border-color:#f7dda0;}
+.chispin-atlas .wm-node b{background:#ffedb9;color:#183c61;}
+.chispin-atlas .wm-node small{background:#112e52;color:#fff3d4;}
+.chispin-atlas .wm-node.here .wm-marker{background:#ffe69b;color:#183d6b;border-color:#fffbdc;box-shadow:0 0 0 6px #ffe5a166;}
+.chispin-atlas .wm-node.selected:not(.here) .wm-marker,.chispin-atlas .wm-node:focus-visible .wm-marker{border-color:#fffbd6;box-shadow:0 0 0 5px #ffe79d70;}
+.chispin-atlas .wm-node:hover .wm-marker{background:#fff0c5;color:#1d426e;}
