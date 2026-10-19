@@ -14,6 +14,7 @@ import {createWorldTwoGuardian,updateWorldTwoGuardian,drawWorldTwoGuardian,drawW
 import {createChispinBoss,updateChispinBoss,drawChispinBossBody,drawChispinBossSignals,CHISPIN_BOSS_ID} from "./systems/chispin-boss.js";
 import {enterChispinStorm,interactChispinStorm,chispinStormPrompt,updateChispinStorm,drawChispinStorm,chispinStormAbility,chispinStormSnapshot} from "./systems/chispin-storm.js";
 import {drawChispinIsles} from "./worlds/chispin-isles.js";
+import {enterChispinEnemies,updateChispinEnemies,drawChispinEnemies} from "./systems/chispin-enemies.js";
 import {renderChispinAtlasHTML,chispinAtlasDetail} from "./systems/chispin-atlas.js";
 import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
 import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
@@ -571,6 +572,7 @@ game.spawnChispinBoss=()=>{
   game.enemies.push(createChispinBoss(makeFoe,game.rng));
   return true;
 };
+enterChispinEnemies(game);
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -2775,7 +2777,7 @@ if(game.stitchoTrail){
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinStorm(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinStorm(ctx,game,game.cam,t);drawChispinEnemies(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
@@ -3251,7 +3253,7 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
-updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinStorm(game,hurtPlayer);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinStorm(game,hurtPlayer);updateChispinEnemies(game,hurtPlayer);
 updatePlayer();
 updateRoomAlbum(game);updateHeroCollection(game);
 if(game.relicScene)return;
