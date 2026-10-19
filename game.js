@@ -2607,7 +2607,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
-if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
+if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._chispinBoss?"¡EL OJO DE LA TORMENTA HA CAÍDO!":e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._chispinBoss?"#ffe9a0":e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
