@@ -121,6 +121,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
     this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
+    this.pendingVisualCombo=null;
     this._reliableDuetSource=null;this._reliableDuetLink=null;
     this._relayDuetSource=null;this._relayDuetHoldUntil=0;
   }
@@ -161,6 +162,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
     this.seenActionEvents.clear();this.effectSequence=0;this.lastEffectsSentAt=0;
+    this.pendingVisualCombo=null;
     this._reliableDuetSource=null;this._reliableDuetLink=null;
     this._relayDuetSource=null;this._relayDuetHoldUntil=0;
     resetCombatMirror(game);game.coopPeerEffects=null;this._combatGame=game;
@@ -506,6 +508,7 @@ class OnlineCoop {
     this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
     this.lastCombatFrame=0;this.lastCombatReceivedAt=0;this.remoteCombatScope="";
     this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
+    this.pendingVisualCombo=null;
     if(this._combatGame){resetCombatMirror(this._combatGame);this._combatGame.coopPeerEffects=null;}
   }
 
@@ -971,10 +974,24 @@ class OnlineCoop {
   sendPeerEffects(game,force=false){
     const now=performance.now();
     const duet=game._familyDuet||game._michiDuet||game._chispinDuet||game._stitchoDuet||game._kiloDuet;
+    // Keep a bounded, validated, cosmetic-only J/K/L sample after a
+    // transient reliable-channel rejection. An old epoch, room, peer link
+    // or 2.5-second-old sample is discarded without touching combat state.
+    const stale=p=>now-p.createdAt>2500||p.roomId!==game.roomId||
+      p.scope!==this.combatEpoch||p.link!==this.direct;
+    if(this.pendingVisualCombo&&stale(this.pendingVisualCombo))this.pendingVisualCombo=null;
+    const fullCombo=frame=>{
+      const has=(list,kinds)=>kinds.every(kind=>list?.some(f=>f?.kind===kind));
+      return has(frame?.michiFx,['yarn','purr','wisp'])||
+        has(frame?.chispinFx,['chain','trail','storm']);
+    };
+    if(force&&!this.pendingVisualCombo){
+      const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
+      if(fullCombo(frame))this.pendingVisualCombo={
+        frame,roomId:game.roomId,scope:this.combatEpoch,link:this.direct,createdAt:now
+      };
+    }
     if(!this.direct?.active||this.remoteWorld!==game.roomId){
-      // The test harness and reconnecting clients can cast U without
-      // going through the physical keyboard handler. Relay only once per
-      // family-duet instance, not on every heartbeat.
       if(game._familyDuet&&this.enabled&&this.remoteWorld===game.roomId&&
          this._relayDuetSource!==game._familyDuet&&
          Number(game._familyDuet.age)<100&&this.snapshot?.phase!=="lobby"){
@@ -983,13 +1000,21 @@ class OnlineCoop {
       }
       return false;
     }
-    if(!force&&now-this.lastEffectsSentAt<200)return false;
-    // A U cast can precede remote-room synchronization or reliable channel
-    // readiness. Keep attempting its first durable snapshot at normal 5 Hz
-    // until accepted; a freshly negotiated link must receive it again.
-    const pending=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
+    if(!force&&!this.pendingVisualCombo&&now-this.lastEffectsSentAt<200)return false;
+    // A full J/K/L trio must be accepted by ordered SCTP, not only
+    // the disposable pose lane. Retry at the existing game update tick.
+    const saved=this.pendingVisualCombo;
+    if(saved){
+      const accepted=sendPeerEffectsWithReliableDuet(this.direct,saved.frame,true);
+      if(!accepted)return false;
+      this.pendingVisualCombo=null;
+      this.lastEffectsSentAt=now;
+      return true;
+    }
+    // Native U handshake and normal 5Hz FX retain their original behavior.
+    const pendingDuet=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
     const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
-    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pending,()=>{
+    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pendingDuet,()=>{
       if(duet){this._reliableDuetSource=duet;this._reliableDuetLink=this.direct;}
     });
     if(sent)this.lastEffectsSentAt=now;
