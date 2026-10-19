@@ -1,18 +1,19 @@
 import {makeFoe,applyElite,isAirFoe} from '../engine/foes.js';
 import {addPlayerXp,addScore} from './mutations.js';
 import {MAX_RUNTIME_ENEMIES} from './runtime.js';
+import {campaignRole} from './campaign-enemies.js';
 
 const TAU=Math.PI*2;
 export const ADVENTURES=Object.freeze({
  hub:{name:'El sendero de las luciérnagas',kind:'race',color:'#e7e99a'},
- beach:{name:'La guardia de las mareas',kind:'battle',foes:['cangrejo','gaviota'],color:'#7fe1ee'},
+ beach:{name:'La guardia de las mareas',kind:'battle',foes:['cangrejo','gaviota','planta'],color:'#7fe1ee'},
  jungle:{name:'La carrera de las copas',kind:'race',color:'#b5ef8c'},
- cave:{name:'El eco despierta',kind:'battle',foes:['murcielago','arana'],color:'#c1afff'},
- lab:{name:'Alarma del experimento',kind:'battle',foes:['ufo','phosquito'],color:'#81eeec'},
+ cave:{name:'El eco despierta',kind:'battle',foes:['murcielago','arana','cucaracho'],color:'#c1afff'},
+ lab:{name:'Alarma del experimento',kind:'battle',foes:['ufo','phosquito','arana'],color:'#81eeec'},
  ridge:{name:'Los anillos del viento',kind:'race',color:'#e1e9ff'},
- space:{name:'Patrulla de estrellas',kind:'battle',foes:['ufo','phosquito'],color:'#ceadff'},
+ space:{name:'Patrulla de estrellas',kind:'battle',foes:['ufo','phosquito','medusa'],color:'#ceadff'},
  reef:{name:'El collar de coral',kind:'race',color:'#ffa8d8'},
- volcano:{name:'El corazón de la caldera',kind:'battle',foes:['escoria','brasita'],color:'#ffc184'}
+ volcano:{name:'El corazón de la caldera',kind:'battle',foes:['escoria','brasita','planta'],color:'#ffc184'}
 });
 const center=p=>({x:p.x+p.w/2,y:p.y+p.h/2});
 const live=e=>e&&e.hp>0&&!e.dying&&!e.fell;
@@ -55,7 +56,7 @@ function queueWave(g,a){
  for(let i=0;i<count;i++){
   const side=i%2?1:-1,raw=center(p).x+side*(150+Math.floor(i/2)*100);
   a.pending.push({x:Math.max(floor.x+40,Math.min(floor.x+floor.w-40,raw)),y:floor.y,
-   kind:a.foes[i%a.foes.length],elite:a.wave===1&&i===0,wait:65+i*16});
+   kind:a.foes[(i+a.wave)%a.foes.length],elite:a.wave===1&&i===0,wait:65+i*22});
  }
  a.phase='warning';
  notify(g,a.wave?'¡LLEGA EL GUARDIÁN!':'¡EMBOSCADA!');
@@ -103,6 +104,7 @@ export function updateAdventure(g){
    if(spawn.elite)applyElite(e);
    e.x=Math.max(0,spawn.x-e.w/2);e.y=spawn.y-e.h-(isAirFoe(e)?110:0);
    e.spawnIndex=100+a.spawned.length;e.roomId=g.roomId;e._adventureFoe=true;
+   e.campaignRole=campaignRole(g.roomId,a.spawned.length+a.wave*3);
    e.invuln=12;e.flash=12;e.dropsOrb=false;e.canSplit=false;
    g.enemies.push(e);a.spawned.push(e);spawn.done=true;
    g.fx?.emit?.(spawn.x,spawn.y-20,{color:a.color,count:12,size:3,speed:2,life:20});

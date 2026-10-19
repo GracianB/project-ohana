@@ -110,7 +110,10 @@ function attackBudget(alive, hard, roomId) {
   if (alive <= 1) return alive;
   // Early rooms teach one readable threat. Caldera can briefly sustain one extra
   // committed foe, still capped at the existing maximum of three.
-  return clamp(1 + Math.floor((hard + Math.max(0, alive - 4)) / 2) + ecologyBudget(roomId), 1, 3);
+  // Late biomes keep up to three independently telegraphed threats active.
+  // Hub and early rooms retain their deliberately gentle entry pressure.
+  const latePressure=hard>=2&&alive>=4?1:0;
+  return clamp(1 + Math.floor((hard + Math.max(0, alive - 4)) / 2) + ecologyBudget(roomId) + latePressure, 1, 3);
 }
 
 function lowHealthRetreat(e, role) {

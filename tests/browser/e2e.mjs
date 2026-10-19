@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { chromium, devices } from 'playwright';
 import { startServer } from './server.mjs';
+import { DRAGON_EMBERS } from '../../systems/dragon-trial.js';
 import { FIRST_CONTENTFUL_PAINT_MS, SIMULATION_STEP_BUDGET_MS } from '../../tools/performance-budgets.mjs';
 
 const server = await startServer(0);
@@ -1140,26 +1141,41 @@ try {
     'desktop: V85 hero did not settle on the upper ledge');
   await page.locator('#game').focus();
   await page.keyboard.down('ArrowDown');
-  const platformDropAfter = await page.evaluate(() => window.__OHANA_E2E.step(40));
+  const platformDropTrace = await page.evaluate(()=>{
+    const api=window.__OHANA_E2E,samples=[];let state;
+    for(let frame=1;frame<=40;frame++){
+      state=api.step(1);
+      if(frame<=8||frame%4===0){
+        const p=state.player;
+        samples.push({frame,y:p.y,vy:p.vy,grounded:p.grounded,held:p.dropHeld,platform:p.dropPlatform&&p.dropPlatform.y});
+      }
+    }
+    return {state,samples};
+  });
+  const platformDropAfter=platformDropTrace.state;
   await page.keyboard.up('ArrowDown');
+  console.log('V85_DROP_DATA',JSON.stringify({before:platformDropBefore.player,samples:platformDropTrace.samples,after:platformDropAfter.player,input:platformDropAfter.input}));
   assert.ok(platformDropAfter.player.y > platformDropBefore.player.y + 75,
     'desktop: V85 DOWN did not traverse the ledge / snapback detected');
   assert.equal(platformDropAfter.player.grounded, true,
     'desktop: V85 lower solid floor did not catch the descending hero');
 
   // V87 · Dragon sanctuary is playable without locking co-op doors.
-  const dragonSanctuary=await page.evaluate(()=>{
+  const dragonSanctuary=await page.evaluate((embers)=>{
     const api=window.__OHANA_E2E;
     api.start('dragon');api.setEvo(4);api.loadRoom('volcano');
     api.resetInput();api.setInvulnerable(600);
-    api.step(12); // Room entrance animation must finish before sampling embers.
-    const steps=[];
-    for(const ember of api.state().dragonTrialEmbers){
-      api.setPlayer(ember.x-32,ember.y-12);
-      steps.push(api.step(37).dragonTrial?.count||0);
+    api.step(12); // Clear entry animation before channeling.
+    const steps=[],positions=[];
+    for(const ember of embers){
+      // Every focus now has real terrain beneath it and requires 30 held ticks.
+      api.setPlayer(ember.x,ember.y-37);
+      const state=api.step(37);
+      steps.push(state.dragonTrial?.count||0);
+      positions.push({ember:ember.title,position:state.player,charge:state.dragonTrial?.charge||0});
     }
-    return {steps,trial:api.state().dragonTrial};
-  });
+    return {steps,positions,trial:api.state().dragonTrial};
+  },DRAGON_EMBERS);
   assert.deepEqual(dragonSanctuary.steps,[1,2,3],
     'V87: dragon embers not collected in real engine · '+JSON.stringify(dragonSanctuary));
   assert.equal(dragonSanctuary.trial?.completed,true,

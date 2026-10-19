@@ -1,3 +1,9 @@
+## ohana-452 · Fase 1 Kilo: isla y guardián
+
+Integra main V451 conservando sus mejoras de campaña, mapa y cooperativo, junto con Kilo V1. Bahía del compás usa palmeras y cabaña detalladas, escenario de madera, faroles, flores y espuma de costa. Kilo interpreta entrada, hula, ukelele y bienvenida; Stitcho reacciona con su nave.
+
+Tambor del Claro: 100×76, 360 PV, dos fases, introducción dentro del escenario, onda dirigida, carga y doble tambor. Avisos antes del ataque, recuperación de 75 fotogramas, pausa al dormir e interrupción con golpes fuertes. Su derrota se guarda inmediatamente con un identificador propio; premio de 600 puntos y 40 XP. Punto de control antes del encuentro. Se corrige además la invulnerabilidad de impacto de enemigos de campaña, que impedía continuar combos tras H.
+
 ## ohana-445 · Kilo V1 · cierre del personaje
 
 Kilo queda fijado con H cercano, J a distancia, K vuelo/defensa/reflejo, L daño/curación por impacto, I remate ganado al acertar H → J → H y P área rítmica con barra. La secuencia exige tres acciones distintas, dura cuatro segundos y habilita I seis segundos; un mismo golpe multiblanco o nota rebotada solo cuenta una vez. I concede diez fotogramas de evasión, avanza y golpea a los enemigos que cruza, con fuerza creciente según forma. Recibir daño o cambiar de sala cancela la secuencia. I y P tienen poses propias de anticipación, golpe ascendente y palmas a compás. K protege solo al arrancar y ya no cura: la recuperación ofensiva pertenece a L.
@@ -57,6 +63,54 @@ Cooperativo: terreno, WebRTC y HTTP comparten los límites por sala; las posicio
 Validación V440: 1265/1265 pruebas unitarias; auditoría general de navegador PASS; Michi (cinco formas × ocho poses), carrera/ronroneo reales, bajada con ↓ y rito del Dragón 1→2→3 PASS. Auditoría candidata de diez salas, atlas y escritorio/móvil PASS. Release gate PASS. Se añaden las auditorías de Michi y recorrido a CI.
 
 Pendientes para la V1 oficial: duración real de 60–90 minutos, balance completo, cierre de cinemáticas/jefe y conexión WebRTC completa entre dos jugadores (la validación de posiciones HTTP/directas sí pasa).
+
+## ohana-451 · Sincronización WebRTC fuera de orden (J/K/L)
+
+Solucionada la carrera entre la instantánea ligera (frameNo más nuevo) y el evento fiable de ráfaga completa que llega después. Se permite fusionar únicamente la terna visual validada de Michi o Chispín si pertenece al mismo scope, la distancia es de 8 frames o menos y aún no se aceptó esa secuencia. No retrocede frameNo, combate, HP ni objetivos; rechaza paquetes caducados, repetidos o de ámbitos retirados. Node incluye pruebas de llegada inversa, ausencia de daño, expiración y anti-replay. La prueba de navegador continúa verificando los FX reales en ambos jugadores.
+
+## ohana-450 · Ráfagas cosméticas no desaparecen con un frame más reciente
+
+Los paquetes completos J/K/L de Michi y Chispín pueden llegar correctamente por WebRTC fiable y aun así ser reemplazados por la actualización latest siguiente antes del render. Ahora el receptor conserva sólo los componentes validados, del mismo scope y con vida residual positiva, durante los frames ordinarios siguientes. Las FX caducan naturalmente; no reviven, no contienen daño ni sobreviven a un cambio de sala o sesión. Tests Node simulan un frame completo seguido por un frame vacío, expiración y scopes nuevos.
+
+## ohana-449 · Michi y Chispín: FX J/K/L fiables sin tráfico periódico adicional
+
+Las ráfagas cosméticas de tres habilidades pueden ser sustituidas en el canal latest antes de la recepción, también con Michi. Se añade la segunda firma real yarn/purr/wisp al envío fiable de eventos únicamente cuando se envía un combo completo forzado. El canal normal a 5 Hz continúa ligero. Nueva prueba Node pierde el canal rápido, valida la llegada por el fiable, rechaza daño remoto y verifica que los combos parciales no activan el canal fiable; el navegador confirma las tres FX en el motor de origen y luego en el invitado.
+
+## ohana-448 · Chispín J/K/L coherente en WebRTC
+
+El test real de Chispín puede perder la única ráfaga simultánea si el canal latest sobrescribe el paquete antes de entregarlo. Al forzar un lanzamiento completo J/K/L, las tres FX validadas y cosméticas se envían también una vez por el canal fiable de eventos WebRTC; no se añade tráfico HTTP ni se duplican las actualizaciones periódicas. Test Node verifica la entrega fiable cuando falla la vía rápida, ausencia de daño remoto, y coste normal de FX parciales. El test navegador comprueba la presencia real de los tres efectos en origen y en el cliente remoto.
+
+## ohana-447 · Ritual del Dragón en plataformas verdaderamente alcanzables
+
+El E2E llegó más lejos al superar V85 y detectó que dos de tres brasas de Caldera ya no podían mantenerse encendidas: el terreno ampliado las dejaba flotando lejos del suelo. Se distribuyen por tres sectores a 2.000/3.440/5.390 unidades, sobre el suelo real, una terraza y un altar ascendente de dos peldaños. El test de navegador conserva la canalización de 30 fotogramas para cada brasa, toma las coordenadas oficiales y verifica [1,2,3]. Unidad valida el apoyo físico y el reparto por sectores. No fusionar hasta pasar CI y E2E completo.
+
+## ohana-446 · Descenso voluntario sin rebote accidental
+
+El paso intencional con ABAJO a través de plataformas finas tiene prioridad sobre las flores de salto y los mecanismos automáticos de bioma. El rebote sigue operativo en aterrizajes normales y no se dispara tarde al soltar la tecla. Tests de regresión de ambos sistemas; E2E V85 debe verificar que se alcanza el suelo inferior en escritorio y móvil. No fusionar la PR hasta validar quality y focused gameplay.
+
+## ohana-445 · Auditoría E2E del descenso real
+
+Se añade instrumentación limitada a E2E para diferenciar tecla DOWN recibida, plataforma de descenso seleccionada y posible recuperación indebida a la misma altura. El objetivo es reparar la colisión de plataformas sin relajar los tests. Es una fase de diagnóstico, no una versión oficial.
+
+## ohana-444 · Evolución accesible sin animación residual
+
+La auditoría completa de las 100 siluetas de personajes pasó. Corregida la escena de evolución en modo movimiento reducido: el encuadre final y la intensidad de los emblemas permanecen estáticos entre fotogramas. No altera la animación normal ni el combate. Sigue en PR de desarrollo.
+
+## ohana-443 · Chispín original calibrado por medición Canvas
+
+La medición de las cinco siluetas del Chispín redondo original produjo 50/72/99/117/129 px frente a los objetivos 55/70/85/102/120. Se calibra exclusivamente OPTICAL_SCALE por forma para conservar silueta, expresividad y hitboxes en vector y pintado; se retira el registro diagnóstico temporal. Continúan las pruebas CI de navegador antes de publicar.
+
+## ohana-442 · Defensa táctica y avisos honestos
+
+Los escuderos bloquean por delante (30 % del daño de H) pero quedan expuestos por la espalda. Tiradores y artilleros fijan la trayectoria en la preparación: la línea visible coincide con el disparo posterior; mover el héroe no cambia el vector a escondidas. U, secretos, campamento y mecanismos de V441 se mantienen. Requiere pasar quality y verificación de jugabilidad.
+
+## ohana-441 · Mundo con mecanismos, U reactiva y desafíos tácticos
+
+Corrección de navegación de luciérnaga por pulsación en el campamento y guardado persistente de secretos. Dos mecanismos por bioma con acciones distintas, castigos anunciados con nuevas combinaciones de especies, enemigos de retos con roles tácticos y ecos de pareja U que reaccionan a J/K/L/I/P con límite de frecuencia. No fusionar ni publicar hasta superar las validaciones de navegador, cooperativo y V1.
+
+## ohana-440 · Pulido jugable y atlas del Mundo 1 (PR #384, borrador)
+
+Diseño de sectores con menos plataformas repetidas, cartografía local del terreno, atlas ilustrado de diez biomas, acompañantes U animados que persiguen y se posicionan, patrones de disparo propios para artilleros y tiradores. Versión de desarrollo sin desplegar. La revisión de cooperativo, balance y sesiones completas sigue pendiente.
 
 ## ohana-439 · Candidata V1 en desarrollo
 

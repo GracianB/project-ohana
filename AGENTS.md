@@ -8,3 +8,6 @@ allowed and must preserve the Kilo regression tests.
 
 Keep hero-specific changes isolated inside shared combat/movement modules.
 Closing Kilo does not imply that the full game's V1 or multiplayer is complete.
+
+Apply the common delivery checklist in docs/CHARACTER-PHASES.md to each hero/room.
+Kilo selection and Claro miniboss are finalized in phase 1, ohana-452.

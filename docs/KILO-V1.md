@@ -32,3 +32,7 @@ Claro: jardín y palmeras, casa sobre pilotes, balsas horizontal/vertical, tres 
 ## Verificación de cierre
 
 Pruebas de secuencia, orden incorrecto, repetición multigolpe, expiración, consumo, cambio de sala, daño, desbloqueos, daño del remate, barra/ritmo, vuelo/reflejo, curación por impacto, carrera y saltos. Recorridos reales de navegador con teclado y capturas de escritorio/móvil, cinco formas/cuatro evoluciones y álbum/peligros. La lista final ejecutada figura en PROGRESS.md.
+
+## Cierre de fase 1 · ohana-452
+
+El repertorio de ohana-445 se conserva. La selección mejora Bahía del compás con la escena de Kilo y Stitcho. Tambor del Claro pasa a minijefe de 360 PV y 100×76, con tres ataques anunciados, dos fases, recuperación y guardado de derrota. Se integra la campaña/cooperativo de main V451. El checklist compartido vive en CHARACTER-PHASES.md.

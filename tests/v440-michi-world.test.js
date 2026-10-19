@@ -27,8 +27,8 @@ test('Near-stacked ledges cannot catch DOWN immediately below the same landing',
  assert.equal(rows.length,2);assert.ok(rows.every(p=>p.y!==974));
 });
 test('Local map follows the nearby terrain and stays above attack buttons',()=>{
- const g={worldW:7200,worldH:1260,player:{x:5600,y:900,w:40}};
- for(const [w,h] of [[390,844],[1100,860],[1440,1000]]){const b=localMapBounds(g,w,h);assert.equal(b.spanX,2400);assert.ok(b.left>0);assert.ok(b.y+b.h<=h-110);assert.ok(b.x>=0&&b.x+b.w<=w);}
+ const g={roomDef:ROOMS.beach,worldW:7200,worldH:1260,player:{x:5600,y:900,w:40}};
+ for(const [w,h] of [[390,844],[1100,860],[1440,1000]]){const b=localMapBounds(g,w,h);assert.equal(b.spanX,w<600?1360:2000);assert.ok(b.left>0);assert.ok(b.y+b.h<=h-110);assert.ok(b.x>=0&&b.x+b.w<=w);}
 });
 test('WebRTC accepts the full campaign and rejects coordinates outside each room',()=>{
  assert.equal(safeDirectPose({seq:1,x:10,y:20,room:{toString:null}}),null);

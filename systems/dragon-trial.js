@@ -2,9 +2,11 @@
 // Optional single-player/coop-safe collection: no locked door, enemy stats,
 // network protocol changes or cross-player authoritative progression.
 export const DRAGON_EMBERS=Object.freeze([
- Object.freeze({x:290,y:913,title:"ALIENTO",color:"#ffbe7e"}),
- Object.freeze({x:1580,y:937,title:"BATIDA",color:"#ff8a65"}),
- Object.freeze({x:2010,y:572,title:"ASCENSO",color:"#ffe29b"}),
+ // Anchored to real Caldera footholds across its five extended sectors.
+ // Y is the channel focal height for Dragón Celestial (ground contact + .55*h).
+ Object.freeze({x:2000,y:1113,title:"ALIENTO",color:"#ffbe7e"}),
+ Object.freeze({x:3440,y:953,title:"BATIDA",color:"#ff8a65"}),
+ Object.freeze({x:5390,y:713,title:"ASCENSO",color:"#ffe29b"}),
 ]);
 // V88: channel each ember in sequence; the ritual must be played, not grazed.
 export const DRAGON_CHANNEL_FRAMES=30;
@@ -55,7 +57,7 @@ export function drawDragonTrial(ctx,game,cam,t=0,reduce=false){
  const ox=finite(cam?.x),oy=finite(cam?.y);
  ctx.save();
  // The dragon's ancient silhouette is carved into the back wall.
- const cx=1115-ox,cy=595-oy;
+ const cx=3500-ox,cy=610-oy;
  ctx.globalAlpha=.14;ctx.strokeStyle="#ffc078";ctx.lineWidth=5;
  ctx.beginPath();ctx.moveTo(cx,cy+60);
  ctx.bezierCurveTo(cx-80,cy-20,cx-150,cy-175,cx-380,cy-182);

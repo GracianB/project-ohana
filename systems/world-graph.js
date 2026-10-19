@@ -89,7 +89,36 @@ export function worldMapDetailHTML(id,current,visited={},evo=0){
   return '<div><span class="wm-detail-kicker">'+(node.id===current?'Estás aquí':locked?'Forma '+(node.needEvo+1)+' para entrar':visited[node.id]?'Lugar descubierto':'Por descubrir')+'</span><h3>'+esc(node.name)+'</h3><p>'+esc(ROOM_NOTES[node.id])+'</p></div><ul aria-label="Caminos desde '+esc(node.name)+'">'+exits+'</ul>';
 }
 
-function atlasIslands(state){return state.nodes.map((n,i)=>{const x=n.x*10,y=n.y*5.6,col=ROOMS[n.id].color||'#b4ceac';let d='';for(let j=0;j<=16;j++){const a=j/16*Math.PI*2,k=1+Math.sin(j*2.1+i)*.13;d+=(j?'L':'M')+(x+Math.cos(a)*(n.id==='hub'?72:60)*k)+' '+(y+Math.sin(a)*43*k);}return '<g opacity="'+(n.visited?1:.46)+'"><path d="'+d+'Z" fill="'+col+'" stroke="#ead7ab" stroke-width="5"/><path d="M'+(x-32)+' '+(y-10)+'q30-28 60 0" fill="none" stroke="#365e5c33" stroke-width="3"/></g>';}).join('');}
+// Each island is authored by biome. Silhouettes vary and retain the same world
+// graph coordinates and click targets, rather than ten identical ovals.
+const ATLAS_LANDMARKS=Object.freeze({
+ hub:'<path d="M-35 17v-34m-13 24q0-31 23-22t20 25m14 16v-44m-12 10q15-21 30 5" stroke="#2a664f" stroke-width="7" stroke-linecap="round" fill="none"/><circle cx="-35" cy="-19" r="14" fill="#3d9470"/><circle cx="14" cy="-27" r="17" fill="#3d9470"/>',
+ beach:'<path d="M-24 28Q-6 7 17 23M-9 25Q-10 0 0-24M0-24q-22-8-29 5m29-5q21-10 31 2m-31-2q-10-14-3-20" fill="none" stroke="#557c5b" stroke-width="5"/><path d="M-44 31q14-8 29 0t30 0t30 0" fill="none" stroke="#f9f6dc" stroke-width="4"/>',
+ jungle:'<path d="M-42 28V-8M-12 30V-19M24 28V-8" stroke="#3c6952" stroke-width="8"/><circle cx="-42" cy="-12" r="17" fill="#207d57"/><circle cx="-12" cy="-27" r="22" fill="#348a55"/><circle cx="24" cy="-12" r="20" fill="#217352"/><path d="M-47 14q26-15 54 0t40 0" stroke="#d1f2a4" fill="none" stroke-width="3"/>',
+ cave:'<path d="M-42 29L-30-25l17 20L0-41l20 39 17-22 9 53" stroke="#5e79af" stroke-width="5" fill="#4f6da0"/><path d="M-19 27L-12 0l12 27m7 0 9-40 10 40" fill="#9adfff" stroke="#e9f6ff" stroke-width="2"/>',
+ lab:'<path d="M-39 25v-28h78v28M-29-3V-25H28V-3M0-25v-21" fill="#46848b" stroke="#2c566b" stroke-width="4"/><path d="M-18 3h36v21h-36ZM-30-13h13m16 0h13m16 0h9" fill="#aaf8ee" stroke="#28566b" stroke-width="3"/><circle cy="-47" r="5" fill="#bff7f8"/>',
+ ridge:'<path d="M-50 30-25-24l14 19 17-41 40 76" fill="#799ab7" stroke="#e8f8ff" stroke-width="4"/><path d="M-36 1-25-24l14 19 17-41 24 39-24-10-15 14-9-10Z" fill="#e3f5fa"/>',
+ space:'<circle cy="-4" r="30" fill="#8277ae" stroke="#e2d0ff" stroke-width="4"/><ellipse cy="-3" rx="43" ry="15" transform="rotate(-19)" stroke="#d2a9fc" stroke-width="5" fill="none"/><circle cx="-10" cy="-8" r="6" fill="#5c588b"/><circle cx="18" cy="8" r="8" fill="#5c588b"/><path d="M30-39l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z" fill="#fff2ca"/>',
+ reef:'<path d="M-44 28Q-36-15-24 16M-34 2l-18-15m27 13 18-20M-1 29V-16m0 23 18-17m-18 1-13-18M25 29q-12-23 3-39t18-13" stroke="#a94d8e" stroke-width="8" fill="none" stroke-linecap="round"/><circle cx="-10" cy="20" r="8" fill="#f7b9c9"/><circle cx="33" cy="14" r="5" fill="#ffd29b"/>',
+ volcano:'<path d="M-50 32-20-12-10-10 1-40 16-9 29-13 52 32Z" fill="#6b4854" stroke="#f4c3a1" stroke-width="4"/><path d="M-7-18 1-40 10-19 4-10 11 10 1 32-4 7Z" fill="#ff914c"/><path d="M-4-46q-8-10 0-15m14 15q10-10 1-16" fill="none" stroke="#ffc08b" stroke-width="4"/>',
+ boss:'<path d="M-45 22Q-15-12 0 8Q20-17 46 22" fill="none" stroke="#885a7e" stroke-width="12"/><path d="M-34-10-18 0 0-30 20 0 36-11 31 29H-30Z" fill="#95627f" stroke="#f4d7df" stroke-width="5"/><circle cy="10" r="11" fill="#fff2be"/>'
+});
+function atlasIslands(state){
+ return state.nodes.map((n,i)=>{
+  const x=n.x*10,y=n.y*5.6,col=ROOMS[n.id].color||'#b4ceac',rx=n.id==='hub'?78:62,ry=n.id==='hub'?47:41;
+  let edge='';
+  for(let j=0;j<=32;j++){
+   const a=j/32*Math.PI*2;
+   const wave=1+Math.sin(j*1.9+i*1.7)*.12+Math.cos(j*.83+i*2.6)*.10;
+   edge+=(j?'L':'M')+(Math.cos(a)*rx*wave).toFixed(1)+' '+(Math.sin(a)*ry*wave).toFixed(1);
+  }
+  return '<g transform="translate('+x+' '+y+')" opacity="'+(n.visited?1:.51)+'">'+
+   '<path d="'+edge+'Z" fill="#274a54" stroke="#325968" stroke-width="12"/>'+
+   '<path d="'+edge+'Z" fill="'+col+'" stroke="#f3e4bd" stroke-width="4"/>'+
+   '<path d="M-34 35q24-10 60 0" fill="none" stroke="#f4f4dd66" stroke-width="3"/>'+
+   ATLAS_LANDMARKS[n.id]+'</g>';
+ }).join('');
+}
 export function renderWorldGraphHTML(current,visited={},evo=0){
   const state=worldGraphSnapshot(current,visited,evo);
   const lines=state.edges.map((e,index)=>{

@@ -61,7 +61,7 @@ function textLines(ctx,text,x,y,width,lineHeight){
 }
 
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
- const s=evolutionPresentation(id,evo,width,height,time,reduced),def=ROSTER.find(r=>r.id===s.id);
+ const s=evolutionPresentation(id,evo,width,height,reduced?3.5:time,reduced),def=ROSTER.find(r=>r.id===s.id);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
  ctx.save();
  try{

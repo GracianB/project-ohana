@@ -7,7 +7,7 @@ import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
-import {campaignRole,updateCampaignEnemy,drawCampaignEnemy} from "./systems/campaign-enemies.js";
+import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
 import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
 import {drawLocalMap} from "./systems/local-map.js";
@@ -895,7 +895,13 @@ function markHit(p, e, dmg, kb) {
 const evo = Number(p.evo) || 0;
 let d = dmg;
 const push = kb == null ? 1 : kb;
-const crit = d >= 32 || push >= 1.5;
+const shieldBlock=shieldBlocksHit(e,p);
+const crit = !shieldBlock && (d >= 32 || push >= 1.5);
+if (shieldBlock){
+ d=Math.max(1,Math.ceil(d*.3));
+ e._shieldImpact=18;
+ game.nums?.add?.(e.x,e.y-26,'¡BLOQUEADO!','#bcf3ff',false);
+}
 if (e.boss) d = Math.ceil(d * 0.55);
 if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.y + e.h * 0.35)) {
   d = Math.max(1, Math.round(d * 0.35));
@@ -906,11 +912,11 @@ damageEnemy(e, d);
 if(e.hp<healthBefore)recordKiloHit(game,'H',p._swing);
 registerBossPunish(e);
 const face = p.facing || 1;
-e.vx = face * (e.boss ? 3 : 8) * push;
-e.vy = Math.min(e.vy || 0, -2.2 * Math.abs(push));
-e.stun = Math.max(e.stun || 0, 10);
+e.vx = shieldBlock ? 0 : face * (e.boss ? 3 : 8) * push;
+e.vy = shieldBlock ? e.vy : Math.min(e.vy || 0, -2.2 * Math.abs(push));
+e.stun = Math.max(e.stun || 0, shieldBlock ? 3 : 10);
 e.flash = crit ? 18 : 14;
-e.invuln = Math.max(e.invuln || 0, 8);
+e.invuln = Math.max(e.invuln || 0, shieldBlock ? 4 : 8);
 e._hitT = crit ? 16 : 12;
 e._hitMax = e._hitT;
 e._hitDir = face;
@@ -2566,6 +2572,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
+if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,"¡EL CLARO VUELVE A CANTAR!","#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -3524,7 +3531,7 @@ combatTarget(){
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,hp:e.hp,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3576,6 +3583,7 @@ state() {
     player: p ? {
       x: p.x, y: p.y, vx: p.vx, vy: p.vy,
       grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
+      dropHeld:!!p._dropWasHeld,dropPlatform:p._dropPlatform?{...p._dropPlatform}:null,
     } : null,
     input: {
       left: !!(input?.keys?.a || input?.keys?.arrowleft),
