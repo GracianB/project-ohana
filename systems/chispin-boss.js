@@ -1,14 +1,14 @@
 // Chispín's original final foe, independent of Hoku's Queen and Stitcho's core.
 // Its combat HP/death passes through the normal shared enemy pipeline.
-export const CHISPIN_BOSS_ID='hub-chispin-tempest-v1';
+export const CHISPIN_BOSS_ID='lab-chispin-tempest-v1';
 export const CHISPIN_BOSS=Object.freeze({hp:520,left:3160,right:4040,floor:1134});
 export const CHISPIN_PATTERNS=Object.freeze(['LÍNEA RELÁMPAGO','BARRIDO DE IONES','CARGA MAGNÉTICA','CORONA DE RAYOS']);
 export function createChispinBoss(makeFoe,rng=()=>.5){
- const e=makeFoe(3550,970,'cangrejo','hub',998,{rng});
+ const e=makeFoe(3550,970,'cangrejo','lab',998,{rng});
  e.x=3550;e.y=CHISPIN_BOSS.floor-110;e.w=138;e.h=110;
  e.hp=e.max=CHISPIN_BOSS.hp;
  e.miniBoss=true;e._chispinBoss=true;e._campaignOriginal=true;
- e.spawnIndex=998;e._encounterSaveId=CHISPIN_BOSS_ID;e.roomId='hub';
+ e.spawnIndex=998;e._encounterSaveId=CHISPIN_BOSS_ID;e.roomId='lab';
  e.contactDmg=0;e.color='#fff5ac';
  e._tempest={phase:'intro',clock:95,attack:0,tier:1,aim:1,emitted:0,
   interruptible:true,markedX:3550};
