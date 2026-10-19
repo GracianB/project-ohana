@@ -871,6 +871,9 @@ async function auditPage(page, label) {
       // from a prior seeded replay. Bond persistence is tested separately.
       localStorage.removeItem("ohana-u-bonds-v2");
       localStorage.removeItem("ohana-room-albums-v1");
+      // V453's personal hundred-item album also persists outside the room album.
+      // Match the same save profile across both deterministic seeded replays.
+      localStorage.removeItem("ohana-hero-100-v1:kilo");
       api.setSeed(123456789);
       api.start('kilo');
       api.setXp(55);
