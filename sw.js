@@ -7,6 +7,7 @@ const PRECACHE = [
   "./systems/stitcho-trail.js?v=" + VERSION,
   "./systems/stitcho-boss.js?v=" + VERSION,
   "./worlds/stitcho-archipelago.js?v=" + VERSION,
+  "./systems/world-two-guardian.js?v=" + VERSION,
   "./systems/chispin-room.js?v=" + VERSION,
   "./systems/chispin-boss.js?v=" + VERSION,
   "./systems/chispin-storm.js?v=" + VERSION,
@@ -354,7 +355,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/chispa-sprite.js": "93529865bdf7232a2e61a89d177877a25e6f35e6",
   "assets/sprites/chispa-white-gold-v3.png": "3a4c55023a4abb57e8c6cc3e2fd2ca4f1887d4e8",
   "assets/sprites/chispa-kirin-four-legs-v4.png": "c443533822513aa8e3d44ca3b5d718dbd751bb95",
-  "characters/art/chispa.js": "4457b834f4746d48a1275bdd4bdf284d6fd17602",
+  "characters/art/chispa.js": "f1a5681e7c74a961ca8f71bc21975923e9982c60",
   "systems/chispa-effects.js": "919bf7b68dd6896c644cae083625e0e6ee8fd0e9",
   "systems/chispa-kit.js": "019c4395fa807c81f9c6afabbe6c4219f18bcb62",
   "systems/chispa-stagecraft.js": "5703e13ad0c86fe26bbb9a52dfb5ba979f15bbdf",
@@ -401,7 +402,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "cc2b56b1804da9f0bc9d6e7ab49322ea9db492eb",
+  "game.js": "66a3dcb4f1131ad4e1c6707227cd44347029c075",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "41320480ca284e54cd100c31148c95a4b8c9dbac",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
@@ -615,15 +616,16 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "systems/hero-collections.js": "4f3aaaf3d5332bb898ccdf3543e9c4280525d762",
   "systems/stitcho-room.js": "5c3c842830115ba4b39693a216f996712483779e",
-  "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
-  "systems/stitcho-trail.js": "2add4e32314c4d58900ca335f6c356a9e526c73f",
+  "systems/stitcho-atlas.js": "276a33a27a7ceda913807008e8112c16b15ba12a",
+  "systems/stitcho-trail.js": "2783be9c08123c6e29cf8be1f7625a0c53e3a4d8",
   "systems/stitcho-boss.js": "7a0a5d3e6fc1c24329a98aa910004f6d6e90c3d5",
   "worlds/stitcho-archipelago.js": "c4ce58b4e7818fdea549d0242029ec0aca2a2845",
   "systems/chispin-room.js": "4abc51f60bd866e3e553ca2084b6ccdcaec94a73",
   "systems/chispin-boss.js": "aeb39ea71d955ef921a757aa31323ad818de4648",
   "systems/chispin-storm.js": "ee65f3f119dca11f5b154a332efd9018ff97688c",
   "systems/chispin-atlas.js": "9324e00d0b32ba32b1d0f77f7de355df098ce045",
-  "worlds/chispin-isles.js": "e9a42c2874417acd3c99df68b605346d25b1c14d"
+  "worlds/chispin-isles.js": "e9a42c2874417acd3c99df68b605346d25b1c14d",
+  "systems/world-two-guardian.js": "5bb5ce302dea3da1ef73248fe6a4bae0cab16aca"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
