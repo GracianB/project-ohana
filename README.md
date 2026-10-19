@@ -1,406 +1,152 @@
 <div align="center">
 
-<a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=240&color=0:071226,40:102A43,78:7EE7FF,100:071226&text=PROJECT%20OHANA&fontColor=F4F3EE&fontSize=56&fontAlignY=34&desc=ISLA%20HOKU%20%C2%B7%20CANVAS%202D%20%C2%B7%20BEB%C3%89%20%E2%86%92%20FORMA%20FINAL&descAlignY=58&descSize=16&animation=twinkling" width="100%" alt="Project Ohana, isla Hoku, de bebé a forma final"/>
-</a>
+# PROJECT OHANA
 
-<a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://readme-typing-svg.demolab.com?font=Fraunces&weight=600&size=24&duration=2600&pause=700&color=7EE7FF&center=true&vCenter=true&width=760&height=52&lines=No+te+lo+explico.+P%C3%BAlsalo.;Kilo+%C2%B7+Stitcho+%C2%B7+Chisp%C3%ADn+%C2%B7+Michi+%C2%B7+Drag%C3%B3n;Dino+%C2%B7+Frita+%C2%B7+Pizza+%C2%B7+Yomi+%C2%B7+Cuerno;10+salas+%C2%B7+5+formas+%C2%B7+1+Reina" alt="Elenco y tamaño del juego"/>
-</a>
+**Diez héroes. Cinco formas por héroe. Un universo que crece contigo.**
 
-<br/>
+Un juego de plataformas y aventura 2D hecho con JavaScript y Canvas. Explora, domina poderes distintos, evoluciona, descubre secretos y lucha junto a otra persona.
 
-<a href="https://gracianb.github.io/project-ohana/"><img src="https://img.shields.io/badge/JUGAR_AHORA-7EE7FF?style=for-the-badge&labelColor=071226" alt="Jugar ahora"/></a>
-<a href="https://gracianb.github.io/systems-lab/"><img src="https://img.shields.io/badge/02-SYSTEMS_LAB-7AF3FF?style=for-the-badge&labelColor=071226" alt="Systems Lab"/></a>
-<a href="https://gracianb.github.io/GracianB/"><img src="https://img.shields.io/badge/00-GRACIANB-C4A574?style=for-the-badge&labelColor=071226" alt="Hub GracianB"/></a>
+<a href="https://gracianb.github.io/project-ohana/"><img alt="Jugar Project OHANA" src="https://img.shields.io/badge/JUGAR_EN_EL_NAVEGADOR-7EE7FF?style=for-the-badge&labelColor=071226" /></a>
+<a href="https://github.com/GracianB/project-ohana/actions"><img alt="GitHub Actions" src="https://img.shields.io/github/actions/workflow/status/GracianB/project-ohana/ohana-ci.yml?branch=main&style=for-the-badge&labelColor=071226&label=CI" /></a>
 
-<br/><br/>
+[**Jugar**](https://gracianb.github.io/project-ohana/) · [**Ver el código**](https://github.com/GracianB/project-ohana) · [**Desarrollo de mundos personales**](https://github.com/GracianB/project-ohana/pull/387)
 
-<img src="https://img.shields.io/badge/WORLD_1-7EE7FF?style=flat-square&labelColor=071226" alt="Mundo 1"/>
-<img src="https://img.shields.io/github/stars/GracianB/project-ohana?style=flat-square&label=STARS&color=7EE7FF&labelColor=071226" alt="Estrellas"/>
-<img src="https://img.shields.io/github/last-commit/GracianB/project-ohana?style=flat-square&label=LAST&color=F4F3EE&labelColor=071226" alt="Último commit"/>
-<img src="https://img.shields.io/github/license/GracianB/project-ohana?style=flat-square&color=C4A574&labelColor=071226" alt="Licencia"/>
-<img src="https://img.shields.io/badge/ROOMS-10-F4F3EE?style=flat-square&labelColor=071226" alt="10 salas"/>
-<img src="https://img.shields.io/badge/CAST-10-7EE7FF?style=flat-square&labelColor=071226" alt="10 personajes"/>
-<img src="https://img.shields.io/badge/FORMS-5-F4F3EE?style=flat-square&labelColor=071226" alt="5 formas"/>
-<img src="https://img.shields.io/badge/BOSS-REINA-EA6A6A?style=flat-square&labelColor=071226" alt="Un jefe"/>
+<img src="assets/worlds/hub-bg.jpg" width="100%" alt="Arte incluido en el juego: paisaje del Claro Ohana" />
+
+<sub>Arte del proyecto. El escenario del juego se genera también con ilustración vectorial dinámica; esta imagen no es una captura de una partida.</sub>
 
 </div>
 
----
+## Conoce a la familia
 
-<div align="center">
-
-#### Evolución
-
-La cinemática de evolución refuerza la identidad de cada héroe y etapa con firmas visuales específicas durante la transformación.
-
-## [Abrir el juego](https://gracianb.github.io/project-ohana/)
-
-Nueva partida: bebé, en el Claro. Continuar: tu forma y tu sala. Si la Reina cae, la partida queda como Ohana completado.
-
-<img src="https://skillicons.dev/icons?i=js,html,css&theme=dark" alt="JavaScript, HTML y CSS" height="40"/>
-
-</div>
-
----
-
-## En 20 segundos
-
-Ohana es un platformer de Canvas en Isla Hoku. Diez héroes, cinco formas, diez salas, una Reina. La H pega. J, K y L son los poderes. El Nido está al este de la Caldera, y la Caldera pide forma 4.
-
-Lo que demuestra no es un motor abierto: simulación fija a 60 Hz, director de combate determinista, save v2 y CI antes de Pages. La cara publicada es vector. Pintura es un piloto opt-in, no el elenco.
-
-El contrato de cierre está en [WORLD-1.md](WORLD-1.md). No hay Mundo 2 hasta que ese tag se respete.
-
-## Crecimiento y rendimiento
-
-El desarrollo de OHANA tiene ahora un margen de **12 MB para el código JS de juego** y **2 MB de CSS transferido** (antes 3 MB y 500 KB). Los avisos de revisión aparecen desde 2,4 MB de JS y 400 KB de CSS. Estos presupuestos son controles propios del repositorio, **no son las cuotas de Netlify** ni invitan a descargar más recursos al iniciar el juego.
-
-Permanecen activas las pruebas de primera pintura (< 4 s), simulación, accesibilidad, regresión visual, multijugador y Release Gate. Si el juego crece, priorizar carga por mundos y demanda antes de aumentar el coste inicial para quien juega desde móvil.
-
-## El bucle
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-flowchart LR
-  A[Claro] --> B[Explorar]
-  B --> C[Pegar]
-  C --> D[XP]
-  D --> E[Evolucionar]
-  E --> B
-  E --> F[Nido]
-  F --> G[Reina]
-```
-
-Cinco formas. El XP es absoluto: al llegar al número, esa es la forma. No se suman entre sí.
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-stateDiagram-v2
-  direction LR
-  [*] --> Bebe
-  Bebe --> Base: 55
-  Base --> Evo: 140
-  Evo --> Final: 260
-  Final --> forma final: 420
-```
-
-Al llenar la barra, evolucionas automáticamente. Hay cinemática. Las chispas pasan por detrás de la cara. <kbd>E</kbd> usa portales y catapultas; en móvil hay un botón E. Cada forma tiene además una lectura propia de postura, escalado visual y firma de evolución; las 50 combinaciones personaje × forma se mantienen separadas de la hitbox y la física. En combate, las firmas de H/J/K/L también escalan visualmente por forma sin alterar daño, alcance ni hitbox.
-
-La Reina del Nido ya no selecciona golpes aislados. Cada fase usa rutinas encadenadas:
-- **Fase 1 · TERRITORIO**: secuencias cortas de presión y respuesta.
-- **Fase 2 · ASCENSO**: zambullida, proyectil y embestida se combinan en rutas de tres pasos.
-- **Fase 3 · APOCALIPSIS**: cadenas de hasta cuatro ataques con menos hueco entre movimientos.
-Tras cada rutina existe una **ventana de castigo** claramente telegráfica. La selección considera distancia y altura del jugador, recuerda el comportamiento reciente del jugador (dash, aire y presión) y evita repetir la misma rutina consecutivamente. En fase 3, con la Reina por debajo del 22% de vida, entra en **desesperación** y prioriza una presión final determinista. Una defensa limpia con **DASH**, **AIRE** o **DISTANCIA** genera una respuesta puntuable; tres respuestas consecutivas abren un **BREAK** que amplía la recuperación vulnerable del boss. Golpear durante esa ventana mantiene además el **PUNISH** único por ciclo. Después de cada respuesta limpia, la Reina conserva memoria corta de DASH/AIRE/DISTANCIA; si una defensa se repite, cambia su siguiente preferencia dentro de las rutinas autorizadas y puede marcar **CEBO** para forzar variedad. La memoria es acotada, determinista y se enfría con respuestas mezcladas. El sistema no altera daño base ni hitboxes.
-
-Un golpe normal para el mundo un instante. Un golpe gordo —forma alta, Dino, o un poder de 40 o más— lo para más rato y el número sale en dorado. El combo se queda desde el primer golpe. Se rompe si te dan, o si pasas unos ocho segundos sin pegar. La puerta espera medio segundo y entonces te suelta.
-
----
-
-## Elenco
-
-Diez personajes originales. La <kbd>H</kbd> es siempre un golpe cercano y no cambia de nombre al evolucionar. <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> son los tres poderes, y esos sí cambian con la forma.
+No son diez aspectos del mismo protagonista. Cada uno tiene su personalidad, movilidad, animaciones, pasivas y habilidades para resolver el mundo de forma diferente.
 
 <table>
 <tr>
-<td align="center"><img src="https://img.shields.io/badge/Kilo-F%C3%A1cil-e23b3d?style=for-the-badge&labelColor=071226" alt="Kilo, fácil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Pizza-F%C3%A1cil-ffb43a?style=for-the-badge&labelColor=071226" alt="Pizza, fácil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Michi-F%C3%A1cil-ffb6e4?style=for-the-badge&labelColor=071226" alt="Michi, fácil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Cuerno-F%C3%A1cil-f2c1ff?style=for-the-badge&labelColor=071226" alt="Cuerno, fácil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Chisp%C3%ADn-MEDIA-ffd83a?style=for-the-badge&labelColor=071226" alt="Chispín, media"/></td>
+<td align="center" width="20%"><img src="assets/portraits/kilo.jpg" width="115" alt="Retrato de Kilo"/><br/><b>Kilo</b><br/><sub>Ritmo y vuelo</sub></td>
+<td align="center" width="20%"><img src="assets/portraits/stitcho.jpg" width="115" alt="Retrato de Stitcho"/><br/><b>Stitcho</b><br/><sub>Caos alienígena</sub></td>
+<td align="center" width="20%"><img src="assets/portraits/chispin.jpg" width="115" alt="Retrato de Chispín"/><br/><b>Chispín</b><br/><sub>Electricidad</sub></td>
+<td align="center" width="20%"><img src="assets/portraits/cat.jpg" width="115" alt="Retrato de Michi"/><br/><b>Michi</b><br/><sub>Sigilo y sueños</sub></td>
+<td align="center" width="20%"><img src="assets/portraits/dragon.jpg" width="115" alt="Retrato de Dragón"/><br/><b>Dragón</b><br/><sub>Fuego y altura</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="https://img.shields.io/badge/Stitcho-MEDIA-2f6bff?style=for-the-badge&labelColor=071226" alt="Stitcho, media"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Drag%C3%B3n-MEDIA-e8452f?style=for-the-badge&labelColor=071226" alt="Dragón, media"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Dino-DIF%C3%8DCIL-4cbf56?style=for-the-badge&labelColor=071226" alt="Dino, difícil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Frita-DIF%C3%8DCIL-f0b43a?style=for-the-badge&labelColor=071226" alt="Frita, difícil"/></td>
-<td align="center"><img src="https://img.shields.io/badge/Yomi-DIF%C3%8DCIL-e8c090?style=for-the-badge&labelColor=071226" alt="Yomi, difícil"/></td>
+<td align="center"><img src="assets/portraits/dino.jpg" width="115" alt="Retrato de Dino"/><br/><b>Dino</b><br/><sub>Fuerza</sub></td>
+<td align="center"><img src="assets/portraits/frita.jpg" width="115" alt="Retrato de Frita"/><br/><b>Frita</b><br/><sub>Velocidad</sub></td>
+<td align="center"><img src="assets/portraits/pizza.jpg" width="115" alt="Retrato de Pizza"/><br/><b>Pizza</b><br/><sub>Rebotes</sub></td>
+<td align="center"><img src="assets/portraits/yomi.jpg" width="115" alt="Retrato de Yomi"/><br/><b>Yomi</b><br/><sub>Paso espectral</sub></td>
+<td align="center"><img src="assets/portraits/cuerno.jpg" width="115" alt="Retrato de Cuerno"/><br/><b>Cuerno</b><br/><sub>Luz y protección</sub></td>
 </tr>
 </table>
 
-| Personaje | Golpe con H | Pasiva | forma final |
-| --- | --- | --- | --- |
-| **Kilo** | Nota | Caída lenta. En forma final, un vuelo corto | KILO forma final |
-| **Pizza** | Porción | Caer sobre un bicho lo aplasta y te rebota | PIZZA forma final |
-| **Michi** | Zarpazo | Aguanta un golpe mortal por sala | MICHI forma final |
-| **Cuerno** | Puya | Al caer, el cuerno brilla y te da un saltito | CUERNO forma final |
-| **Chispín** | Chispín Tormenta | Tras correr un segundo va más rápido y deja chispas | CHISPÍN forma final |
-| **Stitcho** | Zarpa | Se agarra a las paredes y trepa | STITCHO forma final |
-| **Dragón** | Garra | Mantén el salto para planear. En forma final, vuela | DRAGÓN forma final |
-| **Dino** | Mordisco | Abajo en el aire: picado con onda | DINO forma final |
-| **Frita** | Corte | Abajo mientras corres: se desliza y arrolla | KÉTCHUP forma final |
-| **Yomi** | Fauces | Cae más rápido. En el aire, salto es un paso espectral | YOMI FAUCES |
-
-La dificultad es la de la portada. Fácil se lee pronto. Difícil pide más la sala.
-
----
-
-## Isla Hoku
-
-Diez salas. Visitar Claro, Costa, Jungla, Caldera, Cueva, Lab, Cumbre y Órbita despierta el Nido. El Arrecife es el desvío del agua.
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-flowchart TB
-  ridge[Cumbre] --- space[Órbita]
-  lab[Alien Lab] --- cave[Cueva Azul] --- hub[Claro Ohana] --- beach[Costa Hoku] --- jungle[Jungla Alta]
-  ridge --- hub
-  beach --- reef[Arrecife Abismo]
-  space -.->|vórtice| reef
-  jungle --- volcano[Caldera] --- boss[Nido · Reina]
-```
-
-| Sala | Para entrar | Qué hace |
-| --- | --- | --- |
-| **Claro Ohana** | — | Centro. Este costa, oeste cueva, arriba cumbre. |
-| **Costa Hoku** | — | El hueco baja al Arrecife. Este, la jungla, pide forma 3. |
-| **Jungla Alta** | Forma 3 | El hueco o el vórtice bajan a la Caldera. |
-| **Caldera** | Forma 4 | Este es el Nido. |
-| **Nido Final** | Forma 4 | La Reina. No se sale a medias. |
-| **Cueva Azul** | — | Oeste, el Lab, pide forma 2. |
-| **Alien Lab** | Forma 2 | Solo se vuelve por el este. |
-| **Cumbre** | — | El hueco devuelve al Claro. Este, la Órbita. |
-| **Órbita** | Forma 2 | Un vórtice secreto baja al Arrecife. |
-| **Arrecife Abismo** | — | Agua. Arriba vuelve a la Costa. |
-
-La catapulta y el vórtice también cambian de sala. Se usan con <kbd>E</kbd>.
-
----
-
-## Las dos manos
+### De bebé a forma final
 
 <table>
 <tr>
-<td width="50%" valign="top">
-
-### Izquierda · mover
-
-| Tecla | Acción |
-| --- | --- |
-| <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> | Caminar. También las flechas |
-| <kbd>W</kbd> o espacio | Saltar |
-| <kbd>S</kbd> o <kbd>↓</kbd> | Soltar una plataforma. En el aire, la pasiva de algunos |
-| <kbd>Shift</kbd> | Dash |
-
-</td>
-<td width="50%" valign="top">
-
-### Derecha · pegar
-
-| Tecla | Acción |
-| --- | --- |
-| <kbd>H</kbd> | Golpe normal. También vale <kbd>F</kbd> |
-| <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> | Poder corto, medio y definitivo |
-| <kbd>E</kbd> | Interactuar con catapulta o vórtice. La evolución es automática |
-| <kbd>R</kbd> | Volver al Claro |
-| <kbd>M</kbd> | Mapa |
-| <kbd>º</kbd> | Ayuda |
-| <kbd>N</kbd> | Silencio |
-| <kbd>Esc</kbd> | Pausa |
-
-</td>
+<td align="center" width="50%"><img src="assets/sprites/forms/kilo-0.png" width="220" alt="Kilo en su forma inicial"/><br/><b>Forma 1</b></td>
+<td align="center" width="50%"><img src="assets/sprites/forms/kilo-4.png" width="220" alt="Kilo en su forma final"/><br/><b>Forma 5</b></td>
 </tr>
 </table>
 
-En el teléfono hay botones en pantalla. El juego está pensado primero para teclado.
+El XP transforma las capacidades, la silueta y la puesta en escena del personaje. Son **50 combinaciones de héroe y forma**, con combate **H** y tres poderes **J / K / L**.
 
----
+## La aventura que puedes jugar hoy
 
-## Qué recuerda la partida
-
-El guardado v2 conserva personaje, forma, sala, salud, magia y victoria. Se actualiza al cruzar puertas, evolucionar, completar el juego, pausar y volver al menú, y cada cinco segundos de simulación activa. Perder el foco pausa la partida y limpia las teclas; al ocultar o cerrar la página se intenta guardar. Si el navegador bloquea el almacenamiento, aparece un aviso y la partida puede seguir sin guardado persistente.
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-flowchart LR
-  subgraph partida [Save v2]
-    id[Personaje]
-    evo[Forma y XP]
-    hp[Vida]
-    room[Sala y mapa visitado]
-    score[Puntos y bajas]
-    won[Nido caído]
-  end
-  id --- evo --- hp --- room --- score --- won
-```
-
-Continuar no mezcla personajes. Una partida de Kilo no abre a Dino. Los ids viejos de prueba `lilo`, `stitch` y `pikachu` se leen como Kilo, Stitcho y Chispín.
-
----
-
-## Hardening de runtime
-
-El bucle principal también contiene fallos inesperados de simulación o render: registra el error, limpia el estado de entrada y pausa la partida en lugar de dejar morir el ciclo de animación.
-
-El runtime aplica un guard de integridad antes de cada paso de simulación para normalizar HP, XP, puntuación, movimiento y colecciones transitorias ante valores no finitos o estados corruptos. Los límites de runtime y los VFX de portales deterministas se mantienen separados de la lógica de gameplay.
-
-## Hecho en el navegador
+**Isla Hoku** es la campaña compartida publicada: diez salas conectadas, rutas verticales, secretos, plataformas, encuentros especiales y la **Reina del Nido**, un combate final con tres fases.
 
 <table>
 <tr>
-<td width="58%" valign="top">
-
-Canvas 2D a la resolución de la pantalla. JavaScript en módulos, sin framework. La simulación tiene un paso fijo de 60 Hz, independiente de la frecuencia de la pantalla, con recuperación de atrasos limitada. HTML y CSS para el marco. Teclado y botones táctiles, incluido E para interactuar. Diálogos con foco contenido y barras de estado accesibles. Publicado en GitHub Pages después de pasar las pruebas.
-
-Los personajes son vector y se animan. Cucaracho, mosquito y cangrejo tienen cara, paso, aviso y embestida. El jefe es la Reina del Nido.
-
-Doble clic en `index.html` no arranca: los módulos no cargan por `file://`.
-
-</td>
-<td width="42%" valign="top">
-
-<p align="center">
-  <a href="https://github.com/GracianB/project-ohana"><img src="https://img.shields.io/badge/GracianB%2Fproject--ohana-071226?style=for-the-badge&logo=github&logoColor=7EE7FF&labelColor=102A43&color=071226" alt="Repositorio"/></a>
-  <br/><br/>
-  <img src="https://img.shields.io/github/stars/GracianB/project-ohana?style=for-the-badge&logo=github&label=estrellas&color=7EE7FF&labelColor=071226" alt="Estrellas"/>
-  <br/><br/>
-  <img src="https://img.shields.io/github/license/GracianB/project-ohana?style=for-the-badge&label=licencia&color=C4A574&labelColor=071226" alt="Licencia"/>
-  <br/><br/>
-  <img src="https://img.shields.io/github/last-commit/GracianB/project-ohana?style=for-the-badge&label=cambio&color=F4F3EE&labelColor=071226" alt="Último cambio"/>
-</p>
-
-</td>
+<td width="50%" align="center"><img src="assets/worlds/beach-bg.jpg" width="100%" alt="Arte ambiental de Costa Hoku"/><br/><sub>Costa Hoku</sub></td>
+<td width="50%" align="center"><img src="assets/worlds/jungle-bg.jpg" width="100%" alt="Arte ambiental de Jungla Alta"/><br/><sub>Jungla Alta</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="assets/worlds/volcano-bg.jpg" width="100%" alt="Arte ambiental de Caldera"/><br/><sub>Caldera</sub></td>
+<td width="50%" align="center"><img src="assets/worlds/boss-bg.jpg" width="100%" alt="Arte ambiental del Nido de la Reina"/><br/><sub>Nido de la Reina</sub></td>
 </tr>
 </table>
 
-<details>
-<summary><b>Jugar en local y pasar los tests</b></summary>
+<sub>Imágenes ambientales existentes en el repositorio, no capturas de la interfaz en ejecución.</sub>
 
-<br/>
+**Su recorrido:** Claro → Costa / Jungla → Caldera → Nido, con desvíos por Cueva, Laboratorio, Cumbre, Órbita y Arrecife. El jugador progresa mediante combate, movimientos, evolución y exploración, no pasando diapositivas.
 
-```powershell
-cd project-ohana
-python -m http.server 8080
-```
+## El siguiente capítulo: diez experiencias personales
 
-Abre [http://localhost:8080](http://localhost:8080).
+La visión de OHANA no consiste en cambiar el color de las mismas diez salas. **Cada héroe tendrá una ruta personal reconocible**, con biomas, retos, plataformas, enemigos, colecciones, un encuentro especial y puesta en escena adaptados a sus poderes. Esa es la dirección de desarrollo, **no una promesa de que ya estén publicadas**.
 
-```powershell
+| Personaje | Universo personal | Estado |
+| :--- | :--- | :--- |
+| **Kilo** | Bahía del Compás, música, flores y Tambor del Claro | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
+| **Stitcho** | Archipiélago del Caos, fragmentos, electricidad y Núcleo Glitch | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
+| **Chispín** | Islas del Relámpago | Planificado |
+| **Michi** | Jardines de la Luna | Planificado |
+| **Dragón** | Cordillera de las Brasas | Planificado |
+| **Dino** | Valle de los Gigantes | Planificado |
+| **Frita** | Mercado Dorado | Planificado |
+| **Pizza** | Reino del Horno | Planificado |
+| **Yomi** | Observatorio Astral | Planificado |
+| **Cuerno** | Bosque del Prisma | Planificado |
+
+**Objetivo de cada ruta:** exploración y combate propios, progresión individual, **100 objetos por personaje** y una recompensa especial al reunirlos todos. La mecánica se está desarrollando y validando en [PR #387](https://github.com/GracianB/project-ohana/pull/387); no aparece todavía en la versión pública de la web. La [arquitectura de diez identidades](https://github.com/GracianB/project-ohana/pull/388) continúa en una PR separada.
+
+## Juega con otra persona
+
+OHANA ya contiene una base multijugador en desarrollo con conexión entre navegadores, sincronización del combate, habilidades conjuntas y pruebas WebRTC en Chromium y Firefox. **Todavía no presentamos la experiencia cooperativa como un modo público listo para concurso**: falta cerrar el flujo de acceso con código de sala, las reconexiones, pruebas entre dispositivos y el despliegue reproducible.
+
+Tras estabilizar los mundos personales, el objetivo es una experiencia compartida fácil de entender: **abrir la URL, crear o introducir un código de sala y jugar en dos dispositivos sin instalar nada**.
+
+El siguiente gran hito es una demo multijugador completamente jugable y verificable, no una cifra de tests en un README.
+
+## Controles
+
+| Movimiento | Acción |
+| :--- | :--- |
+| **A / D** o flechas | Desplazarse |
+| **W / Espacio** | Saltar |
+| **S / ↓** | Descender de una plataforma |
+| **Shift** | Dash |
+| **H** | Ataque |
+| **J / K / L** | Habilidades especiales |
+| **E** | Interactuar |
+| **M** | Mapa |
+| **Esc** | Pausa |
+
+En móvil hay controles táctiles.
+
+## Desarrollo y pruebas
+
+- **Motor:** JavaScript modular, HTML, CSS y Canvas 2D; simulación fija a 60 Hz.
+- **Personajes:** ilustración vectorial animada, con dirección visual propia por héroe y evolución.
+- **Combate:** comportamiento de enemigos, animaciones de aviso, estados de impacto, jefes y habilidades cooperativas.
+- **Calidad:** tests de Node.js, Playwright, navegador real, rendimiento, accesibilidad y GitHub Actions.
+- **Guardado:** progreso y evolución local, álbumes y compatibilidad con IDs antiguos. Las nuevas colecciones individuales todavía se están sometiendo a pruebas.
+
+```bash
+npm ci
 npm test
 npm run test:browser
 npm run release:check
 ```
 
+Para probar el juego localmente, abre un servidor HTTP en la raíz del proyecto: los módulos ES no funcionan al abrir `index.html` mediante `file://`.
+
+<details>
+<summary><b>Seguimiento técnico y criterios de cierre</b></summary>
+
+Cada personaje pasa por: identidad visual → recorrido y física → enemigos y mecánicas → minijefe → 100 objetos y recompensa → guardado → pruebas de navegador → publicación.
+
+Se cierra una fase **cuando funciona en el juego y supera las pruebas**, no cuando simplemente existe una PR. Los detalles históricos de campaña y pruebas permanecen en [WORLD-1.md](WORLD-1.md) y los documentos técnicos del repositorio.
+
+El multijugador requiere además: sincronización del estado autoritativo, conexión remota real, reconexión, interacción de dos dispositivos, experiencia de invitación, equilibrio de combate y una URL pública verificable.
+
 </details>
-
----
-
-## Presupuesto de rendimiento · V70
-
-OHANA tiene margen para incorporar **Dino**, nuevas animaciones y el siguiente ciclo de **multijugador**. El antiguo tope de 1,5 MB de JavaScript se amplía a **3 MB (3.000.000 bytes)**; al llegar a **2,4 MB** aparece un aviso de revisión. El límite se define en `tools/performance-budgets.mjs` y se verifica desde **Browser E2E** (recursos JS transferidos) y **Release Gate** (suma de bytes fuente en módulos runtime, incluso con caché). No es una licencia para descargar 3 MB innecesarios.
-
-Siguen activos los controles de **CSS < 500 KB**, **first contentful paint < 4 s**, estabilidad de Canvas, errores de consola, rendimiento de simulación, pruebas multijugador y regresión visual. Para crecer de verdad, cargaremos lo pesado bajo demanda cuando corresponda, en lugar de recortar código a ciegas.
-
-## Original
-
-Nombres, dibujos, salas y poderes son de Ohana. No hay marcas de terceros ni afiliación con ninguna. Isla, criatura, dragón, evolución y jefe son el lenguaje del género. El universo concreto es este.
-
-**MIT © 2026 Gracián Baena**
 
 ---
 
 <div align="center">
 
-<a href="https://gracianb.github.io/project-ohana/">
-  <img src="https://capsule-render.vercel.app/api?type=waving&height=110&section=footer&color=0:7EE7FF,45:102A43,100:071226&reversal=true&text=BEB%C3%89%20%E2%86%92%20FORMA%20FINAL&fontColor=F4F3EE&fontSize=28&fontAlignY=62&animation=fadeIn" width="100%" alt="De bebé a forma final"/>
-</a>
+**Hecho para jugarlo, no solo para enseñarlo.**
 
-<br/>
+[**ENTRAR EN OHANA**](https://gracianb.github.io/project-ohana/) · [GitHub](https://github.com/GracianB/project-ohana) · [Systems Lab](https://gracianb.github.io/systems-lab/)
 
-[Hub](https://gracianb.github.io/GracianB/) · [Systems Lab](https://gracianb.github.io/systems-lab/) · [Experience](https://gracianb.github.io/professional-deck/) · [Yoga](https://gracianb.github.io/yoga-instructor/)
-
-<sub>PLAY · Murcia · 2026</sub>
+<sub>© 2026 Gracián Baena · Licencia del repositorio: MIT</sub>
 
 </div>
-
-
-## Boss Director · Phases 15–21
-
-La Reina del Nido evoluciona en capas deterministas de dirección de combate:
-
-- **Phase 15 · Combat Director**: rutinas encadenadas, selección contextual y recuperación vulnerable.
-- **Phase 16 · Reactive Director**: memoria de dash/aire/presión y respuesta contextual.
-- **Phase 17 · Counterplay**: DASH/AIRE/DISTANCIA, racha defensiva y BREAK.
-- **Phase 18 · Adaptive Encounter**: memoria corta de respuestas repetidas y cambio de preferencia dentro del repertorio autorizado.
-- **Phase 19 · Adaptive Bait**: dos respuestas iguales arman un CEBO de un solo uso; el patrón señuelo ya existe en la tabla de rutinas de la fase y no cambia daño ni hitboxes.
-- **Phase 21 · Encounter Memory**: la Reina conserva una memoria de ocho observaciones como máximo y ajusta la longitud de la siguiente rutina hacia corta o larga según la lectura del jugador, siempre dentro del repertorio autorizado.
-
-La adaptación es determinista, acotada y separada de la simulación física. El objetivo es aumentar la lectura del combate, no hacer trampas cambiando reglas invisibles.
-
-## Boss Director · Phase 20
-
-Phase 20 añade feedback de resultado al sistema de adaptación: un CEBO que el jugador identifica reduce el tempo de la Reina, mientras un CEBO eficaz lo incrementa. El efecto está limitado a la cadencia de decisión del siguiente ciclo y no modifica daño, hitboxes, física ni RNG.
-
-## Boss Director · Phase 21
-
-Phase 21 añade memoria corta del encuentro. Las respuestas limpias y los CEBO leídos relajan la selección hacia rutinas más cortas; los fallos y CEBO eficaces elevan la presión hacia rutinas más largas. El historial está limitado a ocho observaciones y la selección sigue cerrada a los patrones autorizados de cada fase.
-
-## Ability Fix · Kilo + Pizza
-
-Se corrigió una regresión de habilidades: el segundo ataque de Kilo (`Giro hula`) ahora tiene ciclo de impacto real y el agarre de queso de Pizza tiene duración limitada, permite contramovimiento y se cancela al lanzar otra habilidad. Las tres habilidades de Pizza quedan cubiertas por pruebas de impacto. Caché `ohana-98`.
-
-
-## Cuerno Paint Closure · Phase 41
-
-Cuerno ya tiene una ruta pintada completa para las cuatro poses de combate usadas por el cargador (`idle`, `run`, `jump`, `atk`). Los assets SVG usan gradientes y volumen, se cargan solo para Cuerno y quedan precacheados junto con el runtime.
-
-## Cache Graph Closure · Phase 40
-
-El Service Worker precachea el conjunto completo de módulos JavaScript del runtime con la versión actual de caché. El CI comprueba que `index.html` y `sw.js` usan la misma versión y que ningún módulo `.js` de producción queda fuera del precache.
-
-## CI Hardening
-
-GitHub Actions usa `actions/checkout@v7` y `actions/setup-node@v7`, ejecuta el pipeline con límites de tiempo y conserva regresión, E2E de navegador y consistencia antes de publicar.
-
-
-## RNG Domain Separation
-
-El RNG de simulación no es consumido por el render ni por VFX de presentación. La cámara, partículas y cinemáticas usan una semilla determinista derivada del tick, manteniendo la reproducibilidad del combate independiente de la frecuencia de render.
-
-## Deterministic Gameplay Core · Phase 33
-
-Las decisiones jugables de sorpresas y lluvia consumen RNG inyectable de simulación. La convocatoria del Nido utiliza 132 ticks de simulación en lugar de `setTimeout`, por lo que la espera se pausa con la partida y no depende del reloj de pared.
-
- 
-## V364 · Rendimiento y alojamiento gratuito (GitHub Pages)
-
-OHANA individual se sirve únicamente desde GitHub Pages. El modo cooperativo público queda **en pausa** mientras no exista un servicio de salas y señalización WebRTC; GitHub Pages es alojamiento estático y no ejecuta las funciones de Netlify ni proporciona TURN. Se conserva el motor cooperativo y sus pruebas para recuperarlo cuando haya infraestructura disponible, sin consumir créditos de Netlify ni contratar TURN.
-
-Rendimiento: el Service Worker reutiliza los módulos JS ya precacheados, evitando descargarlos de nuevo en cada visita con caché caliente. Los recursos que faltan durante una desconexión devuelven un error de recurso, nunca HTML fingiendo ser JavaScript. El menú reutiliza contextos y gradientes Canvas mientras sus dimensiones y aura no cambien. El bucle de juego baja la frecuencia de sus comprobaciones durante menús, pausa y pestañas ocultas, manteniendo la simulación de tiempo fijo y la frecuencia normal mientras se juega. Se preservan las pruebas de navegador, dibujos, evoluciones, guardado y juego individual.
-
-**Alcance medible:** menos peticiones redundantes tras la primera instalación del Service Worker y menos asignaciones de gradientes por fotograma; no se afirma una ganancia de FPS sin una medición de dispositivo representativo. La primera visita todavía descarga los módulos y el cooperativo necesita infraestructura externa para funcionar entre dispositivos.
-
-
-## OHANA V366 · Rendimiento móvil y diagnóstico local
-
-Para revisar el rendimiento en cualquier dispositivo, abre la URL habitual con `?perf=1` al final, por ejemplo `https://gracianb.github.io/project-ohana/?perf=1`. Aparece un medidor local de FPS, percentil 95 de fotogramas, percentil 95 de dibujo y resolución Canvas. No se registran datos personales ni se envían estadísticas a servidores.
-
-En dispositivos táctiles con hardware realmente limitado (hasta 2 GB RAM o dos núcleos) se reduce la resolución inicial del Canvas, nunca la frecuencia de la simulación. Si el juego registra sobrecarga baja la resolución, y cuando recupera estabilidad durante suficiente tiempo intenta restablecer la nitidez. Pausas y pestañas ocultas no cuentan como tiempo fluido. Los dispositivos modernos mantienen su calidad inicial.
-
-El CI guarda métricas headless Chromium para escritorio y móvil emulado en un JSON descargable desde el artefacto visual. Son datos reproducibles del entorno GitHub Actions, no una promesa de FPS para teléfonos físicos. Juego individual en GitHub Pages; cooperativo público en pausa sin Netlify/TURN.
-
-
-### V367 · Arranque por fases
-
-La portada y el juego ya no ejecutan módulos completos de cinemáticas raras antes de entrar. El kit común `systems/cinema-kit.js` conserva la calidad Canvas de la bienvenida y la carga bajo demanda mantiene las escenas originales de evolución, victoria y supremas. El selector activo es `family-grid`; dos módulos históricos inactivos ya no figuran como entradas de la página.
-
-Los recursos continúan íntegros en el precache del Service Worker para que el juego funcione offline. Esto reduce el trabajo de importación, compilación y ejecución inicial, pero no equivale a reducir los bytes descargados por la instalación offline. El CI comprueba el arranque en Chromium y el disparo de las tres cinemáticas originales. Solo despliegue en GitHub Pages, sin Netlify ni TURN de pago.
-
-
-### V368 · Actualizaciones offline incrementales
-
-OHANA instala todos los recursos necesarios para funcionar sin conexión. La instalación inicial precarga el juego por lotes de seis peticiones, con prioridad para la portada, el motor y sus estilos, en vez de intentar descargarlo todo a la vez.
-
-Desde V368 se conserva un manifiesto de huellas Git de cada archivo en la caché. Al publicar una nueva versión, el Service Worker puede reutilizar sin descarga los recursos exactamente iguales y descargar únicamente los que cambien. La primera migración desde V367 necesita reconstruir la caché porque no había metadatos comparables. Una instalación interrumpida no reemplaza una versión anterior válida.
-
-**Al desarrollar V369 y siguientes:** actualizar referencias `ohana-NNN` y ejecutar `node tools/update-offline-revisions.mjs` después de editar recursos y antes de la batería `npm run release:check`. El Release Gate rechaza cualquier manifiesto incorrecto. Se conserva el catálogo offline completo, el control de errores 503 para recursos no disponibles y el aislamiento de endpoints externos.
-
-
-### V369 · Una actualización incremental medida
-
-La primera actualización basada en el manifiesto de V368 muestra **199 de 200 recursos estáticos sin cambios**, equivalentes a **6.433.149 bytes (6,14 MiB) de archivos originales potencialmente reutilizables**. Solo `index.html` necesita actualizarse (17.817 bytes de origen). Estas cifras comparan contenido del repositorio, sin atribuirlas a consumo real de transferencia HTTP comprimida.
-
-El Service Worker guarda estadísticas de instalación exclusivamente en CacheStorage (`./.ohana-install-stats.json`, dentro del caché `ohana-static-ohana-369`) y no envía datos personales ni analítica. La auditoría `node tools/offline-upgrade-report.mjs` genera `test-results/performance/v369-offline-upgrade.json`. Chromium prueba la migración y que sigue habiendo juego offline tras ella.
-
-Las próximas revisiones deben conservar la tabla de huellas regenerándola con `node tools/update-offline-revisions.mjs` y validarla con Release Gate. Solo GitHub Pages, sin Netlify/TURN de pago.
