@@ -20,6 +20,12 @@ export function drawNaturalLedge(ctx,p,world,cam,t){
  ctx.fillStyle=hot?'#f2b68d':'#e0eac4';ctx.fillRect(x+2,y-2,Math.max(0,w-4),2);ctx.fillRect(x,y-2,Math.min(8,w*.08),7);ctx.fillRect(x+w-Math.min(8,w*.08),y-2,Math.min(8,w*.08),7);
  ctx.strokeStyle=hot?'#f2b68d':'#e0eac4';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+1,y);ctx.lineTo(x+w-1,y);ctx.stroke();
  if(!hot&&!rocky&&!reef){ctx.strokeStyle='#557f5d';ctx.lineWidth=2;for(let i=0;i<Math.floor(w/48);i++){const xx=x+20+i*48;ctx.beginPath();ctx.moveTo(xx,y+5);ctx.quadraticCurveTo(xx-6,y-9,xx+2,y-7);ctx.moveTo(xx,y+4);ctx.quadraticCurveTo(xx+7,y-7,xx+10,y-4);ctx.stroke();}
+  if(id==='grove')for(let i=0;i<Math.floor(w/100);i++){
+   const xx=x+45+i*100,yy=y-4;
+   ctx.fillStyle=['#ffacc2','#eb554a','#ffe9a8'][i%3];
+   for(let petal=0;petal<5;petal++){const a=petal*Math.PI*2/5;ctx.beginPath();ctx.ellipse(xx+Math.cos(a)*4,yy+Math.sin(a)*3,3,2,a,0,Math.PI*2);ctx.fill();}
+   ctx.fillStyle='#ffe9a8';ctx.beginPath();ctx.arc(xx,yy,1.6,0,Math.PI*2);ctx.fill();
+  }
   // Hanging roots give the ledge weight without hiding a lower landing.
   for(let i=0;i<2;i++){const xx=x+w*(.3+i*.42),length=12+random(p.x+i*3)*24;ctx.strokeStyle='#567654';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xx,y+depth*.7);ctx.quadraticCurveTo(xx-7,y+depth+8,xx+Math.sin(t*.025+i)*2,y+depth+length);ctx.stroke();}
  }

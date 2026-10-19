@@ -203,6 +203,7 @@ if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 if (index > 3) castEvolutionAttack(game,index);
 else if (index === 3) castSupreme(game, p, flow);
 else if (!cuernoKey) fn(game, p, evo);
+game.onHeroAbility?.(p,index);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
 if (flow.label && index < 3) {
@@ -2986,21 +2987,21 @@ ctx.ellipse(f.x - cam.x, f.y - cam.y, 6 + k * 26, 2 + k * 6, 0, 0, TAU);
 ctx.stroke();
 },
 hula(ctx, f, cam, t, g, p) {
-const x = cx(p) - cam.x, y = cy(p) - cam.y;
+const x = cx(p) - cam.x, y = p.y+p.h - cam.y;
 const k = Math.min(1, f.life / 10);
 ctx.globalAlpha = 0.25 * k;
 ctx.fillStyle = "#ff5ad5";
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.fill();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.fill();
 ctx.globalAlpha = 0.9 * k;
 ctx.strokeStyle = "#ffb3ee";
 ctx.lineWidth = 2;
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.stroke();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.stroke();
 // Four stationary hibiscus accents mark the four dance beats.
 const n = 4;
 const beat = Math.floor((96-f.life)/24)%4;
 for (let i = 0; i < n; i++) {
   const a = (i / n) * TAU - Math.PI/2;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
+  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r*.24;
   ctx.save();
   ctx.translate(px, py);
   ctx.rotate(a + Math.PI / 2);

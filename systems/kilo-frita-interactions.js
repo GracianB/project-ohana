@@ -158,10 +158,10 @@ function drawCast(ctx, a, px, py, ph, t) {
     } else if (a.slot === 1) { // Hula: aro giratorio + pétalos
       const R = (40 + a.evo * 7) * (ant ? a.age / 8 : 1);
       ctx.strokeStyle = "#ff5ad5"; ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.ellipse(px, py + 4, R, R * .32, 0, 0, Math.PI * 2); ctx.stroke();
+      // The physical hoop is drawn around Kilo by characters/hula-depth.js.
       for (let i = 0; i < 6 + a.evo; i++) {
         const an = t * .12 + i * 6.283 / (6 + a.evo);
-        flower(ctx, px + Math.cos(an) * R, py + 4 + Math.sin(an) * R * .32, 5 * sc, i % 2 ? "#ff6b9a" : "#7fe0c8", an);
+        flower(ctx, px + Math.cos(an) * R, py - 22 + Math.sin(an) * R * .55, 3 * sc, i % 2 ? "#ff6b9a" : "#ffe9a8", an);
       }
       if (a.age > 8 && a.age < 50) label(ctx, "¡HULA FLOTANTE!", px, py - ph - 12, "#ff6b9a", 13 + a.evo);
     } else if (a.slot === 2) { // Ohana: corazones que estallan en anillo

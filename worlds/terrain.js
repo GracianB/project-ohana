@@ -265,8 +265,16 @@ function dress(ctx, world, cam, t) {
   }
   ctx.restore();
 }
-export function drawTerrain(ctx, platforms, world, cam, t) {
+export function terrainInView(p,cam,view){
+ return p.x+p.w>=cam.x-100&&p.x<=cam.x+view.width+100&&p.y+Math.max(p.h,110)>=cam.y&&p.y<=cam.y+view.height+30;
+}
+export function drawTerrain(ctx, platforms, world, cam, t, view) {
   drawChasms(ctx, platforms, cam, t);
-  for (const plat of platforms || []) drawPlatform(ctx, plat, world, cam, t);
+  let drawn=0;
+  for (const plat of platforms || []) {
+    if(view&&!terrainInView(plat,cam,view))continue;
+    drawPlatform(ctx, plat, world, cam, t);drawn++;
+  }
   dress(ctx, world, cam, t);
+  return {total:platforms?.length||0,drawn,culled:(platforms?.length||0)-drawn};
 }

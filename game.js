@@ -1,3 +1,4 @@
+import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy} from "./systems/campaign-enemies.js";
@@ -311,7 +312,7 @@ return "C";
 function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+if (!interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -505,6 +506,8 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
+enterKiloGrove(game);
+game.onHeroAbility=(p,index)=>groveAbility(game,p,index);
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
@@ -663,6 +666,7 @@ try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 input?.reset();
 clock.reset();
 t = 0;
+game.t = 0;
 paused = false;
 game.hitstop = 0;
 game.camPunch = 0;
@@ -1667,7 +1671,8 @@ if (ok) {
 }
 }
 const r = room();
-if (portals.prompt) setPrompt(portals.prompt, true);
+if (grovePrompt(game))setPrompt(grovePrompt(game),true);
+else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
@@ -2689,8 +2694,9 @@ drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
-drawTerrain(ctx, game.platforms, world, game.cam, t);
+game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 drawIslandSprings(ctx,game,game.cam,t);
@@ -3155,6 +3161,7 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
+updateKiloGrove(game);
 updatePlayer();
 updateCampaignProgress(game);
 updateIslandSprings(game);
@@ -3583,6 +3590,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),

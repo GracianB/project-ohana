@@ -1,3 +1,4 @@
+import {drawHulaDepth} from './hula-depth.js';
 import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
@@ -264,6 +265,7 @@ case "note-bounce":
   }
   break;
 case "hula-ring":
+  if(p.id==='kilo')break; // Kilo's hoop surrounds the body in two depth passes.
   ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.022);
   ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 1.35, r * 0.72, t * 0.08, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 0.82, r * 0.44, -t * 0.11, 0, Math.PI * 2); ctx.stroke();
@@ -1338,6 +1340,7 @@ if (burstK > 0.35) {
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; }
 const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 if (painted) {
@@ -1358,6 +1361,7 @@ ctx.restore();
 if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
 if(p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
+drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 if (burstK > 0) {
 drawBurst(ctx, H, color, burstK);
 p.evoBurst--;

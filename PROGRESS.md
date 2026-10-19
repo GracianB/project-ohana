@@ -1,3 +1,11 @@
+## ohana-441 · Entrega 1/10 en construcción: Kilo y su Claro
+
+Nuevo trazado de 16 repisas estáticas y dos transportes (horizontal y vertical), ukelele interactivo con respuesta a J/K de Kilo, recompensa persistente y corriente musical exclusiva. Se evita reconstruir la antigua escalera genérica en el Claro. Paleta rosa/coral/crema del personaje, hibiscos y aro compuesto detrás/delante del cuerpo; el área de daño se proyecta sobre el suelo. Descarte bidimensional de terreno: captura de prueba con 7 plataformas dibujadas y 11 descartadas de 18.
+
+Validación: 1269/1269 pruebas unitarias; auditoría general de navegador PASS (incluida repetición determinista tras reiniciar); transporte horizontal/vertical, canción, mapas, diez salas y escritorio/móvil PASS; release gate PASS. La auditoría del Claro se añade a CI.
+
+El documento V1-DELIVERIES.md fija las diez entregas. Esta versión abre la primera: no declara completo el kit de Kilo ni la V1 oficial. Faltan revisión integral J/K/L/I/P/U, escenas y validación de duración/balance.
+
 ## ohana-440 · Escenario y movimiento de Michi
 
 Retirado el rectángulo translúcido del efecto de entrada que aparecía en la captura. Corregidos los solapes entre plataformas del trazado base, desvíos y puente de regreso. Los salientes naturales sustituyen las barras verdes; se añaden relieves, vegetación y cascadas en coordenadas del mundo. El minimapa muestra el entorno cercano y queda por encima de los controles, con el suelo largo recortado por sectores descubiertos. Las flores de salto respetan bajar con ↓: ya no devuelven al jugador automáticamente a la repisa superior.
