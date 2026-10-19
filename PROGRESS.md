@@ -1,3 +1,7 @@
+## ohana-452 · Reintento acotado de la ráfaga visual J/K/L por WebRTC
+
+GitHub Pages bloqueó V451 después de una regresión intermitente de la prueba de Chispín: el canal rápido pudo aceptar el snapshot mientras el canal fiable rechazaba la ráfaga completa por congestión. Un combo completo que no consigue entrar en la cola fiable se conserva en el enlace WebRTC y se reintenta en el siguiente heartbeat, como máximo ocho fotogramas de diferencia. La retransmisión se limita al mismo enlace, sala y scope y se retira tras el primer éxito. Los paquetes periódicos y combos parciales siguen utilizando exclusivamente el canal rápido. Nuevos tests unitarios comprueban congestión, recuperación y ausencia de retransmisiones cruzadas; el E2E incluye diagnóstico del origen/destino si vuelve a fallar.
+
 ## ohana-451 · Sincronización WebRTC fuera de orden (J/K/L)
 
 Solucionada la carrera entre la instantánea ligera (frameNo más nuevo) y el evento fiable de ráfaga completa que llega después. Se permite fusionar únicamente la terna visual validada de Michi o Chispín si pertenece al mismo scope, la distancia es de 8 frames o menos y aún no se aceptó esa secuencia. No retrocede frameNo, combate, HP ni objetivos; rechaza paquetes caducados, repetidos o de ámbitos retirados. Node incluye pruebas de llegada inversa, ausencia de daño, expiración y anti-replay. La prueba de navegador continúa verificando los FX reales en ambos jugadores.
