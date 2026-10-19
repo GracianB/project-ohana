@@ -106,9 +106,9 @@ export function applyPeerEffects(game,frame){
   // Reliable cosmetic combo events can arrive AFTER newer disposable frames.
   // They cannot roll back frameNo, combat, room, HP, or non-cosmetic fields.
   // Accept only an unseen, fully validated trio in the current scope and
-  // within eight 5 Hz snapshots of the live state.
+  // within sixteen 5 Hz snapshots of the live state (under the 3s E2E budget).
   if(current?.scope!==frame.scope||frame.frameNo>=current.frameNo||
-     current.frameNo-frame.frameNo>8||history?.lateCombos?.has(frame.frameNo))return false;
+     current.frameNo-frame.frameNo>16||history?.lateCombos?.has(frame.frameNo))return false;
   const m=readMichiEffects(frame.michiFx||[]);
   const c=readChispinEffects(frame.chispinFx||[]);
   if(!m||!c)return false;
