@@ -4,7 +4,7 @@ export const STITCHO_BOSS_ID='hub-stitcho-glitch-v1';
 export const STITCHO_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['sweep','charge','cross','meteor']);
 export function createStitchoBoss(makeFoe,rng=()=>.5){
-  const e=makeFoe(3400,1000,'cucaracho','hub',997,{rng});
+  const e=makeFoe(3400,1000,'cangrejo','hub',997,{rng});
   e.x=3400;e.y=STITCHO_BOSS.floor-92;e.w=112;e.h=92;
   e.hp=e.max=STITCHO_BOSS.hp;
   e.miniBoss=true;e._stitchoBoss=true;
