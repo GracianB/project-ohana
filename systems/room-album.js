@@ -20,7 +20,7 @@ export function enterRoomAlbum(g){if(g.relicScene)g.onRelicEnd?.();g.roomAlbums|
 export function takeRoomItem(g,id){const album=g.roomAlbums?.[g.roomId];if(!album||album.found.includes(id)||!Number.isInteger(id)||id<0||id>=100)return false;album.found.push(id);g.score=(g.score||0)+10;persistRoomAlbums(g);return true;}
 export function claimRoomRelic(g){const a=g.roomAlbums?.[g.roomId];if(!a||a.found.length!==100||a.relic)return false;a.relic=true;g.relicScene={room:g.roomId,age:0,duration:600};g.renderDirty=true;g.onRelicBegin?.();persistRoomAlbums(g);g.resetInput?.();return true;}
 export function updateRoomAlbum(g){
- const p=g.player,a=g.roomAlbums?.[g.roomId];if(!p||p.dead||!a)return;
+ const p=g.player,a=g.roomAlbums?.[g.roomId];if(g.heroCollection||!p||p.dead||!a)return;
  const found=new Set(a.found);let changed=false;
  for(const item of g.roomAlbumItems||[])if(!found.has(item.id)&&Math.abs(p.x+p.w/2-item.x)<25&&Math.abs(p.y+p.h/2-item.y)<32){a.found.push(item.id);found.add(item.id);g.score=(g.score||0)+10;changed=true;}
  if(changed){g.nums?.add?.(p.x,p.y-20,`${a.found.length}/100 · RECUERDOS`,ROOM_RELICS[g.roomId][2],false);if(a.found.length===100)g.nums?.add?.(p.x,p.y-65,'OBJETO ESPECIAL · VUELVE A LA BANDERA DE ENTRADA','#fff1b5',true);persistRoomAlbums(g);}
@@ -29,7 +29,7 @@ export function updateRoomAlbum(g){
 }
 export function tickRelicScene(g){if(!g.relicScene)return false;g.relicScene.age++;g.renderDirty=true;if(g.relicScene.age>=120&&g.relicScene.age<480&&g.relicScene.age%45===0)g.onRelicBeat?.(Math.floor((g.relicScene.age-120)/45));if(g.relicScene.age>=600){g.relicScene=null;g.onRelicEnd?.();g.resetInput?.();}return true;}
 export function drawRoomAlbum(ctx,g,cam){
- const a=g.roomAlbums?.[g.roomId];if(!a)return;const found=new Set(a.found),color=ROOM_RELICS[g.roomId][2];ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff5dc';ctx.lineWidth=1.5;
+ const a=g.roomAlbums?.[g.roomId];if(g.heroCollection||!a)return;const found=new Set(a.found),color=ROOM_RELICS[g.roomId][2];ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff5dc';ctx.lineWidth=1.5;
  for(const item of g.roomAlbumItems||[]){const x=item.x-cam.x,y=item.y-cam.y;if(found.has(item.id)||x<-15||x>(g.viewW||1600)+15||y<-15||y>(g.viewH||1000)+15)continue;ctx.beginPath();ctx.moveTo(x,y-6);ctx.lineTo(x+5,y);ctx.lineTo(x,y+6);ctx.lineTo(x-5,y);ctx.closePath();ctx.fill();if(item.challenge)ctx.stroke();}
  if(a.found.length===100&&!a.relic){const c=g.roomDef.checkpoints?.[0]||{x:180,y:1134},x=c.x-cam.x,y=c.y-25-cam.y;ctx.font='bold 15px sans-serif';ctx.textAlign='center';ctx.fillText('✦ '+ROOM_RELICS[g.roomId][1],x,y-50);ctx.save();ctx.translate(x,y-18);ctx.rotate(-.6);ctx.fillStyle="#e0b47b";ctx.fillRect(0,-3,36,6);ctx.beginPath();ctx.ellipse(0,0,13,18,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle="#604335";ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff1ca";ctx.lineWidth=.8;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-6,i*1.5);ctx.lineTo(35,i*1.5);ctx.stroke();}ctx.restore();}
  ctx.restore();
