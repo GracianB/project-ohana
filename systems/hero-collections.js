@@ -14,6 +14,24 @@ export const HERO_COLLECTIONS=Object.freeze({
  yomi:{room:'space',title:'Las cien estrellas perdidas',color:'#f5bedc',bonus:'CONSTELACIÓN ETERNA'},
  cuerno:{room:'ridge',title:'Los cien prismas del bosque',color:'#d5c8ff',bonus:'AURORA VIVA'}
 });
+const personalKey=hero=>'ohana-hero-100-v1:'+hero;
+function readPersonal(g,hero){
+ try{
+  const storage=g.personalCollectionStorage||globalThis.localStorage;
+  const raw=JSON.parse(storage?.getItem(personalKey(hero))||'{}');
+  const ids=Array.isArray(raw.ids)?raw.ids.filter(id=>Number.isInteger(id)&&id>=0&&id<100):[];
+  return {ids:new Set(ids),complete:raw.complete===true&&new Set(ids).size===100};
+ }catch{return {ids:new Set(),complete:false};}
+}
+function writePersonal(g,s){
+ try{
+  const storage=g.personalCollectionStorage||globalThis.localStorage;
+  storage?.setItem(personalKey(s.hero),JSON.stringify({
+   v:1,ids:[...s.collected].sort((a,b)=>a-b),complete:!!s.complete
+  }));
+  return true;
+ }catch{return false;}
+}
 const mark=(hero,id)=>'hero-100:'+hero+':'+id;
 const prize=(hero)=>'hero-100:'+hero+':complete';
 const center=p=>[p.x+p.w/2,p.y+p.h/2];
@@ -23,23 +41,26 @@ export function enterHeroCollection(g){
  const p=g.player,def=HERO_COLLECTIONS[p?.id];
  if(!def||g.personalAdventureSolo===false||def.room!==g.roomId||!g.roomDef){g.heroCollection=null;return;}
  const store=new Set(g.secrets?.[g.roomId]||[]);
+ const personal=readPersonal(g,p.id);
  // A previously earned Kilo hub relic remains earned, not a reset.
  if(p.id==='kilo'&&g.roomAlbums?.hub?.relic&&g.roomAlbums.hub.found.length===100){
   for(let i=0;i<100;i++)store.add(mark(p.id,i));
   store.add(prize(p.id));
  }
  const items=roomAlbumPlacements(g.roomDef);
- const collected=new Set(items.filter(i=>store.has(mark(p.id,i.id))).map(i=>i.id));
- const complete=store.has(prize(p.id));
+ const collected=new Set(items.filter(i=>store.has(mark(p.id,i.id))||personal.ids.has(i.id)).map(i=>i.id));
+ const complete=collected.size===100&&(store.has(prize(p.id))||personal.complete);
  g.heroCollection={hero:p.id,def,items,collected,complete,pulse:0,scene:0,display:0};
  // Do not display a second, shared layer of 100 diamonds over the personal set.
  g.roomAlbumItems=[];
  if(complete)p._heroHundredBonus=def.bonus;
+ if(collected.size)writePersonal(g,g.heroCollection);
 }
 export function takeHeroCollectionItem(g,id){
  const s=g.heroCollection,p=g.player;
  if(!s||!Number.isInteger(id)||id<0||id>=100||s.collected.has(id))return false;
  s.collected.add(id);g.score=(g.score||0)+12;
+ writePersonal(g,s);
  save(g,mark(s.hero,id));
  if(s.collected.size===100)completeHeroCollection(g);
  return true;
@@ -48,6 +69,7 @@ function completeHeroCollection(g){
  const s=g.heroCollection,p=g.player;
  if(!s||s.complete||s.collected.size!==100)return false;
  s.complete=true;s.scene=240;s.pulse=180;
+ writePersonal(g,s);
  if(save(g,prize(s.hero))){
   g.score=(g.score||0)+1200;p.xp=(p.xp||0)+150;
   if(Number.isFinite(p.maxHealth))p.health=p.maxHealth;
