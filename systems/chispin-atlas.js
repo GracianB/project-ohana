@@ -1,8 +1,8 @@
 import {CHISPIN_CHAPTERS} from './chispin-storm.js';
 const SECTORS=Object.freeze([
  {id:'chispin-0',short:'DÁRSENA',name:'Dársena de la chispa',x:13,y:52,desc:'Recupera la primera descarga y encuentra el camino sobre los restos flotantes.'},
- {id:'chispin-1',short:'PUENTES',name:'Puentes electrostáticos',x:36,y:32,desc:'Impúlsate en los muelles eléctricos y rescata dos fragmentos para el segundo pararrayos.'},
- {id:'chispin-2',short:'TORRE',name:'Torre de las nubes',x:62,y:52,desc:'Cinco fragmentos permiten activar la tercera señal. Pulsa J junto a las barreras para silenciarlas.'},
+ {id:'chispin-1',short:'PUENTES',name:'Puentes electrostáticos',x:36,y:32,desc:'Las flores voltaicas sobre suelo firme te lanzan a las plataformas más altas. Sigue sus estelas para alcanzar dos fragmentos y el segundo pararrayos.'},
+ {id:'chispin-2',short:'TORRE',name:'Torre de las nubes',x:62,y:52,desc:'Cinco fragmentos activan el tercer pararrayos. Pulsa J para absorber barreras o enlaza J → K → L para lanzar el Circuito del Trueno.'},
  {id:'chispin-3',short:'SANTUARIO',name:'Santuario de la Tormenta',x:85,y:32,desc:'Un jefe propio de 520 PV, con tres fases y cuatro ataques. Esquiva la zona marcada antes del impacto.'}
 ]);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
