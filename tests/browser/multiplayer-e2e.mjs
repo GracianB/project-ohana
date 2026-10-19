@@ -117,7 +117,7 @@ try {
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
   const errors = [];
-  for (const page of [hostPage, guestPage]) page.on("pageerror", (error) => errors.push(error.stack || error.message));
+  for (const page of [hostPage, guestPage]) page.on("pageerror", (error) => {errors.push(error.stack || error.message);console.error("BROWSER RUNTIME",error.stack||error.message);});
 
   await hostPage.goto(origin+"/multiplayer.html");
   console.log(`multiplayer ${browserName}: lobby loaded${lateIce?" / late ICE":""}`);
@@ -161,7 +161,7 @@ try {
   // V108: both real Chromium instances must exchange SDP through the SAME
   // fake Netlify room, then open direct SCTP pose + reliable action channels.
   for (const [label,page] of [["host",hostPage],["guest",guestPage]]) {
-    await page.waitForFunction(()=>document.body.dataset.coopTransport==="direct",null,{timeout:30000});
+    await page.waitForFunction(()=>document.body.dataset.coopTransport==="direct",null,{timeout:30000}).catch(async error=>{console.error("RTC BOOT DIAGNOSTICS",label,JSON.stringify({errors,state:await page.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,body:document.body.className,phase:o.snapshot?.phase,enabled:o.enabled,active:o.direct?.active,attempted:o.directAttempted,ice:o.direct?.iceState,pc:o.direct?.pc?.connectionState,peer:!!o.remote?.playerId};})}));throw error;});
     const verified=await page.evaluate(async()=>{
       const {onlineCoop}=await import("/systems/online-coop.js");
       return {active:onlineCoop.direct?.active,offer:!!onlineCoop.direct?.pc?.remoteDescription,
@@ -238,6 +238,7 @@ try {
     if(recoveredSession)break;
     await hostPage.waitForTimeout(200);
   }
+  if(!recoveredSession)console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,host:await hostPage.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,paused:document.getElementById("pause")?.className,body:document.body.className,state:o.snapshot?.phase,initiator:o.direct?.initiator,active:o.direct?.active,attempted:o.directAttempted,available:o.direct?.available,peer:!!o.remote?.playerId,at:o.directRetryAt,now:performance.now()};})}));
   assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
     const {onlineCoop}=await import("/systems/online-coop.js");
