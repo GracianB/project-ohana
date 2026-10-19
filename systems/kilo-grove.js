@@ -14,7 +14,7 @@ export function installKiloGrove(room){
  room.hint='Toca las flores con J si eres Kilo, o usa E junto al instrumento. La balsa cruza el claro; la flor ascensor sube al mirador.';
 }
 export function enterKiloGrove(g){
- if(g.roomId!=='hub'){g.kiloGrove=null;return;}
+ if(g.roomId!=='hub'||(g.player?.id==='stitcho'&&g.personalAdventureSolo)){g.kiloGrove=null;return;}
  const lifts=[
   {axis:'x',x:1430,y:894,span:540,period:360},
   {axis:'y',x:2850,y:1054,span:960,period:480}
