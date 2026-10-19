@@ -6,10 +6,10 @@ import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlb
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
-import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoAbility} from './systems/stitcho-trail.js';
+import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoTrailSnapshot,stitchoAbility} from './systems/stitcho-trail.js';
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
-import {enterHeroCollection,updateHeroCollection,drawHeroCollection} from "./systems/hero-collections.js";
+import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -3550,6 +3550,8 @@ combatTarget(){
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
+ heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
+ interact(){interact();return this.state();},
 roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
@@ -3656,7 +3658,7 @@ state() {
       formation: game.enemyDirector.formation || "",
     } : null,
     kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
-    roomAlbum:roomAlbumSnapshot(game),grove:groveSnapshot(game),terrainStats:game.terrainStats,
+    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),
