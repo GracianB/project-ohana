@@ -7,6 +7,7 @@ import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail} from './systems/stitcho-trail.js';
+import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -535,7 +536,15 @@ initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return e;
 });
-game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&game.player?.id==='stitcho'&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+game.spawnStitchoBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._stitchoBoss))return true;
+  const enemy=createStitchoBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -676,6 +685,7 @@ game.lastAbilitySlot = null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
+game.personalAdventureSolo = !onlineMode;
 const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 input?.reset();
@@ -1910,6 +1920,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateGroveGuardian(e,game,hurtPlayer))continue;
 if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
@@ -2574,7 +2585,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
-if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,"¡EL CLARO VUELVE A CANTAR!","#ffe1a0",true);game.save?.();}}
+if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -2767,7 +2778,8 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
-  if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
+  if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
 if (!game.finale) {
@@ -3198,7 +3210,7 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
-updateKiloGrove(game);updateStitchoTrail(game);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);
 updatePlayer();
 updateRoomAlbum(game);
 if(game.relicScene)return;
