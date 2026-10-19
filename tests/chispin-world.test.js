@@ -12,9 +12,9 @@ import {createChispinBoss,updateChispinBoss,CHISPIN_BOSS_ID,CHISPIN_BOSS,CHISPIN
 
 const make=(saved=[],defeated=false)=>{
  let writes=0,spawns=0;
- const g={roomId:'hub',roomDef:createChispinRoom(ROOMS.hub),personalAdventureSolo:true,
+ const g={roomId:'lab',roomDef:createChispinRoom(ROOMS.lab),personalAdventureSolo:true,
   player:{id:'chispin',x:0,y:0,w:30,h:40,xp:0,invuln:0,grounded:false,cds:{}},
-  platforms:[],secrets:{hub:saved.slice()},clearedEncounters:{hub:defeated?[CHISPIN_BOSS_ID]:[]},
+  platforms:[],secrets:{lab:saved.slice()},clearedEncounters:{lab:defeated?[CHISPIN_BOSS_ID]:[]},
   cam:{x:0,y:0},score:0,t:0,
   save(){writes++;},nums:{add(){}},fx:{emit(){}},spawnChispinBoss(){spawns++;return true;}
  };
@@ -24,17 +24,17 @@ const make=(saved=[],defeated=false)=>{
  return {g,at,pickup,get writes(){return writes;},get spawns(){return spawns;}};
 };
 test('four authored sectors, ten custom foes, five rails and 100 personal pickups leave the shared hub untouched',()=>{
- const before=JSON.stringify(ROOMS.hub),room=createChispinRoom(ROOMS.hub);
+ const before=JSON.stringify(ROOMS.hub),room=createChispinRoom(ROOMS.lab);
  assert.equal(room.name,'Islas del Relámpago');assert.equal(room.foes.length,10);
  assert.equal(CHISPIN_SECTORS.length,4);assert.ok(room.plats.length>=22);
  assert.equal(room.hazards.length,2);assert.equal(JSON.stringify(ROOMS.hub),before);
- assert.equal(HERO_COLLECTIONS.chispin.room,'hub');
+ assert.equal(HERO_COLLECTIONS.chispin.room,'lab');
  const f=make();assert.equal(f.g.chispinStorm.lifts.length,5);
  assert.equal(f.g.platforms.length,5);assert.equal(CHISPIN_GATES.length,3);
  assert.equal(CHISPIN_SPRINGS.length,3);
  assert.equal(roomAlbumPlacements(room).length,100);
- const c={roomId:'hub',roomDef:room,personalAdventureSolo:true,player:{id:'chispin',w:30,h:40},
-  secrets:{hub:[]},roomAlbumItems:[]};
+ const c={roomId:'lab',roomDef:room,personalAdventureSolo:true,player:{id:'chispin',w:30,h:40},
+  secrets:{lab:[]},roomAlbumItems:[]};
  enterHeroCollection(c);assert.equal(heroCollectionSnapshot(c).total,100);
  assert.equal(takeHeroCollectionItem(c,0),true);
 });
@@ -53,11 +53,11 @@ test('three real lightning relays require five shards and permanently unlock bos
  assert.equal(chispinStormSnapshot(f.g).index,3);
  updateChispinStorm(f.g);updateChispinStorm(f.g);
  assert.equal(f.spawns,1);assert.equal(f.g.player.xp,120);
- const recovered=make(f.g.secrets.hub);
+ const recovered=make(f.g.secrets.lab);
  assert.equal(recovered.g.chispinStorm.complete,true);
  assert.equal(recovered.g.chispinStorm.shards,5);
  assert.equal(interactChispinStorm(recovered.g),false);
- const won=make(f.g.secrets.hub,true);
+ const won=make(f.g.secrets.lab,true);
  assert.equal(won.g.chispinStorm.defeated,true);updateChispinStorm(won.g);assert.equal(won.spawns,0);
 });
 test('J interrupts a nearby electrical gate and the J/K/L mastery reward cannot duplicate',()=>{
@@ -67,9 +67,9 @@ test('J interrupts a nearby electrical gate and the J/K/L mastery reward cannot 
  assert.ok(f.g.chispinStorm.gateSilencedUntil[0]>0);
  const score=f.g.score;for(let k=0;k<3;k++)chispinStormAbility(f.g,p,k);
  assert.equal(f.g.score,score);
- assert.equal(f.g.secrets.hub.filter(x=>x==='hub-chispin-constellation-v1').length,1);
+ assert.equal(f.g.secrets.lab.filter(x=>x==='lab-chispin-constellation-v1').length,1);
  assert.equal(make([],false).g.chispinStorm.shards,0);
- assert.equal(({roomId:'hub',player:{id:'kilo'},platforms:[],secrets:{hub:[]}}.chispinStorm??null),null);
+ assert.equal(({roomId:'lab',player:{id:'kilo'},platforms:[],secrets:{lab:[]}}.chispinStorm??null),null);
 });
 test('Tempest Eye cycles four telegraphed patterns and all three phases with permanent encounter ID',()=>{
  const e=createChispinBoss((x,y,kind)=>({x,y,kind,w:40,h:40,hp:80,max:80}),()=>.5);
