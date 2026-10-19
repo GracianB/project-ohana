@@ -19,7 +19,7 @@ test('every character owns a distinct 100-item personal album with specific trop
   const g={roomId:info.room,roomDef:room,player:{id:hero.id,x:0,y:0,w:24,h:30},secrets:{},roomAlbumItems:places};
   enterHeroCollection(g);
   assert.equal(heroCollectionSnapshot(g)?.total,100);
-  assert.equal(g.roomAlbumItems.length,0,'no duplicate shared diamonds');
+  assert.equal(g.roomAlbumItems.length,100,'legacy album placements remain available for the cinematic and old saves');
  }
 });
 test('Stitcho stage geometry is authored but never mutates canonical hub or Kilo',()=>{
