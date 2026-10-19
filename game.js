@@ -8,6 +8,8 @@ import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoAbility} from './systems/stitcho-trail.js';
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
+import {createStitchoRoom} from "./systems/stitcho-room.js";
+import {enterHeroCollection,updateHeroCollection,drawHeroCollection} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -484,7 +486,8 @@ p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
 if (fromDir !== "down") snapToFloor(p);
 }
 function loadRoom(id, fromDir) {
-const r = ROOMS[id];
+let r = ROOMS[id];
+if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -520,7 +523,7 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
-enterKiloGrove(game);enterStitchoTrail(game);enterRoomAlbum(game);
+enterKiloGrove(game);enterStitchoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
 game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -2740,7 +2743,7 @@ drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
@@ -3212,7 +3215,7 @@ if (!canAct()) return;
 updateCampaignExploration(game);
 updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);
 updatePlayer();
-updateRoomAlbum(game);
+updateRoomAlbum(game);updateHeroCollection(game);
 if(game.relicScene)return;
 updateCampaignProgress(game);
 updateIslandSprings(game);
