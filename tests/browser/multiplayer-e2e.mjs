@@ -451,6 +451,17 @@ try {
     throw error;
   }
   console.log("multiplayer: bidirectional U echoes verified");
+  // A real ICE link can be replaced between the U test and the J/K/L tests.
+  // Never cast on a stale channel and then mislabel it "congested". Both real
+  // peers must report OPEN state again before issuing a new combat action.
+  if(['cat','chispin'].includes(hostCharacter)){
+    const ready=async page=>page.waitForFunction(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      return !!onlineCoop.direct?.active&&
+        onlineCoop.remoteWorld===onlineCoop._combatGame?.roomId;
+    },null,{timeout:15000,polling:120});
+    await Promise.all([ready(hostPage),ready(guestPage)]);
+  }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     // Arm the guest before casting: normal peer FX snapshots expire after
