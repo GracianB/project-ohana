@@ -1,6 +1,7 @@
-const VERSION = "ohana-445";
+const VERSION = "ohana-446";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/grove-guardian.js?v=" + VERSION,
   "./systems/kilo-combo.js?v=" + VERSION,
   "./systems/player-movement.js?v=" + VERSION,
   "./systems/kilo-flight.js?v=" + VERSION,

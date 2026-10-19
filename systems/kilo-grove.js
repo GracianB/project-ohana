@@ -7,6 +7,7 @@ export function installKiloGrove(room){
   [2150,894,260,22],[2220,780,255,22],[2490,974,250,22],[2620,1054,220,22],
   [3180,814,260,22],[3000,574,260,22],[2720,334,260,22],[2850,14,300,22],[3650,960,260,22]
  ];
+ if(room.checkpoints&&!room.checkpoints.some(c=>c.id==='hub-guardian'))room.checkpoints.push({id:'hub-guardian',x:3000,y:1134,sector:2});
  room.upExit={x:2850,w:300,dest:'ridge'};
  room.hazards=[1190,2340].map((x,i)=>({id:`hub-abyss-${i}`,x,y:1100,w:100,h:360,type:'death',dest:null,label:'ABISMO MORTAL',color:'#ff8e86'}));
  room.orbs=[[390,910],[1110,675],[1440,665],[1850,665],[2260,835],[3120,515],[2820,275],[3780,905]];
@@ -53,6 +54,7 @@ export function drawKiloGrove(ctx,g,cam,t){
  const s=g.kiloGrove;if(!s)return;
  for(const l of s.lifts)drawPlatformRail(ctx,l.platform,l.motion,cam);
  for(const f of s.fragile||[])if(!f.restore){ctx.save();ctx.strokeStyle=f.age?'#ffd36a':'#e9bdad';ctx.lineWidth=2;const x=f.x-cam.x,y=f.platform.y-cam.y;for(let i=0;i<3;i++){const xx=x+f.w*(i+1)/4;ctx.beginPath();ctx.moveTo(xx-4,y+3);ctx.lineTo(xx+3,y+10);ctx.lineTo(xx-3,y+19);ctx.stroke();}ctx.restore();}
+ for(const xx of [3050,3750]){const x=xx-cam.x,y=1134-cam.y;ctx.save();ctx.fillStyle='#765544';ctx.fillRect(x-5,y-142,10,142);ctx.fillStyle='#e9b584';ctx.beginPath();ctx.ellipse(x,y-142,15,10,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#f2cc99';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-125);ctx.lineTo(x+48,y-105);ctx.stroke();ctx.fillStyle='#bc6c80';ctx.beginPath();ctx.moveTo(x+8,y-121);ctx.lineTo(x+40,y-108);ctx.lineTo(x+12,y-84);ctx.closePath();ctx.fill();ctx.restore();}
  const x=s.shrine.x-cam.x,y=s.shrine.y-cam.y;
  ctx.save();ctx.strokeStyle='#665542';ctx.lineWidth=5;ctx.fillStyle='#ddbb77';ctx.beginPath();ctx.ellipse(x,y+15,27,18,-.3,0,Math.PI*2);ctx.fill();ctx.stroke();
  ctx.fillStyle='#68513c';ctx.beginPath();ctx.arc(x,y+13,6,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(x+12,y+4);ctx.lineTo(x+37,y-35);ctx.stroke();

@@ -57,3 +57,16 @@ export function drawOhanaGardenLandmarks(ctx,g,cam){
  for(const [i,s] of g.roomDef.sectors.entries()){const x=s.x+s.w*.6-cam.x,y=1134-cam.y;if(x<-500||x>(g.viewW||1600)+500)continue;ctx.save();ctx.globalAlpha=.9;
   if(tree)ctx.drawImage(tree,x-235,y-590);else palm(ctx,x,y,1.55,i%2?1:-1);ctx.restore();}
 }
+
+// Painted once in the selection's cached scenery, using the Claro art language.
+export function drawAlohaCamp(ctx,z){
+ ctx.save();palm(ctx,z.x-158,z.y+15,.46,-1);palm(ctx,z.x+165,z.y+6,.42,1);cottage(ctx,z.x+12,z.y-68,.42);
+ ctx.fillStyle='#755240';ctx.beginPath();ctx.moveTo(z.x-145,z.y-8);ctx.lineTo(z.x+125,z.y-8);ctx.lineTo(z.x+145,z.y+53);ctx.lineTo(z.x-165,z.y+53);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#c49b72';ctx.lineWidth=2;for(let i=0;i<12;i++){const x=z.x-140+i*24;ctx.beginPath();ctx.moveTo(x,z.y-7);ctx.lineTo(x-14,z.y+52);ctx.stroke();}
+ ctx.strokeStyle='#e7ce98';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(z.x-157,z.y+54);ctx.lineTo(z.x+140,z.y+54);ctx.stroke();
+ ctx.strokeStyle='#7c6353';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(z.x-155,z.y-98);ctx.quadraticCurveTo(z.x,z.y-44,z.x+162,z.y-98);ctx.stroke();
+ for(let i=0;i<11;i++){const x=z.x-143+i*29,y=z.y-89+Math.sin(i/10*Math.PI)*23;ctx.fillStyle=i%2?'#f6d29b':'#df9fa7';ctx.beginPath();ctx.ellipse(x,y,4,6,0,0,TAU);ctx.fill();}
+ for(let i=0;i<17;i++){const x=z.x-165+i*20,y=z.y+70+Math.sin(i*.8)*7;leaf(ctx,x,y,16,-1+i%3*.4,i%2?'#e9a6b0':'#eed6a0',.4);}
+ ctx.strokeStyle='#f4e4bd';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(z.x-140+i*18,z.y+95+i*5);ctx.quadraticCurveTo(z.x,z.y+120+i*4,z.x+130-i*20,z.y+91+i*6);ctx.stroke();}
+ ctx.restore();
+}

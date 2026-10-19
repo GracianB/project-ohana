@@ -137,7 +137,7 @@ export function drawEnemy(ctx, e, cam, t, {reduceMotion=false}={}) {
   }
   ctx.restore();
   // Status stays anchored to the physical actor while its artwork recoils.
-  if(enemyStatus(e).visible){
+  if(!e.miniBoss&&enemyStatus(e).visible){
     ctx.save();ctx.translate(x+e.w/2,y+e.h/2);drawHpBar(ctx,e);ctx.restore();
   }
 }
@@ -1478,7 +1478,7 @@ function drawGroveDrummer(ctx,e,t,reduced){
   const lift=reduced?0:Math.sin(phase+i*2+side)*Math.min(4,Math.abs(e.vx||0)*2);
   ctx.beginPath();ctx.moveTo(side*14,5+i*3);ctx.lineTo(side*(24+i*2),12+lift);ctx.lineTo(side*(28+i*2),20);ctx.stroke();
  }
- ctx.fillStyle='#b95c59';ctx.beginPath();ctx.ellipse(0,1,21,16,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=e._drummer?.round===2?'#9d4764':'#b95c59';ctx.beginPath();ctx.ellipse(0,1,21,16,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#f2ac7f';ctx.beginPath();ctx.ellipse(-3,-2,15,10,-.15,0,Math.PI*2);ctx.fill();
  for(const side of [-1,1]){
   const arm=warn?-24:strike?8:-9+(reduced?0:Math.sin(phase+side)*3);

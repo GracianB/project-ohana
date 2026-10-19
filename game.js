@@ -1,3 +1,4 @@
+import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
 import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
@@ -529,10 +530,11 @@ e.spawnIndex = i;e._campaignOriginal=true;
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
+initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return e;
 });
-game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-cast443-${e.spawnIndex}`));
+game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -1900,6 +1902,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateGroveGuardian(e,game,hurtPlayer))continue;
 if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
 const cuernoSleeping = !e.boss && e.sleep > 0;
@@ -2561,7 +2564,7 @@ if (e.kind === "cucaracho") {
     color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
   });
 }
-if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-cast443-${e.spawnIndex}`);
+if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
@@ -2755,7 +2758,7 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
-  drawCampaignEnemy(ctx,e,game.cam);
+  if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
 if (!game.finale) {
