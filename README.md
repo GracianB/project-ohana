@@ -4,6 +4,8 @@
 
 **Diez héroes. Cinco formas por héroe. Un universo que crece contigo.**
 
+**10 personajes · 5 formas cada uno · 10 salas compartidas de Isla Hoku.**
+
 Un juego de plataformas y aventura 2D hecho con JavaScript y Canvas. Explora, domina poderes distintos, evoluciona, descubre secretos y lucha junto a otra persona.
 
 **10 personajes · 5 formas por héroe · 10 salas conectadas en Isla Hoku.**
