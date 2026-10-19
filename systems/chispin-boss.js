@@ -8,6 +8,7 @@ export function createChispinBoss(makeFoe,rng=()=>.5){
  e.x=3550;e.y=CHISPIN_BOSS.floor-110;e.w=138;e.h=110;
  e.hp=e.max=CHISPIN_BOSS.hp;
  e.miniBoss=true;e._chispinBoss=true;e._campaignOriginal=true;
+ e.name='Ojo de la Tormenta';e._phaseTheme='corazón del pararrayos';
  e.spawnIndex=998;e._encounterSaveId=CHISPIN_BOSS_ID;e.roomId='lab';
  e.contactDmg=0;e.color='#fff5ac';
  e._tempest={phase:'intro',clock:95,attack:0,tier:1,aim:1,emitted:0,
@@ -76,6 +77,7 @@ export function updateChispinBoss(e,g,hurt){
 export function drawChispinBossBody(ctx,e,cam,t=0,reduced=false){
  if(!e?._chispinBoss||e.hp<=0)return false;
  const b=e._tempest,cx=e.x+e.w/2-cam.x,cy=e.y+e.h/2-cam.y;
+ const wounds=1-Math.max(0,e.hp/e.max);
  const time=reduced?0:t;
  ctx.save();ctx.translate(cx,cy);
  ctx.fillStyle='rgba(0,19,45,.55)';ctx.beginPath();ctx.ellipse(0,e.h/2-4,76,13,0,0,Math.PI*2);ctx.fill();
@@ -94,6 +96,13 @@ export function drawChispinBossBody(ctx,e,cam,t=0,reduced=false){
  ctx.beginPath();ctx.arc(0,-7,32,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#07203d';ctx.beginPath();ctx.ellipse(0,-6,19,25,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(b.aim*5,-10,8,13,0,0,Math.PI*2);ctx.fill();
+ // Its glass shell cracks as the hero breaks successive shields, with a
+ // distinct eye state in all three phases. Not a generic cangrejo skin.
+ if(wounds>.34){
+  ctx.strokeStyle='#fff7e0';ctx.lineWidth=wounds>.7?4:2;
+  ctx.beginPath();ctx.moveTo(-37,-39);ctx.lineTo(-16,-22);ctx.lineTo(-26,-2);
+  ctx.moveTo(33,23);ctx.lineTo(13,11);ctx.lineTo(22,-9);ctx.stroke();
+ }
  ctx.strokeStyle='#fff1a2';ctx.lineWidth=3;
  for(let i=0;i<b.tier;i++){
   const a=time*.06+i*2.3;
