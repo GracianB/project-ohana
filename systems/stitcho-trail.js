@@ -56,7 +56,8 @@ export function enterStitchoTrail(g){
   index:index<0?3:index,complete,cleared,collected:saved,
   shards:STITCHO_FRAGMENTS.filter(f=>saved.has(FRAGMENT_PREFIX+f.id)).length,
   lifts,padCooldown:0,gateCooldown:0,pulse:0,announcement:0,
-  last:'',bossSummoned:false,gateStates:[],intro:180
+  last:'',bossSummoned:false,gateStates:[],gateSilencedUntil:[0,0,0],
+  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),intro:180
  };
  if(cleared)g.stitchoTrail.complete=true;
 }
@@ -86,6 +87,31 @@ export function interactStitchoTrail(g){
   if(persist(g,SAVE_KEY)){g.score=(g.score||0)+600;p.xp=(p.xp||0)+30;g.save?.();}
  }
  g.nums?.add?.(b.x,b.y-63,s.complete?'¡NÚCLEO GLITCH DESBLOQUEADO!':b.label+' · '+s.index+'/3','#aee9ff',true);
+ return true;
+}
+// Casting three different native powers completes a unique Stitcho challenge.
+// J can short-circuit a nearby electric gate temporarily; the others retain
+// their real combat behavior. This NEVER grants an ability that is still locked.
+export function stitchoAbility(g,p,index){
+ const s=g.stitchoTrail;if(!s||p?.id!=='stitcho'||!Number.isInteger(index)||index<0||index>2)return false;
+ if(!s.signatureComplete){
+  s.abilityMarks.add(index);
+  if(s.abilityMarks.size===3){
+   s.signatureComplete=true;
+   if(persist(g,'stitcho-combo-v1')){
+    g.score=(g.score||0)+250;p.xp=(p.xp||0)+35;g.save?.();
+   }
+   s.pulse=120;
+   g.nums?.add?.(p.x,p.y-65,'¡TRIPLE IMPULSO ALIENÍGENA!','#b4ffdc',true);
+  }
+ }
+ if(index===0){
+  const i=STITCHO_GATES.findIndex(gate=>Math.abs(p.x+p.w/2-(gate.x+gate.w/2))<240);
+  if(i>=0){
+   s.gateSilencedUntil[i]=(Number(g.t)||0)+145;
+   g.nums?.add?.(STITCHO_GATES[i].x,p.y-80,'¡CIRCUITO DESACTIVADO!','#b3ffdf',true);
+  }
+ }
  return true;
 }
 export function updateStitchoTrail(g,hurt){
@@ -118,7 +144,7 @@ export function updateStitchoTrail(g,hurt){
  // Warning / active / recovery: predictable 180-tick electrical cycle.
  s.gateStates=STITCHO_GATES.map((gate,i)=>{
   const phase=((tick+gate.offset)%180+180)%180;
-  const state=phase<65?'safe':phase<105?'warn':'active';
+  const state=tick<s.gateSilencedUntil[i]?'safe':phase<65?'safe':phase<105?'warn':'active';
   if(s.index>0&&state==='active'&&!s.gateCooldown&&p.invuln<=0&&
     p.x+p.w>gate.x&&p.x<gate.x+gate.w&&p.y+p.h>gate.y-gate.height&&p.y<gate.y){
    hurt?.(11,'ARCO ELÉCTRICO');s.gateCooldown=85;
