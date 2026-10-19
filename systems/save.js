@@ -10,6 +10,27 @@ export function canonId(id) {
 function cleanProgress(raw,arrays=false){
  const result={};for(const id of ['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss']){const v=raw?.[id];if(arrays&&Array.isArray(v))result[id]=[...new Set(v.filter(x=>typeof x==='string'&&x.startsWith(id+'-')&&x.length<80))].slice(0,64);else if(!arrays&&typeof v==='string'&&v.startsWith(id+'-')&&v.length<80)result[id]=v;}return result;
 }
+// V453: 100 personal items + 1 trophy + older room secrets exceed
+// cleanProgress' 64-item cap. Maintain that strict cap for enemy/checkpoint
+// state but validate full personal collections separately, per room.
+function cleanSecrets(raw){
+ const rooms=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss'];
+ const heroes=['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
+ const out={};
+ for(const id of rooms){
+  const entries=raw?.[id];if(!Array.isArray(entries))continue;
+  out[id]=[...new Set(entries.filter(value=>{
+   if(typeof value!=='string'||value.length>90)return false;
+   if(value.startsWith(id+'-')&&/^[a-z0-9-]+$/i.test(value))return true;
+   const m=/^hero-100:([a-z]+):(complete|0|[1-9][0-9]?)$/.exec(value);
+   if(m)return heroes.includes(m[1]);
+   // The Stitcho chapter occupies a separate single-player hub variant.
+   if(id==='hub'&&/^stitcho-(?:spark|echo|star|trail-v1|combo-v1|fragment-[a-h])$/.test(value))return true;
+   return false;
+  }))].slice(0,256);
+ }
+ return out;
+}
 const SAVE_KEY = "ohana";
 const SAVE_TMP_KEY = "ohana.tmp";
 export function sanitizeDragonTrial(raw){
@@ -39,7 +60,7 @@ export function packSave(game, MagicMod) {
     checkpoints: cleanProgress(game.checkpoints),
     clearedEncounters: cleanProgress(game.clearedEncounters,true),
     explored: cleanProgress(game.explored,true),
-    secrets: cleanProgress(game.secrets,true),
+    secrets: cleanSecrets(game.secrets),
     roomId: game.roomId,
     visited: game.visited || { hub: true },
     score: game.score || 0,
@@ -108,7 +129,7 @@ export function unpackSave(raw, defId) {
     checkpoints: cleanProgress(raw.checkpoints),
     clearedEncounters: cleanProgress(raw.clearedEncounters,true),
     explored: cleanProgress(raw.explored,true),
-    secrets: cleanProgress(raw.secrets,true),
+    secrets: cleanSecrets(raw.secrets),
     roomId: typeof raw.roomId === "string" && raw.roomId ? raw.roomId : "hub",
     visited: vis,
     score: Math.max(0, finiteNumber(raw.score)),
