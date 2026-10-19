@@ -44,6 +44,13 @@ test('electric flower launches a walking hero, cannot double trigger and rearms 
  g.player.x=flower.x-15;g.t++;updateChispinStorm(g);
  assert.equal(g.player.vy,-flower.power,'later return launches again');
 });
+test('hundredth Storm Core relic upgrades an actual flower launch by fourteen percent',()=>{
+ const g=fixture(),flower=CHISPIN_SPRINGS[0];
+ g.player._heroHundredBonus='CORONA DE TORMENTA';
+ g.player.x=flower.x-15;g.player.y=flower.y-40;
+ updateChispinStorm(g);
+ assert.ok(g.player.vy<=-flower.power*1.13);
+});
 test('DOWN explicitly suppresses the flower and authored scene suppresses generic flowers',()=>{
  const g=fixture(),flower=CHISPIN_SPRINGS[0];
  g.player.x=flower.x-15;g.player.y=flower.y-40;
