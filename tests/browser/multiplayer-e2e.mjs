@@ -456,17 +456,24 @@ try {
     // Arm the guest before casting: normal peer FX snapshots expire after
     // 750 ms and may disappear before a post-cast Playwright wait starts.
     // Observe actual deserialized game state, preserving the 3-second budget.
-    await guestPage.evaluate(()=>{
-      window.__michiFxProof={};
-      window.__michiFxObserver=setInterval(async()=>{
-        if(!window.__michiFxProof)return;
-        const {onlineCoop}=await import('/systems/online-coop.js');
-        const fx=onlineCoop._combatGame?.coopPeerEffects?.michiFx||[];
-        for(const effect of fx){
-          if(['yarn','purr','wisp'].includes(effect.kind)&&!window.__michiFxProof[effect.kind])
-            window.__michiFxProof[effect.kind]=structuredClone(effect);
+    await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const proof={};
+      const original=onlineCoop.receiveDirectEvent;
+      window.__michiFxProof=proof;
+      window.__michiFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      onlineCoop.receiveDirectEvent=function(game,event){
+        const before=game.coopPeerEffects?.frameNo;
+        const outcome=original.call(this,game,event);
+        if(event.kind==='effects'){
+          const fx=game.coopPeerEffects?.michiFx||[];
+          for(const item of fx){
+            if(["yarn","purr","wisp"].includes(item.kind)&&!proof[item.kind])
+              proof[item.kind]=structuredClone(item);
+          }
         }
-      },20);
+        return outcome;
+      };
     });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
@@ -496,24 +503,31 @@ try {
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
         'Michi peer echoes must remain cosmetic');
     } finally {
-      await guestPage.evaluate(()=>{clearInterval(window.__michiFxObserver);delete window.__michiFxObserver;delete window.__michiFxProof;});
+      await guestPage.evaluate(()=>{window.__michiFxRestore?.();delete window.__michiFxRestore;delete window.__michiFxProof;});
     }
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
     // Observe the real deserialized FX before casting. J/K are short lived;
     // waiting until after the host RPC can miss a valid WebRTC delivery.
-    await guestPage.evaluate(()=>{
-      window.__chispinFxProof={};
-      window.__chispinFxObserver=setInterval(async()=>{
-        if(!window.__chispinFxProof)return;
-        const {onlineCoop}=await import('/systems/online-coop.js');
-        const fx=onlineCoop._combatGame?.coopPeerEffects?.chispinFx||[];
-        for(const effect of fx){
-          if(['chain','trail','storm'].includes(effect.kind)&&!window.__chispinFxProof[effect.kind])
-            window.__chispinFxProof[effect.kind]=structuredClone(effect);
+    await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const proof={};
+      const original=onlineCoop.receiveDirectEvent;
+      window.__chispinFxProof=proof;
+      window.__chispinFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      onlineCoop.receiveDirectEvent=function(game,event){
+        const before=game.coopPeerEffects?.frameNo;
+        const outcome=original.call(this,game,event);
+        if(event.kind==='effects'){
+          const fx=game.coopPeerEffects?.chispinFx||[];
+          for(const item of fx){
+            if(["chain","trail","storm"].includes(item.kind)&&!proof[item.kind])
+              proof[item.kind]=structuredClone(item);
+          }
         }
-      },20);
+        return outcome;
+      };
     });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
@@ -542,7 +556,7 @@ try {
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
         'native electrical echoes must never carry damaging state');
     } finally {
-      await guestPage.evaluate(()=>{clearInterval(window.__chispinFxObserver);delete window.__chispinFxObserver;delete window.__chispinFxProof;});
+      await guestPage.evaluate(()=>{window.__chispinFxRestore?.();delete window.__chispinFxRestore;delete window.__chispinFxProof;});
     }
   }
   console.log("multiplayer: character-specific J/K/L effects verified");
