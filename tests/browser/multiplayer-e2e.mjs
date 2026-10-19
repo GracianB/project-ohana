@@ -499,6 +499,18 @@ try {
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
+    // Observe the real deserialized FX before casting. J/K are short lived;
+    // waiting until after the host RPC can miss a valid WebRTC delivery.
+    await guestPage.evaluate(()=>{
+      window.__chispinFxProof=null;
+      window.__chispinFxObserver=setInterval(async()=>{
+        if(window.__chispinFxProof)return;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const fx=onlineCoop._combatGame?.coopPeerEffects?.chispinFx||[];
+        if(['chain','trail','storm'].every(kind=>fx.some(f=>f.kind===kind)))
+          window.__chispinFxProof=structuredClone(fx);
+      },20);
+    });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -517,15 +529,17 @@ try {
       onlineCoop.lastEffectsSentAt=0;
       if(!onlineCoop.sendPeerEffects(game,true))throw Error('Chispin native WebRTC FX delivery rejected');
     });
-    // The receiver must actually deserialize all three real cosmetic effects.
-    // A bounded reliable event mirrors the full explicit cast, so CI packet
-    // coalescing cannot erase the one-time combo snapshot.
-    await guestPage.waitForFunction(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
-      return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
-    },null,{timeout:3000});
-    const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
-    assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
+    // Preserve 3-second deadline and original purely cosmetic assertions.
+    try {
+      await guestPage.waitForFunction(()=>!!window.__chispinFxProof,null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
+      assert.ok(['chain','trail','storm'].every(kind=>captured.some(f=>f.kind===kind)),
+        'native Chispin J/K/L effects were not all deserialized by guest');
+      assert.equal(captured.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
+        'native electrical echoes must never carry damaging state');
+    } finally {
+      await guestPage.evaluate(()=>{clearInterval(window.__chispinFxObserver);delete window.__chispinFxObserver;delete window.__chispinFxProof;});
+    }
   }
   console.log("multiplayer: character-specific J/K/L effects verified");
   // Stitcho's storm is verified by the dedicated Stitcho Chromium/Firefox
