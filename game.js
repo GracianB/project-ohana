@@ -3552,7 +3552,7 @@ checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomD
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
  interact(){interact();return this.state();},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3758,6 +3758,7 @@ forceRain() {
   Rain.start(game);
   return this.state();
 },
+setStitchoBossHp(value){const boss=game.enemies.find(e=>e._stitchoBoss);if(boss)boss.hp=Math.max(0,Math.min(boss.max,Number(value)||0));return this.state();},
 setBossHp(value) {
   const boss = game.boss || game.enemies.find((e) => e.boss);
   if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
