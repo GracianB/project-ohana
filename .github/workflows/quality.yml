@@ -54,6 +54,7 @@ jobs:
           node tests/browser/v452-kilo-phase-one.mjs
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v454-chispin-world.mjs
+          node tests/browser/v454-chispin-identity.mjs
           node tests/browser/v1-candidate.mjs
 
       - name: V400 pause, audio and motion preferences
