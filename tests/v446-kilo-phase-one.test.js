@@ -21,3 +21,12 @@ import {shouldSkipCoopWelcome} from '../systems/coop-welcome.js';
 test('Live lobby sessions bypass automatic title welcome; solo, invalid sessions and voluntary replay keep it',()=>{
  const s=JSON.stringify({originalEngine:true,characterId:'kilo'});assert.equal(shouldSkipCoopWelcome('?online=1',s),true);assert.equal(shouldSkipCoopWelcome('?online=1',s,true),false);assert.equal(shouldSkipCoopWelcome('',s),false);assert.equal(shouldSkipCoopWelcome('?online=1','{bad'),false);assert.equal(shouldSkipCoopWelcome('?online=1','{}'),false);assert.equal(shouldSkipCoopWelcome('?online=1',null),false);
 });
+import {WELCOME_STORIES,welcomeStoryAt,nextWelcomeLine} from '../systems/welcome-story.js';
+test('Next dialogue visits all 33 lines exactly once despite fractional scene durations',()=>{
+ let at=0;for(const line of WELCOME_STORIES.flatMap(s=>s.lines)){assert.equal(welcomeStoryAt(at).line?.text,line.text);at=nextWelcomeLine(at);}assert.equal(welcomeStoryAt(at).complete,true);
+});
+import {onlineCoop} from '../systems/online-coop.js';
+test('Paused/background network heartbeat reuses paced poll without advancing or polling active gameplay',()=>{
+ const c=new onlineCoop.constructor();let polls=0,repairs=0;c.enabled=true;c.lastGameTick=100;c.poll=()=>polls++;c.repairDirect=()=>repairs++;const g={player:{x:10}};
+ assert.equal(c.networkHeartbeat(g,1000),false);assert.equal(polls,0);assert.equal(c.networkHeartbeat(g,2600),true);assert.equal(polls,1);assert.equal(g.player.x,10);c.enabled=false;assert.equal(c.networkHeartbeat(g,6000),false);assert.equal(polls,1);
+});

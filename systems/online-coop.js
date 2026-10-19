@@ -148,6 +148,7 @@ class OnlineCoop {
     const session = this.readSession();
     if (!session || !definition) return false;
 
+    clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.direct?.close();
     this.direct=null;
     this.directAttempted=false;
@@ -210,6 +211,9 @@ class OnlineCoop {
       throw new Error(this.error || "No se pudo recuperar el estado inicial de la partida online.");
     }
     document.body.dataset.onlineState = "connected";
+    this.lastGameTick=performance.now();
+    this.heartbeatTimer=setInterval(()=>this.networkHeartbeat(game),2500);
+    this.heartbeatTimer?.unref?.();
 
     // Online mode reuses the original OHANA room/physics/rendering.
     // The lobby's synthetic 1280×720 coordinates are never applied to it.
@@ -571,6 +575,7 @@ class OnlineCoop {
 
   failClosed(error){
     this.error=error?.message||"Sesión caducada";
+    clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.enabled=false;
     this.pendingMutations.length=0;
     this.direct?.close();this.direct=null;this.directAttempted=false;
@@ -1065,8 +1070,18 @@ class OnlineCoop {
       performance.now()-this.lastCombatReceivedAt<750;
   }
 
+  networkHeartbeat(game,now=performance.now()){
+    if(!this.enabled||now-(this.lastGameTick||0)<2000)return false;
+    // Keep the authenticated room alive while a hidden/paused view stops RAF.
+    // Reuse paced poll; never advance physics or increase foreground requests.
+    this.direct?.ping();void this.poll(game);
+    if(typeof document==="undefined"||!document.hidden)this.repairDirect(game,now);
+    return true;
+  }
+
   tick(game) {
     if (!this.enabled) return;
+    this.lastGameTick=performance.now();
     if(!this.directAttempted&&this.remote?.playerId)this.setupDirect(game);
     else this.repairDirect(game);
     this.direct?.sendPose(game);
