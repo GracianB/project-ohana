@@ -153,7 +153,10 @@ export function updateChispinStorm(g,hurt){
   // detection stranded players who stepped onto it from a low platform.
   const valid=p.grounded&&!p._dropWasHeld&&!p._dropPlatform&&dx<50&&dy<20;
   if(!valid||!s.springArmed[i]||s.springCd)continue;
-  p.vy=-spring.power;p.grounded=false;p.coyote=0;p.jumps=0;
+  // The hundredth relic has a tangible reward: its charged corona makes
+  // all the world's launch flowers 14% stronger without changing the physics.
+  const reward=p._heroHundredBonus==='CORONA DE TORMENTA'?1.14:1;
+  p.vy=-spring.power*reward;p.grounded=false;p.coyote=0;p.jumps=0;
   p._jumpHeld=false;p._pmove='spring';p.invuln=Math.max(p.invuln||0,14);
   s.springArmed[i]=false;s.springFlash[i]=35;s.springCd=40;
   g.fx?.emit?.(spring.x,spring.y-15,{color:'#fff5ae',count:g.reduceMotion?6:28,size:4,up:3,life:35});
@@ -178,7 +181,29 @@ export function drawChispinStorm(ctx,g,cam,t){
  const s=g.chispinStorm;if(!s)return;
  const reduced=!!g.reduceMotion;
  ctx.save();
- for(const lift of s.lifts)drawPlatformRail(ctx,lift.platform,lift.motion,cam);
+ // Electrify the existing room's actual collidable platforms. This is purely
+ // a themed overlay, so it cannot desynchronise the physical coordinates.
+ for(const platform of g.platforms||[]){
+  if(platform.h>42||platform.w<90)continue;
+  const x=platform.x-cam.x,y=platform.y-cam.y,w=platform.w;
+  if(x+w<-50||x>(g.viewW||1600)+50||y<-50||y>(g.viewH||1000)+50)continue;
+  ctx.strokeStyle=platform._chispinRail?'#ffe497':'#8ce3fc';ctx.lineWidth=3;
+  ctx.globalAlpha=.82;ctx.beginPath();ctx.moveTo(x+3,y+2);ctx.lineTo(x+w-3,y+2);ctx.stroke();
+  ctx.globalAlpha=.54;
+  for(let boltX=x+23;boltX<x+w-14;boltX+=55){
+   const wave=reduced?0:Math.sin(t*.09+boltX*.1)*2;
+   ctx.beginPath();ctx.moveTo(boltX,y+8);ctx.lineTo(boltX+8,y+13+wave);
+   ctx.lineTo(boltX+2,y+17);ctx.lineTo(boltX+18,y+17);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+ }
+ for(const lift of s.lifts){
+  const p=lift.platform,m=lift.motion,x=m.x-cam.x,y=m.y-cam.y;
+  ctx.strokeStyle='#b5f4ff';ctx.globalAlpha=.36;ctx.lineWidth=2;
+  ctx.setLineDash([7,8]);ctx.beginPath();ctx.moveTo(x,y);
+  if(m.axis==='x')ctx.lineTo(x+m.span,y);else ctx.lineTo(x,y-m.span);
+  ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+ }
  for(let i=0;i<CHISPIN_GATES.length;i++){
   const gate=CHISPIN_GATES[i],x=gate.x-cam.x,y=gate.y-cam.y;
   if(x<-80||x>1700)continue;
