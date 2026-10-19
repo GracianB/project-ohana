@@ -24,10 +24,13 @@ const make=(saved=[],defeated=false)=>{
  return {g,at,pickup,get writes(){return writes;},get spawns(){return spawns;}};
 };
 test('four authored sectors, ten custom foes, five rails and 100 personal pickups leave the shared hub untouched',()=>{
- const before=JSON.stringify(ROOMS.hub),room=createChispinRoom(ROOMS.lab);
+ const before=JSON.stringify(ROOMS.lab),room=createChispinRoom(ROOMS.lab);
+ assert.equal(Object.keys(ROOMS).length,10,'Hoku still has exactly ten rooms');
+ assert.equal(room.id,'lab','Chispin personalizes Alien Lab, does not add a map node');
+ assert.equal(room.needEvo,0,'Chispin must start there in baby form');
  assert.equal(room.name,'Islas del Relámpago');assert.equal(room.foes.length,10);
  assert.equal(CHISPIN_SECTORS.length,4);assert.ok(room.plats.length>=22);
- assert.equal(room.hazards.length,2);assert.equal(JSON.stringify(ROOMS.hub),before);
+ assert.equal(room.hazards.length,2);assert.equal(JSON.stringify(ROOMS.lab),before);
  assert.equal(HERO_COLLECTIONS.chispin.room,'lab');
  const f=make();assert.equal(f.g.chispinStorm.lifts.length,5);
  assert.equal(f.g.platforms.length,5);assert.equal(CHISPIN_GATES.length,3);
