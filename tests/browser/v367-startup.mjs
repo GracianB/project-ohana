@@ -17,6 +17,10 @@ try {
    const page=await context.newPage();
    const errors=[];
    page.on("pageerror",e=>errors.push(String(e.message)));
+   // V453: >250 eager assets exhaust Chromium's default Resource Timing
+   // buffer. Enlarge it BEFORE navigation or lazy import requests disappear
+   // from getEntriesByType despite the cinema actually rendering.
+   await page.addInitScript(() => performance.setResourceTimingBufferSize(2000));
    try {
      await page.goto(base+"?e2e=1",{waitUntil:"domcontentloaded"});
      await page.waitForFunction(()=>!!window.__OHANA_E2E?.start&&!!document.querySelector("#ohana-intro"),undefined,{timeout:15000});
