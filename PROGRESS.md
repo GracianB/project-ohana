@@ -1,3 +1,13 @@
+## OHANA V454.2 · Chispín eléctrico · dieZ salas existentes
+
+**No se añade ninguna undécima sala.** El Laboratorio (`lab`) de Hoku se personaliza para Chispín en solitario, conservando el laboratorio canónico y el Claro del modo cooperativo. Chispín arranca en su laboratorio desde su primera forma, incluido su recorrido de cinco evoluciones hasta Trueno Gordo.
+
+Flores voltaicas rediseñadas en suelo firme (no sobre abismos), impulso vertical entre 29 y 31, reactivación al abandonar y regresar, indicador luminoso del salto y supresión de flores genéricas duplicadas. Plataformas reales y raíles con circuito eléctrico, cinco tipos de ataque de enemigo tematizados con avisos, Circuito del Trueno ejecutable mediante **J → K → L** (ventana, recarga, curación limitada, apagado de barreras e interrupción del jefe). Ojo de la Tormenta con cuerpo vectorial y fases de daño.
+
+**Objeto número 100**: reliquia grande y nombrada que aparece en el altar de entrada solo cuando se han recogido las otras 99. Chispín obtiene el **Núcleo de Tormenta**, desbloquea la **Corona de Tormenta** y aumenta un 14 % el impulso de sus flores. Stitcho obtiene el **Corazón Galáctico**, con blindaje corto al usar L y anulación eléctrica prolongada mediante J. Guardado individual conservado. Se añaden pruebas de geometría, rearmado de flores, combos, enemigos y reliquias.
+
+**Estado:** PR #390; no publicado ni fusionado hasta aprobar las validaciones. No debe confundirse con el hotfix de Pages V453, PR #389.
+
 ## Identidad V454 · Chispín redondo y Kirin como jefe secreto del Mundo 2
 
 Se impide confundir los dos diseños: el Chispín jugable conserva `characters/art/pikachu.js`, sus cinco formas y **Trueno Gordo** como cuarta transformación. La criatura de aspecto de dragón, blanca y dorada, queda fuera de la selección y del motor de evolución del jugador. Se reutiliza como **Kirin**, mini-jefe opcional de Stitcho en el segundo mundo, después de la baliza ECO. Su aparición, combate, derrota y guardado son independientes del Núcleo Glitch. Pruebas unitarias y de Chromium para impedir regresiones. Sin desplegar hasta aprobar CI y fusionar PR #390.
