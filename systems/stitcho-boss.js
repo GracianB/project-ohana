@@ -81,3 +81,69 @@ export function drawStitchoBossSignals(ctx,e,cam,t=0,reduced=false){
  if(!reduced){ctx.globalAlpha=.4+.3*Math.sin(t*.13);ctx.strokeStyle='#b9efff';ctx.strokeRect(x-66,y-15,132,12);}
  ctx.restore();
 }
+
+// Fully vectorial mechanical enemy. Three health phases reshape the core and
+// animate six segmented arms; no static cangrejo sprite or image dependency.
+export function drawStitchoBossBody(ctx,e,cam,t=0,reduced=false){
+ if(!e?._stitchoBoss||e.hp<=0)return false;
+ const b=e._glitch,phase=b.tier||1,active=b.phase==='attack',warning=b.phase==='warn';
+ const cx=e.x+e.w/2-cam.x,cy=e.y+e.h/2-cam.y;
+ const time=reduced?0:t,sw=Math.sin(time*.09);
+ ctx.save();ctx.translate(cx,cy);
+ // Ground shadow and articulated angular feet.
+ ctx.fillStyle='rgba(10,25,46,.5)';ctx.beginPath();ctx.ellipse(0,e.h/2-3,68,10,0,0,Math.PI*2);ctx.fill();
+ for(const side of [-1,1]){
+  const stride=active&&b.attack===1?(reduced?5:sw*10):reduced?0:Math.sin(time*.07+side)*3;
+  ctx.strokeStyle='#16324b';ctx.lineWidth=15;ctx.lineCap='round';ctx.beginPath();
+  ctx.moveTo(side*30,17);ctx.lineTo(side*(35+stride*.25),e.h/2-9);ctx.lineTo(side*(53+stride),e.h/2-5);ctx.stroke();
+  ctx.strokeStyle='#66cce4';ctx.lineWidth=5;ctx.stroke();
+ }
+ // Six individually jointed and animated arms as enemies escalate.
+ for(let arm=0;arm<6;arm++){
+  const side=arm%2?1:-1,k=Math.floor(arm/2)-1;
+  const ax=side*42,ay=k*22,reach=phase===3?54:phase===2?44:34;
+  const swing=reduced?0:Math.sin(time*.11+arm*1.8)*9+(warning?5:0);
+  const elbowX=side*(63+reach*.32),elbowY=ay-11+swing;
+  const tipX=side*(65+reach),tipY=ay-20-swing*.6;
+  ctx.strokeStyle='#0e213c';ctx.lineWidth=15;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(elbowX,elbowY);ctx.lineTo(tipX,tipY);ctx.stroke();
+  ctx.strokeStyle=arm%3===0?'#dca7ff':'#70dffc';ctx.lineWidth=8;ctx.stroke();
+  ctx.fillStyle='#d5faff';ctx.beginPath();ctx.arc(elbowX,elbowY,5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=phase===3?'#ffd0e1':'#a3dfff';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(tipX,tipY);ctx.lineTo(tipX+side*14,tipY-9);ctx.moveTo(tipX,tipY);ctx.lineTo(tipX+side*16,tipY+7);ctx.stroke();
+ }
+ // Main shell + energy core; damage reveals glowing cracks.
+ ctx.fillStyle='#132f4e';ctx.strokeStyle='#89e6ff';ctx.lineWidth=5;ctx.beginPath();
+ ctx.moveTo(-48,-30);ctx.lineTo(-25,-48);ctx.lineTo(28,-48);ctx.lineTo(51,-23);
+ ctx.lineTo(45,29);ctx.lineTo(14,45);ctx.lineTo(-35,33);ctx.closePath();ctx.fill();ctx.stroke();
+ ctx.fillStyle=phase===3?'#ff8ccc':phase===2?'#c8a6ff':'#82edff';
+ ctx.beginPath();ctx.moveTo(-20,-24);ctx.lineTo(23,-28);ctx.lineTo(28,19);ctx.lineTo(-18,21);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#061527';ctx.beginPath();ctx.ellipse(0,-5,17,21,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e9ffff';ctx.beginPath();ctx.ellipse(0,-5,7,9,0,0,Math.PI*2);ctx.fill();
+ // Expressive eyes and antennae track active warning rhythm.
+ ctx.strokeStyle='#b8f8ff';ctx.lineWidth=4;ctx.beginPath();
+ ctx.moveTo(-21,-44);ctx.lineTo(-29,-64-(warning?7:0));
+ ctx.moveTo(21,-44);ctx.lineTo(29,-64-(warning?7:0));ctx.stroke();
+ ctx.fillStyle=warning?'#ffdf82':'#a6eaff';
+ for(const x of [-29,29]){ctx.beginPath();ctx.arc(x,-64-(warning?7:0),8,0,Math.PI*2);ctx.fill();}
+ if(phase>=2){
+  ctx.strokeStyle='#ffddf3';ctx.lineWidth=3;ctx.beginPath();
+  ctx.moveTo(-25,-35);ctx.lineTo(-9,-19);ctx.lineTo(-19,0);ctx.moveTo(29,20);ctx.lineTo(10,10);ctx.lineTo(18,-6);ctx.stroke();
+ }
+ if(phase===3&&!reduced){
+  ctx.strokeStyle='#fbc2ee';ctx.globalAlpha=.6+.4*Math.sin(time*.2);
+  for(let i=0;i<4;i++){
+   const angle=time*.08+i*Math.PI/2;ctx.beginPath();ctx.arc(0,-4,60+i*8,angle,angle+.3);ctx.stroke();
+  }
+ }
+ ctx.restore();return true;
+}
+export function drawStitchoEnemyAccent(ctx,e,cam,t=0,reduced=false){
+ if(!e||e._stitchoBoss||!e.roomPersona?.name)return;
+ const x=e.x+e.w/2-cam.x,y=e.y-cam.y,variant=(e.spawnIndex||0)%4;
+ ctx.save();ctx.strokeStyle=['#99eafe','#d0aeff','#c4ffe4','#ffe6af'][variant];
+ ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-8,y+4);ctx.lineTo(x-13,y-9);ctx.lineTo(x,y-5);
+ ctx.lineTo(x+11,y-16);ctx.stroke();
+ ctx.fillStyle=ctx.strokeStyle;const flicker=reduced?0:Math.sin(t*.15+variant)*2;
+ ctx.beginPath();ctx.arc(x+11,y-17+flicker,3.5,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
