@@ -80,7 +80,7 @@ La visión de OHANA no consiste en cambiar el color de las mismas diez salas. **
 | :--- | :--- | :--- |
 | **Kilo** | Bahía del Compás, música, flores y Tambor del Claro | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
 | **Stitcho** | Archipiélago del Caos, fragmentos, electricidad y Núcleo Glitch | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
-| **Chispín** | Islas del Relámpago | Planificado |
+| **Chispín** | Islas del Relámpago · cinco formas, incluida **Trueno Gordo** | En desarrollo, [PR #390](https://github.com/GracianB/project-ohana/pull/390) |
 | **Michi** | Jardines de la Luna | Planificado |
 | **Dragón** | Cordillera de las Brasas | Planificado |
 | **Dino** | Valle de los Gigantes | Planificado |
