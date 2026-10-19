@@ -12,6 +12,7 @@ import { sanitizeRuntimeState } from "./systems/runtime-state.js";
 import {forwardCoopAbilityHit} from './systems/coop-ability-hits.js';
 import { ROSTER, applyForm, tickEvoTween } from "./characters/roster.js";
 import { mountSelectScreen } from "./systems/select-screen.js";
+import { heroWorld } from "./worlds/hero-worlds.js";
 import { evolutionMessage } from "./characters/evolution.js";
 import { signature, markAt, difficulty } from "./characters/signature.js";
 import { drawCharacter } from "./characters/draw.js";
@@ -3251,7 +3252,9 @@ const RANKS = ["", "Fácil", "Media", "Difícil"];
 grid.innerHTML = ROSTER.map((c, i) => {
 const rank = difficulty(c.id);
 const hit = markAt(c.id, 0).name;
-return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small><div class="hint">tecla ' + (i + 1) + '</div></button>';
+const personalWorld = heroWorld(c.id);
+const worldNote = personalWorld ? `<span class="hero-world-label" title="Mundo individual todavía no disponible">${personalWorld.name} · Próximamente</span>` : "";
+return '<button class="char-card" type="button" data-id="' + c.id + '" aria-label="' + c.name + ", " + RANKS[rank] + '"><span class="role r' + rank + '">' + RANKS[rank] + '</span><div class="swatch" style="background:' + c.color + '"></div><h3>' + c.name + '</h3><span class="h-move">H · ' + hit + '</span><small>' + c.evoNames.join(" → ") + '</small>' + worldNote + '<div class="hint">tecla ' + (i + 1) + '</div></button>';
 }).join("");
 grid.querySelectorAll(".char-card").forEach((el) => el.addEventListener("click", () => dispatchEvent(new CustomEvent("ohana-select", { detail: { id: el.dataset.id } }))));
 try { mountSelectScreen({ grid, roster: ROSTER }); } catch (err) { console.error("[ohana] select screen", err); }
