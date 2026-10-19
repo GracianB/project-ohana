@@ -22,3 +22,15 @@
 #map-overlay #btn-close-map{margin-top:14px;background:#244e48;color:#fff3d5;border:0;border-radius:12px;padding:12px 22px;min-height:44px;box-shadow:none;}
 @media(max-width:640px){#map-overlay .panel{padding:18px!important;border-radius:18px!important;}#map-title{font-size:27px;}.wm-detail{grid-template-columns:1fr;gap:12px;}.wm-scroll{overflow-y:hidden;}.wm-board{min-width:680px;}.wm-legend{gap:10px;font-size:10px;}.wm-detail h3{font-size:22px;}.wm-detail p{font-size:12px;}}
 @media(prefers-reduced-motion:reduce){.wm-node{transition:none;}.wm-node:hover{transform:translate(-50%,-50%);}}
+
+/* Stitcho's personal atlas: dark electric sea with accessible readable nodes. */
+.stitcho-atlas .wm-scroll{background:#102e50;border-color:#75dce7;scrollbar-color:#6ac4e5 #132d4d;}
+.stitcho-atlas .wm-board{background:#102e50;}
+.stitcho-atlas .wm-marker{background:#164c6a;color:#c5f7ff;border-color:#74dce9;box-shadow:0 3px 0 #06344999;}
+.stitcho-atlas .wm-node b{background:#d9faff;color:#0b3655;}
+.stitcho-atlas .wm-node small{background:#123653e8;color:#ecffff;}
+.stitcho-atlas .wm-node.here .wm-marker{background:#e4faff;color:#15415c;border-color:#9df9f3;box-shadow:0 0 0 6px #56cfff55;}
+.stitcho-atlas .wm-node.selected:not(.here) .wm-marker{box-shadow:0 0 0 5px #8deeff70;border-color:#e5ffff;}
+.stitcho-atlas .wm-node:hover .wm-marker{background:#bbebff;color:#193a63;}
+.stitcho-atlas .wm-north{color:#c7efff;}
+.stitcho-atlas .wm-node:focus-visible{outline-color:#a7eaff;}
