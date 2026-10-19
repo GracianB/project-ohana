@@ -10,6 +10,7 @@ import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoT
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
 import {createChispinRoom} from "./systems/chispin-room.js";
+import {createWorldTwoGuardian,updateWorldTwoGuardian,drawWorldTwoGuardian,drawWorldTwoGuardianSignals,WORLD_TWO_GUARDIAN_ID} from "./systems/world-two-guardian.js";
 import {createChispinBoss,updateChispinBoss,drawChispinBossBody,drawChispinBossSignals,CHISPIN_BOSS_ID} from "./systems/chispin-boss.js";
 import {enterChispinStorm,interactChispinStorm,chispinStormPrompt,updateChispinStorm,drawChispinStorm,chispinStormAbility,chispinStormSnapshot} from "./systems/chispin-storm.js";
 import {drawChispinIsles} from "./worlds/chispin-isles.js";
@@ -548,6 +549,13 @@ if (f[3]) applyElite(e);
 return e;
 });
 game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&game.player?.id==='stitcho'&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+game.spawnWorldTwoGuardian=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(WORLD_TWO_GUARDIAN_ID))return true;
+  if(game.enemies.some(e=>e._worldTwoGuardian))return true;
+  game.enemies.push(createWorldTwoGuardian(makeFoe,game.rng));
+  return true;
+};
 game.spawnStitchoBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
@@ -1941,6 +1949,7 @@ if (e.boss) {
   continue;
 }
 
+if(updateWorldTwoGuardian(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer))continue;
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateGroveGuardian(e,game,hurtPlayer))continue;
@@ -2607,7 +2616,7 @@ if (e.kind === "cucaracho") {
 }
 if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
-if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._chispinBoss?"¡EL OJO DE LA TORMENTA HA CAÍDO!":e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._chispinBoss?"#ffe9a0":e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
+if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._worldTwoGuardian?"¡EL KIRIN BLANCO HA CAÍDO!":e._chispinBoss?"¡EL OJO DE LA TORMENTA HA CAÍDO!":e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._worldTwoGuardian?"#ffefb4":e._chispinBoss?"#ffe9a0":e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -2803,11 +2812,13 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  if(e._worldTwoGuardian)drawWorldTwoGuardian(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else {drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
     if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
-  if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t);
+  if(e._worldTwoGuardian)drawWorldTwoGuardianSignals(ctx,e,game.cam);
+  else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t);
   else if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
