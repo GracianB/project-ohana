@@ -22,7 +22,9 @@ test('reliable late Chispin combo merges cosmetically without rolling back peer 
  assert.equal(game.coopPeerEffects.frameNo,100,'never replace newer authoritative state');
  assert.equal(applyPeerEffects(game,frame(80,effectTrio)),false,'reliable duplicate must not replay');
  assert.equal(applyPeerEffects(game,frame(67,effectTrio)),false,'too old to merge');
- assert.equal(applyPeerEffects(game,frame(95,effectTrio,'foreign-session')),false,'foreign session cannot inject combo');
+ assert.equal(applyPeerEffects(game,frame(110,[],'next-session')),true,'legitimate reconnect starts new scope');
+ assert.equal(applyPeerEffects(game,frame(95,effectTrio,'session-same')),false,'retired scope cannot inject old combo');
+ assert.equal(game.coopPeerEffects.frameNo,110);
 });
 test('late cosmetic combos reject invalid and damaging payloads even within the catch-up window',()=>{
  const game={roomId:'hub',coopPeerEffects:null};
