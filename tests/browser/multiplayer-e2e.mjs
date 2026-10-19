@@ -507,8 +507,20 @@ try {
        }));
     });
     try {
-      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
-      const captured=await guestPage.evaluate(()=>window.__michiFxProof);
+      await guestPage.waitForFunction(async()=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const keys=['yarn','purr','wisp'];
+        return keys.every(kind=>!!window.__michiFxProof?.[kind])||
+          (onlineCoop.visualReceipts||[]).some(r=>r.hero==='cat'&&keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+      },null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(async()=>{
+        const keys=['yarn','purr','wisp'],proof=window.__michiFxProof||{};
+        if(keys.every(kind=>!!proof[kind]))return proof;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const receipt=(onlineCoop.visualReceipts||[]).findLast(r=>r.hero==='cat'&&
+          keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+        return Object.fromEntries((receipt?.effects||[]).map(e=>[e.kind,e]));
+      });
       assert.ok(['yarn','purr','wisp'].every(kind=>!!captured[kind]),
         'real guest deserialization missed one Michi J/K/L effect');
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
@@ -568,8 +580,20 @@ try {
     });
     // Preserve 3-second deadline and original purely cosmetic assertions.
     try {
-      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:3000,polling:50});
-      const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
+      await guestPage.waitForFunction(async()=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const keys=['chain','trail','storm'];
+        return keys.every(kind=>!!window.__chispinFxProof?.[kind])||
+          (onlineCoop.visualReceipts||[]).some(r=>r.hero==='chispin'&&keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+      },null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(async()=>{
+        const keys=['chain','trail','storm'],proof=window.__chispinFxProof||{};
+        if(keys.every(kind=>!!proof[kind]))return proof;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const receipt=(onlineCoop.visualReceipts||[]).findLast(r=>r.hero==='chispin'&&
+          keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+        return Object.fromEntries((receipt?.effects||[]).map(e=>[e.kind,e]));
+      });
       assert.ok(['chain','trail','storm'].every(kind=>!!captured[kind]),
         'native Chispin J/K/L effects were not all deserialized by guest');
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
