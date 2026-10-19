@@ -455,12 +455,27 @@ try {
   // Never cast on a stale channel and then mislabel it "congested". Both real
   // peers must report OPEN state again before issuing a new combat action.
   if(['cat','chispin'].includes(hostCharacter)){
-    const ready=async page=>page.waitForFunction(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');
-      return !!onlineCoop.direct?.active&&
-        onlineCoop.remoteWorld===onlineCoop._combatGame?.roomId;
-    },null,{timeout:15000,polling:120});
-    await Promise.all([ready(hostPage),ready(guestPage)]);
+    // Playwright waitForFunction can import an isolated copy of the module
+    // in its utility world, whose onlineCoop has no direct link. Verify
+    // the ACTUAL running game's singleton in the main world via evaluate.
+    const ready=async(page,label)=>{
+      const deadline=Date.now()+15000;
+      let observed=null;
+      do{
+        observed=await page.evaluate(async()=>{
+          const {onlineCoop:o}=await import('/systems/online-coop.js');
+          return {active:!!o.direct?.active,localRoom:o._combatGame?.roomId,
+            remoteRoom:o.remoteWorld,pose:o.direct?.poseChannel?.readyState,
+            event:o.direct?.eventChannel?.readyState,session:o.direct?.sessionId,
+            transport:document.body.dataset.coopTransport};
+        });
+        if(observed.active&&observed.localRoom===observed.remoteRoom&&
+           observed.pose==='open'&&observed.event==='open')return observed;
+        if(Date.now()<deadline)await page.waitForTimeout(120);
+      }while(Date.now()<deadline);
+      throw new Error(label+' real WebRTC channels not in same playable room: '+JSON.stringify(observed));
+    };
+    await Promise.all([ready(hostPage,'host'),ready(guestPage,'guest')]);
   }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
