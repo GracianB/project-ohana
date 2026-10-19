@@ -448,6 +448,10 @@ try {
       window.__OHANA_PEER_FX_WITNESS?.restore?.();
       const original=onlineCoop.receiveDirectEvent;
       const audit={seen:false,clean:false,arrivals:0,wireComplete:0,rxFrame:null,txFrame:null,field};
+      // Promise resolves inside the data-channel event handler, independent
+      // of requestAnimationFrame throttling in Playwright background tabs.
+      let resolveReady;
+      audit.ready=new Promise(resolve=>{resolveReady=resolve;});
       onlineCoop.receiveDirectEvent=function(game,event){
         const isFx=event?.kind==='effects';
         const payload=event?.payload?.[field]||[];
@@ -461,6 +465,7 @@ try {
             audit.txFrame=event.payload.frameNo;
             audit.clean=received.every(e=>e.dmg===undefined&&e.target===undefined&&
               e.hit===undefined&&e.hitA===undefined&&e.hitB===undefined);
+            resolveReady(true);
           }
         }
         return result;
@@ -470,9 +475,17 @@ try {
     },{field,kinds});
   };
   const awaitPeerFxWitness=async(label)=>{
+    let receiptTimer;
     try{
-      await guestPage.waitForFunction(()=>window.__OHANA_PEER_FX_WITNESS?.seen,
-        null,{timeout:3000});
+      // Playwright waitForFunction defaults to polling with rAF. Background
+      // pages can throttle rAF even after receiving valid WebRTC events.
+      // Race the actual onEvent promise against the ORIGINAL Node-side 3s
+      // deadline, rather than waiting for the next painted animation frame.
+      await Promise.race([
+        guestPage.evaluate(()=>window.__OHANA_PEER_FX_WITNESS.ready),
+        new Promise((_,reject)=>{receiptTimer=setTimeout(()=>
+          reject(new Error(label+': no authenticated FX arrival within 3000 ms')),3000);})
+      ]);
     }catch(error){
       const diagnostics=await Promise.allSettled([
         hostPage.evaluate(async()=>{
@@ -499,7 +512,7 @@ try {
       ]);
       throw new Error(label+': real WebRTC receipt failed: '+JSON.stringify(diagnostics)+
         ' original='+error.message);
-    }
+    }finally{clearTimeout(receiptTimer);}
     const result=await guestPage.evaluate(()=>{
       const a=window.__OHANA_PEER_FX_WITNESS;
       const r={seen:a.seen,clean:a.clean,arrivals:a.arrivals,
