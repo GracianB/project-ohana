@@ -8,18 +8,18 @@ import {updateIslandSprings} from '../systems/island-springs.js';
 import {enterChispinEnemies,updateChispinEnemies} from '../systems/chispin-enemies.js';
 import {HERO_FINAL_OBJECTS,enterHeroCollection,takeHeroCollectionItem} from '../systems/hero-collections.js';
 const fixture=()=>{
- const g={roomId:'hub',roomDef:createChispinRoom(ROOMS.hub),
+ const g={roomId:'lab',roomDef:createChispinRoom(ROOMS.lab),
   player:{id:'chispin',x:0,y:0,w:30,h:40,grounded:true,vy:0,
    jumpPower:12,jumps:1,health:65,maxHealth:100,invuln:0},
   personalAdventureSolo:true,t:1,score:0,
-  platforms:[],enemies:[],projectiles:[],secrets:{hub:[]},
-  clearedEncounters:{hub:[]},cam:{x:0},fx:{emit(){}},
+  platforms:[],enemies:[],projectiles:[],secrets:{lab:[]},
+  clearedEncounters:{lab:[]},cam:{x:0},fx:{emit(){}},
   nums:{add(){}},save(){},spawnChispinBoss(){return true;}
  };
  enterChispinStorm(g);return g;
 };
 test('all three voltaic flowers sit over real ground and reach the elevated routes',()=>{
- const room=createChispinRoom(ROOMS.hub);
+ const room=createChispinRoom(ROOMS.lab);
  for(const flower of CHISPIN_SPRINGS){
   assert.ok(room.plats.some(([x,y,w,h])=>h>40&&y===flower.y&&
    flower.x>=x+45&&flower.x<=x+w-45),'flower must be safe on solid ground');
