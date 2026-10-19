@@ -108,11 +108,21 @@ export function stitchoAbility(g,p,index){
    g.nums?.add?.(p.x,p.y-65,'¡TRIPLE IMPULSO ALIENÍGENA!','#b4ffdc',true);
   }
  }
+ // The real 100th object is the Galactic Heart. Its permanent pulse
+ // protects Stitcho briefly when L is cast; time-gated to avoid free
+ // invulnerability from spamming an ability key.
+ if(index===2&&p._heroHundredBonus==='CORAZÓN GALÁCTICO'&&
+    (Number(g.t)||0)-(s.heartPulseAt??-999)>360){
+   s.heartPulseAt=Number(g.t)||0;
+   p.invuln=Math.max(p.invuln||0,32);
+   g.fx?.emit?.(p.x+p.w*.5,p.y+p.h*.5,{color:'#aaf8f4',count:g.reduceMotion?5:20,life:32});
+ }
  if(index===0){
   const i=STITCHO_GATES.findIndex(gate=>Math.abs(p.x+p.w/2-(gate.x+gate.w/2))<240);
   if(i>=0){
-   s.gateSilencedUntil[i]=(Number(g.t)||0)+145;
-   g.nums?.add?.(STITCHO_GATES[i].x,p.y-80,'¡CIRCUITO DESACTIVADO!','#b3ffdf',true);
+   const heart=p._heroHundredBonus==='CORAZÓN GALÁCTICO';
+   s.gateSilencedUntil[i]=(Number(g.t)||0)+(heart?260:145);
+   g.nums?.add?.(STITCHO_GATES[i].x,p.y-80,heart?'¡CORAZÓN GALÁCTICO · CIRCUITO DOMINADO!':'¡CIRCUITO DESACTIVADO!','#b3ffdf',true);
   }
  }
  return true;
