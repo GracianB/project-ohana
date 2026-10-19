@@ -13,11 +13,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    uses: ./.github/workflows/quality.yml
+  # Full Chromium/Firefox/visual/WebRTC QA still runs independently on every
+  # PR in quality.yml. Once a reviewed commit lands on main, repeat only the
+  # deterministic unit + release integrity gates before publishing it.
+  # Re-running the entire multi-minute E2E suite after merge previously left
+  # GitHub Pages stale despite the exact PR commit having passed quality.
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout verified commit
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Unit regression suite
+        run: npm test
+      - name: Validate release assets and service worker integrity
+        run: npm run release:check
 
   deploy:
-    needs: quality
+    needs: release
     timeout-minutes: 15
     permissions:
       contents: read
