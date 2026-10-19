@@ -1,3 +1,4 @@
+import {drawAlohaCamp} from '../worlds/ohana-garden.js';
 export const FAMILY_ISLANDS=Object.freeze([
  {id:'aloha',name:'Bahía del compás',heroes:['kilo','stitcho'],x:250,y:260,rx:220,ry:128,color:'#83bfa0',sand:'#efd49e'},
  {id:'kitchen',name:'Puerto del banquete',heroes:['pizza','frita'],x:690,y:230,rx:200,ry:125,color:'#b7c18a',sand:'#f2c78c'},
@@ -18,8 +19,7 @@ export function drawFamilyIslands(c){
   c.strokeStyle='#e3d6ad80';c.lineWidth=14;c.lineCap='round';c.beginPath();c.moveTo(z.x-105,z.y+10);c.quadraticCurveTo(z.x,z.y-28,z.x+100,z.y+15);c.stroke();
   c.fillStyle='#e7f2d9';c.font='600 14px Outfit,sans-serif';c.textAlign='center';c.fillText(z.name,z.x,z.y+z.ry+22);
   if(z.id==='aloha'){
-   c.fillStyle='#bd8d60';c.fillRect(z.x-72,z.y-72,145,40);for(let j=0;j<7;j++){c.strokeStyle='#805c46';c.beginPath();c.moveTo(z.x-68+j*22,z.y-72);c.lineTo(z.x-68+j*22,z.y-32);c.stroke();}
-   for(const dx of [-155,155]){c.strokeStyle='#775d47';c.lineWidth=9;c.beginPath();c.moveTo(z.x+dx,z.y);c.quadraticCurveTo(z.x+dx+25,z.y-70,z.x+dx,z.y-130);c.stroke();for(let j=0;j<5;j++){c.strokeStyle='#397d69';c.lineWidth=10;c.beginPath();c.moveTo(z.x+dx,z.y-125);c.quadraticCurveTo(z.x+dx-70+j*34,z.y-160,z.x+dx-65+j*30,z.y-105);c.stroke();}}
+   drawAlohaCamp(c,z);
   }else if(z.id==='kitchen'){
    c.fillStyle='#b77758';c.beginPath();c.arc(z.x,z.y-60,48,Math.PI,0);c.lineTo(z.x+48,z.y-26);c.lineTo(z.x-48,z.y-26);c.fill();c.fillStyle='#483d47';c.fillRect(z.x-22,z.y-60,44,34);c.fillStyle='#ffbd78';c.fillRect(z.x-14,z.y-47,28,17);c.fillStyle='#eee0aa';c.fillRect(z.x+105,z.y-75,50,45);c.fillStyle='#d48670';c.fillRect(z.x+98,z.y-83,65,12);
   }else if(z.id==='fossil'){
@@ -35,6 +35,7 @@ export function drawFamilyIslands(c){
 export function islandForHero(id){return FAMILY_ISLANDS.find(z=>z.heroes.includes(id));}
 export function pairedScene(id,selected,seconds){
  const island=islandForHero(selected);if(!island?.heroes.includes(id))return null;
+ if(island.id==='aloha'){const lead=id==='kilo',act=seconds<3?0:seconds<7?1:seconds<10?2:3;return {pose:act===0?'idle':act===1?(lead?'cast':'jump'):'victory',dx:act===1?Math.sin(seconds*Math.PI)*(lead?8:-12):0,dy:act===1&&!lead?-Math.abs(Math.sin(seconds*Math.PI))*18:0,...(lead?{performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:act===2?2+seconds-7:seconds}}:{})};}
  const phase=Math.min(2,Math.floor(seconds/4)),lead=id===island.heroes[0],wave=Math.sin(seconds*Math.PI);
  const poses={aloha:['cast','jump'],kitchen:['run','jump'],fossil:['jump','cast'],moon:['jump','cast'],storm:['cast','jump']};
  return {pose:phase===0?'idle':phase===2?'victory':poses[island.id][lead?0:1],dx:phase===1?wave*(lead?16:-16):0,dy:phase===1&&!lead?-Math.abs(wave)*22:0};

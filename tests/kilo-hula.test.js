@@ -22,7 +22,7 @@ test('dance strikes on four beats only, reflects immediately and rewards one ope
   g.projectiles=Array.from({length:3},()=>({x:110,y:210,w:6,h:6,vx:-4,vy:0,life:100,owner:'enemy'}));
   const hits=[];g.onAbilityHit=()=>hits.push(g.t);useAbility(g,1);
   for(let i=1;i<=96;i++){g.t=i;updateAbilityFx(g);if(i===1){assert.equal(kiloPetals(g),1);assert.ok(g.projectiles.every(p=>p.owner==='player'&&p.vx===4));}}
-  assert.deepEqual(hits,[24,48,72,96]);assert.equal(far.hp,1000);assert.equal(g.kiloAbilityFx.length,0);
+  assert.deepEqual(hits,[24,48,72,96]);assert.equal(far.hp,1000);assert.ok(g.kiloAbilityFx.some(f=>f.kind==='hula'));
  }
  clearAbilityFx();
 });

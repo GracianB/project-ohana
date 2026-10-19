@@ -43,6 +43,18 @@ jobs:
       - name: V410 family camp · ten heroes and fifty real forms
         run: node tests/browser/v410-family-camp.mjs
 
+      - name: V440 Michi animation and island traversal
+        run: |
+          node tests/browser/v440-michi.mjs
+          node tests/browser/v441-grove.mjs
+          node tests/browser/v442-albums.mjs
+          node tests/browser/v443-kilo-flight.mjs
+          node tests/browser/v444-kilo-combat.mjs
+          node tests/browser/v445-kilo-final.mjs
+          node tests/browser/v452-kilo-phase-one.mjs
+          node tests/browser/v453-hero-worlds.mjs
+          node tests/browser/v1-candidate.mjs
+
       - name: V400 pause, audio and motion preferences
         run: node tests/browser/v400-experience.mjs
 

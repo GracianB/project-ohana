@@ -1,3 +1,17 @@
+import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianSignals} from './systems/grove-guardian.js';
+import {steerKiloFlight} from './systems/kilo-flight.js';
+import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
+import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
+import {drawRelicCinema} from './systems/relic-cinema.js';
+import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
+import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
+import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoTrailSnapshot,stitchoAbility} from './systems/stitcho-trail.js';
+import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
+import {createStitchoRoom} from "./systems/stitcho-room.js";
+import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
+import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
+import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -30,7 +44,7 @@ import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attack
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
-import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
+import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
@@ -68,7 +82,7 @@ import { damageFeedback } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
 import { drawBossFallScene, bossFallStage } from "./systems/boss-fall-scene.js";
-import { newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
+import { dragonEmbersForRoom,newDragonTrial, updateDragonTrial, drawDragonTrial, dragonTrialSnapshot } from "./systems/dragon-trial.js";
 import { formatBossStatus } from "./systems/boss-hud.js";
 import { ExperienceDirector } from "./systems/experience.js";
 import { baitLabel } from "./systems/boss-bait.js";
@@ -307,10 +321,10 @@ if (n > 3) return "B";
 return "C";
 }
 
-function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
+function canAct() { return game.running && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+if (!interactStitchoTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -356,8 +370,13 @@ saveWarning = !saved;
 return saved;
 }
 game.save=save;
+game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");};
+game.onRelicEnd=()=>{duckMusic(paused);document.body.classList.remove("relic-cinema");};
+game.onRelicBeat=relicUkulele;
+game.onRoomAlbumChange=()=>Festival.setCounter();
 function returnToMenu() {
 save();
+if(game.relicScene){game.relicScene=null;document.body.classList.remove('relic-cinema');duckMusic(false);}
 game.running = false;
 input?.reset();
 clock.reset();
@@ -469,7 +488,8 @@ p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
 if (fromDir !== "down") snapToFloor(p);
 }
 function loadRoom(id, fromDir) {
-const r = ROOMS[id];
+let r = ROOMS[id];
+if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -479,6 +499,7 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+resetKiloCombo(game);resetPlayerLocomotion(game.player);
 game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
@@ -504,19 +525,31 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
+enterKiloGrove(game);enterStitchoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
+game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
-const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
+const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng}));
 e.spawnIndex = i;e._campaignOriginal=true;
-if(f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
+if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=f[4].anchorY;}}
+if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
+initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return e;
 });
-game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-foe-${e.spawnIndex}`));
+game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&game.player?.id==='stitcho'&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+game.spawnStitchoBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._stitchoBoss))return true;
+  const enemy=createStitchoBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -617,7 +650,9 @@ return;
 }
 DOM.help?.classList.remove("open");
 setPaused(false);
-grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+const personalMap=!!game.stitchoTrail;
+const title=document.getElementById("map-title");if(title)title.textContent=personalMap?"Archipiélago del Caos":"Mapa de Isla Hoku";
+grid.innerHTML = personalMap?renderStitchoAtlasHTML(game):renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
 grid.onclick = event => {
   const node=event.target.closest('.wm-node');
   if(!node||!grid.contains(node))return;
@@ -625,7 +660,7 @@ grid.onclick = event => {
     other.classList.toggle('selected',other===node);
     other.setAttribute('aria-pressed',String(other===node));
   }
-  grid.querySelector('.wm-detail').innerHTML=worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+  grid.querySelector('.wm-detail').innerHTML=personalMap?stitchoAtlasDetail(node.dataset.room,game):worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
 };
 requestAnimationFrame(()=>{
  const node=grid.querySelector('.wm-node.here');
@@ -657,11 +692,13 @@ game.lastAbilitySlot = null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
+game.personalAdventureSolo = !onlineMode;
 const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 input?.reset();
 clock.reset();
 t = 0;
+game.t = 0;
 paused = false;
 game.hitstop = 0;
 game.camPunch = 0;
@@ -695,7 +732,7 @@ game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
-game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};
+game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};game.roomAlbums=readRoomAlbums();if(game.relicScene)game.onRelicEnd?.();game.relicScene=null;game.resetInput=()=>input?.reset();
 game.best = null;
 Surprises.reset();
 Festival.reset();
@@ -726,7 +763,7 @@ try {
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
-    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;
+    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;game.roomAlbums=mergeRoomAlbums(game.roomAlbums,u.roomAlbums);
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
@@ -799,6 +836,7 @@ final: toGod
 save();
 }
 function cheatEvolve() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead || !game.running || paused || overlayOpen() || document.hidden) return;
 if (p.evo >= 4) {
@@ -827,6 +865,7 @@ if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jum
 game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
 function dash() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.dash > 0) { p.dashBuf = 8; return; }
@@ -886,7 +925,9 @@ if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.
   d = Math.max(1, Math.round(d * 0.35));
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 3, { color: "#9fe8ff", count: 5, size: 2, up: 0.8, life: 10 });
 }
+const healthBefore=e.hp;
 damageEnemy(e, d);
+if(e.hp<healthBefore)recordKiloHit(game,'H',p._swing);
 registerBossPunish(e);
 const face = p.facing || 1;
 e.vx = shieldBlock ? 0 : face * (e.boss ? 3 : 8) * push;
@@ -1045,6 +1086,7 @@ markHit(p, e, s.dmg, s.kb);
 }
 
 function attack() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.melee > 0) { p.meleeBuf = 8; return; }
@@ -1104,6 +1146,7 @@ const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard"
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
 damagePlayer(p, amount);
+resetKiloCombo(game);resetPlayerLocomotion(p);
 p.invuln = 42;
 p.vx = Math.sign(p.vx || p.facing || 1) * -8;
 p.vy = -6.5;
@@ -1243,7 +1286,7 @@ if (hazard.type === HAZARD_TYPES.DEATH) {
 if (!hazardAxis) {
 p._hazardEscapeKey = "";
 const next = nearestBelow(p.x, p.w, feet - 8);
-if (next && feet >= next.y && !dropIgnoresPlatform(p, next)) {
+if (next && !(p._kiloFlightT>0&&next.h<=40) && feet >= next.y && !dropIgnoresPlatform(p, next)) {
   landOn(p, next);
   return;
 }
@@ -1464,6 +1507,7 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
+const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
 if (p.melee > 0) p.melee--;
@@ -1488,7 +1532,7 @@ if (oppose) {
   p.facing = face;
 }
 } else if (axisX !== 0) {
-const target = axisX * Math.abs(p.speed);
+const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
 const accel = p.grounded
   ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
@@ -1503,7 +1547,8 @@ if (Math.abs(p.vx) < 0.04) p.vx = 0;
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
 else if (p.buffer > 0) p.buffer--;
 const masteryPlatforms = playerMasteryPlatforms(game);
-const playerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
+const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
+const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
 p.wall = 0;
 if (!p.grounded) {
 for (const plat of game.platforms) {
@@ -1549,13 +1594,16 @@ if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
 }
 if (p.wall) p.vy = Math.min(p.vy, 2.2);
 stepChispinCloud(p,{jump,left,right});
-const inputState = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
+const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
 p._jumpPrev = !!jump;
 Passives.update(game, inputState);
+const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4&&m.life>0);
+if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(kiloStep.age<6?3:kiloStep.speed);p.vx=inputState.kiloBurst;p.facing=kiloStep.face;}
+const kiloFlight=steerKiloFlight(p,inputState);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -1672,7 +1720,9 @@ if (ok) {
 }
 }
 const r = room();
-if (portals.prompt) setPrompt(portals.prompt, true);
+if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
+else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
+else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
 else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
@@ -1877,6 +1927,8 @@ if (e.boss) {
   continue;
 }
 
+if(updateStitchoBoss(e,game,hurtPlayer))continue;
+if(updateGroveGuardian(e,game,hurtPlayer))continue;
 if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
 const cuernoSleeping = !e.boss && e.sleep > 0;
@@ -2538,8 +2590,9 @@ if (e.kind === "cucaracho") {
     color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
   });
 }
-if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-foe-${e.spawnIndex}`);
+if(e._campaignOriginal)game._defeatedThisVisit?.add(e._encounterSaveId||`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
+if(e.miniBoss){game.clearedEncounters||={};const cleared=game.clearedEncounters[game.roomId]||=[];if(!cleared.includes(e._encounterSaveId)){cleared.push(e._encounterSaveId);addScore(600);addPlayerXp(game.player,40);game.nums.add(e.x,e.y-60,e._stitchoBoss?"¡NÚCLEO GLITCH VENCIDO!":"¡EL CLARO VUELVE A CANTAR!",e._stitchoBoss?"#a7edff":"#ffe1a0",true);game.save?.();}}
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 2, { color: "#ffe66a", count: 12, size: 4, up: 1.6, star: true });
@@ -2680,21 +2733,25 @@ if (paintedHubOn(game.roomId)) {
 drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 } else {
-renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
-drawRoomAtmosphere(
-  ctx,
-  game.roomId,
-  game.cam,
-  t,
-  viewportW,viewportH,
-  game.player?.id,
-  game.reduceMotion || reduceMotion
-);
-drawLivingWorld(ctx, game, t, viewportW,viewportH);
+if(game.stitchoTrail){
+ const tier=game.enemies.find(e=>e._stitchoBoss)?._glitch?.tier||1;
+ drawStitchoArchipelago(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.stitchoTrail.index
+ });
+}else{
+ renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
+ drawRoomAtmosphere(
+   ctx,game.roomId,game.cam,t,viewportW,viewportH,game.player?.id,
+   game.reduceMotion||reduceMotion
+ );
+ drawLivingWorld(ctx, game, t, viewportW,viewportH);
+}
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawTerrain(ctx, game.platforms, world, game.cam, t);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
+drawIslandLandmarks(ctx,game,game.cam,t);
+game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 drawIslandSprings(ctx,game,game.cam,t);
@@ -2729,8 +2786,11 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
-  drawCampaignEnemy(ctx,e,game.cam);
+  if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else {drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
+    if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
+  if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
 if (!game.finale) {
@@ -2868,16 +2928,11 @@ const u = game.ult.t / 42;
 ctx.save();
 ctx.strokeStyle = game.ult.color || "#ffe66a";
 ctx.globalAlpha = Math.min(0.85, u + 0.15);
-ctx.lineWidth = 8;
-const rad = (1 - u) * Math.max(viewW, viewH) * 0.72;
-ctx.beginPath();
-ctx.arc(viewW / 2, viewH / 2, rad, 0, Math.PI * 2);
-ctx.stroke();
-ctx.font = "800 28px Fraunces, serif";
+ctx.font = "800 18px Fraunces, serif";
 ctx.textAlign = "center";
 ctx.fillStyle = game.ult.color || "#fff";
 ctx.globalAlpha = Math.min(1, u * 2);
-ctx.fillText(game.ult.name || "", viewW / 2, viewH * 0.28);
+ctx.fillText(game.ult.name || "", viewW / 2, Math.max(105,viewH*.15));
 ctx.restore();
 }
 if (game.flash > 0) {
@@ -2901,8 +2956,10 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
 drawMinimap();
+drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
 function castPower(index) {
+if(game.relicScene)return;
 const p = game.player;
 if (!p) return;
 const need = POWER_LEVELS[index] ?? 4;
@@ -2921,6 +2978,7 @@ function renderAbilityBar() {
 const bar = DOM.abilityBar;
 if (!bar || !game.player) return;
 const evo = Number(game.player.evo) || 0;
+const kiloHelp=document.getElementById("kilo-kit-help");if(kiloHelp)kiloHelp.hidden=game.player.id!=="kilo";
 const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
 slots.push(...[4,5].map(index=>({id:extraAbility(game.player.id,index).id,need:POWER_LEVELS[index],index})));
 slots.push({ id: "supreme", need: 0, supreme: true, index:3 });
@@ -2933,7 +2991,7 @@ const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name + (d.desc ? " · " + d.desc : "");
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante "+(game.player.id==="kilo"?"2 s":"6 s")) : d.name + (d.desc ? " · " + d.desc : "");
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
@@ -3095,21 +3153,24 @@ const isSupreme = item.slot.dataset.supreme === "1";
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : item.slot.dataset.id;
 const slotIndex=Number(item.slot.dataset.index);
+const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
 const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def || !item.fill) continue;
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
 const w = pct + "%";
 if (item.fill.style.width !== w) item.fill.style.width = w;
-const sec = slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
+const sec = comboGate?(comboGate.ready?'I · '+Math.ceil(comboGate.remaining/60)+' s':comboGate.step+'/3 · H J H'):slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
 if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
-item.slot.classList.toggle("cooling", slotIndex===5?finisherCharge(p)<100:left>80);
+item.slot.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5?finisherCharge(p)<100:left>80));
 }
 const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for (let i = 0; i < touchPowers.length; i++) {
 const btn = touchPowers[i];
 const slotIndex = PWIDX[btn.dataset.k];
+const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
+if(slotIndex===4){const caption=comboGate?.ready?'I✓':'I';if(btn.textContent!==caption)btn.textContent=caption;}
 const isSupreme = slotIndex === 3;
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : slotIndex>3?extraAbility(p.id,slotIndex).id:(p.abilities || [])[slotIndex];
@@ -3123,12 +3184,13 @@ const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " �
 if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-btn.classList.toggle("cooling", slotIndex===5 ? finisherCharge(p)<100 : left > 80);
+const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+btn.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5 ? finisherCharge(p)<100 : left > 80));
 btn.style.setProperty("--cd", pct + "%");
 }
 }
 function step() {
+if(game.relicScene){if(!paused&&!overlayOpen()&&!document.hidden)tickRelicScene(game);return;}
 if (!canAct()) return;
 t++;
 game.t = t;
@@ -3159,7 +3221,10 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);
 updatePlayer();
+updateRoomAlbum(game);updateHeroCollection(game);
+if(game.relicScene)return;
 updateCampaignProgress(game);
 updateIslandSprings(game);
 updateCuernoPlay(game, t);
@@ -3482,8 +3547,18 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+combatTarget(){
+ const p=game.player;if(!p)return null;
+ const e=makeFoe(p.x+p.w+22,p.y,'cucaracho',game.roomId,0,{rng:()=>.5});
+ e.hp=e.max=5000;e.w=48;e.h=90;e.invuln=0;e.stun=60000;e.y=p.y+p.h-e.h;game.enemies=[e];
+ return {x:e.x,y:e.y,hp:e.hp};
+},
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
+albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
+ heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
+ interact(){interact();return this.state();},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3524,9 +3599,10 @@ state() {
     paused,
     runtimeFaults: game.runtimeFaults || 0,
     camera: { x: game.cam.x, y: game.cam.y },
+    platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
-    worldW:game.worldW,worldH:game.worldH,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
+    worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
     hp: p ? p.health : 0,
@@ -3573,6 +3649,7 @@ state() {
     assist: game._assist && game._assist.t > 0 ? game._assist.heroId : null,
     hazardEscape: p?._hazardEscapeKey || "",
     mastery: masterySnapshot(game),
+    dragonTrialEmbers:game.roomId==="volcano"?dragonEmbersForRoom(game.roomDef):[],
     dragonTrial: game.roomId==="volcano" ? dragonTrialSnapshot(game.dragonTrial) : null,
     masteryPlatforms: playerMasteryPlatforms(game).map((pl) => ({ x:pl.x, y:pl.y, w:pl.w, h:pl.h, mastery:pl.mastery })),
     worldGraph: worldGraphSnapshot(game.roomId, game.visited, p?.evo || 0),
@@ -3586,6 +3663,8 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
+    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),
@@ -3685,6 +3764,7 @@ forceRain() {
   Rain.start(game);
   return this.state();
 },
+setStitchoBossHp(value){const boss=game.enemies.find(e=>e._stitchoBoss);if(boss)boss.hp=Math.max(0,Math.min(boss.max,Number(value)||0));return this.state();},
 setBossHp(value) {
   const boss = game.boss || game.enemies.find((e) => e.boss);
   if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));

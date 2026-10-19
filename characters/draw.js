@@ -1,3 +1,4 @@
+import {drawHulaDepth} from './hula-depth.js';
 import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
@@ -264,11 +265,13 @@ case "note-bounce":
   }
   break;
 case "hula-ring":
+  if(p.id==='kilo')break; // Kilo's hoop surrounds the body in two depth passes.
   ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.5, H * 0.022);
   ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 1.35, r * 0.72, t * 0.08, 0, Math.PI * 2); ctx.stroke();
   ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 0.82, r * 0.44, -t * 0.11, 0, Math.PI * 2); ctx.stroke();
   break;
 case "ohana-halo":
+  if(p.id==='kilo')break;
   ctx.strokeStyle = "#fff7d1"; ctx.lineWidth = Math.max(1.6, H * 0.025);
   ctx.beginPath(); ctx.arc(0, -H * 0.52, r * 1.45, 0, Math.PI * 2); ctx.stroke();
   for (let i = 0; i < 5; i++) {
@@ -1234,9 +1237,11 @@ if (p.id === "cuerno") {
   }
 }
 if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
- const age=t-(p._cast?.t??-9999),entry=t-(p._kiloEntranceAt??-9999);
+ const age=t-(p._cast?.t??-9999),entry=t-(p._kiloEntranceAt??-9999),powerAge=t-(p._powerPerformance?.start??-9999);
  if(p._kiloPerformance)pose.kiloPerformance=p._kiloPerformance;
- else if(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96)
+ else if(powerAge>=0&&powerAge<24&&p._powerPerformance?.index===4)pose.kiloPerformance={kind:'remate',time:powerAge/60};
+ else if(powerAge>=0&&powerAge<120&&p._powerPerformance?.index===5)pose.kiloPerformance={kind:'finale',time:powerAge/60};
+ else if((p._kiloFlightT>0&&!(pose.state==='cast'&&p._cast?.slot!==1&&age<36))||(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96))
    pose.kiloPerformance={kind:'dance',time:age/60};
  else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
    pose.kiloPerformance={kind:'entrance',time:entry/60};
@@ -1268,6 +1273,12 @@ if(p.id==='stitcho'&&(Number(p._stitchoDanceT)||0)>0){
  pose.stitchoDanceAge=Number(p._stitchoDanceAge)||0;
 }
 applyPowerPerformance(pose,p,t);
+if(p.id==='cat'&&!p.dead&&pose.state!=='hurt'&&!Number.isFinite(pose.michiDuetAge)){
+ const age=t-(p._cast?.t??-9999);
+ if(p._cast?.slot===1&&age>=0&&age<72&&!moving&&!air){pose.state='cast';pose.castSlot=1;pose.cast=age/72;}
+ const powerAge=t-(p._powerPerformance?.start??-9999);
+ if(powerAge>=0&&powerAge<(p._powerPerformance?.index===5?120:32))pose.michiPowerIndex=p._powerPerformance.index;
+}
 const atk = pose.atk;
 const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
 const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
@@ -1332,6 +1343,7 @@ if (burstK > 0.35) {
 }
 else if (hurtFresh || (hurt && (p.invuln || 0) % 8 < 4)) { flashCol = "#ff3b4e"; flashA = hurtFresh ? 0.55 : 0.3; if (p.id === "frita") flashA = hurtFresh ? 0.3 : 0.18; }
 const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","cat"].includes(p.id)||p._duetActor?null:pickPainted(p, t, moving, air, atk);
+drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);
 if (painted) {
@@ -1352,6 +1364,7 @@ ctx.restore();
 if(p.id!=="chispin")drawFlavor(ctx, p.id, H, t, evo, true);
 if(p.id!=="chispin")drawEvolutionSignatureFX(ctx, p, H, pose, t);
 drawCharacterMotionFX(ctx, p, H, pose, t, options.reduceMotion===true);
+drawHulaDepth(ctx,p,H,t,true,options.reduceMotion===true);
 if (burstK > 0) {
 drawBurst(ctx, H, color, burstK);
 p.evoBurst--;

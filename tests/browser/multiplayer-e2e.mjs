@@ -117,7 +117,7 @@ try {
   const hostPage = await hostContext.newPage();
   const guestPage = await guestContext.newPage();
   const errors = [];
-  for (const page of [hostPage, guestPage]) page.on("pageerror", (error) => errors.push(error.stack || error.message));
+  for (const page of [hostPage, guestPage]) page.on("pageerror", (error) => {errors.push(error.stack || error.message);console.error("BROWSER RUNTIME",error.stack||error.message);});
 
   await hostPage.goto(origin+"/multiplayer.html");
   console.log(`multiplayer ${browserName}: lobby loaded${lateIce?" / late ICE":""}`);
@@ -158,10 +158,13 @@ try {
 
   await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
   await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
+  // Keep this transport/recovery stage independent of ambient enemy pressure.
+  // Later fixtures still verify real replicated enemies and exact guest damage.
+  for(const page of [hostPage,guestPage])await page.evaluate(async()=>{const {onlineCoop}=await import("/systems/online-coop.js");onlineCoop._combatGame.player.invuln=60000;});
   // V108: both real Chromium instances must exchange SDP through the SAME
   // fake Netlify room, then open direct SCTP pose + reliable action channels.
   for (const [label,page] of [["host",hostPage],["guest",guestPage]]) {
-    await page.waitForFunction(()=>document.body.dataset.coopTransport==="direct",null,{timeout:30000});
+    await page.waitForFunction(()=>document.body.dataset.coopTransport==="direct",null,{timeout:30000}).catch(async error=>{console.error("RTC BOOT DIAGNOSTICS",label,JSON.stringify({errors,state:await page.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,body:document.body.className,phase:o.snapshot?.phase,enabled:o.enabled,active:o.direct?.active,attempted:o.directAttempted,ice:o.direct?.iceState,pc:o.direct?.pc?.connectionState,peer:!!o.remote?.playerId};})}));throw error;});
     const verified=await page.evaluate(async()=>{
       const {onlineCoop}=await import("/systems/online-coop.js");
       return {active:onlineCoop.direct?.active,offer:!!onlineCoop.direct?.pc?.remoteDescription,
@@ -212,8 +215,10 @@ try {
   assert.ok(hostState.x <= 2240 && hostState.x >= 0, "host escaped world bounds");
 
   console.log("multiplayer: authoritative movement and direct poses verified");
-  await hostPage.keyboard.press("h");
-  await hostPage.waitForTimeout(300);
+  // Recovery must begin from a quiet, already-verified transport state.
+  // Injecting an unrelated H attack immediately before closing the channel
+  // schedules heavy hero-specific combat/FX on Chromium and can starve the
+  // next Playwright RPC. Actual guest hit and both U casts are asserted below.
 
   // V109: simulate a real direct link loss while Netlify stays connected.
   // A fresh offer must rebuild BOTH data channels and the guest's answerer.
@@ -237,6 +242,14 @@ try {
     },firstSession);
     if(recoveredSession)break;
     await hostPage.waitForTimeout(200);
+  }
+  if(!recoveredSession){
+    const clients=await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
+      const {onlineCoop:o}=await import("/systems/online-coop.js");
+      return {hidden:document.hidden,body:document.body.className,hp:o._combatGame?.player?.health,dead:o._combatGame?.player?.dead,state:o.snapshot?.phase,enabled:o.enabled,error:o.error,polling:o.polling,lastTick:o.lastGameTick,lastPoll:o.lastPoll,lastSnapshot:o.lastSnapshotAt,retryAfter:o.retryAfter,attempted:o.directAttempted,peer:!!o.remote?.playerId,now:performance.now()};
+    })));
+    const stored=[...store.entries.values()].map(e=>({phase:e.data.phase,players:e.data.players?.map(p=>({slot:p.slot,connected:p.connected,lastSeenAt:p.lastSeenAt}))}));
+    console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,clients,stored,serverNow:Date.now()}));
   }
   assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
@@ -440,6 +453,27 @@ try {
   console.log("multiplayer: bidirectional U echoes verified");
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
+    // Arm the guest before casting: normal peer FX snapshots expire after
+    // 750 ms and may disappear before a post-cast Playwright wait starts.
+    // Observe actual deserialized game state, preserving the 3-second budget.
+    await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const proof={};
+      const original=onlineCoop.receiveDirectEvent;
+      window.__michiFxProof=proof;
+      window.__michiFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      onlineCoop.receiveDirectEvent=function(game,event){
+        const outcome=original.call(this,game,event);
+        if(event.kind==='effects'){
+          const fx=game.coopPeerEffects?.michiFx||[];
+          for(const item of fx){
+            if(["yarn","purr","wisp"].includes(item.kind)&&!proof[item.kind])
+              proof[item.kind]=structuredClone(item);
+          }
+        }
+        return outcome;
+      };
+    });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -458,13 +492,53 @@ try {
       if(!['yarn','purr','wisp'].every(kind=>sample.michiFx.some(f=>f.kind===kind)))
         throw Error('Michi source J/K/L FX incomplete '+JSON.stringify(sample.michiFx));
       onlineCoop.lastEffectsSentAt=0;
-      if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
+      let accepted=onlineCoop.sendPeerEffects(g,true);
+       // Retain the original real J/K/L casts. If SCTP is backpressured after
+       // reconnection, wait for the game's bounded reliable retry, not a fake
+       // peer effect or a longer expiration.
+       for(let attempt=0;!accepted&&attempt<20;attempt++){
+         await new Promise(resolve=>setTimeout(resolve,100));
+         accepted=onlineCoop.sendPeerEffects(g,false);
+       }
+       if(!accepted)throw Error('Michi native reliable WebRTC FX stayed congested: '+JSON.stringify({
+         direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+         eventBuffered:onlineCoop.direct?.eventChannel?.bufferedAmount,
+         poseBuffered:onlineCoop.direct?.poseChannel?.bufferedAmount
+       }));
     });
-    await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
-    assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
+    try {
+      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(()=>window.__michiFxProof);
+      assert.ok(['yarn','purr','wisp'].every(kind=>!!captured[kind]),
+        'real guest deserialization missed one Michi J/K/L effect');
+      assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
+        'Michi peer echoes must remain cosmetic');
+    } finally {
+      await guestPage.evaluate(()=>{window.__michiFxRestore?.();delete window.__michiFxRestore;delete window.__michiFxProof;});
+    }
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
+    // Observe the real deserialized FX before casting. J/K are short lived;
+    // waiting until after the host RPC can miss a valid WebRTC delivery.
+    await guestPage.evaluate(async()=>{
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      const proof={};
+      const original=onlineCoop.receiveDirectEvent;
+      window.__chispinFxProof=proof;
+      window.__chispinFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      onlineCoop.receiveDirectEvent=function(game,event){
+        const outcome=original.call(this,game,event);
+        if(event.kind==='effects'){
+          const fx=game.coopPeerEffects?.chispinFx||[];
+          for(const item of fx){
+            if(["chain","trail","storm"].includes(item.kind)&&!proof[item.kind])
+              proof[item.kind]=structuredClone(item);
+          }
+        }
+        return outcome;
+      };
+    });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -481,17 +555,28 @@ try {
       if(!['chain','trail','storm'].every(kind=>sample.chispinFx.some(f=>f.kind===kind)))
         throw Error('Chispin source J/K/L FX incomplete '+JSON.stringify(sample.chispinFx));
       onlineCoop.lastEffectsSentAt=0;
-      if(!onlineCoop.sendPeerEffects(game,true))throw Error('Chispin native WebRTC FX delivery rejected');
+      let accepted=onlineCoop.sendPeerEffects(game,true);
+       for(let attempt=0;!accepted&&attempt<20;attempt++){
+         await new Promise(resolve=>setTimeout(resolve,100));
+         accepted=onlineCoop.sendPeerEffects(game,false);
+       }
+       if(!accepted)throw Error('Chispin native reliable WebRTC FX stayed congested: '+JSON.stringify({
+         direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+         eventBuffered:onlineCoop.direct?.eventChannel?.bufferedAmount,
+         poseBuffered:onlineCoop.direct?.poseChannel?.bufferedAmount
+       }));
     });
-    // The receiver must actually deserialize all three real cosmetic effects.
-    // A bounded reliable event mirrors the full explicit cast, so CI packet
-    // coalescing cannot erase the one-time combo snapshot.
-    await guestPage.waitForFunction(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');const list=onlineCoop._combatGame.coopPeerEffects?.chispinFx||[];
-      return ['chain','trail','storm'].every(kind=>list.some(f=>f.kind===kind));
-    },null,{timeout:3000});
-    const cosmetic=await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.chispinFx.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined);});
-    assert.equal(cosmetic,true,'native electrical echoes must never carry damaging state');
+    // Preserve 3-second deadline and original purely cosmetic assertions.
+    try {
+      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
+      assert.ok(['chain','trail','storm'].every(kind=>!!captured[kind]),
+        'native Chispin J/K/L effects were not all deserialized by guest');
+      assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
+        'native electrical echoes must never carry damaging state');
+    } finally {
+      await guestPage.evaluate(()=>{window.__chispinFxRestore?.();delete window.__chispinFxRestore;delete window.__chispinFxProof;});
+    }
   }
   console.log("multiplayer: character-specific J/K/L effects verified");
   // Stitcho's storm is verified by the dedicated Stitcho Chromium/Firefox

@@ -32,8 +32,15 @@ test('L remains local, consumes petals and never repeatedly damages a target',()
  clearAbilityFx(); const g=game(4);for(let i=0;i<3;i++)earnKiloPetal(g,{});
  const near={x:200,y:200,w:24,h:24,hp:1000},far={x:1300,y:200,w:24,h:24,hp:1000};g.enemies=[near,far];
  const hits=[];g.onAbilityHit=e=>hits.push(e);useAbility(g,2);
- assert.equal(kiloPetals(g),0);assert.equal(g.player.health,91);
+ assert.equal(kiloPetals(g),0);assert.equal(g.player.health,30);
  for(let i=0;i<50;i++){g.t++;updateAbilityFx(g);}
- assert.equal(hits.filter(e=>e===near).length,1);assert.equal(far.hp,1000);
+ assert.ok(g.player.health>30);assert.equal(hits.filter(e=>e===near).length,1);assert.equal(far.hp,1000);
  assert.equal(spendKiloPetals(g),0);clearAbilityFx();
+});
+test('L lasts beyond three seconds and neither blocked hits nor empty space heal',()=>{
+ clearAbilityFx();const g=game(4),e={x:180,y:200,w:24,h:24,hp:1000,invuln:999};g.enemies=[e];useAbility(g,2);
+ for(let i=0;i<120;i++){g.t++;updateAbilityFx(g);}assert.equal(g.player.health,30);
+ e.invuln=0;for(let i=0;i<100;i++){g.t++;updateAbilityFx(g);}
+ assert.ok(g.player.health>30);assert.ok(g.kiloAbilityFx.some(f=>f.kind==='ohana'));
+ clearAbilityFx();assert.equal(g.player._kiloOhanaT,0);
 });

@@ -11,6 +11,7 @@ function mockCtx() {
       if (k in o) return o[k];
       if (k === "createRadialGradient" || k === "createLinearGradient") return () => { calls.grad++; return { addColorStop() {} }; };
       if (k === "fillText") return (s) => calls.text.push(String(s));
+      if (k === "measureText") return s => ({width:String(s).length*7});
       if (k === "save") return () => calls.save++;
       if (k === "restore") return () => calls.restore++;
       return () => {};

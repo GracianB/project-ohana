@@ -200,3 +200,8 @@ export function sfx(type) {
 }
 
 export const SFX_NAMES = Object.keys(BANK);
+export function relicUkulele(beat=0){
+ if(muted)return;
+ const chords=[[261.63,329.63,392],[220,261.63,329.63],[174.61,261.63,349.23],[196,293.66,392]];
+ try{arp(chords[Math.floor(beat/2)%4],.055,.5,.035,'triangle');}catch{}
+}

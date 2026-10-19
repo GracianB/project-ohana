@@ -20,7 +20,7 @@ export function welcomeStoryAt(seconds=0){
  const time=Math.max(0,Number(seconds)||0),index=Math.max(0,WELCOME_STORIES.findIndex(s=>time<s.end));
  const complete=time>=WELCOME_STORY_DURATION,scene=WELCOME_STORIES[complete?WELCOME_STORIES.length-1:index];
  const local=Math.max(0,Math.min(scene.duration,time-scene.start));let at=0,line=null,lineIndex=-1;
- for(let i=0;i<scene.lines.length;i++){const duration=dialogueSeconds(scene.lines[i].text);if(local>=at&&local<at+duration){line=scene.lines[i];lineIndex=i;break;}at+=duration;}
+ for(let i=0;i<scene.lines.length;i++){const duration=dialogueSeconds(scene.lines[i].text);if(local+1e-7>=at&&local<at+duration-1e-7){line=scene.lines[i];lineIndex=i;break;}at+=duration;}
  const k=Math.min(1,local/(scene.duration-1.2));
  return {...scene,index:WELCOME_STORIES.indexOf(scene),local,line,lineIndex,complete,sceneTime:scene.range[0]+(scene.range[1]-scene.range[0])*k};
 }

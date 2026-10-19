@@ -16,6 +16,8 @@ export function michiFoeTier(e) {
 export function michiFoePose(e) {
   if (!e) return "idle";
   if ((e._hitT || 0) > 0 || (e.flash || 0) > 6) return "hurt";
+  if(e.campaignRole&&e._campaign?.wind>0)return 'telegraph';
+  if(e.campaignRole&&e._campaign?.active>0)return e.kind==='rana'?'jump':'attack';
   if (e.kind === "rana") return (e.hopWind > 0 || e.tongueWind > 0) ? "telegraph" : Math.abs(e.vy || 0) > 1 ? "jump" : (e.sitting > 0 || !e.vx) ? "idle" : "move";
   if (e.kind === "planta") return !e.up ? "hidden" : e.plantWind > 0 ? "telegraph" : ((e.plantWind | 0) === 0 && (e.shoot || 0) >= 20 && (e.shoot || 0) < 32) ? "attack" : "idle";
   if (e.kind === "gaviota") return e.diving ? "attack" : e.telegraph ? "telegraph" : "move";

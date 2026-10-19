@@ -121,6 +121,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
     this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
+    this.pendingVisualCombo=null;
     this._reliableDuetSource=null;this._reliableDuetLink=null;
     this._relayDuetSource=null;this._relayDuetHoldUntil=0;
   }
@@ -148,6 +149,7 @@ class OnlineCoop {
     const session = this.readSession();
     if (!session || !definition) return false;
 
+    clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.direct?.close();
     this.direct=null;
     this.directAttempted=false;
@@ -160,6 +162,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
     this.seenActionEvents.clear();this.effectSequence=0;this.lastEffectsSentAt=0;
+    this.pendingVisualCombo=null;
     this._reliableDuetSource=null;this._reliableDuetLink=null;
     this._relayDuetSource=null;this._relayDuetHoldUntil=0;
     resetCombatMirror(game);game.coopPeerEffects=null;this._combatGame=game;
@@ -210,6 +213,9 @@ class OnlineCoop {
       throw new Error(this.error || "No se pudo recuperar el estado inicial de la partida online.");
     }
     document.body.dataset.onlineState = "connected";
+    this.lastGameTick=performance.now();
+    this.heartbeatTimer=setInterval(()=>this.networkHeartbeat(game),2500);
+    this.heartbeatTimer?.unref?.();
 
     // Online mode reuses the original OHANA room/physics/rendering.
     // The lobby's synthetic 1280×720 coordinates are never applied to it.
@@ -424,7 +430,29 @@ class OnlineCoop {
     }else if(event.kind==="combat"){
       this.receiveCombatFrame(game,event.payload);
     }else if(event.kind==="effects"){
-      if(applyPeerEffects(game,event.payload))this.lastPeerEffectsAt=performance.now();
+      const frame=event.payload;
+      const received=applyPeerEffects(game,frame);
+      if(received)this.lastPeerEffectsAt=performance.now();
+      // A queued SCTP send is NOT proof the other browser has displayed it.
+      // Acknowledge only complete, validated, damage-free visual trios in the
+      // current room/scope. Duplicates get an ack too if they were displayed.
+      const state=game.coopPeerEffects;
+      const trio=list=>Array.isArray(list)&&
+        ["yarn","purr","wisp"].every(kind=>list.some(f=>f.kind===kind));
+      const spark=list=>Array.isArray(list)&&
+        ["chain","trail","storm"].every(kind=>list.some(f=>f.kind===kind));
+      const valid=frame?.roomId===game.roomId&&state?.scope===frame.scope&&
+        (trio(frame.michiFx)&&trio(state.michiFx)||
+         spark(frame.chispinFx)&&spark(state.chispinFx));
+      if(valid&&Number.isSafeInteger(frame.frameNo)&&frame.frameNo>0){
+        this.direct?.sendEvent?.("state",{state:"fx-ack",
+          scope:frame.scope,frameNo:frame.frameNo});
+      }
+    }else if(event.kind==="state"&&event.payload?.state==="fx-ack"){
+      const ack=event.payload,pending=this.pendingVisualCombo;
+      if(pending&&ack.scope===pending.scope&&
+         ack.frameNo===pending.frame.frameNo&&
+         pending.link===this.direct)this.pendingVisualCombo=null;
     }else if(event.kind==="state"&&event.payload?.state==="protocol"){
       this.peerCombatProtocol=Number.isInteger(event.payload.version)?event.payload.version:0;
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
@@ -502,6 +530,7 @@ class OnlineCoop {
     this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
     this.lastCombatFrame=0;this.lastCombatReceivedAt=0;this.remoteCombatScope="";
     this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
+    this.pendingVisualCombo=null;
     if(this._combatGame){resetCombatMirror(this._combatGame);this._combatGame.coopPeerEffects=null;}
   }
 
@@ -571,6 +600,7 @@ class OnlineCoop {
 
   failClosed(error){
     this.error=error?.message||"Sesión caducada";
+    clearInterval(this.heartbeatTimer);this.heartbeatTimer=null;
     this.enabled=false;
     this.pendingMutations.length=0;
     this.direct?.close();this.direct=null;this.directAttempted=false;
@@ -966,10 +996,24 @@ class OnlineCoop {
   sendPeerEffects(game,force=false){
     const now=performance.now();
     const duet=game._familyDuet||game._michiDuet||game._chispinDuet||game._stitchoDuet||game._kiloDuet;
+    // Keep a bounded, validated, cosmetic-only J/K/L sample after a
+    // transient reliable-channel rejection. An old epoch, room, peer link
+    // or 2.5-second-old sample is discarded without touching combat state.
+    const stale=p=>now-p.createdAt>2500||p.roomId!==game.roomId||
+      p.scope!==this.combatEpoch||p.link!==this.direct;
+    if(this.pendingVisualCombo&&stale(this.pendingVisualCombo))this.pendingVisualCombo=null;
+    const fullCombo=frame=>{
+      const has=(list,kinds)=>kinds.every(kind=>list?.some(f=>f?.kind===kind));
+      return has(frame?.michiFx,['yarn','purr','wisp'])||
+        has(frame?.chispinFx,['chain','trail','storm']);
+    };
+    if(force&&!this.pendingVisualCombo){
+      const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
+      if(fullCombo(frame))this.pendingVisualCombo={
+        frame,roomId:game.roomId,scope:this.combatEpoch,link:this.direct,createdAt:now
+      };
+    }
     if(!this.direct?.active||this.remoteWorld!==game.roomId){
-      // The test harness and reconnecting clients can cast U without
-      // going through the physical keyboard handler. Relay only once per
-      // family-duet instance, not on every heartbeat.
       if(game._familyDuet&&this.enabled&&this.remoteWorld===game.roomId&&
          this._relayDuetSource!==game._familyDuet&&
          Number(game._familyDuet.age)<100&&this.snapshot?.phase!=="lobby"){
@@ -979,12 +1023,23 @@ class OnlineCoop {
       return false;
     }
     if(!force&&now-this.lastEffectsSentAt<200)return false;
-    // A U cast can precede remote-room synchronization or reliable channel
-    // readiness. Keep attempting its first durable snapshot at normal 5 Hz
-    // until accepted; a freshly negotiated link must receive it again.
-    const pending=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
+    // A full J/K/L trio must be accepted by ordered SCTP, not only
+    // the disposable pose lane. Retry at the existing game update tick.
+    const saved=this.pendingVisualCombo;
+    if(saved){
+      const accepted=sendPeerEffectsWithReliableDuet(this.direct,saved.frame,true);
+      // The existing 5 Hz budget applies to both successful and rejected
+      // attempts: temporary SCTP congestion must never create a retry storm.
+      this.lastEffectsSentAt=now;
+      if(!accepted)return false;
+      // Only the peer's explicit fx-ack clears the pending burst. A successful
+      // local send may still be lost when the remote data channel reconnects.
+      return true;
+    }
+    // Native U handshake and normal 5Hz FX retain their original behavior.
+    const pendingDuet=!!duet&&(this._reliableDuetSource!==duet||this._reliableDuetLink!==this.direct);
     const frame=capturePeerEffects(game,++this.effectSequence,this.combatEpoch);
-    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pending,()=>{
+    const sent=sendPeerEffectsWithReliableDuet(this.direct,frame,force||pendingDuet,()=>{
       if(duet){this._reliableDuetSource=duet;this._reliableDuetLink=this.direct;}
     });
     if(sent)this.lastEffectsSentAt=now;
@@ -1065,8 +1120,18 @@ class OnlineCoop {
       performance.now()-this.lastCombatReceivedAt<750;
   }
 
+  networkHeartbeat(game,now=performance.now()){
+    if(!this.enabled||now-(this.lastGameTick||0)<2000)return false;
+    // Keep the authenticated room alive while a hidden/paused view stops RAF.
+    // Reuse paced poll; never advance physics or increase foreground requests.
+    this.direct?.ping();void this.poll(game);
+    if(typeof document==="undefined"||!document.hidden)this.repairDirect(game,now);
+    return true;
+  }
+
   tick(game) {
     if (!this.enabled) return;
+    this.lastGameTick=performance.now();
     if(!this.directAttempted&&this.remote?.playerId)this.setupDirect(game);
     else this.repairDirect(game);
     this.direct?.sendPose(game);

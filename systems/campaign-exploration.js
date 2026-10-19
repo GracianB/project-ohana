@@ -1,3 +1,5 @@
+import {movePlatform,drawPlatformRail} from './moving-platforms.js';
+import {tidyPlatforms} from './platform-layout.js';
 import {healPlayer} from './mutations.js';
 const MECHANISMS=Object.freeze({
  hub:{glyph:'✦',name:'Farol familiar',color:'#ffedac',action:'glide'},
@@ -33,11 +35,11 @@ export function triggerBiomeMechanism(g,m){
 }
 export function enterCampaignExploration(g){
  const r=g.roomDef;if(!r||r.boss){g.campaignExploration=null;return;}
- const branches=[1,3].filter(i=>i<r.sectors.length).map((n,i)=>{
+ const branches=(r.id==='hub'?[]:[1,3]).filter(i=>i<r.sectors.length).map((n,i)=>{
   const s=r.sectors[n],x=s.x+620;
   for(let j=0;j<3;j++)g.platforms.push({x:x+j*140,y:734-j*80,w:260,h:22});
   const platform={x:x+80,y:974,w:170,h:22,_campaignLift:true};g.platforms.push(platform);
-  return {id:`${r.id}-secret-${i}`,x:x+390,y:540,platform,baseY:974,phase:i*Math.PI,found:false};
+  return {id:`${r.id}-secret-${i}`,x:x+390,y:540,platform,baseY:974,phase:i*Math.PI,motion:{axis:i%2?'x':'y',x:x+80,y:974,span:i%2?280:220,period:420,start:Number(g.t)||0,phase:i*Math.PI},found:false};
  });
  const def=mechanismForBiome(r.id);
  const mechanisms=def?(r.sectors.length===3?[0,1]:[1,3]).filter(n=>n<r.sectors.length).map((n,i)=>{
@@ -45,6 +47,7 @@ export function enterCampaignExploration(g){
   const floor=(g.platforms||[]).filter(pl=>pl.h>40&&x>=pl.x+30&&x<=pl.x+pl.w-30).sort((a,b)=>b.y-a.y)[0];
   return floor?{...def,id:r.id+'-mechanism-'+i,x,y:floor.y,cd:0,flash:0,used:0}:null;
  }).filter(Boolean):[];
+ g.platforms=tidyPlatforms(g.platforms);
  g.campaignExploration={branches,shortcut:false,mechanisms};
 }
 export function updateCampaignExploration(g){
@@ -66,11 +69,13 @@ export function updateCampaignExploration(g){
   }
  }
  // Reaching the far side opens a permanent high return route for this run/save.
+ if(r.id==='hub')return; // The musical flower and lifts are the authored return route.
  const key=`${r.id}-shortcut`;
  if(p.x>r.width-240&&!state.shortcut){g.secrets||={};const found=(g.secrets[r.id]||=[]);if(!found.includes(key))found.push(key);}
  if(!state.shortcut&&g.secrets?.[r.id]?.includes(key)){
   state.shortcut=true;for(let x=3500;x<r.width-250;x+=340)g.platforms.push({x,y:654,w:300,h:22,_campaignReturn:true});
   for(let y=1054;y>=654;y-=80)g.platforms.push({x:r.width-400,y,w:240,h:22,_campaignReturn:true});
+  g.platforms=tidyPlatforms(g.platforms);
   g.nums?.add?.(p.x,p.y-40,'ATAJO DEL REGRESO ABIERTO','#a9ffe6',true);g.save?.();
  }
 }
@@ -87,7 +92,7 @@ export function drawCampaignExploration(ctx,g,cam,t){
   ctx.fillStyle='#edf3de';ctx.font='700 11px sans-serif';
   ctx.fillText(m.name,x,y-55);ctx.restore();
  }
- for(const b of s.branches){const x=b.x-cam.x,y=b.y-cam.y;if(b.found||x<-40||x>1600)continue;
+ for(const b of s.branches){drawPlatformRail(ctx,b.platform,b.motion,cam);const x=b.x-cam.x,y=b.y-cam.y;if(b.found||x<-40||x>1600)continue;
   ctx.fillStyle='#ffe7a7';ctx.strokeStyle='#fff8d5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y-17);ctx.lineTo(x+12,y);ctx.lineTo(x,y+17);ctx.lineTo(x-12,y);ctx.closePath();ctx.fill();ctx.stroke();
   if(!g.reduceMotion){ctx.globalAlpha=.3;ctx.beginPath();ctx.arc(x,y,24+Math.sin(t*.07)*4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}
  }

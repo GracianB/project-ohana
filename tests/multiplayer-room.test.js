@@ -541,3 +541,12 @@ test("online engine integration exposes the canonical room loader", async () => 
   assert.match(source, /game\.loadRoom\s*=\s*loadRoom/);
   assert.match(source, /onlineCoop\.start\(game, def\)/);
 });
+
+
+test("V440 HTTP engine fallback preserves positions beyond the old 2240px rooms",async()=>{
+ const {service}=setup(),room=await makeRoom(service);await startMatch(service,room);
+ const moved=await service.move(room.host.roomId,room.host.identity,{mode:"engine",positionX:6880,positionY:1120,worldRoomId:"volcano",sequence:1,actionId:"engine:wide:1"});
+ assert.equal(moved.players.find(p=>p.isYou).x,6880);
+ const hub=await service.move(room.host.roomId,room.host.identity,{mode:"engine",positionX:9000,positionY:1120,worldRoomId:"hub",sequence:2,actionId:"engine:wide:2"});
+ assert.equal(hub.players.find(p=>p.isYou).x,4200);
+});

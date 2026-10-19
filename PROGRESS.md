@@ -1,3 +1,77 @@
+## ohana-453 · Kilo y Stitcho · mundos personales + colecciones + offline
+
+Se mantiene el capítulo de Kilo V452 y se añade la primera fase jugable del Archipiélago del Caos de Stitcho: cuatro sectores propios, raíles móviles, trampolines, trampas eléctricas, ocho fragmentos, tres antenas, mapa de personaje, enemigos temáticos y Núcleo Glitch de 480 PV con tres fases y cuatro ataques telegrafiados.
+
+El sistema de colecciones personales define 100 objetos por héroe y una recompensa única al completarlos. Se conserva el álbum compartido de Hoku y se añade persistencia por personaje. Precache y hashes regenerados para seis módulos nuevos; HTML y Service Worker usan `ohana-453`.
+
+**Estado:** implementado en PR #387; sin declarar publicado hasta que las pruebas unitarias, E2E de navegador, cooperativo, regresión visual y publicación sean verdes. El README público se ha renovado por separado en main. Los otros ocho mundos personales continúan planificados.
+
+## ohana-452 · Fase 1 Kilo: isla y guardián
+
+Integra main V451 conservando sus mejoras de campaña, mapa y cooperativo, junto con Kilo V1. Bahía del compás usa palmeras y cabaña detalladas, escenario de madera, faroles, flores y espuma de costa. Kilo interpreta entrada, hula, ukelele y bienvenida; Stitcho reacciona con su nave.
+
+Tambor del Claro: 100×76, 360 PV, dos fases, introducción dentro del escenario, onda dirigida, carga y doble tambor. Avisos antes del ataque, recuperación de 75 fotogramas, pausa al dormir e interrupción con golpes fuertes. Su derrota se guarda inmediatamente con un identificador propio; premio de 600 puntos y 40 XP. Punto de control antes del encuentro. Se corrige además la invulnerabilidad de impacto de enemigos de campaña, que impedía continuar combos tras H.
+
+## ohana-445 · Kilo V1 · cierre del personaje
+
+Kilo queda fijado con H cercano, J a distancia, K vuelo/defensa/reflejo, L daño/curación por impacto, I remate ganado al acertar H → J → H y P área rítmica con barra. La secuencia exige tres acciones distintas, dura cuatro segundos y habilita I seis segundos; un mismo golpe multiblanco o nota rebotada solo cuenta una vez. I concede diez fotogramas de evasión, avanza y golpea a los enemigos que cruza, con fuerza creciente según forma. Recibir daño o cambiar de sala cancela la secuencia. I y P tienen poses propias de anticipación, golpe ascendente y palmas a compás. K protege solo al arrancar y ya no cura: la recuperación ofensiva pertenece a L.
+
+Movimiento compartido: doble toque lateral en dieciséis fotogramas activa carrera (1,4×, tope 12), mientras se mantiene esa dirección. Soltar, invertir o bajar frena; vuelo conserva su control propio. Kilo mantiene salto único en formas 1–2, doble en formas 3–4 y triple en forma 5, además de planeo y vuelo K. HUD, ayuda, metadatos y escena de desbloqueo reflejan el kit definitivo.
+
+Cierre: especificación aceptada en docs/KILO-V1.md e instrucción de mantenimiento en AGENTS.md. El diseño de Kilo queda cerrado; los siguientes personajes reutilizan las bases compartidas sin rediseñarlo. Referencia de versión: kilo-v1.0.0.
+
+Validación V445: 1.289/1.289 pruebas unitarias; auditoría general de navegador PASS; secuencia real H-J-H, bloqueo/consumo de I, remate, carrera/detención y saltos 1/2/3 PASS; activación móvil y movimiento reducido PASS; cinco formas/cuatro evoluciones, vuelo y balsas, L/P/U, álbum/ukelele/pozos, diez salas e I/P de los diez héroes PASS. Capturas de escritorio/móvil revisadas; release gate PASS.
+
+## ohana-444 · El compás se entiende jugando
+
+P de Kilo muestra tres señales que convergen en la ventana real, confirma aciertos y fallos, y dibuja cada onda con el alcance que usa su daño. Los impactos solo producen estela cuando hacen daño. L conserva sus guardianes y curación por impacto, sustituyendo el gran disco frontal por una proyección musical sobre el suelo y estelas hacia las víctimas. El halo de invulnerabilidad queda contenido alrededor del cuerpo en vez de cruzar toda la pantalla. U conserva el compañero que atraviesa el escenario y golpea; las pruebas de dúos comprueban el combate.
+
+Se elimina la capa cosmética antigua que duplicaba los círculos de L y confundía I/P con U. El aviso general de poder pasa a un título breve sin onda de pantalla completa. La ventana tardía válida del ritmo se resuelve antes del daño de ese mismo pulso.
+
+Validación V444: 1.282/1.282 pruebas unitarias; pruebas reales de ritmo y L en escritorio/móvil y U activa sin fallos; vuelo y ambas balsas PASS; cinco formas, entrada, victoria y cuatro evoluciones PASS; release gate PASS. Capturas revisadas.
+
+## ohana-443 · Hula libre y jardín Ohana
+
+K de Kilo pasa de frenar la caída durante un segundo a vuelo dirigido de 4,5–6 segundos según forma. Permite subir, bajar, diagonales y suspensión sin pulsar controles; atraviesa repisas manteniendo el suelo sólido y las salidas. L acompaña durante 4–5 segundos, golpea una vez por enemigo y cura solo al causar daño real. Ambos efectos permanecen visibles durante su actividad.
+
+El Claro sustituye árboles de óvalos y la casita geométrica por palmeras con frondas, nervaduras, troncos anillados y una casa sobre pilotes con porche, listones y tejado de palma. Dos ilustraciones de vegetación se dibujan una vez y se reutilizan. El pelo de Kilo cae por la espalda y gana longitud en cada forma; las evoluciones muestran un cambio de escala más marcado, una revelación ascendente, rayos suaves y el ataque desbloqueado. Se respeta movimiento reducido.
+
+La corrección posterior sustituye la población de 32–37 por 10 enemigos en Claro y 6–14 en las demás salas, en grupos separados. Cada sala reserva un único enemigo especial; el Tambor del Claro ya tiene rig de patas, ojos y mazas sincronizado con el aviso y la descarga. Los demás especiales conservan sus rigs existentes para trabajarlos en su entrega. Los enemigos comunes reutilizan especies y reciben los estados reales de preparación/ataque en sus animaciones. Los encuentros de esta nueva distribución se reinician una vez al actualizar; evolución, secretos y álbumes se conservan.
+
+Las dos plataformas del Claro usan balsas de madera sin sombra ni raíces variables: horizontal de seis segundos por ciclo y vertical de ocho. I y dash conservan su impulso durante el hula.
+
+Validación V443: 1.278/1.278 pruebas unitarias; auditoría general de navegador PASS; vuelo real, suspensión, diagonales, descenso entre repisas, L prolongada y desplazamiento de ambas balsas PASS; álbum de 100, escena de 600 fotogramas, persistencia y recuperación en pozo PASS. Capturas de escritorio/móvil y guardián revisadas; cinco formas/cuatro evoluciones y recorrido de las diez salas PASS; release gate PASS.
+
+## ohana-442 · Kilo: recuerdos, crecimiento y terreno interactivo
+
+Continúa la entrega 1/10. Cada sala dispone de 100 fragmentos persistentes, con 30 en rutas altas. El álbum local muestra su cuadrícula propia sin borrar las diez historias anteriores. El progreso se conserva en partida y perfil al cambiar de sala o héroe. Completar el Claro revela el Ukelele del hogar en la bandera de entrada: todos pueden recogerlo; Kilo protagoniza una escena de diez segundos que detiene la simulación y toca una progresión de ukelele.
+
+Kilo: pelo progresivamente más largo en las cinco formas; cuatro evoluciones con motivos, actuación y frases propios (canción, familia, guardiana y floración); profundidad del aro en K/L/P/U y área musical sobre el suelo. El Claro mantiene pocas repisas e incorpora dos pozos mortales de 100 unidades y tres repisas que se agrietan, ceden a los 45 fotogramas y regresan a los cuatro segundos. Cruces comprobados desde bebé con margen adicional del 20 % en la distancia.
+
+Validación V442: 1274/1274 pruebas unitarias; auditoría general de navegador PASS; recorrido de diez salas, mapas y caídas PASS; captura de cinco formas y cuatro evoluciones de Kilo PASS; recogida de 100 fragmentos con Michi, premio universal, congelación exacta de 600 fotogramas, guardado entre héroes/salas, recuperación en pozo y salida al menú durante la escena PASS. Capturas de escritorio/móvil revisadas y release gate PASS.
+
+Diez repartos de al menos 32 enemigos: criaturas existentes y añadidas, nombres de sala, ocho roles y cuatro variantes de ritmo/alcance, conservando los avisos de ataque y el límite del director. Los enemigos añadidos lejos de cámara y del jugador suspenden sus decisiones. Los objetos de las otras salas tienen datos y presentación base; su dirección artística específica se afinará en su entrega.
+
+## ohana-441 · Entrega 1/10 en construcción: Kilo y su Claro
+
+Nuevo trazado de 16 repisas estáticas y dos transportes (horizontal y vertical), ukelele interactivo con respuesta a J/K de Kilo, recompensa persistente y corriente musical exclusiva. Se evita reconstruir la antigua escalera genérica en el Claro. Paleta rosa/coral/crema del personaje, hibiscos y aro compuesto detrás/delante del cuerpo; el área de daño se proyecta sobre el suelo. Descarte bidimensional de terreno: captura de prueba con 7 plataformas dibujadas y 11 descartadas de 18.
+
+Validación: 1269/1269 pruebas unitarias; auditoría general de navegador PASS (incluida repetición determinista tras reiniciar); transporte horizontal/vertical, canción, mapas, diez salas y escritorio/móvil PASS; release gate PASS. La auditoría del Claro se añade a CI.
+
+El documento V1-DELIVERIES.md fija las diez entregas. Esta versión abre la primera: no declara completo el kit de Kilo ni la V1 oficial. Faltan revisión integral J/K/L/I/P/U, escenas y validación de duración/balance.
+
+## ohana-440 · Escenario y movimiento de Michi
+
+Retirado el rectángulo translúcido del efecto de entrada que aparecía en la captura. Corregidos los solapes entre plataformas del trazado base, desvíos y puente de regreso. Los salientes naturales sustituyen las barras verdes; se añaden relieves, vegetación y cascadas en coordenadas del mundo. El minimapa muestra el entorno cercano y queda por encima de los controles, con el suelo largo recortado por sectores descubiertos. Las flores de salto respetan bajar con ↓: ya no devuelven al jugador automáticamente a la repisa superior.
+
+Michi: articulación independiente de patas, apoyo alterno al correr, recogida al saltar, compresión al aterrizar, cabeza/cola/orejas y amasado durante los 72 fotogramas de ronroneo. La I conserva una pose distinta a K. Se mantienen las cinco siluetas canónicas y las escenas de bienvenida.
+
+Cooperativo: terreno, WebRTC y HTTP comparten los límites por sala; las posiciones a 6880 unidades ya no se rechazan ni se recortan a 2240. La conexión WebRTC completa sigue pendiente de validar en este entorno. Las tres brasas del rito del Dragón se anclan ahora a repisas reales de la Caldera ampliada; la secuencia física 1→2→3 pasa en Chromium.
+
+Validación V440: 1265/1265 pruebas unitarias; auditoría general de navegador PASS; Michi (cinco formas × ocho poses), carrera/ronroneo reales, bajada con ↓ y rito del Dragón 1→2→3 PASS. Auditoría candidata de diez salas, atlas y escritorio/móvil PASS. Release gate PASS. Se añaden las auditorías de Michi y recorrido a CI.
+
+Pendientes para la V1 oficial: duración real de 60–90 minutos, balance completo, cierre de cinemáticas/jefe y conexión WebRTC completa entre dos jugadores (la validación de posiciones HTTP/directas sí pasa).
+
 ## ohana-451 · Sincronización WebRTC fuera de orden (J/K/L)
 
 Solucionada la carrera entre la instantánea ligera (frameNo más nuevo) y el evento fiable de ráfaga completa que llega después. Se permite fusionar únicamente la terna visual validada de Michi o Chispín si pertenece al mismo scope, la distancia es de 8 frames o menos y aún no se aceptó esa secuencia. No retrocede frameNo, combate, HP ni objetivos; rechaza paquetes caducados, repetidos o de ámbitos retirados. Node incluye pruebas de llegada inversa, ausencia de daño, expiración y anti-replay. La prueba de navegador continúa verificando los FX reales en ambos jugadores.

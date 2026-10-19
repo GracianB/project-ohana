@@ -1,5 +1,5 @@
 export const CAMP_HEROES = Object.freeze({
- kilo:{x:170,y:285,role:'Melodía y flotación',route:'Corrientes de polen y mecanismos musicales',prop:'music',lines:['La aventura empieza con una nota.','¿Quién ha convertido mi ukelele en una tostadora?','Vale. Ensayamos una vez más.']},
+ kilo:{x:170,y:285,role:'Melodía y flotación',route:'Corrientes de polen y mecanismos musicales',prop:'music',lines:['Una isla, una canción y un sitio para ti.','Stitcho… ¡la nave también sigue el compás!','Ninguna melodía está sola si la compartes.']},
  stitcho:{x:325,y:285,role:'Acrobacias y agarre',route:'Paredes, trepa y recorridos verticales',prop:'kite',lines:['He encontrado un atajo. Está arriba.','¡Era una cometa! ¡ERA UNA COMETA!','Aterrizaje perfecto. Casi.']},
  chispin:{x:905,y:520,role:'Velocidad y electricidad',route:'Nubes eléctricas y circuitos de impulso',prop:'spark',lines:['Respira. Escucha. Hasta el rayo tiene su calma.','Ups. He meditado tan fuerte que he encendido la isla.','Puedo partir el cielo. Pero primero, un abrazo.']},
  cat:{x:400,y:520,role:'Precisión y salto lunar',route:'Saltos felinos y secretos a contraluz',prop:'moon',lines:['Esa mariposa sabe algo.','¡La tenía! Bueno, casi la tenía.','Estoy vigilando. No estoy durmiendo.']},

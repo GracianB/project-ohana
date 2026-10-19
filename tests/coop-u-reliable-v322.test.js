@@ -19,7 +19,7 @@ test("V322 · six real U beginnings use both WebRTC paths only when forced",()=>
   const f=capture(hero),wire=transport();
   assert.ok(f.familyDuet&&f.familyDuet.hero===hero);
   assert.equal(sendPeerEffectsWithReliableDuet(wire,f,true),true);
-  assert.deepEqual(wire.sent.map(x=>x.mode),["fast","reliable"]);
+  assert.deepEqual(wire.sent.map(x=>x.mode),["reliable","fast"]);
   assert.ok(wire.sent.every(x=>x.kind==="effects"&&x.payload===f));
   assert.ok(JSON.stringify(f).length<=8500);
  }
@@ -63,7 +63,7 @@ test("V322 · only successful durable sends acknowledge the U; quick successes s
  const quickOnly=transport(true,false);
  assert.equal(sendPeerEffectsWithReliableDuet(quickOnly,f,true,()=>acknowledged++),true);
  assert.equal(acknowledged,0,"the unreliable lane must not mark U delivered");
- assert.deepEqual(quickOnly.sent.map(x=>x.mode),["fast","reliable"]);
+ assert.deepEqual(quickOnly.sent.map(x=>x.mode),["reliable","fast"]);
  const retry=transport(false,true);
  assert.equal(sendPeerEffectsWithReliableDuet(retry,f,true,()=>acknowledged++),true);
  assert.equal(acknowledged,1,"first ordered acknowledgment occurs once");
@@ -126,9 +126,9 @@ test("V448 · native Chispin J/K/L visual trio survives loss of latest WebRTC fr
  assert.deepEqual(frame.chispinFx.map(e=>e.kind),["chain","trail","storm"]);
  const link=transport(false,true);
  assert.equal(sendPeerEffectsWithReliableDuet(link,frame,true),true);
- assert.deepEqual(link.sent.map(x=>x.mode),["fast","reliable"]);
+ assert.deepEqual(link.sent.map(x=>x.mode),["reliable","fast"]);
  const client={roomId:"hub",coopPeerEffects:null,enemies:[{hp:180}]};
- assert.equal(applyPeerEffects(client,link.sent[1].payload),true);
+ assert.equal(applyPeerEffects(client,link.sent[0].payload),true);
  assert.deepEqual(client.coopPeerEffects.chispinFx.map(e=>e.kind),["chain","trail","storm"]);
  assert.equal(client.enemies[0].hp,180);
  assert.ok(client.coopPeerEffects.chispinFx.every(e=>e.dmg===undefined&&e.hit===undefined));
@@ -150,9 +150,9 @@ test("V449 · real Michi J/K/L FX survive a dropped quick WebRTC frame without t
  assert.deepEqual(frame.michiFx.map(f=>f.kind),["yarn","purr","wisp"]);
  const wire=transport(false,true);
  assert.equal(sendPeerEffectsWithReliableDuet(wire,frame,true),true);
- assert.deepEqual(wire.sent.map(e=>e.mode),["fast","reliable"]);
+ assert.deepEqual(wire.sent.map(e=>e.mode),["reliable","fast"]);
  const client={roomId:"hub",coopPeerEffects:null,enemies:[{hp:220}]};
- assert.equal(applyPeerEffects(client,wire.sent[1].payload),true);
+ assert.equal(applyPeerEffects(client,wire.sent[0].payload),true);
  assert.deepEqual(client.coopPeerEffects.michiFx.map(f=>f.kind),["yarn","purr","wisp"]);
  assert.equal(client.enemies[0].hp,220);
  assert.ok(client.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined));
@@ -223,7 +223,9 @@ test("V451 · delayed reliable Michi and Chispin trios survive newer WebRTC fast
   for(let n=0;n<35;n++)advancePeerEffects(receiver);
   assert.equal(receiver.coopPeerEffects[key].length,0,"late restored FX must expire normally");
   assert.equal(applyPeerEffects(receiver,delayed),false,"expired packet may not resurrect visuals");
-  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,20,"epoch-451")),true);
+  // V453 permits 32 frames of delayed cosmetic catch-up after RTC recovery.
+  // A reliable packet 41 frames behind must still be rejected.
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,50,"epoch-451")),true);
   assert.equal(applyPeerEffects(receiver,{...delayed,frameNo:9}),false,"out-of-window packet rejected");
   assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,1,"other-epoch")),true);
   assert.equal(applyPeerEffects(receiver,delayed),false,"retired scope cannot inject FX");

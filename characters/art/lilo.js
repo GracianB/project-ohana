@@ -447,7 +447,25 @@ function solve(pose, d, f) {
   if(pose.kiloPerformance){
     const b=pose.kiloPerformance;
     const blend=b.kind==='entrance'?Math.min(1,b.time*4,Math.max(0,(1.6-b.time)*4)):1;
-    applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind!=='remate')applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind==='remate'){
+      const frame=b.time*60,hit=frame>=7&&frame<=20,wind=frame<6;
+      r.uke='back';r.fx=null;r.paci=false;r.armOver=true;r.backOver=false;r.mood=hit?'happy':'normal';r.mouth=hit?'open':'smile';
+      r.lean=wind?-.12:hit?.26:.08;r.headRot=hit?-.09:.04;r.oy+=wind?4:hit?-2:0;
+      r.handF=wind?[8,sy+10]:hit?[al*.9,sy-al*.65]:[16,sy+4];r.handB=[-al*.8,sy+al*.5];
+      r.footF=wind?[8,-2]:[15,-8];r.footB=wind?[-8,0]:[-17,-2];r.hairLag=pose.reduceMotion?0:.8;r.skirt=hit?.7:.15;
+    }
+    if(b.kind==='finale'){
+      const beat=(b.time*60)%30,clap=Math.max(0,1-Math.min(beat,30-beat)/8);
+      r.handF=[18-12*clap,sy+5-8*clap];r.handB=[-18+17*clap,sy+5-8*clap];r.uke='back';r.mood='happy';r.mouth=clap>.5?'open':'smile';
+    }
+    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[12,sy+7];r.handF=[19,sy+14+Math.sin(b.time*9)*3];r.lean=.03;r.mood="closed";r.mouth="smile";
+     if(b.time<2){r.uke='hand';r.handF=[8,sy+15];r.headRot=-.08;}
+     if(b.time>8){r.uke='back';r.handF=[3,sy+5];r.handB=[-20,sy+6];r.headRot=.12;}
+    }
+    if(b.kind==='family'){r.handB=[-5-al,sy+3];r.handF=[4+al,sy+3];r.mood='happy';r.headRot=Math.sin(b.time*2)*.08;}
+    if(b.kind==='guardian'){r.staffUp=true;r.handF=[hx+hr*.8,sy-16];r.handB=[0,sy+6];r.lean=-.04;r.mood='normal';}
+    if(b.kind==='bloom'){r.handF=[5,sy+5];r.handB=[-3,sy+7];r.mood='closed';r.headRot=.08;r.hairUp=.6;}
     if(b.kind==='entrance'&&b.time<.45){r.handF=[hx+hr*.7,sy-10];r.headRot=-.08;r.wink=true;}
   } else if(pose.kiloWelcome&&!pose.kiloWelcome.reduced){
     const b=pose.kiloWelcome,blend=Math.min(1,b.strum*.5+b.bloom*.7+b.finale);
@@ -466,20 +484,14 @@ function ponytail(ctx, R, pose, f, hr, r) {
     ctx.restore();
     return;
   }
-  const turn = -2.1 + r.hairUp * 1.4 - pose.sway * 0.9 + pose.bounce * 0.6 + (r.hairLag || 0);
-  const bx = -hr * 0.5, by = -hr * 0.82;
-  const len = hr * (f === 4 ? 1.9 : 1.55);
-  R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
-    (k) => turn + (r.hairLag || 0) * k * 0.8 + Math.sin(t * 0.08 - k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
-  if(f===2){
-    for(let i=0;i<4;i++)R.ellipse(ctx,-hr*1.08+Math.sin(t*.06+i*.5)*2,-hr*.5+i*hr*.3,hr*.15,hr*.22,HAIR,{lw:1.7});
-  }
-  if (f === 4) {
-    for (let i = 0; i < 2; i++) {
-      R.tail(ctx, -hr * 0.8, -hr * 0.1 + i * hr * 0.3, hr * 0.8, -2.4 - i * 0.3,
-        (k) => Math.sin(t * 0.09 + i * 2 + k * 4) * 1.2 + 0.8, hr * 0.16, hr * 0.05, HAIR, { segments: 6 });
-    }
-  }
+  const len=hr*[.55,1.9,2.5,3.1,3.7][f],bx=-hr*.63,by=-hr*.42;
+  const wind=pose.reduceMotion?0:Math.sin(t*.055)*3+(r.hairLag||0)*12;
+  ctx.save();ctx.fillStyle=HAIR;ctx.strokeStyle=R.INK;ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(bx+hr*.3,by-hr*.3);ctx.bezierCurveTo(bx-hr*.7,by-hr*.2,bx-hr*.8+wind,by+len*.5,bx-hr*.15+wind,by+len);
+  ctx.bezierCurveTo(bx+hr*.15+wind,by+len*.83,bx+hr*.43,by+len*.3,bx+hr*.3,by-hr*.3);ctx.fill();ctx.stroke();
+  ctx.strokeStyle=HAIR_HI;ctx.globalAlpha=.6;ctx.lineWidth=1.5;
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(bx-2-i*3,by);ctx.bezierCurveTo(bx-hr*.4-i*2,by+len*.35,bx-hr*.3+wind,by+len*.7,bx+wind-i*2,by+len*(.83+i*.04));ctx.stroke();}
+  ctx.restore();
 }
 
 function head(ctx, R, pose, f, hr, r) {

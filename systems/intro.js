@@ -1,3 +1,4 @@
+import {shouldSkipCoopWelcome} from './coop-welcome.js';
 import {drawOhanaCoast,drawEnemyIslet} from './ohana-panorama.js';
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // ============================================================================
@@ -65,6 +66,8 @@ export function playTitleIntro(options = {}) {
     el?.classList.remove("show");
     el?.setAttribute("aria-hidden", "true");
   };
+  let session=null;try{session=sessionStorage.getItem("ohana-coop-session");}catch{}
+  if(shouldSkipCoopWelcome(location.search,session,!!options.replay)){finishClasses();return;}
   if (!el) {
     document.body.classList.remove("intro-pending");
     document.body.classList.add("intro-complete");

@@ -3714,3 +3714,6 @@ body.playing .ability-slot {
   #char-select #menu-row { margin-top:4px; }
   #char-select .legal { margin-top:5px; }
 }
+
+/* The ten-second discovery scene keeps the stage clear of combat chrome. */
+body.relic-cinema > :not(#game):not(#pause-overlay):not(#a11y-game-announcements):not(script):not(style){visibility:hidden!important;pointer-events:none!important}

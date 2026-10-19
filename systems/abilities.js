@@ -1,3 +1,5 @@
+import {recordKiloHit,kiloComboStatus,consumeKiloCombo} from './kilo-combo.js';
+import {startKiloFlight,kiloFlightDuration} from './kilo-flight.js';
 import {rhythmPress} from "./hero-combos.js";
 import {chargeFinisher,consumeFinisher,finisherCharge} from "./finisher.js";
 import {POWER_LEVELS,powerAbility,castEvolutionAttack,summonDanceFleet,startBattleCompanion,updateEvolutionAttacks,drawEvolutionAttacks} from './evolution-attacks.js';
@@ -161,6 +163,7 @@ const now = abilityNow(game);
 p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 if(index===5&&finisherCharge(p)<100)return false;
+if(p.id==="kilo"&&index===4&&!kiloComboStatus(game).ready){game.nums?.add?.(cx(p),p.y-32,"I · ACIERTA H → J → H","#ffe49b");return false;}
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
 // Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
@@ -175,6 +178,7 @@ const chainCd = index < 3
 : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
 const dur = baseCd / (1 + evo * 0.12) * chainCd;
 if(index===5)consumeFinisher(p);
+if(p.id==="kilo"&&index===4)consumeKiloCombo(game);
 p.cds[id] = index===5 ? now : now + dur;
 p.cdDur[id] = dur;
 p._chargeAction=(p._chargeAction||0)+1;
@@ -185,7 +189,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2 && p.id !== "chispin" && !(p.id === "stitcho" && id === "caos")) {
+if (index === 2 && !['chispin','kilo'].includes(p.id) && !(p.id === "stitcho" && id === "caos")) {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -203,6 +207,7 @@ if(bondGain){try{persistUBonds(globalThis.localStorage,p.id,p.uBonds);}catch{}}
 if (index > 3) castEvolutionAttack(game,index);
 else if (index === 3) castSupreme(game, p, flow);
 else if (!cuernoKey) fn(game, p, evo);
+game.onHeroAbility?.(p,index);
 if (signatureLink) game._combatFlow = { ...game._combatFlow, signature: signatureLink.name };
 
 if (flow.label && index < 3) {
@@ -576,6 +581,7 @@ S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0; S.p._stitchoRollBounces = 0;
 S.p = p;
 S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
+S.p._kiloOhanaT=0;S.p._kiloFlightT=0;S.p._kiloFlightVX=0;S.p._kiloFlightVY=0;
 FX.length = 0;
 }
 
@@ -620,6 +626,7 @@ FX.length = 0;
 S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 if (S.p) S.p._stitchoRollBounces = 0;
 if (S.p) {
+S.p._kiloFlightT=0;S.p._kiloOhanaT=0;
 S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
 S.p._kiloRhythm = null;
 S.p._abilMove = null;
@@ -677,7 +684,7 @@ if (p._specialFlightT > 0) {
   if ((input?.t || 0) % 4 === 0) game.fx.emit(cx(p) - (p.facing || 1) * 10, cy(p), { color: "#fff2a8", count: 3, size: 2.8, speed: 1.4, life: 16, star: true });
 }
 }
-if (S.hover > 0) {
+if (S.hover > 0 && !(p._kiloFlightT>0)) {
 S.hover--;
 p.vy = Math.min(p.vy, -0.42);
 }
@@ -1182,15 +1189,15 @@ boom(g, h.x, h.y, "#ffb347", 8, { star: true });
 },
 hula(g, p, evo) {
 const petals = spendKiloPetals(g);
-S.hover = 60;
-if (p.vy > 0) p.vy = -2;
+startKiloFlight(p,evo);
+g.nums?.add?.(cx(p),p.y-48,'WASD / FLECHAS · VUELO LIBRE','#ffe3a6',true);
 add({
   kind: "hula",
-  life: 96,
+  life: kiloFlightDuration(evo),
   age: 0,
   r: 46 + evo * 6 + petals * 8,
   dmg: (16 + petals * 3.5) * pw(p),
-  heal: evo >= 3 ? 3 : 0,
+  heal: 0,
   hit: new Set(),
   pulse: 0,
   evo,
@@ -1201,13 +1208,13 @@ ohana(g, p, evo) {
 const god = evo >= 4;
 const petals = spendKiloPetals(g);
 const heal = 20 + evo * 8 + petals * 3;
-healPlayer(p, heal);
-g.nums.add(cx(p), p.y - 10, "+" + heal, "#6f6", true);
 const R = 240 + evo * 35 + petals * 25;
-add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: 44, hit: new Set(), n: 10 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: god ? 5 : 0 });
-g.flash = Math.max(g.flash || 0, god ? 10 : 6);
+const duration=180+evo*30;
+p._kiloOhanaT=duration;
+add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: duration, duration, hit: new Set(), n: 8 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: 6+evo, healBudget:heal });
+g.flash = Math.max(g.flash || 0, 2);
 g.flashColor = "#ffe9a0";
-g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
+g.shake = Math.min(8, (g.shake || 0) + (god ? 3 : 2));
 if (god) g.hitstop = Math.min(5, Math.max(g.hitstop || 0, 3));
 boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
 },
@@ -1840,13 +1847,12 @@ for (const pr of g.projectiles) {
   boom(g, px, py, "#ff5ad5", 5, { star: true, up: 0.4, speed: 2.5 });
 }
 
-if (f.pulse % 24 === 0) {
+if (f.pulse<=96 ? f.pulse % 24 === 0 : f.pulse % 48 === 0) {
   f.hit.clear();
   for (const e of g.enemies) {
     if (!canHit(e) || f.hit.has(e)) continue;
     if (Math.hypot(cx(e) - cx(p), cy(e) - cy(p)) > rad + Math.max(e.w, e.h) / 2) continue;
-    f.hit.add(e);
-    hitEnemy(g, e, f.dmg, {
+    const landed=hitEnemy(g, e, f.dmg, {
       kx: Math.sign(cx(e) - cx(p)) * 7 || p.facing,
       ky: -5,
       stun: 20,
@@ -1855,6 +1861,8 @@ if (f.pulse % 24 === 0) {
       hitstop: 0,
       xp: 1,
     });
+    if(!landed)continue;
+    f.hit.add(e);
     if (f.heal && p.health < p.maxHealth) {
       p.health = Math.min(p.maxHealth, p.health + f.heal);
       g.nums.add(cx(p), p.y - 18, "+" + f.heal, "#7de87a");
@@ -1862,7 +1870,7 @@ if (f.pulse % 24 === 0) {
   }
   boom(g, cx(p), cy(p), "#ff8adf", 5, { star: true, up: 1 });
 }
-armor(p, 2);
+if(f.pulse<=12)armor(p, 2);
 return f.life > 0;
 },
 note(g, f) {
@@ -1896,7 +1904,7 @@ note(g, f) {
   for (const e of g.enemies) {
     if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
       f.hit.add(e);
-      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) earnKiloPetal(g, f.rhythmAttack);
+      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) {earnKiloPetal(g, f.rhythmAttack);recordKiloHit(g,"J",f.rhythmAttack);}
     }
   }
  return f.life > 0;
@@ -1904,17 +1912,22 @@ note(g, f) {
 
 ohana(g, f, p) {
 f.life--;
+f.impacts=(f.impacts||[]).filter(v=>--v.life>0);
+p._kiloOhanaT=f.life;
 f.x = cx(p); f.y = cy(p);
 f.r = Math.min(f.max, f.r + f.max / 30);
 for (const e of g.enemies) {
   if (f.hit.has(e) || !canHit(e)) continue;
   if (Math.hypot(cx(e) - f.x, cy(e) - f.y) < f.r) {
+    const landed=hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
+    if(!landed)continue;
     f.hit.add(e);
-    hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
+    f.impacts||=[];if(f.impacts.length<16)f.impacts.push({x:cx(e),y:cy(e),life:12});
     boom(g, cx(e), cy(e), "#fff1b0", 8, { star: true, up: 2 });
-    if (f.lifesteal && p.health < p.maxHealth) {
-      p.health = Math.min(p.maxHealth, p.health + f.lifesteal);
-      g.nums.add(cx(p), p.y - 18, "+" + f.lifesteal, "#7de87a");
+    if (f.healBudget>0 && p.health < p.maxHealth) {
+      const heal=Math.min(f.lifesteal,f.healBudget,p.maxHealth-p.health);f.healBudget-=heal;
+      healPlayer(p,heal);
+      g.nums.add(cx(p), p.y - 18, "+" + heal, "#7de87a");
     }
   }
 }
@@ -2986,21 +2999,21 @@ ctx.ellipse(f.x - cam.x, f.y - cam.y, 6 + k * 26, 2 + k * 6, 0, 0, TAU);
 ctx.stroke();
 },
 hula(ctx, f, cam, t, g, p) {
-const x = cx(p) - cam.x, y = cy(p) - cam.y;
+const x = cx(p) - cam.x, y = p.y+p.h - cam.y;
 const k = Math.min(1, f.life / 10);
 ctx.globalAlpha = 0.25 * k;
 ctx.fillStyle = "#ff5ad5";
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.fill();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.fill();
 ctx.globalAlpha = 0.9 * k;
 ctx.strokeStyle = "#ffb3ee";
 ctx.lineWidth = 2;
-ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r, 0, 0, TAU); ctx.stroke();
+ctx.beginPath(); ctx.ellipse(x, y, f.r, f.r*.24, 0, 0, TAU); ctx.stroke();
 // Four stationary hibiscus accents mark the four dance beats.
 const n = 4;
 const beat = Math.floor((96-f.life)/24)%4;
 for (let i = 0; i < n; i++) {
   const a = (i / n) * TAU - Math.PI/2;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
+  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r*.24;
   ctx.save();
   ctx.translate(px, py);
   ctx.rotate(a + Math.PI / 2);
@@ -3085,34 +3098,19 @@ ctx.font = "800 22px Outfit,sans-serif";
 ctx.textAlign = "center";
 ctx.fillText(name, x, y - r - 16);
 },
-ohana(ctx, f, cam, t) {
-const x = f.x - cam.x, y = f.y - cam.y;
-const k = f.life / 44;
-ctx.globalAlpha = 0.18 * k;
-ctx.fillStyle = "#ffe9a0";
-ctx.beginPath(); ctx.arc(x, y, f.r, 0, TAU); ctx.fill();
-ctx.globalAlpha = Math.min(1, k * 1.6);
-ctx.strokeStyle = "#ffd36a";
-ctx.lineWidth = 10 * k + 2;
-ctx.beginPath(); ctx.arc(x, y, f.r, 0, TAU); ctx.stroke();
-ctx.strokeStyle = "#fff";
-ctx.lineWidth = 2;
-ctx.beginPath(); ctx.arc(x, y, Math.max(0, f.r - 6), 0, TAU); ctx.stroke();
-for (let i = 0; i < f.n; i++) {
-  const a = (i / f.n) * TAU + t * 0.03;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
-  glow(ctx, px, py, 22, "#fff4c0", 0.7 * k);
-  ctx.globalAlpha = Math.min(1, k * 1.6);
-  ctx.fillStyle = "#fffbe8";
-  ctx.beginPath();
-  ctx.arc(px, py - 4, 8, Math.PI, 0);
-  ctx.lineTo(px + 8, py + 6);
-  for (let j = 0; j < 3; j++) ctx.quadraticCurveTo(px + 8 - j * 5.3 - 2.6, py + 11 + Math.sin(t * 0.3 + j + i) * 2, px + 8 - (j + 1) * 5.3, py + 6);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "#4a3a20";
-  ctx.beginPath(); ctx.arc(px - 3, py - 4, 1.4, 0, TAU); ctx.arc(px + 3, py - 4, 1.4, 0, TAU); ctx.fill();
+ohana(ctx, f, cam, t, g, p) {
+const x=f.x-cam.x,y=f.y-cam.y,floor=p?p.y+p.h-cam.y:y+24,k=Math.min(1,f.life/36);
+ctx.save();ctx.globalAlpha=.26*k;ctx.strokeStyle='#ffd36a';ctx.lineWidth=2;
+// A ground projection leaves the body and the scenery readable.
+for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.beginPath();ctx.ellipse(x,floor,f.r,f.r*.2,0,a+.12,a+1.15);ctx.stroke();}
+for(let i=0;i<f.n;i++){
+ const a=i/f.n*TAU+(g?.reduceMotion?0:t*.025),px=x+Math.cos(a)*f.r,py=floor+Math.sin(a)*f.r*.2-18;
+ ctx.globalAlpha=.8*k;ctx.fillStyle='#fffbe8';ctx.beginPath();ctx.arc(px,py-4,7,Math.PI,0);ctx.lineTo(px+7,py+6);
+ ctx.quadraticCurveTo(px+3,py+10,px,py+6);ctx.quadraticCurveTo(px-3,py+10,px-7,py+6);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#4a3a20';ctx.beginPath();ctx.arc(px-2.5,py-4,1.2,0,TAU);ctx.arc(px+2.5,py-4,1.2,0,TAU);ctx.fill();
 }
+for(const impact of f.impacts||[]){const tx=impact.x-cam.x,ty=impact.y-cam.y;ctx.globalAlpha=k*impact.life/12;ctx.strokeStyle='#fff0b0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+tx)/2,Math.min(y,ty)-55,tx,ty);ctx.stroke();}
+ctx.restore();
 },
 chain(ctx,f,cam,t,g){drawChispaChain(ctx,f,cam,t,!!g?.reduceMotion);},
 trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},

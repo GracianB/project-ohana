@@ -416,11 +416,11 @@ export const Surprises = {
       ctx.globalCompositeOperation = "lighter";
       for (let i = 0; i < rings.length; i++) {
         const ring = rings[i];
-        ctx.globalAlpha = ring.alpha * Math.max(0, ring.life / ring.maxLife);
+        ctx.globalAlpha = ring.alpha * Math.max(0, ring.life / ring.maxLife) * .35;
         ctx.strokeStyle = i % 2 ? "#ffffff" : "#ffe66a";
         ctx.lineWidth = game.reduceMotion ? 2 : 3;
         ctx.beginPath();
-        ctx.arc(cx, cy, ring.r, 0, Math.PI * 2);
+        ctx.arc(cx, cy, Math.min(ring.r,p.h*1.4+20), 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.restore();

@@ -1,3 +1,4 @@
+import {worldBounds} from "../../systems/world-bounds.js";
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
 import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
 import { isRtcCandidateSignal } from "../../systems/coop-v108-direct.js";
@@ -9,8 +10,6 @@ const MOVE_MIN_INTERVAL_MS = 240;
 const PLAYER_HEARTBEAT_MS = 4_000;
 const PLAYER_STALE_MS = 15_000;
 const ACTION_HISTORY_LIMIT = 128;
-const ENGINE_WORLD_W = 2240;
-const ENGINE_WORLD_H = 1260;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export class RoomError extends Error {
@@ -292,8 +291,9 @@ export function createRoomService(store, options = {}) {
             state.combat.enemies = [];
             state.combat.boss = null;
           }
-          player.x = finitePayloadNumber(payload?.positionX,player.x,0,ENGINE_WORLD_W);
-          player.y = finitePayloadNumber(payload?.positionY,player.y,0,ENGINE_WORLD_H);
+          const bounds=worldBounds(String(payload?.worldRoomId||player.worldRoomId||"beach"))||worldBounds("beach");
+          player.x = finitePayloadNumber(payload?.positionX,player.x,0,bounds.width);
+          player.y = finitePayloadNumber(payload?.positionY,player.y,0,bounds.height);
           player.facing = Number(payload?.facing) < 0 ? -1 : 1;
           player.evolution = Math.max(0, Math.min(4, Math.floor(Number(payload?.evolution) || 0)));
           player.experience = Math.max(0, Number(payload?.experience) || 0);

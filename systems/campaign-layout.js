@@ -1,3 +1,7 @@
+import {installRoomCast} from './room-cast.js';
+import {installKiloGrove} from "./kilo-grove.js";
+import {tidyPlatforms} from "./platform-layout.js";
+import {worldBounds} from "./world-bounds.js";
 // World geometry is also the source for falls, checkpoints and the local map.
 const PALETTES={hub:'#9cdb9a',beach:'#f5d595',jungle:'#7ed399',cave:'#95b9ef',lab:'#80e1df',ridge:'#d9e8fb',space:'#c8a5f5',reef:'#7edbd8',volcano:'#ffad77',boss:'#d5aec6'};
 const SECTORS={
@@ -18,7 +22,7 @@ export function groundGaps(plats,width){
 }
 export function installCampaign(rooms){
  for(const r of Object.values(rooms)){
-  r.width=r.id==='hub'?4200:r.boss?3360:7200;r.height=1260;r.color=PALETTES[r.id];
+  const bounds=worldBounds(r.id);r.width=bounds.width;r.height=bounds.height;r.color=PALETTES[r.id];
   const names=SECTORS[r.id]||(r.boss?['Umbral de raíces','Antesala de la Reina','Trono del Nido']:['Claro de la familia','Sendero del viento','Mirador Ohana']);
   r.sectors=names.map((name,i)=>({id:`${r.id}-${i}`,name,x:i*r.width/names.length,w:r.width/names.length,role:['explore','combat','platform','secret','rest'][i%5]}));
   if(!r.boss){
@@ -51,6 +55,7 @@ export function installCampaign(rooms){
    // The other two embers use actual ground and the third sector's ledge.
    r.plats.push([5030,814,240,22],[5270,734,240,22]);
   }
+  r.plats=tidyPlatforms(r.plats.map(([x,y,w,h])=>({x,y,w,h}))).map(p=>[p.x,p.y,p.w,p.h]);
   r.hazards=groundGaps(r.plats,r.width).map((gap,i)=>({id:({beach:"reef-drop",jungle:"caldera-drop",ridge:"hub-drop-ridge",space:"hub-drop-space",volcano:"magma-pit"}[r.id]||`${r.id}-fall`)+ (i?`-${i}`:""),x:gap.x,y:gap.y-36,w:gap.w,h:r.height-gap.y+200,type:r.doors.down?'transfer':'death',dest:r.doors.down||null,label:r.doors.down?rooms[r.doors.down]?.short||r.doors.down:r.id==='volcano'?'MAGMA MORTAL':'ABISMO MORTAL',color:r.doors.down?'#7eeaff':'#ff765f',...(r.id==='volcano'?{heroEscape:'dragon'}:{})}));
   // Large drop mouths have visible stepping stones; missing one still takes the labelled route.
   if(!r.boss)for(const h of r.hazards)if(h.w>140)for(let x=h.x+45;x<h.x+h.w-40;x+=105)r.plats.push([x,h.y-25,90,22]);
@@ -59,6 +64,8 @@ export function installCampaign(rooms){
   const top=r.plats.filter(p=>p[3]<40).sort((a,b)=>a[1]-b[1])[0];
   r.upExit=r.doors.up?{x:top?.[0]||r.width/2,w:top?.[2]||280,dest:r.doors.up}:null;
   if(r.upExit)for(let y=1054;y>=14;y-=80)r.plats.push([r.upExit.x,y,r.upExit.w,22]);
+  if(r.id==='hub')installKiloGrove(r);
+  installRoomCast(r);
  }
  return rooms;
 }

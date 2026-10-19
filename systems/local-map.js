@@ -11,11 +11,15 @@ export function localMapView(g,viewW=1280){
  return {room:r.id,start,end:start+span,span,cx,progress:clamp(cx/r.width,0,1),
   sector,known,nextCheckpoint:next,remaining:next?Math.max(0,Math.round(next.x-cx)):null};
 }
+export function localMapBounds(g,viewW=1280,viewH=720){
+ const v=localMapView(g,viewW);if(!v)return null;const small=viewW<600,w=small?176:298,h=small?98:140;
+ return {w,h,x:viewW-w-14,y:Math.max(12,viewH-h-(small?184:112)),spanX:v.span,spanY:g.roomDef.height,left:v.start,top:0};
+}
 export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
  if(!ctx)return;
  const v=localMapView(g,viewW);if(!v)return;
  const r=g.roomDef,p=g.player,small=viewW<600;
- const w=small?176:298,h=small?98:140,x=viewW-w-14,y=Math.max(12,viewH-h-(small?132:18));
+ const {w,h,x,y}=localMapBounds(g,viewW,viewH);
  const left=x+12,right=x+w-12,top=y+34,bottom=y+h-24,plotH=bottom-top;
  const sx=(right-left)/v.span,py=n=>top+4+clamp(n/Math.max(1,r.height),0,1)*(plotH-8),px=n=>left+(n-v.start)*sx;
  const seen=x=>r.sectors?.some(s=>x>=s.x&&x<s.x+s.w&&v.known.has(s.id))||false;

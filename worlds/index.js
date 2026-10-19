@@ -15,7 +15,7 @@ export const WORLDS = [
   { id: "space",   name: "Espacio",   ground: "#161628", groundTop: "#7a5cff", edge: "#9a7cff", sky: ["#03030c", "#0b0a24", "#191542"] },
   { id: "lab",     name: "Alien Lab", ground: "#15202a", groundTop: "#3ee0ff", edge: "#7af3ff", sky: ["#050d13", "#0a1a24", "#123646"] },
   { id: "aquatic", name: "Abismo",    ground: "#0a3a58", groundTop: "#3ec8e8", edge: "#8af8ff", platOutline: "rgba(150,245,255,.85)", sky: ["#010c1c", "#042848", "#0a4a78"] },
-  { id: "grove",   name: "Claro",     ground: "#3a6a32", groundTop: "#7ec85a", edge: "#b8f090", sky: ["#6eb8e8", "#a8d8f0", "#e8f4c8"] },
+  { id: "grove",   name: "Claro",     ground: "#795b55", groundTop: "#b6c98a", edge: "#ffe9a8", sky: ["#9ba3d0", "#e4bdd0", "#fff0cb"] },
   { id: "boss",    name: "Nido",      ground: "#24131d", groundTop: "#6d3341", edge: "#ff8a6e", sky: ["#080612", "#1b0d1d", "#4b1726"] },
   { id: "cave",    name: "Cueva Azul", ground: "#17223a", groundTop: "#7194c8", edge: "#a9cfff", sky: ["#030817", "#0a1730", "#172c4f"] },
   { id: "ridge",   name: "Cumbre",     ground: "#566471", groundTop: "#dceaf0", edge: "#f6fbff", sky: ["#4e86b8", "#92c7e6", "#eef8ff"] }

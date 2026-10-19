@@ -15,7 +15,9 @@ const entries=[...source.slice(pre,stop).matchAll(/"\.\/([^"?]+)(?:\?v=" \+ VERS
 const values={};
 for(const name of entries){
   if(!fs.existsSync(name))throw new Error("Missing static precache resource: "+name);
-  const data=fs.readFileSync(name);
+  let data=fs.readFileSync(name);
+  // Git publishes text with LF. Canonicalize before hashing on Windows too.
+  if(/\.(?:js|mjs|css|html|json|svg|txt)$/.test(name)&&data.includes(Buffer.from("\r\n"))){fs.writeFileSync(name,data.toString("utf8").replace(/\r\n/g,"\n"));data=fs.readFileSync(name); }
   values[name]=createHash("sha1").update("blob "+data.length)
     .update(Buffer.from([0])).update(data).digest("hex");
 }

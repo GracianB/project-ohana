@@ -25,7 +25,7 @@ export const ALL_ROSTER = [
     color: "#eb554a",
     speed: 3.6, jumpPower: 11.4, maxJumps: 1, health: 80, w: 20, h: 28,
     abilities: ["ukulele", "hula", "ohana"],
-    passive: { id: "float", name: "Hula flotante", desc: "Mantén salto en el aire para caer despacio. En Kilo Flor Solar, vuela un momento. El polen se recarga en el suelo." },
+    passive: { id: "float", name: "Pasos de aloha", desc: "Doble toque lateral para correr. Mantén salto para planear; vuelve a pulsarlo para saltos extra: doble desde Ohana y triple en Flor Solar. K permite volar en ocho direcciones." },
     evoNames: ["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "Kilo Flor Solar"],
     forms: [
       { name: "Kilo Bebé", color: "#ffacc2", speed: 3.6, jump: 11.4, jumps: 1, hp: 80, w: 20, h: 28 },

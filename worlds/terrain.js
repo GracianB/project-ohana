@@ -1,3 +1,4 @@
+import {drawNaturalLedge} from "./natural-ledges.js";
 
 function plate(ctx, x, y, w, h, r) {
   const rad = Math.max(0, Math.min(r, h / 2, w / 2));
@@ -94,6 +95,14 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   if (!platformInView(x, w, drawingWidth(ctx))) return;
   const id = world.id || "grove";
   const thin = h <= 24;
+  if(plat._campaignLift){
+    ctx.save();ctx.fillStyle='#765038';ctx.fillRect(x,y+5,w,h-5);
+    ctx.fillStyle='#e3b875';ctx.fillRect(x,y,w,6);ctx.strokeStyle='#b88750';ctx.lineWidth=2;
+    for(let i=16;i<w;i+=24){ctx.beginPath();ctx.moveTo(x+i,y+6);ctx.lineTo(x+i,y+h);ctx.stroke();}
+    ctx.strokeStyle='#e9d5a0';ctx.lineWidth=3;for(const i of [12,w-12]){ctx.beginPath();ctx.moveTo(x+i,y+3);ctx.lineTo(x+i,y+h-2);ctx.stroke();}
+    ctx.restore();return;
+  }
+  if(thin&&drawNaturalLedge(ctx,plat,world,cam,t))return;
 
   ctx.save();
   ctx.fillStyle = "rgba(0,0,0,.28)";
@@ -263,8 +272,16 @@ function dress(ctx, world, cam, t) {
   }
   ctx.restore();
 }
-export function drawTerrain(ctx, platforms, world, cam, t) {
+export function terrainInView(p,cam,view){
+ return p.x+p.w>=cam.x-100&&p.x<=cam.x+view.width+100&&p.y+Math.max(p.h,110)>=cam.y&&p.y<=cam.y+view.height+30;
+}
+export function drawTerrain(ctx, platforms, world, cam, t, view) {
   drawChasms(ctx, platforms, cam, t);
-  for (const plat of platforms || []) drawPlatform(ctx, plat, world, cam, t);
+  let drawn=0;
+  for (const plat of platforms || []) {
+    if(view&&!terrainInView(plat,cam,view))continue;
+    drawPlatform(ctx, plat, world, cam, t);drawn++;
+  }
   dress(ctx, world, cam, t);
+  return {total:platforms?.length||0,drawn,culled:(platforms?.length||0)-drawn};
 }
