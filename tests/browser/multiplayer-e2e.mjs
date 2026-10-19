@@ -215,8 +215,10 @@ try {
   assert.ok(hostState.x <= 2240 && hostState.x >= 0, "host escaped world bounds");
 
   console.log("multiplayer: authoritative movement and direct poses verified");
-  await hostPage.keyboard.press("h");
-  await hostPage.waitForTimeout(300);
+  // Recovery must begin from a quiet, already-verified transport state.
+  // Injecting an unrelated H attack immediately before closing the channel
+  // schedules heavy hero-specific combat/FX on Chromium and can starve the
+  // next Playwright RPC. Actual guest hit and both U casts are asserted below.
 
   // V109: simulate a real direct link loss while Netlify stays connected.
   // A fresh offer must rebuild BOTH data channels and the guest's answerer.
