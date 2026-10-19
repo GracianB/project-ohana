@@ -521,16 +521,35 @@ try {
     });
     assert.equal(result.clean,true,label+': remote FX must be purely cosmetic');
   };
+  if(hostCharacter==='cat'||hostCharacter==='chispin'){
+    // Preload module code BEFORE invoking the short-lived native powers.
+    // Crucially, no async import is allowed between casting J and taking
+    // its 30-tick snapshot. Also check live WebRTC after the preload, since
+    // the game may renegotiate during a resource-constrained CI import.
+    await hostPage.evaluate(async()=>{
+      const [coop,abilities,roster,peerFx]=await Promise.all([
+        import('/systems/online-coop.js'),
+        import('/systems/abilities.js'),
+        import('/characters/roster.js'),
+        import('/systems/coop-peer-effects.js')
+      ]);
+      window.__OHANA_JKL_MODULES={
+        onlineCoop:coop.onlineCoop,useAbility:abilities.useAbility,
+        updateAbilityFx:abilities.updateAbilityFx,
+        applyForm:roster.applyForm,capturePeerEffects:peerFx.capturePeerEffects
+      };
+    });
+    await hostPage.waitForFunction(()=>{
+      const o=window.__OHANA_JKL_MODULES?.onlineCoop;
+      return !!o?.direct?.active&&o.remoteWorld===o._combatGame?.roomId;
+    },null,{timeout:3000,polling:100});
+  }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     await armPeerFxWitness('michiFx',['yarn','purr','wisp']);
-    await hostPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');
-      const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
-      const {applyForm}=await import('/characters/roster.js');
-      // All module imports MUST complete before casting short-lived FX.
-      // Awaiting the next import after the cast can allow 30+ game ticks.
-      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+    await hostPage.evaluate(()=>{
+      const {onlineCoop,useAbility,updateAbilityFx,applyForm,capturePeerEffects}=
+        window.__OHANA_JKL_MODULES;
       const g=onlineCoop._combatGame;
       // These real J/K/L multiplayer visuals require form 3 (index 2).
       // Earlier V304 predated progression gates and tried locked abilities
@@ -551,13 +570,9 @@ try {
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
     await armPeerFxWitness('chispinFx',['chain','trail','storm']);
-    await hostPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');
-      const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
-      const {applyForm}=await import('/characters/roster.js');
-      // Preload snapshot code. Never yield to browser animation frames
-      // between a real J/K/L cast and its one-shot 30-frame FX capture.
-      const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
+    await hostPage.evaluate(()=>{
+      const {onlineCoop,useAbility,updateAbilityFx,applyForm,capturePeerEffects}=
+        window.__OHANA_JKL_MODULES;
       const game=onlineCoop._combatGame;
       // Storm is the form-3 L slot; do not silently bypass the gate.
       game.player.evo=Math.max(2,game.player.evo|0);
