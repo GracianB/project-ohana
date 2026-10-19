@@ -223,7 +223,9 @@ test("V451 · delayed reliable Michi and Chispin trios survive newer WebRTC fast
   for(let n=0;n<35;n++)advancePeerEffects(receiver);
   assert.equal(receiver.coopPeerEffects[key].length,0,"late restored FX must expire normally");
   assert.equal(applyPeerEffects(receiver,delayed),false,"expired packet may not resurrect visuals");
-  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,20,"epoch-451")),true);
+  // V453 permits 32 frames of delayed cosmetic catch-up after RTC recovery.
+  // A reliable packet 41 frames behind must still be rejected.
+  assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,50,"epoch-451")),true);
   assert.equal(applyPeerEffects(receiver,{...delayed,frameNo:9}),false,"out-of-window packet rejected");
   assert.equal(applyPeerEffects(receiver,capturePeerEffects(base,1,"other-epoch")),true);
   assert.equal(applyPeerEffects(receiver,delayed),false,"retired scope cannot inject FX");
