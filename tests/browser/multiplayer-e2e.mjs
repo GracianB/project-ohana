@@ -619,6 +619,21 @@ try {
   // six-hero WebRTC run was redundant and could stall overloaded CI browsers.
   // Keep the original 12-second delivery budget, not 120 unbounded RPC calls.
   if(hostCharacter==='stitcho'){
+  // Snapshot-based lightning can vanish on the next normal 5Hz peer packet.
+  // Observe the *actual* deserialization callback instead of hoping the
+  // polling tab sees a short-lived frame. Require the same real WebRTC lane.
+  await guestPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    const original=onlineCoop.receiveDirectEvent;
+    window.__stitchoStormSeen=false;
+    window.__stitchoStormRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+    onlineCoop.receiveDirectEvent=function(game,event){
+      const result=original.call(this,game,event);
+      if(event.kind==='effects'&&game.coopPeerEffects?.stitchoDuet)
+        window.__stitchoStormSeen=true;
+      return result;
+    };
+  });
   const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
@@ -632,10 +647,19 @@ try {
   while(Date.now()<stormDeadline){
     await sendStorm();
     stormDelivered=await guestPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      return !!window.__stitchoStormSeen||!!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
     });if(stormDelivered)break;await guestPage.waitForTimeout(100);
   }
-  assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC');
+  const diagnostics=stormDelivered?null:await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    return {connected:!!onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+      pose:onlineCoop.direct?.poseChannel?.readyState,event:onlineCoop.direct?.eventChannel?.readyState,
+      scope:onlineCoop.combatEpoch,frameNo:onlineCoop._combatGame?.coopPeerEffects?.frameNo,
+      storm:!!onlineCoop._combatGame?.coopPeerEffects?.stitchoDuet};
+  })));
+  await guestPage.evaluate(()=>{window.__stitchoStormRestore?.();delete window.__stitchoStormRestore;});
+  assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC: '+JSON.stringify(diagnostics));
   }
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
