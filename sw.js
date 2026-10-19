@@ -615,7 +615,7 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "systems/hero-collections.js": "35689ab6d8d7d33678b0f5a834f249c64aff584d",
+  "systems/hero-collections.js": "741bc141b5b516fac437de581ee93cc14d75933d",
   "systems/stitcho-room.js": "5c3c842830115ba4b39693a216f996712483779e",
   "systems/stitcho-atlas.js": "276a33a27a7ceda913807008e8112c16b15ba12a",
   "systems/stitcho-trail.js": "59a922bc30ac49d20f8006131e80f15c7b3464dd",
