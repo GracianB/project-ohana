@@ -1,3 +1,13 @@
+## ohana-445 · Kilo V1 · cierre del personaje
+
+Kilo queda fijado con H cercano, J a distancia, K vuelo/defensa/reflejo, L daño/curación por impacto, I remate ganado al acertar H → J → H y P área rítmica con barra. La secuencia exige tres acciones distintas, dura cuatro segundos y habilita I seis segundos; un mismo golpe multiblanco o nota rebotada solo cuenta una vez. I concede diez fotogramas de evasión, avanza y golpea a los enemigos que cruza, con fuerza creciente según forma. Recibir daño o cambiar de sala cancela la secuencia. I y P tienen poses propias de anticipación, golpe ascendente y palmas a compás. K protege solo al arrancar y ya no cura: la recuperación ofensiva pertenece a L.
+
+Movimiento compartido: doble toque lateral en dieciséis fotogramas activa carrera (1,4×, tope 12), mientras se mantiene esa dirección. Soltar, invertir o bajar frena; vuelo conserva su control propio. Kilo mantiene salto único en formas 1–2, doble en formas 3–4 y triple en forma 5, además de planeo y vuelo K. HUD, ayuda, metadatos y escena de desbloqueo reflejan el kit definitivo.
+
+Cierre: especificación aceptada en docs/KILO-V1.md e instrucción de mantenimiento en AGENTS.md. El diseño de Kilo queda cerrado; los siguientes personajes reutilizan las bases compartidas sin rediseñarlo. Referencia de versión: kilo-v1.0.0.
+
+Validación V445: 1.289/1.289 pruebas unitarias; auditoría general de navegador PASS; secuencia real H-J-H, bloqueo/consumo de I, remate, carrera/detención y saltos 1/2/3 PASS; activación móvil y movimiento reducido PASS; cinco formas/cuatro evoluciones, vuelo y balsas, L/P/U, álbum/ukelele/pozos, diez salas e I/P de los diez héroes PASS. Capturas de escritorio/móvil revisadas; release gate PASS.
+
 ## ohana-444 · El compás se entiende jugando
 
 P de Kilo muestra tres señales que convergen en la ventana real, confirma aciertos y fallos, y dibuja cada onda con el alcance que usa su daño. Los impactos solo producen estela cuando hacen daño. L conserva sus guardianes y curación por impacto, sustituyendo el gran disco frontal por una proyección musical sobre el suelo y estelas hacia las víctimas. El halo de invulnerabilidad queda contenido alrededor del cuerpo en vez de cruzar toda la pantalla. U conserva el compañero que atraviesa el escenario y golpea; las pruebas de dúos comprueban el combate.

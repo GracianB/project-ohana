@@ -1,3 +1,4 @@
+import {recordKiloHit,kiloComboStatus,consumeKiloCombo} from './kilo-combo.js';
 import {startKiloFlight,kiloFlightDuration} from './kilo-flight.js';
 import {rhythmPress} from "./hero-combos.js";
 import {chargeFinisher,consumeFinisher,finisherCharge} from "./finisher.js";
@@ -162,6 +163,7 @@ const now = abilityNow(game);
 p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 if(index===5&&finisherCharge(p)<100)return false;
+if(p.id==="kilo"&&index===4&&!kiloComboStatus(game).ready){game.nums?.add?.(cx(p),p.y-32,"I · ACIERTA H → J → H","#ffe49b");return false;}
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
 // Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
@@ -176,6 +178,7 @@ const chainCd = index < 3
 : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
 const dur = baseCd / (1 + evo * 0.12) * chainCd;
 if(index===5)consumeFinisher(p);
+if(p.id==="kilo"&&index===4)consumeKiloCombo(game);
 p.cds[id] = index===5 ? now : now + dur;
 p.cdDur[id] = dur;
 p._chargeAction=(p._chargeAction||0)+1;
@@ -186,7 +189,7 @@ p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
 
-if (index === 2 && p.id !== "chispin" && !(p.id === "stitcho" && id === "caos")) {
+if (index === 2 && !['chispin','kilo'].includes(p.id) && !(p.id === "stitcho" && id === "caos")) {
 game.ult = { t: 46, color: def.color, name: def.name };
 game.flashColor = def.color;
 game.flash = Math.max(game.flash || 0, 14);
@@ -1194,7 +1197,7 @@ add({
   age: 0,
   r: 46 + evo * 6 + petals * 8,
   dmg: (16 + petals * 3.5) * pw(p),
-  heal: evo >= 3 ? 3 : 0,
+  heal: 0,
   hit: new Set(),
   pulse: 0,
   evo,
@@ -1209,9 +1212,9 @@ const R = 240 + evo * 35 + petals * 25;
 const duration=180+evo*30;
 p._kiloOhanaT=duration;
 add({ kind: "ohana", x: cx(p), y: cy(p), r: 48, max: R, life: duration, duration, hit: new Set(), n: 8 + evo * 2, dmg: (30 + evo * 4 + petals * 4) * pw(p), lifesteal: 6+evo, healBudget:heal });
-g.flash = Math.max(g.flash || 0, god ? 10 : 6);
+g.flash = Math.max(g.flash || 0, 2);
 g.flashColor = "#ffe9a0";
-g.shake = Math.min(18, (g.shake || 0) + (god ? 8 : 6));
+g.shake = Math.min(8, (g.shake || 0) + (god ? 3 : 2));
 if (god) g.hitstop = Math.min(5, Math.max(g.hitstop || 0, 3));
 boom(g, cx(p), cy(p), "#ffd36a", god ? 14 : 10, { star: true, up: 2 });
 },
@@ -1867,7 +1870,7 @@ if (f.pulse<=96 ? f.pulse % 24 === 0 : f.pulse % 48 === 0) {
   }
   boom(g, cx(p), cy(p), "#ff8adf", 5, { star: true, up: 1 });
 }
-armor(p, 2);
+if(f.pulse<=12)armor(p, 2);
 return f.life > 0;
 },
 note(g, f) {
@@ -1901,7 +1904,7 @@ note(g, f) {
   for (const e of g.enemies) {
     if (!f.hit.has(e) && canHit(e) && circleHit(f.x, f.y, f.r, e)) {
       f.hit.add(e);
-      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) earnKiloPetal(g, f.rhythmAttack);
+      if (hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx) * 6, ky: -3, stun: 16, color: f.color, hitstop: 1, shake: 2 })) {earnKiloPetal(g, f.rhythmAttack);recordKiloHit(g,"J",f.rhythmAttack);}
     }
   }
  return f.life > 0;

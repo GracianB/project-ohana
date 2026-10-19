@@ -1,4 +1,6 @@
 import {steerKiloFlight} from './systems/kilo-flight.js';
+import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
+import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -489,6 +491,7 @@ return false;
 }
 const first = !game.visited[id];
 game.roomId = id;
+resetKiloCombo(game);resetPlayerLocomotion(game.player);
 game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
@@ -896,7 +899,9 @@ if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.
   d = Math.max(1, Math.round(d * 0.35));
   game.fx.emit(e.x + e.w / 2, e.y + e.h / 3, { color: "#9fe8ff", count: 5, size: 2, up: 0.8, life: 10 });
 }
+const healthBefore=e.hp;
 damageEnemy(e, d);
+if(e.hp<healthBefore)recordKiloHit(game,'H',p._swing);
 registerBossPunish(e);
 const face = p.facing || 1;
 e.vx = face * (e.boss ? 3 : 8) * push;
@@ -1115,6 +1120,7 @@ const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard"
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
 damagePlayer(p, amount);
+resetKiloCombo(game);resetPlayerLocomotion(p);
 p.invuln = 42;
 p.vx = Math.sign(p.vx || p.facing || 1) * -8;
 p.vy = -6.5;
@@ -1475,6 +1481,7 @@ const right = axisX > 0;
 const jump = !!(keys["w"] || keys["arrowup"] || keys[" "]);
 const jumpPressed = input?.consumePress?.(["w", "arrowup", " "]) ?? (!!jump && !p._jumpPrev);
 const drop = !!(keys["s"] || keys["arrowdown"]);
+const moveSpeed=updatePlayerLocomotion(p,{axisX,pressedLeft:input?.consumePress?.(['a','arrowleft']),pressedRight:input?.consumePress?.(['d','arrowright']),drop,t});
 if (p.dash > 0) p.dash--;
 if (p._dashGo > 0) p._dashGo--;
 if (p.melee > 0) p.melee--;
@@ -1499,7 +1506,7 @@ if (oppose) {
   p.facing = face;
 }
 } else if (axisX !== 0) {
-const target = axisX * Math.abs(p.speed);
+const target = axisX * moveSpeed;
 const reversing = Math.sign(p.vx || 0) !== 0 && Math.sign(p.vx) !== axisX;
 const accel = p.grounded
   ? (reversing ? CONTROL_FEEL.reverseGroundAccel : CONTROL_FEEL.groundAccel)
@@ -1565,7 +1572,7 @@ const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!
 p._jumpPrev = !!jump;
 Passives.update(game, inputState);
 const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4&&m.life>0);
-if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*8;p.vx=inputState.kiloBurst;}
+if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*(kiloStep.age<6?3:kiloStep.speed);p.vx=inputState.kiloBurst;p.facing=kiloStep.face;}
 const kiloFlight=steerKiloFlight(p,inputState);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
@@ -2936,6 +2943,7 @@ function renderAbilityBar() {
 const bar = DOM.abilityBar;
 if (!bar || !game.player) return;
 const evo = Number(game.player.evo) || 0;
+const kiloHelp=document.getElementById("kilo-kit-help");if(kiloHelp)kiloHelp.hidden=game.player.id!=="kilo";
 const slots = (game.player.abilities || []).map((id, i) => ({ id, need: [0, 1, 2][i] || 0 }));
 slots.push(...[4,5].map(index=>({id:extraAbility(game.player.id,index).id,need:POWER_LEVELS[index],index})));
 slots.push({ id: "supreme", need: 0, supreme: true, index:3 });
@@ -2948,7 +2956,7 @@ const locked = evo < slot.need;
 const visibleName = locked ? "Forma " + (slot.need + 1) : d.name;
 const ally=slot.supreme?uPartnerInfo(game.player.id,game.player.uPartner):null;
 const bond=slot.supreme?uBondProgress(game.player):null;
-const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante 6 s") : d.name + (d.desc ? " · " + d.desc : "");
+const detail = slot.supreme && game.player.uSurprise ? "U · Compañero sorpresa" : slot.supreme ? (d.name + " · U EXP "+bond.rank+"/3 con " + (ally?.name||"familia") + " · Ataca durante "+(game.player.id==="kilo"?"2 s":"6 s")) : d.name + (d.desc ? " · " + d.desc : "");
 return '<button type="button" class="ability-slot' + (locked ? " locked" : "") + '" data-index="' + (slot.index??(game.player.abilities||[]).indexOf(slot.id)) + '" data-id="' + slot.id + '"' + (slot.supreme ? ' data-supreme="1"' : "") + ' aria-label="' + visibleName + ' · ' + d.key + '" title="' + detail + '" style="--abil:' + d.color + ';opacity:' + (locked ? "0.4" : "1") + '"><span class="key">' + d.key + '</span><span class="name">' + visibleName + '</span><span class="cd"><i class="cd-fill"></i></span><b class="cd-sec" aria-hidden="true"></b></button>';
 }).join("");
 abilitySlots = Array.from(bar.querySelectorAll(".ability-slot")).map((slot) => ({
@@ -3110,21 +3118,24 @@ const isSupreme = item.slot.dataset.supreme === "1";
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : item.slot.dataset.id;
 const slotIndex=Number(item.slot.dataset.index);
+const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
 const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
 if (!def || !item.fill) continue;
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
 const w = pct + "%";
 if (item.fill.style.width !== w) item.fill.style.width = w;
-const sec = slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
+const sec = comboGate?(comboGate.ready?'I · '+Math.ceil(comboGate.remaining/60)+' s':comboGate.step+'/3 · H J H'):slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
 if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
-item.slot.classList.toggle("cooling", slotIndex===5?finisherCharge(p)<100:left>80);
+item.slot.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5?finisherCharge(p)<100:left>80));
 }
 const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
 for (let i = 0; i < touchPowers.length; i++) {
 const btn = touchPowers[i];
 const slotIndex = PWIDX[btn.dataset.k];
+const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
+if(slotIndex===4){const caption=comboGate?.ready?'I✓':'I';if(btn.textContent!==caption)btn.textContent=caption;}
 const isSupreme = slotIndex === 3;
 const sup = isSupreme ? supremeOf(p.id) : null;
 const id = isSupreme ? sup.id : slotIndex>3?extraAbility(p.id,slotIndex).id:(p.abilities || [])[slotIndex];
@@ -3138,8 +3149,8 @@ const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " �
 if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
 const left = Math.max(0, (p.cds[id] || 0) - now);
 const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-btn.classList.toggle("cooling", slotIndex===5 ? finisherCharge(p)<100 : left > 80);
+const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
+btn.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5 ? finisherCharge(p)<100 : left > 80));
 btn.style.setProperty("--cd", pct + "%");
 }
 }
@@ -3501,6 +3512,12 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+combatTarget(){
+ const p=game.player;if(!p)return null;
+ const e=makeFoe(p.x+p.w+22,p.y,'cucaracho',game.roomId,0,{rng:()=>.5});
+ e.hp=e.max=5000;e.w=48;e.h=90;e.invuln=0;e.stun=60000;e.y=p.y+p.h-e.h;game.enemies=[e];
+ return {x:e.x,y:e.y,hp:e.hp};
+},
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
@@ -3548,7 +3565,7 @@ state() {
     platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
-    worldW:game.worldW,worldH:game.worldH,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
+    worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
     hp: p ? p.health : 0,

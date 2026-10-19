@@ -1,7 +1,7 @@
 // OHANA V86. Power metadata shared by HUD and combat. No graphics or physics.
 export const ABILITY_DEFS = {
 ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "Notas que rebotan tres veces. Cada lanzamiento que acierta carga un pétalo (máximo 3; duran 4 s)." },
-hula: { name: "Hula libre", key: "K", cd: 7000, color: "#ff5ad5", desc: "Vuela en ocho direcciones con mover/saltar/bajar, sin caer al soltar los controles. Atraviesa repisas, refleja disparos y golpea al bailar. Dura 4,5–6 s según forma." },
+hula: { name: "Hula libre", key: "K", cd: 7000, color: "#ff5ad5", desc: "Vuela en ocho direcciones con mover/saltar/bajar, sin caer al soltar los controles. Atraviesa repisas, protege al arrancar durante 0,2 s y refleja disparos mientras golpea al bailar. Dura 4,5–6 s según forma." },
 ohana: { name: "Guardianes Ohana", key: "L", cd: 7200, color: "#ffd36a", desc: "Guardianes que te acompañan durante 4–5 s. Atacan a los enemigos que entran en su radio y curan al acertar. Los pétalos amplían su alcance y potencia." },
 plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
 rollo: { name: "Bola saltarina 626", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos. Guíala con ←/→ y rebota contra paredes y plataformas; las formas avanzadas permiten más rebotes." },

@@ -447,7 +447,18 @@ function solve(pose, d, f) {
   if(pose.kiloPerformance){
     const b=pose.kiloPerformance;
     const blend=b.kind==='entrance'?Math.min(1,b.time*4,Math.max(0,(1.6-b.time)*4)):1;
-    applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind!=='remate')applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind==='remate'){
+      const frame=b.time*60,hit=frame>=7&&frame<=20,wind=frame<6;
+      r.uke='back';r.fx=null;r.paci=false;r.armOver=true;r.backOver=false;r.mood=hit?'happy':'normal';r.mouth=hit?'open':'smile';
+      r.lean=wind?-.12:hit?.26:.08;r.headRot=hit?-.09:.04;r.oy+=wind?4:hit?-2:0;
+      r.handF=wind?[8,sy+10]:hit?[al*.9,sy-al*.65]:[16,sy+4];r.handB=[-al*.8,sy+al*.5];
+      r.footF=wind?[8,-2]:[15,-8];r.footB=wind?[-8,0]:[-17,-2];r.hairLag=pose.reduceMotion?0:.8;r.skirt=hit?.7:.15;
+    }
+    if(b.kind==='finale'){
+      const beat=(b.time*60)%30,clap=Math.max(0,1-Math.min(beat,30-beat)/8);
+      r.handF=[18-12*clap,sy+5-8*clap];r.handB=[-18+17*clap,sy+5-8*clap];r.uke='back';r.mood='happy';r.mouth=clap>.5?'open':'smile';
+    }
     if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[12,sy+7];r.handF=[19,sy+14+Math.sin(b.time*9)*3];r.lean=.03;r.mood="closed";r.mouth="smile";
      if(b.time<2){r.uke='hand';r.handF=[8,sy+15];r.headRot=-.08;}
      if(b.time>8){r.uke='back';r.handF=[3,sy+5];r.handB=[-20,sy+6];r.headRot=.12;}

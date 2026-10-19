@@ -192,7 +192,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
     const words=story.line.split(' ');let line='',row=0;ctx.font=`600 ${Math.max(11,Math.min(w,h)*.027)}px sans-serif`;
     for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>w*.86){text(ctx,line,cx,h*.81+row*Math.min(w,h)*.035,Math.max(11,Math.min(w,h)*.027),COL.white);row++;line=word;}else line=next;}
     text(ctx,line,cx,h*.81+row*Math.min(w,h)*.035,Math.max(11,Math.min(w,h)*.027),COL.white);
-    text(ctx,['J · NOTA SALTARINA','K · HULA LIBRE','L · GUARDIANES OHANA','I · PASO DE HULA','P · A COMPÁS DEL SOL'][to],cx,h*.96,Math.max(11,Math.min(w,h)*.027),COL.gold);
+    text(ctx,['J · NOTA SALTARINA','K · HULA LIBRE','L · GUARDIANES OHANA','I · REMATE ALOHA','P · A COMPÁS DEL SOL'][to],cx,h*.96,Math.max(11,Math.min(w,h)*.027),COL.gold);
     ctx.globalAlpha = 1;
   }
   ctx.restore();

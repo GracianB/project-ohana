@@ -50,6 +50,7 @@ jobs:
           node tests/browser/v442-albums.mjs
           node tests/browser/v443-kilo-flight.mjs
           node tests/browser/v444-kilo-combat.mjs
+          node tests/browser/v445-kilo-final.mjs
           node tests/browser/v1-candidate.mjs
 
       - name: V400 pause, audio and motion preferences
