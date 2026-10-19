@@ -1,5 +1,5 @@
-// CHISPÍN V454: an authored, four-district private stage. The original
-// multiplayer hub remains untouched: the variant is only used in solo play.
+// CHISPÍN V454: tailor the existing Alien Lab, room 5 of Hoku's TEN rooms.
+// There is no new eleventh room. Multiplayer retains the canonical lab.
 export const CHISPIN_SECTORS=Object.freeze([
  Object.freeze({name:'Dársena de la chispa',start:0,end:1020,role:'intro'}),
  Object.freeze({name:'Puentes electrostáticos',start:1020,end:2080,role:'platform'}),
@@ -7,7 +7,7 @@ export const CHISPIN_SECTORS=Object.freeze([
  Object.freeze({name:'Santuario de la Tormenta',start:3100,end:4200,role:'boss'})
 ]);
 export function createChispinRoom(base){
- if(base?.id!=='hub')throw new Error('Chispin personal room requires the Hoku hub');
+ if(base?.id!=='lab')throw new Error('Chispin personal room requires Alien Lab');
  const platforms=[
   [0,1134,1110,126],[1210,1134,950,126],[2260,1134,1940,126],
   [120,1005,225,22],[365,925,245,22],[650,817,190,22],[870,675,245,22],
@@ -30,21 +30,21 @@ export function createChispinRoom(base){
   [3810,1040,'rana',false,{role:'jumper',name:'Último salto eléctrico',anchorY:1040}]
  ];
  return {...base,name:'Islas del Relámpago',short:'Relámpago',world:4,
-  color:'#ffe7a1',doors:{left:null,right:null,up:null,down:null},portals:[],
+  color:'#ffe7a1',needEvo:0,doors:{left:null,right:null,up:null,down:null},portals:[],
   hint:'Activa tres pararrayos con fragmentos. Usa las plataformas magnéticas, corta las trampas con J y derrota al Ojo de la Tormenta.',
   width:4200,height:1260,plats:platforms,foes,orbs:[
    [410,930],[710,755],[1010,520],[1500,780],[2000,720],[2450,570],[2920,730],[3750,850]
   ],
   checkpoints:[
-   {id:'hub-chispin-dock',x:250,y:1134,sector:0},
-   {id:'hub-chispin-bridges',x:1450,y:1134,sector:1},
-   {id:'hub-chispin-clouds',x:2460,y:1134,sector:2},
-   {id:'hub-chispin-temple',x:3320,y:1134,sector:3}
+   {id:'lab-chispin-dock',x:250,y:1134,sector:0},
+   {id:'lab-chispin-bridges',x:1450,y:1134,sector:1},
+   {id:'lab-chispin-clouds',x:2460,y:1134,sector:2},
+   {id:'lab-chispin-temple',x:3320,y:1134,sector:3}
   ],
   sectors:CHISPIN_SECTORS,
   hazards:[
-   {id:'hub-chispin-abyss-1',x:1110,y:1120,w:100,h:300,type:'death',label:'MAR ELÉCTRICO'},
-   {id:'hub-chispin-abyss-2',x:2160,y:1120,w:100,h:300,type:'death',label:'VACÍO DE LAS NUBES'}
+   {id:'lab-chispin-abyss-1',x:1110,y:1120,w:100,h:300,type:'death',label:'MAR ELÉCTRICO'},
+   {id:'lab-chispin-abyss-2',x:2160,y:1120,w:100,h:300,type:'death',label:'VACÍO DE LAS NUBES'}
   ]
  };
 }
