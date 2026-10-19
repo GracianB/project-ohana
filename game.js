@@ -3569,7 +3569,8 @@ game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
 game.summonDelay = 0;
-game.roomId = "hub";
+// Preserve the room chosen by start(def); Chispín begins in the lab.
+// Resetting to hub here broke the real ten-room chapter in browser tests.
 game.won = false;
 game.summoned = false;
 game.runtimeFaults = 0;
