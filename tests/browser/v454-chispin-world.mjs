@@ -12,6 +12,7 @@ try{
  await fs.mkdir('test-results/v454',{recursive:true});
  const intro=await page.evaluate(()=>window.__OHANA_E2E.start('chispin'));
  assert.equal(intro.roomName,'Islas del Relámpago');
+ assert.equal(intro.roomId,'lab','Chispin customizes the existing Alien Lab, no eleventh room');
  assert.equal(intro.chispinStorm.index,0);
  assert.equal(intro.heroCollection.total,100);
  assert.equal(intro.heroCollection.hero,'chispin');
@@ -40,7 +41,7 @@ try{
   }
   api.setChispinBossHp(0);api.step(80);
   const alive=api.roomCast().some(x=>x.chispinBoss);
-  api.loadRoom('beach');api.loadRoom('hub');
+  api.loadRoom('beach');api.loadRoom('lab');
   return {tiers,alive,returned:api.state(),restored:api.roomCast().some(x=>x.chispinBoss)};
  });
  assert.deepEqual(phases.tiers,[1,2,3]);
