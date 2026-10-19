@@ -1,3 +1,4 @@
+import {steerKiloFlight} from './systems/kilo-flight.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
@@ -528,7 +529,7 @@ e.roomId = id;
 if (f[3]) applyElite(e);
 return e;
 });
-game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-foe-${e.spawnIndex}`));
+game.enemies=game.enemies.filter(e=>!game.clearedEncounters?.[id]?.includes(`${id}-cast443-${e.spawnIndex}`));
 for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
@@ -1253,7 +1254,7 @@ if (hazard.type === HAZARD_TYPES.DEATH) {
 if (!hazardAxis) {
 p._hazardEscapeKey = "";
 const next = nearestBelow(p.x, p.w, feet - 8);
-if (next && feet >= next.y && !dropIgnoresPlatform(p, next)) {
+if (next && !(p._kiloFlightT>0&&next.h<=40) && feet >= next.y && !dropIgnoresPlatform(p, next)) {
   landOn(p, next);
   return;
 }
@@ -1513,7 +1514,8 @@ if (Math.abs(p.vx) < 0.04) p.vx = 0;
 if (jumpPressed) p.buffer = CONTROL_FEEL.jumpBufferFrames;
 else if (p.buffer > 0) p.buffer--;
 const masteryPlatforms = playerMasteryPlatforms(game);
-const playerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
+const allPlayerPlatforms = masteryPlatforms.length ? game.platforms.concat(masteryPlatforms) : game.platforms;
+const playerPlatforms=p._kiloFlightT>0?allPlayerPlatforms.filter(plat=>plat.h>40):allPlayerPlatforms;
 p.wall = 0;
 if (!p.grounded) {
 for (const plat of game.platforms) {
@@ -1559,13 +1561,16 @@ if (glideActive && (p.evo >= 4 || p.glide) && (t % 5 === 0)) {
 }
 if (p.wall) p.vy = Math.min(p.vy, 2.2);
 stepChispinCloud(p,{jump,left,right});
-const inputState = { left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
+const inputState = { axisX, left: !!left, right: !!right, jump: !!jump, drop: !!drop, jumpPressed: !!jumpPressed, t };
 p._jumpPrev = !!jump;
 Passives.update(game, inputState);
+const kiloStep=game._evolutionAttacks?.moves?.find(m=>m.id==='kilo'&&m.index===4&&m.life>0);
+if(p.id==='kilo'&&kiloStep&&!(p._dashGo>0)){inputState.kiloBurst=kiloStep.face*8;p.vx=inputState.kiloBurst;}
+const kiloFlight=steerKiloFlight(p,inputState);
 const wasGrounded = !!p.grounded;
 const dropThroughY = beginPlatformDrop(p, playerPlatforms, drop, wasGrounded);
 const incoming = p.vy;
-p.vy = Math.min(14, p.vy + (p._dashGo > 0 ? 0.14 : 0.5));
+p.vy = Math.min(14, p.vy + (kiloFlight?0:p._dashGo > 0 ? 0.14 : 0.5));
 p.grounded = false;
 const steps = Math.max(1, Math.ceil((Math.abs(p.vx) + Math.abs(p.vy)) / 8));
 let wall = 0;
@@ -2549,7 +2554,7 @@ if (e.kind === "cucaracho") {
     color: "#ff4a20", count: 1, size: 5, up: 2.4, star: true,
   });
 }
-if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-foe-${e.spawnIndex}`);
+if(e._campaignOriginal)game._defeatedThisVisit?.add(`${game.roomId}-cast443-${e.spawnIndex}`);
 punch(e.x, e.y, e.color); beep("kill"); addKill(); healPlayer(game.player, 4);
 if (e.dropsOrb) {
   pushRuntime(game.orbs, { x: e.x + e.w / 2, y: e.y + e.h / 2, r: 9, taken: false }, MAX_RUNTIME_ORBS);
@@ -3608,6 +3613,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
+    kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
     roomAlbum:roomAlbumSnapshot(game),grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),

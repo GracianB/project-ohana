@@ -9,8 +9,7 @@ export function movePlatform(g,platform,motion){
  return {dx:platform.x-oldX,dy:platform.y-oldY,rider:!!rider};
 }
 export function drawPlatformRail(ctx,p,m,cam){
- ctx.save();ctx.strokeStyle='#d8dfb85c';ctx.lineWidth=2;ctx.setLineDash([4,8]);
+ ctx.save();ctx.strokeStyle='#d8dfb85c';ctx.lineWidth=2;
  const x=m.x+p.w/2-cam.x,y=m.y+10-cam.y;
- ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+(m.axis==='x'?m.span:0),y-(m.axis==='y'?m.span:0));ctx.stroke();ctx.setLineDash([]);
  ctx.fillStyle='#e5e0b4';for(const side of [0,1]){const px=x+(m.axis==='x'?side*m.span:0),py=y-(m.axis==='y'?side*m.span:0);ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fill();}ctx.restore();
 }

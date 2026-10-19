@@ -1,3 +1,15 @@
+## ohana-443 · Hula libre y jardín Ohana
+
+K de Kilo pasa de frenar la caída durante un segundo a vuelo dirigido de 4,5–6 segundos según forma. Permite subir, bajar, diagonales y suspensión sin pulsar controles; atraviesa repisas manteniendo el suelo sólido y las salidas. L acompaña durante 4–5 segundos, golpea una vez por enemigo y cura solo al causar daño real. Ambos efectos permanecen visibles durante su actividad.
+
+El Claro sustituye árboles de óvalos y la casita geométrica por palmeras con frondas, nervaduras, troncos anillados y una casa sobre pilotes con porche, listones y tejado de palma. Dos ilustraciones de vegetación se dibujan una vez y se reutilizan. El pelo de Kilo cae por la espalda y gana longitud en cada forma; las evoluciones muestran un cambio de escala más marcado, una revelación ascendente, rayos suaves y el ataque desbloqueado. Se respeta movimiento reducido.
+
+La corrección posterior sustituye la población de 32–37 por 10 enemigos en Claro y 6–14 en las demás salas, en grupos separados. Cada sala reserva un único enemigo especial; el Tambor del Claro ya tiene rig de patas, ojos y mazas sincronizado con el aviso y la descarga. Los demás especiales conservan sus rigs existentes para trabajarlos en su entrega. Los enemigos comunes reutilizan especies y reciben los estados reales de preparación/ataque en sus animaciones. Los encuentros de esta nueva distribución se reinician una vez al actualizar; evolución, secretos y álbumes se conservan.
+
+Las dos plataformas del Claro usan balsas de madera sin sombra ni raíces variables: horizontal de seis segundos por ciclo y vertical de ocho. I y dash conservan su impulso durante el hula.
+
+Validación V443: 1.278/1.278 pruebas unitarias; auditoría general de navegador PASS; vuelo real, suspensión, diagonales, descenso entre repisas, L prolongada y desplazamiento de ambas balsas PASS; álbum de 100, escena de 600 fotogramas, persistencia y recuperación en pozo PASS. Capturas de escritorio/móvil y guardián revisadas; cinco formas/cuatro evoluciones y recorrido de las diez salas PASS; release gate PASS.
+
 ## ohana-442 · Kilo: recuerdos, crecimiento y terreno interactivo
 
 Continúa la entrega 1/10. Cada sala dispone de 100 fragmentos persistentes, con 30 en rutas altas. El álbum local muestra su cuadrícula propia sin borrar las diez historias anteriores. El progreso se conserva en partida y perfil al cambiar de sala o héroe. Completar el Claro revela el Ukelele del hogar en la bandera de entrada: todos pueden recogerlo; Kilo protagoniza una escena de diez segundos que detiene la simulación y toca una progresión de ukelele.

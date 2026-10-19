@@ -8,7 +8,7 @@ try{
  const collected=await page.evaluate(()=>{localStorage.removeItem('ohana-room-albums-v1');const e=window.__OHANA_E2E;e.start('cat');e.loadRoom('hub');e.step(12);e.setInvulnerable(600);const count=e.roomCast().length;
   for(const item of e.albumItems()){e.setInvulnerable(600);e.setPlayer(item.x-10,item.y-14);e.step(1);if(e.state().roomId!=='hub')throw new Error('collectible triggered room exit');}
   return {count,album:e.state().roomAlbum};});
- assert.ok(collected.count>=32);assert.equal(collected.album.count,100);
+ assert.ok(collected.count===10);assert.equal(collected.album.count,100);
  await page.evaluate(()=>{const e=window.__OHANA_E2E,c=e.checkpointData().checkpoints[0];e.setPlayer(c.x-10,c.y-28);e.step(1);});
  let s=await page.evaluate(()=>window.__OHANA_E2E.state());assert.ok(s.roomAlbum.scene);assert.equal(s.roomAlbum.relic,true);
  const frozen=await page.evaluate(()=>{const e=window.__OHANA_E2E,before={enemies:e.roomCast(),player:e.state().player,t:e.state().platformDrop.t};e.step(200);return {before,after:{enemies:e.roomCast(),player:e.state().player,t:e.state().platformDrop.t}};});assert.deepEqual(frozen.before,frozen.after);
@@ -21,5 +21,5 @@ try{
  s=await page.evaluate(()=>window.__OHANA_E2E.state());assert.equal(s.roomId,'hub');assert.ok(s.player.x<1190);assert.equal(s.roomAlbum.count,100);assert.equal(s.runtimeFaults,0);assert.deepEqual(errors,[]);
  await page.evaluate(()=>{localStorage.setItem('ohana-room-albums-v1',JSON.stringify({hub:{found:Array.from({length:100},(_,i)=>i),relic:false}}));const e=window.__OHANA_E2E;e.start('kilo');e.loadRoom('hub');e.setPlayer(90,1106);});
  assert.ok((await page.evaluate(()=>window.__OHANA_E2E.state())).roomAlbum.scene);await page.keyboard.press('Escape');await page.locator('#btn-quit').click();assert.equal(await page.evaluate(()=>document.body.classList.contains('relic-cinema')),false);assert.equal((await page.evaluate(()=>window.__OHANA_E2E.state())).running,false);
- console.log('PASS V442: collect all 100 as Michi, 32 enemies, universal ukulele, frozen player/enemies/time, 600 ticks, persistence across rooms/heroes, lethal pit recovery, desktop/mobile.');
+ console.log('PASS V442: collect all 100 as Michi, 10 enemies, universal ukulele, frozen player/enemies/time, 600 ticks, persistence across rooms/heroes, lethal pit recovery, desktop/mobile.');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

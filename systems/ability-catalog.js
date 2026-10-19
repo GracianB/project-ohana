@@ -1,8 +1,8 @@
 // OHANA V86. Power metadata shared by HUD and combat. No graphics or physics.
 export const ABILITY_DEFS = {
 ukulele: { name: "Nota saltarina", key: "J", cd: 520, color: "#ffb347", desc: "Notas que rebotan tres veces. Cada lanzamiento que acierta carga un pétalo (máximo 3; duran 4 s)." },
-hula: { name: "Baile aloha", key: "K", cd: 2100, color: "#ff5ad5", desc: "Cuatro pasos hula: reflejan proyectiles y pulsan daño. Consume pétalos para ampliar alcance y potencia; reflejar al empezar recupera un pétalo." },
-ohana: { name: "Anillo Ohana", key: "L", cd: 6200, color: "#ffd36a", desc: "Floración que cura y alcanza una zona cercana. Consume pétalos para aumentar alcance, daño y curación." },
+hula: { name: "Hula libre", key: "K", cd: 7000, color: "#ff5ad5", desc: "Vuela en ocho direcciones con mover/saltar/bajar, sin caer al soltar los controles. Atraviesa repisas, refleja disparos y golpea al bailar. Dura 4,5–6 s según forma." },
+ohana: { name: "Guardianes Ohana", key: "L", cd: 7200, color: "#ffd36a", desc: "Guardianes que te acompañan durante 4–5 s. Atacan a los enemigos que entran en su radio y curan al acertar. Los pétalos amplían su alcance y potencia." },
 plasma: { name: "Ráfaga plasma", key: "J", cd: 600, color: "#5ad1ff", desc: "Tres disparos rápidos de plasma." },
 rollo: { name: "Bola saltarina 626", key: "K", cd: 1900, color: "#2f6bff", desc: "Rueda atravesando enemigos. Guíala con ←/→ y rebota contra paredes y plataformas; las formas avanzadas permiten más rebotes." },
 caos: { name: "Baile extraterrestre 626", key: "L", cd: 5600, color: "#8f7bff", desc: "Baila y convoca 1–5 naves según evolución. Sus láseres buscan enemigos; los impactos recuperan vida." },

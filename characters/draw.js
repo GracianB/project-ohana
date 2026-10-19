@@ -1239,7 +1239,7 @@ if (p.id === "cuerno") {
 if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
  const age=t-(p._cast?.t??-9999),entry=t-(p._kiloEntranceAt??-9999);
  if(p._kiloPerformance)pose.kiloPerformance=p._kiloPerformance;
- else if(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96)
+ else if((p._kiloFlightT>0&&!(pose.state==='cast'&&p._cast?.slot!==1&&age<36))||(p._cast?.slot===1&&p._cast?.id==='hula'&&age>=0&&age<96))
    pose.kiloPerformance={kind:'dance',time:age/60};
  else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
    pose.kiloPerformance={kind:'entrance',time:entry/60};

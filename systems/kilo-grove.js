@@ -15,8 +15,8 @@ export function installKiloGrove(room){
 export function enterKiloGrove(g){
  if(g.roomId!=='hub'){g.kiloGrove=null;return;}
  const lifts=[
-  {axis:'x',x:1430,y:894,span:540,period:420},
-  {axis:'y',x:2850,y:1054,span:960,period:1080}
+  {axis:'x',x:1430,y:894,span:540,period:360},
+  {axis:'y',x:2850,y:1054,span:960,period:480}
  ].map(m=>{m.start=Number(g.t)||0;const platform={x:m.x,y:m.y,w:m.axis==='y'?240:190,h:22,_campaignLift:true};g.platforms.push(platform);return {platform,motion:m};});
  g.kiloGrove={lifts,shrine:{x:980,y:1094},song:!!g.secrets?.hub?.includes(SONG),pulse:0,source:null};
  g.kiloGrove.fragile=g.platforms.filter(p=>p.h<40&&!p._campaignLift&&[690,2150,2490].includes(p.x)).map(p=>{p._crumbles=true;return {platform:p,age:0,restore:0,w:p.w,x:p.x};});

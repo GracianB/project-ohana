@@ -473,20 +473,14 @@ function ponytail(ctx, R, pose, f, hr, r) {
     ctx.restore();
     return;
   }
-  const turn = -2.1 + r.hairUp * 1.4 - pose.sway * 0.9 + pose.bounce * 0.6 + (r.hairLag || 0);
-  const bx = -hr * 0.5, by = -hr * 0.82;
-  const len = hr * [0.55,1.35,1.65,1.95,2.3][f];
-  R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
-    (k) => turn + (r.hairLag || 0) * k * 0.8 + Math.sin(t * 0.08 - k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
-  if(f===2){
-    for(let i=0;i<4;i++)R.ellipse(ctx,-hr*1.08+Math.sin(t*.06+i*.5)*2,-hr*.5+i*hr*.3,hr*.15,hr*.22,HAIR,{lw:1.7});
-  }
-  if (f === 4) {
-    for (let i = 0; i < 2; i++) {
-      R.tail(ctx, -hr * 0.8, -hr * 0.1 + i * hr * 0.3, hr * 0.8, -2.4 - i * 0.3,
-        (k) => Math.sin(t * 0.09 + i * 2 + k * 4) * 1.2 + 0.8, hr * 0.16, hr * 0.05, HAIR, { segments: 6 });
-    }
-  }
+  const len=hr*[.55,1.9,2.5,3.1,3.7][f],bx=-hr*.63,by=-hr*.42;
+  const wind=pose.reduceMotion?0:Math.sin(t*.055)*3+(r.hairLag||0)*12;
+  ctx.save();ctx.fillStyle=HAIR;ctx.strokeStyle=R.INK;ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(bx+hr*.3,by-hr*.3);ctx.bezierCurveTo(bx-hr*.7,by-hr*.2,bx-hr*.8+wind,by+len*.5,bx-hr*.15+wind,by+len);
+  ctx.bezierCurveTo(bx+hr*.15+wind,by+len*.83,bx+hr*.43,by+len*.3,bx+hr*.3,by-hr*.3);ctx.fill();ctx.stroke();
+  ctx.strokeStyle=HAIR_HI;ctx.globalAlpha=.6;ctx.lineWidth=1.5;
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(bx-2-i*3,by);ctx.bezierCurveTo(bx-hr*.4-i*2,by+len*.35,bx-hr*.3+wind,by+len*.7,bx+wind-i*2,by+len*(.83+i*.04));ctx.stroke();}
+  ctx.restore();
 }
 
 function head(ctx, R, pose, f, hr, r) {

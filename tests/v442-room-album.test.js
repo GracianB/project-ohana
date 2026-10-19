@@ -20,8 +20,8 @@ test('Relic needs 100 unique finds and freezes the world for exactly 600 ticks o
  assert.equal(claimRoomRelic(g),true);assert.equal(g.roomAlbums.hub.relic,true);assert.equal(claimRoomRelic(g),false);
  for(let i=0;i<599;i++)assert.equal(tickRelicScene(g),true);assert.ok(g.relicScene);tickRelicScene(g);assert.equal(g.relicScene,null);assert.equal(g.score,1000);
 });
-test('Ten rooms contain at least 32 named enemies and all eight added combat roles',()=>{
- for(const room of Object.values(ROOMS)){assert.ok(room.foes.length>=32);assert.ok(room.foes.every(f=>f[4]?.name));assert.equal(new Set(room.foes.map(f=>f[4].role).filter(Boolean)).size,8);}
+test('Ten rooms use compact encounters and exactly one named special',()=>{
+ for(const room of Object.values(ROOMS)){assert.ok(room.foes.length>=6&&room.foes.length<=14);assert.equal(room.foes.filter(f=>f[4]?.special).length,1);assert.ok(room.foes.filter(f=>f[2]!=="boss").every(f=>f[4]?.name));}
 });
 test('Claro has lethal pits, baby-accessible crossings and reversible crumbling ledges',()=>{
  assert.equal(ROOMS.hub.hazards.length,2);for(const h of ROOMS.hub.hazards){assert.equal(h.type,'death');for(const hero of ROSTER)assert.ok(simulateJump(hero.forms[0],{gap:h.w*1.2,landing:600}).landed,hero.id);}

@@ -1,8 +1,10 @@
+import {drawOhanaGardenLandmarks} from './ohana-garden.js';
 const TAU=Math.PI*2;
 const PALETTES={hub:['#537e60','#294f49','#b7d599'],beach:['#789f78','#375d5c','#e8d5a4'],jungle:['#3d7658','#204b48','#8eb873'],cave:['#6f9aaf','#304e69','#c6dfe4'],lab:['#608d99','#314659','#a6e0df'],ridge:['#8faba8','#516c77','#e0e5ce'],space:['#817b9c','#454c70','#b1c4de'],reef:['#61a5a7','#376c81','#b3d8bf'],volcano:['#946b64','#4d4757','#c59b7d'],boss:['#826e71','#453f52','#b8af9c']};
 // Landmarks belong to world coordinates, so camera movement reveals a place.
 export function drawIslandLandmarks(ctx,g,cam,t){
  const r=g.roomDef;if(!r)return;const [light,dark,leaf]=PALETTES[r.id]||PALETTES.hub;
+ if(r.id==='hub'){drawOhanaGardenLandmarks(ctx,g,cam);return;}
  const floor=1134;
  ctx.save();ctx.lineCap='round';
  for(const sector of r.sectors){

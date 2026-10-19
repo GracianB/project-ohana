@@ -1,3 +1,4 @@
+import {drawOhanaGarden} from './ohana-garden.js';
 import {drawNestSanctuary} from './nest-sanctuary.js';
 // Distant scenery only. Solid platforms and hazards are drawn by terrain.js.
 const TAU=Math.PI*2;
@@ -12,6 +13,7 @@ export const SCENIC_PALETTES=Object.freeze({
 function ellipse(ctx,x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fill();}
 
 export function drawScenicBackdrop(ctx,id,cam,t,width,height){
+ if(id==='grove'){drawOhanaGarden(ctx,cam,t,width,height);return;}
  const colors=SCENIC_PALETTES[id]||SCENIC_PALETTES.grove;
  ctx.save();
  try{

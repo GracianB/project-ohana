@@ -95,6 +95,13 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   if (!platformInView(x, w, drawingWidth(ctx))) return;
   const id = world.id || "grove";
   const thin = h <= 24;
+  if(plat._campaignLift){
+    ctx.save();ctx.fillStyle='#765038';ctx.fillRect(x,y+5,w,h-5);
+    ctx.fillStyle='#e3b875';ctx.fillRect(x,y,w,6);ctx.strokeStyle='#b88750';ctx.lineWidth=2;
+    for(let i=16;i<w;i+=24){ctx.beginPath();ctx.moveTo(x+i,y+6);ctx.lineTo(x+i,y+h);ctx.stroke();}
+    ctx.strokeStyle='#e9d5a0';ctx.lineWidth=3;for(const i of [12,w-12]){ctx.beginPath();ctx.moveTo(x+i,y+3);ctx.lineTo(x+i,y+h-2);ctx.stroke();}
+    ctx.restore();return;
+  }
   if(thin&&drawNaturalLedge(ctx,plat,world,cam,t))return;
 
   ctx.save();
