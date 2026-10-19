@@ -18,8 +18,13 @@ export const CHISPIN_GATES=Object.freeze([
  {x:2330,y:1134,w:58,h:200,offset:62},
  {x:2810,y:1134,w:58,h:240,offset:127}
 ]);
+// The flowers are physical tools for climbing: each anchor sits on solid
+// ground, not above one of the two 100px pits. The tall pulse reaches upper
+// islands, including those >500px above the ground.
 export const CHISPIN_SPRINGS=Object.freeze([
- {x:1070,y:1134,power:16.1},{x:2185,y:1134,power:18.0},{x:2910,y:1134,power:17.2}
+ Object.freeze({x:750,y:1134,power:29,aimX:1010,aimY:500}),
+ Object.freeze({x:1860,y:1134,power:30,aimX:1920,aimY:540}),
+ Object.freeze({x:2630,y:1134,power:31,aimX:2890,aimY:480})
 ]);
 export const CHISPIN_CHAPTERS=Object.freeze([
  'EL PRIMER LATIDO','LOS PUENTES DEL TRUENO',
@@ -56,6 +61,8 @@ export function enterChispinStorm(g){
   index,complete:complete||defeated,defeated,
   saved,shards:CHISPIN_SHARDS.filter(x=>saved.has(shardKey(x.id))).length,
   lifts,pulse:0,springCd:0,gateCd:0,gateStates:[],gateSilencedUntil:[0,0,0],
+  springArmed:[true,true,true],springFlash:[0,0,0],comboStep:0,comboAt:-1000,
+  comboCooldown:0,comboCount:0,
   abilityMarks:new Set(),signatureComplete:saved.has(SKILL),bossSummoned:false,notice:''
  };
 }
@@ -95,6 +102,27 @@ export function chispinStormAbility(g,p,index){
    g.nums?.add?.(p.x,p.y-54,'¡TRIPLE CHISPA!','#fff9ad',true);
   }
  }
+ // J → K → L in a short window triggers a deliberate Thunder Circuit
+ // rather than awarding a passive simply for pressing three random keys.
+ const tick=Number(g.t)||0,expected=s.comboStep;
+ if(tick-s.comboAt>220)s.comboStep=0;
+ if(index===s.comboStep){s.comboStep++;s.comboAt=tick;}
+ else{s.comboStep=index===0?1:0;s.comboAt=tick;}
+ if(s.comboStep===3){
+  s.comboStep=0;
+  if(!s.comboCooldown){
+   s.comboCooldown=360;s.comboCount++;s.pulse=80;
+   g.score=(g.score||0)+75;
+   if(Number.isFinite(p.health)&&Number.isFinite(p.maxHealth))
+    p.health=Math.min(p.maxHealth,p.health+8);
+   for(let i=0;i<CHISPIN_GATES.length;i++)s.gateSilencedUntil[i]=tick+235;
+   const boss=g.enemies?.find(e=>e._chispinBoss&&e.hp>0);
+   if(boss&&Math.abs(boss.x+boss.w*.5-(p.x+p.w*.5))<365)
+    boss.stun=Math.max(boss.stun||0,29);
+   g.fx?.emit?.(p.x+p.w*.5,p.y,{color:'#fff0a3',count:g.reduceMotion?8:32,size:4,life:32});
+   g.nums?.add?.(p.x,p.y-85,'¡CIRCUITO DEL TRUENO!','#fff0a3',true);
+  }
+ }
  if(index===0){
   const i=CHISPIN_GATES.findIndex(k=>Math.abs(p.x+p.w*.5-(k.x+k.w*.5))<245);
   if(i>=0){s.gateSilencedUntil[i]=(g.t||0)+175;g.nums?.add?.(CHISPIN_GATES[i].x,p.y-65,'¡RELÁMPAGO ABSORBIDO!','#a6ffdd',true);}
@@ -104,6 +132,7 @@ export function chispinStormAbility(g,p,index){
 export function updateChispinStorm(g,hurt){
  const s=g.chispinStorm,p=g.player;if(!s||!p||p.dead)return;
  const t=g.t||0;s.pulse=Math.max(0,s.pulse-1);s.springCd=Math.max(0,s.springCd-1);
+ s.comboCooldown=Math.max(0,s.comboCooldown-1);
  s.gateCd=Math.max(0,s.gateCd-1);
  for(const lift of s.lifts)movePlatform(g,lift.platform,lift.motion);
  for(const shard of CHISPIN_SHARDS){
@@ -115,11 +144,20 @@ export function updateChispinStorm(g,hurt){
   g.nums?.add?.(shard.x,shard.y-32,'FRAGMENTO '+s.shards+'/8','#ffeca3',true);
   persist(g,key);
  }
- for(const spring of CHISPIN_SPRINGS){
-  if(s.springCd||!p.grounded||Math.abs(p.x+p.w*.5-spring.x)>=42||
-     Math.abs(p.y+p.h-spring.y)>=25)continue;
-  p.vy=-spring.power;p.grounded=false;s.springCd=42;
-  g.fx?.emit?.(spring.x,spring.y-15,{color:'#f5e38d',count:g.reduceMotion?3:12,size:4,life:22});
+ for(let i=0;i<CHISPIN_SPRINGS.length;i++){
+  const spring=CHISPIN_SPRINGS[i],dx=Math.abs(p.x+p.w*.5-spring.x);
+  const feet=p.y+p.h,dy=Math.abs(feet-spring.y);
+  s.springFlash[i]=Math.max(0,s.springFlash[i]-1);
+  if(dx>66||dy>110)s.springArmed[i]=true;
+  // Walking onto an energized flower should also launch. Landing-only
+  // detection stranded players who stepped onto it from a low platform.
+  const valid=p.grounded&&!p._dropWasHeld&&!p._dropPlatform&&dx<50&&dy<20;
+  if(!valid||!s.springArmed[i]||s.springCd)continue;
+  p.vy=-spring.power;p.grounded=false;p.coyote=0;p.jumps=0;
+  p._jumpHeld=false;p._pmove='spring';p.invuln=Math.max(p.invuln||0,14);
+  s.springArmed[i]=false;s.springFlash[i]=35;s.springCd=40;
+  g.fx?.emit?.(spring.x,spring.y-15,{color:'#fff5ae',count:g.reduceMotion?6:28,size:4,up:3,life:35});
+  g.nums?.add?.(spring.x,spring.y-65,'¡FLOR VOLTAICA · SALTO AL CIELO!','#fff1a9',true);
  }
  s.gateStates=CHISPIN_GATES.map((gate,i)=>{
   const phase=((t+gate.offset)%210+210)%210;
@@ -152,11 +190,29 @@ export function drawChispinStorm(ctx,g,cam,t){
    ctx.moveTo(x,y-gate.h*.55);ctx.lineTo(x+gate.w,y-gate.h*.55);ctx.stroke();ctx.setLineDash([]);}
   ctx.globalAlpha=1;
  }
- for(const spring of CHISPIN_SPRINGS){
-  const x=spring.x-cam.x,y=spring.y-cam.y;if(x<-80||x>1700)continue;
-  ctx.fillStyle='#234c69';ctx.fillRect(x-38,y-14,76,14);
-  ctx.strokeStyle='#ffe7aa';ctx.lineWidth=4;ctx.beginPath();
-  ctx.moveTo(x-34,y-17);ctx.lineTo(x-14,y-28);ctx.lineTo(x,y-17);ctx.lineTo(x+14,y-28);ctx.lineTo(x+34,y-17);ctx.stroke();
+ for(let i=0;i<CHISPIN_SPRINGS.length;i++){
+  const spring=CHISPIN_SPRINGS[i],x=spring.x-cam.x,y=spring.y-cam.y;
+  if(x<-110||x>(g.viewW||1600)+110)continue;
+  // Five translucent voltaic petals surround the actual collidable anchor.
+  const shine=s.springFlash[i]/35,pulse=reduced?0:Math.sin(t*.085+i)*4;
+  ctx.fillStyle='#1a3b60';ctx.fillRect(x-44,y-12,88,12);
+  ctx.save();ctx.translate(x,y-21);
+  for(let petal=0;petal<5;petal++){
+   const a=petal*Math.PI*2/5-Math.PI/2;
+   ctx.save();ctx.rotate(a);ctx.fillStyle=petal%2?'#a8ecff':'#ffe59c';
+   ctx.globalAlpha=.74+shine*.25;ctx.beginPath();
+   ctx.ellipse(0,-17-pulse*.2,13+shine*4,23+shine*6,0,0,Math.PI*2);
+   ctx.fill();ctx.restore();
+  }
+  ctx.globalAlpha=1;ctx.fillStyle='#fff8d3';ctx.beginPath();ctx.arc(0,0,11,0,Math.PI*2);ctx.fill();ctx.restore();
+  // The dotted vertical lightning trail explains where the flower launches.
+  ctx.strokeStyle='#ffeca4';ctx.lineWidth=2;ctx.globalAlpha=.5+shine*.5;
+  ctx.setLineDash([7,10]);ctx.beginPath();ctx.moveTo(x,y-55);ctx.lineTo(x,y-440);ctx.stroke();
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+  if(shine>0){
+   ctx.strokeStyle='#fdf5bd';ctx.lineWidth=4;ctx.beginPath();
+   ctx.arc(x,y-21,28+(1-shine)*56,0,Math.PI*2);ctx.stroke();
+  }
  }
  for(const shard of CHISPIN_SHARDS){
   if(s.saved.has(shardKey(shard.id)))continue;
@@ -187,5 +243,6 @@ export function drawChispinStorm(ctx,g,cam,t){
 export function chispinStormSnapshot(g){
  const s=g.chispinStorm;
  return s?{index:s.index,complete:s.complete,defeated:s.defeated,shards:s.shards,
-  rails:s.lifts.length,gates:s.gateStates.slice(),signature:s.signatureComplete}:null;
+  rails:s.lifts.length,gates:s.gateStates.slice(),signature:s.signatureComplete,
+  flowerUses:s.springFlash.filter(n=>n>0).length,combos:s.comboCount}:null;
 }
