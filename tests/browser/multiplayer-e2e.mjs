@@ -492,7 +492,19 @@ try {
       if(!['yarn','purr','wisp'].every(kind=>sample.michiFx.some(f=>f.kind===kind)))
         throw Error('Michi source J/K/L FX incomplete '+JSON.stringify(sample.michiFx));
       onlineCoop.lastEffectsSentAt=0;
-      if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
+      let accepted=onlineCoop.sendPeerEffects(g,true);
+       // Retain the original real J/K/L casts. If SCTP is backpressured after
+       // reconnection, wait for the game's bounded reliable retry, not a fake
+       // peer effect or a longer expiration.
+       for(let attempt=0;!accepted&&attempt<20;attempt++){
+         await new Promise(resolve=>setTimeout(resolve,100));
+         accepted=onlineCoop.sendPeerEffects(g,false);
+       }
+       if(!accepted)throw Error('Michi native reliable WebRTC FX stayed congested: '+JSON.stringify({
+         direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+         eventBuffered:onlineCoop.direct?.eventChannel?.bufferedAmount,
+         poseBuffered:onlineCoop.direct?.poseChannel?.bufferedAmount
+       }));
     });
     try {
       await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
@@ -543,7 +555,16 @@ try {
       if(!['chain','trail','storm'].every(kind=>sample.chispinFx.some(f=>f.kind===kind)))
         throw Error('Chispin source J/K/L FX incomplete '+JSON.stringify(sample.chispinFx));
       onlineCoop.lastEffectsSentAt=0;
-      if(!onlineCoop.sendPeerEffects(game,true))throw Error('Chispin native WebRTC FX delivery rejected');
+      let accepted=onlineCoop.sendPeerEffects(game,true);
+       for(let attempt=0;!accepted&&attempt<20;attempt++){
+         await new Promise(resolve=>setTimeout(resolve,100));
+         accepted=onlineCoop.sendPeerEffects(game,false);
+       }
+       if(!accepted)throw Error('Chispin native reliable WebRTC FX stayed congested: '+JSON.stringify({
+         direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+         eventBuffered:onlineCoop.direct?.eventChannel?.bufferedAmount,
+         poseBuffered:onlineCoop.direct?.poseChannel?.bufferedAmount
+       }));
     });
     // Preserve 3-second deadline and original purely cosmetic assertions.
     try {
