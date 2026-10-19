@@ -1,4 +1,4 @@
-const VERSION = "ohana-453";
+const VERSION = "ohana-454";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -7,6 +7,11 @@ const PRECACHE = [
   "./systems/stitcho-trail.js?v=" + VERSION,
   "./systems/stitcho-boss.js?v=" + VERSION,
   "./worlds/stitcho-archipelago.js?v=" + VERSION,
+  "./systems/chispin-room.js?v=" + VERSION,
+  "./systems/chispin-boss.js?v=" + VERSION,
+  "./systems/chispin-storm.js?v=" + VERSION,
+  "./systems/chispin-atlas.js?v=" + VERSION,
+  "./worlds/chispin-isles.js?v=" + VERSION,
   "./systems/coop-welcome.js?v=" + VERSION,
   "./systems/grove-guardian.js?v=" + VERSION,
   "./systems/kilo-combo.js?v=" + VERSION,
@@ -320,7 +325,7 @@ const PRECACHE_REVISIONS = {
   "systems/room-album.js": "07a117b3ddb6e6df4d91ed5d2e2389dc1b03beba",
   "systems/room-cast.js": "78205e4792f27da9e86b2f0207c9aabaaec2f7b8",
   "systems/relic-cinema.js": "7865586739fd69632e6e62fb46b9db1329191177",
-  "systems/kilo-grove.js": "6e734822e55541f2b646d9ed59f694358fbe5266",
+  "systems/kilo-grove.js": "b14aec4c128868c20a8d2ae438ec315455a9fd18",
   "systems/moving-platforms.js": "eaa75c99c844cb3ff2bf598bbbc93990306fb085",
   "characters/hula-depth.js": "d8d727af693c5b0e406f40d69c163126087c8e0d",
   "systems/world-bounds.js": "bb28e553ed1c07a0dfc0b62b3924fe0525f359c2",
@@ -371,7 +376,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "2805eb386c09377af7d3af204345580ff2585b37",
+  "index.html": "e607a639f97042b3b628ed6d1df3389fe13b9a09",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -390,13 +395,13 @@ const PRECACHE_REVISIONS = {
   "experience.css": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
   "cinematic-ui.css": "4f413944a0ba3c63d43c078c3565f223df736c38",
   "supreme.css": "8cdec07251d4a7f268ec50fb3f96a199c32287f5",
-  "world-map.css": "ec63726b1bb04d6b4a78adbaba11fd4f817f1a09",
+  "world-map.css": "903a4a6a6e1dcb0a1e66dede1be7c4cea91a7540",
   "mobile-v96.css": "94eee90701d07018460f5f18889e7a3d28f57941",
   "v100-special.css": "0e9d0b30a4955be103011c8818f0302b29d22c30",
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "0a6c43463bd4550252d56019af65a521bc841619",
+  "game.js": "cc2b56b1804da9f0bc9d6e7ab49322ea9db492eb",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "41320480ca284e54cd100c31148c95a4b8c9dbac",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
@@ -608,12 +613,17 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "systems/hero-collections.js": "fa48fb0034dd5cf72802318f586aa70c75856f29",
+  "systems/hero-collections.js": "4f3aaaf3d5332bb898ccdf3543e9c4280525d762",
   "systems/stitcho-room.js": "5c3c842830115ba4b39693a216f996712483779e",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
   "systems/stitcho-trail.js": "2add4e32314c4d58900ca335f6c356a9e526c73f",
   "systems/stitcho-boss.js": "7a0a5d3e6fc1c24329a98aa910004f6d6e90c3d5",
-  "worlds/stitcho-archipelago.js": "c4ce58b4e7818fdea549d0242029ec0aca2a2845"
+  "worlds/stitcho-archipelago.js": "c4ce58b4e7818fdea549d0242029ec0aca2a2845",
+  "systems/chispin-room.js": "4abc51f60bd866e3e553ca2084b6ccdcaec94a73",
+  "systems/chispin-boss.js": "aeb39ea71d955ef921a757aa31323ad818de4648",
+  "systems/chispin-storm.js": "ee65f3f119dca11f5b154a332efd9018ff97688c",
+  "systems/chispin-atlas.js": "9324e00d0b32ba32b1d0f77f7de355df098ce045",
+  "worlds/chispin-isles.js": "e9a42c2874417acd3c99df68b605346d25b1c14d"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
