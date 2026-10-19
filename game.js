@@ -10,6 +10,7 @@ import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoT
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
 import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
+import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
@@ -649,7 +650,9 @@ return;
 }
 DOM.help?.classList.remove("open");
 setPaused(false);
-grid.innerHTML = renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+const personalMap=!!game.stitchoTrail;
+const title=document.getElementById("map-title");if(title)title.textContent=personalMap?"Archipiélago del Caos":"Mapa de Isla Hoku";
+grid.innerHTML = personalMap?renderStitchoAtlasHTML(game):renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
 grid.onclick = event => {
   const node=event.target.closest('.wm-node');
   if(!node||!grid.contains(node))return;
@@ -657,7 +660,7 @@ grid.onclick = event => {
     other.classList.toggle('selected',other===node);
     other.setAttribute('aria-pressed',String(other===node));
   }
-  grid.querySelector('.wm-detail').innerHTML=worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+  grid.querySelector('.wm-detail').innerHTML=personalMap?stitchoAtlasDetail(node.dataset.room,game):worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
 };
 requestAnimationFrame(()=>{
  const node=grid.querySelector('.wm-node.here');
