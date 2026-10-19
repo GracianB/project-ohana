@@ -33,7 +33,7 @@ export const CHISPIN_CHAPTERS=Object.freeze([
 const shardKey=id=>'lab-chispin-shard-'+id;
 const close=(p,x,y,d)=>!!p&&Math.hypot(p.x+p.w*.5-x,p.y+p.h*.5-y)<d;
 function persist(g,key){
- g.secrets||={};g.secrets.hub||=[];
+ g.secrets||={};g.secrets[ROOM]||=[];
  if(g.secrets[ROOM].includes(key))return false;
  g.secrets[ROOM].push(key);g.save?.();return true;
 }
