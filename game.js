@@ -9,6 +9,7 @@ import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoTrailSnapshot,stitchoAbility} from './systems/stitcho-trail.js';
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
+import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
@@ -2729,17 +2730,19 @@ if (paintedHubOn(game.roomId)) {
 drawPaintedHub(ctx, game.cam, game.worldW, game.worldH, viewportW,viewportH);
 drawLivingWorld(ctx, game, t, viewportW,viewportH);
 } else {
-renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
-drawRoomAtmosphere(
-  ctx,
-  game.roomId,
-  game.cam,
-  t,
-  viewportW,viewportH,
-  game.player?.id,
-  game.reduceMotion || reduceMotion
-);
-drawLivingWorld(ctx, game, t, viewportW,viewportH);
+if(game.stitchoTrail){
+ const tier=game.enemies.find(e=>e._stitchoBoss)?._glitch?.tier||1;
+ drawStitchoArchipelago(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.stitchoTrail.index
+ });
+}else{
+ renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
+ drawRoomAtmosphere(
+   ctx,game.roomId,game.cam,t,viewportW,viewportH,game.player?.id,
+   game.reduceMotion||reduceMotion
+ );
+ drawLivingWorld(ctx, game, t, viewportW,viewportH);
+}
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
