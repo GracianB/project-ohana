@@ -6,6 +6,8 @@
 
 Un juego de plataformas y aventura 2D hecho con JavaScript y Canvas. Explora, domina poderes distintos, evoluciona, descubre secretos y lucha junto a otra persona.
 
+**10 personajes · 5 formas por héroe · 10 salas conectadas en Isla Hoku.**
+
 <a href="https://gracianb.github.io/project-ohana/"><img alt="Jugar Project OHANA" src="https://img.shields.io/badge/JUGAR_EN_EL_NAVEGADOR-7EE7FF?style=for-the-badge&labelColor=071226" /></a>
 <a href="https://github.com/GracianB/project-ohana/actions"><img alt="GitHub Actions" src="https://img.shields.io/github/actions/workflow/status/GracianB/project-ohana/ohana-ci.yml?branch=main&style=for-the-badge&labelColor=071226&label=CI" /></a>
 
