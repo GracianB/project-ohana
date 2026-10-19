@@ -463,7 +463,6 @@ try {
       window.__michiFxProof=proof;
       window.__michiFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
       onlineCoop.receiveDirectEvent=function(game,event){
-        const before=game.coopPeerEffects?.frameNo;
         const outcome=original.call(this,game,event);
         if(event.kind==='effects'){
           const fx=game.coopPeerEffects?.michiFx||[];
@@ -517,7 +516,6 @@ try {
       window.__chispinFxProof=proof;
       window.__chispinFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
       onlineCoop.receiveDirectEvent=function(game,event){
-        const before=game.coopPeerEffects?.frameNo;
         const outcome=original.call(this,game,event);
         if(event.kind==='effects'){
           const fx=game.coopPeerEffects?.chispinFx||[];
