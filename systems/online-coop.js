@@ -381,8 +381,22 @@ class OnlineCoop {
     // new offer arrives, avoiding simultaneous teardown during slow signaling.
     if(!this.direct.initiator)return false;
     const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt);
-    if(!rtcCanRetry({now,at:this.directRetryAt,hidden:typeof document!=="undefined"&&document.hidden,
-      lobby:this.snapshot?.phase==="lobby",peer:!!this.remote?.playerId,connected}))return false;
+    const hidden=typeof document!=="undefined"&&document.hidden;
+    const lobby=this.snapshot?.phase==="lobby";
+    const normal=rtcCanRetry({now,at:this.directRetryAt,hidden,lobby,peer:!!this.remote?.playerId,connected});
+    // A physically CLOSED data channel cannot heal by waiting for the usual
+    // 16-second quiet retry. Recover it promptly during an active game,
+    // including unfocused browser tabs. Only proven transport closure qualifies:
+    // do not churn an OPEN link when a 60 Hz game tick is briefly throttled.
+    const hardClosed=!this.direct.active&&(
+      this.direct.closed===true||
+      ["closed","closing"].includes(this.direct.poseChannel?.readyState)||
+      ["closed","closing"].includes(this.direct.eventChannel?.readyState));
+    const expedited=hardClosed&&!!this.remote?.playerId&&!lobby&&!connected&&
+      this.directConnectedAt>0&&now-this.directConnectedAt>=2000&&
+      now-(this.lastHardCloseRepairAt||0)>=5000;
+    if(!normal&&!expedited)return false;
+    if(expedited)this.lastHardCloseRepairAt=now;
     this.direct?.close();this.direct=null;
     this.directAttempted=false;
     this.lastDirectPoseAt=0;this.directConnectedAt=0;
