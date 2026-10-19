@@ -106,7 +106,9 @@ export function updateHeroCollection(g){
  if(s.scene>0)s.scene--;if(s.pulse>0)s.pulse--;
  if(s.complete)return;
  let changed=0;
- for(const item of s.items){if(s.collected.has(item.id)||!inRange(p,item))continue;
+ for(const item of s.items){
+  const close=item.final?Math.hypot(p.x+p.w/2-item.x,p.y+p.h/2-item.y)<145:inRange(p,item);
+  if(s.collected.has(item.id)||!close)continue;
   if(item.final&&s.collected.size!==99)continue;
   if(takeHeroCollectionItem(g,item.id))changed++;
  }
