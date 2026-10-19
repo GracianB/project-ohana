@@ -453,6 +453,19 @@ try {
   console.log("multiplayer: bidirectional U echoes verified");
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
+    // Arm the guest before casting: normal peer FX snapshots expire after
+    // 750 ms and may disappear before a post-cast Playwright wait starts.
+    // Observe actual deserialized game state, preserving the 3-second budget.
+    await guestPage.evaluate(()=>{
+      window.__michiFxProof=null;
+      window.__michiFxObserver=setInterval(async()=>{
+        if(window.__michiFxProof)return;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const fx=onlineCoop._combatGame?.coopPeerEffects?.michiFx||[];
+        if(['yarn','purr','wisp'].every(kind=>fx.some(f=>f.kind===kind)))
+          window.__michiFxProof=structuredClone(fx);
+      },20);
+    });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
       const {useAbility,updateAbilityFx}=await import('/systems/abilities.js');
@@ -473,8 +486,16 @@ try {
       onlineCoop.lastEffectsSentAt=0;
       if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
     });
-    await guestPage.waitForFunction(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');const f=onlineCoop._combatGame.coopPeerEffects?.michiFx||[];return ['yarn','purr','wisp'].every(kind=>f.some(e=>e.kind===kind));},null,{timeout:3000});
-    assert.equal(await guestPage.evaluate(async()=>{const {onlineCoop}=await import('/systems/online-coop.js');return onlineCoop._combatGame.coopPeerEffects.michiFx.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined);}),true);
+    try {
+      await guestPage.waitForFunction(()=>!!window.__michiFxProof,null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(()=>window.__michiFxProof);
+      assert.ok(['yarn','purr','wisp'].every(kind=>captured.some(f=>f.kind===kind)),
+        'real guest deserialization missed one Michi J/K/L effect');
+      assert.equal(captured.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
+        'Michi peer echoes must remain cosmetic');
+    } finally {
+      await guestPage.evaluate(()=>{clearInterval(window.__michiFxObserver);delete window.__michiFxObserver;delete window.__michiFxProof;});
+    }
   }
   // V303: actual J/K/L casts, native FX and a direct delivery to the other player.
   if(hostCharacter==='chispin'){
