@@ -1,3 +1,7 @@
+## Identidad V454 · Chispín redondo y Kirin como jefe secreto del Mundo 2
+
+Se impide confundir los dos diseños: el Chispín jugable conserva `characters/art/pikachu.js`, sus cinco formas y **Trueno Gordo** como cuarta transformación. La criatura de aspecto de dragón, blanca y dorada, queda fuera de la selección y del motor de evolución del jugador. Se reutiliza como **Kirin**, mini-jefe opcional de Stitcho en el segundo mundo, después de la baliza ECO. Su aparición, combate, derrota y guardado son independientes del Núcleo Glitch. Pruebas unitarias y de Chromium para impedir regresiones. Sin desplegar hasta aprobar CI y fusionar PR #390.
+
 ## ohana-454 · Islas del Relámpago, capítulo personal de Chispín
 
 Se añade una variante de escenario individual, aislada del Claro cooperativo: cuatro sectores, diez enemigos elegidos, cinco plataformas móviles, tres muelles de impulso, tres arcos eléctricos con aviso y contrajuego mediante J, ocho fragmentos y tres relés persistentes. El Ojo de la Tormenta tiene 520 PV, tres fases y cuatro patrones telegrafiados; el personaje conserva su propia colección de 100 recuerdos y la recompensa CORONA DE TORMENTA. Mapa exclusivo interactivo, atmósfera Canvas animada y escenarios para Chromium desktop/mobile.
