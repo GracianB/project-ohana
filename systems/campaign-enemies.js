@@ -3,6 +3,7 @@ const cx=e=>e.x+e.w/2,cy=e=>e.y+e.h/2;
 export function campaignRole(room,index){return CAMPAIGN_ROLES[(index+['beach','jungle','cave','lab','ridge','space','reef','volcano'].indexOf(room)*3+24)%8];}
 export function updateCampaignEnemy(e,g,hurt){
  if(!e.campaignRole)return false;
+ if(e.invuln>0)e.invuln--;
  const p=g.player,role=e.campaignRole;if(!p||p.dead)return true;
  const dx=cx(p)-cx(e),dy=cy(p)-cy(e),dir=Math.sign(dx)||1,dist=Math.hypot(dx,dy),a=e._campaign||={age:0,wind:0,cd:40,active:0,aim:1};a.age++;
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
