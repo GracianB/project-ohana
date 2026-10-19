@@ -430,7 +430,29 @@ class OnlineCoop {
     }else if(event.kind==="combat"){
       this.receiveCombatFrame(game,event.payload);
     }else if(event.kind==="effects"){
-      if(applyPeerEffects(game,event.payload))this.lastPeerEffectsAt=performance.now();
+      const frame=event.payload;
+      const received=applyPeerEffects(game,frame);
+      if(received)this.lastPeerEffectsAt=performance.now();
+      // A queued SCTP send is NOT proof the other browser has displayed it.
+      // Acknowledge only complete, validated, damage-free visual trios in the
+      // current room/scope. Duplicates get an ack too if they were displayed.
+      const state=game.coopPeerEffects;
+      const trio=list=>Array.isArray(list)&&
+        ["yarn","purr","wisp"].every(kind=>list.some(f=>f.kind===kind));
+      const spark=list=>Array.isArray(list)&&
+        ["chain","trail","storm"].every(kind=>list.some(f=>f.kind===kind));
+      const valid=frame?.roomId===game.roomId&&state?.scope===frame.scope&&
+        (trio(frame.michiFx)&&trio(state.michiFx)||
+         spark(frame.chispinFx)&&spark(state.chispinFx));
+      if(valid&&Number.isSafeInteger(frame.frameNo)&&frame.frameNo>0){
+        this.direct?.sendEvent?.("state",{state:"fx-ack",
+          scope:frame.scope,frameNo:frame.frameNo});
+      }
+    }else if(event.kind==="state"&&event.payload?.state==="fx-ack"){
+      const ack=event.payload,pending=this.pendingVisualCombo;
+      if(pending&&ack.scope===pending.scope&&
+         ack.frameNo===pending.frame.frameNo&&
+         pending.link===this.direct)this.pendingVisualCombo=null;
     }else if(event.kind==="state"&&event.payload?.state==="protocol"){
       this.peerCombatProtocol=Number.isInteger(event.payload.version)?event.payload.version:0;
     }else if(event.kind==="state"&&["won","lost"].includes(event.payload?.state)){
@@ -1000,14 +1022,15 @@ class OnlineCoop {
       }
       return false;
     }
-    if(!force&&!this.pendingVisualCombo&&now-this.lastEffectsSentAt<200)return false;
+    if(!force&&now-this.lastEffectsSentAt<200)return false;
     // A full J/K/L trio must be accepted by ordered SCTP, not only
     // the disposable pose lane. Retry at the existing game update tick.
     const saved=this.pendingVisualCombo;
     if(saved){
       const accepted=sendPeerEffectsWithReliableDuet(this.direct,saved.frame,true);
       if(!accepted)return false;
-      this.pendingVisualCombo=null;
+      // Only the peer's explicit fx-ack clears the pending burst. A successful
+      // local send may still be lost when the remote data channel reconnects.
       this.lastEffectsSentAt=now;
       return true;
     }
