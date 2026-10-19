@@ -1,3 +1,9 @@
+## ohana-454 · Islas del Relámpago, capítulo personal de Chispín
+
+Se añade una variante de escenario individual, aislada del Claro cooperativo: cuatro sectores, diez enemigos elegidos, cinco plataformas móviles, tres muelles de impulso, tres arcos eléctricos con aviso y contrajuego mediante J, ocho fragmentos y tres relés persistentes. El Ojo de la Tormenta tiene 520 PV, tres fases y cuatro patrones telegrafiados; el personaje conserva su propia colección de 100 recuerdos y la recompensa CORONA DE TORMENTA. Mapa exclusivo interactivo, atmósfera Canvas animada y escenarios para Chromium desktop/mobile.
+
+**Estado:** desarrollo y pruebas en rama `feat/chispin-thunder-isles`. No afirmar publicado hasta que pase CI/E2E y se fusione en `main`. El mundo anterior Kilo/Stitcho sigue en V453. La integración multijugador usa el Claro compartido, no este mundo individual.
+
 ## ohana-453 · Kilo y Stitcho · mundos personales + colecciones + offline
 
 Se mantiene el capítulo de Kilo V452 y se añade la primera fase jugable del Archipiélago del Caos de Stitcho: cuatro sectores propios, raíles móviles, trampolines, trampas eléctricas, ocho fragmentos, tres antenas, mapa de personaje, enemigos temáticos y Núcleo Glitch de 480 PV con tres fases y cuatro ataques telegrafiados.
