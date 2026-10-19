@@ -2,11 +2,11 @@
 // The same Hoku combat and movement engine powers the authored challenges.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {CHISPIN_BOSS_ID} from './chispin-boss.js';
-const ALL='hub-chispin-storm-v1',SKILL='hub-chispin-constellation-v1';
+const ROOM='lab',ALL='lab-chispin-storm-v1',SKILL='lab-chispin-constellation-v1';
 export const CHISPIN_RELAYS=Object.freeze([
- Object.freeze({id:'hub-chispin-relay-0',x:440,y:1075,name:'CHISPA',need:0}),
- Object.freeze({id:'hub-chispin-relay-1',x:1760,y:1083,name:'IMPULSO',need:2}),
- Object.freeze({id:'hub-chispin-relay-2',x:3075,y:1080,name:'TEMPESTAD',need:5})
+ Object.freeze({id:'lab-chispin-relay-0',x:440,y:1075,name:'CHISPA',need:0}),
+ Object.freeze({id:'lab-chispin-relay-1',x:1760,y:1083,name:'IMPULSO',need:2}),
+ Object.freeze({id:'lab-chispin-relay-2',x:3075,y:1080,name:'TEMPESTAD',need:5})
 ]);
 export const CHISPIN_SHARDS=Object.freeze([
  {id:'a',x:590,y:1055},{id:'b',x:810,y:785},{id:'c',x:1320,y:1080},
@@ -30,19 +30,19 @@ export const CHISPIN_CHAPTERS=Object.freeze([
  'EL PRIMER LATIDO','LOS PUENTES DEL TRUENO',
  'LAS NUBES IMPOSIBLES','EL OJO DE LA TORMENTA','LA CORONA DE LAS ISLAS'
 ]);
-const shardKey=id=>'hub-chispin-shard-'+id;
+const shardKey=id=>'lab-chispin-shard-'+id;
 const close=(p,x,y,d)=>!!p&&Math.hypot(p.x+p.w*.5-x,p.y+p.h*.5-y)<d;
 function persist(g,key){
  g.secrets||={};g.secrets.hub||=[];
- if(g.secrets.hub.includes(key))return false;
- g.secrets.hub.push(key);g.save?.();return true;
+ if(g.secrets[ROOM].includes(key))return false;
+ g.secrets[ROOM].push(key);g.save?.();return true;
 }
 export function enterChispinStorm(g){
- if(g.player?.id!=='chispin'||g.roomId!=='hub'||g.personalAdventureSolo===false){
+ if(g.player?.id!=='chispin'||g.roomId!==ROOM||g.personalAdventureSolo===false){
   g.chispinStorm=null;return;
  }
- const saved=new Set(g.secrets?.hub||[]);
- const defeated=(g.clearedEncounters?.hub||[]).includes(CHISPIN_BOSS_ID);
+ const saved=new Set(g.secrets?.[ROOM]||[]);
+ const defeated=(g.clearedEncounters?.[ROOM]||[]).includes(CHISPIN_BOSS_ID);
  const complete=saved.has(ALL);
  let index=complete?3:CHISPIN_RELAYS.findIndex(relay=>!saved.has(relay.id));
  if(index<0)index=3;
@@ -173,7 +173,7 @@ export function updateChispinStorm(g,hurt){
  });
  if(s.complete&&!s.defeated&&!s.bossSummoned&&typeof g.spawnChispinBoss==='function')
   s.bossSummoned=!!g.spawnChispinBoss();
- if(!s.defeated&&(g.clearedEncounters?.hub||[]).includes(CHISPIN_BOSS_ID)){
+ if(!s.defeated&&(g.clearedEncounters?.[ROOM]||[]).includes(CHISPIN_BOSS_ID)){
   s.defeated=true;s.pulse=180;s.notice='VICTORIA';
  }
 }
