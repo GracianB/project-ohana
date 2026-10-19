@@ -1028,10 +1028,12 @@ class OnlineCoop {
     const saved=this.pendingVisualCombo;
     if(saved){
       const accepted=sendPeerEffectsWithReliableDuet(this.direct,saved.frame,true);
+      // The existing 5 Hz budget applies to both successful and rejected
+      // attempts: temporary SCTP congestion must never create a retry storm.
+      this.lastEffectsSentAt=now;
       if(!accepted)return false;
       // Only the peer's explicit fx-ack clears the pending burst. A successful
       // local send may still be lost when the remote data channel reconnects.
-      this.lastEffectsSentAt=now;
       return true;
     }
     // Native U handshake and normal 5Hz FX retain their original behavior.
