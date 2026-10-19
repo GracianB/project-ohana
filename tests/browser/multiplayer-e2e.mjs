@@ -457,13 +457,15 @@ try {
     // 750 ms and may disappear before a post-cast Playwright wait starts.
     // Observe actual deserialized game state, preserving the 3-second budget.
     await guestPage.evaluate(()=>{
-      window.__michiFxProof=null;
+      window.__michiFxProof={};
       window.__michiFxObserver=setInterval(async()=>{
-        if(window.__michiFxProof)return;
+        if(!window.__michiFxProof)return;
         const {onlineCoop}=await import('/systems/online-coop.js');
         const fx=onlineCoop._combatGame?.coopPeerEffects?.michiFx||[];
-        if(['yarn','purr','wisp'].every(kind=>fx.some(f=>f.kind===kind)))
-          window.__michiFxProof=structuredClone(fx);
+        for(const effect of fx){
+          if(['yarn','purr','wisp'].includes(effect.kind)&&!window.__michiFxProof[effect.kind])
+            window.__michiFxProof[effect.kind]=structuredClone(effect);
+        }
       },20);
     });
     await hostPage.evaluate(async()=>{
@@ -487,11 +489,11 @@ try {
       if(!onlineCoop.sendPeerEffects(g,true))throw Error('Michi native WebRTC FX delivery rejected');
     });
     try {
-      await guestPage.waitForFunction(()=>!!window.__michiFxProof,null,{timeout:3000,polling:50});
+      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
       const captured=await guestPage.evaluate(()=>window.__michiFxProof);
-      assert.ok(['yarn','purr','wisp'].every(kind=>captured.some(f=>f.kind===kind)),
+      assert.ok(['yarn','purr','wisp'].every(kind=>!!captured[kind]),
         'real guest deserialization missed one Michi J/K/L effect');
-      assert.equal(captured.every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
+      assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
         'Michi peer echoes must remain cosmetic');
     } finally {
       await guestPage.evaluate(()=>{clearInterval(window.__michiFxObserver);delete window.__michiFxObserver;delete window.__michiFxProof;});
@@ -502,13 +504,15 @@ try {
     // Observe the real deserialized FX before casting. J/K are short lived;
     // waiting until after the host RPC can miss a valid WebRTC delivery.
     await guestPage.evaluate(()=>{
-      window.__chispinFxProof=null;
+      window.__chispinFxProof={};
       window.__chispinFxObserver=setInterval(async()=>{
-        if(window.__chispinFxProof)return;
+        if(!window.__chispinFxProof)return;
         const {onlineCoop}=await import('/systems/online-coop.js');
         const fx=onlineCoop._combatGame?.coopPeerEffects?.chispinFx||[];
-        if(['chain','trail','storm'].every(kind=>fx.some(f=>f.kind===kind)))
-          window.__chispinFxProof=structuredClone(fx);
+        for(const effect of fx){
+          if(['chain','trail','storm'].includes(effect.kind)&&!window.__chispinFxProof[effect.kind])
+            window.__chispinFxProof[effect.kind]=structuredClone(effect);
+        }
       },20);
     });
     await hostPage.evaluate(async()=>{
@@ -531,11 +535,11 @@ try {
     });
     // Preserve 3-second deadline and original purely cosmetic assertions.
     try {
-      await guestPage.waitForFunction(()=>!!window.__chispinFxProof,null,{timeout:3000,polling:50});
+      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:3000,polling:50});
       const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
-      assert.ok(['chain','trail','storm'].every(kind=>captured.some(f=>f.kind===kind)),
+      assert.ok(['chain','trail','storm'].every(kind=>!!captured[kind]),
         'native Chispin J/K/L effects were not all deserialized by guest');
-      assert.equal(captured.every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
+      assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
         'native electrical echoes must never carry damaging state');
     } finally {
       await guestPage.evaluate(()=>{clearInterval(window.__chispinFxObserver);delete window.__chispinFxObserver;delete window.__chispinFxProof;});
