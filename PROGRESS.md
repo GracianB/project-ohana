@@ -1,3 +1,11 @@
+## ohana-453 · Kilo y Stitcho · mundos personales + colecciones + offline
+
+Se mantiene el capítulo de Kilo V452 y se añade la primera fase jugable del Archipiélago del Caos de Stitcho: cuatro sectores propios, raíles móviles, trampolines, trampas eléctricas, ocho fragmentos, tres antenas, mapa de personaje, enemigos temáticos y Núcleo Glitch de 480 PV con tres fases y cuatro ataques telegrafiados.
+
+El sistema de colecciones personales define 100 objetos por héroe y una recompensa única al completarlos. Se conserva el álbum compartido de Hoku y se añade persistencia por personaje. Precache y hashes regenerados para seis módulos nuevos; HTML y Service Worker usan `ohana-453`.
+
+**Estado:** implementado en PR #387; sin declarar publicado hasta que las pruebas unitarias, E2E de navegador, cooperativo, regresión visual y publicación sean verdes. El README público se ha renovado por separado en main. Los otros ocho mundos personales continúan planificados.
+
 ## ohana-452 · Fase 1 Kilo: isla y guardián
 
 Integra main V451 conservando sus mejoras de campaña, mapa y cooperativo, junto con Kilo V1. Bahía del compás usa palmeras y cabaña detalladas, escenario de madera, faroles, flores y espuma de costa. Kilo interpreta entrada, hula, ukelele y bienvenida; Stitcho reacciona con su nave.
