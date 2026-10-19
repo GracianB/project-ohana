@@ -158,6 +158,9 @@ try {
 
   await hostPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
   await guestPage.locator("#online-peer-badge").waitFor({ state: "visible", timeout: 3000 });
+  // Keep this transport/recovery stage independent of ambient enemy pressure.
+  // Later fixtures still verify real replicated enemies and exact guest damage.
+  for(const page of [hostPage,guestPage])await page.evaluate(async()=>{const {onlineCoop}=await import("/systems/online-coop.js");onlineCoop._combatGame.player.invuln=60000;});
   // V108: both real Chromium instances must exchange SDP through the SAME
   // fake Netlify room, then open direct SCTP pose + reliable action channels.
   for (const [label,page] of [["host",hostPage],["guest",guestPage]]) {
@@ -238,7 +241,7 @@ try {
     if(recoveredSession)break;
     await hostPage.waitForTimeout(200);
   }
-  if(!recoveredSession)console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,host:await hostPage.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,paused:document.getElementById("pause")?.className,body:document.body.className,state:o.snapshot?.phase,initiator:o.direct?.initiator,active:o.direct?.active,attempted:o.directAttempted,available:o.direct?.available,peer:!!o.remote?.playerId,at:o.directRetryAt,now:performance.now()};})}));
+  if(!recoveredSession)console.error("RTC RECOVERY DIAGNOSTICS",JSON.stringify({errors,host:await hostPage.evaluate(async()=>{const {onlineCoop:o}=await import("/systems/online-coop.js");return {hidden:document.hidden,paused:document.getElementById("pause")?.className,body:document.body.className,hp:o._combatGame?.player?.health,dead:o._combatGame?.player?.dead,state:o.snapshot?.phase,initiator:o.direct?.initiator,active:o.direct?.active,attempted:o.directAttempted,available:o.direct?.available,peer:!!o.remote?.playerId,at:o.directRetryAt,now:performance.now()};})}));
   assert.ok(recoveredSession,"host did not establish a fresh RTC session after link loss");
   await guestPage.waitForFunction(async sessionId=>{
     const {onlineCoop}=await import("/systems/online-coop.js");
