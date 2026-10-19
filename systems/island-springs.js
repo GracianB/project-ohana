@@ -1,7 +1,12 @@
 const TAU=Math.PI*2;
 const COLORS={hub:'#f4d98e',beach:'#95e4ed',jungle:'#b7ef94',cave:'#cbb5ff',lab:'#89e8d9',ridge:'#d5eeff',space:'#d4b8f8',reef:'#f0b5da',volcano:'#ffc495'};
 function springs(g){
- if(g.roomId==='boss'||!COLORS[g.roomId]){g.islandSprings=null;return null;}
+ // Personal Stitcho and Chispín routes already have authored, collidable
+ // spring pads. Generic flowers selected by array order can spawn above pits,
+ // or double-trigger another launch, so never overlay them in these chapters.
+ if(g.chispinStorm||g.stitchoTrail||g.roomId==='boss'||!COLORS[g.roomId]){
+  g.islandSprings=null;return null;
+ }
  if(g.islandSprings?.room!==g.roomId||g.islandSprings?.owner!==g.player){
   const platforms=(g.platforms||[]).filter(p=>!p._campaignLift&&!p._crumbles&&p.h<=40&&p.y>600&&p.w>150).sort((a,b)=>a.x-b.x);
   const selected=platforms.filter((_,i)=>i===0||i===Math.floor(platforms.length/2));

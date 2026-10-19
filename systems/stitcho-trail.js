@@ -4,6 +4,7 @@
 // All permanent rewards use Stitcho's existing per-hero save, never Kilo's.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {STITCHO_BOSS_ID} from './stitcho-boss.js';
+import {WORLD_TWO_GUARDIAN_ID} from './world-two-guardian.js';
 const SAVE_KEY='stitcho-trail-v1';
 const FRAGMENT_PREFIX='stitcho-fragment-';
 export const STITCHO_BEACONS=Object.freeze([
@@ -57,7 +58,7 @@ export function enterStitchoTrail(g){
   shards:STITCHO_FRAGMENTS.filter(f=>saved.has(FRAGMENT_PREFIX+f.id)).length,
   lifts,padCooldown:0,gateCooldown:0,pulse:0,announcement:0,
   last:'',bossSummoned:false,gateStates:[],gateSilencedUntil:[0,0,0],
-  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),castPulse:0,castSlot:-1,intro:180
+  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),castPulse:0,castSlot:-1,intro:180,worldTwoGuardianSpawned:false
  };
  if(cleared)g.stitchoTrail.complete=true;
 }
@@ -107,11 +108,21 @@ export function stitchoAbility(g,p,index){
    g.nums?.add?.(p.x,p.y-65,'¡TRIPLE IMPULSO ALIENÍGENA!','#b4ffdc',true);
   }
  }
+ // The real 100th object is the Galactic Heart. Its permanent pulse
+ // protects Stitcho briefly when L is cast; time-gated to avoid free
+ // invulnerability from spamming an ability key.
+ if(index===2&&p._heroHundredBonus==='CORAZÓN GALÁCTICO'&&
+    (Number(g.t)||0)-(s.heartPulseAt??-999)>360){
+   s.heartPulseAt=Number(g.t)||0;
+   p.invuln=Math.max(p.invuln||0,32);
+   g.fx?.emit?.(p.x+p.w*.5,p.y+p.h*.5,{color:'#aaf8f4',count:g.reduceMotion?5:20,life:32});
+ }
  if(index===0){
   const i=STITCHO_GATES.findIndex(gate=>Math.abs(p.x+p.w/2-(gate.x+gate.w/2))<240);
   if(i>=0){
-   s.gateSilencedUntil[i]=(Number(g.t)||0)+145;
-   g.nums?.add?.(STITCHO_GATES[i].x,p.y-80,'¡CIRCUITO DESACTIVADO!','#b3ffdf',true);
+   const heart=p._heroHundredBonus==='CORAZÓN GALÁCTICO';
+   s.gateSilencedUntil[i]=(Number(g.t)||0)+(heart?260:145);
+   g.nums?.add?.(STITCHO_GATES[i].x,p.y-80,heart?'¡CORAZÓN GALÁCTICO · CIRCUITO DOMINADO!':'¡CIRCUITO DESACTIVADO!','#b3ffdf',true);
   }
  }
  return true;
@@ -155,6 +166,14 @@ export function updateStitchoTrail(g,hurt){
   }
   return {id:i,state};
  });
+ // Optional World 2 midboss: the white/gold dragon-like sprite is NOT
+ // Chispín's player art. It unlocks at relay ECO; the Glitch Core remains
+ // the mandatory final boss. Persist the defeat separately.
+ if(s.index>=2&&!s.worldTwoGuardianSpawned&&
+    !(g.clearedEncounters?.hub||[]).includes(WORLD_TWO_GUARDIAN_ID)&&
+    typeof g.spawnWorldTwoGuardian==='function'){
+   s.worldTwoGuardianSpawned=!!g.spawnWorldTwoGuardian();
+ }
  if(s.complete&&!s.cleared&&!s.bossSummoned&&typeof g.spawnStitchoBoss==='function'){
   s.bossSummoned=!!g.spawnStitchoBoss();
  }

@@ -14,6 +14,16 @@ export const HERO_COLLECTIONS=Object.freeze({
  yomi:{room:'space',title:'Las cien estrellas perdidas',color:'#f5bedc',bonus:'CONSTELACIÓN ETERNA'},
  cuerno:{room:'ridge',title:'Los cien prismas del bosque',color:'#d5c8ff',bonus:'AURORA VIVA'}
 });
+// The 100th discovery is an authored relic, not another tiny random diamond.
+// It appears at the entrance altar only after the other 99 memories are found.
+export const HERO_FINAL_OBJECTS=Object.freeze({
+ kilo:'Ukelele del Hogar',
+ stitcho:'Corazón Galáctico',
+ chispin:'Núcleo de Tormenta',
+ cat:'Ovillo de Luna',dragon:'Brasa Primigenia',dino:'Fósil del Primer Gigante',
+ frita:'Salero de Mareas',pizza:'Perla del Horno',yomi:'Estrella del Regreso',
+ cuerno:'Prisma de Aurora'
+});
 const personalKey=hero=>'ohana-hero-100-v1:'+hero;
 function readPersonal(g,hero){
  try{
@@ -48,6 +58,11 @@ export function enterHeroCollection(g){
   store.add(prize(p.id));
  }
  const items=roomAlbumPlacements(g.roomDef);
+ // The altar sits on the starting platform, near enough for E/mobile taps,
+ // never on a generated ledge, an abyss or underneath a boss hitbox.
+ const start=g.roomDef.checkpoints?.[0]||{x:180,y:1134};
+ items[99]={...items[99],x:Math.max(110,start.x+115),y:start.y-61,
+   challenge:true,final:true,name:HERO_FINAL_OBJECTS[p.id]};
  const collected=new Set(items.filter(i=>store.has(mark(p.id,i.id))||personal.ids.has(i.id)).map(i=>i.id));
  const complete=collected.size===100&&(store.has(prize(p.id))||personal.complete);
  g.heroCollection={hero:p.id,def,items,collected,complete,pulse:0,scene:0,display:0};
@@ -59,6 +74,9 @@ export function enterHeroCollection(g){
 export function takeHeroCollectionItem(g,id){
  const s=g.heroCollection,p=g.player;
  if(!s||!Number.isInteger(id)||id<0||id>=100||s.collected.has(id))return false;
+ // The relic really is memory #100. An old pre-V455 save containing an
+ // out-of-order #99 remains readable, but no new run can claim it early.
+ if(id===99&&s.collected.size!==99)return false;
  s.collected.add(id);g.score=(g.score||0)+12;
  writePersonal(g,s);
  save(g,mark(s.hero,id));
@@ -88,10 +106,17 @@ export function updateHeroCollection(g){
  if(s.scene>0)s.scene--;if(s.pulse>0)s.pulse--;
  if(s.complete)return;
  let changed=0;
- for(const item of s.items){if(s.collected.has(item.id)||!inRange(p,item))continue;
-  takeHeroCollectionItem(g,item.id);changed++;
+ for(const item of s.items){
+  const close=item.final?Math.hypot(p.x+p.w/2-item.x,p.y+p.h/2-item.y)<145:inRange(p,item);
+  if(s.collected.has(item.id)||!close)continue;
+  if(item.final&&s.collected.size!==99)continue;
+  if(takeHeroCollectionItem(g,item.id))changed++;
  }
  if(changed&&s.collected.size<100)g.nums?.add?.(p.x,p.y-25,s.collected.size+'/100 · '+s.def.title,s.def.color,false);
+ if(s.collected.size===99&&!s.collected.has(99)&&!s.altarShown){
+  s.altarShown=true;
+  g.nums?.add?.(p.x,p.y-70,'OBJETO Nº 100 · REGRESA AL ALTAR DE ENTRADA',s.def.color,true);
+ }
 }
 export function drawHeroCollection(ctx,g,cam,t){
  const s=g.heroCollection;if(!s)return;
@@ -99,15 +124,41 @@ export function drawHeroCollection(ctx,g,cam,t){
  ctx.fillStyle=s.def.color;ctx.strokeStyle='#fff3e6';ctx.lineWidth=1.2;
  for(const i of s.items){
   if(s.collected.has(i.id))continue;
-  const x=i.x-cam.x,y=i.y-cam.y;if(x<-18||y<-18||x>w+18||y>h+18)continue;
+  const x=i.x-cam.x,y=i.y-cam.y;if(x<-70||y<-90||x>w+70||y>h+80)continue;
   const bob=g.reduceMotion?0:Math.sin(t*.09+i.id*.63)*3;
+  if(i.final){
+   const unlocked=s.collected.size===99;
+   ctx.save();ctx.translate(x,y+bob);ctx.globalAlpha=unlocked?1:.36;
+   // Each hero's final relic uses a different icon and color. A floating
+   // altar with a heart/electric core is deliberately NOT a regular pickup.
+   ctx.fillStyle='#0d3558';ctx.strokeStyle=s.def.color;ctx.lineWidth=3;
+   ctx.beginPath();ctx.ellipse(0,33,38,10,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+   ctx.strokeStyle=unlocked?s.def.color:'#8195a7';
+   ctx.beginPath();ctx.arc(0,0,21,0,Math.PI*2);ctx.stroke();
+   ctx.fillStyle=s.def.color;ctx.beginPath();
+   if(s.hero==='stitcho'){
+    ctx.moveTo(0,17);ctx.bezierCurveTo(-38,-9,-15,-28,0,-12);
+    ctx.bezierCurveTo(15,-28,38,-9,0,17);
+   }else if(s.hero==='chispin'){
+    ctx.moveTo(6,-26);ctx.lineTo(-13,3);ctx.lineTo(0,3);
+    ctx.lineTo(-8,26);ctx.lineTo(19,-8);ctx.lineTo(5,-8);
+   }else{
+    for(let n=0;n<10;n++){const a=n*Math.PI/5-Math.PI/2,r=n%2?10:23;
+     const xx=Math.cos(a)*r,yy=Math.sin(a)*r;
+     if(n===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}
+   }
+   ctx.closePath();ctx.fill();ctx.textAlign='center';ctx.font='bold 12px sans-serif';
+   ctx.fillStyle='#fff6dc';ctx.fillText(unlocked?'✦ '+i.name:'RECUERDO FINAL · 99/100',0,-36);
+   ctx.restore();
+   continue;
+  }
   ctx.beginPath();ctx.moveTo(x,y-7+bob);ctx.lineTo(x+6,y+bob);ctx.lineTo(x,y+7+bob);ctx.lineTo(x-6,y+bob);ctx.closePath();ctx.fill();
   if(i.challenge)ctx.stroke();
  }
  // Per-character status: one modest line, never a modal on each pickup.
  ctx.fillStyle='rgba(9,21,35,.72)';ctx.fillRect(18,210,250,39);
  ctx.fillStyle=s.def.color;ctx.font='bold 12px sans-serif';ctx.textAlign='left';
- ctx.fillText(s.complete?s.def.bonus:s.def.title,26,225);
+ ctx.fillText(s.complete?s.def.bonus:s.collected.size===99?'ALTAR FINAL · '+HERO_FINAL_OBJECTS[s.hero]:s.def.title,26,225);
  ctx.font='11px sans-serif';ctx.fillText(s.collected.size+'/100 · '+(s.complete?'RELIQUIA CONSEGUIDA':'RECUERDOS PERSONALES'),26,240);
  if(s.complete){
   const p=g.player,x=p.x+p.w/2-cam.x,y=p.y+p.h/2-cam.y;
@@ -120,7 +171,7 @@ export function drawHeroCollection(ctx,g,cam,t){
   ctx.globalAlpha=Math.max(0,fade)*.92;ctx.fillStyle='#071d31';ctx.fillRect(w*.17,h*.12,w*.66,88);
   ctx.fillStyle=s.def.color;ctx.textAlign='center';
   ctx.font='bold 25px sans-serif';ctx.fillText('¡CIEN RECUERDOS COMPLETOS!',w*.5,h*.12+38);
-  ctx.font='bold 17px sans-serif';ctx.fillText(s.def.bonus,w*.5,h*.12+64);ctx.globalAlpha=1;
+  ctx.font='bold 17px sans-serif';ctx.fillText(HERO_FINAL_OBJECTS[s.hero]+' · '+s.def.bonus,w*.5,h*.12+64);ctx.globalAlpha=1;
  }
  ctx.restore();
 }

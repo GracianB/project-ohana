@@ -4,7 +4,7 @@ const DISTRICTS=Object.freeze([
  {id:'stitcho-0',name:'Playa de chatarra',short:'PLAYA',x:14,y:55,
  note:'Rescata el motor de la nave y activa la baliza Chispa. La primera grieta se cruza sobre las plataformas.'},
  {id:'stitcho-1',name:'Puentes de resonancia',short:'PUENTES',x:38,y:34,
- note:'Recoge dos fragmentos. Los raíles horizontales cambian de dirección y el trampolín impulsa hacia los puentes.'},
+ note:'Recoge dos fragmentos y activa ECO. Tras la señal aparece Kirin, guardián opcional blanco y dorado; no es Chispín. Los raíles y el trampolín permiten esquivarlo.'},
  {id:'stitcho-2',name:'Circuitos cruzados',short:'CIRCUITOS',x:62,y:55,
  note:'Busca cuatro fragmentos y utiliza J cerca de los arcos para cortar la electricidad. Atento al ciclo de aviso.'},
  {id:'stitcho-3',name:'Templo del Núcleo',short:'NÚCLEO',x:85,y:34,
