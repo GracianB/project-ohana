@@ -31,7 +31,7 @@ export function createStitchoRoom(base){
  ];
  return {...base,name:'Archipiélago del Caos',short:'Archipiélago',world:4,color:'#8bc8e5',
   hint:'Recoge 8 fragmentos, activa tres antenas y vence al Núcleo Glitch. J corta los arcos eléctricos; los raíles y trampolines cambian la ruta.',
-  plats:platforms,foes,orbs:[[540,920],[840,820],[1100,710],[1530,810],[2100,810],[2400,670],[2850,630],[3610,830]],
+  doors:{...base.doors,up:null},plats:platforms,foes,orbs:[[540,920],[840,820],[1100,710],[1530,810],[2100,810],[2400,670],[2850,630],[3610,830]],
   checkpoints,upExit:null,
   sectors:[
    {id:'hub-stitcho-0',name:'Playa de chatarra',x:0,w:1050,role:'explore'},
