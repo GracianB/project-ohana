@@ -1,0 +1,44 @@
+name: Chispin V454 acceptance
+
+on:
+  pull_request:
+    paths:
+      - 'game.js'
+      - 'systems/chispin-*.js'
+      - 'systems/hero-collections.js'
+      - 'worlds/chispin-isles.js'
+      - 'tests/chispin-world.test.js'
+      - 'tests/browser/v454-chispin-world.mjs'
+      - '.github/workflows/chispin-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playable-world:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Chispin campaign unit checks
+        run: node --test tests/chispin-world.test.js
+      - name: Complete Chispin solo route and 100-piece reward in real Chromium
+        run: node tests/browser/v454-chispin-world.mjs
+      - name: Upload audited desktop and mobile scenes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chispin-v454-browser
+          path: test-results/v454/
+          if-no-files-found: ignore
