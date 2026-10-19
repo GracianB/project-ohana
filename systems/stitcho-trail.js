@@ -57,7 +57,7 @@ export function enterStitchoTrail(g){
   shards:STITCHO_FRAGMENTS.filter(f=>saved.has(FRAGMENT_PREFIX+f.id)).length,
   lifts,padCooldown:0,gateCooldown:0,pulse:0,announcement:0,
   last:'',bossSummoned:false,gateStates:[],gateSilencedUntil:[0,0,0],
-  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),intro:180
+  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),castPulse:0,castSlot:-1,intro:180
  };
  if(cleared)g.stitchoTrail.complete=true;
 }
@@ -80,6 +80,7 @@ export function interactStitchoTrail(g){
   return true; // consume E; don't accidentally evolve.
  }
  s.index++;s.pulse=110;s.announcement=150;s.last=b.label;
+ p._stitchoDanceT=75;p._stitchoDanceAge=0;
  const changed=persist(g,b.id);
  if(changed){g.score=(g.score||0)+175;p.xp=(p.xp||0)+10;g.save?.();}
  if(s.index===STITCHO_BEACONS.length){
@@ -94,6 +95,7 @@ export function interactStitchoTrail(g){
 // their real combat behavior. This NEVER grants an ability that is still locked.
 export function stitchoAbility(g,p,index){
  const s=g.stitchoTrail;if(!s||p?.id!=='stitcho'||!Number.isInteger(index)||index<0||index>2)return false;
+ s.castPulse=40;s.castSlot=index;
  if(!s.signatureComplete){
   s.abilityMarks.add(index);
   if(s.abilityMarks.size===3){
@@ -117,7 +119,9 @@ export function stitchoAbility(g,p,index){
 export function updateStitchoTrail(g,hurt){
  const s=g.stitchoTrail,p=g.player;if(!s||!p||p.dead)return;
  const tick=Number(g.t)||0;s.pulse=Math.max(0,s.pulse-1);s.announcement=Math.max(0,s.announcement-1);
- s.intro=Math.max(0,s.intro-1);s.padCooldown=Math.max(0,s.padCooldown-1);s.gateCooldown=Math.max(0,s.gateCooldown-1);
+ s.intro=Math.max(0,s.intro-1);s.castPulse=Math.max(0,s.castPulse-1);
+ if(p._stitchoDanceT>0){p._stitchoDanceT--;p._stitchoDanceAge=(p._stitchoDanceAge||0)+1;}
+ s.padCooldown=Math.max(0,s.padCooldown-1);s.gateCooldown=Math.max(0,s.gateCooldown-1);
  // Four authored mobile rails. movePlatform carries standing players instead
  // of teleporting them, and the Kilo mechanics remain unchanged.
  for(const lift of s.lifts)movePlatform(g,lift.platform,lift.motion);
@@ -212,6 +216,35 @@ export function drawStitchoTrail(ctx,g,cam,t){
   ctx.moveTo(x,y-85+bob);ctx.lineTo(x+28,y-48+bob);ctx.lineTo(x,y-11+bob);ctx.lineTo(x-28,y-48+bob);ctx.closePath();ctx.stroke();
   ctx.fillStyle=done?'#7feccb':'#dff8ff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
   ctx.fillText(b.label,x,y-98+bob);ctx.globalAlpha=1;
+ }
+ // Native Stitcho arm/antenna/tail dance is driven by _stitchoDanceT in
+ // characters/draw.js. These extra rings explain *which* ability was cast.
+ if(s.castPulse>0){
+  const p=g.player,cx=p.x+p.w/2-cam.x,cy=p.y+p.h/2-cam.y;
+  const fraction=s.castPulse/40,radius=26+(1-fraction)*62;
+  ctx.save();ctx.globalAlpha=fraction*.7;
+  ctx.strokeStyle=['#9af6ff','#cca9ff','#ffdba1'][s.castSlot]||'#9af6ff';
+  ctx.lineWidth=2.5;
+  for(let i=0;i<3;i++){
+   const a=(reduced?0:t*.06)+i*Math.PI*2/3;
+   ctx.beginPath();ctx.arc(cx,cy,radius+i*7,a,a+Math.PI*.62);ctx.stroke();
+  }
+  ctx.restore();
+ }
+ // Jet wakes respond to real velocity, and the feet compress during landing;
+ // low-motion users get a calm stationary signal instead.
+ if(!reduced){
+  const p=g.player,speed=Math.abs(p.vx||0),cx=p.x+p.w/2-cam.x,feet=p.y+p.h-cam.y;
+  if(speed>4||p._pmove==='spring'){
+   ctx.save();ctx.globalAlpha=Math.min(.68,.12+speed*.045);
+   ctx.strokeStyle='#8df0ff';ctx.lineWidth=2;
+   for(let i=0;i<4;i++){
+    const offset=(t*2.7+i*19)%70,side=Math.sign(p.vx||p.facing||1);
+    ctx.beginPath();ctx.moveTo(cx-side*(15+offset),feet-7-i*9);
+    ctx.lineTo(cx-side*(30+offset),feet-10-i*9);ctx.stroke();
+   }
+   ctx.restore();
+  }
  }
  // Compact chapter tracker in screen-space: no full-screen interrupt.
  ctx.fillStyle='rgba(7,28,49,.78)';ctx.fillRect(22,143,226,58);
