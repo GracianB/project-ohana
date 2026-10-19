@@ -497,7 +497,7 @@ if (fromDir !== "down") snapToFloor(p);
 function loadRoom(id, fromDir) {
 let r = ROOMS[id];
 if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
-if(id==="hub"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
+if(id==="lab"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -566,8 +566,8 @@ game.spawnStitchoBoss=()=>{
   return true;
 };
 game.spawnChispinBoss=()=>{
-  if(game.roomId!=='hub'||game.player?.id!=='chispin'||!game.personalAdventureSolo)return false;
-  if((game.clearedEncounters?.hub||[]).includes(CHISPIN_BOSS_ID))return true;
+  if(game.roomId!=='lab'||game.player?.id!=='chispin'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.lab||[]).includes(CHISPIN_BOSS_ID))return true;
   if(game.enemies.some(e=>e._chispinBoss))return true;
   game.enemies.push(createChispinBoss(makeFoe,game.rng));
   return true;
@@ -761,7 +761,7 @@ Surprises.reset();
 Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
 game.running = true; closeOverlays();
-let roomId = "hub";
+let roomId = game.personalAdventureSolo&&def.id==="chispin"?"lab":"hub";
 if (resume) {
 try {
   const u = saveStore.read(def.id);
