@@ -6,7 +6,7 @@ import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlb
 import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
-import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail} from './systems/stitcho-trail.js';
+import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoAbility} from './systems/stitcho-trail.js';
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
@@ -521,7 +521,7 @@ game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
 enterKiloGrove(game);enterStitchoTrail(game);enterRoomAlbum(game);
-game.onHeroAbility=(p,index)=>groveAbility(game,p,index);
+game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
