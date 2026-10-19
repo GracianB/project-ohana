@@ -5,7 +5,7 @@ import {roomAlbumPlacements} from './room-album.js';
 export const HERO_COLLECTIONS=Object.freeze({
  kilo:{room:'hub',title:'La melodía de las cien flores',color:'#ffe2ac',bonus:'CANCIÓN DEL HOGAR'},
  stitcho:{room:'hub',title:'Las cien chispas del caos',color:'#8cecff',bonus:'CORAZÓN GALÁCTICO'},
- chispin:{room:'hub',title:'Los cien rayos del trueno',color:'#fff2a3',bonus:'CORONA DE TORMENTA'},
+ chispin:{room:'lab',title:'Los cien rayos del trueno',color:'#fff2a3',bonus:'CORONA DE TORMENTA'},
  cat:{room:'cave',title:'Los cien sueños de Michi',color:'#e5c2ff',bonus:'LUNA SOÑADORA'},
  dragon:{room:'volcano',title:'Las cien brasas ancestrales',color:'#ffac83',bonus:'DRAGÓN CELESTIAL'},
  dino:{room:'boss',title:'Los cien fósiles de Dino',color:'#c5f5a2',bonus:'GUARDIÁN ANTIGUO'},
