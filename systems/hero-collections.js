@@ -51,8 +51,8 @@ export function enterHeroCollection(g){
  const collected=new Set(items.filter(i=>store.has(mark(p.id,i.id))||personal.ids.has(i.id)).map(i=>i.id));
  const complete=collected.size===100&&(store.has(prize(p.id))||personal.complete);
  g.heroCollection={hero:p.id,def,items,collected,complete,pulse:0,scene:0,display:0};
- // Do not display a second, shared layer of 100 diamonds over the personal set.
- g.roomAlbumItems=[];
+ // Keep the existing shared album placements and cinematic behavior for
+ // compatibility; its renderer hides duplicate diamonds in personal chapters.
  if(complete)p._heroHundredBonus=def.bonus;
  if(collected.size)writePersonal(g,g.heroCollection);
 }
