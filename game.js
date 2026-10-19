@@ -7,7 +7,7 @@ import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoTrail,drawStitchoTrail,stitchoAbility} from './systems/stitcho-trail.js';
-import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
+import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
@@ -2780,7 +2780,9 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
+  if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else {drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
+    if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
   if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
