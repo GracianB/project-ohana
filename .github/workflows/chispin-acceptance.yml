@@ -32,8 +32,8 @@ jobs:
         run: npm ci
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Chispin campaign unit checks
-        run: node --test tests/chispin-world.test.js
+      - name: Chispin campaign and electric design unit checks
+        run: node --test tests/chispin-world.test.js tests/chispin-electric-design.test.js
       - name: Complete Chispin solo route and 100-piece reward in real Chromium
         run: node tests/browser/v454-chispin-world.mjs
       - name: Original Chispin and secret World 2 guardian browser identity
