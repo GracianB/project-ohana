@@ -20,7 +20,7 @@ export function enterRoomAlbum(g){if(g.relicScene)g.onRelicEnd?.();g.roomAlbums|
 export function takeRoomItem(g,id){const album=g.roomAlbums?.[g.roomId];if(!album||album.found.includes(id)||!Number.isInteger(id)||id<0||id>=100)return false;album.found.push(id);g.score=(g.score||0)+10;persistRoomAlbums(g);return true;}
 export function claimRoomRelic(g){const a=g.roomAlbums?.[g.roomId];if(!a||a.found.length!==100||a.relic)return false;a.relic=true;g.relicScene={room:g.roomId,age:0,duration:600};g.renderDirty=true;g.onRelicBegin?.();persistRoomAlbums(g);g.resetInput?.();return true;}
 export function updateRoomAlbum(g){
- const p=g.player,a=g.roomAlbums?.[g.roomId];if(g.heroCollection||!p||p.dead||!a)return;
+ const p=g.player,a=g.roomAlbums?.[g.roomId];if(!p||p.dead||!a)return;
  const found=new Set(a.found);let changed=false;
  for(const item of g.roomAlbumItems||[])if(!found.has(item.id)&&Math.abs(p.x+p.w/2-item.x)<25&&Math.abs(p.y+p.h/2-item.y)<32){a.found.push(item.id);found.add(item.id);g.score=(g.score||0)+10;changed=true;}
  if(changed){g.nums?.add?.(p.x,p.y-20,`${a.found.length}/100 · RECUERDOS`,ROOM_RELICS[g.roomId][2],false);if(a.found.length===100)g.nums?.add?.(p.x,p.y-65,'OBJETO ESPECIAL · VUELVE A LA BANDERA DE ENTRADA','#fff1b5',true);persistRoomAlbums(g);}
