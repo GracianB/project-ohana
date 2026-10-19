@@ -1,3 +1,11 @@
+## ohana-444 · El compás se entiende jugando
+
+P de Kilo muestra tres señales que convergen en la ventana real, confirma aciertos y fallos, y dibuja cada onda con el alcance que usa su daño. Los impactos solo producen estela cuando hacen daño. L conserva sus guardianes y curación por impacto, sustituyendo el gran disco frontal por una proyección musical sobre el suelo y estelas hacia las víctimas. El halo de invulnerabilidad queda contenido alrededor del cuerpo en vez de cruzar toda la pantalla. U conserva el compañero que atraviesa el escenario y golpea; las pruebas de dúos comprueban el combate.
+
+Se elimina la capa cosmética antigua que duplicaba los círculos de L y confundía I/P con U. El aviso general de poder pasa a un título breve sin onda de pantalla completa. La ventana tardía válida del ritmo se resuelve antes del daño de ese mismo pulso.
+
+Validación V444: 1.282/1.282 pruebas unitarias; pruebas reales de ritmo y L en escritorio/móvil y U activa sin fallos; vuelo y ambas balsas PASS; cinco formas, entrada, victoria y cuatro evoluciones PASS; release gate PASS. Capturas revisadas.
+
 ## ohana-443 · Hula libre y jardín Ohana
 
 K de Kilo pasa de frenar la caída durante un segundo a vuelo dirigido de 4,5–6 segundos según forma. Permite subir, bajar, diagonales y suspensión sin pulsar controles; atraviesa repisas manteniendo el suelo sólido y las salidas. L acompaña durante 4–5 segundos, golpea una vez por enemigo y cura solo al causar daño real. Ambos efectos permanecen visibles durante su actividad.

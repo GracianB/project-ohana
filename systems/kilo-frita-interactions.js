@@ -140,6 +140,9 @@ function label(ctx, txt, x, y, col, size = 15) {
 const fade = (a) => clamp(Math.min(a.age / 6, (a.life - a.age) / 14), 0, 1);
 
 function drawCast(ctx, a, px, py, ph, t) {
+  // L/U/I/P own their effects and timing. The legacy cast layer used to add
+  // an unrelated expanding circle (and a U flower even when casting P).
+  if(a.id==='kilo'&&a.slot>=2)return;
   const k = a.age / a.life, sc = 1 + a.evo * .16, f = a.face, ant = a.age < 8;
   const al = fade(a);
   ctx.globalAlpha = al;
@@ -163,7 +166,7 @@ function drawCast(ctx, a, px, py, ph, t) {
         const an = t * .12 + i * 6.283 / (6 + a.evo);
         flower(ctx, px + Math.cos(an) * R, py - 22 + Math.sin(an) * R * .55, 3 * sc, i % 2 ? "#ff6b9a" : "#ffe9a8", an);
       }
-      if (a.age > 8 && a.age < 50) label(ctx, "¡HULA FLOTANTE!", px, py - ph - 12, "#ff6b9a", 13 + a.evo);
+      if (a.age > 8 && a.age < 50) label(ctx, "¡HULA LIBRE!", px, py - ph - 12, "#ff6b9a", 13 + a.evo);
     } else if (a.slot === 2) { // Ohana: corazones que estallan en anillo
       const R = (ant ? 30 : 30 + (a.age - 8) * 4.2) * sc;
       ctx.strokeStyle = "#ffd36a"; ctx.lineWidth = 6 * (1 - k) + 1;

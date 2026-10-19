@@ -2886,16 +2886,11 @@ const u = game.ult.t / 42;
 ctx.save();
 ctx.strokeStyle = game.ult.color || "#ffe66a";
 ctx.globalAlpha = Math.min(0.85, u + 0.15);
-ctx.lineWidth = 8;
-const rad = (1 - u) * Math.max(viewW, viewH) * 0.72;
-ctx.beginPath();
-ctx.arc(viewW / 2, viewH / 2, rad, 0, Math.PI * 2);
-ctx.stroke();
-ctx.font = "800 28px Fraunces, serif";
+ctx.font = "800 18px Fraunces, serif";
 ctx.textAlign = "center";
 ctx.fillStyle = game.ult.color || "#fff";
 ctx.globalAlpha = Math.min(1, u * 2);
-ctx.fillText(game.ult.name || "", viewW / 2, viewH * 0.28);
+ctx.fillText(game.ult.name || "", viewW / 2, Math.max(105,viewH*.15));
 ctx.restore();
 }
 if (game.flash > 0) {

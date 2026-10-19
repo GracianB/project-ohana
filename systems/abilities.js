@@ -1909,6 +1909,7 @@ note(g, f) {
 
 ohana(g, f, p) {
 f.life--;
+f.impacts=(f.impacts||[]).filter(v=>--v.life>0);
 p._kiloOhanaT=f.life;
 f.x = cx(p); f.y = cy(p);
 f.r = Math.min(f.max, f.r + f.max / 30);
@@ -1918,6 +1919,7 @@ for (const e of g.enemies) {
     const landed=hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) * 6, ky: -5, stun: 30, color: "#ffd36a", crit: true });
     if(!landed)continue;
     f.hit.add(e);
+    f.impacts||=[];if(f.impacts.length<16)f.impacts.push({x:cx(e),y:cy(e),life:12});
     boom(g, cx(e), cy(e), "#fff1b0", 8, { star: true, up: 2 });
     if (f.healBudget>0 && p.health < p.maxHealth) {
       const heal=Math.min(f.lifesteal,f.healBudget,p.maxHealth-p.health);f.healBudget-=heal;
@@ -3093,34 +3095,19 @@ ctx.font = "800 22px Outfit,sans-serif";
 ctx.textAlign = "center";
 ctx.fillText(name, x, y - r - 16);
 },
-ohana(ctx, f, cam, t) {
-const x = f.x - cam.x, y = f.y - cam.y;
-const k = Math.min(1,f.life / 36);
-ctx.globalAlpha = 0.06 * k;
-ctx.fillStyle = "#ffe9a0";
-ctx.beginPath(); ctx.arc(x, y, f.r, 0, TAU); ctx.fill();
-ctx.globalAlpha = Math.min(1, k * 1.6);
-ctx.strokeStyle = "#ffd36a";
-ctx.lineWidth = 3 * k + 1;
-ctx.beginPath(); ctx.arc(x, y, f.r, 0, TAU); ctx.stroke();
-ctx.strokeStyle = "#fff";
-ctx.lineWidth = 2;
-ctx.beginPath(); ctx.arc(x, y, Math.max(0, f.r - 6), 0, TAU); ctx.stroke();
-for (let i = 0; i < f.n; i++) {
-  const a = (i / f.n) * TAU + t * 0.03;
-  const px = x + Math.cos(a) * f.r, py = y + Math.sin(a) * f.r;
-  glow(ctx, px, py, 22, "#fff4c0", 0.7 * k);
-  ctx.globalAlpha = Math.min(1, k * 1.6);
-  ctx.fillStyle = "#fffbe8";
-  ctx.beginPath();
-  ctx.arc(px, py - 4, 8, Math.PI, 0);
-  ctx.lineTo(px + 8, py + 6);
-  for (let j = 0; j < 3; j++) ctx.quadraticCurveTo(px + 8 - j * 5.3 - 2.6, py + 11 + Math.sin(t * 0.3 + j + i) * 2, px + 8 - (j + 1) * 5.3, py + 6);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = "#4a3a20";
-  ctx.beginPath(); ctx.arc(px - 3, py - 4, 1.4, 0, TAU); ctx.arc(px + 3, py - 4, 1.4, 0, TAU); ctx.fill();
+ohana(ctx, f, cam, t, g, p) {
+const x=f.x-cam.x,y=f.y-cam.y,floor=p?p.y+p.h-cam.y:y+24,k=Math.min(1,f.life/36);
+ctx.save();ctx.globalAlpha=.26*k;ctx.strokeStyle='#ffd36a';ctx.lineWidth=2;
+// A ground projection leaves the body and the scenery readable.
+for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.beginPath();ctx.ellipse(x,floor,f.r,f.r*.2,0,a+.12,a+1.15);ctx.stroke();}
+for(let i=0;i<f.n;i++){
+ const a=i/f.n*TAU+(g?.reduceMotion?0:t*.025),px=x+Math.cos(a)*f.r,py=floor+Math.sin(a)*f.r*.2-18;
+ ctx.globalAlpha=.8*k;ctx.fillStyle='#fffbe8';ctx.beginPath();ctx.arc(px,py-4,7,Math.PI,0);ctx.lineTo(px+7,py+6);
+ ctx.quadraticCurveTo(px+3,py+10,px,py+6);ctx.quadraticCurveTo(px-3,py+10,px-7,py+6);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#4a3a20';ctx.beginPath();ctx.arc(px-2.5,py-4,1.2,0,TAU);ctx.arc(px+2.5,py-4,1.2,0,TAU);ctx.fill();
 }
+for(const impact of f.impacts||[]){const tx=impact.x-cam.x,ty=impact.y-cam.y;ctx.globalAlpha=k*impact.life/12;ctx.strokeStyle='#fff0b0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+tx)/2,Math.min(y,ty)-55,tx,ty);ctx.stroke();}
+ctx.restore();
 },
 chain(ctx,f,cam,t,g){drawChispaChain(ctx,f,cam,t,!!g?.reduceMotion);},
 trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},

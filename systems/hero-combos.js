@@ -35,13 +35,14 @@ export function updateHeroPowers(g,s,hit,color){
  const pulse=(m,x,y,r,damage,once=true)=>{for(const e of close(g,x,y,r)){
   if(once&&m.hit.has(e))continue;const landed=hit(g,e,damage,{color:color(m.id),kx:m.face*5,ky:-4,hitstop:0});
   if(!landed)continue;m.hit.add(e);
+  if(m.id==='kilo'){m.impacts||=[];if(m.impacts.length<16)m.impacts.push({...mid(e),life:12});}
   if(m.id==='cat')e._lunarMarkUntil=(g.t||0)+360;
   if(m.id==='stitcho'&&m.index===4){p.vy=-7;p.grounded=false;m.face=Math.sign(mid(close(g,x,y,400).find(v=>v!==e)||p).x-x)||-m.face;}
   if(['cat','dragon'].includes(m.id)&&m.index===4){p.vy=-11;p.grounded=false;p.jumps=Math.max(0,(p.jumps||0)-1);}
   if(m.id==='dino'&&!e.boss){e.vx=m.face*11;e.vy=-2;}
  }};
  const field=(m,x,y,r,damage,mode='burst',delay=12)=>s.fields.push({id:m.id,x,y,age:0,life:delay+20,r,damage,mode,next:delay,noCharge:m.index===5});
- for(const m of s.moves){m.age++;m.life--;const c=mid(p),a=m.age,final=m.index===5;
+ for(const m of s.moves){m.age++;m.life--;m.impacts=(m.impacts||[]).filter(v=>--v.life>0);const c=mid(p),a=m.age,final=m.index===5;
   if(!final){
    if(m.id!=='pizza'){
     p.vx=m.face*(m.id==='cuerno'?13:m.id==='frita'?12:m.id==='kilo'?8:10);
@@ -52,8 +53,8 @@ export function updateHeroPowers(g,s,hit,color){
     if(m.id==='frita'&&a%6===0){s.oil||=[];s.oil.push({x:c.x,y:p.y+p.h,life:480});s.oil=s.oil.slice(-32);}
    }
   }else if(m.id==='kilo'){
-   if([22,52,82].includes(a))g.nums?.add?.(p.x,p.y-35,'P · ¡AHORA!','#ffefa2',true);
-   if([36,66,96].includes(a)){m.hit.clear();pulse(m,c.x,c.y,210+m.bonus*45,36+m.bonus*12);field(m,c.x,c.y,210+m.bonus*45,12,'garden',1);}
+   // The three persistent markers provide the cue; floating text obscures them.
+   if([39,69,99].includes(a)){m.hit.clear();m.pulseAge=a;m.pulseRadius=210+m.bonus*45;pulse(m,c.x,c.y,m.pulseRadius,36+m.bonus*12);field(m,c.x,c.y,m.pulseRadius,12,'garden',1);}
   }else if(m.id==='stitcho'){
    if(a%20===1){const x=m.start.x+m.face*260,y=m.start.y;for(const side of [-1,1])s.drones.push({id:'stitcho',x:x+side*220,y:y-160,age:0,life:38,index:side===1?1:0,count:2,next:8,noCharge:true});field(m,x,y,150,38,'burst',18);}
   }else if(m.id==='chispin'){
@@ -87,7 +88,18 @@ export function drawHeroPowers(ctx,g,cam){
  for(const o of s.oil||[]){ctx.fillStyle='#e6b75d77';ctx.beginPath();ctx.ellipse(o.x-cam.x,o.y-cam.y-2,35,5,0,0,Math.PI*2);ctx.fill();}
  for(const m of s.moves||[]){const p=g.player,x=p.x+p.w/2-cam.x,y=p.y+p.h/2-cam.y;ctx.strokeStyle=m.index===5?'#fff1b5':'#b6f5ed';ctx.lineWidth=3;ctx.globalAlpha=.6;ctx.beginPath();
   if(m.id==='pizza'||m.id==='stitcho')ctx.arc(x,y,Math.max(p.w,p.h)*.65,0,Math.PI*2);
-  else if(m.id==='kilo'&&m.index===5){const r=60+((m.age%30)/30)*90;ctx.ellipse(x,p.y+p.h-cam.y,r,r*.24,0,0,Math.PI*2);ctx.font='bold 16px sans-serif';ctx.fillStyle='#fff2c6';ctx.textAlign='center';ctx.fillText('P · A COMPÁS',x,y-75);}
+  else if(m.id==='kilo'&&m.index===5){
+   const beats=[30,60,90],next=beats.find(v=>v>=m.age-8&&!m.beats.has(v)),ready=next!==undefined&&Math.abs(next-m.age)<=8;
+   ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#183e48';ctx.fillRect(x-68,y-103,136,45);
+   ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillStyle=ready?'#fff0a2':'#d9e5df';ctx.fillText(ready?'P · ¡AHORA!':'SIGUE EL COMPÁS',x,y-86);
+   beats.forEach((beat,i)=>{const bx=x+(i-1)*34,hit=m.beats.has(beat),miss=m.age>beat+8&&!hit;
+    ctx.fillStyle=hit?'#b6f5cd':miss?'#ac8494':'#efe4c0';ctx.beginPath();ctx.arc(bx,y-70,hit?5:3,0,Math.PI*2);ctx.fill();
+    if(!hit&&!miss){ctx.strokeStyle='#ffe492';ctx.lineWidth=2;ctx.beginPath();ctx.arc(bx,y-70,5+Math.min(22,Math.abs(beat-m.age)*.55),0,Math.PI*2);ctx.stroke();}
+   });
+   const flash=m.age-(m.pulseAge??-100);if(flash>=0&&flash<14){ctx.globalAlpha=(1-flash/14)*.7;ctx.strokeStyle='#fff0a2';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,p.y+p.h-cam.y,m.pulseRadius,m.pulseRadius*.24,0,0,Math.PI*2);ctx.stroke();}
+   ctx.beginPath();
+  }
   else{ctx.moveTo(x-m.face*70,y+15);ctx.quadraticCurveTo(x-m.face*30,y-30,x+m.face*40,y);}ctx.stroke();
+  if(m.id==='kilo')for(const impact of m.impacts||[]){ctx.globalAlpha=impact.life/12;ctx.strokeStyle='#fff0b1';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+impact.x-cam.x)/2,y-40,impact.x-cam.x,impact.y-cam.y);ctx.stroke();}
  }ctx.restore();
 }
