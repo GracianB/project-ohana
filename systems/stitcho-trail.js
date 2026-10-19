@@ -4,6 +4,7 @@
 // All permanent rewards use Stitcho's existing per-hero save, never Kilo's.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {STITCHO_BOSS_ID} from './stitcho-boss.js';
+import {WORLD_TWO_GUARDIAN_ID} from './world-two-guardian.js';
 const SAVE_KEY='stitcho-trail-v1';
 const FRAGMENT_PREFIX='stitcho-fragment-';
 export const STITCHO_BEACONS=Object.freeze([
@@ -57,7 +58,7 @@ export function enterStitchoTrail(g){
   shards:STITCHO_FRAGMENTS.filter(f=>saved.has(FRAGMENT_PREFIX+f.id)).length,
   lifts,padCooldown:0,gateCooldown:0,pulse:0,announcement:0,
   last:'',bossSummoned:false,gateStates:[],gateSilencedUntil:[0,0,0],
-  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),castPulse:0,castSlot:-1,intro:180
+  abilityMarks:new Set(),signatureComplete:saved.has('stitcho-combo-v1'),castPulse:0,castSlot:-1,intro:180,worldTwoGuardianSpawned:false
  };
  if(cleared)g.stitchoTrail.complete=true;
 }
@@ -155,6 +156,14 @@ export function updateStitchoTrail(g,hurt){
   }
   return {id:i,state};
  });
+ // Optional World 2 midboss: the white/gold dragon-like sprite is NOT
+ // Chispín's player art. It unlocks at relay ECO; the Glitch Core remains
+ // the mandatory final boss. Persist the defeat separately.
+ if(s.index>=2&&!s.worldTwoGuardianSpawned&&
+    !(g.clearedEncounters?.hub||[]).includes(WORLD_TWO_GUARDIAN_ID)&&
+    typeof g.spawnWorldTwoGuardian==='function'){
+   s.worldTwoGuardianSpawned=!!g.spawnWorldTwoGuardian();
+ }
  if(s.complete&&!s.cleared&&!s.bossSummoned&&typeof g.spawnStitchoBoss==='function'){
   s.bossSummoned=!!g.spawnStitchoBoss();
  }
