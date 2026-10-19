@@ -1,3 +1,4 @@
+import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
@@ -34,6 +35,7 @@ export function packSave(game, MagicMod) {
   } catch (e) { magic = null; }
   return {
     v: 3,
+    roomAlbums: cleanRoomAlbums(game.roomAlbums),
     checkpoints: cleanProgress(game.checkpoints),
     clearedEncounters: cleanProgress(game.clearedEncounters,true),
     explored: cleanProgress(game.explored,true),
@@ -102,6 +104,7 @@ export function unpackSave(raw, defId) {
   if (defId && id !== canonId(defId)) return null;
   const vis = raw.visited && typeof raw.visited === "object" && !Array.isArray(raw.visited) ? raw.visited : { hub: true };
   return {
+    roomAlbums: cleanRoomAlbums(raw.roomAlbums),
     checkpoints: cleanProgress(raw.checkpoints),
     clearedEncounters: cleanProgress(raw.clearedEncounters,true),
     explored: cleanProgress(raw.explored,true),

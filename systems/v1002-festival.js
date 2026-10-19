@@ -1,3 +1,4 @@
+import {ROOM_RELICS,readRoomAlbums} from './room-album.js';
 // OHANA V100.2 · Cien descubrimientos jugables, diez por cada sala.
 // Motivos y títulos escritos a mano. Motor limitado a la sala actual y 10 sprites.
 import { addPlayerXp, healPlayer, addScore, addCombo } from "./mutations.js";
@@ -162,7 +163,7 @@ class FestivalDirector{
     const n=this.claimed.size;
     const count=festivalProgress([...this.claimed]);
     const chapter=FESTIVAL_ROOMS.find(x=>x.id===this.lastRoom);
-    if(this.button){this.button.textContent="✦ Álbum "+n+"/100";this.button.setAttribute("aria-label","Abrir álbum de "+n+" de 100 descubrimientos. Tecla B");}
+    if(this.button){const local=this.game?.roomAlbums?.[this.lastRoom];this.button.textContent=local?"✦ Álbum "+local.found.length+"/100 · "+(chapter?.name||this.lastRoom):"✦ Álbum "+n+"/100";this.button.setAttribute("aria-label","Abrir álbum de "+n+" de 100 descubrimientos. Tecla B");}
     const inRoom=typeof document!=="undefined"?document.getElementById("festival-room-meter"):null;
     if(inRoom&&chapter){
       const n=count.byRoom[chapter.id];
@@ -177,6 +178,7 @@ class FestivalDirector{
     if(!this.album)return;
     this.focusBefore=document.activeElement;
     const progress=festivalProgress([...this.claimed]);
+    const roomAlbums=this.game?.roomAlbums||readRoomAlbums();
     const roomHTML=FESTIVAL_ROOMS.map((room,ri)=>{
       const n=progress.byRoom[room.id];
       return '<section class="festival-chapter '+(n===10?'completed':'')+'" data-festival-room="'+room.id+'" style="--festival-accent:'+room.color+'"><h3><span>'+safeText(room.name)+'</span><small>'+(n===10?'✦ SELLO '+chapterSeal(room.id,n):n+'/10')+'</small></h3><p>'+safeText(room.story)+'</p><ol>'+room.titles.map((title,i)=>{
@@ -185,7 +187,9 @@ class FestivalDirector{
       }).join("")+'</ol>'+(n===10?'<button class="festival-replay" type="button" data-festival-replay="'+room.id+'">✦ Revivir la celebración de este mundo</button>':'<p class="festival-chapter-goal">Encuentra los diez recuerdos para descubrir su sello secreto.</p>')+'</section>';
     }).join("");
     const body=this.album.querySelector(".festival-contents");
-    if(body)body.innerHTML=roomHTML;
+    if(body){body.innerHTML=roomHTML;const albums=roomAlbums;
+     for(const section of body.querySelectorAll('[data-festival-room]')){const id=section.dataset.festivalRoom,a=albums[id]||{found:[],relic:false},relic=ROOM_RELICS[id];const sheet=document.createElement('div');sheet.className='room-album-sheet';sheet.innerHTML='<h4>Álbum de exploración · '+a.found.length+'/100</h4><p>'+ (a.relic?'✦ '+relic[1]+' · encontrado':a.found.length===100?'El objeto especial te espera junto al primer punto de control.':'Recorre la sala y sus rutas altas. Los 100 fragmentos revelan: '+relic[1])+ '</p><div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px" aria-label="Cien fragmentos de la sala">'+Array.from({length:100},(_,n)=>'<span title="Fragmento '+(n+1)+'" style="text-align:center;color:'+ (a.found.includes(n)?relic[2]:'#777')+'">'+(a.found.includes(n)?'◆':'◇')+'</span>').join('')+'</div><h4>Historias de Ohana</h4>';section.prepend(sheet);}
+    }
     // Completion is a ten-chapter atlas, not a second inventory or prize.
     let atlas=this.album.querySelector(".festival-grand-atlas");
     if(!atlas){atlas=document.createElement("section");atlas.className="festival-grand-atlas";atlas.hidden=true;this.album.querySelector(".festival-world-nav")?.before(atlas);}
@@ -196,14 +200,15 @@ class FestivalDirector{
     const nav=this.album.querySelector(".festival-world-nav");
     if(nav) nav.innerHTML=FESTIVAL_ROOMS.map(room=>{
       const n=progress.byRoom[room.id];
-      return '<button type="button" data-festival-chapter="'+room.id+'" style="--festival-accent:'+room.color+'" aria-pressed="false"><span class="festival-nav-mark">'+(n===10?chapterSeal(room.id,n):"✧")+'</span><span>'+safeText(room.name)+'</span><small>'+n+'/10</small></button>';
+      return '<button type="button" data-festival-chapter="'+room.id+'" style="--festival-accent:'+room.color+'" aria-pressed="false"><span class="festival-nav-mark">'+(n===10?chapterSeal(room.id,n):"✧")+'</span><span>'+safeText(room.name)+'</span><small>'+(roomAlbums[room.id]?.found.length||0)+'/100</small></button>';
     }).join("");
     this.activateChapter(FESTIVAL_ROOMS.some(room=>room.id===roomId)?roomId:
       FESTIVAL_ROOMS.some(room=>room.id===this.lastRoom)?this.lastRoom:"hub");
     const total=this.album.querySelector(".festival-count");
-    if(total)total.textContent=progress.found+" / 100";
+    const fragments=Object.values(roomAlbums).reduce((sum,a)=>sum+a.found.length,0);
+    if(total)total.textContent=fragments+" / 1000 fragmentos · Historias "+progress.found+" / 100";
     const bar=this.album.querySelector(".festival-progress i");
-    if(bar)bar.style.width=progress.found+"%";
+    if(bar)bar.style.width=(fragments/10)+"%";
     this.album.classList.add("open");this.album.setAttribute("aria-hidden","false");
     this.album.querySelector(".festival-close")?.focus({preventScroll:true});
   }
@@ -227,7 +232,7 @@ class FestivalDirector{
   reset(){this.items=[];this.runCollected.clear();this.lastRoom="";this.tickN=0;this.toastT=0;this.justCollected=null;FestivalMoment.close();LivingMemories.clear();V103Memories.clear();V104Memories.clear();V105Memories.clear();V106Memories.clear();this.closeMemory();this.setCounter();}
   onEnterRoom(game){
     if(!game)return;
-    this.lastRoom=game.roomId;
+    this.lastRoom=game.roomId;this.game=game;
     LivingMemories.onRoom(game.roomId);
     V103Memories.onRoom(game.roomId);
     V104Memories.onRoom(game.roomId);

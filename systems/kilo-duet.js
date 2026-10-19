@@ -93,13 +93,13 @@ export function drawKiloDuet(ctx,state,cam,t,drawActor,roster,reduce=false){
  // ACT 2 · anillo hula: banda gruesa + flores grandes + notas orbitando.
  if(pose.ring>0&&age<96){
   const band=6+evo*2,R=pose.ring;
-  ctx.globalAlpha=.22;ctx.fillStyle='#ffd36a';ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
-  ctx.strokeStyle='#ffd36a';ctx.lineWidth=band;ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle='#fff2ba';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,R-band,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=.22;ctx.fillStyle='#ffd36a';ctx.beginPath();ctx.ellipse(x,y+26,R,R*.24,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle='#ffd36a';ctx.lineWidth=band;ctx.beginPath();ctx.ellipse(x,y+26,R,R*.24,0,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle='#fff2ba';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y+26,Math.max(1,R-band),Math.max(1,R-band)*.24,0,0,Math.PI*2);ctx.stroke();
   const fl=6+evo*2;
   for(let i=0;i<fl;i++){const a=i*Math.PI*2/fl+spin;
-   if(solar)kiloFlower(ctx,x+Math.cos(a)*R,y+Math.sin(a)*R,12,8,'#ffc21a','#7a4a1c',a);
-   else kiloFlower(ctx,x+Math.cos(a)*R,y+Math.sin(a)*R,8+evo*1.5,5,i%2?'#ff6b9a':'#fff2ba','#ffd36a',a);}
+   if(solar)kiloFlower(ctx,x+Math.cos(a)*R,y+26+Math.sin(a)*R*.24,12,8,'#ffc21a','#7a4a1c',a);
+   else kiloFlower(ctx,x+Math.cos(a)*R,y+26+Math.sin(a)*R*.24,8+evo*1.5,5,i%2?'#ff6b9a':'#fff2ba','#ffd36a',a);}
   const notes=3+evo;
   for(let i=0;i<notes;i++){const a=-i*Math.PI*2/notes-spin*1.6;
    kiloNote(ctx,x+Math.cos(a)*R*.62,y+Math.sin(a)*R*.62,8+evo,KILO_U_COL[(i+1)%5]);}

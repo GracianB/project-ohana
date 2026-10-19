@@ -1,3 +1,5 @@
+import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
+import {drawRelicCinema} from './systems/relic-cinema.js';
 import {enterKiloGrove,updateKiloGrove,drawKiloGrove,groveAbility,interactGrove,grovePrompt,groveSnapshot} from "./systems/kilo-grove.js";
 import {drawIslandLandmarks} from "./worlds/island-landmarks.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
@@ -32,7 +34,7 @@ import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attack
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
-import { sfx, setMuted as setAudioMuted } from "./engine/audio.js";
+import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
@@ -309,7 +311,7 @@ if (n > 3) return "B";
 return "C";
 }
 
-function canAct() { return game.running && !paused && !overlayOpen() && !document.hidden; }
+function canAct() { return game.running && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
 if (!interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
@@ -358,8 +360,13 @@ saveWarning = !saved;
 return saved;
 }
 game.save=save;
+game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");};
+game.onRelicEnd=()=>{duckMusic(paused);document.body.classList.remove("relic-cinema");};
+game.onRelicBeat=relicUkulele;
+game.onRoomAlbumChange=()=>Festival.setCounter();
 function returnToMenu() {
 save();
+if(game.relicScene){game.relicScene=null;document.body.classList.remove('relic-cinema');duckMusic(false);}
 game.running = false;
 input?.reset();
 clock.reset();
@@ -506,16 +513,17 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
-enterKiloGrove(game);
+enterKiloGrove(game);enterRoomAlbum(game);
 game.onHeroAbility=(p,index)=>groveAbility(game,p,index);
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
-const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, f[3] ? { elite: true } : undefined));
+const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng}));
 e.spawnIndex = i;e._campaignOriginal=true;
-if(f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
+if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=f[4].anchorY;}}
+if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
 if (f[3]) applyElite(e);
 return e;
@@ -700,7 +708,7 @@ game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.clearTicks = 0;
 game.dragonTrial = null;
-game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};
+game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};game.roomAlbums=readRoomAlbums();if(game.relicScene)game.onRelicEnd?.();game.relicScene=null;game.resetInput=()=>input?.reset();
 game.best = null;
 Surprises.reset();
 Festival.reset();
@@ -731,7 +739,7 @@ try {
     if (u.nineUsed) game.player._nineUsed = true;
     game.clearTicks = u.clearTicks || 0;
     game.best = u.best || null;
-    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;
+    game.clearedEncounters=u.clearedEncounters||{};game.checkpoints=u.checkpoints||{};game.explored=u.explored||{};game.secrets=u.secrets||{};game._resumeCheckpoint=true;game.roomAlbums=mergeRoomAlbums(game.roomAlbums,u.roomAlbums);
     game._magicSnap = u.magic;
     game.dragonTrial = u.dragonTrial || null;
     roomId = ROOMS[u.roomId] ? u.roomId : "hub";
@@ -804,6 +812,7 @@ final: toGod
 save();
 }
 function cheatEvolve() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead || !game.running || paused || overlayOpen() || document.hidden) return;
 if (p.evo >= 4) {
@@ -832,6 +841,7 @@ if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jum
 game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
 function dash() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.dash > 0) { p.dashBuf = 8; return; }
@@ -1044,6 +1054,7 @@ markHit(p, e, s.dmg, s.kb);
 }
 
 function attack() {
+if(game.relicScene)return;
 const p = game.player;
 if (!p || p.dead) return;
 if (p.melee > 0) { p.meleeBuf = 8; return; }
@@ -2694,7 +2705,7 @@ drawLivingWorld(ctx, game, t, viewportW,viewportH);
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawKiloGrove(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
@@ -2903,8 +2914,10 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
 drawMinimap();
+drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
 function castPower(index) {
+if(game.relicScene)return;
 const p = game.player;
 if (!p) return;
 const need = POWER_LEVELS[index] ?? 4;
@@ -3131,6 +3144,7 @@ btn.style.setProperty("--cd", pct + "%");
 }
 }
 function step() {
+if(game.relicScene){if(!paused&&!overlayOpen()&&!document.hidden)tickRelicScene(game);return;}
 if (!canAct()) return;
 t++;
 game.t = t;
@@ -3163,6 +3177,8 @@ if (!canAct()) return;
 updateCampaignExploration(game);
 updateKiloGrove(game);
 updatePlayer();
+updateRoomAlbum(game);
+if(game.relicScene)return;
 updateCampaignProgress(game);
 updateIslandSprings(game);
 updateCuernoPlay(game, t);
@@ -3487,6 +3503,8 @@ game.cam.y = 0;
 window.__OHANA_E2E = {
 setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min(100,Number(value)||0));return this.state();},
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
+albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,hp:e.hp,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3590,7 +3608,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
-    grove:groveSnapshot(game),terrainStats:game.terrainStats,
+    roomAlbum:roomAlbumSnapshot(game),grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),

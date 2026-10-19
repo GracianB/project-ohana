@@ -1,3 +1,4 @@
+import {installRoomCast} from './room-cast.js';
 import {installKiloGrove} from "./kilo-grove.js";
 import {tidyPlatforms} from "./platform-layout.js";
 import {worldBounds} from "./world-bounds.js";
@@ -49,6 +50,7 @@ export function installCampaign(rooms){
   r.upExit=r.doors.up?{x:top?.[0]||r.width/2,w:top?.[2]||280,dest:r.doors.up}:null;
   if(r.upExit)for(let y=1054;y>=14;y-=80)r.plats.push([r.upExit.x,y,r.upExit.w,22]);
   if(r.id==='hub')installKiloGrove(r);
+  installRoomCast(r);
  }
  return rooms;
 }

@@ -19,4 +19,4 @@ Cada personaje requiere revisión de locomoción, J/K/L/I/P/U, preparación e im
 
 Las mejoras de rendimiento se aceptan con una medida verificable; menos objetos dibujados no equivale por sí solo a prometer más FPS. Las propuestas de las filas siguientes se concretan al trabajar cada entrega.
 
-Estado: entrega 1 en construcción en ohana-441. Transporte, trazado y primera interacción musical implementados; el cierre completo del kit y las escenas de Kilo requiere todavía revisión. Las otras nueve entregas están pendientes. Tras las diez, versiones centradas en el juego global y después una fase dedicada al multijugador; se conserva su compatibilidad existente.
+Estado: entrega 1 en construcción, ampliada en ohana-442. Un parche no cierra una entrega. Transporte, trazado y primera interacción musical implementados; el cierre completo del kit y las escenas de Kilo requiere todavía revisión. Las otras nueve entregas están pendientes. Tras las diez, versiones centradas en el juego global y después una fase dedicada al multijugador; se conserva su compatibilidad existente.

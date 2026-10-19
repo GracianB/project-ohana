@@ -3,7 +3,7 @@ const COLORS={hub:'#f4d98e',beach:'#95e4ed',jungle:'#b7ef94',cave:'#cbb5ff',lab:
 function springs(g){
  if(g.roomId==='boss'||!COLORS[g.roomId]){g.islandSprings=null;return null;}
  if(g.islandSprings?.room!==g.roomId||g.islandSprings?.owner!==g.player){
-  const platforms=(g.platforms||[]).filter(p=>!p._campaignLift&&p.h<=40&&p.y>600&&p.w>150).sort((a,b)=>a.x-b.x);
+  const platforms=(g.platforms||[]).filter(p=>!p._campaignLift&&!p._crumbles&&p.h<=40&&p.y>600&&p.w>150).sort((a,b)=>a.x-b.x);
   const selected=platforms.filter((_,i)=>i===0||i===Math.floor(platforms.length/2));
   g.islandSprings={room:g.roomId,owner:g.player,wasAir:!g.player?.grounded,
    pads:selected.map(p=>({x:p.x+p.w*.5,y:p.y,cd:0,flash:0})),used:0};

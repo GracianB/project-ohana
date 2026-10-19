@@ -448,6 +448,13 @@ function solve(pose, d, f) {
     const b=pose.kiloPerformance;
     const blend=b.kind==='entrance'?Math.min(1,b.time*4,Math.max(0,(1.6-b.time)*4)):1;
     applyHula(r,pose,d,f,b.time,blend);
+    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[12,sy+7];r.handF=[19,sy+14+Math.sin(b.time*9)*3];r.lean=.03;r.mood="closed";r.mouth="smile";
+     if(b.time<2){r.uke='hand';r.handF=[8,sy+15];r.headRot=-.08;}
+     if(b.time>8){r.uke='back';r.handF=[3,sy+5];r.handB=[-20,sy+6];r.headRot=.12;}
+    }
+    if(b.kind==='family'){r.handB=[-5-al,sy+3];r.handF=[4+al,sy+3];r.mood='happy';r.headRot=Math.sin(b.time*2)*.08;}
+    if(b.kind==='guardian'){r.staffUp=true;r.handF=[hx+hr*.8,sy-16];r.handB=[0,sy+6];r.lean=-.04;r.mood='normal';}
+    if(b.kind==='bloom'){r.handF=[5,sy+5];r.handB=[-3,sy+7];r.mood='closed';r.headRot=.08;r.hairUp=.6;}
     if(b.kind==='entrance'&&b.time<.45){r.handF=[hx+hr*.7,sy-10];r.headRot=-.08;r.wink=true;}
   } else if(pose.kiloWelcome&&!pose.kiloWelcome.reduced){
     const b=pose.kiloWelcome,blend=Math.min(1,b.strum*.5+b.bloom*.7+b.finale);
@@ -468,7 +475,7 @@ function ponytail(ctx, R, pose, f, hr, r) {
   }
   const turn = -2.1 + r.hairUp * 1.4 - pose.sway * 0.9 + pose.bounce * 0.6 + (r.hairLag || 0);
   const bx = -hr * 0.5, by = -hr * 0.82;
-  const len = hr * (f === 4 ? 1.9 : 1.55);
+  const len = hr * [0.55,1.35,1.65,1.95,2.3][f];
   R.tail(ctx, bx, by, len, -2.2 - pose.sway * 0.2,
     (k) => turn + (r.hairLag || 0) * k * 0.8 + Math.sin(t * 0.08 - k * 3) * (f === 4 ? 0.9 : 0.35), hr * 0.44, hr * 0.14, HAIR, { segments: 10 });
   if(f===2){

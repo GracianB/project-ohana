@@ -271,6 +271,7 @@ case "hula-ring":
   ctx.beginPath(); ctx.ellipse(0, -H * 0.48, r * 0.82, r * 0.44, -t * 0.11, 0, Math.PI * 2); ctx.stroke();
   break;
 case "ohana-halo":
+  if(p.id==='kilo')break;
   ctx.strokeStyle = "#fff7d1"; ctx.lineWidth = Math.max(1.6, H * 0.025);
   ctx.beginPath(); ctx.arc(0, -H * 0.52, r * 1.45, 0, Math.PI * 2); ctx.stroke();
   for (let i = 0; i < 5; i++) {

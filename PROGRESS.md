@@ -1,3 +1,13 @@
+## ohana-442 · Kilo: recuerdos, crecimiento y terreno interactivo
+
+Continúa la entrega 1/10. Cada sala dispone de 100 fragmentos persistentes, con 30 en rutas altas. El álbum local muestra su cuadrícula propia sin borrar las diez historias anteriores. El progreso se conserva en partida y perfil al cambiar de sala o héroe. Completar el Claro revela el Ukelele del hogar en la bandera de entrada: todos pueden recogerlo; Kilo protagoniza una escena de diez segundos que detiene la simulación y toca una progresión de ukelele.
+
+Kilo: pelo progresivamente más largo en las cinco formas; cuatro evoluciones con motivos, actuación y frases propios (canción, familia, guardiana y floración); profundidad del aro en K/L/P/U y área musical sobre el suelo. El Claro mantiene pocas repisas e incorpora dos pozos mortales de 100 unidades y tres repisas que se agrietan, ceden a los 45 fotogramas y regresan a los cuatro segundos. Cruces comprobados desde bebé con margen adicional del 20 % en la distancia.
+
+Validación V442: 1274/1274 pruebas unitarias; auditoría general de navegador PASS; recorrido de diez salas, mapas y caídas PASS; captura de cinco formas y cuatro evoluciones de Kilo PASS; recogida de 100 fragmentos con Michi, premio universal, congelación exacta de 600 fotogramas, guardado entre héroes/salas, recuperación en pozo y salida al menú durante la escena PASS. Capturas de escritorio/móvil revisadas y release gate PASS.
+
+Diez repartos de al menos 32 enemigos: criaturas existentes y añadidas, nombres de sala, ocho roles y cuatro variantes de ritmo/alcance, conservando los avisos de ataque y el límite del director. Los enemigos añadidos lejos de cámara y del jugador suspenden sus decisiones. Los objetos de las otras salas tienen datos y presentación base; su dirección artística específica se afinará en su entrega.
+
 ## ohana-441 · Entrega 1/10 en construcción: Kilo y su Claro
 
 Nuevo trazado de 16 repisas estáticas y dos transportes (horizontal y vertical), ukelele interactivo con respuesta a J/K de Kilo, recompensa persistente y corriente musical exclusiva. Se evita reconstruir la antigua escalera genérica en el Claro. Paleta rosa/coral/crema del personaje, hibiscos y aro compuesto detrás/delante del cuerpo; el área de daño se proyecta sobre el suelo. Descarte bidimensional de terreno: captura de prueba con 7 plataformas dibujadas y 11 descartadas de 18.

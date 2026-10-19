@@ -870,6 +870,7 @@ async function auditPage(page, label) {
       // Deterministic GAMEPLAY should not depend on an accumulated profile
       // from a prior seeded replay. Bond persistence is tested separately.
       localStorage.removeItem("ohana-u-bonds-v2");
+      localStorage.removeItem("ohana-room-albums-v1");
       api.setSeed(123456789);
       api.start('kilo');
       api.setXp(55);

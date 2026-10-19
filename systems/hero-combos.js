@@ -87,7 +87,7 @@ export function drawHeroPowers(ctx,g,cam){
  for(const o of s.oil||[]){ctx.fillStyle='#e6b75d77';ctx.beginPath();ctx.ellipse(o.x-cam.x,o.y-cam.y-2,35,5,0,0,Math.PI*2);ctx.fill();}
  for(const m of s.moves||[]){const p=g.player,x=p.x+p.w/2-cam.x,y=p.y+p.h/2-cam.y;ctx.strokeStyle=m.index===5?'#fff1b5':'#b6f5ed';ctx.lineWidth=3;ctx.globalAlpha=.6;ctx.beginPath();
   if(m.id==='pizza'||m.id==='stitcho')ctx.arc(x,y,Math.max(p.w,p.h)*.65,0,Math.PI*2);
-  else if(m.id==='kilo'&&m.index===5){ctx.arc(x,y,60+((m.age%30)/30)*90,0,Math.PI*2);ctx.font='bold 16px sans-serif';ctx.fillStyle='#fff2c6';ctx.textAlign='center';ctx.fillText('P · A COMPÁS',x,y-75);}
+  else if(m.id==='kilo'&&m.index===5){const r=60+((m.age%30)/30)*90;ctx.ellipse(x,p.y+p.h-cam.y,r,r*.24,0,0,Math.PI*2);ctx.font='bold 16px sans-serif';ctx.fillStyle='#fff2c6';ctx.textAlign='center';ctx.fillText('P · A COMPÁS',x,y-75);}
   else{ctx.moveTo(x-m.face*70,y+15);ctx.quadraticCurveTo(x-m.face*30,y-30,x+m.face*40,y);}ctx.stroke();
  }ctx.restore();
 }

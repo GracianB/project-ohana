@@ -10,6 +10,13 @@ import { ROSTER } from "../../characters/roster.js";
 export const EVO_CINE_DURATION = 4.0; // s
 export const EVO_CINE_PHASES = Object.freeze({ charge: [0, 1.4], transform: [1.4, 2.6], reveal: [2.6, 4.0] });
 export const KILO_FORM_NAMES = Object.freeze(["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "Kilo Flor Solar"]);
+export const KILO_EVOLUTION_STORIES=Object.freeze([
+ {motif:'home',sky:'#302442',line:'Una pequeña canción puede encontrar un hogar.'},
+ {motif:'song',sky:'#51334b',line:'Aprendí esta canción para volver a encontrarte.'},
+ {motif:'family',sky:'#263951',line:'Cuando bailamos juntos, nadie está solo.'},
+ {motif:'guardian',sky:'#302b55',line:'Ahora me toca a mí cuidar de nuestra familia.'},
+ {motif:'bloom',sky:'#67495f',line:'Todo el amor que recibimos vuelve a florecer.'}
+]);
 const COL = { bg: "#1b1030", bg2: "#2a1a44", sea: "#163a52", leaf: "#2f8a4a", leaf2: "#46b060", vein: "#1f5e33", gold: "#ffd36a", pink: "#ff6b9a", teal: "#7fe0c8", white: "#fff6e8", skirt: "#6cbf4a" };
 const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -85,7 +92,7 @@ function kiloActor(evo, pose) {
 function drawKilo(ctx, evo, fx, fy, H, t, pose, draw) {
   const p = kiloActor(evo, pose);
   const s = H / KILO_VISUAL_H[evo];
-  p._kiloPerformance={kind:"evolution",time:t};
+  p._kiloPerformance={kind:['entrance','relic','family','guardian','bloom'][evo],time:t};
   ctx.save(); ctx.translate(fx, fy); ctx.scale(s, s);
   p.x = -p.w / 2; p.y = -p.h;
   try { draw(flatCtx(ctx), p, { x: 0, y: 0 }, t * 60, { reduceMotion: false }); } catch { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.w, p.h); }
@@ -109,10 +116,17 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
   const kC = seg(t, 0, 1.4), kT = seg(t, 1.4, 2.6), kR = seg(t, 2.6, 4.0);
   ctx.save();
   // fondo: atardecer en capas + mar
-  ctx.fillStyle = COL.bg; ctx.fillRect(0, 0, w, h);
+  const story=KILO_EVOLUTION_STORIES[to];
+  ctx.fillStyle = story.sky; ctx.fillRect(0, 0, w, h);
   ctx.fillStyle = COL.bg2; ctx.fillRect(0, h * .35, w, h * .4);
   ctx.fillStyle = COL.sea; ctx.fillRect(0, h * .75, w, h * .25);
   ctx.fillStyle = "rgba(255,211,106,.25)"; ctx.beginPath(); ctx.arc(cx, h * .75, H * (.5 + kR * .4), Math.PI, 0); ctx.fill();
+  if(story.motif==='family')for(let i=0;i<6;i++){
+   const x=w*(.1+i*.16),y=h*(.4+(i%2)*.07);ctx.fillStyle=i%2?COL.pink:COL.gold;ctx.beginPath();ctx.ellipse(x,y,H*.025,H*.04,0,0,TAU);ctx.fill();ctx.strokeStyle=COL.gold;ctx.beginPath();ctx.moveTo(x,y-H*.04);ctx.lineTo(x,y-H*.13);ctx.stroke();
+  }
+  if(story.motif==='guardian'){ctx.strokeStyle=COL.teal;ctx.lineWidth=H*.035;ctx.beginPath();ctx.ellipse(cx,foot+8,H*.9,H*.12,0,Math.PI,TAU);ctx.stroke();}
+  if(story.motif==='song')for(let i=0;i<3;i++)note(ctx,cx-H*.65+i*H*.65,foot-H*(.9+i*.1),H*.06,COL.gold);
+  if(story.motif==='bloom')for(let i=0;i<7;i++)flower(ctx,w*(i+.5)/7,h*.76,H*.06,i%2?COL.pink:COL.gold,i);
   // hojas tropicales que se cierran (carga) y se abren (presentación)
   const close = phase === "presentacion" ? 1 - easeOut(kR) : easeOut(kC);
   for (let i = 0; i < 4; i++) {
@@ -170,6 +184,9 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
     text(ctx, ["ALOHA","ENCUENTRA SU RITMO","BAILA CON SU FAMILIA","GUARDIANA DEL COMPÁS","LA ISLA FLORECE"][to], cx, h * .1, Math.min(w, h) * .035, COL.teal);
     text(ctx, "¡" + name.toUpperCase() + "!", cx, h * .18, Math.min(w, h) * .08 * (.8 + .2 * k), COL.gold);
     text(ctx, "Forma " + (to + 1) + " de 5", cx, h * .9, Math.min(w, h) * .035, COL.white);
+    const words=story.line.split(' ');let line='',row=0;ctx.font=`600 ${Math.max(11,Math.min(w,h)*.027)}px sans-serif`;
+    for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>w*.86){text(ctx,line,cx,h*.81+row*Math.min(w,h)*.035,Math.max(11,Math.min(w,h)*.027),COL.white);row++;line=word;}else line=next;}
+    text(ctx,line,cx,h*.81+row*Math.min(w,h)*.035,Math.max(11,Math.min(w,h)*.027),COL.white);
     ctx.globalAlpha = 1;
   }
   ctx.restore();

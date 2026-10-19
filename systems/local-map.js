@@ -18,6 +18,7 @@ export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
  for(const q of g.platforms||[])for(const piece of pieces(q))ctx.fillRect(px(piece.x),py(q.y),Math.max(1,piece.w*sx),q.h>40?Math.max(4,q.h*sy):2);
  for(const z of r.hazards||[])for(const piece of pieces(z)){ctx.fillStyle=z.type==='death'?'#ff7667':'#72e5ff';ctx.fillRect(px(piece.x),py(z.y),Math.max(2,piece.w*sx),Math.max(4,z.h*sy));}
  for(const c of r.checkpoints||[])if(visible(c.x)){ctx.fillStyle=g.checkpoints?.[r.id]===c.id?'#b9ffcf':'#e2c58d';ctx.fillRect(px(c.x)-1,py(c.y)-7,2,7);ctx.fillRect(px(c.x),py(c.y)-7,4,3);}
+ const album=g.roomAlbums?.[r.id],home=r.checkpoints?.[0];if(album?.found.length===100&&!album.relic&&home){ctx.fillStyle='#ffb8d4';ctx.beginPath();ctx.arc(px(home.x),py(home.y)-10,4,0,Math.PI*2);ctx.fill();}
  const exits=[{x:10,y:1134,d:r.doors.left},{x:r.width-12,y:1134,d:r.doors.right},r.upExit?{x:r.upExit.x+r.upExit.w/2,y:15,d:r.doors.up}:null];
  for(const e of exits)if(e?.d&&visible(e.x)){ctx.fillStyle='#fff0ad';ctx.beginPath();ctx.arc(px(e.x),py(e.y),3,0,Math.PI*2);ctx.fill();}
  ctx.strokeStyle='#c9eaff55';ctx.strokeRect(px(g.cam.x),py(g.cam.y),(g.viewW||viewW)*sx,(g.viewH||viewH)*sy);

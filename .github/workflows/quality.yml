@@ -47,6 +47,7 @@ jobs:
         run: |
           node tests/browser/v440-michi.mjs
           node tests/browser/v441-grove.mjs
+          node tests/browser/v442-albums.mjs
           node tests/browser/v1-candidate.mjs
 
       - name: V400 pause, audio and motion preferences
