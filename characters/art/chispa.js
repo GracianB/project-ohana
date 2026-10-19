@@ -148,4 +148,4 @@ function draw(ctx,pose){
   if(a.gag>.25){const x=23+a.gag*4,y=-68-a.gag*8;line(ctx,[[x-3,y],[x,y-4],[x+2,y],[x,y+4],[x-3,y]],'#c2d8bc',1.5);}
  }finally{ctx.restore();}
 }
-export default {id:'chispin',draw,cacheKey:chispaSpriteCacheKey};
+export default {id:'world-two-thunder-guardian',draw,cacheKey:chispaSpriteCacheKey};
