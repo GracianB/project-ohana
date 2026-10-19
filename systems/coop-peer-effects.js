@@ -30,7 +30,6 @@ function effect(item,type){
 // channel only, and applyPeerEffects deduplicates matching scope/frameNo.
 export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onReliable){
  if(!direct?.active||!frame||frame.protocol!==2)return false;
- const quick=direct.sendLatest?.("effects",frame)===true;
  const hasDuet=!!(frame.familyDuet||frame.michiDuet||frame.chispinDuet||
   frame.stitchoDuet||frame.kiloDuet);
  // A complete J/K/L visual trio is one short authored action. The
@@ -41,11 +40,15 @@ export function sendPeerEffectsWithReliableDuet(direct,frame,force=false,onRelia
  const spark=kindsOf(frame.chispinFx),cat=kindsOf(frame.michiFx);
  const hasChispinCombo=spark.has("chain")&&spark.has("trail")&&spark.has("storm");
  const hasMichiCombo=cat.has("yarn")&&cat.has("purr")&&cat.has("wisp");
- const durable=!!force&&(hasDuet||hasChispinCombo||hasMichiCombo)&&direct.sendEvent?.("effects",frame)===true;
+ const combo=hasChispinCombo||hasMichiCombo;
+ const durable=!!force&&(hasDuet||combo)&&direct.sendEvent?.("effects",frame)===true;
+ const quick=direct.sendLatest?.("effects",frame)===true;
  // A fast snapshot alone is not proof of a durable start. The caller must
  // retry until the ordered event channel accepts the current duet.
  if(durable&&typeof onReliable==="function")onReliable();
- return quick||durable;
+ // A replaceable fast packet is never enough to acknowledge an explicit
+ // three-key burst. Keep trying until SCTP's ordered channel accepts it.
+ return force&&combo?durable:(quick||durable);
 }
 // V322 · one bounded, damage-free U start descriptor piggybacked on the
 // existing authenticated ability signal. Never relay live missiles, foes,
@@ -106,9 +109,9 @@ export function applyPeerEffects(game,frame){
   // Reliable cosmetic combo events can arrive AFTER newer disposable frames.
   // They cannot roll back frameNo, combat, room, HP, or non-cosmetic fields.
   // Accept only an unseen, fully validated trio in the current scope and
-  // within sixteen 5 Hz snapshots of the live state (under the 3s E2E budget).
+  // within eight 5 Hz snapshots of the live state.
   if(current?.scope!==frame.scope||frame.frameNo>=current.frameNo||
-     current.frameNo-frame.frameNo>16||history?.lateCombos?.has(frame.frameNo))return false;
+     current.frameNo-frame.frameNo>8||history?.lateCombos?.has(frame.frameNo))return false;
   const m=readMichiEffects(frame.michiFx||[]);
   const c=readChispinEffects(frame.chispinFx||[]);
   if(!m||!c)return false;
