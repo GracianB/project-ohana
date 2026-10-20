@@ -10,7 +10,7 @@ export function createMichiBoss(makeFoe,rng=()=>.5){
  e.x=3420;e.y=MICHI_BOSS.floor-96;e.w=118;e.h=96;
  e.hp=e.max=MICHI_BOSS.hp;
  e.miniBoss=true;e._michiBoss=true;
- e._campaignOriginal=true;e.spawnIndex=997;
+ e._campaignOriginal=true;e.spawnIndex=999;
  e._encounterSaveId=MICHI_BOSS_ID;
  e.roomId='hub';e.color='#e5c2ff';e.contactDmg=0;
  e._astralCat={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false};

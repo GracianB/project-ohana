@@ -1,23 +1,46 @@
 // Personal single-player variant of the Claro for Michi (cat).
 // Do not mutate the canonical shared Hoku ROOM; it is used by multiplayer, Kilo, Stitcho, Chispín and the world graph.
+// LOS JARDINES DE LA LUNA — Michi's world: rose-quartz bioluminescent caves,
+// floating lunar crystal bridges, dream labyrinths, and the moon-temple of the Espíritu Astral Felino.
+// Layout: spiralling cave terraces S0, long floating crystal bridges S1,
+// dream-cloud maze S2, lunar crescent altar arena S3.
 export function createMichiRoom(base){
  if(base?.id!=='hub')throw new Error('Michi room requires canonical hub');
  const platforms=[
   // Ground segments spanning the full 4200 width with two canonical chasms
   [0,1134,1190,126],[1290,1134,1050,126],[2440,1134,1760,126],
-  // Sector 0 · Caverna de los Ecos (rose quartz & bioluminescent terraces)
-  [130,1020,230,22],[330,910,240,22],[680,870,250,22],[970,760,220,22],
-  [350,690,170,22],[520,540,230,22],[810,430,220,22],
-  // Sector 1 · Puentes del Firmamento (floating lunar crystal spans)
-  [1360,980,250,22],[1500,860,220,22],[1800,970,250,22],
-  [1650,610,180,22],[1380,480,230,22],[1870,390,240,22],
-  // Sector 2 · Laberinto de los Sueños (dream catwalks & high platforms)
-  [2000,850,260,22],[2240,720,230,22],[2480,920,240,22],
-  [2680,800,230,22],[2860,670,240,22],
-  [2600,500,220,22],[2290,340,240,22],[2590,240,230,22],[2870,180,250,22],
-  // Sector 3 · Templo de la Luna Llena (astral sanctuary & moon altar)
-  [3070,950,240,22],[3380,870,240,22],[3680,960,240,22],
-  [3240,680,230,22],[3540,530,240,22],[3810,400,230,22]
+
+  // ── Sector 0: Caverna de los Ecos (x:0–1050) ────────────────────────────
+  // Spiralling bioluminescent cave terraces — circular rising pattern
+  [80,1090,160,20],[280,1040,160,20],[520,1020,180,20],
+  [740,980,160,20],[900,900,180,20],[720,800,160,20],
+  [500,740,180,20],[280,680,180,20],[80,600,160,20],
+  [240,480,200,20],[560,440,200,20],[860,400,180,20],
+
+  // ── Sector 1: Puentes del Firmamento (x:1050–2100) ──────────────────────
+  // Long floating lunar crystal spans — very wide, minimalist, gap-heavy
+  [1310,1000,440,20],
+  [1370,800,400,20],
+  [1310,600,440,20],
+  [1420,420,360,20],
+  [1450,240,320,20],
+
+  // ── Sector 2: Laberinto de los Sueños (x:2100–3150) ─────────────────────
+  // Dream-maze — compact alternating left/right platforms, tight vertical spacing
+  [2100,1040,180,20],[2900,1040,180,20],
+  [2220,900,160,20],[2780,910,160,20],
+  [2380,770,180,20],[2640,780,180,20],
+  [2100,640,160,20],[2920,640,160,20],
+  [2240,510,180,20],[2760,520,180,20],
+  [2420,380,200,20],[2600,360,200,20],
+  [2300,240,260,20],
+
+  // ── Sector 3: Templo de la Luna Llena (x:3150–4200) ─────────────────────
+  // Crescent-shaped arena — curved tier feel, split platforms left and right
+  [3160,1010,220,20],[3780,1010,220,20],
+  [3200,840,200,20],[3750,840,200,20],
+  [3310,680,180,20],[3670,680,180,20],
+  [3430,520,300,20],[3460,360,240,20]
  ];
  const checkpoints=[
   {id:'hub-michi-entry',x:230,y:1134,sector:0},
@@ -26,23 +49,25 @@ export function createMichiRoom(base){
   {id:'hub-michi-temple',x:3200,y:1134,sector:3}
  ];
  const foes=[
-  [590,1050,'cucaracho',false,{role:'pursuer',name:'Sombra de la caverna',anchorY:1050}],
-  [820,830,'phosquito',false,{role:'flyer',name:'Polilla lunar',anchorY:830}],
-  [1450,1085,'cangrejo',false,{role:'shield',name:'Guardián de cuarzo',anchorY:1085}],
-  [1780,1080,'rana',false,{role:'jumper',name:'Saltador onírico',anchorY:1080}],
-  [1990,780,'ufo',false,{role:'gunner',name:'Orbe espectral',anchorY:780}],
-  [2290,1060,'cucaracho',false,{role:'pursuer',name:'Merodeador nocturno',anchorY:1060}],
-  [2540,880,'phosquito',false,{role:'flyer',name:'Fatuo de luna',anchorY:880}],
-  [2770,730,'rana',false,{role:'jumper',name:'Acróbata astral',anchorY:730}],
-  [3040,1010,'cangrejo',false,{role:'shield',name:'Centinela del eclipse',anchorY:1010}],
-  [3750,1050,'cucaracho',false,{role:'pursuer',name:'Lince de las sombras',anchorY:1050}]
+  [360,1040,'cucaracho',false,{role:'pursuer',name:'Sombra de la caverna',anchorY:1040}],
+  [720,940,'phosquito',false,{role:'flyer',name:'Polilla lunar',anchorY:940}],
+  [900,860,'cangrejo',false,{role:'shield',name:'Guardián de cuarzo',anchorY:860}],
+  [1380,990,'rana',false,{role:'jumper',name:'Saltador onírico',anchorY:990}],
+  [1700,790,'ufo',false,{role:'gunner',name:'Orbe espectral',anchorY:790}],
+  [2200,1030,'cucaracho',false,{role:'pursuer',name:'Merodeador nocturno',anchorY:1030}],
+  [2500,740,'phosquito',false,{role:'flyer',name:'Fatuo de luna',anchorY:740}],
+  [2800,900,'rana',false,{role:'jumper',name:'Acróbata astral',anchorY:900}],
+  [3200,990,'cangrejo',false,{role:'shield',name:'Centinela del eclipse',anchorY:990}],
+  [3780,990,'cucaracho',false,{role:'pursuer',name:'Lince de las sombras',anchorY:990}]
  ];
  return {...base,name:'Los Jardines de la Luna',short:'Jardines',world:6,color:'#e5c2ff',
   hint:'Recoge 8 esencias de luna, sintoniza tres campanas astrales y despierta al Espíritu Astral Felino. El Ovillo (J) y el Ronroneo (K) disipan nieblas y abren rutas secretas.',
   doors:{...base.doors,up:null},plats:platforms,foes,
   orbs:[
-   [540,910],[840,810],[1100,710],[1530,810],[2100,810],[2400,670],[2850,630],[3610,830],
-   [800,380],[1580,310],[2580,190],[2860,130],[3540,470],[3800,340]
+   [240,440],[560,400],[870,360],[980,220],
+   [1350,210],[1480,380],[1600,560],[1500,760],
+   [2220,860],[2450,340],[2640,720],[2920,510],
+   [3320,640],[3690,640]
   ],
   checkpoints,upExit:null,
   sectors:[

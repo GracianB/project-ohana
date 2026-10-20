@@ -1,14 +1,46 @@
 // REINO DEL HORNO — Procedural vector backdrop for Pizza's personal world.
-// 100% vector Canvas drawing: terracotta brick arches, glowing oven vaults, melted cheese stalactites,
-// volcanic chimney silhouettes, and the Stellar Oven constellation (HORNO ESTELAR). Zero external bitmaps.
+// 100% vector Canvas drawing: 8 parallax layers — volcanic brick oven sky,
+// glowing hearth oven sun, HORNO ESTELAR constellation, distant chimney skyline,
+// giant pizza silhouettes, brick oven arches, molten cheese stalactites, ember sparks.
+// Zero external bitmaps.
+
+function _ovenArch(ctx,x,y,w,h){
+ ctx.beginPath();
+ ctx.moveTo(x,y+h);ctx.lineTo(x,y+h*0.3);
+ ctx.quadraticCurveTo(x+w/2,y-h*0.15,x+w,y+h*0.3);
+ ctx.lineTo(x+w,y+h);ctx.closePath();
+}
+
+function _chimney(ctx,x,y,w,h){
+ ctx.fillRect(x-w/2,y-h,w,h);
+ ctx.fillRect(x-w*0.7,y-h-10,w*1.4,10);
+}
+
+function _pizzaSilhouette(ctx,x,y,r){
+ ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+ // slice lines
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.stroke();
+ }
+}
+
+function _cheeseDrip(ctx,x,y,w,h){
+ ctx.beginPath();ctx.moveTo(x-w/2,y);
+ ctx.lineTo(x-w/2,y+h*0.4);
+ ctx.quadraticCurveTo(x-w/2,y+h,x,y+h);
+ ctx.quadraticCurveTo(x+w/2,y+h,x+w/2,y+h*0.4);
+ ctx.lineTo(x+w/2,y);ctx.closePath();
+}
 
 export function drawPizzaOvensBackdrop(ctx, cam, t, viewportW, viewportH, reduceMotion = false) {
  const w = viewportW || 1100;
  const h = viewportH || 700;
+ const cam0 = cam.x || 0;
 
  ctx.save();
 
- // Layer 0: Warm stone oven vault glow
+ // ── Layer 0: Warm stone oven vault sky gradient ──────────────────────────
  const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
  skyGrad.addColorStop(0, '#2e1008');
  skyGrad.addColorStop(0.35, '#5c1f0d');
@@ -17,132 +49,121 @@ export function drawPizzaOvensBackdrop(ctx, cam, t, viewportW, viewportH, reduce
  ctx.fillStyle = skyGrad;
  ctx.fillRect(0, 0, w, h);
 
- // Glowing Hearth Vent (giant radiant oven sun)
- const ovenX = w * 0.74 - (cam.x * 0.015) % (w * 1.5);
+ // ── Layer 1: Glowing Hearth Oven Sun (HORNO SOLAR) ──────────────────────
+ const ovenX = ((w * 0.74 - cam0 * 0.015) % (w * 2) + w * 2) % (w * 2) - w * 0.5;
  const ovenY = h * 0.28;
- const ovenGrad = ctx.createRadialGradient(ovenX, ovenY, 15, ovenX, ovenY, 70);
+ const pulse = reduceMotion ? 0 : Math.sin(t * 0.06) * 6;
+ const ovenGrad = ctx.createRadialGradient(ovenX, ovenY, 12, ovenX, ovenY, 72 + pulse);
  ovenGrad.addColorStop(0, '#fff3e0');
  ovenGrad.addColorStop(0.4, '#ffab40');
  ovenGrad.addColorStop(0.8, '#ff3d00');
  ovenGrad.addColorStop(1, 'rgba(255,61,0,0)');
  ctx.fillStyle = ovenGrad;
- ctx.beginPath();
- ctx.arc(ovenX, ovenY, 70, 0, Math.PI * 2);
- ctx.fill();
+ ctx.beginPath();ctx.arc(ovenX, ovenY, 72 + pulse, 0, Math.PI * 2);ctx.fill();
+ // Oven heat rays
+ if(!reduceMotion){
+  ctx.strokeStyle = 'rgba(255,200,100,0.18)';ctx.lineWidth = 2;
+  for(let i=0;i<8;i++){
+   const a=i*Math.PI/4+(t*0.01);
+   ctx.beginPath();ctx.moveTo(ovenX+Math.cos(a)*76,ovenY+Math.sin(a)*76);
+   ctx.lineTo(ovenX+Math.cos(a)*110,ovenY+Math.sin(a)*110);ctx.stroke();
+  }
+ }
 
- // Layer 1: Stellar Hearth Constellation (HORNO ESTELAR)
+ // ── Layer 2: HORNO ESTELAR Constellation ───────────────────────────────
  const pizzaStars = [
   { x: 0.18, y: 0.16 }, { x: 0.25, y: 0.12 }, { x: 0.34, y: 0.16 },
   { x: 0.38, y: 0.24 }, { x: 0.30, y: 0.28 }, { x: 0.20, y: 0.25 },
-  { x: 0.27, y: 0.20 } // Center star
+  { x: 0.27, y: 0.20 }
  ];
  ctx.save();
- ctx.strokeStyle = 'rgba(255, 230, 190, 0.48)';
- ctx.lineWidth = 1.4;
- ctx.beginPath();
- // Draw perimeter
- for (let i = 0; i < 6; i++) {
-  const sx = (pizzaStars[i].x * w * 1.3 - cam.x * 0.02) % (w * 1.2);
-  const sy = pizzaStars[i].y * h;
-  if (i === 0) ctx.moveTo(sx, sy);
-  else ctx.lineTo(sx, sy);
+ ctx.strokeStyle = 'rgba(255,230,190,0.50)';ctx.lineWidth = 1;
+ const cx7 = pizzaStars[6].x * w, cy7 = pizzaStars[6].y * h;
+ for(let i=0;i<6;i++){
+  const s1=pizzaStars[i],s2=pizzaStars[(i+1)%6];
+  ctx.beginPath();ctx.moveTo(s1.x*w,s1.y*h);ctx.lineTo(s2.x*w,s2.y*h);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(s1.x*w,s1.y*h);ctx.lineTo(cx7,cy7);ctx.stroke();
  }
- ctx.closePath();
- ctx.stroke();
-
- // Connect to center star
- const cx = (pizzaStars[6].x * w * 1.3 - cam.x * 0.02) % (w * 1.2);
- const cy = pizzaStars[6].y * h;
- for (let i = 0; i < 6; i++) {
-  const sx = (pizzaStars[i].x * w * 1.3 - cam.x * 0.02) % (w * 1.2);
-  const sy = pizzaStars[i].y * h;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(sx, sy);
-  ctx.stroke();
+ for(const ps of pizzaStars){
+  ctx.fillStyle='rgba(255,240,210,0.9)';
+  ctx.beginPath();ctx.arc(ps.x*w,ps.y*h,2.2,0,Math.PI*2);ctx.fill();
  }
+ ctx.fillStyle='rgba(255,210,140,0.45)';ctx.font='10px sans-serif';ctx.textAlign='left';
+ ctx.fillText('HORNO ESTELAR',pizzaStars[1].x*w+6,pizzaStars[1].y*h-4);
+ ctx.restore();
 
- for (const st of pizzaStars) {
-  const sx = (st.x * w * 1.3 - cam.x * 0.02) % (w * 1.2);
-  const sy = st.y * h;
-  const pulse = reduceMotion ? 1 : (1 + Math.sin(t * 0.08 + st.x * 20) * 0.35);
-  ctx.fillStyle = '#fffde7';
-  ctx.beginPath();
-  ctx.arc(sx, sy, 2.8 * pulse, 0, Math.PI * 2);
+ // ── Layer 3: Distant chimney skyline silhouettes (far parallax) ─────────
+ const chimneyOff = ((cam0 * 0.08) % (w * 1.6) + w * 1.6) % (w * 1.6);
+ ctx.fillStyle = '#1a0804';
+ const chimneyData = [
+  [0.05,0.55,14,120],[0.14,0.5,18,150],[0.22,0.58,12,100],[0.30,0.48,20,165],
+  [0.42,0.52,15,130],[0.55,0.46,22,170],[0.63,0.55,13,108],[0.72,0.50,18,145],
+  [0.82,0.56,14,120],[0.92,0.48,20,158]
+ ];
+ for(const [rx,ry,cw,ch] of chimneyData){
+  const cx=rx*w*1.6-chimneyOff;
+  _chimney(ctx,cx,ry*h,cw,ch);
   ctx.fill();
- }
- ctx.restore();
-
- // Layer 2: Distant stone arches & brick chimneys
- ctx.save();
- const archX = -(cam.x * 0.06) % 450;
- ctx.fillStyle = 'rgba(78, 26, 12, 0.85)';
- ctx.beginPath();
- ctx.moveTo(0, h);
- for (let x = -450; x < w + 450; x += 160) {
-  const ax = x + archX;
-  const ay = h * 0.60 + Math.sin(x * 0.015) * 35;
-  ctx.lineTo(ax, ay);
-  ctx.lineTo(ax + 50, ay - 30);
-  ctx.lineTo(ax + 110, ay - 30);
-  ctx.lineTo(ax + 160, ay);
- }
- ctx.lineTo(w, h);
- ctx.closePath();
- ctx.fill();
- ctx.restore();
-
- // Layer 3: Terracotta masonry arches & melted cheese stalactites
- ctx.save();
- const masonryBaseX = -(cam.x * 0.18) % 550;
- ctx.strokeStyle = '#3e1508';
- ctx.lineWidth = 6;
- for (let mx = -200; mx < w + 550; mx += 480) {
-  const cx = mx + masonryBaseX;
-  const cy = h * 0.74;
-
-  // Brick Arch
-  ctx.beginPath();
-  ctx.arc(cx + 60, cy - 40, 70, Math.PI, 0);
-  ctx.stroke();
-
-  // Cheese stalactites
-  ctx.fillStyle = '#ffd54f';
-  for (let s = 0; s < 4; s++) {
-   const stalX = cx + 20 + s * 30;
-   const len = 25 + Math.sin(s * 1.5 + cx) * 12;
-   ctx.beginPath();
-   ctx.moveTo(stalX - 6, cy - 80);
-   ctx.quadraticCurveTo(stalX, cy - 80 + len, stalX + 6, cy - 80);
-   ctx.fill();
+  // smoke puff
+  if(!reduceMotion){
+   ctx.fillStyle='rgba(80,30,10,0.3)';
+   const sy=ry*h-ch-(t*0.5%30);
+   ctx.beginPath();ctx.arc(cx,sy,8,0,Math.PI*2);ctx.fill();
   }
-
-  // Glowing oven window
-  const ox = cx + 60, oy = cy - 25;
-  ctx.fillStyle = '#ff7043';
-  ctx.beginPath();
-  ctx.arc(ox, oy, 14, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(255, 112, 67, 0.35)';
-  ctx.beginPath();
-  ctx.arc(ox, oy, 28 + Math.sin(t * 0.12 + cx) * 4, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillStyle='#1a0804';
  }
- ctx.restore();
 
- // Layer 4: Floating oven sparks & golden oregano embers
- if (!reduceMotion) {
-  ctx.save();
-  for (let i = 0; i < 24; i++) {
-   const px = ((i * 123.7 + t * 20 - cam.x * 0.22) % (w + 100) + w + 100) % (w + 100);
-   const py = ((i * 88.5 + Math.sin(t * 0.06 + i) * 30) % (h * 0.8) + h * 0.8) % (h * 0.8);
-   const size = 1.6 + (i % 3);
-   ctx.fillStyle = 'rgba(255, 204, 128, 0.7)';
-   ctx.beginPath();
-   ctx.arc(px, py, size, 0, Math.PI * 2);
-   ctx.fill();
+ // ── Layer 4: Giant pizza silhouettes (mid parallax) ─────────────────────
+ const pizzaOff = ((cam0 * 0.18) % (w * 1.8) + w * 1.8) % (w * 1.8);
+ ctx.fillStyle='rgba(60,18,5,0.65)';
+ ctx.strokeStyle='rgba(80,25,8,0.4)';ctx.lineWidth=1.5;
+ const pizzaData=[
+  [0.1,0.42,55],[0.38,0.38,68],[0.65,0.45,52],[0.92,0.40,62]
+ ];
+ for(const [rx,ry,r] of pizzaData){
+  const px=rx*w*1.8-pizzaOff;
+  _pizzaSilhouette(ctx,px,ry*h,r);ctx.fill();ctx.stroke();
+ }
+
+ // ── Layer 5: Brick oven arches (near-mid parallax) ──────────────────────
+ const archOff = ((cam0 * 0.28) % (w * 1.5) + w * 1.5) % (w * 1.5);
+ ctx.fillStyle='#3b1005';ctx.strokeStyle='#7a2d12';ctx.lineWidth=3;
+ const archData=[[0.08,0.72,160,180],[0.32,0.68,180,200],[0.60,0.74,155,175],[0.88,0.70,170,195]];
+ for(const [rx,ry,aw,ah] of archData){
+  const ax=rx*w*1.5-archOff;
+  _ovenArch(ctx,ax-aw/2,ry*h,aw,ah);
+  ctx.fill();ctx.stroke();
+  // glowing oven window inside arch
+  ctx.fillStyle='rgba(255,150,40,0.35)';
+  ctx.beginPath();ctx.ellipse(ax,ry*h+ah*0.45,aw*0.22,ah*0.22,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#3b1005';
+ }
+
+ // ── Layer 6: Molten cheese stalactites from ceiling ──────────────────────
+ const dripOff = ((cam0 * 0.40) % (w * 1.4) + w * 1.4) % (w * 1.4);
+ const dripData=[
+  [0.04,22,45],[0.13,28,55],[0.22,18,38],[0.31,32,60],[0.40,22,44],
+  [0.49,26,52],[0.58,18,36],[0.67,30,58],[0.76,20,42],[0.85,28,54],[0.94,22,46]
+ ];
+ for(const [rx,cw,ch] of dripData){
+  const dripX=rx*w*1.4-dripOff;
+  const dripGrad=ctx.createLinearGradient(dripX,0,dripX,ch);
+  dripGrad.addColorStop(0,'rgba(255,214,80,0.85)');
+  dripGrad.addColorStop(0.6,'rgba(255,180,30,0.7)');
+  dripGrad.addColorStop(1,'rgba(255,150,0,0)');
+  ctx.fillStyle=dripGrad;
+  _cheeseDrip(ctx,dripX-cw/2,0,cw,ch);ctx.fill();
+ }
+
+ // ── Layer 7: Ember/spark particles (near, animated) ──────────────────────
+ if(!reduceMotion){
+  ctx.fillStyle='rgba(255,220,80,0.8)';
+  for(let i=0;i<22;i++){
+   const px=(((i*137+cam0*0.6+t*0.9)%(w*1.1))+w*1.1)%(w*1.1);
+   const py=h-(((i*79+t*(0.6+i%4*0.15))%(h*0.85))+h*0.1);
+   const sr=1+i%3;
+   ctx.beginPath();ctx.arc(px,py,sr,0,Math.PI*2);ctx.fill();
   }
-  ctx.restore();
  }
 
  ctx.restore();

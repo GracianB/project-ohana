@@ -1,7 +1,7 @@
 // BOSQUE DEL PRISMA — Cuerno's solo campaign chapter inside the expanded Claro.
 // Aurora ribbon slides, prismatic crystal blast barriers, prism shards, summit beacons,
 // and the celestial prism arena with Bestia Prisma.
-import {movePlatform} from './moving-platforms.js';
+import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {createCuernoBoss,CUERNO_BOSS_ID} from './cuerno-boss.js';
 
 const SAVE_KEY='cuerno-trail-v1';
@@ -65,6 +65,7 @@ export function enterCuernoTrail(g){
   saved,complete,index:index<0?CUERNO_BEACONS.length:index,
   bossDefeated:cleared,banner:0,bannerText:'',bannerSub:'',lifts,
   gateShorts:[0,0,0],altarLit:complete,altarAge:0,
+  crystalCooldown:[0,0,0,0],
   act:cleared?4:Math.min(3,index<0?3:index)
  };
 }
@@ -73,9 +74,11 @@ export function updateCuernoTrail(game,hurtPlayer){
  const s=game.cuernoTrail,p=game.player;if(!s||!p||p.dead)return;
  for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
  if(s.banner>0)s.banner--;
+ if(s.altarLit)s.altarAge=(s.altarAge||0)+1;
 
  // Aurora ribbon slides: speed/jump boost
- for(const slide of CUERNO_CRYSTALS){
+ for(let i=0;i<CUERNO_CRYSTALS.length;i++){
+  const slide=CUERNO_CRYSTALS[i];
   const cx=slide.x,dx=Math.abs(p.x+p.w/2-cx);
   if(dx<45&&p.y<slide.y&&p.y>slide.y-260){
    p.vy=Math.max(-slide.force,p.vy-1.1);
@@ -84,16 +87,17 @@ export function updateCuernoTrail(game,hurtPlayer){
     game.fx?.emit?.(p.x+p.w/2,p.y+p.h,{color:slide.color,count:2,up:4.5,size:4,life:25});
    }
   }
+  if(s.crystalCooldown[i]>0)s.crystalCooldown[i]--;
  }
 
- // Prismatic barriers
+ // Prismatic barriers (correct pushout: gate.w/2)
  for(let i=0;i<CUERNO_BARRIERS.length;i++){
   const gate=CUERNO_BARRIERS[i];
   if(s.gateShorts[i]>0){s.gateShorts[i]--;continue;}
   const near=Math.abs(p.x+p.w/2-gate.x)<gate.w+25&&p.y+p.h>gate.y-gate.height&&p.y<gate.y;
   if(near){
-   if(p.x+p.w/2<gate.x)p.x=gate.x-gate.w-p.w/2;
-   else p.x=gate.x+gate.w+p.w/2;
+   if(p.x+p.w/2<gate.x)p.x=gate.x-gate.w/2-p.w;
+   else p.x=gate.x+gate.w/2;
    p.vx=0;
   }
  }
@@ -101,7 +105,7 @@ export function updateCuernoTrail(game,hurtPlayer){
  // Collect prism shards
  for(const c of CUERNO_SHARDS){
   const key=FRAGMENT_PREFIX+c.id;
-  if(!s.saved.has(key)&&inRange(p,c.x,c.y,38)){
+  if(!s.saved.has(key)&&inRange(p,c.x,c.y,40)){
    persist(game,key);
    s.saved.add(key);
    game.nums?.add?.(c.x,c.y-25,'+1 PRISMA DEL BOSQUE','#b2dfdb',true);
@@ -156,10 +160,26 @@ export function updateCuernoTrail(game,hurtPlayer){
  }
 }
 
+// DESTELLO PRISMA: near a crystal pad → mega launch + brief rainbow dash
+// Near a barrier → CRISTAL ROTO (open it, cooldown 160t)
 export function cuernoAbility(game,player,index){
  const s=game.cuernoTrail;if(!s||!player)return;
+ // Crystal launcher interaction
+ for(let i=0;i<CUERNO_CRYSTALS.length;i++){
+  if(s.crystalCooldown[i]>0)continue;
+  const slide=CUERNO_CRYSTALS[i];
+  if(Math.abs(player.x+player.w/2-slide.x)<110&&player.y<slide.y&&player.y>slide.y-380){
+   s.crystalCooldown[i]=175;
+   player.vy=-slide.force*1.35;player.grounded=false;
+   game.nums?.add?.(slide.x,slide.y-70,'¡DESTELLO PRISMA!','#b2dfdb',true);
+   game.fx?.emit?.(slide.x,slide.y,{color:slide.color,count:22,up:8,size:5.5,life:48});
+   return;
+  }
+ }
+ // Barrier interaction (with cooldown guard)
  for(let i=0;i<CUERNO_BARRIERS.length;i++){
   const gate=CUERNO_BARRIERS[i];
+  if(s.gateShorts[i]>0)continue;
   if(Math.abs(player.x+player.w/2-gate.x)<100&&Math.abs(player.y-gate.y)<gate.height+80){
    s.gateShorts[i]=160;
    game.nums?.add?.(gate.x,gate.y-gate.height/2,'¡CRISTAL ROTO!','#b2dfdb',true);
@@ -171,27 +191,23 @@ export function cuernoAbility(game,player,index){
 export function drawCuernoTrail(ctx,game,cam,t){
  const s=game.cuernoTrail;if(!s)return;
  ctx.save();
+ for(const item of s.lifts)drawPlatformRail(ctx,item.platform,item.motion,cam);
 
  // Draw Aurora Slides
  for(const slide of CUERNO_CRYSTALS){
   const sx=slide.x-cam.x,sy=slide.y-cam.y;
   ctx.fillStyle='#004d40';
   ctx.beginPath();
-  ctx.moveTo(sx-32,sy);
-  ctx.lineTo(sx-18,sy-18);
-  ctx.lineTo(sx+18,sy-18);
-  ctx.lineTo(sx+32,sy);
-  ctx.closePath();
-  ctx.fill();
+  ctx.moveTo(sx-32,sy);ctx.lineTo(sx-18,sy-18);ctx.lineTo(sx+18,sy-18);ctx.lineTo(sx+32,sy);
+  ctx.closePath();ctx.fill();
   const pulse=Math.sin(t*0.2+slide.x)*8;
-  ctx.fillStyle='rgba(128,203,196,0.5)';
-  ctx.beginPath();
-  ctx.moveTo(sx-18,sy-18);
-  ctx.lineTo(sx-24,sy-160+pulse);
-  ctx.lineTo(sx+24,sy-160+pulse);
-  ctx.lineTo(sx+18,sy-18);
-  ctx.closePath();
-  ctx.fill();
+  const colG=ctx.createLinearGradient(sx,sy-18,sx,sy-170+pulse);
+  colG.addColorStop(0,`rgba(128,203,196,0.72)`);colG.addColorStop(1,'rgba(128,222,234,0)');
+  ctx.fillStyle=colG;
+  ctx.beginPath();ctx.moveTo(sx-18,sy-18);ctx.lineTo(sx-24,sy-170+pulse);ctx.lineTo(sx+24,sy-170+pulse);ctx.lineTo(sx+18,sy-18);ctx.closePath();ctx.fill();
+  // J/K hint
+  ctx.fillStyle='rgba(224,242,241,0.85)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+  ctx.fillText('J/K',sx,sy-175+pulse);
  }
 
  // Draw Prismatic Barriers
@@ -201,14 +217,12 @@ export function drawCuernoTrail(ctx,game,cam,t){
   if(shorted){
    ctx.strokeStyle='rgba(128,222,234,0.35)';ctx.lineWidth=2;ctx.strokeRect(gx-g.w/2,gy-g.height,g.w,g.height);
   }else{
-   ctx.fillStyle='#00695c';
-   ctx.fillRect(gx-g.w/2,gy-g.height,g.w,g.height);
-   ctx.strokeStyle='#b2dfdb';ctx.lineWidth=3;
-   ctx.strokeRect(gx-g.w/2,gy-g.height,g.w,g.height);
-   ctx.fillStyle='#80cbc4';
-   ctx.beginPath();
-   ctx.arc(gx,gy-g.height/2,16,0,Math.PI*2);
-   ctx.fill();
+   ctx.fillStyle='#00695c';ctx.fillRect(gx-g.w/2,gy-g.height,g.w,g.height);
+   ctx.strokeStyle='#b2dfdb';ctx.lineWidth=3;ctx.strokeRect(gx-g.w/2,gy-g.height,g.w,g.height);
+   ctx.fillStyle='#80cbc4';ctx.beginPath();ctx.arc(gx,gy-g.height/2,16,0,Math.PI*2);ctx.fill();
+   // J/K label on closed barrier
+   ctx.fillStyle='#e0f2f1';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+   ctx.fillText('J/K',gx,gy-g.height/2+4);
   }
  }
 
@@ -218,15 +232,10 @@ export function drawCuernoTrail(ctx,game,cam,t){
   if(s.saved.has(key))continue;
   const fx=c.x-cam.x,fy=c.y-cam.y;
   const bob=Math.sin(t*0.12+c.x)*5;
-  ctx.fillStyle='#80cbc4';
-  ctx.strokeStyle='#e0f2f1';ctx.lineWidth=2;
+  ctx.fillStyle='#80cbc4';ctx.strokeStyle='#e0f2f1';ctx.lineWidth=2;
   ctx.beginPath();
-  ctx.moveTo(fx,fy-14+bob);
-  ctx.lineTo(fx+10,fy+bob);
-  ctx.lineTo(fx,fy+14+bob);
-  ctx.lineTo(fx-10,fy+bob);
-  ctx.closePath();
-  ctx.fill();ctx.stroke();
+  ctx.moveTo(fx,fy-14+bob);ctx.lineTo(fx+10,fy+bob);ctx.lineTo(fx,fy+14+bob);ctx.lineTo(fx-10,fy+bob);
+  ctx.closePath();ctx.fill();ctx.stroke();
  }
 
  // Draw Summit Beacons
@@ -244,25 +253,25 @@ export function drawCuernoTrail(ctx,game,cam,t){
 
  // Draw Relic Altar
  const ax=3780-cam.x,ay=1100-cam.y;
- ctx.fillStyle='#00251a';
- ctx.fillRect(ax-40,ay-20,80,20);
- ctx.fillStyle=s.altarLit?'#80deea':'#00897b';
- ctx.beginPath();ctx.arc(ax,ay-35,22,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#00251a';ctx.fillRect(ax-40,ay-20,80,20);
+ const altarGlow=s.altarLit?'#80deea':'#00897b';
+ ctx.fillStyle=altarGlow;ctx.beginPath();ctx.arc(ax,ay-35,22,0,Math.PI*2);ctx.fill();
  if(s.altarLit){
   ctx.fillStyle='rgba(128,222,234,0.35)';
-  ctx.beginPath();ctx.arc(ax,ay-35,40+Math.sin(t*0.1)*6,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(ax,ay-35,40+Math.sin((s.altarAge||0)*.1)*6,0,Math.PI*2);ctx.fill();
  }
 
- // Act Banner
+ // Act Banner — with proper fade alpha
  if(s.banner>0&&s.bannerText){
-  ctx.fillStyle='rgba(5,25,20,0.85)';
-  ctx.fillRect(180,45,740,55);
-  ctx.strokeStyle='#80cbc4';ctx.lineWidth=2;
-  ctx.strokeRect(180,45,740,55);
+  const alpha=Math.min(1,s.banner/30);
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle='rgba(5,25,20,0.85)';ctx.fillRect(180,45,740,55);
+  ctx.strokeStyle='#80cbc4';ctx.lineWidth=2;ctx.strokeRect(180,45,740,55);
   ctx.fillStyle='#e0f2f1';ctx.font='bold 16px sans-serif';ctx.textAlign='center';
   ctx.fillText(s.bannerText,550,70);
   ctx.fillStyle='#b2dfdb';ctx.font='12px sans-serif';
   ctx.fillText(s.bannerSub,550,90);
+  ctx.globalAlpha=1;
  }
  ctx.restore();
 }
