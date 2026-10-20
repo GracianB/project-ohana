@@ -3,7 +3,7 @@ const living=e=>e&&e.hp>0&&!e.dying&&!e.fell;
 const close=(g,x,y,r)=>g.enemies.filter(living).filter(e=>Math.hypot(mid(e).x-x,mid(e).y-y)<r);
 export const HERO_POWERS=Object.freeze({
  kilo:['Remate aloha','A compás del sol','Acierta H → J → H en 4 s; pulsa I durante los 6 s siguientes: paso evasivo y golpe ascendente.','Carga 100 causando daño real; pulsa P para lanzar y al ritmo de sus tres señales para ampliar ondas y daño.'],
- stitcho:['Rebote 626','Flota cruzada','Rebota hacia el siguiente enemigo al acertar.','La flota cruza la zona que señalas al mirar.'],
+ stitcho:['Rebote 626','Flota cruzada','Rebota hacia el siguiente enemigo al acertar con paso acrobático de plasma.','La flota 626 bombardea la zona señalada con rayos orbitales de plasma.'],
  chispin:['Carrera relámpago','Tormenta enlazada','Cruza enemigos y conecta las marcas de J.','Detona las marcas y encadena descargas.'],
  cat:['Garra ascendente','Cacería lunar','Zarpazo aéreo que rebota al acertar.','Persigue tus presas y termina con una caída lunar.'],
  dragon:['Picado del cometa','Vuelo volcánico','Pica y recupera altura al golpear.','Dirige el vuelo y deja una estela de fuego.'],
@@ -54,7 +54,6 @@ export function updateHeroPowers(g,s,hit,color){
     if(m.id==='frita'&&a%6===0){s.oil||=[];s.oil.push({x:c.x,y:p.y+p.h,life:480});s.oil=s.oil.slice(-32);}
    }
   }else if(m.id==='kilo'){
-   // The three persistent markers provide the cue; floating text obscures them.
    if([39,69,99].includes(a)){m.hit.clear();m.pulseAge=a;m.pulseRadius=210+m.bonus*45;pulse(m,c.x,c.y,m.pulseRadius,36+m.bonus*12);field(m,c.x,c.y,m.pulseRadius,12,'garden',1);}
   }else if(m.id==='stitcho'){
    if(a%20===1){const x=m.start.x+m.face*260,y=m.start.y;for(const side of [-1,1])s.drones.push({id:'stitcho',x:x+side*220,y:y-160,age:0,life:38,index:side===1?1:0,count:2,next:8,noCharge:true});field(m,x,y,150,38,'burst',18);}
@@ -88,11 +87,44 @@ export function drawHeroPowers(ctx,g,cam){
  const s=g._evolutionAttacks;if(!s)return;ctx.save();
  for(const o of s.oil||[]){ctx.fillStyle='#e6b75d77';ctx.beginPath();ctx.ellipse(o.x-cam.x,o.y-cam.y-2,35,5,0,0,Math.PI*2);ctx.fill();}
  for(const m of s.moves||[]){const p=g.player,x=p.x+p.w/2-cam.x,y=p.y+p.h/2-cam.y;ctx.strokeStyle=m.index===5?'#fff1b5':'#b6f5ed';ctx.lineWidth=3;ctx.globalAlpha=.6;ctx.beginPath();
-  if(m.id==='pizza'||m.id==='stitcho')ctx.arc(x,y,Math.max(p.w,p.h)*.65,0,Math.PI*2);
+  if(m.id==='pizza')ctx.arc(x,y,Math.max(p.w,p.h)*.65,0,Math.PI*2);
+  else if(m.id==='stitcho'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    // Flota cruzada (P / Ultimate): tactical targeting HUD + dual orbital lasers
+    ctx.strokeStyle='#67ddff';ctx.lineWidth=2.5;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,52,0,Math.PI*2);ctx.stroke();
+    // Crosshair reticle
+    ctx.beginPath();
+    ctx.moveTo(x-70,y);ctx.lineTo(x-35,y);ctx.moveTo(x+35,y);ctx.lineTo(x+70,y);
+    ctx.moveTo(x,y-70);ctx.lineTo(x,y-35);ctx.moveTo(x,y+35);ctx.lineTo(x,y+70);
+    ctx.stroke();
+    ctx.fillStyle='#a6f4ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('FLOTA 626 · ORBITAL',x,y-78);
+    // Dual orbital strikes
+    for(const side of [-1,1]){
+     const bx=x+side*180;
+     ctx.fillStyle='rgba(103,221,255,0.18)';ctx.fillRect(bx-20,-cam.y,40,1400);
+     ctx.strokeStyle='#d5aaff';ctx.lineWidth=2.5;
+     ctx.beginPath();ctx.moveTo(bx,-cam.y);ctx.lineTo(bx,y);ctx.stroke();
+    }
+   } else {
+    // Rebote 626 (I / Remate combo): Plasma roll sphere + erratic lightning arcs
+    ctx.strokeStyle='#62f3ff';ctx.lineWidth=3.2;ctx.globalAlpha=.8;
+    ctx.beginPath();ctx.arc(x,y,Math.max(p.w,p.h)*.82,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#d6a8ff';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const a=i*Math.PI/2+(g.reduceMotion?0:m.age*.2);
+     ctx.beginPath();ctx.moveTo(x+Math.cos(a)*18,y+Math.sin(a)*18);
+     ctx.lineTo(x+Math.cos(a)*36+Math.sin(a*3)*6,y+Math.sin(a)*36);
+     ctx.stroke();
+    }
+   }
+  }
   else if(m.id==='kilo'&&m.index===5){
    const beats=[30,60,90],next=beats.find(v=>v>=m.age-8&&!m.beats.has(v)),ready=next!==undefined&&Math.abs(next-m.age)<=8;
    ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#183e48';ctx.fillRect(x-68,y-103,136,45);
-   ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillStyle=ready?'#fff0a2':'#d9e5df';ctx.fillText(ready?'P · ¡AHORA!':'SIGUE EL COMPÁS',x,y-86);
+   ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillStyle=ready?'#fff0a2':'#d9e5df';ctx.fillText(ready?'P — ¡AHORA!':'SIGUE EL COMPÁS',x,y-86);
    beats.forEach((beat,i)=>{const bx=x+(i-1)*34,hit=m.beats.has(beat),miss=m.age>beat+8&&!hit;
     ctx.fillStyle=hit?'#b6f5cd':miss?'#ac8494':'#efe4c0';ctx.beginPath();ctx.arc(bx,y-70,hit?5:3,0,Math.PI*2);ctx.fill();
     if(!hit&&!miss){ctx.strokeStyle='#ffe492';ctx.lineWidth=2;ctx.beginPath();ctx.arc(bx,y-70,5+Math.min(22,Math.abs(beat-m.age)*.55),0,Math.PI*2);ctx.stroke();}
