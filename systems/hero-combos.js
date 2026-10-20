@@ -132,6 +132,40 @@ export function drawHeroPowers(ctx,g,cam){
    const flash=m.age-(m.pulseAge??-100);if(flash>=0&&flash<14){ctx.globalAlpha=(1-flash/14)*.7;ctx.strokeStyle='#fff0a2';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,p.y+p.h-cam.y,m.pulseRadius,m.pulseRadius*.24,0,0,Math.PI*2);ctx.stroke();}
    ctx.beginPath();
   }
+  else if(m.id==='chispin'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ffe45a';ctx.lineWidth=2.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,56,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ca8eff';ctx.lineWidth=1.8;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.15);
+     const r=56+Math.sin(m.age*.2+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#fff39e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('TORMENTA ENLAZADA · 100V',x,y-74);
+    for(let i=-1;i<=1;i++){
+     const lx=x+i*130;
+     ctx.fillStyle='rgba(255,228,90,0.15)';ctx.fillRect(lx-16,-cam.y,32,1400);
+     ctx.strokeStyle='#fff8c4';ctx.lineWidth=2;
+     ctx.beginPath();ctx.moveTo(lx,-cam.y);ctx.lineTo(lx,y);ctx.stroke();
+    }
+   } else {
+    ctx.strokeStyle='#ffe761';ctx.lineWidth=3.4;ctx.globalAlpha=.85;
+    ctx.beginPath();
+    ctx.moveTo(x-m.face*60,y+10);
+    ctx.lineTo(x-m.face*35,y-18);
+    ctx.lineTo(x-m.face*10,y+14);
+    ctx.lineTo(x+m.face*45,y-6);
+    ctx.stroke();
+    ctx.strokeStyle='#d996ff';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*28,y+Math.sin(sa)*28);ctx.stroke();
+    }
+   }
+  }
   else if(m.id==='kilo'){
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;

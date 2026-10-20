@@ -17,7 +17,7 @@ Cada una de las diez fases se cierra con esta misma lista, sin sustituir una mec
 
 1. **Kilo** — Claro y Bahía del compás; Tambor del Claro (360 PV, 2 fases); 100 flores y Ukelele del hogar. Repertorio V1 cerrado.
 2. **Stitcho** — Archipiélago del Caos y cápsula en Bahía del compás; Núcleo Glitch (Error 626, 480 PV, 3 fases); 100 chispas del caos y Corazón Galáctico. Repertorio alienígena, 5 formas, roll, acrobacias, arcos eléctricos desactivables con J y 4 raíles móviles completados.
-3. **Chispín** — Siguiente entrega (en desarrollo en PR #390: Islas del Relámpago en el Laboratorio original, Ojo de la Tormenta, flores voltaicas y Corona/Núcleo de Tormenta).
+3. **Chispín** — Islas del Relámpago y Santuario del Trueno; Titán de Trueno (480 PV, 3 fases); 100 bobinas/rayos y Relámpago Dorado. Repertorio 100% Canvas vectorial, 5 formas (incluyendo Trueno Gordo), cadena J, blink K, tormenta L, remate I (Carrera Relámpago) y ultimate P (Tormenta Enlazada) completados.
 4. **Michi** — Jardines de la Luna en la Cueva; encuentro astral felino y Luna Soñadora.
 5. **Dragón** — Cordillera de las Brasas en la Caldera; Brasa del hogar.
 6. **Dino** — Valle de los Gigantes en la arena del Coloso; Fósil de la familia.

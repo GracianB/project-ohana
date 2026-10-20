@@ -10,6 +10,10 @@ import {enterStitchoTrail,interactStitchoTrail,stitchoTrailPrompt,updateStitchoT
 import {createStitchoBoss,updateStitchoBoss,drawStitchoBossSignals,drawStitchoBossBody,drawStitchoEnemyAccent,STITCHO_BOSS_ID} from './systems/stitcho-boss.js';
 import {createStitchoRoom} from "./systems/stitcho-room.js";
 import {drawStitchoArchipelago} from "./worlds/stitcho-archipelago.js";
+import {createChispinRoom} from "./systems/chispin-room.js";
+import {drawChispinSanctuary} from "./worlds/chispin-sanctuary.js";
+import {enterChispinTrail,interactChispinTrail,chispinTrailPrompt,updateChispinTrail,drawChispinTrail,chispinTrailSnapshot,chispinAbility} from './systems/chispin-trail.js';
+import {createChispinBoss,updateChispinBoss,drawChispinBossSignals,drawChispinBossBody,CHISPIN_BOSS_ID} from './systems/chispin-boss.js';
 import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
@@ -324,7 +328,7 @@ return "C";
 function canAct() { return game.running && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
-if (!interactStitchoTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
+if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -490,6 +494,7 @@ if (fromDir !== "down") snapToFloor(p);
 function loadRoom(id, fromDir) {
 let r = ROOMS[id];
 if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
+if(id==="hub"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -525,8 +530,8 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
-enterKiloGrove(game);enterStitchoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
-game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);};
+enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
+game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
@@ -1721,6 +1726,7 @@ if (ok) {
 }
 const r = room();
 if (stitchoTrailPrompt(game))setPrompt(stitchoTrailPrompt(game),true);
+else if (chispinTrailPrompt(game))setPrompt(chispinTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
@@ -1928,6 +1934,7 @@ if (e.boss) {
 }
 
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
+if(updateChispinBoss(e,game,hurtPlayer))continue;
 if(updateGroveGuardian(e,game,hurtPlayer))continue;
 if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
@@ -2738,6 +2745,11 @@ if(game.stitchoTrail){
  drawStitchoArchipelago(ctx,game.cam,t,viewportW,viewportH,{
   reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.stitchoTrail.index
  });
+}else if(game.chispinTrail){
+ const tier=game.enemies.find(e=>e._chispinBoss)?._titan?.tier||1;
+ drawChispinSanctuary(ctx,game.cam,t,viewportW,viewportH,{
+  reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.chispinTrail.index
+ });
 }else{
  renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
  drawRoomAtmosphere(
@@ -2749,7 +2761,7 @@ if(game.stitchoTrail){
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
@@ -2787,9 +2799,11 @@ for (const e of game.enemies) {
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
   if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else {drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
     if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
   if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
@@ -3221,7 +3235,7 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
-updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);
 updatePlayer();
 updateRoomAlbum(game);updateHeroCollection(game);
 if(game.relicScene)return;
@@ -3558,7 +3572,7 @@ checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomD
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
  interact(){interact();return this.state();},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3664,7 +3678,7 @@ state() {
       formation: game.enemyDirector.formation || "",
     } : null,
     kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
-    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
+    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),

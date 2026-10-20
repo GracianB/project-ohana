@@ -34,6 +34,21 @@ function drawStitchoCampPod(c,z){
  c.restore();
 }
 
+function drawChispinCampPod(c,z){
+ c.save();
+ c.translate(z.x+85,z.y-12);
+ c.fillStyle='#2f2042';c.strokeStyle='#ffe45a';c.lineWidth=2.2;
+ c.beginPath();c.moveTo(-22,10);c.lineTo(-12,-28);c.lineTo(12,-28);c.lineTo(22,10);c.closePath();c.fill();c.stroke();
+ c.fillStyle='#d68a35';c.fillRect(-8,-26,16,20);
+ c.strokeStyle='#ffd84a';c.lineWidth=1.5;
+ for(let i=0;i<4;i++){c.beginPath();c.moveTo(-8,-24+i*5);c.lineTo(8,-24+i*5);c.stroke();}
+ c.fillStyle='#ffe96b';c.beginPath();c.arc(0,-36,8,0,Math.PI*2);c.fill();
+ c.strokeStyle='#ffffff';c.lineWidth=1.6;c.stroke();
+ c.fillStyle='#ffd43f';c.strokeStyle='#ffffff';c.lineWidth=1;
+ c.beginPath();c.moveTo(28,10);c.lineTo(34,-4);c.lineTo(38,10);c.closePath();c.fill();c.stroke();
+ c.restore();
+}
+
 export function drawFamilyIslands(c){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
