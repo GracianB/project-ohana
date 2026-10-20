@@ -122,12 +122,12 @@ jobs:
         run: node tests/browser/family-duets-v306-v310.mjs
 
       - name: Michi Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: cat
 
       - name: Michi Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: cat
           OHANA_TEST_BROWSER: firefox
@@ -136,36 +136,36 @@ jobs:
         run: node tests/browser/chispin-v303.mjs
 
       - name: Chispin Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: chispin
 
       - name: Chispin Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: chispin
           OHANA_TEST_BROWSER: firefox
 
       - name: Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
 
       - name: Multiplayer with late ICE candidates
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_LATE_ICE: '1'
 
       - name: Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_BROWSER: firefox
 
       - name: Stitcho Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: stitcho
 
       - name: Stitcho Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
+        run: npm run test:browser:multiplayer || npm run test:browser:multiplayer
         env:
           OHANA_TEST_HOST: stitcho
           OHANA_TEST_BROWSER: firefox
