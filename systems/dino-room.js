@@ -44,7 +44,7 @@ export function createDinoRoom(base){
  ];
  const foes=[
   // Sector 0 — gorge crawlers and aerial fossils
-  [480,900,'cangrejo',false,{role:'pursuer',  name:'Trilobite acorazado',   anchorY:900}],
+  [480,900,'cucaracho',false,{role:'pursuer',  name:'Trilobite acorazado',   anchorY:900}],
   [700,820,'escoria', false,{role:'flyer',    name:'Pterosaurio fósil',     anchorY:820}],
   [920,800,'rana',    false,{role:'jumper',   name:'Anuro primigenio',      anchorY:800}],
   // Sector 1 — mesa guardians and fossil gunners
@@ -52,11 +52,11 @@ export function createDinoRoom(base){
   [1750,1000,'rana',  false,{role:'jumper',   name:'Saltador de meseta',    anchorY:1000}],
   [1920,820,'ufo',    false,{role:'gunner',   name:'Centinela fósil',       anchorY:820}],
   // Sector 2 — amber cavern ambushers
-  [2620,1040,'cangrejo',false,{role:'pursuer','name':'Reptil de cuarzo',    anchorY:1040}],
+  [2620,1040,'cucaracho',false,{role:'pursuer','name':'Reptil de cuarzo',    anchorY:1040}],
   [2800,960,'escoria', false,{role:'flyer',   name:'Arqueópterix',          anchorY:960}],
   // Sector 3 — arena guards
   [3200,990,'cangrejo',false,{role:'shield',  name:'Guardián de la roca',   anchorY:990}],
-  [3600,960,'rana',    false,{role:'jumper',  name:'Heraldo del coloso',    anchorY:960}]
+  [3600,960,'brasita', false,{role:'pursuer', name:'Heraldo �gneo',     anchorY:960}]
  ];
  return {
   ...base,

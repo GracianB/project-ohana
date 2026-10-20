@@ -46,18 +46,18 @@ export function createPizzaRoom(base){
  const foes=[
   // Sector 0 — oven-mouth sentinels
   [360,960,'brasita', false,{role:'pursuer', name:'Chispa de mozzarella', anchorY:960}],
-  [700,890,'escoria', false,{role:'flyer',   name:'Cortador volador',     anchorY:890}],
+  [700,890,'phosquito',false,{role:'flyer',   name:'Dron cortapizzas',     anchorY:890}],
   [920,830,'rana',    false,{role:'jumper',  name:'Saltarín de masa',     anchorY:830}],
   // Sector 1 — pizza oven guardians
   [1450,1000,'cangrejo',false,{role:'shield', name:'Guardián del horno',  anchorY:1000}],
   [1700,950,'brasita', false,{role:'pursuer', name:'Burbuja de queso',    anchorY:950}],
   [1960,780,'ufo',     false,{role:'gunner',  name:'Centinela magmático', anchorY:780}],
   // Sector 2 — molten cheese cave
-  [2640,1030,'rana',   false,{role:'jumper',  name:'Rana del queso',      anchorY:1030}],
-  [2850,960,'escoria', false,{role:'flyer',   name:'Volador de especias', anchorY:960}],
+  [2640,1030,'phosquito',false,{role:'flyer',  name:'Mosca de especias',   anchorY:1030}],
+  [2850,960,'cucaracho', false,{role:'pursuer', name:'Corredor de lava',   anchorY:960}],
   // Sector 3 — coliseum defenders
   [3250,990,'cangrejo',false,{role:'shield',  name:'Centinela del coliseo',anchorY:990}],
-  [3680,960,'brasita', false,{role:'pursuer', name:'Heraldo del chef',    anchorY:960}]
+  [3680,960,'rana',    false,{role:'jumper',  name:'Heraldo del chef',     anchorY:960}]
  ];
  return {
   ...base,
