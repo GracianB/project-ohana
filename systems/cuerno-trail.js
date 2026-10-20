@@ -72,7 +72,7 @@ export function enterCuernoTrail(g){
 
 export function updateCuernoTrail(game,hurtPlayer){
  const s=game.cuernoTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
  if(s.altarLit)s.altarAge=(s.altarAge||0)+1;
 

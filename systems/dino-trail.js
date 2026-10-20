@@ -83,7 +83,7 @@ export function enterDinoTrail(g){
 // ── update ────────────────────────────────────────────────────────────────────
 export function updateDinoTrail(game,hurtPlayer){
  const s=game.dinoTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
 
  // ── Mud geyser pads ──────────────────────────────────────────────────────

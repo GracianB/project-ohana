@@ -80,7 +80,7 @@ export function enterYomiTrail(g){
 
 export function updateYomiTrail(game,hurtPlayer){
  const s=game.yomiTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
  if(s.shield>0){s.shield--;if(p.invuln<s.shield)p.invuln=Math.max(p.invuln,s.shield);}
 

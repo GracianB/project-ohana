@@ -80,7 +80,7 @@ export function enterPizzaTrail(g){
 
 export function updatePizzaTrail(game,hurtPlayer){
  const s=game.pizzaTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
 
  for(let i=0;i<PIZZA_LAUNCHERS.length;i++){

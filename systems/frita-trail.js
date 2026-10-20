@@ -83,7 +83,7 @@ export function enterFritaTrail(g){
 // ── update ────────────────────────────────────────────────────────────────────
 export function updateFritaTrail(game,hurtPlayer){
  const s=game.fritaTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
 
  // ── Sizzling oil springs — vertical launch ────────────────────────────────

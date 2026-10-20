@@ -71,7 +71,7 @@ export function enterDragonTrail(g){
 
 export function updateDragonTrail(game,hurtPlayer){
  const s=game.dragonTrail,p=game.player;if(!s||!p||p.dead)return;
- for(const item of s.lifts)movePlatform(item.platform,item.motion,game.t,p);
+ for(const item of s.lifts)movePlatform(game,item.platform,item.motion);
  if(s.banner>0)s.banner--;
 
  // Updraft vents: thermal updraft columns push player smoothly upwards
