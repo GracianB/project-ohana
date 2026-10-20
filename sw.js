@@ -332,8 +332,8 @@ const PRECACHE_REVISIONS = {
   "systems/campaign-layout.js": "824c9fc2ecd108e7c4f8891b54e5d01163f6c0f0",
   "systems/local-map.js": "f8b561815c32a9ddd5ed022040aaaf5b49240d84",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
-  "systems/family-islands.js": "4f724c8d2a56edf7a272d783e598f1771685d6dd",
-  "systems/hero-combos.js": "2f0d7371665601e8d16471920941ad65905f685d",
+  "systems/family-islands.js": "96b895029884e790e512f23185042f4f370bbfa4",
+  "systems/hero-combos.js": "53600f502dd1fa388c98041c11d97411c49751ba",
   "systems/campaign-enemies.js": "36cc8abcf5a882ce2f3b432c6592ee8d2eb4fbc0",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
@@ -609,11 +609,11 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "systems/hero-collections.js": "fa48fb0034dd5cf72802318f586aa70c75856f29",
-  "systems/stitcho-room.js": "5c3c842830115ba4b39693a216f996712483779e",
+  "systems/stitcho-room.js": "a3f965f11fc7f32385c4cb8d235bcd890b5f714d",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
-  "systems/stitcho-trail.js": "2add4e32314c4d58900ca335f6c356a9e526c73f",
+  "systems/stitcho-trail.js": "7f834abb3ce08628a60e4a32f7072f81f806e7dc",
   "systems/stitcho-boss.js": "7a0a5d3e6fc1c24329a98aa910004f6d6e90c3d5",
-  "worlds/stitcho-archipelago.js": "c4ce58b4e7818fdea549d0242029ec0aca2a2845"
+  "worlds/stitcho-archipelago.js": "ecda3b3d8b2af806078caa2351f5c77de68b761d"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
