@@ -1,16 +1,19 @@
-// ARCHIPIÉLAGO DEL CAOS · Stitcho's solo campaign chapter inside the expanded Claro.
+// ARCHIPIÉLAGO DEL CAOS — Stitcho's solo campaign chapter inside the expanded Claro.
 // Own interaction gates, energy shards, transport rails, spring mechanics,
 // timed electrical hazards, three story acts and a distinct final encounter.
 // All permanent rewards use Stitcho's existing per-hero save, never Kilo's.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {STITCHO_BOSS_ID} from './stitcho-boss.js';
+
 const SAVE_KEY='stitcho-trail-v1';
 const FRAGMENT_PREFIX='stitcho-fragment-';
+
 export const STITCHO_BEACONS=Object.freeze([
  Object.freeze({id:'stitcho-spark',x:430,y:1074,label:'CHISPA',need:0,line:'El motor alienígena vuelve a latir.'}),
  Object.freeze({id:'stitcho-echo',x:1720,y:1090,label:'ECO',need:2,line:'Los puentes responden a tu energía.'}),
  Object.freeze({id:'stitcho-star',x:3050,y:1084,label:'ESTRELLA',need:4,line:'¡El Núcleo Glitch ha despertado!'})
 ]);
+
 export const STITCHO_FRAGMENTS=Object.freeze([
  Object.freeze({id:'a',x:540,y:1070}),
  Object.freeze({id:'b',x:830,y:836}),
@@ -21,23 +24,28 @@ export const STITCHO_FRAGMENTS=Object.freeze([
  Object.freeze({id:'g',x:3350,y:1080}),
  Object.freeze({id:'h',x:3800,y:1075})
 ]);
+
 export const STITCHO_PADS=Object.freeze([
  Object.freeze({x:990,y:1134,force:15.2,color:'#8defff'}),
  Object.freeze({x:2150,y:1134,force:17,color:'#b8a5ff'}),
  Object.freeze({x:2790,y:1134,force:16.1,color:'#8defff'})
 ]);
+
 export const STITCHO_GATES=Object.freeze([
  Object.freeze({x:1530,y:1134,w:65,height:168,offset:0}),
  Object.freeze({x:2570,y:1134,w:65,height:168,offset:74}),
  Object.freeze({x:2850,y:1134,w:65,height:168,offset:143})
 ]);
+
 export const STITCHO_ACTS=Object.freeze([
  'EL MOTOR DESPIERTA','LAS AGUAS IMPOSIBLES','EL CORREDOR ELÉCTRICO',
  'EL NÚCLEO GLITCH','LA ISLA RECOBRADA'
 ]);
+
 const inRange=(p,x,y,r)=>!!p&&Math.hypot(p.x+p.w/2-x,p.y+p.h/2-y)<r;
 const read=(g)=>new Set(g.secrets?.hub||[]);
 function persist(g,key){g.secrets||={};g.secrets.hub||=[];if(g.secrets.hub.includes(key))return false;g.secrets.hub.push(key);g.save?.();return true;}
+
 export function enterStitchoTrail(g){
  if(g.roomId!=='hub'||g.player?.id!=='stitcho'||g.personalAdventureSolo===false){g.stitchoTrail=null;return;}
  const saved=read(g),complete=saved.has(SAVE_KEY),cleared=(g.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID);
@@ -61,8 +69,10 @@ export function enterStitchoTrail(g){
  };
  if(cleared)g.stitchoTrail.complete=true;
 }
+
 export function stitchoTrailPrompt(g){
  const s=g.stitchoTrail,p=g.player;if(!s||!p||p.dead)return '';
+ if(s.cleared&&inRange(p,3750,1134,115))return 'E · Sostener el Corazón Galáctico';
  if(s.cleared)return 'ARCHIPIÉLAGO DEL CAOS · capítulo completado';
  if(s.complete)return 'ENFRENTA AL NÚCLEO GLITCH · derrota al guardián';
  const b=STITCHO_BEACONS[s.index];if(!b||!inRange(p,b.x,b.y,115))return '';
@@ -70,9 +80,17 @@ export function stitchoTrailPrompt(g){
  return missing?'Recoge '+missing+' fragmento'+(missing>1?'s':'')+' para '+b.label:
   'E · activar '+b.label.toLowerCase()+' ('+(s.index+1)+'/3)';
 }
+
 export function interactStitchoTrail(g){
  const s=g.stitchoTrail,p=g.player;
- if(!s||s.complete||!p||p.dead)return false;
+ if(!s||!p||p.dead)return false;
+ if(s.cleared&&inRange(p,3750,1134,115)){
+  p._stitchoDanceT=120;p._stitchoDanceAge=0;
+  g.fx?.emit?.(3750,1074,{color:'#85eeff',count:g.reduceMotion?8:32,size:4,star:true,life:45});
+  g.nums?.add?.(3750,1050,'¡CORAZÓN GALÁCTICO!','#aef5ff',true);
+  return true;
+ }
+ if(s.complete)return false;
  const b=STITCHO_BEACONS[s.index];
  if(!b||!inRange(p,b.x,b.y,115))return false;
  if(s.shards<b.need){
@@ -90,6 +108,7 @@ export function interactStitchoTrail(g){
  g.nums?.add?.(b.x,b.y-63,s.complete?'¡NÚCLEO GLITCH DESBLOQUEADO!':b.label+' · '+s.index+'/3','#aee9ff',true);
  return true;
 }
+
 // Casting three different native powers completes a unique Stitcho challenge.
 // J can short-circuit a nearby electric gate temporarily; the others retain
 // their real combat behavior. This NEVER grants an ability that is still locked.
@@ -116,6 +135,7 @@ export function stitchoAbility(g,p,index){
  }
  return true;
 }
+
 export function updateStitchoTrail(g,hurt){
  const s=g.stitchoTrail,p=g.player;if(!s||!p||p.dead)return;
  const tick=Number(g.t)||0;s.pulse=Math.max(0,s.pulse-1);s.announcement=Math.max(0,s.announcement-1);
@@ -162,6 +182,7 @@ export function updateStitchoTrail(g,hurt){
   s.cleared=true;s.announcement=240;
  }
 }
+
 export function drawStitchoTrail(ctx,g,cam,t){
  const s=g.stitchoTrail;if(!s)return;
  const reduced=!!g.reduceMotion;
@@ -217,6 +238,29 @@ export function drawStitchoTrail(ctx,g,cam,t){
   ctx.fillStyle=done?'#7feccb':'#dff8ff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
   ctx.fillText(b.label,x,y-98+bob);ctx.globalAlpha=1;
  }
+
+ // Relic pedestal for Corazón Galáctico
+ if(s.cleared||s.complete){
+  const rx=3750-cam.x,ry=1134-cam.y;
+  if(rx>-100&&rx<1800){
+   ctx.save();
+   ctx.fillStyle='#132a45';ctx.strokeStyle='#7fe6fd';ctx.lineWidth=3;
+   ctx.beginPath();ctx.moveTo(rx-28,ry);ctx.lineTo(rx-18,ry-35);ctx.lineTo(rx+18,ry-35);ctx.lineTo(rx+28,ry);ctx.closePath();ctx.fill();ctx.stroke();
+   const bob=reduced?0:Math.sin(t*.08)*6;
+   const relicY=ry-62+bob;
+   ctx.fillStyle='rgba(128,240,255,0.25)';ctx.beginPath();ctx.arc(rx,relicY,22,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#85eeff';ctx.strokeStyle='#ffffff';ctx.lineWidth=2;
+   ctx.beginPath();ctx.moveTo(rx,relicY+14);ctx.lineTo(rx-14,relicY);ctx.lineTo(rx-10,relicY-14);ctx.lineTo(rx,relicY-8);ctx.lineTo(rx+10,relicY-14);ctx.lineTo(rx+14,relicY);ctx.closePath();ctx.fill();ctx.stroke();
+   if(!reduced){
+    ctx.strokeStyle='#d5b0ff';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.ellipse(rx,relicY,22,7,t*.04,0,Math.PI*2);ctx.stroke();
+   }
+   ctx.fillStyle='#d5f7ff';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+   ctx.fillText('CORAZÓN GALÁCTICO',rx,relicY-24);
+   ctx.restore();
+  }
+ }
+
  // Native Stitcho arm/antenna/tail dance is driven by _stitchoDanceT in
  // characters/draw.js. These extra rings explain *which* ability was cast.
  if(s.castPulse>0){
@@ -254,6 +298,7 @@ export function drawStitchoTrail(ctx,g,cam,t){
  ctx.fillText('SEÑALES '+s.index+'/3  ·  FRAGMENTOS '+s.shards+'/8',32,184);
  ctx.restore();
 }
+
 export function stitchoTrailSnapshot(g){
  const s=g.stitchoTrail;return s?{
   index:s.index,complete:s.complete,cleared:s.cleared,shards:s.shards,

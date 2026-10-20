@@ -3,13 +3,21 @@
 export function createStitchoRoom(base){
  if(base?.id!=='hub')throw new Error('Stitcho room requires canonical hub');
  const platforms=[
+  // Ground segments spanning the full 4200 width with two canonical chasms
   [0,1134,1190,126],[1290,1134,1050,126],[2440,1134,1760,126],
+  // Sector 0 · Playa de chatarra (ruins & lower terraces)
   [120,1020,230,22],[320,920,240,22],[690,880,260,22],[950,760,225,22],
+  [350,700,160,22],[520,540,220,22],[800,430,210,22],
+  // Sector 1 · Puentes de resonancia (floating pylons & intermediate landings)
   [1360,990,250,22],[1490,855,210,22],[1790,980,250,22],
+  [1650,600,160,22],[1380,480,230,22],[1860,390,240,22],
+  // Sector 2 · Circuitos cruzados (high-altitude secret skywalk)
   [1990,850,270,22],[2230,720,220,22],[2470,930,240,22],
-  [2680,800,220,22],[2850,670,240,22],[3070,950,235,22],
-  [3380,875,230,22],[3680,970,240,22],
-  [350,700,160,22],[1650,600,160,22],[2590,500,210,22]
+  [2680,800,220,22],[2850,670,240,22],
+  [2590,500,210,22],[2280,340,250,22],[2580,240,230,22],[2860,180,260,22],
+  // Sector 3 · Templo del Núcleo (arena & temple balconies)
+  [3070,950,235,22],[3380,875,230,22],[3680,970,240,22],
+  [3240,680,230,22],[3540,530,240,22],[3800,400,230,22]
  ];
  const checkpoints=[
   {id:'hub-stitcho-entry',x:230,y:1134,sector:0},
@@ -30,8 +38,12 @@ export function createStitchoRoom(base){
   [3730,1050,'cucaracho',false,{role:'pursuer',name:'Último chatarrero',anchorY:1050}]
  ];
  return {...base,name:'Archipiélago del Caos',short:'Archipiélago',world:4,color:'#8bc8e5',
-  hint:'Recoge 8 fragmentos, activa tres antenas y vence al Núcleo Glitch. J corta los arcos eléctricos; los raíles y trampolines cambian la ruta.',
-  doors:{...base.doors,up:null},plats:platforms,foes,orbs:[[540,920],[840,820],[1100,710],[1530,810],[2100,810],[2400,670],[2850,630],[3610,830]],
+  hint:'Recoge 8 fragmentos, activa tres antenas y vence al Núcleo Glitch. J corta los arcos eléctricos; los raíles y trampolines abren las rutas altas.',
+  doors:{...base.doors,up:null},plats:platforms,foes,
+  orbs:[
+   [540,920],[840,820],[1100,710],[1530,810],[2100,810],[2400,670],[2850,630],[3610,830],
+   [800,380],[1580,310],[2580,190],[2860,130],[3540,470],[3800,340]
+  ],
   checkpoints,upExit:null,
   sectors:[
    {id:'hub-stitcho-0',name:'Playa de chatarra',x:0,w:1050,role:'explore'},
@@ -39,7 +51,7 @@ export function createStitchoRoom(base){
    {id:'hub-stitcho-2',name:'Circuitos cruzados',x:2100,w:1050,role:'secret'},
    {id:'hub-stitcho-3',name:'Templo del Núcleo',x:3150,w:1050,role:'combat'}
   ],
-  // Keep safe cliff gaps consistent with the existing Hoku fall logic.
+  // Safe cliff gaps consistent with canonical Hoku fall logic.
   hazards:[1190,2340].map((x,i)=>({id:'stitcho-fall-'+i,x,y:1100,w:100,h:360,type:'death',dest:null,label:'VACÍO DEL CAOS',color:'#a77bf2'}))
  };
 }

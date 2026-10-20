@@ -6,10 +6,34 @@ export const FAMILY_ISLANDS=Object.freeze([
  {id:'moon',name:'Jardín de la luna',heroes:['cat','cuerno'],x:480,y:510,rx:220,ry:100,color:'#99b0bb',sand:'#d9d2bb'},
  {id:'storm',name:'Santuario del trueno',heroes:['chispin','yomi'],x:990,y:510,rx:230,ry:100,color:'#9b9eba',sand:'#d4bfd0'},
 ]);
+
 const coast=(c,z,dy=0,scale=1)=>{
  const points=Array.from({length:24},(_,i)=>{const a=i/24*Math.PI*2,k=1+Math.sin(i*1.7+z.x)*.07+Math.cos(i*2.3)*.035;return {x:z.x+Math.cos(a)*z.rx*k*scale,y:z.y+dy+Math.sin(a)*z.ry*k*scale};});
  c.beginPath();for(let i=0;i<points.length;i++){const p=points[i],next=points[(i+1)%points.length],x=(p.x+next.x)/2,y=(p.y+next.y)/2;if(!i)c.moveTo(x,y);else c.quadraticCurveTo(p.x,p.y,x,y);}const p=points[0],next=points[1];c.quadraticCurveTo(p.x,p.y,(p.x+next.x)/2,(p.y+next.y)/2);c.closePath();
 };
+
+function drawStitchoCampPod(c,z){
+ c.save();
+ c.translate(z.x+92,z.y-8);
+ c.rotate(-0.16);
+ // Scout capsule fuselage
+ c.fillStyle='#1d385a';c.strokeStyle='#7be3f7';c.lineWidth=2.4;
+ c.beginPath();c.moveTo(-32,10);c.quadraticCurveTo(-18,-24,14,-26);c.quadraticCurveTo(42,-14,48,10);c.closePath();c.fill();c.stroke();
+ // Cockpit glass dome
+ c.fillStyle='#0f2038';c.beginPath();c.ellipse(12,-16,20,10,0,Math.PI,Math.PI*2);c.fill();
+ c.strokeStyle='#a6f5ff';c.lineWidth=1.5;c.stroke();
+ c.fillStyle='rgba(98,243,255,0.32)';c.beginPath();c.ellipse(12,-16,16,7,0,Math.PI,Math.PI*2);c.fill();
+ // Thruster fin & antenna
+ c.strokeStyle='#c7aaff';c.lineWidth=2;
+ c.beginPath();c.moveTo(-22,-14);c.lineTo(-34,-34);c.stroke();
+ c.fillStyle='#9ff3ff';c.beginPath();c.arc(-34,-35,3.5,0,Math.PI*2);c.fill();
+ // Ground energy crystal cluster on the sand
+ c.fillStyle='#72ebff';c.strokeStyle='#ffffff';c.lineWidth=1;
+ c.beginPath();c.moveTo(34,10);c.lineTo(40,-4);c.lineTo(45,10);c.closePath();c.fill();c.stroke();
+ c.beginPath();c.moveTo(46,12);c.lineTo(50,2);c.lineTo(54,12);c.closePath();c.fill();c.stroke();
+ c.restore();
+}
+
 export function drawFamilyIslands(c){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
@@ -20,6 +44,7 @@ export function drawFamilyIslands(c){
   c.fillStyle='#e7f2d9';c.font='600 14px Outfit,sans-serif';c.textAlign='center';c.fillText(z.name,z.x,z.y+z.ry+22);
   if(z.id==='aloha'){
    drawAlohaCamp(c,z);
+   drawStitchoCampPod(c,z);
   }else if(z.id==='kitchen'){
    c.fillStyle='#b77758';c.beginPath();c.arc(z.x,z.y-60,48,Math.PI,0);c.lineTo(z.x+48,z.y-26);c.lineTo(z.x-48,z.y-26);c.fill();c.fillStyle='#483d47';c.fillRect(z.x-22,z.y-60,44,34);c.fillStyle='#ffbd78';c.fillRect(z.x-14,z.y-47,28,17);c.fillStyle='#eee0aa';c.fillRect(z.x+105,z.y-75,50,45);c.fillStyle='#d48670';c.fillRect(z.x+98,z.y-83,65,12);
   }else if(z.id==='fossil'){
@@ -32,10 +57,31 @@ export function drawFamilyIslands(c){
   }
  }
 }
+
 export function islandForHero(id){return FAMILY_ISLANDS.find(z=>z.heroes.includes(id));}
+
 export function pairedScene(id,selected,seconds){
  const island=islandForHero(selected);if(!island?.heroes.includes(id))return null;
- if(island.id==='aloha'){const lead=id==='kilo',act=seconds<3?0:seconds<7?1:seconds<10?2:3;return {pose:act===0?'idle':act===1?(lead?'cast':'jump'):'victory',dx:act===1?Math.sin(seconds*Math.PI)*(lead?8:-12):0,dy:act===1&&!lead?-Math.abs(Math.sin(seconds*Math.PI))*18:0,...(lead?{performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:act===2?2+seconds-7:seconds}}:{})};}
+ if(island.id==='aloha'){
+  if(selected==='stitcho'){
+   // Dedicated Stitcho protagonist choreography
+   const isStitcho=id==='stitcho',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+   return {
+    pose:act===0?'idle':act===1?(isStitcho?'run':'jump'):(isStitcho?'cast':'victory'),
+    dx:act===1?Math.sin(seconds*Math.PI*1.4)*(isStitcho?14:-8):0,
+    dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.4))*(isStitcho?16:10):0,
+    performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+   };
+  }
+  // Canonical Kilo protagonist choreography
+  const lead=id==='kilo',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(lead?'cast':'jump'):'victory',
+   dx:act===1?Math.sin(seconds*Math.PI)*(lead?8:-12):0,
+   dy:act===1&&!lead?-Math.abs(Math.sin(seconds*Math.PI))*18:0,
+   ...(lead?{performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:act===2?2+seconds-7:seconds}}:{})
+  };
+ }
  const phase=Math.min(2,Math.floor(seconds/4)),lead=id===island.heroes[0],wave=Math.sin(seconds*Math.PI);
  const poses={aloha:['cast','jump'],kitchen:['run','jump'],fossil:['jump','cast'],moon:['jump','cast'],storm:['cast','jump']};
  return {pose:phase===0?'idle':phase===2?'victory':poses[island.id][lead?0:1],dx:phase===1?wave*(lead?16:-16):0,dy:phase===1&&!lead?-Math.abs(wave)*22:0};
