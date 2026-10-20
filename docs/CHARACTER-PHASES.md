@@ -19,7 +19,7 @@ Cada una de las diez fases se cierra con esta misma lista, sin sustituir una mec
 2. **Stitcho** — Archipiélago del Caos y cápsula en Bahía del compás; Núcleo Glitch (Error 626, 480 PV, 3 fases); 100 chispas del caos y Corazón Galáctico. Repertorio alienígena, 5 formas, roll, acrobacias, arcos eléctricos desactivables con J y 4 raíles móviles completados.
 3. **Chispín** — Islas del Relámpago y Santuario del Trueno; Titán de Trueno (480 PV, 3 fases); 100 bobinas/rayos y Relámpago Dorado. Repertorio 100% Canvas vectorial, 5 formas (incluyendo Trueno Gordo), cadena J, blink K, tormenta L, remate I (Carrera Relámpago) y ultimate P (Tormenta Enlazada) completados.
 4. **Michi** — Jardines de la Luna en el Claro personal; Espíritu Astral Felino (480 PV, 3 fases: zarpazo de sombra, lluvia de orbes y eclipse total); 100 sueños de Michi y Luna Soñadora. Repertorio 100% Canvas vectorial, 5 formas, ovillo J, ronroneo K, nueve colas L, remate I (Garra ascendente) y ultimate P (Cacería lunar) completados. CERRADO.
-5. **Dragón** — Cordillera de las Brasas en la Caldera; Brasa del hogar.
+5. **Dragón** — Cordillera de las Brasas en la Caldera volcánica; Guardián del Núcleo Ígneo (480 PV, 3 fases: embestida ígnea, lluvia volcánica y sobrecarga solar); 100 brasas ancestrales y Dragón Celestial. Repertorio 100% Canvas vectorial, 5 formas, llamarada J, coletazo K, aliento de fuego L, remate I (Picado del cometa) y ultimate P (Vuelo volcánico), 4 corrientes térmicas ascendentes y 3 puertas de obsidiana completados. CERRADO.
 6. **Dino** — Valle de los Gigantes en la arena del Coloso; Fósil de la familia.
 7. **Frita** — Mercado Dorado en la Playa; Banquete Dorado.
 8. **Pizza** — Reino del Horno en el Arrecife; Horno Estelar.

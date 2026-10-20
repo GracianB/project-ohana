@@ -1,3 +1,12 @@
+## ohana-455 · Dragón (Fase 5) · Cordillera de las Brasas y Guardián del Núcleo Ígneo
+
+Se completa la Fase 5 (Dragón) dentro del Claro personal en 100% Canvas vectorial sin dependencias de mapas de bits externos:
+- **Dragón (Fase 5)**: Sala dedicada *Cordillera de las Brasas* (`systems/dragon-room.js`), 4 sectores (Garganta de Obsidiana, Ríos de Magma y Geiseres, Caverna de las Brasas, Cúspide del Dragón Celestial), 25 plataformas, 10 enemigos, 14 orbes de fuego y 4 puntos de control.
+- **Escenario procedural y efectos**: Caldera volcánica con torres de basalto, niebla de ceniza, ríos de lava y constelación del Dragón Celestial (`worlds/dragon-caldera.js`). Corrientes térmicas ascendentes, puertas de obsidiana destructibles, rescoldos flotantes y Altar del Dragón Celestial (`systems/dragon-trail.js`).
+- **Mini boss temático**: *Guardián del Núcleo Ígneo* (480 HP, 3 fases tácticas: embestida ígnea, lluvia volcánica y sobrecarga solar, `systems/dragon-boss.js`).
+- **Combos y colecciones**: Remate I (*Picado del cometa*) y Suprema P (*Vuelo volcánico*) en Canvas (`systems/hero-combos.js`). Colección de 100 brasas ancestrales con reliquia legendaria *DRAGÓN CELESTIAL* (`systems/hero-collections.js`).
+- Precache del Service Worker, hashes SHA-1 regenerados y versión sincronizada a `ohana-455`.
+
 ## ohana-454 · Michi (Fase 4) y Chispín (Fase 3) · mundos personales y mini bosses
 
 Se completa y cierra la Fase 4 (Michi) y Fase 3 (Chispín) dentro del Claro personal en 100% Canvas vectorial sin dependencias de mapas de bits externos:

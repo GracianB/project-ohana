@@ -63,6 +63,20 @@ function drawMichiCampPod(c,z){
  c.restore();
 }
 
+function drawDragonCampPod(c,z){
+ c.save();
+ c.translate(z.x+84,z.y-10);
+ c.fillStyle='#230c08';c.strokeStyle='#ff6b3d';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,24,Math.PI*0.3,Math.PI*1.7);
+ c.quadraticCurveTo(-8,0,0,24*Math.sin(Math.PI*0.3));
+ c.closePath();c.fill();c.stroke();
+ c.fillStyle='#ff5020';c.beginPath();c.arc(-18,10,9,0,Math.PI*2);c.fill();
+ c.strokeStyle='#ffe885';c.lineWidth=1.2;c.stroke();
+ c.fillStyle='#ffd862';c.strokeStyle='#ffffff';c.lineWidth=1;
+ c.beginPath();c.moveTo(22,12);c.lineTo(28,-4);c.lineTo(34,12);c.closePath();c.fill();c.stroke();
+ c.restore();
+}
+
 export function drawFamilyIslands(c){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
@@ -78,6 +92,7 @@ export function drawFamilyIslands(c){
    c.fillStyle='#b77758';c.beginPath();c.arc(z.x,z.y-60,48,Math.PI,0);c.lineTo(z.x+48,z.y-26);c.lineTo(z.x-48,z.y-26);c.fill();c.fillStyle='#483d47';c.fillRect(z.x-22,z.y-60,44,34);c.fillStyle='#ffbd78';c.fillRect(z.x-14,z.y-47,28,17);c.fillStyle='#eee0aa';c.fillRect(z.x+105,z.y-75,50,45);c.fillStyle='#d48670';c.fillRect(z.x+98,z.y-83,65,12);
   }else if(z.id==='fossil'){
    c.fillStyle='#655d65';c.beginPath();c.moveTo(z.x-65,z.y-50);c.lineTo(z.x-25,z.y-155);c.lineTo(z.x+30,z.y-155);c.lineTo(z.x+90,z.y-50);c.fill();c.strokeStyle='#f2a475';c.lineWidth=7;c.beginPath();c.moveTo(z.x-25,z.y-152);c.lineTo(z.x+5,z.y-130);c.lineTo(z.x+30,z.y-152);c.stroke();c.strokeStyle='#e5d5b2';c.lineWidth=10;c.beginPath();c.arc(z.x-120,z.y-25,38,Math.PI,0);c.stroke();
+   drawDragonCampPod(c,z);
   }else if(z.id==='moon'){
    for(let j=0;j<4;j++){c.strokeStyle=['#edb8d0','#ead69b','#b4d7ba','#b1c8e4'][j];c.lineWidth=6;c.beginPath();c.arc(z.x,z.y-15,60+j*7,Math.PI,Math.PI*2);c.stroke();}
    c.fillStyle='#fff1bc';c.beginPath();c.arc(z.x-150,z.y-65,18,0,Math.PI*2);c.fill();
@@ -128,6 +143,15 @@ export function pairedScene(id,selected,seconds){
    pose:act===0?'idle':act===1?(isChispin?'run':'jump'):(isChispin?'cast':'victory'),
    dx:act===1?Math.sin(seconds*Math.PI*1.5)*(isChispin?15:-10):0,
    dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.5))*(isChispin?14:12):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='fossil'&&selected==='dragon'){
+  const isDragon=id==='dragon',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isDragon?'jump':'run'):(isDragon?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.2)*(isDragon?16:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.2))*(isDragon?20:6):0,
    performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
   };
  }

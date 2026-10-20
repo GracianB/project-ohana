@@ -200,6 +200,36 @@ export function drawHeroPowers(ctx,g,cam){
     }
    }
   }
+  else if(m.id==='dragon'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ff5020';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,60,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffd862';ctx.lineWidth=2;
+    for(let i=0;i<8;i++){
+     const a=i*Math.PI/4+(g.reduceMotion?0:m.age*.15);
+     const r=60+Math.sin(m.age*.2+i)*10;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#ffe89c';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('DESPERTAR CELESTIAL · METEORO',x,y-76);
+    for(let i=-1;i<=1;i++){
+     const lx=x+i*110;
+     ctx.fillStyle='rgba(255,100,30,0.18)';ctx.fillRect(lx-16,-cam.y,32,1400);
+     ctx.strokeStyle='#ffe07a';ctx.lineWidth=2;
+     ctx.beginPath();ctx.moveTo(lx,-cam.y);ctx.lineTo(lx,y);ctx.stroke();
+    }
+   } else {
+    ctx.strokeStyle='#ff5a22';ctx.lineWidth=3.8;ctx.globalAlpha=.85;
+    ctx.beginPath();
+    ctx.arc(x+m.face*20,y,36,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffd862';ctx.lineWidth=2;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*30,y+Math.sin(sa)*30);ctx.stroke();
+    }
+   }
+  }
   else if(m.id==='kilo'){
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;

@@ -18,6 +18,10 @@ import {createMichiRoom} from "./systems/michi-room.js";
 import {drawMichiGardens} from "./worlds/michi-gardens.js";
 import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
 import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
+import {createDragonRoom} from "./systems/dragon-room.js";
+import {drawDragonCalderaBackdrop} from "./worlds/dragon-caldera.js";
+import {enterDragonTrail,updateDragonTrail,drawDragonTrail,dragonTrailSnapshot} from './systems/dragon-trail.js';
+import {createDragonBoss,updateDragonBoss,drawDragonBoss,DRAGON_BOSS_ID} from './systems/dragon-boss.js';
 import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
@@ -500,6 +504,7 @@ let r = ROOMS[id];
 if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
 if(id==="hub"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
 if(id==="hub"&&game.player?.id==="cat"&&game.personalAdventureSolo)r=createMichiRoom(r);
+if(id==="hub"&&game.player?.id==="dragon"&&game.personalAdventureSolo)r=createDragonRoom(r);
 if (!r) return false;
 if (r.needEvo && game.player && game.player.evo < r.needEvo) {
 showErrorMessage("CERRADO", "Necesitas forma " + (r.needEvo + 1));
@@ -535,7 +540,7 @@ game.worldW = (r.width || ROOM_W) * S;
 game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
-enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
+enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiTrail(game);enterDragonTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
 game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);michiAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -551,7 +556,7 @@ initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return e;
 });
-game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
 game.spawnStitchoBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
@@ -573,6 +578,14 @@ game.spawnMichiBoss=()=>{
   if((game.clearedEncounters?.hub||[]).includes(MICHI_BOSS_ID))return true;
   if(game.enemies.some(e=>e._michiBoss))return true;
   const enemy=createMichiBoss(makeFoe,game.rng);
+  game.enemies.push(enemy);
+  return true;
+};
+game.spawnDragonBoss=()=>{
+  if(game.roomId!=='hub'||game.player?.id!=='dragon'||!game.personalAdventureSolo)return false;
+  if((game.clearedEncounters?.hub||[]).includes(DRAGON_BOSS_ID))return true;
+  if(game.enemies.some(e=>e._dragonBoss))return true;
+  const enemy=createDragonBoss(makeFoe,game.rng);
   game.enemies.push(enemy);
   return true;
 };
@@ -1958,6 +1971,7 @@ if (e.boss) {
 if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer))continue;
 if(updateMichiBoss(e,game,hurtPlayer))continue;
+if(updateDragonBoss(e,game,hurtPlayer))continue;
 if(updateGroveGuardian(e,game,hurtPlayer))continue;
 if(updateCampaignEnemy(e,game,hurtPlayer))continue;
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
@@ -2778,6 +2792,8 @@ if(game.stitchoTrail){
  drawChispinSanctuary(ctx,game.cam,t,viewportW,viewportH,{
   reducedMotion:game.reduceMotion||reduceMotion,tier,progress:game.chispinTrail.index
  });
+}else if(game.dragonTrail){
+ drawDragonCalderaBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
 }else{
  renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
  drawRoomAtmosphere(
@@ -2789,7 +2805,7 @@ if(game.stitchoTrail){
 drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
-drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
+drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawDragonTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 }
@@ -2834,6 +2850,7 @@ for (const e of game.enemies) {
   if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
   else if(e.miniBoss)drawGroveGuardianSignals(ctx,e,game.cam);else drawCampaignEnemy(ctx,e,game.cam);
   ctx.restore();
 }
@@ -3265,7 +3282,7 @@ if (game.finale) {
 tickWorldSummon();
 if (!canAct()) return;
 updateCampaignExploration(game);
-updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);updateMichiTrail(game,hurtPlayer);
+updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);updateMichiTrail(game,hurtPlayer);updateDragonTrail(game,hurtPlayer);
 updatePlayer();
 updateRoomAlbum(game);updateHeroCollection(game);
 if(game.relicScene)return;
@@ -3602,7 +3619,7 @@ checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomD
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
  interact(){interact();return this.state();},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
@@ -3708,7 +3725,7 @@ state() {
       formation: game.enemyDirector.formation || "",
     } : null,
     kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
-    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),michiTrail:michiTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
+    roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),michiTrail:michiTrailSnapshot(game),dragonTrail:dragonTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),
     springs: islandSpringsSnapshot(game),
