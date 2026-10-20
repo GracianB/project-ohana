@@ -77,6 +77,54 @@ function drawDragonCampPod(c,z){
  c.restore();
 }
 
+function drawDinoCampPod(c,z){
+ c.save();
+ c.translate(z.x-84,z.y-10);
+ c.fillStyle='#1c1006';c.strokeStyle='#81c784';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,24,Math.PI*0.3,Math.PI*1.7);
+ c.quadraticCurveTo(-8,0,0,24*Math.sin(Math.PI*0.3));
+ c.closePath();c.fill();c.stroke();
+ c.fillStyle='#ffb74d';c.beginPath();c.arc(-18,10,9,0,Math.PI*2);c.fill();
+ c.strokeStyle='#ffffff';c.lineWidth=1.2;c.stroke();
+ c.restore();
+}
+
+function drawFritaCampPod(c,z){
+ c.save();
+ c.translate(z.x+64,z.y-10);
+ c.fillStyle='#2b1008';c.strokeStyle='#ffd54f';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
+ c.fillStyle='#ff9800';c.fillRect(-8,-18,16,14);
+ c.restore();
+}
+
+function drawPizzaCampPod(c,z){
+ c.save();
+ c.translate(z.x-64,z.y-10);
+ c.fillStyle='#2e1008';c.strokeStyle='#ff7043';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
+ c.fillStyle='#ffd54f';c.beginPath();c.arc(0,-4,8,0,Math.PI*2);c.fill();
+ c.restore();
+}
+
+function drawYomiCampPod(c,z){
+ c.save();
+ c.translate(z.x-84,z.y-10);
+ c.fillStyle='#1e1438';c.strokeStyle='#ba68c8';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
+ c.fillStyle='#ea80fc';c.beginPath();c.arc(0,-4,8,0,Math.PI*2);c.fill();
+ c.restore();
+}
+
+function drawCuernoCampPod(c,z){
+ c.save();
+ c.translate(z.x-84,z.y-10);
+ c.fillStyle='#061a22';c.strokeStyle='#80cbc4';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
+ c.fillStyle='#80deea';c.beginPath();c.arc(0,-4,8,0,Math.PI*2);c.fill();
+ c.restore();
+}
+
 export function drawFamilyIslands(c){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
@@ -90,16 +138,21 @@ export function drawFamilyIslands(c){
    drawStitchoCampPod(c,z);
   }else if(z.id==='kitchen'){
    c.fillStyle='#b77758';c.beginPath();c.arc(z.x,z.y-60,48,Math.PI,0);c.lineTo(z.x+48,z.y-26);c.lineTo(z.x-48,z.y-26);c.fill();c.fillStyle='#483d47';c.fillRect(z.x-22,z.y-60,44,34);c.fillStyle='#ffbd78';c.fillRect(z.x-14,z.y-47,28,17);c.fillStyle='#eee0aa';c.fillRect(z.x+105,z.y-75,50,45);c.fillStyle='#d48670';c.fillRect(z.x+98,z.y-83,65,12);
+   drawFritaCampPod(c,z);
+   drawPizzaCampPod(c,z);
   }else if(z.id==='fossil'){
    c.fillStyle='#655d65';c.beginPath();c.moveTo(z.x-65,z.y-50);c.lineTo(z.x-25,z.y-155);c.lineTo(z.x+30,z.y-155);c.lineTo(z.x+90,z.y-50);c.fill();c.strokeStyle='#f2a475';c.lineWidth=7;c.beginPath();c.moveTo(z.x-25,z.y-152);c.lineTo(z.x+5,z.y-130);c.lineTo(z.x+30,z.y-152);c.stroke();c.strokeStyle='#e5d5b2';c.lineWidth=10;c.beginPath();c.arc(z.x-120,z.y-25,38,Math.PI,0);c.stroke();
    drawDragonCampPod(c,z);
+   drawDinoCampPod(c,z);
   }else if(z.id==='moon'){
    for(let j=0;j<4;j++){c.strokeStyle=['#edb8d0','#ead69b','#b4d7ba','#b1c8e4'][j];c.lineWidth=6;c.beginPath();c.arc(z.x,z.y-15,60+j*7,Math.PI,Math.PI*2);c.stroke();}
    c.fillStyle='#fff1bc';c.beginPath();c.arc(z.x-150,z.y-65,18,0,Math.PI*2);c.fill();
    drawMichiCampPod(c,z);
+   drawCuernoCampPod(c,z);
   }else{
    c.strokeStyle='#66567f';c.lineWidth=10;c.beginPath();c.moveTo(z.x-75,z.y-35);c.lineTo(z.x-75,z.y-110);c.lineTo(z.x+75,z.y-110);c.lineTo(z.x+75,z.y-35);c.stroke();c.strokeStyle='#e9d19d';c.lineWidth=2;c.beginPath();c.moveTo(z.x-145,z.y-90);c.quadraticCurveTo(z.x,z.y-60,z.x+145,z.y-90);c.stroke();for(let j=0;j<7;j++){c.fillStyle=j%2?'#eab8c1':'#f0d49e';c.fillRect(z.x-140+j*45,z.y-83,12,18);}
    drawChispinCampPod(c,z);
+   drawYomiCampPod(c,z);
   }
  }
 }
@@ -152,6 +205,51 @@ export function pairedScene(id,selected,seconds){
    pose:act===0?'idle':act===1?(isDragon?'jump':'run'):(isDragon?'cast':'victory'),
    dx:act===1?Math.sin(seconds*Math.PI*1.2)*(isDragon?16:-8):0,
    dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.2))*(isDragon?20:6):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='fossil'&&selected==='dino'){
+  const isDino=id==='dino',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isDino?'run':'jump'):(isDino?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.2)*(isDino?14:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.2))*(isDino?16:10):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='kitchen'&&selected==='frita'){
+  const isFrita=id==='frita',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isFrita?'run':'jump'):(isFrita?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.4)*(isFrita?16:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.4))*(isFrita?14:8):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='kitchen'&&selected==='pizza'){
+  const isPizza=id==='pizza',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isPizza?'run':'jump'):(isPizza?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.3)*(isPizza?14:-10):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.3))*(isPizza?16:10):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='storm'&&selected==='yomi'){
+  const isYomi=id==='yomi',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isYomi?'run':'jump'):(isYomi?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.2)*(isYomi?12:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.2))*(isYomi?16:8):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='moon'&&selected==='cuerno'){
+  const isCuerno=id==='cuerno',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isCuerno?'run':'jump'):(isCuerno?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.3)*(isCuerno?14:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.3))*(isCuerno?18:8):0,
    performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
   };
  }

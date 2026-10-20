@@ -230,6 +230,121 @@ export function drawHeroPowers(ctx,g,cam){
     }
    }
   }
+  else if(m.id==='dino'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ffb74d';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,60,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#8d6e63';ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.12);
+     const r=60+Math.sin(m.age*.18+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#ffe082';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('ESTAMPIDA ANCESTRAL · TERREMOTO',x,y-76);
+   } else {
+    ctx.strokeStyle='#a1887f';ctx.lineWidth=3.8;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x+m.face*20,y,36,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffe082';ctx.lineWidth=2;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*28,y+Math.sin(sa)*28);ctx.stroke();
+    }
+   }
+  }
+  else if(m.id==='frita'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ffd54f';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,58,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ff9800';ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.14);
+     const r=58+Math.sin(m.age*.2+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,4.5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#fff59d';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('FREIDORA EXPRÉS · EXPLOSIÓN',x,y-74);
+   } else {
+    ctx.strokeStyle='#ffca28';ctx.lineWidth=3.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x+m.face*20,y,34,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#fff9c4';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*26,y+Math.sin(sa)*26);ctx.stroke();
+    }
+   }
+  }
+  else if(m.id==='pizza'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ff7043';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,58,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffab40';ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.14);
+     const r=58+Math.sin(m.age*.2+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,4.5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#ffe082';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('RUEDA DE PIZZA · HORNO ESTELAR',x,y-74);
+   } else {
+    ctx.strokeStyle='#ff5722';ctx.lineWidth=3.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x+m.face*20,y,34,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffd54f';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*26,y+Math.sin(sa)*26);ctx.stroke();
+    }
+   }
+  }
+  else if(m.id==='yomi'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#ba68c8';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,58,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ea80fc';ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.14);
+     const r=58+Math.sin(m.age*.2+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,4.5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#f3e5f5';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('TRES ECOS · CONSTELACIÓN ETERNA',x,y-74);
+   } else {
+    ctx.strokeStyle='#ab47bc';ctx.lineWidth=3.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x+m.face*20,y,34,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#e1bee7';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*26,y+Math.sin(sa)*26);ctx.stroke();
+    }
+   }
+  }
+  else if(m.id==='cuerno'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#80cbc4';ctx.lineWidth=3;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,58,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#80deea';ctx.lineWidth=2;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.14);
+     const r=58+Math.sin(m.age*.2+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,4.5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#e0f2f1';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('ARCO DE CONSTELACIONES · AURORA',x,y-74);
+   } else {
+    ctx.strokeStyle='#26a69a';ctx.lineWidth=3.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x+m.face*20,y,34,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#b2dfdb';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.25);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*26,y+Math.sin(sa)*26);ctx.stroke();
+    }
+   }
+  }
   else if(m.id==='kilo'){
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;

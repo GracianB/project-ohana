@@ -224,3 +224,8 @@ export function dragonTrailSnapshot(g){
   embersFound:DRAGON_EMBERS.filter(e=>s.saved.has(FRAGMENT_PREFIX+e.id)).length
  };
 }
+
+export function dragonAbility(game,player,index){
+  // Dragon's hero ability is handled via the thermal updrafts in the trail update;
+  // no discrete per-button action needed.
+}

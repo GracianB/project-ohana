@@ -1,3 +1,13 @@
+## ohana-456 — Fases 6-10: Dino, Frita, Pizza, Yomi, Cuerno — 10 héroes completos
+
+Se completan simultáneamente las Fases 6-10 en 100% Canvas vectorial — cero dependencias de imagen externa:
+- **Dino (Fase 6)**: Sala *Garganta de Fósiles* (systems/dino-room.js), 4 sectores, 25 plataformas, mini boss *Coloso de Piedra* 480 HP/3 fases (systems/dino-boss.js), escenario procedural de cráter (worlds/dino-crater.js), trail con géiseres de lodo, puertas de ámbar, 8 fósiles y altar ancestral (systems/dino-trail.js).\r
+- **Frita (Fase 7)**: Sala *Mercado Dorado* (systems/frita-room.js), mini boss *Rey Crujiente* 480 HP/3 fases (systems/frita-boss.js), escenario de mercado frito (worlds/frita-market.js), trail con manantiales de aceite, puertas de freidora y crujientes dorados (systems/frita-trail.js).\r
+- **Pizza (Fase 8)**: Sala *Reino del Horno* (systems/pizza-room.js), mini boss *Chef Magmático* 480 HP/3 fases (systems/pizza-boss.js), escenario de hornos de queso fundido (worlds/pizza-ovens.js), trail con lanzadores de queso, puertas de horno y gemas estelares (systems/pizza-trail.js).\r
+- **Yomi (Fase 9)**: Sala *Observatorio Astral* (systems/yomi-room.js), mini boss *Guía del Más Allá* 480 HP/3 fases (systems/yomi-boss.js), escenario de observatorio (worlds/yomi-observatory.js), trail con corrientes espirituales, barreras astrales y linternas del alma (systems/yomi-trail.js).\r
+- **Cuerno (Fase 10)**: Sala *Bosque del Prisma* (systems/cuerno-room.js), mini boss *Bestia Prisma* 480 HP/3 fases (systems/cuerno-boss.js), escenario de bosque aurora (worlds/cuerno-forest.js), trail con toboganes de aurora, barreras prisma y fragmentos de cristal (systems/cuerno-trail.js).\r
+- Precache del Service Worker actualizado con 20 nuevos módulos, hashes SHA-1 regenerados y versión ohana-456.\r
+
 ## ohana-455 · Dragón (Fase 5) · Cordillera de las Brasas y Guardián del Núcleo Ígneo
 
 Se completa la Fase 5 (Dragón) dentro del Claro personal en 100% Canvas vectorial sin dependencias de mapas de bits externos:

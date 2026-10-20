@@ -1,0 +1,1574 @@
+{
+  "Created": "2026-10-10T19:07:30.9767596+02:00",
+  "Computer": "JUNCHO",
+  "Elevated": true,
+  "OS": {
+    "Caption": "Microsoft Windows 10 Pro",
+    "Version": "10.0.19045",
+    "BuildNumber": "19045",
+    "OSArchitecture": "64 bits"
+  },
+  "Profiles": [
+    {
+      "Name": "Xiaomi_EFC5 2",
+      "InterfaceAlias": "Wi-Fi",
+      "NetworkCategory": 0,
+      "IPv4Connectivity": 4,
+      "IPv6Connectivity": 1
+    },
+    {
+      "Name": "Xiaomi_EFC5 2",
+      "InterfaceAlias": "Ethernet",
+      "NetworkCategory": 0,
+      "IPv4Connectivity": 4,
+      "IPv6Connectivity": 1
+    }
+  ],
+  "Adapters": [
+    {
+      "Name": "Conexión de área local* 3",
+      "InterfaceDescription": "WAN Miniport (SSTP)",
+      "Status": "Disconnected",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 6",
+      "InterfaceDescription": "WAN Miniport (PPTP)",
+      "Status": "Disconnected",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 8",
+      "InterfaceDescription": "WAN Miniport (IP)",
+      "Status": "Up",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local",
+      "InterfaceDescription": "Xbox Wireless Adapter for Windows",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": true,
+      "Virtual": false,
+      "MacAddress": "62-45-B5-32-45-F1"
+    },
+    {
+      "Name": "Teredo Tunneling Pseudo-Interface",
+      "InterfaceDescription": "",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 7",
+      "InterfaceDescription": "WAN Miniport (PPPOE)",
+      "Status": "Disconnected",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 1",
+      "InterfaceDescription": "Microsoft Wi-Fi Direct Virtual Adapter",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": "00-28-F8-AA-CB-AD"
+    },
+    {
+      "Name": "Ethernet",
+      "InterfaceDescription": "Realtek PCIe GBE Family Controller",
+      "Status": "Up",
+      "LinkSpeed": "1 Gbps",
+      "HardwareInterface": true,
+      "Virtual": false,
+      "MacAddress": "80-D4-ED-33-3E-0B"
+    },
+    {
+      "Name": "Conexión de red Bluetooth",
+      "InterfaceDescription": "Bluetooth Device (Personal Area Network)",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": "00-28-F8-AA-CB-B0"
+    },
+    {
+      "Name": "Conexión de área local* 4",
+      "InterfaceDescription": "WAN Miniport (IKEv2)",
+      "Status": "Disconnected",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 10",
+      "InterfaceDescription": "WAN Miniport (Network Monitor)",
+      "Status": "Up",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 5",
+      "InterfaceDescription": "WAN Miniport (L2TP)",
+      "Status": "Disconnected",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Wi-Fi",
+      "InterfaceDescription": "Intel(R) Dual Band Wireless-AC 8265",
+      "Status": "Up",
+      "LinkSpeed": "866.7 Mbps",
+      "HardwareInterface": true,
+      "Virtual": false,
+      "MacAddress": "00-28-F8-AA-CB-AC"
+    },
+    {
+      "Name": "Microsoft IP-HTTPS Platform Interface",
+      "InterfaceDescription": "",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Conexión de área local* 9",
+      "InterfaceDescription": "WAN Miniport (IPv6)",
+      "Status": "Up",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "Ethernet (depurador de kernel)",
+      "InterfaceDescription": "Microsoft Kernel Debug Network Adapter",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    },
+    {
+      "Name": "6to4 Adapter",
+      "InterfaceDescription": "",
+      "Status": "Not Present",
+      "LinkSpeed": "0 bps",
+      "HardwareInterface": false,
+      "Virtual": true,
+      "MacAddress": ""
+    }
+  ],
+  "PnpProblems": [
+    {
+      "Class": "Net",
+      "FriendlyName": "Bluetooth Device (Personal Area Network)",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "BTH\\MS_BTHPAN\\6&99BAE44&0&2"
+    },
+    {
+      "Class": "Net",
+      "FriendlyName": "Xbox Wireless Adapter for Windows",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "USB\\VID_045E&PID_02F9\\000000000"
+    },
+    {
+      "Class": "Net",
+      "FriendlyName": "Microsoft Wi-Fi Direct Virtual Adapter",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "{5D624F94-8850-40C3-A3FA-A4FD2080BAF3}\\VWIFIMP_WFD\\5&BEEE234&0&11"
+    },
+    {
+      "Class": "AudioEndpoint",
+      "FriendlyName": "MSI G27C6P E2 (High Definition Audio Device)",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "SWD\\MMDEVAPI\\{0.0.0.00000000}.{610191BA-380C-42FB-A58C-67135D863F84}"
+    },
+    {
+      "Class": "Monitor",
+      "FriendlyName": "Monitor PnP genérico",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "DISPLAY\\MSI7CA9\\5&3596C086&0&UID4356"
+    },
+    {
+      "Class": "Monitor",
+      "FriendlyName": "Monitor PnP genérico",
+      "Status": "Error",
+      "Problem": 22,
+      "InstanceId": "DISPLAY\\LGD0533\\4&3CCA320&0&UID265988"
+    }
+  ],
+  "BluetoothPnp": [
+    {
+      "FriendlyName": "Jabra Elite 65t Transporte AVRCP",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTHENUM\\{0000110C-0000-1000-8000-00805F9B34FB}_VID&00010067_PID&247E\\7&38E25D69&0&70BF926B16DF_C00000000"
+    },
+    {
+      "FriendlyName": "Jabra Elite 65t Transporte AVRCP",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTHENUM\\{0000110E-0000-1000-8000-00805F9B34FB}_VID&00010067_PID&247E\\7&38E25D69&0&70BF926B16DF_C00000000"
+    },
+    {
+      "FriendlyName": "Enumerador Bluetooth de Microsoft",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTH\\MS_BTHBRB\\6&99BAE44&0&1"
+    },
+    {
+      "FriendlyName": "Intel(R) Wireless Bluetooth(R)",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "USB\\VID_8087&PID_0A2B\\5&2F1928B6&0&11"
+    },
+    {
+      "FriendlyName": "Enumerador de Bluetooth LE de Microsoft",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTH\\MS_BTHLE\\6&99BAE44&0&3"
+    },
+    {
+      "FriendlyName": "Bluetooth Device (RFCOMM Protocol TDI)",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTH\\MS_RFCOMM\\6&99BAE44&0&0"
+    },
+    {
+      "FriendlyName": "Jabra Elite 65t",
+      "Status": "OK",
+      "Problem": 0,
+      "InstanceId": "BTHENUM\\DEV_70BF926B16DF\\7&38E25D69&0&BLUETOOTHDEVICE_70BF926B16DF"
+    }
+  ],
+  "Services": [
+    {
+      "Name": "BTAGService",
+      "Status": 4,
+      "StartType": 3
+    },
+    {
+      "Name": "BthAvctpSvc",
+      "Status": 4,
+      "StartType": 3
+    },
+    {
+      "Name": "bthserv",
+      "Status": 4,
+      "StartType": 3
+    },
+    {
+      "Name": "iphlpsvc",
+      "Status": 4,
+      "StartType": 2
+    },
+    {
+      "Name": "MpsSvc",
+      "Status": 4,
+      "StartType": 2
+    },
+    {
+      "Name": "RmSvc",
+      "Status": 4,
+      "StartType": 3
+    },
+    {
+      "Name": "SharedAccess",
+      "Status": 1,
+      "StartType": 3
+    },
+    {
+      "Name": "Spooler",
+      "Status": 1,
+      "StartType": 4
+    },
+    {
+      "Name": "WinDefend",
+      "Status": 4,
+      "StartType": 2
+    }
+  ],
+  "FirewallProfiles": [
+    {
+      "Name": "Domain",
+      "Enabled": 1,
+      "DefaultInboundAction": 4,
+      "DefaultOutboundAction": 0,
+      "AllowLocalFirewallRules": 2,
+      "AllowInboundRules": 0,
+      "NotifyOnListen": 1
+    },
+    {
+      "Name": "Private",
+      "Enabled": 1,
+      "DefaultInboundAction": 4,
+      "DefaultOutboundAction": 0,
+      "AllowLocalFirewallRules": 2,
+      "AllowInboundRules": 0,
+      "NotifyOnListen": 1
+    },
+    {
+      "Name": "Public",
+      "Enabled": 1,
+      "DefaultInboundAction": 4,
+      "DefaultOutboundAction": 0,
+      "AllowLocalFirewallRules": 2,
+      "AllowInboundRules": 0,
+      "NotifyOnListen": 1
+    }
+  ],
+  "InboundAllowRules": [
+    {
+      "Name": "Solo controlador de WFD (TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Solo controlador de WFD (UDP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Optimización de distribución (TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "7680",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Optimización de distribución (UDP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "7680",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Plataforma de dispositivos conectados (UDP de entrada)",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Plataforma de dispositivos conectados (TCP de entrada)",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: destino inaccesible (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: paquete demasiado grande (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: tiempo superado (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: problema de parámetro (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: solicitud de detección de vecinos (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: anuncio de detección de vecinos (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: anuncio de enrutador (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "fe80::/64"
+    },
+    {
+      "Name": "Redes principales: solicitud de enrutador (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: consulta de escucha de multidifusión (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet6"
+    },
+    {
+      "Name": "Redes principales: informe de escucha de multidifusión (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet6"
+    },
+    {
+      "Name": "Redes principales: informe de escucha de multidifusión v2 (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet6"
+    },
+    {
+      "Name": "Redes principales: escucha de multidifusión finalizada (ICMPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv6",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet6"
+    },
+    {
+      "Name": "Redes principales: destino inaccesible fragment. necesaria (ICMPv4 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "ICMPv4",
+      "LocalPort": "RPC",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: Protocolo de admin. de grupo de Internet (IGMP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "2",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: Protocolo de configurac. dinámica de host (DHCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "68",
+      "RemotePort": "67",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: Protocolo de conf. dinámica de host para IPv6 (DHCPV6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "546",
+      "RemotePort": "547",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: Teredo (UDP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "Teredo",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: IPHTTPS (TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "IPHTTPSIn",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Redes principales: IPv6 (IPv6 de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "41",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Uso compartido de proximidad sobre TCP (uso compartido de TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "mDNS (UDP de entrada)",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "mDNS (UDP de entrada)",
+      "Profile": 1,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "mDNS (UDP de entrada)",
+      "Profile": 4,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "Enrutador AllJoyn (TCP de entrada)",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "9955",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Enrutador AllJoyn (UDP de entrada)",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Pantalla inalámbrica (TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Canal posterior de infraestructura de pantalla inalámbrica (TCP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "7250",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Servidor de protocolo DIAL (HTTP-In)",
+      "Profile": 1,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "10247",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Servidor de protocolo DIAL (HTTP-In)",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "10247",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "@FirewallAPI.dll,-80201",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": [
+        "554",
+        "8554-8558"
+      ],
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "@FirewallAPI.dll,-80206",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5000-5020",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "Protocolo de coordinación de ASP WFD (UDP de entrada)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "7235",
+      "RemotePort": "7235",
+      "LocalAddress": "Any",
+      "RemoteAddress": "LocalSubnet"
+    },
+    {
+      "Name": "ms-resource:ProductPkgDisplayName",
+      "Profile": 4,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "7000",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ms-resource:ProductPkgDisplayName",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "7000",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ms-resource:ProductPkgDisplayName",
+      "Profile": 4,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "7000",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ms-resource:ProductPkgDisplayName",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "7000",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Tu cuenta",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Visor web de aplicación de escritorio",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Seguridad de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Windows Search",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Inicio",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Windows Feature Experience Pack",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Skype",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Agregar una cuenta profesional o educativa",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Mail and Calendar",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "MSN El Tiempo",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Instalador de aplicación",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Reloj de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Solitaire & Casual Games",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Notas rápidas de Microsoft",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Host de la experiencia de Store",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Cámara de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Feedback Hub",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Store",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Game Bar",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Reproductor multimedia de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Movies & TV",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Tu cuenta",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Seguridad de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Visor web de aplicación de escritorio",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Windows Search",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Inicio",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Agregar una cuenta profesional o educativa",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Windows Feature Experience Pack",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Host de la experiencia de Store",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Firefox (C:\\Program Files\\Mozilla Firefox)",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Firefox (C:\\Program Files\\Mozilla Firefox)",
+      "Profile": 2,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Edge (mDNS-In)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Copilot (mDNS-In)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Edge (mDNS-In)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Edge (mDNS-In)",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "UDP",
+      "LocalPort": "5353",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Notas rápidas de Microsoft",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Instalador de aplicación",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Game Bar",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Reproductor multimedia de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Reloj de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Cámara de Windows",
+      "Profile": 3,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "Microsoft Store",
+      "Profile": 7,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "Any",
+      "LocalPort": "Any",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "1455",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "1457",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "1455",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "1457",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "3128-3159",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    },
+    {
+      "Name": "ChatGPT",
+      "Profile": 0,
+      "PolicyStoreSource": "PersistentStore",
+      "Program": null,
+      "Service": null,
+      "Protocol": "TCP",
+      "LocalPort": "8081-8112",
+      "RemotePort": "Any",
+      "LocalAddress": "Any",
+      "RemoteAddress": "Any"
+    }
+  ],
+  "Defender": {
+    "AntivirusEnabled": true,
+    "RealTimeProtectionEnabled": true,
+    "AntispywareEnabled": true,
+    "BehaviorMonitorEnabled": true,
+    "IoavProtectionEnabled": true,
+    "NISEnabled": true,
+    "IsTamperProtected": true,
+    "AntivirusSignatureLastUpdated": "2026-10-10T07:23:08+02:00"
+  },
+  "GuardianTasks": [
+    {
+      "TaskName": "UninstallDeviceTask",
+      "TaskPath": "\\Microsoft\\Windows\\Bluetooth\\",
+      "State": 3,
+      "Actions": "BthUdTask.exe $(Arg0)"
+    }
+  ],
+  "GuardianProcesses": [
+    {
+      "Name": "pwsh.exe",
+      "ProcessId": 9756,
+      "ParentProcessId": 6988,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.6.0_x64__8wekyb3d8bbwe\\pwsh.exe",
+      "CommandLine": "\"C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.6.0_x64__8wekyb3d8bbwe\\pwsh.exe\" "
+    },
+    {
+      "Name": "pwsh.exe",
+      "ProcessId": 21152,
+      "ParentProcessId": 6988,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.6.0_x64__8wekyb3d8bbwe\\pwsh.exe",
+      "CommandLine": "\"C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.6.0_x64__8wekyb3d8bbwe\\pwsh.exe\" "
+    },
+    {
+      "Name": "powershell.exe",
+      "ProcessId": 22984,
+      "ParentProcessId": 21152,
+      "ExecutablePath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "CommandLine": "\"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe\" -Version 5.1 -s -NoLogo -NoProfile"
+    },
+    {
+      "Name": "pwsh.exe",
+      "ProcessId": 23792,
+      "ParentProcessId": 8208,
+      "ExecutablePath": "C:\\Users\\Juncho\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+      "CommandLine": "\"C:\\Users\\Juncho\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe\" -NoProfile -Command \"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\n@'\nfrom pathlib import Path\np=Path('web/studio-import.js');p.write_text(''' 'use strict';\n(()=>{\n const status=document.createElement('p');status.id='import-file-status';status.className='helper';status.setAttribute('role','status');const clear=document.createElement('button');clear.type='button';clear.className='text-button';clear.textContent='Cambiar archivo';clear.hidden=true;$('drop-zone').after(status,clear);let generation=0,checking=false,error='';\n function inspect(){const file=$('video-file').files[0],version=++generation;error='';checking=false;clear.hidden=!file;if(!file){status.textContent='';$('upload').disabled=state.busy;return;}const mb=(file.size/1024/1024).toFixed(1);if(!file.size||file.size>500*1024*1024||!(/\\\\.(mp4|mov|webm|mkv|m4v|avi)$/i.test(file.name)||file.type.startsWith('video/'))){error=!file.size?'El archivo está vacío.':file.size>500*1024*1024?'El archivo supera 500 MB.':'Elige un archivo de vídeo.';status.textContent=error;$('upload').disabled=true;return;}checking=true;$('upload').disabled=true;status.textContent=`${mb} MB · leyendo duración…`;const probe=document.createElement('video'),url=URL.createObjectURL(file);const timer=setTimeout(()=>finish(false),6000);let finished=false;\n function finish(ok){if(finished)return;finished=true;clearTimeout(timer);const duration=probe.duration;probe.removeAttribute('src');probe.load();URL.revokeObjectURL(url);if(version!==generation)return;checking=false;if(ok&&Number.isFinite(duration)&&duration>7200)error='El vídeo supera dos horas. Prepara un fragmento más corto.';status.textContent=error||`${mb} MB${ok&&Number.isFinite(duration)?' · '+time(duration):' · duración a comprobar al importar'} · listo para preparar`;$('upload').disabled=state.busy||Boolean(error);}\n probe.preload='metadata';probe.onloadedmetadata=()=>finish(true);probe.onerror=()=>finish(false);probe.src=url;}\n $('video-file').addEventListener('change',inspect);clear.addEventListener('click',()=>{if(state.busy)return;$('video-file').value='';$('video-file').dispatchEvent(new Event('change'));$('video-file').click();});$('upload-form').addEventListener('submit',event=>{if(checking||error){event.preventDefault();event.stopImmediatePropagation();notify(error||'Espera a que se lea el archivo.',true);}},{capture:true});\n $('youtube-submit').closest('form').addEventListener('submit',event=>{let valid=false;try{const url=new URL($('youtube-url').value);valid=url.protocol==='https:'&&(['youtube.com','www.youtube.com','m.youtube.com','youtu.be'].includes(url.hostname))&&(url.hostname==='youtu.be'?url.pathname.length>1:((url.pathname==='/watch'&&url.searchParams.has('v'))||/^\\\\/(shorts|live)\\\\/[^/]+/.test(url.pathname)));}catch{}if(!valid){event.preventDefault();event.stopImmediatePropagation();notify('Pega el enlace HTTPS de un vídeo, Short o directo de YouTube.',true);}},{capture:true});\n const previousBusy=setBusy;setBusy=function(value){previousBusy(value);$('upload').disabled=value||checking||Boolean(error);clear.disabled=value;};\n})();\n''',encoding='utf-8')\np=Path('web/index.html');p.write_text(p.read_text(encoding='utf-8').replace('</head>','<script src=\\\"/studio-import.js?v=product-12\\\" defer></script></head>'),encoding='utf-8')\np=Path('.github/workflows/quality.yml');p.write_text(p.read_text(encoding='utf-8')+'      - run: node --check web/studio-import.js\\n',encoding='utf-8')\n'@ | python -\nnode --check web/studio-import.js\npython C:\\Users\\Juncho\\Documents\\Codex\\2026-10-07\\es\\publish-cutter-pr.py 7 \\\"Importación con metadatos y validación previa\\\" \\\"Muestra tamaño y duración del archivo antes de enviarlo; evita archivos vacíos o que superan los límites. Si el navegador no puede leer la duración, permite comprobarla en el motor. Valida enlaces YouTube y libera los recursos del previsualizador. Sintaxis JS verificada.\\\"\""
+    }
+  ],
+  "BluetoothPolicy": [
+    {
+      "RadioState": null,
+      "SystemRadioState": null,
+      "SecurityLevel": 1
+    }
+  ],
+  "ListeningPorts": [
+    {
+      "LocalAddress": "::",
+      "LocalPort": 49668,
+      "OwningProcess": 960
+    },
+    {
+      "LocalAddress": "::",
+      "LocalPort": 49667,
+      "OwningProcess": 2764
+    },
+    {
+      "LocalAddress": "::",
+      "LocalPort": 49666,
+      "OwningProcess": 1900
+    },
+    {
+      "LocalAddress": "::",
+      "LocalPort": 49665,
+      "OwningProcess": 888
+    },
+    {
+      "LocalAddress": "::",
+      "LocalPort": 49664,
+      "OwningProcess": 988
+    },
+    {
+      "LocalAddress": "::",
+      "LocalPort": 135,
+      "OwningProcess": 1212
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 60705,
+      "OwningProcess": 14584
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 49668,
+      "OwningProcess": 960
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 49667,
+      "OwningProcess": 2764
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 49666,
+      "OwningProcess": 1900
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 49665,
+      "OwningProcess": 888
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 49664,
+      "OwningProcess": 988
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 11436,
+      "OwningProcess": 8972
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8010,
+      "OwningProcess": 21240
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8001,
+      "OwningProcess": 25060
+    },
+    {
+      "LocalAddress": "192.168.18.6",
+      "LocalPort": 139,
+      "OwningProcess": 4
+    },
+    {
+      "LocalAddress": "0.0.0.0",
+      "LocalPort": 135,
+      "OwningProcess": 1212
+    }
+  ],
+  "Notes": []
+}
