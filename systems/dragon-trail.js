@@ -64,7 +64,7 @@ export function enterDragonTrail(g){
  g.dragonTrail={
   saved,complete,index:index<0?DRAGON_BEACONS.length:index,
   bossDefeated:cleared,banner:0,bannerText:'',bannerSub:'',lifts,
-  gateShorts:[0,0,0],altarLit:complete,altarAge:0,
+  gateShorts:[0,0,0],altarLit:complete,altarAge:0,megaVueloCooldown:0,
   act:cleared?4:Math.min(3,index<0?3:index)
  };
 }
@@ -225,7 +225,30 @@ export function dragonTrailSnapshot(g){
  };
 }
 
+// ALIENTO DE FUEGO (J/K): near updraft → MEGA VUELO (extra vy burst + brief invuln wing gust)
+// Near an obsidian gate → IGNICIÓN (blast it open, 240t cooldown)
 export function dragonAbility(game,player,index){
-  // Dragon's hero ability is handled via the thermal updrafts in the trail update;
-  // no discrete per-button action needed.
+ const s=game.dragonTrail;if(!s||!player)return;
+ // Gate ignition — J/K opens obsidian doors
+ for(let i=0;i<DRAGON_GATES.length;i++){
+  if(s.gateShorts[i]>0)continue;
+  const g=DRAGON_GATES[i];
+  if(Math.abs(player.x+player.w/2-g.x)<110&&Math.abs(player.y-g.y)<g.height+80){
+   s.gateShorts[i]=240;
+   game.nums?.add?.(g.x,g.y-80,'¡IGNICIÓN!','#ff8542',true);
+   game.fx?.emit?.(g.x,g.y-60,{color:'#ffd875',count:22,up:6,size:5,life:40});
+   return;
+  }
+ }
+ // Updraft mega-boost — J/K near a thermal vent → BATIDA DE ALA
+ if(s.megaVueloCooldown>0){s.megaVueloCooldown--;return;}
+ for(const vent of DRAGON_UPDRAFTS){
+  if(Math.abs(player.x+player.w/2-vent.x)<110&&player.y<vent.y&&player.y>vent.y-380){
+   s.megaVueloCooldown=175;
+   player.vy=-vent.force*1.4;player.grounded=false;
+   game.nums?.add?.(vent.x,vent.y-80,'¡BATIDA DE ALA!','#ffb366',true);
+   game.fx?.emit?.(vent.x,vent.y,{color:vent.color,count:28,up:9,size:6,star:true,life:55});
+   return;
+  }
+ }
 }

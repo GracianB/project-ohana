@@ -125,7 +125,7 @@ function _drawColossus(ctx,e,t){
  ctx.fill();ctx.stroke();
 
  // Teeth
- ctx.fillStyle='#efebe9';ctx.strokeStyle='none';
+ ctx.fillStyle='#efebe9';ctx.strokeStyle='transparent';
  for(let t2=0;t2<3;t2++){
   const tx=68+t2*9,ty=4-t2*4;
   ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx-4,ty+10);ctx.lineTo(tx+4,ty+10);ctx.closePath();ctx.fill();
