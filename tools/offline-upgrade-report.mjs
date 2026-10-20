@@ -17,7 +17,9 @@ if(entries.length<180)throw Error("Unexpectedly small current precache");
 let reused=0,downloaded=0,reusedSourceBytes=0,downloadedSourceBytes=0;
 const changed=[],reusedPaths=[],removed=[];
 for(const [name,sha] of entries){
- const data=fs.readFileSync(name);
+ const raw=fs.readFileSync(name);
+ const isText=/\.(js|json|html|css|md|txt|svg)$/.test(name);
+ const data=isText&&raw.includes(13)?Buffer.from(raw.toString("utf8").replace(/\r\n/g,"\n")):raw;
  const actual=createHash("sha1").update("blob "+data.length).update(Buffer.from([0])).update(data).digest("hex");
  if(actual!==sha)throw Error("Stale revision for "+name);
  const prev=old.resources[name];

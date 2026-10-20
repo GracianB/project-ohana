@@ -49,6 +49,20 @@ function drawChispinCampPod(c,z){
  c.restore();
 }
 
+function drawMichiCampPod(c,z){
+ c.save();
+ c.translate(z.x+82,z.y-10);
+ c.fillStyle='#231238';c.strokeStyle='#e5c2ff';c.lineWidth=2.2;
+ c.beginPath();c.arc(0,0,24,Math.PI*0.3,Math.PI*1.7);
+ c.quadraticCurveTo(-8,0,0,24*Math.sin(Math.PI*0.3));
+ c.closePath();c.fill();c.stroke();
+ c.fillStyle='#ffb6e4';c.beginPath();c.arc(-18,12,9,0,Math.PI*2);c.fill();
+ c.strokeStyle='#ffffff';c.lineWidth=1.2;c.stroke();
+ c.fillStyle='#f0c4ff';c.strokeStyle='#ffffff';c.lineWidth=1;
+ c.beginPath();c.moveTo(22,12);c.lineTo(28,-4);c.lineTo(34,12);c.closePath();c.fill();c.stroke();
+ c.restore();
+}
+
 export function drawFamilyIslands(c){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
@@ -67,8 +81,10 @@ export function drawFamilyIslands(c){
   }else if(z.id==='moon'){
    for(let j=0;j<4;j++){c.strokeStyle=['#edb8d0','#ead69b','#b4d7ba','#b1c8e4'][j];c.lineWidth=6;c.beginPath();c.arc(z.x,z.y-15,60+j*7,Math.PI,Math.PI*2);c.stroke();}
    c.fillStyle='#fff1bc';c.beginPath();c.arc(z.x-150,z.y-65,18,0,Math.PI*2);c.fill();
+   drawMichiCampPod(c,z);
   }else{
    c.strokeStyle='#66567f';c.lineWidth=10;c.beginPath();c.moveTo(z.x-75,z.y-35);c.lineTo(z.x-75,z.y-110);c.lineTo(z.x+75,z.y-110);c.lineTo(z.x+75,z.y-35);c.stroke();c.strokeStyle='#e9d19d';c.lineWidth=2;c.beginPath();c.moveTo(z.x-145,z.y-90);c.quadraticCurveTo(z.x,z.y-60,z.x+145,z.y-90);c.stroke();for(let j=0;j<7;j++){c.fillStyle=j%2?'#eab8c1':'#f0d49e';c.fillRect(z.x-140+j*45,z.y-83,12,18);}
+   drawChispinCampPod(c,z);
   }
  }
 }
@@ -95,6 +111,24 @@ export function pairedScene(id,selected,seconds){
    dx:act===1?Math.sin(seconds*Math.PI)*(lead?8:-12):0,
    dy:act===1&&!lead?-Math.abs(Math.sin(seconds*Math.PI))*18:0,
    ...(lead?{performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:act===2?2+seconds-7:seconds}}:{})
+  };
+ }
+ if(island.id==='moon'&&selected==='cat'){
+  const isMichi=id==='cat',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isMichi?'run':'jump'):(isMichi?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.3)*(isMichi?12:-8):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.3))*(isMichi?18:8):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
+  };
+ }
+ if(island.id==='storm'&&selected==='chispin'){
+  const isChispin=id==='chispin',act=seconds<3?0:seconds<7?1:seconds<10?2:3;
+  return {
+   pose:act===0?'idle':act===1?(isChispin?'run':'jump'):(isChispin?'cast':'victory'),
+   dx:act===1?Math.sin(seconds*Math.PI*1.5)*(isChispin?15:-10):0,
+   dy:act===1?-Math.abs(Math.sin(seconds*Math.PI*1.5))*(isChispin?14:12):0,
+   performance:{kind:act===0?'entrance':act===1?'dance':act===2?'relic':'family',time:seconds}
   };
  }
  const phase=Math.min(2,Math.floor(seconds/4)),lead=id===island.heroes[0],wave=Math.sin(seconds*Math.PI);

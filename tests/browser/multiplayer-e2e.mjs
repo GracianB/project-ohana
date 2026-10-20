@@ -611,8 +611,8 @@ try {
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
     if(!onlineCoop.direct?.active)return false;
     const g=onlineCoop._combatGame;const effects=capturePeerEffects(g,++onlineCoop.effectSequence,onlineCoop.combatEpoch);
-    effects.stitchoDuet={x:300,y:900,age:45,evo:4,facing:1,bolts:[{x:330,y:850,life:10}]};
-    onlineCoop.lastEffectsSentAt=performance.now()+600;return onlineCoop.direct.sendLatest('effects',effects);
+    effects.stitchoDuet={x:300,y:900,originX:300,originY:900,age:45,evo:4,facing:1,bolts:[{x:330,y:850,life:10}]};
+    onlineCoop.lastEffectsSentAt=performance.now()+600;onlineCoop.direct.sendEvent?.('effects',effects);return onlineCoop.direct.sendLatest?.('effects',effects);
   });
   let stormDelivered=false;
   const stormDeadline=Date.now()+12000;

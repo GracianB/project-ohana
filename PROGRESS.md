@@ -1,3 +1,9 @@
+## ohana-454 · Michi (Fase 4) y Chispín (Fase 3) · mundos personales y mini bosses
+
+Se completa y cierra la Fase 4 (Michi) y Fase 3 (Chispín) dentro del Claro personal en 100% Canvas vectorial sin dependencias de mapas de bits externos:
+- **Michi (Fase 4)**: Sala dedicada *Los Jardines de la Luna* (`systems/michi-room.js`), escenario procedural *Los Jardines de la Luna* con parallax cósmico, luna radiante y cuarzo (`worlds/michi-gardens.js`), 4 plataformas móviles sobre rieles de cristal, 3 almohadillas oníricas, 3 puertas de niebla astral, 8 esencias de luna, 3 campanas astrales y Altar de la Luna Soñadora (`systems/michi-trail.js`), mini boss *Espíritu Astral Felino* (480 HP, 3 fases tácticas: zarpazos de sombra, lluvia de orbes y eclipse total, `systems/michi-boss.js`), remate I (*Garra ascendente*) y ultimate P (*Cacería lunar*) en Canvas (`systems/hero-combos.js`), y colección de 100 sueños de Michi con reliquia *LUNA SOÑADORA* (`systems/hero-collections.js`).
+- Precache del Service Worker, hashes SHA-1 regenerados y versión elevada a `ohana-454`.
+
 ## ohana-453 · Kilo y Stitcho · mundos personales + colecciones + offline
 
 Se mantiene el capítulo de Kilo V452 y se añade la primera fase jugable del Archipiélago del Caos de Stitcho: cuatro sectores propios, raíles móviles, trampolines, trampas eléctricas, ocho fragmentos, tres antenas, mapa de personaje, enemigos temáticos y Núcleo Glitch de 480 PV con tres fases y cuatro ataques telegrafiados.

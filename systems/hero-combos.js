@@ -166,6 +166,40 @@ export function drawHeroPowers(ctx,g,cam){
     }
    }
   }
+  else if(m.id==='cat'){
+   const isFinal=m.index===5;
+   if(isFinal){
+    ctx.strokeStyle='#e5c2ff';ctx.lineWidth=2.6;ctx.globalAlpha=.85;
+    ctx.beginPath();ctx.arc(x,y,56,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='#ffb6e4';ctx.lineWidth=1.8;
+    for(let i=0;i<6;i++){
+     const a=i*Math.PI/3+(g.reduceMotion?0:m.age*.12);
+     const r=56+Math.sin(m.age*.18+i)*8;
+     ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,4.5,0,Math.PI*2);ctx.stroke();
+    }
+    ctx.fillStyle='#ffd6fa';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('CACERÍA LUNAR · ECLIPSE',x,y-74);
+    for(let i=-1;i<=1;i++){
+     const lx=x+i*110;
+     ctx.fillStyle='rgba(229,194,255,0.15)';ctx.fillRect(lx-14,-cam.y,28,1400);
+     ctx.strokeStyle='#ffe6ff';ctx.lineWidth=1.8;
+     ctx.beginPath();ctx.moveTo(lx,-cam.y);ctx.lineTo(lx,y);ctx.stroke();
+    }
+   } else {
+    ctx.strokeStyle='#ffb6e4';ctx.lineWidth=3.4;ctx.globalAlpha=.85;
+    // Triple crescent claw slashes
+    for(let k=-1;k<=1;k++){
+     ctx.beginPath();
+     ctx.arc(x+m.face*(20+k*10),y+k*12,32,m.face>0?-0.6:2.2,m.face>0?0.6:3.8);
+     ctx.stroke();
+    }
+    ctx.strokeStyle='#e5c2ff';ctx.lineWidth=1.8;
+    for(let i=0;i<4;i++){
+     const sa=i*Math.PI/2+(g.reduceMotion?0:m.age*.22);
+     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(sa)*26,y+Math.sin(sa)*26);ctx.stroke();
+    }
+   }
+  }
   else if(m.id==='kilo'){
    const strike=m.age>=7&&m.age<=20,reach=strike?70:34,tx=x+m.face*25;
    ctx.globalAlpha=strike?.85:.5;ctx.strokeStyle=strike?'#ffe39a':'#e9a5bd';ctx.lineWidth=strike?4:2;

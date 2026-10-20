@@ -1,4 +1,4 @@
-const VERSION = "ohana-453";
+const VERSION = "ohana-454";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -11,6 +11,10 @@ const PRECACHE = [
   "./systems/chispin-trail.js?v=" + VERSION,
   "./systems/chispin-boss.js?v=" + VERSION,
   "./worlds/chispin-sanctuary.js?v=" + VERSION,
+  "./systems/michi-room.js?v=" + VERSION,
+  "./systems/michi-trail.js?v=" + VERSION,
+  "./systems/michi-boss.js?v=" + VERSION,
+  "./worlds/michi-gardens.js?v=" + VERSION,
   "./systems/coop-welcome.js?v=" + VERSION,
   "./systems/grove-guardian.js?v=" + VERSION,
   "./systems/kilo-combo.js?v=" + VERSION,
@@ -336,8 +340,8 @@ const PRECACHE_REVISIONS = {
   "systems/campaign-layout.js": "824c9fc2ecd108e7c4f8891b54e5d01163f6c0f0",
   "systems/local-map.js": "f8b561815c32a9ddd5ed022040aaaf5b49240d84",
   "systems/finisher.js": "d9a753cd38abd7759ecd3dad9408ce815c108b4d",
-  "systems/family-islands.js": "d97d20e426ffebdc165b6aeee92bb773b3b837a9",
-  "systems/hero-combos.js": "b50a36c462874dd748b24af022db675b6e9d2488",
+  "systems/family-islands.js": "d5bf6b073d11890d6d99ae14b427f5c1249f9fe6",
+  "systems/hero-combos.js": "56ba953acec02ca5f3bbe356ee5a388f5de773ea",
   "systems/campaign-enemies.js": "36cc8abcf5a882ce2f3b432c6592ee8d2eb4fbc0",
   "systems/jump-audit.js": "46702fd22db697bc7db4393296b3f5105ce7dac6",
   "systems/nest-arena.js": "fa87a72d0fe59d75c8efe505238fa52cc8bd0d73",
@@ -375,7 +379,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "2805eb386c09377af7d3af204345580ff2585b37",
+  "index.html": "e607a639f97042b3b628ed6d1df3389fe13b9a09",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
@@ -400,7 +404,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "fa5246f38d4c7f3ee75e0952ecf1e5fcf95dbbdb",
+  "game.js": "86788c00eae9bc9b0e3e21ceb9dc228538b8246a",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "41320480ca284e54cd100c31148c95a4b8c9dbac",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
@@ -612,16 +616,20 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "systems/hero-collections.js": "74b12aa72683b5663446662810d5731609a9b965",
+  "systems/hero-collections.js": "39e7164d8c88fc9409f14d89d53a0ab49a105d39",
   "systems/stitcho-room.js": "a3f965f11fc7f32385c4cb8d235bcd890b5f714d",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
   "systems/stitcho-trail.js": "7f834abb3ce08628a60e4a32f7072f81f806e7dc",
   "systems/stitcho-boss.js": "7a0a5d3e6fc1c24329a98aa910004f6d6e90c3d5",
   "worlds/stitcho-archipelago.js": "ecda3b3d8b2af806078caa2351f5c77de68b761d",
   "systems/chispin-room.js": "7bbb11badaf21f5147bd0496d052832b9b63c3aa",
-  "systems/chispin-trail.js": "101167fb782197910317474c72e0cb5a409c451f",
+  "systems/chispin-trail.js": "7ac148bc536fd02a2b7f722615ccc8291943daf2",
   "systems/chispin-boss.js": "e165107fa78318a3c01938af2b2d1bc383407a2f",
-  "worlds/chispin-sanctuary.js": "db3550f2142f71a1809786237a9884ddc8e15685"
+  "worlds/chispin-sanctuary.js": "db3550f2142f71a1809786237a9884ddc8e15685",
+  "systems/michi-room.js": "bc4d8b815df4c40e7483b8f30d6ac319c5788b02",
+  "systems/michi-trail.js": "e00f0dc356549ad7ef775adf38663c5ee4f268ab",
+  "systems/michi-boss.js": "8b4dfb444892dc42dc36548130225640b7de4e26",
+  "worlds/michi-gardens.js": "2de96d135e6dc8a9b463ec80e4c0b3383fe65ada"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";

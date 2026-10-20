@@ -3,10 +3,11 @@
 // timed electrical arc gates, three story acts and the Titan of Thunder encounter.
 // All permanent rewards use Chispín's existing per-hero save.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
+import {CHISPIN_BOSS_ID} from './chispin-boss.js';
 
 const SAVE_KEY='chispin-trail-v1';
 const FRAGMENT_PREFIX='chispin-fragment-';
-export const CHISPIN_BOSS_ID='chispin-titan-v1';
+export {CHISPIN_BOSS_ID};
 
 export const CHISPIN_BEACONS=Object.freeze([
  Object.freeze({id:'chispin-spark',x:440,y:1074,label:'VOLTIO',need:0,line:'El transformador ruge con chispas de bienvenida.'}),
@@ -175,6 +176,10 @@ export function updateChispinTrail(g,hurt){
  if(s.complete&&!s.cleared&&!s.bossSummoned&&p.x>3150){
   s.bossSummoned=true;
   g.spawnChispinBoss?.();
+ }
+
+ if(!s.cleared&&(g.clearedEncounters?.hub||[]).includes(CHISPIN_BOSS_ID)){
+  s.cleared=true;s.complete=true;
  }
 }
 
