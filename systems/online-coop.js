@@ -121,7 +121,7 @@ class OnlineCoop {
     this.combatEpoch=globalThis.crypto?.randomUUID?.()||("world-"+Date.now());
     this.remoteCombatScope="";this.retiredCombatScopes=new Set();this.peerCombatProtocol=null;
     this.seenActionEvents=new Set();this.effectSequence=0;this.lastEffectsSentAt=0;this.lastCombatHealthAt=0;
-    this.pendingVisualCombo=null;
+    this.pendingVisualCombo=null;this.visualReceipts=[];
     this._reliableDuetSource=null;this._reliableDuetLink=null;
     this._relayDuetSource=null;this._relayDuetHoldUntil=0;
   }
@@ -381,8 +381,22 @@ class OnlineCoop {
     // new offer arrives, avoiding simultaneous teardown during slow signaling.
     if(!this.direct.initiator)return false;
     const connected=rtcFresh(this.direct?.active,this.lastDirectPoseAt,this.directConnectedAt,now,this.direct?.lastPongAt);
-    if(!rtcCanRetry({now,at:this.directRetryAt,hidden:typeof document!=="undefined"&&document.hidden,
-      lobby:this.snapshot?.phase==="lobby",peer:!!this.remote?.playerId,connected}))return false;
+    const hidden=typeof document!=="undefined"&&document.hidden;
+    const lobby=this.snapshot?.phase==="lobby";
+    const normal=rtcCanRetry({now,at:this.directRetryAt,hidden,lobby,peer:!!this.remote?.playerId,connected});
+    // A physically CLOSED data channel cannot heal by waiting for the usual
+    // 16-second quiet retry. Recover it promptly during an active game,
+    // including unfocused browser tabs. Only proven transport closure qualifies:
+    // do not churn an OPEN link when a 60 Hz game tick is briefly throttled.
+    const hardClosed=!this.direct.active&&(
+      this.direct.closed===true||
+      ["closed","closing"].includes(this.direct.poseChannel?.readyState)||
+      ["closed","closing"].includes(this.direct.eventChannel?.readyState));
+    const expedited=hardClosed&&!!this.remote?.playerId&&!lobby&&!connected&&
+      this.directConnectedAt>0&&now-this.directConnectedAt>=2000&&
+      now-(this.lastHardCloseRepairAt||0)>=5000;
+    if(!normal&&!expedited)return false;
+    if(expedited)this.lastHardCloseRepairAt=now;
     this.direct?.close();this.direct=null;
     this.directAttempted=false;
     this.lastDirectPoseAt=0;this.directConnectedAt=0;
@@ -441,12 +455,25 @@ class OnlineCoop {
         ["yarn","purr","wisp"].every(kind=>list.some(f=>f.kind===kind));
       const spark=list=>Array.isArray(list)&&
         ["chain","trail","storm"].every(kind=>list.some(f=>f.kind===kind));
+      const isMichi=trio(frame?.michiFx)&&trio(state?.michiFx);
+      const isChispin=spark(frame?.chispinFx)&&spark(state?.chispinFx);
       const valid=frame?.roomId===game.roomId&&state?.scope===frame.scope&&
-        (trio(frame.michiFx)&&trio(state.michiFx)||
-         spark(frame.chispinFx)&&spark(state.chispinFx));
-      if(valid&&Number.isSafeInteger(frame.frameNo)&&frame.frameNo>0){
-        this.direct?.sendEvent?.("state",{state:"fx-ack",
-          scope:frame.scope,frameNo:frame.frameNo});
+        (isMichi||isChispin)&&Number.isSafeInteger(frame.frameNo)&&frame.frameNo>0;
+      if(valid){
+        const now=performance.now();
+        this.visualReceipts=Array.isArray(this.visualReceipts)?this.visualReceipts:[];
+        this.visualReceipts=this.visualReceipts.filter(x=>now-x.at<5000);
+        const seen=this.visualReceipts.some(x=>x.scope===frame.scope&&x.frameNo===frame.frameNo);
+        if(received&&!seen){
+          const hero=isMichi?"cat":"chispin";
+          const keys=isMichi?["yarn","purr","wisp"]:["chain","trail","storm"];
+          const effects=(isMichi?state.michiFx:state.chispinFx).filter(x=>keys.includes(x.kind)).map(x=>({...x}));
+          // Actual validated peer pixels can expire before Playwright switches
+          // tab. Retain bounded evidence of RECEIPT, never combat state.
+          this.visualReceipts.push({scope:frame.scope,frameNo:frame.frameNo,roomId:game.roomId,hero,effects,at:now});
+          if(this.visualReceipts.length>8)this.visualReceipts.shift();
+        }
+        if(received||seen)this.direct?.sendEvent?.("state",{state:"fx-ack",scope:frame.scope,frameNo:frame.frameNo});
       }
     }else if(event.kind==="state"&&event.payload?.state==="fx-ack"){
       const ack=event.payload,pending=this.pendingVisualCombo;
@@ -530,7 +557,7 @@ class OnlineCoop {
     this.pendingMutations=this.pendingMutations.filter(item=>item.payload?.action!=="rtc");
     this.lastCombatFrame=0;this.lastCombatReceivedAt=0;this.remoteCombatScope="";
     this.retiredCombatScopes.clear();this.peerCombatProtocol=null;
-    this.pendingVisualCombo=null;
+    this.pendingVisualCombo=null;this.visualReceipts=[];
     if(this._combatGame){resetCombatMirror(this._combatGame);this._combatGame.coopPeerEffects=null;}
   }
 

@@ -121,54 +121,17 @@ jobs:
       - name: Six Family U duet screenshots (150 scenes)
         run: node tests/browser/family-duets-v306-v310.mjs
 
-      - name: Michi Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: cat
 
-      - name: Michi Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: cat
-          OHANA_TEST_BROWSER: firefox
 
       - name: Chispin V303 vector and duet audit
         run: node tests/browser/chispin-v303.mjs
 
-      - name: Chispin Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: chispin
 
-      - name: Chispin Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: chispin
-          OHANA_TEST_BROWSER: firefox
 
-      - name: Multiplayer E2E
-        run: npm run test:browser:multiplayer
 
-      - name: Multiplayer with late ICE candidates
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_LATE_ICE: '1'
 
-      - name: Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_BROWSER: firefox
 
-      - name: Stitcho Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: stitcho
 
-      - name: Stitcho Firefox Multiplayer E2E
-        run: npm run test:browser:multiplayer
-        env:
-          OHANA_TEST_HOST: stitcho
-          OHANA_TEST_BROWSER: firefox
 
       - name: Visual regression matrix
         run: npm run test:visual
@@ -195,6 +158,43 @@ jobs:
           name: ohana-visual-results
           path: test-results/
           if-no-files-found: ignore
+
+  # Real browser-to-browser WebRTC acceptance is mandatory, not omitted:
+  # run the nine original scenarios on FRESH isolated runners instead of
+  # sequentially after hundreds of Canvas/performance scenes. This avoids
+  # starving ICE connections while preserving every tested hero/browser mode.
+  multiplayer-native:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: "Michi Multiplayer E2E", hero: cat, browser: chromium, lateIce: '0'}
+          - {name: "Michi Firefox Multiplayer E2E", hero: cat, browser: firefox, lateIce: '0'}
+          - {name: "Chispin Multiplayer E2E", hero: chispin, browser: chromium, lateIce: '0'}
+          - {name: "Chispin Firefox Multiplayer E2E", hero: chispin, browser: firefox, lateIce: '0'}
+          - {name: "Multiplayer E2E", hero: kilo, browser: chromium, lateIce: '0'}
+          - {name: "Multiplayer with late ICE candidates", hero: kilo, browser: chromium, lateIce: '1'}
+          - {name: "Firefox Multiplayer E2E", hero: kilo, browser: firefox, lateIce: '0'}
+          - {name: "Stitcho Multiplayer E2E", hero: stitcho, browser: chromium, lateIce: '0'}
+          - {name: "Stitcho Firefox Multiplayer E2E", hero: stitcho, browser: firefox, lateIce: '0'}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Native WebRTC end-to-end test
+        run: npm run test:browser:multiplayer
+        env:
+          OHANA_TEST_HOST: ${{ matrix.hero }}
+          OHANA_TEST_BROWSER: ${{ matrix.browser }}
+          OHANA_TEST_LATE_ICE: ${{ matrix.lateIce }}
 
   six-hero-coop:
     name: Six hero guest impacts and U echoes (${{ matrix.browser }})

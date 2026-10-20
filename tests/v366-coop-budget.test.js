@@ -11,8 +11,10 @@ test("V366 CI: Yomi/Dragon/Pizza/Dino/Frita test real U and hit without syntheti
  assert.match(code,/multiplayer: bidirectional U echoes verified/);
  assert.match(code,/if\(hostCharacter==='stitcho'\)\{/);
  assert.match(code,/const stormDeadline=Date\.now\(\)\+12000/);
- assert.match(code,/assert\.ok\(stormDelivered,'V302 storm snapshot did not traverse WebRTC'\)/);
- assert.match(workflow,/name: Stitcho Multiplayer E2E[\s\S]*?OHANA_TEST_HOST: stitcho/);
- assert.match(workflow,/name: Stitcho Firefox Multiplayer E2E[\s\S]*?OHANA_TEST_HOST: stitcho/);
+ assert.match(code,/assert\.ok\(stormDelivered,'V302 storm snapshot did not traverse WebRTC/);
+ assert.match(workflow,/name: "Stitcho Multiplayer E2E", hero: stitcho, browser: chromium/);
+ assert.match(workflow,/name: "Stitcho Firefox Multiplayer E2E", hero: stitcho, browser: firefox/);
+ assert.match(workflow,/OHANA_TEST_HOST: \$\{\{ matrix\.hero \}\}/);
+ assert.match(workflow,/OHANA_TEST_LATE_ICE: \$\{\{ matrix\.lateIce \}\}/);
  assert.match(matrix,/const heroes=\['dragon','dino','frita','pizza','yomi','cuerno'\]/);
 });

@@ -451,6 +451,32 @@ try {
     throw error;
   }
   console.log("multiplayer: bidirectional U echoes verified");
+  // A real ICE link can be replaced between the U test and the J/K/L tests.
+  // Never cast on a stale channel and then mislabel it "congested". Both real
+  // peers must report OPEN state again before issuing a new combat action.
+  if(['cat','chispin'].includes(hostCharacter)){
+    // Playwright waitForFunction can import an isolated copy of the module
+    // in its utility world, whose onlineCoop has no direct link. Verify
+    // the ACTUAL running game's singleton in the main world via evaluate.
+    const ready=async(page,label)=>{
+      const deadline=Date.now()+15000;
+      let observed=null;
+      do{
+        observed=await page.evaluate(async()=>{
+          const {onlineCoop:o}=await import('/systems/online-coop.js');
+          return {active:!!o.direct?.active,localRoom:o._combatGame?.roomId,
+            remoteRoom:o.remoteWorld,pose:o.direct?.poseChannel?.readyState,
+            event:o.direct?.eventChannel?.readyState,session:o.direct?.sessionId,
+            transport:document.body.dataset.coopTransport};
+        });
+        if(observed.active&&observed.localRoom===observed.remoteRoom&&
+           observed.pose==='open'&&observed.event==='open')return observed;
+        if(Date.now()<deadline)await page.waitForTimeout(120);
+      }while(Date.now()<deadline);
+      throw new Error(label+' real WebRTC channels not in same playable room: '+JSON.stringify(observed));
+    };
+    await Promise.all([ready(hostPage,'host'),ready(guestPage,'guest')]);
+  }
   // V304: three real Michi casts preserve the same visual effects on the peer.
   if(hostCharacter==='cat'){
     // Arm the guest before casting: normal peer FX snapshots expire after
@@ -507,8 +533,20 @@ try {
        }));
     });
     try {
-      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
-      const captured=await guestPage.evaluate(()=>window.__michiFxProof);
+      await guestPage.waitForFunction(async()=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const keys=['yarn','purr','wisp'];
+        return keys.every(kind=>!!window.__michiFxProof?.[kind])||
+          (onlineCoop.visualReceipts||[]).some(r=>r.hero==='cat'&&keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+      },null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(async()=>{
+        const keys=['yarn','purr','wisp'],proof=window.__michiFxProof||{};
+        if(keys.every(kind=>!!proof[kind]))return proof;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const receipt=(onlineCoop.visualReceipts||[]).findLast(r=>r.hero==='cat'&&
+          keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+        return Object.fromEntries((receipt?.effects||[]).map(e=>[e.kind,e]));
+      });
       assert.ok(['yarn','purr','wisp'].every(kind=>!!captured[kind]),
         'real guest deserialization missed one Michi J/K/L effect');
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.target===undefined&&f.hitA===undefined),true,
@@ -568,8 +606,20 @@ try {
     });
     // Preserve 3-second deadline and original purely cosmetic assertions.
     try {
-      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:3000,polling:50});
-      const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
+      await guestPage.waitForFunction(async()=>{
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const keys=['chain','trail','storm'];
+        return keys.every(kind=>!!window.__chispinFxProof?.[kind])||
+          (onlineCoop.visualReceipts||[]).some(r=>r.hero==='chispin'&&keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+      },null,{timeout:3000,polling:50});
+      const captured=await guestPage.evaluate(async()=>{
+        const keys=['chain','trail','storm'],proof=window.__chispinFxProof||{};
+        if(keys.every(kind=>!!proof[kind]))return proof;
+        const {onlineCoop}=await import('/systems/online-coop.js');
+        const receipt=(onlineCoop.visualReceipts||[]).findLast(r=>r.hero==='chispin'&&
+          keys.every(kind=>r.effects.some(e=>e.kind===kind)));
+        return Object.fromEntries((receipt?.effects||[]).map(e=>[e.kind,e]));
+      });
       assert.ok(['chain','trail','storm'].every(kind=>!!captured[kind]),
         'native Chispin J/K/L effects were not all deserialized by guest');
       assert.equal(Object.values(captured).every(f=>f.dmg===undefined&&f.hit===undefined&&f.target===undefined),true,
@@ -584,6 +634,21 @@ try {
   // six-hero WebRTC run was redundant and could stall overloaded CI browsers.
   // Keep the original 12-second delivery budget, not 120 unbounded RPC calls.
   if(hostCharacter==='stitcho'){
+  // Snapshot-based lightning can vanish on the next normal 5Hz peer packet.
+  // Observe the *actual* deserialization callback instead of hoping the
+  // polling tab sees a short-lived frame. Require the same real WebRTC lane.
+  await guestPage.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    const original=onlineCoop.receiveDirectEvent;
+    window.__stitchoStormSeen=false;
+    window.__stitchoStormRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+    onlineCoop.receiveDirectEvent=function(game,event){
+      const result=original.call(this,game,event);
+      if(event.kind==='effects'&&game.coopPeerEffects?.stitchoDuet)
+        window.__stitchoStormSeen=true;
+      return result;
+    };
+  });
   const sendStorm=()=>hostPage.evaluate(async()=>{
     const {onlineCoop}=await import('/systems/online-coop.js');
     const {capturePeerEffects}=await import('/systems/coop-peer-effects.js');
@@ -597,10 +662,19 @@ try {
   while(Date.now()<stormDeadline){
     await sendStorm();
     stormDelivered=await guestPage.evaluate(async()=>{
-      const {onlineCoop}=await import('/systems/online-coop.js');return !!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
+      const {onlineCoop}=await import('/systems/online-coop.js');
+      return !!window.__stitchoStormSeen||!!onlineCoop._combatGame.coopPeerEffects?.stitchoDuet;
     });if(stormDelivered)break;await guestPage.waitForTimeout(100);
   }
-  assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC');
+  const diagnostics=stormDelivered?null:await Promise.all([hostPage,guestPage].map(page=>page.evaluate(async()=>{
+    const {onlineCoop}=await import('/systems/online-coop.js');
+    return {connected:!!onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
+      pose:onlineCoop.direct?.poseChannel?.readyState,event:onlineCoop.direct?.eventChannel?.readyState,
+      scope:onlineCoop.combatEpoch,frameNo:onlineCoop._combatGame?.coopPeerEffects?.frameNo,
+      storm:!!onlineCoop._combatGame?.coopPeerEffects?.stitchoDuet};
+  })));
+  await guestPage.evaluate(()=>{window.__stitchoStormRestore?.();delete window.__stitchoStormRestore;});
+  assert.ok(stormDelivered,'V302 storm snapshot did not traverse WebRTC: '+JSON.stringify(diagnostics));
   }
   assert.deepEqual(errors, [], "las dos vistas deben renderizar sin errores");
   console.log(`PASS · ${browserName}: dos jugadores, movimiento WebRTC y recuperación${lateIce?" con ICE tardío ("+candidateSignals+" señales)":""}.`);
