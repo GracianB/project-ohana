@@ -378,7 +378,7 @@ saveWarning = !saved;
 return saved;
 }
 game.save=save;
-game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");};
+game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");DOM.evoStage?.classList.remove("show");};
 game.onRelicEnd=()=>{duckMusic(paused);document.body.classList.remove("relic-cinema");};
 game.onRelicBeat=relicUkulele;
 game.onRoomAlbumChange=()=>Festival.setCounter();
@@ -814,7 +814,7 @@ updateHUD();
 canvas.focus({ preventScroll: true });
 }
 function evolve(reason) {
-const p = game.player; if (!p || p.dead) return;
+const p = game.player; if (!p || p.dead || game.relicScene) return;
 p.evo = Number(p.evo) || 0;
 const fromEvo = p.evo;
 const fromName = p.evoNames?.[fromEvo] || p.forms?.[fromEvo]?.name || p.name || "Forma";
@@ -1762,7 +1762,7 @@ const nxt = p.forms && p.forms[p.evo + 1];
 setPrompt("E · evolucionar" + (nxt ? " · " + nxt.name : ""), true);
 }
 else setPrompt("", false);
-while (p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
+while (!game.relicScene && p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
 tickRam(p);
 }
 function tickRam(p) {
@@ -3234,7 +3234,7 @@ btn.style.setProperty("--cd", pct + "%");
 }
 }
 function step() {
-if(game.relicScene){if(!paused&&!overlayOpen()&&!document.hidden)tickRelicScene(game);return;}
+if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
 if (!canAct()) return;
 t++;
 game.t = t;
