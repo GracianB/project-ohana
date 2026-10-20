@@ -50,7 +50,7 @@ function makeDummyCtx() {
     scale: () => {}, translate: () => {}, rotate: () => {},
     set fillStyle(v) {}, set strokeStyle(v) {}, set lineWidth(v) {},
     set globalAlpha(v) {}, set font(v) {}, set textAlign(v) {},
-    fillText: () => { commands++; }, clip: () => {}, rect: () => { commands++; }
+    fillText: () => { commands++; }, clip: () => {}, rect: () => { commands++; }, ellipse: () => { commands++; }
   };
 }
 
