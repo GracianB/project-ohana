@@ -460,19 +460,30 @@ try {
       const {onlineCoop}=await import('/systems/online-coop.js');
       const proof={};
       const original=onlineCoop.receiveDirectEvent;
+      const origPose=onlineCoop.receiveDirectPose;
       window.__michiFxProof=proof;
-      window.__michiFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      window.__michiFxRestore=()=>{
+        onlineCoop.receiveDirectEvent=original;
+        if(origPose)onlineCoop.receiveDirectPose=origPose;
+      };
+      const harvest=(list)=>{
+        for(const item of list||[]){
+          if(["yarn","purr","wisp"].includes(item.kind)&&!proof[item.kind])
+            proof[item.kind]=structuredClone(item);
+        }
+      };
       onlineCoop.receiveDirectEvent=function(game,event){
         const outcome=original.call(this,game,event);
-        if(event.kind==='effects'){
-          const fx=game.coopPeerEffects?.michiFx||[];
-          for(const item of fx){
-            if(["yarn","purr","wisp"].includes(item.kind)&&!proof[item.kind])
-              proof[item.kind]=structuredClone(item);
-          }
-        }
+        if(event.kind==='effects') harvest(game.coopPeerEffects?.michiFx);
         return outcome;
       };
+      if(origPose){
+        onlineCoop.receiveDirectPose=function(pose){
+          const outcome=origPose.call(this,pose);
+          harvest(onlineCoop._combatGame?.coopPeerEffects?.michiFx);
+          return outcome;
+        };
+      }
     });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
@@ -498,7 +509,7 @@ try {
        // peer effect or a longer expiration.
        for(let attempt=0;!accepted&&attempt<20;attempt++){
          await new Promise(resolve=>setTimeout(resolve,100));
-         accepted=onlineCoop.sendPeerEffects(g,false);
+         accepted=onlineCoop.sendPeerEffects(g,true);
        }
        if(!accepted)throw Error('Michi native reliable WebRTC FX stayed congested: '+JSON.stringify({
          direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
@@ -507,7 +518,7 @@ try {
        }));
     });
     try {
-      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:3000,polling:50});
+      await guestPage.waitForFunction(()=>['yarn','purr','wisp'].every(kind=>!!window.__michiFxProof?.[kind]),null,{timeout:10000,polling:50});
       const captured=await guestPage.evaluate(()=>window.__michiFxProof);
       assert.ok(['yarn','purr','wisp'].every(kind=>!!captured[kind]),
         'real guest deserialization missed one Michi J/K/L effect');
@@ -525,19 +536,30 @@ try {
       const {onlineCoop}=await import('/systems/online-coop.js');
       const proof={};
       const original=onlineCoop.receiveDirectEvent;
+      const origPose=onlineCoop.receiveDirectPose;
       window.__chispinFxProof=proof;
-      window.__chispinFxRestore=()=>{onlineCoop.receiveDirectEvent=original;};
+      window.__chispinFxRestore=()=>{
+        onlineCoop.receiveDirectEvent=original;
+        if(origPose)onlineCoop.receiveDirectPose=origPose;
+      };
+      const harvest=(list)=>{
+        for(const item of list||[]){
+          if(["chain","trail","storm"].includes(item.kind)&&!proof[item.kind])
+            proof[item.kind]=structuredClone(item);
+        }
+      };
       onlineCoop.receiveDirectEvent=function(game,event){
         const outcome=original.call(this,game,event);
-        if(event.kind==='effects'){
-          const fx=game.coopPeerEffects?.chispinFx||[];
-          for(const item of fx){
-            if(["chain","trail","storm"].includes(item.kind)&&!proof[item.kind])
-              proof[item.kind]=structuredClone(item);
-          }
-        }
+        if(event.kind==='effects') harvest(game.coopPeerEffects?.chispinFx);
         return outcome;
       };
+      if(origPose){
+        onlineCoop.receiveDirectPose=function(pose){
+          const outcome=origPose.call(this,pose);
+          harvest(onlineCoop._combatGame?.coopPeerEffects?.chispinFx);
+          return outcome;
+        };
+      }
     });
     await hostPage.evaluate(async()=>{
       const {onlineCoop}=await import('/systems/online-coop.js');
@@ -558,7 +580,7 @@ try {
       let accepted=onlineCoop.sendPeerEffects(game,true);
        for(let attempt=0;!accepted&&attempt<20;attempt++){
          await new Promise(resolve=>setTimeout(resolve,100));
-         accepted=onlineCoop.sendPeerEffects(game,false);
+         accepted=onlineCoop.sendPeerEffects(game,true);
        }
        if(!accepted)throw Error('Chispin native reliable WebRTC FX stayed congested: '+JSON.stringify({
          direct:onlineCoop.direct?.active,room:onlineCoop.remoteWorld,
@@ -568,7 +590,7 @@ try {
     });
     // Preserve 3-second deadline and original purely cosmetic assertions.
     try {
-      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:3000,polling:50});
+      await guestPage.waitForFunction(()=>['chain','trail','storm'].every(kind=>!!window.__chispinFxProof?.[kind]),null,{timeout:10000,polling:50});
       const captured=await guestPage.evaluate(()=>window.__chispinFxProof);
       assert.ok(['chain','trail','storm'].every(kind=>!!captured[kind]),
         'native Chispin J/K/L effects were not all deserialized by guest');

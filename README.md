@@ -44,12 +44,13 @@ No son diez aspectos del mismo protagonista. Cada uno tiene su personalidad, mov
 
 ### De bebé a forma final
 
-<table>
-<tr>
-<td align="center" width="50%"><img src="assets/sprites/forms/kilo-0.png" width="220" alt="Kilo en su forma inicial"/><br/><b>Forma 1</b></td>
-<td align="center" width="50%"><img src="assets/sprites/forms/kilo-4.png" width="220" alt="Kilo en su forma final"/><br/><b>Forma 5</b></td>
-</tr>
-</table>
+| Forma | Nombre canónico | Evolución y capacidades |
+| :---: | :--- | :--- |
+| **1** | Bebé | Silueta compacta, salto ágil y habilidades básicas. |
+| **2** | Joven | Control direccional aumentado y primer remate rítmico. |
+| **3** | Avanzado | Salto doble, desplazamiento acrobático y carga de combo. |
+| **4** | Maestro | Masa y poder expandidos, mayor alcance de ataque y resistencia. |
+| **5** | Forma Final | Puesta en escena definitiva, aura de energía y vuelo/planeo continuo. |
 
 El XP transforma las capacidades, la silueta y la puesta en escena del personaje. Son **50 combinaciones de héroe y forma**, con combate **H** y tres poderes **J / K / L**.
 
