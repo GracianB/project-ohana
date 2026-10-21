@@ -686,8 +686,8 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
   "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
-  "previews/michi-design.html": "bb4d38311c19ea10f76c3b4f0ae376ab25302e43",
-  "previews/michicornio-cinema.html": "3b9df51ca50238b8ffd92136fa7c4a3060f2f41e"
+  "previews/michi-design.html": "1247a8a5b0b182b2793ca032e45c7c7c639f1b3f",
+  "previews/michicornio-cinema.html": "2200e980f13e3f4d58b98c0222a8f7e0f8565540"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
