@@ -1,7 +1,7 @@
-// LOS JARDINES DE LA LUNA — Michi's solo campaign chapter inside the expanded Claro.
+// SANTUARIO LUNAR — Michicornio's solo campaign chapter inside the expanded Claro.
 // Own interaction gates, astral bells, moving crystal rails, dream bounce pads,
 // swirling mist gates, three acts of celestial awakening and the Astral Feline Spirit.
-// All permanent rewards use Michi's existing per-hero save.
+// All permanent rewards preserve the existing cat per-hero save.
 import {movePlatform,drawPlatformRail} from './moving-platforms.js';
 import {MICHI_BOSS_ID} from './michi-boss.js';
 
@@ -11,7 +11,7 @@ const FRAGMENT_PREFIX='michi-essence-';
 export const MICHI_BELLS=Object.freeze([
  Object.freeze({id:'michi-echo',x:440,y:1074,label:'ECO',need:0,line:'La campana de cuarzo vibra con los recuerdos de la noche.'}),
  Object.freeze({id:'michi-star',x:1720,y:1090,label:'ASTRAL',need:2,line:'Los puentes del firmamento se iluminan con luz de estrellas.'}),
- Object.freeze({id:'michi-eclipse',x:3080,y:1084,label:'ECLIPSE',need:4,line:'¡El Espíritu Astral Felino despierta en el santuario de la luna!'})
+ Object.freeze({id:'michi-eclipse',x:3080,y:1084,label:'ECLIPSE',need:4,line:'¡El Oráculo Medusaluna despierta en el santuario de la luna!'})
 ]);
 
 export const MICHI_ESSENCES=Object.freeze([
@@ -39,7 +39,7 @@ export const MICHI_GATES=Object.freeze([
 
 export const MICHI_ACTS=Object.freeze([
  'LA CAVERNA DE LOS ECOS','LOS PUENTES DEL FIRMAMENTO','EL LABERINTO DE LOS SUEÑOS',
- 'EL ESPÍRITU ASTRAL FELINO','LA LUNA SOÑADORA'
+ 'EL ORÁCULO MEDUSALUNA','LA LUNA SOÑADORA'
 ]);
 
 const inRange=(p,x,y,r)=>!!p&&Math.hypot(p.x+p.w/2-x,p.y+p.h/2-y)<r;
@@ -73,8 +73,8 @@ export function enterMichiTrail(g){
 export function michiTrailPrompt(g){
  const s=g.michiTrail,p=g.player;if(!s||!p||p.dead)return '';
  if(s.cleared&&inRange(p,3780,1134,115))return 'E · Despertar la Luna Soñadora';
- if(s.cleared)return 'JARDINES DE LA LUNA · capítulo completado';
- if(s.complete)return 'ENFRENTA AL ESPÍRITU ASTRAL FELINO · despierta a la bestia';
+ if(s.cleared)return 'SANTUARIO DE MICHICORNIO · capítulo completado';
+ if(s.complete)return 'ENFRENTA AL ORÁCULO MEDUSALUNA · despierta a la bestia';
  const b=MICHI_BELLS[s.index];if(!b||!inRange(p,b.x,b.y,115))return '';
  const missing=Math.max(0,b.need-s.shards);
  return missing?'Recoge '+missing+' esencia'+(missing>1?'s':'')+' de luna para '+b.label:
@@ -105,7 +105,7 @@ export function interactMichiTrail(g){
   s.complete=true;s.last='ESPÍRITU ASTRAL';
   if(persist(g,SAVE_KEY)){g.score=(g.score||0)+600;p.xp=(p.xp||0)+30;g.save?.();}
  }
- g.nums?.add?.(b.x,b.y-63,s.complete?'¡ESPÍRITU ASTRAL FELINO DESPIERTO!':b.label+' · '+s.index+'/3','#f7d2ff',true);
+ g.nums?.add?.(b.x,b.y-63,s.complete?'¡ORÁCULO MEDUSALUNA DESPIERTO!':b.label+' · '+s.index+'/3','#f7d2ff',true);
  return true;
 }
 
@@ -120,7 +120,7 @@ export function michiAbility(g,p,index){
     g.score=(g.score||0)+250;p.xp=(p.xp||0)+35;g.save?.();
    }
    s.pulse=120;
-   g.nums?.add?.(p.x,p.y-65,'¡TRINIDAD ASTRAL DE MICHI!','#ffd6fa',true);
+   g.nums?.add?.(p.x,p.y-65,'¡TRINIDAD ASTRAL DE MICHICORNIO!','#ffd6fa',true);
   }
  }
  if(index===0||index===1){

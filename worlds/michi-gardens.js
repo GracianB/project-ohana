@@ -1,4 +1,4 @@
-// LOS JARDINES DE LA LUNA — Michi's dedicated procedural stage backdrop.
+// SANTUARIO LUNAR — Michicornio's dedicated procedural stage backdrop.
 // 100% vector Canvas pipeline: zero external image assets, zero layout thrash.
 // Atmospheric parallax: deep caverns with skyward openings, glowing crescent moon,
 // rose quartz stalactites, astral mist, starlight wisps and the Moon Sanctuary.
@@ -146,4 +146,28 @@ export function drawMichiGardens(ctx,cam,t=0,viewportW=1400,viewportH=700,option
    crystalCluster(ctx,fx,fy-16,0.85,t,'#f2c8ff','#ffc2e8',reduced);
   }
  }
+ // V458: four non-interactive moon constellations identify the four exploration sectors.
+ // They're painted at half-depth and never pretend to be platforms.
+ for(let sector=0;sector<4;sector++){
+  const cx=430+sector*1050-camX*.42,cy=h*.3+(sector%2)*48;
+  if(!visible(cx,w,180))continue;
+  ctx.save();ctx.globalAlpha=.55;ctx.lineWidth=1.4;
+  ctx.strokeStyle=sector===2?'#a1e2ed':'#f0c5ff';
+  const points=[[0,0],[40,-25],[77,8],[113,-37],[144,-13]];
+  ctx.beginPath();points.forEach(([dx,dy],i)=>i?ctx.lineTo(cx+dx,cy+dy):ctx.moveTo(cx+dx,cy+dy));ctx.stroke();
+  for(let i=0;i<points.length;i++){const [dx,dy]=points[i],glimmer=reduced?0:Math.sin(t*.08+sector+i)*1.3;
+   ctx.fillStyle=i===2?'#fff2b8':'#f9e8ff';
+   ctx.beginPath();ctx.arc(cx+dx,cy+dy,2.5+glimmer,0,TAU);ctx.fill();}
+  ctx.restore();
+ }
+ // Responsive foreground petals convey wind/current without obscuring platforms.
+ for(let j=0;j<14;j++){
+  const px=wrap(j*283-camX*.62+(reduced?0:t*(.12+j%3*.06)),w+100)-45;
+  const py=wrap(j*97+(reduced?0:t*.13),h*.85);
+  if(!visible(px,w,12))continue;
+  ctx.save();ctx.translate(px,py);ctx.rotate(reduced?0:t*.008+j);
+  ctx.fillStyle=j%3?'rgba(222,183,255,.4)':'rgba(173,245,244,.4)';
+  ctx.beginPath();ctx.ellipse(0,0,5,2,0,0,TAU);ctx.fill();ctx.restore();
+ }
+
 }

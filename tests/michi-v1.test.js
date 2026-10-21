@@ -10,19 +10,19 @@ test('Michi V1: 5 forms include pure vector Canvas metadata and active roster en
   const def = ROSTER.find(r => r.id === 'cat');
   assert.ok(def, 'Michi (cat) must exist in active roster');
   assert.equal(def.forms.length, 5, 'Must have exactly 5 forms');
-  assert.equal(def.forms[0].name, 'Michito');
-  assert.equal(def.forms[1].name, 'Michi');
-  assert.equal(def.forms[2].name, 'Nube rosa');
-  assert.equal(def.forms[3].name, 'Michi Luna');
-  assert.equal(def.forms[4].name, 'Michi Eclipse');
-  assert.equal(def.evoNames[4], 'Michi Eclipse');
+  assert.equal(def.forms[0].name, 'Michicornio Bebé');
+  assert.equal(def.forms[1].name, 'Liebre Lunar');
+  assert.equal(def.forms[2].name, 'Medusa Onírica');
+  assert.equal(def.forms[3].name, 'Dragón Astral');
+  assert.equal(def.forms[4].name, 'Michicornio Eclipse');
+  assert.equal(def.evoNames[4], 'Michicornio Eclipse');
   assert.equal(def.passive.id, 'ninelives');
 });
 
 test('Michi V1: Room generation creates 4 sectors, hazards and correct entities', () => {
   const base = { id: 'hub', doors: {}, plats: [], foes: [] };
   const r = createMichiRoom(base);
-  assert.equal(r.name, 'Los Jardines de la Luna');
+  assert.equal(r.name, 'Santuario Lunar de Michicornio');
   assert.equal(r.world, 6);
   assert.equal(r.sectors.length, 4);
   assert.equal(r.checkpoints.length, 4);

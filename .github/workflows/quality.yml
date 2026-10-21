@@ -52,6 +52,9 @@ jobs:
       - name: V457 early optical size regression
         run: node tests/browser/character-size.mjs
 
+      - name: V458 Michicornio art, custom foes, room and mobile
+        run: node tests/browser/v458-michicornio.mjs
+
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
 

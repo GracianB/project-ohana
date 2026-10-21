@@ -1,3 +1,9 @@
+# OHANA · V458: Michicornio (PR #392, no publicado)
+
+**Caché candidata**: `ohana-458`. Mantiene 10 personajes, 5 formas por personaje y 10 salas canónicas. Rama aislada de `main`.
+
+V01–V03: identidad visible y cinco formas, Medusa Onírica de cristal animado. V04–V07: Santuario de los Jardines Lunares, 14 plataformas conectivas, cinco familias de enemigos propias y Oráculo Medusaluna con tres niveles de combate. V08–V10: pruebas de regresión, accesibilidad, móvil y alcance físico de 100 reliquias pendientes de aceptación final. Multijugador remoto y servidores externos en pausa.
+
 ## ohana-457 · Recuperación de Michi, CI individual y pausa de servicios externos (21-10-2026)
 
 - **10 personajes · 5 formas · 10 salas canónicas** conservados. Variantes individuales del Claro existentes en main, sin duplicar el mapa público.

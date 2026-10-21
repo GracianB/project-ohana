@@ -1,4 +1,4 @@
-// Personal single-player variant of the Claro for Michi (cat).
+// Michicornio personal solo variant of the Claro (stable ID cat).
 // Do not mutate the canonical shared Hoku ROOM; it is used by multiplayer, Kilo, Stitcho, Chispín and the world graph.
 // LOS JARDINES DE LA LUNA — Michi's world: rose-quartz bioluminescent caves,
 // floating lunar crystal bridges, dream labyrinths, and the moon-temple of the Espíritu Astral Felino.
@@ -42,6 +42,17 @@ export function createMichiRoom(base){
   [3310,680,180,20],[3670,680,180,20],
   [3430,520,300,20],[3460,360,240,20]
  ];
+ // Moon-v458: forgiving connections and visible recovery steps, not another canonical room.
+ // These are physical platforms and are included in the same collision/navigation arrays.
+ platforms.push(
+  [1140,1076,135,18],[1210,1015,122,18],
+  [1710,950,165,18],[1845,1020,170,18],[1960,1080,150,18],
+  [2150,1000,152,18],[2300,955,160,18],
+  [2515,900,150,18],[2690,860,150,18],
+  [3060,1040,155,18],[3100,945,152,18],
+  [3380,925,156,18],[3540,900,148,18],
+  [3600,760,155,18]
+ );
  const checkpoints=[
   {id:'hub-michi-entry',x:230,y:1134,sector:0},
   {id:'hub-michi-bridges',x:1460,y:1134,sector:1},
@@ -49,19 +60,21 @@ export function createMichiRoom(base){
   {id:'hub-michi-temple',x:3200,y:1134,sector:3}
  ];
  const foes=[
-  [360,1040,'cucaracho',false,{role:'pursuer',name:'Sombra de la caverna',anchorY:1040}],
-  [720,940,'phosquito',false,{role:'flyer',name:'Polilla lunar',anchorY:940}],
-  [900,860,'cangrejo',false,{role:'shield',name:'Guardián de cuarzo',anchorY:860}],
-  [1380,990,'rana',false,{role:'jumper',name:'Saltador onírico',anchorY:990}],
-  [1700,790,'ufo',false,{role:'gunner',name:'Orbe espectral',anchorY:790}],
-  [2200,1030,'cucaracho',false,{role:'pursuer',name:'Merodeador nocturno',anchorY:1030}],
-  [2500,740,'phosquito',false,{role:'flyer',name:'Fatuo de luna',anchorY:740}],
-  [2800,900,'rana',false,{role:'jumper',name:'Acróbata astral',anchorY:900}],
-  [3200,990,'cangrejo',false,{role:'shield',name:'Centinela del eclipse',anchorY:990}],
-  [3780,990,'cucaracho',false,{role:'pursuer',name:'Lince de las sombras',anchorY:990}]
+  // Native AI remains the base kind; Michicornio's unique procedural body is michiKind.
+  [360,1030,'cucaracho',false,{role:'pursuer',name:'Lince del Velo',michiKind:'lynx',anchorY:1030}],
+  [720,930,'phosquito',false,{role:'flyer',name:'Polilla de Nácar',michiKind:'moth',anchorY:930}],
+  [930,840,'cangrejo',false,{role:'shield',name:'Zarza de Amatista',michiKind:'thorn',anchorY:840}],
+  [1380,970,'rana',false,{role:'jumper',name:'Lince Saltarín',michiKind:'lynx',anchorY:970}],
+  [1700,780,'ufo',false,{role:'gunner',name:'Prisma del Sueño',michiKind:'prism',anchorY:780}],
+  [2180,990,'medusa',false,{role:'flyer',name:'Medusilla Lunar',michiKind:'jelly',anchorY:990}],
+  [2490,720,'phosquito',false,{role:'flyer',name:'Polilla del Eclipse',michiKind:'moth',anchorY:720}],
+  [2800,850,'medusa',false,{role:'flyer',name:'Medusa Espectral',michiKind:'jelly',anchorY:850}],
+  [3150,970,'planta',false,{role:'shooter',name:'Zarza de los Deseos',michiKind:'thorn',anchorY:970}],
+  [3800,970,'ufo',false,{role:'gunner',name:'Centinela Prismático',michiKind:'prism',anchorY:970}]
  ];
- return {...base,name:'Los Jardines de la Luna',short:'Jardines',world:6,color:'#e5c2ff',
-  hint:'Recoge 8 esencias de luna, sintoniza tres campanas astrales y despierta al Espíritu Astral Felino. El Ovillo (J) y el Ronroneo (K) disipan nieblas y abren rutas secretas.',
+
+ return {...base,name:'Santuario Lunar de Michicornio',short:'Luna',world:6,color:'#e5c2ff',
+  hint:'Recoge 8 esencias de luna, sintoniza tres campanas astrales y despierta al Oráculo Medusaluna. El Ovillo (J) y el Ronroneo (K) disipan nieblas y abren rutas secretas.',
   doors:{...base.doors,up:null},plats:platforms,foes,
   orbs:[
    [240,440],[560,400],[870,360],[980,220],
@@ -78,4 +91,25 @@ export function createMichiRoom(base){
   ],
   hazards:[1190,2340].map((x,i)=>({id:'michi-fall-'+i,x,y:1100,w:100,h:360,type:'death',dest:null,label:'NIEBLA ASTRAL',color:'#d6a8ff'}))
  };
+}
+
+export function drawMichicornioPlatformTrim(ctx,platforms,cam,t,viewportW=1400,reduced=false){
+ if(!Array.isArray(platforms))return 0;
+ let painted=0;
+ for(const p of platforms){
+  const [x0,y0,w0,h0]=Array.isArray(p)?p:[p.x,p.y,p.w,p.h];
+  if(!(h0>0&&h0<=26)||x0+w0<(cam?.x||0)-40||x0>(cam?.x||0)+viewportW+40)continue;
+  const x=x0-(cam?.x||0),y=y0-(cam?.y||0);
+  if(y< -45||y>(ctx.canvas?.height||1200)+50)continue;
+  ctx.save();ctx.fillStyle='#8061a7';ctx.fillRect(x+3,y-2,w0-6,5);
+  ctx.fillStyle='#efd2ff';ctx.fillRect(x+7,y-2,w0-14,2);
+  for(let i=20;i<w0-15;i+=41){
+   const glow=reduced?0:Math.sin(t*.055+x0*.01+i)*2;
+   ctx.beginPath();ctx.moveTo(x+i,y-5+glow);ctx.lineTo(x+i+5,y-12+glow);
+   ctx.lineTo(x+i+10,y-5+glow);ctx.closePath();ctx.fillStyle='#c3a2ef';ctx.fill();
+   ctx.fillStyle='#fff2b7';ctx.fillRect(x+i+4,y-13+glow,2,3);
+  }
+  ctx.restore();painted++;
+ }
+ return painted;
 }

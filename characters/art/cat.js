@@ -274,8 +274,7 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
 
 // V457 · Mythic Michi: four radically different playable silhouettes.
 // Canvas-only. Feet/pose origin, hitboxes, input, Moon Soul FX and timing are unchanged.
-// F0 remains the readable baby cat. F1 hare, F2 spectral jelly, F3 dragon,
-// F4 nine-tailed guardian are drawn from their own bodies instead of recoloring F0.
+// Michicornio: five independent luminous silhouettes with a shared moon-horn crest.
 function drawMichiMythic(ctx,pose,r,f){
  const t=Number.isFinite(pose.t)?pose.t:0;
  const still=!!pose.reduceMotion;
@@ -350,6 +349,7 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.beginPath();ctx.moveTo(side*20,y);ctx.lineTo(side*37,y-3);stroke('#8e77bd',1.4);
   }
   gem(0,-20,'#ffe2a0',6);
+   ctx.beginPath();ctx.moveTo(-4,-20);ctx.lineTo(0,-41);ctx.lineTo(4,-20);ctx.closePath();ctx.fillStyle='#ffe3ab';ctx.fill();stroke(ink,2);
   oval(-20,5,4,2,'#f6a6c8',null);
   ctx.restore();ctx.restore();return;
  }
@@ -377,31 +377,53 @@ function drawMichiMythic(ctx,pose,r,f){
   oval(0,-58,3,2.7,'#f49ab4',null);
   ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(-4,-53);ctx.moveTo(0,-56);ctx.lineTo(4,-53);stroke(ink,1.5);
   gem(0,-104,'#ffe4a3',4.5);
+   ctx.beginPath();ctx.moveTo(-4,-103);ctx.lineTo(0,-128);ctx.lineTo(4,-103);ctx.closePath();ctx.fillStyle='#f6d994';ctx.fill();stroke(ink,2);
   ctx.restore();return;
  }
- if(f===2){ // DREAM MEDUSA: no fake legs, six real flowing tentacles.
-  const p=wave(0,.07),bob=wave(1,.06)*2.6;
-  ctx.save();ctx.scale(.72,.72);ctx.translate(0,bob-5+lift);
-  ctx.globalAlpha=.21;oval(0,-31,48,43,'#53ccdc',null);
-  ctx.globalAlpha=1;
+ if(f===2){ // DREAM MEDUSA: living stained glass, seven silk tentacles and lunar unicorn crest.
+  const wave1=wave(0,.064),flight=wave(.8,.05),cast=r.st==='cast',attack=angry||r.st==='attack';
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5+lift+wave1*1.8);
+  ctx.globalAlpha=.2;oval(0,-55,49,50,'#7fe1eb',null);ctx.globalAlpha=1;
+  // Seven independently swimming ribbons; the middle one is the heart.
   for(let i=0;i<7;i++){
-   const x=-26+i*8,drift=wave(i,.085)*5,tip=-1+(i%3)*5;
-   ctx.beginPath();ctx.moveTo(x,-40);
-   ctx.bezierCurveTo(x-7,-19,x+drift*2,-18,x+drift,tip);
-   stroke(i%2?'#a4def0':'#a890e6',i%2?6:8);
-   oval(x+drift,tip,3.5,3.5,i%2?'#ffe3ff':'#b7ffff',null);
+   const lane=i-3,x=lane*9,tip=x+wave(i*.63,.081)*7+(cast?8:0);
+   const tipY=2+(i%3)*3-(attack?7:0);
+   ctx.beginPath();ctx.moveTo(x*.85,-53);
+   ctx.bezierCurveTo(x-10,-32,x+wave(i,.077)*6,-22,tip,tipY);
+   const ribbon=ctx.createLinearGradient(x,-54,tip,tipY);
+   ribbon.addColorStop(0,i%2?'#c3e9ff':'#e3c5ff');
+   ribbon.addColorStop(.55,i%2?'#78b1e1':'#a19bdb');
+   ribbon.addColorStop(1,'#f8eaff');
+   stroke('#46335e',i===3?9:7);stroke(ribbon,i===3?6.5:5);
+   oval(tip,tipY,3.7,4.5,i%2?'#fef8ff':'#bfffff',null);
+   if(i%2===0){ctx.globalAlpha=.78;gem(x+(tip-x)*.65,-13,'#fff8d8',2.1);ctx.globalAlpha=1;}
   }
-  ctx.beginPath();ctx.moveTo(-38,-65);
-  ctx.bezierCurveTo(-34,-106,-21,-120,0,-118);
-  ctx.bezierCurveTo(23,-117,39,-103,40,-66);
-  ctx.bezierCurveTo(22,-54,13,-59,0,-52);
-  ctx.bezierCurveTo(-16,-59,-28,-53,-38,-65);
-  ctx.closePath();ctx.fillStyle='#d7f7ff';ctx.fill();stroke(ink,2.1);
-  ctx.globalAlpha=.65;oval(0,-85,26,24,'#b8d3f9',null);ctx.globalAlpha=1;
-  oval(0,-82,12,12,'#9d69e3',null);gem(0,-82,'#f9f1ff',7);
-  eye(-17,-92,'#ff6bd0',4,6);eye(17,-92,'#ff6bd0',4,6);
-  ctx.beginPath();ctx.moveTo(-5,-72);ctx.quadraticCurveTo(0,-68+2*p,5,-72);stroke('#53618b',1.8);
-  for(const s of [-1,1])gem(s*30,-73,'#e4f9ff',3);
+  // Cathedral-bell contour and rippling scalloped lower rim.
+  ctx.beginPath();ctx.moveTo(-42,-64);
+  ctx.bezierCurveTo(-39,-98,-23,-119,0,-121);
+  ctx.bezierCurveTo(24,-121,39,-98,42,-64);
+  for(let i=4;i>=0;i--){const x=i*18-36;ctx.quadraticCurveTo(x,-52,x-17,-64);}
+  ctx.closePath();
+  const glass=ctx.createLinearGradient(0,-125,0,-52);
+  glass.addColorStop(0,'#ffffff');glass.addColorStop(.23,'#d5f6ff');
+  glass.addColorStop(.69,'#e1c6ff');glass.addColorStop(1,'#8baee3');
+  ctx.fillStyle=glass;ctx.fill();stroke('#51416d',2.4);
+  ctx.globalAlpha=.5;oval(0,-90,28,25,'#a3d5fa',null);ctx.globalAlpha=1;
+  for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*5,-111);ctx.quadraticCurveTo(i*12,-92,i*14,-69);stroke('rgba(255,255,255,.76)',1.8);}
+  ctx.beginPath();ctx.moveTo(-35,-66);ctx.quadraticCurveTo(0,-53,35,-66);stroke('#fff9ff',2.5);
+  // The horn is part of the body, not an oversized detached particle.
+  ctx.beginPath();ctx.moveTo(-6,-112);ctx.lineTo(0,-133);ctx.lineTo(6,-112);ctx.closePath();
+  ctx.fillStyle='#ffdda1';ctx.fill();stroke('#4e3d6f',1.9);
+  for(let j=0;j<3;j++)gem(0,-107+j*8,j===1?'#f9d1ff':'#fffcef',2.8);
+  eye(-17,-87,'#d66fcb',4.4,6.2);eye(17,-87,'#d66fcb',4.4,6.2);
+  ctx.beginPath();ctx.moveTo(-5,-75);ctx.quadraticCurveTo(0,-70+wave1*2,5,-75);stroke('#4d5284',1.8);
+  for(const s of [-1,1]){oval(s*29,-76,5,2.6,'#f2b7eb',null);gem(s*34,-71,'#fff5cf',2.6);}
+  if(cast||attack){
+   ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#fff5b9';ctx.lineWidth=2.2;
+   ctx.beginPath();ctx.ellipse(0,-83,43+(cast?flight*5:0),35,0,0,TAU);ctx.stroke();
+   for(let j=0;j<4;j++){const angle=j*TAU/4+t*.023;gem(Math.cos(angle)*46,-83+Math.sin(angle)*37,'#fff0c5',3);}
+   ctx.restore();
+  }
   ctx.restore();return;
  }
  if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
@@ -430,6 +452,7 @@ function drawMichiMythic(ctx,pose,r,f){
    stroke('#ebc582',2);
   }
   gem(0,-94,'#ffd86d',6);
+  ctx.beginPath();ctx.moveTo(-5,-92);ctx.lineTo(0,-117);ctx.lineTo(5,-92);ctx.closePath();ctx.fillStyle='#ffe0b3';ctx.fill();stroke(ink,2);
   if(angry){gem(38+p*3,-61,'#ffb649',5);}
   ctx.restore();return;
  }
@@ -457,6 +480,8 @@ function drawMichiMythic(ctx,pose,r,f){
   eye(-14,-72,'#d04f99',6,8);eye(14,-72,'#d04f99',6,8);
   oval(0,-57,4,3,'#e897a9',null);
   gem(0,-86,'#f1c65e',6);
+  ctx.beginPath();ctx.moveTo(-6,-83);ctx.lineTo(0,-116);ctx.lineTo(6,-83);ctx.closePath();ctx.fillStyle='#fff1a9';ctx.fill();stroke(ink,2.2);
+  if(!still)for(let j=0;j<3;j++){const aa=t*.035+j*TAU/3;gem(Math.cos(aa)*21,-112+Math.sin(aa)*7,'#f9dcff',2.4);}
   ctx.globalAlpha=.66;ctx.beginPath();ctx.arc(0,-72,42,Math.PI*1.1,Math.PI*1.9);
   stroke('#f2d479',3);ctx.globalAlpha=1;
   // Playful tail flick, not another damaging hitbox.
