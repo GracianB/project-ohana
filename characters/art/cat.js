@@ -456,10 +456,10 @@ function drawMichiMythic(ctx,pose,r,f){
   for(const side of [-1,1]){
    const flick=wave(side*1.5,.092)*4;
    ctx.beginPath();ctx.moveTo(side*17,-109);
-   ctx.quadraticCurveTo(side*28,-130,side*35,-147+flick);
+   ctx.quadraticCurveTo(side*28,-116,side*35,-125+flick);
    ctx.lineTo(side*42,-100);ctx.lineTo(side*21,-103);
    ctx.closePath();ctx.fillStyle='#d7b9f6';ctx.fill();stroke(ink,2.8);
-   ctx.beginPath();ctx.moveTo(side*28,-112);ctx.lineTo(side*35,-133+flick);
+   ctx.beginPath();ctx.moveTo(side*28,-112);ctx.lineTo(side*35,-121+flick);
    ctx.lineTo(side*36,-107);ctx.closePath();ctx.fillStyle='#f5b5d8';ctx.fill();
    gem(side*32,-113,'#fff2b9',3.4);
   }
