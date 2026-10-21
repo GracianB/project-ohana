@@ -93,7 +93,7 @@ function solve(pose) {
 
 // V51 · Michi Moon Soul Pass. Local Canvas-only animation, no timers or global particles.
 function moonSoul(ctx, pose, form, front) {
-  const t = Number.isFinite(pose.t) ? pose.t : 0;
+  const t = pose.reduceMotion ? 0 : (Number.isFinite(pose.t) ? pose.t : 0);
   const state = pose.state || "idle";
   const attack = state === "attack" || state === "cast";
   const airborne = state === "jump" || state === "glide" || state === "fall";
@@ -276,7 +276,7 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
 // Canvas-only. Feet/pose origin, hitboxes, input, Moon Soul FX and timing are unchanged.
 // Michicornio: five independent luminous silhouettes with a shared moon-horn crest.
 function drawMichiMythic(ctx,pose,r,f){
- const t=Number.isFinite(pose.t)?pose.t:0;
+ const t=pose.reduceMotion?0:(Number.isFinite(pose.t)?pose.t:0);
  const still=!!pose.reduceMotion;
  const wave=(phase=0,speed=.055)=>still?0:Math.sin(t*speed+phase);
  const ink='#25213e';
@@ -310,8 +310,8 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.save();ctx.scale(.70,.70);ctx.translate(0,lift);
   // A curled crescent tail remains recognizable even at tiny sizes.
   ctx.beginPath();ctx.moveTo(-13,-26);
-  ctx.bezierCurveTo(-40,-19,-53,-54,-32,-72);
-  ctx.bezierCurveTo(-14,-81,-12,-62,-26,-58);
+  ctx.bezierCurveTo(-40,-19,-53+(r.motion?.tail||0)*6,-54,-32+(r.motion?.tail||0)*3,-72);
+  ctx.bezierCurveTo(-14,-81,-12,-62,-26+(r.motion?.tail||0)*3,-58);
   stroke(ink,12);stroke('#dbc7f5',8);
   oval(-26,-58,4,4,'#ffe1a6',null);
   for(const side of [-1,1])oval(side*13,-5,11,6,'#e6d5f9');
@@ -488,8 +488,8 @@ function drawMichiMythic(ctx,pose,r,f){
   const p=wave(0,.055);
   ctx.save();ctx.scale(.98,.98);ctx.translate(0,lift);
   ctx.beginPath();ctx.moveTo(-3,-39);
-  ctx.bezierCurveTo(-55,-7,-75,-38,-64,-67);
-  ctx.bezierCurveTo(-48,-100,-76,-109,-91,-88);
+  ctx.bezierCurveTo(-55,-7,-75,-38+(r.motion?.tail||0)*7,-64,-67);
+  ctx.bezierCurveTo(-48,-100,-76-(r.motion?.tail||0)*6,-109,-91,-88+(r.motion?.tail||0)*4);
   stroke(ink,25);stroke('#60447d',19);stroke('#a889d1',6);
   for(let i=0;i<7;i++)gem(-66+i*7,-44-i*2,'#d6ba72',3.6);
   oval(0,-28,23,25,'#573e7a');oval(3,-24,12,15,'#b99ac9',null);
@@ -586,7 +586,7 @@ export const MICHICORNIO_ACTIONS=Object.freeze(['idle','run','jump','fall','glid
 function drawMichicornioGesture(ctx,pose,r,form){
  const state=pose.state||'idle';
  if(!MICHICORNIO_ACTIONS.includes(state))return;
- const reduced=!!pose.reduceMotion,t=Number(pose.t)||0;
+ const reduced=!!pose.reduceMotion,t=reduced?0:(Number(pose.t)||0);
  const beat=reduced?0:Math.sin(t*.13),kin=reduced?0:Math.sin(t*.08);
  const y=[-64,-87,-91,-75,-72][form];
  const scale=[.76,.83,.93,1.06,1.15][form];
