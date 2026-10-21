@@ -67,7 +67,7 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
-      - name: V457 ten solo chapters, 1000 personal pickups and mobile final forms
+      - name: V457 solo chapter state, reward contracts, and mobile final forms
         run: node tests/browser/v457-ten-heroes.mjs
 
       - name: V400 pause, audio and motion preferences
