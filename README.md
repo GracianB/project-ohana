@@ -12,7 +12,7 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. **Michicornio V458** está en la <a href="https://github.com/GracianB/project-ohana/pull/392">PR #392</a>, no publicada todavía. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
+<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459 ya se integraron en <code>main</code>. La evolución cinematográfica y animación V460 se prepara en una PR independiente, sin cambiar el multijugador remoto. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
 
 </div>
 
@@ -33,6 +33,16 @@ OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Lo
 
 > **Fidelidad visual:** la galería pública utiliza la versión desplegada, que puede ir por detrás de V457. Para comprobar el arte exacto de esta PR, ejecuta el proyecto desde su rama. El motor combina dibujo procedural y, en ciertos casos o modos, atlas pintados; **no se afirma que se hayan eliminado todos los PNG del código**.
 
+## V460 · Michicornio vivo: actuación corporal e intro / evolución cinematográfica
+
+Michicornio deja de limitarse a diez poses estáticas. Ahora su **carrera articula patas y hombros**, las orejas reaccionan, **parpadea y mira alrededor**, la Medusa respira con su campana y sus **siete filamentos se desplazan independientemente**. El dragón hereda ese movimiento y el Guardián Eclipse lo culmina con **nueve tentáculos de vidrio animados**. Todo sucede en Canvas, sin alterar hitboxes.
+
+La **intro familiar** incorpora corona, iris lunar y gestos de personalidad exclusivos. La **cinemática de evolución** pasa de un retrato inmóvil a cuatro actos con dos formas pintadas durante la metamorfosis, luz en el cuerno y presentación animada.
+
+[**Ver el storyboard cinematográfico V460**](previews/michicornio-cinema.html) · [**Laboratorio de cinco formas y diez acciones**](previews/michi-design.html) · [**Comprobar el movimiento de los diez héroes**](previews/animation-lab.html)
+
+> **Control de publicación:** V460 es una candidata de la rama de desarrollo, no una versión pública hasta que CI, la regresión visual y Pages aprueben el mismo commit. El modo de movimiento reducido mantiene las escenas principales sin vibración.
+
 ## V459 · Cien animaciones de personaje y evolución felina coherente
 
 **Diez héroes × diez acciones corporales**, con perfiles de peso, elasticidad, ritmo y reacción distintos por personaje. No son diez GIF ni cambios de color: el renderizador transforma el cuerpo en cada acción (`idle`, carrera, salto, caída, planeo, pared, ataque, magia, daño y celebración) sin alterar las colisiones.
@@ -41,7 +51,7 @@ OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Lo
 
 [**Estudio vivo de las cinco formas de Michicornio**](previews/michi-design.html) · [**Laboratorio interactivo: diez héroes y diez animaciones**](previews/animation-lab.html) · [**Código de actuación compartida**](characters/ten-action-acting.js)
 
-> **Estado de versión:** estos cambios se desarrollan en la [PR V459 #393](https://github.com/GracianB/project-ohana/pull/393). El enlace a la web pública no garantiza mostrar V459 hasta que dicha PR se integre y GitHub Pages apruebe el mismo commit.
+> **Estado de versión:** V459 fue integrada mediante la [PR #393](https://github.com/GracianB/project-ohana/pull/393). V460 permanece en revisión y no se considera publicada hasta verificar GitHub Pages.
 
 ## La familia: diez maneras distintas de jugar
 
@@ -61,7 +71,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 
 El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
+**Michicornio V458–V459 (ya integrado):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). El diseño se encuentra en el código de `main` desde V459 y se refina en V460.
 
 ## Isla Hoku: una aventura compartida, diez salas reales
 

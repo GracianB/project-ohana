@@ -58,6 +58,9 @@ jobs:
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs
 
+      - name: V460 Michicornio facial acting, ten kinetic states and metamorphosis cinema
+        run: node tests/browser/v460-michicornio-cinema.mjs
+
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
 
