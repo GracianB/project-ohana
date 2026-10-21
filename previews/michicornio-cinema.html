@@ -45,10 +45,10 @@ function paint(){
  scrub.value=t.toFixed(2);clock.textContent='0:'+String(Math.floor(t)).padStart(2,'0');
  chapter.textContent={listen:'01 · Escuchar',gather:'02 · Reunir luz',morph:'03 · Transformación',reveal:'04 · Revelación'}[beat.act];
 }
-selector.onchange=()=>{t=0;frozen=false;paint();};
+selector.onchange=()=>{t=0;frozen=false;last=0;stop=false;paint();};
 scrub.oninput=()=>{t=Number(scrub.value);frozen=true;pause.setAttribute('aria-pressed','true');paint();};
-document.querySelector('#replay').onclick=()=>{t=0;frozen=false;last=0;pause.setAttribute('aria-pressed','false');paint();};
-pause.onclick=()=>{frozen=!frozen;pause.setAttribute('aria-pressed',String(frozen));};
+document.querySelector('#replay').onclick=()=>{t=0;frozen=false;last=0;stop=false;pause.setAttribute('aria-pressed','false');paint();};
+pause.onclick=()=>{frozen=!frozen;last=0;pause.setAttribute('aria-pressed',String(frozen));};
 function tick(now){
  if(!frozen&&!stop){if(last)t+=Math.min(.05,(now-last)/1000);last=now;
   if(t>EVO_CINE_DURATION){t=EVO_CINE_DURATION;stop=true;}paint();}
