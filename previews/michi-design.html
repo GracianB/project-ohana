@@ -1,6 +1,57 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Michicornio · Un santuario de cristal lunar</title><style>body{margin:0;background:#171425;color:#fff0f8;font:16px system-ui}main{max-width:1300px;margin:auto;padding:30px}h1{font-size:40px}p{color:#cab8d7}.forms{display:flex;flex-wrap:wrap;gap:12px}canvas{width:230px;height:280px;background:#292239;border-radius:24px}button,select{padding:12px;margin:10px;border:1px solid #907da6;border-radius:12px;background:#3b2e50;color:#fff}</style><main><h1>Michicornio: cinco vidas de leyenda.</h1><p>Gatito lunar, liebre, medusa onírica, dragón astral y guardián de nueve colas. Cinco siluetas vivas en Canvas.</p><select id="pose"><option>idle</option><option>run</option><option>jump</option><option>attack</option><option>cast</option><option>hurt</option><option>dead</option><option>victory</option></select><button id="music">Escuchar nueva música</button><button id="ending">Ver el final animado</button><div class="forms"></div></main><link rel="stylesheet" href="../ending.css"><script type="module">
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Michicornio · Cinco metamorfosis felinas</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#13182b;color:#f6eeff;font:16px/1.5 system-ui}
+main{max-width:1280px;margin:auto;padding:clamp(14px,3vw,36px)}header{max-width:900px}
+h1{font-size:clamp(27px,4vw,48px);line-height:1.08;letter-spacing:-.05em;margin:10px 0}p{color:#bfcce8}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0}
+select,button{background:#283552;border:1px solid #6879a6;color:#fff;border-radius:12px;padding:10px;font:inherit;cursor:pointer}
+label{display:inline-flex;gap:8px;align-items:center}
+.forms{display:grid;grid-template-columns:repeat(auto-fit,minmax(202px,1fr));gap:12px}
+article{border:1px solid #455879;background:linear-gradient(160deg,#26324f,#171d35);border-radius:20px;padding:12px}
+article h2{font-size:17px;margin:0}article p{margin:4px 0;font-size:12px}
+canvas{width:100%;height:auto;max-height:285px;aspect-ratio:1/1.13;display:block}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e6c0ff;outline-offset:3px}
+</style>
+<main><header><p>OHANA · ESTUDIO V459 · ARTE PROCEDURAL</p><h1>Michicornio: un mismo gato, cinco metamorfosis.</h1>
+<p>Gatito lunar → Lince lunar → Medusa felina → Dragón astral → Guardián de nueve tentáculos. Las orejas, el cuerno y el hilo de medusa unen las formas. Cada una responde a diez gestos distintos.</p></header>
+<div class="controls"><label for="pose">Animación
+<select id="pose"><option value="idle">Respirar</option><option value="run">Correr</option><option value="jump">Saltar</option><option value="fall">Caer</option><option value="glide">Planear</option><option value="wall">Aferrarse</option><option value="attack">Atacar</option><option value="cast">Conjurar</option><option value="hurt">Recibir daño</option><option value="victory">Celebrar</option><option value="dead">Derrota (legado)</option></select></label>
+<label><input type="checkbox" id="reduced"> Reducir movimiento</label>
+<button id="music">Música</button><button id="ending">Final animado</button>
+<a href="./animation-lab.html" style="color:#d9b9ff">Ver los 10 héroes</a></div>
+<section class="forms"></section>
+</main><link rel="stylesheet" href="../ending.css">
+<script type="module">
 import {playMusic} from '../engine/music.js';
-import art from '../characters/art/cat.js';import {R} from '../characters/rig.js';import {showEnding} from '../systems/ending.js';
-const canvases=Array.from({length:5},()=>{const c=document.createElement('canvas');c.width=460;c.height=560;document.querySelector('.forms').append(c);return c});let t=40;
-function paint(){canvases.forEach((c,f)=>{const ctx=c.getContext('2d');ctx.clearRect(0,0,460,560);ctx.save();ctx.translate(255,485);ctx.scale(3.3,3.3);art.draw(ctx,{form:f,state:document.querySelector('#pose').value,t,phase:t*.15,look:{x:.2,y:0},atk:.5,cast:.5,castSlot:2,reduceMotion:false},R);ctx.restore()})}setInterval(()=>{t+=2;paint()},50);paint();document.querySelector('#ending').onclick=()=>showEnding({id:'cat',evo:4,hero:'Michicornio',form:'Eclipse',time:'2:25',kills:8});document.querySelector('#music').onclick=()=>playMusic('title');window.previewReady=true;
+import {R} from '../characters/rig.js';
+import art from '../characters/art/cat.js';
+import {applyTenActionPose} from '../characters/ten-action-acting.js';
+import {ROSTER} from '../characters/roster.js';
+import {showEnding} from '../systems/ending.js';
+const names=ROSTER.find(x=>x.id==='cat').forms.map(x=>x.name);
+const canvases=names.map((name,i)=>{
+ const el=document.createElement('article'),h=document.createElement('h2'),p=document.createElement('p'),c=document.createElement('canvas');
+ h.textContent=name;p.textContent='FORMA '+i+' · orejas + cuerno lunar'+(i>=2?' + tentáculos':'');
+ c.width=320;c.height=370;el.append(h,p,c);document.querySelector('.forms').append(el);return c;
+});
+const poseSelect=document.querySelector('#pose'),reduced=document.querySelector('#reduced');
+let t=62,frozen=false;
+function paint(){
+ canvases.forEach((c,f)=>{
+  const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  const frame=reduced.checked?62:t;
+  const pose={state:poseSelect.value,form:f,t:frame,phase:frame*.14,look:{x:.2,y:0},speed:.9,
+   atk:.15+(frame%70)/90,cast:.14+(frame%65)/90,castSlot:2,reduceMotion:reduced.checked};
+  ctx.save();ctx.translate(165,313);ctx.scale(2.55,2.55);
+  applyTenActionPose(ctx,pose,'cat',f);art.draw(ctx,pose,R);ctx.restore();
+ });
+}
+poseSelect.onchange=paint;reduced.onchange=paint;
+document.querySelector('#ending').onclick=()=>showEnding({id:'cat',evo:4,hero:'Michicornio',form:'Eclipse',time:'2:25',kills:8});
+document.querySelector('#music').onclick=()=>playMusic('title');
+window.michiPreview={setFrame(v){t=v;frozen=true;paint();},setPose(v){poseSelect.value=v;paint();},setReduced(v){reduced.checked=v;paint();}};
+paint();window.previewReady=true;
+function loop(){if(!frozen&&!reduced.checked){t+=2;paint();}requestAnimationFrame(loop);}requestAnimationFrame(loop);
 </script></html>

@@ -50,7 +50,7 @@ test("V457 five distinct mythic silhouettes retain the welcome rig and game coll
  assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
  for(const form of [0,1,2,3,4])
    assert.match(src,new RegExp("if\\(f==="+form+"\\)\\{"),"Michi F"+form+" must have its own drawing path");
- for(const signature of ["MOON KITTEN","MOON HARE","DREAM MEDUSA","ASTRAL DRAGON","NINE-TAIL GUARDIAN"])
+ for(const signature of ["MOON KITTEN","LUNAR LYNX","DREAM MEDUSA","ASTRAL DRAGON","NINE-TAIL GUARDIAN"])
    assert.ok(src.includes(signature),"Missing original silhouette "+signature);
  assert.doesNotMatch(src,/if \(f===0\) drawMichiPortrait/,"F0 must not fall back to the previous cat art");
  assert.match(src,/const welcome=michiWelcomeRig\(safe,f\)/);

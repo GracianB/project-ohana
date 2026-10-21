@@ -33,6 +33,16 @@ OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Lo
 
 > **Fidelidad visual:** la galería pública utiliza la versión desplegada, que puede ir por detrás de V457. Para comprobar el arte exacto de esta PR, ejecuta el proyecto desde su rama. El motor combina dibujo procedural y, en ciertos casos o modos, atlas pintados; **no se afirma que se hayan eliminado todos los PNG del código**.
 
+## V459 · Cien animaciones de personaje y evolución felina coherente
+
+**Diez héroes × diez acciones corporales**, con perfiles de peso, elasticidad, ritmo y reacción distintos por personaje. No son diez GIF ni cambios de color: el renderizador transforma el cuerpo en cada acción (`idle`, carrera, salto, caída, planeo, pared, ataque, magia, daño y celebración) sin alterar las colisiones.
+
+**Michicornio ya no cambia de gato a conejo.** Su árbol es **Gatito Lunar → Lince Lunar → Medusa Onírica con orejas gatunas → Dragón Astral con vibrisas y filamentos → Michicornio Eclipse con nueve tentáculos cristalinos**. El cuerno, la anatomía de orejas y el hilo onírico permiten reconocer el personaje incluso cuando cambia por completo de forma.
+
+[**Estudio vivo de las cinco formas de Michicornio**](previews/michi-design.html) · [**Laboratorio interactivo: diez héroes y diez animaciones**](previews/animation-lab.html) · [**Código de actuación compartida**](characters/ten-action-acting.js)
+
+> **Estado de versión:** estos cambios se desarrollan en la [PR V459 #393](https://github.com/GracianB/project-ohana/pull/393). El enlace a la web pública no garantiza mostrar V459 hasta que dicha PR se integre y GitHub Pages apruebe el mismo commit.
+
 ## La familia: diez maneras distintas de jugar
 
 Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habilidades propias. Pulsa en su nombre para verlo dibujado por el motor, en lugar de consultar un retrato estático desactualizado.
@@ -51,7 +61,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 
 El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
+**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
 
 ## Isla Hoku: una aventura compartida, diez salas reales
 
