@@ -359,7 +359,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
   const p=wave(0,.055);
-  ctx.save();ctx.scale(.86,.86);ctx.translate(0,lift);
+  ctx.save();ctx.scale(.98,.98);ctx.translate(0,lift);
   ctx.beginPath();ctx.moveTo(-3,-39);
   ctx.bezierCurveTo(-55,-7,-75,-38,-64,-67);
   ctx.bezierCurveTo(-48,-100,-76,-109,-91,-88);
