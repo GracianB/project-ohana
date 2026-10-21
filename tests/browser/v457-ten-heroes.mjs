@@ -27,6 +27,10 @@ try{
  const report=[];
  for(const [id,reward] of HEROES){
   const initial=await page.evaluate(hero=>{
+   // Independent new-game scenario: do not let the optional shared Hoku
+   // 100-piece album auto-start its film during a different hero's smoke test.
+   // Personal hero stores are intentionally NOT reset here.
+   localStorage.removeItem('ohana-room-albums-v1');
    const e=window.__OHANA_E2E;
    return {state:e.start(hero),items:e.heroItems()};
   },id);
