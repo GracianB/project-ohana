@@ -51,6 +51,11 @@ try{
    // It cannot certify that platforming routes are human-reachable.
    const items=e.heroItems(), missed=[];
    e.setInvulnerable(600);
+   if(hero==='dino'){
+    // Actual puzzle rule: Dino must strike the first amber gate using J.
+    // Two real collection placements (near x=1490) lie inside its blocker.
+    e.setPlayer(1400,1030);e.cast(0);e.step(3);
+   }
    for(const item of items){
     const before=e.state().heroCollection?.count||0;
     e.setPlayer(item.x-form.w/2,item.y-form.h/2);
