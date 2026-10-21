@@ -529,7 +529,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===4){ // NINE-TAIL GUARDIAN: nine countable, independently moving tails.
   const p=wave(0,.06);
-  ctx.save();ctx.scale(.92,.92);ctx.translate(0,lift);
+  ctx.save();ctx.scale(.99,.99);ctx.translate(0,lift);
   // Nine EXPLICIT jelly-tendrils: the F2 medusa grows into a crown of
   // independent luminous ribbons with shared nerve/glow anatomy.
   for(let i=0;i<9;i++){
