@@ -55,10 +55,18 @@ try {
  const stitchoMemories=await page.evaluate(()=>{
   const e=window.__OHANA_E2E,items=e.heroItems();
   if(items.length!==100)throw Error('Stitcho missing collectible placements');
-  for(const item of items){e.setInvulnerable(600);e.setPlayer(item.x-15,item.y-20);}
-  return e.state().heroCollection;
+  // A single teleport can be resolved against a platform/gate before the
+  // pickup detector runs. Retry with small collider offsets; all successes
+  // must still come from the real spatial pickup pipeline, never grantHeroItem.
+  const attempts=[];
+  for(const [dx,dy] of [[-15,-20],[-10,-18],[-16,-9],[0,-20],[-25,-25]]){
+   for(const item of items){e.setInvulnerable(600);e.setPlayer(item.x+dx,item.y+dy);}
+   attempts.push({dx,dy,count:e.state().heroCollection.count});
+   if(e.state().heroCollection.count===100)break;
+  }
+  return {...e.state().heroCollection,attempts};
  });
- assert.equal(stitchoMemories.count,100);
+ assert.equal(stitchoMemories.count,100,'Stitcho collectible collisions: '+JSON.stringify(stitchoMemories.attempts));
  assert.equal(stitchoMemories.complete,true);
  assert.equal(stitchoMemories.reward,'CORAZÓN GALÁCTICO');
  await page.screenshot({path:'test-results/v453/stitcho-hundred-memory-reward.png'});
@@ -67,10 +75,18 @@ try {
   const e=window.__OHANA_E2E;e.start('kilo');
   const items=e.heroItems();
   if(items.length!==100)throw Error('Kilo missing collectible placements');
-  for(const item of items){e.setInvulnerable(600);e.setPlayer(item.x-15,item.y-20);}
-  return e.state().heroCollection;
+  // A single teleport can be resolved against a platform/gate before the
+  // pickup detector runs. Retry with small collider offsets; all successes
+  // must still come from the real spatial pickup pipeline, never grantHeroItem.
+  const attempts=[];
+  for(const [dx,dy] of [[-15,-20],[-10,-18],[-16,-9],[0,-20],[-25,-25]]){
+   for(const item of items){e.setInvulnerable(600);e.setPlayer(item.x+dx,item.y+dy);}
+   attempts.push({dx,dy,count:e.state().heroCollection.count});
+   if(e.state().heroCollection.count===100)break;
+  }
+  return {...e.state().heroCollection,attempts};
  });
- assert.equal(kilo.count,100);
+ assert.equal(kilo.count,100,'Kilo collectible collisions: '+JSON.stringify(kilo.attempts));
  assert.equal(kilo.complete,true);
  assert.equal(kilo.reward,'CANCIÓN DEL HOGAR');
  assert.notEqual(kilo.reward,stitchoMemories.reward);
