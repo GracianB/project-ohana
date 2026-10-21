@@ -12,7 +12,7 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459 ya se integraron en <code>main</code>. La evolución cinematográfica y animación V460 se prepara en una PR independiente, sin cambiar el multijugador remoto. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
+<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459, integradas mediante las PR #392 y #393, ya están en <code>main</code>. La evolución cinematográfica y animación V460 se prepara en una PR independiente, sin cambiar el multijugador remoto. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
 
 </div>
 
