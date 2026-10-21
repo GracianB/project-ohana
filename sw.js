@@ -1,4 +1,4 @@
-const VERSION = "ohana-458";
+const VERSION = "ohana-459";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -129,6 +129,8 @@ const PRECACHE = [
   "./game.js?v=" + VERSION,
   "./characters/art/_template.js?v=" + VERSION,
   "./characters/art/cat.js?v=" + VERSION,
+  "./characters/ten-action-acting.js?v=" + VERSION,
+  "./previews/animation-lab.html?v=" + VERSION,
   "./characters/art/chispin.js?v=" + VERSION,
   "./characters/art/cuerno.js?v=" + VERSION,
   "./characters/art/dino.js?v=" + VERSION,
@@ -397,7 +399,7 @@ const PRECACHE_REVISIONS = {
   "characters/hula-depth.js": "d8d727af693c5b0e406f40d69c163126087c8e0d",
   "systems/world-bounds.js": "bb28e553ed1c07a0dfc0b62b3924fe0525f359c2",
   "systems/platform-layout.js": "3d5b15bbf71dda8749f63adcec11c44aedce3464",
-  "characters/michi-motion.js": "8ae3f5959c0b85f7b8bdb4f00b0760ff96c664e5",
+  "characters/michi-motion.js": "9cd47d58043c33ab1bfb616e0aead776debb095e",
   "worlds/natural-ledges.js": "92e2931c6efc84a477da5e09cde443e3a78715b3",
   "worlds/island-landmarks.js": "c10f704c253992ef123299d0ab182d94b0c0367a",
   "systems/campaign-exploration.js": "573e6fc94d957fe8292951b4cacf134ee573a457",
@@ -443,7 +445,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "d3bfdcc6b0114fed8d057eb5c9c79710bce03577",
+  "index.html": "3ec8d1aa2fe3fb214b0e98c99e50c9fe46f6cb75",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -470,7 +472,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "659b513db77ac4d95457344713d16092e2e88065",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "70783e9c07eb2acec7220ead548bedc62c609566",
+  "characters/art/cat.js": "12baf268a556fdeaafe6a7f8b9c3adea676243d6",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
@@ -484,14 +486,14 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "4a49bc0ad8621f8413a566e97b415d5590f8ac72",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "afe3a1db9b73eaa46d40517b8161ce28626d72ba",
-  "characters/draw.js": "699fe7f6a52f8442e31b571991452f3eede2c348",
+  "characters/draw.js": "bcebd5a2063d62671d7cc6d88f6ac5605e6859f2",
   "characters/kinetic-stagecraft.js": "892f6728bf8fc00c28f5798da41514d62b12e3a8",
   "characters/evolution.js": "4c693aa7c93354fb18f5673e9b774a42d8b4b6e0",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "f9e1d610ba74bec6823cc8fcc093d3b2875f7c07",
   "characters/rig.js": "709eef2e67c4fe6e0e8d09b6057e5cf3c80cfdfe",
-  "characters/roster.js": "b37fb6fce96df98f3f7082c8e93b7c6edaa148a7",
+  "characters/roster.js": "4e86a5c68113bac4fc9bbb9d33cca5417b0173af",
   "characters/signature.js": "220bc15f0d3cb8af1773fcbc2b1e0d939762cd63",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "c1dbde319dd88fd006d247e209e4fa91e6c20268",
@@ -679,7 +681,9 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/cat-4.png": "798687a48289d5282fc1fcc1e2482f910de89f33",
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
-  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3"
+  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
+  "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
+  "previews/animation-lab.html": "fd8509d83464b59605d4c1d1d7f61e68f1719f59"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
