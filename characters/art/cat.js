@@ -422,7 +422,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===2){ // DREAM MEDUSA: living stained glass, seven silk tentacles and lunar unicorn crest.
   const wave1=wave(0,.064),flight=wave(.8,.05),cast=r.st==='cast',attack=angry||r.st==='attack';
-  ctx.save();ctx.scale(.72,.72);ctx.translate(0,-5+lift+wave1*1.8);
+  ctx.save();ctx.scale(.68,.68);ctx.translate(0,-5+lift+wave1*1.8);
   ctx.globalAlpha=.2;oval(0,-55,49,50,'#7fe1eb',null);ctx.globalAlpha=1;
   // Seven independently swimming ribbons; the middle one is the heart.
   for(let i=0;i<7;i++){
