@@ -42,5 +42,6 @@ test('README local source and docs links resolve to existing repository paths',a
 test('README does not present the draft release or remote multiplayer as already public',()=>{
   assert.match(readme,/PR #391/);
   assert.match(readme,/En pausa/);
-  assert.match(readme,/Pendiente de integrar/);
+  assert.match(readme,/publicación real requiere un Pages correcto/i);
+  assert.match(readme,/GitHub Pages Actions/);
 });
