@@ -1,3 +1,13 @@
+## ohana-457 · Recuperación de Michi, CI individual y pausa de servicios externos (21-10-2026)
+
+- **10 personajes · 5 formas · 10 salas canónicas** conservados. Variantes individuales del Claro existentes en main, sin duplicar el mapa público.
+- Michi: nueva dirección de formas 1-4 (conejo lunar, medusa espectral, dragón serpentino y guardián de nueve colas), manteniendo bebé y Moon Soul y sin alterar colisiones. Pendiente aceptación visual humana.
+- Cuerno L: la regresión visual aísla un lanzamiento real de L de otro lanzamiento anterior, cuyo cooldown es legítimo; K→L se sigue comprobando de forma independiente. La corrección requiere green CI del commit final.
+- Multijugador remoto en pausa por presupuesto de Netlify y servidor externo. No crear salas ni sondear API desde clientes públicos; tests locales WebRTC solo con opción manual en Actions.
+- README sincronizado con estado real del código; matriz de cierre en `docs/V457-CIERRE-SOLO.md`; no se declaran completas las pruebas manuales de diez personajes sin ejecutarlas.
+- Asset graph cache version `ohana-457`; hashes del Service Worker actualizados para entradas modificadas.
+- Requisitos de lanzamiento: pruebas Node, navegador, regresión visual, release gate y Pages correctos sobre el mismo commit. **Hasta entonces, rama de preparación y no versión pública.**
+
 ## ohana-456 — Fases 6-10: Dino, Frita, Pizza, Yomi, Cuerno — 10 héroes completos
 
 Se completan simultáneamente las Fases 6-10 en 100% Canvas vectorial — cero dependencias de imagen externa:

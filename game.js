@@ -48,7 +48,7 @@ import {drawCuernoForestBackdrop} from "./worlds/cuerno-forest.js";
 import {enterCuernoTrail,updateCuernoTrail,drawCuernoTrail,cuernoTrailSnapshot,cuernoAbility} from './systems/cuerno-trail.js';
 import {createCuernoBoss,updateCuernoBoss,drawCuernoBoss,CUERNO_BOSS_ID} from './systems/cuerno-boss.js';
 import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas.js";
-import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot} from "./systems/hero-collections.js";
+import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot,takeHeroCollectionItem} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
@@ -3668,6 +3668,9 @@ setFinisher(value){if(game.player)game.player.finisherCharge=Math.max(0,Math.min
 checkpointData(){return {checkpoints:game.roomDef.checkpoints,hazards:game.roomDef.hazards};},
 albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  heroItems(){return (game.heroCollection?.items||[]).map(item=>({...item}));},
+ // E2E-only domain contract for state/persistence; unlike walking through a
+ // locked gate, this deliberately does NOT verify route reachability.
+ grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
 roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},

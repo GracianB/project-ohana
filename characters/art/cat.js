@@ -271,6 +271,200 @@ function drawMichiPortrait(ctx,R,pose,r,c,f){
  if(f>=3){ctx.beginPath();ctx.arc(0,-29,6,.5,5.8);stroke('#ffe5a1',2.5);}ctx.restore();
  if(f>0){const collarY=Math.max(bodyY-14,headY+25);ctx.beginPath();ctx.moveTo(-12,collarY);ctx.quadraticCurveTo(0,collarY+3,12,collarY);stroke(f===4?'#6c458f':c.ear,4);oval(0,collarY+5,3.3,4,'#ffe3a0');}
 }
+
+// V457 · Mythic Michi: four radically different playable silhouettes.
+// Canvas-only. Feet/pose origin, hitboxes, input, Moon Soul FX and timing are unchanged.
+// F0 remains the readable baby cat. F1 hare, F2 spectral jelly, F3 dragon,
+// F4 nine-tailed guardian are drawn from their own bodies instead of recoloring F0.
+function drawMichiMythic(ctx,pose,r,f){
+ const t=Number.isFinite(pose.t)?pose.t:0;
+ const still=!!pose.reduceMotion;
+ const wave=(phase=0,speed=.055)=>still?0:Math.sin(t*speed+phase);
+ const ink='#25213e';
+ const oval=(x,y,rx,ry,color,outline=ink,width=2)=>{
+  ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);
+  ctx.fillStyle=color;ctx.fill();
+  if(outline){ctx.strokeStyle=outline;ctx.lineWidth=width;ctx.stroke();}
+ };
+ const stroke=(color,width=2)=>{
+  ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+ };
+ const gem=(x,y,color,size=5)=>{
+  ctx.beginPath();ctx.moveTo(x,y-size);ctx.lineTo(x+size*.73,y);
+  ctx.lineTo(x,y+size);ctx.lineTo(x-size*.73,y);ctx.closePath();
+  ctx.fillStyle=color;ctx.fill();stroke(ink,1);
+ };
+ const eye=(x,y,color,rx=5,ry=7)=>{
+  if(r.mood==='closed'||r.mood==='happy'){
+   ctx.beginPath();ctx.moveTo(x-rx,y);ctx.quadraticCurveTo(x,y-ry*.6,x+rx,y);
+   stroke(ink,2.4);return;
+  }
+  oval(x,y,rx+3,ry+3,'#fff',ink,1.7);
+  oval(x+(pose.look?.x||0)*1.2,y,rx,ry,color,null);
+  oval(x+1,y,rx*.38,ry*.8,ink,null);
+  oval(x-1.6,y-ry*.42,1.8,2.2,'#fff',null);
+ };
+ const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;
+ const lift=(r.st==='jump'||r.st==='glide')?-4:0;
+ if(f===0){ // MOON KITTEN: fully redrawn baby, not the old cat portrait.
+  const sway=wave(0,.075);
+  ctx.save();ctx.scale(.70,.70);ctx.translate(0,lift);
+  // A curled crescent tail remains recognizable even at tiny sizes.
+  ctx.beginPath();ctx.moveTo(-13,-26);
+  ctx.bezierCurveTo(-40,-19,-53,-54,-32,-72);
+  ctx.bezierCurveTo(-14,-81,-12,-62,-26,-58);
+  stroke(ink,12);stroke('#dbc7f5',8);
+  oval(-26,-58,4,4,'#ffe1a6',null);
+  for(const side of [-1,1])oval(side*13,-5,11,6,'#e6d5f9');
+  oval(0,-27,23,27,'#c8b5f0');
+  oval(2,-26,14,19,'#fff7e9',null);
+  ctx.beginPath();ctx.arc(4,-31,10,-1.25,2.25);stroke('#eabf63',3);
+  oval(0,-23,7,9,'#c8b5f0',null);
+  for(const side of [-1,1]){
+   const pawY=-27+(r.st==='run'?sway*3:0);
+   ctx.beginPath();ctx.moveTo(side*15,-37);
+   ctx.quadraticCurveTo(side*29,-35,side*25,pawY);
+   stroke(ink,8);stroke('#e4d0f7',5);
+   oval(side*25,pawY,5.5,5.5,'#fff3f9');
+  }
+  ctx.save();ctx.translate(0,-70);
+  ctx.rotate((r.michiHead||0)*.30+sway*.035);
+  // Asymmetric star ears: unique facial language, not reused cat outlines.
+  for(const side of [-1,1]){
+   ctx.beginPath();ctx.moveTo(side*13,-17);
+   ctx.lineTo(side*29,-43+(side===1?sway:0));
+   ctx.quadraticCurveTo(side*36,-26,side*29,-2);
+   ctx.closePath();ctx.fillStyle='#d9c6f6';ctx.fill();stroke(ink,2.6);
+   ctx.beginPath();ctx.moveTo(side*20,-16);
+   ctx.lineTo(side*29,-32);ctx.lineTo(side*26,-10);
+   ctx.closePath();ctx.fillStyle='#f5b6d8';ctx.fill();
+  }
+  oval(0,0,32,28,'#e6d9fb');
+  oval(0,13,19,11,'#fff8f1',null);
+  eye(-13,-3,'#6d68d9',6,8);
+  eye(13,-3,'#6d68d9',6,8);
+  oval(0,11,4,3,'#e995b6',null);
+  ctx.beginPath();ctx.moveTo(0,14);ctx.quadraticCurveTo(-4,19,-7,15);
+  ctx.moveTo(0,14);ctx.quadraticCurveTo(4,19,7,15);stroke(ink,1.8);
+  for(const side of [-1,1])for(const y of [11,16]){
+   ctx.beginPath();ctx.moveTo(side*20,y);ctx.lineTo(side*37,y-3);stroke('#8e77bd',1.4);
+  }
+  gem(0,-20,'#ffe2a0',6);
+  oval(-20,5,4,2,'#f6a6c8',null);
+  ctx.restore();ctx.restore();return;
+ }
+ if(f===1){ // MOON HARE: towering flexible ears, spring haunches, lunar tail.
+  const p=wave(0,.075),hop=still?0:Math.abs(wave(1,.12))*2.5;
+  ctx.save();ctx.scale(.62,.62);ctx.translate(0,lift-hop);
+  ctx.beginPath();ctx.arc(-36,-41,19,Math.PI*.32,Math.PI*1.63);
+  stroke('#fbe39b',6);ctx.beginPath();ctx.arc(-35,-41,19,Math.PI*.5,Math.PI*1.5);stroke('#fff8e3',2);
+  oval(-9,-23,22,25,'#c7d9fa');oval(1,-24,15,19,'#f7f9ff',null);
+  for(const s of [-1,1]){
+   ctx.save();ctx.translate(s*11,-15);ctx.rotate((s===1?-1:1)*p*.2);
+   oval(0,0,10,17,'#a6b8de');
+   oval(0,-5,7,9,'#fff5fc',null);
+   ctx.restore();
+  }
+  for(const s of [-1,1]){
+   ctx.save();ctx.translate(s*16,-77);
+   ctx.rotate(s*(.12+p*.16)+(r.michiEar||0)*.16);
+   oval(0,-19,10,39,'#e9f2ff');
+   oval(0,-20,5.5,29,'#d4a7dc',null);
+   ctx.restore();
+  }
+  oval(0,-71,29,26,'#eef3ff');oval(0,-62,18,9,'#ffffff',null);
+  eye(-11,-72,'#516de6');eye(11,-72,'#516de6');
+  oval(0,-58,3,2.7,'#f49ab4',null);
+  ctx.beginPath();ctx.moveTo(0,-56);ctx.lineTo(-4,-53);ctx.moveTo(0,-56);ctx.lineTo(4,-53);stroke(ink,1.5);
+  gem(0,-104,'#ffe4a3',4.5);
+  ctx.restore();return;
+ }
+ if(f===2){ // DREAM MEDUSA: no fake legs, six real flowing tentacles.
+  const p=wave(0,.07),bob=wave(1,.06)*2.6;
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,bob-5+lift);
+  ctx.globalAlpha=.21;oval(0,-31,48,43,'#53ccdc',null);
+  ctx.globalAlpha=1;
+  for(let i=0;i<7;i++){
+   const x=-26+i*8,drift=wave(i,.085)*5,tip=-1+(i%3)*5;
+   ctx.beginPath();ctx.moveTo(x,-40);
+   ctx.bezierCurveTo(x-7,-19,x+drift*2,-18,x+drift,tip);
+   stroke(i%2?'#a4def0':'#a890e6',i%2?6:8);
+   oval(x+drift,tip,3.5,3.5,i%2?'#ffe3ff':'#b7ffff',null);
+  }
+  ctx.beginPath();ctx.moveTo(-38,-65);
+  ctx.bezierCurveTo(-34,-106,-21,-120,0,-118);
+  ctx.bezierCurveTo(23,-117,39,-103,40,-66);
+  ctx.bezierCurveTo(22,-54,13,-59,0,-52);
+  ctx.bezierCurveTo(-16,-59,-28,-53,-38,-65);
+  ctx.closePath();ctx.fillStyle='#d7f7ff';ctx.fill();stroke(ink,2.1);
+  ctx.globalAlpha=.65;oval(0,-85,26,24,'#b8d3f9',null);ctx.globalAlpha=1;
+  oval(0,-82,12,12,'#9d69e3',null);gem(0,-82,'#f9f1ff',7);
+  eye(-17,-92,'#ff6bd0',4,6);eye(17,-92,'#ff6bd0',4,6);
+  ctx.beginPath();ctx.moveTo(-5,-72);ctx.quadraticCurveTo(0,-68+2*p,5,-72);stroke('#53618b',1.8);
+  for(const s of [-1,1])gem(s*30,-73,'#e4f9ff',3);
+  ctx.restore();return;
+ }
+ if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
+  const p=wave(0,.055);
+  ctx.save();ctx.scale(.98,.98);ctx.translate(0,lift);
+  ctx.beginPath();ctx.moveTo(-3,-39);
+  ctx.bezierCurveTo(-55,-7,-75,-38,-64,-67);
+  ctx.bezierCurveTo(-48,-100,-76,-109,-91,-88);
+  stroke(ink,25);stroke('#60447d',19);stroke('#a889d1',6);
+  for(let i=0;i<7;i++)gem(-66+i*7,-44-i*2,'#d6ba72',3.6);
+  oval(0,-28,23,25,'#573e7a');oval(3,-24,12,15,'#b99ac9',null);
+  for(const s of [-1,1]){
+   ctx.beginPath();ctx.moveTo(s*13,-30);
+   ctx.quadraticCurveTo(s*(19+p*3),-10,s*18,0);stroke(ink,9);stroke('#7b5b9b',6);
+   oval(s*18,0,8,4,'#d8b17c');
+  }
+  ctx.beginPath();ctx.moveTo(-22,-75);ctx.quadraticCurveTo(-37,-100,-20,-111);
+  ctx.lineTo(-6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
+  ctx.beginPath();ctx.moveTo(22,-75);ctx.quadraticCurveTo(37,-100,20,-111);
+  ctx.lineTo(6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
+  oval(0,-68,29,25,'#5a3878');oval(0,-56,19,9,'#b798bb',null);
+  eye(-12,-73,'#ffa43b',5,6.5);eye(12,-73,'#ffa43b',5,6.5);
+  for(const s of [-1,1]){
+   ctx.beginPath();ctx.moveTo(s*17,-55);
+   ctx.quadraticCurveTo(s*(41+p*2),-54,s*49,-67);
+   stroke('#ebc582',2);
+  }
+  gem(0,-94,'#ffd86d',6);
+  if(angry){gem(38+p*3,-61,'#ffb649',5);}
+  ctx.restore();return;
+ }
+ if(f===4){ // NINE-TAIL GUARDIAN: nine countable, independently moving tails.
+  const p=wave(0,.06);
+  ctx.save();ctx.scale(.92,.92);ctx.translate(0,lift);
+  for(let i=0;i<9;i++){
+   const a=-Math.PI*.85+i*Math.PI*1.7/8;
+   const endX=Math.cos(a)*68-6, endY=-44+Math.sin(a)*37+wave(i,.045)*4;
+   ctx.beginPath();ctx.moveTo(-12,-29);
+   ctx.bezierCurveTo(-30,-74,-3+endX*.8,endY-41,endX,endY);
+   stroke('#3d2b50',14);stroke(i%2?'#eac87b':'#fff2cb',10);
+   oval(endX,endY,5,7,i%2?'#fffefa':'#ffde9a',null);
+  }
+  oval(0,-24,20,26,'#fff3d9');oval(2,-22,13,16,'#fff',null);
+  for(const s of [-1,1]){
+   ctx.beginPath();ctx.moveTo(s*11,-12);ctx.lineTo(s*16,-1);stroke(ink,9);stroke('#f7dfb4',6);
+   oval(s*17,-1,7,4,'#fff9e9',null);
+   ctx.beginPath();ctx.moveTo(s*17,-77);ctx.lineTo(s*39,-111);
+   ctx.lineTo(s*33,-61);ctx.closePath();ctx.fillStyle='#fff5d4';ctx.fill();stroke(ink,2);
+   ctx.beginPath();ctx.moveTo(s*23,-77);ctx.lineTo(s*33,-98);ctx.lineTo(s*29,-73);
+   ctx.closePath();ctx.fillStyle='#efbad6';ctx.fill();
+  }
+  oval(0,-69,33,27,'#fff7df');oval(0,-59,21,12,'#fff',null);
+  eye(-14,-72,'#d04f99',6,8);eye(14,-72,'#d04f99',6,8);
+  oval(0,-57,4,3,'#e897a9',null);
+  gem(0,-86,'#f1c65e',6);
+  ctx.globalAlpha=.66;ctx.beginPath();ctx.arc(0,-72,42,Math.PI*1.1,Math.PI*1.9);
+  stroke('#f2d479',3);ctx.globalAlpha=1;
+  // Playful tail flick, not another damaging hitbox.
+  if(r.fl>.22&&r.st==='idle'){gem(36,-109-4*p,'#fbd59a',4);}
+  ctx.restore();return;
+ }
+}
+
 function draw(ctx, pose, R) {
   const src = pose || {};
   const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
@@ -303,7 +497,7 @@ function draw(ctx, pose, R) {
   else if (r.st === "fall") ctx.scale(1.05, 0.92);
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
-  drawMichiPortrait(ctx,R,safe,r,c,f);
+  drawMichiMythic(ctx,safe,r,f);
   moonSoul(ctx, safe, f, true);
   ctx.restore();
 }
