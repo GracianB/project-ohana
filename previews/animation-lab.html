@@ -40,6 +40,7 @@ for(const [i,name] of ACTION_CHANNELS.entries()){
   for(const b of selection.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b===btn));draw();};
  selection.append(btn);
 }
+window.__labErrors=[];
 const cards=ROSTER.map((hero)=>{
  const art=document.createElement('article');const title=document.createElement('h2');
  title.textContent=hero.name;const tag=document.createElement('small');tag.textContent=hero.forms[2].name;
@@ -54,11 +55,14 @@ function draw(){
    cast:Math.max(.08,(time%100)/100),castSlot:2,look:{x:.4,y:0},speed:.9,reduceMotion:toggle.checked};
   ctx.save();ctx.translate(132,221);ctx.scale(1.32,1.32);
   applyTenActionPose(ctx,pose,id,2);
-  ART[id].draw(ctx,pose,R);ctx.restore();
+  try{ART[id].draw(ctx,pose,R);}
+  catch(error){window.__labErrors.push(id+': '+error.message);ctx.restore();continue;}
+  ctx.restore();
  }
 }
 toggle.onchange=draw;
-function loop(){if(!freeze&&!toggle.checked){frame++;draw();}requestAnimationFrame(loop);}
+let last=0;
+function loop(now){if(!freeze&&!toggle.checked&&now-last>65){frame++;draw();last=now;}requestAnimationFrame(loop);}
 window.actionLab={setFrame(value){frame=value;freeze=true;draw();},setAction(value){const btn=selection.querySelector('[data-action="'+value+'"]');if(!btn)throw Error('Unknown action '+value);btn.click();},setReduced(value){toggle.checked=value;draw();},getFrame(){return frame;},actions:ACTION_CHANNELS};
 draw();window.previewReady=true;requestAnimationFrame(loop);
 </script></html>
