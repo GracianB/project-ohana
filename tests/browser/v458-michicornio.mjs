@@ -23,14 +23,8 @@ try{
  await page.screenshot({path:'test-results/v458/michicornio-five-forms.png',fullPage:true});
  await page.goto(root+'/?e2e=1');
  await page.locator('.oi-enter').click();await page.locator('#family-camp').waitFor();
- const result=await page.evaluate(()=>{
-  const api=window.__OHANA_E2E;
-  const s=api.start('michicornio'); // canonical alias is accepted by the roster, actual gameplay still uses cat
-  return {s,foes:api.roomCast(),items:api.heroItems()};
- });
- // Direct gameplay start uses canonical cat ID; artist alias is a lookup API, not a duplicated hero.
- if(!result.s.running){const started=await page.evaluate(()=>window.__OHANA_E2E.start('cat'));assert.equal(started.running,true);}
  const state=await page.evaluate(()=>window.__OHANA_E2E.start('cat'));
+ assert.equal(state.running,true);
  assert.match(state.roomName,/Michicornio/);
  assert.equal(state.heroCollection?.hero,'cat');
  assert.equal((await page.evaluate(()=>window.__OHANA_E2E.heroItems())).length,100);

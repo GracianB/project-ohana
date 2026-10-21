@@ -12,7 +12,7 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública se sirve desde <code>main</code>. El rediseño V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
+<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. **Michicornio V458** está en la <a href="https://github.com/GracianB/project-ohana/pull/392">PR #392</a>, no publicada todavía. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
 
 </div>
 
@@ -51,7 +51,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 
 El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-**Michicornio en V458:** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
+**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
 
 ## Isla Hoku: una aventura compartida, diez salas reales
 
@@ -75,7 +75,7 @@ La rama V457 añade variantes de aventura para los diez protagonistas, **sin dup
 
 Se ha implementado el estado de **100 coleccionables por héroe**, con persistencia y recompensas. La prueba automatizada valida contratos de estado y navegación, pero **no acredita por sí sola que los 1.000 objetos sean físicamente alcanzables ni que las diez campañas hayan superado una partida humana completa**. Esa aceptación sigue abierta.
 
-[Ver los criterios reales de cierre de cada mundo](docs/V457-CIERRE-SOLO.md).
+[Ver los criterios reales de cierre de cada mundo](docs/V457-CIERRE-SOLO.md). [**Michicornio: 10 versiones y QA**](docs/MICHICORNIO-V458.md).
 
 ## Cómo se juega
 
