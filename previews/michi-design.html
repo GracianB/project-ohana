@@ -53,5 +53,7 @@ document.querySelector('#ending').onclick=()=>showEnding({id:'cat',evo:4,hero:'M
 document.querySelector('#music').onclick=()=>playMusic('title');
 window.michiPreview={setFrame(v){t=v;frozen=true;paint();},setPose(v){poseSelect.value=v;paint();},setReduced(v){reduced.checked=v;paint();}};
 paint();window.previewReady=true;
-function loop(){if(!frozen&&!reduced.checked){t+=2;paint();}requestAnimationFrame(loop);}requestAnimationFrame(loop);
+let last=0;
+function loop(now){if(!frozen&&!reduced.checked&&now-last>34){t+=2;paint();last=now;}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
 </script></html>
