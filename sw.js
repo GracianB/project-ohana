@@ -1,4 +1,4 @@
-const VERSION = "ohana-456";
+const VERSION = "ohana-457";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -441,10 +441,10 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "5c23ac200fb356bc7a4562138057ecbdb3ef87f3",
+  "index.html": "6bce491c92873af9fc5031e5c122a9ea805c6572",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
-  "multiplayer.js": "80a4df82fe9afb1d0d4209d57448cb24956fffdc",
+  "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
   "multiplayer/mission.js": "e94f85833c4c66f3ac8e2e51d1162d7e6db1cdd1",
   "multiplayer/duo-altars.js": "29aafd8ca96cd1320d75cbd2b7be6bd107a569b0",
   "manifest.json": "3e910803d5c4ea7d158370d0b5becb462c23d77b",
@@ -468,7 +468,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "e2f45372ff565999fb834b3e8ec4860d2a9b26d9",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "41320480ca284e54cd100c31148c95a4b8c9dbac",
+  "characters/art/cat.js": "9e7480151703478f31d62e7e551c7588a40af065",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
