@@ -10,10 +10,10 @@ El personaje visible **Michicornio** dispone de cinco formas de biología fantá
 | Forma | Silueta | Rasgos jugables y legibilidad |
 |---|---|---|
 | F0 | Gatito lunar | Cola creciente, orejas asimétricas y mini cuerno |
-| F1 | Liebre lunar | Orejas elásticas, saltos y cuerno entre las orejas |
+| F1 | Lince lunar | Cuerpo felino adulto, cuatro patas articuladas, cuerno central y cola creciente |
 | F2 | **Medusa Onírica** | Campana translúcida de cristal, siete tentáculos independientes, nervaduras y ataque telegrafiado |
 | F3 | Dragón Astral | Cuerpo serpentino, cuernos laterales y cuerno lunar central |
-| F4 | Michicornio Eclipse | Nueve colas independientes, corona y halo astral |
+| F4 | Michicornio Eclipse | Nueve tentáculos de cristal nacidos de la Medusa Onírica, orejas de gato, cuerno y halo astral |
 
 El arte se genera en Canvas. Respeta movimiento reducido y no modifica `w/h` físicos de las formas.
 

@@ -51,7 +51,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 
 El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
+**Michicornio V458 (PR #392, sin publicar):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
 
 ## Isla Hoku: una aventura compartida, diez salas reales
 
