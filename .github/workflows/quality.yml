@@ -49,6 +49,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: V457 early optical size regression
+        run: node tests/browser/character-size.mjs
+
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
 
