@@ -14,7 +14,8 @@ import {createChispinRoom} from "./systems/chispin-room.js";
 import {drawChispinSanctuary} from "./worlds/chispin-sanctuary.js";
 import {enterChispinTrail,interactChispinTrail,chispinTrailPrompt,updateChispinTrail,drawChispinTrail,chispinTrailSnapshot,chispinAbility} from './systems/chispin-trail.js';
 import {createChispinBoss,updateChispinBoss,drawChispinBossSignals,drawChispinBossBody,CHISPIN_BOSS_ID} from './systems/chispin-boss.js';
-import {createMichiRoom} from "./systems/michi-room.js";
+import {createMichiRoom,drawMichicornioPlatformTrim} from "./systems/michi-room.js";
+import {drawMichicornioFoe} from "./systems/michicornio-foes.js";
 import {drawMichiGardens} from "./worlds/michi-gardens.js";
 import {enterMichiTrail,interactMichiTrail,michiTrailPrompt,updateMichiTrail,drawMichiTrail,michiTrailSnapshot,michiAbility} from './systems/michi-trail.js';
 import {createMichiBoss,updateMichiBoss,drawMichiBossSignals,drawMichiBossBody,MICHI_BOSS_ID} from './systems/michi-boss.js';
@@ -2853,6 +2854,7 @@ drawCampaignExploration(ctx,game,game.cam,t);
 drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawDragonTrail(ctx,game,game.cam,t);drawDinoTrail(ctx,game,game.cam,t);drawFritaTrail(ctx,game,game.cam,t);drawPizzaTrail(ctx,game,game.cam,t);drawYomiTrail(ctx,game,game.cam,t);drawCuernoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 drawIslandLandmarks(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
+if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
 drawIslandSprings(ctx,game,game.cam,t);
@@ -2890,8 +2892,11 @@ for (const e of game.enemies) {
   if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
-  else {drawEnemy(ctx, e, game.cam, t, {reduceMotion:game.reduceMotion || reduceMotion});
-    if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
+  else {
+    const bespoke=!!game.michiTrail&&drawMichicornioFoe(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+    if(!bespoke)drawEnemy(ctx,e,game.cam,t,{reduceMotion:game.reduceMotion||reduceMotion});
+    if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  }
   if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
