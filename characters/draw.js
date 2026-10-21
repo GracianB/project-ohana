@@ -1,4 +1,5 @@
 import {drawHulaDepth} from './hula-depth.js';
+import {applyTenActionPose} from './ten-action-acting.js';
 import {applyPowerPerformance} from './power-performance.js';
 import {MICHI_VISUAL_H} from "./art/cat.js";
 import {CHISPIN_VISUAL_H} from "./art/chispin.js";
@@ -1346,6 +1347,9 @@ const painted = p._introForceCanvas||calibrated||["kilo","stitcho","chispin","ca
 drawHulaDepth(ctx,p,H,t,false,options.reduceMotion===true);
 ctx.save();
 ctx.rotate(tilt * 0.5);
+// Per-hero ten-channel acting: exclusively stage-space transform, hitbox-safe.
+// Real movement/attack timing remains owned by the physics and character rig.
+applyTenActionPose(ctx,pose,p.id,evo);
 if (painted) {
 const ih = H * 1.05;
 const iw = ih * (painted.naturalWidth / painted.naturalHeight);
