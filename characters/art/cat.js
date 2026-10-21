@@ -308,7 +308,7 @@ function drawMichiMythic(ctx,pose,r,f){
  const lift=(r.st==='jump'||r.st==='glide')?-4:0;
  if(f===1){ // MOON HARE: towering flexible ears, spring haunches, lunar tail.
   const p=wave(0,.075),hop=still?0:Math.abs(wave(1,.12))*2.5;
-  ctx.save();ctx.translate(0,lift-hop);
+  ctx.save();ctx.scale(.62,.62);ctx.translate(0,lift-hop);
   ctx.beginPath();ctx.arc(-36,-41,19,Math.PI*.32,Math.PI*1.63);
   stroke('#fbe39b',6);ctx.beginPath();ctx.arc(-35,-41,19,Math.PI*.5,Math.PI*1.5);stroke('#fff8e3',2);
   oval(-9,-23,22,25,'#c7d9fa');oval(1,-24,15,19,'#f7f9ff',null);
@@ -334,7 +334,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===2){ // DREAM MEDUSA: no fake legs, six real flowing tentacles.
   const p=wave(0,.07),bob=wave(1,.06)*2.6;
-  ctx.save();ctx.translate(0,bob-5+lift);
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,bob-5+lift);
   ctx.globalAlpha=.21;oval(0,-31,48,43,'#53ccdc',null);
   ctx.globalAlpha=1;
   for(let i=0;i<7;i++){
@@ -359,7 +359,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
   const p=wave(0,.055);
-  ctx.save();ctx.translate(0,lift);
+  ctx.save();ctx.scale(.86,.86);ctx.translate(0,lift);
   ctx.beginPath();ctx.moveTo(-3,-39);
   ctx.bezierCurveTo(-55,-7,-75,-38,-64,-67);
   ctx.bezierCurveTo(-48,-100,-76,-109,-91,-88);
@@ -388,7 +388,7 @@ function drawMichiMythic(ctx,pose,r,f){
  }
  if(f===4){ // NINE-TAIL GUARDIAN: nine countable, independently moving tails.
   const p=wave(0,.06);
-  ctx.save();ctx.translate(0,lift);
+  ctx.save();ctx.scale(.92,.92);ctx.translate(0,lift);
   for(let i=0;i<9;i++){
    const a=-Math.PI*.85+i*Math.PI*1.7/8;
    const endX=Math.cos(a)*68-6, endY=-44+Math.sin(a)*37+wave(i,.045)*4;
