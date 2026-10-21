@@ -683,7 +683,7 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
-  "previews/animation-lab.html": "fd8509d83464b59605d4c1d1d7f61e68f1719f59"
+  "previews/animation-lab.html": "6d68f34b060fb8e96583672d1043ea38c2cd7a6e"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
