@@ -1,6 +1,6 @@
 # OHANA V460 · Michicornio: cuerpo vivo, intro y metamorfosis
 
-Versión candidata **V460**, rama `feat/ohana-v460-michicornio-living-cinema`. No publicada hasta comprobar PR, CI, quality y Pages por commit. Diez personajes, cinco formas por héroe, diez salas canónicas y multijugador remoto pausado.
+Versión candidata **V460** (`ohana-460`), rama `feat/ohana-v460-michicornio-living-cinema`. No publicada hasta comprobar PR, CI, quality y Pages por commit. Diez personajes, cinco formas por héroe, diez salas canónicas y multijugador remoto pausado.
 
 ## Trabajos implementados
 - Diez acciones con rig anatómico específico, patas realmente articuladas, cabeza reactiva, pupilas, parpadeo y orejas.
