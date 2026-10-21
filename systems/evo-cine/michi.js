@@ -55,8 +55,12 @@ function lunarRibbon(ctx,cx,cy,i,count,t,size,alpha){
 }
 export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2){
  const K=h/300,cx=w/2,cy=h*.73;
- const beat=michicornioEvoBeat(t,fromForm,toForm);
+ let gentle=false;
+ try{gentle=globalThis.localStorage?.getItem('ohana-gentle-motion')==='1'||
+  !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;}catch{}
+ const beat=michicornioEvoBeat(t,fromForm,toForm,gentle);
  const eclipse=beat.to===5,medusa=beat.to>=3,now=beat.time;
+ const fxTime=gentle?0:now;
  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
  // Stage is in the same blue-violet moon palette as Michicornio and the room.
  ctx.fillStyle=eclipse?'#0c1029':'#151c35';ctx.fillRect(0,0,w,h);
@@ -71,7 +75,7 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2){
  ctx.restore();
  for(let i=0;i<27;i++){
   const x=(i*137.5+23)%Math.max(1,w),y=(i*101.3+17)%(h*.68);
-  const twinkle=.3+.4*Math.abs(Math.sin(now*2.8+i*.74));
+  const twinkle=.3+.4*Math.abs(Math.sin(fxTime*2.8+i*.74));
   ctx.save();ctx.globalAlpha=twinkle;diamond(ctx,x,y,(1.2+(i%3)*.5)*K,'#eae4ff');ctx.restore();
  }
  // Translucent ground ellipse anchors the actor's feet, not an imported sprite.
@@ -79,30 +83,30 @@ export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2){
  const rise=beat.reducedMotion?0:Math.sin(now*7)*2.3*K;
  const enterScale=1.78+beat.arrival*.56;
  if(beat.act==='listen'){
-  drawEvolutionActor(ctx,'cat',cx,cy+rise,1.83*K,beat.from,now,{state:'idle'});
-  orbit(ctx,cx,cy-65*K,51*K,now,.13+beat.progress*.18,3,'#c7b6e9');
+  drawEvolutionActor(ctx,'cat',cx,cy+rise,1.83*K,beat.from,now,{state:'idle',reducedMotion:gentle});
+  orbit(ctx,cx,cy-65*K,51*K,fxTime,.13+beat.progress*.18,3,'#c7b6e9');
  }else if(beat.act==='gather'){
-  orbit(ctx,cx,cy-74*K,(58-beat.progress*12)*K,now,.35+beat.progress*.5,7,'#e3c4ff');
+  orbit(ctx,cx,cy-74*K,(58-beat.progress*12)*K,fxTime,.35+beat.progress*.5,7,'#e3c4ff');
   drawEvolutionActor(ctx,'cat',cx,cy+rise,1.82*K,beat.from,now,
-   {state:'cast',cast:.12+beat.progress*.8});
-  for(let i=0;i<3;i++)lunarRibbon(ctx,cx,cy-90*K,i,3,now,66*K,beat.charge*.58);
+   {state:'cast',cast:.12+beat.progress*.8,reducedMotion:gentle});
+  for(let i=0;i<3;i++)lunarRibbon(ctx,cx,cy-90*K,i,3,fxTime,66*K,beat.charge*.58);
  }else if(beat.act==='morph'){
   const oldAlpha=clip((1-beat.progress)*1.4),newAlpha=clip(beat.progress*1.5);
   ctx.save();ctx.globalAlpha=oldAlpha;
   drawEvolutionActor(ctx,'cat',cx-20*K*beat.progress,cy+rise,1.8*K*(1-beat.progress*.12),beat.from,now,
-   {state:'cast',cast:.85});ctx.restore();
+   {state:'cast',cast:.85,reducedMotion:gentle});ctx.restore();
   ctx.save();ctx.globalAlpha=newAlpha;
   drawEvolutionActor(ctx,'cat',cx+14*K*(1-beat.progress),cy+rise,(1.84+beat.progress*.54)*K,beat.to,now,
-   {state:'jump'});ctx.restore();
+   {state:'jump',reducedMotion:gentle});ctx.restore();
   const ribbons=medusa?beat.tendrils:4;
-  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-82*K,i,ribbons,now,80*K,beat.progress*.5);
-  orbit(ctx,cx,cy-77*K,65*K,now,.47,9,'#f7c9ff');
+  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-82*K,i,ribbons,fxTime,80*K,beat.progress*.5);
+  orbit(ctx,cx,cy-77*K,65*K,fxTime,.47,9,'#f7c9ff');
  }else{
   // The form visibly celebrates. The previous version drew a STATIC reduced-motion idle pose here.
-  drawEvolutionActor(ctx,'cat',cx,cy+rise,enterScale*K,beat.to,now,{state:'victory'});
+  drawEvolutionActor(ctx,'cat',cx,cy+rise,enterScale*K,beat.to,now,{state:'victory',reducedMotion:gentle});
   const ribbons=medusa?beat.tendrils:5;
-  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-85*K,i,ribbons,now,100*K,.12+.24*Math.sin(beat.progress*Math.PI));
-  orbit(ctx,cx,cy-84*K,87*K,now,.55*(1-beat.progress*.4),9,'#efc9ff');
+  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-85*K,i,ribbons,fxTime,100*K,.12+.24*Math.sin(beat.progress*Math.PI));
+  orbit(ctx,cx,cy-84*K,87*K,fxTime,.55*(1-beat.progress*.4),9,'#efc9ff');
  }
  // Cinematic name remains readable even at narrow mobile resolution.
  if(now>=2.75){
