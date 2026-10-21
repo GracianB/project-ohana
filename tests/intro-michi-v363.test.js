@@ -45,13 +45,16 @@ test("V363 five family responses: music, sparks, food chase, lantern and dino",(
   assert.ok(keys.length===4&&keys.every((x,i)=>Number.isFinite(x)&&(!i||x>keys[i-1])));
 });
 
-test("V381 redesigned feline retains the welcome rig and five distinct silhouettes",()=>{
+test("V457 five distinct mythic silhouettes retain the welcome rig and game collision contract",()=>{
  const src=readFileSync(new URL("../characters/art/cat.js",import.meta.url),"utf8");
- assert.match(src,/drawMichiPortrait\(ctx,R,safe,r,c,f\)/);
+ assert.match(src,/drawMichiMythic\(ctx,safe,r,f\)/);
+ for(const form of [0,1,2,3,4])
+   assert.match(src,new RegExp("if\\(f==="+form+"\\)\\{"),"Michi F"+form+" must have its own drawing path");
+ for(const signature of ["MOON KITTEN","MOON HARE","DREAM MEDUSA","ASTRAL DRAGON","NINE-TAIL GUARDIAN"])
+   assert.ok(src.includes(signature),"Missing original silhouette "+signature);
+ assert.doesNotMatch(src,/if \(f===0\) drawMichiPortrait/,"F0 must not fall back to the previous cat art");
  assert.match(src,/const welcome=michiWelcomeRig\(safe,f\)/);
  assert.match(src,/if\(welcome\.active\)ctx\.scale/);
- assert.match(src,/if\(f!==2\)for/,'cloud floats without invented boots');
- assert.match(src,/if\(f===4\)/,'only final form has wings');
  assert.equal(typeof michiFootwork,"function");
 });
 
