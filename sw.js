@@ -488,7 +488,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "4a49bc0ad8621f8413a566e97b415d5590f8ac72",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "afe3a1db9b73eaa46d40517b8161ce28626d72ba",
-  "characters/draw.js": "bcebd5a2063d62671d7cc6d88f6ac5605e6859f2",
+  "characters/draw.js": "e58e8be3be97f378a4c392ff2c58b81c4c08394f",
   "characters/kinetic-stagecraft.js": "892f6728bf8fc00c28f5798da41514d62b12e3a8",
   "characters/evolution.js": "4c693aa7c93354fb18f5673e9b774a42d8b4b6e0",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
