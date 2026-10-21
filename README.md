@@ -40,7 +40,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 | Héroe y galería en vivo | Personalidad jugable | Héroe y galería en vivo | Personalidad jugable |
 | :--- | :--- | :--- | :--- |
 | [**Kilo**](https://gracianb.github.io/project-ohana/gallery.html?id=kilo) | Ukelele, ritmo y planeo | [**Stitcho**](https://gracianb.github.io/project-ohana/gallery.html?id=stitcho) | Plasma, caos y paredes |
-| [**Chispín**](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Electricidad y aceleración | [**Michi**](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Sueños, esquiva y nueve vidas |
+| [**Chispín**](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Electricidad y aceleración | [**Michicornio**](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Sueños, esquiva y nueve vidas |
 | [**Dragón**](https://gracianb.github.io/project-ohana/gallery.html?id=dragon) | Fuego, viento y altura | [**Dino**](https://gracianb.github.io/project-ohana/gallery.html?id=dino) | Fuerza e impacto |
 | [**Frita**](https://gracianb.github.io/project-ohana/gallery.html?id=frita) | Velocidad y derrape | [**Pizza**](https://gracianb.github.io/project-ohana/gallery.html?id=pizza) | Rebotes y giros |
 | [**Yomi**](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | Energía espiritual | [**Cuerno**](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Luz, prismas y protección |
@@ -51,7 +51,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 
 El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-**Michi en V457:** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
+**Michicornio en V458:** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
 
 ## Isla Hoku: una aventura compartida, diez salas reales
 
@@ -68,7 +68,7 @@ La rama V457 añade variantes de aventura para los diez protagonistas, **sin dup
 | Héroe | Identidad del recorrido | Héroe | Identidad del recorrido |
 | :--- | :--- | :--- | :--- |
 | Kilo | Bahía del Compás | Stitcho | Archipiélago del Caos |
-| Chispín | Islas del Relámpago | Michi | Jardines de la Luna |
+| Chispín | Islas del Relámpago | Michicornio | Jardines de la Luna |
 | Dragón | Cordillera de las Brasas | Dino | Valle de los Gigantes |
 | Frita | Mercado Dorado | Pizza | Reino del Horno |
 | Yomi | Observatorio Astral | Cuerno | Bosque del Prisma |

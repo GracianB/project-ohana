@@ -26,6 +26,7 @@ const ART = Object.freeze({
 
   cat,
   michi: cat,
+  michicornio: cat,
 
   dragon,
   dino,
