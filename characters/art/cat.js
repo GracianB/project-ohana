@@ -578,6 +578,75 @@ function drawMichiMythic(ctx,pose,r,f){
  }
 }
 
+
+/* Ten distinct Michicornio acting beats, in character-space. These are physical
+   gestures with tiny readable accents, not a second generic particle cloud.
+   F0→F4 keep moon horn/ears and increasingly articulate jelly ribbons. */
+export const MICHICORNIO_ACTIONS=Object.freeze(['idle','run','jump','fall','glide','wall','attack','cast','hurt','victory']);
+function drawMichicornioGesture(ctx,pose,r,form){
+ const state=pose.state||'idle';
+ if(!MICHICORNIO_ACTIONS.includes(state))return;
+ const reduced=!!pose.reduceMotion,t=Number(pose.t)||0;
+ const beat=reduced?0:Math.sin(t*.13),kin=reduced?0:Math.sin(t*.08);
+ const y=[-64,-87,-91,-75,-72][form];
+ const scale=[.76,.83,.93,1.06,1.15][form];
+ ctx.save();ctx.scale(scale,scale);
+ ctx.strokeStyle=form>=3?'#ffe7b3':'#e8c1fa';
+ ctx.lineWidth=1.9;ctx.lineCap='round';ctx.lineJoin='round';
+ const curl=(x,yy,spread,alpha)=>{
+  ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(x-spread,yy+8);
+  ctx.quadraticCurveTo(x,yy-spread/2+kin*3,x+spread,yy+6);
+  ctx.stroke();
+ };
+ const diamond=(x,yy,rr,color)=>{
+  ctx.beginPath();ctx.moveTo(x,yy-rr);ctx.lineTo(x+rr*.65,yy);
+  ctx.lineTo(x,yy+rr);ctx.lineTo(x-rr*.65,yy);ctx.closePath();
+  ctx.fillStyle=color;ctx.fill();
+ };
+ switch(state){
+  case 'idle': // Antennae listen; the heartbeat is tethered to the moon horn.
+   curl(0,y-13,8,.16+Math.abs(kin)*.12);
+   break;
+  case 'run': // Displaced paw scratches and elastic nine-tail follow-through.
+   for(let i=0;i<3;i++){ctx.globalAlpha=.23+i*.07;
+    ctx.beginPath();ctx.moveTo(-20-i*9,-4-i*3+beat*3);ctx.lineTo(-33-i*9,-4-i*3);ctx.stroke();}
+   break;
+  case 'jump': // Claw tuck and vertical lunar crescent.
+   ctx.globalAlpha=.6;ctx.beginPath();ctx.arc(-21,y+16,10,1.2,5.1);ctx.stroke();break;
+  case 'fall': // Opposed forepaw wings, spread tentacles.
+   ctx.globalAlpha=.48;curl(0,y+28,40,.48);curl(0,y+36,31,.31);break;
+  case 'glide': // Gliding makes the jelly veil lift rather than stretch into feet.
+   ctx.globalAlpha=.44;ctx.beginPath();ctx.ellipse(0,y+16,36+beat*2,11,0,.1,Math.PI-.1);ctx.stroke();break;
+  case 'wall': // Three planted claw strokes, attached to the reaching paw.
+   for(let i=0;i<3;i++){ctx.globalAlpha=.58-i*.1;
+    ctx.beginPath();ctx.moveTo(25+i*4,y-2+i*8);
+    ctx.lineTo(32+i*4,y-8+i*8);ctx.stroke();}
+   break;
+  case 'attack': { // A three-beat swipe tied to attack progress, not world time.
+   const swing=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.atk)||.5)));
+   for(let i=0;i<3;i++){ctx.globalAlpha=swing*(.72-i*.11);
+    ctx.beginPath();ctx.moveTo(20+i*7,y-19);
+    ctx.quadraticCurveTo(46+i*6,y-5,29+i*8,y+17);ctx.stroke();}
+   break;
+  }
+  case 'cast':{ // Horn charges first; one ring releases after the body recoil.
+   const energy=Math.sin(Math.PI*Math.max(0,Math.min(1,Number(pose.cast)||.5)));
+   ctx.globalAlpha=energy*.55;ctx.beginPath();ctx.ellipse(0,y-20,18+energy*13,10+energy*6,0,0,TAU);ctx.stroke();
+   for(let i=0;i<3;i++){const a=t*.045+i*TAU/3;diamond(Math.cos(a)*27,y-20+Math.sin(a)*16,3,'#fff1b6');}
+   break;
+  }
+  case 'hurt': // Temporarily folds the moon aura inward.
+   ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(0,y+3,18,2.3,5.9);ctx.stroke();break;
+  case 'victory': // Crowning animation traces the medusa-to-nine-tail genealogy.
+   for(let i=0;i<5;i++){
+    const a=i*TAU/5+(reduced?0:t*.027);
+    ctx.globalAlpha=.45+i*.06;diamond(Math.cos(a)*29,y-21+Math.sin(a)*17,3.2,'#fff8cb');
+   }
+   break;
+ }
+ ctx.restore();
+}
+
 function draw(ctx, pose, R) {
   const src = pose || {};
   const safe = src.look ? src : Object.assign({ look: { x: 1, y: 0 } }, src);
@@ -611,6 +680,7 @@ function draw(ctx, pose, R) {
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
   drawMichiMythic(ctx,safe,r,f);
+  drawMichicornioGesture(ctx,safe,r,f);
   moonSoul(ctx, safe, f, true);
   ctx.restore();
 }
