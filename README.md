@@ -13,7 +13,7 @@ Un juego de plataformas y aventura 2D hecho con JavaScript y Canvas. Explora, do
 <a href="https://gracianb.github.io/project-ohana/"><img alt="Jugar Project OHANA" src="https://img.shields.io/badge/JUGAR_EN_EL_NAVEGADOR-7EE7FF?style=for-the-badge&labelColor=071226" /></a>
 <a href="https://github.com/GracianB/project-ohana/actions"><img alt="GitHub Actions" src="https://img.shields.io/github/actions/workflow/status/GracianB/project-ohana/ohana-ci.yml?branch=main&style=for-the-badge&labelColor=071226&label=CI" /></a>
 
-[**Jugar**](https://gracianb.github.io/project-ohana/) · [**Ver el código**](https://github.com/GracianB/project-ohana) · [**Desarrollo de mundos personales**](https://github.com/GracianB/project-ohana/pull/387)
+[**Jugar**](https://gracianb.github.io/project-ohana/) · [**Ver el código**](https://github.com/GracianB/project-ohana) · [**Seguimiento del cierre individual**](docs/V457-CIERRE-SOLO.md)
 
 <img src="assets/worlds/hub-bg.jpg" width="100%" alt="Arte incluido en el juego: paisaje del Claro Ohana" />
 
@@ -73,32 +73,30 @@ El XP transforma las capacidades, la silueta y la puesta en escena del personaje
 
 **Su recorrido:** Claro → Costa / Jungla → Caldera → Nido, con desvíos por Cueva, Laboratorio, Cumbre, Órbita y Arrecife. El jugador progresa mediante combate, movimientos, evolución y exploración, no pasando diapositivas.
 
-## El siguiente capítulo: diez experiencias personales
+## Aventuras personales: código integrado, aceptación pendiente
 
-La visión de OHANA no consiste en cambiar el color de las mismas diez salas. **Cada héroe tendrá una ruta personal reconocible**, con biomas, retos, plataformas, enemigos, colecciones, un encuentro especial y puesta en escena adaptados a sus poderes. Esa es la dirección de desarrollo, **no una promesa de que ya estén publicadas**.
+Las **10 salas canónicas de Isla Hoku** siguen siendo la campaña compartida. En partida individual, las variantes de escenario viven sobre el Claro sin crear otras diez salas canónicas ni alterar el grafo original. El juego contiene ya integraciones de sala y recorrido para los diez héroes; **eso no implica que todos hayan superado aceptación de 100 coleccionables, minijefe, móvil, persistencia y publicación**.
 
-| Personaje | Universo personal | Estado |
+| Héroe | Bioma individual | Validación pendiente |
 | :--- | :--- | :--- |
-| **Kilo** | Bahía del Compás, música, flores y Tambor del Claro | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
-| **Stitcho** | Archipiélago del Caos, fragmentos, electricidad y Núcleo Glitch | En desarrollo, [PR #387](https://github.com/GracianB/project-ohana/pull/387) |
-| **Chispín** | Islas del Relámpago | Planificado |
-| **Michi** | Jardines de la Luna | Planificado |
-| **Dragón** | Cordillera de las Brasas | Planificado |
-| **Dino** | Valle de los Gigantes | Planificado |
-| **Frita** | Mercado Dorado | Planificado |
-| **Pizza** | Reino del Horno | Planificado |
-| **Yomi** | Observatorio Astral | Planificado |
-| **Cuerno** | Bosque del Prisma | Planificado |
+| Kilo | Bahía del Compás | Recorrido completo y despliegue verificado |
+| Stitcho | Archipiélago del Caos | Recompensa y campaña completa |
+| Chispín | Islas del Relámpago | Integración selectiva de [PR #390](https://github.com/GracianB/project-ohana/pull/390) tras revisión de dependencias |
+| Michi | Jardines de la Luna | Rediseño visual y aceptación completa |
+| Dragón | Cordillera de las Brasas | Prueba de ruta, combate y recompensa |
+| Dino | Valle de los Gigantes | Prueba de ruta, combate y recompensa |
+| Frita | Mercado Dorado | Prueba de ruta, combate y recompensa |
+| Pizza | Reino del Horno | Prueba de ruta, combate y recompensa |
+| Yomi | Observatorio Astral | Prueba de ruta, combate y recompensa |
+| Cuerno | Bosque del Prisma | L / corona prismática y regresión visual |
 
-**Objetivo de cada ruta:** exploración y combate propios, progresión individual, **100 objetos por personaje** y una recompensa especial al reunirlos todos. La mecánica se está desarrollando y validando en [PR #387](https://github.com/GracianB/project-ohana/pull/387); no aparece todavía en la versión pública de la web. La [arquitectura de diez identidades](https://github.com/GracianB/project-ohana/pull/388) continúa en una PR separada.
+El progreso individual de 100 objetos utiliza guardado por héroe. Las pruebas de recorrido real, ubicación alcanzable y ventajas de cada reliquia deben mantenerse independientes del simple recuento de objetos. Consulte [matriz de cierre](docs/V457-CIERRE-SOLO.md).
 
-## Juega con otra persona
+## Multijugador: temporalmente en pausa
 
-OHANA ya contiene una base multijugador en desarrollo con conexión entre navegadores, sincronización del combate, habilidades conjuntas y pruebas WebRTC en Chromium y Firefox. **Todavía no presentamos la experiencia cooperativa como un modo público listo para concurso**: falta cerrar el flujo de acceso con código de sala, las reconexiones, pruebas entre dispositivos y el despliegue reproducible.
+La base de conexión WebRTC y los tests entre dos navegadores **se conservan**, pero la experiencia pública está **en pausa** por límites de créditos de Netlify y el servidor de señalización/relay. No se reactivarán servicios externos ni se prometerá una sesión pública hasta que haya presupuesto y un despliegue autorizado.
 
-Tras estabilizar los mundos personales, el objetivo es una experiencia compartida fácil de entender: **abrir la URL, crear o introducir un código de sala y jugar en dos dispositivos sin instalar nada**.
-
-El siguiente gran hito es una demo multijugador completamente jugable y verificable, no una cifra de tests en un README.
+La validación obligatoria se centra ahora en **partida individual, offline, controles, diez héroes, diez salas, jefes y móvil**. La batería cooperativa local puede ejecutarse manualmente desde GitHub Actions con `run_multiplayer=true`, sin invocar Netlify, TURN de pago ni el otro servidor. No se ha comprobado una sesión real entre dos redes/dispositivos externos en este cierre.
 
 ## Controles
 
@@ -140,7 +138,7 @@ Cada personaje pasa por: identidad visual → recorrido y física → enemigos y
 
 Se cierra una fase **cuando funciona en el juego y supera las pruebas**, no cuando simplemente existe una PR. Los detalles históricos de campaña y pruebas permanecen en [WORLD-1.md](WORLD-1.md) y los documentos técnicos del repositorio.
 
-El multijugador requiere además: sincronización del estado autoritativo, conexión remota real, reconexión, interacción de dos dispositivos, experiencia de invitación, equilibrio de combate y una URL pública verificable.
+Cuando se reactive, el multijugador requerirá además: sincronización del estado autoritativo, conexión remota real, reconexión, interacción de dos dispositivos, experiencia de invitación, equilibrio de combate y una URL pública verificable.
 
 </details>
 
