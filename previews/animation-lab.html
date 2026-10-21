@@ -49,8 +49,9 @@ const cards=ROSTER.map((hero)=>{
 function draw(){
  for(const {id,canvas} of cards){
   const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
-  const pose={state:action,form:2,t:frame,phase:frame*.15,atk:Math.max(.08,(frame%90)/90),
-   cast:Math.max(.08,(frame%100)/100),castSlot:2,look:{x:.4,y:0},speed:.9,reduceMotion:toggle.checked};
+  const time=toggle.checked?90:frame;
+  const pose={state:action,form:2,t:time,phase:time*.15,atk:Math.max(.08,(time%90)/90),
+   cast:Math.max(.08,(time%100)/100),castSlot:2,look:{x:.4,y:0},speed:.9,reduceMotion:toggle.checked};
   ctx.save();ctx.translate(132,221);ctx.scale(1.32,1.32);
   applyTenActionPose(ctx,pose,id,2);
   ART[id].draw(ctx,pose,R);ctx.restore();

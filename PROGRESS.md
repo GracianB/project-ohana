@@ -1,3 +1,11 @@
+# OHANA · V459 · Michicornio anatomical motion, 10 × 10 actions
+
+**Candidate cache**: `ohana-459`. 10 personajes, 5 formas, 10 salas. PR de desarrollo: no desplegada hasta fusionar y verificar Pages.
+
+Michicornio: F1 deja de ser liebre y vuelve a una línea felina como Lince Lunar adulto. F2 Medusa Onírica conserva orejas gatunas y bigotes; F3 dragón astral hereda orejas y filamentos; F4 guardián Eclipse culmina en nueve tentáculos vítreos animados. Los 10 personajes comparten diez canales de acción diferenciados con perfiles propios, y Michicornio añade 10 gestos específicos de su anatomía. Movimiento reducido determinista.
+
+**Pruebas nuevas**: `tests/ten-action-v459.test.js`, `tests/browser/v459-motion.mjs` y el laboratorio navegable `previews/animation-lab.html`.
+
 # OHANA · V458: Michicornio (PR #392, no publicado)
 
 **Caché candidata**: `ohana-458`. Mantiene 10 personajes, 5 formas por personaje y 10 salas canónicas. Rama aislada de `main`.

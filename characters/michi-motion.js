@@ -3,7 +3,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
 export function michiMotion(pose={},form=0){
  const state=pose.state||'idle',phase=Number(pose.phase)||0,t=Number(pose.t)||0;
  const reduced=!!pose.reduceMotion,run=state==='run',air=['jump','fall','glide'].includes(state);
- const step=Math.sin(phase),stride=run?clamp(pose.speed,.2,1):0;
+ const step=reduced?0:Math.sin(phase),stride=run?clamp(pose.speed,.2,1):0;
  const land=air?0:clamp(pose.land,0,1),cast=clamp(pose.cast,0,1),atk=clamp(pose.atk,0,1);
  const slot=Number.isInteger(pose.michiPowerIndex)?pose.michiPowerIndex:state==='cast'?Number(pose.castSlot):-1;
  const swipe=state==='attack'?Math.sin(atk*Math.PI):slot===0?Math.sin(cast*Math.PI):0;
@@ -23,8 +23,8 @@ export function michiMotion(pose={},form=0){
   frontX:run?step*10*stride:tuck*8,
   backY:run?-Math.max(0,-Math.cos(phase))*8*stride:-tuck*7,
   frontY:run?-Math.max(0,Math.cos(phase))*8*stride:-tuck*11,
-  rearPaw:slot===1?.3+Math.sin(t*.2)*.25:run?-step*.65:-tuck*.6,
-  frontPaw:(slot===1?.3-Math.sin(t*.2)*.25:0)+swipe*1.9+reach*1.4+(run?step*.75:-tuck*.8),
+  rearPaw:slot===1?.3+(reduced?0:Math.sin(t*.2)*.25):run?-step*.65:-tuck*.6,
+  frontPaw:(slot===1?.3-(reduced?0:Math.sin(t*.2)*.25):0)+swipe*1.9+reach*1.4+(run?step*.75:-tuck*.8),
   crouch:land*5+(slot===1?3:0),
   mood:slot===1?'happy':swipe>.2||slot===2?'angry':state==='hurt'?'sad':null,
   cloud:form===2,wing:form===4&&!reduced?(air?Math.sin(t*.24)*.35:Math.sin(t*.08)*.06):0,

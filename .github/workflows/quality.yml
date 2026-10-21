@@ -55,6 +55,9 @@ jobs:
       - name: V458 Michicornio art, custom foes, room and mobile
         run: node tests/browser/v458-michicornio.mjs
 
+      - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
+        run: node tests/browser/v459-motion.mjs
+
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
 
