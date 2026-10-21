@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Michicornio V460 · Evoluciones cinematográficas</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1124;color:#f5efff;font:16px/1.4 system-ui}
+main{max-width:1120px;margin:auto;padding:clamp(15px,3vw,35px)}
+h1{font-size:clamp(26px,4vw,46px);margin:8px 0;letter-spacing:-.045em}
+p{color:#c1c9e3;max-width:780px}
+.toolbar{display:flex;flex-wrap:wrap;gap:13px;align-items:center;padding:18px 0}
+button,select{padding:10px 12px;border:1px solid #6977a7;background:#273454;color:#f9f3ff;border-radius:12px;font:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f6d1ff;outline-offset:2px}
+label{display:inline-flex;align-items:center;gap:8px}
+.card{border:1px solid #58648d;border-radius:22px;background:#141b33;overflow:hidden;position:relative}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9}
+time{color:#f2e3ff;font-variant-numeric:tabular-nums}
+input[type=range]{accent-color:#d6b6ed;width:min(280px,70vw)}
+.badge{font-size:13px;color:#e2d2ff}footer{padding-top:19px;color:#aab8d5}
+</style><main><p>OHANA · ESTUDIO CANVAS V460 · METAMORFOSIS</p>
+<h1>Michicornio: la luna despierta.</h1>
+<p>La cinemática utiliza el personaje real, con ojos, orejas, zarpas y tentáculos vivos. Cuatro actos y tres grandes transiciones visuales. Sin PNG ni reproducción automática de música.</p>
+<div class="toolbar">
+<label>Transformación
+<select id="step">
+<option value="1">Bebé → Lince lunar</option><option value="2">Lince → Medusa Onírica</option>
+<option value="3">Medusa → Dragón Astral</option><option value="4">Dragón → Eclipse</option>
+</select></label>
+<button id="replay" type="button">Reproducir de nuevo</button>
+<button id="pause" type="button" aria-pressed="false">Pausar</button>
+<label>Tiempo <input id="scrub" type="range" min="0" max="4" step=".02" value="0"></label>
+<time id="clock">0:00</time>
+</div>
+<div class="card"><canvas width="960" height="540" aria-label="Transformación animada de Michicornio"></canvas></div>
+<div class="toolbar"><span class="badge" id="chapter">Escuchando a la luna…</span>
+<a style="color:#e4c8ff" href="./michi-design.html">Volver a las cinco formas</a></div>
+<footer>Movimiento reducido: los gestos pequeños se detienen, pero se conservan las cuatro escenas esenciales de la evolución.</footer>
+</main>
+<script type="module">
+import {drawEvoCine,michicornioEvoBeat,EVO_CINE_DURATION} from '../systems/evo-cine/michi.js';
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),selector=document.querySelector('#step');
+const scrub=document.querySelector('#scrub'),clock=document.querySelector('#clock'),chapter=document.querySelector('#chapter');
+const pause=document.querySelector('#pause');let t=0,frozen=false,last=0,stop=false;
+function paint(){
+ const to=Number(selector.value)+1,beat=michicornioEvoBeat(t,to-1,to);
+ drawEvoCine(ctx,canvas.width,canvas.height,t,to-1,to);
+ scrub.value=t.toFixed(2);clock.textContent='0:'+String(Math.floor(t)).padStart(2,'0');
+ chapter.textContent={listen:'01 · Escuchar',gather:'02 · Reunir luz',morph:'03 · Transformación',reveal:'04 · Revelación'}[beat.act];
+}
+selector.onchange=()=>{t=0;frozen=false;paint();};
+scrub.oninput=()=>{t=Number(scrub.value);frozen=true;pause.setAttribute('aria-pressed','true');paint();};
+document.querySelector('#replay').onclick=()=>{t=0;frozen=false;last=0;pause.setAttribute('aria-pressed','false');paint();};
+pause.onclick=()=>{frozen=!frozen;pause.setAttribute('aria-pressed',String(frozen));};
+function tick(now){
+ if(!frozen&&!stop){if(last)t+=Math.min(.05,(now-last)/1000);last=now;
+  if(t>EVO_CINE_DURATION){t=EVO_CINE_DURATION;stop=true;}paint();}
+ requestAnimationFrame(tick);
+}
+window.michiCinema={setFrame(seconds){t=Math.max(0,Math.min(4,seconds));frozen=true;paint();},
+ setEvolution(n){selector.value=String(n);selector.onchange();frozen=true;paint();},
+ getBeat(){const from=Number(selector.value);return michicornioEvoBeat(t,from,from+1);}};
+paint();window.previewReady=true;requestAnimationFrame(tick);
+</script></html>
