@@ -39,21 +39,33 @@ try{
   assert.ok(initial.state.roomName,id+' needs a named chapter');
   names.add(initial.state.roomName);
   await page.screenshot({path:'test-results/v457/'+id+'-baby-desktop.png'});
-  const result=await page.evaluate(hero=>{
+  const result=await page.evaluate(async hero=>{
    const e=window.__OHANA_E2E;
-   // State/persistence only: teleport is intentional and does not validate
-   // reachability or boss defeat, which require human route acceptance.
-   const items=e.heroItems();
+   const {ROSTER}=await import('/characters/roster.js');
+   const form=ROSTER.find(c=>c.id===hero).forms[0];
+   // State/persistence only: teleport targets the ACTUAL baby hitbox center.
+   // It cannot certify that platforming routes are human-reachable.
+   const items=e.heroItems(), missed=[];
    e.setInvulnerable(600);
    for(const item of items){
-    e.setPlayer(item.x-15,item.y-20);
+    const before=e.state().heroCollection?.count||0;
+    e.setPlayer(item.x-form.w/2,item.y-form.h/2);
+    if((e.state().heroCollection?.count||0)===before){
+     // Collision resolution can move the actor during this frame. Retry the
+     // same exact point once, rather than treating a physics tick as a pickup.
+     e.setPlayer(item.x-form.w/2,item.y-form.h/2);
+    }
+    if((e.state().heroCollection?.count||0)===before){
+     missed.push({id:item.id,x:Math.round(item.x),y:Math.round(item.y),dead:e.state().hp<=0});
+    }
    }
    const collected=e.state().heroCollection;
+   if(collected.count!==100)return {collected,missed,after:null};
    e.loadRoom('beach');e.loadRoom('hub');
    const after=e.state().heroCollection;
-   return {collected,after};
+   return {collected,after,missed};
   },id);
-  assert.equal(result.collected?.count,100,id+' did not pick all objects');
+  assert.equal(result.collected?.count,100,id+' did not pick all objects: '+JSON.stringify(result.missed));
   assert.equal(result.collected?.complete,true,id+' reward not issued');
   assert.equal(result.collected?.reward,reward,id+' trophy not personal');
   assert.equal(result.after?.count,100,id+' did not persist after room transition');
