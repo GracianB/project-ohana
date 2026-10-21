@@ -1,4 +1,4 @@
-const VERSION = "ohana-459";
+const VERSION = "ohana-460";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -131,6 +131,8 @@ const PRECACHE = [
   "./characters/art/cat.js?v=" + VERSION,
   "./characters/ten-action-acting.js?v=" + VERSION,
   "./previews/animation-lab.html?v=" + VERSION,
+  "./previews/michi-design.html?v=" + VERSION,
+  "./previews/michicornio-cinema.html?v=" + VERSION,
   "./characters/art/chispin.js?v=" + VERSION,
   "./characters/art/cuerno.js?v=" + VERSION,
   "./characters/art/dino.js?v=" + VERSION,
@@ -399,7 +401,7 @@ const PRECACHE_REVISIONS = {
   "characters/hula-depth.js": "d8d727af693c5b0e406f40d69c163126087c8e0d",
   "systems/world-bounds.js": "bb28e553ed1c07a0dfc0b62b3924fe0525f359c2",
   "systems/platform-layout.js": "3d5b15bbf71dda8749f63adcec11c44aedce3464",
-  "characters/michi-motion.js": "9cd47d58043c33ab1bfb616e0aead776debb095e",
+  "characters/michi-motion.js": "354be1f07643966e91515952784d4fe414ec1dc9",
   "worlds/natural-ledges.js": "92e2931c6efc84a477da5e09cde443e3a78715b3",
   "worlds/island-landmarks.js": "c10f704c253992ef123299d0ab182d94b0c0367a",
   "systems/campaign-exploration.js": "573e6fc94d957fe8292951b4cacf134ee573a457",
@@ -441,11 +443,11 @@ const PRECACHE_REVISIONS = {
   "family-camp.css": "5e107cb7d8c96964f4e1c65dc6e62767634bfebf",
   "systems/family-camp.js": "83e30aa32fc9b8f8c214584a40d6d854b3d13f75",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
-  "systems/evo-cine/real-actor.js": "ac8fe2a1f4fbbf5edd9504044839704e12bd02eb",
+  "systems/evo-cine/real-actor.js": "819f87e17260c00c7740929b94820385fe1e7172",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "3ec8d1aa2fe3fb214b0e98c99e50c9fe46f6cb75",
+  "index.html": "87d7b63752abc433cee68fe325922917c99a607d",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -472,7 +474,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "659b513db77ac4d95457344713d16092e2e88065",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "b0725bdebbbde2019372fc790fb450f79fc9d95d",
+  "characters/art/cat.js": "c68038d1174cedff3f5a60d86ff36a5abd68d846",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
@@ -520,7 +522,7 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/cuerno.js": "0edde04ae08117a722003f551b6966912253a314",
   "systems/evo-cine/chispin.js": "950ba67afb4711967291b222e8f016fedf829acc",
   "systems/evo-cine/pizza.js": "ff81084feff4b0f62e8d19b3bd5dbf7f0fdb18e7",
-  "systems/evo-cine/michi.js": "e7d05336670c0efebd6cedb90abeeb0a581c4a8d",
+  "systems/evo-cine/michi.js": "57f263c97458b04533121fe6a3c9d9f307491f0a",
   "systems/evo-cine/yomi.js": "1d7c30124e64a3fe061a45199d01b2e2529bb8f2",
   "systems/evo-cine/dino.js": "fc356b5e946345dbf856173fdf293b4cb0e9b654",
   "systems/evo-cine/dragon.js": "4cfec65095a07be5942c45bc47bf119725c61b35",
@@ -637,7 +639,7 @@ const PRECACHE_REVISIONS = {
   "systems/intro-kilo-stage.js": "89c4d649e598e2c7ad5ec51daecf0b8904fc374b",
   "systems/intro-stitcho-stage.js": "55d59da936c32ecc447078b83b18323c257c36b4",
   "systems/intro-chispin-stage.js": "e9c52c2b8852b3a861e17d5fd73b7209a1f17454",
-  "systems/intro-michi-stage.js": "a89f2ad4ada0c4fb89af14324d08ad7377d5a579",
+  "systems/intro-michi-stage.js": "51329eb652f97f92cf62c9edf4490f07b1bc475c",
   "systems/intro-fantasy.js": "4af41b9fc17ba8736ab2b8306167f270de242b80",
   "systems/magic.js": "4f737b1eda71e63ffd62ed28a88fcf54993945c8",
   "systems/map.js": "cf944a71e5d3fa396e0a4dae337ee23eb5973130",
@@ -683,7 +685,9 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
-  "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e"
+  "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
+  "previews/michi-design.html": "bb4d38311c19ea10f76c3b4f0ae376ab25302e43",
+  "previews/michicornio-cinema.html": "3b9df51ca50238b8ffd92136fa7c4a3060f2f41e"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
