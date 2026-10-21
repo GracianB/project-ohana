@@ -8,7 +8,9 @@ try{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const root='http://127.0.0.1:'+server.address().port;
  await page.goto(root+'/previews/animation-lab.html');
- await page.waitForFunction(()=>window.previewReady===true);
+ try{await page.waitForFunction(()=>window.previewReady===true,{timeout:12000});}
+ catch(error){throw Error('Animation lab did not boot: '+errors.join(' | ')+'; '+error.message);}
+ assert.deepEqual(await page.evaluate(()=>window.__labErrors||[]),[],'animation lab hero renderer errors');
  assert.equal(await page.locator('#heroes canvas').count(),10);
  assert.equal(await page.locator('#actions button').count(),10);
  const results=await page.evaluate(()=>{
