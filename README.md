@@ -12,7 +12,7 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459, integradas mediante las PR #392 y #393, ya están en <code>main</code>. La evolución cinematográfica y animación V460 se prepara en una PR independiente, sin cambiar el multijugador remoto. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
+<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459, integradas mediante las PR #392 y #393, ya están en <code>main</code>. La animación V460 está documentada en la <a href="https://github.com/GracianB/project-ohana/pull/394">PR #394</a>; comprueba el commit publicado en Pages para confirmar su disponibilidad. El multijugador remoto sigue en pausa. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
 
 </div>
 
@@ -41,7 +41,7 @@ La **intro familiar** incorpora corona, iris lunar y gestos de personalidad excl
 
 [**Ver el storyboard cinematográfico V460**](previews/michicornio-cinema.html) · [**Laboratorio de cinco formas y diez acciones**](previews/michi-design.html) · [**Comprobar el movimiento de los diez héroes**](previews/animation-lab.html)
 
-> **Control de publicación:** V460 es una candidata de la rama de desarrollo, no una versión pública hasta que CI, la regresión visual y Pages aprueben el mismo commit. El modo de movimiento reducido mantiene las escenas principales sin vibración.
+> **Control de publicación:** La publicación de V460 se acredita únicamente con CI, regresión visual y GitHub Pages aprobados para el commit de <code>main</code>. El modo de movimiento reducido mantiene las escenas principales sin vibración.
 
 ## V459 · Cien animaciones de personaje y evolución felina coherente
 
