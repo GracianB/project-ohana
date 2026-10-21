@@ -25,7 +25,12 @@ try {
  });
 
  for(const row of audit){assert.deepEqual(row.before,row.after,'hitbox changed');const target=[55,70,85,102,120][row.evo];assert.ok(Math.abs(row.height-target)<15,`${row.id} F${row.evo} ${row.look}: ${row.height}px`)}
- for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++)assert.ok(audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo).height>audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1).height);
+ for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++){
+  const before=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1);
+  const after=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo);
+  assert.ok(after.height>before.height,`${id} vector F${evo-1}→F${evo}: ${before.height}→${after.height}px (must grow)`);
+ }
+ console.log('Optical size matrix:',JSON.stringify(audit.filter(row=>row.id==='cat').map(({look,evo,height})=>({look,evo,height}))));
  await fs.mkdir('test-results/visual',{recursive:true});await page.screenshot({path:'test-results/visual/cuerno-design.png',fullPage:true});
  for(const pose of ['blink','victory','shy','curious','hurt','death','attack','trail']){await page.selectOption('#pose',pose);await page.evaluate(()=>window.cuernoPreview.setFrame(50));assert.equal(await page.locator('.evolutions canvas').count(),5)}
  await page.getByRole('button',{name:'Girar'}).click();assert.equal(await page.locator('#mirror').getAttribute('aria-pressed'),'true');
