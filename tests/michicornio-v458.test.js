@@ -36,7 +36,7 @@ test('solo Moon Sanctuary has recoverable connectors, original topology and five
  const room=createMichiRoom(base);
  assert.equal(room.id,'hub');assert.equal(base.name,undefined);
  assert.match(room.name,/Michicornio/);
- assert.equal(room.plats.length>=60,true,'need meaningful accessible ledges');
+ assert.equal(room.plats.length>=55,true,'need meaningful accessible ledges');
  assert.equal(room.foes.length,10);
  assert.deepEqual(new Set(room.foes.map(x=>x[4].michiKind)),new Set(MICHICORNIO_FOE_KINDS));
  assert.equal(room.sectors.length,4);

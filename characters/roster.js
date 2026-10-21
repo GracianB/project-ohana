@@ -11,6 +11,7 @@ const ALIAS = {
   pikachu: "chispin",
   stitch: "stitcho",
   michi: "cat",
+  michicornio: "cat",
   lilo: "kilo",
 };
 
