@@ -472,7 +472,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "659b513db77ac4d95457344713d16092e2e88065",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "3a724dde75a9954dd8a2715b9fea9d8ac3349b7b",
+  "characters/art/cat.js": "b0725bdebbbde2019372fc790fb450f79fc9d95d",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
