@@ -48,11 +48,23 @@ jobs:
             --exclude=".[^/]*" \
             .
 
+      # Give each attempt its own artifact. GitHub keeps artifacts from
+      # previous attempts, so re-running a failed deploy otherwise creates
+      # multiple "github-pages" archives and deploy-pages refuses to choose.
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           path: .
+
+      # The Actions artifact service can be briefly eventually consistent:
+      # an upload may report SUCCESS before deploy-pages can index it.
+      - name: Allow artifact indexing
+        shell: sh
+        run: sleep 15
 
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
