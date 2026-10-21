@@ -8,11 +8,11 @@
 
 **Plataformas · exploración · combate · evolución · mundos personales**
 
-**10 héroes** · **5 evoluciones por héroe** · **10 salas canónicas conectadas**
+**10 personajes** · **5 formas por héroe** · **10 salas canónicas conectadas**
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública sigue la rama <code>main</code>. Las novedades de V457 están en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a> y no se consideran publicadas hasta superar el despliegue de Pages.</sub>
+<sub>La web pública se sirve desde <code>main</code>. El rediseño V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
 
 </div>
 
@@ -101,10 +101,10 @@ Hay controles táctiles en móvil.
 | **Diez salas compartidas** | Implementadas |
 | **Variantes y coleccionables personales** | Integrados; falta aceptación manual de todas las rutas y recompensas |
 | **Calidad de la PR #391** | [CI y quality aprobados para el código V457](https://github.com/GracianB/project-ohana/actions/runs/39637919429), incluido arte de Michi y regresión visual |
-| **Publicación** | Pendiente de integrar la PR y verificar GitHub Pages en el commit publicado |
+| **Publicación** | Verificar en [GitHub Pages Actions](https://github.com/GracianB/project-ohana/actions/workflows/pages.yml) que el commit de `main` se ha desplegado correctamente |
 | **Multijugador remoto** | **En pausa** por créditos de Netlify y del servidor externo; sin reactivaciones ni consumo de servicios |
 
-**Importante:** una PR en verde es un paso de calidad, no equivale a un despliegue en Pages ni a una validación manual completa.
+**Importante:** una PR en verde es un paso de calidad; la publicación real requiere un Pages correcto para el commit de `main` y después validación manual completa.
 
 ## Desarrollo local
 
