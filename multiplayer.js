@@ -5,6 +5,9 @@ import { makeFoe } from "./engine/foes.js";
 import { WORLDS, renderWorld } from "./worlds/index.js";
 import { CAMPAIGN } from "./multiplayer/mission.js";
 
+// Until the external signaling/Netlify budget is restored, public clients must
+// never create rooms or poll paid endpoints. Loopback is kept for local tests.
+const LIVE_COOP_PAUSED = !['localhost','127.0.0.1'].includes(location.hostname);
 const endpoint = "/.netlify/functions/game";
 const ARENA = { left: 48, right: 1232, top: 450, floor: 572, exit: 1125 };
 const MAX_QUEUED_ACTIONS = 8;
@@ -28,6 +31,7 @@ function showError(id, message = "") { $(id).textContent = message; }
 function serverNow() { return Date.now() + state.serverOffset; }
 
 async function api(action, payload = {}) {
+  if (LIVE_COOP_PAUSED) throw new Error('Multijugador temporalmente en pausa: servidores externos sin créditos. Juega al modo individual.');
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
   try {
@@ -1230,3 +1234,16 @@ try {
       });
   }
 } catch {}
+
+// Keep the archived cooperative page informative, not a paid-service trap.
+if (LIVE_COOP_PAUSED) {
+  for (const id of ['create-room','join-room','confirm-character']) {
+    const button=document.getElementById(id);
+    if(button){button.disabled=true;button.title='En pausa hasta recuperar servidores externos';}
+  }
+  const note=document.createElement('p');
+  note.setAttribute('role','status');
+  note.textContent='El multijugador está temporalmente en pausa por límites del servidor. La aventura individual sigue disponible.';
+  note.style.cssText='margin:1rem auto;padding:1rem;border:1px solid #9daac0;border-radius:10px;max-width:42rem;text-align:center';
+  document.querySelector('#entry')?.prepend(note);
+}
