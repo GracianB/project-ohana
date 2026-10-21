@@ -306,6 +306,53 @@ function drawMichiMythic(ctx,pose,r,f){
  };
  const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;
  const lift=(r.st==='jump'||r.st==='glide')?-4:0;
+ if(f===0){ // MOON KITTEN: fully redrawn baby, not the old cat portrait.
+  const sway=wave(0,.075);
+  ctx.save();ctx.scale(.70,.70);ctx.translate(0,lift);
+  // A curled crescent tail remains recognizable even at tiny sizes.
+  ctx.beginPath();ctx.moveTo(-13,-26);
+  ctx.bezierCurveTo(-40,-19,-53,-54,-32,-72);
+  ctx.bezierCurveTo(-14,-81,-12,-62,-26,-58);
+  stroke(ink,12);stroke('#dbc7f5',8);
+  oval(-26,-58,4,4,'#ffe1a6',null);
+  for(const side of [-1,1])oval(side*13,-5,11,6,'#e6d5f9');
+  oval(0,-27,23,27,'#c8b5f0');
+  oval(2,-26,14,19,'#fff7e9',null);
+  ctx.beginPath();ctx.arc(4,-31,10,-1.25,2.25);stroke('#eabf63',3);
+  oval(0,-23,7,9,'#c8b5f0',null);
+  for(const side of [-1,1]){
+   const pawY=-27+(r.st==='run'?sway*3:0);
+   ctx.beginPath();ctx.moveTo(side*15,-37);
+   ctx.quadraticCurveTo(side*29,-35,side*25,pawY);
+   stroke(ink,8);stroke('#e4d0f7',5);
+   oval(side*25,pawY,5.5,5.5,'#fff3f9');
+  }
+  ctx.save();ctx.translate(0,-70);
+  ctx.rotate((r.michiHead||0)*.30+sway*.035);
+  // Asymmetric star ears: unique facial language, not reused cat outlines.
+  for(const side of [-1,1]){
+   ctx.beginPath();ctx.moveTo(side*13,-17);
+   ctx.lineTo(side*29,-43+(side===1?sway:0));
+   ctx.quadraticCurveTo(side*36,-26,side*29,-2);
+   ctx.closePath();ctx.fillStyle='#d9c6f6';ctx.fill();stroke(ink,2.6);
+   ctx.beginPath();ctx.moveTo(side*20,-16);
+   ctx.lineTo(side*29,-32);ctx.lineTo(side*26,-10);
+   ctx.closePath();ctx.fillStyle='#f5b6d8';ctx.fill();
+  }
+  oval(0,0,32,28,'#e6d9fb');
+  oval(0,13,19,11,'#fff8f1',null);
+  eye(-13,-3,'#6d68d9',6,8);
+  eye(13,-3,'#6d68d9',6,8);
+  oval(0,11,4,3,'#e995b6',null);
+  ctx.beginPath();ctx.moveTo(0,14);ctx.quadraticCurveTo(-4,19,-7,15);
+  ctx.moveTo(0,14);ctx.quadraticCurveTo(4,19,7,15);stroke(ink,1.8);
+  for(const side of [-1,1])for(const y of [11,16]){
+   ctx.beginPath();ctx.moveTo(side*20,y);ctx.lineTo(side*37,y-3);stroke('#8e77bd',1.4);
+  }
+  gem(0,-20,'#ffe2a0',6);
+  oval(-20,5,4,2,'#f6a6c8',null);
+  ctx.restore();ctx.restore();return;
+ }
  if(f===1){ // MOON HARE: towering flexible ears, spring haunches, lunar tail.
   const p=wave(0,.075),hop=still?0:Math.abs(wave(1,.12))*2.5;
   ctx.save();ctx.scale(.62,.62);ctx.translate(0,lift-hop);
@@ -450,8 +497,7 @@ function draw(ctx, pose, R) {
   else if (r.st === "fall") ctx.scale(1.05, 0.92);
   else if (r.slot === 1) ctx.scale(1.08, 0.9);
   else if (safe.bodyTilt) ctx.rotate(safe.bodyTilt * 0.8);
-  if (f===0) drawMichiPortrait(ctx,R,safe,r,c,f);
-  else drawMichiMythic(ctx,safe,r,f);
+  drawMichiMythic(ctx,safe,r,f);
   moonSoul(ctx, safe, f, true);
   ctx.restore();
 }
