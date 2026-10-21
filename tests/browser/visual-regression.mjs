@@ -1224,8 +1224,15 @@ try {
   });
   assert.equal(ribbonV84.lastAbilityId,'gallop','09t2-cuerno: K trail cast was lost');
   await capture(page,'09t2-cuerno-v84-persistent-rainbow-k');
+  // A second L must be tested on a fresh actor: the prior L in this suite
+  // has a legitimate 5.6s cooldown. K -> L is separately tested in
+  // cuerno-v92-resonance; do not misreport cooldown as a rendering failure.
   const crownV84=await page.evaluate(()=>{
-    const api=window.__OHANA_E2E;api.cast(2);api.step(18);return api.state();
+    const api=window.__OHANA_E2E;
+    api.start('cuerno');api.setEvo(4);api.setInvulnerable(240);
+    const first=api.cast(2);
+    if(first.lastAbilityId!=='rainbow')return first;
+    api.step(18);return api.state();
   });
   assert.equal(crownV84.lastAbilityId,'rainbow','09t3-cuerno: L prism crown was not cast');
   await capture(page,'09t3-cuerno-v84-seven-horn-crown-l');
