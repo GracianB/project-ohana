@@ -1,144 +1,137 @@
 <div align="center">
 
+<img src="favicon.svg" alt="Símbolo de Project OHANA" width="76" />
+
 # PROJECT OHANA
 
-**Diez héroes. Cinco formas por héroe. Un universo que crece contigo.**
+### Diez héroes. Cincuenta formas. Una isla llena de aventuras.
 
-**10 personajes · 5 formas cada uno · 10 salas compartidas de Isla Hoku.**
+**Plataformas · exploración · combate · evolución · mundos personales**
 
-Un juego de plataformas y aventura 2D hecho con JavaScript y Canvas. Explora, domina poderes distintos, evoluciona, descubre secretos y lucha junto a otra persona.
+**10 héroes** · **5 evoluciones por héroe** · **10 salas canónicas conectadas**
 
-**10 personajes · 5 formas por héroe · 10 salas conectadas en Isla Hoku.**
+[**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<a href="https://gracianb.github.io/project-ohana/"><img alt="Jugar Project OHANA" src="https://img.shields.io/badge/JUGAR_EN_EL_NAVEGADOR-7EE7FF?style=for-the-badge&labelColor=071226" /></a>
-<a href="https://github.com/GracianB/project-ohana/actions"><img alt="GitHub Actions" src="https://img.shields.io/github/actions/workflow/status/GracianB/project-ohana/ohana-ci.yml?branch=main&style=for-the-badge&labelColor=071226&label=CI" /></a>
-
-[**Jugar**](https://gracianb.github.io/project-ohana/) · [**Ver el código**](https://github.com/GracianB/project-ohana) · [**Seguimiento del cierre individual**](docs/V457-CIERRE-SOLO.md)
-
-<img src="assets/worlds/hub-bg.jpg" width="100%" alt="Arte incluido en el juego: paisaje del Claro Ohana" />
-
-<sub>Arte del proyecto. El escenario del juego se genera también con ilustración vectorial dinámica; esta imagen no es una captura de una partida.</sub>
+<sub>La web pública sigue la rama <code>main</code>. Las novedades de V457 están en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a> y no se consideran publicadas hasta superar el despliegue de Pages.</sub>
 
 </div>
 
-## Conoce a la familia
+---
 
-No son diez aspectos del mismo protagonista. Cada uno tiene su personalidad, movilidad, animaciones, pasivas y habilidades para resolver el mundo de forma diferente.
+## Un videojuego que se dibuja en tiempo real
 
-<table>
-<tr>
-<td align="center" width="20%"><img src="assets/portraits/kilo.jpg" width="115" alt="Retrato de Kilo"/><br/><b>Kilo</b><br/><sub>Ritmo y vuelo</sub></td>
-<td align="center" width="20%"><img src="assets/portraits/stitcho.jpg" width="115" alt="Retrato de Stitcho"/><br/><b>Stitcho</b><br/><sub>Caos alienígena</sub></td>
-<td align="center" width="20%"><img src="assets/portraits/chispin.jpg" width="115" alt="Retrato de Chispín"/><br/><b>Chispín</b><br/><sub>Electricidad</sub></td>
-<td align="center" width="20%"><img src="assets/portraits/cat.jpg" width="115" alt="Retrato de Michi"/><br/><b>Michi</b><br/><sub>Sigilo y sueños</sub></td>
-<td align="center" width="20%"><img src="assets/portraits/dragon.jpg" width="115" alt="Retrato de Dragón"/><br/><b>Dragón</b><br/><sub>Fuego y altura</sub></td>
-</tr>
-<tr>
-<td align="center"><img src="assets/portraits/dino.jpg" width="115" alt="Retrato de Dino"/><br/><b>Dino</b><br/><sub>Fuerza</sub></td>
-<td align="center"><img src="assets/portraits/frita.jpg" width="115" alt="Retrato de Frita"/><br/><b>Frita</b><br/><sub>Velocidad</sub></td>
-<td align="center"><img src="assets/portraits/pizza.jpg" width="115" alt="Retrato de Pizza"/><br/><b>Pizza</b><br/><sub>Rebotes</sub></td>
-<td align="center"><img src="assets/portraits/yomi.jpg" width="115" alt="Retrato de Yomi"/><br/><b>Yomi</b><br/><sub>Paso espectral</sub></td>
-<td align="center"><img src="assets/portraits/cuerno.jpg" width="115" alt="Retrato de Cuerno"/><br/><b>Cuerno</b><br/><sub>Luz y protección</sub></td>
-</tr>
-</table>
+OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Los personajes reaccionan al movimiento, el combate y sus poderes; los escenarios tienen plataformas, rutas verticales, peligros y encuentros propios.
+
+**El arte que se debe evaluar es el que pinta el motor del juego, no los retratos JPG ni los sprites PNG históricos del repositorio.** Por eso este README enlaza las vistas **renderizadas de verdad** y deja de presentar imágenes antiguas como si fueran el diseño de V457.
+
+| Ver el juego real | Dónde |
+| :--- | :--- |
+| **Aventura y controles** | [Abrir OHANA](https://gracianb.github.io/project-ohana/) |
+| **Galería del motor** | [Diez héroes en Canvas](https://gracianb.github.io/project-ohana/gallery.html) |
+| **Evoluciones de Cuerno** | [Estudio interactivo de sus cinco formas](https://gracianb.github.io/project-ohana/previews/cuerno-design.html) |
+| **Implementación gráfica** | [Renderizador](characters/draw.js) · [Arte de personajes](characters/art/) · [Mundos](worlds/) |
+
+> **Fidelidad visual:** la galería pública utiliza la versión desplegada, que puede ir por detrás de V457. Para comprobar el arte exacto de esta PR, ejecuta el proyecto desde su rama. El motor combina dibujo procedural y, en ciertos casos o modos, atlas pintados; **no se afirma que se hayan eliminado todos los PNG del código**.
+
+## La familia: diez maneras distintas de jugar
+
+Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habilidades propias. Pulsa en su nombre para verlo dibujado por el motor, en lugar de consultar un retrato estático desactualizado.
+
+| Héroe y galería en vivo | Personalidad jugable | Héroe y galería en vivo | Personalidad jugable |
+| :--- | :--- | :--- | :--- |
+| [**Kilo**](https://gracianb.github.io/project-ohana/gallery.html?id=kilo) | Ukelele, ritmo y planeo | [**Stitcho**](https://gracianb.github.io/project-ohana/gallery.html?id=stitcho) | Plasma, caos y paredes |
+| [**Chispín**](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Electricidad y aceleración | [**Michi**](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Sueños, esquiva y nueve vidas |
+| [**Dragón**](https://gracianb.github.io/project-ohana/gallery.html?id=dragon) | Fuego, viento y altura | [**Dino**](https://gracianb.github.io/project-ohana/gallery.html?id=dino) | Fuerza e impacto |
+| [**Frita**](https://gracianb.github.io/project-ohana/gallery.html?id=frita) | Velocidad y derrape | [**Pizza**](https://gracianb.github.io/project-ohana/gallery.html?id=pizza) | Rebotes y giros |
+| [**Yomi**](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | Energía espiritual | [**Cuerno**](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Luz, prismas y protección |
 
 ### De bebé a forma final
 
-| Forma | Nombre canónico | Evolución y capacidades |
-| :---: | :--- | :--- |
-| **1** | Bebé | Silueta compacta, salto ágil y habilidades básicas. |
-| **2** | Joven | Control direccional aumentado y primer remate rítmico. |
-| **3** | Avanzado | Salto doble, desplazamiento acrobático y carga de combo. |
-| **4** | Maestro | Masa y poder expandidos, mayor alcance de ataque y resistencia. |
-| **5** | Forma Final | Puesta en escena definitiva, aura de energía y vuelo/planeo continuo. |
+**50 combinaciones jugables**: cada uno de los diez héroes tiene cinco formas, de la inicial a su evolución definitiva. El crecimiento modifica tamaño visual, atributos, animación y posibilidades de combate, **sin confundir la silueta pintada con la caja física de colisión**.
 
-El XP transforma las capacidades, la silueta y la puesta en escena del personaje. Son **50 combinaciones de héroe y forma**, con combate **H** y tres poderes **J / K / L**.
+El combate usa **H** para el ataque base y **J / K / L** para las habilidades. No todos los personajes saltan, vuelan o atacan igual: esa diferencia es parte del diseño.
 
-## La aventura que puedes jugar hoy
+**Michi en V457:** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → liebre lunar → medusa onírica → dragón astral → guardián de nueve colas. [Ver su implementación Canvas](characters/art/cat.js). Este rediseño pertenece a la PR, no necesariamente a la galería pública.
 
-**Isla Hoku** es la campaña compartida publicada: diez salas conectadas, rutas verticales, secretos, plataformas, encuentros especiales y la **Reina del Nido**, un combate final con tres fases.
+## Isla Hoku: una aventura compartida, diez salas reales
 
-<table>
-<tr>
-<td width="50%" align="center"><img src="assets/worlds/beach-bg.jpg" width="100%" alt="Arte ambiental de Costa Hoku"/><br/><sub>Costa Hoku</sub></td>
-<td width="50%" align="center"><img src="assets/worlds/jungle-bg.jpg" width="100%" alt="Arte ambiental de Jungla Alta"/><br/><sub>Jungla Alta</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><img src="assets/worlds/volcano-bg.jpg" width="100%" alt="Arte ambiental de Caldera"/><br/><sub>Caldera</sub></td>
-<td width="50%" align="center"><img src="assets/worlds/boss-bg.jpg" width="100%" alt="Arte ambiental del Nido de la Reina"/><br/><sub>Nido de la Reina</sub></td>
-</tr>
-</table>
+La campaña común mantiene **diez salas canónicas conectadas**. Su recorrido atraviesa el Claro, Costa, Jungla, Cueva, Laboratorio, Cumbre, Caldera, Órbita, Arrecife y el Nido de la Reina.
 
-<sub>Imágenes ambientales existentes en el repositorio, no capturas de la interfaz en ejecución.</sub>
+No es una presentación de fondos: las zonas se recorren saltando entre plataformas, combinando poderes, descubriendo rutas y enfrentándose a enemigos y jefes. El enfrentamiento principal es la **Reina del Nido**, con tres fases.
 
-**Su recorrido:** Claro → Costa / Jungla → Caldera → Nido, con desvíos por Cueva, Laboratorio, Cumbre, Órbita y Arrecife. El jugador progresa mediante combate, movimientos, evolución y exploración, no pasando diapositivas.
+**[Explorar el juego](https://gracianb.github.io/project-ohana/)** · **[Código del mapa](systems/world-graph.js)** · **[Escenarios generados](worlds/)**
 
-## Aventuras personales: código integrado, aceptación pendiente
+### Diez aventuras personales
 
-Las **10 salas canónicas de Isla Hoku** siguen siendo la campaña compartida. En partida individual, las variantes de escenario viven sobre el Claro sin crear otras diez salas canónicas ni alterar el grafo original. El juego contiene ya integraciones de sala y recorrido para los diez héroes; **eso no implica que todos hayan superado aceptación de 100 coleccionables, minijefe, móvil, persistencia y publicación**.
+La rama V457 añade variantes de aventura para los diez protagonistas, **sin duplicar artificialmente las diez salas del mapa compartido**.
 
-| Héroe | Bioma individual | Validación pendiente |
-| :--- | :--- | :--- |
-| Kilo | Bahía del Compás | Recorrido completo y despliegue verificado |
-| Stitcho | Archipiélago del Caos | Recompensa y campaña completa |
-| Chispín | Islas del Relámpago | Integración selectiva de [PR #390](https://github.com/GracianB/project-ohana/pull/390) tras revisión de dependencias |
-| Michi | Jardines de la Luna | Rediseño visual y aceptación completa |
-| Dragón | Cordillera de las Brasas | Prueba de ruta, combate y recompensa |
-| Dino | Valle de los Gigantes | Prueba de ruta, combate y recompensa |
-| Frita | Mercado Dorado | Prueba de ruta, combate y recompensa |
-| Pizza | Reino del Horno | Prueba de ruta, combate y recompensa |
-| Yomi | Observatorio Astral | Prueba de ruta, combate y recompensa |
-| Cuerno | Bosque del Prisma | L / corona prismática y regresión visual |
+| Héroe | Identidad del recorrido | Héroe | Identidad del recorrido |
+| :--- | :--- | :--- | :--- |
+| Kilo | Bahía del Compás | Stitcho | Archipiélago del Caos |
+| Chispín | Islas del Relámpago | Michi | Jardines de la Luna |
+| Dragón | Cordillera de las Brasas | Dino | Valle de los Gigantes |
+| Frita | Mercado Dorado | Pizza | Reino del Horno |
+| Yomi | Observatorio Astral | Cuerno | Bosque del Prisma |
 
-El progreso individual de 100 objetos utiliza guardado por héroe. Las pruebas de recorrido real, ubicación alcanzable y ventajas de cada reliquia deben mantenerse independientes del simple recuento de objetos. Consulte [matriz de cierre](docs/V457-CIERRE-SOLO.md).
+Se ha implementado el estado de **100 coleccionables por héroe**, con persistencia y recompensas. La prueba automatizada valida contratos de estado y navegación, pero **no acredita por sí sola que los 1.000 objetos sean físicamente alcanzables ni que las diez campañas hayan superado una partida humana completa**. Esa aceptación sigue abierta.
 
-## Multijugador: temporalmente en pausa
+[Ver los criterios reales de cierre de cada mundo](docs/V457-CIERRE-SOLO.md).
 
-La base de conexión WebRTC y los tests entre dos navegadores **se conservan**, pero la experiencia pública está **en pausa** por límites de créditos de Netlify y el servidor de señalización/relay. No se reactivarán servicios externos ni se prometerá una sesión pública hasta que haya presupuesto y un despliegue autorizado.
+## Cómo se juega
 
-La validación obligatoria se centra ahora en **partida individual, offline, controles, diez héroes, diez salas, jefes y móvil**. La batería cooperativa local puede ejecutarse manualmente desde GitHub Actions con `run_multiplayer=true`, sin invocar Netlify, TURN de pago ni el otro servidor. No se ha comprobado una sesión real entre dos redes/dispositivos externos en este cierre.
-
-## Controles
-
-| Movimiento | Acción |
+| Acción | Teclado |
 | :--- | :--- |
-| **A / D** o flechas | Desplazarse |
-| **W / Espacio** | Saltar |
-| **S / ↓** | Descender de una plataforma |
-| **Shift** | Dash |
-| **H** | Ataque |
-| **J / K / L** | Habilidades especiales |
-| **E** | Interactuar |
-| **M** | Mapa |
-| **Esc** | Pausa |
+| Movimiento | **A / D** o flechas |
+| Salto | **W** o **Espacio** |
+| Descender de plataforma | **S** o **↓** |
+| Dash | **Shift** |
+| Ataque | **H** |
+| Habilidades | **J / K / L** |
+| Interacción | **E** |
+| Mapa | **M** |
+| Pausa | **Esc** |
 
-En móvil hay controles táctiles.
+Hay controles táctiles en móvil.
 
-## Desarrollo y pruebas
+## Estado verificable · V457
 
-- **Motor:** JavaScript modular, HTML, CSS y Canvas 2D; simulación fija a 60 Hz.
-- **Personajes:** ilustración vectorial animada, con dirección visual propia por héroe y evolución.
-- **Combate:** comportamiento de enemigos, animaciones de aviso, estados de impacto, jefes y habilidades cooperativas.
-- **Calidad:** tests de Node.js, Playwright, navegador real, rendimiento, accesibilidad y GitHub Actions.
-- **Guardado:** progreso y evolución local, álbumes y compatibilidad con IDs antiguos. Las nuevas colecciones individuales todavía se están sometiendo a pruebas.
+| Área | Situación |
+| :--- | :--- |
+| **Motor y diez héroes** | Implementados y sometidos a pruebas automatizadas |
+| **Diez salas compartidas** | Implementadas |
+| **Variantes y coleccionables personales** | Integrados; falta aceptación manual de todas las rutas y recompensas |
+| **Calidad de la PR #391** | [CI y quality aprobados para el código V457](https://github.com/GracianB/project-ohana/actions/runs/39637919429), incluido arte de Michi y regresión visual |
+| **Publicación** | Pendiente de integrar la PR y verificar GitHub Pages en el commit publicado |
+| **Multijugador remoto** | **En pausa** por créditos de Netlify y del servidor externo; sin reactivaciones ni consumo de servicios |
+
+**Importante:** una PR en verde es un paso de calidad, no equivale a un despliegue en Pages ni a una validación manual completa.
+
+## Desarrollo local
+
+Requiere Node.js y un navegador compatible. Los módulos ES se deben servir por HTTP; **no** abras `index.html` con `file://`.
 
 ```bash
 npm ci
 npm test
 npm run test:browser
+npm run test:visual
 npm run release:check
 ```
 
-Para probar el juego localmente, abre un servidor HTTP en la raíz del proyecto: los módulos ES no funcionan al abrir `index.html` mediante `file://`.
+Para ejecutar el juego, sirve esta carpeta mediante un servidor HTTP local y abre `index.html`. Las pruebas de navegador usan **Playwright**.
+
+El motor, los rigs, el progreso, el combate y la interfaz están versionados en este repositorio. Los archivos raster de `assets/` se conservan donde siguen siendo necesarios para modos opcionales, compatibilidad o recursos históricos, **pero no se utilizan como presentación visual oficial de este README**. [Ver inventario de recursos](assets/README.md).
 
 <details>
-<summary><b>Seguimiento técnico y criterios de cierre</b></summary>
+<summary><strong>Arquitectura y seguimiento técnico</strong></summary>
 
-Cada personaje pasa por: identidad visual → recorrido y física → enemigos y mecánicas → minijefe → 100 objetos y recompensa → guardado → pruebas de navegador → publicación.
+- [Motor de dibujo](characters/draw.js) y [arte por héroe](characters/art/).
+- [Estadísticas y cinco formas](characters/roster.js), [modo visual](characters/look.js).
+- [Escenarios](worlds/), [mapa canónico](systems/world-graph.js) y [colecciones por héroe](systems/hero-collections.js).
+- [Pruebas de diez héroes V457](tests/browser/v457-ten-heroes.mjs) y [proporciones visuales](tests/browser/character-size.mjs).
+- [Checklist de cierre, pendientes y clasificación de PR](docs/V457-CIERRE-SOLO.md).
 
-Se cierra una fase **cuando funciona en el juego y supera las pruebas**, no cuando simplemente existe una PR. Los detalles históricos de campaña y pruebas permanecen en [WORLD-1.md](WORLD-1.md) y los documentos técnicos del repositorio.
-
-Cuando se reactive, el multijugador requerirá además: sincronización del estado autoritativo, conexión remota real, reconexión, interacción de dos dispositivos, experiencia de invitación, equilibrio de combate y una URL pública verificable.
+**Criterio de publicación:** CI + quality + release gate + Pages para el mismo commit; después, prueba real del juego, accesibilidad, móvil, colisiones, jefes, progresión y guardado.
 
 </details>
 
@@ -146,10 +139,10 @@ Cuando se reactive, el multijugador requerirá además: sincronización del esta
 
 <div align="center">
 
-**Hecho para jugarlo, no solo para enseñarlo.**
+**OHANA está hecho para jugarlo. Su README debe mostrar lo que realmente existe.**
 
-[**ENTRAR EN OHANA**](https://gracianb.github.io/project-ohana/) · [GitHub](https://github.com/GracianB/project-ohana) · [Systems Lab](https://gracianb.github.io/systems-lab/)
+[**JUGAR**](https://gracianb.github.io/project-ohana/) · [**GALERÍA CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**SYSTEMS LAB**](https://gracianb.github.io/systems-lab/)
 
-<sub>© 2026 Gracián Baena · Licencia del repositorio: MIT</sub>
+<sub>© 2026 Gracián Baena · Licencia MIT</sub>
 
 </div>
