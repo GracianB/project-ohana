@@ -72,9 +72,12 @@ try {
        }
      }
      if(Math.abs(gap)<26 && !exit){
-       await simulate(40); // release deceleration + timed puzzle hold
+       // A jump used to dodge foes may still be descending at this waypoint.
+       // Kilo's serenade requires 45 grounded and stationary simulation ticks:
+       // do not return early while airborne, even if X is already aligned.
+       await simulate(110);
        s=await state();
-       if(Math.abs(target-(s.player.x+18))<48)return s;
+       if(Math.abs(target-(s.player.x+18))<48 && s.player.grounded)return s;
      }
      if(exit && s.player.x>s.worldW-180) {
        // Continue holding forward so that the real door threshold starts
