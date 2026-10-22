@@ -538,7 +538,7 @@ if (fromDir !== "down") snapToFloor(p);
 }
 function loadRoom(id, fromDir) {
 // V470: el Mundo 2 está en construcción — ningún menú, portal o puerta lleva allí en solo.
-if (world2Locked(id, { solo: !!game.personalAdventureSolo, e2e: fromDir === "e2e" })) {
+if (world2Locked(id, { solo: !!game.personalAdventureSolo, e2e: fromDir === "e2e" || !!game._e2eLegacyStart })) {
   showSystemMessage("MUNDO 2", WORLD2_LOCK_TEXT);
   beep("locked");
   if (game.roomDef) bounceLocked(fromDir);
@@ -859,7 +859,9 @@ Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
 game.running = true; closeOverlays();
 // V468: una partida nueva en solitario empieza en el Mundo 1 (Claro de Kilo).
-let roomId = game.personalAdventureSolo ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
+// V470: el arnés e2e (window.__OHANA_E2E.start) conserva el arranque clásico del Mundo 2
+// para las suites de navegador heredadas; el jugador real empieza en el Mundo 1.
+let roomId = game.personalAdventureSolo && !game._e2eLegacyStart ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
 globalThis.__ohanaWorld1Start = null;
 if (resume) {
 try {
@@ -3949,6 +3951,7 @@ step(frames = 1) {
 },
 start(id = "kilo") {
   const def = ROSTER.find((r) => r.id === id);
+  game._e2eLegacyStart = true;
   start(def);
   game._cuernoIntroT = null;
   dismissE2EOverlays();
