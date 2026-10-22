@@ -45,8 +45,11 @@ for (const [content, label] of [
   [progress, "PROGRESS"],
   [improvements, "IMPROVEMENTS"],
 ]) {
-  if (!new RegExp(activeCharacters + "\\s+personajes", "i").test(content)) errors.push(label + ": falta cifra de personajes");
-  if (!new RegExp(formsPerCharacter + "\\s+formas", "i").test(content)) errors.push(label + ": falta cifra de formas");
+  // The same verified invariants may be written as "10 personajes" or
+  // "10 héroes" and as "5 formas" per hero or "50 formas" overall.
+  // Keep checking actual roster, forms and room counts above, not only prose.
+  if (!new RegExp(activeCharacters + "\\s+(?:personajes|héroes)", "i").test(content)) errors.push(label + ": falta cifra de personajes");
+  if (!new RegExp("(?:\\b" + formsPerCharacter + "|\\b" + (activeCharacters * formsPerCharacter) + ")\\s+formas", "i").test(content)) errors.push(label + ": falta cifra de formas");
   if (!new RegExp(roomCount + "\\s+salas", "i").test(content)) errors.push(label + ": falta cifra de salas");
 }
 
