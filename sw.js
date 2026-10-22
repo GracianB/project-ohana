@@ -1,4 +1,4 @@
-const VERSION = "ohana-460";
+const VERSION = "ohana-461";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -55,6 +55,7 @@ const PRECACHE = [
   "./systems/world-bounds.js?v=" + VERSION,
   "./systems/platform-layout.js?v=" + VERSION,
   "./characters/michi-motion.js?v=" + VERSION,
+  "./characters/michi-jelly.js?v=" + VERSION,
   "./worlds/natural-ledges.js?v=" + VERSION,
   "./worlds/island-landmarks.js?v=" + VERSION,
   "./systems/campaign-exploration.js?v=" + VERSION,
@@ -402,6 +403,7 @@ const PRECACHE_REVISIONS = {
   "systems/world-bounds.js": "bb28e553ed1c07a0dfc0b62b3924fe0525f359c2",
   "systems/platform-layout.js": "3d5b15bbf71dda8749f63adcec11c44aedce3464",
   "characters/michi-motion.js": "354be1f07643966e91515952784d4fe414ec1dc9",
+  "characters/michi-jelly.js": "fe7f29dfe0c277b4287a111ad6b118e8221facf5",
   "worlds/natural-ledges.js": "92e2931c6efc84a477da5e09cde443e3a78715b3",
   "worlds/island-landmarks.js": "c10f704c253992ef123299d0ab182d94b0c0367a",
   "systems/campaign-exploration.js": "573e6fc94d957fe8292951b4cacf134ee573a457",
@@ -443,11 +445,11 @@ const PRECACHE_REVISIONS = {
   "family-camp.css": "5e107cb7d8c96964f4e1c65dc6e62767634bfebf",
   "systems/family-camp.js": "83e30aa32fc9b8f8c214584a40d6d854b3d13f75",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
-  "systems/evo-cine/real-actor.js": "819f87e17260c00c7740929b94820385fe1e7172",
+  "systems/evo-cine/real-actor.js": "fcdecf739d6fef4c266d66be67a6da9edec4531e",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "975c3a2de1b9193cf3d243ded89b6ce6f4fb053d",
-  "index.html": "87d7b63752abc433cee68fe325922917c99a607d",
+  "index.html": "70e1b0a5271d7f2869e47fc63be376b0cbfd37ee",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -472,9 +474,13 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "659b513db77ac4d95457344713d16092e2e88065",
+  "game.js": "2483372015d4b7e684ae53817df5dba945b26415",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "c68038d1174cedff3f5a60d86ff36a5abd68d846",
+  "characters/art/cat.js": "495844bf7760152af943c00ce3ecf6c5c1617bc6",
+  "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
+  "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
+  "previews/michi-design.html": "8726f141b105016aed0c153a80d1db902187f717",
+  "previews/michicornio-cinema.html": "c8c2977c311e3b5003f25ca6f111eb08dba65d82",
   "characters/art/chispin.js": "98c11867e58cbac16d4a169b1e12db21864bff54",
   "characters/art/cuerno.js": "ef4f38a0d525d5e9d8aaeaa13d08aef07c85b581",
   "characters/art/dino.js": "89f11598288a5526db7f31fc5d37266d2dc8ca02",
@@ -488,7 +494,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "4a49bc0ad8621f8413a566e97b415d5590f8ac72",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "afe3a1db9b73eaa46d40517b8161ce28626d72ba",
-  "characters/draw.js": "e58e8be3be97f378a4c392ff2c58b81c4c08394f",
+  "characters/draw.js": "7c0d03e5852e6c488bacee495a7a4baa30996789",
   "characters/kinetic-stagecraft.js": "892f6728bf8fc00c28f5798da41514d62b12e3a8",
   "characters/evolution.js": "4c693aa7c93354fb18f5673e9b774a42d8b4b6e0",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
@@ -522,7 +528,7 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/cuerno.js": "0edde04ae08117a722003f551b6966912253a314",
   "systems/evo-cine/chispin.js": "950ba67afb4711967291b222e8f016fedf829acc",
   "systems/evo-cine/pizza.js": "ff81084feff4b0f62e8d19b3bd5dbf7f0fdb18e7",
-  "systems/evo-cine/michi.js": "57f263c97458b04533121fe6a3c9d9f307491f0a",
+  "systems/evo-cine/michi.js": "9d149368d95d53854d23a697e8b9b3e618afa01a",
   "systems/evo-cine/yomi.js": "1d7c30124e64a3fe061a45199d01b2e2529bb8f2",
   "systems/evo-cine/dino.js": "fc356b5e946345dbf856173fdf293b4cb0e9b654",
   "systems/evo-cine/dragon.js": "4cfec65095a07be5942c45bc47bf119725c61b35",
@@ -620,7 +626,7 @@ const PRECACHE_REVISIONS = {
   "systems/cinematic-director.js": "b238f8829d833dae6756b22ea4067a808c1992d3",
   "systems/supreme-cinema.js": "1ff12dcff311bd1ccbe5879908a807e4884cf0e1",
   "systems/supreme-storyboards.js": "9ebe3ba6f15a2cd2e23d2c0e307b8b8ddf0acb26",
-  "systems/evo-cinema.js": "1b924bc6ca973339c86f36619508de3e79f95fbc",
+  "systems/evo-cinema.js": "0657dd07e39519bb46188025701c94ac4f3d75dd",
   "systems/floaters.js": "caa36305a89c892c70d86d01356df4d62280edb5",
   "systems/hud.js": "5a168383aeb7896cb86991f4812040b80f548eee",
   "systems/a11y-v97.js": "a636eae0e6b45bd8896d931d2e459e8049d4623f",
@@ -683,11 +689,7 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/cat-4.png": "798687a48289d5282fc1fcc1e2482f910de89f33",
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
-  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
-  "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
-  "previews/michi-design.html": "1247a8a5b0b182b2793ca032e45c7c7c639f1b3f",
-  "previews/michicornio-cinema.html": "2200e980f13e3f4d58b98c0222a8f7e0f8565540"
+  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";

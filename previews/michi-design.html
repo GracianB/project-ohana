@@ -42,7 +42,7 @@ function paint(){
  canvases.forEach((c,f)=>{
   const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   const frame=reduced.checked?62:t;
-  const pose={state:poseSelect.value,form:f,t:frame,phase:frame*.14,look:{x:.2,y:0},speed:.9,
+  const pose={michiSeed:Number(new URLSearchParams(location.search).get('seed'))||0,state:poseSelect.value,form:f,t:frame,phase:frame*.14,look:{x:.2,y:0},speed:.9,
    atk:.15+(frame%70)/90,cast:.14+(frame%65)/90,castSlot:2,reduceMotion:reduced.checked};
   ctx.save();ctx.translate(165,313);ctx.scale(2.55,2.55);
   applyTenActionPose(ctx,pose,'cat',f);art.draw(ctx,pose,R);ctx.restore();
