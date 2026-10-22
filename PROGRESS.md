@@ -1,3 +1,24 @@
+# OHANA · Dino & Dragón
+
+Rama local `dino-dragon-v2` (sin número de versión, sin publicar). Objetivo: que Dino y Dragón dejen de parecer el mismo personaje con otro color, crezcan juntos y tengan su propia cinemática e isla.
+
+## Por qué se parecían
+- Dos bípedos chibi con la misma cabeza redonda, los mismos ojos, la misma postura y la misma tinta; ambos bebés con cascarón.
+- Acentos naranja/oro en los dos (placas, gorguera Rex, grietas de lava y aura del Coloso) y formas finales ambas amarillas.
+- Alturas casi idénticas (57/74/89/106/124 frente a 59/75/89/107/126) y alas de Dragón diminutas y plegadas.
+- Ninguna de sus cinemáticas propias se reproducía en el juego (la escena compartida las ignoraba) y las dos islas eran naranja/rojo.
+
+## Trabajos implementados
+- Tamaños: curva común `DINO_DRAGON_HEIGHT` 64/82/100/120/140 px y `heroHeightTarget()`; Dragón +8 % solo por la envergadura. Hitboxes intactas.
+- Dino = TIERRA: paleta jade/teal/musgo/hueso sin naranja, Coloso jade con geodas turquesa; cuerpo más ancho y horizontal; idle con pisotón, anillo de polvo y piedrecitas.
+- Dragón = CIELO + FUEGO: granate/carmesí con membranas ciruela/obsidiana, cuernos marfil y Celestial perla-oro; cuello en S con púas, cabeza en cuña, alas de murciélago alzadas que baten al correr, cola serpenteante, levitación en idle/ataque/victoria; el bebé lleva un mechón de brasa en vez de cascarón. Se arregla el trazo del contorno del ala.
+- Cinemáticas propias de 4,5 s y cuatro actos, enrutadas en la partida real desde `drawEvolutionPresentation`: «Despertar fósil» (Dino) y «Ascenso» (Dragón). En movimiento reducido se muestra un único fotograma fijo, cacheado.
+- Islas: Valle de los Gigantes pasa a ser un valle jade de día (mesetas con cascadas, manada de saurópodos, pterosaurios, acantilado fósil, cícadas, luciérnagas). Cordillera de las Brasas pasa a ser una noche volcánica (constelación del Dragón, luna eclipsada, volcán en erupción, agujas de obsidiana, wyverns y un río de lava). Gradientes cacheados, sin azar.
+
+## Calidad
+- `tests/dino-dragon-v2.test.js`: curva de tamaños, paletas disjuntas, siluetas, enrutado y determinismo de las cinemáticas, islas deterministas y sin gradientes por frame.
+- Suite completa, release gate y pruebas de navegador (e2e, tamaños, dirección visual, pulido, presentación y matriz visual) en verde.
+
 # OHANA V460 · Michicornio: cuerpo vivo, intro y metamorfosis
 
 Versión **V460** (`ohana-460`), desarrollada en la [PR #394](https://github.com/GracianB/project-ohana/pull/394). El despliegue se acredita verificando CI, quality y GitHub Pages para el mismo commit de `main`. Diez personajes, cinco formas por héroe, diez salas canónicas y multijugador remoto pausado.

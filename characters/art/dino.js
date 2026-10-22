@@ -9,20 +9,24 @@ const seg = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
 const ease = (k) => k * k * (3 - 2 * k);
 const lerp = (a, b, k) => a + (b - a) * k;
 
+// Dino & Dragón · Dino is the EARTH sibling: leaf, teal, moss and jade skin
+// with darker camouflage spots, fossil-bone plates and (at the end) turquoise
+// geode crystals. No orange, red or flame accents: those belong to Dragón.
 const PAL = [
-  { body: "#8ee07a", spot: "#ffa64a", belly: "#fff4b4", claw: "#fffbe8", plate: "#ffb84a", plate2: "#ffd86a" },
-  { body: "#4cbf56", spot: "#ff9a3a", belly: "#fff0a4", claw: "#fffbe8", plate: "#ffb03a", plate2: "#ffd24a" },
-  { body: "#2ea8a0", spot: "#ff9a3a", belly: "#fff2b6", claw: "#fffbe8", plate: "#ff9a3a", plate2: "#ffcf4a" },
-  { body: "#3f8f3a", spot: "#e8822a", belly: "#f2e6a0", claw: "#fff6dc", plate: "#dcc48c", plate2: "#ff9a3a" },
-  { body: "#a9d83e", spot: "#ffd84a", belly: "#fff6b8", claw: "#fffbe8", plate: "#bff4ff", plate2: "#e8fdff" },
+  { body: "#9fe27e", spot: "#5fae4e", belly: "#fff6cf", claw: "#fffbe8", plate: "#efe0b4", plate2: "#fff3d2" },
+  { body: "#55c25a", spot: "#2f8a3e", belly: "#f7f1bd", claw: "#fffbe8", plate: "#e8d6a2", plate2: "#f7ebc4" },
+  { body: "#2fae9c", spot: "#1a7a76", belly: "#f1f6d0", claw: "#fffbe8", plate: "#f1d495", plate2: "#fbe8b8" },
+  { body: "#3f8a3c", spot: "#265c28", belly: "#eee4ae", claw: "#fff6dc", plate: "#c2aa7e", plate2: "#e0cc9e" },
+  { body: "#2e8a68", spot: "#1a5c48", belly: "#e6f6d6", claw: "#f4fffb", plate: "#8fe2f8", plate2: "#e8fdff" },
 ];
+export const DINO_PALETTE = Object.freeze(PAL.map(Object.freeze));
 
 const F = [
   { hw: 31, hh: 26, bw: 17, bh: 24, legL: 6,  legW: 12, armL: 9,  tail: 12, tw: 8 },
-  { hw: 25, hh: 19, bw: 16, bh: 24, legL: 11, legW: 13, armL: 10, tail: 32, tw: 17 },
-  { hw: 25, hh: 19, bw: 17, bh: 27, legL: 13, legW: 14, armL: 11, tail: 38, tw: 18 },
-  { hw: 27, hh: 20, bw: 21, bh: 30, legL: 14, legW: 17, armL: 12, tail: 44, tw: 22 },
-  { hw: 26, hh: 20, bw: 20, bh: 31, legL: 15, legW: 16, armL: 12, tail: 46, tw: 21 },
+  { hw: 26, hh: 20, bw: 18, bh: 24, legL: 11, legW: 14, armL: 10, tail: 34, tw: 18 },
+  { hw: 26, hh: 20, bw: 19.5, bh: 27, legL: 13, legW: 16, armL: 11, tail: 40, tw: 20 },
+  { hw: 28, hh: 21, bw: 23, bh: 30, legL: 14, legW: 19, armL: 12, tail: 46, tw: 24 },
+  { hw: 28, hh: 21, bw: 23, bh: 31, legL: 15, legW: 19, armL: 12, tail: 50, tw: 24 },
 ];
 
 // Dino V75 · 100 curated acting calibrations (20 qualities × 5 evolutions).
@@ -291,14 +295,15 @@ function crack(ctx, pts, t, seed) {
   const glow = 0.75 + Math.sin(t * 0.15 + seed) * 0.25;
   ctx.save();
   ctx.lineCap = "round"; ctx.lineJoin = "round";
-  ctx.shadowColor = "#ff9a1a"; ctx.shadowBlur = 7;
-  ctx.strokeStyle = "rgba(255,120,20," + (0.95 * glow).toFixed(2) + ")";
+  // Geode seams: the Coloso's power is crystal and stone, never magma.
+  ctx.shadowColor = "#5ff0d0"; ctx.shadowBlur = 7;
+  ctx.strokeStyle = "rgba(80,236,212," + (0.95 * glow).toFixed(2) + ")";
   ctx.lineWidth = 3.5;
   ctx.beginPath();
   pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.stroke();
   ctx.shadowBlur = 0;
-  ctx.strokeStyle = "#fff7c0";
+  ctx.strokeStyle = "#eafffa";
   ctx.lineWidth = 1.4;
   ctx.stroke();
   ctx.restore();
@@ -578,6 +583,22 @@ function draw(ctx, pose, R) {
   let roarK = 0, chomp = 0, speedLines = 0, shock = 0, stomp = 0, apple = 0, lookUp = 0, rawr = 0;
   let shellRot = 0;
 
+  // Dino & Dragón · Dino is grounded and stompy: a forward-leaning, horizontal
+  // T-rex stance (Dragón stands upright and hovers). Every ~4 s the idle Dino
+  // lifts a foot and stomps it down with a dust ring: weight, not flight.
+  let idleStomp = 0;
+  if (!baby) lean += 0.08 + f * 0.012;
+  if (st === "idle" && !fl && !pose.dinoWelcome && !pose.reduceMotion && !pound && !charging && !rolling) {
+    const u = ((t + f * 37) % 240) / 240;
+    const lift = ease(seg(u, .78, .9)) * (1 - ease(seg(u, .9, .94)));
+    idleStomp = ease(seg(u, .92, .95)) * (1 - ease(seg(u, .95, 1)));
+    legF += -0.42 * lift; lenF -= 0.1 * lift;
+    lean -= 0.05 * lift; headRot += -0.08 * lift + 0.1 * idleStomp;
+    bob += -1.2 * lift + 1.6 * idleStomp; hdy += 1.4 * idleStomp;
+    jaw += 0.18 * idleStomp; tailA += 0.12 * lift - 0.18 * idleStomp;
+    if (idleStomp > .3) eyeMood = "happy";
+  }
+
   // LÓGICA DE ESTADOS Y ANIMACIÓN
   if (rolling) {
     // Motion is separate from the hitbox: tuck all four limbs, gather the
@@ -840,9 +861,9 @@ function draw(ctx, pose, R) {
   if (final && st !== "dead") {
     ctx.save();
     const auraGlow = (0.5 + Math.sin(t * 0.1) * 0.25) * T.rollGlow[f];
-    ctx.shadowColor = "#ffaa00";
+    ctx.shadowColor = "#5ff0d0";
     ctx.shadowBlur = 15 * auraGlow;
-    ctx.fillStyle = "rgba(255, 170, 0, " + (0.15 * auraGlow).toFixed(2) + ")";
+    ctx.fillStyle = "rgba(95, 240, 208, " + (0.13 * auraGlow).toFixed(2) + ")";
     ctx.beginPath();
     ctx.ellipse(0, hipY - bh * 0.5, bw * 1.8, bh * 1.5, 0, 0, PI * 2);
     ctx.fill();
@@ -1076,6 +1097,15 @@ function draw(ctx, pose, R) {
     ctx.beginPath();ctx.ellipse(0,-1,12+(1-k)*22+f*3,2.5+(1-k)*3,0,0,PI*2);ctx.stroke();
     ctx.restore();
   }
+  if (idleStomp > .05) {
+    ctx.save();
+    ctx.globalAlpha *= .5 * idleStomp;
+    ctx.strokeStyle = f === 2 ? "#9bdfce" : final ? "#bff8ec" : "#d9ceaa"; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(10, -1, 10 + (1 - idleStomp) * 16, 2 + (1 - idleStomp) * 2.5, 0, 0, PI * 2); ctx.stroke();
+    R.ellipse(ctx, 22 + (1 - idleStomp) * 6, -3, 2.6, 2, "#e4dcc8", { lw: 1.1, ink: "#8a7d6a" });
+    R.ellipse(ctx, -2 - (1 - idleStomp) * 6, -3, 2.2, 1.8, "#e4dcc8", { lw: 1.1, ink: "#8a7d6a" });
+    ctx.restore();
+  }
   // POLVO AL CORRER
   if (stomp > 0) {
     ctx.save();
@@ -1109,21 +1139,21 @@ function drawHead(ctx, R, pose, o) {
     }
     ctx.lineTo(cx, cy + hh * 0.3);
     ctx.closePath();
-    ctx.fillStyle = R.volume(ctx, cx, cy, rr, "#ff9a3a");
+    ctx.fillStyle = R.volume(ctx, cx, cy, rr, c.plate2);
     ctx.fill();
     ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.lineJoin = "round"; ctx.stroke();
     for (let i = 0; i < 4; i++) {
       const a = -PI * 0.3 - i * PI * 0.22;
-      R.ellipse(ctx, cx + Math.cos(a) * rr * 0.68, cy + Math.sin(a) * rr * 0.68, 2.6, 2.6, "#ffe07a", { lw: 1.4 });
+      R.ellipse(ctx, cx + Math.cos(a) * rr * 0.68, cy + Math.sin(a) * rr * 0.68, 2.6, 2.6, "#7fd6a0", { lw: 1.4 });
     }
   }
 
   if (final) {
-    // Dino Coloso: volcanic crown of lava spikes (no angel halo)
+    // Dino Coloso: crown of basalt horns tipped with geode light (no halo, no lava)
     for (let i = -2; i <= 2; i++) {
       const bx = -hw * 0.1 + i * hw * 0.26, by = -hh * 0.95 - (2 - Math.abs(i)) * 1.5;
       const ht = hh * (0.55 + (2 - Math.abs(i)) * 0.14) + Math.sin(t * 0.08 + i) * 1.2;
-      R.poly(ctx, [[bx - hw * 0.11, by], [bx, by - ht], [bx + hw * 0.11, by]], i === 0 ? "#ffd84a" : "#ff6a2a", { lw: 1.8 });
+      R.poly(ctx, [[bx - hw * 0.11, by], [bx, by - ht], [bx + hw * 0.11, by]], i === 0 ? "#bff8ec" : "#3c6e5e", { lw: 1.8 });
     }
   }
 
@@ -1239,7 +1269,7 @@ function drawHead(ctx, R, pose, o) {
       ? { ...pose, look: {x:1,y:.4} }
       : { ...pose, look: {x:clamp((Number(look.x)||0)*.7+o.eyeLook*.3,-1,1),
         y:clamp(Number(look.y)||0,-1,1)} };
-    R.eye(ctx, ex, ey, er, lp, { iris: final ? "#ff9a1a" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
+    R.eye(ctx, ex, ey, er, lp, { iris: final ? "#2fcfb8" : f === 2 ? "#7a3a10" : "#5a3a12", mood: o.eyeMood });
   }
 
   if ((f >= 3 || o.eyeMood === "angry") && !o.hurtEyes && !o.deadEyes && o.eyeMood !== "happy" && o.eyeMood !== "closed") {
