@@ -476,9 +476,24 @@ switch (kind) {
 case "note":
   for (let i = 0; i < 3; i++) { const a = -0.7 + i * 0.35; ctx.beginPath(); ctx.arc(f * reach * 0.45, -H * 0.45 + Math.sin(a) * H * 0.08, H * 0.04, 0, Math.PI * 2); ctx.stroke(); }
   break;
-case "claws":
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * H * 0.16, -H * (0.50 - i * 0.08), reach * (0.55 + i * 0.08), -0.95, 0.25); ctx.stroke(); }
+case "claws": {
+  // V465 · Stitcho: three staggered rake marks that tear diagonally through the
+  // air (glow pass + white core), each ending in a tiny cyan spark tick.
+  const lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  for (let i = 0; i < 3; i++) {
+    const kk = Math.max(0, Math.min(1, k * 1.7 - i * 0.2));
+    if (kk <= 0) continue;
+    const x0 = f * (reach * 0.3 + i * H * 0.075), y0 = -H * (0.74 - i * 0.035);
+    const x1 = x0 + f * H * 0.28 * kk, y1 = y0 + H * 0.36 * kk;
+    const path = () => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo((x0 + x1) / 2 + f * H * 0.07, (y0 + y1) / 2 - H * 0.03, x1, y1); };
+    path(); ctx.strokeStyle = color; ctx.lineWidth = lw0 * 2.4; ctx.globalAlpha = a0 * 0.4; ctx.stroke();
+    path(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = lw0 * 0.75; ctx.globalAlpha = a0; ctx.stroke();
+    ctx.strokeStyle = "#62f3ff"; ctx.lineWidth = lw0 * 0.6;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.04, y1 - H * 0.03); ctx.moveTo(x1, y1); ctx.lineTo(x1 + f * H * 0.05, y1 + H * 0.015); ctx.stroke();
+  }
+  ctx.lineWidth = lw0; ctx.globalAlpha = a0; ctx.strokeStyle = color;
   break;
+}
 case "bolt":
   ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.56); ctx.lineTo(f * H * 0.30, -H * 0.74); ctx.lineTo(f * H * 0.22, -H * 0.50); ctx.lineTo(f * H * 0.48, -H * 0.62); ctx.stroke();
   break;

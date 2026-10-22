@@ -146,6 +146,14 @@ const STITCHO={
   for(let i=0;i<7;i++){ctx.globalAlpha=.25-i*.03;const y=gy+i*i*3*u+2*u;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
   for(let i=-8;i<=8;i++){ctx.globalAlpha=.16;ctx.beginPath();ctx.moveTo(w/2+i*30*u,gy);ctx.lineTo(w/2+i*120*u,gy+160*u);ctx.stroke();}
   ctx.globalAlpha=.05+s.glow*.05;ctx.fillStyle='#62f3ff';for(let y=0;y<gy;y+=4*u)ctx.fillRect(0,y,w,1);
+  // V465: lab rig — glowing launch pad, hazard chevrons and two blinking beacons
+  const cx=w/2;ctx.globalAlpha=.55;ctx.fillStyle='#16324a';ctx.beginPath();ctx.ellipse(cx,gy+6*u,110*u,16*u,0,0,TAU);ctx.fill();
+  ctx.globalAlpha=.35+s.glow*.4;ctx.strokeStyle='#62f3ff';ctx.lineWidth=2*u;ctx.beginPath();ctx.ellipse(cx,gy+6*u,92*u,12*u,0,0,TAU);ctx.stroke();
+  ctx.globalAlpha=.8;ctx.fillStyle='#ffcf3a';
+  for(let i=-6;i<=6;i++){const x=cx+i*16*u;ctx.beginPath();ctx.moveTo(x-5*u,gy+26*u);ctx.lineTo(x,gy+20*u);ctx.lineTo(x+5*u,gy+26*u);ctx.lineTo(x,gy+23*u);ctx.closePath();ctx.fill();}
+  for(const side of [-1,1]){const on=Math.floor(t*3+(side>0?1:0))%2;ctx.globalAlpha=1;ctx.fillStyle='#3a4660';ctx.fillRect(cx+side*150*u-4*u,gy-40*u,8*u,40*u);
+   ctx.fillStyle=on?'#ff4a6a':'#5a1a2a';ctx.beginPath();ctx.arc(cx+side*150*u,gy-44*u,6*u,0,TAU);ctx.fill();
+   if(on){ctx.globalAlpha=.22;ctx.beginPath();ctx.arc(cx+side*150*u,gy-44*u,16*u,0,TAU);ctx.fill();}}
   ctx.globalAlpha=1;
  },
  gather(ctx,cx,cy,u,t,k){
@@ -157,6 +165,11 @@ const STITCHO={
  },
  aura(ctx,cx,cy,r,u,t,k){
   ctx.globalAlpha=.16*k;ctx.fillStyle='#62f3ff';ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r*1.4,t*3,t*3+.7);ctx.closePath();ctx.fill();
+  // V465: a scanner beam sweeps Stitcho head-to-toe, with a readout grid
+  const sweep=cy-r*1.1+((t*1.6)%1)*r*2.2;ctx.globalAlpha=.5*k;ctx.fillStyle='#62f3ff';ctx.fillRect(cx-r*.95,sweep-1.5*u,r*1.9,3*u);
+  ctx.globalAlpha=.14*k;ctx.fillRect(cx-r*.95,sweep-10*u,r*1.9,20*u);
+  ctx.globalAlpha=.35*k;ctx.strokeStyle='#62f3ff';ctx.lineWidth=1.4*u;
+  for(const sx of [-1,1])for(const sy of [-1,1]){ctx.beginPath();ctx.moveTo(cx+sx*r,cy+sy*r*1.15-sy*12*u);ctx.lineTo(cx+sx*r,cy+sy*r*1.15);ctx.lineTo(cx+sx*r-sx*12*u,cy+sy*r*1.15);ctx.stroke();}
   ctx.lineWidth=1.6*u;
   for(let o=0;o<3;o++){ctx.globalAlpha=.55*k;ctx.strokeStyle=o===1?'#f08cff':'#62f3ff';ctx.beginPath();ctx.ellipse(cx,cy,r*1.15,r*.32,o*1.05+t*.3,0,TAU);ctx.stroke();
    const a=t*(2.4+o*.6)+o*2,ex=Math.cos(a)*r*1.15,ey=Math.sin(a)*r*.32,c=Math.cos(o*1.05+t*.3),s=Math.sin(o*1.05+t*.3);
@@ -173,6 +186,9 @@ const STITCHO={
    ctx.fillStyle='#62f3ff';ctx.globalAlpha=.55+.35*Math.sin(t*6);ctx.beginPath();ctx.ellipse(side*r*.34,-r*.2,r*.16,r*.3,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
    for(let i=0;i<3;i++){ctx.fillStyle='#c9d6e8';ctx.beginPath();ctx.arc(side*r*.5,-r*.6+i*r*.6,2*u,0,TAU);ctx.fill();}
    ctx.restore();}
+  // V465: countdown on the pod, 3·2·1, then the stitches pop one by one
+  if(close>.6){const n=3-Math.min(2,Math.floor(clamp01((t-2.45)/.65)*3));ctx.globalAlpha=1;ctx.fillStyle='#071428';ctx.fillRect(-11*u,r*.55,22*u,16*u);
+   ctx.fillStyle=n===1?'#ff6f95':'#7dffb0';ctx.font=`bold ${Math.round(13*u)}px Outfit, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(n),0,r*.55+8.5*u);}
   if(close>.9)for(let i=0;i<6;i++){if(i<popped)continue;const y=-r*.8+i*r*.32;ctx.strokeStyle='#ff6f95';ctx.lineWidth=2.4*u;ctx.beginPath();ctx.moveTo(-6*u,y-4*u);ctx.lineTo(6*u,y+4*u);ctx.moveTo(6*u,y-4*u);ctx.lineTo(-6*u,y+4*u);ctx.stroke();}
   ctx.restore();
  },
