@@ -55,6 +55,9 @@ jobs:
       - name: V458 Michicornio art, custom foes, room and mobile
         run: node tests/browser/v458-michicornio.mjs
 
+      - name: V473 five feline moon-jellies · idle, wake, unique palette and reduced motion
+        run: node tests/browser/v473-lunar-jellies.mjs
+
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs
 
