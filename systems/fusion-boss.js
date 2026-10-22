@@ -60,7 +60,15 @@ export function fusionPhaseFor(hp, max) {
   return k > FUSION_PHASES[0] ? 1 : k > FUSION_PHASES[1] ? 2 : k > FUSION_PHASES[2] ? 3 : 4;
 }
 
-function pushShot(b, s) { if (b.shots.length < FUSION_BOSS.maxShots) b.shots.push(s); }
+function pushShot(b, s) {
+  if (b.shots.length >= FUSION_BOSS.maxShots) return;
+  // A projectile keeps its source after the boss returns to rest or starts
+  // another attack. The HUD/damage label must describe the projectile that hit.
+  const source = b.mode === "special"
+    ? b.special?.name || "QUIMERA OHANA"
+    : FUSION_ATTACKS[b.attack]?.name || "QUIMERA OHANA";
+  b.shots.push({ ...s, source });
+}
 
 function chooseAttack(e, b) {
   const pool = FUSION_PHASE_ATTACKS[e.phase];
@@ -88,8 +96,11 @@ export function updateFusionBoss(e, g, helpers = {}) {
   b.tick++;
   if (e.flash > 0) e.flash--;
   e.vx = 0; e.vy = 0;
+  // Do not inflict one last projectile hit after the killing blow.
+  // The boss director handles its defeat animation in the following tick.
+  if (e.hp <= 0) { b.shots.length = 0; return true; }
+  if (!p || p.dead) return true;
   updateShots(e, b, g, hurt);
-  if (!p || p.dead || e.hp <= 0) return true;
   // Cambio de fase → movimiento especial cinemático (invulnerable mientras dura).
   const phase = fusionPhaseFor(e.hp, e.max);
   if (phase > e.phase && b.mode !== "special") {
@@ -184,7 +195,7 @@ function updateShots(e, b, g, hurt) {
     else if (s.k === "beam") hit = s.life < s.liveFor && Math.abs((p.y + p.h - s.band) ) < 40 && p.x + p.w > A.left;
     else if (s.k === "echo") hit = Math.abs(pcx(p) - s.x) < 36 && Math.abs(pcy(p) - s.y) < 40;
     else hit = Math.hypot(pcx(p) - s.x, pcy(p) - s.y) < s.r + Math.min(p.w, p.h) * .45;
-    if (hit) { s.hit = s.k !== "bolt" && s.k !== "geyser" && s.k !== "beam"; hurt(s.dmg, FUSION_ATTACKS[b.attack]?.name || "QUIMERA"); if (s.k === "bolt" || s.k === "geyser" || s.k === "beam") s.life = Math.min(s.life, 1); }
+    if (hit) { s.hit = s.k !== "bolt" && s.k !== "geyser" && s.k !== "beam"; hurt(s.dmg, s.source || FUSION_ATTACKS[b.attack]?.name || "QUIMERA"); if (s.k === "bolt" || s.k === "geyser" || s.k === "beam") s.life = Math.min(s.life, 1); }
   }
   b.shots = b.shots.filter((s) => s.life > 0 && !s.hit);
 }
