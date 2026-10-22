@@ -440,6 +440,9 @@ game.flashColor = null;
 game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
@@ -562,6 +565,9 @@ bounceLocked(fromDir);
 return false;
 }
 const first = !game.visited[id];
+// Clear only the cinematic of the previous room. Do this BEFORE enterWorld1()
+// and playWorld1Cine() create the new room's introduction.
+game.world1Cine = null;
 game.roomId = id;
 resetKiloCombo(game);resetPlayerLocomotion(game.player);
 game.islandSprings=null;game.nestArena=null;
@@ -820,6 +826,9 @@ game.flashColor = null;
 game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
