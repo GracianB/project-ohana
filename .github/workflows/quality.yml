@@ -54,7 +54,14 @@ jobs:
           if [ "${{ inputs.run_multiplayer }}" = "true" ]; then
             npx playwright install --with-deps chromium firefox
           else
-            npx playwright install --with-deps chromium
+            # Hosted Ubuntu runners already ship with most Chromium libraries.
+            # Avoid fetching dozens of Ubuntu packages from a slow apt mirror
+            # on every PR; install OS deps only if an actual launch fails.
+            npx playwright install chromium
+            if ! node --input-type=module -e 'import {chromium} from "playwright"; const b=await chromium.launch(); await b.close()'; then
+              npx playwright install-deps chromium
+              node --input-type=module -e 'import {chromium} from "playwright"; const b=await chromium.launch(); await b.close()'
+            fi
           fi
 
       - name: V457 early optical size regression
