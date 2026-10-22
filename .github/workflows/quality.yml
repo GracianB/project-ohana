@@ -54,7 +54,14 @@ jobs:
           if [ "${{ inputs.run_multiplayer }}" = "true" ]; then
             npx playwright install --with-deps chromium firefox
           else
-            npx playwright install --with-deps chromium
+            # Hosted Ubuntu runners already ship with most Chromium libraries.
+            # Avoid fetching dozens of Ubuntu packages from a slow apt mirror
+            # on every PR; install OS deps only if an actual launch fails.
+            npx playwright install chromium
+            if ! node --input-type=module -e 'import {chromium} from "playwright"; const b=await chromium.launch(); await b.close()'; then
+              npx playwright install-deps chromium
+              node --input-type=module -e 'import {chromium} from "playwright"; const b=await chromium.launch(); await b.close()'
+            fi
           fi
 
       - name: V457 early optical size regression
@@ -65,6 +72,9 @@ jobs:
 
       - name: V473 five feline moon-jellies · idle, wake, unique palette and reduced motion
         run: node tests/browser/v473-lunar-jellies.mjs
+
+      - name: V475 World 1 authentic keyboard start and Kilo first flower
+        run: node tests/browser/v475-world1-natural-walk.mjs
 
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs

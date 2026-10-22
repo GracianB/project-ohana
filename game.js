@@ -86,7 +86,7 @@ import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js"
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
-import { enterWorld1, updateWorld1, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
+import { enterWorld1, updateWorld1, world1Snapshot, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
 import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
@@ -3786,7 +3786,7 @@ if (e2eEnabled || e2eParams.get("perf") === "1") {
 }
 
 if (e2eEnabled) {
-const dismissE2EOverlays = () => {
+const dismissE2EOverlays = ({ preserveRoom = false } = {}) => {
 DOM.help?.classList.remove("open");
 DOM.map?.classList.remove("open");
 DOM.pause?.classList.remove("open");
@@ -3806,7 +3806,9 @@ game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
 game.summonDelay = 0;
-game.roomId = "hub";
+// Legacy tests deliberately reset to hub; the physical World 1 pilot must
+// retain the room actually loaded by start() and its genuine collision map.
+if (!preserveRoom) game.roomId = "hub";
 game.won = false;
 game.summoned = false;
 game.runtimeFaults = 0;
@@ -3874,6 +3876,11 @@ state() {
     platformDrop: p ? {held:!!p._dropWasHeld,target:p._dropPlatform||null,vy:p.vy,t:game.t,hitstop:game.hitstop,doorHold:game.doorHold} : null,
     bufferedActions: { jump: p?.buffer || 0, dash: p?.dashBuf || 0, attack: p?.meleeBuf || 0 },
     roomId: game.roomId,
+    // Read-only campaign snapshots: no grant, bypass, or victory injection.
+    world1: world1Snapshot(game),
+    world1Won: !!game.world1Won,
+    world1Seals: [...(game.world1Seals || [])],
+    world1Cine: game.world1Cine?.id || null,
     worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
@@ -3964,6 +3971,17 @@ start(id = "kilo") {
   start(def);
   game._cuernoIntroT = null;
   dismissE2EOverlays();
+  return this.state();
+},
+// E2E setup takes the real solo entry path, unlike legacy start(). It does
+// not move the player, disable enemies, grant a seal, or mark a room complete.
+startWorld1(id = "kilo") {
+  const def = ROSTER.find((r) => r.id === id);
+  if (!def) throw new Error("Unknown World 1 hero: " + id);
+  game._e2eLegacyStart = false;
+  start(def);
+  game._cuernoIntroT = null;
+  dismissE2EOverlays({ preserveRoom: true });
   return this.state();
 },
 loadRoom(id) {
