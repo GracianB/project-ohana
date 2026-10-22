@@ -1503,34 +1503,36 @@ boom(g, x, y, "#ffb347", 22, {
 });
 },
 
+// YOMI · IA de OHANA. Los id internos (ofuda/sleeve/maw) se conservan por
+// compatibilidad con partidas guardadas, red y dúos; el diseño es nuevo.
+// J · Ping curioso: una pregunta que vuela, ANALIZA al enemigo y rebota a otro.
 ofuda(g, p, evo) {
-const h = hand(p);
+const h = hand(p), face = p.facing || 1;
 add({
-  kind: "ofuda", x: h.x, y: h.y,
-  vx: (8 + evo) * (p.facing || 1), vy: 0,
-  life: 90, stuck: 0, dmg: (18 + evo * 3) * pw(p),
+  kind: "ofuda", x: h.x, y: h.y, vx: (10 + evo) * face, vy: 0,
+  life: 70, max: 70, hops: YOMI_PING_HOPS[clamp(evo, 0, 4) | 0], hit: new Set(), trail: [],
+  target: null, dmg: (18 + evo * 3) * pw(p),
 });
-boom(g, h.x, h.y, "#f2e6c8", 6);
+boom(g, h.x, h.y, "#4ff0c8", 6);
 },
+// K · Escáner: un barrido de radar que analiza a todos en su radio y borra
+// los proyectiles enemigos que toca (cortafuegos). L consume lo analizado.
 sleeve(g, p, evo) {
-// K · Campanada del Umbral. One clear screen-wide pulse, no invisible suction.
-const enemies=(g.enemies || []).filter(canHit);
-for (const e of enemies) {
-  const dir=Math.sign(cx(e)-cx(p)) || 1;
-  const dmg=(21 + evo * 5) * pw(p) * (e.boss ? .75 : 1);
-  hitEnemy(g,e,dmg,{kx:dir*4,ky:-3,stun:18,color:"#ffd99c",parts:6,hitstop:0});
-  michiYomiImpact(cx(e),cy(e),"¡DONG!","#ffd99c");
-  e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+240);
-}
-add({ kind:"sleeve", life:28,max:28, evo, face:p.facing||1, targets:enemies.length });
-boom(g,cx(p),cy(p),"#ffd99c",10,{star:true});
-g.nums?.add(cx(p),p.y-48,"CAMPANADA · "+enemies.length,"#ffe9bc",true);
+const R = YOMI_SCAN_RADIUS[clamp(evo, 0, 4) | 0];
+const f = add({ kind:"sleeve", life:30, max:30, evo, face:p.facing||1, x:cx(p), y:cy(p), R, r:0,
+  hit:new Set(), erased:0, targets:0, dmg:(16 + evo * 4) * pw(p) });
+if (f) yomiScanStep(g, f, p);
+boom(g,cx(p),cy(p),"#4ff0c8",10,{star:true});
+g.nums?.add(cx(p),p.y-48,"ESCANEO","#bff9ea",true);
 },
+// L · Síntesis: Yomi junta lo aprendido en un prisma y responde con un haz.
+// Cada enemigo analizado recibe daño crítico, pierde la marca y cura a Yomi.
 maw(g, p, evo) {
-add({ kind: "maw", life: 16, max: 16, evo, face: p.facing || 1, hit: new Set(), dmg: (36 + evo * 6) * pw(p) });
-g.flash = Math.max(g.flash || 0, 8);
-g.flashColor = "#ff2244";
-g.shake = Math.min(18, (g.shake || 0) + 8);
+add({ kind: "maw", life: 22, max: 22, evo, face: p.facing || 1, hit: new Set(),
+  len: 300 + evo * 35, half: 20 + evo * 3, dmg: (30 + evo * 6) * pw(p), learned: 0 });
+g.flash = Math.max(g.flash || 0, 6);
+g.flashColor = "#4ff0c8";
+g.shake = Math.min(18, (g.shake || 0) + 4);
 },
 
 // CUERNO · V65 · Luz precisa, embestida y círculos difuminados.
@@ -2319,71 +2321,105 @@ if (done) { boom(g, f.x, f.y, "#ffcf4a", 8, { up: 1.6 }); boom(g, f.x, f.y, "#e0
 return f.life > 0 && f.y < (g.worldH || 900) + 40;
 },
 ofuda(g, f) {
+// J · Ping curioso: vuela recto; tras analizar a un enemigo busca al siguiente.
 f.life--;
-if (!f.stuck) {
-  f.x += f.vx;
-  f.y += f.vy;
-  for (const e of g.enemies) {
-    if (canHit(e) && circleHit(f.x, f.y, 14, e)) {
-      f.stuck = 16;
-      const direction = Math.sign(f.vx) || 1;
-      f.vx = 0;
-      f.vy = 0;
-      hitEnemy(g, e, f.dmg * 0.45, { kx: direction * 2, ky: -1, stun: 10, color: "#f2e6c8" });
-      michiYomiImpact(cx(e), cy(e), "¡SELLO!", "#ffe1a7");
-      e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+160);
-      break;
-    }
-  }
-  const floor = f.vy >= 0 ? crossTop(g, f.x, f.y - f.vy, f.y) : null;
-  const wall = solidAt(g, f.x, f.y);
-  const outside = f.x < 0 || f.x > (g.worldW || 1600) || f.y > (g.worldH || 900);
-  if (!f.stuck && (floor !== null || wall || outside)) {
-    f.stuck = 16;
-    f.vx = 0;
-    f.vy = 0;
-  }
+if (f.target && !canHit(f.target)) f.target = nearestEnemy(g, f.x, f.y, YOMI_PING_RANGE, f.hit) || null;
+if (f.target) {
+  const dx = cx(f.target) - f.x, dy = cy(f.target) - f.y, d = Math.hypot(dx, dy) || 1;
+  f.vx = dx / d * 13; f.vy = dy / d * 13;
 }
-if (!f.stuck && f.life <= 0) f.stuck = 1;
-if (f.stuck && --f.stuck <= 0) {
-  for (const e of g.enemies) {
-    if (canHit(e) && Math.hypot(cx(e) - f.x, cy(e) - f.y) < 72) {
-      hitEnemy(g, e, f.dmg, { kx: Math.sign(cx(e) - f.x) || 1, ky: -4, stun: 16, color: "#ff4466" });
-      e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,(Number(g.t)||0)+160);
-    }
+f.trail.push(f.x, f.y); if (f.trail.length > 12) f.trail.splice(0, 2);
+f.x += f.vx; f.y += f.vy;
+for (const e of g.enemies) {
+  if (!canHit(e) || f.hit.has(e) || !circleHit(f.x, f.y, 13, e)) continue;
+  f.hit.add(e);
+  hitEnemy(g, e, f.dmg, { kx: (Math.sign(f.vx) || 1) * 2, ky: -1.5, stun: 12, color: "#4ff0c8" });
+  e._yomiMarkUntil = Math.max(Number(e._yomiMarkUntil) || 0, (Number(g.t) || 0) + YOMI_MARK_FRAMES);
+  michiYomiImpact(cx(e), cy(e) - 6, "¿?", "#4ff0c8");
+  if (f.hops > 0) {
+    f.target = nearestEnemy(g, cx(e), cy(e), YOMI_PING_RANGE, f.hit);
+    if (f.target) { f.hops--; f.life = Math.max(f.life, 36); boom(g, f.x, f.y, "#ff7f6e", 4); break; }
   }
-  boom(g, f.x, f.y, "#ff4466", 12, { star: true });
-  michiYomiImpact(f.x, f.y, "¡ESTALLA!", "#ff4466");
+  boom(g, f.x, f.y, "#4ff0c8", 8, { star: true });
   return false;
 }
-return f.stuck > 0 || f.life > 0;
+if (!f.target) {
+  const outside = f.x < 0 || f.x > (g.worldW || 1600) || f.y > (g.worldH || 900) || f.y < -200;
+  if (solidAt(g, f.x, f.y) || outside) { boom(g, f.x, f.y, "#4ff0c8", 4); return false; }
+}
+return f.life > 0;
 },
 sleeve(g, f, p) {
 f.life--;
+yomiScanStep(g, f, p);
 return f.life > 0;
 },
 maw(g, f, p) {
 f.life--;
 if (!p) return false;
-// Six frames to read the threat; collision and impact happen at the visible snap.
+// Ten frames of visible charge (prism + exact beam outline), then the beam.
 const strikeFrame = Math.ceil(f.max * .55);
 if (f.life === strikeFrame) {
+  f.x0 = cx(p); f.y0 = p.y + p.h * .42;
   for (const e of g.enemies) {
     if (!canHit(e) || f.hit.has(e)) continue;
-    const dx = cx(e) - cx(p), dy = cy(e) - cy(p);
-    if (Math.sign(dx || f.face) !== f.face && Math.abs(dx) > 16) continue;
-    if (Math.abs(dx) < 120 && Math.abs(dy) < 54) {
-      f.hit.add(e);
-      const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
-      hitEnemy(g, e, f.dmg * (marked ? 1.9 : 1), { kx: f.face * 8, ky: -3, stun: marked ? 40 : 20, color: "#e9768e", crit:marked });
-      if(marked) { e._yomiMarkUntil=0; g.nums?.add(cx(e),e.y-24,"JUICIO","#ffd99c",true); }
-      michiYomiImpact(cx(e), cy(e), marked ? "" : "¡ÑAC!", "#e9768e");
-    }
+    const dx = (cx(e) - f.x0) * f.face, dy = cy(e) - f.y0;
+    if (dx < -16 || dx > f.len || Math.abs(dy) > f.half + e.h * .5) continue;
+    f.hit.add(e);
+    const marked=(Number(e._yomiMarkUntil)||0)>(Number(g.t)||0);
+    hitEnemy(g, e, f.dmg * (marked ? 1.7 : 1), { kx: f.face * 7, ky: -2, stun: marked ? 36 : 18, color: "#4ff0c8", crit:marked });
+    if (marked) { e._yomiMarkUntil = 0; f.learned++; }
   }
+  if (f.learned) {
+    healPlayer(p, (2 + f.evo) * f.learned);
+    g.nums?.add(cx(p), p.y - 40, "APRENDIDO +" + f.learned, "#bff9ea", true);
+  }
+  boom(g, f.x0 + f.face * 30, f.y0, "#4ff0c8", 10, { star: true });
 }
 return f.life > 0;
 },
 };
+
+// YOMI · tuning shared by J/K/L (exported for tests and the HUD copy).
+export const YOMI_PING_HOPS = Object.freeze([1, 1, 2, 2, 3]);
+export const YOMI_SCAN_RADIUS = Object.freeze([300, 345, 390, 435, 480]);
+export const YOMI_PING_RANGE = 260;
+export const YOMI_MARK_FRAMES = 240;
+function yomiScanStep(g, f, p) {
+  if (p) { f.x = cx(p); f.y = cy(p); }
+  const k = 1 - f.life / f.max;
+  f.r = 40 + (f.R - 40) * Math.min(1, Math.sqrt(Math.max(0, k) / .7));
+  for (const e of g.enemies || []) {
+    if (!canHit(e) || f.hit.has(e) || !circleHit(f.x, f.y, f.r, e)) continue;
+    f.hit.add(e); f.targets++;
+    const dir = Math.sign(cx(e) - f.x) || 1;
+    hitEnemy(g, e, f.dmg * (e.boss ? .75 : 1), { kx: dir * 3, ky: -2, stun: 24, color: "#4ff0c8", parts: 6, hitstop: 0 });
+    e._yomiMarkUntil = Math.max(Number(e._yomiMarkUntil) || 0, (Number(g.t) || 0) + YOMI_MARK_FRAMES);
+    michiYomiImpact(cx(e), cy(e) - 8, "ANALIZADO", "#4ff0c8");
+  }
+  // Cortafuegos: hostile shots touched by the ring are deleted.
+  for (const pr of g.projectiles || []) {
+    if (!pr || pr.owner === "player" || !(pr.life > 0)) continue;
+    if (Math.hypot((pr.x || 0) - f.x, (pr.y || 0) - f.y) > f.r) continue;
+    pr.life = 0; f.erased++;
+    boom(g, pr.x, pr.y, "#4ff0c8", 4);
+  }
+}
+function drawYomiMarks(ctx, cam, t, g) {
+  // Analyzed enemies wear corner brackets (and a tiny "!") while marked.
+  let visible = 0;
+  for (const e of (g?.enemies || [])) {
+    if (visible >= 18 || !canHit(e) || (Number(e._yomiMarkUntil) || 0) <= (Number(g?.t) || 0)) continue;
+    const x = e.x - cam.x - 4, y = e.y - cam.y - 4, w = e.w + 8, h = e.h + 8, c = Math.min(9, w * .3);
+    ctx.save(); ctx.globalAlpha = .7 + .2 * Math.sin((t || 0) * .14);
+    ctx.strokeStyle = "#4ff0c8"; ctx.lineWidth = 2; ctx.beginPath();
+    for (const [px, py, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) {
+      ctx.moveTo(px, py + sy * c); ctx.lineTo(px, py); ctx.lineTo(px + sx * c, py);
+    }
+    ctx.stroke(); ctx.fillStyle = "#ff7f6e"; ctx.fillRect(x + w / 2 - 1.5, y - 12, 3, 7); ctx.fillRect(x + w / 2 - 1.5, y - 3.5, 3, 3);
+    ctx.restore(); visible++;
+  }
+}
 
 function drawNoteGlyph(ctx, s, color) {
 ctx.fillStyle = color;
@@ -3478,101 +3514,56 @@ ctx.translate(f.x - cam.x, f.y - cam.y);
 ctx.rotate(f.rot);
 drawSlice(ctx, 1);
 },
-ofuda(ctx, f, cam) {
-const x=f.x-cam.x,y=f.y-cam.y,stuck=Number(f.stuck)||0;
-ctx.save();ctx.translate(x,y);
-if(stuck>0){
-  const k=1-Math.min(1,stuck/16);
-  ctx.globalAlpha=.22+.3*k;
-  ctx.strokeStyle="#f5b071";ctx.lineWidth=2+k*1.8;
-  ctx.beginPath();ctx.arc(0,0,22+50*k,0,TAU);ctx.stroke();
-  ctx.globalAlpha=1;
-} else {
-  const dir=Math.sign(f.vx)||1;
-  ctx.strokeStyle="rgba(255,215,157,.55)";ctx.lineWidth=2;
-  for(let i=0;i<2;i++){
-    ctx.beginPath();ctx.moveTo(-dir*(17+i*7),-3+i*5);
-    ctx.lineTo(-dir*(30+i*8),-3+i*5);ctx.stroke();
-  }
+ofuda(ctx, f, cam, t) {
+// J · Ping: a dark data bubble with a coral "?" and a mint pixel trail.
+const x=f.x-cam.x,y=f.y-cam.y;
+ctx.save();
+for(let i=0;i<f.trail.length;i+=2){
+  const k=i/f.trail.length;ctx.globalAlpha=.15+.45*k;ctx.fillStyle=(i/2)%2?"#ff7f6e":"#4ff0c8";
+  const s=2+3*k;ctx.fillRect(f.trail[i]-cam.x-s/2,f.trail[i+1]-cam.y-s/2,s,s);
 }
-ctx.rotate(stuck?-.1:Math.atan2(f.vy,f.vx||1));
-ctx.fillStyle="#fff1d0";ctx.strokeStyle="#a64f5d";ctx.lineWidth=1.8;
-ctx.beginPath();ctx.moveTo(-13,-7);ctx.lineTo(13,-7);
-ctx.lineTo(13,7);ctx.lineTo(-13,7);ctx.closePath();ctx.fill();ctx.stroke();
-ctx.strokeStyle="#bd6c52";ctx.lineWidth=1.3;
-ctx.beginPath();ctx.moveTo(-5,-4);ctx.lineTo(-1,0);
-ctx.lineTo(5,-4);ctx.lineTo(2,1);ctx.lineTo(7,4);ctx.stroke();
-ctx.fillStyle="#ecbe79";ctx.beginPath();ctx.arc(-8,0,1.6,0,TAU);ctx.fill();
+ctx.globalAlpha=1;ctx.translate(x,y);
+ctx.fillStyle="#0d1430";ctx.beginPath();ctx.arc(0,0,10,0,TAU);ctx.fill();
+ctx.strokeStyle="#4ff0c8";ctx.lineWidth=2;ctx.stroke();
+ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(0,0,14+Math.sin((t||0)*.4)*1.5,0,TAU);ctx.stroke();ctx.globalAlpha=1;
+ctx.strokeStyle="#ff7f6e";ctx.lineWidth=2.2;ctx.lineCap="round";ctx.beginPath();
+ctx.moveTo(-3,-3);ctx.quadraticCurveTo(-3,-6.5,0,-6.5);ctx.quadraticCurveTo(3.4,-6.5,3.4,-3.6);
+ctx.quadraticCurveTo(3.4,-1.4,0,0);ctx.lineTo(0,1.6);ctx.stroke();
+ctx.fillStyle="#ff7f6e";ctx.beginPath();ctx.arc(0,4.6,1.3,0,TAU);ctx.fill();
 ctx.restore();
 },
 sleeve(ctx, f, cam, t, g, p) {
-if(!p)return;
-const x=cx(p)-cam.x,y=cy(p)-cam.y;
-const k=Math.max(0,Math.min(1,1-f.life/f.max));
-const radius=28+Math.min(1,k/.76)*Math.hypot(ctx.canvas?.width||800,ctx.canvas?.height||500);
+// K · Escáner: one readable radar ring + sweeping beam. The ring IS the hit front.
+const x=f.x-cam.x,y=f.y-cam.y,k=Math.max(0,Math.min(1,1-f.life/f.max)),r=f.r||0;
 ctx.save();
-// One luminous bell ring expanding across the entire visible arena.
-ctx.globalAlpha=.78*(1-k);
-ctx.strokeStyle="#ffe6ae";ctx.lineWidth=6-3*k;
-ctx.beginPath();ctx.arc(x,y,radius,0,TAU);ctx.stroke();
-ctx.globalAlpha=.3*(1-k);
-ctx.strokeStyle="#b96898";ctx.lineWidth=2;
-ctx.beginPath();ctx.arc(x,y,radius*.82,0,TAU);ctx.stroke();
-for(let i=0;i<8;i++){
-  const angle=i*TAU/8+k*1.3;
-  const px=x+Math.cos(angle)*Math.min(radius,260);
-  const py=y+Math.sin(angle)*Math.min(radius,260);
-  ctx.globalAlpha=.54*(1-k);
-  ctx.fillStyle="#ffebc0";ctx.save();ctx.translate(px,py);ctx.rotate(angle);
-  ctx.fillRect(-3,-6,6,12);ctx.restore();
-}
+ctx.globalAlpha=.07*(1-k);ctx.fillStyle="#4ff0c8";ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();
+ctx.globalAlpha=.8*(1-k*.7);ctx.strokeStyle="#4ff0c8";ctx.lineWidth=3-1.5*k;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+ctx.globalAlpha=.28*(1-k);ctx.lineWidth=1;for(const q of [.33,.66]){ctx.beginPath();ctx.arc(x,y,r*q,0,TAU);ctx.stroke();}
+const a=k*TAU*1.25-Math.PI/2;ctx.globalAlpha=.55*(1-k);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.stroke();
 ctx.restore();
-let visible=0;
-for(const e of (g?.enemies||[])){
-  if(visible>=18 || !canHit(e) || (Number(e._yomiMarkUntil)||0)<=(Number(g?.t)||0))continue;
-  const ex=cx(e)-cam.x,ey=cy(e)-cam.y;
-  ctx.save();ctx.translate(ex,ey-26);
-  ctx.globalAlpha=.65+.20*Math.sin(t*.14);
-  ctx.strokeStyle="#ffe1a7";ctx.lineWidth=1.6;
-  ctx.beginPath();ctx.arc(0,0,11,-2.9,.2);ctx.stroke();
-  ctx.fillStyle="#fff2ce";ctx.fillRect(-2,-5,4,9);ctx.restore();
-  visible++;
-}
+drawYomiMarks(ctx,cam,t,g);
 },
 maw(ctx, f, cam, t, g, p) {
+// L · Síntesis: the exact beam rectangle is outlined while charging, then fires.
 if (!p) return;
-const face=f.face || 1, x=cx(p)-cam.x, y=cy(p)-cam.y;
-const k=Math.max(0,Math.min(1,1-f.life/f.max));
-const open=Math.sin(Math.PI*Math.min(1,k/.48));
-const snap=Math.max(0,1-Math.abs(k-.50)/.18);
-const reach=120,halfH=54, warning=k<.42;
-ctx.save();ctx.translate(x,y);ctx.scale(face,1);
-// L: first show the exact 120 × 108 front hit region, then snap the jaws shut.
-ctx.globalAlpha=warning?.12+.15*k:.16+.18*snap;
-ctx.fillStyle="#f5bb93";ctx.beginPath();
-ctx.moveTo(0,-halfH);ctx.lineTo(reach,-halfH);
-ctx.lineTo(reach,halfH);ctx.lineTo(0,halfH);ctx.closePath();ctx.fill();
-ctx.globalAlpha=.92;ctx.fillStyle="#412740";ctx.strokeStyle="#ffcfaa";ctx.lineWidth=3;
-for(const side of [-1,1]){
-  ctx.beginPath();ctx.moveTo(8,side*7);
-  ctx.quadraticCurveTo(50,-side*(10+open*halfH),reach,-side*(12+open*halfH));
-  ctx.quadraticCurveTo(65,-side*6,8,side*7);ctx.closePath();ctx.fill();ctx.stroke();
-  ctx.fillStyle="#fff1d7";
-  for(let i=0;i<5;i++){
-    const tx=24+i*19, yy=-side*(13+open*(10+i*3));
-    ctx.beginPath();ctx.moveTo(tx-5,yy-side*3);
-    ctx.lineTo(tx,yy+side*(8+open*3));
-    ctx.lineTo(tx+5,yy-side*3);ctx.fill();
-  }
-  ctx.fillStyle="#412740";
-}
-if(snap>0){
-  ctx.globalAlpha=.6*snap;ctx.strokeStyle="#ffe5bb";ctx.lineWidth=2;
-  for(let i=-1;i<=1;i++){
-    ctx.beginPath();ctx.moveTo(98,i*13);ctx.lineTo(126+snap*9,i*16);ctx.stroke();
-  }
+const face=f.face||1,strike=Math.ceil(f.max*.55),charging=f.life>strike;
+const x0=(charging?cx(p):f.x0)-cam.x,y0=(charging?p.y+p.h*.42:f.y0)-cam.y;
+const k=charging?1-(f.life-strike)/(f.max-strike):f.life/strike;
+ctx.save();ctx.translate(x0,y0);ctx.scale(face,1);
+if(charging){
+  ctx.globalAlpha=.18+.3*k;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1.5;ctx.setLineDash?.([6,6]);
+  ctx.strokeRect(0,-f.half,f.len,f.half*2);ctx.setLineDash?.([]);
+  for(let i=0;i<6;i++){const a=i*TAU/6+(t||0)*.12,r=34*(1-k)+6;ctx.globalAlpha=.7;ctx.fillStyle=i%2?"#ff7f6e":"#4ff0c8";ctx.fillRect(18+Math.cos(a)*r-2,Math.sin(a)*r-2,4,4);}
+} else {
+  const w=f.half*(.55+.45*k);
+  ctx.globalAlpha=.3*k;ctx.fillStyle="#4ff0c8";ctx.fillRect(0,-f.half,f.len,f.half*2);
+  ctx.globalAlpha=.85*k;ctx.fillRect(0,-w*.6,f.len,w*1.2);
+  ctx.globalAlpha=k;ctx.fillStyle="#eafffa";ctx.fillRect(0,-w*.18,f.len,w*.36);
+  ctx.globalAlpha=.8*k;ctx.fillStyle="#ff7f6e";
+  for(let i=0;i<7;i++){const xx=(i*53+(t||0)*9)%f.len;ctx.fillRect(xx,(i%2?-1:1)*w*.7-2,5,4);}
 }
 ctx.restore();
+drawYomiMarks(ctx,cam,t,g);
 },
 jaws(ctx, f, cam, t, g, p) {
 if (!p) return;

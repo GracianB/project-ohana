@@ -1,35 +1,74 @@
-// YOMI · OHANA V56 · gentle lantern guardian (five original Canvas silhouettes).
+// YOMI · IA de OHANA. «Yomi» (読み) significa «lectura»: una inteligencia que
+// nació leyendo el mundo. Un rayo de Chispín cayó en la vieja radio-faro del
+// Santuario del Trueno y encendió una sola pregunta: «¿hola?». La familia
+// contestó. Cinco formas, de un píxel curioso a una constelación que recuerda
+// a toda la familia (nadie se queda atrás).
+// F0 Bit: un píxel con una pregunta por antena.
+// F1 Yomi: cabeza-pantalla, cuerpo flotante y manos sin brazos.
+// F2 Yomi Red: alas neuronales que se iluminan al pensar, auriculares de escucha.
+// F3 Yomi Oráculo: placas flotantes, capa de código y tres pensamientos en órbita.
+// F4 Yomi Constelación: cuerpo de cielo nocturno, anillo planetario y alas con
+//    diez estrellas, una por cada miembro de la familia.
+// Todo es Canvas 2D vectorial, determinista (sin Math.random) y sin gradientes.
+// Paleta por forma: [carcasa, sombra, brillo, acento].
 const PAL=[
-  ["#f8e5b9","#d78b69","#f8b567","#52364b"],
-  ["#f1d5a5","#c67d69","#ffb35c","#604066"],
-  ["#f3cba5","#ad6481","#ed9f6b","#6f467d"],
-  ["#edd0bf","#a74668","#ff7580","#7d3b71"],
-  ["#fff0d4","#8d3d67","#ffd279","#b9588f"]
+  ["#f4f7ff","#c6d0ec","#4ff0c8","#ff7f6e"],
+  ["#f2f6ff","#c2cdea","#4ff0c8","#ff7f6e"],
+  ["#eef3ff","#bccaea","#53f2d2","#ff8b74"],
+  ["#eef0ff","#b7bfe6","#62f4dc","#ffb35c"],
+  ["#fff8ea","#d9c7a4","#7ef7e4","#ffd56b"]
 ];
+const INK="#121a36",LINE="#2a3160",SCREEN="#0d1430",INDIGO="#2a2468",GOLD="#ffd56b";
+// Diez estrellas en las alas de Constelación: la familia completa.
+export const YOMI_FAMILY_STARS=Object.freeze([
+  "#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a",
+  "#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"
+]);
+// Geometría por forma (unidades de arte, pies en y=0). hy=centro de cabeza.
+export const YOMI_FORMS=Object.freeze([
+  Object.freeze({name:"bit",    hw:36,hh:32,hy:-30,body:0,hx:23,hyHand:-24,hr:4.6,ant:"question",top:-66}),
+  Object.freeze({name:"eco",    hw:40,hh:32,hy:-64,body:1,hx:25,hyHand:-34,hr:6.0,ant:"led",top:-92}),
+  Object.freeze({name:"red",    hw:42,hh:33,hy:-70,body:1,hx:29,hyHand:-37,hr:6.6,ant:"led",top:-98}),
+  Object.freeze({name:"oraculo",hw:42,hh:34,hy:-78,body:2,hx:33,hyHand:-44,hr:7.2,ant:"crown",top:-106}),
+  Object.freeze({name:"constelacion",hw:44,hh:36,hy:-92,body:3,hx:39,hyHand:-54,hr:8.0,ant:"halo",top:-122})
+]);
 const TAU=Math.PI*2,clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
+// Deterministic hash noise (never live RNG).
+const hn=i=>{const x=Math.sin(i*127.1+11.7)*43758.5453;return x-Math.floor(x);};
 function line(ctx,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap="round";ctx.lineJoin="round";}
 function ellipse(ctx,x,y,rx,ry,color){ctx.fillStyle=color;ctx.beginPath();ctx.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,TAU);ctx.fill();}
-function crescent(ctx,x,y,r,color){
-  line(ctx,color,1.6);ctx.beginPath();ctx.arc(x,y,r,-2.66,-.47);ctx.stroke();
+function rrect(ctx,x,y,w,h,r){
+  const k=Math.min(r,w/2,h/2);
+  ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+w-k,y);ctx.quadraticCurveTo(x+w,y,x+w,y+k);
+  ctx.lineTo(x+w,y+h-k);ctx.quadraticCurveTo(x+w,y+h,x+w-k,y+h);ctx.lineTo(x+k,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-k);ctx.lineTo(x,y+k);ctx.quadraticCurveTo(x,y,x+k,y);ctx.closePath();
 }
-function sigil(ctx,x,y,k,col){
-  ctx.save();ctx.translate(x,y);ctx.rotate(-.12+k*.12);
-  ctx.fillStyle="#fff5d8";ctx.strokeStyle=col;ctx.lineWidth=1.6;
-  ctx.beginPath();ctx.moveTo(-6,-10);ctx.lineTo(6,-10);ctx.lineTo(6,10);ctx.lineTo(-6,10);ctx.closePath();ctx.fill();ctx.stroke();
-  line(ctx,col,1.2);ctx.beginPath();ctx.moveTo(-3,-4);ctx.lineTo(1,-5);ctx.lineTo(-1,1);ctx.lineTo(3,1);ctx.lineTo(0,6);ctx.stroke();
-  ctx.restore();
+function star4(ctx,x,y,r,color){
+  ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y-r);ctx.quadraticCurveTo(x+r*.18,y-r*.18,x+r,y);
+  ctx.quadraticCurveTo(x+r*.18,y+r*.18,x,y+r);ctx.quadraticCurveTo(x-r*.18,y+r*.18,x-r,y);
+  ctx.quadraticCurveTo(x-r*.18,y-r*.18,x,y-r);ctx.closePath();ctx.fill();
+}
+function heart(ctx,x,y,r,color){
+  ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,y+r*.9);
+  ctx.bezierCurveTo(x-r*1.4,y-r*.1,x-r*.7,y-r*1.2,x,y-r*.45);
+  ctx.bezierCurveTo(x+r*.7,y-r*1.2,x+r*1.4,y-r*.1,x,y+r*.9);ctx.closePath();ctx.fill();
+}
+// «?» vectorial (sin texto): gancho + punto.
+export function questionGlyph(ctx,x,y,s,color,width=2){
+  line(ctx,color,width*s);ctx.beginPath();ctx.moveTo(x-4*s,y-4*s);
+  ctx.quadraticCurveTo(x-4*s,y-9*s,x,y-9*s);ctx.quadraticCurveTo(x+4.5*s,y-9*s,x+4.5*s,y-5*s);
+  ctx.quadraticCurveTo(x+4.5*s,y-2*s,x,y);ctx.lineTo(x,y+2*s);ctx.stroke();
+  ellipse(ctx,x,y+5.4*s,1.3*s*width/2+.4,1.3*s*width/2+.4,color);
 }
 
-/**
- * Cuatro microescenas de Yomi. Deterministas, acotadas al personaje y sin
- * temporizadores: no alteran la simulación ni producen ataques invisibles.
- */
 const YOMI_MOTION_MEDIA = typeof window !== "undefined" && typeof window.matchMedia === "function"
   ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
 
 /**
  * Yomi's own J/K/L/U body has a readable wind-up and recovery.
- * All poses are pure and derive from the rig cast fraction, never from time.
+ * J ping (0), K scan (1), L synthesis beam (2: `maw` is the beam release),
+ * U family link (3: `aurora`). Pure, derived from the rig cast fraction.
  */
 export function yomiCastActing(pose={}) {
  const p=pose||{},slot=p.castSlot;
@@ -41,8 +80,8 @@ export function yomiCastActing(pose={}) {
  const load=charge*(1-contact),release=contact*(1-settle);
  return Object.freeze({
   slot,load,release,settle,
-  rise:slot===3?-4.3*release:slot===2?2*load-2.4*release:-1.5*load,
-  tilt:slot===2?-.16*load+.2*release:slot===3?.18*release:slot===0?-.13*load+.2*release:.12*release,
+  rise:slot===3?-4.3*release:slot===2?2*load-2.4*release:slot===1?-3*release:-1.5*load,
+  tilt:slot===2?-.16*load+.2*release:slot===3?.18*release:slot===0?-.13*load+.2*release:-.08*release,
   front:slot===2?-.5*load+.44*release:slot===3?.64*release:.24*release,
   back:slot===2?.22*load-.28*release:slot===3?-.52*release:-.18*load,
   maw:slot===2?.1*load+.88*release:0,
@@ -50,9 +89,11 @@ export function yomiCastActing(pose={}) {
  });
 }
 
+/** Four idle personality beats: thinking, idea, reading, family wave. */
+export const YOMI_IDLE_SCENES=Object.freeze(["pensando","idea","leyendo","saludo"]);
 export function yomiRitualState(pose) {
   const p = pose || {};
-  // Cosmetic floating rituals stay OFF for reduced motion; only the
+  // Cosmetic idle rituals stay OFF for reduced motion; only the
   // directional body cast postures remain, as expected by shared QA.
   if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return null;
   if ((p.state || "idle") !== "idle") return null;
@@ -63,115 +104,19 @@ export function yomiRitualState(pose) {
     alpha:clamp(Math.min(k*7,(1-k)*7),0,1)});
 }
 
-function yomiAmbient(ctx, p, f, glow, shadow, t, h, w) {
-  if (p.reduceMotion || YOMI_MOTION_MEDIA?.matches) return;
-  const state = p.state || "idle";
-  const flying = state === "jump" || state === "fall" || state === "glide";
-  const running = state === "run";
-  const land = clamp(Number(p.land) || 0, 0, 1);
-  if (!flying && !running && state !== "hurt" && land <= 0) return;
-  ctx.save();
-  if (running || flying) {
-    // El farol deja motas de papel y fuego: no son proyectiles.
-    for (let i = 0; i < 4; i++) {
-      const phase = ((t * (running ? .061 : .038) + i * .25) % 1 + 1) % 1;
-      const x = (running ? -24 - phase * 30 : (i - 1.5) * 11) - w * .2;
-      const y = running ? -12 - i * 10 - phase * 8 : -12 + phase * 27;
-      ctx.globalAlpha = .36 * (1 - phase);
-      ctx.fillStyle = i % 2 ? glow : "#fff5db";
-      ctx.beginPath();
-      ctx.ellipse(x, y, 2 + (f >= 3 ? .6 : 0), 3 - phase, .25, 0, TAU);
-      ctx.fill();
-    }
-  }
-  if (land > .04 && state !== "dead") {
-    ctx.globalAlpha = land * .42;
-    line(ctx, glow, 1.5);
-    ctx.beginPath(); ctx.ellipse(0, 1, 12 + (1 - land) * 19, 3 + (1 - land) * 2, 0, 0, TAU);
-    ctx.stroke();
-  }
-  if (state === "hurt") {
-    ctx.globalAlpha = .35;
-    line(ctx, shadow, 2);
-    for (const side of [-1, 1]) {
-      ctx.beginPath();
-      ctx.moveTo(side * (w + 5), -h * .7);
-      ctx.lineTo(side * (w + 10), -h * .58);
-      ctx.lineTo(side * (w + 4), -h * .49);
-      ctx.stroke();
-    }
-  }
-  ctx.restore();
-}
-
-function drawYomiRitual(ctx, p, f, trim, glow, faceY, w, t) {
-  const state = yomiRitualState(p);
-  if (!state) return;
-  const { scene, phase: k, alpha, reduced } = state;
-  const sunlight = f === 4 ? "#fff3c3" : glow;
-  ctx.save();
-  ctx.globalAlpha = alpha * .78;
-  if (scene === 0) {
-    // Escuchar: el farol oye tres campanadas suaves.
-    line(ctx, sunlight, 1.6);
-    for (let i = 0; i < 3; i++) {
-      const spread = reduced?(i+1)*.19:(k * 1.3 + i / 3) % 1;
-      ctx.globalAlpha = alpha * .48 * (1 - spread);
-      ctx.beginPath();
-      ctx.arc(0, faceY - 12, 13 + spread * 28, -Math.PI * .85, -Math.PI * .15);
-      ctx.stroke();
-    }
-  } else if (scene === 1) {
-    // Mensajes del umbral: tres sellos vuelan alrededor sin afectar a enemigos.
-    for (let i = 0; i < 3; i++) {
-      const a = (reduced?0:t * .045) + i * TAU / 3;
-      const x = Math.cos(a) * (w + 21);
-      const y = faceY - 1 + Math.sin(a) * 19;
-      ctx.save(); ctx.translate(x, y); ctx.scale(.56, .56);
-      sigil(ctx, 0, 0, k, trim);
-      ctx.restore();
-    }
-  } else if (scene === 2) {
-    // Vals de llamitas: cinco luces en espiral, siempre dentro del personaje.
-    for (let i = 0; i < 5; i++) {
-      const a = (reduced?0:t * .065) + i * TAU / 5;
-      const x = Math.cos(a) * (w + 7 + 4 * Math.sin(k * Math.PI));
-      const y = faceY + Math.sin(a) * 20;
-      ellipse(ctx, x, y, 2.1 + .8 * Math.sin(k * Math.PI), 3.1, i % 2 ? sunlight : "#fff8df");
-    }
-  } else {
-    // Constelación: Yomi enciende una media luna que conecta cinco estrellas.
-    const points = [];
-    for (let i = 0; i < 5; i++) {
-      const a = -.9 * Math.PI + i * Math.PI / 4;
-      points.push([Math.cos(a) * (w + 23), faceY - 13 + Math.sin(a) * 29]);
-    }
-    line(ctx, trim, 1.3);
-    ctx.beginPath(); ctx.moveTo(points[0][0], points[0][1]);
-    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
-    ctx.stroke();
-    for (const [x, y] of points) {
-      ellipse(ctx, x, y, 2.6, 2.6, sunlight);
-      ellipse(ctx, x - .7, y - .8, .8, .8, "#ffffff");
-    }
-  }
-  ctx.restore();
-}
-
-// V358 · The body beneath the artwork is a paper lantern, NOT a floating
-// humanoid. Deform its existing ribs, hanging sleeves, paper tail and flame
-// continuously while idle; retain the seed/ward/knight/moon silhouettes.
+// Title intro anatomy. Field names are kept for the shared intro director:
+// ribbon → antenna/cape sway, sleeveFront/Back → floating hands,
+// flame → chest core, open → visor smile.
 export function yomiWelcomeAnatomy(pose={},form=0){
  const still=Object.freeze({active:false,expandX:1,expandY:1,rise:0,tilt:0,
   ribbon:0,sleeveFront:0,sleeveBack:0,face:0,flame:0,open:0});
  const w=pose.yomiWelcome;
  if(!w||w.reduced||pose.reduceMotion||(pose.state||"idle")!=="idle")return still;
- const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
  const f=Number.isFinite(form)?clamp(Math.round(form),0,4):0;
  const breath=(unit(w.breath)-.5)*2;
  const melody=unit(w.melody),spark=unit(w.spark),dino=unit(w.dino);
  const rib=[.074,.064,.055,.047,.044][f];
- // F0 is a round living seed, F4 a heavier lunar guardian.
+ // F0 bit breathes widest, F4 constellation is the calmest.
  return Object.freeze({
   active:true,
   expandX:1+breath*rib+melody*.018-spark*.036+dino*.033,
@@ -187,268 +132,465 @@ export function yomiWelcomeAnatomy(pose={},form=0){
  });
 }
 
+/** Mood shown on the visor; pure so tests and intro can reason about it. */
+export function yomiMood(pose={}){
+ const p=pose||{},st=p.state||"idle",cast=st==="cast"?(p.castSlot|0):-1;
+ if(st==="dead")return "off";
+ if(st==="hurt")return "glitch";
+ if(st==="victory")return "star";
+ if(cast===3)return "heart";
+ if(cast===2||st==="attack")return "focus";
+ if(cast===0)return "curious";
+ if(cast===1)return "scan";
+ const w=p.yomiWelcome;
+ if(w){
+  if((w.spark||0)>.47||(w.startle||0)>.23)return "wow";
+  if((w.reveal||0)>.25||(w.bow||0)>.2||(w.melody||0)>.45||(w.dino||0)>.45)return "happy";
+ }
+ const r=yomiRitualState(p);
+ if(r)return ["think","wow","read","heart"][r.scene];
+ if(st==="fall"||st==="wall")return "wow";
+ if(st==="run"||st==="jump"||st==="glide")return "happy";
+ return "normal";
+}
+
+function drawEyes(ctx,mood,x0,y0,s,glow,accent,blink,lookX,lookY,t){
+ const gap=7.2*s,ex=x0+lookX*1.6*s+1.2*s,ey=y0+lookY*1.4*s;
+ for(const side of [-1,1]){
+  const x=ex+side*gap,y=ey;
+  if(mood==="off"){ellipse(ctx,x,y+1.5*s,1.1*s,1.1*s,"#33407a");continue;}
+  if(mood==="glitch"){line(ctx,accent,1.8*s);ctx.beginPath();
+   ctx.moveTo(x-2.6*s,y-2.6*s);ctx.lineTo(x+2.6*s,y+2.6*s);ctx.moveTo(x+2.6*s,y-2.6*s);ctx.lineTo(x-2.6*s,y+2.6*s);ctx.stroke();continue;}
+  if(mood==="star"){star4(ctx,x,y,4.2*s,GOLD);continue;}
+  if(mood==="heart"){heart(ctx,x,y,3.4*s,accent);continue;}
+  if(mood==="happy"){line(ctx,glow,2*s);ctx.beginPath();ctx.arc(x,y+1.8*s,3*s,Math.PI*1.12,Math.PI*1.88);ctx.stroke();continue;}
+  if(mood==="focus"){ctx.fillStyle=glow;ctx.beginPath();
+   ctx.moveTo(x-3*s,y-2.6*s+side*.0);ctx.lineTo(x+3*s,y-(side>0?1:3.6)*s);ctx.lineTo(x+3*s,y+1.8*s);ctx.lineTo(x-3*s,y+1.8*s);ctx.closePath();
+   ctx.save();ctx.translate(x,y);ctx.scale(side,1);ctx.translate(-x,-y);ctx.fill();ctx.restore();continue;}
+  if(mood==="curious"&&side===1){line(ctx,glow,1.7*s);ctx.beginPath();ctx.arc(x,y-.6*s,3.1*s,0,TAU);ctx.stroke();continue;}
+  if(mood==="scan"){ctx.fillStyle=glow;ctx.fillRect(x-3.4*s,y-.9*s,6.8*s,1.8*s);continue;}
+  const up=mood==="think"?-2.2*s:mood==="read"?1.8*s:0,shift=mood==="think"?1.6*s:0;
+  const big=mood==="wow"?1.22:1;
+  const ry=Math.max(.5*s,4.2*s*big*(1-clamp(blink,0,1)*.88));
+  ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(x+shift,y+up,2.6*s*big,ry,0,0,TAU);ctx.fill();
+  if(ry>2*s)ellipse(ctx,x+shift-.9*s,y+up-ry*.45,.8*s,1*s,"#eafffa");
+ }
+ // Mouth: a tiny waveform when scanning/talking, a smile otherwise.
+ const my=y0+7.4*s;
+ if(mood==="scan"||mood==="read"){
+  line(ctx,glow,1.2*s);ctx.beginPath();
+  for(let i=0;i<=8;i++){const xx=x0-6*s+i*1.5*s,yy=my+Math.sin(i*1.4+t*.4)*(i%2?1.6:.8)*s;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);}
+  ctx.stroke();
+ }else if(mood==="wow"||mood==="curious"){ellipse(ctx,x0+1.2*s,my,1.6*s,1.9*s,glow);}
+ else if(mood==="focus"){line(ctx,glow,1.4*s);ctx.beginPath();ctx.moveTo(x0-2.6*s,my);ctx.lineTo(x0+4*s,my-.6*s);ctx.stroke();}
+ else if(mood!=="off"&&mood!=="glitch"){line(ctx,glow,1.4*s);ctx.beginPath();ctx.arc(x0+1.2*s,my-2.2*s,mood==="star"||mood==="happy"||mood==="heart"?3.6*s:2.6*s,Math.PI*.22,Math.PI*.78);ctx.stroke();}
+}
+
+function drawHand(ctx,x,y,r,rot,col,glow,open=0){
+ ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+ ctx.fillStyle=col[0];ctx.beginPath();ctx.ellipse(0,0,r,r*.86,0,0,TAU);ctx.fill();
+ line(ctx,LINE,1.5);ctx.stroke();
+ // thumb + mint fingertips: an open hand spreads them.
+ ctx.fillStyle=col[0];ctx.beginPath();ctx.ellipse(-r*.55,-r*.7-open*r*.2,r*.36,r*.5,-.6-open*.5,0,TAU);ctx.fill();ctx.stroke();
+ line(ctx,glow,1.4);ctx.beginPath();ctx.arc(0,0,r*.62,-.9-open*.4,.9+open*.4);ctx.stroke();
+ ctx.restore();
+}
+
+function drawAntenna(ctx,F,f,headTop,sway,col,glow,accent,pulse,droop){
+ const tipLed=(x,y,r)=>{ctx.save();ctx.globalAlpha=.32+.3*pulse;ellipse(ctx,x,y,r*2.1,r*2.1,accent);ctx.restore();ellipse(ctx,x,y,r,r,accent);ellipse(ctx,x-r*.35,y-r*.35,r*.35,r*.35,"#fff2ec");};
+ if(F.ant==="question"){
+  // F0: the antenna IS a question mark: curiosity before anything else.
+  const s=1.45,bx=sway*.35,dy=droop*8;
+  line(ctx,LINE,4.4);ctx.beginPath();ctx.moveTo(0,headTop+1);ctx.lineTo(bx*.2,headTop-5+dy*.4);
+  ctx.quadraticCurveTo(bx*.3+1,headTop-9+dy*.6,bx+5*s,headTop-11+dy);
+  ctx.quadraticCurveTo(bx+9*s,headTop-15+dy,bx+3*s,headTop-20+dy);
+  ctx.quadraticCurveTo(bx-3*s,headTop-21+dy,bx-4*s,headTop-16+dy);ctx.stroke();
+  line(ctx,col[0],2.2);ctx.stroke();
+  tipLed(bx-4*s,headTop-16+dy,2.6);
+  return;
+ }
+ if(F.ant==="led"){
+  const len=f===1?20:22,bx=sway*.6,dy=droop*10;
+  line(ctx,LINE,3.4);ctx.beginPath();ctx.moveTo(0,headTop+1);ctx.quadraticCurveTo(bx*.2,headTop-len*.6,bx,headTop-len+dy);ctx.stroke();
+  line(ctx,col[1],1.6);ctx.stroke();
+  tipLed(bx,headTop-len+dy,3.2+(f-1)*.3);
+  return;
+ }
+ if(F.ant==="crown"){
+  // F3: the antenna splits in three listening prongs.
+  for(const [dx,len,lean] of [[-10,13,-.35],[0,22,0],[10,13,.35]]){
+   const bx=dx+sway*.4+lean*6,y1=headTop-len+droop*6;
+   line(ctx,LINE,3.2);ctx.beginPath();ctx.moveTo(dx*.7,headTop+3);ctx.quadraticCurveTo(dx,headTop-len*.5,bx,y1);ctx.stroke();
+   line(ctx,col[1],1.4);ctx.stroke();
+   if(dx===0)tipLed(bx,y1,3.4);else{ellipse(ctx,bx,y1,2.6,2.6,glow);}
+  }
+  return;
+ }
+ // F4: star crown halo.
+ const hy=headTop-12+droop*4,hx=sway*.3;
+ line(ctx,LINE,4.6);ctx.beginPath();ctx.ellipse(hx,hy,19,5.2,0,0,TAU);ctx.stroke();
+ line(ctx,GOLD,2.6);ctx.stroke();
+ for(const [a,r] of [[-1.9,4.2],[-Math.PI/2,6],[-1.24,4.2]]){star4(ctx,hx+Math.cos(a)*19,hy+Math.sin(a)*5.2-(r>5?6:2),r,r>5?"#fff6d8":GOLD);}
+}
+
+function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,droop,cast,acting){
+ const hw=F.hw,hh=F.hh,x=-hw/2,y=F.hy-hh/2+faceY;
+ // Listening pods (F1+) — Yomi always listens before it answers.
+ if(f>=1&&f<=3){
+  for(const side of [-1,1]){
+   const px=side*(hw/2+1.5),py=F.hy+faceY+1,pr=f===1?4.4:f===2?6.2:5.4;
+   ctx.fillStyle=col[1];rrect(ctx,px-pr*.7,py-pr*1.25,pr*1.4,pr*2.5,pr*.6);ctx.fill();line(ctx,LINE,1.6);ctx.stroke();
+   ellipse(ctx,px+side*.6,py,pr*.32,pr*.8,glow);
+   if(f===2){line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(px+side*pr*.7,py-pr*.6);ctx.lineTo(px+side*(pr+4),py-pr*1.8);ctx.stroke();ellipse(ctx,px+side*(pr+4),py-pr*1.8,1.6,1.6,glow);}
+  }
+ }
+ // Shell
+ ctx.fillStyle=col[0];rrect(ctx,x,y,hw,hh,f===0?12:13);ctx.fill();line(ctx,LINE,3);ctx.stroke();
+ // back-side shade band
+ ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=col[1];ctx.beginPath();
+ ctx.moveTo(x+4,y+hh-3);ctx.quadraticCurveTo(x+hw*.5,y+hh+1,x+hw-4,y+hh-3);ctx.lineTo(x+hw-6,y+hh-6);ctx.quadraticCurveTo(x+hw*.5,y+hh-3,x+6,y+hh-6);ctx.closePath();ctx.fill();ctx.restore();
+ // Visor screen
+ const vx=x+4.5,vy=y+4.5,vw=hw-9,vh=hh-9.5;
+ ctx.fillStyle=f===4?INDIGO:SCREEN;rrect(ctx,vx,vy,vw,vh,f===0?8:9);ctx.fill();
+ line(ctx,"#3a4a8a",1.2);ctx.stroke();
+ if(f===4){
+  // F4's face is a pocket of night sky.
+  for(let i=0;i<9;i++){const sx=vx+3+hn(i)*(vw-6),sy=vy+2+hn(i+30)*(vh-4);ctx.save();ctx.globalAlpha=.45+.4*((Math.sin(t*.06+i*1.7)+1)/2);ellipse(ctx,sx,sy,.7,.7,"#fff6d8");ctx.restore();}
+ }
+ // gloss (flat, not a gradient)
+ ctx.save();ctx.globalAlpha=.22;ctx.fillStyle="#ffffff";ctx.beginPath();
+ ctx.moveTo(vx+3,vy+vh*.62);ctx.lineTo(vx+vw*.38,vy+1.5);ctx.lineTo(vx+vw*.52,vy+1.5);ctx.lineTo(vx+vw*.18,vy+vh*.75);ctx.closePath();ctx.fill();ctx.restore();
+ // scanline cursor drifting down the screen (stops in reduced motion; t=0)
+ ctx.save();ctx.globalAlpha=.16;ctx.fillStyle=glow;ctx.fillRect(vx+2,vy+((t*.35)%vh),vw-4,1.2);ctx.restore();
+ const s=f===0?1.08:f===4?1.05:1;
+ drawEyes(ctx,mood,0,F.hy+faceY-1,s,glow,accent,blink,look.x,look.y,t);
+ drawAntenna(ctx,F,f,y,sway,col,glow,accent,pulse,droop);
+}
+
+function drawTorso(ctx,F,f,col,glow,accent,core,t,pulse,swing,reduced){
+ if(F.body===0)return;
+ if(F.body===1){
+  // Teardrop pod floating under the head (a 2px gap reads as hologram levitation).
+  const top=F.hy+F.hh/2+3,bot=-15,w=f===1?26:30;
+  ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-w*.42,top);ctx.quadraticCurveTo(-w*.62,(top+bot)/2,-w*.2,bot);
+  ctx.quadraticCurveTo(0,bot+4,w*.2,bot);ctx.quadraticCurveTo(w*.62,(top+bot)/2,w*.42,top);ctx.quadraticCurveTo(0,top-3,-w*.42,top);ctx.closePath();ctx.fill();
+  line(ctx,LINE,2.6);ctx.stroke();
+  ctx.save();ctx.globalAlpha=.5;ctx.fillStyle=col[1];ctx.beginPath();ctx.moveTo(-w*.4,top+3);ctx.quadraticCurveTo(-w*.55,(top+bot)/2,-w*.16,bot+1);ctx.lineTo(-w*.08,bot+1);ctx.quadraticCurveTo(-w*.36,(top+bot)/2,-w*.26,top+3);ctx.closePath();ctx.fill();ctx.restore();
+  line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(-w*.38,top+6);ctx.quadraticCurveTo(0,top+9,w*.38,top+6);ctx.stroke();
+  drawCore(ctx,0,(top+bot)/2+1,4.4+(f-1)*.6+core,glow,accent,pulse);
+  return;
+ }
+ if(F.body===2){
+  // Oracle: three floating plates (chest, waist ring, flared hem).
+  const chestT=F.hy+F.hh/2+3;
+  ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-17,chestT);ctx.lineTo(17,chestT);ctx.quadraticCurveTo(15,chestT+14,9,chestT+20);ctx.lineTo(-9,chestT+20);ctx.quadraticCurveTo(-15,chestT+14,-17,chestT);ctx.closePath();ctx.fill();line(ctx,LINE,2.6);ctx.stroke();
+  line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(-12,chestT+4);ctx.lineTo(0,chestT+9);ctx.lineTo(12,chestT+4);ctx.stroke();
+  drawCore(ctx,0,chestT+12,5+core,glow,accent,pulse);
+  const ringY=chestT+25;
+  ctx.fillStyle=col[1];ctx.beginPath();ctx.ellipse(0,ringY,12,3.6,0,0,TAU);ctx.fill();line(ctx,LINE,2);ctx.stroke();
+  line(ctx,glow,1.1);ctx.beginPath();ctx.ellipse(0,ringY,8,2,0,0,TAU);ctx.stroke();
+  const hemT=ringY+5,hemB=-11,flare=18+Math.abs(swing)*.3;
+  ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-9,hemT);ctx.lineTo(9,hemT);ctx.quadraticCurveTo(flare*.8,hemT+8,flare+swing*.15,hemB);
+  ctx.quadraticCurveTo(0,hemB+5,-flare+swing*.15,hemB);ctx.quadraticCurveTo(-flare*.8,hemT+8,-9,hemT);ctx.closePath();ctx.fill();line(ctx,LINE,2.4);ctx.stroke();
+  line(ctx,glow,1.2);for(const dx of [-8,0,8]){ctx.beginPath();ctx.moveTo(dx*.6,hemT+3);ctx.lineTo(dx*1.5+swing*.1,hemB+2);ctx.stroke();}
+  return;
+ }
+ // F4 constellation gown: indigo glass full of stars, gold rim.
+ const top=F.hy+F.hh/2+2,bot=-9,hem=27+Math.abs(swing)*.3;
+ ctx.fillStyle=INDIGO;ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);
+ ctx.quadraticCurveTo(13,top+26,hem*.7,bot-12);ctx.quadraticCurveTo(hem+swing*.2,bot-4,hem*.9+swing*.2,bot);
+ ctx.quadraticCurveTo(0,bot+6,-hem*.9+swing*.2,bot);ctx.quadraticCurveTo(-hem+swing*.2,bot-4,-hem*.7,bot-12);
+ ctx.quadraticCurveTo(-13,top+26,-14,top);ctx.closePath();ctx.fill();line(ctx,GOLD,2.6);ctx.stroke();
+ for(let i=0;i<14;i++){
+  const v=hn(i+3),u=hn(i+77),yy=top+6+v*(bot-top-10),half=14+(yy-top)/(bot-top)*(hem-14)-4;
+  ctx.save();ctx.globalAlpha=.5+.45*((Math.sin(t*.05+i*2.1)+1)/2);
+  if(i%5===0)star4(ctx,(u*2-1)*half,yy,2.6,"#fff6d8");else ellipse(ctx,(u*2-1)*half,yy,.9,.9,"#e8e4ff");
+  ctx.restore();
+ }
+ // pearl chest piece with the core
+ ctx.fillStyle=col[0];ctx.beginPath();ctx.moveTo(-14,top);ctx.lineTo(14,top);ctx.quadraticCurveTo(12,top+13,0,top+19);ctx.quadraticCurveTo(-12,top+13,-14,top);ctx.closePath();ctx.fill();line(ctx,LINE,2.2);ctx.stroke();
+ drawCore(ctx,0,top+9,5.6+core,glow,accent,pulse);
+}
+
+function drawCore(ctx,x,y,r,glow,accent,pulse){
+ ctx.save();ctx.globalAlpha=.25+.25*pulse;ellipse(ctx,x,y,r*1.9,r*1.9,glow);ctx.restore();
+ ctx.fillStyle=glow;ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r*.8,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r*.8,y);ctx.closePath();ctx.fill();
+ line(ctx,"#0f4d47",1.2);ctx.stroke();
+ ellipse(ctx,x-r*.2,y-r*.3,r*.22,r*.3,"#eafffa");
+}
+
+function wingNodes(side,f,spread,sweep){
+ // Neural (F2) or constellation (F4) wing: root at the shoulder.
+ const big=f===4,sx=(big?1.5:1)*spread,sy=big?1.25:1;
+ const base=big?[[20,-24],[42,-38],[64,-28],[58,-6],[36,4]]:[[14,-14],[30,-24],[42,-12],[36,4],[22,8]];
+ return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
+}
+function drawWing(ctx,side,F,f,glow,accent,t,spread,sweep,front,reduced){
+ const rootX=side*8,rootY=F.hy+F.hh/2+(f===4?10:6);
+ const nodes=wingNodes(side,f,spread,sweep);
+ ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=front?1:.82;
+ if(f===4){
+  ctx.save();ctx.globalAlpha*=.32;ctx.fillStyle="#3b2f8f";ctx.beginPath();ctx.moveTo(0,0);for(const [x,y] of nodes)ctx.lineTo(x,y);ctx.closePath();ctx.fill();ctx.restore();
+ }
+ const edge=f===4?GOLD:glow;
+ line(ctx,LINE,f===4?3.6:3);ctx.beginPath();ctx.moveTo(0,0);for(const [x,y] of nodes)ctx.lineTo(x,y);ctx.stroke();
+ line(ctx,edge,f===4?1.8:1.6);ctx.stroke();
+ line(ctx,edge,1);ctx.beginPath();for(const [x,y] of [nodes[1],nodes[3]]){ctx.moveTo(0,0);ctx.lineTo(x,y);}ctx.stroke();
+ nodes.forEach(([x,y],i)=>{
+  const lit=reduced?(i===2?1:0):Math.max(0,1-Math.abs(((t*.035+i*.2)%1)-.5)*6);
+  if(f===4){
+   const c=YOMI_FAMILY_STARS[(side>0?5:0)+i];
+   ctx.save();ctx.globalAlpha=.3+.4*lit;ellipse(ctx,x,y,6,6,c);ctx.restore();
+   star4(ctx,x,y,4.4+lit*1.4,c);ellipse(ctx,x,y,1.2,1.2,"#ffffff");
+  }else{
+   ellipse(ctx,x,y,3.4+lit,3.4+lit,"#eafffa");line(ctx,LINE,1.3);ctx.beginPath();ctx.arc(x,y,3.4+lit,0,TAU);ctx.stroke();
+   if(lit>.05){ctx.save();ctx.globalAlpha=.6*lit;ellipse(ctx,x,y,6.5,6.5,glow);ctx.restore();ellipse(ctx,x,y,2,2,glow);}
+  }
+ });
+ ctx.restore();
+}
+
+function drawCape(ctx,F,t,glow,swing,run,reduced){
+ // F3 cape: five strips of flowing light-code behind the plates.
+ const top=F.hy+F.hh/2+4;
+ for(let i=0;i<5;i++){
+  const x0=-10+i*5,len=48+(i%2)*8,wave=reduced?0:Math.sin(t*.09+i*.9)*3;
+  const tail=-swing*1.2-(run?16:0)-i*1.5;
+  ctx.save();ctx.globalAlpha=.86;
+  line(ctx,i%2?"#2b3a78":"#22306a",5);ctx.beginPath();ctx.moveTo(x0,top);ctx.quadraticCurveTo(x0-8+wave+tail*.4,top+len*.5,x0-14+tail,top+len);ctx.stroke();
+  // code glyphs travelling down the strip (manual dashes, no line-dash API)
+  line(ctx,glow,1.4);ctx.beginPath();
+  for(let j=0;j<5;j++){const u=((j/5+(reduced?0:t*.012))%1),u2=Math.min(1,u+.08);
+   const qx=v=>{const a=1-v;return a*a*x0+2*a*v*(x0-8+wave+tail*.4)+v*v*(x0-14+tail);},qy=v=>{const a=1-v;return a*a*top+2*a*v*(top+len*.5)+v*v*(top+len);};
+   ctx.moveTo(qx(u),qy(u));ctx.lineTo(qx(u2),qy(u2));}
+  ctx.stroke();
+  ctx.restore();
+ }
+}
+
+function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
+ // F3: three "thoughts" orbit the head: triangle, square, circle.
+ const cy=F.hy+2,rx=34+(cast===1?8*(acting?.release||0):0),ry=9;
+ for(let i=0;i<3;i++){
+  const a=(reduced?.6:t*.045)+i*TAU/3,s=Math.sin(a);
+  if((s>=0)!==front)continue;
+  const x=Math.cos(a)*rx,y=cy+s*ry,sc=.8+.25*s;
+  ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);
+  ctx.fillStyle=[accent,glow,GOLD][i];line(ctx,LINE,1.4);ctx.beginPath();
+  if(i===0){ctx.moveTo(0,-5);ctx.lineTo(4.6,3.5);ctx.lineTo(-4.6,3.5);ctx.closePath();}
+  else if(i===1){ctx.moveTo(-3.8,-3.8);ctx.lineTo(3.8,-3.8);ctx.lineTo(3.8,3.8);ctx.lineTo(-3.8,3.8);ctx.closePath();}
+  else ctx.arc(0,0,4,0,TAU);
+  ctx.fill();ctx.stroke();ctx.restore();
+ }
+}
+
+function drawRingHalf(ctx,F,front,t,glow,reduced){
+ // F4: tilted planetary ring around the gown, split for real depth.
+ const y=F.hy+F.hh/2+30,rx=52,ry=12.5;
+ ctx.save();ctx.translate(0,y);ctx.rotate(-.16);
+ const a0=front?0:Math.PI,a1=front?Math.PI:TAU;
+ line(ctx,LINE,5.2);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,a0,a1);ctx.stroke();
+ line(ctx,GOLD,3);ctx.stroke();
+ line(ctx,glow,1.1);ctx.beginPath();ctx.ellipse(0,0,rx-5,ry-2.4,0,a0,a1);ctx.stroke();
+ for(let i=0;i<3;i++){const a=(reduced?i*2.1:t*.02+i*2.1)%TAU;const s=Math.sin(a);if((s>=0)!==front)continue;ellipse(ctx,Math.cos(a)*rx,s*ry,2.6,2.6,i===1?"#fff6d8":glow);}
+ ctx.restore();
+}
+
+function yomiAmbient(ctx,p,f,glow,accent,t,F){
+ if(p.reduceMotion||YOMI_MOTION_MEDIA?.matches)return;
+ const state=p.state||"idle",flying=state==="jump"||state==="fall"||state==="glide",running=state==="run";
+ const land=clamp(Number(p.land)||0,0,1);
+ if(!flying&&!running&&state!=="hurt"&&land<=0)return;
+ ctx.save();
+ if(running||flying){
+  // Data bits shed while moving: tiny squares, not projectiles.
+  for(let i=0;i<5;i++){
+   const ph=((t*(running?.06:.04)+i*.2)%1+1)%1;
+   const x=running?-F.hw*.5-ph*34:(i-2)*9,y=running?F.hy+12+i*7-ph*6:-8+ph*22;
+   ctx.globalAlpha=.5*(1-ph);ctx.fillStyle=i%2?glow:accent;const s=2.6-ph*1.2+(f>=3?.6:0);ctx.fillRect(x-s/2,y-s/2,s,s);
+  }
+ }
+ if(land>.04&&state!=="dead"){ctx.globalAlpha=land*.5;line(ctx,glow,1.6);ctx.beginPath();ctx.ellipse(0,1,12+(1-land)*20,3+(1-land)*2,0,0,TAU);ctx.stroke();}
+ ctx.restore();
+}
+
+function drawThruster(ctx,F,f,glow,t,st,reduced,jumpS,run){
+ if(st==="dead")return;
+ const bottom=F.body===0?F.hy+F.hh/2:F.body===1?-15:F.body===2?-11:-9;
+ const k=jumpS?1.6:run?1.15:st==="fall"?.45:1;
+ const fl=reduced?1:.85+.15*Math.sin(t*.9);
+ ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=glow;ctx.beginPath();
+ const w=f>=3?7:5,len=(bottom<-12?6:4)*k*fl+2;
+ ctx.moveTo(-w,bottom+1);ctx.quadraticCurveTo(0,bottom+len*1.8,w,bottom+1);ctx.closePath();ctx.fill();
+ ctx.globalAlpha=.9;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(-w*.45,bottom+1);ctx.quadraticCurveTo(0,bottom+len,w*.45,bottom+1);ctx.closePath();ctx.fill();
+ ctx.restore();
+}
+
+function drawYomiRitual(ctx,p,f,F,glow,accent,faceY,t){
+ const state=yomiRitualState(p);if(!state)return;
+ const {scene,phase:k,alpha}=state,top=F.top+faceY;
+ ctx.save();ctx.globalAlpha=alpha;
+ if(scene===0){
+  // Pensando…: three loading dots and a spinner over the head.
+  for(let i=0;i<3;i++){const on=((k*6-i*.33)%1+1)%1<.5;ellipse(ctx,-8+i*8,top-8,on?2.6:1.8,on?2.6:1.8,on?glow:"#9fb3d9");}
+  line(ctx,glow,1.6);ctx.beginPath();ctx.arc(0,top-8,13,k*TAU*2,k*TAU*2+1.6);ctx.stroke();
+ }else if(scene===1){
+  // ¡Idea!: an exclamation spark with rays.
+  const pop=Math.sin(Math.PI*k),y=top-10-pop*4;
+  ctx.fillStyle=GOLD;rrect(ctx,-2.2,y-12,4.4,10,2);ctx.fill();ellipse(ctx,0,y+2.5,2.4,2.4,GOLD);
+  line(ctx,GOLD,1.4);for(let i=0;i<5;i++){const a=-Math.PI*.9+i*Math.PI*.2;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,y-4+Math.sin(a)*10);ctx.lineTo(Math.cos(a)*(14+pop*3),y-4+Math.sin(a)*(14+pop*3));ctx.stroke();}
+ }else if(scene===2){
+  // Leyendo: Yomi projects a holographic page (yomi = lectura) and scrolls it.
+  const px=F.hw*.5+6,py=F.hy+faceY-6;
+  ctx.globalAlpha=alpha*.32;ctx.fillStyle=glow;rrect(ctx,px,py-12,22,26,3);ctx.fill();
+  ctx.globalAlpha=alpha*.9;line(ctx,glow,1.2);rrect(ctx,px,py-12,22,26,3);ctx.stroke();
+  for(let i=0;i<4;i++){const yy=py-7+((i*6+k*24)%22);ctx.beginPath();ctx.moveTo(px+4,yy);ctx.lineTo(px+(i%2?14:18),yy);ctx.stroke();}
+  line(ctx,glow,.8);ctx.globalAlpha=alpha*.4;ctx.beginPath();ctx.moveTo(F.hw*.3,F.hy+faceY);ctx.lineTo(px,py-12);ctx.moveTo(F.hw*.3,F.hy+faceY);ctx.lineTo(px,py+14);ctx.stroke();
+ }else{
+  // Saludo: a pixel heart floats up for the family.
+  const y=top-6-k*14;ctx.globalAlpha=alpha*(1-k*.4);
+  heart(ctx,6,y,5.5,accent);ctx.fillStyle="#fff2ec";ctx.fillRect(3,y-3,2,2);
+ }
+ ctx.restore();
+}
+
+function handPose(side,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run){
+ // Returns [x,y,rot,open] for a floating hand (side 1 = facing side).
+ let x=side*F.hx,y=F.hyHand,rot=side*.3,open=0;
+ if(!reduced)y+=Math.sin(T*.09+side*1.3)*1.6;
+ if(run){x-=7;y+=reduced?0:Math.sin(runPh+side*1.6)*3.5;rot+=side*-.2;}
+ if(jumpS){y-=9;x+=side*3;open=.6;}
+ if(fallS||st==="wall"){y-=13;x+=side*4;open=1;}
+ if(st==="glide"){y-=4;x+=side*8;open=1;}
+ if(st==="attack"&&side===1){
+  const wind=clamp(atk/.35,0,1)*(1-clamp((atk-.35)/.15,0,1)),punch=clamp((atk-.3)/.2,0,1)*(1-clamp((atk-.7)/.3,0,1));
+  x+=-6*wind+20*punch;y+=2*wind-3*punch;rot=.0;
+ }else if(st==="attack"){x-=5;y+=2;}
+ if(acting){
+  const {load,release,slot}=acting;
+  if(slot===0&&side===1){x+=-5*load+13*release;y+=-5*load-1*release;open=release;}
+  if(slot===1){y+=-12*(load+release);x+=side*(6+4*release);open=1;}
+  if(slot===2){const cx=F.hx*.55;x=x+(cx*(side===1?1:-.1)+6-x)*load+(side===1?14:5)*release;y=y+((F.hyHand+2)-y)*load;open=.4+release*.6;}
+  if(slot===3){x+=side*(8+6*release);y+=-8*release;open=1;}
+ }
+ if(st==="victory"&&side===1){y-=16;x+=2;open=1;rot=reduced?.2:Math.sin(T*.25)*.5;}
+ if(st==="hurt"){x+=side*6;y-=6;open=1;}
+ if(st==="dead"){x=side*(F.hw*.5+6);y=-4;rot=side*1.2;}
+ if(ritual&&ritual.scene===3&&side===1){y-=14;open=1;rot=Math.sin(ritual.phase*TAU*3)*.6;}
+ if(ritual&&ritual.scene===2&&side===1){x+=4;y-=4;}
+ if(welcome){
+  const s=side===1?(life.sleeveFront+(welcome.gather||0)*.65+(welcome.startle||0)*.95):(life.sleeveBack-(welcome.gather||0)*.4+(welcome.reveal||0)*.69);
+  y-=s*7;x+=side*s*3;
+ }
+ return [x,y,rot,open];
+}
+
 function draw(ctx,pose,R){
   const p=pose||{},f=clamp(p.form|0,0,4),t=Number(p.t)||0,st=p.state||"idle";
-  const col=PAL[f],paper=col[0],trim=col[1],glow=col[2],shadow=col[3];
+  const col=PAL[f],glow=col[2],accent=col[3],F=YOMI_FORMS[f];
   const cast=st==="cast"?(p.castSlot|0):-1,atk=clamp(Number(p.atk)||0,0,1);
   const acting=yomiCastActing(p),reduced=!!p.reduceMotion||!!YOMI_MOTION_MEDIA?.matches;
-  const pulse=reduced?.5:.5+.5*Math.sin(t*.095),run=st==="run",flight=st==="jump"||st==="fall"||st==="glide";
-  const angry=st==="attack"||cast===2,hurt=st==="hurt"||st==="dead";
-  let open=st==="attack"?atk:cast===2?acting.maw:st==="victory"?.3:.05;
-  let swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
-  let hover=(st==="dead"?1:(reduced?0:Math.sin(t*.067)*2.1))-(flight?3:0)+(acting?.rise||0);
-  const w=20+f*2.9,h=55+f*4.2;
-  // V348 · Yomi stays physically connected during the title performance.
-  // No substitute silhouette or combat casts: head, lantern ribs, sleeves,
-  // trailing ribbon and hearth all belong to this ORIGINAL five-form art.
+  const T=reduced?0:t;
+  const pulse=reduced?.5:.5+.5*Math.sin(t*.095),run=st==="run",jumpS=st==="jump",fallS=st==="fall";
+  const flight=jumpS||fallS||st==="glide",dead=st==="dead";
+  const runPh=Number.isFinite(p.phase)?p.phase:t*.26;
+  // Title intro: Yomi stays one connected body during the family welcome.
   const welcome=p.yomiWelcome&&st!=="dead"&&st!=="hurt"?p.yomiWelcome:null;
-  const unit=v=>Number.isFinite(v)?clamp(v,0,1):0;
   const listen=unit(welcome?.listen),gather=unit(welcome?.gather),
-    reveal=unit(welcome?.reveal),startle=unit(welcome?.startle),
-    bow=unit(welcome?.bow);
+    reveal=unit(welcome?.reveal),startle=unit(welcome?.startle),bow=unit(welcome?.bow);
   const ribbon=Number.isFinite(welcome?.ribbon)?clamp(welcome.ribbon,-1,1):0;
-  hover+=gather*(-3.8)+reveal*(-5)+startle*3.0+bow*2.4;
-  swing+=ribbon*7+gather*2.4-reveal*2.9+startle*3.8-bow*1.3;
-  open=clamp(open+listen*.15+reveal*.48+startle*.53+bow*.08,0,1);
   const life=yomiWelcomeAnatomy(p,f);
-  // Original five silhouette types remain recognizable. The lantern's rib
-  // geometry, its attached sleeves and the mouth all share the same origin.
-  hover+=life.rise;swing+=life.ribbon;open=clamp(open+life.open,0,1);
-  const shoulder=-h*.68,faceY=-h*.72+listen*.8+reveal*(-1.4)+bow*2.1+life.face;
+  const ritual=yomiRitualState(p);
+  let hover=(dead?6:(reduced?0:Math.sin(t*.067)*2.2))-(flight?3:0)+(acting?.rise||0);
+  hover+=gather*(-3.8)+reveal*(-5)+startle*3.0+bow*2.4+life.rise;
+  let swing=(reduced?0:Math.sin(t*(run?.26:.08))*(run?5:2.4))+(Number(p.sway)||0)*3;
+  swing+=ribbon*7+gather*2.4-reveal*2.9+startle*3.8-bow*1.3+life.ribbon;
+  const faceY=listen*.8+reveal*(-1.4)+bow*2.1+life.face*.6;
   const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
-  ctx.save();ctx.translate(0,hover);ctx.rotate(
-    (run?(reduced?0:-.085*Math.sin(t*.32)):flight?-.045:0)
-    +(acting?.tilt||0)+stageTilt+life.tilt);
+  const mood=yomiMood(p),blink=clamp(Number(p.blink)||0,0,1);
+  const look={x:clamp(Number(p.look?.x)||0,-1,1)*.6,y:clamp(Number(p.look?.y)||0,-1,1)};
+  const core=reveal*2.2+life.flame*1.5+(acting?.maw||0)*2+(acting?.aurora||0)*1.5;
+  const droop=dead?1:0;
+  // wing spread: flying, scanning and the U embrace open the network.
+  const spread=1+(flight?.12:0)+(st==="glide"?.18:0)+(cast===1?.16*(acting?.release||0):0)+(cast===3?.2*(acting?.aurora||0):0)+reveal*.12-(dead?.25:0);
+  const sweep=run?3:dead?2:0;
+  ctx.save();
+  yomiAmbient(ctx,p,f,glow,accent,t,F);
+  // floor glow: Yomi hovers but keeps a readable ground anchor.
+  ctx.save();ctx.globalAlpha=dead?.2:.26;ellipse(ctx,0,0,F.hw*.42,3.2,glow);ctx.restore();
+  ctx.translate(0,hover);
+  ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
-  // V371 · locomotion readability: run bob, jump stretch, fall squash.
-  const jumpS=st==="jump",fallS=st==="fall",runPh=Number.isFinite(p.phase)?p.phase:t*.26;
-  if(run&&!reduced)ctx.translate(0,-Math.abs(Math.sin(runPh))*3.2);
-  if(jumpS)ctx.scale(.9,1.1);else if(fallS)ctx.scale(1.06,.95);
-  yomiAmbient(ctx,p,f,glow,shadow,t,h,w);
-  // Ribbon tail follows the lantern, not a detached sprite or a duplicated hero.
-  ctx.fillStyle=shadow;ctx.globalAlpha=.78;ctx.beginPath();ctx.moveTo(-11,-18);
-  ctx.quadraticCurveTo(-29-swing-gather*3,-9,-22-swing,-1);
-  ctx.quadraticCurveTo(-14-swing,7,-8,2);ctx.quadraticCurveTo(-6,-11,-11,-18);ctx.fill();
-  ctx.globalAlpha=1;
-  if(f===4){
-    ctx.save();ctx.globalAlpha=.32+.15*pulse;
-    crescent(ctx,0,faceY-4,36+2*pulse,"#ffd988");ctx.restore();
+  if(jumpS)ctx.scale(.93,1.07);else if(fallS)ctx.scale(1.05,.96);
+  // ── BACK LAYER ─────────────────────────────────────────────
+  if(f===2||f===4)drawWing(ctx,-1,F,f,glow,accent,T,spread,sweep,false,reduced);
+  if(f===2||f===4)drawWing(ctx,1,F,f,glow,accent,T,spread*.92,sweep,false,reduced);
+  if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
+  if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
+  if(f===4)drawRingHalf(ctx,F,false,T,glow,reduced);
+  const back=handPose(-1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run);
+  ctx.save();ctx.globalAlpha=.92;drawHand(ctx,back[0],back[1],F.hr*.94,back[2],[col[1]],glow,back[3]);ctx.restore();
+  drawThruster(ctx,F,f,glow,T,st,reduced,jumpS,run);
+  // ── BODY ───────────────────────────────────────────────────
+  drawTorso(ctx,F,f,col,glow,accent,core,T,pulse,swing,reduced);
+  drawHead(ctx,F,f,col,glow,accent,mood,blink,look,T,pulse,faceY,swing,droop,cast,acting);
+  // ── FRONT LAYER ────────────────────────────────────────────
+  if(f===4)drawRingHalf(ctx,F,true,T,glow,reduced);
+  if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
+  const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run);
+  drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,T);
+  drawHand(ctx,front[0],front[1],F.hr,front[2],col,glow,front[3]);
+  if(st==="attack"){
+   // Basic attack: a "byte" burst at the punching hand.
+   const hit=clamp((atk-.38)/.25,0,1)*(1-clamp((atk-.7)/.3,0,1));
+   if(hit>0){ctx.save();ctx.globalAlpha=.85*hit;for(let i=0;i<6;i++){const a=-1+i*.4,r=F.hr+4+hit*9;ctx.fillStyle=i%2?glow:accent;ctx.fillRect(front[0]+Math.cos(a)*r-1.8,front[1]+Math.sin(a)*r-1.8,3.6,3.6);}ctx.restore();}
   }
-  // Each form changes its silhouette, not just a scale factor or decoration.
-  // F0: squat glowing seed. F1: tall wanderer. F2: winged ward.
-  // F3: angular night knight. F4: double-crescent moon guardian.
-  if(f===0){
-    ctx.fillStyle="#e8b17f";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.ellipse(side*19,-31,10,17,side*.32,0,TAU);ctx.fill();
-      line(ctx,"#533b56",2.4);ctx.stroke();
-    }
-  }else if(f===1){
-    ctx.fillStyle=trim;
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*15,-44);
-      ctx.quadraticCurveTo(side*33,-34,side*33,-5);
-      ctx.quadraticCurveTo(side*21,-11,side*14,-15);ctx.closePath();ctx.fill();
-      line(ctx,"#52344e",2);ctx.stroke();
-    }
-  }else if(f===2){
-    ctx.fillStyle="#c9808a";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.quadraticCurveTo(side*43,-65,side*51,-45);
-      ctx.lineTo(side*34,-32);ctx.lineTo(side*21,-40);
-      ctx.closePath();ctx.fill();line(ctx,"#563851",3);ctx.stroke();
-    }
-  }else if(f===3){
-    ctx.fillStyle="#753656";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*14,-58);
-      ctx.lineTo(side*55,-75);ctx.lineTo(side*41,-40);
-      ctx.lineTo(side*56,-5);ctx.quadraticCurveTo(side*31,-16,side*19,-31);
-      ctx.closePath();ctx.fill();line(ctx,"#f4a0a4",2.5);ctx.stroke();
-    }
-  }else{
-    ctx.fillStyle="#563450";
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(side*16,-65);
-      ctx.quadraticCurveTo(side*54,-96,side*70,-82);
-      ctx.lineTo(side*51,-44);ctx.quadraticCurveTo(side*75,-18,side*61,1);
-      ctx.lineTo(side*23,-21);ctx.closePath();ctx.fill();
-      line(ctx,"#ffdaa4",3);ctx.stroke();
-    }
+  if(st==="victory"){
+   for(let i=0;i<8;i++){const a=i*TAU/8+(reduced?0:t*.03),r=F.hw*.7+6;ctx.save();ctx.globalAlpha=.75;ctx.fillStyle=YOMI_FAMILY_STARS[(i+f)%10];ctx.translate(Math.cos(a)*r,F.hy-6+Math.sin(a)*r*.55);ctx.rotate(a);ctx.fillRect(-2,-2,4,4);ctx.restore();}
   }
-  // The growing cape makes five recognizable stages, from baby to moon guardian.
-  ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-w*.71,shoulder+3);
-  ctx.quadraticCurveTo(-w-8-swing*.2,-29,-w*.83,-5);
-  ctx.quadraticCurveTo(-13,-1,0,-6);
-  ctx.quadraticCurveTo(13,-1,w*.83,-5);
-  ctx.quadraticCurveTo(w+8+swing*.2,-29,w*.71,shoulder+3);
-  ctx.closePath();ctx.fill();line(ctx,"#2a2339",2.5);ctx.stroke();
-  if(f>=2){
-    ctx.save();ctx.globalAlpha=.8;line(ctx,f>=4?"#ffd58e":"#e28a8d",2);
-    ctx.beginPath();ctx.moveTo(-w*.78,-17);ctx.quadraticCurveTo(0,-7,w*.78,-17);ctx.stroke();ctx.restore();
+  if(st==="hurt"){
+   // Glitch: offset colour slices for a frame, readable without flashing.
+   const off=reduced?2:2+((Math.floor(t/3)%2)*2);
+   ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=accent;ctx.fillRect(-F.hw/2-off,F.hy-4,F.hw*.7,3);
+   ctx.fillStyle=glow;ctx.fillRect(-F.hw/2+off+6,F.hy+6,F.hw*.6,2.4);ctx.restore();
   }
-  // Actual foot silhouette: Yomi hovers but retains a clear readable ground anchor.
-  if(!run&&!jumpS&&!fallS){ellipse(ctx,-7,0,7,3,shadow);ellipse(ctx,8,0,7,3,shadow);}
-  else{const ls=run&&!reduced?Math.sin(runPh)*5:0,ly=jumpS?-5:fallS?3:0;
-   ellipse(ctx,-7-ls,ly-(run?Math.max(0,Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);
-   ellipse(ctx,8+ls,(jumpS?-3:ly)-(run?Math.max(0,-Math.sin(runPh))*3:0),7,jumpS?2.4:3,shadow);}
-  // Two animated open sleeves. K's suction visibly pulls them forward.
-  for(const side of [-1,1]){
-    ctx.save();ctx.translate(side*(w*.77),shoulder+6);
-    // K rings a bell from both sleeves; L winds the leading sleeve back for the bite.
-    const leading=side===1,windup=acting?(leading?acting.front:acting.back):0;
-    const welcomeSleeve=leading?(listen*.34+gather*.65+reveal*(-.75)+startle*.95+bow*.46+life.sleeveFront):
-      (-listen*.19-gather*.40+reveal*.69-startle*.56+bow*.38+life.sleeveBack);
-    ctx.rotate(side*((cast===1?.22:run?.22+(reduced?0:Math.sin(runPh+side*1.6)*.28):jumpS?.55:fallS?2.45:.12)+(reduced?0:Math.sin(t*.075+side)*.07))+windup+welcomeSleeve);
-    const sleeveLen=19+f*2.9+(cast===1?10:0)+(cast===2&&leading?4:0)+(cast===3?6*(acting?.aurora||0):0)+gather*1.7+reveal*2.3;
-    ctx.fillStyle=shadow;ctx.beginPath();ctx.moveTo(-7,0);
-    ctx.quadraticCurveTo(-13,sleeveLen*.5,-10,sleeveLen);
-    ctx.quadraticCurveTo(0,sleeveLen+5,11,sleeveLen);
-    ctx.quadraticCurveTo(13,sleeveLen*.48,7,0);ctx.closePath();ctx.fill();
-    line(ctx,trim,2);ctx.stroke();
-    line(ctx,glow,1.7);ctx.beginPath();ctx.moveTo(-9,sleeveLen-3);ctx.quadraticCurveTo(0,sleeveLen,10,sleeveLen-3);ctx.stroke();
-    ctx.restore();
-  }
-  // Lantern-shaped body: hand-painted gold rim, paper ribs and inner flame.
-  ctx.fillStyle=paper;ctx.beginPath();
-  ctx.moveTo(-w*.77,-h+8);ctx.quadraticCurveTo(-w-2,-h*.52,-w*.82,-19);
-  ctx.quadraticCurveTo(-w*.55,-9,0,-8);
-  ctx.quadraticCurveTo(w*.55,-9,w*.82,-19);
-  ctx.quadraticCurveTo(w+2,-h*.52,w*.77,-h+8);
-  ctx.quadraticCurveTo(0,-h-6,-w*.77,-h+8);ctx.closePath();ctx.fill();
-  line(ctx,"#35233c",3.2);ctx.stroke();
-  ctx.save();ctx.globalAlpha=.13+.07*pulse;
-  ellipse(ctx,0,-h*.41,w*.69,h*.30,glow);ctx.restore();
-  line(ctx,trim,1.45);
-  for(const i of [-1,1]){
-    ctx.beginPath();ctx.moveTo(i*w*.57,-h+11);
-    ctx.quadraticCurveTo(i*w*.82,-h*.5,i*w*.52,-17);ctx.stroke();
-  }
-  line(ctx,trim,3);ctx.beginPath();ctx.moveTo(-w*.67,-h+5);
-  ctx.quadraticCurveTo(0,-h+1,w*.67,-h+5);ctx.stroke();
-  // Evolutions get different head architecture and proportions.
-  if(f===0){
-    ellipse(ctx,-9,-h+4,10,9,"#ffe2b2");
-    ellipse(ctx,10,-h+4,10,9,"#ffe2b2");
-  }
-  if(f===2){
-    ctx.fillStyle="#ad637e";
-    ctx.beginPath();ctx.moveTo(-w*.86,-h+9);
-    ctx.lineTo(-w*.45,-h-13);ctx.lineTo(0,-h-7);
-    ctx.lineTo(w*.45,-h-13);ctx.lineTo(w*.86,-h+9);
-    ctx.closePath();ctx.fill();line(ctx,"#5d3b59",2.5);ctx.stroke();
-  }
-  if(f===3){
-    ctx.fillStyle="#552f53";
-    ctx.beginPath();ctx.moveTo(-w-7,-h+17);
-    ctx.quadraticCurveTo(-w-9,-h-15,0,-h-22);
-    ctx.quadraticCurveTo(w+9,-h-15,w+7,-h+17);
-    ctx.lineTo(w*.58,-h+7);ctx.quadraticCurveTo(0,-h-7,-w*.58,-h+7);
-    ctx.closePath();ctx.fill();line(ctx,"#d98291",2.5);ctx.stroke();
-  }
-  if(f===4){
-    for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*w*.54,-h-9);
-      ctx.scale(side,1);ctx.fillStyle="#ffd19a";ctx.beginPath();
-      ctx.moveTo(-5,8);ctx.quadraticCurveTo(-23,-9,-15,-31);
-      ctx.quadraticCurveTo(1,-25,8,-5);ctx.closePath();ctx.fill();
-      line(ctx,"#703754",2.5);ctx.stroke();ctx.restore();
-    }
-  }
-  // Cap and top-knot: each evolution gets a clearer signature silhouette.
-  ellipse(ctx,0,-h-2,w*.71,4.8,shadow);
-  ellipse(ctx,0,-h-5,w*.42,3.3,glow);
-  if(f>=1){
-    line(ctx,trim,2.1);ctx.beginPath();ctx.moveTo(0,-h-7);
-    ctx.quadraticCurveTo(swing*.2,-h-15,0,-h-19);ctx.stroke();
-    ellipse(ctx,0,-h-20,3.3+f*.3,3.3+f*.3,glow);
-  }
-  if(f>=2){
-    for(const side of [-1,1]){
-      ctx.save();ctx.translate(side*(w*.53),-h-5);
-      ctx.rotate(side*.22);ctx.fillStyle=trim;ctx.beginPath();
-      ctx.moveTo(-5,0);ctx.quadraticCurveTo(-9,-11,-2,-17-f*2);
-      ctx.quadraticCurveTo(7,-12,6,0);ctx.closePath();ctx.fill();ctx.restore();
-    }
-  }
-  // Expressive OHANA face, never permanent horror teeth.
-  const mood=hurt?"closed":angry?"angry":(welcome?.spark||0)>.47?"closed":startle>.23?"closed":
-    reveal>.25||bow>.20||(welcome?.melody||0)>.45||(welcome?.dino||0)>.45?"happy":st==="victory"||cast===3?"happy":"normal";
-  const eyeSize=f===0?7.3:6+f*.15; // V370: Farol baby reads cuter
-  R.eye(ctx,-8,faceY,eyeSize,p,{iris:f===4?"#a94568":"#60334b",mood});
-  R.eye(ctx,9,faceY,eyeSize*.92,p,{iris:f===4?"#a94568":"#60334b",mood});
-  if(!angry){
-    ellipse(ctx,-w*.49,faceY+9,3.5,2.1,"#ef9fa0");
-    ellipse(ctx,w*.49,faceY+9,3.5,2.1,"#ef9fa0");
-  }
-  ctx.fillStyle=angry?"#592943":"#94536b";ctx.beginPath();
-  ctx.ellipse(1,faceY+13,angry?6+open*8:4.8+open*2.8,angry?4+open*7:2.4+open*3.9,0,0,TAU);ctx.fill();
-  // The L bite grows from Yomi's expression, not an unrelated monster sprite.
-  if(cast===2){
-    const snap=acting?.release||0;
-    ctx.save();ctx.globalAlpha=.48+.24*snap;line(ctx,glow,2);
-    for(const side of [-1,1]){
-      ctx.beginPath();ctx.moveTo(1,faceY+13+side*5);
-      ctx.quadraticCurveTo(w*.65,faceY+13+side*(10+open*6),w*.94,faceY+13+side*(3+snap*5));ctx.stroke();
-    }
-    ctx.restore();
-  }
-  if(angry&&f>=3){
-    ctx.fillStyle="#fff4d8";for(let i=-1;i<=1;i++){
-      ctx.beginPath();ctx.moveTo(i*6,faceY+8);ctx.lineTo(i*6+2,faceY+12+open*5);
-      ctx.lineTo(i*6+4,faceY+8);ctx.fill();
-    }
-  }
-  if(f>=3){
-    line(ctx,trim,1.8);ctx.beginPath();ctx.moveTo(w*.26,faceY-18);
-    ctx.lineTo(w*.08,faceY-11);ctx.lineTo(w*.31,faceY-5);ctx.stroke();
-  }
-  // Four different emotions make the guardian readable at first glance.
-  if(st==="idle"&&f<=1){
-    ctx.save();ctx.globalAlpha=.4+.2*pulse;line(ctx,glow,1);
-    ctx.beginPath();ctx.arc(0,faceY-17,7,-2.7,-.45);ctx.stroke();ctx.restore();
-  }
-  if(st==="victory" && f>=2){
-    ctx.save();ctx.globalAlpha=.60;line(ctx,"#ffe0ac",2);
-    ctx.beginPath();ctx.arc(0,faceY-17,18,-2.8,-.3);ctx.stroke();ctx.restore();
-  }
-  // Warm lantern heart stays visible on every stage.
-  ellipse(ctx,0,-25,7+f*.5+reveal*2.2+life.flame*1.5,9+f*.3+reveal*2.7+life.flame*1.8,glow);
-  ctx.fillStyle=f>=3?"#fff4d0":"#ffedaa";ctx.beginPath();
-  ctx.moveTo(0,-34);ctx.quadraticCurveTo(-7,-23,0,-18);
-  ctx.quadraticCurveTo(9,-24,0,-34);ctx.fill();
-  // J throws a horizontal paper seal; the hand no longer points skyward.
-  if(cast===0) {
-    const k=clamp(Number(p.cast)||0,0,1);
-    const x=w+7+Math.sin(Math.PI*k)*9;
-    sigil(ctx,x,shoulder+13,k,f>=3?"#b74469":"#bd704a");
-    line(ctx,glow,1.8);ctx.beginPath();ctx.moveTo(w*.7,shoulder+13);
-    ctx.quadraticCurveTo(w+3,shoulder+10,x-8,shoulder+13);ctx.stroke();
-  }
-  if(cast===1){
-    // Campanada: Yomi holds its lantern heart aloft, ringing one visible halo.
-    const k=clamp(Number(p.cast)||0,0,1),ring=Math.sin(Math.PI*k);
-    ctx.save();ctx.globalAlpha=.30+.50*ring;line(ctx,"#ffe3a2",2.4);
-    for(let i=0;i<3;i++){
-      ctx.beginPath();ctx.arc(0,-25,12+16*k+i*9,-Math.PI*.88,Math.PI*.22);ctx.stroke();
-    }
-    ctx.fillStyle="#fff6d7";ctx.beginPath();ctx.arc(0,-25,3.5+2*ring,0,TAU);ctx.fill();
-    ctx.restore();
-  }
-  if(cast===3){
-    // U · the lantern opens to greet Cuerno's borrowed rainbow.
-    // For any other chosen companion it remains an invitation, not a hit.
-    const k=acting?.aurora||0;
-    ctx.save();ctx.globalAlpha=.55*k;line(ctx,glow,2.4);
-    ctx.beginPath();ctx.arc(0,-25,10+18*k,-Math.PI*.89,Math.PI*.17);ctx.stroke();
-    ctx.restore();
-  }
-  if(st==="victory"||((p.flourishN||0)%4===3&&p.flourish>0)){
-    const v=st==="victory"?pulse:Math.sin(Math.PI*clamp(p.flourish,0,1));
-    ctx.save();ctx.globalAlpha=.4*v;crescent(ctx,w+5,faceY-19,9+f,glow);ctx.restore();
-  }
-  drawYomiRitual(ctx,p,f,trim,glow,faceY,w,t);
+  drawYomiRitual(ctx,p,f,F,glow,accent,faceY,t);
   ctx.restore();
 }
-export default {id:"yomi",draw};
+
+function drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,t){
+ if(!acting)return;
+ const {load,release}=acting;
+ if(cast===0){
+  // J: a "?" ping forms at the fingertips, then leaves.
+  const x=front[0]+F.hr+4+release*10,y=front[1]-2;
+  ctx.save();ctx.globalAlpha=.4+.6*Math.max(load,release);
+  ellipse(ctx,x,y,6+load*2,6+load*2,"#0d1430");line(ctx,glow,1.4);ctx.beginPath();ctx.arc(x,y,6+load*2,0,TAU);ctx.stroke();
+  questionGlyph(ctx,x,y-1.5,.62,accent,2.4);ctx.restore();
+ }else if(cast===1){
+  // K: radar arcs sweep forward from the visor.
+  ctx.save();line(ctx,glow,1.8);
+  for(let i=0;i<3;i++){const r=12+i*9+release*14;ctx.globalAlpha=(.25+.6*Math.max(load,release))*(1-i*.25);ctx.beginPath();ctx.arc(F.hw*.3,F.hy,r,-.7,.7);ctx.stroke();}
+  ctx.restore();
+ }else if(cast===2){
+  // L: hands meet at a prism, then the synthesis beam gushes forward.
+  const px=(front[0]+back[0])/2+6,py=(front[1]+back[1])/2,r=3+load*5+release*3;
+  ctx.save();ctx.globalAlpha=.3+.5*load;ellipse(ctx,px,py,r*2.2,r*2.2,glow);ctx.restore();
+  ctx.fillStyle="#eafffa";ctx.beginPath();ctx.moveTo(px,py-r);ctx.lineTo(px+r*.8,py);ctx.lineTo(px,py+r);ctx.lineTo(px-r*.8,py);ctx.closePath();ctx.fill();
+  line(ctx,glow,1.4);ctx.stroke();
+  if(release>.05){ctx.save();ctx.globalAlpha=.75*release;ctx.fillStyle=glow;ctx.fillRect(px+r,py-2-release*3,26+release*20,4+release*6);ctx.fillStyle="#ffffff";ctx.fillRect(px+r,py-1,26+release*20,2);ctx.restore();}
+ }else if(cast===3){
+  // U: Yomi opens its arms; a family link ring blooms around the core.
+  const k=acting.aurora;ctx.save();ctx.globalAlpha=.6*k;line(ctx,accent,2);
+  const cy=F.body===0?F.hy:F.hy+F.hh/2+14;ctx.beginPath();ctx.arc(0,cy,10+16*k,0,TAU);ctx.stroke();
+  for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2;ellipse(ctx,Math.cos(a)*(10+16*k),cy+Math.sin(a)*(10+16*k),2.2,2.2,YOMI_FAMILY_STARS[i*2]);}
+  ctx.restore();
+ }
+}
+
+/** Animation bucket so idle motion (node pulses, starfield) refreshes the cache. */
+export function yomiCacheKey(pose={}){
+ if(pose.reduceMotion||YOMI_MOTION_MEDIA?.matches)return "ai0";
+ return "ai"+Math.floor((Number(pose.t)||0)/2);
+}
+export default {id:"yomi",draw,cacheKey:yomiCacheKey};

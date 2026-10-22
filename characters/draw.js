@@ -47,12 +47,12 @@ ctx.fill();
 }
 
 const VISUAL_H = [36, 48, 58, 68, 80];
-const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", plasma:"#5ad1ff", rollo:"#2f6bff", caos:"#8f7bff", chain:"#ffe14a", blink:"#fff3a0", storm:"#99ccff", yarn:"#ff8ad4", purr:"#ffb6e4", ninetails:"#b78bff", breath:"#ff6a2a", gust:"#bfefff", meteor:"#ff4a20", bite:"#e8ffe0", charge:"#4cbf56", quake:"#c8a060", salt:"#fff3c0", ketchup:"#e23b3b", fryer:"#ffd36a", pepperoni:"#e0402a", cheese:"#ffd84a", oven:"#ff8a2a", ofuda:"#f2e6c8", sleeve:"#6a3cff", maw:"#ff2244", gleam:"#ffe9a8", gallop:"#f2c1ff", rainbow:"#fff6c8" };
+const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", plasma:"#5ad1ff", rollo:"#2f6bff", caos:"#8f7bff", chain:"#ffe14a", blink:"#fff3a0", storm:"#99ccff", yarn:"#ff8ad4", purr:"#ffb6e4", ninetails:"#b78bff", breath:"#ff6a2a", gust:"#bfefff", meteor:"#ff4a20", bite:"#e8ffe0", charge:"#4cbf56", quake:"#c8a060", salt:"#fff3c0", ketchup:"#e23b3b", fryer:"#ffd36a", pepperoni:"#e0402a", cheese:"#ffd84a", oven:"#ff8a2a", ofuda:"#4ff0c8", sleeve:"#7ef7e4", maw:"#ff7f6e", gleam:"#ffe9a8", gallop:"#f2c1ff", rainbow:"#fff6c8" };
 
 const CHARACTER_ACCENTS = {
 kilo: "#ffd36a", stitcho: "#67ddff", chispin: "#fff29a", cat: "#ffb8e8",
 dragon: "#ff8a45", dino: "#b8ef6b", frita: "#fff1b3", pizza: "#ffd84a",
-yomi: "#ff5b78", cuerno: "#f2c1ff",
+yomi: "#4ff0c8", cuerno: "#f2c1ff",
 };
 
 function accentFor(p) {
@@ -216,7 +216,7 @@ ctx.restore();
 
 export const BASIC_ATTACK_SIGNATURES = Object.freeze({
 kilo: "note", stitcho: "claws", chispin: "bolt", cat: "paw", dragon: "flame",
-dino: "bite", frita: "salt", pizza: "wedge", yomi: "fang", cuerno: "poke",
+dino: "bite", frita: "salt", pizza: "wedge", yomi: "byte", cuerno: "poke",
 });
 
 export const ABILITY_VISUAL_SIGNATURES = Object.freeze({
@@ -228,7 +228,7 @@ breath: "breath-cone", gust: "gust-wing", meteor: "meteor-rain",
 bite: "bite-jaw", charge: "charge-ram", quake: "quake-ring",
 salt: "salt-shot", ketchup: "ketchup-pool", fryer: "fryer-geyser",
 pepperoni: "pepperoni-disc", cheese: "cheese-tether", oven: "oven-heat",
-ofuda: "ofuda-paper", sleeve: "sleeve-pull", maw: "maw-open",
+ofuda: "ping-ring", sleeve: "scan-sweep", maw: "prism-charge",
 gleam: "gleam-star", gallop: "gallop-horn", rainbow: "rainbow-arc",
 });
 
@@ -417,21 +417,18 @@ case "oven-heat":
   }
   break;
 
-case "ofuda-paper":
-  ctx.fillStyle = "#f2e6c8"; ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, H * 0.014);
-  ctx.save(); ctx.translate(f * H * 0.26, -H * 0.54); ctx.rotate(Math.sin(t * 0.14) * 0.16);
-  ctx.fillRect(-H * 0.07, -H * 0.14, H * 0.14, H * 0.28); ctx.strokeRect(-H * 0.07, -H * 0.14, H * 0.14, H * 0.28);
-  ctx.restore();
+// YOMI · the art already stages each cast; these stay small and on-theme.
+case "ping-ring":
+  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1, H * 0.014);
+  for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(f * H * 0.34, -H * 0.42, H * (0.05 + i * 0.05) + k * H * 0.05, 0, Math.PI * 2); ctx.stroke(); }
   break;
-case "sleeve-pull":
-  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.3, H * 0.02);
-  ctx.beginPath(); ctx.arc(f * H * 0.24, -H * 0.48, r * 1.15, 1.2, 4.1); ctx.stroke();
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(f * H * 0.12, -H * (0.36 + i * 0.08)); ctx.lineTo(f * H * (0.34 + i * 0.06), -H * (0.40 + i * 0.08)); ctx.stroke(); }
+case "scan-sweep":
+  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.2, H * 0.016);
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(0, -H * 0.62, H * (0.30 + i * 0.12) + k * H * 0.1, -0.5 - i * 0.1, 0.5 + i * 0.1); ctx.stroke(); }
   break;
-case "maw-open":
-  ctx.strokeStyle = color; ctx.lineWidth = Math.max(1.8, H * 0.028);
-  ctx.beginPath(); ctx.arc(f * H * 0.18, -H * 0.48, r * 0.9, -0.8, 0.8); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(f * H * 0.42, -H * 0.48); ctx.lineTo(f * H * 0.58, -H * 0.57); ctx.moveTo(f * H * 0.42, -H * 0.48); ctx.lineTo(f * H * 0.58, -H * 0.39); ctx.stroke();
+case "prism-charge":
+  ctx.fillStyle = color;
+  for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2 + t * 0.12, rr = H * 0.22 * (1 - k * 0.7); ctx.fillRect(f * H * 0.3 + Math.cos(a) * rr - H * 0.015, -H * 0.42 + Math.sin(a) * rr - H * 0.015, H * 0.03, H * 0.03); }
   break;
 
 case "gleam-star":
@@ -491,6 +488,9 @@ case "paw":
   break;
 case "flame":
   for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(f * reach * (0.45 + i * 0.08), -H * (0.38 + i * 0.08), H * (0.10 + k * 0.04), -1.5, 1.1); ctx.stroke(); }
+  break;
+case "byte":
+  for (let i = 0; i < 5; i++) { ctx.fillStyle = i % 2 ? "#ff7f6e" : "#4ff0c8"; const x = f * (reach * 0.40 + H * i * 0.05), y = -H * (0.50 - (i % 3) * 0.05); ctx.fillRect(x - H * 0.02, y - H * 0.02, H * 0.04, H * 0.04); }
   break;
 case "bite":
 case "fang":
@@ -835,7 +835,7 @@ drawAttackFX(ctx, H, color, pose);
 if(p.id!=="chispin")drawEvolutionCombatFX(ctx, p, H, pose, t);
 // Independent, low-cost character acting layered atop the original art.
 drawKineticSignature(ctx,p,H,pose,t,reduceMotion);
-if(p.id!=="chispin")drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
+if(p.id!=="chispin"&&p.id!=="yomi")drawCastFX(ctx, H, color, pose, pose.castSlot | 0, p._cast && p._cast.id);
 if (pose.state === "jump" && pose.stretch > 0.12) {
 ctx.save();
 ctx.globalAlpha = 0.22 + pose.stretch * 0.18;
@@ -877,7 +877,6 @@ dragon:  { kind: "ember", colors: ["#ff7a2a", "#ffd84a", "#ff3b2a"] },
 frita:   { kind: "salt",  colors: ["#ffffff", "#fff3c4", "#ff4a3a"] },
 dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
 pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
-yomi:    { kind: "ember", colors: ["#6a3cff", "#ff4466", "#1a0828"] },
 cuerno:  { kind: "star",  colors: ["#ffe9a8", "#f2c1ff", "#ffffff"] },
 };
 
@@ -1173,6 +1172,8 @@ const id = p.id;
 // Cuerno's V59+ metamorphosis is authored in Canvas in every look mode.
 // Never revive the obsolete four-legged baby SVG over the living horn.
 if (id === "cuerno") return null;
+// Yomi IA is Canvas-authored in every look: never revive the old lantern plates.
+if (id === "yomi") return null;
 const plate = paintedForm(id, p.evo);
 if (plate && !moving && !air && atk < 0.12) return plate;
 if (id === "kilo") {
