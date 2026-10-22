@@ -97,6 +97,7 @@ export function updateFusionBoss(e, g, helpers = {}) {
     if (!b.announced[phase]) { b.announced[phase] = true; startSpecial(e, b, g, phase, helpers); }
   }
   if (b.mode === "intro" || b.mode === "special") e.invuln = Math.max(e.invuln || 0, 2);
+  e.vulnerable = b.mode === "rest";
   b.hover = Math.sin(b.tick * .04) * 8;
   e.x = clamp(e.x, A.left, A.right - e.w);
   e.y = WORLD1_FLOOR - e.h + (b.mode === "leap" ? -Math.sin(Math.PI * clamp(b.clock / 50, 0, 1)) * 260 : 0);

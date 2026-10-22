@@ -84,7 +84,16 @@ import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMess
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
-import { ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
+import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
+import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room } from "./systems/world1-rooms.js";
+import { enterWorld1, updateWorld1, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
+import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
+import { FUSION_STORY } from "./systems/world1-story.js";
+import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
+import { readWorld1Seals, storeWorld1Seals, world1StartRoom } from "./systems/world1-progress.js";
+import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
+// V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
+const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
 import { renderWorldGraphHTML, worldMapDetailHTML, drawWorldMinimap, worldGraphSnapshot } from "./systems/world-graph.js";
 import { drawEnemy } from "./engine/enemies.js";
 import { visibleForRender } from "./systems/render-v98-culling.js";
@@ -572,6 +581,9 @@ game.worldH = (r.height || ROOM_H) * S;
 game.platforms = r.plats.map((p) => ({ x: p[0] * S, y: p[1] * S, w: p[2] * S, h: p[3] * S }));
 enterCampaignExploration(game);
 enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiTrail(game);enterDragonTrail(game);enterDinoTrail(game);enterFritaTrail(game);enterPizzaTrail(game);enterYomiTrail(game);enterCuernoTrail(game);enterRoomAlbum(game);enterHeroCollection(game);
+// V468: en el Mundo 1 hay UN solo coleccionable (álbum de 100 cromos por sala).
+if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[];game.heroCollection=null;}
+enterWorld1Collect(game);enterWorld1(game);
 game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -629,7 +641,16 @@ if (floor) e.y = floor.y - e.h;
 }
 game.bossFx?.clear();
 game.boss = null;
-if (r.boss && !game.won) {
+game.spawnFusionBoss=()=>{
+  if(game.roomId!=="w1-final"||game.world1Won||game.boss)return false;
+  game.boss=createFusionBoss((game.player?.michiSeed||0)+467);
+  game.enemies.push(game.boss);
+  game.storyLine=FUSION_STORY.intro[0];
+  playMusic("jefe");beep("boss");
+  game.shake=Math.max(game.shake||0,reduceMotion?2:12);
+  return true;
+};
+if (r.boss && !r.fusionBoss && !game.won) {
 game.boss = scaleFoe(createBossNido());
 game.enemies.push(game.boss);
 applyCoopChallenge(game.boss,onlineCoop.enabled);
@@ -672,16 +693,16 @@ volcano: "La caldera es la última puerta. La Reina del Nido espera más adelant
 boss: "La Reina ha despertado. Aquí termina la ruta de este Mundo."
 };
 dispatchEvent(new CustomEvent("ohana-cinema-room", { detail: { id, repeat: !first, boss: !!r.boss } }));
-if (!r.boss) {
-const story = LINES[id] || "";
+if (!r.boss || r.fusionBoss) {
+const story = r.world1 ? "" : LINES[id] || "";
 const objective = r.hint || r.goal || "";
 showRoomMessage(r.name, first && story ? story + (objective ? " " + objective : "") : objective || story || "Explora la sala.", {
   key: "room:" + id + ":" + (first ? "first" : "repeat")
 });
-} else {
+} else if (!r.fusionBoss) {
 game.bossIntro = { t: 220 };
 game.storyLine = "La Reina sale del nido. No negocia.";
-showBossMessage("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 1.", {
+showBossMessage("REINA DEL NIDO", "Has llegado al corazón del Nido. Derrota a la Reina y cierra el Mundo 2.", {
   key: "boss:intro"
 });
 game.flash = 16;
@@ -690,7 +711,7 @@ game.shake = 12;
 }
 game.experience?.room(id, r.name, !!r.boss);
 beep(r.boss ? "boss" : "door");
-playMusic(themeForRoom(id));
+playMusic(themeForRoom(r.world1 ? ({0:"beach",1:"jungle",2:"volcano",3:"space",4:"lab",5:"reef",6:"hub",7:"boss",8:"cave",9:"ridge"})[r.world] : id));
 worldClear();
 Surprises.onEnterRoom(game);
 enterAdventure(game);
@@ -811,6 +832,9 @@ game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
 game.player.uBonds=readStoredUBonds(localStorage,def.id);
 game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
+game.onWorld1Beat=(kind)=>{if(kind==="seal")storeWorld1Seals(game.world1Seals);beep(kind==="seal"?"win":"pickup");};
+try { loadWorld1Collect(game); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
 game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};game.roomAlbums=readRoomAlbums();if(game.relicScene)game.onRelicEnd?.();game.relicScene=null;game.resetInput=()=>input?.reset();
@@ -819,7 +843,9 @@ Surprises.reset();
 Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
 game.running = true; closeOverlays();
-let roomId = "hub";
+// V468: una partida nueva en solitario empieza en el Mundo 1 (Claro de Kilo).
+let roomId = game.personalAdventureSolo ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
+globalThis.__ohanaWorld1Start = null;
 if (resume) {
 try {
   const u = saveStore.read(def.id);
@@ -838,6 +864,9 @@ try {
     game.score = u.score;
     game.kills = u.kills;
     game.won = u.won;
+    game.world1Seals = storeWorld1Seals([...game.world1Seals, ...(Array.isArray(u.world1Seals) ? u.world1Seals : [])]);
+    game.world1Won = !!u.world1Won;
+    game.world1Visited = u.world1Visited || {};
     applyForm(game.player, { silent: true });
     paintFit(game.player);
     if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
@@ -854,7 +883,7 @@ try {
 document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
-if (!loadRoom(roomId)) loadRoom("hub");
+if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 if (onlineMode) {
@@ -969,7 +998,7 @@ game.experience?.dash(p);
 void onlineCoop.signal(game, "action", { action: "dash", characterId: p.id });
 }
 function finiteOr(value, fallback = 0) { return safeFiniteOr(value, fallback); }
-function damageEnemy(e, amount) { if (e.dying > 0) return true; const before=e.hp;const ok=safeDamageEnemy(e, amount);if(ok)chargeFinisher(game,Math.max(0,before-e.hp));return ok; }
+function damageEnemy(e, amount) { if (e.dying > 0) return true; if (e._fusionBoss && e.invuln > 0) return true; const before=e.hp;const ok=safeDamageEnemy(e, amount);if(ok)chargeFinisher(game,Math.max(0,before-e.hp));return ok; }
 function healPlayer(p, amount) { return safeHealPlayer(p, amount); }
 function damagePlayer(p, amount) { return safeDamagePlayer(p, amount); }
 function addPlayerXp(p, amount) { return safeAddPlayerXp(p, amount); }
@@ -1427,7 +1456,7 @@ t: 210,
 max: 210,
 x: e.x + e.w / 2,
 y: e.y + e.h * 0.42,
-lines: [
+lines: e._fusionBoss ? [...FUSION_STORY.fall] : [
   "El nido se abre.",
   "Los que se quedaron atrás salen a la luz.",
   "Ohana no es el poder. Es no dejar a nadie."
@@ -1478,8 +1507,10 @@ if (f.t === 135) {
   beep("win");
 }
 if (f.t === 55) game.storyLine = "";
-if (f.t === 0 && !game.won) {
-game.won = true;
+const w1Final = game.roomDef?.fusionBoss;
+if (f.t === 0 && (w1Final ? !game.world1Won : !game.won)) {
+if (w1Final) game.world1Won = true;
+else game.won = true;
 game._cuernoWonT = t;
 const p = game.player;
 const ticks = game.clearTicks || 0;
@@ -1497,6 +1528,8 @@ dispatchEvent(new CustomEvent("ohana-win", { detail: {
   hero: p ? p.name : "Ohana",
   form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
   rank,
+  world: w1Final ? 1 : 2,
+  room: game.roomId,
   time: formatClear(ticks),
   best: game.best ? formatClear(game.best.ticks) : ""
 }}));
@@ -1507,7 +1540,7 @@ dispatchEvent(new CustomEvent("ohana-room", { detail: {
 }
 function worldClear() {
 const need = ["hub", "beach", "jungle", "cave", "lab", "ridge", "space", "volcano"];
-if (game.won || game.summoned || game.roomId === "boss") return;
+if (game.won || game.summoned || game.roomId === "boss" || isWorld1Room(game.roomId)) return;
 if (!need.every((id) => game.visited[id])) return;
 game.summoned = true;
 game.summonDelay = 132; // 2.2 s a 60 Hz, pausables y reproducibles.
@@ -1535,6 +1568,15 @@ return !!exit && cx>exit.x && cx<exit.x+exit.w;
 function tryDoors() {
 const p = game.player; const r = room();
 const nestLocked = r.id === "boss" && !game.won;
+// Mundo 1: el sello de la sala abre el este; la arena final se cierra durante la Quimera.
+if (r.world1) {
+  const wantR = p.x > game.worldW - 24 && r.doors.right, wantL = p.x < -8 && r.doors.left;
+  if ((wantR && !world1CanLeave(game,"right")) || (wantL && !world1CanLeave(game,"left"))) {
+    p.x = wantR ? game.worldW - p.w - 30 : 30; p.vx = 0;
+    if (!game._w1LockMsgT || t - game._w1LockMsgT > 180) { game._w1LockMsgT = t; showObjectiveMessage("SELLO DORMIDO", world1LockedMessage(game)); beep("locked"); }
+    return;
+  }
+}
 if (nestLocked && p.x < 72) p.x = 72;
 let dest = null, dir = null;
 if (p.x > game.worldW - 24 && r.doors.right) { dest = r.doors.right; dir = "right"; }
@@ -1808,7 +1850,7 @@ else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
-else if (p.x > game.worldW - 90 && r.doors.right) setPrompt("ESTE · sigue andando", true);
+else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : "despierta el sello de la sala") : "ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
 else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
@@ -1983,7 +2025,8 @@ if (e.boss) {
   }
   if (e.invuln > 0) e.invuln--;
   try {
-    updateBossNido(e, game, {
+    if (e._fusionBoss) updateFusionBoss(e, game, { hurtPlayer, showBossMessage, beep, reduceMotion: game.reduceMotion || reduceMotion });
+    else updateBossNido(e, game, {
       t, hurtPlayer, showBossMessage, makeFoe,
       ROOM_W: game.worldW, ROOM_H: game.worldH,
       reduceMotion: game.reduceMotion || reduceMotion,
@@ -2802,6 +2845,28 @@ ctx.closePath();
 ctx.fill();
 ctx.restore();
 }
+// V468: cada sala del Mundo 1 usa el decorado de su héroe y su silueta gigante.
+function drawWorld1Backdrop(world,W,H){
+ const rd=game.reduceMotion||reduceMotion,h=game.roomDef.hero;
+ if(h==="stitcho")drawStitchoArchipelago(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
+ else if(h==="cat")drawMichiGardens(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
+ else if(h==="chispin")drawChispinSanctuary(ctx,game.cam,t,W,H,{reducedMotion:rd,tier:1,progress:0});
+ else if(h==="dragon")drawDragonCalderaBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="dino")drawDinoCraterBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="frita")drawFritaMarketBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="pizza")drawPizzaOvensBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="yomi")drawYomiObservatoryBackdrop(ctx,game.cam,t,W,H,rd);
+ else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
+ else renderWorld(ctx,world,game.cam,t,W,H);
+ drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
+}
+// B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
+addEventListener("keydown",(e)=>{
+ if(!game.running||!game.roomDef?.world1||e.ctrlKey||e.altKey||e.metaKey)return;
+ const k=e.key;
+ if(k==="b"||k==="B"){if(!e.repeat)toggleWorld1Album(game);e.preventDefault();e.stopImmediatePropagation();return;}
+ if(game.world1CollectUI?.open&&world1AlbumKey(game,k)){e.preventDefault();e.stopImmediatePropagation();}
+},true);
 function render() {
 if (!game.player) return;
 ctx.setTransform(viewDpr, 0, 0, viewDpr, 0, 0);
@@ -2852,6 +2917,8 @@ if(game.stitchoTrail){
  drawYomiObservatoryBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
 }else if(game.cuernoTrail){
  drawCuernoForestBackdrop(ctx,game.cam,t,viewportW,viewportH,game.reduceMotion||reduceMotion);
+}else if(game.roomDef?.world1){
+ drawWorld1Backdrop(world,viewportW,viewportH);
 }else{
  renderWorld(ctx, world, game.cam, t, viewportW,viewportH);
  drawRoomAtmosphere(
@@ -2864,7 +2931,8 @@ drawHazards(ctx, game.roomId, game.cam, t, game.reduceMotion || reduceMotion);
 drawCheckpoints(ctx,game,game.cam,t);
 drawCampaignExploration(ctx,game,game.cam,t);
 drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawDragonTrail(ctx,game,game.cam,t);drawDinoTrail(ctx,game,game.cam,t);drawFritaTrail(ctx,game,game.cam,t);drawPizzaTrail(ctx,game,game.cam,t);drawYomiTrail(ctx,game,game.cam,t);drawCuernoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
-drawIslandLandmarks(ctx,game,game.cam,t);
+if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
+drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
@@ -2892,7 +2960,7 @@ for (const g of game.ghosts) {
 if (!visibleForRender(g,game.cam,viewportW,viewportH)) continue;
 ctx.globalAlpha = g.life / 16; ctx.fillStyle = g.color; ctx.fillRect(g.x - game.cam.x, g.y - game.cam.y, g.w, g.h); ctx.globalAlpha = 1;
 }
-if (!game.finale) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
+if (!game.finale && !game.boss?._fusionBoss) game.bossFx?.render(ctx, game.cam, t, { width: viewW, height: viewH }, game.boss, game.reduceMotion || reduceMotion);
 for (const e of game.enemies) {
   // Keep the Queen's actual authored sprite until it breaks into shards.
   // Everything else freezes and disappears during the scripted epilogue.
@@ -2901,7 +2969,8 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  if(e._fusionBoss)drawFusionBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else {
@@ -2909,7 +2978,8 @@ for (const e of game.enemies) {
     if(!bespoke)drawEnemy(ctx,e,game.cam,t,{reduceMotion:game.reduceMotion||reduceMotion});
     if(game.stitchoTrail)drawStitchoEnemyAccent(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   }
-  if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  if(e._fusionBoss){}
+  else if(e._stitchoBoss)drawStitchoBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
@@ -3083,6 +3153,9 @@ game.experience?.render(ctx, game, viewW, viewH, t);
 if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
+drawWorld1Overlay(ctx,game,viewW,viewH);
+if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH);if(game.world1CollectUI?.open)drawWorld1Album(ctx,game,viewW,viewH,t);}
+if(game.boss?._fusionBoss)drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 drawMinimap();
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
@@ -3351,7 +3424,7 @@ if (!canAct()) return;
 updateCampaignExploration(game);
 updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);updateMichiTrail(game,hurtPlayer);updateDragonTrail(game,hurtPlayer);updateDinoTrail(game,hurtPlayer);updateFritaTrail(game,hurtPlayer);updatePizzaTrail(game,hurtPlayer);updateYomiTrail(game,hurtPlayer);updateCuernoTrail(game,hurtPlayer);
 updatePlayer();
-updateRoomAlbum(game);updateHeroCollection(game);
+updateRoomAlbum(game);updateHeroCollection(game);updateWorld1(game);if(game.roomDef?.world1)updateWorld1Collect(game);
 if(game.relicScene)return;
 updateCampaignProgress(game);
 updateIslandSprings(game);

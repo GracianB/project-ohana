@@ -1,10 +1,10 @@
 export function formatBossStatus(boss = {}, phaseName = "") {
-  const phase = Math.max(1, Math.min(3, Number(boss.phase) || 1));
+  const phase = Math.max(1, Math.min(Number(boss.maxPhase) || 3, Number(boss.phase) || 1));
   const hp = Math.max(0, Math.ceil(
     (Number(boss.hp) / Math.max(1, Number(boss.max) || 1)) * 100
   ));
 
-  const title = "REINA DEL NIDO · FASE " + phase;
+  const title = (boss.bossName || "REINA DEL NIDO") + " · FASE " + phase;
   const feather = Number.isInteger(boss._feathersReturned) ? " · H PLUMAS " + (boss._feathersReturned%3) + "/3" : "";
   const visible = (phaseName ? title + " · " + phaseName : title) + feather;
 
