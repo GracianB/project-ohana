@@ -440,6 +440,9 @@ game.flashColor = null;
 game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
@@ -581,6 +584,9 @@ game.renderDirty = true;
 game.roomDef = r;
 game._defeatedThisVisit=new Set();
 game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;
 game.visited[id] = true;
 game.worldIndex = r.world;
 const paint = getLook() === "paint";
@@ -820,6 +826,9 @@ game.flashColor = null;
 game.doorWait = null;
 game.doorHold = 0;
 game.finale = null;
+// A World 1 cutscene must never survive a new run, menu return, or room change.
+// Otherwise step() keeps advancing the old cinematic and freezes gameplay.
+game.world1Cine = null;
 game.summonDelay = 0;
 game.roomId = "hub";
 game.won = false;
