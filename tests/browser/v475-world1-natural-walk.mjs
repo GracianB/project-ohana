@@ -44,7 +44,7 @@ try {
 
  const journal=[];
  async function walkTo(target,roomId,{exit=false}={}) {
-   for (let attempt=0;attempt<110;attempt++) {
+   for (let attempt=0;attempt<220;attempt++) {
      await finishCinema();
      let s=await state();
      if(s.roomId!==roomId){
@@ -53,6 +53,24 @@ try {
      }
      if(!(s.hp>0))throw Error('Real hero died during unassisted walk: '+JSON.stringify({roomId,target,player:s.player,score:s.score}));
      let gap=target-(s.player.x+18);
+     // Genuine keyboard combat/defense. The first pilot died near Kilo's
+     // fourth flower because it blindly walked through eight enemies.
+     // Here the player attacks and jumps, without touching HP or enemy state.
+     if (gap>0 && s.player.grounded) {
+       const foe=await page.evaluate(()=>window.__OHANA_E2E.roomCast()
+         .filter(f=>f.hp>0&&!f.miniBoss).map(f=>({x:f.x,y:f.y,w:f.w,h:f.h})));
+       const ahead=foe.filter(f=>f.x>s.player.x-10 && f.x<s.player.x+320).sort((a,b)=>a.x-b.x)[0];
+       if(ahead && ahead.x-s.player.x<260) {
+         await page.keyboard.down('w');
+         await simulate(3);
+         await page.keyboard.up('w');
+         await page.keyboard.down('h');
+         await simulate(2);
+         await page.keyboard.up('h');
+         s=await state();
+         gap=target-(s.player.x+18);
+       }
+     }
      if(Math.abs(gap)<26 && !exit){
        await simulate(40); // release deceleration + timed puzzle hold
        s=await state();
@@ -69,7 +87,7 @@ try {
      const key=gap>0?'d':'a',other=gap>0?'a':'d';
      await page.keyboard.up(other);
      await page.keyboard.down(key);
-     const frames= Math.max(2,Math.min(200,Math.floor((Math.abs(gap)-42)/6)));
+     const frames= Math.max(2,Math.min(95,Math.floor((Math.abs(gap)-42)/6)));
      const before=s.player.x;
      s=await simulate(frames);
      await page.keyboard.up(key);
