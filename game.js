@@ -740,6 +740,14 @@ requestAnimationFrame(()=>{
 });
 overlay.classList.add("open");
 }
+function michiRunSeed(resume){
+ try{const pinned=new URLSearchParams(location.search).get('michiSeed');if(pinned!==null)return Math.max(0,Math.floor(Number(pinned))||0);}catch(_){}
+ if(e2eEnabled)return 0;
+ try{const kept=Number(localStorage.getItem('ohana-michi-seed'));if(resume&&kept>0)return kept;}catch(_){}
+ const fresh=1+Math.floor(game.rng()*2147483646);
+ try{localStorage.setItem('ohana-michi-seed',String(fresh));}catch(_){}
+ return fresh;
+}
 function makePlayer(def) {
 const p = {
 ...def,
@@ -796,6 +804,9 @@ if(def.id==='kilo')game.player._kiloEntranceAt=t;
 else game.player._ohanaEntranceAt=t;
 // Browser audits can pin a pair; normal play always invokes a surprise.
 game.player.uSurprise=!e2eEnabled;
+// V461: every Michicornio run dreams its own palette, tentacle rhythm and
+// evolution motif. ?michiSeed=N pins it; audits stay on the canonical seed 0.
+if(def.id==='cat')game.player.michiSeed=michiRunSeed(resume);
 game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
 game.player.uBonds=readStoredUBonds(localStorage,def.id);
 game.player.uExp=bondXP(game.player);
@@ -901,7 +912,8 @@ fromEvo,
 fromName,
 toName,
 color: p.color,
-final: toGod
+final: toGod,
+michiSeed: p.michiSeed || 0
 }}));
 save();
 }

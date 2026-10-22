@@ -1,3 +1,21 @@
+# OHANA V461 · Michicornio: medusa de luna viva, sueño aleatorio y metamorfosis real en partida
+
+Versión **V461** (`ohana-461`), rama local `michi-v461` sobre la PR #394 (V460). **No publicada**: requiere CI, quality y GitHub Pages verdes sobre el mismo commit de `main`. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.
+
+## Trabajos implementados
+- `characters/michi-jelly.js` (nuevo): genoma de sueño por partida (`michiGenome(seed)`), 5 paletas curadas (Luna de nácar, Aurora boreal, Coral del alba, Abismo estelar, Oro de eclipse), ritmo y longitud por tentáculo, motas y pecas bioluminiscentes repartidas sin amontonarse. Semilla 0 = diseño canónico (tests y auditorías).
+- Pulso de nado real (contracción rápida 28 %, recuperación lenta), tentáculos con onda viajera y raíz fija, cintas afiladas con brillo interior y cuentas de luz, halo sin gradientes.
+- F2 Medusa Onírica rehecha como medusa luna (Aurelia) con cara de gato: umbrela translúcida, subumbrela, 4 gónadas en herradura, canales radiales, borde festoneado con flecos, 7 tentáculos marginales y 2 brazos orales con volantes. Saltar contrae, caer abre la campana, correr arrastra los tentáculos, atacar los latiguea hacia delante, conjurar los abre, el daño tiñe la campana.
+- F3 Dragón Astral: cola serpentina afilada enroscada detrás del cuerpo (antes un trazo grueso que se salía), aleta dorsal de gelatina, escamas, mechón de medusa en la punta y filamentos vivos.
+- F4 Michicornio Eclipse: campana-eclipse translúcida tras la cabeza que sostiene los nueve tentáculos como falda, cada uno con su fase y longitud; se eliminan los gradientes por fotograma de F2/F4.
+- F0/F1: rubor simétrico, marcas atigradas, pechera del lince y punta de cola con el color de sueño de la partida (anticipa la medusa).
+- Evolución en partida: `systems/evo-cinema.js` ahora usa la cinemática propia de Michicornio (antes la partida mostraba la presentación genérica y la V460 solo se veía en el estudio). Cuatro actos: llamada de motas, carga del cuerno, capullo de gelatina + un único destello suave (nunca en movimiento reducido) con gotas y ondas, revelación con rebote elástico, rótulo y frase. Motivo aleatorio por partida: marea, capullo, constelación o aurora.
+- `game.js`: semilla por partida (`?michiSeed=N` la fija, se conserva al reanudar, 0 en e2e), enviada en `ohana-evolve`; `characters/draw.js` la incluye en la clave de caché del retrato.
+
+## Calidad
+- Nuevo `tests/michicornio-v461.test.js` (7 pruebas): genoma determinista y paletas/motivos alcanzables en 400 semillas, pulso y raíz fija de tentáculos, 5 formas × 11 estados × 8 semillas sin gradientes, variación visible solo en las formas gelatinosas, movimiento reducido independiente del reloj, destello único y cableado del juego.
+- Precache: `characters/michi-jelly.js` añadido y huellas regeneradas con `node tools/update-offline-revisions.mjs`.
+
 # OHANA V460 · Michicornio: cuerpo vivo, intro y metamorfosis
 
 Versión **V460** (`ohana-460`), desarrollada en la [PR #394](https://github.com/GracianB/project-ohana/pull/394). El despliegue se acredita verificando CI, quality y GitHub Pages para el mismo commit de `main`. Diez personajes, cinco formas por héroe, diez salas canónicas y multijugador remoto pausado.

@@ -1096,6 +1096,8 @@ q(pose.michiWelcome?.yomi,12),q(pose.michiWelcome?.dino,12),
 // V460: cat's eyes, tail and tentacles depend on clock, not only locomotion phase.
 // 1 redraw / 3 frames (~20 FPS at 60Hz) keeps the portrait moving without a 60 FPS texture rebuild.
 q(pose.michicornioFrame,1),
+// V461: the run's dream genome (palette, tentacle rhythm) is part of the portrait.
+q(pose.michiSeed,1),
 ].join("|");
 }
 
@@ -1231,6 +1233,7 @@ if(p.id==="stitcho"&&p._introForceCanvas&&p._introStitcho)pose.stitchoWelcome=p.
 if(p.id==="chispin"&&p._introForceCanvas&&p._introChispin)pose.chispinWelcome=p._introChispin;
 if(p.id==="cat"&&p._introForceCanvas&&p._introMichi)pose.michiWelcome=p._introMichi;
 if(p.id==='cat'&&!pose.reduceMotion)pose.michicornioFrame=Math.floor(t/3);
+if(p.id==='cat')pose.michiSeed=Number.isFinite(p.michiSeed)?p.michiSeed:0;
 if (p.id === "cuerno") {
   pose.cuernoBeat = p._cuernoBeat || "";
   pose.cuernoMagicSlot = Number.isInteger(p._cuernoMagicSlot) ? p._cuernoMagicSlot : -1;

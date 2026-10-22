@@ -36,12 +36,13 @@ input[type=range]{accent-color:#d6b6ed;width:min(280px,70vw)}
 </main>
 <script type="module">
 import {drawEvoCine,michicornioEvoBeat,EVO_CINE_DURATION} from '../systems/evo-cine/michi.js';
+const DREAM_SEED=Number(new URLSearchParams(location.search).get('seed'))||0; // V461: ?seed=N previews a run's dream motif
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),selector=document.querySelector('#step');
 const scrub=document.querySelector('#scrub'),clock=document.querySelector('#clock'),chapter=document.querySelector('#chapter');
 const pause=document.querySelector('#pause');let t=0,frozen=false,last=0,stop=false;
 function paint(){
  const to=Number(selector.value)+1,beat=michicornioEvoBeat(t,to-1,to);
- drawEvoCine(ctx,canvas.width,canvas.height,t,to-1,to);
+ drawEvoCine(ctx,canvas.width,canvas.height,t,to-1,to,{seed:DREAM_SEED});
  scrub.value=t.toFixed(2);clock.textContent='0:'+String(Math.floor(t)).padStart(2,'0');
  chapter.textContent={listen:'01 · Escuchar',gather:'02 · Reunir luz',morph:'03 · Transformación',reveal:'04 · Revelación'}[beat.act];
 }

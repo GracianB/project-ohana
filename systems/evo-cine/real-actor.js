@@ -18,6 +18,6 @@ export function drawEvolutionActor(ctx,id,x,y,s,form,t,options={}){
  // the previous frozen reducedMotion=true portrait. Others stay compatible.
  ART[id].draw(flatCtx(ctx),{form:f,state,t:clock,phase:clock*.17,
   look:{x:.2,y:0},speed:1,reduceMotion:!motion,flourish:0,
-  cast:options.cast??.55,atk:options.atk??.45,castSlot:2},R);
+  cast:options.cast??.55,atk:options.atk??.45,castSlot:2,michiSeed:options.seed||0},R);
  ctx.restore();
 }

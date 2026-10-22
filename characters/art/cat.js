@@ -1,4 +1,5 @@
 import {michiMotion} from "../michi-motion.js";
+import {michiGenome,jellyPulse,drawJellyBell,drawTentacle,halo,motes,ribbon} from "../michi-jelly.js";
 // Michicornio: 5-stage lunar CAT lineage (baby, lynx, ear-jelly, dragon, nine-tentacle guardian).
 export const MICHI_VISUAL_H=[60,72,84,94,106];
 const INK = "#3a2416";
@@ -314,7 +315,7 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.bezierCurveTo(-40,-19,-53+(r.motion?.tail||0)*6,-54,-32+(r.motion?.tail||0)*3,-72);
   ctx.bezierCurveTo(-14,-81,-12,-62,-26+(r.motion?.tail||0)*3,-58);
   stroke(ink,12);stroke('#dbc7f5',8);
-  oval(-26,-58,4,4,'#ffe1a6',null);
+  {const dream=michiGenome(pose.michiSeed).palette;halo(ctx,-26,-58,7,7,dream.glow,1.6+(still?0:Math.sin(t*.06)*.4));oval(-26,-58,4,4,dream.tip,null);gem(-26,-58,dream.bead,2.4);}
   for(const side of [-1,1]){
    ctx.save();ctx.translate((r.motion?.frontX||0)*side*.34,(side>0?r.motion?.frontY:r.motion?.backY)||0);
    oval(side*13,-5,11,6,'#e6d5f9');ctx.restore();
@@ -355,7 +356,9 @@ function drawMichiMythic(ctx,pose,r,f){
   }
   gem(0,-20,'#ffe2a0',6);
    ctx.beginPath();ctx.moveTo(-4,-20);ctx.lineTo(0,-41);ctx.lineTo(4,-20);ctx.closePath();ctx.fillStyle='#ffe3ab';ctx.fill();stroke(ink,2);
-  oval(-20,5,4,2,'#f6a6c8',null);
+  ctx.save();ctx.globalAlpha=.75;oval(-20,5,4.5,2.4,'#f6a6c8',null);oval(20,5,4.5,2.4,'#f6a6c8',null);ctx.restore();
+  for(const x of [-6,0,6]){ctx.beginPath();ctx.moveTo(x,-27);ctx.lineTo(x*.75,-21);stroke('#b9a3e6',1.6);}
+  ctx.save();ctx.globalAlpha=.3;ctx.beginPath();ctx.ellipse(0,21,22,6,0,0,Math.PI);ctx.fillStyle='#a993d8';ctx.fill();ctx.restore();
   ctx.restore();ctx.restore();return;
  }
  if(f===1){ // LUNAR LYNX: a growing feline, NOT a rabbit between two cats.
@@ -367,6 +370,7 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.bezierCurveTo(-42,-30,-53,-58+stride*.6,-46,-79+stride);
   ctx.bezierCurveTo(-42,-103,-27,-93,-30,-83);
   stroke(ink,13);stroke('#bfa5ec',9);
+  {const dream=michiGenome(pose.michiSeed).palette;halo(ctx,-31,-84+stride,11,12,dream.glow,1.4+(still?0:Math.sin(t*.06)*.4));}
   oval(-31,-84+stride,7,8,'#e7d3ff');
   gem(-32,-85+stride,'#fff2bd',3.5);
   // Real haunches, four grounded paw anchors and chest. No elongated hare legs.
@@ -380,6 +384,7 @@ function drawMichiMythic(ctx,pose,r,f){
   }
   oval(0,-41+breath,26,32,'#9b86cb');
   oval(1,-41+breath,17,25,'#fff5ff',null);
+  ctx.beginPath();ctx.moveTo(-10,-60+breath);for(let k=0;k<5;k++){ctx.lineTo(-7+k*4.5,-52+breath+(k%2)*4);}ctx.lineTo(11,-60+breath);ctx.fillStyle='#fff5ff';ctx.fill();
   // Shoulder-to-wrist animation, independent from the haunches.
   for(const side of [-1,1]){
    const flex=(side>0?paw:-(r.motion?.rearPaw||0))*7;
@@ -418,6 +423,8 @@ function drawMichiMythic(ctx,pose,r,f){
    ctx.beginPath();ctx.moveTo(side*17,dy);
    ctx.lineTo(side*(34+(r.st==='attack'?5:0)),dy-4);stroke('#79609d',1.5);
   }
+  ctx.save();ctx.globalAlpha=.7;oval(-22,8,5,2.6,'#f3a9cc',null);oval(22,8,5,2.6,'#f3a9cc',null);ctx.restore();
+  for(const x of [-7,0,7]){ctx.beginPath();ctx.moveTo(x,-26);ctx.lineTo(x*.7,-18);stroke('#9178bf',1.8);}
   // Moon horn emerges from the forehead, not the ears.
   ctx.beginPath();ctx.moveTo(-7,-23);ctx.lineTo(0,-45);
   ctx.lineTo(7,-23);ctx.closePath();ctx.fillStyle='#ffe5a9';ctx.fill();stroke(ink,2.1);
@@ -425,111 +432,129 @@ function drawMichiMythic(ctx,pose,r,f){
   if(r.st==='cast')for(const side of [-1,1])gem(side*26,-30+wave(side,.13)*3,'#f6ecff',3);
   ctx.restore();ctx.restore();return;
  }
- if(f===2){ // DREAM MEDUSA: living stained glass, seven silk tentacles and lunar unicorn crest.
-  const wave1=wave(0,.064),flight=wave(.8,.05),cast=r.st==='cast',attack=angry||r.st==='attack';
-  const medusaPulse=still?0:(r.motion?.mantle||0);
-  const sweep=r.motion?.ribbon||0;
-  ctx.save();ctx.scale(.68*(1+medusaPulse*.28),.68*(1-medusaPulse*.15));
-  ctx.translate(0,-5+lift+wave1*1.8-(r.motion?.bounce||0)*.32);
-  ctx.globalAlpha=.2;oval(0,-55,49,50,'#7fe1eb',null);ctx.globalAlpha=1;
-  // Seven independently swimming ribbons; the middle one is the heart.
-  for(let i=0;i<7;i++){
-   const lane=i-3,x=lane*9,tip=x+wave(i*.63,.081)*8+sweep*(i%2?4:-5)+(cast?8:0);
-   const tipY=2+(i%3)*3+Math.abs(sweep)*2-(attack?7:0);
-   ctx.beginPath();ctx.moveTo(x*.85,-53);
-   ctx.bezierCurveTo(x-10,-32,x+wave(i,.077)*6,-22,tip,tipY);
-   const ribbon=ctx.createLinearGradient(x,-54,tip,tipY);
-   ribbon.addColorStop(0,i%2?'#c3e9ff':'#e3c5ff');
-   ribbon.addColorStop(.55,i%2?'#78b1e1':'#a19bdb');
-   ribbon.addColorStop(1,'#f8eaff');
-   stroke('#46335e',i===3?9:7);stroke(ribbon,i===3?6.5:5);
-   oval(tip,tipY,3.7,4.5,i%2?'#fef8ff':'#bfffff',null);
-   if(i%2===0){ctx.globalAlpha=.78;gem(x+(tip-x)*.65,-13,'#fff8d8',2.1);ctx.globalAlpha=1;}
-  }
-  // Cathedral-bell contour and rippling scalloped lower rim.
-  ctx.beginPath();ctx.moveTo(-42,-64);
-  ctx.bezierCurveTo(-39,-98,-23,-119,0,-121);
-  ctx.bezierCurveTo(24,-121,39,-98,42,-64);
-  for(let i=4;i>=0;i--){const x=i*18-36;ctx.quadraticCurveTo(x,-52,x-17,-64);}
-  ctx.closePath();
-  const glass=ctx.createLinearGradient(0,-125,0,-52);
-  glass.addColorStop(0,'#ffffff');glass.addColorStop(.23,'#d5f6ff');
-  glass.addColorStop(.69,'#e1c6ff');glass.addColorStop(1,'#8baee3');
-  ctx.fillStyle=glass;ctx.fill();stroke('#51416d',2.4);
-  ctx.globalAlpha=.5;oval(0,-90,28,25,'#a3d5fa',null);ctx.globalAlpha=1;
-  for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*5,-111);ctx.quadraticCurveTo(i*12,-92,i*14,-69);stroke('rgba(255,255,255,.76)',1.8);}
-  ctx.beginPath();ctx.moveTo(-35,-66);ctx.quadraticCurveTo(0,-53,35,-66);stroke('#fff9ff',2.5);
+ if(f===2){ // DREAM MEDUSA: a real moon jelly (Aurelia) that kept its cat face, ears and horn.
+  // V461: translucent umbrella, four horseshoe gonads, seven marginal tentacles with
+  // travelling waves, two frilled oral arms, fast-contract/slow-relax swim pulse.
+  const g=michiGenome(pose.michiSeed),pal=g.palette,cast=r.st==='cast',attack=angry||r.st==='attack';
+  const unit=v=>Math.max(0,Math.min(1,Number(v)||0));
+  let c=jellyPulse(t,g,still).c;
+  if(r.st==='jump')c=Math.max(c,.85);else if(r.st==='fall'||r.st==='glide')c*=.2;else if(r.st==='hurt')c=.55;
+  const atkK=r.st==='attack'?Math.sin(Math.PI*unit(r.atk)):0,castK=cast?Math.sin(Math.PI*unit(r.cast)):0;
+  const victory=r.st==='victory',sweep=r.motion?.ribbon||0;
+  const trail=r.st==='run'?-10:r.st==='glide'?-4:0,float=r.st==='fall'||r.st==='glide'?1:0;
+  ctx.save();ctx.scale(.68,.68);
+  ctx.translate(0,-5+lift-c*5+wave(0,.064)*1.6-(r.motion?.bounce||0)*.32);
+  const rimY=-62,bellH=58,bellW=40;
+  const tent=(i,front)=>{
+   const lane=i-3,ax=lane*bellW*.27*(1-.1*c)*(1+castK*.25);
+   const lash=front&&lane>0?atkK:0;
+   return drawTentacle(ctx,{x:ax,y:rimY+3,len:(54+(i%3)*4)*g.lengths[i]*(1-float*.12),
+    phase:g.phases[i],t,still,amp:4.5+c*2.5+float*3+(victory?3:0)+castK*2,
+    sway:trail+sweep*(i%2?4:-5)+lash*34+lane*castK*7,lift:c*.8+float*.6,
+    curl:(victory?(i%2?.55:-.55):0)+lash*.6+(r.st==='hurt'?-.4:0),
+    dir:Math.PI/2-lash*.75,width:front?4.6:5.4,alpha:front?.88:.78,
+    fill:i%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.9,core:'#ffffff',beads:pal.bead});
+  };
+  halo(ctx,0,-70,50,44,pal.glow2,.7+castK+(victory?.4:0));
+  // Behind the umbrella: frilled oral arms + even tentacles, seen through the glass.
+  for(const side of [-1,1])for(const layer of [0,1])drawTentacle(ctx,{x:side*7,y:rimY-4,len:40+layer*6,
+   phase:g.phases[7+(side>0)]+layer*1.9,t,still,amp:3.2+c*1.5,sway:trail*.6+side*(3+castK*6),lift:c,
+   curl:side*.25,width:11-layer*3,alpha:.72,fill:layer?pal.gonad:pal.arm,edge:pal.ink,edgeWidth:.7,core:pal.rim});
+  for(let i=0;i<7;i+=2)tent(i,false);
+  const B=drawJellyBell(ctx,{x:0,y:rimY,w:bellW,h:bellH,pal,t,c,still,ink:pal.ink,spots:g.spots,
+   glow:.8+castK,flash:r.st==='hurt'?1:0});
+  for(let i=1;i<7;i+=2)tent(i,true);
   // Ears are inherited from F1, now crystal-cat fins on the glass bell.
   // They are attached to the crown, so the medusa remains unmistakably feline.
+  const top=B.top;
   for(const side of [-1,1]){
-   const flick=wave(side*1.5,.092)*4+(r.motion?.ear||0)*8;
-   ctx.beginPath();ctx.moveTo(side*17,-109);
-   ctx.quadraticCurveTo(side*28,-116,side*35,-125+flick);
-   ctx.lineTo(side*42,-100);ctx.lineTo(side*21,-103);
-   ctx.closePath();ctx.fillStyle='#d7b9f6';ctx.fill();stroke(ink,2.8);
-   ctx.beginPath();ctx.moveTo(side*28,-112);ctx.lineTo(side*35,-121+flick);
-   ctx.lineTo(side*36,-107);ctx.closePath();ctx.fillStyle='#f5b5d8';ctx.fill();
-   gem(side*32,-113,'#fff2b9',3.4);
+   const flick=wave(side*1.5,.092)*4+(r.motion?.ear||0)*8-c*3;
+   ctx.save();ctx.globalAlpha=.92;
+   ctx.beginPath();ctx.moveTo(side*13,top+9);
+   ctx.quadraticCurveTo(side*24,top-1,side*30,top-14+flick);
+   ctx.quadraticCurveTo(side*37,top+6,side*33,top+20);ctx.closePath();
+   ctx.fillStyle=pal.bell;ctx.fill();stroke(pal.ink,2.4);
+   ctx.beginPath();ctx.moveTo(side*20,top+9);ctx.lineTo(side*29,top-8+flick);
+   ctx.lineTo(side*31,top+14);ctx.closePath();ctx.fillStyle=pal.gonad;ctx.globalAlpha=.7;ctx.fill();
+   ctx.restore();gem(side*30,top-9+flick,pal.bead,2.6);
   }
   // A paired whisker signature follows all five forms.
-  for(const side of [-1,1])for(const dy of [-1,7]){
-   ctx.beginPath();ctx.moveTo(side*23,-82+dy);
-   ctx.quadraticCurveTo(side*35,-82+dy,side*46,-88+dy+wave(side,.08)*2);
-   stroke('#645281',1.5);
+  for(const side of [-1,1])for(const dy of [-1,6]){
+   ctx.beginPath();ctx.moveTo(side*22,-80+dy);
+   ctx.quadraticCurveTo(side*36,-81+dy,side*48,-86+dy+wave(side,.08)*2);
+   stroke(pal.ink,1.3);
   }
   // The horn is part of the body, not an oversized detached particle.
-  ctx.beginPath();ctx.moveTo(-6,-112);ctx.lineTo(0,-133);ctx.lineTo(6,-112);ctx.closePath();
-  ctx.fillStyle='#ffdda1';ctx.fill();stroke('#4e3d6f',1.9);
-  for(let j=0;j<3;j++)gem(0,-107+j*8,j===1?'#f9d1ff':'#fffcef',2.8);
-  eye(-17,-87,'#d66fcb',4.4,6.2);eye(17,-87,'#d66fcb',4.4,6.2);
-  ctx.beginPath();ctx.moveTo(-5,-75);ctx.quadraticCurveTo(0,-70+wave1*2,5,-75);stroke('#4d5284',1.8);
-  for(const s of [-1,1]){oval(s*29,-76,5,2.6,'#f2b7eb',null);gem(s*34,-71,'#fff5cf',2.6);}
+  ctx.beginPath();ctx.moveTo(-5.5,top+3);ctx.lineTo(0,top-19-castK*3);ctx.lineTo(5.5,top+3);ctx.closePath();
+  ctx.fillStyle='#ffe2a8';ctx.fill();stroke(pal.ink,1.8);
+  ctx.beginPath();ctx.moveTo(-3,top-3);ctx.lineTo(3,top-6);ctx.moveTo(-2,top-10);ctx.lineTo(2,top-12);stroke('#c99a52',1.1);
+  if(cast)halo(ctx,0,top-12,9+castK*6,9+castK*6,'#fff3b8',1.5);
+  eye(-15,-88,pal.ink==='#33335e'?'#5f7fe8':'#c56ad0',4.4,6.2);eye(15,-88,pal.ink==='#33335e'?'#5f7fe8':'#c56ad0',4.4,6.2);
+  ctx.beginPath();ctx.moveTo(-1.8,-79);ctx.lineTo(1.8,-79);ctx.lineTo(0,-77);ctx.closePath();ctx.fillStyle='#f08fb0';ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-77);ctx.quadraticCurveTo(-3.5,-72-(r.motion?.jaw||0)*3,-6,-75);
+  ctx.moveTo(0,-77);ctx.quadraticCurveTo(3.5,-72-(r.motion?.jaw||0)*3,6,-75);stroke(pal.ink,1.5);
+  ctx.save();ctx.globalAlpha=.55;for(const s of [-1,1])oval(s*26,-77,5,2.6,pal.gonad,null);ctx.restore();
+  motes(ctx,t,g,{x:0,y:-30,spread:44,height:100,count:cast||victory?9:6,color:pal.bead,size:1.7,strength:.7+castK*.6,still});
   if(cast||attack){
-   ctx.save();ctx.globalAlpha=.55;ctx.strokeStyle='#fff5b9';ctx.lineWidth=2.2;
-   ctx.beginPath();ctx.ellipse(0,-83,43+(cast?flight*5:0),35,0,0,TAU);ctx.stroke();
-   for(let j=0;j<4;j++){const angle=j*TAU/4+t*.023;gem(Math.cos(angle)*46,-83+Math.sin(angle)*37,'#fff0c5',3);}
+   ctx.save();ctx.globalAlpha=.5*(cast?castK:atkK)+.1;ctx.strokeStyle=pal.rim;ctx.lineWidth=2;
+   ctx.beginPath();ctx.ellipse(0,-88,46+castK*8,36+castK*4,0,0,TAU);ctx.stroke();
+   for(let j=0;j<4;j++){const angle=j*TAU/4+t*.023;gem(Math.cos(angle)*48,-88+Math.sin(angle)*38,pal.bead,3);}
    ctx.restore();
   }
   ctx.restore();return;
  }
  if(f===3){ // ASTRAL DRAGON: long coiled serpent with horns and whiskers.
-  const p=wave(0,.055),sweep=r.motion?.ribbon||0;
+  // V461: tapered serpentine body with a translucent jelly dorsal fin and a
+  // medusa tail-tuft, so the dragon visibly descends from the Medusa Onírica.
+  const g=michiGenome(pose.michiSeed),pal=g.palette;
+  const p=wave(0,.055),sweep=r.motion?.ribbon||0,tl=(r.motion?.tail||0);
   ctx.save();ctx.scale(.98,.98);ctx.translate(0,lift-(r.motion?.bounce||0)*.18);
-  ctx.beginPath();ctx.moveTo(-3,-39);
-  ctx.bezierCurveTo(-55,-7,-75,-38+(r.motion?.tail||0)*11,-64-sweep*4,-67);
-  ctx.bezierCurveTo(-48,-100,-76-(r.motion?.tail||0)*6,-109,-91,-88+(r.motion?.tail||0)*4);
-  stroke(ink,25);stroke('#60447d',19);stroke('#a889d1',6);
-  for(let i=0;i<7;i++)gem(-66+i*7,-44-i*2,'#d6ba72',3.6);
+  // The serpent coils BEHIND the body in an S that rises over the shoulder.
+  const spine=[],bz=(a,b,c,d,u)=>{const v=1-u;return v*v*v*a+3*v*v*u*b+3*v*u*u*c+u*u*u*d;};
+  for(let k=0;k<=15;k++){const s=k/15,undul=still?0:Math.sin(s*5-t*.065)*4.5*s;
+   const bx=bz(-6,-62,-80-sweep*5,-48+tl*6,s),by=bz(-30,-14,-84,-96-g.tailCurl*5,s);
+   spine.push([bx+undul,by+undul*.6+tl*5*s*s]);}
+  const widths=spine.map((_,k)=>22*(1-k/15*.8)+1.5);
+  // Dorsal fin: glassy jelly membrane riding the spine wave.
+  const fin=spine.map((q,k)=>{const a=spine[Math.max(0,k-1)],b=spine[Math.min(15,k+1)];let nx=-(b[1]-a[1]),ny=b[0]-a[0];const d=Math.hypot(nx,ny)||1;
+   const off=widths[k]*.5+4+(still?0:Math.sin(k*1.1-t*.12)*2);return [q[0]+nx/d*off,q[1]+ny/d*off];});
+  ctx.save();ctx.globalAlpha=.55;ribbon(ctx,fin,widths.map(w=>w*.45+3),pal.glow,pal.ink,.8);ctx.restore();
+  ribbon(ctx,spine,widths,'#5b3f7c',ink,2.2);
+  ribbon(ctx,spine.map(q=>[q[0]+1.5,q[1]+1.5]),widths.map(w=>w*.42),'#a98ad3',null);
+  ctx.save();ctx.strokeStyle='#e2c07a';ctx.lineWidth=1.3;ctx.globalAlpha=.85;
+  for(let k=2;k<14;k+=2){const q=spine[k];ctx.beginPath();ctx.arc(q[0],q[1],widths[k]*.22,Math.PI*.1,Math.PI*.9);ctx.stroke();}
+  ctx.restore();
+  const tip=spine[15];
+  for(let j=0;j<3;j++)drawTentacle(ctx,{x:tip[0],y:tip[1],len:16+j*3,phase:g.phases[j],t,still,amp:3,
+   dir:Math.PI*(.85+j*.2),width:3.2,alpha:.85,fill:j%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.7,beads:pal.bead});
   oval(0,-28,23,25,'#573e7a');oval(3,-24,12,15,'#b99ac9',null);
   for(const s of [-1,1]){
    ctx.beginPath();ctx.moveTo(s*13,-30);
    ctx.quadraticCurveTo(s*(19+p*3),-10,s*18,0);stroke(ink,9);stroke('#7b5b9b',6);
    oval(s*18,0,8,4,'#d8b17c');
+   for(const toe of [-3,0,3]){ctx.beginPath();ctx.moveTo(s*18+toe,2);ctx.lineTo(s*18+toe*1.3,5);stroke('#f6e0b0',1.4);}
   }
   ctx.beginPath();ctx.moveTo(-22,-75);ctx.quadraticCurveTo(-37,-100,-20,-111);
   ctx.lineTo(-6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
   ctx.beginPath();ctx.moveTo(22,-75);ctx.quadraticCurveTo(37,-100,20,-111);
   ctx.lineTo(6,-95);ctx.closePath();ctx.fillStyle='#e0b969';ctx.fill();stroke(ink,1.7);
   oval(0,-68,29,25,'#5a3878');oval(0,-56,19,9,'#b798bb',null);
+  ctx.save();ctx.globalAlpha=.35;oval(-10,-80,10,5,'#8f6db8',null);ctx.restore();
   eye(-12,-73,'#ffa43b',5,6.5);eye(12,-73,'#ffa43b',5,6.5);
   for(const s of [-1,1]){
    ctx.beginPath();ctx.moveTo(s*17,-55);
-   ctx.quadraticCurveTo(s*(41+p*2),-54,s*49,-67);
+   ctx.quadraticCurveTo(s*(41+p*2),-54,s*49,-67+(still?0:Math.sin(t*.07+s)*3));
    stroke('#ebc582',2);
   }
   // Crystal cat ears and seven inherited jelly ribbons on the astral dragon.
   for(const side of [-1,1]){
-   ctx.beginPath();ctx.moveTo(side*18,-86);ctx.lineTo(side*33,-120);
+   ctx.beginPath();ctx.moveTo(side*18,-86);ctx.lineTo(side*33,-120+(r.motion?.ear||0)*5);
    ctx.lineTo(side*34,-78);ctx.closePath();ctx.fillStyle='#d3b7f3';ctx.fill();stroke(ink,2);
    ctx.beginPath();ctx.moveTo(side*24,-85);ctx.lineTo(side*31,-107);
    ctx.lineTo(side*30,-82);ctx.fillStyle='#eeb1dc';ctx.fill();
   }
-  for(let i=0;i<5;i++){
-   const x=-25+i*12,sway=wave(i*1.23,.08)*8+sweep*(i%2?6:-5);
-   ctx.beginPath();ctx.moveTo(x,-24);
-   ctx.bezierCurveTo(x+sway,-13,x-sway,-2,x+sway*1.2,5);
-   stroke('#d4beed',3.4);gem(x+sway*1.2,5,'#bceeff',2.5);
-  }
+  for(let i=0;i<5;i++)drawTentacle(ctx,{x:-20+i*10,y:-26,len:26+(i%2)*4,phase:g.phases[i+3],t,still,amp:3.5,
+   sway:sweep*(i%2?6:-5),width:3.4,alpha:.8,fill:i%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.7,beads:pal.bead});
   gem(0,-94,'#ffd86d',6);
   ctx.beginPath();ctx.moveTo(-5,-92);ctx.lineTo(0,-117);ctx.lineTo(5,-92);ctx.closePath();ctx.fillStyle='#ffe0b3';ctx.fill();stroke(ink,2);
   if(angry){gem(38+p*3,-61,'#ffb649',5);}
@@ -540,28 +565,23 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.save();ctx.scale(.99,.99);ctx.translate(0,lift-(r.motion?.bounce||0)*.16);
   // Nine EXPLICIT jelly-tendrils: the F2 medusa grows into a crown of
   // independent luminous ribbons with shared nerve/glow anatomy.
+  // V461: an eclipse bell (translucent moon-jelly mantle) carries the nine
+  // tentacles as a swimming skirt; each has its own seeded phase and length.
+  const g=michiGenome(pose.michiSeed),pal=g.palette;
+  let c=jellyPulse(t,g,still).c;if(r.st==='jump')c=Math.max(c,.8);
+  const unitK=v=>Math.max(0,Math.min(1,Number(v)||0));
+  const atkK=r.st==='attack'?Math.sin(Math.PI*unitK(r.atk)):0,castK=r.st==='cast'?Math.sin(Math.PI*unitK(r.cast)):0;
+  halo(ctx,0,-86,62,52,pal.glow2,.7+castK);
+  const M=drawJellyBell(ctx,{x:0,y:-58,w:56,h:56,pal,t,c,still,ink:pal.ink,spots:g.spots,alpha:.42,glow:.6+castK,lobes:9});
   for(let i=0;i<9;i++){
-   const a=-Math.PI*.88+i*Math.PI*1.76/8;
-   const swim=wave(i*1.17,.048+i*.002)*7+sweep*(i%2?4:-5);
-   const endX=Math.cos(a)*70-4+swim*.55;
-   const endY=-50+Math.sin(a)*31+swim*.4;
-   const bend=-39+wave(i*1.37,.062)*8;
-   ctx.beginPath();ctx.moveTo(-13,-35);
-   ctx.bezierCurveTo(bend,-70,-11+endX*.8,endY-37,endX,endY);
-   stroke(ink,11.5);
-   const silk=ctx.createLinearGradient(-13,-35,endX,endY);
-   silk.addColorStop(0,'#c49de7');
-   silk.addColorStop(.44,i%3===0?'#89e8ed':i%2?'#e4c0ff':'#f7ceef');
-   silk.addColorStop(1,'#fff8df');
-   stroke(silk,7.5);
-   ctx.beginPath();ctx.moveTo(-12,-37);
-   ctx.quadraticCurveTo(endX*.44,endY-21,endX,endY);
-   stroke('rgba(255,255,255,.53)',1.5);
-   oval(endX,endY,5.5,7.5,i%2?'#fff7d8':'#c9f9ff',null);
-   gem(endX,endY-3,i%2?'#ffde9e':'#e0b4ff',3.3);
+   const fan=Math.PI*(.84-i*.085)+(i-4)*c*-.03,lash=i>=6?atkK:0;
+   const e=drawTentacle(ctx,{x:M.anchors[i][0]*.92,y:M.anchors[i][1]-2,len:58*g.lengths[i]*(1+castK*.1),phase:g.phases[i],t,still,
+    amp:5+c*3+castK*2,sway:sweep*(i%2?4:-5)+lash*26,lift:c*.7,curl:(i<4?.35:i>4?-.35:0)+lash*.5,
+    dir:fan-lash*.5,width:7,alpha:.86,fill:i%3===0?pal.glow:i%2?pal.arm:pal.gonad,edge:ink,edgeWidth:1.1,core:'#ffffff',beads:pal.bead});
+   gem(e[0],e[1],i%2?'#ffde9e':pal.bead,3.3);
   }
+  motes(ctx,t,g,{x:0,y:-20,spread:70,height:120,count:r.st==='victory'||r.st==='cast'?10:7,color:pal.bead,size:1.8,strength:.8+castK*.5,still});
   // Medusa glass mantle retained as the guardian's living collar.
-  ctx.globalAlpha=.68;oval(0,-54,30,25,'#bfe7f1',null);ctx.globalAlpha=1;
   oval(0,-24,20,26,'#fff3d9');oval(2,-22,13,16,'#fff',null);
   for(const s of [-1,1]){
    ctx.beginPath();ctx.moveTo(s*11,-12);ctx.lineTo(s*16,-1);stroke(ink,9);stroke('#f7dfb4',6);
