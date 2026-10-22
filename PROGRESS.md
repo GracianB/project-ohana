@@ -1,3 +1,12 @@
+# OHANA V469 · Michicornio Bebé, Porcioncita, ukelele de Kilo y cámara tranquila
+
+Versión **V469** (`ohana-469`) sobre V468 (`main` 53e197d).
+
+- Michicornio Bebé rediseñado: gatito chibi con cabeza grande, cuerpo de pan, patitas cortas, cola corta con gema de sueño, brote de cuerno dorado y luna en la frente.
+- Porcioncita: la cara se dibuja después del brazo cercano (los ojos ya no quedan detrás), proporciones más redondas y toppings que no tapan la cara.
+- Kilo: el ukelele al tocar se refleja, el mástil apunta a la izquierda y ya no tapa el brazo.
+- Cámara tranquila: zona muerta vertical anclada a la plataforma, amortiguación Y más suave, velocidad vertical limitada y sin temblor al aterrizar.
+
 # OHANA V468 · MUNDO 1: la Ruta de los Diez
 
 Versión **V468** (`ohana-468`) sobre V467. El juego se reorganiza en dos mundos: el **Mundo 1** nuevo (diez salas de héroe + Corazón de Ohana) y el **Mundo 2**, que conserva intactas las salas clásicas (Claro, Costa, Jungla, Cueva, Lab, Cumbre, Órbita, Arrecife, Caldera y Nido).

@@ -22,7 +22,7 @@ const PEP = "#c8322a";
 const PEP_GOD = "#ff5a26"; // volcanic: magma pepperoni
 
 const FORM = [
-{ W: 60, legL: 13, top: -80, crH: 14, rT: 11, rB: 7, er: 10.4, arm: 13, fv: 0.33 },
+{ W: 64, legL: 12, top: -74, crH: 15, rT: 13, rB: 9, er: 10.8, arm: 12, fv: 0.31 },
 { W: 66, legL: 17, top: -84, crH: 14, rT: 8,  rB: 7,  er: 7.4, arm: 16, fv: 0.34 },
 { W: 68, legL: 18, top: -84, crH: 14, rT: 8,  rB: 7,  er: 7.4, arm: 17, fv: 0.34 },
 { W: 96, legL: 16, top: -72, crH: 13, rT: 9,  rB: 9,  er: 8.6, arm: 18, fv: 0.30 },
@@ -30,7 +30,7 @@ const FORM = [
 ];
 
 const TOPS = [
-[["pep", -0.05, 0.66, 6]],
+[["pep", -0.15, 0.74, 5], ["olive", 0.35, 0.88, 2.2], ["pep", -0.85, 0.07, 3.4], ["basil", 0.85, 0.07, 3]],
 [
   ["pep", -0.80, 0.14, 5.5], ["pep", 0.05, 0.72, 5.5], ["pep", 0.72, 0.52, 4.6],
   ["olive", 0.82, 0.10, 2.8], ["olive", -0.55, 0.50, 2.8],
@@ -1221,13 +1221,6 @@ if (f === 2) {
 if (f === 3) chefHat(ctx, R, 2, -F.crH * 1.72, t, pose.sway);
 ctx.restore();
 
-faceDraw(ctx, R, pose, P, F, tipY, f);
-
-if (P.drool > 0) {
-  const [mx, my] = uv(F, tipY, 0.12, F.fv);
-  const myy = my + F.er * 1.9;
-  drip(ctx, R, mx + F.er * 0.2, myy, P.drool * (-myy - 10), 3.5, 1, c.cheese, 0, 0, false);
-}
 
 let hand = null;
 if (P.wall) {
@@ -1236,6 +1229,16 @@ if (P.wall) {
 } else {
   drawLeg(4, P.legF, false);
   hand = drawArm(shX, shY, P.armF, false);
+}
+
+// V468: face LAST inside the body layer — the near arm stays in front of the
+// slice but can never cover the eyes or the mouth (Porcioncita bug).
+faceDraw(ctx, R, pose, P, F, tipY, f);
+
+if (P.drool > 0) {
+  const [mx, my] = uv(F, tipY, 0.12, F.fv);
+  const myy = my + F.er * 1.9;
+  drip(ctx, R, mx + F.er * 0.2, myy, P.drool * (-myy - 10), 3.5, 1, c.cheese, 0, 0, false);
 }
 
 ctx.restore(); // spin
