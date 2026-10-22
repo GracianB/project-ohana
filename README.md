@@ -4,15 +4,15 @@
 
 # PROJECT OHANA
 
-### Diez héroes. Cincuenta formas. Una isla llena de aventuras.
+### Diez héroes. Cincuenta formas. Una historia para toda la familia.
 
-**Plataformas · exploración · combate · evolución · mundos personales**
+**Plataformas · exploración · combate · evolución · aventura narrativa en Canvas 2D**
 
-**10 personajes** · **5 formas por héroe** · **10 salas canónicas conectadas**
+**10 héroes** · **50 formas** · **10 salas temáticas + final de Mundo 1**
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>La web pública se sirve desde <code>main</code>. El cierre V457 se documenta en la <a href="https://github.com/GracianB/project-ohana/pull/391">PR #391</a>. Las mejoras V458 y V459, integradas mediante las PR #392 y #393, ya están en <code>main</code>. La animación V460 está documentada en la <a href="https://github.com/GracianB/project-ohana/pull/394">PR #394</a>; comprueba el commit publicado en Pages para confirmar su disponibilidad. El multijugador remoto sigue en pausa. La publicación efectiva se comprueba en <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>; una PR aprobada no equivale a un despliegue.</sub>
+<sub>Estado del código: V469 integrada en <code>main</code>. <a href="https://github.com/GracianB/project-ohana/pull/404">V470</a> es el candidato que cierra el Mundo 1 y bloquea el acceso al Mundo 2 en construcción. <strong>El sitio público puede ir por detrás</strong>: solo <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a> confirma el despliegue del commit correspondiente. El multijugador remoto permanece en pausa.</sub>
 
 </div>
 
@@ -33,6 +33,16 @@ OHANA es un plataformas 2D construido con **JavaScript modular y Canvas 2D**. Lo
 
 > **Fidelidad visual:** la galería pública utiliza la versión desplegada, que puede ir por detrás de V457. Para comprobar el arte exacto de esta PR, ejecuta el proyecto desde su rama. El motor combina dibujo procedural y, en ciertos casos o modos, atlas pintados; **no se afirma que se hayan eliminado todos los PNG del código**.
 
+## Mundo 1 · La Ruta de los Diez (V468–V470)
+
+El Eco ha robado las canciones de la familia. La aventura recorre **diez salas de personaje en un solo mundo**, desde el Claro de Kilo hasta el Observatorio de Yomi, y desemboca en el **Corazón de Ohana**. Cada sala tiene una misión de sello propia, plataformas, enemigos, puntos de control y un capítulo de la misma historia. Al reunir los diez sellos aparece la **Quimera Ohana**, el jefe que reúne los ecos de los protagonistas.
+
+Las salas se abren en orden. Elegir personaje en el campamento enseña sus cinco formas y su portal; las salas cerradas indican qué sello hace falta. La salida de V470 presenta **«Mundo 2 · en construcción»** en lugar de enviar silenciosamente al jugador a contenido anterior. El código de ese contenido se conserva, sin anunciarlo como un segundo mundo terminado.
+
+**Ver el diseño ejecutable:** [grafo y salas](systems/world1-rooms.js) · [historia completa](systems/world1-story.js) · [selector de portales](systems/world1-select.js) · [estado de sellos](systems/world1-progress.js) · [PR V470](https://github.com/GracianB/project-ohana/pull/404).
+
+> **Aceptación pendiente:** la CI automatiza contratos y recorridos parciales; todavía no equivale a una partida humana completa por las diez salas, con todos los recuerdos, jefe final, mando/táctil y guardado. La versión publicada se confirma separadamente en Pages.
+
 ## V460 · Michicornio vivo: actuación corporal e intro / evolución cinematográfica
 
 Michicornio deja de limitarse a diez poses estáticas. Ahora su **carrera articula patas y hombros**, las orejas reaccionan, **parpadea y mira alrededor**, la Medusa respira con su campana y sus **siete filamentos se desplazan independientemente**. El dragón hereda ese movimiento y el Guardián Eclipse lo culmina con **nueve tentáculos de vidrio animados**. Todo sucede en Canvas, sin alterar hitboxes.
@@ -51,7 +61,7 @@ La **intro familiar** incorpora corona, iris lunar y gestos de personalidad excl
 
 [**Estudio vivo de las cinco formas de Michicornio**](previews/michi-design.html) · [**Laboratorio interactivo: diez héroes y diez animaciones**](previews/animation-lab.html) · [**Código de actuación compartida**](characters/ten-action-acting.js)
 
-> **Estado de versión:** V459 fue integrada mediante la [PR #393](https://github.com/GracianB/project-ohana/pull/393). V460 permanece en revisión y no se considera publicada hasta verificar GitHub Pages.
+> **Historial de arte:** V459 y V460 están fusionadas en `main`. Sus galerías siguen siendo útiles para inspeccionar animaciones; su disponibilidad pública depende del último despliegue de Pages.
 
 ## La familia: diez maneras distintas de jugar
 
@@ -63,7 +73,7 @@ Cada héroe cuenta con identidad, movimiento, estadísticas, evoluciones y habil
 | [**Chispín**](https://gracianb.github.io/project-ohana/gallery.html?id=chispin) | Electricidad y aceleración | [**Michicornio**](https://gracianb.github.io/project-ohana/gallery.html?id=cat) | Sueños, esquiva y nueve vidas |
 | [**Dragón**](https://gracianb.github.io/project-ohana/gallery.html?id=dragon) | Fuego, viento y altura | [**Dino**](https://gracianb.github.io/project-ohana/gallery.html?id=dino) | Fuerza e impacto |
 | [**Frita**](https://gracianb.github.io/project-ohana/gallery.html?id=frita) | Velocidad y derrape | [**Pizza**](https://gracianb.github.io/project-ohana/gallery.html?id=pizza) | Rebotes y giros |
-| [**Yomi**](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | Energía espiritual | [**Cuerno**](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Luz, prismas y protección |
+| [**Yomi**](https://gracianb.github.io/project-ohana/gallery.html?id=yomi) | IA familiar, análisis y red neuronal | [**Cuerno**](https://gracianb.github.io/project-ohana/gallery.html?id=cuerno) | Luz, prismas y protección |
 
 ### De bebé a forma final
 
@@ -73,29 +83,13 @@ El combate usa **H** para el ataque base y **J / K / L** para las habilidades. N
 
 **Michicornio V458–V459 (ya integrado):** el arte actual dibuja una evolución de siluetas diferenciadas: bebé felino → lince lunar → medusa felina con orejas → dragón astral → guardián de nueve tentáculos. [Ver su implementación Canvas](characters/art/cat.js). El diseño se encuentra en el código de `main` desde V459 y se refina en V460.
 
-## Isla Hoku: una aventura compartida, diez salas reales
+## Un mundo ahora, el siguiente después
 
-La campaña común mantiene **diez salas canónicas conectadas**. Su recorrido atraviesa el Claro, Costa, Jungla, Cueva, Laboratorio, Cumbre, Caldera, Órbita, Arrecife y el Nido de la Reina.
+**Mundo 1**, la campaña actual, tiene diez salas grandes de héroe y un escenario final. El Claro, Costa, Jungla, Cueva, Laboratorio, Cumbre, Caldera, Órbita, Arrecife y el antiguo Nido de la Reina permanecen en el código histórico como base del **Mundo 2**, pero no se presentan como contenido completado en el modo individual V470.
 
-No es una presentación de fondos: las zonas se recorren saltando entre plataformas, combinando poderes, descubriendo rutas y enfrentándose a enemigos y jefes. El enfrentamiento principal es la **Reina del Nido**, con tres fases.
+Hay un álbum y progresión de recuerdos por protagonista; la lógica de recompensas está automatizada, aunque la accesibilidad física de todos los objetos no se ha demostrado recorriendo cada nivel manualmente.
 
-**[Explorar el juego](https://gracianb.github.io/project-ohana/)** · **[Código del mapa](systems/world-graph.js)** · **[Escenarios generados](worlds/)**
-
-### Diez aventuras personales
-
-La rama V457 añade variantes de aventura para los diez protagonistas, **sin duplicar artificialmente las diez salas del mapa compartido**.
-
-| Héroe | Identidad del recorrido | Héroe | Identidad del recorrido |
-| :--- | :--- | :--- | :--- |
-| Kilo | Bahía del Compás | Stitcho | Archipiélago del Caos |
-| Chispín | Islas del Relámpago | Michicornio | Jardines de la Luna |
-| Dragón | Cordillera de las Brasas | Dino | Valle de los Gigantes |
-| Frita | Mercado Dorado | Pizza | Reino del Horno |
-| Yomi | Observatorio Astral | Cuerno | Bosque del Prisma |
-
-Se ha implementado el estado de **100 coleccionables por héroe**, con persistencia y recompensas. La prueba automatizada valida contratos de estado y navegación, pero **no acredita por sí sola que los 1.000 objetos sean físicamente alcanzables ni que las diez campañas hayan superado una partida humana completa**. Esa aceptación sigue abierta.
-
-[Ver los criterios reales de cierre de cada mundo](docs/V457-CIERRE-SOLO.md). [**Michicornio: 10 versiones y QA**](docs/MICHICORNIO-V458.md).
+La ruta, sus sellos y sus enemigos están definidos en [Mundo 1](systems/world1-rooms.js). Para la estructura de combate, consulta [motor](game.js) y [sistemas](systems/).
 
 ## Cómo se juega
 
@@ -113,18 +107,18 @@ Se ha implementado el estado de **100 coleccionables por héroe**, con persisten
 
 Hay controles táctiles en móvil.
 
-## Estado verificable · V457
+## Estado verificable · V470 candidata
 
-| Área | Situación |
+| Área | Estado del código |
 | :--- | :--- |
-| **Motor y diez héroes** | Implementados y sometidos a pruebas automatizadas |
-| **Diez salas compartidas** | Implementadas |
-| **Variantes y coleccionables personales** | Integrados; falta aceptación manual de todas las rutas y recompensas |
-| **Calidad de la PR #391** | [CI y quality aprobados para el código V457](https://github.com/GracianB/project-ohana/actions/runs/39637919429), incluido arte de Michi y regresión visual |
-| **Publicación** | Verificar en [GitHub Pages Actions](https://github.com/GracianB/project-ohana/actions/workflows/pages.yml) que el commit de `main` se ha desplegado correctamente |
-| **Multijugador remoto** | **En pausa** por créditos de Netlify y del servidor externo; sin reactivaciones ni consumo de servicios |
+| **Motor, diez héroes y cincuenta formas** | Integrados en `main`; existe galería Canvas y batería de regresión. |
+| **Mundo 1: diez salas + Quimera Ohana** | Introducido en V468; V470 propone finalizar la ruta y cerrar Mundo 2. |
+| **Selección de personajes** | Portales Canvas con navegación por teclado, sincronizados con las tarjetas HTML. |
+| **Progresión y coleccionables** | Contratos y guardado implementados; pendiente una partida completa de aceptación. |
+| **Pruebas y publicación** | Ver [PR #404](https://github.com/GracianB/project-ohana/pull/404) y [GitHub Actions](https://github.com/GracianB/project-ohana/actions). Solo declarar publicado cuando el commit de `main` tenga Pages correcto. |
+| **Multijugador remoto** | En pausa; sin reactivar servidores ni créditos de servicios. |
 
-**Importante:** una PR en verde es un paso de calidad; la publicación real requiere un Pages correcto para el commit de `main` y después validación manual completa.
+**No confundimos tres cosas:** código fusionado, pruebas automáticas y juego realmente publicado. Para concursar debe existir un mismo commit con CI, pruebas de navegador, regresión visual, puerta de lanzamiento y Pages aprobados, seguido de revisión manual.
 
 ## Desarrollo local
 

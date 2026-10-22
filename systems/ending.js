@@ -51,7 +51,7 @@ function bindActions(layer){
     layer.setAttribute("aria-hidden","true");
     dispatchEvent(new CustomEvent("ohana-after",{detail:{action}}));
   };
-  layer.querySelector("#win-continue").onclick=()=>close("continue");
+  layer.querySelector("#win-continue").onclick=(e)=>close(e.currentTarget?.dataset?.action||"continue");
   layer.querySelector("#win-repeat").onclick=()=>close("repeat");
   layer.querySelector("#win-roster").onclick=()=>close("roster");
 }
@@ -110,7 +110,11 @@ function showEnding(detail={}){
   const w1=Number(detail.world)===1;
   const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
   for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
-  const cont=layer.querySelector("#win-continue");if(cont)cont.textContent=w1?"Seguir hacia el Mundo 2":"Continuar en este mundo";
+  // V470: el Mundo 2 está en construcción — en lugar de viajar, una tarjeta lo anuncia.
+  const cont=layer.querySelector("#win-continue");if(cont){cont.textContent=w1?"Volver al inicio":"Continuar en este mundo";cont.dataset.action=w1?"home":"continue";}
+  let soon=layer.querySelector(".win-soon");
+  if(w1&&!soon){soon=document.createElement("p");soon.className="win-soon";soon.setAttribute("role","note");layer.querySelector(".win-actions")?.before(soon);}
+  if(soon){soon.textContent="Mundo 2 — en construcción";soon.hidden=!w1;}
   const rep=layer.querySelector("#win-repeat");if(rep)rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";
   layer.dataset.world=w1?"1":"2";
   const score=layer.querySelector(".win-score");

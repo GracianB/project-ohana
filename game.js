@@ -85,7 +85,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
-import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room } from "./systems/world1-rooms.js";
+import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
 import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
@@ -537,6 +537,13 @@ p.vx = 0; p.vy = fromDir === "down" ? 2 : 0;
 if (fromDir !== "down") snapToFloor(p);
 }
 function loadRoom(id, fromDir) {
+// V470: el Mundo 2 está en construcción — ningún menú, portal o puerta lleva allí en solo.
+if (world2Locked(id, { solo: !!game.personalAdventureSolo, e2e: fromDir === "e2e" || !!game._e2eLegacyStart })) {
+  showSystemMessage("MUNDO 2", WORLD2_LOCK_TEXT);
+  beep("locked");
+  if (game.roomDef) bounceLocked(fromDir);
+  return false;
+}
 let r = ROOMS[id];
 if(id==="hub"&&game.player?.id==="stitcho"&&game.personalAdventureSolo)r=createStitchoRoom(r);
 if(id==="hub"&&game.player?.id==="chispin"&&game.personalAdventureSolo)r=createChispinRoom(r);
@@ -852,7 +859,9 @@ Festival.reset();
 game.projectiles = []; game.bolts = []; game.slashes = []; game.ghosts = []; game.fx.clear?.(); game.won = false; game.summoned = false;
 game.running = true; closeOverlays();
 // V468: una partida nueva en solitario empieza en el Mundo 1 (Claro de Kilo).
-let roomId = game.personalAdventureSolo ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
+// V470: el arnés e2e (window.__OHANA_E2E.start) conserva el arranque clásico del Mundo 2
+// para las suites de navegador heredadas; el jugador real empieza en el Mundo 1.
+let roomId = game.personalAdventureSolo && !game._e2eLegacyStart ? world1StartRoom(def.id, game.world1Seals, globalThis.__ohanaWorld1Start) : "hub";
 globalThis.__ohanaWorld1Start = null;
 if (resume) {
 try {
@@ -3637,10 +3646,10 @@ addEventListener("ohana-after", (e) => {
 const act = e.detail && e.detail.action;
 if (act === "continue") {
   game.running = true;
-  // Mundo 1 cerrado: el camino sigue hacia las salas clásicas del Mundo 2.
-  if (game.roomId === "w1-final" && game.world1Won) loadRoom("hub", "portal");
+  // V470: el juego termina en el Mundo 1 (Mundo 2 en construcción): seguir = quedarse en el Corazón.
   return;
 }
+if (act === "home") { returnToMenu(); return; }
 if (act === "repeat" && game.roomId === "w1-final") {
   game.world1Won = false; game._w1WinSent = false; game.boss = null; game.world1Boss = null;
   if (game.player) { game.player.dead = false; game.player.health = game.player.maxHealth; }
@@ -3942,6 +3951,7 @@ step(frames = 1) {
 },
 start(id = "kilo") {
   const def = ROSTER.find((r) => r.id === id);
+  game._e2eLegacyStart = true;
   start(def);
   game._cuernoIntroT = null;
   dismissE2EOverlays();
