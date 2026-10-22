@@ -476,7 +476,7 @@ const PRECACHE_REVISIONS = {
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
   "game.js": "2483372015d4b7e684ae53817df5dba945b26415",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "495844bf7760152af943c00ce3ecf6c5c1617bc6",
+  "characters/art/cat.js": "4c6a3f50ca64250d82559b5bcc13c47f7f0ecf84",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
   "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
   "previews/michi-design.html": "8726f141b105016aed0c153a80d1db902187f717",

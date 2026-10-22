@@ -512,7 +512,7 @@ function drawMichiMythic(ctx,pose,r,f){
   // The serpent coils BEHIND the body in an S that rises over the shoulder.
   const spine=[],bz=(a,b,c,d,u)=>{const v=1-u;return v*v*v*a+3*v*v*u*b+3*v*u*u*c+u*u*u*d;};
   for(let k=0;k<=15;k++){const s=k/15,undul=still?0:Math.sin(s*5-t*.065)*4.5*s;
-   const bx=bz(-6,-62,-78-sweep*5,-40+tl*6,s),by=bz(-30,-14,-92,-112-g.tailCurl*8,s);
+   const bx=bz(-6,-62,-80-sweep*5,-48+tl*6,s),by=bz(-30,-14,-84,-96-g.tailCurl*5,s);
    spine.push([bx+undul,by+undul*.6+tl*5*s*s]);}
   const widths=spine.map((_,k)=>22*(1-k/15*.8)+1.5);
   // Dorsal fin: glassy jelly membrane riding the spine wave.
@@ -526,7 +526,7 @@ function drawMichiMythic(ctx,pose,r,f){
   ctx.restore();
   const tip=spine[15];
   for(let j=0;j<3;j++)drawTentacle(ctx,{x:tip[0],y:tip[1],len:16+j*3,phase:g.phases[j],t,still,amp:3,
-   dir:Math.PI*(1.25+j*.18),width:3.2,alpha:.85,fill:j%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.7,beads:pal.bead});
+   dir:Math.PI*(.85+j*.2),width:3.2,alpha:.85,fill:j%2?pal.glow:pal.arm,edge:pal.ink,edgeWidth:.7,beads:pal.bead});
   oval(0,-28,23,25,'#573e7a');oval(3,-24,12,15,'#b99ac9',null);
   for(const s of [-1,1]){
    ctx.beginPath();ctx.moveTo(s*13,-30);
@@ -572,10 +572,10 @@ function drawMichiMythic(ctx,pose,r,f){
   const unitK=v=>Math.max(0,Math.min(1,Number(v)||0));
   const atkK=r.st==='attack'?Math.sin(Math.PI*unitK(r.atk)):0,castK=r.st==='cast'?Math.sin(Math.PI*unitK(r.cast)):0;
   halo(ctx,0,-86,62,52,pal.glow2,.7+castK);
-  const M=drawJellyBell(ctx,{x:0,y:-58,w:56,h:62,pal,t,c,still,ink:pal.ink,spots:g.spots,alpha:.42,glow:.6+castK,lobes:9});
+  const M=drawJellyBell(ctx,{x:0,y:-58,w:56,h:56,pal,t,c,still,ink:pal.ink,spots:g.spots,alpha:.42,glow:.6+castK,lobes:9});
   for(let i=0;i<9;i++){
    const fan=Math.PI*(.84-i*.085)+(i-4)*c*-.03,lash=i>=6?atkK:0;
-   const e=drawTentacle(ctx,{x:M.anchors[i][0]*.92,y:M.anchors[i][1]-2,len:66*g.lengths[i]*(1+castK*.12),phase:g.phases[i],t,still,
+   const e=drawTentacle(ctx,{x:M.anchors[i][0]*.92,y:M.anchors[i][1]-2,len:58*g.lengths[i]*(1+castK*.1),phase:g.phases[i],t,still,
     amp:5+c*3+castK*2,sway:sweep*(i%2?4:-5)+lash*26,lift:c*.7,curl:(i<4?.35:i>4?-.35:0)+lash*.5,
     dir:fan-lash*.5,width:7,alpha:.86,fill:i%3===0?pal.glow:i%2?pal.arm:pal.gonad,edge:ink,edgeWidth:1.1,core:'#ffffff',beads:pal.bead});
    gem(e[0],e[1],i%2?'#ffde9e':pal.bead,3.3);
