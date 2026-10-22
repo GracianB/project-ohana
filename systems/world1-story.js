@@ -38,5 +38,5 @@ export const WORLD1_ENDING = Object.freeze({
   act: "LAS DIEZ CANCIONES VUELVEN A CASA",
   title: "NADIE SE QUEDA ATRÁS",
   jun: "LA QUIMERA SE DESCOSE",
-  sub: "Diez sellos, diez héroes y una sola canción. Más allá del Corazón de Ohana se abre el Mundo 2."
+  sub: "Diez sellos, diez héroes y una sola canción. Más allá del Corazón de Ohana espera el Mundo 2, todavía en construcción."
 });

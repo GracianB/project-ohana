@@ -1,3 +1,10 @@
+# OHANA V470 · El juego termina en el Mundo 1 (Mundo 2 en construcción)
+
+Versión **V470** (`ohana-470`) sobre V469 (`main` 59c18ec).
+
+- El final del Mundo 1 ya no viaja al Mundo 2: muestra la tarjeta «Mundo 2 — en construcción», mantiene «Repetir la Quimera» y añade «Volver al inicio».
+- En modo solo, cualquier puerta, portal, menú o guardado que lleve a las salas del Mundo 2 se bloquea con el aviso «en construcción» (el código del Mundo 2 sigue intacto; `WORLD2_OPEN` lo reabre).
+
 # OHANA V469 · Michicornio Bebé, Porcioncita, ukelele de Kilo y cámara tranquila
 
 Versión **V469** (`ohana-469`) sobre V468 (`main` 53e197d).

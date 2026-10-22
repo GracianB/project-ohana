@@ -3,6 +3,14 @@
 // final todavía mayor con la Quimera Ohana. Datos puros: sin DOM ni Math.random.
 // Las salas antiguas (Claro, Costa, Jungla…) pasan a ser el MUNDO 2.
 
+// V470: de momento el juego termina en el Mundo 1. El código del Mundo 2 sigue
+// intacto, pero sus salas quedan cerradas ("en construcción") en el modo solo.
+export const WORLD2_OPEN = false;
+export const WORLD2_LOCK_TEXT = "Mundo 2 — en construcción";
+export function world2Locked(id, state = {}) {
+  if (WORLD2_OPEN || !state.solo || state.e2e) return false;
+  return typeof id === "string" && !Object.hasOwn(WORLD1_ROOMS, id);
+}
 export const WORLD1_ROOM_W = 9600;
 export const WORLD1_FINAL_W = 12000;
 export const WORLD1_ROOM_H = 1260;
@@ -90,7 +98,7 @@ export function buildWorld1HeroRoom(hero) {
     hint: WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
-    portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2" }] : []
+    portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
   };
 }
 

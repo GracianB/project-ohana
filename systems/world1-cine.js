@@ -61,7 +61,7 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
       { dur: 220, bg: "#1e1838", color: "#ffe9a8", layout: "circle", heroes: ALL, lit: ALL, dance: true, kicker: WORLD1_ENDING.kicker, title: WORLD1_ENDING.act, line: "Kilo rasguea, Chispín ríe en truenos, Dragón calienta el banquete de Frita y Pizza." },
       { dur: 200, bg: "#1a1030", color: "#ffacc2", layout: "line", heroes: ALL, lit: ALL, kicker: "Juntos", title: WORLD1_ENDING.title, line: "Michi sueña, Cuerno pinta la aurora, Dino pisa fuerte, Stitcho cose la nave y Yomi vigila las estrellas." },
       { dur: 240, bg: "#0e0a1c", color: "#8fe9ff", layout: "portal", heroes: ALL, lit: ALL, kicker: "Pero…", title: "Más allá del Corazón", line: "Yomi: «Detecto un eco más antiguo. Viene de las islas de siempre… el MUNDO 2»." },
-      { dur: 200, bg: "#000000", color: "#ffd6f2", layout: "none", heroes: [], kicker: "Fin del Mundo 1", title: "Continuará en el MUNDO 2", line: WORLD1_ENDING.sub }
+      { dur: 200, bg: "#000000", color: "#ffd6f2", layout: "none", heroes: [], kicker: "Fin del Mundo 1", title: "MUNDO 2 — en construcción", line: WORLD1_ENDING.sub }
     ];
     default: return [];
   }
@@ -115,7 +115,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   ctx.fillStyle = "#fff"; for (const [x, y, r] of STARS) { ctx.globalAlpha = 0.25 + 0.35 * (reduce ? 0.5 : 0.5 + 0.5 * Math.sin(t * 0.03 + x * 30)); ctx.fillRect(x * W, y * H, r, r); }
   // Halo plano del color del plano (círculos concéntricos, sin degradado).
   ctx.fillStyle = s.color; for (let i = 3; i >= 1; i--) { ctx.globalAlpha = (s.burst ? 0.09 : 0.05) * i * fadeIn; ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * (0.12 + 0.1 * (4 - i)) * (s.burst ? 0.8 + k * 0.5 : 1), 0, Math.PI * 2); ctx.fill(); }
-  if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.5); }
+  if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
   // Héroes.
   const lit = new Set(s.lit || (s.layout === "one" ? s.heroes : [])), n = s.heroes.length;
   s.heroes.forEach((h, i) => {
