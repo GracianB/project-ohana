@@ -401,7 +401,7 @@ const PRECACHE_REVISIONS = {
   "systems/fusion-boss.js": "fbe2e42b7d344725a0c106a2a684ee454225c6ff",
   "systems/world1-story.js": "4c034ecd1754258f52e3fba4f4b068998f410ae4",
   "systems/world1-rooms.js": "4c6eb4da585846911aaadc623078ae93939d4c4a",
-  "systems/world1-play.js": "15feb5df687fc006fd48281a40728a26298de140",
+  "systems/world1-play.js": "eb761670d4cb7b2cd9ca7b48fe8d155c15e154d4",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "ef9dc362d4a1b19246378216bae835a972cd9ce5",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",
