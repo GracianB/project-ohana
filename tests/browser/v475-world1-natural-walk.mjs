@@ -24,7 +24,7 @@ try {
    const e=window.__OHANA_E2E;
    return e.startWorld1('kilo');
  });
- assert.equal(initial.roomId,'w1-kilo','start must use the genuine World 1 solo entry: '+JSON.stringify({roomId:initial.roomId,soloMode:initial.soloMode,legacyRoomMode:initial.legacyRoomMode,expectedSoloStart:initial.expectedSoloStart,startTrace:initial.startTrace}));
+ assert.equal(initial.roomId,'w1-kilo','start must use the genuine World 1 solo entry');
  assert.deepEqual(initial.world1Seals,[],'clean journey begins with no pre-earned seals');
  assert.equal(initial.world1?.done,0);
  assert.equal(initial.world1?.sealed,false);
