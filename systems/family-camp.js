@@ -4,7 +4,7 @@ import {drawCharacter} from '../characters/draw.js';
 import {CAMP_HEROES,campNearest,campViewport,campPresentation} from './family-camp-model.js';
 import {menuPaintAllowedInDocument} from './menu-visibility.js';
 import {reducedMotion} from './cinema-kit.js';
-import {CALIBRATED_HEIGHT} from '../characters/visual-size.js';
+import {heroHeightTarget} from '../characters/visual-size.js';
 import {MICHI_VISUAL_H} from '../characters/art/cat.js';
 import {CHISPIN_VISUAL_H} from '../characters/art/chispin.js';
 import {STITCHO_VISUAL_H} from '../characters/art/stitcho.js';
@@ -16,14 +16,14 @@ import {ABILITY_DEFS} from './ability-catalog.js';
 const TAU=Math.PI*2;
 export function campActor(def,evo=1,pose='idle',height=92){
  const f=def.forms[evo];
- let base=['dino','dragon','pizza','yomi'].includes(def.id)?CALIBRATED_HEIGHT[evo]:({kilo:KILO_VISUAL_H,stitcho:STITCHO_VISUAL_H,chispin:CHISPIN_VISUAL_H,cat:MICHI_VISUAL_H,frita:FRITA_VISUAL_H}[def.id]?.[evo]||80);
+ let base=['dino','dragon','pizza','yomi'].includes(def.id)?heroHeightTarget(def.id,evo):({kilo:KILO_VISUAL_H,stitcho:STITCHO_VISUAL_H,chispin:CHISPIN_VISUAL_H,cat:MICHI_VISUAL_H,frita:FRITA_VISUAL_H}[def.id]?.[evo]||80);
  if(def.id==='cuerno')base=CUERNO_V373_HEIGHT[evo]*CUERNO_VISUAL_H[evo]/100;
  return {id:def.id,evo,color:f.color||def.color,w:f.w,h:f.h,x:-f.w/2,y:-f.h,facing:1,grounded:pose!=='jump',vx:pose==='run'?4:0,vy:pose==='jump'?-3:0,health:f.hp,maxHealth:f.hp,visualScale:height/base,invuln:0,melee:0,_poseOverride:pose,_introForceCanvas:true,_duetActor:true};
 }
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
 function line(c,x,y,x2,y2,color,width=3){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.stroke();}
 function label(c,text,x,y,size=15,color='#fff5cb'){c.font=`600 ${size}px Outfit,sans-serif`;c.textAlign='center';c.fillStyle=color;c.fillText(text,x,y);}
-function island(c,t,reduce){drawFamilyIslands(c);}
+function island(c,t,reduce){drawFamilyIslands(c,t,reduce);}
 
 function prop(c,id,x,y,t,active,reduce){
  const type=CAMP_HEROES[id].prop,phase=reduce?0:t;

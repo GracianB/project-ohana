@@ -5,21 +5,29 @@ const seg = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
 const ease = (k) => k * k * (3 - 2 * k);
 const lerp = (a, b, k) => a + (b - a) * k;
 
+// Dino & Dragón · Dragón is the sinuous, airborne sibling: crimson-to-garnet
+// scales, dark plum/obsidian bat membranes lit by an ember glow, ivory horns.
+// The final Celestial form turns pearl and gold. No greens, no orange plates:
+// nothing here may read as Dino's earthy jade/teal/bone palette.
 const PAL = [
-{ body: "#ff7458", belly: "#ffe9c8", plate: "#f2b98a", gold: "#ffc93a", mem: "#ffb08a", bone: "#ff9a78", iris: "#ff9d1a" },
-{ body: "#e8452f", belly: "#ffe3b6", plate: "#eaa86e", gold: "#ffc93a", mem: "#ff9a5c", bone: "#f06a4a", iris: "#ffa01a" },
-{ body: "#f0532a", belly: "#ffe6b0", plate: "#eda060", gold: "#ffcd3a", mem: "#ffa446", bone: "#ff7a3a", iris: "#ffb01a" },
-{ body: "#c7331f", belly: "#ffdfa8", plate: "#dd9a5a", gold: "#ffcc34", mem: "#f06a3a", bone: "#e0502e", iris: "#ffd23a" },
-{ body: "#ffcf3a", belly: "#fff6d2", plate: "#f0c060", gold: "#fff2a0", mem: "#ff7a1a", bone: "#ffb32a", iris: "#fff4a0" },
+{ body: "#ff6457", belly: "#ffe2c8", plate: "#ffb896", gold: "#ffc93a", mem: "#8a2f55", glow: "#ff9a6a", bone: "#ffcaa6", horn: "#fff1dc", spine: "#ffd2b0", iris: "#ffb21a" },
+{ body: "#e2343a", belly: "#ffd7a8", plate: "#ff9a7a", gold: "#ffc93a", mem: "#5e1f42", glow: "#ff6a3a", bone: "#f08a76", horn: "#f7e7cf", spine: "#ffbfa0", iris: "#ffb01a" },
+{ body: "#c8243e", belly: "#ffd29a", plate: "#ff8a6a", gold: "#ffcd3a", mem: "#3f1638", glow: "#ff7038", bone: "#e07a6e", horn: "#f2e2c6", spine: "#ffb092", iris: "#ffc21a" },
+{ body: "#8f1a30", belly: "#ffcf86", plate: "#ff9a5a", gold: "#ffcc34", mem: "#2a0d22", glow: "#ff5426", bone: "#c8505a", horn: "#ffd36a", spine: "#ffcf86", iris: "#ffe23a" },
+{ body: "#fff0dc", belly: "#ffe08a", plate: "#ffd27a", gold: "#ffc93a", mem: "#ff7a2a", glow: "#ffd84a", bone: "#ffb84a", horn: "#ffc93a", spine: "#ffcf6a", iris: "#fff4a0" },
 ];
 
+// Long neck, small wedge head, raised bat wings, whip tail: a vertical S that
+// never shares Dino's horizontal, heavy, big-headed silhouette.
 const F = [
-{ r: 31, bw: 14, bh: 20, legL: 8, legW: 10, armL: 8, wing: 20, tail: 18, horn: 3, sn: 0.4 },
-{ r: 25, bw: 14, bh: 29, legL: 14, legW: 10, armL: 13, wing: 36, tail: 30, horn: 9, sn: 0.62 },
-{ r: 22, bw: 13, bh: 33, legL: 18, legW: 10, armL: 15, wing: 58, tail: 38, horn: 11, sn: 0.68 },
-{ r: 22, bw: 16, bh: 35, legL: 18, legW: 12, armL: 16, wing: 62, tail: 42, horn: 19, sn: 0.68 },
-{ r: 21, bw: 15, bh: 36, legL: 19, legW: 11, armL: 16, wing: 70, tail: 44, horn: 15, sn: 0.7 },
+{ r: 27, bw: 14, bh: 21, legL: 8, legW: 9.5, armL: 8, wing: 30, tail: 30, horn: 4, sn: 0.5, neck: 0, hover: 0 },
+{ r: 18.5, bw: 12.5, bh: 30, legL: 15, legW: 9, armL: 12, wing: 50, tail: 48, horn: 10, sn: 0.95, neck: 11, hover: 0 },
+{ r: 17, bw: 12.5, bh: 33, legL: 17, legW: 9, armL: 13, wing: 70, tail: 60, horn: 13, sn: 1.05, neck: 17, hover: 4 },
+{ r: 17.5, bw: 14, bh: 36, legL: 18, legW: 10, armL: 14, wing: 82, tail: 68, horn: 17, sn: 1.1, neck: 21, hover: 7 },
+{ r: 17.5, bw: 13.5, bh: 37, legL: 19, legW: 9.5, armL: 14, wing: 94, tail: 76, horn: 19, sn: 1.15, neck: 24, hover: 12 },
 ];
+export const DRAGON_FORM_SPEC = Object.freeze(F.map(Object.freeze));
+export const DRAGON_PALETTE = Object.freeze(PAL.map(Object.freeze));
 
 function chain(x, y, len, a0, wave, n) {
 const pts = [];
@@ -92,31 +100,40 @@ for (let i = 0; i < 3; i++) {
   tips.push([W[0] + Math.cos(a) * L * lens[i], W[1] + Math.sin(a) * L * lens[i], a]);
 }
 const P = [-0.1 * L - 0.12 * L * open, 0.08 * L];
-ctx.beginPath();
-ctx.moveTo(0, 0);
-ctx.lineTo(W[0], W[1]);
-ctx.lineTo(tips[0][0], tips[0][1]);
 const scal = (a, b) => {
   const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
   ctx.quadraticCurveTo(mx + (W[0] - mx) * 0.22, my + (W[1] - my) * 0.22, b[0], b[1]);
 };
-for (let i = 1; i < 3; i++) scal(tips[i - 1], tips[i]);
-scal(tips[2], P);
-ctx.closePath();
+// The membrane path is traced twice: the glow lobes replace the current path,
+// so the scalloped outline must be rebuilt before it is stroked.
+const membrane = () => {
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(W[0], W[1]);
+  ctx.lineTo(tips[0][0], tips[0][1]);
+  for (let i = 1; i < 3; i++) scal(tips[i - 1], tips[i]);
+  scal(tips[2], P);
+  ctx.closePath();
+};
+membrane();
 // Flat membrane + inner glow lobe (no per-frame gradient)
-const m0 = final ? "#ff8a2a" : (far ? R.darken(c.mem, 0.22) : c.mem);
+const m0 = far ? R.darken(c.mem, 0.22) : c.mem;
 ctx.fillStyle = m0;
 ctx.fill();
 ctx.save();
 ctx.clip();
-ctx.fillStyle = final ? "rgba(255,232,106,.55)" : "rgba(255,255,255,.16)";
-ctx.beginPath(); ctx.ellipse(W[0], W[1], L * 0.42, L * 0.3, rot || 0, 0, PI * 2); ctx.fill();
+// Ember light seen through the membrane: two flat lobes, no gradient.
+ctx.fillStyle = R.alpha(c.glow, final ? 0.55 : far ? 0.16 : 0.3);
+ctx.beginPath(); ctx.ellipse(W[0] * 0.6, W[1] * 0.75, L * 0.42, L * 0.3, rot || 0, 0, PI * 2); ctx.fill();
+ctx.fillStyle = R.alpha(c.glow, final ? 0.4 : far ? 0.1 : 0.2);
+ctx.beginPath(); ctx.ellipse(tips[1][0] * 0.7, tips[1][1] * 0.7, L * 0.2, L * 0.13, rot || 0, 0, PI * 2); ctx.fill();
 ctx.restore();
+membrane();
 ctx.lineWidth = R.LINE;
-ctx.strokeStyle = final ? "#8a2a10" : R.INK;
+ctx.strokeStyle = final ? "#8a3a10" : R.INK;
 ctx.lineJoin = "round";
 ctx.stroke();
-const bone = final ? "#ffe27a" : far ? R.darken(c.bone, 0.22) : c.bone;
+const bone = far ? R.darken(c.bone, 0.22) : c.bone;
 const bw = Math.max(2.2, L * (final ? 0.045 : 0.07));
 ctx.lineCap = "round";
 for (let pass = 0; pass < 2; pass++) {
@@ -132,7 +149,7 @@ ctx.beginPath();
 for (let i = 1; i < 3; i++) { ctx.moveTo(W[0], W[1]); ctx.lineTo(lerp(W[0], tips[i][0], 0.92), lerp(W[1], tips[i][1], 0.92)); }
 ctx.stroke();
 const cs = Math.max(3, L * 0.08);
-R.poly(ctx, [[W[0] - cs * 0.4, W[1]], [W[0] + cs * 0.7, W[1] - cs], [W[0] + cs * 0.5, W[1] + cs * 0.3]], c.gold, { lw: 1.6 });
+R.poly(ctx, [[W[0] - cs * 0.4, W[1]], [W[0] + cs * 0.7, W[1] - cs * 1.4], [W[0] + cs * 0.5, W[1] + cs * 0.3]], c.horn, { lw: 1.6 });
 if (final) {
   for (let i = 0; i < 3; i++) flame(ctx, R, tips[i][0], tips[i][1], 3.4 + (i === 0 ? 1.2 : 0), tips[i][2], t, i + (far ? 5 : 0));
   for (let i = 1; i < 3; i++) {
@@ -228,10 +245,12 @@ const flN = (pose.flourishN || 0) % 4;
 const flE = fl > 0 ? Math.sin(fl * PI) : 0;
 const flying = st === "glide" || pose.move === "fly" || pose.move === "float";
 
-let bob = pose.breath * 1.1, lean = 0.04, headRot = Math.sin(t * 0.025) * 0.04, hdx = 0, hdy = 0;
+// Dino & Dragón: proud, upright S-posture. The neck sways like a periscope
+// and the wings breathe half-raised above the shoulders.
+let bob = pose.breath * 1.1, lean = f === 0 ? 0.04 : -0.03, headRot = Math.sin(t * 0.025) * 0.05 - (f >= 1 ? 0.06 : 0), hdx = Math.sin(t * 0.021) * (f >= 1 ? 1.6 : 0), hdy = 0;
 let legF = 0, legB = 0, lenF = 1, lenB = 1;
 let armF = 0.35 + pose.breath * 0.05, armB = -0.15;
-let wRot = -0.42 + Math.sin(t * 0.05) * 0.12, wOpen = 0.62, wRotFar = null;
+let wRot = (f === 0 ? -0.3 : -0.5) + Math.sin(t * 0.05) * 0.12, wOpen = f === 0 ? 0.7 : 0.66, wRotFar = null;
 let jaw = 0, eyeMood = "normal", brow = 0;
 let tailWave = Math.sin(t * 0.06) * 0.5 + pose.sway * 1.4;
 let smoke = st === "idle" && fl === 0, breath = 0, breathUp = 0, slash = 0, gust = 0, roar = 0, rings = 0;
@@ -244,9 +263,11 @@ if (st === "run") {
   lenF = 1 - Math.max(0, cph) * 0.3;
   lenB = 1 - Math.max(0, -cph) * 0.3;
   bob = P.legL * (1 - Math.cos(a)) * 0.9 - 2.2 * Math.abs(cph);
-  lean = 0.2;
+  lean = 0.2 + (f >= 2 ? 0.12 : 0);
   armF = 0.5 - s * 0.7; armB = 0.2 + s * 0.7;
-  wRot = -0.55 + Math.sin(ph * 2) * 0.1; wOpen = 0.4;
+  // Juveniles trot; from Dragón Alado on the wings row the air in a skim.
+  if (f >= 2) { bob *= 0.55; wRot = -0.75 + Math.sin(ph) * 0.42; wOpen = 0.78; }
+  else { wRot = -0.55 + Math.sin(ph * 2) * 0.1; wOpen = 0.45; }
   headRot = 0.05 + Math.sin(ph * 2) * 0.03;
   tailWave = Math.sin(ph) * 0.5 + pose.sway * 1.6;
 } else if (st === "jump") {
@@ -332,6 +353,21 @@ if (st === "run") {
   else { wRot = Math.sin(t * 0.3) * 0.6 - 0.4 - climb * .12; }
   wOpen = 1; eyeMood = "happy";
   tailWave = -0.3 + Math.sin(t * 0.07) * 0.3;
+}
+
+// Dino & Dragón · hover. Mature dragons never stomp: the body floats a few
+// units above its own shadow, lifted by slow wingbeats, the feet dangling.
+// Drawing only; the hitbox and the grounded flag stay exactly as physics says.
+const hoverStates = st === "idle" || st === "victory" || st === "cast" || st === "attack";
+let hover = 0;
+if (P.hover > 0 && hoverStates && !pose.reduceMotion) {
+  const flap = Math.sin(t * 0.085);
+  hover = P.hover * (0.8 + 0.2 * flap);
+  bob -= hover;
+  wRot += flap * 0.26; wOpen = clamp(wOpen + 0.12 + flap * 0.06, 0.18, 1);
+  legF += 0.28 + flap * 0.05; legB -= 0.18 - flap * 0.04; lenB *= 0.92;
+} else if (P.hover > 0 && hoverStates) {
+  hover = P.hover * 0.8; bob -= hover; legF += 0.28; legB -= 0.18;
 }
 
 if (fl > 0) {
@@ -429,7 +465,7 @@ ctx.save();
 if (st === "dead") { ctx.translate(40, -bw - 3); ctx.rotate(-PI / 2); }
 
 const upper = () => { ctx.translate(0, hipY); ctx.rotate(lean); if(life.active)ctx.scale(life.bodyX,life.bodyY); };
-const neckX = bw * 0.28 + hdx, neckY = -bh - r * 0.5 + hdy;
+const neckX = bw * 0.28 + P.neck * 0.62 + hdx, neckY = -bh - r * 0.5 - P.neck + hdy + (f >= 1 ? r * 0.25 : 0);
 const shX = bw * 0.38, shY = -bh * 0.74;
 const wingX = f === 0 ? -bw * 0.75 : -bw * 0.55, wingY = f === 0 ? -bh * 0.55 : -bh * 0.8;
 if (f === 0) { wRot -= 0.45; if (wRotFar !== null) wRotFar -= 0.45; }
@@ -442,17 +478,20 @@ wing(ctx, R, wingX + 7 + (farTuck ? -3 : 0), wingY - 3, P.wing * farLen, (wRotFa
 ctx.restore(); }
 
 ctx.save(); upper();
-const tpts = chain(-bw * 0.7, -4, P.tail, PI * 0.86, (k) => tailWave * (0.3 + k) + k * 6.5 - 1.6 + Math.sin(t * 0.09 + k * 3) * 0.3, 9);
+// Dino & Dragón · whip tail: a travelling S-wave (serpentine), never Dino's
+// heavy, ground-dragging counterweight. Reduced motion freezes the wave.
+const serp = f === 0 || pose.reduceMotion ? 0 : 1.25;
+const tpts = chain(-bw * 0.7, -4, P.tail, PI * 0.86, (k) => tailWave * (0.3 + k) + k * 6.5 - 1.6 + Math.sin(t * 0.09 + k * 3) * 0.3 + Math.sin(k * 5.2 - t * 0.075) * serp * k, f === 0 ? 9 : 12);
 strokeChain(ctx, R, tpts, P.legW * 0.95, 3.5, c.body);
 if (f >= 3) {
   for (let i = 2; i < tpts.length - 1; i += 2) {
     const p = tpts[i], a = p[2] + PI / 2, len = 5 + (1 - i / tpts.length) * 6;
-    R.poly(ctx, [[p[0] + Math.cos(a + 0.5) * 2, p[1] + Math.sin(a + 0.5) * 2], [p[0] + Math.cos(a) * len, p[1] + Math.sin(a) * len], [p[0] + Math.cos(a - 0.9) * 3, p[1] + Math.sin(a - 0.9) * 3]], c.gold, { lw: 1.6 });
+    R.poly(ctx, [[p[0] + Math.cos(a + 0.5) * 2, p[1] + Math.sin(a + 0.5) * 2], [p[0] + Math.cos(a) * len, p[1] + Math.sin(a) * len], [p[0] + Math.cos(a - 0.9) * 3, p[1] + Math.sin(a - 0.9) * 3]], c.spine, { lw: 1.6 });
   }
 } else if (f >= 1) {
   for (let i = 3; i < tpts.length - 1; i += 3) {
     const p = tpts[i], a = p[2] + PI / 2;
-    R.poly(ctx, [[p[0] + Math.cos(a + 0.6) * 1.5, p[1] + Math.sin(a + 0.6) * 1.5], [p[0] + Math.cos(a) * 4.5, p[1] + Math.sin(a) * 4.5], [p[0] + Math.cos(a - 0.8) * 2, p[1] + Math.sin(a - 0.8) * 2]], c.gold, { lw: 1.4 });
+    R.poly(ctx, [[p[0] + Math.cos(a + 0.6) * 1.5, p[1] + Math.sin(a + 0.6) * 1.5], [p[0] + Math.cos(a) * 4.5, p[1] + Math.sin(a) * 4.5], [p[0] + Math.cos(a - 0.8) * 2, p[1] + Math.sin(a - 0.8) * 2]], c.spine, { lw: 1.4 });
   }
 }
 const tip = tpts[tpts.length - 1];
@@ -490,7 +529,7 @@ if (f >= 2) {
   for (let i = 0; i < n; i++) {
     const k = i / n;
     const bx = lerp(-bw * 0.9, -bw * 0.45, k), by = lerp(-bh * 0.3, -bh * 0.92, k);
-    R.poly(ctx, [[bx + 2, by + 2], [bx - 6 - f, by - 3], [bx + 1, by - 5]], c.gold, { lw: 1.6 });
+    R.poly(ctx, [[bx + 2, by + 2], [bx - 6 - f, by - 3], [bx + 1, by - 5]], c.spine, { lw: 1.6 });
   }
 }
 if (f === 3) {
@@ -527,6 +566,8 @@ const frontLeg = () => {
   }
 };
 if (!scratch) frontLeg();
+
+if (P.neck > 0) { ctx.save(); upper(); drawDragonNeck(ctx, R, P, c, bw, bh, neckX, neckY + pose.bounce * 1.5, r, t, f); ctx.restore(); }
 
 ctx.save(); upper();
 ctx.translate(neckX, neckY + pose.bounce * 1.5);
@@ -569,6 +610,51 @@ if (gust > 0) {
 ctx.restore();
 }
 
+// Dino & Dragón · the long S-neck is the single strongest silhouette cue that
+// separates Dragón from Dino's neckless, head-first T-rex body.
+function drawDragonNeck(ctx, R, P, c, bw, bh, hx, hy, r, t, f) {
+const x0 = bw * 0.32, y0 = -bh * 0.8;
+const x1 = hx - r * 0.35, y1 = hy + r * 0.42;
+const sway = Math.sin(t * 0.03) * 1.2;
+const c1x = x0 + (x1 - x0) * 0.1 - 3 + sway, c1y = y0 + (y1 - y0) * 0.45;
+const c2x = x0 + (x1 - x0) * 0.35 + 4, c2y = y1 + (y0 - y1) * 0.18;
+const pts = [];
+for (let i = 0; i <= 8; i++) {
+  const k = i / 8, u = 1 - k;
+  pts.push([u * u * u * x0 + 3 * u * u * k * c1x + 3 * u * k * k * c2x + k * k * k * x1,
+    u * u * u * y0 + 3 * u * u * k * c1y + 3 * u * k * k * c2y + k * k * k * y1, 0]);
+}
+for (let i = 0; i < pts.length - 1; i++) pts[i][2] = Math.atan2(pts[i + 1][1] - pts[i][1], pts[i + 1][0] - pts[i][0]);
+pts[pts.length - 1][2] = pts[pts.length - 2][2];
+const w0 = bw * 0.95, w1 = r * 0.78;
+strokeChain(ctx, R, pts, w0, w1, c.body);
+// Throat scales on the front of the neck.
+ctx.save();
+ctx.lineCap = "round"; ctx.strokeStyle = c.belly; ctx.lineWidth = Math.max(2.4, w1 * 0.36);
+ctx.beginPath();
+for (let i = 1; i < pts.length - 1; i++) {
+  const p = pts[i], a = p[2] + PI / 2, off = lerp(w0, w1, i / 8) * 0.28;
+  const x = p[0] + Math.cos(a) * off, y = p[1] + Math.sin(a) * off;
+  i === 1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+}
+ctx.stroke();
+ctx.strokeStyle = R.alpha(R.darken(c.belly, 0.3), 0.7); ctx.lineWidth = 1;
+for (let i = 2; i < pts.length - 1; i++) {
+  const p = pts[i], a = p[2] + PI / 2, off = lerp(w0, w1, i / 8) * 0.28;
+  const x = p[0] + Math.cos(a) * off, y = p[1] + Math.sin(a) * off;
+  ctx.beginPath(); ctx.moveTo(x - Math.cos(p[2]) * 0.2 + Math.cos(a) * 2, y + Math.sin(a) * 2);
+  ctx.lineTo(x - Math.cos(a) * 2, y - Math.sin(a) * 2); ctx.stroke();
+}
+ctx.restore();
+// Dorsal ridge spines along the back of the neck.
+for (let i = 2; i < pts.length - 1; i += 2) {
+  const p = pts[i], a = p[2] - PI / 2, off = lerp(w0, w1, i / 8) * 0.5;
+  const bx = p[0] + Math.cos(a) * off, by = p[1] + Math.sin(a) * off;
+  const len = 3.5 + f * 0.8;
+  R.poly(ctx, [[bx + Math.cos(p[2]) * 2.4, by + Math.sin(p[2]) * 2.4], [bx + Math.cos(a - 0.5) * len, by + Math.sin(a - 0.5) * len], [bx - Math.cos(p[2]) * 2.4, by - Math.sin(p[2]) * 2.4]], c.spine, { lw: 1.4 });
+}
+}
+
 function drawHead(ctx, R, pose, o) {
 const { f, c, P, r, t, final, jaw, eyeMood, hurtEyes } = o;
 const sn = P.sn;
@@ -576,14 +662,14 @@ const snX = r * (0.45 + sn * 0.45), snY = r * 0.3, snRx = r * (0.3 + sn * 0.4), 
 const tipX = snX + snRx;
 const swayK = pose.sway;
 
-if (f >= 1) horn(ctx, R, r * 0.28, -r * 0.05, r, P.horn * 0.85, R.darken(c.gold, 0.18), f);
+if (f >= 1) horn(ctx, R, r * 0.28, -r * 0.05, r, P.horn * 0.85, R.darken(c.horn, 0.2), f);
 if (f >= 2 && !final) {
   for (let i = 0; i < 4; i++) {
     const a = -PI * 0.62 - i * 0.26;
     const ex = Math.cos(a) * r * 0.95, ey = Math.sin(a) * r * 0.88;
     const sp = r * (0.42 - i * 0.07) * (f >= 3 ? 1.15 : 1);
     const px = Math.cos(a + 0.35), py = Math.sin(a + 0.35);
-    R.poly(ctx, [[ex + px * 4, ey + py * 4], [ex + Math.cos(a - 0.25) * sp, ey + Math.sin(a - 0.25) * sp], [ex - px * 4, ey - py * 4]], c.gold, { lw: 1.8 });
+    R.poly(ctx, [[ex + px * 4, ey + py * 4], [ex + Math.cos(a - 0.25) * sp, ey + Math.sin(a - 0.25) * sp], [ex - px * 4, ey - py * 4]], c.spine, { lw: 1.8 });
   }
 }
 const fin = r * (f === 0 ? 0.3 : 0.45);
@@ -618,7 +704,7 @@ if (jaw > 0.15) {
 ctx.restore();
 
 const shapes = [
-  () => { ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.92, 0, 0, PI * 2); },
+  () => { ctx.beginPath(); ctx.ellipse(0, 0, r, r * (f === 0 ? 0.92 : 0.8), f === 0 ? 0 : 0.12, 0, PI * 2); },
   () => { ctx.beginPath(); ctx.ellipse(snX, snY, snRx, snRy, -0.08, 0, PI * 2); },
 ];
 ctx.lineWidth = R.LINE * 2; ctx.strokeStyle = R.INK;
@@ -642,36 +728,23 @@ if (jaw < 0.1) {
   ctx.beginPath(); ctx.arc(r * 0.24, hy - r * 0.08, r * 0.1, 0.2, 1.8); ctx.stroke();
 }
 
-if (f >= 1) horn(ctx, R, 0, 0, r, P.horn, c.gold, f);
+if (f >= 1) horn(ctx, R, 0, 0, r, P.horn, c.horn, f);
 else {
-  R.ellipse(ctx, -r * 0.1, -r * 0.88, 3.5, 5, c.gold, { rot: -0.4, lw: 2 });
+  R.ellipse(ctx, -r * 0.05, -r * 0.88, 3.2, 4.6, c.horn, { rot: -0.4, lw: 1.8 });
 }
 
 if (f === 0) {
-  ctx.save();
-  ctx.rotate(-0.18);
-  ctx.beginPath();
-  ctx.arc(-r * 0.05, -r * 0.1, r * 1.03, PI * 1.13, PI * 1.87);
-  const x1 = Math.cos(PI * 1.87) * r * 1.03 - r * 0.05, y1 = Math.sin(PI * 1.87) * r * 1.03 - r * 0.1;
-  const x0 = Math.cos(PI * 1.13) * r * 1.03 - r * 0.05;
-  const n = 6;
-  for (let i = 1; i <= n; i++) {
-    const x = lerp(x1, x0, i / n), y = y1 + (i % 2 ? r * 0.2 : -r * 0.02) + (i === n ? r * 0.02 : 0);
-    ctx.lineTo(x, y + (i / n) * r * 0.05);
-  }
-  ctx.closePath();
-  ctx.fillStyle = R.volume(ctx, -r * 0.2, -r * 0.8, r * 0.9, "#fff8ec");
-  ctx.fill();
-  ctx.lineWidth = R.LINE; ctx.strokeStyle = R.INK; ctx.lineJoin = "round"; ctx.stroke();
-  R.ellipse(ctx, -r * 0.35, -r * 0.8, 3, 2.2, "#ffb07a", { line: false, shade: false });
-  R.ellipse(ctx, r * 0.25, -r * 0.88, 2.2, 1.7, "#ffb07a", { line: false, shade: false });
-  R.ellipse(ctx, -r * 0.02, -r * 0.98, 1.6, 1.2, "#9fd8a0", { line: false, shade: false });
-  ctx.restore();
+  // Dino & Dragón · no shell cap: the hatchling wears an ember tuft and ivory horn buds.
+  // Dragoncito wears a living ember tuft and two soft ivory horn buds.
+  const flick = pose.reduceMotion ? 0 : Math.sin(t * 0.21) * 0.12;
+  R.ellipse(ctx, r * 0.32, -r * 0.84, 3.2, 4.6, c.horn, { rot: 0.35, lw: 1.8 });
+  flame(ctx, R, -r * 0.18, -r * 0.86, 4.4, -PI / 2 - 0.35 + flick, t, 2, { outer: "#ff5a2a", mid: "#ffc234" });
+  flame(ctx, R, -r * 0.46, -r * 0.7, 3, -PI / 2 - 0.85 + flick, t, 4, { outer: "#ff5a2a", mid: "#ffc234" });
 }
 
 if (f === 3) {
   ctx.save();
-  ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.92, 0, 0, PI * 2); ctx.clip();
+  ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.8, 0.12, 0, PI * 2); ctx.clip();
   ctx.beginPath();
   ctx.moveTo(-r * 1.1, -r * 0.35);
   ctx.quadraticCurveTo(r * 0.1, -r * 0.62, r * 1.1, -r * 0.3);
@@ -708,17 +781,19 @@ R.ellipse(ctx, tipX - r * 0.14, snY - snRy * 0.35, 1.8, 1.2, R.INK, { line: fals
 R.blush(ctx, r * 0.18, r * 0.36, r * 0.14, "#ff5a6a");
 
 if (f >= 1) {
-  const wl = [0, 0.7, 0.9, 1.0, 1.15][f] * r;
-  const sx = tipX - r * 0.2, sy = snY + snRy * 0.55;
-  const w1 = Math.sin(t * 0.08) * 2.5 + swayK * 6;
+  // Barbels stream BACK from the upper lip like a sky dragon's, rippling in
+  // the wind of its own wingbeats (they used to curl into a nose ring).
+  const wl = [0, 1.0, 1.25, 1.4, 1.6][f] * r;
+  const sx = tipX - r * 0.32, sy = snY - snRy * 0.1;
+  const w1 = (pose.reduceMotion ? 0 : Math.sin(t * 0.08) * 2.5) + swayK * 6;
   ctx.lineCap = "round";
   for (let pass = 0; pass < 2; pass++) {
-    ctx.strokeStyle = pass ? c.gold : R.INK;
-    ctx.lineWidth = pass ? 1.8 : 1.8 + 2.4;
+    ctx.strokeStyle = pass ? (final ? c.gold : c.horn) : R.INK;
+    ctx.lineWidth = pass ? 1.6 : 1.6 + 2.2;
     ctx.beginPath();
     ctx.moveTo(sx, sy);
-    ctx.bezierCurveTo(sx + wl * 0.25, sy + wl * 0.45, sx - wl * 0.3, sy + wl * 0.75, sx - wl * 0.85 + w1, sy + wl * 0.55);
-    ctx.quadraticCurveTo(sx - wl * 1.1 + w1 * 1.3, sy + wl * 0.4, sx - wl * 1.0 + w1 * 1.4, sy + wl * 0.25);
+    ctx.bezierCurveTo(sx - wl * 0.35, sy - wl * 0.25, sx - wl * 0.7, sy + wl * 0.2 + w1 * 0.4, sx - wl * 1.05 + w1 * 0.5, sy - wl * 0.05 + w1);
+    ctx.quadraticCurveTo(sx - wl * 1.3, sy - wl * 0.25 + w1 * 1.2, sx - wl * 1.5 + w1, sy - wl * 0.05 + w1 * 1.4);
     ctx.stroke();
   }
 }

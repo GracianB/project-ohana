@@ -38,6 +38,7 @@ import { damageEnemy, healPlayer, addPlayerXp, addScore, addCombo } from "./muta
 import { MAX_RUNTIME_GHOSTS, MAX_RUNTIME_PROJECTILES, pushRuntime } from "./runtime.js";
 
 import { ABILITY_DEFS } from "./ability-catalog.js";
+import { MICHI_L_SHOTS, michiLaunchFrame, michiShotAnchors, michiShotPalette, drawMichiTailShot } from "./michi-tail-shots.js";
 export { ABILITY_DEFS };
 
 
@@ -1334,19 +1335,24 @@ add({ kind: "purr", life: 72, max: 72, R, hit: new Set(), slept, dmg: 6 * pw(p),
 boom(g, cx(p), cy(p), "#ffb6e4", 16, { star: true });
 },
 ninetails(g, p, evo) {
+// V462: one projectile per real tentacle/appendage of the current form (3/4/7/5/9),
+// each born on its tentacle tip and launched by that tentacle in a ripple. Total
+// damage is kept equal to the old nine-shot volley.
 const targets = g.enemies.filter(canHit).sort((a, b) => Math.hypot(cx(a) - cx(p), cy(a) - cy(p)) - Math.hypot(cx(b) - cx(p), cy(b) - cy(p)));
-for (let i = 0; i < 9; i++) {
-  const fan = -1.25 + (i / 8) * 2.5;
-  const a = p.facing > 0 ? fan : Math.PI - fan;
-  const sp = 10 + (i % 3) * 1.8 + evo * 0.35;
+const form = Math.max(0, Math.min(4, evo | 0)), n = MICHI_L_SHOTS[form];
+const anchors = michiShotAnchors(p, form), cols = michiShotPalette(p.michiSeed);
+const dmg = (13 + evo * 2) * pw(p) * 9 / n;
+for (let i = 0; i < n; i++) {
+  const an = anchors[i], sp = 9.5 + (i % 3) * 1.2 + evo * 0.35, delay = michiLaunchFrame(i, n);
   add({
-    kind: "wisp", x: cx(p) - p.facing * 6, y: cy(p) - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-    life: 230, target: targets.length ? targets[i % targets.length] : null, dmg: (13 + evo * 2) * pw(p),
-    color: i % 3 === 0 ? "#d7b0ff" : i % 3 === 1 ? "#ff7ad4" : "#b6f0ff", trail: [], delay: i * 1.2, idx: i, tail: true,
+    kind: "wisp", x: an.x, y: an.y, vx: Math.cos(an.ang) * sp, vy: Math.sin(an.ang) * sp,
+    ax: an.x - cx(p), ay: an.y - (p.y + p.h),
+    life: 230, target: targets.length ? targets[i % targets.length] : null, dmg,
+    color: cols[i % 3], accent: cols[3], trail: [], delay, delay0: delay, idx: i, tail: true, form, n,
   });
 }
-g.shake = Math.min(18, (g.shake || 0) + 6);
-boom(g, cx(p), cy(p), "#b78bff", 18, { star: true, up: 3 });
+g.shake = Math.min(18, (g.shake || 0) + 4);
+boom(g, cx(p), cy(p), cols[0], 10, { star: true, up: 3 });
 },
 
 breath(g, p, evo) {
@@ -2093,10 +2099,15 @@ return f.life > 0 && f.list.length > 0;
 wisp(g, f, p) {
 f.life--;
 f.trail.push({ x: f.x, y: f.y });
-const trailMax = f.tail ? 30 : 8;
+const trailMax = f.tail ? 22 : 8;
 if (f.trail.length > trailMax) f.trail.shift();
 if (f.delay > 0) {
   f.delay--;
+  if (f.tail && Number.isFinite(f.ax)) {
+    // V462: the shot rides its tentacle tip until that tentacle whips it out.
+    f.x = cx(p) + f.ax; f.y = p.y + p.h + f.ay; f.trail.length = 0;
+    return f.life > 0;
+  }
   f.vx *= f.tail ? 0.985 : 0.95;
   f.vy *= f.tail ? 0.985 : 0.95;
 } else {
@@ -2588,6 +2599,7 @@ for (const [px, py, r] of puffs.slice(1, 4)) { ctx.beginPath(); ctx.arc(x + px *
 }
 
 function drawWisp(ctx, f, cam, t) {
+if (f.tail) { drawMichiTailShot(ctx, f, cam, t); return; }
 const x = f.x - cam.x, y = f.y - cam.y;
 const pts = f.trail || [];
 if (f.tail && pts.length > 1) {

@@ -1297,7 +1297,7 @@ const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
 let H = (p.id==="cuerno"?CUERNO_VISUAL_H[evo]:p.id==="kilo"?KILO_VISUAL_H[evo]:p.id==="cat"?MICHI_VISUAL_H[evo]:p.id==="chispin"?CHISPIN_VISUAL_H[evo]:p.id==="stitcho"?STITCHO_VISUAL_H[evo]:p.id==="frita"?FRITA_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[p.id]||1))*(p.visualScale||1);
 const calibrated = CALIBRATED_VISUAL_H[p.id];
 if (calibrated) H = calibrated[evo] * (p.visualScale || 1);
-if (getLook() === "paint" && !calibrated && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(220, Math.max(H, (p.h || 28) * 3));
+if (getLook() === "paint" && !calibrated && !["cuerno","kilo","stitcho","chispin","cat"].includes(p.id)&&!p._duetActor) H = Math.min(320, Math.max(H, (p.h || 28) * 3)); // V463: techo visual ampliado (antes 220)
 if (p.id === "frita" && !p._duetActor) H = FRITA_VISUAL_H[evo] * (p.visualScale || 1); // Frita: altura propia también en look "paint"
 H *= OPTICAL_SCALE[p.id]?.[evo] || 1;
 const burstK = p.evoBurst > 0 ? Math.max(0, Math.min(1, p.evoBurst / Math.max(1, p.evoBurstMax || 90))) : 0;

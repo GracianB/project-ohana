@@ -47,7 +47,7 @@ La **intro familiar** incorpora corona, iris lunar y gestos de personalidad excl
 
 **Diez héroes × diez acciones corporales**, con perfiles de peso, elasticidad, ritmo y reacción distintos por personaje. No son diez GIF ni cambios de color: el renderizador transforma el cuerpo en cada acción (`idle`, carrera, salto, caída, planeo, pared, ataque, magia, daño y celebración) sin alterar las colisiones.
 
-**Michicornio ya no cambia de gato a conejo.** Su árbol es **Gatito Lunar → Lince Lunar → Medusa Onírica con orejas gatunas → Dragón Astral con vibrisas y filamentos → Michicornio Eclipse con nueve tentáculos cristalinos**. El cuerno, la anatomía de orejas y el hilo onírico permiten reconocer el personaje incluso cuando cambia por completo de forma.
+**Michicornio ya no cambia de gato a conejo.** Su árbol es **Gatito Lunar → Hada Felina → Medusa Onírica con orejas gatunas → Dragón Astral con vibrisas y filamentos → Michicornio Eclipse con nueve tentáculos cristalinos**. El cuerno, la anatomía de orejas y el hilo onírico permiten reconocer el personaje incluso cuando cambia por completo de forma.
 
 [**Estudio vivo de las cinco formas de Michicornio**](previews/michi-design.html) · [**Laboratorio interactivo: diez héroes y diez animaciones**](previews/animation-lab.html) · [**Código de actuación compartida**](characters/ten-action-acting.js)
 

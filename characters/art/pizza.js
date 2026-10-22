@@ -5,15 +5,21 @@ const frac = (x) => x - Math.floor(x);
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
+// Pizza & Frita · Pizza is the ITALIAN TRICOLORE: tomato red, mozzarella
+// cream and BASIL GREEN (green belongs to Pizza alone; Frita is gold + ketchup
+// + navy). Arms are baked-crust brown with white chef mitts so they read
+// against the cheese; shoes are basil green. The final form is VOLCANIC:
+// charred crust, molten cheese and lava cracks — never a second golden hero.
 const PAL = [
-{ cheese: "#ffd66a", crust: "#eaa64e", sauce: "#e0452c", dough: "#f0b868", shoe: "#9a4a22", rim: "#f8e8a8" },
-{ cheese: "#ffcc48", crust: "#e0963e", sauce: "#d83a26", dough: "#eaae5e", shoe: "#9a4a22", rim: "#ffe8a0" },
-{ cheese: "#ffc23a", crust: "#d8843a", sauce: "#e0301e", dough: "#e8a456", shoe: "#5a2a2a", rim: "#ffd090" },
-{ cheese: "#ffd24e", crust: "#e0983e", sauce: "#d83a26", dough: "#eab060", shoe: "#9a4a22", rim: "#fff0b0" },
-{ cheese: "#fff0a0", crust: "#ffcf3a", sauce: "#ff7a3a", dough: "#ffd46a", shoe: "#e8a41a", rim: "#fffbe8" },
+{ cheese: "#ffdc78", crust: "#eaa64e", sauce: "#e0452c", dough: "#f0b868", arm: "#b8642e", mitt: "#fffaf0", basil: "#3f9a3a", shoe: "#3a8a36", rim: "#f8e8a8" },
+{ cheese: "#ffd35e", crust: "#e0963e", sauce: "#d83a26", dough: "#eaae5e", arm: "#ad5a28", mitt: "#fffaf0", basil: "#379236", shoe: "#2f7e30", rim: "#ffe8a0" },
+{ cheese: "#ffc94a", crust: "#d8843a", sauce: "#e0301e", dough: "#e8a456", arm: "#a44e24", mitt: "#fff4e8", basil: "#2f8a30", shoe: "#28702a", rim: "#ffd090" },
+{ cheese: "#ffd65a", crust: "#e0983e", sauce: "#d83a26", dough: "#eab060", arm: "#a95828", mitt: "#ffffff", basil: "#3a9638", shoe: "#2e7a2e", rim: "#fff0b0" },
+{ cheese: "#ffb447", crust: "#5e2a20", sauce: "#ff4a1a", dough: "#7a3424", arm: "#5a2620", mitt: "#ffd2a0", basil: "#2c6a2a", shoe: "#2a1614", rim: "#ff8a3a", lava: "#ff6a1a", lavaHot: "#ffd23a" },
 ];
+export const PIZZA_PALETTE = Object.freeze(PAL.map(Object.freeze));
 const PEP = "#c8322a";
-const PEP_GOD = "#e84838";
+const PEP_GOD = "#ff5a26"; // volcanic: magma pepperoni
 
 const FORM = [
 { W: 60, legL: 13, top: -80, crH: 14, rT: 11, rB: 7, er: 10.4, arm: 13, fv: 0.33 },
@@ -257,6 +263,52 @@ for (const lx of [-6, 1, 8]) {
 ctx.restore();
 }
 
+// Pizza & Frita · signature basil sprig on the crust (forms 1–4).
+function basilSprig(ctx, R, x, y, s, t, col, sway) {
+ctx.save();
+ctx.translate(x, y);
+ctx.scale(s, s);
+ctx.rotate(-0.35 + Math.sin(t * 0.06) * 0.08 + (sway || 0) * 0.08);
+for (const [a, l] of [[-0.55, 8.5], [0.35, 7.5], [-0.05, 9.5]]) {
+  ctx.save();
+  ctx.rotate(a);
+  R.blob(ctx, [[0, 0], [-3.2, -l * 0.45], [0, -l], [3.2, -l * 0.45]], col, { lw: 1.7, shade: false });
+  ctx.strokeStyle = R.alpha("#e8ffd8", 0.55); ctx.lineWidth = 0.8;
+  ctx.beginPath(); ctx.moveTo(0, -1); ctx.lineTo(0, -l * 0.8); ctx.stroke();
+  ctx.restore();
+}
+ctx.restore();
+}
+
+// Volcanic crust: glowing magma fissures across the charred rim.
+function lavaCracks(ctx, R, W, h, t, c) {
+ctx.save();
+ctx.lineCap = "round";
+const pulse = 0.65 + 0.35 * Math.sin(t * 0.1);
+for (const [lw, col, a] of [[3.4, c.lava, 0.75 * pulse], [1.3, c.lavaHot, pulse]]) {
+  ctx.strokeStyle = R.alpha(col, a); ctx.lineWidth = lw;
+  ctx.beginPath();
+  ctx.moveTo(-W * 0.4, -h * 0.5); ctx.lineTo(-W * 0.26, -h * 0.72); ctx.lineTo(-W * 0.12, -h * 0.42);
+  ctx.moveTo(W * 0.02, -h * 0.82); ctx.lineTo(W * 0.12, -h * 0.5); ctx.lineTo(W * 0.3, -h * 0.68); ctx.lineTo(W * 0.4, -h * 0.4);
+  ctx.stroke();
+}
+ctx.restore();
+}
+
+// Volcanic smoke: three soft puffs rising from the crust (deterministic).
+function volcanicSmoke(ctx, R, F, t, reduced) {
+ctx.save();
+for (let i = 0; i < 3; i++) {
+  const life = reduced ? 0.35 + i * 0.2 : frac(t * 0.008 + i / 3);
+  const x = (i - 1) * F.W * 0.22 + Math.sin(life * 5 + i) * 4;
+  const y = F.top - F.crH - 4 - life * 30;
+  ctx.globalAlpha = (1 - life) * 0.42;
+  ctx.fillStyle = i % 2 ? "#6a5a5a" : "#8a7a76";
+  ctx.beginPath(); ctx.arc(x, y, 5 + life * 9, 0, TAU); ctx.fill();
+}
+ctx.restore();
+}
+
 /**
  * V319: elastic oven acting is purely visual and uses the existing
  * bounded cast phase. It cannot alter hits, camera, physics or U choice.
@@ -318,8 +370,8 @@ const P = {
   sy: 1,
   legF: [0.1, 2],
   legB: [-0.1, -2],
-  armF: { ang: 0.5 + pose.breath * 0.08, bend: 3 },
-  armB: { ang: -0.5 - pose.breath * 0.08, bend: -3 },
+  armF: { ang: 0.95 + pose.breath * 0.1, bend: 3 },
+  armB: { ang: -0.95 - pose.breath * 0.1, bend: -3 },
   mood: "normal",
   mouth: "smile",
   dripK: 1 - pose.bounce * 1.1,
@@ -342,6 +394,10 @@ if (st === "run") {
   P.armB = { ang: -1.25 + s * 0.55, bend: -4 };
   P.mouth = "open";
   P.strings = Math.min(1, Math.abs(pose.sway) + pose.speed * 0.65);
+  // elastic dough: stretch on the push, squash on contact
+  const c2 = Math.abs(Math.cos(ph));
+  P.sy = 1 + 0.07 * c2 - 0.05 * (1 - c2);
+  P.sx = 1 - 0.05 * c2 + 0.05 * (1 - c2);
 } else if (st === "jump") {
   P.legF = [0.95, 4];
   P.legB = [0.55, 4];
@@ -460,6 +516,9 @@ if (st === "run") {
   const j = Math.abs(Math.sin(t * 0.09));
   P.lift = -j * 17;
   P.roll = Math.sin(t * 0.09) * 0.07;
+  // every second hop is a pizzaiolo spin that throws basil confetti
+  if (Math.floor(t * 0.09 / Math.PI) % 2 === 1) P.spin = Math.cos(frac(t * 0.09 / Math.PI) * TAU);
+  P.sprinkle = 0.75 * j;
   P.armF = { ang: 2.85, bend: 3 };
   P.armB = { ang: -2.85, bend: -3 };
   P.legF = [0.75 * j, 4];
@@ -523,6 +582,12 @@ if (st === "idle" && pose.flourish > 0) {
     P.gag = k;
     P.dripK = 1 + .4 * b;
   }
+}
+
+if (st === "idle" && !(pose.flourish > 0) && P.sx === 1 && P.sy === 1) {
+  // elastic idle: the dough breathes (squash & stretch), unlike Frita's crisp stance
+  P.sy = 1 + pose.breath * 0.045;
+  P.sx = 1 - pose.breath * 0.035;
 }
 
 if (pose.land > 0.05) {
@@ -652,8 +717,8 @@ for (let i = 0; i < 4; i++) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(s, s);
-  ctx.shadowColor = "#ffd84a";
-  ctx.shadowBlur = 10;
+  ctx.shadowColor = "#ff6a1a";
+  ctx.shadowBlur = 8;
   R.ellipse(ctx, 0, 0, 6.2, 5.7, PEP_GOD, { lw: 2 });
   ctx.restore();
   ctx.fillStyle = R.darken(PEP, 0.28);
@@ -973,16 +1038,15 @@ if (P.sx !== 1 || P.sy !== 1) ctx.scale(P.sx, P.sy);
 drawPizzaMomentum(ctx, pose, f, F, t, c);
 
 if (f === 4 && !P.dead) {
+  // Volcanic heat: a low magma ring at the feet and smoke rising from the
+  // charred crust (the old golden halo made her read like Frita Centella).
+  volcanicSmoke(ctx, R, F, t, pose.reduceMotion);
   ctx.save();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "#ffe27a";
-  ctx.shadowColor = "#fff2a0";
-  ctx.shadowBlur = 14;
+  ctx.globalAlpha = 0.55 + 0.2 * Math.sin(t * 0.09);
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = c.lava;
   ctx.beginPath();
-  ctx.ellipse(0, F.top - 2 + Math.sin(t * 0.07) * 1.6, W * 0.58, W * 0.52, 0, 0, TAU);
-  ctx.stroke();
-  ctx.lineWidth = 1.6;
-  ctx.strokeStyle = "#fffbe0";
+  ctx.ellipse(0, -1, W * 0.5, 5.5, 0, 0, TAU);
   ctx.stroke();
   ctx.restore();
   orbit(ctx, R, F, t, false);
@@ -997,14 +1061,19 @@ if (P.spin != null) {
 
 const shV = 0.46;
 const shY = F.top + shV * (tipY - F.top);
-const shX = (W / 2) * (1 - shV) - 2;
-const armC = c.dough;
-const armW = f === 0 ? 4.6 : 5.2;
+// Arms fix: the shoulder sits ON the slice edge (not 2 px inside), the idle
+// angle opens away from the slanted edge, the arm is baked-crust brown
+// (not the cheese-like dough) and ends in a white chef mitt, so the arms
+// never melt into the triangle or get swallowed by a portrait outline.
+const shX = (W / 2) * (1 - shV) + 1;
+const armC = c.arm;
+const armW = f === 0 ? 5.2 : 5.8;
+const mitt = (f === 0 ? 4.4 : 5) * (f === 3 ? 1.1 : 1);
 
 const drawArm = (sx, sy, A, back) => {
   if (!A) return null;
-  const len = F.arm * (A.len || 1);
-  return R.swingLimb(ctx, sx, sy, len, A.ang, A.bend, armW, back ? R.darken(armC, 0.15) : armC, { lw: 2.2 });
+  const len = F.arm * 1.12 * (A.len || 1);
+  return R.swingLimb(ctx, sx, sy, len, A.ang, A.bend, armW, back ? R.darken(armC, 0.15) : armC, { lw: 2.2, hand: mitt, handColor: back ? R.darken(c.mitt, 0.12) : c.mitt });
 };
 const legC = R.darken(c.dough, 0.08);
 const drawLeg = (x, L, back) => {
@@ -1018,7 +1087,7 @@ const drawLeg = (x, L, back) => {
 
 if (P.wall) {
   drawLeg(-4, [-0.2, -2], true);
-  R.limb(ctx, -shX, shY, -shX + 10, shY - 18, W / 2 + 6, F.top + 6, armW, R.darken(armC, 0.15), { lw: 2.2 });
+  R.limb(ctx, -shX, shY, -shX + 10, shY - 18, W / 2 + 6, F.top + 6, armW, R.darken(armC, 0.15), { lw: 2.2, hand: mitt, handColor: R.darken(c.mitt, 0.12) });
 } else {
   drawLeg(-4, P.legB, true);
   drawArm(-shX, shY, P.armB, true);
@@ -1076,8 +1145,15 @@ ctx.fillRect(W * 0.22, F.top - 10, W, -F.top + 10);
 
 R.shine(ctx, -W * 0.28, F.top + 14, 5.5, 2.5, 0.62);
 if (f === 4) {
-  ctx.fillStyle = R.alpha("#ffffff", 0.16 + 0.12 * Math.sin(t * 0.12));
-  ctx.fillRect(-W, F.top - 10, W * 2, -F.top + 10);
+  // molten cheese: glowing lava veins pulse through the slice
+  ctx.strokeStyle = R.alpha(c.lavaHot, 0.55 + 0.3 * Math.sin(t * 0.12));
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = "round";
+  for (let i = 0; i < 3; i++) {
+    const [x0, y0] = uv(F, tipY, -0.7 + i * 0.7, 0.18);
+    const [x1, y1] = uv(F, tipY, -0.3 + i * 0.3, 0.62);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo((x0 + x1) / 2 + (i - 1) * 5, (y0 + y1) / 2, x1, y1); ctx.stroke();
+  }
 }
 
 TOPS[f].forEach(([kind, u, v, r], i) => {
@@ -1100,7 +1176,7 @@ const drips =
   f === 3 ? [[-1, 0.1], [-1, 0.48], [1, 0.2], [1, 0.6], [-1, 0.78], [1, 0.78]] :
   f === 0 ? [[-1, 0.25], [1, 0.5]] :
   [[-1, 0.12], [1, 0.24], [-1, 0.58], [1, 0.7]];
-const dripCol = f === 4 ? "#fff6c0" : c.cheese;
+const dripCol = f === 4 ? c.lava : c.cheese;
 const dripArgs = drips.map(([side, v], i) => {
   const [x, y] = uv(F, tipY, side, v);
   const base = (5.5 + frac(i * 0.61) * 7.5) * (f === 0 ? 0.78 : 1);
@@ -1123,8 +1199,10 @@ if (f === 3) {
   crust(ctx, R, F, c, -F.crH * 0.92, W * 0.94, t, false);
   crust(ctx, R, F, c, 0, W, t, false);
 } else {
-  crust(ctx, R, F, c, 0, W, t, f === 4);
+  crust(ctx, R, F, c, 0, W, t, false);
 }
+if (f === 4) lavaCracks(ctx, R, W, F.crH, t, c);
+else basilSprig(ctx, R, -W * 0.3, -F.crH * 0.95, f === 3 ? 1.15 : 1, t, c.basil, pose.sway);
 if (P.glow > 0) {
   ctx.globalAlpha = P.glow * 0.42;
   ctx.fillStyle = "#ff3a10";
@@ -1154,7 +1232,7 @@ if (P.drool > 0) {
 let hand = null;
 if (P.wall) {
   drawLeg(4, [1.5, 4], false);
-  hand = R.limb(ctx, shX, shY, shX + 6, shY - 6, W / 2 + 7, shY - 4, armW, armC, { lw: 2.2 });
+  hand = R.limb(ctx, shX, shY, shX + 6, shY - 6, W / 2 + 7, shY - 4, armW, armC, { lw: 2.2, hand: mitt, handColor: c.mitt });
 } else {
   drawLeg(4, P.legF, false);
   hand = drawArm(shX, shY, P.armF, false);

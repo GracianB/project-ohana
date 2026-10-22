@@ -11,7 +11,7 @@ test('Michi V1: 5 forms include pure vector Canvas metadata and active roster en
   assert.ok(def, 'Michi (cat) must exist in active roster');
   assert.equal(def.forms.length, 5, 'Must have exactly 5 forms');
   assert.equal(def.forms[0].name, 'Michicornio Bebé');
-  assert.equal(def.forms[1].name, 'Lince Lunar');
+  assert.equal(def.forms[1].name, 'Hada Felina');
   assert.equal(def.forms[2].name, 'Medusa Onírica');
   assert.equal(def.forms[3].name, 'Dragón Astral');
   assert.equal(def.forms[4].name, 'Michicornio Eclipse');

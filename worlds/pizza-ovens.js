@@ -1,170 +1,124 @@
-// REINO DEL HORNO — Procedural vector backdrop for Pizza's personal world.
-// 100% vector Canvas drawing: 8 parallax layers — volcanic brick oven sky,
-// glowing hearth oven sun, HORNO ESTELAR constellation, distant chimney skyline,
-// giant pizza silhouettes, brick oven arches, molten cheese stalactites, ember sparks.
-// Zero external bitmaps.
+// PUERTO DEL HORNO — Pizza's dedicated procedural stage backdrop.
+// 100% vector Canvas: zero external bitmaps.
+// Identity: ITALIAN TRICOLORE harbour at dusk (tomato red, mozzarella cream,
+// basil green), with a smoking volcano across the bay that foreshadows Pizza's
+// VOLCANIC final form and the Chef Magmático boss. Parallax layers, far → near:
+// dusk sky + moon, "HORNO ESTELAR" constellation, the volcano with lava glow and
+// smoke, the bay with sailboats and shimmer, pastel harbour houses with green
+// shutters and tricolore laundry, festoon lights, brick wood-fired oven arches
+// with live fire, basil pots and tomato crates, floating embers and flour.
+// Rules: gradients are built once per context via cachedGradient (never per
+// frame), every "random" value is a deterministic hash of an index, and with
+// reduced motion every moving element freezes.
+import {cachedGradient} from '../systems/canvas-gradient-cache.js';
+const TAU=Math.PI*2;
+const wrap=(v,lim)=>((v%lim)+lim)%lim;
+const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
-function _ovenArch(ctx,x,y,w,h){
- ctx.beginPath();
- ctx.moveTo(x,y+h);ctx.lineTo(x,y+h*0.3);
- ctx.quadraticCurveTo(x+w/2,y-h*0.15,x+w,y+h*0.3);
- ctx.lineTo(x+w,y+h);ctx.closePath();
+export const PIZZA_PORT_PALETTE=Object.freeze({
+ skyTop:'#1b1640',skyMid:'#5a2c5c',skyLow:'#f08a5a',moon:'#fff4dc',star:'#ffe9c4',
+ volcano:'#3a2234',lava:'#ff6a1a',lavaHot:'#ffd23a',smoke:'#cdb8c4',
+ sea:'#2a4f7a',seaHi:'#ffb88a',sail:'#fff4dc',
+ houses:['#e8a86a','#f2d49a','#d9785a','#f4e6c8','#c9604a'],shutter:'#3f8a3a',window:'#ffd98a',roof:'#a4462e',
+ brick:'#8e3a26',brick2:'#6a2a1c',mortar:'#c98a62',mouth:'#1c0a08',fire:'#ff8a2a',fire2:'#ffd24a',
+ basil:'#3f9a3a',tomato:'#e0452c',cream:'#fff4dc',wood:'#8a5a30',flour:'#fff8ec'
+});
+const P=PIZZA_PORT_PALETTE;
+
+function _volcano(ctx,x,base,w,h,t,reduced){
+ ctx.fillStyle=P.volcano;
+ ctx.beginPath();ctx.moveTo(x-w*.6,base);ctx.quadraticCurveTo(x-w*.22,base-h*.55,x-w*.1,base-h);
+ ctx.lineTo(x+w*.08,base-h);ctx.quadraticCurveTo(x+w*.24,base-h*.5,x+w*.62,base);ctx.closePath();ctx.fill();
+ // lava rivulets
+ ctx.strokeStyle=P.lava;ctx.lineWidth=3;ctx.lineCap='round';
+ for(let k=0;k<3;k++){const sx=x-w*.06+k*w*.07;ctx.beginPath();ctx.moveTo(sx,base-h+2);
+  ctx.quadraticCurveTo(sx+(k-1)*w*.12,base-h*.6,sx+(k-1)*w*.2,base-h*.35+k*6);ctx.stroke();}
+ const glow=reduced?.5:.45+.2*Math.sin(t*.05);
+ ctx.globalAlpha=glow;ctx.fillStyle=P.lavaHot;ctx.beginPath();ctx.ellipse(x,base-h,w*.12,8,0,0,TAU);ctx.fill();ctx.globalAlpha=1;
+ for(let i=0;i<6;i++){const life=reduced?i/6:wrap(t*.0025+i/6,1);
+  ctx.globalAlpha=(1-life)*.5;ctx.fillStyle=P.smoke;
+  ctx.beginPath();ctx.arc(x+life*w*.35+Math.sin(life*6+i)*10,base-h-life*h*.9,10+life*34,0,TAU);ctx.fill();}
+ ctx.globalAlpha=1;
 }
 
-function _chimney(ctx,x,y,w,h){
- ctx.fillRect(x-w/2,y-h,w,h);
- ctx.fillRect(x-w*0.7,y-h-10,w*1.4,10);
-}
-
-function _pizzaSilhouette(ctx,x,y,r){
- ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
- // slice lines
- for(let i=0;i<8;i++){
-  const a=i*Math.PI/4;
-  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.stroke();
+function _house(ctx,x,base,w,h,i,lit){
+ ctx.fillStyle=P.houses[i%P.houses.length];ctx.fillRect(x,base-h,w,h);
+ ctx.fillStyle=P.roof;ctx.fillRect(x-3,base-h-6,w+6,7);
+ const cols=Math.max(1,Math.floor(w/22)),rows=Math.max(1,Math.floor(h/30));
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+  const wx=x+8+c*(w-16)/Math.max(1,cols-1||1)-(cols===1?-(w-16)/2+6:0),wy=base-h+12+r*28;
+  ctx.fillStyle=hash(i*31+r*7+c)<lit?P.window:'#3a2a3a';ctx.fillRect(wx-5,wy,10,14);
+  ctx.fillStyle=P.shutter;ctx.fillRect(wx-10,wy,4,14);ctx.fillRect(wx+6,wy,4,14);
  }
 }
 
-function _cheeseDrip(ctx,x,y,w,h){
- ctx.beginPath();ctx.moveTo(x-w/2,y);
- ctx.lineTo(x-w/2,y+h*0.4);
- ctx.quadraticCurveTo(x-w/2,y+h,x,y+h);
- ctx.quadraticCurveTo(x+w/2,y+h,x+w/2,y+h*0.4);
- ctx.lineTo(x+w/2,y);ctx.closePath();
+function _ovenArch(ctx,x,base,r,t,reduced){
+ ctx.fillStyle=P.brick;ctx.beginPath();ctx.arc(x,base,r,Math.PI,0);ctx.closePath();ctx.fill();
+ ctx.strokeStyle=P.mortar;ctx.lineWidth=1.5;
+ for(const k of [.55,.8]){ctx.beginPath();ctx.arc(x,base,r*k,Math.PI*1.05,Math.PI*1.95);ctx.stroke();}
+ for(let a=0;a<9;a++){const ang=Math.PI+a*Math.PI/8;ctx.beginPath();ctx.moveTo(x+Math.cos(ang)*r*.8,base+Math.sin(ang)*r*.8);ctx.lineTo(x+Math.cos(ang)*r,base+Math.sin(ang)*r);ctx.stroke();}
+ ctx.fillStyle=P.mouth;ctx.beginPath();ctx.arc(x,base,r*.42,Math.PI,0);ctx.closePath();ctx.fill();
+ const f=reduced?.85:.75+.25*Math.sin(t*.3+x*.01);
+ for(let k=-2;k<=2;k++){ctx.fillStyle=k%2?P.fire:P.fire2;ctx.globalAlpha=f;
+  ctx.beginPath();ctx.moveTo(x+k*r*.12-r*.09,base);ctx.lineTo(x+k*r*.12,base-r*(.18+(2-Math.abs(k))*.06)*f);ctx.lineTo(x+k*r*.12+r*.09,base);ctx.fill();}
+ ctx.globalAlpha=.18*f;ctx.fillStyle=P.fire2;ctx.beginPath();ctx.arc(x,base,r*.7,Math.PI,0);ctx.fill();ctx.globalAlpha=1;
 }
 
 export function drawPizzaOvensBackdrop(ctx, cam, t, viewportW, viewportH, reduceMotion = false) {
- const w = viewportW || 1100;
- const h = viewportH || 700;
- const cam0 = cam.x || 0;
-
+ const w=viewportW||1100,h=viewportH||700,cx=(cam&&cam.x)||0,R=!!reduceMotion,T=R?0:(Number.isFinite(t)?t:0);
  ctx.save();
-
- // ── Layer 0: Warm stone oven vault sky gradient ──────────────────────────
- const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
- skyGrad.addColorStop(0, '#2e1008');
- skyGrad.addColorStop(0.35, '#5c1f0d');
- skyGrad.addColorStop(0.7, '#a83c16');
- skyGrad.addColorStop(1, '#ff6e40');
- ctx.fillStyle = skyGrad;
- ctx.fillRect(0, 0, w, h);
-
- // ── Layer 1: Glowing Hearth Oven Sun (HORNO SOLAR) ──────────────────────
- const ovenX = ((w * 0.74 - cam0 * 0.015) % (w * 2) + w * 2) % (w * 2) - w * 0.5;
- const ovenY = h * 0.28;
- const pulse = reduceMotion ? 0 : Math.sin(t * 0.06) * 6;
- const ovenGrad = ctx.createRadialGradient(ovenX, ovenY, 12, ovenX, ovenY, 72 + pulse);
- ovenGrad.addColorStop(0, '#fff3e0');
- ovenGrad.addColorStop(0.4, '#ffab40');
- ovenGrad.addColorStop(0.8, '#ff3d00');
- ovenGrad.addColorStop(1, 'rgba(255,61,0,0)');
- ctx.fillStyle = ovenGrad;
- ctx.beginPath();ctx.arc(ovenX, ovenY, 72 + pulse, 0, Math.PI * 2);ctx.fill();
- // Oven heat rays
- if(!reduceMotion){
-  ctx.strokeStyle = 'rgba(255,200,100,0.18)';ctx.lineWidth = 2;
-  for(let i=0;i<8;i++){
-   const a=i*Math.PI/4+(t*0.01);
-   ctx.beginPath();ctx.moveTo(ovenX+Math.cos(a)*76,ovenY+Math.sin(a)*76);
-   ctx.lineTo(ovenX+Math.cos(a)*110,ovenY+Math.sin(a)*110);ctx.stroke();
-  }
+ // 0 · dusk sky (cached)
+ ctx.fillStyle=cachedGradient(ctx,`pizza-port-sky:${h}`,()=>{const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,P.skyTop);g.addColorStop(.5,P.skyMid);g.addColorStop(.78,P.skyLow);g.addColorStop(1,P.skyLow);return g;});
+ ctx.fillRect(0,0,w,h);
+ // 1 · stars + HORNO ESTELAR constellation + moon
+ for(let i=0;i<60;i++){const x=wrap(hash(i)*w*1.4-cx*.01,w),y=hash(i+90)*h*.42;
+  ctx.globalAlpha=.35+.5*(R?.5:.5+.5*Math.sin(T*.04+i));ctx.fillStyle=P.star;ctx.fillRect(x,y,1.6,1.6);}
+ ctx.globalAlpha=1;
+ const mx=wrap(w*.18-cx*.008,w*1.2);ctx.fillStyle=P.moon;ctx.beginPath();ctx.arc(mx,h*.14,24,0,TAU);ctx.fill();
+ ctx.fillStyle=P.skyTop;ctx.globalAlpha=.25;ctx.beginPath();ctx.arc(mx+8,h*.13,6,0,TAU);ctx.arc(mx-7,h*.16,4,0,TAU);ctx.fill();ctx.globalAlpha=1;
+ const cxs=wrap(w*.62-cx*.012,w*1.3),pts=[[0,0],[34,-18],[70,-6],[52,26],[14,22]];
+ ctx.strokeStyle='rgba(255,233,196,0.45)';ctx.lineWidth=1;ctx.beginPath();
+ pts.forEach(([a,b],i)=>i?ctx.lineTo(cxs+a,h*.12+b):ctx.moveTo(cxs+a,h*.12+b));ctx.closePath();ctx.stroke();
+ ctx.fillStyle=P.star;for(const [a,b] of pts){ctx.beginPath();ctx.arc(cxs+a,h*.12+b,2.4,0,TAU);ctx.fill();}
+ // 2 · volcano across the bay
+ const horizon=h*.6;
+ _volcano(ctx,wrap(w*.7-cx*.03,w*1.6)-w*.2,horizon,w*.44,h*.24,T,R);
+ // 3 · the bay
+ ctx.fillStyle=P.sea;ctx.fillRect(0,horizon,w,h-horizon);
+ ctx.fillStyle=P.seaHi;for(let i=0;i<26;i++){const y=horizon+6+hash(i+300)*(h*.16),x=wrap(hash(i+200)*w-cx*.06+(R?0:Math.sin(T*.03+i)*6),w);
+  ctx.globalAlpha=.25+.25*hash(i+7);ctx.fillRect(x,y,14+hash(i)*26,2);}
+ ctx.globalAlpha=1;
+ for(let b=0;b<3;b++){const bx=wrap(b*w*.45+w*.2-cx*.08+(R?0:T*.15*(b+1)),w*1.3)-w*.1,by=horizon+18+b*12+(R?0:Math.sin(T*.05+b)*2);
+  ctx.fillStyle=P.cream;ctx.beginPath();ctx.moveTo(bx-16,by);ctx.lineTo(bx+16,by);ctx.lineTo(bx+11,by+6);ctx.lineTo(bx-11,by+6);ctx.closePath();ctx.fill();
+  ctx.fillStyle=b===1?P.tomato:P.sail;ctx.beginPath();ctx.moveTo(bx,by-26);ctx.lineTo(bx+14,by-2);ctx.lineTo(bx,by-2);ctx.closePath();ctx.fill();}
+ // 4 · pastel harbour houses with shutters & tricolore laundry
+ const hb=h*.74,span=w+240,off=wrap(-cx*.18,span);
+ for(let i=0;i<9;i++){const x=wrap(i*130+off,span)-120,hh=90+hash(i+40)*80,ww=84+hash(i+50)*40;
+  _house(ctx,x,hb,ww,hh,i,.55);
+  if(i%2===0){ctx.strokeStyle='#5a4040';ctx.lineWidth=1;const ly=hb-hh*.55;ctx.beginPath();ctx.moveTo(x+ww,ly);ctx.quadraticCurveTo(x+ww+23,ly+10,x+ww+46,ly);ctx.stroke();
+   ['#3f9a3a','#fff4dc','#e0452c'].forEach((col,k)=>{ctx.fillStyle=col;ctx.fillRect(x+ww+8+k*12,ly+3+(k===1?2:0)+(R?0:Math.sin(T*.08+k+i)*1.2),9,12);});}
  }
-
- // ── Layer 2: HORNO ESTELAR Constellation ───────────────────────────────
- const pizzaStars = [
-  { x: 0.18, y: 0.16 }, { x: 0.25, y: 0.12 }, { x: 0.34, y: 0.16 },
-  { x: 0.38, y: 0.24 }, { x: 0.30, y: 0.28 }, { x: 0.20, y: 0.25 },
-  { x: 0.27, y: 0.20 }
- ];
- ctx.save();
- ctx.strokeStyle = 'rgba(255,230,190,0.50)';ctx.lineWidth = 1;
- const cx7 = pizzaStars[6].x * w, cy7 = pizzaStars[6].y * h;
- for(let i=0;i<6;i++){
-  const s1=pizzaStars[i],s2=pizzaStars[(i+1)%6];
-  ctx.beginPath();ctx.moveTo(s1.x*w,s1.y*h);ctx.lineTo(s2.x*w,s2.y*h);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(s1.x*w,s1.y*h);ctx.lineTo(cx7,cy7);ctx.stroke();
+ // 5 · festoon lights
+ const lspan=w+300,loff=wrap(-cx*.3,lspan);
+ for(let s=0;s<4;s++){const x0=wrap(s*300+loff,lspan)-150,y0=h*.5;
+  ctx.strokeStyle='rgba(40,24,24,0.7)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x0,y0);ctx.quadraticCurveTo(x0+150,y0+46,x0+300,y0);ctx.stroke();
+  for(let k=1;k<10;k++){const q=k/10,x=x0+q*300,y=y0+2*46*q*(1-q);
+   ctx.globalAlpha=R?.9:.6+.4*Math.sin(T*.07+k*1.7+s);ctx.fillStyle=[P.tomato,P.cream,P.basil][k%3];ctx.beginPath();ctx.arc(x,y+4,3.4,0,TAU);ctx.fill();}
+  ctx.globalAlpha=1;}
+ // 6 · brick oven arches with live fire, basil pots, tomato crates
+ const ab=h*.96,aspan=w+360,aoff=wrap(-cx*.45,aspan);
+ ctx.fillStyle=P.brick2;ctx.fillRect(0,ab,w,h-ab);
+ for(let i=0;i<4;i++){const x=wrap(i*360+aoff,aspan)-180;
+  _ovenArch(ctx,x,ab,80,T,R);
+  ctx.fillStyle='#b8643a';ctx.fillRect(x+96,ab-16,18,16);
+  for(let k=-1;k<=1;k++){ctx.fillStyle=P.basil;ctx.beginPath();ctx.ellipse(x+105+k*5,ab-22+(R?0:Math.sin(T*.04+k+i)*.8),4.5,7,k*.5,0,TAU);ctx.fill();}
+  ctx.fillStyle=P.wood;ctx.fillRect(x-130,ab-20,40,20);
+  for(let k=0;k<4;k++){ctx.fillStyle=P.tomato;ctx.beginPath();ctx.arc(x-124+k*9.5,ab-22,5,0,TAU);ctx.fill();}
  }
- for(const ps of pizzaStars){
-  ctx.fillStyle='rgba(255,240,210,0.9)';
-  ctx.beginPath();ctx.arc(ps.x*w,ps.y*h,2.2,0,Math.PI*2);ctx.fill();
- }
- ctx.fillStyle='rgba(255,210,140,0.45)';ctx.font='10px sans-serif';ctx.textAlign='left';
- ctx.fillText('HORNO ESTELAR',pizzaStars[1].x*w+6,pizzaStars[1].y*h-4);
- ctx.restore();
-
- // ── Layer 3: Distant chimney skyline silhouettes (far parallax) ─────────
- const chimneyOff = ((cam0 * 0.08) % (w * 1.6) + w * 1.6) % (w * 1.6);
- ctx.fillStyle = '#1a0804';
- const chimneyData = [
-  [0.05,0.55,14,120],[0.14,0.5,18,150],[0.22,0.58,12,100],[0.30,0.48,20,165],
-  [0.42,0.52,15,130],[0.55,0.46,22,170],[0.63,0.55,13,108],[0.72,0.50,18,145],
-  [0.82,0.56,14,120],[0.92,0.48,20,158]
- ];
- for(const [rx,ry,cw,ch] of chimneyData){
-  const cx=rx*w*1.6-chimneyOff;
-  _chimney(ctx,cx,ry*h,cw,ch);
-  ctx.fill();
-  // smoke puff
-  if(!reduceMotion){
-   ctx.fillStyle='rgba(80,30,10,0.3)';
-   const sy=ry*h-ch-(t*0.5%30);
-   ctx.beginPath();ctx.arc(cx,sy,8,0,Math.PI*2);ctx.fill();
-  }
-  ctx.fillStyle='#1a0804';
- }
-
- // ── Layer 4: Giant pizza silhouettes (mid parallax) ─────────────────────
- const pizzaOff = ((cam0 * 0.18) % (w * 1.8) + w * 1.8) % (w * 1.8);
- ctx.fillStyle='rgba(60,18,5,0.65)';
- ctx.strokeStyle='rgba(80,25,8,0.4)';ctx.lineWidth=1.5;
- const pizzaData=[
-  [0.1,0.42,55],[0.38,0.38,68],[0.65,0.45,52],[0.92,0.40,62]
- ];
- for(const [rx,ry,r] of pizzaData){
-  const px=rx*w*1.8-pizzaOff;
-  _pizzaSilhouette(ctx,px,ry*h,r);ctx.fill();ctx.stroke();
- }
-
- // ── Layer 5: Brick oven arches (near-mid parallax) ──────────────────────
- const archOff = ((cam0 * 0.28) % (w * 1.5) + w * 1.5) % (w * 1.5);
- ctx.fillStyle='#3b1005';ctx.strokeStyle='#7a2d12';ctx.lineWidth=3;
- const archData=[[0.08,0.72,160,180],[0.32,0.68,180,200],[0.60,0.74,155,175],[0.88,0.70,170,195]];
- for(const [rx,ry,aw,ah] of archData){
-  const ax=rx*w*1.5-archOff;
-  _ovenArch(ctx,ax-aw/2,ry*h,aw,ah);
-  ctx.fill();ctx.stroke();
-  // glowing oven window inside arch
-  ctx.fillStyle='rgba(255,150,40,0.35)';
-  ctx.beginPath();ctx.ellipse(ax,ry*h+ah*0.45,aw*0.22,ah*0.22,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#3b1005';
- }
-
- // ── Layer 6: Molten cheese stalactites from ceiling ──────────────────────
- const dripOff = ((cam0 * 0.40) % (w * 1.4) + w * 1.4) % (w * 1.4);
- const dripData=[
-  [0.04,22,45],[0.13,28,55],[0.22,18,38],[0.31,32,60],[0.40,22,44],
-  [0.49,26,52],[0.58,18,36],[0.67,30,58],[0.76,20,42],[0.85,28,54],[0.94,22,46]
- ];
- for(const [rx,cw,ch] of dripData){
-  const dripX=rx*w*1.4-dripOff;
-  const dripGrad=ctx.createLinearGradient(dripX,0,dripX,ch);
-  dripGrad.addColorStop(0,'rgba(255,214,80,0.85)');
-  dripGrad.addColorStop(0.6,'rgba(255,180,30,0.7)');
-  dripGrad.addColorStop(1,'rgba(255,150,0,0)');
-  ctx.fillStyle=dripGrad;
-  _cheeseDrip(ctx,dripX-cw/2,0,cw,ch);ctx.fill();
- }
-
- // ── Layer 7: Ember/spark particles (near, animated) ──────────────────────
- if(!reduceMotion){
-  ctx.fillStyle='rgba(255,220,80,0.8)';
-  for(let i=0;i<22;i++){
-   const px=(((i*137+cam0*0.6+t*0.9)%(w*1.1))+w*1.1)%(w*1.1);
-   const py=h-(((i*79+t*(0.6+i%4*0.15))%(h*0.85))+h*0.1);
-   const sr=1+i%3;
-   ctx.beginPath();ctx.arc(px,py,sr,0,Math.PI*2);ctx.fill();
-  }
- }
-
+ // 7 · embers + flour
+ if(!R){for(let i=0;i<34;i++){const life=wrap(T*.004+hash(i),1),x=wrap(hash(i+500)*w+Math.sin(life*8+i)*20-cx*.5,w),y=h-life*h*.7;
+  ctx.globalAlpha=(1-life)*.8;ctx.fillStyle=i%3?P.fire2:P.flour;ctx.fillRect(x,y,i%3?2.2:3,i%3?2.2:3);}
+  ctx.globalAlpha=1;}
  ctx.restore();
 }

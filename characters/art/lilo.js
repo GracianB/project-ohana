@@ -24,7 +24,7 @@ function applyHula(r,pose,d,f,seconds,blend=1) {
   r.footB=L2(r.footB,[-6+b.hip*.4,-b.heel],blend);
  }
  r.skirt+=b.skirt*blend;r.hairLag-=b.skirt*.5*blend;
- r.flare+=.25*blend;r.armOver=true;r.backOver=true;
+ r.flare+=.25*blend;r.armOver=true;r.backBend=true;if(blend>.5)r.backOver=false; // V462: far arm stays BEHIND the dress
  r.mood='happy';r.mouth='smile';r.paci=false;r.uke=f>0?'back':null;r.fx=null;
 }
 const SKIN = "#c68657";
@@ -201,7 +201,9 @@ export function kiloWelcomeRig(pose={},form=0){
 function solve(pose, d, f) {
   const t = pose.t, st = pose.state, hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const xF = 4, xB = -5;
-  const restF = [xF + 3, sy + al * 0.86], restB = [xB - 3, sy + al * 0.86];
+  // V462: arms hang naturally from the shoulders (4/-5, sy+3) at ~95% reach, a little
+  // out from the dress, so the elbow only softens instead of folding into a "C" hook.
+  const restF = [4 + al * 0.4, sy + 3 + al * 0.86], restB = [-5 - al * 0.4, sy + 3 + al * 0.86];
   const hr = d.hr, hx = 1;
   const r = {
     ox: 0, oy: 0, lean: 0, spin: 1, hipX: 0, headRot: Math.sin(t * 0.03) * 0.04,
@@ -459,7 +461,8 @@ function solve(pose, d, f) {
       const beat=(b.time*60)%30,clap=Math.max(0,1-Math.min(beat,30-beat)/8);
       r.handF=[18-12*clap,sy+5-8*clap];r.handB=[-18+17*clap,sy+5-8*clap];r.uke='back';r.mood='happy';r.mouth=clap>.5?'open':'smile';
     }
-    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[12,sy+7];r.handF=[19,sy+14+Math.sin(b.time*9)*3];r.lean=.03;r.mood="closed";r.mouth="smile";
+    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[15,sy+3];r.handF=[6,sy+al*.62+1+Math.sin(b.time*9)*2.5]; // V462: strum ON the sound hole (was floating at x=19, folding the arm)
+    r.lean=.03;r.mood="closed";r.mouth="smile";
      if(b.time<2){r.uke='hand';r.handF=[8,sy+15];r.headRot=-.08;}
      if(b.time>8){r.uke='back';r.handF=[3,sy+5];r.handB=[-20,sy+6];r.headRot=.12;}
     }
@@ -578,19 +581,63 @@ function head(ctx, R, pose, f, hr, r) {
   }
 }
 
-function dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, flare) {
+function dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, flare, wave = 0) {
   ctx.beginPath();
   ctx.moveTo(x0 - wT, sy);
-  ctx.quadraticCurveTo(x0 - wT - 2, sy + (hemY - sy) * 0.4, x0 - wH + shift, hemY);
+  // V463: the hem is cloth, not a cut-out: a small wave travels along it.
+  const hy = (i) => hemY + Math.sin(wave + i * 1.25) * (wave ? 1.1 : 0);
+  ctx.quadraticCurveTo(x0 - wT - 2, sy + (hemY - sy) * 0.4, x0 - wH + shift, hy(0));
   const n = f === 0 ? 3 : 5;
   const w = (wH * 2) / n;
   for (let i = 0; i < n; i++) {
     const xa = x0 - wH + shift + w * i;
-    ctx.quadraticCurveTo(xa + w / 2, hemY + 3 + flare * 1.2, xa + w, hemY);
+    ctx.quadraticCurveTo(xa + w / 2, hy(i + .5) + 3 + flare * 1.2, xa + w, hy(i + 1));
   }
   ctx.quadraticCurveTo(x0 + wT + 2, sy + (hemY - sy) * 0.4, x0 + wT, sy);
   ctx.quadraticCurveTo(x0, sy + 4, x0 - wT, sy);
   ctx.closePath();
+}
+
+// V463 · Hawaiian wardrobe: one coherent palette per form (print, leaf, trim,
+// sash) and flat, cheap print motifs clipped inside the dress (no gradients).
+const OUTFIT = [
+  { print: "#ffffff", print2: "#ffd23f", leaf: "#ff8fab", trim: "#ffffff" },
+  { print: "#ffffff", print2: "#ffd0c8", leaf: "#c8382f", trim: "#ffffff", sash: "#ffd23f" },
+  { print: "#fff3f6", print2: "#ffd23f", leaf: "#c94a63", trim: "#ffd23f", tapa: "#7a2a3a" },
+  { print: "#ffe7a0", print2: "#ffffff", leaf: "#9e2534", trim: "#ffc53d", pareo: "#2fa59a", pareoLight: "#5cc8b8", pareoPrint: "#e8fff6" },
+  { print: "#ffc53d", print2: "#ffffff", leaf: "#f3b04a", trim: "#ffd35a", sash: "#ffb3d0", petals: ["#ffb13d", "#ffd35a", "#ff9a3d"] },
+];
+function printFlower(ctx, x, y, s, rot) {
+  for (let i = 0; i < 5; i++) {
+    const a = rot + i * Math.PI * 0.4;
+    ctx.moveTo(x + Math.cos(a) * s * 1.05 + s * 0.62, y + Math.sin(a) * s * 1.05);
+    ctx.ellipse(x + Math.cos(a) * s * 1.05, y + Math.sin(a) * s * 1.05, s * 0.62, s * 0.62, 0, 0, Math.PI * 2);
+  }
+}
+function printLeaf(ctx, x, y, s, rot) {
+  ctx.moveTo(x + Math.cos(rot) * s * 1.6, y + Math.sin(rot) * s * 1.6);
+  ctx.ellipse(x, y, s * 1.6, s * 0.7, rot, 0, Math.PI * 2);
+}
+function tapaBand(ctx, x0, y, w, h, col) {
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  for (let x = x0 - w; x < x0 + w; x += h) { ctx.moveTo(x, y + h); ctx.lineTo(x + h / 2, y); ctx.lineTo(x + h, y + h); }
+  ctx.fill();
+}
+function sashRibbon(ctx, R, x, y, len, wid, col, t, side, skirt) {
+  // flowing ribbon tails with a delayed cloth wave (secondary animation)
+  const pts = [];
+  for (let i = 0; i <= 6; i++) {
+    const k = i / 6, wv = Math.sin(t * 0.09 - k * 3.2 + side) * 4 * k - (skirt || 0) * 5 * k;
+    pts.push([x + side * k * len * 0.35 + wv - k * len * 0.25, y + k * len]);
+  }
+  ctx.beginPath(); ctx.moveTo(pts[0][0] - wid / 2, pts[0][1]);
+  for (const [px, py] of pts) ctx.lineTo(px - wid / 2, py);
+  ctx.lineTo(pts[6][0] + wid * 0.2, pts[6][1] + wid * 0.8);
+  for (let i = 6; i >= 0; i--) ctx.lineTo(pts[i][0] + wid / 2, pts[i][1]);
+  ctx.closePath();
+  ctx.fillStyle = col; ctx.fill();
+  ctx.lineWidth = 1.6; ctx.strokeStyle = R.INK; ctx.stroke();
 }
 
 function torso(ctx, R, pose, f, d, r) {
@@ -604,35 +651,52 @@ function torso(ctx, R, pose, f, d, r) {
   const shift = -pose.sway * 3 + r.hipX * 0.6 + (r.skirt || 0) * 3;
   if (f === 0) {
     R.blob(ctx, [[x0 - 9, sy + 1], [x0 + 9, sy + 1], [x0 + 13, sy + d.th * 0.7], [x0 + 9, hemY], [x0 - 9, hemY], [x0 - 13, sy + d.th * 0.7]], col);
+    // V463: baby romper with a scalloped Peter-Pan collar, tiny plumeria print
+    // and a ruffled hem that bounces with the crawl.
+    ctx.save(); ctx.beginPath(); ctx.rect(x0 - 14, sy, 28, hemY - sy + 1); ctx.clip();
+    ctx.fillStyle = R.alpha("#ffffff", 0.8); ctx.beginPath();
+    for (const [fx, fy] of [[-6, 0.45], [6, 0.35], [-3, 0.8], [8, 0.78]]) printFlower(ctx, x0 + fx, sy + (hemY - sy) * fy, 1.1, t * 0.01);
+    ctx.fill(); ctx.restore();
+    const bob = Math.sin(t * 0.12) * 0.8;
+    ctx.fillStyle = "#ffffff"; ctx.beginPath();
+    for (let i = 0; i < 5; i++) { const x = x0 - 9 + i * 4.5; ctx.moveTo(x + 2.6, hemY - 0.5 + bob * (i % 2 ? 1 : -1)); ctx.arc(x, hemY - 0.5 + bob * (i % 2 ? 1 : -1), 2.6, 0, Math.PI); }
+    ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = R.INK; ctx.stroke();
+    for (const side of [-1, 1]) R.ellipse(ctx, x0 + side * 4.2, sy + 2.2, 4.6, 2.6, "#ffffff", { lw: 1.6, rot: side * 0.35 });
     R.ellipse(ctx, x0 + 3, sy + d.th * 0.55, 5, 5, "#ffffff", { lw: 2 });
     hibiscus(ctx, R, x0 + 3, sy + d.th * 0.55, 3.2, "#ff5c8a");
     return;
   }
-  dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, r.flare);
+  const O = OUTFIT[f], wave = pose.reduceMotion ? 0 : t * 0.11 + (r.skirt || 0) * 1.5;
+  if (f === 4) for (const side of [-1, 1]) sashRibbon(ctx, R, x0 - side * 4, hipY - 6, d.ll * 1.25, 4.2, O.sash, t, side, r.skirt);
+  dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, r.flare, wave);
   ctx.fillStyle = col;
   ctx.fill();
   ctx.save();
   ctx.clip();
   ctx.fillStyle = R.alpha(R.lighten(col, 0.3), 0.55);
   ctx.beginPath(); ctx.ellipse(x0 - wH * 0.55, sy + (hemY - sy) * 0.35, wH * 0.45, (hemY - sy) * 0.6, 0, 0, Math.PI * 2); ctx.fill();
-  if (f <= 2) {
-    const fl = [[-6, 0.25], [4, 0.45], [-2, 0.8], [8, 0.95], [-10, 1.05], [2, 1.25]];
-    ctx.fillStyle = f === 2 ? "#fff3f6" : "#ffffff";
-    for (const [fx, fy] of fl) {
-      const cx = x0 + fx + shift * fy * 0.5, cy = sy + (hemY - sy) * fy * 0.8;
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) {
-        const a = (i / 5) * Math.PI * 2;
-        ctx.moveTo(cx + Math.cos(a) * 2.2 + 1.3, cy + Math.sin(a) * 2.2);
-        ctx.arc(cx + Math.cos(a) * 2.2, cy + Math.sin(a) * 2.2, 1.3, 0, Math.PI * 2);
-      }
-      ctx.fill();
-    }
-    ctx.fillStyle = "#ffd23f";
-    ctx.beginPath();
-    for (const [fx, fy] of fl) { const cx = x0 + fx + shift * fy * 0.5, cy = sy + (hemY - sy) * fy * 0.8; ctx.moveTo(cx + 1, cy); ctx.arc(cx, cy, 1, 0, Math.PI * 2); }
-    ctx.fill();
-  } else {
+  // Aloha print: tonal monstera leaves under bold hibiscus/plumeria flowers.
+  // Prints ride the skirt (shift) so the fabric visibly moves with the hips.
+  const H = hemY - sy, ride = (fy) => shift * fy * 0.5;
+  const leaves = [[-9, 0.35, 0.6], [7, 0.62, -0.5], [-4, 0.92, 0.3], [10, 1.02, 2.2], [-12, 0.78, -1.9]];
+  ctx.fillStyle = R.alpha(O.leaf, f === 4 ? 0.5 : 0.42); ctx.beginPath();
+  for (const [fx, fy, a] of leaves) printLeaf(ctx, x0 + fx + ride(fy), sy + H * fy, 2.6, a + Math.sin(t * 0.04 + fx) * 0.08);
+  ctx.fill();
+  const flowers = [[-6, 0.25, 2], [4, 0.45, 2.4], [-2, 0.8, 2.1], [8, 0.95, 1.8], [-10, 1.05, 2.2], [2, 1.2, 1.9]];
+  ctx.fillStyle = O.print; ctx.beginPath();
+  for (const [fx, fy, sz] of flowers) printFlower(ctx, x0 + fx + ride(fy), sy + H * fy * 0.8, sz * (f >= 3 ? 0.85 : 1), fx * 0.3);
+  ctx.fill();
+  ctx.fillStyle = O.print2; ctx.beginPath();
+  for (const [fx, fy] of flowers) { const cx = x0 + fx + ride(fy), cy = sy + H * fy * 0.8; ctx.moveTo(cx + 1.1, cy); ctx.arc(cx, cy, 1.1, 0, Math.PI * 2); }
+  ctx.fill();
+  if (O.tapa) { tapaBand(ctx, x0, sy + 2, 20, 3.2, O.tapa); ctx.fillStyle = O.trim; ctx.fillRect(x0 - 20, sy + 5.2, 40, 1.2); }
+  if (f === 1) {
+    // white eyelet trim along the hem + yellow sash at the waist
+    ctx.fillStyle = O.trim; ctx.fillRect(x0 - 30, hemY - 3.2, 60, 1.6);
+    ctx.beginPath(); for (let x = -wH; x <= wH; x += 4) { const hx = x0 + x + shift; ctx.moveTo(hx + 1.1, hemY - 1); ctx.arc(hx, hemY - 1, 1.1, 0, Math.PI * 2); } ctx.fill();
+    ctx.fillStyle = O.sash; ctx.fillRect(x0 - 30, sy + d.th * 0.5, 60, 2.6);
+  }
+  if (f >= 3) {
     const gold = f === 3 ? "#ffc53d" : "#ffd35a";
     ctx.fillStyle = gold;
     ctx.fillRect(x0 - 30, hemY - 6, 60, 8);
@@ -646,14 +710,45 @@ function torso(ctx, R, pose, f, d, r) {
     if (f === 4) {
       ctx.fillStyle = "rgba(255,210,120,0.35)";
       ctx.beginPath(); ctx.ellipse(x0 + 6, hemY - 4, 10, 16, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      for (let i = 0; i < 4; i++) { const k = (t * 0.01 + i * 0.25) % 1; ctx.globalAlpha = Math.sin(Math.PI * k); ctx.fillRect(x0 - 10 + i * 7, sy + H * (0.2 + k * 0.6), 1.4, 1.4); }
+      ctx.globalAlpha = 1;
     }
   }
   ctx.fillStyle = R.alpha(R.darken(col, 0.5), 0.18);
   ctx.beginPath(); ctx.ellipse(x0 + wH * 0.8, hemY, wH * 0.6, (hemY - sy) * 0.9, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
-  dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, r.flare);
+  dressPath(ctx, x0, sy, hemY, wT, wH, shift, f, r.flare, wave);
   R.paint(ctx, null);
   R.shine(ctx, x0 - wT * 0.4, sy + 5, 2.2, 4, 0.45);
+  if (f === 3) {
+    // Super Kilo: teal pareo wrapped over the crimson dress, knotted at the hip;
+    // its tie ends swing half a beat behind the skirt.
+    const ky = hipY - 3, kx = x0 + wT + 1.5;
+    const wrap = [[x0 - wT - 1.5, ky - 3], [kx, ky - 1], [x0 + wH * 0.85 + shift, hemY + 1.5], [x0 - wH * 0.15 + shift * 1.15, hemY + 3.5]];
+    R.poly(ctx, wrap, O.pareo, { lw: 2 });
+    ctx.save(); ctx.beginPath(); wrap.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath(); ctx.clip();
+    ctx.fillStyle = R.alpha(O.pareoLight, 0.7); ctx.beginPath();
+    for (const [fx, fy, a] of [[-2, 0.3, 0.4], [6, 0.65, -0.7], [1, 0.95, 1.9]]) printLeaf(ctx, x0 + fx + shift * fy * 0.7, ky + (hemY - ky) * fy, 2.6, a);
+    ctx.fill();
+    ctx.fillStyle = O.pareoPrint; ctx.beginPath();
+    for (const [fx, fy] of [[3, 0.25], [-1, 0.6], [8, 0.85]]) printFlower(ctx, x0 + fx + shift * fy * 0.7, ky + (hemY - ky) * fy, 1.9, fx);
+    ctx.fill(); ctx.restore();
+    const lag = r.skirt || 0;
+    for (const [len, off] of [[d.ll * 0.55, -1.2], [d.ll * 0.42, 1.6]]) {
+      const ex = kx + off + Math.sin(t * 0.1 + off) * 1.6 - lag * 4, ey = ky + len;
+      R.poly(ctx, [[kx - 1.6, ky], [kx + 1.6, ky], [ex + 1.4, ey], [ex - 1.4, ey + 1.2]], O.pareo, { lw: 1.6 });
+    }
+    R.ellipse(ctx, kx, ky, 3.2, 2.6, O.pareoLight, { lw: 1.8 });
+  }
+  if (f === 4) {
+    // Flor Solar: layered sunflower-petal hem that ripples with the cloth wave
+    const n = 9;
+    for (let layer = 0; layer < 2; layer++) for (let i = 0; i < n; i++) {
+      const k = (i + layer * 0.5) / (n - 1), x = x0 - wH + shift + k * wH * 2, yy = hemY + 1 + Math.sin(wave + i * 1.25) * 1.1;
+      R.ellipse(ctx, x, yy + 2.6 - layer * 1.4, 2.4, 3.6, O.petals[(i + layer) % 3], { lw: 1.4, rot: (k - 0.5) * 0.6 + (r.skirt || 0) * 0.2 });
+    }
+  }
 
   if (f === 2) {
     const wy = hipY - 3, n = 11, L = d.ll * 0.62;
@@ -867,7 +962,7 @@ function draw(ctx, pose, R) {
     staff(ctx, R, hb[0], hb[1], r.staffUp ? -0.15 : -0.12 - pose.sway * 0.1, 56, t, r.staffUp);
   }
   const backArm = () => {
-    ik(ctx, R, -5, sy + 3, r.handB[0], r.handB[1], al, r.backOver ? -1 : 1, d.aw, skinB, { hand: d.aw * 0.72 });
+    ik(ctx, R, -5, sy + 3, r.handB[0], r.handB[1], al, r.backOver || r.backBend ? -1 : 1, d.aw, skinB, { hand: d.aw * 0.72 });
     R.ellipse(ctx, -5, sy + 3, 5, 4.5, R.darken(DRESS[f], 0.15), { lw: 2.4 });
   };
   if (!r.backOver) backArm();
@@ -884,6 +979,9 @@ function draw(ctx, pose, R) {
   ctx.save();
   bodyT();
   torso(ctx, R, pose, f, d, r);
+  // V462: the back-slung ukulele hangs from a visible strap across the chest,
+  // so it no longer floats beside Kilo as a stray stick.
+  if (r.uke === "back") kiloUkeStrap(ctx, sy, d, f);
   if(f>=1){
     const count=f===1?3:f===2?5:7;
     for(let i=0;i<count;i++){
@@ -892,7 +990,10 @@ function draw(ctx, pose, R) {
     }
   }
   const frontArm = () => {
-    const e = ik(ctx, R, 4, sy + 3, r.handF[0], r.handF[1], al, 1, d.aw, SKIN, { hand: d.aw * 0.75 });
+    // V462: when strumming, the elbow points OUT in front of the ukulele instead of
+    // looping back across the chest (the brown "C" seen in the companion panel).
+    const strumming = r.uke === "play" && r.handF[1] > sy + 3 && r.handF[0] < 4 + al * 0.5;
+    const e = ik(ctx, R, 4, sy + 3, r.handF[0], r.handF[1], al, strumming ? -1 : 1, strumming ? d.aw * 1.12 : d.aw, SKIN, { hand: d.aw * (strumming ? 0.95 : 0.75) });
     R.ellipse(ctx, 4, sy + 3.5, 5, 4.5, DRESS[f], { lw: 2.4 });
     if (f === 0) {
       const ang = Math.atan2(e[0] - 4, -(e[1] - sy - 3)) * 0.4 + (r.fx === "notes" ? Math.sin(t * 0.8) * 0.5 : 0) + (st === "attack" ? pose.atk * 1.5 - 0.5 : 0);
@@ -903,6 +1004,9 @@ function draw(ctx, pose, R) {
       R.ellipse(ctx, e[0], e[1], d.aw * 0.75, d.aw * 0.75, SKIN, { lw: 2.4 });
     }
   };
+  // V462 depth: the far arm is NEVER painted over the torso/dress. Arms-up poses
+  // (backOver) lift it above the dress but keep it behind the head and near arm.
+  if (r.backOver) backArm();
   if (r.uke === "play") {
     const bx = 1, by = sy + al * 0.62;
     uke(ctx, R, bx, by, Math.atan2(r.handB[1] - by, r.handB[0] - bx), 14 + f, f === 4);
@@ -921,7 +1025,6 @@ function draw(ctx, pose, R) {
   headT();
   head(ctx, R, pose, f, d.hr, r);
   ctx.restore();
-  if (r.backOver) backArm();
   if (r.armOver) frontArm();
   effects(ctx, R, pose, f, d, r, hy - d.hr);
   ctx.restore();
@@ -936,3 +1039,11 @@ function draw(ctx, pose, R) {
 }
 
 export default { id: "kilo", draw };
+
+export function kiloUkeStrap(ctx, sy, d, f) {
+  ctx.save(); ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(-9, sy + d.th * 0.62); ctx.quadraticCurveTo(-1, sy + d.th * 0.3, 6, sy + 1.5);
+  ctx.strokeStyle = "#2a1a22"; ctx.lineWidth = 4.2; ctx.stroke();
+  ctx.strokeStyle = f === 4 ? "#f0b040" : "#a5683a"; ctx.lineWidth = 2.2; ctx.stroke();
+  ctx.restore();
+}

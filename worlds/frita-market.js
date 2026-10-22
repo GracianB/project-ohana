@@ -1,205 +1,98 @@
-// MERCADO DORADO — Frita's dedicated procedural stage backdrop.
+// MERCADO CENTELLA — Frita's dedicated procedural stage backdrop.
 // 100% vector Canvas: zero external image assets.
-// 8 parallax layers: golden coastal sunset, market stall silhouettes, palm trees,
-// hanging lanterns, seagull silhouettes, wave shimmer, spice smoke and feast constellation.
+// Identity: a NAVY night-time harbour diner market (navy, ketchup red, fry gold,
+// electric cyan), deliberately apart from Pizza's warm tricolore dusk. Parallax
+// layers, far → near: navy night sky with stars and the "BANQUETE DORADO"
+// constellation, a neon skyline, a giant fry-carton billboard with a blinking
+// "F", the chrome diner with a checkerboard band and lit booths, market stalls
+// with ketchup-and-white awnings, boardwalk lamps, ketchup & mustard bottles,
+// and electric salt sparkles crackling in the air.
+// Rules: gradients are built once per context via cachedGradient (never per
+// frame), every "random" value is a deterministic hash of an index, and with
+// reduced motion every moving element freezes.
+import {cachedGradient} from '../systems/canvas-gradient-cache.js';
 const TAU=Math.PI*2;
 const wrap=(v,lim)=>((v%lim)+lim)%lim;
+const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
-// ── Helper: market stall canopy ──────────────────────────────────────────────
-function _stall(ctx,cx,cy,w,col,stripe){
- ctx.fillStyle=col;
- // Canopy top (wavy pennant shape)
- ctx.beginPath();
- ctx.moveTo(cx-w*.55,cy);
- for(let i=0;i<=8;i++){
-  const tx=cx-w*.55+i*(w*1.1/8);
-  const ty=cy+(i%2===0?0:-12);
-  ctx.lineTo(tx,ty);
- }
- ctx.lineTo(cx+w*.55,cy);ctx.lineTo(cx+w*.5,cy+18);ctx.lineTo(cx-w*.5,cy+18);
- ctx.closePath();ctx.fill();
- // Stripe
- ctx.fillStyle=stripe;ctx.fillRect(cx-w*.5,cy+2,w,7);
- // Pole
- ctx.strokeStyle='rgba(80,40,10,0.7)';ctx.lineWidth=5;ctx.lineCap='butt';
- ctx.beginPath();ctx.moveTo(cx-w*.45,cy+18);ctx.lineTo(cx-w*.45,cy+80);ctx.stroke();
- ctx.beginPath();ctx.moveTo(cx+w*.45,cy+18);ctx.lineTo(cx+w*.45,cy+80);ctx.stroke();
+export const FRITA_MARKET_PALETTE=Object.freeze({
+ skyTop:'#070c24',skyMid:'#142a6a',skyLow:'#2f4fa8',star:'#dff4ff',
+ skyline:'#0d1a44',skylineWin:'#5fd0ff',neon:'#5fd0ff',neonPink:'#ff5a7a',
+ carton:'#d8231c',fry:'#ffcf3a',fry2:'#e8a51a',chrome:'#c8d6e8',diner:'#1f3a8a',diner2:'#14245a',
+ booth:'#ffd98a',check1:'#f4ece0',check2:'#d8231c',awning1:'#d8231c',awning2:'#f4ece0',
+ boardwalk:'#3a2a3a',lamp:'#fff2b8',mustard:'#ffcc1a',spark:'#9ff0ff'
+});
+const P=FRITA_MARKET_PALETTE;
+
+function _carton(ctx,x,base,s,t,R){
+ ctx.fillStyle=P.fry2;for(let k=-3;k<=3;k++)ctx.fillRect(x+k*s*.13-s*.05,base-s*1.15-Math.abs(((k*7)%3))*s*.08,s*.1,s*.6);
+ ctx.fillStyle=P.fry;for(let k=-3;k<=3;k++)ctx.fillRect(x+k*s*.13-s*.035,base-s*1.13-Math.abs(((k*7)%3))*s*.08,s*.05,s*.55);
+ ctx.fillStyle=P.carton;ctx.beginPath();ctx.moveTo(x-s*.5,base-s*.72);ctx.lineTo(x+s*.5,base-s*.72);ctx.lineTo(x+s*.38,base);ctx.lineTo(x-s*.38,base);ctx.closePath();ctx.fill();
+ ctx.fillStyle=P.check1;for(let k=0;k<3;k++)ctx.fillRect(x-s*.3+k*s*.24,base-s*.68,s*.1,s*.64);
+ const on=R||Math.sin(t*.09)>-.7;
+ ctx.globalAlpha=on?1:.3;ctx.strokeStyle=P.neon;ctx.lineWidth=Math.max(2,s*.05);ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(x-s*.08,base-s*.18);ctx.lineTo(x-s*.06,base-s*.52);ctx.lineTo(x+s*.14,base-s*.52);ctx.moveTo(x-s*.07,base-s*.36);ctx.lineTo(x+s*.08,base-s*.36);ctx.stroke();
+ ctx.globalAlpha=1;
 }
 
-// ── Helper: coastal palm tree ─────────────────────────────────────────────────
-function _palm(ctx,cx,cy,h,lean,col){
- ctx.strokeStyle=col;ctx.lineCap='round';
- // Trunk with lean
- ctx.lineWidth=9;
- ctx.beginPath();ctx.moveTo(cx,cy);ctx.quadraticCurveTo(cx+lean*.4,cy-h*.5,cx+lean,cy-h);ctx.stroke();
- // Fronds
- ctx.lineWidth=3;
- for(let f=-4;f<=4;f++){
-  const fx=cx+lean+f*30,fy=cy-h+Math.abs(f)*16;
-  ctx.beginPath();ctx.moveTo(cx+lean,cy-h);ctx.quadraticCurveTo((cx+lean+fx)*.5,fy-30,fx,fy);ctx.stroke();
- }
+function _stall(ctx,x,base,w,i){
+ ctx.fillStyle=P.diner2;ctx.fillRect(x-w/2,base-46,w,46);
+ ctx.fillStyle=P.booth;ctx.fillRect(x-w/2+8,base-38,w-16,14);
+ for(let k=0;k<7;k++){ctx.fillStyle=k%2?P.awning2:P.awning1;const sx=x-w/2-6+k*(w+12)/7,sw=(w+12)/7;
+  ctx.beginPath();ctx.moveTo(sx,base-66);ctx.lineTo(sx+sw,base-66);ctx.lineTo(sx+sw,base-52);ctx.quadraticCurveTo(sx+sw/2,base-46,sx,base-52);ctx.closePath();ctx.fill();}
+ ctx.strokeStyle=P.chrome;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-w/2,base-52);ctx.lineTo(x-w/2,base);ctx.moveTo(x+w/2,base-52);ctx.lineTo(x+w/2,base);ctx.stroke();
+ // bottles on the counter
+ ctx.fillStyle=i%2?P.mustard:P.carton;ctx.fillRect(x-w*.2,base-58+30,8,14);ctx.fillRect(x-w*.2+2,base-62+30,4,5);
+ ctx.fillStyle=i%2?P.carton:P.mustard;ctx.fillRect(x+w*.15,base-58+30,8,14);ctx.fillRect(x+w*.15+2,base-62+30,4,5);
 }
-
-// ── Helper: hanging lantern ──────────────────────────────────────────────────
-function _lantern(ctx,cx,cy,col,glow,t,reduced){
- const swing=reduced?0:Math.sin(t*.06+cx*.01)*5;
- ctx.save();ctx.translate(cx,cy);ctx.rotate(swing*.04);
- // String
- ctx.strokeStyle='rgba(120,80,20,0.7)';ctx.lineWidth=1.5;
- ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,22);ctx.stroke();
- // Body
- ctx.fillStyle=col;ctx.strokeStyle='rgba(200,140,0,0.8)';ctx.lineWidth=1.5;
- ctx.beginPath();ctx.ellipse(0,32,10,16,0,0,TAU);ctx.fill();ctx.stroke();
- // Glow
- if(!reduced){
-  ctx.fillStyle=`rgba(${glow},${0.35+Math.sin(t*.1+cx)*.1})`;
-  ctx.beginPath();ctx.arc(0,32,22,0,TAU);ctx.fill();
- }
- ctx.restore();
-}
-
-// ── Helper: seagull silhouette ────────────────────────────────────────────────
-function _seagull(ctx,cx,cy,span,col){
- ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineCap='round';
- ctx.beginPath();
- ctx.moveTo(cx-span,cy);ctx.quadraticCurveTo(cx-span*.5,cy-span*.3,cx,cy);
- ctx.quadraticCurveTo(cx+span*.5,cy-span*.3,cx+span,cy);
- ctx.stroke();
-}
-
-// ── Helper: BANQUETE DORADO constellation ─────────────────────────────────────
-const BANQUET_STARS=[
- {x:.12,y:.12},{x:.18,y:.08},{x:.26,y:.11},{x:.32,y:.18},
- {x:.28,y:.25},{x:.20,y:.27},{x:.14,y:.20},{x:.38,y:.14},{x:.44,y:.09}
-];
 
 export function drawFritaMarketBackdrop(ctx,cam,t,viewportW,viewportH,reduceMotion=false){
- const w=viewportW||1100,h=viewportH||700;
+ const w=viewportW||1100,h=viewportH||700,cx=(cam&&cam.x)||0,R=!!reduceMotion,T=R?0:(Number.isFinite(t)?t:0);
  ctx.save();
-
- // ── Layer 0: Warm golden coastal sunset sky ──
- const skyG=ctx.createLinearGradient(0,0,0,h);
- skyG.addColorStop(0,'#2c0e18');skyG.addColorStop(.22,'#7a2818');
- skyG.addColorStop(.52,'#c84e14');skyG.addColorStop(.78,'#f0941a');
- skyG.addColorStop(1,'#ffc843');
- ctx.fillStyle=skyG;ctx.fillRect(0,0,w,h);
-
- // ── Layer 1: Setting sun disc ──
- const sunX=wrap(w*.7-cam.x*.016,w*2);
- const sunY=h*.30;
- const sunG=ctx.createRadialGradient(sunX,sunY,14,sunX,sunY,72);
- sunG.addColorStop(0,'#fffde7');sunG.addColorStop(.4,'#ffd54f');
- sunG.addColorStop(.82,'#ff9800');sunG.addColorStop(1,'rgba(255,150,0,0)');
- ctx.fillStyle=sunG;ctx.beginPath();ctx.arc(sunX,sunY,72,0,TAU);ctx.fill();
- // Sun rays
- if(!reduceMotion){
-  ctx.strokeStyle='rgba(255,220,100,0.18)';ctx.lineWidth=2;
-  for(let r=0;r<8;r++){
-   const ang=r*TAU/8+(t*.006);
-   ctx.beginPath();
-   ctx.moveTo(sunX+Math.cos(ang)*76,sunY+Math.sin(ang)*76);
-   ctx.lineTo(sunX+Math.cos(ang)*130,sunY+Math.sin(ang)*130);
-   ctx.stroke();
-  }
- }
-
- // ── Layer 2: BANQUETE DORADO constellation ──
- ctx.save();
- ctx.strokeStyle='rgba(255,235,140,0.40)';ctx.lineWidth=1.4;
- ctx.beginPath();
- for(let i=0;i<BANQUET_STARS.length;i++){
-  const sx=wrap(BANQUET_STARS[i].x*w*1.35-cam.x*.019,w*1.3);
-  const sy=BANQUET_STARS[i].y*h;
-  i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
- }
- ctx.stroke();
- for(const st of BANQUET_STARS){
-  const sx=wrap(st.x*w*1.35-cam.x*.019,w*1.3);
-  const sy=st.y*h;
-  const pulse=reduceMotion?1:(1+Math.sin(t*.09+st.x*16)*.28);
-  ctx.fillStyle='#fffde7';ctx.beginPath();ctx.arc(sx,sy,2.5*pulse,0,TAU);ctx.fill();
- }
- ctx.restore();
-
- // ── Layer 3: Distant coastal town silhouette ──
- ctx.save();
- ctx.fillStyle='rgba(60,25,10,0.75)';
- ctx.beginPath();ctx.moveTo(0,h);
- const townOff=wrap(-(cam.x*.06),w+500);
- for(let tx=-200;tx<w+500;tx+=220){
-  const bx=tx+townOff;
-  const bh=h*(.32+Math.sin(tx*.008)*.04);
-  ctx.lineTo(bx,h-bh);
-  // Tower / minaret
-  ctx.lineTo(bx+18,h-bh-24);ctx.lineTo(bx+22,h-bh-24);ctx.lineTo(bx+40,h-bh);
-  ctx.lineTo(bx+100,h-bh+12);ctx.lineTo(bx+120,h-bh-18);ctx.lineTo(bx+140,h-bh);
-  ctx.lineTo(bx+220,h-bh+8);
- }
- ctx.lineTo(w,h);ctx.closePath();ctx.fill();
- ctx.restore();
-
- // ── Layer 4: Palm trees (mid parallax) ──
- ctx.save();
- const palmOff=wrap(-(cam.x*.14),w+600);
- const palmCol='rgba(24,12,4,0.88)';
- const palmData=[{ox:60,h:95,lean:22},{ox:280,h:110,lean:-18},{ox:500,h:88,lean:15},{ox:720,h:100,lean:-20},{ox:940,h:105,lean:18}];
- for(const pd of palmData){
-  const px=wrap(pd.ox+palmOff,w+600)-100;
-  _palm(ctx,px,h*.84,pd.h,pd.lean,palmCol);
- }
- ctx.restore();
-
- // ── Layer 5: Market stall canopies (near-mid) ──
- ctx.save();
- const stallOff=wrap(-(cam.x*.22),w+700);
- const stallDef=[
-  {ox:40, col:'rgba(180,60,10,0.82)',stripe:'rgba(255,200,0,0.55)',w:90},
-  {ox:260,col:'rgba(10,80,30,0.75)', stripe:'rgba(255,220,60,0.5)',w:80},
-  {ox:480,col:'rgba(20,30,120,0.75)',stripe:'rgba(255,180,0,0.55)',w:85},
-  {ox:700,col:'rgba(140,20,10,0.8)', stripe:'rgba(255,230,80,0.5)',w:90}
- ];
- for(const sd of stallDef){
-  const sx=wrap(sd.ox+stallOff,w+700)-80;
-  _stall(ctx,sx,h*.82,sd.w,sd.col,sd.stripe);
- }
- ctx.restore();
-
- // ── Layer 6: Hanging lanterns ──
- ctx.save();
- const lanternOff=wrap(-(cam.x*.28),w+400);
- const lanternColors=['rgba(255,180,0,0.9)','rgba(255,80,40,0.85)','rgba(0,160,100,0.8)'];
- const lanternGlow=['255,200,80','255,120,60','80,220,140'];
- for(let i=0;i<10;i++){
-  const lx=wrap(i*120+lanternOff,w+400)-40;
-  _lantern(ctx,lx,h*.58,lanternColors[i%3],lanternGlow[i%3],t,reduceMotion);
- }
- ctx.restore();
-
- // ── Layer 7: Seagull silhouettes ──
- ctx.save();
- if(!reduceMotion){
-  const birdCol='rgba(30,14,4,0.6)';
-  const birdOff=wrap(-(cam.x*.35),w+600);
-  for(let b=0;b<6;b++){
-   const bx=wrap(b*190+birdOff+Math.sin(t*.04+b)*20,w+600)-50;
-   const by=h*(.12+b*.04)+Math.sin(t*.07+b*.8)*8;
-   _seagull(ctx,bx,by,14+b*3,birdCol);
-  }
- }
- ctx.restore();
-
- // ── Layer 8: Floating spice smoke particles ──
- if(!reduceMotion){
-  ctx.save();
-  for(let i=0;i<24;i++){
-   const px=wrap(i*143+t*14-cam.x*.26,w+120)-60;
-   const py=wrap(i*83+Math.sin(t*.05+i)*28,h*.75);
-   const sz=1.4+(i%4)*.5;
-   ctx.fillStyle=`rgba(255,200,100,${0.38+Math.sin(i+t*.06)*.18})`;
-   ctx.beginPath();ctx.arc(px,py,sz,0,TAU);ctx.fill();
-  }
-  ctx.restore();
- }
-
+ // 0 · navy night sky (cached)
+ ctx.fillStyle=cachedGradient(ctx,`frita-market-sky:${h}`,()=>{const g=ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,P.skyTop);g.addColorStop(.55,P.skyMid);g.addColorStop(1,P.skyLow);return g;});
+ ctx.fillRect(0,0,w,h);
+ // 1 · stars + BANQUETE DORADO constellation (a fry-carton shape)
+ for(let i=0;i<70;i++){const x=wrap(hash(i+11)*w*1.4-cx*.01,w),y=hash(i+77)*h*.45;
+  ctx.globalAlpha=.3+.6*(R?.5:.5+.5*Math.sin(T*.05+i*1.3));ctx.fillStyle=P.star;ctx.fillRect(x,y,1.5,1.5);}
+ ctx.globalAlpha=1;
+ const kx=wrap(w*.3-cx*.012,w*1.3),ky=h*.12,pts=[[0,0],[60,0],[50,40],[10,40]];
+ ctx.strokeStyle='rgba(255,207,58,0.5)';ctx.lineWidth=1;ctx.beginPath();pts.forEach(([a,b],i)=>i?ctx.lineTo(kx+a,ky+b):ctx.moveTo(kx+a,ky+b));ctx.closePath();
+ for(let k=0;k<3;k++){ctx.moveTo(kx+15+k*15,ky);ctx.lineTo(kx+12+k*16,ky-20-(k%2)*8);}ctx.stroke();
+ ctx.fillStyle=P.fry;for(const [a,b] of pts){ctx.beginPath();ctx.arc(kx+a,ky+b,2.4,0,TAU);ctx.fill();}
+ // 2 · neon skyline
+ const sb=h*.62,sspan=w+200,soff=wrap(-cx*.06,sspan);
+ for(let i=0;i<14;i++){const x=wrap(i*90+soff,sspan)-100,bw=56+hash(i+5)*40,bh=70+hash(i+9)*120;
+  ctx.fillStyle=P.skyline;ctx.fillRect(x,sb-bh,bw,bh);
+  for(let r=0;r<Math.floor(bh/18);r++)for(let c=0;c<3;c++){if(hash(i*41+r*5+c)<.42){ctx.fillStyle=(i+r)%5?P.skylineWin:P.neonPink;ctx.globalAlpha=.55;ctx.fillRect(x+8+c*(bw-20)/2,sb-bh+8+r*18,6,8);}}
+  ctx.globalAlpha=1;}
+ // 3 · giant fry-carton billboard on a pole
+ const bspan=w*1.6,bx=wrap(w*.72-cx*.12,bspan)-w*.2;
+ ctx.fillStyle=P.chrome;ctx.fillRect(bx-4,sb-60,8,60);
+ ctx.globalAlpha=.18;ctx.fillStyle=P.neon;ctx.beginPath();ctx.arc(bx,sb-130,90,0,TAU);ctx.fill();ctx.globalAlpha=1;
+ _carton(ctx,bx,sb-60,120,T,R);
+ // 4 · chrome diner with checkerboard band and lit booths
+ const db=h*.8,dspan=w+520,doff=wrap(-cx*.22,dspan);
+ for(let i=0;i<2;i++){const x=wrap(i*520+doff,dspan)-260,dw=340;
+  ctx.fillStyle=P.diner;ctx.beginPath();ctx.moveTo(x,db);ctx.lineTo(x,db-96);ctx.quadraticCurveTo(x,db-120,x+24,db-120);ctx.lineTo(x+dw-24,db-120);ctx.quadraticCurveTo(x+dw,db-120,x+dw,db-96);ctx.lineTo(x+dw,db);ctx.closePath();ctx.fill();
+  ctx.fillStyle=P.chrome;ctx.fillRect(x,db-94,dw,4);ctx.fillRect(x,db-30,dw,4);
+  for(let k=0;k<6;k++){ctx.fillStyle=P.booth;ctx.fillRect(x+16+k*54,db-84,42,40);ctx.fillStyle=P.diner2;ctx.fillRect(x+16+k*54,db-62,42,4);}
+  for(let k=0;k<dw/10;k++){ctx.fillStyle=k%2?P.check1:P.check2;ctx.fillRect(x+k*10,db-26,10,8);ctx.fillStyle=k%2?P.check2:P.check1;ctx.fillRect(x+k*10,db-18,10,8);}
+  const on=R||Math.sin(T*.06+i)>-.85;ctx.globalAlpha=on?1:.35;ctx.fillStyle=P.neonPink;ctx.font='700 22px Outfit,sans-serif';ctx.textAlign='center';ctx.fillText('DINER',x+dw/2,db-128);ctx.globalAlpha=1;}
+ // 5 · market stalls with ketchup awnings
+ const mb=h*.92,mspan=w+300,moff=wrap(-cx*.38,mspan);
+ for(let i=0;i<5;i++)_stall(ctx,wrap(i*260+moff,mspan)-150,mb,150,i);
+ // 6 · boardwalk + lamps
+ ctx.fillStyle=P.boardwalk;ctx.fillRect(0,mb,w,h-mb);
+ ctx.fillStyle='rgba(255,242,184,0.12)';for(let k=0;k<w/40;k++)ctx.fillRect(wrap(k*40-cx*.5,w+40)-20,mb+2,2,h-mb);
+ const lspan=w+240,loff=wrap(-cx*.5,lspan);
+ for(let i=0;i<5;i++){const x=wrap(i*240+loff,lspan)-120;ctx.fillStyle=P.chrome;ctx.fillRect(x-2,mb-110,4,110);
+  ctx.globalAlpha=.22;ctx.fillStyle=P.lamp;ctx.beginPath();ctx.arc(x,mb-112,26,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle=P.lamp;ctx.beginPath();ctx.arc(x,mb-112,7,0,TAU);ctx.fill();}
+ // 7 · electric salt sparkles
+ if(!R){ctx.strokeStyle=P.spark;ctx.lineWidth=1.4;
+  for(let i=0;i<26;i++){const life=wrap(T*.006+hash(i+900),1),x=wrap(hash(i+600)*w-cx*.6+Math.sin(life*7+i)*16,w),y=h*.95-life*h*.6;
+   ctx.globalAlpha=(1-life)*.85;if(i%3===0){ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x,y-3);ctx.lineTo(x-1,y+2);ctx.lineTo(x+4,y-1);ctx.stroke();}else{ctx.fillStyle=P.check1;ctx.fillRect(x,y,2,2);}}
+  ctx.globalAlpha=1;}
  ctx.restore();
 }

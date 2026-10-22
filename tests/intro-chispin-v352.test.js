@@ -36,7 +36,7 @@ test("V352 reduced motion disables body animation and forward effects without al
 });
 
 test("V352 all five real Chispin anatomies retain distinct connected gestures",()=>{
- assert.deepEqual(CHISPIN_VISUAL_H,[62,72,82,90,102]);
+ assert.deepEqual(CHISPIN_VISUAL_H,[62,72,82,104,114]);
  assert.equal(typeof chispinFootwork,"function");
  assert.equal(WELCOME_CAST_ORDER.filter(id=>id==="chispin").length,1);
  for(let form=0;form<5;form++){

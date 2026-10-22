@@ -8,10 +8,10 @@ import { drawCuernoDream, drawRainbowPuff } from "../../characters/cuerno-stagec
 import { R } from "../../characters/rig.js";
 import { flatCtx, hash01 } from "./stitcho.js";
 
-export const EVO_CINE_DURATION = 4.0;
+export const EVO_CINE_DURATION = 4.5;
 export const EVO_CINE_UNITS = "seconds";
 export const FORM_NAMES = Object.freeze(["Cuernín · Semilla", "Destello · Naciente", "Kirín Aurora", "Serafín Aurora", "Cuerno Eclipse"]);
-export const EVO_CINE_PHASES = Object.freeze({ dream: [0, 1.5], stampede: [1.5, 2.6], present: [2.6, 4.0] });
+export const EVO_CINE_PHASES = Object.freeze({ dream: [0, 1.5], stampede: [1.5, 2.6], present: [2.6, 4.5] });
 const TAU = Math.PI * 2, NIGHT = "#1a1430", INK = "#3a2050";
 const IRIS = ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa", "#aeb9fb", "#e5b9f4"];
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -48,7 +48,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
   t = clamp(Number(t) || 0, 0, EVO_CINE_DURATION);
   const from = clamp((fromForm | 0) - 1, 0, 4), to = clamp((toForm | 0) - 1, 0, 4);
   const cx = w / 2, foot = h * .78, s = h * .4 / CUERNO_V373_HEIGHT[to], U = h;
-  const kD = seg(t, 0, 1.5), kS = seg(t, 1.5, 2.6), kP = seg(t, 2.6, 4.0), phase = evoCinePhase(t);
+  const kD = seg(t, 0, 1.5), kS = seg(t, 1.5, 2.6), kP = seg(t, 2.6, 4.5), phase = evoCinePhase(t);
   ctx.save();
   ctx.fillStyle = NIGHT; ctx.fillRect(0, 0, w, h);
   // cielo de sueño: estrellas que titilan (deterministas)

@@ -16,7 +16,7 @@ import { motionProfile } from "../characters/rig.js";
 import { difficulty } from "../characters/signature.js";
 import { masteryOf } from "./hero-mastery.js";
 import { rosterIndex } from "./roster-navigation.js";
-import { CALIBRATED_VISUAL_H, CALIBRATED_HEIGHT } from "../characters/visual-size.js";
+import { CALIBRATED_VISUAL_H, heroHeightTarget } from "../characters/visual-size.js";
 import { mountFamilyCamp } from "./family-camp.js";
 
 // Jingle de portada al primer toque/tecla (los navegadores no dejan sonar antes).
@@ -68,7 +68,7 @@ export const CUERNO_PORTRAIT_GROWTH = Object.freeze([.68,.77,.86,.94,1.00]);
 
 function portraitFit(def, evo, bw, bh, hero) {
 const form = def.forms?.[evo] || {};
-const baseH = CALIBRATED_VISUAL_H[def.id] ? CALIBRATED_HEIGHT[evo] : def.id==="cuerno"?CUERNO_VISUAL_H[evo]:def.id==="kilo"?KILO_VISUAL_H[evo]:def.id==="cat"?MICHI_VISUAL_H[evo]:def.id==="chispin"?CHISPIN_VISUAL_H[evo]:def.id==="stitcho"?STITCHO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
+const baseH = CALIBRATED_VISUAL_H[def.id] ? heroHeightTarget(def.id, evo) : def.id==="cuerno"?CUERNO_VISUAL_H[evo]:def.id==="kilo"?KILO_VISUAL_H[evo]:def.id==="cat"?MICHI_VISUAL_H[evo]:def.id==="chispin"?CHISPIN_VISUAL_H[evo]:def.id==="stitcho"?STITCHO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
 const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
 const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
 const visualAspect = def.id==="cuerno" ? CUERNO_PORTRAIT_ASPECT[evo] : Math.max(.72, geometryAspect * envelope);

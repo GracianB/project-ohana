@@ -7,8 +7,8 @@ import { drawCharacter } from "../../characters/draw.js";
 import { KILO_VISUAL_H } from "../../characters/art/kilo.js";
 import { ROSTER } from "../../characters/roster.js";
 
-export const EVO_CINE_DURATION = 4.0; // s
-export const EVO_CINE_PHASES = Object.freeze({ charge: [0, 1.4], transform: [1.4, 2.6], reveal: [2.6, 4.0] });
+export const EVO_CINE_DURATION = 4.5; // s
+export const EVO_CINE_PHASES = Object.freeze({ charge: [0, 1.4], transform: [1.4, 2.6], reveal: [2.6, 4.5] });
 export const KILO_FORM_NAMES = Object.freeze(["Kilo Bebé", "Kilo", "Kilo Ohana", "Super Kilo", "Kilo Flor Solar"]);
 export const KILO_EVOLUTION_STORIES=Object.freeze([
  {motif:'home',sky:'#302442',line:'Una pequeña canción puede encontrar un hogar.'},
@@ -113,7 +113,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm, toForm, opts = {}) {
   t = clamp(Number(t) || 0, 0, EVO_CINE_DURATION);
   const phase = evoCinePhase(t);
   const cx = w / 2, foot = h * .74, H = Math.min(h * .5, w * .42);
-  const kC = seg(t, 0, 1.4), kT = seg(t, 1.4, 2.6), kR = seg(t, 2.6, 4.0);
+  const kC = seg(t, 0, 1.4), kT = seg(t, 1.4, 2.6), kR = seg(t, 2.6, 4.5);
   ctx.save();
   // fondo: atardecer en capas + mar
   const story=KILO_EVOLUTION_STORIES[to];
