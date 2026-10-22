@@ -309,55 +309,73 @@ function drawMichiMythic(ctx,pose,r,f){
  };
  const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;
  const lift=(r.st==='jump'||r.st==='glide')?-4:0;
- if(f===0){ // MOON KITTEN: fully redrawn baby, not the old cat portrait.
-  const sway=wave(0,.075);
-  ctx.save();ctx.scale(.70,.70);ctx.translate(0,lift);
-  // A curled crescent tail remains recognizable even at tiny sizes.
-  // V462: tapered tail with follow-through (lags the body, curls on landing).
-  const kTail=drawCatTail(ctx,{x:-14,y:-24,len:50,t,still,swish:1+(r.st==='run'?.7:0)+(r.st==='attack'?.8:0),lag:(r.motion?.tail||0)*2,
-   curl:.75,dir:-2.95,phase:michiGenome(pose.michiSeed).phases[0],root:10,tip:4.5,fur:'#dbc7f5',dark:'#b7a0e3',ink,fluff:false});
-  {const dream=michiGenome(pose.michiSeed).palette;halo(ctx,kTail[0],kTail[1],7,7,dream.glow,1.6+(still?0:Math.sin(t*.06)*.4));oval(kTail[0],kTail[1],4.5,4.5,dream.tip,ink,1.4);gem(kTail[0],kTail[1],dream.bead,2.4);}
-  oval(0,-27,23,27,'#c8b5f0');
-  oval(2,-26,14,19,'#fff7e9',null);
-  ctx.beginPath();ctx.arc(4,-31,10,-1.25,2.25);stroke('#eabf63',3);
-  oval(0,-23,7,9,'#c8b5f0',null);
-  // V462 polish: hind legs are drawn OVER the body now (they used to hide behind it):
-  // round haunches, digitigrade shins and big beaned paws that plant on the ground
-  // and alternate with the gait rig (left/right opposite phase).
+ if(f===0){ // MOON KITTEN: V468 redesign — a chibi baby Michicornio (big head, loaf body, stubby paws, horn bud).
+  // Reads as the same lineage as the later forms: lilac fur, moon mark, golden horn bud and the
+  // seeded dream-tip on the tail that later becomes the fairy wand-tail and the jelly tentacles.
+  const sway=wave(0,.075),g0=michiGenome(pose.michiSeed),dream=g0.palette;
+  const fur='#d6c4f6',furLight='#e9dffc',furDark='#ac94e0',cream='#fff7ec';
+  const run=r.st==='run',atk=r.st==='attack',hurt=r.st==='hurt',victory=r.st==='victory';
+  ctx.save();ctx.scale(.72,.72);ctx.translate(0,lift);
+  // Soft contact shadow.
+  ctx.save();ctx.globalAlpha=.22;oval(0,-1,24,4.5,'#2a2450',null);ctx.restore();
+  // Short, fluffy curled tail behind the body with the seeded dream bead on its tip.
+  const kTail=drawCatTail(ctx,{x:-15,y:-16,len:34,t,still,swish:1+(run?.7:0)+(atk?.8:0),lag:(r.motion?.tail||0)*2,
+   curl:1.05,dir:-2.7,phase:g0.phases[0],root:8.5,tip:5,fur,dark:furDark,ink,fluff:false});
+  halo(ctx,kTail[0],kTail[1],6,6,dream.glow,1.4+(still?0:Math.sin(t*.06)*.4));
+  oval(kTail[0],kTail[1],4,4,dream.tip,ink,1.3);gem(kTail[0],kTail[1],dream.bead,2.2);
+  const runK=run&&!still?Math.sin(t*.32):0;
+  // Round loaf body: one clean oval + cream bib, nothing floating on it.
+  oval(0,-21,21,18,fur,ink,2.2);
+  oval(3,-19,11,12,cream,null);
+  // Near hind haunch sits OVER the body so the kitten clearly has back legs.
   for(const side of [-1,1]){
-   const dy=(side>0?r.motion?.frontY:r.motion?.backY)||0,dx=((side>0?r.motion?.frontX:r.motion?.backX)||0)*.45;
-   drawCatHaunch(ctx,{side,hip:[side*15,-12],paw:[side*17+dx,-2+dy*.9],thigh:10,width:8.5,fur:'#d9c8f6',dark:'#b7a0e3',ink,lift:Math.min(1,-dy/6),toe:'#f4eaff',pawS:1.25});
+   const dy=(side>0?r.motion?.frontY:r.motion?.backY)||0,dx=((side>0?r.motion?.frontX:r.motion?.backX)||0)*.35;
+   drawCatHaunch(ctx,{side,hip:[side*13,-13],paw:[side*15+dx,-2+dy*.8],thigh:8,width:7,fur:furLight,dark:furDark,ink,lift:Math.min(1,-dy/6),toe:'#f4eaff',pawS:1.05});
   }
+  // Near front stubby paws straight down under the chest (they lift for attack / victory).
   for(const side of [-1,1]){
    const bend=(side>0?r.motion?.frontPaw:r.motion?.rearPaw)||0;
-   const pawY=-27+(r.st==='run'?sway*2:0)-bend*7;
-   drawCatLeg(ctx,{hip:[side*15,-38],paw:[side*(24+bend*5),pawY],upper:8,lower:8,bend:side>0?1:-1,width:7,fur:'#e4d0f7',ink,lift:Math.min(1,Math.abs(bend)),claws:r.st==='attack'&&side>0,toe:'#fff3f9'});
+   let px=side*6+(run?runK*side*4:0),py=-4-bend*6;
+   if(atk&&side>0){px=20;py=-24;}
+   if(victory){px=side*17;py=-36+(still?0:Math.sin(t*.14+side)*2);}
+   if(hurt){px=side*10;py=-12;}
+   drawCatLeg(ctx,{hip:[side*6,-20],paw:[px,py],upper:9,lower:9,bend:side>0?1:-1,width:8,fur:furLight,dark:furDark,ink,lift:(atk&&side>0)||victory?.8:0,claws:false,toe:'#fff3f9',pawS:1.1});
+   if(atk&&side>0)for(const k of [-3,0,3]){ctx.beginPath();ctx.moveTo(px+5,py+k);ctx.lineTo(px+9,py+k-1);stroke(ink,1.3);}
   }
-  ctx.save();ctx.translate(0,-70);
+  // Big baby head: overlaps the body top, tilts with the rig.
+  ctx.save();ctx.translate(0,-54);
   ctx.rotate((r.michiHead||0)*.30+(r.motion?.head||0)+sway*.035);
-  // Asymmetric star ears: unique facial language, not reused cat outlines.
+  // Rounded kitten ears (no star spikes), pink inner fur.
   for(const side of [-1,1]){
-   ctx.beginPath();ctx.moveTo(side*13,-17);
-   ctx.lineTo(side*29,-43+(side===1?sway:0)-(r.motion?.ear||0)*8);
-   ctx.quadraticCurveTo(side*36,-26,side*29,-2);
-   ctx.closePath();ctx.fillStyle='#d9c6f6';ctx.fill();stroke(ink,2.6);
-   ctx.beginPath();ctx.moveTo(side*20,-16);
-   ctx.lineTo(side*29,-32);ctx.lineTo(side*26,-10);
-   ctx.closePath();ctx.fillStyle='#f5b6d8';ctx.fill();
+   const ear=(side===1?sway:0)*1.5+(r.motion?.ear||0)*6-(hurt?5:0);
+   ctx.beginPath();ctx.moveTo(side*10,-18);
+   ctx.quadraticCurveTo(side*19,-38+ear,side*25,-36+ear);
+   ctx.quadraticCurveTo(side*30,-24,side*27,-8);ctx.closePath();
+   ctx.fillStyle=fur;ctx.fill();stroke(ink,2.3);
+   ctx.beginPath();ctx.moveTo(side*14,-17);ctx.quadraticCurveTo(side*20,-31+ear,side*23.5,-30+ear);
+   ctx.quadraticCurveTo(side*25.5,-21,side*24,-12);ctx.closePath();ctx.fillStyle='#f5b6d8';ctx.fill();
   }
-  oval(0,0,32,28,'#e6d9fb');
-  oval(0,13,19,11,'#fff8f1',null);
-  eye(-13,-3,'#6d68d9',6,8);
-  eye(13,-3,'#6d68d9',6,8);
-  drawCatMouth(ctx,{x:0,y:13,s:1.05,open:r.st==='victory'?.6:r.st==='attack'?.7:r.st==='hurt'?.35:(r.motion?.jaw||0)*.3,smile:r.mood==='happy'||r.st==='victory'?1:0,ink,nose:'#e995b6',fangs:r.st==='attack'});
-  for(const side of [-1,1])for(const y of [11,16]){
-   ctx.beginPath();ctx.moveTo(side*20,y);ctx.lineTo(side*37,y-3);stroke('#8e77bd',1.4);
+  // Tiny golden horn bud (the "cornio"), short and rounded — it grows in later forms.
+  ctx.beginPath();ctx.moveTo(-4.5,-23);ctx.quadraticCurveTo(-1.5,-31,0,-36);ctx.quadraticCurveTo(1.5,-31,4.5,-23);ctx.closePath();
+  ctx.fillStyle='#ffe3ab';ctx.fill();stroke(ink,1.9);
+  ctx.beginPath();ctx.moveTo(-2.6,-27);ctx.lineTo(2.2,-25.5);ctx.moveTo(-1.6,-31);ctx.lineTo(1.6,-29.5);stroke('#d9a64a',1.1);
+  // Head.
+  oval(0,0,30,25,furLight,ink,2.4);
+  // Fluffy tuft between the ears.
+  ctx.beginPath();ctx.moveTo(-7,-23);ctx.quadraticCurveTo(-3,-30,0,-24);ctx.quadraticCurveTo(3,-30,7,-23);stroke(ink,1.6);
+  // Crescent moon mark on the forehead (lineage sign shared by every form).
+  oval(0,-14,4.6,4.6,'#ffd98a',null);oval(2.2,-15.4,4,4,furLight,null);
+  // Muzzle + huge sparkly eyes (baby proportions: eyes low and wide).
+  oval(0,11,15,9,cream,null);
+  const ex=12,ey=1;
+  eye(-ex,ey,'#6d68d9',6.6,8.6);eye(ex,ey,'#6d68d9',6.6,8.6);
+  if(!(r.mood==='closed'||r.mood==='happy'||r.motion?.blink))for(const sx of [-1,1])oval(sx*ex+2.6,ey+3.5,1.2,1.2,'#fff',null);
+  if(atk){for(const sx of [-1,1]){ctx.beginPath();ctx.moveTo(sx*(ex+7),-10);ctx.lineTo(sx*(ex-4),-7);stroke(ink,2);}}
+  ctx.save();ctx.globalAlpha=.8;oval(-20,9,4.6,2.6,'#f6a6c8',null);oval(20,9,4.6,2.6,'#f6a6c8',null);ctx.restore();
+  drawCatMouth(ctx,{x:0,y:11,s:.95,open:victory?.6:atk?.7:hurt?.35:(r.motion?.jaw||0)*.3,smile:r.mood==='happy'||victory?1:0,ink,nose:'#e995b6',fangs:atk});
+  for(const side of [-1,1])for(const y of [10,14]){
+   ctx.beginPath();ctx.moveTo(side*17,y);ctx.lineTo(side*30,y-2+(y-12));stroke('#8e77bd',1.2);
   }
-  gem(0,-20,'#ffe2a0',6);
-   ctx.beginPath();ctx.moveTo(-4,-20);ctx.lineTo(0,-41);ctx.lineTo(4,-20);ctx.closePath();ctx.fillStyle='#ffe3ab';ctx.fill();stroke(ink,2);
-  ctx.save();ctx.globalAlpha=.75;oval(-20,5,4.5,2.4,'#f6a6c8',null);oval(20,5,4.5,2.4,'#f6a6c8',null);ctx.restore();
-  for(const x of [-6,0,6]){ctx.beginPath();ctx.moveTo(x,-27);ctx.lineTo(x*.75,-21);stroke('#b9a3e6',1.6);}
-  ctx.save();ctx.globalAlpha=.3;ctx.beginPath();ctx.ellipse(0,21,22,6,0,0,Math.PI);ctx.fillStyle='#a993d8';ctx.fill();ctx.restore();
   ctx.restore();ctx.restore();return;
  }
  if(f===1){ // FAIRY CAT (Hada Felina): a floating moon-fairy, NOT a second kitten.

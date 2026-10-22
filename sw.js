@@ -1,4 +1,4 @@
-const VERSION = "ohana-468";
+const VERSION = "ohana-469";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -472,7 +472,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "d9f61d2224d9453d14105d8e855783f53e2cac12",
-  "index.html": "915db8c2c1aa34777a731bc86f3a7ccd89fafbfa",
+  "index.html": "a1487ed5ce6abac1695ac93100f35d719908bd8f",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -497,9 +497,9 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "46e14fcf9af0d0f9a745b8c09583f851368ebb88",
+  "game.js": "a645348c842b0f24f6e659d9887fb2134d818595",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
-  "characters/art/cat.js": "2794a724245512239a597cf4581295b57005312a",
+  "characters/art/cat.js": "9b6a7b35c9a31d777b43214b028ffb29ee541021",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
   "previews/animation-lab.html": "d12d4213dc7952102701c8ea5741f41523de105e",
   "previews/michi-design.html": "ba6f32aef28b06966e4871c981eb9f4e4bab77ac",
@@ -511,9 +511,9 @@ const PRECACHE_REVISIONS = {
   "characters/art/frita.js": "128a9647674d37522be77ecd51aadb1b52dea9ae",
   "characters/art/index.js": "f5402b1adf8cb1aba5ba45d9af1706ba65c2023e",
   "characters/art/kilo.js": "6cb085e45287bb7d32a8d19606506437c8d23ce6",
-  "characters/art/lilo.js": "b65b04137ff719935b356dde4ebbd394dc057dd8",
+  "characters/art/lilo.js": "2c53ae3f0f3fd381b96fbf4d6c8f637a7a69d6af",
   "characters/art/pikachu.js": "b0f5c0436aa258f3501e0fb03119e1838a7e990a",
-  "characters/art/pizza.js": "1f7cd27af47c9e0c36d1aaedcf7579f7ffd3caba",
+  "characters/art/pizza.js": "2fab4b5d25249088ef2d38e42b153b8a60c1ed0a",
   "characters/art/stitch.js": "97c9fd36d77b77eef847e692780b480e4949a0ad",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "84eb92286425e6f4c4d92eeaa98896d90a673389",
@@ -690,7 +690,7 @@ const PRECACHE_REVISIONS = {
   "systems/surprises.js": "9ac680c25713258f8e828eb396bf7f659ce390da",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "26212ebc7e76eafed3f4a53484bdb39520a88dbc",
-  "systems/experience.js": "fdae32ccbf59e4f838cee4f5fe0ca0f5f66d16ca",
+  "systems/experience.js": "df1e58798417234504dc49483f86457082db7a8c",
   "systems/online-coop.js": "d4ec36b514a6b597562d61777bbf2b68e3f34dc9",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
   "systems/xp.js": "df3fba7395dfacd5fe3dc37826c6cb10c244856a",

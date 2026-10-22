@@ -1329,7 +1329,8 @@ if (wasAir && impactSpeed > 7) {
 beep("land");
 game.experience?.land(p, impactSpeed);
 game.fx.emit(p.x + p.w / 2, plat.y, { color: p.color || "#fff", count: impactSpeed > 11 ? 16 : 8, size: 3, speed: 2.4, up: 0.4, life: 14 });
-if (impactSpeed > 11) game.shake = Math.min(10, (game.shake || 0) + 3);
+// V468: no screen shake on normal landings, only on very long falls.
+if (impactSpeed > 20) game.shake = Math.min(6, (game.shake || 0) + 2);
 }
 
 p.y = plat.y - p.h;
@@ -2798,7 +2799,20 @@ const vw = camW(), vh = camH();
 let lerp = 0.24;
 const look = horizontalLook(p);
 let tx = p.x + p.w / 2 + look - vw / 2;
-let ty = p.y + p.h / 2 - vh / 2 + Math.max(-100,Math.min(160,(p.vy||0)*12));
+// V468 calm camera: Y follows a platform anchor, not every jump. The anchor
+// re-centres only when the hero lands on a new height or leaves the vertical
+// dead zone (top 28% / bottom 30% of the view), so normal jumps don't bob the view.
+const pcY = p.y + p.h / 2;
+const cs = game._camCalm || (game._camCalm = { anchor: pcY });
+if (!Number.isFinite(cs.anchor) || p.dead) cs.anchor = pcY;
+if (p.grounded) cs.anchor = pcY;
+else {
+  const top = game.cam.y + vh * 0.28, bottom = game.cam.y + vh * 0.70;
+  if (pcY < top) cs.anchor = Math.min(cs.anchor, pcY + vh * 0.14);
+  else if (pcY > bottom) cs.anchor = Math.max(cs.anchor, pcY - vh * 0.06);
+}
+let ty = cs.anchor - vh * 0.56;
+let lerpY = 0.075;
 const boss = game.enemies.find((e) => e.boss && !e.fell);
 const fin = game.finale && game.finale.t > 0 ? game.finale : null;
 if (fin) {
@@ -2815,7 +2829,12 @@ ty = (py * 0.45 + by * 0.55) - vh * 0.42;
 lerp = 0.18;
 }
 game.cam.x += (tx - game.cam.x) * lerp;
-game.cam.y += (ty - game.cam.y) * lerp;
+{
+  const k = (fin || boss) ? lerp : lerpY;
+  const maxVy = vh * 0.022; // vertical speed cap (px per frame)
+  const dy = Math.max(-maxVy, Math.min(maxVy, (ty - game.cam.y) * k));
+  game.cam.y += Math.abs(ty - game.cam.y) > vh * 1.5 ? (ty - game.cam.y) : dy; // teleports snap
+}
 if (game.camPunch > 0) game.camPunch *= 0.82;
 game.cam.x = Math.max(0, Math.min(game.cam.x, Math.max(0, game.worldW - vw)));
 game.cam.y = Math.max(-40, Math.min(game.cam.y, Math.max(-40, game.worldH - vh + 80)));

@@ -932,6 +932,10 @@ function draw(ctx, pose, R) {
     r.handF = [4 + al * 0.8, sy - al * 0.2]; r.handB = [-5 - al * 0.8, sy - al * 0.1];
     r.footF = [6, 0]; r.footB = [-6, 0]; r.headRot = 0.1; r.flare = 0.3;
   }
+  // V468: the played ukulele is mirrored — the neck/headstock points to Kilo's
+  // LEFT (free space) instead of across the near arm. The fretting (back) hand
+  // follows the neck; the strumming hand stays on the body at bx = 1.
+  if (r.uke === "play" && !dead) r.handB = [1 - Math.abs(r.handB[0] - 1), r.handB[1]];
 
   ctx.save();
   if (dead) { ctx.translate(46 + f * 2, -d.hr * 1.12); ctx.rotate(-Math.PI / 2); }

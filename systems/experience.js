@@ -384,7 +384,7 @@ export class ExperienceDirector {
     const boost =
       this.state.impact * 0.022 +
       this.state.shock * 0.012 +
-      this.state.land * 0.008 +
+      this.state.land * 0 + // V468: landings no longer pulse the zoom
       this.state.evo * (this.state.finalEvo ? 0.025 : 0.014);
 
     return clamp(1 + boost, 1, 1.065);
