@@ -53,7 +53,8 @@ function complete(g, s, label) {
   const n = w.stations.filter((x) => x.done && x.kind !== "oven").length;
   g.nums?.add?.(s.x, s.y - 90, label + " " + n + "/" + need, WORLD1_THEMES[w.hero]?.color || "#fff", true);
   g.fx?.emit?.(s.x, s.y - 50, { color: WORLD1_THEMES[w.hero]?.color || "#fff", count: g.reduceMotion ? 6 : 20, size: 4, up: 2, star: true, life: 30 });
-  g.score = (g.score || 0) + 150;
+  // A timed chain can restart: each physical station grants score only once.
+  if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
   g.onWorld1Beat?.("station", w.hero);
   if (n >= need) awardSeal(g);
   return true;
@@ -93,9 +94,17 @@ export function updateWorld1(g) {
       else { const s = w.stations.find((x) => x.id === w.carry); if (s && near(p, s.target.x, s.target.y - 30, 60, 80)) { w.carry = null; complete(g, s, "NAVE"); } }
       break;
     case "cadena": {
+      // Reset before selecting the active rod. Selecting first allowed an old
+      // second/third rod to auto-complete on the exact frame of expiration.
+      if (w.order > 0 && w.tick > w.chainUntil) {
+        for (const s of w.stations) { s.done = false; s.glow = 0; }
+        w.order = 0; w.chainUntil = 0;
+        g.nums?.add?.(p.x, p.y - 40, "LA CHISPA SE APAGÓ · VUELVE AL PRIMERO", "#ffe28a", true);
+      }
       const next = w.stations.find((s) => !s.done);
-      if (w.order > 0 && w.tick > w.chainUntil) { for (const s of w.stations) s.done = false; w.order = 0; g.nums?.add?.(p.x, p.y - 40, "LA CHISPA SE APAGÓ · VUELVE AL PRIMERO", "#ffe28a", true); }
-      if (next && near(p, next.x, next.y - 40, 50, 90)) { w.order++; w.chainUntil = w.tick + CHAIN_TICKS; complete(g, next, "PARARRAYOS"); }
+      if (next && near(p, next.x, next.y - 40, 50, 90)) {
+        w.order++; w.chainUntil = w.tick + CHAIN_TICKS; complete(g, next, "PARARRAYOS");
+      }
       break; }
     case "medusas":
       for (const s of w.stations) if (!s.done && airborne && near(p, s.x, s.y, 48, 52)) complete(g, s, "MEDUSA");
