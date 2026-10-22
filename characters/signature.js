@@ -34,7 +34,7 @@ const HITS = {
   dino:    { name: "Mordisco", kind: "bite",  color: "#8ee07a" },
   frita:   { name: "Corte",    kind: "slice", color: "#f0b43a" },
   pizza:   { name: "Porcion",  kind: "wedge", color: "#ffb43a" },
-  yomi:    { name: "Fauces",   kind: "fang",  color: "#ff4466" },
+  yomi:    { name: "Palmada de datos", kind: "fang",  color: "#4ff0c8" },
   cuerno:  { name: "Puya",     kind: "poke",  color: "#ffe9a8" },
 };
 

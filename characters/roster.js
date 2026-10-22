@@ -142,18 +142,19 @@ export const ALL_ROSTER = [
     ],
   },
   {
-    id: "yomi", name: "Yomi", role: "espectro", tag: "Ofuda y paso hueco",
-    color: "#e8c090",
+    id: "yomi", name: "Yomi", role: "IA", tag: "Ping, escáner y síntesis · la IA de la familia",
+    color: "#4ff0c8",
     speed: 4.4, jumpPower: 12.0, maxJumps: 2, health: 84, w: 26, h: 36,
+    // Internal ids kept for saves, net and duets: ofuda=J Ping, sleeve=K Escáner, maw=L Síntesis.
     abilities: ["ofuda", "sleeve", "maw"],
-    passive: { id: "hollow", name: "Paso hueco", desc: "Cae más rápido. En el aire, pulsa salto para un paso espectral." },
-    evoNames: ["Farol", "Yomi", "Yomi Manga", "Yomi Grieta", "Yomi Devoralunas"],
+    passive: { id: "hollow", name: "Salto recalculado", desc: "Cae más rápido para recolocarse. En el aire, pulsa salto para un microteletransporte de datos con un instante de invulnerabilidad." },
+    evoNames: ["Yomi Bit", "Yomi", "Yomi Red", "Yomi Oráculo", "Yomi Constelación"],
     forms: [
-      { name: "Farol", color: "#f4e2c4", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
-      { name: "Yomi", color: "#e8c090", speed: 4.8, jump: 12.6, jumps: 2, hp: 104, w: 28, h: 40 },
-      { name: "Yomi Manga", color: "#d09060", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
-      { name: "Yomi Grieta", color: "#c4503a", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
-      { name: "Yomi Devoralunas", color: "#ff4466", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true },
+      { name: "Yomi Bit", color: "#9ff7e0", speed: 4.4, jump: 12.0, jumps: 2, hp: 84, w: 26, h: 36 },
+      { name: "Yomi", color: "#4ff0c8", speed: 4.8, jump: 12.6, jumps: 2, hp: 104, w: 28, h: 40 },
+      { name: "Yomi Red", color: "#35d9c0", speed: 5.3, jump: 13.2, jumps: 2, hp: 126, w: 30, h: 42 },
+      { name: "Yomi Oráculo", color: "#8f9bff", speed: 5.8, jump: 13.8, jumps: 3, hp: 150, w: 32, h: 44 },
+      { name: "Yomi Constelación", color: "#ffd56b", speed: 6.6, jump: 14.8, jumps: 3, hp: 196, w: 36, h: 48, aura: true },
     ],
   },
   {

@@ -65,7 +65,7 @@ dragon:  Object.freeze({ motif: "flame",    silhouette: "wing",     span: 1.16, 
 dino:    Object.freeze({ motif: "crystal",  silhouette: "back",     span: 1.10, spin: 0.08, nodes: 8, accent: "#b8ef6b", profile: "crystal-spine" }),
 frita:   Object.freeze({ motif: "fries",    silhouette: "crest",    span: 1.04, spin: -0.20, nodes: 8, accent: "#fff1b3", profile: "crisp-crest" }),
 pizza:   Object.freeze({ motif: "crust",    silhouette: "ring",     span: 1.10, spin: 0.10, nodes: 7, accent: "#ffd84a", profile: "volcanic-ring" }),
-yomi:    Object.freeze({ motif: "maw",      silhouette: "mantle",   span: 1.04, spin: 0.00, nodes: 6, accent: "#ff5b78", profile: "devourer-mantle" }),
+yomi:    Object.freeze({ motif: "signal",   silhouette: "none",     span: 1.04, spin: 0.00, nodes: 6, accent: "#4ff0c8", profile: "neural-constellation" }),
 cuerno:  Object.freeze({ motif: "aurora",   silhouette: "antler",     span: 1.12, spin: 0.18, nodes: 8, accent: "#f2c1ff", profile: "aurora-mane" }),
 });
 export const EVOLUTION_CINEMA_PROFILES = Object.freeze({
@@ -77,7 +77,7 @@ dragon:  Object.freeze({ camera:"sweep",    bg:"#2a1007", accent:"#ff8a45", moti
 dino:    Object.freeze({ camera:"impact",   bg:"#10220d", accent:"#b8ef6b", motif:"shards",  pulse:"quake",   reveal:"impact",  speed:0.94 }),
 frita:   Object.freeze({ camera:"whip",     bg:"#24170b", accent:"#fff1b3", motif:"salt",    pulse:"crisp",   reveal:"fry",     speed:1.18 }),
 pizza:   Object.freeze({ camera:"roll",     bg:"#281007", accent:"#ffd84a", motif:"cheese",  pulse:"oven",    reveal:"volcano", speed:0.92 }),
-yomi:    Object.freeze({ camera:"pull",     bg:"#170510", accent:"#ff2244", motif:"ofuda",   pulse:"maw",     reveal:"devour",  speed:0.82 }),
+yomi:    Object.freeze({ camera:"pull",     bg:"#071526", accent:"#4ff0c8", motif:"signal",  pulse:"network", reveal:"constellation", speed:0.9 }),
 cuerno:  Object.freeze({ camera:"rise",     bg:"#17102a", accent:"#f2c1ff", motif:"aurora",  pulse:"rainbow", reveal:"aurora",  speed:1.02 }),
 });
 
@@ -139,10 +139,10 @@ pizza: [
 "Pizza Volcánica descubre un fuego capaz de proteger a toda la familia.",
 ],
 yomi: [
-"Una llamita tímida descubre cómo iluminar el camino.",
-"Las mangas ya no esconden miedo: protegen a los viajeros.",
-"El sello despierta y el farol aprende a defender sin herir por gusto.",
-"El Juez del Umbral abre la puerta a Cuerno: juntos protegen todo OHANA.",
+"Un píxel aprende su primera palabra: «¿hola?». La familia contesta.",
+"Cada pregunta enciende un nodo: Yomi Red ya piensa en voz alta.",
+"Tres pensamientos orbitan al Oráculo: escucha, recuerda y responde.",
+"Diez estrellas, una por cada miembro de la familia: Yomi Constelación no deja a nadie atrás.",
 ],
 cuerno: [
 // V75: tell the same biological story that the five live Canvas silhouettes show.
@@ -200,7 +200,7 @@ dragon:  Object.freeze({ kind: "flame", lean:  0.020, head: -0.040, swing: 0.92,
 dino:    Object.freeze({ kind: "shard", lean:  0.090, head: -0.050, swing: 0.78, float: -0.04, combat: 1.24 }),
 frita:   Object.freeze({ kind: "salt",  lean:  0.065, head: -0.022, swing: 1.12, float: 0.00, combat: 1.06 }),
 pizza:   Object.freeze({ kind: "cheese",lean: -0.055, head: 0.020, swing: 0.84, float: 0.06, combat: 1.02 }),
-yomi:    Object.freeze({ kind: "ofuda", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }),
+yomi:    Object.freeze({ kind: "signal", lean:  0.012, head: 0.065, swing: 0.72, float: 0.22, combat: 1.12 }),
 cuerno:  Object.freeze({ kind: "horn",  lean: -0.030, head: -0.030, swing: 1.02, float: 0.14, combat: 0.98 }),
 });
 
@@ -360,11 +360,9 @@ case "cheese":
   ctx.closePath();
   ctx.fill();
   break;
-case "ofuda":
-  ctx.fillRect(-s * 0.34, -s * 0.68, s * 0.68, s * 1.36);
-  ctx.globalAlpha = 0.65;
-  ctx.fillStyle = "#fff8df";
-  ctx.fillRect(-s * 0.07, -s * 0.55, s * 0.14, s * 1.10);
+case "signal": // Yomi: a data diamond with a bright core
+  ctx.moveTo(0, -s * 0.8); ctx.lineTo(s * 0.6, 0); ctx.lineTo(0, s * 0.8); ctx.lineTo(-s * 0.6, 0); ctx.closePath(); ctx.fill();
+  ctx.globalAlpha = 0.7; ctx.fillStyle = "#eafffa"; ctx.fillRect(-s * 0.12, -s * 0.12, s * 0.24, s * 0.24);
   break;
 case "horn":
   ctx.moveTo(-s * 0.10, s * 0.70);

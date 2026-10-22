@@ -1,79 +1,107 @@
+// OHANA · Yomi IA · metamorfosis propia en partida (4 actos, 4 s).
+// Canvas 2D, determinista, sin gradientes ni azar (ruido hash).
+// Actos: 1 «¿hola?» (pregunta) → 2 «leer» (runas de código convergen)
+// → 3 «compilar» (capullo de datos + un único destello suave) → 4 «despertar».
 import {ROSTER} from '../../characters/roster.js';
 import {drawEvolutionActor} from './real-actor.js';
-// Cinemática de evolución de Yomi: tinta y sombras, mariposas lunares y abanico. Sin gradientes, determinista.
-// Fases: carga (0-1.6s), transformación (1.6-2.9s), presentación (2.9-4s).
 export const EVO_CINE_DURATION = 4.0;
-const FORM_NAMES = ROSTER.find(r=>r.id==='yomi').forms.map(f=>f.name);
-const formName = (f) => FORM_NAMES[Math.max(0, Math.min(4, (f | 0) - 1))];
-// Paleta de characters/art/yomi.js: [piel, túnica, farol, sombra].
-const PAL = [["#f8e5b9", "#d78b69", "#f8b567", "#52364b"], ["#f1d5a5", "#c67d69", "#ffb35c", "#604066"], ["#f3cba5", "#ad6481", "#ed9f6b", "#6f467d"], ["#edd0bf", "#a74668", "#ff7580", "#7d3b71"], ["#fff0d4", "#8d3d67", "#ffd279", "#b9588f"]];
-const TAU = Math.PI * 2, INK = "#1a0f1e", L = "#2a1424";
-const ease = (k) => k * k * (3 - 2 * k), cl = (v) => Math.max(0, Math.min(1, v));
-const hash = (i) => { const s = Math.sin(i * 127.1) * 43758.5453; return s - Math.floor(s); };
+export const YOMI_EVO_ACTS = Object.freeze([
+ Object.freeze({id:'question',start:0,end:.9}),
+ Object.freeze({id:'read',start:.9,end:1.8}),
+ Object.freeze({id:'compile',start:1.8,end:2.9}),
+ Object.freeze({id:'awaken',start:2.9,end:4})
+]);
+export const YOMI_FLASH_AT = 2.35;
+const TAU = Math.PI * 2, MINT = "#4ff0c8", CORAL = "#ff7f6e", GOLD = "#ffd56b", BG = "#071526";
+const FORM_NAMES = ROSTER.find(r => r.id === 'yomi').forms.map(f => f.name);
+const STARS = ["#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a","#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"];
+const LINES = ["¿hola?", "leyendo a la familia…", "compilando recuerdos…", "nadie se queda atrás"];
+const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, Number(v) || 0));
+const sm = v => { const k = cl(v); return k * k * (3 - 2 * k); };
+const hn = i => { const x = Math.sin(i * 127.1 + 3.3) * 43758.5453; return x - Math.floor(x); };
+const formName = f => FORM_NAMES[Math.max(0, Math.min(4, (f | 0) - 1))];
 
-function butterfly(ctx, x, y, s, flap, col) {
-  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  const o = 0.35 + Math.abs(Math.sin(flap)) * 0.65;
-  ctx.fillStyle = col; ctx.strokeStyle = L; ctx.lineWidth = 0.8;
-  for (const d of [-1, 1]) { ctx.save(); ctx.scale(d * o, 1);
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.bezierCurveTo(4, -8, 11, -6, 8, 1); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, 1); ctx.bezierCurveTo(6, 3, 6, 8, 2, 7); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
-  ctx.fillStyle = L; ctx.fillRect(-0.6, -3, 1.2, 9);
-  ctx.restore();
+export function evoCinePhase(t) {
+  t = Number(t) || 0;
+  for (const a of YOMI_EVO_ACTS) if (t >= a.start && t < a.end) return a.id;
+  return "awaken";
 }
-function fan(ctx, x, y, R, open, col, line) {
-  // Abanico plegable: 9 varillas, papel con franjas y una luna.
-  const span = 0.25 + open * 2.3, a0 = -Math.PI / 2 - span / 2;
-  ctx.save(); ctx.translate(x, y);
-  ctx.fillStyle = col; ctx.strokeStyle = line; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(0, 0, R, a0, a0 + span); ctx.arc(0, 0, R * 0.35, a0 + span, a0, true); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.lineWidth = 1.2;
-  for (let i = 0; i <= 8; i++) { const a = a0 + span * i / 8; ctx.beginPath(); ctx.moveTo(Math.cos(a) * R * 0.1, Math.sin(a) * R * 0.1); ctx.lineTo(Math.cos(a) * R, Math.sin(a) * R); ctx.stroke(); }
-  if (open > 0.5) { ctx.fillStyle = "#fff4c8"; ctx.globalAlpha = (open - 0.5) * 2; ctx.beginPath(); ctx.arc(0, -R * 0.68, R * 0.16, 0, TAU); ctx.fill(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(R * 0.06, -R * 0.7, R * 0.14, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
-  ctx.restore();
+export function yomiEvoBeat(t = 0, from = 1, to = 2, reduced = false) {
+ const time = cl(t, 0, EVO_CINE_DURATION), act = YOMI_EVO_ACTS.find(a => time < a.end) || YOMI_EVO_ACTS[3];
+ return Object.freeze({ act: act.id, progress: sm((time - act.start) / (act.end - act.start)), time,
+  from: cl(from, 1, 5), to: cl(to, 1, 5), reduced: !!reduced,
+  runes: sm((time - .7) / 1.1), cocoon: sm((time - 1.8) / .4) * (1 - sm((time - YOMI_FLASH_AT) / .25)),
+  flash: reduced ? 0 : Math.max(0, 1 - Math.abs(time - YOMI_FLASH_AT) / .18),
+  reveal: sm((time - 2.4) / .6), nodes: cl(to, 1, 5) >= 5 ? 10 : cl(to, 1, 5) * 2 });
 }
-function yomi(ctx,x,y,s,form,t){drawEvolutionActor(ctx,'yomi',x,y,s,form,t);}
-
-export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
-  const K = h / 300, cx = w / 2, cy = h * 0.68, to = Math.max(1, Math.min(5, toForm | 0)), fi = to - 1;
-  const [, robe, lantern, shade] = PAL[fi], BF = ["#fff4c8", "#c9a0ff", "#ffd279"];
-  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
-  ctx.fillStyle = "#120a1c"; ctx.fillRect(0, 0, w, h);
-  // Luna fija al fondo + estrellas deterministas.
-  ctx.fillStyle = "#fff2d0"; for (let i = 0; i < 20; i++) { ctx.globalAlpha = 0.3 + 0.35 * Math.abs(Math.sin(t * 1.7 + i)); ctx.beginPath(); ctx.arc(hash(i) * w, hash(i + 50) * h * 0.5, 1.2 * K, 0, TAU); ctx.fill(); }
+function rune(ctx, x, y, s, i, col) {
+ // Code runes: brackets, slash, chevrons, dots — "magic" written as code.
+ ctx.save(); ctx.translate(x, y); ctx.strokeStyle = col; ctx.lineWidth = Math.max(1, s * .16); ctx.lineCap = "round"; ctx.beginPath();
+ switch (i % 5) {
+  case 0: ctx.moveTo(-s * .2, -s * .5); ctx.lineTo(-s * .5, 0); ctx.lineTo(-s * .2, s * .5); ctx.moveTo(s * .2, -s * .5); ctx.lineTo(s * .5, 0); ctx.lineTo(s * .2, s * .5); break;
+  case 1: ctx.moveTo(-s * .25, -s * .5); ctx.quadraticCurveTo(-s * .5, 0, -s * .25, s * .5); ctx.moveTo(s * .25, -s * .5); ctx.quadraticCurveTo(s * .5, 0, s * .25, s * .5); break;
+  case 2: ctx.moveTo(s * .3, -s * .5); ctx.lineTo(-s * .3, s * .5); break;
+  case 3: ctx.arc(0, 0, s * .35, 0, TAU); ctx.moveTo(-s * .5, 0); ctx.lineTo(s * .5, 0); break;
+  default: ctx.moveTo(-s * .4, -s * .3); ctx.lineTo(s * .4, -s * .3); ctx.moveTo(-s * .4, s * .3); ctx.lineTo(s * .1, s * .3); break;
+ }
+ ctx.stroke(); ctx.restore();
+}
+export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2, opts = {}) {
+ const reduced = !!opts.reducedMotion, b = yomiEvoBeat(reduced ? 3.6 : t, fromForm, toForm, reduced);
+ const K = h / 300, cx = w / 2, cy = h * .7, to = b.to | 0, T = reduced ? 0 : b.time;
+ ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+ ctx.fillStyle = BG; ctx.fillRect(0, 0, w, h);
+ // grid floor + distant stars (flat colours)
+ ctx.strokeStyle = "#12304a"; ctx.lineWidth = 1;
+ for (let i = -8; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(cx + i * 22 * K, cy + 8 * K); ctx.lineTo(cx + i * 70 * K, h); ctx.stroke(); }
+ for (let j = 0; j < 5; j++) { const y = cy + 8 * K + j * j * 6 * K; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+ for (let i = 0; i < 26; i++) { ctx.globalAlpha = .25 + .35 * Math.abs(Math.sin(T * 1.3 + i)); ctx.fillStyle = i % 4 ? "#cfe8ff" : MINT; ctx.fillRect(hn(i) * w, hn(i + 40) * h * .55, 2 * K, 2 * K); }
+ ctx.globalAlpha = 1;
+ const fromS = 1.9 * K, toS = 2.3 * K;
+ if (b.act === 'question') {
+  // ACT 1 · a single question appears over the old form; the LED blinks.
+  const k = b.progress;
+  drawEvolutionActor(ctx, 'yomi', cx, cy, fromS, b.from, T * 60);
+  ctx.globalAlpha = k; ctx.fillStyle = CORAL; ctx.font = `900 ${Math.round(34 * K)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("?", cx + 34 * K, cy - 92 * K - k * 8 * K);
   ctx.globalAlpha = 1;
-  const moonR = 46 * K * (t < 1.6 ? 0.7 : 1);
-  ctx.fillStyle = "#fff0c8"; ctx.beginPath(); ctx.arc(cx + 120 * K, h * 0.28, moonR, 0, TAU); ctx.fill();
-  ctx.fillStyle = "#120a1c"; ctx.beginPath(); ctx.arc(cx + 120 * K + moonR * (t < 2.9 ? 0.5 : 0.25), h * 0.28 - 4 * K, moonR * 0.9, 0, TAU); ctx.fill();
-  // Charco de sombra/tinta bajo Yomi.
-  const pool = t < 1.6 ? 50 + 50 * (t / 1.6) : 100;
-  ctx.fillStyle = INK; ctx.strokeStyle = "#5a3478"; ctx.lineWidth = 2 * K; ctx.beginPath(); ctx.ellipse(cx, cy + 3 * K, pool * K, 13 * K, 0, 0, TAU); ctx.fill(); ctx.stroke();
-  if (t < 1.6) { // CARGA: gotas de tinta caen al charco, la sombra sube como llamas, abanico cerrado
-    const k = t / 1.6;
-    for (let i = 0; i < 10; i++) { const ph = ((t * 1.3 + hash(i)) % 1), x = cx + (hash(i + 9) - 0.5) * 260 * K * (1 - k * 0.5), y = h * 0.1 + ph * (cy - h * 0.1);
-      ctx.fillStyle = shade; ctx.strokeStyle = "#c9a0ff"; ctx.lineWidth = 1.2 * K; ctx.beginPath(); ctx.moveTo(x, y - 9 * K); ctx.quadraticCurveTo(x + 5 * K, y, x, y + 4 * K); ctx.quadraticCurveTo(x - 5 * K, y, x, y - 9 * K); ctx.fill(); ctx.stroke(); }
-    for (let i = 0; i < 7; i++) { const hh = (20 + 40 * k) * K * (0.6 + 0.4 * Math.abs(Math.sin(t * 5 + i * 1.3))); const x = cx + (i - 3) * 16 * K;
-      ctx.fillStyle = i % 2 ? shade : "#3a2048"; ctx.strokeStyle = "#8a5ab0"; ctx.lineWidth = 1.4 * K; ctx.beginPath(); ctx.moveTo(x - 8 * K, cy); ctx.quadraticCurveTo(x, cy - hh * 1.2, x + 2 * K, cy - hh); ctx.quadraticCurveTo(x + 4 * K, cy - hh * 0.5, x + 8 * K, cy); ctx.fill(); ctx.stroke(); }
-    yomi(ctx, cx, cy, 1.9 * K * (1 + Math.sin(t * 26) * 0.01 * k), fromForm, t);
-    fan(ctx, cx + 32 * K, cy - 30 * K, 34 * K, 0.08, lantern, L);
-    ctx.fillStyle = "#c9a0ff"; ctx.globalAlpha = k; ctx.textAlign = "center"; ctx.font = `700 ${Math.round(13 * K)}px sans-serif`; ctx.fillText("…la sombra despierta…", cx, h * 0.12); ctx.globalAlpha = 1;
-  } else if (t < 2.9) { // TRANSFORMACIÓN: pincelada de tinta en espiral, flash, abanico se abre, mariposas lunares
-    const k = (t - 1.6) / 1.3, e = ease(cl(k / 0.6));
-    fan(ctx, cx, cy - 46 * K, 120 * K * e, e, robe, L);
-    ctx.strokeStyle = "#6a3a88"; ctx.lineWidth = 9 * K * (1 - k * 0.6);
-    ctx.beginPath(); for (let j = 0; j <= 50; j++) { const u = j / 50, a = u * 10 + t * 3, r = (10 + u * 150 * (0.4 + k)) * K; const px = cx + Math.cos(a) * r, py = cy - 46 * K + Math.sin(a) * r * 0.55; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke();
-    yomi(ctx, cx, cy, (1.9 + 0.5 * e) * K, k < 0.5 ? fromForm : to, t);
-    for (let i = 0; i < 9; i++) { const a = i * TAU / 9 + k * 2, r = (30 + k * 170) * K; butterfly(ctx, cx + Math.cos(a) * r, cy - 50 * K + Math.sin(a) * r * 0.55 - k * 30 * K, 1.6 * K, t * 14 + i, BF[i % 3]); }
-    if (k < 0.15) { ctx.globalAlpha = 1 - k / 0.15; ctx.fillStyle = "#fff4e6"; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
-  } else { // PRESENTACIÓN
-    const k = cl((t - 2.9) / 0.5), bob = Math.sin(t * 4) * 3 * K;
-    fan(ctx, cx, cy - 46 * K + bob, 120 * K, 1, robe, L);
-    yomi(ctx, cx, cy + bob, 2.4 * K, to, t);
-    for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.8; butterfly(ctx, cx + Math.cos(a) * 150 * K, cy - 70 * K + Math.sin(a) * 55 * K, 1.5 * K, t * 12 + i, BF[i % 3]); }
-    ctx.globalAlpha = k; ctx.textAlign = "center"; ctx.lineWidth = 6 * K; ctx.strokeStyle = INK;
-    ctx.font = `900 ${Math.round(30 * K)}px sans-serif`; ctx.strokeText("¡" + formName(to) + "!", cx, h * 0.14); ctx.fillStyle = lantern; ctx.fillText("¡" + formName(to) + "!", cx, h * 0.14);
-    ctx.font = `700 ${Math.round(14 * K)}px sans-serif`; ctx.lineWidth = 4 * K; ctx.strokeText("Forma " + fromForm + " → " + to, cx, h * 0.14 + 22 * K); ctx.fillStyle = "#c9a0ff"; ctx.fillText("Forma " + fromForm + " → " + to, cx, h * 0.14 + 22 * K);
-    ctx.globalAlpha = 1;
+ } else if (b.act === 'read') {
+  // ACT 2 · runes of code converge into the core: Yomi reads the family.
+  drawEvolutionActor(ctx, 'yomi', cx, cy, fromS, b.from, T * 60);
+  for (let i = 0; i < 18; i++) {
+   const a = i * TAU / 18 + T * .6, r = (180 - 130 * b.progress) * K;
+   ctx.globalAlpha = .4 + .6 * b.progress; rune(ctx, cx + Math.cos(a) * r, cy - 50 * K + Math.sin(a) * r * .55, 12 * K, i, i % 3 ? MINT : GOLD);
   }
-  ctx.restore();
+  ctx.globalAlpha = 1;
+ } else if (b.act === 'compile') {
+  // ACT 3 · data cocoon (hexagon), progress bar and one soft flash.
+  const k = b.progress, R = (48 + 14 * Math.sin(k * Math.PI)) * K;
+  if (b.time < YOMI_FLASH_AT) drawEvolutionActor(ctx, 'yomi', cx, cy, fromS, b.from, T * 60);
+  else drawEvolutionActor(ctx, 'yomi', cx, cy, toS * (.85 + .15 * b.reveal), to, T * 60);
+  ctx.save(); ctx.translate(cx, cy - 50 * K); ctx.rotate(T * .8);
+  ctx.globalAlpha = .25 + .5 * b.cocoon; ctx.fillStyle = "#0d2a3a"; ctx.strokeStyle = MINT; ctx.lineWidth = 3 * K;
+  ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i * TAU / 6; i ? ctx.lineTo(Math.cos(a) * R, Math.sin(a) * R) : ctx.moveTo(Math.cos(a) * R, Math.sin(a) * R); } ctx.closePath();
+  if (b.cocoon > .05) ctx.fill(); ctx.stroke(); ctx.restore();
+  const bw = 160 * K; ctx.globalAlpha = 1; ctx.strokeStyle = MINT; ctx.lineWidth = 2 * K; ctx.strokeRect(cx - bw / 2, h * .2, bw, 10 * K);
+  ctx.fillStyle = MINT; ctx.fillRect(cx - bw / 2 + 2, h * .2 + 2, (bw - 4) * k, 10 * K - 4);
+  if (b.flash > 0) { ctx.globalAlpha = .55 * b.flash; ctx.fillStyle = "#eafffa"; ctx.fillRect(0, 0, w, h); }
+  ctx.globalAlpha = 1;
+ } else {
+  // ACT 4 · awakening: the new form with family stars linked around it.
+  const k = b.progress, bob = reduced ? 0 : Math.sin(T * 3) * 3 * K;
+  const n = b.nodes, pts = [];
+  for (let i = 0; i < n; i++) { const a = -Math.PI / 2 + i * TAU / n + T * .2; pts.push([cx + Math.cos(a) * 140 * K, cy - 60 * K + Math.sin(a) * 70 * K]); }
+  ctx.strokeStyle = GOLD; ctx.lineWidth = 1.5 * K; ctx.globalAlpha = .6 * k; ctx.beginPath();
+  pts.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.stroke();
+  pts.forEach(([x, y], i) => { ctx.globalAlpha = k; ctx.fillStyle = STARS[i % 10]; ctx.beginPath(); ctx.arc(x, y, 4 * K, 0, TAU); ctx.fill(); });
+  ctx.globalAlpha = 1;
+  drawEvolutionActor(ctx, 'yomi', cx, cy + bob, toS, to, T * 60);
+  ctx.globalAlpha = sm(k * 2); ctx.textAlign = "center"; ctx.lineWidth = 6 * K; ctx.strokeStyle = BG;
+  ctx.font = `900 ${Math.round(30 * K)}px sans-serif`; ctx.strokeText("¡" + formName(to) + "!", cx, h * .14); ctx.fillStyle = MINT; ctx.fillText("¡" + formName(to) + "!", cx, h * .14);
+  ctx.font = `700 ${Math.round(14 * K)}px sans-serif`; ctx.lineWidth = 4 * K; ctx.strokeText("Forma " + b.from + " → " + to, cx, h * .14 + 22 * K); ctx.fillStyle = GOLD; ctx.fillText("Forma " + b.from + " → " + to, cx, h * .14 + 22 * K);
+  ctx.globalAlpha = 1;
+ }
+ const li = YOMI_EVO_ACTS.findIndex(a => a.id === b.act);
+ ctx.globalAlpha = .85; ctx.textAlign = "center"; ctx.fillStyle = "#bff9ea"; ctx.font = `600 ${Math.round(13 * K)}px monospace`;
+ ctx.fillText("> " + LINES[li], cx, h * .93); ctx.globalAlpha = 1;
+ ctx.restore();
 }

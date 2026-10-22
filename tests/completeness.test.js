@@ -850,8 +850,8 @@ test('phase 24: matriz de contratos de gameplay de las 30 habilidades', () => {
     const g = contractGame({ player: { ...contractGame().player, id: 'yomi', abilities: ['ofuda', 'sleeve', 'maw'] } });
     useAbility(g, 1);
     advanceAbility(g, 10);
-    assert.ok(g.enemies[0].hp < 500, 'Campanada K debe dañar al enemigo');
-    assert.ok(g.enemies[0]._yomiMarkUntil > g.t, 'Campanada debe marcar para el remate L');
+    assert.ok(g.enemies[0].hp < 500, 'Escáner K debe dañar al enemigo');
+    assert.ok(g.enemies[0]._yomiMarkUntil > g.t, 'Escáner debe analizar para la Síntesis L');
     clearAbilityFx();
   }
   {
@@ -1017,14 +1017,17 @@ test('phase 25: useAbility rechaza contratos corruptos sin consumir cooldown', (
   clearAbilityFx();
 });
 
-test('V58: la campanada K golpea y marca a todos, incluso detrás de Yomi', () => {
+test('Yomi IA: el Escáner K golpea y analiza a ambos lados dentro de su radio', () => {
   clearAbilityFx();
   const base=contractGame();
   const second={...base.enemies[0],x:20,hp:500,vx:0,vy:0,stun:0,flash:0};
-  const g=contractGame({player:{...base.player,id:'yomi',abilities:['ofuda','sleeve','maw']},enemies:[base.enemies[0],second]});
+  const far={...base.enemies[0],x:1500,hp:500,vx:0,vy:0,stun:0,flash:0};
+  const g=contractGame({player:{...base.player,id:'yomi',abilities:['ofuda','sleeve','maw']},enemies:[base.enemies[0],second,far]});
   assert.equal(useAbility(g,1),true);
-  assert.ok(g.enemies.every(e=>e.hp<500),'K debe dañar enemigos a ambos lados');
-  assert.ok(g.enemies.every(e=>e._yomiMarkUntil>g.t),'K debe marcar a todos los alcanzados');
+  advanceAbility(g,12);
+  assert.ok(g.enemies[0].hp<500&&g.enemies[1].hp<500,'K debe dañar enemigos a ambos lados');
+  assert.ok(g.enemies[0]._yomiMarkUntil>g.t&&g.enemies[1]._yomiMarkUntil>g.t,'K debe analizar a los alcanzados');
+  assert.equal(far.hp,500,'fuera del radio no hay daño');
   clearAbilityFx();
 });
 test('V58: L consume la marca y aumenta su mordida, con anticipación visible', () => {

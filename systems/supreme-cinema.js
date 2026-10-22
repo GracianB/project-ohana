@@ -157,6 +157,34 @@ ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(cx+R*.025,cy-R*.035,R*.022,0,Math.P
 ctx.restore();
 }
 
+// Yomi IA · U «Red neuronal»: flat vignette (stacked alpha frames, no gradient),
+// falling code-rune columns and the ten family stars linking into one network.
+const YOMI_NET_STARS=["#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a","#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"];
+function yomiNetworkVignette(ctx,W,H,cx,cy,k){
+ctx.save();
+for(let i=0;i<5;i++){const m=Math.min(W,H)*(.03+i*.035);ctx.globalAlpha=.16;ctx.fillStyle="#020614";
+  ctx.fillRect(0,0,W,m);ctx.fillRect(0,H-m,W,m);ctx.fillRect(0,0,m,H);ctx.fillRect(W-m,0,m,H);}
+const cols=Math.max(8,Math.round(W/70)),fall=Math.min(1,k*1.4);
+ctx.lineCap="round";ctx.lineWidth=1.6;
+for(let c=0;c<cols;c++){
+  const x=(c+.5)*W/cols,h=(.35+((c*37)%11)/16)*H*fall,off=((c*53)%17)*9;
+  for(let y=-off;y<h;y+=26){ctx.globalAlpha=.10+.22*(y/Math.max(1,h));ctx.strokeStyle=(c+Math.floor(y/26))%4===0?"#ff7f6e":"#4ff0c8";
+   const g=(c*7+Math.floor((y+off)/26))%3;ctx.beginPath();
+   if(g===0){ctx.moveTo(x-4,y-4);ctx.lineTo(x-7,y);ctx.lineTo(x-4,y+4);ctx.moveTo(x+4,y-4);ctx.lineTo(x+7,y);ctx.lineTo(x+4,y+4);}
+   else if(g===1){ctx.moveTo(x-3,y-5);ctx.lineTo(x-3,y+5);ctx.moveTo(x+3,y-5);ctx.lineTo(x+3,y+5);ctx.moveTo(x-6,y);ctx.lineTo(x+6,y);}
+   else{ctx.moveTo(x-5,y+4);ctx.lineTo(x,y-5);ctx.lineTo(x+5,y+4);ctx.closePath();}
+   ctx.stroke();}
+}
+const R=Math.min(W,H)*.34,link=Math.max(0,Math.min(1,(k-.25)/.5)),pts=[];
+for(let i=0;i<10;i++){const a=i*Math.PI*2/10-Math.PI/2;pts.push([cx+Math.cos(a)*R*(i%2?1:.82),cy+Math.sin(a)*R*.62*(i%2?1:.82)]);}
+ctx.globalAlpha=.5*link;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=2;ctx.beginPath();
+const n=Math.floor(link*10);for(let i=0;i<=n&&i<10;i++){const p=pts[i];i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}
+if(n>=10)ctx.closePath();ctx.stroke();
+ctx.globalAlpha=.22*link;ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<n;i++){ctx.moveTo(cx,cy);ctx.lineTo(pts[i][0],pts[i][1]);}ctx.stroke();
+for(let i=0;i<10;i++){const on=i<n?1:.25;ctx.globalAlpha=.9*on;ctx.fillStyle=YOMI_NET_STARS[i];ctx.beginPath();ctx.arc(pts[i][0],pts[i][1],4+on*3,0,Math.PI*2);ctx.fill();}
+ctx.restore();
+}
+
 function backdrop(ctx,W,H,cx,cy,color,story,k){
 const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.hypot(W,H)*.62);
 const hot=story.scene==="nova"||story.scene==="oven"||story.scene==="crisp";
@@ -180,7 +208,8 @@ if(story.scene==="aurora"){
   sky.addColorStop(1,"rgba(240,179,224,.10)");
   ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
 }
-if(story.scene==="eclipse"||story.scene==="maw"){
+if(story.scene==="maw")yomiNetworkVignette(ctx,W,H,cx,cy,k);
+if(story.scene==="eclipse"){
   const v=ctx.createRadialGradient(cx,cy,Math.min(W,H)*.12,cx,cy,Math.min(W,H)*.62);
   v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(0,0,0,.62)");
   ctx.fillStyle=v;ctx.fillRect(0,0,W,H);

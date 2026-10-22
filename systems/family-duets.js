@@ -13,7 +13,7 @@ const names={
  dragon:{ally:"dino",borrowedL:"quake",name:"Dragón y Dino",line:"¡El cielo tiembla!",cue:"DINO · TERREMOTO",color:"#ffac63",kind:"quake"},
  dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",cue:"FRITA · FREIDORA",color:"#d9ee7a",kind:"geyser"},
  frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",cue:"PIZZA · HORNO",color:"#ffd36a",kind:"oven"},
- pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · FAUCES",color:"#ff9d82",kind:"maw"},
+ pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · SÍNTESIS",color:"#ff9d82",kind:"maw"},
  yomi:{ally:"cuerno",borrowedL:"rainbow",name:"Yomi y Cuerno",line:"¡Luz entre sombras!",cue:"CUERNO · ARCOÍRIS",color:"#e2b8ff",kind:"rainbow"},
  cuerno:{ally:"kilo",borrowedL:"ohana",name:"Cuerno y Kilo",line:"¡Toda la familia!",cue:"KILO · CORO OHANA",color:"#ffe9a8",kind:"ohana"}
 };
@@ -320,13 +320,12 @@ function drawFamilyDuetSignature(ctx,s,pose,cam,t,reduce){
    for(let i=0;i<count;i++){ctx.fillStyle=i%2?"#df6950":"#ffdf8c";ctx.beginPath();
     ctx.arc(ax-s.facing*(20+i*12),ay-5+(reduce?0:Math.cos(s.age*.13+i)*3),3.6,0,TAU);ctx.fill();}
    break;
-  case "maw": // Yomi arrives through folds of shadow, with floating ofuda
+  case "maw": // Yomi IA arrives on a trail of floating code runes and data bits
    for(let i=0;i<count;i++){
-    ctx.save();ctx.translate(ax-s.facing*(15+i*12),ay-7-i*6);
-    ctx.rotate((reduce?0:Math.sin(s.age*.07+i)*.12)*s.facing);
-    ctx.fillStyle="#f5dbc3";ctx.fillRect(-3.8,-9,7.6,15);
-    ctx.strokeStyle="#be6570";ctx.lineWidth=1.2;ctx.beginPath();
-    ctx.moveTo(-2,-5);ctx.lineTo(2,-2);ctx.lineTo(-2,1);ctx.stroke();ctx.restore();
+    const rx=ax-s.facing*(15+i*12),ry=ay-7-i*6+(reduce?0:Math.sin(s.age*.07+i)*3);
+    ctx.strokeStyle=i%2?"#ff7f6e":"#4ff0c8";ctx.lineWidth=1.6;ctx.beginPath();
+    ctx.moveTo(rx-2,ry-3);ctx.lineTo(rx-5,ry);ctx.lineTo(rx-2,ry+3);ctx.moveTo(rx+2,ry-3);ctx.lineTo(rx+5,ry);ctx.lineTo(rx+2,ry+3);ctx.stroke();
+    ctx.fillStyle="#ffd56b";ctx.fillRect(rx-1,ry-1,2,2);
    }break;
   case "rainbow": // Cuerno sweeps seven gentle ribbon strokes, never flashing
    for(let i=0;i<7;i++){
@@ -463,10 +462,11 @@ export function drawFamilyDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
     for(let k=0;k<3;k++)ring(ctx,x+s.facing*(56+k*30),yy+(k-1)*18,12,def.color,.6,.4);
     break;}
    case "maw":{
-    const bx=x+s.facing*(60+j*22),gape=windup?5:46*(1-progress*.65);
-    ctx.strokeStyle="#ffe2c7";ctx.lineWidth=4;ctx.beginPath();
-    ctx.ellipse(bx,yy-30,62,gape,0,0,TAU);ctx.stroke();
-    for(let k=-2;k<=2;k++){ctx.beginPath();ctx.moveTo(bx+k*18,yy-30-gape);ctx.lineTo(bx+k*18+5,yy-30-gape+11);ctx.stroke();}
+    // Yomi IA Síntesis: a rune circle opens, then the data beam leaves it.
+    const bx=x+s.facing*(60+j*22),rr=windup?14+progress*30:44;
+    ctx.strokeStyle="#4ff0c8";ctx.lineWidth=3;ctx.beginPath();ctx.arc(bx,yy-30,rr,0,TAU);ctx.stroke();
+    ctx.lineWidth=1.4;ctx.beginPath();for(let k=0;k<6;k++){const a=k*TAU/6+(reduce?0:t*.02);const px=bx+Math.cos(a)*rr*.75,py=yy-30+Math.sin(a)*rr*.75;k?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.stroke();
+    if(!windup){ctx.fillStyle="rgba(79,240,200,.55)";ctx.fillRect(Math.min(bx,bx+s.facing*220),yy-38,220,16);}
     break;}
    case "rainbow":{
     const palette=["#ff9bad","#ffeaa0","#9ef3ff","#9cf6bb","#b6a5ff","#fff0bc","#ffb8e8"];

@@ -14,7 +14,7 @@ const origin=Object.freeze({
  dino:{shape:"fossil",verb:"Pisada",perk:"titan",line:"Una tierra que tiembla"},
  frita:{shape:"crisp",verb:"Turbo",perk:"speed",line:"Carrera crujiente"},
  pizza:{shape:"slice",verb:"Rebote",perk:"bounce",line:"Fiesta volcánica"},
- yomi:{shape:"spirit",verb:"Umbral",perk:"ghost",line:"Secretos del otro lado"},
+ yomi:{shape:"spirit",verb:"Enlace",perk:"ghost",line:"Lo que aprendo, lo comparto"},
  cuerno:{shape:"star",verb:"Aurora",perk:"aura",line:"Sueños compartidos"}
 });
 const byId=Object.freeze(Object.fromEntries(ROSTER.map((p,i)=>[p.id,Object.freeze({name:p.name,color:p.color,index:i})])));

@@ -116,8 +116,8 @@ export const Passives = {
         p.vy = Math.min(p.vy, 1.2);
         p.invuln = Math.max(p.invuln || 0, 8);
         p._pmove = "hollow";
-        game.fx.emit(cx(p), cy(p), { color: "#6a3cff", count: 8, size: 3, up: 0.4, life: 14 });
-        game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#1a0828" });
+        game.fx.emit(cx(p), cy(p), { color: "#4ff0c8", count: 8, size: 3, up: 0.4, life: 14 });
+        game.ghosts.push({ x: p.x, y: p.y, w: p.w, h: p.h, life: 10, color: "#123a44" });
       }
       if (p._specter > 0) p._specter--;
     } else if (id === "climb") {

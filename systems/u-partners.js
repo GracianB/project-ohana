@@ -12,7 +12,7 @@ export const MAX_U_EXP=200;
 export const U_L_NAMES=Object.freeze({
  ohana:"Coro Ohana",caos:"Caos",storm:"Santuario del trueno",ninetails:"Nueve colas",
  meteor:"Meteoritos",quake:"Terremoto",fryer:"Freidora",oven:"Horno",
- maw:"Fauces",rainbow:"Arcoíris"
+ maw:"Síntesis",rainbow:"Arcoíris"
 });
 const byId=new Map(ROSTER.map(r=>[r.id,r]));
 export function optionsForUPartner(hero){

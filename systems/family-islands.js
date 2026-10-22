@@ -141,12 +141,30 @@ function drawKitchenHarbor(c,z,t=0,reduce=false){
  c.globalAlpha=1;
 }
 
+// Yomi IA · its corner of the Santuario del trueno: the old radio-lighthouse
+// where Chispín's lightning woke the first question. Antenna mast, dish,
+// data screen with a "?" and ten family LEDs. Static flat colours only.
+export const YOMI_CORNER_LEDS=Object.freeze(["#eb554a","#5ad1ff","#ffe14a","#c9a8ff","#ff6a2a","#4cbf56","#f0b43a","#e0402a","#f2c1ff","#4ff0c8"]);
 function drawYomiCampPod(c,z){
  c.save();
- c.translate(z.x-84,z.y-10);
- c.fillStyle='#1e1438';c.strokeStyle='#ba68c8';c.lineWidth=2.2;
- c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
- c.fillStyle='#ea80fc';c.beginPath();c.arc(0,-4,8,0,Math.PI*2);c.fill();
+ c.translate(z.x-120,z.y-6);
+ // stone base
+ c.fillStyle='#3a3f5c';c.beginPath();c.ellipse(0,8,30,9,0,0,Math.PI*2);c.fill();
+ // lighthouse-radio tower
+ c.fillStyle='#e9eefc';c.strokeStyle='#2a3160';c.lineWidth=2;
+ c.beginPath();c.moveTo(-14,6);c.lineTo(-9,-46);c.lineTo(9,-46);c.lineTo(14,6);c.closePath();c.fill();c.stroke();
+ c.fillStyle='#4ff0c8';c.fillRect(-11,-18,22,4);c.fillRect(-10,-34,20,4);
+ // lamp room = screen with a question
+ c.fillStyle='#0d1430';c.fillRect(-12,-62,24,16);c.strokeRect(-12,-62,24,16);
+ c.strokeStyle='#ff7f6e';c.lineWidth=2;c.beginPath();c.moveTo(-3,-57);c.quadraticCurveTo(-3,-60,0,-60);c.quadraticCurveTo(3,-60,3,-57);c.quadraticCurveTo(3,-55,0,-54);c.lineTo(0,-52.5);c.stroke();
+ c.fillStyle='#ff7f6e';c.fillRect(-1,-50.8,2,2);
+ // antenna mast + dish
+ c.strokeStyle='#2a3160';c.lineWidth=2;c.beginPath();c.moveTo(0,-62);c.lineTo(0,-84);c.stroke();
+ c.fillStyle='#ff7f6e';c.beginPath();c.arc(0,-86,3,0,Math.PI*2);c.fill();
+ c.strokeStyle='#4ff0c8';c.lineWidth=1.5;for(const r of [7,12]){c.beginPath();c.arc(0,-86,r,-2.4,-.7);c.stroke();}
+ c.fillStyle='#c6d0ec';c.beginPath();c.ellipse(20,-28,9,5,-.6,0,Math.PI*2);c.fill();c.strokeStyle='#2a3160';c.stroke();
+ // ten family LEDs along the base
+ YOMI_CORNER_LEDS.forEach((col,i)=>{c.fillStyle=col;c.beginPath();c.arc(-22+i*4.9,12,1.8,0,Math.PI*2);c.fill();});
  c.restore();
 }
 

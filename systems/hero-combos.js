@@ -10,7 +10,7 @@ export const HERO_POWERS=Object.freeze({
  dino:['Carga fósil','Estampida ancestral','Arrastra enemigos ligeros durante la carga.','Encadena tres saltos y golpes de suelo.'],
  frita:['Derrape de aceite','Freidora exprés','Deslízate dejando aceite en el recorrido.','Enciende tus pistas de aceite y acaba con una explosión.'],
  pizza:['Porción de regreso','Rueda de pizza','La porción regresa hacia tu posición actual.','Conduce la rueda y lanza porciones al terminar.'],
- yomi:['Paso del umbral','Tres ecos','Atraviesa enemigos y recuerda el recorrido del corte.','Los espíritus repiten tus tres últimos cortes.'],
+ yomi:['Salto de datos','Tres respuestas','Se teletransporta entre enemigos analizados y recuerda el recorrido.','Tres pensamientos repiten tus tres últimos golpes como runas de código.'],
  cuerno:['Lanza de aurora','Arco de constelaciones','Carga atravesando una fila de enemigos.','Salta sobre un arco y deja caer lanzas tras de ti.'],
 });
 export function beginHeroPower(g,index,s){
