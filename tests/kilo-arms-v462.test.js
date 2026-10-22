@@ -61,3 +61,16 @@ test('V462 panel ukulele pose: strumming hand on the sound hole, elbow out in fr
   assert.ok(front.elbowX>0,'elbow points forward, no C-loop across the chest F'+f);
  }
 });
+
+test('V462 Kilo depth: the far arm is drawn behind the dress in hula, panel and idle poses',()=>{
+ const poses=[['idle',{}],['victory',{}],['idle',{kiloPerformance:{kind:'relic',time:3.5}}],['idle',{kiloPerformance:{kind:'finale',time:1}}]];
+ for(let f=1;f<5;f++)for(const [state,extra] of poses){
+  const seq=[];
+  const spy={...R,limb:(c,...a)=>{if(a[0]===-5)seq.push('back');if(a[0]===4)seq.push('front');return R.limb(c,...a);},
+   ellipse:(c,...a)=>{if(a[4]==='#76cbb4'||a[4]==='#ffe09a')seq.push('lei');return R.ellipse(c,...a);}};
+  kilo.draw(ctx(),{state,t:90,phase:18,form:f,breath:0,sway:0,look:{x:0,y:0},speed:0,flourish:0,atk:0,cast:0,castSlot:-1,...extra},spy);
+  const back=seq.indexOf('back'),lei=seq.indexOf('lei');
+  assert.ok(back>=0&&lei>=0,`F${f} ${state} draws back arm and lei`);
+  assert.ok(back<lei,`F${f} ${state}${extra.kiloPerformance?' '+extra.kiloPerformance.kind:''}: far arm must be behind the dress`);
+ }
+});
