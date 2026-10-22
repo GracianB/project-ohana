@@ -1,4 +1,4 @@
-const VERSION = "ohana-465";
+const VERSION = "ohana-466";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/hero-collections.js?v=" + VERSION,
@@ -454,7 +454,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "d9f61d2224d9453d14105d8e855783f53e2cac12",
-  "index.html": "1fa6bb1ff71972a30a6f60c567821ddf8f0857e1",
+  "index.html": "548eb33e5038d083319ad6466d3e817596da51bb",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -499,7 +499,7 @@ const PRECACHE_REVISIONS = {
   "characters/art/stitch.js": "97c9fd36d77b77eef847e692780b480e4949a0ad",
   "characters/art/stitcho.js": "cdc8f5ec3158c79ca9600bcd5b40dbd8b3e94cdc",
   "characters/art/yomi.js": "84eb92286425e6f4c4d92eeaa98896d90a673389",
-  "characters/draw.js": "1680b98c2d890fd59cb2fe67acd8074594d174f8",
+  "characters/draw.js": "9c0ea99f16ea410b2f8dcf495d84bf7281d272dd",
   "characters/kinetic-stagecraft.js": "186017a29d6a23d2b41bcfadce6550cdfab1e523",
   "characters/evolution.js": "712e99af5f39429eb2f38222ad8d015e0d9ce80a",
   "characters/costume.js": "ac0a620099244df844bee9cddac6c68149a0a960",
@@ -533,7 +533,7 @@ const PRECACHE_REVISIONS = {
   "systems/evo-cine/cuerno.js": "4aa631fe47ef32344b70f71a3aa03c877399b845",
   "systems/evo-cine/chispin.js": "b5abbe566c9a2a2d9cc09a68e4beeebef1812936",
   "systems/evo-cine/pizza.js": "583a71693432538160d61781c7ab833f87ab3d09",
-  "systems/evo-cine/family-own.js": "7bfbef1f2107636d40942d70e0b6c3fd3c423f0d",
+  "systems/evo-cine/family-own.js": "8f47c2135c36643dbf83f89e901b9e13bc7d01ff",
   "systems/evo-cine/michi.js": "9d149368d95d53854d23a697e8b9b3e618afa01a",
   "systems/evo-cine/yomi.js": "e513d0e08ff7b5f472f50ecacf59fa1fdc0449cf",
   "systems/evo-cine/dino.js": "7b05da88e41abc9eaed595bd18ff81ec8445fc20",
@@ -569,7 +569,7 @@ const PRECACHE_REVISIONS = {
   "systems/cuerno-kit.js": "4c34498745bd2d92d7f54fecceca706832edab97",
   "systems/cuerno-play-v373.js": "fc9adf47204ded5e3dae48e26c25e5002b039f7c",
   "systems/cuerno-evo-v373.js": "27e336a70c2cbc022d918596ec356c0fc7e44bf5",
-  "characters/art/cuerno-v373.js": "42158b30a68cda1e11d36b9d83fc5cf8b0bb128b",
+  "characters/art/cuerno-v373.js": "8cdb42fa193d5af37a5276355f1b1801b77e4994",
   "systems/cuerno-v92-resonance.js": "20f145a444f37b11a55d3437486a4dcedae3d14c",
   "systems/cuerno-v93-metamorphosis.js": "e57d82a29cb96e5f194cfa95c6074ac503426851",
   "systems/cuerno-v91-illusions.js": "6d54567cb5c51c224e84ab1651d284ef505981de",

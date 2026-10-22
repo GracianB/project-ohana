@@ -52,7 +52,7 @@ const ABILITY_ACCENTS = { ukulele:"#ffb347", hula:"#ff5ad5", ohana:"#ffd36a", pl
 const CHARACTER_ACCENTS = {
 kilo: "#ffd36a", stitcho: "#67ddff", chispin: "#fff29a", cat: "#ffb8e8",
 dragon: "#ff8a45", dino: "#b8ef6b", frita: "#fff1b3", pizza: "#ffd84a",
-yomi: "#4ff0c8", cuerno: "#f2c1ff",
+yomi: "#4ff0c8", cuerno: "#ffd98a",
 };
 
 function accentFor(p) {
@@ -522,10 +522,22 @@ case "salt":
 case "wedge":
   ctx.beginPath(); ctx.moveTo(f * H * 0.08, -H * 0.56); ctx.lineTo(f * reach * 0.75, -H * 0.38); ctx.lineTo(f * reach * 0.75, -H * 0.62); ctx.closePath(); ctx.stroke();
   break;
-case "poke":
-  ctx.beginPath(); ctx.moveTo(f * H * 0.10, -H * 0.50); ctx.lineTo(f * reach * 0.84, -H * 0.50); ctx.stroke();
-  star(ctx, f * reach * 0.86, -H * 0.50, H * 0.06, "#fff6c8");
+case "poke": {
+  // V466 · Cuerno: a prism lance — the horn thrust leaves a tapered white
+  // streak inside a seven-colour fan, ending in a sunburst.
+  const PR = ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa", "#aeb9fb", "#e5b9f4"];
+  const y0 = -H * 0.56, x1 = f * reach * 0.86, lw0 = ctx.lineWidth, a0 = ctx.globalAlpha;
+  for (let i = 0; i < 7; i++) {
+    const off = (i - 3) * H * 0.018 * k;
+    ctx.strokeStyle = PR[i]; ctx.globalAlpha = a0 * 0.55; ctx.lineWidth = lw0 * 0.9;
+    ctx.beginPath(); ctx.moveTo(f * H * 0.18, y0 + off * 0.3); ctx.lineTo(x1 - f * H * 0.04, y0 + off); ctx.stroke();
+  }
+  ctx.globalAlpha = a0; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = lw0 * 1.3;
+  ctx.beginPath(); ctx.moveTo(f * H * 0.22, y0); ctx.lineTo(x1, y0); ctx.stroke();
+  ctx.lineWidth = lw0; ctx.strokeStyle = color;
+  star(ctx, x1, y0, H * (0.05 + k * 0.04), "#fffbe8");
   break;
+}
 }
 if (k > 0.18 && (Number(pose.form) || 0) >= 2) {
 ctx.save();
@@ -892,7 +904,7 @@ dragon:  { kind: "ember", colors: ["#ff7a2a", "#ffd84a", "#ff3b2a"] },
 frita:   { kind: "salt",  colors: ["#ffffff", "#fff3c4", "#ff4a3a"] },
 dino:    { kind: "leaf",  colors: ["#7bd86a", "#c8f07a", "#fff3a0"] },
 pizza:   { kind: "salt",  colors: ["#ffd24a", "#e8452f", "#6fbf4a"] },
-cuerno:  { kind: "star",  colors: ["#ffe9a8", "#f2c1ff", "#ffffff"] },
+cuerno:  { kind: "star",  colors: ["#ffe9a8", "#6ad8e0", "#ffffff"] },
 };
 
 function withAlpha(color, a) {

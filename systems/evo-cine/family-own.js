@@ -263,15 +263,22 @@ const CHISPIN={
 
 const RAINBOW=['#ff6b8a','#ffa65a','#ffe36a','#7ee08a','#6ad0ff','#8a8cff','#d48cff'];
 const CUERNO={
- id:'cuerno',accent:'#ffd8ff',ink:'#160a2e',title:'#fff0ff',
+ id:'cuerno',accent:'#ffd98a',ink:'#0e1e2e',title:'#fff6dc',
  backdrop(ctx,w,h,gy,u,t,s){
-  bands(ctx,w,gy,['#0c0820','#150c32','#1e1244','#281a56','#332468']);
+  bands(ctx,w,gy,['#071420','#0b1e30','#102840','#163452','#1d4060']);
   for(let i=0;i<55;i++){ctx.globalAlpha=.4+.5*Math.abs(Math.sin(t*1.5+i));ctx.fillStyle='#ffffff';ctx.fillRect(hash(i+5)*w,hash(i+90)*gy*.85,1.4*u,1.4*u);}
   // aurora ribbons
   ctx.lineCap='round';
   for(let r=0;r<3;r++){ctx.strokeStyle=['#7ef0c0','#7ad0ff','#ff9ce7'][r];
    for(let l=0;l<3;l++){ctx.globalAlpha=(.07+s.glow*.05)*(3-l);ctx.lineWidth=(30-l*9)*u;ctx.beginPath();
     for(let i=0;i<=24;i++){const x=i/24*w,y=gy*(.22+r*.12)+Math.sin(i*.5+t*(.6+r*.2)+r*2)*22*u;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}}
+  // V466: the dream night warms into a prism dawn as the metamorphosis builds
+  for(let i=0;i<4;i++){ctx.globalAlpha=s.glow*(.1+i*.05);ctx.fillStyle=['#ff8f6a','#ffb36b','#ffd98a','#fff1c8'][i];ctx.fillRect(0,gy-(70-i*16)*u,w,(70-i*16)*u);}
+  // deterministic shooting stars
+  ctx.lineCap='round';
+  for(let i=0;i<3;i++){const life=(t*.45+i/3)%1,x=w*(.2+hash(i+40)*.6)+life*120*u,y=gy*(.08+hash(i+44)*.25)+life*50*u;
+   ctx.globalAlpha=Math.sin(Math.PI*life)*.8;ctx.strokeStyle='#fff6dc';ctx.lineWidth=2*u;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-26*u,y-11*u);ctx.stroke();}
+  ctx.globalAlpha=1;
   // moon → eclipse in the final form
   const mx=w*.18,my=gy*.25,mr=24*u;ctx.globalAlpha=1;
   if(s.fin){ctx.fillStyle='#ffd8ff';ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(mx,my,mr*1.35,0,TAU);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle='#0c0820';ctx.beginPath();ctx.arc(mx,my,mr,0,TAU);ctx.fill();ctx.strokeStyle='#fff0ff';ctx.lineWidth=2.5*u;ctx.stroke();}
@@ -291,6 +298,8 @@ const CUERNO={
   ctx.globalAlpha=1;
  },
  aura(ctx,cx,cy,r,u,t,k){
+  // V466: a pillar of horn-light falls from the sky onto Cuerno
+  for(let i=0;i<3;i++){ctx.globalAlpha=k*(.08+i*.06);ctx.fillStyle=i===2?'#fff6dc':'#ffd98a';const pw=r*(.7-i*.22);ctx.fillRect(cx-pw/2,0,pw,cy+r*.2);}
   for(let i=0;i<7;i++){const a=i*TAU/7+t*.5;ctx.globalAlpha=k*.16;ctx.fillStyle=RAINBOW[i];ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r*1.7,a,a+.22);ctx.closePath();ctx.fill();}
   for(let i=0;i<12;i++){const a=t*1.2+i*TAU/12;ctx.globalAlpha=k;star(ctx,cx+Math.cos(a)*r*1.1,cy+Math.sin(a)*r*.65,3.2*u,RAINBOW[i%7],a);}
   ctx.globalAlpha=1;
@@ -301,7 +310,7 @@ const CUERNO={
   ctx.lineWidth=5*u;for(let i=0;i<7;i++){ctx.globalAlpha=.35*close;ctx.strokeStyle=RAINBOW[i];ctx.beginPath();ctx.moveTo(r*.4,-r*.1);ctx.lineTo(r*3.2,-r*.6+i*r*.2);ctx.stroke();}
   const hgt=r*1.15*close+r*.2,wid=r*.75;
   const pts=[[0,-hgt],[wid,-hgt*.45],[wid,hgt*.45],[0,hgt],[-wid,hgt*.45],[-wid,-hgt*.45]];
-  ctx.globalAlpha=.72;ctx.fillStyle='#d8c8ff';ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();
+  ctx.globalAlpha=.72;ctx.fillStyle='#e8fff6';ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();
   ctx.globalAlpha=1;ctx.strokeStyle='#ffffff';ctx.lineWidth=2.2*u;ctx.stroke();
   ctx.globalAlpha=.5;ctx.lineWidth=1.2*u;ctx.beginPath();ctx.moveTo(0,-hgt);ctx.lineTo(0,hgt);ctx.moveTo(-wid,-hgt*.45);ctx.lineTo(wid*.3,0);ctx.lineTo(-wid,hgt*.45);ctx.stroke();
   ctx.globalAlpha=.6;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.moveTo(-wid*.7,-hgt*.4);ctx.lineTo(-wid*.2,-hgt*.8);ctx.lineTo(-wid*.1,-hgt*.3);ctx.fill();
