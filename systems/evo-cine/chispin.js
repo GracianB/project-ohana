@@ -1,7 +1,7 @@
 import {drawEvolutionActor} from './real-actor.js';
 // Cinemática de evolución de Chispín: rayos. Sin gradientes.
 // Fases: carga (0-1.5s), transformación (1.5-2.8s), presentación (2.8-4s).
-export const EVO_CINE_DURATION = 4.0;
+export const EVO_CINE_DURATION = 4.5;
 export const FORM_NAMES = ["Chispín Bebé", "Chispín", "Voltín", "Trueno Gordo", "Chispín Tormenta"]; // = roster evoNames
 const formName = (f) => FORM_NAMES[Math.max(0, Math.min(FORM_NAMES.length - 1, (f | 0) - 1))] || "Chispín";
 // rayo en zigzag determinista (sin random por frame)

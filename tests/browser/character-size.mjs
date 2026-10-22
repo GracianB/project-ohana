@@ -25,7 +25,10 @@ try {
   }setLook('vector');return result;
  });
 
- for(const row of audit){assert.deepEqual(row.before,row.after,'hitbox changed');const target=heroHeightTarget(row.id,row.evo);assert.ok(Math.abs(row.height-target)<15,`${row.id} F${row.evo} ${row.look}: ${row.height}px`)}
+ for(const row of audit){assert.deepEqual(row.before,row.after,'hitbox changed');const target=heroHeightTarget(row.id,row.evo);
+  // V463 «quita límites»: only a floor (forms never shrink below the curve) and a
+  // generous sanity ceiling, so big chunky forms like Trueno Gordo may grow.
+  assert.ok(row.height>target-15&&row.height<target*1.45+15,`${row.id} F${row.evo} ${row.look}: ${row.height}px`)}
  for(const id of new Set(audit.map(r=>r.id)))for(let evo=1;evo<5;evo++){
   const before=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo-1);
   const after=audit.find(r=>r.look==='vector'&&r.id===id&&r.evo===evo);
