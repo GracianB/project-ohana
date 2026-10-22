@@ -7,12 +7,14 @@ import {EVOLUTION_CINEMA_PROFILES,evolutionMessage} from '../../characters/evolu
 import {cachedGradient} from '../canvas-gradient-cache.js';
 import * as dinoCine from './dino.js';
 import * as dragonCine from './dragon.js';
+import * as pizzaCine from './pizza.js';
+import * as fritaCine from './frita.js';
 
-// Dino & Dragón: both heroes play their OWN four-act metamorphosis in the real
+// Dino & Dragón, Pizza & Frita: these heroes play their OWN four-act metamorphosis in the real
 // game (not only in a preview): the in-game evolution stage calls this shared
 // entry point, so routing here reaches every caller without touching the
 // stage director. Text/unlock overlay below stays shared and readable.
-export const OWN_EVOLUTION_CINE=Object.freeze({dino:dinoCine,dragon:dragonCine});
+export const OWN_EVOLUTION_CINE=Object.freeze({dino:dinoCine,dragon:dragonCine,pizza:pizzaCine,frita:fritaCine});
 
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};

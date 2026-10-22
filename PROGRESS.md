@@ -2326,3 +2326,7 @@ Validación final de ohana-437: 1241/1241 pruebas unitarias; puerta de publicaci
 Revisión móvil: barra de la Reina bajo las tarjetas de vida/XP, contador de plumas legible y avisos separados. Se evita duplicar el anuncio de fase sobre la barra. Verificación de devolución con H real, fases 2/3, flores, escritorio, 390/320 px y movimiento reducido; sin fallos de ejecución.
 
 Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación correcta; navegador con H real, fases 2/3, flores, diez héroes y 160 fotogramas de evolución. HUD del jefe y avisos comprobados sin solapar vida/XP a 390/320 px.
+
+# OHANA · Pizza & Frita
+- Tallas estándar 64/82/100/120/140; Pizza tricolor elástica (brazos marrones con manoplas, F5 volcánica) vs Frita superhéroe diner azul marino (F5 Centella eléctrica).
+- Cinemáticas propias de 4 actos (Horno de leña / Al punto) enrutadas por presentation.js; fondos Puerto del Horno y Mercado Centella con gradientes cacheados; isla Puerto del banquete con horno, kiosco, guirnaldas y muelle.

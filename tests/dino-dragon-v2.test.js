@@ -68,7 +68,7 @@ test('Silhouettes: Dragón grows an S-neck, wings and hover; baby keeps no eggsh
 });
 
 test('Cinematics: Dino and Dragón route their own 4-act cine through the in-game entry point', () => {
- assert.deepEqual(Object.keys(OWN_EVOLUTION_CINE).sort(),['dino','dragon']);
+ for(const id of ['dino','dragon'])assert.ok(OWN_EVOLUTION_CINE[id],id);
  for(const id of ['dino','dragon']){
   const a=recorder(),b=recorder();
   const ra=drawEvolutionPresentation(a,960,540,id,3,2.2,false);

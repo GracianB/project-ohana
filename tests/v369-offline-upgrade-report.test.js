@@ -28,7 +28,9 @@ test("V369 verified historical upgrade computes accurate SHA diff and source-byt
  for(const must of ["systems/cuerno-fx.js","systems/cuerno-kit.js","systems/cuerno-play-v373.js","systems/cuerno-evo-v373.js","characters/art/cuerno-v373.js"])assert.ok(added.includes(must),must);
  assert.deepEqual(added.sort(),Object.keys(revs).filter(k=>!baseline.resources[k]).sort());
  assert.deepEqual(report.removed,[]);
- assert.ok(report.avoidedSourceBytes>5_000_000);
+ // Floor, not a frozen edit count: hero art rewrites (Pizza/Frita) legitimately
+ // re-download their own files; the identity check below proves the accounting.
+ assert.ok(report.avoidedSourceBytes>4_000_000);
  assert.equal(report.avoidedSourceBytes+report.changedSourceBytes,report.currentFullSourceBytes);
  const manifest=JSON.parse(fs.readFileSync("tools/offline-baseline-v372.json","utf8"));
  assert.equal(report.priorFullSourceBytes,Object.values(manifest.resources).reduce((sum,item)=>sum+item.bytes,0));
