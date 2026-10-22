@@ -1,3 +1,7 @@
+# OHANA V462 · Michicornio y Kilo, Dino & Dragón, Pizza & Frita
+
+Versión **V462** (`ohana-462`): publicación conjunta de tres ramas sobre V461 (`main` 040a233): `michi-v462` (Michicornio Hada Felina, patas/colas/boca, L Nueve colas, brazos de Kilo), `dino-dragon-v2` (tamaños unificados, identidades tierra/cielo, cinemáticas e islas propias) y `pizza-frita-v2` (tallas estándar, brazos visibles de Pizza, cinemáticas, fondos e isla Puerto del banquete). Las secciones de cada rama se detallan abajo. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.
+
 # OHANA V462 · Michicornio: Hada Felina, patas y colas articuladas, boca del gato oscuro
 
 Versión **V462** (`ohana-462`), rama local `michi-v462` sobre `main` con V461. **No publicada**: pendiente de aprobación; requiere CI, quality y GitHub Pages verdes sobre el mismo commit de `main`. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.
@@ -36,6 +40,27 @@ Versión **V461** (`ohana-461`), rama local `michi-v461` sobre la PR #394 (V460)
 ## Calidad
 - Nuevo `tests/michicornio-v461.test.js` (7 pruebas): genoma determinista y paletas/motivos alcanzables en 400 semillas, pulso y raíz fija de tentáculos, 5 formas × 11 estados × 8 semillas sin gradientes, variación visible solo en las formas gelatinosas, movimiento reducido independiente del reloj, destello único y cableado del juego.
 - Precache: `characters/michi-jelly.js` añadido y huellas regeneradas con `node tools/update-offline-revisions.mjs`.
+
+# OHANA · Dino & Dragón
+
+Rama local `dino-dragon-v2` (sin número de versión, sin publicar). Objetivo: que Dino y Dragón dejen de parecer el mismo personaje con otro color, crezcan juntos y tengan su propia cinemática e isla.
+
+## Por qué se parecían
+- Dos bípedos chibi con la misma cabeza redonda, los mismos ojos, la misma postura y la misma tinta; ambos bebés con cascarón.
+- Acentos naranja/oro en los dos (placas, gorguera Rex, grietas de lava y aura del Coloso) y formas finales ambas amarillas.
+- Alturas casi idénticas (57/74/89/106/124 frente a 59/75/89/107/126) y alas de Dragón diminutas y plegadas.
+- Ninguna de sus cinemáticas propias se reproducía en el juego (la escena compartida las ignoraba) y las dos islas eran naranja/rojo.
+
+## Trabajos implementados
+- Tamaños: curva común `DINO_DRAGON_HEIGHT` 64/82/100/120/140 px y `heroHeightTarget()`; Dragón +8 % solo por la envergadura. Hitboxes intactas.
+- Dino = TIERRA: paleta jade/teal/musgo/hueso sin naranja, Coloso jade con geodas turquesa; cuerpo más ancho y horizontal; idle con pisotón, anillo de polvo y piedrecitas.
+- Dragón = CIELO + FUEGO: granate/carmesí con membranas ciruela/obsidiana, cuernos marfil y Celestial perla-oro; cuello en S con púas, cabeza en cuña, alas de murciélago alzadas que baten al correr, cola serpenteante, levitación en idle/ataque/victoria; el bebé lleva un mechón de brasa en vez de cascarón. Se arregla el trazo del contorno del ala.
+- Cinemáticas propias de 4,5 s y cuatro actos, enrutadas en la partida real desde `drawEvolutionPresentation`: «Despertar fósil» (Dino) y «Ascenso» (Dragón). En movimiento reducido se muestra un único fotograma fijo, cacheado.
+- Islas: Valle de los Gigantes pasa a ser un valle jade de día (mesetas con cascadas, manada de saurópodos, pterosaurios, acantilado fósil, cícadas, luciérnagas). Cordillera de las Brasas pasa a ser una noche volcánica (constelación del Dragón, luna eclipsada, volcán en erupción, agujas de obsidiana, wyverns y un río de lava). Gradientes cacheados, sin azar.
+
+## Calidad
+- `tests/dino-dragon-v2.test.js`: curva de tamaños, paletas disjuntas, siluetas, enrutado y determinismo de las cinemáticas, islas deterministas y sin gradientes por frame.
+- Suite completa, release gate y pruebas de navegador (e2e, tamaños, dirección visual, pulido, presentación y matriz visual) en verde.
 
 # OHANA V460 · Michicornio: cuerpo vivo, intro y metamorfosis
 
@@ -2344,3 +2369,7 @@ Validación final de ohana-437: 1241/1241 pruebas unitarias; puerta de publicaci
 Revisión móvil: barra de la Reina bajo las tarjetas de vida/XP, contador de plumas legible y avisos separados. Se evita duplicar el anuncio de fase sobre la barra. Verificación de devolución con H real, fases 2/3, flores, escritorio, 390/320 px y movimiento reducido; sin fallos de ejecución.
 
 Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación correcta; navegador con H real, fases 2/3, flores, diez héroes y 160 fotogramas de evolución. HUD del jefe y avisos comprobados sin solapar vida/XP a 390/320 px.
+
+# OHANA · Pizza & Frita
+- Tallas estándar 64/82/100/120/140; Pizza tricolor elástica (brazos marrones con manoplas, F5 volcánica) vs Frita superhéroe diner azul marino (F5 Centella eléctrica).
+- Cinemáticas propias de 4 actos (Horno de leña / Al punto) enrutadas por presentation.js; fondos Puerto del Horno y Mercado Centella con gradientes cacheados; isla Puerto del banquete con horno, kiosco, guirnaldas y muelle.

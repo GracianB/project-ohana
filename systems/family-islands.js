@@ -89,22 +89,56 @@ function drawDinoCampPod(c,z){
  c.restore();
 }
 
-function drawFritaCampPod(c,z){
- c.save();
- c.translate(z.x+64,z.y-10);
- c.fillStyle='#2b1008';c.strokeStyle='#ffd54f';c.lineWidth=2.2;
- c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
- c.fillStyle='#ff9800';c.fillRect(-8,-18,16,14);
+// Pizza & Frita · PUERTO DEL BANQUETE: one harbour, two kitchens.
+// Left: Pizza's brick wood-fired oven (tomato, mozzarella, basil). Right:
+// Frita's navy diner kiosk with a ketchup-and-white awning and neon sign.
+// Between them festoon lights, in front a pier with a bobbing fishing boat,
+// tomato crates and basil pots. Flat colours only; motion is a deterministic
+// function of t and stops entirely with reduced motion.
+export const KITCHEN_HARBOR_PALETTE=Object.freeze({brick:'#a4462e',brick2:'#7e3222',mouth:'#1c0a08',fire:'#ff8a2a',fire2:'#ffd24a',basil:'#3f9a3a',tomato:'#e0452c',cream:'#fff4dc',navy:'#1f3a8a',navy2:'#14245a',ketchup:'#d8231c',neon:'#5fd0ff',wood:'#a8743e',wood2:'#7a5028',sea:'#2a7f96'});
+function drawKitchenHarbor(c,z,t=0,reduce=false){
+ const K=KITCHEN_HARBOR_PALETTE,T=reduce?0:t,TAU=Math.PI*2;
+ // pier + boat on the sea-side (south-east)
+ c.save();c.translate(z.x+96,z.y+96);
+ c.fillStyle=K.wood2;c.fillRect(-6,-10,56,12);for(let i=0;i<4;i++){c.fillStyle=K.wood;c.fillRect(-4+i*14,-10,11,12);c.fillStyle=K.wood2;c.fillRect(i*14,2,4,16);}
+ const bob=Math.sin(T*1.6)*2.4,roll=Math.sin(T*1.6+.8)*.05;
+ c.save();c.translate(80,8+bob);c.rotate(roll);
+ c.fillStyle=K.cream;c.beginPath();c.moveTo(-30,-6);c.lineTo(30,-6);c.lineTo(22,8);c.lineTo(-22,8);c.closePath();c.fill();
+ c.fillStyle=K.ketchup;c.fillRect(-28,-6,56,4);c.fillStyle=K.navy;c.fillRect(-4,-30,3,24);
+ c.fillStyle=K.cream;c.beginPath();c.moveTo(-1,-30);c.lineTo(16,-12);c.lineTo(-1,-12);c.closePath();c.fill();
  c.restore();
-}
-
-function drawPizzaCampPod(c,z){
- c.save();
- c.translate(z.x-64,z.y-10);
- c.fillStyle='#2e1008';c.strokeStyle='#ff7043';c.lineWidth=2.2;
- c.beginPath();c.arc(0,0,22,0,Math.PI*2);c.fill();c.stroke();
- c.fillStyle='#ffd54f';c.beginPath();c.arc(0,-4,8,0,Math.PI*2);c.fill();
- c.restore();
+ c.strokeStyle='#bfeef0';c.globalAlpha=.5;c.lineWidth=1.5;for(let i=0;i<3;i++){const r=(T*12+i*14)%42;c.beginPath();c.ellipse(80,16,20+r,4+r*.15,0,0,TAU);c.globalAlpha=.5*(1-r/42);c.stroke();}
+ c.globalAlpha=1;c.restore();
+ // Pizza's wood-fired oven (north-west)
+ const ox=z.x-112,oy=z.y-30;
+ c.fillStyle=K.brick2;c.fillRect(ox-50,oy-6,100,12);
+ c.fillStyle=K.brick;c.beginPath();c.arc(ox,oy-6,46,Math.PI,0);c.closePath();c.fill();
+ c.strokeStyle=K.brick2;c.lineWidth=2;for(const r of [18,30,40]){c.beginPath();c.arc(ox,oy-6,r,Math.PI*1.08,Math.PI*1.92);c.stroke();}
+ c.fillStyle=K.mouth;c.beginPath();c.arc(ox,oy-6,19,Math.PI,0);c.closePath();c.fill();
+ const flick=.75+.25*Math.sin(T*9);
+ for(let i=-2;i<=2;i++){c.fillStyle=i%2?K.fire:K.fire2;c.globalAlpha=flick;c.beginPath();c.moveTo(ox+i*6-5,oy-6);c.lineTo(ox+i*6+Math.sin(T*7+i)*1.5,oy-18-(2-Math.abs(i))*4*flick);c.lineTo(ox+i*6+5,oy-6);c.fill();}
+ c.globalAlpha=.22*flick;c.fillStyle=K.fire2;c.beginPath();c.arc(ox,oy-10,30,0,TAU);c.fill();c.globalAlpha=1;
+ c.fillStyle=K.brick2;c.fillRect(ox+18,oy-66,14,26);
+ for(let i=0;i<4;i++){const life=reduce?.2+i*.2:((T*.35+i/4)%1);c.globalAlpha=(1-life)*.45;c.fillStyle='#e8e0d8';c.beginPath();c.arc(ox+25+Math.sin(life*5+i)*6,oy-72-life*44,5+life*10,0,TAU);c.fill();}
+ c.globalAlpha=1;
+ // basil pots + tomato crate by the oven
+ for(const [px,py] of [[ox-62,oy+10],[ox+56,oy+12]]){c.fillStyle='#b8643a';c.fillRect(px-7,py-8,14,10);for(let k=-1;k<=1;k++){c.fillStyle=K.basil;c.beginPath();c.ellipse(px+k*4,py-12-Math.abs(k)*-2+Math.sin(T*1.2+k)*.6,4,6,k*.5,0,TAU);c.fill();}}
+ c.fillStyle=K.wood;c.fillRect(z.x-170,z.y+30,30,16);for(let k=0;k<3;k++){c.fillStyle=K.tomato;c.beginPath();c.arc(z.x-164+k*9,z.y+28,5,0,TAU);c.fill();}
+ // Frita's navy diner kiosk (north-east)
+ const kx=z.x+112,ky=z.y-28;
+ c.fillStyle=K.navy;c.fillRect(kx-38,ky-44,76,50);
+ c.fillStyle=K.navy2;c.fillRect(kx-30,ky-34,60,20);
+ c.fillStyle='#ffd36a';for(let i=0;i<5;i++)c.fillRect(kx-24+i*11,ky-30+((i*3)%4),4,14);
+ for(let i=0;i<8;i++){c.fillStyle=i%2?K.cream:K.ketchup;c.beginPath();c.moveTo(kx-44+i*11,ky-46);c.lineTo(kx-33+i*11,ky-46);c.lineTo(kx-34+i*11,ky-36);c.quadraticCurveTo(kx-38.5+i*11,ky-32,kx-43+i*11,ky-36);c.closePath();c.fill();}
+ const neon=Math.sin(T*5)>-.8?1:.35;
+ c.globalAlpha=.25*neon;c.fillStyle=K.neon;c.beginPath();c.arc(kx,ky-62,16,0,TAU);c.fill();c.globalAlpha=neon;
+ c.strokeStyle=K.neon;c.lineWidth=2.4;c.beginPath();c.moveTo(kx-6,ky-54);c.lineTo(kx-4,ky-70);c.lineTo(kx+7,ky-70);c.moveTo(kx-5,ky-62);c.lineTo(kx+4,ky-62);c.stroke();c.globalAlpha=1;
+ c.fillStyle='#f4ece0';c.fillRect(kx-38,ky+6,76,5);for(let i=0;i<8;i++){c.fillStyle=i%2?K.ketchup:'#f4ece0';c.fillRect(kx-38+i*9.5,ky+6,9.5,5);}
+ // festoon lights from chimney to kiosk sign
+ c.strokeStyle='#4a3a38';c.lineWidth=1.2;c.beginPath();c.moveTo(ox+25,oy-60);c.quadraticCurveTo(z.x,z.y-40,kx-30,ky-50);c.stroke();
+ for(let i=1;i<12;i++){const k=i/12,x=(1-k)*(1-k)*(ox+25)+2*k*(1-k)*z.x+k*k*(kx-30),y=(1-k)*(1-k)*(oy-60)+2*k*(1-k)*(z.y-40)+k*k*(ky-50);
+  c.globalAlpha=.65+.35*Math.sin(T*3+i*1.9);c.fillStyle=[K.tomato,K.cream,K.basil,K.neon][i%4];c.beginPath();c.arc(x,y+3,3,0,TAU);c.fill();}
+ c.globalAlpha=1;
 }
 
 function drawYomiCampPod(c,z){
@@ -125,7 +159,7 @@ function drawCuernoCampPod(c,z){
  c.restore();
 }
 
-export function drawFamilyIslands(c){
+export function drawFamilyIslands(c,t=0,reduce=false){
  c.fillStyle='#174762';c.fillRect(0,0,1400,660);
  const sea=c.createLinearGradient(0,0,1400,660);sea.addColorStop(0,'#236780');sea.addColorStop(1,'#10304c');c.fillStyle=sea;c.fillRect(0,0,1400,660);
  for(let i=0;i<80;i++){c.strokeStyle=i%3?'#9de7e314':'#a9e5e52a';c.lineWidth=2;c.beginPath();const x=(i*197)%1400,y=(i*83)%660;c.moveTo(x,y);c.quadraticCurveTo(x+18,y+4,x+38,y);c.stroke();}
@@ -137,9 +171,7 @@ export function drawFamilyIslands(c){
    drawAlohaCamp(c,z);
    drawStitchoCampPod(c,z);
   }else if(z.id==='kitchen'){
-   c.fillStyle='#b77758';c.beginPath();c.arc(z.x,z.y-60,48,Math.PI,0);c.lineTo(z.x+48,z.y-26);c.lineTo(z.x-48,z.y-26);c.fill();c.fillStyle='#483d47';c.fillRect(z.x-22,z.y-60,44,34);c.fillStyle='#ffbd78';c.fillRect(z.x-14,z.y-47,28,17);c.fillStyle='#eee0aa';c.fillRect(z.x+105,z.y-75,50,45);c.fillStyle='#d48670';c.fillRect(z.x+98,z.y-83,65,12);
-   drawFritaCampPod(c,z);
-   drawPizzaCampPod(c,z);
+   drawKitchenHarbor(c,z,t,reduce);
   }else if(z.id==='fossil'){
    c.fillStyle='#655d65';c.beginPath();c.moveTo(z.x-65,z.y-50);c.lineTo(z.x-25,z.y-155);c.lineTo(z.x+30,z.y-155);c.lineTo(z.x+90,z.y-50);c.fill();c.strokeStyle='#f2a475';c.lineWidth=7;c.beginPath();c.moveTo(z.x-25,z.y-152);c.lineTo(z.x+5,z.y-130);c.lineTo(z.x+30,z.y-152);c.stroke();c.strokeStyle='#e5d5b2';c.lineWidth=10;c.beginPath();c.arc(z.x-120,z.y-25,38,Math.PI,0);c.stroke();
    drawDragonCampPod(c,z);

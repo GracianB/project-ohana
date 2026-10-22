@@ -4,10 +4,10 @@ import Dino, { dinoAirbornePose } from '../characters/art/dino.js';
 
 const forms=[
   {legW:12,bw:17},
-  {legW:13,bw:16},
-  {legW:14,bw:17},
-  {legW:17,bw:21},
-  {legW:16,bw:20},
+  {legW:14,bw:18},
+  {legW:16,bw:19.5},
+  {legW:19,bw:23},
+  {legW:19,bw:23},
 ];
 function pose(form,state,overrides={}) {
   return {form,state,phase:1.42,t:115,vy:0,look:{x:1,y:0},

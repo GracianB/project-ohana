@@ -1,18 +1,24 @@
 
+// Pizza & Frita · Frita is the DINER SUPERHERO: crisp gold fry, ketchup-red
+// cape and carton, and NAVY BLUE as her own accent (sneakers, cape lining,
+// hero mask) — never Pizza's basil green or volcanic orange. The final
+// "Centella" form crackles with electric sparks, not a golden halo.
 const PAL = [
-{ fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a", thick: 3.8, shoeS: 1.15 },
-{ fry: "#f7c04a", edge: "#d98c22", cape: "#e8322a", limb: "#5a3322", shoe: "#e8322a" },
-{ fry: "#f6bd45", edge: "#d6851e", cape: "#d42020", limb: "#4a2a26", shoe: "#e8322a", thick: 3.6 },
-{ fry: "#ffd35e", edge: "#cf7a18", cape: "#d42020", limb: "#4a2a26", shoe: "#e8322a" },
-{ fry: "#ffd23a", edge: "#e89a10", cape: "#e82020", limb: "#6a3a16", shoe: "#ffe27a", thick: 3.8, shoeS: 1.1 },
+{ fry: "#ffe08a", edge: "#e3a63c", cape: "#e8322a", limb: "#5a3322", shoe: "#2c4aa6", lining: "#1f3a8a", thick: 3.8, shoeS: 1.15 },
+{ fry: "#f7c04a", edge: "#d98c22", cape: "#e8322a", limb: "#5a3322", shoe: "#2c4aa6", lining: "#1f3a8a" },
+{ fry: "#f6bd45", edge: "#d6851e", cape: "#d42020", limb: "#4a2a26", shoe: "#2846a0", lining: "#1c3480", thick: 3.6 },
+{ fry: "#ffd35e", edge: "#cf7a18", cape: "#d42020", limb: "#4a2a26", shoe: "#24409a", lining: "#1a3078" },
+{ fry: "#ffd23a", edge: "#e89a10", cape: "#e82020", limb: "#6a3a16", shoe: "#2a54c8", lining: "#3fd0ff", spark: "#7fe8ff", thick: 3.8, shoeS: 1.1 },
 ];
+export const FRITA_PALETTE = Object.freeze(PAL.map(Object.freeze));
 const KETCHUP = "#d8231c";
 // Contorno único: miembros/accesorios usan fracciones fijas de R.LINE para que
 // la silueta lea igual en las 5 formas.
 const OL_LIMB = 0.6, OL_PROP = 0.7;
 
 /** Altura visual por forma (la usa draw.js, igual que CUERNO/KILO/MICHI…). */
-export const FRITA_VISUAL_H = Object.freeze([68, 70, 80, 90, 102]);
+// Pizza & Frita: calibrated to the standard 64/82/100/120/140 px curve.
+export const FRITA_VISUAL_H = Object.freeze([64, 75.5, 94.1, 124.1, 108.1]);
 
 const TAU = Math.PI * 2;
 const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
@@ -170,6 +176,9 @@ ctx.scale(ss, ss);
 R.ellipse(ctx, 2.2, -1.8, 5.4, 3.4, c.shoe, { lw: R.LINE * OL_PROP / ss });
 ctx.fillStyle = "#ffffff";
 ctx.fillRect(-2.6, 0.2, 9.4, 1.2);
+// ketchup sneaker stripe on the navy hero shoe
+ctx.strokeStyle = KETCHUP; ctx.lineWidth = 1.2; ctx.lineCap = "round";
+ctx.beginPath(); ctx.moveTo(0.4, -2.4); ctx.lineTo(4.2, -1); ctx.stroke();
 R.shine(ctx, 0.5, -3.2, 1.8, 0.9, 0.7);
 ctx.restore();
 }
@@ -277,7 +286,7 @@ for (let i = 0; i < 9; i++) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(lean);
-  for (const [k, col, a] of [[1, "#ff9a1a", 0.7], [0.72, "#ffd23a", 0.85], [0.4, "#fffbe0", 0.9]]) {
+  for (const [k, col, a] of [[1, "#ffb81a", 0.62], [0.72, "#7fe8ff", 0.85], [0.4, "#ffffff", 0.95]]) {
     ctx.beginPath();
     const cu = Math.sin(t * 0.4 + i) * 3 * k;
     ctx.moveTo(cu, -h * k);
@@ -287,6 +296,14 @@ for (let i = 0; i < 9; i++) {
     ctx.fill();
   }
   ctx.restore();
+}
+// Centella: two zig-zag sparks flicker around the fry (deterministic beat).
+ctx.strokeStyle = "#bff4ff"; ctx.lineWidth = 1.8; ctx.lineCap = "round"; ctx.lineJoin = "round";
+for (let b = 0; b < 2; b++) {
+  if (Math.floor(t * 0.12 + b * 1.7) % 3 === 2) continue;
+  const q = at(sp, 0.35 + b * 0.35), side = b ? 1 : -1;
+  const [x, y] = off(q, side * (w * 0.5 + 10 * scale));
+  ctx.beginPath(); ctx.moveTo(x, y - 9 * scale); ctx.lineTo(x + side * 4, y - 3 * scale); ctx.lineTo(x - side * 1, y); ctx.lineTo(x + side * 5, y + 7 * scale); ctx.stroke();
 }
 ctx.restore();
 }
@@ -316,6 +333,11 @@ smoothPath(ctx, pts);
 ctx.fillStyle = g;
 ctx.fill();
 R.paint(ctx, null, { lw: R.LINE });
+// navy hero lining along the billowing hem
+ctx.save();
+ctx.strokeStyle = c.lining || "#1f3a8a"; ctx.lineWidth = 2.6; ctx.lineCap = "round"; ctx.globalAlpha = 0.9;
+ctx.beginPath(); ctx.moveTo(pts[2][0] + 2, pts[2][1]); ctx.quadraticCurveTo(pts[3][0] + 3, pts[3][1] - 2, pts[4][0], pts[4][1] - 2); ctx.stroke();
+ctx.restore();
 const drips = [[0.3, 0], [0.6, 1], [0.85, 2]];
 for (const [k, i] of drips) {
   const x = pts[3][0] + (pts[5][0] - pts[3][0]) * k;
@@ -475,10 +497,11 @@ const st = pose.state, t = pose.t;
 const P = {
   a0: 0, bend: Math.sin(t * 0.045) * 0.1 + pose.breath * 0.04, wig: pose.sway * 0.55,
   bx: 0, lift: 0,
-  legF: [0.12, 1.5], legB: [-0.12, -1.5],
+  // superhero stance: feet apart, chest up, the cape always catching a breeze
+  legF: [0.2, 1.5], legB: [-0.2, -1.5],
   armF: { ang: 0.35 + pose.breath * 0.05, bend: 3 }, armB: { ang: -0.35 - pose.breath * 0.05, bend: -3 },
   mood: "normal", mouth: "smile", item: null, fx: null, faceRot: 0,
-  capeFlow: 6 + Math.abs(pose.sway) * 10, capeWind: 0, dipped: 0, lying: false,
+  capeFlow: 9 + Math.abs(pose.sway) * 10 + Math.sin(t * 0.05) * 3, capeWind: 0.35, dipped: 0, lying: false,
 };
 const withFork = f >= 2;
 if (st === "run" && pose.move !== "slide") {
