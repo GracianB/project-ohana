@@ -13,7 +13,7 @@ export const ENDING_SIGNATURES = Object.freeze({
   dino: Object.freeze({ motif: "quake", color: "#a6f08c", accent: "#ffe6a3", line: "¡PUM! ¡GANAMOS!" }),
   frita: Object.freeze({ motif: "fries", color: "#ffd84a", accent: "#ff6a3a", line: "¡VICTORIA CRUJIENTE!" }),
   pizza: Object.freeze({ motif: "cheese", color: "#ffc48e", accent: "#ff5a5a", line: "¡RACIÓN DE GLORIA!" }),
-  yomi: Object.freeze({ motif: "ofuda", color: "#ff4466", accent: "#fff1d0", line: "LA SOMBRA TAMBIÉN VUELVE A CASA." }),
+  yomi: Object.freeze({ motif: "ofuda", color: "#ff4466", accent: "#fff1d0", line: "TAMBIÉN UNA IA PUEDE TENER FAMILIA." }),
   cuerno: Object.freeze({ motif: "rainbow", color: "#d9c6ff", accent: "#7ee7ff", line: "¡DULCES SUEÑOS, HOKU!" }),
 });
 export function endingSignature(id) { return ENDING_SIGNATURES[id] || ENDING_SIGNATURES.kilo; }

@@ -10,7 +10,7 @@ const impacts = [];
 
 export const MICHI_YOMI_PLAY = Object.freeze({
   cat: Object.freeze(["G · Miau~ con ovillo", "Aterrizaje · ¡De pie!", "Quieto · se acurruca (zzz purr)"]),
-  yomi: Object.freeze(["G · ¡Yomi-sello! abanico de ofudas", "Aterrizaje · torii de sombra", "Quieto · farolillos espíritu"]),
+  yomi: Object.freeze(["G · ¡Hechizo de código! runas en órbita", "Aterrizaje · onda de escaneo", "Quieto · pensamientos en órbita"]),
 });
 
 if (typeof addEventListener === "function") {

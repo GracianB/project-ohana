@@ -261,7 +261,7 @@ dragon:  { kind: "nova",    line: "EL CIELO TAMBIÉN LUCHA", text: "El vuelo abr
 dino:    { kind: "quake",   line: "EL MÁS GRANDE TAMBIÉN TIENE CORAZÓN", text: "Dino despierta al coloso: cinco actos, cometas fósiles y un último gran abrazo." },
 frita:   { kind: "crisp",   line: "TODO AL PUNTO", text: "Aceite, velocidad y una cocina absolutamente irresponsable." },
 pizza:   { kind: "volcano", line: "ABRID EL HORNO", text: "El escenario entero se convierte en una pizzería volcánica." },
-yomi:    { kind: "maw",     line: "CUERNO TRAE EL JUICIO", text: "Yomi abre el umbral. Cuerno atraviesa el campo y sentencia a todos los enemigos." },
+yomi:    { kind: "maw",     line: "OS RECUERDO A TODOS", text: "Yomi compila un hechizo de código: diez estrellas de la familia se enlazan y Cuerno cruza la constelación golpeando a todos los enemigos analizados." },
 cuerno:  { kind: "aurora",  line: "LOS SUEÑOS TAMBIÉN VUELAN", text: "Cuerno despierta siete colores. Los enemigos visibles se duermen entre estrellas, salvo el jefe." },
 });
 

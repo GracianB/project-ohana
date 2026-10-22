@@ -45,17 +45,13 @@ test("V358 Yomi acknowledges ukulele, Chispin shock and Dino's stomp without an 
   assert.ok(row.length===4&&row.every((v,i)=>Number.isFinite(v)&&(!i||v>row[i-1])));
 });
 
-test("V358 Yomi retains its original five form-only silhouettes, two sleeves and attached flame",()=>{
+test("Yomi IA keeps five form silhouettes, floating hands and the chest core",()=>{
  const art=readFileSync(new URL("../characters/art/yomi.js",import.meta.url),"utf8");
- for(const shape of ["if(f===0){","else if(f===1){","else if(f===2){","else if(f===3){",
-   "ctx.scale(life.expandX,life.expandY)","life.sleeveFront","life.sleeveBack",
-   "Ribbon tail follows the lantern","Actual foot silhouette","Lantern-shaped body:",
-   "Warm lantern heart","drawYomiRitual(ctx,p,f","function sigil(","function crescent("])
-  assert.ok(art.includes(shape),"native body lost "+shape);
+ for(const shape of ["YOMI_FORMS","function drawHand(","function drawCore(","function drawWing(",
+   "function drawCape(","function drawSatellites(","function drawRingHalf(","drawYomiRitual(ctx,p,f",
+   "ctx.scale(life.expandX,life.expandY)","life.sleeveFront","life.sleeveBack"])
+  assert.ok(art.includes(shape),"Yomi IA body lost "+shape);
  assert.match(art,/const life=yomiWelcomeAnatomy\(p,f\)/);
- assert.match(art,/7\+f\*\.5\+reveal\*2\.2\+life\.flame\*1\.5/);
- assert.match(art,/R\.eye\(ctx,-8,faceY/);
- assert.match(art,/ellipse\(ctx,-7,0,7,3,shadow\)/);
  assert.equal(typeof yomiCastActing,"function");
  assert.equal(typeof yomiRitualState,"function");
 });

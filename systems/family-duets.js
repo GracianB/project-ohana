@@ -13,7 +13,7 @@ const names={
  dragon:{ally:"dino",borrowedL:"quake",name:"Dragón y Dino",line:"¡El cielo tiembla!",cue:"DINO · TERREMOTO",color:"#ffac63",kind:"quake"},
  dino:{ally:"frita",borrowedL:"fryer",name:"Dino y Frita",line:"¡Patatas sísmicas!",cue:"FRITA · FREIDORA",color:"#d9ee7a",kind:"geyser"},
  frita:{ally:"pizza",borrowedL:"oven",name:"Frita y Pizza",line:"¡Menú volcánico!",cue:"PIZZA · HORNO",color:"#ffd36a",kind:"oven"},
- pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · FAUCES",color:"#ff9d82",kind:"maw"},
+ pizza:{ally:"yomi",borrowedL:"maw",name:"Pizza y Yomi",line:"¡Esta pizza muerde!",cue:"YOMI · SÍNTESIS",color:"#ff9d82",kind:"maw"},
  yomi:{ally:"cuerno",borrowedL:"rainbow",name:"Yomi y Cuerno",line:"¡Luz entre sombras!",cue:"CUERNO · ARCOÍRIS",color:"#e2b8ff",kind:"rainbow"},
  cuerno:{ally:"kilo",borrowedL:"ohana",name:"Cuerno y Kilo",line:"¡Toda la familia!",cue:"KILO · CORO OHANA",color:"#ffe9a8",kind:"ohana"}
 };

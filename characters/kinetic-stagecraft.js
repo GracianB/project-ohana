@@ -13,7 +13,7 @@ export const KINETIC_IDENTITIES=Object.freeze({
  dino:make("fossils",["#c0ed84","#dfc6a6","#fff3ce"],"Pisadas jurásicas"),
  frita:make("salt",["#fff6c7","#fda970","#fffdf0"],"Sal y velocidad"),
  pizza:make("cheese",["#ffe48e","#ed7354","#fff8d0"],"Queso en el aire"),
- yomi:make("ofuda",["#f8dccd","#f38c9e","#b9a5ee"],"Ofuda entre sombras"),
+ yomi:make("ofuda",["#f8dccd","#f38c9e","#b9a5ee"],"Runas de código"),
  cuerno:make("prism",["#fff5c6","#eab4ff","#9befff"],"Luz de siete colores")
 });
 export const KINETIC_STAGES=Object.freeze(["landing","turn","brake","attack","air","run"]);

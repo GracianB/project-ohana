@@ -9,7 +9,7 @@ export const SUPREME_STORYBOARDS = Object.freeze({
   dino:    { duration:6.30, camera:"colossus",gag:"heart-of-colossus",scene:"quake",beat:"LATIDO → DESPERTAR → FRACTURA → COMETAS → CORAZÓN" },
   frita:   { duration:4.85, camera:"whip",    gag:"potato-catch",   scene:"crisp",   beat:"PATATA → CAPTURA → KÉTCHUP → CRUJIDO" },
   pizza:   { duration:5.10, camera:"recoil",  gag:"oven-too-hot",   scene:"oven",    beat:"BOSTEZO → HORNO → ¡QUEMA! → VOLCÁN" },
-  yomi:    { duration:6.25, camera:"pull",    gag:"void-looks-back",scene:"maw",     beat:"FAROL → CUERNO → EMBESTIDA → JUICIO" },
+  yomi:    { duration:6.25, camera:"pull",    gag:"void-looks-back",scene:"maw",     beat:"PREGUNTA → RUNAS → CONSTELACIÓN → RESPUESTA" },
   cuerno:  { duration:6.10, camera:"sweep",   gag:"dream-rainbow",   scene:"aurora",  beat:"ALIENTO → CÍRCULO → SUEÑO → AURORA" },
 });
 

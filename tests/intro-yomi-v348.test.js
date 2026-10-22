@@ -92,7 +92,6 @@ test("V348 all five Yomi forms and four J/K/L/U ritual poses survive without bec
  const draw=readFileSync(new URL("../characters/draw.js",import.meta.url),"utf8");
  assert.match(art,/const welcome=p\.yomiWelcome/);
  assert.match(art,/const stageTilt=/);
- assert.match(art,/const welcomeSleeve=/);
  assert.match(art,/yomiCastActing\(p\)/);
  assert.match(art,/drawYomiRitual\(ctx,p/);
  assert.match(art,/const PAL=\[/);

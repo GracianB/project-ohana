@@ -598,7 +598,8 @@ function playCharacterCine(st, detail, mod) {
       ctx.clearRect(0, 0, fc.W, fc.H);
       // V461: Michicornio plays its own four-act metamorphosis (seeded motif +
       // dream palette); the other nine heroes keep the shared presentation.
-      if (def.id === "cat") mod.drawEvoCine(ctx, fc.W, fc.H, Math.min(t, dur), from, to, { seed: detail.michiSeed || 0, reducedMotion: reducedMotion() });
+      if (def.id === "yomi") mod.drawEvoCine(ctx, fc.W, fc.H, Math.min(t, dur), from, to, { reducedMotion: reducedMotion() });
+      else if (def.id === "cat") mod.drawEvoCine(ctx, fc.W, fc.H, Math.min(t, dur), from, to, { seed: detail.michiSeed || 0, reducedMotion: reducedMotion() });
       else drawEvolutionPresentation(ctx, fc.W, fc.H, id, evo, Math.min(t, dur), reducedMotion());
       ctx.restore();
     } catch (err) {

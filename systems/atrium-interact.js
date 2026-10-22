@@ -11,7 +11,7 @@ if (stage && grid && !["family-grid", "family-camp"].includes(stage.dataset.sele
     dino: ["¡Pisotón!", "Grrr", "Te cubro"],
     frita: ["¡Kétchup!", "Resbalón", "Corre"],
     pizza: ["¡Horno!", "Queso", "Rebote"],
-    yomi: ["Ofuda", "Paso hueco", "Shhh"],
+    yomi: ["¿Hola?", "Analizando…", "Te recuerdo"],
     cuerno: ["¡Arcoíris!", "Galope", "Brillo"]
   };
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;

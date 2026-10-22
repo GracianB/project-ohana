@@ -14,7 +14,7 @@ const THEMES={
  dino:['#c3ef91','fossil','Pisotón fósil','Estampida ancestral','quake','stampede'],
  frita:['#ffe6a1','salt','Abanico crujiente','Festival de freidoras','fan','fryer'],
  pizza:['#ffc774','slice','Porción boomerang','Rueda de porciones','return','orbit'],
- yomi:['#d5bcff','seal','Corte del umbral','Desfile de espíritus','cross','spirits'],
+ yomi:['#d5bcff','seal','Runa de código','Lluvia de respuestas','cross','spirits'],
  cuerno:['#d7f9fa','prism','Lanza de aurora','Lluvia de constelaciones','lance','constellation']
 };
 const DESCRIPTIONS={
