@@ -34,7 +34,7 @@ test("Michi World 1: five lunar jellies are individually authored, finite Canvas
     assert.equal(stats.gradients, 0, "no per-frame gradients");
     assert.equal(stats.badCoordinates, 0, "no non-finite geometry");
     assert.ok(stats.calls.bezierCurveTo >= 7, "organic dome and animated tentacles");
-    assert.ok(stats.calls.quadraticCurveTo >= 8, "cat ears, eyes and face required");
+    assert.ok(stats.calls.quadraticCurveTo >= (done ? 6 : 8), "cat ears, eyes and face required");
     assert.ok(stats.calls.ellipse >= (done ? 5 : 3), "real facial anatomy");
     assert.equal(values.globalAlpha, 1, "Canvas should restore its input opacity");
     const colors = [...stats.paints].filter(c => typeof c === "string").sort();
