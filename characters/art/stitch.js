@@ -5,6 +5,11 @@
 // sonrisa pícara con colmillitos, manos de 3 garras, cola corta con punta
 // luminosa. Formas 2+ galopan a cuatro patas.
 // pose.move: "roll" (bola rodando), "climb" (trepando, igual que wall).
+// V465 · Rediseño: Stitcho es FRÍO y ANGULOSO (cobalto, marino, cian) frente al
+// Chispín cálido y redondo: orejas de murciélago enormes con interior rosa que
+// reaccionan a cada estado, pecas alienígenas, mechón, pechera de pelo, una
+// identidad por forma (cáscara de huevo, pintura de guerra, LEDs de laboratorio,
+// pecas de estrellas) y garras con estelas afiladas. Sin gradientes por frame.
 // ============================================================================
 
 const TAU = Math.PI * 2;
@@ -12,20 +17,20 @@ const CYAN = "#62f3ff";
 const CLAW = "#f2f7ff";
 
 const PAL = [
-  { body: "#8ac6ff", stripe: "#827aeb", limb: "#6aabe8" },
-  { body: "#367ddd", stripe: "#7a3fe0", limb: "#2a5fe6" },
-  { body: "#244aa3", stripe: "#8e3ff0", limb: "#213fc0" },
-  { body: "#337cbb", stripe: "#7a3fe0", limb: "#246add" },
-  { body: "#5b4cc4", stripe: "#f08cff", limb: "#5a44d8" },
+  { body: "#9cc8ff", stripe: "#5a7cf0", limb: "#7eb0f0", belly: "#e4f0ff", inner: "#ff9ad5", spot: "#6f9ae8", blush: "#ff9ad5" },
+  { body: "#3d7fe0", stripe: "#22379a", limb: "#2f66d8", belly: "#a9d4ff", inner: "#ff86c0", spot: "#2a56b0", blush: "#9fb8ff" },
+  { body: "#2747a8", stripe: "#101c5e", limb: "#1f3ab8", belly: "#7fb4ff", inner: "#ff5f8f", spot: "#16297a", blush: "#7f9cff", paint: CYAN },
+  { body: "#2f78b4", stripe: "#143e66", limb: "#2464a8", belly: "#9ee6ff", inner: "#ff7aa8", spot: "#1b4f80", blush: "#8fd8ff" },
+  { body: "#4b3fb8", stripe: "#f08cff", limb: "#4a36cc", belly: "#c9b8ff", inner: "#ffd0ff", spot: "#2a1f80", blush: "#cbbaff" },
 ];
 
 // Proporciones por forma (y de 0 a ~-100; las antenas pueden sobresalir)
 const P = [
-  { egg: true, hx: 1, hy: -38, hrx: 30, hry: 33, bx: 0, by: -24, brx: 0, bry: 0, legL: 5, legW: 8.5, armL: 8, armW: 6, hand: 4.6, antL: 13, ear: 9.5, eye: 12.2 },
-  { hx: 4, hy: -58, hrx: 25, hry: 21, bx: -2, by: -31, brx: 15, bry: 17, legL: 13, legW: 8.5, armL: 16, armW: 6.5, hand: 5.4, antL: 26, ear: 11, eye: 10.4 },
-  { hx: 13, hy: -52, hrx: 25, hry: 20, bx: -2, by: -30, brx: 19, bry: 17, lean: 0.32, legL: 12, legW: 10.5, armL: 20, armW: 8.5, hand: 7.5, antL: 29, ear: 12.5, eye: 9.2, spikes: true, bigClaw: true },
-  { hx: 5, hy: -64, hrx: 26, hry: 21, bx: -2, by: -35, brx: 19, bry: 20, legL: 15, legW: 10, armL: 19, armW: 8, hand: 6.4, antL: 30, ear: 12.5, eye: 9.4, tech: true, extraArms: true },
-  { hx: 5, hy: -72, hrx: 27, hry: 22, bx: -2, by: -39, brx: 19, bry: 22, legL: 17, legW: 10, armL: 21, armW: 8, hand: 6.6, antL: 35, ear: 14, eye: 9.8, final: true, extraArms: true },
+  { egg: true, hx: 1, hy: -38, hrx: 30, hry: 33, bx: 0, by: -24, brx: 0, bry: 0, legL: 5, legW: 8.5, armL: 8, armW: 6, hand: 4.6, antL: 13, ear: 12, eye: 12.2 },
+  { hx: 4, hy: -58, hrx: 25, hry: 21, bx: -2, by: -31, brx: 15, bry: 17, legL: 13, legW: 8.5, armL: 16, armW: 6.5, hand: 5.4, antL: 26, ear: 15, eye: 10.4 },
+  { hx: 13, hy: -52, hrx: 25, hry: 20, bx: -2, by: -30, brx: 19, bry: 17, lean: 0.32, legL: 12, legW: 10.5, armL: 20, armW: 8.5, hand: 7.5, antL: 29, ear: 16, eye: 9.2, spikes: true, bigClaw: true },
+  { hx: 5, hy: -64, hrx: 26, hry: 21, bx: -2, by: -35, brx: 19, bry: 20, legL: 15, legW: 10, armL: 19, armW: 8, hand: 6.4, antL: 30, ear: 16.5, eye: 9.4, tech: true, extraArms: true },
+  { hx: 5, hy: -72, hrx: 27, hry: 22, bx: -2, by: -39, brx: 19, bry: 22, legL: 17, legW: 10, armL: 21, armW: 8, hand: 6.6, antL: 35, ear: 18.5, eye: 9.8, final: true, extraArms: true },
 ];
 
 // ---------------------------------------------------------------------------
@@ -89,10 +94,11 @@ function stroke2(ctx, R, build, w, col, lw = 2.4) {
 function glowDot(ctx, x, y, r, col, a = 1) {
   ctx.save();
   ctx.globalAlpha *= Math.max(0, Math.min(1, a));
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, "#ffffff"); g.addColorStop(0.35, col); g.addColorStop(1, "rgba(98,243,255,0)");
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+  // V465: layered alpha discs instead of a per-frame radial gradient.
+  const base = ctx.globalAlpha, rr = Math.max(0.1, r);
+  ctx.fillStyle = col;
+  for (const [k, a2] of [[1, 0.16], [0.72, 0.24], [0.48, 0.4]]) { ctx.globalAlpha = base * a2; ctx.beginPath(); ctx.arc(x, y, rr * k, 0, TAU); ctx.fill(); }
+  ctx.globalAlpha = base * 0.95; ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(x, y, rr * 0.22, 0, TAU); ctx.fill();
   ctx.restore();
 }
 function zap(ctx, x, y, ang, len, col, w = 1.6) {
@@ -284,13 +290,26 @@ function headPath(S) {
     [rx * 0.62, ry * 0.9], [-rx * 0.2, ry * 0.98], [-rx * 0.88, ry * 0.55], [-rx * 1.02, -ry * 0.1], [-rx * 0.75, -ry * 0.72]]);
 }
 
-function earFin(ctx, R, x, y, s, ang, col, back) {
+/** V465: big bat ear (the silhouette nobody else in the family has). Wide,
+ * swept back, pink inner membrane, two scalloped ribs; Bravo wears a notch. */
+function earFin(ctx, R, x, y, s, ang, col, back, inner = "#ff86c0", notch = false, droop = 0) {
   ctx.save();
   ctx.translate(x, y); ctx.rotate(ang);
-  const pts = [[0, -s * 0.35], [-s * 1.7, -s * 0.55], [-s * 0.3, s * 0.55]];
-  R.poly(ctx, pts, back ? R.darken(col, 0.2) : col, { lw: 2.4 });
-  ctx.beginPath(); ctx.moveTo(-s * 0.3, s * 0.05); ctx.lineTo(-s * 1.2, -s * 0.35);
-  ctx.strokeStyle = "rgba(160,110,255,0.8)"; ctx.lineWidth = 1.6; ctx.stroke();
+  const d = droop * s * 0.6;
+  const outer = pBlob([[s * 0.1, -s * 0.42], [-s * 0.9, -s * 1.0 - d * 0.3], [-s * 1.9, -s * 0.78 + d], [-s * 2.15, -s * 0.18 + d * 1.2],
+    [-s * 1.55, s * 0.2 + d * 0.7], [-s * 0.85, s * 0.48], [-s * 0.1, s * 0.55]]);
+  ctx.fillStyle = back ? R.darken(col, 0.2) : col; ctx.fill(outer);
+  ctx.lineWidth = 2.4; ctx.strokeStyle = R.INK; ctx.lineJoin = "round"; ctx.stroke(outer);
+  const mem = pBlob([[-s * 0.2, -s * 0.18], [-s * 0.95, -s * 0.62 - d * 0.2], [-s * 1.65, -s * 0.45 + d * 0.8], [-s * 1.7, -s * 0.05 + d],
+    [-s * 1.1, s * 0.2 + d * 0.4], [-s * 0.35, s * 0.25]]);
+  ctx.fillStyle = back ? R.darken(inner, 0.28) : inner; ctx.fill(mem);
+  ctx.strokeStyle = R.alpha(R.darken(inner, 0.35), 0.7); ctx.lineWidth = 1.2; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(-s * 0.3, s * 0.02); ctx.quadraticCurveTo(-s * 0.9, -s * 0.25, -s * 1.5, -s * 0.2 + d * 0.8);
+  ctx.moveTo(-s * 0.35, s * 0.15); ctx.quadraticCurveTo(-s * 0.9, s * 0.1, -s * 1.3, s * 0.12 + d * 0.5); ctx.stroke();
+  if (notch) {
+    ctx.fillStyle = R.INK; ctx.beginPath();
+    ctx.moveTo(-s * 1.2, -s * 0.9); ctx.lineTo(-s * 1.32, -s * 0.62); ctx.lineTo(-s * 1.45, -s * 0.86); ctx.closePath(); ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -332,7 +351,8 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   // --- oreja trasera
   const earWig = Math.sin(t * 0.05) * 0.08 + pose.sway * 0.12 + (face.earFlick || 0) +
     (pose.stitchoWelcome?.reduced||pose.reduceMotion ? 0 : (pose.stitchoWelcome?.antenna||0)*.13);
-  earFin(ctx, R, -rx * 0.45, -ry * 0.62, S.ear * 0.85, -0.25 + earWig, C.body, true);
+  const droop = Math.max(0, -(face.earFlick || 0)) * 0.9;
+  earFin(ctx, R, -rx * 0.45, -ry * 0.62, S.ear * 0.85, -0.25 + earWig, C.body, true, C.inner, f === 2, droop);
 
   // --- cabeza
   const hp = headPath(S);
@@ -352,6 +372,38 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
     ctx.beginPath(); ctx.ellipse(-rx * 0.2, ry * 0.95, rx * 1.1, ry * 0.4, 0, 0, TAU); ctx.fill();
   });
   R.shine(ctx, -rx * 0.25, -ry * 0.62, rx * 0.22, ry * 0.12, 0.45);
+  // V465 · per-form identity on the head
+  if (S.egg) {
+    // Mini: still wears the top of its alien egg as a wobbly cracked cap
+    ctx.save(); ctx.translate(-rx * 0.05, -ry * 0.82); ctx.rotate(Math.sin(t * 0.09) * 0.12 - 0.08);
+    ctx.beginPath(); ctx.moveTo(-rx * 0.5, 0);
+    for (let i = 0; i <= 6; i++) ctx.lineTo(-rx * 0.5 + i * rx / 6, i % 2 ? -3.5 : 1.5);
+    ctx.quadraticCurveTo(rx * 0.45, -ry * 0.55, 0, -ry * 0.6); ctx.quadraticCurveTo(-rx * 0.45, -ry * 0.55, -rx * 0.5, 0); ctx.closePath();
+    R.paint(ctx, "#f4f0e6", { lw: 2.2 });
+    ctx.fillStyle = "#9ad8ff"; for (const [sx, sy2] of [[-rx * 0.2, -ry * 0.3], [rx * 0.18, -ry * 0.22]]) { ctx.beginPath(); ctx.arc(sx, sy2, 2.2, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  } else {
+    // alien freckles on the crown (stars on Nébula)
+    const spots = [[-rx * 0.55, -ry * 0.55, 2.6], [-rx * 0.3, -ry * 0.74, 2], [-rx * 0.72, -ry * 0.3, 1.8]];
+    for (const [sx, sy2, sr] of spots) {
+      if (S.final) R.sparkle(ctx, sx, sy2, sr + 1, "#fff2ba");
+      else { ctx.fillStyle = C.spot; ctx.beginPath(); ctx.ellipse(sx, sy2, sr, sr * 0.8, 0.3, 0, TAU); ctx.fill(); }
+    }
+    if (f === 1) {
+      // mischievous three-strand tuft that bounces
+      ctx.strokeStyle = R.INK; ctx.lineCap = "round";
+      for (let i = 0; i < 3; i++) {
+        const bx2 = -rx * 0.05 + i * 3, by2 = -ry * 0.98, sw = Math.sin(t * 0.12 + i) * 2 - (pose.state === "run" ? 3 : 0);
+        ctx.beginPath(); ctx.moveTo(bx2, by2); ctx.quadraticCurveTo(bx2 - 2 + sw, by2 - 7, bx2 - 6 + sw * 1.4, by2 - 9 + i);
+        ctx.lineWidth = 4.4; ctx.strokeStyle = R.INK; ctx.stroke(); ctx.lineWidth = 2.2; ctx.strokeStyle = C.body; ctx.stroke();
+      }
+    }
+    if (C.paint) {
+      // Bravo: cyan war paint chevrons under the eyes
+      ctx.strokeStyle = C.paint; ctx.lineWidth = 2.2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      for (let i = 0; i < 2; i++) { const yy = ry * (0.2 + i * 0.16); ctx.beginPath(); ctx.moveTo(-rx * 0.38, yy - 2); ctx.lineTo(-rx * 0.22, yy + 2); ctx.lineTo(-rx * 0.06, yy - 2); ctx.stroke(); }
+    }
+  }
 
   // púas en la cabeza (Bravo)
   if (S.spikes) {
@@ -362,7 +414,7 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   }
 
   // --- oreja delantera
-  earFin(ctx, R, -rx * 0.28, -ry * 0.28, S.ear, -0.05 + earWig * 1.3, C.body, false);
+  earFin(ctx, R, -rx * 0.28, -ry * 0.28, S.ear, -0.05 + earWig * 1.3, C.body, false, C.inner, f === 2, droop);
 
   // --- cara
   const eyR = S.eye, mood = face.mood;
@@ -386,7 +438,7 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
   ctx.fillStyle = R.INK;
   ctx.beginPath(); ctx.arc(rx * 0.93, ry * 0.12, 1, 0, TAU); ctx.arc(rx * 0.8, ry * 0.16, 0.9, 0, TAU); ctx.fill();
   alienMouth(ctx, R, rx * 0.42, ry * 0.56, rx * (S.egg ? 0.5 : 0.92), face.mouth, S.egg ? 1 : 2);
-  if (face.blush !== false) R.blush(ctx, rx * 0.05, ry * 0.42, rx * (S.egg ? 0.2 : 0.14), S.egg ? "#ff9ad5" : "#b784ff");
+  if (face.blush !== false) R.blush(ctx, rx * 0.05, ry * 0.42, rx * (S.egg ? 0.2 : 0.14), C.blush || "#9fb8ff");
   if (S.egg && face.blush !== false) R.blush(ctx, rx * 0.86, ry * 0.36, rx * 0.12, "#ff9ad5");
 
   // --- visor (Experimento Ñam)
@@ -405,6 +457,12 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
     ctx.lineWidth = 3.2; ctx.strokeStyle = "#c9d6e8"; ctx.stroke(vp);
     ctx.lineWidth = 1.4; ctx.strokeStyle = R.INK; ctx.stroke(vp);
     glowDot(ctx, exF + eyR * 1.2, ey - eyR * 1.1, 3, "#ff4a7a", 0.6 + 0.4 * Math.sin(t * 0.3));
+    // V465: lab LEDs chase along the strap
+    for (let i = 0; i < 3; i++) {
+      const k = (i + 1) / 4, lx = exF - eyR * 0.9 + (-rx * 0.98 - exF + eyR * 0.9) * k, ly = ey - eyR * 1.1 + (-ry * 0.2 - ey + eyR * 1.1) * k - Math.sin(k * Math.PI) * ry * 0.18;
+      const on = (Math.floor(t * 0.12) % 3) === i;
+      R.ellipse(ctx, lx, ly, 1.7, 1.7, on ? "#7dffb0" : "#2f5a48", { lw: 1, shade: false });
+    }
   }
 
   // V302: a constellation crest belongs to Nebula's alien silhouette.
@@ -426,8 +484,12 @@ function drawHead(ctx, R, pose, f, S, C, x, y, rot, face) {
     ctx.save();
     ctx.strokeStyle = "rgba(150,250,255,0.85)"; ctx.lineWidth = 1.6;
     if (k < 0.6) for (const tp of tips) zap(ctx, tp[0], tp[1], Math.atan2(py - tp[1], px - tp[0]), Math.hypot(py - tp[1], px - tp[0]), "rgba(150,250,255,0.85)", 1.4);
-    ctx.shadowColor = CYAN; ctx.shadowBlur = 12;
-    glowDot(ctx, px, py, 7 + k * 9, CYAN, 1);
+    glowDot(ctx, px, py, 9 + k * 11, CYAN, 1);
+    // V465: a spinning containment ring and three orbiting sparks
+    ctx.strokeStyle = "#e8ffff"; ctx.lineWidth = 1.4; ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.ellipse(px, py, 7 + k * 6, 3 + k * 2, t * 0.3, 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 3; i++) { const a = t * 0.45 + i * TAU / 3; R.sparkle(ctx, px + Math.cos(a) * (9 + k * 7), py + Math.sin(a) * (5 + k * 4), 2.2, i % 2 ? "#ffffff" : CYAN); }
     ctx.restore();
     R.ellipse(ctx, px, py, 3 + k * 3, 3 + k * 3, "#e8ffff", { line: false, shade: false });
   }
@@ -493,6 +555,11 @@ function drawBody(ctx, R, f, S, C, bx, by, rx, ry, t, horizontal) {
     // V463 · Stitcho's signature (vs. Chispín's smooth golden tummy): a cool
     // periwinkle belly patch closed by a glowing cyan cross-stitched seam.
     if (!horizontal) {
+      // V465: fluffy chest bib (pale belly colour, zig-zag fur edge)
+      ctx.fillStyle = C.belly || "#cfe3ff"; ctx.beginPath();
+      ctx.moveTo(bx - rx * 0.05, by - ry * 0.95);
+      for (let i = 0; i <= 6; i++) ctx.lineTo(bx + rx * (0.05 + i * 0.1), by - ry * (0.55 - (i % 2) * 0.14) + i * 0.6);
+      ctx.lineTo(bx + rx * 0.8, by - ry * 0.95); ctx.closePath(); ctx.fill();
       ctx.fillStyle = "rgba(196,222,255,0.42)";
       ctx.beginPath(); ctx.ellipse(bx + rx * 0.32, by + ry * 0.18, rx * 0.5, ry * 0.62, 0.08, 0, TAU); ctx.fill();
       const sa = 0.6 + 0.3 * Math.sin(t * 0.15), sx = bx + rx * 0.32;
@@ -637,6 +704,18 @@ function faceFor(pose, S) {
     else if (n === 2) { face.mouth = "grin"; face.ant = "spin"; face.lookUp = true; face.glow = 1; }
     else { face.mouth = "smirk"; face.ant = "forward"; face.crackle = true; face.glow = 1.15; }
   }
+  // V465 · the giant ears act every state: streaming back on the run, perked
+  // on the jump, fluttering in the fall, pinned on the attack, flapping on win.
+  if (!pose.reduceMotion) {
+    const ph = pose.phase || 0, tt = pose.t || 0;
+    if (st === "run") face.earFlick += -0.35 + Math.sin(ph * 2) * 0.18;
+    else if (st === "jump") face.earFlick += 0.38;
+    else if (st === "fall" || st === "glide") face.earFlick += -0.4 + Math.sin(tt * 0.5) * 0.14;
+    else if (st === "attack") face.earFlick += -0.45;
+    else if (st === "cast") face.earFlick += -0.2 + Math.sin(tt * 0.7) * 0.08;
+    else if (st === "victory") face.earFlick += Math.sin(tt * 0.4) * 0.42;
+    else if (st === "idle" && (tt % 150) < 14) face.earFlick += Math.sin((tt % 150) * 0.9) * 0.2;  // ear twitch
+  }
   // Stage expressions live in this face, not on a decorative overlay.
   const w=pose.stitchoWelcome;
   if(w&&!w.reduced&&!pose.reduceMotion&&st==='idle'){
@@ -699,17 +778,22 @@ function drawBiped(ctx, R, pose, f, S, C) {
       trail = { which: "B", from: 2.1, to: armB };
     } else { const u = (k - 0.85) / 0.15; armA = 0.6 - u * 0.25; armB = 0.4 - u * 0.6; lean += 0.12 * (1 - u); }
     legA = 0.45; legB = -0.35;
+    // V465: whole-body lunge into the swipe, head leads the strike
+    const lunge = Math.sin(Math.PI * Math.min(1, k / 0.85));
+    headDX += lunge * 4; lift -= lunge * 2.5;
   } else if (st === "cast") {
     if (pose.castSlot === 0) { armA = 1.3; armB = 1.0; lean += 0.1; headRot = 0.05; legA = 0.35; legB = -0.3; }
     else { armA = 1.45 + Math.sin(t * 0.6) * 0.1; armB = -1.85; kA = 1.25; kB = 1.35; headRot = -0.22; legA = 0.4; legB = -0.4; lift = 0; }
   } else if (st === "hurt") {
     armA = 1.25; armB = -2.1; lean -= 0.42; headRot = -0.42; headDX = -5; headDY = 1.5; legA = 0.55; legB = -0.35; legBendA = -4;
+    if (!pose.reduceMotion) { headDX += Math.sin(t * 2.2) * 1.4; armA += Math.sin(t * 1.7) * 0.25; }  // V465: dizzy shudder
   } else if (st === "victory") {
     const hop = Math.abs(Math.sin(t * 0.17));
     lift = -hop * 16;
     legA = 0.3 + hop * 0.5; legB = -0.2 + hop * 0.6; legBendA = -hop * 6; legBendB = -hop * 5;
     armA = 1.5 + Math.sin(t * 0.34) * 0.35; armB = -2.7 - Math.sin(t * 0.34) * 0.3;
     headRot = Math.sin(t * 0.34) * 0.1 - 0.05;
+    if (hop > 0.7) face.ant = "spin";  // V465: antennae twirl at the top of each hop
   } else if (st === "wall") {
     const c = Math.sin(t * 0.2);
     armA = 1.75 + c * 0.35; armB = 1.45 - c * 0.35; bendA = -4; bendB = -4;
@@ -740,7 +824,9 @@ function drawBiped(ctx, R, pose, f, S, C) {
   // squash/stretch leve: estira al saltar/caer, aplasta al aterrizar
   if (st !== "dead") {
     const land = Math.max(0, Math.min(1, Number(pose.land) || 0));
-    const sy = (st === "jump" ? 1.06 : st === "fall" ? 1.03 : 1) - land * 0.08;
+    // V465: a springy squash on every running footfall
+    const step = st === "run" && !pose.reduceMotion ? (1 - Math.abs(Math.cos(pose.phase || 0))) * 0.05 : 0;
+    const sy = (st === "jump" ? 1.06 : st === "fall" ? 1.03 : 1) - land * 0.08 - step;
     if (sy !== 1) ctx.scale(1 + (1 - sy) * 0.7, sy);
   }
 
@@ -760,10 +846,23 @@ function drawBiped(ctx, R, pose, f, S, C) {
     if (!trail) return;
     ctx.save();
     const a0 = Math.PI / 2 - trail.from, a1 = Math.PI / 2 - trail.to; // swing → canvas
+    // V465: three razor claw-slashes that taper from the claw tips backwards,
+    // layered alpha (glow + white core), plus sparks at the leading edge.
+    ctx.lineCap = "round";
+    const N = 9, base = ctx.globalAlpha;
     for (let i = 0; i < 3; i++) {
-      ctx.globalAlpha = 0.75 - i * 0.18;
-      ctx.strokeStyle = i === 1 ? "#ffffff" : CYAN; ctx.lineWidth = 2.4 - i * 0.4;
-      ctx.beginPath(); ctx.arc(sh[0], sh[1], len + hs * 1.6 + i * 3.5, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke();
+      const r = len + hs * 1.4 + i * 4.2;
+      for (let j = 0; j < N; j++) {
+        const k0 = j / N, k1 = (j + 1) / N, w = (S.bigClaw ? 4.2 : 3.2) * (1 - k0) * (1 - i * 0.18);
+        const b0 = a1 + (a0 - a1) * k0, b1 = a1 + (a0 - a1) * k1;
+        ctx.globalAlpha = base * (1 - k0) * 0.35; ctx.strokeStyle = i === 1 ? "#b6f8ff" : CYAN; ctx.lineWidth = w + 3;
+        ctx.beginPath(); ctx.arc(sh[0], sh[1], r, Math.min(b0, b1), Math.max(b0, b1)); ctx.stroke();
+        ctx.globalAlpha = base * (1 - k0) * 0.95; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = Math.max(0.6, w * 0.45);
+        ctx.stroke();
+      }
+      const tx = sh[0] + Math.cos(a1) * r, ty = sh[1] + Math.sin(a1) * r;
+      ctx.globalAlpha = base * 0.9;
+      zap(ctx, tx, ty, a1 + (a1 > a0 ? 1.3 : -1.3), 5 + i * 1.5, i % 2 ? "#ffffff" : CYAN, 1.3);
     }
     ctx.restore();
   };

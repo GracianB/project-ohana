@@ -1,3 +1,13 @@
+# OHANA V465 · Stitcho rediseñado: frío, anguloso y travieso
+
+Versión **V465** (`ohana-465`) sobre V464 (`main` cc38060).
+
+- **Silueta y paleta propias** (`characters/art/stitch.js`): Stitcho es el polo frío y anguloso frente al Chispín cálido y redondo. Orejas de murciélago enormes (+30 %) con membrana rosa y nervaduras que reaccionan a cada estado (al viento al correr, erguidas al saltar, aleteando al caer, pegadas al atacar, caídas al recibir daño, bailando en la victoria, tic ocasional en reposo). Paleta cobalto/marino/cian con rayas marinas (ya no violetas, salvo Nébula), pechera de pelo, parche de barriga con costura cian y pecas alienígenas.
+- **Una identidad por forma**: Mini Stitcho lleva la tapa agrietada de su huevo; Stitcho, mechón travieso de tres pelos; Bravo, pintura de guerra cian y muesca en la oreja; Experimento Ñam, LEDs de laboratorio que recorren la correa del visor; Nébula, pecas de estrellas.
+- **Animación**: embestida de todo el cuerpo con la cabeza por delante al atacar, rebote elástico en cada pisada, temblor mareado al recibir daño, antenas que giran en lo alto de cada salto de victoria.
+- **FX**: estelas de garra afiladas y degradadas por capas alfa con chispas en el filo; tres rasguños diagonales escalonados en el golpe básico; bola de plasma con anillo de contención y chispas orbitando (sin `shadowBlur`); `glowDot` ya no crea gradientes por frame.
+- **Cinemática V463 pulida**: plataforma de lanzamiento, galones de peligro y balizas parpadeantes en el laboratorio, haz de escáner que recorre a Stitcho en la carga y cuenta atrás 3·2·1 en la cápsula.
+
 # OHANA V464 · Yomi IA
 
 Versión **V464** (`ohana-464`) sobre V463 (`main` d0f4336). Rama `yomi-ai` (PR #397).
