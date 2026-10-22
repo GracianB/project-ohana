@@ -112,7 +112,8 @@ function sealStations(hero, theme, sectors) {
     case "reparar": return [1, 2, 4].map((s, i) => ({ id: i, x: at(s, .3), y: floor, kind: "part", target: { x: at(s, .3) + 520, y: floor } }));
     case "cadena": return [1, 2, 2, 3].map((s, i) => ({ id: i, x: at(s, i === 2 ? .85 : .35), y: floor, kind: "rod" }));
     case "medusas": return [1, 2, 3, 3, 4].map((s, i) => ({ id: i, x: at(s, i === 3 ? .8 : .45), y: floor - 140, kind: "jelly" }));
-    case "prismas": return [{ s: 3, order: 0 }, { s: 1, order: 1 }, { s: 4, order: 2 }].map((d, i) => ({ id: i, x: at(d.s, .5), y: floor, kind: "prism", order: d.order }));
+    // Readable I → II → III pilgrimage, west to east, without forced backtracking.
+    case "prismas": return [{ s: 1, order: 0 }, { s: 3, order: 1 }, { s: 4, order: 2 }].map((d, i) => ({ id: i, x: at(d.s, .5), y: floor, kind: "prism", order: d.order }));
     case "braseros": return [1, 2, 3, 4].map((s, i) => ({ id: i, x: at(s, .6), y: floor, kind: "brazier" }));
     case "pisotones": return [1, 3, 4].map((s, i) => ({ id: i, x: at(s, .55), y: floor, kind: "fossil" }));
     case "geiseres": return [1, 2, 4].map((s, i) => ({ id: i, x: at(s, .5), y: floor, kind: "geyser", prize: { x: at(s, .5), y: floor - 470 } }));
