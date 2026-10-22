@@ -73,7 +73,7 @@ jobs:
       - name: V473 five feline moon-jellies · idle, wake, unique palette and reduced motion
         run: node tests/browser/v473-lunar-jellies.mjs
 
-      - name: V475 World 1 unassisted keyboard traversal · Kilo and Stitcho
+      - name: V475 World 1 authentic keyboard start and Kilo first flower
         run: node tests/browser/v475-world1-natural-walk.mjs
 
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
