@@ -91,6 +91,8 @@ import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverl
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom } from "./systems/world1-progress.js";
+import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay } from "./systems/world1-boss.js";
+import { playWorld1Cine, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
 const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
@@ -584,6 +586,8 @@ enterKiloGrove(game);enterStitchoTrail(game);enterChispinTrail(game);enterMichiT
 // V468: en el Mundo 1 hay UN solo coleccionable (álbum de 100 cromos por sala).
 if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[];game.heroCollection=null;}
 enterWorld1Collect(game);enterWorld1(game);
+if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
+if(!r.fusionBoss)game.world1Boss=null;
 game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -646,6 +650,8 @@ game.spawnFusionBoss=()=>{
   game.boss=createFusionBoss((game.player?.michiSeed||0)+467);
   game.enemies.push(game.boss);
   game.storyLine=FUSION_STORY.intro[0];
+  game.world1Boss=createWorld1BossDirector(game.boss);
+  playWorld1Cine(game,"bossIntro");
   playMusic("jefe");beep("boss");
   game.shake=Math.max(game.shake||0,reduceMotion?2:12);
   return true;
@@ -833,7 +839,9 @@ game.player.uBonds=readStoredUBonds(localStorage,def.id);
 game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
-game.onWorld1Beat=(kind)=>{if(kind==="seal")storeWorld1Seals(game.world1Seals);beep(kind==="seal"?"win":"pickup");};
+game.onWorld1Beat=(kind,hero)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");};
+game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 try { loadWorld1Collect(game); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
@@ -884,6 +892,7 @@ document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
 if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
+if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
 if (onlineMode) {
@@ -1253,6 +1262,7 @@ return e;
 function hurtPlayer(amount, label) {
 const p = game.player;
 if (!p || p.dead || p.invuln > 0) return;
+if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
 const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard" ? 1.4 : 1;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
@@ -1508,8 +1518,8 @@ if (f.t === 135) {
 }
 if (f.t === 55) game.storyLine = "";
 const w1Final = game.roomDef?.fusionBoss;
-if (f.t === 0 && (w1Final ? !game.world1Won : !game.won)) {
-if (w1Final) game.world1Won = true;
+if (f.t === 0 && (w1Final ? !game._w1WinSent : !game.won)) {
+if (w1Final) { game.world1Won = true; game._w1WinSent = true; }
 else game.won = true;
 game._cuernoWonT = t;
 const p = game.player;
@@ -1519,7 +1529,7 @@ game.best = rememberBest(game.best, {
   ticks, kills: game.kills, score: game.score, evo: p ? p.evo : 0, rank, id: p ? p.id : ""
 });
 save();
-dispatchEvent(new CustomEvent("ohana-win", { detail: {
+const winDetail = {
   score: game.score,
   kills: game.kills,
   id: p ? p.id : "kilo",
@@ -1532,7 +1542,10 @@ dispatchEvent(new CustomEvent("ohana-win", { detail: {
   room: game.roomId,
   time: formatClear(ticks),
   best: game.best ? formatClear(game.best.ticks) : ""
-}}));
+};
+// Mundo 1: la tarjeta de resultados llega después de las cinemáticas de caída y final.
+if (w1Final && (world1CineActive(game) || (game.world1Boss && !game.world1Boss.done))) game._w1WinDetail = winDetail;
+else dispatchEvent(new CustomEvent("ohana-win", { detail: winDetail }));
 dispatchEvent(new CustomEvent("ohana-room", { detail: {
   id: game.roomId, visited: game.visited, won: true, evo: p ? p.evo : 0
 }}));
@@ -2859,11 +2872,15 @@ function drawWorld1Backdrop(world,W,H){
  else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
  else renderWorld(ctx,world,game.cam,t,W,H);
  drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
+ if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
+const w1Actors=new Map();
+function w1CineActor(c,hero,x,y,scale){let d=w1Actors.get(hero);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error("hero");d=w1MakeDummy(hero,1,def.color);d.facing=1;d.grounded=true;d._poseOverride="idle";w1Actors.set(hero,d);}w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,1)),reduceMotion?0:t);}
 // B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
 addEventListener("keydown",(e)=>{
  if(!game.running||!game.roomDef?.world1||e.ctrlKey||e.altKey||e.metaKey)return;
  const k=e.key;
+ if(world1CineActive(game)&&(k==="Enter"||k===" "||k==="Escape")){skipWorld1Cine(game);e.preventDefault();e.stopImmediatePropagation();return;}
  if(k==="b"||k==="B"){if(!e.repeat)toggleWorld1Album(game);e.preventDefault();e.stopImmediatePropagation();return;}
  if(game.world1CollectUI?.open&&world1AlbumKey(game,k)){e.preventDefault();e.stopImmediatePropagation();}
 },true);
@@ -2997,6 +3014,7 @@ if (!game.finale) {
   drawCuernoFx(ctx, game.cuernoFx); drawCuernoBursts(ctx);
   ctx.restore();
 }
+if(game.world1Boss)drawWorld1BossTelegraphs(ctx,game,game.cam,t);
 if (!game.finale){drawEncounterSignals(ctx,game.enemies,game.player,game.cam,t,{width:viewW,height:viewH},game.reduceMotion||reduceMotion);drawChampionSignals(ctx,game,game.cam);}
 Magic.draw(ctx, game, t);
 Passives.draw(ctx, game, t);
@@ -3156,6 +3174,8 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
 drawWorld1Overlay(ctx,game,viewW,viewH);
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH);if(game.world1CollectUI?.open)drawWorld1Album(ctx,game,viewW,viewH,t);}
 if(game.boss?._fusionBoss)drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
+if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
+if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
 drawMinimap();
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
@@ -3391,6 +3411,7 @@ btn.style.setProperty("--cd", pct + "%");
 }
 }
 function step() {
+if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
 if (!canAct()) return;
 t++;
@@ -3425,6 +3446,7 @@ updateCampaignExploration(game);
 updateKiloGrove(game);updateStitchoTrail(game,hurtPlayer);updateChispinTrail(game,hurtPlayer);updateMichiTrail(game,hurtPlayer);updateDragonTrail(game,hurtPlayer);updateDinoTrail(game,hurtPlayer);updateFritaTrail(game,hurtPlayer);updatePizzaTrail(game,hurtPlayer);updateYomiTrail(game,hurtPlayer);updateCuernoTrail(game,hurtPlayer);
 updatePlayer();
 updateRoomAlbum(game);updateHeroCollection(game);updateWorld1(game);if(game.roomDef?.world1)updateWorld1Collect(game);
+if(game.world1Boss&&game.roomId==="w1-final"){const ev=updateWorld1BossDirector(game);if(ev==="defeated")playWorld1Cine(game,"bossDefeat");}
 if(game.relicScene)return;
 updateCampaignProgress(game);
 updateIslandSprings(game);
@@ -3596,6 +3618,15 @@ addEventListener("ohana-after", (e) => {
 const act = e.detail && e.detail.action;
 if (act === "continue") {
   game.running = true;
+  // Mundo 1 cerrado: el camino sigue hacia las salas clásicas del Mundo 2.
+  if (game.roomId === "w1-final" && game.world1Won) loadRoom("hub", "portal");
+  return;
+}
+if (act === "repeat" && game.roomId === "w1-final") {
+  game.world1Won = false; game._w1WinSent = false; game.boss = null; game.world1Boss = null;
+  if (game.player) { game.player.dead = false; game.player.health = game.player.maxHealth; }
+  game.world1Visited && (game.world1Visited["w1-final"] = true);
+  loadRoom("w1-final", "right");
   return;
 }
 if (act === "repeat") {

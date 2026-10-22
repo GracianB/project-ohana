@@ -7,7 +7,7 @@
 // antiguas: el Mundo 2.
 //
 // CÓMO ENGANCHARLO:
-//   import * as W1Cine from "./systems/world1-cine.js";   (o window.OhanaWorld1Cine)
+//   import * as W1Cine from "./world1-cine.js";   (o window.OhanaWorld1Cine)
 //   W1Cine.playWorld1Cine(g, "intro")                 // al empezar Mundo 1
 //   W1Cine.playWorld1Cine(g, "roomEnter", "dino")     // al entrar en w1-dino (1.ª vez)
 //   W1Cine.playWorld1Cine(g, "awaken", "dino")        // tras awardSeal (onWorld1Beat "seal")

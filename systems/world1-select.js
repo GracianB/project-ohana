@@ -5,7 +5,7 @@
 //
 // CÓMO ENGANCHARLO (lo hace el dueño del cableado):
 //   import { createWorld1Select, world1SelectKey, world1SelectPointer,
-//            drawWorld1Select } from "./systems/world1-select.js";
+//            drawWorld1Select } from "./world1-select.js";
 //   const sel = createWorld1Select({ seals: g.world1Seals, counts: OhanaWorld1Collect.countsByHero(g) });
 //   keydown → const r = world1SelectKey(sel, e.key); if (r?.action === "enter") goRoom(r.room, r.hero);
 //   click   → const r = world1SelectPointer(sel, x, y, true);  (move → false para hover)

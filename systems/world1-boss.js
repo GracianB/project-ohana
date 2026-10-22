@@ -11,7 +11,7 @@
 //   · Derrota: diez luces vuelven a su héroe y se entrega el relevo a world1-cine.
 //
 // CÓMO ENGANCHARLO:
-//   import * as W1B from "./systems/world1-boss.js";   (o window.OhanaWorld1Boss)
+//   import * as W1B from "./world1-boss.js";   (o window.OhanaWorld1Boss)
 //   al aparecer la Quimera      → g.world1Boss = W1B.createWorld1BossDirector(g.boss)
 //   en hurtPlayer(dmg, src)     → dmg = W1B.world1BossFilterDamage(g, dmg)   (0 = ignorado)
 //   cada tick (tras updateFusionBoss) → const ev = W1B.updateWorld1BossDirector(g)

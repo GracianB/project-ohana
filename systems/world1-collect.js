@@ -9,7 +9,7 @@
 // Mapa: sala antigua → héroe (ROOM_RELICS) y colección personal → mismo héroe.
 //
 // CÓMO ENGANCHARLO:
-//   import * as W1C from "./systems/world1-collect.js";   (o window.OhanaWorld1Collect)
+//   import * as W1C from "./world1-collect.js";   (o window.OhanaWorld1Collect)
 //   al iniciar partida      → W1C.loadWorld1Collect(g)          // migra y deja g.world1Collect
 //   al entrar en sala w1-*  → W1C.enterWorld1Collect(g)         // coloca 100 objetos
 //   cada tick               → W1C.updateWorld1Collect(g)

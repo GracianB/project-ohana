@@ -31,6 +31,7 @@ import { michiWelcomeBeat, drawMichiWelcomeFX } from "./intro-michi-stage.js";
 import { planWelcomeFantasy, activeFantasy, drawWelcomeFantasy, fantasyCamera } from "./intro-fantasy.js";
 import { cachedGradient } from "./canvas-gradient-cache.js";
 import { welcomeStoryAt, nextWelcomeLine, WELCOME_STORIES } from "./welcome-story.js";
+import { WORLD1_PREMISE } from "./world1-story.js";
 import { makeFoe } from "../engine/foes.js";
 import { drawEnemy } from "../engine/enemies.js";
 import { duckMusic } from "../engine/music.js";
@@ -752,7 +753,7 @@ export function playTitleIntro(options = {}) {
     const direction = frozenSceneTime === null ? welcomeStoryAt(storyTime) : null;
     const line = direction?.line;
     const speaker = line ? (ROSTER.find(r=>r.id===line.speaker)?.name || (line.speaker==="avispa"?"Avispa":"Cangrejo")) : "La familia";
-    const text = direction ? (line?.text || (direction.complete ? "La aventura te espera. Nadie se queda atrás." : "Un pequeño respiro. Y otra travesura.")) : "";
+    const text = direction ? (line?.text || (direction.complete ? WORLD1_PREMISE : "Un pequeño respiro. Y otra travesura.")) : "";
     if(storyLine.textContent!==text){storyLine.textContent=text;storySpeaker.textContent=speaker;}
     if(direction){
       const chapter=(direction.index+1)+" / "+WELCOME_STORIES.length+" · "+direction.title;
