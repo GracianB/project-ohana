@@ -39,10 +39,13 @@ test('README local source and docs links resolve to existing repository paths',a
   }
 });
 
-test('README does not present the draft release or remote multiplayer as already public',()=>{
-  assert.match(readme,/PR #391/);
-  assert.match(readme,/PR #392/);
-  assert.match(readme,/En pausa/);
-  assert.match(readme,/publicación real requiere un Pages correcto/i);
-  assert.match(readme,/GitHub Pages Actions/);
+test('README truthfully distinguishes World 1 candidate, deployment and paused multiplayer',()=>{
+  assert.match(readme,/V469 integrada en/i);
+  assert.match(readme,/V470 candidata/i);
+  assert.match(readme,/PR #404/);
+  assert.match(readme,/Mundo 2[^\n]*en construcción/i);
+  assert.match(readme,/multijugador remoto[^\n]*en pausa/i);
+  assert.match(readme,/No confundimos tres cosas/i);
+  assert.match(readme,/GitHub Pages/i);
+  assert.doesNotMatch(readme,/V460 permanece en revisión/i);
 });
