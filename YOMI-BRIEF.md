@@ -1,5 +1,7 @@
 # YOMI IA · brief para continuar (WIP, SIN VERIFICAR)
 
+> V464: fusionado en main con `npm test` en verde. La capa visual (arte, FX y cinemáticas) sigue sin revisarse en navegador.
+>
 > Este código se escribió sin ejecutar los tests, sin capturas y sin navegador, porque al usuario se le acababan los créditos. **No fusionar** hasta que todo esté verde y alguien lo haya revisado a mano.
 
 ## 1. Concepto (en primera persona, la IA)
@@ -22,7 +24,7 @@ Gestos de reposo (`yomiRitualState`): pensando… (puntos de carga), ¡idea!, le
 - **J · Ping curioso** (cd 560): una pregunta que vuela a 10+evo px/frame y hace (18+3·evo)·pw de daño. **ANALIZA** al enemigo (`_yomiMarkUntil`, 240 frames) y rebota hacia el siguiente en 260 px. Rebotes por forma: `YOMI_PING_HOPS` = 1,1,2,2,3.
 - **K · Escáner** (cd 2900): un anillo de radar que crece en 30 frames hasta `YOMI_SCAN_RADIUS` = 300/345/390/435/480. Hace (16+4·evo)·pw (×0,75 a jefes), aturde 24, analiza, y **borra los proyectiles enemigos** que toca (cortafuegos).
 - **L · Síntesis** (cd 5800): carga visible de unos 10 frames con el rectángulo exacto. Después dispara un haz de largo 300+35·evo y medio alto 20+3·evo con (30+6·evo)·pw de daño. Contra analizados hace ×1,7 y crítico, consume la marca y cura (2+evo) por cada uno.
-- **U / P (supremo) · Red neuronal**: «OS RECUERDO A TODOS». Carga de 0,4 s con un **círculo de runas** que se compila («RED · COMPILANDO» y barra de progreso). Al resolver aplica el daño de `resolveYomiJudgement` (×1,90 a analizados) y crea el FX `yomiNet`, que enlaza hasta 10 enemigos (primero los analizados) con runas de código brillantes, los marca a todos y lanza **3 pulsos** (`YOMI_NET_PULSES`). Cada pulso aturde 10 frames y cura un 1,5 % de la vida máxima. Al resolver, Yomi se cura `YOMI_NET_HEAL`=6 % ×(1+0,25·evo). Campo de 170 frames: círculo de runas y retícula neuronal de radio 390. Marca por enemigo: corchetes de análisis y «¡RESPUESTA!». Dúos U (`family-duets` `maw`): estela de runas `</>` y círculo de runas que abre un haz.
+- **U / P (supremo) · Red neuronal**: «OS RECUERDO A TODOS». Carga de 0,4 s con un **círculo de runas** que se compila («RED · COMPILANDO» y barra de progreso). Al resolver aplica el daño de `resolveYomiJudgement` (×1,90 a analizados) y crea el FX `yomiNet`, que enlaza hasta 10 enemigos (primero los analizados) con runas de código brillantes, los marca a todos y lanza **3 pulsos** (`YOMI_NET_PULSES`). Cada pulso aturde 10 frames. Curación V464: 8 % + 1 %/nodo (máx. +6 %) + 1 %/pulso, entre 11 y 17 % en total. Campo de 170 frames: círculo de runas y retícula neuronal de radio 390. Marca por enemigo: corchetes de análisis y «¡RESPUESTA!». Dúos U (`family-duets` `maw`): estela de runas `</>` y círculo de runas que abre un haz.
 - **Pasiva · Salto recalculado** (`hollow`): cae más rápido. En el aire, el salto hace un microteletransporte con 8 frames de invulnerabilidad.
 - **Capa mágica** (HECHO, SIN VERIFICAR): 6 runas-glifo de código (`drawYomiRune` en el arte y `yomiRune` en abilities: `</>`, `{}`, `#`, `λ`, barras y nodo), todas con trazos, sin gradientes ni azar. Al lanzar aparece un círculo de runas en el suelo, coral en J, menta en K, oro en L y estrellas familiares en U, con una constelación de 5 puntos sobre la cabeza. En reposo y en victoria flotan 2–3 glifos y orbitan 3+forma chispas de datos (estáticos con movimiento reducido). J: 2 runas orbitan el ping. K: 8 runas viajan en el frente del radar. L: círculo de runas vertical en la boca del haz y runas dentro del rayo.
 
@@ -49,7 +51,7 @@ Rincón de Yomi en el **Santuario del trueno** (`drawYomiCampPod` en `systems/fa
 
 ## 8. TODO / sin verificar
 - **Nada se ha ejecutado** desde el último commit WIP. En el último `npm test` fallaron 12 tests (los de diseño antiguo, ya sustituidos o ajustados). Posibles fallos restantes: `tests/browser/*` con textos o colores de Yomi, el mock de `renderers.test.js` (revisar si alguna API de canvas no está declarada), tamaños de CI y `visual-regression`.
-- ~~Visual del supremo y del dúo U~~: **hecho, sin verificar** (abilities.js: `yomiNet`, `uCharge`, `uHitMark`, `supremeField` y la identidad `maw`; family-duets.js). Pendiente: la viñeta `scene==="maw"` de `supreme-cinema.js` (usa un radial gradient compartido) y el storyboard. Revisar el equilibrio de la curación de la U y que `yomiNet` no se dibuje fuera de la sala.
+- ~~Visual del supremo y del dúo U~~: **hecho, sin verificar** (abilities.js: `yomiNet`, `uCharge`, `uHitMark`, `supremeField` y la identidad `maw`; family-duets.js). Viñeta `scene==="maw"` de `supreme-cinema.js` sustituida por `yomiNetworkVignette` (plana) en V464. Revisar el equilibrio de la curación de la U y que `yomiNet` no se dibuje fuera de la sala.
 - `systems/intro-yomi-stage.js` (FX del farol en el título), `costume.js` y `definitive.js` (fallbacks antiguos), `worlds/room-atmosphere.js`, `odyssey-sectors.js` («Archivo de Ofudas») y el jefe `yomi-boss.js`.
 - `netlify/lib/combat.mjs` tiene los números antiguos (el multijugador está en pausa).
 - Equilibrio: comparar los DPS de J/K/L con Chispín y Michi en partida, y faltan capturas de antes y después de todo.

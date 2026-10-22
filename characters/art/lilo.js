@@ -653,7 +653,7 @@ function torso(ctx, R, pose, f, d, r) {
     R.blob(ctx, [[x0 - 9, sy + 1], [x0 + 9, sy + 1], [x0 + 13, sy + d.th * 0.7], [x0 + 9, hemY], [x0 - 9, hemY], [x0 - 13, sy + d.th * 0.7]], col);
     // V463: baby romper with a scalloped Peter-Pan collar, tiny plumeria print
     // and a ruffled hem that bounces with the crawl.
-    ctx.save(); ctx.beginPath(); ctx.rect(x0 - 14, sy, 28, hemY - sy + 1); ctx.clip();
+    ctx.save(); ctx.beginPath(); ctx.moveTo(x0 - 14, sy); ctx.lineTo(x0 + 14, sy); ctx.lineTo(x0 + 14, hemY + 1); ctx.lineTo(x0 - 14, hemY + 1); ctx.closePath(); ctx.clip();
     ctx.fillStyle = R.alpha("#ffffff", 0.8); ctx.beginPath();
     for (const [fx, fy] of [[-6, 0.45], [6, 0.35], [-3, 0.8], [8, 0.78]]) printFlower(ctx, x0 + fx, sy + (hemY - sy) * fy, 1.1, t * 0.01);
     ctx.fill(); ctx.restore();

@@ -1,3 +1,15 @@
+# OHANA V464 · Yomi IA
+
+Versión **V464** (`ohana-464`) sobre V463 (`main` d0f4336). Rama `yomi-ai` (PR #397).
+
+- **Yomi IA**: Yomi se reinventa como la IA de la familia (Grok Bot dentro de OHANA). Cinco formas nuevas: Yomi Bit, Yomi, Yomi Red, Yomi Oráculo y Yomi Constelación. Pantalla-visor con ojos de píxel y estados de ánimo, manos flotantes, alas neuronales, capa de código, pensamientos en órbita, anillo planetario y diez estrellas familiares. Respira y parpadea en reposo y bota al celebrar. Arte vectorial determinista sin gradientes.
+- **Habilidades**: J Ping curioso (rebota 1/1/2/2/3 y analiza), K Escáner (radar de 300 a 480 px que borra proyectiles), L Síntesis (haz ×1,7 contra analizados y cura por cada marca). **U Red neuronal**: un círculo de runas compila y las runas de código enlazan hasta 10 enemigos, con 3 pulsos. Cura 8 % + 1 %/nodo (máx. +6 %) + 1 %/pulso, entre 11 y 17 % en total.
+- **Magia**: seis runas-glifo de código; círculo de runas al lanzar J/K/L/U; glifos flotantes y chispas de datos en reposo; viñeta propia del supremo (código que cae y la constelación familiar, sin gradientes) que sustituye a la de fauces; dúos U retematizados.
+- **Metamorfosis propia** (`systems/evo-cine/yomi.js`, 4 actos: pregunta · lectura · compilación · despertar), enrutada en partida por `OWN_EVOLUTION_CINE` (presentation.js) y en `evo-cinema.js`.
+- **Isla**: rincón radio-faro de Yomi en el Santuario del trueno (el arte de Chispín no cambia).
+- **Arreglo de puerta de calidad (V463)**: la falda de Kilo usaba `ctx.rect` para recortar, que no está en el mock de Canvas; ahora usa un trazado equivalente (moveTo/lineTo), y `npm test` vuelve a pasar.
+- Tests: `yomi-ia.test.js` sustituye a los del farol (`yomi-reborn`, `yomi-phase2`). Brief para continuar en `YOMI-BRIEF.md`.
+
 # OHANA V463 · Metamorfosis propias de la familia, Trueno Gordo vuelve, trajes hawaianos de Kilo
 
 Versión **V463** (`ohana-463`) sobre V462 (`main` f1339c9).

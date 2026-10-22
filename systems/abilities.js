@@ -598,7 +598,9 @@ function yomiRune(ctx,x,y,s,i,color){
  else {ctx.moveTo(-5,3);ctx.lineTo(0,-4);ctx.lineTo(5,3);ctx.closePath();}
  ctx.stroke();ctx.restore();
 }
-export const YOMI_NET_LIFE=96,YOMI_NET_PULSES=3,YOMI_NET_HEAL=.06;
+// U heal balance (V464): 8 % base + 1 % per analysed node (max +6 %), plus 1 % per
+// network pulse → 11–17 % total, below Kilo (32 %) and Frita (18 %).
+export const YOMI_NET_LIFE=96,YOMI_NET_PULSES=3,YOMI_NET_HEAL=.08,YOMI_NET_HEAL_PER_NODE=.01,YOMI_NET_HEAL_NODE_CAP=6,YOMI_NET_PULSE_HEAL=.01;
 function drawYomiRuneCircle(ctx,x,y,r,n,t,color,alpha,reduced){
  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=2;
  ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
@@ -1676,7 +1678,7 @@ uCharge(g,f,p){
   const now=Number(g.t)||0,nodes=foes.slice().sort((a,b)=>((Number(b._yomiMarkUntil)||0)>now)-((Number(a._yomiMarkUntil)||0)>now)||cx(a)-cx(b)).slice(0,10);
   for(const e of nodes)e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,now+YOMI_MARK_FRAMES);
   add({kind:"yomiNet",x:cx(p),y:cy(p)-30,nodes,actor:p,evo:f.evo||0,life:YOMI_NET_LIFE,max:YOMI_NET_LIFE,pulses:0});
-  healPlayer(p,p.maxHealth*YOMI_NET_HEAL*(1+(f.evo||0)*.25));
+  healPlayer(p,p.maxHealth*(YOMI_NET_HEAL+YOMI_NET_HEAL_PER_NODE*Math.min(YOMI_NET_HEAL_NODE_CAP,nodes.length)));
   for(const e of foes)add({kind:"uHitMark",mode:"yomi",e,x:cx(e),y:cy(e),evo:f.evo||0,life:60,max:60});
   for(const e of foes)michiYomiImpact(cx(e),cy(e),"¡RESPUESTA!","#4ff0c8",{life:84,big:2});
  }else{
@@ -1696,7 +1698,7 @@ yomiNet(g,f,p){
  const age=f.max-f.life,step=Math.floor(f.max/(YOMI_NET_PULSES+1));
  if(age>0&&age%step===0&&f.pulses<YOMI_NET_PULSES){f.pulses++;
   for(const e of f.nodes)if(canHit(e))e.stun=Math.max(e.stun||0,10);
-  if(f.actor)healPlayer(f.actor,Math.max(1,f.actor.maxHealth*.015));}
+  if(f.actor)healPlayer(f.actor,Math.max(1,f.actor.maxHealth*YOMI_NET_PULSE_HEAL));}
  return --f.life>0;
 },
 cuernoDreamCloud(g,f){if(f.actor&&!f.actor.dead){f.x=cx(f.actor);f.y=cy(f.actor);}return --f.life>0;},

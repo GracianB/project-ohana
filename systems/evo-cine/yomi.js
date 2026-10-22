@@ -1,5 +1,5 @@
 // OHANA · Yomi IA · metamorfosis propia en partida (4 actos, 4 s).
-// Canvas 2D, determinista, sin gradientes ni Math.random.
+// Canvas 2D, determinista, sin gradientes ni azar (ruido hash).
 // Actos: 1 «¿hola?» (pregunta) → 2 «leer» (runas de código convergen)
 // → 3 «compilar» (capullo de datos + un único destello suave) → 4 «despertar».
 import {ROSTER} from '../../characters/roster.js';
@@ -21,6 +21,11 @@ const sm = v => { const k = cl(v); return k * k * (3 - 2 * k); };
 const hn = i => { const x = Math.sin(i * 127.1 + 3.3) * 43758.5453; return x - Math.floor(x); };
 const formName = f => FORM_NAMES[Math.max(0, Math.min(4, (f | 0) - 1))];
 
+export function evoCinePhase(t) {
+  t = Number(t) || 0;
+  for (const a of YOMI_EVO_ACTS) if (t >= a.start && t < a.end) return a.id;
+  return "awaken";
+}
 export function yomiEvoBeat(t = 0, from = 1, to = 2, reduced = false) {
  const time = cl(t, 0, EVO_CINE_DURATION), act = YOMI_EVO_ACTS.find(a => time < a.end) || YOMI_EVO_ACTS[3];
  return Object.freeze({ act: act.id, progress: sm((time - act.start) / (act.end - act.start)), time,

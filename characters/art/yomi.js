@@ -9,7 +9,7 @@
 // F3 Yomi Oráculo: placas flotantes, capa de código y tres pensamientos en órbita.
 // F4 Yomi Constelación: cuerpo de cielo nocturno, anillo planetario y alas con
 //    diez estrellas, una por cada miembro de la familia.
-// Todo es Canvas 2D vectorial, determinista (sin Math.random) y sin gradientes.
+// Todo es Canvas 2D vectorial, determinista (ruido hash, sin azar) y sin gradientes.
 // Paleta por forma: [carcasa, sombra, brillo, acento].
 const PAL=[
   ["#f4f7ff","#c6d0ec","#4ff0c8","#ff7f6e"],
@@ -507,7 +507,10 @@ function draw(ctx,pose,R){
   swing+=ribbon*7+gather*2.4-reveal*2.9+startle*3.8-bow*1.3+life.ribbon;
   const faceY=listen*.8+reveal*(-1.4)+bow*2.1+life.face*.6;
   const stageTilt=listen*(-.10)+gather*.16-reveal*(-.19)+startle*.22+bow*(-.13);
-  const mood=yomiMood(p),blink=clamp(Number(p.blink)||0,0,1);
+  const mood=yomiMood(p);
+  // Deterministic blink when the caller gives none: 5 frames every ~3.7 s, off in reduced motion.
+  const autoBlink=reduced||st!=="idle"?0:((t%223)<5?1:0);
+  const blink=clamp(Number(p.blink)||autoBlink,0,1);
   const look={x:clamp(Number(p.look?.x)||0,-1,1)*.6,y:clamp(Number(p.look?.y)||0,-1,1)};
   const core=reveal*2.2+life.flame*1.5+(acting?.maw||0)*2+(acting?.aurora||0)*1.5;
   const droop=dead?1:0;
@@ -523,6 +526,8 @@ function draw(ctx,pose,R){
   ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
   if(jumpS)ctx.scale(.93,1.07);else if(fallS)ctx.scale(1.05,.96);
+  else if(st==="idle"&&!reduced){const br=Math.sin(t*.05)*.014;ctx.scale(1+br,1-br);} // soft shell breathing
+  else if(st==="victory"&&!reduced){const hop=Math.abs(Math.sin(t*.16));ctx.translate(0,-hop*3);ctx.scale(1-hop*.03,1+hop*.03);}
   // ── BACK LAYER ─────────────────────────────────────────────
   if(f===2||f===4)drawWing(ctx,-1,F,f,glow,accent,T,spread,sweep,false,reduced);
   if(f===2||f===4)drawWing(ctx,1,F,f,glow,accent,T,spread*.92,sweep,false,reduced);
