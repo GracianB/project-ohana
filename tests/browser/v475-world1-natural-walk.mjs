@@ -21,6 +21,9 @@ try {
  const initial=await page.evaluate(()=>{
    localStorage.removeItem('ohana-w1-seals-v1');
    localStorage.removeItem('ohana-resume');
+   // Use the actual selectable Easy difficulty, not an E2E HP or enemy hack.
+   // Normal mode is deliberately NOT claimed by this beginner-route pilot.
+   localStorage.setItem('ohana-difficulty','easy');
    const e=window.__OHANA_E2E;
    return e.startWorld1('kilo');
  });
@@ -108,7 +111,7 @@ try {
  for(let i=0;i<flowers.length;i++){
    const s=await walkTo(flowers[i].x,'w1-kilo');
    assert.equal(s.world1?.done,i+1,'Kilo flower '+(i+1)+' must trigger from real grounded movement: '+JSON.stringify(journal.slice(-5)));
-   assert.ok(s.hp>0,'Kilo must survive the full room, not use invulnerability');
+   assert.ok(s.hp>0,'Kilo must survive flower '+(i+1)+' on real Easy mode: '+JSON.stringify({hp:s.hp,score:s.score,at:s.player.x,journal:journal.slice(-5)}));
    assert.equal(s.runtimeFaults,0);
  }
  await finishCinema();
@@ -141,10 +144,10 @@ try {
  assert.deepEqual(faults,[],'browser runtime errors');
  await fs.writeFile('test-results/v475/physical-campaign-pilot.json',JSON.stringify({
    earnedSeals:delivered.world1Seals,room:delivered.roomId,firstRepair:delivered.world1.done,
-   input:'real keyboard physics',noTeleport:true,noInvulnerability:true,roomsVisited:2,fullCampaignCompleted:false,
+   input:'real keyboard physics',noTeleport:true,noInvulnerability:true,difficulty:'easy',roomsVisited:2,fullCampaignCompleted:false,
    journal:journal.slice(-70), floor:WORLD1_FLOOR
  },null,2));
- console.log('PASS V475: unassisted real keyboard + collision traversal, all four Kilo flowers, earned east door, Stitcho part ID 0 delivery. NOT a complete 10-room campaign.');
+ console.log('PASS V475: real Easy-mode keyboard + collision traversal, all four Kilo flowers, earned east door, Stitcho part ID 0 delivery. NOT a complete 10-room campaign.');
 } finally{
  await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));
 }
