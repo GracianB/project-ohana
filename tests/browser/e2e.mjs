@@ -565,6 +565,11 @@ async function auditPage(page, label) {
   assert.ok(sw.scope.endsWith('/'), label + ': scope PWA incorrecto');
   await page.waitForTimeout(700);
   await page.locator('#btn-play').click();
+  // The public game now starts in World 1. This historical end-to-end suite
+  // explicitly audits the original Claro/Festival/Mundo 2 mechanics; use the
+  // E2E-only legacy entry rather than silently changing public progression.
+  const legacyStart=await page.evaluate(()=>window.__OHANA_E2E.start('kilo'));
+  assert.equal(legacyStart.roomId,'hub',label+': legacy Claro must be entered only by test harness');
   await page.waitForTimeout(800);
   if (errors.length) throw new Error(label + ': runtime errors before visual audit\n' + errors.join('\n'));
 
