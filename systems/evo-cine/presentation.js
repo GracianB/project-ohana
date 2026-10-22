@@ -5,6 +5,16 @@ import {ROSTER} from '../../characters/roster.js';
 import {CALIBRATED_HEIGHT} from '../../characters/visual-size.js';
 import {EVOLUTION_CINEMA_PROFILES,evolutionMessage} from '../../characters/evolution.js';
 import {cachedGradient} from '../canvas-gradient-cache.js';
+import * as dinoCine from './dino.js';
+import * as dragonCine from './dragon.js';
+import * as pizzaCine from './pizza.js';
+import * as fritaCine from './frita.js';
+
+// Dino & Dragón, Pizza & Frita: these heroes play their OWN four-act metamorphosis in the real
+// game (not only in a preview): the in-game evolution stage calls this shared
+// entry point, so routing here reaches every caller without touching the
+// stage director. Text/unlock overlay below stays shared and readable.
+export const OWN_EVOLUTION_CINE=Object.freeze({dino:dinoCine,dragon:dragonCine,pizza:pizzaCine,frita:fritaCine});
 
 const clamp=x=>Math.max(0,Math.min(1,x));
 const ease=x=>{const k=clamp(x);return k*k*(3-2*k);};
@@ -60,9 +70,49 @@ function textLines(ctx,text,x,y,width,lineHeight){
  if(line)ctx.fillText(line,x,y+row*lineHeight);
 }
 
+// Reduced motion shows ONE calm frame. It is painted once into an offscreen
+// canvas and blitted, so the browser rasterizer can never make it shimmer.
+const REDUCED_STILLS=new Map();
+function reducedStill(ctx,id,form,width,height,paint){
+ const make=(w,h)=>typeof OffscreenCanvas==='function'?new OffscreenCanvas(w,h):(typeof document!=='undefined'?Object.assign(document.createElement('canvas'),{width:w,height:h}):null);
+ const m=typeof ctx.getTransform==='function'?ctx.getTransform():null;
+ const sc=m?Math.max(1,Math.min(3,Math.hypot(m.a,m.b)||1)):1;
+ const key=id+':'+form+':'+width+'x'+height+'@'+sc.toFixed(2);
+ if(REDUCED_STILLS.has(key))return REDUCED_STILLS.get(key);
+ const c=make(Math.max(1,Math.round(width*sc)),Math.max(1,Math.round(height*sc)));
+ const g=c&&c.getContext('2d');if(!g)return null;
+ g.scale(sc,sc);paint(g);
+ if(REDUCED_STILLS.size>=8)REDUCED_STILLS.delete(REDUCED_STILLS.keys().next().value);
+ REDUCED_STILLS.set(key,c);return c;
+}
+
+function drawUnlockCard(ctx,def,s,width,height,alpha){
+ const unlock=s.form<3?ABILITY_DEFS[def.abilities[s.form]]:extraAbility(s.id,s.form+1);
+ if(!unlock||alpha<=0)return;
+ ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.globalAlpha=alpha;ctx.fillStyle='#071e2c';const cw=Math.min(430,width-32),cy=height*.89;
+ ctx.fillRect(s.cx-cw/2,cy-20,cw,40);ctx.strokeStyle=s.accent;ctx.lineWidth=1;ctx.strokeRect(s.cx-cw/2,cy-20,cw,40);
+ ctx.fillStyle=s.accent;ctx.font='700 '+Math.min(15,width*.034)+'px Outfit, sans-serif';ctx.fillText('NUEVO PODER · '+unlock.key+' · '+unlock.name,s.cx,cy);
+ ctx.restore();
+}
+
 export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=false){
  const s=evolutionPresentation(id,evo,width,height,reduced?3.5:time,reduced),def=ROSTER.find(r=>r.id===s.id);
  const profile=EVOLUTION_CINEMA_PROFILES[s.id];
+ const own=OWN_EVOLUTION_CINE[s.id];
+ if(own){
+  const raw=reduced?own.EVO_CINE_DURATION:Math.max(0,Math.min(own.EVO_CINE_DURATION,Number(time)||0));
+  const paint=c=>{
+   c.save();c.beginPath();
+   try{
+    own.drawEvoCine(c,width,height,raw,s.form,s.form+1,{reducedMotion:reduced});
+    drawUnlockCard(c,def,s,width,height,reduced?1:Math.max(0,Math.min(1,(raw-3.4)/.4)));
+   }finally{c.restore();}
+  };
+  const still=reduced&&reducedStill(ctx,s.id,s.form,width,height,paint);
+  if(still)ctx.drawImage(still,0,0,width,height);else paint(ctx);
+  return {...s,cinematic:s.id,act:own.evoCinePhase?own.evoCinePhase(raw):''};
+ }
  ctx.save();
  try{
   const bg=cachedGradient(ctx,`evolution-stage:${s.id}:${height}`,()=>{

@@ -64,8 +64,9 @@ test('V461 randomness is visible but identity-safe: palette changes jelly forms,
  const colours=(seed,f)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,f,seed),{});return [...log.fills].sort().join('|');};
  const jelly=new Set(SEEDS.slice(0,6).map(s=>colours(s,2)));
  assert.ok(jelly.size>=3,'seeds must visibly vary the Medusa Onírica');
- const base=(seed)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,1,seed),{});return log.fills.has('#9b86cb')&&log.fills.has('#c4b1e6');};
- assert.ok(SEEDS.every(base),'lynx fur colours are canonical for every seed');
+ const base=(seed)=>{const {c,log}=rec();cat.draw(c,pose('idle',60,1,seed),{});return log.fills.has('#efe4ff')&&log.fills.has('#fff8ff');};
+ // V462: F1 became the Hada Felina; its fur stays canonical, only wings/dust take the dream palette.
+ assert.ok(SEEDS.every(base),'fairy-cat fur colours are canonical for every seed');
 });
 
 test('V461 reduced motion is clock independent for every form',()=>{

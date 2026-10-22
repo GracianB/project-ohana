@@ -24,7 +24,7 @@ function applyHula(r,pose,d,f,seconds,blend=1) {
   r.footB=L2(r.footB,[-6+b.hip*.4,-b.heel],blend);
  }
  r.skirt+=b.skirt*blend;r.hairLag-=b.skirt*.5*blend;
- r.flare+=.25*blend;r.armOver=true;r.backOver=true;
+ r.flare+=.25*blend;r.armOver=true;r.backBend=true;if(blend>.5)r.backOver=false; // V462: far arm stays BEHIND the dress
  r.mood='happy';r.mouth='smile';r.paci=false;r.uke=f>0?'back':null;r.fx=null;
 }
 const SKIN = "#c68657";
@@ -201,7 +201,9 @@ export function kiloWelcomeRig(pose={},form=0){
 function solve(pose, d, f) {
   const t = pose.t, st = pose.state, hipY = -d.ll, sy = hipY - d.th, al = d.al;
   const xF = 4, xB = -5;
-  const restF = [xF + 3, sy + al * 0.86], restB = [xB - 3, sy + al * 0.86];
+  // V462: arms hang naturally from the shoulders (4/-5, sy+3) at ~95% reach, a little
+  // out from the dress, so the elbow only softens instead of folding into a "C" hook.
+  const restF = [4 + al * 0.4, sy + 3 + al * 0.86], restB = [-5 - al * 0.4, sy + 3 + al * 0.86];
   const hr = d.hr, hx = 1;
   const r = {
     ox: 0, oy: 0, lean: 0, spin: 1, hipX: 0, headRot: Math.sin(t * 0.03) * 0.04,
@@ -459,7 +461,8 @@ function solve(pose, d, f) {
       const beat=(b.time*60)%30,clap=Math.max(0,1-Math.min(beat,30-beat)/8);
       r.handF=[18-12*clap,sy+5-8*clap];r.handB=[-18+17*clap,sy+5-8*clap];r.uke='back';r.mood='happy';r.mouth=clap>.5?'open':'smile';
     }
-    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[12,sy+7];r.handF=[19,sy+14+Math.sin(b.time*9)*3];r.lean=.03;r.mood="closed";r.mouth="smile";
+    if(b.kind==='relic'){r.uke="play";r.paci=false;r.handB=[15,sy+3];r.handF=[6,sy+al*.62+1+Math.sin(b.time*9)*2.5]; // V462: strum ON the sound hole (was floating at x=19, folding the arm)
+    r.lean=.03;r.mood="closed";r.mouth="smile";
      if(b.time<2){r.uke='hand';r.handF=[8,sy+15];r.headRot=-.08;}
      if(b.time>8){r.uke='back';r.handF=[3,sy+5];r.handB=[-20,sy+6];r.headRot=.12;}
     }
@@ -867,7 +870,7 @@ function draw(ctx, pose, R) {
     staff(ctx, R, hb[0], hb[1], r.staffUp ? -0.15 : -0.12 - pose.sway * 0.1, 56, t, r.staffUp);
   }
   const backArm = () => {
-    ik(ctx, R, -5, sy + 3, r.handB[0], r.handB[1], al, r.backOver ? -1 : 1, d.aw, skinB, { hand: d.aw * 0.72 });
+    ik(ctx, R, -5, sy + 3, r.handB[0], r.handB[1], al, r.backOver || r.backBend ? -1 : 1, d.aw, skinB, { hand: d.aw * 0.72 });
     R.ellipse(ctx, -5, sy + 3, 5, 4.5, R.darken(DRESS[f], 0.15), { lw: 2.4 });
   };
   if (!r.backOver) backArm();
@@ -884,6 +887,9 @@ function draw(ctx, pose, R) {
   ctx.save();
   bodyT();
   torso(ctx, R, pose, f, d, r);
+  // V462: the back-slung ukulele hangs from a visible strap across the chest,
+  // so it no longer floats beside Kilo as a stray stick.
+  if (r.uke === "back") kiloUkeStrap(ctx, sy, d, f);
   if(f>=1){
     const count=f===1?3:f===2?5:7;
     for(let i=0;i<count;i++){
@@ -892,7 +898,10 @@ function draw(ctx, pose, R) {
     }
   }
   const frontArm = () => {
-    const e = ik(ctx, R, 4, sy + 3, r.handF[0], r.handF[1], al, 1, d.aw, SKIN, { hand: d.aw * 0.75 });
+    // V462: when strumming, the elbow points OUT in front of the ukulele instead of
+    // looping back across the chest (the brown "C" seen in the companion panel).
+    const strumming = r.uke === "play" && r.handF[1] > sy + 3 && r.handF[0] < 4 + al * 0.5;
+    const e = ik(ctx, R, 4, sy + 3, r.handF[0], r.handF[1], al, strumming ? -1 : 1, strumming ? d.aw * 1.12 : d.aw, SKIN, { hand: d.aw * (strumming ? 0.95 : 0.75) });
     R.ellipse(ctx, 4, sy + 3.5, 5, 4.5, DRESS[f], { lw: 2.4 });
     if (f === 0) {
       const ang = Math.atan2(e[0] - 4, -(e[1] - sy - 3)) * 0.4 + (r.fx === "notes" ? Math.sin(t * 0.8) * 0.5 : 0) + (st === "attack" ? pose.atk * 1.5 - 0.5 : 0);
@@ -903,6 +912,9 @@ function draw(ctx, pose, R) {
       R.ellipse(ctx, e[0], e[1], d.aw * 0.75, d.aw * 0.75, SKIN, { lw: 2.4 });
     }
   };
+  // V462 depth: the far arm is NEVER painted over the torso/dress. Arms-up poses
+  // (backOver) lift it above the dress but keep it behind the head and near arm.
+  if (r.backOver) backArm();
   if (r.uke === "play") {
     const bx = 1, by = sy + al * 0.62;
     uke(ctx, R, bx, by, Math.atan2(r.handB[1] - by, r.handB[0] - bx), 14 + f, f === 4);
@@ -921,7 +933,6 @@ function draw(ctx, pose, R) {
   headT();
   head(ctx, R, pose, f, d.hr, r);
   ctx.restore();
-  if (r.backOver) backArm();
   if (r.armOver) frontArm();
   effects(ctx, R, pose, f, d, r, hy - d.hr);
   ctx.restore();
@@ -936,3 +947,11 @@ function draw(ctx, pose, R) {
 }
 
 export default { id: "kilo", draw };
+
+export function kiloUkeStrap(ctx, sy, d, f) {
+  ctx.save(); ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(-9, sy + d.th * 0.62); ctx.quadraticCurveTo(-1, sy + d.th * 0.3, 6, sy + 1.5);
+  ctx.strokeStyle = "#2a1a22"; ctx.lineWidth = 4.2; ctx.stroke();
+  ctx.strokeStyle = f === 4 ? "#f0b040" : "#a5683a"; ctx.lineWidth = 2.2; ctx.stroke();
+  ctx.restore();
+}
