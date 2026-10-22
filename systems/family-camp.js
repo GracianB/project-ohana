@@ -76,7 +76,12 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
  $('camp-line').textContent=data.lines[0];host.dataset.hero=selected;host.dataset.form=String(form);
  }
- function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;if(!walk){
+ function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;
+ // Keep keyboard focus and the Canvas portal selection in sync with the HTML hero cards.
+ // V468 replaced paired islands with eleven cards; the old selector index could
+ // still point at Dino after the player clicked Kilo, breaking ArrowRight.
+ if(w1sel){const cardIndex=w1sel.cards.findIndex(card=>card.hero===id);if(cardIndex>=0){w1sel.index=cardIndex;w1sel.hover=-1;}}
+ if(!walk){
   // Direct card/pointer selections must also relocate the firefly. Otherwise
   // the next arrow key starts from a stale character across the archipelago.
   cursor={x:CAMP_HEROES[id].x,y:CAMP_HEROES[id].y+40};
