@@ -87,7 +87,9 @@ export function updateWorld1(g) {
       for (const s of w.stations) { if (s.done) continue; if (onPad(p, s, 50) && Math.abs(p.vx || 0) < 1.2) { if (++s.hold >= HOLD_TICKS) complete(g, s, "NOTA"); } else s.hold = Math.max(0, s.hold - 2); }
       break;
     case "reparar":
-      if (!w.carry) { for (const s of w.stations) if (!s.done && near(p, s.x, s.y - 30, 50, 70)) { w.carry = s.id; g.nums?.add?.(p.x, p.y - 40, "PIEZA COGIDA → TALLER", "#8cecff", false); break; } }
+      // Piece 0 is a valid carried item. A truthiness check makes it look empty
+      // and prevents delivery of the first part (blocking Stitcho's seal).
+      if (w.carry == null) { for (const s of w.stations) if (!s.done && near(p, s.x, s.y - 30, 50, 70)) { w.carry = s.id; g.nums?.add?.(p.x, p.y - 40, "PIEZA COGIDA → TALLER", "#8cecff", false); break; } }
       else { const s = w.stations.find((x) => x.id === w.carry); if (s && near(p, s.target.x, s.target.y - 30, 60, 80)) { w.carry = null; complete(g, s, "NAVE"); } }
       break;
     case "cadena": {
