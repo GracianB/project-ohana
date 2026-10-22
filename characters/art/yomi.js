@@ -518,6 +518,7 @@ function draw(ctx,pose,R){
   yomiAmbient(ctx,p,f,glow,accent,t,F);
   // floor glow: Yomi hovers but keeps a readable ground anchor.
   ctx.save();ctx.globalAlpha=dead?.2:.26;ellipse(ctx,0,0,F.hw*.42,3.2,glow);ctx.restore();
+  if(!dead)drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st);
   ctx.translate(0,hover);
   ctx.rotate((run?(reduced?.1:.1+.03*Math.sin(runPh*2)):flight?-.04:0)+(acting?.tilt||0)+stageTilt+life.tilt+(dead?.34:0));
   if(life.active)ctx.scale(life.expandX,life.expandY);
@@ -556,6 +557,57 @@ function draw(ctx,pose,R){
   }
   drawYomiRitual(ctx,p,f,F,glow,accent,faceY,t);
   ctx.restore();
+}
+
+// ── MAGIC LAYER (Yomi IA) ────────────────────────────────────
+// Code-glyph runes: six stroke-only shapes (</>, {}, #, λ, bars, node).
+export const YOMI_RUNE_COUNT=6;
+export function drawYomiRune(ctx,x,y,s,i,color,width=1.4){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.strokeStyle=color;ctx.lineWidth=width/s;ctx.lineCap="round";ctx.lineJoin="round";ctx.beginPath();
+ switch(((i%6)+6)%6){
+  case 0:ctx.moveTo(-3,-3);ctx.lineTo(-6,0);ctx.lineTo(-3,3);ctx.moveTo(3,-3);ctx.lineTo(6,0);ctx.lineTo(3,3);ctx.moveTo(1.2,-4);ctx.lineTo(-1.2,4);break;
+  case 1:ctx.moveTo(-2,-5);ctx.quadraticCurveTo(-5,-5,-4,-1);ctx.lineTo(-6,0);ctx.lineTo(-4,1);ctx.quadraticCurveTo(-5,5,-2,5);
+   ctx.moveTo(2,-5);ctx.quadraticCurveTo(5,-5,4,-1);ctx.lineTo(6,0);ctx.lineTo(4,1);ctx.quadraticCurveTo(5,5,2,5);break;
+  case 2:ctx.moveTo(-2,-5);ctx.lineTo(-3,5);ctx.moveTo(3,-5);ctx.lineTo(2,5);ctx.moveTo(-5,-2);ctx.lineTo(5,-2);ctx.moveTo(-5,2);ctx.lineTo(5,2);break;
+  case 3:ctx.moveTo(-4,5);ctx.lineTo(0,-1);ctx.moveTo(-3,-5);ctx.lineTo(-1,-5);ctx.lineTo(4,5);break;
+  case 4:ctx.moveTo(-4,-4);ctx.lineTo(-4,4);ctx.moveTo(0,-4);ctx.lineTo(0,4);ctx.moveTo(4,-1);ctx.lineTo(4,4);ctx.moveTo(-5,-4);ctx.lineTo(-3,-4);break;
+  default:ctx.moveTo(-5,3);ctx.lineTo(0,-4);ctx.lineTo(5,3);ctx.closePath();
+ }
+ ctx.stroke();ctx.restore();
+}
+function hashNoise(i){const v=Math.sin(i*127.1+311.7)*43758.5453;return v-Math.floor(v);}
+// Ground rune circle while casting + idle floating glyphs and data sparks.
+function drawYomiMagic(ctx,p,f,F,glow,accent,T,cast,acting,reduced,st){
+ const strength=cast>=0?.55+.45*Math.max(acting?.release||0,acting?.maw||0,acting?.aurora||0):0;
+ if(strength>0){
+  const col=cast===0?accent:cast===2?"#ffd56b":glow,R=F.hw*(.62+.08*f)+(cast===3?14:0),spin=reduced?0:T*.035;
+  ctx.save();ctx.globalAlpha=.5*strength;ctx.strokeStyle=col;ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.ellipse(0,0,R,R*.26,0,0,TAU);ctx.stroke();
+  ctx.globalAlpha=.3*strength;ctx.beginPath();ctx.ellipse(0,0,R*.72,R*.19,0,0,TAU);ctx.stroke();
+  const n=6+f*2;
+  for(let i=0;i<n;i++){const a=i*TAU/n+spin;ctx.globalAlpha=.75*strength;
+   drawYomiRune(ctx,Math.cos(a)*R*.86,Math.sin(a)*R*.22,.55,i,cast===3?YOMI_FAMILY_STARS[i%10]:col,1.3);}
+  if(cast===3){ // U: the network spell lifts above the head as a constellation.
+   ctx.globalAlpha=.55*strength;ctx.strokeStyle=glow;ctx.lineWidth=1;ctx.beginPath();
+   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5,px=Math.cos(a)*F.hw*.55,py=F.top-14+Math.sin(a)*10;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}
+   ctx.closePath();ctx.stroke();
+   for(let i=0;i<5;i++){const a=i*TAU/5-Math.PI/2+spin*.5;ctx.fillStyle=YOMI_FAMILY_STARS[(i*2)%10];ctx.fillRect(Math.cos(a)*F.hw*.55-2,F.top-16+Math.sin(a)*10,4,4);}
+  }
+  ctx.restore();
+ }
+ if(st==="idle"||st==="victory"){
+  // Idle flourish: 2-3 glyphs drifting up from the hands + orbiting data sparks.
+  ctx.save();
+  const g=2+(f>2?1:0);
+  for(let i=0;i<g;i++){
+   const ph=reduced?(i+.5)/g:((T*.006+i/g)%1),x=(hashNoise(i+f*7)-.5)*F.hw*1.1,y=F.hy+8-ph*(F.hy-F.top+26);
+   ctx.globalAlpha=.55*Math.sin(ph*Math.PI);drawYomiRune(ctx,x,y,.5,i+f,i%2?accent:glow,1.2);
+  }
+  const sp=3+f;
+  for(let i=0;i<sp;i++){const a=i*TAU/sp+(reduced?0:T*.04),r=F.hw*.58+4;
+   ctx.globalAlpha=.6;ctx.fillStyle=i%3===0?accent:glow;ctx.fillRect(Math.cos(a)*r-1.3,F.hy+Math.sin(a)*r*.32-1.3,2.6,2.6);}
+  ctx.restore();
+ }
 }
 
 function drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,t){

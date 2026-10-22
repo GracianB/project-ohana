@@ -587,6 +587,26 @@ FX.length = 0;
 
 // V370 · U wind-up for Pizza/Yomi/Cuerno: 24 frames ≈ 0.4 s at 60 fps.
 export const OHANA_U_WINDUP = 24;
+// Yomi IA magic helpers: code-glyph runes and the neural-network U.
+function yomiRune(ctx,x,y,s,i,color){
+ ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.strokeStyle=color;ctx.lineWidth=1.6/s;ctx.lineCap="round";ctx.beginPath();
+ const k=((i%4)+4)%4;
+ if(k===0){ctx.moveTo(-3,-3);ctx.lineTo(-6,0);ctx.lineTo(-3,3);ctx.moveTo(3,-3);ctx.lineTo(6,0);ctx.lineTo(3,3);ctx.moveTo(1.2,-4);ctx.lineTo(-1.2,4);}
+ else if(k===1){ctx.moveTo(-2,-5);ctx.lineTo(-3,5);ctx.moveTo(3,-5);ctx.lineTo(2,5);ctx.moveTo(-5,-2);ctx.lineTo(5,-2);ctx.moveTo(-5,2);ctx.lineTo(5,2);}
+ else if(k===2){ctx.moveTo(-4,5);ctx.lineTo(0,-1);ctx.moveTo(-3,-5);ctx.lineTo(-1,-5);ctx.lineTo(4,5);}
+ else {ctx.moveTo(-5,3);ctx.lineTo(0,-4);ctx.lineTo(5,3);ctx.closePath();}
+ ctx.stroke();ctx.restore();
+}
+export const YOMI_NET_LIFE=96,YOMI_NET_PULSES=3,YOMI_NET_HEAL=.06;
+function drawYomiRuneCircle(ctx,x,y,r,n,t,color,alpha,reduced){
+ ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=2;
+ ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
+ ctx.globalAlpha=alpha*.55;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,r*.8,0,TAU);ctx.stroke();
+ ctx.beginPath();for(let i=0;i<6;i++){const a=i*TAU/6+(reduced?0:t*.01);const px=x+Math.cos(a)*r*.8,py=y+Math.sin(a)*r*.8;i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.stroke();
+ ctx.restore();
+ for(let i=0;i<n;i++){const a=i*TAU/n-(reduced?0:t*.02);ctx.save();ctx.globalAlpha=alpha;yomiRune(ctx,x+Math.cos(a)*r*.9,y+Math.sin(a)*r*.9,.9,i,i%3===0?"#ff7f6e":color);ctx.restore();}
+}
+
 function resolveYomiJudgement(game,p,enemies,dmg){
 // U · Juicio del Umbral: Cuerno's aurora charge hits every living foe.
 // Bosses receive a capped percentage; ordinary marked foes are executed only if weakened.
@@ -1646,8 +1666,13 @@ uCharge(g,f,p){
  if(f.mode==="yomi"){
   const foes=(g.enemies||[]).filter(canHit);
   resolveYomiJudgement(g,p,foes,f.dmg);
+  // Red neuronal: runes link every foe (marked first) and pulse; allies heal.
+  const now=Number(g.t)||0,nodes=foes.slice().sort((a,b)=>((Number(b._yomiMarkUntil)||0)>now)-((Number(a._yomiMarkUntil)||0)>now)||cx(a)-cx(b)).slice(0,10);
+  for(const e of nodes)e._yomiMarkUntil=Math.max(Number(e._yomiMarkUntil)||0,now+YOMI_MARK_FRAMES);
+  add({kind:"yomiNet",x:cx(p),y:cy(p)-30,nodes,actor:p,evo:f.evo||0,life:YOMI_NET_LIFE,max:YOMI_NET_LIFE,pulses:0});
+  healPlayer(p,p.maxHealth*YOMI_NET_HEAL*(1+(f.evo||0)*.25));
   for(const e of foes)add({kind:"uHitMark",mode:"yomi",e,x:cx(e),y:cy(e),evo:f.evo||0,life:60,max:60});
-  for(const e of foes)michiYomiImpact(cx(e),cy(e),"¡JUICIO!","#ffcb91",{life:84,big:2});
+  for(const e of foes)michiYomiImpact(cx(e),cy(e),"¡RESPUESTA!","#4ff0c8",{life:84,big:2});
  }else{
   const sleepers=(f.targets||[]).filter(e=>e&&!e.dying&&!e.dead);
   resolveCuernoDream(g,p,sleepers);
@@ -1659,6 +1684,15 @@ uCharge(g,f,p){
  return false;
 },
 uHitMark(g,f){if(f.e&&!f.e.dead){f.x=cx(f.e);f.y=cy(f.e);}return --f.life>0;},
+yomiNet(g,f,p){
+ // Visual + light follow-up: each of the 3 pulses taps linked nodes for 12% dmg-free stun and heals Yomi a little.
+ if(f.actor&&!f.actor.dead){f.x=cx(f.actor);f.y=cy(f.actor)-30;}
+ const age=f.max-f.life,step=Math.floor(f.max/(YOMI_NET_PULSES+1));
+ if(age>0&&age%step===0&&f.pulses<YOMI_NET_PULSES){f.pulses++;
+  for(const e of f.nodes)if(canHit(e))e.stun=Math.max(e.stun||0,10);
+  if(f.actor)healPlayer(f.actor,Math.max(1,f.actor.maxHealth*.015));}
+ return --f.life>0;
+},
 cuernoDreamCloud(g,f){if(f.actor&&!f.actor.dead){f.x=cx(f.actor);f.y=cy(f.actor);}return --f.life>0;},
 cuernoSleepZ(g,f){f.list=f.list.filter(e=>e&&!e.dead&&!e.dying&&e.hp>0);return --f.life>0&&f.list.length>0;},
 supremeLaunch(g,f,p){
@@ -2785,16 +2819,10 @@ uCharge(ctx,f,cam,t,g){
  const x=f.x-cam.x,y=f.y-cam.y,k=1-f.life/f.max;
  ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
  if(f.mode==="yomi"){
-  // A torii-like threshold gate rises and opens around Yomi.
-  const sc=1+(Number(f.evo)||0)*.12,h=(40+90*k)*sc,w=(70+50*k)*sc;
-  ctx.globalAlpha=.35+.5*k;ctx.strokeStyle="#ffcb91";ctx.lineWidth=5;
-  ctx.beginPath();ctx.moveTo(x-w/2,y+30);ctx.lineTo(x-w/2,y+30-h);ctx.moveTo(x+w/2,y+30);ctx.lineTo(x+w/2,y+30-h);
-  ctx.moveTo(x-w/2-14,y+30-h);ctx.quadraticCurveTo(x,y+18-h,x+w/2+14,y+30-h);
-  ctx.moveTo(x-w/2,y+42-h);ctx.lineTo(x+w/2,y+42-h);ctx.stroke();
-  ctx.fillStyle="#2a1020";ctx.globalAlpha=.28*k;ctx.fillRect(x-w/2+4,y+44-h,w-8,h-14);
-  for(let i=0;i<6;i++){const a=i*TAU/6+t*.05,r=110*(1-k)+20;
-   ctx.globalAlpha=.7*k;ctx.fillStyle="#fff1d6";ctx.save();ctx.translate(x+Math.cos(a)*r,y+Math.sin(a)*r*.6);ctx.rotate(a);
-   ctx.fillRect(-4,-7,8,14);ctx.restore();}
+  // Rune circle compiles around Yomi: code glyphs converge from the edge.
+  const sc=1+(Number(f.evo)||0)*.12,r=(130-70*k)*sc;
+  drawYomiRuneCircle(ctx,x,y,r,8+(Number(f.evo)||0)*2,t,"#4ff0c8",.35+.55*k,!!g?.reduceMotion);
+  ctx.globalAlpha=k;ctx.fillStyle="#ffd56b";ctx.fillRect(x-r*.5,y+r+10,r*k,4);ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1;ctx.strokeRect(x-r*.5,y+r+10,r,4);
  }else{
   // Seven rainbow arcs gather into Cuerno's horn (escala por forma).
   const cols=["#ff8cab","#ffc28e","#ffe9a3","#9de7bb","#a5e5fa","#aeb9fb","#e5b9f4"],ev=Number(f.evo)||0,sc=.75+ev*.12;
@@ -2806,7 +2834,30 @@ uCharge(ctx,f,cam,t,g){
   ctx.strokeStyle="#7b5aa6";ctx.lineWidth=2;ctx.stroke();
  }
  ctx.globalAlpha=.9;ctx.fillStyle="#fff8da";ctx.textAlign="center";ctx.font="800 14px Outfit,system-ui,sans-serif";
- ctx.fillText(f.mode==="yomi"?"UMBRAL · SE ABRE":"ARCOÍRIS · CARGANDO",x,y-150);
+ ctx.fillText(f.mode==="yomi"?"RED · COMPILANDO":"ARCOÍRIS · CARGANDO",x,y-150);
+ ctx.restore();
+},
+// Yomi IA U: glowing code runes link the analysed foes into a constellation;
+// a pulse travels the network three times. Flat strokes, no gradients.
+yomiNet(ctx,f,cam,t,g){
+ const nodes=(f.nodes||[]).filter(e=>e&&!e.dead);if(!nodes.length)return;
+ const k=1-f.life/f.max,fade=Math.min(1,f.life/18,(f.max-f.life)/8),reduced=!!g?.reduceMotion;
+ const pts=[[f.x-cam.x,f.y-cam.y],...nodes.map(e=>[cx(e)-cam.x,cy(e)-cam.y])];
+ ctx.save();ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.globalAlpha=.75*fade;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=2.4;ctx.beginPath();
+ for(let i=0;i<pts.length;i++){i?ctx.lineTo(pts[i][0],pts[i][1]):ctx.moveTo(pts[i][0],pts[i][1]);}ctx.stroke();
+ ctx.globalAlpha=.3*fade;ctx.lineWidth=1;ctx.beginPath();
+ for(let i=1;i<pts.length;i++){ctx.moveTo(pts[0][0],pts[0][1]);ctx.lineTo(pts[i][0],pts[i][1]);}ctx.stroke();
+ // the travelling pulse (static at the midpoint under reduced motion)
+ const seg=pts.length-1,u=reduced?.5:((k*YOMI_NET_PULSES)%1),pos=u*seg,j=Math.min(seg-1,Math.floor(pos)),q=pos-j;
+ const px=pts[j][0]+(pts[j+1][0]-pts[j][0])*q,py=pts[j][1]+(pts[j+1][1]-pts[j][1])*q;
+ ctx.globalAlpha=fade;ctx.fillStyle="#eafffa";ctx.beginPath();ctx.arc(px,py,6,0,TAU);ctx.fill();
+ ctx.strokeStyle="#ffd56b";ctx.lineWidth=2;ctx.stroke();
+ nodes.forEach((e,i)=>{const [nx,ny]=pts[i+1];ctx.globalAlpha=fade;
+  ctx.fillStyle="#0d1430";ctx.beginPath();ctx.arc(nx,ny-34,9,0,TAU);ctx.fill();
+  yomiRune(ctx,nx,ny-34,.9,i,i%3===0?"#ff7f6e":"#4ff0c8");});
+ ctx.globalAlpha=.9*fade;ctx.fillStyle="#eafffa";ctx.font="800 14px Outfit,system-ui,sans-serif";ctx.textAlign="center";
+ ctx.fillText("RED NEURONAL · "+nodes.length+" NODOS",pts[0][0],pts[0][1]-70);
  ctx.restore();
 },
 // V370: per-enemy impact marks so U hits are readable on each foe.
@@ -2820,15 +2871,13 @@ uHitMark(ctx,f,cam,t){
    ctx.fillStyle="#ffcc48";ctx.beginPath();ctx.moveTo(0,6);ctx.lineTo(-6,-6);ctx.lineTo(6,-6);ctx.closePath();ctx.fill();
    ctx.fillStyle="#c8322a";ctx.beginPath();ctx.arc(0,-2,1.8,0,TAU);ctx.fill();ctx.restore();}
  }else if(f.mode==="yomi"){
-  // Ofuda seal slaps onto the foe, then a crack.
-  ctx.save();ctx.translate(x,y-4);ctx.rotate(-.2);ctx.fillStyle="#fff1d6";ctx.fillRect(-7,-14,14,28);
-  ctx.strokeStyle="#c4503a";ctx.lineWidth=2;ctx.strokeRect(-7,-14,14,28);
-  ctx.beginPath();ctx.moveTo(-3,-8);ctx.lineTo(3,-2);ctx.lineTo(-3,4);ctx.lineTo(3,10);ctx.stroke();ctx.restore();
-  const sc=1+(Number(f.evo)||0)*.15;
-  ctx.strokeStyle="#ffcb91";ctx.lineWidth=3+sc;ctx.beginPath();ctx.arc(x,y,(16+30*k)*sc,0,TAU);ctx.stroke();
-  ctx.strokeStyle="#c4503a";ctx.lineWidth=2;for(let i=0;i<4;i++){const an=i*TAU/4+.4,r0=(12+10*k)*sc,r1=(22+26*k)*sc;
-   ctx.beginPath();ctx.moveTo(x+Math.cos(an)*r0,y+Math.sin(an)*r0);ctx.lineTo(x+Math.cos(an)*r1,y+Math.sin(an)*r1);ctx.stroke();}
-  if(k<.6){ctx.fillStyle="#fff1d6";ctx.font="800 13px Outfit,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("¡SELLADO!",x,y-30*sc-16*k);}
+  // Analysis brackets snap onto the foe, then a mint data ring expands.
+  const sc=1+(Number(f.evo)||0)*.15,q=(18-6*k)*sc;
+  ctx.strokeStyle="#4ff0c8";ctx.lineWidth=2.6;
+  for(const [sx,sy] of [[-1,-1],[1,-1],[1,1],[-1,1]]){ctx.beginPath();ctx.moveTo(x+sx*q,y+sy*(q-7));ctx.lineTo(x+sx*q,y+sy*q);ctx.lineTo(x+sx*(q-7),y+sy*q);ctx.stroke();}
+  ctx.globalAlpha=a*(1-k);ctx.lineWidth=2+sc;ctx.beginPath();ctx.arc(x,y,(16+34*k)*sc,0,TAU);ctx.stroke();
+  ctx.globalAlpha=a;yomiRune(ctx,x,y,1.2,(f.e&&f.e.id?String(f.e.id).length:0),"#ff7f6e");
+  if(k<.6){ctx.fillStyle="#eafffa";ctx.font="800 13px Outfit,system-ui,sans-serif";ctx.textAlign="center";ctx.fillText("¡RESPUESTA!",x,y-30*sc-16*k);}
  }else{
   // Dream: little rainbow arc + "z" stars above the sleeper.
   const cols=["#ff8cab","#ffe9a3","#a5e5fa"];
@@ -2983,7 +3032,11 @@ if(f.mode==="kilo"){
   for(let i=0;i<8;i++){const ph=(t*.018+i*.37)%1,px=x+Math.cos(i*2.4)*R*.8,py=y+40-ph*120;ctx.globalAlpha=(1-ph)*.9*fade;ctx.fillStyle="#c8322a";ctx.beginPath();ctx.arc(px,py,5,0,TAU);ctx.fill();}
   ctx.globalAlpha=.65*fade;ctx.beginPath();ctx.moveTo(x,y-R*.75);ctx.lineTo(x+R*.7,y+R*.48);ctx.lineTo(x-R*.7,y+R*.48);ctx.closePath();ctx.stroke();for(let i=0;i<5;i++){const a=i*TAU/5+t*.015;ctx.beginPath();ctx.arc(x+Math.cos(a)*R*.42,y+Math.sin(a)*R*.34,6,0,TAU);ctx.stroke();}
 }else if(f.mode==="yomi"){
-  ctx.globalAlpha=.72*fade;ctx.beginPath();ctx.moveTo(x-R*.78,y);ctx.quadraticCurveTo(x,y-R*.62,x+R*.78,y);ctx.quadraticCurveTo(x,y+R*.62,x-R*.78,y);ctx.stroke();ctx.beginPath();ctx.arc(x,y,R*.14,0,TAU);ctx.fillStyle=f.color;ctx.fill();
+  // Neural field: rune circle + node lattice; the drawn radius matches the 390 px pulse.
+  drawYomiRuneCircle(ctx,x,y,R,10,t,"#4ff0c8",.6*fade,!!g?.reduceMotion);
+  ctx.globalAlpha=.35*fade;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1;
+  for(let i=0;i<7;i++){const a=i*TAU/7,b=(i+3)*TAU/7;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*R*.55,y+Math.sin(a)*R*.55);ctx.lineTo(x+Math.cos(b)*R*.55,y+Math.sin(b)*R*.55);ctx.stroke();}
+  for(let i=0;i<7;i++){const a=i*TAU/7;ctx.globalAlpha=.8*fade;ctx.fillStyle=i%2?"#ffd56b":"#4ff0c8";ctx.fillRect(x+Math.cos(a)*R*.55-3,y+Math.sin(a)*R*.55-3,6,6);}
  }else if(f.mode==="cuerno"){
   drawCuernoAuroraDome(ctx,f,cam,t,g);
   ctx.globalCompositeOperation="source-over";
@@ -3117,13 +3170,8 @@ if (f.identity === "bloom") {
   ctx.closePath();
   ctx.stroke();
 } else if (f.identity === "maw") {
-  ctx.beginPath();
-  ctx.moveTo(x - r * 0.6, y);
-  ctx.lineTo(x, y - 30);
-  ctx.lineTo(x + r * 0.6, y);
-  ctx.lineTo(x, y + 30);
-  ctx.closePath();
-  ctx.stroke();
+  // Yomi IA: a compiled rune circle instead of the old maw.
+  drawYomiRuneCircle(ctx, x, y, r * 0.7, 8, t, "#4ff0c8", 0.85, false);
 } else {
   ctx.beginPath();
   ctx.arc(x, y - 10, r * 0.8, 0.3, Math.PI - 0.3);
@@ -3530,6 +3578,8 @@ ctx.strokeStyle="#ff7f6e";ctx.lineWidth=2.2;ctx.lineCap="round";ctx.beginPath();
 ctx.moveTo(-3,-3);ctx.quadraticCurveTo(-3,-6.5,0,-6.5);ctx.quadraticCurveTo(3.4,-6.5,3.4,-3.6);
 ctx.quadraticCurveTo(3.4,-1.4,0,0);ctx.lineTo(0,1.6);ctx.stroke();
 ctx.fillStyle="#ff7f6e";ctx.beginPath();ctx.arc(0,4.6,1.3,0,TAU);ctx.fill();
+// magic: two code runes orbit the question
+for(let i=0;i<2;i++){const a=(t||0)*.18+i*Math.PI;ctx.globalAlpha=.8;yomiRune(ctx,Math.cos(a)*19,Math.sin(a)*11,.6,i*2,i?"#ffd56b":"#4ff0c8");}
 ctx.restore();
 },
 sleeve(ctx, f, cam, t, g, p) {
@@ -3540,6 +3590,8 @@ ctx.globalAlpha=.07*(1-k);ctx.fillStyle="#4ff0c8";ctx.beginPath();ctx.arc(x,y,r,
 ctx.globalAlpha=.8*(1-k*.7);ctx.strokeStyle="#4ff0c8";ctx.lineWidth=3-1.5*k;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();
 ctx.globalAlpha=.28*(1-k);ctx.lineWidth=1;for(const q of [.33,.66]){ctx.beginPath();ctx.arc(x,y,r*q,0,TAU);ctx.stroke();}
 const a=k*TAU*1.25-Math.PI/2;ctx.globalAlpha=.55*(1-k);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);ctx.stroke();
+// magic: 8 code runes ride the hit front
+for(let i=0;i<8;i++){const b=i*TAU/8+k*.8;ctx.globalAlpha=.7*(1-k);yomiRune(ctx,x+Math.cos(b)*r,y+Math.sin(b)*r,.8,i,i%2?"#ff7f6e":"#4ff0c8");}
 ctx.restore();
 drawYomiMarks(ctx,cam,t,g);
 },
@@ -3554,6 +3606,9 @@ if(charging){
   ctx.globalAlpha=.18+.3*k;ctx.strokeStyle="#4ff0c8";ctx.lineWidth=1.5;ctx.setLineDash?.([6,6]);
   ctx.strokeRect(0,-f.half,f.len,f.half*2);ctx.setLineDash?.([]);
   for(let i=0;i<6;i++){const a=i*TAU/6+(t||0)*.12,r=34*(1-k)+6;ctx.globalAlpha=.7;ctx.fillStyle=i%2?"#ff7f6e":"#4ff0c8";ctx.fillRect(18+Math.cos(a)*r-2,Math.sin(a)*r-2,4,4);}
+  // magic: a vertical rune circle compiles at the muzzle
+  ctx.globalAlpha=.3+.5*k;ctx.strokeStyle="#ffd56b";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(16,0,8,f.half+6,0,0,TAU);ctx.stroke();
+  for(let i=0;i<4;i++)yomiRune(ctx,16,-f.half+i*(f.half*2/3),.55,i,"#ffd56b");
 } else {
   const w=f.half*(.55+.45*k);
   ctx.globalAlpha=.3*k;ctx.fillStyle="#4ff0c8";ctx.fillRect(0,-f.half,f.len,f.half*2);
@@ -3561,6 +3616,7 @@ if(charging){
   ctx.globalAlpha=k;ctx.fillStyle="#eafffa";ctx.fillRect(0,-w*.18,f.len,w*.36);
   ctx.globalAlpha=.8*k;ctx.fillStyle="#ff7f6e";
   for(let i=0;i<7;i++){const xx=(i*53+(t||0)*9)%f.len;ctx.fillRect(xx,(i%2?-1:1)*w*.7-2,5,4);}
+  ctx.globalAlpha=.7*k;for(let i=0;i<4;i++)yomiRune(ctx,(i*79+(t||0)*6)%f.len,0,.7,i,"#0d1430");
 }
 ctx.restore();
 drawYomiMarks(ctx,cam,t,g);
