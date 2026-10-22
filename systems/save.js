@@ -1,6 +1,8 @@
 import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
+import {WORLD1_IDS,cleanWorld1Seals} from "./world1-rooms.js";
+const SAVE_ROOMS=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss',...WORLD1_IDS];
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
 export function canonId(id) {
@@ -8,13 +10,13 @@ export function canonId(id) {
 }
 
 function cleanProgress(raw,arrays=false){
- const result={};for(const id of ['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss']){const v=raw?.[id];if(arrays&&Array.isArray(v))result[id]=[...new Set(v.filter(x=>typeof x==='string'&&x.startsWith(id+'-')&&x.length<80))].slice(0,64);else if(!arrays&&typeof v==='string'&&v.startsWith(id+'-')&&v.length<80)result[id]=v;}return result;
+ const result={};for(const id of SAVE_ROOMS){const v=raw?.[id];if(arrays&&Array.isArray(v))result[id]=[...new Set(v.filter(x=>typeof x==='string'&&x.startsWith(id+'-')&&x.length<80))].slice(0,64);else if(!arrays&&typeof v==='string'&&v.startsWith(id+'-')&&v.length<80)result[id]=v;}return result;
 }
 // V453: 100 personal items + 1 trophy + older room secrets exceed
 // cleanProgress' 64-item cap. Maintain that strict cap for enemy/checkpoint
 // state but validate full personal collections separately, per room.
 function cleanSecrets(raw){
- const rooms=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss'];
+ const rooms=SAVE_ROOMS;
  const heroes=['kilo','stitcho','chispin','cat','dragon','dino','frita','pizza','yomi','cuerno'];
  const out={};
  for(const id of rooms){
@@ -31,6 +33,7 @@ function cleanSecrets(raw){
  }
  return out;
 }
+function cleanVisited(raw){const out={};for(const id of WORLD1_IDS)if(raw?.[id]===true)out[id]=true;return out;}
 const SAVE_KEY = "ohana";
 const SAVE_TMP_KEY = "ohana.tmp";
 export function sanitizeDragonTrial(raw){
@@ -66,6 +69,9 @@ export function packSave(game, MagicMod) {
     score: game.score || 0,
     kills: game.kills || 0,
     won: !!game.won,
+    world1Seals: cleanWorld1Seals(game.world1Seals),
+    world1Won: !!game.world1Won,
+    world1Visited: cleanVisited(game.world1Visited),
     evo: p ? p.evo : 0,
     id: p ? canonId(p.id) : "",
     xp: p ? p.xp : 0,
@@ -135,6 +141,9 @@ export function unpackSave(raw, defId) {
     score: Math.max(0, finiteNumber(raw.score)),
     kills: Math.max(0, finiteNumber(raw.kills)),
     won: !!raw.won,
+    world1Seals: cleanWorld1Seals(raw.world1Seals),
+    world1Won: !!raw.world1Won,
+    world1Visited: cleanVisited(raw.world1Visited),
     evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),
     xp: Math.max(0, finiteNumber(raw.xp)),
     uExp: Math.max(0, Math.min(200,Math.floor(finiteNumber(raw.uExp)))),

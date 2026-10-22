@@ -11,6 +11,7 @@ import { sfx } from "../engine/audio.js";
 import { chooseUPartner } from "./u-partners.js";
 import { endingSignature, duoBeat, drawSignature } from "./ending-duo.js";
 import { cachedGradient } from "./canvas-gradient-cache.js";
+import { WORLD1_ENDING } from "./world1-story.js";
 
 let running=null;
 const CAST=["kilo","stitcho","chispin","cat","dragon","dino","frita","pizza","yomi","cuerno"];
@@ -105,6 +106,13 @@ function showEnding(detail={}){
   layer.dataset.duration=String(Math.round(duration*1000));
   layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
+  // V468: el final del Mundo 1 cierra la historia del Eco y abre el Mundo 2.
+  const w1=Number(detail.world)===1;
+  const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
+  for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
+  const cont=layer.querySelector("#win-continue");if(cont)cont.textContent=w1?"Seguir hacia el Mundo 2":"Continuar en este mundo";
+  const rep=layer.querySelector("#win-repeat");if(rep)rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";
+  layer.dataset.world=w1?"1":"2";
   const score=layer.querySelector(".win-score");
   layer.querySelector(".win-hero").textContent=(detail.hero||hero.name)+" · "+(detail.form||"forma final");
   score.textContent=(detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");

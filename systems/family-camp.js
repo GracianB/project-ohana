@@ -13,6 +13,9 @@ import {CUERNO_VISUAL_H} from '../characters/art/cuerno.js';
 import {CUERNO_V373_HEIGHT} from '../characters/art/cuerno-v373.js';
 import {FRITA_VISUAL_H} from '../characters/art/frita.js';
 import {ABILITY_DEFS} from './ability-catalog.js';
+import {createWorld1Select,refreshWorld1Select,world1SelectKey,world1SelectPointer,drawWorld1Select} from './world1-select.js';
+import {readWorld1Seals} from './world1-progress.js';
+import {countsByHero,loadWorld1Collect} from './world1-collect.js';
 const TAU=Math.PI*2;
 export function campActor(def,evo=1,pose='idle',height=92){
  const f=def.forms[evo];
@@ -50,7 +53,18 @@ export function mountFamilyCamp({select,onBegin,document:doc=globalThis.document
 const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('#camp-route').after(powers);
  let selected=menu.dataset.hero||'kilo',form=0,film=null,last=0,time=0,raf=0,view={scale:1,x:0};
  let cursor={x:CAMP_HEROES[selected].x,y:CAMP_HEROES[selected].y+40},target={...cursor};const keys=new Set();let walkSelectionLatched=false;
- const canvas=host.querySelector('#camp-canvas'),ctx=canvas.getContext('2d');const portrait=host.querySelector('#camp-portrait'),pc=portrait.getContext('2d');
+ const canvas=host.querySelector('#camp-canvas'),ctx=canvas.getContext('2d');
+ // V468: selección del Mundo 1 — una carta-portal por héroe enlazada a SU sala (sin islas en pareja).
+ const w1opts=()=>{let counts={};try{const g={};loadWorld1Collect(g);counts=countsByHero(g);}catch(_){}return {seals:readWorld1Seals(),counts};};
+ let w1sel=null;try{w1sel=createWorld1Select({...w1opts(),start:selected});}catch(_){w1sel=null;}
+ if(w1sel){menu.dataset.selectorMode='world1-rooms';host.dataset.world='1';canvas.setAttribute('aria-label','Mundo 1: diez salas, una por héroe, y el Corazón de Ohana. Flechas para elegir, Intro para entrar.');}
+ const w1enter=(r)=>{if(!r)return;if(r.card?.hero&&r.card.hero!==selected)selectHero(r.card.hero);if(r.action==='enter'){globalThis.__ohanaWorld1Start=r.room;onBegin();}else if(r.action==='locked'&&r.message)$('camp-line').textContent=r.message;};
+ if(w1sel){
+  canvas.addEventListener('pointerdown',e=>{const b=canvas.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;canvas.focus({preventScroll:true});e.stopImmediatePropagation();const m=world1SelectPointer(w1sel,x,y,false);if(!m)return;const again=m.card.final||m.card.hero===selected;w1enter(again?world1SelectPointer(w1sel,x,y,true):m);},true);
+  canvas.addEventListener('pointermove',e=>{const b=canvas.getBoundingClientRect();world1SelectPointer(w1sel,e.clientX-b.left,e.clientY-b.top,false);});
+  canvas.addEventListener('keydown',e=>{const r=world1SelectKey(w1sel,e.key);if(!r||r.action==='back')return;e.preventDefault();e.stopImmediatePropagation();w1enter(r);},true);
+  addEventListener('focus',()=>{try{refreshWorld1Select(w1sel,w1opts());}catch(_){}});
+ }const portrait=host.querySelector('#camp-portrait'),pc=portrait.getContext('2d');
  const scenery=doc.createElement('canvas');scenery.width=1400;scenery.height=660;island(scenery.getContext('2d'),0,true);
  const idleActors=new Map();
  const $=id=>host.querySelector('#'+id);
@@ -90,7 +104,8 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   selectHero(near,true);
   if(keys.size){walkSelectionLatched=true;target={...cursor};}
  }
- ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
+ if(w1sel){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);drawWorld1Select(ctx,width,height,reduce?0:time*60,w1sel,{reduceMotion:reduce,drawActor:(c,hero,x,y,sc)=>{const d=ROSTER.find(r=>r.id===hero);if(!d)throw Error('hero');c.save();c.translate(x,y);drawCharacter(c,campActor(d,1,'idle',Math.max(30,sc*40*1.6)),{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});c.restore();}});}
+ else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
  for(const def of ROSTER){const p=CAMP_HEROES[def.id],hot=def.id===selected,beat=film?.id===def.id?campPresentation(def.id,time-film.start):null;
  ellipse(ctx,p.x,p.y+4,hot?50:35,12,hot?'#fff5c066':'#425f5029');
  const pair=film?pairedScene(def.id,selected,time-film.start):null;
@@ -107,6 +122,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  label(ctx,def.name,p.x,p.y+32,hot?19:16,hot?'#4d3e46':'#475e5c');if(hot){label(ctx,'▼',p.x,p.y-110,18,'#fff5c2');}
  }
  ellipse(ctx,cursor.x,cursor.y,reduce?8:8+Math.sin(time*6),8,'#fff4b9');ellipse(ctx,cursor.x-10,cursor.y-4,7,3,'#f3f9e6aa');ellipse(ctx,cursor.x+10,cursor.y-4,7,3,'#f3f9e6aa');
+}
  const def=ROSTER.find(r=>r.id===selected);pc.clearRect(0,0,300,240);ellipse(pc,150,206,65,12,'#ae9de32b');pc.save();pc.translate(150,207);const portraitActor=campActor(def,form,film?campPresentation(selected,time-film.start).pose:'idle',140);if(def.id==='kilo')portraitActor._kiloPerformance=reduce?{kind:'relic',time:3.5}:film?pairedScene('kilo',selected,time-film.start)?.performance:{kind:'relic',time:2+time%5.5};drawCharacter(pc,portraitActor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});pc.restore();
  if(film){const beat=campPresentation(selected,time-film.start);if($('camp-line').textContent!==beat.line)$('camp-line').textContent=beat.line;if(beat.done)$('camp-film-stop').click();}
  raf=requestAnimationFrame(paint);

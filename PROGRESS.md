@@ -1,3 +1,22 @@
+# OHANA V468 · MUNDO 1: la Ruta de los Diez
+
+Versión **V468** (`ohana-468`) sobre V467. El juego se reorganiza en dos mundos: el **Mundo 1** nuevo (diez salas de héroe + Corazón de Ohana) y el **Mundo 2**, que conserva intactas las salas clásicas (Claro, Costa, Jungla, Cueva, Lab, Cumbre, Órbita, Arrecife, Caldera y Nido).
+
+## Plan
+1. Salas: una por héroe, 9600 px (más del doble que las salas personales de 4200), y una sala final de 12000 px. Datos puros en `systems/world1-rooms.js`.
+2. Conexiones: ruta lineal Kilo → Stitcho → Chispín → Michi → Cuerno → Dragón → Dino → Frita → Pizza → Yomi → Corazón. El sello de cada sala abre su salida este; el Corazón exige los diez. Vórtice «Mundo 2» en la sala de Kilo; tras la Quimera, el este del Corazón lleva al Mundo 2.
+3. Menos plataformas: suelo continuo y como mucho un motivo de 0–3 repisas bajas por sector (8 plataformas por sala frente a 40+ en las salas personales).
+4. Una interacción única por sala (`systems/world1-play.js`): serenata (Kilo), reparar la nave (Stitcho), cadena de truenos (Chispín), medusas lunares (Michi), prismas en orden (Cuerno), braseros (Dragón), pisotones fósiles (Dino), géiseres y patatas (Frita), reparto caliente (Pizza), sincronía de nodos (Yomi).
+5. Fondo: decorado propio del héroe + su silueta gigante teñida (lienzo cacheado, sin degradados por fotograma).
+6. Coleccionables: los «100 objetos por sala» y los «100 álbumes» pasan a ser UNO (`systems/world1-collect.js`): 100 cromos por sala del Mundo 1, un contador, un álbum (B). Migración por unión de `ohana-room-albums-v1` y `ohana-hero-100-v1:*` sin borrar nada.
+7. Selección de héroe sin islas en pareja (`systems/world1-select.js`): una carta-portal por héroe enlazada a su sala, con sello y álbum.
+8. Jefe final: Quimera Ohana (`systems/fusion-boss.js`), fusión de los diez: 4 fases, 10 ataques (uno por héroe) y 3 especiales con cinemática (Eco de la familia, Erupción de los diez, Ohana rota). Determinista, sin degradados, listas acotadas.
+9. Historia única (`systems/world1-story.js`): el Eco roba la canción de cada héroe y la cose en la Quimera; cada sala tiene frase de entrada y de sello; la caída devuelve las diez luces; el final abre el Mundo 2.
+10. Sellos globales de la familia (`systems/world1-progress.js`, `ohana-w1-seals-v1`); el save por héroe guarda `world1Seals`, `world1Won`, `world1Visited`.
+
+## Sin verificar
+Solo `npm test`. No se ha jugado en navegador: falta comprobar a mano alcance de saltos de medusas/géiseres, ritmo de la Quimera y la nueva selección.
+
 # OHANA V467 · Arreglo de la puerta de Pages (movimiento reducido)
 
 Versión **V467** (`ohana-467`) sobre V466 (`main` a98763e).
