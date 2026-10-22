@@ -1,3 +1,13 @@
+# OHANA V463 · Metamorfosis propias de la familia, Trueno Gordo vuelve, trajes hawaianos de Kilo
+
+Versión **V463** (`ohana-463`) sobre V462 (`main` f1339c9).
+
+- **Cinemáticas propias en partida** (`systems/evo-cine/family-own.js`) para Kilo, Stitcho, Chispín y Cuerno, enrutadas como Dino/Dragón y Pizza/Frita por `OWN_EVOLUTION_CINE` en `presentation.js`: cuatro actos en 4,5 s (llamada · carga · capullo · revelación), el personaje real vía `drawCharacter`, mundo propio (Kilo: atardecer aloha con capullo de hibisco; Stitcho: laboratorio estelar con cápsula cosida; Chispín: gran tormenta, nube-capullo, rayo y arcoíris, con aterrizaje pesado de Trueno Gordo; Cuerno: sueño de aurora con prisma de cristal y eclipse final). Deterministas, sin gradientes (flatCtx), fotograma quieto en movimiento reducido. Los módulos antiguos pasan a 4,5 s para que el director de escena cubra los cuatro actos.
+- **Trueno Gordo (Chispín F4 en UI)** vuelve a ser grande, redondo y rechoncho: cuerpo 31×30, cabeza 25, brazos/patas gruesos, mofletes que se inflan con la carga, barriga con ombligo-rayo y pliegues, y barriga que respira, rebota al correr y tiembla al celebrar. `CHISPIN_VISUAL_H` = [62,72,82,104,114].
+- **Chispín y Stitcho, pareja distinta**: Chispín pasa a acentos cálidos coral-mandarina (branquias, orejas, pila) frente al azul/violeta frío de Stitcho; Stitcho estrena parche de barriga lavanda con costura cian luminosa en punto de cruz.
+- **Quita límites**: el chequeo de tamaño óptico solo exige un suelo (target−15) y un techo de cordura amplio (×1,45+15); el techo visual del look «paint» sube de 220 a 320 px. Hitboxes intactas.
+- **Trajes de Kilo**: paleta coherente por forma, estampado aloha (hojas de monstera tonales + hibiscos/plumerias) que viaja con la cadera, bajo con onda de tela; Bebé con cuello bebé festoneado y volante; Kilo con ribete calado y fajín; Ohana con banda tapa; Super Kilo con pareo turquesa anudado y lazos que oscilan; Flor Solar con bajo de pétalos en dos capas y cintas que ondean. El brazo lejano sigue detrás del cuerpo (V462).
+
 # OHANA V462 · Michicornio y Kilo, Dino & Dragón, Pizza & Frita
 
 Versión **V462** (`ohana-462`): publicación conjunta de tres ramas sobre V461 (`main` 040a233): `michi-v462` (Michicornio Hada Felina, patas/colas/boca, L Nueve colas, brazos de Kilo), `dino-dragon-v2` (tamaños unificados, identidades tierra/cielo, cinemáticas e islas propias) y `pizza-frita-v2` (tallas estándar, brazos visibles de Pizza, cinemáticas, fondos e isla Puerto del banquete). Las secciones de cada rama se detallan abajo. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.

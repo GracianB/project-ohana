@@ -1,13 +1,13 @@
 
 const TAU = Math.PI * 2;
-const TQ = "#b05cff"; // acento violeta eléctrico (distinto del cian de Stitcho)
+const TQ = "#ff6a3d"; // V463: acento coral-mandarina cálido (Stitcho es azul/violeta frío)
 const BOLT = "#fff6a0";
 
 const PAL = [
-  { body: "#fff06a", belly: "#fffdf2", gill: "#c07bff", glow: "#ecd6ff", inner: "#b066ff" },
-  { body: "#ffd83a", belly: "#fffaf0", gill: "#b05cff", glow: "#e6ccff", inner: "#a04cf0" },
-  { body: "#ffc13e", belly: "#fff1dc", gill: "#d24cff", glow: "#f2c8ff", inner: "#b83ce0" },
-  { body: "#ffdc62", belly: "#fffbef", gill: "#a85cff", glow: "#e2c8ff", inner: "#9a4cf0" },
+  { body: "#fff06a", belly: "#fffdf2", gill: "#ff8a5c", glow: "#ffe0c8", inner: "#ff9470" },
+  { body: "#ffd83a", belly: "#fffaf0", gill: "#ff6f4f", glow: "#ffd6c0", inner: "#f2603e" },
+  { body: "#ffc13e", belly: "#fff1dc", gill: "#ff4f6a", glow: "#ffd0d8", inner: "#e8405a" },
+  { body: "#ffd84a", belly: "#fffbef", gill: "#ff7a3a", glow: "#ffe2b8", inner: "#f06a2e" },
   { body: "#ffe17b", belly: "#fffbed", gill: "#ff5ad8", glow: "#ffd0f4", inner: "#ff5ad8" },
 ];
 
@@ -15,7 +15,7 @@ const P = [
   { hr: 29, hx: 2, hy: -40, brx: 16, bry: 13, bx: 0, by: -16, legW: 8, armL: 6, armW: 6, gillL: 7, gillW: 3, ear: 6, eye: 9.8, tail: 15, coil: 3.5, turns: 2 },
   { hr: 24, hx: 3, hy: -60, brx: 19, bry: 20, bx: -1, by: -27, legW: 9, armL: 11, armW: 6.5, gillL: 13, gillW: 3.4, ear: 8.5, eye: 8.6, tail: 25, coil: 6, turns: 2.5 },
   { hr: 21, hx: 4, hy: -74, brx: 14, bry: 24, bx: 0, by: -37, legW: 8, armL: 15, armW: 6, gillL: 15, gillW: 3.4, ear: 9.5, eye: 7.6, tail: 33, coil: 5, turns: 3, crest: true },
-  { hr: 22, hx: 5, hy: -83, brx: 20, bry: 27, bx: -1, by: -40, legW: 10, armL: 10, armW: 7, gillL: 21, gillW: 4.4, ear: 8.5, eye: 8, tail: 30, coil: 6, turns: 2.5, clouds: true },
+  { hr: 25, hx: 6, hy: -80, brx: 31, bry: 30, bx: 0, by: -36, legW: 13, armL: 10, armW: 9.5, gillL: 20, gillW: 4.8, ear: 9.5, eye: 8.6, tail: 30, coil: 7, turns: 2.5, clouds: true, chunky: true },
   { hr: 23, hx: 4, hy: -70, brx: 18, bry: 23, bx: -1, by: -33, legW: 9, armL: 13, armW: 6.5, gillL: 17, gillW: 3.8, ear: 10.5, eye: 8, tail: 38, coil: 5.5, turns: 3, final: true },
 ];
 
@@ -192,10 +192,25 @@ function figure(ctx, R, pose, f, S, C, o) {
   const ae = [shB[0] + Math.sin(o.armB) * S.armL, shB[1] + Math.cos(o.armB) * S.armL];
   paw(ctx, R, shB[0], shB[1], ae[0], ae[1], S.armW, back, 2);
 
-  const bp = pEll(S.bx, S.by, S.brx, S.bry);
+  // V463 · Trueno Gordo is big, round and chunky again: the belly breathes,
+  // wobbles on every step and jiggles when he celebrates (squash keeps volume).
+  const jig = S.chunky && !pose.reduceMotion
+    ? Math.sin(t * 0.11) * 0.035 + (pose.state === "run" ? Math.sin((pose.phase || 0) * 2) * 0.05 : 0)
+      + (pose.state === "victory" ? Math.sin(t * 0.35) * 0.06 : 0) + Math.min(0.1, (pose.land || 0) * 0.1)
+    : 0;
+  const bp = pEll(S.bx, S.by + S.bry * jig * 0.5, S.brx * (1 + jig), S.bry * (1 - jig));
   skin(ctx, R, bp, f, S.bx, S.by, Math.max(S.brx, S.bry), C.body, () => {
     ctx.fillStyle = C.belly;
     ctx.beginPath(); ctx.ellipse(S.bx + S.brx * 0.35, S.by + S.bry * 0.15, S.brx * 0.62, S.bry * 0.72, 0, 0, TAU); ctx.fill();
+    if (S.chunky) {
+      // round tummy, a bolt-shaped belly button and two soft fat folds
+      ctx.strokeStyle = "rgba(170,90,10,0.35)"; ctx.lineWidth = 2;
+      for (const k of [-1, 1]) { ctx.beginPath(); ctx.arc(S.bx + S.brx * 0.3, S.by + S.bry * (0.25 + k * 0.38), S.brx * 0.5, Math.PI * 0.2, Math.PI * 0.8); ctx.stroke(); }
+      ctx.fillStyle = TQ; ctx.beginPath();
+      const bxm = S.bx + S.brx * 0.36, bym = S.by + S.bry * 0.1;
+      ctx.moveTo(bxm + 2, bym - 7); ctx.lineTo(bxm - 4, bym + 1); ctx.lineTo(bxm, bym + 1); ctx.lineTo(bxm - 2, bym + 8); ctx.lineTo(bxm + 5, bym - 1); ctx.lineTo(bxm + 1, bym - 1); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.35)"; ctx.beginPath(); ctx.ellipse(S.bx + S.brx * 0.15, S.by - S.bry * 0.15, S.brx * 0.28, S.bry * 0.2, -0.4, 0, TAU); ctx.fill();
+    }
     ctx.fillStyle = "rgba(120,60,0,0.14)";
     ctx.beginPath(); ctx.ellipse(S.bx + S.brx * 0.2, S.by + S.bry * 1.05, S.brx * 1.1, S.bry * 0.45, 0, 0, TAU); ctx.fill();
     if (f === 2) {
@@ -233,6 +248,14 @@ function figure(ctx, R, pose, f, S, C, o) {
     ctx.beginPath(); ctx.ellipse(-hr * 0.3, hr * 0.9, hr * 1.1, hr * 0.35, 0, 0, TAU); ctx.fill();
   });
   R.shine(ctx, -hr * 0.3, -hr * 0.55, hr * 0.28, hr * 0.14, 0.5);
+  if (S.chunky) {
+    // chubby cheeks that puff with charge: the charismatic Trueno Gordo grin
+    const puffK = 1 + (o.charge || 0) * 0.12 + jig * 0.8;
+    for (const [cx0, r0] of [[hr * 0.86, hr * 0.27], [-hr * 0.22, hr * 0.22]]) {
+      R.ellipse(ctx, cx0, hr * 0.42, r0 * puffK, r0 * 0.82 * puffK, R.lighten(C.body, 0.08), { lw: 2.2 });
+      ctx.fillStyle = "rgba(255,110,90,0.42)"; ctx.beginPath(); ctx.ellipse(cx0, hr * 0.44, r0 * 0.62, r0 * 0.4, 0, 0, TAU); ctx.fill();
+    }
+  }
   ear(ctx, R, hr * 0.35, -hr * 0.82, S.ear * 1.05, 0.3 + o.earA * 0.8, C.body, C.inner, false);
 
   const ey = -hr * 0.08;
@@ -664,7 +687,7 @@ export function chispinFootwork(pose={}){
  return landing>.02||turn>.02||brake>.02||running>.3?{landing,turn,brake,running}:null;
 }
 function drawChispinFootwork(ctx,pose,f,t){
- const m=chispinFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';const col=f===4?'#ff9ce7':'#cc9cff';
+ const m=chispinFootwork(pose);if(!m)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';const col=f===4?'#ff9ce7':'#ffb07a';
  if(m.running>.3)for(let i=0;i<2;i++){const k=((t*.075+i*.5)%1+1)%1,x=-16-k*26;ctx.globalAlpha=.48*(1-k)*m.running;ctx.strokeStyle=i?col:'#fff3a0';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x,-2-k*3);ctx.lineTo(x-4,-6-k*3);ctx.lineTo(x+1,-6-k*3);ctx.lineTo(x-3,-11-k*3);ctx.stroke();}
  if(m.landing>.02){ctx.globalAlpha=m.landing*.55;ctx.fillStyle=f>=3?'#beb0ed':'#d8d8ee';for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse((i-1)*(8+(1-m.landing)*15),-1-i%2,8,2.7,0,0,Math.PI*2);ctx.fill();}ctx.strokeStyle=col;ctx.lineWidth=1.5;for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*11,-3);ctx.lineTo(side*16,-7-(1-m.landing)*9);ctx.stroke();}}
  if(m.turn>.02){ctx.globalAlpha=m.turn*.6;ctx.strokeStyle='#fff3a0';ctx.lineWidth=1.7;ctx.beginPath();ctx.moveTo(-7,-6);ctx.lineTo(-17,-10);ctx.lineTo(-13,-15);ctx.lineTo(-23,-19);ctx.stroke();}

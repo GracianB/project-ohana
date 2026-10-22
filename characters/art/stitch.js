@@ -490,6 +490,18 @@ function drawBody(ctx, R, f, S, C, bx, by, rx, ry, t, horizontal) {
       ctx.fillStyle = "rgba(200,255,255," + a + ")";
       for (const [u, v] of [[0.1, -0.7], [0.5, 0.2], [-0.2, 0.1], [0.55, 0.5]]) { ctx.beginPath(); ctx.arc(bx + rx * u, by + ry * v, 1.6, 0, TAU); ctx.fill(); }
     }
+    // V463 · Stitcho's signature (vs. Chispín's smooth golden tummy): a cool
+    // periwinkle belly patch closed by a glowing cyan cross-stitched seam.
+    if (!horizontal) {
+      ctx.fillStyle = "rgba(196,222,255,0.42)";
+      ctx.beginPath(); ctx.ellipse(bx + rx * 0.32, by + ry * 0.18, rx * 0.5, ry * 0.62, 0.08, 0, TAU); ctx.fill();
+      const sa = 0.6 + 0.3 * Math.sin(t * 0.15), sx = bx + rx * 0.32;
+      ctx.strokeStyle = "rgba(98,243,255," + sa + ")"; ctx.lineWidth = 1.3; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(sx, by - ry * 0.38); ctx.lineTo(sx + rx * 0.03, by + ry * 0.72); ctx.stroke();
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) { const y = by - ry * 0.26 + i * ry * 0.27, xx = sx + rx * 0.01 * i; ctx.moveTo(xx - 2.4, y - 2); ctx.lineTo(xx + 2.4, y + 2); ctx.moveTo(xx + 2.4, y - 2); ctx.lineTo(xx - 2.4, y + 2); }
+      ctx.stroke();
+    }
     ctx.fillStyle = "rgba(20,10,60,0.16)";
     ctx.beginPath(); ctx.ellipse(bx + rx * 0.2, by + ry * 0.9, rx * 1.1, ry * 0.45, 0, 0, TAU); ctx.fill();
   });

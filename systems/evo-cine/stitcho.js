@@ -6,11 +6,11 @@ import stitchArt from "../../characters/art/stitch.js";
 import { R } from "../../characters/rig.js";
 import { ROSTER } from "../../characters/roster.js";
 
-export const EVO_CINE_DURATION = 4.0;
+export const EVO_CINE_DURATION = 4.5;
 // Formas 1-based (1 = Mini Stitcho … 5 = Stitcho Nébula), igual que evo-cine/chispin.js.
 export const FORM_NAMES = Object.freeze(["Mini Stitcho", "Stitcho", "Stitcho Bravo", "Experimento Ñam", "Stitcho Nébula"]);
 export const EVO_CINE_UNITS = "seconds";
-export const EVO_CINE_PHASES = Object.freeze({ charge: [0, 1.5], transform: [1.5, 2.6], present: [2.6, 4.0] });
+export const EVO_CINE_PHASES = Object.freeze({ charge: [0, 1.5], transform: [1.5, 2.6], present: [2.6, 4.5] });
 const TAU = Math.PI * 2;
 const BLUE = "#2f6bff", CYAN = "#62f3ff", INK = "#060a1c", MAGENTA = "#ff3fa4";
 const GLYPHS = ["6", "2", "6", "Ж", "Ψ", "Ω", "Δ", "Ξ", "λ", "∑"];
@@ -120,7 +120,7 @@ export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
   t = clamp(Number(t) || 0, 0, EVO_CINE_DURATION);
   const from = clamp((fromForm | 0) - 1, 0, 4), to = clamp((toForm | 0) - 1, 0, 4);
   const cx = w / 2, foot = h * .85, R0 = h * .32, s = h / 255;
-  const kC = seg(t, 0, 1.5), kT = seg(t, 1.5, 2.6), kP = seg(t, 2.6, 4.0);
+  const kC = seg(t, 0, 1.5), kT = seg(t, 1.5, 2.6), kP = seg(t, 2.6, 4.5);
   ctx.save();
   ctx.fillStyle = INK; ctx.fillRect(0, 0, w, h);
   // energía azul de fondo (anillos planos)
