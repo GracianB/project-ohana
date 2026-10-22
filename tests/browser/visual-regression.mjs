@@ -605,7 +605,10 @@ try {
   assert.equal(finalFormFit.cardEvo, '4', '01c-final-form-fit: tarjeta no conoce su evolución');
   assert.ok(finalFormFit.envelope >= 1.3, '01c-final-form-fit: Forma 5 sin margen de silueta');
   assert.ok(finalFormFit.scale >= .34, '01c-final-form-fit: escala inválida');
-  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'family-camp', '01c-final-form-fit: campamento no activado');
+  // V468+: the family camp remains mounted, but its interactive Canvas selector
+  // is the World 1 hero-room portal map rather than the original paired islands.
+  assert.equal(await page.locator('#char-select').getAttribute('data-selector-mode'), 'world1-rooms', '01c-final-form-fit: portal del Mundo 1 no activado');
+  assert.equal(await page.locator('#family-camp').getAttribute('data-world'), '1', '01c-final-form-fit: campamento sin mapa del Mundo 1');
   await capture(page, '01c-character-select-final-form-fit');
   await page.evaluate(() => { window.__OHANA_TITLE_EVO_OVERRIDE = null; });
   await page.waitForTimeout(120);
