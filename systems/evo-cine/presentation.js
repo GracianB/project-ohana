@@ -114,7 +114,9 @@ export function drawEvolutionPresentation(ctx,width,height,id,evo,time,reduced=f
    }finally{c.restore();}
   };
   const still=reduced&&reducedStill(ctx,s.id,s.form,width,height,paint);
-  if(still)ctx.drawImage(still,0,0,width,height);else paint(ctx);
+  // The still is not opaque for every hero (Chispín/Cuerno skies use alpha):
+  // clear first so the reduced frame never composites over the previous one.
+  if(still){ctx.clearRect(0,0,width,height);ctx.drawImage(still,0,0,width,height);}else paint(ctx);
   return {...s,cinematic:s.id,act:own.evoCinePhase?own.evoCinePhase(raw):''};
  }
  ctx.save();

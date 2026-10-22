@@ -1,3 +1,9 @@
+# OHANA V467 · Arreglo de la puerta de Pages (movimiento reducido)
+
+Versión **V467** (`ohana-467`) sobre V466 (`main` a98763e).
+
+- `tests/browser/visual-direction.mjs` fallaba con «reduced reveal moves» en las metamorfosis propias de Chispín y Cuerno (desde V463), lo que bloqueaba el despliegue de Pages (el sitio seguía en `ohana-461`). El fotograma quieto en caché tiene cielo con alfa y se componía sobre el fotograma anterior. Ahora `drawEvolutionPresentation` limpia el lienzo antes de pintarlo (`systems/evo-cine/presentation.js`). Sin cambios de arte.
+
 # OHANA V466 · Cuerno rediseñado: unicornio equino del amanecer prisma
 
 Versión **V466** (`ohana-466`) sobre V465 (`main` 2972cb2).
