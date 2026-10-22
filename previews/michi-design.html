@@ -14,13 +14,13 @@ article h2{font-size:17px;margin:0}article p{margin:4px 0;font-size:12px}
 canvas{width:100%;height:auto;max-height:285px;aspect-ratio:1/1.13;display:block}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e6c0ff;outline-offset:3px}
 </style>
-<main><header><p>OHANA · ESTUDIO V459 · ARTE PROCEDURAL</p><h1>Michicornio: un mismo gato, cinco metamorfosis.</h1>
+<main><header><p>OHANA · ESTUDIO V460 · ARTE PROCEDURAL VIVO</p><h1>Michicornio: un mismo gato, cinco metamorfosis.</h1>
 <p>Gatito lunar → Lince lunar → Medusa felina → Dragón astral → Guardián de nueve tentáculos. Las orejas, el cuerno y el hilo de medusa unen las formas. Cada una responde a diez gestos distintos.</p></header>
 <div class="controls"><label for="pose">Animación
 <select id="pose"><option value="idle">Respirar</option><option value="run">Correr</option><option value="jump">Saltar</option><option value="fall">Caer</option><option value="glide">Planear</option><option value="wall">Aferrarse</option><option value="attack">Atacar</option><option value="cast">Conjurar</option><option value="hurt">Recibir daño</option><option value="victory">Celebrar</option><option value="dead">Derrota (legado)</option></select></label>
 <label><input type="checkbox" id="reduced"> Reducir movimiento</label>
 <button id="music">Música</button><button id="ending">Final animado</button>
-<a href="./animation-lab.html" style="color:#d9b9ff">Ver los 10 héroes</a></div>
+<a href="./animation-lab.html" style="color:#d9b9ff">10 héroes</a><a href="./michicornio-cinema.html" style="color:#ffe7c1">Ver la evolución cinematográfica ↗</a></div>
 <section class="forms"></section>
 </main><link rel="stylesheet" href="../ending.css">
 <script type="module">
@@ -53,5 +53,7 @@ document.querySelector('#ending').onclick=()=>showEnding({id:'cat',evo:4,hero:'M
 document.querySelector('#music').onclick=()=>playMusic('title');
 window.michiPreview={setFrame(v){t=v;frozen=true;paint();},setPose(v){poseSelect.value=v;paint();},setReduced(v){reduced.checked=v;paint();}};
 paint();window.previewReady=true;
-function loop(){if(!frozen&&!reduced.checked){t+=2;paint();}requestAnimationFrame(loop);}requestAnimationFrame(loop);
+let last=0;
+function loop(now){if(!frozen&&!reduced.checked&&now-last>34){t+=2;paint();last=now;}requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
 </script></html>

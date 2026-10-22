@@ -1,4 +1,4 @@
-// OHANA V353 · Michi: the small cat who thinks she is directing the family.
+// OHANA V460 · Michicornio: lunar spotlight and ten connected acting beats in the family.
 // Five theatrical acts, one deterministic 14-second welcome. No powers or collisions.
 const TAU=Math.PI*2;
 const clip=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
@@ -25,7 +25,8 @@ export function michiWelcomeBeat(seconds,reducedMotion=false){
  const t=Math.round((((raw%14)+14)%14)*10000)/10000;
  const breath=(1+Math.sin(t*TAU*5/14))*.5;
  if(reducedMotion)return Object.freeze({phase:"idle",inspect:0,sideeye:0,groom:0,flick:0,purr:0,
-  breath:.5,melody:0,spark:0,chase:0,yomi:0,dino:0,ear:0,tail:0,wing:0,halo:.1,reduced:true});
+  breath:.5,melody:0,spark:0,chase:0,yomi:0,dino:0,ear:0,tail:0,wing:0,halo:.1,
+  moonCrown:0,headFocus:0,tailCascade:0,shimmer:0,reduced:true});
  const inspect=pulse(t,...MICHI_WELCOME_BEATS.inspect);
  const sideeye=pulse(t,...MICHI_WELCOME_BEATS.sideeye);
  const groom=pulse(t,...MICHI_WELCOME_BEATS.groom);
@@ -46,8 +47,12 @@ export function michiWelcomeBeat(seconds,reducedMotion=false){
     +melody*.12+spark*.27+chase*.43+yomi*.22+dino*.34),
   wing:clip(.08*inspect+.16*sideeye+.28*groom+.45*flick+.74*purr
     +melody*.09+spark*.14+yomi*.16+dino*.27),
-  halo:clip(.1+.12*inspect+.09*sideeye+.16*groom+.27*flick+.43*purr
-    +melody*.04+spark*.07+chase*.06+yomi*.10+dino*.09),
+  halo:clip(.17+.19*inspect+.16*sideeye+.22*groom+.40*flick+.62*purr
+    +melody*.09+spark*.12+chase*.11+yomi*.13+dino*.14),
+  moonCrown:clip(.13+inspect*.32+sideeye*.18+groom*.26+flick*.54+purr*.90),
+  headFocus:clip(sideeye*.75+inspect*.42+spark*.26+yomi*.18),
+  tailCascade:clip(groom*.34+flick*.90+purr*.6+chase*.28),
+  shimmer:clip(.11+purr*.65+flick*.35+melody*.2+spark*.3),
   reduced:false});
 }
 export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
@@ -59,9 +64,40 @@ export function drawMichiWelcomeFX(ctx,x,foot,height,seconds,beat,layer="back"){
   g.addColorStop(.58,"rgba(200,173,255,"+(.06+.09*beat.halo)+")");
   g.addColorStop(1,"rgba(255,191,226,0)");
   ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,foot-h*.54,h*.49,0,TAU);ctx.fill();
-  ctx.globalAlpha=.22;ctx.lineWidth=1.4;ctx.strokeStyle="#ffc1db";
-  ctx.beginPath();ctx.ellipse(x,foot+2,h*.23,h*.045,0,0,TAU);ctx.stroke();
+  // A private moon iris, behind Michicornio and not behind every cast member.
+  // The centre remains translucent so the five-form silhouette stays readable.
+  ctx.globalAlpha=.18+.20*(beat.moonCrown||0);
+  ctx.strokeStyle="#d3bdff";ctx.lineWidth=Math.max(1.2,h*.018);
+  ctx.beginPath();ctx.arc(x,foot-h*.58,h*.37,Math.PI*.70,Math.PI*2.3);ctx.stroke();
+  ctx.globalAlpha=.15+.18*(beat.halo||0);
+  ctx.strokeStyle="#ffedd0";ctx.lineWidth=Math.max(1,h*.012);
+  ctx.beginPath();ctx.arc(x-h*.025,foot-h*.66,h*.31,Math.PI*.38,Math.PI*1.42);ctx.stroke();
+  ctx.globalAlpha=.28;ctx.strokeStyle="#ffc1db";ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.ellipse(x,foot+2,h*.24,h*.047,0,0,TAU);ctx.stroke();
  }else if(layer==="front"&&!beat.reduced){
+  // Silhouette-attached stars, horn glints and a distinct 5-beat reveal.
+  // All amplitudes are bounded to the existing intro stage slot.
+  const crown=beat.moonCrown||0,shimmer=beat.shimmer||0;
+  if(crown>.08){
+   ctx.globalAlpha=.38*crown;ctx.strokeStyle="#fff4d6";ctx.lineWidth=Math.max(1,h*.013);
+   ctx.beginPath();ctx.arc(x,foot-h*.97,h*.13,-Math.PI*.90,-Math.PI*.10);ctx.stroke();
+   for(let i=0;i<3;i++){
+    const a=i*TAU/3+seconds*.8;
+    const px=x+Math.cos(a)*h*.21,py=foot-h*.97+Math.sin(a)*h*.09;
+    ctx.fillStyle=i%2?"#c9f9ff":"#ffe6ae";
+    ctx.beginPath();ctx.moveTo(px,py-h*.025);ctx.lineTo(px+h*.015,py);
+    ctx.lineTo(px,py+h*.025);ctx.lineTo(px-h*.015,py);ctx.closePath();ctx.fill();
+   }
+  }
+  if(shimmer>.05){
+   ctx.globalAlpha=.25*shimmer;ctx.strokeStyle="#c8b2f7";ctx.lineWidth=Math.max(1,h*.009);
+   for(let i=0;i<5;i++){
+    const k=i/5,a=Math.PI*(1.1+k*.8)+seconds*.24;
+    const radius=h*(.24+.035*Math.sin(seconds*1.4+i));
+    ctx.beginPath();ctx.moveTo(x+Math.cos(a)*radius,foot-h*.52+Math.sin(a)*radius*.4);
+    ctx.lineTo(x+Math.cos(a)*radius*1.16,foot-h*.52+Math.sin(a)*radius*.45);ctx.stroke();
+   }
+  }
   if(beat.inspect>.03){
    ctx.globalAlpha=.54*beat.inspect;ctx.strokeStyle="#ffe7fb";ctx.lineWidth=1.4;
    for(let i=0;i<2;i++){

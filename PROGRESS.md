@@ -1,3 +1,19 @@
+# OHANA V460 · Michicornio: cuerpo vivo, intro y metamorfosis
+
+Versión **V460** (`ohana-460`), desarrollada en la [PR #394](https://github.com/GracianB/project-ohana/pull/394). El despliegue se acredita verificando CI, quality y GitHub Pages para el mismo commit de `main`. Diez personajes, cinco formas por héroe, diez salas canónicas y multijugador remoto pausado.
+
+## Trabajos implementados
+- Diez acciones con rig anatómico específico, patas realmente articuladas, cabeza reactiva, pupilas, parpadeo y orejas.
+- Medusa: campana que pulsa, siete tentáculos cinéticos; dragón: continuación de filamentos; Eclipse: nueve tentáculos con movimiento individual.
+- Intro familiar: iris lunar propio, brillo de cuerno, corona y seguimiento de las cinco reacciones.
+- Evolución: cinemática en cuatro actos (escucha, carga, metamorfosis, revelación), pintado simultáneo de formas y cuerpo animado (fin del antiguo `reduceMotion:true` forzado).
+- Storyboard independiente `previews/michicornio-cinema.html`, accesible con scrub, pausa y reproducción controlada.
+
+## Calidad
+- `tests/michicornio-v460.test.js`: cinemática, reacciones, rig físico, reducción del movimiento, cinco formas.
+- `tests/browser/v460-michicornio-cinema.mjs`: cuatro transiciones con frames realmente distintos, cinco formas x diez gestos, móvil y ausencia de errores.
+- El resto de suite y release gate siguen siendo obligatorios. El test visual no sustituye una partida completa ni la revisión manual del arte.
+
 # OHANA · V459 · Michicornio anatomical motion, 10 × 10 actions
 
 **Candidate cache**: `ohana-459`. 10 personajes, 5 formas, 10 salas. PR de desarrollo: no desplegada hasta fusionar y verificar Pages.

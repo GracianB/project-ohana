@@ -1,83 +1,129 @@
+// OHANA V460 · Michicornio's living metamorphosis, four seconds, four acts.
+// All 2D Canvas, deterministic, accessible; no images, RNG or new gameplay state.
+// Phase: listening → horn gathers light → feline anatomy morphs → living reveal.
 import {ROSTER} from '../../characters/roster.js';
 import {drawEvolutionActor} from './real-actor.js';
-// Cinemática de evolución de Michi: ovillos, nueve vidas, colas y luna. Sin gradientes, determinista.
-// Fases: carga (0-1.6s), transformación (1.6-2.9s), presentación (2.9-4s).
-export const EVO_CINE_DURATION = 4.0;
-const FORM_NAMES = ROSTER.find(r=>r.id==='cat').forms.map(f=>f.name);
-const formName = (f) => FORM_NAMES[Math.max(0, Math.min(4, (f | 0) - 1))];
-const FUR = ["#ffe3b8", "#ffc4e6", "#ffd0e8", "#c9b4ff", "#ffb3dc"], DARK = ["#e7b56a", "#d978b4", "#e888c0", "#7052bb", "#b8508f"];
-const YARN = ["#ff8ad4", "#ffd24a", "#8ad8ff"], TAU = Math.PI * 2;
-const ease = (k) => k * k * (3 - 2 * k), cl = (v) => Math.max(0, Math.min(1, v));
-
-function heart(ctx, x, y, s, fill, line) {
-  ctx.beginPath(); ctx.moveTo(x, y + s * 0.8);
-  ctx.bezierCurveTo(x - s * 1.3, y - s * 0.1, x - s * 0.6, y - s * 1.1, x, y - s * 0.35);
-  ctx.bezierCurveTo(x + s * 0.6, y - s * 1.1, x + s * 1.3, y - s * 0.1, x, y + s * 0.8);
-  ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = Math.max(1, s * 0.18); ctx.strokeStyle = line; ctx.stroke();
+export const EVO_CINE_DURATION=4.0;
+export const MICHI_EVO_ACTS=Object.freeze([
+ Object.freeze({id:'listen',start:0,end:.9}),
+ Object.freeze({id:'gather',start:.9,end:1.75}),
+ Object.freeze({id:'morph',start:1.75,end:2.9}),
+ Object.freeze({id:'reveal',start:2.9,end:4})
+]);
+const TAU=Math.PI*2;
+const FORM_NAMES=ROSTER.find(r=>r.id==='cat').forms.map(f=>f.name);
+const clip=(v,a=0,b=1)=>Math.max(a,Math.min(b,Number(v)||0));
+const smooth=v=>{const k=clip(v);return k*k*(3-2*k);};
+export function michicornioEvoBeat(t=0,from=1,to=2,reducedMotion=false){
+ const time=clip(t,0,EVO_CINE_DURATION),act=MICHI_EVO_ACTS.find(a=>time<a.end)||MICHI_EVO_ACTS.at(-1);
+ const duration=act.end-act.start,progress=smooth((time-act.start)/duration);
+ const begin=clip(from,1,5),end=clip(to,1,5);
+ return Object.freeze({act:act.id,progress,from:begin,to:end,time,reducedMotion:!!reducedMotion,
+   charge:smooth((time-.65)/1.2),arrival:smooth((time-2.15)/.85),
+   face:time<1.75?'cast':time<2.8?'jump':'victory',
+   tendrils:end>=3?end>=5?9:7:3,
+   moon:smooth((time-.9)/1.4),
+   glow:time<1.75?smooth((time-.4)/1.35):1-smooth((time-2.7)/1.4)*.28});
 }
-function yarn(ctx, x, y, r, col, rot) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
-  ctx.fillStyle = col; ctx.strokeStyle = "#5a2a4a"; ctx.lineWidth = Math.max(1, r * 0.14);
-  ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = "rgba(90,42,74,.55)"; ctx.lineWidth = Math.max(1, r * 0.1);
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(0, 0, r * 0.85, r * 0.35, i * 1.05, 0, TAU); ctx.stroke(); }
-  ctx.restore();
+const oval=(ctx,x,y,rx,ry,color)=>{
+ ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,TAU);ctx.fillStyle=color;ctx.fill();
+};
+const diamond=(ctx,x,y,r,color)=>{
+ ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r*.7,y);
+ ctx.lineTo(x,y+r);ctx.lineTo(x-r*.7,y);ctx.closePath();ctx.fillStyle=color;ctx.fill();
+};
+function orbit(ctx,cx,cy,r,time,alpha,count,color){
+ ctx.save();ctx.globalAlpha=clip(alpha);ctx.strokeStyle=color;ctx.lineWidth=Math.max(1,r*.019);
+ ctx.beginPath();ctx.ellipse(cx,cy,r,r*.42,0,0,TAU);ctx.stroke();
+ for(let j=0;j<count;j++){
+  const a=j*TAU/count+time*.8;
+  diamond(ctx,cx+Math.cos(a)*r,cy+Math.sin(a)*r*.42,r*.065,'#fff4c6');
+ }
+ ctx.restore();
 }
-// Cola esponjosa simple (círculos solapados) para el abanico.
-
-// Michi chibi con la paleta de characters/art/cat.js (PAL). Se dibuja aquí porque el render real usa gradientes.
-const PAL = [
-  { fur: "#ffe3b8", dark: "#e7b56a", belly: "#fff8ee", ear: "#ffb7c8", nose: "#ff8aa0", eye: "#3aa0e8", accent: "#7ec8ff" },
-  { fur: "#ffc4e6", dark: "#d978b4", belly: "#fff2fa", ear: "#ff8fbf", nose: "#ff5c8a", eye: "#2d6fe0", accent: "#ffd24a" },
-  { fur: "#ffd0e8", dark: "#e888c0", belly: "#fff", ear: "#ffb3d9", nose: "#ff5c8a", eye: "#3f8ef0", accent: "#fff4a8" },
-  { fur: "#c9b4ff", dark: "#7052bb", belly: "#f4eeff", ear: "#a88cff", nose: "#ff7aa8", eye: "#f0d060", accent: "#ffe27a" },
-  { fur: "#ffb3dc", dark: "#b8508f", belly: "#fff0f8", ear: "#ff7ac0", nose: "#ff3f7f", eye: "#7a4ae0", accent: "#4a2f8a" },
-];
-function michi(ctx,x,y,s,form,t){drawEvolutionActor(ctx,'cat',x,y,s,form,t);}
-
-export function drawEvoCine(ctx, w, h, t, fromForm = 1, toForm = 2) {
-  const K = h / 300, cx = w / 2, cy = h * 0.66, to = Math.max(1, Math.min(5, toForm | 0)), fi = to - 1;
-  const moon = to >= 3, eclipse = to >= 5;
-  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
-  ctx.fillStyle = eclipse ? "#140a26" : "#1a1238"; ctx.fillRect(0, 0, w, h);
-  // Estrellas fijas (deterministas).
-  ctx.fillStyle = "#fff2fb";
-  for (let i = 0; i < 24; i++) { const s = Math.sin(i * 91.7) * 43758.5; const r = s - Math.floor(s); ctx.globalAlpha = 0.35 + 0.4 * Math.abs(Math.sin(t * 2 + i)); ctx.beginPath(); ctx.arc((i * 137.5) % w, (r * h * 0.55), 1.3 * K, 0, TAU); ctx.fill(); }
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = "#2c2050"; ctx.beginPath(); ctx.ellipse(cx, cy + 4 * K, 90 * K, 14 * K, 0, 0, TAU); ctx.fill();
-  const hearts = (lit, y) => { for (let i = 0; i < 9; i++) { const x = cx + (i - 4) * 22 * K, on = i < lit; heart(ctx, x, y, (on ? 7.5 : 6) * K, on ? "#ff5c8a" : "#3a2c5a", on ? "#fff0f6" : "#5a4a7a"); } };
-  if (t < 1.6) { // CARGA: ovillos orbitan y enrollan hilo; 9 vidas se encienden una a una
-    const k = t / 1.6;
-    hearts(Math.min(9, Math.floor(k * 10)), h * 0.16);
-    for (let i = 0; i < 3; i++) {
-      const a = t * 3.2 + i * TAU / 3, r = (110 - 50 * k) * K, x = cx + Math.cos(a) * r, y = cy - 36 * K + Math.sin(a) * r * 0.45;
-      ctx.strokeStyle = YARN[i]; ctx.lineWidth = 2 * K; ctx.globalAlpha = 0.8;
-      ctx.beginPath(); for (let j = 0; j <= 16; j++) { const aa = a - j * 0.18 * (0.4 + k); const rr = r * (1 - j * 0.015); const px = cx + Math.cos(aa) * rr, py = cy - 36 * K + Math.sin(aa) * rr * 0.45; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke(); ctx.globalAlpha = 1;
-      if (Math.sin(a) < 0) yarn(ctx, x, y, 10 * K, YARN[i], a * 2);
-    }
-    michi(ctx, cx, cy, 1.9 * K * (1 + Math.sin(t * 28) * 0.012 * k), fromForm, t);
-    for (let i = 0; i < 3; i++) { const a = t * 3.2 + i * TAU / 3; if (Math.sin(a) >= 0) yarn(ctx, cx + Math.cos(a) * (110 - 50 * k) * K, cy - 36 * K + Math.sin(a) * (110 - 50 * k) * K * 0.45, 10 * K, YARN[i], a * 2); }
-  } else if (t < 2.9) { // TRANSFORMACIÓN: el hilo se desenrolla en espiral, flash, abanico de nueve colas, luna
-    const k = (t - 1.6) / 1.3, e = ease(cl(k / 0.7));
-    if (moon) { // luna detrás
-      const R = 70 * K * ease(cl(k * 1.5)); ctx.fillStyle = "#fff4c8"; ctx.beginPath(); ctx.arc(cx, cy - 70 * K, R, 0, TAU); ctx.fill();
-      if (eclipse) { ctx.fillStyle = "#140a26"; ctx.beginPath(); ctx.arc(cx + R * 0.35 * cl(k * 2), cy - 74 * K, R * 0.92, 0, TAU); ctx.fill(); }
-    }
-    ctx.lineWidth = 3 * K;
-    for (let i = 0; i < 3; i++) { ctx.strokeStyle = YARN[i]; ctx.globalAlpha = 1 - k * 0.7; ctx.beginPath(); for (let j = 0; j <= 40; j++) { const u = j / 40, a = u * 9 + i * 2.1 + t * 2, r = (12 + u * 170 * (0.3 + k)) * K; const px = cx + Math.cos(a) * r, py = cy - 40 * K + Math.sin(a) * r * 0.6; j ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.stroke(); }
-    ctx.globalAlpha = 1;
-    michi(ctx, cx, cy, (1.9 + 0.5 * e) * K, k < 0.5 ? fromForm : to, t);
-    if (k < 0.16) { ctx.globalAlpha = 1 - k / 0.16; ctx.fillStyle = "#fff6fb"; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1; }
-    hearts(9, h * 0.16);
-  } else { // PRESENTACIÓN
-    const k = cl((t - 2.9) / 0.5), bob = Math.sin(t * 4) * 3 * K;
-    if (moon) { ctx.fillStyle = "#fff4c8"; ctx.beginPath(); ctx.arc(cx, cy - 70 * K, 70 * K, 0, TAU); ctx.fill(); if (eclipse) { ctx.fillStyle = "#140a26"; ctx.beginPath(); ctx.arc(cx + 24 * K, cy - 74 * K, 64 * K, 0, TAU); ctx.fill(); ctx.strokeStyle = "#b78bff"; ctx.lineWidth = 3 * K; ctx.beginPath(); ctx.arc(cx, cy - 70 * K, 74 * K, 0, TAU); ctx.stroke(); } }
-    michi(ctx, cx, cy + bob, 2.4 * K, to, t);
-    for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t; heart(ctx, cx + Math.cos(a) * 120 * K, cy - 60 * K + Math.sin(a) * 50 * K, 5 * K, "#ff8ad4", "#fff0f6"); }
-    ctx.globalAlpha = k; ctx.textAlign = "center"; ctx.lineWidth = 6 * K; ctx.strokeStyle = "#3a1a4a";
-    ctx.font = `900 ${Math.round(30 * K)}px sans-serif`; ctx.strokeText("¡" + formName(to) + "!", cx, h * 0.14); ctx.fillStyle = "#ffe6f5"; ctx.fillText("¡" + formName(to) + "!", cx, h * 0.14);
-    ctx.font = `700 ${Math.round(14 * K)}px sans-serif`; ctx.lineWidth = 4 * K; ctx.strokeText("Forma " + fromForm + " → " + to, cx, h * 0.14 + 22 * K); ctx.fillStyle = "#c9b4ff"; ctx.fillText("Forma " + fromForm + " → " + to, cx, h * 0.14 + 22 * K);
-    ctx.globalAlpha = 1;
-  }
+function lunarRibbon(ctx,cx,cy,i,count,t,size,alpha){
+ const a=(i-(count-1)/2)*TAU/count*.94;
+ const sway=Math.sin(t*4+i*.88)*size*.09,reach=size*(.5+(i%3)*.08);
+ const tx=cx+Math.sin(a)*reach*1.5+sway,ty=cy+Math.cos(a)*reach*.77;
+ ctx.save();ctx.globalAlpha=clip(alpha);ctx.lineCap='round';
+ ctx.strokeStyle='#30254d';ctx.lineWidth=5*size/80;
+ ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx+Math.sin(a)*size*.5,cy-size*.38,
+  tx+Math.cos(a)*size*.18,ty-size*.32,tx,ty);ctx.stroke();
+ ctx.strokeStyle=i%2?'#bfeeff':'#f7c3ed';ctx.lineWidth=3.4*size/80;ctx.stroke();
+ diamond(ctx,tx,ty,size*.055,i%2?'#bfffff':'#ffe8c5');
+ ctx.restore();
+}
+export function drawEvoCine(ctx,w,h,t,fromForm=1,toForm=2){
+ const K=h/300,cx=w/2,cy=h*.73;
+ let gentle=false;
+ try{gentle=globalThis.localStorage?.getItem('ohana-gentle-motion')==='1'||
+  !!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;}catch{}
+ const beat=michicornioEvoBeat(t,fromForm,toForm,gentle);
+ const eclipse=beat.to===5,medusa=beat.to>=3,now=beat.time;
+ const fxTime=gentle?0:now;
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+ // Stage is in the same blue-violet moon palette as Michicornio and the room.
+ ctx.fillStyle=eclipse?'#0c1029':'#151c35';ctx.fillRect(0,0,w,h);
+ ctx.save();ctx.globalAlpha=.18;
+ for(let i=0;i<5;i++){const x=cx+(i-2)*71*K;
+  oval(ctx,x,cy-155*K+(i%2)*15*K,24*K,12*K,'#9b86d2');}
+ ctx.restore();
+ const mr=(32+beat.moon*61)*K;
+ ctx.save();ctx.globalAlpha=.45+.4*beat.moon;
+ oval(ctx,cx,cy-76*K,mr,mr,eclipse?'#d8c0ff':'#e7edff');
+ if(eclipse)oval(ctx,cx+mr*.32,cy-80*K,mr*.91,mr*.92,'#0c1029');
+ ctx.restore();
+ for(let i=0;i<27;i++){
+  const x=(i*137.5+23)%Math.max(1,w),y=(i*101.3+17)%(h*.68);
+  const twinkle=.3+.4*Math.abs(Math.sin(fxTime*2.8+i*.74));
+  ctx.save();ctx.globalAlpha=twinkle;diamond(ctx,x,y,(1.2+(i%3)*.5)*K,'#eae4ff');ctx.restore();
+ }
+ // Translucent ground ellipse anchors the actor's feet, not an imported sprite.
+ ctx.save();ctx.globalAlpha=.26;oval(ctx,cx,cy+5*K,95*K,12*K,'#8a6eb8');ctx.restore();
+ const rise=beat.reducedMotion?0:Math.sin(now*7)*2.3*K;
+ const enterScale=1.78+beat.arrival*.56;
+ if(beat.act==='listen'){
+  drawEvolutionActor(ctx,'cat',cx,cy+rise,1.83*K,beat.from,now,{state:'idle',reducedMotion:gentle});
+  orbit(ctx,cx,cy-65*K,51*K,fxTime,.13+beat.progress*.18,3,'#c7b6e9');
+ }else if(beat.act==='gather'){
+  orbit(ctx,cx,cy-74*K,(58-beat.progress*12)*K,fxTime,.35+beat.progress*.5,7,'#e3c4ff');
+  drawEvolutionActor(ctx,'cat',cx,cy+rise,1.82*K,beat.from,now,
+   {state:'cast',cast:.12+beat.progress*.8,reducedMotion:gentle});
+  for(let i=0;i<3;i++)lunarRibbon(ctx,cx,cy-90*K,i,3,fxTime,66*K,beat.charge*.58);
+ }else if(beat.act==='morph'){
+  const oldAlpha=clip((1-beat.progress)*1.4),newAlpha=clip(beat.progress*1.5);
+  ctx.save();ctx.globalAlpha=oldAlpha;
+  drawEvolutionActor(ctx,'cat',cx-20*K*beat.progress,cy+rise,1.8*K*(1-beat.progress*.12),beat.from,now,
+   {state:'cast',cast:.85,reducedMotion:gentle});ctx.restore();
+  ctx.save();ctx.globalAlpha=newAlpha;
+  drawEvolutionActor(ctx,'cat',cx+14*K*(1-beat.progress),cy+rise,(1.84+beat.progress*.54)*K,beat.to,now,
+   {state:'jump',reducedMotion:gentle});ctx.restore();
+  const ribbons=medusa?beat.tendrils:4;
+  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-82*K,i,ribbons,fxTime,80*K,beat.progress*.5);
+  orbit(ctx,cx,cy-77*K,65*K,fxTime,.47,9,'#f7c9ff');
+ }else{
+  // The form visibly celebrates. The previous version drew a STATIC reduced-motion idle pose here.
+  drawEvolutionActor(ctx,'cat',cx,cy+rise,enterScale*K,beat.to,now,{state:'victory',reducedMotion:gentle});
+  const ribbons=medusa?beat.tendrils:5;
+  for(let i=0;i<ribbons;i++)lunarRibbon(ctx,cx,cy-85*K,i,ribbons,fxTime,100*K,.12+.24*Math.sin(beat.progress*Math.PI));
+  orbit(ctx,cx,cy-84*K,87*K,fxTime,.55*(1-beat.progress*.4),9,'#efc9ff');
+ }
+ // Cinematic name remains readable even at narrow mobile resolution.
+ if(now>=2.75){
+  const show=smooth((now-2.75)/.38),name=FORM_NAMES[beat.to-1];
+  ctx.save();ctx.globalAlpha=show;ctx.textAlign='center';
+  ctx.font=`900 ${Math.max(15,Math.round(22*K))}px sans-serif`;
+  ctx.lineWidth=5*K;ctx.strokeStyle='#13122e';ctx.strokeText(name,cx,h*.14);
+  ctx.fillStyle='#f7edff';ctx.fillText(name,cx,h*.14);
+  ctx.font=`700 ${Math.max(10,Math.round(12*K))}px sans-serif`;
+  ctx.strokeText('Forma '+beat.from+' → '+beat.to,cx,h*.14+21*K);
+  ctx.fillStyle='#e6c7ff';ctx.fillText('Forma '+beat.from+' → '+beat.to,cx,h*.14+21*K);
   ctx.restore();
+ }
+ // Visible progress provides continuity through the five possible transitions.
+ for(let i=0;i<5;i++){
+  const x=cx+(i-2)*24*K,y=h*.90;
+  diamond(ctx,x,y,5*K,i<beat.to?'#e7ceff':'#54486a');
+ }
+ ctx.restore();
 }
