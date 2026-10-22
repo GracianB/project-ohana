@@ -253,6 +253,111 @@ export function drawWorld1(ctx, g, cam, t) {
   ctx.restore();
 }
 
+// V473: the five lunar jellyfish are cat descendants, not generic sleeping
+// jellyfish. Every dome has rooted feline ears, a moon-horn, whiskers and a
+// face; their breathing bell and nine-partner lineage match Michicornio F2/F4.
+// Draw in world/viewport pixels so this same routine works in normal gameplay
+// and in the deterministic real-browser art audit.
+const LUNAR_JELLY_COLORS = Object.freeze([
+  { bell: "#c8aafa", rim: "#f5d9ff", ear: "#ffbfdc", ink: "#47315f", glow: "#ffeead" },
+  { bell: "#a5cbff", rim: "#e3f5ff", ear: "#f7bddd", ink: "#314e71", glow: "#ffe6a0" },
+  { bell: "#eeabe7", rim: "#fff0fc", ear: "#ffcbdb", ink: "#673759", glow: "#ffe7af" },
+  { bell: "#baa5f4", rim: "#e9e0ff", ear: "#ffc3e3", ink: "#4a3c73", glow: "#fff0c2" },
+  { bell: "#acdce2", rim: "#eaffed", ear: "#ffbcd8", ink: "#355c68", glow: "#ffe9b5" }
+]);
+export function drawWorld1MoonJelly(ctx, s, t = 0, reduceMotion = false) {
+  const id = Math.max(0, Math.trunc(Number(s.id) || 0)), done = !!s.done;
+  const pal = LUNAR_JELLY_COLORS[id % LUNAR_JELLY_COLORS.length];
+  const time = reduceMotion ? 0 : (Number.isFinite(t) ? t : 0);
+  const pulse = reduceMotion ? 0 : Math.sin(time * .075 + id * 1.9);
+  const bell = 1 + pulse * .065;
+  const float = reduceMotion ? 0 : Math.sin(time * .048 + id * 1.35) * 5;
+  const x = Number(s.x) || 0, y = (Number(s.y) || 0) + float;
+  const ink = pal.ink, TAU = Math.PI * 2;
+  const line = (color, width) => { ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round"; ctx.lineJoin = "round"; };
+  ctx.save();
+
+  // Tentacles originate from the same five sockets on the bell: elastic
+  // follow-through, stronger when the jelly wakes, still in reduced motion.
+  for (let k = -2; k <= 2; k++) {
+    const rootX = x + k * 12 * bell;
+    const wave = reduceMotion ? 0 : Math.sin(time * .095 + k * 1.4 + id) * (done ? 8 : 5);
+    const reach = 38 + (k % 2 === 0 ? 6 : 0) + (done ? 4 : 0);
+    line(k === 0 ? pal.glow : pal.rim, k === 0 ? 5 : 3.7);
+    ctx.beginPath();ctx.moveTo(rootX, y - 2);
+    ctx.bezierCurveTo(rootX + wave * .65, y + 14, rootX + k * 4 - wave, y + reach * .7, rootX + wave * 1.3 + k * 2, y + reach);
+    ctx.stroke();
+    ctx.fillStyle = done ? pal.glow : pal.ear;
+    ctx.beginPath();ctx.arc(rootX + wave * 1.3 + k * 2, y + reach, 2.5, 0, TAU);ctx.fill();
+  }
+
+  // Ears are anatomically connected to the dome, with the cat's pink inner
+  // triangle; unlike a decorative floating symbol, they travel with the bell.
+  for (const side of [-1, 1]) {
+    const flick = reduceMotion ? 0 : Math.sin(time * .11 + id + side) * 2.5;
+    ctx.beginPath();ctx.moveTo(x + side * 12, y - 27);
+    ctx.quadraticCurveTo(x + side * 24, y - 52, x + side * 29, y - 58 + flick);
+    ctx.quadraticCurveTo(x + side * 39, y - 32, x + side * 30, y - 15);
+    ctx.closePath();ctx.fillStyle = pal.bell;ctx.fill();line(ink, 2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x + side * 20, y - 33);
+    ctx.lineTo(x + side * 29, y - 49 + flick);ctx.lineTo(x + side * 29, y - 24);
+    ctx.closePath();ctx.fillStyle = pal.ear;ctx.fill();
+  }
+
+  // Moon-jelly bell: a shallow transparent mantle with an illuminated edge.
+  const half = 37 * bell;
+  ctx.globalAlpha = done ? .98 : .83;
+  ctx.beginPath();ctx.moveTo(x - half, y);
+  ctx.bezierCurveTo(x - half - 4, y - 22, x - 22, y - 45, x, y - 46);
+  ctx.bezierCurveTo(x + 22, y - 45, x + half + 4, y - 22, x + half, y);
+  ctx.quadraticCurveTo(x, y + 6 + pulse * 1.7, x - half, y);
+  ctx.closePath();ctx.fillStyle = pal.bell;ctx.fill();line(done ? pal.glow : pal.rim, 3);ctx.stroke();
+  ctx.globalAlpha = .35;
+  ctx.beginPath();ctx.ellipse(x - 10, y - 28, 12, 4.5, -.3, 0, TAU);
+  ctx.fillStyle = "#fff";ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // One real horn that grows with the same lunar ancestry as F0 → F4.
+  ctx.beginPath();ctx.moveTo(x - 5, y - 41);ctx.lineTo(x, y - 62);
+  ctx.lineTo(x + 5, y - 41);ctx.closePath();ctx.fillStyle = pal.glow;
+  ctx.fill();line(ink, 1.6);ctx.stroke();
+
+  // Awake after a successful aerial touch; sleepy before it.
+  const blinking = !reduceMotion && done && ((time + id * 39) % 190 < 7);
+  for (const side of [-1, 1]) {
+    const eyeX = x + side * 14, eyeY = y - 19;
+    if (!done || blinking) {
+      line(ink, 2.5);ctx.beginPath();ctx.moveTo(eyeX - 5, eyeY);
+      ctx.quadraticCurveTo(eyeX, eyeY + (done ? 2 : 4), eyeX + 5, eyeY);ctx.stroke();
+    } else {
+      ctx.fillStyle = "#fff";ctx.beginPath();ctx.ellipse(eyeX, eyeY, 5.3, 6.2, 0, 0, TAU);ctx.fill();
+      ctx.fillStyle = ink;ctx.beginPath();ctx.ellipse(eyeX + side * .8, eyeY + .5, 2.6, 4.2, 0, 0, TAU);ctx.fill();
+      ctx.fillStyle = "#fff";ctx.beginPath();ctx.arc(eyeX - 1, eyeY - 2, 1.5, 0, TAU);ctx.fill();
+    }
+    // Real whiskers and cheek blush, not a second face drawn on top.
+    ctx.fillStyle = pal.ear;ctx.beginPath();ctx.ellipse(x + side * 25, y - 10, 4.2, 2.7, 0, 0, TAU);ctx.fill();
+    line(ink, 1.1);
+    for (const dy of [0, 5]) {
+      ctx.beginPath();ctx.moveTo(x + side * 25, y - 10 + dy);
+      ctx.lineTo(x + side * 40, y - 14 + dy);ctx.stroke();
+    }
+  }
+  ctx.fillStyle = pal.ear;ctx.beginPath();ctx.moveTo(x - 3.3, y - 11);
+  ctx.lineTo(x + 3.3, y - 11);ctx.lineTo(x, y - 8);ctx.closePath();ctx.fill();
+  line(ink, 1.6);ctx.beginPath();ctx.moveTo(x, y - 8);
+  ctx.quadraticCurveTo(x - 5, y - (done ? 1 : 4), x - 8, y - 6);
+  ctx.moveTo(x, y - 8);ctx.quadraticCurveTo(x + 5, y - (done ? 1 : 4), x + 8, y - 6);ctx.stroke();
+
+  // Tiny stars show the awakened objective without an obscuring text label.
+  if (done) for (const side of [-1, 1]) {
+    const a = reduceMotion ? 0 : Math.sin(time * .07 + side + id) * 3;
+    const sx = x + side * 49, sy = y - 35 + a;
+    line(pal.glow, 2.1);ctx.beginPath();ctx.moveTo(sx - 4, sy);
+    ctx.lineTo(sx + 4, sy);ctx.moveTo(sx, sy - 5);ctx.lineTo(sx, sy + 5);ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawStation(ctx, g, w, s, cam, t, reduce, col) {
   const x = s.x - cam.x, y = s.y - cam.y, done = s.done, pulse = reduce ? 0 : Math.sin(t * .08 + s.id) * 3;
   ctx.lineWidth = 3; ctx.strokeStyle = "#fff6e0";
@@ -275,11 +380,8 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if (done && !reduce) { ctx.strokeStyle = "#fff8c4"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y - 146); for (let k = 1; k < 5; k++) ctx.lineTo(x + ((k * 37 + t) % 20) - 10, y - 146 - k * 16); ctx.stroke(); }
       ctx.fillStyle = "#fff"; ctx.font = "700 13px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(String(s.id + 1), x, y - 160); break; }
     case "jelly": {
-      const yy = y + pulse * 2; ctx.globalAlpha = done ? .95 : .55;
-      ctx.fillStyle = done ? "#e7d4ff" : "#8d7bb0"; ctx.beginPath(); ctx.arc(x, yy, 26, Math.PI, 0); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = done ? "#ceb2ff" : "#6e6290"; ctx.lineWidth = 2;
-      for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x + k * 9, yy); ctx.quadraticCurveTo(x + k * 9 + (reduce ? 0 : Math.sin(t * .07 + k) * 6), yy + 22, x + k * 8, yy + 40); ctx.stroke(); }
-      ctx.globalAlpha = 1; ctx.fillStyle = "#2a2140"; ctx.font = "700 12px sans-serif"; ctx.textAlign = "center"; ctx.fillText(done ? "◡ ◡" : "– –", x, yy - 8); break; }
+      drawWorld1MoonJelly(ctx, { x, y, id: s.id, done }, t, reduce);
+      break; }
     case "prism": {
       ctx.fillStyle = done ? "#eccbff" : "#6c5d86"; ctx.beginPath(); ctx.moveTo(x, y - 120); ctx.lineTo(x + 34, y - 20); ctx.lineTo(x - 34, y - 20); ctx.closePath(); ctx.fill(); ctx.stroke();
       if (done) { const cols = ["#ff8fb1", "#ffe27a", "#8cecff", "#b8ef6b"]; cols.forEach((c, k) => { ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + 10, y - 70); ctx.lineTo(x + 140, y - 110 + k * 14); ctx.stroke(); }); }

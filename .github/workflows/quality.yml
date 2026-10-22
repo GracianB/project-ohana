@@ -43,17 +43,28 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Install Chromium and Firefox
-        run: npx playwright install --with-deps chromium firefox
-
+      # Run fast checks first: bad JavaScript must not wait for apt mirrors.
       - name: Unit tests
         run: npm test
+
+      # All normal browser/visual cases use Chromium. Firefox is only needed
+      # for explicitly requested multiplayer runs, not every PR or Pages build.
+      - name: Install browser dependencies
+        run: |
+          if [ "${{ inputs.run_multiplayer }}" = "true" ]; then
+            npx playwright install --with-deps chromium firefox
+          else
+            npx playwright install --with-deps chromium
+          fi
 
       - name: V457 early optical size regression
         run: node tests/browser/character-size.mjs
 
       - name: V458 Michicornio art, custom foes, room and mobile
         run: node tests/browser/v458-michicornio.mjs
+
+      - name: V473 five feline moon-jellies · idle, wake, unique palette and reduced motion
+        run: node tests/browser/v473-lunar-jellies.mjs
 
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs
