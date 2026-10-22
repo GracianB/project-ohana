@@ -109,7 +109,7 @@ chispin: [
 "La nube reconoce a su compañero: Chispín ya sabe cuidar de una tempestad.",
 ],
 cat: [
-"Michi descubre que hasta su sombra quiere jugar.",
+"Le brotan alas de luna: Michi flota, gira y deja polvo de estrellas.",
 "Aprende a saltar entre reflejos de luna sin tocar el suelo.",
 "El eclipse responde a sus zarpas: nueve huellas, ninguna igual.",
 "Nueve vidas, un solo guardián. Y todavía exige caricias.",

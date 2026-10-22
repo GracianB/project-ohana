@@ -1,3 +1,22 @@
+# OHANA V462 · Michicornio: Hada Felina, patas y colas articuladas, boca del gato oscuro
+
+Versión **V462** (`ohana-462`), rama local `michi-v462` sobre `main` con V461. **No publicada**: pendiente de aprobación; requiere CI, quality y GitHub Pages verdes sobre el mismo commit de `main`. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.
+
+## Trabajos implementados
+- `characters/michi-anatomy.js` (nuevo): kit de anatomía felina sin gradientes ni `Math.random`. Patas de dos huesos con IK (`legJoint`/`drawCatLeg`: muslo, corvejón, manopla con dedos, almohadillas rosas al levantar, garras opcionales), cola afilada con inercia (`tailPoints`/`drawCatTail`: raíz fija, onda que llega tarde a la punta, longitud constante, congelada en movimiento reducido), alas de hada (`drawFairyWing`) y boca de gato (`drawCatMouth`: nariz con brillo, labios ω, boca abierta con lengua y colmillos).
+- F1 rediseñada de "Lince Lunar" a **Hada Felina**: flota con sombra en el suelo, cuatro alas translúcidas que aletean (más rápido al saltar/planear, abiertas al conjurar), antenas con orbes, orejas con penacho, corona de flores con el cuerno lunar, cuello de pétalos, cola-varita con estrella y estela de polvo de estrellas, patas traseras colgantes con almohadillas, piruetas al celebrar y en el gesto ocioso, círculo rúnico al conjurar, zarpazo con ráfaga al atacar. Las alas y el polvo usan la paleta del genoma de sueño (aleatoria por partida); el pelaje es canónico.
+- F0: cola en media luna con inercia, patas traseras y brazos de dos huesos (almohadillas al dar el paso, garra al atacar), boca expresiva (abre al atacar/celebrar/daño, sonrisa feliz).
+- F3 Dragón Astral (el gato oscuro): ahora tiene boca real (antes no tenía): ruge con colmillos y lengua al atacar, abre al conjurar y celebrar; patas digitígradas con garras movidas por el rig de marcha.
+- F4: patas de dos huesos y boca expresiva.
+- Hada Felina: tres luciérnagas-hada sembradas por el genoma orbitan el cuerpo (se agrupan en la zarpa al conjurar, se dispersan al atacar).
+- F3 Dragón Astral (retrato del panel): los "bigotes" dorados de V461 eran cuerdas planas de 2 px que cruzaban la cara; ahora son barbillones afilados que nacen en las mejillas y caen hacia fuera, sin cruzar ojos ni boca. Eliminadas las cinco cintas de medusa del vientre que parecían patas-tentáculo; el linaje medusa queda en la aleta dorsal y en un penacho de tres frondas con bulbo luminoso en la punta de la cola.
+- **Kilo · brazos**: en reposo las manos quedaban al ~73 % del alcance y el codo IK se doblaba en un gancho en "C" sobre el vestido; ahora cuelgan al ~95 % y algo separadas del cuerpo (mano delantera delante del vestido, trasera asomando detrás). En el retrato del panel (`kiloPerformance` "relic") la mano que rasguea flotaba en x=19 fuera del ukelele: ahora rasguea sobre la boca del ukelele con el codo hacia fuera, y la mano del mástil se adelanta. El ukelele a la espalda cuelga de una correa visible (`kiloUkeStrap`) en vez de flotar como un palo.
+- Pizza no se toca en esta rama (lo lleva otro trabajo).
+- Mensaje de evolución 0→1 y nombres en roster, previews y tests actualizados a "Hada Felina".
+- Tests nuevos: `tests/michicornio-v462.test.js` (+ filamentos del Dragón Astral, luciérnagas sembradas) y `tests/kilo-arms-v462.test.js` (codo sin gancho en las 5 formas, brazos finitos en todos los estados, pose del panel con rasgueo sobre el ukelele, correa). El test de brazos falla con el código de V461.
+
+---
+
 # OHANA V461 · Michicornio: medusa de luna viva, sueño aleatorio y metamorfosis real en partida
 
 Versión **V461** (`ohana-461`), rama local `michi-v461` sobre la PR #394 (V460). **No publicada**: requiere CI, quality y GitHub Pages verdes sobre el mismo commit de `main`. Diez personajes, cinco formas, diez salas canónicas; multijugador remoto en pausa.
