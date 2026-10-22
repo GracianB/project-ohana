@@ -909,7 +909,12 @@ try {
 document.body.classList.add("playing");
 document.getElementById("char-select")?.classList.add("hidden");
 renderAbilityBar();
-if (!loadRoom(roomId)) loadRoom(game.personalAdventureSolo ? "w1-kilo" : "hub");
+// E2E-only startup trace isolates routing bugs before the walking test.
+if(e2eEnabled) game._e2eStartTrace={requested:roomId,solo:!!game.personalAdventureSolo,legacy:!!game._e2eLegacyStart,available:!!ROOMS[roomId],world1:isWorld1Room(roomId),world2Locked:world2Locked(roomId,{solo:!!game.personalAdventureSolo}),needEvo:ROOMS[roomId]?.needEvo||null};
+const started=loadRoom(roomId);
+if(e2eEnabled) game._e2eStartTrace.primaryAccepted=started;
+if(!started) { const fallback=game.personalAdventureSolo ? "w1-kilo" : "hub"; const secondary=loadRoom(fallback);if(e2eEnabled)game._e2eStartTrace.fallback={room:fallback,accepted:secondary}; }
+if(e2eEnabled)game._e2eStartTrace.actual=game.roomId;
 if (!resume && game.roomDef?.world1 && !game.world1Seals.length) playWorld1Cine(game, "intro");
 if(game._resumeCheckpoint){const c=checkpointFor(game.roomDef,game.checkpoints?.[game.roomId]);if(c){game.player.x=c.x-game.player.w/2;game.player.y=c.y-game.player.h;}game._resumeCheckpoint=false;}
 if (game._magicSnap) { Magic.restore(game._magicSnap); game._magicSnap = null; }
@@ -3882,6 +3887,7 @@ state() {
     soloMode: !!game.personalAdventureSolo,
     legacyRoomMode: !!game._e2eLegacyStart,
     expectedSoloStart: p ? world1StartRoom(p.id, game.world1Seals) : null,
+    startTrace:game._e2eStartTrace||null,
     worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
