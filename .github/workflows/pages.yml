@@ -13,11 +13,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    uses: ./.github/workflows/quality.yml
+  # PRs are tested with the full Chromium, visual and release suite in
+  # quality.yml. Deploying the *same merged code* must not re-run hundreds of
+  # screenshots: the duplicate run used to time out and prevent publication.
+  # Revalidate committed code, offline SHA manifest and critical invariants.
+  verify-release:
+    name: Release · unit tests and offline integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run unit and progression tests
+        run: npm test
+      - name: Validate release assets and content-addressed offline cache
+        run: npm run release:check
 
   deploy:
-    needs: quality
+    needs: verify-release
     timeout-minutes: 15
     permissions:
       contents: read
