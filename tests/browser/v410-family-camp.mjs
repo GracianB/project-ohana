@@ -7,8 +7,25 @@ for(const def of ROSTER){console.log('Camp audit: '+def.id);await p.locator(`.ch
  await p.locator('#camp-film').click();assert.equal(await p.locator('#camp-film-stop').isVisible(),true);const line=await p.locator('#camp-line').textContent();await p.waitForTimeout(120);assert.equal(await p.locator('#camp-line').textContent(),line);await p.locator('#camp-film-stop').click();
 }
 assert.equal(await p.evaluate(()=>localStorage.getItem('ohana')),saved,'camp exploration must not change campaign save');
-await p.locator('.char-card[data-id="kilo"]').click();await p.locator('#camp-canvas').scrollIntoViewIfNeeded();const r=await p.locator('#camp-canvas').boundingBox();await p.mouse.click(r.x+1210*r.width/1400,r.y+300*r.width/1400);assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'dino');
-await p.locator('.char-card[data-id="kilo"]').click();await p.locator('#camp-canvas').focus();await p.waitForTimeout(4500);await p.keyboard.down('ArrowRight');await p.waitForTimeout(1800);await p.keyboard.up('ArrowRight');await p.waitForTimeout(150);assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'stitcho','walking the firefly should select the other hero on the same island');
+// V468/V470: the camp now displays 11 World 1 portal cards, not five paired islands.
+// Exercise a real Canvas hit on Dino's card (row 2, column 1), using the
+// same deterministic six-column responsive layout as world1-select.js.
+assert.equal(await p.locator('#family-camp').getAttribute('data-world'),'1');
+await p.locator('.char-card[data-id="kilo"]').click();
+await p.locator('#camp-canvas').scrollIntoViewIfNeeded();
+const r=await p.locator('#camp-canvas').boundingBox();
+const pad=Math.max(10,r.width*.012),top=r.height*.2;
+const cw=Math.max(60,(r.width-pad*7)/6),ch=Math.max(90,(r.height-top-r.height*.16-pad)/2);
+await p.mouse.click(r.x+pad+(cw+pad)/2+cw/2,r.y+top+ch+pad+ch/2);
+assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'dino','Canvas portal must select Dino');
+// Selecting Kilo from the HTML cards must reset keyboard navigation to Kilo,
+// not continue from the previous Canvas index (Dino).
+await p.locator('.char-card[data-id="kilo"]').click();
+await p.locator('#camp-canvas').focus();
+await p.keyboard.press('ArrowRight');
+assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'stitcho','ArrowRight from Kilo must focus Stitcho');
+await p.keyboard.press('Enter');
+assert.match(await p.locator('#camp-line').textContent(),/sello de Kilo/i,'locked World 1 room must explain which seal unlocks it');
 await fs.mkdir('test-results/visual',{recursive:true});
 for(const [name,width,height] of [['desktop',1440,1050],['mobile',390,844],['landscape',844,390]]){await p.setViewportSize({width,height});await p.locator('.char-card[data-id="cuerno"]').click();await p.waitForTimeout(600);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');
  const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
