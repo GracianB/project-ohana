@@ -1,3 +1,13 @@
+# OHANA V466 · Cuerno rediseñado: unicornio equino del amanecer prisma
+
+Versión **V466** (`ohana-466`) sobre V465 (`main` 2972cb2).
+
+- **Distinto de Michicornio** (`characters/art/cuerno-v373.js`): Michi es la gata lila del sueño; Cuerno pasa a ser un unicornio claramente EQUINO y cálido: pelaje perla/crema, tinta azul petróleo, cuerno y cascos dorados, crines de amanecer y arcoíris, ojos turquesa (dorados en Eclipse), hocico melocotón, cernejas emplumadas en las patas y perilla de unicornio que se balancea. Alas y manto en turquesa/oro/melocotón; Eclipse en azul petróleo nocturno con corona dorada.
+- **Una identidad por forma**: Semilla conserva su brote y crin de primavera; Destello estrena lucero blanco en la frente y crin de amanecer; Kirín Aurora, escamas turquesa-oro en el flanco; Serafín Aurora, aureola dorada flotante; Cuerno Eclipse, sol negro con corona dorada tras la raíz del cuerno.
+- **Personalidad y animación**: se encabrita en la victoria (formas 1-4) pateando con las manos, sacude la cabeza y da un pisotón en reposo, tiembla al recibir un golpe y se estira en cada salto.
+- **FX**: el cuerno abre un abanico prisma de siete colores con estallido de luz en la punta al atacar; el golpe básico es una lanza prisma (estela blanca dentro de un abanico arcoíris); acento de combate dorado en vez de lila.
+- **Cinemática V463 pulida**: la noche de sueño (ahora azul petróleo) se calienta hacia un amanecer prisma conforme crece la metamorfosis, con estrellas fugaces, un pilar de luz que cae sobre Cuerno y un prisma de cristal más claro.
+
 # OHANA V465 · Stitcho rediseñado: frío, anguloso y travieso
 
 Versión **V465** (`ohana-465`) sobre V464 (`main` cc38060).
