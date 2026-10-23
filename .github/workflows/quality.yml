@@ -124,6 +124,9 @@ jobs:
       - name: V492 Quimera second phase · genuine melee combat threshold
         run: node tests/browser/v492-quimera-physical-phase-two.mjs
 
+      - name: V493 all authentic seals, four Quimera phases and genuine World 1 win
+        run: node tests/browser/v493-full-physical-quimera-victory.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
