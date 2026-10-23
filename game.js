@@ -4064,6 +4064,9 @@ setBossHp(value) {
   if (boss) boss.hp = Math.max(1, Math.min(boss.max, Number(value) || boss.max));
   return this.state();
 },
+// Invoke the real production retry in browser integration tests. This
+// never grants a station or overrides the room checkpoint.
+respawn() { respawn(); return this.state(); },
 die(reason = "hurt") {
   const p = game.player;
   if (!p) return this.state();
