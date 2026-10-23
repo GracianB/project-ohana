@@ -831,9 +831,16 @@ try {
       // Stay on the actual oil vent. The game's own gravity/launch decides success.
       if(distance>46) await key('d',Math.max(1,Math.min(14,Math.floor((distance-46)/5))));
       else if(distance< -46) await key('a',Math.max(1,Math.min(10,Math.floor((-distance-46)/5))));
-      else await step(8);
+      else if(ss.player.grounded && ss.player.y < geyser.y-110) {
+        // The upper ledge can trap the pilot above the vent. A real held W
+        // jumps off the ledge to meet the floating potato; never change y/vy.
+        await key('w',22);
+      } else if(ss.player.grounded && n%5===0) {
+        // An ordinary jump can clear short ledges on the way to the vent.
+        await key('w',14);
+      } else await step(8);
       if(n%35===0) journal.push({type:'frita-geyser',index,x:Math.round(center),
-        y:Math.round(ss.player.y),vy:ss.player.vy,done:ss.world1?.done});
+        y:Math.round(ss.player.y),vy:ss.player.vy,grounded:ss.player.grounded,done:ss.world1?.done});
     }
     assert.ok(collected,'Frita potato '+index+' not collected physically: '+
       JSON.stringify({last:lastSnapshot?.player,journal:journal.slice(-18)}));
