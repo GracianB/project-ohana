@@ -141,6 +141,16 @@ function bars(ctx, W, H, k) { const h = H * 0.11 * clamp(k, 0, 1); ctx.fillStyle
 
 // Keep World 1 boss health above the bottom ability bar and away from the
 // minimap on normal desktop viewports. Fight prompts remain at screen top.
+// Canvas text is invisible to assistive technology. Announce coarse HP bands
+// (10% increments) rather than every hit, so screen readers are not flooded.
+export function world1BossAccessibleText(e) {
+  if(!e?._fusionBoss) return "";
+  const phase = Math.max(1, Math.min(4, Math.floor(num(e.phase,1))));
+  const health = Math.max(0, Math.min(100,
+    Math.ceil(clamp(num(e.hp) / Math.max(1, num(e.max,1)),0,1)*10)*10));
+  return `Quimera Ohana. Fase ${phase} de 4. Vida aproximada: ${health} por ciento.`;
+}
+
 export function world1BossHealthLayout(W, H) {
   W = Math.max(320, num(W, 1280));
   H = Math.max(400, num(H, 720));
