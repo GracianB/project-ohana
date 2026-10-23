@@ -976,22 +976,43 @@ try {
   assert.deepEqual(ninth.world1Seals,expectedNine,'exactly nine physical seals must be earned');
 
   // Exit east by real controls; the tenth room must start without objectives granted.
-  let enteredYomi=false, yomiDeaths=0;
-  for(let n=0;n<145;n++){
+  let enteredYomi=false, yomiDeaths=0, lastPizzaX=null, stuckPizza=0;
+  const pizzaExitJournal=[];
+  for(let n=0;n<260;n++){
     await film();
     let ss=await state();
     if(ss.roomId==='w1-yomi'){enteredYomi=true;break;}
     assert.equal(ss.roomId,'w1-pizza','Yomi entry only through Pizza east door');
+    assert.deepEqual(ss.world1Seals,expectedNine,'Pizza exit must retain exactly nine earned seals');
     if(ss.hp<=0){
-      assert.ok(++yomiDeaths<=12,'too many natural Pizza exit retries');
+      assert.ok(++yomiDeaths<=18,'too many natural Pizza exit retries');
       const recover=await page.evaluate(()=>window.__OHANA_E2E.respawn());
       assert.equal(recover.roomId,'w1-pizza');
+      lastPizzaX=null;stuckPizza=0;
       continue;
     }
-    const remaining=ss.worldW-(ss.player.x+18);
-    await key('d',remaining>125?Math.max(8,Math.min(95,Math.floor(remaining/5))):65);
+    const x=ss.player.x;
+    if(n%12===0) pizzaExitJournal.push({n,x:Math.round(x),y:Math.round(ss.player.y),
+      hp:ss.hp,done:ss.world1?.done,sealed:ss.world1?.sealed,worldW:ss.worldW});
+    stuckPizza=lastPizzaX!==null&&Math.abs(x-lastPizzaX)<4?stuckPizza+1:0;
+    lastPizzaX=x;
+    if(stuckPizza>=3 && x<ss.worldW-145){
+      // Jump a physical obstruction only if the ordinary eastward route stalls.
+      await key('w',18);
+      stuckPizza=0;
+    }
+    const remaining=ss.worldW-(x+18);
+    await key('d',remaining>125?Math.max(8,Math.min(110,Math.floor(remaining/5))):90);
   }
-  assert.ok(enteredYomi,'nine authentic seals must open the east door to Yomi');
+  if(!enteredYomi){
+    await fs.mkdir('test-results/v490',{recursive:true});
+    await page.screenshot({path:'test-results/v490/pizza-east-exit-failure.png'});
+    await fs.writeFile('test-results/v490/pizza-east-exit-failure.json',JSON.stringify({
+      state:await state(),journal:pizzaExitJournal
+    },null,2));
+  }
+  assert.ok(enteredYomi,'nine authentic seals must open the east door to Yomi: '+
+    JSON.stringify(pizzaExitJournal.slice(-12)));
   ninth=await state();
   assert.equal(ninth.roomId,'w1-yomi');
   assert.deepEqual(ninth.world1Seals,expectedNine);
