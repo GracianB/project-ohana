@@ -103,6 +103,9 @@ jobs:
       - name: V485 seventh real seal · Dino three hard landings and Frita gate
         run: node tests/browser/v485-seven-physical-seals.mjs
 
+      - name: V486 first Frita potato · genuine geyser physics after seven earned seals
+        run: node tests/browser/v486-frita-first-physical-geyser.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
