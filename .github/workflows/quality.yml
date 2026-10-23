@@ -76,6 +76,9 @@ jobs:
       - name: V475 World 1 authentic keyboard start and Kilo first flower
         run: node tests/browser/v475-world1-natural-walk.mjs
 
+      - name: V477 Kilo complete natural campaign gate · four physical flowers and Stitcho
+        run: node tests/browser/v477-kilo-physical-route.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
