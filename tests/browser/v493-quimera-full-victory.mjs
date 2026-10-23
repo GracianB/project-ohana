@@ -15,7 +15,7 @@ let browser;
 try {
   browser = await chromium.launch();
   const page = await browser.newPage({viewport: {width: 1440, height: 900}});
-  const faults = [], journal = [];
+  const faults = [], journal = [], observedWorld1Films = new Set();
   page.on('pageerror', e => faults.push(e.message));
   await page.goto('http://127.0.0.1:' + server.address().port + '/?e2e=1', {waitUntil: 'domcontentloaded'});
   await page.waitForFunction(() => Boolean(window.__OHANA_E2E));
@@ -49,6 +49,7 @@ try {
         continue;
       }
       const s=await state();
+      if(s.world1Cine) observedWorld1Films.add(s.world1Cine);
       if(!s.world1Cine) return s;
       await step(500);
     }
@@ -1359,7 +1360,7 @@ try {
   // defeat and reunion cinematics deliver the accessible results card.
   // The test advances genuine game frames and clicks the visible UI control:
   // no synthetic ohana-win dispatch and no cinematic-state injection.
-  const productionFilms = new Set();
+  const productionFilms = new Set(observedWorld1Films);
   for(let movieFrame=0; movieFrame<25; movieFrame++){
     const still=await state();
     if(still.world1Cine) productionFilms.add(still.world1Cine);
