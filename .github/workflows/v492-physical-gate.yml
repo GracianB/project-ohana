@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Check phase-two test syntax before browser setup
+        run: node --check tests/browser/v492-quimera-phase-two.mjs
       - run: npm ci --no-audit --no-fund
       - name: Install Chromium
         run: npx playwright install chromium
