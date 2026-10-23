@@ -4,7 +4,7 @@ export function bindDialogs({ document: doc, onChange = () => {}, onEscape = () 
   let returnFocus = null;
   const originalInert = new Map();
   const focusable = (layer) => [...layer.querySelectorAll("button, a[href], [tabindex], input, select, textarea")]
-    .filter((el) => !el.disabled && el.tabIndex >= 0 && el.getClientRects().length > 0);
+    .filter((el) => !el.disabled && el.tabIndex >= 0 && !el.closest?.("[inert], [hidden]") && doc.defaultView?.getComputedStyle?.(el)?.visibility !== "hidden" && el.getClientRects().length > 0);
   function sync() {
     const next = layers.findLast((layer) => layer.classList.contains(layer.dataset.dialog));
     for (const layer of layers) layer.setAttribute("aria-hidden", layer === next ? "false" : "true");

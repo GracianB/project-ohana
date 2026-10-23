@@ -66,6 +66,7 @@ function drawRift(ctx,cx,cy,R,k){
 function showEnding(detail={}){
   if(running)running.stop(true);
   const layer=buildLayer();bindActions(layer);
+  layer.querySelector(".win-skip").focus({preventScroll:true});
   // Keep all ten illustrated actors crisp without a high-DPR full-screen GPU tax.
   const canvas=layer.querySelector(".win-canvas"),reduce=reducedMotion();
   const fc=fullCanvas(canvas,reduce?1:1.2),ctx=fc.ctx;
