@@ -86,7 +86,7 @@ import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js"
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
-import { enterWorld1, updateWorld1, world1Snapshot, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
+import { enterWorld1, updateWorld1, world1Snapshot, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
 import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
@@ -998,7 +998,10 @@ game._supremeFlow = null;
 Magic.reset(game);
 const r=ROOMS[game.roomId]||ROOMS.hub;
 const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
-loadRoom(r.id);
+// Capture only legitimately completed station IDs before enterWorld1() resets
+// per-room state. Timed chains and anything carried are deliberately excluded.
+const puzzleCheckpoint=world1DeathCheckpoint(game);
+if(loadRoom(r.id)) restoreWorld1DeathCheckpoint(game,puzzleCheckpoint);
 if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
 game.cam.x=Math.max(0,p.x-camW()/2);game.cam.y=Math.max(0,p.y-camH()/2);
 }
