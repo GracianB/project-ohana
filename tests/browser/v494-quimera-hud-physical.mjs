@@ -1181,12 +1181,20 @@ try {
   assert.ok(hud.exists,'experience ribbon must still exist for other battles');
   assert.equal(hud.visible,false,'legacy Momentum boss ribbon obscures the Quimera');
   assert.equal(hud.ariaHidden,'true','Quimera legacy HUD must be hidden accessibly');
+  const genericBossBar=await page.evaluate(()=>{
+    const wrap=document.getElementById('boss-wrap');
+    return {exists:!!wrap,hidden:!!wrap?.classList.contains('hidden'),
+      label:wrap?.querySelector('.boss-label')?.textContent??null};
+  });
+  assert.ok(genericBossBar.exists,'legacy Nest boss bar remains available in other rooms');
+  assert.equal(genericBossBar.hidden,true,
+    'legacy bottom boss bar must not duplicate Quimera dedicated top HP');
   await fs.mkdir('test-results/v494',{recursive:true});
   await page.screenshot({path:'test-results/v494/quimera-dedicated-hud.png'});
   await fs.writeFile('test-results/v494/quimera-hud-regression.json',JSON.stringify({
     realTenSeals:true,realBossEncounter:true,legacyHudHidden:true,
     dedicatedQuimeraHud:true,playerTeleported:false,manipulatedHP:false,
-    hud
+    hud,genericBossBar
   },null,2));
   console.log('PASS V494: real Quimera fight renders without the legacy Nest Queen Momentum panel.');
 
