@@ -88,6 +88,20 @@ export function buildWorld1HeroRoom(hero) {
   const orbs = [];
   for (let i = 0; i < sectors.length; i++) orbs.push([Math.round(sectors[i].x + 800), 1040], [Math.round(sectors[i].x + 1250), 980]);
   const stations = sealStations(hero, theme, sectors);
+  // Frita's oil vents must have an uninterrupted launch corridor to their prizes.
+  // Decorative one-way platforms previously stopped a launched hero at y~940
+  // before reaching the floating potato at floor - 470.
+  if (hero === "frita") {
+    const clearRadius = 94;
+    for (let i = plats.length - 1; i >= 1; i--) {
+      const [px, py, pw] = plats[i];
+      const overlapsVent = stations.some(st => st.kind === "geyser" &&
+        px < st.x + clearRadius && px + pw > st.x - clearRadius);
+      if (overlapsVent && py > WORLD1_FLOOR - 590 && py < WORLD1_FLOOR) {
+        plats.splice(i, 1);
+      }
+    }
+  }
   const prev = idx > 0 ? "w1-" + WORLD1_ORDER[idx - 1] : null;
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
   return {

@@ -1,0 +1,39 @@
+name: V487 physical Frita seal gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v487-frita-clean-main']
+    paths:
+      - 'systems/world1-rooms.js'
+      - 'systems/world1-play.js'
+      - 'tests/browser/v487-eight-physical-seals.mjs'
+      - '.github/workflows/v487-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-frita:
+    name: Eight earned seals and natural Pizza entry
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Frita physical three-geyser eight-seal run
+        run: node tests/browser/v487-eight-physical-seals.mjs
+      - name: Preserve actual physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v487-physical-evidence
+          path: test-results/v487/
+          if-no-files-found: ignore
+          retention-days: 7

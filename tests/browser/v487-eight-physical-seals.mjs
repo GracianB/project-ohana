@@ -831,9 +831,19 @@ try {
       // Stay on the actual oil vent. The game's own gravity/launch decides success.
       if(distance>46) await key('d',Math.max(1,Math.min(14,Math.floor((distance-46)/5))));
       else if(distance< -46) await key('a',Math.max(1,Math.min(10,Math.floor((-distance-46)/5))));
-      else await step(8);
+      else if(ss.player.grounded && ss.player.y < geyser.y-110) {
+        // Upper ledges interrupt the geyser launch. Use the player's legitimate
+        // down+jump drop-through control to descend onto the floor vent.
+        await page.keyboard.down('s');
+        await page.keyboard.down('w');
+        await step(16);
+        await page.keyboard.up('w');
+        await page.keyboard.up('s');
+      } else if(ss.player.grounded && n%7===0) {
+        await key('w',10);
+      } else await step(8);
       if(n%35===0) journal.push({type:'frita-geyser',index,x:Math.round(center),
-        y:Math.round(ss.player.y),vy:ss.player.vy,done:ss.world1?.done});
+        y:Math.round(ss.player.y),vy:ss.player.vy,grounded:ss.player.grounded,done:ss.world1?.done});
     }
     assert.ok(collected,'Frita potato '+index+' not collected physically: '+
       JSON.stringify({last:lastSnapshot?.player,journal:journal.slice(-18)}));
