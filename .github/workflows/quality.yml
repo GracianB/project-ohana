@@ -112,6 +112,9 @@ jobs:
       - name: V488 first timed Pizza delivery by real movement
         run: node tests/browser/v488-first-physical-pizza-delivery.mjs
 
+      - name: V489 ninth real seal · three timed Pizza deliveries and Yomi gate
+        run: node tests/browser/v489-nine-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
