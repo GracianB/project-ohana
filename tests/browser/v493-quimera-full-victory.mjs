@@ -15,7 +15,7 @@ let browser;
 try {
   browser = await chromium.launch();
   const page = await browser.newPage({viewport: {width: 1440, height: 900}});
-  const faults = [], journal = [];
+  const faults = [], journal = [], observedWorld1Films = new Set();
   page.on('pageerror', e => faults.push(e.message));
   await page.goto('http://127.0.0.1:' + server.address().port + '/?e2e=1', {waitUntil: 'domcontentloaded'});
   await page.waitForFunction(() => Boolean(window.__OHANA_E2E));
@@ -41,7 +41,10 @@ try {
   async function film() {
     // Evolution is a separate production modal that pauses keyboard input.
     // Continue using the real on-screen button, never E2E state mutation.
-    for (let i=0;i<12;i++){
+    // Film transitions can happen inside a single 500-tick E2E advance.
+    // Read the production cinematic ID at <=90-tick intervals so neither
+    // bossDefeat nor ending is accidentally skipped in the audit journal.
+    for (let i=0;i<75;i++){
       const evolution=page.locator('#evo-stage.show .evo-skip');
       if(await evolution.count()){
         await evolution.click();
@@ -49,8 +52,10 @@ try {
         continue;
       }
       const s=await state();
+      if(s.world1Cine) observedWorld1Films.add(s.world1Cine);
       if(!s.world1Cine) return s;
-      await step(500);
+      const progressed=await step(90);
+      if(progressed.world1Cine) observedWorld1Films.add(progressed.world1Cine);
     }
     throw Error('Unskippable world or evolution cinematic');
   }
@@ -1359,12 +1364,19 @@ try {
   // defeat and reunion cinematics deliver the accessible results card.
   // The test advances genuine game frames and clicks the visible UI control:
   // no synthetic ohana-win dispatch and no cinematic-state injection.
-  const productionFilms = new Set();
+  const productionFilms = new Set(observedWorld1Films);
   for(let movieFrame=0; movieFrame<25; movieFrame++){
     const still=await state();
     if(still.world1Cine) productionFilms.add(still.world1Cine);
     if(!still.world1Cine && productionFilms.has('ending')) break;
     await step(110);
+  }
+  if(!productionFilms.has('bossDefeat') || !productionFilms.has('ending')){
+    await fs.mkdir('test-results/v493',{recursive:true});
+    await fs.writeFile('test-results/v493/film-observation.json',JSON.stringify({
+      observedWorld1Films:[...productionFilms],
+      winningState:await state(),realVictory:authenticVictory
+    },null,2));
   }
   assert.ok(productionFilms.has('bossDefeat'),
     'defeated Quimera must trigger the real fall-of-the-Echo film');
