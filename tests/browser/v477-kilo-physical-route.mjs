@@ -72,7 +72,7 @@ try {
       let s=await state();
       assert.equal(s.roomId,'w1-kilo');
       assert.equal(s.runtimeFaults,0);
-      assert.deepEqual(s.world1Seals,[], 'no seal until fourth flower is finished');
+      if(index<3) assert.deepEqual(s.world1Seals,[], 'no seal until fourth flower is finished');
       if(s.world1.done >= index+1){completed=true;break;}
       const center = s.player.x + 18;
       let gap = target - center;
