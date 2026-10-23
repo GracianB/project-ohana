@@ -1355,7 +1355,49 @@ try {
   assert.deepEqual([...phasesSeen].sort((a,b)=>a-b),[1,2,3,4],
     'Quimera must enter all four combat phases before legitimate defeat');
   assert.equal(authenticFinal.runtimeFaults,0);
+  // A real boss win is not a complete player experience until its production
+  // defeat and reunion cinematics deliver the accessible results card.
+  // The test advances genuine game frames and clicks the visible UI control:
+  // no synthetic ohana-win dispatch and no cinematic-state injection.
+  const productionFilms = new Set();
+  for(let movieFrame=0; movieFrame<25; movieFrame++){
+    const still=await state();
+    if(still.world1Cine) productionFilms.add(still.world1Cine);
+    if(!still.world1Cine && productionFilms.has('ending')) break;
+    await step(110);
+  }
+  assert.ok(productionFilms.has('bossDefeat'),
+    'defeated Quimera must trigger the real fall-of-the-Echo film');
+  assert.ok(productionFilms.has('ending'),
+    'boss defeat must lead to the real ten-hero reunion film');
+  await page.waitForFunction(()=>{
+    const layer=document.getElementById('win-cinema');
+    return layer?.getAttribute('aria-hidden')==='false' && layer?.dataset.world==='1';
+  },null,{timeout:15000});
+  const endingLayer=page.locator('#win-cinema');
+  const finishButton=endingLayer.locator('.win-skip');
+  if(await finishButton.isVisible()) await finishButton.click();
+  await page.waitForFunction(()=>{
+    const layer=document.getElementById('win-cinema');
+    return layer?.classList.contains('cinema-complete') &&
+      layer.querySelector('.win-card')?.getAttribute('aria-hidden')==='false';
+  },null,{timeout:15000});
+  const results=await endingLayer.evaluate(layer=>({
+    title:layer.querySelector('#win-title')?.textContent?.trim()??'',
+    world:layer.dataset.world,
+    continueLabel:layer.querySelector('#win-continue')?.textContent?.trim()??'',
+    soon:layer.querySelector('.win-soon')?.textContent?.trim()??'',
+    skipHidden:!!layer.querySelector('.win-skip')?.hidden
+  }));
+  assert.equal(results.title,'NADIE SE QUEDA ATRÁS');
+  assert.equal(results.world,'1');
+  assert.equal(results.continueLabel,'Volver al inicio');
+  assert.match(results.soon,/Mundo 2/);
+  assert.equal(results.skipHidden,true);
+  assert.equal((await state()).world1Won,true,
+    'final results card cannot revoke genuine World 1 victory');
   await fs.mkdir('test-results/v493',{recursive:true});
+  await page.screenshot({path:'test-results/v493/authentic-family-reunion-results.png'});
   await page.screenshot({path:'test-results/v493/quimera-real-victory-ten-earned-seals.png'});
   await fs.writeFile('test-results/v493/physical-quimera-victory.json',JSON.stringify({
     earnedSeals:tenSeals,defenseCounts,allTenSealsLegitimate:true,
