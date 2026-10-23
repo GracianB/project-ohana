@@ -1241,6 +1241,8 @@ try {
   // No boss damage writes, seal grants, invulnerability, player teleport or
   // synthetic victory events are permitted.
   let authenticVictory=false, combatDeaths=0, lowestBossHp=phaseTwoState.boss.hp;
+  let lastGuardianTry=-1000, lastNoteTry=-1000, lastHulaHealTry=-1000, lastDuetTry=-1000;
+  const defenseCounts={guardianAttempts:0,notes:0,hulaHealAttempts:0,duets:0,retreats:0};
   const phasesSeen=new Set([1,2]), victoryJournal=[];
   for(let n=0;n<14500;n++){
     await film();
@@ -1271,6 +1273,45 @@ try {
       continue;
     }
     const gap=ss.boss.x-(ss.player.x+18);
+    const distance=Math.abs(gap);
+    // Production Kilo's L summons real Ohana guardians. Their strikes provide
+    // limited lifesteal; before this pilot never used J/K/L/U at all.
+    // Cast using the player's keyboard only, with normal cooldowns intact.
+    if(distance<380 && ss.hp<ss.maxHealth*0.91 && n-lastGuardianTry>65){
+      lastGuardianTry=n;defenseCounts.guardianAttempts++;
+      const hpBefore=ss.hp;
+      await key('l',2);
+      victoryJournal.push({event:'real-l-guardians-attempt',n,hpBefore,
+        bossHp:ss.boss.hp,phase:ss.boss.phase});
+      await step(8);
+      continue;
+    }
+    if(distance<540 && n-lastNoteTry>18){
+      lastNoteTry=n;defenseCounts.notes++;
+      await key('j',2); // physical ranged notes; real cooldown and projectiles
+    }
+    // Kilo's authored J→K signature is a real 8-HP healing link, while
+    // K also starts the real defensive Hula flight when its cooldown allows.
+    if(distance<250 && ss.hp<ss.maxHealth*0.53 && n-lastHulaHealTry>95){
+      lastHulaHealTry=n;defenseCounts.hulaHealAttempts++;
+      const hpBefore=(await state()).hp;
+      await key('j',2);await step(3);await key('k',2);
+      victoryJournal.push({event:'physical-j-k-defensive-link',n,hpBefore,
+        hpAfter:(await state()).hp});
+      continue;
+    }
+    if(distance<400 && n-lastDuetTry>175){
+      lastDuetTry=n;defenseCounts.duets++;
+      await key('u',2); // production surprise companion, never direct summon
+    }
+    // Do not stand inside an invulnerable boss during her attacks. Retreat
+    // and jump through ordinary controls, then re-engage on her real window.
+    if(!ss.boss.vulnerable && distance<190){
+      defenseCounts.retreats++;
+      await key(gap>=0?'a':'d',Math.max(12,Math.min(24,Math.floor((190-distance)/5))));
+      if(ss.player.grounded)await key('w',16);
+      continue;
+    }
     if(gap>75) await key('d',Math.max(1,Math.min(29,Math.floor((gap-75)/5))));
     else if(gap< -40) await key('a',Math.max(1,Math.min(17,Math.floor((-gap-40)/5))));
     else if(ss.boss.vulnerable && ss.evo>=4 && ss.finisherCharge>=100 &&
@@ -1302,7 +1343,7 @@ try {
     await page.screenshot({path:'test-results/v493/unfinished-quimera-physical-battle.png'});
     await fs.writeFile('test-results/v493/unfinished-quimera-diagnostic.json',JSON.stringify({
       state:await state(),minimumBossHp:lowestBossHp,phasesSeen:[...phasesSeen],
-      ordinaryDeaths:combatDeaths,journal:victoryJournal.slice(-240)
+      ordinaryDeaths:combatDeaths,defenseCounts,journal:victoryJournal.slice(-240)
     },null,2));
   }
   assert.ok(authenticVictory,'Quimera must be genuinely defeated in production: '+
@@ -1317,7 +1358,7 @@ try {
   await fs.mkdir('test-results/v493',{recursive:true});
   await page.screenshot({path:'test-results/v493/quimera-real-victory-ten-earned-seals.png'});
   await fs.writeFile('test-results/v493/physical-quimera-victory.json',JSON.stringify({
-    earnedSeals:tenSeals,allTenSealsLegitimate:true,
+    earnedSeals:tenSeals,defenseCounts,allTenSealsLegitimate:true,
     bossDefeatedByRealCombat:true,world1Won:true,
     phasesSeen:[...phasesSeen].sort((a,b)=>a-b),
     totalOrdinaryDeaths:combatDeaths,minimumBossHp:lowestBossHp,
