@@ -5,6 +5,8 @@ on:
     branches: [main, 'test/v493-quimera-full-victory']
     paths:
       - 'systems/experience.js'
+      - 'game.js'
+      - 'sw.js'
       - 'tests/world1-quimera-hud-isolation.test.js'
       - 'tests/browser/v494-quimera-hud-physical.mjs'
       - '.github/workflows/v494-visual-gate.yml'
