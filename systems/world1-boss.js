@@ -139,13 +139,27 @@ export function safeLaneX(e, b) {
 
 function bars(ctx, W, H, k) { const h = H * 0.11 * clamp(k, 0, 1); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, h); ctx.fillRect(0, H - h, W, h); }
 
+// Keep World 1 boss health above the bottom ability bar and away from the
+// minimap on normal desktop viewports. Fight prompts remain at screen top.
+export function world1BossHealthLayout(W, H) {
+  W = Math.max(320, num(W, 1280));
+  H = Math.max(400, num(H, 720));
+  const bw = Math.min(W * 0.52, 700);
+  return {
+    bw,
+    bx: (W - bw) / 2,
+    by: H - Math.max(120, Math.min(170, H * 0.165))
+  };
+}
+
 export function drawWorld1BossOverlay(ctx, g, W, H, t = 0) {
   const d = g?.world1Boss, e = fusion(g) || d?.boss; if (!d || !e) return;
   W = num(W, 1280); H = num(H, 720); const b = e._fusion || {};
   ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";
   // Barra de vida con los tres cortes de fase y los diez colores.
   if (!d.defeat) {
-    const bw = Math.min(W * 0.6, 760), bx = (W - bw) / 2, by = H - 46, k = clamp(num(e.hp) / Math.max(1, num(e.max, 1)), 0, 1);
+    const {bw,bx,by} = world1BossHealthLayout(W,H);
+    const k = clamp(num(e.hp) / Math.max(1, num(e.max, 1)), 0, 1);
     ctx.fillStyle = "rgba(10,6,20,.8)"; ctx.fillRect(bx - 4, by - 4, bw + 8, 22);
     WORLD1_ORDER.forEach((h, i) => { const x0 = bx + bw * i / 10, x1 = Math.min(bx + bw * k, bx + bw * (i + 1) / 10); if (x1 > x0) { ctx.fillStyle = WORLD1_THEMES[h].color; ctx.fillRect(x0, by, x1 - x0, 14); } });
     ctx.fillStyle = "#fff"; for (const c of [0.7, 0.45, 0.2]) ctx.fillRect(bx + bw * c - 1, by - 4, 2, 22);
