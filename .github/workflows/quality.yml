@@ -91,6 +91,9 @@ jobs:
       - name: V481 Michi first aerial lunar jelly · real held jump after three seals
         run: node tests/browser/v481-michi-first-jelly.mjs
 
+      - name: V482 fourth real seal · five Michi medusa jumps and Cuerno gate
+        run: node tests/browser/v482-four-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
