@@ -1225,12 +1225,21 @@ try {
   assert.ok(genericBossBar.exists,'legacy Nest boss bar remains available in other rooms');
   assert.equal(genericBossBar.hidden,true,
     'legacy bottom boss bar must not duplicate Quimera dedicated top HP');
+  const accessibleHud=await page.evaluate(()=>{
+    const el=document.getElementById('world1-quimera-a11y');
+    return {text:el?.textContent??'',role:el?.getAttribute('role')??null,
+      live:el?.getAttribute('aria-live')??null};
+  });
+  assert.equal(accessibleHud.role,'status','Quimera needs a screen-reader status region');
+  assert.equal(accessibleHud.live,'polite','boss updates should be non-interrupting');
+  assert.match(accessibleHud.text,/Quimera Ohana\. Fase [1-4] de 4\. Vida aproximada:/,
+    'canvas-only boss UI must also expose phase and coarse HP to assistive tech');
   await fs.mkdir('test-results/v494',{recursive:true});
   await page.screenshot({path:'test-results/v494/quimera-dedicated-hud.png'});
   await fs.writeFile('test-results/v494/quimera-hud-regression.json',JSON.stringify({
     realTenSeals:true,realBossEncounter:true,legacyHudHidden:true,
     dedicatedQuimeraHud:true,playerTeleported:false,manipulatedHP:false,
-    hud,genericBossBar
+    hud,genericBossBar,accessibleHud
   },null,2));
   console.log('PASS V494: real Quimera fight renders without the legacy Nest Queen Momentum panel.');
 
