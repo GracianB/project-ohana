@@ -32,6 +32,53 @@ export function enterWorld1(g) {
   return g.world1;
 }
 
+// Death and retry must never erase a finished *independent* objective in a
+// 9,600 px room. Timed electrical chains are explicitly excluded; carried
+// parts and hot pizza are transient and never included in the snapshot.
+//
+// Only authored station IDs already marked 'done' by the production puzzle
+// runtime can be retained. No stored seal, boss win or reward is created.
+export function world1DeathCheckpoint(g) {
+  const w = g?.world1, r = g?.roomDef;
+  if (!w || !r?.world1 || r.id !== w.room || r.fusionBoss || w.sealed) return null;
+  return Object.freeze({
+    room: w.room,
+    hero: w.hero,
+    kind: w.kind,
+    completed: w.kind === "cadena" ? [] : w.stations.filter(s => s.done && s.kind !== "oven").map(s => s.id),
+    // Even a failed Chispín chain must not pay score twice after death.
+    scored: w.stations.filter(s => s._scored).map(s => s.id),
+  });
+}
+
+export function restoreWorld1DeathCheckpoint(g, checkpoint) {
+  const w = g?.world1;
+  if (!checkpoint || !w || w.sealed || !g?.roomDef ||
+      g.roomDef.id !== checkpoint.room || w.room !== checkpoint.room ||
+      w.hero !== checkpoint.hero || w.kind !== checkpoint.kind ||
+      checkpoint.room === "w1-final") return false;
+  const authored = new Set(w.stations.filter(s => s.kind !== "oven").map(s => s.id));
+  const accepted = ids => new Set(Array.isArray(ids) ? ids.filter(id => authored.has(id)) : []);
+  const completed = w.kind === "cadena" ? new Set() : accepted(checkpoint.completed);
+  const scored = accepted(checkpoint.scored);
+  for (const station of w.stations) {
+    if (completed.has(station.id)) {
+      station.done = true;
+      station.hold = 0;
+      station.glow = 0;
+    }
+    if (completed.has(station.id) || scored.has(station.id)) station._scored = true;
+  }
+  if (w.kind === "prismas") {
+    // Continue at the first unfinished prism; ordinary ordered play always
+    // finishes 0, then 1, then 2. No regrant or hidden auto-completion.
+    w.order = w.stations.filter(s => s.done).length;
+  }
+  // A life retry never transports an item, extends Pizza's timer, or continues
+  // Chispín's chain. All these variables are reset by enterWorld1().
+  return true;
+}
+
 export function world1Snapshot(g) {
   const w = g.world1; if (!w) return null;
   return { room: w.room, hero: w.hero, kind: w.kind, done: w.stations.filter((s) => s.done && s.kind !== "oven").length, total: WORLD1_SEALS[w.kind]?.count || 0, sealed: w.sealed, seals: [...(g.world1Seals || [])] };
