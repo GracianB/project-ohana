@@ -82,6 +82,9 @@ jobs:
       - name: V478 Stitcho piece zero · delivered physically after authentic Kilo route
         run: node tests/browser/v478-kilo-stitcho-delivery.mjs
 
+      - name: V479 two full real seals · Kilo, Stitcho and natural Chispín door
+        run: node tests/browser/v479-two-authentic-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
