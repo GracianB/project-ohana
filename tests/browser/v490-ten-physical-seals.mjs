@@ -38,13 +38,24 @@ try {
     await page.keyboard.up(k);
     return s;
   };
+  let realEvolutionContinues = 0;
   async function film() {
-    for (let i=0;i<8;i++){
+    // Evolution is a real modal, independent from world1Cine. It blocks
+    // keyboard movement until the player presses "Continuar · Esc".
+    // Dismiss via the actual user-facing button, not by changing game state.
+    for (let i=0;i<12;i++){
+      const evolution=page.locator('#evo-stage.show .evo-skip');
+      if(await evolution.count()){
+        await evolution.click();
+        await page.waitForFunction(() => !document.querySelector('#evo-stage.show'));
+        realEvolutionContinues++;
+        continue;
+      }
       const s=await state();
       if(!s.world1Cine) return s;
       await step(500);
     }
-    throw Error('Unskippable world cinematic');
+    throw Error('Unskippable world or evolution cinematic');
   }
   let deaths=0;
   async function retryIfDead() {
@@ -1002,7 +1013,7 @@ try {
       state:await state(),journal:pizzaExitJournal
     },null,2));
   }
-  assert.ok(enteredYomi,'nine authentic seals must open the east door to Yomi: '+
+  assert.ok(enteredYomi,'nine authentic seals must open the east door to Yomi (UI evolutions dismissed='+realEvolutionContinues+'): '+
     JSON.stringify(pizzaExitJournal.slice(-12)));
   ninth=await state();
   assert.equal(ninth.roomId,'w1-yomi');
@@ -1092,7 +1103,7 @@ try {
   await fs.writeFile('test-results/v490/yomi-four-live-nodes.json',JSON.stringify({
     earnedSeals:tenSeals,yomiNodesSynchronized:4,room:'w1-final',
     ordinaryYomiDeaths:yomiNormalDeaths,ordinaryFinalExitDeaths:finalDeaths,
-    yomiAttempts,physicalKeyboard:true,noTeleports:true,noGrantedSeals:true,
+    yomiAttempts,realEvolutionContinues,physicalKeyboard:true,noTeleports:true,noGrantedSeals:true,
     quimeraDefeated:false,journal:yomiJournal
   },null,2));
   console.log('PASS V490: all ten authentic seals, four green Yomi nodes and natural final-room entry.');
