@@ -1,0 +1,39 @@
+name: V491 first physical Quimera combat hit
+
+on:
+  pull_request:
+    branches: [main, 'test/v490-yomi-tenth-seal']
+    paths:
+      - 'tests/browser/v491-first-physical-quimera-hit.mjs'
+      - '.github/workflows/v491-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boss-first-hit:
+    name: Natural ten-seal route and first Quimera damage
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: True physical Quimera first hit
+        run: node tests/browser/v491-first-physical-quimera-hit.mjs
+      - name: Preserve combat evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v491-physical-evidence
+          path: |
+            test-results/v490/
+            test-results/v491/
+          if-no-files-found: ignore
+          retention-days: 7
