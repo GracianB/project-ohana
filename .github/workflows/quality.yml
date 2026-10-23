@@ -94,6 +94,9 @@ jobs:
       - name: V482 fourth real seal · five Michi medusa jumps and Cuerno gate
         run: node tests/browser/v482-four-physical-seals.mjs
 
+      - name: V483 fifth real seal · Cuerno three ordered prisms and Dragon gate
+        run: node tests/browser/v483-five-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
