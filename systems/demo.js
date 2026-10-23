@@ -58,6 +58,7 @@ function paintGoal(detail) {
 
 function boot() {
   let playing = false;
+  let lastRoom=null;
   let evolutionHintShown = false;
   const seen = new Set();
 
@@ -96,7 +97,7 @@ function boot() {
     evolutionHintShown = false;
 
     if (playing) {
-      setPersistentObjective("Explora el Claro y abre la ruta hacia la costa.");
+      if(lastRoom)paintGoal(lastRoom);
     } else {
       setPersistentObjective("");
     }
@@ -112,6 +113,7 @@ function boot() {
 
   addEventListener("ohana-room", (event) => {
     const detail = event.detail || {};
+    lastRoom=detail;
     paintGoal(detail);
 
     if (

@@ -1,3 +1,4 @@
+import {world1Guidance} from "./world1-guidance.js";
 const DEFAULT_REQUIREMENT = "Sin requisito adicional";
 
 export const OBJECTIVE_DEFS = Object.freeze({
@@ -77,6 +78,8 @@ export const OBJECTIVE_DEFS = Object.freeze({
 
 export function objectiveForRoom(id, state = {}) {
   const key = String(id || "hub");
+  const guidance=world1Guidance(key,state);
+  if(guidance)return {id:key,title:guidance.journey,text:guidance.objective,requirement:DEFAULT_REQUIREMENT,completed:!!state.world1Won};
   const base = OBJECTIVE_DEFS[key] || OBJECTIVE_DEFS.hub;
   const evo = Number.isFinite(Number(state.evo)) ? Number(state.evo) : 0;
 
