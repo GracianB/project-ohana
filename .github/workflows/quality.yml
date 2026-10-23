@@ -97,6 +97,9 @@ jobs:
       - name: V483 fifth real seal · Cuerno three ordered prisms and Dragon gate
         run: node tests/browser/v483-five-physical-seals.mjs
 
+      - name: V484 sixth real seal · Dragon four real brazier attacks and Dino gate
+        run: node tests/browser/v484-six-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
