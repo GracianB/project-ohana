@@ -106,6 +106,9 @@ jobs:
       - name: V486 first Frita potato · genuine geyser physics after seven earned seals
         run: node tests/browser/v486-frita-first-physical-geyser.mjs
 
+      - name: V487 eighth real seal · Frita three geyser prizes and Pizza gate
+        run: node tests/browser/v487-eight-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
