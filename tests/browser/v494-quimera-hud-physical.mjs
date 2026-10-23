@@ -1171,6 +1171,34 @@ try {
   // The Quimera already owns her World 1 name, HP and phase HUD. The generic
   // Nest Queen Momentum ribbon must remain hidden during this actual fight.
   await step(12);
+  // Only the real arena is valid visual evidence. Cosmetic evolution/intro
+  // films can briefly cover the canvas after Kilo earns XP during the route.
+  // Close them through the real Escape control, never by mutating game state.
+  const visibleFilmOverlays=()=>page.evaluate(()=>{
+    return ['#ohana-intro','#evo-stage','#win-cinema','#char-select']
+      .filter(selector=>{
+        const el=document.querySelector(selector);
+        if(!el)return false;
+        const box=el.getBoundingClientRect(),css=getComputedStyle(el);
+        return css.display!=='none' && css.visibility!=='hidden' &&
+          box.width>300 && box.height>300 &&
+          (el.classList.contains('show') || el.classList.contains('cinema-running')
+           || el.getAttribute('aria-hidden')==='false');
+      });
+  });
+  for(let i=0;i<9;i++){
+    const overlay=await visibleFilmOverlays();
+    if(overlay.length===0)break;
+    await page.keyboard.press('Escape');
+    await step(60);
+  }
+  const overlaysStillVisible=await visibleFilmOverlays();
+  assert.deepEqual(overlaysStillVisible,[],
+    'Cannot claim visual Quimera evidence while another full-screen cinematic covers it');
+  const arenaState=await state();
+  assert.equal(arenaState.roomId,'w1-final','visual evidence must be captured in Quimera arena');
+  assert.ok(arenaState.boss?.hp>0,'actual Quimera actor must be present in screenshot');
+  assert.equal(arenaState.world1Won,false,'snapshot belongs to an ongoing real fight');
   const hud=await page.evaluate(()=>{
     const el=document.getElementById('experience-ribbon');
     return {exists:!!el,visible:!!el?.classList.contains('show'),
