@@ -1,3 +1,4 @@
+import {installFamilyConstellation} from "./systems/family-constellation.js";
 import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight} from './systems/kilo-flight.js';
@@ -4111,3 +4112,5 @@ onChange: () => { input.reset(); clock.reset(); },
 onEscape: () => escape()
 });
 requestAnimationFrame(loop);
+
+installFamilyConstellation();

@@ -38,6 +38,7 @@ function buildLayer(){
       '<p class="win-jun">HOKU VUELVE A RESPIRAR</p>'+
       '<p class="win-sub">La Reina cae. El Nido se abre. La familia regresa junta al Claro.</p>'+
       '<div class="win-actions">'+
+        '<button type="button" data-open-constellation hidden>✦ Un lugar para ti · V500</button>'+
         '<button type="button" id="win-continue">Continuar en este mundo</button>'+
         '<button type="button" id="win-repeat" class="ghost">Repetir el nido</button>'+
         '<button type="button" id="win-roster" class="ghost">Elegir personaje</button>'+
@@ -110,7 +111,8 @@ function showEnding(detail={}){
   layer.setAttribute("aria-hidden","false");
   // V468: el final del Mundo 1 cierra la historia del Eco y abre el Mundo 2.
   const w1=Number(detail.world)===1;
-  if(w1)rememberFamilyVictory(detail);
+  if(w1){const memory=rememberFamilyVictory(detail);dispatchEvent(new CustomEvent("ohana-family-memory",{detail:memory}));}
+  layer.querySelector("[data-open-constellation]").hidden=!w1;
   const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
   for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
   // V470: el Mundo 2 está en construcción — en lugar de viajar, una tarjeta lo anuncia.
@@ -262,3 +264,5 @@ if(!window.__ohanaWinBound){
   addEventListener("ohana-win",(e)=>showEnding(e.detail||{}));
 }
 export { showEnding };
+
+addEventListener("ohana-constellation-open",()=>{if(running)running.stop(true);});

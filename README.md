@@ -12,11 +12,17 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>Estado comprobado el 23 oct 2026: <strong>V492 fusionada en <code>main</code></strong>, con diez sellos físicos y primer golpe legítimo a la Quimera. <a href="https://github.com/GracianB/project-ohana/pull/431">V493</a> ha demostrado una victoria completa en Chromium; <a href="https://github.com/GracianB/project-ohana/pull/434">V494</a> pule el HUD. <strong>PR aprobada no equivale a Pages desplegada:</strong> comprueba <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a> para el commit público. Multijugador remoto en pausa.</sub>
+<sub><strong>V500 candidata · Un lugar para ti.</strong> Integración anterior en <code>main</code>: V493/V494, con campaña y final aprobados. La nueva candidata añade guía coherente, memoria de victoria y una constelación de diez voces; requiere sus propias validaciones antes de publicarse. <strong>PR aprobada no equivale a Pages desplegada:</strong> comprueba <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>. Multijugador remoto en pausa.</sub>
 
 </div>
 
 ---
+
+## V500 · Un lugar para ti
+
+Al completar el Mundo 1 aparece una constelación interactiva: diez héroes pintados por el motor, diez voces de regreso a casa y una última luz para quien ha jugado. Escucha cada voz a tu ritmo; el recuerdo se guarda aparte de la partida y puede volver a abrirse desde el menú. Incluye teclado, móvil y movimiento reducido. No añade daño, ventajas ni requisitos para terminar la campaña.
+
+V495–V499 preparan ese cierre: objetivos y sellos coherentes, ayuda de Quimera, foco accesible, recuerdo de victoria y epílogo. [Alcance y aceptación V500](docs/V500-UN-LUGAR-PARA-TI.md).
 
 ## Un videojuego que se dibuja en tiempo real
 

@@ -64,6 +64,9 @@ jobs:
             fi
           fi
 
+      - name: V500 constellation UI and persistence
+        run: node tests/browser/v500-constellation.mjs
+
       - name: V457 early optical size regression
         run: node tests/browser/character-size.mjs
 

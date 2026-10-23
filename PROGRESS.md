@@ -1,3 +1,7 @@
+# V500 · ohana-500 · Un lugar para ti
+
+V495–V499 corrigen guía, controles, foco y memoria de victoria. V500 añade una constelación de diez voces con los personajes del motor, desbloqueada por la victoria del Mundo 1. Sin cambios de estadísticas ni infraestructura multijugador. Pendiente de aceptación de navegador, Quality y Pages.
+
 # OHANA V470 · El juego termina en el Mundo 1 (Mundo 2 en construcción)
 
 Versión **V470** (`ohana-470`) sobre V469 (`main` 59c18ec).

@@ -40,9 +40,9 @@ test('README local source and docs links resolve to existing repository paths',a
 });
 
 test('README truthfully distinguishes World 1 candidate, deployment and paused multiplayer',()=>{
-  assert.match(readme,/V492 fusionada en/i);
-  assert.match(readme,/V493[^\n]*victoria completa/i);
-  assert.match(readme,/pull\/431/);
+  assert.match(readme,/Integración[^\n]*main/i);
+  assert.match(readme,/V500 candidata/i);
+  assert.match(readme,/campaña y final aprobados/i);
   assert.match(readme,/PR aprobada no equivale a Pages desplegada/i);
   assert.match(readme,/Mundo 2[^\n]*en construcción/i);
   assert.match(readme,/multijugador remoto[^\n]*en pausa/i);
