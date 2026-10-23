@@ -690,7 +690,7 @@ const PRECACHE_REVISIONS = {
   "systems/surprises.js": "9ac680c25713258f8e828eb396bf7f659ce390da",
   "systems/title-fx.js": "f394d4642051f290c2964e8c919fea24e2020242",
   "systems/title.js": "26212ebc7e76eafed3f4a53484bdb39520a88dbc",
-  "systems/experience.js": "df1e58798417234504dc49483f86457082db7a8c",
+  "systems/experience.js": "7c6a91a94db97b737204898e97963d20963d6328",
   "systems/online-coop.js": "d4ec36b514a6b597562d61777bbf2b68e3f34dc9",
   "systems/duo-altar-art.js": "2563f6d83f5428ff00af011fff13a542ba6dfae4",
   "systems/xp.js": "df3fba7395dfacd5fe3dc37826c6cb10c244856a",
