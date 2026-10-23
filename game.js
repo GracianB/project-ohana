@@ -91,7 +91,7 @@ import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverl
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom } from "./systems/world1-progress.js";
-import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay } from "./systems/world1-boss.js";
+import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText } from "./systems/world1-boss.js";
 import { playWorld1Cine, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
@@ -3394,6 +3394,22 @@ chip.classList.toggle("flow", !!flow);
 const boss = game.boss || game.enemies.find((e) => e.boss);
 // World 1 Quimera has its own dedicated four-phase arena HUD.
 if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss || !!boss._fusionBoss);
+// Canvas HP bars have no text accessibility. Keep a dedicated screen-reader
+// status with only coarse health bands, not a noisy update per hit.
+let bossA11y = document.getElementById("world1-quimera-a11y");
+if (!bossA11y && boss?._fusionBoss) {
+  bossA11y = document.createElement("span");
+  bossA11y.id = "world1-quimera-a11y";
+  bossA11y.setAttribute("role", "status");
+  bossA11y.setAttribute("aria-live", "polite");
+  bossA11y.setAttribute("aria-atomic", "true");
+  bossA11y.style.cssText = "position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
+  document.body.appendChild(bossA11y);
+}
+if (bossA11y) {
+  const accessibleBoss = world1BossAccessibleText(boss);
+  if (bossA11y.textContent !== accessibleBoss) bossA11y.textContent = accessibleBoss;
+}
 document.body.classList.toggle("boss-fight", !!boss);
 if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
 if (boss) {
