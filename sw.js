@@ -497,7 +497,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "8b5c0f0cf72211e4b0b36aaf11a0bc709dbd077c",
+  "game.js": "f9797cc54390a545a7342c280707a67f819288b4",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "9b6a7b35c9a31d777b43214b028ffb29ee541021",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
