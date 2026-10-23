@@ -397,7 +397,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-select.js": "b4a6c306f9013dfc3cdbaaaef2671203a6292159",
   "systems/world1-progress.js": "e994466ea623a27f9f1ae1d51bcb57b638798b30",
   "systems/world1-collect.js": "711961ee84bd2f564d1d375f193c87d5d74e99a0",
-  "systems/world1-boss.js": "6a55aab13775207f20fc3b45667664471ce9d063",
+  "systems/world1-boss.js": "b0fd19d3530e6a9f073b84e700a2a2c7deb7edaf",
   "systems/fusion-boss.js": "c3fe5a45dc7c9599c91d4796f756a8aa0d0e5904",
   "systems/world1-story.js": "4c034ecd1754258f52e3fba4f4b068998f410ae4",
   "systems/world1-rooms.js": "c27810ded89fc9e5ba28f9de0320d29f0fb8212f",
