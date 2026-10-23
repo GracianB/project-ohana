@@ -111,6 +111,8 @@ const CSS = `
 #chars-grid .char-card.ss-pick .portrait canvas{animation:ssPick .7s cubic-bezier(.2,1.6,.4,1) 1}
 #chars-grid .char-card.ss-hover{box-shadow:0 0 0 2px var(--tint,#fff) inset}
 #chars-grid .char-card{position:relative}
+#chars-grid .char-card .hero-world-label{display:block;margin:.35rem auto 0;max-width:95%;color:#b7e7f4;font:600 10px/1.25 system-ui,sans-serif;text-wrap:balance;opacity:.88}
+#chars-grid .char-card:is(:hover,:focus-visible,.selected) .hero-world-label{color:#e7faff;opacity:1}
 .ss-stats{display:none;position:absolute;left:6px;right:6px;bottom:calc(100% + 6px);gap:2px;padding:5px 7px;border-radius:8px;background:rgba(6,12,24,.86);color:#e8f4ff;font:700 10px system-ui,sans-serif;text-align:left;pointer-events:none;z-index:3}
 #chars-grid .char-card.selected .ss-stats,#chars-grid .char-card.ss-hover .ss-stats{display:grid}
 @media (max-height:600px){.ss-stats{font-size:9px;gap:1px;padding:3px 6px}.ss-bar{height:4px}}
