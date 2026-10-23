@@ -12,7 +12,7 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub>Estado comprobado el 23 oct 2026: <strong>V491 fusionada en <code>main</code></strong>, con diez sellos físicos y primer golpe legítimo a la Quimera. <a href="https://github.com/GracianB/project-ohana/pull/431">V493</a> ha demostrado una victoria completa en Chromium; <a href="https://github.com/GracianB/project-ohana/pull/434">V494</a> pule el HUD. <strong>PR aprobada no equivale a Pages desplegada:</strong> comprueba <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a> para el commit público. Multijugador remoto en pausa.</sub>
+<sub>Estado comprobado el 23 oct 2026: <strong>V492 fusionada en <code>main</code></strong>, con diez sellos físicos y primer golpe legítimo a la Quimera. <a href="https://github.com/GracianB/project-ohana/pull/431">V493</a> ha demostrado una victoria completa en Chromium; <a href="https://github.com/GracianB/project-ohana/pull/434">V494</a> pule el HUD. <strong>PR aprobada no equivale a Pages desplegada:</strong> comprueba <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a> para el commit público. Multijugador remoto en pausa.</sub>
 
 </div>
 
@@ -112,10 +112,10 @@ Hay controles táctiles en móvil.
 | Área | Estado del código |
 | :--- | :--- |
 | **Motor, diez héroes y cincuenta formas** | Integrados en `main`; existe galería Canvas y batería de regresión. |
-| **Mundo 1: diez salas + Quimera Ohana** | Diez sellos físicos fusionados desde V490; V491 acredita el primer golpe en `main`. V493 demuestra las cuatro fases y el jefe a 0 HP en una PR candidata. |
+| **Mundo 1: diez salas + Quimera Ohana** | Diez sellos físicos, primer impacto y segunda fase real fusionados en `main` desde V492. V493 demuestra las cuatro fases y el jefe a 0 HP en una PR candidata. |
 | **Selección de personajes** | Portales Canvas con navegación por teclado, sincronizados con las tarjetas HTML. |
 | **Progresión y coleccionables** | Contratos y guardado implementados. Los diez sellos y las puertas se han recorrido en Chromium; pendientes las auditorías exhaustivas de recuerdos y persistencia. |
-| **Pruebas y publicación** | [Diez sellos V490](https://github.com/GracianB/project-ohana/actions/runs/40008443953) · [Victoria física V493](https://github.com/GracianB/project-ohana/actions/runs/40017010179) · [HUD V494](https://github.com/GracianB/project-ohana/actions/runs/40012431683). Exigir además Quality, CI y Pages del commit de publicación. |
+| **Pruebas y publicación** | [Diez sellos V490](https://github.com/GracianB/project-ohana/actions/runs/40008058098) · [Victoria física V493](https://github.com/GracianB/project-ohana/actions/runs/40017010179) · [HUD V494](https://github.com/GracianB/project-ohana/actions/runs/40012431683). Exigir además Quality, CI y Pages del commit de publicación. |
 | **Multijugador remoto** | En pausa; sin reactivar servidores ni créditos de servicios. |
 
 ### Evidencia reproducible del Mundo 1
@@ -126,7 +126,7 @@ La campaña de Chromium comienza con **cero sellos**, usa movimiento, saltos, at
 - [V493 · Quimera con controles reales y final de campaña](tests/browser/v493-quimera-full-victory.mjs)
 - [V494 · HUD de jefe y accesibilidad](tests/browser/v494-quimera-hud-physical.mjs)
 
-La [PR #431](https://github.com/GracianB/project-ohana/pull/431) amplía la aceptación a las escenas de derrota, reunión y resultados. Las PR #431 y #434 pueden seguir abiertas mientras se repiten las Quality completas. **El sello de publicación corresponde únicamente al mismo SHA aprobado en Pages.**
+La [PR #431](https://github.com/GracianB/project-ohana/pull/431) amplía la aceptación a las escenas de derrota, reunión y resultados, cuyo gate se valida por separado. Las PR #431 y #434 pueden seguir abiertas mientras se repiten las Quality completas. **El sello de publicación corresponde únicamente al mismo SHA aprobado en Pages.**
 
 **No confundimos tres cosas:** código fusionado, pruebas automáticas y juego realmente publicado. Para concursar debe existir un mismo commit con CI, pruebas de navegador, regresión visual, puerta de lanzamiento y Pages aprobados, seguido de revisión manual.
 
