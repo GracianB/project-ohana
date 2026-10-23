@@ -962,7 +962,16 @@ try {
   }
   let ninth=await state();
   assert.equal(ninth.roomId,'w1-pizza');
-  assert.equal(ninth.world1?.done,3,'all three authentic Pizza guests must be served');
+  if(ninth.world1?.done!==3) {
+    await fs.mkdir('test-results/v489',{recursive:true});
+    await page.screenshot({path:'test-results/v489/failed-third-delivery.png'});
+    await fs.writeFile('test-results/v489/failed-third-delivery.json',JSON.stringify({
+      state:ninth,phase:pendingDelivery,completed:lastDelivered,
+      lastJournal:ninthJournal.slice(-100)
+    },null,2));
+  }
+  assert.equal(ninth.world1?.done,3,'all three authentic Pizza guests must be served: '+
+    JSON.stringify(ninthJournal.slice(-18)));
   assert.equal(ninth.world1?.sealed,true,'the third guest must unlock Pizza seal');
   assert.deepEqual(ninth.world1Seals,expectedNine,'exactly nine physical seals must be earned');
 

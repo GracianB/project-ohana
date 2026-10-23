@@ -5,7 +5,10 @@ import { WORLD1_ROOMS, WORLD1_THEMES, WORLD1_SEALS, WORLD1_ORDER, WORLD1_ARENA, 
 import { WORLD1_ROOM_STORY, FUSION_STORY, WORLD1_TITLE } from "./world1-story.js";
 import { ROSTER } from "../characters/roster.js";
 
-const CHAIN_TICKS = 420, PIZZA_TICKS = 1500, HOLD_TICKS = 45;
+// Hot deliveries need to remain reachable at the base Kilo walking speed.
+// Furthest guest is ~5,360 px from the oven; 25 seconds left no hazard margin.
+export const PIZZA_TICKS = 2100;
+const CHAIN_TICKS = 420, HOLD_TICKS = 45;
 const cx = (p) => p.x + p.w / 2, cy = (p) => p.y + p.h / 2;
 const heroName = (id) => ROSTER.find((r) => r.id === id)?.name || id;
 
@@ -177,7 +180,7 @@ export function updateWorld1(g) {
       break;
     case "reparto": {
       const oven = w.stations.find((s) => s.kind === "oven");
-      if (!w.carry && near(p, oven.x, oven.y - 40, 60, 90)) { w.carry = "pizza"; w.pizzaUntil = w.tick + PIZZA_TICKS; g.nums?.add?.(p.x, p.y - 40, "¡PIZZA RECIÉN HECHA! · 25 s", "#ffd36a", true); }
+      if (!w.carry && near(p, oven.x, oven.y - 40, 60, 90)) { w.carry = "pizza"; w.pizzaUntil = w.tick + PIZZA_TICKS; g.nums?.add?.(p.x, p.y - 40, "¡PIZZA RECIÉN HECHA! · " + Math.ceil(PIZZA_TICKS / 60) + " s", "#ffd36a", true); }
       if (w.carry === "pizza") {
         if (w.tick > w.pizzaUntil) { w.carry = null; g.nums?.add?.(p.x, p.y - 40, "SE ENFRIÓ · VUELVE AL HORNO", "#ffb08a", true); }
         else for (const s of w.stations) if (s.kind === "guest" && !s.done && near(p, s.x, s.y - 40, 60, 90)) { complete(g, s, "CLIENTE"); w.carry = null; break; }
