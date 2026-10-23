@@ -1,0 +1,39 @@
+name: V492 physical Quimera phase-two gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v491-first-physical-quimera-hit']
+    paths:
+      - 'tests/browser/v492-quimera-phase-two.mjs'
+      - '.github/workflows/v492-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase-two:
+    name: Ten authentic seals and Quimera phase-two combat
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Quimera phase-two legitimate melee
+        run: node tests/browser/v492-quimera-phase-two.mjs
+      - name: Preserve phase-two evidence and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v492-physical-evidence
+          path: |
+            test-results/v491/
+            test-results/v492/
+          if-no-files-found: ignore
+          retention-days: 7
