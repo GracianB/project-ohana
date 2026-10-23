@@ -1232,7 +1232,7 @@ try {
   // Only real keyboard movement, real H attacks, and ordinary death respawns.
   // No boss damage writes, seal grants, invulnerability, player teleport or
   // synthetic victory events are permitted.
-  let authenticVictory=false, combatDeaths=0, lowestBossHp=stage.boss.hp;
+  let authenticVictory=false, combatDeaths=0, lowestBossHp=phaseTwoState.boss.hp;
   const phasesSeen=new Set([1,2]), victoryJournal=[];
   for(let n=0;n<14500;n++){
     await film();
