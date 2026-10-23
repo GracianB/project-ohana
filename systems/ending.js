@@ -1,3 +1,4 @@
+import {rememberFamilyVictory} from "./family-memory.js";
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // PROJECT OHANA V44 · TRUE ENDING
 import {
@@ -109,6 +110,7 @@ function showEnding(detail={}){
   layer.setAttribute("aria-hidden","false");
   // V468: el final del Mundo 1 cierra la historia del Eco y abre el Mundo 2.
   const w1=Number(detail.world)===1;
+  if(w1)rememberFamilyVictory(detail);
   const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
   for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
   // V470: el Mundo 2 está en construcción — en lugar de viajar, una tarjeta lo anuncia.
