@@ -5,6 +5,7 @@ on:
     branches: [main, 'test/v493-quimera-full-victory']
     paths:
       - 'systems/experience.js'
+      - 'systems/world1-boss.js'
       - 'game.js'
       - 'sw.js'
       - 'tests/world1-quimera-hud-isolation.test.js'
