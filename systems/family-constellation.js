@@ -5,11 +5,11 @@ import {makeDummy,drawDummy,baseHeight,reducedMotion} from './cinema-kit.js';
 export function installFamilyConstellation(){
  const layer=document.getElementById('family-constellation');if(!layer)return;
  const menu=document.getElementById('btn-family-memory');
- let memory=null,selected=null,frame=0,last=0,actor=null,opener=null;
+ let memory=null,selected=null,frame=0,last=0,actor=null,opener=null,previousOverflow="";
  const portrait=layer.querySelector('canvas'),ctx=portrait.getContext('2d');
  const nav=layer.querySelector('.constellation-stars');
  const status=layer.querySelector('.constellation-progress');
- const close=()=>{layer.classList.remove('open');layer.setAttribute('aria-hidden','true');cancelAnimationFrame(frame);opener?.focus({preventScroll:true});};
+ const close=()=>{layer.classList.remove('open');layer.setAttribute('aria-hidden','true');cancelAnimationFrame(frame);document.body.style.overflow=previousOverflow;opener?.focus({preventScroll:true});};
  function refresh(){memory=readFamilyMemory()||memory;if(menu)menu.hidden=!memory;}
  function draw(now=0){
   if(!layer.classList.contains('open'))return;
@@ -44,6 +44,7 @@ export function installFamilyConstellation(){
  }
  function open(button){
   refresh();if(!memory)return;opener=button;
+  previousOverflow=document.body.style.overflow;document.body.style.overflow='hidden';
   layer.classList.add('open');layer.setAttribute('aria-hidden','false');
   dispatchEvent(new CustomEvent('ohana-constellation-open'));
   choose(FAMILY_STARS.find(s=>s.id===memory.hero)||FAMILY_STARS[0],false);

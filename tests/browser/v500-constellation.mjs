@@ -21,7 +21,15 @@ try{
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   const buttons=await page.locator('.constellation-stars button').evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return {x:r.left,right:r.right,w:r.width,h:r.height}}));
   assert.ok(buttons.every(b=>b.x>=0&&b.right<=width&&b.h>=44),JSON.stringify(buttons));
-  await page.screenshot({path:`test-results/v500/${name}.png`,fullPage:true});
+  const bounds=await page.locator('#family-constellation').evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});
+  assert.deepEqual(bounds,{x:0,y:0,w:width,h:height},'dialog covers the viewport');
+  assert.equal(await page.evaluate(()=>document.body.style.overflow),'hidden');
+  await page.screenshot({path:`test-results/v500/${name}.png`});
+  if(name==='mobile'){
+   await page.locator('.constellation-last-copy').scrollIntoViewIfNeeded();
+   await page.screenshot({path:'test-results/v500/mobile-last-light.png'});
+   await page.locator('#family-constellation').evaluate(e=>e.scrollTop=0);
+  }
  }
  await page.setViewportSize({width:1440,height:1000});
  await page.locator('.constellation-close').focus();

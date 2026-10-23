@@ -293,6 +293,7 @@ addEventListener("resize", fit); fit();
 
 function overlayOpen() {
 return !!(
+document.getElementById("family-constellation")?.classList.contains("open") ||
 DOM.help?.classList.contains("open") ||
 DOM.map?.classList.contains("open") ||
 DOM.pause?.classList.contains("open") ||
@@ -378,6 +379,8 @@ if (!canAct()) return;
 if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
+const constellation=document.getElementById("family-constellation");
+if(constellation?.classList.contains("open")){constellation.querySelector(".constellation-close")?.click();return;}
 if (Festival.isOpen()) { Festival.close(); return; }
 if (DOM.evoStage?.classList.contains("show") || DOM.finale?.classList.contains("show")) return;
 if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
