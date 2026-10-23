@@ -14,6 +14,20 @@ export function experienceRank(combo = 0, crit = false) {
   return "READY";
 }
 
+// World 1 owns a dedicated four-phase Quimera HUD. The old Momentum boss
+// ribbon and the Nest cinematics must never cover that fight.
+export function experienceBossMeta(boss) {
+  const dedicatedHud = !!boss?._fusionBoss;
+  const maxPhase = dedicatedHud ? 4 : 3;
+  const phase = Math.max(1, Math.min(maxPhase, Math.floor(Number(boss?.phase) || 1)));
+  return { phase, name: dedicatedHud ? "QUIMERA OHANA" : "REINA DEL NIDO", dedicatedHud };
+}
+
+export function shouldShowExperienceRibbon({boss=null,combo=0,evoT=0}={}) {
+  if (boss?._fusionBoss) return false;
+  return combo>=2 || !!boss || evoT>0;
+}
+
 export class ExperienceDirector {
   constructor() {
     this.impulses = [];
@@ -294,7 +308,7 @@ export class ExperienceDirector {
     const boss = game?.boss || game?.enemies?.find?.((e) => e?.boss);
 
     if (boss) {
-      const phase = Math.max(1, Math.min(3, Number(boss.phase) || 1));
+      const phase = experienceBossMeta(boss).phase;
 
       if (this.lastBossPhase && phase !== this.lastBossPhase) {
         this.state.boss = 1;
@@ -336,10 +350,7 @@ export class ExperienceDirector {
     const combo = Math.max(0, Number(game?.combo) || 0);
     const boss = game?.boss || game?.enemies?.find?.((e) => e?.boss);
     // Room arrivals are narrated exclusively by MessageManager.
-    const visible =
-      combo >= 2 ||
-      !!boss ||
-      this.state.evoT > 0;
+    const visible = shouldShowExperienceRibbon({boss,combo,evoT:this.state.evoT});
 
     if (this.ui.classList.contains("show") !== visible) this.ui.classList.toggle("show", visible);
     const hidden = visible ? "false" : "true";
@@ -349,13 +360,13 @@ export class ExperienceDirector {
     const rank = experienceRank(combo, this.state.crit);
 
     if (this.uiTitle) {
-      const title = boss ? "FASE " + (Number(boss.phase) || 1) : rank;
+      const title = boss ? "FASE " + experienceBossMeta(boss).phase : rank;
       if (this.uiTitle.textContent !== title) this.uiTitle.textContent = title;
     }
 
     if (this.uiNote) {
       const note = boss
-          ? "REINA DEL NIDO"
+          ? experienceBossMeta(boss).name
           : combo >= 2
             ? "COMBO ×" + combo
             : "READY";
@@ -474,7 +485,7 @@ export class ExperienceDirector {
     }
 
 
-    if (boss > 0.035 || game?.boss) {
+    if ((boss > 0.035 || game?.boss) && !game?.boss?._fusionBoss) {
       const bossPresence = Math.max(
         boss,
         game?.boss ? 0.24 : 0
@@ -494,7 +505,7 @@ export class ExperienceDirector {
 
       ctx.globalAlpha = 0.24 + bossPresence * 0.26;
       ctx.strokeStyle =
-        Number(game?.boss?.phase) === 3
+        Number(game?.boss?.phase) >= 3
           ? "#ff1846"
           : "#ff6b72";
 

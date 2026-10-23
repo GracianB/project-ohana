@@ -1,0 +1,43 @@
+name: V493 authentic full Quimera World 1 victory
+
+on:
+  pull_request:
+    branches: [main, 'test/v492-quimera-phase-two']
+    paths:
+      - 'tests/browser/v493-quimera-full-victory.mjs'
+      - '.github/workflows/v493-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-victory:
+    name: Ten seals, four real boss phases, production victory
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Check full victory test syntax
+        run: node --check tests/browser/v493-quimera-full-victory.mjs
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Four genuine Quimera phases and production victory
+        run: node tests/browser/v493-quimera-full-victory.mjs
+      - name: Preserve complete victory or failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v493-physical-evidence
+          path: |
+            test-results/v490/
+            test-results/v491/
+            test-results/v492/
+            test-results/v493/
+          if-no-files-found: ignore
+          retention-days: 7

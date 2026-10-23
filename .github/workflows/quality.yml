@@ -124,6 +124,12 @@ jobs:
       - name: V492 real Quimera damage and second combat phase
         run: node tests/browser/v492-quimera-phase-two.mjs
 
+      - name: V493 full ten-seal Quimera four-phase natural victory
+        run: node tests/browser/v493-quimera-full-victory.mjs
+
+      - name: V494 Quimera dedicated HUD · no Nest Queen Momentum overlay
+        run: node tests/browser/v494-quimera-hud-physical.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
