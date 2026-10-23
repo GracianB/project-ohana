@@ -3488,6 +3488,12 @@ return;
 if (!game.won) game.clearTicks = (game.clearTicks || 0) + 1;
 tickFinale();
 if (game.finale) {
+  // The generic death beat freezes combat, but World 1 must still finish
+  // its own defeat director and hand off to the reunion cinematics.
+  if(game.world1Boss && game.roomId === "w1-final") {
+    const event = updateWorld1BossDirector(game);
+    if(event === "defeated") playWorld1Cine(game, "bossDefeat");
+  }
   // Locked, deterministic 3.5-second death beat: no enemy AI, bullets,
   // hazards or renewed damage while the boss dissolves. Camera/FX still run.
   game.fx.update();
