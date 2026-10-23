@@ -12,7 +12,7 @@ const HINTS = {
   },
   ability: {
     title: "PODERES",
-    text: "J, K y L usan habilidades desbloqueadas por tu evolución. U reserva el supremo para la forma 5.",
+    text: "J, K y L se desbloquean al evolucionar. I es el remate de forma 4 y P el poder de forma 5. U llama a tu compañero sorpresa.",
   },
   interact: {
     title: "PORTALES",
@@ -35,7 +35,7 @@ const HINTS = {
 const KEY_HINTS = new Map([
   ["a", "move"], ["d", "move"], ["w", "move"], ["s", "move"],
   ["h", "attack"],
-  ["j", "ability"], ["k", "ability"], ["l", "ability"], ["u", "ability"],
+  ["j", "ability"], ["k", "ability"], ["l", "ability"], ["i", "ability"], ["p", "ability"], ["u", "ability"],
   ["e", "interact"],
   ["m", "map"],
   ["shift", "dash"],
