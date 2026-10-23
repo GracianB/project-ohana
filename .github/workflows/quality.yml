@@ -76,6 +76,9 @@ jobs:
       - name: V475 World 1 authentic keyboard start and Kilo first flower
         run: node tests/browser/v475-world1-natural-walk.mjs
 
+      - name: V476 physical death retry · earned Kilo note without score farming
+        run: node tests/browser/v476-death-checkpoint.mjs
+
       - name: V459 ten kinetic animations per hero, lunar feline lineage and accessibility
         run: node tests/browser/v459-motion.mjs
 
