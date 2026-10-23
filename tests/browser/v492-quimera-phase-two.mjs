@@ -1212,17 +1212,17 @@ try {
   }
   assert.ok(phaseTwoReached,'Quimera must reach phase two through real combat: '+
     JSON.stringify({bestBossHp,retries:phaseTwoRetries,last:phaseTwoJournal.slice(-16)}));
-  const stage=await state();
-  assert.ok(stage.boss?.phase>=2,'boss phase must advance naturally');
-  assert.ok(stage.boss?.hp<=initialBossMax*.70,'phase requires genuine combat HP threshold');
-  assert.equal(stage.world1Won,false,'entering second phase does not defeat the Quimera');
-  assert.deepEqual(stage.world1Seals,tenSeals);
+  const phaseTwoState=await state();
+  assert.ok(phaseTwoState.boss?.phase>=2,'boss phase must advance naturally');
+  assert.ok(phaseTwoState.boss?.hp<=initialBossMax*.70,'phase requires genuine combat HP threshold');
+  assert.equal(phaseTwoState.world1Won,false,'entering second phase does not defeat the Quimera');
+  assert.deepEqual(phaseTwoState.world1Seals,tenSeals);
   await fs.mkdir('test-results/v492',{recursive:true});
   await page.screenshot({path:'test-results/v492/physical-quimera-phase-two.png'});
   await fs.writeFile('test-results/v492/quimera-phase-two.json',JSON.stringify({
-    earnedSeals:tenSeals,phaseReached:stage.boss.phase,
-    bossHp:stage.boss.hp,startingBossHp:initialBossMax,
-    actualDamage:initialBossMax-stage.boss.hp,ordinaryRetries:phaseTwoRetries,
+    earnedSeals:tenSeals,phaseReached:phaseTwoState.boss.phase,
+    bossHp:phaseTwoState.boss.hp,startingBossHp:initialBossMax,
+    actualDamage:initialBossMax-phaseTwoState.boss.hp,ordinaryRetries:phaseTwoRetries,
     noTeleports:true,noHPWrites:true,noBossPhaseWrites:true,noInvulnerabilityInjection:true,
     quimeraDefeated:false,journal:phaseTwoJournal
   },null,2));
