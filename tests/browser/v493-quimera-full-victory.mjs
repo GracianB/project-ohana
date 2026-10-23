@@ -39,12 +39,20 @@ try {
     return s;
   };
   async function film() {
-    for (let i=0;i<8;i++){
+    // Evolution is a separate production modal that pauses keyboard input.
+    // Continue using the real on-screen button, never E2E state mutation.
+    for (let i=0;i<12;i++){
+      const evolution=page.locator('#evo-stage.show .evo-skip');
+      if(await evolution.count()){
+        await evolution.click();
+        await page.waitForFunction(() => !document.querySelector('#evo-stage.show'));
+        continue;
+      }
       const s=await state();
       if(!s.world1Cine) return s;
       await step(500);
     }
-    throw Error('Unskippable world cinematic');
+    throw Error('Unskippable world or evolution cinematic');
   }
   let deaths=0;
   async function retryIfDead() {
@@ -1265,7 +1273,24 @@ try {
     const gap=ss.boss.x-(ss.player.x+18);
     if(gap>75) await key('d',Math.max(1,Math.min(29,Math.floor((gap-75)/5))));
     else if(gap< -40) await key('a',Math.max(1,Math.min(17,Math.floor((-gap-40)/5))));
+    else if(ss.boss.vulnerable && ss.evo>=4 && ss.finisherCharge>=100 &&
+            Math.abs(gap)<125) {
+      // Legitimate P finisher: charge comes entirely from previous real hits.
+      // Three additional P presses follow its authored rhythm cues at 30/60/90.
+      // This is the Kilo move the physical pilot previously never used.
+      const before=ss.finisherCharge;
+      await key('p',2);
+      const activated=(await state()).finisherCharge<before;
+      if(activated){
+        victoryJournal.push({event:'natural-kilo-finisher',n,phase:ss.boss.phase,
+          bossHp:ss.boss.hp,chargeBefore:before});
+        await step(28);await key('p',2);
+        await step(28);await key('p',2);
+        await step(28);await key('p',2);
+      } else await key('h',2);
+    }
     else if(ss.boss.vulnerable) await key('h',2);
+    else if(ss.player.grounded && n%6===0) await key('w',18);
     else await step(9);
     if(n%100===0)victoryJournal.push({event:'real-melee',n,
       bossHp:ss.boss.hp,phase:ss.boss.phase,vulnerable:ss.boss.vulnerable,
