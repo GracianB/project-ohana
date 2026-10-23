@@ -88,6 +88,9 @@ jobs:
       - name: V480 three real seals · timed Chispín lightning sprint into Michi garden
         run: node tests/browser/v480-three-physical-seals.mjs
 
+      - name: V481 Michi first aerial lunar jelly · real held jump after three seals
+        run: node tests/browser/v481-michi-first-jelly.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
