@@ -43,6 +43,8 @@ Las salas se abren en orden. Elegir personaje en el campamento enseña sus cinco
 
 > **Aceptación diferenciada:** Chromium ya ha completado una ruta física con diez sellos y derrota de la Quimera, sin alterar los estados de salud, sellos o victoria. Esto **no sustituye** la prueba humana de accesibilidad, mando, móvil, todos los recuerdos y persistencia, ni certifica por sí solo el despliegue de Pages.
 
+**Plan vigente de cierre:** [candidata single player, alcance y puertas de salida](docs/SINGLE-PLAYER-RELEASE.md). La auditoría V457 se conserva como histórico; la candidata actual reúne V493 y V494 y debe acreditar las cinemáticas finales antes de publicarse.
+
 ## V460 · Michicornio vivo: actuación corporal e intro / evolución cinematográfica
 
 Michicornio deja de limitarse a diez poses estáticas. Ahora su **carrera articula patas y hombros**, las orejas reaccionan, **parpadea y mira alrededor**, la Medusa respira con su campana y sus **siete filamentos se desplazan independientemente**. El dragón hereda ese movimiento y el Guardián Eclipse lo culmina con **nueve tentáculos de vidrio animados**. Todo sucede en Canvas, sin alterar hitboxes.
