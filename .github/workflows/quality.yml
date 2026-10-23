@@ -115,6 +115,9 @@ jobs:
       - name: V489 ninth real seal · three timed Pizza deliveries and Yomi gate
         run: node tests/browser/v489-nine-physical-seals.mjs
 
+      - name: V490 tenth real seal · four live Yomi nodes and final-room gate
+        run: node tests/browser/v490-ten-physical-seals.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 

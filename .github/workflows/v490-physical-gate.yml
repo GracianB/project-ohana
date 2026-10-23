@@ -1,0 +1,39 @@
+name: V490 ten authentic World 1 seals gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v489-pizza-ninth-seal']
+    paths:
+      - 'tests/browser/v490-ten-physical-seals.mjs'
+      - '.github/workflows/v490-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ten-seals:
+    name: Four physical Yomi nodes and final-room entry
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Yomi green-node tenth physical seal gate
+        run: node tests/browser/v490-ten-physical-seals.mjs
+      - name: Preserve physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v490-physical-evidence
+          path: |
+            test-results/v489/
+            test-results/v490/
+          if-no-files-found: ignore
+          retention-days: 7
