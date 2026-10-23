@@ -3392,7 +3392,8 @@ if (chip.dataset.flow !== flow) chip.dataset.flow = flow;
 chip.classList.toggle("flow", !!flow);
 }
 const boss = game.boss || game.enemies.find((e) => e.boss);
-if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss);
+// World 1 Quimera has its own dedicated four-phase arena HUD.
+if (DOM.bossWrap) DOM.bossWrap.classList.toggle("hidden", !boss || !!boss._fusionBoss);
 document.body.classList.toggle("boss-fight", !!boss);
 if (boss && DOM.bossBar) DOM.bossBar.style.width = Math.max(0, (boss.hp / Math.max(1, boss.max)) * 100) + "%";
 if (boss) {
