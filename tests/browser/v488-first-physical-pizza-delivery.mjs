@@ -876,7 +876,7 @@ try {
   const oven=pizzaStations.find(x=>x.kind==='oven');
   const firstGuest=pizzaStations.find(x=>x.kind==='guest' && x.id===1);
   assert.ok(oven && firstGuest,'Pizza room must contain the oven and guest #1');
-  let firstDelivered=false,pizzaRetries=0;
+  let firstDelivered=false,pizzaRetries=0,deliveryPhase='oven';
   const pizzaJournal=[];
   for(let attempt=0;attempt<900;attempt++){
     await film();
@@ -890,16 +890,19 @@ try {
       assert.equal(recover.roomId,'w1-pizza');
       continue;
     }
-    // The production update picks up pizza by proximity and starts its timer.
-    const carrying=ss.world1?.carry==='pizza';
-    const target=carrying?firstGuest:oven;
+    // The public snapshot deliberately doesn't expose the carried item.
+    // Walk to the oven, then to the customer, and retry naturally if it expires.
+    const target=deliveryPhase==='oven'?oven:firstGuest;
     const center=ss.player.x+18;
     const delta=target.x-center;
-    if(delta>48) await key('d',Math.max(1,Math.min(18,Math.floor((delta-48)/5))));
-    else if(delta< -48) await key('a',Math.max(1,Math.min(18,Math.floor((-delta-48)/5))));
-    else await step(5);
+    if(delta>42) await key('d',Math.max(1,Math.min(18,Math.floor((delta-42)/5))));
+    else if(delta< -42) await key('a',Math.max(1,Math.min(18,Math.floor((-delta-42)/5))));
+    else {
+      await step(5);
+      deliveryPhase=deliveryPhase==='oven'?'guest':'oven';
+    }
     if(attempt%35===0) pizzaJournal.push({x:Math.round(center),
-      y:Math.round(ss.player.y),carrying,done:ss.world1?.done});
+      y:Math.round(ss.player.y),phase:deliveryPhase,done:ss.world1?.done});
   }
   assert.ok(firstDelivered,'Timed pizza delivery #1 failed with physical input: '+
     JSON.stringify(pizzaJournal.slice(-15)));
