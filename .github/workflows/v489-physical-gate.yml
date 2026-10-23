@@ -1,0 +1,39 @@
+name: V489 physical ninth-seal Pizza gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v488-pizza-first-delivery']
+    paths:
+      - 'tests/browser/v489-nine-physical-seals.mjs'
+      - '.github/workflows/v489-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nine-seals:
+    name: Three authentic Pizza deliveries and natural Yomi entry
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Physical Pizza ninth seal and Yomi room gate
+        run: node tests/browser/v489-nine-physical-seals.mjs
+      - name: Preserve physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v489-physical-evidence
+          path: |
+            test-results/v488/
+            test-results/v489/
+          if-no-files-found: ignore
+          retention-days: 7
