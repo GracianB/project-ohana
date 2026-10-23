@@ -118,6 +118,9 @@ jobs:
       - name: V490 tenth real seal · four live Yomi nodes and final-room gate
         run: node tests/browser/v490-ten-physical-seals.mjs
 
+      - name: V491 genuine Quimera encounter and first combat hit
+        run: node tests/browser/v491-first-physical-quimera-hit.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
