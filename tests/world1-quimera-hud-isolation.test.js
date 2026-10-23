@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { experienceBossMeta, shouldShowExperienceRibbon } from '../systems/experience.js';
+import { world1BossHealthLayout } from '../systems/world1-boss.js';
 
 test('Quimera owns a dedicated 4-phase HUD, not the old Nest Queen ribbon', () => {
   for(const phase of [1,2,3,4]){
@@ -28,4 +29,14 @@ test('Normal play keeps standard combo and evolution notifications', () => {
   assert.equal(shouldShowExperienceRibbon({combo:0,evoT:0}),false);
   assert.equal(shouldShowExperienceRibbon({combo:2}),true);
   assert.equal(shouldShowExperienceRibbon({evoT:4}),true);
+});
+
+test('Quimera health bar clears the lower ability controls at desktop and compact sizes', () => {
+  for(const [w,h] of [[1440,900],[1280,720],[800,600],[390,700]]) {
+    const {bx,bw,by}=world1BossHealthLayout(w,h);
+    assert.ok(bx>=0 && bx+bw<=w+0.01,'health bar should remain in viewport');
+    assert.ok(by>100,'health bar must not overlap top navigation');
+    assert.ok(by+24<=h-90,'reserve at least 90px for bottom controls');
+    assert.ok(bw<=700 && bw<=w*0.52+0.01);
+  }
 });
