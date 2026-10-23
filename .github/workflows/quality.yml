@@ -121,6 +121,9 @@ jobs:
       - name: V491 genuine Quimera encounter and first combat hit
         run: node tests/browser/v491-first-physical-quimera-hit.mjs
 
+      - name: V492 Quimera second phase · genuine melee combat threshold
+        run: node tests/browser/v492-quimera-physical-phase-two.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
