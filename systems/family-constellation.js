@@ -1,5 +1,5 @@
 import {FAMILY_STARS,constellationProgress} from './family-constellation-story.js';
-import {readFamilyMemory,rememberFamilyLight} from './family-memory.js';
+import {readFamilyMemory,rememberFamilyLight,migrateFamilyMemory} from './family-memory.js';
 import {makeDummy,drawDummy,baseHeight,reducedMotion} from './cinema-kit.js';
 
 export function installFamilyConstellation(){
@@ -56,5 +56,5 @@ export function installFamilyConstellation(){
  addEventListener('ohana-family-memory',e=>{memory=e.detail||memory;refresh();});
  addEventListener('storage',refresh);
  document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(frame);else if(layer.classList.contains('open')){last=0;draw();}});
- refresh();
+ memory=migrateFamilyMemory()||memory;refresh();
 }

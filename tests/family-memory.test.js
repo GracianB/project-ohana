@@ -1,5 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {readFamilyMemory,rememberFamilyVictory,rememberFamilyLight,FAMILY_MEMORY_KEY} from '../systems/family-memory.js';
+import {readFamilyMemory,rememberFamilyVictory,rememberFamilyLight,FAMILY_MEMORY_KEY,migrateFamilyMemory} from '../systems/family-memory.js';
+import {WORLD1_ORDER} from '../systems/world1-rooms.js';
 const store=()=>{const map=new Map();return {map,getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)}};
 test('only a World 1 result creates its own memory; game save remains untouched',()=>{
  const s=store();s.setItem('ohana','original');assert.equal(readFamilyMemory(s),null);
@@ -14,4 +15,12 @@ test('malformed and unavailable storage do not break victory',()=>{
  const blocked={getItem(){throw Error('blocked')},setItem(){throw Error('quota')}};
  assert.equal(rememberFamilyVictory({world:1,id:'kilo'},blocked).hero,'kilo');
  assert.equal(readFamilyMemory(blocked),null);
+});
+
+test('legacy wins migrate without rewriting saves; ten seals without victory cannot unlock',()=>{
+ const s=store();const save={v:3,id:'kilo',roomId:'w1-final',world1Seals:WORLD1_ORDER,world1Won:false};
+ s.setItem('ohana',JSON.stringify(save));assert.equal(migrateFamilyMemory(s),null);
+ save.world1Won=true;s.setItem('ohana',JSON.stringify(save));const original=s.getItem('ohana');
+ assert.equal(migrateFamilyMemory(s).hero,'kilo');assert.equal(s.getItem('ohana'),original);
+ rememberFamilyLight('cat',readFamilyMemory(s),s);assert.deepEqual(migrateFamilyMemory(s).lights,['cat']);
 });

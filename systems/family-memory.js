@@ -19,3 +19,14 @@ export function rememberFamilyLight(id,memory,storage){
  try{(storage??globalThis.localStorage)?.setItem(FAMILY_MEMORY_KEY,JSON.stringify(record));}catch{}
  return record;
 }
+
+// Compatibility: an older completed campaign already earned this epilogue.
+// Never infer victory from seals alone; leave the original save untouched.
+export function migrateFamilyMemory(storage){
+ const existing=readFamilyMemory(storage);if(existing)return existing;
+ try{
+  const s=storage??globalThis.localStorage;const save=JSON.parse(s?.getItem('ohana')||'null');
+  if(![2,3].includes(save?.v)||save.world1Won!==true||save.roomId!=='w1-final'||!Array.isArray(save.world1Seals)||!WORLD1_ORDER.every(id=>save.world1Seals?.includes(id)))return null;
+  return rememberFamilyVictory({world:1,id:save.id},s);
+ }catch{return null;}
+}
