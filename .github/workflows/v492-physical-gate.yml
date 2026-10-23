@@ -5,6 +5,7 @@ on:
     branches: [main, 'test/v491-first-physical-quimera-hit']
     paths:
       - 'tests/browser/v492-quimera-physical-phase-two.mjs'
+      - 'tests/world1-quimera-boss-contract.test.js'
       - '.github/workflows/v492-physical-gate.yml'
   workflow_dispatch:
 
@@ -24,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install chromium
+      - name: Quimera phase and fairness contract
+        run: node --test tests/world1-quimera-boss-contract.test.js
       - name: Genuine first Quimera phase transition
         run: node tests/browser/v492-quimera-physical-phase-two.mjs
       - name: Preserve actual boss encounter evidence
