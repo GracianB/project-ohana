@@ -30,7 +30,7 @@ jobs:
   quality:
     name: Unit + Browser + Visual + Release Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 75
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -108,6 +108,9 @@ jobs:
 
       - name: V487 eighth real seal · Frita three geyser prizes and Pizza gate
         run: node tests/browser/v487-eight-physical-seals.mjs
+
+      - name: V488 first timed Pizza delivery by real movement
+        run: node tests/browser/v488-first-physical-pizza-delivery.mjs
 
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs

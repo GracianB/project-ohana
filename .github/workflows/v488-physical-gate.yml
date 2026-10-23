@@ -1,0 +1,39 @@
+name: V488 physical Pizza delivery gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v487-frita-clean-main']
+    paths:
+      - 'tests/browser/v488-first-physical-pizza-delivery.mjs'
+      - '.github/workflows/v488-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-delivery:
+    name: Eight seals and first timed Pizza delivery
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Physical Pizza oven-to-guest delivery
+        run: node tests/browser/v488-first-physical-pizza-delivery.mjs
+      - name: Preserve actual physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v488-physical-evidence
+          path: |
+            test-results/v487/
+            test-results/v488/
+          if-no-files-found: ignore
+          retention-days: 7
