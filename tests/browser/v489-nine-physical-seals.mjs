@@ -39,12 +39,20 @@ try {
     return s;
   };
   async function film() {
-    for (let i=0;i<8;i++){
+    // Modal evolution ("Continuar · Esc") pauses normal gameplay even when
+    // world1Cine is null. Continue via the visible production UI button.
+    for (let i=0;i<12;i++){
+      const evolution=page.locator('#evo-stage.show .evo-skip');
+      if(await evolution.count()){
+        await evolution.click();
+        await page.waitForFunction(() => !document.querySelector('#evo-stage.show'));
+        continue;
+      }
       const s=await state();
       if(!s.world1Cine) return s;
       await step(500);
     }
-    throw Error('Unskippable world cinematic');
+    throw Error('Unskippable world or evolution cinematic');
   }
   let deaths=0;
   async function retryIfDead() {
