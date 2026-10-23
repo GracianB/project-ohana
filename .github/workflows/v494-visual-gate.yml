@@ -1,0 +1,40 @@
+name: V494 Quimera HUD isolation
+
+on:
+  pull_request:
+    branches: [main, 'test/v493-quimera-full-victory']
+    paths:
+      - 'systems/experience.js'
+      - 'tests/world1-quimera-hud-isolation.test.js'
+      - 'tests/browser/v494-quimera-hud-physical.mjs'
+      - '.github/workflows/v494-visual-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dedicated-boss-hud:
+    name: Quimera four-phase HUD and real arena screenshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Pure boss-HUD regression
+        run: node --test tests/world1-quimera-hud-isolation.test.js
+      - run: npx playwright install chromium
+      - name: Authentic Quimera dedicated HUD screenshot
+        run: node tests/browser/v494-quimera-hud-physical.mjs
+      - name: Preserve visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v494-quimera-visual-evidence
+          path: test-results/v494/
+          if-no-files-found: ignore
+          retention-days: 7
