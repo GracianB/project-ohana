@@ -1,0 +1,40 @@
+name: V493 full physical World 1 victory
+
+on:
+  pull_request:
+    branches: [main, 'test/v492-quimera-physical-phase-two']
+    paths:
+      - 'tests/browser/v493-full-physical-quimera-victory.mjs'
+      - '.github/workflows/v493-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  world-one-finale:
+    name: Ten earned seals, four boss phases, real Quimera defeat
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - name: Complete authentic World 1 campaign in Chromium
+        run: node tests/browser/v493-full-physical-quimera-victory.mjs
+      - name: Preserve physical campaign and boss evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v493-real-campaign-physical-evidence
+          path: |
+            test-results/v490/
+            test-results/v491/
+            test-results/v492/
+            test-results/v493/
+          if-no-files-found: ignore
+          retention-days: 7
