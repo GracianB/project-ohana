@@ -79,6 +79,9 @@ jobs:
       - name: V477 Kilo complete natural campaign gate · four physical flowers and Stitcho
         run: node tests/browser/v477-kilo-physical-route.mjs
 
+      - name: V478 Stitcho piece zero · delivered physically after authentic Kilo route
+        run: node tests/browser/v478-kilo-stitcho-delivery.mjs
+
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
