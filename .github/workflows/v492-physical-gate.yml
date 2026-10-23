@@ -1,0 +1,38 @@
+name: V492 physical Quimera phase-two gate
+
+on:
+  pull_request:
+    branches: [main, 'test/v491-first-physical-quimera-hit']
+    paths:
+      - 'tests/browser/v492-quimera-physical-phase-two.mjs'
+      - '.github/workflows/v492-physical-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quimera-phase-two:
+    name: Ten seals and real Quimera phase-two threshold
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - name: Genuine first Quimera phase transition
+        run: node tests/browser/v492-quimera-physical-phase-two.mjs
+      - name: Preserve actual boss encounter evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v492-real-boss-physics
+          path: |
+            test-results/v491/
+            test-results/v492/
+          if-no-files-found: ignore
+          retention-days: 7
