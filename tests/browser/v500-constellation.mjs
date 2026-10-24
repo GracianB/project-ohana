@@ -34,7 +34,7 @@ try{
  await page.setViewportSize({width:1440,height:1000});
  await page.locator('.constellation-close').focus();
  await page.keyboard.press('Shift+Tab');
- assert.equal(await page.evaluate(()=>document.activeElement?.dataset.hero),'cuerno');
+ assert.equal(await page.evaluate(()=>document.activeElement?.dataset.constellationHero),'cuerno');
  await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement?.className),'constellation-close');
  await page.keyboard.press('Escape');assert.equal(await page.locator('#family-constellation').isVisible(),false);
  await page.reload();await page.locator('.oi-enter').click();await page.locator('#btn-family-memory').click();

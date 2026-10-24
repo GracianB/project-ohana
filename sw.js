@@ -369,7 +369,7 @@ const PRECACHE_REVISIONS = {
   "systems/world1-guidance.js": "db01d1857b64de59ac94a0f4d3579c9be3aacca5",
   "systems/family-memory.js": "6e44ce4d51d3e3b4dddab6dafb0e5331653da65a",
   "systems/family-constellation-story.js": "887f9694f106b922bef0ae2404cbc763389a8537",
-  "systems/family-constellation.js": "955f60581a51ec6eb0c74ebc224b79e370aff419",
+  "systems/family-constellation.js": "4d1667a4b224a59e1722fd1b29fa3f5485e3b110",
   "systems/hero-collections.js": "cb3bf8d5e7c71041ec57d9aca558ac837e31f60e",
   "systems/stitcho-room.js": "f4da79b64de430815d82d42b6c584e352ea5679c",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",

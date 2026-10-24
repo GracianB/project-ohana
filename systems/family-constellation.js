@@ -28,7 +28,7 @@ export function installFamilyConstellation(){
   layer.querySelector('.constellation-name').textContent=star.name;
   layer.querySelector('.constellation-gift').textContent=star.gift;
   layer.querySelector('.constellation-voice').textContent=star.line;
-  for(const b of nav.querySelectorAll('button')){b.setAttribute('aria-pressed',String(b.dataset.hero===star.id));b.dataset.lit=String(memory.lights.includes(b.dataset.hero));}
+  for(const b of nav.querySelectorAll('button')){b.setAttribute('aria-pressed',String(b.dataset.constellationHero===star.id));b.dataset.lit=String(memory.lights.includes(b.dataset.constellationHero));}
   const progress=constellationProgress(memory.lights);status.textContent=`${progress.count} / 10 voces recuperadas`;
   layer.classList.toggle('all-lit',progress.complete);
   layer.querySelector('.constellation-last-title').textContent=progress.title;
@@ -36,7 +36,7 @@ export function installFamilyConstellation(){
   cancelAnimationFrame(frame);last=0;draw();
  }
  for(const [i,star] of FAMILY_STARS.entries()){
-  const b=document.createElement('button');b.type='button';b.dataset.hero=star.id;
+  const b=document.createElement('button');b.type='button';b.dataset.constellationHero=star.id;
   b.style.setProperty('--x',String(50+38*Math.cos(-Math.PI/2+i*Math.PI/5))+'%');
   b.style.setProperty('--y',String(50+38*Math.sin(-Math.PI/2+i*Math.PI/5))+'%');
   b.style.setProperty('--light',star.color);b.textContent=star.name;b.setAttribute('aria-label','Escuchar a '+star.name);
