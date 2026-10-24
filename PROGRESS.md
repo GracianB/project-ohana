@@ -1,3 +1,20 @@
+# V502 · ohana-502 · El taller de Stitcho
+
+Stitcho integra tres reparaciones, un raíl que exige una bola K continua y Núcleo Glitch
+en su propia arena. Cada hito garantiza su evolución local; el sello requiere también
+la derrota real del jefe. Talleres y raíl se conservan con Continuar; los sellos antiguos
+siguen siendo válidos. Accesos de suelo despejados y ruta elevada entre talleres.
+
+Piloto físico: cinco formas, cero muertes, Continuar, bola táctil y salida a Chispín bebé.
+Kilo vuelve a superar su piloto físico sin muertes. Auditoría general de navegador
+(`node tests/browser/e2e.mjs`) aprobada. V501 superó la matriz completa
+(`node tests/browser/visual-regression.mjs`); no se atribuye aquí una matriz completa
+nueva a V502. La integridad offline se comprueba con `npm run release:check`.
+Quedan la aceptación humana de dificultad y los cien recuerdos por capítulo.
+V501 está publicada y verificada; esta entrada describe la candidata V502 antes del despliegue.
+
+## Historial V501
+
 # V501 · ohana-501 · La aventura se entiende jugando
 
 Plan de cierre individual preparado en docs/V1-SOLO-ESTRATEGIA.md, con matriz por capítulo, paquete ejecutable de Stitcho, contrato del final, puertas de V1 y entrega sin depender del chat en docs/HANDOFF-V1-SOLO.md. Estado estructurado en docs/v1-solo-status.json. Esta ampliación es documental: no declara integrados los otros nueve capítulos ni publicado el juego.
