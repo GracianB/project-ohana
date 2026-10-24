@@ -1,3 +1,4 @@
+import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
 import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
 // Cada sala tiene UNA interacción propia (WORLD1_SEALS); el resto es sencillo.
@@ -35,7 +36,7 @@ export function enterWorld1(g) {
     } : null,
     statuesLit: r.statues ? r.statues.map((s) => g.world1Seals.includes(s.hero)) : null
   };
-  kiloNoteGrowth(g);enterKiloAirTrail(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);enterKiloAirTrail(g);
   return g.world1;
 }
 
@@ -97,6 +98,7 @@ export function world1NextObjective(g) {
   if (!w || !p || !r || r.fusionBoss) return null;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:8750,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
+  const workshopGoal=stitchoObjective(g);if(workshopGoal)return workshopGoal;
   const remaining = w.stations.filter(s => !s.done && s.kind !== "oven");
   const nearest = list => [...list].sort((a,b) => Math.abs(a.x - cx(p)) - Math.abs(b.x - cx(p)))[0];
   let target = w.kind === "prismas" ? remaining.find(s => s.order === w.order) : nearest(remaining);
@@ -155,7 +157,7 @@ function complete(g, s, label) {
   g.fx?.emit?.(s.x, s.y - 50, { color: WORLD1_THEMES[w.hero]?.color || "#fff", count: g.reduceMotion ? 6 : 20, size: 4, up: 2, star: true, life: 30 });
   // Each physical station grants score only once, including after a reload.
   if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
-  kiloNoteGrowth(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
@@ -164,7 +166,7 @@ function complete(g, s, label) {
 }
 
 export function awardSeal(g) {
-  const w = g.world1; if (!w || w.sealed || !w.hero || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
+  const w = g.world1; if (!w || w.sealed || !w.hero || !stitchoChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
   w.sealed = true; w.flash = 40;
   g.world1Seals = cleanWorld1Seals([...(g.world1Seals || []), w.hero]);
   const p = g.player;
@@ -184,9 +186,10 @@ export function updateWorld1(g) {
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
-  updateKiloAirTrail(g);
+  updateKiloAirTrail(g);updateStitchoChapter(g);
   if (w.sealed) return;
   kiloNoteGrowth(g);
+  if(r.stitchoChapter&&w.stations.every(s=>s.done)&&stitchoChapterReady(g)){awardSeal(g);return;}
   if(r.kiloChapter&&w.stations.every(s=>s.done)&&!kiloGuardianRequired(g)){awardSeal(g);return;}
   const airborne = !p.grounded;
   switch (w.kind) {
@@ -204,7 +207,7 @@ export function updateWorld1(g) {
     case "reparar":
       // Piece 0 is a valid carried item. A truthiness check makes it look empty
       // and prevents delivery of the first part (blocking Stitcho's seal).
-      if (w.carry == null) { for (const s of w.stations) if (!s.done && near(p, s.x, s.y - 30, 50, 70)) { w.carry = s.id; g.nums?.add?.(p.x, p.y - 40, "PIEZA COGIDA → TALLER", "#8cecff", false); break; } }
+      if (w.carry == null) { for (const s of w.stations) if (!s.done && (!r.stitchoChapter || s.id===0 || g.secrets?.[r.id]?.includes("w1-stitcho-main-rail-v1")) && near(p, s.x, s.y - 30, 50, 70)) { w.carry = s.id; g.nums?.add?.(p.x, p.y - 40, "PIEZA COGIDA → TALLER", "#8cecff", false); break; } }
       else { const s = w.stations.find((x) => x.id === w.carry); if (s && near(p, s.target.x, s.target.y - 30, 60, 80)) { w.carry = null; complete(g, s, "NAVE"); } }
       break;
     case "cadena": {
@@ -342,7 +345,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -355,7 +358,7 @@ export function drawWorld1(ctx, g, cam, t) {
     ctx.beginPath();ctx.moveTo(ax - 105,ay - 140);ctx.lineTo(ax + 85,ay - 140);
     ctx.lineTo(ax + 120,ay - 112);ctx.lineTo(ax + 85,ay - 84);ctx.lineTo(ax - 105,ay - 84);ctx.closePath();ctx.fill();
     ctx.fillStyle = w.sealed ? "#101c2b" : "#fff";ctx.font = "800 13px Outfit, sans-serif";ctx.textAlign = "center";
-    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":"SELLO " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
+    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":g.roomDef?.stitchoChapter&&w.stations.every(s=>s.done)?"VENCE AL NÚCLEO":"SELLO " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
   }
   const objective = world1NextObjective(g);
   if (objective && vis(objective.x)) {

@@ -54,6 +54,7 @@ test("death: Stitcho delivered part ID 0 stays repaired; loose part is dropped",
   const x=makeGame("stitcho"),s=x.g.world1.stations;
   x.stand(s[0].x);x.tick();assert.equal(x.g.world1.carry,0);
   x.stand(s[0].target.x);x.tick();assert.equal(s[0].done,true);
+  x.g.secrets={'w1-stitcho':['w1-stitcho-main-rail-v1']}; // earned rail is isolated in chapter tests
   x.stand(s[1].x);x.tick();assert.equal(x.g.world1.carry,1);
   const snapshot=world1DeathCheckpoint(x.g);
   assert.deepEqual(snapshot.completed,[0]);
@@ -65,6 +66,8 @@ test("death: Stitcho delivered part ID 0 stays repaired; loose part is dropped",
     x.stand(station.x);x.tick();assert.equal(x.g.world1.carry,station.id);
     x.stand(station.target.x);x.tick();
   }
+  assert.deepEqual(x.g.world1Seals,[],'repair persistence cannot bypass Glitch');
+  x.g.clearedEncounters={'w1-stitcho':['w1-stitcho-glitch-v1']};x.tick();
   assert.deepEqual(x.g.world1Seals,["stitcho"]);
   assert.equal(x.g.score,450);
 });

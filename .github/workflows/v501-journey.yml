@@ -25,11 +25,14 @@ jobs:
       - run: npm run test:browser:album
       - run: npm run test:browser:powers
       - run: npm run test:browser:kilo-airplay
+      - run: npm run test:browser:stitcho-chapter
       - run: npm run test:browser:kilo-chapter
       - run: npm run test:browser:worlds
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: v501-journey-evidence
-          path: test-results/v501/
+          path: |
+            test-results/v501/
+            test-results/v502/
           if-no-files-found: ignore

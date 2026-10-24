@@ -28,7 +28,8 @@
     "test:browser:michi-ending": "node tests/browser/michi-ending.mjs",
     "test:browser:u-companions": "node tests/browser/u-companions-v382.mjs",
     "test:browser:kilo-chapter": "node tests/browser/v501-kilo-chapter.mjs",
-    "test:browser:kilo-airplay": "node tests/browser/v501-kilo-airplay.mjs"
+    "test:browser:kilo-airplay": "node tests/browser/v501-kilo-airplay.mjs",
+    "test:browser:stitcho-chapter": "node tests/browser/v502-stitcho-chapter.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

@@ -1,3 +1,4 @@
+import {STITCHO_CHAPTER_BOSS_ID,STITCHO_CHAPTER_ARENA} from './systems/stitcho-chapter.js';
 import {drawOhanaPlace} from "./worlds/ohana-environments.js";
 import {installFamilyConstellation} from "./systems/family-constellation.js";
 import {world1Guidance} from "./systems/world1-guidance.js";
@@ -649,6 +650,7 @@ if (f[3]) applyElite(e);
 return e;
 });
 game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon'||game.player?.id==='dino'||game.player?.id==='frita'||game.player?.id==='pizza'||game.player?.id==='yomi'||game.player?.id==='cuerno')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
+if(r.stitchoChapter&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:8750,arena:STITCHO_CHAPTER_ARENA}));}
 game.spawnStitchoBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='stitcho'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(STITCHO_BOSS_ID))return true;
@@ -3917,6 +3919,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  // locked gate, this deliberately does NOT verify route reachability.
  grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
+stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
 kiloAirState(){return {chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
 roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},

@@ -74,3 +74,23 @@ La rama `feat/v502-stitcho-chapter` prepara la adaptación de Núcleo Glitch con
 roomId e ID persistente configurables. Conserva los valores históricos del hub. Su prueba
 recorre los cuatro patrones dentro de los límites del capítulo. Esta preparación no integra
 ni cierra todavía el capítulo de Stitcho y no forma parte de la V501 publicada.
+
+
+## V502 · capítulo de Stitcho integrado
+
+Sustituye la preparación anterior: `w1-stitcho` carga ahora su propio Glitch y su
+ID de derrota. Tres reparaciones + raíl real de bola + jefe son obligatorios para
+un sello nuevo; los sellos antiguos siguen siendo válidos. Hitos de XP mínimos:
+55 / 140 / 260 / 420, sin premios duplicados ni reducción de XP mayor. La pieza 0
+sigue siendo válida y el guardado conserva talleres y raíl. La zona de bola y
+los talleres tienen sus columnas de acceso despejadas; hay una ruta elevada de
+mantenimiento entre talleres. No se ha trasladado íntegramente el viejo hub ni
+se afirma que sus cuatro raíles móviles/arcos estén en este capítulo.
+
+Piloto físico: acceso directo a `w1-stitcho` como única fixture; sin cambiar posición,
+XP, HP, formas, enemigos ni victoria. Cinco formas ganadas, cero muertes, Continuar
+a mitad, bola táctil usando el save ganado y salida física a Chispín bebé. Evidencia:
+`test-results/v502/stitcho-pilot.json`; comando `npm run test:browser:stitcho-chapter`
+(`CHROMIUM_BIN=/usr/bin/chromium` solo en este entorno). Suite Node: 1.500 pruebas.
+La aceptación humana y la alcanzabilidad de los cien recuerdos siguen pendientes.
+Siguiente integración: Chispín. Mantener las cuatro antenas persistentes.

@@ -25,7 +25,7 @@ La base contiene diez héroes, cincuenta formas, diez salas del Mundo 1, sus mec
 
 Kilo tiene una primera integración completa del capítulo: cuatro encuentros y notas, cinco formas alcanzadas, Tambor con recuperación/avisos aéreos, vuelo solar, J dirigido, vigías y carillones persistentes. El piloto físico verifica también Continuar. Sigue pendiente su aceptación humana de dificultad y el recorrido completo de cien recuerdos.
 
-Los demás personajes tienen repertorios y sistemas propios existentes, pero no están cerrados como capítulos nuevos. Ejemplo verificable: `createStitchoBoss` usa arena e ID `hub`, y `game.spawnStitchoBoss` exige `roomId === 'hub'`; entrar en `w1-stitcho` no integra automáticamente ese jefe. Lo mismo debe auditarse para cada implementación histórica. No confundir los documentos de cierre de repertorio con el cierre de la campaña actual.
+Stitcho tiene ya integración local en V502: reparaciones, raíl de bola, cuatro hitos de crecimiento y Núcleo Glitch en su sala. El piloto físico verifica cinco formas, Continuar, control táctil y salida a Chispín bebé. Sus cien recuerdos y dificultad humana siguen pendientes. Los ocho personajes restantes conservan sus repertorios y sistemas históricos; todavía necesitan integración y aceptación como capítulos completos. No confundir los documentos de cierre de repertorio con el cierre de la campaña actual.
 
 Validación local de referencia: 1.496 pruebas Node, release gate y auditoría general de navegador aprobados antes de esta entrega documental. Las fixtures de acceso, forma o posición se distinguen de los recorridos físicos; el resto de capítulos no se presenta como ganado por esas fixtures.
 
@@ -36,7 +36,7 @@ Se sigue el orden real de WORLD1_ORDER. Los contratos visuales y tácticos detal
 | Orden | Capítulo | Trabajo concreto siguiente | Evidencia mínima para cerrarlo |
 | --- | --- | --- | --- |
 | 1 | Kilo | Aceptación humana; revisar cámara, avisos, dificultad y cien recuerdos; corregir únicamente hallazgos reproducibles | Bebé → cinco formas → notas/carillones → Tambor → Stitcho bebé; móvil y Continuar; inventario alcanzable |
-| 2 | Stitcho | Integrar piezas, bola/paredes, un tramo principal de raíl y Núcleo Glitch en `w1-stitcho` | Crecer reparando y atravesando el taller, derrotar Núcleo, guardar reparaciones y salir con Chispín bebé |
+| 2 | Stitcho | Integración local V502 aprobada; revisar dificultad humana y cien recuerdos | Crecer reparando y atravesando el taller, derrotar Núcleo, guardar reparaciones y salir con Chispín bebé |
 | 3 | Chispín | Integrar blink, cadena, conductores y Titán en su santuario; conservar las cuatro antenas persistentes | Antenas ganadas, desplazamiento útil, jefe real, retorno de Continuar sin perder conexiones |
 | 4 | Michi | Integrar medusas, control de grupos y Espíritu Astral Felino en el jardín | Cruces suspendidos alcanzables, uso efectivo de control, cinco formas y jefe sin exigir XP externa |
 | 5 | Cuerno | Integrar rutas de luz, prismas y minijefe existente en su bosque | Orden I/II/III conservado, flancos y altura legibles, jefe y salida propia |
@@ -48,7 +48,7 @@ Se sigue el orden real de WORLD1_ORDER. Los contratos visuales y tácticos detal
 
 Para cada fila: auditar lo existente → escribir hitos y encuentros → adaptar arena/guardado → implementar → probar desde bebé → revisar móvil y persistencia → registrar evidencia → corregir → aceptar. Una fila no se cierra porque su archivo exista.
 
-## Siguiente paquete ejecutable: Stitcho
+## Paquete Stitcho: integrado en V502; aceptación humana pendiente
 
 Objetivo: completar `w1-stitcho`, aprovechando `stitcho-trail.js`, `stitcho-boss.js`, `stitcho-room.js`, sus animaciones, plasma, bola y baile. No copiar las cuatro flores de Kilo ni tocar su arte o vuelo para adaptar Stitcho.
 

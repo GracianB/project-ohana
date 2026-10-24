@@ -53,11 +53,16 @@ test('World 1 Stitcho: first repair piece uses numeric zero and can be delivered
   assert.equal(game.world1Snapshot?.sealed ?? game.world1.sealed, false);
 });
 
-test('World 1 Stitcho: all three deliveries awaken exactly one seal and unlock east', () => {
+test('World 1 Stitcho: repairs need the roll rail and defeated Glitch before the unique seal', () => {
   const run = createStitchoRun();
   const { game, standNear } = run;
   assert.equal(game.world1.stations.length, 3);
   for (const part of game.world1.stations) {
+    if(part.id===1){
+      game.player.id='stitcho';game.player._abilMove='roll';
+      for(let x=2940;x<=3340;x+=10){game.player.x=x-game.player.w/2;game.player.y=1134-game.player.h;updateWorld1(game);}
+      game.player._abilMove=null;
+    }
     standNear(part.x, part.y - 30);
     updateWorld1(game);
     assert.equal(game.world1.carry, part.id, 'must carry part ' + part.id);
@@ -68,13 +73,17 @@ test('World 1 Stitcho: all three deliveries awaken exactly one seal and unlock e
     assert.equal(game.world1.carry, null);
   }
 
+  assert.equal(game.world1.sealed, false,'repairs alone never defeat the boss');
+  assert.equal(awardSeal(game),false);
+  game.clearedEncounters={'w1-stitcho':['w1-stitcho-glitch-v1']};
+  updateWorld1(game);
   assert.equal(game.world1.sealed, true);
   assert.deepEqual(game.world1Seals, ['stitcho']);
   assert.equal(world1CanLeave(game, 'right'), true, 'east opens after all repairs');
   assert.equal(game.player.health, 100, 'seal reward heals but cannot overfill');
-  assert.equal(game.player.xp, 3);
-  assert.equal(run.saved, 3, 'each delivered part must be saved once');
+  assert.equal(game.player.xp, 423);
+  assert.equal(run.saved, 5, 'each delivered part must be saved once');
   assert.equal(run.beats.filter(([kind]) => kind === 'seal').length, 1);
   assert.equal(awardSeal(game), false, 'the reward cannot be claimed twice');
-  assert.equal(run.saved, 3);
+  assert.equal(run.saved, 5);
 });

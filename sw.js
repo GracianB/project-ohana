@@ -1,6 +1,7 @@
-const VERSION = "ohana-501";
+const VERSION = "ohana-502";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/stitcho-chapter.js?v=" + VERSION,
   "./worlds/ohana-environments.js?v=" + VERSION,
   "./systems/kilo-chapter.js?v=" + VERSION,
   "./systems/power-status.js?v=" + VERSION,
@@ -369,6 +370,7 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/stitcho-chapter.js": "f2775bf7b4aca9b6215af8fc443a797a6df8b872",
   "worlds/ohana-environments.js": "2076851ad9b299a92c699d6d10b5b48012d55442",
   "systems/kilo-chapter.js": "2f8a187e701782b2c912a5d4355e6c0703b34c3d",
   "systems/power-status.js": "b5c2ea479144ed8d26f90cacf36ec1ccecbbcbc1",
@@ -415,8 +417,8 @@ const PRECACHE_REVISIONS = {
   "systems/world1-boss.js": "8f48db5e251a748edbe3a70d1118678d0300d2b0",
   "systems/fusion-boss.js": "c3fe5a45dc7c9599c91d4796f756a8aa0d0e5904",
   "systems/world1-story.js": "868d73db7e14db752a5afdcd42d3652daea5df21",
-  "systems/world1-rooms.js": "798838d9419f0e084be6a53dff0a627aed5cf555",
-  "systems/world1-play.js": "84576bee2423e7414a85451e13165986778869b3",
+  "systems/world1-rooms.js": "67e67ffeb38bd75a9e27465cd794bc6087966198",
+  "systems/world1-play.js": "be11aa496a84b790818bbe9941b10c6c60b54257",
   "systems/yomi-trail.js": "d39306a5ada636f9c9b2dee5107e7990da01134c",
   "systems/yomi-boss.js": "ef9dc362d4a1b19246378216bae835a972cd9ce5",
   "worlds/yomi-observatory.js": "bbc3e453a487d67ec7ae8f51dde1b58d959cc2ce",
@@ -487,7 +489,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "d9f61d2224d9453d14105d8e855783f53e2cac12",
-  "index.html": "40f9b812dc98050fbed921f6facb80d45a18f2ca",
+  "index.html": "b3de5fff48e6b429d969766e1297489f3a7f4de2",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -512,7 +514,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "1693352c43493969bf40a50d0ab572c6a35e56bd",
+  "game.js": "a2be537ca8b6ad88a12fb0f702072ed81278f474",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "9b6a7b35c9a31d777b43214b028ffb29ee541021",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",

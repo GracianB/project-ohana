@@ -3,19 +3,19 @@
   "updated_on": "2026-10-24",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v501-playable-journey",
-  "base_commit": "981526fc51177355f138e6f7f3917f5d037dade7",
+  "branch": "feat/v502-stitcho-chapter",
+  "base_commit": "2139967c30fb04266428addfffe0d41850a06fc7",
   "published": false,
   "campaign_complete_verified": false,
   "v1_ready": false,
-  "next_task": "chapter.stitcho",
+  "next_task": "chapter.chispin",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1496,
-    "runtime_modules": 310,
-    "precache_resources": 360,
+    "node_passed": 1500,
+    "runtime_modules": 311,
+    "precache_resources": 361,
     "source": "Existing local V501 execution logs; documentation-only planning does not constitute a new playthrough",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
@@ -41,12 +41,15 @@
       "id": "stitcho",
       "order": 2,
       "room": "w1-stitcho",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate pieces, main rail, four earned growth milestones and existing Glitch boss in the chapter",
-      "evidence": []
+      "next_work": "Human difficulty review, all 100 memories reachability; existing moving rails/electrical arcs remain optional future integration",
+      "evidence": [
+        "tests/browser/v502-stitcho-chapter.mjs",
+        "test-results/v502/stitcho-pilot.json"
+      ]
     },
     {
       "id": "chispin",
@@ -187,5 +190,11 @@
       "status": "blocked_by_chapter_integration"
     }
   ],
-  "evidence_storage": "Test sources are versioned; test-results and logs are generated locally and included in the delivery ZIP."
+  "evidence_storage": "Test sources are versioned; test-results and logs are generated locally and included in the delivery ZIP.",
+  "published_release": {
+    "version": "ohana-501",
+    "commit": "2139967c30fb04266428addfffe0d41850a06fc7",
+    "url": "https://gracianb.github.io/project-ohana/",
+    "verified": true
+  }
 }

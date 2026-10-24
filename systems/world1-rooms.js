@@ -121,6 +121,12 @@ export function buildWorld1HeroRoom(hero) {
     // A low stepping route gives room to practise K and the extra jumps.
     plats.push([3420,1054,180,22],[3650,974,220,22],[5010,1054,180,22],[5240,974,220,22]);
   }
+  if(hero==='stitcho'){
+    // Clear the floor workshops and the first continuous roll lesson. Elevated
+    // machinery stays between them, leaving transport possible in baby form.
+    for(let i=plats.length-1;i>0;i--){const [x,y,w]=plats[i];if(y<WORLD1_FLOOR&&((x<3390&&x+w>2880)||stations.some(st=>[st.x,st.target.x].some(px=>x<px+95&&x+w>px-95))))plats.splice(i,1);}
+    plats.push([4670,1040,190,22],[4930,950,200,22],[5210,860,220,22],[5550,950,220,22]);
+  }
   // Frita's oil vents must have an uninterrupted launch corridor to their prizes.
   // Decorative one-way platforms previously stopped a launched hero at y~940
   // before reaching the floating potato at floor - 470.
@@ -140,10 +146,10 @@ export function buildWorld1HeroRoom(hero) {
   return {
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
-    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo',
+    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho',
     width: W, height: WORLD1_ROOM_H,
     doors: { left: prev, right: next, up: null, down: null },
-    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
+    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []

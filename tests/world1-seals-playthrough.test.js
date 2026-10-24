@@ -37,14 +37,14 @@ function assertSealed(run, hero) {
   assert.equal(world1Snapshot(game).sealed, true, hero + " seal state");
   assert.deepEqual(game.world1Seals, [hero], hero + " global seal inventory");
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
-  assert.equal(game.score, 150 * total, hero + " grants points once per station");
+  assert.equal(game.score, 150 * (total+(hero==='stitcho'?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, hero==='kilo'?423:3, hero + " rewards experience");
-  assert.equal(run.saves, total, hero + " saves each completed objective once");
+  assert.equal(game.player.xp, ['kilo','stitcho'].includes(hero)?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total+(hero==='stitcho'?2:0), hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, total, "no extra save after completion");
+  assert.equal(run.saves, total+(hero==='stitcho'?2:0), "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -85,12 +85,15 @@ test("Stitcho: part zero and the remaining pieces reach their own workshops", ()
   const run = setup("stitcho"), { game, stand, tick } = run;
   assert.equal(game.world1.stations[0].id, 0);
   for (const s of game.world1.stations) {
+    if(s.id===1){game.player.id='stitcho';game.player._abilMove='roll';for(let x=2940;x<=3340;x+=10){stand(x);tick();}game.player._abilMove=null;}
     stand(s.x); tick();
     assert.equal(game.world1.carry, s.id);
     stand(s.target.x); tick();
     assert.equal(s.done, true);
     assert.equal(game.world1.carry, null);
   }
+  assert.equal(game.world1.sealed,false);
+  game.clearedEncounters={'w1-stitcho':['w1-stitcho-glitch-v1']};tick();
   assertSealed(run, "stitcho");
 });
 
