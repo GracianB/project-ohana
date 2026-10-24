@@ -30,16 +30,16 @@ export function installFamilyConstellation(){
   const halo=c.createRadialGradient(W/2,H*.5,10,W/2,H*.5,W*.55);
   halo.addColorStop(0,'#e6ad4938');halo.addColorStop(1,'#e6ad4900');c.fillStyle=halo;c.fillRect(0,0,W,H);
   // Paint back to front, retaining each hero's canonical engine art.
-  const seats=FAMILY_STARS.map((s,i)=>({s,i,x:W*(.12+(i%5)*.19),y:H*(i<5?.28:.53)}));
+  const seats=FAMILY_STARS.map((s,i)=>({s,i,x:W*(.12+(i%5)*.19),y:H*(i<5?.25:.56)}));
   for(const {s,i,x,y} of seats){
    const a=family[i];a.grounded=true;a.vx=0;a.vy=0;a._poseOverride='idle';
-   drawDummy(c,a,x,y,H*.18/baseHeight(s.id,4),now*.06);
+   drawDummy(c,a,x,y,H*.15/baseHeight(s.id,4),now*.06);
    c.fillStyle=s.color;c.font='16px Outfit, sans-serif';c.textAlign='center';c.fillText(s.name,x,y+25);
   }
-  c.fillStyle='#392c31';c.beginPath();c.ellipse(W/2,H*.68,W*.34,H*.13,0,0,Math.PI*2);c.fill();
+  c.fillStyle='#392c31';c.beginPath();c.ellipse(W/2,H*.73,W*.34,H*.10,0,0,Math.PI*2);c.fill();
   c.strokeStyle='#d6ad70';c.lineWidth=2;c.stroke();
   for(let i=0;i<11;i++){
-   const a=-Math.PI+i*Math.PI/9,x=i===10?W/2:W/2+W*.29*Math.cos(a),y=i===10?H*.79:H*.73+H*.07*Math.sin(a);
+   const a=-Math.PI+i*Math.PI/9,x=i===10?W/2:W/2+W*.29*Math.cos(a),y=i===10?H*.82:H*.76+H*.07*Math.sin(a);
    c.shadowColor=i===10?'#fff6d3':FAMILY_STARS[i].color;c.shadowBlur=18;
    c.fillStyle=i===10?'#fff6d3':FAMILY_STARS[i].color;c.beginPath();c.arc(x,y,5,0,Math.PI*2);c.fill();
   }
