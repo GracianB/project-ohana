@@ -380,7 +380,7 @@ const PRECACHE_REVISIONS = {
   "systems/stitcho-room.js": "f4da79b64de430815d82d42b6c584e352ea5679c",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
   "systems/stitcho-trail.js": "7f834abb3ce08628a60e4a32f7072f81f806e7dc",
-  "systems/stitcho-boss.js": "7a0a5d3e6fc1c24329a98aa910004f6d6e90c3d5",
+  "systems/stitcho-boss.js": "8635de0eb5464166c8ea797be2ae2c30b8c54731",
   "worlds/stitcho-archipelago.js": "ecda3b3d8b2af806078caa2351f5c77de68b761d",
   "systems/chispin-room.js": "c44226494a2ee44507da15670b8768e5ca82bf41",
   "systems/chispin-trail.js": "7ac148bc536fd02a2b7f722615ccc8291943daf2",

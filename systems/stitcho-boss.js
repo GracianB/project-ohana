@@ -3,23 +3,27 @@
 export const STITCHO_BOSS_ID='hub-stitcho-glitch-v1';
 export const STITCHO_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['sweep','charge','cross','meteor']);
-export function createStitchoBoss(makeFoe,rng=()=>.5){
-  const e=makeFoe(3400,1000,'cangrejo','hub',997,{rng});
-  e.x=3400;e.y=STITCHO_BOSS.floor-92;e.w=112;e.h=92;
-  e.hp=e.max=STITCHO_BOSS.hp;
+export function createStitchoBoss(makeFoe,rng=()=>.5,options={}){
+  const arena=Object.freeze({...STITCHO_BOSS,...options.arena});
+  const roomId=options.roomId||'hub';
+  const x=options.x??3400;
+  const e=makeFoe(x,arena.floor-92,'cangrejo',roomId,997,{rng});
+  e._stitchoArena=arena;
+  e.x=x;e.y=arena.floor-92;e.w=112;e.h=92;
+  e.hp=e.max=arena.hp;
   e.miniBoss=true;e._stitchoBoss=true;
   e._campaignOriginal=true;e.spawnIndex=997;
-  e._encounterSaveId=STITCHO_BOSS_ID;
-  e.roomId='hub';e.color='#80ddf8';e.contactDmg=0;
+  e._encounterSaveId=options.encounterId||STITCHO_BOSS_ID;
+  e.roomId=roomId;e.color='#80ddf8';e.contactDmg=0;
   e._glitch={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false};
   return e;
 }
 export function updateStitchoBoss(e,g,hurt){
  if(!e?._stitchoBoss)return false;
- const b=e._glitch,p=g.player;
+ const b=e._glitch,p=g.player,arena=e._stitchoArena||STITCHO_BOSS;
  if(e.invuln>0)e.invuln--;
- e.x=Math.max(STITCHO_BOSS.left,Math.min(STITCHO_BOSS.right-e.w,e.x));
- e.y=STITCHO_BOSS.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
+ e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
+ e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  if(!p||p.dead||e.hp<=0)return true;
  b.tier=e.hp<=e.max*.26?3:e.hp<=e.max*.60?2:1;
  const dx=p.x+p.w/2-(e.x+e.w/2);
@@ -47,7 +51,7 @@ export function updateStitchoBoss(e,g,hurt){
    b.burst=1;
   }
   if(b.attack===1){
-   e.x=Math.max(STITCHO_BOSS.left,Math.min(STITCHO_BOSS.right-e.w,e.x+b.aim*(b.tier===3?10:6)));
+   e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x+b.aim*(b.tier===3?10:6)));
    if(Math.abs(dx)<(e.w+p.w)/2&&Math.abs(p.y+p.h/2-e.y-e.h/2)<(p.h+e.h)/2)
      hurt?.(b.tier===3?22:16,'EMBESTIDA GLITCH');
   }
@@ -66,7 +70,7 @@ export function drawStitchoBossSignals(ctx,e,cam,t=0,reduced=false){
  ctx.fillStyle='#2d5570';ctx.fillRect(x-108,y-46,216,8);
  ctx.fillStyle='#73e7fc';ctx.fillRect(x-108,y-46,216*Math.max(0,e.hp/e.max),8);
  if(b.phase==='warn'){
-  const floor=STITCHO_BOSS.floor-cam.y;ctx.strokeStyle='#ffe6a3';ctx.lineWidth=4;
+  const floor=(e._stitchoArena||STITCHO_BOSS).floor-cam.y;ctx.strokeStyle='#ffe6a3';ctx.lineWidth=4;
   ctx.setLineDash([9,8]);ctx.beginPath();
   if(b.attack===0||b.attack===2){ctx.moveTo(x-260,floor-13);ctx.lineTo(x+260,floor-13);}
   else if(b.attack===1){ctx.moveTo(x,floor-8);ctx.lineTo(x+b.aim*310,floor-8);}

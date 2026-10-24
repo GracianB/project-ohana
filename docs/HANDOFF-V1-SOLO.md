@@ -60,3 +60,17 @@ Añadir el piloto del siguiente capítulo cuando exista. Los scripts admiten CHR
 Si cambia runtime: actualizar hashes con `node tools/update-offline-revisions.mjs` después de los últimos cambios y antes de ejecutar la suite; no editar runtime mientras corren comprobaciones de hashes. Probar el cambio y las regresiones afectadas, sin repetir baterías ya verdes sin motivo.
 
 Actualizar la matriz/JSON con evidencia, README/PROGRESS cuando cambie el estado y el ZIP con `git diff --binary HEAD`. Incluir archivos nuevos en el parche mediante intención de añadido; revisar `git diff --check`, correspondencia ZIP/fuentes y aplicación inversa del parche. Conservar base/branch/published=false hasta integración y publicación verificadas. Nunca marcar pendientes como aprobados ni llamar “V1 completa” a un cambio solo local.
+
+
+## Publicación verificada y siguiente rama · 24 de octubre de 2026
+
+V501 publicada en https://gracianb.github.io/project-ohana/ desde `2139967c30fb04266428addfffe0d41850a06fc7`.
+Pages: https://github.com/GracianB/project-ohana/actions/runs/40134908925 (correcto).
+La matriz visual completa local terminó con `OHANA VISUAL MATRIX PASS`; los archivos públicos
+index.html, sw.js, game.js, kilo-chapter, world1-play y los tres módulos de cooperación
+verificados coinciden por SHA256 con el commit publicado. Los capítulos restantes siguen pendientes.
+
+La rama `feat/v502-stitcho-chapter` prepara la adaptación de Núcleo Glitch con arena, origen,
+roomId e ID persistente configurables. Conserva los valores históricos del hub. Su prueba
+recorre los cuatro patrones dentro de los límites del capítulo. Esta preparación no integra
+ni cierra todavía el capítulo de Stitcho y no forma parte de la V501 publicada.

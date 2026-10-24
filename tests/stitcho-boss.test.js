@@ -54,3 +54,28 @@ test('boss and named minions have independent accessible vector renderers',()=>{
  drawStitchoEnemyAccent(ctx,{x:20,y:20,w:32,spawnIndex:1,roomPersona:{name:'Dron'}},{x:0,y:0},123,false);
  assert.ok(seen.includes('ellipse')&&seen.includes('stroke')&&seen.includes('restore'));
 });
+
+// The chapter arena is far east of the historical hub. Its AI and warning
+// geometry must follow its own floor/bounds without changing the old encounter.
+test('chapter Glitch keeps its own arena, persistent ID and room through all patterns',()=>{
+ const calls=[];
+ const e=createStitchoBoss((...args)=>{calls.push(args);return {stun:0,invuln:0,sleep:0};},()=>.5,{
+  roomId:'w1-stitcho',encounterId:'w1-stitcho-glitch-v1',x:8750,
+  arena:{left:8260,right:9320,floor:1134}
+ });
+ assert.equal(calls[0][3],'w1-stitcho');
+ assert.equal(e.roomId,'w1-stitcho');
+ assert.equal(e._encounterSaveId,'w1-stitcho-glitch-v1');
+ const g={player:{x:8800,y:1070,w:32,h:40},cam:{x:8200,y:400},viewW:1100,projectiles:[],nums:{add(){}}};
+ const patterns=new Set();
+ for(let i=0;i<1500;i++){
+  updateStitchoBoss(e,g,()=>{});
+  if(e._glitch.phase==='warn')patterns.add(e._glitch.attack);
+  assert.ok(e.x>=8260&&e.x+e.w<=9320,'cannot snap back into the legacy hub');
+  assert.equal(e.y+e.h,1134);
+ }
+ assert.deepEqual([...patterns].sort(),[0,1,2,3]);
+ const legacy=fixture().e;
+ assert.equal(legacy.roomId,'hub');assert.equal(legacy._encounterSaveId,STITCHO_BOSS_ID);
+ assert.deepEqual(legacy._stitchoArena,STITCHO_BOSS);
+});
