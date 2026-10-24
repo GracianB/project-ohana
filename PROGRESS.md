@@ -2460,3 +2460,7 @@ Validación de ohana-438: 1250/1250 pruebas unitarias; puerta de publicación co
 # OHANA · Pizza & Frita
 - Tallas estándar 64/82/100/120/140; Pizza tricolor elástica (brazos marrones con manoplas, F5 volcánica) vs Frita superhéroe diner azul marino (F5 Centella eléctrica).
 - Cinemáticas propias de 4 actos (Horno de leña / Al punto) enrutadas por presentation.js; fondos Puerto del Horno y Mercado Centella con gradientes cacheados; isla Puerto del banquete con horno, kiosco, guirnaldas y muelle.
+
+## V500.1 · La mesa de las once luces
+
+Candidata con caché `ohana-5001`. Reunión opcional de los diez héroes, undécima luz para quien juega y despedida del héroe de la victoria. Conserva el desbloqueo y la memoria de V500.

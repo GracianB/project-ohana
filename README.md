@@ -1,3 +1,7 @@
+## V500.1 · La mesa de las once luces
+
+Tras reunir las diez voces de «Un lugar para ti», abre una reunión de los diez héroes con un lugar reservado para ti y una despedida del héroe con el que ganaste. [Detalle y validación](docs/V500-1-LA-MESA.md).
+
 <div align="center">
 
 <img src="favicon.svg" alt="Símbolo de Project OHANA" width="76" />

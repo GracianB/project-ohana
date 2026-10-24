@@ -12,9 +12,14 @@ try{
  await page.reload();await page.locator('.oi-enter').click();await page.locator('#btn-family-memory').click();
  await page.locator('#family-constellation.open').waitFor();
  assert.equal(await page.locator('.constellation-stars button').count(),10);
+ assert.equal(await page.locator('.constellation-reunion-open').isVisible(),false,'reunion requires all ten lights');
  for(const button of await page.locator('.constellation-stars button').all())await button.click();
  assert.equal(await page.locator('#family-constellation').evaluate(e=>e.classList.contains('all-lit')),true);
  assert.equal(await page.locator('.constellation-last-title').textContent(),'La última luz eres tú.');
+ await page.locator('.constellation-reunion-open').click();
+ assert.equal(await page.locator('.constellation-reunion').isVisible(),true);
+ assert.match(await page.locator('.reunion-hero').textContent(),/Kilo/,'dedication follows victory hero, not last selected Cuerno');
+ assert.equal(await page.evaluate(()=>document.activeElement.id),'reunion-title');
  await fs.mkdir('test-results/v500',{recursive:true});
  for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844],['landscape',844,390]]){
   await page.setViewportSize({width,height});
@@ -24,6 +29,9 @@ try{
   const bounds=await page.locator('#family-constellation').evaluate(e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};});
   assert.deepEqual(bounds,{x:0,y:0,w:width,h:height},'dialog covers the viewport');
   assert.equal(await page.evaluate(()=>document.body.style.overflow),'hidden');
+  await page.locator('.constellation-reunion').scrollIntoViewIfNeeded();
+  await page.screenshot({path:`test-results/v500/${name}-reunion.png`});
+  await page.locator('#family-constellation').evaluate(e=>e.scrollTop=0);
   await page.screenshot({path:`test-results/v500/${name}.png`});
   if(name==='mobile'){
    await page.locator('.constellation-last-copy').scrollIntoViewIfNeeded();
@@ -39,5 +47,6 @@ try{
  await page.keyboard.press('Escape');assert.equal(await page.locator('#family-constellation').isVisible(),false);
  await page.reload();await page.locator('.oi-enter').click();await page.locator('#btn-family-memory').click();
  assert.equal(await page.locator('#family-constellation').evaluate(e=>e.classList.contains('all-lit')),true,'memory survives reload');
+ await page.locator('.constellation-reunion-open').click();assert.equal(await page.locator('.constellation-reunion').isVisible(),true,'reunion can be replayed after reload');
  assert.deepEqual(errors,[]);console.log('PASS V500 UI: lock, ten rendered heroes, full constellation, mobile, landscape, focus, reduced motion and reload. Physical unlock belongs to V493.');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

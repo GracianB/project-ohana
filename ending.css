@@ -222,3 +222,12 @@
 @media(prefers-reduced-motion:reduce){#family-constellation *{animation:none!important;transition:none!important}}
 
 [data-open-constellation][hidden]{display:none!important}
+
+/* V500.1 · A voluntary, replayable reunion after the ten earned lights. */
+.constellation-reunion-open{align-self:flex-start;margin-top:24px;padding:15px 24px;min-height:48px;border:1px solid #ffe39a;border-radius:999px;background:#ffe39a;color:#1c1828;font:600 15px Outfit,sans-serif;cursor:pointer}
+.constellation-reunion-open[hidden],.constellation-reunion[hidden]{display:none}
+.constellation-reunion-open:focus-visible{outline:3px solid white;outline-offset:5px}
+.constellation-reunion{scroll-margin-top:24px;text-align:center;border:1px solid #d6ad7055;border-radius:28px;padding:clamp(20px,4vw,48px);margin:32px 0;background:radial-gradient(ellipse at 50% 35%,#4b334144,#0a1224aa)}
+.reunion-eyebrow{color:#ffe39a;font-size:11px;letter-spacing:.18em}.constellation-reunion h3{font-size:clamp(30px,4vw,54px);line-height:1.1;margin:18px 0}.reunion-intro{color:#b7c6db;line-height:1.6}
+.constellation-reunion canvas{display:block;width:100%;height:auto;margin:16px auto}
+.reunion-hero{font-size:24px;color:var(--reunion-color,#ffe39a)}.reunion-letter,.reunion-promise{max-width:660px;margin:24px auto;font-size:clamp(17px,2vw,22px);line-height:1.8;text-wrap:pretty}.reunion-promise{color:#ffe9b7;border:0;padding:20px 0}.reunion-signature{font-size:13px;line-height:2;color:#aabdd0}.reunion-signature strong{display:inline-block;margin-top:16px;color:#fff2c7;font-size:24px}
