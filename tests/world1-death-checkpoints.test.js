@@ -24,6 +24,8 @@ function makeGame(hero) {
 
 test("death: authentic first Kilo note survives room reload without extra score, seal or XP",()=>{
   const x=makeGame("kilo"),s=x.g.world1.stations[0];
+  // Isolate note persistence from the separately tested guardian gate.
+  x.g.clearedEncounters={"w1-kilo":["w1-kilo-tambor-v1"]};
   x.stand(s.x);for(let i=0;i<45;i++)x.tick();
   assert.equal(s.done,true);
   assert.equal(world1Snapshot(x.g).done,1);
@@ -31,7 +33,7 @@ test("death: authentic first Kilo note survives room reload without extra score,
   const save=world1DeathCheckpoint(x.g);
   assert.deepEqual(save.completed,[0]);
   x.reload();
-  assert.equal(world1Snapshot(x.g).done,0,"raw reentry resets state, as on a death");
+  assert.equal(world1Snapshot(x.g).done,1,"saved station survives a room reentry");
   assert.equal(restoreWorld1DeathCheckpoint(x.g,save),true);
   assert.equal(world1Snapshot(x.g).done,1);
   assert.equal(x.g.world1.stations[0]._scored,true);
@@ -44,8 +46,8 @@ test("death: authentic first Kilo note survives room reload without extra score,
   }
   assert.deepEqual(x.g.world1Seals,["kilo"]);
   assert.equal(x.g.score,600,"must never count a repeated note twice");
-  assert.equal(x.g.player.xp,3);
-  assert.equal(x.g.saves,1,"awards one seal and performs one save");
+  assert.equal(x.g.player.xp,423);
+  assert.equal(x.g.saves,4,"four earned notes saved, last one also stores the seal");
 });
 
 test("death: Stitcho delivered part ID 0 stays repaired; loose part is dropped",()=>{
@@ -67,17 +69,17 @@ test("death: Stitcho delivered part ID 0 stays repaired; loose part is dropped",
   assert.equal(x.g.score,450);
 });
 
-test("death: Chispín's electrical race restarts, but replays cannot farm station scores",()=>{
+test("death: Chispín's connected network survives death without replay rewards",()=>{
   const x=makeGame("chispin");
   const rods=x.g.world1.stations;
   for(const r of rods.slice(0,2)){x.stand(r.x);x.tick();}
   const prior=world1DeathCheckpoint(x.g);
-  assert.deepEqual(prior.completed,[],"timed objectives must reset on death");
+  assert.deepEqual(prior.completed,[0,1],"antennas retain real connections on death");
   assert.deepEqual(prior.scored,[0,1]);
   x.reload();restoreWorld1DeathCheckpoint(x.g,prior);
-  assert.equal(x.g.world1.order,0);
+  assert.equal(x.g.world1.order,2);
   assert.equal(x.g.world1.chainUntil,0);
-  assert.equal(world1Snapshot(x.g).done,0);
+  assert.equal(world1Snapshot(x.g).done,2);
   for(const rod of x.g.world1.stations){x.stand(rod.x);x.tick();}
   assert.deepEqual(x.g.world1Seals,["chispin"]);
   assert.equal(x.g.score,600,"4 unique stations × 150, no replay farming");

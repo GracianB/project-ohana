@@ -6,7 +6,7 @@
  */
 
 import { ROOMS } from "./map.js";
-import { showNotification } from "./notify.js";
+import { world2Locked, WORLD2_LOCK_TEXT } from "./world1-rooms.js";
 import { traversalProfile, traversalNodeSnapshot } from "./traversal-nodes.js";
 import { boundedArrivalSpawn, boundedTraversalKick } from "./traversal-safety.js";
 
@@ -48,6 +48,8 @@ function makePortal(def) {
     dest: def.dest,
     label: def.label || def.dest || "?",
     needEvo: def.needEvo,
+    locked: !!def.locked,
+    blocked: def.locked ? "Ruta cerrada · " + (def.label || def.dest) : "",
     armAng: type === "catapult" ? -0.42 : 0,
     armVel: 0,
     swallow: 0, // destello al tragar (BH)
@@ -93,13 +95,11 @@ export class Portals {
     this._overlay = null; // { alpha, color } durante viaje
     this._kick = null; // { vx, vy, facing } post-aterrizaje
     this._visual = { scale: 1, alpha: 1 }; // flags para game.js
-    this._lockNotifyCD = 0;
     this._simT = 0;
     this.trailTicks = 0; // estela post-aterrizaje
     this.trailType = null; // "catapult" | "blackhole" | "water"
     this.trailColor = null; // override (ej. cyan agua en reef)
     this._landingType = null;
-    this._groundGrace = 0; // auto-fire catapult: grounded este frame o el anterior
     this._arrivePreferDest = null; // al aterrizar, preferir pad que vuelve al origen
   }
 
@@ -114,7 +114,6 @@ export class Portals {
     this.trailTicks = 0;
     this.trailType = null;
     this.trailColor = null;
-    this._groundGrace = 0;
     this._simT = 0;
     // Orbitals deterministas: misma sala + mismo portal = misma distribución visual.
     this.items.forEach((p, i) => {
@@ -233,7 +232,6 @@ export class Portals {
   update(game) {
     this._simT = (Number.isFinite(Number(this._simT)) ? Number(this._simT) : 0) + 1;
     if (this.cooldown > 0) this.cooldown--;
-    if (this._lockNotifyCD > 0) this._lockNotifyCD--;
     this.near = null;
     this.prompt = "";
 
@@ -278,79 +276,15 @@ export class Portals {
       return;
     }
 
-    const evo = p.evo || 0;
-    const groundedOk = !!(p.grounded || this._groundGrace > 0);
-    if (p.grounded) this._groundGrace = 1;
-    else if (this._groundGrace > 0) this._groundGrace--;
-    let closestBH = null;
-    let closestDist = Infinity;
-
     for (const portal of this.items) {
-      const cx = portal.x + portal.w / 2;
-      const cy = portal.y + portal.h / 2;
-      const pr = Math.min(portal.w, portal.h) * 0.5;
-      const px = p.x + p.w / 2;
-      const py = p.y + p.h / 2;
-      const d = Math.hypot(px - cx, py - cy);
-
-      if (portal.type === "blackhole") {
-        const pullR = pr * 1.6;
-        if (d < pullR && d > 2 && this.cooldown <= 0) {
-          if (d < closestDist) {
-            closestDist = d;
-            closestBH = portal;
-          }
-          const locked = isDestLocked(portal.dest, evo);
-          if (!locked) {
-            const profile = traversalProfile(portal.roomId, portal.dest, portal.type);
-            const pullScale = Number(profile.pull) || 1;
-            const twist = Number(profile.twist) || 0;
-            const strength = (1 - d / pullR) * (reduce ? 0.12 : 0.28) * pullScale;
-            const nx = (cx - px) / Math.max(d, 1);
-            const ny = (cy - py) / Math.max(d, 1);
-            p.vx += nx * strength + (-ny) * strength * 0.16 * twist;
-            p.vy += ny * strength * 0.85 + nx * strength * 0.08 * twist;
-            if (!reduce && game.fx && unit(this._simT + portal.x * 0.07 + portal.y * 0.11) < 0.18) {
-              game.fx.emit(px, py, {
-                color: "#c9a0ff",
-                count: 1,
-                size: 1.6,
-                up: 0.3,
-                speed: 0.8,
-                life: 10
-              });
-            }
-          }
-        }
-
-        if (overlaps(p, portal)) {
-          this.near = portal;
-          const locked = isDestLocked(portal.dest, evo);
-          if (locked) {
-            const need = destNeedEvo(portal.dest);
-            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · bloqueado · Forma " + (need + 1);
-            this._maybeLockNotify(portal, need);
-          } else {
-            this.prompt = "◉ VÓRTICE · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " · entra para viajar";
-            if (this.cooldown <= 0) this._beginCharge(portal, "blackhole", reduce);
-          }
-          break;
-        }
-      } else {
-        const pad = catapultPad(portal);
-        if (overlaps(p, pad)) {
-          this.near = portal;
-          const locked = isDestLocked(portal.dest, evo);
-          if (locked) {
-            const need = destNeedEvo(portal.dest);
-            this.prompt = "⚔ CATAPULTA · " + portal.label + " · bloqueada · Forma " + (need + 1);
-            this._maybeLockNotify(portal, need);
-          } else {
-            this.prompt = "E · " + traversalProfile(portal.roomId, portal.dest, portal.type).label + " → " + portal.label;
-          }
-          break;
-        }
-      }
+      // One activation area for the prompt and E, so a visible instruction
+      // can never silently fall through to the unrelated evolution action.
+      if (!overlaps(p, portalActivationArea(portal))) continue;
+      this.near = portal;
+      portal.blocked = portalBlockReason(portal, game);
+      const kind = portal.type === "blackhole" ? "Vórtice" : "Catapulta";
+      this.prompt = portal.blocked || "E · " + kind + " → " + (ROOMS[portal.dest]?.name || portal.label);
+      break;
     }
 
     this._tickOrbitals(reduce);
@@ -360,14 +294,6 @@ export class Portals {
       if (portal.swallow > 0) portal.swallow--;
       if (portal.sparkT > 0) portal.sparkT--;
     }
-  }
-
-  _maybeLockNotify(portal, need) {
-    if (this._lockNotifyCD > 0) return;
-    this._lockNotifyCD = 90;
-    try {
-      showNotification("CERRADO", "Necesitas forma " + (need + 1) + " · " + (portal.label || ""));
-    } catch (_) {}
   }
 
   _beginCharge(portal, type, reduce) {
@@ -663,25 +589,20 @@ export class Portals {
   }
 
   /**
-   * Catapulta: tecla E. Devuelve true si inició charge o bloqueó evolve (locked).
-   * BH se auto-activa en update.
+   * Viajes voluntarios: E para ambas rutas. Consume E también si está cerrado.
+   * Un vórtice nunca absorbe ni cambia de sala por contacto.
    */
   tryUse(player, game) {
     if (!player || player.dead || this.pending || this.charge || this.cooldown > 0) return false;
     const portal = this.near;
-    if (!portal || portal.type !== "catapult") return false;
-    const pad = catapultPad(portal);
+    if (!portal) return false;
+    const pad = portalActivationArea(portal);
     if (!overlaps(player, pad)) return false;
-
-    const evo = player.evo || 0;
-    if (isDestLocked(portal.dest, evo)) {
-      const need = destNeedEvo(portal.dest);
-      this._maybeLockNotify(portal, need);
-      return true; // consumir E, no evolucionar
-    }
+    const blocked = portalBlockReason(portal, game);
+    if (blocked) { this.prompt = blocked; return true; }
 
     const reduce = !!(game && game.reduceMotion);
-    this._beginCharge(portal, "catapult", reduce);
+    this._beginCharge(portal, portal.type, reduce);
     return true;
   }
 
@@ -868,7 +789,9 @@ function drawCatapult(ctx, cam, t, portal, charge) {
   ctx.font = "800 11px Outfit, system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.fillStyle = profile.color || "#ffe8c8";
-  ctx.fillText(profile.label || portal.label || "Catapulta", x + portal.w / 2, y - 6);
+  ctx.fillText("↗ " + (ROOMS[portal.dest]?.name || portal.label || "Catapulta"), x + portal.w / 2, y - 6);
+  ctx.font = "700 10px Outfit, sans-serif";
+  ctx.fillText(portal.blocked ? "RUTA CERRADA" : "E · VIAJAR", x + portal.w / 2, y - 22);
   ctx.restore();
 }
 
@@ -974,7 +897,9 @@ function drawBlackhole(ctx, cam, t, portal, orbitals, charge) {
   ctx.textAlign = "center";
   ctx.fillStyle = "#e8d6ff";
   ctx.fillStyle = profile.color || "#e8d6ff";
-  ctx.fillText("◉ " + profile.label, cx, cy - r - 12);
+  ctx.fillText("◉ " + (portal.locked ? portal.label : ROOMS[portal.dest]?.name || portal.label), cx, cy - r - 12);
+  ctx.font = "700 10px Outfit, sans-serif";
+  ctx.fillText(portal.blocked ? "RUTA CERRADA" : "E · VIAJAR", cx, cy + r + 18);
   ctx.restore();
 }
 
@@ -1018,3 +943,17 @@ function drawNearPrompt(ctx, cam, portal, text, t) {
 }
 
 export const portals = new Portals();
+
+export function portalBlockReason(portal, game = {}) {
+  if (portal.locked) return "Ruta cerrada · " + (portal.label || portal.dest);
+  if (world2Locked(portal.dest, { solo: !!game.personalAdventureSolo, e2e: !!game._e2eLegacyStart })) return WORLD2_LOCK_TEXT;
+  if (isDestLocked(portal.dest, game.player?.evo || 0))
+    return "Ruta cerrada · necesitas Forma " + (destNeedEvo(portal.dest) + 1);
+  return "";
+}
+
+function portalActivationArea(portal) {
+  return portal.type === "blackhole"
+    ? { x: portal.x - 28, y: portal.y - 28, w: portal.w + 56, h: portal.h + 56 }
+    : catapultPad(portal);
+}

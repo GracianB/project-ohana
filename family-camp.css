@@ -87,3 +87,37 @@ body.playing #char-select.camp-on {display:none!important;}
 #char-select.camp-on #chars #chars-grid .char-card .portrait {overflow:hidden!important;flex:0 0 64px!important;}
 @media(max-width:1000px){#char-select.camp-on #chars #chars-grid .char-card .portrait {flex-basis:48px!important;}}
 #char-select.camp-on #chars #chars-grid .char-card,#char-select.camp-on #chars #chars-grid .char-card:is(.selected,:hover,:focus-visible) {position:relative!important;inset:auto!important;transform:none!important;translate:none!important;rotate:none!important;scale:none!important;z-index:auto!important;transition:background .15s ease!important;}
+/* V501 · A sunlit coastal welcome around the animated family. */
+#char-select.camp-on[data-selector-mode="world1-rooms"]{background:#e5e7d9!important;color:#254e49;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] .brand-bar{background:#244e49;color:#f7eed8;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] .word.ohana{color:#245c54!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] .tagline{color:#55746b!important;}
+#family-camp[data-world="1"] .camp-scene{background:#b9d8ca;border-color:#8eada0;box-shadow:0 16px 40px #264c4220;}
+#family-camp[data-world="1"] .camp-scene-heading{display:none;}
+#family-camp[data-world="1"] .camp-instructions{color:#315e55;background:#f8f0ddde;border:1px solid #9db5a5;border-radius:12px;padding:8px 12px;}
+#family-camp[data-world="1"] .camp-dossier{background:#fff7e6;color:#294f48;border-color:#c1cbb3;}
+#family-camp[data-world="1"] #camp-name{color:#28564e;}
+#family-camp[data-world="1"] .camp-eyebrow,#family-camp[data-world="1"] #camp-role,#family-camp[data-world="1"] #camp-route,#family-camp[data-world="1"] #camp-powers{color:#536f62;}
+#family-camp[data-world="1"] .camp-album-art{background:#e6ecd8;}
+#family-camp[data-world="1"] .camp-talk{background:#e7ecd8;color:#3e5f50;}
+#family-camp[data-world="1"] #camp-start{background:#285c51;color:#fff1cd;border-color:#285c51;}
+@media(max-width:600px){#family-camp[data-world="1"] #camp-canvas{height:660px;min-height:660px;}#family-camp[data-world="1"] .camp-mystery{display:none;}#family-camp[data-world="1"] .camp-instructions{bottom:auto;top:82px;left:12px;right:12px;font-size:10px;padding:6px 9px;}}
+
+#char-select.camp-on[data-selector-mode="world1-rooms"] .title-stack h1 .word.ohana{-webkit-text-fill-color:#245c54!important;color:#245c54!important;}
+#family-camp[data-world="1"] .camp-instructions{position:static;transform:none;margin:8px 12px;max-width:none;}
+/* Chapter theatre: the room and protagonist are one campaign choice. */
+#char-select.camp-on[data-selector-mode="world1-rooms"]{background:#101c30!important;color:#eee5cf!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] .title-stack h1 .word.ohana{-webkit-text-fill-color:#ffe3aa!important;color:#ffe3aa!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] .tagline{color:#cad5d5!important;}
+#family-camp[data-world="1"] .camp-scene{background:#192e43;border-color:#768b91;min-height:0;align-self:start;}
+#family-camp[data-world="1"] .camp-mystery{display:none;}
+#family-camp[data-world="1"] .camp-scene-heading{display:none;}
+#family-camp[data-world="1"] .camp-dossier #camp-form-name,#family-camp[data-world="1"] .camp-dossier #camp-stats dd{color:#28564e;}
+#family-camp[data-world="1"] .camp-dossier #camp-stats dt,#family-camp[data-world="1"] .camp-dossier #camp-film{color:#46665e;}
+#family-camp[data-world="1"] .camp-dossier #camp-line{color:#34594f;}
+#family-camp[data-world="1"] .camp-forms button{color:#34594f;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] #chars-grid .char-card{height:44px!important;justify-content:center!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] #chars-grid canvas{display:none!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] #chars-grid .char-card h3{color:#e7d9b5!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] #chars-grid .char-card .portrait{display:none!important;}
+#char-select.camp-on[data-selector-mode="world1-rooms"] #chars-grid .char-card h3{display:block!important;}

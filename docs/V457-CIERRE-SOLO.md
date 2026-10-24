@@ -1,4 +1,6 @@
 # OHANA V457 · Cierre responsable de la aventura individual
+
+Documento histórico. La estructura anterior de variantes del Claro queda sustituida, para la campaña actual, por [V1-SOLO-ESTRATEGIA.md](V1-SOLO-ESTRATEGIA.md): diez capítulos del Mundo 1 con su protagonista y Quimera. Se conservan la pausa de infraestructura externa y la distinción entre código, pruebas y publicación. El inventario de PR de abajo corresponde a su fecha; comprobar su estado antes de actuar.
 **21 octubre 2026 · Rama de consolidación: fix/ohana-solo-closure-20261021**
 
 ## Contrato de lanzamiento

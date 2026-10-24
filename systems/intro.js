@@ -1,5 +1,6 @@
+import {drawFamilyWelcomeBackdrop} from "../worlds/ohana-environments.js";
 import {shouldSkipCoopWelcome} from './coop-welcome.js';
-import {drawOhanaCoast,drawEnemyIslet} from './ohana-panorama.js';
+import {drawEnemyIslet} from './ohana-panorama.js';
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // ============================================================================
 // PROJECT OHANA · Intros (systems/intro.js)
@@ -318,32 +319,7 @@ export function playTitleIntro(options = {}) {
   // tamaño en un lienzo aparte y cada fotograma solo copia ese bitmap.
   let backdrop=null,backdropKey="";
   function paintBackdrop(c,W,H,floor){
-    const horizon=H*.70;
-    const sky=c.createLinearGradient(0,0,0,H);
-    sky.addColorStop(0,"#15364a");
-    sky.addColorStop(.46,"#285d6a");
-    sky.addColorStop(.72,"#cf9d65");
-    sky.addColorStop(1,"#07131b");
-    c.fillStyle=sky;c.fillRect(0,0,W,H);
-    const sunX=W*.76, sunY=H*.23, sr=Math.min(W,H)*.075;
-    const sg=c.createRadialGradient(sunX,sunY,0,sunX,sunY,sr*3.8);
-    sg.addColorStop(0,"rgba(255,237,174,.74)");
-    sg.addColorStop(.28,"rgba(255,208,126,.22)");
-    sg.addColorStop(1,"rgba(255,195,110,0)");
-    c.fillStyle=sg;c.fillRect(0,0,W,H);
-    c.fillStyle="#091e25";
-    c.beginPath();
-    c.moveTo(0,floor+10);c.lineTo(0,horizon+20);
-    c.quadraticCurveTo(W*.12,horizon-24,W*.25,horizon+14);
-    c.quadraticCurveTo(W*.39,horizon+38,W*.52,horizon-4);
-    c.quadraticCurveTo(W*.67,horizon-34,W*.82,horizon+10);
-    c.quadraticCurveTo(W*.92,horizon+26,W,horizon-2);
-    c.lineTo(W,H);c.lineTo(0,H);c.closePath();c.fill();
-    const grass=c.createLinearGradient(0,floor-20,0,H);
-    grass.addColorStop(0,"rgba(35,82,60,.82)");
-    grass.addColorStop(1,"rgba(7,20,19,.98)");
-    c.fillStyle=grass;c.fillRect(0,floor-8,W,H-floor+8);
-    drawOhanaCoast(c,W,H,floor);
+    drawFamilyWelcomeBackdrop(c,W,H,floor);
   }
   function island(t,L) {
     const {W,H,floor}=L;
@@ -781,7 +757,7 @@ export function playTitleIntro(options = {}) {
     scene(reduce?0.7:(frozenSceneTime ?? direction.sceneTime),L,direction);
     const vign=cachedGradient(ctx,"welcome-vignette:"+L.W+"x"+L.H,()=>{
       const g=ctx.createRadialGradient(L.W*.5,L.H*.46,Math.min(L.W,L.H)*.12,L.W*.5,L.H*.46,Math.hypot(L.W,L.H)*.63);
-      g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.52)");return g;
+      g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,.12)");return g;
     });
     ctx.fillStyle=vign;ctx.fillRect(0,0,L.W,L.H);
     ctx.restore();

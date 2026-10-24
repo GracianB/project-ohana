@@ -100,3 +100,51 @@ body.playing #notification-container{top:166px;}
  body.playing.boss-fight #experience-ribbon{display:none;}
  body.playing.boss-fight #notification-container{top:244px!important;}
 }
+
+/* Let the story own the screen, with the same advance action on touch/keyboard. */
+body.playing.world1-story :is(#hud,#top-actions,#controls-hint,#ability-bar,#touch,#notification-container,#boss-wrap,#experience-ribbon){visibility:hidden;pointer-events:none;}
+#world1-cine-controls{position:fixed;z-index:85;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);}
+#world1-cine-controls[hidden]{display:none;}
+#world1-cine-next{min-height:44px;min-width:156px;padding:10px 22px;border:1px solid #dac9ff88;border-radius:12px;background:#211a36;color:#fff4df;font:600 15px Outfit,sans-serif;touch-action:manipulation;cursor:pointer;}
+#world1-cine-next:focus-visible{outline:3px solid #ffe9a8;outline-offset:3px;}
+#world1-cine-next[aria-disabled="true"]{opacity:.6;}
+
+/* Persistent goals share the notice position and stay readable as timers update. */
+body.playing #notification-container:has(.game-notification.objective){top:166px;bottom:auto;}
+body.playing #notification-container .game-notification[data-persistent="1"]{animation:none;}
+@media(max-width:640px){body.playing #notification-container:has(.game-notification.objective){top:184px;}}
+@media(max-height:450px) and (pointer:coarse){body.playing #notification-container:has(.game-notification.objective){top:100px;}}
+
+#world1-album{display:none;position:fixed;inset:0;z-index:var(--z-modal,40);background:#071725ed;padding:20px;overflow:auto;align-items:center;justify-content:center;}
+#world1-album.open{display:flex;}
+.world1-album-panel{width:min(720px,100%);max-height:100%;overflow:auto;padding:26px;border-radius:22px;background:#f4efdf;color:#284b40;text-align:left;box-sizing:border-box;}
+.world1-album-panel header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.world1-album-panel h2{font:600 30px/1.15 Fredoka,sans-serif;margin:4px 0 8px;color:#214541;}
+.world1-album-panel p{font:400 13px/1.5 Outfit,sans-serif;margin:8px 0;}
+.world1-album-panel .album-eyebrow{font-size:10px;letter-spacing:.12em;}
+.world1-album-panel h3{font:600 19px/1.3 Fredoka,sans-serif;margin:20px 0 12px;}
+.world1-album-panel ol{list-style:none;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0;}
+.world1-album-panel li{display:grid;place-items:center;min-height:72px;border:1px solid #bcc9ad;border-radius:12px;background:#e1e6d1;font:600 22px Fredoka,sans-serif;}
+.world1-album-panel li.found{background:#cee4c0;color:#244e48;border-color:#729b6a;}
+.world1-album-panel li.pending{color:#7c8877;}
+.world1-album-panel button{min-height:44px;padding:10px 16px;border:1px solid #537c62;border-radius:11px;background:#244e48;color:#fff3d5;font:600 13px Outfit,sans-serif;cursor:pointer;touch-action:manipulation;}
+.world1-album-panel button:focus-visible{outline:3px solid #c18736;outline-offset:3px;}
+.world1-album-panel nav{display:flex;justify-content:space-between;gap:12px;margin-top:18px;}
+@media(max-width:640px){#world1-album{padding:12px;}.world1-album-panel{padding:18px;border-radius:16px;}.world1-album-panel header{flex-wrap:wrap;}.world1-album-panel h2{font-size:25px;}.world1-album-panel ol{gap:6px;}.world1-album-panel li{min-height:56px;font-size:18px;}}
+@media(max-height:500px){#world1-album{align-items:flex-start;}}
+
+/* Read availability in place; reserve the large ribbon for bosses/evolution. */
+body.playing .ability-slot .cd-sec{position:static;display:block;min-height:14px;margin-top:5px;font:600 10px/1.3 Outfit,sans-serif;color:#f4dfaa;}
+body.playing #touch .touch-btn.pw[data-power-state="cooldown"]{font-size:11px;font-variant-numeric:tabular-nums;}
+body.playing #touch .touch-btn.pw[data-power-state="charge"]{font-size:10px;}
+body.playing #touch .touch-btn.pw[data-power-state="locked"]{font-size:12px;}
+body.playing #experience-ribbon[data-mode="combo"]{width:auto;max-width:210px;padding:6px 12px;top:178px;border-radius:10px;backdrop-filter:none;box-shadow:none;animation:none;}
+body.playing #experience-ribbon[data-mode="combo"] .exp-kicker{display:none;}
+body.playing #experience-ribbon[data-mode="combo"] .exp-title{font-size:14px;display:inline;}
+body.playing #experience-ribbon[data-mode="combo"] .exp-note{font-size:9px;display:inline;margin-left:9px;}
+body.playing #experience-ribbon[data-mode="combo"] .exp-meter{height:2px;margin-top:5px;}
+@media(max-width:640px){body.playing #experience-ribbon[data-mode="combo"]{display:none;}}
+body.playing #controls-hint{bottom:112px;}
+#pause-overlay .pause-room-strategy{font:400 12px/1.5 Outfit,sans-serif;color:#516e5d;margin-top:10px;}
+
+body.playing.world1-story :is(#ability-bar,#combo-chip,#prompt){display:none!important;}

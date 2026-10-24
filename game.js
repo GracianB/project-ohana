@@ -1,7 +1,8 @@
+import {drawOhanaPlace} from "./worlds/ohana-environments.js";
 import {installFamilyConstellation} from "./systems/family-constellation.js";
 import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianSignals} from './systems/grove-guardian.js';
-import {steerKiloFlight} from './systems/kilo-flight.js';
+import {steerKiloFlight,stopKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
 import {updatePlayerLocomotion,resetPlayerLocomotion} from './systems/player-movement.js';
 import {enterRoomAlbum,updateRoomAlbum,drawRoomAlbum,readRoomAlbums,mergeRoomAlbums,roomAlbumSnapshot,tickRelicScene} from './systems/room-album.js';
@@ -54,6 +55,7 @@ import {renderStitchoAtlasHTML,stitchoAtlasDetail} from "./systems/stitcho-atlas
 import {enterHeroCollection,updateHeroCollection,drawHeroCollection,heroCollectionSnapshot,takeHeroCollectionItem} from "./systems/hero-collections.js";
 import {enterCampaignExploration,updateCampaignExploration,drawCampaignExploration} from "./systems/campaign-exploration.js";
 import {campaignRole,updateCampaignEnemy,drawCampaignEnemy,shieldBlocksHit} from "./systems/campaign-enemies.js";
+import {powerStatus} from "./systems/power-status.js";
 import {chargeFinisher,finisherCharge} from "./systems/finisher.js";
 import {checkpointFor,updateCampaignProgress,drawCheckpoints} from "./systems/campaign-layout.js";
 import {drawLocalMap} from "./systems/local-map.js";
@@ -82,19 +84,19 @@ import { clearRank, formatClear, rememberBest } from "./systems/save.js";
 import { earnKiloPetal } from "./systems/kilo-rhythm.js";
 import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attacks.js";
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
-import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications } from "./systems/notify.js";
+import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications, setPersistentObjective, clearPersistentObjective, messageManager } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
 import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
-import { enterWorld1, updateWorld1, world1Snapshot, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
+import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
 import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
-import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, drawWorld1Album, toggleWorld1Album, world1AlbumKey } from "./systems/world1-collect.js";
-import { readWorld1Seals, storeWorld1Seals, world1StartRoom } from "./systems/world1-progress.js";
+import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
+import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
 import { createWorld1BossDirector, world1BossFilterDamage, updateWorld1BossDirector, drawWorld1BossBackdrop, drawWorld1BossTelegraphs, drawWorld1BossOverlay, world1BossAccessibleText } from "./systems/world1-boss.js";
-import { playWorld1Cine, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive } from "./systems/world1-cine.js";
+import { playWorld1Cine, updateWorld1Cine, skipWorld1Cine, drawWorld1Cine, world1CineActive, syncWorld1CineControls } from "./systems/world1-cine.js";
 import { makeDummy as w1MakeDummy, drawDummy as w1DrawDummy, baseHeight as w1BaseHeight } from "./systems/cinema-kit.js";
 // V468: Mundo 1 (diez salas de héroe + Corazón de Ohana) convive con el Mundo 2 (salas clásicas).
 const ROOMS = Object.freeze({ ...WORLD2_ROOMS, ...WORLD1_ROOMS });
@@ -256,6 +258,9 @@ game.onAbilityHit=(enemy,damage,options)=>forwardCoopAbilityHit(game,onlineCoop,
 game.festivalNotify = (title,message) => showObjectiveMessage(title,message);
 game.festivalSfx = (name) => beep(name);
 game.festivalVibrate = (ms) => buzz(ms);
+Festival.openWorld1Album = () => {
+  if(!world1CineActive(game) && !paused && (!overlayOpen() || game.world1CollectUI?.open)) toggleWorld1Album(game);
+};
 Festival.mount();
 function beep(n) { if (!muted) try { sfx(n); } catch (e) {} }
 
@@ -293,6 +298,7 @@ addEventListener("resize", fit); fit();
 
 function overlayOpen() {
 return !!(
+game.world1CollectUI?.open ||
 document.getElementById("family-constellation")?.classList.contains("open") ||
 DOM.help?.classList.contains("open") ||
 DOM.map?.classList.contains("open") ||
@@ -334,6 +340,13 @@ if (paused) {
 const p = game.player;
 setText(document.getElementById("pause-hero"), p?.name || "Familia Ohana");
 setText(document.getElementById("pause-objective"), world1Guidance(game.roomId,game)?.objective || room().hint || room().goal || "Explora la isla y reúne a la familia.");
+setText(document.getElementById("pause-room-strategy"),game.player?.id==='kilo'&&room().hero==='kilo' ? [
+ "Bebé: J te permite atacar a distancia; H sirve cuando el enemigo se acerca. Despeja cada hibisco antes de detenerte a tocar. U llama a tu compañero.",
+ "Kilo: K permite volar y reflejar proyectiles. Úsalo para cambiar de posición; aterriza en una zona despejada antes de tocar el hibisco.",
+ "Ohana: L combina golpe y curación. Resérvalo para recuperar terreno cuando te rodean; ya dispones de doble salto.",
+ "Super Kilo: acierta H, después J y otro H en cuatro segundos. Cuando aparezca I LISTO, tienes seis segundos para lanzar el remate.",
+ "Flor Solar: K activa vuelo sostenido y otra pulsación permite descender. Dirige J moviéndote antes de disparar. El daño corta el vuelo; esquiva el abanico del Tambor. Busca los tres carillones elevados."
+ ][game.player.evo] : room().strategy||"");
 setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
 setText(document.getElementById("pause-journey"), world1Guidance(game.roomId,game)?.journey || Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
 setText(document.getElementById("pause-score"), String(game.score || 0));
@@ -373,12 +386,13 @@ if (n > 3) return "B";
 return "C";
 }
 
-function canAct() { return game.running && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
+function canAct() { return game.running && !world1CineActive(game) && !game.relicScene && !paused && !overlayOpen() && !document.hidden; }
 function interact() {
 if (!canAct()) return;
 if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
+if(game.world1CollectUI?.open){toggleWorld1Album(game,false);return;}
 const constellation=document.getElementById("family-constellation");
 if(constellation?.classList.contains("open")){constellation.querySelector(".constellation-close")?.click();return;}
 if (Festival.isOpen()) { Festival.close(); return; }
@@ -430,6 +444,7 @@ game.onRelicBeat=relicUkulele;
 game.onRoomAlbumChange=()=>Festival.setCounter();
 function returnToMenu() {
 save();
+if(game.world1CollectUI)toggleWorld1Album(game,false);
 if(game.relicScene){game.relicScene=null;document.body.classList.remove('relic-cinema');duckMusic(false);}
 game.running = false;
 input?.reset();
@@ -569,12 +584,24 @@ beep("locked");
 bounceLocked(fromDir);
 return false;
 }
+if(game.personalAdventureSolo&&!game._e2eLegacyStart){
+ const chapter=world1ChapterEntry(id,{hero:game.player?.id,previousRoom:game.roomId,resume:!!game._resumeCheckpoint});
+ if(chapter?.reset){
+  const def=ROSTER.find(h=>h.id===chapter.hero);
+  game.player=makePlayer(def);
+  game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
+  game.player.uBonds=readStoredUBonds(localStorage,def.id);
+  game.player.uExp=bondXP(game.player);
+  game.player.uSurprise=!e2eEnabled;
+  renderAbilityBar();
+ }
+}
 const first = !game.visited[id];
 // Clear only the cinematic of the previous room. Do this BEFORE enterWorld1()
 // and playWorld1Cine() create the new room's introduction.
 game.world1Cine = null;
 game.roomId = id;
-resetKiloCombo(game);resetPlayerLocomotion(game.player);
+resetKiloCombo(game);resetPlayerLocomotion(game.player);stopKiloFlight(game.player);
 game.islandSprings=null;game.nestArena=null;
 game._evolutionAttacks = null;
 game._assist = null;
@@ -735,7 +762,7 @@ game.shake = 12;
 }
 game.experience?.room(id, r.name, !!r.boss);
 beep(r.boss ? "boss" : "door");
-playMusic(themeForRoom(r.world1 ? ({0:"beach",1:"jungle",2:"volcano",3:"space",4:"lab",5:"reef",6:"hub",7:"boss",8:"cave",9:"ridge"})[r.world] : id));
+playMusic(themeForRoom(id));
 worldClear();
 Surprises.onEnterRoom(game);
 enterAdventure(game);
@@ -819,6 +846,12 @@ const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
 game.personalAdventureSolo = !onlineMode;
 const resume = !onlineMode && (function () { try { return localStorage.getItem("ohana-resume") === "1"; } catch (e) { return false; } })();
+// A campaign save follows the active chapter, regardless of the highlighted
+// title card. Chapter transitions can change the hero without reopening title.
+if(resume&&game.personalAdventureSolo&&!game._e2eLegacyStart){
+ const saved=saveStore.read();
+ if(saved&&isWorld1Room(saved.roomId))def=ROSTER.find(h=>h.id===saved.id)||def;
+}
 try { localStorage.removeItem("ohana-resume"); } catch (e) {}
 input?.reset();
 clock.reset();
@@ -861,11 +894,12 @@ game.player.uPartner=loadUPartnerChoice(localStorage,def.id);
 game.player.uBonds=readStoredUBonds(localStorage,def.id);
 game.player.uExp=bondXP(game.player);
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
+game.world1Stations = {};
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
-game.onWorld1Beat=(kind,hero)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");};
+game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
 game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
-try { loadWorld1Collect(game); } catch (err) { console.warn("[ohana] world1 collect", err); }
+try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
 game.checkpoints={};game.explored={};game.secrets={};game.clearedEncounters={};game.roomAlbums=readRoomAlbums();if(game.relicScene)game.onRelicEnd?.();game.relicScene=null;game.resetInput=()=>input?.reset();
@@ -900,6 +934,7 @@ try {
     game.world1Seals = storeWorld1Seals([...game.world1Seals, ...(Array.isArray(u.world1Seals) ? u.world1Seals : [])]);
     game.world1Won = !!u.world1Won;
     game.world1Visited = u.world1Visited || {};
+    game.world1Stations = u.world1Stations || {};
     applyForm(game.player, { silent: true });
     paintFit(game.player);
     if (u.hp != null) game.player.health = Math.max(1, Math.min(game.player.maxHealth, u.hp));
@@ -1006,7 +1041,7 @@ Magic.reset(game);
 const r=ROOMS[game.roomId]||ROOMS.hub;
 const checkpoint=checkpointFor(r,game.checkpoints?.[r.id]);
 // Capture only legitimately completed station IDs before enterWorld1() resets
-// per-room state. Timed chains and anything carried are deliberately excluded.
+// per-room state. Carried items and transient timers are deliberately excluded.
 const puzzleCheckpoint=world1DeathCheckpoint(game);
 if(loadRoom(r.id)) restoreWorld1DeathCheckpoint(game,puzzleCheckpoint);
 if(checkpoint){p.x=checkpoint.x-p.w/2;p.y=checkpoint.y-p.h;p.grounded=true;p.jumps=0;}
@@ -1295,7 +1330,7 @@ const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard"
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
 damagePlayer(p, amount);
-resetKiloCombo(game);resetPlayerLocomotion(p);
+resetKiloCombo(game);resetPlayerLocomotion(p);if(p._kiloFlightMode==='solar')stopKiloFlight(p);
 p.invuln = 42;
 p.vx = Math.sign(p.vx || p.facing || 1) * -8;
 p.vy = -6.5;
@@ -1899,7 +1934,7 @@ else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al 
 else if (p.y > game.worldH - 160 && r.doors.down && inPitX(p)) setPrompt("ABAJO · cae por el hueco", true);
 else if (p.evo < 4 && p.xp >= (XP_NEED[p.evo + 1] || Infinity)) {
 const nxt = p.forms && p.forms[p.evo + 1];
-setPrompt("E · evolucionar" + (nxt ? " · " + nxt.name : ""), true);
+setPrompt("Tu experiencia despierta" + (nxt ? " · " + nxt.name : " la siguiente forma"), true);
 }
 else setPrompt("", false);
 while (!game.relicScene && p.evo < 4 && XP_NEED[p.evo + 1] != null && p.xp >= XP_NEED[p.evo + 1]) evolve("xp");
@@ -2918,6 +2953,7 @@ function drawWorld1Backdrop(world,W,H){
  else if(h==="yomi")drawYomiObservatoryBackdrop(ctx,game.cam,t,W,H,rd);
  else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
  else renderWorld(ctx,world,game.cam,t,W,H);
+ drawOhanaPlace(ctx,game,game.cam,t,W,H);
  drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
@@ -2925,13 +2961,15 @@ const w1Actors=new Map();
 function w1CineActor(c,hero,x,y,scale){let d=w1Actors.get(hero);if(!d){const def=ROSTER.find(r=>r.id===hero);if(!def)throw Error("hero");d=w1MakeDummy(hero,1,def.color);d.facing=1;d.grounded=true;d._poseOverride="idle";w1Actors.set(hero,d);}w1DrawDummy(c,d,x,y,Math.max(.2,scale)*60/Math.max(1,w1BaseHeight(hero,1)),reduceMotion?0:t);}
 // B abre el álbum del Mundo 1 cuando estás en una de sus salas (un solo álbum).
 addEventListener("keydown",(e)=>{
- if(!game.running||!game.roomDef?.world1||e.ctrlKey||e.altKey||e.metaKey)return;
+ if(!game.running||!game.roomDef?.world1||e.ctrlKey||e.altKey||e.metaKey||e.target?.closest?.("input,textarea,select,[contenteditable=true]"))return;
  const k=e.key;
  if(world1CineActive(game)&&(k==="Enter"||k===" "||k==="Escape")){skipWorld1Cine(game);e.preventDefault();e.stopImmediatePropagation();return;}
- if(k==="b"||k==="B"){if(!e.repeat)toggleWorld1Album(game);e.preventDefault();e.stopImmediatePropagation();return;}
+ if(!world1CineActive(game)&&(k==="b"||k==="B")){if(!e.repeat)toggleWorld1Album(game);e.preventDefault();e.stopImmediatePropagation();return;}
  if(game.world1CollectUI?.open&&world1AlbumKey(game,k)){e.preventDefault();e.stopImmediatePropagation();}
 },true);
 function render() {
+syncWorld1Album(game);
+syncWorld1CineControls(game, document, !paused && !overlayOpen());
 if (!game.player) return;
 ctx.setTransform(viewDpr, 0, 0, viewDpr, 0, 0);
 ctx.imageSmoothingEnabled = true;
@@ -3218,24 +3256,31 @@ game.experience?.render(ctx, game, viewW, viewH, t);
 if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
   try { ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, (CUERNO_INTRO_DURATION * 60 - game._cuernoIntroT) / 12)); drawCuernoIntro(ctx, viewW, viewH, game._cuernoIntroT / 60, (Number(game.player.evo) || 0) + 1); ctx.restore(); } catch (_) { game._cuernoIntroT = null; }
 }
+drawMinimap();
 drawWorld1Overlay(ctx,game,viewW,viewH);
-if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH);if(game.world1CollectUI?.open)drawWorld1Album(ctx,game,viewW,viewH,t);}
+if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss)drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
 if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
-drawMinimap();
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
 }
 function castPower(index) {
-if(game.relicScene)return;
+if(game.relicScene || world1CineActive(game))return;
 const p = game.player;
 if (!p) return;
-const need = POWER_LEVELS[index] ?? 4;
-if ((Number(p.evo) || 0) < need) {
-game.nums.add(p.x, p.y - 12, "FORMA " + (need + 1), "#fff6c8");
-return;
+const status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+if(!status)return;
+if(!useAbility(game, index)){
+  if(!status.available){
+    const key=p.id+":"+index+":"+status.kind,previous=game._powerFeedback;
+    if(!previous||previous.key!==key||game.t<previous.t||game.t-previous.t>=90){
+      if(showCombatMessage(status.kind==="locked"?"PODER POR DESCUBRIR · "+status.def.key:status.def.key+" · "+status.def.name,status.label,{key:"power-block:"+key,duration:1300,priority:70})!==false)game._powerFeedback={key,t:game.t};
+    }
+  }
+  return;
 }
-if(!useAbility(game, index))return;
+if(messageManager.current?.key?.startsWith("power-block:"))dismissNotifications();
+dispatchEvent(new CustomEvent("ohana-power-used",{detail:{key:status.def.key}}));
 void onlineCoop.signal(game, "action", {
 action: "ability",
 slot: index,
@@ -3295,6 +3340,25 @@ c.restore();
 
 function updateHUD() {
 const p = game.player; if (!p) return;
+const goal = world1NextObjective(game);
+if (goal) {
+  const progress = world1Snapshot(game);
+  const direction = world1ObjectiveDirection(game, goal);
+  const text = (progress.sealed ? "Sello recuperado" : "Sello " + progress.done + "/" + progress.total) + " · " + direction + " · " + goal.label + ": " + goal.action;
+  if (messageManager.objective !== text) setPersistentObjective(text, progress.sealed);
+  game._world1ObjectiveText = text;
+} else if (game._world1ObjectiveText) {
+  if (messageManager.objective === game._world1ObjectiveText) clearPersistentObjective();
+  game._world1ObjectiveText = null;
+}
+if (game.world1CollectHero) {
+  const found = world1AlbumFor(game,game.world1CollectHero).found.length;
+  const album = document.getElementById("btn-festival");
+  setText(album,"✦ Álbum " + found + "/100");
+  album?.setAttribute("aria-label","Álbum opcional: " + found + " de 100 recuerdos; no bloquea la evolución");
+  album?.setAttribute("aria-controls","world1-album");
+  album?.setAttribute("aria-expanded",String(!!game.world1CollectUI?.open));
+}
 const nextAbilityBarKey = p.id + ":" + (Number(p.evo) || 0) + ":" + (p.abilities || []).join(",") + ":" + p.uPartner;
 if (abilityBarKey !== nextAbilityBarKey) renderAbilityBar();
 setText(DOM.hudName, p.name);
@@ -3329,7 +3393,7 @@ setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
 setText(DOM.hudWorld, room().name);
 const seen = Object.keys(game.visited || {}).length;
 setText(document.getElementById("hud-journey"), world1Guidance(game.roomId,game)?.journey || "Isla Hoku · " + Math.min(10, seen) + "/10");
-setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
+setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5");
 const ally=uPartnerInfo(p.id,p.uPartner),bond=uBondProgress(p);
 setText(document.getElementById("u-exp-hud"),
  p.uSurprise&&![game._familyDuet,game._michiDuet,game._chispinDuet,game._stitchoDuet,game._kiloDuet].some(s=>s&&s.age>=18&&s.age<120)?"U · ? · Compañero sorpresa":
@@ -3431,47 +3495,26 @@ DOM.bossWrap?.setAttribute("aria-label", status.accessible + (voiceCue ? " Ataqu
 setText(DOM.bossLabel, "REINA DEL NIDO");
 }
 syncHudStatus({ player: p, hp, xpPct, boss });
-const now = Number.isFinite(Number(game.t)) ? Number(game.t) * (1000 / 60) : 0;
-for (let i = 0; i < abilitySlots.length; i++) {
-const item = abilitySlots[i];
-const isSupreme = item.slot.dataset.supreme === "1";
-const sup = isSupreme ? supremeOf(p.id) : null;
-const id = isSupreme ? sup.id : item.slot.dataset.id;
-const slotIndex=Number(item.slot.dataset.index);
-const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
-const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
-if (!def || !item.fill) continue;
-const left = Math.max(0, (p.cds[id] || 0) - now);
-const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-const w = pct + "%";
-if (item.fill.style.width !== w) item.fill.style.width = w;
-const sec = comboGate?(comboGate.ready?'I · '+Math.ceil(comboGate.remaining/60)+' s':comboGate.step+'/3 · H J H'):slotIndex===5 ? Math.floor(finisherCharge(p))+"/100" : left > 80 ? (left / 1000).toFixed(1) : "";
-if (item.sec && item.sec.textContent !== sec) item.sec.textContent = sec;
-item.slot.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5?finisherCharge(p)<100:left>80));
+for(const item of abilitySlots){
+ const index=Number(item.slot.dataset.index),status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+ if(!status||!item.fill)continue;
+ const width=status.pct+"%";if(item.fill.style.width!==width)item.fill.style.width=width;
+ if(item.sec?.textContent!==status.short)item.sec.textContent=status.short;
+ item.slot.classList.toggle("cooling",!status.available&&status.kind!=="locked");
+ item.slot.dataset.powerState=status.kind;
+ item.slot.setAttribute("aria-label",status.def.key+" · "+status.def.name+" · "+status.label);
+ item.slot.title=status.def.name+" · "+status.label+(status.def.desc?" · "+status.def.desc:"");
 }
 const PWIDX = { j: 0, k: 1, l: 2, u: 3, i:4, p:5 };
-for (let i = 0; i < touchPowers.length; i++) {
-const btn = touchPowers[i];
-const slotIndex = PWIDX[btn.dataset.k];
-const comboGate=p.id==='kilo'&&slotIndex===4?kiloComboStatus(game):null;
-if(slotIndex===4){const caption=comboGate?.ready?'I✓':'I';if(btn.textContent!==caption)btn.textContent=caption;}
-const isSupreme = slotIndex === 3;
-const sup = isSupreme ? supremeOf(p.id) : null;
-const id = isSupreme ? sup.id : slotIndex>3?extraAbility(p.id,slotIndex).id:(p.abilities || [])[slotIndex];
-const def = powerAbility(p,slotIndex,ABILITY_DEFS,sup);
-if (!def) { btn.classList.add("off"); btn.style.setProperty("--cd", "100%"); continue; }
-const locked = (Number(p.evo)||0)<POWER_LEVELS[slotIndex];
-btn.classList.toggle("off", locked);
-const title = locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) + " · " + def.name : (isSupreme ? def.name + " · " + (def.special || "Suprema") : def.name);
-if (btn.getAttribute("title") !== title) btn.setAttribute("title", title);
-const label = (locked ? "Forma " + (POWER_LEVELS[slotIndex]+1) : def.name) + " · " + btn.dataset.k.toUpperCase();
-if (btn.getAttribute("aria-label") !== label) btn.setAttribute("aria-label", label);
-const left = Math.max(0, (p.cds[id] || 0) - now);
-const dur = (p.cdDur && p.cdDur[id]) || def.cd;
-const pct = comboGate&&!comboGate.ready?comboGate.step/3*100:slotIndex===5 ? finisherCharge(p) : dur > 0 ? Math.max(0, Math.min(100, 100 - (left / dur) * 100)) : 100;
-btn.classList.toggle("cooling", comboGate&&!comboGate.ready|| (slotIndex===5 ? finisherCharge(p)<100 : left > 80));
-btn.style.setProperty("--cd", pct + "%");
+for(const btn of touchPowers){
+ const index=PWIDX[btn.dataset.k],status=powerStatus(game,index,index===3?supremeOf(p.id):null);
+ if(!status)continue;
+ const key=btn.dataset.k.toUpperCase(),caption=status.kind==='flight'?'K ↓':status.kind==='cooldown'?status.short:status.kind==='charge'?'P '+Math.floor(status.pct)+'%':status.kind==='locked'?key+'·'+(POWER_LEVELS[index]+1):key+(index===4&&status.available?'✓':'');
+ if(btn.textContent!==caption)btn.textContent=caption;
+ btn.classList.toggle("off",status.kind==='locked');btn.classList.toggle("cooling",!status.available&&status.kind!=='locked');
+ btn.dataset.powerState=status.kind;btn.style.setProperty("--cd",status.pct+"%");
+ btn.title=status.def.name+" · "+status.label;
+ btn.setAttribute("aria-label",key+" · "+status.def.name+" · "+status.label);
 }
 }
 function step() {
@@ -3750,8 +3793,8 @@ isRunning: () => game.running,
 actions: {
   attack, dash, interact, respawn, escape,
   power: (index) => castPower(index),
-  help: toggleHelp,
-  map: () => { if (game.running) showMap(); },
+  help: () => { if(!game.world1CollectUI?.open)toggleHelp(); },
+  map: () => { if (game.running && !game.world1CollectUI?.open) showMap(); },
   mute: () => { setMuted(!muted); showSystemMessage("AUDIO", muted ? "Mute" : "On"); }
 }
 });
@@ -3771,19 +3814,28 @@ const p = game.player;
 if (!p || detail.id !== p.id) return;
 const evo = Math.max(0, Math.min(4, Number(detail.evo) || p.evo));
 const story = evolutionMessage(p.id, evo);
-const opened = evo === 1 ? "K abierto" : evo === 2 ? "L abierto" : evo === 4 ? "U, supremo" : "";
+const index = [null, 1, 2, 4, 5][evo];
+const unlocked = index == null ? null : powerAbility(p, index, ABILITY_DEFS, supremeOf(p.id));
+const opened = unlocked ? unlocked.key + " · " + unlocked.name : "";
 showEvolutionMessage(
 "NUEVA FORMA · " + (evo + 1) + "/5",
-p.name + " · " + story.line + (opened ? " · " + opened : ""),
+opened ? opened + (unlocked.desc ? ": " + unlocked.desc : "") + (p.id==='kilo'&&evo===4?' K también activa vuelo solar sostenido; otra K desciende.':'') : p.name + " · " + story.line,
 {
   key: "evolution:" + p.id + ":" + evo,
-  duration: 3600
+  duration: 5200
 }
 );
 if (opened) game.nums.add(p.x, p.y - 28, opened, "#fff6c8", true);
 updateHUD();
 });
 
+document.getElementById("world1-cine-next")?.addEventListener("click", () => {
+  if (!paused && !overlayOpen()) skipWorld1Cine(game);
+});
+document.getElementById("world1-album-close")?.addEventListener("click",()=>toggleWorld1Album(game,false));
+for(const [id,key] of [["world1-album-prev","ArrowLeft"],["world1-album-next","ArrowRight"]]) {
+  document.getElementById(id)?.addEventListener("click",()=>world1AlbumKey(game,key));
+}
 setupSelect();
 
 const onlineBoot = new URLSearchParams(location.search);
@@ -3865,6 +3917,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  // locked gate, this deliberately does NOT verify route reachability.
  grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
+kiloAirState(){return {chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
 roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
@@ -3915,12 +3968,13 @@ state() {
     world1Seals: [...(game.world1Seals || [])],
     world1Cine: game.world1Cine?.id || null,
     worldW:game.worldW,worldH:game.worldH,kiloCombo:kiloComboStatus(game),sprinting:!!p?._sprinting,finisherCharge:finisherCharge(p),checkpoints:{...game.checkpoints},explored:{...game.explored},
+    hero: p?.id || null,
     evo: p ? p.evo : -1,
     xp: p ? p.xp : 0,
     hp: p ? p.health : 0,
     maxHealth: p ? p.maxHealth : 0,
     player: p ? {
-      x: p.x, y: p.y, vx: p.vx, vy: p.vy,
+      x: p.x, y: p.y, w: p.w, h: p.h, vx: p.vx, vy: p.vy,
       grounded: !!p.grounded, jumps: p.jumps, maxJumps: p.maxJumps,
       dropHeld:!!p._dropWasHeld,dropPlatform:p._dropPlatform?{...p._dropPlatform}:null,
     } : null,
@@ -3975,7 +4029,7 @@ state() {
       ecology: game.enemyDirector.ecology || "",
       formation: game.enemyDirector.formation || "",
     } : null,
-    kiloFlight:p?{remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
+    kiloFlight:p?{mode:p._kiloFlightMode||null,aim:{x:p._kiloAimX||0,y:p._kiloAimY||0},remaining:p._kiloFlightT||0,ohana:p._kiloOhanaT||0}:null,
     roomAlbum:roomAlbumSnapshot(game),heroCollection:heroCollectionSnapshot(game),stitchoTrail:stitchoTrailSnapshot(game),chispinTrail:chispinTrailSnapshot(game),michiTrail:michiTrailSnapshot(game),dragonTrail:dragonTrailSnapshot(game),dinoTrail:dinoTrailSnapshot(game),fritaTrail:fritaTrailSnapshot(game),pizzaTrail:pizzaTrailSnapshot(game),yomiTrail:yomiTrailSnapshot(game),cuernoTrail:cuernoTrailSnapshot(game),roomName:game.roomDef?.name,grove:groveSnapshot(game),terrainStats:game.terrainStats,
     adventure: adventureSnapshot(game),
     nestArena: nestArenaSnapshot(game),

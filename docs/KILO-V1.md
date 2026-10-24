@@ -36,3 +36,7 @@ Pruebas de secuencia, orden incorrecto, repetición multigolpe, expiración, con
 ## Cierre de fase 1 · ohana-452
 
 El repertorio de ohana-445 se conserva. La selección mejora Bahía del compás con la escena de Kilo y Stitcho. Tambor del Claro pasa a minijefe de 360 PV y 100×76, con tres ataques anunciados, dos fases, recuperación y guardado de derrota. Se integra la campaña/cooperativo de main V451. El checklist compartido vive en CHARACTER-PHASES.md.
+
+## Reapertura explícita · campaña V501
+
+El usuario ha reabierto el trabajo de Kilo para la campaña por protagonistas. La referencia V445 anterior se conserva como historial del repertorio. V501 mantiene arte, daño base y umbrales; las formas intermedias conservan la levitación temporal. Flor Solar añade vuelo sostenido con K, otra K desciende y el daño aceptado lo interrumpe. El aura ofensiva/reflejo mantiene su duración máxima de seis segundos. J puede dirigirse durante ese vuelo; su uso normal conserva rebotes y búsqueda. El Claro del Mundo 1 incorpora sus cuatro encuentros, crecimiento por notas, ruta opcional de carillones y respuestas aéreas del Tambor. La sala y el Tambor del Mundo 2 conservan sus reglas previas. Detalles y alcance de validación en V501-AVENTURA-CLARA.md; contratos para las demás salas en CAPITULOS-IDENTIDAD.md. No se declara aceptación humana del balance ni publicación.

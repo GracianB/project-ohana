@@ -1,0 +1,35 @@
+name: V501 intentional travel and saved objectives
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test tests/world1-v501-journey.test.js tests/world1-seals-playthrough.test.js tests/world1-death-checkpoints.test.js tests/world1-story-experience.test.js tests/world1-album-experience.test.js tests/power-status.test.js tests/world1-places.test.js tests/kilo-chapter.test.js tests/kilo-airplay.test.js tests/world1-quimera-ending-handoff.test.js
+      - run: npm run release:check
+      - run: npx playwright install chromium
+      - run: npm run test:browser:journey
+      - run: npm run test:browser:experience
+      - run: npm run test:browser:rooms
+      - run: npm run test:browser:album
+      - run: npm run test:browser:powers
+      - run: npm run test:browser:kilo-airplay
+      - run: npm run test:browser:kilo-chapter
+      - run: npm run test:browser:worlds
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v501-journey-evidence
+          path: test-results/v501/
+          if-no-files-found: ignore

@@ -27,3 +27,11 @@ export function world1StartRoom(heroId, seals = [], requested = null) {
   const next = WORLD1_ORDER.find((h) => !s.has(h));
   return next ? "w1-" + next : "w1-final";
 }
+
+// Chapter entry owns its protagonist. Retry/Continue in the same chapter keeps
+// earned evolution; crossing into another chapter creates a fresh baby.
+export function world1ChapterEntry(room, {hero, previousRoom, resume=false}={}) {
+ const owner=String(room).startsWith('w1-')?String(room).slice(3):null;
+ if(!WORLD1_ORDER.includes(owner))return null;
+ return {hero:owner,reset:hero!==owner||(!resume&&previousRoom!==room)};
+}

@@ -1,3 +1,19 @@
+# V501 · ohana-501 · La aventura se entiende jugando
+
+Plan de cierre individual preparado en docs/V1-SOLO-ESTRATEGIA.md, con matriz por capítulo, paquete ejecutable de Stitcho, contrato del final, puertas de V1 y entrega sin depender del chat en docs/HANDOFF-V1-SOLO.md. Estado estructurado en docs/v1-solo-status.json. Esta ampliación es documental: no declara integrados los otros nueve capítulos ni publicado el juego.
+
+Kilo: levitación intermedia, vuelo solar sostenido/cancelable y J dirigido en vuelo; aura ofensiva con duración limitada, daño interrumpe el vuelo. Flancos reales por altura, vigías aéreos, abanico anunciado del Tambor y tres carillones opcionales persistentes. Contratos de identidad diferenciados para las diez salas en docs/CAPITULOS-IDENTIDAD.md.
+
+Dirección de campaña aceptada: diez capítulos con su protagonista, empezando por Kilo, y Quimera tras diez sellos. Cambiar de capítulo crea su héroe bebé; reintento y Continuar mantienen evolución. Nueva galería de capítulos y guía estratégica de Kilo por forma. El Claro incorpora cuatro encuentros, evolución garantizada por notas sin XP repetida y Tambor con ventana de recuperación para obtener el sello.
+
+Candidata local sobre V500 (`981526f`), sin publicación acreditada todavía. Antenas de Chispín persistentes y activables por contacto/ataque; vórtices y catapultas voluntarios con E; objetivos contextuales y guardado por estación. Se conservan 10 héroes, 50 formas y 10 salas con su final. Se conservan los umbrales de evolución; K y J incorporan las mejoras aéreas descritas arriba. El álbum continúa disponible y opcional, sin duplicar el contador sobre la partida.
+
+Álbum unificado y táctil que detiene el combate, diez páginas accesibles y cromos distintos de los cristales de XP. Contador inmediato con menos texto flotante por recogida. Historia con avance táctil, textos adaptados al móvil y avisos de poderes correctos en las cuatro evoluciones. Guía vertical para géiseres, calor visible de pizzas, piezas emparejadas por número/color y terminales de sincronía con fase legible. La historia recupera el control y el foco al terminar.
+
+Bienvenida costera nueva, selector móvil sin recortes, diez paisajes y partituras propias. Rutas opcionales preparadas al entrar; corregido el generador de plataformas que aparecía al acercarse al borde. Estrategia de sala en pausa y estados reales de poderes, con el siguiente golpe del combo de Kilo explicado.
+
+Validación: 1.496 pruebas Node aprobadas. Nuevo recorrido físico de Kilo: notas, cinco formas, Continuar y guardián con recuperación; no se acredita la campaña entera. `npm test`, `npm run release:check`, `npm run test:browser:experience`, `npm run test:browser:journey`, `npm run test:browser:rooms` y `npm run test:browser:album`. El recorrido nuevo usa una fixture que abre la sala de Chispín; no acredita una campaña completa de once salas ni una victoria nueva sobre Quimera. La regresión V500 sigue comprobando su interfaz y memoria por separado. Las notas anteriores conservan el estado de preparación de cada versión, no el resultado actual de sus workflows.
+
 # V500 · ohana-500 · Un lugar para ti
 
 V495–V499 corrigen guía, controles, foco y memoria de victoria. V500 añade una constelación de diez voces con los personajes del motor, desbloqueada por la victoria del Mundo 1. Sin cambios de estadísticas ni infraestructura multijugador. Pendiente de aceptación de navegador, Quality y Pages.

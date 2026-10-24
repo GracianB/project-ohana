@@ -906,7 +906,7 @@ async function auditPage(page, label) {
 
 try {
   await fs.mkdir('test-results', { recursive:true });
-  const desktop = await chromium.launch({ headless:true });
+  const desktop = await chromium.launch({ headless:true, ...(process.env.CHROMIUM_BIN ? {executablePath:process.env.CHROMIUM_BIN} : {}) });
   const page = await desktop.newPage({ viewport:{width:1280,height:720}, deviceScaleFactor:1 });
   await auditPage(page, 'desktop');
 
@@ -1332,7 +1332,7 @@ try {
   await page.context().setOffline(false);
   await desktop.close();
 
-  const mobile = await chromium.launch({ headless:true });
+  const mobile = await chromium.launch({ headless:true, ...(process.env.CHROMIUM_BIN ? {executablePath:process.env.CHROMIUM_BIN} : {}) });
   const mobilePage = await mobile.newPage({ ...devices['iPhone 13'], isMobile:true, hasTouch:true });
   await auditPage(mobilePage, 'mobile');
   assert.ok(await mobilePage.locator('#touch').isVisible(), 'mobile: controles táctiles');

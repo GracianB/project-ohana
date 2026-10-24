@@ -40,7 +40,7 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
     ];
     case "roomEnter": return th ? [
       { dur: 170, bg: "#140f26", color: th.color, layout: "one", heroes: [hero], dim: true, kicker: `Sala ${ALL.indexOf(hero) + 1} de 10 · ${th.name}`, title: `${name}, sin su canción`, line: WORLD1_ROOM_STORY[hero]?.enter || "" },
-      { dur: 140, bg: "#140f26", color: th.color, layout: "one", heroes: [hero], dim: true, kicker: "Sello: " + (WORLD1_SEALS[th.seal]?.title || ""), title: "Lo que hay que hacer", line: (WORLD1_SEALS[th.seal]?.verb || "") + "." }
+      { dur: 140, bg: "#140f26", color: th.color, layout: "one", heroes: [hero], dim: true, kicker: "Sello: " + (WORLD1_SEALS[th.seal]?.title || ""), title: "Lo que hay que hacer", line: hero==='kilo'?'Despeja cada hibisco y toca su nota para crecer. Después vence al Tambor: esquiva sus ondas y ataca cuando se recupere.':(WORLD1_SEALS[th.seal]?.verb || "") + "." }
     ] : [];
     case "awaken": {
       if (!th) return [];
@@ -76,13 +76,53 @@ export function playWorld1Cine(g, id, hero = null) {
   return true;
 }
 export function world1CineActive(g) { return !!g?.world1Cine; }
-export function skipWorld1Cine(g) { const c = g?.world1Cine; if (!c) return false; if (c.t < 20) return false; if (c.i < c.shots.length - 1) { c.i++; c.t = 0; } else endScene(g); return true; }
+export function world1CinePresentation(g) {
+  const c = g?.world1Cine, s = c?.shots[c.i];
+  if (!s) return null;
+  const reading = !g.reduceMotion && !c.revealed && c.t * 1.6 < String(s.line || "").length;
+  const last = c.i === c.shots.length - 1;
+  return {key: c.id + ":" + c.i, title: s.title, line: s.line,
+    canAdvance: c.t >= 20,
+    button: reading ? "Mostrar texto" : last && c.id !== "bossDefeat" ? "Volver al juego" : "Continuar"};
+}
+export function skipWorld1Cine(g) {
+  const c = g?.world1Cine, view = world1CinePresentation(g);
+  if (!view?.canAdvance) return false;
+  // First reveal a sentence that is still being typed; never throw it away.
+  if (view.button === "Mostrar texto") { c.revealed = true; return true; }
+  if (c.i < c.shots.length - 1) { c.i++; c.t = 0; c.revealed = false; }
+  else endScene(g);
+  return true;
+}
+// The story remains drawn on Canvas; expose its full text and one real button
+// so touch and assistive technology can advance the same production sequence.
+export function syncWorld1CineControls(g, doc = globalThis.document, visible = true) {
+  const root = doc?.getElementById("world1-cine-controls");
+  if (!root) return;
+  const view = g.running ? world1CinePresentation(g) : null;
+  const active = !!view;
+  if (doc.body.classList.contains("world1-story") !== active) doc.body.classList.toggle("world1-story", active);
+  const show = active && visible, wasHidden = root.hidden, ownedFocus = root.contains(doc.activeElement);
+  root.hidden = !show;
+  if (!show) {
+    if (ownedFocus) doc.getElementById("game")?.focus({preventScroll:true});
+    return;
+  }
+  const button = root.querySelector("button");
+  if (root.dataset.scene !== view.key) {
+    root.dataset.scene = view.key;
+    root.querySelector("p").textContent = view.title + ". " + view.line;
+  }
+  if (button.textContent !== view.button) button.textContent = view.button;
+  button.setAttribute("aria-disabled", String(!view.canAdvance));
+  if (wasHidden) button.focus({preventScroll:true});
+}
 function endScene(g) { const c = g.world1Cine; g.world1Cine = null; g.resetInput?.(); g.onWorld1CineEnd?.(c.id, c.hero); if (c.id === "bossDefeat") playWorld1Cine(g, "ending"); }
 
 export function updateWorld1Cine(g) {
   const c = g?.world1Cine; if (!c) return false;
   c.t++; c.total++;
-  const s = c.shots[c.i]; if (!s || c.t >= num(s.dur, 120)) { if (c.i < c.shots.length - 1) { c.i++; c.t = 0; } else endScene(g); }
+  const s = c.shots[c.i]; if (!s || c.t >= num(s.dur, 120)) { if (c.i < c.shots.length - 1) { c.i++; c.t = 0; c.revealed = false; } else endScene(g); }
   if (c.total > 6000) endScene(g); // finito pase lo que pase
   g.renderDirty = true;
   return true;
@@ -102,7 +142,27 @@ function heroPos(layout, i, n, W, H, k, t) {
     default: return [cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.55, 1];
   }
 }
-function wrap(ctx, text, maxW) { const words = String(text || "").split(" "), out = []; let line = ""; for (const w of words) { const n = line ? line + " " + w : w; if (ctx.measureText(n).width > maxW && line) { out.push(line); line = w; } else line = n; } if (line) out.push(line); return out.slice(0, 3); }
+function wrap(ctx, text, maxW) { const words = String(text || "").split(" "), out = []; let line = ""; for (const w of words) { const n = line ? line + " " + w : w; if (ctx.measureText(n).width > maxW && line) { out.push(line); line = w; } else line = n; } if (line) out.push(line); return out; }
+
+export function world1CineTextLayout(ctx, shot, W, H) {
+  const width = W * 0.86;
+  let titleSize = Math.max(16, Math.round(Math.min(H * 0.06, W * 0.085)));
+  ctx.font = `bold ${titleSize}px sans-serif`;
+  let titleLines = wrap(ctx, shot.title, width);
+  while (titleSize > 14 && titleLines.length > 2) {
+    ctx.font = `bold ${--titleSize}px sans-serif`;
+    titleLines = wrap(ctx, shot.title, width);
+  }
+  let bodySize = Math.max(13, Math.round(Math.min(H * 0.03, W * 0.05)));
+  const maxLines = W < H ? 4 : 3;
+  ctx.font = `${bodySize}px sans-serif`;
+  let lines = wrap(ctx, shot.line, width);
+  while (lines.length > maxLines && bodySize > 12) {
+    ctx.font = `${--bodySize}px sans-serif`;
+    lines = wrap(ctx, shot.line, width);
+  }
+  return {titleSize, titleLines, bodySize, lines, width};
+}
 
 export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   const c = g?.world1Cine; if (!c) return;
@@ -131,14 +191,15 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   if (s.layout === "fused") { ctx.globalAlpha = fadeIn * 0.9; ctx.strokeStyle = "#ffd6f2"; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * 0.13, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = "#ff3a8a"; ctx.beginPath(); ctx.arc(W / 2 - 18, H * 0.47, 7, 0, Math.PI * 2); ctx.arc(W / 2 + 18, H * 0.47, 7, 0, Math.PI * 2); ctx.fill(); }
   // Bandas de cine.
   const bh = H * 0.1; ctx.globalAlpha = 1; ctx.fillStyle = "#000"; ctx.fillRect(-10, 0, W + 20, bh); ctx.fillRect(-10, H - bh, W + 20, bh);
+  const textLayout = world1CineTextLayout(ctx, s, W, H);
   // Textos: rótulo, título y frase con máquina de escribir.
   ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.globalAlpha = fadeIn * fadeOut;
-  ctx.fillStyle = s.color; ctx.font = `bold ${Math.round(H * 0.024)}px sans-serif`; ctx.fillText(String(s.kicker || "").toUpperCase(), W / 2, bh * 0.5);
-  ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.round(H * 0.06)}px sans-serif`; ctx.fillText(s.title || "", W / 2, H * 0.19);
-  ctx.font = `${Math.round(H * 0.03)}px sans-serif`; ctx.fillStyle = "#f4ecff";
-  const shown = String(s.line || "").slice(0, reduce ? 999 : Math.floor(c.t * 1.6));
-  wrap(ctx, shown, W * 0.8).forEach((ln, i, arr) => ctx.fillText(ln, W / 2, H - bh - 18 - (arr.length - 1 - i) * H * 0.04 - H * 0.03));
-  ctx.globalAlpha = 0.6; ctx.fillStyle = "#cfc4ff"; ctx.font = `${Math.round(H * 0.018)}px sans-serif`; ctx.fillText(`${c.i + 1}/${c.shots.length} · Espacio para continuar`, W / 2, H - bh * 0.5);
+  ctx.fillStyle = s.color; ctx.font = `bold ${Math.round(H * 0.024)}px sans-serif`; ctx.fillText(String(s.kicker || "").toUpperCase(), W / 2, bh * 0.5, W * 0.92);
+  ctx.fillStyle = "#fff"; ctx.font = `bold ${textLayout.titleSize}px sans-serif`; textLayout.titleLines.forEach((line,i,lines) => ctx.fillText(line, W / 2, H * 0.19 + (i - (lines.length - 1) / 2) * textLayout.titleSize * 1.2, textLayout.width));
+  ctx.font = `${textLayout.bodySize}px sans-serif`; ctx.fillStyle = "#f4ecff";
+  const shown = String(s.line || "").slice(0, reduce || c.revealed ? 999 : Math.floor(c.t * 1.6));
+  wrap(ctx, shown, textLayout.width).forEach((ln, i, arr) => ctx.fillText(ln, W / 2, H - bh - 18 - (arr.length - 1 - i) * textLayout.bodySize * 1.35 - textLayout.bodySize, textLayout.width));
+  ctx.globalAlpha = 0.6; ctx.fillStyle = "#cfc4ff"; ctx.font = `${Math.round(H * 0.018)}px sans-serif`; ctx.fillText(`${c.i + 1}/${c.shots.length} · Enter o Espacio`, W / 2, H - bh * 0.5);
   ctx.restore();
 }
 

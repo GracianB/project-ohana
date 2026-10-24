@@ -12,6 +12,8 @@ function setup(hero) {
   const events = [];
   const game = {
     roomId: room.id, roomDef: room, reduceMotion: true,
+    // This suite isolates station actions; guardian gating has its own tests.
+    clearedEncounters: hero==='kilo'?{'w1-kilo':['w1-kilo-tambor-v1']}:{},
     world1Seals: [], world1Visited: {}, score: 0, projectiles: [],
     player: { x: 0, y: WORLD1_FLOOR - 40, w: 28, h: 40, vx: 0, vy: 0, grounded: true, jumps: 0, health: 70, maxHealth: 100, xp: 0 },
     nums: { add() {} }, fx: { emit() {} },
@@ -37,12 +39,12 @@ function assertSealed(run, hero) {
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
   assert.equal(game.score, 150 * total, hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, 3, hero + " rewards experience");
-  assert.equal(run.saves, 1, hero + " saves once");
+  assert.equal(game.player.xp, hero==='kilo'?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total, hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, 1, "no extra save after completion");
+  assert.equal(run.saves, total, "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -92,22 +94,16 @@ test("Stitcho: part zero and the remaining pieces reach their own workshops", ()
   assertSealed(run, "stitcho");
 });
 
-test("Chispín: timed chain expires cleanly, restarts at rod one and cannot farm points", () => {
+test("Chispín: each connected antenna stays lit, accepts any order and cannot farm score", () => {
   const run = setup("chispin"), { game, stand, tick } = run;
   const rods = game.world1.stations;
   stand(rods[2].x); tick();
-  assert.equal(rods[2].done, false, "a future rod cannot be skipped to");
-  for (const s of rods.slice(0, 2)) { stand(s.x); tick(); }
-  assert.equal(game.score, 300);
-  assert.equal(game.world1.order, 2);
-  // Expiry while touching the previously-next rod must not complete it.
-  game.world1.tick = game.world1.chainUntil;
-  stand(rods[2].x); tick();
-  assert.equal(game.world1.order, 0);
-  assert.equal(rods.every((s) => !s.done), true);
-  assert.equal(rods[2].glow, 0);
-  assert.equal(game.score, 300);
-  for (const s of rods) { stand(s.x); tick(); assert.equal(s.done, true); }
+  assert.equal(rods[2].done, true, "a real contact connects the antenna");
+  stand(0);
+  for (let i=0;i<1200;i++) tick();
+  assert.equal(rods[2].done, true, "waiting never erases an earned connection");
+  stand(rods[2].x); tick();assert.equal(game.score,150,"repeat contact is not rewarded twice");
+  for (const s of [rods[0],rods[3],rods[1]]) { stand(s.x); tick(); }
   assertSealed(run, "chispin");
 });
 

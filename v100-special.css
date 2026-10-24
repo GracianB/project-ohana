@@ -231,12 +231,12 @@
   font-size:clamp(58px,10vw,118px)!important;
   line-height:.94!important;
   letter-spacing:.025em!important;
-  text-shadow:0 6px 30px rgba(0,0,0,.58),0 0 38px rgba(255,223,161,.25)!important;
+  text-shadow:none!important;
 }
 #ohana-intro.family-welcome .oi-welcome small{
   font-size:clamp(11px,1.1vw,16px)!important;
-  line-height:1.4!important;color:#fff7de!important;
-  text-shadow:0 3px 12px rgba(0,0,0,.88)!important;
+  line-height:1.4!important;color:#345e53!important;
+  text-shadow:none!important;
 }
 #ohana-intro.family-welcome .oi-enter{
   left:50%!important;right:auto!important;bottom:clamp(20px,4vh,52px)!important;
@@ -259,10 +259,10 @@
 }
 #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome strong{
   font-size:clamp(70px,8.5vw,122px)!important;line-height:.94!important;
-  letter-spacing:.05em!important;text-shadow:0 6px 36px rgba(0,0,0,.6)!important;
+  letter-spacing:.05em!important;text-shadow:none!important;
 }
 #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-welcome small{
-  color:#fff4dc!important;font-size:clamp(11px,1.2vw,15px)!important;
+  color:#345e53!important;font-size:clamp(11px,1.2vw,15px)!important;
 }
 #char-select[data-selector-mode="family-grid"] #ohana-intro .oi-enter{
   left:50%!important;right:auto!important;bottom:max(36px,6vh)!important;

@@ -6,9 +6,9 @@ export const WORLD1_PREMISE = "El Eco robó la canción de cada héroe y la cosi
 
 // Cada sala: lo que dice su héroe al entrar y al despertar su sello.
 export const WORLD1_ROOM_STORY = Object.freeze({
-  kilo:    { enter: "Kilo: «Mi ukelele suena hueco… el Eco se llevó la canción del hogar».",      seal: "Kilo: «¡Ahí está! Cuatro notas y la casa vuelve a sonar»." },
+  kilo:    { enter: "Kilo: «El Eco robó cuatro notas. Cada una me ayudará a crecer; después nos espera el Tambor del Claro».",      seal: "Kilo: «¡Ahí está! ¡Cuatro notas y el Tambor en calma! La casa vuelve a sonar»." },
   stitcho: { enter: "Stitcho: «¡Mi nave! El Eco la ha descosido pieza a pieza».",                 seal: "Stitcho: «Cosida y brillando. Ningún experimento se queda atrás»." },
-  chispin: { enter: "Chispín: «Sin mi chispa el trueno no tiene voz. Ayúdame a encadenarla».",    seal: "Chispín: «¡PIKA-BUM! El cielo vuelve a reír»." },
+  chispin: { enter: "Chispín: «Sin mi chispa el trueno no tiene voz. Conectemos las antenas para que vuelva a cantar».",    seal: "Chispín: «¡PIKA-BUM! El cielo vuelve a reír»." },
   cat:     { enter: "Michi: «Mis medusas lunares se han dormido. Sin ellas no sé soñar».",        seal: "Michi: «Brillan otra vez. El sueño era nuestro, no del Eco»." },
   cuerno:  { enter: "Cuerno: «La aurora está rota en tres prismas. Hay que ordenarla».",          seal: "Cuerno: «I, II, III… la aurora vuelve a pintar el bosque»." },
   dragon:  { enter: "Dragón: «Mis braseros están fríos. El Eco se bebió el fuego del hogar».",    seal: "Dragón: «Cuatro llamas. Ahora el fuego calienta, no asusta»." },

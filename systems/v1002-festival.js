@@ -120,7 +120,7 @@ class FestivalDirector{
       if(this.isOpen()&&e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();this.preview&&!this.preview.hidden?this.closeMemory():this.close();return;}
       if(e.key?.toLowerCase()!=="b"||e.repeat||e.ctrlKey||e.altKey||e.metaKey)return;
       if(document.activeElement?.matches("input,textarea,select,[contenteditable]"))return;
-      if(document.querySelector("#ohana-intro.show,#start-intro.show,#help.open,#map-overlay.open,#pause-overlay.open,#win-cinema.show"))return;
+      if(document.body.classList.contains("world1-story")||document.querySelector("#ohana-intro.show,#start-intro.show,#help.open,#map-overlay.open,#pause-overlay.open,#win-cinema.show"))return;
       e.preventDefault();e.stopImmediatePropagation();this.isOpen()?this.close():this.open();
     },true);
     FestivalMoment.mount();
@@ -174,6 +174,9 @@ class FestivalDirector{
     if(label)label.textContent=n+" / 100";
   }
   open(roomId){
+    // The campaign button and B must open the same persistent room collection.
+    // Title/legacy memories retain their authored gallery outside World 1 play.
+    if(this.game?.running && this.game.roomDef?.world1 && this.openWorld1Album){this.openWorld1Album();return;}
     this.mount();
     if(!this.album)return;
     this.focusBefore=document.activeElement;

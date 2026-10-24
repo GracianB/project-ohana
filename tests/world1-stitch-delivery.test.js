@@ -73,8 +73,8 @@ test('World 1 Stitcho: all three deliveries awaken exactly one seal and unlock e
   assert.equal(world1CanLeave(game, 'right'), true, 'east opens after all repairs');
   assert.equal(game.player.health, 100, 'seal reward heals but cannot overfill');
   assert.equal(game.player.xp, 3);
-  assert.equal(run.saved, 1, 'seal progress must be saved once');
+  assert.equal(run.saved, 3, 'each delivered part must be saved once');
   assert.equal(run.beats.filter(([kind]) => kind === 'seal').length, 1);
   assert.equal(awardSeal(game), false, 'the reward cannot be claimed twice');
-  assert.equal(run.saved, 1);
+  assert.equal(run.saved, 3);
 });

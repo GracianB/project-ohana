@@ -4,7 +4,7 @@ import {chromium} from 'playwright';
 import {startServer} from './server.mjs';
 const server=await startServer(0);let browser;
 try{
- browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1280,height:900}});
+ browser=await chromium.launch(process.env.CHROMIUM_BIN ? {executablePath:process.env.CHROMIUM_BIN} : {});const page=await browser.newPage({viewport:{width:1280,height:900}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  const base=`http://127.0.0.1:${server.address().port}/`;
  await fs.mkdir('test-results/polish',{recursive:true});

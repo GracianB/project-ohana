@@ -129,12 +129,33 @@ const THEMES = {
   },
 };
 
+// Ten authored variations, one identity per World 1 room. Legacy scores stay intact.
+const WORLD1_SCORES = {
+ kilo:['claro',106,55,[0,2,4,2,1,0,4,2]],
+ stitcho:['lab',116,50,[0,4,2,5,3,1,4,0]],
+ chispin:['cumbre',128,62,[0,2,5,4,2,6,4,1]],
+ cat:['orbita',82,57,[0,4,3,1,5,3,2,0]],
+ cuerno:['cueva',92,60,[0,2,4,6,5,3,1,0]],
+ dragon:['caldera',120,48,[0,3,2,5,4,2,1,0]],
+ dino:['jungla',100,43,[0,0,3,2,4,1,3,0]],
+ frita:['costa',124,58,[0,2,1,4,3,5,2,0]],
+ pizza:['costa',114,53,[0,1,4,2,5,4,1,0]],
+ yomi:['abismo',88,59,[0,3,5,2,6,4,1,0]]
+};
+for(const [hero,[base,bpm,root,motif]] of Object.entries(WORLD1_SCORES)){
+ THEMES['w1-'+hero]={...THEMES[base],bpm,root,motif,swing:hero==='frita'?.14:THEMES[base].swing,
+  melody:{...THEMES[base].melody},chords:THEMES[base].chords.map(chord=>[...chord])};
+}
+export function world1MusicProfile(hero){
+ const theme=THEMES['w1-'+hero];return theme?{name:'w1-'+hero,bpm:theme.bpm,root:theme.root,motif:[...theme.motif]}:null;
+}
+
 // Sala → tema
 const ROOM_THEME = {
   hub: "claro", beach: "costa", jungle: "jungla", cave: "cueva",
   ridge: "cumbre", space: "orbita", reef: "abismo", volcano: "caldera", boss: "jefe", lab: "lab",
 };
-export function themeForRoom(id) { return ROOM_THEME[id] || "claro"; }
+export function themeForRoom(id) { return id==="w1-final"?"jefe":THEMES[id]?id:ROOM_THEME[id] || "claro"; }
 
 const SCALES = {
   major: [0, 2, 4, 5, 7, 9, 11],
@@ -155,7 +176,7 @@ function rng(seed) {
 }
 const MOTIFS={title:[0,2,4,2,1,0,4,2],claro:[0,2,4,2,1,0,4,2],victoria:[0,2,4,5,4,2,1,0],costa:[0,1,2,4,2,1,4,2],jungla:[0,2,3,4,2,3,1,0],jefe:[0,1,0,4,3,1,4,0],jefe3:[0,1,3,4,3,1,4,0]};
 function buildMelody(th){
- const name=Object.keys(THEMES).find(k=>THEMES[k]===th),motif=MOTIFS[name]||[0,2,1,4,3,2,1,0],scale=SCALES[th.scale],out=[];
+ const name=Object.keys(THEMES).find(k=>THEMES[k]===th),motif=th.motif||MOTIFS[name]||[0,2,1,4,3,2,1,0],scale=SCALES[th.scale],out=[];
  for(let bar=0;bar<th.chords.length*4;bar++){
   const [root,quality]=th.chords[bar%th.chords.length],tones=CHORD[quality].map(n=>n+root);
   let phraseNote=0;

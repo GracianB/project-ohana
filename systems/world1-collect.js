@@ -128,7 +128,9 @@ export function takeWorld1Item(g, id) {
   a.found.push(id); a.found.sort((x, y) => x - y);
   g.score = num(g.score) + 10;
   const th = WORLD1_THEMES[hero], page = Math.floor(id / PAGE_SIZE), p = g.player, ui = (g.world1CollectUI ||= { open: false, page: 0, toast: null });
-  g.nums?.add?.(num(p?.x), num(p?.y) - 20, `${a.found.length}/100 · ÁLBUM`, th.color, false);
+  // The HUD counter updates for every item; reserve words for meaningful beats.
+  g.fx?.emit?.(num(p?.x) + num(p?.w) / 2, num(p?.y), {color:th.color,count:g.reduceMotion?2:5,size:2,life:18,up:1});
+  if (a.found.length === 1) g.nums?.add?.(num(p?.x), num(p?.y) - 20, "PRIMER RECUERDO · ÁLBUM 1/100", th.color, false);
   if (pageDone(a, page)) { ui.toast = { t: 0, max: 150, text: `Página ${page + 1} completa · ${PAGE_TITLES[page]}`, color: th.color }; g.onWorld1Beat?.("album-page", hero, page); if (p) p.health = Math.min(num(p.maxHealth, p.health), num(p.health) + 10); }
   if (a.found.length === ALBUM_SIZE && !a.relic) { a.relic = true; ui.toast = { t: 0, max: 240, text: `¡Álbum completo! Reliquia: ${th.relic}`, color: "#fff1b5", big: true }; g.onWorld1Beat?.("album-relic", hero); }
   persist(g); g.save?.();
@@ -145,7 +147,36 @@ export function updateWorld1Collect(g) {
 }
 
 export function toggleWorld1Album(g, open) { const ui = (g.world1CollectUI ||= { open: false, page: 0, toast: null }); ui.open = open ?? !ui.open; g.renderDirty = true; return ui.open; }
-export function world1AlbumKey(g, key) { const ui = g.world1CollectUI; if (!ui?.open) return false; if (key === "ArrowRight") ui.page = (ui.page + 1) % PAGE_SIZE; else if (key === "ArrowLeft") ui.page = (ui.page + PAGE_SIZE - 1) % PAGE_SIZE; else if (key === "Escape" || key === "b" || key === "B") ui.open = false; return true; }
+export function world1AlbumKey(g, key) { const ui = g.world1CollectUI; if (!ui?.open) return false; if (key === "ArrowRight") ui.page = (ui.page + 1) % PAGE_SIZE; else if (key === "ArrowLeft") ui.page = (ui.page + PAGE_SIZE - 1) % PAGE_SIZE; else if (key === "Escape" || key === "b" || key === "B") ui.open = false; else return false; g.renderDirty = true; return true; }
+
+// One page of the real persistent collection, shared by the accessible panel.
+export function world1AlbumView(g) {
+  const hero = g.world1CollectHero || WORLD1_ORDER[0], th = WORLD1_THEMES[hero];
+  const album = world1AlbumFor(g, hero), found = new Set(album.found);
+  const page = Math.max(0, Math.min(9, Number(g.world1CollectUI?.page) || 0));
+  return {hero, title:"Álbum de " + th.short, count:found.size, page,
+    heading:`Página ${page + 1}/10 · ${PAGE_TITLES[page]}`,
+    complete:pageDone(album,page), relic:album.relic ? th.relic : null,
+    cards:Array.from({length:PAGE_SIZE},(_,i)=>({id:page * PAGE_SIZE + i,found:found.has(page * PAGE_SIZE + i)}))};
+}
+export function syncWorld1Album(g, doc = globalThis.document) {
+  const root = doc?.getElementById("world1-album");if(!root)return;
+  const open = !!(g.running && g.world1CollectHero && g.world1CollectUI?.open);
+  if(root.classList.contains("open") !== open)root.classList.toggle("open",open);
+  if(!open)return;
+  const view = world1AlbumView(g), key = [view.hero,view.page,world1AlbumFor(g,view.hero).found.join(","),view.relic].join(":");
+  if(root.dataset.view === key)return;root.dataset.view = key;
+  root.querySelector("h2").textContent = view.title;
+  root.querySelector(".album-count").textContent = `${view.count}/100 recuerdos · colección opcional`;
+  root.querySelector(".album-page-title").textContent = view.heading + (view.complete ? " ✓" : "");
+  root.querySelector(".album-reward").textContent = view.relic ? "Reliquia conseguida: " + view.relic : "Cada página completa recupera hasta 10 de vida. Los 100 recuerdos reúnen la reliquia de esta sala.";
+  const grid=root.querySelector("ol");
+  grid.replaceChildren(...view.cards.map(card=>{
+    const li=doc.createElement("li");li.className=card.found?"found":"pending";
+    li.textContent=card.found?"✦ " + (card.id+1):"?";
+    li.setAttribute("aria-label","Recuerdo " + (card.id+1) + (card.found?" conseguido":" pendiente"));return li;
+  }));
+}
 
 // Cromo: el emblema reducido es un rombo con el color del héroe; los "reto" tienen borde.
 export function drawWorld1Collect(ctx, g, cam, t = 0) {
@@ -157,15 +188,19 @@ export function drawWorld1Collect(ctx, g, cam, t = 0) {
     if (have.has(it.id)) continue;
     const x = it.x - cx, y = it.y - cy + Math.sin(num(t) * 0.06 + it.id) * 3;
     if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
-    ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x + 6, y); ctx.lineTo(x, y + 8); ctx.lineTo(x - 6, y); ctx.closePath(); ctx.fill(); if (it.challenge) ctx.stroke();
+    // A small paper card reads as a memory, distinct from an XP crystal.
+    ctx.fillStyle = "#f6ecd8";ctx.strokeStyle = c;ctx.lineWidth = it.challenge ? 2.5 : 1.5;
+    ctx.beginPath();ctx.roundRect(x - 7,y - 10,14,20,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle = c;ctx.fillRect(x - 4,y - 6,8,8);
+    ctx.fillStyle = "#4a3d55";ctx.fillRect(x - 3,y + 5,6,1.5);
   }
   ctx.restore();
 }
 
-export function drawWorld1CollectHud(ctx, g, W, H) {
+export function drawWorld1CollectHud(ctx, g, W, H, options = {}) {
   const hero = g?.world1CollectHero; const ui = g?.world1CollectUI; W = num(W, 1280); H = num(H, 720);
   ctx.save(); ctx.textBaseline = "middle";
-  if (hero) {
+  if (hero && options.badge !== false) {
     const a = g.world1Collect.rooms[hero], th = WORLD1_THEMES[hero], n = a.found.length, page = Math.min(9, Math.floor(n / PAGE_SIZE));
     const x = W - 250, y = 18; ctx.fillStyle = "rgba(18,13,36,.72)"; ctx.fillRect(x, y, 232, 44);
     ctx.fillStyle = th.color; ctx.fillRect(x, y + 40, 232 * n / ALBUM_SIZE, 4);

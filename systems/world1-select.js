@@ -1,3 +1,4 @@
+
 // OHANA V467 · MUNDO 1 · Selección de héroe personalizada.
 // Sin islas en pareja: cada héroe tiene su propia carta-portal enlazada a SU sala
 // grande (w1-<héroe>), con su silueta, su color, su frase y el estado del sello.
@@ -66,11 +67,12 @@ export function refreshWorld1Select(sel, opts) { const i = sel.index; sel.cards 
 
 const COLS = 6;
 function layout(sel, W, H) {
-  const n = sel.cards.length, rows = Math.ceil(n / COLS);
+  const n = sel.cards.length, cols = W < 600 ? 3 : COLS, rows = Math.ceil(n / cols);
+  sel.columns = cols;
   const pad = Math.max(10, W * 0.012), top = H * 0.2, bottom = H * 0.16;
-  const cw = Math.max(60, (W - pad * (COLS + 1)) / COLS), ch = Math.max(90, (H - top - bottom - pad * (rows - 1)) / rows);
-  sel.rects = sel.cards.map((c, i) => { const r = Math.floor(i / COLS), k = i % COLS;
-    const rowN = Math.min(COLS, n - r * COLS), off = (COLS - rowN) * (cw + pad) / 2;
+  const cw = Math.max(1, (W - pad * (cols + 1)) / cols), ch = Math.max(90, (H - top - bottom - pad * (rows - 1)) / rows);
+  sel.rects = sel.cards.map((c, i) => { const r = Math.floor(i / cols), k = i % cols;
+    const rowN = Math.min(cols, n - r * cols), off = (cols - rowN) * (cw + pad) / 2;
     return { x: pad + off + k * (cw + pad), y: top + r * (ch + pad), w: cw, h: ch }; });
   return sel.rects;
 }
@@ -86,8 +88,8 @@ export function world1SelectKey(sel, key) {
   const n = sel.cards.length;
   if (key === "ArrowRight" || key === "d") sel.index = (sel.index + 1) % n;
   else if (key === "ArrowLeft" || key === "a") sel.index = (sel.index + n - 1) % n;
-  else if (key === "ArrowDown" || key === "s") sel.index = Math.min(n - 1, sel.index + COLS);
-  else if (key === "ArrowUp" || key === "w") sel.index = Math.max(0, sel.index - COLS);
+  else if (key === "ArrowDown" || key === "s") sel.index = Math.min(n - 1, sel.index + (sel.columns || COLS));
+  else if (key === "ArrowUp" || key === "w") sel.index = Math.max(0, sel.index - (sel.columns || COLS));
   else if (key === "Enter" || key === " " || key === "j") return choose(sel);
   else if (key === "Escape") return { action: "back" };
   return { action: "move", card: sel.cards[sel.index] };
@@ -133,47 +135,54 @@ export function drawWorld1Select(ctx, W, H, t, sel, { drawActor = null, reduceMo
   if (sel.pulse > 0) sel.pulse--; if (sel.deny > 0) sel.deny--;
   const cur = sel.cards[sel.index] || sel.cards[0];
   ctx.save();
-  ctx.fillStyle = "#120d24"; ctx.fillRect(0, 0, W, H);
-  // Halo plano del héroe enfocado (tres círculos, sin degradado).
-  ctx.fillStyle = cur.tint; for (let k = 3; k >= 1; k--) { ctx.globalAlpha = 0.05 * k; ctx.beginPath(); ctx.arc(W * 0.5, H * 0.55, Math.min(W, H) * (0.16 + 0.12 * (4 - k)), 0, Math.PI * 2); ctx.fill(); }
-  ctx.globalAlpha = 1; ctx.fillStyle = "#fff";
-  for (const [sx, sy, r] of STARS) { ctx.globalAlpha = reduceMotion ? 0.5 : 0.3 + 0.3 * Math.sin(t * 0.03 + sx * 20); ctx.fillRect(sx * W, sy * H * 0.9, r, r); }
+  // A chapter theatre, with illuminated doors and a shared constellation.
+  ctx.fillStyle='#101c30';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#192e43';ctx.beginPath();ctx.ellipse(W/2,H*.52,W*.6,H*.55,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<48;i++){const x=((i*7919)%997)/997*W,y=((i*317)%991)/991*H;
+   ctx.globalAlpha=reduceMotion?.4:.25+Math.sin(t*.018+i)*.15;ctx.fillStyle='#f5d89e';ctx.fillRect(x,y,2,2);}
+  ctx.globalAlpha=1;ctx.strokeStyle='#bca578';ctx.lineWidth=1;
+  ctx.strokeRect(7,7,W-14,H-14);
+  ctx.fillStyle="#ffe7b4";
   ctx.globalAlpha = 1; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.font = `bold ${Math.round(H * 0.05)}px sans-serif`; ctx.fillText("Mundo 1 · La Ruta de los Diez", W / 2, H * 0.07);
-  ctx.font = `${Math.round(H * 0.026)}px sans-serif`; ctx.fillStyle = "#e8dcff";
+  ctx.font = `bold ${Math.round(Math.min(H * 0.05,W * .055))}px sans-serif`; ctx.fillText("OHANA · El libro de la familia", W / 2, H * 0.07,W*.92);
+  ctx.font = `${Math.round(H * 0.026)}px sans-serif`; ctx.fillStyle = "#c8d9db";
   const sealedN = sel.cards.filter((c) => c.sealed).length;
-  ctx.fillText(`Cada héroe espera en su propia sala · Sellos ${sealedN}/10`, W / 2, H * 0.125);
+  ctx.fillText(`Diez protagonistas · Diez sellos · Un enemigo final · ${sealedN}/10`, W / 2, H * 0.125,W*.92);
   const rects = layout(sel, W, H);
   sel.cards.forEach((c, i) => {
     const r = rects[i], focus = i === sel.index, lift = focus ? (reduceMotion ? 0 : 6 + Math.sin(t * 0.08) * 2) : 0;
     const x = r.x, y = r.y - lift, w = r.w, h = r.h, shake = focus && sel.deny ? Math.sin(sel.deny) * 4 : 0;
     ctx.save(); ctx.translate(shake, 0);
-    ctx.globalAlpha = c.unlocked ? 1 : 0.55;
-    ctx.fillStyle = "#1e1838"; roundRect(ctx, x, y, w, h, 14); ctx.fill();
+    ctx.globalAlpha = c.unlocked ? 1 : 0.83;
+    ctx.fillStyle = focus ? "#fff5de" : "#d8dfdc"; roundRect(ctx, x, y, w, h, 14); ctx.fill();
     ctx.fillStyle = c.tint; ctx.globalAlpha *= 0.28; roundRect(ctx, x + 4, y + 4, w - 8, h * 0.62, 11); ctx.fill();
-    ctx.globalAlpha = c.unlocked ? 1 : 0.55;
-    ctx.lineWidth = focus ? 4 : 2; ctx.strokeStyle = focus ? c.color : "#4a3f72"; roundRect(ctx, x, y, w, h, 14); ctx.stroke();
-    // Portal: arco de la sala con la silueta dentro.
+    ctx.globalAlpha = c.unlocked ? 1 : 0.83;
+    ctx.lineWidth = focus ? 4 : 2; ctx.strokeStyle = focus ? "#2b6561" : "#9db7a5"; roundRect(ctx, x, y, w, h, 14); ctx.stroke();
+    ctx.fillStyle="#45645f";ctx.font="bold 10px sans-serif";
+    ctx.fillText(c.final?'FINAL':`CAPÍTULO ${String(i+1).padStart(2,'0')}`,x+w/2,y+12,w*.8);
+    // Door: the chapter protagonist, not a freely interchangeable avatar.
     const pcx = x + w / 2, pcy = y + h * 0.36, pr = Math.min(w * 0.36, h * 0.25);
     ctx.strokeStyle = c.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(pcx, pcy, pr, pr * 1.15, 0, 0, Math.PI * 2); ctx.stroke();
-    if (!c.final && drawActor && c.unlocked) { try { drawActor(ctx, c.hero, pcx, pcy + pr * 0.9, pr / 40); } catch (_) { drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, t); } }
-    else drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.unlocked ? c.color : "#5b5280", reduceMotion ? 0 : t);
-    if (!c.unlocked) { ctx.fillStyle = "#cfc4ff"; ctx.font = `bold ${Math.round(pr * 0.6)}px sans-serif`; ctx.fillText("🔒", pcx, pcy); }
-    ctx.fillStyle = "#fff"; ctx.font = `bold ${Math.round(Math.min(w * 0.12, h * 0.085))}px sans-serif`; ctx.fillText(c.name, pcx, y + h * 0.7);
-    ctx.fillStyle = c.color; ctx.font = `${Math.round(Math.min(w * 0.075, h * 0.05))}px sans-serif`; ctx.fillText(c.roomName, pcx, y + h * 0.79);
+    if (!c.final && drawActor) { try { drawActor(ctx, c.hero, pcx, pcy + pr * 0.9, pr / 40); } catch (_) { drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, t); } }
+    else drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, reduceMotion ? 0 : t);
+    if (!c.unlocked) { ctx.fillStyle = "#345c59"; ctx.font = `bold ${Math.round(pr * 0.35)}px sans-serif`; ctx.fillText("🔒", x + w - 16, y + 18); }
+    ctx.fillStyle = "#244d4a"; ctx.font = `bold ${Math.max(12,Math.round(Math.min(w * 0.12, h * 0.085)))}px sans-serif`; ctx.fillText(c.name, pcx, y + h * 0.67,w*.9);
+    ctx.fillStyle = "#496b64"; ctx.font = `${Math.round(Math.min(w * 0.075, h * 0.05))}px sans-serif`; if(W>=600)ctx.fillText(c.roomName, pcx, y + h * 0.77,w*.9);
     if (!c.final) {
-      const bw = w * 0.7, bx = pcx - bw / 2, by = y + h * 0.87;
-      ctx.fillStyle = "#3a3160"; ctx.fillRect(bx, by, bw, 6); ctx.fillStyle = c.color; ctx.fillRect(bx, by, bw * c.found / 100, 6);
-      ctx.fillStyle = "#e8dcff"; ctx.font = `${Math.round(h * 0.042)}px sans-serif`; ctx.fillText(`Álbum ${c.found}/100`, pcx, by + 16);
+      const bw = w * 0.7, bx = pcx - bw / 2, by = y + h * 0.83;
+      ctx.fillStyle = "#c7ceb9"; ctx.fillRect(bx, by, bw, 6); ctx.fillStyle = c.color; ctx.fillRect(bx, by, bw * c.found / 100, 6);
+      ctx.fillStyle = "#385e56"; ctx.font = `${Math.max(9,Math.round(h * 0.042))}px sans-serif`; ctx.fillText(`${c.found}/100`, pcx, by + 11);
     }
     if (c.sealed) { ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(x + w - 18, y + 18, 12, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#1e1838"; ctx.font = "bold 14px sans-serif"; ctx.fillText("✓", x + w - 18, y + 19); }
     ctx.restore();
   });
   // Pie: frase del héroe enfocado + qué hay en su sala.
-  ctx.globalAlpha = 1; ctx.fillStyle = cur.color; ctx.font = `bold ${Math.round(H * 0.034)}px sans-serif`;
-  ctx.fillText(cur.tagline, W / 2, H * 0.89);
-  ctx.fillStyle = "#cfc4ff"; ctx.font = `${Math.round(H * 0.022)}px sans-serif`;
-  ctx.fillText(cur.final ? "Arena enorme · la fusión corrupta de los diez" : `Sello: ${cur.seal} · Reliquia: ${cur.relic}${cur.sealed ? " · ¡despertado!" : ""}`, W / 2, H * 0.94);
+  ctx.fillStyle="#fff3ddeb";roundRect(ctx,8,H*.855,W-16,H*.14,12);ctx.fill();
+  ctx.globalAlpha = 1; ctx.fillStyle = "#244d4a"; ctx.font = `bold ${Math.round(H * 0.034)}px sans-serif`;
+  ctx.fillText(cur.tagline, W / 2, H * 0.89,W*.92);
+  ctx.fillStyle = "#345c59"; ctx.font = `${Math.round(H * 0.022)}px sans-serif`;
+  ctx.fillText(cur.final ? "Corazón de Ohana · Quimera final" : `Sello: ${cur.seal}${cur.sealed ? " · recuperado" : ""}`, W / 2, H * 0.935,W*.92);
+  ctx.fillText(cur.final ? "Reúne los diez sellos" : `Reliquia: ${cur.relic}`,W / 2,H*.97,W*.92);
   if (sel.pulse > 0) { ctx.globalAlpha = sel.pulse / 30 * 0.5; ctx.fillStyle = cur.color; ctx.fillRect(0, 0, W, H); }
   ctx.restore();
 }

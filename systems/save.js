@@ -1,7 +1,7 @@
 import {cleanRoomAlbums} from './room-album.js';
 // Save v3 (reads v2). Ids viejos se canonizan para no romper partidas.
 import {sanitizeUBonds} from "./u-partners.js";
-import {WORLD1_IDS,cleanWorld1Seals} from "./world1-rooms.js";
+import {WORLD1_IDS,cleanWorld1Seals,cleanWorld1Stations} from "./world1-rooms.js";
 const SAVE_ROOMS=['hub','beach','jungle','cave','lab','ridge','space','reef','volcano','boss',...WORLD1_IDS];
 export const ID_LEGACY = { lilo: "kilo", stitch: "stitcho", pikachu: "chispin" };
 
@@ -70,6 +70,7 @@ export function packSave(game, MagicMod) {
     kills: game.kills || 0,
     won: !!game.won,
     world1Seals: cleanWorld1Seals(game.world1Seals),
+    world1Stations: cleanWorld1Stations(game.world1Stations),
     world1Won: !!game.world1Won,
     world1Visited: cleanVisited(game.world1Visited),
     evo: p ? p.evo : 0,
@@ -142,6 +143,7 @@ export function unpackSave(raw, defId) {
     kills: Math.max(0, finiteNumber(raw.kills)),
     won: !!raw.won,
     world1Seals: cleanWorld1Seals(raw.world1Seals),
+    world1Stations: cleanWorld1Stations(raw.world1Stations),
     world1Won: !!raw.world1Won,
     world1Visited: cleanVisited(raw.world1Visited),
     evo: Math.max(0, Math.min(4, Math.floor(finiteNumber(raw.evo)))),

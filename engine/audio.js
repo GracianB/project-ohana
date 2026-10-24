@@ -124,6 +124,9 @@ const BANK = {
   kill: () => { tone(500, 1200, 0.1, 0.05, "square"); noise(0.2, 0.08, 0, { f0: 1800, f1: 400 }); },
   // recogidas
   orb: () => { tone(N(7) * 2, 0, 0.09, 0.06, "sine"); tone(N(12) * 2, 0, 0.14, 0.06, "sine", 0.06); },
+  windChime1: () => { arp([N(12),N(16)],.07,.3,.055,"sine"); },
+  windChime2: () => { arp([N(16),N(19)],.07,.3,.055,"sine"); },
+  windChime3: () => { arp([N(19),N(24),N(28)],.07,.4,.055,"sine"); },
   pickup: () => { arp([N(12), N(16), N(19), N(24)], 0.07, 0.22, 0.07, "triangle"); },
   heal: () => arp([N(3), N(7), N(10), N(15)], 0.06, 0.18, 0.05, "sine"),
   magic: () => { arp([N(12), N(16), N(19), N(24), N(28)], 0.05, 0.3, 0.05, "triangle"); noise(0.5, 0.03, 0.05, { type: "highpass", f0: 5000 }); },

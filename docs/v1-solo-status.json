@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "updated_on": "2026-10-24",
+  "scope": "single_player_v1",
+  "repository": "GracianB/project-ohana",
+  "branch": "feat/v501-playable-journey",
+  "base_commit": "981526fc51177355f138e6f7f3917f5d037dade7",
+  "published": false,
+  "campaign_complete_verified": false,
+  "v1_ready": false,
+  "next_task": "chapter.stitcho",
+  "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
+  "handoff": "docs/HANDOFF-V1-SOLO.md",
+  "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
+  "validation_baseline": {
+    "node_passed": 1496,
+    "runtime_modules": 310,
+    "precache_resources": 360,
+    "source": "Existing local V501 execution logs; documentation-only planning does not constitute a new playthrough",
+    "local_browser_audit": "passed",
+    "local_kilo_physical_pilot": "passed",
+    "remote_ci_current_candidate": "not_verified",
+    "published_url_current_candidate": "not_verified"
+  },
+  "chapters": [
+    {
+      "id": "kilo",
+      "order": 1,
+      "room": "w1-kilo",
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Human playtest, full memory reachability, fix recorded defects",
+      "evidence": [
+        "tests/browser/v501-kilo-chapter.mjs",
+        "test-results/v501/kilo-chapter-pilot.json"
+      ]
+    },
+    {
+      "id": "stitcho",
+      "order": 2,
+      "room": "w1-stitcho",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate pieces, main rail, four earned growth milestones and existing Glitch boss in the chapter",
+      "evidence": []
+    },
+    {
+      "id": "chispin",
+      "order": 3,
+      "room": "w1-chispin",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "cat",
+      "order": 4,
+      "room": "w1-cat",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "cuerno",
+      "order": 5,
+      "room": "w1-cuerno",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "dragon",
+      "order": 6,
+      "room": "w1-dragon",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "dino",
+      "order": 7,
+      "room": "w1-dino",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "frita",
+      "order": 8,
+      "room": "w1-frita",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "pizza",
+      "order": 9,
+      "room": "w1-pizza",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    },
+    {
+      "id": "yomi",
+      "order": 10,
+      "room": "w1-yomi",
+      "status": "needs_campaign_integration",
+      "physical_chapter_verified": false,
+      "human_acceptance": "pending",
+      "all_100_memories_verified": "pending",
+      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
+      "evidence": []
+    }
+  ],
+  "finale": {
+    "room": "w1-final",
+    "status": "existing_runtime_needs_campaign_entry_normalization_and_full_run",
+    "planned_hero": "kilo",
+    "planned_evolution": 4,
+    "plan_implemented": false,
+    "requires": "ten earned seals",
+    "relay_mechanic": "deferred_after_v1",
+    "victory_epilogue_menu_full_run": "pending"
+  },
+  "release_gates": {
+    "ten_integrated_chapters": "pending",
+    "full_clean_save_campaign": "pending",
+    "save_death_resume_migration_matrix": "pending",
+    "all_offered_memories_reachable": "pending",
+    "keyboard_gamepad_touch_review": "pending",
+    "human_difficulty_acceptance": "pending",
+    "final_candidate_automated_and_visual_checks": "pending",
+    "same_sha_ci_pages_and_live_sw_check": "pending"
+  },
+  "excluded_from_v1": [
+    "World 2",
+    "remote multiplayer and external infrastructure",
+    "new heroes or forms",
+    "mandatory 100-item collection to finish story",
+    "new family relay combat system"
+  ],
+  "open_tasks": [
+    {
+      "id": "chapter.stitcho",
+      "priority": 1,
+      "packet": "docs/V1-SOLO-ESTRATEGIA.md#siguiente-paquete-ejecutable-stitcho",
+      "status": "ready_for_local_implementation"
+    },
+    {
+      "id": "kilo.acceptance",
+      "priority": 1,
+      "status": "pending_human_review_and_collection_audit"
+    },
+    {
+      "id": "finale.entry",
+      "priority": 2,
+      "status": "planned_not_implemented"
+    },
+    {
+      "id": "campaign.full_run",
+      "priority": 3,
+      "status": "blocked_by_chapter_integration"
+    }
+  ],
+  "evidence_storage": "Test sources are versioned; test-results and logs are generated locally and included in the delivery ZIP."
+}

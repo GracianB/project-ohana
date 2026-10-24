@@ -12,7 +12,7 @@ export function localMapView(g,viewW=1280){
   sector,known,nextCheckpoint:next,remaining:next?Math.max(0,Math.round(next.x-cx)):null};
 }
 export function localMapBounds(g,viewW=1280,viewH=720){
- const v=localMapView(g,viewW);if(!v)return null;const small=viewW<600,w=small?176:298,h=small?98:140;
+ const v=localMapView(g,viewW);if(!v)return null;const small=viewW<600,w=small?144:298,h=small?82:140;
  return {w,h,x:viewW-w-14,y:Math.max(12,viewH-h-(small?184:112)),spanX:v.span,spanY:g.roomDef.height,left:v.start,top:0};
 }
 export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
@@ -30,7 +30,7 @@ export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
  ctx.beginPath();ctx.roundRect(x,y,w,h,13);ctx.fill();ctx.stroke();
  ctx.fillStyle='#eef7e7';ctx.textBaseline='middle';ctx.textAlign='left';
  ctx.font=small?'700 10px sans-serif':'700 12px sans-serif';
- const heading=(r.short||r.name||r.id).toUpperCase();
+ const heading=(small?'MAPA · M':r.short||r.name||r.id).toUpperCase();
  ctx.fillText(heading,x+12,y+16);
  ctx.fillStyle='#a6cdd2';ctx.textAlign='right';ctx.font=small?'9px sans-serif':'10px sans-serif';
  ctx.fillText('SECTOR '+(r.sectors?.indexOf(v.sector)+1||1)+'/'+(r.sectors?.length||1),x+w-12,y+16);

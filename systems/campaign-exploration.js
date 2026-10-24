@@ -36,8 +36,12 @@ export function triggerBiomeMechanism(g,m){
 export function enterCampaignExploration(g){
  const r=g.roomDef;if(!r||r.boss){g.campaignExploration=null;return;}
  const branches=(r.id==='hub'?[]:[1,3]).filter(i=>i<r.sectors.length).map((n,i)=>{
-  const s=r.sectors[n],x=s.x+620;
-  for(let j=0;j<3;j++)g.platforms.push({x:x+j*140,y:734-j*80,w:260,h:22});
+  const s=r.sectors[n],style=r.world1?r.explorationStyle:null,x=s.x+(style?.offset||620);
+  for(let j=0;j<3;j++){
+   const pl={x:x+j*140,y:734-(style?style.steps[j]:j*80),w:260,h:22};
+   // Secret routes cannot obstruct the authored oil-vent launch columns.
+   if(!r.seal?.stations?.some(st=>(st.kind==='geyser'||(r.kiloChapter&&st.kind==='flower'))&&pl.x<st.x+130&&pl.x+pl.w>st.x-130))g.platforms.push(pl);
+  }
   const platform={x:x+80,y:974,w:170,h:22,_campaignLift:true};g.platforms.push(platform);
   return {id:`${r.id}-secret-${i}`,x:x+390,y:540,platform,baseY:974,phase:i*Math.PI,motion:{axis:i%2?'x':'y',x:x+80,y:974,span:i%2?280:220,period:420,start:Number(g.t)||0,phase:i*Math.PI},found:false};
  });
@@ -69,6 +73,7 @@ export function updateCampaignExploration(g){
   }
  }
  // Reaching the far side opens a permanent high return route for this run/save.
+ if(r.world1)return; // World 1 routes are authored on entry; nothing materializes at its exit.
  if(r.id==='hub')return; // The musical flower and lifts are the authored return route.
  const key=`${r.id}-shortcut`;
  if(p.x>r.width-240&&!state.shortcut){g.secrets||={};const found=(g.secrets[r.id]||=[]);if(!found.includes(key))found.push(key);}

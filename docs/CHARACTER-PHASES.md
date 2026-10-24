@@ -1,5 +1,9 @@
 # Entregas por personaje y sala
 
+Plan vigente de la campaña individual: [V1-SOLO-ESTRATEGIA.md](V1-SOLO-ESTRATEGIA.md). Estado verificable: [v1-solo-status.json](v1-solo-status.json). Para reanudar: [HANDOFF-V1-SOLO.md](HANDOFF-V1-SOLO.md). Los cierres de repertorio históricos de abajo no acreditan integración en las salas nuevas. Kilo ha sido reabierto expresamente por el usuario.
+
+Orden de campaña actual: Kilo → Stitcho → Chispín → Michi → Cuerno → Dragón → Dino → Frita → Pizza → Yomi → Quimera.
+
 Cada una de las diez fases se cierra con esta misma lista, sin sustituir una mecánica real por un efecto visual:
 
 - Personaje: cinco formas, identidad y silueta legibles, animaciones de reposo, movimiento, daño y celebración.
@@ -13,7 +17,7 @@ Cada una de las diez fases se cierra con esta misma lista, sin sustituir una mec
 - Enemigos: población elegida y repartida, especies comunes reutilizables, movimientos y avisos de ataque; un minijefe propio de la sala.
 - Revisión: física/saltos, combate, guardado, rendimiento, escritorio/móvil, compatibilidad compartida y publicación comprobada.
 
-## Orden de entrega
+## Historial de entrega de repertorios
 
 1. **Kilo** — Claro y Bahía del compás; Tambor del Claro (360 PV, 2 fases); 100 flores y Ukelele del hogar. Repertorio V1 cerrado.
 2. **Stitcho** — Archipiélago del Caos y cápsula en Bahía del compás; Núcleo Glitch (Error 626, 480 PV, 3 fases); 100 chispas del caos y Corazón Galáctico. Repertorio alienígena, 5 formas, roll, acrobacias, arcos eléctricos desactivables con J y 4 raíles móviles completados.

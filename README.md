@@ -12,11 +12,25 @@
 
 [**JUGAR EN EL NAVEGADOR**](https://gracianb.github.io/project-ohana/) · [**VER PERSONAJES EN CANVAS**](https://gracianb.github.io/project-ohana/gallery.html) · [**VER EL CÓDIGO**](https://github.com/GracianB/project-ohana)
 
-<sub><strong>V500 candidata · Un lugar para ti.</strong> Integración anterior en <code>main</code>: V493/V494, con campaña y final aprobados. La nueva candidata añade guía coherente, memoria de victoria y una constelación de diez voces; requiere sus propias validaciones antes de publicarse. <strong>PR aprobada no equivale a Pages desplegada:</strong> comprueba <a href="https://github.com/GracianB/project-ohana/actions/workflows/pages.yml">GitHub Pages</a>. Multijugador remoto en pausa.</sub>
+<sub><strong>V501 en desarrollo · La aventura se entiende jugando.</strong> Parte de V500 integrada en <code>main</code> (`981526f`) e incorpora antenas persistentes, viajes voluntarios, objetivos concretos, historia con avance táctil, avisos de poderes por forma y un álbum accesible que detiene el combate. Conserva 10 héroes, 50 formas y 10 salas temáticas con su final. Los cambios locales no acreditan publicación; verifica GitHub Pages sobre el commit integrado. Multijugador remoto en pausa.</sub>
+
+V501 añade una bienvenida costera, diez ambientes y músicas propias, estrategias de sala y estados de poderes legibles. Corrige las plataformas que aparecían al llegar al borde y explica paso a paso el combo H → J → H de Kilo. Detalles y alcance de las pruebas en [la entrega V501](docs/V501-AVENTURA-CLARA.md).
+
+Plan de cierre: [V1 para un jugador](docs/V1-SOLO-ESTRATEGIA.md) · [estado por capítulo](docs/v1-solo-status.json) · [punto de reanudación](docs/HANDOFF-V1-SOLO.md).
+
 
 </div>
 
 ---
+
+## V501 · La aventura se entiende jugando
+
+- Chispín recupera una red de cuatro antenas: contacto o ataque las conecta y ninguna cuenta atrás borra el avance. Las conexiones y los demás objetivos completados se guardan al conseguirlos.
+- Los vórtices dejan de absorber por sorpresa. Vórtices y catapultas muestran el destino y esperan **E**, también en móvil. Las rutas cerradas no inician un viaje.
+- Una única tarjeta accesible explica el siguiente objetivo y su dirección. Las piezas guían hasta su taller, las pizzas hasta el cliente y los carteles señalan la salida; no hay que activar otro altar.
+- Las cinco formas siguen despertando con experiencia y conservan sus habilidades. El álbum de 100 recuerdos por sala es opcional y se muestra en su botón, sin duplicar paneles sobre el juego.
+
+[Diseño y validación V501](docs/V501-AVENTURA-CLARA.md). `npm run test:browser:journey` comprueba las interacciones nuevas. Para usar Chromium instalado: `CHROMIUM_BIN=/ruta/a/chromium npm run test:browser:journey`.
 
 ## V500 · Un lugar para ti
 

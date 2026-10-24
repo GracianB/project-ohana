@@ -1,0 +1,64 @@
+// Real input and ability gates; forms, P charge and a stationary combat target
+// are explicit fixtures. This is not a claim of earned evolution or campaign victory.
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import {chromium} from 'playwright';
+import {startServer} from './server.mjs';
+const server=await startServer(0);let browser;
+try{
+ browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
+ let page=await browser.newPage({viewport:{width:1280,height:900}});const errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.clock.install({time:new Date('2026-10-24T12:00:00Z')});
+ await page.clock.pauseAt(new Date('2026-10-24T12:00:01Z'));
+ await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
+ const state=()=>page.evaluate(()=>window.__OHANA_E2E.state());
+ const step=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);return state();};
+ const slot=index=>page.locator('.ability-slot[data-index="'+index+'"]');
+ const notice=()=>page.locator('#notification-container').innerText();
+ await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));await step(600);await step(600);
+ page.setDefaultTimeout(10000);
+ console.log('POWER PILOT START');
+ await page.locator('#game').focus();await page.keyboard.press('k');await step(1);
+ assert.equal(await slot(1).getAttribute('data-power-state'),'locked');assert.match(await notice(),/forma 2/);
+ await page.keyboard.press('j');await step(1);
+ assert.equal((await state()).lastAbilityId,'ukulele');
+ assert.equal(await slot(0).getAttribute('data-power-state'),'cooldown');
+ assert.match(await slot(0).getAttribute('aria-label'),/Recargando/);
+ console.log('POWER PILOT COOLDOWN');
+ await slot(0).click();await step(1);assert.match(await notice(),/Recargando/);
+ console.log('POWER PILOT MOBILE');
+ await page.close();page=await browser.newPage({viewport:{width:390,height:844},hasTouch:true});
+ page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(10000);
+ await page.clock.install({time:new Date('2026-10-24T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-24T12:00:01Z'));
+ await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
+ await page.evaluate(()=>window.__OHANA_E2E.startWorld1('kilo'));await step(600);await step(600);
+ await page.keyboard.press('j');await step(1);
+ await page.locator('.touch-btn[data-k="j"]').tap();await step(1);
+ assert.match(await notice(),/Recargando/);assert.match(await page.locator('.touch-btn[data-k="j"]').innerText(),/s$/);
+ assert.equal((await state()).lastAbilityId,'ukulele','locked touch input must not cast');
+ await fs.mkdir('test-results/v501',{recursive:true});
+ await page.screenshot({path:'test-results/v501/power-cooling-mobile.png'});
+ // Isolate the decorative combo layout from gameplay/kill progression.
+ await page.evaluate(async()=>{const {ExperienceDirector}=await import('/systems/experience.js');new ExperienceDirector().updateUI({combo:4,enemies:[]});});
+ assert.equal(await page.locator('#experience-ribbon').getAttribute('data-mode'),'combo');
+ assert.equal(await page.locator('#experience-ribbon').evaluate(el=>getComputedStyle(el).display),'none');
+ await page.setViewportSize({width:1280,height:900});await page.clock.runFor(32);
+ await page.evaluate(async()=>{const {ExperienceDirector}=await import('/systems/experience.js');new ExperienceDirector().updateUI({combo:4,enemies:[]});});
+ assert.ok((await page.locator('#experience-ribbon').boundingBox()).height<55);
+ await page.screenshot({path:'test-results/v501/combat-compact-desktop.png'});
+ await page.evaluate(()=>window.__OHANA_E2E.setEvo(3));await step(1);
+ await page.keyboard.press('i');await step(1);
+ assert.equal(await slot(4).getAttribute('data-power-state'),'combo');assert.match(await notice(),/Empieza acertando H/);
+ await page.evaluate(()=>{window.__OHANA_E2E.setEvo(4);window.__OHANA_E2E.setFinisher(35);});await step(1);
+ await page.keyboard.press('p');await step(1);
+ assert.equal(await slot(5).getAttribute('data-power-state'),'charge');assert.match(await notice(),/35\/100/);
+ assert.equal((await state()).finisherCharge,35);
+ await page.evaluate(()=>window.__OHANA_E2E.setFinisher(100));await step(1);
+ await page.keyboard.press('p');await step(1);
+ assert.equal((await state()).finisherCharge,0);assert.equal(await slot(5).getAttribute('data-power-state'),'rhythm');
+ await page.keyboard.press('p');await step(1);
+ assert.equal(await slot(5).getAttribute('data-power-state'),'rhythm','rhythm input must remain usable after consuming charge');
+ assert.deepEqual(errors,[]);
+ console.log('PASS V501 powers: keyboard/mouse/touch locked and cooling feedback, compact combo layout fixture, I combo requirement, P charge and active rhythm. Forms, charge and combo layout are fixtures.');
+}finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

@@ -8,7 +8,7 @@ import { startServer } from './server.mjs';
 import { WORLD1_ROOMS, WORLD1_FLOOR } from '../../systems/world1-rooms.js';
 const server=await startServer(0);let browser;
 try{
- browser=await chromium.launch();
+ browser=await chromium.launch(process.env.CHROMIUM_BIN ? {executablePath:process.env.CHROMIUM_BIN} : {});
  const page=await browser.newPage({viewport:{width:1300,height:850}});
  const faults=[];page.on('pageerror',e=>faults.push(e.message));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'domcontentloaded'});

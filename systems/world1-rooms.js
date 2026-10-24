@@ -1,3 +1,5 @@
+import {KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
+import {OHANA_PLACES} from "../worlds/ohana-environments.js";
 // OHANA V467 · MUNDO 1 · La Ruta de los Diez.
 // Diez salas grandes (una por héroe) encadenadas de oeste a este y una sala
 // final todavía mayor con la Quimera Ohana. Datos puros: sin DOM ni Math.random.
@@ -24,7 +26,7 @@ export const WORLD1_HERO_ROOMS = Object.freeze(WORLD1_ORDER.map((h) => "w1-" + h
 
 // world = índice de WORLDS (cielo base) · seal = interacción única de la sala.
 export const WORLD1_THEMES = Object.freeze({
-  kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","phosquito","planta","rana"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Altar de la canción"] },
+  kilo:    { name: "Claro de Kilo",            short: "Kilo",      world: 6, color: "#ffacc2", tint: "#ff8fb1", relic: "Canción del hogar",     seal: "serenata",   cast: ["cucaracho","phosquito","planta","rana"],        sectors: ["Puerta aloha","Campo de hibiscos","Escenario del ukelele","Lago de las guirnaldas","Senda de los cocos","Escenario del Tambor"] },
   stitcho: { name: "Astillero de Stitcho",     short: "Stitcho",   world: 4, color: "#67ddff", tint: "#3f8cff", relic: "Corazón galáctico",     seal: "reparar",    cast: ["ufo","phosquito","cucaracho","arana"],          sectors: ["Muelle cosido","Chatarrería azul","Grúas de plasma","Taller del caos","Hangar estrellado","Altar del experimento"] },
   chispin: { name: "Santuario del Trueno",     short: "Chispín",   world: 9, color: "#fff29a", tint: "#ffd84a", relic: "Relámpago dorado",      seal: "cadena",     cast: ["gaviota","murcielago","phosquito","rana"],      sectors: ["Puerta de nubes","Campo de pararrayos","Puente del chispazo","Pico tormenta","Valle del arcoíris","Altar del trueno"] },
   cat:     { name: "Jardín Lunar de Michi",    short: "Michi",     world: 3, color: "#ceb2ff", tint: "#b98cff", relic: "Luna soñadora",         seal: "medusas",    cast: ["medusa","phosquito","ufo","murcielago"],        sectors: ["Umbral del sueño","Estanque de lunas","Bosque de medusas","Observatorio gatuno","Mar de estrellas","Altar del sueño"] },
@@ -40,7 +42,7 @@ export const WORLD1_THEMES = Object.freeze({
 export const WORLD1_SEALS = Object.freeze({
   serenata:  { title: "Serenata de las flores",  verb: "Quédate quieto sobre cada hibisco para rasguear su nota", count: 4 },
   reparar:   { title: "Reparar la nave",         verb: "Lleva cada pieza (tócala) hasta su taller marcado",       count: 3 },
-  cadena:    { title: "Cadena de truenos",       verb: "Toca un pararrayos y alcanza el siguiente antes de que se descargue", count: 4 },
+  cadena:    { title: "Red de truenos",          verb: "Conecta las cuatro antenas: acércate o golpéalas; cada conexión se conserva", count: 4 },
   medusas:   { title: "Medusas lunares",         verb: "Salta y toca en el aire cada medusa dormida",             count: 5 },
   prismas:   { title: "Alinear los prismas",     verb: "Activa los prismas en el orden I · II · III",             count: 3 },
   braseros:  { title: "Encender los braseros",   verb: "Golpea cada brasero apagado",                             count: 4 },
@@ -48,6 +50,21 @@ export const WORLD1_SEALS = Object.freeze({
   geiseres:  { title: "Patatas en las nubes",    verb: "Pisa un géiser de aceite y atrapa la patata dorada de arriba", count: 3 },
   reparto:   { title: "Reparto caliente",        verb: "Recoge la pizza del horno y llévala a los clientes antes de que se enfríe", count: 3 },
   sincronia: { title: "Sincronizar la red",      verb: "Toca cada nodo de datos mientras parpadea en verde",      count: 4 }
+});
+
+// Authoring contracts: a room's interactions, movement and combat must express
+// its protagonist. These plans describe direction, not unfinished unlocks.
+export const WORLD1_CHAPTER_PLANS=Object.freeze({
+ kilo:{identity:'Combate musical entre suelo y cielo',mobility:'Levitación K; vuelo solar en la última forma',combat:'Rebota notas, refleja disparos y cambia de altura para abrir defensas',interaction:'Recuperar notas y tocar carillones elevados',optional:'Ruta aérea de los tres carillones'},
+ stitcho:{identity:'Acrobacia, transporte y máquinas',mobility:'Bola, rebotes y paredes',combat:'Desactivar defensas con plasma y entrar por otro ángulo',interaction:'Transportar piezas y reparar su nave',optional:'Raíles y atajos de mantenimiento'},
+ chispin:{identity:'Circuitos y desplazamiento eléctrico',mobility:'Blink y carrera relámpago',combat:'Encadenar blancos y salir antes de la respuesta',interaction:'Conectar una red de antenas',optional:'Desvíos entre conductores'},
+ cat:{identity:'Sueños suspendidos y control de enemigos',mobility:'Saltos entre medusas y plataformas lunares',combat:'Ovillos y ronroneo para controlar grupos',interaction:'Despertar medusas en el aire',optional:'Estanques y rutas del observatorio'},
+ cuerno:{identity:'Una peregrinación de luz y orden',mobility:'Doble salto y arcoíris',combat:'Elegir posiciones para barrer con el prisma',interaction:'Alinear prismas en orden',optional:'Rutas de color y miradores'},
+ dragon:{identity:'Altura, calor y fuego dirigido',mobility:'Vuelo y corrientes térmicas',combat:'Preparar picados y separar grupos con fuego',interaction:'Encender braseros y cruzar la forja',optional:'Terrazas y chimeneas volcánicas'},
+ dino:{identity:'Peso, impulso y aterrizajes',mobility:'Saltos pesados y caídas dirigidas',combat:'Romper formaciones al aterrizar',interaction:'Despertar placas fósiles con una caída',optional:'Cornisas del cañón'},
+ frita:{identity:'Lanzamiento y corrección en el aire',mobility:'Géiseres y trayectorias balísticas',combat:'Usar el impulso para cambiar de posición',interaction:'Atrapar premios durante el vuelo del géiser',optional:'Toldos y rutas altas del mercado'},
+ pizza:{identity:'Reparto bajo presión y elección de ruta',mobility:'Rutas rápidas entre horno y clientes',combat:'Despejar primero el camino de entrega',interaction:'Transportar pizzas antes de perder calor',optional:'Explorar tejados entre repartos'},
+ yomi:{identity:'Lectura de fases y control del espacio',mobility:'Cobertura y cambios entre repisas',combat:'Anticipar ventanas y contener disparos',interaction:'Sincronizar terminales durante su fase activa',optional:'Rutas de datos del observatorio'}
 });
 
 // Pseudo-aleatorio estable por cadena (las salas no cambian entre partidas).
@@ -88,6 +105,22 @@ export function buildWorld1HeroRoom(hero) {
   const orbs = [];
   for (let i = 0; i < sectors.length; i++) orbs.push([Math.round(sectors[i].x + 800), 1040], [Math.round(sectors[i].x + 1250), 980]);
   const stations = sealStations(hero, theme, sectors);
+  if(hero==='kilo'){
+    // Each note has a short encounter suited to the form available on arrival.
+    const lessons=[['pursuer','jumper'],['gunner','pursuer'],['shield','pursuer'],['gunner','shield']];
+    foes.length=0;
+    stations.forEach((st,i)=>lessons[i].forEach((role,k)=>{
+      const x=st.x+(k?185:-190),y=WORLD1_FLOOR-40;
+      foes.push([x,y,theme.cast[(i+k)%theme.cast.length],false,{role,name:['Ecos de la orilla','Guardianes del viento','Ronda de pétalos','Último estribillo'][i],anchorY:y}]);
+    }));
+    foes.push([4680,760,'phosquito',false,{role:'flyer',name:'Vigía de la laguna',anchorY:760,flightBand:{top:550,bottom:820}}],[7930,620,'phosquito',false,{role:'flyer',name:'Guardián del viento',anchorY:620,flightBand:{top:400,bottom:780}}]);
+    plats.push([4550,890,220,22],[7740,780,220,22],[8050,650,220,22]);
+    foes.push([8750,WORLD1_FLOOR-48,'cangrejo',false,{special:true,name:'Tambor del Claro',arena:KILO_CHAPTER_ARENA,encounterId:KILO_CHAPTER_BOSS_ID}]);
+    // Keep the floor interaction visible and reachable without guessing a drop.
+    for(let i=plats.length-1;i>0;i--){const [x,y,w]=plats[i];if(y<WORLD1_FLOOR&&stations.some(st=>x<st.x+100&&x+w>st.x-100))plats.splice(i,1);}
+    // A low stepping route gives room to practise K and the extra jumps.
+    plats.push([3420,1054,180,22],[3650,974,220,22],[5010,1054,180,22],[5240,974,220,22]);
+  }
   // Frita's oil vents must have an uninterrupted launch corridor to their prizes.
   // Decorative one-way platforms previously stopped a launched hero at y~940
   // before reaching the floating potato at floor - 470.
@@ -106,10 +139,11 @@ export function buildWorld1HeroRoom(hero) {
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
   return {
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
-    world1: true, worldNumber: 1, hero, signatureCharacter: hero,
+    chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
+    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo',
     width: W, height: WORLD1_ROOM_H,
     doors: { left: prev, right: next, up: null, down: null },
-    hint: WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
+    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
@@ -191,3 +225,22 @@ export function world1DoorOpen(fromId, dir, state = {}) {
 }
 export function world1SealsComplete(seals = []) { const s = new Set(seals); return WORLD1_ORDER.every((h) => s.has(h)); }
 export function cleanWorld1Seals(raw) { return Array.isArray(raw) ? [...new Set(raw.filter((h) => WORLD1_ORDER.includes(h)))] : []; }
+
+// Only real, authored station IDs survive a save; no timers or carried items.
+export function cleanWorld1Stations(raw) {
+  const out = {};
+  for (const id of WORLD1_HERO_ROOMS) {
+    const values = raw?.[id];
+    if (!Array.isArray(values)) continue;
+    const room = WORLD1_ROOMS[id];
+    const authored = room.seal.stations.filter(s => s.kind !== "oven");
+    const accepted = new Set(values.filter(v => Number.isInteger(v)));
+    const done = [];
+    for (const station of authored) {
+      if (accepted.has(station.id)) done.push(station.id);
+      else if (room.seal.kind === "prismas") break;
+    }
+    if (done.length) out[id] = done;
+  }
+  return out;
+}

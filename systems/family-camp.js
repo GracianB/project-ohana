@@ -1,3 +1,4 @@
+import {WORLD1_CHAPTER_PLANS} from './world1-rooms.js';
 import {drawFamilyIslands,pairedScene} from "./family-islands.js";
 import {ROSTER} from '../characters/roster.js';
 import {drawCharacter} from '../characters/draw.js';
@@ -57,7 +58,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  // V468: selección del Mundo 1 — una carta-portal por héroe enlazada a SU sala (sin islas en pareja).
  const w1opts=()=>{let counts={};try{const g={};loadWorld1Collect(g);counts=countsByHero(g);}catch(_){}return {seals:readWorld1Seals(),counts};};
  let w1sel=null;try{w1sel=createWorld1Select({...w1opts(),start:selected});}catch(_){w1sel=null;}
- if(w1sel){menu.dataset.selectorMode='world1-rooms';host.dataset.world='1';canvas.setAttribute('aria-label','Mundo 1: diez salas, una por héroe, y el Corazón de Ohana. Flechas para elegir, Intro para entrar.');}
+ if(w1sel){host.querySelector('.camp-scene-heading span').textContent='CRÓNICAS DE OHANA';host.querySelector('.camp-scene-heading strong').textContent='Diez historias. Un destino.';host.querySelector('.camp-instructions').textContent='Elige un capítulo · cada héroe comienza como bebé · reúne diez sellos';menu.dataset.selectorMode='world1-rooms';host.dataset.world='1';const caption=menu.querySelector('.family-grid-caption');if(caption)caption.textContent='ACCESO DIRECTO A LOS CAPÍTULOS';canvas.setAttribute('aria-label','Mundo 1: diez salas, una por héroe, y el Corazón de Ohana. Flechas para elegir, Intro para entrar.');}
  const w1enter=(r)=>{if(!r)return;if(r.card?.hero&&r.card.hero!==selected)selectHero(r.card.hero);if(r.action==='enter'){globalThis.__ohanaWorld1Start=r.room;onBegin();}else if(r.action==='locked'&&r.message)$('camp-line').textContent=r.message;};
  if(w1sel){
   canvas.addEventListener('pointerdown',e=>{const b=canvas.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;canvas.focus({preventScroll:true});e.stopImmediatePropagation();const m=world1SelectPointer(w1sel,x,y,false);if(!m)return;const again=m.card.final||m.card.hero===selected;w1enter(again?world1SelectPointer(w1sel,x,y,true):m);},true);
@@ -69,7 +70,8 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const idleActors=new Map();
  const $=id=>host.querySelector('#'+id);
  function update(){const def=ROSTER.find(r=>r.id===selected),data=CAMP_HEROES[selected],f=def.forms[form];
- $('camp-name').textContent=def.name;$('camp-role').textContent=data.role;$('camp-route').textContent='Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
+ $('camp-start').textContent=w1sel?'Entrar en su capítulo →':'¡Vámonos de aventura! ↗';
+ $('camp-name').textContent=def.name;$('camp-role').textContent=w1sel?'Su capítulo · comienza como bebé':data.role;$('camp-route').textContent=w1sel?(WORLD1_CHAPTER_PLANS[selected]?.identity+' · '+WORLD1_CHAPTER_PLANS[selected]?.mobility):'Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
  portrait.setAttribute('aria-label',def.evoNames[form]+' · personaje real');
  $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div>`;
  $('camp-powers').textContent=def.abilities.map((id,i)=>['J','K','L'][i]+' · '+(ABILITY_DEFS[id]?.name||id)).join(' / ');
@@ -93,7 +95,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
  $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
  $('camp-film-stop').onclick=()=>{film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
- $('camp-start').onclick=()=>onBegin();
+ $('camp-start').onclick=()=>w1sel?w1enter(world1SelectKey(w1sel,'Enter')):onBegin();
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
  canvas.addEventListener('pointerdown',e=>{canvas.focus({preventScroll:true});const p=position(e),id=campNearest(p.x,p.y+35,100);if(id)selectHero(id);else target={x:Math.max(140,Math.min(1230,p.x)),y:Math.max(190,Math.min(540,p.y))};});
  canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','w','a','s','d','W','A','S','D'].includes(e.key)){e.preventDefault();e.stopPropagation();if(!keys.size)walkSelectionLatched=false;keys.add(e.key.toLowerCase());}});

@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {startKiloFlight,steerKiloFlight,kiloFlightDuration} from '../systems/kilo-flight.js';
-test('Hula gives eight normalized directions, settles in place and expires exactly',()=>{
- for(let evo=1;evo<5;evo++)for(const [x,y] of [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]]){
+test('Intermediate Hula gives eight normalized directions, settles in place and expires exactly',()=>{
+ for(let evo=1;evo<4;evo++)for(const [x,y] of [[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1]]){
   const p={id:'kilo',evo};startKiloFlight(p,evo);for(let i=0;i<40;i++)assert.equal(steerKiloFlight(p,{axisX:x,jump:y<0,drop:y>0}),true);
   if(x)assert.equal(Math.sign(p.vx),x);if(y)assert.equal(Math.sign(p.vy),y);assert.ok(Math.hypot(p.vx,p.vy)<=4.8+evo*.4+.001);
   for(let i=0;i<40;i++)steerKiloFlight(p,{});assert.equal(p.vx,0);assert.equal(p.vy,0);

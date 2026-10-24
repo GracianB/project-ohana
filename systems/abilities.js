@@ -1,5 +1,6 @@
+import {shieldBlocksHit} from './campaign-enemies.js';
 import {recordKiloHit,kiloComboStatus,consumeKiloCombo} from './kilo-combo.js';
-import {startKiloFlight,kiloFlightDuration} from './kilo-flight.js';
+import {startKiloFlight,stopKiloFlight,kiloFlightDuration,kiloNoteTrajectory} from './kilo-flight.js';
 import {rhythmPress} from "./hero-combos.js";
 import {chargeFinisher,consumeFinisher,finisherCharge} from "./finisher.js";
 import {POWER_LEVELS,powerAbility,castEvolutionAttack,summonDanceFleet,startBattleCompanion,updateEvolutionAttacks,drawEvolutionAttacks} from './evolution-attacks.js';
@@ -152,6 +153,9 @@ export function useAbility(game, index) {
 const p = game?.player;
 if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
 if(index===5&&rhythmPress(game))return true;
+if(p.id==='kilo'&&index===1&&p.evo>=4&&p._kiloFlightMode==='solar'&&p._kiloFlightT>0){
+ stopKiloFlight(p);game.nums?.add?.(cx(p),p.y-40,'DESCENSO','#ffe3a6',false);return true;
+}
 const supreme = index === 3 ? SUPREME[p.id] : null;
 const def = powerAbility(p,index,ABILITY_DEFS,supreme);
 const id = index>3 ? def?.id : supreme ? supreme.id : p.abilities && p.abilities[index];
@@ -582,7 +586,7 @@ S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0; S.p._stitchoRollBounces = 0;
 S.p = p;
 S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
-S.p._kiloOhanaT=0;S.p._kiloFlightT=0;S.p._kiloFlightVX=0;S.p._kiloFlightVY=0;
+S.p._kiloOhanaT=0;stopKiloFlight(S.p);
 FX.length = 0;
 }
 
@@ -649,7 +653,7 @@ FX.length = 0;
 S.hover = 0; S.roll = 0; S.rollBounces = 0; S.rollLock = 0; S.stitchoDance = 0; S.stitchoDanceAge = 0; S.cvx = 0; S.charge = 0; S.pull = null; S.gallop = 0; S.gallopFace = 1;
 if (S.p) S.p._stitchoRollBounces = 0;
 if (S.p) {
-S.p._kiloFlightT=0;S.p._kiloOhanaT=0;
+stopKiloFlight(S.p);S.p._kiloOhanaT=0;
 S.p._stitchoDanceT = 0; S.p._stitchoDanceAge = 0;
 S.p._kiloRhythm = null;
 S.p._abilMove = null;
@@ -1088,7 +1092,7 @@ export function hitEnemy(g, e, dmg, o = {}) {
 if (!canHit(e)) return false;
 let d = Number(dmg);
 if (!Number.isFinite(d)) return false;
-if(e._shieldFacing&&g.player&&Math.sign(cx(g.player)-cx(e))===e._shieldFacing)d*=.3;
+if(shieldBlocksHit(e,g.player))d*=.3;
 if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
 const before=e.hp;
@@ -1206,14 +1210,14 @@ const h = hand(p);
 const n = evo >= 4 ? 3 : evo >= 2 ? 2 : 1;
 const rhythmAttack = {};
 for (let i = 0; i < n; i++) {
-  add({ kind: "note", rhythmAttack, x: h.x, y: h.y, vx: (6.4 + i * 1.4) * p.facing, vy: -3.2 - i * 1.2, r: 14 + evo, bounces: 0, maxB: 3, life: 220, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0, home: evo >= 4 });
+  add({ kind: "note", rhythmAttack, x: h.x, y: h.y, ...kiloNoteTrajectory(p,i), r: 14 + evo, bounces: 0, hit: new Set(), dmg: (16 + evo * 2) * pw(p), color: ["#ffb347", "#ffd36a", "#ff7a3a"][i], rot: 0 });
 }
 boom(g, h.x, h.y, "#ffb347", 8, { star: true });
 },
 hula(g, p, evo) {
 const petals = spendKiloPetals(g);
 startKiloFlight(p,evo);
-g.nums?.add?.(cx(p),p.y-48,'WASD / FLECHAS · VUELO LIBRE','#ffe3a6',true);
+g.nums?.add?.(cx(p),p.y-48,evo>=4?'VUELO SOLAR · K ↓':'LEVITA · ↑ ↓ ← →','#ffe3a6',true);
 add({
   kind: "hula",
   life: kiloFlightDuration(evo),
@@ -1919,7 +1923,7 @@ return f.life > 0;
 },
 note(g, f) {
   f.life--;
-  f.vy += 0.38;
+  if(!f.directed)f.vy += 0.38;
   if (f.home) {
     const e = nearestEnemy(g, f.x, f.y, 260, f.hit);
     if (e) {

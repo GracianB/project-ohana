@@ -12,11 +12,11 @@ const HINTS = {
   },
   ability: {
     title: "PODERES",
-    text: "J, K y L se desbloquean al evolucionar. I es el remate de forma 4 y P el poder de forma 5. U llama a tu compañero sorpresa.",
+    text: "Prueba J para usar tu primer poder. Las siguientes formas añadirán habilidades a la barra inferior.",
   },
   interact: {
     title: "PORTALES",
-    text: "E activa portales y catapultas. También puede iniciar una evolución manual cuando corresponda.",
+    text: "E confirma el viaje en vórtices y catapultas. Nunca te llevan por sorpresa. Las formas despiertan automáticamente con tu experiencia.",
   },
   map: {
     title: "MAPA",
@@ -42,8 +42,8 @@ const KEY_HINTS = new Map([
 ]);
 
 function overlaysBlockHints() {
-  return !!document.querySelector(
-    "#pause-overlay.open, #map-overlay.open, #help.open, #evo-stage.show, #win-cinema.show"
+  return document.body.classList.contains("world1-story") || !!document.querySelector(
+    "#world1-album.open, #pause-overlay.open, #map-overlay.open, #help.open, #evo-stage.show, #win-cinema.show"
   );
 }
 
@@ -62,22 +62,40 @@ function boot() {
   let evolutionHintShown = false;
   const seen = new Set();
 
+  const showPowerHint = (key) => {
+    if (!playing || overlaysBlockHints()) return;
+    const slot = [...document.querySelectorAll(".ability-slot")].find(
+      el => el.querySelector(".key")?.textContent?.trim().toLowerCase() === key
+    );
+    if (!slot) return;
+    const locked = slot.classList.contains("locked");
+    const token = "power:" + slot.dataset.id + ":" + locked;
+    if (seen.has(token)) return;
+    const name = slot.querySelector(".name")?.textContent || "Poder";
+    const shown = showTutorialMessage(locked ? "PODER POR DESCUBRIR" : key.toUpperCase() + " · " + name,
+      locked ? name + ": sigue recogiendo cristales. Despertará automáticamente al llegar a esa forma."
+        : slot.title || name,
+      {key: "tutorial:" + token});
+    if (shown !== false) seen.add(token);
+  };
+
   const showHint = (id) => {
     if (!playing || seen.has(id) || overlaysBlockHints()) return;
     const hint = HINTS[id];
     if (!hint) return;
 
-    seen.add(id);
-    showTutorialMessage(hint.title, hint.text, {
+    const shown = showTutorialMessage(hint.title, hint.text, {
       key: "tutorial:" + id,
     });
+    if (shown !== false) seen.add(id);
   };
 
   const onKeyDown = (event) => {
     if (event.repeat) return;
     const key = String(event.key || "").toLowerCase();
     const id = KEY_HINTS.get(key);
-    if (id) showHint(id);
+    if (id === "ability") showPowerHint(key);
+    else if (id) showHint(id);
   };
 
   const onPointerDown = (event) => {
@@ -85,7 +103,8 @@ function boot() {
       event.target?.closest?.(".touch-btn")?.dataset?.k || ""
     ).toLowerCase();
     const id = KEY_HINTS.get(key);
-    if (id) showHint(id);
+    if (id === "ability") showPowerHint(key);
+    else if (id) showHint(id);
   };
 
   const mo = new MutationObserver(() => {
@@ -108,6 +127,7 @@ function boot() {
     attributeFilter: ["class"],
   });
 
+  addEventListener("ohana-power-used",event=>showPowerHint(String(event.detail?.key||"").toLowerCase()));
   addEventListener("keydown", onKeyDown, true);
   document.addEventListener("pointerdown", onPointerDown, true);
 

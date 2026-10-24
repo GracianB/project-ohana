@@ -357,6 +357,8 @@ export class ExperienceDirector {
     if (this.ui.getAttribute("aria-hidden") !== hidden) this.ui.setAttribute("aria-hidden", hidden);
     if (!visible) return;
 
+    const mode=boss?'boss':this.state.evoT>0?'evolution':'combo';
+    if(this.ui.getAttribute("data-mode")!==mode)this.ui.setAttribute("data-mode",mode);
     const rank = experienceRank(combo, this.state.crit);
 
     if (this.uiTitle) {

@@ -46,3 +46,11 @@ test('K protects only its opening, never heals; L heals only after damaging an e
  assert.ok(g.enemies[0].hp<5000);assert.equal(g.player.health,50);clearAbilityFx();g.enemies[0].invuln=0;assert.equal(useAbility(g,2),true);assert.equal(g.player.health,50);
  for(let i=0;i<40;i++){g.t++;updateAbilityFx(g);}assert.ok(g.player.health>50);clearAbilityFx();
 });
+
+test('Kilo real hits teach the next combo input without duplicate multi-hit feedback',()=>{
+ const g=fixture(),messages=[];g.nums.add=(x,y,text)=>messages.push(text);
+ const swing={};recordKiloHit(g,'H',swing);recordKiloHit(g,'H',swing);
+ assert.deepEqual(messages,['1/3 · ACIERTA J']);
+ recordKiloHit(g,'J',{});recordKiloHit(g,'H',{});
+ assert.deepEqual(messages,['1/3 · ACIERTA J','2/3 · ACIERTA H','3/3 · PULSA I · 6 s']);
+});

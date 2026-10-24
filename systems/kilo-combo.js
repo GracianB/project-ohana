@@ -12,7 +12,8 @@ export function recordKiloHit(g,key,action){
  const status=kiloComboStatus(g),s=state(g),now=Number(g.t)||0;
  if(s.seen.has(action))return false;s.seen.add(action);if(status.ready)return false;
  if(key===KILO_COMBO[s.step]){if(!s.step)s.start=now;s.step++;}else{s.step=key==='H'?1:0;s.start=now;}
- if(s.step===3){s.step=0;s.readyUntil=now+READY;g.nums?.add?.(g.player.x,g.player.y-45,'I · ¡REMATE ALOHA!','#ffe49b',true);return true;}return false;
+ if(s.step===1||s.step===2)g.nums?.add?.(g.player.x,g.player.y-45,s.step===1?'1/3 · ACIERTA J':'2/3 · ACIERTA H','#d6eed0',false);
+ if(s.step===3){s.step=0;s.readyUntil=now+READY;g.nums?.add?.(g.player.x,g.player.y-45,'3/3 · PULSA I · 6 s','#ffe49b',true);return true;}return false;
 }
 export function consumeKiloCombo(g){if(!kiloComboStatus(g).ready)return false;state(g).readyUntil=0;return true;}
 export function resetKiloCombo(g){g._kiloCombo=null;}

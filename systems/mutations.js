@@ -11,7 +11,11 @@ export function damageEnemy(enemy, amount) {
   if (!enemy) return false;
   const d = Number(amount);
   if (!Number.isFinite(d) || d <= 0) return false;
-  enemy.hp = Math.max(0, finiteOr(enemy.hp, 0) - d);
+  // Authored encounter protection applies at the numeric boundary so melee,
+  // projectiles and companions obey the same window. Other foes default to 1.
+  const scale=enemy.damageTakenScale==null?1:Math.max(0,Math.min(1,finiteOr(enemy.damageTakenScale,1)));
+  if(scale===0)return false;
+  enemy.hp = Math.max(0, finiteOr(enemy.hp, 0) - d*scale);
   return true;
 }
 
