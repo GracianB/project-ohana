@@ -367,7 +367,7 @@ const PRECACHE = [
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
   "systems/world1-guidance.js": "db01d1857b64de59ac94a0f4d3579c9be3aacca5",
-  "systems/family-memory.js": "6e44ce4d51d3e3b4dddab6dafb0e5331653da65a",
+  "systems/family-memory.js": "80dcd068ad919a8da3ae1722ac8207e99c233e42",
   "systems/family-constellation-story.js": "887f9694f106b922bef0ae2404cbc763389a8537",
   "systems/family-constellation.js": "4d1667a4b224a59e1722fd1b29fa3f5485e3b110",
   "systems/hero-collections.js": "cb3bf8d5e7c71041ec57d9aca558ac837e31f60e",
