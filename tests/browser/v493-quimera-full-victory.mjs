@@ -1420,6 +1420,16 @@ try {
     noBossHPWrites:true,noForcedVictory:true,
     journal:victoryJournal
   },null,2));
+  // V500 unlock is checked only after the real production victory above.
+  const memory=await page.evaluate(()=>JSON.parse(localStorage.getItem('ohana-family-memory-v500')));
+  assert.equal(memory?.world,1);
+  await endingLayer.locator('[data-open-constellation]').click();
+  await page.locator('#family-constellation.open').waitFor();
+  for(const hero of tenSeals)await page.locator('#family-constellation button[data-constellation-hero="'+hero+'"]').click();
+  assert.equal(await page.locator('#family-constellation').evaluate(el=>el.classList.contains('all-lit')),true);
+  await page.screenshot({path:'test-results/v493/v500-earned-constellation.png'});
+  await page.locator('.constellation-close').click();
+  assert.equal((await state()).world1Won,true);
   console.log('PASS V493: ten real seals and all four Quimera phases defeated using physical keyboard combat.');
 
 

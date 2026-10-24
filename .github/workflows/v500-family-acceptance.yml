@@ -1,0 +1,28 @@
+name: V500 family constellation acceptance
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  constellation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - run: node tests/browser/v500-constellation.mjs
+      - name: Existing character viewer remains unambiguous
+        run: node tests/browser/character-polish.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v500-family-constellation
+          path: test-results/v500/
+          if-no-files-found: ignore

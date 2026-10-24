@@ -64,6 +64,13 @@ jobs:
             fi
           fi
 
+      - name: V500 constellation UI and persistence
+        run: node tests/browser/v500-constellation.mjs
+
+      # Catch presentation/selector regressions before the long campaign gates.
+      - name: Story bubbles, character sizes and surprise encore
+        run: npm run test:browser:polish && npm run test:browser:characters && npm run test:browser:direction && npm run test:browser:chispa && npm run test:browser:approved-chispa && npm run test:browser:chispa-sanctuary
+
       - name: V457 early optical size regression
         run: node tests/browser/character-size.mjs
 
@@ -168,9 +175,6 @@ jobs:
 
       - name: Illustrated atlas, readable guide and compact play interface
         run: npm run test:browser:presentation
-
-      - name: Story bubbles, character sizes and surprise encore
-        run: npm run test:browser:polish && npm run test:browser:characters && npm run test:browser:direction && npm run test:browser:chispa && npm run test:browser:approved-chispa && npm run test:browser:chispa-sanctuary
 
       - name: Browser E2E
         run: npm run test:browser

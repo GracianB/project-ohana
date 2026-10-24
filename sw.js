@@ -1,6 +1,11 @@
-const VERSION = "ohana-470";
+const VERSION = "ohana-500";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/world1-guidance.js?v=" + VERSION,
+  "./systems/family-memory.js?v=" + VERSION,
+  "./systems/family-constellation-story.js?v=" + VERSION,
+  "./systems/family-constellation.js?v=" + VERSION,
+
   "./systems/hero-collections.js?v=" + VERSION,
   "./systems/stitcho-room.js?v=" + VERSION,
   "./systems/stitcho-atlas.js?v=" + VERSION,
@@ -361,6 +366,10 @@ const PRECACHE = [
 // versions. Generated from committed source files; the release gate verifies
 // every digest against the working tree before publication.
 const PRECACHE_REVISIONS = {
+  "systems/world1-guidance.js": "db01d1857b64de59ac94a0f4d3579c9be3aacca5",
+  "systems/family-memory.js": "80dcd068ad919a8da3ae1722ac8207e99c233e42",
+  "systems/family-constellation-story.js": "887f9694f106b922bef0ae2404cbc763389a8537",
+  "systems/family-constellation.js": "4d1667a4b224a59e1722fd1b29fa3f5485e3b110",
   "systems/hero-collections.js": "cb3bf8d5e7c71041ec57d9aca558ac837e31f60e",
   "systems/stitcho-room.js": "f4da79b64de430815d82d42b6c584e352ea5679c",
   "systems/stitcho-atlas.js": "25912b44ad229b1561a627dcd083a928b23f410f",
@@ -472,7 +481,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "d9f61d2224d9453d14105d8e855783f53e2cac12",
-  "index.html": "f2ec5e2275984790ef6e8974bb713626a409a234",
+  "index.html": "578516fd8fdf4a17311dc5711849e66243c9d8a9",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -485,7 +494,7 @@ const PRECACHE_REVISIONS = {
   "atrium-interact.css": "d7da49b1a7d2c0d5ac3bef25d5ba8fd79e86ea5b",
   "hud.css": "de49c113688894eb2685223a22835b913cd83eaa",
   "evo.css": "132220ace77530b5c4e976e03f43addfef22d343",
-  "ending.css": "e051ef838d69f3fd6a5de86bebc43244e732bbe8",
+  "ending.css": "ffc8a6dd5e296d52514e2b275ae6d472115bc164",
   "intro.css": "1a5f72a89e758d88c8e305124b02d448fc7dd090",
   "demo.css": "44b745dbace004886fc317f8c9ea0a654cd37de2",
   "experience.css": "b091139825feb6be1a678f3ba5ebd77f2bb29306",
@@ -497,7 +506,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "d1a8a52df1b20700328ea96acda72024a8ea5fdd",
+  "game.js": "3c83ce1cdd96bafcb1d541795e3b0c4e957c45c6",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "9b6a7b35c9a31d777b43214b028ffb29ee541021",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
@@ -606,9 +615,9 @@ const PRECACHE_REVISIONS = {
   "systems/combat-fx.js": "d175e7fc28efc392a9dce71e12547adcca313771",
   "systems/combat-feedback.js": "535bdb2e5f923d10e554a7f8f605cf8f0f2f984d",
   "systems/death-fx.js": "b373412bd245f196d6d484007814301d773fc145",
-  "systems/demo.js": "59f2808ccaabe0e279398918df36724f481b1d0f",
-  "systems/dialogs.js": "f71fe7e537278185e260369284dc8391566e9848",
-  "systems/ending.js": "392ab0c6c555a9fa11ba817b034cada7e70b623b",
+  "systems/demo.js": "f4d386ac20b419d85692b67a31200edb8d44876f",
+  "systems/dialogs.js": "734efae04b14a525bf69117adc9c5c779ea01d21",
+  "systems/ending.js": "767a46dca57bd830c27ca4f0f35ba15de02b21ed",
   "systems/ending-duo.js": "9d08ce9aef45f9f13350a893ab427432fdeffe1a",
   "systems/v100-family-choreography.js": "4f8ac04fa38f03b397d3ece1474e5504be69196b",
   "systems/v1002-festival.js": "cf7cdf9d24edbc3b669630825e41634b0dc70c33",
@@ -680,7 +689,7 @@ const PRECACHE_REVISIONS = {
   "systems/message-manager.js": "bbae3a1611d1d31810c9f76bf16cc71e79379f8a",
   "systems/notify.js": "d6ab13a1955952106587e945a0291ca29c21663d",
   "systems/evolution-timing.js": "31195d306f284aecd436e85d89a4650845b2bb1f",
-  "systems/objectives.js": "74e96109895e8bb32ab852f3b0019f57bfa6a5ca",
+  "systems/objectives.js": "a9bd28570d1bbb548c3b1182747307771d038422",
   "systems/passives.js": "71ea18727b424e26b0ef96d826159829d02fdc5a",
   "systems/portals.js": "3a0fa97d105647de3551bc81bc7c0e1e8431a8ee",
   "systems/rain.js": "02c82578fd89f44120a607b21138c6ca62fe2be2",

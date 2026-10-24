@@ -1181,7 +1181,10 @@ try {
   await step(12);
   // Only the real arena is valid visual evidence. Cosmetic evolution/intro
   // films can briefly cover the canvas after Kilo earns XP during the route.
-  // Close them through the real Escape control, never by mutating game state.
+  // Use the actual on-screen Continue button for evolutions: their Escape
+  // handler ignores keys in the first 800ms of real time, while E2E.step()
+  // advances game frames without waiting for real animation time. Never
+  // mutate game state to dismiss a production cinematic.
   const visibleFilmOverlays=()=>page.evaluate(()=>{
     return ['#ohana-intro','#evo-stage','#win-cinema','#char-select']
       .filter(selector=>{
@@ -1197,8 +1200,16 @@ try {
   for(let i=0;i<9;i++){
     const overlay=await visibleFilmOverlays();
     if(overlay.length===0)break;
-    await page.keyboard.press('Escape');
-    await step(60);
+    if(overlay.includes('#evo-stage')){
+      const continueButton=page.locator('#evo-stage.show .evo-skip');
+      assert.equal(await continueButton.count(),1,
+        'visible evolution cinema must provide its production Continue control');
+      await continueButton.click();
+      await page.waitForFunction(()=>!document.querySelector('#evo-stage.show'));
+    }else{
+      await page.keyboard.press('Escape');
+    }
+    await step(12);
   }
   const overlaysStillVisible=await visibleFilmOverlays();
   assert.deepEqual(overlaysStillVisible,[],

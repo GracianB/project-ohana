@@ -1,3 +1,5 @@
+import {installFamilyConstellation} from "./systems/family-constellation.js";
+import {world1Guidance} from "./systems/world1-guidance.js";
 import {initGroveGuardian,updateGroveGuardian,drawGroveGuardianSignals} from './systems/grove-guardian.js';
 import {steerKiloFlight} from './systems/kilo-flight.js';
 import {recordKiloHit,kiloComboStatus,resetKiloCombo} from './systems/kilo-combo.js';
@@ -291,6 +293,7 @@ addEventListener("resize", fit); fit();
 
 function overlayOpen() {
 return !!(
+document.getElementById("family-constellation")?.classList.contains("open") ||
 DOM.help?.classList.contains("open") ||
 DOM.map?.classList.contains("open") ||
 DOM.pause?.classList.contains("open") ||
@@ -330,9 +333,9 @@ clock.reset();
 if (paused) {
 const p = game.player;
 setText(document.getElementById("pause-hero"), p?.name || "Familia Ohana");
-setText(document.getElementById("pause-objective"), room().hint || room().goal || "Explora la isla y reúne a la familia.");
+setText(document.getElementById("pause-objective"), world1Guidance(game.roomId,game)?.objective || room().hint || room().goal || "Explora la isla y reúne a la familia.");
 setText(document.getElementById("pause-form"), ((p?.evo || 0) + 1) + " / 5");
-setText(document.getElementById("pause-journey"), Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
+setText(document.getElementById("pause-journey"), world1Guidance(game.roomId,game)?.journey || Math.min(10, Object.keys(game.visited || {}).length) + " / 10");
 setText(document.getElementById("pause-score"), String(game.score || 0));
 try {
   save();
@@ -376,6 +379,8 @@ if (!canAct()) return;
 if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
+const constellation=document.getElementById("family-constellation");
+if(constellation?.classList.contains("open")){constellation.querySelector(".constellation-close")?.click();return;}
 if (Festival.isOpen()) { Festival.close(); return; }
 if (DOM.evoStage?.classList.contains("show") || DOM.finale?.classList.contains("show")) return;
 if (game.finale && game.finale.t > 40) { game.finale.t = 8; return; }
@@ -741,6 +746,8 @@ save();
 dispatchEvent(new CustomEvent("ohana-room", { detail: {
 id,
 name: r.name,
+world1Seals: [...(game.world1Seals || [])],
+world1Won: !!game.world1Won,
 visited: game.visited,
 won: !!game.won,
 evo: game.player ? game.player.evo : 0
@@ -3321,7 +3328,7 @@ setText(DOM.xpText, p.evo >= 4 ? "MAX" : Math.round(xpPct) + "%");
 }
 setText(DOM.hudWorld, room().name);
 const seen = Object.keys(game.visited || {}).length;
-setText(document.getElementById("hud-journey"), "Isla Hoku · " + Math.min(10, seen) + "/10");
+setText(document.getElementById("hud-journey"), world1Guidance(game.roomId,game)?.journey || "Isla Hoku · " + Math.min(10, seen) + "/10");
 setText(DOM.hudEvo, "Forma " + (p.evo + 1) + "/5 · Cristales " + orbsLeft);
 const ally=uPartnerInfo(p.id,p.uPartner),bond=uBondProgress(p);
 setText(document.getElementById("u-exp-hud"),
@@ -4108,3 +4115,5 @@ onChange: () => { input.reset(); clock.reset(); },
 onEscape: () => escape()
 });
 requestAnimationFrame(loop);
+
+installFamilyConstellation();

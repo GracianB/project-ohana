@@ -198,3 +198,27 @@
 #win-cinema button{font-size:12px;min-height:44px}
 @media(max-width:560px){#win-cinema .win-card{width:96vw;padding:8px 10px;max-height:31vh}#win-cinema .win-actions{display:flex;flex-wrap:wrap}#win-cinema button{padding:0 12px;font-size:11px}}
 #win-cinema .win-soon{display:inline-block;margin:0 auto 16px;padding:8px 16px;border-radius:999px;border:1px dashed rgba(143,233,255,.7);color:#8fe9ff;font:800 13px/1.3 Outfit,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+
+/* V500 · The family constellation: real hero rendering, ten voices, one place. */
+#family-constellation{display:none;position:fixed;inset:0;z-index:180;overflow:auto;color:#fff6df;background:radial-gradient(ellipse at 25% 45%,#20334e 0,#13132d 42%,#060b16 85%);font-family:Outfit,sans-serif}
+#family-constellation.open{display:block}
+.constellation-shell{box-sizing:border-box;width:min(1240px,100%);min-height:100svh;margin:auto;padding:clamp(20px,4vw,56px);display:flex;flex-direction:column;justify-content:center}
+.constellation-header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.constellation-header p{font-size:11px;letter-spacing:.2em;color:#8fe9ff;margin:0 0 12px}.constellation-header h2{font-size:clamp(36px,5vw,72px);letter-spacing:-.045em;line-height:1.05;margin:0 0 12px}.constellation-header span{color:#b7c6db;font-size:15px}
+.constellation-close,#family-constellation nav button{font:inherit;cursor:pointer;color:#fff6df;border:1px solid #617185;background:#101c30;min-height:44px;border-radius:999px;padding:10px 18px}
+.constellation-close:focus-visible,#family-constellation nav button:focus-visible{outline:3px solid #fff6df;outline-offset:5px}
+.constellation-body{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:clamp(20px,4vw,64px);margin:20px 0}
+.constellation-stars{position:relative;aspect-ratio:1;width:100%;isolation:isolate}
+.constellation-orbit{position:absolute;inset:12%;border:1px solid #82aec447;border-radius:50%;box-shadow:0 0 70px #67ddff12,inset 0 0 50px #67ddff12}
+.constellation-stars canvas{position:absolute;width:65%;height:65%;inset:17.5%;pointer-events:none}
+#family-constellation nav button{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);padding:8px 10px;font-size:12px;min-width:72px;z-index:2;border-color:var(--light);background:#101c30e8;transition:box-shadow .3s,background .3s}
+#family-constellation nav button::before{content:'✧';display:block;font-size:22px;color:var(--light);line-height:1}
+#family-constellation nav button[data-lit=true]::before{content:'✦'}
+#family-constellation nav button[aria-pressed=true]{background:#30405b;box-shadow:0 0 28px color-mix(in srgb,var(--light) 35%,transparent)}
+.constellation-letter{border-left:2px solid var(--star-color,#8fe9ff);padding:10px 0 10px 28px}.constellation-gift{color:var(--star-color);text-transform:uppercase;letter-spacing:.16em;font-size:12px}.constellation-name{font-size:38px;margin:10px 0}.constellation-voice{font-size:clamp(20px,2.3vw,30px);line-height:1.5;min-height:4.5em;text-wrap:pretty}.constellation-progress{color:#9eb4c8;font-size:12px;letter-spacing:.08em}
+.constellation-last{border-top:1px solid #ffffff24;margin-top:24px;padding-top:20px;color:#b7c6db}.constellation-last>span{font-size:28px;color:#718399}.constellation-last h3{font-size:22px;margin:10px 0}.constellation-last p{font-size:15px;line-height:1.7}.all-lit .constellation-last{color:#fff2c7}.all-lit .constellation-last>span{color:#ffe39a;text-shadow:0 0 30px #ffd36a}
+.constellation-shell footer{font-size:14px;line-height:1.9;color:#aabdd0;text-align:center}.constellation-shell footer small{font-size:11px;letter-spacing:.06em}
+@media(max-width:650px){.constellation-body{grid-template-columns:1fr;gap:8px}.constellation-stars{max-width:410px;margin:auto}.constellation-header{gap:12px}.constellation-close{font-size:12px;padding:8px 12px;white-space:nowrap}.constellation-letter{padding-left:18px}.constellation-voice{min-height:0}#family-constellation nav button{font-size:10px;min-width:60px;padding:6px}.constellation-header p{font-size:9px;line-height:1.8}.constellation-shell footer{margin-top:20px}}
+@media(prefers-reduced-motion:reduce){#family-constellation *{animation:none!important;transition:none!important}}
+
+[data-open-constellation][hidden]{display:none!important}
