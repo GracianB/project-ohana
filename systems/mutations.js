@@ -15,7 +15,13 @@ export function damageEnemy(enemy, amount) {
   // projectiles and companions obey the same window. Other foes default to 1.
   const scale=enemy.damageTakenScale==null?1:Math.max(0,Math.min(1,finiteOr(enemy.damageTakenScale,1)));
   if(scale===0)return false;
-  enemy.hp = Math.max(0, finiteOr(enemy.hp, 0) - d*scale);
+  let applied=d*scale;
+  if(Number.isFinite(enemy.damageWindowRemaining)){
+    applied=Math.min(applied,Math.max(0,enemy.damageWindowRemaining));
+    enemy.damageWindowRemaining=Math.max(0,enemy.damageWindowRemaining-applied);
+  }
+  if(applied<=0)return false;
+  enemy.hp = Math.max(0, finiteOr(enemy.hp, 0) - applied);
   return true;
 }
 

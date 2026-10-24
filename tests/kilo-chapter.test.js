@@ -29,17 +29,17 @@ test('restored notes recover earned XP floors without paying score; old earned s
 });
 test('the chapter guardian uses the new arena and save ID without moving the legacy guardian',()=>{
  const r=WORLD1_ROOMS['w1-kilo'],f=r.foes.find(f=>f[4]?.special);assert.ok(f);const e={x:f[0],y:f[1],hp:1,roomPersona:f[4]};initGroveGuardian(e);
- assert.equal(e.hp,360);assert.equal(e._encounterSaveId,KILO_CHAPTER_BOSS_ID);
+ assert.equal(e.hp,540);assert.equal(e._encounterSaveId,KILO_CHAPTER_BOSS_ID);
  const g={player:{x:8700,y:1080,w:36,h:52},cam:{x:8200,y:600},viewW:1200,viewH:700,projectiles:[],nums:{add(){}}};
  for(let i=0;i<1000;i++){updateGroveGuardian(e,g,()=>{});assert.ok(e.x>=KILO_CHAPTER_ARENA.left);assert.ok(e.x+e.w<=KILO_CHAPTER_ARENA.right);assert.equal(e.y+e.h,WORLD1_FLOOR);}
 });
 import {damageEnemy} from '../systems/mutations.js';
 test('chapter guardian protects its introduction and exposes recovery consistently for every damage caller',()=>{
  const f=WORLD1_ROOMS['w1-kilo'].foes.find(f=>f[4]?.special),e={x:f[0],y:f[1],roomPersona:f[4]};initGroveGuardian(e);
- assert.equal(damageEnemy(e,100),false);assert.equal(e.hp,360);
+ assert.equal(damageEnemy(e,100),false);assert.equal(e.hp,540);
  const g={player:{x:8700,y:1080,w:36,h:52},cam:{x:8200,y:600},viewW:1200,viewH:700,projectiles:[],nums:{add(){}}};
- e._drummer.phase='warn';e._drummer.timer=50;updateGroveGuardian(e,g,()=>{});damageEnemy(e,100);assert.equal(e.hp,340);
- e._drummer.phase='rest';e._drummer.timer=50;updateGroveGuardian(e,g,()=>{});damageEnemy(e,100);assert.equal(e.hp,240);
+ e._drummer.phase='warn';e._drummer.timer=50;updateGroveGuardian(e,g,()=>{});damageEnemy(e,100);assert.equal(e.hp,540);
+ e._drummer.phase='rest';e._drummer.timer=50;e.damageWindowRemaining=180;updateGroveGuardian(e,g,()=>{});damageEnemy(e,100);assert.equal(e.hp,440);
  const normal={hp:360};damageEnemy(normal,100);assert.equal(normal.hp,260);
 });
 
@@ -47,4 +47,21 @@ test('Kilo notes have clear floor access, and all other hero rooms retain their 
  const room=WORLD1_ROOMS['w1-kilo'];
  for(const note of room.seal.stations)assert.ok(!room.plats.some(([x,y,w])=>y<1134&&x<note.x+90&&x+w>note.x-90));
  for(const [id,r] of Object.entries(WORLD1_ROOMS))if(id!=='w1-kilo')assert.ok(!r.kiloChapter);
+});
+
+test('earned sealed Kilo progress restores the maximum XP floor instead of trapping repeat visits',()=>{
+ const g=fixture();g.world1Seals=['kilo'];g.player.xp=0;enterWorld1(g);
+ assert.equal(g.player.xp,420);assert.equal(g.world1.sealed,true);
+ const score=g.score;enterWorld1(g);assert.equal(g.score,score);assert.equal(g.player.xp,420);
+});
+test('Tambor requires earned final form and survives a full-power multi-hit burst until later recoveries',()=>{
+ const f=WORLD1_ROOMS['w1-kilo'].foes.find(f=>f[4]?.special),e={x:f[0],y:f[1],roomPersona:f[4]};initGroveGuardian(e);
+ const g={player:{x:8700,y:1050,w:36,h:70,evo:3},world1:{stations:[{done:true},{done:true},{done:true},{done:true}]},cam:{x:8200,y:600},viewW:1200,viewH:700,projectiles:[],nums:{add(){}}};
+ updateGroveGuardian(e,g,()=>{});assert.equal(e._drummer.phase,'waiting');
+ g.player.evo=4;updateGroveGuardian(e,g,()=>{});assert.equal(e._drummer.phase,'intro');
+ e._drummer.phase='strike';e._drummer.timer=1;updateGroveGuardian(e,g,()=>{});
+ assert.equal(e._drummer.phase,'rest');assert.equal(e.damageWindowRemaining,180);
+ damageEnemy(e,1000);assert.equal(e.hp,360);assert.equal(damageEnemy(e,1000),false);
+ updateGroveGuardian(e,g,()=>{});assert.equal(e._drummer.phase,'warn');assert.equal(damageEnemy(e,1000),false);
+ const legacy={x:3400,y:1086,roomPersona:{special:true,name:'Tambor del Claro'}};initGroveGuardian(legacy);assert.equal(legacy.hp,360);assert.equal(legacy.damageWindowRemaining,undefined);
 });

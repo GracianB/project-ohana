@@ -11,7 +11,7 @@ try{
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
  const notes=await page.evaluate(async()=>{localStorage.clear();const e=window.__OHANA_E2E;e.setSeed(73);e.startWorld1('kilo');return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-kilo'].seal.stations;});
  const step=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
- let s=await step(600),deaths=0,airResumed=false;await page.locator('#game').focus();
+ let s=await step(600),deaths=0,airResumed=false,guardianAttacks=0;await page.locator('#game').focus();
  await fs.mkdir('test-results/v501',{recursive:true});
  const forms=new Set([s.evo]),milestones=[],guardianPhases=new Set();
  for(let i=0;i<1800&&!s.world1.sealed;i++){
@@ -25,7 +25,7 @@ try{
   if(chime&&s.kiloFlight.mode!=='solar')await page.keyboard.press('k');
   if(!chime&&s.kiloFlight.mode==='solar')await page.keyboard.press('k');
   const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());
-  for(const foe of foes)if(foe.guardian)guardianPhases.add(foe.guardian.phase);
+  for(const foe of foes)if(foe.guardian){guardianPhases.add(foe.guardian.phase);guardianAttacks=Math.max(guardianAttacks,foe.guardian.attacksExecuted||0);}
   const p=s.player,near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-(p.x+p.w/2),e.y+e.h/2-(p.y+p.h/2))<400).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
   if(count>=4&&near?.guardian&&['warn','rest'].includes(near.guardian.phase))await page.screenshot({path:`test-results/v501/kilo-guardian-${near.guardian.phase}.png`});
   const dx=target-(p.x+p.w/2),dir=dx>0?'d':'a';
@@ -66,11 +66,11 @@ try{
  assert.equal(s.world1.done,4);assert.equal(s.evo,4);assert.equal(s.world1.sealed,true);assert.ok(s.world1Seals.includes('kilo'));assert.ok(deaths<=8);
  assert.equal((await page.evaluate(()=>window.__OHANA_E2E.roomCast())).some(e=>e.miniBoss&&e.hp>0),false);
  assert.deepEqual([...forms],[0,1,2,3,4]);
- assert.ok(guardianPhases.has('warn'));assert.ok(guardianPhases.has('rest'));
+ assert.ok(guardianPhases.has('warn'));assert.ok(guardianPhases.has('rest'));assert.ok(guardianAttacks>=3,'the guardian must execute at least three real attacks before defeat');
  assert.ok(milestones.every((m,i)=>m.xp>=[55,140,260,420][i]));
  assert.equal(await page.locator('#ability-bar').isVisible(),false,'story hides combat powers');
  await page.screenshot({path:'test-results/v501/kilo-chapter-complete.png'});
  await step(600);await page.clock.runFor(100);await page.screenshot({path:'test-results/v501/kilo-stage-after-combat.png'});
- await fs.writeFile('test-results/v501/kilo-chapter-pilot.json',JSON.stringify({deaths,forms:[...forms],guardianPhases:[...guardianPhases],airChimes:3,airContinueVerified:airResumed,milestones,final:{hp:s.hp,evo:s.evo,sealed:s.world1.sealed}},null,2));
+ await fs.writeFile('test-results/v501/kilo-chapter-pilot.json',JSON.stringify({deaths,forms:[...forms],guardianPhases:[...guardianPhases],guardianAttacks,airChimes:3,airContinueVerified:airResumed,milestones,final:{hp:s.hp,evo:s.evo,sealed:s.world1.sealed}},null,2));
  assert.deepEqual(errors,[]);console.log('PASS Kilo physical chapter: four notes, earned five forms, solar flight and three earned air chimes, real guardian defeated, seal; natural retries '+deaths);
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

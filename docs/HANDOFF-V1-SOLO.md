@@ -94,3 +94,17 @@ a mitad, bola táctil usando el save ganado y salida física a Chispín bebé. E
 (`CHROMIUM_BIN=/usr/bin/chromium` solo en este entorno). Suite Node: 1.500 pruebas.
 La aceptación humana y la alcanzabilidad de los cien recuerdos siguen pendientes.
 Siguiente integración: Chispín. Mantener las cuatro antenas persistentes.
+
+
+## V503 · revisión de Kilo tras prueba humana
+
+El usuario confirmó que jugaba «Claro de Kilo»: dificultad demasiado baja, enemigos
+aparentemente inofensivos, jefe trivial y forma máxima/candados sin llegar a desbloquear.
+La integración de Chispín se pausa para esta corrección expresamente autorizada.
+Contrato de ajuste en `KILO-V1.md`, sección V503. El mínimo de XP de notas ahora
+se aplica también con sello previamente ganado. La fixture de compatibilidad
+`tests/browser/v503-kilo-save-recovery.mjs` reproduce un save con sello y forma 4/5,
+verificando forma final restaurada; no se confunde con una victoria física.
+El piloto físico sigue ganando sus cinco formas, tres carillones y sello, y ahora
+exige al menos tres ataques ejecutados del Tambor. Stitcho mantiene su piloto.
+La validación automatizada no sustituye una segunda aceptación humana de dificultad.

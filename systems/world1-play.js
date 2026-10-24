@@ -120,7 +120,7 @@ export function world1NextObjective(g) {
   else if (w.kind === "medusas") { label = "Medusa dormida"; action = "Salta para despertarla"; }
   else if (w.kind === "serenata") {label = "Flor sin canción";
     if(target&&kiloFlowerThreat(g,target))action='Despeja los enemigos junto al hibisco antes de tocar. H cerca · J a distancia';
-    else action='Quédate quieto para tocar · esta nota ayuda a despertar tu siguiente forma';
+    else action='Nota '+((target?.note??0)+1)+'/4 → forma '+(w.stations.filter(s=>s.done).length+2)+'/5 · quédate quieto para tocar. Los cromos del álbum son opcionales';
   }
   else if (w.kind === "braseros") label = "Brasero apagado";
   else if (w.kind === "pisotones") label = "Fósil dormido";
@@ -494,7 +494,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.fillStyle = "#ffe27a"; ctx.beginPath(); ctx.arc(x, y - 62, 7, 0, Math.PI * 2); ctx.fill();
       if (!done && s.hold > 0) { ctx.strokeStyle = col; ctx.beginPath(); ctx.arc(x, y - 62, 30, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * s.hold / HOLD_TICKS); ctx.stroke(); }
       ctx.fillStyle = "#fff"; ctx.font = "700 16px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(["♩","♪","♫","♬"][s.note], x, y - 100 + pulse);
-      if(!done){ctx.font="700 11px Outfit, sans-serif";ctx.fillStyle=s.threatened?'#ffd28e':'#e4edca';ctx.fillText(s.threatened?'DESPEJA EL HIBISCO':'QUIETO · TOCA LA NOTA',x,y-125);}
+      if(!done){ctx.font="700 11px Outfit, sans-serif";ctx.fillStyle=s.threatened?'#ffd28e':'#e4edca';ctx.fillText(s.threatened?'DESPEJA EL HIBISCO':'NOTA '+(s.note+1)+'/4 → FORMA '+(w.stations.filter(s=>s.done).length+2)+'/5 · QUIETO',x,y-125);}
       break; }
     case "part": {
       if (!done && w.carry !== s.id) { ctx.fillStyle = PART_COLORS[s.id % PART_COLORS.length]; ctx.fillRect(x - 17, y - 48 + pulse, 34, 34); ctx.strokeRect(x - 17, y - 48 + pulse, 34, 34);

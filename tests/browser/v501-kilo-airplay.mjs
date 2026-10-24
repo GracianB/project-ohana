@@ -27,8 +27,8 @@ try{
  for(let i=0;i<80&&s.kiloFlight.mode==='solar';i++)s=await step(3);
  assert.equal(s.roomId,'lab');assert.ok(s.hp>0);assert.equal(s.kiloFlight.mode,null,'accepted damage must interrupt flight; later healing may restore HP');
  // The boss's real warning renderer with an airborne target; access, form
- // and position are fixtures, and this does not claim a second earned victory.
- await page.evaluate(()=>{const e=window.__OHANA_E2E;e.startWorld1('kilo');e.step(600);e.step(600);e.setEvo(4);e.setPlayer(8500,730);});
+ // position and four earned notes are fixtures; this does not claim a second earned victory.
+ await page.evaluate(()=>{const e=window.__OHANA_E2E;e.startWorld1('kilo');const save=JSON.parse(localStorage.getItem('ohana'));Object.assign(save,{id:'kilo',roomId:'w1-kilo',evo:4,xp:420,world1Seals:[],clearedEncounters:{},world1Stations:{'w1-kilo':[0,1,2,3]}});localStorage.setItem('ohana',JSON.stringify(save));localStorage.removeItem('ohana.tmp');localStorage.setItem('ohana-resume','1');e.startWorld1('kilo');e.step(600);e.setPlayer(8500,730);});
  await page.locator('#game').focus();await page.keyboard.press('k');
  let aerial=null;
  for(let i=0;i<200;i++){

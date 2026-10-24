@@ -67,7 +67,7 @@ export function updateCampaignEnemy(e,g,hurt){
  const band=flying?e.roomPersona?.flightBand:null;
  if(band){e.y=Math.max(band.top,Math.min(band.bottom-e.h,e.y));if((e.y===band.top&&e.vy<0)||(e.y===band.bottom-e.h&&e.vy>0))e.vy=0;}
  e.x=Math.max(0,Math.min(g.worldW-e.w,e.x));if(e.y>g.worldH+100){e.hp=0;e.fell=true;}
- if(a.active>0&&Math.abs(cx(p)-cx(e))<(p.w+e.w)/2&&Math.abs(cy(p)-cy(e))<(p.h+e.h)/2)hurt(e.elite?18:12,'¡EMBOSCADA!');
+ if((a.active>0||e.roomPersona?.kiloPressure)&&e.hp>0&&Math.abs(cx(p)-cx(e))<(p.w+e.w)/2&&Math.abs(cy(p)-cy(e))<(p.h+e.h)/2)hurt(a.active>0?(e.elite?18:e.roomPersona?.kiloPressure?14:12):8,a.active>0?'¡EMBOSCADA!':'¡NO LO ATRAVIESES!');
  return true;
 }
 export function drawCampaignEnemy(ctx,e,cam){

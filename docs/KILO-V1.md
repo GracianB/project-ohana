@@ -40,3 +40,22 @@ El repertorio de ohana-445 se conserva. La selección mejora Bahía del compás 
 ## Reapertura explícita · campaña V501
 
 El usuario ha reabierto el trabajo de Kilo para la campaña por protagonistas. La referencia V445 anterior se conserva como historial del repertorio. V501 mantiene arte, daño base y umbrales; las formas intermedias conservan la levitación temporal. Flor Solar añade vuelo sostenido con K, otra K desciende y el daño aceptado lo interrumpe. El aura ofensiva/reflejo mantiene su duración máxima de seis segundos. J puede dirigirse durante ese vuelo; su uso normal conserva rebotes y búsqueda. El Claro del Mundo 1 incorpora sus cuatro encuentros, crecimiento por notas, ruta opcional de carillones y respuestas aéreas del Tambor. La sala y el Tambor del Mundo 2 conservan sus reglas previas. Detalles y alcance de validación en V501-AVENTURA-CLARA.md; contratos para las demás salas en CAPITULOS-IDENTIDAD.md. No se declara aceptación humana del balance ni publicación.
+
+
+## Reapertura V503 por prueba humana · 24/10/2026
+
+El usuario completó Claro de Kilo y señaló enemigos sin amenaza, jefe trivial y
+forma final/candados sin desbloquear. Se revisa la dificultad del capítulo; el
+contrato histórico del hub permanece. Los cuerpos de los enemigos de las notas
+hacen 8 de contacto y 14 durante ataque anunciado; sus PV siguen la etapa
+65/100/150/200. Tambor pasa a 150×118 y 540 PV. Requiere cuatro notas y forma final
+antes de despertar, blinda avisos/ataques y abre recuperaciones de 54 frames con
+180 de daño máximo cada una, compartido por todos los impactos/auras/compañeros.
+Así debe ejecutar varios patrones antes de caer. Carga 7/9, proyectiles 20, daño
+corporal en ataque 22; el hub conserva sus valores anteriores.
+
+Se elimina el retorno temprano de crecimiento con sello ganado: un save legítimo
+que ya completó las notas recupera su mínimo de 420 XP, sin repetir puntuación.
+HUD y flores indican nota → forma. Los cromos del álbum se explican como opcionales,
+independientes de XP y evolución. La dificultad final requiere otra prueba humana;
+no se considera aceptada por sobrevivir un piloto automatizado.

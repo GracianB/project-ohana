@@ -5,7 +5,7 @@ export const KILO_CHAPTER_BOSS_ID='w1-kilo-tambor-v1';
 export const KILO_CHAPTER_ARENA=Object.freeze({left:8260,right:9320,floor:1134});
 export function kiloChapter(g){return g?.roomDef?.id==='w1-kilo'&&!!g.roomDef.kiloChapter;}
 export function kiloNoteGrowth(g){
- if(!kiloChapter(g)||!g.player||!g.world1||g.world1.sealed)return 0;
+ if(!kiloChapter(g)||!g.player||!g.world1)return 0;
  const n=g.world1.stations.filter(s=>s.kind==='flower'&&s.done).length;
  const floor=XP_NEED[Math.min(4,n)]||0;
  g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;

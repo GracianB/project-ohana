@@ -111,7 +111,7 @@ export function buildWorld1HeroRoom(hero) {
     foes.length=0;
     stations.forEach((st,i)=>lessons[i].forEach((role,k)=>{
       const x=st.x+(k?185:-190),y=WORLD1_FLOOR-40;
-      foes.push([x,y,theme.cast[(i+k)%theme.cast.length],false,{role,name:['Ecos de la orilla','Guardianes del viento','Ronda de pétalos','Último estribillo'][i],anchorY:y}]);
+      foes.push([x,y,theme.cast[(i+k)%theme.cast.length],false,{role,name:['Ecos de la orilla','Guardianes del viento','Ronda de pétalos','Último estribillo'][i],anchorY:y,kiloPressure:true,chapterHP:[65,100,150,200][i]}]);
     }));
     foes.push([4680,760,'phosquito',false,{role:'flyer',name:'Vigía de la laguna',anchorY:760,flightBand:{top:550,bottom:820}}],[7930,620,'phosquito',false,{role:'flyer',name:'Guardián del viento',anchorY:620,flightBand:{top:400,bottom:780}}]);
     plats.push([4550,890,220,22],[7740,780,220,22],[8050,650,220,22]);

@@ -1,3 +1,14 @@
+# V503 · ohana-503 · Kilo: amenaza y evolución coherentes
+
+Reapertura explícita por prueba humana: enemigos sin amenaza de contacto, Tambor demasiado
+fácil y forma final no alcanzada. Se corrige la recuperación de XP de las notas con sello
+ya ganado. El Tambor del capítulo solo despierta tras las cuatro notas y la forma final;
+tiene mayor presencia física, 540 PV, blindaje durante avisos/ataques y recuperaciones
+con un máximo de 180 de daño por ventana frente a auras y golpes múltiples. Ataques más
+peligrosos y carga más rápida; se conserva el guardián histórico del hub. Los encuentros
+de las notas escalan 65/100/150/200 PV según la etapa y sus cuerpos hacen daño de contacto.
+Los avisos y flancos se mantienen. No se declara aceptación humana de este ajuste.
+
 # V502 · ohana-502 · El taller de Stitcho
 
 Stitcho integra tres reparaciones, un raíl que exige una bola K continua y Núcleo Glitch

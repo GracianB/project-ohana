@@ -10,7 +10,7 @@ export function powerStatus(g,index,supreme=null){
  const now=(Number(g.t)||0)*1000/60,left=Math.max(0,(Number(p.cds?.[def.id||p.abilities?.[index]])||0)-now);
  const need=POWER_LEVELS[index],base={def,left};
  const state=(kind,short,label,pct=0)=>({...base,kind,short,label,pct,available:kind==='ready'||kind==='rhythm'||kind==='flight'});
- if((Number(p.evo)||0)<need)return state('locked','Forma '+(need+1),'Se desbloquea en la forma '+(need+1)+'. Recoge cristales de XP.');
+ if((Number(p.evo)||0)<need)return state('locked','Forma '+(need+1),'Se desbloquea en la forma '+(need+1)+'. '+(g.roomId==='w1-kilo'?'Completa las notas de los hibiscos para evolucionar; los cromos no dan XP.':'Recoge cristales de XP.'));
  if(index===1&&p.id==='kilo'&&p.evo>=4&&p._kiloFlightMode==='solar'&&p._kiloFlightT>0)return state('flight','Vuelo · K bajar','Vuelo solar activo. Mover/saltar/bajar dirige; J dispara en esa dirección. K desciende y recibir daño corta el vuelo.',100);
  const rhythm=index===5&&p.id==='kilo'&&g._evolutionAttacks?.moves?.some(m=>m.id==='kilo'&&m.index===5);
  if(rhythm)return state('rhythm','A compás','Pulsa P siguiendo las tres señales de ritmo.',100);

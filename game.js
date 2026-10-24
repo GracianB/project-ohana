@@ -645,6 +645,7 @@ e.spawnIndex = i;e._campaignOriginal=true;
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
+if(r.kiloChapter&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
 initGroveGuardian(e);
 if (f[3]) applyElite(e);
 return e;
