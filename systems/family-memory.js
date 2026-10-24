@@ -1,4 +1,5 @@
 import {WORLD1_ORDER} from './world1-rooms.js';
+import {createSaveStore,canonId} from './save.js';
 export const FAMILY_MEMORY_KEY='ohana-family-memory-v500';
 export function readFamilyMemory(storage){
  try {const s=storage??globalThis.localStorage;const raw=JSON.parse(s?.getItem(FAMILY_MEMORY_KEY)||'null');
@@ -25,8 +26,11 @@ export function rememberFamilyLight(id,memory,storage){
 export function migrateFamilyMemory(storage){
  const existing=readFamilyMemory(storage);if(existing)return existing;
  try{
-  const s=storage??globalThis.localStorage;const save=JSON.parse(s?.getItem('ohana')||'null');
-  if(![2,3].includes(save?.v)||save.world1Won!==true||save.roomId!=='w1-final'||!Array.isArray(save.world1Seals)||!WORLD1_ORDER.every(id=>save.world1Seals?.includes(id)))return null;
-  return rememberFamilyVictory({world:1,id:save.id},s);
+  // Respect the transactional save contract: a newer valid ohana.tmp can
+  // survive an interrupted write; a stale temporary file cannot override main.
+  const save=createSaveStore(storage??(()=>globalThis.localStorage)).readRaw();
+  const hero=canonId(save?.id);
+  if(![2,3].includes(save?.v)||save.world1Won!==true||save.roomId!=='w1-final'||!WORLD1_ORDER.includes(hero)||!Array.isArray(save.world1Seals)||!WORLD1_ORDER.every(id=>save.world1Seals.includes(id)))return null;
+  return rememberFamilyVictory({world:1,id:hero},storage);
  }catch{return null;}
 }
