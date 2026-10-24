@@ -30,10 +30,10 @@ export function installFamilyConstellation(){
   const halo=c.createRadialGradient(W/2,H*.5,10,W/2,H*.5,W*.55);
   halo.addColorStop(0,'#e6ad4938');halo.addColorStop(1,'#e6ad4900');c.fillStyle=halo;c.fillRect(0,0,W,H);
   // Paint back to front, retaining each hero's canonical engine art.
-  const seats=FAMILY_STARS.map((s,i)=>{const a=Math.PI+i*Math.PI/9;return {s,i,x:W/2+W*.4*Math.cos(a),y:H*.49+H*.25*Math.sin(a)};}).sort((a,b)=>a.y-b.y);
+  const seats=FAMILY_STARS.map((s,i)=>({s,i,x:W*(.12+(i%5)*.19),y:H*(i<5?.28:.53)}));
   for(const {s,i,x,y} of seats){
    const a=family[i];a.grounded=true;a.vx=0;a.vy=0;a._poseOverride='idle';
-   drawDummy(c,a,x,y,H*.21/baseHeight(s.id,4),now*.06);
+   drawDummy(c,a,x,y,H*.18/baseHeight(s.id,4),now*.06);
    c.fillStyle=s.color;c.font='16px Outfit, sans-serif';c.textAlign='center';c.fillText(s.name,x,y+25);
   }
   c.fillStyle='#392c31';c.beginPath();c.ellipse(W/2,H*.68,W*.34,H*.13,0,0,Math.PI*2);c.fill();
