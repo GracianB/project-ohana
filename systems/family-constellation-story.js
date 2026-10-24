@@ -11,3 +11,12 @@ export const FAMILY_STARS=Object.freeze([
  {id:'cuerno',name:'Cuerno',color:'#eccbff',gift:'La esperanza',line:'La aurora no borra la noche. Nos enseña lo que hemos cuidado dentro de ella.'}
 ]);
 export function constellationProgress(lights=[]){const set=new Set(lights);const count=FAMILY_STARS.filter(s=>set.has(s.id)).length;return {count,complete:count===10,title:count===10?'La última luz eres tú.':'Cada voz enciende un lugar.'};}
+
+// The farewell belongs to the hero of the earned victory, not the last portrait viewed.
+export function reunionDedication(hero){
+ const star=FAMILY_STARS.find(s=>s.id===hero)||FAMILY_STARS[0];
+ return {name:star.name,color:star.color,
+  title:`${star.name} te ha guardado un sitio.`,
+  line:`Llegaste hasta el final con ${star.name}. Ahora no queda una puerta que defender ni una prueba que superar. Solo volver, sentarte y dejar que alguien cuide también de ti.`,
+  promise:'Si algún día necesitas volver, aquí seguirá habiendo sitio. Para los diez. Y para ti.'};
+}
