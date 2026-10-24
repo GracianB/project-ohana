@@ -24,3 +24,26 @@ test('legacy wins migrate without rewriting saves; ten seals without victory can
  assert.equal(migrateFamilyMemory(s).hero,'kilo');assert.equal(s.getItem('ohana'),original);
  rememberFamilyLight('cat',readFamilyMemory(s),s);assert.deepEqual(migrateFamilyMemory(s).lights,['cat']);
 });
+
+test('V500 migration recovers an interrupted newer transactional save and canonicalizes older hero IDs',()=>{
+ const s=store();
+ const base={v:3,revision:4,id:'kilo',roomId:'w1-final',world1Seals:WORLD1_ORDER,world1Won:false};
+ const staged={...base,revision:5,id:'lilo',world1Won:true};
+ s.setItem('ohana',JSON.stringify(base));
+ s.setItem('ohana.tmp',JSON.stringify(staged));
+ const primary=s.getItem('ohana'),temporary=s.getItem('ohana.tmp');
+ assert.equal(migrateFamilyMemory(s).hero,'kilo','legacy Lilo becomes canonical Kilo');
+ assert.equal(s.getItem('ohana'),primary,'main save remains untouched');
+ assert.equal(s.getItem('ohana.tmp'),temporary,'staged recovery remains untouched');
+});
+test('V500 migration ignores stale or invalid temporary saves',()=>{
+ const s=store();
+ const base={v:3,revision:9,id:'pizza',roomId:'w1-final',world1Seals:WORLD1_ORDER,world1Won:false};
+ s.setItem('ohana',JSON.stringify(base));
+ s.setItem('ohana.tmp',JSON.stringify({...base,revision:8,world1Won:true}));
+ assert.equal(migrateFamilyMemory(s),null,'older staged win must not override the newer primary');
+ s.setItem('ohana.tmp','{invalid json');
+ assert.equal(migrateFamilyMemory(s),null,'corrupt temporary checkpoint cannot unlock');
+ s.setItem('ohana',JSON.stringify({...base,revision:10,world1Won:true,id:'stitch'}));
+ assert.equal(migrateFamilyMemory(s).hero,'stitcho','legacy Stitch win can unlock');
+});
