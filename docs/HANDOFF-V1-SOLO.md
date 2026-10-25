@@ -473,3 +473,14 @@ La matriz histórica de75min y sus pilotos anteriores a la campaña V501 no se
 han repetido/adaptado; no afirmar ese gate completo. Sigue pendiente el recorrido
 concatenado y cierre de Quimera, incluida la observación sobre su guardia de sellos
 indicada en V510. No habilitar multijugador por cerrar esta iteración de salas.
+
+
+Publicación V511 verificada: commit `21fa9c9`, Pages
+https://github.com/GracianB/project-ohana/actions/runs/40189221098 en Success.
+https://gracianb.github.io/project-ohana/?release=511 sirve los nueve archivos runtime
+modificados con SHA256 idéntico al candidato, incluidos composición, superficies,
+exploración, enemigos, game.js y sw.js. Informe
+`/workspace/.cloud-setup/logs/ohana-v511-live-verification.json`.
+Diez pilotos completos de la geometría final PASS; prueba de caminar/saltar y
+salto táctil PASS;30 capturas finales separan escritorio y contexto móvil real.
+Siguiente: aceptación humana del aspecto/recorrido e integración final pendiente.
