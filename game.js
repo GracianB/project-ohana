@@ -3398,7 +3398,14 @@ if (goal) {
   const progress = world1Snapshot(game);
   const direction = world1ObjectiveDirection(game, goal);
   const text = (progress.sealed ? "Sello recuperado" : "Sello " + progress.done + "/" + progress.total) + " · " + direction + " · " + goal.label + ": " + goal.action;
-  if (messageManager.objective !== text) setPersistentObjective(text, progress.sealed);
+  // A dismissed/expired toast can leave its DOM slot empty while the
+  // persistent objective model is still correct. Restore the actual card
+  // whenever no higher-priority message owns the slot; never overwrite a
+  // live notification or fake progress to repair the HUD.
+  const missingObjectiveCard = !messageManager.current &&
+    !messageManager.node?.querySelector('.game-notification[data-persistent="1"]');
+  if (messageManager.objective !== text || missingObjectiveCard)
+    setPersistentObjective(text, progress.sealed);
   game._world1ObjectiveText = text;
 } else if (game._world1ObjectiveText) {
   if (messageManager.objective === game._world1ObjectiveText) clearPersistentObjective();
