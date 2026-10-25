@@ -54,10 +54,10 @@ try {
  // Outwait the old seven-second reset without moving or modifying objectives.
  s=await step(600);assert.ok(s.world1.done>=earned);
  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();s=await step(5);}
- await page.evaluate(async()=>{const notices=await import('/systems/notify.js');notices.dismissNotifications();});
- for(let n=0;n<10&&!(await page.locator('#notification-container').isVisible());n++){if(await page.locator('#evo-stage.show .evo-skip').count())await page.locator('#evo-stage .evo-skip').click();await page.waitForTimeout(500);}
- await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
- await page.waitForTimeout(250);
+ // Do not dismiss the notification before testing it: dismiss() clears
+ // transient messages and races the persistent objective fallback.
+ await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Sello 1/4'),
+   {timeout:10000});
  assert.match(await page.locator('#notification-container').innerText(),/Sello 1\/4.*Antena/s);
  assert.equal(await page.locator('#notification-container .game-notification').count(),1);
  // Teach the actual equipped power, and explain a locked power without listing every key.
