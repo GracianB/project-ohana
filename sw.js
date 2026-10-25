@@ -1,6 +1,7 @@
-const VERSION = "ohana-513";
+const VERSION = "ohana-514";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./characters/identity-v2.js?v=" + VERSION,
   "./characters/anatomical-stride.js?v=" + VERSION,
   "./systems/chapter-encounters.js?v=" + VERSION,
   "./systems/campaign-creature-art.js?v=" + VERSION,
@@ -513,13 +514,13 @@ const PRECACHE_REVISIONS = {
   "engine/camera.js": "b21bd3aa6c6f3984184f404046d6bbecb5b09c3c",
   "systems/welcome-story.js": "c45fcfb2e3d8894b8e77519ee01755534b82b433",
   "family-camp.css": "c91246413b1bae3c15e4bfa3e298db323eaa7758",
-  "systems/family-camp.js": "1af10aa60a56d04648501f0fb0a9582ab625a357",
+  "systems/family-camp.js": "350aff0d58c1919361bc7b5becadc3271a04b8e1",
   "systems/family-camp-model.js": "d49f1bf31d2d8bbca5a797da20abcc2b1e972c60",
   "systems/evo-cine/real-actor.js": "fcdecf739d6fef4c266d66be67a6da9edec4531e",
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "cff260c38ab6a3eae2b1a3cdbc43be72c1d74dbd",
+  "index.html": "83ab4058ae5a5d3d2006c3ddf5c0b1c60c3d3b47",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -571,8 +572,8 @@ const PRECACHE_REVISIONS = {
   "characters/definitive.js": "de08a60a9ae7198707cb68f557a6d7be15b2ea3a",
   "characters/look.js": "f9e1d610ba74bec6823cc8fcc093d3b2875f7c07",
   "characters/rig.js": "709eef2e67c4fe6e0e8d09b6057e5cf3c80cfdfe",
-  "characters/roster.js": "11c4f62a668e74ce63e0ea7f64f1ab439f40975f",
-  "characters/signature.js": "e660b4eaa9877d1ca0354a4f56e70393a8bdbc05",
+  "characters/roster.js": "b0f9f98d00d77df7ee7f61ac35ce97f8f042703a",
+  "characters/signature.js": "77c787347a7eb94b7f0e869ed4b7f89b3a23831f",
   "characters/sprites.js": "3c1785be5f0da46f16d277ca56091fa35f6f764a",
   "engine/audio.js": "b28938e7852d62c421b109b0f72d484affb82c29",
   "engine/boss-art.js": "c3e1c244e70cd95197aaffc173683961b373b899",
@@ -609,7 +610,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "cca11516ee6d83b768a0cde22baf563fc8be6d95",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "866c92d53da9dd65c4b4181552d5b5f556847ab1",
-  "systems/abilities.js": "098576d060a7e11f4a4d2a181aa3e2b27acf4846",
+  "systems/abilities.js": "abf98ae7625c376f13aed75e4ce6dfaa197280ac",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "7b81399f34181a7cca497161cad6ccdb0f9ad80c",
   "systems/u-partners.js": "c90b1d09dc481c99a4da005e083a4f4ac928117f",
@@ -762,7 +763,8 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/cat-4.png": "798687a48289d5282fc1fcc1e2482f910de89f33",
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
-  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3"
+  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
+  "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
