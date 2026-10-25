@@ -7,8 +7,8 @@ import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
- const checkpoint='test-results/v513/memory-checkpoint-storage.json';
- const source=await fs.access(checkpoint).then(()=>checkpoint,()=> 'test-results/v513/earned-campaign-storage.json');
+ const checkpoint='test-results/v600/memory-checkpoint-storage.json';
+ const source=await fs.access(checkpoint).then(()=>checkpoint,()=> 'test-results/v600/earned-campaign-storage.json');
  const earned=JSON.parse(await fs.readFile(source,'utf8'));
  // The test server chooses a new port; move the untouched earned backup to that origin.
  for(const origin of earned.origins)origin.origin=`http://127.0.0.1:${server.address().port}`;
@@ -60,14 +60,20 @@ try{
    s=await step(n);
    if(found.length>=lastCount+10){lastCount=found.length;console.log('COLLECTION',JSON.stringify({hero,found:found.length,i,x:Math.round(s.player.x),target:target.id,deaths}));}
    if(i%100===0)await context.storageState({path:checkpoint});
-   if(i%500===0){await page.screenshot({path:`test-results/v513/${hero}-collection-debug.png`});console.log('COLLECT STATE',JSON.stringify({hero,i,found:found.length,target,player:s.player}));}
+   if(i%500===0){await page.screenshot({path:`test-results/v600/${hero}-collection-debug.png`});console.log('COLLECT STATE',JSON.stringify({hero,i,found:found.length,target,player:s.player}));}
    assert.equal(s.runtimeFaults,0);
   }
   for(const k of ['a','d','w','s'])await page.keyboard.up(k);
   found=await read(hero);assert.equal(found.length,100,hero+' all real pickups must be reachable');
-  await context.storageState({path:checkpoint});report.push({hero,found:found.length,deaths});await page.screenshot({path:`test-results/v513/${hero}-100-memories.png`});
-  await fs.writeFile('test-results/v513/collection-progress.json',JSON.stringify(report,null,2));console.log('100 MEMORIES PASS '+hero);
+  if(await page.evaluate(()=>document.body.classList.contains('relic-cinema'))){
+   await page.evaluate(()=>window.__OHANA_E2E.step(280));await page.clock.runFor(16);
+   await page.screenshot({path:`test-results/v600/${hero}-earned-celebration.png`});
+   await page.evaluate(()=>window.__OHANA_E2E.step(320));await page.clock.runFor(16);
+   assert.equal(await page.evaluate(()=>document.body.classList.contains('relic-cinema')),false);
+  }
+  await context.storageState({path:checkpoint});report.push({hero,found:found.length,deaths});await page.screenshot({path:`test-results/v600/${hero}-100-memories.png`});
+  await fs.writeFile('test-results/v600/collection-progress.json',JSON.stringify(report,null,2));console.log('100 MEMORIES PASS '+hero);
  }
- assert.deepEqual(errors,[]);await context.storageState({path:'test-results/v513/all-memory-storage.json'});
- await fs.writeFile('test-results/v513/all-memories.json',JSON.stringify({report,total:report.reduce((n,r)=>n+r.found,0),errors},null,2));
+ assert.deepEqual(errors,[]);await context.storageState({path:'test-results/v600/all-memory-storage.json'});
+ await fs.writeFile('test-results/v600/all-memories.json',JSON.stringify({report,total:report.reduce((n,r)=>n+r.found,0),errors},null,2));
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

@@ -1,3 +1,4 @@
+import {advanceExpeditionControls} from './expedition-controls-v2.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Physical Stitcho pilot. Direct chapter entry is the only access fixture:
 // no position, experience, health, form or enemy/victory setters are used.
@@ -19,6 +20,7 @@ try{
   if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);await page.locator('#game').focus();}
   forms.add(s.evo);
   const data=await page.evaluate(async()=>({room:(await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-stitcho'],workshop:window.__OHANA_E2E.stitchoChapterState()}));
+  const act2=await advanceExpeditionControls(page,s,'stitcho',step);if(act2){s=act2;continue;}
   const rail=data.workshop.railDone,done=s.world1.done;
   let target;
   if(done===1&&!rail)target=s.player.x+s.player.w/2<2930?2940:3380;

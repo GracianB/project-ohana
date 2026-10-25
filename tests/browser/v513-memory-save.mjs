@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs/promises';
 import {chromium} from 'playwright';import {startServer} from './server.mjs';
 const server=await startServer(0);let browser;
 try{
- const earned=JSON.parse(await fs.readFile('test-results/v513/all-memory-storage.json','utf8'));
+ const earned=JSON.parse(await fs.readFile('test-results/v600/all-memory-storage.json','utf8'));
  for(const origin of earned.origins)origin.origin=`http://127.0.0.1:${server.address().port}`;
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
  const context=await browser.newContext({storageState:earned,viewport:{width:1440,height:900}}),page=await context.newPage(),errors=[];
@@ -30,6 +30,6 @@ try{
   assert.equal((await page.evaluate(()=>window.__OHANA_E2E.state())).evo,4);
  }
  await page.reload();await page.keyboard.press('Escape');assert.deepEqual(await read(),before);
- assert.deepEqual(errors,[]);await fs.writeFile('test-results/v513/memory-save.json',JSON.stringify({total:1000,relics:10,albumPanels:10,reloadPreserved:true,errors},null,2));
+ assert.deepEqual(errors,[]);await fs.writeFile('test-results/v600/memory-save.json',JSON.stringify({total:1000,relics:10,albumPanels:10,reloadPreserved:true,errors},null,2));
  console.log('PASS: 1000 actually collected memories, ten relics, ten album panels and reload preserve the earned backup');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

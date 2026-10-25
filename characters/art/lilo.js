@@ -318,7 +318,7 @@ function solve(pose, d, f) {
       break;
     }
     case "hurt":
-      r.lean = -0.26; r.headRot = -0.22; r.mood = "hurt"; r.mouth = "o"; r.paci = false;
+      r.lean = -0.26*(pose.hurt||.5); r.headRot = -0.22*(pose.hurt||.5); r.mood = "hurt"; r.mouth = "o"; r.paci = false;
       r.handF = [xF + al * 0.85, sy - 8]; r.handB = [xB - al * 0.85, sy - 6]; r.armOver = true;
       r.footF = [8, -5]; r.footB = [-4, 0]; r.hairUp = 0.6;
       break;
@@ -895,8 +895,8 @@ function draw(ctx, pose, R) {
   // Land on alternating feet, and protect the face with real elbow movement.
   if(!pose.reduceMotion&&!dead){
    if(st==='run'){const beat=Math.sin(pose.phase);r.footF[1]-=Math.max(0,beat)*1.8;r.footB[1]-=Math.max(0,-beat)*1.8;r.headRot-=beat*.025;}
-   if(st==='fall'){r.footF[0]+=2;r.footB[0]-=2;r.handF[0]+=2;r.handB[0]-=2;}
-   if(st==='hurt'){r.handF[0]=7;r.handF[1]=-d.ll-d.th-4;r.handB[0]=-8;r.handB[1]=-d.ll-d.th*.6;r.headRot=-.13;r.footF[0]+=3;}
+   if(st==='fall'){r.footF[0]+=2+Math.min(3,Math.abs(pose.vy||0)*.2);r.footB[0]-=2;r.handF[0]+=4;r.handB[0]-=4;}
+   if(st==='hurt'){r.handF[0]=7;r.handF[1]=-d.ll-d.th-4;r.handB[0]=-8;r.handB[1]=-d.ll-d.th*.6;r.headRot=-.23*(pose.hurt||.5);r.footF[0]+=5*(pose.hurt||.5);r.footB[0]-=2*(pose.hurt||.5);}
   }
   // Cast-driven follow-through: independent of wall clock and continuous at rest.
   if (!dead && (st === 'cast' || st === 'attack')) {

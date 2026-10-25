@@ -31,15 +31,36 @@ export function drawMemoryAura(c,g,cam,t){
  }c.restore();
 }
 export function drawMemoryCelebration(c,g,W,H,draw){
- const s=g.relicScene,id=s.hero,copy=MEMORY_REWARDS[id],hero=ROSTER.find(r=>r.id===id),seconds=s.age/60,k=Math.min(1,s.age/90),reduced=g.reduceMotion;
+ const s=g.relicScene,id=s.hero,copy=MEMORY_REWARDS[id],hero=ROSTER.find(r=>r.id===id),reduced=g.reduceMotion,seconds=reduced?7:s.age/60,k=reduced?1:Math.min(1,s.age/90);
  const skies={stitcho:['#101a35','#31617c'],dragon:['#432f4e','#cf8e70'],cat:['#302c55','#9a88ba'],yomi:['#203f58','#92bbb8']},sky=skies[id]||['#325365','#d4bc93'];
  c.save();const bg=c.createLinearGradient(0,0,0,H);bg.addColorStop(0,sky[0]);bg.addColorStop(1,sky[1]);c.fillStyle=bg;c.fillRect(0,0,W,H);
  drawChapterVista(c,{roomDef:{hero:id,composition:true},reduceMotion:reduced},{x:0,y:0},s.age,W,H);
  c.fillStyle='#183346';c.globalAlpha=.48;c.beginPath();c.ellipse(W*.5,H*.8,W*.38,H*.09,0,0,Math.PI*2);c.fill();c.globalAlpha=1;
- const f=hero.forms[4],pose=seconds<1.5?'idle':seconds<5?'cast':'victory';
- const actor={...f,id,evo:4,x:-f.w/2,y:-f.h,w:f.w,h:f.h,grounded:true,facing:1,vx:pose==='run'?3:0,vy:0,invuln:0,melee:0,_poseOverride:pose,_cast:pose==='cast'?{slot:3,t:Math.max(0,s.age-12)}:null};
+ const f=hero.forms[4];let pose=seconds<1.5?'idle':seconds<5?'cast':'victory',actorX=W*.5,actorY=H*.8;
+ const arc=Math.sin(Math.PI*Math.max(0,Math.min(1,(seconds-1.5)/4)));
+ if(id==='stitcho'){pose=seconds<2?'run':seconds<4?'jump':seconds<6?'cast':'victory';actorX+=Math.sin(seconds*.8)*W*.11;actorY-=Math.max(0,arc)*H*.15;}
+ if(id==='chispin'){pose=seconds<2?'idle':seconds<5?'jump':'victory';actorY-=Math.abs(Math.sin(seconds*2.6))*H*.045;}
+ if(id==='cat'){pose=seconds<2?'idle':seconds<6?'glide':'victory';actorY-=arc*H*.12;}
+ if(id==='cuerno'){pose=seconds<4?'run':'victory';actorX+=(Math.min(1,seconds/4)-.5)*W*.3;}
+ if(id==='dragon'){pose=seconds<1.5?'idle':seconds<6?'glide':'victory';actorX+=Math.sin(seconds*.75)*W*.08;actorY-=arc*H*.21;}
+ if(id==='dino'){pose=seconds<2?'idle':seconds<3?'jump':seconds<3.7?'fall':seconds<6?'cast':'victory';actorY-=seconds>2&&seconds<3.7?Math.sin((seconds-2)/1.7*Math.PI)*H*.16:0;}
+ if(id==='frita'){pose=seconds<1.5?'idle':seconds<5?'jump':'victory';actorY-=arc*H*.18;}
+ if(id==='pizza'){pose=seconds<2?'run':seconds<6?'cast':'victory';actorX+=Math.sin(seconds*.65)*W*.05;}
+ if(id==='yomi'){pose=seconds<1.5?'idle':seconds<6?'cast':'victory';actorY-=arc*H*.05;}
+ // A concrete prop performs with the hero, rather than a completion popup.
+ c.save();c.strokeStyle='#fff0c5';c.fillStyle=hero.color;c.lineWidth=3;
+ const px=W*.72,py=H*.5;
+ if(id==='stitcho'){c.beginPath();c.ellipse(px,py,65,20,-.1,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#c1ece8';c.beginPath();c.ellipse(px,py-19,35,25,0,Math.PI,Math.PI*2);c.fill();c.stroke();for(let k=-1;k<=1;k++){c.fillStyle='#ffe3a0';c.beginPath();c.arc(px+k*24,py+2,4,0,Math.PI*2);c.fill();}}
+ else if(id==='dino')for(let k=0;k<7;k++){c.beginPath();c.ellipse(W*.5,H*.8,70+k*17,12+k*5,0,0,Math.PI*2);c.globalAlpha=Math.max(0,.6-(seconds%1.4)*.4);c.stroke();}
+ else if(id==='cuerno')for(let k=0;k<6;k++){c.strokeStyle=['#f4b9d5','#efd29e','#d5e8b0','#a6dfd6','#b8c5ea','#d7b3e8'][k];c.beginPath();c.arc(W*.5,H*.78,H*.3+k*7,Math.PI,Math.PI*2);c.stroke();}
+ else if(id==='cat'){c.fillStyle='#f5e9ca';c.beginPath();c.arc(px,py,36,0,Math.PI*2);c.fill();c.fillStyle=sky[0];c.beginPath();c.arc(px+14,py-12,31,0,Math.PI*2);c.fill();}
+ else if(id==='pizza'){c.fillStyle='#eab57c';c.beginPath();c.ellipse(px,py,58,23,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#d9675c';for(let i=0;i<7;i++){const a=i*Math.PI*2/7;c.beginPath();c.ellipse(px+Math.cos(a)*35,py+Math.sin(a)*12,7,4,0,0,Math.PI*2);c.fill();}}
+ else if(id==='frita')for(let i=0;i<7;i++){c.fillStyle=['#efd59a','#dca89c','#b9ddbd'][i%3];c.beginPath();c.ellipse(W*.5+(i-3)*W*.075,H*.52+Math.sin(seconds*1.5+i)*H*.06,10,16,i*.3,0,Math.PI*2);c.fill();c.stroke();}
+ else if(id==='dragon'){for(let k=0;k<4;k++){c.strokeStyle=['#ffc994','#f3a181','#ffe6b6'][k%3];c.beginPath();c.moveTo(px-25+k*16,H*.77);c.bezierCurveTo(px-80+k*24,H*.58,px+85-k*26,H*.47,px-15+k*15,H*.3);c.stroke();}}
+ c.restore();
+ const actor={...f,id,evo:4,x:-f.w/2,y:-f.h,w:f.w,h:f.h,grounded:!['jump','fall','glide'].includes(pose),facing:1,vx:pose==='run'?f.speed:0,vy:pose==='jump'?-6:pose==='fall'?7:0,invuln:0,melee:0,_poseOverride:pose,_cast:pose==='cast'?{slot:3,t:Math.max(0,s.age-(s.age%110)*.2)}:null};
  if(id==='kilo')actor._kiloPerformance={kind:'dance',time:seconds};
- c.save();c.translate(W*.5,H*.8);const sc=Math.min(W/490,H/360);c.scale(sc,sc);draw(c,actor,{x:0,y:0},reduced?60:s.age,{reduceMotion:reduced});c.restore();
+ c.save();c.translate(actorX,actorY);const sc=Math.min(W/490,H/360);c.scale(sc,sc);draw(c,actor,{x:0,y:0},reduced?60:s.age,{reduceMotion:reduced});c.restore();
  // Every collected memory participates in the event, spiralling into the
  // family's emblem and then into the hero's permanent signature trail.
  c.fillStyle=hero.color;c.strokeStyle='#fff1c9';c.lineWidth=1.5;
@@ -54,7 +75,7 @@ export function drawMemoryCelebration(c,g,W,H,draw){
  }
  c.textAlign='center';c.fillStyle='#fff1c9';c.font=`bold ${Math.max(20,Math.min(38,W*.045))}px sans-serif`;c.fillText(copy[0],W/2,H*.12,W*.9);
  c.font=`${Math.max(12,Math.min(20,W*.028))}px sans-serif`;c.fillText(copy[1],W/2,H*.19,W*.9);
- c.fillText('100/100 · '+copy[2]+' desbloqueada',W/2,H*.9,W*.9);
- c.font='12px sans-serif';c.fillText('Tu firma te acompaña en la sala · Repite esta escena desde el álbum',W/2,H*.95,W*.92);
+ c.fillText('100/100 · Firma desbloqueada: '+copy[2],W/2,H*.9,W*.9);
+ c.font='12px sans-serif';c.fillText('Toca o pulsa Esc para volver · Repite la celebración desde el álbum',W/2,H*.95,W*.92);c.fillStyle='#ffe7b3';c.fillRect(W*.1,H*.98,W*.8*Math.min(1,s.age/(s.duration||540)),3);
  c.restore();
 }

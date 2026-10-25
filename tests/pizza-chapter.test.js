@@ -1,3 +1,4 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {pizzaOvens,notePizzaBake,pizzaBaked,PIZZA_ROUTE_TICKS} from '../systems/pizza-chapter.js';
@@ -5,7 +6,7 @@ import {nextChapterGrowth,NEXT_CHAPTERS,NEXT_ARENA} from '../systems/chapters-lu
 import {enterWorld1,updateWorld1,awardSeal} from '../systems/world1-play.js';
 import {createPizzaBoss,updatePizzaBoss} from '../systems/pizza-boss.js';
 import {packSave,unpackSave} from '../systems/save.js';
-const game=()=>{const r=WORLD1_ROOMS['w1-pizza'],g={roomId:r.id,roomDef:r,player:{id:'pizza',x:1900,y:1094,w:40,h:40,xp:0,evo:0},world1Seals:[],save(){}};enterWorld1(g);return g;};
+const game=()=>{const r=WORLD1_ROOMS['w1-pizza'],g={roomId:r.id,roomDef:{...r,expedition:null},player:{id:'pizza',x:1900,y:1094,w:40,h:40,xp:0,evo:0},world1Seals:[],save(){}};enterWorld1(g);return g;};
 test('Pizza first bake persists once and deliveries unlock relay ovens and all forms',()=>{
  const g=game();assert.equal(pizzaOvens(g).length,1);notePizzaBake(g);assert.equal(g.player.xp,55);assert.equal(pizzaBaked(g),true);
  const guests=g.world1.stations.filter(s=>s.kind==='guest');for(const [i,s] of guests.entries()){s.done=true;assert.equal(nextChapterGrowth(g),[140,260,420][i]);assert.equal(pizzaOvens(g).length,Math.min(3,i+2));}

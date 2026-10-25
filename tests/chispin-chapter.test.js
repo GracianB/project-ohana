@@ -1,10 +1,11 @@
+// Act I isolated; V2 gate is tested separately with real campaign controls.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {enterWorld1,updateWorld1,awardSeal} from '../systems/world1-play.js';
 import {CHISPIN_CHAPTER_BOSS_ID,CHISPIN_CHAPTER_ARENA,chispinGrowth,chispinChapterAbility,chispinGateState,updateChispinChapter} from '../systems/chispin-chapter.js';
 import {createChispinBoss,updateChispinBoss} from '../systems/chispin-boss.js';
 import {damageEnemy} from '../systems/mutations.js';
-const make=()=>{const g={roomDef:WORLD1_ROOMS['w1-chispin'],world1Seals:[],player:{id:'chispin',xp:0,evo:0,x:0,y:1094,w:30,h:40},save(){}};enterWorld1(g);return g;};
+const make=()=>{const g={roomDef:{...WORLD1_ROOMS['w1-chispin'],expedition:null},world1Seals:[],player:{id:'chispin',xp:0,evo:0,x:0,y:1094,w:30,h:40},save(){}};enterWorld1(g);return g;};
 test('four permanent antenna connections earn all forms but need a real Titan defeat for a new seal',()=>{
  const g=make();for(let i=0;i<4;i++){g.world1.stations[i].done=true;assert.equal(chispinGrowth(g),[55,140,260,420][i]);}
  assert.equal(awardSeal(g),false);g.clearedEncounters={'w1-chispin':[CHISPIN_CHAPTER_BOSS_ID]};updateWorld1(g);assert.equal(g.world1.sealed,true);

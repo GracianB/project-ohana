@@ -153,6 +153,13 @@ jobs:
       - name: Browser E2E
         run: npm run test:browser
 
+      - name: V600 guardians, chapter atlas, star feedback and actual combat pressure
+        run: |
+          CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
+          export CHROMIUM_BIN
+          npm run test:browser:v2-presentation
+          npm run test:browser:pressure
+
       - name: V366 performance · live desktop and mobile Chromium
         run: node tests/browser/v366-performance.mjs
 
@@ -284,7 +291,7 @@ jobs:
       # The accepted gate is now strictly broader: one clean Normal save,
       # real terrain/jump/attack/respawn, all ten earned chapter bosses,
       # all 50 forms, every Quimera phase and the actual final screen.
-      - name: V514 continuous Normal campaign · ten earned seals + Quimera HUD
+      - name: V600 continuous Normal campaign · ten earned seals + Quimera HUD
         run: |
           CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
           export CHROMIUM_BIN

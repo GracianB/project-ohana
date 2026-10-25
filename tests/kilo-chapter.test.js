@@ -1,9 +1,10 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD1_ROOMS,WORLD1_FLOOR} from '../systems/world1-rooms.js';
 import {enterWorld1,updateWorld1,world1NextObjective,world1CanLeave,awardSeal} from '../systems/world1-play.js';
 import {kiloNoteGrowth,KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from '../systems/kilo-chapter.js';
 import {initGroveGuardian,updateGroveGuardian} from '../systems/grove-guardian.js';
-const fixture=()=>{const r=WORLD1_ROOMS['w1-kilo'],g={roomDef:r,roomId:r.id,world1Seals:[],world1Stations:{},world1Visited:{},clearedEncounters:{},enemies:[],player:{id:'kilo',x:0,y:1094,w:28,h:40,health:80,maxHealth:80,xp:0,vx:0,grounded:true},nums:{add(){}},fx:{emit(){}},save(){}};enterWorld1(g);return g;};
+const fixture=()=>{const r=WORLD1_ROOMS['w1-kilo'],g={roomDef:{...r,expedition:null},roomId:r.id,world1Seals:[],world1Stations:{},world1Visited:{},clearedEncounters:{},enemies:[],player:{id:'kilo',x:0,y:1094,w:28,h:40,health:80,maxHealth:80,xp:0,vx:0,grounded:true},nums:{add(){}},fx:{emit(){}},save(){}};enterWorld1(g);return g;};
 function note(g,index){const s=g.world1.stations[index];g.player.x=s.x-g.player.w/2;g.player.y=WORLD1_FLOOR-g.player.h;for(let i=0;i<45;i++)updateWorld1(g);return s;}
 test('four earned notes provide four XP milestones, never replay XP or lower exploration XP',()=>{
  const early=fixture();early.clearedEncounters['w1-kilo']=[KILO_CHAPTER_BOSS_ID];assert.equal(awardSeal(early),false,'guardian alone does not replace notes');

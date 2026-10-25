@@ -27,7 +27,7 @@ test('V302 storm replicas retain visible bolts and never gain damaging state',()
 
 test('V302 ability protection never looks like an enemy hit, while real hurt still does',async()=>{
  const {computePose}=await import('../characters/rig.js');
- const make=()=>({id:'stitcho',evo:4,invuln:60,x:0,y:0,w:30,h:30,vx:0,vy:0,grounded:true});
+ const make=()=>({id:'stitcho',evo:4,invuln:60,hurtFlash:12,x:0,y:0,w:30,h:30,vx:0,vy:0,grounded:true});
  assert.equal(computePose(make(),1,{rng:()=>.5}).state,'hurt');
  assert.notEqual(computePose(make(),1,{rng:()=>.5,ignoreHurt:true}).state,'hurt');
 });

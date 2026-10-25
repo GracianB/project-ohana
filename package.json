@@ -47,7 +47,9 @@
     "test:browser:pressure": "node tests/browser/v513-pressure.mjs",
     "test:browser:performance": "node tests/browser/v513-performance.mjs",
     "test:browser:living-stage": "node tests/browser/v513-living-stage.mjs",
-    "test:browser:memory-save": "node tests/browser/v513-memory-save.mjs"
+    "test:browser:memory-save": "node tests/browser/v513-memory-save.mjs",
+    "test:browser:v2-presentation": "node tests/browser/v600-presentation.mjs",
+    "test:browser:reward-replays": "node tests/browser/v600-reward-replays.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

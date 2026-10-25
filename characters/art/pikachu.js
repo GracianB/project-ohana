@@ -441,8 +441,8 @@ function opts(pose, f, S) {
       o.armA = 2.0; o.armB = -2.7; o.eyes = "closed"; o.mouth = "open"; o.charge = 1.2; o.gillFlare = 0.7; o.headRot = -0.15;
     }
   } else if (st === "hurt") {
-    o.eyes = "closed"; o.mouth = "o"; o.headRot = -0.3; o.headDX = -2; o.rot = -0.15; o.armA = 1.8; o.armB = -2.2;
-    o.gillFlare = 1; o.charge = 1; o.sparks = 0.6; o.tailLen = 1.3; o.tailAmp = 0.5; o.tailAxis = -2.9; o.earA = -0.4;
+    o.eyes = "closed"; o.mouth = "o"; o.headRot = -.3*(pose.hurt||.5); o.headDX = -4*(pose.hurt||.5); o.rot = -.15*(pose.hurt||.5); o.armA = 1.8; o.armB = -2.2;
+    o.gillFlare = 1; o.charge = 1; o.sparks = 0.6; o.tailLen = 1.3; o.tailAmp = 0.5; o.tailAxis = -2.9; o.earA = -.5*(pose.hurt||.5);o.footX=-3*(pose.hurt||.5);o.legBend=4*(pose.hurt||.5);
   } else if (st === "wall") {
     const c = Math.sin(t * 0.18);
     o.armFTo = [S.bx + S.brx + 7, S.by - S.bry * 0.9 + c * 2];

@@ -769,7 +769,7 @@ function drawBiped(ctx, R, pose, f, S, C) {
     bob = -Math.abs(Math.cos(pose.phase)) * 4; lean += 0.12; headRot = 0.05;
     if (S.egg) { lean += sw * 0.16 - 0.1; bob *= 1.6; }
   } else if (st === "jump") {
-    legA = 0.9; legB = 0.4; legBendA = -8; legBendB = -6;
+    legA = 0.9; legB = 0.4; legBendA = -5-Math.max(0,-pose.vy||0)*.35; legBendB = -4-Math.max(0,-pose.vy||0)*.3;
     armA = 1.35; armB = -2.5; headRot = -0.08;
   } else if (st === "fall" || st === "glide") {
     legA = 0.25; legB = -0.35; armA = 1.75; armB = -2.2; bendA = -5; headRot = 0.06;
@@ -791,7 +791,7 @@ function drawBiped(ctx, R, pose, f, S, C) {
     if (pose.castSlot === 0) { armA = 1.3; armB = 1.0; lean += 0.1; headRot = 0.05; legA = 0.35; legB = -0.3; }
     else { armA = 1.45 + Math.sin(t * 0.6) * 0.1; armB = -1.85; kA = 1.25; kB = 1.35; headRot = -0.22; legA = 0.4; legB = -0.4; lift = 0; }
   } else if (st === "hurt") {
-    armA = 1.25; armB = -2.1; lean -= 0.42; headRot = -0.42; headDX = -5; headDY = 1.5; legA = 0.55; legB = -0.35; legBendA = -4;
+    armA = 1.25; armB = -2.1; lean -= 0.42*(pose.hurt||.5); headRot = -0.42*(pose.hurt||.5); headDX = -5*(pose.hurt||.5); headDY = 1.5; legA = 0.55; legB = -0.35; legBendA = -4;
     if (!pose.reduceMotion) { headDX += Math.sin(t * 2.2) * 1.4; armA += Math.sin(t * 1.7) * 0.25; }  // V465: dizzy shudder
   } else if (st === "victory") {
     const hop = Math.abs(Math.sin(t * 0.17));
@@ -829,7 +829,7 @@ function drawBiped(ctx, R, pose, f, S, C) {
   if(!pose.reduceMotion&&st!=='dead'){
    if(st==='run'){const step=Math.sin(pose.phase);legBendA+=Math.max(0,step)*3;legBendB+=Math.max(0,-step)*3;headRot-=Math.sin(pose.phase*2)*.025;}
    if(st==='fall'){legA=.12;legB=-.48;legBendA=-2;legBendB=2;armA=1.5;armB=-1.8;}
-   if(st==='hurt'){armA=-.4;armB=-1.1;bendA=8;bendB=-7;headRot=-.16;}
+   if(st==='hurt'){armA=-.4-.6*(pose.hurt||.5);armB=-1.1+.4*(pose.hurt||.5);bendA=8*(pose.hurt||.5);bendB=-7*(pose.hurt||.5);headRot=-.26*(pose.hurt||.5);}
   }
   ctx.translate(0, lift);
   // squash/stretch leve: estira al saltar/caer, aplasta al aterrizar

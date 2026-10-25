@@ -7,7 +7,7 @@ import {drawDinoCraterBackdrop} from './dino-crater.js';
 const TAU=Math.PI*2;
 const gradients=new WeakMap();
 function sky(c,W,H,kind){let m=gradients.get(c);if(!m)gradients.set(c,m=new Map());const key=kind+W+':'+H;
- if(!m.has(key)){const g=c.createLinearGradient(0,0,0,H);for(const [k,col] of ({dock:[[0,'#79c5e5'],[.5,'#d5eff0'],[1,'#efcfaa']],cat:[[0,'#a7b1d5'],[.5,'#e5cedd'],[1,'#eee4d0']],cuerno:[[0,'#b4d7c4'],[.5,'#e3e7bf'],[1,'#f3e8cb']],dragon:[[0,'#caa4aa'],[.5,'#edc3a5'],[1,'#f8e3bc']]}[kind]||[[0,'#68b4e2'],[.53,'#d6f3fa'],[1,'#f9e8c4']]))g.addColorStop(k,col);if(m.size>8)m.delete(m.keys().next().value);m.set(key,g);}c.fillStyle=m.get(key);c.fillRect(0,0,W,H);}
+ if(!m.has(key)){const g=c.createLinearGradient(0,0,0,H);for(const [k,col] of ({dock:[[0,'#101b35'],[.5,'#25445f'],[1,'#537b88']],cat:[[0,'#a7b1d5'],[.5,'#e5cedd'],[1,'#eee4d0']],cuerno:[[0,'#b4d7c4'],[.5,'#e3e7bf'],[1,'#f3e8cb']],dragon:[[0,'#caa4aa'],[.5,'#edc3a5'],[1,'#f8e3bc']]}[kind]||[[0,'#68b4e2'],[.53,'#d6f3fa'],[1,'#f9e8c4']]))g.addColorStop(k,col);if(m.size>8)m.delete(m.keys().next().value);m.set(key,g);}c.fillStyle=m.get(key);c.fillRect(0,0,W,H);}
 function oval(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
 function line(c,col,w,fn){c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();}
 function cloud(c,x,y,s,col){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle=col;c.beginPath();c.moveTo(-90,15);c.bezierCurveTo(-115,-13,-66,-35,-45,-15);c.bezierCurveTo(-42,-66,35,-66,41,-22);c.bezierCurveTo(78,-45,111,-3,86,15);c.bezierCurveTo(42,34,-43,34,-90,15);c.fill();c.restore();}
@@ -37,18 +37,18 @@ export function drawCraftedScene(c,g,cam,t,W,H){
  c.save();c.globalAlpha=1;c.globalCompositeOperation='source-over';c.filter='none';sky(c,W,H,dock?'dock':'storm');
  // Broad, softly layered sky instead of the old polygonal mountains.
  oval(c,W*.78,H*.22,64,64,'#fff6d549');oval(c,W*.78,H*.22,43,43,'#fffce8');
- for(let i=-1;i<7;i++){const x=i*340-(cam.x*.08+time*.05)%340;cloud(c,x,95+(i%3)*75,1.2+(i%2)*.55,'#ffffff8c');}
+ for(let i=-1;i<7;i++){const x=i*340-(cam.x*.08+time*.05)%340;cloud(c,x,95+(i%3)*75,1.2+(i%2)*.55,dock?'#7496ac55':'#ffffff8c');}
  const horizon=H*.66;
  if(dock){
   for(let layer=0;layer<3;layer++){const span=720,shift=cam.x*(.07+layer*.07),base=horizon+layer*40;c.globalAlpha=.55+layer*.12;
-   for(let i=Math.floor(shift/span)-1;i<Math.ceil((shift+W)/span)+1;i++)island(c,i*span-shift,base,390,150-layer*28,['#96bfcb','#79a6b5','#648f9c'][layer]);}
-  c.globalAlpha=1;c.fillStyle='#79b9c4';c.fillRect(0,horizon+95,W,H);
-  for(let i=0;i<26;i++){const yy=horizon+102+i*12,xx=((i*153-cam.x*.2+time*.16)%(W+240)+W+240)%(W+240)-120;line(c,i%3?'#bddedc':'#f4dfba',1+(i%2),()=>{c.moveTo(xx,yy);c.quadraticCurveTo(xx+30,yy+3,xx+70+(i%4)*13,yy);});}
+   for(let i=Math.floor(shift/span)-1;i<Math.ceil((shift+W)/span)+1;i++)island(c,i*span-shift,base,390,150-layer*28,['#29435d','#36566e','#426d7d'][layer]);}
+  c.globalAlpha=1;c.fillStyle='#244a60';c.fillRect(0,horizon+95,W,H);
+  for(let i=0;i<26;i++){const yy=horizon+102+i*12,xx=((i*153-cam.x*.2+time*.16)%(W+240)+W+240)%(W+240)-120;line(c,i%3?'#679ca8':'#d7c39d',1+(i%2),()=>{c.moveTo(xx,yy);c.quadraticCurveTo(xx+30,yy+3,xx+70+(i%4)*13,yy);});}
   for(let i=-1;i<4;i++)boat(c,i*520+250-cam.x*.22,horizon+100+(i%2)*44,.6+(i%2)*.18,time+i*40);
   for(let i=Math.floor(cam.x/1250)-1;i<Math.ceil((cam.x+W)/1250)+1;i++){const x=i*1250+640-cam.x;
    c.globalAlpha=.8;crane(c,x,ground-15,time+i*20);c.globalAlpha=1;
    // Organic warehouse roof, portholes and suspended repair gantries.
-   c.fillStyle='#d7d6bd';c.beginPath();c.moveTo(x+165,ground-12);c.lineTo(x+165,ground-130);c.bezierCurveTo(x+190,ground-203,x+337,ground-203,x+370,ground-130);c.lineTo(x+370,ground-12);c.fill();
+   c.fillStyle='#859a99';c.beginPath();c.moveTo(x+165,ground-12);c.lineTo(x+165,ground-130);c.bezierCurveTo(x+190,ground-203,x+337,ground-203,x+370,ground-130);c.lineTo(x+370,ground-12);c.fill();
    line(c,'#537d87',9,()=>{c.moveTo(x+160,ground-132);c.bezierCurveTo(x+190,ground-210,x+340,ground-210,x+375,ground-132);});
    for(let k=0;k<4;k++){oval(c,x+199+k*42,ground-112,13,15,'#517e94');oval(c,x+195+k*42,ground-116,4,7,'#c5f1ef');}
    c.fillStyle='#678e96';c.fillRect(x+238,ground-73,62,61);line(c,'#c5d8c3',2,()=>{for(let k=0;k<5;k++){c.moveTo(x+240,ground-63+k*10);c.lineTo(x+298,ground-63+k*10);}});

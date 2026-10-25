@@ -721,8 +721,8 @@ function draw(ctx, pose, R) {
       }
     }
   } else if (st === "hurt") {
-    lean = -0.25; headRot = -0.38; hdx = -3;
-    armF = 2.2; armB = 2.6; legF = 0.45; legB = -0.1;
+    lean = -.18*(pose.hurt||.5); headRot = -.38*(pose.hurt||.5); hdx = -4*(pose.hurt||.5);
+    armF = 1.3+.9*(pose.hurt||.5); armB = 1.5+1.1*(pose.hurt||.5); legF = .45*(pose.hurt||.5); legB = -.2*(pose.hurt||.5);
     jaw = 0.45; hurtEyes = true; tailA = -0.5;
   } else if (st === "wall") {
     lean = 0.18; headRot = -0.22; hdx = 2;

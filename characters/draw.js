@@ -1130,7 +1130,11 @@ q(pose.michiSeed,1),
 
 function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
 const U = 280;
-const ps = 1.5;
+// Keep large cinematics and selection portraits crisp. Quantized buckets
+// avoid reallocating every breathing frame; the shared buffers stay bounded.
+const matrix=ctx.getTransform?.();
+const demand=matrix?Math.max(Math.hypot(matrix.a,matrix.b),Math.hypot(matrix.c,matrix.d)):1;
+const ps=demand>3?4:demand>2?3:demand>1.5?2:1.5;
 const W = Math.round(U * ps);
 const faBucket = Math.round((flashA || 0) * 20);
 const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket + "#" + (art.cacheKey?.(pose)||"");
@@ -1186,7 +1190,7 @@ const cast = p._cast;
 if (cast && t >= cast.t && t - cast.t < (cast.slot === 2 ? 34 : cast.slot === 1 ? 26 : 16)) {
 return ["j", "k", "l"][cast.slot] || "j";
 }
-if ((p.invuln || 0) > 14) return "hurt";
+if ((p.hurtFlash || 0) > 0) return "hurt";
 if (atk > 0.12 || (p.melee || 0) > 0) return "hit";
 if (air && (p.vy || 0) < -0.6) return "rise";
 if (air) return "fall";
@@ -1321,8 +1325,9 @@ if(p.id==='cat'&&!p.dead&&pose.state!=='hurt'&&!Number.isFinite(pose.michiDuetAg
  if(powerAge>=0&&powerAge<(p._powerPerformance?.index===5?120:32))pose.michiPowerIndex=p._powerPerformance.index;
 }
 const atk = pose.atk;
-const hurt = !duetProtected&&((p.invuln || 0) > 0 || (p.hurtFlash || 0) > 0);
-const hurtFresh = !duetProtected&&(p.invuln || 0) > 18;
+const injuryAge=Number.isFinite(p._hurtAt)?t-p._hurtAt:(p.hurtFlash>0?0:999);
+const hurt = !duetProtected&&injuryAge>=0&&injuryAge<38;
+const hurtFresh = hurt&&injuryAge<9;
 
 // Cuerno V74 is already drawn in five different anatomical sizes. Do NOT
 // multiply their growth again by generic evolution scaling or old sprite size.

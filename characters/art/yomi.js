@@ -468,7 +468,7 @@ function drawYomiRitual(ctx,p,f,F,glow,accent,faceY,t){
  ctx.restore();
 }
 
-function handPose(side,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run){
+function handPose(side,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,recoil=1){
  // Returns [x,y,rot,open] for a floating hand (side 1 = facing side).
  let x=side*F.hx,y=F.hyHand,rot=side*.3,open=0;
  if(!reduced)y+=Math.sin(T*.09+side*1.3)*1.6;
@@ -488,7 +488,7 @@ function handPose(side,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritua
   if(slot===3){x+=side*(8+6*release);y+=-8*release;open=1;}
  }
  if(st==="victory"&&side===1){y-=16;x+=2;open=1;rot=reduced?.2:Math.sin(T*.25)*.5;}
- if(st==="hurt"){x+=side*6;y-=6;open=1;}
+ if(st==="hurt"){x+=side*(3+8*recoil);y-=3+9*recoil;open=1;}
  if(st==="dead"){x=side*(F.hw*.5+6);y=-4;rot=side*1.2;}
  if(ritual&&ritual.scene===3&&side===1){y-=14;open=1;rot=Math.sin(ritual.phase*TAU*3)*.6;}
  if(ritual&&ritual.scene===2&&side===1){x+=4;y-=4;}
@@ -548,7 +548,7 @@ function draw(ctx,pose,R){
   if(f===3)drawCape(ctx,F,T,glow,swing,run,reduced);
   if(f===3)drawSatellites(ctx,F,T,false,reduced,glow,accent,cast,acting);
   if(f===4)drawRingHalf(ctx,F,false,T,glow,reduced);
-  const back=handPose(-1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run);
+  const back=handPose(-1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   ctx.save();ctx.globalAlpha=.92;drawHand(ctx,back[0],back[1],F.hr*.94,back[2],[col[1]],glow,back[3]);ctx.restore();
   drawThruster(ctx,F,f,glow,T,st,reduced,jumpS,run);
   // ── BODY ───────────────────────────────────────────────────
@@ -561,7 +561,7 @@ function draw(ctx,pose,R){
   // ── FRONT LAYER ────────────────────────────────────────────
   if(f===4)drawRingHalf(ctx,F,true,T,glow,reduced);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
-  const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run);
+  const front=handPose(1,F,f,st,acting,atk,cast,T,runPh,reduced,life,welcome,ritual,jumpS,fallS,run,p.hurt||.5);
   drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,T);
   drawHand(ctx,front[0],front[1],F.hr,front[2],col,glow,front[3]);
   if(st==="attack"){
@@ -574,7 +574,7 @@ function draw(ctx,pose,R){
   }
   if(st==="hurt"){
    // Glitch: offset colour slices for a frame, readable without flashing.
-   const off=reduced?2:2+((Math.floor(t/3)%2)*2);
+   const off=reduced?1:1+4*(p.hurt||.5);
    ctx.save();ctx.globalAlpha=.55;ctx.fillStyle=accent;ctx.fillRect(-F.hw/2-off,F.hy-4,F.hw*.7,3);
    ctx.fillStyle=glow;ctx.fillRect(-F.hw/2+off+6,F.hy+6,F.hw*.6,2.4);ctx.restore();
   }

@@ -2226,6 +2226,9 @@ export const Magic = {
       const sx = it.x - cam.x;
       if (sx < -60 || sx > vw + 60) continue;
       drawItem(ctx, it, cam, t);
+      if(p&&Math.hypot(p.x+p.w/2-it.x,p.y+p.h/2-it.y)<175){
+       const def=DEFS[it.kind];ctx.save();ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillStyle='#112b42e8';const label=def.name,w=Math.max(100,ctx.measureText(label).width+16);ctx.fillRect(sx-w/2,it.y-cam.y-57,w,24);ctx.fillStyle=def.color;ctx.fillText(label,sx,it.y-cam.y-41);ctx.restore();
+      }
     }
     drawEffects(ctx, game, t);
   },

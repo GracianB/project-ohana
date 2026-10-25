@@ -203,6 +203,12 @@ export function sfx(type) {
 }
 
 export const SFX_NAMES = Object.keys(BANK);
+// Each completed collection has its own short original musical signature.
+export function relicMemoryPhrase(hero,beat=0){
+ if(muted)return;const roots={kilo:60,stitcho:62,chispin:71,cat:69,cuerno:67,dragon:52,dino:48,frita:65,pizza:57,yomi:74};
+ const root=roots[hero]||60,steps=[[0,4,7],[5,9,12],[7,11,14],[0,7,16]][Math.floor(beat/2)%4],wave=['stitcho','dragon'].includes(hero)?'triangle':hero==='yomi'||hero==='cat'?'sine':'triangle';
+ try{arp(steps.map(n=>440*Math.pow(2,(root+n-69)/12)),hero==='chispin'?.035:.07,.45,.035,wave);}catch{}
+}
 export function relicUkulele(beat=0){
  if(muted)return;
  const chords=[[261.63,329.63,392],[220,261.63,329.63],[174.61,261.63,349.23],[196,293.66,392]];

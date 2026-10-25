@@ -6,7 +6,7 @@ const server=await startServer(0);let browser;
 try{
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await fs.mkdir('test-results/v513',{recursive:true});
+ await fs.mkdir('test-results/v600',{recursive:true});
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);await page.keyboard.press('Escape');
  for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
   await page.setViewportSize(viewport);await page.waitForTimeout(150);
@@ -25,7 +25,7 @@ try{
   await canvas.focus();await page.keyboard.press('ArrowRight');
   assert.equal(await page.locator('#family-camp').getAttribute('data-hero'),'stitcho');
   await page.locator('[data-camp-form="4"]').click();
-  await page.screenshot({path:`test-results/v513/selection-${viewport.width}.png`,fullPage:true});
+  await page.screenshot({path:`test-results/v600/selection-${viewport.width}.png`,fullPage:true});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  }
  const png=await page.evaluate(async()=>{
@@ -39,6 +39,6 @@ try{
    drawCharacter(ctx,p,{x:0,y:0},40);
   }));return c.toDataURL().split(',')[1];
  });
- await fs.writeFile('test-results/v513/anatomical-states.png',Buffer.from(png,'base64'));
+ await fs.writeFile('test-results/v600/anatomical-states.png',Buffer.from(png,'base64'));
  assert.deepEqual(errors,[]);console.log('PASS: actual ten-actor pointer choices, keyboard navigation, form previews and no overflow on desktop/mobile; forty anatomical state renders');
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

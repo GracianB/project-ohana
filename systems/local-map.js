@@ -1,3 +1,4 @@
+import {world1NextObjective} from './world1-play.js';
 // Camera-relative cartography: the full 7,200-unit room is too small to read
 // on a 260px thumbnail. The detail lens tracks real collidable geometry.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,Number(v)||0));
@@ -70,6 +71,10 @@ export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
   if(!e?.d||!overlap(e.x,e.x)||!seen(e.x))continue;
   ctx.strokeStyle='#fff1a9';ctx.lineWidth=2;ctx.beginPath();ctx.arc(px(e.x),py(e.y),4,0,Math.PI*2);ctx.stroke();
  }
+ const goal=world1NextObjective(g);
+ if(goal&&overlap(goal.x,goal.x)){ctx.fillStyle='#ffd28a';ctx.beginPath();ctx.arc(px(goal.x),py(goal.y),5,0,Math.PI*2);ctx.fill();}
+ const album=g.world1Collect?.rooms?.[r.hero];
+ if(album?.found.length>=25){const found=new Set(album.found);ctx.fillStyle='#c5e8f3';for(const it of g.world1CollectItems||[])if(!found.has(it.id)&&overlap(it.x,it.x)&&seen(it.x))ctx.fillRect(px(it.x)-1.5,py(it.y)-2,3,4);}
  // What the camera is actually showing, not an arbitrary rectangle on the full island.
  const camX=clamp(px(g.cam?.x||0),left,right),camEnd=clamp(px((g.cam?.x||0)+viewW),left,right);
  ctx.strokeStyle='#e1f4ef88';ctx.lineWidth=1;ctx.strokeRect(camX,top+1,Math.max(0,camEnd-camX),plotH-2);
@@ -81,6 +86,7 @@ export function drawLocalMap(ctx,g,viewW=1280,viewH=720){
  ctx.font=small?'9px sans-serif':'10px sans-serif';
  ctx.fillText(Math.round(v.progress*100)+'% RUTA',x+12,y+h-11);
  ctx.textAlign='right';
- ctx.fillText(v.remaining==null?'FIN DE RUTA':'CONTROL '+v.remaining+' u',x+w-12,y+h-11);
+ const target=world1NextObjective(g);
+ ctx.fillText(target?'META '+(target.x>v.cx?'→':'←')+' '+Math.round(Math.abs(target.x-v.cx)):'FIN DE RUTA',x+w-12,y+h-11);
  ctx.restore();
 }

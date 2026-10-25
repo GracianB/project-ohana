@@ -273,13 +273,13 @@ if (st === "run") {
 } else if (st === "jump") {
   legF = 0.9; lenF = 0.72; legB = 0.25; lenB = 0.85;
   armF = 1.8; armB = 1.5;
-  wRot = Math.sin(t * 0.7) * 0.75 - 0.15; wOpen = 1;
+  wRot = Math.sin(t * (f>=2?.13:.22)) * 0.75 - 0.15; wOpen = 1;
   lean = -0.04; headRot = -0.12; jaw = 0.25;
   tailWave = 1.2 + pose.bounce;
 } else if (st === "fall") {
   legF = 0.35; legB = -0.3;
   armF = 2.2; armB = -2.4;
-  wRot = -0.25 + Math.sin(t * 0.35) * 0.3; wOpen = 1;
+  wRot = -0.25 + Math.sin(t * .10) * 0.3; wOpen = 1;
   headRot = 0.1; jaw = 0.3;
   tailWave = -0.6 + pose.bounce;
 } else if (st === "attack") {
@@ -324,9 +324,9 @@ if (st === "run") {
     tailWave = 1.5 * e + Math.sin(t * 0.3) * 0.3;
   }
 } else if (st === "hurt") {
-  lean = -0.28; headRot = -0.35; hdx = -2;
+  lean = -.28*(pose.hurt||.5); headRot = -.35*(pose.hurt||.5); hdx = -3*(pose.hurt||.5);
   armF = 2.3; armB = -2.2; legF = 0.5; legB = -0.1;
-  wRot = -1.0; wOpen = 0.25; jaw = 0.35; hurtEyes = true;
+  wRot = -.7-.3*(pose.hurt||.5); wOpen = .75-.5*(pose.hurt||.5); jaw = 0.35; hurtEyes = true;
   tailWave = -1.2;
 } else if (st === "wall") {
   lean = 0.12; headRot = -0.2;

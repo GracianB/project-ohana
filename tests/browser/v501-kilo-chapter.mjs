@@ -1,3 +1,4 @@
+import {advanceExpeditionControls} from './expedition-controls-v2.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Physical solo chapter pilot: no setPlayer, XP/form grants, healing or enemy
 // replacement. Natural retries are recorded; the browser clock is controlled.
@@ -27,6 +28,7 @@ try{
   if(!chime&&s.kiloFlight.mode==='solar')await page.keyboard.press('k');
   const foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast());
   for(const foe of foes)if(foe.guardian){guardianPhases.add(foe.guardian.phase);guardianAttacks=Math.max(guardianAttacks,foe.guardian.attacksExecuted||0);}
+  const act2=await advanceExpeditionControls(page,s,'kilo',step);if(act2){s=act2;continue;}
   const p=s.player,near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-(p.x+p.w/2),e.y+e.h/2-(p.y+p.h/2))<400).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
   if(count>=4&&near?.guardian&&['warn','rest'].includes(near.guardian.phase))await page.screenshot({path:`test-results/v501/kilo-guardian-${near.guardian.phase}.png`});
   const dx=target-(p.x+p.w/2),dir=dx>0?'d':'a';

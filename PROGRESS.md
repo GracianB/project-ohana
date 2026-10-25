@@ -1,3 +1,11 @@
+# V600 · ohana-600 · V2 en validación
+
+Base integrada: PR440 V514, HEAD53e386f, todas sus validaciones aprobadas.
+V2 añade segundo acto con tres retos propios, jefes articulados y reactivos,
+colección con brújula/imán/celebración y firma permanente, mapa de campaña
+y guía de combinaciones; música original para estrella y feedback de objetos.
+No se declara publicada ni validada hasta terminar las pruebas de esta ampliación.
+
 # V514 · ohana-514 · V2 / Primera entrega de identidad jugable (candidata)
 
 Rama de desarrollo, no equivale a publicación en main. Se han mantenido los diez héroes, sus cinco formas, hitboxes, claves de habilidades y guardados; nueve héroes reciben diferencias efectivas en vida, velocidad y salto, y todos reciben información visible de ventaja y riesgo. Kilo y las velocidades canónicas de Cuerno conservan sus contratos aprobados. El ataque H y la cadencia de J/K/L reflejan compromisos propios. Nuevos tests verifican que las cifras llegan al personaje jugable, no solo a las cartas. Los cambios de V2 requieren CI, recorridos y revisión visual antes de integrar. Mundo 2 y multijugador no se amplían aquí.

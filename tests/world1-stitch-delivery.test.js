@@ -1,3 +1,4 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WORLD1_ROOMS } from '../systems/world1-rooms.js';
@@ -9,7 +10,7 @@ function createStitchoRun() {
   const beats = [];
   const game = {
     roomId: room.id,
-    roomDef: room,
+    roomDef: {...room,expedition:null},
     world1Visited: {},
     world1Seals: [],
     player: { x: 0, y: 0, w: 28, h: 40, vx: 0, vy: 0, grounded: true, maxHealth: 100, health: 75, xp: 0 },

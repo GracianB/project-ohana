@@ -114,7 +114,7 @@ if (p._cast && t - p._cast.t < 26) {
   castSlot = p._cast.slot;
 }
 
-const injuryAge=Number.isFinite(p._hurtAt)?Math.max(0,t-p._hurtAt):999;
+const injuryAge=Number.isFinite(p._hurtAt)?Math.max(0,t-p._hurtAt):(p.hurtFlash>0?0:999);
 const hurt = !opts.ignoreHurt && injuryAge<24 ? Math.sin(Math.PI*Math.min(1,(injuryAge+2)/26)) : 0;
 
 let state = "idle";

@@ -1,3 +1,4 @@
+import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
 import {drawMemoryAura} from './systems/memory-rewards-v2.js';
 import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
 import {prepareChapterBossV2} from './systems/chapter-boss-v2.js';
@@ -101,8 +102,8 @@ import {POWER_LEVELS,extraAbility,powerAbility} from "./systems/evolution-attack
 import { ABILITY_DEFS, useAbility, drawProjectile, drawSlash, drawBolt, supremeOf, specialOf, registerCombatAction,hitEnemy as hitArenaEnemy } from "./systems/abilities.js";
 import { showSystemMessage, showRoomMessage, showErrorMessage, showObjectiveMessage, showCombatMessage, showBossMessage, showEvolutionMessage, dismissNotifications, setPersistentObjective, clearPersistentObjective, messageManager } from "./systems/notify.js";
 import { ParticleSystem } from "./engine/particles.js";
-import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
-import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
+import { sfx, relicMemoryPhrase, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
+import { setMusicOverride, playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, world1SealsComplete, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
@@ -407,6 +408,7 @@ if (!canAct()) return;
 if (!interactStitchoTrail(game) && !interactChispinTrail(game) && !interactMichiTrail(game) && !interactGrove(game) && !portals.tryUse(game.player, game) && !interactAdventure(game)) evolve("manual");
 }
 function escape() {
+if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){game.relicScene=null;game.onRelicEnd?.();game.resetInput?.();return;}
 if(game.world1CollectUI?.open){toggleWorld1Album(game,false);return;}
 const constellation=document.getElementById("family-constellation");
 if(constellation?.classList.contains("open")){constellation.querySelector(".constellation-close")?.click();return;}
@@ -454,8 +456,9 @@ return saved;
 }
 game.save=save;
 game.onRelicBegin=()=>{duckMusic(true);document.body.classList.add("relic-cinema");DOM.evoStage?.classList.remove("show");};
-game.onRelicEnd=()=>{duckMusic(paused);document.body.classList.remove("relic-cinema");};
-game.onRelicBeat=relicUkulele;
+game.onRelicEnd=()=>{setMusicOverride(Magic.status().some(p=>p.id==='star')?'star-power':null);duckMusic(paused);document.body.classList.remove("relic-cinema");};
+game.onRelicBeat=beat=>game.relicScene?.kind==='memory-v2'?relicMemoryPhrase(game.relicScene.hero,beat):relicUkulele(beat);
+canvas.addEventListener('pointerdown',event=>{if(game.relicScene?.kind==='memory-v2'&&game.relicScene.age>90){escape();event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
 game.onRoomAlbumChange=()=>Festival.setCounter();
 function returnToMenu() {
 save();
@@ -827,9 +830,9 @@ return;
 }
 DOM.help?.classList.remove("open");
 setPaused(false);
-const personalMap=!!game.stitchoTrail;
-const title=document.getElementById("map-title");if(title)title.textContent=personalMap?"Archipiélago del Caos":"Mapa de Isla Hoku";
-grid.innerHTML = personalMap?renderStitchoAtlasHTML(game):renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
+const chapterMap=!!game.roomDef?.world1,personalMap=!chapterMap&&!!game.stitchoTrail;
+const title=document.getElementById("map-title");if(title)title.textContent=chapterMap?"La ruta de los diez · mapa de aventura":personalMap?"Archipiélago del Caos":"Mapa de Isla Hoku";
+grid.innerHTML = chapterMap?chapterAtlasHTML(game):personalMap?renderStitchoAtlasHTML(game):renderWorldGraphHTML(game.roomId, game.visited, game.player?.evo || 0);
 grid.onclick = event => {
   const node=event.target.closest('.wm-node');
   if(!node||!grid.contains(node))return;
@@ -837,7 +840,7 @@ grid.onclick = event => {
     other.classList.toggle('selected',other===node);
     other.setAttribute('aria-pressed',String(other===node));
   }
-  grid.querySelector('.wm-detail').innerHTML=personalMap?stitchoAtlasDetail(node.dataset.room,game):worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
+  grid.querySelector('.wm-detail').innerHTML=chapterMap?chapterMapDetail(node.dataset.room,game):personalMap?stitchoAtlasDetail(node.dataset.room,game):worldMapDetailHTML(node.dataset.room,game.roomId,game.visited,game.player?.evo||0);
 };
 requestAnimationFrame(()=>{
  const node=grid.querySelector('.wm-node.here');
@@ -873,7 +876,7 @@ function start(def) {
 game.loadRoom = loadRoom;
 game._cuernoIntroT = def?.id === "cuerno" && !reduceMotion ? 0 : null;
 game.lastAbilityId = null;
-game.lastAbilitySlot = null;
+game.lastAbilitySlot = null;game._signatureLink=null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
@@ -930,7 +933,7 @@ game.combatReport={hits:0,damage:0};
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.world1Stations = {};
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
-game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
+game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
 game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
@@ -1353,13 +1356,13 @@ return v === "easy" || v === "hard" ? v : "normal";
 } catch (e) { return "normal"; }
 }
 function scaleFoe(e) {
-return scaleCombatHealth(e);
+return scaleCombatHealth(e,readCombatDifficulty(e.roomId));
 }
 function hurtPlayer(amount, label) {
 const p = game.player;
 if (!p || p.dead || p.invuln > 0) return;
 if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
-const diffMul = readCombatDifficulty().damage;
+const diffMul = readCombatDifficulty(game.roomId).damage;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
 const beforeDamage=p.health;damagePlayer(p, amount);p._hurtAt=t;p.hurtFlash=18;
@@ -1889,6 +1892,7 @@ p.coyote = 0;
 p.jumps = p.maxJumps;
 }
 if (p.invuln > 0) p.invuln--;
+if(p.hurtFlash>0)p.hurtFlash--;
 for (const o of game.orbs) {
 if (!o.taken && Math.hypot(p.x + p.w / 2 - o.x, p.y + p.h / 2 - o.y) < 28) {
   o.taken = true;
@@ -2143,7 +2147,7 @@ if (onlineCoop.advanceGuestCombat(game)) {
 }
 game.bossFx?.update();
 game.viewW=camW();game.viewH=camH();
-game.combatDifficulty=readCombatDifficulty();
+game.combatDifficulty=readCombatDifficulty(game.roomId);
 game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
 updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
@@ -3191,7 +3195,7 @@ ctx.globalAlpha = 0.45;
 drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 ctx.globalAlpha = 1;
 }
-} else if (game.player.invuln % 4 !== 1 && !(game.won && game.player.id === "cuerno" && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION)) {
+} else if (!(game.player.hurtFlash>0&&game.player.invuln%4===1) && !(game.won && game.player.id === "cuerno" && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION)) {
 const pv = typeof portals.playerVisual === "function" ? portals.playerVisual() : null;
 if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   const px = game.player.x + game.player.w / 2 - game.cam.x;
@@ -3319,6 +3323,7 @@ if (game._cuernoIntroT != null && game.player?.id === "cuerno") {
 }
 drawMinimap();
 drawWorld1Overlay(ctx,game,viewW,viewH);
+drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
 if(game.boss?._fusionBoss)drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
@@ -3521,7 +3526,7 @@ chip.classList.toggle("show", show);
 chip.classList.toggle("hidden", !show);
 const rank = show ? comboRank(game.combo) : "";
 if (chip.dataset.rank !== rank) chip.dataset.rank = rank;
-const signature = show && game._signatureLink && (t - Number(game._signatureLink.t || 0) <= 90)
+const signature = show && game._signatureLink?.id===p.id && t>=Number(game._signatureLink.t||0) && (t - Number(game._signatureLink.t || 0) <= 90)
   ? String(game._signatureLink.name || "")
   : "";
 const flow = signature || (show && game._combatFlow && (t - Number(game._combatFlow.t || 0) <= 180)
@@ -3993,6 +3998,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  // locked gate, this deliberately does NOT verify route reachability.
  grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
+expeditionState(){return game.expedition?JSON.parse(JSON.stringify(game.expedition)):null;},
 roomTraversal(){return {terraces:game.roomDef?.terraces||[],nooks:game.roomDef?.nooks||[],composition:game.roomDef?.composition?.name||null};},
 fryerAstralState(){return {launches:game.world1?.fritaLaunches||0,corrections:game.world1?.fritaAirCorrections||0,extensions:game.world1?.yomiWindowExtensions||0,launched:game.world1?.launchedGeyser,stations:(game.world1?.stations||[]).map(s=>({id:s.id,x:s.x,done:s.done,state:game.roomDef?.fritaChapter?fritaVentState(game.world1.tick,s):yomiNodeState(game,s)}))};},
 pizzaChapterState(){return {carry:game.world1?.carry,remaining:(game.world1?.pizzaUntil||0)-(game.world1?.tick||0),baked:pizzaBaked(game),ovens:pizzaOvens(game).map(s=>s.x)};},

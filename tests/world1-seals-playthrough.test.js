@@ -1,3 +1,4 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import {yomiNodeState} from '../systems/frita-yomi-chapters.js';
 import {nextChapterAbility,NEXT_CHAPTERS} from '../systems/chapters-lunar-prism-embers.js';
 // Mundo 1: regression tests run the production seal state machine in all ten rooms.
@@ -13,7 +14,7 @@ function setup(hero) {
   let saves = 0;
   const events = [];
   const game = {
-    roomId: room.id, roomDef: room, reduceMotion: true,
+    roomId: room.id, roomDef: {...room,expedition:null}, reduceMotion: true,
     // This suite isolates station actions; guardian gating has its own tests.
     clearedEncounters: hero==='kilo'?{'w1-kilo':['w1-kilo-tambor-v1']}:{},
     world1Seals: [], world1Visited: {}, score: 0, projectiles: [],

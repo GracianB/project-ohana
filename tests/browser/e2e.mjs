@@ -767,24 +767,25 @@ async function auditPage(page, label) {
     api.setPlayer(boss.x - 42, boss.y + 8);
     boss = api.state().boss;
     const hpBeforeHit = boss.hp;
-    api.setBossHp(600);
+    const hitFixtureHp=Math.floor(boss.max*.8);
+    api.setBossHp(hitFixtureHp);
     api.setPlayer(boss.x - 42, boss.y + 8);
     api.attack();
     const combatAfter = api.step(4);
     snapshots.push({ hpBeforeHit, combatAfter });
 
-    if (!combatAfter.boss || !(combatAfter.boss.hp < 600) || combatAfter.boss.hp <= 0) {
+    if (!combatAfter.boss || !(combatAfter.boss.hp < hitFixtureHp) || combatAfter.boss.hp <= 0) {
       throw new Error('E2E: el ataque real no dañó a la Reina del Nido sin matarla');
     }
 
-    api.setBossHp(1000);
+    api.setBossHp(Math.floor(boss.max*.6));
     const phaseTwo = api.step(1);
     snapshots.push({ phaseTwo });
     if (!phaseTwo.boss || phaseTwo.boss.phase !== 2) {
       throw new Error('E2E: transición fase1→fase2 inválida · ' + JSON.stringify(phaseTwo.boss));
     }
 
-    api.setBossHp(300);
+    api.setBossHp(Math.floor(boss.max*.25));
     const phaseAfter = api.step(12);
     snapshots.push({ phaseAfter });
     if (!phaseAfter.boss || phaseAfter.boss.phase < 3 || phaseAfter.boss.dying) {

@@ -99,7 +99,7 @@ export function world1CollectPlacements(room) {
   return Array.from({ length: ALBUM_SIZE }, (_, id) => {
     const page = Math.floor(id / PAGE_SIZE), k = id % PAGE_SIZE, challenge = k >= 7;
     let x = 300 + page * band + (k + 0.5) / PAGE_SIZE * band;
-    const floor=room.plats.filter(p=>p[3]>40&&x>=p[0]&&x<=p[0]+p[2]).sort((a,b)=>a[1]-b[1])[0];
+    const floor=room.plats.filter(p=>p[3]>40&&x>=p[0]-14&&x<=p[0]+p[2]+14).sort((a,b)=>a[1]-b[1])[0];
     let y = (floor?.[1]??WORLD1_FLOOR) - 34 - (k % 3 === 1 ? 46 : 0);
     if (challenge) {
       const inBand = ledges.filter((p) => p[0] + p[2] > 300 + page * band && p[0] < 300 + (page + 1) * band);
@@ -136,7 +136,7 @@ export function takeWorld1Item(g, id) {
   if (a.found.length === 1) g.nums?.add?.(num(p?.x), num(p?.y) - 20, "PRIMER RECUERDO · ÁLBUM 1/100", th.color, false);
   if (pageDone(a, page)) { ui.toast = { t: 0, max: 150, text: `Página ${page + 1} completa · ${PAGE_TITLES[page]}`, color: th.color }; g.onWorld1Beat?.("album-page", hero, page); if (p) p.health = Math.min(num(p.maxHealth, p.health), num(p.health) + 10); }
   if (a.found.length === ALBUM_SIZE && !a.relic) { a.relic = true; ui.toast = { t: 0, max: 240, text: `¡Álbum completo! Reliquia: ${th.relic}`, color: "#fff1b5", big: true }; g.onWorld1Beat?.("album-relic", hero); startMemoryCelebration(g,hero); }
-  if([25,50].includes(a.found.length))g.onWorld1Beat?.('album-unlock',hero,a.found.length);
+  if([25,50].includes(a.found.length)){ui.toast={t:0,max:180,text:a.found.length===25?'BRÚJULA · Los recuerdos aparecen en tu mapa':'IMÁN · Recoges recuerdos desde más lejos',color:th.color};g.onWorld1Beat?.('album-unlock',hero,a.found.length);}
   persist(g); g.save?.();
   return true;
 }
@@ -174,7 +174,7 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   root.querySelector("h2").textContent = view.title;
   root.querySelector(".album-count").textContent = `${view.count}/100 recuerdos · colección opcional`;
   root.querySelector(".album-page-title").textContent = view.heading + (view.complete ? " ✓" : "");
-  root.querySelector(".album-reward").textContent = view.relic ? "Reliquia: " + view.relic + " · Firma permanente: " + MEMORY_REWARDS[view.hero][2] : "Cada página: +10 vida · 25: brújula en el mapa · 50: imán de recuerdos · 100: celebración propia y firma visual permanente.";
+  root.querySelector(".album-reward").textContent = view.relic ? "Reliquia conseguida: " + view.relic + " · Firma permanente: " + MEMORY_REWARDS[view.hero][2] : "Cada página: +10 vida · 25: brújula en el mapa · 50: imán de recuerdos · 100: celebración propia y firma visual permanente.";
   let replay=root.querySelector('[data-memory-replay]');
   if(!replay){replay=doc.createElement('button');replay.type='button';replay.dataset.memoryReplay='true';replay.textContent='Ver mi celebración';root.querySelector('.album-reward').after(replay);replay.onclick=()=>{toggleWorld1Album(g,false);startMemoryCelebration(g,g.world1CollectHero,true);};}
   replay.hidden=!view.relic;
@@ -215,7 +215,7 @@ export function drawWorld1CollectHud(ctx, g, W, H, options = {}) {
     ctx.font = "bold 16px sans-serif"; ctx.textAlign = "left"; ctx.fillText(`✦ ${n}/100`, x + 10, y + 14);
     ctx.fillStyle = "#e8dcff"; ctx.font = "12px sans-serif"; ctx.fillText(`Álbum de ${th.short} · ${a.relic ? "reliquia ✓" : "pág. " + (page + 1) + " " + PAGE_TITLES[page]}`, x + 10, y + 31);
   }
-  if (ui?.toast) { const k = ui.toast; ctx.globalAlpha = Math.min(1, (k.max - k.t) / 30, k.t / 10); ctx.textAlign = "center"; ctx.fillStyle = k.color; ctx.font = `bold ${k.big ? 30 : 20}px sans-serif`; ctx.fillText(k.text, W / 2, H * 0.2); }
+  if (ui?.toast) { const k = ui.toast; ctx.globalAlpha = Math.min(1, (k.max - k.t) / 30, k.t / 10); ctx.textAlign = "center"; ctx.fillStyle = k.color; ctx.font = `bold ${k.big ? 30 : 20}px sans-serif`; ctx.fillText(k.text, W / 2, H * 0.2,W*.86); }
   ctx.restore();
 }
 

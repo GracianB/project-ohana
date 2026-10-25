@@ -1,3 +1,4 @@
+import {advanceExpeditionControls} from './expedition-controls-v2.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Direct chapter entry is the access fixture. All forms, objectives and boss
 // wins in these pilots use physical input, with no position/HP/XP/win setters.
@@ -21,6 +22,7 @@ try{
   const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState()),foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss),b=boss?.chapterBoss;
   thermal||=data.thermalFrames>0;
   if(b){attacks=Math.max(attacks,b.attacksExecuted||0);if(b.phase==='warn')patterns.add(b.attack);}
+  const act2=await advanceExpeditionControls(page,s,hero,step);if(act2){s=act2;continue;}
   const p=s.player,stage=s.world1.done,station=stations[stage],near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<430).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
   let target=hero==='cuerno'&&!data.mirror?1000:station?station.x:(boss?.x||8750)-210;
   if(!station&&b?.phase==='warn'&&(b.attack===0||b.attack===3))target=p.x<boss.x?Math.max(8290,boss.x-380):Math.min(9240,boss.x+380);
@@ -45,7 +47,7 @@ try{
   if(!resumed&&s.world1.done===2){await page.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('kilo');});s=await step(600);assert.equal(s.hero,hero);assert.equal(s.world1.done,2);resumed=true;await page.locator('#game').focus();}
   if(i%100===0){console.log('PILOT',JSON.stringify({hero,i,x:s.player.x,y:s.player.y,hp:s.hp,xp:s.xp,evo:s.evo,done:s.world1.done,boss:boss?.hp,phase:b?.phase,attacks,thermal}));await page.screenshot({path:`test-results/v507/${hero}-debug.png`});}
  }
- assert.equal(s.world1.sealed,true,hero+' must earn its seal');assert.equal(resumed,true);assert.deepEqual([...forms].sort(),[0,1,2,3,4]);assert.ok(attacks>=4);assert.deepEqual([...patterns].sort(),[0,1,2,3]);
+ assert.equal(s.world1.sealed,true,hero+' must earn its seal');assert.equal(resumed,true);assert.deepEqual([...forms].sort(),[0,1,2,3,4]);assert.ok(attacks>=4);assert.ok(patterns.size>=2,'adaptive boss must execute distinct warnings');assert.ok([...patterns].every(n=>[0,1,2,3].includes(n))); /* V2 counter-patterns; full native cycle is unit-tested. */
  const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState());if(hero==='cat')assert.equal(data.bridges,5);if(hero==='cuerno')assert.equal(data.mirror,true);if(hero==='dragon')assert.equal(thermal,true);
  for(let n=0;n<12&&s.world1Cine;n++){await page.keyboard.press('Enter');s=await step(120);}
  await page.locator('#game').focus();for(let n=0;n<100&&s.roomId==='w1-'+hero;n++){await page.keyboard.down('d');s=await step(20);}await page.keyboard.up('d');

@@ -1,3 +1,4 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
 import {enterWorld1,updateWorld1,awardSeal} from '../systems/world1-play.js';
@@ -7,7 +8,7 @@ import {createCuernoBoss,updateCuernoBoss} from '../systems/cuerno-boss.js';
 import {createDragonBoss,updateDragonBoss} from '../systems/dragon-boss.js';
 import {damageEnemy} from '../systems/mutations.js';
 import {packSave,unpackSave} from '../systems/save.js';
-const make=hero=>{const r=WORLD1_ROOMS['w1-'+hero],g={roomId:r.id,roomDef:r,world1Seals:[],world1Visited:{},player:{id:hero,x:970,y:1094,w:40,h:40,xp:0,evo:0,facing:1,health:100},save(){}};enterWorld1(g);return g;};
+const make=hero=>{const r=WORLD1_ROOMS['w1-'+hero],g={roomId:r.id,roomDef:{...r,expedition:null},world1Seals:[],world1Visited:{},player:{id:hero,x:970,y:1094,w:40,h:40,xp:0,evo:0,facing:1,health:100},save(){}};enterWorld1(g);return g;};
 test('the next three chapters earn their final XP, require their boss, and preserve legacy seals',()=>{
  for(const hero of ['cat','cuerno','dragon']){
   const g=make(hero);if(hero==='cuerno')nextChapterAbility(g,g.player,0);

@@ -1,0 +1,462 @@
+{
+  "version": "ohana-600",
+  "date": "2026-10-25",
+  "status": "candidate_under_final_CI",
+  "integrated_baseline": {
+    "pr": 440,
+    "commit": "53e386f90ac004a0345570fd6bede48dbc577fa3",
+    "original_checks": "all passed; not counted as V600 checks"
+  },
+  "node": {
+    "passed": 1567,
+    "failed": 0
+  },
+  "release": {
+    "runtimeModules": 334,
+    "precacheResources": 384
+  },
+  "campaign": {
+    "difficulty": "normal",
+    "journal": [
+      {
+        "hero": "kilo",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 71.68,
+        "iterations": 258,
+        "sealCount": 1,
+        "discoveries": 3
+      },
+      {
+        "hero": "stitcho",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 72.3,
+        "iterations": 217,
+        "sealCount": 2,
+        "discoveries": 3
+      },
+      {
+        "hero": "chispin",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 47.74,
+        "iterations": 158,
+        "sealCount": 3,
+        "discoveries": 3
+      },
+      {
+        "hero": "cat",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 50.2,
+        "iterations": 217,
+        "sealCount": 4,
+        "discoveries": 3
+      },
+      {
+        "hero": "cuerno",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 86,
+        "iterations": 195,
+        "sealCount": 5,
+        "discoveries": 3
+      },
+      {
+        "hero": "dragon",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 52.44000000000001,
+        "iterations": 252,
+        "sealCount": 6,
+        "discoveries": 3
+      },
+      {
+        "hero": "dino",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 130.56,
+        "iterations": 286,
+        "sealCount": 7,
+        "discoveries": 3
+      },
+      {
+        "hero": "frita",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 55.84,
+        "iterations": 170,
+        "sealCount": 8,
+        "discoveries": 3
+      },
+      {
+        "hero": "pizza",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 110,
+        "iterations": 204,
+        "sealCount": 9,
+        "discoveries": 3
+      },
+      {
+        "hero": "yomi",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 45.68000000000001,
+        "iterations": 247,
+        "sealCount": 10,
+        "discoveries": 3
+      }
+    ],
+    "finalDeaths": 0,
+    "phases": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "films": [
+      "bossIntro",
+      "bossDefeat",
+      "ending"
+    ],
+    "won": true,
+    "combatReport": {
+      "hits": 133,
+      "damage": 1852.5999999999995
+    },
+    "errors": []
+  },
+  "collection": {
+    "report": [
+      {
+        "hero": "kilo",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "stitcho",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "chispin",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "cat",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "cuerno",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "dragon",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "dino",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "frita",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "pizza",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "yomi",
+        "found": 100,
+        "deaths": 0
+      }
+    ],
+    "total": 1000,
+    "errors": []
+  },
+  "save": {
+    "total": 1000,
+    "relics": 10,
+    "albumPanels": 10,
+    "reloadPreserved": true,
+    "errors": []
+  },
+  "replays": {
+    "report": [
+      {
+        "hero": "kilo",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "stitcho",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "chispin",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "cat",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "cuerno",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "dragon",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "dino",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "frita",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "pizza",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      },
+      {
+        "hero": "yomi",
+        "earned": 100,
+        "scene": true,
+        "clearStage": true,
+        "escapeReturns": true
+      }
+    ],
+    "mobileTap": true,
+    "errors": []
+  },
+  "presentation": {
+    "report": [
+      {
+        "hero": "kilo",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "stitcho",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "chispin",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "cat",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "cuerno",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "dragon",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "dino",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "frita",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "pizza",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      },
+      {
+        "hero": "yomi",
+        "guardianRender": true,
+        "act2Render": true,
+        "map": true
+      }
+    ],
+    "starChecked": true,
+    "errors": []
+  },
+  "pressure": [
+    {
+      "mode": "easy",
+      "policy": "idle",
+      "frames": 1200,
+      "hp": 40.94999999999999,
+      "maxHp": 80,
+      "damage": 39.05000000000001,
+      "hits": 9,
+      "faults": 0
+    },
+    {
+      "mode": "normal",
+      "policy": "idle",
+      "frames": 780,
+      "hp": 0,
+      "maxHp": 80,
+      "damage": 80,
+      "hits": 9,
+      "faults": 0
+    },
+    {
+      "mode": "hard",
+      "policy": "idle",
+      "frames": 520,
+      "hp": 0,
+      "maxHp": 80,
+      "damage": 80,
+      "hits": 7,
+      "faults": 0
+    },
+    {
+      "mode": "normal",
+      "policy": "active",
+      "frames": 1200,
+      "hp": 53.78000000000001,
+      "maxHp": 80,
+      "damage": 34.21999999999999,
+      "hits": 4,
+      "faults": 0
+    }
+  ],
+  "optical_sizes": {
+    "checks": 100,
+    "hitboxes_unchanged": true,
+    "passed": true
+  },
+  "terrain": {
+    "physical_banks": 10,
+    "touch_jump": true,
+    "passed": true
+  },
+  "performance": {
+    "status": "rechecking_latest_adaptive_raster",
+    "scenes": 40
+  },
+  "methods": {
+    "campaign": "One clean Normal save, physical keyboard/terrain controls, no position/form/HP/XP/seal/win grants; all 30 discoveries, Quimera, results, actual selector and re-entry persistence. Final boss cycle correction additionally rerun by candidate CI.",
+    "collection": "1000 physically earned memories on an earned campaign backup; camera/form fixtures only in presentation and benchmarks, never counted as earned progress.",
+    "difficulty": "Waiting and active play compared in the same authored encounter; no claim of human difficulty acceptance.",
+    "art": "Canvas screenshots and real articulated state renders; artistic acceptance remains user play feedback."
+  },
+  "publication": {
+    "published": false,
+    "requires": "Candidate Quality and independent checks, then Pages and live asset byte verification"
+  }
+}

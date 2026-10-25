@@ -1,3 +1,4 @@
+// Act I isolated; V2 expansion gate is covered by v2-adventure tests and the real full campaign.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {dinoLanding,trackDinoAir,dinoChapterAbility} from '../systems/dino-chapter.js';
 import {WORLD1_ROOMS} from '../systems/world1-rooms.js';
@@ -6,7 +7,7 @@ import {nextChapterGrowth,NEXT_CHAPTERS,NEXT_ARENA} from '../systems/chapters-lu
 import {createDinoBoss,updateDinoBoss} from '../systems/dino-boss.js';
 import {updateCampaignEnemy} from '../systems/campaign-enemies.js';
 import {packSave,unpackSave} from '../systems/save.js';
-const game=()=>{const r=WORLD1_ROOMS['w1-dino'],g={roomId:r.id,roomDef:r,player:{id:'dino',x:2400,y:1094,w:40,h:40,grounded:true,evo:0,xp:0},score:0,save(){}};enterWorld1(g);return g;};
+const game=()=>{const r=WORLD1_ROOMS['w1-dino'],g={roomId:r.id,roomDef:{...r,expedition:null},player:{id:'dino',x:2400,y:1094,w:40,h:40,grounded:true,evo:0,xp:0},score:0,save(){}};enterWorld1(g);return g;};
 test('Dino rejects shallow landings and an earned impact opens nearby shields only',()=>{
  const g=game(),s=g.world1.stations[3],foe={x:s.x,w:40,hp:50,stun:0,_shieldFacing:1,_campaign:{active:0,wind:20}},boss={...foe,miniBoss:true};g.enemies=[foe,boss];
  g.world1.dinoPeak=s.y-s.dropHeight+1;assert.equal(dinoLanding(g,s),false);assert.equal(foe._shieldFacing,1);

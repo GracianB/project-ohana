@@ -18,7 +18,7 @@ export function authorExpedition(hero,room){
  const def=EXPEDITIONS[hero];if(!def)return room;
  const old=room.width,extra=EXPEDITION_WIDTH-old;
  room.width=EXPEDITION_WIDTH;room.plats.push([old,FLOOR,extra,126]);
- const nodes=[10200,11750,13300].map((x,i)=>({id:`v2-trial-${hero}-${i}`,x,y:def.ys[i],kind:def.kind}));
+ const nodes=[10200,11750,13300].map((x,i)=>({id:`${room.id}-v2-trial-${i}`,x,y:def.ys[i],kind:def.kind}));
  // Recovery floor stays continuous; genuine ascending ledges make the upper
  // route legible. No one-way shelf may cover a floor mechanism.
  for(const node of nodes){
@@ -41,15 +41,30 @@ export function authorExpedition(hero,room){
  room.expedition={...def,nodes};return room;
 }
 export function expeditionUnlocked(g){return !!g.world1?.sealed||!!g.world1?.stations?.every(s=>s.kind==='oven'||s.done)&&g.player?.evo>=4&&!!g.clearedEncounters?.[g.roomId]?.some(id=>String(id).startsWith('w1-'))&&!g.enemies?.some(e=>e.miniBoss&&e.hp>0&&!e.dying);}
+export const EXPEDITION_KEY='ohana-expeditions-v2';
+function expeditionStorage(g){return g.expeditionStorage||globalThis.localStorage;}
+function readProgress(g){
+ const storage=expeditionStorage(g);let data={},legacy={};
+ try{data=JSON.parse(storage?.getItem(EXPEDITION_KEY)||'{}');legacy=JSON.parse(storage?.getItem('ohana')||'{}')?.secrets||{};}catch{}
+ const out={};for(const hero of Object.keys(EXPEDITIONS)){
+  const room='w1-'+hero,accepted=new Set([...(Array.isArray(data?.[room])?data[room]:[]),...(Array.isArray(legacy?.[room])?legacy[room]:[])]);
+  out[room]=[0,1,2].map(i=>room+'-v2-trial-'+i).filter(id=>accepted.has(id));
+ }
+ return out;
+}
+function persistProgress(g,progress){try{expeditionStorage(g)?.setItem(EXPEDITION_KEY,JSON.stringify(progress));}catch{}}
 export function enterExpedition(g){
  const r=g.roomDef;if(!r?.expedition){g.expedition=null;return;}
- const saved=new Set(g.secrets?.[r.id]||[]);
+ const progress=readProgress(g),saved=new Set([...(g.secrets?.[r.id]||[]),...(progress[r.id]||[])]);
+ progress[r.id]=r.expedition.nodes.filter(n=>saved.has(n.id)).map(n=>n.id);persistProgress(g,progress);
+ g.secrets||={};g.secrets[r.id]=[...new Set([...(g.secrets[r.id]||[]),...progress[r.id]])];
  g.expedition={hero:r.hero,tick:0,done:r.expedition.nodes.filter(n=>saved.has(n.id)).map(n=>n.id),carry:null,until:0,wasGrounded:!!g.player?.grounded,fall:0};
 }
 export function expeditionReady(g){return !g.roomDef?.expedition||g.expedition?.done.length===3;}
 function complete(g,n){
  const a=g.expedition;if(a.done.includes(n.id))return false;
- a.done.push(n.id);g.secrets||={};g.secrets[g.roomId]||=[];if(!g.secrets[g.roomId].includes(n.id))g.secrets[g.roomId].push(n.id);
+ const progress=readProgress(g);if(progress[g.roomId]?.includes(n.id)){a.done.push(n.id);return false;}
+ a.done.push(n.id);progress[g.roomId]=[...(progress[g.roomId]||[]),n.id];persistProgress(g,progress);g.secrets||={};g.secrets[g.roomId]||=[];if(!g.secrets[g.roomId].includes(n.id))g.secrets[g.roomId].push(n.id);
  g.score=(g.score||0)+200;g.onWorld1Beat?.('chime',g.player.id,a.done.length);
  g.nums?.add?.(n.x,n.y-65,'DESCUBRIMIENTO '+a.done.length+'/3',g.roomDef.color,true);
  g.fx?.emit?.(n.x,n.y,{color:g.roomDef.color,count:g.reduceMotion?5:20,size:4,life:32,up:2});g.save?.();return true;
@@ -102,6 +117,12 @@ export function drawExpedition(c,g,cam,t){
    c.beginPath();c.ellipse(x,y-5,70,15,0,0,TAU);c.fill();c.stroke();c.beginPath();c.moveTo(x-35,y-10);c.lineTo(x,y-45);c.lineTo(x+35,y-10);c.stroke();
   }else if(n.kind==='moon'){
    c.beginPath();c.arc(x,y,34,0,TAU);c.fill();c.stroke();c.fillStyle='#515478';c.beginPath();c.arc(x+13,y-9,27,0,TAU);c.fill();
+  }else if(n.kind==='nest'){
+   c.fillStyle='#6d4a50';c.beginPath();c.ellipse(x,y+18,43,16,0,0,TAU);c.fill();c.stroke();
+   c.fillStyle=done?'#ffe9bd':'#d48264';c.beginPath();c.moveTo(x-16,y+12);c.bezierCurveTo(x-31,y-18,x+2,y-26,x,y-53);c.bezierCurveTo(x+30,y-26,x+25,y+8,x+16,y+12);c.fill();c.stroke();
+   const vx=x-190,base=FLOOR-cam.y,height=FLOOR-n.y+80;
+   c.fillStyle='#6a6064';c.beginPath();c.ellipse(vx,base-6,63,14,0,0,TAU);c.fill();c.stroke();
+   for(let k=0;k<5;k++){const u=g.reduceMotion?k/5:(t*.006+k/5)%1,yy=base-u*height;c.globalAlpha=.55*(1-u);c.strokeStyle='#ffd8aa';c.lineWidth=2;c.beginPath();c.moveTo(vx-48,yy);c.bezierCurveTo(vx-18,yy-20,vx+18,yy+20,vx+48,yy);c.stroke();}c.globalAlpha=1;c.fillStyle='#ffe4b7';c.font='bold 12px sans-serif';c.textAlign='center';c.fillText('TÉRMICA · SALTA',vx,base-43);
   }else if(n.kind==='bell'){
    c.beginPath();c.moveTo(x-24,y+20);c.bezierCurveTo(x-12,y-8,x-22,y-40,x,y-42);c.bezierCurveTo(x+22,y-40,x+12,y-8,x+24,y+20);c.closePath();c.fill();c.stroke();c.beginPath();c.arc(x,y+25,6,0,TAU);c.fill();
   }else if(n.kind==='supper'){

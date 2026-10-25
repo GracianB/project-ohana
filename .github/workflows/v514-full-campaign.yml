@@ -1,4 +1,4 @@
-name: V514 real full campaign · Normal
+name: V600 real full campaign · Normal
 
 on:
   pull_request:
@@ -12,6 +12,9 @@ on:
       - 'systems/enemy-hero-counterplay.js'
       - 'systems/kilo-chapter.js'
       - 'systems/world1-**'
+      - 'systems/chapter-**'
+      - 'systems/combat-difficulty.js'
+      - 'systems/memory-rewards-v2.js'
       - 'game.js'
       - 'index.html'
       - 'sw.js'
@@ -50,7 +53,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v514-real-campaign-evidence
-          path: test-results/v513/
+          name: v600-real-campaign-evidence
+          path: test-results/v600/
           retention-days: 10
           if-no-files-found: ignore

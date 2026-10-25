@@ -1,3 +1,10 @@
+# Estado actual: V2 / ohana-600
+
+La V514 de PR440 está integrada. Continuar con [V2-ADVENTURE.md](V2-ADVENTURE.md) y
+[V600-VALIDATION.json](V600-VALIDATION.json): segundo acto, treinta descubrimientos,
+guardianes reactivos y colección con recompensa real. Candidato pendiente de CI final y publicación.
+El informe V513 que sigue es histórico; no acredita la publicación de V600.
+
 # Revisión final solicitada — candidato V513
 
 Los seis frentes de implementación se resuelven en V513. La aceptación artística y la dificultad percibida se comprueban jugando la versión publicada; las pruebas automatizadas no sustituyen esa valoración.

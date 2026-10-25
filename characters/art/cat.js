@@ -88,7 +88,7 @@ function solve(pose) {
   else if (st === "attack" || slot === 2) mood = "angry";
   else if (st === "idle" && fl > 0 && (pose.flourishN % 4) === 3) mood = fl > .45 ? "happy" : "normal";
   return {
-    st, slot, t, run, atk, cast, fl, arm, leg, mood,
+    st, slot, t, run, atk, cast, fl, arm, leg, mood, recoil:pose.hurt||.5,
     bob: st === "run" ? -Math.abs(run) * 3.4 : st === "jump" ? -5 : st === "idle" ? Math.sin(t * 0.07) * 1.7 : 0,
     tail: slot === 2 ? 2.1 : st === "run" ? 1.25 : st === "attack" ? 1.45 : 0.75,
   };
@@ -339,7 +339,7 @@ function drawMichiMythic(ctx,pose,r,f){
    let px=side*6+(run?runK*side*4:0),py=-4-bend*6;
    if(atk&&side>0){px=20;py=-24;}
    if(victory){px=side*17;py=-36+(still?0:Math.sin(t*.14+side)*2);}
-   if(hurt){px=side*10;py=-12;}
+   if(hurt){px=side*(8+8*r.recoil);py=-9-8*r.recoil;}
    drawCatLeg(ctx,{hip:[side*6,-20],paw:[px,py],upper:9,lower:9,bend:side>0?1:-1,width:8,fur:furLight,dark:furDark,ink,lift:(atk&&side>0)||victory?.8:0,claws:false,toe:'#fff3f9',pawS:1.1});
    if(atk&&side>0)for(const k of [-3,0,3]){ctx.beginPath();ctx.moveTo(px+5,py+k);ctx.lineTo(px+9,py+k-1);stroke(ink,1.3);}
   }
@@ -435,7 +435,7 @@ function drawMichiMythic(ctx,pose,r,f){
    if(castK&&lead)paw=[16+castK*6,-76-castK*8];
    if(atkK&&lead)paw=[18+atkK*20,-56+atkK*4];
    if(victory)paw=[side*20,-84+(still?0:Math.sin(t*.12+side)*3)];
-   if(hurt)paw=[side*12,-62];
+   if(hurt)paw=[side*(10+8*r.recoil),-57-10*r.recoil];
    drawCatLeg(ctx,{hip:[side*11,-56],paw,upper:10,lower:10,bend:side>0?1:-1,width:6.2,fur,dark:furDark,ink:ink2,lift:lead&&(castK||atkK)?.8:0,claws:lead&&atkK>.3,toe:'#fff8ff'});
   }
   ctx.save();ctx.translate(0,-82);

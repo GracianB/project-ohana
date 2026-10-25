@@ -29,7 +29,7 @@ export function updateCampaignEnemy(e,g,hurt){
  e._shieldImpact=Math.max(0,(e._shieldImpact||0)-1);
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
  if(!visible&&dist>1100){e.vx=0;return true;}
- const difficulty=g.combatDifficulty||readCombatDifficulty();
+ const difficulty=g.combatDifficulty||readCombatDifficulty(g.roomId);
  const variant=e.roomPersona?.variant||0,pace=[.85,1,1.12,.95][variant%4],reach=[1,.85,1.15,1.05][variant%4];
  // Feed the articulated creature rigs the actual combat state, not a cosmetic clock.
  e.wind=a.wind;e.lunge=a.active;e.hopWind=role==='jumper'?a.wind:0;

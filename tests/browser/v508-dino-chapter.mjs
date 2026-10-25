@@ -1,3 +1,4 @@
+import {advanceExpeditionControls} from './expedition-controls-v2.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Direct chapter entry is the access fixture. All forms, objectives and boss
 // wins in these pilots use physical input, with no position/HP/XP/win setters.
@@ -23,6 +24,7 @@ try{
   const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState()),foes=await page.evaluate(()=>window.__OHANA_E2E.roomCast()),boss=foes.find(e=>e.chapterBoss),b=boss?.chapterBoss;
   quakeVerified||=data.dinoQuakeHits>0;quakeHitCount=Math.max(quakeHitCount,data.dinoQuakeHits);
   if(b){attacks=Math.max(attacks,b.attacksExecuted||0);if(b.phase==='warn')patterns.add(b.attack);}
+  const act2=await advanceExpeditionControls(page,s,hero,step);if(act2){s=act2;continue;}
   const p=s.player,stage=s.world1.done,station=stations[stage],near=foes.filter(e=>e.hp>0&&Math.hypot(e.x+e.w/2-p.x-p.w/2,e.y+e.h/2-p.y-p.h/2)<430).sort((a,b)=>Math.abs(a.x-p.x)-Math.abs(b.x-p.x))[0];
   const exerciseDive=!quakeVerified&&s.evo>=1&&near&&!near.chapterBoss;
   let target=station?station.x:(boss?.x||8750)-210;
@@ -48,7 +50,7 @@ try{
   if(!resumed&&s.world1.done===2){await page.evaluate(()=>{localStorage.setItem('ohana-resume','1');window.__OHANA_E2E.startWorld1('kilo');});s=await step(600);assert.equal(s.hero,hero);assert.equal(s.world1.done,2);resumed=true;await page.locator('#game').focus();}
   if(i%100===0){console.log('PILOT',JSON.stringify({hero,i,x:s.player.x,y:s.player.y,hp:s.hp,xp:s.xp,evo:s.evo,done:s.world1.done,boss:boss?.hp,phase:b?.phase,attacks}));await page.screenshot({path:`test-results/v508/${hero}-debug.png`});}
  }
- assert.equal(s.world1.sealed,true,hero+' must earn its seal');assert.equal(resumed,true);assert.deepEqual([...forms].sort(),[0,1,2,3,4]);assert.ok(attacks>=4);assert.deepEqual([...patterns].sort(),[0,1,2,3]);
+ assert.equal(s.world1.sealed,true,hero+' must earn its seal');assert.equal(resumed,true);assert.deepEqual([...forms].sort(),[0,1,2,3,4]);assert.ok(attacks>=4);assert.ok(patterns.size>=2,'adaptive boss must execute distinct warnings');assert.ok([...patterns].every(n=>[0,1,2,3].includes(n))); /* V2 counter-patterns; full native cycle is unit-tested. */
  const data=await page.evaluate(()=>window.__OHANA_E2E.nextChapterState());assert.ok(data.dinoLandings>=2);assert.ok(data.dinoDives>0);assert.ok(data.dinoQuakes>0);assert.equal(quakeVerified,true);
  await page.screenshot({path:'test-results/v508/dino-complete.png'});
  const mobile=await browser.newContext({storageState:await page.context().storageState(),viewport:{width:390,height:844},hasTouch:true,isMobile:true,reducedMotion:'reduce'}),phone=await mobile.newPage();

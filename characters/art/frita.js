@@ -613,8 +613,8 @@ if (st === "run" && pose.move !== "slide") {
     P.capeFlow=7+13*act.offer;P.capeWind=.5;P.capeUp=act.offer;
   }
 } else if (st === "hurt") {
-  P.a0 = -0.3; P.bend = -0.9 - pose.hurt * 0.2; P.wig = -0.3; P.bx = -3;
-  P.legF = [0.7, 4]; P.legB = [-0.15, -2];
+  P.a0 = -.3*(pose.hurt||.5); P.bend = -.3-.7*(pose.hurt||.5); P.wig = -0.3; P.bx = -3;
+  P.legF = [.7*(pose.hurt||.5), 4]; P.legB = [-.3*(pose.hurt||.5), -2];
   P.armF = { ang: 1.4, bend: 4 }; P.armB = { ang: 1.9, bend: 4 };
   P.mood = "hurt"; P.mouth = "o";
   P.capeFlow = 2; P.capeWind = 0.8;

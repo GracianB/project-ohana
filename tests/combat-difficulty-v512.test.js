@@ -8,7 +8,7 @@ const player=()=>({x:200,y:100,w:24,h:30,vx:5,vy:0,grounded:true});
 const foe=(i=0)=>({x:100+i*80,y:100,w:30,h:30,hp:100,max:100,kind:'cucaracho',spawnIndex:i,campaignRole:'pursuer',vx:0,vy:0});
 test('three campaign modes coordinate different attack budgets and preserve authored health',()=>{
  const old=globalThis.localStorage;
- try{for(const [mode,budget] of [['easy',1],['normal',2],['hard',3]]){
+ try{for(const [mode,budget] of [['easy',1],['normal',3],['hard',4]]){
   globalThis.localStorage={getItem:()=>mode};
   const enemies=Array.from({length:4},(_,i)=>foe(i));
   assert.equal(directEnemyEncounter(enemies,player(),'w1-dino',60).budget,budget);

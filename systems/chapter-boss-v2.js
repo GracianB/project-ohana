@@ -17,7 +17,7 @@ export function prepareChapterBossV2(e,g){
    v.turn++;const air=p.y+p.h<e.y+e.h-95,far=Math.abs(p.x-e.x)>310;
    // Read at commitment only: after the warning begins no aim or pattern moves.
    // Every third turn keeps the native cycle so baiting never freezes the boss.
-   if(!e._drummer&&v.turn%3!==0)b.attack=air?3:far?1:2;
+   if(!e._drummer)b.attack=v.turn%3===0?(Math.floor(v.turn/3)-1)%4:air?3:far?1:2;
    b.aim=Math.sign(p.x+p.w/2-e.x-e.w/2)||1;
    v.target={x:p.x+p.w/2+Math.max(-55,Math.min(55,(p.vx||0)*9)),y:p.y+p.h/2};
    b[clockKey]=Math.max(28,Math.round((b[clockKey]||50)*d.windup));

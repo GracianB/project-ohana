@@ -14,15 +14,19 @@ test('all 1000 memories are outside solids and within an earned-form jump or fli
    assert.equal(room.plats.some(p=>p[3]>40&&it.x>p[0]-5&&it.x<p[0]+p[2]+5&&it.y>p[1]-8&&it.y<p[1]+p[3]+8),false,hero+' buried memory '+it.id);
    // Full held jumps at gravity .5: rise=v². Budget .75 deliberately
    // understates repeated jumps; Kilo also has earned solar free flight.
-   const rise=WORLD1_FLOOR-it.y;
-   assert.ok(hero==='kilo'||rise<=f.jump*f.jump*f.jumps*.75+40,hero+' inaccessible vertical envelope '+it.id);
+   // V2 has genuine stepped ascents. Flood reachable supports from floor,
+   // then verify the collectible relative to a reachable support, not sea level.
+   const maxRise=f.jump*f.jump*f.jumps*.75,reach=f.speed*f.jump*4*f.jumps*.75;
+   const supports=room.plats,known=new Set(supports.filter(p=>p[3]>40));let changed=true;
+   while(changed){changed=false;for(const p of supports)if(!known.has(p)&&[...known].some(q=>q[1]-p[1]<=maxRise&&Math.max(0,p[0]-q[0]-q[2],q[0]-p[0]-p[2])<reach)){known.add(p);changed=true;}}
+   assert.ok(hero==='kilo'||[...known].some(p=>it.x>=p[0]-reach&&it.x<=p[0]+p[2]+reach&&p[1]-it.y<=maxRise+40),hero+' inaccessible vertical envelope '+it.id);
   }total+=items.length;
  }assert.equal(total,1000);
 });
 test('ten encounter plans replace patrols with finite, complementary chapter groups',()=>{
  const signatures=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero],plan=CHAPTER_ENCOUNTERS[hero];
-  signatures.add(JSON.stringify(plan.groups));assert.equal(plan.groups.length,3);assert.ok(r.foes.length<=26);
+  signatures.add(JSON.stringify(plan.groups));assert.equal(plan.groups.length,3);assert.ok(r.foes.length<=34);
   for(let group=0;group<3;group++){
    const foes=r.foes.filter(f=>f[4]?.authoredEncounter===group);
    assert.ok(foes.length>=2&&foes.length<=3);

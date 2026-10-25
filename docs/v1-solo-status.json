@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "updated_on": "2026-10-25",
-  "scope": "single_player_v1",
+  "scope": "single_player_v2",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v513-complete-solo-experience",
+  "branch": "feat/v2-identity-challenge-and-discovery",
   "base_commit": "3fe0b84",
   "published": true,
   "campaign_complete_verified": true,
   "v1_ready": false,
-  "next_task": "v1.user_play_review",
+  "next_task": "v2.final_candidate_CI_and_publication",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
@@ -257,7 +257,7 @@
   },
   "published_commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
   "published_url": "https://gracianb.github.io/project-ohana/?release=513",
-  "candidate_version": "ohana-513",
+  "candidate_version": "ohana-600",
   "review": "docs/V1-FINAL-REVIEW.md",
   "previous_verified_publication": {
     "version": "ohana-512",
@@ -266,5 +266,8 @@
     "verified": true,
     "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40205716045",
     "live_assets_verified_sha256": 42
-  }
+  },
+  "candidate_review": "docs/V2-ADVENTURE.md",
+  "candidate_validation": "docs/V600-VALIDATION.json",
+  "candidate_published": false
 }

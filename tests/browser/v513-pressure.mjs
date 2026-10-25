@@ -25,5 +25,5 @@ try{
  const normal=report.find(r=>r.mode==='normal'&&r.policy==='idle'),active=report.find(r=>r.policy==='active');
  assert.ok(normal.damage>0,'normal enemies must hurt a player ignoring them');
  assert.ok(active.damage<normal.damage,'jumping and attacking must beat passive tanking');
- await fs.mkdir('test-results/v513',{recursive:true});await fs.writeFile('test-results/v513/pressure.json',JSON.stringify(report,null,2));
+ await fs.mkdir('test-results/v600',{recursive:true});await fs.writeFile('test-results/v600/pressure.json',JSON.stringify(report,null,2));
 }finally{await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

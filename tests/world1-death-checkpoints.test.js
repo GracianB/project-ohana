@@ -1,3 +1,4 @@
+// Act I checkpoint isolation; V2 discoveries have their own persistent-state tests.
 import test from "node:test";
 import assert from "node:assert/strict";
 import { WORLD1_FLOOR, WORLD1_ORDER, WORLD1_ROOMS } from "../systems/world1-rooms.js";
@@ -9,7 +10,7 @@ import {
 function makeGame(hero) {
   const room = WORLD1_ROOMS["w1-"+hero];
   const g={
-    roomId:room.id,roomDef:room,reduceMotion:true,world1Seals:[],world1Visited:{},
+    roomId:room.id,roomDef:{...room,expedition:null},reduceMotion:true,world1Seals:[],world1Visited:{},
     score:0,projectiles:[],player:{x:0,y:WORLD1_FLOOR-42,w:32,h:42,vx:0,vy:0,grounded:true,maxHealth:100,health:60,xp:0},
     nums:{add(){}},fx:{emit(){}},save(){this.saves=(this.saves||0)+1;},
     onWorld1Beat(type, id){this.events.push([type,id]);},events:[]

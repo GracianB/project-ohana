@@ -494,12 +494,12 @@ if (st === "run") {
     P.dripK=1+.45*a.offer;P.fx=null;
   }
 } else if (st === "hurt") {
-  P.roll = -0.34;
-  P.bx = -3.5;
+  P.roll = -.34*(pose.hurt||.5);
+  P.bx = -5*(pose.hurt||.5);
   P.armF = { ang: 2.35, bend: 4 };
   P.armB = { ang: -2.45, bend: -4 };
-  P.legF = [0.65, 3];
-  P.legB = [-0.12, -2];
+  P.legF = [.65*(pose.hurt||.5), 3];
+  P.legB = [-.3*(pose.hurt||.5), -2];
   P.mood = "hurt";
   P.mouth = "o";
   P.dripK = -0.85;
