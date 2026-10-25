@@ -361,3 +361,52 @@ Auditoría Chromium general PASS. Piloto final Pizza: ocho ataques del Chef,
 cero muertes, Continue, J táctil y salida a Yomi bebé. Dino: siete ataques,
 dos impactos reales verificados, cero muertes, Continue, caída táctil y Frita bebé.
 Primera ejecución de Pizza había registrado12 ataques; prevalece el informe final8.
+
+
+## V510 · Frita y Yomi · 25 de octubre de 2026
+
+Workspace `/workspace/ohana-stitcho`, rama `feat/v510-frita-yomi`, base `cc9d1e0`.
+Los diez capítulos tienen ahora integración individual; **eso no acredita campaña
+completa ni V1 lista**. Siguiente trabajo: recorrido concatenado, Quimera, balance
+humano y auditoría de cien recuerdos. No comenzar multijugador por este hito.
+
+Frita: `frita-yomi-chapters.js`, primer lanzamiento persistente secreto
+`w1-frita-first-launch-v1` garantiza55XP. Tres premios garantizan140/260/420.
+Conserva IDs0–2. Fuerzas20/22/24, desplazamientos+100/-110/+140 y alturas360/430/500.
+Géiser listo105ticks, recarga45, aviso30 dentro de ciclo180 con desfase por estación.
+Corredor libre abarca plataforma→premio, no sólo la vertical del géiser. J aceptado
+durante ese lanzamiento aplica una corrección limitada, una vez por vuelo. Primer
+lanzamiento y premios guardados; trayectoria/cooldowns transitorios no persistidos.
+
+Yomi: IDs0–3 conservados, ciclo180; AHORA55ticks, preparación150–179 y espera entre
+ellos. J aceptado dentro230px prolonga75ticks una ventana ya activa, sin conectar
+remotamente ni abrir una fase oscura. Conectar requiere acercarse. K conserva su
+cortafuegos; cuatro terminales garantizan55/140/260/420XP. Campos temporales no se
+guardan. Los terminales pintados consultan el mismo estado real que la interacción.
+
+Ambos jefes parametrizados, defaults del hub intactos. Capítulo640PV en arena8260–
+9320, suelo1134, cuatro ataques y recuperación160PV. IDs `w1-frita-king-v1` y
+`w1-yomi-custodian-v1`. Objetivos + derrota real para sello nuevo; sellos antiguos
+siguen válidos. Contacto/pisotón real, un cuerpo por jefe y HUD único. Cangrejo rey
+y autómata del observatorio con superficies/piezas propias y movimiento reducido.
+
+Frita mantiene el diner neón con cielo de hora azul más luminoso; Yomi usa nuevo
+`worlds/yomi-dawn.js`: cúpulas de cristal, telescopios, planeta, cables y vegetación.
+Plataformas propias y entradas con actores. Fondos no introducen colisiones.
+
+Pilotos con teclas: única fixture de acceso entrar al capítulo, sin posición/vida/
+XP/forma/victoria inyectada. Cinco formas, objetivos, Continue tras dos, cuatro
+patrones y victoria real. Frita: cinco ataques del jefe, cero muertes, J corrector
+real, móvil J y salida a Pizza bebé. Yomi: ocho ataques, cero muertes, J ampliando
+ventana real, móvil J y entrada en la procesión final. No representa una campaña
+concatenada ni victoria sobre Quimera. Presentación usa fixtures explícitas.
+
+Validación:1531 Node PASS; release gate319 módulos/369 recursos, auditoría Chromium
+PASS, regresiones físicas Kilo y Pizza PASS; integridad offline tras el último arte
+PASS. Matriz histórica completa no repetida. Aceptación humana pendiente.
+
+Observación para la siguiente integración final: `world1DoorOpen` permite entrar
+al final con el sello de Yomi y `spawnFusionBoss` no comprueba explícitamente los
+diez sellos, pese al comentario histórico. El piloto aislado entra en la procesión
+con sólo el sello de Yomi; se detiene antes de la arena. Auditar/cerrar esa condición
+y la selección/forma para Quimera antes de afirmar V1 completa.

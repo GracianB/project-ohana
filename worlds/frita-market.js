@@ -16,8 +16,8 @@ const wrap=(v,lim)=>((v%lim)+lim)%lim;
 const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
 export const FRITA_MARKET_PALETTE=Object.freeze({
- skyTop:'#070c24',skyMid:'#142a6a',skyLow:'#2f4fa8',star:'#dff4ff',
- skyline:'#0d1a44',skylineWin:'#5fd0ff',neon:'#5fd0ff',neonPink:'#ff5a7a',
+ skyTop:'#364c72',skyMid:'#56739a',skyLow:'#c4a3a3',star:'#dff4ff',
+ skyline:'#657e97',skylineWin:'#5fd0ff',neon:'#5fd0ff',neonPink:'#ff5a7a',
  carton:'#d8231c',fry:'#ffcf3a',fry2:'#e8a51a',chrome:'#c8d6e8',diner:'#1f3a8a',diner2:'#14245a',
  booth:'#ffd98a',check1:'#f4ece0',check2:'#d8231c',awning1:'#d8231c',awning2:'#f4ece0',
  boardwalk:'#3a2a3a',lamp:'#fff2b8',mustard:'#ffcc1a',spark:'#9ff0ff'

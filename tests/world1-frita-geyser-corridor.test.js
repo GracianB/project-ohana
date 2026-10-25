@@ -7,10 +7,10 @@ test('Frita keeps all three geyser launch corridors clear of overhead platforms'
   const vents = room.seal.stations.filter(st => st.kind === 'geyser');
   assert.equal(vents.length, 3);
   for (const vent of vents) {
-    assert.equal(vent.prize.x, vent.x);
-    assert.equal(vent.prize.y, WORLD1_FLOOR - 470);
+    assert.notEqual(vent.prize.x,vent.x,'the route requires lateral steering');
+    assert.ok(vent.force*vent.force>=WORLD1_FLOOR-vent.prize.y,'launch can reach prize height with gravity .5');
     for (const [x,y,w] of room.plats.slice(1)) {
-      const corridorOverlap = x < vent.x + 94 && x + w > vent.x - 94;
+      const corridorOverlap = x < Math.max(vent.x,vent.prize.x) + 94 && x + w > Math.min(vent.x,vent.prize.x) - 94;
       const overhead = y > WORLD1_FLOOR - 590 && y < WORLD1_FLOOR;
       assert.ok(!(corridorOverlap && overhead), 'Blocking platform in geyser '+vent.id+' corridor at y='+y);
     }

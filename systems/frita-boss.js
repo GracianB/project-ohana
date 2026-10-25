@@ -1,3 +1,5 @@
+import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
+import {drawFryerKing} from './fryer-astral-boss-art.js';
 // MERCADO DORADO — Rey Crujiente (Frita's personal mini boss).
 // 100% vector Canvas: a massive golden crab chef king — wide shell, chef toque,
 // enormous claws, oil-dripping apron. Three phases evolve the colour and silhouette.
@@ -5,25 +7,28 @@ export const FRITA_BOSS_ID='hub-frita-boss-v1';
 export const FRITA_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['charge','bubble_spray','fryer_slam','crisp_overdrive']);
 
-export function createFritaBoss(makeFoe,rng=()=>.5){
- const e=makeFoe(3420,1000,'cangrejo','hub',994,{rng});
- e.x=3420;e.y=FRITA_BOSS.floor-116;e.w=138;e.h=116;
- e.hp=e.max=FRITA_BOSS.hp;
+export function createFritaBoss(makeFoe,rng=()=>.5,options={}){
+ const arena=Object.freeze({...FRITA_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
+ const e=makeFoe(x,arena.floor-120,'cangrejo',roomId,994,{rng});
+ e._chapterArena=arena;e._growthChapter=options.chapter||null;
+ e.x=x;e.w=e._growthChapter?240:138;e.h=e._growthChapter?190:116;e.y=arena.floor-e.h;
+ e.hp=e.max=arena.hp;if(e._growthChapter){e.damageTakenScale=0;e.damageWindowRemaining=0;}
  e.miniBoss=true;e._fritaBoss=true;
  e._campaignOriginal=true;e.spawnIndex=994;
- e._encounterSaveId=FRITA_BOSS_ID;
- e.roomId='hub';e.color='#ffb300';e.contactDmg=0;
+ e._encounterSaveId=options.encounterId||FRITA_BOSS_ID;
+ e.roomId=roomId;e.color='#ffb300';e.contactDmg=0;
  e._crispyKing={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,boil:0};
  return e;
 }
 
 export function updateFritaBoss(e,g,hurt){
  if(!e?._fritaBoss)return false;
- const b=e._crispyKing,p=g.player;
+ const b=e._crispyKing,p=g.player,arena=e._chapterArena||FRITA_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
- e.x=Math.max(FRITA_BOSS.left,Math.min(FRITA_BOSS.right-e.w,e.x));
- e.y=FRITA_BOSS.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
+ e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
+ e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  if(!p||p.dead||e.hp<=0)return true;
+ if(!chapterBossStart(e,g,b))return true;
 
  b.tier=e.hp<=e.max*.26?3:e.hp<=e.max*.60?2:1;
  if(b.boil>0)b.boil--;
@@ -34,14 +39,14 @@ export function updateFritaBoss(e,g,hurt){
  if(b.phase==='intro'){
   if(visible&&Math.abs(dx)<680){
    if(--b.clock===60)g.nums?.add?.(e.x,e.y-50,'REY CRUJIENTE — DESPIERTO','#ffd54f',true);
-   if(b.clock<=0){b.phase='rest';b.clock=55;}
+   if(b.clock<=0){b.phase=e._growthChapter?'warn':'rest';b.clock=50;b.aim=Math.sign(dx)||1;}
   }
  }else if(b.phase==='rest'){
   b.exposed=true;
-  if(--b.clock<=0&&visible&&Math.abs(dx)<950){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?32:48;b.exposed=false;}
+  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<950){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?32:48;b.exposed=false;}
  }else if(b.phase==='warn'){
   e.telegraph=true;e.wind=b.clock;
-  if((e.stun||0)>=24){b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡REY CRUJIENTE ATURDIDO!','#fff59d',true);}
+  if((e.stun||0)>=24&&!e._growthChapter){b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡REY CRUJIENTE ATURDIDO!','#fff59d',true);}
   else if(--b.clock<=0){b.phase='attack';b.clock=b.attack===0?30:22;b.burst=0;}
  }else if(b.phase==='attack'){
   e.lunge=b.clock;
@@ -53,13 +58,14 @@ export function updateFritaBoss(e,g,hurt){
    if(b.attack===0){b.boil=20;}                                                    // sizzle charge
    if(b.attack===1){fireOil(b.aim*7,-2.5);if(b.tier>1)fireOil(-b.aim*5,-1.5,'#ffd54f');}
    if(b.attack===2){for(let s=-1;s<=1;s++)fireOil(b.aim*(5+s*2),-2.5-Math.abs(s));}
-   if(b.attack===3&&b.tier===3){for(let k=-2;k<=2;k++)fireOil(k*4,-4,'#ffeb3b');}
+   if(b.attack===3&&(b.tier===3||e._growthChapter)){for(let k=-2;k<=2;k++)fireOil(k*4,-4,'#ffeb3b');}
    b.burst=1;
   }
   if(b.attack===0){e.x+=b.aim*9;e.facing=b.aim;}
   if(Math.abs(dx)<e.w*.55&&Math.abs(p.y+p.h/2-(e.y+e.h/2))<e.h*.6)hurt?.(b.tier===3?20:14,'frita-boss');
   if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?32:55;b.attack=(b.attack+1)%PATTERNS.length;b.burst=0;}
  }
+ chapterBossFinish(e,g,b,previous);
  return true;
 }
 
@@ -146,13 +152,13 @@ function _drawCrabKing(ctx,e,t){
  }
 }
 
-export function drawFritaBoss(ctx,e,cam,t){
+export function drawFritaBoss(ctx,e,cam,t,reduceMotion=false){
  if(!e?._fritaBoss)return false;
  const b=e._crispyKing,x=e.x-cam.x,y=e.y-cam.y;
  ctx.save();
- ctx.translate(x+e.w/2,y+e.h);
+ ctx.translate(x+e.w/2,y+e.h-(e._growthChapter?47:0));
  ctx.scale(b.aim||1,1);
- _drawCrabKing(ctx,e,t);
+ if(e._growthChapter)drawFryerKing(ctx,e,reduceMotion?0:t);else _drawCrabKing(ctx,e,reduceMotion?0:t);
  if(e.telegraph){
   ctx.strokeStyle='#ffd54f';ctx.lineWidth=2.5;ctx.setLineDash([6,6]);
   ctx.strokeRect(-100,-108,200,115);ctx.setLineDash([]);
@@ -160,6 +166,7 @@ export function drawFritaBoss(ctx,e,cam,t){
  ctx.restore();
 
  // Boss health bar
+ if(e._growthChapter)return true;
  const barW=164,barH=10,bx=x+e.w/2-barW/2,by=y-32;
  ctx.fillStyle='rgba(20,10,0,0.88)';ctx.fillRect(bx-2,by-2,barW+4,barH+4);
  const ratio=Math.max(0,e.hp/e.max);

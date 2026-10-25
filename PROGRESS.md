@@ -1,3 +1,27 @@
+# V510 · ohana-510 · Frita y Yomi
+
+Frita: tres géiseres con fuerza/altura/desplazamiento distintos, recarga y aviso
+visibles. Primer lanzamiento persistente garantiza55 XP; tres patatas140/260/420.
+J permite una corrección por lanzamiento, sin vuelo ilimitado. Corredores de subida
+limpios. Mercado al anochecer más luminoso con diner/neones, plataformas propias,
+géiseres/premios dibujados y entrada animada. Rey Crujiente del capítulo, cuerpo
+propio de cangrejo coronado con núcleo y patas ancladas.
+
+Yomi: cuatro terminales con espera/preparación/AHORA. J prolonga75 ticks una
+ventana ya abierta dentro de230 px; hay que llegar para conectar. K conserva su
+cortafuegos contra disparos. Nodos persistentes y XP mínima55/140/260/420.
+Observatorio nuevo con cúpulas de cristal, telescopios, planeta y vegetación;
+plataformas metálicas y Custodio del Observatorio con cuerpo de autómata propio.
+
+Ambos jefes tienen arena/ID propios,640 PV, cuatro ataques y recuperación limitada
+a160 PV. Objetivos + derrota real para nuevos sellos; defaults históricos y sellos
+antiguos conservados. Pilotos físicos ganan formas, objetivos, Continue y jefes;
+Frita pasa a Pizza bebé, Yomi entra en la procesión final. Esa entrada aislada no
+acredita recorrer la campaña completa ni vencer a Quimera. Revisión humana de
+balance y alcance de cien recuerdos pendientes. 1.531 Node, auditoría Chromium,
+release gate (319 módulos/369 recursos), móvil J y regresiones Kilo/Pizza aprobados.
+Siguiente: integración final.
+
 # V509 · ohana-509 · Pizza de barrio y onda de Dino
 
 Pizza integra primer horneado (55 XP) y tres repartos (140/260/420 XP mínima).

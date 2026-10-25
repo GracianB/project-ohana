@@ -164,6 +164,12 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
+      - name: V510 Frita and Yomi physical chapters and mobile input
+        run: npm run test:browser:frita-yomi-chapters
+
+      - name: V510 Frita and Yomi presentation
+        run: npm run test:browser:frita-yomi-presentation
+
       - name: V509 Pizza deliveries, Chef and mobile input
         run: npm run test:browser:pizza-chapter
 

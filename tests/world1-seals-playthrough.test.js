@@ -1,3 +1,4 @@
+import {yomiNodeState} from '../systems/frita-yomi-chapters.js';
 import {nextChapterAbility,NEXT_CHAPTERS} from '../systems/chapters-lunar-prism-embers.js';
 // Mundo 1: regression tests run the production seal state machine in all ten rooms.
 // The tests validate puzzle actions and state, not a simulated browser playthrough.
@@ -40,12 +41,12 @@ function assertSealed(run, hero) {
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
   assert.equal(game.score, 150 * (total+(['stitcho','cuerno'].includes(hero)?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','pizza'].includes(hero)?423:3, hero + " rewards experience");
-  assert.equal(run.saves, total+(['stitcho','cuerno','pizza'].includes(hero)?2:['chispin','cat','dragon','dino'].includes(hero)?1:0), hero + " saves each completed objective once");
+  assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(hero)?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total+(['stitcho','cuerno','pizza','frita'].includes(hero)?2:['chispin','cat','dragon','dino','yomi'].includes(hero)?1:0), hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, total+(['stitcho','cuerno','pizza'].includes(hero)?2:['chispin','cat','dragon','dino'].includes(hero)?1:0), "no extra save after completion");
+  assert.equal(run.saves, total+(['stitcho','cuerno','pizza','frita'].includes(hero)?2:['chispin','cat','dragon','dino','yomi'].includes(hero)?1:0), "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -173,17 +174,18 @@ test("Dino: a downward landing, not walking, wakes each fossil", () => {
 test("Frita: a geyser launches the player high enough to reach each golden prize", () => {
   const run = setup("frita"), { game, stand, tick } = run;
   for (const s of game.world1.stations) {
-    stand(s.x); tick();
+    game.world1.tick=(180-s.id*55)%180;stand(s.x); tick();
     assert.equal(game.player.grounded, false, "geyser must launch player");
-    assert.equal(game.player.vy, -21);
+    assert.equal(game.player.vy, -s.force);
     for (let frame = 0; frame < 80 && !s.done; frame++) {
       const p = game.player;
-      p.y += p.vy;
+      p.x+=Math.max(-4,Math.min(4,s.prize.x-p.x-p.w/2));p.y += p.vy;
       p.vy = Math.min(14, p.vy + 0.5); // game.js gravity
       tick();
     }
     assert.equal(s.done, true, "prize should be in the geyser trajectory");
   }
+  assert.equal(game.world1.sealed,false);game.clearedEncounters={"w1-frita":[NEXT_CHAPTERS.frita.bossId]};tick();
   assertSealed(run, "frita");
 });
 
@@ -211,17 +213,18 @@ test("Yomi: only nodes in their green phase synchronize", () => {
   const run = setup("yomi"), { game, stand, tick } = run;
   for (const s of game.world1.stations) {
     stand(s.x);
-    const dark = (60 - s.phase + 120) % 120;
+    const dark = (70 - s.phase + 180) % 180;
     game.world1.tick = dark - 1;
-    assert.equal(nodeLive(dark, s), false);
+    game.world1.tick=dark;assert.equal(yomiNodeState(game,s),'wait');game.world1.tick=dark-1;
     tick();
     assert.equal(s.done, false);
-    const green = (120 - s.phase) % 120;
+    const green = (180 - s.phase) % 180;
     game.world1.tick = green - 1;
-    assert.equal(nodeLive(green, s), true);
+    game.world1.tick=green;assert.equal(yomiNodeState(game,s),'live');game.world1.tick=green-1;
     tick();
     assert.equal(s.done, true);
   }
+  assert.equal(game.world1.sealed,false);game.clearedEncounters={"w1-yomi":[NEXT_CHAPTERS.yomi.bossId]};tick();
   assertSealed(run, "yomi");
 });
 

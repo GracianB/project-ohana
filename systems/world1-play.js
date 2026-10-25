@@ -1,3 +1,4 @@
+import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
@@ -130,7 +131,7 @@ export function world1NextObjective(g) {
   else if (w.kind === "pisotones") {label = "Placa fósil "+((target?.order??target?.id??0)+1);action=(target?.dropHeight>=160?"Sube a la cornisa alta o usa doble salto":target?.dropHeight>=110?"Haz un salto alto o sube a la cornisa":"Salta sobre la placa y aterriza en el centro")+". K en el aire acelera la bajada";}
   else if (w.kind === "sincronia") {
     label = "Terminal astral";
-    action = target && nodeLive(w.tick, target) ? "AHORA · acércate para conectar" : "Espera junto al terminal hasta que indique AHORA";
+    action = target && (g.roomDef?.yomiChapter?yomiNodeState(g,target)==='live':nodeLive(w.tick,target)) ? "AHORA · acércate para conectar" : "Espera junto al terminal hasta que indique AHORA";
   }
   return target ? { x: target.x, y: target.y, label, action } : null;
 }
@@ -245,7 +246,7 @@ export function updateWorld1(g,hurt) {
       if (p.grounded) w.launchedGeyser = null;
       for (const s of w.stations) {
         if (s.done) continue;
-        if (onPad(p, s, 46)) { w.launchedGeyser = s.id; p.vy = -21; p.grounded = false; p.jumps = 0; p._jumpHeld = false; p.buffer = 0; p.coyote = 0; g.fx?.emit?.(s.x, s.y - 10, { color: "#ffd65a", count: g.reduceMotion ? 4 : 12, size: 4, up: 3, life: 24 }); }
+        if (onPad(p, s, 46)&&(!r.fritaChapter||fritaVentState(w.tick,s)==='ready')) {noteFritaLaunch(g,s); w.launchedGeyser = s.id; p.vy = -(r.fritaChapter?s.force:21); p.grounded = false; p.jumps = 0; p._jumpHeld = false; p.buffer = 0; p.coyote = 0; g.fx?.emit?.(s.x, s.y - 10, { color: "#ffd65a", count: g.reduceMotion ? 4 : 12, size: 4, up: 3, life: 24 }); }
         if (near(p, s.prize.x, s.prize.y, 55, 60)) complete(g, s, "PATATA");
       }
       break;
@@ -258,7 +259,7 @@ export function updateWorld1(g,hurt) {
       }
       break; }
     case "sincronia":
-      for (const s of w.stations) if (!s.done && nodeLive(w.tick, s) && near(p, s.x, s.y - 40, 50, 90)) complete(g, s, "NODO");
+      for (const s of w.stations) if (!s.done && (r.yomiChapter?yomiNodeState(g,s)==='live':nodeLive(w.tick,s)) && near(p, s.x, s.y - 40, 50, 90)) complete(g, s, "NODO");
       break;
   }
   trackDinoAir(g);
@@ -542,6 +543,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if (!done) { ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText("↓ PISOTÓN", x, y - 34 + pulse); }
       break; }
     case "geyser": {
+      if(g.roomDef?.fritaChapter){drawFritaVent(ctx,g,s,cam,done,t,reduce);break;}
       ctx.fillStyle = "#5a3e1e"; ctx.fillRect(x - 40, y - 14, 80, 14);
       ctx.globalAlpha = .55; ctx.fillStyle = "#ffd65a"; const hh = 60 + (reduce ? 0 : (t * 3 + s.id * 40) % 50); ctx.fillRect(x - 12, y - 14 - hh, 24, hh); ctx.globalAlpha = 1;
       if (!done) { const px = s.prize.x - cam.x, py = s.prize.y - cam.y + pulse; ctx.fillStyle = "#ffcf3a"; for (let k = -1; k <= 1; k++) ctx.fillRect(px - 4 + k * 9, py - 16 - Math.abs(k) * -4, 7, 32); ctx.strokeStyle = "#fff4c2"; ctx.strokeRect(px - 18, py - 18, 36, 36); }
@@ -559,6 +561,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.beginPath(); if (done) ctx.arc(x, y - 54, 7, .2, Math.PI - .2); else { ctx.moveTo(x - 6, y - 50); ctx.lineTo(x + 6, y - 50); } ctx.stroke();
       ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(done ? "¡GRACIAS!" : "¡TENGO HAMBRE!", x, y - 88 + pulse); break; }
     case "node": {
+      if(g.roomDef?.yomiChapter){drawYomiTerminal(ctx,g,s,cam,done,t,reduce);break;}
       const live = nodeLive(w.tick, s) || done, phase = ((w.tick + (s.phase || 0)) % 120) / 120;
       const light = done ? "#8fe9ff" : live ? "#6dff9c" : "#ffcf8a";
       ctx.fillStyle = "#233646";ctx.fillRect(x - 26,y - 18,52,18);ctx.fillRect(x - 8,y - 58,16,40);

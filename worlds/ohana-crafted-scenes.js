@@ -1,3 +1,5 @@
+import {drawYomiDawn} from './yomi-dawn.js';
+import {drawFritaMarketBackdrop} from './frita-market.js';
 import {drawPizzaOvensBackdrop} from './pizza-ovens.js';
 import {drawDinoCraterBackdrop} from './dino-crater.js';
 // Scenic Canvas painting for the workshop coast and cloud sanctuary. All
@@ -30,7 +32,7 @@ function arch(c,x,y,s,col){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle=co
  line(c,'#fff8df',4,()=>{c.moveTo(-92,-184);c.bezierCurveTo(-79,-273,79,-273,92,-184);});
  c.fillStyle='#c4d8df';c.fillRect(-119,-7,238,7);c.restore();}
 export function drawCraftedScene(c,g,cam,t,W,H){
- const hero=g.roomDef?.hero;if(hero==='pizza'){drawPizzaOvensBackdrop(c,cam,t,W,H,!!g.reduceMotion);return true;}if(hero==='dino'){drawDinoCraterBackdrop(c,cam,t,W,H,!!g.reduceMotion);return true;}if(!['stitcho','chispin'].includes(hero))return drawThreeRealms(c,g,cam,t,W,H);
+ const hero=g.roomDef?.hero;if(hero==='frita'){drawFritaMarketBackdrop(c,cam,t,W,H,!!g.reduceMotion);return true;}if(hero==='yomi'){drawYomiDawn(c,cam,t,W,H,!!g.reduceMotion);return true;}if(hero==='pizza'){drawPizzaOvensBackdrop(c,cam,t,W,H,!!g.reduceMotion);return true;}if(hero==='dino'){drawDinoCraterBackdrop(c,cam,t,W,H,!!g.reduceMotion);return true;}if(!['stitcho','chispin'].includes(hero))return drawThreeRealms(c,g,cam,t,W,H);
  const dock=hero==='stitcho',time=g.reduceMotion?0:t,ground=1134-cam.y;
  c.save();c.globalAlpha=1;c.globalCompositeOperation='source-over';c.filter='none';sky(c,W,H,dock?'dock':'storm');
  // Broad, softly layered sky instead of the old polygonal mountains.

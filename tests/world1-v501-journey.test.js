@@ -47,13 +47,13 @@ test('V501: guidance follows the actual geyser launch up to its prize, then back
  p.x=s.x-p.w/2;p._jumpHeld=true;p.buffer=5;p.coyote=4;
  assert.equal(world1NextObjective(g).label,'Géiser de aceite');
  updateWorld1(g);
- assert.equal(p.grounded,false);assert.equal(p.vy,-21);
+ assert.equal(p.grounded,false);assert.equal(p.vy,-s.force);
  assert.equal(p._jumpHeld,false,'release of an earlier jump must not cut the geyser impulse');
  assert.equal(p.buffer,0);assert.equal(p.coyote,0);
  const flight=world1NextObjective(g);
  assert.equal(flight.y,s.prize.y);assert.equal(flight.label,'Patata dorada');
- assert.equal(world1ObjectiveDirection(g,flight),'Arriba ↑');
- p.y=s.prize.y-p.h/2;updateWorld1(g);
+ assert.equal(world1ObjectiveDirection(g,flight),'Hacia el este → · Arriba ↑');
+ p.x=s.prize.x-p.w/2;p.y=s.prize.y-p.h/2;updateWorld1(g);
  assert.equal(s.done,true);assert.equal(g.score,150);
  p.grounded=true;p.y=s.y-p.h;
  assert.equal(world1NextObjective(g).label,'Géiser de aceite');
@@ -81,7 +81,7 @@ test('V501: terminal guidance matches activation phase and a closed exit names t
  p.x=s.x-p.w/2;g.world1.tick=80;
  assert.match(world1NextObjective(g).action,/Espera/);
  updateWorld1(g);assert.equal(s.done,false);
- g.world1.tick=120;
+ g.world1.tick=180;
  assert.match(world1NextObjective(g).action,/AHORA/);
  updateWorld1(g);assert.equal(s.done,true);
  assert.match(world1LockedMessage(g),/1\/4 completados.*Terminal astral/);

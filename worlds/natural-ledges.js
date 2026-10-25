@@ -2,8 +2,15 @@ const random=n=>{const x=Math.sin(n*127.1+311.7)*43758.5;return x-Math.floor(x);
 export function drawNaturalLedge(ctx,p,world,cam,t){
  const id=world.id;if(['lab','space'].includes(id))return false;
  const x=p.x-cam.x,y=p.y-cam.y,w=p.w;
+ if(['yomi-observatory','frita-market'].includes(id)){
+  const space=id==='yomi-observatory';ctx.save();ctx.fillStyle=space?'#a2bac0':'#ad979a';ctx.strokeStyle=space?'#587b88':'#675b6c';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.quadraticCurveTo(x+w-4,y+21,x+w-28,y+24);ctx.lineTo(x+28,y+24);ctx.quadraticCurveTo(x+4,y+21,x,y);ctx.fill();ctx.stroke();
+  ctx.fillStyle=space?'#e0eee5':'#f2d5a0';ctx.fillRect(x,y-2,w,5);ctx.strokeStyle=space?'#d5efe3':'#d5b7bf';ctx.lineWidth=2;
+  for(let i=1;i<4;i++){const xx=x+w*i/4;ctx.beginPath();ctx.arc(xx,y+13,2,0,Math.PI*2);ctx.stroke();}
+  ctx.restore();return true;
+ }
  const reef=id==='aquatic',hot=['volcano','ember-forge','pizza-harbor'].includes(id),rocky=['cave','ridge','boss'].includes(id);
- const lunar=id==='lunar-garden',prism=['prism-grove','fossil-valley'].includes(id);
+ const lunar=id==='lunar-garden',prism=['prism-grove','fossil-valley','frita-market','yomi-observatory'].includes(id);
  const depth=34+random(p.x+p.y)*35;
  ctx.save();
  const stone=ctx.createLinearGradient(0,y,0,y+depth);
