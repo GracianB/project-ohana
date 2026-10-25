@@ -125,6 +125,17 @@ export function buildWorld1HeroRoom(hero) {
     // A low stepping route gives room to practise K and the extra jumps.
     plats.push([3420,1054,180,22],[3650,974,220,22],[5010,1054,180,22],[5240,974,220,22]);
   }
+  if(['cat','cuerno','dragon'].includes(hero)){
+    foes.length=0;
+    stations.forEach((st,i)=>{
+      const roles=hero==='cat'?['pursuer','flyer']:hero==='cuerno'?['shield','gunner']:['jumper','gunner'];
+      roles.forEach((role,k)=>foes.push([st.x-200+k*380,role==='flyer'?WORLD1_FLOOR-210:WORLD1_FLOOR-40,theme.cast[(i+k)%theme.cast.length],false,{role,name:theme.short+' · guardia '+(i+1),chapterHP:65+Math.min(i,3)*30,anchorY:WORLD1_FLOOR-210}]));
+    });
+    for(let i=plats.length-1;i>0;i--){const [x,y,w]=plats[i];if(y<WORLD1_FLOOR&&stations.some(st=>x<st.x+100&&x+w>st.x-100))plats.splice(i,1);}
+    if(hero==='cat')for(const st of stations){const rise=WORLD1_FLOOR-st.y;for(let h=80;h<rise;h+=80)plats.push([st.x-260+(h/80%2)*80,WORLD1_FLOOR-h,160,18]);}
+    if(hero==='cuerno')plats.push([3040,1054,210,22],[3360,974,220,22],[3660,894,210,22],[3980,974,200,22]);
+    if(hero==='dragon')for(const x of [3050,4750,6450]){plats.push([x+170,834,200,22],[x+410,714,220,22]);orbs.push([x,990],[x,850],[x+200,795],[x+440,675]);}
+  }
   if(hero==='chispin'){
     foes.length=0;
     stations.forEach((st,i)=>{
@@ -160,10 +171,10 @@ export function buildWorld1HeroRoom(hero) {
   return {
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
-    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin',
+    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', growthChapter:['cat','cuerno','dragon'].includes(hero)?hero:null,
     width: W, height: WORLD1_ROOM_H,
     doors: { left: prev, right: next, up: null, down: null },
-    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
+    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':hero==='cat'?'Salta hacia las cinco medusas para despertarlas: se convierten en apoyos. Controla los grupos y vence al Oráculo Medusaluna.':hero==='cuerno'?'J en el espejo del alba. Después sigue los prismas I → II → III y vence a la Bestia Prisma.':hero==='dragon'?'Enciende cuatro braseros con J. Salta dentro de las térmicas para ganar altura y vence al Guardián Ígneo.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
@@ -179,7 +190,7 @@ function sealStations(hero, theme, sectors) {
     case "serenata": return [1, 2, 3, 4].map((s, i) => ({ id: i, x: at(s, .5), y: floor, kind: "flower", note: i }));
     case "reparar": return [1, 2, 4].map((s, i) => ({ id: i, x: at(s, .3), y: floor, kind: "part", target: { x: at(s, .3) + 520, y: floor } }));
     case "cadena": return [2160,3760,5360,7280].map((x,i)=>({id:i,x,y:floor,kind:"rod"}));
-    case "medusas": return [1, 2, 3, 3, 4].map((s, i) => ({ id: i, x: at(s, i === 3 ? .8 : .45), y: floor - 140, kind: "jelly" }));
+    case "medusas": return [1940,3300,4750,6220,7540].map((x,i)=>({id:i,x,y:floor-[110,160,220,280,340][i],kind:"jelly"}));
     // Readable I → II → III pilgrimage, west to east, without forced backtracking.
     case "prismas": return [{ s: 1, order: 0 }, { s: 3, order: 1 }, { s: 4, order: 2 }].map((d, i) => ({ id: i, x: at(d.s, .5), y: floor, kind: "prism", order: d.order }));
     case "braseros": return [1, 2, 3, 4].map((s, i) => ({ id: i, x: at(s, .6), y: floor, kind: "brazier" }));

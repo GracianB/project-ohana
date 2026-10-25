@@ -3,24 +3,26 @@
   "updated_on": "2026-10-25",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v506-chispin-chapter",
-  "base_commit": "466cbe8",
+  "branch": "feat/v507-lunar-prism-embers",
+  "base_commit": "5db93d1",
   "published": false,
   "campaign_complete_verified": false,
   "v1_ready": false,
-  "next_task": "chapter.cat",
+  "next_task": "chapter.dino",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1512,
-    "runtime_modules": 313,
-    "precache_resources": 363,
-    "source": "Existing local V501 execution logs; documentation-only planning does not constitute a new playthrough",
+    "node_passed": 1517,
+    "runtime_modules": 314,
+    "precache_resources": 364,
+    "source": "V507 local unit suite, physical chapter pilots and presentation fixtures; logs ohana-v507-*",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
     "remote_ci_current_candidate": "not_verified",
-    "published_url_current_candidate": "not_verified"
+    "published_url_current_candidate": "not_verified",
+    "local_three_chapter_physical_pilots": "passed",
+    "local_three_realm_mobile": "passed"
   },
   "chapters": [
     {
@@ -69,34 +71,46 @@
       "id": "cat",
       "order": 4,
       "room": "w1-cat",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
-      "evidence": []
+      "next_work": "Human difficulty review and full memory reachability",
+      "evidence": [
+        "tests/browser/v507-three-chapters.mjs",
+        "test-results/v507/cat-pilot.json",
+        "tests/browser/v507-three-realms.mjs"
+      ]
     },
     {
       "id": "cuerno",
       "order": 5,
       "room": "w1-cuerno",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
-      "evidence": []
+      "next_work": "Human difficulty review and full memory reachability",
+      "evidence": [
+        "tests/browser/v507-three-chapters.mjs",
+        "test-results/v507/cuerno-pilot.json",
+        "tests/browser/v507-three-realms.mjs"
+      ]
     },
     {
       "id": "dragon",
       "order": 6,
       "room": "w1-dragon",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
-      "evidence": []
+      "next_work": "Human difficulty review and full memory reachability",
+      "evidence": [
+        "tests/browser/v507-three-chapters.mjs",
+        "test-results/v507/dragon-pilot.json",
+        "tests/browser/v507-three-realms.mjs"
+      ]
     },
     {
       "id": "dino",

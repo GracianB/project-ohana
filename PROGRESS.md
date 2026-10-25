@@ -1,3 +1,27 @@
+# V507 · ohana-507 · Michi, Cuerno y Dragón
+
+Tres capítulos con crecimiento ganado y jefe obligatorio. Michi despierta cinco
+medusas que se convierten en apoyos; Cuerno restaura con J el espejo del alba y
+activa tres prismas en orden; Dragón enciende cuatro braseros con J y puede ganar
+altura saltando dentro de tres térmicas. Los objetivos garantizan XP mínima para
+las cinco formas y persisten sin repetir premios. Los sellos antiguos se conservan.
+
+Jardín lunar lavanda con lago y flores, bosque del alba con árboles/prismas y
+caldera cálida con vapor y vetas de magma: Canvas por capas, entradas animadas,
+colores propios de terreno/plataformas y movimiento reducido. Enemigos agrupados
+por función y rutas elevadas. Cada jefe tiene arena/ID propios, 640 PV, cuatro
+patrones, avisos y recuperación de 160 PV como máximo; no se vence sólo activando
+objetivos. Se conserva el encuentro histórico del hub con sus valores anteriores.
+
+Pilotos físicos sin inyectar posición/vida/XP/victoria: cinco formas, guardado y
+Continuar a mitad, cuatro patrones, derrota, sello y salida al siguiente bebé.
+Michi ejecutó 6 ataques, Cuerno 7 y Dragón 4; cero muertes en estos pilotos.
+Presentación y J táctil comprobados por separado con fixtures explícitas de acceso.
+La dificultad humana y los cien recuerdos de cada capítulo siguen pendientes.
+Validación: 1.517 pruebas Node, release gate (314 módulos / 364 recursos),
+auditoría Chromium y regresión física de Kilo, Stitcho y Chispín aprobados.
+Siguiente integración: Dino.
+
 # V506 · ohana-506 · Tres protagonistas, lugares vivos
 
 Revisión solicitada por el usuario: Kilo conserva su paisaje y gana Flor Solar

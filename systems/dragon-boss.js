@@ -1,3 +1,4 @@
+import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
 // CORDILLERA DE LAS BRASAS — Guardián del Núcleo Ígneo (Dragón's personal mini boss).
 // 100% vector Canvas drawing: colossal igneous dragon guardian with molten magma scales.
 // Three phases: magma charge, volcanic eruption barrage, and full solar flare overload.
@@ -5,25 +6,28 @@ export const DRAGON_BOSS_ID='hub-dragon-boss-v1';
 export const DRAGON_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['charge','lava_barrage','magma_slam','solar_eruption']);
 
-export function createDragonBoss(makeFoe,rng=()=>.5){
- const e=makeFoe(3420,1000,'cangrejo','hub',996,{rng});
- e.x=3420;e.y=DRAGON_BOSS.floor-100;e.w=124;e.h=100;
- e.hp=e.max=DRAGON_BOSS.hp;
+export function createDragonBoss(makeFoe,rng=()=>.5,options={}){
+ const arena=Object.freeze({...DRAGON_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
+ const e=makeFoe(x,arena.floor-100,'cangrejo',roomId,996,{rng});
+ e._chapterArena=arena;e._growthChapter=options.chapter||null;
+ e.x=x;e.y=arena.floor-100;e.w=124;e.h=100;
+ e.hp=e.max=arena.hp;if(e._growthChapter){e.damageTakenScale=0;e.damageWindowRemaining=0;}
  e.miniBoss=true;e._dragonBoss=true;
  e._campaignOriginal=true;e.spawnIndex=996;
- e._encounterSaveId=DRAGON_BOSS_ID;
- e.roomId='hub';e.color='#ff6a2a';e.contactDmg=0;
+ e._encounterSaveId=options.encounterId||DRAGON_BOSS_ID;
+ e.roomId=roomId;e.color='#ff6a2a';e.contactDmg=0;
  e._igneousDragon={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false};
  return e;
 }
 
 export function updateDragonBoss(e,g,hurt){
  if(!e?._dragonBoss)return false;
- const b=e._igneousDragon,p=g.player;
+ const b=e._igneousDragon,p=g.player,arena=e._chapterArena||DRAGON_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
- e.x=Math.max(DRAGON_BOSS.left,Math.min(DRAGON_BOSS.right-e.w,e.x));
- e.y=DRAGON_BOSS.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
+ e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
+ e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  if(!p||p.dead||e.hp<=0)return true;
+ if(!chapterBossStart(e,g,b))return true;
 
  b.tier=e.hp<=e.max*.26?3:e.hp<=e.max*.60?2:1;
  const dx=p.x+p.w/2-(e.x+e.w/2);
@@ -33,14 +37,14 @@ export function updateDragonBoss(e,g,hurt){
  if(b.phase==='intro'){
   if(visible&&Math.abs(dx)<670){
    if(--b.clock===60)g.nums?.add?.(e.x,e.y-40,'GUARDIÁN DEL NÚCLEO ÍGNEO · DESPIERTO','#ff8a50',true);
-   if(b.clock<=0){b.phase='rest';b.clock=50;}
+   if(b.clock<=0){b.phase=e._growthChapter?'warn':'rest';b.clock=50;b.aim=Math.sign(dx)||1;}
   }
  }else if(b.phase==='rest'){
   b.exposed=true;
-  if(--b.clock<=0&&visible&&Math.abs(dx)<900){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?35:50;b.exposed=false;}
+  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<900){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?35:50;b.exposed=false;}
  }else if(b.phase==='warn'){
   e.telegraph=true;e.wind=b.clock;
-  if((e.stun||0)>=24){b.phase='rest';b.clock=90;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡GUARDIÁN ATURDIDO!','#ffe89c',true);}
+  if((e.stun||0)>=24&&!e._growthChapter){b.phase='rest';b.clock=90;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡GUARDIÁN ATURDIDO!','#ffe89c',true);}
   else if(--b.clock<=0){b.phase='attack';b.clock=b.attack===0?28:20;b.burst=0;}
  }else if(b.phase==='attack'){
   e.lunge=b.clock;
@@ -73,6 +77,7 @@ export function updateDragonBoss(e,g,hurt){
   }
   if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?35:55;b.attack=(b.attack+1)%PATTERNS.length;b.burst=0;}
  }
+ chapterBossFinish(e,g,b,previous);
  return true;
 }
 

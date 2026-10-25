@@ -200,3 +200,41 @@ Pruebas visuales de acceso/forma/cámara explícitas en
 `test-results/v506/*-new-landscape.png`, `*-arrival.png` y
 `kilo-white-spirit-and-friend.png`. Revisar esas imágenes y dificultad con el usuario;
 no afirmar aprobado humano ni prometer que el resto de salas fue rediseñado.
+
+
+## V507 · Michi, Cuerno y Dragón · 25 de octubre de 2026
+
+Workspace actual `/workspace/ohana-stitcho`, rama `feat/v507-lunar-prism-embers`,
+base `5db93d1` (V506 publicada). La planificación anterior de Stitcho/Chispín es
+histórica; siguiente integración: **Dino**. No reaplicar ZIPs antiguos.
+
+`systems/chapters-lunar-prism-embers.js` integra progreso, espejo de Cuerno,
+apoyos reales de medusas y térmicas de Dragón. J aceptado restaura el espejo una
+sola vez y enciende braseros próximos por delante. XP mínima absoluta evita
+bloqueo de forma final sin dar premios repetidos. Guardado de estaciones/secretos
+y derrotas usa el contrato existente. Michi llega a 420 con la quinta medusa;
+Cuerno necesita espejo + tres prismas; Dragón cuatro braseros. Un sello nuevo
+requiere además su jefe realmente derrotado; sello antiguo válido conserva XP.
+
+Los tres creadores de jefes aceptan arena/roomId/chapter opcionales y conservan
+sus valores por defecto de hub. Capítulos: arena 8260–9320, suelo 1134, 640 PV,
+ventanas de daño de 160, cuatro ataques y avisos. Michi fija columnas al avisar;
+Dragón fija abanico antiaéreo si el jugador está alto. Cuerno ancla sus pezuñas al
+suelo y usa un solo HUD; no se dibuja el enemigo genérico debajo del jefe propio.
+
+Pilotos: `npm run test:browser:lunar-prism-embers` (CHROMIUM_BIN en este entorno).
+Única fixture de acceso: entrar a cada capítulo. Movimiento, combate, cinco formas,
+objetivos, guardado/Continuar, sello y salida al siguiente bebé ganados mediante
+teclas. Cero muertes; ataques ejecutados Michi 6, Cuerno 7, Dragón 4, cuatro patrones
+en todos. Dragón usa térmica; Michi verifica cinco apoyos; Cuerno espejo persistente.
+No equivalen a aceptación humana de dificultad ni auditoría de cien recuerdos.
+
+`npm run test:browser:three-realms` usa fixtures de forma/cámara sólo para
+presentación: tres entradas, fondos propios, movimiento reducido y J táctil real.
+Capturas en `test-results/v507/`; pruebas Node de progresión/compatibilidad en
+`tests/chapters-lunar-prism-embers.test.js`. Las tres salas reutilizan repertorio
+propio existente y ahora lo conectan a la campaña; no se afirma V1 terminada.
+
+Validación V507: 1.517 Node PASS, release gate PASS (314 módulos / 364 recursos),
+auditoría Chromium general PASS, pilotos Kilo/Stitcho/Chispín PASS; capturas de las
+tres salas y controles táctiles revisadas. Logs `/workspace/.cloud-setup/logs/ohana-v507-*`.

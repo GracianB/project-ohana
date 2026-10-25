@@ -164,6 +164,12 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
+      - name: V507 Michi, Cuerno and Dragon physical chapters
+        run: npm run test:browser:lunar-prism-embers
+
+      - name: V507 three realm arrivals, landscapes and mobile controls
+        run: npm run test:browser:three-realms
+
       - name: V457 solo chapter state, reward contracts, and mobile final forms
         run: node tests/browser/v457-ten-heroes.mjs
 

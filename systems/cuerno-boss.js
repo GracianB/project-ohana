@@ -1,3 +1,4 @@
+import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
 // BOSQUE DEL PRISMA — Bestia Prisma (Cuerno's personal mini boss).
 // 100% vector Canvas: a majestic crystal stag/beast — faceted crystal body,
 // rainbow prism antlers that refract light, aurora tail, crystal hooves.
@@ -6,26 +7,29 @@ export const CUERNO_BOSS_ID='hub-cuerno-boss-v1';
 export const CUERNO_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['charge','prism_volley','aurora_slam','rainbow_eruption']);
 
-export function createCuernoBoss(makeFoe,rng=()=>.5){
- const e=makeFoe(3420,1000,'rana','hub',991,{rng});
- e.x=3420;e.y=CUERNO_BOSS.floor-118;e.w=132;e.h=118;
- e.hp=e.max=CUERNO_BOSS.hp;
+export function createCuernoBoss(makeFoe,rng=()=>.5,options={}){
+ const arena=Object.freeze({...CUERNO_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
+ const e=makeFoe(x,arena.floor-118,'rana',roomId,991,{rng});
+ e._chapterArena=arena;e._growthChapter=options.chapter||null;
+ e.x=x;e.y=arena.floor-118;e.w=132;e.h=options.chapter?190:118;e.y=arena.floor-e.h;
+ e.hp=e.max=arena.hp;if(e._growthChapter){e.damageTakenScale=0;e.damageWindowRemaining=0;}
  e.miniBoss=true;e._cuernoBoss=true;
  e._campaignOriginal=true;e.spawnIndex=991;
- e._encounterSaveId=CUERNO_BOSS_ID;
- e.roomId='hub';e.color='#b39ddb';e.contactDmg=0;
+ e._encounterSaveId=options.encounterId||CUERNO_BOSS_ID;
+ e.roomId=roomId;e.color='#b39ddb';e.contactDmg=0;
  e._prismBeast={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,rainbowAngle:0};
  return e;
 }
 
 export function updateCuernoBoss(e,g,hurt){
  if(!e?._cuernoBoss)return false;
- const b=e._prismBeast,p=g.player;
+ const b=e._prismBeast,p=g.player,arena=e._chapterArena||CUERNO_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
- e.x=Math.max(CUERNO_BOSS.left,Math.min(CUERNO_BOSS.right-e.w,e.x));
- e.y=CUERNO_BOSS.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
+ e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
+ e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  b.rainbowAngle=(b.rainbowAngle||0)+0.05;
  if(!p||p.dead||e.hp<=0)return true;
+ if(!chapterBossStart(e,g,b))return true;
 
  b.tier=e.hp<=e.max*.26?3:e.hp<=e.max*.60?2:1;
  const dx=p.x+p.w/2-(e.x+e.w/2);
@@ -35,14 +39,14 @@ export function updateCuernoBoss(e,g,hurt){
  if(b.phase==='intro'){
   if(visible&&Math.abs(dx)<700){
    if(--b.clock===60)g.nums?.add?.(e.x,e.y-50,'BESTIA PRISMA — DESPIERTA','#e1d5ff',true);
-   if(b.clock<=0){b.phase='rest';b.clock=55;}
+   if(b.clock<=0){b.phase=e._growthChapter?'warn':'rest';b.clock=55;b.aim=Math.sign(dx)||1;}
   }
  }else if(b.phase==='rest'){
   b.exposed=true;
-  if(--b.clock<=0&&visible&&Math.abs(dx)<950){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?30:48;b.exposed=false;}
+  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<950){b.aim=Math.sign(dx)||1;b.phase='warn';b.clock=b.tier===3?30:48;b.exposed=false;}
  }else if(b.phase==='warn'){
   e.telegraph=true;e.wind=b.clock;
-  if((e.stun||0)>=24){b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡BESTIA ATURDIDA!','#e1d5ff',true);}
+  if((e.stun||0)>=24&&!e._growthChapter){b.phase='rest';b.clock=88;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡BESTIA ATURDIDA!','#e1d5ff',true);}
   else if(--b.clock<=0){b.phase='attack';b.clock=b.attack===0?30:22;b.burst=0;}
  }else if(b.phase==='attack'){
   e.lunge=b.clock;
@@ -62,6 +66,7 @@ export function updateCuernoBoss(e,g,hurt){
   if(Math.abs(dx)<e.w*.55&&Math.abs(p.y+p.h/2-(e.y+e.h/2))<e.h*.6)hurt?.(b.tier===3?20:14,'cuerno-boss');
   if(--b.clock<=0){b.phase='rest';b.clock=b.tier===3?30:55;b.attack=(b.attack+1)%PATTERNS.length;b.burst=0;}
  }
+ chapterBossFinish(e,g,b,previous);
  return true;
 }
 
@@ -158,11 +163,12 @@ export function drawCuernoBoss(ctx,e,cam,t){
  if(!e?._cuernoBoss)return false;
  const b=e._prismBeast,x=e.x-cam.x,y=e.y-cam.y;
  ctx.save();
- ctx.translate(x+e.w/2,y+e.h);ctx.scale(b.aim||1,1);
+ ctx.translate(x+e.w/2,y+e.h-(e._growthChapter?70:0));ctx.scale(b.aim||1,1);
  _drawPrismBeast(ctx,e,t);
  if(e.telegraph){ctx.strokeStyle='#ce93d8';ctx.lineWidth=2.5;ctx.setLineDash([6,6]);ctx.strokeRect(-80,-120,160,130);ctx.setLineDash([]);}
  ctx.restore();
 
+ if(e._growthChapter)return true;
  const barW=162,barH=10,bx=x+e.w/2-barW/2,by=y-32;
  ctx.fillStyle='rgba(8,4,18,0.88)';ctx.fillRect(bx-2,by-2,barW+4,barH+4);
  const ratio=Math.max(0,e.hp/e.max);

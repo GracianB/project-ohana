@@ -1,3 +1,4 @@
+import {chapterBossStart,chapterBossFinish} from './chapters-lunar-prism-embers.js';
 // LOS JARDINES DE LA LUNA — Oráculo Medusaluna (Michicornio's personal mini boss).
 // 100% vector Canvas drawing: colossal astral celestial feline with twin moon tails.
 // Three phases: shadow pounce, dream orb barrage, and full eclipse overload.
@@ -5,25 +6,28 @@ export const MICHI_BOSS_ID='hub-michi-boss-v1';
 export const MICHI_BOSS=Object.freeze({hp:480,left:3120,right:3990,floor:1134});
 const PATTERNS=Object.freeze(['pounce','dream_barrage','crescent_strike','eclipse_overload']);
 
-export function createMichiBoss(makeFoe,rng=()=>.5){
- const e=makeFoe(3420,1000,'cangrejo','hub',997,{rng});
- e.x=3420;e.y=MICHI_BOSS.floor-96;e.w=118;e.h=96;
- e.hp=e.max=MICHI_BOSS.hp;
+export function createMichiBoss(makeFoe,rng=()=>.5,options={}){
+ const arena=Object.freeze({...MICHI_BOSS,...options.arena}),roomId=options.roomId||'hub',x=options.x??3420;
+ const e=makeFoe(x,arena.floor-96,'cangrejo',roomId,997,{rng});
+ e._chapterArena=arena;e._growthChapter=options.chapter||null;
+ e.x=x;e.y=arena.floor-96;e.w=118;e.h=96;
+ e.hp=e.max=arena.hp;if(e._growthChapter){e.damageTakenScale=0;e.damageWindowRemaining=0;}
  e.miniBoss=true;e._michiBoss=true;
  e._campaignOriginal=true;e.spawnIndex=999;
- e._encounterSaveId=MICHI_BOSS_ID;
- e.roomId='hub';e.color='#e5c2ff';e.contactDmg=0;
+ e._encounterSaveId=options.encounterId||MICHI_BOSS_ID;
+ e.roomId=roomId;e.color='#e5c2ff';e.contactDmg=0;
  e._astralCat={phase:'intro',clock:100,attack:0,tier:1,aim:1,burst:0,exposed:false,pattern:'pounce'};
  return e;
 }
 
 export function updateMichiBoss(e,g,hurt){
  if(!e?._michiBoss)return false;
- const b=e._astralCat,p=g.player;
+ const b=e._astralCat,p=g.player,arena=e._chapterArena||MICHI_BOSS,previous=b.phase;
  if(e.invuln>0)e.invuln--;
- e.x=Math.max(MICHI_BOSS.left,Math.min(MICHI_BOSS.right-e.w,e.x));
- e.y=MICHI_BOSS.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
+ e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x));
+ e.y=arena.floor-e.h;e.vy=0;e.grounded=true;e.vx=0;e.telegraph=false;
  if(!p||p.dead||e.hp<=0)return true;
+ if(!chapterBossStart(e,g,b))return true;
 
  b.tier=e.hp<=e.max*.26?3:e.hp<=e.max*.60?2:1;
  const dx=p.x+p.w/2-(e.x+e.w/2);
@@ -33,14 +37,14 @@ export function updateMichiBoss(e,g,hurt){
  if(b.phase==='intro'){
   if(visible&&Math.abs(dx)<670){
    if(--b.clock===60)g.nums?.add?.(e.x,e.y-40,'ORÁCULO MEDUSALUNA · DESPIERTO','#e5c2ff',true);
-   if(b.clock<=0){b.phase='rest';b.clock=50;}
+   if(b.clock<=0){b.phase=e._growthChapter?'warn':'rest';b.clock=50;b.aim=Math.sign(dx)||1;}
   }
  }else if(b.phase==='rest'){
   b.exposed=true;
-  if(--b.clock<=0&&visible&&Math.abs(dx)<900){b.aim=Math.sign(dx)||1;b.phase='warn';b.pattern=PATTERNS[b.attack];b.clock=b.tier===3?35:50;b.exposed=false;}
+  if((--b.clock<=0||e._growthChapter&&e.damageWindowRemaining<=0)&&visible&&Math.abs(dx)<900){b.aim=Math.sign(dx)||1;b.phase='warn';b.pattern=PATTERNS[b.attack];b.clock=b.tier===3?35:50;b.exposed=false;}
  }else if(b.phase==='warn'){
   e.telegraph=true;e.wind=b.clock;
-  if((e.stun||0)>=24){b.phase='rest';b.clock=90;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡ESPÍRITU ATURDIDO!','#ffd6fa',true);}
+  if((e.stun||0)>=24&&!e._growthChapter){b.phase='rest';b.clock=90;b.exposed=true;g.nums?.add?.(e.x,e.y-30,'¡ESPÍRITU ATURDIDO!','#ffd6fa',true);}
   else if(--b.clock<=0){b.phase='attack';b.clock=b.attack===0?28:20;b.burst=0;}
  }else if(b.phase==='attack'){
   e.lunge=b.clock;
@@ -61,7 +65,7 @@ export function updateMichiBoss(e,g,hurt){
    if(b.attack===3){
     // Lunar eclipse starlight barrage from above
     for(let i=-1;i<=1;i++){
-     const sx=p.x+i*80;
+     const sx=e._growthChapter?b.columns[i+1]-9:p.x+i*80;
      g.fx?.emit?.(sx,p.y-120,{color:'#e5c2ff',count:8,size:3,star:true,life:30});
      if((g.projectiles?.length||0)<130){
       g.projectiles.push({x:sx,y:e.y-180,w:18,h:32,vx:0,vy:8,life:90,dmg:b.tier===3?22:15,owner:'enemy',shape:'orb',color:'#ffcbf2'});
@@ -71,7 +75,7 @@ export function updateMichiBoss(e,g,hurt){
    b.burst=1;
   }
   if(b.attack===0){
-   e.x=Math.max(MICHI_BOSS.left,Math.min(MICHI_BOSS.right-e.w,e.x+b.aim*(b.tier===3?9.5:6.2)));
+   e.x=Math.max(arena.left,Math.min(arena.right-e.w,e.x+b.aim*(b.tier===3?9.5:6.2)));
    if(Math.abs(dx)<(e.w+p.w)/2&&Math.abs(p.y+p.h/2-e.y-e.h/2)<(p.h+e.h)/2){
     hurt?.(b.tier===3?22:16,'ZARPAZO ASTRAL');
    }
@@ -80,6 +84,7 @@ export function updateMichiBoss(e,g,hurt){
  }
  e.stun=Math.min(e.stun||0,2);
  e._campaign={wind:e.wind,active:e.lunge,aim:b.aim};
+ chapterBossFinish(e,g,b,previous);
  return true;
 }
 

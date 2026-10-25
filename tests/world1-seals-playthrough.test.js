@@ -1,3 +1,4 @@
+import {nextChapterAbility,NEXT_CHAPTERS} from '../systems/chapters-lunar-prism-embers.js';
 // Mundo 1: regression tests run the production seal state machine in all ten rooms.
 // The tests validate puzzle actions and state, not a simulated browser playthrough.
 import test from "node:test";
@@ -37,14 +38,14 @@ function assertSealed(run, hero) {
   assert.equal(world1Snapshot(game).sealed, true, hero + " seal state");
   assert.deepEqual(game.world1Seals, [hero], hero + " global seal inventory");
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
-  assert.equal(game.score, 150 * (total+(hero==='stitcho'?1:0)), hero + " grants points once per station");
+  assert.equal(game.score, 150 * (total+(['stitcho','cuerno'].includes(hero)?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, ['kilo','stitcho','chispin'].includes(hero)?423:3, hero + " rewards experience");
-  assert.equal(run.saves, total+(hero==='stitcho'?2:hero==='chispin'?1:0), hero + " saves each completed objective once");
+  assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon'].includes(hero)?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon'].includes(hero)?1:0), hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, total+(hero==='stitcho'?2:hero==='chispin'?1:0), "no extra save after completion");
+  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon'].includes(hero)?1:0), "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -124,17 +125,22 @@ test("Michi: a grounded touch is insufficient; jumping wakes all five lunar jell
     tick();
     assert.equal(s.done, true);
   }
+  assert.equal(game.world1.sealed,false,'objectives cannot fabricate a boss win');
+  game.clearedEncounters={'w1-cat':[NEXT_CHAPTERS.cat.bossId]};tick();
   assertSealed(run, "cat");
 });
 
 test("Cuerno: prisms are solved I → II → III on a forward-only route", () => {
   const run = setup("cuerno"), { game, stand, tick } = run;
+  game.player.id='cuerno';stand(1000);nextChapterAbility(game,game.player,0);
   const prisms = [...game.world1.stations].sort((a, b) => a.order - b.order);
   assert.deepEqual(prisms.map((s) => s.order), [0, 1, 2]);
   assert.ok(prisms[0].x < prisms[1].x && prisms[1].x < prisms[2].x, "no forced backtracking");
   stand(prisms[1].x); tick();
   assert.equal(prisms[1].done, false, "must activate I first");
   for (const s of prisms) { stand(s.x); tick(); assert.equal(s.done, true); }
+  assert.equal(game.world1.sealed,false,'objectives cannot fabricate a boss win');
+  game.clearedEncounters={'w1-cuerno':[NEXT_CHAPTERS.cuerno.bossId]};tick();
   assertSealed(run, "cuerno");
 });
 
@@ -146,6 +152,8 @@ test("Dragón: lit braziers require a player strike", () => {
     game.player.melee = 8; tick();
     assert.equal(s.done, true);
   }
+  assert.equal(game.world1.sealed,false,'objectives cannot fabricate a boss win');
+  game.clearedEncounters={'w1-dragon':[NEXT_CHAPTERS.dragon.bossId]};tick();
   assertSealed(run, "dragon");
 });
 
