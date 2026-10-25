@@ -60,7 +60,18 @@ try {
  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();}
  // Outwait the old seven-second reset without moving or modifying objectives.
  s=await step(600);assert.ok(s.world1.done>=earned);
- if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();s=await step(5);}
+ // Several earned form milestones can queue one after another. The HUD
+ // is intentionally hidden for EVERY evolution cinematic. Dismiss each
+ // via the real Continue button before claiming the objective is invisible.
+ for(let n=0;n<12;n++){
+   const cine=page.locator('#evo-stage.show');
+   if(!(await cine.count()))break;
+   await cine.locator('.evo-skip').click();
+   await cine.waitFor({state:'hidden',timeout:20000});
+   await page.locator('#game').focus();
+   s=await step(20);
+ }
+ assert.equal(await page.locator('#evo-stage.show').count(),0,'all earned evolution cinematics must finish before HUD acceptance');
  // Do not dismiss the notification before testing it: dismiss() clears
  // transient messages and races the persistent objective fallback.
  await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Sello 1/4'),
