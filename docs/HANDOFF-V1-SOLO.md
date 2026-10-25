@@ -108,3 +108,30 @@ verificando forma final restaurada; no se confunde con una victoria física.
 El piloto físico sigue ganando sus cinco formas, tres carillones y sello, y ahora
 exige al menos tres ataques ejecutados del Tambor. Stitcho mantiene su piloto.
 La validación automatizada no sustituye una segunda aceptación humana de dificultad.
+
+
+## V504 · contacto real y ruta del cielo
+
+Usuario: pisotones sin daño, contacto lateral inconsistente, objetos invisibles,
+calidad visual de enemigos/Tambor, más actividad aérea y cristales XP.
+Causa confirmada de pisotones: el `continue` de updateCampaignEnemy eludía el bloque
+común de colisión. Ese bloque se extrae a resolveEnemyContact y lo consumen también
+campaña y Tambor. Incluye daño lateral incluso en reposo, rebote por pisotón,
+invulnerabilidad y texto de daño efectivo. La prueba de navegador v504-contact
+usa un enemigo de campaña dormido como fixture explícita y verifica daño real,
+rebote y ausencia de doble daño al aterrizar encima; el mismo enemigo duele de lado.
+
+Kilo añade 42 cristales reales de +XP (24 bajos y 18 elevados), dos vigías aéreos
+y cinco aros secuenciales recorridos en vuelo, con premios únicos guardados.
+La prueba de aros usa acceso/posición/forma como fixtures, y movimiento de vuelo
+real para atravesar cada aro; no acredita una segunda campaña física.
+Tambor: contornos oscuros y detalles de ojos/mazas/tambor. Plataformas finas de
+Kilo llevan bordes dibujados sobre sus rectángulos reales. El reporte de objetos
+invisibles sigue pendiente de ubicación concreta; no se afirma resuelto por entero.
+
+
+Aclaración posterior: los objetos reportados eran probablemente diamantes amarillos,
+uno arriba a la izquierda. Los cristales XP se dibujan ahora con opacidad explícita,
+sin filtro heredado y con contorno oscuro; los diamantes grandes de secreto llevan
+contorno oscuro y rótulo «SECRETO · +18 XP» para distinguirlos. Son mejoras de
+visibilidad y lectura, sin afirmar haber reproducido una desaparición concreta.

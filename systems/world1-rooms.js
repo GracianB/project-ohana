@@ -106,6 +106,9 @@ export function buildWorld1HeroRoom(hero) {
   for (let i = 0; i < sectors.length; i++) orbs.push([Math.round(sectors[i].x + 800), 1040], [Math.round(sectors[i].x + 1250), 980]);
   const stations = sealStations(hero, theme, sectors);
   if(hero==='kilo'){
+    // Visible XP paths: low diamonds before the early forms and aerial arcs.
+    for(const base of [650,3200])for(let i=0;i<12;i++)orbs.push([base+i*105,WORLD1_FLOOR-45]);
+    for(let i=0;i<18;i++)orbs.push([4560+i*100,870-Math.sin(i/17*Math.PI)*230]);
     // Each note has a short encounter suited to the form available on arrival.
     const lessons=[['pursuer','jumper'],['gunner','pursuer'],['shield','pursuer'],['gunner','shield']];
     foes.length=0;
@@ -114,6 +117,7 @@ export function buildWorld1HeroRoom(hero) {
       foes.push([x,y,theme.cast[(i+k)%theme.cast.length],false,{role,name:['Ecos de la orilla','Guardianes del viento','Ronda de pétalos','Último estribillo'][i],anchorY:y,kiloPressure:true,chapterHP:[65,100,150,200][i]}]);
     }));
     foes.push([4680,760,'phosquito',false,{role:'flyer',name:'Vigía de la laguna',anchorY:760,flightBand:{top:550,bottom:820}}],[7930,620,'phosquito',false,{role:'flyer',name:'Guardián del viento',anchorY:620,flightBand:{top:400,bottom:780}}]);
+    foes.push([6120,500,'avispa',false,{role:'flyer',name:'Vigía de los aros',anchorY:500,flightBand:{top:300,bottom:720}}],[8340,420,'phosquito',false,{role:'flyer',name:'Vigía de la corona',anchorY:420,flightBand:{top:240,bottom:650}}]);
     plats.push([4550,890,220,22],[7740,780,220,22],[8050,650,220,22]);
     foes.push([8750,WORLD1_FLOOR-48,'cangrejo',false,{special:true,name:'Tambor del Claro',arena:KILO_CHAPTER_ARENA,encounterId:KILO_CHAPTER_BOSS_ID}]);
     // Keep the floor interaction visible and reachable without guessing a drop.

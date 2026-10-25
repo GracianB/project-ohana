@@ -6,9 +6,8 @@ const encounter=(pressure,active=0)=>{
  const hits=[],g={player:{x:100,y:1094,w:40,h:40},cam:{x:0,y:600},viewW:1200,viewH:700,worldW:9600,worldH:1260,projectiles:[],platforms:[{x:0,y:1134,w:9600,h:126}]};
  updateCampaignEnemy(e,g,n=>hits.push(n));return hits;
 };
-test('Kilo note foes cannot be walked through harmlessly; other chapters retain their combat rules',()=>{
- assert.deepEqual(encounter(true),[8]);assert.deepEqual(encounter(false),[]);
- assert.deepEqual(encounter(true,10),[14]);assert.deepEqual(encounter(false,10),[12]);
+test('campaign AI leaves body damage to the shared collision path, avoiding duplicate hits',()=>{
+ for(const pressure of [true,false])for(const active of [0,10])assert.deepEqual(encounter(pressure,active),[]);
 });
 test('authored window budget is shared by every hit and never makes negative damage or heals',()=>{
  const boss={hp:540,damageTakenScale:1,damageWindowRemaining:180};

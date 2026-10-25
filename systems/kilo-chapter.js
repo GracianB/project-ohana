@@ -26,12 +26,30 @@ export const KILO_AIR_CHIMES=Object.freeze([
  Object.freeze({id:'w1-kilo-wind-chime-2',x:7930,y:480}),
  Object.freeze({id:'w1-kilo-wind-chime-3',x:8280,y:620})
 ]);
+export const KILO_SKY_RINGS=Object.freeze([
+ {id:'w1-kilo-sky-ring-1',x:4900,y:760},
+ {id:'w1-kilo-sky-ring-2',x:5500,y:600},
+ {id:'w1-kilo-sky-ring-3',x:6150,y:400},
+ {id:'w1-kilo-sky-ring-4',x:7720,y:500},
+ {id:'w1-kilo-sky-ring-5',x:8340,y:350}
+].map(Object.freeze));
+export function updateKiloSkyRoute(g){
+ const p=g.player,w=g.world1;if(!kiloChapter(g)||!p||p.dead||!w||!(p._kiloFlightT>0))return;
+ const ring=w.skyRings?.find(r=>!r.done);if(!ring||Math.hypot(p.x+p.w/2-ring.x,p.y+p.h/2-ring.y)>46)return;
+ g.secrets||={};const found=g.secrets['w1-kilo']||=[];ring.done=true;
+ if(found.includes(ring.id))return;found.push(ring.id);
+ const complete=w.skyRings.every(r=>r.done);p.xp=(p.xp||0)+8;g.score=(g.score||0)+(complete?500:100);
+ g.nums?.add?.(ring.x,ring.y-40,complete?'RUTA DEL CIELO COMPLETA · +500':'ARO '+(w.skyRings.filter(r=>r.done).length)+'/5 · +8 XP','#a9f2ff',true);
+ g.onWorld1Beat?.('chime','kilo',2);g.save?.();
+}
 export function enterKiloAirTrail(g){
  if(!kiloChapter(g)||!g.world1)return;
  const found=g.secrets?.['w1-kilo']||[];
  g.world1.airChimes=KILO_AIR_CHIMES.map(ch=>({...ch,done:found.includes(ch.id)}));
+ g.world1.skyRings=KILO_SKY_RINGS.map(r=>({...r,done:found.includes(r.id)}));
 }
 export function updateKiloAirTrail(g){
+ updateKiloSkyRoute(g);
  const p=g.player,w=g.world1;
  if(!kiloChapter(g)||!w||!p||p.dead||p.evo<4||p._kiloFlightMode!=='solar'||!(p._kiloFlightT>0))return;
  for(const ch of w.airChimes||[]){
@@ -43,6 +61,16 @@ export function updateKiloAirTrail(g){
 export function drawKiloAirTrail(ctx,g,cam,t){
  if(!kiloChapter(g))return;
  ctx.save();ctx.textAlign='center';
+ const next=g.world1?.skyRings?.find(r=>!r.done);
+ for(const r of g.world1?.skyRings||[]){
+  const x=r.x-cam.x,y=r.y-cam.y;if(x<-70||x>(g.viewW||1600)+70)continue;
+  ctx.globalAlpha=r.done?.4:r===next?1:.55;ctx.lineWidth=r===next?5:3;ctx.strokeStyle=r.done?'#a6e2b2':'#83e9ff';
+  ctx.beginPath();ctx.ellipse(x,y,30,44,0,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle='#243c46';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,35,49,0,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#efffff';ctx.font='bold 12px sans-serif';ctx.fillText(r.done?'✓':'ARO '+(KILO_SKY_RINGS.indexOf(KILO_SKY_RINGS.find(a=>a.id===r.id))+1)+'/5',x,y-58);
+  if(r===next){ctx.font='11px sans-serif';ctx.fillText('CRUZA VOLANDO · +8 XP',x,y+65);}
+ }
+ ctx.globalAlpha=1;
  for(const ch of g.world1?.airChimes||[]){
   const x=ch.x-cam.x,y=ch.y-cam.y+(g.reduceMotion?0:Math.sin(t*.03+ch.x)*4);
   if(x<-80||x>(g.viewW||1600)+80)continue;

@@ -2039,6 +2039,55 @@ else if (e.evo) dmg = 10;
 if (e.elite) dmg = Math.round(dmg * 1.25);
 return dmg;
 }
+function resolveEnemyContact(e) {
+const p = game.player;
+const solid = !(e.kind === "planta" && !e.up);
+if (p && !p.dead && e.hp>0 && !e.dying && solid && aabb(p, e)) {
+  const kb = Math.sign((p.x + p.w / 2) - (e.x + e.w / 2) || p.facing || 1);
+  const feet = p.y + p.h;
+  const stomp = p.vy > 1.5 && feet - p.vy <= e.y + 8 && p.y < e.y && feet < e.y + e.h;
+  if (stomp) {
+    p.vy = -9.4;
+    p.grounded = false;
+    p.jumps = Math.max(0, (p.jumps || 1) - 1);
+    p.invuln = Math.max(p.invuln || 0, 10);
+    if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
+      const dmg = 8 + (Number(p.evo) || 0) * 2;
+      const hpBefore=e.hp;
+      damageEnemy(e, dmg);
+      registerBossPunish(e);
+      e.vy = 2.4;
+      e.stun = Math.max(e.stun || 0, 10);
+      e.flash = 10;
+      e.invuln = Math.max(e.invuln || 0, 10);
+      if(e.hp<hpBefore)game.nums.add(e.x, e.y - 6, "" + Math.ceil(hpBefore-e.hp), "#fff");
+      punch(e.x, e.y, p.color || "#fff");
+      hitStop(2);
+    } else {
+      e.flash = Math.max(e.flash || 0, 6);
+      game.shake = Math.min(10, (game.shake || 0) + 3);
+      beep("land");
+    }
+    game.fx.emit(p.x + p.w / 2, feet, { color: "#fff", count: 6, size: 2, up: 0.4, life: 12 });
+  } else {
+    const hp0 = p.health;
+    hurtPlayer(dmgFor(e), "-" + dmgFor(e));
+    const took = p.health < hp0;
+    if (took && !p.dead) {
+      p.vx = kb * 11;
+      p.vy = -6.6;
+      p.x += kb * 5;
+      if (!e.boss) e.x -= kb * 7;
+    } else if (!p.dead && !(p._dashGo > 0) && !(p.invuln > 0)) {
+      p.x += kb * 2.4;
+      if (!e.boss) e.x -= kb * 1.6;
+    }
+    if (e.kind === "mosquito" && took) {
+      game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
+    }
+  }
+}
+}
 function updateEnemies() {
 if (!game.player) return;
 // WebRTC host is the single source of enemy decisions during fresh frames.
@@ -2143,8 +2192,8 @@ if(updateFritaBoss(e,game,hurtPlayer))continue;
 if(updatePizzaBoss(e,game,hurtPlayer))continue;
 if(updateYomiBoss(e,game,hurtPlayer))continue;
 if(updateCuernoBoss(e,game,hurtPlayer))continue;
-if(updateGroveGuardian(e,game,hurtPlayer))continue;
-if(updateCampaignEnemy(e,game,hurtPlayer))continue;
+if(updateGroveGuardian(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
+if(updateCampaignEnemy(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
 // Sleep suppresses only decisions and locomotion, preserving contact and deaths.
 const cuernoSleeping = !e.boss && e.sleep > 0;
 if (cuernoSleeping) {
@@ -2690,52 +2739,7 @@ if (!e.telegraph && aiTarget) {
 updateMichiFoeAI(e, game, t, aiTarget);
 solidifyFoe(e);
 }
-const p = game.player;
-const solid = !(e.kind === "planta" && !e.up);
-if (p && !p.dead && !e.dying && solid && aabb(p, e)) {
-  const kb = Math.sign((p.x + p.w / 2) - (e.x + e.w / 2) || p.facing || 1);
-  const feet = p.y + p.h;
-  const stomp = p.vy > 1.5 && feet < e.y + Math.min(28, e.h * 0.5) && p.y < e.y + 8;
-  if (stomp) {
-    p.vy = -9.4;
-    p.grounded = false;
-    p.jumps = Math.max(0, (p.jumps || 1) - 1);
-    p.invuln = Math.max(p.invuln || 0, 10);
-    if (!e.boss && !(e.invuln > 0) && e.hp > 0) {
-      const dmg = 8 + (Number(p.evo) || 0) * 2;
-      damageEnemy(e, dmg);
-      registerBossPunish(e);
-      e.vy = 2.4;
-      e.stun = Math.max(e.stun || 0, 10);
-      e.flash = 10;
-      e.invuln = Math.max(e.invuln || 0, 10);
-      game.nums.add(e.x, e.y - 6, "" + dmg, "#fff");
-      punch(e.x, e.y, p.color || "#fff");
-      hitStop(2);
-    } else {
-      e.flash = Math.max(e.flash || 0, 6);
-      game.shake = Math.min(10, (game.shake || 0) + 3);
-      beep("land");
-    }
-    game.fx.emit(p.x + p.w / 2, feet, { color: "#fff", count: 6, size: 2, up: 0.4, life: 12 });
-  } else {
-    const hp0 = p.health;
-    hurtPlayer(dmgFor(e), "-" + dmgFor(e));
-    const took = p.health < hp0;
-    if (took && !p.dead) {
-      p.vx = kb * 11;
-      p.vy = -6.6;
-      p.x += kb * 5;
-      if (!e.boss) e.x -= kb * 7;
-    } else if (!p.dead && !(p._dashGo > 0) && !(p.invuln > 0)) {
-      p.x += kb * 2.4;
-      if (!e.boss) e.x -= kb * 1.6;
-    }
-    if (e.kind === "mosquito" && took) {
-      game.fx.emit(p.x + p.w / 2, p.y + p.h / 2, { color: "#ff2020", count: 6, size: 2.4, up: 1.0, life: 14 });
-    }
-  }
-}
+resolveEnemyContact(e);
 }
 updateStitchoWebs(game);
 updateDinoHazards(game, (n) => hurtPlayer(n, "-" + n));
@@ -2926,6 +2930,7 @@ function drawCrystal(o) {
 const x = o.x - game.cam.x;
 const y = o.y - game.cam.y + Math.sin(t / 12) * 4;
 ctx.save();
+ctx.globalAlpha=1;ctx.filter='none';
 ctx.translate(x, y);
 ctx.rotate(Math.sin(t / 18) * 0.12);
 ctx.shadowColor = "#ffe66a";
@@ -2935,8 +2940,8 @@ ctx.beginPath();
 ctx.moveTo(0, -12); ctx.lineTo(8, 0); ctx.lineTo(0, 12); ctx.lineTo(-8, 0);
 ctx.closePath();
 ctx.fill();
-ctx.shadowBlur = 0;
-ctx.fillStyle = "rgba(255,255,255,.78)";
+ctx.shadowBlur = 0;ctx.strokeStyle="#45341c";ctx.lineWidth=2;ctx.stroke();
+ctx.fillStyle = "rgba(255,255,255,.9)";
 ctx.beginPath();
 ctx.moveTo(0, -12); ctx.lineTo(3.2, -1); ctx.lineTo(0, 3); ctx.lineTo(-2.2, -4);
 ctx.closePath();
@@ -3039,6 +3044,7 @@ drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChi
 if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
 game.terrainStats=drawTerrain(ctx, game.platforms, world, game.cam, t,{width:camW(),height:camH()});
+if(game.roomDef?.kiloChapter){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
 if(game.michiTrail)drawMichicornioPlatformTrim(ctx,game.platforms,game.cam,t,viewportW,game.reduceMotion||reduceMotion);
 }
 drawDragonTrial(ctx,game,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3906,6 +3912,11 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
+campaignContactTarget(){
+ const p=game.player;const e=makeFoe(650,1094,'cucaracho',game.roomId,0,{rng:()=>.5});
+ Object.assign(e,{x:650,y:1094,w:40,h:40,hp:120,max:120,campaignRole:'pursuer',invuln:0,sleep:99999});
+ game.enemies=[e];game.hitstop=0;p.invuln=0;return {x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp};
+},
 combatTarget(){
  const p=game.player;if(!p)return null;
  const e=makeFoe(p.x+p.w+22,p.y,'cucaracho',game.roomId,0,{rng:()=>.5});
@@ -3921,7 +3932,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
-kiloAirState(){return {chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
+kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
 roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},

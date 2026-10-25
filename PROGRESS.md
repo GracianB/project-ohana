@@ -1,3 +1,15 @@
+# V504 · ohana-504 · Colisiones, contornos y cielo de Kilo
+
+Se unifica el contacto de enemigos de campaña con la colisión real: pisotón,
+rebote, daño lateral, invulnerabilidad y daño efectivo mostrado. La salida temprana
+de su IA estaba evitando los pisotones. Se eliminan los golpes duplicados del
+parche anterior. El Tambor usa también esta ruta, respetando su blindaje real.
+Contornos oscuros en caparazón, ojos, mazas y tambor; bordes visibles en las
+plataformas de Kilo para que el dibujo coincida con la superficie de colisión.
+42 cristales XP nuevos en rutas bajas y elevadas. Ruta opcional de cinco aros,
+cruzados volando en orden, con XP y premio único persistente. Dos vigías aéreos
+adicionales. No se atribuye una causa única a todos los objetos invisibles reportados.
+
 # V503 · ohana-503 · Kilo: amenaza y evolución coherentes
 
 Reapertura explícita por prueba humana: enemigos sin amenaza de contacto, Tambor demasiado

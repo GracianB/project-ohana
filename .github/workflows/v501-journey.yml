@@ -26,6 +26,7 @@ jobs:
       - run: npm run test:browser:powers
       - run: npm run test:browser:kilo-airplay
       - run: npm run test:browser:stitcho-chapter
+      - run: node tests/browser/v504-contact.mjs
       - run: node tests/browser/v503-kilo-save-recovery.mjs
       - run: npm run test:browser:kilo-chapter
       - run: npm run test:browser:worlds
