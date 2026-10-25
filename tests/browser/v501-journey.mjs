@@ -63,13 +63,21 @@ try {
  // Several earned form milestones can queue one after another. The HUD
  // is intentionally hidden for EVERY evolution cinematic. Dismiss each
  // via the real Continue button before claiming the objective is invisible.
- for(let n=0;n<12;n++){
+ let settled=0;
+ for(let n=0;n<40&&settled<4;n++){
    const cine=page.locator('#evo-stage.show');
-   if(!(await cine.count()))break;
-   await cine.locator('.evo-skip').click();
-   await cine.waitFor({state:'hidden',timeout:20000});
-   await page.locator('#game').focus();
-   s=await step(20);
+   if(await cine.count()){
+     await cine.locator('.evo-skip').click();
+     await cine.waitFor({state:'hidden',timeout:20000});
+     await page.locator('#game').focus();
+     s=await step(20);
+     settled=0;
+   }else{
+     // Evolution scenes can queue asynchronously on the next animation
+     // frame. Don't accept one transient frame between two queued scenes.
+     await page.waitForTimeout(150);
+     settled=(await cine.count())?0:settled+1;
+   }
  }
  assert.equal(await page.locator('#evo-stage.show').count(),0,'all earned evolution cinematics must finish before HUD acceptance');
  // Do not dismiss the notification before testing it: dismiss() clears
