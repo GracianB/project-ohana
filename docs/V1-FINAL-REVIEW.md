@@ -110,5 +110,3 @@ Los 42 archivos runtime modificados coinciden por SHA256 con los publicados.
 
 Estas comprobaciones no cierran ninguno de los pendientes artísticos, de balance
 humano o de campaña continua descritos en la tabla. No se declara V1 lista.
-
-
