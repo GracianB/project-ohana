@@ -99,8 +99,20 @@ try {
      await simulate(10);
      journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done});
      if(journal.length>260)journal.shift();
-     if(Math.abs(s.player.x-before)<.3 && !s.world1Cine && frames>12)
-       throw Error('Player physically stuck, no teleport allowed: '+JSON.stringify(journal.slice(-8)));
+     // V511 added real 48px terraced banks. Ordinary walking must NOT phase
+     // through them: climb using the genuine jump key before diagnosing a bug.
+     if(Math.abs(s.player.x-before)<.3 && !s.world1Cine && frames>12){
+       const blocked=s.player.x;
+       if(s.player.grounded){
+         await page.keyboard.down('w'); await simulate(3); await page.keyboard.up('w');
+         await page.keyboard.down(key); s=await simulate(34); await page.keyboard.up(key);
+         await simulate(8);
+         s=await state();
+         journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done,action:'physical jump'});
+       }
+       if(s.player.x<=blocked+.3 && s.player.grounded)
+         throw Error('Player physically stuck after walking AND jumping: '+JSON.stringify(journal.slice(-8)));
+     }
    }
    throw Error('Could not walk to '+target+' in '+roomId+': '+JSON.stringify(journal.slice(-10)));
  }
