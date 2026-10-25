@@ -132,12 +132,15 @@ try{
    if(await page.locator('#ohana-intro.show').count())await page.keyboard.press('Escape');
    await page.clock.runFor(250);
  }
- const hud=await page.evaluate(()=>{
+ const hud=await page.evaluate(async()=>{
+   const {messageManager:manager}=await import('/systems/notify.js');
    const e=document.querySelector('#notification-container'),card=e?.querySelector('[data-persistent="1"]');
-   return {body:document.body.className,rootClass:e?.className,cardClass:card?.className,
-      text:card?.textContent,rendered:card?.innerText,
+   return {body:document.body.className,rootClass:e?.className,rootHTML:e?.innerHTML?.slice(0,900),
+      cardClass:card?.className,text:card?.textContent,rendered:card?.innerText,
       rootVisibility:e?getComputedStyle(e).visibility:null,
       cardVisibility:card?getComputedStyle(card).visibility:null,
+      objective:manager.objective,current:manager.current?.key,currentType:manager.current?.type,
+      activeTimer:!!manager.timer,game:window.__OHANA_E2E.state().world1,
       overlays:[...document.querySelectorAll('[role="dialog"]')].filter(x=>getComputedStyle(x).display!=='none').map(x=>({id:x.id,cls:x.className})).slice(0,7)};
  });
  assert.equal(hud.cardVisibility,'visible','earned Pizza delivery objective must remain visible: '+JSON.stringify(hud));
