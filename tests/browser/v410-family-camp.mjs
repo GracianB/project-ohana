@@ -33,5 +33,10 @@ await fs.mkdir('test-results/visual',{recursive:true});
 for(const [name,width,height] of [['desktop',1440,1050],['mobile',390,844],['landscape',844,390]]){await p.setViewportSize({width,height});await p.locator('.char-card[data-id="cuerno"]').click();await p.waitForTimeout(600);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');
  const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
 assert.equal(await p.locator('.camp-mystery canvas').count(),0);assert.equal(await p.locator('.u-partner-panel').isVisible(),false);
+// Cuerno was selected only to audit the three viewport layouts. A clean
+// campaign has not earned the previous four seals, so entry MUST remain locked.
+// Return to the genuinely unlocked Kilo chapter before checking game start.
+await p.locator('.char-card[data-id="kilo"]').click();
+assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'kilo');
 await p.locator('#camp-start').click();await p.waitForFunction(()=>document.body.classList.contains('playing'));assert.deepEqual(errors,[]);console.log('PASS V410: ten heroes × five real forms, stats, voluntary films, saved-game isolation, Canvas hit selection, keyboard walking, mystery and desktop/mobile/landscape');
 }finally{await browser?.close();s.closeAllConnections();await new Promise(r=>s.close(r));}
