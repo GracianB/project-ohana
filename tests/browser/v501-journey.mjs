@@ -11,6 +11,13 @@ try {
  page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.__OHANA_E2E);
+ // The real welcome is a modal and intentionally hides the gameplay HUD.
+ // Finish it through its supported Escape control BEFORE testing objective
+ // visibility. The old pilot started gameplay behind the cinematic.
+ if(await page.locator('#ohana-intro.show').count()){
+   await page.keyboard.press('Escape');
+   await page.waitForFunction(()=>!document.body.classList.contains('intro-pending'));
+ }
  const traversal=await page.evaluate(async()=>{
   const {Portals,portalBlockReason}=await import('/systems/portals.js');
   const p={x:110,y:104,w:32,h:42,vx:2,vy:0,grounded:true,evo:4};
