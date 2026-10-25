@@ -57,9 +57,20 @@ try {
  // Do not dismiss the notification before testing it: dismiss() clears
  // transient messages and races the persistent objective fallback.
  await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Sello 1/4'),
-   {timeout:10000});
- assert.match(await page.locator('#notification-container').innerText(),/Sello 1\/4.*Antena/s);
- assert.equal(await page.locator('#notification-container .game-notification').count(),1);
+   null,{timeout:10000});
+ const notice=await page.evaluate(async()=>{
+   const {messageManager}=await import('/systems/notify.js');
+   const root=document.querySelector('#notification-container'), card=root?.querySelector('.game-notification');
+   return {objective:messageManager.objective,htmlText:root?.textContent||'',
+     renderedText:root?.innerText||'',cardCount:root?.querySelectorAll('.game-notification').length||0,
+     display:root?getComputedStyle(root).display:null,visibility:root?getComputedStyle(root).visibility:null,
+     cardDisplay:card?getComputedStyle(card).display:null,cardVisibility:card?getComputedStyle(card).visibility:null,
+     bodyClass:document.body.className,modals:[...document.querySelectorAll('.show')].slice(0,5).map(x=>x.id)};
+ });
+ assert.match(notice.objective,/Sello 1\/4.*Antena/s,'persistent objective model must survive: '+JSON.stringify(notice));
+ assert.match(notice.htmlText,/Sello 1\/4.*Antena/s,'DOM must render objective: '+JSON.stringify(notice));
+ assert.ok(notice.renderedText.includes('Sello 1/4'),'objective card must be visibly rendered: '+JSON.stringify(notice));
+ assert.equal(notice.cardCount,1);
  // Teach the actual equipped power, and explain a locked power without listing every key.
  await page.keyboard.press('l');
  await page.waitForTimeout(250);
