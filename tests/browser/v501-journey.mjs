@@ -83,21 +83,37 @@ try {
 
  await page.setViewportSize({width:1440,height:900});
  s=await step(600);let deaths=0,lastX=s.player.x;
- await page.locator('#game').focus();await page.keyboard.down('d');
+ const antennaX=[2160,3760,5360,7280]; // real authored station coordinates
+ await page.locator('#game').focus();
  for(let i=0;i<500&&s.world1.done<4;i++){
-  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();await page.keyboard.down('d');}
+  if(await page.locator('#evo-stage.show .evo-skip').count()){
+   await page.locator('#evo-stage .evo-skip').click();
+   await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});
+   await page.locator('#game').focus();
+  }
   if(s.hp<=0){
    assert.ok(++deaths<=12,'too many natural retries on the antenna route');
-   await page.keyboard.up('d');
+   await page.keyboard.up('d');await page.keyboard.up('a');
    s=await page.evaluate(()=>window.__OHANA_E2E.respawn());
-   await step(600);await page.keyboard.down('d');
+   await step(600);continue;
   }
-  await page.keyboard.press('h');await page.keyboard.press('j');
-  if(s.evo>=2)await page.keyboard.press('l');
-  if(i%4===0||Math.abs(s.player.x-lastX)<1)await page.keyboard.press('Space');
-  lastX=s.player.x;s=await step(24);
+  const target=antennaX[s.world1.done];
+  const dx=target-(s.player.x+18);
+  const dir=dx>=0?'d':'a',other=dx>=0?'a':'d';
+  await page.keyboard.up(other);
+  if(Math.abs(dx)>48)await page.keyboard.down(dir);else await page.keyboard.up(dir);
+  if(s.player.grounded && (i%9===0 || Math.abs(s.player.x-lastX)<.7) && Math.abs(dx)>80){
+   // Physics-driven jump at the V511 banks, never an injected position.
+   await page.keyboard.down('w');await step(4);await page.keyboard.up('w');
+  }
+  if(Math.abs(dx)>90){
+   await page.keyboard.press('h');await page.keyboard.press('j');
+   if(s.evo>=2&&i%7===0)await page.keyboard.press('l');
+  }
+  lastX=s.player.x;
+  s=await step(Math.abs(dx)<55?18:Math.max(5,Math.min(26,Math.floor(Math.abs(dx)/6))));
  }
- await page.keyboard.up('d');
+ await page.keyboard.up('d');await page.keyboard.up('a');
  assert.equal(s.world1.done,4,'all four antennas must work through real movement and combat');
  assert.equal(s.world1.sealed,false,'four antennas require the chapter Titan before a new seal');assert.ok(!s.world1Seals.includes('chispin'));
  await page.screenshot({path:'test-results/v501/antenna-network-complete.png'});
