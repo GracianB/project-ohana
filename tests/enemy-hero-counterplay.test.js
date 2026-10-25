@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {heroCounterplay} from '../systems/enemy-hero-counterplay.js';
 import {directEnemyEncounter,enemyDirectorSnapshot} from '../systems/enemy-director.js';
+import {updateCampaignEnemy} from '../systems/campaign-enemies.js';
 const e=(kind,index,x)=>({kind,spawnIndex:index,x,y:500,w:30,h:30,hp:100,max:100,aggro:0,vx:0,vy:0});
 const p=(id,extra={})=>({id,x:300,y:500,w:32,h:38,vx:0,vy:0,grounded:true,...extra});
 test('V2: falling Dino provokes physical flanks, not arbitrary damage buffs',()=>{
@@ -45,4 +46,19 @@ test('V2: active windups are committed, unknown heroes never receive secret coun
  assert.equal(plan.budget,2);
  assert.equal(committed.aiAttackPermit,true);
  assert.notEqual(committed.aiIntent,'FLANK');
+});
+
+test('V2: campaign combat actually consumes the hero-specific steering order',()=>{
+ const heavy=p('dino',{y:390,vy:9,grounded:false});
+ const foe=e('cangrejo',0,460);foe.campaignRole='pursuer';
+ const g={player:heavy,roomId:'w1-dino',roomDef:{composition:true},
+  cam:{x:0,y:0},viewW:1000,viewH:800,
+  worldW:1600,worldH:1260,platforms:[],projectiles:[],enemies:[foe]};
+ directEnemyEncounter(g.enemies,heavy,g.roomId,60);
+ assert.equal(foe.aiIntent,'FLANK');
+ const startingX=foe.x;
+ updateCampaignEnemy(foe,g);
+ assert.ok(Number.isFinite(foe.x));
+ assert.notEqual(foe.x,startingX,'movement must consume the tactic in actual combat');
+ assert.ok(foe._campaign.age===1,'the existing campaign brain remains authoritative');
 });
