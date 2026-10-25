@@ -1,6 +1,7 @@
 const VERSION = "ohana-514";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/enemy-hero-counterplay.js?v=" + VERSION,
   "./characters/identity-v2.js?v=" + VERSION,
   "./characters/anatomical-stride.js?v=" + VERSION,
   "./systems/chapter-encounters.js?v=" + VERSION,
@@ -396,7 +397,7 @@ const PRECACHE_REVISIONS = {
   "systems/chispin-chapter.js": "4c8b4ef255cccf3336705ce113d1afcd92a49bc3",
   "systems/stitcho-chapter.js": "b604a89aa75553340676550445d99e998da8a578",
   "worlds/ohana-environments.js": "e60b22629e89deb9a7d8dd4bfc580ada287f0a1d",
-  "systems/kilo-chapter.js": "8e2fad1201bd1238b4ee86c12bcd45b6fd67592b",
+  "systems/kilo-chapter.js": "378fc4a1a204c8cf941a86b50cd337eb43887024",
   "systems/power-status.js": "69cb9fdeeb5826b6b0e89ce6ad8e65471d28ffab",
   "systems/world1-guidance.js": "c743a9b6bc00648ea4669d891e002332cca5f559",
   "systems/family-memory.js": "80dcd068ad919a8da3ae1722ac8207e99c233e42",
@@ -691,7 +692,7 @@ const PRECACHE_REVISIONS = {
   "systems/menu-visibility.js": "4a779b567eaf1c0a4d8fa9c4c056c10816410382",
   "systems/combat-difficulty.js": "ff67d1df4a5650a086435fff4fa0fa8e42d5ada1",
   "systems/encounter-memory.js": "cfcd990a7610e00960ecb902c873112e2c3dede3",
-  "systems/enemy-director.js": "d4de70836a3001990e8c5541dd59f5be709d3b8a",
+  "systems/enemy-director.js": "4f9df014a38c8e8aa45f216d8ebb90648c40641c",
   "systems/encounter-spatial.js": "4f50b64880f8182f0db121dd353067eba2276668",
   "systems/encounter-signals.js": "70b550e019561332fa598584938c888edf40106b",
   "systems/enemy-ecology.js": "b50f47be30c5ddb5e86de25986ed737529367d0d",
@@ -764,7 +765,8 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f"
+  "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f",
+  "systems/enemy-hero-counterplay.js": "3ed7df907f0a349cdb92aab12c7e539ad566ca78"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
