@@ -41,7 +41,11 @@ try{
    if(Math.abs(dx)>18)await page.keyboard.down(dx>0?'d':'a');
    if(Math.abs(dx)<100 && state.player.grounded && state.player.y<1000)await page.keyboard.down('s');else await page.keyboard.up('s');
    await page.keyboard.press('h');await page.keyboard.press('j');
-   if(Math.abs(state.player.x-lastX)<1&&Math.abs(dx)>60&&n%8===0)await page.keyboard.press('Space');
+   // V511 adds 48px terrace banks. Space taps were not a reliable
+   // physical jump; hold the real W key long enough to cross the ledge.
+   if(Math.abs(state.player.x-lastX)<1&&Math.abs(dx)>60&&state.player.grounded){
+     await page.keyboard.down('w');await step(4);await page.keyboard.up('w');
+   }
    lastX=state.player.x;state=await step(8);
   }
   await page.keyboard.up('d');await page.keyboard.up('a');await page.keyboard.up('s');
