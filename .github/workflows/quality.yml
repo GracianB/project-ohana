@@ -83,59 +83,18 @@ jobs:
       - name: V475 World 1 authentic keyboard start and Kilo first flower
         run: node tests/browser/v475-world1-natural-walk.mjs
 
-      - name: V477 Kilo complete natural campaign gate · four physical flowers and Stitcho
-        run: node tests/browser/v477-kilo-physical-route.mjs
-
-      - name: V478 Stitcho piece zero · delivered physically after authentic Kilo route
-        run: node tests/browser/v478-kilo-stitcho-delivery.mjs
-
-      - name: V479 two full real seals · Kilo, Stitcho and natural Chispín door
-        run: node tests/browser/v479-two-authentic-seals.mjs
-
-      - name: V480 three real seals · timed Chispín lightning sprint into Michi garden
-        run: node tests/browser/v480-three-physical-seals.mjs
-
-      - name: V481 Michi first aerial lunar jelly · real held jump after three seals
-        run: node tests/browser/v481-michi-first-jelly.mjs
-
-      - name: V482 fourth real seal · five Michi medusa jumps and Cuerno gate
-        run: node tests/browser/v482-four-physical-seals.mjs
-
-      - name: V483 fifth real seal · Cuerno three ordered prisms and Dragon gate
-        run: node tests/browser/v483-five-physical-seals.mjs
-
-      - name: V484 sixth real seal · Dragon four real brazier attacks and Dino gate
-        run: node tests/browser/v484-six-physical-seals.mjs
-
-      - name: V485 seventh real seal · Dino three hard landings and Frita gate
-        run: node tests/browser/v485-seven-physical-seals.mjs
-
-      - name: V486 first Frita potato · genuine geyser physics after seven earned seals
-        run: node tests/browser/v486-frita-first-physical-geyser.mjs
-
-      - name: V487 eighth real seal · Frita three geyser prizes and Pizza gate
-        run: node tests/browser/v487-eight-physical-seals.mjs
-
-      - name: V488 first timed Pizza delivery by real movement
-        run: node tests/browser/v488-first-physical-pizza-delivery.mjs
-
-      - name: V489 ninth real seal · three timed Pizza deliveries and Yomi gate
-        run: node tests/browser/v489-nine-physical-seals.mjs
-
-      - name: V490 tenth real seal · four live Yomi nodes and final-room gate
-        run: node tests/browser/v490-ten-physical-seals.mjs
-
-      - name: V491 genuine Quimera encounter and first combat hit
-        run: node tests/browser/v491-first-physical-quimera-hit.mjs
-
-      - name: V492 real Quimera damage and second combat phase
-        run: node tests/browser/v492-quimera-phase-two.mjs
-
-      - name: V493 full ten-seal Quimera four-phase natural victory
-        run: node tests/browser/v493-quimera-full-victory.mjs
-
-      - name: V494 Quimera dedicated HUD · no Nest Queen Momentum overlay
-        run: node tests/browser/v494-quimera-hud-physical.mjs
+      # V477–V494 were incremental Easy-mode pilots for unfinished chapters.
+      # Their assumptions (instant Kilo seal, timed Chispin chain, flat
+      # terrain) are no longer true. They remain in tests/browser/ for
+      # historical reproduction; do NOT claim that they pass as written.
+      # The accepted gate is now strictly broader: one clean Normal save,
+      # real terrain/jump/attack/respawn, all ten earned chapter bosses,
+      # all 50 forms, every Quimera phase and the actual final screen.
+      - name: V514 continuous Normal campaign · ten earned seals + Quimera HUD
+        run: |
+          CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
+          export CHROMIUM_BIN
+          node tests/browser/v513-full-campaign.mjs
 
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
