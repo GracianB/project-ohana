@@ -104,8 +104,14 @@ try {
       if(Math.abs(gap)>=34){
         const motion = gap>=0?'d':'a';
         const frames = Math.max(2,Math.min(75,Math.floor((Math.abs(gap)-36)/6)));
+        const beforeX=s.player.x;
         s = await key(motion,frames);
         await step(8);
+        if(Math.abs(s.player.x-beforeX)<.4 && s.player.grounded){
+          await key('w',4);
+          s=await key(motion,35);
+          await step(8);
+        }
       }
       if(n%10===0) {
         const snap=await state();
