@@ -1,4 +1,4 @@
-name: V487 physical Frita seal gate
+name: V600 physical campaign compatibility gate
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   physical-frita:
-    name: Eight earned seals and natural Pizza entry
+    name: Ten earned seals and thirty real discoveries
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -27,13 +27,13 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Install Chromium
         run: npx playwright install chromium
-      - name: Frita physical three-geyser eight-seal run
+      - name: Full Normal campaign including three Frita geysers and discoveries
         run: node tests/browser/v487-eight-physical-seals.mjs
       - name: Preserve actual physical evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v487-physical-evidence
-          path: test-results/v487/
+          path: test-results/v600/
           if-no-files-found: ignore
           retention-days: 7
