@@ -22,12 +22,14 @@ try{
   for(let k=0;k<10;k++){
    const cine=page.locator('#evo-stage.show');
    if(!(await cine.count()))break;
+   const description=await cine.locator('#evo-description').textContent();
    await cine.locator('.evo-skip').click();
    // Playwright's virtual clock is paused in this suite. The Continue
    // button marks the cinematic to close on an animation frame, so let
    // that real renderer frame run before checking visibility.
-   for(let frames=0;frames<6&&await cine.count();frames++)await page.clock.runFor(350);
-   assert.equal(await cine.count(),0,'Continue must close the earned evolution cinematic');
+   for(let frames=0;frames<6&&await cine.count()&&await cine.locator('#evo-description').textContent()===description;frames++)await page.clock.runFor(350);
+   // Finishing one earned form may immediately open the next queued form.
+   assert.ok(!(await cine.count())||await cine.locator('#evo-description').textContent()!==description,'Continue must close this earned evolution cinematic');
   }
   return page.evaluate(()=>window.__OHANA_E2E.state());
  };

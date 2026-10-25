@@ -94,7 +94,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const selectHero=(id,walk=false)=>{choose(id,walk);select(id);};
  addEventListener('ohana-title-hero',e=>{if(e.detail.id!==selected)choose(e.detail.id);});
  host.querySelector('.camp-forms').addEventListener('click',e=>{const b=e.target.closest('[data-camp-form]');if(b){form=Number(b.dataset.campForm);update();}});
- $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
+ $('camp-film').onclick=()=>{film={id:selected,start:time};$('camp-line').textContent=campPresentation(selected,0).line;$('camp-film-stop').hidden=false;$('camp-film').hidden=true;};
  $('camp-film-stop').onclick=()=>{film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;$('camp-line').textContent=CAMP_HEROES[selected].lines[0];};
  $('camp-start').onclick=()=>w1sel?w1enter(world1SelectKey(w1sel,'Enter')):onBegin();
  function position(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)/view.scale+view.x,y:(e.clientY-r.top)/view.scale};}
