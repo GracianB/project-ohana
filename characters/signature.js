@@ -1,3 +1,4 @@
+import {HERO_IDENTITY} from './identity-v2.js';
 // Cómo pega y cómo sale cada personaje. El arte ya los distingue; esto, el tacto.
 // H sigue siendo un golpe cercano. J K L no viven aquí.
 
@@ -58,7 +59,7 @@ export function markAt(id, evo) {
     kind: base.kind,
     color: base.color,
     style: "arc",
-    dmg: 20 + i * 4 + sig.dmg,
+    dmg: Math.round((20 + i * 4 + sig.dmg)*(HERO_IDENTITY[key]?.melee||1)),
     reach: 64 + i * 3 + sig.reach,
     kb: sig.kb,
     dash: sig.dash,

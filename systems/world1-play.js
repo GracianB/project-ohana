@@ -1,3 +1,4 @@
+import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
 import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
@@ -42,6 +43,7 @@ export function enterWorld1(g) {
     statuesLit: r.statues ? r.statues.map((s) => g.world1Seals.includes(s.hero)) : null
   };
   kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);nextChapterGrowth(g);enterKiloAirTrail(g);
+  enterExpedition(g);
   return g.world1;
 }
 
@@ -94,13 +96,14 @@ export function restoreWorld1DeathCheckpoint(g, checkpoint) {
 
 export function world1Snapshot(g) {
   const w = g.world1; if (!w) return null;
-  return { room: w.room, hero: w.hero, kind: w.kind, done: w.stations.filter((s) => s.done && s.kind !== "oven").length, total: WORLD1_SEALS[w.kind]?.count || 0, sealed: w.sealed, seals: [...(g.world1Seals || [])] };
+  return { room: w.room, hero: w.hero, kind: w.kind, done: w.stations.filter((s) => s.done && s.kind !== "oven").length, total: WORLD1_SEALS[w.kind]?.count || 0, sealed: w.sealed, expedition:g.expedition?{done:g.expedition.done.length,total:3}:null, seals: [...(g.world1Seals || [])] };
 }
 
 // One actionable objective, shared by HUD, pause and the world marker.
 export function world1NextObjective(g) {
   const w = g?.world1, p = g?.player, r = g?.roomDef;
   if (!w || !p || !r || r.fusionBoss) return null;
+  const expedition=expeditionObjective(g);if(expedition)return expedition;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:8750,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
   const workshopGoal=stitchoObjective(g)||chispinObjective(g)||nextChapterObjective(g);if(workshopGoal)return workshopGoal;
@@ -171,7 +174,7 @@ function complete(g, s, label) {
 }
 
 export function awardSeal(g) {
-  const w = g.world1; if (!w || w.sealed || !w.hero || !stitchoChapterReady(g) || !chispinChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
+  const w = g.world1; if (!w || w.sealed || !w.hero || !expeditionReady(g) || !stitchoChapterReady(g) || !chispinChapterReady(g) || !nextChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
   w.sealed = true; w.flash = 40;
   g.world1Seals = cleanWorld1Seals([...(g.world1Seals || []), w.hero]);
   const p = g.player;
@@ -192,7 +195,8 @@ export function updateWorld1(g,hurt) {
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
   updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
-  if (w.sealed) {if(r.dinoChapter){trackDinoAir(g);w.wasGrounded=!!p.grounded;}return;}
+  if (w.sealed) {updateExpedition(g);if(r.dinoChapter){trackDinoAir(g);w.wasGrounded=!!p.grounded;}return;}
+  updateExpedition(g);
   kiloNoteGrowth(g);
   if(r.growthChapter&&w.stations.every(s=>s.kind==='oven'||s.done)&&nextChapterReady(g)){awardSeal(g);return;}
   if(r.chispinChapter&&w.stations.every(s=>s.done)&&chispinChapterReady(g)){awardSeal(g);return;}
@@ -346,6 +350,7 @@ function drawEmblem(ctx, hero, x, y, s, color) {
 }
 
 export function drawWorld1(ctx, g, cam, t) {
+  drawExpedition(ctx,g,cam,t);
   const w = g.world1, r = g.roomDef; if (!w || !r) return;
   const reduce = !!g.reduceMotion, col = WORLD1_THEMES[w.hero]?.color || "#ffd6f2";
   const vis = (x) => x - cam.x > -200 && x - cam.x < (g.viewW || 1600) + 200;

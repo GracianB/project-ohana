@@ -1,3 +1,4 @@
+import {HERO_IDENTITY} from '../characters/identity-v2.js';
 import {markAt} from '../characters/signature.js';
 import {WORLD1_CHAPTER_PLANS} from './world1-rooms.js';
 import {drawFamilyIslands,pairedScene} from "./family-islands.js";
@@ -76,7 +77,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div><div><dt>Saltos</dt><dd>${f.jumps}</dd></div><div><dt>Golpe H</dt><dd>${markAt(selected,form).dmg}</dd></div>`;
  $('camp-powers').textContent=def.abilities.map((id,i)=>['J','K','L'][i]+' · '+(ABILITY_DEFS[id]?.name||id)).join(' / ');
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
- $('camp-line').textContent=data.lines[0];host.dataset.hero=selected;host.dataset.form=String(form);
+ $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].cost;host.dataset.hero=selected;host.dataset.form=String(form);
  }
  function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;
  // Keep keyboard focus and the Canvas portal selection in sync with the HTML hero cards.

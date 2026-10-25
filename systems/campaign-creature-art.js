@@ -13,7 +13,7 @@ export const CHAPTER_FAUNA=Object.freeze({
  pizza:{name:'Diablillos de masa',body:'#dcaa80',light:'#ffe1ad',dark:'#97635a'},
  yomi:{name:'Grullas de papel astral',body:'#8bbed0',light:'#ebf1d8',dark:'#506d91'}
 });
-function oval(c,x,y,rx,ry,col,a=0){c.fillStyle=col;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),a,0,TAU);c.fill();c.stroke();}
+function oval(c,x,y,rx,ry,col,a=0){c.fillStyle=col;if(rx>12&&ry>9){const g=c.createLinearGradient(x-rx,y-ry,x+rx,y+ry);g.addColorStop(0,'#f8e6c7');g.addColorStop(.28,col);g.addColorStop(1,INK);c.fillStyle=g;}c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),a,0,TAU);c.fill();c.stroke();}
 function path(c,col,points){c.fillStyle=col;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();c.stroke();}
 function line(c,col,w,fn){c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();}
 function eyes(c,x,y,space,wind,hurt){
@@ -31,7 +31,7 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
  const a=e._campaign||{},time=reduced?0:t,phase=time*.19+(e.spawnIndex||0),run=Math.abs(e.vx||0)>.4,
   wind=(a.wind||0)>0,active=(a.active||0)>0,hurt=e.invuln>0||e.stun>5,
   step=run?Math.sin(phase):0,face=Math.sign(e.vx)||a.aim||1;
- const height=Math.max(38,Math.min(105,(e.h||32)*1.45)),scale=height/64;
+ const height=Math.max(62,Math.min(126,(e.h||42)*1.65)),scale=height/64;
  c.save();c.translate(e.x+e.w/2-cam.x,e.y+e.h-cam.y);c.scale(scale*face,scale);
  c.globalAlpha=e.dying?Math.max(0,1-e.dying/32):1;c.lineJoin='round';c.lineCap='round';c.lineWidth=1.8;c.strokeStyle=INK;
  if(e.campaignRole==='flyer')c.translate(0,reduced?0:Math.sin(time*.08)*2);
@@ -99,6 +99,14 @@ export function drawCampaignCreature(c,e,cam,t,reduced=false){
   c.save();c.globalAlpha=.55;c.strokeStyle=P.light;c.lineWidth=1.3;
   oval(c,side*24,-39,15,7,P.light,side*(reduced?-.25:Math.sin(time*.25)*.5));c.restore();
  }
+ // Hero-specific surface anatomy: segmented shell, feathers, gills or armour.
+ c.strokeStyle=P.dark;c.lineWidth=1.1;
+ if(['dino','cuerno','kilo'].includes(hero))for(let k=-2;k<=2;k++){c.beginPath();c.moveTo(k*8,-40);c.quadraticCurveTo(k*10+5,-30,k*8,-17);c.stroke();}
+ if(['chispin','yomi'].includes(hero))for(let side of [-1,1])for(let k=0;k<3;k++){c.strokeStyle=P.dark;c.beginPath();c.moveTo(side*9,-31);c.lineTo(side*(21+k*4),-45+k*7);c.stroke();}
+ if(hero==='dragon')for(let k=-2;k<=1;k++){c.fillStyle=P.light;c.beginPath();c.moveTo(k*7,-35);c.lineTo(k*7+4,-44);c.lineTo(k*7+8,-33);c.fill();c.stroke();}
+ if(hero==='stitcho'){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.moveTo(-18,-40);c.quadraticCurveTo(-11,-50,0,-46);c.stroke();c.fillStyle='#f1be91';c.fillRect(-16,-22,4,3);c.fillRect(10,-22,4,3);}
+ if(['frita','pizza'].includes(hero)){c.strokeStyle=P.dark;c.beginPath();c.moveTo(2,-29);c.quadraticCurveTo(10,-22,18,-29);c.stroke();}
+ if(hero==='cat'){c.strokeStyle=P.light;for(let side of [-1,1]){c.beginPath();c.moveTo(side*15,-28);c.quadraticCurveTo(side*38,-23,side*39,-32);c.stroke();}}
  if(wind){c.strokeStyle=P.light;c.lineWidth=2;c.beginPath();c.arc(18,-35,7+(Math.sin(time*.3)+1),-.8,.8);c.stroke();}
  c.restore();
  if(e.hp<e.max&&e.hp>0){const x=e.x-cam.x,y=e.y-cam.y-10;c.save();c.fillStyle='#1b2b40';c.fillRect(x,y,e.w,4);c.fillStyle=P.light;c.fillRect(x,y,e.w*Math.max(0,e.hp/e.max),4);c.restore();}

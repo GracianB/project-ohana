@@ -1,3 +1,4 @@
+import {authorExpedition} from './chapter-expedition-v2.js';
 import {composeChapterRoom} from './chapter-room-composition.js';
 import {KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 import {OHANA_PLACES} from "../worlds/ohana-environments.js";
@@ -14,7 +15,7 @@ export function world2Locked(id, state = {}) {
   if (WORLD2_OPEN || !state.solo || state.e2e) return false;
   return typeof id === "string" && !Object.hasOwn(WORLD1_ROOMS, id);
 }
-export const WORLD1_ROOM_W = 9600;
+export const WORLD1_ROOM_W = 14400;
 export const WORLD1_FINAL_W = 12000;
 export const WORLD1_ROOM_H = 1260;
 export const WORLD1_FLOOR = 1134;
@@ -76,7 +77,7 @@ export function buildWorld1HeroRoom(hero) {
   const theme = WORLD1_THEMES[hero];
   if (!theme) throw new Error("Unknown World 1 hero: " + hero);
   const id = "w1-" + hero, idx = WORLD1_ORDER.indexOf(hero), r = rng(hash(id));
-  const W = WORLD1_ROOM_W, sw = W / theme.sectors.length;
+  const W = 9600, sw = W / theme.sectors.length;
   const plats = [[0, WORLD1_FLOOR, W, 126]];
   const sectors = theme.sectors.map((name, i) => ({ id: `${id}-${i}`, name, x: i * sw, w: sw, role: ["explore","combat","platform","secret","rest","explore"][i] }));
   const checkpoints = sectors.map((s, i) => ({ id: s.id, x: Math.round(s.x + (i ? 140 : 220)), y: WORLD1_FLOOR, sector: i }));
@@ -183,7 +184,7 @@ export function buildWorld1HeroRoom(hero) {
   }
   const prev = idx > 0 ? "w1-" + WORLD1_ORDER[idx - 1] : null;
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
-  return composeChapterRoom(hero,{
+  return authorExpedition(hero,composeChapterRoom(hero,{
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
     world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino',pizzaChapter:hero==='pizza',fritaChapter:hero==='frita',yomiChapter:hero==='yomi', growthChapter:['cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(hero)?hero:null,
@@ -193,7 +194,7 @@ export function buildWorld1HeroRoom(hero) {
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
-  });
+  }));
 }
 
 // Las estaciones de cada sello se reparten por los sectores 1–4 para que la

@@ -1,3 +1,4 @@
+import {memoryBenefits,startMemoryCelebration,MEMORY_REWARDS} from './memory-rewards-v2.js';
 // OHANA V467 · MUNDO 1 · Coleccionables unificados (objetos + álbumes = UNO).
 // Antes había dos sistemas: "100 objetos por sala" (ohana-room-albums-v1) y
 // "100 álbumes personales" (ohana-hero-100-v1:<héroe>). Ahora cada sala grande
@@ -134,7 +135,8 @@ export function takeWorld1Item(g, id) {
   g.fx?.emit?.(num(p?.x) + num(p?.w) / 2, num(p?.y), {color:th.color,count:g.reduceMotion?2:5,size:2,life:18,up:1});
   if (a.found.length === 1) g.nums?.add?.(num(p?.x), num(p?.y) - 20, "PRIMER RECUERDO · ÁLBUM 1/100", th.color, false);
   if (pageDone(a, page)) { ui.toast = { t: 0, max: 150, text: `Página ${page + 1} completa · ${PAGE_TITLES[page]}`, color: th.color }; g.onWorld1Beat?.("album-page", hero, page); if (p) p.health = Math.min(num(p.maxHealth, p.health), num(p.health) + 10); }
-  if (a.found.length === ALBUM_SIZE && !a.relic) { a.relic = true; ui.toast = { t: 0, max: 240, text: `¡Álbum completo! Reliquia: ${th.relic}`, color: "#fff1b5", big: true }; g.onWorld1Beat?.("album-relic", hero); }
+  if (a.found.length === ALBUM_SIZE && !a.relic) { a.relic = true; ui.toast = { t: 0, max: 240, text: `¡Álbum completo! Reliquia: ${th.relic}`, color: "#fff1b5", big: true }; g.onWorld1Beat?.("album-relic", hero); startMemoryCelebration(g,hero); }
+  if([25,50].includes(a.found.length))g.onWorld1Beat?.('album-unlock',hero,a.found.length);
   persist(g); g.save?.();
   return true;
 }
@@ -144,8 +146,9 @@ export function updateWorld1Collect(g) {
   if (ui?.toast && ++ui.toast.t >= ui.toast.max) ui.toast = null;
   if (!p || p.dead || !g.world1CollectHero || ui?.open) return;
   const a = g.world1Collect.rooms[g.world1CollectHero], have = new Set(a.found);
+  const benefit=memoryBenefits(a.found.length),rx=benefit.magnet?58:26,ry=benefit.magnet?62:34;
   const px = num(p.x) + num(p.w, 24) / 2, py = num(p.y) + num(p.h, 30) / 2;
-  for (const it of g.world1CollectItems || []) if (!have.has(it.id) && Math.abs(px - it.x) < 26 && Math.abs(py - it.y) < 34) takeWorld1Item(g, it.id);
+  for (const it of g.world1CollectItems || []) if (!have.has(it.id) && Math.abs(px - it.x) < rx && Math.abs(py - it.y) < ry) takeWorld1Item(g, it.id);
 }
 
 export function toggleWorld1Album(g, open) { const ui = (g.world1CollectUI ||= { open: false, page: 0, toast: null }); ui.open = open ?? !ui.open; g.renderDirty = true; return ui.open; }
@@ -171,7 +174,10 @@ export function syncWorld1Album(g, doc = globalThis.document) {
   root.querySelector("h2").textContent = view.title;
   root.querySelector(".album-count").textContent = `${view.count}/100 recuerdos · colección opcional`;
   root.querySelector(".album-page-title").textContent = view.heading + (view.complete ? " ✓" : "");
-  root.querySelector(".album-reward").textContent = view.relic ? "Reliquia conseguida: " + view.relic : "Cada página completa recupera hasta 10 de vida. Los 100 recuerdos reúnen la reliquia de esta sala.";
+  root.querySelector(".album-reward").textContent = view.relic ? "Reliquia: " + view.relic + " · Firma permanente: " + MEMORY_REWARDS[view.hero][2] : "Cada página: +10 vida · 25: brújula en el mapa · 50: imán de recuerdos · 100: celebración propia y firma visual permanente.";
+  let replay=root.querySelector('[data-memory-replay]');
+  if(!replay){replay=doc.createElement('button');replay.type='button';replay.dataset.memoryReplay='true';replay.textContent='Ver mi celebración';root.querySelector('.album-reward').after(replay);replay.onclick=()=>{toggleWorld1Album(g,false);startMemoryCelebration(g,g.world1CollectHero,true);};}
+  replay.hidden=!view.relic;
   const grid=root.querySelector("ol");
   grid.replaceChildren(...view.cards.map(card=>{
     const li=doc.createElement("li");li.className=card.found?"found":"pending";

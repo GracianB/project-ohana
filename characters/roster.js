@@ -1,3 +1,4 @@
+import {applyIdentityCurves} from './identity-v2.js';
 // ============================================================================
 // ROSTER · 10 personajes × 5 formas
 // Stats, habilidades y pasiva. El arte vive en characters/art/<id>.js.
@@ -173,6 +174,8 @@ export const ALL_ROSTER = [
     ],
   },
 ];
+
+applyIdentityCurves(ALL_ROSTER);
 
 export const ROSTER = ACTIVE.map((id) => ALL_ROSTER.find((r) => r.id === id)).filter(Boolean);
 

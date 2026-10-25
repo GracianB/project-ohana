@@ -114,7 +114,8 @@ if (p._cast && t - p._cast.t < 26) {
   castSlot = p._cast.slot;
 }
 
-const hurt = !opts.ignoreHurt && (p.invuln || 0) > 18 ? clamp(((p.invuln || 0) - 18) / 10, 0, 1) : 0;
+const injuryAge=Number.isFinite(p._hurtAt)?Math.max(0,t-p._hurtAt):999;
+const hurt = !opts.ignoreHurt && injuryAge<24 ? Math.sin(Math.PI*Math.min(1,(injuryAge+2)/26)) : 0;
 
 let state = "idle";
 if (p.dead) state = "dead";
@@ -123,7 +124,7 @@ else if (hurt > 0) state = "hurt";
 else if (cast > 0) state = "cast";
 else if (atk > 0) state = "attack";
 else if (p.wall && air) state = "wall";
-else if (air && p._gliding) state = "glide";
+else if (air && (p._gliding||p._kiloFlightMode==="solar"||p._abilMove==="fly")) state = "glide";
 else if (air) state = vy < 0 ? "jump" : "fall";
 else if (speed > 0.08) state = "run";
 

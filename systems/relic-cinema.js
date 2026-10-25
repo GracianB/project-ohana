@@ -1,7 +1,8 @@
+import {drawMemoryCelebration} from './memory-rewards-v2.js';
 import {ROOM_RELICS} from './room-album.js';
 import {ROSTER} from '../characters/roster.js';
 export function drawRelicCinema(ctx,g,w,h,draw){
- const s=g.relicScene;if(!s)return;const [owner,name,color]=ROOM_RELICS[s.room],seconds=s.age/60,reduced=g.reduceMotion;
+ const s=g.relicScene;if(!s)return;if(s.kind==='memory-v2'){drawMemoryCelebration(ctx,g,w,h,draw);return;}const [owner,name,color]=ROOM_RELICS[s.room],seconds=s.age/60,reduced=g.reduceMotion;
  ctx.save();ctx.fillStyle='#20192e';ctx.fillRect(0,0,w,h);ctx.fillStyle='#593e64';ctx.fillRect(0,h*.55,w,h*.45);
  ctx.fillStyle='#f7d99a';ctx.beginPath();ctx.arc(w*.5,h*.58,Math.min(w,h)*.24,Math.PI,0);ctx.fill();
  ctx.fillStyle='#304c55';ctx.beginPath();ctx.moveTo(0,h*.72);ctx.quadraticCurveTo(w*.25,h*.64,w*.5,h*.72);ctx.quadraticCurveTo(w*.75,h*.8,w,h*.7);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();

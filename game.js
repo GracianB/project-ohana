@@ -1,3 +1,7 @@
+import {drawMemoryAura} from './systems/memory-rewards-v2.js';
+import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
+import {prepareChapterBossV2} from './systems/chapter-boss-v2.js';
+import {expeditionAbility} from './systems/chapter-expedition-v2.js';
 import {drawChapterVista} from './worlds/chapter-vistas.js';
 import {drawCampaignCreature} from './systems/campaign-creature-art.js';
 import {readCombatDifficulty,scaleCombatHealth} from './systems/combat-difficulty.js';
@@ -652,7 +656,7 @@ if(r.world1&&game.world1?.sealed&&game.player?.id===r.hero&&game.player.evo<4){
 }
 if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
 if(!r.fusionBoss)game.world1Boss=null;
-game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
+game.onHeroAbility=(p,index)=>{expeditionAbility(game,p,index);groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);fryerAstralAbility(game,p,index);};
 game.onDinoLandingHit=(e,dmg)=>hitArenaEnemy(game,e,dmg,{color:'#deedbc',stun:25,ky:-4,kx:Math.sign(e.x-game.player.x)*4,shake:2,parts:6});
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
@@ -661,6 +665,7 @@ game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
 e.spawnIndex = i;e._campaignOriginal=true;
+if(r.world1&&f[4]?.role){const foot=e.y+e.h;e.w=Math.max(38,e.w);e.h=Math.max(42,e.h);e.y=foot-e.h;}
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
@@ -1357,7 +1362,7 @@ if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage
 const diffMul = readCombatDifficulty().damage;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
-const beforeDamage=p.health;damagePlayer(p, amount);
+const beforeDamage=p.health;damagePlayer(p, amount);p._hurtAt=t;p.hurtFlash=18;
 game.combatReport||={hits:0,damage:0};game.combatReport.hits++;game.combatReport.damage+=Math.max(0,beforeDamage-p.health);
 resetPlayerLocomotion(p);if(p._kiloFlightMode==='solar')stopKiloFlight(p);
 p.invuln = 42;
@@ -2144,6 +2149,7 @@ updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
 if (game.enemySlow > 0 && (t & 1)) return; // Reloj de arena: enemigos a media velocidad
 for (const e of game.enemies) {
+prepareChapterBossV2(e,game);
 const molts = e.kind === "cucaracho" && !e.baby && (e.evo || 0) < 2;
 const posed = e.kind === "cucaracho" || e.kind === "mosquito" || e.kind === "cangrejo";
 if (!e.boss && e.hp <= 0 && posed && !molts) {
@@ -3116,7 +3122,8 @@ for (const e of game.enemies) {
   if (!e.boss && !visibleForRender(e, game.cam, viewportW,viewportH)) continue;
   ctx.save();
   if (fall) ctx.globalAlpha = 1 - Math.max(0, (fall.progress - .24) / .11);
-  if(e._fusionBoss)drawFusionBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
+  if(drawChapterBossV2(ctx,e,game.cam,t,game.reduceMotion||reduceMotion)){}
+  else if(e._fusionBoss)drawFusionBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._drummer)drawGroveGuardianBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._stitchoBoss)drawStitchoBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3200,6 +3207,7 @@ if (pv && (pv.scale < 0.99 || pv.alpha < 0.99)) {
   drawCharacter(ctx, game.player, game.cam, t, {reduceMotion:game.reduceMotion});
 }
 }
+if(!game.player.dead)drawMemoryAura(ctx,game,game.cam,t);
 if (!game.player.dead) drawKiloFritaInteractions(ctx, game, game.cam, t, drawCharacter, ROSTER);
 if (!game.player.dead) drawCuernoPlay(ctx, game, t, drawCharacter, ROSTER);
 if (game.won && game.player.id === "cuerno" && !game.player.dead && game._cuernoWonT != null && (t - game._cuernoWonT) / 60 < CUERNO_VICTORY_DURATION) {

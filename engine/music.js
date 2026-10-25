@@ -36,6 +36,13 @@ export function setMusicVolume(value) {
 // drums: 16 pasos por compás: k = bombo, s = caja, h = charles, o = abierto.
 // ---------------------------------------------------------------------------
 const THEMES = {
+  'star-power': {
+    bpm:168,root:64,scale:'major',swing:0,
+    chords:[[0,'maj'],[5,'maj'],[7,'maj'],[0,'maj']],pad:.12,
+    bass:'x.x.x.x.x.x.x.x.',arp:'xxxxxxxxxxxxxxxx',arpInst:'bell',
+    melody:{rhythm:'x.x.xx.x.x.xx.xx',inst:'marimba',oct:12,seed:600},
+    drums:{k:'x...x...x...x...',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.'}
+  },
   title: {
     bpm: 84, root: 60, scale: "major", swing: 0,
     chords: [[0, "maj"], [9, "min"], [5, "maj"], [7, "sus"]],
@@ -264,7 +271,7 @@ function drum(g, dest, t, type, vol) {
 // Reproductor
 // ---------------------------------------------------------------------------
 let current = null;   // { name, th, melody, bus, step, next, timer }
-let wanted = null;
+let wanted = null,baseWanted=null,musicOverride=null;
 let duck = 1;
 
 function startTheme(name) {
@@ -344,13 +351,14 @@ function schedule(st,horizon) {
 
 /** Cambia al tema indicado (null = silencio). No hace nada si ya suena. */
 export function playMusic(name) {
-  wanted = name;
+  baseWanted=name;name=musicOverride||name;wanted=name;
   if (current && current.name === name) return;
   const old = current;
   current = null;
   stopTheme(old, 0.9);
   if (name) startTheme(name);
 }
+export function setMusicOverride(name){musicOverride=name||null;playMusic(baseWanted);}
 export function stopMusic() { playMusic(null); }
 export function currentMusic() { return current ? current.name : null; }
 

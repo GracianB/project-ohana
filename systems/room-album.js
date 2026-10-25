@@ -27,7 +27,7 @@ export function updateRoomAlbum(g){
  const home=g.roomDef.checkpoints?.[0]||{x:180,y:1134};
  if(a.found.length===100&&!a.relic&&Math.hypot(p.x+p.w/2-home.x,p.y+p.h-(home.y-25))<70)claimRoomRelic(g);
 }
-export function tickRelicScene(g){if(!g.relicScene)return false;g.relicScene.age++;g.renderDirty=true;if(g.relicScene.age>=120&&g.relicScene.age<480&&g.relicScene.age%45===0)g.onRelicBeat?.(Math.floor((g.relicScene.age-120)/45));if(g.relicScene.age>=600){g.relicScene=null;g.onRelicEnd?.();g.resetInput?.();}return true;}
+export function tickRelicScene(g){if(!g.relicScene)return false;g.relicScene.age++;g.renderDirty=true;if(g.relicScene.age>=120&&g.relicScene.age<480&&g.relicScene.age%45===0)g.onRelicBeat?.(Math.floor((g.relicScene.age-120)/45));if(g.relicScene.age>=(g.relicScene.duration||600)){g.relicScene=null;g.onRelicEnd?.();g.resetInput?.();}return true;}
 export function drawRoomAlbum(ctx,g,cam){
  const a=g.roomAlbums?.[g.roomId];if(g.heroCollection||!a)return;const found=new Set(a.found),color=ROOM_RELICS[g.roomId][2];ctx.save();ctx.fillStyle=color;ctx.strokeStyle='#fff5dc';ctx.lineWidth=1.5;
  for(const item of g.roomAlbumItems||[]){const x=item.x-cam.x,y=item.y-cam.y;if(found.has(item.id)||x<-15||x>(g.viewW||1600)+15||y<-15||y>(g.viewH||1000)+15)continue;ctx.beginPath();ctx.moveTo(x,y-6);ctx.lineTo(x+5,y);ctx.lineTo(x,y+6);ctx.lineTo(x-5,y);ctx.closePath();ctx.fill();if(item.challenge)ctx.stroke();}

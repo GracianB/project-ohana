@@ -1,3 +1,4 @@
+import {setMusicOverride} from '../engine/music.js';
 
 
 import { showNotification } from "./notify.js";
@@ -517,6 +518,7 @@ function apply(game, kind, x, y) {
     );
   } else if (TIMED_KINDS.includes(kind)) {
     fx[kind] = d.dur;
+    if(kind==='star')setMusicOverride('star-power');
 
     if (kind === "feather") {
       feathered(p);
@@ -585,6 +587,7 @@ function apply(game, kind, x, y) {
 }
 
 function clearAll(game) {
+  if(fx.star>0)setMusicOverride(null);
   unfeather(lastPlayer);
 
   fx = Object.create(null);
@@ -2158,6 +2161,7 @@ function renderHud(force) {
 }
 
 export const Magic = {
+  status(){return Object.entries(fx).filter(([id,left])=>left>0&&DEFS[id]).map(([id,left])=>({id,name:DEFS[id].name,desc:DEFS[id].desc,left,seconds:Math.ceil(left/60),duration:DEFS[id].dur||0}));},
   onRoom(game, roomId) {
     lastGame = game;
     if (game.player !== lastPlayer) { clearAll(game); lastPlayer = game.player; }
@@ -2184,6 +2188,7 @@ export const Magic = {
       fx[k]--;
       if (fx[k] <= 0) {
         delete fx[k];
+        if(k==='star')setMusicOverride(null);
         if (k === "feather") unfeather(p);
         if (k === "hourglass") game.enemySlow = 0;
         if (game.nums) game.nums.add(p.x, p.y - 20, DEFS[k].name + " ✕", "#aab");
@@ -2206,6 +2211,7 @@ export const Magic = {
       }
     }
     if (fx.star > 0) starHits(game, p);
+    if(fx.star>0&&fx.star<=120&&fx.star%30===0)play('tick');
     if (shellCrack > 0) shellCrack--;
     if ((frame & 7) === 0) renderHud(false);
   },
@@ -2266,6 +2272,7 @@ export const Magic = {
       fx[k] = k === "shell" ? Math.min(def.hits, Math.floor(n)) : Math.min(def.dur, n);
     }
     const p = lastPlayer || (lastGame && lastGame.player);
+    if(fx.star>0)setMusicOverride('star-power');
     if (p && fx.feather > 0) feathered(p);
     if (lastGame && fx.hourglass > 0) lastGame.enemySlow = 2;
     renderHud(true);
