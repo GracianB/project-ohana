@@ -59,3 +59,15 @@ que ya completó las notas recupera su mínimo de 420 XP, sin repetir puntuació
 HUD y flores indican nota → forma. Los cromos del álbum se explican como opcionales,
 independientes de XP y evolución. La dificultad final requiere otra prueba humana;
 no se considera aceptada por sobrevivir un piloto automatizado.
+
+
+## Reapertura visual y de claridad V506 · 25/10/2026
+
+El usuario pide blanco/halo para Flor Solar, I comprensible y objetivos mejor
+presentados. Forma final de Kilo: blanco marfil, hojas menta y halo natural en vez
+del abanico amarillo; se conserva su cara, rig, repertorio y paisaje. I cuenta tres
+ataques distintos H/J que realmente aciertan en cualquier orden y queda preparado
+hasta usarlo, sin cuenta atrás. El mismo lanzamiento no cuenta varias veces.
+Guardianes L son brotes/espíritus de hojas con geometría de daño conservada.
+Las flores usan pétalos curvos, hojas y un progreso real; la entrada muestra al
+actor animado y el paisaje claro. Se requiere nueva aceptación humana.

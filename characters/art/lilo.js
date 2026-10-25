@@ -39,7 +39,7 @@ const DIM = [
   { hr: 23, th: 29, ll: 26, al: 27, lw: 7.5, aw: 6 },
   { hr: 22, th: 30, ll: 28, al: 28, lw: 7.5, aw: 6 },
 ];
-const DRESS = ["#ffacc2", "#eb554a", "#ea637b", "#c73d4a", "#ffe9a8"];
+const DRESS = ["#ffacc2", "#eb554a", "#ea637b", "#c73d4a", "#f4fff9"];
 const HIBIS = ["#ff5c8a", "#ff6f91", "#ffd23f", "#ff4d6d", "#ff6b9a"];
 
 const lerp = (a, b, k) => a + (b - a) * k;
@@ -605,7 +605,7 @@ const OUTFIT = [
   { print: "#ffffff", print2: "#ffd0c8", leaf: "#c8382f", trim: "#ffffff", sash: "#ffd23f" },
   { print: "#fff3f6", print2: "#ffd23f", leaf: "#c94a63", trim: "#ffd23f", tapa: "#7a2a3a" },
   { print: "#ffe7a0", print2: "#ffffff", leaf: "#9e2534", trim: "#ffc53d", pareo: "#2fa59a", pareoLight: "#5cc8b8", pareoPrint: "#e8fff6" },
-  { print: "#ffc53d", print2: "#ffffff", leaf: "#f3b04a", trim: "#ffd35a", sash: "#ffb3d0", petals: ["#ffb13d", "#ffd35a", "#ff9a3d"] },
+  { print: "#c5e9d8", print2: "#ffffff", leaf: "#67b99d", trim: "#e1d4aa", sash: "#9edbc2", petals: ["#ffffff", "#d5f3e8", "#fff7d8"] },
 ];
 function printFlower(ctx, x, y, s, rot) {
   for (let i = 0; i < 5; i++) {
@@ -775,26 +775,12 @@ function torso(ctx, R, pose, f, d, r) {
 // Kilo Flor Solar: corona-girasol plana detrás del cuerpo (sin gradientes,
 // colores planos). Los pétalos laten con la música y se abren en la intro.
 const SUN_PETAL = ["#ffd23f", "#ff9a3d"];
-function wings(ctx, R, pose, sy) {
-  const t = pose.t;
-  const flap = Math.min(1.25, 0.85 + 0.15 * Math.abs(Math.sin(t * 0.12)) + kiloWelcomeRig(pose, 4).wing * 0.3);
-  const cx = -1, cy = sy - 21, n = 12, rot = t * 0.01; // centrado tras la cabeza: la enmarca como un sol
-  ctx.save();
-  ctx.fillStyle = "rgba(255,226,122,0.18)";
-  ctx.beginPath(); ctx.arc(cx, cy, 40 * flap, 0, Math.PI * 2); ctx.fill();
-  for (let ring = 0; ring < 2; ring++) {
-    for (let i = 0; i < n; i++) {
-      const a = rot + (i + ring * 0.5) * (Math.PI * 2 / n);
-      const L = (ring ? 27 : 35) * flap;
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(a);
-      R.ellipse(ctx, 0, -L * 0.62, 6.5 - ring, L * 0.42, SUN_PETAL[ring], { lw: 2.2, shade: false });
-      ctx.restore();
-    }
-  }
-  R.ellipse(ctx, cx, cy, 17, 17, "#8a4e22", { lw: 2.4, shade: false });
-  ctx.fillStyle = "#5a3014";
-  for (let i = 0; i < 10; i++) { const a = i * 2.4, rr = 3 + (i % 3) * 4; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 1.4, 0, Math.PI * 2); ctx.fill(); }
-  ctx.restore();
+function wings(ctx,R,pose,sy){
+ const t=pose.reduceMotion?0:pose.t,cx=-1,cy=sy-30;ctx.save();
+ ctx.globalAlpha=.18;ctx.fillStyle='#e7fff3';ctx.beginPath();ctx.arc(cx,cy,47,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ for(const [r,col,w] of [[39,'#fffef0',2.6],[44,'#a3ddc5',1.3]]){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();}
+ for(let i=0;i<8;i++){const a=i*Math.PI/4+t*.003;ctx.save();ctx.translate(cx+Math.cos(a)*43,cy+Math.sin(a)*43);ctx.rotate(a+.8);R.ellipse(ctx,0,0,3.2,7.5,i%2?'#d8f5e8':'#ffffff',{lw:1,shade:false});ctx.restore();}
+ for(let i=0;i<5;i++){const a=i*1.7+t*.008;R.ellipse(ctx,cx+Math.cos(a)*51,cy+Math.sin(a)*42,1.5,1.5,'#fffce5',{line:false,shade:false});}ctx.restore();
 }
 
 function cape(ctx, R, pose, d, r) {

@@ -54,14 +54,12 @@ export function summonDanceFleet(g){
 // geometry so the behavior can be tested without a DOM, renderer or RNG.
 export function companionGoal(ally,hero,target=null,tick=0,reduced=false){
  const face=Math.sign(hero.facing||1)||1,c=center(hero);
- if(!target)return {
-  x:c.x-face*(78+(reduced?0:Math.sin(tick*.045)*14)),
-  y:hero.y+hero.h-(reduced?0:Math.abs(Math.sin(tick*.09))*8),
-  engaged:false
- };
- const q=center(target),dir=Math.sign(q.x-ally.x)||face;
- return {x:q.x-dir*52,y:target.y+target.h-10,engaged:true};
+ // The friend walks beside the hero rather than chasing an aerial target.
+ // Ranged powers reach enemies; the visual actor keeps the player's floor.
+ const direction=target?(Math.sign(center(target).x-c.x)||face):-face;
+ return {x:c.x+direction*82,y:hero.y+hero.h,engaged:!!target};
 }
+
 export const DUET_ECHOES=Object.freeze({
  'kilo+stitcho':{mode:'garden',label:'DÚO A COMPÁS',heal:3,radius:95},
  'frita+pizza':{mode:'fryer',label:'FIESTA DEL HORNO',heal:0,radius:115},
@@ -142,6 +140,8 @@ export function updateEvolutionAttacks(g,hit,heal){
   const nearby=targets(g,c.x,c.y,950);
   const target=nearby.find(e=>(e.elite||e.aiAttackPermit)&&Math.hypot(center(e).x-c.x,center(e).y-c.y)<520)||nearby[0];
   const q=target?center(target):c,goal=companionGoal(a,p,target,a.age,!!g.reduceMotion);
+  const support=(g.platforms||[]).filter(pl=>a.x>=pl.x&&a.x<=pl.x+pl.w&&pl.y>=p.y+p.h-40).sort((x,y)=>x.y-y.y)[0];
+  if(p.grounded&&support)goal.y=support.y;
   const ox=a.x,oy=a.y,dx=goal.x-a.x,dy=goal.y-a.y;
   const speed=goal.engaged?Math.abs(dx)>230?13:9:10;
   a.x+=clamp(dx,-speed,speed);
@@ -168,7 +168,7 @@ export function updateEvolutionAttacks(g,hit,heal){
     g.nums?.add?.(a.x,a.y-42,echo.label,THEMES[a.id][0],false);
    }
   }
-  if(--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<240){
+  if(--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<300){
    a.next=36;a.attack=14;
    const damage=(15+e*5)*a.power,sy=a.y-28;
    if(['stitcho','chispin'].includes(a.id)){
@@ -252,7 +252,7 @@ export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
   ctx.globalAlpha=alpha*.38;ctx.fillStyle='#102d39';ctx.beginPath();ctx.ellipse(x,y,Math.max(12,f.w*.3),6,0,0,TAU);ctx.fill();
   ctx.globalAlpha=alpha;
   if(a.attack){ctx.strokeStyle=THEMES[a.id][0];ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y-f.h*.5,Math.max(26,f.w*.6)+(14-a.attack)*1.4,0,TAU);ctx.stroke();}
-  const bob=g.reduceMotion?0:a.motion==='run'?Math.sin(a.age*.42)*5:Math.sin(a.age*.10)*2;
+  const bob=0;
   drawActor(ctx,{...def,...f,id:a.id,evo:e,x:a.x-f.w/2,y:a.y-f.h-bob,facing:a.face,
    vx:a.vx||0,vy:a.vy||0,grounded:!a.air,
    _poseOverride:a.attack?'attack':a.motion==='run'?'run':'idle',

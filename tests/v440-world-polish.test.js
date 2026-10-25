@@ -36,7 +36,7 @@ test('V440 U ally follows hero when quiet, intercepts targets and respects reduc
  const hunt=companionGoal(ally,hero,enemy,25,false);
  assert.equal(hunt.engaged,true);
  assert.ok(hunt.x>hero.x+hero.w);
- assert.equal(hunt.y,enemy.y+enemy.h-10);
+ assert.equal(hunt.y,hero.y+hero.h);
  const flipped=companionGoal(ally,{...hero,facing:-1},null,0,true);
  assert.ok(flipped.x>hero.x+hero.w);
 });

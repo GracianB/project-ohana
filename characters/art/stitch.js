@@ -572,6 +572,12 @@ function drawBody(ctx, R, f, S, C, bx, by, rx, ry, t, horizontal) {
     ctx.fillStyle = "rgba(20,10,60,0.16)";
     ctx.beginPath(); ctx.ellipse(bx + rx * 0.2, by + ry * 0.9, rx * 1.1, ry * 0.45, 0, 0, TAU); ctx.fill();
   });
+  if(f>=1){
+   ctx.save();ctx.strokeStyle='#214450';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(bx-rx*.65,by-ry*.68);ctx.quadraticCurveTo(bx+rx*.1,by,bx+rx*.72,by+ry*.62);ctx.stroke();ctx.strokeStyle='#b2efdd';ctx.lineWidth=2;ctx.stroke();
+   ctx.fillStyle='#f3ead2';ctx.strokeStyle='#274458';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(bx+rx*.2,by+ry*.16,5.5,6.5,-.4,0,TAU);ctx.fill();ctx.stroke();
+   ctx.fillStyle=f===4?'#c5f6f0':'#437d95';ctx.beginPath();ctx.arc(bx+rx*.2,by+ry*.16,2.5,0,TAU);ctx.fill();
+   if(f>=3){ctx.strokeStyle='#a9f5ed';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(bx-rx*.65,by+ry*.3);ctx.lineTo(bx-rx*.38,by+ry*.5);ctx.lineTo(bx-rx*.1,by+ry*.25);ctx.stroke();}ctx.restore();
+  }
   R.shine(ctx, bx - rx * 0.1, by - ry * 0.55, rx * 0.25, ry * 0.12, 0.35);
   if (S.spikes) {
     for (let i = 0; i < 4; i++) {

@@ -1,3 +1,4 @@
+import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
 import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kiloGuardianRequired,kiloFlowerThreat,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
@@ -36,7 +37,7 @@ export function enterWorld1(g) {
     } : null,
     statuesLit: r.statues ? r.statues.map((s) => g.world1Seals.includes(s.hero)) : null
   };
-  kiloNoteGrowth(g);stitchoGrowth(g);enterKiloAirTrail(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);enterKiloAirTrail(g);
   return g.world1;
 }
 
@@ -98,7 +99,7 @@ export function world1NextObjective(g) {
   if (!w || !p || !r || r.fusionBoss) return null;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:8750,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};
-  const workshopGoal=stitchoObjective(g);if(workshopGoal)return workshopGoal;
+  const workshopGoal=stitchoObjective(g)||chispinObjective(g);if(workshopGoal)return workshopGoal;
   const remaining = w.stations.filter(s => !s.done && s.kind !== "oven");
   const nearest = list => [...list].sort((a,b) => Math.abs(a.x - cx(p)) - Math.abs(b.x - cx(p)))[0];
   let target = w.kind === "prismas" ? remaining.find(s => s.order === w.order) : nearest(remaining);
@@ -157,7 +158,7 @@ function complete(g, s, label) {
   g.fx?.emit?.(s.x, s.y - 50, { color: WORLD1_THEMES[w.hero]?.color || "#fff", count: g.reduceMotion ? 6 : 20, size: 4, up: 2, star: true, life: 30 });
   // Each physical station grants score only once, including after a reload.
   if (!s._scored) { g.score = (g.score || 0) + 150; s._scored = true; }
-  kiloNoteGrowth(g);stitchoGrowth(g);
+  kiloNoteGrowth(g);stitchoGrowth(g);chispinGrowth(g);
   g.onWorld1Beat?.("station", w.hero);
   g.world1Stations = cleanWorld1Stations({ ...(g.world1Stations || {}),
     [w.room]: w.stations.filter(x => x.done && x.kind !== "oven").map(x => x.id) });
@@ -166,7 +167,7 @@ function complete(g, s, label) {
 }
 
 export function awardSeal(g) {
-  const w = g.world1; if (!w || w.sealed || !w.hero || !stitchoChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
+  const w = g.world1; if (!w || w.sealed || !w.hero || !stitchoChapterReady(g) || !chispinChapterReady(g) || kiloGuardianRequired(g) || (g.roomDef?.kiloChapter&&!w.stations.every(s=>s.done))) return false;
   w.sealed = true; w.flash = 40;
   g.world1Seals = cleanWorld1Seals([...(g.world1Seals || []), w.hero]);
   const p = g.player;
@@ -178,7 +179,7 @@ export function awardSeal(g) {
   return true;
 }
 
-export function updateWorld1(g) {
+export function updateWorld1(g,hurt) {
   const w = g.world1, p = g.player, r = g.roomDef;
   if (!w || !p || p.dead || !r || r.id !== w.room) return;
   w.tick++;
@@ -186,9 +187,10 @@ export function updateWorld1(g) {
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
-  updateKiloAirTrail(g);updateStitchoChapter(g);
+  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);
   if (w.sealed) return;
   kiloNoteGrowth(g);
+  if(r.chispinChapter&&w.stations.every(s=>s.done)&&chispinChapterReady(g)){awardSeal(g);return;}
   if(r.stitchoChapter&&w.stations.every(s=>s.done)&&stitchoChapterReady(g)){awardSeal(g);return;}
   if(r.kiloChapter&&w.stations.every(s=>s.done)&&!kiloGuardianRequired(g)){awardSeal(g);return;}
   const airborne = !p.grounded;
@@ -345,7 +347,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -358,7 +360,7 @@ export function drawWorld1(ctx, g, cam, t) {
     ctx.beginPath();ctx.moveTo(ax - 105,ay - 140);ctx.lineTo(ax + 85,ay - 140);
     ctx.lineTo(ax + 120,ay - 112);ctx.lineTo(ax + 85,ay - 84);ctx.lineTo(ax - 105,ay - 84);ctx.closePath();ctx.fill();
     ctx.fillStyle = w.sealed ? "#101c2b" : "#fff";ctx.font = "800 13px Outfit, sans-serif";ctx.textAlign = "center";
-    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":g.roomDef?.stitchoChapter&&w.stations.every(s=>s.done)?"VENCE AL NÚCLEO":"SELLO " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
+    ctx.fillText(w.sealed ? "SALIDA ABIERTA →" : kiloGuardianRequired(g)&&w.stations.every(s=>s.done)?"VENCE AL TAMBOR":g.roomDef?.chispinChapter&&w.stations.every(s=>s.done)?"VENCE AL TITÁN":g.roomDef?.stitchoChapter&&w.stations.every(s=>s.done)?"VENCE AL NÚCLEO":"SELLO " + world1Snapshot(g).done + "/" + world1Snapshot(g).total,ax,ay - 108);
   }
   const objective = world1NextObjective(g);
   if (objective && vis(objective.x)) {
@@ -489,36 +491,30 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
   ctx.lineWidth = 3; ctx.strokeStyle = "#fff6e0";
   switch (s.kind) {
     case "flower": {
-      ctx.fillStyle = "#2f7a4c"; ctx.fillRect(x - 3, y - 50, 6, 50);
-      for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + (done ? t * .01 : 0); ctx.fillStyle = done ? col : "#9a6f86"; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 16, y - 62 + Math.sin(a) * 16, 13, 8, a, 0, Math.PI * 2); ctx.fill(); }
-      ctx.fillStyle = "#ffe27a"; ctx.beginPath(); ctx.arc(x, y - 62, 7, 0, Math.PI * 2); ctx.fill();
-      if (!done && s.hold > 0) { ctx.strokeStyle = col; ctx.beginPath(); ctx.arc(x, y - 62, 30, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * s.hold / HOLD_TICKS); ctx.stroke(); }
-      ctx.fillStyle = "#fff"; ctx.font = "700 16px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(["♩","♪","♫","♬"][s.note], x, y - 100 + pulse);
-      if(!done){ctx.font="700 11px Outfit, sans-serif";ctx.fillStyle=s.threatened?'#ffd28e':'#e4edca';ctx.fillText(s.threatened?'DESPEJA EL HIBISCO':'NOTA '+(s.note+1)+'/4 → FORMA '+(w.stations.filter(s=>s.done).length+2)+'/5 · QUIETO',x,y-125);}
+      ctx.strokeStyle='#346b51';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x-6,y-27,x+8,y-46,x,y-68);ctx.stroke();
+      for(const side of [-1,1]){ctx.fillStyle='#6ca486';ctx.strokeStyle='#346b51';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(x,y-27);ctx.bezierCurveTo(x+side*24,y-58,x+side*39,y-33,x+side*3,y-22);ctx.fill();ctx.stroke();}
+      ctx.save();ctx.translate(x,y-73);ctx.rotate(reduce?0:Math.sin(t*.017+s.id)*.035);
+      for(let k=0;k<5;k++){ctx.save();ctx.rotate(k*Math.PI*2/5);ctx.fillStyle=done?'#fff0df':k%2?'#ed91a1':'#f9b1b0';ctx.strokeStyle='#8d5664';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-26,-6,-25,-35,-7,-30);ctx.bezierCurveTo(7,-44,28,-16,0,0);ctx.fill();ctx.stroke();ctx.strokeStyle='#fff7e5';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,-4);ctx.quadraticCurveTo(-2,-15,-6,-24);ctx.stroke();ctx.restore();}
+      ctx.fillStyle='#e4b85c';ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ecc26f';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(12,-12);ctx.stroke();ctx.fillStyle='#fff4c0';for(let j=0;j<3;j++){ctx.beginPath();ctx.arc(10+j*2,-13+j,2,0,Math.PI*2);ctx.fill();}
+      if(!done&&s.hold>0){ctx.strokeStyle='#fff8c3';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,39,-Math.PI/2,-Math.PI/2+Math.PI*2*s.hold/HOLD_TICKS);ctx.stroke();}ctx.restore();
+      ctx.fillStyle='#173d3b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'NOTA RECUPERADA ✓':s.threatened?'DESPEJA EL HIBISCO':'QUIETO · NOTA '+(s.note+1)+'/4 → CRECER',x,y-128);
       break; }
     case "part": {
-      if (!done && w.carry !== s.id) { ctx.fillStyle = PART_COLORS[s.id % PART_COLORS.length]; ctx.fillRect(x - 17, y - 48 + pulse, 34, 34); ctx.strokeRect(x - 17, y - 48 + pulse, 34, 34);
-        ctx.fillStyle = "#102738"; ctx.font = "900 18px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(String(s.id + 1), x, y - 23 + pulse); }
-      const tx = s.target.x - cam.x, ty = s.target.y - cam.y;
-      ctx.fillStyle = done ? "#3fa3ff" : "#33405a"; ctx.fillRect(tx - 50, ty - 70, 100, 70);
-      ctx.strokeStyle = done ? "#bff2ff" : PART_COLORS[s.id % PART_COLORS.length]; ctx.setLineDash?.([6, 6]); ctx.strokeRect(tx - 50, ty - 70, 100, 70); ctx.setLineDash?.([]);
-      ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText(done ? "COSIDO ✓" : "TALLER " + (s.id + 1), tx, ty - 80); break; }
+      const color=PART_COLORS[s.id%3];
+      if(!done&&w.carry!==s.id){ctx.save();ctx.translate(x,y-35+pulse);ctx.fillStyle=color;ctx.strokeStyle='#294858';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,21,17,-.25,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#f1ffef';ctx.beginPath();ctx.arc(-4,-3,7,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#517b92';ctx.lineWidth=2;for(let j=-1;j<=1;j++){ctx.beginPath();ctx.moveTo(j*8,8);ctx.lineTo(j*8+3,16);ctx.stroke();}ctx.fillStyle='#173b4a';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText(String(s.id+1),0,4);ctx.restore();}
+      const tx=s.target.x-cam.x,ty=s.target.y-cam.y;
+      ctx.fillStyle='#718f9b';ctx.strokeStyle='#2e4c5b';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx-58,ty-12);ctx.lineTo(tx-40,ty-77);ctx.quadraticCurveTo(tx,ty-94,tx+40,ty-77);ctx.lineTo(tx+58,ty-12);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle=done?'#c4f2dd':'#d7e3dc';ctx.beginPath();ctx.ellipse(tx,ty-68,25,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.strokeStyle=done?'#9aead4':color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(tx-32,ty-28);ctx.lineTo(tx+32,ty-28);ctx.stroke();
+      ctx.fillStyle='#214752';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'MÓDULO '+(s.id+1)+' RESTAURADO ✓':'LLEVA LA PIEZA '+(s.id+1),tx,ty-106);break; }
     case "rod": {
-      // Antennas visibly restore a network: dish, receiver and stored charge.
-      const active = done ? "#fff29a" : "#91a9c7";
-      ctx.fillStyle = "#26384c";ctx.fillRect(x - 25,y - 16,50,16);
-      ctx.strokeStyle = active;ctx.lineWidth = 5;ctx.beginPath();ctx.moveTo(x,y - 12);ctx.lineTo(x,y - 115);ctx.stroke();
-      ctx.save();ctx.translate(x,y - 115);ctx.rotate(-.45);
-      ctx.fillStyle = done ? "#d7bd4f" : "#456280";ctx.beginPath();ctx.arc(0,0,29,0,Math.PI);ctx.closePath();ctx.fill();ctx.stroke();
-      ctx.beginPath();ctx.moveTo(0,8);ctx.lineTo(0,-21);ctx.stroke();ctx.fillStyle = active;ctx.beginPath();ctx.arc(0,-21,5,0,Math.PI*2);ctx.fill();ctx.restore();
-      ctx.fillStyle = done ? "#c8ffad" : "#172a40";ctx.fillRect(x - 10,y - 60,20,14);
-      ctx.font = "800 12px Outfit, sans-serif";ctx.textAlign = "center";ctx.fillStyle = "#fff6cb";
-      ctx.fillText(done ? "CONECTADA ✓" : "ACÉRCATE / GOLPEA",x,y - 166);
-      if (done) {
-        ctx.strokeStyle = "#ffe77b";ctx.lineWidth = 2;
-        for(let k=1;k<=2;k++){ctx.beginPath();ctx.arc(x,y - 137,28 + k * 11,Math.PI * 1.12,Math.PI * 1.88);ctx.stroke();}
-      }
-      break; }
+      const active=done?'#f5d778':'#91b8c4';
+      ctx.fillStyle='#698c99';ctx.strokeStyle='#294858';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-34,y);ctx.lineTo(x-26,y-36);ctx.quadraticCurveTo(x,y-47,x+26,y-36);ctx.lineTo(x+34,y);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#dfd6b8';ctx.fillRect(x-10,y-100,20,66);ctx.strokeRect(x-10,y-100,20,66);
+      for(let k=0;k<6;k++){ctx.strokeStyle=k%2?'#9b754c':'#e8c08a';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y-39-k*9,15,4,0,0,Math.PI*2);ctx.stroke();}
+      ctx.save();ctx.translate(x,y-116);ctx.rotate(-.4);ctx.fillStyle='#e5e9d6';ctx.strokeStyle='#526c7d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-32,-9);ctx.bezierCurveTo(-29,23,29,23,32,-9);ctx.quadraticCurveTo(0,2,-32,-9);ctx.fill();ctx.stroke();ctx.strokeStyle=active;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,11);ctx.lineTo(0,-25);ctx.stroke();ctx.fillStyle=active;ctx.beginPath();ctx.arc(0,-27,5,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle=done?'#f9e5a7':'#52758a';ctx.beginPath();ctx.arc(x,y-22,8,0,Math.PI*2);ctx.fill();
+      if(done){ctx.strokeStyle='#a0c4c7';ctx.lineWidth=1.5;for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(x,y-142,20+k*12,-Math.PI*.8,-Math.PI*.2);ctx.stroke();}}
+      ctx.fillStyle='#244756';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'ANTENA '+(s.id+1)+' CONECTADA ✓':'CONECTA LA ANTENA '+(s.id+1),x,y-194);break; }
     case "jelly": {
       drawWorld1MoonJelly(ctx, { x, y, id: s.id, done }, t, reduce);
       break; }

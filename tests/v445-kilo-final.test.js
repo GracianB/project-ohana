@@ -3,19 +3,18 @@ import {recordKiloHit,kiloComboStatus,consumeKiloCombo,resetKiloCombo} from '../
 import {updatePlayerLocomotion,resetPlayerLocomotion} from '../systems/player-movement.js';
 import {beginHeroPower,updateHeroPowers} from '../systems/hero-combos.js';
 const fixture=()=>({player:{id:'kilo',evo:3,x:0,y:0,w:32,h:48,speed:5.1,facing:1},roomId:'hub',t:0,nums:{add(){}}});
-test('Only distinct landed H J H actions earn a single six-second I window',()=>{
- const g=fixture(),swing={},note={};assert.equal(consumeKiloCombo(g),false);
- recordKiloHit(g,'H',swing);recordKiloHit(g,'H',swing);assert.equal(kiloComboStatus(g).step,1);
- recordKiloHit(g,'J',note);recordKiloHit(g,'J',note);assert.equal(kiloComboStatus(g).step,2);
- g.t=200;assert.equal(recordKiloHit(g,'H',{}),true);assert.equal(kiloComboStatus(g).remaining,360);
+test('Three distinct landed H or J casts in any order prepare I without expiring',()=>{
+ const g=fixture(),cast={};assert.equal(consumeKiloCombo(g),false);
+ recordKiloHit(g,'J',cast);recordKiloHit(g,'J',cast);assert.equal(kiloComboStatus(g).step,1);
+ g.t=5000;recordKiloHit(g,'J',{});assert.equal(kiloComboStatus(g).step,2);
+ assert.equal(recordKiloHit(g,'H',{}),true);g.t=50000;assert.equal(kiloComboStatus(g).ready,true);
  assert.equal(consumeKiloCombo(g),true);assert.equal(consumeKiloCombo(g),false);assert.equal(kiloComboStatus(g).step,0);
 });
-test('Wrong order, timeouts, room/hero changes, death and resets never keep a stale combo',()=>{
- const g=fixture();recordKiloHit(g,'J',{});assert.equal(kiloComboStatus(g).step,0);
- recordKiloHit(g,'H',{});g.t=241;recordKiloHit(g,'J',{});assert.equal(kiloComboStatus(g).step,0);
- for(const key of ['H','J','H'])recordKiloHit(g,key,{});g.t+=361;assert.equal(kiloComboStatus(g).ready,false);
- for(const key of ['H','J','H'])recordKiloHit(g,key,{});g.roomId='beach';assert.equal(kiloComboStatus(g).ready,false);
- for(const key of ['H','J','H'])recordKiloHit(g,key,{});g.player.dead=true;assert.equal(consumeKiloCombo(g),false);resetKiloCombo(g);g.player.dead=false;assert.equal(kiloComboStatus(g).ready,false);
+test('Room/hero changes, death and resets cannot carry a prepared I; earlier forms cannot charge it',()=>{
+ const g=fixture();for(const key of ['J','J','H'])recordKiloHit(g,key,{});
+ g.roomId='beach';assert.equal(kiloComboStatus(g).ready,false);
+ for(const key of ['H','H','H'])recordKiloHit(g,key,{});g.player.dead=true;assert.equal(consumeKiloCombo(g),false);
+ resetKiloCombo(g);g.player.dead=false;assert.equal(kiloComboStatus(g).ready,false);
  g.player={...g.player};assert.equal(kiloComboStatus(g).step,0);g.player.evo=2;for(const key of ['H','J','H'])recordKiloHit(g,key,{});assert.equal(kiloComboStatus(g).ready,false);
 });
 test('Double tap runs while held; release, reverse, drop, death and reset stop it',()=>{
@@ -50,7 +49,7 @@ test('K protects only its opening, never heals; L heals only after damaging an e
 test('Kilo real hits teach the next combo input without duplicate multi-hit feedback',()=>{
  const g=fixture(),messages=[];g.nums.add=(x,y,text)=>messages.push(text);
  const swing={};recordKiloHit(g,'H',swing);recordKiloHit(g,'H',swing);
- assert.deepEqual(messages,['1/3 · ACIERTA J']);
+ assert.deepEqual(messages,['REMATE I · 1/3']);
  recordKiloHit(g,'J',{});recordKiloHit(g,'H',{});
- assert.deepEqual(messages,['1/3 · ACIERTA J','2/3 · ACIERTA H','3/3 · PULSA I · 6 s']);
+ assert.deepEqual(messages,['REMATE I · 1/3','REMATE I · 2/3','I LISTO · PULSA PARA REMATAR']);
 });

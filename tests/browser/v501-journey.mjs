@@ -44,14 +44,18 @@ try {
  }
  await page.keyboard.up('d');assert.ok(s.world1.done>=1,'real walking must connect an antenna');
  const earned=s.world1.done;
+ if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();}
  // Outwait the old seven-second reset without moving or modifying objectives.
  s=await step(600);assert.ok(s.world1.done>=earned);
+ if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();s=await step(5);}
  await page.evaluate(async()=>{const notices=await import('/systems/notify.js');notices.dismissNotifications();});
+ for(let n=0;n<10&&!(await page.locator('#notification-container').isVisible());n++){if(await page.locator('#evo-stage.show .evo-skip').count())await page.locator('#evo-stage .evo-skip').click();await page.waitForTimeout(500);}
+ await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
  await page.waitForTimeout(250);
  assert.match(await page.locator('#notification-container').innerText(),/Sello 1\/4.*Antena/s);
  assert.equal(await page.locator('#notification-container .game-notification').count(),1);
  // Teach the actual equipped power, and explain a locked power without listing every key.
- await page.keyboard.press('k');
+ await page.keyboard.press('l');
  await page.waitForTimeout(250);
  assert.match(await page.locator('#notification-container').innerText(),/PODER POR DESCUBRIR/);
  await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
@@ -75,6 +79,7 @@ try {
  s=await step(600);let deaths=0,lastX=s.player.x;
  await page.locator('#game').focus();await page.keyboard.down('d');
  for(let i=0;i<500&&s.world1.done<4;i++){
+  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();await page.keyboard.down('d');}
   if(s.hp<=0){
    assert.ok(++deaths<=12,'too many natural retries on the antenna route');
    await page.keyboard.up('d');
@@ -88,9 +93,9 @@ try {
  }
  await page.keyboard.up('d');
  assert.equal(s.world1.done,4,'all four antennas must work through real movement and combat');
- assert.equal(s.world1.sealed,true);assert.ok(s.world1Seals.includes('chispin'));
+ assert.equal(s.world1.sealed,false,'four antennas require the chapter Titan before a new seal');assert.ok(!s.world1Seals.includes('chispin'));
  await page.screenshot({path:'test-results/v501/antenna-network-complete.png'});
  console.log('PHYSICAL NETWORK COMPLETE',JSON.stringify({deaths,evo:s.evo,hp:s.hp}));
  assert.deepEqual(errors,[]);
- console.log('PASS V501: voluntary vortex/catapult, locked route, four physical antennas and earned seal, no timer reset, desktop/mobile render, partial progress restored by Continue.');
+ console.log('PASS V501: voluntary vortex/catapult, locked route, four physical antennas, Titan still required, no timer reset, desktop/mobile render, partial progress restored by Continue.');
 } finally {await browser?.close();server.closeAllConnections();await new Promise(r=>server.close(r));}

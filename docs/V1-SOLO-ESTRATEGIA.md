@@ -25,7 +25,7 @@ La base contiene diez héroes, cincuenta formas, diez salas del Mundo 1, sus mec
 
 Kilo tiene una primera integración completa del capítulo: cuatro encuentros y notas, cinco formas alcanzadas, Tambor con recuperación/avisos aéreos, vuelo solar, J dirigido, vigías y carillones persistentes. El piloto físico verifica también Continuar. Sigue pendiente su aceptación humana de dificultad y el recorrido completo de cien recuerdos.
 
-Stitcho tiene ya integración local en V502: reparaciones, raíl de bola, cuatro hitos de crecimiento y Núcleo Glitch en su sala. El piloto físico verifica cinco formas, Continuar, control táctil y salida a Chispín bebé. Sus cien recuerdos y dificultad humana siguen pendientes. Los ocho personajes restantes conservan sus repertorios y sistemas históricos; todavía necesitan integración y aceptación como capítulos completos. No confundir los documentos de cierre de repertorio con el cierre de la campaña actual.
+Stitcho tiene ya integración local en V502: reparaciones, raíl de bola, cuatro hitos de crecimiento y Núcleo Glitch en su sala. El piloto físico verifica cinco formas, Continuar, control táctil y salida a Chispín bebé. Sus cien recuerdos y dificultad humana siguen pendientes. Chispín integra ahora sus cuatro antenas, cinco formas, tres arcos con alternativas J/K/espera y Titán de Trueno en V506. Piloto físico, Continuar, blink táctil y salida a Michi bebé aprobados; dificultad humana y cien recuerdos pendientes. Los siete personajes restantes conservan sus repertorios y sistemas históricos; todavía necesitan integración y aceptación como capítulos completos. No confundir los documentos de cierre de repertorio con el cierre de la campaña actual.
 
 Validación local de referencia: 1.496 pruebas Node, release gate y auditoría general de navegador aprobados antes de esta entrega documental. Las fixtures de acceso, forma o posición se distinguen de los recorridos físicos; el resto de capítulos no se presenta como ganado por esas fixtures.
 
@@ -37,7 +37,7 @@ Se sigue el orden real de WORLD1_ORDER. Los contratos visuales y tácticos detal
 | --- | --- | --- | --- |
 | 1 | Kilo | Aceptación humana; revisar cámara, avisos, dificultad y cien recuerdos; corregir únicamente hallazgos reproducibles | Bebé → cinco formas → notas/carillones → Tambor → Stitcho bebé; móvil y Continuar; inventario alcanzable |
 | 2 | Stitcho | Integración local V502 aprobada; revisar dificultad humana y cien recuerdos | Crecer reparando y atravesando el taller, derrotar Núcleo, guardar reparaciones y salir con Chispín bebé |
-| 3 | Chispín | Integrar blink, cadena, conductores y Titán en su santuario; conservar las cuatro antenas persistentes | Antenas ganadas, desplazamiento útil, jefe real, retorno de Continuar sin perder conexiones |
+| 3 | Chispín | Integración local V506 aprobada; revisar dificultad humana y cien recuerdos | Antenas ganadas, desplazamiento útil, jefe real, retorno de Continuar sin perder conexiones |
 | 4 | Michi | Integrar medusas, control de grupos y Espíritu Astral Felino en el jardín | Cruces suspendidos alcanzables, uso efectivo de control, cinco formas y jefe sin exigir XP externa |
 | 5 | Cuerno | Integrar rutas de luz, prismas y minijefe existente en su bosque | Orden I/II/III conservado, flancos y altura legibles, jefe y salida propia |
 | 6 | Dragón | Llevar térmicas, fuego/obsidiana y Guardián al capítulo de la forja | Ascenso y picado útiles; peligros compatibles con vuelo; no bloquear a la forma inicial |
@@ -103,3 +103,12 @@ Las pruebas aisladas preparan formas/posición para diagnosticar; nunca sustituy
 Al cerrar una fila se congelan sus reglas salvo errores encontrados por la siguiente integración. Las ideas nuevas que no bloquean terminar, comprender, guardar o usar los poderes pasan a después de V1. No habrá que inventar otros diez sistemas para declarar terminado el juego.
 
 Prioridad de corrección: bloqueo/pérdida de progreso → controles/colisiones → discrepancia entre aviso y daño → dificultad injusta o trivial → claridad visual/sonora → decoración adicional. Los defectos reproducibles abiertos van al registro de estado con archivo, pasos y resultado esperado.
+
+
+## Próxima integración: Michi
+
+Auditar `michi-trail.js`, `michi-boss.js` y el repertorio de control de grupos antes
+de trasladar arenas. Mantener la identidad de medusas y cruces suspendidos; no copiar
+arcos eléctricos. Cinco formas ganadas en su capítulo, Espíritu Astral real antes
+del sello, guardado, táctil y salida a Cuerno bebé. Acceso al piloto se declara como
+fixture; ningún set de salud/posición/forma se admite para acreditar victoria física.

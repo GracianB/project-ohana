@@ -2,7 +2,7 @@ const mid=e=>({x:e.x+e.w/2,y:e.y+e.h/2});
 const living=e=>e&&e.hp>0&&!e.dying&&!e.fell;
 const close=(g,x,y,r)=>g.enemies.filter(living).filter(e=>Math.hypot(mid(e).x-x,mid(e).y-y)<r);
 export const HERO_POWERS=Object.freeze({
- kilo:['Remate aloha','A compás del sol','Acierta H → J → H en 4 s; pulsa I durante los 6 s siguientes: paso evasivo y golpe ascendente.','Carga 100 causando daño real; pulsa P para lanzar y al ritmo de sus tres señales para ampliar ondas y daño.'],
+ kilo:['Remate aloha','A compás del sol','Acierta tres ataques H o J en cualquier orden; cuando ponga I LISTO, pulsa I: paso evasivo y golpe ascendente.','Carga 100 causando daño real; pulsa P para lanzar y al ritmo de sus tres señales para ampliar ondas y daño.'],
  stitcho:['Rebote 626','Flota cruzada','Rebota hacia el siguiente enemigo al acertar con paso acrobático de plasma.','La flota 626 bombardea la zona señalada con rayos orbitales de plasma.'],
  chispin:['Carrera relámpago','Tormenta enlazada','Cruza enemigos y conecta las marcas de J.','Detona las marcas y encadena descargas.'],
  cat:['Garra ascendente','Cacería lunar','Zarpazo aéreo que rebota al acertar.','Persigue tus presas y termina con una caída lunar.'],

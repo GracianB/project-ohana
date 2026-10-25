@@ -17,16 +17,11 @@ export function powerStatus(g,index,supreme=null){
  if(index===5&&finisherCharge(p)<100)return state('charge',Math.floor(finisherCharge(p))+'/100','Carga P haciendo daño: '+Math.floor(finisherCharge(p))+'/100.',finisherCharge(p));
  const combo=p.id==='kilo'&&index===4?kiloComboStatus(g):null;
  if(combo&&!combo.ready){
-  const next=['H','J','H'][combo.step],steps=[
-   'Empieza acertando H a un enemigo. Después acierta J y H, en ese orden, en cuatro segundos.',
-   'H acertado. Ahora acierta J a un enemigo y termina con H. Pulsar al aire no cuenta.',
-   'H y J acertados. Termina con otro golpe H a un enemigo para preparar I.'
-  ];
-  return state('combo',combo.step+'/3 · ahora '+next,steps[combo.step],combo.step/3*100);
+  return state('combo',combo.step+'/3 golpes','Acierta tres ataques H o J, en cualquier orden. Cada ataque cuenta una vez; después pulsa I. La carga no caduca.',combo.step/3*100);
  }
  if(left>0){
   const seconds=Math.max(.1,Math.ceil(left/100)/10).toFixed(1),dur=Number(p.cdDur?.[def.id||p.abilities?.[index]])||def.cd;
   return state('cooldown',seconds+' s','Recargando · quedan '+seconds+' s.',Math.max(0,Math.min(100,100-left/dur*100)));
  }
- return state('ready',combo?'Listo · '+Math.ceil(combo.remaining/60)+' s':'Listo',combo?'I preparado durante '+Math.ceil(combo.remaining/60)+' s.':'Poder listo.',100);
+ return state('ready',combo?'I LISTO':'Listo',combo?'Pulsa I: paso evasivo y golpe ascendente. Queda preparado hasta usarlo.':'Poder listo.',100);
 }

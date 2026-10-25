@@ -39,12 +39,12 @@ function assertSealed(run, hero) {
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
   assert.equal(game.score, 150 * (total+(hero==='stitcho'?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, ['kilo','stitcho'].includes(hero)?423:3, hero + " rewards experience");
-  assert.equal(run.saves, total+(hero==='stitcho'?2:0), hero + " saves each completed objective once");
+  assert.equal(game.player.xp, ['kilo','stitcho','chispin'].includes(hero)?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total+(hero==='stitcho'?2:hero==='chispin'?1:0), hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, total+(hero==='stitcho'?2:0), "no extra save after completion");
+  assert.equal(run.saves, total+(hero==='stitcho'?2:hero==='chispin'?1:0), "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -107,6 +107,8 @@ test("Chispín: each connected antenna stays lit, accepts any order and cannot f
   assert.equal(rods[2].done, true, "waiting never erases an earned connection");
   stand(rods[2].x); tick();assert.equal(game.score,150,"repeat contact is not rewarded twice");
   for (const s of [rods[0],rods[3],rods[1]]) { stand(s.x); tick(); }
+  assert.equal(game.world1.sealed,false,"antennas do not grant a Titan victory");
+  game.clearedEncounters={"w1-chispin":["w1-chispin-titan-v1"]};tick();
   assertSealed(run, "chispin");
 });
 

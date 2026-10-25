@@ -169,7 +169,7 @@ const now = abilityNow(game);
 p.cds = p.cds || {};
 p.cdDur = p.cdDur || {};
 if(index===5&&finisherCharge(p)<100)return false;
-if(p.id==="kilo"&&index===4&&!kiloComboStatus(game).ready){game.nums?.add?.(cx(p),p.y-32,"I · ACIERTA H → J → H","#ffe49b");return false;}
+if(p.id==="kilo"&&index===4&&!kiloComboStatus(game).ready){game.nums?.add?.(cx(p),p.y-32,"I · ACIERTA 3 ATAQUES H O J","#ffe49b");return false;}
 const currentUntil = Number(p.cds[id]);
 if (Number.isFinite(currentUntil) && currentUntil > now) return false;
 // Keep the shared cooldown, flow, cast pose and bond pipeline for the new kit.
@@ -251,7 +251,7 @@ cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 9000, color: "#ff
 });
 
 export function supremeOf(id) {
-return {...(SUPREME[id] || SUPREME.kilo),special:"Compañero invencible · 6 s",desc:"Disponible desde bebé. Tu compañero busca enemigos y ataca durante seis segundos."};
+return {...(SUPREME[id] || SUPREME.kilo),special:"Compañero invencible · 6 s",desc:"Disponible desde bebé. Tu compañero aparece a tu lado y ayuda a atacar durante seis segundos."};
 }
 
 export function specialOf(id) {
@@ -3210,9 +3210,11 @@ ctx.save();ctx.globalAlpha=.26*k;ctx.strokeStyle='#ffd36a';ctx.lineWidth=2;
 for(let i=0;i<4;i++){const a=i*Math.PI/2;ctx.beginPath();ctx.ellipse(x,floor,f.r,f.r*.2,0,a+.12,a+1.15);ctx.stroke();}
 for(let i=0;i<f.n;i++){
  const a=i/f.n*TAU+(g?.reduceMotion?0:t*.025),px=x+Math.cos(a)*f.r,py=floor+Math.sin(a)*f.r*.2-18;
- ctx.globalAlpha=.8*k;ctx.fillStyle='#fffbe8';ctx.beginPath();ctx.arc(px,py-4,7,Math.PI,0);ctx.lineTo(px+7,py+6);
- ctx.quadraticCurveTo(px+3,py+10,px,py+6);ctx.quadraticCurveTo(px-3,py+10,px-7,py+6);ctx.closePath();ctx.fill();
- ctx.fillStyle='#4a3a20';ctx.beginPath();ctx.arc(px-2.5,py-4,1.2,0,TAU);ctx.arc(px+2.5,py-4,1.2,0,TAU);ctx.fill();
+ ctx.globalAlpha=.9*k;ctx.fillStyle='#dcf5dd';ctx.strokeStyle='#5b8a74';ctx.lineWidth=1.3;
+ ctx.beginPath();ctx.moveTo(px,py-19);ctx.bezierCurveTo(px-17,py-16,px-15,py+7,px,py+7);ctx.bezierCurveTo(px+15,py+7,px+17,py-16,px,py-19);ctx.fill();ctx.stroke();
+ for(const side of [-1,1]){ctx.fillStyle='#a3cdaa';ctx.beginPath();ctx.moveTo(px+side*5,py-14);ctx.quadraticCurveTo(px+side*18,py-31,px+side*14,py-12);ctx.fill();ctx.stroke();}
+ ctx.fillStyle='#315d50';ctx.beginPath();ctx.arc(px-4,py-6,1.5,0,TAU);ctx.arc(px+4,py-6,1.5,0,TAU);ctx.fill();
+ ctx.fillStyle='#f6dca1';ctx.beginPath();ctx.arc(px,py+1,2.5,0,TAU);ctx.fill();
 }
 for(const impact of f.impacts||[]){const tx=impact.x-cam.x,ty=impact.y-cam.y;ctx.globalAlpha=k*impact.life/12;ctx.strokeStyle='#fff0b0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo((x+tx)/2,Math.min(y,ty)-55,tx,ty);ctx.stroke();}
 ctx.restore();

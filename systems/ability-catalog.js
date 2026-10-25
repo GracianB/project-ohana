@@ -8,7 +8,7 @@ rollo: { name: "Bola saltarina 626", key: "K", cd: 1900, color: "#2f6bff", desc:
 caos: { name: "Baile extraterrestre 626", key: "L", cd: 5600, color: "#8f7bff", desc: "Baila y convoca 1–5 naves según evolución. Sus láseres buscan enemigos; los impactos recuperan vida." },
 chain: { name: "Rayo en cadena", key: "J", cd: 650, color: "#ffe14a", desc: "Relámpago que salta entre enemigos: evoluciona de 2 a 5 blancos. Combínalo con la tormenta para cubrir más terreno." },
 blink: { name: "Chispazo", key: "K", cd: 1700, color: "#fff3a0", desc: "Paso de relámpago: cruza de 145 a 240 px, deja una estela dañina y concede evasión breve." },
-storm: { name: "Sello del trueno", key: "L", cd: 6000, color: "#9cf", desc: "Tormenta dirigida: 1–5 rayos por descarga según evolución, con aviso e impactos sobre los enemigos." },
+storm: { name: "Tormenta dirigida", key: "L", cd: 6000, color: "#9cf", desc: "Tormenta dirigida: 1–5 rayos por descarga según evolución, con aviso e impactos sobre los enemigos." },
 yarn: { name: "Ovillo bumerán", key: "J", cd: 600, color: "#ff8ad4", desc: "Ovillo que va y vuelve atravesando enemigos." },
 purr: { name: "Ronroneo", key: "K", cd: 2400, color: "#ffb6e4", desc: "Ronroneo que duerme enemigos y cura: su alcance crece de 320 a 600 con las evoluciones." },
 ninetails: { name: "Nueve colas", key: "L", cd: 6000, color: "#b78bff", desc: "9 colas brillantes que serpentean y persiguen." },

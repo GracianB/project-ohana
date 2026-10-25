@@ -153,3 +153,50 @@ aprobados; vuelo de los cinco aros y colisión normal también. Suite Node: 1.50
 Evidencia en logs ohana-v505-*.log, tests/browser/v505-honest-hits.mjs y
 captura test-results/v504/kilo-sky-route.png actualizada. No se declara aceptación
 humana ni cierre de los cien recuerdos. Chispín sigue como siguiente integración.
+
+
+## V506 · Chispín integrado · 25 de octubre de 2026
+
+`chispin-chapter.js` integra las cuatro antenas persistentes, crecimiento mínimo
+55/140/260/420 XP y tres arcos con ventanas abiertas/aviso/activas. J aceptado dentro
+de 250 px cortocircuita el arco 150 ticks; K permite cruzarlo y esperar sigue siendo
+viable. Los arcos no borran antenas ni son llaves ocultas. Ruta elevada y grupos
+orientados a cadena/tormenta. Se conserva la pieza histórica del hub.
+
+Titán del capítulo: arena 8260–9320, ID `w1-chispin-titan-v1`, 640 PV y núcleo
+abierto con presupuesto de 160 por recuperación. Despierta con cuatro antenas y
+forma final; requiere varios ataques y fases antes de caer. Tormenta fija tres
+columnas al iniciar el aviso, con dibujo y proyectiles en esas posiciones. Cuatro
+antenas + derrota real dan un sello nuevo; sellos antiguos siguen válidos.
+
+Piloto físico desde bebé: acceso directo a sala como única fixture; sin posición,
+XP, salud, formas, enemigos o victoria inyectados. Cinco formas ganadas, cuatro
+antenas, J cortocircuitando un arco real, Continuar a mitad, cinco ataques ejecutados
+y los cuatro patrones vistos, cero muertes, blink táctil desde save ganado, salida
+física a Michi bebé. Evidencia `test-results/v506/chispin-pilot.json`; comando
+`npm run test:browser:chispin-chapter` (CHROMIUM_BIN en este entorno).
+Kilo y Stitcho vuelven a pasar. Node: 1.512 pruebas. Los cien recuerdos y la dificultad
+humana siguen pendientes. Siguiente integración: Michi (`w1-cat`), manteniendo su
+control de grupos, rutas suspendidas y Espíritu Astral Felino.
+
+
+## Ampliación V506 por nueva dirección del usuario
+
+Antes de publicar V506, el usuario pidió rehacer fondos de Stitcho/Chispín, entradas,
+I confuso, compañero flotante, Flor Solar blanca y objetivos de los tres. Se añade
+`worlds/ohana-crafted-scenes.js`: costa/astillero y santuario diurno en nubes, curvas,
+capas, paralaje y gradientes de cielo cacheados; terrenos con colores propios y
+sin gigantes geométricos. Paisaje de Kilo conservado. Actores reales animados en
+roomEnter; Kilo entra después de su prólogo. El compañero U sigue junto al héroe,
+con objetivo a su altura/suelo y ataques cercanos, en vez de flotar hacia blancos.
+I: tres H/J distintos con impacto real, cualquier orden y sin caducidad; los tests
+históricos se actualizan al requisito expresamente reabierto. Forma final de Kilo
+blanca/marfil, halo de hojas; arnés e insignia en Stitcho. Hibiscos curvos, antenas
+con bobinas, módulos con su nave al final. L de Kilo espíritus vegetales y tormenta
+Chispín sin gran sello circular. Pintura decorativa no crea colliders.
+
+Pruebas visuales de acceso/forma/cámara explícitas en
+`tests/browser/v506-visual-experience.mjs`; no se presentan como victorias. Capturas
+`test-results/v506/*-new-landscape.png`, `*-arrival.png` y
+`kilo-white-spirit-and-friend.png`. Revisar esas imágenes y dificultad con el usuario;
+no afirmar aprobado humano ni prometer que el resto de salas fue rediseñado.

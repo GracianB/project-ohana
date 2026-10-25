@@ -1,21 +1,21 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-24",
+  "updated_on": "2026-10-25",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v502-stitcho-chapter",
-  "base_commit": "2139967c30fb04266428addfffe0d41850a06fc7",
+  "branch": "feat/v506-chispin-chapter",
+  "base_commit": "466cbe8",
   "published": false,
   "campaign_complete_verified": false,
   "v1_ready": false,
-  "next_task": "chapter.chispin",
+  "next_task": "chapter.cat",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1500,
-    "runtime_modules": 311,
-    "precache_resources": 361,
+    "node_passed": 1512,
+    "runtime_modules": 313,
+    "precache_resources": 363,
     "source": "Existing local V501 execution logs; documentation-only planning does not constitute a new playthrough",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
@@ -29,7 +29,7 @@
       "room": "w1-kilo",
       "status": "implemented_locally",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending",
+      "human_acceptance": "pending_after_explicit_visual_and_I_redesign",
       "all_100_memories_verified": "pending",
       "next_work": "Human playtest, full memory reachability, fix recorded defects",
       "evidence": [
@@ -55,12 +55,15 @@
       "id": "chispin",
       "order": 3,
       "room": "w1-chispin",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
-      "evidence": []
+      "next_work": "Human difficulty review, full 100-memory reachability; integration acceptance is not final V1",
+      "evidence": [
+        "tests/browser/v506-chispin-chapter.mjs",
+        "test-results/v506/chispin-pilot.json"
+      ]
     },
     {
       "id": "cat",
@@ -192,8 +195,8 @@
   ],
   "evidence_storage": "Test sources are versioned; test-results and logs are generated locally and included in the delivery ZIP.",
   "published_release": {
-    "version": "ohana-501",
-    "commit": "2139967c30fb04266428addfffe0d41850a06fc7",
+    "version": "ohana-505",
+    "commit": "466cbe8",
     "url": "https://gracianb.github.io/project-ohana/",
     "verified": true
   }

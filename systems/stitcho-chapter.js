@@ -43,6 +43,19 @@ export function stitchoObjective(g){
 export function drawStitchoChapter(ctx,g,cam){
  if(!stitchoChapter(g))return;
  const r=STITCHO_RAIL,done=stitchoRailDone(g),x=r.left-cam.x,y=r.y-cam.y;
+ const shipX=7900-cam.x,shipY=1134-cam.y,parts=g.world1?.stations.filter(s=>s.done).length||0;
+ ctx.save();ctx.translate(shipX,shipY-50);ctx.strokeStyle='#315d6b';ctx.lineWidth=2;
+ ctx.fillStyle='#688b97';ctx.beginPath();ctx.ellipse(0,12,123,33,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.fillStyle='#c5f1eb';ctx.beginPath();ctx.ellipse(-7,-16,61,47,-.1,Math.PI,Math.PI*2);ctx.fill();ctx.stroke();
+ ctx.strokeStyle='#f4fbec';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(-14,-13,44,33,-.1,Math.PI*1.1,Math.PI*1.75);ctx.stroke();
+ for(let i=0;i<3;i++){
+  const restored=g.world1?.stations[i]?.done,sx=(i-1)*70;
+  ctx.fillStyle=restored?['#92e3da','#f7cf9b','#d6b5e9'][i]:'#435f70';ctx.strokeStyle='#315d6b';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,13,19,9,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  if(restored){ctx.fillStyle='#e6fff1';ctx.beginPath();ctx.ellipse(sx,18,6,2,0,0,Math.PI*2);ctx.fill();}
+ }
+ ctx.fillStyle='#426274';ctx.fillRect(-73,32,14,18);ctx.fillRect(58,32,14,18);
+ ctx.textAlign='center';ctx.fillStyle='#234c5b';ctx.font='bold 13px sans-serif';ctx.fillText(parts===3?'NAVE RESTAURADA · LISTA PARA VOLVER':'LA NAVE · MÓDULOS '+parts+'/3',0,-88);ctx.restore();
+
  ctx.save();ctx.strokeStyle=done?'#9cffcc':'#8cecff';ctx.lineWidth=5;
  ctx.beginPath();ctx.moveTo(x-60,y-4);ctx.lineTo(x+320,y-4);ctx.stroke();
  ctx.lineWidth=2;for(let i=0;i<=320;i+=32){ctx.beginPath();ctx.moveTo(x+i,y-12);ctx.lineTo(x+i+12,y-4);ctx.stroke();}

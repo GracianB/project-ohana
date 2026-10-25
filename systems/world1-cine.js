@@ -1,3 +1,5 @@
+import {drawCraftedScene} from '../worlds/ohana-crafted-scenes.js';
+import {drawHarborWelcome} from '../worlds/ohana-environments.js';
 // OHANA V467 · MUNDO 1 · Cinemáticas con UNA sola historia.
 // Intro → (por sala) llegada + despertar del héroe → aparición de la Quimera →
 // caída de la Quimera → final que reúne a los diez y abre el Mundo 2.
@@ -39,8 +41,8 @@ export function buildWorld1Scene(id, hero = null, ctx = {}) {
       { dur: 220, bg: "#1e1838", color: WORLD1_THEMES.kilo.color, layout: "one", heroes: ["kilo"], kicker: WORLD1_TITLE, title: "Despierta el primer sello", line: WORLD1_PREMISE }
     ];
     case "roomEnter": return th ? [
-      { dur: 170, bg: "#140f26", color: th.color, layout: "one", heroes: [hero], dim: true, kicker: `Sala ${ALL.indexOf(hero) + 1} de 10 · ${th.name}`, title: `${name}, sin su canción`, line: WORLD1_ROOM_STORY[hero]?.enter || "" },
-      { dur: 140, bg: "#140f26", color: th.color, layout: "one", heroes: [hero], dim: true, kicker: "Sello: " + (WORLD1_SEALS[th.seal]?.title || ""), title: "Lo que hay que hacer", line: hero==='kilo'?'Despeja cada hibisco y toca su nota para crecer. Después vence al Tambor: esquiva sus ondas y ataca cuando se recupere.':(WORLD1_SEALS[th.seal]?.verb || "") + "." }
+      { dur: 170, bg: "#140f26", color: th.color, layout: ["kilo","stitcho","chispin"].includes(hero)?"arrival":"one", heroes: [hero], dim: !["kilo","stitcho","chispin"].includes(hero), kicker: `Sala ${ALL.indexOf(hero) + 1} de 10 · ${th.name}`, title: `${name}, sin su canción`, line: WORLD1_ROOM_STORY[hero]?.enter || "" },
+      { dur: 140, bg: "#140f26", color: th.color, layout: ["kilo","stitcho","chispin"].includes(hero)?"arrival":"one", heroes: [hero], dim: false, kicker: "Objetivo: " + (WORLD1_SEALS[th.seal]?.title || ""), title: "Lo que hay que hacer", line: hero==='kilo'?'Recupera cuatro notas para crecer y vence al Tambor. I se prepara con tres ataques H o J que acierten.':hero==='stitcho'?'Transporta cada pieza hasta su módulo. Usa la bola K en el raíl y termina de reparar la nave antes de vencer a Glitch.':hero==='chispin'?'Conecta las cuatro antenas. J corta los arcos y K los cruza. Crece y vence al Titán de Trueno.':(WORLD1_SEALS[th.seal]?.verb || "") + "." }
     ] : [];
     case "awaken": {
       if (!th) return [];
@@ -138,6 +140,7 @@ function heroPos(layout, i, n, W, H, k, t) {
     case "burst": { const e = Math.min(1, k * 1.4); return [cx + Math.cos(a) * R * 0.2 * (1 - e) + Math.cos(a) * R * e, cy + Math.sin(a) * R * 0.6 * e, 0.8 + e * 0.3]; }
     case "line": return [W * (0.08 + 0.84 * (i + 0.5) / n), H * 0.62 + Math.sin(t * 0.08 + i) * 6, 1];
     case "portal": return [W * (0.1 + 0.5 * (i + 0.5) / n) + k * W * 0.08, H * 0.64, 0.9];
+    case "arrival": return [W*(.25+.3*Math.min(1,k*2)),H*.6-Math.sin(Math.min(1,k*2)*Math.PI)*30,2.8];
     case "one": return [cx, cy, 2.4];
     default: return [cx + Math.cos(a) * R, cy + Math.sin(a) * R * 0.55, 1];
   }
@@ -172,19 +175,24 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   const shake = s.shake && !reduce ? Math.sin(c.t * 1.7) * 6 * (1 - k) : 0;
   ctx.save(); ctx.translate(shake, 0);
   ctx.fillStyle = s.bg || "#120d24"; ctx.fillRect(-10, 0, W + 20, H);
+  if(s.layout==='arrival'){
+   if(c.hero==='kilo')drawHarborWelcome(ctx,W,H,reduce?0:t,reduce);
+   else drawCraftedScene(ctx,{roomDef:{hero:c.hero},reduceMotion:reduce},{x:0,y:1134-H*.72},t,W,H);
+   ctx.fillStyle='#102c3a99';ctx.fillRect(0,H*.12,W,H*.18);ctx.fillRect(0,H*.75,W,H*.16);
+  }
   ctx.fillStyle = "#fff"; for (const [x, y, r] of STARS) { ctx.globalAlpha = 0.25 + 0.35 * (reduce ? 0.5 : 0.5 + 0.5 * Math.sin(t * 0.03 + x * 30)); ctx.fillRect(x * W, y * H, r, r); }
   // Halo plano del color del plano (círculos concéntricos, sin degradado).
   ctx.fillStyle = s.color; for (let i = 3; i >= 1; i--) { ctx.globalAlpha = (s.burst ? 0.09 : 0.05) * i * fadeIn; ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * (0.12 + 0.1 * (4 - i)) * (s.burst ? 0.8 + k * 0.5 : 1), 0, Math.PI * 2); ctx.fill(); }
   if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
   // Héroes.
-  const lit = new Set(s.lit || (s.layout === "one" ? s.heroes : [])), n = s.heroes.length;
+  const lit = new Set(s.lit || (["one","arrival"].includes(s.layout) ? s.heroes : [])), n = s.heroes.length;
   s.heroes.forEach((h, i) => {
     const [x, y, sc] = heroPos(s.layout, i, n, W, H, k, reduce ? 0 : t), on = lit.has(h) && !s.dim;
     const col = s.layout === "fused" ? "#ff3a8a" : on ? WORLD1_THEMES[h].color : "#4a3f72";
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
     ctx.globalAlpha = fadeIn * fadeOut * (s.layout === "fused" ? 0.85 : 1);
     const hop = s.dance && !reduce ? Math.abs(Math.sin(t * 0.09 + i)) * 14 : 0;
-    if (drawActor && on && s.layout !== "fused") { try { drawActor(ctx, h, x, y + size * 0.5 - hop, size / 60); return; } catch (_) {} }
+    if (drawActor && on && s.layout !== "fused") { try { drawActor(ctx,h,x,y+size*.5-hop,size/60,s.layout==='arrival'?{pose:reduce?'idle':k<.45?'run':k<.7?'cast':'victory',form:0}:null); return; } catch (_) {} }
     drawHeroEmblem(ctx, h, x, y - hop, size, col, reduce ? 0 : t);
     if (s.dim && s.layout === "one") { ctx.globalAlpha = 0.5 * fadeIn; ctx.fillStyle = s.bg; ctx.fillRect(x - size, y - size * 0.8 + size * 1.6 * k * 0.6, size * 2, size * 1.6 * (1 - k * 0.6)); }
   });

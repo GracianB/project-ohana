@@ -84,6 +84,8 @@ test("death: Chispín's connected network survives death without replay rewards"
   assert.equal(x.g.world1.chainUntil,0);
   assert.equal(world1Snapshot(x.g).done,2);
   for(const rod of x.g.world1.stations){x.stand(rod.x);x.tick();}
+  assert.deepEqual(x.g.world1Seals,[]);
+  x.g.clearedEncounters={"w1-chispin":["w1-chispin-titan-v1"]};x.tick();
   assert.deepEqual(x.g.world1Seals,["chispin"]);
   assert.equal(x.g.score,600,"4 unique stations × 150, no replay farming");
 });

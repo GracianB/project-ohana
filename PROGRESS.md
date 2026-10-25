@@ -1,3 +1,31 @@
+# V506 · ohana-506 · Tres protagonistas, lugares vivos
+
+Revisión solicitada por el usuario: Kilo conserva su paisaje y gana Flor Solar
+blanca con halo de hojas. Stitcho tiene astillero costero de día, grúas, barcos,
+almacenes y nave restaurable; Chispín tiene santuario luminoso sobre nubes con
+arquerías, cobre y circuitos. Canvas curvo por capas y paralaje, sin imágenes
+externas ni cambios encubiertos en colisiones. Entradas de los tres con sus actores
+animados, fondos claros y objetivos concretos. Flores, antenas y módulos dibujados
+con piezas reconocibles. Stitcho conserva su anatomía, añade arnés/insignia y su
+personalidad de reparador. L de Kilo usa espíritus de hojas y L de Chispín nubes,
+rayos y corrientes en vez de una gran runa circular.
+
+I de Kilo se prepara con tres ataques H/J distintos que acierten, en cualquier
+orden, y no caduca hasta usarlo. U acompaña al protagonista a su lado y en su plano
+de suelo; no persigue a un enemigo flotando. Las habilidades siguen aplicando daño
+real y respetan protección. La integración completa de Chispín se describe abajo.
+La aceptación humana y los cien recuerdos de cada capítulo siguen pendientes.
+
+## Integración de Chispín en V506
+
+Capítulo de Chispín integrado: cuatro antenas persistentes garantizan cinco formas,
+tres arcos con fases abiertas/aviso/activas, cortocircuito temporal con J, cruce con K
+o espera, ruta elevada opcional y grupos propios para cadena/tormenta. El Titán de
+Trueno tiene arena e ID de derrota del capítulo, 640 PV y ventanas de núcleo abierto.
+Cuatro antenas + derrota real son obligatorias para sellos nuevos; saves con sello
+antiguo siguen válidos. Los rayos de tormenta se fijan durante el aviso y se dibujan
+en sus columnas reales. Repertorio y encuentro del hub conservan sus valores.
+
 # V505 · ohana-505 · Daño real y guía del cielo
 
 H, proyectiles normales y hitEnemy muestran y propagan el daño realmente quitado,

@@ -59,7 +59,9 @@ export function drawChispaStorm(ctx,f,cam,t,reduced=false){
   const arrival=unit((f.maxLife?(f.maxLife-f.life):30)/16),s=.55+arrival*.35;
   drawChispaCloud(ctx,x,y,s,charge,t,reduced);
   const tier=Math.max(0,Math.min(4,((f.maxLife||220)-180)/20));
-  drawThunderSeal(ctx,x,y,48+tier*7,t,reduced,charge);
+  // Atmospheric currents gather around the real storm cloud, not a magic seal.
+  ctx.strokeStyle='#e7fbff';ctx.lineWidth=1.6;ctx.globalAlpha*=.65;
+  for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-62-i*9,y+8+i*9);ctx.bezierCurveTo(x-30,y+32+i*8,x+30,y+25+i*8,x+65+i*8,y+4+i*7);ctx.stroke();}
   if(f.forecast&&!reduced){ctx.save();ctx.globalAlpha*=.28;thunderBolt(ctx,x,y,f.forecast.x-cam.x,f.forecast.y1-cam.y,.45,t,false);ctx.restore();}
   if(f.life<24){ctx.save();ctx.globalAlpha*=1-f.life/24;oval(ctx,x+36,y-25,5,3,'#f2edc7');oval(ctx,x+45,y-34,3,2,'#f2edc7');ctx.restore();}
  }finally{ctx.restore();}

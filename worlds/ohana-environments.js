@@ -1,9 +1,10 @@
+import {drawCraftedScene} from './ohana-crafted-scenes.js';
 // Authored environment vocabulary. Geometry is decorative: collision belongs
 // to the room layout and never changes because a scene happens to be drawn.
 export const OHANA_PLACES=Object.freeze({
  kilo:{name:'Bahía de los hibiscos',sky:'#b7ded8',far:'#679d92',mid:'#3c756c',light:'#ffe4a0',ink:'#244b49',kind:'cove',offset:430,steps:[0,80,0],strategy:'Las flores son pausas seguras: despeja al enemigo cercano antes de detenerte a tocar. Usa las repisas para atacar desde arriba.'},
- stitcho:{name:'Astillero de las estrellas',sky:'#15334c',far:'#305a73',mid:'#487e89',light:'#a6f0ee',ink:'#112d43',kind:'dock',offset:500,steps:[0,80,160],strategy:'Lleva una pieza cada vez. La ruta baja es directa; las grúas y plataformas permiten evitar a los perseguidores durante el transporte.'},
- chispin:{name:'Templo de las nubes',sky:'#31446e',far:'#728cb1',mid:'#adbed0',light:'#ffecad',ink:'#334560',kind:'storm',offset:530,steps:[80,0,80],strategy:'Conecta la antena más próxima y conserva esa posición como avance. Ataca a los voladores desde una repisa antes de cruzar a la siguiente.'},
+ stitcho:{name:'Astillero de las estrellas',sky:'#96d3e5',far:'#305a73',mid:'#487e89',light:'#a6f0ee',ink:'#112d43',kind:'dock',offset:500,steps:[0,80,160],strategy:'Lleva una pieza cada vez. La ruta baja es directa; las grúas y plataformas permiten evitar a los perseguidores durante el transporte.'},
+ chispin:{name:'Templo de las nubes',sky:'#b8dff3',far:'#728cb1',mid:'#adbed0',light:'#ffecad',ink:'#334560',kind:'storm',offset:530,steps:[80,0,80],strategy:'Conecta la antena más próxima y conserva esa posición como avance. Ataca a los voladores desde una repisa antes de cruzar a la siguiente.'},
  cat:{name:'Laguna de la luna',sky:'#30264f',far:'#67547e',mid:'#8d78a0',light:'#ffe9c8',ink:'#322c51',kind:'moon',offset:390,steps:[0,80,160],strategy:'Despierta las medusas con saltos cortos y corrige en el aire. Las plataformas del estanque dan altura sin exigir una forma avanzada.'},
  cuerno:{name:'Bosque de las auroras',sky:'#1f414d',far:'#3b7778',mid:'#669d8d',light:'#f0d8ff',ink:'#203e4b',kind:'forest',offset:450,steps:[0,80,80],strategy:'Sigue los prismas I, II y III. El recorrido superior sirve para explorar; la ruta del suelo permite completar el orden sin dar vueltas.'},
  dragon:{name:'Forja del amanecer',sky:'#442b3b',far:'#88504b',mid:'#bd7153',light:'#ffcd91',ink:'#402b35',kind:'forge',offset:510,steps:[0,160,80],strategy:'Enciende los braseros desde una distancia segura. Las terrazas permiten separar enemigos antes de bajar a por cada fuego.'},
@@ -61,6 +62,7 @@ function pavilion(c,x,y,p,kind,t){
  }
 }
 export function drawOhanaPlace(c,g,cam,t,W,H){
+ if(drawCraftedScene(c,g,cam,t,W,H))return;
  const p=OHANA_PLACES[g.roomDef?.hero];if(!p)return;
  const ground=1134-(cam.y||0),time=g.reduceMotion?0:t;
  c.save();
