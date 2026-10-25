@@ -17,12 +17,26 @@ try{
  const step=async n=>{
   await page.evaluate(n=>window.__OHANA_E2E.step(n),n);
   await page.clock.runFor(16);
+  // A truly earned evolution pauses the game and intentionally hides the
+  // objective card. Resume through the actual UI before movement continues.
+  for(let k=0;k<10;k++){
+   const cine=page.locator('#evo-stage.show');
+   if(!(await cine.count()))break;
+   await cine.locator('.evo-skip').click();
+   await cine.waitFor({state:'hidden',timeout:20000});
+  }
   return page.evaluate(()=>window.__OHANA_E2E.state());
  };
  const objective=()=>page.evaluate(async()=>(await import('/systems/notify.js')).messageManager.objective);
  async function begin(hero){
   await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
   assert.ok(await page.evaluate(()=>!!window.__OHANA_E2E));
+  // Every per-hero fixture starts a fresh page. Close the actual opening
+  // modal; it hides #notification-container while it owns the screen.
+  if(await page.locator('#ohana-intro.show').count()){
+   await page.keyboard.press('Escape');
+   await page.waitForFunction(()=>!document.body.classList.contains('intro-pending'));
+  }
   const data=await page.evaluate(async hero=>{
    const {WORLD1_ORDER,WORLD1_ROOMS}=await import('/systems/world1-rooms.js');
    localStorage.clear();localStorage.setItem('ohana-w1-seals-v1',JSON.stringify(WORLD1_ORDER.slice(0,WORLD1_ORDER.indexOf(hero))));
