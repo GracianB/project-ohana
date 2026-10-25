@@ -7,16 +7,19 @@ for(const def of ROSTER){console.log('Camp audit: '+def.id);await p.locator(`.ch
  await p.locator('#camp-film').click();assert.equal(await p.locator('#camp-film-stop').isVisible(),true);const line=await p.locator('#camp-line').textContent();await p.waitForTimeout(120);assert.equal(await p.locator('#camp-line').textContent(),line);await p.locator('#camp-film-stop').click();
 }
 assert.equal(await p.evaluate(()=>localStorage.getItem('ohana')),saved,'camp exploration must not change campaign save');
-// V468/V470: the camp now displays 11 World 1 portal cards, not five paired islands.
-// Exercise a real Canvas hit on Dino's card (row 2, column 1), using the
-// same deterministic six-column responsive layout as world1-select.js.
+// World 1 uses a circular chapter garden, not the earlier six-column grid.
+// Select Dino through its actual Canvas hit-box, shared with game rendering.
 assert.equal(await p.locator('#family-camp').getAttribute('data-world'),'1');
 await p.locator('.char-card[data-id="kilo"]').click();
 await p.locator('#camp-canvas').scrollIntoViewIfNeeded();
 const r=await p.locator('#camp-canvas').boundingBox();
-const pad=Math.max(10,r.width*.012),top=r.height*.2;
-const cw=Math.max(60,(r.width-pad*7)/6),ch=Math.max(90,(r.height-top-r.height*.16-pad)/2);
-await p.mouse.click(r.x+pad+(cw+pad)/2+cw/2,r.y+top+ch+pad+ch/2);
+const rect=await p.evaluate(async({width,height})=>{
+ const {createWorld1Select,world1SelectCardRects}=await import('/systems/world1-select.js');
+ const sel=createWorld1Select({start:'kilo'}),cards=world1SelectCardRects(sel,width,height);
+ return cards[sel.cards.findIndex(card=>card.hero==='dino')];
+},{width:r.width,height:r.height});
+assert.ok(rect&&rect.w>0&&rect.h>0,'Dino must have a real selectable portal');
+await p.mouse.click(r.x+rect.x+rect.w/2,r.y+rect.y+rect.h/2);
 assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'dino','Canvas portal must select Dino');
 // Selecting Kilo from the HTML cards must reset keyboard navigation to Kilo,
 // not continue from the previous Canvas index (Dino).
