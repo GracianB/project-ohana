@@ -38,8 +38,13 @@ try {
  const step=n=>page.evaluate(n=>window.__OHANA_E2E.step(n),n);
  let s=await step(600);assert.equal(s.roomId,'w1-chispin');assert.equal(s.evo,0);
  await page.locator('#game').focus();await page.keyboard.down('d');
+ let previousX=s.player.x;
  for(let i=0;i<100&&s.world1.done===0;i++){
-  await page.keyboard.press('h');s=await step(24);
+  // The V511 chapter has physical raised banks. Use ordinary jump controls
+  // when a bank blocks horizontal travel, never injected state or teleport.
+  if(s.player.grounded&&(i%7===0||Math.abs(s.player.x-previousX)<.4))
+   await page.keyboard.press('Space');
+  await page.keyboard.press('h');previousX=s.player.x;s=await step(24);
   assert.ok(s.hp>0,'first antenna route must not require an injected heal');
  }
  await page.keyboard.up('d');assert.ok(s.world1.done>=1,'real walking must connect an antenna');
