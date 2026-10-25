@@ -5,7 +5,7 @@
   "repository": "GracianB/project-ohana",
   "branch": "feat/v508-dino-impact",
   "base_commit": "18d86b4",
-  "published": false,
+  "published": true,
   "campaign_complete_verified": false,
   "v1_ready": false,
   "next_task": "chapter.frita",
@@ -19,8 +19,8 @@
     "source": "V508 local unit suite, physical Dino pilot, prior chapter regression and presentation checks",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "not_verified",
-    "published_url_current_candidate": "not_verified",
+    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40183070346",
+    "published_url_current_candidate": "15 runtime assets SHA256 matched live V508",
     "local_three_chapter_physical_pilots": "passed",
     "local_three_realm_mobile": "passed",
     "local_dino_physical_pilot": "passed",
@@ -118,7 +118,7 @@
       "id": "dino",
       "order": 7,
       "room": "w1-dino",
-      "status": "implemented_locally",
+      "status": "published_pending_human_acceptance",
       "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
@@ -219,5 +219,7 @@
     "commit": "466cbe8",
     "url": "https://gracianb.github.io/project-ohana/",
     "verified": true
-  }
+  },
+  "published_commit": "bc26ab2",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=508"
 }

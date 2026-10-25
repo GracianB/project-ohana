@@ -298,3 +298,13 @@ dinosaurio de piedra con pies, dientes, placas curvas y grietas/núcleo de ámba
 el arte histórico del hub sigue disponible. `dino-colossus-design.png` inspeccionada.
 No se ejecutó la matriz histórica completa de capturas/campaña; estos resultados
 no acreditan campaña entera, aceptación humana ni cien recuerdos alcanzables.
+
+
+Publicación V508 verificada: commit `bc26ab2`, Pages
+https://github.com/GracianB/project-ohana/actions/runs/40183070346 en Success.
+https://gracianb.github.io/project-ohana/?release=508 sirve quince archivos runtime
+con SHA256 idéntico al candidato, incluidos nuevo capítulo, Coloso, fondo y sw.js.
+Informe `/workspace/.cloud-setup/logs/ohana-v508-live-verification.json`.
+La repetición del piloto final pasó con cinco ataques, cero muertes, Continue,
+caída táctil y Frita bebé; captura móvil renderizada con reloj controlado.
+Siguiente: Frita, manteniendo pendientes revisión humana y cien recuerdos.
