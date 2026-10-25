@@ -42,8 +42,9 @@ try {
  for(let i=0;i<100&&s.world1.done===0;i++){
   // The V511 chapter has physical raised banks. Use ordinary jump controls
   // when a bank blocks horizontal travel, never injected state or teleport.
-  if(s.player.grounded&&(i%7===0||Math.abs(s.player.x-previousX)<.4))
-   await page.keyboard.press('Space');
+  if(s.player.grounded&&(i%7===0||Math.abs(s.player.x-previousX)<.4)){
+   await page.keyboard.down('w');await step(4);await page.keyboard.up('w');
+  }
   await page.keyboard.press('h');previousX=s.player.x;s=await step(24);
   assert.ok(s.hp>0,'first antenna route must not require an injected heal');
  }
