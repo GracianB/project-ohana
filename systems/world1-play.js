@@ -1,4 +1,5 @@
-import {dinoLanding,trackDinoAir,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
+import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
+import {dinoLanding,trackDinoAir,updateDinoDive,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
@@ -111,7 +112,7 @@ export function world1NextObjective(g) {
     else { label = "Pieza de la nave"; action = "Recógela y llévala a su taller"; }
   } else if (w.kind === "reparto") {
     if (w.carry === "pizza") { label = "Cliente esperando"; action = "Entrega la pizza caliente · quedan " + Math.max(0, Math.ceil((w.pizzaUntil - w.tick) / 60)) + " s"; }
-    else { target = w.stations.find(s => s.kind === "oven"); label = "Horno"; action = "Recoge una pizza para el próximo cliente"; }
+    else { target = g.roomDef?.pizzaChapter?nearestPizzaOven(g):w.stations.find(s => s.kind === "oven"); label = "Horno"; action = "Recoge una pizza para el próximo cliente"; }
   } else if (w.kind === "cadena") { label = "Antena " + ((target?.id ?? 0) + 1); action = "Acércate o golpéala · la conexión se conserva"; }
   else if (w.kind === "geiseres") {
     const inFlight = target && !p.grounded && w.launchedGeyser === target.id;
@@ -189,10 +190,10 @@ export function updateWorld1(g,hurt) {
   if (w.flash > 0) w.flash--;
   for (const s of w.stations) if (s.glow > 0) s.glow--;
   if (r.fusionBoss) return updateFinalRoom(g, w, p, r);
-  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateNextChapter(g);
-  if (w.sealed) return;
+  updateKiloAirTrail(g);updateStitchoChapter(g);updateChispinChapter(g,hurt);updateNextChapter(g);updateDinoDive(g);
+  if (w.sealed) {if(r.dinoChapter){trackDinoAir(g);w.wasGrounded=!!p.grounded;}return;}
   kiloNoteGrowth(g);
-  if(r.growthChapter&&w.stations.every(s=>s.done)&&nextChapterReady(g)){awardSeal(g);return;}
+  if(r.growthChapter&&w.stations.every(s=>s.kind==='oven'||s.done)&&nextChapterReady(g)){awardSeal(g);return;}
   if(r.chispinChapter&&w.stations.every(s=>s.done)&&chispinChapterReady(g)){awardSeal(g);return;}
   if(r.stitchoChapter&&w.stations.every(s=>s.done)&&stitchoChapterReady(g)){awardSeal(g);return;}
   if(r.kiloChapter&&w.stations.every(s=>s.done)&&!kiloGuardianRequired(g)){awardSeal(g);return;}
@@ -249,8 +250,8 @@ export function updateWorld1(g,hurt) {
       }
       break;
     case "reparto": {
-      const oven = w.stations.find((s) => s.kind === "oven");
-      if (!w.carry && near(p, oven.x, oven.y - 40, 60, 90)) { w.carry = "pizza"; w.pizzaUntil = w.tick + PIZZA_TICKS; g.nums?.add?.(p.x, p.y - 40, "¡PIZZA RECIÉN HECHA! · " + Math.ceil(PIZZA_TICKS / 60) + " s", "#ffd36a", true); }
+      const oven = r.pizzaChapter?pizzaOvens(g).find(s=>near(p,s.x,s.y-40,70,90)):w.stations.find((s) => s.kind === "oven");
+      if (!w.carry && oven && near(p, oven.x, oven.y - 40, 70, 90)) {notePizzaBake(g); w.carry = "pizza"; w.pizzaUntil = w.tick + (r.pizzaChapter?PIZZA_ROUTE_TICKS:PIZZA_TICKS); g.nums?.add?.(p.x, p.y - 40, "¡PIZZA RECIÉN HECHA! · " + Math.ceil((r.pizzaChapter?PIZZA_ROUTE_TICKS:PIZZA_TICKS) / 60) + " s", "#ffd36a", true); }
       if (w.carry === "pizza") {
         if (w.tick > w.pizzaUntil) { w.carry = null; g.nums?.add?.(p.x, p.y - 40, "SE ENFRIÓ · VUELVE AL HORNO", "#ffb08a", true); }
         else for (const s of w.stations) if (s.kind === "guest" && !s.done && near(p, s.x, s.y - 40, 60, 90)) { complete(g, s, "CLIENTE"); w.carry = null; break; }
@@ -351,7 +352,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);drawPizzaChapter(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -546,11 +547,13 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if (!done) { const px = s.prize.x - cam.x, py = s.prize.y - cam.y + pulse; ctx.fillStyle = "#ffcf3a"; for (let k = -1; k <= 1; k++) ctx.fillRect(px - 4 + k * 9, py - 16 - Math.abs(k) * -4, 7, 32); ctx.strokeStyle = "#fff4c2"; ctx.strokeRect(px - 18, py - 18, 36, 36); }
       break; }
     case "oven": {
+      if(g.roomDef?.pizzaChapter){drawPizzaOven(ctx,s,cam);break;}
       ctx.fillStyle = "#a8552e"; ctx.beginPath(); ctx.arc(x, y - 40, 60, Math.PI, 0); ctx.lineTo(x + 60, y); ctx.lineTo(x - 60, y); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = "#2a1208"; ctx.beginPath(); ctx.arc(x, y - 20, 26, Math.PI, 0); ctx.closePath(); ctx.fill();
       ctx.fillStyle = "#ff9d4a"; ctx.globalAlpha = .6 + (reduce ? 0 : Math.sin(t * .1) * .2); ctx.fillRect(x - 18, y - 30, 36, 10); ctx.globalAlpha = 1;
       ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText("HORNO · RECOGE", x, y - 112); break; }
     case "guest": {
+      if(g.roomDef?.pizzaChapter){drawPizzaCustomer(ctx,s,cam,done);break;}
       ctx.fillStyle = done ? "#ffd36a" : "#7a8aa0"; ctx.beginPath(); ctx.arc(x, y - 58, 18, 0, Math.PI * 2); ctx.fill(); ctx.fillRect(x - 14, y - 40, 28, 40);
       ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(x - 6, y - 62, 2.5, 0, Math.PI * 2); ctx.arc(x + 6, y - 62, 2.5, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.beginPath(); if (done) ctx.arc(x, y - 54, 7, .2, Math.PI - .2); else { ctx.moveTo(x - 6, y - 50); ctx.lineTo(x + 6, y - 50); } ctx.stroke();

@@ -63,8 +63,8 @@ test('V501: guidance follows the actual geyser launch up to its prize, then back
 test('V501: pizza guidance reports real heat, then returns to oven without undoing deliveries',()=>{
  const g=game('pizza'), oven=g.world1.stations[0],p=g.player;
  p.x=oven.x-p.w/2;updateWorld1(g);
- assert.match(world1NextObjective(g).action,/35 s/);
- g.world1.tick+=1800;
+ assert.match(world1NextObjective(g).action,/18 s/);
+ g.world1.tick+=750;
  assert.match(world1NextObjective(g).action,/5 s/);
  p.x=g.world1.stations[1].x-p.w/2;updateWorld1(g);
  assert.equal(g.world1.stations[1].done,true);

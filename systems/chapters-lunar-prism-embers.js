@@ -1,5 +1,7 @@
+import {pizzaBaked} from './pizza-chapter.js';
 import {XP_NEED} from './xp.js';
 export const NEXT_CHAPTERS=Object.freeze({
+ pizza:{bossId:'w1-pizza-chef-v1',name:'Chef Magmático',color:'#f3d3ac',state:'_magmaChef',patterns:['SALTA LA CARRERA DEL CHEF','ESQUIVA EL QUESO','SALTA EL GOLPE DE PALA','BUSCA EL HUECO DEL ABANICO']},
  dino:{bossId:'w1-dino-colossus-v1',name:'Coloso de Piedra Ancestral',color:'#dce9b8',state:'_stoneColossus',patterns:['SALTA LA EMBESTIDA','ESQUIVA LAS ROCAS','SALTA LA ONDA FÓSIL','BUSCA EL HUECO DEL ABANICO']},
  cat:{bossId:'w1-cat-astral-v1',name:'Oráculo Medusaluna',color:'#e6c4f1',state:'_astralCat',patterns:['ESQUIVA EL ZARPAZO','SEPARA LOS ORBES','SALTA LA MEDIA LUNA','SAL DE LAS COLUMNAS']},
  cuerno:{bossId:'w1-cuerno-prism-v1',name:'Bestia Prisma',color:'#c8e7bd',state:'_prismBeast',patterns:['ESQUIVA LA CARGA','CAMBIA DE ALTURA','SALTA EL ABANICO','BUSCA EL HUECO ENTRE PRISMAS']},
@@ -13,13 +15,13 @@ export const mirrorRestored=g=>!!g.secrets?.['w1-cuerno']?.includes(DAWN_MIRROR.
 export function nextChapterGrowth(g){
  const hero=nextChapter(g),w=g?.world1,p=g?.player;if(!hero||!w||!p)return 0;
  const n=w.stations.filter(s=>s.done).length;
- const stage=w.sealed?4:hero==='cat'?[0,1,2,3,3,4][Math.min(5,n)]:hero==='cuerno'?Math.min(4,n+(mirrorRestored(g)?1:0)):Math.min(4,n);
+ const stage=w.sealed?4:hero==='pizza'?Math.min(4,n+(pizzaBaked(g)?1:0)):hero==='cat'?[0,1,2,3,3,4][Math.min(5,n)]:hero==='cuerno'?Math.min(4,n+(mirrorRestored(g)?1:0)):Math.min(4,n);
  const floor=XP_NEED[stage]||0;p.xp=Math.max(Number(p.xp)||0,floor);return floor;
 }
 export function nextChapterReady(g){
  const hero=nextChapter(g);if(!hero)return true;
  if(g.world1Seals?.includes(hero))return true;
- return !!g.world1?.stations.every(s=>s.done)&&(hero!=='cuerno'||mirrorRestored(g))&&!!g.clearedEncounters?.[g.roomDef.id]?.includes(NEXT_CHAPTERS[hero].bossId);
+ return !!g.world1?.stations.every(s=>s.kind==='oven'||s.done)&&(hero!=='cuerno'||mirrorRestored(g))&&!!g.clearedEncounters?.[g.roomDef.id]?.includes(NEXT_CHAPTERS[hero].bossId);
 }
 export function nextChapterAbility(g,p,index){
  const hero=nextChapter(g);if(!hero||p?.id!==hero||index!==0||!g.world1)return;
@@ -41,7 +43,7 @@ export function updateNextChapter(g){
 export function nextChapterObjective(g){
  const hero=nextChapter(g),w=g?.world1;if(!hero||!w||w.sealed)return null;
  if(hero==='cuerno'&&!mirrorRestored(g))return {x:DAWN_MIRROR.x,y:1134,label:'Espejo del alba',action:'Acércate y pulsa J para devolver la luz al bosque. Después sigue los prismas I → II → III'};
- if(w.stations.every(s=>s.done))return {x:8750,y:1134,label:NEXT_CHAPTERS[hero].name,action:'La sala está restaurada. Esquiva el ataque anunciado y golpea durante la recuperación'};
+ if(w.stations.every(s=>s.kind==='oven'||s.done))return {x:8750,y:1134,label:NEXT_CHAPTERS[hero].name,action:'La sala está restaurada. Esquiva el ataque anunciado y golpea durante la recuperación'};
  return null;
 }
 export function drawNextChapter(ctx,g,cam,t){
@@ -63,7 +65,7 @@ export function drawNextChapter(ctx,g,cam,t){
 export function chapterBossStart(e,g,b){
  const hero=e._growthChapter;if(!hero)return true;
  e.x=Math.max(NEXT_ARENA.left,Math.min(NEXT_ARENA.right-e.w,e.x));e.y=NEXT_ARENA.floor-e.h;
- if(b.phase==='intro'&&g.world1&&(g.world1.stations.some(s=>!s.done)||(hero==='cuerno'&&!mirrorRestored(g))||g.player.evo<4))return false;
+ if(b.phase==='intro'&&g.world1&&(g.world1.stations.some(s=>s.kind!=='oven'&&!s.done)||(hero==='cuerno'&&!mirrorRestored(g))||g.player.evo<4))return false;
  return true;
 }
 export function chapterBossFinish(e,g,b,previous){

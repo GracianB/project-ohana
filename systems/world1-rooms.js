@@ -125,6 +125,11 @@ export function buildWorld1HeroRoom(hero) {
     // A low stepping route gives room to practise K and the extra jumps.
     plats.push([3420,1054,180,22],[3650,974,220,22],[5010,1054,180,22],[5240,974,220,22]);
   }
+  if(hero==='pizza'){
+    foes.length=0;
+    for(let i=0;i<3;i++){const x=3000+i*1600;foes.push([x,WORLD1_FLOOR-40,'cucaracho',false,{role:'pursuer',name:'Pillastre de la masa',chapterHP:75+i*30,anchorFloor:WORLD1_FLOOR}],[x+380,WORLD1_FLOOR-40,'cangrejo',false,{role:'gunner',name:'Cocinero del muelle',chapterHP:85+i*30,anchorFloor:WORLD1_FLOOR}]);
+      plats.push([x-140,1034,220,22],[x+200,954,220,22],[x+500,1034,240,22]);orbs.push([x-60,990],[x+280,910],[x+570,990]);}
+  }
   if(hero==='dino'){
     foes.length=0;
     for(const [i,st] of stations.entries()){
@@ -182,10 +187,10 @@ export function buildWorld1HeroRoom(hero) {
   return {
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
-    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino', growthChapter:['cat','cuerno','dragon','dino'].includes(hero)?hero:null,
+    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino',pizzaChapter:hero==='pizza', growthChapter:['cat','cuerno','dragon','dino','pizza'].includes(hero)?hero:null,
     width: W, height: WORLD1_ROOM_H,
     doors: { left: prev, right: next, up: null, down: null },
-    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':hero==='dino'?'Despierta cuatro placas aterrizando desde la altura indicada. Usa cornisas y K en el aire para acelerar la caída. Después vence al Coloso de Piedra.':hero==='cat'?'Salta hacia las cinco medusas para despertarlas: se convierten en apoyos. Controla los grupos y vence al Oráculo Medusaluna.':hero==='cuerno'?'J en el espejo del alba. Después sigue los prismas I → II → III y vence a la Bestia Prisma.':hero==='dragon'?'Enciende cuatro braseros con J. Salta dentro de las térmicas para ganar altura y vence al Guardián Ígneo.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
+    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':hero==='pizza'?'Recoge una pizza en el horno y llévala caliente al cliente. Cada entrega abre un horno de barrio para la siguiente. Después vence al Chef Magmático.':hero==='dino'?'Despierta cuatro placas aterrizando desde la altura indicada. Usa cornisas y K en el aire para acelerar la caída. Después vence al Coloso de Piedra.':hero==='cat'?'Salta hacia las cinco medusas para despertarlas: se convierten en apoyos. Controla los grupos y vence al Oráculo Medusaluna.':hero==='cuerno'?'J en el espejo del alba. Después sigue los prismas I → II → III y vence a la Bestia Prisma.':hero==='dragon'?'Enciende cuatro braseros con J. Salta dentro de las térmicas para ganar altura y vence al Guardián Ígneo.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []

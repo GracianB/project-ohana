@@ -1,3 +1,25 @@
+# V509 · ohana-509 · Pizza de barrio y onda de Dino
+
+Pizza integra primer horneado (55 XP) y tres repartos (140/260/420 XP mínima).
+Cada entrega abre un horno de barrio más cerca del siguiente cliente. Ventana de
+calor de 1050 ticks, caja y barra visibles; una pizza fría se recoge de nuevo sin
+perder entregas. Primer horneado y clientes se guardan, sin premios repetidos.
+Chef Magmático del capítulo: arena/ID propios, 640 PV, cuatro ataques, recuperación
+con presupuesto de 160 PV. Repartos + derrota real obligatorios para sellos nuevos;
+se conservan defaults del hub y sellos antiguos. Chef redibujado con cuerpo propio,
+delantal, gorro, guantes, zapatos y pala de madera. Puerto de atardecer claro,
+hornos de ladrillo curvos, clientes dibujados y entrada animada.
+
+Dino: K en el aire prepara una onda al siguiente aterrizaje real. Abre escudos
+cercanos y aplica daño real a enemigos a nivel del suelo, respetando blindaje del
+jefe. Una sola onda por caída; cambio de sala/muerte cancela la preparación.
+La guía K explica suelo/aire. Las placas siguen exigiendo altura y contacto real.
+Pilotos de Pizza y Dino ganan cinco formas, objetivos, Continue, cuatro patrones,
+jefe y salida al siguiente bebé. Pizza ejecuta8 ataques; Dino verifica dos impactos
+con daño real. Cero muertes en ambos. Móvil J y salto+K comprobados. 1.526 Node,
+release gate (316 módulos/366 recursos), presentación y regresión Kilo aprobados.
+No se declara terminada la campaña, aceptada su dificultad ni los cien recuerdos.
+
 # V508 · ohana-508 · Dino: peso, altura y fósiles
 
 Dino tiene cuatro placas con alturas de caída crecientes. Conserva IDs antiguos

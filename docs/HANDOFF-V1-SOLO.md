@@ -308,3 +308,45 @@ Informe `/workspace/.cloud-setup/logs/ohana-v508-live-verification.json`.
 La repetición del piloto final pasó con cinco ataques, cero muertes, Continue,
 caída táctil y Frita bebé; captura móvil renderizada con reloj controlado.
 Siguiente: Frita, manteniendo pendientes revisión humana y cien recuerdos.
+
+
+## V509 · Pizza y ampliación de Dino · 25 de octubre de 2026
+
+El usuario pide Pizza y Dino expresamente; no sustituir Pizza por Frita. Rama
+`feat/v509-pizza-dino`, base `6097767`, workspace `/workspace/ohana-stitcho`.
+Frita y Yomi siguen pendientes de integración completa de capítulo.
+
+Pizza: `systems/pizza-chapter.js`, secreto `w1-pizza-first-bake-v1` garantiza
+primera forma 55XP. Tres repartos garantizan 140/260/420. Horno inicial x1920;
+entrega ID1 abre x4320, ID2 abre x5920. El horno original sigue disponible.
+Recoger en cualquier horno activo da 1050 ticks de calor; la caja y barra muestran
+calor real. Si caduca, volver al horno local sin borrar entregas. Horneado/estaciones
+se guardan; comida y reloj en curso no sobreviven a Continue ni muerte, por diseño.
+No se repiten premios del primer horneado ni clientes ya servidos.
+
+Chef del capítulo: `w1-pizza-chef-v1`, arena8260–9320, suelo1134, 640PV,
+cuatro patrones y ventana160. Los helpers excluyen el horno de la condición de
+objetivos resueltos: sólo importan los tres clientes y derrota real para sello nuevo.
+Defaults del jefe en hub y sellos antiguos se mantienen. Chef con cuerpo propio,
+gorro de tela, guantes, zapatos y pala; sin cangrejo genérico por debajo ni doble HUD.
+Puerto de atardecer claro, mar, fachadas, hornos curvos y clientes; llegada animada.
+
+Dino: K aéreo prepara una onda para el siguiente aterrizaje real. Consume una vez
+la preparación, abre escudos cercanos y llama a `hitArenaEnemy` (daño/recompensas
+reales, protección y presupuesto del jefe respetados). Alcance150+20*evo horizontal,
+sólo enemigos con pies a menos de65 de altura. Aire alto fuera del alcance. Cambiar
+sala, morir o cambiar actor no puede transportar el ataque a una sala nueva.
+K sigue rodando en suelo y la guía explica ambas acciones. Las placas conservan
+sus alturas y contacto real. Ondas verificadas con teclas sobre enemigos normales:
+se reserva un enemigo vivo para salto+K, en vez de matarlo con H/J antes de medir.
+
+Pilotos físicos: Pizza cinco formas, tres clientes, tres hornos, Continue tras dos,
+cuatro patrones, Chef ejecuta8 ataques, cero muertes, móvil J y salida a Yomi bebé.
+Dino cinco formas, placas, guardado, siete ataques del jefe, dos impactos con daño
+real verificados, cero muertes, móvil salto+K y Frita bebé. Relojes deterministas;
+la única fixture de acceso es entrar al capítulo, sin inyectar posición/HP/XP/victoria.
+Presentación de Pizza/Dino usa fixtures de forma/cámara explícitas, no victorias.
+
+Validación Node1.526 PASS; release gate316 módulos/366 recursos, Kilo físico PASS.
+No se declara campaña completa, matriz histórica entera ni aceptación humana de
+balance o alcance físico de cien recuerdos. Siguiente planificación: Frita.

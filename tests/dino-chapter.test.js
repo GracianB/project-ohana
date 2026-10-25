@@ -41,3 +41,11 @@ test('landing on a high ledge above a plate cannot wake the fossil underneath',(
  g.world1.wasGrounded=false;g.world1.prevVy=10;g.world1.dinoPeak=s.y-300;
  g.player.y=s.y-g.player.h;updateWorld1(g);assert.equal(s.done,true);
 });
+
+test('a Dino dive hits nearby grounded enemies once, excludes aerial targets, and cancels on room change',async()=>{
+ const {updateDinoDive}=await import('../systems/dino-chapter.js'),g=game();g.player.evo=2;g.player.grounded=false;g.player.vx=0;
+ const ground={x:g.player.x+50,y:1094,w:40,h:40,hp:100,_shieldFacing:1},air={...ground,y:700};g.enemies=[ground,air];let hits=0;
+ g.onDinoLandingHit=(e,d)=>{hits++;e.hp-=d;};dinoChapterAbility(g,g.player,1);g.world1.wasGrounded=false;g.player.grounded=true;updateDinoDive(g);updateDinoDive(g);
+ assert.equal(hits,1);assert.equal(ground.hp,74);assert.equal(ground._guardBreak,45);assert.equal(air.hp,100);assert.equal(g.world1.dinoQuakeHits,1);
+ g.player.grounded=false;dinoChapterAbility(g,g.player,1);g.roomId='w1-pizza';g.player.grounded=true;updateDinoDive(g);assert.equal(hits,1);assert.equal(g.world1.dinoDiveArmed,null);
+});

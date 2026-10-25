@@ -16,9 +16,9 @@ const wrap=(v,lim)=>((v%lim)+lim)%lim;
 const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
 export const PIZZA_PORT_PALETTE=Object.freeze({
- skyTop:'#1b1640',skyMid:'#5a2c5c',skyLow:'#f08a5a',moon:'#fff4dc',star:'#ffe9c4',
+ skyTop:'#bca8c6',skyMid:'#dbb5bd',skyLow:'#f5d3aa',moon:'#fff4dc',star:'#ffe9c4',
  volcano:'#3a2234',lava:'#ff6a1a',lavaHot:'#ffd23a',smoke:'#cdb8c4',
- sea:'#2a4f7a',seaHi:'#ffb88a',sail:'#fff4dc',
+ sea:'#749da7',seaHi:'#f3d1aa',sail:'#fff4dc',
  houses:['#e8a86a','#f2d49a','#d9785a','#f4e6c8','#c9604a'],shutter:'#3f8a3a',window:'#ffd98a',roof:'#a4462e',
  brick:'#8e3a26',brick2:'#6a2a1c',mortar:'#c98a62',mouth:'#1c0a08',fire:'#ff8a2a',fire2:'#ffd24a',
  basil:'#3f9a3a',tomato:'#e0452c',cream:'#fff4dc',wood:'#8a5a30',flour:'#fff8ec'

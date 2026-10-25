@@ -164,6 +164,12 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
+      - name: V509 Pizza deliveries, Chef and mobile input
+        run: npm run test:browser:pizza-chapter
+
+      - name: V509 Pizza and Dino presentation
+        run: npm run test:browser:pizza-dino-presentation
+
       - name: V508 Dino physical chapter and mobile dive
         run: npm run test:browser:dino-chapter
 

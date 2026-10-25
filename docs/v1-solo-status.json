@@ -3,9 +3,9 @@
   "updated_on": "2026-10-25",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v508-dino-impact",
-  "base_commit": "18d86b4",
-  "published": true,
+  "branch": "feat/v509-pizza-dino",
+  "base_commit": "6097767",
+  "published": false,
   "campaign_complete_verified": false,
   "v1_ready": false,
   "next_task": "chapter.frita",
@@ -13,18 +13,20 @@
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1522,
-    "runtime_modules": 315,
-    "precache_resources": 365,
-    "source": "V508 local unit suite, physical Dino pilot, prior chapter regression and presentation checks",
+    "node_passed": 1526,
+    "runtime_modules": 316,
+    "precache_resources": 366,
+    "source": "V509 Pizza and Dino physical pilots, mobile checks, presentation fixtures and unit suite",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40183070346",
-    "published_url_current_candidate": "15 runtime assets SHA256 matched live V508",
+    "remote_ci_current_candidate": "not_verified",
+    "published_url_current_candidate": "not_verified",
     "local_three_chapter_physical_pilots": "passed",
     "local_three_realm_mobile": "passed",
     "local_dino_physical_pilot": "passed",
-    "local_dino_mobile_dive": "passed"
+    "local_dino_mobile_dive": "passed",
+    "local_pizza_physical_pilot": "passed",
+    "local_dino_quake_real_hits": "passed"
   },
   "chapters": [
     {
@@ -118,7 +120,7 @@
       "id": "dino",
       "order": 7,
       "room": "w1-dino",
-      "status": "published_pending_human_acceptance",
+      "status": "updated_locally_pending_publication",
       "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
@@ -126,7 +128,8 @@
       "evidence": [
         "tests/browser/v508-dino-chapter.mjs",
         "test-results/v508/dino-pilot.json",
-        "tests/browser/v508-dino-presentation.mjs"
+        "tests/browser/v508-dino-presentation.mjs",
+        "tests/dino-chapter.test.js"
       ]
     },
     {
@@ -144,12 +147,16 @@
       "id": "pizza",
       "order": 9,
       "room": "w1-pizza",
-      "status": "needs_campaign_integration",
-      "physical_chapter_verified": false,
+      "status": "implemented_locally",
+      "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
-      "next_work": "Integrate existing hero systems, authored growth and own miniboss; see identity contract",
-      "evidence": []
+      "next_work": "Human difficulty review and full memory reachability",
+      "evidence": [
+        "tests/browser/v509-pizza-chapter.mjs",
+        "test-results/v509/pizza-pilot.json",
+        "tests/browser/v509-pizza-dino-presentation.mjs"
+      ]
     },
     {
       "id": "yomi",
@@ -219,7 +226,5 @@
     "commit": "466cbe8",
     "url": "https://gracianb.github.io/project-ohana/",
     "verified": true
-  },
-  "published_commit": "bc26ab2",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=508"
+  }
 }
