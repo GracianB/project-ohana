@@ -115,8 +115,13 @@ try{
  const pizza=await begin('pizza');
  await approach(pizza[0].x,async()=>/Cliente esperando/.test(await objective()));
  assert.match(await objective(),/quedan [1-9]\d* s/);
- await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
- await page.clock.runFor(250);
+ // A real pickup may put an earned evolutionary/tutorial toast ahead of the
+ // persistent objective. The original pilot forcibly dismissed it and then
+ // tried to assert the fallback before the message queue settled.
+ // Allow the real timed announcement to expire, leaving the still-hot order
+ // visible without forcing the UI into any artificial state.
+ await page.clock.runFor(5400);
+ await step(1);
  const goalCard=page.locator('#notification-container .game-notification[data-persistent="1"]');
  // The help HUD is hidden by authored intro/evolution scenes. Clear any
  // scene only through the player-facing controls and wait for a visible card.
