@@ -5,7 +5,7 @@
   "repository": "GracianB/project-ohana",
   "branch": "feat/v510-frita-yomi",
   "base_commit": "cc9d1e0",
-  "published": false,
+  "published": true,
   "campaign_complete_verified": false,
   "v1_ready": false,
   "next_task": "campaign.integration_quimera",
@@ -19,8 +19,8 @@
     "source": "V510 Frita/Yomi physical chapters, mobile J, presentation, browser audit, Kilo/Pizza regressions and unit suite",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "not_verified",
-    "published_url_current_candidate": "not_verified",
+    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40186344617",
+    "published_url_current_candidate": "16 runtime assets SHA256 matched live V510",
     "local_three_chapter_physical_pilots": "last_passed_V508_not_repeated_V509",
     "local_three_realm_mobile": "last_passed_V507_not_repeated_V509",
     "local_dino_physical_pilot": "last_passed_V509_not_repeated_V510",
@@ -138,7 +138,7 @@
       "id": "frita",
       "order": 8,
       "room": "w1-frita",
-      "status": "implemented_locally",
+      "status": "published_pending_human_acceptance",
       "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
@@ -168,7 +168,7 @@
       "id": "yomi",
       "order": 10,
       "room": "w1-yomi",
-      "status": "implemented_locally",
+      "status": "published_pending_human_acceptance",
       "physical_chapter_verified": true,
       "human_acceptance": "pending",
       "all_100_memories_verified": "pending",
@@ -236,5 +236,7 @@
     "commit": "466cbe8",
     "url": "https://gracianb.github.io/project-ohana/",
     "verified": true
-  }
+  },
+  "published_commit": "e2ca7dd",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=510"
 }

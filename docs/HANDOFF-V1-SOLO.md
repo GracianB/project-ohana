@@ -410,3 +410,11 @@ al final con el sello de Yomi y `spawnFusionBoss` no comprueba explícitamente l
 diez sellos, pese al comentario histórico. El piloto aislado entra en la procesión
 con sólo el sello de Yomi; se detiene antes de la arena. Auditar/cerrar esa condición
 y la selección/forma para Quimera antes de afirmar V1 completa.
+
+
+Publicación V510 verificada: commit `e2ca7dd`, Pages
+https://github.com/GracianB/project-ohana/actions/runs/40186344617 en Success.
+https://gracianb.github.io/project-ohana/?release=510 sirve dieciséis archivos runtime
+con SHA256 igual al candidato, incluidos módulos nuevos, jefes, fondos y sw.js.
+Informe `/workspace/.cloud-setup/logs/ohana-v510-live-verification.json`.
+Siguiente tarea: integración final/campaña concatenada; no declarar V1 lista.
