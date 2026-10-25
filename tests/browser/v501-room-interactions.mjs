@@ -115,22 +115,24 @@ try{
  const pizza=await begin('pizza');
  await approach(pizza[0].x,async()=>/Cliente esperando/.test(await objective()));
  assert.match(await objective(),/quedan [1-9]\d* s/);
- // A real pickup may put an earned evolutionary/tutorial toast ahead of the
- // persistent objective. The original pilot forcibly dismissed it and then
- // tried to assert the fallback before the message queue settled.
- // Allow the real timed announcement to expire, leaving the still-hot order
- // visible without forcing the UI into any artificial state.
- await page.clock.runFor(5400);
- await step(1);
+ // Pizza genuinely earns an evolution at the first oven. Evolution owns
+ // the one-slot notification region while it is displayed, and should
+ // preempt (not delete) the delivery objective. Dismiss through the actual
+ // clickable announcement, then prove the live heat objective reappears.
  const goalCard=page.locator('#notification-container .game-notification[data-persistent="1"]');
- // The help HUD is hidden by authored intro/evolution scenes. Clear any
- // scene only through the player-facing controls and wait for a visible card.
- for(let n=0;n<14;n++){
+ const interstitials=[];
+ for(let n=0;n<18;n++){
    if(await goalCard.isVisible())break;
    const cine=page.locator('#evo-stage.show .evo-skip');
-   if(await cine.count()){await cine.click();await page.clock.runFor(450);}
-   if(await page.locator('#ohana-intro.show').count())await page.keyboard.press('Escape');
-   await page.clock.runFor(250);
+   if(await cine.count()){await cine.click();await page.clock.runFor(500);await step(1);continue;}
+   const toast=page.locator('#notification-container .game-notification:not([data-persistent="1"])');
+   if(await toast.count()){
+     const title=await toast.locator('h2').textContent().catch(()=>null);
+     interstitials.push(title);
+     await toast.evaluate(el=>el.click()); // production dismiss handler, not E2E state
+     await page.clock.runFor(260); // allow its real 180ms closing transition
+   }else await page.clock.runFor(240);
+   await step(1); // re-render the real active chapter objective
  }
  const hud=await page.evaluate(async()=>{
    const {messageManager:manager}=await import('/systems/notify.js');
