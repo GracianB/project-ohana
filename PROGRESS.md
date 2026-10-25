@@ -1,10 +1,23 @@
-# V600 · ohana-600 · V2 en validación
+# V600 · ohana-600 · V2 publicada y verificada
 
-Base integrada: PR440 V514, HEAD53e386f, todas sus validaciones aprobadas.
-V2 añade segundo acto con tres retos propios, jefes articulados y reactivos,
-colección con brújula/imán/celebración y firma permanente, mapa de campaña
-y guía de combinaciones; música original para estrella y feedback de objetos.
-No se declara publicada ni validada hasta terminar las pruebas de esta ampliación.
+https://gracianb.github.io/project-ohana/?release=600
+
+V514 PR440 integrada y preservada. Diez salas de 14.400 (+50%), treinta retos
+propios de cada héroe, diez guardianes articulados y reactivos, mayor presión Normal,
+mapa de campaña y guía de combinaciones. Colección con brújula, imán, celebración
+personal y firma permanente; estrella con música original y efecto explicado.
+
+1.567 pruebas Node, Quality completa y seis validaciones independientes aprobadas.
+Campaña Normal continua hasta Quimera, reencuentro, resultados y selección;
+treinta descubrimientos conservados al cambiar de héroe. Mil recuerdos físicos,
+diez recompensas y recarga comprobados. Cien tamaños y diez bancos/tacto aprobados.
+40 escenas: mediana RAF 16,7 ms; apertura/selector/celebración medidos por separado,
+caché de poses acotada a doce actores. Móvil emulado, no certificación de hardware.
+
+Runtime6ecdb76, Pages40237852122 y Quality40236423368. Los 46 archivos runtime
+cambiados coinciden por SHA256 con la web; arranque público y caché aprobados.
+Evidencia y límites: docs/V600-VALIDATION.json y docs/V2-ADVENTURE.md.
+Aceptación artística y dificultad percibida: prueba del usuario.
 
 # V514 · ohana-514 · V2 / Primera entrega de identidad jugable (candidata)
 

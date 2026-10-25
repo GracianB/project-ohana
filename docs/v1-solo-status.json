@@ -4,93 +4,86 @@
   "scope": "single_player_v2",
   "repository": "GracianB/project-ohana",
   "branch": "feat/v2-identity-challenge-and-discovery",
-  "base_commit": "3fe0b84",
+  "base_commit": "ab615f58069dee84983b009ac799c1d515574faa",
   "published": true,
   "campaign_complete_verified": true,
   "v1_ready": false,
-  "next_task": "v2.final_candidate_CI_and_publication",
+  "next_task": "v2.user_play_review",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1544,
-    "runtime_modules": 327,
-    "precache_resources": 377,
-    "source": "V513: continuous clean-save Normal campaign, ten earned chapters and five forms each, four Quimera phases, reunion/results/return to selection; all 1000 physical memories, ten relics and reload persistence. Human artistic/difficulty acceptance is separate.",
-    "local_browser_audit": "passed_V513",
-    "local_ten_room_presentation": "30 desktop/mobile views passed_V513",
-    "local_ten_bank_physical_traversal": "passed_V513 including actual held touch jump",
-    "local_optical_size_matrix": "100 checks passed_V513",
-    "local_eight_second_companions": "ten heroes passed_V513",
-    "local_living_stage": "actual pointer choices and keyboard, desktop/mobile, passed_V513",
-    "local_full_campaign": "passed_V513",
-    "local_all_memories": "1000 physically collected and ten album panels/relics retained on reload",
-    "local_normal_pressure": "idle Kilo dies; active control survives same encounter",
-    "local_performance": "20 scenes; median16.7ms; worst p95 desktop33.3ms/emulated mobile16.8ms; no >50ms frames in sample",
-    "remote_ci_current_candidate": "pages verify-release/deploy and OHANA CI passed for30cd122",
-    "published_url_current_candidate": "26 changed runtime assets SHA256 matched live V513; public browser startup passed"
+    "node_passed": 1567,
+    "runtime_modules": 334,
+    "precache_resources": 384,
+    "source": "docs/V600-VALIDATION.json",
+    "local_browser_audit": "passed_V600",
+    "github_quality": "passed_6ecdb76"
   },
   "chapters": [
     {
       "id": "kilo",
       "order": 1,
       "room": "w1-kilo",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v501-kilo-chapter.mjs",
         "test-results/v501/kilo-chapter-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "stitcho",
       "order": 2,
       "room": "w1-stitcho",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v502-stitcho-chapter.mjs",
         "test-results/v502/stitcho-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "chispin",
       "order": 3,
       "room": "w1-chispin",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v506-chispin-chapter.mjs",
         "test-results/v506/chispin-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "cat",
       "order": 4,
       "room": "w1-cat",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/cat-pilot.json",
@@ -98,17 +91,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "cuerno",
       "order": 5,
       "room": "w1-cuerno",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/cuerno-pilot.json",
@@ -116,17 +110,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "dragon",
       "order": 6,
       "room": "w1-dragon",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/dragon-pilot.json",
@@ -134,17 +129,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "dino",
       "order": 7,
       "room": "w1-dino",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v508-dino-chapter.mjs",
         "test-results/v508/dino-pilot.json",
@@ -153,17 +149,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "frita",
       "order": 8,
       "room": "w1-frita",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v510-frita-yomi-chapters.mjs",
         "test-results/v510/frita-pilot.json",
@@ -171,17 +168,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "pizza",
       "order": 9,
       "room": "w1-pizza",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v509-pizza-chapter.mjs",
         "test-results/v509/pizza-pilot.json",
@@ -189,17 +187,18 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     },
     {
       "id": "yomi",
       "order": 10,
       "room": "w1-yomi",
-      "status": "v513_implemented_and_campaign_verified",
+      "status": "v600_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V513",
+      "human_acceptance": "pending_user_play_V600",
       "all_100_memories_verified": true,
-      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
+      "next_work": "User play review of published V2 candidate",
       "evidence": [
         "tests/browser/v510-frita-yomi-chapters.mjs",
         "test-results/v510/yomi-pilot.json",
@@ -207,7 +206,8 @@
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
         "tests/browser/v513-memory-save.mjs"
-      ]
+      ],
+      "v2_discoveries_verified": 3
     }
   ],
   "finale": {
@@ -222,14 +222,14 @@
     "entry_gate": "ten_seals_required_at_door_and_spawn"
   },
   "release_gates": {
-    "ten_integrated_chapters": "passed_V513_continuous_campaign",
-    "full_clean_save_campaign": "passed_V513",
+    "ten_integrated_chapters": "passed_V600_continuous_Normal_campaign",
+    "full_clean_save_campaign": "passed_V600_including_thirty_real_discoveries",
     "save_death_resume_migration_matrix": "Node migration/resume/death regressions pass; earned browser album reload and sealed revisit pass",
-    "all_offered_memories_reachable": "1000 physically collected; ten relics verified",
+    "all_offered_memories_reachable": "1000 physically collected; ten earned rewards replayed and retained after reload",
     "keyboard_gamepad_touch_review": "browser audit input checks and actual touch bank traversal pass; physical hardware acceptance separate",
     "human_difficulty_acceptance": "pending_user_play",
-    "final_candidate_automated_and_visual_checks": "passed_V513",
-    "same_sha_ci_pages_and_live_sw_check": "passed_V513_30cd122"
+    "final_candidate_automated_and_visual_checks": "passed_V600",
+    "same_sha_ci_pages_and_live_sw_check": "passed_V600_6ecdb76_46_matching_runtime_assets"
   },
   "excluded_from_v1": [
     "World 2",
@@ -240,13 +240,40 @@
   ],
   "open_tasks": [
     {
-      "id": "v1.user_play_acceptance",
+      "id": "v2.user_play_acceptance",
       "priority": 1,
       "status": "pending_art_and_perceived_difficulty_acceptance"
     }
   ],
-  "evidence_storage": "Versioned drivers and docs/V513-VALIDATION.json; generated evidence in test-results/v513 (legacy presentation drivers also v511/v512), logs in /workspace/.cloud-setup/logs/ohana-v513-*. No new delivery ZIP claimed.",
+  "evidence_storage": "Versioned drivers and docs/V600-VALIDATION.json; generated evidence in test-results/v600 and /workspace/.cloud-setup/logs/ohana-v600-*.",
   "published_release": {
+    "version": "ohana-600",
+    "runtime_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
+    "url": "https://gracianb.github.io/project-ohana/?release=600",
+    "verified": true,
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40237852122",
+    "quality_run": "https://github.com/GracianB/project-ohana/actions/runs/40236423368",
+    "live_assets_verified_sha256": 46,
+    "public_startup": {
+      "url": "https://gracianb.github.io/project-ohana/?release=600",
+      "enteredViaRealCamp": true,
+      "playing": true,
+      "caches": [
+        "ohana-static-ohana-600"
+      ],
+      "workers": [
+        {
+          "active": "https://gracianb.github.io/project-ohana/sw.js?v=ohana-600"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "published_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=600",
+  "candidate_version": "ohana-600",
+  "review": "docs/V2-ADVENTURE.md",
+  "previous_verified_publication": {
     "version": "ohana-513",
     "commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
     "url": "https://gracianb.github.io/project-ohana/?release=513",
@@ -255,19 +282,7 @@
     "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40210771546",
     "live_assets_verified_sha256": 26
   },
-  "published_commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=513",
-  "candidate_version": "ohana-600",
-  "review": "docs/V1-FINAL-REVIEW.md",
-  "previous_verified_publication": {
-    "version": "ohana-512",
-    "commit": "1ff944725665667ad8bbf089402067869d535d04",
-    "url": "https://gracianb.github.io/project-ohana/?release=512",
-    "verified": true,
-    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40205716045",
-    "live_assets_verified_sha256": 42
-  },
   "candidate_review": "docs/V2-ADVENTURE.md",
   "candidate_validation": "docs/V600-VALIDATION.json",
-  "candidate_published": false
+  "candidate_published": true
 }

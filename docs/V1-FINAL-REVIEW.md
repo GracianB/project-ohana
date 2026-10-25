@@ -2,7 +2,7 @@
 
 La V514 de PR440 está integrada. Continuar con [V2-ADVENTURE.md](V2-ADVENTURE.md) y
 [V600-VALIDATION.json](V600-VALIDATION.json): segundo acto, treinta descubrimientos,
-guardianes reactivos y colección con recompensa real. Candidato pendiente de CI final y publicación.
+guardianes reactivos y colección con recompensa real. V600 publicada: Quality completa y Pages aprobados; 46 archivos runtime verificados en vivo.
 El informe V513 que sigue es histórico; no acredita la publicación de V600.
 
 # Revisión final solicitada — candidato V513

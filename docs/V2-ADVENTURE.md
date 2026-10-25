@@ -1,4 +1,9 @@
-# OHANA V2 · candidato ohana-600
+# OHANA V2 · ohana-600 publicada
+
+Disponible: https://gracianb.github.io/project-ohana/?release=600
+
+Runtime `6ecdb76`, Quality completa y Pages aprobados; 46 archivos runtime
+comparados por SHA256 y arranque público con caché activa comprobado.
 
 La campaña crece con un segundo acto que usa la forma máxima, diez guardianes
 articulados, presión de combate mayor y recompensas que se ven durante la partida.

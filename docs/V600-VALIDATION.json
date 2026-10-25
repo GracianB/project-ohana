@@ -1,7 +1,7 @@
 {
   "version": "ohana-600",
   "date": "2026-10-25",
-  "status": "candidate_under_final_CI",
+  "status": "published_and_verified",
   "integrated_baseline": {
     "pr": 440,
     "commit": "53e386f90ac004a0345570fd6bede48dbc577fa3",
@@ -186,7 +186,8 @@
       "hits": 133,
       "damage": 1852.5999999999995
     },
-    "errors": []
+    "errors": [],
+    "record_note": "Local physical pilot; final runtime candidate independently repeats the same assertions in all four green campaign gates, including Quality."
   },
   "collection": {
     "report": [
@@ -446,8 +447,473 @@
     "passed": true
   },
   "performance": {
-    "status": "rechecking_latest_adaptive_raster",
-    "scenes": 40
+    "status": "passed_latest_render_cache",
+    "viewport_benchmark": [
+      {
+        "label": "desktop",
+        "hero": "kilo",
+        "scene": "route",
+        "median": 16.699999999999818,
+        "p95": 33.29999999999973,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 23
+      },
+      {
+        "label": "desktop",
+        "hero": "kilo",
+        "scene": "guardian",
+        "median": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 23
+      },
+      {
+        "label": "desktop",
+        "hero": "stitcho",
+        "scene": "route",
+        "median": 16.699999999999818,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 21
+      },
+      {
+        "label": "desktop",
+        "hero": "stitcho",
+        "scene": "guardian",
+        "median": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 21
+      },
+      {
+        "label": "desktop",
+        "hero": "chispin",
+        "scene": "route",
+        "median": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 24
+      },
+      {
+        "label": "desktop",
+        "hero": "chispin",
+        "scene": "guardian",
+        "median": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 24
+      },
+      {
+        "label": "desktop",
+        "hero": "cat",
+        "scene": "route",
+        "median": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 22
+      },
+      {
+        "label": "desktop",
+        "hero": "cat",
+        "scene": "guardian",
+        "median": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 22
+      },
+      {
+        "label": "desktop",
+        "hero": "cuerno",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 17
+      },
+      {
+        "label": "desktop",
+        "hero": "cuerno",
+        "scene": "guardian",
+        "median": 16.700000000000728,
+        "p95": 33.400000000001455,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 17
+      },
+      {
+        "label": "desktop",
+        "hero": "dragon",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "desktop",
+        "hero": "dragon",
+        "scene": "guardian",
+        "median": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "desktop",
+        "hero": "dino",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "desktop",
+        "hero": "dino",
+        "scene": "guardian",
+        "median": 16.700000000000728,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "desktop",
+        "hero": "frita",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "desktop",
+        "hero": "frita",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "desktop",
+        "hero": "pizza",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.80000000000291,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "desktop",
+        "hero": "pizza",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.80000000000291,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "desktop",
+        "hero": "yomi",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 19
+      },
+      {
+        "label": "desktop",
+        "hero": "yomi",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.80000000000291,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 19
+      },
+      {
+        "label": "mobile",
+        "hero": "kilo",
+        "scene": "route",
+        "median": 16.699999999999818,
+        "p95": 16.700000000000273,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 23
+      },
+      {
+        "label": "mobile",
+        "hero": "kilo",
+        "scene": "guardian",
+        "median": 16.699999999999818,
+        "p95": 16.800000000000182,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 23
+      },
+      {
+        "label": "mobile",
+        "hero": "stitcho",
+        "scene": "route",
+        "median": 16.699999999999818,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 21
+      },
+      {
+        "label": "mobile",
+        "hero": "stitcho",
+        "scene": "guardian",
+        "median": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 21
+      },
+      {
+        "label": "mobile",
+        "hero": "chispin",
+        "scene": "route",
+        "median": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 24
+      },
+      {
+        "label": "mobile",
+        "hero": "chispin",
+        "scene": "guardian",
+        "median": 16.69999999999891,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 24
+      },
+      {
+        "label": "mobile",
+        "hero": "cat",
+        "scene": "route",
+        "median": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 22
+      },
+      {
+        "label": "mobile",
+        "hero": "cat",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 22
+      },
+      {
+        "label": "mobile",
+        "hero": "cuerno",
+        "scene": "route",
+        "median": 16.700000000000728,
+        "p95": 16.80000000000291,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 17
+      },
+      {
+        "label": "mobile",
+        "hero": "cuerno",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 17
+      },
+      {
+        "label": "mobile",
+        "hero": "dragon",
+        "scene": "route",
+        "median": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "mobile",
+        "hero": "dragon",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "mobile",
+        "hero": "dino",
+        "scene": "route",
+        "median": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "mobile",
+        "hero": "dino",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.700000000000728,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 20
+      },
+      {
+        "label": "mobile",
+        "hero": "frita",
+        "scene": "route",
+        "median": 16.700000000000728,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "mobile",
+        "hero": "frita",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.799999999999272,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "mobile",
+        "hero": "pizza",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.799999999995634,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "mobile",
+        "hero": "pizza",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 18
+      },
+      {
+        "label": "mobile",
+        "hero": "yomi",
+        "scene": "route",
+        "median": 16.69999999999709,
+        "p95": 16.700000000004366,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 19
+      },
+      {
+        "label": "mobile",
+        "hero": "yomi",
+        "scene": "guardian",
+        "median": 16.69999999999709,
+        "p95": 16.80000000000291,
+        "over50": 0,
+        "frames": 90,
+        "activeThreats": 3,
+        "enemies": 19
+      }
+    ],
+    "real_animated_stages": [
+      {
+        "scene": "opening",
+        "median": 16.699999999999818,
+        "p95": 33.299999999999955,
+        "over50": 0,
+        "frames": 90
+      },
+      {
+        "scene": "chapter-selection",
+        "median": 16.699999999999818,
+        "p95": 33.399999999999636,
+        "over50": 2,
+        "frames": 90
+      },
+      {
+        "scene": "earned-Yomi-celebration",
+        "median": 16.700000000000728,
+        "p95": 33.400000000001455,
+        "over50": 0,
+        "frames": 90
+      }
+    ],
+    "limitation": "Emulated mobile viewport on this Chromium/CPU, not physical-phone certification."
   },
   "methods": {
     "campaign": "One clean Normal save, physical keyboard/terrain controls, no position/form/HP/XP/seal/win grants; all 30 discoveries, Quimera, results, actual selector and re-entry persistence. Final boss cycle correction additionally rerun by candidate CI.",
@@ -456,7 +922,370 @@
     "art": "Canvas screenshots and real articulated state renders; artistic acceptance remains user play feedback."
   },
   "publication": {
-    "published": false,
-    "requires": "Candidate Quality and independent checks, then Pages and live asset byte verification"
-  }
+    "version": "ohana-600",
+    "runtime_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
+    "url": "https://gracianb.github.io/project-ohana/?release=600",
+    "verified": true,
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40237852122",
+    "quality_run": "https://github.com/GracianB/project-ohana/actions/runs/40236423368",
+    "live_assets_verified_sha256": 46,
+    "public_startup": {
+      "url": "https://gracianb.github.io/project-ohana/?release=600",
+      "enteredViaRealCamp": true,
+      "playing": true,
+      "caches": [
+        "ohana-static-ohana-600"
+      ],
+      "workers": [
+        {
+          "active": "https://gracianb.github.io/project-ohana/sw.js?v=ohana-600"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "runtime_candidate": "6ecdb76a6559f6137ebab260f205b50663a7763b",
+  "rendering": {
+    "bounded_actor_cache": 12,
+    "raster_buckets": [
+      420,
+      840
+    ],
+    "high_resolution_scope": "Solo evolution and earned-reward stages; opening/selection keep normal raster budget."
+  },
+  "github_checks": [
+    {
+      "gate": "quality",
+      "run": "40236423368",
+      "status": "success",
+      "passed_steps": 62,
+      "failed": [],
+      "last_success": "Release gate",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423368",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "campaign",
+      "run": "40236423378",
+      "status": "success",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423378",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "compatibility",
+      "run": "40236423376",
+      "status": "success",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423376",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "journey",
+      "run": "40236423366",
+      "status": "success",
+      "passed_steps": 25,
+      "failed": [],
+      "last_success": "Run actions/upload-artifact@v4",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423366",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "Quimera",
+      "run": "40236423377",
+      "status": "success",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423377",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "selection",
+      "run": "40236423383",
+      "status": "success",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423383",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    },
+    {
+      "gate": "CI",
+      "run": "40236423384",
+      "status": "success",
+      "url": "https://github.com/GracianB/project-ohana/actions/runs/40236423384",
+      "commit": "6ecdb76a6559f6137ebab260f205b50663a7763b"
+    }
+  ],
+  "live_assets": [
+    {
+      "path": "characters/art/cat.js",
+      "matched": true,
+      "sha256": "f76c84acfa9670f974a67bdaac37b51778e1cfa0ce17aaf3631605b8d11896e4",
+      "live_sha256": "f76c84acfa9670f974a67bdaac37b51778e1cfa0ce17aaf3631605b8d11896e4"
+    },
+    {
+      "path": "characters/art/cuerno-v373.js",
+      "matched": true,
+      "sha256": "5fb3173c6c1b81bdc76be1ecb142ab940a2d5e09fdd6b475ee12d9f86f45380f",
+      "live_sha256": "5fb3173c6c1b81bdc76be1ecb142ab940a2d5e09fdd6b475ee12d9f86f45380f"
+    },
+    {
+      "path": "characters/art/dino.js",
+      "matched": true,
+      "sha256": "b15eb9d31bb37b4df24a5f68a1d98ed45b9cee668a8ce7c0c204a56bd497b006",
+      "live_sha256": "b15eb9d31bb37b4df24a5f68a1d98ed45b9cee668a8ce7c0c204a56bd497b006"
+    },
+    {
+      "path": "characters/art/dragon.js",
+      "matched": true,
+      "sha256": "d728279b987ffc4bb112ecccb39e319ef9d71b1b084ceb3e4c8c511a88674bec",
+      "live_sha256": "d728279b987ffc4bb112ecccb39e319ef9d71b1b084ceb3e4c8c511a88674bec"
+    },
+    {
+      "path": "characters/art/frita.js",
+      "matched": true,
+      "sha256": "0df1f09784bca9a8e589cc0c0429d3da0cc24116f69e35af3039834cd55bf8fc",
+      "live_sha256": "0df1f09784bca9a8e589cc0c0429d3da0cc24116f69e35af3039834cd55bf8fc"
+    },
+    {
+      "path": "characters/art/lilo.js",
+      "matched": true,
+      "sha256": "971c8ae2edbc9c91cbdd6bc8e2188309e32d563e821c8545fa41dc94bd490df3",
+      "live_sha256": "971c8ae2edbc9c91cbdd6bc8e2188309e32d563e821c8545fa41dc94bd490df3"
+    },
+    {
+      "path": "characters/art/pikachu.js",
+      "matched": true,
+      "sha256": "62f7430b7a8c09eb6d3273955a8e7e60ca0b0fc6ed28705f75782b3833ee2d94",
+      "live_sha256": "62f7430b7a8c09eb6d3273955a8e7e60ca0b0fc6ed28705f75782b3833ee2d94"
+    },
+    {
+      "path": "characters/art/pizza.js",
+      "matched": true,
+      "sha256": "21b44295e4bcc9f0e0758cd3229d5ba3b12376608058abe0198903396356cc1b",
+      "live_sha256": "21b44295e4bcc9f0e0758cd3229d5ba3b12376608058abe0198903396356cc1b"
+    },
+    {
+      "path": "characters/art/stitch.js",
+      "matched": true,
+      "sha256": "33e42a9fe04c6cd72d41d4f63b51809b4f8df788259e3e3f4cce8feb64bb2393",
+      "live_sha256": "33e42a9fe04c6cd72d41d4f63b51809b4f8df788259e3e3f4cce8feb64bb2393"
+    },
+    {
+      "path": "characters/art/yomi.js",
+      "matched": true,
+      "sha256": "6fa4e1fc235e2316f6ab7d508db9cd0a749c54a2c71af8e8dd2d87308393470c",
+      "live_sha256": "6fa4e1fc235e2316f6ab7d508db9cd0a749c54a2c71af8e8dd2d87308393470c"
+    },
+    {
+      "path": "characters/draw.js",
+      "matched": true,
+      "sha256": "c458f25bfab087f413abf10f50e669f938d9f7d15de9be4b03240a38d28f49c4",
+      "live_sha256": "c458f25bfab087f413abf10f50e669f938d9f7d15de9be4b03240a38d28f49c4"
+    },
+    {
+      "path": "characters/identity-v2.js",
+      "matched": true,
+      "sha256": "50749fcc5155855924eb971983c7d9216f544035b22d14556786151e519e0b2b",
+      "live_sha256": "50749fcc5155855924eb971983c7d9216f544035b22d14556786151e519e0b2b"
+    },
+    {
+      "path": "characters/rig.js",
+      "matched": true,
+      "sha256": "0a4b090bb26db32628783f7bdd36f4867d3bfad6098196c0a47c6625ee975e3d",
+      "live_sha256": "0a4b090bb26db32628783f7bdd36f4867d3bfad6098196c0a47c6625ee975e3d"
+    },
+    {
+      "path": "characters/roster.js",
+      "matched": true,
+      "sha256": "9ce0f03745b43757e91c13ed30f023dd048d01529ffe7e26ee183d0c69a74ccb",
+      "live_sha256": "9ce0f03745b43757e91c13ed30f023dd048d01529ffe7e26ee183d0c69a74ccb"
+    },
+    {
+      "path": "characters/signature.js",
+      "matched": true,
+      "sha256": "978dfbb88c4a9325d94f0843536c9c7cee3174159085e30ea84798cf314c1779",
+      "live_sha256": "978dfbb88c4a9325d94f0843536c9c7cee3174159085e30ea84798cf314c1779"
+    },
+    {
+      "path": "engine/audio.js",
+      "matched": true,
+      "sha256": "300ca8e8ee3e7a533273d43f3ecf4e94d7e6b1670e0b7840b6756945a957b1d2",
+      "live_sha256": "300ca8e8ee3e7a533273d43f3ecf4e94d7e6b1670e0b7840b6756945a957b1d2"
+    },
+    {
+      "path": "engine/music.js",
+      "matched": true,
+      "sha256": "0bafb47680c0573397a7cdd4ab8ae3f97e682c5bce094cccbe9ea18b6f4dd3a9",
+      "live_sha256": "0bafb47680c0573397a7cdd4ab8ae3f97e682c5bce094cccbe9ea18b6f4dd3a9"
+    },
+    {
+      "path": "game.js",
+      "matched": true,
+      "sha256": "333d7c2f5b8624cfecb0aa568143979dbb085fd048827f37ae0062cdfae17961",
+      "live_sha256": "333d7c2f5b8624cfecb0aa568143979dbb085fd048827f37ae0062cdfae17961"
+    },
+    {
+      "path": "index.html",
+      "matched": true,
+      "sha256": "90e6980e3dd7f174b293cd1aa3ce625ff15cb7f9e6979dcb0f583d00626c9b38",
+      "live_sha256": "90e6980e3dd7f174b293cd1aa3ce625ff15cb7f9e6979dcb0f583d00626c9b38"
+    },
+    {
+      "path": "play-interface.css",
+      "matched": true,
+      "sha256": "fd4404d5a642e2057496d9da4a911f964945d122c85b0468dba913e968df1c14",
+      "live_sha256": "fd4404d5a642e2057496d9da4a911f964945d122c85b0468dba913e968df1c14"
+    },
+    {
+      "path": "sw.js",
+      "matched": true,
+      "sha256": "6ab56adbc3e975f688e7740e77cca627919ebfe017445099f60bcbf947cd1254",
+      "live_sha256": "6ab56adbc3e975f688e7740e77cca627919ebfe017445099f60bcbf947cd1254"
+    },
+    {
+      "path": "systems/abilities.js",
+      "matched": true,
+      "sha256": "94d1875f13f70889738d6951d1b6f391ba3c3e3d5e5f59ef4f5a7ea6a874e421",
+      "live_sha256": "94d1875f13f70889738d6951d1b6f391ba3c3e3d5e5f59ef4f5a7ea6a874e421"
+    },
+    {
+      "path": "systems/adventure-guide-v2.js",
+      "matched": true,
+      "sha256": "e763684bb7d749d72b44b2cc02106e089cc4dc03e30370227fec1433e14e6ad4",
+      "live_sha256": "e763684bb7d749d72b44b2cc02106e089cc4dc03e30370227fec1433e14e6ad4"
+    },
+    {
+      "path": "systems/campaign-creature-art.js",
+      "matched": true,
+      "sha256": "9e6cdff7f650253ace02ecab3b7470a1b47715a1923cb2d01a0f661d67e4f726",
+      "live_sha256": "9e6cdff7f650253ace02ecab3b7470a1b47715a1923cb2d01a0f661d67e4f726"
+    },
+    {
+      "path": "systems/campaign-enemies.js",
+      "matched": true,
+      "sha256": "1f38f2e6e63d3c37bf9f480d899c071b8c922e68a8e1d8e40589c6f7edd52261",
+      "live_sha256": "1f38f2e6e63d3c37bf9f480d899c071b8c922e68a8e1d8e40589c6f7edd52261"
+    },
+    {
+      "path": "systems/chapter-boss-art-v2.js",
+      "matched": true,
+      "sha256": "511c242e638313be817c418c7efe46779c42711a0cf817b7ce73a04110a7b636",
+      "live_sha256": "511c242e638313be817c418c7efe46779c42711a0cf817b7ce73a04110a7b636"
+    },
+    {
+      "path": "systems/chapter-boss-v2.js",
+      "matched": true,
+      "sha256": "96cb1c16a45530ce240b7bbe939d0c68868a0be55606daff4fd712599463d8ea",
+      "live_sha256": "96cb1c16a45530ce240b7bbe939d0c68868a0be55606daff4fd712599463d8ea"
+    },
+    {
+      "path": "systems/chapter-expedition-v2.js",
+      "matched": true,
+      "sha256": "5aa2c8b7737c0e1e89f5c4d594bef4c008e18751babedc5d9a990a2f0c7f8344",
+      "live_sha256": "5aa2c8b7737c0e1e89f5c4d594bef4c008e18751babedc5d9a990a2f0c7f8344"
+    },
+    {
+      "path": "systems/combat-difficulty.js",
+      "matched": true,
+      "sha256": "f578608bcf32162fa3e548efce4af87e2faaabb7ae91785f6c4513f350a7228b",
+      "live_sha256": "f578608bcf32162fa3e548efce4af87e2faaabb7ae91785f6c4513f350a7228b"
+    },
+    {
+      "path": "systems/enemy-director.js",
+      "matched": true,
+      "sha256": "8af858e1b19d73e9c915959a3220ce675a4c0e36d12a3d92d263dab3f7f09cf8",
+      "live_sha256": "8af858e1b19d73e9c915959a3220ce675a4c0e36d12a3d92d263dab3f7f09cf8"
+    },
+    {
+      "path": "systems/enemy-hero-counterplay.js",
+      "matched": true,
+      "sha256": "78b6274d20eecc9ba2a68feb818759ab281e40e0472780615e29bf0016a7d52c",
+      "live_sha256": "78b6274d20eecc9ba2a68feb818759ab281e40e0472780615e29bf0016a7d52c"
+    },
+    {
+      "path": "systems/family-camp.js",
+      "matched": true,
+      "sha256": "0570314a4ebd30fa96ce46a9f76dad6094c78f2136a4c117a93ddf4407a3e558",
+      "live_sha256": "0570314a4ebd30fa96ce46a9f76dad6094c78f2136a4c117a93ddf4407a3e558"
+    },
+    {
+      "path": "systems/kilo-chapter.js",
+      "matched": true,
+      "sha256": "f96d8fecd81e318e8795bfdd6b0386ca175ec5c7a5b39db0b3d372eab533a557",
+      "live_sha256": "f96d8fecd81e318e8795bfdd6b0386ca175ec5c7a5b39db0b3d372eab533a557"
+    },
+    {
+      "path": "systems/local-map.js",
+      "matched": true,
+      "sha256": "472aa0d52e7be8c88c5237b3b7c03585634f6c18cd42013160063af68a1e1a16",
+      "live_sha256": "472aa0d52e7be8c88c5237b3b7c03585634f6c18cd42013160063af68a1e1a16"
+    },
+    {
+      "path": "systems/magic.js",
+      "matched": true,
+      "sha256": "7c6d35a6698b3525476dc7265ff8ce18d285ec33c94dc46f8d550a6c5bef08b3",
+      "live_sha256": "7c6d35a6698b3525476dc7265ff8ce18d285ec33c94dc46f8d550a6c5bef08b3"
+    },
+    {
+      "path": "systems/memory-rewards-v2.js",
+      "matched": true,
+      "sha256": "7cdcf39da7666b17896292371ab3ab4020f35b26b73f1a879040f63f062dc35a",
+      "live_sha256": "7cdcf39da7666b17896292371ab3ab4020f35b26b73f1a879040f63f062dc35a"
+    },
+    {
+      "path": "systems/message-manager.js",
+      "matched": true,
+      "sha256": "e0ccb86676ce3694b1d2986b248b556da36fa62fc1041d9884a84d597d33dfc5",
+      "live_sha256": "e0ccb86676ce3694b1d2986b248b556da36fa62fc1041d9884a84d597d33dfc5"
+    },
+    {
+      "path": "systems/relic-cinema.js",
+      "matched": true,
+      "sha256": "6bc08ec4aa9001d0d8d8c1462ae3f23236cdd1becd83cbf0fee0ad1050f0e366",
+      "live_sha256": "6bc08ec4aa9001d0d8d8c1462ae3f23236cdd1becd83cbf0fee0ad1050f0e366"
+    },
+    {
+      "path": "systems/room-album.js",
+      "matched": true,
+      "sha256": "c67bad22d9ca3f452e0ba55155dd3dc30293d74baf2e728a79f17f01b62f8b7d",
+      "live_sha256": "c67bad22d9ca3f452e0ba55155dd3dc30293d74baf2e728a79f17f01b62f8b7d"
+    },
+    {
+      "path": "systems/world1-collect.js",
+      "matched": true,
+      "sha256": "3a52d79fbfe70e15d4450974ba2ae28fb0f719af70e59d52449484aefd6f2ea1",
+      "live_sha256": "3a52d79fbfe70e15d4450974ba2ae28fb0f719af70e59d52449484aefd6f2ea1"
+    },
+    {
+      "path": "systems/world1-play.js",
+      "matched": true,
+      "sha256": "a0e96b9f880a3d429af24c75dc036de6d465c5f10d3dc01b296b0df1aef3b54b",
+      "live_sha256": "a0e96b9f880a3d429af24c75dc036de6d465c5f10d3dc01b296b0df1aef3b54b"
+    },
+    {
+      "path": "systems/world1-rooms.js",
+      "matched": true,
+      "sha256": "c4cb2e7acc7cd349ce6b2ab032ac748100dda4e473409c4a87719f7ad70df2a9",
+      "live_sha256": "c4cb2e7acc7cd349ce6b2ab032ac748100dda4e473409c4a87719f7ad70df2a9"
+    },
+    {
+      "path": "systems/world1-select.js",
+      "matched": true,
+      "sha256": "1ce3633f4051b8afca719d26d8f68583b047b6902c264ad9b27b77bf427dd309",
+      "live_sha256": "1ce3633f4051b8afca719d26d8f68583b047b6902c264ad9b27b77bf427dd309"
+    },
+    {
+      "path": "world-map.css",
+      "matched": true,
+      "sha256": "9b7c4ebf7634cba29e34e8fd63e51f2adccf40fed8c0bb84520128b1d0362051",
+      "live_sha256": "9b7c4ebf7634cba29e34e8fd63e51f2adccf40fed8c0bb84520128b1d0362051"
+    },
+    {
+      "path": "worlds/ohana-crafted-scenes.js",
+      "matched": true,
+      "sha256": "6dc30be51948301c139157d3b8f72986a312cef3a20a66909766a549e0922857",
+      "live_sha256": "6dc30be51948301c139157d3b8f72986a312cef3a20a66909766a549e0922857"
+    },
+    {
+      "path": "worlds/ohana-environments.js",
+      "matched": true,
+      "sha256": "4745f99d4e1d457611b204126ba157dad872ca935612f2c985a8fa37c92abfc5",
+      "live_sha256": "4745f99d4e1d457611b204126ba157dad872ca935612f2c985a8fa37c92abfc5"
+    }
+  ]
 }
