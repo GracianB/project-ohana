@@ -5,7 +5,7 @@
   "repository": "GracianB/project-ohana",
   "branch": "feat/v512-hero-identity-and-v1-review",
   "base_commit": "ecd4699",
-  "published": false,
+  "published": true,
   "campaign_complete_verified": false,
   "v1_ready": false,
   "next_task": "final_review.room_and_hero_quality",
@@ -17,10 +17,10 @@
     "runtime_modules": 323,
     "precache_resources": 373,
     "source": "V512 foundation: 10 physical chapter pilots; 100 optical size checks; 50-form sheet; 10 eight-second companions; general browser audit. Art acceptance and full campaign remain pending.",
-    "local_browser_audit": "passed",
+    "local_browser_audit": "passed_V512",
     "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "not yet published",
-    "published_url_current_candidate": "pending",
+    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40205716045",
+    "published_url_current_candidate": "42 changed runtime assets SHA256 matched live V512",
     "local_three_chapter_physical_pilots": "passed_V511",
     "local_three_realm_mobile": "presentation_passed_V511",
     "local_dino_physical_pilot": "passed_V511",
@@ -29,9 +29,12 @@
     "local_dino_quake_real_hits": "passed_V511",
     "local_frita_physical_pilot": "passed",
     "local_yomi_physical_pilot": "passed",
-    "local_ten_chapter_physical_pilots": "passed",
+    "local_ten_chapter_physical_pilots": "passed_V512",
     "local_ten_room_presentation": "passed",
-    "local_ten_bank_physical_traversal": "passed"
+    "local_ten_bank_physical_traversal": "passed",
+    "local_yomi_ten_seal_gate": "passed_V512",
+    "local_optical_size_matrix": "100 checks passed_V512",
+    "local_eight_second_companions": "ten heroes passed_V512"
   },
   "chapters": [
     {
@@ -202,7 +205,7 @@
     "keyboard_gamepad_touch_review": "pending",
     "human_difficulty_acceptance": "pending",
     "final_candidate_automated_and_visual_checks": "pending",
-    "same_sha_ci_pages_and_live_sw_check": "pending"
+    "same_sha_ci_pages_and_live_sw_check": "passed_V512_foundation_not_final_V1"
   },
   "excluded_from_v1": [
     "World 2",
@@ -250,13 +253,15 @@
   ],
   "evidence_storage": "Tests are versioned; generated evidence is in test-results/v512 and /workspace/.cloud-setup/logs/ohana-v512-*.log. No new delivery ZIP claimed.",
   "published_release": {
-    "version": "ohana-511",
-    "commit": "21fa9c9",
-    "url": "https://gracianb.github.io/project-ohana/?release=511",
-    "verified": true
+    "version": "ohana-512",
+    "commit": "1ff944725665667ad8bbf089402067869d535d04",
+    "url": "https://gracianb.github.io/project-ohana/?release=512",
+    "verified": true,
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40205716045",
+    "live_assets_verified_sha256": 42
   },
-  "published_commit": "21fa9c9",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=511",
+  "published_commit": "1ff944725665667ad8bbf089402067869d535d04",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=512",
   "candidate_version": "ohana-512",
   "review": "docs/V1-FINAL-REVIEW.md",
   "previous_verified_publication": {

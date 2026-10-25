@@ -47,3 +47,22 @@ Se registran evidencias de pruebas y resultados reales antes de marcar cualquier
 
 La petición queda abierta hasta resolver los pendientes. Las pruebas de progresión
 no certifican diversión, dificultad adecuada ni calidad artística aceptada.
+
+## Entrega V512 verificada (base, no cierre de V1)
+
+Commit de juego: `1ff944725665667ad8bbf089402067869d535d04`.
+[Probar V512](https://gracianb.github.io/project-ohana/?release=512).
+[Pages: verificación y despliegue correctos](https://github.com/GracianB/project-ohana/actions/runs/40205716045).
+Los 42 archivos runtime modificados coinciden por SHA256 con los publicados.
+
+- 1.540 pruebas Node aprobadas; release gate aprobado, 323 módulos y 373 recursos offline.
+- Auditoría general de navegador aprobada; 100 verificaciones de tamaño en 50 formas.
+- Diez pilotos físicos de capítulo aprobados. La prueba actualizada de Yomi conserva
+  su sello ganado pero bloquea el final porque faltan los otros nueve.
+- Diez compañeros U: siguen al lado y a la altura del héroe pasados seis segundos,
+  expiran a los 480 ticks activos y no amplían el presupuesto de daño anterior.
+- Entrada única de las diez salas, introducción sin encadenar otra llegada,
+  bloqueo de aparición del jefe final con sellos incompletos y móvil comprobados.
+
+Estas comprobaciones no cierran ninguno de los pendientes artísticos, de balance
+humano o de campaña continua descritos en la tabla. No se declara V1 lista.

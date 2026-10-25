@@ -21,7 +21,7 @@ Menú con paleta teatral coherente; apertura distribuida en dos planos. Los fond
 Michi, Cuerno y Dragón ya no quedan tapados por un segundo cielo. Pizza sobre muelle.
 Quimera no aparece si falta alguno de los diez sellos.
 
-Validación y publicación se registran al terminar las comprobaciones.
+Validación V512: 1.540 pruebas Node, release gate, auditoría general de navegador, diez pilotos físicos de capítulo, 100 verificaciones de escala y diez compañeros U aprobados. Pages 40205716045 correcto; 42 archivos modificados verificados por SHA256 en vivo. Los pendientes de V1 siguen abiertos en docs/V1-FINAL-REVIEW.md.
 
 # V511 · ohana-511 · Diez salas con terreno y rutas diseñados
 
