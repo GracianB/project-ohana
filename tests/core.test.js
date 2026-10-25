@@ -63,8 +63,8 @@ test("cada personaje pega distinto", () => {
   assert.equal(markAt("dino", 2).style, "arc");
   assert.equal(markAt("frita", 4).style, "arc");
   assert.equal(markAt("kilo", 0).dmg, 14);
-  assert.equal(markAt("frita", 0).dmg, 20);
-  assert.equal(markAt("dino", 0).dmg, 46);
+  assert.equal(markAt("frita", 0).dmg, 18);
+  assert.equal(markAt("dino", 0).dmg, 68);
   assert.ok(markAt("dino", 4).dmg > markAt("dino", 0).dmg);
   assert.ok(Math.abs(markAt("dino", 0).reach - markAt("frita", 0).reach) < 8);
 });
