@@ -58,16 +58,31 @@ try{
  assert.match(await objective(),/Patata dorada: Dirige el vuelo/);
  await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
  await page.screenshot({path:'test-results/v501/frita-flight.png'});
- let state=await step(1),minY=state.player.y;
- for(let i=0;i<120&&state.world1.done===0;i++){
-  const dx=frita[0].prize.x-state.player.x-state.player.w/2;
+ let state=await step(1),minY=state.player.y,launches=0,corrections=0;
+ const telemetry=[];
+ // A real geyser is a trajectory, not a fixed upward animation. The old pilot
+ // ran only 120 single ticks and NEVER pressed Frita's actual airborne J
+ // correction. If a flight misses, walk back and take the next timed vent.
+ for(let i=0;i<760&&state.world1.done===0;i++){
+  const flyer=await page.evaluate(()=>window.__OHANA_E2E.fryerAstralState());
+  if(i%30===0)telemetry.push({i,x:Math.round(state.player.x),y:Math.round(state.player.y),vy:Math.round(state.player.vy*10)/10,
+    airborne:!state.player.grounded,launched:flyer.launched,steered:flyer.steered,done:state.world1.done});
+  minY=Math.min(minY,state.player.y);
+  launches=Math.max(launches,Number(flyer.launches)||0);
+  corrections=Math.max(corrections,Number(flyer.airCorrections)||0);
+  const flying=flyer.launched===frita[0].id&&!state.player.grounded;
+  const goal=flying?frita[0].prize.x:frita[0].x;
+  const dx=goal-state.player.x-state.player.w/2;
   await page.keyboard.up('a');await page.keyboard.up('d');
-  if(Math.abs(dx)>10)await page.keyboard.down(dx>0?'d':'a');
-  state=await step(1);minY=Math.min(minY,state.player.y);
+  if(Math.abs(dx)>(flying?9:22))await page.keyboard.down(dx>0?'d':'a');
+  if(flying&&!flyer.steered)await page.keyboard.press('j'); // earned aerial correction
+  // Geyser readiness is managed by the real game clock, not by this pilot.
+  state=await step(Math.abs(dx)>40?5:2);
  }
  await page.keyboard.up('a');await page.keyboard.up('d');
- console.log('FRITA TRAJECTORY',JSON.stringify({minY,prizeY:frita[0].prize.y,done:state.world1.done}));
- assert.ok(state.world1.done>=1,'first golden potato must be reachable by the real geyser');
+ console.log('FRITA TRAJECTORY',JSON.stringify({minY,prizeY:frita[0].prize.y,done:state.world1.done,
+   launches,corrections,telemetry:telemetry.slice(-18)}));
+ assert.ok(state.world1.done>=1,'first golden potato must be reachable through real launch and J steering');
  console.log('PHYSICAL FRITA FIRST PRIZE',JSON.stringify({hp:state.hp,done:state.world1.done,evo:state.evo}));
  const stitcho=await begin('stitcho');
  await approach(stitcho[0].x,async()=>/Taller de la pieza 1/.test(await objective()));
