@@ -1,16 +1,17 @@
+import {authorChapterEncounters} from './chapter-encounters.js';
 // Authoring data: no random platform motifs, no new progression keys.
 const FLOOR=1134;
 export const ROOM_COMPOSITIONS=Object.freeze({
- kilo:{name:'Sendero de raíces y agua',material:'grove',terraces:[[1080,280,48],[4540,300,64],[6580,250,48]],branch:[[1540,1054,180],[1780,954,260],[2100,1014,190]],landmark:'arbor'},
- stitcho:{name:'Muelles y diques del astillero',material:'dock',terraces:[[1160,280,56],[3900,310,72],[6060,260,56]],branch:[[2980,1054,160],[3160,974,170],[3360,894,160]],landmark:'drydock'},
- chispin:{name:'Acueductos del relámpago',material:'marble',terraces:[[1140,280,56],[4760,280,64],[6660,260,56]],branch:[[3200,1054,180],[3450,954,220],[3740,954,180]],landmark:'conductor'},
- cat:{name:'Jardín suspendido de los sueños',material:'lunar',terraces:[[1080,260,48],[3780,300,64],[6700,260,56]],branch:[[3840,1054,180],[4100,934,180],[4370,1014,180]],landmark:'willow'},
- cuerno:{name:'Invernadero de cristal',material:'prism',terraces:[[1560,260,48],[3520,320,72],[6160,270,56]],branch:[[4230,1034,180],[4460,914,190],[4720,974,210]],landmark:'glasshouse'},
- dragon:{name:'Terrazas de la forja',material:'basalt',terraces:[[1360,280,56],[3500,280,72],[5220,250,56]],branch:[[3400,974,190],[3650,814,190],[3890,714,210]],landmark:'forge'},
- dino:{name:'Cañón de las costillas gigantes',material:'fossil',terraces:[[1160,280,56],[4660,300,64],[6200,280,56]],branch:[[4450,1054,180],[4680,974,260],[4990,974,180]],landmark:'ribs'},
- frita:{name:'Pasarelas del mercado',material:'diner',terraces:[[1080,260,48],[5100,300,64],[6040,270,56]],branch:[[5040,974,240],[5370,914,220],[5650,1034,220]],landmark:'market'},
- pizza:{name:'Balcones del puerto',material:'brick',terraces:[[1080,250,48],[3020,300,64],[6380,280,56]],branch:[[4700,1054,210],[4970,934,240],[5290,1014,180]],landmark:'piazza'},
- yomi:{name:'Pasarelas del observatorio',material:'alloy',terraces:[[1100,280,48],[3060,280,64],[6220,280,56]],branch:[[4640,1054,210],[4900,974,260],[5220,974,210]],landmark:'orrery'}
+ kilo:{name:'Sendero de raíces y agua',material:'grove',terraces:[[1080,280,48],[2640,190,72],[4540,300,88],[6580,250,96],[7560,200,80]],branch:[[1540,1054,180],[1780,954,260],[2100,1014,190]],landmark:'arbor'},
+ stitcho:{name:'Muelles y diques del astillero',material:'dock',terraces:[[1160,280,56],[2620,160,64],[3900,310,96],[5360,220,80],[6060,260,96]],branch:[[2980,1054,160],[3160,974,170],[3360,894,160]],landmark:'drydock'},
+ chispin:{name:'Acueductos del relámpago',material:'marble',terraces:[[1140,280,56],[3300,140,64],[4760,280,88],[5760,160,72],[6660,260,96]],branch:[[3200,1054,180],[3450,954,220],[3740,954,180]],landmark:'conductor'},
+ cat:{name:'Jardín suspendido de los sueños',material:'lunar',terraces:[[1080,260,48],[2540,180,64],[3780,300,88],[5400,160,96],[6700,260,96]],branch:[[3840,1054,180],[4100,934,180],[4370,1014,180]],landmark:'willow'},
+ cuerno:{name:'Invernadero de cristal',material:'prism',terraces:[[1560,400,48],[2760,240,64],[3520,430,88],[5480,280,72],[6160,390,96]],branch:[[4230,1034,180],[4460,914,190],[4720,974,210]],landmark:'glasshouse'},
+ dragon:{name:'Terrazas de la forja',material:'basalt',terraces:[[1360,280,56],[2550,220,72],[3500,280,96],[5220,250,112],[6880,300,112]],branch:[[3400,974,190],[3650,814,190],[3890,714,210]],landmark:'forge'},
+ dino:{name:'Cañón de las costillas gigantes',material:'fossil',terraces:[[1160,280,56],[2650,260,72],[4660,300,112],[5500,260,96],[6200,280,112]],branch:[[4450,1054,180],[4680,974,260],[4990,974,180]],landmark:'ribs'},
+ frita:{name:'Pasarelas del mercado',material:'diner',terraces:[[1080,260,48],[2860,200,64],[5100,300,88],[6040,270,96],[7200,240,96]],branch:[[5040,974,240],[5370,914,220],[5650,1034,220]],landmark:'market'},
+ pizza:{name:'Balcones del puerto',material:'brick',terraces:[[1080,250,48],[3020,300,64],[4660,180,72],[6380,280,88],[7340,200,72]],branch:[[4700,1054,210],[4970,934,240],[5290,1014,180]],landmark:'piazza'},
+ yomi:{name:'Pasarelas del observatorio',material:'alloy',terraces:[[1100,280,48],[3060,280,72],[4140,170,88],[6220,280,96],[7440,200,88]],branch:[[4640,1054,210],[4900,974,260],[5220,974,210]],landmark:'orrery'}
 });
 const overlap=(a,b,pad=0)=>a.x<b.x+b.w+pad&&a.x+a.w>b.x-pad;
 export function composeChapterRoom(hero,room){
@@ -31,6 +32,7 @@ export function composeChapterRoom(hero,room){
  for(const orb of room.orbs){const y=topAt(orb[0]);if(orb[1]>y-20)orb[1]=y-42;}
  for(const cp of room.checkpoints)cp.y=topAt(cp.x);
  if(branchEnd){const x=branchEnd[0]+branchEnd[2]/2;room.foes.push([x,branchEnd[1]-40,'cucaracho',false,{role:'shooter',name:'Vigía de '+plan.name,anchorFloor:branchEnd[1],chapterHP:105}]);}
+ authorChapterEncounters(hero,room,topAt);
  const encounterLanes=terraces.map((tr,i)=>({x:tr.x,w:tr.w,name:plan.name+' · '+(i+1)}));
  return {...room,plats:[...floors,...upper],composition:plan,terraces,nooks,encounterLanes};
 }

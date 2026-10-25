@@ -154,6 +154,7 @@ export function useAbility(game, index) {
 const p = game?.player;
 if (!p || p.dead || !Number.isInteger(index) || index < 0 || index > 5 || (Number(p.evo)||0)<POWER_LEVELS[index]) return false;
 if(index===5&&rhythmPress(game))return true;
+if(index===3&&game._evolutionAttacks?.guest)return false;
 if(p.id==='kilo'&&index===1&&p.evo>=4&&p._kiloFlightMode==='solar'&&p._kiloFlightT>0){
  stopKiloFlight(p);game.nums?.add?.(cx(p),p.y-40,'DESCENSO','#ffe3a6',false);return true;
 }
@@ -239,16 +240,16 @@ cuerno:  { aurora: true,  name: "Manto aurora", text: "Escudo luminoso y salto m
 });
 
 const SUPREME = Object.freeze({
-kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 9000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
-stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 9000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
-chispin: { id: "boltgod", name: "JUICIO DEL TRUENO", key: "U", cd: 9000, color: "#ffe14a", special: "Dúo del trueno", ally: "cat" },
-cat:     { id: "eclipse", name: "¡ESE OVILLO QUEMA!", key: "U", cd: 9000, color: "#ffb6e4", special: "Dúo de meteoros", ally: "dragon" },
-dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 9000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
-dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 9000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
-frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 9000, color: "#ffd36a", special: "Centella", ally: "pizza" },
-pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 9000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
-yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 9000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
-cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 9000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
+kilo:    { id: "solar", name: "OHANA: ¡A COMPÁS!", key: "U", cd: 18000, color: "#ffd36a", special: "Dúo musical", ally: "stitcho" },
+stitcho: { id: "bang", name: "CAOS BAJO LA NUBE", key: "U", cd: 18000, color: "#8f7bff", special: "Dúo de tormenta", ally: "chispin" },
+chispin: { id: "boltgod", name: "JUICIO DEL TRUENO", key: "U", cd: 18000, color: "#ffe14a", special: "Dúo del trueno", ally: "cat" },
+cat:     { id: "eclipse", name: "¡ESE OVILLO QUEMA!", key: "U", cd: 18000, color: "#ffb6e4", special: "Dúo de meteoros", ally: "dragon" },
+dragon:  { id: "nova", name: "SUPERNOVA CELESTE", key: "U", cd: 18000, color: "#ff4a20", special: "Vuelo celestial", ally: "dino" },
+dino:    { id: "impact", name: "CORAZÓN DE COLOSO", key: "U", cd: 18000, color: "#d3f59c", special: "Modo coloso", ally: "frita" },
+frita:   { id: "frygod", name: "FREIDORA APOCALIPSIS", key: "U", cd: 18000, color: "#ffd36a", special: "Centella", ally: "pizza" },
+pizza:   { id: "ovenking", name: "HORNO REAL", key: "U", cd: 18000, color: "#ff8a2a", special: "Rebote volcánico", ally: "yomi" },
+yomi:    { id: "devour", name: "JUICIO DEL UMBRAL", key: "U", cd: 18000, color: "#ffcb91", special: "Paso del abismo", ally: "cuerno" },
+cuerno:  { id: "aurora", name: "CORO DE AURORA", key: "U", cd: 18000, color: "#fff6c8", special: "Manto aurora", ally: "kilo" },
 });
 
 export function supremeOf(id) {
@@ -840,6 +841,7 @@ if (pl.e) {
 export function updateAbilityFx(game) {
 const p = game.player;
 if (!p) return;
+if(p.id==="yomi")p._yomiKnowledge=(game.enemies||[]).filter(e=>e.hp>0&&(e._yomiMarkUntil||0)>(game.t||0)).length;
 updateKiloDuet(game,hitEnemy);
 updateStitchoDuet(game,hitEnemy);
 updateMoments(game);

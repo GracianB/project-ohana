@@ -41,7 +41,13 @@
     "test:browser:frita-yomi-chapters": "node tests/browser/v510-frita-yomi-chapters.mjs",
     "test:browser:frita-yomi-presentation": "node tests/browser/v510-frita-yomi-presentation.mjs",
     "test:browser:ten-room-direction": "node tests/browser/v511-ten-room-direction.mjs",
-    "test:browser:room-terrain": "node tests/browser/v511-room-traversal.mjs"
+    "test:browser:room-terrain": "node tests/browser/v511-room-traversal.mjs",
+    "test:browser:campaign": "node tests/browser/v513-full-campaign.mjs",
+    "test:browser:memories": "node tests/browser/v513-all-memories.mjs",
+    "test:browser:pressure": "node tests/browser/v513-pressure.mjs",
+    "test:browser:performance": "node tests/browser/v513-performance.mjs",
+    "test:browser:living-stage": "node tests/browser/v513-living-stage.mjs",
+    "test:browser:memory-save": "node tests/browser/v513-memory-save.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

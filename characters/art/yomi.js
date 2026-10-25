@@ -244,6 +244,15 @@ function drawHead(ctx,F,f,col,glow,accent,mood,blink,look,t,pulse,faceY,sway,dro
    if(f===2){line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(px+side*pr*.7,py-pr*.6);ctx.lineTo(px+side*(pr+4),py-pr*1.8);ctx.stroke();ellipse(ctx,px+side*(pr+4),py-pr*1.8,1.6,1.6,glow);}
   }
  }
+ // Folded listening petals frame the visor: a paper spirit, not a stock TV.
+ for(const side of [-1,1]){
+  const spread=f===0?8:f===4?12:9,shift=f===0?3:0;
+  ctx.fillStyle=f>=3?'#f6e9c6':'#d5eee4';ctx.strokeStyle=LINE;ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(side*hw*.37,y+hh*.18);
+  ctx.quadraticCurveTo(side*(hw*.55+spread),y-5-shift,side*(hw*.47+spread),y+hh*.7);
+  ctx.lineTo(side*hw*.38,y+hh*.82);ctx.closePath();ctx.fill();ctx.stroke();
+  line(ctx,glow,.8);ctx.beginPath();ctx.moveTo(side*hw*.4,y+hh*.26);ctx.lineTo(side*(hw*.47+spread-2),y+hh*.12);ctx.stroke();
+ }
  // Shell
  ctx.fillStyle=col[0];rrect(ctx,x,y,hw,hh,f===0?12:13);ctx.fill();line(ctx,LINE,3);ctx.stroke();
  // back-side shade band
@@ -277,6 +286,9 @@ function drawTorso(ctx,F,f,col,glow,accent,core,t,pulse,swing,reduced){
   line(ctx,LINE,2.6);ctx.stroke();
   ctx.save();ctx.globalAlpha=.5;ctx.fillStyle=col[1];ctx.beginPath();ctx.moveTo(-w*.4,top+3);ctx.quadraticCurveTo(-w*.55,(top+bot)/2,-w*.16,bot+1);ctx.lineTo(-w*.08,bot+1);ctx.quadraticCurveTo(-w*.36,(top+bot)/2,-w*.26,top+3);ctx.closePath();ctx.fill();ctx.restore();
   line(ctx,glow,1.3);ctx.beginPath();ctx.moveTo(-w*.38,top+6);ctx.quadraticCurveTo(0,top+9,w*.38,top+6);ctx.stroke();
+  // Fold seams travel from shoulder to the lit thought at the chest.
+  line(ctx,'#81aaa8',1.1);ctx.beginPath();ctx.moveTo(-w*.38,top+2);ctx.lineTo(0,bot-2);ctx.lineTo(w*.38,top+2);ctx.stroke();
+  for(let side of [-1,1]){ctx.fillStyle='#d8e9d6';ctx.beginPath();ctx.moveTo(0,bot-1);ctx.lineTo(side*w*.4,bot-13);ctx.lineTo(side*w*.26,bot+2);ctx.closePath();ctx.fill();line(ctx,LINE,1);ctx.stroke();}
   drawCore(ctx,0,(top+bot)/2+1,4.4+(f-1)*.6+core,glow,accent,pulse);
   return;
  }
@@ -326,27 +338,22 @@ function wingNodes(side,f,spread,sweep){
  return base.map(([x,y],i)=>[side*(x*sx-sweep*i*1.2),y*sy+sweep*i*.8]);
 }
 function drawWing(ctx,side,F,f,glow,accent,t,spread,sweep,front,reduced){
- const rootX=side*8,rootY=F.hy+F.hh/2+(f===4?10:6);
- const nodes=wingNodes(side,f,spread,sweep);
- ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=front?1:.82;
- if(f===4){
-  ctx.save();ctx.globalAlpha*=.32;ctx.fillStyle="#3b2f8f";ctx.beginPath();ctx.moveTo(0,0);for(const [x,y] of nodes)ctx.lineTo(x,y);ctx.closePath();ctx.fill();ctx.restore();
+ const rootX=side*8,rootY=F.hy+F.hh/2+(f===4?10:6),nodes=wingNodes(side,f,spread,sweep);
+ ctx.save();ctx.translate(rootX,rootY);ctx.globalAlpha=front?1:.94;
+ // A network becomes a wing of folded memory pages. Each feather has a
+ // shoulder, hinge and tip; the ten family colours are structural seams.
+ for(let i=nodes.length-1;i>=0;i--){
+  const [nx,ny]=nodes[i],flap=reduced?0:Math.sin(t*.08+i*.65)*3,
+   x=nx+side*(f===4?8:4),y=ny+flap,rootY=i*2-3;
+  const color=f===4?YOMI_FAMILY_STARS[(side>0?5:0)+i]:i%2?'#c4eee0':'#edf3db';
+  ctx.fillStyle=f===4?(i%2?'#eee9ce':'#c4e3db'):'#d6eee6';ctx.strokeStyle=LINE;ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.quadraticCurveTo(x*.45,y-12,x+side*14,y-6);
+  ctx.lineTo(x,y+7);ctx.quadraticCurveTo(x*.6,y+12,side*7,rootY+6);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle=f===4?'#52659b':'#8abfc2';ctx.globalAlpha*=.65;ctx.beginPath();ctx.moveTo(side*3,rootY);ctx.lineTo(x+side*14,y-6);ctx.lineTo(x,y+7);ctx.closePath();ctx.fill();ctx.globalAlpha=front?1:.94;
+  line(ctx,color,1.5);ctx.beginPath();ctx.moveTo(side*6,rootY+1);ctx.lineTo(x+side*9,y-4);ctx.stroke();
+  const lit=reduced?.7:.55+Math.sin(t*.035+i*.8)*.25;
+  star4(ctx,x,y,3.2+lit,color);ellipse(ctx,x,y,1,1,'#fff9df');
  }
- const edge=f===4?GOLD:glow;
- line(ctx,LINE,f===4?3.6:3);ctx.beginPath();ctx.moveTo(0,0);for(const [x,y] of nodes)ctx.lineTo(x,y);ctx.stroke();
- line(ctx,edge,f===4?1.8:1.6);ctx.stroke();
- line(ctx,edge,1);ctx.beginPath();for(const [x,y] of [nodes[1],nodes[3]]){ctx.moveTo(0,0);ctx.lineTo(x,y);}ctx.stroke();
- nodes.forEach(([x,y],i)=>{
-  const lit=reduced?(i===2?1:0):Math.max(0,1-Math.abs(((t*.035+i*.2)%1)-.5)*6);
-  if(f===4){
-   const c=YOMI_FAMILY_STARS[(side>0?5:0)+i];
-   ctx.save();ctx.globalAlpha=.3+.4*lit;ellipse(ctx,x,y,6,6,c);ctx.restore();
-   star4(ctx,x,y,4.4+lit*1.4,c);ellipse(ctx,x,y,1.2,1.2,"#ffffff");
-  }else{
-   ellipse(ctx,x,y,3.4+lit,3.4+lit,"#eafffa");line(ctx,LINE,1.3);ctx.beginPath();ctx.arc(x,y,3.4+lit,0,TAU);ctx.stroke();
-   if(lit>.05){ctx.save();ctx.globalAlpha=.6*lit;ellipse(ctx,x,y,6.5,6.5,glow);ctx.restore();ellipse(ctx,x,y,2,2,glow);}
-  }
- });
  ctx.restore();
 }
 
@@ -547,6 +554,10 @@ function draw(ctx,pose,R){
   // ── BODY ───────────────────────────────────────────────────
   drawTorso(ctx,F,f,col,glow,accent,core,T,pulse,swing,reduced);
   drawHead(ctx,F,f,col,glow,accent,mood,blink,look,T,pulse,faceY,swing,droop,cast,acting);
+  // Memory cells show real analysed enemies; L consumes them in combat.
+  if(f>=1){const known=Math.max(0,Math.min(6,Number(p.yomiKnowledge)||0)),yy=F.hy+F.hh/2+7;
+   for(let i=0;i<6;i++){ctx.fillStyle=i<known?glow:'#527985';ctx.beginPath();ctx.moveTo((i-2.5)*4,yy-1.7);ctx.lineTo((i-2.5)*4+1.7,yy);ctx.lineTo((i-2.5)*4,yy+1.7);ctx.lineTo((i-2.5)*4-1.7,yy);ctx.fill();}
+  }
   // ── FRONT LAYER ────────────────────────────────────────────
   if(f===4)drawRingHalf(ctx,F,true,T,glow,reduced);
   if(f===3)drawSatellites(ctx,F,T,true,reduced,glow,accent,cast,acting);
@@ -654,7 +665,7 @@ function drawCastBody(ctx,p,F,f,cast,acting,front,back,glow,accent,t){
 
 /** Animation bucket so idle motion (node pulses, starfield) refreshes the cache. */
 export function yomiCacheKey(pose={}){
- if(pose.reduceMotion||YOMI_MOTION_MEDIA?.matches)return "ai0";
- return "ai"+Math.floor((Number(pose.t)||0)/2);
+ if(pose.reduceMotion||YOMI_MOTION_MEDIA?.matches)return "ai0:"+(pose.yomiKnowledge||0);
+ return "ai"+Math.floor((Number(pose.t)||0)/2)+":"+(pose.yomiKnowledge||0);
 }
 export default {id:"yomi",draw,cacheKey:yomiCacheKey};

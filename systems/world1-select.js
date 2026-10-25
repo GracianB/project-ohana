@@ -1,3 +1,4 @@
+import {cachedGradient} from './canvas-gradient-cache.js';
 
 // OHANA V467 · MUNDO 1 · Selección de héroe personalizada.
 // Sin islas en pareja: cada héroe tiene su propia carta-portal enlazada a SU sala
@@ -66,15 +67,15 @@ export function createWorld1Select({ seals = [], counts = {}, start = null } = {
 export function refreshWorld1Select(sel, opts) { const i = sel.index; sel.cards = world1SelectCards(opts); sel.index = clamp(i, 0, sel.cards.length - 1); return sel; }
 
 const COLS = 6;
-function layout(sel, W, H) {
-  const n = sel.cards.length, cols = W < 600 ? 3 : COLS, rows = Math.ceil(n / cols);
-  sel.columns = cols;
-  const pad = Math.max(10, W * 0.012), top = H * 0.2, bottom = H * 0.16;
-  const cw = Math.max(1, (W - pad * (cols + 1)) / cols), ch = Math.max(90, (H - top - bottom - pad * (rows - 1)) / rows);
-  sel.rects = sel.cards.map((c, i) => { const r = Math.floor(i / cols), k = i % cols;
-    const rowN = Math.min(cols, n - r * cols), off = (cols - rowN) * (cw + pad) / 2;
-    return { x: pad + off + k * (cw + pad), y: top + r * (ch + pad), w: cw, h: ch }; });
-  return sel.rects;
+function layout(sel,W,H){
+ const compact=W<600,cx=W/2,cy=H*.47,rx=W*(compact?.39:.40),ry=H*.24;
+ sel.columns=5;
+ sel.rects=sel.cards.map((card,i)=>{
+  const final=!!card.final,a=-Math.PI/2+(i+.5)*Math.PI*2/10;
+  const x=final?cx:cx+Math.cos(a)*rx,y=final?H*.78:cy+Math.sin(a)*ry;
+  const w=compact?(final?44:48):Math.min(100,W*.12),h=compact?(final?60:71):89;
+  return {x:x-w/2,y:y-h*.72,w,h};
+ });return sel.rects;
 }
 
 function choose(sel) {
@@ -130,61 +131,69 @@ export function drawHeroEmblem(ctx, hero, x, y, s, color = "#fff", t = 0) {
 function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 const STARS = Array.from({ length: 60 }, (_, i) => [((i * 7919) % 997) / 997, ((i * 104729) % 991) / 991, 1 + (i % 3)]);
 
-export function drawWorld1Select(ctx, W, H, t, sel, { drawActor = null, reduceMotion = false } = {}) {
-  W = Math.max(1, num(W, 1280)); H = Math.max(1, num(H, 720)); t = num(t); sel.t++;
-  if (sel.pulse > 0) sel.pulse--; if (sel.deny > 0) sel.deny--;
-  const cur = sel.cards[sel.index] || sel.cards[0];
-  ctx.save();
-  // A chapter theatre, with illuminated doors and a shared constellation.
-  ctx.fillStyle='#101c30';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#192e43';ctx.beginPath();ctx.ellipse(W/2,H*.52,W*.6,H*.55,0,0,Math.PI*2);ctx.fill();
-  for(let i=0;i<48;i++){const x=((i*7919)%997)/997*W,y=((i*317)%991)/991*H;
-   ctx.globalAlpha=reduceMotion?.4:.25+Math.sin(t*.018+i)*.15;ctx.fillStyle='#f5d89e';ctx.fillRect(x,y,2,2);}
-  ctx.globalAlpha=1;ctx.strokeStyle='#bca578';ctx.lineWidth=1;
-  ctx.strokeRect(7,7,W-14,H-14);
-  ctx.fillStyle="#ffe7b4";
-  ctx.globalAlpha = 1; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.font = `bold ${Math.round(Math.min(H * 0.05,W * .055))}px sans-serif`; ctx.fillText("OHANA · El libro de la familia", W / 2, H * 0.07,W*.92);
-  ctx.font = `${Math.round(H * 0.026)}px sans-serif`; ctx.fillStyle = "#c8d9db";
-  const sealedN = sel.cards.filter((c) => c.sealed).length;
-  ctx.fillText(`Diez protagonistas · Diez sellos · Un enemigo final · ${sealedN}/10`, W / 2, H * 0.125,W*.92);
-  const rects = layout(sel, W, H);
-  sel.cards.forEach((c, i) => {
-    const r = rects[i], focus = i === sel.index, lift = focus ? (reduceMotion ? 0 : 6 + Math.sin(t * 0.08) * 2) : 0;
-    const x = r.x, y = r.y - lift, w = r.w, h = r.h, shake = focus && sel.deny ? Math.sin(sel.deny) * 4 : 0;
-    ctx.save(); ctx.translate(shake, 0);
-    ctx.globalAlpha = c.unlocked ? 1 : 0.83;
-    ctx.fillStyle = focus ? "#284b60" : "#1b3048"; roundRect(ctx, x, y, w, h, 14); ctx.fill();
-    ctx.fillStyle = c.tint; ctx.globalAlpha *= 0.28; roundRect(ctx, x + 4, y + 4, w - 8, h * 0.62, 11); ctx.fill();
-    ctx.globalAlpha = c.unlocked ? 1 : 0.83;
-    ctx.lineWidth = focus ? 4 : 2; ctx.strokeStyle = focus ? "#ffe0a4" : "#546b80"; roundRect(ctx, x, y, w, h, 14); ctx.stroke();
-    ctx.fillStyle="#c2d8e1";ctx.font="bold 10px sans-serif";
-    ctx.fillText(c.final?'FINAL':`CAPÍTULO ${String(i+1).padStart(2,'0')}`,x+w/2,y+12,w*.8);
-    // Door: the chapter protagonist, not a freely interchangeable avatar.
-    const pcx = x + w / 2, pcy = y + h * 0.36, pr = Math.min(w * 0.36, h * 0.25);
-    ctx.strokeStyle = c.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(pcx, pcy, pr, pr * 1.15, 0, 0, Math.PI * 2); ctx.stroke();
-    if (!c.final && drawActor) { try { drawActor(ctx, c.hero, pcx, pcy + pr * 0.9, pr / 40); } catch (_) { drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, t); } }
-    else drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, reduceMotion ? 0 : t);
-    if (!c.unlocked) { ctx.fillStyle = "#c5d6df"; ctx.font = `bold ${Math.round(pr * 0.35)}px sans-serif`; ctx.fillText("🔒", x + w - 16, y + 18); }
-    ctx.fillStyle = "#fff0cc"; ctx.font = `bold ${Math.max(12,Math.round(Math.min(w * 0.12, h * 0.085)))}px sans-serif`; ctx.fillText(c.name, pcx, y + h * 0.67,w*.9);
-    ctx.fillStyle = "#c3d2df"; ctx.font = `${Math.round(Math.min(w * 0.075, h * 0.05))}px sans-serif`; if(W>=600)ctx.fillText(c.roomName, pcx, y + h * 0.77,w*.9);
-    if (!c.final) {
-      const bw = w * 0.7, bx = pcx - bw / 2, by = y + h * 0.83;
-      ctx.fillStyle = "#101e32"; ctx.fillRect(bx, by, bw, 6); ctx.fillStyle = c.color; ctx.fillRect(bx, by, bw * c.found / 100, 6);
-      ctx.fillStyle = "#d2dfe8"; ctx.font = `${Math.max(9,Math.round(h * 0.042))}px sans-serif`; ctx.fillText(`${c.found}/100`, pcx, by + 11);
-    }
-    if (c.sealed) { ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(x + w - 18, y + 18, 12, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#1e1838"; ctx.font = "bold 14px sans-serif"; ctx.fillText("✓", x + w - 18, y + 19); }
-    ctx.restore();
-  });
-  // Pie: frase del héroe enfocado + qué hay en su sala.
-  ctx.fillStyle="#192e43";roundRect(ctx,8,H*.855,W-16,H*.14,12);ctx.fill();
-  ctx.globalAlpha = 1; ctx.fillStyle = "#fff0cc"; ctx.font = `bold ${Math.round(H * 0.034)}px sans-serif`;
-  ctx.fillText(cur.tagline, W / 2, H * 0.89,W*.92);
-  ctx.fillStyle = "#c5d6df"; ctx.font = `${Math.round(H * 0.022)}px sans-serif`;
-  ctx.fillText(cur.final ? "Corazón de Ohana · Quimera final" : `Sello: ${cur.seal}${cur.sealed ? " · recuperado" : ""}`, W / 2, H * 0.935,W*.92);
-  ctx.fillText(cur.final ? "Reúne los diez sellos" : `Reliquia: ${cur.relic}`,W / 2,H*.97,W*.92);
-  if (sel.pulse > 0) { ctx.globalAlpha = sel.pulse / 30 * 0.5; ctx.fillStyle = cur.color; ctx.fillRect(0, 0, W, H); }
+export function drawWorld1Select(ctx,W,H,t,sel,{drawActor=null,reduceMotion=false,previewForm=0}={}){
+ W=Math.max(1,num(W,1280));H=Math.max(1,num(H,720));t=num(t);sel.t++;
+ if(sel.pulse>0)sel.pulse--;if(sel.deny>0)sel.deny--;
+ const cur=sel.cards[sel.index]||sel.cards[0],compact=W<600,cx=W/2,cy=H*.47;
+ const rects=layout(sel,W,H),time=reduceMotion?0:t;
+ ctx.save();
+ ctx.fillStyle=cachedGradient(ctx,`family-garden:${W}:${H}`,()=>{const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#182945');g.addColorStop(.55,'#355b68');g.addColorStop(1,'#162e3c');return g;});ctx.fillRect(0,0,W,H);
+ // The family inhabits one garden, with paths, terraces and a shared hearth.
+ for(let layer=0;layer<3;layer++){
+  ctx.fillStyle=['#385e69','#294f58','#214149'][layer];ctx.beginPath();ctx.moveTo(0,H);
+  ctx.bezierCurveTo(W*.08,H*(.44+layer*.08),W*.36,H*(.52+layer*.08),W*.5,H*(.59+layer*.07));
+  ctx.bezierCurveTo(W*.68,H*(.43+layer*.09),W*.87,H*(.48+layer*.1),W,H*(.59+layer*.1));ctx.lineTo(W,H);ctx.fill();
+ }
+ for(let i=0;i<32;i++){
+  const x=((i*7919)%997)/997*W,y=H*.18+((i*317)%991)/991*H*.55;
+  ctx.globalAlpha=reduceMotion?.45:.28+Math.sin(time*.025+i)*.2;ctx.fillStyle='#ffe6ad';ctx.beginPath();ctx.arc(x,y,1.2+(i%2)*.6,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff0ca';ctx.font=`600 ${Math.min(28,W*.055)}px sans-serif`;
+ ctx.fillText('El jardín de los diez',cx,H*.055,W*.9);
+ ctx.fillStyle='#cfe1df';ctx.font=`${compact?11:13}px sans-serif`;
+ ctx.fillText(`${sel.cards.filter(c=>c.sealed).length}/10 canciones recuperadas · cada puerta tiene su héroe`,cx,H*.105,W*.94);
+ // Winding route joins the actual chapter choices in order.
+ ctx.lineWidth=compact?3:5;ctx.strokeStyle='#8ca08a';ctx.beginPath();
+ for(let i=0;i<10;i++){const r=rects[i],x=r.x+r.w/2,y=r.y+r.h*.8;if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);}ctx.stroke();
+ ctx.strokeStyle='#ead6a0';ctx.lineWidth=1.2;ctx.setLineDash([2,7]);ctx.stroke();ctx.setLineDash([]);
+ // A lit stage grows from roots and stone, rather than a giant avatar tile.
+ ctx.fillStyle='#122c39';ctx.beginPath();ctx.ellipse(cx,cy+H*.14,W*(compact?.22:.17),H*.055,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#b2bc9e';ctx.beginPath();ctx.ellipse(cx,cy+H*.12,W*(compact?.21:.16),H*.037,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#f5e4ae';ctx.lineWidth=2;ctx.stroke();
+ const actorHeight=Math.min(H*.27,W*(compact?.26:.18)),foot=cy+H*.12;
+ // Changing heroes changes the portal's silhouette and stage props.
+ const vista=cur.hero;
+ ctx.save();ctx.translate(cx,foot);ctx.globalAlpha=.4;ctx.strokeStyle=cur.color;ctx.fillStyle=cur.tint;ctx.lineWidth=3;
+ if(vista==='dragon'){ctx.beginPath();ctx.moveTo(-110,0);ctx.bezierCurveTo(-125,-140,-38,-175,-20,-95);ctx.bezierCurveTo(15,-180,115,-160,112,0);ctx.closePath();ctx.fill();}
+ else if(vista==='dino'){for(let i=-2;i<=2;i++){ctx.beginPath();ctx.ellipse(i*36,3,22,80-Math.abs(i)*12,-i*.1,Math.PI,Math.PI*2);ctx.stroke();}}
+ else if(vista==='yomi'||vista==='stitcho'){ctx.beginPath();ctx.arc(0,-44,actorHeight*.76,Math.PI,Math.PI*2);ctx.stroke();for(let i=-1;i<=1;i++)ctx.strokeRect(i*52-14,-100,28,54);}
+ else {for(let side of [-1,1]){ctx.beginPath();ctx.moveTo(side*88,4);ctx.bezierCurveTo(side*75,-50,side*110,-92,side*68,-134);ctx.stroke();for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(side*(70+i*9),-70-i*18,20,8,side*.5,0,Math.PI*2);ctx.fill();}}}
+ ctx.restore();
+ const poses={kilo:'idle',stitcho:'wall',chispin:'jump',cat:'idle',cuerno:'victory',dragon:'glide',dino:'victory',frita:'run',pizza:'victory',yomi:'cast'};
+ if(drawActor&&cur.hero)drawActor(ctx,cur.hero,cx,foot,actorHeight/64,{form:previewForm,pose:reduceMotion?'idle':poses[cur.hero],performance:cur.hero==='kilo'?'dance':null});
+ else drawHeroEmblem(ctx,null,cx,foot-actorHeight*.5,actorHeight*.7,'#ffe2b7',time);
+ ctx.fillStyle='#fff0ca';ctx.font=`600 ${compact?16:21}px sans-serif`;ctx.fillText(cur.name,cx,foot+H*.065,W*.44);
+ // Small living companions occupy the path. All hit regions stay explicit.
+ sel.cards.forEach((card,i)=>{
+  const r=rects[i],x=r.x+r.w/2,y=r.y+r.h*.76,focus=i===sel.index,form=card.sealed?2:0;
+  ctx.save();ctx.globalAlpha=card.unlocked?1:.63;
+  ctx.fillStyle=focus?'#f2dba7':'#608b87';ctx.strokeStyle=focus?'#fff4d7':'#b4c7b1';ctx.lineWidth=focus?2.5:1;
+  ctx.beginPath();ctx.ellipse(x,y,r.w*.43,r.h*.12,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  if(card.hero&&drawActor){const phase=(time+i*23)%240,pose=reduceMotion?'idle':phase<40&&i%3===0?'victory':phase>190&&i%3===1?'run':'idle';
+   drawActor(ctx,card.hero,x,y-2,Math.min(r.w*.64,r.h*.64)/64,{form,pose,performance:card.hero==='kilo'?'dance':null});
+  }else drawHeroEmblem(ctx,null,x,y-r.h*.33,r.h*.4,card.color,time);
+  ctx.fillStyle=focus?'#fff4ca':'#d8e8df';ctx.font=`600 ${compact?9:11}px sans-serif`;ctx.fillText(card.final?'Corazón':card.name,x,y+r.h*.22,r.w*1.25);
+  if(!card.unlocked){ctx.strokeStyle='#ecdab6';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+r.w*.3,y-r.h*.6,3.5,Math.PI,Math.PI*2);ctx.stroke();ctx.fillStyle='#ecdab6';ctx.fillRect(x+r.w*.3-4,y-r.h*.6,8,6);}
+  else if(card.sealed){ctx.fillStyle='#fff3b9';ctx.font='bold 12px sans-serif';ctx.fillText('✓',x+r.w*.35,y-r.h*.6);}
   ctx.restore();
+ });
+ // Footer is one legible instruction area; the dossier retains stats/forms.
+ ctx.fillStyle='#142c3fe8';roundRect(ctx,8,H*.83,W-16,H*.155,14);ctx.fill();
+ ctx.fillStyle='#ffe8b6';ctx.font=`600 ${compact?12:16}px sans-serif`;ctx.fillText(cur.tagline,cx,H*.865,W*.92);
+ ctx.fillStyle='#c7dcd9';ctx.font=`${compact?10:12}px sans-serif`;ctx.fillText(cur.roomName,cx,H*.91,W*.92);
+ ctx.fillText(cur.final?'Los diez sellos abren el Corazón':`${cur.sealed?'✓ Canción recuperada · ':''}${cur.found}/100 recuerdos · ${cur.unlocked?'Entrar con Intro o tocar otra vez':'Capítulo por despertar'}`,cx,H*.95,W*.92);
+ ctx.restore();
 }
 
 export const OhanaWorld1Select = Object.freeze({ cards: world1SelectCards, create: createWorld1Select, refresh: refreshWorld1Select, key: world1SelectKey, pointer: world1SelectPointer, draw: drawWorld1Select, emblem: drawHeroEmblem, taglines: WORLD1_TAGLINES, name: heroDisplayName });

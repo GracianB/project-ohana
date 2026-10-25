@@ -8,7 +8,8 @@ export const stitchoRailDone=g=>!!g.secrets?.['w1-stitcho']?.includes(STITCHO_RA
 export const stitchoBossDefeated=g=>!!g.clearedEncounters?.['w1-stitcho']?.includes(STITCHO_CHAPTER_BOSS_ID);
 export function stitchoChapterReady(g){return !stitchoChapter(g)||!!g.world1Seals?.includes('stitcho')||(g.world1?.stations.every(s=>s.done)&&stitchoRailDone(g)&&stitchoBossDefeated(g));}
 export function stitchoGrowth(g){
- if(!stitchoChapter(g)||!g.player||!g.world1||g.world1.sealed)return 0;
+ if(!stitchoChapter(g)||!g.player||!g.world1)return 0;
+ if(g.world1.sealed){g.player.xp=Math.max(Number(g.player.xp)||0,XP_NEED[4]);return XP_NEED[4];}
  const s=g.world1.stations;
  const stage=s[0]?.done?(s[1]?.done?(s[2]?.done?4:3):(stitchoRailDone(g)?2:1)):0;
  const floor=XP_NEED[stage]||0;g.player.xp=Math.max(Number(g.player.xp)||0,floor);return floor;

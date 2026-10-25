@@ -510,8 +510,8 @@ if (st === "run" && pose.move !== "slide") {
   P.bend = Math.sin(ph * 2 + 0.8) * 0.28 + pose.sway * 0.35;
   P.wig = -0.35 * pose.speed + Math.sin(ph * 2) * 0.2;
   P.lift = -Math.abs(Math.cos(ph)) * 4.5;
-  P.legF = [s * 1.0, 3 + Math.max(0, s) * 4];
-  P.legB = [-s * 1.0, 3 + Math.max(0, -s) * 4];
+  P.legF = [s * 1.12, 3 + Math.max(0, s) * 6];
+  P.legB = [-s * 1.12, 3 + Math.max(0, -s) * 6];
   // El brazo delantero no cruza la silueta al ir hacia atrás: se queda al costado.
   P.armF = { ang: Math.max(-0.3, -s * 1.1), bend: 4 + Math.max(0, s) * 2 };
   P.armB = { ang: Math.min(0.5, s * 1.1), bend: -4 };

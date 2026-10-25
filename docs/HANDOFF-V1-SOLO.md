@@ -1,28 +1,33 @@
-# Estado vigente — V512 en revisión, V1 abierta
+# Estado vigente — V513, candidato completo de campaña individual
 
-Workspace `/workspace/ohana-stitcho`, rama `feat/v512-hero-identity-and-v1-review`, base `ecd4699`.
-La petición completa del usuario y sus pendientes están auditados punto por punto en
-[V1-FINAL-REVIEW.md](V1-FINAL-REVIEW.md). Leer esa auditoría antes de afirmar que está terminada.
-El usuario volvió a pedir revisar lo que falta: no basta un cambio de colores o una
-transformación común de animación para cerrar salas, personajes o dificultad.
+Workspace `/workspace/ohana-stitcho`, rama `feat/v513-complete-solo-experience`, base `3fe0b84`.
+Los seis frentes pedidos por el usuario están implementados. Ver la resolución V513 en
+[V1-FINAL-REVIEW.md](V1-FINAL-REVIEW.md), las evidencias en `V513-VALIDATION.json` y
+la publicación en `v1-solo-status.json`. No reutilizar la tabla histórica V512 como pendientes actuales.
 
-Candidato V512: combate/dificultad reales, memoria táctica de partida, J Cuerno/Michi,
-compañero real de ocho segundos con daño acotado, entrada sin duplicar, escala común,
-Kilo sin capa y con halo, Cuerno REAL de `art/cuerno-v373.js` sin astas azules y ojo legible,
-Michi más amable y Yomi con aves de memoria. Menú coherente y apertura en dos planos.
-Fondos sin sobrepintar, bosque orgánico de Cuerno cacheado, muelle de Pizza.
-Puerta final y aparición de Quimera exigen diez sellos; el piloto aislado de Yomi
-verifica que no puede fingir una campaña completa.
+Diez decorados de fantasía Canvas cacheados; recorridos altos y encuentros finitos
+por héroe; diez anatomías de enemigos y Tambor tallado articulado; Yomi de papel/memoria
+con feedback de análisis real. Ritmos de articulación y caída propios. Selección en
+jardín habitado, introducción en tres profundidades, entrada única y compañero U de
+ocho segundos con recuperación real.
 
-Pruebas y publicación actuales: consultar `v1-solo-status.json`. Logs V512 en
-`/workspace/.cloud-setup/logs/`, lámina de 50 formas y revisión en `test-results/v512/`.
-`node_modules` es un enlace no versionado: NO añadirlo a git.
+Campaña continua: comienza cada capítulo nuevo como bebé, gana sus cinco formas,
+recupera diez sellos y entra en Quimera como Kilo Flor Solar. Al revisitar una sala
+sellada recupera la forma ganada silenciosamente; el jefe queda derrotado. Los mil
+recuerdos y las diez reliquias se recogen y persisten. Colección opcional para terminar.
 
-Pendiente principal: profundizar arte y rutas de las diez salas, actuación anatómica
-de los diez héroes, diseño de enemigos pobres, propuesta más ambiciosa de Yomi,
-escenario vivo de selección, balance real de Normal, campaña continua/Quimera,
-recuerdos y aceptación humana. Memoria IA actual se borra con la partida;
-no hay aprendizaje persistente ni llamadas a un LLM por criatura.
+Validación: `npm test`, `release:check`, `test:browser:campaign`,
+`test:browser:memories`, `test:browser:memory-save`, `test:browser:pressure`,
+`test:browser:living-stage`, matriz óptica, auditoría general y salto táctil.
+Primero ejecutar campaña para producir su respaldo; recuerdos puede reanudar su
+checkpoint legítimo. Los scripts distinguen fixtures de presentación de progreso ganado.
+Logs en `/workspace/.cloud-setup/logs/ohana-v513-*`; capturas e informes en
+`test-results/v513/` (algunos drivers heredados guardan en v511/v512).
+`node_modules` es un enlace NO versionado: no añadirlo a git.
+
+La aceptación artística y de dificultad percibida corresponde al usuario jugando.
+IA local por partida, sin aprendizaje persistente ni LLM remoto. Multijugador sigue
+fuera de este cambio. No declarar aceptada V1 por el usuario a partir de tests.
 
 ---
 

@@ -407,8 +407,8 @@ if (st === "run") {
   P.strings = 0.85;
   P.lift = -2;
 } else if (st === "fall" || st === "glide") {
-  P.legF = [0.25 + Math.sin(t * 0.5) * 0.22, -2];
-  P.legB = [-0.3 - Math.sin(t * 0.5) * 0.22, 2];
+  P.legF = [0.16 + Math.sin(t * 0.18) * 0.12, -3];
+  P.legB = [-0.38 - Math.sin(t * 0.18) * 0.12, 3];
   P.armF = { ang: 2.05 + Math.sin(t * 0.4) * 0.32, bend: 3 };
   P.armB = { ang: -2.05 - Math.sin(t * 0.4 + 1) * 0.32, bend: -3 };
   if (st === "glide") {

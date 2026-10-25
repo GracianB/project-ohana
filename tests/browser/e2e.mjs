@@ -51,8 +51,8 @@ async function auditPage(page, label) {
   assert.ok(castAudit.cast.every(hero=>Number.isFinite(hero.paintedHeight)&&
     hero.paintedHeight>=hero.targetHeight*.33&&hero.paintedHeight<=hero.targetHeight*1.02),
     label+': visual character size remains disproportionate '+JSON.stringify(castAudit.cast));
-  if(label==='desktop')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,2);
-  if(label==='mobile')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,2);
+  if(label==='desktop')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,3);
+  if(label==='mobile')assert.equal(new Set(castAudit.cast.map(hero=>hero.row)).size,3);
   // V344 real browser: the Dragon micro-film must be a deterministic,
   // independently importable performance, not a frozen painted baby sprite.
   const dragonFilm=await page.evaluate(async()=>{

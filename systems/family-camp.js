@@ -1,3 +1,4 @@
+import {markAt} from '../characters/signature.js';
 import {WORLD1_CHAPTER_PLANS} from './world1-rooms.js';
 import {drawFamilyIslands,pairedScene} from "./family-islands.js";
 import {ROSTER} from '../characters/roster.js';
@@ -72,7 +73,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  $('camp-start').textContent=w1sel?'Entrar en su capítulo →':'¡Vámonos de aventura! ↗';
  $('camp-name').textContent=def.name;$('camp-role').textContent=w1sel?'Su capítulo · comienza como bebé':data.role;$('camp-route').textContent=w1sel?(WORLD1_CHAPTER_PLANS[selected]?.identity+' · '+WORLD1_CHAPTER_PLANS[selected]?.mobility):'Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
  portrait.setAttribute('aria-label',def.evoNames[form]+' · personaje real');
- $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div>`;
+ $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div><div><dt>Saltos</dt><dd>${f.jumps}</dd></div><div><dt>Golpe H</dt><dd>${markAt(selected,form).dmg}</dd></div>`;
  $('camp-powers').textContent=def.abilities.map((id,i)=>['J','K','L'][i]+' · '+(ABILITY_DEFS[id]?.name||id)).join(' / ');
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
  $('camp-line').textContent=data.lines[0];host.dataset.hero=selected;host.dataset.form=String(form);
@@ -110,7 +111,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
   selectHero(near,true);
   if(keys.size){walkSelectionLatched=true;target={...cursor};}
  }
- if(w1sel){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);drawWorld1Select(ctx,width,height,reduce?0:time*60,w1sel,{reduceMotion:reduce,drawActor:(c,hero,x,y,sc)=>{const d=ROSTER.find(r=>r.id===hero);if(!d)throw Error('hero');c.save();c.translate(x,y);drawCharacter(c,campActor(d,1,'idle',Math.max(30,sc*40*1.6)),{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});c.restore();}});}
+ if(w1sel){ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);drawWorld1Select(ctx,width,height,reduce?0:time*60,w1sel,{reduceMotion:reduce,previewForm:form,drawActor:(c,hero,x,y,sc,acting={})=>{const d=ROSTER.find(r=>r.id===hero);if(!d)throw Error('hero');c.save();c.translate(x,y);const actor=campActor(d,acting.form??0,acting.pose||'idle',Math.max(28,sc*64));if(acting.performance)actor._kiloPerformance={kind:acting.performance,time};drawCharacter(c,actor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});c.restore();}});}
  else{ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);ctx.scale(view.scale,view.scale);ctx.translate(-view.x,0);ctx.drawImage(scenery,0,0);
  for(const def of ROSTER){const p=CAMP_HEROES[def.id],hot=def.id===selected,beat=film?.id===def.id?campPresentation(def.id,time-film.start):null;
  ellipse(ctx,p.x,p.y+4,hot?50:35,12,hot?'#fff5c066':'#425f5029');

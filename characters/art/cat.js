@@ -77,10 +77,10 @@ function solve(pose) {
   else if (slot === 2) arm = -2.15;
   else if (st === "run") arm = 0.25 + run * 0.85;
   else if (st === "jump") arm = -2.15;
-  else if (st === "fall" || st === "glide") arm = 0.55;
+  else if (st === "fall" || st === "glide") arm = 0.75;
   else if (st === "wall") arm = -1.7;
   else if (st === "idle" && fl > 0.22 && fl < 0.78) arm = -2.25;
-  const leg = st === "run" ? run * 0.8 : st === "jump" ? -2.35 : st === "fall" || st === "glide" ? 0.28 : st === "wall" ? -0.4 : 0.05;
+  const leg = st === "run" ? run * 0.8 : st === "jump" ? -2.35 : st === "fall" || st === "glide" ? 0.48 : st === "wall" ? -0.4 : 0.05;
   let mood = "normal";
   if (st === "dead") mood = "closed";
   else if (slot === 1) mood = "happy";

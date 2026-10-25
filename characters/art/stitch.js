@@ -826,6 +826,11 @@ function drawBiped(ctx, R, pose, f, S, C) {
 
   ctx.save();
   if (st === "dead") { ctx.translate(-S.hy * 0.55, -(S.hrx - S.hx) - 1); ctx.rotate(-Math.PI / 2 + 0.06); legA = 0.6; legB = -0.2; armA = 1.7; armB = -1.3; headRot = 0.1; bob = 0; }
+  if(!pose.reduceMotion&&st!=='dead'){
+   if(st==='run'){const step=Math.sin(pose.phase);legBendA+=Math.max(0,step)*3;legBendB+=Math.max(0,-step)*3;headRot-=Math.sin(pose.phase*2)*.025;}
+   if(st==='fall'){legA=.12;legB=-.48;legBendA=-2;legBendB=2;armA=1.5;armB=-1.8;}
+   if(st==='hurt'){armA=-.4;armB=-1.1;bendA=8;bendB=-7;headRot=-.16;}
+  }
   ctx.translate(0, lift);
   // squash/stretch leve: estira al saltar/caer, aplasta al aterrizar
   if (st !== "dead") {

@@ -1,3 +1,4 @@
+import {articulateStride} from './anatomical-stride.js';
 import {drawHulaDepth} from './hula-depth.js';
 import {applyTenActionPose} from './ten-action-acting.js';
 import {applyPowerPerformance} from './power-performance.js';
@@ -1250,6 +1251,8 @@ const duetProtected=isDuetProtected(p,t)||(p.id==='chispin'&&Number(p._chispaEva
 // Propagate accessibility preference to the *local* render pose only.
 const pose = {...applyEvolutionPose(enhancePose(computePose(p, t, { rng: p.rng,ignoreHurt:duetProtected }), p), p),
   reduceMotion: options.reduceMotion===true};
+articulateStride(pose,p.id);
+if(p.id==="yomi")pose.yomiKnowledge=p._yomiKnowledge||0;
 if(p.id==="dragon"&&p._introForceCanvas&&p._introDragon)pose.dragonWelcome=p._introDragon;
 if(p.id==="dino"&&p._introForceCanvas&&p._introDino)pose.dinoWelcome=p._introDino;
 if(p.id==="frita"&&p._introForceCanvas&&p._introFrita)pose.fritaWelcome=p._introFrita;

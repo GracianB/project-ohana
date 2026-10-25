@@ -75,6 +75,6 @@ test("V65 screen coverage is genuinely drawn, cinematic narrative and budgets re
  assert.match(captures,/09k-cuerno-iris-fullscreen-l/);
  assert.match(captures,/09l-cuerno-rainbow-sleep-u/);
  assert.equal(ABILITY_DEFS.rainbow.cd,5600);
- assert.equal(supremeOf("cuerno").cd,9000);
+ assert.equal(supremeOf("cuerno").cd,18000);
  // Historical 135 KB source cap retired; functional checks remain active.
 });

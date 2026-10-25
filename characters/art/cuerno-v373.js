@@ -251,7 +251,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   ctx.restore();
   const flap = dead ? -.4 : face.reduced ? 0 : pose.cuernoDreamT>0 ? .55+Math.sin(t*.08)*.12 : air ? Math.sin(t * .5) : Math.sin(t * .12) * .25;
   if (P.wings) wing(ctx, P, -bodyRx * .1, bodyY - bodyRy * .7, 26 * P.wings * u, flap + .15, true, lw);
-  const sw = (k) => run ? Math.sin(ph + k) * .9 : air ? (k ? -1 : 1) * tuck * .6 : dead ? (k ? 1.4 : -1.4) : 0;
+  const sw = (k) => run ? Math.sin(ph + k) * (f>=2?1.05:.85) : air ? (k ? -1 : 1) * tuck * .6 : dead ? (k ? 1.4 : -1.4) : 0;
   leg(ctx, P, -bodyRx * .55, bodyY + bodyRy * .3, legL * (dead ? .42 : 1), sw(Math.PI), 4.4 * u * P.leg, true, lw);
   leg(ctx, P, bodyRx * .55, bodyY + bodyRy * .3, legL * (dead ? .42 : 1), sw(0) + rear * (1.1 + Math.sin(t * .5) * .5), 4.4 * u * P.leg, true, lw);
   // Near legs are also BEHIND the barrel: their flat root caps never show.

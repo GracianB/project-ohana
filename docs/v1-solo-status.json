@@ -3,209 +3,233 @@
   "updated_on": "2026-10-25",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v512-hero-identity-and-v1-review",
-  "base_commit": "ecd4699",
-  "published": true,
-  "campaign_complete_verified": false,
+  "branch": "feat/v513-complete-solo-experience",
+  "base_commit": "3fe0b84",
+  "published": false,
+  "campaign_complete_verified": true,
   "v1_ready": false,
-  "next_task": "final_review.room_and_hero_quality",
+  "next_task": "v1.user_play_review",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1540,
-    "runtime_modules": 323,
-    "precache_resources": 373,
-    "source": "V512 foundation: 10 physical chapter pilots; 100 optical size checks; 50-form sheet; 10 eight-second companions; general browser audit. Art acceptance and full campaign remain pending.",
-    "local_browser_audit": "passed_V512",
-    "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40205716045",
-    "published_url_current_candidate": "42 changed runtime assets SHA256 matched live V512",
-    "local_three_chapter_physical_pilots": "passed_V511",
-    "local_three_realm_mobile": "presentation_passed_V511",
-    "local_dino_physical_pilot": "passed_V511",
-    "local_dino_mobile_dive": "passed_V511",
-    "local_pizza_physical_pilot": "passed",
-    "local_dino_quake_real_hits": "passed_V511",
-    "local_frita_physical_pilot": "passed",
-    "local_yomi_physical_pilot": "passed",
-    "local_ten_chapter_physical_pilots": "passed_V512",
-    "local_ten_room_presentation": "passed",
-    "local_ten_bank_physical_traversal": "passed",
-    "local_yomi_ten_seal_gate": "passed_V512",
-    "local_optical_size_matrix": "100 checks passed_V512",
-    "local_eight_second_companions": "ten heroes passed_V512"
+    "node_passed": 1544,
+    "runtime_modules": 327,
+    "precache_resources": 377,
+    "source": "V513: continuous clean-save Normal campaign, ten earned chapters and five forms each, four Quimera phases, reunion/results/return to selection; all 1000 physical memories, ten relics and reload persistence. Human artistic/difficulty acceptance is separate.",
+    "local_browser_audit": "passed_V513",
+    "local_ten_room_presentation": "30 desktop/mobile views passed_V513",
+    "local_ten_bank_physical_traversal": "passed_V513 including actual held touch jump",
+    "local_optical_size_matrix": "100 checks passed_V513",
+    "local_eight_second_companions": "ten heroes passed_V513",
+    "local_living_stage": "actual pointer choices and keyboard, desktop/mobile, passed_V513",
+    "local_full_campaign": "passed_V513",
+    "local_all_memories": "1000 physically collected and ten album panels/relics retained on reload",
+    "local_normal_pressure": "idle Kilo dies; active control survives same encounter",
+    "local_performance": "20 scenes; median16.7ms; worst p95 desktop33.3ms/emulated mobile16.8ms; no >50ms frames in sample",
+    "remote_ci_current_candidate": "pending_publication",
+    "published_url_current_candidate": "pending_publication"
   },
   "chapters": [
     {
       "id": "kilo",
       "order": 1,
       "room": "w1-kilo",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v501-kilo-chapter.mjs",
-        "test-results/v501/kilo-chapter-pilot.json"
+        "test-results/v501/kilo-chapter-pilot.json",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "stitcho",
       "order": 2,
       "room": "w1-stitcho",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v502-stitcho-chapter.mjs",
-        "test-results/v502/stitcho-pilot.json"
+        "test-results/v502/stitcho-pilot.json",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "chispin",
       "order": 3,
       "room": "w1-chispin",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v506-chispin-chapter.mjs",
-        "test-results/v506/chispin-pilot.json"
+        "test-results/v506/chispin-pilot.json",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "cat",
       "order": 4,
       "room": "w1-cat",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/cat-pilot.json",
-        "tests/browser/v507-three-realms.mjs"
+        "tests/browser/v507-three-realms.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "cuerno",
       "order": 5,
       "room": "w1-cuerno",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/cuerno-pilot.json",
-        "tests/browser/v507-three-realms.mjs"
+        "tests/browser/v507-three-realms.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "dragon",
       "order": 6,
       "room": "w1-dragon",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v507-three-chapters.mjs",
         "test-results/v507/dragon-pilot.json",
-        "tests/browser/v507-three-realms.mjs"
+        "tests/browser/v507-three-realms.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "dino",
       "order": 7,
       "room": "w1-dino",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v508-dino-chapter.mjs",
         "test-results/v508/dino-pilot.json",
         "tests/browser/v508-dino-presentation.mjs",
-        "tests/dino-chapter.test.js"
+        "tests/dino-chapter.test.js",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "frita",
       "order": 8,
       "room": "w1-frita",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v510-frita-yomi-chapters.mjs",
         "test-results/v510/frita-pilot.json",
-        "tests/browser/v510-frita-yomi-presentation.mjs"
+        "tests/browser/v510-frita-yomi-presentation.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "pizza",
       "order": 9,
       "room": "w1-pizza",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v509-pizza-chapter.mjs",
         "test-results/v509/pizza-pilot.json",
-        "tests/browser/v509-pizza-dino-presentation.mjs"
+        "tests/browser/v509-pizza-dino-presentation.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     },
     {
       "id": "yomi",
       "order": 10,
       "room": "w1-yomi",
-      "status": "room_redesign_published_pending_human_acceptance",
+      "status": "v513_implemented_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_after_V511_room_redesign",
-      "all_100_memories_verified": "pending",
-      "next_work": "Human review of new terrain, routes and visual identity; final campaign integration and full memory reachability",
+      "human_acceptance": "pending_user_play_V513",
+      "all_100_memories_verified": true,
+      "next_work": "User play review of final candidate; no known implementation task among the six requested fronts",
       "evidence": [
         "tests/browser/v510-frita-yomi-chapters.mjs",
         "test-results/v510/yomi-pilot.json",
-        "tests/browser/v510-frita-yomi-presentation.mjs"
+        "tests/browser/v510-frita-yomi-presentation.mjs",
+        "tests/browser/v513-full-campaign.mjs",
+        "tests/browser/v513-all-memories.mjs",
+        "tests/browser/v513-memory-save.mjs"
       ]
     }
   ],
   "finale": {
     "room": "w1-final",
-    "status": "existing_runtime_needs_campaign_entry_normalization_and_full_run",
-    "planned_hero": "kilo",
-    "planned_evolution": 4,
-    "plan_implemented": false,
+    "status": "continuous_normal_campaign_won",
+    "hero": "kilo",
+    "evolution": 4,
+    "plan_implemented": true,
     "requires": "ten earned seals",
     "relay_mechanic": "deferred_after_v1",
-    "victory_epilogue_menu_full_run": "pending",
+    "victory_epilogue_menu_full_run": "passed_V513: four phases, bossDefeat, ending, reunion/results and real roster button",
     "entry_gate": "ten_seals_required_at_door_and_spawn"
   },
   "release_gates": {
-    "ten_integrated_chapters": "physical_pilots_passed_not_full_campaign",
-    "full_clean_save_campaign": "pending",
-    "save_death_resume_migration_matrix": "pending",
-    "all_offered_memories_reachable": "pending",
-    "keyboard_gamepad_touch_review": "pending",
-    "human_difficulty_acceptance": "pending",
-    "final_candidate_automated_and_visual_checks": "pending",
-    "same_sha_ci_pages_and_live_sw_check": "passed_V512_foundation_not_final_V1"
+    "ten_integrated_chapters": "passed_V513_continuous_campaign",
+    "full_clean_save_campaign": "passed_V513",
+    "save_death_resume_migration_matrix": "Node migration/resume/death regressions pass; earned browser album reload and sealed revisit pass",
+    "all_offered_memories_reachable": "1000 physically collected; ten relics verified",
+    "keyboard_gamepad_touch_review": "browser audit input checks and actual touch bank traversal pass; physical hardware acceptance separate",
+    "human_difficulty_acceptance": "pending_user_play",
+    "final_candidate_automated_and_visual_checks": "passed_V513",
+    "same_sha_ci_pages_and_live_sw_check": "pending_publication"
   },
   "excluded_from_v1": [
     "World 2",
@@ -216,42 +240,12 @@
   ],
   "open_tasks": [
     {
-      "id": "rooms.art_and_routes",
+      "id": "v1.user_play_acceptance",
       "priority": 1,
-      "status": "pending_deeper_authored_review_of_all_ten"
-    },
-    {
-      "id": "heroes.yomi_and_anatomical_animation",
-      "priority": 1,
-      "status": "pending"
-    },
-    {
-      "id": "enemies.design_and_normal_balance",
-      "priority": 1,
-      "status": "pending_human_and_instrumented_review"
-    },
-    {
-      "id": "selection.living_stage",
-      "priority": 2,
-      "status": "palette_and_scale_fixed_staging_pending"
-    },
-    {
-      "id": "campaign.full_run",
-      "priority": 2,
-      "status": "pending_continuous_run_and_quimera"
-    },
-    {
-      "id": "collection.reachability",
-      "priority": 2,
-      "status": "pending"
-    },
-    {
-      "id": "v1.human_acceptance",
-      "priority": 3,
-      "status": "pending"
+      "status": "pending_art_and_perceived_difficulty_acceptance"
     }
   ],
-  "evidence_storage": "Tests are versioned; generated evidence is in test-results/v512 and /workspace/.cloud-setup/logs/ohana-v512-*.log. No new delivery ZIP claimed.",
+  "evidence_storage": "Versioned drivers and docs/V513-VALIDATION.json; generated evidence in test-results/v513 (legacy presentation drivers also v511/v512), logs in /workspace/.cloud-setup/logs/ohana-v513-*. No new delivery ZIP claimed.",
   "published_release": {
     "version": "ohana-512",
     "commit": "1ff944725665667ad8bbf089402067869d535d04",
@@ -262,11 +256,14 @@
   },
   "published_commit": "1ff944725665667ad8bbf089402067869d535d04",
   "published_url": "https://gracianb.github.io/project-ohana/?release=512",
-  "candidate_version": "ohana-512",
+  "candidate_version": "ohana-513",
   "review": "docs/V1-FINAL-REVIEW.md",
   "previous_verified_publication": {
-    "version": "ohana-511",
-    "commit": "21fa9c9",
-    "url": "https://gracianb.github.io/project-ohana/?release=511"
+    "version": "ohana-512",
+    "commit": "1ff944725665667ad8bbf089402067869d535d04",
+    "url": "https://gracianb.github.io/project-ohana/?release=512",
+    "verified": true,
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40205716045",
+    "live_assets_verified_sha256": 42
   }
 }

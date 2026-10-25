@@ -1,0 +1,501 @@
+{
+  "version": "ohana-513",
+  "date": "2026-10-25",
+  "node": {
+    "passed": 1544,
+    "failed": 0
+  },
+  "release": {
+    "runtimeModules": 327,
+    "precacheResources": 377
+  },
+  "campaign": {
+    "difficulty": "normal",
+    "journal": [
+      {
+        "hero": "kilo",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 76,
+        "iterations": 165,
+        "sealCount": 1
+      },
+      {
+        "hero": "stitcho",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 83,
+        "iterations": 114,
+        "sealCount": 2
+      },
+      {
+        "hero": "chispin",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 71,
+        "iterations": 109,
+        "sealCount": 3
+      },
+      {
+        "hero": "cat",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 62,
+        "iterations": 148,
+        "sealCount": 4
+      },
+      {
+        "hero": "cuerno",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 86,
+        "iterations": 104,
+        "sealCount": 5
+      },
+      {
+        "hero": "dragon",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 80,
+        "iterations": 136,
+        "sealCount": 6
+      },
+      {
+        "hero": "dino",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 92,
+        "iterations": 188,
+        "sealCount": 7
+      },
+      {
+        "hero": "frita",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 85,
+        "iterations": 183,
+        "sealCount": 8
+      },
+      {
+        "hero": "pizza",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 88,
+        "iterations": 115,
+        "sealCount": 9
+      },
+      {
+        "hero": "yomi",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 84,
+        "iterations": 166,
+        "sealCount": 10
+      }
+    ],
+    "finalDeaths": 0,
+    "phases": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "films": [
+      "bossIntro",
+      "bossDefeat",
+      "ending"
+    ],
+    "won": true,
+    "combatReport": {
+      "hits": 50,
+      "damage": 529
+    },
+    "errors": []
+  },
+  "memories": {
+    "report": [
+      {
+        "hero": "kilo",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "stitcho",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "chispin",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "cat",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "cuerno",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "dragon",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "dino",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "frita",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "pizza",
+        "found": 100,
+        "deaths": 0
+      },
+      {
+        "hero": "yomi",
+        "found": 100,
+        "deaths": 0
+      }
+    ],
+    "total": 1000,
+    "errors": []
+  },
+  "memorySave": {
+    "total": 1000,
+    "relics": 10,
+    "albumPanels": 10,
+    "reloadPreserved": true,
+    "errors": []
+  },
+  "pressure": [
+    {
+      "mode": "easy",
+      "policy": "idle",
+      "frames": 1200,
+      "hp": 37.09999999999999,
+      "maxHp": 80,
+      "damage": 42.90000000000001,
+      "hits": 10,
+      "faults": 0
+    },
+    {
+      "mode": "normal",
+      "policy": "idle",
+      "frames": 1080,
+      "hp": 0,
+      "maxHp": 80,
+      "damage": 80,
+      "hits": 11,
+      "faults": 0
+    },
+    {
+      "mode": "hard",
+      "policy": "idle",
+      "frames": 1200,
+      "hp": 1.5999999999999908,
+      "maxHp": 80,
+      "damage": 78.40000000000002,
+      "hits": 7,
+      "faults": 0
+    },
+    {
+      "mode": "normal",
+      "policy": "active",
+      "frames": 1200,
+      "hp": 42,
+      "maxHp": 80,
+      "damage": 46,
+      "hits": 6,
+      "faults": 0
+    }
+  ],
+  "performance": [
+    {
+      "label": "desktop",
+      "hero": "kilo",
+      "median": 16.699999999999818,
+      "p95": 33.30000000000018,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 17
+    },
+    {
+      "label": "desktop",
+      "hero": "stitcho",
+      "median": 16.699999999999818,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 15
+    },
+    {
+      "label": "desktop",
+      "hero": "chispin",
+      "median": 16.699999999999818,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 18
+    },
+    {
+      "label": "desktop",
+      "hero": "cat",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 16
+    },
+    {
+      "label": "desktop",
+      "hero": "cuerno",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 11
+    },
+    {
+      "label": "desktop",
+      "hero": "dragon",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 14
+    },
+    {
+      "label": "desktop",
+      "hero": "dino",
+      "median": 16.69999999999891,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 14
+    },
+    {
+      "label": "desktop",
+      "hero": "frita",
+      "median": 16.700000000000728,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 12
+    },
+    {
+      "label": "desktop",
+      "hero": "pizza",
+      "median": 16.69999999999709,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 12
+    },
+    {
+      "label": "desktop",
+      "hero": "yomi",
+      "median": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 13
+    },
+    {
+      "label": "mobile",
+      "hero": "kilo",
+      "median": 16.699999999999818,
+      "p95": 16.799999999999955,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 17
+    },
+    {
+      "label": "mobile",
+      "hero": "stitcho",
+      "median": 16.699999999999818,
+      "p95": 16.800000000000182,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 15
+    },
+    {
+      "label": "mobile",
+      "hero": "chispin",
+      "median": 16.699999999999818,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 18
+    },
+    {
+      "label": "mobile",
+      "hero": "cat",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 16
+    },
+    {
+      "label": "mobile",
+      "hero": "cuerno",
+      "median": 16.69999999999891,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 11
+    },
+    {
+      "label": "mobile",
+      "hero": "dragon",
+      "median": 16.69999999999891,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 14
+    },
+    {
+      "label": "mobile",
+      "hero": "dino",
+      "median": 16.69999999999891,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 14
+    },
+    {
+      "label": "mobile",
+      "hero": "frita",
+      "median": 16.69999999999709,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 12
+    },
+    {
+      "label": "mobile",
+      "hero": "pizza",
+      "median": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 12
+    },
+    {
+      "label": "mobile",
+      "hero": "yomi",
+      "median": 16.700000000000728,
+      "p95": 16.700000000000728,
+      "over50": 0,
+      "frames": 90,
+      "activeThreats": 2,
+      "enemies": 13
+    }
+  ],
+  "presentation": {
+    "opticalSizeChecks": 100,
+    "forms": 50,
+    "anatomicalStateRenders": 40,
+    "singleArrivals": 10,
+    "eightSecondCompanions": 10,
+    "roomsDesktopMobileViews": 30,
+    "livingStagePointerKeyboard": "desktop and mobile passed",
+    "physicalTerrainAndTouchJump": "passed",
+    "generalBrowserAudit": "passed"
+  },
+  "method": {
+    "campaign": "Single clean save and one page; real control inputs and held-jump terrain assistance; no position, form, XP, HP, seal or victory grants. Final reunion and results paint to completion, then actual roster button returns to selection.",
+    "memories": "Opens already earned chapters from genuine campaign backup; real movement, jumps, flight and cooldown-limited defense; resumable genuine storage checkpoint. Existing campaign pickups plus subsequent physical pickups total1000. Album/relic verification runs in a new browser context and reload.",
+    "presentation": "Camera/form/invulnerability fixtures are used only for visual inspection and performance. They do not count as earned campaign progress.",
+    "performance": "RAF on this Chromium/CPU, two viewports; emulated mobile is not physical-device evidence.",
+    "pressure": "First Kilo encounter only. Does not prove all users find Normal challenging; hard does not die earlier in this one timing sample.",
+    "acceptance": "No claim of human acceptance of art, fun or difficulty."
+  }
+}

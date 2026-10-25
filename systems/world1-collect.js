@@ -97,7 +97,9 @@ export function world1CollectPlacements(room) {
   const band = (W - 600) / PAGE_SIZE;
   return Array.from({ length: ALBUM_SIZE }, (_, id) => {
     const page = Math.floor(id / PAGE_SIZE), k = id % PAGE_SIZE, challenge = k >= 7;
-    let x = 300 + page * band + (k + 0.5) / PAGE_SIZE * band, y = WORLD1_FLOOR - 34 - (k % 3 === 1 ? 46 : 0);
+    let x = 300 + page * band + (k + 0.5) / PAGE_SIZE * band;
+    const floor=room.plats.filter(p=>p[3]>40&&x>=p[0]&&x<=p[0]+p[2]).sort((a,b)=>a[1]-b[1])[0];
+    let y = (floor?.[1]??WORLD1_FLOOR) - 34 - (k % 3 === 1 ? 46 : 0);
     if (challenge) {
       const inBand = ledges.filter((p) => p[0] + p[2] > 300 + page * band && p[0] < 300 + (page + 1) * band);
       if (inBand.length) { const p = inBand[k % inBand.length]; x = p[0] + 20 + r() * Math.max(1, p[2] - 40); y = p[1] - 32; }

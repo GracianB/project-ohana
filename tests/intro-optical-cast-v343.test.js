@@ -17,13 +17,8 @@ test("Opening optical V343: complete ten-hero cast, no aliases or duplicate posi
       assert.ok(s.x+s.slotWidth*.44<=width,"right silhouette safe");
       assert.equal(s.compact,width<760);
     }
-    if(width<760){
-      assert.deepEqual(spots.map(s=>s.row),[0,0,0,0,0,1,1,1,1,1]);
-      assert.ok(spots[0].foot<spots[5].foot,"mobile needs two distinct rows");
-    }else{
-      assert.equal(new Set(spots.map(s=>s.row)).size,2);
-      assert.ok(spots[0].foot<spots[5].foot,"desktop cast has two interacting depths");
-    }
+    assert.equal(new Set(spots.map(s=>s.row)).size,3);
+    assert.ok(spots[5].foot<spots[0].foot,"Michi's reading terrace is above Dino's ground vignette");
   }
 });
 

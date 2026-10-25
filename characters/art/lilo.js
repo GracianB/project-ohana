@@ -892,6 +892,12 @@ function draw(ctx, pose, R) {
   const dead = st === "dead";
   drawKiloFootwork(ctx,pose,f,pose.t||0);
   const r = dead ? solve({ ...pose, state: "idle", flourish: 0 }, d, f) : solve(pose, d, f);
+  // Land on alternating feet, and protect the face with real elbow movement.
+  if(!pose.reduceMotion&&!dead){
+   if(st==='run'){const beat=Math.sin(pose.phase);r.footF[1]-=Math.max(0,beat)*1.8;r.footB[1]-=Math.max(0,-beat)*1.8;r.headRot-=beat*.025;}
+   if(st==='fall'){r.footF[0]+=2;r.footB[0]-=2;r.handF[0]+=2;r.handB[0]-=2;}
+   if(st==='hurt'){r.handF[0]=7;r.handF[1]=-d.ll-d.th-4;r.handB[0]=-8;r.handB[1]=-d.ll-d.th*.6;r.headRot=-.13;r.footF[0]+=3;}
+  }
   // Cast-driven follow-through: independent of wall clock and continuous at rest.
   if (!dead && (st === 'cast' || st === 'attack')) {
     const progress = Math.max(0, Math.min(1, Number(st === 'attack' ? pose.atk : pose.cast) || 0));

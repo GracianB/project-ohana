@@ -10,15 +10,10 @@ export function welcomeCastSpot(id, width, floor, heroHeight) {
   const index = WELCOME_CAST_ORDER.indexOf(id);
   if (index < 0 || ![width, floor, heroHeight].every(Number.isFinite) || width <= 0) return null;
   const compact = width < 760;
-  const columns = 5;
-  const column = index % columns;
-  const row = Math.floor(index / columns);
-  return Object.freeze({
-    x: width * (column + .5 + (!compact&&row===1?.10:0)) / columns,
-    foot: floor - (row === 0 ? heroHeight * 1.42 : !compact?(column%2)*heroHeight*.12:0),
-    slotWidth: width / columns * (compact?1:.82),
-    column, row, compact
-  });
+  const desktop={dino:[.10,0,2],dragon:[.24,.8,1],kilo:[.43,.05,2],stitcho:[.35,1.45,0],chispin:[.57,.95,1],cat:[.68,1.8,0],frita:[.68,0,2],pizza:[.82,.7,1],yomi:[.91,1.8,0],cuerno:[.12,2,0]};
+  const mobile={dino:[.18,0,2],dragon:[.12,1.3,1],kilo:[.50,0,2],stitcho:[.37,1.3,1],chispin:[.62,1.3,1],cat:[.50,2.6,0],frita:[.82,0,2],pizza:[.87,1.3,1],yomi:[.82,2.6,0],cuerno:[.18,2.6,0]};
+  const [x,lift,row]=(compact?mobile:desktop)[id];
+  return Object.freeze({x:width*x,foot:floor-heroHeight*lift,slotWidth:width*(compact?.20:.13),column:index,row,compact});
 }
 
 export function welcomeActorFit(bounds, targetHeight, slotWidth) {

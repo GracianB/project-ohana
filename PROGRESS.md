@@ -1,3 +1,21 @@
+# V513 · ohana-513 · Campaña completa y dirección de las diez salas
+
+Seis frentes implementados; evidencia y límites en docs/V1-FINAL-REVIEW.md y docs/V513-VALIDATION.json.
+Nuevos encuentros específicos, mayor relieve, diez familias de fauna articulada,
+diez grandes paisajes de fantasía cacheados, jardín vivo de selección, bienvenida
+en tres grupos, Yomi de papel/memoria y marcha anatómica diferenciada.
+U necesita recuperación real y no permite reiniciar un compañero todavía activo.
+La primera campaña continua en Normal ha ganado los diez sellos, cincuenta formas,
+cuatro fases de Quimera y epílogo sin conceder progreso ni teletransportar.
+Campaña final Normal verificada hasta reencuentro, resultados y vuelta a selección.
+1.000 recuerdos recogidos físicamente, diez reliquias y álbumes conservados tras recarga.
+1.544 tests Node, release gate (327 módulos / 377 recursos), auditoría de navegador,
+100 verificaciones de tamaño, diez bancos físicos y salto táctil aprobados.
+Selección operada en escritorio y móvil; 40 estados anatómicos revisados.
+Presión Normal real: esperar mata, jugar activamente sobrevive al mismo encuentro.
+Mediana RAF 16,7 ms en veinte escenas; móvil emulado, no garantía para cualquier teléfono.
+Aceptación artística y dificultad percibida: corresponde al usuario jugando el candidato.
+
 # V512 · ohana-512 · Identidad, alcance y revisión final de V1
 
 Revisión en curso: V1 no está cerrada. Registro completo en docs/V1-FINAL-REVIEW.md.

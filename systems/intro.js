@@ -373,6 +373,11 @@ export function playTitleIntro(options = {}) {
     if(wonder&&wonder.beat.kind!=="cameraThief")drawWelcomeFantasy(ctx,W,L.H,wonder,spots,{reduce,
       actorAt:(id,x,foot,h,alpha)=>actor(id,x,foot,h,tf,{alpha,noLabel:true,pose:"idle"})});
 
+    // The vignettes occupy connected garden terraces, not a floating lineup.
+    for(const spot of Object.values(spots)){
+      ctx.save();ctx.globalAlpha=.62;ctx.fillStyle='#416f64';ctx.beginPath();ctx.ellipse(spot.x,spot.foot+4,spot.slotWidth*.40,8,0,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#c5d3a2';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(spot.x,spot.foot+1,spot.slotWidth*.39,5,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+    }
     // V350: Kilo plays an actual connected five-form body/ukulele rig.
     // Pollination, laughter and surprise are its own fully timed story.
     const kiloBeat=kiloWelcomeBeat(loop,reduce);

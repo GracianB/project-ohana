@@ -413,7 +413,7 @@ function opts(pose, f, S) {
     o.footY = -6; o.footX = -2; o.legBend = 6; o.armA = 1.9; o.armB = -2.5;
     o.tailAxis = -2.95; o.tailLen = 1.3; o.tailAmp = 0.7; o.earA = -0.4; o.gillFlare = -0.5; o.mouth = "open";
   } else if (st === "fall" || st === "glide") {
-    o.footY = -2; o.footX = 3; o.legBend = -2; o.armA = 1.95; o.armB = -2.6;
+    o.footY = 2; o.footX = 4; o.legBend = -3; o.armA = 1.95; o.armB = -2.6;
     o.tailAxis = -2.7; o.tailLen = 0.95; o.tailAmp = 1.3; o.earA = 0.25; o.gillFlare = 0.6; o.mouth = "o";
   } else if (st === "attack") {
     const k = pose.atk;

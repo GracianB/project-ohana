@@ -5,7 +5,7 @@ import {enterCampaignExploration,updateCampaignExploration} from '../systems/cam
 test('ten authored rooms have distinct materials, continuous recoverable terrain and an unchanged boss floor',()=>{
  const materials=new Set();
  for(const hero of WORLD1_ORDER){const r=WORLD1_ROOMS['w1-'+hero];assert.ok(r.composition);materials.add(r.composition.material);assert.ok(r.terraces.length>=2,hero+' needs meaningful relief');
-  const floors=r.plats.filter(p=>p[3]>40).sort((a,b)=>a[0]-b[0]);let x=0;for(const p of floors){assert.equal(p[0],x);x+=p[2];assert.ok(WORLD1_FLOOR-p[1]<=80);}assert.equal(x,r.width);
+  const floors=r.plats.filter(p=>p[3]>40).sort((a,b)=>a[0]-b[0]);let x=0;for(const p of floors){assert.equal(p[0],x);x+=p[2];assert.ok(WORLD1_FLOOR-p[1]<=112,"banks must remain within the late-form physical jump envelope");}assert.equal(x,r.width);
   for(const px of [8260,8750,9320])assert.equal(floors.find(p=>px>=p[0]&&px<p[0]+p[2])[1],1134);
   for(const s of r.seal.stations){const floor=floors.find(p=>s.x>=p[0]&&s.x<p[0]+p[2]);assert.equal(floor[1],1134,hero+' objective floor stays reachable');}
  }

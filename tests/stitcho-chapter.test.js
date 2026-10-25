@@ -30,3 +30,5 @@ test('saved rail and repairs restore growth; legacy seals stay valid',()=>{
  assert.equal(g.player.xp,260);assert.equal(stitchoRailDone(g),true);assert.equal(g.score,undefined);
  g.world1Seals=['stitcho'];enterWorld1(g);assert.equal(g.world1.sealed,true);
 });
+
+test('earned workshop seal restores final growth for collection revisits without score payout',()=>{const g=make();g.world1Seals=['stitcho'];enterWorld1(g);assert.equal(g.world1.sealed,true);assert.equal(g.player.xp,420);assert.equal(g.score||0,0);});
