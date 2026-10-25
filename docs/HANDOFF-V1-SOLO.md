@@ -238,3 +238,10 @@ propio existente y ahora lo conectan a la campaña; no se afirma V1 terminada.
 Validación V507: 1.517 Node PASS, release gate PASS (314 módulos / 364 recursos),
 auditoría Chromium general PASS, pilotos Kilo/Stitcho/Chispín PASS; capturas de las
 tres salas y controles táctiles revisadas. Logs `/workspace/.cloud-setup/logs/ohana-v507-*`.
+
+Publicación V507 verificada: commit `6ddc0aa`, Pages
+https://github.com/GracianB/project-ohana/actions/runs/40157004932 en Success.
+https://gracianb.github.io/project-ohana/?release=507 sirve once archivos runtime
+con SHA256 idéntico al candidato local, incluido el nuevo módulo y sw.js.
+Informe: `/workspace/.cloud-setup/logs/ohana-v507-live-verification.json`.
+Siguiente paquete: Dino; aceptación humana de estos tres sigue pendiente.
