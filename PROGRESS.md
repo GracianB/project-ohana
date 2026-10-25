@@ -16,6 +16,10 @@ Presión Normal real: esperar mata, jugar activamente sobrevive al mismo encuent
 Mediana RAF 16,7 ms en veinte escenas; móvil emulado, no garantía para cualquier teléfono.
 Aceptación artística y dificultad percibida: corresponde al usuario jugando el candidato.
 
+Publicación V513: commit30cd122, Pages40210771516 y CI40210771546 correctos.
+26 archivos runtime verificados por SHA256 en vivo; arranque público aprobado.
+https://gracianb.github.io/project-ohana/?release=513
+
 # V512 · ohana-512 · Identidad, alcance y revisión final de V1
 
 Revisión en curso: V1 no está cerrada. Registro completo en docs/V1-FINAL-REVIEW.md.

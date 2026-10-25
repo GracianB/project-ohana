@@ -5,7 +5,7 @@
   "repository": "GracianB/project-ohana",
   "branch": "feat/v513-complete-solo-experience",
   "base_commit": "3fe0b84",
-  "published": false,
+  "published": true,
   "campaign_complete_verified": true,
   "v1_ready": false,
   "next_task": "v1.user_play_review",
@@ -27,8 +27,8 @@
     "local_all_memories": "1000 physically collected and ten album panels/relics retained on reload",
     "local_normal_pressure": "idle Kilo dies; active control survives same encounter",
     "local_performance": "20 scenes; median16.7ms; worst p95 desktop33.3ms/emulated mobile16.8ms; no >50ms frames in sample",
-    "remote_ci_current_candidate": "pending_publication",
-    "published_url_current_candidate": "pending_publication"
+    "remote_ci_current_candidate": "pages verify-release/deploy and OHANA CI passed for30cd122",
+    "published_url_current_candidate": "26 changed runtime assets SHA256 matched live V513; public browser startup passed"
   },
   "chapters": [
     {
@@ -229,7 +229,7 @@
     "keyboard_gamepad_touch_review": "browser audit input checks and actual touch bank traversal pass; physical hardware acceptance separate",
     "human_difficulty_acceptance": "pending_user_play",
     "final_candidate_automated_and_visual_checks": "passed_V513",
-    "same_sha_ci_pages_and_live_sw_check": "pending_publication"
+    "same_sha_ci_pages_and_live_sw_check": "passed_V513_30cd122"
   },
   "excluded_from_v1": [
     "World 2",
@@ -247,15 +247,16 @@
   ],
   "evidence_storage": "Versioned drivers and docs/V513-VALIDATION.json; generated evidence in test-results/v513 (legacy presentation drivers also v511/v512), logs in /workspace/.cloud-setup/logs/ohana-v513-*. No new delivery ZIP claimed.",
   "published_release": {
-    "version": "ohana-512",
-    "commit": "1ff944725665667ad8bbf089402067869d535d04",
-    "url": "https://gracianb.github.io/project-ohana/?release=512",
+    "version": "ohana-513",
+    "commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
+    "url": "https://gracianb.github.io/project-ohana/?release=513",
     "verified": true,
-    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40205716045",
-    "live_assets_verified_sha256": 42
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40210771516",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40210771546",
+    "live_assets_verified_sha256": 26
   },
-  "published_commit": "1ff944725665667ad8bbf089402067869d535d04",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=512",
+  "published_commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=513",
   "candidate_version": "ohana-513",
   "review": "docs/V1-FINAL-REVIEW.md",
   "previous_verified_publication": {

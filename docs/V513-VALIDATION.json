@@ -497,5 +497,15 @@
     "performance": "RAF on this Chromium/CPU, two viewports; emulated mobile is not physical-device evidence.",
     "pressure": "First Kilo encounter only. Does not prove all users find Normal challenging; hard does not die earlier in this one timing sample.",
     "acceptance": "No claim of human acceptance of art, fun or difficulty."
+  },
+  "publication": {
+    "commit": "30cd122f5f934e930c35ce3c332f1fc54d295c4c",
+    "url": "https://gracianb.github.io/project-ohana/?release=513",
+    "pages": "https://github.com/GracianB/project-ohana/actions/runs/40210771516",
+    "ci": "https://github.com/GracianB/project-ohana/actions/runs/40210771546",
+    "pagesAndCi": "success",
+    "liveRuntimeAssetsChecked": 26,
+    "liveRuntimeAssetsMatched": 26,
+    "publicBrowserStartup": "passed; Chromium workspace HTTPS CA bypass only, Python asset checks use default HTTPS trust"
   }
 }
