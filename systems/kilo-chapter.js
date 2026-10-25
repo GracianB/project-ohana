@@ -18,7 +18,12 @@ export function kiloGuardianRequired(g){
 }
 export function kiloFlowerThreat(g,s){
  if(!kiloChapter(g))return null;
- return g.enemies?.find(e=>e.hp>0&&!e.friendly&&Math.abs(e.x+(e.w||0)/2-s.x)<270&&Math.abs(e.y+(e.h||0)/2-(s.y-40))<240)||null;
+ // The note is interrupted by enemies actually defending the flower, not
+ // by a harmless patrol almost one screen away. Nearby creatures still block
+ // the ritual until defeated or lured outside its immediate playing area.
+ return g.enemies?.find(e=>e.hp>0&&!e.friendly&&!e.dying&&!e.fell&&
+   Math.abs(e.x+(e.w||0)/2-s.x)<Math.max(112,(Number(e.w)||0)/2+82)&&
+   Math.abs(e.y+(e.h||0)/2-(s.y-40))<140)||null;
 }
 
 export const KILO_AIR_CHIMES=Object.freeze([
