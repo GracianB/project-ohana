@@ -118,9 +118,27 @@ try{
  await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
  await page.clock.runFor(250);
  const goalCard=page.locator('#notification-container .game-notification[data-persistent="1"]');
- const box=await goalCard.boundingBox();assert.ok(box.y>=150&&box.y<210,'goal should stay in the notice area');
+ // The help HUD is hidden by authored intro/evolution scenes. Clear any
+ // scene only through the player-facing controls and wait for a visible card.
+ for(let n=0;n<14;n++){
+   if(await goalCard.isVisible())break;
+   const cine=page.locator('#evo-stage.show .evo-skip');
+   if(await cine.count()){await cine.click();await page.clock.runFor(450);}
+   if(await page.locator('#ohana-intro.show').count())await page.keyboard.press('Escape');
+   await page.clock.runFor(250);
+ }
+ const hud=await page.evaluate(()=>{
+   const e=document.querySelector('#notification-container'),card=e?.querySelector('[data-persistent="1"]');
+   return {body:document.body.className,rootClass:e?.className,cardClass:card?.className,
+      text:card?.textContent,rendered:card?.innerText,
+      rootVisibility:e?getComputedStyle(e).visibility:null,
+      cardVisibility:card?getComputedStyle(card).visibility:null,
+      overlays:[...document.querySelectorAll('[role="dialog"]')].filter(x=>getComputedStyle(x).display!=='none').map(x=>({id:x.id,cls:x.className})).slice(0,7)};
+ });
+ assert.equal(hud.cardVisibility,'visible','earned Pizza delivery objective must remain visible: '+JSON.stringify(hud));
+ const box=await goalCard.boundingBox();assert.ok(box&&box.y>=150&&box.y<210,'goal should stay in the notice area: '+JSON.stringify(hud));
  assert.equal(await goalCard.evaluate(el=>getComputedStyle(el).animationName),'none');
- assert.match(await goalCard.innerText(),/quedan [1-9]\d* s/);
+ assert.match(await goalCard.innerText(),/quedan [1-9]\d* s/,'Pizza heat must be readable: '+JSON.stringify(hud));
  await page.screenshot({path:'test-results/v501/pizza-heat.png'});
  await approach(pizza[1].x,s=>s.world1.done>=1);
  console.log('PHYSICAL PIZZA FIRST HOT DELIVERY');
