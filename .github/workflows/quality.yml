@@ -67,6 +67,10 @@ jobs:
       - name: V500 constellation UI and persistence
         run: node tests/browser/v500-constellation.mjs
 
+      # Check the chapter selector before the slow campaign and art matrix.
+      - name: V410 family camp · ten heroes and fifty real forms
+        run: node tests/browser/v410-family-camp.mjs
+
       # Catch presentation/selector regressions before the long campaign gates.
       - name: Story bubbles, character sizes and surprise encore
         run: npm run test:browser:polish && npm run test:browser:characters && npm run test:browser:direction && npm run test:browser:chispa && npm run test:browser:approved-chispa && npm run test:browser:chispa-sanctuary
@@ -83,19 +87,6 @@ jobs:
       - name: V475 World 1 authentic keyboard start and Kilo first flower
         run: node tests/browser/v475-world1-natural-walk.mjs
 
-      # V477–V494 were incremental Easy-mode pilots for unfinished chapters.
-      # Their assumptions (instant Kilo seal, timed Chispin chain, flat
-      # terrain) are no longer true. They remain in tests/browser/ for
-      # historical reproduction; do NOT claim that they pass as written.
-      # The accepted gate is now strictly broader: one clean Normal save,
-      # real terrain/jump/attack/respawn, all ten earned chapter bosses,
-      # all 50 forms, every Quimera phase and the actual final screen.
-      - name: V514 continuous Normal campaign · ten earned seals + Quimera HUD
-        run: |
-          CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
-          export CHROMIUM_BIN
-          node tests/browser/v513-full-campaign.mjs
-
       - name: V476 physical death retry · earned Kilo note without score farming
         run: node tests/browser/v476-death-checkpoint.mjs
 
@@ -107,9 +98,6 @@ jobs:
 
       - name: V420 readable welcome · pause, dialogue and replay
         run: node tests/browser/v420-welcome-story.mjs
-
-      - name: V410 family camp · ten heroes and fifty real forms
-        run: node tests/browser/v410-family-camp.mjs
 
       - name: V440 Michi animation and island traversal
         run: |
@@ -289,6 +277,21 @@ jobs:
       - name: Surprise U companions in action
         run: npm run test:browser:u-companions
 
+      # V477–V494 were incremental Easy-mode pilots for unfinished chapters.
+      # Their assumptions (instant Kilo seal, timed Chispin chain, flat
+      # terrain) are no longer true. They remain in tests/browser/ for
+      # historical reproduction; do NOT claim that they pass as written.
+      # The accepted gate is now strictly broader: one clean Normal save,
+      # real terrain/jump/attack/respawn, all ten earned chapter bosses,
+      # all 50 forms, every Quimera phase and the actual final screen.
+      - name: V514 continuous Normal campaign · ten earned seals + Quimera HUD
+        run: |
+          CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
+          export CHROMIUM_BIN
+          node tests/browser/v513-full-campaign.mjs
+
+      # Full continuous Normal play runs after fast regressions; it is also
+      # checked independently by the V514 workflow on every PR.
       - name: Release gate
         run: npm run release:check
 
