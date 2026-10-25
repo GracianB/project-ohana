@@ -350,3 +350,14 @@ Presentación de Pizza/Dino usa fixtures de forma/cámara explícitas, no victor
 Validación Node1.526 PASS; release gate316 módulos/366 recursos, Kilo físico PASS.
 No se declara campaña completa, matriz histórica entera ni aceptación humana de
 balance o alcance físico de cien recuerdos. Siguiente planificación: Frita.
+
+
+Publicación V509 verificada: commit `ddbe69c`; Pages
+https://github.com/GracianB/project-ohana/actions/runs/40184866805 en Success.
+https://gracianb.github.io/project-ohana/?release=509 sirve diecinueve archivos runtime
+con SHA256 igual al candidato local, incluidos Pizza, Dino, fondos, habilidades y sw.js.
+Informe `/workspace/.cloud-setup/logs/ohana-v509-live-verification.json`.
+Auditoría Chromium general PASS. Piloto final Pizza: ocho ataques del Chef,
+cero muertes, Continue, J táctil y salida a Yomi bebé. Dino: siete ataques,
+dos impactos reales verificados, cero muertes, Continue, caída táctil y Frita bebé.
+Primera ejecución de Pizza había registrado12 ataques; prevalece el informe final8.
