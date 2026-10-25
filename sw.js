@@ -728,7 +728,7 @@ const PRECACHE_REVISIONS = {
   "systems/traversal-safety.js": "22dd9d72a4a9e2f3d4bc79e5a90c61a3eb03f812",
   "systems/world-graph.js": "0274f74bcfefc52c608000d82dd12045237b2bf8",
   "systems/mutations.js": "dfbd5089e642ac210adce04c4ac3561fd081c7a9",
-  "systems/message-manager.js": "bbae3a1611d1d31810c9f76bf16cc71e79379f8a",
+  "systems/message-manager.js": "ef1d14f9f74d0f538f485ce1a31630e0f6223638",
   "systems/notify.js": "d6ab13a1955952106587e945a0291ca29c21663d",
   "systems/evolution-timing.js": "31195d306f284aecd436e85d89a4650845b2bb1f",
   "systems/objectives.js": "a9bd28570d1bbb548c3b1182747307771d038422",
