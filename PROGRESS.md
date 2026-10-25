@@ -1,3 +1,11 @@
+# V505 · ohana-505 · Daño real y guía del cielo
+
+H, proyectiles normales y hitEnemy muestran y propagan el daño realmente quitado,
+no el daño nominal. Blindaje sin daño emite un aviso limitado «BLINDADO» y no
+premia XP, combo, puntuación o carga de remate. Se evita la lluvia de números falsos
+sobre Tambor protegido. Guía de vuelo opcional indica siguiente aro y dirección
+sin reemplazar el objetivo de las cuatro notas; muestra finalización y premio exacto.
+
 # V504 · ohana-504 · Colisiones, contornos y cielo de Kilo
 
 Se unifica el contacto de enemigos de campaña con la colisión real: pisotón,

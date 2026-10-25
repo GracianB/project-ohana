@@ -1,3 +1,4 @@
+import {showBlockedHit} from './combat-feedback.js';
 import {shieldBlocksHit} from './campaign-enemies.js';
 import {recordKiloHit,kiloComboStatus,consumeKiloCombo} from './kilo-combo.js';
 import {startKiloFlight,stopKiloFlight,kiloFlightDuration,kiloNoteTrajectory} from './kilo-flight.js';
@@ -1097,6 +1098,8 @@ if (e.boss) d *= 0.55;
 d = Math.max(1, Math.round(d));
 const before=e.hp;
 damageEnemy(e, d);
+d=Math.max(0,before-e.hp);
+if(!d){showBlockedHit(g,e);return false;}
 if(!o.noCharge)chargeFinisher(g,Math.max(0,before-e.hp));
 g.onAbilityHit?.(e,d,o);
 e.flash = Math.max(e.flash || 0, 14);

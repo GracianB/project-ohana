@@ -135,3 +135,21 @@ uno arriba a la izquierda. Los cristales XP se dibujan ahora con opacidad explí
 sin filtro heredado y con contorno oscuro; los diamantes grandes de secreto llevan
 contorno oscuro y rótulo «SECRETO · +18 XP» para distinguirlos. Son mejoras de
 visibilidad y lectura, sin afirmar haber reproducido una desaparición concreta.
+
+
+## V505 · feedback de daño y orientación aérea
+
+Se continúa el pulido de Kilo. H, J normal y hitEnemy propagan el delta real de HP;
+los bloqueos no pagan XP, score, combo ni carga. No hay número nominal que finja
+un impacto en Tambor protegido. «BLINDADO» se limita a un aviso cada 30 ticks por
+enemigo. Las pruebas unitarias cubren el presupuesto parcial de ventana y los
+premios; la fixture de navegador usa enemigo dormido blindado y elimina cristales
+para aislar XP de golpes, comprobando H/J reales que llegan al blanco sin premios.
+No representa una victoria física.
+
+La ruta opcional de vuelo indica el siguiente aro y dirección, conserva la misión
+principal de notas, y muestra la finalización. Pilotos físicos de Kilo y Stitcho
+aprobados; vuelo de los cinco aros y colisión normal también. Suite Node: 1.509.
+Evidencia en logs ohana-v505-*.log, tests/browser/v505-honest-hits.mjs y
+captura test-results/v504/kilo-sky-route.png actualizada. No se declara aceptación
+humana ni cierre de los cien recuerdos. Chispín sigue como siguiente integración.

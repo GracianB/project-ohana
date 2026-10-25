@@ -39,7 +39,7 @@ export function updateKiloSkyRoute(g){
  g.secrets||={};const found=g.secrets['w1-kilo']||=[];ring.done=true;
  if(found.includes(ring.id))return;found.push(ring.id);
  const complete=w.skyRings.every(r=>r.done);p.xp=(p.xp||0)+8;g.score=(g.score||0)+(complete?500:100);
- g.nums?.add?.(ring.x,ring.y-40,complete?'RUTA DEL CIELO COMPLETA · +500':'ARO '+(w.skyRings.filter(r=>r.done).length)+'/5 · +8 XP','#a9f2ff',true);
+ g.nums?.add?.(ring.x,ring.y-40,complete?'RUTA DEL CIELO · +8 XP · +500':'ARO '+(w.skyRings.filter(r=>r.done).length)+'/5 · +8 XP','#a9f2ff',true);
  g.onWorld1Beat?.('chime','kilo',2);g.save?.();
 }
 export function enterKiloAirTrail(g){
@@ -58,16 +58,30 @@ export function updateKiloAirTrail(g){
   if(!found.includes(ch.id)){found.push(ch.id);g.score=(g.score||0)+150;g.onWorld1Beat?.('chime','kilo',KILO_AIR_CHIMES.findIndex(c=>c.id===ch.id)+1);g.nums?.add?.(ch.x,ch.y-25,'CARILLÓN · '+w.airChimes.filter(c=>c.done).length+'/3','#ffe4a0',false);g.fx?.emit?.(ch.x,ch.y,{color:'#ffe4a0',count:g.reduceMotion?4:12,size:3,star:true,life:25});g.save?.();}
  }
 }
+export function kiloSkyGuidance(g){
+ if(!kiloChapter(g)||!(g.player?._kiloFlightT>0))return null;
+ const rings=g.world1?.skyRings||[],index=rings.findIndex(r=>!r.done);
+ if(index<0)return {complete:true,total:rings.length};
+ const ring=rings[index],dx=ring.x-(g.player.x+g.player.w/2),dy=ring.y-(g.player.y+g.player.h/2);
+ return {complete:false,index:index+1,total:rings.length,id:ring.id,x:ring.x,y:ring.y,direction:(Math.abs(dx)>60?(dx>0?'→':'←'):'')+(Math.abs(dy)>60?(dy>0?' ↓':' ↑'):'')||'AQUÍ'};
+}
 export function drawKiloAirTrail(ctx,g,cam,t){
  if(!kiloChapter(g))return;
  ctx.save();ctx.textAlign='center';
- const next=g.world1?.skyRings?.find(r=>!r.done);
- for(const r of g.world1?.skyRings||[]){
+ const next=g.world1?.skyRings?.find(r=>!r.done),guide=kiloSkyGuidance(g);
+ if(guide){
+  const width=g.viewW||1280,bw=Math.min(320,width-24),x=(width-bw)/2,y=width<600?300:88;
+  ctx.fillStyle='#12323ee8';ctx.fillRect(x,y,bw,51);ctx.strokeStyle='#8bdfeb';ctx.lineWidth=1;ctx.strokeRect(x,y,bw,51);
+  ctx.fillStyle='#dbfaff';ctx.font='bold 13px sans-serif';ctx.fillText(guide.complete?'RUTA DEL CIELO COMPLETA':'CIELO · ARO '+guide.index+'/'+guide.total+' '+guide.direction,width/2,y+20);
+  ctx.font='11px sans-serif';ctx.fillText(guide.complete?'Premios guardados · continúa la aventura':'Ruta opcional · cruza los aros azules volando',width/2,y+39);
+ }
+
+ for(const [index,r] of (g.world1?.skyRings||[]).entries()){
   const x=r.x-cam.x,y=r.y-cam.y;if(x<-70||x>(g.viewW||1600)+70)continue;
   ctx.globalAlpha=r.done?.4:r===next?1:.55;ctx.lineWidth=r===next?5:3;ctx.strokeStyle=r.done?'#a6e2b2':'#83e9ff';
   ctx.beginPath();ctx.ellipse(x,y,30,44,0,0,Math.PI*2);ctx.stroke();
   ctx.strokeStyle='#243c46';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,35,49,0,0,Math.PI*2);ctx.stroke();
-  ctx.fillStyle='#efffff';ctx.font='bold 12px sans-serif';ctx.fillText(r.done?'✓':'ARO '+(KILO_SKY_RINGS.indexOf(KILO_SKY_RINGS.find(a=>a.id===r.id))+1)+'/5',x,y-58);
+  ctx.fillStyle='#efffff';ctx.font='bold 12px sans-serif';ctx.fillText(r.done?'✓':'ARO '+(index+1)+'/5',x,y-58);
   if(r===next){ctx.font='11px sans-serif';ctx.fillText('CRUZA VOLANDO · +8 XP',x,y+65);}
  }
  ctx.globalAlpha=1;

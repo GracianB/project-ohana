@@ -1,4 +1,4 @@
-const VERSION = "ohana-504";
+const VERSION = "ohana-505";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/stitcho-chapter.js?v=" + VERSION,
@@ -372,7 +372,7 @@ const PRECACHE = [
 const PRECACHE_REVISIONS = {
   "systems/stitcho-chapter.js": "f2775bf7b4aca9b6215af8fc443a797a6df8b872",
   "worlds/ohana-environments.js": "2076851ad9b299a92c699d6d10b5b48012d55442",
-  "systems/kilo-chapter.js": "7f303b2a8eff51f2f758c6d31ca68a99d2f23eb0",
+  "systems/kilo-chapter.js": "8e2fad1201bd1238b4ee86c12bcd45b6fd67592b",
   "systems/power-status.js": "e4ef3c8e4b3c0959fb78ad0ea30b9ed88745aef1",
   "systems/world1-guidance.js": "c743a9b6bc00648ea4669d891e002332cca5f559",
   "systems/family-memory.js": "80dcd068ad919a8da3ae1722ac8207e99c233e42",
@@ -489,7 +489,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "d9f61d2224d9453d14105d8e855783f53e2cac12",
-  "index.html": "661490342008a8ede678d703545addfb5961ded6",
+  "index.html": "b6726a745262636603f197910f39d87ca0f4adba",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -514,7 +514,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "51fbe63b3e9e9933b6451d7fef74e1e051de442c",
+  "game.js": "ab4c92b9b1aa210cc3218670af9b47b753be27c7",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "9b6a7b35c9a31d777b43214b028ffb29ee541021",
   "characters/ten-action-acting.js": "09e5e89ffb006196e7a3240d49ef39ea28619949",
@@ -579,7 +579,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "cca11516ee6d83b768a0cde22baf563fc8be6d95",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "866c92d53da9dd65c4b4181552d5b5f556847ab1",
-  "systems/abilities.js": "0f402f8415767fded52095ecef9ac1b8a74adc4a",
+  "systems/abilities.js": "ec64b6c0ca06f5ab608c3fdcebb4bd5434c87d74",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "143cff8baa3ca5a1b18948d90eacb7cfe56fe564",
   "systems/u-partners.js": "c90b1d09dc481c99a4da005e083a4f4ac928117f",
@@ -621,7 +621,7 @@ const PRECACHE_REVISIONS = {
   "systems/boss-hud.js": "6763935cf596554d4f0f9010d15c14e0dc4487e1",
   "systems/boss-nido.js": "1dafcf212a6300af5daa0436ec9e731397b87687",
   "systems/combat-fx.js": "d175e7fc28efc392a9dce71e12547adcca313771",
-  "systems/combat-feedback.js": "535bdb2e5f923d10e554a7f8f605cf8f0f2f984d",
+  "systems/combat-feedback.js": "3b499fc506c5626ba18b14e025735b87f9eb6199",
   "systems/death-fx.js": "b373412bd245f196d6d484007814301d773fc145",
   "systems/demo.js": "aace64289d8aa541de43639c4cb476b5d09d5059",
   "systems/dialogs.js": "734efae04b14a525bf69117adc9c5c779ea01d21",

@@ -132,7 +132,7 @@ import { masteryOf, playerMasteryPlatforms, masterySnapshot } from "./systems/he
 import { HAZARD_TYPES, hazardContainsX, hazardTrigger, drawHazards } from "./systems/hazards.js";
 import { Magic } from "./systems/magic.js";
 import { CombatFX, combatTier } from "./systems/combat-fx.js";
-import { damageFeedback } from "./systems/combat-feedback.js";
+import { damageFeedback,showBlockedHit } from "./systems/combat-feedback.js";
 import { BossFX, bossPhaseProfile, bossAttackProfile } from "./systems/boss-fx.js";
 import { bossAttackCue } from "./systems/boss-v94-readability.js";
 import { drawBossFallScene, bossFallStage } from "./systems/boss-fall-scene.js";
@@ -1113,6 +1113,9 @@ if (!e.boss && chispinFoeBlocks(e, p.x + (p.w || 0) / 2, (p.y + (p.h || 0)) < e.
 }
 const healthBefore=e.hp;
 damageEnemy(e, d);
+const applied=Math.max(0,healthBefore-e.hp);
+if(!applied){showBlockedHit(game,e);return;}
+d=applied;
 if(e.hp<healthBefore)recordKiloHit(game,'H',p._swing);
 registerBossPunish(e);
 const face = p.facing || 1;
@@ -2838,7 +2841,9 @@ if (pr.owner === "player") {
     if (!pr.pickup && !e.dying && !(e.invuln > 0) && !(pr.hit && pr.hit.has(e)) && aabb({ x: pr.x, y: pr.y, w: pr.w, h: pr.h }, e)) {
     let dmg = pr.dmg * (1 + game.player.evo * 0.35); if (e.boss) dmg *= 0.55;
       dmg = Math.round(dmg);
-      damageEnemy(e, dmg); registerBossPunish(e);
+      const before=e.hp;damageEnemy(e,dmg);dmg=Math.max(0,before-e.hp);
+      if(!dmg){showBlockedHit(game,e);pr.life=0;continue;}
+      registerBossPunish(e);
       void onlineCoop.signal(game,"hit",{targetSyncId:e._coopSyncId,targetVisit:e._coopVisit,targetId:e.id,
         kind:e.kind,x:e.x,y:e.y,damage:dmg,characterId:game.player.id});
       e.vx += Math.sign(pr.vx) * (e.boss ? 0.6 : 5.5); e.vy = Math.min(e.vy || 0, -2.5);
@@ -3912,9 +3917,12 @@ game.cam.y = 0;
 };
 
 window.__OHANA_E2E = {
-campaignContactTarget(){
+campaignContactTarget(options={}){
  const p=game.player;const e=makeFoe(650,1094,'cucaracho',game.roomId,0,{rng:()=>.5});
  Object.assign(e,{x:650,y:1094,w:40,h:40,hp:120,max:120,campaignRole:'pursuer',invuln:0,sleep:99999});
+ if(options.isolateRewards)game.orbs=[];
+ if(options.guarded)e.damageTakenScale=0;
+ if(Number.isFinite(options.budget))e.damageWindowRemaining=options.budget;
  game.enemies=[e];game.hitstop=0;p.invuln=0;return {x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp};
 },
 combatTarget(){
@@ -3933,7 +3941,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  interact(){interact();return this.state();},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
 kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},
-roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
+roomCast(){return game.enemies.map(e=>({x:e.x,y:e.y,w:e.w,h:e.h,hp:e.hp,max:e.max,miniBoss:!!e.miniBoss,blockedNoticeTick:e._blockNoticeAt,damageWindowRemaining:e.damageWindowRemaining,guardian:e._drummer?{...e._drummer}:null,stitchoBoss:e._glitch?{...e._glitch}:null,chispinBoss:e._titan?{...e._titan}:null,michiBoss:e._astralCat?{...e._astralCat}:null,dragonBoss:e._dragonBoss?{...e._igneousDragon}:null,role:e.campaignRole||null,persona:e.roomPersona?.name||null}));},
  setUSurprise(on=true){if(game.player)game.player.uSurprise=!!on;},
  selectUPartner(hero,ally){storeUPartnerChoice(localStorage,hero,ally);if(game.player?.id===hero){switchUPartner(game.player,ally);game.player.uSurprise=false;}},
 foeBoxes() {
