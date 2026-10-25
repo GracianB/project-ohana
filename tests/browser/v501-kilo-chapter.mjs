@@ -1,3 +1,4 @@
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Physical solo chapter pilot: no setPlayer, XP/form grants, healing or enemy
 // replacement. Natural retries are recorded; the browser clock is controlled.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';
@@ -10,7 +11,7 @@ try{
  await page.clock.install({time:new Date('2026-10-24T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-24T12:00:01Z'));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'load'});
  const notes=await page.evaluate(async()=>{localStorage.clear();const e=window.__OHANA_E2E;e.setSeed(73);e.startWorld1('kilo');return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-kilo'].seal.stations;});
- const step=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
+ const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
  let s=await step(600),deaths=0,airResumed=false,guardianAttacks=0;await page.locator('#game').focus();
  await fs.mkdir('test-results/v501',{recursive:true});
  const forms=new Set([s.evo]),milestones=[],guardianPhases=new Set();

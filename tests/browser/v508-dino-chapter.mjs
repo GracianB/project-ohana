@@ -1,3 +1,4 @@
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Direct chapter entry is the access fixture. All forms, objectives and boss
 // wins in these pilots use physical input, with no position/HP/XP/win setters.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';import {chromium} from 'playwright';import {startServer} from './server.mjs';
@@ -11,7 +12,7 @@ try{
  await page.clock.install({time:new Date('2026-10-25T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-25T12:00:01Z'));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  const stations=await page.evaluate(async hero=>{localStorage.clear();const e=window.__OHANA_E2E;e.setSeed(73);e.startWorld1(hero);e.loadRoom('w1-'+hero);return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-'+hero].seal.stations;},hero);
- const step=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
+ const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
  let s=await step(600),deaths=0,resumed=false,attacks=0,quakeVerified=false,quakeHitCount=0;const forms=new Set([s.evo]),patterns=new Set();
  await page.locator('#game').focus();
  for(const foe of await page.evaluate(()=>window.__OHANA_E2E.roomCast()))assert.ok(foe.y+foe.h<=1134.1,'no enemy spawned through the floor');

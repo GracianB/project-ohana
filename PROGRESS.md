@@ -1,3 +1,28 @@
+# V511 · ohana-511 · Diez salas con terreno y rutas diseñados
+
+Sustituidos los motivos aleatorios comunes por composiciones de sala explícitas.
+Dos o tres desniveles reales por capítulo: hay que saltarlos o usar movilidad,
+no se atraviesan andando. Suelo continuo sin pozos mortales añadidos; estaciones,
+raíles, géiseres y arenas conservan sus zonas de interacción. Rutas altas con
+alturas/anchuras distintas, secretos persistentes y vigía opcional. Se retiran las
+plataformas/lifts genéricos que antes se insertaban al entrar. Enemigos y cristales
+se apoyan en la superficie real, no dentro de los taludes. Las criaturas de suelo
+se detienen y saltan ante paredes; proyectiles terminan al chocar con el terreno.
+
+Diez materiales de terreno/plataforma, estratos, mampostería, sombreado y bordes
+sobre sus colisiones reales. Árboles y raíces en Kilo, dique/grúa en Stitcho,
+conductores en Chispín, sauce lunar en Michi, invernadero prismático en Cuerno,
+forja en Dragón, costillas fósiles en Dino, puestos/toldos en Frita, balcones del
+puerto en Pizza y planetario en Yomi. Pintura detrás del recorrido, sin colliders
+ocultos. Kilo conserva su paisaje base y su repertorio, reabierto sólo para esta
+revisión de sala solicitada expresamente.
+
+Progreso, estaciones y claves existentes conservados. La revisión de diez salas
+no declara cerrada la integración final con Quimera ni la aceptación humana de
+calidad, dificultad o cien recuerdos alcanzables. Validación:1.536 Node, diez
+pilotos completos, diez taludes con caminar/saltar real, salto táctil,30 capturas
+de presentación, auditoría Chromium y release gate (321 módulos/371 recursos).
+
 # V510 · ohana-510 · Frita y Yomi
 
 Frita: tres géiseres con fuerza/altura/desplazamiento distintos, recarga y aviso

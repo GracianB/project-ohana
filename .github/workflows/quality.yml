@@ -164,6 +164,9 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
+      - name: V511 ten authored room scenes and real terrain traversal
+        run: npm run test:browser:ten-room-direction && npm run test:browser:room-terrain
+
       - name: V510 Frita and Yomi physical chapters and mobile input
         run: npm run test:browser:frita-yomi-chapters
 

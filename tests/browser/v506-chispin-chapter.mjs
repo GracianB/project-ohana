@@ -1,3 +1,4 @@
+import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 // Direct chapter entry is the only access fixture. The run earns forms and
 // antennas with movement/combat: no position, XP, HP, enemy or victory setters.
 import assert from 'node:assert/strict';import fs from 'node:fs/promises';
@@ -10,7 +11,7 @@ try{
  await page.clock.install({time:new Date('2026-10-25T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-25T12:00:01Z'));
  await page.goto(`http://127.0.0.1:${server.address().port}/?e2e=1`);
  const antennas=await page.evaluate(async()=>{localStorage.clear();const e=window.__OHANA_E2E;e.setSeed(73);e.startWorld1('chispin');e.loadRoom('w1-chispin');return (await import('/systems/world1-rooms.js')).WORLD1_ROOMS['w1-chispin'].seal.stations;});
- const step=async n=>{await page.evaluate(n=>window.__OHANA_E2E.step(n),n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
+ const step=async n=>{await advanceTerrainControls(page,n);await page.clock.runFor(16);return page.evaluate(()=>window.__OHANA_E2E.state());};
  let s=await step(600),deaths=0,resumed=false,attacks=0,shortCircuitVerified=false;const forms=new Set([s.evo]),patterns=new Set();
  await page.locator('#game').focus();await fs.mkdir('test-results/v506',{recursive:true});
  for(let i=0;i<2200&&!s.world1.sealed;i++){

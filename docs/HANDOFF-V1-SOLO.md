@@ -418,3 +418,58 @@ https://gracianb.github.io/project-ohana/?release=510 sirve dieciséis archivos 
 con SHA256 igual al candidato, incluidos módulos nuevos, jefes, fondos y sw.js.
 Informe `/workspace/.cloud-setup/logs/ohana-v510-live-verification.json`.
 Siguiente tarea: integración final/campaña concatenada; no declarar V1 lista.
+
+
+## V511 · Diez salas: aspecto y recorrido · 25 de octubre de 2026
+
+El usuario rechaza la calidad de las diez salas y confirma explícitamente que
+fallan **tanto aspecto como recorrido**. Reabre las salas, incluida Kilo; no se
+replantea su repertorio. Workspace `/workspace/ohana-stitcho`, rama
+`feat/v511-ten-authored-rooms`, base `308fa40`. Siguiente: prueba humana de esta
+revisión y la integración final pendiente, no otra declaración de V1 lista.
+
+`systems/chapter-room-composition.js`: elimina la plantilla aleatoria MOTIFS;
+29 taludes de48–72px repartidos en las diez salas, suelo continuo sin pozos nuevos.
+Son colisiones reales que bloquean caminar: se atraviesan saltando o con movilidad.
+Perfiles reservan estaciones/talleres/lanzamientos y arena8260–9320 al suelo1134.
+Checkpoints y cristales siguen el suelo real. Los enemigos tienen sus pies sobre
+la superficie real. Objetivos, XP garantizada, IDs de estación y jefes conservados.
+
+Rutas opcionales por personaje: raíces, muelles, acueductos, setas lunares, terrazas
+prismáticas, perchas de forja, mesetas de fósiles, toldos, balcones y pasarelas.
+Alturas/anchuras/desniveles distintos; vigía opcional y20 secretos usando los IDs
+históricos secret-0/secret-1. No farmear premios de secretos ya guardados.
+`campaign-exploration.js` usa estas rutas y deja de insertar ocho repisas/lifts
+comunes al entrar a cada sala. No se materializan plataformas al final.
+
+`worlds/chapter-stagecraft.js`: diez materiales con bordes sobre colisiones reales,
+sombreado por capas, estratos/mampostería y detalles vegetales/mecánicos. Hitos
+escénicos: árboles de raíces, diques/grúas, conductores, sauce lunar, invernadero,
+forja, costillas fósiles, mercado, piazza y planetario. Pertenecen al fondo;
+los colliders son exclusivamente los del plano. Paisaje base de Kilo conservado.
+
+Correcciones necesarias por el nuevo relieve: criaturas de suelo se detienen y
+saltan contra bancos, sin enterrarse ni morir debajo. Al crecer conservan los pies
+y no se teletransportan al borde del suelo; prueba roja antes y verde después.
+Se limita esta adaptación a roomDef.composition para no alterar mapas históricos.
+Proyectiles salen del update al chocar contra terreno, sin golpear después de
+consumirse en la pared. Así el relieve sirve como cobertura real.
+
+Validación:1536 Node PASS; release gate321 módulos/371 recursos; auditoría Chromium
+PASS. Los diez pilotos físicos ganan sus cinco formas, objetivos, jefes, Continue
+y transiciones, sin inyectar posición/vida/XP/forma/victoria. Acceso directo a sala
+es fixture explícita. `authored-terrain-controls.mjs` ayuda al piloto manteniendo
+W ante un talud real: sólo teclado ordinario, no bypass de colisiones. Se conserva
+la prueba completa de habilidades de cada héroe. Evidencia logs ohana-v511-*-verified.
+
+`v511-room-traversal.mjs`: en las diez salas andar se detiene en el talud y saltar
+lo cruza; salto táctil sostenido por Input.dispatchTouchEvent de Chromium también
+lo cruza. `v511-ten-room-direction.mjs`:30 capturas de fixtures de forma/cámara,
+escritorio real separado del contexto móvil táctil, sin afirmar victorias por fotos.
+Capturas `test-results/v511/*-arrival.png`, `*-route.png`, `*-mobile.png`.
+
+No se declara aceptada la calidad subjetiva ni verificados los cien recuerdos.
+La matriz histórica de75min y sus pilotos anteriores a la campaña V501 no se
+han repetido/adaptado; no afirmar ese gate completo. Sigue pendiente el recorrido
+concatenado y cierre de Quimera, incluida la observación sobre su guardia de sellos
+indicada en V510. No habilitar multijugador por cerrar esta iteración de salas.

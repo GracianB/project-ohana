@@ -1,3 +1,4 @@
+import {composeChapterRoom} from './chapter-room-composition.js';
 import {KILO_CHAPTER_BOSS_ID,KILO_CHAPTER_ARENA} from './kilo-chapter.js';
 import {OHANA_PLACES} from "../worlds/ohana-environments.js";
 // OHANA V467 · MUNDO 1 · La Ruta de los Diez.
@@ -71,23 +72,12 @@ export const WORLD1_CHAPTER_PLANS=Object.freeze({
 function hash(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function rng(seed) { let s = seed >>> 0 || 1; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; }; }
 
-// Vocabulario de plataformas deliberadamente escaso: el suelo es el camino.
-// Cada sector tiene como mucho un motivo de 0–3 repisas bajas (80 px por escalón).
-const MOTIFS = Object.freeze([
-  [],
-  [[300, 1054, 260]],
-  [[220, 1054, 240], [560, 974, 240]],
-  [[260, 1054, 220], [600, 974, 220], [940, 1054, 220]]
-]);
-
 export function buildWorld1HeroRoom(hero) {
   const theme = WORLD1_THEMES[hero];
   if (!theme) throw new Error("Unknown World 1 hero: " + hero);
   const id = "w1-" + hero, idx = WORLD1_ORDER.indexOf(hero), r = rng(hash(id));
   const W = WORLD1_ROOM_W, sw = W / theme.sectors.length;
   const plats = [[0, WORLD1_FLOOR, W, 126]];
-  const motifPlan = [1, 2, 0, 3, 1, 0];
-  theme.sectors.forEach((_, i) => { for (const [dx, y, w] of MOTIFS[motifPlan[(i + idx) % motifPlan.length]]) plats.push([Math.round(i * sw + dx + r() * 120), y, w, 22]); });
   const sectors = theme.sectors.map((name, i) => ({ id: `${id}-${i}`, name, x: i * sw, w: sw, role: ["explore","combat","platform","secret","rest","explore"][i] }));
   const checkpoints = sectors.map((s, i) => ({ id: s.id, x: Math.round(s.x + (i ? 140 : 220)), y: WORLD1_FLOOR, sector: i }));
   // Pocos enemigos y legibles: dos por sector intermedio, con rol de campaña.
@@ -193,7 +183,7 @@ export function buildWorld1HeroRoom(hero) {
   }
   const prev = idx > 0 ? "w1-" + WORLD1_ORDER[idx - 1] : null;
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
-  return {
+  return composeChapterRoom(hero,{
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
     world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino',pizzaChapter:hero==='pizza',fritaChapter:hero==='frita',yomiChapter:hero==='yomi', growthChapter:['cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(hero)?hero:null,
@@ -203,7 +193,7 @@ export function buildWorld1HeroRoom(hero) {
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
-  };
+  });
 }
 
 // Las estaciones de cada sello se reparten por los sectores 1–4 para que la

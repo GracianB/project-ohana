@@ -35,6 +35,9 @@ export function triggerBiomeMechanism(g,m){
 }
 export function enterCampaignExploration(g){
  const r=g.roomDef;if(!r||r.boss){g.campaignExploration=null;return;}
+ if(r.world1&&r.composition){
+  g.campaignExploration={branches:(r.nooks||[]).map(b=>({...b,found:!!g.secrets?.[r.id]?.includes(b.id)})),shortcut:false,mechanisms:[]};return;
+ }
  const branches=(r.id==='hub'?[]:[1,3]).filter(i=>i<r.sectors.length).map((n,i)=>{
   const s=r.sectors[n],style=r.world1?r.explorationStyle:null,x=s.x+(style?.offset||620);
   for(let j=0;j<3;j++){
@@ -65,8 +68,8 @@ export function updateCampaignExploration(g){
    triggerBiomeMechanism(g,m);
  }
  for(const b of state.branches){
-  const pl=b.platform,old=pl.y;pl.y=b.baseY-Math.max(0,Math.sin(t*.012+b.phase))*220;
-  if(p.grounded&&p.x+p.w>pl.x&&p.x<pl.x+pl.w&&Math.abs(p.y+p.h-old)<3)p.y+=pl.y-old;
+  const pl=b.platform,old=pl?.y;if(pl)pl.y=b.baseY-Math.max(0,Math.sin(t*.012+b.phase))*220;
+  if(pl&&p.grounded&&p.x+p.w>pl.x&&p.x<pl.x+pl.w&&Math.abs(p.y+p.h-old)<3)p.y+=pl.y-old;
   g.secrets||={};const found=(g.secrets[r.id]||=[]);b.found=found.includes(b.id);
   if(!b.found&&Math.hypot(p.x+p.w/2-b.x,p.y+p.h/2-b.y)<55){
    found.push(b.id);b.found=true;g.score=(g.score||0)+450;p.xp=(p.xp||0)+18;g.nums?.add?.(b.x,b.y-30,'SECRETO · +450','#fff1a6',true);g.save?.();
@@ -97,7 +100,7 @@ export function drawCampaignExploration(ctx,g,cam,t){
   ctx.fillStyle='#edf3de';ctx.font='700 11px sans-serif';
   ctx.fillText(m.name,x,y-55);ctx.restore();
  }
- for(const b of s.branches){drawPlatformRail(ctx,b.platform,b.motion,cam);const x=b.x-cam.x,y=b.y-cam.y;if(b.found||x<-40||x>1600)continue;
+ for(const b of s.branches){if(b.platform)drawPlatformRail(ctx,b.platform,b.motion,cam);const x=b.x-cam.x,y=b.y-cam.y;if(b.found||x<-40||x>1600)continue;
   ctx.globalAlpha=1;ctx.fillStyle='#ffe7a7';ctx.strokeStyle='#49351f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y-17);ctx.lineTo(x+12,y);ctx.lineTo(x,y+17);ctx.lineTo(x-12,y);ctx.closePath();ctx.fill();ctx.stroke();
   ctx.fillStyle='#49351f';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('SECRETO · +18 XP',x,y-29);
   if(!g.reduceMotion){ctx.globalAlpha=.3;ctx.beginPath();ctx.arc(x,y,24+Math.sin(t*.07)*4,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;}

@@ -18,6 +18,8 @@ export function campaignRole(room,index){return CAMPAIGN_ROLES[(index+['beach','
 export function updateCampaignEnemy(e,g,hurt){
  if(!e.campaignRole)return false;
  if(e.invuln>0)e.invuln--;
+ // Growing creatures retain their support point when their hitbox changes.
+ if(g.roomDef?.composition&&e.grounded){const foot=e.y+e.h,support=(g.platforms||[]).find(pl=>e.x+e.w>pl.x&&e.x<pl.x+pl.w&&Math.abs(foot-pl.y)<14);if(support)e.y=support.y-e.h;}
  const p=g.player,role=e.campaignRole;if(!p||p.dead)return true;
  const dx=cx(p)-cx(e),dy=cy(p)-cy(e),dir=Math.sign(dx)||1,dist=Math.hypot(dx,dy),a=e._campaign||={age:0,wind:0,cd:40,active:0,aim:1};a.age++;
  e._guardBreak=Math.max(0,(e._guardBreak||0)-1);
@@ -63,7 +65,17 @@ export function updateCampaignEnemy(e,g,hurt){
  const flying=role==='flyer',oldFeet=e.y+e.h;
  if(flying){if(!a.active)e.vy=Math.max(-2,Math.min(2,(p.y-80-e.y)*.02));}
  else e.vy=Math.min(14,(e.vy||0)+.5);
- e.x+=e.vx||0;e.y+=e.vy||0;e.grounded=false;
+ // Raised chapter banks are real solids for creatures as well as the hero.
+ // Ground creatures stop at a face and can make a short hop; they never sink
+ // into a bank and die underneath the level.
+ let nextX=e.x+(e.vx||0);
+ if(!flying&&g.roomDef?.composition)for(const wall of g.platforms||[]){
+  if(wall.h<=40||oldFeet<=wall.y+2||e.y>=wall.y+wall.h||nextX+e.w<=wall.x||nextX>=wall.x+wall.w)continue;
+  nextX=e.x+e.w/2<wall.x+wall.w/2?wall.x-e.w:wall.x+wall.w;
+  if(e.grounded&&!a.wind&&!a.active&&!(e.sleep>0)&&!(e.stun>5)){e.vy=-9;e.grounded=false;}
+  e.vx=0;break;
+ }
+ e.x=nextX;e.y+=e.vy||0;e.grounded=false;
  if(!flying&&e.vy>=0)for(const floor of g.platforms)if(e.x+e.w>floor.x&&e.x<floor.x+floor.w&&oldFeet<=floor.y+2&&e.y+e.h>=floor.y){e.y=floor.y-e.h;e.vy=0;e.grounded=true;break;}
  const band=flying?e.roomPersona?.flightBand:null;
  if(band){e.y=Math.max(band.top,Math.min(band.bottom-e.h,e.y));if((e.y===band.top&&e.vy<0)||(e.y===band.bottom-e.h&&e.vy>0))e.vy=0;}

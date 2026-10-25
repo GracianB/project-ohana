@@ -1,3 +1,4 @@
+import {drawChapterSurface} from './chapter-stagecraft.js';
 import {drawNaturalLedge} from "./natural-ledges.js";
 
 function plate(ctx, x, y, w, h, r) {
@@ -93,6 +94,7 @@ export function drawPlatform(ctx, plat, world, cam, t) {
   const w = plat.w;
   const h = plat.h;
   if (!platformInView(x, w, drawingWidth(ctx))) return;
+  if(world.chapterHero&&drawChapterSurface(ctx,plat,world,cam,t))return;
   const id = world.id || "grove";
   const thin = h <= 24;
   if(plat._campaignLift){
