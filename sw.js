@@ -441,7 +441,7 @@ const PRECACHE_REVISIONS = {
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
   "systems/world1-cine.js": "9b1ccde90729338713b9eb211cb705115b7c2156",
-  "systems/world1-select.js": "422215a10f3ae08ccf5ce9271d96fc57911cc60b",
+  "systems/world1-select.js": "3e9661b5cd49fe5927ca0bec0dc7bb289f011e68",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
   "systems/world1-collect.js": "3d77514a27badc3c937c27b6d3531e002bc8b311",
   "systems/world1-boss.js": "8f48db5e251a748edbe3a70d1118678d0300d2b0",
