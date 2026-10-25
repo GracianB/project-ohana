@@ -23,7 +23,11 @@ try{
    const cine=page.locator('#evo-stage.show');
    if(!(await cine.count()))break;
    await cine.locator('.evo-skip').click();
-   await cine.waitFor({state:'hidden',timeout:20000});
+   // Playwright's virtual clock is paused in this suite. The Continue
+   // button marks the cinematic to close on an animation frame, so let
+   // that real renderer frame run before checking visibility.
+   for(let frames=0;frames<6&&await cine.count();frames++)await page.clock.runFor(350);
+   assert.equal(await cine.count(),0,'Continue must close the earned evolution cinematic');
   }
   return page.evaluate(()=>window.__OHANA_E2E.state());
  };
