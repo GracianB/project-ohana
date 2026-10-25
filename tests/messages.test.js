@@ -126,3 +126,21 @@ test("persistent objective recovers from a stale toast whose DOM was removed", (
   assert.match(root.children[0].children[1].textContent, /quedan 14 s/);
   assert.equal(root.attributes.get("aria-live"), "polite");
 });
+
+test("Pizza objective is restored after the player closes a higher-priority evolution toast", async () => {
+  const manager = new MessageManager({ documentRef: new FakeDocument() });
+  manager.setObjective("Cliente esperando · quedan 14 s");
+  assert.equal(manager.node.children[0].dataset.persistent, "1");
+  assert.equal(manager.show({
+    type: "evolution", title: "NUEVA FORMA · 2/5", text: "Hilo de queso",
+    key: "evolution:pizza:1", duration: 0,
+  }), true);
+  manager.setObjective("Cliente esperando · quedan 13 s");
+  assert.match(manager.node.children[0].className, /evolution/);
+  assert.equal(manager.node.children[0].dataset.persistent, undefined,
+    "the priority evolution toast must own the single visible slot");
+  manager.dismiss(); // equivalent to clicking the actual notification
+  await new Promise(resolve => setTimeout(resolve, 205));
+  assert.equal(manager.node.children[0].dataset.persistent, "1");
+  assert.match(manager.node.children[0].children[1].textContent, /quedan 13 s/);
+});
