@@ -22,6 +22,17 @@ test('a nearby living enemy blocks a note; corpses and distant enemies do not, a
  g.player.health-=5;updateWorld1(g);assert.equal(s.hold,0);assert.equal(s.done,false);
  for(let i=0;i<45;i++)updateWorld1(g);assert.equal(s.done,true);
 });
+test('V2: a distant patrol cannot silently block the flower ritual',()=>{
+ const g=fixture(),s=g.world1.stations[0];
+ // The old 270px invisible exclusion zone blocked a perfectly safe note.
+ g.enemies=[{x:s.x-220,y:s.y-40,w:40,h:40,hp:100}];
+ note(g,0);
+ assert.equal(s.done,true);
+ const near=fixture(),n=near.world1.stations[0];
+ near.enemies=[{x:n.x-85,y:n.y-40,w:40,h:40,hp:100}];
+ assert.equal(note(near,0).done,false);
+});
+
 test('restored notes recover earned XP floors without paying score; old earned seals remain valid',()=>{
  const g=fixture();note(g,0);g.player.xp=0;const score=g.score;enterWorld1(g);
  assert.equal(g.player.xp,55);assert.equal(g.score,score);assert.equal(g.world1.stations[0].done,true);
