@@ -267,6 +267,7 @@ export function world1DoorOpen(fromId, dir, state = {}) {
   if (dir === "left") return !(room.fusionBoss && state.bossActive);
   if (dir !== "right") return true;
   if (room.fusionBoss) return !!state.won;
+  if(room.hero===WORLD1_ORDER.at(-1))return world1SealsComplete([...seals]);
   return seals.has(room.hero);
 }
 export function world1SealsComplete(seals = []) { const s = new Set(seals); return WORLD1_ORDER.every((h) => s.has(h)); }

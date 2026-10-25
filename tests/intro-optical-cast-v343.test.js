@@ -21,8 +21,8 @@ test("Opening optical V343: complete ten-hero cast, no aliases or duplicate posi
       assert.deepEqual(spots.map(s=>s.row),[0,0,0,0,0,1,1,1,1,1]);
       assert.ok(spots[0].foot<spots[5].foot,"mobile needs two distinct rows");
     }else{
-      assert.ok(spots.every(s=>s.row===0));
-      assert.ok(spots.every(s=>s.foot===720));
+      assert.equal(new Set(spots.map(s=>s.row)).size,2);
+      assert.ok(spots[0].foot<spots[5].foot,"desktop cast has two interacting depths");
     }
   }
 });

@@ -14,7 +14,7 @@ const visible=(x,w,pad=260)=>x>=-pad&&x<=w+pad;
 const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
 export const DRAGON_CALDERA_PALETTE=Object.freeze({
- skyTop:'#06030f',skyMid:'#1b0b2a',skyLow:'#3d1024',horizon:'#7a1e16',
+ skyTop:'#342543',skyMid:'#724256',skyLow:'#c77b65',horizon:'#f2bc87',
  star:'#fff1d6',moon:'#ffd9a8',volcano:'#170812',lava:'#ff5a1e',lavaHot:'#ffd166',
  spire:'#12060f',spireRim:'#6e2a5e',ash:'#4a3346'
 });

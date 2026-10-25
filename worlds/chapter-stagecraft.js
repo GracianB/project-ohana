@@ -2,7 +2,7 @@
 // All painted surfaces use the actual collision rectangle supplied by the room.
 const TAU=Math.PI*2;
 const P={
- kilo:['#637d5e','#c4c99b','#344f44','#a2b88a'],stitcho:['#718a8d','#dbc6a3','#395b65','#afc7c5'],chispin:['#a4b9c1','#ece7cc','#658493','#d3dedd'],cat:['#a49ab5','#e7d8e8','#716887','#c9b9d5'],cuerno:['#92aa8a','#e4e4b9','#5e7d71','#bdcfa4'],dragon:['#927f78','#dfbc94','#5c555c','#c89b7b'],dino:['#8d9e82','#d7d9b4','#5c7669','#b8c4a2'],frita:['#8d8393','#edcba1','#565d75','#bba6af'],pizza:['#b28e78','#efcf9f','#826459','#d9b399'],yomi:['#8aa6b1','#dae9df','#506f82','#b3ccd0']
+ kilo:['#416b55','#cbe4a0','#344f44','#a2b88a'],stitcho:['#456f82','#f3d2a1','#395b65','#afc7c5'],chispin:['#597d9e','#fff0bc','#658493','#d3dedd'],cat:['#73608f','#f3d6eb','#716887','#c9b9d5'],cuerno:['#527e71','#ecedb3','#5e7d71','#bdcfa4'],dragon:['#70505b','#f0bc86','#5c555c','#c89b7b'],dino:['#54785f','#e3ddb1','#5c7669','#b8c4a2'],frita:['#665772','#f8d295','#565d75','#bba6af'],pizza:['#97624f','#ffe1a0','#826459','#d9b399'],yomi:['#456f8c','#d0f3e6','#506f82','#b3ccd0']
 };
 const ellipse=(c,x,y,rx,ry,col,a=0)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,a,0,TAU);c.fill();};
 const stroke=(c,col,w,fn)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();fn();c.stroke();};

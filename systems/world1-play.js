@@ -287,6 +287,7 @@ export function world1CanLeave(g, dir) { return world1DoorOpen(g.roomId, dir, wo
 export function world1LockedMessage(g) {
   const r = WORLD1_ROOMS[g.roomId]; if (!r) return "";
   if (r.fusionBoss) return "La Quimera bloquea el camino.";
+  if(r.hero===WORLD1_ORDER.at(-1)&&g.world1Seals?.includes(r.hero)&&!world1SealsComplete(g.world1Seals)){const missing=WORLD1_ORDER.filter(id=>!g.world1Seals?.includes(id));return "El Corazón de Ohana necesita los diez sellos. Faltan: "+missing.map(heroName).join(", ")+".";}
   const seal = WORLD1_SEALS[r.seal.kind];
   const progress = world1Snapshot(g), next = world1NextObjective(g);
   return "Sello de " + heroName(r.hero) + " · " + (progress ? progress.done + "/" + progress.total + " completados. " : "")

@@ -70,7 +70,7 @@ test("V360 authentic clothes, ponytail, baby pacifier, F3 staff and F4 angel win
  assert.match(art,/if \(f === 0\) \{/);
  assert.match(art,/if \(f === 2\) \{/);
  assert.match(art,/if \(f === 4\) hemY/);
- assert.match(art,/if \(f === 3\) cape\(ctx/);
+ assert.doesNotMatch(art,/if \(f === 3\) cape\(ctx/,"fourth form no longer hides behind a cape");
  assert.match(art,/if \(f === 3\) \{\s*const hb/);
  assert.match(art,/if \(f === 4 && !dead\) wings/);
  assert.match(art,/r\.paci = false/);

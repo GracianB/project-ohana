@@ -3,24 +3,24 @@
   "updated_on": "2026-10-25",
   "scope": "single_player_v1",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v511-ten-authored-rooms",
-  "base_commit": "308fa40",
-  "published": true,
+  "branch": "feat/v512-hero-identity-and-v1-review",
+  "base_commit": "ecd4699",
+  "published": false,
   "campaign_complete_verified": false,
   "v1_ready": false,
-  "next_task": "rooms.human_playtest_and_final_integration",
+  "next_task": "final_review.room_and_hero_quality",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1536,
-    "runtime_modules": 321,
-    "precache_resources": 371,
-    "source": "V511 ten complete physical chapter pilots, real bank traversal and touch jump, 30 presentation fixtures, browser audit and unit suite",
+    "node_passed": 1540,
+    "runtime_modules": 323,
+    "precache_resources": 373,
+    "source": "V512 foundation: 10 physical chapter pilots; 100 optical size checks; 50-form sheet; 10 eight-second companions; general browser audit. Art acceptance and full campaign remain pending.",
     "local_browser_audit": "passed",
     "local_kilo_physical_pilot": "passed",
-    "remote_ci_current_candidate": "pages verify-release and deploy passed: 40189221098",
-    "published_url_current_candidate": "9 changed runtime assets SHA256 matched live V511",
+    "remote_ci_current_candidate": "not yet published",
+    "published_url_current_candidate": "pending",
     "local_three_chapter_physical_pilots": "passed_V511",
     "local_three_realm_mobile": "presentation_passed_V511",
     "local_dino_physical_pilot": "passed_V511",
@@ -191,10 +191,11 @@
     "plan_implemented": false,
     "requires": "ten earned seals",
     "relay_mechanic": "deferred_after_v1",
-    "victory_epilogue_menu_full_run": "pending"
+    "victory_epilogue_menu_full_run": "pending",
+    "entry_gate": "ten_seals_required_at_door_and_spawn"
   },
   "release_gates": {
-    "ten_integrated_chapters": "pending",
+    "ten_integrated_chapters": "physical_pilots_passed_not_full_campaign",
     "full_clean_save_campaign": "pending",
     "save_death_resume_migration_matrix": "pending",
     "all_offered_memories_reachable": "pending",
@@ -212,34 +213,55 @@
   ],
   "open_tasks": [
     {
-      "id": "chapter.stitcho",
+      "id": "rooms.art_and_routes",
       "priority": 1,
-      "packet": "docs/V1-SOLO-ESTRATEGIA.md#siguiente-paquete-ejecutable-stitcho",
-      "status": "ready_for_local_implementation"
+      "status": "pending_deeper_authored_review_of_all_ten"
     },
     {
-      "id": "kilo.acceptance",
+      "id": "heroes.yomi_and_anatomical_animation",
       "priority": 1,
-      "status": "pending_human_review_and_collection_audit"
+      "status": "pending"
     },
     {
-      "id": "finale.entry",
+      "id": "enemies.design_and_normal_balance",
+      "priority": 1,
+      "status": "pending_human_and_instrumented_review"
+    },
+    {
+      "id": "selection.living_stage",
       "priority": 2,
-      "status": "planned_not_implemented"
+      "status": "palette_and_scale_fixed_staging_pending"
     },
     {
       "id": "campaign.full_run",
+      "priority": 2,
+      "status": "pending_continuous_run_and_quimera"
+    },
+    {
+      "id": "collection.reachability",
+      "priority": 2,
+      "status": "pending"
+    },
+    {
+      "id": "v1.human_acceptance",
       "priority": 3,
-      "status": "blocked_by_chapter_integration"
+      "status": "pending"
     }
   ],
-  "evidence_storage": "Test sources are versioned; test-results and logs are generated locally and included in the delivery ZIP.",
+  "evidence_storage": "Tests are versioned; generated evidence is in test-results/v512 and /workspace/.cloud-setup/logs/ohana-v512-*.log. No new delivery ZIP claimed.",
   "published_release": {
-    "version": "ohana-505",
-    "commit": "466cbe8",
-    "url": "https://gracianb.github.io/project-ohana/",
+    "version": "ohana-511",
+    "commit": "21fa9c9",
+    "url": "https://gracianb.github.io/project-ohana/?release=511",
     "verified": true
   },
   "published_commit": "21fa9c9",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=511"
+  "published_url": "https://gracianb.github.io/project-ohana/?release=511",
+  "candidate_version": "ohana-512",
+  "review": "docs/V1-FINAL-REVIEW.md",
+  "previous_verified_publication": {
+    "version": "ohana-511",
+    "commit": "21fa9c9",
+    "url": "https://gracianb.github.io/project-ohana/?release=511"
+  }
 }

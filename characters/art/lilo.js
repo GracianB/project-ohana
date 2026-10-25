@@ -604,7 +604,7 @@ const OUTFIT = [
   { print: "#ffffff", print2: "#ffd23f", leaf: "#ff8fab", trim: "#ffffff" },
   { print: "#ffffff", print2: "#ffd0c8", leaf: "#c8382f", trim: "#ffffff", sash: "#ffd23f" },
   { print: "#fff3f6", print2: "#ffd23f", leaf: "#c94a63", trim: "#ffd23f", tapa: "#7a2a3a" },
-  { print: "#ffe7a0", print2: "#ffffff", leaf: "#9e2534", trim: "#ffc53d", pareo: "#2fa59a", pareoLight: "#5cc8b8", pareoPrint: "#e8fff6" },
+  { print: "#ffe7a0", print2: "#ffffff", leaf: "#9e2534", trim: "#ffc53d", pareo: "#b44457", pareoLight: "#df7783", pareoPrint: "#fff1db" },
   { print: "#c5e9d8", print2: "#ffffff", leaf: "#67b99d", trim: "#e1d4aa", sash: "#9edbc2", petals: ["#ffffff", "#d5f3e8", "#fff7d8"] },
 ];
 function printFlower(ctx, x, y, s, rot) {
@@ -776,11 +776,13 @@ function torso(ctx, R, pose, f, d, r) {
 // colores planos). Los pétalos laten con la música y se abren en la intro.
 const SUN_PETAL = ["#ffd23f", "#ff9a3d"];
 function wings(ctx,R,pose,sy){
- const t=pose.reduceMotion?0:pose.t,cx=-1,cy=sy-30;ctx.save();
- ctx.globalAlpha=.18;ctx.fillStyle='#e7fff3';ctx.beginPath();ctx.arc(cx,cy,47,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
- for(const [r,col,w] of [[39,'#fffef0',2.6],[44,'#a3ddc5',1.3]]){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();}
- for(let i=0;i<8;i++){const a=i*Math.PI/4+t*.003;ctx.save();ctx.translate(cx+Math.cos(a)*43,cy+Math.sin(a)*43);ctx.rotate(a+.8);R.ellipse(ctx,0,0,3.2,7.5,i%2?'#d8f5e8':'#ffffff',{lw:1,shade:false});ctx.restore();}
- for(let i=0;i<5;i++){const a=i*1.7+t*.008;R.ellipse(ctx,cx+Math.cos(a)*51,cy+Math.sin(a)*42,1.5,1.5,'#fffce5',{line:false,shade:false});}ctx.restore();
+ // A single halo above the head, separate from hair and shoulders.
+ const cy=sy-59,breath=pose.reduceMotion?0:Math.sin(pose.t*.035)*1.2;
+ ctx.save();ctx.lineCap='round';ctx.strokeStyle='#c69e55';ctx.lineWidth=4;
+ ctx.beginPath();ctx.ellipse(0,cy+breath,19,5,-.06,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle='#fff9d9';ctx.lineWidth=2;
+ ctx.beginPath();ctx.ellipse(0,cy+breath,19,5,-.06,0,Math.PI*2);ctx.stroke();
+ ctx.restore();
 }
 
 function cape(ctx, R, pose, d, r) {
@@ -943,7 +945,7 @@ function draw(ctx, pose, R) {
   ctx.save();
   bodyT();
   if (f === 4 && !dead) wings(ctx, R, pose, sy);
-  if (f === 3) cape(ctx, R, pose, d, r);
+  // Super Kilo keeps a clean silhouette: the wrap carries the motion, without a second cape.
   if (r.fx === "summon" && f >= 1) glowOrb(ctx, R, 0, sy - d.hr * 2 - 6, 12, t, "#fff0c0");
   ctx.save(); headT(); ponytail(ctx, R, pose, f, d.hr, r); ctx.restore();
   if (r.uke === "back") uke(ctx, R, -21, sy + d.th * 0.7, -Math.PI / 2 - 0.55 + pose.sway * 0.1, 13 + f, f === 4);

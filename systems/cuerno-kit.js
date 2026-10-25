@@ -19,7 +19,7 @@ const FORM_TINT = Object.freeze(["#ffe0f4", "#f2c1ff", "#c9b6ff", "#9ad7ff", "#2
 
 // Definición del kit (frames a 60 Hz). warn = frames de aviso antes de golpear.
 export const CUERNO_KIT = Object.freeze({
-  J: Object.freeze({ id: "lanza", name: "Lanza astral", warn: 10, active: 14, cd: 29 }),
+  J: Object.freeze({ id: "lanza", name: "Onda arcoíris", warn: 10, active: 14, cd: 29 }),
   K: Object.freeze({ id: "cornada", name: "Prrrf arcoíris", warn: 16, active: 16, cd: 96 }),
   L: Object.freeze({ id: "estampida", name: "Estampida arcoíris", warn: 30, active: 40, cd: 336 }),
   F: Object.freeze({ id: "sueno", name: "Sueño", warn: 26, active: 20, cd: 420 }),
@@ -278,9 +278,17 @@ export function drawCuerno(ctx, p, cam = { x: 0, y: 0 }, t = 0) {
         const origin=CuernoArt.cuernoHornOrigin(cxOf(p),p.y+p.h,{form:a.form,facing:a.face,scale:CUERNO_VISUAL_H[a.form-1]/100*(p.visualScale||1)});
         for(const lance of a.lances||[{sl:0}]){
           const tip=a.x+a.face*w,ty=a.y+lance.sl*w;
-          ctx.strokeStyle="#c8b3f3";ctx.lineWidth=a.key==="M"?5:8;ctx.beginPath();ctx.moveTo(origin.x,origin.y);ctx.quadraticCurveTo(a.x+a.face*w*.4,a.y,tip,ty);ctx.stroke();
-          ctx.strokeStyle="#fff6d3";ctx.lineWidth=2;ctx.stroke();
-          ctx.fillStyle="#fff1ad";ctx.beginPath();ctx.moveTo(tip+a.face*9,ty);ctx.lineTo(tip-a.face*4,ty-6);ctx.lineTo(tip-a.face*4,ty+6);ctx.closePath();ctx.fill();
+          if(a.key==="J"){
+           for(let band=0;band<7;band++){
+            const offset=(band-3)*2.6;
+            ctx.strokeStyle=COLORS[band];ctx.lineWidth=2.7;ctx.beginPath();
+            ctx.moveTo(origin.x,origin.y+offset*.3);
+            ctx.bezierCurveTo(a.x+a.face*w*.25,a.y-14+offset,a.x+a.face*w*.7,ty-12+offset,tip,ty+offset);ctx.stroke();
+           }
+           ctx.strokeStyle='#fff6df';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(tip,ty,5,11,0,-Math.PI/2,Math.PI/2);ctx.stroke();
+          }else{
+           ctx.strokeStyle="#fff6d3";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(origin.x,origin.y);ctx.quadraticCurveTo(a.x+a.face*w*.4,a.y,tip,ty);ctx.stroke();
+          }
         }
         ctx.restore();continue;
       }

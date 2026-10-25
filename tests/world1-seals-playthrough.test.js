@@ -38,7 +38,7 @@ function assertSealed(run, hero) {
   assert.equal(world1Snapshot(game).done, total, hero + " completed stations");
   assert.equal(world1Snapshot(game).sealed, true, hero + " seal state");
   assert.deepEqual(game.world1Seals, [hero], hero + " global seal inventory");
-  assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
+  assert.equal(world1CanLeave(game, "right"), hero!==WORLD1_ORDER.at(-1), hero + " respects the final ten-seal gate");
   assert.equal(game.score, 150 * (total+(['stitcho','cuerno'].includes(hero)?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
   assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(hero)?423:3, hero + " rewards experience");
@@ -57,11 +57,13 @@ test("World 1: exactly ten distinct seal mechanics, stations, and east gates", (
     kinds.add(room.seal.kind);
     assert.equal(room.seal.stations.filter((s) => s.kind !== "oven").length, WORLD1_SEALS[room.seal.kind].count);
     assert.equal(world1DoorOpen(room.id, "right", { seals: [] }), false);
-    assert.equal(world1DoorOpen(room.id, "right", { seals: [hero] }), true);
+    assert.equal(world1DoorOpen(room.id, "right", { seals: [hero] }), hero!==WORLD1_ORDER.at(-1));
   }
   assert.equal(kinds.size, 10);
   assert.equal(world1SealsComplete(WORLD1_ORDER.slice(0, 9)), false);
   assert.equal(world1SealsComplete(WORLD1_ORDER), true);
+  assert.equal(world1DoorOpen("w1-yomi", "right", {seals:WORLD1_ORDER}),true);
+  for(const missing of WORLD1_ORDER)assert.equal(world1DoorOpen("w1-yomi", "right",{seals:WORLD1_ORDER.filter(id=>id!==missing)}),false,"missing "+missing);
   assert.equal(world1DoorOpen("w1-final", "right", { won: false }), false);
   assert.equal(world1DoorOpen("w1-final", "right", { won: true }), true);
 });

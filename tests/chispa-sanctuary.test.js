@@ -38,11 +38,11 @@ test('Recasting replaces the sanctuary instead of stacking autonomous damage',()
  assert.equal(useAbility(g,2),true);updateAbilityFx(g);
  assert.equal(g.chispinAbilityFx.filter(f=>f.kind==='storm').length,1);clearAbilityFx();
 });
-test('Surprise Chispa performs for six seconds but cannot strike after frame 90',()=>{
+test('Surprise Chispa performs for eight seconds but cannot strike after frame 90',()=>{
  const g=fixture();g.player.id='stitcho';g.player.uSurprise=true;
  startStitchoDuet(g);let hits=0;const hit=()=>{hits++;return true;};
  for(let i=0;i<102;i++)updateStitchoDuet(g,hit);const before=hits;
- for(let i=102;i<359;i++)updateStitchoDuet(g,hit);
+ for(let i=102;i<479;i++)updateStitchoDuet(g,hit);
  assert.equal(hits,before);assert.ok(readStitchoDuet(g._stitchoDuet));
  const peer={roomId:'hub'};assert.ok(applyPeerEffects(peer,capturePeerEffects(g,1,'chispa')));
  advancePeerEffects(peer);assert.equal(peer.coopPeerEffects.stitchoDuet,null);

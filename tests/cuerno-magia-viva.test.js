@@ -62,7 +62,7 @@ for(let form=0;form<5;form++){
 });
 test("V67 Aurora's face and wings respond to dream, without dead-state spell residue",()=>{
 const u=paint(4,3),quiet=paint(4,-1);
-assert.ok(u.eyes.includes("closed"),"Aurora U must close her eye");
+assert.ok(u.eyes.includes("normal"),"Aurora keeps her eye readable during U");
 assert.ok(quiet.eyes.includes("normal"),"resting Aurora must remain awake");
 const persisted=paint(4,-1,{cuernoDreamT:.9});
 assert.ok(persisted.quadratics>quiet.quadratics,"sleep aura stopped before duration");

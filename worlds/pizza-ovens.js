@@ -94,6 +94,14 @@ export function drawPizzaOvensBackdrop(ctx, cam, t, viewportW, viewportH, reduce
   ctx.fillStyle=b===1?P.tomato:P.sail;ctx.beginPath();ctx.moveTo(bx,by-26);ctx.lineTo(bx+14,by-2);ctx.lineTo(bx,by-2);ctx.closePath();ctx.fill();}
  // 4 · pastel harbour houses with shutters & tricolore laundry
  const hb=h*.74,span=w+240,off=wrap(-cx*.18,span);
+ // The town stands on a stone quay; water ends at its retaining wall.
+ ctx.fillStyle='#5f4858';ctx.fillRect(0,hb-7,w,h-hb+7);
+ ctx.fillStyle='#d8b99a';ctx.fillRect(0,hb-7,w,9);
+ ctx.strokeStyle='#846779';ctx.lineWidth=2;
+ for(let row=0;row<4;row++)for(let col=-1;col<w/80+1;col++){
+  const bx=col*80+(row%2)*40;ctx.strokeRect(bx,hb+6+row*22,80,22);
+ }
+ ctx.fillStyle='#f9dbac';ctx.fillRect(0,hb-11,w,4);
  for(let i=0;i<9;i++){const x=wrap(i*130+off,span)-120,hh=90+hash(i+40)*80,ww=84+hash(i+50)*40;
   _house(ctx,x,hb,ww,hh,i,.55);
   if(i%2===0){ctx.strokeStyle='#5a4040';ctx.lineWidth=1;const ly=hb-hh*.55;ctx.beginPath();ctx.moveTo(x+ww,ly);ctx.quadraticCurveTo(x+ww+23,ly+10,x+ww+46,ly);ctx.stroke();

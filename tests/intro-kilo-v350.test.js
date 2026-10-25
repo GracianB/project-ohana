@@ -106,7 +106,7 @@ test("V350 Kilo uses real lilo.js inverse-kinematics and preserves six prior her
  assert.match(art,/r\.handF\[0\]\+=listen/);
  assert.match(art,/r\.handB\[0\]-=listen/);
  assert.match(art,/r\.uke="play"/);
- assert.ok(art.includes("#e7fff3"),"nature spirit halo replaces the old yellow flower fan");
+ assert.ok(art.includes("#fff9d9"),"nature spirit halo replaces the old yellow flower fan");
  assert.match(intro,/kiloWelcomeBeat\(loop,reduce\)/);
  assert.match(intro,/kiloWelcome:kiloBeat/);
  assert.match(intro,/drawKiloWelcomeFX\(ctx,kilo\.x,kilo\.foot/);

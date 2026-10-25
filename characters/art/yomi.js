@@ -385,14 +385,21 @@ function drawSatellites(ctx,F,t,front,reduced,glow,accent,cast,acting){
 }
 
 function drawRingHalf(ctx,F,front,t,glow,reduced){
- // F4: tilted planetary ring around the gown, split for real depth.
- const y=F.hy+F.hh/2+30,rx=52,ry=12.5;
- ctx.save();ctx.translate(0,y);ctx.rotate(-.16);
- const a0=front?0:Math.PI,a1=front?Math.PI:TAU;
- line(ctx,LINE,5.2);ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,a0,a1);ctx.stroke();
- line(ctx,GOLD,3);ctx.stroke();
- line(ctx,glow,1.1);ctx.beginPath();ctx.ellipse(0,0,rx-5,ry-2.4,0,a0,a1);ctx.stroke();
- for(let i=0;i<3;i++){const a=(reduced?i*2.1:t*.02+i*2.1)%TAU;const s=Math.sin(a);if((s>=0)!==front)continue;ellipse(ctx,Math.cos(a)*rx,s*ry,2.6,2.6,i===1?"#fff6d8":glow);}
+ // Ten folded memory birds, one family colour each. They circle behind
+ // and in front of the gown, with wing hinges rather than particle dots.
+ const y=F.hy+F.hh/2+30;
+ ctx.save();
+ for(let i=0;i<10;i++){
+  const a=(reduced?0:t*.008)+i*TAU/10,depth=Math.sin(a);
+  if((depth>=0)!==front)continue;
+  const x=Math.cos(a)*52,yy=y+depth*12,flap=reduced?.4:Math.sin(t*.09+i*.9)*.6;
+  ctx.save();ctx.translate(x,yy);ctx.scale(.85+depth*.1,.85+depth*.1);
+  ctx.fillStyle=YOMI_FAMILY_STARS[i];ctx.strokeStyle=LINE;ctx.lineWidth=.9;
+  for(const side of [-1,1]){
+   ctx.beginPath();ctx.moveTo(0,1);ctx.lineTo(side*10,-6-flap*5);ctx.lineTo(side*6,3);ctx.lineTo(0,4);ctx.closePath();ctx.fill();ctx.stroke();
+  }
+  ctx.fillStyle='#fff8df';ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(3,2);ctx.lineTo(0,7);ctx.lineTo(-2,2);ctx.closePath();ctx.fill();ctx.restore();
+ }
  ctx.restore();
 }
 

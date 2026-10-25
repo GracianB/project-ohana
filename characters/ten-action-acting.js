@@ -68,6 +68,16 @@ export function tenActionPose(pose={},id='cat',form=0){
    q.ear=-.22;q.tail=.35+s*.43;q.paw=1.24;q.wing=.8;
    q.glow=.7+.2*b;break;
  }
+ // Anatomy-aware weight transfer: broad ground bodies plant their stride,
+ // flyers open the wings in descent, elastic food characters spring back.
+ if(state==='run'){
+  if(id==='dino'){q.dy=-Math.abs(step)*1.25;q.rotation=-step*.018;q.paw=step*1.15;}
+  else if(id==='cuerno'){q.dy=-Math.max(0,step)*3.1;q.rotation=-.035+step*.018;q.paw=step*1.1;}
+  else if(id==='yomi'){q.dy=s*1.3;q.rotation=-.065;q.paw=step*.35;}
+ }
+ if(state==='fall'&&(id==='dragon'||id==='cuerno')){q.wing=1;q.sx=1.025;q.sy=.98;q.rotation=.025;}
+ if(state==='hurt'&&id==='dino'){q.dx=-1.5;q.rotation=-.055;q.sy=.92;}
+ if(state==='jump'&&(id==='pizza'||id==='frita')){q.sx=.92;q.sy=1.12;q.tail=.7;}
  q.dy*=mod;q.dx*=mod;
  return q;
 }

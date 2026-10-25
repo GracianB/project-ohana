@@ -1,3 +1,4 @@
+export const surpriseDuetTicks=s=>s?.surprise===true?480:120;
 // OHANA V315 · Each of ten allies arrives, lends L and departs differently.
 // Shared authoritative footprints ensure warning artwork and hit testing
 // describe exactly the same area, without changing the old attack geometry.
@@ -65,7 +66,7 @@ export function readGuestOrigin(s){
 export function guestPerformance(s,ally,reduced=false){
  const identity=GUEST_ACTING[ally];
  if(!identity||!s||!finite(s.x)||!finite(s.y)||
-  !Number.isInteger(s.age)||s.age<0||s.age>=(s.surprise===true?360:120)||
+  !Number.isInteger(s.age)||s.age<0||s.age>=surpriseDuetTicks(s)||
   ![-1,1].includes(s.facing))return null;
  const origin=readGuestOrigin(s);if(origin===null)return null;
  const originX=origin.originX??s.x,originY=origin.originY??s.y;
@@ -129,13 +130,13 @@ export function guestPerformance(s,ally,reduced=false){
  const size=(.59+arrive*.13+e*.017+(rank-1)*.012)*(ally==='chispin'?1.16:1);
  if(s.surprise===true&&age>=102){
   // The combat beats finish at frame 90. This encore is visual acting only.
-  const k=clamp((age-102)/198,0,1),farewell=clamp((age-300)/60,0,1);
+  const k=clamp((age-102)/318,0,1),farewell=clamp((age-420)/60,0,1);
   const play=reduced?0:Math.sin(k*TAU);
   return Object.freeze({ally,style:identity.style,gesture:farewell?'wave':identity.gesture,
-   phase:farewell?'farewell':'encore',x:originX+f*(180+play*110+farewell*300),
-   y:originY-identity.height-(reduced?0:Math.abs(Math.sin(k*TAU*2))*36),
+   phase:farewell?'farewell':'encore',x:s.x+f*(78+play*10+farewell*80),
+   y:s.y,
    facing:farewell?f:-f,pose:farewell?'victory':k<.45?'jump':'victory',
-   vx:0,vy:0,grounded:identity.height<20,visualScale:size,rank,impact:false,
+   vx:0,vy:0,grounded:true,visualScale:size,rank,impact:false,
    arrival:1,exit:farewell});
  }
  return Object.freeze({
@@ -197,24 +198,24 @@ export function surpriseGuestDrawer(drawActor,s,cam,reduced=false){
     const width=(ctx.canvas?.width||1280)/Math.abs(scale),height=(ctx.canvas?.height||720)/Math.abs(scale);
     const startX=clamp(actor.x+actor.w/2-cam.x,48,Math.max(48,width-48));
     const startY=clamp(actor.y+actor.h-cam.y,160,Math.max(160,height-100));
-    const k=clamp((age-102)/198,0,1),blend=clamp((age-102)/30,0,1);
+    const k=clamp((age-102)/318,0,1),blend=clamp((age-102)/30,0,1);
     const smooth=blend*blend*(3-2*blend);
     // A playful lap of the viewport: arrive, bounce off an edge, take a bow.
     // Screen acting never supplies combat coordinates or a second hitbox.
-    const edge=width/2+Math.sin(k*TAU)*Math.max(0,width/2-65);
-    const floor=height*.68-(reduced?0:Math.abs(Math.sin(k*TAU*2))*height*.16);
+    const edge=clamp(s.x-cam.x+s.facing*(78+Math.sin(k*TAU)*10),48,Math.max(48,width-48));
+    const floor=clamp(s.y-cam.y,160,Math.max(160,height-80));
     const px=reduced?startX:startX+(edge-startX)*smooth;
     const py=reduced?startY:startY+(floor-startY)*smooth;
     const guest={...actor,x:cam.x+px-actor.w/2,y:cam.y+py-actor.h};
     if(actor.id==='chispin'){
      ctx.save();ctx.strokeStyle='#e6cf88';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(px,py+3,34,8,0,0,TAU);ctx.stroke();
-     if(!reduced&&age<300)for(let i=0;i<3;i++){const dx=(i-1)*24,dy=-42-Math.sin(age*.05+i)*8;ctx.strokeStyle=i%2?'#ffffff':'#b8efff';ctx.beginPath();ctx.moveTo(px+dx,py+dy-15);ctx.lineTo(px+dx-5,py+dy);ctx.lineTo(px+dx+3,py+dy-2);ctx.lineTo(px+dx-2,py+dy+11);ctx.stroke();}
+     if(!reduced&&age<420)for(let i=0;i<3;i++){const dx=(i-1)*24,dy=-42-Math.sin(age*.05+i)*8;ctx.strokeStyle=i%2?'#ffffff':'#b8efff';ctx.beginPath();ctx.moveTo(px+dx,py+dy-15);ctx.lineTo(px+dx-5,py+dy);ctx.lineTo(px+dx+3,py+dy-2);ctx.lineTo(px+dx-2,py+dy+11);ctx.stroke();}
      ctx.restore();
     }
     drawActor(ctx,guest,...args.slice(2));
     ctx.fillStyle='#fff2ce';ctx.strokeStyle='#173c40';ctx.lineWidth=4;
     ctx.font='600 13px Fredoka, sans-serif';ctx.textAlign='center';
-    const text=actor.id==='chispin'?(age>=300?'Namasté. ¡No toques el rayo!':age<200?'He desenchufado el cielo.':'Tranquilo. Era mi calentamiento.'):(age>=300?'¡Hasta la próxima!':age<200?'¡Yo también juego!':'¿Has visto mi L?');
+    const text=actor.id==='chispin'?(age>=420?'Namasté. ¡No toques el rayo!':age<200?'He desenchufado el cielo.':'Tranquilo. Era mi calentamiento.'):(age>=420?'¡Hasta la próxima!':age<200?'¡Yo también juego!':'¿Has visto mi L?');
     ctx.strokeText(text,px,py-92);ctx.fillText(text,px,py-92);
    }else drawActor(...args);
    ctx.restore();

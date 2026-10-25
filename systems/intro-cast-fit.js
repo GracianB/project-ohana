@@ -10,13 +10,13 @@ export function welcomeCastSpot(id, width, floor, heroHeight) {
   const index = WELCOME_CAST_ORDER.indexOf(id);
   if (index < 0 || ![width, floor, heroHeight].every(Number.isFinite) || width <= 0) return null;
   const compact = width < 760;
-  const columns = compact ? 5 : 10;
+  const columns = 5;
   const column = index % columns;
   const row = Math.floor(index / columns);
   return Object.freeze({
-    x: width * (column + .5) / columns,
-    foot: floor - (compact && row === 0 ? heroHeight * 1.42 : 0),
-    slotWidth: width / columns,
+    x: width * (column + .5 + (!compact&&row===1?.10:0)) / columns,
+    foot: floor - (row === 0 ? heroHeight * 1.42 : !compact?(column%2)*heroHeight*.12:0),
+    slotWidth: width / columns * (compact?1:.82),
     column, row, compact
   });
 }

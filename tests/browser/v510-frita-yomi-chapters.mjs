@@ -56,7 +56,7 @@ try{
  await phone.clock.runFor(32);await phone.screenshot({path:`test-results/v510/${hero}-mobile.png`});await mobile.close();
  for(let n=0;n<12&&s.world1Cine;n++){await page.keyboard.press('Enter');s=await step(120);}
  await page.locator('#game').focus();for(let n=0;n<100&&s.roomId==='w1-'+hero;n++){await page.keyboard.down('d');s=await step(20);}await page.keyboard.up('d');
- if(hero==='frita'){assert.equal(s.roomId,'w1-pizza');assert.equal(s.hero,'pizza');assert.equal(s.evo,0);}else{assert.equal(s.roomId,'w1-final','Yomi can enter the final procession after earning its own seal');assert.equal(s.boss,null,'arrival is before the final arena');assert.equal(s.world1Won,false);assert.deepEqual(s.world1Seals,['yomi']);}assert.deepEqual(errors,[]);
+ if(hero==='frita'){assert.equal(s.roomId,'w1-pizza');assert.equal(s.hero,'pizza');assert.equal(s.evo,0);}else{assert.equal(s.roomId,'w1-yomi','isolated Yomi pilot cannot bypass the other nine seals');assert.equal(s.boss,null,'final boss remains inaccessible');assert.equal(s.world1Won,false);assert.deepEqual(s.world1Seals,['yomi']);}assert.deepEqual(errors,[]);
  await fs.writeFile(`test-results/v510/${hero}-pilot.json`,JSON.stringify({deaths,forms:[...forms],resumed,attacks,patterns:[...patterns],mechanicVerified,mobileJ:true,next:s.roomId,nextEvo:s.evo},null,2));
  console.log('PHYSICAL CHAPTER PASS '+hero);await page.close();
  }

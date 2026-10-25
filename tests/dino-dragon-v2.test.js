@@ -36,7 +36,7 @@ test('Sizes: Dino and Dragón share one growth curve, bigger every form; Dragón
   if(f)assert.ok(DINO_DRAGON_HEIGHT[f]-DINO_DRAGON_HEIGHT[f-1]>=18,'each evolution must read clearly bigger');
   for(const id of ['dino','dragon'])assert.ok(Math.abs(CALIBRATED_VISUAL_H[id][f]-100*heroHeightTarget(id,f)/CANVAS_ANATOMY_HEIGHT[id][f])<0.6);
  }
- assert.ok(DRAGON_WING_ALLOWANCE>1&&DRAGON_WING_ALLOWANCE<1.12);
+ assert.ok(DRAGON_WING_ALLOWANCE>1&&DRAGON_WING_ALLOWANCE<=1.35);
 });
 
 test('Palettes: Dino is earth (green/teal, no orange body), Dragón is fire (crimson, no green)', () => {

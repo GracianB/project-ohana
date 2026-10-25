@@ -1,9 +1,9 @@
 import {drawChispaAssist} from './chispa-stagecraft.js';
-import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
+import {surpriseDuetTicks,guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V302: in-world controllable chaos and Chispin storm.
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 export function readStitchoDuet(s){
- if(!s||readGuestOrigin(s)===null||![s.x,s.y,s.age,s.evo,s.facing].every(Number.isFinite)||Math.abs(s.x)>20000||Math.abs(s.y)>20000||!Number.isInteger(s.age)||s.age<0||s.age>=(s.surprise===true?360:120)||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
+ if(!s||readGuestOrigin(s)===null||![s.x,s.y,s.age,s.evo,s.facing].every(Number.isFinite)||Math.abs(s.x)>20000||Math.abs(s.y)>20000||!Number.isInteger(s.age)||s.age<0||s.age>=surpriseDuetTicks(s)||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
  const bolts=Array.isArray(s.bolts)?s.bolts:[];
  if(bolts.length>3||bolts.some(b=>!b||![b.x,b.y,b.life].every(Number.isFinite)||Math.abs(b.x)>20000||Math.abs(b.y)>20000||b.life<0||b.life>12))return null;
  const imp=(Array.isArray(s.impacts)?s.impacts:[]).filter(b=>b&&[b.x,b.y,b.life].every(Number.isFinite)&&Math.abs(b.x)<=20000&&Math.abs(b.y)<=20000&&b.life>0&&b.life<=14).slice(0,6);
@@ -16,7 +16,7 @@ export function startStitchoDuet(g,power=1){
 }
 export function updateStitchoDuet(g,hit){
  const s=g._stitchoDuet,p=g.player;if(!s){if(p)p._stitchoDuetT=0;return;}
- if(!p||p.dead||p.id!=='stitcho'||s.age>=(s.surprise===true?360:120)){g._stitchoDuet=null;if(p)p._stitchoDuetT=0;if(g._assist?.heroId==='chispin')g._assist.t=0;return;}
+ if(!p||p.dead||p.id!=='stitcho'||s.age>=surpriseDuetTicks(s)){g._stitchoDuet=null;if(p)p._stitchoDuetT=0;if(g._assist?.heroId==='chispin')g._assist.t=0;return;}
  s.x=p.x+p.w/2;s.y=p.y+p.h;s.bolts=s.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);s.impacts=(s.impacts||[]).map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);
  const pose=stitchoDuetPose(s),damage=(70+s.evo*14)*s.power;
  const targets=(g.enemies||[]).filter(e=>e&&e.hp>0&&!e.dying&&!e.fell);
@@ -27,11 +27,11 @@ export function updateStitchoDuet(g,hit){
    for(const e of nearby)if(hit(g,e,damage*.15,{color:'#fff29a',stun:56,kx:s.facing*3,ky:-3,hitstop:0,shake:1}))s.bolts.push({x:e.x+e.w/2,y:e.y+e.h/2,life:12});
   }
  }
- p._stitchoDuetAge=s.age;p._stitchoDuetT=(s.surprise?360:120)-s.age;if(g._assist?.heroId==='chispin')g._assist.t=(s.surprise?360:120)-s.age;s.age++;
+ p._stitchoDuetAge=s.age;p._stitchoDuetT=surpriseDuetTicks(s)-s.age;if(g._assist?.heroId==='chispin')g._assist.t=surpriseDuetTicks(s)-s.age;s.age++;
 }
 export function drawStitchoDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readStitchoDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=stitchoDuetPose(s,reduce),x=s.x-cam.x,y=s.y-24-cam.y,cx=pose.cloudX-cam.x,cy=pose.cloudY-cam.y;
- ctx.save();ctx.globalAlpha*=s.age>(s.surprise?348:108)?((s.surprise?360:120)-s.age)/12:1;
+ ctx.save();ctx.globalAlpha*=s.age>(surpriseDuetTicks(s)-12)?(surpriseDuetTicks(s)-s.age)/12:1;
  drawChispaAssist(ctx,s,cam,t,reduce,s.bolts);
  // Plasma alienígena de Stitcho: carga (0-30 ticks ≈ 0,5 s), costuras de plasma y anillos de impacto. Sin gradientes; partículas acotadas.
  const k=s.evo,plasma=['#7fe9ff','#62f3ff','#3fd8ff','#4ad2ff','#c5a8ff'][k],core='#e8ffff';

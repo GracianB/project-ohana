@@ -1281,6 +1281,8 @@ if(p.id==='kilo'&&!p.dead&&pose.state!=='hurt'){
    pose.kiloPerformance={kind:'dance',time:age/60};
  else if(entry>=0&&entry<96&&!moving&&!air&&pose.state==='idle')
    pose.kiloPerformance={kind:'entrance',time:entry/60};
+ else if(!moving&&!air&&pose.state==='idle'&&!pose.reduceMotion)
+   pose.kiloPerformance={kind:'dance',time:t/60};
 }
 if(p.id!=='kilo'&&!p.dead&&!pose.reduceMotion&&pose.state==='idle'&&!moving&&!air){
  const entry=t-(Number.isFinite(Number(p._ohanaEntranceAt))?Number(p._ohanaEntranceAt):-9999);

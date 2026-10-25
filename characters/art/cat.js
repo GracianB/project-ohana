@@ -304,7 +304,8 @@ function drawMichiMythic(ctx,pose,r,f){
   oval(x,y,rx+3,ry+3,'#fff',ink,1.7);
   const gaze=(pose.look?.x||0)*1.2+(r.motion?.lookX||0)*1.4;
   oval(x+gaze,y,rx,ry,color,null);
-  oval(x+gaze+1,y,rx*.38,ry*.8,ink,null);
+  oval(x+gaze,y+ry*.1,rx*.52,ry*.56,ink,null);
+  ctx.beginPath();ctx.moveTo(x-rx-1,y-ry*.62);ctx.quadraticCurveTo(x,y-ry*.95,x+rx+1,y-ry*.62);stroke(ink,1.3);
   oval(x-1.6,y-ry*.42,1.8,2.2,'#fff',null);
  };
  const angry=r.mood==='angry'||r.st==='attack'||r.slot===2;

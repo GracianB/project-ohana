@@ -60,7 +60,7 @@ test("V74 five visible sizes rise gradually, without triple growth from generic 
  assert.ok(screenHeights[4]/screenHeights[0]<2,"F4 still too large vs newborn");
  assert.match(draw,/p\.id==="cuerno"\?CUERNO_VISUAL_H\[evo\]/);
  assert.match(draw,/if\(!calibrated&&p\.id!=="cuerno"&&p\.id!=="kilo"&&p\.id!=="stitcho"&&p\.id!=="chispin"&&p\.id!=="cat"\)\{/);
- assert.match(title,/def\.id==="cuerno"\?CUERNO_VISUAL_H\[evo\]/);
+ assert.match(title,/const baseH = heroHeightTarget\(def\.id,evo\)/);
  assert.match(title,/cuerno:  \[0\.70,0\.98,1\.10,1\.43,1\.77\]/);
 });
 test("V74 poses stay deterministic and readable at each evolution",()=>{

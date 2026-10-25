@@ -1,22 +1,22 @@
-import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
+import {surpriseDuetTicks,guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V304: nine orbiting tails catch three telegraphed meteors from Dragon.
 import {michiYomiImpact} from './michi-yomi-play.js';
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),finite=n=>Number.isFinite(n)&&Math.abs(n)<=20000;
 export function readMichiDuet(s){
- if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(finite)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||!Array.isArray(s.stars)||s.stars.length>3||s.stars.some(b=>!b||![b.x,b.y].every(finite)||!Number.isInteger(b.age)||b.age<0||b.age>30))return null;
+ if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(finite)||!Number.isInteger(s.age)||s.age<0||s.age>=surpriseDuetTicks(s)||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing)||!Array.isArray(s.stars)||s.stars.length>3||s.stars.some(b=>!b||![b.x,b.y].every(finite)||!Number.isInteger(b.age)||b.age<0||b.age>30))return null;
  return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,stars:s.stars.map(b=>({x:b.x,y:b.y,age:b.age}))};
 }
-export function michiDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:Math.min(119,s.age),hero:'cat'},'dragon',reduce);return {guest,radius:84+s.evo*10,meteorRadius:42+s.evo*3,dragonX:guest.x,dragonY:guest.y,beat:s.age<18?'arrival':s.age<36?'yarn':s.age<104?'catch':'farewell'};}
+export function michiDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:s.age,hero:'cat'},'dragon',reduce);return {guest,radius:84+s.evo*10,meteorRadius:42+s.evo*3,dragonX:guest.x,dragonY:guest.y,beat:s.age<18?'arrival':s.age<36?'yarn':s.age<104?'catch':'farewell'};}
 export function startMichiDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='cat')return false;g._michiDuet={...(p.uSurprise?{surprise:true}:{}),x:p.x+p.w/2,y:p.y+p.h,originX:p.x+p.w/2,originY:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),stars:[],tailsHit:new Set()};return true;}
 export function updateMichiDuet(g,hit){
  const s=g._michiDuet,p=g.player;if(!s){if(p)p._michiDuetT=0;return;}
- if(!p||p.dead||p.id!=='cat'||s.age>=120){g._michiDuet=null;if(p)p._michiDuetT=0;if(g._assist?.heroId==='dragon')g._assist.t=0;return;}
+ if(!p||p.dead||p.id!=='cat'||s.age>=surpriseDuetTicks(s)){g._michiDuet=null;if(p)p._michiDuetT=0;if(g._assist?.heroId==='dragon')g._assist.t=0;return;}
  s.x=p.x+p.w/2;s.y=p.y+p.h;const pose=michiDuetPose(s),damage=(70+s.evo*14)*s.power;
  const targets=(g.enemies||[]).filter(e=>e&&e.hp>0&&!e.dying&&!e.fell);
  if([36,60,84].includes(s.age)){const nearby=targets.filter(e=>Math.hypot(e.x+e.w/2-s.x,e.y+e.h/2-(s.y-25))<=220+20*s.evo).sort((a,b)=>Math.abs(a.x-s.x)-Math.abs(b.x-s.x));const e=nearby[0];s.stars.push({x:e?e.x+e.w/2:s.x+s.facing*70,y:e?e.y+e.h/2:s.y-20,age:0});}
  for(const b of s.stars){if(b.age===18)for(const e of targets)if(Math.hypot(e.x+e.w/2-b.x,e.y+e.h/2-b.y)<=pose.meteorRadius+Math.min(e.w,e.h)/2){hit(g,e,damage*.2,{color:'#ffb379',stun:30,kx:s.facing*4,ky:-4,hitstop:4,shake:2});michiYomiImpact(e.x+e.w/2,e.y+e.h/2,'¡ATRAPADO!','#ffb379',{life:72,big:1.8});}b.age++;}s.stars=s.stars.filter(b=>b.age<=30);
  if(s.age>=48&&s.age<104)for(const e of targets)if(!s.tailsHit.has(e)&&Math.hypot(e.x+e.w/2-s.x,(e.y+e.h/2-(s.y-25))/.55)<=pose.radius+Math.min(e.w,e.h)/2&&hit(g,e,damage*.45,{color:'#d7b0ff',stun:36,kx:s.facing*5,ky:-4,hitstop:3,shake:1})){s.tailsHit.add(e);michiYomiImpact(e.x+e.w/2,e.y+e.h/2,'¡NUEVE VIDAS!','#d7b0ff',{life:72,big:1.8});}
- p._michiDuetAge=s.age;p._michiDuetT=120-s.age;if(g._assist?.heroId==='dragon')g._assist.t=120-s.age;s.age++;
+ p._michiDuetAge=s.age;p._michiDuetT=surpriseDuetTicks(s)-s.age;if(g._assist?.heroId==='dragon')g._assist.t=surpriseDuetTicks(s)-s.age;s.age++;
 }
 const MICHI_U_FORM=[{name:'Michito',w:7,tip:8,glow:'#ffd6ee'},{name:'Michi',w:8,tip:9,glow:'#ffc4e6'},{name:'Nube rosa',w:9,tip:10,glow:'#ffe0f2'},{name:'Michi Luna',w:10,tip:11,glow:'#e6d6ff'},{name:'Michi Eclipse',w:12,tip:13,glow:'#7a4ae0'}];
 const MICHI_U_COLORS=['#ff9cdb','#c9a2ff','#ffd36b'];
@@ -59,7 +59,7 @@ function drawMichiTail(ctx,x,y,a,len,P,age,i,face,reduce,hairs){
  ctx.restore();
 }
 export function drawMichiDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
- const s=readMichiDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=michiDuetPose(s,reduce),F=MICHI_U_FORM[s.evo],x=s.x-cam.x,y=s.y-25-cam.y,age=s.age;ctx.save();ctx.globalAlpha*=age>108?(120-age)/12:1;ctx.lineCap='round';
+ const s=readMichiDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=michiDuetPose(s,reduce),F=MICHI_U_FORM[s.evo],x=s.x-cam.x,y=s.y-25-cam.y,age=s.age;ctx.save();ctx.globalAlpha*=age>surpriseDuetTicks(s)-12?(surpriseDuetTicks(s)-age)/12:1;ctx.lineCap='round';
  const def=roster.find(r=>r.id==='dragon'),form=def?.forms?.[s.evo];if(def&&form)drawActor(ctx,{...def,...form,id:'dragon',evo:s.evo,x:pose.dragonX-form.w/2,y:pose.dragonY-form.h,facing:pose.guest.facing,vx:pose.guest.vx,vy:pose.guest.vy,grounded:false,_poseOverride:pose.guest.pose,visualScale:.70,_duetActor:true},cam,t);
  // 1) Anticipación 0-24: aro que se cierra hacia Michi + chispas convergentes + texto.
  if(age<28){const k=Math.min(1,age/24),R=pose.radius*1.6*(1-k)+18;ctx.save();ctx.globalAlpha*=age<24?.35+.65*k:(28-age)/4;ctx.strokeStyle=MICHI_U_COLORS[0];ctx.lineWidth=4+4*k;ctx.beginPath();ctx.ellipse(x,y,R,R*.6,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=MICHI_U_COLORS[2];ctx.lineWidth=2;ctx.setLineDash([6,6]);ctx.beginPath();ctx.ellipse(x,y,R+10,(R+10)*.6,reduce?0:age*.05,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);

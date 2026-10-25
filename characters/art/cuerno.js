@@ -11,7 +11,7 @@ if(typeof forced==="string"&&SOUL_BEATS.includes(forced))return forced;
 if(state==="victory")return form>=4?"bow":form>=2?"prance":"curious";
 if(state==="cast"&&form>=3&&pose?.castSlot===3)return "stargaze";
 if(state!=="idle"||!(Number(pose?.flourish)>.06&&Number(pose?.flourish)<.94))return "";
-return form===4?(Number(pose.flourishN)%2?"bow":"sneeze"):SOUL_BEATS[form];
+return form===4?(Number(pose.flourishN)%2?"stargaze":"prance"):SOUL_BEATS[form];
 }
 // V349 · Pure pose applied to the ORIGINAL five evolution silhouettes.
 // Newborn Cuernin has no hooves or wings; Destello is still an orb.
@@ -179,8 +179,8 @@ export function cuernoLegPose(pose,form,t,clock=0,far=false){
  const ritual=cuernoRitualBody(pose,f);
   const additional=ritual?.hoof||0,intro=cuernoWelcomeAnatomy(pose,f);
   return {reach:(moving?step*range:0)+(far?-.8:1.3)*(ritual?.load||0)+intro.hoof*(far?-.37:.75),
-    tuck:air?(far?8:11)+(f-2)*1.2:0,
-    kneeLift:(moving?Math.max(0,-step)*(f===2?1.3:2.2):0)+additional*.62+intro.hoof*.35,
+    tuck:state==="fall"?(far?1:2):air?(far?8:11)+(f-2)*1.2:0,
+    kneeLift:(moving?Math.max(0,-step)*(f===2?2.1:3.8):0)+additional*.62+intro.hoof*.35,
     hoofLift:(moving?Math.max(0,step)*((f-2)*1.25+2):0)+(far?.15:.9)*additional+intro.hoof*(far?.16:.48)};
 }
 export function cuernoManePose(pose,form,t,index){
@@ -702,7 +702,7 @@ const soul=cuernoSoulBeat(pose,4);
 const magic=cuernoMagicPose(pose,4);
 const wingMotion=cuernoWingPose(pose,4,t),unfold=wingMotion.open;
 const ink="#a69ab6",coat="#1b1a28",shadow="#39364e",gold="#f8d994";
-const colors=["#ffe1be","#f7bddf","#bed8ff","#a5ece4","#d9c9ff","#fff2bd"];
+const colors=["#ffe1be","#f7bddf","#e5c7f2","#f2dba9","#d9c9ff","#fff2bd"];
 const ritual=cuernoRitualBody(pose,4);
 const intro=cuernoWelcomeAnatomy(pose,4);
 const bounce=(Number(pose.bounce)||0)+(run?-2.4*Math.abs(Math.sin(phase*2)):Math.sin(t*.055)*.8)+(ritual?.lift||0)+intro.lift;
@@ -820,7 +820,7 @@ ctx.beginPath();ctx.moveTo(41,-71);ctx.quadraticCurveTo(48,-72,51,-67);ctx.strok
 ctx.beginPath();ctx.moveTo(13,-40);ctx.quadraticCurveTo(20,-38,22,-33);ctx.stroke();
 ctx.restore();
 R.blush(ctx,45,-68,2.0,"#bb7d99");
-R.eye(ctx,35,-79,5,pose,{iris:"#dcc3ff",mood:hurt||soul==="sneeze"||soul==="bow"||magic?.slot===3?"closed":triumph?"happy":cast?"angry":"normal"});
+R.eye(ctx,36,-79,6.2,pose,{iris:"#e6b875",mood:hurt?"closed":triumph?"happy":"normal"});
 R.mouth(ctx,48,-61,4.1,soul==="sneeze"?"o":magic?.slot===3?"smile":triumph?"happy":cast?"grin":"smile");
 ctx.fillStyle="#e7c9e2";ctx.beginPath();ctx.arc(51,-69,1.8,0,TAU);ctx.fill();
 // A crown-horn rises naturally from the brow with visible spiral relief.

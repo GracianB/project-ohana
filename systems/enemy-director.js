@@ -3,6 +3,8 @@
 // It never mutates health/damage/hitboxes; it only assigns intent, attack permits
 // and steering hints consumed by the existing per-species state machines.
 
+import {encounterMemory} from "./encounter-memory.js";
+import {readCombatDifficulty} from "./combat-difficulty.js";
 import { ROOM_HARD } from "../engine/foes.js";
 import { buildEncounterSpatialIndex } from "./encounter-spatial.js";
 import {
@@ -147,10 +149,11 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
 
   const hard = ROOM_HARD[roomId] ?? 1;
   const ecology = ecologyForRoom(roomId);
+  const memory=roomId.startsWith("w1-")?encounterMemory(player,tick):{air:0,ranged:0};
   // Small groups are cheaper to scan directly; crowded arenas use a spatial index.
   const spatial = alive.length>12 ? buildEncounterSpatialIndex(alive) : null;
   prepareSpeciesEvolution(alive, roomId, tick, enemyRole);
-  const budget = viewport&&alive.some(e=>e.elite&&Math.abs(centerX(e)-centerX(player))<500) ? 4 : attackBudget(alive.length, hard, roomId);
+  const budget = roomId.startsWith("w1-") ? Math.min(alive.length,readCombatDifficulty().budget) : viewport&&alive.some(e=>e.elite&&Math.abs(centerX(e)-centerX(player))<500) ? 4 : attackBudget(alive.length, hard, roomId);
   const sorted = alive.slice().sort((a, b) =>
     scoreCandidate(b, player, hard, tick, roomId) - scoreCandidate(a, player, hard, tick, roomId)
   );
@@ -177,10 +180,12 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
       alive.filter((o) => o !== e && Math.hypot(centerX(o)-centerX(e),centerY(o)-centerY(e)) < 300).length;
     const retreat = lowHealthRetreat(e, role);
     const permit = permits.has(e) || enemyIsCommitted(e);
-    const flank = !permit && !retreat && dist < 520 && flankBias > 0.4;
+    const flank = !permit && !retreat && dist < 520 && (flankBias > 0.4||memory.ranged>.16);
     const tooClose = dist < preferred * 0.62;
 
     e.aiRole = role;
+    e.aiAirPressure=memory.air;
+    e.aiRangedPressure=memory.ranged;
     e.aiPack = nearby;
     e.aiAttackPermit = permit;
     const naturalFlank = flankDirection(e, player);

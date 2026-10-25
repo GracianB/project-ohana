@@ -1,3 +1,28 @@
+# V512 · ohana-512 · Identidad, alcance y revisión final de V1
+
+Revisión en curso: V1 no está cerrada. Registro completo en docs/V1-FINAL-REVIEW.md.
+Dificultad con presupuestos, anticipación, recuperación y puntería propios;
+vida de capítulo escalada después de aplicar su definición, también en minibosses.
+Los enemigos de cuerpo a cuerpo ya no gastan ataques a 690 px. Consumen flanqueo
+y retirada; memoria táctica local de hábitos que decae y no cruza partidas.
+Avisos de arma/cuerpo y equipo unido a las criaturas sustituyen rayas y glifos.
+
+J de Cuerno es onda arcoíris; J de Michi es zarpa lunar a distancia sin retorno.
+Dino golpea con más fuerza y tarda más en recuperarse. Actuación de poderes por héroe.
+U conserva impactos y alarga a ocho segundos el compañero sorpresa en todos los dúos;
+el acompañante sigue los pies del héroe también tras el ataque, sin vuelta flotante.
+Una entrada continua por sala, sin repetir la llegada al acabar la introducción.
+
+Escala óptica común en mapa/selección/cine; dragón compensado por tamaño corporal.
+Kilo sin capa ni turquesa en cuarta forma, última con halo sobre la cabeza y baile en
+reposo; Cuerno con ojos legibles, caída de cascos extendidos y galope más articulado;
+Michi con pupila amable; Yomi Constelación con diez aves plegadas de memoria familiar.
+Menú con paleta teatral coherente; apertura distribuida en dos planos. Los fondos de
+Michi, Cuerno y Dragón ya no quedan tapados por un segundo cielo. Pizza sobre muelle.
+Quimera no aparece si falta alguno de los diez sellos.
+
+Validación y publicación se registran al terminar las comprobaciones.
+
 # V511 · ohana-511 · Diez salas con terreno y rutas diseñados
 
 Sustituidos los motivos aleatorios comunes por composiciones de sala explícitas.

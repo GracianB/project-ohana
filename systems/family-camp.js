@@ -20,8 +20,7 @@ import {countsByHero,loadWorld1Collect} from './world1-collect.js';
 const TAU=Math.PI*2;
 export function campActor(def,evo=1,pose='idle',height=92){
  const f=def.forms[evo];
- let base=['dino','dragon','pizza','yomi'].includes(def.id)?heroHeightTarget(def.id,evo):({kilo:KILO_VISUAL_H,stitcho:STITCHO_VISUAL_H,chispin:CHISPIN_VISUAL_H,cat:MICHI_VISUAL_H,frita:FRITA_VISUAL_H}[def.id]?.[evo]||80);
- if(def.id==='cuerno')base=CUERNO_V373_HEIGHT[evo]*CUERNO_VISUAL_H[evo]/100;
+ const base=heroHeightTarget(def.id,evo);
  return {id:def.id,evo,color:f.color||def.color,w:f.w,h:f.h,x:-f.w/2,y:-f.h,facing:1,grounded:pose!=='jump',vx:pose==='run'?4:0,vy:pose==='jump'?-3:0,health:f.hp,maxHealth:f.hp,visualScale:height/base,invuln:0,melee:0,_poseOverride:pose,_introForceCanvas:true,_duetActor:true};
 }
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,0,0,TAU);c.fill();}
@@ -119,7 +118,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const pose=pair?.pose||beat?.pose||'idle';let x=p.x+(reduce?0:pair?.dx||0),y=p.y+(reduce?0:pair?.dy||0);
  if(beat&&!reduce){const phase=(time-film.start)%4;if(pose==='run')x+=Math.sin(phase*Math.PI/2)*30;if(pose==='jump')y-=Math.sin(phase*Math.PI/4)*35;}
  prop(ctx,def.id,x,y,time,!!beat||!!pair,reduce);
- if(hot||pair){ctx.save();ctx.translate(x,y);const actor=campActor(def,hot?form:1,pose,94);if(def.id==='kilo'){actor._kiloPerformance=pair?.performance||{kind:'relic',time:2+time%5.5};if(reduce)actor._kiloPerformance={...actor._kiloPerformance,time:3.5};}drawCharacter(ctx,actor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});ctx.restore();}
+ if(hot||pair){ctx.save();ctx.translate(x,y);const actor=campActor(def,hot?form:1,pose,94);if(def.id==='kilo'){actor._kiloPerformance=pair?.performance||{kind:'dance',time};if(reduce)actor._kiloPerformance={...actor._kiloPerformance,time:3.5};}drawCharacter(ctx,actor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});ctx.restore();}
  else {
   let cached=idleActors.get(def.id);
   if(!cached){const image=doc.createElement('canvas');image.width=220;image.height=190;cached={image,at:-Infinity,reduce};idleActors.set(def.id,cached);}
@@ -130,7 +129,7 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  }
  ellipse(ctx,cursor.x,cursor.y,reduce?8:8+Math.sin(time*6),8,'#fff4b9');ellipse(ctx,cursor.x-10,cursor.y-4,7,3,'#f3f9e6aa');ellipse(ctx,cursor.x+10,cursor.y-4,7,3,'#f3f9e6aa');
 }
- const def=ROSTER.find(r=>r.id===selected);pc.clearRect(0,0,300,240);ellipse(pc,150,206,65,12,'#ae9de32b');pc.save();pc.translate(150,207);const portraitActor=campActor(def,form,film?campPresentation(selected,time-film.start).pose:'idle',140);if(def.id==='kilo')portraitActor._kiloPerformance=reduce?{kind:'relic',time:3.5}:film?pairedScene('kilo',selected,time-film.start)?.performance:{kind:'relic',time:2+time%5.5};drawCharacter(pc,portraitActor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});pc.restore();
+ const def=ROSTER.find(r=>r.id===selected);pc.clearRect(0,0,300,240);ellipse(pc,150,206,65,12,'#ae9de32b');pc.save();pc.translate(150,207);const portraitActor=campActor(def,form,film?campPresentation(selected,time-film.start).pose:'idle',140);if(def.id==='kilo')portraitActor._kiloPerformance=reduce?{kind:'relic',time:3.5}:film?pairedScene('kilo',selected,time-film.start)?.performance:{kind:'dance',time};drawCharacter(pc,portraitActor,{x:0,y:0},reduce?0:Math.floor(time*60),{reduceMotion:reduce});pc.restore();
  if(film){const beat=campPresentation(selected,time-film.start);if($('camp-line').textContent!==beat.line)$('camp-line').textContent=beat.line;if(beat.done)$('camp-film-stop').click();}
  raf=requestAnimationFrame(paint);
  }

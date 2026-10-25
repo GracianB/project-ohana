@@ -42,7 +42,7 @@ export function familyDuetDefinition(s){
   color:friend.color||"#fff6cf"});
 }
 export const FAMILY_DUET_LENGTH=120;
-export const SURPRISE_DUET_LENGTH=360;
+export const SURPRISE_DUET_LENGTH=480;
 const duetLength=s=>s?.surprise===true?SURPRISE_DUET_LENGTH:FAMILY_DUET_LENGTH;
 export const FAMILY_DUET_BEATS=Object.freeze([42,66,90]);
 const validNumber=n=>typeof n==="number"&&Number.isFinite(n)&&Math.abs(n)<=20000;
@@ -60,7 +60,7 @@ export function familyDuetPose(s,reduce=false){
  const age=clamp(s.age,0,duetLength(s)-1),evo=clamp(s.evo,0,4),face=s.facing===-1?-1:1;
  const arrival=Math.min(1,age/18);
  const exit=Math.min(1,(duetLength(s)-age)/14);
- const beat=age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
+ const beat=s.surprise&&age>=102?(age<420?'together':'farewell'):age<18?"arrival":age<36?"exchange":age<102?"borrowed-L":"farewell";
  const phase=age<36?0:age<102?(age-36)/66:1;
  const guest=guestPerformance({...s,age,evo,facing:face},data.ally,reduce);
  const allyX=guest?.x??s.x-face*(146-75*arrival);
@@ -80,7 +80,7 @@ export function startFamilyDuet(game,power=1,legacyTargets=[],selectedAlly){
    facing:p.facing===-1?-1:1,power:clamp(power,1,2),
    // Entities already handled by the legacy U cannot be damaged twice by L.
    legacyTargets:new Set(Array.isArray(legacyTargets)?legacyTargets.slice(0,256):[])};
- game._assist={heroId:def.ally,heroName:def.ally,t:p.id==="yomi"?240:FAMILY_DUET_LENGTH};
+ game._assist={heroId:def.ally,heroName:def.ally,t:duetLength(game._familyDuet)};
  return true;
 }
 // The exact footprint is shared with the on-screen pre-hit telegraph.
@@ -133,7 +133,7 @@ export function updateFamilyDuet(game,hit,heal){
   if(applied>0)game.fx?.emit?.(s.x+s.facing*54,s.y-30,{color:def.color,count:Math.min(6,applied+2),size:3,up:1,speed:2,life:13});
  }
  p._familyDuetAge=s.age;p._familyDuetT=duetLength(s)-s.age;
- if(game._assist?.heroId===def.ally)game._assist.t=(s.hero==="yomi"?240:FAMILY_DUET_LENGTH)-s.age;
+ if(game._assist?.heroId===def.ally)game._assist.t=duetLength(s)-s.age;
  s.age++;
 }
 

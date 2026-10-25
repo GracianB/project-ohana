@@ -24,7 +24,7 @@ const F = [
   { coat: "#fff6e6", shade: "#f2d6bd", ink: "#2e5470", hoof: "#d9a54e", muzzle: "#ffe2cc", mane: ["#ffb36b", "#ffe08a", "#ff8f7a"], head: 1.15, body: .9, leg: .8, horn: .85, wings: 0, tail: .8, blaze: true },
   { coat: "#eafff7", shade: "#b7e3d6", ink: "#2b5a68", hoof: "#e0b04e", muzzle: "#dff6ee", mane: ["#5fd3c4", "#ffd36a", "#ff9bb0", "#8fd0ff", "#b8f0a0"], head: 1.06, body: 1, leg: 1, horn: 1.15, wings: 0, tail: 1.1, scales: true },
   { coat: "#fffaf0", shade: "#e8dcc4", ink: "#3a5378", hoof: "#e8b85a", muzzle: "#ffeede", mane: ["#ff8cab", "#ffc28e", "#ffe9a3", "#9de7bb", "#a5e5fa"], head: 1.02, body: 1.05, leg: 1.08, horn: 1.5, wings: 1.35, tail: 1.6, stars: true, halo: true },
-  { coat: "#14283a", shade: "#0c1a28", ink: "#08121e", hoof: "#ffcf6a", muzzle: "#2a4a5e", mane: ["#ffcf6a", "#ff8f6a", "#6ad8e0", "#f4f0d8"], head: .99, body: 1.1, leg: 1.12, horn: 1.9, wings: 1.65, tail: 1.8, stars: true, night: true },
+  { coat: "#14283a", shade: "#0c1a28", ink: "#08121e", hoof: "#ffcf6a", muzzle: "#456479", mane: ["#ffcf6a", "#edb3bf", "#cdb8e0", "#f4f0d8"], head: 1.16, body: 1.1, leg: 1.12, horn: 1.4, wings: 1.65, tail: 1.8, stars: true, night: true },
 ];
 const hash = (i, s = 0) => { const x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); };
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -44,7 +44,7 @@ export function cuernoExpression(pose = {}) {
     ? Math.sin((phase - 220) / 10 * Math.PI) : 0;
   return {
     blink: disabled ? 0 : Math.max(blink, autoBlink),
-    happy: !disabled && (state === "victory" || beat === "prance"),
+    happy: !disabled && (state === "victory" || (beat === "prance" && (pose.form|0)<4)),
     shy: !disabled && beat === "shy",
     wonder: !disabled && (beat === "curious" || beat === "stargaze" || Number(welcome?.wonder) > .3),
     tilt: disabled || reduced ? 0 : beat === "shy" ? .065 : beat === "curious" ? -.065 : welcome ? clamp((Number(welcome.wonder) || 0) * -.06 + (Number(welcome.bow) || 0) * .06, -.08, .08) : Math.sin(t * .025) * .012,
@@ -69,7 +69,8 @@ function animOf(pose) {
   if (st === "dead") return "death";
   if (st === "trail") return "trail";
   if (st === "attack" || (st === "cast" && (pose.castSlot | 0) === 0)) return "attack";
-  if (st === "jump" || st === "fall" || st === "glide" || pose?.air) return "jump";
+  if(st === "fall")return "fall";
+  if (st === "jump" || st === "glide" || pose?.air) return "jump";
   if (st === "run") return "walk";
   if (st === "hurt") return "hurt";
   if (st === "victory") return "victory";
@@ -210,7 +211,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const face = cuernoExpression({ ...pose, t });
   if (face.reduced) t = 0;
   const P = F[f], H = CUERNO_V373_HEIGHT[f], u = H / 60, lw = Math.max(1.05, 1.25 * Math.min(1.4, u));
-  const trail = anim === "trail", run = anim === "walk" || trail, air = anim === "jump", dead = anim === "death", hit = anim === "hurt", att = anim === "attack";
+  const trail = anim === "trail", run = anim === "walk" || trail, air = anim === "jump" || anim === "fall", dead = anim === "death", hit = anim === "hurt", att = anim === "attack";
   const ph = face.reduced?0:run&&Number.isFinite(pose.phase)?pose.phase:t * (trail ? .45 : run ? .32 : .05);
   const legL = 22 * P.leg * u * (f === 0 ? .75 : 1), bodyRx = 17 * P.body * u, bodyRy = 10 * P.body * u;
   const bodyY = -(legL + bodyRy * .55);
@@ -223,6 +224,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const bob = face.reduced ? 0 : run ? -Math.abs(Math.sin(ph)) * 2.5 * u : air ? -3 * u : Math.sin(t * .06) * .6 * u;
   const lunge = att ? Math.sin(clamp(atk, 0, 1) * Math.PI) * 6 * u : 0;
   ctx.translate(lunge, bob);
+  if(run&&!face.reduced)ctx.rotate(-.022+Math.sin(ph*2)*.018);
   // V466 · personality: rears up on victory (forms 1–4), tosses its head and
   // stamps a hoof when idle, shudders when hit, stretches into each jump.
   const idle = anim === "idle" && !face.reduced, cyc = ((t % 300) + 300) % 300;
@@ -235,7 +237,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   const charge=pose.cuernoK?.phase==="warn"?clamp(pose.cuernoK.progress,0,1):0;
   if(charge&&!face.reduced)ctx.scale(1+charge*.045,1-charge*.04);
   if (att) ctx.rotate(.08 * Math.sin(clamp(atk, 0, 1) * Math.PI));
-  const tuck = air ? .9 : 0;
+  const tuck = anim === "fall" ? .18 : air ? .9 : 0;
   if(f>=3)ascendantMane(ctx,P,neckX-3*u,hy+headR*.4,u,t,face.reduced||hit,dead);
   if(f===2&&!dead)auroraMantle(ctx,neckX-3*u,hy+headR*.4,bodyY,u,t,face.reduced,hit);
   // --- capa trasera: cola, ala lejana, patas lejanas
@@ -299,7 +301,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   // Far ear stays visible behind the soft, rounded forehead.
   ell(ctx, hx + headR * .06, hy - headR * .76, headR * .16, headR * .37, .35, P.shade, P.ink, lw * .7);
   // cabeza
-  ell(ctx, hx, hy, headR, headR * .86, 0, P.coat, P.ink, lw);
+  ell(ctx, hx, hy, headR, headR * .86, 0, P.night?"#29495e":P.coat, P.ink, lw);
   ell(ctx, hx + headR * .65, hy + headR * .38, headR * .49, headR * .36, .12, P.muzzle, P.ink, lw * .65);
   ell(ctx, hx + headR * .7, hy + headR * .24, headR * .23, headR * .07, .08, P.night ? "#3e6478" : "#fffaf2", null, 0);
   ell(ctx, hx + headR * .96, hy + headR * .35, .65 * u, .85 * u, -.2, P.ink, null, 0);
@@ -320,7 +322,7 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   lock(ctx, 0, 0, headR * .21, headR * .78, headR * .2, P.mane[0], P.ink, lw * .55);
   ctx.restore();
   // Ojos expresivos: derrota con párpado caído, dolor con gesto contraído.
-  const ex = hx + headR * .23, ey = hy - headR * .07, er = headR * (f === 0 ? .37 : f === 1 ? .34 : .31);
+  const ex = hx + headR * .23, ey = hy - headR * .07, er = headR * (f === 4 ? .4 : f === 0 ? .37 : f === 1 ? .34 : .31);
   if (dead) {ctx.strokeStyle = P.night ? "#dccaf3" : P.ink;ctx.lineWidth = lw;ctx.lineCap="round";
     ctx.beginPath();ctx.moveTo(ex-er*.9,ey);ctx.quadraticCurveTo(ex,ey+er*.55,ex+er*.9,ey);ctx.stroke();
     ctx.beginPath();ctx.moveTo(ex+er*.65,ey+er*.13);ctx.lineTo(ex+er*.86,ey+er*.38);ctx.stroke();}
@@ -356,12 +358,6 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
   // cuerno en espiral (embiste al atacar)
   const hl = 11 * P.horn * u * (f === 0 ? .6 : 1), ha = -1.05 + (att ? .45 * Math.sin(clamp(atk, 0, 1) * Math.PI) : 0);
   const bx = hx + headR * .15, by = hy - headR * .78, tx = bx + Math.cos(ha) * hl, ty = by + Math.sin(ha) * hl, nx = -Math.sin(ha) * 2.4 * u * P.horn, ny = Math.cos(ha) * 2.4 * u * P.horn;
-  if (P.night && !dead) {
-    // V466 · Eclipse: a dark sun with a golden corona sits behind the horn root
-    ctx.save(); ctx.fillStyle = "#08121e"; ctx.beginPath(); ctx.arc(bx - u, by + u, 4.6 * u, 0, TAU); ctx.fill();
-    ctx.strokeStyle = "#ffcf6a"; ctx.lineWidth = lw * .9; ctx.stroke();
-    ctx.globalAlpha *= .45; ctx.lineWidth = lw * .5; ctx.beginPath(); ctx.arc(bx - u, by + u, 6.4 * u + (face.reduced ? 0 : Math.sin(t * .1) * .6 * u), 0, TAU); ctx.stroke(); ctx.restore();
-  }
   if (P.halo && !dead) {
     // V466 · Serafín: a thin golden halo floats over the forelock
     ctx.save(); ctx.strokeStyle = "#ffd36a"; ctx.lineWidth = lw * .75; ctx.beginPath();
@@ -386,15 +382,6 @@ function drawForm(ctx, f, anim, t, atk = 0, R, pose = {}) {
     ctx.globalAlpha = k; star(ctx, tx, ty, (2.4 + 2 * k) * u, "#fffbe8");
     ctx.globalAlpha = .5 * k; ctx.strokeStyle = "#fff6c8"; ctx.lineWidth = lw * .6; ctx.beginPath(); ctx.arc(tx, ty, (4 + 6 * k) * u, 0, TAU); ctx.stroke();
     ctx.restore();
-  }
-  if(f===4&&!dead){
-    // Crescent antlers frame the single central horn without hiding the eye.
-    for(const side of [-1,1]){
-      ctx.save();ctx.translate(bx-5*u+side*3*u,by+2*u);ctx.scale(side,1);
-      ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-10*u,-8*u,-9*u,-20*u,-2*u,-24*u);
-      ctx.bezierCurveTo(-5*u,-15*u,-2*u,-7*u,4*u,-2*u);ctx.closePath();
-      ctx.fillStyle='#b7ddea';ctx.fill();ctx.strokeStyle='#656f9f';ctx.lineWidth=lw*.65;ctx.stroke();ctx.restore();
-    }
   }
   if(f>=3){
     ctx.strokeStyle=P.night?'#c3b1e2':'#bcb4dd';ctx.lineWidth=lw*.55;

@@ -68,7 +68,7 @@ export const CUERNO_PORTRAIT_GROWTH = Object.freeze([.68,.77,.86,.94,1.00]);
 
 function portraitFit(def, evo, bw, bh, hero) {
 const form = def.forms?.[evo] || {};
-const baseH = CALIBRATED_VISUAL_H[def.id] ? heroHeightTarget(def.id, evo) : def.id==="cuerno"?CUERNO_VISUAL_H[evo]:def.id==="kilo"?KILO_VISUAL_H[evo]:def.id==="cat"?MICHI_VISUAL_H[evo]:def.id==="chispin"?CHISPIN_VISUAL_H[evo]:def.id==="stitcho"?STITCHO_VISUAL_H[evo]:VISUAL_H[evo]*(CHAR_K[def.id]||1);
+const baseH = heroHeightTarget(def.id,evo);
 const envelope = PORTRAIT_ENVELOPE[def.id]?.[evo] || (1 + evo * .09);
 const geometryAspect = Math.max(.70, Math.min(1.45, Number(form.w || 28) / Math.max(1, Number(form.h || 32))));
 const visualAspect = def.id==="cuerno" ? CUERNO_PORTRAIT_ASPECT[evo] : Math.max(.72, geometryAspect * envelope);
@@ -382,7 +382,7 @@ cards.forEach((el) => {
       "aria-label",
       (selected ? "Seleccionado: " : "") +
       def.name + ". " + form + ". " +
-      "Dificultad " + (difficulty(def.id) === 1 ? "fácil" : difficulty(def.id) === 3 ? "difícil" : "media")
+      "Manejo " + (difficulty(def.id) === 1 ? "fácil" : difficulty(def.id) === 3 ? "difícil" : "media")
     );
   }
 });
@@ -396,7 +396,7 @@ if (selectedDef) {
   const rank = difficulty(selectedDef.id);
   if (heroName) heroName.textContent = selectedDef.name;
   if (heroForm) heroForm.textContent = selectedDef.evoNames?.[0] || selectedDef.forms?.[0]?.name || "Forma inicial";
-  if (heroDifficulty) heroDifficulty.textContent = "Dificultad " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
+  if (heroDifficulty) heroDifficulty.textContent = "Manejo " + (rank === 1 ? "fácil" : rank === 3 ? "difícil" : "media");
   const mastery = masteryOf(selectedDef.id);
   if (heroLine) {
     heroLine.textContent = (HERO_LINES[selectedDef.id] || mastery.desc || "Cinco formas. Tres poderes. Una identidad propia.") + " · " + mastery.name;

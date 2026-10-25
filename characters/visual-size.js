@@ -8,9 +8,9 @@ export const CALIBRATED_HEIGHT = Object.freeze([55, 70, 85, 102, 120]);
 // Hitboxes (roster w/h) are physical and intentionally unchanged.
 export const STANDARD_HERO_HEIGHT = Object.freeze([64, 82, 100, 120, 140]);
 export const DINO_DRAGON_HEIGHT = STANDARD_HERO_HEIGHT;
-// Dragón's measured height includes its raised wings; +8% keeps its BODY the
+// Dragón's measured height includes its raised wings; +30% keeps its BODY the
 // same optical size as Dino's at every form instead of a shrunken torso.
-export const DRAGON_WING_ALLOWANCE = 1.08;
+export const DRAGON_WING_ALLOWANCE = 1.30;
 export const HERO_HEIGHT_TARGET = Object.freeze({
   dino: DINO_DRAGON_HEIGHT,
   dragon: Object.freeze(DINO_DRAGON_HEIGHT.map(h => Math.round(h * DRAGON_WING_ALLOWANCE))),

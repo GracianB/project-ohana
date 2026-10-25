@@ -1,18 +1,18 @@
 import {drawThunderSeal} from './chispa-stagecraft.js';
-import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
+import {surpriseDuetTicks,guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V303: a playable storm, with Michi chasing nine electrical tail wisps.
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),valid=n=>Number.isFinite(n)&&Math.abs(n)<=20000;
 export function readChispinDuet(s){
- if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(valid)||!Number.isInteger(s.age)||s.age<0||s.age>=120||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
+ if(!s||readGuestOrigin(s)===null||![s.x,s.y].every(valid)||!Number.isInteger(s.age)||s.age<0||s.age>=surpriseDuetTicks(s)||!Number.isInteger(s.evo)||s.evo<0||s.evo>4||![-1,1].includes(s.facing))return null;
  const tails=s.tails||[],bolts=s.bolts||[];
  if(!Array.isArray(tails)||tails.length>9||tails.some(b=>!b||![b.x,b.y].every(valid)||!Number.isInteger(b.idx)||b.idx<0||b.idx>8||!Number.isFinite(b.life)||b.life<0||b.life>48)||!Array.isArray(bolts)||bolts.length>3||bolts.some(b=>!b||![b.x,b.y].every(valid)||!Number.isFinite(b.life)||b.life<0||b.life>22))return null;
  return {...(s.surprise===true?{surprise:true}:{}),...readGuestOrigin(s),x:s.x,y:s.y,age:s.age,evo:s.evo,facing:s.facing,tails:tails.map(b=>({x:b.x,y:b.y,idx:b.idx,life:b.life})),bolts:bolts.map(b=>({x:b.x,y:b.y,life:b.life}))};
 }
-export function chispinDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:Math.min(119,s.age),hero:'chispin'},'cat',reduce);const jump=s.age>=18&&s.age<36?Math.sin((s.age-18)/18*Math.PI)*48:0;return {guest,cloudX:s.x,cloudY:s.y-145,catX:guest.x,catY:guest.y-jump,range:220+20*s.evo,beat:s.age<18?'arrival':s.age<36?'chase':s.age<104?'conduction':'farewell'};}
+export function chispinDuetPose(s,reduce=false){const guest=guestPerformance({...s,age:s.age,hero:'chispin'},'cat',reduce);const jump=s.age>=18&&s.age<36?Math.sin((s.age-18)/18*Math.PI)*48:0;return {guest,cloudX:s.x,cloudY:s.y-145,catX:guest.x,catY:guest.y-jump,range:220+20*s.evo,beat:s.age<18?'arrival':s.age<36?'chase':s.age<104?'conduction':'farewell'};}
 export function startChispinDuet(g,power=1){const p=g.player;if(!p||p.dead||p.id!=='chispin')return false;g._chispinDuet={...(p.uSurprise?{surprise:true}:{}),x:p.x+p.w/2,y:p.y+p.h,originX:p.x+p.w/2,originY:p.y+p.h,age:0,evo:clamp(Math.floor(Number(p.evo)||0),0,4),facing:p.facing===-1?-1:1,power:clamp(Number(power)||1,1,2),tails:[],bolts:[]};return true;}
 export function updateChispinDuet(g,hit){
  const s=g._chispinDuet,p=g.player;if(!s){if(p)p._chispinDuetT=0;return;}
- if(!p||p.dead||p.id!=='chispin'||s.age>=120){g._chispinDuet=null;if(p)p._chispinDuetT=0;if(g._assist?.heroId==='cat')g._assist.t=0;return;}
+ if(!p||p.dead||p.id!=='chispin'||s.age>=surpriseDuetTicks(s)){g._chispinDuet=null;if(p)p._chispinDuetT=0;if(g._assist?.heroId==='cat')g._assist.t=0;return;}
  s.x=p.x+p.w/2;s.y=p.y+p.h;const pose=chispinDuetPose(s),damage=(70+s.evo*14)*s.power;
  const alive=e=>e&&e.hp>0&&!e.dying&&!e.fell;
  const targets=(g.enemies||[]).filter(e=>alive(e)&&Math.hypot(e.x+e.w/2-s.x,e.y+e.h/2-(s.y-25))<=pose.range).sort((a,b)=>Math.abs(a.x-s.x)-Math.abs(b.x-s.x));
@@ -25,11 +25,11 @@ export function updateChispinDuet(g,hit){
  }
  s.tails=s.tails.filter(b=>b.life>0);
  if([42,66,90].includes(s.age))for(const e of targets.slice(0,3))if(hit(g,e,damage*.18,{color:'#e7d18e',stun:32,kx:s.facing*2,ky:-3,hitstop:0,shake:1}))s.bolts.push({x:e.x+e.w/2,y:e.y+e.h/2,life:22});
- p._chispinDuetAge=s.age;p._chispinDuetT=120-s.age;if(g._assist?.heroId==='cat')g._assist.t=120-s.age;s.age++;
+ p._chispinDuetAge=s.age;p._chispinDuetT=surpriseDuetTicks(s)-s.age;if(g._assist?.heroId==='cat')g._assist.t=surpriseDuetTicks(s)-s.age;s.age++;
 }
 export function drawChispinDuet(ctx,value,cam,t,drawActor,roster,reduce=false){
  const s=readChispinDuet(value);if(!s)return;drawActor=surpriseGuestDrawer(drawActor,s,cam,reduce);const pose=chispinDuetPose(s,reduce),x=s.x-cam.x,y=s.y-cam.y,cx=pose.cloudX-cam.x,cy=pose.cloudY-cam.y;
- ctx.save();ctx.globalAlpha*=s.age>108?(120-s.age)/12:1;
+ ctx.save();ctx.globalAlpha*=s.age>108?(surpriseDuetTicks(s)-s.age)/12:1;
  // V370 U readability: 0.6 s visible charge, cloud grows, each thunder lingers ~0.4 s.
  const grow=Math.min(1,.55+s.age/40),flashOn=s.bolts.some(b=>b.life>16);
  if(s.age<36){const k=s.age/36,r=70-k*46;ctx.strokeStyle='#e7d18e';ctx.lineWidth=2+k*3;ctx.globalAlpha*=.5+.5*k;ctx.beginPath();ctx.arc(x,y-30,r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha/=(.5+.5*k);

@@ -33,8 +33,8 @@ return trace;
 test("V66 Cuerno has form-authored personality rather than universal particles",()=>{
 const p={state:"idle",flourish:.5,flourishN:0};
 assert.deepEqual([0,1,2,3,4].map(n=>cuernoSoulBeat(p,n)),
- ["curious","shy","prance","stargaze","sneeze"]);
-assert.equal(cuernoSoulBeat({...p,flourishN:1},4),"bow");
+ ["curious","shy","prance","stargaze","prance"]);
+assert.equal(cuernoSoulBeat({...p,flourishN:1},4),"stargaze");
 assert.equal(cuernoSoulBeat({state:"victory"},4),"bow");
 assert.equal(cuernoSoulBeat({state:"cast",castSlot:3},4),"stargaze");
 assert.equal(cuernoSoulBeat({state:"hurt",flourish:.5},4),"");

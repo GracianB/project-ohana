@@ -1,3 +1,4 @@
+import {readCombatDifficulty,scaleCombatHealth} from './systems/combat-difficulty.js';
 import {drawChapterLandmarks} from './worlds/chapter-stagecraft.js';
 import {drawYomiDawn} from './worlds/yomi-dawn.js';
 import {fryerAstralAbility,fritaVentState,yomiNodeState} from './systems/frita-yomi-chapters.js';
@@ -97,7 +98,7 @@ import { ParticleSystem } from "./engine/particles.js";
 import { sfx, relicUkulele, setMuted as setAudioMuted } from "./engine/audio.js";
 import { playMusic, themeForRoom, duckMusic, currentMusic, musicVolume, setMusicVolume } from "./engine/music.js";
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
-import { WORLD1_ROOMS, WORLD1_ORDER, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
+import { WORLD1_ROOMS, WORLD1_ORDER, world1SealsComplete, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
 import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
@@ -648,7 +649,7 @@ if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
 game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
-const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng}));
+const e = makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng});
 e.spawnIndex = i;e._campaignOriginal=true;
 if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
@@ -656,7 +657,7 @@ e.roomId = id;
 if((r.kiloChapter||r.chispinChapter||r.growthChapter)&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
 initGroveGuardian(e);
 if (f[3]) applyElite(e);
-return e;
+return scaleFoe(e);
 });
 game.enemies=game.enemies.filter(e=>!(id==='hub'&&game.personalAdventureSolo&&(game.player?.id==='stitcho'||game.player?.id==='chispin'||game.player?.id==='cat'||game.player?.id==='dragon'||game.player?.id==='dino'||game.player?.id==='frita'||game.player?.id==='pizza'||game.player?.id==='yomi'||game.player?.id==='cuerno')&&e.miniBoss)&&!game.clearedEncounters?.[id]?.includes(e._encounterSaveId||`${id}-cast443-${e.spawnIndex}`));
 if(r.stitchoChapter&&!game.clearedEncounters?.[id]?.includes(STITCHO_CHAPTER_BOSS_ID)){game.enemies.push(createStitchoBoss(makeFoe,game.rng,{roomId:id,encounterId:STITCHO_CHAPTER_BOSS_ID,x:8750,arena:STITCHO_CHAPTER_ARENA}));}
@@ -694,7 +695,10 @@ game.spawnDragonBoss=()=>{
   game.enemies.push(enemy);
   return true;
 };
-for (const e of game.enemies) Surprises.onMakeFoe(e, id, game);
+for (const e of game.enemies) {
+ if(e.miniBoss&&!e._combatHealthScaled)scaleFoe(e);
+ Surprises.onMakeFoe(e, id, game);
+}
 for (const e of game.enemies) applyCoopChallenge(e,onlineCoop.enabled);
 for (const e of game.enemies) {
 if (isAirFoe(e)) continue;
@@ -705,6 +709,7 @@ game.bossFx?.clear();
 game.boss = null;
 game.spawnFusionBoss=()=>{
   if(game.roomId!=="w1-final"||game.world1Won||game.boss)return false;
+  if(!world1SealsComplete(game.world1Seals))return false;
   game.boss=createFusionBoss((game.player?.michiSeed||0)+467);
   game.enemies.push(game.boss);
   game.storyLine=FUSION_STORY.intro[0];
@@ -910,7 +915,7 @@ game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = {
 game.world1Stations = {};
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
 game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
-game.onWorld1CineEnd=(id)=>{if(id==="intro"&&game.roomDef?.hero==="kilo")playWorld1Cine(game,"roomEnter","kilo");if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
@@ -1296,7 +1301,7 @@ if (!p.facing) p.facing = 1;
 const evo = Math.max(0, Math.min(4, Number(p.evo) || 0));
 const def = markAt(p.id, evo);
 
-p.melee = Math.max(7, 12 - evo);
+p.melee = Math.max(7, 12 - evo)+(p.id==="dino"?8:p.id==="dragon"?4:0);
 p.meleeBuf = 0;
 
 beep("slash");
@@ -1332,17 +1337,13 @@ return v === "easy" || v === "hard" ? v : "normal";
 } catch (e) { return "normal"; }
 }
 function scaleFoe(e) {
-if (!e) return e;
-const mul = gameDifficulty() === "easy" ? 0.7 : gameDifficulty() === "hard" ? 1.45 : 1;
-e.max = Math.max(1, Math.ceil((e.max || e.hp || 1) * mul));
-e.hp = e.max;
-return e;
+return scaleCombatHealth(e);
 }
 function hurtPlayer(amount, label) {
 const p = game.player;
 if (!p || p.dead || p.invuln > 0) return;
 if (game.boss?._fusionBoss && game.world1Boss) { amount = world1BossFilterDamage(game, amount); if (!(amount > 0)) return; }
-const diffMul = gameDifficulty() === "easy" ? 0.55 : gameDifficulty() === "hard" ? 1.4 : 1;
+const diffMul = readCombatDifficulty().damage;
 amount = Magic.onHurt(game, Passives.onHurt(game, amount)) * diffMul;
 if (!(amount > 0)) return;
 damagePlayer(p, amount);
@@ -1943,7 +1944,7 @@ else if (michiTrailPrompt(game))setPrompt(michiTrailPrompt(game),true);
 else if (grovePrompt(game))setPrompt(grovePrompt(game),true);
 else if (portals.prompt) setPrompt(portals.prompt, true);
 else if (adventurePrompt(game)) setPrompt(adventurePrompt(game),true);
-else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : "despierta el sello de la sala") : "ESTE · sigue andando", true);
+else if (p.x > game.worldW - 90 && r.doors.right) setPrompt(r.world1 && !world1CanLeave(game,"right") ? "SELLO DORMIDO · " + (r.fusionBoss ? "vence a la Quimera" : r.hero===WORLD1_ORDER.at(-1)&&!world1SealsComplete(game.world1Seals)?"reúne los diez sellos":"despierta el sello de la sala") : "ESTE · sigue andando", true);
 else if (p.x < 120 && r.id === "boss" && !game.won) setPrompt("El nido no se abre hasta que caiga", true);
 else if (p.x < 70 && r.doors.left) setPrompt("OESTE · sigue andando", true);
 else if (p.y < 90 && r.doors.up && nearUpDoor(p)) setPrompt("ARRIBA · salta al techo", true);
@@ -2125,6 +2126,7 @@ if (onlineCoop.advanceGuestCombat(game)) {
 }
 game.bossFx?.update();
 game.viewW=camW();game.viewH=camH();
+game.combatDifficulty=readCombatDifficulty();
 game.enemyDirector = directEnemyEncounter(game.enemies, game.player, game.roomId, t, {x:game.cam.x,y:game.cam.y,w:camW(),h:camH()});
 updateChampions(game);
 { const b = game.enemies.find((e) => e.boss && !e.dying); if (b && b.phase >= 3 && currentMusic() === "jefe") playMusic("jefe3"); }
@@ -2977,7 +2979,8 @@ function drawWorld1Backdrop(world,W,H){
  else if(h==="yomi")drawYomiDawn(ctx,game.cam,t,W,H,rd);
  else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
  else renderWorld(ctx,world,game.cam,t,W,H);
- if(!["dino","pizza","frita","yomi"].includes(h))drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ // One complete backdrop per room: never paint a second sky over the first.
+ if(["kilo","stitcho","chispin"].includes(h))drawOhanaPlace(ctx,game,game.cam,t,W,H);
  drawChapterLandmarks(ctx,game,game.cam,t,W,H);
  if(!['stitcho','chispin','cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
@@ -3965,7 +3968,7 @@ roomTraversal(){return {terraces:game.roomDef?.terraces||[],nooks:game.roomDef?.
 fryerAstralState(){return {launches:game.world1?.fritaLaunches||0,corrections:game.world1?.fritaAirCorrections||0,extensions:game.world1?.yomiWindowExtensions||0,launched:game.world1?.launchedGeyser,stations:(game.world1?.stations||[]).map(s=>({id:s.id,x:s.x,done:s.done,state:game.roomDef?.fritaChapter?fritaVentState(game.world1.tick,s):yomiNodeState(game,s)}))};},
 pizzaChapterState(){return {carry:game.world1?.carry,remaining:(game.world1?.pizzaUntil||0)-(game.world1?.tick||0),baked:pizzaBaked(game),ovens:pizzaOvens(game).map(s=>s.x)};},
 nextChapterState(){return {dinoQuakeHits:game.world1?.dinoQuakeHits||0,dinoQuakes:game.world1?.dinoQuakes||0,dinoLandings:game.world1?.dinoLandings||0,dinoDives:game.world1?.dinoDives||0,dinoPeak:game.world1?.dinoPeak,mirror:mirrorRestored(game),bridges:game.platforms.filter(p=>p._michiBridge!=null).length,thermalFrames:game.world1?.thermalFrames||0};},
-companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.y,air:a.air,id:a.id,heroFoot:game.player.y+game.player.h,heroX:game.player.x+game.player.w/2}:null;},
+companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.y,air:a.air,id:a.id,age:a.age,life:a.life,heroFoot:game.player.y+game.player.h,heroX:game.player.x+game.player.w/2}:null;},
 chispinChapterState(){return {gates:[0,1,2].map(i=>({state:chispinGateState(game,i),until:game.world1?.chispinSilenced?.[i]||0})),tick:game.world1?.tick,lastAbility:game._lastAbilityId};},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},
 kiloAirState(){return {skyRings:(game.world1?.skyRings||[]).map(r=>({...r})),chimes:(game.world1?.airChimes||[]).map(c=>({...c})),effects:(game.kiloAbilityFx||[]).map(f=>({...f}))};},

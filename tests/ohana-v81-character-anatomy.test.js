@@ -135,7 +135,7 @@ test("V81 jump and fall both use airborne wing, tail and folded hoof anatomy",()
   const jump=basicPose(form,"jump",common);
   const fall=basicPose(form,"fall",common);
   assert.deepEqual(cuernoTailPose(fall,form,140),cuernoTailPose(jump,form,140));
-  assert.deepEqual(cuernoLegPose(fall,form,140,.3),cuernoLegPose(jump,form,140,.3));
+  assert.ok(cuernoLegPose(fall,form,140,.3).tuck<cuernoLegPose(jump,form,140,.3).tuck,"fall extends hooves to seek the ground; jump tucks them");
   if(form>=3)assert.deepEqual(cuernoWingPose(fall,form,140),cuernoWingPose(jump,form,140));
  }
 });

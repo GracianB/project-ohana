@@ -1,3 +1,4 @@
+import {heroHeightTarget} from '../characters/visual-size.js';
 // Shared intro and cinema drawing primitives. V367: no evolution event listeners.
 import { drawCharacter } from "../characters/draw.js";
 import { ROSTER } from "../characters/roster.js";
@@ -264,8 +265,7 @@ export function drawTitle(ctx, text, x, y, size, colors, opts = {}) {
 
 /** Altura visual (px) de un personaje/forma con visualScale = 1. */
 export function baseHeight(id, evo) {
-  if(id==="cuerno"){const form=clamp(evo|0,0,4);return CUERNO_V373_HEIGHT[form]*CUERNO_VISUAL_H[form]/100;}
-  return VISUAL_H[clamp(evo | 0, 0, 4)] * (CHAR_K[id] || 1);
+  return heroHeightTarget(id,evo);
 }
 
 /** Muñeco ficticio para drawCharacter con los pies en (fx, fy). */

@@ -1,3 +1,33 @@
+# Estado vigente — V512 en revisión, V1 abierta
+
+Workspace `/workspace/ohana-stitcho`, rama `feat/v512-hero-identity-and-v1-review`, base `ecd4699`.
+La petición completa del usuario y sus pendientes están auditados punto por punto en
+[V1-FINAL-REVIEW.md](V1-FINAL-REVIEW.md). Leer esa auditoría antes de afirmar que está terminada.
+El usuario volvió a pedir revisar lo que falta: no basta un cambio de colores o una
+transformación común de animación para cerrar salas, personajes o dificultad.
+
+Candidato V512: combate/dificultad reales, memoria táctica de partida, J Cuerno/Michi,
+compañero real de ocho segundos con daño acotado, entrada sin duplicar, escala común,
+Kilo sin capa y con halo, Cuerno REAL de `art/cuerno-v373.js` sin astas azules y ojo legible,
+Michi más amable y Yomi con aves de memoria. Menú coherente y apertura en dos planos.
+Fondos sin sobrepintar, bosque orgánico de Cuerno cacheado, muelle de Pizza.
+Puerta final y aparición de Quimera exigen diez sellos; el piloto aislado de Yomi
+verifica que no puede fingir una campaña completa.
+
+Pruebas y publicación actuales: consultar `v1-solo-status.json`. Logs V512 en
+`/workspace/.cloud-setup/logs/`, lámina de 50 formas y revisión en `test-results/v512/`.
+`node_modules` es un enlace no versionado: NO añadirlo a git.
+
+Pendiente principal: profundizar arte y rutas de las diez salas, actuación anatómica
+de los diez héroes, diseño de enemigos pobres, propuesta más ambiciosa de Yomi,
+escenario vivo de selección, balance real de Normal, campaña continua/Quimera,
+recuerdos y aceptación humana. Memoria IA actual se borra con la partida;
+no hay aprendizaje persistente ni llamadas a un LLM por criatura.
+
+---
+
+## Referencia histórica de V501 (superada por el estado de arriba)
+
 # Reanudar OHANA sin depender del historial del chat
 
 ## Leer primero

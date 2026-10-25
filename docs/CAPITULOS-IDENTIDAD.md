@@ -4,7 +4,7 @@ Dirección aceptada: Kilo abre la campaña; cada capítulo pertenece a su héroe
 
 ## Referencia ya implementada: Kilo
 
-La sala alterna combate de suelo, movilidad aérea y música. H abre el cuerpo a cuerpo; J rebota en el suelo y apunta en la última dirección de movimiento durante el vuelo solar. K levita temporalmente en las formas intermedias y activa vuelo sostenido en Flor Solar; otra K desciende y recibir daño lo interrumpe. El vuelo no prolonga el aura ofensiva ni el reflejo, que mantienen sus seis segundos máximos. L recupera vida al acertar; I exige impactos H/J/H; P conserva carga y ritmo.
+La sala alterna combate de suelo, movilidad aérea y música. H abre el cuerpo a cuerpo; J rebota en el suelo y apunta en la última dirección de movimiento durante el vuelo solar. K levita temporalmente en las formas intermedias y activa vuelo sostenido en Flor Solar; otra K desciende y recibir daño lo interrumpe. El vuelo no prolonga el aura ofensiva ni el reflejo, que mantienen sus seis segundos máximos. L recupera vida al acertar; I se prepara con tres ataques H o J que acierten; P conserva carga y ritmo.
 
 Las cuatro notas aseguran los hitos de XP sin sumar premios repetidos. Las defensas frontales invitan a cambiar de altura; los tiradores preparan ráfagas dirigidas y dos vigías tienen bandas aéreas propias. Tres carillones ofrecen un desvío elevado opcional, con +150 puntos por contacto real en vuelo solar y persistencia sin repetición. No bloquean el sello ni proporcionan invulnerabilidad, XP o curación. El Tambor anuncia su abanico si el objetivo está alto: fija el disparo al preparar el ataque, por lo que cambiar de altura permite esquivarlo. No persigue al jugador después de lanzar.
 
@@ -17,7 +17,7 @@ Esta tabla es dirección de diseño; no declara implementadas las futuras varian
 | Kilo | Cuándo acercarse, levitar, subir o descender | Rebotes, reflejo, notas dirigidas y recuperación | Defensas frontales, tiradores, vigías y ventanas del Tambor |
 | Stitcho | Qué ruta permite transportar una pieza con seguridad | Bola, rebotes, plasma y acrobacia junto a paredes | Máquinas con flancos accesibles; raíles y mantenimiento |
 | Chispín | A qué conductor saltar y dónde terminar el desplazamiento | Cadena, blink y carrera relámpago | Grupos separados por circuitos; el destino del blink importa |
-| Michi | Qué enemigo controlar antes de cruzar un espacio suspendido | Ovillos, ronroneo y ataques de colas | Enemigos que pueden dormirse o desviarse; medusas como recorrido |
+| Michi | Qué enemigo controlar antes de cruzar un espacio suspendido | Zarpa lunar a distancia, ronroneo y ataques de colas | Enemigos que pueden dormirse o desviarse; medusas como recorrido |
 | Cuerno | Desde dónde ordenar y proyectar la luz | Doble salto, arcoíris y barridos prismáticos | Líneas de visión, orden de prismas y posiciones de disparo |
 | Dragón | Qué altura ganar antes de descender o lanzar fuego | Vuelo, térmicas, aliento y picado | Calor, terrazas y blancos que invitan a ataques verticales |
 | Dino | Dónde aterrizar y qué romper con ese impulso | Peso, pisotón y golpes de área | Enemigos agrupados y escudos que pueden abrirse desde arriba |

@@ -154,33 +154,33 @@ export function drawWorld1Select(ctx, W, H, t, sel, { drawActor = null, reduceMo
     const x = r.x, y = r.y - lift, w = r.w, h = r.h, shake = focus && sel.deny ? Math.sin(sel.deny) * 4 : 0;
     ctx.save(); ctx.translate(shake, 0);
     ctx.globalAlpha = c.unlocked ? 1 : 0.83;
-    ctx.fillStyle = focus ? "#fff5de" : "#d8dfdc"; roundRect(ctx, x, y, w, h, 14); ctx.fill();
+    ctx.fillStyle = focus ? "#284b60" : "#1b3048"; roundRect(ctx, x, y, w, h, 14); ctx.fill();
     ctx.fillStyle = c.tint; ctx.globalAlpha *= 0.28; roundRect(ctx, x + 4, y + 4, w - 8, h * 0.62, 11); ctx.fill();
     ctx.globalAlpha = c.unlocked ? 1 : 0.83;
-    ctx.lineWidth = focus ? 4 : 2; ctx.strokeStyle = focus ? "#2b6561" : "#9db7a5"; roundRect(ctx, x, y, w, h, 14); ctx.stroke();
-    ctx.fillStyle="#45645f";ctx.font="bold 10px sans-serif";
+    ctx.lineWidth = focus ? 4 : 2; ctx.strokeStyle = focus ? "#ffe0a4" : "#546b80"; roundRect(ctx, x, y, w, h, 14); ctx.stroke();
+    ctx.fillStyle="#c2d8e1";ctx.font="bold 10px sans-serif";
     ctx.fillText(c.final?'FINAL':`CAPÍTULO ${String(i+1).padStart(2,'0')}`,x+w/2,y+12,w*.8);
     // Door: the chapter protagonist, not a freely interchangeable avatar.
     const pcx = x + w / 2, pcy = y + h * 0.36, pr = Math.min(w * 0.36, h * 0.25);
     ctx.strokeStyle = c.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(pcx, pcy, pr, pr * 1.15, 0, 0, Math.PI * 2); ctx.stroke();
     if (!c.final && drawActor) { try { drawActor(ctx, c.hero, pcx, pcy + pr * 0.9, pr / 40); } catch (_) { drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, t); } }
     else drawHeroEmblem(ctx, c.hero, pcx, pcy, pr * 1.5, c.color, reduceMotion ? 0 : t);
-    if (!c.unlocked) { ctx.fillStyle = "#345c59"; ctx.font = `bold ${Math.round(pr * 0.35)}px sans-serif`; ctx.fillText("🔒", x + w - 16, y + 18); }
-    ctx.fillStyle = "#244d4a"; ctx.font = `bold ${Math.max(12,Math.round(Math.min(w * 0.12, h * 0.085)))}px sans-serif`; ctx.fillText(c.name, pcx, y + h * 0.67,w*.9);
-    ctx.fillStyle = "#496b64"; ctx.font = `${Math.round(Math.min(w * 0.075, h * 0.05))}px sans-serif`; if(W>=600)ctx.fillText(c.roomName, pcx, y + h * 0.77,w*.9);
+    if (!c.unlocked) { ctx.fillStyle = "#c5d6df"; ctx.font = `bold ${Math.round(pr * 0.35)}px sans-serif`; ctx.fillText("🔒", x + w - 16, y + 18); }
+    ctx.fillStyle = "#fff0cc"; ctx.font = `bold ${Math.max(12,Math.round(Math.min(w * 0.12, h * 0.085)))}px sans-serif`; ctx.fillText(c.name, pcx, y + h * 0.67,w*.9);
+    ctx.fillStyle = "#c3d2df"; ctx.font = `${Math.round(Math.min(w * 0.075, h * 0.05))}px sans-serif`; if(W>=600)ctx.fillText(c.roomName, pcx, y + h * 0.77,w*.9);
     if (!c.final) {
       const bw = w * 0.7, bx = pcx - bw / 2, by = y + h * 0.83;
-      ctx.fillStyle = "#c7ceb9"; ctx.fillRect(bx, by, bw, 6); ctx.fillStyle = c.color; ctx.fillRect(bx, by, bw * c.found / 100, 6);
-      ctx.fillStyle = "#385e56"; ctx.font = `${Math.max(9,Math.round(h * 0.042))}px sans-serif`; ctx.fillText(`${c.found}/100`, pcx, by + 11);
+      ctx.fillStyle = "#101e32"; ctx.fillRect(bx, by, bw, 6); ctx.fillStyle = c.color; ctx.fillRect(bx, by, bw * c.found / 100, 6);
+      ctx.fillStyle = "#d2dfe8"; ctx.font = `${Math.max(9,Math.round(h * 0.042))}px sans-serif`; ctx.fillText(`${c.found}/100`, pcx, by + 11);
     }
     if (c.sealed) { ctx.fillStyle = c.color; ctx.beginPath(); ctx.arc(x + w - 18, y + 18, 12, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = "#1e1838"; ctx.font = "bold 14px sans-serif"; ctx.fillText("✓", x + w - 18, y + 19); }
     ctx.restore();
   });
   // Pie: frase del héroe enfocado + qué hay en su sala.
-  ctx.fillStyle="#fff3ddeb";roundRect(ctx,8,H*.855,W-16,H*.14,12);ctx.fill();
-  ctx.globalAlpha = 1; ctx.fillStyle = "#244d4a"; ctx.font = `bold ${Math.round(H * 0.034)}px sans-serif`;
+  ctx.fillStyle="#192e43";roundRect(ctx,8,H*.855,W-16,H*.14,12);ctx.fill();
+  ctx.globalAlpha = 1; ctx.fillStyle = "#fff0cc"; ctx.font = `bold ${Math.round(H * 0.034)}px sans-serif`;
   ctx.fillText(cur.tagline, W / 2, H * 0.89,W*.92);
-  ctx.fillStyle = "#345c59"; ctx.font = `${Math.round(H * 0.022)}px sans-serif`;
+  ctx.fillStyle = "#c5d6df"; ctx.font = `${Math.round(H * 0.022)}px sans-serif`;
   ctx.fillText(cur.final ? "Corazón de Ohana · Quimera final" : `Sello: ${cur.seal}${cur.sealed ? " · recuperado" : ""}`, W / 2, H * 0.935,W*.92);
   ctx.fillText(cur.final ? "Reúne los diez sellos" : `Reliquia: ${cur.relic}`,W / 2,H*.97,W*.92);
   if (sel.pulse > 0) { ctx.globalAlpha = sel.pulse / 30 * 0.5; ctx.fillStyle = cur.color; ctx.fillRect(0, 0, W, H); }

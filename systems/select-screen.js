@@ -80,7 +80,7 @@ export function drawSelectCard(ctx, w, h, t, def, stats, state = "idle", enter =
   // nombre + barras
   ctx.fillStyle = "#fff"; ctx.font = "900 " + Math.round(h * .07) + "px system-ui, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   ctx.fillText(def.name, w / 2, h * .66);
-  const rows = [...SELECT_STAT_KEYS.map(([key, label]) => [label, stats[key].b, stats[key].f]), ["Dificultad", stats.dificultad.f, stats.dificultad.f]];
+  const rows = [...SELECT_STAT_KEYS.map(([key, label]) => [label, stats[key].b, stats[key].f]), ["Manejo", stats.dificultad.f, stats.dificultad.f]];
   const bh = Math.max(3, h * .022), x0 = w * .1, bw = w * .8;
   rows.forEach(([label, b, f], i) => {
     const grow = clamp(enter * 1.4 - i * .08, 0, 1);
@@ -125,7 +125,7 @@ const CSS = `
 @media (prefers-reduced-motion:reduce){#chars-grid .char-card,#chars-grid .char-card .portrait canvas{animation:none!important}}`;
 
 export function statsHTML(s) {
-  const rows = [...SELECT_STAT_KEYS.map(([k, label]) => [label, s[k].b, s[k].f, s[k].base + " → " + s[k].final]), ["Dificultad", s.dificultad.f, s.dificultad.f, ["", "Fácil", "Media", "Difícil"][s.dificultad.value]]];
+  const rows = [...SELECT_STAT_KEYS.map(([k, label]) => [label, s[k].b, s[k].f, s[k].base + " → " + s[k].final]), ["Manejo", s.dificultad.f, s.dificultad.f, ["", "Fácil", "Media", "Difícil"][s.dificultad.value]]];
   return '<span class="ss-stats" aria-hidden="true">' + rows.map(([l, b, f, title]) =>
     '<span class="ss-stat" title="' + title + '"><span>' + l + '</span><span class="ss-bar"><i data-w="' + Math.round(f * 100) + '"></i><b data-w="' + Math.round(b * 100) + '"></b></span></span>').join("") + "</span>";
 }

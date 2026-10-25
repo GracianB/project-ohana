@@ -42,6 +42,48 @@ function _stagSilhouette(ctx,x,y,scale){
  ctx.restore();
 }
 
+// Paint the organic grove once, then scroll its cached vector layers. Hundreds
+// of leaf and bark details cost two image blits per frame on a small viewport.
+const groveTiles=new WeakMap();
+function paintPrismaticGrove(ctx,camX,w,h){
+ if(typeof OffscreenCanvas==='undefined')return;
+ let tile=groveTiles.get(ctx);
+ if(!tile){
+  tile=new OffscreenCanvas(1200,640);const c=tile.getContext('2d');
+  for(let n=0;n<3;n++){
+   const x=110+n*430,base=630,lean=n%2?1:-1;
+   c.fillStyle='#285560';c.beginPath();c.moveTo(x-24,base);
+   c.bezierCurveTo(x+18,base-150,x-lean*36,base-310,x+lean*12,base-454);
+   c.bezierCurveTo(x-lean*4,base-295,x+54,base-165,x+42,base);c.closePath();c.fill();
+   for(let side of [-1,1]){
+    c.strokeStyle='#376e71';c.lineWidth=20;c.lineCap='round';c.beginPath();
+    c.moveTo(x+8,base-175);c.bezierCurveTo(x+side*39,base-305,x+side*115,base-352,x+side*190,base-351);c.stroke();
+    c.strokeStyle='#74a39a';c.lineWidth=2;c.beginPath();c.moveTo(x+4,base-12);c.bezierCurveTo(x-18,base-143,x+side*20,base-267,x+side*90,base-328);c.stroke();
+   }
+   for(let cluster=0;cluster<12;cluster++){
+    const a=cluster*Math.PI*2/12,cx=x+Math.cos(a)*135,cy=base-405+Math.sin(a)*44;
+    for(let leaf=0;leaf<18;leaf++){
+     const ang=leaf*2.399,rad=12+Math.sqrt(leaf)*11,lx=cx+Math.cos(ang)*rad,ly=cy+Math.sin(ang)*rad*.56;
+     c.fillStyle=['#3d7d79','#58978a','#80b399','#b2cda1'][(leaf+cluster+n)%4];
+     c.beginPath();c.ellipse(lx,ly,16+(leaf%3)*3,7,ang*.3,0,Math.PI*2);c.fill();
+     if(leaf%4===0){c.strokeStyle='#d4e2b880';c.lineWidth=.8;c.beginPath();c.moveTo(lx-9,ly);c.lineTo(lx+8,ly-2);c.stroke();}
+    }
+   }
+   for(let vine=0;vine<6;vine++){
+    const vx=x-135+vine*51,vy=base-380+(vine%3)*17,len=65+(vine*31)%89;
+    c.strokeStyle='#8eae96';c.lineWidth=1.2;c.beginPath();c.moveTo(vx,vy);c.bezierCurveTo(vx-9,vy+len*.4,vx+11,vy+len*.7,vx+2,vy+len);c.stroke();
+    const light=c.createRadialGradient(vx+2,vy+len,1,vx+2,vy+len,20);light.addColorStop(0,'#ffefd49c');light.addColorStop(1,'#ffefd400');c.fillStyle=light;c.fillRect(vx-18,vy+len-20,40,40);
+    c.fillStyle=vine%2?'#e5bad9':'#efe1a5';c.beginPath();c.ellipse(vx+2,vy+len,4,7,.2,0,Math.PI*2);c.fill();
+   }
+  }
+  groveTiles.set(ctx,tile);
+ }
+ const scale=Math.max(.65,Math.min(1,h/900)),span=1200*scale,off=((camX*.22)%span+span)%span;
+ ctx.save();ctx.globalAlpha=.86;
+ for(let x=-off-span;x<w+span;x+=span)ctx.drawImage(tile,x,h*.75-640*scale,span,640*scale);
+ ctx.restore();
+}
+
 export function drawCuernoForestBackdrop(ctx, cam, t, viewportW, viewportH, reduceMotion = false) {
  const w = viewportW || 1100;
  const h = viewportH || 700;
@@ -51,10 +93,10 @@ export function drawCuernoForestBackdrop(ctx, cam, t, viewportW, viewportH, redu
 
  // ── Layer 0: Alpine twilight sky ─────────────────────────────────────────
  const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
- skyGrad.addColorStop(0, '#050f18');
- skyGrad.addColorStop(0.30, '#091e2e');
- skyGrad.addColorStop(0.65, '#103a44');
- skyGrad.addColorStop(1, '#1a6068');
+ skyGrad.addColorStop(0, '#285266');
+ skyGrad.addColorStop(0.30, '#3d7884');
+ skyGrad.addColorStop(0.65, '#7fb6a5');
+ skyGrad.addColorStop(1, '#d4dfb7');
  ctx.fillStyle = skyGrad;ctx.fillRect(0, 0, w, h);
 
  // ── Layer 1: Aurora Borealis ribbons (3 animated bands) ─────────────────
@@ -117,9 +159,11 @@ export function drawCuernoForestBackdrop(ctx, cam, t, viewportW, viewportH, redu
  for(let x=-200;x<w+300;x+=160){
   const px=x-peakOff%200;
   const py=h*0.55+Math.sin(x*0.014)*48;
-  ctx.lineTo(px,py);ctx.lineTo(px+60,py-42);ctx.lineTo(px+130,py);
+  ctx.bezierCurveTo(px-20,py+18,px+16,py-45,px+60,py-42);ctx.quadraticCurveTo(px+100,py-46,px+160,py+8);
  }
  ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+
+ paintPrismaticGrove(ctx,cam0,w,h);
 
  // ── Layer 4: Crystal stag silhouettes (mid parallax) ─────────────────────
  const stagOff=((cam0*0.14)%(w*2)+w*2)%(w*2);

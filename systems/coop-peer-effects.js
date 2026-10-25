@@ -1,3 +1,4 @@
+import {surpriseDuetTicks} from './u-duet-direction-v315.js';
 import {readDinoEffects,advanceDinoEffects} from './dino-coop-effects.js';
 import {readMichiDuet,readMichiEffects} from './michi-duet.js';
 import {readFamilyDuet,FAMILY_DUET_LENGTH} from './family-duets.js';
@@ -163,16 +164,16 @@ export function advancePeerEffects(game){
  const frame=game.coopPeerEffects;if(!frame)return;
  const move=frame.ticks++<12;
  frame.dinoFx=advanceDinoEffects(frame.dinoFx,move);
- if(frame.familyDuet&&++frame.familyDuet.age>=FAMILY_DUET_LENGTH)frame.familyDuet=null;
- if(frame.michiDuet){frame.michiDuet.stars=frame.michiDuet.stars.map(b=>({...b,age:b.age+1})).filter(b=>b.age<=30);if(++frame.michiDuet.age>=120)frame.michiDuet=null;}
+ if(frame.familyDuet&&++frame.familyDuet.age>=surpriseDuetTicks(frame.familyDuet))frame.familyDuet=null;
+ if(frame.michiDuet){frame.michiDuet.stars=frame.michiDuet.stars.map(b=>({...b,age:b.age+1})).filter(b=>b.age<=30);if(++frame.michiDuet.age>=surpriseDuetTicks(frame.michiDuet))frame.michiDuet=null;}
  for(const f of frame.michiFx||[]){f.life--;if(move&&f.kind!=='purr'){f.x+=f.vx;f.y+=f.vy;}}frame.michiFx=(frame.michiFx||[]).filter(f=>f.life>0);
  for(const f of frame.chispinFx||[]){f.life--;if(f.kind==='storm')f.bolts=f.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);}frame.chispinFx=(frame.chispinFx||[]).filter(f=>f.life>0);
- if(frame.chispinDuet){frame.chispinDuet.tails=frame.chispinDuet.tails.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);frame.chispinDuet.bolts=frame.chispinDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);if(++frame.chispinDuet.age>=120)frame.chispinDuet=null;}
+ if(frame.chispinDuet){frame.chispinDuet.tails=frame.chispinDuet.tails.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);frame.chispinDuet.bolts=frame.chispinDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);if(++frame.chispinDuet.age>=surpriseDuetTicks(frame.chispinDuet))frame.chispinDuet=null;}
  if(frame.stitchoDuet){
   frame.stitchoDuet.bolts=frame.stitchoDuet.bolts.map(b=>({...b,life:b.life-1})).filter(b=>b.life>0);
-  if(++frame.stitchoDuet.age>=(frame.stitchoDuet.surprise?360:120))frame.stitchoDuet=null;
+  if(++frame.stitchoDuet.age>=surpriseDuetTicks(frame.stitchoDuet))frame.stitchoDuet=null;
  }
- if(frame.kiloDuet&&++frame.kiloDuet.age>=120)frame.kiloDuet=null;
+ if(frame.kiloDuet&&++frame.kiloDuet.age>=surpriseDuetTicks(frame.kiloDuet))frame.kiloDuet=null;
  for(const type of ["projectiles","slashes","bolts","kiloFx"]){
   for(const item of frame[type]){
    if(move&&(type==="projectiles"||type==="kiloFx")){item.x+=item.vx;item.y+=item.vy;}

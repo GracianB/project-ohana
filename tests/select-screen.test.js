@@ -29,7 +29,7 @@ test("select-screen: tarjetas idle/hover/selected y pantalla completa sin gradie
 
 test("select-screen: barras HTML y montaje DOM idempotente que no captura input", () => {
   const html = statsHTML(selectStats(ROSTER).kilo);
-  assert.match(html, /Vida/); assert.match(html, /Dificultad/); assert.match(html, /data-w="\d+"/);
+  assert.match(html, /Vida/); assert.match(html, /Manejo/); assert.match(html, /data-w="\d+"/);
   const listeners = [];
   const mkEl = (id) => ({ dataset: { id }, style: { setProperty() {} }, classList: { add() {}, remove() {} }, querySelector: () => null, querySelectorAll: () => [], insertAdjacentHTML(_, h) { this.html = h; }, addEventListener: (ev) => listeners.push(ev), removeEventListener() {} });
   const cards = ROSTER.map((c) => mkEl(c.id));

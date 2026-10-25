@@ -14,7 +14,7 @@ export const SIGNATURE = {
   chispin: { reach: 8,  dmg: 2,  kb: 0.85, kind: "zap",   dash: 15, iframe: 8,  spark: true },
   cat:     { reach: -8, dmg: 4,  kb: 0.9,  kind: "claws", dash: 14, iframe: 10, air: 1.35 },
   dragon:  { reach: 16, dmg: 4,  kb: 1.15, kind: "fan",   dash: 13, iframe: 8,  fire: true },
-  dino:    { reach: 8,  dmg: 10, kb: 1.6,  kind: "fan",   dash: 10, iframe: 6,  heavy: true, ram: true },
+  dino:    { reach: 8,  dmg: 26, kb: 1.9,  kind: "fan",   dash: 10, iframe: 6,  heavy: true, ram: true },
   frita:   { reach: 12, dmg: 0,  kb: 1,    kind: "fan",   dash: 14, iframe: 8,  low: true },
   pizza:   { reach: 4,  dmg: 2,  kb: 1.25, kind: "wedge", dash: 13, iframe: 8,  hop: -1.4 },
   yomi:    { reach: 10, dmg: 4,  kb: 1.15, kind: "fan",   dash: 12, iframe: 8 },

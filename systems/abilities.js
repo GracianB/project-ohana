@@ -191,6 +191,7 @@ p._chargeAction=(p._chargeAction||0)+1;
 game.lastAbilityId = id;
 game.lastAbilitySlot = index;
 syncState(p);
+if(index===3)p._powerPerformance={index,start:Number(game.t)||0};
 p._cast = { slot: index, t: Number.isFinite(Number(game.t)) ? Number(game.t) : 0, id, form: evo };
 sfx(id);
 game.fx?.emit(cx(p) + (p.facing || 1) * 16, cy(p), { color: def.color, count: index === 3 ? 28 : 10, size: index === 3 ? 4 : 3, star: true, speed: index === 3 ? 3.8 : 2.8, life: 14 });
@@ -1331,7 +1332,7 @@ boom(g, cx(p), p.y - 60, "#9cf", 10);
 
 yarn(g, p, evo) {
 const h = hand(p);
-add({ kind: "yarn", x: h.x, y: h.y, vx: (12 + evo) * p.facing, vy: 0, out: true, life: 130, hitA: new Set(), hitB: new Set(), r: 10 + evo, dmg: (15 + evo * 2) * pw(p), rot: 0 });
+add({ kind: "yarn", x: h.x, y: h.y, vx: (12 + evo) * p.facing, vy: 0, out: true, life: 42, hitA: new Set(), hitB: new Set(), r: 10 + evo, dmg: (15 + evo * 2) * pw(p), rot: 0 });
 },
 purr(g, p, evo) {
 const R = 320 + evo * 70;
@@ -2059,23 +2060,13 @@ return f.life > 0;
 yarn(g, f, p) {
 f.life--;
 f.rot += f.vx * 0.05 + 0.1;
-if (f.out) {
-  f.x += f.vx;
-  f.vx *= 0.915;
-  if (f.age >= 22 || Math.abs(f.vx) < 1.4) f.out = false;
-} else {
-  const dx = cx(p) - f.x, dy = cy(p) - f.y, d = Math.hypot(dx, dy) || 1;
-  const sp = Math.min(15, 4 + (f.age - 22) * 0.6);
-  f.vx = (dx / d) * sp; f.vy = (dy / d) * sp;
-  f.x += f.vx; f.y += f.vy;
-  if (d < 22) { boom(g, f.x, f.y, "#ff8ad4", 6, { star: true }); return false; }
-}
-const set = f.out ? f.hitA : f.hitB;
+f.x+=f.vx;f.y+=f.vy;
+const set=f.hitA;
 for (const e of g.enemies) {
   if (set.has(e) || !canHit(e) || !circleHit(f.x, f.y, f.r + 2, e)) continue;
   set.add(e);
   hitEnemy(g, e, f.dmg, { kx: Math.sign(f.vx || 1) * 7, ky: -3, stun: 18, color: "#ff8ad4" });
-  michiYomiImpact(cx(e), cy(e), "¡OVILLO!", "#ff8ad4");
+  michiYomiImpact(cx(e), cy(e), "¡ZARPA LUNAR!", "#ff8ad4");
 }
 return f.life > 0;
 },
@@ -3224,25 +3215,14 @@ trail(ctx,f,cam,t,g){drawChispaTrail(ctx,f,cam,t,!!g?.reduceMotion);},
 storm(ctx,f,cam,t,g){drawChispaStorm(ctx,f,cam,t,!!g?.reduceMotion);},
 
 yarn(ctx, f, cam, t, g, p) {
-const h = hand(p);
-const x = f.x - cam.x, y = f.y - cam.y;
-const hx = h.x - cam.x, hy = h.y - cam.y;
-ctx.strokeStyle = "#ffb6e4";
-ctx.lineWidth = 1.6;
-ctx.beginPath();
-ctx.moveTo(hx, hy);
-ctx.quadraticCurveTo((hx + x) / 2, Math.max(hy, y) + 18, x, y);
-ctx.stroke();
-ctx.globalAlpha = 0.3; ctx.fillStyle = "#ff8ad4"; ctx.beginPath(); ctx.arc(x, y, f.r * 1.8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
-ctx.translate(x, y);
-ctx.rotate(f.rot);
-ctx.fillStyle = "#ff8ad4";
-ctx.beginPath(); ctx.arc(0, 0, f.r, 0, TAU); ctx.fill();
-ctx.strokeStyle = "#c2408f";
-ctx.lineWidth = 1.4;
-for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.ellipse(0, 0, f.r * 0.9, f.r * 0.35, i * 1.05, 0, TAU); ctx.stroke(); }
-ctx.fillStyle = "rgba(255,255,255,.6)";
-ctx.beginPath(); ctx.arc(-f.r * 0.35, -f.r * 0.35, f.r * 0.25, 0, TAU); ctx.fill();
+const x=f.x-cam.x,y=f.y-cam.y,dir=Math.sign(f.vx)||1;
+ctx.save();ctx.translate(x,y);ctx.scale(dir,1);
+ctx.strokeStyle='#d7bbff';ctx.lineWidth=3;ctx.lineCap='round';
+for(let i=0;i<3;i++){ctx.globalAlpha=.24+i*.16;ctx.beginPath();ctx.moveTo(-f.r-10-i*9,(i-1)*6);ctx.quadraticCurveTo(-10,-9+(i-1)*6,0,(i-1)*3);ctx.stroke();}
+ctx.globalAlpha=1;ctx.fillStyle='#ffe5f4';ctx.strokeStyle='#9273b6';ctx.lineWidth=1.5;
+ctx.beginPath();ctx.ellipse(0,3,f.r*.75,f.r*.6,-.2,0,TAU);ctx.fill();ctx.stroke();
+for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(-7+i*7,-f.r*.48,3.4,4.6,(i-1)*.22,0,TAU);ctx.fill();ctx.stroke();}
+ctx.fillStyle='#d8a9d8';ctx.beginPath();ctx.ellipse(0,4,f.r*.35,f.r*.26,0,0,TAU);ctx.fill();ctx.restore();
 },
 purr(ctx, f, cam, t, g, p) {
 const x = cx(p) - cam.x, y = cy(p) - cam.y;

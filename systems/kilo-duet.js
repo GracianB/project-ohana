@@ -1,4 +1,4 @@
-import {guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
+import {surpriseDuetTicks,guestPerformance,readGuestOrigin,surpriseGuestDrawer} from './u-duet-direction-v315.js';
 // V301: an in-world Ohana ring + Stitcho chaos attack. Rendering never damages.
 export const KILO_DUET_TICKS=120;
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
@@ -31,7 +31,7 @@ function nearSegment(e,a,b,r){
 export function updateKiloDuet(game,hit){
  const s=game._kiloDuet,p=game.player;
  if(!s){if(p)p._kiloDuetT=0;return;}
- if(!p||p.dead||p.id!=='kilo'||s.age>=120){game._kiloDuet=null;if(p)p._kiloDuetT=0;if(game._assist?.heroId==="stitcho")game._assist.t=0;return;}
+ if(!p||p.dead||p.id!=='kilo'||s.age>=surpriseDuetTicks(s)){game._kiloDuet=null;if(p)p._kiloDuetT=0;if(game._assist?.heroId==="stitcho")game._assist.t=0;return;}
  s.x=p.x+p.w/2;s.y=p.y+p.h;
  const pose=kiloDuetPose(s),center={x:s.x,y:s.y-26},ally={x:pose.x,y:pose.y-24};
  const damage=(70+s.evo*14)*s.power;
@@ -49,12 +49,12 @@ export function updateKiloDuet(game,hit){
    if(hit(game,e,damage*.2,{...options,crit:true,hitstop:3,shake:3+s.evo,stun:30+s.evo*6,kx:dir*(7+s.evo*2),ky:-7-s.evo}))s.final.add(e);
   }
  }
- if(game._assist?.heroId==="stitcho")game._assist.t=120-s.age;
- s.previous=ally;p._kiloDuetAge=s.age;p._kiloDuetT=120-s.age;s.age++;
+ if(game._assist?.heroId==="stitcho")game._assist.t=surpriseDuetTicks(s)-s.age;
+ s.previous=ally;p._kiloDuetAge=s.age;p._kiloDuetT=surpriseDuetTicks(s)-s.age;s.age++;
 }
 export function readKiloDuet(value){
  if(!value||readGuestOrigin(value)===null||![value.x,value.y,value.age,value.evo,value.facing].every(Number.isFinite)||
-  Math.abs(value.x)>20000||Math.abs(value.y)>20000||!Number.isInteger(value.age)||value.age<0||value.age>=120||
+  Math.abs(value.x)>20000||Math.abs(value.y)>20000||!Number.isInteger(value.age)||value.age<0||value.age>=surpriseDuetTicks(value)||
   !Number.isInteger(value.evo)||value.evo<0||value.evo>4||![-1,1].includes(value.facing))return null;
  return {...(value.surprise===true?{surprise:true}:{}),...readGuestOrigin(value),x:value.x,y:value.y,age:value.age,evo:value.evo,facing:value.facing};
 }
@@ -77,7 +77,7 @@ export function drawKiloDuet(ctx,state,cam,t,drawActor,roster,reduce=false){
  const pose=kiloDuetPose(s),x=s.x-cam.x,y=s.y-26-cam.y,age=s.age,evo=s.evo;
  const spin=reduce?0:t*.006,solar=evo===4;
  ctx.save();
- ctx.globalAlpha*=age>112?(120-age)/8:1;
+ ctx.globalAlpha*=age>surpriseDuetTicks(s)-8?(surpriseDuetTicks(s)-age)/8:1;
  // ACT 1 · carga: notas y pétalos convergen, aro de anticipación que se cierra.
  if(age<30){
   const k=age/30,cr=(1-k)*(90+evo*18)+24;

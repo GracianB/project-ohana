@@ -74,9 +74,9 @@ export function duetEcho(hero,ally){
 export function startBattleCompanion(g,id,power=1){
  if(!THEMES[id]||!g.player)return false;
  const s=state(g),p=g.player,c=center(p);
- s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:360,power,next:35,face:p.facing||1,attack:0,air:false,motion:'idle',vx:0,vy:0,
+ s.guest={id,x:c.x-(p.facing||1)*110,y:p.y+p.h,age:0,life:480,power,next:35,face:p.facing||1,attack:0,air:false,motion:'idle',vx:0,vy:0,
   lastCast:p._cast?.t??null,supportCd:0,echoes:0};
- g._assist={heroId:id,heroName:id,t:360};
+ g._assist={heroId:id,heroName:id,t:480};
  return true;
 }
 export function castEvolutionAttack(g,index){
@@ -148,14 +148,14 @@ export function updateEvolutionAttacks(g,hit,heal){
   a.y+=clamp(dy,-10,10);
   a.vx=a.x-ox;a.vy=a.y-oy;
   a.air=Math.abs(a.vy)>2||Math.abs(a.y-(p.y+p.h))>28;
-  a.motion=Math.abs(a.vx)>1?'run':goal.engaged?'ready':'idle';
+  a.motion=a.age>420?'farewell':Math.abs(a.vx)>1?'run':goal.engaged?'ready':'idle';
   if(Math.abs(a.vx)>0.5)a.face=Math.sign(a.vx);
   else if(target)a.face=q.x>=a.x?1:-1;
   else a.face=p.facing||1;
   // U now listens to the hero: an actual J/K/L/I/P cast signals a short
   // paired follow-up, once per cast and at most once per second.
   const cast=p._cast;
-  if(cast&&cast.slot!==3&&cast.t!==a.lastCast){
+  if(a.age<=360&&cast&&cast.slot!==3&&cast.t!==a.lastCast){
    a.lastCast=cast.t;
    if(a.supportCd===0&&target&&Math.hypot(q.x-a.x,q.y-a.y)<400){
     const echo=duetEcho(p.id,a.id);
@@ -168,7 +168,7 @@ export function updateEvolutionAttacks(g,hit,heal){
     g.nums?.add?.(a.x,a.y-42,echo.label,THEMES[a.id][0],false);
    }
   }
-  if(--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<300){
+  if(a.age<=360&&--a.next<=0&&target&&Math.hypot(q.x-a.x,q.y-(a.y-25))<300){
    a.next=36;a.attack=14;
    const damage=(15+e*5)*a.power,sy=a.y-28;
    if(['stitcho','chispin'].includes(a.id)){
@@ -255,7 +255,7 @@ export function drawEvolutionAttacks(ctx,g,cam,t,drawActor,roster){
   const bob=0;
   drawActor(ctx,{...def,...f,id:a.id,evo:e,x:a.x-f.w/2,y:a.y-f.h-bob,facing:a.face,
    vx:a.vx||0,vy:a.vy||0,grounded:!a.air,
-   _poseOverride:a.attack?'attack':a.motion==='run'?'run':'idle',
+   _poseOverride:a.motion==='farewell'?'victory':a.attack?'attack':a.motion==='run'?'run':'idle',
    _duetActor:true,_introForceCanvas:true,visualScale:.88},cam,t,{reduceMotion:!!g.reduceMotion});
  }}
  ctx.restore();
