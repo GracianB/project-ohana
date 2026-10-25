@@ -49,7 +49,7 @@ try{
  await page.screenshot({path:'test-results/v501/combat-compact-desktop.png'});
  await page.evaluate(()=>window.__OHANA_E2E.setEvo(3));await step(1);
  await page.keyboard.press('i');await step(1);
- assert.equal(await slot(4).getAttribute('data-power-state'),'combo');assert.match(await notice(),/Empieza acertando H/);
+ assert.equal(await slot(4).getAttribute('data-power-state'),'combo');assert.match(await notice(),/Acierta tres ataques H o J/,'the current Kilo combo accepts either real H or J hits');
  await page.evaluate(()=>{window.__OHANA_E2E.setEvo(4);window.__OHANA_E2E.setFinisher(35);});await step(1);
  await page.keyboard.press('p');await step(1);
  assert.equal(await slot(5).getAttribute('data-power-state'),'charge');assert.match(await notice(),/35\/100/);
