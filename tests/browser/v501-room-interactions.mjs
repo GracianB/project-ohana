@@ -58,7 +58,7 @@ try{
  assert.match(await objective(),/Patata dorada: Dirige el vuelo/);
  await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
  await page.screenshot({path:'test-results/v501/frita-flight.png'});
- let state=await step(1),minY=state.player.y,launches=0,corrections=0;
+ let state=await step(1),minY=state.player.y,launches=0,corrections=0,lastSteeredLaunch=-1;
  const telemetry=[];
  // A real geyser is a trajectory, not a fixed upward animation. The old pilot
  // ran only 120 single ticks and NEVER pressed Frita's actual airborne J
@@ -66,16 +66,16 @@ try{
  for(let i=0;i<760&&state.world1.done===0;i++){
   const flyer=await page.evaluate(()=>window.__OHANA_E2E.fryerAstralState());
   if(i%30===0)telemetry.push({i,x:Math.round(state.player.x),y:Math.round(state.player.y),vy:Math.round(state.player.vy*10)/10,
-    airborne:!state.player.grounded,launched:flyer.launched,steered:flyer.steered,done:state.world1.done});
+    airborne:!state.player.grounded,launched:flyer.launched,corrections:flyer.corrections,done:state.world1.done});
   minY=Math.min(minY,state.player.y);
   launches=Math.max(launches,Number(flyer.launches)||0);
-  corrections=Math.max(corrections,Number(flyer.airCorrections)||0);
+  corrections=Math.max(corrections,Number(flyer.corrections)||0);
   const flying=flyer.launched===frita[0].id&&!state.player.grounded;
   const goal=flying?frita[0].prize.x:frita[0].x;
   const dx=goal-state.player.x-state.player.w/2;
   await page.keyboard.up('a');await page.keyboard.up('d');
   if(Math.abs(dx)>(flying?9:22))await page.keyboard.down(dx>0?'d':'a');
-  if(flying&&!flyer.steered)await page.keyboard.press('j'); // earned aerial correction
+  if(flying&&lastSteeredLaunch!==flyer.launches){await page.keyboard.press('j');lastSteeredLaunch=flyer.launches;} // earned aerial correction
   // Geyser readiness is managed by the real game clock, not by this pilot.
   state=await step(Math.abs(dx)>40?5:2);
  }
