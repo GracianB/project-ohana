@@ -108,3 +108,21 @@ test("message accessibility: urgency changes the live region without changing th
   assert.match(source, /assertive/);
   assert.match(source, /prefers-reduced-motion/);
 });
+
+test("persistent objective recovers from a stale toast whose DOM was removed", () => {
+  const documentRef = new FakeDocument();
+  const manager = new MessageManager({ documentRef });
+  manager.show({ type: "room", title: "Cocina", duration: 0 });
+  manager.setObjective("Cliente esperando · quedan 15 s");
+  const root = manager.mount();
+  assert.match(root.children[0].className, /room/,
+    "a live higher-priority toast must retain the slot");
+  // Simulate the legacy cinematic removing a toast without dismiss().
+  root.replaceChildren();
+  manager.setObjective("Cliente esperando · quedan 14 s");
+  assert.equal(manager.current, null);
+  assert.equal(root.children.length, 1);
+  assert.equal(root.children[0].dataset.persistent, "1");
+  assert.match(root.children[0].children[1].textContent, /quedan 14 s/);
+  assert.equal(root.attributes.get("aria-live"), "polite");
+});
