@@ -5,7 +5,7 @@ import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 const server=await startServer(0);let browser;
 try{
- browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
+ browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],journal=[];
  page.on('pageerror',e=>errors.push(e.message));await fs.mkdir('test-results/v513',{recursive:true});
  await page.clock.install({time:new Date('2026-10-25T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-25T12:00:01Z'));
@@ -88,12 +88,24 @@ try{
   await fs.writeFile('test-results/v513/campaign-progress.json',JSON.stringify({journal,current:s.roomId},null,2));
  }
  assert.equal(s.roomId,'w1-final');assert.equal(s.hero,'kilo');assert.equal(s.evo,4);
- let deaths=0;const phases=new Set(),filmsSeen=new Set();
+ let deaths=0;const phases=new Set(),filmsSeen=new Set(),hudPhases=new Set();
+ await fs.mkdir('test-results/v494',{recursive:true});
  for(let i=0;i<11000&&!s.world1Won;i++){
   if(s.world1Cine){filmsSeen.add(s.world1Cine);await films();s=await state();}
   if(s.hp<=0){assert.ok(++deaths<=35,'final boss retry limit');await page.evaluate(()=>window.__OHANA_E2E.respawn());await films();s=await state();}
   if(!s.boss){await hold('d');s=await step(24);await release('d');continue;}
-  phases.add(s.boss.phase);const p=s.player,gap=s.boss.x-p.x-p.w/2,dist=Math.abs(gap);
+  phases.add(s.boss.phase);
+  if(!hudPhases.has(s.boss.phase)&&s.boss.hp>0){
+   // The Quimera draws its own Canvas arena HUD. The old Nest Queen
+   // boss-wrap must be hidden. Verify real screen-reader phase text too.
+   const oldRibbonHidden=await page.locator('#boss-wrap').evaluate(el=>el.classList.contains('hidden'));
+   assert.equal(oldRibbonHidden,true,'legacy Nest Queen HUD must not overlap Quimera');
+   const accessible=await page.locator('#world1-quimera-a11y').textContent();
+   assert.match(accessible,new RegExp('Fase '+s.boss.phase+' de 4'),'accessible Quimera phase');
+   await page.screenshot({path:'test-results/v494/quimera-hud-phase-'+s.boss.phase+'.png'});
+   hudPhases.add(s.boss.phase);
+  }
+  const p=s.player,gap=s.boss.x-p.x-p.w/2,dist=Math.abs(gap);
   if(s.boss.hp<=0){s=await step(30);continue;}
   if(dist<540)await press('j');if(dist<400&&i%20===0)await press('u');
   if(s.hp<s.maxHealth*.92&&dist<480)await press('l');
@@ -107,6 +119,7 @@ try{
  }
  assert.equal(s.world1Won,true,'ordinary combat wins the full campaign');
  assert.deepEqual([...phases].sort(),[1,2,3,4]);
+ assert.deepEqual([...hudPhases].sort(),[1,2,3,4],'four actual HUD screenshots from all phases');
  for(let i=0;i<120;i++){s=await state();if(s.world1Cine)filmsSeen.add(s.world1Cine);if(filmsSeen.has('ending')&&!s.world1Cine)break;await step(60);}
  assert.ok(filmsSeen.has('bossDefeat'));assert.ok(filmsSeen.has('ending'));
  assert.deepEqual(errors,[]);

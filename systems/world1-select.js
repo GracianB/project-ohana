@@ -67,6 +67,9 @@ export function createWorld1Select({ seals = [], counts = {}, start = null } = {
 export function refreshWorld1Select(sel, opts) { const i = sel.index; sel.cards = world1SelectCards(opts); sel.index = clamp(i, 0, sel.cards.length - 1); return sel; }
 
 const COLS = 6;
+// Shared hit-box geometry for Canvas rendering, pointer input and browser QA.
+// A portal's geometry must not be guessed from an obsolete grid layout.
+export function world1SelectCardRects(sel,W,H){return layout(sel,W,H);}
 function layout(sel,W,H){
  const compact=W<600,cx=W/2,cy=H*.47,rx=W*(compact?.39:.40),ry=H*.24;
  sel.columns=5;

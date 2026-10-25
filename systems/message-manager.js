@@ -108,7 +108,14 @@ export class MessageManager {
   setObjective(text, done = false) {
     this.objective = String(text || "").trim();
     this.objectiveDone = !!done;
-    if (!this.current) this.renderFallback();
+    // A stale transient message must not suppress the persistent goal if
+    // another UI transition removed its DOM node. Retain priority whenever
+    // its actual card still exists, but recover if the slot is empty.
+    const activeCard = this.node?.querySelector(".game-notification");
+    if (!this.current || !activeCard) {
+      if (!activeCard) { this.clearTimer(); this.current = null; }
+      this.renderFallback();
+    }
   }
 
   clearObjective() {

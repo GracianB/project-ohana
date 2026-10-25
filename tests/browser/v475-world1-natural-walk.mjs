@@ -99,8 +99,20 @@ try {
      await simulate(10);
      journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done});
      if(journal.length>260)journal.shift();
-     if(Math.abs(s.player.x-before)<.3 && !s.world1Cine && frames>12)
-       throw Error('Player physically stuck, no teleport allowed: '+JSON.stringify(journal.slice(-8)));
+     // V511 added real 48px terraced banks. Ordinary walking must NOT phase
+     // through them: climb using the genuine jump key before diagnosing a bug.
+     if(Math.abs(s.player.x-before)<.3 && !s.world1Cine && frames>12){
+       const blocked=s.player.x;
+       if(s.player.grounded){
+         await page.keyboard.down('w'); await simulate(3); await page.keyboard.up('w');
+         await page.keyboard.down(key); s=await simulate(34); await page.keyboard.up(key);
+         await simulate(8);
+         s=await state();
+         journal.push({room:roomId,target,at:Math.round(s.player?.x||0),hp:s.hp,seal:s.world1?.done,action:'physical jump'});
+       }
+       if(s.player.x<=blocked+.3 && s.player.grounded)
+         throw Error('Player physically stuck after walking AND jumping: '+JSON.stringify(journal.slice(-8)));
+     }
    }
    throw Error('Could not walk to '+target+' in '+roomId+': '+JSON.stringify(journal.slice(-10)));
  }
@@ -109,7 +121,40 @@ try {
  // a synthetic progress grant. Full ten-room E2E remains explicitly open.
  const flowers=WORLD1_ROOMS['w1-kilo'].seal.stations;
  assert.equal(flowers.length,4);
- const first=await walkTo(flowers[0].x,'w1-kilo');
+ let first=await walkTo(flowers[0].x,'w1-kilo');
+ // Reaching a note and *earning* it are different. Kilo's chapter requires
+ // real foes near the flower to be cleared, then 45 stationary grounded beats.
+ // Combat here uses only J/H and actual walk/jump keys, never kill/HP setters.
+ for(let attempt=0;attempt<100&&first.world1?.done<1;attempt++){
+   await finishCinema();
+   const guards=await page.evaluate(x=>window.__OHANA_E2E.roomCast()
+     .filter(e=>e.hp>0&&Math.abs(e.x+(e.w||0)/2-x)<130)
+     .map(e=>({x:e.x,w:e.w,hp:e.hp})),flowers[0].x);
+   if(guards.length){
+     const enemy=guards.sort((a,b)=>Math.abs(a.x-first.player.x)-Math.abs(b.x-first.player.x))[0];
+     const dx=enemy.x+(enemy.w||0)/2-(first.player.x+first.player.w/2);
+     if(Math.abs(dx)>38){
+       const direction=dx>0?'d':'a';
+       await page.keyboard.down(direction);await simulate(Math.min(9,Math.max(2,Math.floor(Math.abs(dx)/7))));
+       await page.keyboard.up(direction);
+     }
+     await page.keyboard.down('h');await simulate(2);await page.keyboard.up('h');
+     await page.keyboard.down('j');await simulate(2);await page.keyboard.up('j');
+     if(attempt%5===0&&first.player.grounded){
+       await page.keyboard.down('w');await simulate(3);await page.keyboard.up('w');
+     }
+     await simulate(20);
+   }else{
+     const dx=flowers[0].x-(first.player.x+first.player.w/2);
+     if(Math.abs(dx)>28){
+       await page.keyboard.down(dx>0?'d':'a');await simulate(Math.min(12,Math.max(2,Math.floor(Math.abs(dx)/5))));
+       await page.keyboard.up(dx>0?'d':'a');
+     }
+     await simulate(60);
+   }
+   first=await state();
+   if(first.hp<=0)throw Error('Kilo died during real flower combat before first note: '+JSON.stringify({attempt,guards,journal:journal.slice(-8)}));
+ }
  assert.equal(first.world1?.done,1,
    'one Kilo flower must actually sing after 45 grounded ticks: '+JSON.stringify(journal.slice(-8)));
  assert.equal(first.world1?.sealed,false,'one flower cannot grant Kilo a seal');

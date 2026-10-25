@@ -7,16 +7,19 @@ for(const def of ROSTER){console.log('Camp audit: '+def.id);await p.locator(`.ch
  await p.locator('#camp-film').click();assert.equal(await p.locator('#camp-film-stop').isVisible(),true);const line=await p.locator('#camp-line').textContent();await p.waitForTimeout(120);assert.equal(await p.locator('#camp-line').textContent(),line);await p.locator('#camp-film-stop').click();
 }
 assert.equal(await p.evaluate(()=>localStorage.getItem('ohana')),saved,'camp exploration must not change campaign save');
-// V468/V470: the camp now displays 11 World 1 portal cards, not five paired islands.
-// Exercise a real Canvas hit on Dino's card (row 2, column 1), using the
-// same deterministic six-column responsive layout as world1-select.js.
+// World 1 uses a circular chapter garden, not the earlier six-column grid.
+// Select Dino through its actual Canvas hit-box, shared with game rendering.
 assert.equal(await p.locator('#family-camp').getAttribute('data-world'),'1');
 await p.locator('.char-card[data-id="kilo"]').click();
 await p.locator('#camp-canvas').scrollIntoViewIfNeeded();
 const r=await p.locator('#camp-canvas').boundingBox();
-const pad=Math.max(10,r.width*.012),top=r.height*.2;
-const cw=Math.max(60,(r.width-pad*7)/6),ch=Math.max(90,(r.height-top-r.height*.16-pad)/2);
-await p.mouse.click(r.x+pad+(cw+pad)/2+cw/2,r.y+top+ch+pad+ch/2);
+const rect=await p.evaluate(async({width,height})=>{
+ const {createWorld1Select,world1SelectCardRects}=await import('/systems/world1-select.js');
+ const sel=createWorld1Select({start:'kilo'}),cards=world1SelectCardRects(sel,width,height);
+ return cards[sel.cards.findIndex(card=>card.hero==='dino')];
+},{width:r.width,height:r.height});
+assert.ok(rect&&rect.w>0&&rect.h>0,'Dino must have a real selectable portal');
+await p.mouse.click(r.x+rect.x+rect.w/2,r.y+rect.y+rect.h/2);
 assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'dino','Canvas portal must select Dino');
 // Selecting Kilo from the HTML cards must reset keyboard navigation to Kilo,
 // not continue from the previous Canvas index (Dino).
@@ -30,5 +33,10 @@ await fs.mkdir('test-results/visual',{recursive:true});
 for(const [name,width,height] of [['desktop',1440,1050],['mobile',390,844],['landscape',844,390]]){await p.setViewportSize({width,height});await p.locator('.char-card[data-id="cuerno"]').click();await p.waitForTimeout(600);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+' overflow');
  const cards=await p.locator('.char-card').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {w:r.width,h:r.height,x:r.x,right:r.right}}));assert.equal(cards.length,10);assert.ok(cards.every(r=>r.w>=40&&r.h>=44&&r.x>=0&&r.right<=width+1));await p.screenshot({path:`test-results/visual/v410-camp-${name}.png`,fullPage:true,timeout:20000});}
 assert.equal(await p.locator('.camp-mystery canvas').count(),0);assert.equal(await p.locator('.u-partner-panel').isVisible(),false);
+// Cuerno was selected only to audit the three viewport layouts. A clean
+// campaign has not earned the previous four seals, so entry MUST remain locked.
+// Return to the genuinely unlocked Kilo chapter before checking game start.
+await p.locator('.char-card[data-id="kilo"]').click();
+assert.equal(await p.locator('#family-camp').getAttribute('data-hero'),'kilo');
 await p.locator('#camp-start').click();await p.waitForFunction(()=>document.body.classList.contains('playing'));assert.deepEqual(errors,[]);console.log('PASS V410: ten heroes × five real forms, stats, voluntary films, saved-game isolation, Canvas hit selection, keyboard walking, mystery and desktop/mobile/landscape');
 }finally{await browser?.close();s.closeAllConnections();await new Promise(r=>s.close(r));}

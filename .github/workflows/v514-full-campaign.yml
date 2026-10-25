@@ -1,0 +1,56 @@
+name: V514 real full campaign · Normal
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'characters/identity-v2.js'
+      - 'characters/roster.js'
+      - 'characters/signature.js'
+      - 'systems/abilities.js'
+      - 'systems/enemy-director.js'
+      - 'systems/enemy-hero-counterplay.js'
+      - 'systems/kilo-chapter.js'
+      - 'systems/world1-**'
+      - 'game.js'
+      - 'index.html'
+      - 'sw.js'
+      - 'tests/browser/v513-full-campaign.mjs'
+      - '.github/workflows/v514-full-campaign.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v514-campaign-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  earned-normal-campaign:
+    name: Ten real chapters · boss · ending
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - name: Verify chapter identity and offline build
+        run: npm run release:check
+      - name: Play ten earned seals and all Quimera phases
+        run: |
+          CHROMIUM_BIN="$(node --input-type=module -e 'import {chromium} from "playwright"; process.stdout.write(chromium.executablePath())')"
+          export CHROMIUM_BIN
+          node tests/browser/v513-full-campaign.mjs
+      - name: Preserve earned-campaign evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v514-real-campaign-evidence
+          path: test-results/v513/
+          retention-days: 10
+          if-no-files-found: ignore

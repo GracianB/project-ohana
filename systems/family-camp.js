@@ -72,12 +72,12 @@ const powers=doc.createElement('p');powers.id='camp-powers';host.querySelector('
  const $=id=>host.querySelector('#'+id);
  function update(){const def=ROSTER.find(r=>r.id===selected),data=CAMP_HEROES[selected],f=def.forms[form];
  $('camp-start').textContent=w1sel?'Entrar en su capítulo →':'¡Vámonos de aventura! ↗';
- $('camp-name').textContent=def.name;$('camp-role').textContent=w1sel?'Su capítulo · comienza como bebé':data.role;$('camp-route').textContent=w1sel?(WORLD1_CHAPTER_PLANS[selected]?.identity+' · '+WORLD1_CHAPTER_PLANS[selected]?.mobility):'Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
+ $('camp-name').textContent=def.name;$('camp-role').textContent=w1sel?'Su capítulo · '+(def.identity?.title||'comienza como bebé'):data.role;$('camp-route').textContent=w1sel?('VENTAJA: '+def.identity?.strength+' · RETO: '+def.identity?.weakness):'Tu camino: '+data.route+'.';$('camp-form-name').textContent=def.evoNames[form];
  portrait.setAttribute('aria-label',def.evoNames[form]+' · personaje real');
  $('camp-stats').innerHTML=`<div><dt>Vida</dt><dd>${f.hp}</dd></div><div><dt>Velocidad</dt><dd>${f.speed}</dd></div><div><dt>Salto</dt><dd>${f.jump}</dd></div><div><dt>Saltos</dt><dd>${f.jumps}</dd></div><div><dt>Golpe H</dt><dd>${markAt(selected,form).dmg}</dd></div>`;
  $('camp-powers').textContent=def.abilities.map((id,i)=>['J','K','L'][i]+' · '+(ABILITY_DEFS[id]?.name||id)).join(' / ');
  for(const b of host.querySelectorAll('[data-camp-form]'))b.setAttribute('aria-pressed',String(Number(b.dataset.campForm)===form));
- $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].cost;host.dataset.hero=selected;host.dataset.form=String(form);
+ $('camp-line').textContent=HERO_IDENTITY[selected].strength+' · '+HERO_IDENTITY[selected].weakness;host.dataset.hero=selected;host.dataset.form=String(form);
  }
  function choose(id,walk=false){if(!CAMP_HEROES[id])return;selected=id;form=0;film=null;$('camp-film-stop').hidden=true;$('camp-film').hidden=false;
  // Keep keyboard focus and the Canvas portal selection in sync with the HTML hero cards.

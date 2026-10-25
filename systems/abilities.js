@@ -184,7 +184,7 @@ const evo = clamp(Number(p.evo) || 0, 0, 4);
 const chainCd = index < 3
 ? Math.max(0.82, 1 - Math.max(0, preFlow.distinct - 1) * 0.035)
 : (preFlow.distinct >= 4 || preFlow.combo >= 10 ? 0.82 : 1);
-const dur = baseCd / (1 + evo * 0.12) * chainCd * (index<3?(HERO_IDENTITY[p.id]?.cooldown||1):1);
+const dur = baseCd / (1 + evo * 0.12) * chainCd * (index < 3 ? (HERO_IDENTITY[p.id]?.cooldown ?? 1) : 1);
 if(index===5)consumeFinisher(p);
 if(p.id==="kilo"&&index===4)consumeKiloCombo(game);
 p.cds[id] = index===5 ? now : now + dur;

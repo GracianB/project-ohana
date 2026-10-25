@@ -11,6 +11,13 @@ try {
  page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:'+server.address().port+'/?e2e=1',{waitUntil:'domcontentloaded'});
  await page.waitForFunction(()=>window.__OHANA_E2E);
+ // The real welcome is a modal and intentionally hides the gameplay HUD.
+ // Finish it through its supported Escape control BEFORE testing objective
+ // visibility. The old pilot started gameplay behind the cinematic.
+ if(await page.locator('#ohana-intro.show').count()){
+   await page.keyboard.press('Escape');
+   await page.waitForFunction(()=>!document.body.classList.contains('intro-pending'));
+ }
  const traversal=await page.evaluate(async()=>{
   const {Portals,portalBlockReason}=await import('/systems/portals.js');
   const p={x:110,y:104,w:32,h:42,vx:2,vy:0,grounded:true,evo:4};
@@ -38,8 +45,14 @@ try {
  const step=n=>page.evaluate(n=>window.__OHANA_E2E.step(n),n);
  let s=await step(600);assert.equal(s.roomId,'w1-chispin');assert.equal(s.evo,0);
  await page.locator('#game').focus();await page.keyboard.down('d');
+ let previousX=s.player.x;
  for(let i=0;i<100&&s.world1.done===0;i++){
-  await page.keyboard.press('h');s=await step(24);
+  // The V511 chapter has physical raised banks. Use ordinary jump controls
+  // when a bank blocks horizontal travel, never injected state or teleport.
+  if(s.player.grounded&&(i%7===0||Math.abs(s.player.x-previousX)<.4)){
+   await page.keyboard.down('w');await step(4);await page.keyboard.up('w');
+  }
+  await page.keyboard.press('h');previousX=s.player.x;s=await step(24);
   assert.ok(s.hp>0,'first antenna route must not require an injected heal');
  }
  await page.keyboard.up('d');assert.ok(s.world1.done>=1,'real walking must connect an antenna');
@@ -47,13 +60,43 @@ try {
  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();}
  // Outwait the old seven-second reset without moving or modifying objectives.
  s=await step(600);assert.ok(s.world1.done>=earned);
- if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();s=await step(5);}
- await page.evaluate(async()=>{const notices=await import('/systems/notify.js');notices.dismissNotifications();});
- for(let n=0;n<10&&!(await page.locator('#notification-container').isVisible());n++){if(await page.locator('#evo-stage.show .evo-skip').count())await page.locator('#evo-stage .evo-skip').click();await page.waitForTimeout(500);}
- await page.evaluate(async()=>{(await import('/systems/notify.js')).dismissNotifications();});
- await page.waitForTimeout(250);
- assert.match(await page.locator('#notification-container').innerText(),/Sello 1\/4.*Antena/s);
- assert.equal(await page.locator('#notification-container .game-notification').count(),1);
+ // Several earned form milestones can queue one after another. The HUD
+ // is intentionally hidden for EVERY evolution cinematic. Dismiss each
+ // via the real Continue button before claiming the objective is invisible.
+ let settled=0;
+ for(let n=0;n<40&&settled<4;n++){
+   const cine=page.locator('#evo-stage.show');
+   if(await cine.count()){
+     await cine.locator('.evo-skip').click();
+     await cine.waitFor({state:'hidden',timeout:20000});
+     await page.locator('#game').focus();
+     s=await step(20);
+     settled=0;
+   }else{
+     // Evolution scenes can queue asynchronously on the next animation
+     // frame. Don't accept one transient frame between two queued scenes.
+     await page.waitForTimeout(150);
+     settled=(await cine.count())?0:settled+1;
+   }
+ }
+ assert.equal(await page.locator('#evo-stage.show').count(),0,'all earned evolution cinematics must finish before HUD acceptance');
+ // Do not dismiss the notification before testing it: dismiss() clears
+ // transient messages and races the persistent objective fallback.
+ await page.waitForFunction(() => document.querySelector('#notification-container')?.textContent?.includes('Sello 1/4'),
+   null,{timeout:10000});
+ const notice=await page.evaluate(async()=>{
+   const {messageManager}=await import('/systems/notify.js');
+   const root=document.querySelector('#notification-container'), card=root?.querySelector('.game-notification');
+   return {objective:messageManager.objective,htmlText:root?.textContent||'',
+     renderedText:root?.innerText||'',cardCount:root?.querySelectorAll('.game-notification').length||0,
+     display:root?getComputedStyle(root).display:null,visibility:root?getComputedStyle(root).visibility:null,
+     cardDisplay:card?getComputedStyle(card).display:null,cardVisibility:card?getComputedStyle(card).visibility:null,
+     bodyClass:document.body.className,modals:[...document.querySelectorAll('.show')].slice(0,5).map(x=>x.id)};
+ });
+ assert.match(notice.objective,/Sello 1\/4.*Antena/s,'persistent objective model must survive: '+JSON.stringify(notice));
+ assert.match(notice.htmlText,/Sello 1\/4.*Antena/s,'DOM must render objective: '+JSON.stringify(notice));
+ assert.ok(notice.renderedText.includes('Sello 1/4'),'objective card must be visibly rendered: '+JSON.stringify(notice));
+ assert.equal(notice.cardCount,1);
  // Teach the actual equipped power, and explain a locked power without listing every key.
  await page.keyboard.press('l');
  await page.waitForTimeout(250);
@@ -77,21 +120,37 @@ try {
 
  await page.setViewportSize({width:1440,height:900});
  s=await step(600);let deaths=0,lastX=s.player.x;
- await page.locator('#game').focus();await page.keyboard.down('d');
+ const antennaX=[2160,3760,5360,7280]; // real authored station coordinates
+ await page.locator('#game').focus();
  for(let i=0;i<500&&s.world1.done<4;i++){
-  if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});await page.locator('#game').focus();await page.keyboard.down('d');}
+  if(await page.locator('#evo-stage.show .evo-skip').count()){
+   await page.locator('#evo-stage .evo-skip').click();
+   await page.locator('#evo-stage.show').waitFor({state:'hidden',timeout:20000});
+   await page.locator('#game').focus();
+  }
   if(s.hp<=0){
    assert.ok(++deaths<=12,'too many natural retries on the antenna route');
-   await page.keyboard.up('d');
+   await page.keyboard.up('d');await page.keyboard.up('a');
    s=await page.evaluate(()=>window.__OHANA_E2E.respawn());
-   await step(600);await page.keyboard.down('d');
+   await step(600);continue;
   }
-  await page.keyboard.press('h');await page.keyboard.press('j');
-  if(s.evo>=2)await page.keyboard.press('l');
-  if(i%4===0||Math.abs(s.player.x-lastX)<1)await page.keyboard.press('Space');
-  lastX=s.player.x;s=await step(24);
+  const target=antennaX[s.world1.done];
+  const dx=target-(s.player.x+18);
+  const dir=dx>=0?'d':'a',other=dx>=0?'a':'d';
+  await page.keyboard.up(other);
+  if(Math.abs(dx)>48)await page.keyboard.down(dir);else await page.keyboard.up(dir);
+  if(s.player.grounded && (i%9===0 || Math.abs(s.player.x-lastX)<.7) && Math.abs(dx)>80){
+   // Physics-driven jump at the V511 banks, never an injected position.
+   await page.keyboard.down('w');await step(4);await page.keyboard.up('w');
+  }
+  if(Math.abs(dx)>90){
+   await page.keyboard.press('h');await page.keyboard.press('j');
+   if(s.evo>=2&&i%7===0)await page.keyboard.press('l');
+  }
+  lastX=s.player.x;
+  s=await step(Math.abs(dx)<55?18:Math.max(5,Math.min(26,Math.floor(Math.abs(dx)/6))));
  }
- await page.keyboard.up('d');
+ await page.keyboard.up('d');await page.keyboard.up('a');
  assert.equal(s.world1.done,4,'all four antennas must work through real movement and combat');
  assert.equal(s.world1.sealed,false,'four antennas require the chapter Titan before a new seal');assert.ok(!s.world1Seals.includes('chispin'));
  await page.screenshot({path:'test-results/v501/antenna-network-complete.png'});
