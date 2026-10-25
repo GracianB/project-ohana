@@ -5,7 +5,7 @@ import {chromium} from 'playwright';import {startServer} from './server.mjs';
 import {advanceTerrainControls} from './authored-terrain-controls.mjs';
 const server=await startServer(0);let browser;
 try{
- browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||'/usr/bin/chromium'});
+ browser=await chromium.launch(process.env.CHROMIUM_BIN?{executablePath:process.env.CHROMIUM_BIN}:{});
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],journal=[];
  page.on('pageerror',e=>errors.push(e.message));await fs.mkdir('test-results/v513',{recursive:true});
  await page.clock.install({time:new Date('2026-10-25T12:00:00Z')});await page.clock.pauseAt(new Date('2026-10-25T12:00:01Z'));
