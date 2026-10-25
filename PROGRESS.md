@@ -1,3 +1,7 @@
+# V514 · ohana-514 · V2 / Primera entrega de identidad jugable (candidata)
+
+Rama de desarrollo, no equivale a publicación en main. Se han mantenido los diez héroes, sus cinco formas, hitboxes, claves de habilidades y guardados; nueve héroes reciben diferencias efectivas en vida, velocidad y salto, y todos reciben información visible de ventaja y riesgo. Kilo y las velocidades canónicas de Cuerno conservan sus contratos aprobados. El ataque H y la cadencia de J/K/L reflejan compromisos propios. Nuevos tests verifican que las cifras llegan al personaje jugable, no solo a las cartas. Los cambios de V2 requieren CI, recorridos y revisión visual antes de integrar. Mundo 2 y multijugador no se amplían aquí.
+
 # V513 · ohana-513 · Campaña completa y dirección de las diez salas
 
 Seis frentes implementados; evidencia y límites en docs/V1-FINAL-REVIEW.md y docs/V513-VALIDATION.json.
