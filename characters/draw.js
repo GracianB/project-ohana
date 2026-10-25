@@ -1012,19 +1012,12 @@ ctx.stroke();
 ctx.restore();
 }
 
-let flashCanvas = null;
-let colorCanvas = null;
-let inkCanvas = null;
-let presentCanvas = null;
-let presentLastKey = "";
+const rasterSheets = new Map();
+const presentedActors = new Map();
 
 function sheet(which, W) {
-let c = which === "color" ? colorCanvas : which === "ink" ? inkCanvas : flashCanvas;
-if (!c) c = document.createElement("canvas");
-if (c.width !== W) { c.width = W; c.height = W; }
-if (which === "color") colorCanvas = c;
-else if (which === "ink") inkCanvas = c;
-else flashCanvas = c;
+const key=which+':'+W;let c=rasterSheets.get(key);
+if(!c){c=document.createElement('canvas');c.width=c.height=W;rasterSheets.set(key,c);}
 return c;
 }
 
@@ -1131,17 +1124,25 @@ q(pose.michiSeed,1),
 function presentCharacter(ctx, art, pose, flashCol, flashA, charId) {
 const U = 280;
 // Keep large cinematics and selection portraits crisp. Quantized buckets
-// avoid reallocating every breathing frame; the shared buffers stay bounded.
+// only for solo evolution/reward stages. Multi-actor menus retain their
+// normal raster budget; two reusable sheet sizes avoid resize churn.
 const matrix=ctx.getTransform?.();
 const demand=matrix?Math.max(Math.hypot(matrix.a,matrix.b),Math.hypot(matrix.c,matrix.d)):1;
-const ps=demand>3?4:demand>2?3:demand>1.5?2:1.5;
+const cinematic=ctx.canvas?.closest?.('#evo-stage')||globalThis.document?.body?.classList.contains('relic-cinema');
+const ps=cinematic&&demand>1.5?3:1.5;
 const W = Math.round(U * ps);
 const faBucket = Math.round((flashA || 0) * 20);
 const key = (charId || art.id || "?") + "#" + (pose.form | 0) + "#" + poseFingerprint(pose) + "#" + (flashCol || "") + "#" + faBucket + "#" + (art.cacheKey?.(pose)||"");
-if (key === presentLastKey && presentCanvas && presentCanvas.width === W) {
-ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
-return;
+const actorKey=(charId||art.id||'?')+'#'+(pose.form|0)+'#'+W;
+let cached=presentedActors.get(actorKey);
+if(cached){presentedActors.delete(actorKey);presentedActors.set(actorKey,cached);}
+if(cached?.key===key){ctx.drawImage(cached.canvas,-U/2,-U*.78,U,U);return;}
+if(!cached){
+ if(presentedActors.size>=12)presentedActors.delete(presentedActors.keys().next().value);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=W;
+ cached={key:null,canvas};presentedActors.set(actorKey,cached);
 }
+const presentCanvas=cached.canvas;
 const color = sheet("color", W);
 const cg = color.getContext("2d");
 cg.setTransform(1, 0, 0, 1, 0, 0);
@@ -1172,8 +1173,6 @@ ig.globalCompositeOperation = "source-in";
 ig.fillStyle = "#1a1022";
 ig.fillRect(0, 0, W, W);
 ig.globalCompositeOperation = "source-over";
-if (!presentCanvas) presentCanvas = document.createElement("canvas");
-if (presentCanvas.width !== W) { presentCanvas.width = W; presentCanvas.height = W; }
 const pg = presentCanvas.getContext("2d");
 pg.setTransform(1, 0, 0, 1, 0, 0);
 pg.clearRect(0, 0, W, W);
@@ -1181,7 +1180,7 @@ const o = 3.4 * ps;
 const dirs = [[o, 0], [-o, 0], [0, o], [0, -o]];
 for (let i = 0; i < dirs.length; i++) pg.drawImage(ink, dirs[i][0], dirs[i][1]);
 pg.drawImage(color, 0, 0);
-presentLastKey = key;
+cached.key = key;
 ctx.drawImage(presentCanvas, -U / 2, -U * 0.78, U, U);
 }
 
