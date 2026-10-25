@@ -1,3 +1,4 @@
+import {dinoLanding,trackDinoAir,drawDinoPlate,drawDinoImpact} from './dino-chapter.js';
 import {nextChapterGrowth,nextChapterReady,updateNextChapter,nextChapterObjective,drawNextChapter} from './chapters-lunar-prism-embers.js';
 import {chispinGrowth,updateChispinChapter,chispinChapterReady,chispinObjective,drawChispinChapter} from './chispin-chapter.js';
 import {stitchoGrowth,updateStitchoChapter,stitchoChapterReady,stitchoObjective,drawStitchoChapter} from './stitcho-chapter.js';
@@ -125,7 +126,7 @@ export function world1NextObjective(g) {
     else action='Nota '+((target?.note??0)+1)+'/4 → forma '+(w.stations.filter(s=>s.done).length+2)+'/5 · quédate quieto para tocar. Los cromos del álbum son opcionales';
   }
   else if (w.kind === "braseros") label = "Brasero apagado";
-  else if (w.kind === "pisotones") label = "Fósil dormido";
+  else if (w.kind === "pisotones") {label = "Placa fósil "+((target?.order??target?.id??0)+1);action=(target?.dropHeight>=160?"Sube a la cornisa alta o usa doble salto":target?.dropHeight>=110?"Haz un salto alto o sube a la cornisa":"Salta sobre la placa y aterriza en el centro")+". K en el aire acelera la bajada";}
   else if (w.kind === "sincronia") {
     label = "Terminal astral";
     action = target && nodeLive(w.tick, target) ? "AHORA · acércate para conectar" : "Espera junto al terminal hasta que indique AHORA";
@@ -237,7 +238,7 @@ export function updateWorld1(g,hurt) {
       for (const s of w.stations) if (!s.done && (playerAttacking(g, s)||(s.flameUntil||0)>w.tick)) complete(g, s, "BRASERO");
       break;
     case "pisotones":
-      if (p.grounded && !w.wasGrounded && w.prevVy > 6) for (const s of w.stations) if (!s.done && Math.abs(cx(p) - s.x) < 70) complete(g, s, "FÓSIL");
+      if (p.grounded && !w.wasGrounded && w.prevVy > 6) for (const s of w.stations) if (!s.done && Math.abs(cx(p) - s.x) < 70 && Math.abs(p.y+p.h-s.y)<8 && dinoLanding(g,s)) complete(g, s, "FÓSIL");
       break;
     case "geiseres":
       if (p.grounded) w.launchedGeyser = null;
@@ -259,6 +260,7 @@ export function updateWorld1(g,hurt) {
       for (const s of w.stations) if (!s.done && nodeLive(w.tick, s) && near(p, s.x, s.y - 40, 50, 90)) complete(g, s, "NODO");
       break;
   }
+  trackDinoAir(g);
   if (!p.grounded) w.prevVy = p.vy || 0;
   w.wasGrounded = !!p.grounded;
 }
@@ -349,7 +351,7 @@ export function drawWorld1(ctx, g, cam, t) {
     r.statues.forEach((s, i) => { if (vis(s.x)) drawStatue(ctx, s, cam, w.statuesLit[i], t, reduce); });
     ctx.restore(); return;
   }
-  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);
+  drawKiloAirTrail(ctx,g,cam,t);drawStitchoChapter(ctx,g,cam);drawChispinChapter(ctx,g,cam);drawNextChapter(ctx,g,cam,t);drawDinoImpact(ctx,g,cam);
   for (const s of w.stations) {
     if (!vis(s.x) && !(s.target && vis(s.target.x)) && !(s.prize && vis(s.prize.x))) continue;
     drawStation(ctx, g, w, s, cam, t, reduce, col);
@@ -533,6 +535,7 @@ function drawStation(ctx, g, w, s, cam, t, reduce, col) {
       if(done){for(let k=0;k<3;k++){const sway=reduce?0:Math.sin(t*.09+k)*6,hh=60-k*13;ctx.fillStyle=['#e9855a','#f9bb70','#fff0bd'][k];ctx.beginPath();ctx.moveTo(x-24+k*7,y-56);ctx.bezierCurveTo(x-33+sway,y-88,x+12+sway,y-80-hh,x+7,y-65-hh);ctx.bezierCurveTo(x-4,y-85,x+36-k*7,y-75,x+24-k*7,y-56);ctx.fill();}}
       ctx.fillStyle='#5d5145';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(done?'FUEGO RESTAURADO ✓':'J · ENCIENDE EL BRASERO',x,y-145);break; }
     case "fossil": {
+      if(g.roomDef?.dinoChapter){drawDinoPlate(ctx,s,cam,done,t,reduce);break;}
       ctx.fillStyle = done ? "#d8f7a8" : "#9b8f74"; ctx.beginPath(); ctx.ellipse(x, y - 6, 66, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.strokeStyle = done ? "#4b8f3a" : "#5c5240"; ctx.lineWidth = 3; for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x + k * 18, y - 14); ctx.lineTo(x + k * 18, y + 2); ctx.stroke(); }
       if (!done) { ctx.fillStyle = "#fff"; ctx.font = "700 12px Outfit, sans-serif"; ctx.textAlign = "center"; ctx.fillText("↓ PISOTÓN", x, y - 34 + pulse); }

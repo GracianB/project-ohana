@@ -1,3 +1,4 @@
+import {dinoChapterAbility} from './systems/dino-chapter.js';
 import {NEXT_CHAPTERS,NEXT_ARENA,nextChapterAbility,drawChapterBossHud,mirrorRestored} from './systems/chapters-lunar-prism-embers.js';
 import {CHISPIN_CHAPTER_BOSS_ID,CHISPIN_CHAPTER_ARENA,chispinChapterAbility,chispinGateState} from './systems/chispin-chapter.js';
 import {STITCHO_CHAPTER_BOSS_ID,STITCHO_CHAPTER_ARENA} from './systems/stitcho-chapter.js';
@@ -636,7 +637,7 @@ if(r.world1){if(game.roomAlbums)delete game.roomAlbums[id];game.roomAlbumItems=[
 enterWorld1Collect(game);enterWorld1(game);
 if(game.world1?.cinema&&!r.fusionBoss){game.world1.cinema=null;playWorld1Cine(game,"roomEnter",r.hero);}
 if(!r.fusionBoss)game.world1Boss=null;
-game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);};
+game.onHeroAbility=(p,index)=>{groveAbility(game,p,index);stitchoAbility(game,p,index);chispinAbility(game,p,index);chispinChapterAbility(game,p,index);michiAbility(game,p,index);dragonAbility(game,p,index);dinoAbility(game,p,index);fritaAbility(game,p,index);pizzaAbility(game,p,index);yomiAbility(game,p,index);cuernoAbility(game,p,index);nextChapterAbility(game,p,index);dinoChapterAbility(game,p,index);};
 // Never carry a previous room's one-way ledge into the next room.
 if (game.player) game.player._dropPlatform = null;
 game.orbs = (r.orbs || []).map((o) => ({ x: o[0] * S, y: o[1] * S, r: 9, taken: false }));
@@ -644,7 +645,7 @@ game.hearts = first ? [{ x: 220 * S, y: 760 * S, taken: false }] : [];
 game.enemies = (r.foes || []).map((f, i) => {
 const e = scaleFoe(makeFoe(f[0] * S, f[1] * S, f[2], id, i, {elite:!!f[3],rng:game.rng}));
 e.spawnIndex = i;e._campaignOriginal=true;
-if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=f[4].anchorY;}}
+if(f[4]){e.roomPersona=f[4];if(f[4].role){e.campaignRole=f[4].role;e.y=Number.isFinite(f[4].anchorFloor)?f[4].anchorFloor-e.h:f[4].anchorY;}}
 if(!e.campaignRole&&f[0]>3360&&!r.boss)e.campaignRole=campaignRole(id,i);
 e.roomId = id;
 if((r.kiloChapter||r.chispinChapter||r.growthChapter)&&e.roomPersona?.chapterHP)e.hp=e.max=e.roomPersona.chapterHP;
@@ -671,7 +672,7 @@ game.spawnChispinBoss=()=>{
   game.enemies.push(enemy);
   return true;
 };
-if(r.growthChapter&&!game.clearedEncounters?.[id]?.includes(NEXT_CHAPTERS[r.growthChapter].bossId)){const create={cat:createMichiBoss,cuerno:createCuernoBoss,dragon:createDragonBoss}[r.growthChapter];game.enemies.push(create(makeFoe,game.rng,{roomId:id,encounterId:NEXT_CHAPTERS[r.growthChapter].bossId,x:8750,arena:NEXT_ARENA,chapter:r.growthChapter}));}
+if(r.growthChapter&&!game.clearedEncounters?.[id]?.includes(NEXT_CHAPTERS[r.growthChapter].bossId)){const create={cat:createMichiBoss,cuerno:createCuernoBoss,dragon:createDragonBoss,dino:createDinoBoss}[r.growthChapter];game.enemies.push(create(makeFoe,game.rng,{roomId:id,encounterId:NEXT_CHAPTERS[r.growthChapter].bossId,x:8750,arena:NEXT_ARENA,chapter:r.growthChapter}));}
 game.spawnMichiBoss=()=>{
   if(game.roomId!=='hub'||game.player?.id!=='cat'||!game.personalAdventureSolo)return false;
   if((game.clearedEncounters?.hub||[]).includes(MICHI_BOSS_ID))return true;
@@ -2194,7 +2195,7 @@ if(updateStitchoBoss(e,game,hurtPlayer))continue;
 if(updateChispinBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
 if(updateMichiBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
 if(updateDragonBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
-if(updateDinoBoss(e,game,hurtPlayer))continue;
+if(updateDinoBoss(e,game,hurtPlayer)){resolveEnemyContact(e);continue;}
 if(updateFritaBoss(e,game,hurtPlayer))continue;
 if(updatePizzaBoss(e,game,hurtPlayer))continue;
 if(updateYomiBoss(e,game,hurtPlayer))continue;
@@ -2970,8 +2971,8 @@ function drawWorld1Backdrop(world,W,H){
  else if(h==="yomi")drawYomiObservatoryBackdrop(ctx,game.cam,t,W,H,rd);
  else if(h==="cuerno")drawCuernoForestBackdrop(ctx,game.cam,t,W,H,rd);
  else renderWorld(ctx,world,game.cam,t,W,H);
- drawOhanaPlace(ctx,game,game.cam,t,W,H);
- if(!['stitcho','chispin','cat','cuerno','dragon'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
+ if(h!=="dino")drawOhanaPlace(ctx,game,game.cam,t,W,H);
+ if(!['stitcho','chispin','cat','cuerno','dragon','dino'].includes(h))drawWorld1Silhouette(ctx,game,game.cam,t,W,H,w1DrawDummy,w1MakeDummy,w1BaseHeight);
  if(game.roomDef.fusionBoss)drawWorld1BossBackdrop(ctx,game,game.cam,t);
 }
 const w1Actors=new Map();
@@ -3053,7 +3054,7 @@ drawCampaignExploration(ctx,game,game.cam,t);
 drawKiloGrove(ctx,game,game.cam,t);drawStitchoTrail(ctx,game,game.cam,t);drawChispinTrail(ctx,game,game.cam,t);drawMichiTrail(ctx,game,game.cam,t);drawDragonTrail(ctx,game,game.cam,t);drawDinoTrail(ctx,game,game.cam,t);drawFritaTrail(ctx,game,game.cam,t);drawPizzaTrail(ctx,game,game.cam,t);drawYomiTrail(ctx,game,game.cam,t);drawCuernoTrail(ctx,game,game.cam,t);drawRoomAlbum(ctx,game,game.cam);drawHeroCollection(ctx,game,game.cam,t);
 if(!game.roomDef?.world1)drawIslandLandmarks(ctx,game,game.cam,t);
 drawWorld1(ctx,game,game.cam,t);if(game.roomDef?.world1)drawWorld1Collect(ctx,game,game.cam,t);
-const realmTerrain={cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
+const realmTerrain={dino:{id:'fossil-valley',groundTop:'#d9deb9',ground:'#90a48a',edge:'#eff1ce'},cat:{id:'lunar-garden',groundTop:'#e4d5e4',ground:'#a598ab',edge:'#f3e6e5'},cuerno:{id:'prism-grove',groundTop:'#cbdca9',ground:'#93a684',edge:'#edf1cb'},dragon:{id:'ember-forge',groundTop:'#e4c4a4',ground:'#9c8070',edge:'#f5dbb3'}}[game.roomDef?.hero];
 const heroTerrain=realmTerrain?{...world,...realmTerrain}:game.roomDef?.hero==='stitcho'?{...world,id:'dock',groundTop:'#e2c6a0',ground:'#a78f77',edge:'#efe0b9',platOutline:'#466577'}:game.roomDef?.hero==='chispin'?{...world,id:'sanctuary',groundTop:'#f1e5ca',ground:'#a3b8bf',edge:'#fff3d8',platOutline:'#5a788e'}:world;
 game.terrainStats=drawTerrain(ctx, game.platforms, heroTerrain, game.cam, t,{width:camW(),height:camH()});
 if(game.roomDef?.kiloChapter){ctx.save();ctx.strokeStyle='#273329';ctx.lineWidth=2;for(const pl of game.platforms){if(pl.h>24||!visibleForRender(pl,game.cam,viewportW,viewportH))continue;const px=pl.x-game.cam.x,py=pl.y-game.cam.y;ctx.fillStyle='#e0c67f';ctx.fillRect(px,py,pl.w,5);ctx.strokeRect(px,py,pl.w,pl.h);}ctx.restore();}
@@ -3097,6 +3098,7 @@ for (const e of game.enemies) {
   else if(e._chispinBoss)drawChispinBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss)drawMichiBossBody(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._dragonBoss)drawDragonBoss(ctx,e,game.cam,t);
+  else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._cuernoBoss)drawCuernoBoss(ctx,e,game.cam,t);
   else {
     const bespoke=!!game.michiTrail&&drawMichicornioFoe(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
@@ -3109,7 +3111,7 @@ for (const e of game.enemies) {
   else if(e._chispinBoss)drawChispinBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);
   else if(e._michiBoss){if(!e._growthChapter)drawMichiBossSignals(ctx,e,game.cam,t,game.reduceMotion||reduceMotion);}
   else if(e._dragonBoss){}
-  else if(e._dinoBoss)drawDinoBoss(ctx,e,game.cam,t);
+  else if(e._dinoBoss){}
   else if(e._fritaBoss)drawFritaBoss(ctx,e,game.cam,t);
   else if(e._pizzaBoss)drawPizzaBoss(ctx,e,game.cam,t);
   else if(e._yomiBoss)drawYomiBoss(ctx,e,game.cam,t);
@@ -3949,7 +3951,7 @@ albumItems(){return game.roomAlbumItems.map(item=>({...item}));},
  // locked gate, this deliberately does NOT verify route reachability.
  grantHeroItem(id){return takeHeroCollectionItem(game,id);},
  interact(){interact();return this.state();},
-nextChapterState(){return {mirror:mirrorRestored(game),bridges:game.platforms.filter(p=>p._michiBridge!=null).length,thermalFrames:game.world1?.thermalFrames||0};},
+nextChapterState(){return {dinoLandings:game.world1?.dinoLandings||0,dinoDives:game.world1?.dinoDives||0,dinoPeak:game.world1?.dinoPeak,mirror:mirrorRestored(game),bridges:game.platforms.filter(p=>p._michiBridge!=null).length,thermalFrames:game.world1?.thermalFrames||0};},
 companionActorState(){const a=game._evolutionAttacks?.guest;return a?{x:a.x,y:a.y,air:a.air,id:a.id,heroFoot:game.player.y+game.player.h,heroX:game.player.x+game.player.w/2}:null;},
 chispinChapterState(){return {gates:[0,1,2].map(i=>({state:chispinGateState(game,i),until:game.world1?.chispinSilenced?.[i]||0})),tick:game.world1?.tick,lastAbility:game._lastAbilityId};},
 stitchoChapterState(){return {move:game.player?._abilMove,carry:game.world1?.carry,railDone:!!game.secrets?.['w1-stitcho']?.includes('w1-stitcho-main-rail-v1'),stations:(game.world1?.stations||[]).map(s=>({id:s.id,done:s.done}))};},

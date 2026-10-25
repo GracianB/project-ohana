@@ -245,3 +245,56 @@ https://gracianb.github.io/project-ohana/?release=507 sirve once archivos runtim
 con SHA256 idéntico al candidato local, incluido el nuevo módulo y sw.js.
 Informe: `/workspace/.cloud-setup/logs/ohana-v507-live-verification.json`.
 Siguiente paquete: Dino; aceptación humana de estos tres sigue pendiente.
+
+
+## V508 · Dino: peso y aterrizajes · 25 de octubre de 2026
+
+Workspace `/workspace/ohana-stitcho`, rama `feat/v508-dino-impact`, base `18d86b4`.
+Siguiente integración: **Frita**. Multijugador permanece fuera del alcance.
+
+`systems/dino-chapter.js` registra la altura real del salto. Cuatro placas:
+ID0 x2480 / caída40, ID3 x4080 / caída80, ID1 x5680 / caída120,
+ID2 x7280 / caída180. IDs0–2 antiguos conservados; orden visual oeste→este.
+Aterrizar requiere velocidad descendente >6, pies en la altura real de la placa,
+centro a menos de 70 y altura suficiente. Una cornisa por encima no activa la
+placa de abajo. Los escalones permiten intentos repetidos sin pozos mortales.
+Cada placa garantiza XP mínima absoluta 55/140/260/420, sin premios repetidos.
+
+K aceptado en el aire acelera la caída; no otorga altura ni completa objetivos
+por sí solo. Impactos válidos abren escudos próximos durante 45 ticks mediante
+`_guardBreak`; se conserva protección del jefe. El cambio compartido de escudos
+sólo actúa cuando existe esa marca, aplicada únicamente por el capítulo Dino.
+Los enemigos de Dino usan `anchorFloor` para colocar sus pies con su altura real;
+`anchorY` sigue compatible para otros mapas. Corazas y vigías son criaturas de
+suelo, evitando abejas que nacían atravesando el suelo y caían fuera del mapa.
+
+Coloso: creador parametrizado, defaults de hub intactos; capítulo arena8260–9320,
+suelo1134, 640PV, ID `w1-dino-colossus-v1`, cuatro patrones, recuperación160PV.
+Se dibuja un solo cuerpo propio con pies al suelo y HUD compartido. Contacto y
+pisotones consumen el resolver real. Para un sello nuevo se necesitan cuatro
+placas y derrota real; sellos antiguos válidos conservan progreso final.
+
+Valle con cielo jade claro, cañones curvos/estratos, cascadas fluidas, manadas,
+pterosaurios, helechos y cráneo fósil. Conserva el arte procedural existente,
+sin duplicar el render del fondo. Entradas animadas con el actor bebé y terreno
+verde propio. Movimiento reducido conservado. No se afirma aceptación humana
+ni alcance físico de cien recuerdos.
+
+Piloto `npm run test:browser:dino-chapter`: única fixture de acceso entrar a Dino;
+movimiento/combate ganan cinco formas, placas, guardado/Continuar tras dos,
+cuatro patrones, victoria y salida a Frita bebé. Salto+K táctil desde save ganado
+con reloj determinista; el reloj evita que una máquina ocupada complete el salto
+entre dos pulsaciones de prueba. Presentación usa forma/cámara explícitas en
+`npm run test:browser:dino-presentation`, sin presentarla como victoria.
+
+
+Cierre local V508: 1.522 Node PASS; release gate PASS (315 módulos/365 recursos),
+auditoría Chromium PASS y regresiones físicas de Kilo/Michi/Cuerno/Dragón PASS.
+Dino físico verificado con cuatro placas, cinco formas, Continue, cinco ataques
+reales del Coloso y cuatro patrones, cero muertes; salida a Frita bebé. Móvil:
+salto real + K desde save ganado, sin posición/vida/forma inyectada. Capturas de
+presentación usan fixtures explícitas. Rediseño del Coloso sólo para el capítulo:
+dinosaurio de piedra con pies, dientes, placas curvas y grietas/núcleo de ámbar;
+el arte histórico del hub sigue disponible. `dino-colossus-design.png` inspeccionada.
+No se ejecutó la matriz histórica completa de capturas/campaña; estos resultados
+no acreditan campaña entera, aceptación humana ni cien recuerdos alcanzables.

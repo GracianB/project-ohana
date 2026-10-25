@@ -40,12 +40,12 @@ function assertSealed(run, hero) {
   assert.equal(world1CanLeave(game, "right"), true, hero + " must unlock east");
   assert.equal(game.score, 150 * (total+(['stitcho','cuerno'].includes(hero)?1:0)), hero + " grants points once per station");
   assert.equal(game.player.health, 95, hero + " heals on completion");
-  assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon'].includes(hero)?423:3, hero + " rewards experience");
-  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon'].includes(hero)?1:0), hero + " saves each completed objective once");
+  assert.equal(game.player.xp, ['kilo','stitcho','chispin','cat','cuerno','dragon','dino'].includes(hero)?423:3, hero + " rewards experience");
+  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon','dino'].includes(hero)?1:0), hero + " saves each completed objective once");
   assert.equal(events.filter((e) => e[0] === "seal").length, 1);
   assert.equal(awardSeal(game), false, "seal cannot be claimed again");
   run.tick();
-  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon'].includes(hero)?1:0), "no extra save after completion");
+  assert.equal(run.saves, total+(['stitcho','cuerno'].includes(hero)?2:['chispin','cat','dragon','dino'].includes(hero)?1:0), "no extra save after completion");
 }
 
 test("World 1: exactly ten distinct seal mechanics, stations, and east gates", () => {
@@ -162,10 +162,11 @@ test("Dino: a downward landing, not walking, wakes each fossil", () => {
   for (const s of game.world1.stations) {
     stand(s.x); tick();
     assert.equal(s.done, false);
-    game.player.grounded = false; game.player.vy = 9; tick();
-    game.player.grounded = true; game.player.vy = 0; tick();
+    game.player.y=s.y-game.player.h-s.dropHeight-10; game.player.grounded = false; game.player.vy = 9; tick();
+    game.player.y=s.y-game.player.h;game.player.grounded = true; game.player.vy = 0; tick();
     assert.equal(s.done, true);
   }
+  assert.equal(game.world1.sealed,false);game.clearedEncounters={"w1-dino":[NEXT_CHAPTERS.dino.bossId]};tick();
   assertSealed(run, "dino");
 });
 

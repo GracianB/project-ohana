@@ -164,6 +164,12 @@ jobs:
           node tests/browser/v453-hero-worlds.mjs
           node tests/browser/v1-candidate.mjs
 
+      - name: V508 Dino physical chapter and mobile dive
+        run: npm run test:browser:dino-chapter
+
+      - name: V508 Dino arrival and daylight valley
+        run: npm run test:browser:dino-presentation
+
       - name: V507 Michi, Cuerno and Dragon physical chapters
         run: npm run test:browser:lunar-prism-embers
 

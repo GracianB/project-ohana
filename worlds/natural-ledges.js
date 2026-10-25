@@ -3,7 +3,7 @@ export function drawNaturalLedge(ctx,p,world,cam,t){
  const id=world.id;if(['lab','space'].includes(id))return false;
  const x=p.x-cam.x,y=p.y-cam.y,w=p.w;
  const reef=id==='aquatic',hot=['volcano','ember-forge'].includes(id),rocky=['cave','ridge','boss'].includes(id);
- const lunar=id==='lunar-garden',prism=id==='prism-grove';
+ const lunar=id==='lunar-garden',prism=['prism-grove','fossil-valley'].includes(id);
  const depth=34+random(p.x+p.y)*35;
  ctx.save();
  const stone=ctx.createLinearGradient(0,y,0,y+depth);

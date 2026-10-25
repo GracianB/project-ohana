@@ -20,6 +20,7 @@ export function updateCampaignEnemy(e,g,hurt){
  if(e.invuln>0)e.invuln--;
  const p=g.player,role=e.campaignRole;if(!p||p.dead)return true;
  const dx=cx(p)-cx(e),dy=cy(p)-cy(e),dir=Math.sign(dx)||1,dist=Math.hypot(dx,dy),a=e._campaign||={age:0,wind:0,cd:40,active:0,aim:1};a.age++;
+ e._guardBreak=Math.max(0,(e._guardBreak||0)-1);
  e._shieldImpact=Math.max(0,(e._shieldImpact||0)-1);
  const visible=e.x+e.w>g.cam.x&&e.x<g.cam.x+(g.viewW||1000)&&e.y+e.h>g.cam.y&&e.y<g.cam.y+(g.viewH||720);
  if(!visible&&dist>1100){e.vx=0;return true;}
@@ -58,7 +59,7 @@ export function updateCampaignEnemy(e,g,hurt){
     a.volley=['shooter','gunner'].includes(role)?campaignVolley(role,e,p,!!e.elite):null;
     e.telegraph=true;g.fx?.emit?.(cx(e),e.y,{color:'#fff1b5',count:3,size:2,life:12});}
  }
- e._shieldFacing=role==='shield'&&!a.active&&!a.wind?dir:0;
+ e._shieldFacing=role==='shield'&&!a.active&&!a.wind&&!e._guardBreak?dir:0;
  const flying=role==='flyer',oldFeet=e.y+e.h;
  if(flying){if(!a.active)e.vy=Math.max(-2,Math.min(2,(p.y-80-e.y)*.02));}
  else e.vy=Math.min(14,(e.vy||0)+.5);

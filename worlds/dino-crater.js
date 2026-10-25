@@ -14,32 +14,36 @@ const wrap=(v,lim)=>((v%lim)+lim)%lim;
 const hash=i=>{const s=Math.sin(i*12.9898+78.233)*43758.5453;return s-Math.floor(s);};
 
 export const DINO_VALLEY_PALETTE=Object.freeze({
- skyTop:'#0e3640',skyMid:'#1d6762',skyLow:'#9fd4a6',sun:'#f4ffd8',
- mesa:'#2b6160',mesaRim:'#5f9c8c',mist:'#d8f5e2',herd:'#1f5450',
- canopy:'#164238',cliff:'#3d5a48',strata:'#54755c',bone:'#e4dcbc',geode:'#5ff0d0',
- fern:'#0c2b24',firefly:'#d9ff9e'
+ skyTop:'#a3d5d4',skyMid:'#c7e5de',skyLow:'#e5edc5',sun:'#f4ffd8',
+ mesa:'#749d8d',mesaRim:'#a3c4a5',mist:'#d8f5e2',herd:'#1f5450',
+ canopy:'#688e76',cliff:'#89957b',strata:'#adb69a',bone:'#e4dcbc',geode:'#5ff0d0',
+ fern:'#416b54',firefly:'#d9ff9e'
 });
 const P=DINO_VALLEY_PALETTE;
 
 function _mesa(ctx,x,base,w,h){
- ctx.fillStyle=P.mesa;
- ctx.beginPath();ctx.moveTo(x-w*.62,base);ctx.lineTo(x-w*.5,base-h*.82);ctx.lineTo(x-w*.42,base-h);
- ctx.lineTo(x+w*.4,base-h);ctx.lineTo(x+w*.5,base-h*.78);ctx.lineTo(x+w*.64,base);ctx.closePath();ctx.fill();
- ctx.strokeStyle=P.mesaRim;ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(x-w*.42,base-h);ctx.lineTo(x+w*.4,base-h);ctx.stroke();
- // jungle cap on top of the mesa
- ctx.fillStyle=P.canopy;
- for(let k=-2;k<=2;k++){ctx.beginPath();ctx.arc(x+k*w*.17,base-h,w*.11,Math.PI,0);ctx.fill();}
+ ctx.save();ctx.fillStyle=P.mesa;
+ ctx.beginPath();ctx.moveTo(x-w*.62,base);
+ ctx.bezierCurveTo(x-w*.57,base-h*.3,x-w*.38,base-h*.55,x-w*.48,base-h*.84);
+ ctx.quadraticCurveTo(x-w*.5,base-h*1.02,x-w*.26,base-h);
+ ctx.bezierCurveTo(x-w*.08,base-h*1.04,x+w*.21,base-h*.96,x+w*.39,base-h);
+ ctx.bezierCurveTo(x+w*.52,base-h*.8,x+w*.35,base-h*.65,x+w*.5,base-h*.39);
+ ctx.quadraticCurveTo(x+w*.59,base-h*.14,x+w*.64,base);ctx.closePath();ctx.fill();
+ ctx.strokeStyle=P.mesaRim;ctx.lineWidth=1.5;
+ for(let k=1;k<6;k++){const yy=base-h+k*h*.15,half=w*(.41+k*.018);ctx.beginPath();ctx.moveTo(x-half,yy);ctx.bezierCurveTo(x-w*.18,yy-7,x+w*.18,yy+9,x+half,yy-3);ctx.stroke();}
+ // Soft moss overhangs and hanging roots break the silhouette of the cliffs.
+ ctx.strokeStyle=P.canopy;ctx.lineWidth=12;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x-w*.44,base-h+2);ctx.bezierCurveTo(x-w*.2,base-h-12,x+w*.17,base-h+9,x+w*.38,base-h);ctx.stroke();
+ ctx.lineWidth=2;for(let k=0;k<5;k++){const xx=x+w*(k*.15-.3);ctx.beginPath();ctx.moveTo(xx,base-h+3);ctx.quadraticCurveTo(xx-7,base-h+18,xx+4,base-h+24+k%3*7);ctx.stroke();}ctx.restore();
 }
 
 function _waterfall(ctx,x,top,len,t,reduced){
- ctx.fillStyle='rgba(216,245,226,0.55)';ctx.fillRect(x-5,top,10,len);
- ctx.fillStyle='rgba(255,255,255,0.75)';
+ ctx.save();ctx.strokeStyle='rgba(216,245,226,0.6)';ctx.lineWidth=12;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(x,top);ctx.bezierCurveTo(x-9,top+len*.3,x+11,top+len*.66,x-2,top+len);ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=2;
  const flow=reduced?0:t*2.2;
- for(let k=0;k<6;k++){const y=top+wrap(k*len/6+flow,len);ctx.fillRect(x-3,y,6,Math.min(12,top+len-y));}
- // spray puffs at the foot
+ for(let k=0;k<8;k++){const u=wrap(k/8+flow/len,1),y=top+u*len;ctx.beginPath();ctx.moveTo(x+Math.sin(u*6)*3,y);ctx.quadraticCurveTo(x+4,y+5,x+Math.sin(u*6)*3,y+10);ctx.stroke();}
  ctx.fillStyle='rgba(216,245,226,0.4)';
- for(let k=0;k<3;k++){const r=8+k*5+(reduced?0:Math.sin(t*.12+k)*2);ctx.beginPath();ctx.arc(x+(k-1)*9,top+len,r,Math.PI,0);ctx.fill();}
+ for(let k=0;k<3;k++){const r=8+k*5+(reduced?0:Math.sin(t*.12+k)*2);ctx.beginPath();ctx.ellipse(x+(k-1)*9,top+len,r,r*.6,0,0,TAU);ctx.fill();}ctx.restore();
 }
 
 function _sauropod(ctx,x,y,s,t,phase,reduced){

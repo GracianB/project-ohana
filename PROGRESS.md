@@ -1,3 +1,25 @@
+# V508 · ohana-508 · Dino: peso, altura y fósiles
+
+Dino tiene cuatro placas con alturas de caída crecientes. Conserva IDs antiguos
+0–2 y añade la cuarta con ID3; el orden visual sigue la ruta oeste→este. Los apoyos
+permiten preparar cada aterrizaje. K en el aire acelera la caída y los impactos
+válidos abren durante 45 ticks los escudos cercanos. Caminar o dar un salto demasiado
+bajo no resuelve una placa. Objetivos y crecimiento mínimo 55/140/260/420 persistentes.
+
+Coloso de Piedra integrado con arena e ID propios: 640 PV, cuatro ataques con
+aviso y ventanas de daño máximo de 160 PV. Objetivos + derrota real obligatorios
+para sellos nuevos; defaults del hub y sellos antiguos conservados. Cuerpo propio
+sin enemigo genérico debajo; pies anclados al suelo, HUD y contacto real.
+
+El valle conserva sus cascadas, manadas de saurópodos, pterosaurios, estratos,
+helechos y fósiles, ahora con cielo jade luminoso y terreno propio. Entrada con
+actor animado; placas con espiral fósil, flecha y guía de altura en lenguaje sencillo.
+Coloso con nuevo cuerpo de dinosaurio de piedra, placas dorsales, garras y núcleo
+con grietas de ámbar. Validación: 1.522 pruebas Node, auditoría Chromium, release
+gate (315 módulos / 365 recursos), piloto físico de Dino con cinco ataques del jefe,
+cero muertes, Continuar y salto+K táctil; regresiones físicas Kilo/Michi/Cuerno/Dragón.
+Siguiente integración: Frita. Dificultad humana y cien recuerdos siguen pendientes.
+
 # V507 · ohana-507 · Michi, Cuerno y Dragón
 
 Tres capítulos con crecimiento ganado y jefe obligatorio. Michi despierta cinco

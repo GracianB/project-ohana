@@ -46,7 +46,7 @@ export const WORLD1_SEALS = Object.freeze({
   medusas:   { title: "Medusas lunares",         verb: "Salta y toca en el aire cada medusa dormida",             count: 5 },
   prismas:   { title: "Alinear los prismas",     verb: "Activa los prismas en el orden I · II · III",             count: 3 },
   braseros:  { title: "Encender los braseros",   verb: "Golpea cada brasero apagado",                             count: 4 },
-  pisotones: { title: "Despertar los fósiles",   verb: "Cae desde un salto sobre cada placa fósil",               count: 3 },
+  pisotones: { title: "Despertar los fósiles",   verb: "Cae desde un salto sobre cada placa fósil",               count: 4 },
   geiseres:  { title: "Patatas en las nubes",    verb: "Pisa un géiser de aceite y atrapa la patata dorada de arriba", count: 3 },
   reparto:   { title: "Reparto caliente",        verb: "Recoge la pizza del horno y llévala a los clientes antes de que se enfríe", count: 3 },
   sincronia: { title: "Sincronizar la red",      verb: "Toca cada nodo de datos mientras parpadea en verde",      count: 4 }
@@ -125,6 +125,17 @@ export function buildWorld1HeroRoom(hero) {
     // A low stepping route gives room to practise K and the extra jumps.
     plats.push([3420,1054,180,22],[3650,974,220,22],[5010,1054,180,22],[5240,974,220,22]);
   }
+  if(hero==='dino'){
+    foes.length=0;
+    for(const [i,st] of stations.entries()){
+      for(let k=0;k<2;k++)foes.push([st.x-240+k*430,WORLD1_FLOOR-40,k?'cucaracho':'cangrejo',false,{role:k?'gunner':'shield',name:k?'Vigía de ámbar':'Coraza fósil',chapterHP:80+i*25,anchorFloor:WORLD1_FLOOR}]);
+      for(let j=plats.length-1;j>0;j--){const [x,y,w]=plats[j];if(y<WORLD1_FLOOR&&x<st.x+140&&x+w>st.x-280)plats.splice(j,1);}
+      const height=Math.max(80,st.dropHeight+45);
+      plats.push([st.x-330,WORLD1_FLOOR-80,150,20]);
+      if(height>110)plats.push([st.x-215,WORLD1_FLOOR-height,145,20]);
+      orbs.push([st.x-270,WORLD1_FLOOR-120],[st.x-130,WORLD1_FLOOR-height-40]);
+    }
+  }
   if(['cat','cuerno','dragon'].includes(hero)){
     foes.length=0;
     stations.forEach((st,i)=>{
@@ -171,10 +182,10 @@ export function buildWorld1HeroRoom(hero) {
   return {
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
-    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', growthChapter:['cat','cuerno','dragon'].includes(hero)?hero:null,
+    world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino', growthChapter:['cat','cuerno','dragon','dino'].includes(hero)?hero:null,
     width: W, height: WORLD1_ROOM_H,
     doors: { left: prev, right: next, up: null, down: null },
-    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':hero==='cat'?'Salta hacia las cinco medusas para despertarlas: se convierten en apoyos. Controla los grupos y vence al Oráculo Medusaluna.':hero==='cuerno'?'J en el espejo del alba. Después sigue los prismas I → II → III y vence a la Bestia Prisma.':hero==='dragon'?'Enciende cuatro braseros con J. Salta dentro de las térmicas para ganar altura y vence al Guardián Ígneo.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
+    hint: hero==='kilo'?'Recupera las cuatro notas para crecer y vence al Tambor del Claro. Esquiva mientras está protegido; ataca en su recuperación.':hero==='stitcho'?'Repara la primera pieza para abrir K. Cruza el raíl rodando, termina los talleres y vence al Núcleo Glitch para abrir la salida.':hero==='chispin'?'Conecta las cuatro antenas para evolucionar. J corta los arcos, K permite cruzarlos; también puedes esperar al paso abierto. Después vence al Titán de Trueno.':hero==='dino'?'Despierta cuatro placas aterrizando desde la altura indicada. Usa cornisas y K en el aire para acelerar la caída. Después vence al Coloso de Piedra.':hero==='cat'?'Salta hacia las cinco medusas para despertarlas: se convierten en apoyos. Controla los grupos y vence al Oráculo Medusaluna.':hero==='cuerno'?'J en el espejo del alba. Después sigue los prismas I → II → III y vence a la Bestia Prisma.':hero==='dragon'?'Enciende cuatro braseros con J. Salta dentro de las térmicas para ganar altura y vence al Guardián Ígneo.':WORLD1_SEALS[theme.seal].title + ": " + WORLD1_SEALS[theme.seal].verb + ". El sello abre la salida del este.",
     plats, foes, orbs, sectors, checkpoints, hazards: [], upExit: null,
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
@@ -194,7 +205,7 @@ function sealStations(hero, theme, sectors) {
     // Readable I → II → III pilgrimage, west to east, without forced backtracking.
     case "prismas": return [{ s: 1, order: 0 }, { s: 3, order: 1 }, { s: 4, order: 2 }].map((d, i) => ({ id: i, x: at(d.s, .5), y: floor, kind: "prism", order: d.order }));
     case "braseros": return [1, 2, 3, 4].map((s, i) => ({ id: i, x: at(s, .6), y: floor, kind: "brazier" }));
-    case "pisotones": return [1, 3, 4].map((s, i) => ({ id: i, x: at(s, .55), y: floor, kind: "fossil" }));
+    case "pisotones": return [2480,5680,7280,4080].map((x,i)=>({id:i,x,y:floor,kind:"fossil",dropHeight:[40,120,180,80][i]})).sort((a,b)=>a.x-b.x).map((s,i)=>({...s,order:i}));
     case "geiseres": return [1, 2, 4].map((s, i) => ({ id: i, x: at(s, .5), y: floor, kind: "geyser", prize: { x: at(s, .5), y: floor - 470 } }));
     case "reparto": return [{ id: 0, x: at(1, .2), y: floor, kind: "oven" }, ...[1, 2, 3].map((s, i) => ({ id: i + 1, x: at(s + 1, .55), y: floor, kind: "guest" }))];
     case "sincronia": return [1, 2, 3, 4].map((s, i) => ({ id: i, x: at(s, .5), y: floor, kind: "node", phase: i * 23 }));
