@@ -4,6 +4,7 @@
 // and steering hints consumed by the existing per-species state machines.
 
 import {encounterMemory} from "./encounter-memory.js";
+import {heroCounterplay} from "./enemy-hero-counterplay.js";
 import {readCombatDifficulty} from "./combat-difficulty.js";
 import { ROOM_HARD } from "../engine/foes.js";
 import { buildEncounterSpatialIndex } from "./encounter-spatial.js";
@@ -205,6 +206,14 @@ export function directEnemyEncounter(enemies = [], player = null, roomId = "hub"
     else if (permit) e.aiIntent = "PRESS";
     else e.aiIntent = "HOLD";
 
+    // V2: react to what the actual hero is doing. Do not overwrite a started
+    // telegraph or a genuine low-HP retreat; neither permits nor HP change.
+    const response=heroCounterplay(e,player,{
+      role,distance:dist,pack:nearby,tick,committed:enemyIsCommitted(e)
+    });
+    e.aiHeroRead=response?.read||'';
+    if(response&&!retreat)e.aiIntent=response.intent;
+
     // Shared awareness: a nearby alerted foe can wake the group, without global hive mind.
     const allyAlert = spatial ? spatial.someNear(e,360,o=>Number(o.aggro)>24) : alive.some((o) =>
       o !== e && Number(o.aggro)>24 &&
@@ -266,5 +275,6 @@ export function enemyDirectorSnapshot(enemies = []) {
     speciesMode: e.aiSpeciesMode || "",
     relation: e.aiSpeciesRelation || "NONE",
     partner: Number.isFinite(Number(e.aiSpeciesPartner)) ? Number(e.aiSpeciesPartner) : -1,
+    heroRead: e.aiHeroRead || "",
   })));
 }
