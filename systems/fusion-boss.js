@@ -1,11 +1,6 @@
 import {drawQuimeraCreature} from './quimera-art.js';
-// OHANA V467 · LA QUIMERA OHANA — jefe final del Mundo 1.
-// Fusión de los diez héroes: cuerpo de Dino, alas de Dragón, orejas de Stitcho,
-// cuerno de Cuerno, visor de Yomi, tentáculos de Michi, antenas de Chispín,
-// hombreras de Pizza y Frita y el hibisco de Kilo en el pecho.
-// Cuatro fases, diez ataques (uno por héroe) y tres movimientos especiales con
-// cinemática (bandas, rótulo, cámara). Determinista (LCG propio), sin
-// degradados, sin shadowBlur y con listas acotadas.
+// Four-phase final boss: combat remains deterministic; V600.1 anatomy is
+// authored separately from attack physics, health and collision.
 import { WORLD1_ARENA, WORLD1_FLOOR, WORLD1_THEMES } from "./world1-rooms.js";
 import { FUSION_STORY } from "./world1-story.js";
 
@@ -255,6 +250,7 @@ export function drawFusionBoss(ctx, e, cam, t, reduce = false) {
   if (formed < 1) drawIntroThreads(ctx, x, foot - 150, formed, tt);
   ctx.globalAlpha *= formed;
   drawQuimeraCreature(ctx,e,cam,t,reduce);
+  const hy=foot-340;
   // Aviso del ataque (icono del héroe + nombre) sobre la cabeza.
   if (b.mode === "warn" && b.attack) {
     const atk = FUSION_ATTACKS[b.attack], col = WORLD1_THEMES[atk.hero].color;

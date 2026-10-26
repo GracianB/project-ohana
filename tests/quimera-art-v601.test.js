@@ -14,3 +14,9 @@ test('the Quimera director relinquishes every overlay to the final films',()=>{
  const boss={hp:0,_fusionBoss:true,_fusion:{shots:[]},x:0,y:0,w:230,h:290};const g={boss,world1Boss:createWorld1BossDirector(boss)};g.world1Boss.special={};g.world1Boss.card={};g.world1Boss.hitFlash=3;
  updateWorld1BossDirector(g);assert.equal(g.world1Boss.special,null);assert.equal(g.world1Boss.card,null);assert.equal(g.world1Boss.hitFlash,0);
 });
+
+import {createFusionBoss,drawFusionBoss,FUSION_ATTACKS} from '../systems/fusion-boss.js';
+test('all ten real warning renderers survive the new anatomical head height',()=>{
+ const gradient={addColorStop(){}};const ctx=new Proxy({globalAlpha:1,createRadialGradient:()=>gradient},{get(o,k){return k in o?o[k]:()=>{};}});
+ for(const attack of Object.keys(FUSION_ATTACKS)){const e=createFusionBoss();e._fusion.mode='warn';e._fusion.attack=attack;drawFusionBoss(ctx,e,{x:0,y:0},100);}
+});

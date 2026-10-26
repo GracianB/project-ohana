@@ -1,0 +1,239 @@
+{
+  "version": "ohana-601",
+  "name": "V600.1",
+  "status": "validated_pending_publication",
+  "scope": "Final boss art and exclusive cinematic handoff; combat rules unchanged",
+  "node": {
+    "passed": 1570,
+    "failed": 0
+  },
+  "offline": {
+    "runtime_modules": 335,
+    "resources": 385
+  },
+  "browser_audit": "passed",
+  "visual": {
+    "states": 20,
+    "phases": 4,
+    "mobile": true,
+    "reduced_motion": true,
+    "arena_telegraphs": "all phases rendered without runtime faults"
+  },
+  "campaign": {
+    "difficulty": "normal",
+    "journal": [
+      {
+        "hero": "kilo",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 71.68,
+        "iterations": 258,
+        "sealCount": 1,
+        "discoveries": 3
+      },
+      {
+        "hero": "stitcho",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 72.3,
+        "iterations": 189,
+        "sealCount": 2,
+        "discoveries": 3
+      },
+      {
+        "hero": "chispin",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 29.639999999999993,
+        "iterations": 170,
+        "sealCount": 3,
+        "discoveries": 3
+      },
+      {
+        "hero": "cat",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 50.2,
+        "iterations": 237,
+        "sealCount": 4,
+        "discoveries": 3
+      },
+      {
+        "hero": "cuerno",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 86,
+        "iterations": 304,
+        "sealCount": 5,
+        "discoveries": 3
+      },
+      {
+        "hero": "dragon",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 104,
+        "iterations": 243,
+        "sealCount": 6,
+        "discoveries": 3
+      },
+      {
+        "hero": "dino",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 130.56,
+        "iterations": 292,
+        "sealCount": 7,
+        "discoveries": 3
+      },
+      {
+        "hero": "frita",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 55.84,
+        "iterations": 195,
+        "sealCount": 8,
+        "discoveries": 3
+      },
+      {
+        "hero": "pizza",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 110,
+        "iterations": 222,
+        "sealCount": 9,
+        "discoveries": 3
+      },
+      {
+        "hero": "yomi",
+        "deaths": 0,
+        "forms": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "minHp": 48.040000000000006,
+        "iterations": 249,
+        "sealCount": 10,
+        "discoveries": 3
+      }
+    ],
+    "finalDeaths": 0,
+    "phases": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "films": [
+      "bossIntro",
+      "bossDefeat",
+      "ending"
+    ],
+    "won": true,
+    "combatReport": {
+      "hits": 122,
+      "damage": 1620.1399999999999
+    },
+    "errors": []
+  },
+  "closing": {
+    "world_story_and_reunion_exclusive": true,
+    "no_evolution_over_reunion": true,
+    "old_story_controls_hidden": true
+  },
+  "performance": [
+    {
+      "phase": 1,
+      "median": 33.30000000000018,
+      "p95": 50,
+      "over50": 1,
+      "frames": 90
+    },
+    {
+      "phase": 2,
+      "median": 33.30000000000109,
+      "p95": 49.900000000001455,
+      "over50": 1,
+      "frames": 90
+    },
+    {
+      "phase": 3,
+      "median": 33.30000000000109,
+      "p95": 33.400000000001455,
+      "over50": 0,
+      "frames": 90
+    },
+    {
+      "phase": 4,
+      "median": 33.30000000000291,
+      "p95": 50,
+      "over50": 0,
+      "frames": 90
+    }
+  ],
+  "limitations": [
+    "Canvas screenshot fixtures are not earned progress.",
+    "Campaign uses real controls and one clean Normal save, with no life, form, XP, seal or victory grants.",
+    "RAF measurements are this Chromium/CPU, not physical-phone certification.",
+    "Artistic acceptance remains user review."
+  ],
+  "publication": {
+    "verified": false
+  }
+}

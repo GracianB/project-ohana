@@ -37,8 +37,8 @@ export function drawQuimeraCreature(c,e,cam,t=0,reduce=false){
  // Weight-bearing hind legs, separate knee and ankle; planted claws.
  for(const side of [1,-1]){
   c.save();c.translate(side*61,-83);c.rotate(side*(p.warning*.08-p.strike*.1));
-  oval(c,0,-7,36,57,shell,side*.2);oval(c,side*9,31,24,31,skin);
-  shape(c,shell,()=>{c.moveTo(-19,29);c.quadraticCurveTo(-32,57,-37,79);c.bezierCurveTo(-20,91,26,91,43,78);c.quadraticCurveTo(26,52,20,31);});
+  oval(c,0,-7,36,57,material(c,0,-10,67,'#acbdb5','#607c8b','#26364f'),side*.2);oval(c,side*9,31,24,31,material(c,side*9,26,38,'#d7dbbd','#8fa8a0','#456078'));
+  shape(c,material(c,-3,48,65,'#a4b8af','#536d84','#273451'),()=>{c.moveTo(-19,29);c.quadraticCurveTo(-32,57,-37,79);c.bezierCurveTo(-20,91,26,91,43,78);c.quadraticCurveTo(26,52,20,31);});
   for(let k=0;k<3;k++)shape(c,'#e4d8b6',()=>{const xx=-21+k*21;c.moveTo(xx,73);c.quadraticCurveTo(xx-5,94,xx+8,87);c.lineTo(xx+14,75);},1.5);
   line(c,'#bfd1c3',2,()=>{c.moveTo(-17,-26);c.quadraticCurveTo(5,-41,23,-20);});c.restore();
  }
@@ -69,17 +69,23 @@ export function drawQuimeraCreature(c,e,cam,t=0,reduce=false){
  // Long forearms hang from the clavicle; wrists tense before casting.
  for(const side of [1,-1]){
   c.save();c.translate(side*87,-225);c.rotate(side*(.12+p.warning*.48-p.strike*.7));
-  oval(c,side*8,30,24,49,shell,-side*.18);oval(c,side*16,69,19,19,'#b7c6ba');
-  shape(c,shell,()=>{c.moveTo(side*16-18,66);c.quadraticCurveTo(side*40-30,112,side*40-22,128);c.quadraticCurveTo(side*40,141,side*40+23,125);c.lineTo(side*16+18,67);});
+  oval(c,side*8,30,24,49,material(c,side*8,18,60,'#c7cbb3','#718e94','#34425e'),-side*.18);oval(c,side*16,69,19,19,material(c,side*16,64,25,'#e3ddbd','#a2b6a8','#52697c'));
+  shape(c,material(c,side*31,100,58,'#a0b4ae','#506d83','#273452'),()=>{c.moveTo(side*16-18,66);c.quadraticCurveTo(side*40-30,112,side*40-22,128);c.quadraticCurveTo(side*40,141,side*40+23,125);c.lineTo(side*16+18,67);});
   for(let k=0;k<3;k++){const xx=side*39-18+k*17;shape(c,'#ddd4ba',()=>{c.moveTo(xx,119);c.quadraticCurveTo(xx-10,157,xx+4,148);c.lineTo(xx+11,125);},1.5);}
   for(let k=0;k<3;k++)line(c,'#a7c4be',2,()=>{c.moveTo(side*11-12+k*9,9);c.lineTo(side*17-12+k*9,43);});c.restore();
  }
+ // Interlocking collar scales and recessed sternum channels catch real light.
+ for(const side of [-1,1])for(let k=0;k<4;k++){
+  const xx=side*(24+k*12),yy=-245+k*12;
+  shape(c,material(c,xx,yy,20,'#dae0c5','#8ca79f','#3f5a71'),()=>{c.moveTo(xx-10,yy-12);c.quadraticCurveTo(xx+13,yy-8,xx+12,yy+8);c.quadraticCurveTo(xx-1,yy+15,xx-10,yy);},1.3);
+ }
+ for(let k=0;k<4;k++){const yy=-177+k*18;line(c,'#28405b80',3,()=>{c.moveTo(-19,yy);c.quadraticCurveTo(0,yy+11,21,yy);});line(c,'#e2e3c877',1,()=>{c.moveTo(-16,yy+3);c.quadraticCurveTo(0,yy+13,18,yy+3);});}
  // Neck connects jaw to chest. Crown is grown bone, never a copied halo.
  oval(c,0,-263,40,48,shell);c.save();c.translate(p.strike?-10:0,-p.warning*7);
  for(const side of [1,-1]){
   shape(c,material(c,side*51,-318,70,'#b5cbc4','#658993','#2c405b'),()=>{c.moveTo(side*30,-318);c.bezierCurveTo(side*65,-367,side*105,-359,side*126,-386);c.bezierCurveTo(side*115,-330,side*80,-294,side*41,-291);});
   line(c,'#cbd8c8',2,()=>{c.moveTo(side*44,-313);c.quadraticCurveTo(side*85,-336,side*113,-366);});
-  shape(c,'#d6d1b1',()=>{c.moveTo(side*29,-342);c.quadraticCurveTo(side*62,-385,side*(55+p.spread*20),-419-p.spread*20);c.quadraticCurveTo(side*92,-378,side*47,-332);});
+  shape(c,material(c,side*50,-375,68,'#fff0c7','#c9bc98','#736e75'),()=>{c.moveTo(side*29,-342);c.quadraticCurveTo(side*62,-385,side*(55+p.spread*20),-419-p.spread*20);c.quadraticCurveTo(side*92,-378,side*47,-332);});
  }
  shape(c,material(c,-5,-309,85,'#d6d7c0','#8ba9a6','#415674'),()=>{c.moveTo(-46,-338);c.bezierCurveTo(-81,-310,-60,-264,-37,-250);c.quadraticCurveTo(0,-229,41,-253);c.bezierCurveTo(70,-273,77,-320,44,-338);c.quadraticCurveTo(0,-360,-46,-338);});
  // Heavy brows frame separate sclera, iris, pupil and catchlight.
@@ -93,8 +99,14 @@ export function drawQuimeraCreature(c,e,cam,t=0,reduce=false){
  oval(c,0,-278,16,10,'#3d4b60');line(c,'#233149',3,()=>{c.moveTo(-27,-261);c.quadraticCurveTo(0,-263+(p.strike?16:0),29,-263);});
  for(const side of [-1,1])shape(c,'#f3e0bb',()=>{c.moveTo(side*19,-263);c.quadraticCurveTo(side*22,-245,side*29,-259);},1);
  // Phase III reveals the branching forehead organ, phase IV its inner eye.
- shape(c,'#d9d6b7',()=>{c.moveTo(-12,-339);c.quadraticCurveTo(-22,-382,-9,-407);c.lineTo(0,-389);c.lineTo(13,-411-p.spread*12);c.quadraticCurveTo(27,-372,15,-339);});
+ shape(c,material(c,0,-367,65,'#fff2cc','#c4bd9e','#747782'),()=>{c.moveTo(-12,-339);c.quadraticCurveTo(-22,-382,-9,-407);c.lineTo(0,-389);c.lineTo(13,-411-p.spread*12);c.quadraticCurveTo(27,-372,15,-339);});
  if(p.phase>=3){for(const side of [-1,1])line(c,'#cfb7c5',4,()=>{c.moveTo(side*9,-356);c.quadraticCurveTo(side*33,-376,side*29,-396);});}
+ // Branches are grown bone with asymmetric tips and incised grain.
+ if(p.phase>=3)for(const side of [-1,1]){
+  shape(c,material(c,side*28,-384,56,'#f9e7c4','#b6a6a4','#635b79'),()=>{c.moveTo(side*11,-357);c.quadraticCurveTo(side*44,-381,side*32,-415);c.lineTo(side*43,-403);c.lineTo(side*54,-421);c.quadraticCurveTo(side*57,-381,side*22,-351);},1.8);
+ }
+ for(const side of [-1,1])for(let k=0;k<5;k++)line(c,'#756e7b77',1,()=>{c.moveTo(side*(35+k*3),-350-k*8);c.lineTo(side*(45+k*2),-353-k*8);});
+ for(const side of [-1,1]){line(c,'#e1d6bb',2,()=>{c.moveTo(side*15,-287);c.quadraticCurveTo(side*30,-278,side*46,-286);});oval(c,side*6,-279,2.3,1.5,'#142238');}
  if(p.phase===4)oval(c,0,-329,6,11,'#fff0bd');
  c.restore();
  if(p.hurt){c.globalAlpha*=.3;line(c,'#ffe5ce',5,()=>{c.moveTo(-80,-232);c.quadraticCurveTo(-116,-159,-77,-106);});}
