@@ -88,6 +88,15 @@ function hasAction(player, actionId) {
   return player.actions.some((entry) => typeof entry === "string" ? entry === actionId : entry?.id === actionId);
 }
 
+// A vote belongs to two live connection epochs. If either peer goes away,
+ // a stale approval must never carry over to their resumed session.
+function closePendingTravel(room, reason, at) {
+  if (room.mode !== 'adventure' || room.travel?.status !== 'pending') return false;
+  room.travelClosed = { id: room.travel.id, reason, at };
+  room.travel = null;
+  return true;
+}
+
 function expireStalePlayers(room, now) {
   let changed = false;
   for (const player of room.players) {
@@ -97,6 +106,7 @@ function expireStalePlayers(room, now) {
       changed = true;
     }
   }
+  if (changed) closePendingTravel(room, 'disconnected', now);
   if (changed && room.phase === "playing") {
     room.phase = "lobby";
     if (room.combat && room.combat.pausedAt == null) room.combat.pausedAt = now;
@@ -204,6 +214,8 @@ export function createRoomService(store, options = {}) {
       const { room } = await mutate(roomCode, (state) => {
         const resume = state.players.find((player) => player.id === identity.playerId && player.token === identity.token);
         if (resume) {
+          // Rejoining supersedes a previous tab's travel approval.
+          closePendingTravel(state, 'reconnected', now());
           resume.connectionEpoch = (resume.connectionEpoch || 0) + 1;
           resume.connected = true;
           resume.lastMoveAt = now();
@@ -538,6 +550,7 @@ export function createRoomService(store, options = {}) {
         if (!player) throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
         if (identity.connectionEpoch !== player.connectionEpoch) return;
         player.connected = false;
+        closePendingTravel(state, 'disconnected', now());
         // A disconnected partner breaks the ritual. Resuming cannot reuse a prior hold.
         state.duoChannel = null;
         if (state.phase === "playing") {

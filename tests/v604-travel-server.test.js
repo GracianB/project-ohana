@@ -65,3 +65,54 @@ test('V604 server: legacy multiplayer remains untouched; unpublished VS fails cl
  assert.equal(classic.players[0].worldRoomId,'hub');
  await assert.rejects(h.service.create('versus'),e=>e.code==='MODE_NOT_READY');
 });
+
+test('V604 server: disconnect cancels proposal and reconnection requires a fresh approval',async()=>{
+ const h=harness(),t=await team(h);
+ const vote=await h.service.travel(t.code,t.host.identity,proposal('w1-kilo','w1-stitcho'));
+ const off=await h.service.disconnect(t.code,t.guest.identity);
+ assert.equal(off.phase,'lobby');assert.equal(off.travel,null);
+ assert.equal(off.travelClosed.id,vote.travel.id);
+ assert.equal(off.travelClosed.reason,'disconnected');
+ assert.deepEqual(off.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
+ const resumed=await h.service.join(t.code,t.guest.identity);
+ assert.equal(resumed.phase,'playing');
+ await assert.rejects(
+   h.service.travel(t.code,resumed.identity,{decision:'accept',voteId:vote.travel.id}),
+   e=>e.code==='TRAVEL_STALE'
+ );
+ const fresh=await h.service.travel(t.code,t.host.identity,proposal('w1-kilo','w1-stitcho'));
+ assert.notEqual(fresh.travel.id,vote.travel.id);
+ const accepted=await h.service.travel(t.code,resumed.identity,{decision:'accept',voteId:fresh.travel.id});
+ assert.deepEqual(accepted.players.map(p=>p.worldRoomId),['w1-stitcho','w1-stitcho']);
+});
+
+test('V604 server: replacing an active tab invalidates pending consent',async()=>{
+ const h=harness(),t=await team(h);
+ const vote=await h.service.travel(t.code,t.host.identity,proposal('w1-kilo','w1-stitcho'));
+ const rejoined=await h.service.join(t.code,t.host.identity);
+ assert.equal(rejoined.travel,null);
+ assert.equal(rejoined.travelClosed.id,vote.travel.id);
+ assert.equal(rejoined.travelClosed.reason,'reconnected');
+ assert.deepEqual(rejoined.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
+ await assert.rejects(
+   h.service.travel(t.code,t.host.identity,{decision:'accept',voteId:vote.travel.id}),
+   e=>e.code==='STALE_SESSION'
+ );
+ await assert.rejects(
+   h.service.travel(t.code,t.guest.identity,{decision:'accept',voteId:vote.travel.id}),
+   e=>e.code==='TRAVEL_STALE'
+ );
+});
+
+test('V604 server: an unresponsive peer expires and their proposal is revoked',async()=>{
+ const h=harness(),t=await team(h);
+ const vote=await h.service.travel(t.code,t.guest.identity,proposal('w1-kilo','w1-stitcho'));
+ h.advance(7000);await h.service.poll(t.code,t.host.identity);
+ h.advance(9000);
+ const result=await h.service.poll(t.code,t.host.identity);
+ assert.equal(result.phase,'lobby');
+ assert.equal(result.travel,null);
+ assert.equal(result.travelClosed.id,vote.travel.id);
+ assert.equal(result.travelClosed.reason,'disconnected');
+ assert.deepEqual(result.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
+});
