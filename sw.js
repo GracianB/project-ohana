@@ -1,6 +1,7 @@
 const VERSION = "ohana-604";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
+  "./systems/chapter-species-v604.js?v=" + VERSION,
   "./systems/guardian-techniques.js?v=" + VERSION,
   "./systems/illustrated-chapters.js?v=" + VERSION,
   "./assets/scenes/stitcho-realm.webp",
@@ -437,7 +438,7 @@ const PRECACHE_REVISIONS = {
   "characters/identity-v2.js": "1200f339e2612f597607d48dbd6c5419dbe9b60f",
   "characters/anatomical-stride.js": "3a0bb654e3f7d8cc65c28a6c86f07c5bf0169b1d",
   "systems/chapter-encounters.js": "457d07ff55d9fa992e81cefc66a7a80451a4c9f7",
-  "systems/campaign-creature-art.js": "3763556dde879ee390022e3632bb0d90ac88651b",
+  "systems/campaign-creature-art.js": "d97ed9568c1f26f2212c457a1f97374d5aa6b4ef",
   "worlds/chapter-vistas.js": "4add1f6b1654dcaf33924bb8a912aef9af2feb22",
   "systems/chapters-lunar-prism-embers.js": "f24c3b1c2e4688f99ea17dceea2d006b31887289",
   "worlds/ohana-crafted-scenes.js": "67c654f2ee9422a6bc1f62a08821f189a7a222c0",
@@ -814,7 +815,9 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "systems/welcome-spotlight.js": "c10075db06b02206dbb4f0b2d0dad14d68a99a27"
+  "systems/welcome-spotlight.js": "c10075db06b02206dbb4f0b2d0dad14d68a99a27",
+  "systems/chapter-species-v604.js": "67f46c28d4645ad0267181556701734fc9c5c3e4",
+  "PROGRESS.md": "7f9fdc785344f80b81566853695700151495905d"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";
