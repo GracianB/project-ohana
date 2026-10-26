@@ -4,7 +4,7 @@
   "date": "2026-10-26",
   "integrated_pr": 441,
   "node": {
-    "passed": 1641,
+    "passed": 1655,
     "failed": 0
   },
   "release_gate": "passed",
@@ -31,7 +31,7 @@
           4
         ],
         "minHp": 80,
-        "iterations": 280,
+        "iterations": 244,
         "sealCount": 1,
         "discoveries": 3
       },
@@ -45,8 +45,8 @@
           3,
           4
         ],
-        "minHp": 61.339999999999975,
-        "iterations": 198,
+        "minHp": 72.3,
+        "iterations": 288,
         "sealCount": 2,
         "discoveries": 3
       },
@@ -60,8 +60,8 @@
           3,
           4
         ],
-        "minHp": 47.74,
-        "iterations": 145,
+        "minHp": 47.339999999999996,
+        "iterations": 150,
         "sealCount": 3,
         "discoveries": 3
       },
@@ -76,7 +76,7 @@
           4
         ],
         "minHp": 50.2,
-        "iterations": 211,
+        "iterations": 228,
         "sealCount": 4,
         "discoveries": 3
       },
@@ -90,8 +90,8 @@
           3,
           4
         ],
-        "minHp": 79.54,
-        "iterations": 218,
+        "minHp": 72.46000000000001,
+        "iterations": 198,
         "sealCount": 5,
         "discoveries": 3
       },
@@ -127,7 +127,7 @@
       },
       {
         "hero": "frita",
-        "deaths": 0,
+        "deaths": 1,
         "forms": [
           0,
           1,
@@ -135,8 +135,8 @@
           3,
           4
         ],
-        "minHp": 39.85999999999998,
-        "iterations": 243,
+        "minHp": 5.619999999999983,
+        "iterations": 293,
         "sealCount": 8,
         "discoveries": 3
       },
@@ -151,7 +151,7 @@
           4
         ],
         "minHp": 110,
-        "iterations": 201,
+        "iterations": 219,
         "sealCount": 9,
         "discoveries": 3
       },
@@ -206,8 +206,8 @@
     ],
     "won": true,
     "combatReport": {
-      "hits": 139,
-      "damage": 2106.299999999999
+      "hits": 154,
+      "damage": 2378.619999999999
     },
     "errors": []
   },
@@ -233,18 +233,34 @@
       "voluntary_role_swap_mobile": true,
       "role_stats_preserved_server_tests": true,
       "stale_role_position_rejected": true,
-      "station_browser_fixture": "guest placed at the first authored note, actual production hold interval; not a full traversal"
+      "station_browser_fixture": "guest placed at the first authored note, actual production hold interval; not a full traversal",
+      "final_act_fixture": {
+        "status": "passed",
+        "two_browsers": true,
+        "mobile_viewport": true,
+        "host_reload": true,
+        "guest_reload": true,
+        "guest_physical_pickup": true,
+        "scene_barriers_and_sequence": true,
+        "single_result_each": true,
+        "solo_profile_preserved": true,
+        "initial_state": "nine previous rescues",
+        "boss_health_fixtures": true,
+        "proves_combat_difficulty": false,
+        "proves_full_cooperative_campaign": false,
+        "lobby_exit": true
+      }
     },
     "webrtc_datachannel": "not_validated",
     "remaining": [
-      "complete cooperative traversal of ten chapters",
-      "shared final keepsakes and finale",
+      "complete cooperative traversal of ten chapters and ten final duels",
+      "cooperative defeat and retry during combat",
       "cross-device and cross-network latency",
       "human PvP balancing"
     ]
   },
   "offline": {
     "runtime_modules": 345,
-    "resources": 413
+    "resources": 414
   }
 }

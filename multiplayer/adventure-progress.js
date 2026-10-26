@@ -27,18 +27,20 @@ export function mergeAdventureProgress(previous,payload,{roomId,host=false}={}){
 }
 export function applyAdventureProgress(game,progress){
  if(!game?.onlineAdventure||!progress)return false;
- const r=WORLD1_ROOMS[game.roomId],w=game.world1;if(!r?.hero||w?.room!==game.roomId)return false;
+ const r=WORLD1_ROOMS[game.roomId],w=game.world1;
  game.world1Stations||={};game.secrets||={};game.clearedEncounters||={};
  for(const hero of WORLD1_ORDER){const room='w1-'+hero;
   game.world1Stations[room]=union(game.world1Stations[room],progress.stations?.[room]);
   game.secrets[room]=union(game.secrets[room],progress.secrets?.[room]);
   game.clearedEncounters[room]=union(game.clearedEncounters[room],progress.encounters?.[room]);
  }
+ game.world1Seals=WORLD1_ORDER.filter(h=>(game.world1Seals||[]).includes(h)||(progress.seals||[]).includes(h));
+ if(!r?.hero||w?.room!==game.roomId){if(w?.statuesLit)w.statuesLit=(r.statues||[]).map(s=>game.world1Seals.includes(s.hero));return game.roomId==='w1-final';}
  const completed=new Set(game.world1Stations[game.roomId]);
  for(const s of w.stations)if(completed.has(s.id)){s.done=true;s._scored=true;s.hold=0;}
  if(['prismas','cadena'].includes(w.kind))w.order=w.stations.filter(s=>s.done).length;
  if(game.expedition)game.expedition.done=(r.expedition?.nodes||[]).filter(n=>game.secrets[game.roomId].includes(n.id)).map(n=>n.id);
- game.world1Seals=WORLD1_ORDER.filter(h=>(game.world1Seals||[]).includes(h)||(progress.seals||[]).includes(h));
+
  if(game.world1Seals.includes(r.hero)&&!w.sealed){w.sealed=true;game.onWorld1Beat?.('seal',r.hero);}
  return true;
 }

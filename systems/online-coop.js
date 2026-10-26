@@ -1,3 +1,5 @@
+import {damageEnemy} from './mutations.js';
+import {adventureFinalePayload,applyAdventureFinale} from '../multiplayer/adventure-finale.js';
 import {renderCoopRole} from './coop-role-v604.js';
 import {adventureRoomProgress,applyAdventureProgress} from '../multiplayer/adventure-progress.js';
 import {drawFamilyDuet} from './family-duets.js';
@@ -193,6 +195,7 @@ class OnlineCoop {
     const me=this.currentPlayer(this.snapshot),g=this._travelGame;
     if(g?.player&&me?.characterId&&g.player.id!==me.characterId)g.changeCoopHero?.(me.characterId,me);
     applyAdventureProgress(g,this.snapshot?.adventureProgress);
+    applyAdventureFinale(g,this.snapshot?.adventureFinale,{host:me?.slot===0,players:this.snapshot?.players||[]});
     renderCoopRole(g,this.snapshot,id=>this.requestRole(id));
     const confirmed=this.snapshot?.lastTravel;
     if(confirmed?.id&&confirmed.id!==this._travelApplied){
@@ -317,6 +320,7 @@ class OnlineCoop {
       local.grounded = true;
     }
 
+    this.syncTravel(game);
     await this.sendPosition(game, true);
     this.ensurePeerHud();
     this.setupDirect(game);
@@ -785,6 +789,7 @@ class OnlineCoop {
     if (!this.enabled || !game.player || game.player.dead || !this.roomId || !this.identity || this.snapshot?.phase==="lobby") return;
     const now=performance.now();
     const pacing=networkPacing(this.rttMs,this.retryFailures,this.snapshot?.phase==="lobby");
+    if(!force&&now-this.lastSend<pacing.moveMs)return;
     const pose={
       action: "move",
       roomId: this.roomId,
@@ -803,7 +808,7 @@ class OnlineCoop {
       melee: finite(game.player.melee, 0),
       dash: finite(game.player.dash, 0),
       worldRoomId: game.roomId || START_ROOM,
-      ...(this.isConsentMode()?{adventureProgress:adventureRoomProgress(game),characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0}:{}),
+      ...(this.isConsentMode()?{adventureProgress:adventureRoomProgress(game),adventureFinale:adventureFinalePayload(game),characterId:game.player.id,roleEpoch:this.currentPlayer(this.snapshot)?.roleEpoch||0}:{}),
     };
     if(!shouldSendPosition(this.lastSentPose,pose,now-this.lastSend,pacing,force))return;
     const sequence=++this.sequence;
@@ -1149,7 +1154,8 @@ class OnlineCoop {
 
     if (!target || Math.hypot(target.x - x, target.y - y) > 180) return false;
 
-    target.hp = Math.max(0, target.hp - damage);
+    if(game.onlineAdventure&&game.roomId==='w1-final'){if(!damageEnemy(target,damage))return false;}
+    else target.hp = Math.max(0, target.hp - damage);
     target.dying = Number(payload.dying) || target.dying || 0;
     target.invuln = Math.max(target.invuln || 0, 8);
     // Dino's authorized impulse is bounded and boss-limited at the host.
@@ -1199,6 +1205,7 @@ class OnlineCoop {
     // Keep the authenticated room alive while a hidden/paused view stops RAF.
     // Reuse paced poll; never advance physics or increase foreground requests.
     this.direct?.ping();void this.poll(game);
+    if(this.isConsentMode()&&game.roomId==='w1-final')void this.sendPosition(game);
     if(typeof document==="undefined"||!document.hidden)this.repairDirect(game,now);
     return true;
   }
@@ -1331,7 +1338,7 @@ class OnlineCoop {
       for(const bolt of peerFx.bolts)drawBolt(ctx,bolt,game.cam,t);
     }
     if(this.hasFreshCombat(game)){
-      for(const pr of game.coopRemoteEnemyBullets||[]){
+      for(const pr of game.onlineAdventure&&game.roomId==='w1-final'?[]:game.coopRemoteEnemyBullets||[]){
         const vx=pr.x-(game.cam?.x||0),vy=pr.y-(game.cam?.y||0);
         if(vx>-200&&vx<(game.viewW||1280)+200&&vy>-200&&vy<(game.viewH||720)+200)
           drawProjectile(ctx,pr,game.cam,t);

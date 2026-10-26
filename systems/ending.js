@@ -111,21 +111,21 @@ function showEnding(detail={}){
   layer.dataset.resultsAt=String(Math.round(duration*1000));
   layer.setAttribute("aria-hidden","false");
   // The family and its rescued belongings close this campaign.
-  const w1=Number(detail.world)===1;
-  if(w1){const memory=rememberFamilyVictory(detail);dispatchEvent(new CustomEvent("ohana-family-memory",{detail:memory}));}
-  layer.querySelector("[data-open-constellation]").hidden=!w1;
+  const w1=Number(detail.world)===1,coop=detail.coop===true;
+  if(w1&&!coop){const memory=rememberFamilyVictory(detail);dispatchEvent(new CustomEvent("ohana-family-memory",{detail:memory}));}
+  layer.querySelector("[data-open-constellation]").hidden=!w1||coop;
   const copy=w1?WORLD1_ENDING:{kicker:"Mundo 2 completado · Isla Hoku",act:"LA FAMILIA VUELVE A CASA",title:"NADIE SE QUEDA ATRÁS",jun:"HOKU VUELVE A RESPIRAR",sub:"La Reina cae. El Nido se abre. La familia regresa junta al Claro."};
   for(const [sel,key] of [[".win-kicker","kicker"],[".win-act","act"],["#win-title","title"],[".win-jun","jun"],[".win-sub","sub"]]){const n=layer.querySelector(sel);if(n)n.textContent=copy[key];}
   // Keep the closing reward about what the player actually rescued.
-  const cont=layer.querySelector("#win-continue");if(cont){cont.textContent=w1?"Volver al inicio":"Continuar en este mundo";cont.dataset.action=w1?"home":"continue";}
+  const cont=layer.querySelector("#win-continue");if(cont){cont.textContent=coop?"Volver al vestíbulo":w1?"Volver al inicio":"Continuar en este mundo";cont.dataset.action=coop?"lobby":w1?"home":"continue";}
   let soon=layer.querySelector(".win-soon");
   if(w1&&!soon){soon=document.createElement("p");soon.className="win-soon";soon.setAttribute("role","note");layer.querySelector(".win-actions")?.before(soon);}
   if(soon){soon.textContent="Diez recuerdos a salvo. Cada uno vuelve con su dueño.";soon.hidden=!w1;}
-  const rep=layer.querySelector("#win-repeat");if(rep)rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";
+  const rep=layer.querySelector("#win-repeat");if(rep){rep.textContent=w1?"Repetir la Quimera":"Repetir el nido";rep.hidden=coop;}const roster=layer.querySelector("#win-roster");if(roster)roster.hidden=coop;
   layer.dataset.world=w1?"1":"2";
   const score=layer.querySelector(".win-score");
   layer.querySelector(".win-hero").textContent=(detail.hero||hero.name)+" · "+(detail.form||"forma final");
-  score.textContent=(detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
+  score.textContent=(coop?"Cooperativo · ":detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
   duckMusic(true);try{sfx("victory");}catch(_){}
 
   const earnedKeepsakes=new Set(mergeKeepsakes(readKeepsakes(),detail.keepsakes));
@@ -199,7 +199,7 @@ function showEnding(detail={}){
       }
       ctx.save();ctx.globalAlpha=1-seg(q,.84,1);
       const duoName=(hero.name||hero.id).toUpperCase()+" & "+(partnerDef.name||partnerId).toUpperCase();
-      drawTitle(ctx,d.combo>.15?duoName:hero.id==="kilo"?"UN ÚLTIMO BAILE, OHANA":"EL NIDO SE ABRE",cx,H*.15,Math.max(26,Math.min(58,W*.048)),["#fff4c6",d.combo>.15?heroSig.color:"#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:d.combo>.15?heroSig.color:"#ff5a72",maxWidth:W*.92});
+      drawTitle(ctx,d.combo>.15?duoName:hero.id==="kilo"?"UN ÚLTIMO BAILE, OHANA":w1?"LOS RECUERDOS VUELVEN A CASA":"EL NIDO SE ABRE",cx,H*.15,Math.max(26,Math.min(58,W*.048)),["#fff4c6",d.combo>.15?heroSig.color:"#ff6b82"],{font:FONT_DISPLAY,weight:700,stroke:false,glow:d.combo>.15?heroSig.color:"#ff5a72",maxWidth:W*.92});
       if(d.combo>.3)drawTitle(ctx,heroSig.line,cx,H*.15+Math.max(26,Math.min(58,W*.048))*.95,Math.max(12,Math.min(20,W*.016)),heroSig.accent,{font:FONT_BODY,weight:800,stroke:false,maxWidth:W*.9});
       ctx.restore();
       layer.classList.add("ending-phase-1");

@@ -36,9 +36,19 @@ En la entrada o junto a un objetivo completado se puede usar al héroe propietar
 
 El panel espera tanto la posición local como la confirmada por el servidor; se oculta durante las cinemáticas y cuando no hay otro personaje disponible. El indicador de conexión vive dentro del HUD, sin tapar el título o la vida.
 
-La prueba de navegador comprueba vestíbulo, entrada, relevo y regreso mediante botones móviles, sincronización de un objetivo, rechazo y aceptación del viaje y conservación de héroes. La prueba del objetivo coloca al invitado sobre una nota y ejecuta su intervalo real de interacción; no acredita recorrer el capítulo completo. **No demuestra que los dos jugadores puedan completar juntos toda la campaña.** Falta validar juntos los diez capítulos con sus habilidades, completar la sincronización de los recuerdos físicos del acto final y validar recompensas, derrotas, cinemáticas y desenlace cooperativos. El relevo proporciona acceso a las habilidades obligatorias, pero aún no acredita todos los recorridos.
+La prueba de navegador comprueba vestíbulo, entrada, relevo y regreso mediante botones móviles, sincronización de un objetivo, rechazo y aceptación del viaje y conservación de héroes. La prueba del objetivo coloca al invitado sobre una nota y ejecuta su intervalo real de interacción; no acredita recorrer el capítulo completo. **No demuestra que los dos jugadores puedan completar juntos toda la campaña.** Falta validar juntos los diez capítulos con sus habilidades mediante recorrido completo. El acto final ya dispone de sincronización y prueba de integración aislada, descrita abajo; esa prueba no acredita una campaña cooperativa continua. El relevo proporciona acceso a las habilidades obligatorias, pero aún no acredita todos los recorridos.
 
 El transporte HTTP local funciona. En este entorno las ofertas/respuestas WebRTC se intercambian, pero el canal directo no se abre; no se declara validado WebRTC ni rendimiento entre redes. La aventura conserva autoridad del anfitrión para enemigos; Versus utiliza simulación del servidor.
+
+## Acto final compartido
+
+El anfitrión publica el guardián activo, su apertura de daño, Quimera, sus proyectiles y los rescates confirmados. El invitado conserva su héroe y refleja el mismo encuentro; no inicia otro guardián, otra IA de Quimera ni un desenlace independiente. Cualquiera de los dos puede tocar físicamente el recuerdo liberado. Los recibos deben avanzar en el orden de los diez héroes y no se aceptan saltos de rescates o un guardián vivo. Una nueva confirmación paga la celebración común una vez; cargar un recibo antiguo no vuelve a premiarlo.
+
+Las escenas de presentación, rescate, Quimera y final tienen un identificador estable. Al terminarlas, cada jugador confirma su lectura; el último plano muestra «Esperando al compañero» hasta que ambos terminan. Las escenas ya liberadas se recuerdan para no atrapar a quien las acaba más tarde. Las escenas pendientes usan la cola existente y los resultados esperan al cierre de la última. No se guarda una victoria cooperativa como récord individual.
+
+Las recargas del anfitrión restauran el encuentro y los rescates de la sala; las del invitado recuperan la misma escena pendiente. Se conserva el perfil individual. El estado de derrota es del anfitrión; cada navegador emite un solo resultado después del final compartido. El retrato final utiliza al compañero real cuando los héroes son distintos. Los resultados cooperativos ofrecen volver al vestíbulo y no permiten reiniciar unilateralmente Quimera ni abrir la selección individual.
+
+Prueba `test:browser:finale-network`: dos navegadores reales, uno con pantalla móvil. Parte de un estado de prueba con nueve rescates previos y pone a cero la vida del último guardián y de Quimera para aislar la transición. El invitado recoge el último objeto por contacto, ambos completan las escenas, recargan en mitad del encuentro y reciben los diez recuerdos en el resultado. **No es una prueba de dificultad, de los diez duelos cooperativos ni del recorrido completo desde Kilo.** Los diez recibos, las aperturas y el orden se comprueban también por pruebas de reglas. La campaña individual completa se vuelve a comprobar con controles físicos.
 
 ## Evidencia reproducible
 
@@ -48,6 +58,7 @@ npm run release:check
 npx playwright install chromium
 npm run test:browser:adventure-network
 npm run test:browser:versus-network
+npm run test:browser:finale-network
 ```
 
 Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:browser:versus-network` (igual para aventura). Capturas y registros estructurados en `test-results/v604/`.
@@ -57,4 +68,4 @@ Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:bro
 - Pruebas del servidor: controles ordinarios derrotan fauna, evolucionan y alcanzan tres eliminaciones; repetición de solicitudes no duplica premios. No se atribuye esa partida completa al piloto de navegador.
 - Aventura escritorio/móvil: héroes distintos, aislamiento del perfil individual, relevo voluntario y regreso, objetivo completado por el invitado y recibido por el anfitrión, rechazo y viaje aceptado por ambos. Las esperas de estado del arnés son síncronas; no se aceptan promesas sin verificar la condición.
 
-Antes de publicar: completar los bloqueos cooperativos, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
+Antes de publicar: completar el recorrido cooperativo continuo y las pruebas de derrota/reintento y desconexión durante combate, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.

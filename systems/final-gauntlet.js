@@ -1,3 +1,4 @@
+import {findRoster} from '../characters/roster.js';
 // Ten earned rematches, ten physical keepsakes, then the final Quimera.
 // No network/model calls. Position is sampled when a warning commits.
 import {KEEPSAKES,KEEPSAKE_ORDER,readKeepsakes,mergeKeepsakes,persistKeepsakes,drawKeepsake} from './keepsakes.js';
@@ -19,7 +20,7 @@ function beginDuel(g,v){
  if(!requested&&!g.world1Cine)v.phase='fight';
 }
 export function updateFinalGauntlet(g){
- if(g.roomId!=='w1-final'||!g.player||g.player.dead||g.world1Won)return false;
+ if(g.roomId!=='w1-final'||!g.player||g.player.dead||g.world1Won||g.onlineAdventure&&g.coopAuthority===false)return false;
  if(!KEEPSAKE_ORDER.every(h=>g.world1Seals?.includes(h)))return false;
  let v=g.finalGauntlet;if(!v)v=g.finalGauntlet={found:mergeKeepsakes(g.keepsakes,readKeepsakes(g.keepsakeStorage)),phase:'dormant',hero:null,guardian:null,object:null,tick:0};
  if(v.found.length===10){if(v.phase!=='complete'){v.phase='complete';g.onGauntletHero?.('kilo');}return true;}
@@ -28,7 +29,8 @@ export function updateFinalGauntlet(g){
   p.x=clamp(p.x,A.left+550,A.right-550-p.w);
   if(v.guardian?.hp<=0){v.phase='released';g.projectiles=(g.projectiles||[]).filter(pr=>!pr.gauntlet);v.guardian.telegraph=false;g.onGauntletBeat?.('released',v.hero);}
  }
- if(v.phase==='released'&&Math.abs(p.x+p.w/2-v.object.x)<75&&Math.abs(p.y+p.h/2-(v.object.y-40))<115){
+ const collectors=[p,...(g.onlineAdventure&&g.coopRemote&&!g.coopRemote.dead&&g.coopRemote.health>0?[{...g.coopRemote,w:findRoster(g.coopRemote.characterId)?.forms[g.coopRemote.evolution||0]?.w||60,h:findRoster(g.coopRemote.characterId)?.forms[g.coopRemote.evolution||0]?.h||80}]:[])];
+ if(v.phase==='released'&&collectors.some(p=>Math.abs(p.x+p.w/2-v.object.x)<75&&Math.abs(p.y+p.h/2-(v.object.y-40))<115)){
   const fresh=!v.found.includes(v.hero);if(fresh){v.found.push(v.hero);g.keepsakes=[...v.found];g.keepsakeSavePending=!persistKeepsakes(v.found,g.keepsakeStorage);g.onGauntletAward?.(v.hero);}
   v.phase='rescue';const requested=g.playWorld1Cine?.('keepsakeRescue',v.hero);if(!requested&&!g.world1Cine)v.phase='dormant';const checkpoint=g.save?.();if(checkpoint||v.found.every(id=>readKeepsakes(g.keepsakeStorage).includes(id)))g.keepsakeSavePending=false;
  }

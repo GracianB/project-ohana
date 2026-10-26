@@ -111,7 +111,7 @@ import { setMusicOverride, playMusic, themeForRoom, duckMusic, currentMusic, mus
 import { ROOMS as WORLD2_ROOMS, ROOM_W, ROOM_H, drawSigns, MAP_LAYOUT } from "./systems/map.js";
 import { WORLD1_ROOMS, WORLD1_ORDER, world1SealsComplete, isWorld1Room, world2Locked, WORLD2_LOCK_TEXT } from "./systems/world1-rooms.js";
 import { enterWorld1, updateWorld1, world1Snapshot, world1NextObjective, world1ObjectiveDirection, world1DeathCheckpoint, restoreWorld1DeathCheckpoint, drawWorld1, drawWorld1Overlay, drawWorld1Silhouette, world1CanLeave, world1LockedMessage } from "./systems/world1-play.js";
-import { createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
+import { updateFusionProjectilesOnly, fusionShotHitsPlayer, createFusionBoss, updateFusionBoss, drawFusionBoss, drawFusionBossOverlay } from "./systems/fusion-boss.js";
 import { FUSION_STORY } from "./systems/world1-story.js";
 import { loadWorld1Collect, enterWorld1Collect, updateWorld1Collect, drawWorld1Collect, drawWorld1CollectHud, syncWorld1Album, toggleWorld1Album, world1AlbumKey, world1AlbumFor } from "./systems/world1-collect.js";
 import { readWorld1Seals, storeWorld1Seals, world1StartRoom, world1ChapterEntry } from "./systems/world1-progress.js";
@@ -956,7 +956,7 @@ game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stag
 game.playWorld1Cine=(id,hero)=>playWorld1Cine(game,id,hero);
 game.onGauntletHero=(hero)=>{
  clearPersistentObjective();dismissNotifications();
- if(!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
+ if(game.onlineAdventure||!world1SealsComplete(game.world1Seals))return;const def=ROSTER.find(r=>r.id===hero);if(!def)return;
  game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
  p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
  game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
@@ -974,8 +974,12 @@ game.changeCoopHero=(hero,stats)=>{
  return true;
 };
 game.onGauntletAward=(hero)=>{addScore(1000);healPlayer(game.player,game.player.maxHealth*.2);game.nums.add(game.player.x,game.player.y-30,KEEPSAKES[hero].name.toUpperCase(),KEEPSAKES[hero].color,true);beep("win");};
-game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.onWorld1CineEnd=(id)=>{gauntletCineEnded(game,id);
+ if(id==='ending'&&game.onlineAdventure&&game.coopFinalWon&&!game._coopFinalResultSent){game._coopFinalResultSent=true;game._w1WinSent=true;game.world1Won=true;const detail=game._w1WinDetail||{world:1,room:game.roomId,id:game.player.id,hero:game.player.name,evo:game.player.evo,score:game.score,kills:game.kills,rank:'JUNTOS'};detail.keepsakes=[...game.keepsakes];detail.coop=true;detail.uPartner=onlineCoop.remote?.characterId||null;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine='';syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent('ohana-win',{detail}));}
+if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
+game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalRevision=-1;game.coopFinaleState=null;game.coopFinalWon=false;game._coopFinalResultSent=false;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+game.createCoopBossDirector=createWorld1BossDirector;
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
@@ -1636,6 +1640,7 @@ game.slashes = [];
 playMusic("victoria");
 }
 function tickFinale() {
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')return;
 const f = game.finale;
 if (!f || f.t <= 0) return;
 f.t--;
@@ -1668,7 +1673,7 @@ game._cuernoWonT = t;
 const p = game.player;
 const ticks = game.clearTicks || 0;
 const rank = clearRank(ticks);
-game.best = rememberBest(game.best, {
+if(!game.onlineAdventure)game.best = rememberBest(game.best, {
   ticks, kills: game.kills, score: game.score, evo: p ? p.evo : 0, rank, id: p ? p.id : ""
 });
 save();
@@ -2168,6 +2173,16 @@ if (p && !p.dead && e.hp>0 && !e.dying && solid && aabb(p, e)) {
 }
 function updateEnemies() {
 if (!game.player) return;
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final'){
+ const p=game.player,consumed=game._coopFinalConsumed||=new Set();
+ if(performance.now()-(game._coopFinalPacketAt||0)<750){
+  for(const shot of game.coopFinalShots||[]){if(shot.life<=0)continue;shot.x+=shot.vx;shot.y+=shot.vy;shot.life--;if(p.invuln<=0&&aabb(p,shot)){hurtPlayer(shot.dmg,'GUARDIÁN');if(!['prism','lightning','geysers','ember'].includes(shot.gauntlet)){shot.life=0;consumed.add('g:'+shot.id);}}}
+  const shots=[...(game.boss?._fusion?.shots||[])];updateFusionProjectilesOnly(game.boss,game,damage=>hurtPlayer(damage,'ECO'));for(const shot of shots)if(shot.hit||shot.life<=1)consumed.add('q:'+(game.boss?._coopSyncId||0)+':'+shot.id);
+  const e=game.finalGauntlet?.guardian;if(e?.hp>0&&e.contactDmg>0&&p.invuln<=0&&aabb(p,e))hurtPlayer(e.contactDmg,'GUARDIÁN');
+ }
+ while(consumed.size>2048)consumed.delete(consumed.values().next().value);
+ return;
+}
 // WebRTC host is the single source of enemy decisions during fresh frames.
 // Guest only extrapolates that state instead of independently picking targets.
 if (onlineCoop.advanceGuestCombat(game)) {
@@ -3218,6 +3233,7 @@ Passives.draw(ctx, game, t);
 // Network freshness is stable for this paint; asking it for each bolt also
 // touches performance.now() repeatedly, without changing synchronization.
 const peerCombatFresh=onlineCoop.hasFreshCombat(game);
+if(game.onlineAdventure&&game.coopAuthority===false&&game.roomId==='w1-final')for(const shot of game.coopFinalShots||[])if(shot.life>0)drawGauntletProjectile(ctx,shot,game.cam,t);
 for (const pr of game.projectiles) if ((!peerCombatFresh || pr.owner === "player") && visibleForRender(pr,game.cam,viewportW,viewportH)) {if(!drawGauntletProjectile(ctx,pr,game.cam,t))drawProjectile(ctx, pr, game.cam, t);}
 for (const b of game.bolts) if (visibleForRender(b,game.cam,viewportW,viewportH)) drawBolt(ctx, b, game.cam, t);
 for (const s of game.slashes || []) drawSlash(ctx, s, game.cam);
@@ -3654,7 +3670,7 @@ for(const btn of touchPowers){
 let lastAnnouncedQuimeraPhase = null;
 function step() {
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
-if(game._pendingWorld1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
+if(game._pendingWorld1Cine&&!game.world1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
 if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
 if (!canAct()) return;
 t++;
@@ -3865,6 +3881,10 @@ if (state === "won" && game.boss && !game.finale && !game.won) {
 
 addEventListener("ohana-after", (e) => {
 const act = e.detail && e.detail.action;
+if(act==='lobby'){
+ navigator.sendBeacon('/.netlify/functions/game',new Blob([JSON.stringify({action:'disconnect',roomId:onlineCoop.roomId,identity:onlineCoop.identity})],{type:'application/json'}));
+ onlineCoop.enabled=false;clearInterval(onlineCoop.heartbeatTimer);onlineCoop.direct?.close();onlineCoop.clearSession();location.href='./multiplayer.html';return;
+}
 if (act === "continue") {
   game.running = true;
   // V470: el juego termina en el Mundo 1 (Mundo 2 en construcción): seguir = quedarse en el Corazón.

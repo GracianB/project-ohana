@@ -59,6 +59,7 @@ export function world1BossFilterDamage(g, dmg) {
 }
 
 export function updateWorld1BossDirector(g) {
+  if(g?.onlineAdventure&&g.coopAuthority===false){const d=g.world1Boss,b=g.boss?._fusion;if(d){if(d.grace>0)d.grace--;const key=b?.attack+':'+g.boss?.phase+':'+b?.step;if(d._coopAttack!==key){d._coopAttack=key;d.attackDmg=0;}}return null;}
   const d = g?.world1Boss; if (!d || d.done) return null;
   const e = fusion(g) || d.boss; if (!e) return null;
   const b = e._fusion || {}, p = g.player; d.t++;

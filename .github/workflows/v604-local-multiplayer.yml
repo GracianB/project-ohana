@@ -31,6 +31,7 @@ jobs:
         run: |
           npm run test:browser:adventure-network
           npm run test:browser:versus-network
+          npm run test:browser:finale-network
       - uses: actions/upload-artifact@v4
         if: always()
         with:

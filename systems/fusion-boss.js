@@ -63,7 +63,8 @@ function pushShot(b, s) {
   const source = b.mode === "special"
     ? b.special?.name || "QUIMERA OHANA"
     : FUSION_ATTACKS[b.attack]?.name || "QUIMERA OHANA";
-  b.shots.push({ ...s, source });
+  b.shotSerial=(b.shotSerial||0)+1;
+  b.shots.push({ ...s, source, id:b.shotSerial });
 }
 
 function chooseAttack(e, b) {
@@ -173,6 +174,18 @@ function tickAttack(e, b, g, p, hurt) {
   if (--b.clock <= 0) finishAttack(e, b);
 }
 
+export function fusionShotHitsPlayer(s,p,A=WORLD1_ARENA){
+ if(!p||p.dead||s.hit||s.delay>0||s.life<=0)return false;
+  let hit = false;
+  if (s.k === "bolt") hit = s.life < 18 && Math.abs(pcx(p) - s.x) < s.r;
+  else if (s.k === "geyser") hit = s.life < 44 && Math.abs(pcx(p) - s.x) < s.r && p.y + p.h > WORLD1_FLOOR - 340;
+  else if (s.k === "wave" || s.k === "ring") hit = Math.abs(pcx(p) - s.x) < s.r && p.y + p.h > WORLD1_FLOOR - (s.k === "wave" ? 30 : 46);
+  else if (s.k === "beam") hit = s.life < s.liveFor && Math.abs((p.y + p.h - s.band) ) < 40 && p.x + p.w > A.left;
+  else if (s.k === "echo") hit = Math.abs(pcx(p) - s.x) < 36 && Math.abs(pcy(p) - s.y) < 40;
+  else hit = Math.hypot(pcx(p) - s.x, pcy(p) - s.y) < s.r + Math.min(p.w, p.h) * .45;
+ return hit;
+}
+export function updateFusionProjectilesOnly(e,g,hurt){if(e?._fusion)updateShots(e,e._fusion,g,hurt);}
 function updateShots(e, b, g, hurt) {
   const p = g.player, A = WORLD1_ARENA;
   for (const s of b.shots) {
@@ -184,13 +197,7 @@ function updateShots(e, b, g, hurt) {
     if (s.k === "fire") s.vy += .05;
     if (s.x < A.left - 300 || s.x > A.right + 300) s.life = 0;
     if (!p || p.dead || s.hit) continue;
-    let hit = false;
-    if (s.k === "bolt") hit = s.life < 18 && Math.abs(pcx(p) - s.x) < s.r;
-    else if (s.k === "geyser") hit = s.life < 44 && Math.abs(pcx(p) - s.x) < s.r && p.y + p.h > WORLD1_FLOOR - 340;
-    else if (s.k === "wave" || s.k === "ring") hit = Math.abs(pcx(p) - s.x) < s.r && p.y + p.h > WORLD1_FLOOR - (s.k === "wave" ? 30 : 46);
-    else if (s.k === "beam") hit = s.life < s.liveFor && Math.abs((p.y + p.h - s.band) ) < 40 && p.x + p.w > A.left;
-    else if (s.k === "echo") hit = Math.abs(pcx(p) - s.x) < 36 && Math.abs(pcy(p) - s.y) < 40;
-    else hit = Math.hypot(pcx(p) - s.x, pcy(p) - s.y) < s.r + Math.min(p.w, p.h) * .45;
+    const hit = fusionShotHitsPlayer(s,p,A);
     if (hit) { s.hit = s.k !== "bolt" && s.k !== "geyser" && s.k !== "beam"; hurt(s.dmg, s.source || FUSION_ATTACKS[b.attack]?.name || "QUIMERA"); if (s.k === "bolt" || s.k === "geyser" || s.k === "beam") s.life = Math.min(s.life, 1); }
   }
   b.shots = b.shots.filter((s) => s.life > 0 && !s.hit);

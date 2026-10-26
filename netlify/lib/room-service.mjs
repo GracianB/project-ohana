@@ -1,3 +1,4 @@
+import {mergeAdventureFinale} from '../../multiplayer/adventure-finale.js';
 import {findRoster} from '../../characters/roster.js';
 import {adventureCamp,adventureRoleAllowed} from '../../multiplayer/adventure-roles.js';
 import {mergeAdventureProgress} from '../../multiplayer/adventure-progress.js';
@@ -71,6 +72,7 @@ function snapshot(room, viewerId) {
     mode: room.mode || 'classic',
     arenaId:room.arenaId||null,
     versus:versusSnapshot(room),
+    adventureFinale:room.mode==='adventure'?structuredClone(room.adventureFinale||null):null,
     adventureProgress:room.mode==='adventure'?structuredClone(room.adventureProgress||null):null,
     travel: room.mode==='adventure'?structuredClone(room.travel||null):null,
     lastTravel: room.mode==='adventure'?structuredClone(room.lastTravel||null):null,
@@ -374,6 +376,7 @@ export function createRoomService(store, options = {}) {
           player.health = finitePayloadNumber(payload?.health,player.health??0,0,100000);
           player.maxHealth = finitePayloadNumber(payload?.maxHealth,player.maxHealth??1,1,100000);
           player.worldRoomId = String(payload?.worldRoomId || player.worldRoomId || "beach");
+          if(state.mode==='adventure'&&selectedRoom==='w1-final'&&payload.adventureFinale)state.adventureFinale=mergeAdventureFinale(state.adventureFinale,payload.adventureFinale,{host:player.slot===0,playerId:player.id,players:state.players.map(p=>p.id)});
           if(state.mode==='adventure'&&payload.adventureProgress)state.adventureProgress=mergeAdventureProgress(state.adventureProgress,payload.adventureProgress,{roomId:selectedRoom,host:player.slot===0});
           player.pose = {
             vx: Math.max(-40, Math.min(40, Number(payload?.velocityX) || 0)),
