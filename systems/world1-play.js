@@ -1,4 +1,5 @@
 import {updateFinalGauntlet} from './final-gauntlet.js';
+import {KEEPSAKES} from './keepsakes.js';
 import {enterExpedition,updateExpedition,expeditionReady,expeditionObjective,drawExpedition} from './chapter-expedition-v2.js';
 import {fritaVentState,noteFritaLaunch,yomiNodeState,drawFritaVent,drawYomiTerminal} from './frita-yomi-chapters.js';
 import {pizzaOvens,nearestPizzaOven,notePizzaBake,PIZZA_ROUTE_TICKS,drawPizzaChapter,drawPizzaOven,drawPizzaCustomer} from './pizza-chapter.js';
@@ -10,7 +11,7 @@ import {enterKiloAirTrail,updateKiloAirTrail,drawKiloAirTrail,kiloNoteGrowth,kil
 // OHANA V467 · MUNDO 1 · sellos, cinemáticas de sala y fondo-silueta del héroe.
 // Cada sala tiene UNA interacción propia (WORLD1_SEALS); el resto es sencillo.
 // Determinista: sin Math.random, sin degradados por fotograma y con geometría finita.
-import { WORLD1_ROOMS, WORLD1_THEMES, WORLD1_SEALS, WORLD1_ORDER, WORLD1_ARENA, isWorld1Room, world1DoorOpen, cleanWorld1Seals, world1SealsComplete, cleanWorld1Stations } from "./world1-rooms.js";
+import { WORLD1_ROOMS, WORLD1_THEMES, WORLD1_SEALS, WORLD1_ORDER, WORLD1_ARENA, WORLD1_FLOOR, isWorld1Room, world1DoorOpen, cleanWorld1Seals, world1SealsComplete, cleanWorld1Stations } from "./world1-rooms.js";
 import { WORLD1_ROOM_STORY, FUSION_STORY, WORLD1_TITLE } from "./world1-story.js";
 import { ROSTER } from "../characters/roster.js";
 
@@ -101,9 +102,22 @@ export function world1Snapshot(g) {
 }
 
 // One actionable objective, shared by HUD, pause and the world marker.
+// Final destinations use the same physical positions as combat and pickup.
+// Map users must never see "end of route" while a guardian or object remains.
+export function world1FinalObjective(g) {
+  const p=g?.player,r=g?.roomDef;if(!p||!r?.fusionBoss||g.world1Won)return null;
+  const v=g.finalGauntlet,e=v?.guardian,d=KEEPSAKES[v?.hero];
+  if((v?.phase==='released'||v?.phase==='fight'&&e?.hp<=0)&&v.object)return {x:v.object.x,y:v.object.y,label:d?.name||'Recuerdo personal',action:'Acércate al relicario y toca el objeto para recuperarlo'};
+  if(v?.phase!=='complete'&&e?.hp>0)return {x:cx(e),y:cy(e),label:d?.guardian||'Guardián evolucionado',action:'Acércate al guardián. Lee su aviso y aprovecha la apertura'};
+  const boss=g.boss||g.world1Boss?.boss;
+  if(boss?.hp>0)return {x:cx(boss),y:cy(boss),label:'Quimera Ohana',action:'Esquiva sus ataques anunciados y golpea entre ataques. Cuatro fases, diez voces'};
+  if(v?.phase==='complete')return {x:(WORLD1_ARENA.left+WORLD1_ARENA.right)/2,y:WORLD1_FLOOR,label:'Quimera Ohana',action:'Los diez recuerdos están a salvo. La familia se enfrenta a Quimera'};
+  return {x:WORLD1_ARENA.start+140,y:WORLD1_FLOOR,label:'Umbral de los guardianes',action:'Cruza el umbral y recupera los diez recuerdos antes de enfrentarte a Quimera'};
+}
 export function world1NextObjective(g) {
   const w = g?.world1, p = g?.player, r = g?.roomDef;
-  if (!w || !p || !r || r.fusionBoss) return null;
+  if(r?.fusionBoss)return world1FinalObjective(g);
+  if (!w || !p || !r) return null;
   const expedition=expeditionObjective(g);if(expedition)return expedition;
   if (w.sealed) return { x: r.width - 80, y: r.seal?.altar?.y || 1134, label: "Salida del este", action: "Sigue hacia la siguiente sala" };
   if(kiloGuardianRequired(g)&&w.stations.every(s=>s.done))return {x:8750,y:KILO_CHAPTER_ARENA.floor,label:'Tambor del Claro',action:'Las cuatro notas están listas · vence al guardián. Salta sus ondas y ataca cuando se recupere.'};

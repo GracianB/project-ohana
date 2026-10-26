@@ -1,4 +1,4 @@
-import {readKeepsakes,drawKeepsake} from './keepsakes.js';
+import {readKeepsakes,mergeKeepsakes,drawKeepsake} from './keepsakes.js';
 import {rememberFamilyVictory} from "./family-memory.js";
 import {drawChispaCeremony} from './chispa-stagecraft.js';
 // PROJECT OHANA V44 · TRUE ENDING
@@ -128,7 +128,7 @@ function showEnding(detail={}){
   score.textContent=(detail.rank?"Claro "+detail.rank+" · ":"")+(detail.time?detail.time+" · ":"")+(Number(detail.kills)||0)+" bajas"+(detail.best&&detail.best!==detail.time?" · mejor "+detail.best:"");
   duckMusic(true);try{sfx("victory");}catch(_){}
 
-  const earnedKeepsakes=new Set(readKeepsakes());
+  const earnedKeepsakes=new Set(mergeKeepsakes(readKeepsakes(),detail.keepsakes));
   function actor(p,x,footY,h,tf,opts={}){
     p.facing=opts.facing||1;p.grounded=opts.grounded!==false;p.vx=opts.vx||0;p.vy=opts.vy||0;p.melee=opts.melee||0;p._poseOverride=opts.pose||"idle";
     if(p.id==='kilo'&&!reduce)p._kiloPerformance={kind:"dance",time:tf/60};

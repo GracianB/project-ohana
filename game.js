@@ -1,6 +1,6 @@
 import {drawIllustratedChapter} from './systems/illustrated-chapters.js';
 import {resolveGuardianProjectileContact,updateGauntletGuardian,gauntletCineEnded,gauntletSnapshot,drawGauntletWorld,drawGauntletHud,gauntletPresentation,gauntletHudLayout,gauntletAccessibleText,drawGauntletProjectile} from './systems/final-gauntlet.js';
-import {KEEPSAKES,readKeepsakes} from './systems/keepsakes.js';
+import {KEEPSAKES,readKeepsakes,mergeKeepsakes,persistKeepsakes} from './systems/keepsakes.js';
 import {chapterAtlasHTML,chapterMapDetail,drawAdventureGuide} from './systems/adventure-guide-v2.js';
 import {drawMemoryAura} from './systems/memory-rewards-v2.js';
 import {drawChapterBossV2} from './systems/chapter-boss-art-v2.js';
@@ -453,6 +453,7 @@ let saveWarning = false;
 function save() {
 if (!game.player || game.player.dead) return;
 const saved = saveStore.write(game, Magic);
+if(saved)game.keepsakeSavePending=false;
 if (!saved && !saveWarning) showSystemMessage("GUARDADO", "No se puede guardar en este navegador. La partida sigue disponible mientras no cierres la página.");
 saveWarning = !saved;
 return saved;
@@ -937,6 +938,7 @@ game.player.uExp=bondXP(game.player);
 game.combatReport={hits:0,damage:0};
 game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = { hub: true };
 game.world1Stations = {};
+game.keepsakes=readKeepsakes();game.keepsakeSavePending=false;
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
 game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
 game.canWorld1CineStart=()=>!game.relicScene&&!document.querySelector('#evo-stage.show,#supreme-cinema[aria-hidden="false"],#win-cinema.show');
@@ -984,6 +986,7 @@ try {
     game.kills = u.kills;
     game.won = u.won;
     game.world1Seals = storeWorld1Seals([...game.world1Seals, ...(Array.isArray(u.world1Seals) ? u.world1Seals : [])]);
+    game.keepsakes=mergeKeepsakes(game.keepsakes,u.keepsakes);persistKeepsakes(game.keepsakes);
     game.world1Won = !!u.world1Won;
     game.world1Visited = u.world1Visited || {};
     game.world1Stations = u.world1Stations || {};
@@ -1655,6 +1658,7 @@ const winDetail = {
   hero: p ? p.name : "Ohana",
   form: p && p.evoNames ? p.evoNames[p.evo] || p.evoNames[4] : "forma final",
   rank,
+  keepsakes: mergeKeepsakes(game.keepsakes,game.finalGauntlet?.found),
   world: w1Final ? 1 : 2,
   room: game.roomId,
   time: formatClear(ticks),

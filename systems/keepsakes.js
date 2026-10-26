@@ -14,8 +14,23 @@ export const KEEPSAKES=Object.freeze({
 });
 export const KEEPSAKE_SAVE_KEY='ohana-keepsakes-v1';
 export function cleanKeepsakes(value){return Array.isArray(value)?KEEPSAKE_ORDER.filter(id=>value.includes(id)):[];}
-export function readKeepsakes(storage=globalThis.localStorage){try{return cleanKeepsakes(JSON.parse(storage?.getItem(KEEPSAKE_SAVE_KEY)||'[]'));}catch{return [];}}
-export function rememberKeepsake(hero,storage=globalThis.localStorage){if(!KEEPSAKES[hero])return false;const found=readKeepsakes(storage);if(found.includes(hero))return false;try{storage?.setItem(KEEPSAKE_SAVE_KEY,JSON.stringify([...found,hero]));return true;}catch{return false;}}
+export function mergeKeepsakes(...groups){return cleanKeepsakes(groups.flatMap(g=>Array.isArray(g)?g:[]));}
+// The profile key and both atomic checkpoint slots can each recover a rescue.
+// Read independently: a blocked/corrupt profile key must not hide the checkpoint.
+export function readKeepsakes(storage=globalThis.localStorage){
+ const groups=[];
+ for(const key of [KEEPSAKE_SAVE_KEY,'ohana','ohana.tmp'])try{
+  const raw=JSON.parse(storage?.getItem(key)||'null');
+  if(key===KEEPSAKE_SAVE_KEY)groups.push(raw);
+  else if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&[2,3].includes(raw.v)&&typeof raw.id==='string'&&raw.id)groups.push(raw.keepsakes);
+ }catch{}
+ return mergeKeepsakes(...groups);
+}
+export function persistKeepsakes(found,storage=globalThis.localStorage){
+ const next=mergeKeepsakes(readKeepsakes(storage),found);
+ try{if(typeof storage?.setItem!=='function')return false;storage.setItem(KEEPSAKE_SAVE_KEY,JSON.stringify(next));return next.every(id=>readKeepsakes(storage).includes(id));}catch{return false;}
+}
+export function rememberKeepsake(hero,storage=globalThis.localStorage){if(!KEEPSAKES[hero]||readKeepsakes(storage).includes(hero))return false;return persistKeepsakes([hero],storage);}
 const TAU=Math.PI*2;
 function line(c,color,width,fn){c.strokeStyle=color;c.lineWidth=width;c.beginPath();fn();c.stroke();}
 function form(c,color,fn){c.beginPath();fn();c.closePath();c.fillStyle=color;c.fill();c.strokeStyle='#27384d';c.lineWidth=2;c.stroke();}

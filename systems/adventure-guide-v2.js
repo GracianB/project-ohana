@@ -19,13 +19,15 @@ export function chapterMapDetail(id,g){
  const r=WORLD1_ROOMS[id];if(!r)return '';
  const current=id===g.roomId,album=g.world1Collect?.rooms?.[r.hero],n=album?.found.length||0,sealed=g.world1Seals?.includes(r.hero),goal=current?world1NextObjective(g):null;
  const progress=current?Math.round((g.player.x+g.player.w/2)/r.width*100):0;
+ const currentProgress=r.fusionBoss?(g.world1Won?'Campaña completada · la familia ha vuelto a casa':`Recuerdos personales a salvo: ${g.finalGauntlet?.found?.length||0}/10`):'Tu capítulo actual · '+progress+'% del recorrido';
  const platforms=r.plats.map(p=>`<rect x="${p[0]/r.width*1000}" y="${p[1]/1260*210}" width="${Math.max(1,p[2]/r.width*1000)}" height="${p[3]>40?8:3}" fill="${p[3]>40?'#8cbfa9':'#d4e8c9'}"/>`).join('');
  const stations=(r.seal?.stations||[]).map(s=>`<circle cx="${s.x/r.width*1000}" cy="${(s.y-35)/1260*210}" r="5" fill="#ffd598"/>`).join('');
  const trials=(r.expedition?.nodes||[]).map(s=>`<circle cx="${s.x/r.width*1000}" cy="${s.y/1260*210}" r="6" fill="#c5a6ee"/>`).join('');
+ const destination=goal?`<circle class="wm-current-objective" cx="${goal.x/r.width*1000}" cy="${goal.y/1260*210}" r="8" fill="#ffb479" stroke="#fff1ce" stroke-width="2"><title>${goal.label}</title></circle>`:'';
  const you=current?`<circle cx="${(g.player.x+g.player.w/2)/r.width*1000}" cy="${(g.player.y+g.player.h/2)/1260*210}" r="6" fill="white" stroke="#143543" stroke-width="2"/>`:'';
- return `<h3>${r.name}</h3><p>${sealed?'Sello recuperado · exploración libre':current?'Tu capítulo actual · '+progress+'% del recorrido':'Cada historia tiene su héroe y sus herramientas'}</p>
- <svg style="width:100%;height:auto" viewBox="0 0 1000 220" role="img" aria-label="Terreno, objetivos dorados, descubrimientos violetas y tu posición blanca"><rect width="1000" height="220" fill="#102b40"/>${platforms}${stations}${trials}${you}</svg>
- <p>● Dorado: objetivo de crecimiento · ● Violeta: descubrimiento del acto II · ● Blanco: tú</p>
+ return `<h3>${r.name}</h3><p>${sealed?'Sello recuperado · exploración libre':current?currentProgress:'Cada historia tiene su héroe y sus herramientas'}</p>
+ <svg style="width:100%;height:auto" viewBox="0 0 1000 220" role="img" aria-label="Terreno, destino actual ámbar, objetivos dorados, descubrimientos violetas y tu posición blanca"><rect width="1000" height="220" fill="#102b40"/>${platforms}${stations}${trials}${destination}${you}</svg>
+ <p>${r.fusionBoss?'● Ámbar: destino actual · ● Blanco: tú':'● Dorado: crecimiento · ● Violeta: descubrimiento · ● Ámbar: destino actual · ● Blanco: tú'}</p>
  ${goal?`<h4>Ahora: ${goal.label}</h4><p>${goal.action}</p>`:''}
  ${r.expedition?`<h4>Acto I · Despertar y guardián</h4><p>${r.hint}</p><h4>Acto II · ${r.expedition.name}</h4><p>${r.expedition.verb}. Tres descubrimientos para llevar la canción hasta el santuario final.</p>`:''}
  ${r.hero?`<h4>Recuerdos: ${n}/100</h4><p>${rewardCopy(n)}</p><h4>Combinación de ${WORLD1_THEMES[r.hero].short}</h4><p><strong>${COMBO_GUIDES[r.hero][0]}</strong><br>${COMBO_GUIDES[r.hero][1]}</p><p>I: movimiento especial desde la cuarta forma. P: requiere quinta forma y 100 de carga ganada causando daño. U: compañero con recuperación propia.</p>`:''}`;
