@@ -24,7 +24,8 @@ export default async function handler(request: Request) {
     let data;
     switch (body.action) {
       case "create": data = await service.create(body.mode,body.arenaId); break;
-      case "role": data=await service.role(body.roomId,body.identity,body.characterId,body.roleEpoch); break;
+      case "retry": data=await service.retry(body.roomId,body.identity,body); break;
+      case "role": data=await service.role(body.roomId,body.identity,body.characterId,body.roleEpoch,body.attemptEpoch); break;
       case "travel": data = await service.travel(body.roomId,body.identity,body); break;
       case "join": data = await service.join(body.roomId, body.identity); break;
       case "choose": data = await service.choose(body.roomId, body.identity, body.characterId); break;

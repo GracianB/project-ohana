@@ -40,6 +40,20 @@ La prueba de navegador comprueba vestíbulo, entrada, relevo y regreso mediante 
 
 El transporte HTTP local funciona. En este entorno las ofertas/respuestas WebRTC se intercambian, pero el canal directo no se abre; no se declara validado WebRTC ni rendimiento entre redes. La aventura conserva autoridad del anfitrión para enemigos; Versus utiliza simulación del servidor.
 
+## Derrota, conexión y reintento conjunto
+
+Una derrota abre un nuevo intento de sala autenticado. Ambos héroes quedan caídos y la escena de muerte prepara su confirmación; R permite solicitar el reintento antes. Nadie reaparece hasta que los dos están preparados y conectados. Pulsar R estando vivo no cura ni reinicia la sala. La entrada o el último objetivo completado determinan el punto común; el acto final usa la entrada de la arena.
+
+Se conservan estaciones, descubrimientos, héroes, evolución, XP y rescates confirmados. El duelo pendiente se reinicia; un recuerdo ya recuperado no vuelve a perderse ni a premiarse. Durante la derrota se cierran las cinemáticas de habilidades/evolución y se cancela cualquier viaje pendiente.
+
+Cada intento tiene un número que acompaña movimientos, ataques, efectos, mensajes directos y propuestas de viaje. Los paquetes del intento anterior se descartan: no pueden matar de nuevo a un héroe recién recuperado ni sobrescribir su posición. Si se pierde la primera comunicación de la muerte, el cliente la vuelve a notificar al recuperar la conexión. Una desconexión revoca las confirmaciones de reintento pendientes.
+
+El motor se pausa al detectar la pérdida de conexión propia o la desconexión del compañero y se reanuda con su sesión autenticada. El aviso de ausencia del compañero sigue dependiendo de la comunicación del servidor; el vencimiento por inactividad utiliza el plazo existente de 15 segundos. No se promete detección instantánea entre redes.
+
+Las ventanas de vulnerabilidad y las fases de los minijefes también llegan al invitado. Sus golpes respetan el presupuesto de daño del anfitrión: ver una apertura tiene efecto real y no permite saltarse una defensa cerrada.
+
+Evidencia local: muerte preparada en una sala con un objetivo ganado, pérdida inicial de red y reintento automático; pausa de un encuentro final durante una desconexión real del contexto del navegador; recuperación autenticada, derrota compartida, reintento del guardián pendiente y conservación de nueve rescates. Son escenarios aislados de integración, no un recorrido cooperativo continuo.
+
 ## Acto final compartido
 
 El anfitrión publica el guardián activo, su apertura de daño, Quimera, sus proyectiles y los rescates confirmados. El invitado conserva su héroe y refleja el mismo encuentro; no inicia otro guardián, otra IA de Quimera ni un desenlace independiente. Cualquiera de los dos puede tocar físicamente el recuerdo liberado. Los recibos deben avanzar en el orden de los diez héroes y no se aceptan saltos de rescates o un guardián vivo. Una nueva confirmación paga la celebración común una vez; cargar un recibo antiguo no vuelve a premiarlo.
@@ -68,4 +82,4 @@ Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:bro
 - Pruebas del servidor: controles ordinarios derrotan fauna, evolucionan y alcanzan tres eliminaciones; repetición de solicitudes no duplica premios. No se atribuye esa partida completa al piloto de navegador.
 - Aventura escritorio/móvil: héroes distintos, aislamiento del perfil individual, relevo voluntario y regreso, objetivo completado por el invitado y recibido por el anfitrión, rechazo y viaje aceptado por ambos. Las esperas de estado del arnés son síncronas; no se aceptan promesas sin verificar la condición.
 
-Antes de publicar: completar el recorrido cooperativo continuo y las pruebas de derrota/reintento y desconexión durante combate, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
+Antes de publicar: completar el recorrido cooperativo continuo y ampliar derrota/reintento a las diez salas y las cuatro fases de Quimera, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.

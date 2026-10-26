@@ -568,6 +568,7 @@ export function playEvolution(detail = {}) {
 
 if (!window.__ohanaEvoCinema) {
   window.__ohanaEvoCinema = true;
+  addEventListener('ohana-coop-down',()=>running?.stop(true));
   addEventListener("ohana-evolve", (e) => playEvolution((e && e.detail) || {}));
 }
 

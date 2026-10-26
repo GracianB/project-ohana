@@ -10,7 +10,7 @@ try{
  for(const p of room.players){const f=ROSTER.find(r=>r.id===p.characterId).forms[4];Object.assign(p,{worldRoomId:'w1-final',x:p.slot?8650:8600,y:1134-f.h,evolution:4,experience:480,health:f.hp,maxHealth:f.hp});}
  await s.store.setJSON(key,room,{onlyIfMatch:entry.etag});
  browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chromium.executablePath(),args:['--disable-background-timer-throttling','--disable-renderer-backgrounding']});const contexts=[await browser.newContext(),await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true})],pages=[],errors=[];
- for(const [i,c]of contexts.entries()){const who=i?g:h;await c.addInitScript(session=>{if(location.pathname.endsWith('/multiplayer.html'))return;sessionStorage.setItem('ohana-coop-session',JSON.stringify(session));localStorage.setItem('ohana-keepsakes-v1','["kilo"]');window.finalWinEvents=[];addEventListener('ohana-win',e=>window.finalWinEvents.push(e.detail));}, {roomId:h.roomId,identity:who.identity,characterId:i?'stitcho':'dino',originalEngine:true});const p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(s.url+'/index.html?online=1');await p.waitForFunction(()=>document.body.dataset.onlineState==='connected');await p.evaluate(async()=>{window.coop=(await import('/systems/online-coop.js')).onlineCoop;});pages.push(p);}
+ for(const [i,c]of contexts.entries()){const who=i?g:h;await c.addInitScript(session=>{if(location.pathname.endsWith('/multiplayer.html'))return;if(!sessionStorage.getItem('ohana-coop-session'))sessionStorage.setItem('ohana-coop-session',JSON.stringify(session));localStorage.setItem('ohana-keepsakes-v1','["kilo"]');window.finalWinEvents=[];addEventListener('ohana-win',e=>window.finalWinEvents.push(e.detail));}, {roomId:h.roomId,identity:who.identity,characterId:i?'stitcho':'dino',originalEngine:true});const p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(s.url+'/index.html?online=1');await p.waitForFunction(()=>document.body.dataset.onlineState==='connected');await p.evaluate(async()=>{window.coop=(await import('/systems/online-coop.js')).onlineCoop;});pages.push(p);}
  const[host,guest]=pages;
  async function finish(p,id){for(let i=0;i<80;i++){const view=await p.evaluate(()=>({id:coop._combatGame.world1Cine?.id,waiting:coop._combatGame._coopFinalWaiting}));if(view.id!==id)return;await p.keyboard.press('Enter');await p.waitForTimeout(110);}throw Error('scene did not finish: '+id);}
  // Clear only the entry presentation, then verify that one reader cannot
@@ -22,6 +22,17 @@ try{
  await Promise.all(pages.map(p=>finish(p,'keepsakeIntro')));for(const p of pages)await p.waitForFunction(()=>coop._combatGame.finalGauntlet?.phase==='fight');
  assert.deepEqual(await Promise.all(pages.map(p=>p.evaluate(()=>coop._combatGame.player.id))),['dino','stitcho']);
  await host.reload();await host.waitForFunction(()=>document.body.dataset.onlineState==='connected');await host.evaluate(async()=>{window.coop=(await import('/systems/online-coop.js')).onlineCoop;});await host.waitForFunction(()=>coop._combatGame.world1Cine?.id==='keepsakeIntro');await finish(host,'keepsakeIntro');assert.equal(await host.evaluate(()=>coop._combatGame.finalGauntlet.found.length),9);console.log('PASS host reload resumes the active guardian and nine shared receipts');
+ const beforeReconnect=await guest.evaluate(()=>JSON.parse(sessionStorage.getItem('ohana-coop-session')).identity);await guest.context().setOffline(true);await s.service.disconnect(h.roomId,beforeReconnect);await host.waitForFunction(()=>coop._combatGame.coopPeerWaiting);
+ const frozen=await host.evaluate(()=>({t:coop._combatGame.t,hp:coop._combatGame.player.health,boss:coop._combatGame.finalGauntlet.guardian.hp}));await host.waitForTimeout(900);assert.deepEqual(await host.evaluate(()=>({t:coop._combatGame.t,hp:coop._combatGame.player.health,boss:coop._combatGame.finalGauntlet.guardian.hp})),frozen);
+ await guest.context().setOffline(false);await guest.waitForFunction(epoch=>JSON.parse(sessionStorage.getItem('ohana-coop-session')).identity.connectionEpoch>epoch,beforeReconnect.connectionEpoch);await host.waitForFunction(()=>!coop._combatGame.coopPeerWaiting);console.log('PASS disconnected peer freezes the active fight and authenticated reconnection resumes it');
+
+ await guest.evaluate(()=>{const game=coop._combatGame;game.player.health=0;game.player.dead=true;dispatchEvent(new CustomEvent('ohana-death',{detail:{reason:'test-lethal-fixture',id:game.player.id}}));});
+ for(const p of pages)await p.waitForFunction(()=>coop.snapshot?.adventureRetry?.status==='down');
+ for(const p of pages)await p.waitForFunction(()=>coop.snapshot?.adventureRetry?.status==='active'&&!coop._combatGame.player.dead);
+ for(const p of pages)await p.waitForFunction(()=>coop._combatGame.world1Cine?.id==='keepsakeIntro');await Promise.all(pages.map(p=>finish(p,'keepsakeIntro')));
+ for(const p of pages){assert.equal(await p.evaluate(()=>coop._combatGame.keepsakes.length),9);assert.equal(await p.evaluate(()=>coop._combatGame.finalGauntlet.hero),'yomi');}
+ console.log('PASS shared defeat retries the unrescued guardian without erasing nine physical memories');
+
 
  // Fixture defeats only the last guardian. The guest must physically touch
  // the released object; the host remains away from it.

@@ -8,10 +8,15 @@ const num=(x,lo,hi)=>Math.round(Math.min(hi,Math.max(lo,finite(x)))*100)/100;
 const coordinate=x=>Number.isFinite(x)&&x>=-4096&&x<=20000;
 const word=x=>typeof x==="string"&&/^[a-zA-Z0-9_-]{1,30}$/.test(x);
 const color=x=>typeof x==="string"&&/^#(?:[a-f0-9]{3}|[a-f0-9]{4}|[a-f0-9]{6}|[a-f0-9]{8})$/i.test(x)?x:"#ffd36a";
-const numbers=["wind","hopWind","clawWind","phase","flash","stun","dying","attackT","charge","invuln","contactDmg","evo","_hitT","_hitMax","alertPing","poseT","teleT","teleMax","teleRange","aimDx","aimDy"];
+const numbers=["wind","hopWind","clawWind","phase","flash","stun","dying","attackT","charge","invuln","contactDmg","evo","_hitT","_hitMax","alertPing","poseT","teleT","teleMax","teleRange","aimDx","aimDy","damageTakenScale","damageWindowRemaining","_guardianOpening"];
 const bools=["telegraph","fell","elite","baby","up","airborne","diving","charging","darting","lunging"];
 const strings=["mode","teleKind","aiRole","aiIntent","aiFormation","campaignRole"];
 const flags=[...numbers,...bools,...strings];
+const chapterKeys=['_drummer','_glitch','_titan','_astralCat','_prismBeast','_igneousDragon','_stoneColossus','_crispyKing','_magmaChef','_spiritGuide'];
+const mindKeys=['phase','clock','timer','attack','tier','pattern','aim','round','burst','exposed'];
+function chapterMind(e){if(!e.miniBoss||e.gauntletBoss)return undefined;const key=chapterKeys.find(k=>e[k]);if(!key)return undefined;const state=Object.fromEntries(mindKeys.filter(k=>Object.hasOwn(e[key],k)).map(k=>[k,e[key][k]]));return {key,state};}
+function validMind(m){return m==null||chapterKeys.includes(m.key)&&m.state&&Object.keys(m.state).length<=mindKeys.length&&Object.entries(m.state).every(([k,v])=>mindKeys.includes(k)&&(typeof v==='boolean'||typeof v==='string'&&word(v)||Number.isFinite(v)&&Math.abs(v)<=1e6));}
+
 function stateFor(game){
  if(!captures.has(game))captures.set(game,{ids:new WeakMap(),next:0,bullets:new WeakMap(),nextBullet:0});
  return captures.get(game);
@@ -30,14 +35,14 @@ export function captureCombatFrame(game,frameNo,scope="local"){
  const peers=[game.player,game.coopRemote].filter(p=>p&&coordinate(p.x)&&coordinate(p.y));
  const priority=e=>(e.boss||e.miniBoss)?-1:peers.length?Math.min(...peers.map(p=>Math.hypot(e.x-p.x,e.y-p.y))):originalIndex.get(e);
  if(source.length>24)source.sort((a,b)=>priority(a)-priority(b));
- const frame={protocol:2,scope,visit:Math.floor(finite(game.coopRoomVisit)),roomId:String(game.roomId||""),
+ const frame={protocol:2,attemptEpoch:game.coopAttemptEpoch||0,scope,visit:Math.floor(finite(game.coopRoomVisit)),roomId:String(game.roomId||""),
  frameNo:Math.floor(num(frameNo,0,1e9)),full:source.length<=24,
  enemies:source.slice(0,24).map((e,i)=>{
   if(!state.ids.has(e))state.ids.set(e,++state.next);
   e._coopSyncId=state.ids.get(e);e._coopVisit=Math.floor(finite(game.coopRoomVisit));
   return {id:e._coopSyncId,index:Number.isInteger(e.spawnIndex)?e.spawnIndex:e.boss?-2:originalIndex.get(e),kind:String(e.kind||"").slice(0,30),boss:!!e.boss,
    x:num(e.x,-4096,20000),y:num(e.y,-4096,20000),w:num(e.w,1,1024),h:num(e.h,1,1024),vx:num(e.vx,-40,40),vy:num(e.vy,-40,40),
-   hp:num(e.hp,0,100000),max:num(e.max??e.hp,1,100000),color:color(e.color),
+   chapterMind:chapterMind(e),hp:num(e.hp,0,100000),max:num(e.max??e.hp,1,100000),color:color(e.color),
    flags:Object.fromEntries(flags.filter(k=>Object.hasOwn(e,k)).map(k=>[k,numbers.includes(k)?num(e[k],-1000,1000):bools.includes(k)?!!e[k]:word(e[k])?e[k]:"idle"]))};
  }),
  bullets:bullets.slice(0,16).map(p=>{
@@ -62,7 +67,7 @@ export function validCombatFrame(frame){
  if(typeof frame.roomId!=="string"||!worldBounds(frame.roomId))return false;
  const ids=new Set();
  for(const e of frame.enemies){
-  if(!e||!word(e.kind)||!coordinate(e.x)||!coordinate(e.y)||!Number.isFinite(e.hp)||e.hp<0||e.hp>100000)return false;
+  if(!e||!validMind(e.chapterMind)||!word(e.kind)||!coordinate(e.x)||!coordinate(e.y)||!Number.isFinite(e.hp)||e.hp<0||e.hp>100000)return false;
   if(modern){
    if(!Number.isSafeInteger(e.id)||e.id<1||ids.has(e.id)||typeof e.boss!=="boolean"||
     ![e.w,e.h,e.max].every(v=>Number.isFinite(v)&&v>0)||e.w>1024||e.h>1024||e.max>100000||e.hp>e.max||
@@ -107,6 +112,7 @@ export function applyCombatFrame(game,frame){
    if(Object.hasOwn(item.flags||{},k))target[k]=item.flags[k];
    else if(Object.hasOwn(target,k)&&!strings.includes(k))target[k]=bools.includes(k)?false:0;
   }
+  if(item.chapterMind){const {key,state}=item.chapterMind;target[key]={...(target[key]||{}),...state};}
   accepted.push(target);
  }
  if(modern){

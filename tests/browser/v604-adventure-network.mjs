@@ -18,6 +18,14 @@ try{browser=await chromium.launch({executablePath:process.env.CHROMIUM_BIN||chro
  await h.waitForFunction(()=>{const game=window.__ohanaNetwork._combatGame;return game.world1.stations[0].done&&game.world1.stations[0]._scored;});
  for(const p of pages)assert.deepEqual(await p.evaluate(()=>JSON.parse(localStorage.getItem('ohana-w1-seals-v1'))),['kilo']);
  console.log('PASS guest puzzle completion reaches the host without importing or changing solo progress');
+ await g.context().setOffline(true);
+ await g.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;game.player.health=0;game.player.dead=true;dispatchEvent(new CustomEvent('ohana-death',{detail:{reason:'test-lethal-fixture',id:game.player.id}}));});
+ await g.waitForTimeout(700);await g.context().setOffline(false);
+ for(const p of pages){await p.waitForFunction(()=>window.__ohanaNetwork.snapshot?.adventureRetry?.status==='down');assert.equal(await p.locator('#evo-stage.show,#supreme-cinema[aria-hidden="false"]').count(),0,'party defeat clears ability/evolution films before retry');}
+ for(const p of pages)await p.waitForFunction(()=>window.__ohanaNetwork.snapshot?.adventureRetry?.status==='active'&&!window.__ohanaNetwork._combatGame.player.dead&&window.__ohanaNetwork._combatGame.coopAttemptEpoch===1);
+ for(const p of pages){const result=await p.evaluate(()=>{const game=window.__ohanaNetwork._combatGame;return{room:game.roomId,done:game.world1.stations[0].done,x:game.player.x,hp:game.player.health};});assert.equal(result.room,'w1-kilo');assert.equal(result.done,true);assert.ok(result.hp>0);assert.ok(result.x>=2300&&result.x<2700);}
+ console.log('PASS shared death, automatic two-player readiness and checkpoint retry preserve the earned note');
+
  for(const p of pages)assert.equal(await p.evaluate(async()=>{const o=(await import('/systems/online-coop.js')).onlineCoop;const previous=localStorage.getItem('ohana');localStorage.setItem('ohana','single-player-sentinel');try{o._combatGame.save();return localStorage.getItem('ohana')==='single-player-sentinel';}finally{if(previous===null)localStorage.removeItem('ohana');else localStorage.setItem('ohana',previous);}}),true,'cooperative autosave preserves the individual campaign');
 
  assert.deepEqual((await Promise.all(pages.map(read))).map(x=>x.room),['w1-kilo','w1-kilo']);

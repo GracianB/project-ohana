@@ -1,3 +1,4 @@
+import {retryEpoch,startAdventureRetry,finishAdventureRetry} from '../../multiplayer/adventure-retry.js';
 import {mergeAdventureFinale} from '../../multiplayer/adventure-finale.js';
 import {findRoster} from '../../characters/roster.js';
 import {adventureCamp,adventureRoleAllowed} from '../../multiplayer/adventure-roles.js';
@@ -72,6 +73,7 @@ function snapshot(room, viewerId) {
     mode: room.mode || 'classic',
     arenaId:room.arenaId||null,
     versus:versusSnapshot(room),
+    adventureRetry:room.mode==='adventure'?structuredClone(room.adventureRetry||null):null,
     adventureFinale:room.mode==='adventure'?structuredClone(room.adventureFinale||null):null,
     adventureProgress:room.mode==='adventure'?structuredClone(room.adventureProgress||null):null,
     travel: room.mode==='adventure'?structuredClone(room.travel||null):null,
@@ -118,6 +120,7 @@ function expireStalePlayers(room, now) {
     }
   }
   if (changed) closePendingTravel(room, 'disconnected', now);
+  if(changed&&room.adventureRetry?.status==='down')room.adventureRetry.ready=[];
   if (changed && room.phase === "playing") {
     room.phase = "lobby";
     if (room.combat && room.combat.pausedAt == null) room.combat.pausedAt = now;
@@ -290,11 +293,43 @@ export function createRoomService(store, options = {}) {
       return snapshot(room, identity.playerId);
     },
 
-    async role(roomCode,identity,characterId,roleEpoch=0){
+    async retry(roomCode,identity,payload){
+      const {room}=await mutate(roomCode,state=>{
+        const p=playerFrom(state,identity),decision=payload?.decision,epoch=payload?.epoch;
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','El reintento conjunto es exclusivo de Aventura.',409);
+        if(!p.connected)throw new RoomError('DISCONNECTED','Reconecta antes de reintentar.',409);
+        if(state.adventureFinale?.complete)throw new RoomError('MATCH_FINISHED','La aventura ya ha terminado.',409);
+        const current=retryEpoch(state);
+        const retainStats=()=>{
+          if(payload.characterId!=null&&payload.characterId!==p.characterId||payload.roleEpoch!=null&&payload.roleEpoch!==(p.roleEpoch||0))throw new RoomError('ROLE_CHANGED','El personaje ya cambió.',409);
+          p.evolution=Math.floor(finitePayloadNumber(payload.evolution,p.evolution||0,0,4));p.experience=finitePayloadNumber(payload.experience,p.experience||0,0,1000000);
+        };
+        if(decision==='down'){
+          if(state.adventureRetry?.status==='down'&&epoch===current-1)return;
+          if(epoch!==current)throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+          if(state.adventureRetry?.status==='down')return;
+          retainStats();
+          if(payload.progress)state.adventureProgress=mergeAdventureProgress(state.adventureProgress,payload.progress,{roomId:p.worldRoomId,host:p.slot===0});
+          if(p.worldRoomId==='w1-final'&&payload.finale)state.adventureFinale=mergeAdventureFinale(state.adventureFinale,payload.finale,{host:p.slot===0,playerId:p.id,players:state.players.map(p=>p.id)});
+          startAdventureRetry(state,p);
+        }else if(decision==='ready'){
+          if(epoch!==current)throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+          if(state.adventureRetry?.status!=='down')return;
+          retainStats();
+          if(!state.adventureRetry.ready.includes(p.id))state.adventureRetry.ready.push(p.id);
+          finishAdventureRetry(state);
+        }else throw new RoomError('RETRY_INVALID','Reintento no válido.',400);
+        p.lastSeenAt=now();
+      });return snapshot(room,identity.playerId);
+    },
+
+    async role(roomCode,identity,characterId,roleEpoch=0,attemptEpoch=0){
       validateCharacter(characterId);
       const {room}=await mutate(roomCode,state=>{
         const player=playerFrom(state,identity),time=now();
         if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','El relevo es exclusivo de Aventura.',409);
+        if(attemptEpoch!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if(state.phase!=='playing'||state.players.some(p=>!p.connected))throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
         if(!adventureRoleAllowed(player,player.worldRoomId,characterId))throw new RoomError('ROLE_INVALID','Elige al héroe de la sala o vuelve a tu personaje.',400);
         if(player.characterId===characterId)return;
@@ -337,6 +372,8 @@ export function createRoomService(store, options = {}) {
       const engineMode = payload?.mode === "engine";
       const { room, result } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de moverte.", 409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) {
@@ -418,6 +455,8 @@ export function createRoomService(store, options = {}) {
       if (!actionId || actionId.length > 96) throw new RoomError("INVALID_ACTION_ID", "La acción no es válida.");
       const { room, result } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de actuar.", 409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) {
@@ -456,6 +495,8 @@ export function createRoomService(store, options = {}) {
       const requestedId=String(payload?.voteId||'');
       const {room}=await mutate(roomCode,state=>{
         const player=playerFrom(state,identity);
+        if((payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','La votación es exclusiva de la aventura conjunta.',409);
         if(state.phase!=='playing'||state.players.length!==2||state.players.some(p=>!p.connected))
           throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
@@ -526,6 +567,8 @@ export function createRoomService(store, options = {}) {
       }
       const { room } = await mutate(roomCode, (state) => {
         const player = playerFrom(state, identity);
+        if(state.mode==='adventure'&&(payload.attemptEpoch||0)!==retryEpoch(state))throw new RoomError('STALE_ATTEMPT','Ese intento ya terminó.',409);
+        if(state.mode==='adventure'&&state.adventureRetry?.status==='down')throw new RoomError('TEAM_DOWN','Esperando el reintento conjunto.',409);
         if(state.mode==='versus')throw new RoomError('AUTHORITATIVE_CONTROLS_REQUIRED','La arena resuelve el combate en el servidor.',409);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de enviar señales.", 409);
         if(signalKind==="combat"&&player.slot!==0)throw new RoomError("HOST_ONLY","Solo el anfitrión publica enemigos.",403);
@@ -607,6 +650,7 @@ export function createRoomService(store, options = {}) {
         if (!player) throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
         if (identity.connectionEpoch !== player.connectionEpoch) return;
         player.connected = false;
+        if(state.adventureRetry?.status==='down')state.adventureRetry.ready=[];
         closePendingTravel(state, 'disconnected', now());
         // A disconnected partner breaks the ritual. Resuming cannot reuse a prior hold.
         state.duoChannel = null;

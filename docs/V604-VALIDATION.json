@@ -4,7 +4,7 @@
   "date": "2026-10-26",
   "integrated_pr": 441,
   "node": {
-    "passed": 1655,
+    "passed": 1661,
     "failed": 0
   },
   "release_gate": "passed",
@@ -248,19 +248,28 @@
         "boss_health_fixtures": true,
         "proves_combat_difficulty": false,
         "proves_full_cooperative_campaign": false,
-        "lobby_exit": true
-      }
+        "lobby_exit": true,
+        "fight_paused_while_peer_disconnected": true,
+        "authenticated_reconnect_in_fight": true,
+        "party_retry_preserves_nine_rescues": true
+      },
+      "retry_after_shared_death": true,
+      "retry_preserves_checkpoint_and_heroes": true,
+      "retry_keeps_xp_evolution_server_tests": true,
+      "offline_death_notification_recovers": true,
+      "old_attempt_packets_rejected": true,
+      "native_guardian_windows_mirrored": true
     },
     "webrtc_datachannel": "not_validated",
     "remaining": [
       "complete cooperative traversal of ten chapters and ten final duels",
-      "cooperative defeat and retry during combat",
-      "cross-device and cross-network latency",
+      "retry coverage in all chapters and four Quimera phases",
+      "cross-device and cross-network latency and WebRTC",
       "human PvP balancing"
     ]
   },
   "offline": {
     "runtime_modules": 345,
-    "resources": 414
+    "resources": 415
   }
 }

@@ -53,7 +53,7 @@ export function safeDirectPose(message,prevSeq=0){
  if(!bounds||!finite(message.x)||!finite(message.y)||message.x<0||message.y<0||message.x>bounds.width||message.y>bounds.height)return null;
  if(typeof message.room!=="string")return null;
  return {
-  seq:message.seq,x:message.x,y:message.y,room:message.room,
+  seq:message.seq,x:message.x,y:message.y,room:message.room,attemptEpoch:Number.isSafeInteger(message.attemptEpoch)&&message.attemptEpoch>=0?message.attemptEpoch:0,
   vx:finite(message.vx)?clamp(message.vx,-45,45):0,
   vy:finite(message.vy)?clamp(message.vy,-65,65):0,
   facing:message.facing===-1?-1:1,
@@ -385,7 +385,7 @@ export class DirectPeerLink{
   if(now-this.lastPoseAt<REALTIME_POSE_MS||this.poseChannel.bufferedAmount>12000)return false;
   const p=game.player;
   const frame=JSON.stringify({
-   t:"pose",seq:this.nextSeq+1,room:game.roomId,
+   t:"pose",seq:this.nextSeq+1,room:game.roomId,attemptEpoch:game.coopAttemptEpoch||0,
    x:p.x,y:p.y,vx:p.vx,vy:p.vy,facing:p.facing,
    evo:p.evo,grounded:p.grounded,melee:p.melee,dash:p.dash,
    move:p._abilMove||null,w:p.w,h:p.h,cloud:!!p._cloudActive,thrust:p._thrust||0,thrustFacing:p._thrustFace||p.facing

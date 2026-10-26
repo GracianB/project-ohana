@@ -893,7 +893,7 @@ game.lastAbilitySlot = null;game._signatureLink=null;
 if (!def) return;
 const onlineSession = onlineCoop.readSession?.();
 const onlineMode = !!onlineSession?.originalEngine;
-game.onlineAdventure = onlineMode;game.coopAuthority=undefined;game.coopAbilityStates={};
+game.onlineAdventure = onlineMode;game.coopAuthority=undefined;game.coopAbilityStates={};game.coopAttemptEpoch=0;game.coopRetryWaiting=false;game.coopPeerWaiting=false;game.coopRetryAnimationDone=false;
 const adventureStorage=onlineMode?createAdventureStorage():undefined;
 game.expeditionStorage=adventureStorage;game.keepsakeStorage=adventureStorage;
 game.personalCollectionStorage=adventureStorage;
@@ -980,6 +980,19 @@ if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalRevision=-1;game.coopFinaleState=null;game.coopFinalWon=false;game._coopFinalResultSent=false;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
 game.createCoopBossDirector=createWorld1BossDirector;
+game.onCoopRetryDown=()=>{
+ game.coopRetryWaiting=true;game.coopRetryAnimationDone=false;dispatchEvent(new Event('ohana-coop-down'));if(game.relicScene)game.onRelicEnd?.();dismissNotifications();game.relicScene=null;game.ult=null;game.player.dead=true;game.player.health=0;game.world1Cine=null;game._pendingWorld1Cine=null;game.projectiles=[];game.coopFinalShots=[];game.resetInput?.();
+ showErrorMessage('REINTENTO CONJUNTO','Conserváis lo conseguido. Preparando a los dos jugadores…');
+ if(!DeathFx.isPlaying())DeathFx.start(game.player,()=>{game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);},{reason:'hurt'});
+};
+game.onCoopRetryRestore=me=>{
+ if(!me||!game.player)return;
+ DeathFx.cancel();game.coopRetryWaiting=false;game.coopFinalWon=false;game.world1Cine=null;game._pendingWorld1Cine=null;game.finale=null;game.world1Won=false;game._w1WinSent=false;game._w1WinDetail=null;
+ game._coopFinalRevision=-1;game._coopFinalCue=null;game._coopFinalReady=null;game._coopFinalWaiting=false;game.coopFinaleState=null;game._coopFinalConsumed=new Set();game.coopFinalShots=[];
+ game.player.dead=false;game.player.evo=me.evolution||0;game.player.xp=me.experience||0;applyForm(game.player,{silent:true});loadRoom(me.worldRoomId,'online-retry');
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.health=me.health;p.dead=false;p.invuln=90;
+ game._combatFlow=null;game._assist=null;game._supremeFlow=null;game.combo=0;game._coopFinalResultSent=false;Magic.reset(game);game.resetInput?.();
+};
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
 game.dragonTrial = null;
@@ -1112,6 +1125,7 @@ showSystemMessage("CHEAT", "Evolución de prueba: Ctrl+Z");
 }
 
 function respawn() {
+if(game.onlineAdventure){game.coopRetryAnimationDone=true;void onlineCoop.requestRetry(game);return;}
 let p = game.player; if (!p) return;
 if (DeathFx.isPlaying()) DeathFx.cancel();
 p.x = 180; p.y = 500; p.vx = 0; p.vy = 0; p.health = p.maxHealth; p.dead = false; p.invuln = 50; game.combo = 0;
@@ -3669,6 +3683,8 @@ for(const btn of touchPowers){
  // never let assistive technology announce the previous Quimera phase.
 let lastAnnouncedQuimeraPhase = null;
 function step() {
+if(game.onlineAdventure&&game.coopPeerWaiting){void onlineCoop.poll(game);return;}
+if(game.coopRetryWaiting){if(!paused&&!document.hidden&&DeathFx.isPlaying())DeathFx.update(game);void onlineCoop.poll(game);return;}
 if(game.relicScene){if(!paused&&!DOM.pause?.classList.contains("open")&&!document.hidden)tickRelicScene(game);return;}
 if(game._pendingWorld1Cine&&!game.world1Cine){flushWorld1CineQueue(game);if(game._pendingWorld1Cine)return;}
 if(world1CineActive(game)){if(!paused&&!document.hidden)updateWorld1Cine(game);return;}
@@ -3863,8 +3879,9 @@ if (resume) resume.onclick = () => setPaused(false);
 if (quit) quit.onclick = returnToMenu;
 $("btn-close-help")?.addEventListener("click", () => DOM.help.classList.remove("open"));
 $("btn-close-map")?.addEventListener("click", () => DOM.map.classList.remove("open"));
+addEventListener('ohana-death',()=>{if(game.onlineAdventure)void onlineCoop.reportDeath(game);});
 addEventListener("ohana-online-state", (event) => {
-if (!onlineCoop.enabled || !game.player) return;
+if (!onlineCoop.enabled || !game.player || game.onlineAdventure) return;
 const state = event.detail?.state;
 if (state === "won" && game.boss && !game.finale && !game.won) {
   game.boss.hp = 0;

@@ -728,6 +728,7 @@ raf=requestAnimationFrame(frame);
 
 if(!window.__ohanaSupremeCinema){
 window.__ohanaSupremeCinema=true;
+addEventListener('ohana-coop-down',()=>active?.stop());
 addEventListener("ohana-supreme",(event)=>play(event?.detail||{}));
 }
 export { SUPREME_STORYBOARDS };

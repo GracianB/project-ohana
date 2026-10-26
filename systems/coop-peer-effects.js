@@ -59,7 +59,7 @@ export function captureFamilyDuetRelay(game,frameNo,scope){
  if(!duet||!Number.isSafeInteger(frameNo)||frameNo<1||
    typeof scope!=="string"||!/^[a-zA-Z0-9_.:-]{1,96}$/.test(scope)||
    typeof game?.roomId!=="string")return null;
- const packet={protocol:2,scope,frameNo,roomId:game.roomId,
+ const packet={protocol:2,scope,frameNo,roomId:game.roomId,attemptEpoch:game.coopAttemptEpoch||0,
   dinoFx:duet.hero==="dino"?(readDinoEffects(game.dinoAbilityFx||[])||[]).filter(f=>f.kind==="dinoColossus").slice(0,1):[],
   familyDuet:duet,michiDuet:null,chispinDuet:null,stitchoDuet:null,
   kiloDuet:null,michiFx:[],chispinFx:[],kiloFx:[],
@@ -67,7 +67,7 @@ export function captureFamilyDuetRelay(game,frameNo,scope){
  return JSON.stringify(packet).length<=1100?packet:null;
 }
 export function capturePeerEffects(game,frameNo,scope){
- const frame={protocol:2,scope,frameNo,roomId:game.roomId,dinoFx:readDinoEffects(game.dinoAbilityFx||[])||[],familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
+ const frame={protocol:2,scope,frameNo,roomId:game.roomId,attemptEpoch:game.coopAttemptEpoch||0,dinoFx:readDinoEffects(game.dinoAbilityFx||[])||[],familyDuet:readFamilyDuet(game._familyDuet),michiDuet:readMichiDuet(game._michiDuet),michiFx:readMichiEffects(game.michiAbilityFx||[])||[],chispinDuet:readChispinDuet(game._chispinDuet),stitchoDuet:readStitchoDuet(game._stitchoDuet),kiloDuet:readKiloDuet(game._kiloDuet),
   chispinFx:readChispinEffects(game.chispinAbilityFx||[])||[],
   kiloFx:(game.kiloAbilityFx||[]).slice(0,12).map(f=>effect(f,"kiloFx")).filter(Boolean),
   projectiles:(game.projectiles||[]).filter(p=>p?.owner==="player").slice(0,12).map(p=>effect(p,"projectiles")).filter(Boolean),
