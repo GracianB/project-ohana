@@ -1,6 +1,6 @@
 {
   "version": "ohana-603",
-  "status": "locally_validated_pending_publication",
+  "status": "published_and_verified",
   "node": {
     "passed": 1591,
     "failed": 0
@@ -852,5 +852,103 @@
   ],
   "standard_browser_audit": "passed",
   "human_difficulty_acceptance": "pending_user_play",
-  "github_quality": "Not run for V603; previous Quality runs are historical evidence only"
+  "github_quality": "Not run for V603; previous Quality runs are historical evidence only",
+  "publication": {
+    "version": "ohana-603",
+    "runtime_commit": "e1270e0d3b24d05c1983a7014784e56462c526c7",
+    "url": "https://gracianb.github.io/project-ohana/?release=603",
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40315437713",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40315437913",
+    "branch_ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40315370753",
+    "verified": true,
+    "live_assets_verified_sha256": 10,
+    "public_startup": {
+      "release": "ohana-603",
+      "views": [
+        {
+          "name": "desktop",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-603"
+            ],
+            "active": true
+          }
+        },
+        {
+          "name": "mobile",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-603"
+            ],
+            "active": true
+          }
+        }
+      ],
+      "errors": []
+    }
+  },
+  "live_assets": [
+    {
+      "path": "game.js",
+      "matched": true,
+      "sha256": "c29f346fe08015d03b736541a9cee5a6d66c201ee6556b8059a591784b822111",
+      "live_sha256": "c29f346fe08015d03b736541a9cee5a6d66c201ee6556b8059a591784b822111"
+    },
+    {
+      "path": "index.html",
+      "matched": true,
+      "sha256": "e9cda9e5a6a9b1f9895b5e9408ba412d5421e5b975210a62a9f4651eaac06088",
+      "live_sha256": "e9cda9e5a6a9b1f9895b5e9408ba412d5421e5b975210a62a9f4651eaac06088"
+    },
+    {
+      "path": "play-interface.css",
+      "matched": true,
+      "sha256": "8c01be25e55967c8e629fe4115d29211eb30854957a5a1493c4511cbb8b72e75",
+      "live_sha256": "8c01be25e55967c8e629fe4115d29211eb30854957a5a1493c4511cbb8b72e75"
+    },
+    {
+      "path": "sw.js",
+      "matched": true,
+      "sha256": "0bc97fb1857c9ca2034961a7e52fcfb4bc65ef9d7d25871777816b93683514a0",
+      "live_sha256": "0bc97fb1857c9ca2034961a7e52fcfb4bc65ef9d7d25871777816b93683514a0"
+    },
+    {
+      "path": "systems/abilities.js",
+      "matched": true,
+      "sha256": "db9ea4fef9425bcd6df8516a4ececc18c6811ce3686c0859608efd4de8d9a5f8",
+      "live_sha256": "db9ea4fef9425bcd6df8516a4ececc18c6811ce3686c0859608efd4de8d9a5f8"
+    },
+    {
+      "path": "systems/chapter-boss-art-v2.js",
+      "matched": true,
+      "sha256": "870d24c29f0f770ccce42563ccf421400feb9a0a2247e423d415f3d9fc8d0d04",
+      "live_sha256": "870d24c29f0f770ccce42563ccf421400feb9a0a2247e423d415f3d9fc8d0d04"
+    },
+    {
+      "path": "systems/enemy-director.js",
+      "matched": true,
+      "sha256": "59c3b54bef84fe5883c7b081a8d61cb5fcdbff1f23bedf5e0a92f43358176237",
+      "live_sha256": "59c3b54bef84fe5883c7b081a8d61cb5fcdbff1f23bedf5e0a92f43358176237"
+    },
+    {
+      "path": "systems/enemy-species.js",
+      "matched": true,
+      "sha256": "e73682a723b46df6e7192fa722e4487dc46d68a2fbf098ce0aef8dd7a26d1025",
+      "live_sha256": "e73682a723b46df6e7192fa722e4487dc46d68a2fbf098ce0aef8dd7a26d1025"
+    },
+    {
+      "path": "systems/final-gauntlet.js",
+      "matched": true,
+      "sha256": "41c348a22875747e9f66897a88d0e9a2e9ea017fc85f3f27ec18d9640cdf065d",
+      "live_sha256": "41c348a22875747e9f66897a88d0e9a2e9ea017fc85f3f27ec18d9640cdf065d"
+    },
+    {
+      "path": "systems/guardian-techniques.js",
+      "matched": true,
+      "sha256": "a091375907483097b54af8b024ff2dd268c5e83b210e24ee76fea19f72475eb0",
+      "live_sha256": "a091375907483097b54af8b024ff2dd268c5e83b210e24ee76fea19f72475eb0"
+    }
+  ]
 }

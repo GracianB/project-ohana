@@ -1,4 +1,4 @@
-# V603 · ohana-603 · validación en curso
+# V603 · ohana-603 · publicada y verificada
 
 Guardianes con tres técnicas, ritmo distinto por dificultad, avisos que coinciden
 con el daño y HUD legible. Corregida coordinación de roles de la fauna.
@@ -6,7 +6,10 @@ con el daño y HUD legible. Corregida coordinación de roles de la fauna.
 aprobada. Campaña limpia Normal completa y diez rescates en Difícil aprobados.
 Matrices Canvas y HUD en escritorio, teléfono y horizontal comprobados.
 Diseño: docs/V603.md. Evidencia: docs/V603-VALIDATION.json.
-Pendiente verificación de publicación.
+Pages y CI aprobados para e1270e0. Los diez archivos runtime modificados
+coinciden por SHA256; arranque público en escritorio/móvil y caché ohana-603
+activa comprobados sin errores JS.
+https://gracianb.github.io/project-ohana/?release=603
 
 # V602 · ohana-602 · publicada y verificada
 
