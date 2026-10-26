@@ -1,6 +1,6 @@
 {
   "version": "ohana-602",
-  "status": "locally_validated_pending_publication",
+  "status": "published_and_verified",
   "node": {
     "passed": 1574,
     "failed": 0
@@ -693,5 +693,253 @@
     "frita",
     "pizza",
     "yomi"
+  ],
+  "publication": {
+    "version": "ohana-602",
+    "runtime_commit": "ea46ab23d33c43aca9419e74d94e0962fa199e4b",
+    "url": "https://gracianb.github.io/project-ohana/?release=602",
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40267138631",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40267138581",
+    "branch_ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40267067235",
+    "verified": true,
+    "live_assets_verified_sha256": 35,
+    "public_startup": {
+      "release": "ohana-602",
+      "views": [
+        {
+          "name": "desktop",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-602"
+            ],
+            "active": true
+          }
+        },
+        {
+          "name": "mobile",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-602"
+            ],
+            "active": true
+          }
+        }
+      ],
+      "errors": []
+    }
+  },
+  "live_assets": [
+    {
+      "path": "assets/scenes/cat-realm.webp",
+      "matched": true,
+      "sha256": "6d6913efb4278ef0dc498287115e0191c47bba5e7a4262d606f9963c555f2fcd",
+      "live_sha256": "6d6913efb4278ef0dc498287115e0191c47bba5e7a4262d606f9963c555f2fcd"
+    },
+    {
+      "path": "assets/scenes/chispin-realm.webp",
+      "matched": true,
+      "sha256": "7f8e353791bdf8d9724f37d5bc7d3290996fe4123183cefc87ded8f62addd8f2",
+      "live_sha256": "7f8e353791bdf8d9724f37d5bc7d3290996fe4123183cefc87ded8f62addd8f2"
+    },
+    {
+      "path": "assets/scenes/cuerno-realm.webp",
+      "matched": true,
+      "sha256": "0141dddd29e8c05490c8eb57a0183aa7348e057b86dc8a9cf478b3e702ff99ca",
+      "live_sha256": "0141dddd29e8c05490c8eb57a0183aa7348e057b86dc8a9cf478b3e702ff99ca"
+    },
+    {
+      "path": "assets/scenes/dino-realm.webp",
+      "matched": true,
+      "sha256": "9d878024b578fd5caa95ed19a6c2f4327a17bb5553ae9e49eb1b73f194dd183e",
+      "live_sha256": "9d878024b578fd5caa95ed19a6c2f4327a17bb5553ae9e49eb1b73f194dd183e"
+    },
+    {
+      "path": "assets/scenes/dragon-realm.webp",
+      "matched": true,
+      "sha256": "13fe4987e9ae19f5b296624f91b85f9d1171962bc1cf592da81217d97a8240a2",
+      "live_sha256": "13fe4987e9ae19f5b296624f91b85f9d1171962bc1cf592da81217d97a8240a2"
+    },
+    {
+      "path": "assets/scenes/frita-realm.webp",
+      "matched": true,
+      "sha256": "27bc27311ee3fe0341141657d317e0f1622e1bd16c8e0376e45d91c63430610b",
+      "live_sha256": "27bc27311ee3fe0341141657d317e0f1622e1bd16c8e0376e45d91c63430610b"
+    },
+    {
+      "path": "assets/scenes/observatory-keyart.png",
+      "matched": true,
+      "sha256": "46882aeb7ec53b8585722eb0a9f493aea9c6f39e724016bbe37edf518001535f",
+      "live_sha256": "46882aeb7ec53b8585722eb0a9f493aea9c6f39e724016bbe37edf518001535f"
+    },
+    {
+      "path": "assets/scenes/pizza-realm.webp",
+      "matched": true,
+      "sha256": "3cc92fc3990839608a0b3be744f7b0a7cd9bb23c644fb2d87e6c894d2302bb60",
+      "live_sha256": "3cc92fc3990839608a0b3be744f7b0a7cd9bb23c644fb2d87e6c894d2302bb60"
+    },
+    {
+      "path": "assets/scenes/stitcho-realm.webp",
+      "matched": true,
+      "sha256": "c54cf7f7bc78a6df94d4cb6d2acdbc9d7be7643af0906d39ab1fe08453b52987",
+      "live_sha256": "c54cf7f7bc78a6df94d4cb6d2acdbc9d7be7643af0906d39ab1fe08453b52987"
+    },
+    {
+      "path": "assets/scenes/yomi-realm.webp",
+      "matched": true,
+      "sha256": "6e4482625d0f02288cf3f38950d7c91fec7ffb998a3246916335964ba26e1e33",
+      "live_sha256": "6e4482625d0f02288cf3f38950d7c91fec7ffb998a3246916335964ba26e1e33"
+    },
+    {
+      "path": "characters/draw.js",
+      "matched": true,
+      "sha256": "31795f4be36e53f507c359bcdc61f35bd61229943cf0a339799faba2ac312364",
+      "live_sha256": "31795f4be36e53f507c359bcdc61f35bd61229943cf0a339799faba2ac312364"
+    },
+    {
+      "path": "family-camp.css",
+      "matched": true,
+      "sha256": "90e68358e4af52458d882e9dfdce8090ef555ffe5f92e163fe40dca4b57829be",
+      "live_sha256": "90e68358e4af52458d882e9dfdce8090ef555ffe5f92e163fe40dca4b57829be"
+    },
+    {
+      "path": "game.js",
+      "matched": true,
+      "sha256": "7c86a996cb829488773afd191239c54ab9d732f8886ec7bbff42e13f73feb2f1",
+      "live_sha256": "7c86a996cb829488773afd191239c54ab9d732f8886ec7bbff42e13f73feb2f1"
+    },
+    {
+      "path": "index.html",
+      "matched": true,
+      "sha256": "25f1a607f9bf76d8e375ba4ef7cba17ed8b32a5ecf51c9d6c0c8979a74744aa7",
+      "live_sha256": "25f1a607f9bf76d8e375ba4ef7cba17ed8b32a5ecf51c9d6c0c8979a74744aa7"
+    },
+    {
+      "path": "intro.css",
+      "matched": true,
+      "sha256": "103940ad9c07fe3b7508e37ed0c4bcea31e0fdf25430a723cea637ddff448c43",
+      "live_sha256": "103940ad9c07fe3b7508e37ed0c4bcea31e0fdf25430a723cea637ddff448c43"
+    },
+    {
+      "path": "sw.js",
+      "matched": true,
+      "sha256": "7ba1cd377f8292c7a1af631438a556aa0a1b82828e60a5dca6c8b4ce07548d94",
+      "live_sha256": "7ba1cd377f8292c7a1af631438a556aa0a1b82828e60a5dca6c8b4ce07548d94"
+    },
+    {
+      "path": "systems/campaign-creature-art.js",
+      "matched": true,
+      "sha256": "0b5d1768cc1a05b04ab1b876835904e4e6a527cfb90a470c60703136683b1452",
+      "live_sha256": "0b5d1768cc1a05b04ab1b876835904e4e6a527cfb90a470c60703136683b1452"
+    },
+    {
+      "path": "systems/chapter-boss-art-v2.js",
+      "matched": true,
+      "sha256": "3598d06dc3e30d53fbcb3d084edbbb814d15157f49d8392e0a7c1ecb4f627f9e",
+      "live_sha256": "3598d06dc3e30d53fbcb3d084edbbb814d15157f49d8392e0a7c1ecb4f627f9e"
+    },
+    {
+      "path": "systems/chapter-boss-v2.js",
+      "matched": true,
+      "sha256": "9212be46ba91190ac6ea2a1c8a84e86696b5b16c97c15186772f4a50899cc10c",
+      "live_sha256": "9212be46ba91190ac6ea2a1c8a84e86696b5b16c97c15186772f4a50899cc10c"
+    },
+    {
+      "path": "systems/chapter-encounters.js",
+      "matched": true,
+      "sha256": "689cf364ce5aac0b73c466b72966e4230c1678272c980613d86f8124b03f83ea",
+      "live_sha256": "689cf364ce5aac0b73c466b72966e4230c1678272c980613d86f8124b03f83ea"
+    },
+    {
+      "path": "systems/ending.js",
+      "matched": true,
+      "sha256": "37f728fc918dd5eeb3cc08269955efbf0a7fbd8c1056ddaaf4cf78a0444c3a95",
+      "live_sha256": "37f728fc918dd5eeb3cc08269955efbf0a7fbd8c1056ddaaf4cf78a0444c3a95"
+    },
+    {
+      "path": "systems/family-camp.js",
+      "matched": true,
+      "sha256": "03881175ad2fc7b4e40ac04511fbfb253af2d6cd733e5e05d3c5e51788abcb26",
+      "live_sha256": "03881175ad2fc7b4e40ac04511fbfb253af2d6cd733e5e05d3c5e51788abcb26"
+    },
+    {
+      "path": "systems/fauna-morphs.js",
+      "matched": true,
+      "sha256": "bf8572d9cdf4996dcd55c5b81d6341e047c65cb8d5c84b820f511c02358d3288",
+      "live_sha256": "bf8572d9cdf4996dcd55c5b81d6341e047c65cb8d5c84b820f511c02358d3288"
+    },
+    {
+      "path": "systems/final-gauntlet.js",
+      "matched": true,
+      "sha256": "518a3dbf9e8a78a9dc0581b3da4ca56095e0222827cab373135defd0dda5ff7d",
+      "live_sha256": "518a3dbf9e8a78a9dc0581b3da4ca56095e0222827cab373135defd0dda5ff7d"
+    },
+    {
+      "path": "systems/illustrated-chapters.js",
+      "matched": true,
+      "sha256": "62861bfd7414b6b7c49a8fb37ce88fc30cc1742ea2c84ea666a0900e4e315760",
+      "live_sha256": "62861bfd7414b6b7c49a8fb37ce88fc30cc1742ea2c84ea666a0900e4e315760"
+    },
+    {
+      "path": "systems/intro.js",
+      "matched": true,
+      "sha256": "87aa929ef968fca6f7118f0a2169485fad7f2a67ccb5b2c5bbaaa732b01ccdd1",
+      "live_sha256": "87aa929ef968fca6f7118f0a2169485fad7f2a67ccb5b2c5bbaaa732b01ccdd1"
+    },
+    {
+      "path": "systems/keepsakes.js",
+      "matched": true,
+      "sha256": "4edca497c40041b76c82603640469884bf46402c01844c1ccdcd5fd89a131781",
+      "live_sha256": "4edca497c40041b76c82603640469884bf46402c01844c1ccdcd5fd89a131781"
+    },
+    {
+      "path": "systems/theatre-stage.js",
+      "matched": true,
+      "sha256": "3b8056e14088780bc54383e7043ad70290bed31b85809491bbb89bad086bc206",
+      "live_sha256": "3b8056e14088780bc54383e7043ad70290bed31b85809491bbb89bad086bc206"
+    },
+    {
+      "path": "systems/title.js",
+      "matched": true,
+      "sha256": "4f4772e1513df482295aece06374d7ab929e3cdeb9d830353a498528f5ff2a57",
+      "live_sha256": "4f4772e1513df482295aece06374d7ab929e3cdeb9d830353a498528f5ff2a57"
+    },
+    {
+      "path": "systems/world1-cine.js",
+      "matched": true,
+      "sha256": "e1a1c22b5e03fc5f12ba937a350981021155570a4eb72bc6bf8aafb89ba51542",
+      "live_sha256": "e1a1c22b5e03fc5f12ba937a350981021155570a4eb72bc6bf8aafb89ba51542"
+    },
+    {
+      "path": "systems/world1-guidance.js",
+      "matched": true,
+      "sha256": "8d70efa1e425848202087a38f38d09a365c883bf10df37fc7d07899f0aee9634",
+      "live_sha256": "8d70efa1e425848202087a38f38d09a365c883bf10df37fc7d07899f0aee9634"
+    },
+    {
+      "path": "systems/world1-play.js",
+      "matched": true,
+      "sha256": "30a2bbb9af9296da34f688dbb767e168509bf95914f8ea05be53e940a46d88a0",
+      "live_sha256": "30a2bbb9af9296da34f688dbb767e168509bf95914f8ea05be53e940a46d88a0"
+    },
+    {
+      "path": "systems/world1-select.js",
+      "matched": true,
+      "sha256": "faa05bbd94ad05425633466512c2664c8c896140500c8b34f48c75024aa8d4a1",
+      "live_sha256": "faa05bbd94ad05425633466512c2664c8c896140500c8b34f48c75024aa8d4a1"
+    },
+    {
+      "path": "systems/world1-story.js",
+      "matched": true,
+      "sha256": "f14e0ac1c5c699e8709c9b25cbf3850d1249f84b91c420963c7acc6e6e6846f2",
+      "live_sha256": "f14e0ac1c5c699e8709c9b25cbf3850d1249f84b91c420963c7acc6e6e6846f2"
+    },
+    {
+      "path": "v100-special.css",
+      "matched": true,
+      "sha256": "b9fdc6e28e22396b68a54801be39756473c6885eaab66a4067ec3c7ad49dc811",
+      "live_sha256": "b9fdc6e28e22396b68a54801be39756473c6885eaab66a4067ec3c7ad49dc811"
+    }
   ]
 }

@@ -1,34 +1,34 @@
 {
   "schema_version": 1,
-  "updated_on": "2026-10-25",
+  "updated_on": "2026-10-26",
   "scope": "single_player_v2",
   "repository": "GracianB/project-ohana",
-  "branch": "feat/v2-identity-challenge-and-discovery",
-  "base_commit": "ab615f58069dee84983b009ac799c1d515574faa",
+  "branch": "feat/v602-theatrical-opening-selection",
+  "base_commit": "3a7c6038e6a733c3c20d8a4958a1b1002627754c",
   "published": true,
   "campaign_complete_verified": true,
   "v1_ready": false,
-  "next_task": "v602.opening_and_character_selection",
+  "next_task": "v602.user_play_acceptance",
   "strategy": "docs/V1-SOLO-ESTRATEGIA.md",
   "handoff": "docs/HANDOFF-V1-SOLO.md",
   "identity_contracts": "docs/CAPITULOS-IDENTIDAD.md",
   "validation_baseline": {
-    "node_passed": 1570,
-    "runtime_modules": 335,
-    "precache_resources": 385,
-    "source": "docs/V601-VALIDATION.json",
-    "local_browser_audit": "passed_V601",
-    "github_node_ci": "passed_8744d49",
-    "github_quality": "V600 baseline only; no V601 Quality run"
+    "node_passed": 1574,
+    "runtime_modules": 340,
+    "precache_resources": 400,
+    "source": "docs/V602-VALIDATION.json",
+    "local_browser_audit": "passed_V602",
+    "github_node_ci": "passed_ea46ab2",
+    "github_quality": "V600 baseline only; no V602 Quality run"
   },
   "chapters": [
     {
       "id": "kilo",
       "order": 1,
       "room": "w1-kilo",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -36,17 +36,19 @@
         "test-results/v501/kilo-chapter-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "stitcho",
       "order": 2,
       "room": "w1-stitcho",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -54,17 +56,19 @@
         "test-results/v502/stitcho-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "chispin",
       "order": 3,
       "room": "w1-chispin",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -72,17 +76,19 @@
         "test-results/v506/chispin-pilot.json",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "cat",
       "order": 4,
       "room": "w1-cat",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -91,17 +97,19 @@
         "tests/browser/v507-three-realms.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "cuerno",
       "order": 5,
       "room": "w1-cuerno",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -110,17 +118,19 @@
         "tests/browser/v507-three-realms.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "dragon",
       "order": 6,
       "room": "w1-dragon",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -129,17 +139,19 @@
         "tests/browser/v507-three-realms.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "dino",
       "order": 7,
       "room": "w1-dino",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -149,17 +161,19 @@
         "tests/dino-chapter.test.js",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "frita",
       "order": 8,
       "room": "w1-frita",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -168,17 +182,19 @@
         "tests/browser/v510-frita-yomi-presentation.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "pizza",
       "order": 9,
       "room": "w1-pizza",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -187,17 +203,19 @@
         "tests/browser/v509-pizza-dino-presentation.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     },
     {
       "id": "yomi",
       "order": 10,
       "room": "w1-yomi",
-      "status": "v600_implemented_and_campaign_verified",
+      "status": "v602_revised_and_campaign_verified",
       "physical_chapter_verified": true,
-      "human_acceptance": "pending_user_play_V600",
+      "human_acceptance": "pending_user_play_V602",
       "all_100_memories_verified": true,
       "next_work": "User play review of published V2 candidate",
       "evidence": [
@@ -206,9 +224,11 @@
         "tests/browser/v510-frita-yomi-presentation.mjs",
         "tests/browser/v513-full-campaign.mjs",
         "tests/browser/v513-all-memories.mjs",
-        "tests/browser/v513-memory-save.mjs"
+        "tests/browser/v513-memory-save.mjs",
+        "docs/V602-VALIDATION.json"
       ],
-      "v2_discoveries_verified": 3
+      "v2_discoveries_verified": 3,
+      "memory_verification_baseline": "V600; collection geometry unchanged in V602"
     }
   ],
   "finale": {
@@ -223,21 +243,21 @@
     "entry_gate": "ten_seals_required_at_door_and_spawn"
   },
   "release_gates": {
-    "ten_integrated_chapters": "passed_V600_continuous_Normal_campaign",
-    "full_clean_save_campaign": "passed_V600_including_thirty_real_discoveries",
+    "ten_integrated_chapters": "passed_V602_continuous_Normal_campaign",
+    "full_clean_save_campaign": "passed_V602_thirty_discoveries_ten_guardians_ten_keepsakes_and_Quimera",
     "save_death_resume_migration_matrix": "Node migration/resume/death regressions pass; earned browser album reload and sealed revisit pass",
     "all_offered_memories_reachable": "1000 physically collected; ten earned rewards replayed and retained after reload",
     "keyboard_gamepad_touch_review": "browser audit input checks and actual touch bank traversal pass; physical hardware acceptance separate",
     "human_difficulty_acceptance": "pending_user_play",
-    "final_candidate_automated_and_visual_checks": "passed_V600",
-    "same_sha_ci_pages_and_live_sw_check": "passed_V600_6ecdb76_46_matching_runtime_assets"
+    "final_candidate_automated_and_visual_checks": "passed_V602_local",
+    "same_sha_ci_pages_and_live_sw_check": "passed_V602_ea46ab2_35_matching_runtime_assets"
   },
   "excluded_from_v1": [
     "World 2",
     "remote multiplayer and external infrastructure",
     "new heroes or forms",
     "mandatory 100-item collection to finish story",
-    "new family relay combat system"
+    "free character swapping during ordinary chapters"
   ],
   "open_tasks": [
     {
@@ -246,8 +266,48 @@
       "status": "pending_art_and_perceived_difficulty_acceptance"
     }
   ],
-  "evidence_storage": "Versioned drivers and docs/V600-VALIDATION.json; generated evidence in test-results/v600 and /workspace/.cloud-setup/logs/ohana-v600-*.",
+  "evidence_storage": "Versioned drivers and docs/V602-VALIDATION.json; generated evidence in test-results/v602, test-results/v600 and /workspace/.cloud-setup/logs/ohana-v602-*.",
   "published_release": {
+    "version": "ohana-602",
+    "runtime_commit": "ea46ab23d33c43aca9419e74d94e0962fa199e4b",
+    "url": "https://gracianb.github.io/project-ohana/?release=602",
+    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40267138631",
+    "ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40267138581",
+    "branch_ci_run": "https://github.com/GracianB/project-ohana/actions/runs/40267067235",
+    "verified": true,
+    "live_assets_verified_sha256": 35,
+    "public_startup": {
+      "release": "ohana-602",
+      "views": [
+        {
+          "name": "desktop",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-602"
+            ],
+            "active": true
+          }
+        },
+        {
+          "name": "mobile",
+          "playing": true,
+          "cache": {
+            "keys": [
+              "ohana-static-ohana-602"
+            ],
+            "active": true
+          }
+        }
+      ],
+      "errors": []
+    }
+  },
+  "published_commit": "ea46ab23d33c43aca9419e74d94e0962fa199e4b",
+  "published_url": "https://gracianb.github.io/project-ohana/?release=602",
+  "candidate_version": "ohana-602",
+  "review": "docs/V602.md",
+  "previous_verified_publication": {
     "version": "ohana-601",
     "runtime_commit": "8744d496f5f66d50284707d41198cde93a2dcb82",
     "url": "https://gracianb.github.io/project-ohana/?release=601",
@@ -265,33 +325,6 @@
         ],
         "active": true
       },
-      "errors": []
-    }
-  },
-  "published_commit": "8744d496f5f66d50284707d41198cde93a2dcb82",
-  "published_url": "https://gracianb.github.io/project-ohana/?release=601",
-  "candidate_version": "ohana-601",
-  "review": "docs/V600.1-QUIMERA.md",
-  "previous_verified_publication": {
-    "version": "ohana-600",
-    "runtime_commit": "6ecdb76a6559f6137ebab260f205b50663a7763b",
-    "url": "https://gracianb.github.io/project-ohana/?release=600",
-    "verified": true,
-    "pages_run": "https://github.com/GracianB/project-ohana/actions/runs/40237852122",
-    "quality_run": "https://github.com/GracianB/project-ohana/actions/runs/40236423368",
-    "live_assets_verified_sha256": 46,
-    "public_startup": {
-      "url": "https://gracianb.github.io/project-ohana/?release=600",
-      "enteredViaRealCamp": true,
-      "playing": true,
-      "caches": [
-        "ohana-static-ohana-600"
-      ],
-      "workers": [
-        {
-          "active": "https://gracianb.github.io/project-ohana/sw.js?v=ohana-600"
-        }
-      ],
       "errors": []
     }
   },
