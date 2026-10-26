@@ -1,4 +1,4 @@
-const VERSION = "ohana-603";
+const VERSION = "ohana-604";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/guardian-techniques.js?v=" + VERSION,
@@ -352,6 +352,7 @@ const PRECACHE = [
   "./systems/hazards.js?v=" + VERSION,
   "./systems/intro.js?v=" + VERSION,
   "./systems/intro-cast-fit.js?v=" + VERSION,
+  "./systems/welcome-spotlight.js?v=" + VERSION,
   "./systems/intro-dragon-stage.js?v=" + VERSION,
   "./systems/intro-dino-stage.js?v=" + VERSION,
   "./systems/intro-frita-stage.js?v=" + VERSION,
@@ -495,7 +496,7 @@ const PRECACHE_REVISIONS = {
   "systems/fusion-boss.js": "23eb42c2400380a495e107cf632f0e76433aafd5",
   "systems/quimera-art.js": "b320aeff3660c6aa859dc545acd2778bc4fdf80a",
   "systems/world1-story.js": "fb68f94e2662f5539c00dc1406f13bb25ab5d111",
-  "systems/world1-rooms.js": "eb06a637620ff11c0bc12d300e63bbd3a05b95c0",
+  "systems/world1-rooms.js": "c9ee3b8f7829005838404d726d399637a731d9be",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
   "worlds/chapter-stagecraft.js": "979021a3b2cd9fca0794d0fa70beb250a20845da",
   "systems/world1-play.js": "294855f749a287995c7098a1c3d20d694f6f5ef7",
@@ -659,7 +660,7 @@ const PRECACHE_REVISIONS = {
   "engine/music.js": "378371c4d659151a2abffbebe86b1cc3635933cc",
   "engine/particles.js": "f9846627187b481a8716480f388539b7257560e8",
   "systems/atrium-interact.js": "866c92d53da9dd65c4b4181552d5b5f556847ab1",
-  "systems/abilities.js": "8d052766ef1c0159a6190f0eea5f7a469449e63a",
+  "systems/abilities.js": "0768231a418fdab2f051af3077a6c6180cdae340",
   "systems/u-field-targeting.js": "9a90034059647cd7b8f9c4b0c08a500344513c9c",
   "systems/family-duets.js": "7b81399f34181a7cca497161cad6ccdb0f9ad80c",
   "systems/u-partners.js": "c90b1d09dc481c99a4da005e083a4f4ac928117f",
@@ -749,7 +750,7 @@ const PRECACHE_REVISIONS = {
   "systems/cinematic-director.js": "b238f8829d833dae6756b22ea4067a808c1992d3",
   "systems/supreme-cinema.js": "cf95fbf5dc74ed376b0d20d1891f83d461384151",
   "systems/supreme-storyboards.js": "a458edc944c821baf9d2733cdf641ac9cde69beb",
-  "systems/evo-cinema.js": "c5e54291bb2b6bad818bd4055e0dee946f9a9f1c",
+  "systems/evo-cinema.js": "5189343afdffcd00ebd7bc3c4816a64bbc1ac603",
   "systems/floaters.js": "caa36305a89c892c70d86d01356df4d62280edb5",
   "systems/hud.js": "5a168383aeb7896cb86991f4812040b80f548eee",
   "systems/a11y-v97.js": "a636eae0e6b45bd8896d931d2e459e8049d4623f",
@@ -757,7 +758,7 @@ const PRECACHE_REVISIONS = {
   "systems/frame-pressure.js": "0386d6604ecfaa482a482eb9216962bf7413c720",
   "systems/hero-mastery.js": "830da8e6a6b2eb2352024b22b2b10cd69373c020",
   "systems/hazards.js": "c7e540b2c7b725405064887b53c46f01baf7759a",
-  "systems/intro.js": "9ab6c4bdf54b583be51fc9f32c5eefe007ca47d5",
+  "systems/intro.js": "659b4309177f9498fc9198dd8316da6371928b99",
   "systems/intro-cast-fit.js": "e23ad877d1deadb5769d639d5fa2200fb69573c6",
   "systems/intro-dragon-stage.js": "d7a0d895dc6406011b408fc16c4ae6a0a9566eed",
   "systems/intro-dino-stage.js": "e866d1dce44c4f50164e944ff3791d616699f060",
@@ -812,7 +813,8 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/cat-4.png": "798687a48289d5282fc1fcc1e2482f910de89f33",
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
-  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3"
+  "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
+  "systems/welcome-spotlight.js": "c10075db06b02206dbb4f0b2d0dad14d68a99a27"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";

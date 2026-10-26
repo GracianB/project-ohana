@@ -184,21 +184,7 @@ export function buildWorld1HeroRoom(hero) {
   }
   const prev = idx > 0 ? "w1-" + WORLD1_ORDER[idx - 1] : null;
   const next = idx < WORLD1_ORDER.length - 1 ? "w1-" + WORLD1_ORDER[idx + 1] : "w1-final";
-  // V604: specialty rooms replace the stock foes; restore every authored
-  // species with one light, physical encounter away from the puzzle stations.
-  const present = new Set(foes.map(f => f[2]));
-  for (const [speciesIndex, kind] of theme.cast.entries()) {
-    if (present.has(kind)) continue;
-    const sector = sectors[1 + speciesIndex % 4];
-    const flying = ['phosquito','avispa','murcielago','libelula','gaviota','abeja','medusa','ufo'].includes(kind);
-    const x = Math.round(sector.x + (speciesIndex % 2 ? 1120 : 300));
-    const y = flying ? WORLD1_FLOOR - 210 : WORLD1_FLOOR - 40;
-    foes.push([x,y,kind,false,{role:flying?'flyer':speciesIndex%2?'jumper':'pursuer',
-      name:theme.short+' · '+kind,chapterHP:62+speciesIndex*9,
-      anchorFloor:WORLD1_FLOOR,anchorY:y}]);
-    present.add(kind);
-  }
-  return authorExpedition(hero,composeChapterRoom(hero,{
+  const composed = authorExpedition(hero,composeChapterRoom(hero,{
     id, name: theme.name, short: theme.short, world: theme.world, color: theme.color,
     chapterPlan: WORLD1_CHAPTER_PLANS[hero], strategy: OHANA_PLACES[hero]?.strategy, explorationStyle: OHANA_PLACES[hero],
     world1: true, worldNumber: 1, hero, signatureCharacter: hero, kiloChapter: hero==='kilo', stitchoChapter: hero==='stitcho', chispinChapter: hero==='chispin', dinoChapter:hero==='dino',pizzaChapter:hero==='pizza',fritaChapter:hero==='frita',yomiChapter:hero==='yomi', growthChapter:['cat','cuerno','dragon','dino','pizza','frita','yomi'].includes(hero)?hero:null,
@@ -209,6 +195,25 @@ export function buildWorld1HeroRoom(hero) {
     seal: { kind: theme.seal, stations, altar: { x: W - 520, y: WORLD1_FLOOR } },
     portals: hero === "kilo" ? [{ type: "blackhole", x: 560, y: WORLD1_FLOOR - 96, w: 96, h: 96, dest: "hub", label: "Mundo 2 · en construcción", locked: true }] : []
   }));
+  // V604: authored encounter passes run after the original patrol layout and
+  // may replace its species. Complete the five-species ecology at the very end.
+  const present = new Set(composed.foes.map(f => f[2]));
+  for (const [speciesIndex, kind] of theme.cast.entries()) {
+    if (present.has(kind)) continue;
+    const sector = composed.sectors[1 + speciesIndex % 4];
+    const flying = ['phosquito','avispa','murcielago','libelula','gaviota','abeja','medusa','ufo'].includes(kind);
+    const x = Math.round(sector.x + (speciesIndex % 2 ? 1120 : 300));
+    const terrace = composed.terraces?.find(t => x >= t.x && x < t.x+t.w);
+    const floor = terrace?.y ?? WORLD1_FLOOR;
+    const y = flying ? floor - 210 : floor - 40;
+    composed.foes.push([x,y,kind,false,{
+      role: flying ? 'flyer' : (speciesIndex % 2 ? 'jumper' : 'pursuer'),
+      name: theme.short + ' · ' + kind, chapterHP: 62 + speciesIndex * 9,
+      anchorFloor: flying ? undefined : floor, anchorY: y
+    }]);
+    present.add(kind);
+  }
+  return composed;
 }
 
 // Las estaciones de cada sello se reparten por los sectores 1–4 para que la

@@ -117,7 +117,8 @@ export function playTitleIntro(options = {}) {
     return [id, player];
   }));
   el.dataset.v45Cast = String(CAST.length);
-  el.dataset.openingMode = "storybook-spotlight";
+  el.dataset.openingMode = "family-welcome";
+  el.dataset.openingStaging = "storybook-spotlight";
   el.dataset.openingFit = "measured-silhouettes";
 
   // The real active Canvas renderer supplies optical bounds once per opening.
