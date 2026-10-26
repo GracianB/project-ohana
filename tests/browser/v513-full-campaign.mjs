@@ -17,7 +17,7 @@ try{
  async function films(){
   for(let i=0;i<24;i++){
    if(await page.locator('#evo-stage.show .evo-skip').count()){await page.locator('#evo-stage .evo-skip').click();await page.clock.runFor(400);continue;}
-   const s=await state();if(!s.world1Cine)break;await press('Enter');await step(100);
+   const s=await state();if(!s.world1Cine)break;if(['bossDefeat','ending'].includes(s.world1Cine)){assert.notEqual(await page.locator('#win-cinema').getAttribute('aria-hidden'),'false','reunion cannot overlap world1 film');assert.equal(await page.locator('#evo-stage.show').count(),0);}await press('Enter');await step(100);
   }await page.locator('#game').focus();
  }
  let s=await step(600);await films();s=await state();
@@ -148,6 +148,8 @@ try{
  // prove that the results or the return to selection can be used.
  await page.clock.runFor(16000);
  assert.equal(await page.locator('#win-cinema').getAttribute('aria-hidden'),'false');
+ assert.equal((await state()).world1Cine,null,'world story relinquishes the screen before reunion');
+ assert.equal(await page.locator('#world1-cine-controls').isVisible(),false,'no old story controls over reunion');
  assert.equal(await page.locator('#win-cinema').evaluate(el=>el.classList.contains('cinema-complete')),true);
  assert.equal(await page.locator('#win-continue').isVisible(),true);
  await page.screenshot({path:'test-results/v600/campaign-ending.png'});

@@ -934,7 +934,7 @@ game.combo = 0; game.score = 0; game.kills = 0; game.shake = 0; game.visited = {
 game.world1Stations = {};
 game.world1Seals = readWorld1Seals(); game.world1Won = false; game.world1Visited = {};
 game.onWorld1Beat=(kind,hero,progress)=>{if(kind==="seal"){storeWorld1Seals(game.world1Seals);if(game.world1)game.world1.cinema=null;playWorld1Cine(game,"awaken",hero);beep("win");}else if(kind==="station")beep("pickup");else if(kind==='album-ceremony'){setMusicOverride(themeForRoom('w1-'+hero));}else if(kind==='album-page'||kind==='album-unlock'){beep('win');}else if(kind==='chime')beep('windChime'+Math.max(1,Math.min(3,progress||1)));};
-game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
+game.onWorld1CineEnd=(id)=>{if(id==="ending"&&game._w1WinDetail){const d=game._w1WinDetail;game._w1WinDetail=null;game.finale=null;game.ult=null;game.storyLine="";syncWorld1CineControls(game,document,false);dispatchEvent(new CustomEvent("ohana-win",{detail:d}));}};
 game.world1Boss=null;game._w1WinSent=false;game._w1WinDetail=null;
 try { loadWorld1Collect(game); toggleWorld1Album(game,false); } catch (err) { console.warn("[ohana] world1 collect", err); }
 game.clearTicks = 0;
@@ -3284,7 +3284,7 @@ const k = 1 - w.t / Math.max(1, w.max || 30);
 ctx.fillStyle = "rgba(4,8,16," + (0.12 + k * 0.62) + ")";
 ctx.fillRect(0, 0, viewW, viewH);
 }
-if (game.finale && game.finale.t > 0) {
+if (game.finale && game.finale.t > 0 && !game.roomDef?.fusionBoss) {
   drawBossFallScene(ctx, game.finale, game.cam, { w: viewW, h: viewH }, reduceMotion || game.reduceMotion);
 }
 
@@ -3325,7 +3325,7 @@ drawMinimap();
 drawWorld1Overlay(ctx,game,viewW,viewH);
 drawAdventureGuide(ctx,game,viewW,viewH,Magic.status());
 if(game.roomDef?.world1){drawWorld1CollectHud(ctx,game,viewW,viewH,{badge:false});}
-if(game.boss?._fusionBoss)drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
+if(game.boss?._fusionBoss&&!game.world1Boss&&!world1CineActive(game))drawFusionBossOverlay(ctx,game.boss,viewW,viewH);
 if(game.world1Boss)drawWorld1BossOverlay(ctx,game,viewW,viewH,t);
 if(world1CineActive(game))drawWorld1Cine(ctx,game,viewW,viewH,t,{drawActor:w1CineActor});
 drawRelicCinema(ctx,game,viewW,viewH,drawCharacter);
@@ -3615,7 +3615,7 @@ if (game.finale) {
   // its own defeat director and hand off to the reunion cinematics.
   if(game.world1Boss && game.roomId === "w1-final") {
     const event = updateWorld1BossDirector(game);
-    if(event === "defeated") playWorld1Cine(game, "bossDefeat");
+    if(event === "defeated") { game.world1Boss.special=null; game.world1Boss.card=null; playWorld1Cine(game, "bossDefeat"); }
   }
   // Locked, deterministic 3.5-second death beat: no enemy AI, bullets,
   // hazards or renewed damage while the boss dissolves. Camera/FX still run.

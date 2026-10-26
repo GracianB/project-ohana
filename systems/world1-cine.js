@@ -1,3 +1,4 @@
+import {drawQuimeraCreature} from './quimera-art.js';
 import {drawCraftedScene} from '../worlds/ohana-crafted-scenes.js';
 import {drawHarborWelcome} from '../worlds/ohana-environments.js';
 // OHANA V467 · MUNDO 1 · Cinemáticas con UNA sola historia.
@@ -185,7 +186,7 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
   if (s.layout === "portal") { ctx.globalAlpha = fadeIn; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 8; const r = Math.min(W, H) * 0.2; ctx.beginPath(); ctx.ellipse(W * 0.82, H * 0.5, r * 0.7, r * (0.9 + 0.05 * Math.sin(t * 0.06)), 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#2a1f4a"; ctx.fill(); ctx.fillStyle = "#8fe9ff"; ctx.font = `bold ${Math.round(H * 0.035)}px sans-serif`; ctx.textAlign = "center"; ctx.fillText("MUNDO 2", W * 0.82, H * 0.48); ctx.font = `bold ${Math.round(H * 0.022)}px sans-serif`; ctx.fillText("en construcción", W * 0.82, H * 0.54); }
   // Héroes.
   const lit = new Set(s.lit || (["one","arrival"].includes(s.layout) ? s.heroes : [])), n = s.heroes.length;
-  s.heroes.forEach((h, i) => {
+  (s.layout=== "fused"?[]:s.heroes).forEach((h, i) => {
     const [x, y, sc] = heroPos(s.layout, i, n, W, H, k, reduce ? 0 : t), on = lit.has(h) && !s.dim;
     const col = s.layout === "fused" ? "#ff3a8a" : on ? WORLD1_THEMES[h].color : "#4a3f72";
     const size = Math.min(W, H) * 0.12 * num(sc, 1);
@@ -195,7 +196,10 @@ export function drawWorld1Cine(ctx, g, W, H, t = 0, { drawActor = null } = {}) {
     drawHeroEmblem(ctx, h, x, y - hop, size, col, reduce ? 0 : t);
     if (s.dim && s.layout === "one") { ctx.globalAlpha = 0.5 * fadeIn; ctx.fillStyle = s.bg; ctx.fillRect(x - size, y - size * 0.8 + size * 1.6 * k * 0.6, size * 2, size * 1.6 * (1 - k * 0.6)); }
   });
-  if (s.layout === "fused") { ctx.globalAlpha = fadeIn * 0.9; ctx.strokeStyle = "#ffd6f2"; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.arc(W / 2, H * 0.5, Math.min(W, H) * 0.13, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = "#ff3a8a"; ctx.beginPath(); ctx.arc(W / 2 - 18, H * 0.47, 7, 0, Math.PI * 2); ctx.arc(W / 2 + 18, H * 0.47, 7, 0, Math.PI * 2); ctx.fill(); }
+  if(s.layout==='fused'){
+    ctx.save();ctx.globalAlpha=fadeIn;ctx.translate(W/2,H*.74);const scale=Math.min(W/680,H/660);ctx.scale(scale,scale);
+    drawQuimeraCreature(ctx,{x:-115,y:-290,w:230,h:290,phase:c.id==='bossDefeat'?4:1,hp:c.id==='bossDefeat'?0:1,_fusion:{mode:'rest'}},{x:0,y:0},t,reduce);ctx.restore();
+  }
   // Bandas de cine.
   const bh = H * 0.1; ctx.globalAlpha = 1; ctx.fillStyle = "#000"; ctx.fillRect(-10, 0, W + 20, bh); ctx.fillRect(-10, H - bh, W + 20, bh);
   const textLayout = world1CineTextLayout(ctx, s, W, H);

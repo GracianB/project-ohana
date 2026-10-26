@@ -1,3 +1,8 @@
+# V600.1 · ohana-601 · Quimera en revisión
+
+Cuerpo Canvas propio, cuatro metamorfosis y un único propietario del cierre.
+Pendiente de validación y publicación; V600 sigue siendo la versión pública.
+
 # V600 · ohana-600 · V2 publicada y verificada
 
 https://gracianb.github.io/project-ohana/?release=600

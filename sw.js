@@ -1,4 +1,4 @@
-const VERSION = "ohana-600";
+const VERSION = "ohana-601";
 const CACHE = "ohana-static-" + VERSION;
 const PRECACHE = [
   "./systems/chapter-boss-v2.js?v=" + VERSION,
@@ -68,6 +68,7 @@ const PRECACHE = [
   "./systems/world1-collect.js?v=" + VERSION,
   "./systems/world1-boss.js?v=" + VERSION,
   "./systems/fusion-boss.js?v=" + VERSION,
+  "./systems/quimera-art.js?v=" + VERSION,
   "./systems/world1-story.js?v=" + VERSION,
   "./systems/world1-rooms.js?v=" + VERSION,
   "./systems/chapter-room-composition.js?v=" + VERSION,
@@ -453,12 +454,13 @@ const PRECACHE_REVISIONS = {
   "systems/pizza-chapter.js": "328fb0f36e5e8bb8e6f7fd18c0aba0d7a059a268",
   "worlds/pizza-ovens.js": "28440ea475b0e5499a04f91d396b1785355ce8e2",
   "systems/yomi-room.js": "0916aa8f05dd7b6dccfafe698f01d43c856bbe3a",
-  "systems/world1-cine.js": "9b1ccde90729338713b9eb211cb705115b7c2156",
+  "systems/world1-cine.js": "b82b00d232b6d5d1e963c34c297b886a6cf19320",
   "systems/world1-select.js": "3e9661b5cd49fe5927ca0bec0dc7bb289f011e68",
   "systems/world1-progress.js": "52c9c5ded533dc649210fd913b737614b2bb67dc",
   "systems/world1-collect.js": "b5442f65c97b116c9e86f2e1731886f04e446bf0",
-  "systems/world1-boss.js": "8f48db5e251a748edbe3a70d1118678d0300d2b0",
-  "systems/fusion-boss.js": "c3fe5a45dc7c9599c91d4796f756a8aa0d0e5904",
+  "systems/world1-boss.js": "56eb3abfe03f4ebece0c6b7e78585ff484e4b75a",
+  "systems/fusion-boss.js": "e80f33232dc8a6e8c1909d163accc0fc9e547318",
+  "systems/quimera-art.js": "c66b6ceb6a220aac8c900db8aa71d1d2b5d39b9e",
   "systems/world1-story.js": "868d73db7e14db752a5afdcd42d3652daea5df21",
   "systems/world1-rooms.js": "eb06a637620ff11c0bc12d300e63bbd3a05b95c0",
   "systems/chapter-room-composition.js": "e0f1d1e5527929fb9a43d2d7b042c270a9886065",
@@ -534,7 +536,7 @@ const PRECACHE_REVISIONS = {
   "characters/cuerno-stagecraft.js": "43d8fbec8ae0514aac549769e2a7cee77a44fc0b",
   "systems/roster-navigation.js": "424d91e1dd30404a83119ceb13ebcbbccdcfb54a",
   "characters/visual-size.js": "c7a3166ffdda84cc24cd5ddf7d2f67da3b7ac965",
-  "index.html": "4edd1063b567ac68364c96729e8c814ce24bc42b",
+  "index.html": "a73684794e94a7ed92317da49c22a1f252ac68b9",
   "multiplayer.html": "8d58e873acb79c46e341587e581ac8924a73de89",
   "multiplayer.css": "1ccb496c2e795a36ecdfb3c0023aa204802c5930",
   "multiplayer.js": "c4d44df059f2bc97baa28af6bee14d82456e69b2",
@@ -559,7 +561,7 @@ const PRECACHE_REVISIONS = {
   "v100-2.css": "f17852938ed2e501b6208cfe46bdda9f4ae41bdd",
   "v101-milestones.css": "580faa55039560a48a88844578ac30bbab5087c3",
   "v106-memory-museum.css": "ac809c9d0a468b6798968fc0a54bcee10d34cdc2",
-  "game.js": "a757495b47d805dba284e64f7d4bfc1f2be6d677",
+  "game.js": "f0b254d169b94a430b3cf58011317a4beaa1629e",
   "characters/art/_template.js": "3b988ab8c3f7b71c3b6cc83358acea551572e58f",
   "characters/art/cat.js": "df85d6cff3ebc2ca66193fd895ad0a2976f68e3f",
   "characters/ten-action-acting.js": "8c56db05f0625ebce31e10abbba5305be881d0ff",

@@ -82,6 +82,7 @@ export function updateWorld1BossDirector(g) {
     const ox = num(e.x) + num(e.w, 230) / 2, oy = num(e.y) + num(e.h, 290) / 2;
     d.defeat = { t: 0, max: g.reduceMotion ? 120 : 220, ox, oy, lights: WORLD1_ORDER.map((hero, i) => ({ hero, a: i / 10 * Math.PI * 2, tx: WORLD1_ARENA.left + 200 + i * ((WORLD1_ARENA.right - WORLD1_ARENA.left - 400) / 9), ty: WORLD1_FLOOR - 220 })) };
     if (e._fusion?.shots) e._fusion.shots.length = 0; // limpieza: nada te golpea tras ganar
+    d.special=null; d.card=null; d.hitFlash=0;
     g.onWorld1Beat?.("boss-defeat");
   }
   if (d.defeat && ++d.defeat.t >= d.defeat.max) { d.done = true; g.world1Won = true; return "defeated"; }
@@ -163,6 +164,7 @@ export function world1BossHealthLayout(W, H) {
 }
 
 export function drawWorld1BossOverlay(ctx, g, W, H, t = 0) {
+  if(g.world1Cine || g.world1Boss?.done)return;
   const d = g?.world1Boss, e = fusion(g) || d?.boss; if (!d || !e) return;
   W = num(W, 1280); H = num(H, 720); const b = e._fusion || {};
   ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle";

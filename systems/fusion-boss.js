@@ -1,3 +1,4 @@
+import {drawQuimeraCreature} from './quimera-art.js';
 // OHANA V467 · LA QUIMERA OHANA — jefe final del Mundo 1.
 // Fusión de los diez héroes: cuerpo de Dino, alas de Dragón, orejas de Stitcho,
 // cuerno de Cuerno, visor de Yomi, tentáculos de Michi, antenas de Chispín,
@@ -253,57 +254,7 @@ export function drawFusionBoss(ctx, e, cam, t, reduce = false) {
   ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
   if (formed < 1) drawIntroThreads(ctx, x, foot - 150, formed, tt);
   ctx.globalAlpha *= formed;
-  // Sombra
-  ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.ellipse(x, foot, 140, 18, 0, 0, Math.PI * 2); ctx.fill();
-  // Tentáculos de Michi (9) bajo el cuerpo.
-  for (let i = 0; i < 9; i++) {
-    const bx = x - 90 + i * 22, wave = reduce ? 0 : Math.sin(tt * .06 + i * .7) * 14;
-    ctx.strokeStyle = i % 2 ? "#ceb2ff" : "#e7d4ff"; ctx.lineWidth = 7 - Math.abs(i - 4) * .5; ctx.globalAlpha = .75 * formed;
-    ctx.beginPath(); ctx.moveTo(bx, foot - 70); ctx.quadraticCurveTo(bx + wave, foot - 30, bx - wave * .6, foot - 4); ctx.stroke();
-  }
-  ctx.globalAlpha = formed;
-  // Alas de Dragón
-  const flap = reduce ? 0 : Math.sin(tt * .08) * .18;
-  for (const side of [-1, 1]) {
-    ctx.save(); ctx.translate(x + side * 60, foot - 210 + hov); ctx.rotate(side * (-.35 + flap));
-    ctx.fillStyle = side === f ? "#b8263c" : "#7c1d3a"; ctx.strokeStyle = "#ffd0c0"; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(side * 150, -120); ctx.lineTo(side * 170, -40); ctx.lineTo(side * 120, 10); ctx.lineTo(side * 80, 40); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.strokeStyle = "#ff8a6e"; ctx.lineWidth = 2; for (let k = 1; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(side * (60 + k * 30), -120 + k * 40); ctx.stroke(); }
-    ctx.restore();
-  }
-  // Cuerpo de Dino (jade, con placas)
-  const by = foot - 140 + hov + breathe;
-  ctx.fillStyle = "#3f9d6b"; ctx.strokeStyle = "#1d4f38"; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.ellipse(x, by, 100, 92, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#b8ef6b"; ctx.beginPath(); ctx.ellipse(x + f * 8, by + 18, 60, 58, 0, 0, Math.PI * 2); ctx.fill();
-  for (let k = 0; k < 5; k++) { ctx.fillStyle = "#6fd38b"; ctx.beginPath(); const px = x - f * 70 - f * k * 6, py = by - 70 + k * 26; ctx.moveTo(px, py - 14); ctx.lineTo(px - f * 22, py); ctx.lineTo(px, py + 14); ctx.closePath(); ctx.fill(); }
-  // Hibisco de Kilo en el pecho
-  for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + (reduce ? 0 : tt * .01); ctx.fillStyle = "#ff8fb1"; ctx.beginPath(); ctx.ellipse(x + f * 10 + Math.cos(a) * 14, by + 4 + Math.sin(a) * 14, 12, 7, a, 0, Math.PI * 2); ctx.fill(); }
-  ctx.fillStyle = "#ffe27a"; ctx.beginPath(); ctx.arc(x + f * 10, by + 4, 6, 0, Math.PI * 2); ctx.fill();
-  // Hombreras: porción de Pizza y cesta de Frita
-  ctx.fillStyle = "#ffd36a"; ctx.strokeStyle = "#a8552e"; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.moveTo(x - 120, by - 60); ctx.lineTo(x - 60, by - 80); ctx.lineTo(x - 88, by - 20); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#e0463a"; ctx.beginPath(); ctx.arc(x - 90, by - 56, 5, 0, Math.PI * 2); ctx.arc(x - 78, by - 44, 4, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#d8402e"; ctx.fillRect(x + 64, by - 76, 48, 40); ctx.fillStyle = "#ffcf3a"; for (let k = 0; k < 4; k++) ctx.fillRect(x + 68 + k * 11, by - 100 + (k % 2) * 6, 7, 28);
-  // Cabeza: orejas de Stitcho, visor de Yomi, cuerno de Cuerno, antenas de Chispín
-  const hy = by - 120;
-  for (const side of [-1, 1]) { ctx.fillStyle = "#3f6fd8"; ctx.strokeStyle = "#1b2a66"; ctx.beginPath(); ctx.moveTo(x + side * 30, hy - 20); ctx.lineTo(x + side * 110, hy - 70 + (reduce ? 0 : Math.sin(tt * .07 + side) * 6)); ctx.lineTo(x + side * 46, hy + 10); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#ff9cc4"; ctx.beginPath(); ctx.moveTo(x + side * 38, hy - 14); ctx.lineTo(x + side * 92, hy - 56); ctx.lineTo(x + side * 48, hy + 2); ctx.closePath(); ctx.fill(); }
-  ctx.fillStyle = "#4a5fd8"; ctx.strokeStyle = "#1b2a66"; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(x, hy, 62, 52, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = "#0d1626"; ctx.strokeStyle = "#8fe9ff"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - 48, hy - 18); ctx.lineTo(x + 48, hy - 18); ctx.lineTo(x + 42, hy + 18); ctx.lineTo(x - 42, hy + 18); ctx.closePath(); ctx.fill(); ctx.stroke();
-  const angry = e.phase >= 3 || b.mode === "warn";
-  ctx.fillStyle = b.mode === "special" ? "#ffffff" : angry ? "#ff6b91" : "#8fe9ff";
-  for (const side of [-1, 1]) { const ex = x + f * 6 + side * 22; ctx.fillRect(ex - 8, hy - 8, 16, angry ? 8 : 12); }
-  ctx.strokeStyle = "#eccbff"; ctx.fillStyle = "#f7e9ff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 10, hy - 50); ctx.lineTo(x + f * 18, hy - 128); ctx.lineTo(x + 12, hy - 48); ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = "#fff29a"; ctx.lineWidth = 4; for (const side of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + side * 24, hy - 46); ctx.lineTo(x + side * 44, hy - 78); ctx.lineTo(x + side * 34, hy - 84); ctx.lineTo(x + side * 56, hy - 112); ctx.stroke(); }
-  // Diez sellos orbitando: se apagan según cae la vida.
-  const lit = Math.ceil(10 * e.hp / Math.max(1, e.max));
-  Object.keys(WORLD1_THEMES).forEach((hero, i) => {
-    const a = i / 10 * Math.PI * 2 + (reduce ? 0 : tt * .015);
-    ctx.globalAlpha = formed * (i < lit ? .95 : .2); ctx.fillStyle = WORLD1_THEMES[hero].color;
-    ctx.beginPath(); ctx.arc(x + Math.cos(a) * 170, by - 40 + Math.sin(a) * 60, 9, 0, Math.PI * 2); ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-  if (e.flash > 0) { ctx.globalAlpha = .4; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.ellipse(x, by, 104, 96, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+  drawQuimeraCreature(ctx,e,cam,t,reduce);
   // Aviso del ataque (icono del héroe + nombre) sobre la cabeza.
   if (b.mode === "warn" && b.attack) {
     const atk = FUSION_ATTACKS[b.attack], col = WORLD1_THEMES[atk.hero].color;
