@@ -51,6 +51,7 @@
     "test:browser:v2-presentation": "node tests/browser/v600-presentation.mjs",
     "test:browser:reward-replays": "node tests/browser/v600-reward-replays.mjs",
     "dev:multiplayer": "node tools/local-multiplayer-server.mjs",
+    "test:browser:coop-campaign": "node tests/browser/v604-coop-campaign.mjs",
     "test:browser:finale-network": "node tests/browser/v604-finale-network.mjs",
     "test:browser:versus-network": "node tests/browser/v604-versus-network.mjs",
     "test:browser:adventure-network": "node tests/browser/v604-adventure-network.mjs"

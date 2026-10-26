@@ -39,6 +39,13 @@ export function makeCredential(randomBytes = (size) => crypto.getRandomValues(ne
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function initializeAdventure(room,at){
+ if(room.combat)return;
+ room.engineMode=true;
+ room.combat={startedAt:at,scene:null,enemies:[],boss:null,events:[],eventSequence:0,lastEvent:null,pausedAt:null};
+ for(const player of room.players){const f=findRoster(player.characterId).forms[0];Object.assign(player,{evolution:0,experience:0,maxHealth:f.hp,health:f.hp,x:420+player.slot*130,y:1134-f.h,facing:1,pose:{vx:0,vy:0,grounded:true,melee:0,dash:0}});}
+}
+
 function snapshot(room, viewerId) {
   return {
     roomId: room.code,
@@ -266,6 +273,7 @@ export function createRoomService(store, options = {}) {
             entry.pose = { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 };
           }
           if(state.mode==='versus'){if(!state.versus)createVersus(state,state.arenaId,now());if(state.versus.phase==='complete')state.phase='complete';}
+          else if(state.mode==='adventure')initializeAdventure(state,now());
           else state.combat ||= createCombat(state.players, now());
         }
       });
@@ -358,6 +366,7 @@ export function createRoomService(store, options = {}) {
           state.phase = "playing";
           for (const entry of state.players) entry.worldRoomId = entry.worldRoomId || "hub";
           if(state.mode==='versus'){if(!state.versus)createVersus(state,state.arenaId,now());if(state.versus.phase==='complete')state.phase='complete';}
+          else if(state.mode==='adventure')initializeAdventure(state,now());
           else state.combat ||= createCombat(state.players, now());
         }
       });
@@ -526,7 +535,7 @@ export function createRoomService(store, options = {}) {
               throw new RoomError('TRAVEL_INVALID','Falta la confirmación de un compañero.',409);
             if(state.players.some(p=>p.worldRoomId!==voted.from))
               throw new RoomError('TEAM_ROOM_MISMATCH','La partida cambió antes de confirmar.',409);
-            for(const member of state.players){member.worldRoomId=voted.to;member.x=member.slot===0?420:550;member.y=1070;}
+            for(const member of state.players){const f=findRoster(member.characterId).forms[member.evolution||0];member.worldRoomId=voted.to;member.x=member.slot===0?420:550;member.y=1134-f.h;member.facing=1;member.pose={vx:0,vy:0,grounded:true,melee:0,dash:0};}
             state.lastTravel={id:voted.id,from:voted.from,to:voted.to,at:now()};
             state.travel=null;
             state.travelClosed=null;

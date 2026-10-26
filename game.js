@@ -182,6 +182,7 @@ import { installKiloFritaInteractions, updateKiloFritaInteractions, drawKiloFrit
 
 const e2eParams = new URLSearchParams(location.search);
 const e2eEnabled = location.hostname === "127.0.0.1" && e2eParams.has("e2e");
+let e2eManualClock=false;
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
@@ -960,6 +961,11 @@ game.onGauntletHero=(hero)=>{
  game.player=makePlayer(def);const p=game.player;p.evo=4;p.xp=420;applyForm(p,{silent:true});paintFit(p);p.x=8600;p.y=1134-p.h;p.grounded=true;p.invuln=90;
  p.uPartner=loadUPartnerChoice(localStorage,hero);p.uBonds=readStoredUBonds(localStorage,hero);p.uExp=bondXP(p);p.uSurprise=!e2eEnabled;
  game._signatureLink=null;game._combatFlow=null;game._assist=null;game._supremeFlow=null;game._evolutionAttacks=null;game.ult=null;game.bolts=[];game.slashes=[];game.projectiles=[];game.resetInput?.();renderAbilityBar();playMusic("w1-"+hero);game.renderDirty=true;
+};
+game.placeCoopEntry=me=>{
+ if(!game.onlineAdventure||!game.player||!me||me.worldRoomId!==game.roomId)return;
+ const p=game.player;p.x=me.x;p.y=me.y;p.vx=0;p.vy=0;p.grounded=true;p.jumps=0;p.facing=me.facing||1;
+ game.resetInput?.();game.cam.x=Math.max(0,Math.min(game.worldW-camW(),p.x-camW()/2));game.cam.y=Math.max(0,Math.min(game.worldH-camH(),p.y-camH()/2));game.renderDirty=true;
 };
 game.changeCoopHero=(hero,stats)=>{
  const def=ROSTER.find(r=>r.id===hero);if(!game.onlineAdventure||!def||!game.player)return false;
@@ -3780,7 +3786,7 @@ if(!paused){
   }
 } else resolutionRecovery.pause();
 try {
-  clock.advance(now, step);
+  if(!e2eManualClock)clock.advance(now, step);
 } catch (error) {
   containRuntimeFault("simulation", error);
 }
@@ -4239,6 +4245,9 @@ state() {
     } : null,
   };
 },
+// Local harness scheduling only: timers/network can advance separately
+// while every physics tick still uses the production step and held inputs.
+manualClock(enabled=true){e2eManualClock=enabled===true;clock.reset();return e2eManualClock;},
 step(frames = 1) {
   const n = Math.max(0, Math.min(600, Math.floor(Number(frames) || 0)));
   for (let i = 0; i < n; i++) step();

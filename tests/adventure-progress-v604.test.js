@@ -48,3 +48,8 @@ test('a guest cannot independently issue a seal before the host receipt',()=>{
  const g=fixture();enterWorld1(g);g.coopAuthority=false;assert.equal(awardSeal(g),false);assert.deepEqual(g.world1Seals,[]);
  let scenes=0;g.onWorld1Beat=kind=>{if(kind==='seal')scenes++;};const p={stations:{},secrets:{},encounters:{},seals:['kilo']};applyAdventureProgress(g,p);applyAdventureProgress(g,p);assert.equal(scenes,1);assert.equal(g.player.health,70);assert.equal(g.player.xp,0);
 });
+
+test('new adventure parties start baby without legacy combat XP or synthetic enemies',async()=>{
+ const service=createRoomService(new LocalRoomStore()),h=await service.create('adventure'),g=await service.join(h.roomId);await service.choose(h.roomId,h.identity,'kilo');await service.choose(h.roomId,g.identity,'dino');await service.ready(h.roomId,h.identity);const s=await service.ready(h.roomId,g.identity);
+ assert.equal(s.engineMode,true);assert.deepEqual(s.players.map(p=>[p.evolution,p.experience]),[[0,0],[0,0]]);assert.deepEqual(s.players.map(p=>p.health),[80,140]);assert.deepEqual(s.combat.enemies,[]);assert.equal(s.combat.scene,null);assert.equal(s.combat.boss,null);
+});

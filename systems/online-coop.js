@@ -239,7 +239,13 @@ class OnlineCoop {
       this._travelApplied=confirmed.id;
       this._travelRequestKey='';
       if(this._travelGame?.roomId===confirmed.from){
-        try{this._travelGame.loadRoom?.(confirmed.to,'online-peer');}catch(_){}
+        try{
+          if(this._travelGame.loadRoom?.(confirmed.to,'online-peer')!==false){
+            this._travelGame.placeCoopEntry?.(this.currentPlayer(this.snapshot));
+            this.pendingMutations=this.pendingMutations.filter(m=>m.action==='move'?m.worldRoomId===confirmed.to:m.payload?.action==='rtc'||m.payload?.roomId===confirmed.to);
+            this.lastSentPose=null;this.lastSend=0;
+          }
+        }catch(_){}
       }
     }
     if(!this.snapshot?.travel)this._travelRequestKey='';
@@ -865,7 +871,7 @@ class OnlineCoop {
     const code=String(error?.code||"SERVER_UNAVAILABLE");
     if(typeof document!=="undefined")document.body.dataset.coopLastErrorCode=code.slice(0,48);
     if(code==="DUPLICATE_ACTION"||code==="ROLE_CHANGED"||code==="STALE_ATTEMPT"||code==="TEAM_DOWN")return "drop";
-    if(code==="NOT_READY"||code==="MATCH_STARTED")return "refresh";
+    if(code==="NOT_READY"||code==="MATCH_STARTED"||code==="TRAVEL_CONSENT_REQUIRED")return "refresh";
     return "retry";
   }
 

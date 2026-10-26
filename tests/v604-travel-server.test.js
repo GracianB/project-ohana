@@ -138,3 +138,8 @@ test('V604 server: old tab cannot forge consent by omitting its epoch',async()=>
  const proposed=await h.service.travel(teamState.code,rotated.identity,{decision:'propose',destination:'w1-stitcho'});
  assert.equal(proposed.travel.status,'pending');
 });
+
+import {onlineCoop} from '../systems/online-coop.js';
+test('a rejected old-room message is refreshed instead of retrying forever',()=>{
+ const c=new onlineCoop.constructor();assert.equal(c.classifyMutationError({code:'TRAVEL_CONSENT_REQUIRED'}),'refresh');
+});

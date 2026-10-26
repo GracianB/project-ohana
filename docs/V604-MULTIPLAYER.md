@@ -73,6 +73,7 @@ npx playwright install chromium
 npm run test:browser:adventure-network
 npm run test:browser:versus-network
 npm run test:browser:finale-network
+npm run test:browser:coop-campaign
 ```
 
 Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:browser:versus-network` (igual para aventura). Capturas y registros estructurados en `test-results/v604/`.
@@ -82,4 +83,14 @@ Si se usa Chromium del sistema: `CHROMIUM_BIN=/usr/bin/chromium npm run test:bro
 - Pruebas del servidor: controles ordinarios derrotan fauna, evolucionan y alcanzan tres eliminaciones; repetición de solicitudes no duplica premios. No se atribuye esa partida completa al piloto de navegador.
 - Aventura escritorio/móvil: héroes distintos, aislamiento del perfil individual, relevo voluntario y regreso, objetivo completado por el invitado y recibido por el anfitrión, rechazo y viaje aceptado por ambos. Las esperas de estado del arnés son síncronas; no se aceptan promesas sin verificar la condición.
 
-Antes de publicar: completar el recorrido cooperativo continuo y ampliar derrota/reintento a las diez salas y las cuatro fases de Quimera, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
+Antes de publicar: completar físicamente los diez duelos finales y Quimera en cooperativo y ampliar derrota/reintento a las diez salas y las cuatro fases de Quimera, evaluar dificultad y equilibrio PvP con personas, latencia/pérdida de conexión, accesibilidad y dispositivos físicos. La infraestructura pública seguirá apagada hasta una decisión expresa del usuario.
+
+## Recorrido cooperativo con controles de juego
+
+`test:browser:coop-campaign` abre dos perfiles limpios y un servidor HTTP local. Ambos eligen voluntariamente al héroe de cada sala mediante el botón de relevo; el anfitrión resuelve las mecánicas con controles de producción y el invitado recorre el escenario y combate. Comprueba evoluciones ganadas, tres descubrimientos por capítulo, sello compartido y consentimiento para avanzar. No concede posiciones, salud, XP ni objetivos. Guarda el diario y las capturas en `test-results/v604/cooperative-campaign/`.
+
+El arnés separa el reloj de renderizado y los ticks de física mediante una interfaz E2E exclusiva de localhost: cada tick ejecuta la simulación de producción y los temporizadores avanzan con el mismo tiempo. Esta prueba comprueba continuidad y reglas; no mide rendimiento a tiempo real, latencia entre redes ni todas las parejas posibles de héroes. `OHANA_COOP_CHAPTERS=1` limita la ejecución a una sonda y no demuestra diez salas. El recorrido termina al entrar en el acto final; los diez duelos y Quimera necesitan su propia comprobación física cooperativa.
+
+Correcciones detectadas al recorrer: la aventura comienza como bebé y sin XP del combate antiguo; tras un viaje aceptado, ambos aparecen en la entrada canónica y se descartan mensajes pendientes de la sala anterior. Las posiciones usan la altura de la forma actual y se limpia el movimiento antes del relevo.
+
+Resultado local del 26 de octubre: diez capítulos consecutivos desde perfiles limpios, treinta descubrimientos y entrada conjunta al acto final, sin errores JavaScript. Dos derrotas naturales (Stitcho y Michi) se recuperaron con el reintento conjunto. Cada héroe ganó sus cinco formas; el invitado recorrió cada sala y registró golpes. Diario conservado en `docs/V604-VALIDATION.json`. Los diez duelos finales y Quimera siguen pendientes de esta comprobación continua.
