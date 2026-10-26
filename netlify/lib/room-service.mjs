@@ -180,7 +180,11 @@ export function createRoomService(store, options = {}) {
     if (!player || !identity?.token || player.token !== identity.token) {
       throw new RoomError("INVALID_SESSION", "La sesión no es válida. Vuelve a entrar en la sala.", 401);
     }
-    if (identity.connectionEpoch !== undefined && Number(identity.connectionEpoch) !== Number(player.connectionEpoch)) {
+    // A co-op connection epoch is mandatory, not merely advisory: old tabs
+    // must not impersonate a player after their session was resumed.
+    if ((room.mode === 'adventure' && (!Number.isSafeInteger(identity?.connectionEpoch) ||
+        identity.connectionEpoch !== player.connectionEpoch)) ||
+        (identity.connectionEpoch !== undefined && Number(identity.connectionEpoch) !== Number(player.connectionEpoch))) {
       throw new RoomError("STALE_SESSION", "Esta sesión se reanudó en otra pestaña o dispositivo.", 409);
     }
     return player;
@@ -216,6 +220,9 @@ export function createRoomService(store, options = {}) {
         if (resume) {
           // Rejoining supersedes a previous tab's travel approval.
           closePendingTravel(state, 'reconnected', now());
+          // The resumed browser receives a fresh bearer token. The previous
+          // tab's credentials cannot simply omit connectionEpoch to return.
+          if (state.mode === 'adventure') resume.token = credential();
           resume.connectionEpoch = (resume.connectionEpoch || 0) + 1;
           resume.connected = true;
           resume.lastMoveAt = now();
@@ -249,6 +256,7 @@ export function createRoomService(store, options = {}) {
         // mutate persists only successful transforms; throw before a room is claimed by a third participant.
         throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
       }
+      identity.token = joined.token;
       identity.connectionEpoch = joined.connectionEpoch;
       return { ...snapshot(room, joined.id), identity };
     },

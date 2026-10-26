@@ -8,7 +8,7 @@ class MemoryStore{
   const e={data:structuredClone(value),etag:String(++this.version)};this.data.set(key,e);return {modified:true,etag:e.etag};}
 }
 function harness(){
- let now=1_850_000_000_000;const store=new MemoryStore(),service=createRoomService(store,{now:()=>now,makeCode:()=> 'QWERTY',makeCredential:()=> 'safe-token'});
+ let now=1_850_000_000_000,tokenSerial=0;const store=new MemoryStore(),service=createRoomService(store,{now:()=>now,makeCode:()=> 'QWERTY',makeCredential:()=> 'safe-token-'+(++tokenSerial)});
  return {store,service,advance:(n)=>now+=n};
 }
 async function team(h,mode='adventure'){
@@ -90,12 +90,17 @@ test('V604 server: replacing an active tab invalidates pending consent',async()=
  const h=harness(),t=await team(h);
  const vote=await h.service.travel(t.code,t.host.identity,proposal('w1-kilo','w1-stitcho'));
  const rejoined=await h.service.join(t.code,t.host.identity);
+ assert.notEqual(rejoined.identity.token,t.host.identity.token,'resume rotates adventure bearer credentials');
  assert.equal(rejoined.travel,null);
  assert.equal(rejoined.travelClosed.id,vote.travel.id);
  assert.equal(rejoined.travelClosed.reason,'reconnected');
  assert.deepEqual(rejoined.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
  await assert.rejects(
    h.service.travel(t.code,t.host.identity,{decision:'accept',voteId:vote.travel.id}),
+   e=>e.code==='INVALID_SESSION'
+ );
+ await assert.rejects(
+   h.service.poll(t.code,{playerId:rejoined.identity.playerId,token:rejoined.identity.token}),
    e=>e.code==='STALE_SESSION'
  );
  await assert.rejects(
@@ -115,4 +120,21 @@ test('V604 server: an unresponsive peer expires and their proposal is revoked',a
  assert.equal(result.travelClosed.id,vote.travel.id);
  assert.equal(result.travelClosed.reason,'disconnected');
  assert.deepEqual(result.players.map(p=>p.worldRoomId),['w1-kilo','w1-kilo']);
+});
+
+test('V604 server: old tab cannot forge consent by omitting its epoch',async()=>{
+ const h=harness(),teamState=await team(h);
+ const guest=teamState.guest.identity;
+ const rotated=await h.service.join(teamState.code,guest);
+ assert.notEqual(rotated.identity.token,guest.token);
+ await assert.rejects(
+   h.service.travel(teamState.code,guest,{decision:'propose',destination:'w1-stitcho'}),
+   e=>e.code==='INVALID_SESSION'
+ );
+ await assert.rejects(
+   h.service.poll(teamState.code,{playerId:guest.playerId,token:rotated.identity.token}),
+   e=>e.code==='STALE_SESSION'
+ );
+ const proposed=await h.service.travel(teamState.code,rotated.identity,{decision:'propose',destination:'w1-stitcho'});
+ assert.equal(proposed.travel.status,'pending');
 });
