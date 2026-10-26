@@ -815,9 +815,8 @@ const PRECACHE_REVISIONS = {
   "assets/sprites/forms/yomi-0.png": "4638db96f86599be2e710c15d253974958fe291e",
   "assets/sprites/forms/yomi-4.png": "ca3291ea61481948429594c2902b6db8cdbe229d",
   "assets/sprites/boss-queen.png": "df621d3e67969bc84df44cf2ab04173184ce29e3",
-  "systems/welcome-spotlight.js": "c10075db06b02206dbb4f0b2d0dad14d68a99a27",
-  "systems/chapter-species-v604.js": "67f46c28d4645ad0267181556701734fc9c5c3e4",
-  "PROGRESS.md": "7f9fdc785344f80b81566853695700151495905d"
+  "systems/welcome-spotlight.js": "76ab5c1894dedacd695aa353658d853960a2048b",
+  "systems/chapter-species-v604.js": "67f46c28d4645ad0267181556701734fc9c5c3e4"
 };
 const REVISION_METADATA = "./.ohana-revisions.json";
 const INSTALL_STATS = "./.ohana-install-stats.json";

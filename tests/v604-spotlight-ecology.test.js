@@ -14,9 +14,11 @@ test('V604: opening stages only the featured pair',()=>{
  assert.equal(welcomeSpotlightAllows('dragon',d),true);
  assert.equal(welcomeSpotlightAllows('dino',d),true);
  assert.equal(welcomeSpotlightAllows('pizza',d),false);
- assert.equal(welcomeSpotlightAllows('pizza',null),true);
+ assert.equal(welcomeSpotlightAllows('pizza',null),false);
  const a=welcomeSpotlightSpot('dragon',base,1200,720,90,d),b=welcomeSpotlightSpot('dino',base,1200,720,90,d);
  assert.ok(a.x>420&&a.x<516);assert.ok(b.x>720&&b.x<840);
  assert.equal(a.row,0);assert.equal(b.row,0);
  assert.equal(welcomeSpotlightSpot('pizza',base,1200,720,90,d),base);
+ assert.equal(welcomeSpotlightAllows('kilo',null),true);
+ assert.equal(welcomeSpotlightSpot('kilo',base,1200,720,90,null).row,0);
 });
