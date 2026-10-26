@@ -1,4 +1,5 @@
 import {worldBounds} from "../../systems/world-bounds.js";
+import {adjacentRoom,createTravelVote,castTravelVote,travelApproved} from "../../multiplayer/match-rules-v604.js";
 import { advanceCombat, createCombat, moveCombatPlayer, resolveCombatAction } from "./combat.mjs";
 import { progressDuoRitual, duoPlateState, DUO_HOLD_MS } from "../../multiplayer/duo-altars.js";
 import { isRtcCandidateSignal } from "../../systems/coop-v108-direct.js";
@@ -61,6 +62,10 @@ function snapshot(room, viewerId) {
     })),
     combat: room.combat ? structuredClone(room.combat) : null,
     engineMode: !!room.engineMode,
+    mode: room.mode || 'classic',
+    travel: room.mode==='adventure'?structuredClone(room.travel||null):null,
+    lastTravel: room.mode==='adventure'?structuredClone(room.lastTravel||null):null,
+    travelClosed: room.mode==='adventure'?structuredClone(room.travelClosed||null):null,
     duoAltars: structuredClone(room.duoAltars || {}),
     duoCharge: room.duoChannel ? { roomId:room.duoChannel.roomId, startedAt:room.duoChannel.startedAt, durationMs:DUO_HOLD_MS } : null,
     updatedAt: room.updatedAt,
@@ -172,17 +177,19 @@ export function createRoomService(store, options = {}) {
   }
 
   return {
-    async create() {
+    async create(mode = 'classic') {
+      if(!['classic','adventure'].includes(mode))throw new RoomError('MODE_NOT_READY','Ese modo todavía no está disponible.',409);
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
         const roomCode = code();
         const room = {
           code: roomCode,
           phase: "lobby",
+          mode,
           revision: 0,
           tick: 0,
           createdAt: now(),
           updatedAt: now(),
-          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: "hub", actions: [] }],
+          players: [{ id: crypto.randomUUID(), token: credential(), connectionEpoch: 1, slot: 0, characterId: "", ready: false, x: 420, y: 1070, facing: 1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, pose: { vx: 0, vy: 0, grounded: true, melee: 0, dash: 0 }, worldRoomId: mode==='adventure'?"w1-kilo":"hub", actions: [] }],
         };
         const write = await store.setJSON(`room:${roomCode}`, room, { onlyIfNew: true });
         if (write.modified) return { ...snapshot(room, room.players[0].id), identity: { playerId: room.players[0].id, token: room.players[0].token, connectionEpoch: 1 } };
@@ -206,7 +213,7 @@ export function createRoomService(store, options = {}) {
           if (state.players.length >= 2) throw new RoomError("ROOM_FULL", "La sala ya tiene dos jugadores.", 409);
           identity.playerId = crypto.randomUUID();
           identity.token = credential();
-          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: "hub", actions: [] });
+          state.players.push({ id: identity.playerId, token: identity.token, connectionEpoch: 1, slot: 1, characterId: "", ready: false, x: 880, y: 572, facing: -1, connected: true, lastSequence: 0, lastMoveAt: now(), lastSeenAt: now(), dodgeUntil: 0, worldRoomId: state.mode==='adventure'?"w1-kilo":"hub", actions: [] });
         }
         if (state.players.length === 2 && state.players.every((player) => player.connected && player.characterId && player.ready)) {
           // V102: reconnecting must never reset both avatars back to the start.
@@ -291,7 +298,12 @@ export function createRoomService(store, options = {}) {
             state.combat.enemies = [];
             state.combat.boss = null;
           }
-          const bounds=worldBounds(String(payload?.worldRoomId||player.worldRoomId||"beach"))||worldBounds("beach");
+          const selectedRoom=String(payload?.worldRoomId||player.worldRoomId||'beach');
+          // The authenticated travel vote owns rooms in V604 adventure. A
+          // forged position packet cannot teleport one player to another world.
+          if(state.mode==='adventure'&&selectedRoom!==player.worldRoomId)
+            throw new RoomError('TRAVEL_CONSENT_REQUIRED','Los dos jugadores deben aceptar el cambio de sala.',409);
+          const bounds=worldBounds(selectedRoom)||worldBounds("beach");
           player.x = finitePayloadNumber(payload?.positionX,player.x,0,bounds.width);
           player.y = finitePayloadNumber(payload?.positionY,player.y,0,bounds.height);
           player.facing = Number(payload?.facing) < 0 ? -1 : 1;
@@ -370,6 +382,52 @@ export function createRoomService(store, options = {}) {
       return { ...snapshot(room, identity.playerId), actionResult: result.result, replayed: result.replayed };
     },
 
+    async travel(roomCode,identity,payload){
+      const decision=String(payload?.decision||'');
+      const destination=String(payload?.destination||'');
+      const requestedId=String(payload?.voteId||'');
+      const {room}=await mutate(roomCode,state=>{
+        const player=playerFrom(state,identity);
+        if(state.mode!=='adventure')throw new RoomError('MODE_REQUIRED','La votación es exclusiva de la aventura conjunta.',409);
+        if(state.phase!=='playing'||state.players.length!==2||state.players.some(p=>!p.connected))
+          throw new RoomError('TEAM_NOT_READY','Los dos compañeros deben estar conectados.',409);
+        if(state.travel?.status==='pending'&&now()>=state.travel.createdAt+25000){
+          state.travelClosed={id:state.travel.id,reason:'expired',at:now()};
+          state.travel=null;
+        }
+        if(decision==='propose'){
+          const from=String(player.worldRoomId||'');
+          if(!adjacentRoom(from,destination))throw new RoomError('TRAVEL_DESTINATION_INVALID','Solo puedes avanzar a una sala adyacente.',400);
+          if(state.players.some(p=>p.worldRoomId!==from))
+            throw new RoomError('TEAM_ROOM_MISMATCH','Los compañeros deben estar en la misma sala.',409);
+          if(state.travel?.status==='pending'){
+            if(state.travel.from===from&&state.travel.to===destination)return;
+            throw new RoomError('TRAVEL_ALREADY_PENDING','Hay una propuesta pendiente de respuesta.',409);
+          }
+          state.travel=createTravelVote({id:'travel:'+crypto.randomUUID(),from,to:destination,
+            by:player.id,players:state.players.map(p=>p.id),now:now()});
+        }else if(decision==='accept'||decision==='reject'){
+          if(!state.travel||state.travel.id!==requestedId)throw new RoomError('TRAVEL_STALE','Esta propuesta ya no está disponible.',409);
+          const voted=castTravelVote(state.travel,player.id,decision==='accept',now());
+          if(voted.status==='approved'){
+            if(!travelApproved(voted,voted.from,state.players.map(p=>p.id)))
+              throw new RoomError('TRAVEL_INVALID','Falta la confirmación de un compañero.',409);
+            if(state.players.some(p=>p.worldRoomId!==voted.from))
+              throw new RoomError('TEAM_ROOM_MISMATCH','La partida cambió antes de confirmar.',409);
+            for(const member of state.players){member.worldRoomId=voted.to;member.x=member.slot===0?420:550;member.y=1070;}
+            state.lastTravel={id:voted.id,from:voted.from,to:voted.to,at:now()};
+            state.travel=null;
+            state.travelClosed=null;
+          }else if(['rejected','expired'].includes(voted.status)){
+            state.travelClosed={id:voted.id,reason:voted.status,at:now()};
+            state.travel=null;
+          }else state.travel=voted;
+        }else throw new RoomError('TRAVEL_DECISION_INVALID','Acción de desplazamiento inválida.',400);
+        player.lastSeenAt=now();
+      });
+      return snapshot(room,identity.playerId);
+    },
+
     async signal(roomCode, identity, payload) {
       const seq = Number(payload?.sequence);
       if (!Number.isSafeInteger(seq) || seq < 1) throw new RoomError("INVALID_SEQUENCE", "La señal no es válida.");
@@ -399,6 +457,8 @@ export function createRoomService(store, options = {}) {
         const player = playerFrom(state, identity);
         if (!player.connected) throw new RoomError("DISCONNECTED", "Reconecta la sesión antes de enviar señales.", 409);
         if(signalKind==="combat"&&player.slot!==0)throw new RoomError("HOST_ONLY","Solo el anfitrión publica enemigos.",403);
+        if(state.mode==='adventure'&&signalKind==='room'&&String(relayPayload?.roomId||'')!==player.worldRoomId)
+          throw new RoomError('TRAVEL_CONSENT_REQUIRED','El cambio de sala necesita dos confirmaciones.',409);
         const previous = player.actions.find((entry) => typeof entry === "object" && entry?.id === actionId);
         if (previous) return;
         if (seq <= player.lastSequence || hasAction(player, actionId)) {

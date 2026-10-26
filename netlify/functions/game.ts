@@ -23,7 +23,8 @@ export default async function handler(request: Request) {
     const service = createRoomService(getStore("ohana-multiplayer-rooms"));
     let data;
     switch (body.action) {
-      case "create": data = await service.create(); break;
+      case "create": data = await service.create(body.mode); break;
+      case "travel": data = await service.travel(body.roomId,body.identity,body); break;
       case "join": data = await service.join(body.roomId, body.identity); break;
       case "choose": data = await service.choose(body.roomId, body.identity, body.characterId); break;
       case "ready": data = await service.ready(body.roomId, body.identity, body.ready); break;

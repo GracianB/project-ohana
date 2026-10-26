@@ -1150,7 +1150,7 @@ $("create-room").addEventListener("click", async () => {
   $("create-room").disabled = true;
   $("join-room").disabled = true;
   showError("entry-error");
-  try { enterLobby(await api("create")); }
+  try { enterLobby(await api("create",{mode:"adventure"})); }
   catch (error) { showError("entry-error", error.message); }
   finally { state.entrySubmitting = false; $("create-room").disabled = false; $("join-room").disabled = false; }
 });
