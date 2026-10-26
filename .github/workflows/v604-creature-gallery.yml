@@ -1,0 +1,32 @@
+name: V604 creature gallery and visual audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'systems/chapter-species-v604.js'
+      - 'systems/campaign-creature-art.js'
+      - 'previews/v604-creatures.html'
+      - 'tests/browser/v604-creature-gallery.mjs'
+      - '.github/workflows/v604-creature-gallery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gallery:
+    name: Bestiary · 18 real Canvas silhouettes · desktop and phone
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install chromium
+      - run: node tests/browser/v604-creature-gallery.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ohana-v604-creature-gallery
+          path: test-results/v604/
+          if-no-files-found: ignore
